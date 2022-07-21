@@ -100,10 +100,6 @@ DEALINGS IN THE SOFTWARE.
 #define UITEXT_CLIPPING		"Clipping Planes"
 #define UITEXT_PROPERTIES	"Properties"
 
-namespace fluo
-{
-	class Root;
-}
 class RenderFrame: public wxFrame
 {
 	enum
@@ -225,6 +221,7 @@ public:
 	//colocalization analysis dialog
 	ColocalDlg* GetColocalizationDlg() { return m_colocalization_dlg; }
 	//recorder dialog
+	void SetRecorderDlg(RecorderDlg* dlg) { m_recorder_dlg = dlg; }
 	RecorderDlg* GetRecorderDlg() { return m_recorder_dlg; }
 	//measure dialog
 	MeasureDlg* GetMeasureDlg() { return m_measure_dlg; }

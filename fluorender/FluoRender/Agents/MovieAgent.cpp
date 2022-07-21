@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <AsyncTimerFactory.hpp>
 #include <Animator/Interpolator.h>
 #include <TextureRenderer.h>
+#include <compatibility.h>
 #include <tiffio.h>
 #include <img/icons.h>
 

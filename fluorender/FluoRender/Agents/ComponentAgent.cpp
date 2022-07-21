@@ -44,6 +44,8 @@ DEALINGS IN THE SOFTWARE.
 #include <exmax.h>
 #include <dbscan.h>
 #include <VolumeRenderer.h>
+#include <compatibility.h>
+#include <wx/fileconf.h>
 #include <cctype>
 #include <fstream>
 

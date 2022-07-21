@@ -29,18 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #include "DragDrop.h"
 #include <Global.hpp>
 #include <AgentFactory.hpp>
-#include <Root.hpp>
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <VolumeGroup.hpp>
-#include <MeshData.hpp>
-#include <MeshGroup.hpp>
-#include <Annotations.hpp>
-#include <VolumeFactory.hpp>
-#include <Formats/msk_writer.h>
-#include <Formats/msk_reader.h>
-#include <Selection/VolumeSelector.h>
-#include <compatibility.h>
 #include <wx/artprov.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
@@ -113,8 +101,9 @@ END_EVENT_TABLE()
 RenderFrame::RenderFrame(
 	const wxString& title,
 	int x, int y,
-	int w, int h)
-	: wxFrame(NULL, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE)
+	int w, int h):
+	wxFrame(NULL, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE),
+	m_agent(nullptr)
 {
 #ifdef _DARWIN
 	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
@@ -341,10 +330,12 @@ RenderFrame::RenderFrame(
 	m_main_tb->Realize();
 
 	//create render view
-	RenderviewPanel *vrv = new RenderviewPanel(this);
+	//RenderviewPanel *vrv = new RenderviewPanel(this);
 	//vrv->m_glview->InitView();
 	//vrv->UpdateView();
-	m_vrv_list.push_back(vrv);
+	//m_vrv_list.push_back(vrv);
+	CreateView();
+	RenderviewPanel *vrv = m_vrv_list[0];
 
 #ifdef _WIN32
 	wxSize panel_size(350, 300);
@@ -696,6 +687,9 @@ RenderFrame::RenderFrame(
 		wxString(" started normally."));
 #endif // wxUSE_STATUSBAR
 
+	m_aui_mgr.Update();
+
+
 }
 
 RenderFrame::~RenderFrame()
@@ -759,8 +753,6 @@ void RenderFrame::Init(
 	}
 
 	SetMinSize(wxSize(800, 600));
-
-	m_aui_mgr.Update();
 
 	if (!windowed)
 		Maximize();
@@ -907,7 +899,7 @@ wxString RenderFrame::CreateView(int row)
 	m_agent->AddView(vrv, set_gl);
 
 	//m_aui_mgr.Update();
-	OrganizeVRenderViews(1);
+	//OrganizeVRenderViews(1);
 
 	//set view default settings
 	if (m_adjust_view)
@@ -1778,8 +1770,7 @@ void RenderFrame::OnOpenProject(wxCommandEvent& WXUNUSED(event))
 
 void RenderFrame::OnSettings(wxCommandEvent& WXUNUSED(event))
 {
-	fluo::SettingAgent* agent = glbin_agtf->getSettingAgent();
-	if (agent) agent->UpdateFui();
+	m_agent->UpdateSettings();
 	m_aui_mgr.GetPane(m_setting_dlg).Show();
 	m_aui_mgr.GetPane(m_setting_dlg).Float();
 	m_aui_mgr.Update();

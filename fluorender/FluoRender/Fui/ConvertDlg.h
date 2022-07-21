@@ -32,11 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <ConvertAgent.hpp>
 
 class RenderFrame;
-namespace fluo
-{
-	class VolumeData;
-	class VolumeGroup;
-}
 class ConvertDlg : public wxPanel
 {
 public:

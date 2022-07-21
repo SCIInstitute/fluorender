@@ -39,10 +39,6 @@ DEALINGS IN THE SOFTWARE.
 #include <MovieAgent.hpp>
 
 class RenderFrame;
-namespace fluo
-{
-	class Renderview;
-}
 class TraceListCtrl : public wxListCtrl
 {
 	enum
@@ -66,10 +62,10 @@ public:
 
 	friend class TrackDlg;
 	friend class fluo::TrackAgent;
+	fluo::TrackAgent* m_agent;
 
 private:
 	int m_type;//0-current; 1-previous
-	fluo::TrackAgent* m_agent;
 
 private:
 	void OnKeyDown(wxKeyEvent& event);
@@ -166,15 +162,13 @@ public:
 	TrackDlg(RenderFrame* frame);
 	~TrackDlg();
 
-	void AssociateRenderview(fluo::Renderview* view)
-	{
-		m_agent->setObject(view);
-	}
-
 	friend class fluo::TrackAgent;
 	fluo::TrackAgent* m_agent;
 	fluo::ComponentAgent* m_compagent;
 	fluo::MovieAgent* m_movieagent;
+	//list ctrls
+	TraceListCtrl *m_trace_list_curr;
+	TraceListCtrl *m_trace_list_prev;
 
 private:
 	RenderFrame* m_frame;
@@ -265,10 +259,6 @@ private:
 	//time text
 	wxStaticText* m_cell_time_curr_st;
 	wxStaticText* m_cell_time_prev_st;
-
-	//list ctrls
-	TraceListCtrl *m_trace_list_curr;
-	TraceListCtrl *m_trace_list_prev;
 
 	//output
 	wxTextCtrl* m_stat_text;

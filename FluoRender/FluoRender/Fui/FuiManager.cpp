@@ -115,6 +115,8 @@ void FuiManager::Init()
 	if (renderframeagent)
 		pInstance = JVMInitializer::getInstance(renderframeagent->GetJvmArgs());
 
+	m_frame->Init(m_benchmark, m_fullscreen, m_windowed, m_hidepanels, pInstance != nullptr);
+
 	wxMemorySize free_mem_size = wxGetFreeMemory();
 	double mainmem_buf_size = free_mem_size.ToDouble() * 0.8 / 1024.0 / 1024.0;
 	if (mainmem_buf_size > flvr::TextureRenderer::get_mainmem_buf_size())
@@ -145,8 +147,6 @@ void FuiManager::Init()
 	flvr::TextRenderer::text_texture_manager_.load_face(font_file.ToStdString());
 	renderframeagent->getValue(gstTextSize, dval);
 	flvr::TextRenderer::text_texture_manager_.SetSize(dval);
-
-	m_frame->Init(m_benchmark, m_fullscreen, m_windowed, m_hidepanels, pInstance!=nullptr);
 
 	bool run_mov = false;
 	if (m_mov_file != "")
@@ -306,6 +306,8 @@ void FuiManager::SetupAgents()
 		track_dlg->m_agent = glbin_agtf->addTrackAgent(gstTrackAgent, *track_dlg);
 		track_dlg->m_compagent = glbin_agtf->getComponentAgent();
 		track_dlg->m_movieagent = glbin_agtf->getMovieAgent();
+		track_dlg->m_trace_list_curr->m_agent = track_dlg->m_agent;
+		track_dlg->m_trace_list_prev->m_agent = track_dlg->m_agent;
 	}
 	//volume properties
 	VolumePropPanel* vol_panel = m_frame->GetPropView();

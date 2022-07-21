@@ -228,7 +228,7 @@ wxWindow* MoviePanel::CreateAdvancedPage(wxWindow *parent)
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	m_advanced_movie = new RecorderDlg(m_frame, page);
-	//m_frame->m_recorder_dlg = m_advanced_movie;
+	m_frame->SetRecorderDlg(m_advanced_movie);
 	sizer_v->Add(m_advanced_movie, 0, wxEXPAND);
 	page->SetSizer(sizer_v);
 	return page;
@@ -415,7 +415,9 @@ MoviePanel::MoviePanel(RenderFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	wxPanel(frame, wxID_ANY, pos, size, style, name)
+	wxPanel(frame, wxID_ANY, pos, size, style, name),
+	m_frame(frame),
+	m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -455,8 +457,8 @@ MoviePanel::MoviePanel(RenderFrame* frame,
 		wxDefaultPosition, wxSize(30, 30));
 	m_rewind_btn->SetBitmap(wxGetBitmapFromMemory(rewind));
 	sizerH->Add(m_rewind_btn, 0, wxEXPAND);
-	long lval;
-	m_agent->getValue(gstMovSliderRange, lval);
+	long lval = 360;
+	//m_agent->getValue(gstMovSliderRange, lval);
 	m_progress_sldr = new wxSlider(this, ID_ProgressSldr, 0, 0, lval);
 	sizerH->Add(m_progress_sldr, 1, wxEXPAND);
 	m_progress_text = new wxTextCtrl(this, ID_ProgressText, "0.00",

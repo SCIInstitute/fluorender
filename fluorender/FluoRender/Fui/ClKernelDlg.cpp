@@ -46,7 +46,8 @@ END_EVENT_TABLE()
 ClKernelDlg::ClKernelDlg(RenderFrame* frame) :
 wxPanel(frame, wxID_ANY,
 wxDefaultPosition, wxSize(550, 600),
-0, "ClKernelDlg")
+0, "ClKernelDlg"),
+m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

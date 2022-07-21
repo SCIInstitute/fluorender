@@ -114,7 +114,8 @@ BrushToolDlg::BrushToolDlg(
 	m_max_value(255.0),
 	m_dft_gm_falloff(0.0),
 	m_dft_scl_translate(0.0),
-	m_hold_history(false)
+	m_hold_history(false),
+	m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker block(this);

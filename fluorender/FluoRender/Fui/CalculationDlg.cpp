@@ -49,7 +49,8 @@ CalculationDlg::CalculationDlg(RenderFrame *frame)
 	: wxPanel(frame, wxID_ANY,
 	wxDefaultPosition,
 	wxSize(500, 350),
-	0, "CalculationDlg")
+	0, "CalculationDlg"),
+	m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

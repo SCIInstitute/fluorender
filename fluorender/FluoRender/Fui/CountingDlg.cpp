@@ -35,10 +35,11 @@ BEGIN_EVENT_TABLE(CountingDlg, wxPanel)
 	EVT_BUTTON(ID_CAAnalyzeBtn, CountingDlg::OnCAAnalyzeBtn)
 END_EVENT_TABLE()
 
-CountingDlg::CountingDlg(RenderFrame *frame)
-: wxPanel(frame, wxID_ANY,
-wxDefaultPosition, wxSize(400, 150),
-0, "CountingDlg")
+CountingDlg::CountingDlg(RenderFrame *frame):
+	wxPanel(frame, wxID_ANY,
+	wxDefaultPosition, wxSize(400, 150),
+	0, "CountingDlg"),
+	m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

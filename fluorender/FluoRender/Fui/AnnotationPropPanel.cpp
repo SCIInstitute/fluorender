@@ -38,7 +38,8 @@ AnnotationPropPanel::AnnotationPropPanel(
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	wxPanel(parent, wxID_ANY, pos, size, style, name)
+	wxPanel(parent, wxID_ANY, pos, size, style, name),
+	m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

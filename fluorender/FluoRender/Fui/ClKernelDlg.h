@@ -35,10 +35,6 @@ DEALINGS IN THE SOFTWARE.
 #include <ClKernelAgent.hpp>
 
 class RenderFrame;
-namespace fluo
-{
-	class Renderview;
-}
 class ClKernelDlg : public wxPanel
 {
 public:

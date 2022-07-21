@@ -122,7 +122,8 @@ VolumePropPanel::VolumePropPanel(
 	wxPanel(parent, wxID_ANY, pos, size,style, name),
 	m_space_x_text(0),
 	m_space_y_text(0),
-	m_space_z_text(0)
+	m_space_z_text(0),
+	m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

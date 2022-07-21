@@ -33,10 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <RecorderAgent.hpp>
 
 class RenderFrame;
-namespace fluo
-{
-	class Renderview;
-}
 class KeyListCtrl : public wxListCtrl
 {
 	enum

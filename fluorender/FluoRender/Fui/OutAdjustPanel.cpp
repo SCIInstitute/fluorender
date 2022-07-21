@@ -70,7 +70,8 @@ OutAdjustPanel::OutAdjustPanel(RenderFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-wxPanel(frame, wxID_ANY, pos, size, style, name)
+	wxPanel(frame, wxID_ANY, pos, size, style, name),
+	m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

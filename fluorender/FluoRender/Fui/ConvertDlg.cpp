@@ -46,7 +46,8 @@ END_EVENT_TABLE()
 ConvertDlg::ConvertDlg(RenderFrame *frame) :
 wxPanel(frame, wxID_ANY,
 	wxDefaultPosition, wxSize(400, 300),
-	0, "ConvertDlg")
+	0, "ConvertDlg"),
+	m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

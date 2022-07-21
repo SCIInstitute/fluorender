@@ -751,9 +751,10 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 
 SettingDlg::SettingDlg(RenderFrame *frame) :
 	wxPanel(frame, wxID_ANY,
-		wxDefaultPosition, wxSize(450, 750),
-		0, "SettingDlg"),
-	m_frame(frame)
+	wxDefaultPosition, wxSize(450, 750),
+	0, "SettingDlg"),
+	m_frame(frame),
+	m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

@@ -42,6 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #include <base_reader.h>
 #include <lbl_reader.h>
 #include <msk_writer.h>
+#include <compatibility.h>
 #include <fstream>
 #include <iostream>
 

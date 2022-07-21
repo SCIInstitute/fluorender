@@ -34,10 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/slider.h>
 #include <AnnotationPropAgent.hpp>
 
-namespace fluo
-{
-	class Annotations;
-}
 class AnnotationPropPanel : public wxPanel
 {
 	enum

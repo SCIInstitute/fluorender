@@ -49,7 +49,8 @@ TraceListCtrl::TraceListCtrl(
 	const wxSize& size,
 	long style) :
 	wxListCtrl(parent, wxID_ANY, pos, size, style),
-	m_type(0)
+	m_type(0),
+	m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -678,9 +679,12 @@ wxWindow* TrackDlg::CreateAnalysisPage(wxWindow *parent)
 
 TrackDlg::TrackDlg(RenderFrame* frame)
 	: wxPanel(frame, wxID_ANY,
-		wxDefaultPosition, wxSize(550, 650),
-		0, "TrackDlg"),
-	m_frame(frame)
+	wxDefaultPosition, wxSize(550, 650),
+	0, "TrackDlg"),
+	m_frame(frame),
+	m_agent(nullptr),
+	m_compagent(nullptr),
+	m_movieagent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -743,10 +747,8 @@ TrackDlg::TrackDlg(RenderFrame* frame)
 	wxBoxSizer* sizer_22 = new wxBoxSizer(wxHORIZONTAL);
 	m_trace_list_curr = new TraceListCtrl(frame, this);
 	m_trace_list_curr->m_type = 0;
-	m_trace_list_curr->m_agent = m_agent;
 	m_trace_list_prev = new TraceListCtrl(frame, this);
 	m_trace_list_prev->m_type = 1;
-	m_trace_list_prev->m_agent = m_agent;
 	sizer_22->Add(m_trace_list_curr, 1, wxEXPAND);
 	sizer_22->Add(m_trace_list_prev, 1, wxEXPAND);
 	//

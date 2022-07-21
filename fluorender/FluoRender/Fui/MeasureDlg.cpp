@@ -60,7 +60,8 @@ RulerListCtrl::RulerListCtrl(
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-	wxListCtrl(parent, wxID_ANY, pos, size, style)
+	wxListCtrl(parent, wxID_ANY, pos, size, style),
+	m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -481,7 +482,8 @@ MeasureDlg::MeasureDlg(RenderFrame* frame)
 	: wxPanel(frame, wxID_ANY,
 	wxDefaultPosition, wxSize(500, 600),
 	0, "MeasureDlg"),
-	m_frame(frame)
+	m_frame(frame),
+	m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

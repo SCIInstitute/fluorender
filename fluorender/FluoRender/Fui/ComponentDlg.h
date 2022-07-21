@@ -39,11 +39,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/splitter.h>
 
 class RenderFrame;
-namespace fluo
-{
-	class Renderview;
-}
-
 class ComponentDlg : public wxPanel
 {
 public:

@@ -32,10 +32,10 @@ BEGIN_EVENT_TABLE(HelpDlg, wxPanel)
 END_EVENT_TABLE()
 
 HelpDlg::HelpDlg(RenderFrame *frame) :
-wxPanel(frame, wxID_ANY,
-		 wxDefaultPosition, wxSize(600, 600),
-		 0, "HelpDlg"),
-m_html(0)
+	wxPanel(frame, wxID_ANY,
+	wxDefaultPosition, wxSize(600, 600),
+	0, "HelpDlg"),
+	m_html(0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

@@ -56,7 +56,7 @@ namespace fluo
 
 		friend class AgentFactory;
 
-		void Init();
+		void Init(unsigned long long, unsigned long long);
 		void CompSelection(fluo::Point& p, int mode);
 		void UpdateInput();
 

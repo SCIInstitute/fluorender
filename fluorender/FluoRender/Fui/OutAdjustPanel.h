@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _OUTADJUSTPANEL_H_
 #define _OUTADJUSTPANEL_H_
 
-#include <Types/Color.h>
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/slider.h>

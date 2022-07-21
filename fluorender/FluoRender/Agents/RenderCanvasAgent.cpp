@@ -26,6 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#include <ShaderProgram.h>
+#include <KernelProgram.h>
 #include <RenderCanvasAgent.hpp>
 #include <RenderCanvas.h>
 #include <Global.hpp>
@@ -40,6 +42,9 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeSelector.h>
 #include <VolumeCalculator.h>
 #include <ScriptProc.h>
+#ifdef _DARWIN
+#include <OpenGL/CGLTypes.h>
+#endif
 
 using namespace fluo;
 
@@ -83,8 +88,26 @@ void RenderCanvasAgent::UpdateFui(const ValueCollection &names)
 	resumeObserverNotification();
 }
 
-void RenderCanvasAgent::Init()
+void RenderCanvasAgent::Init(unsigned long long hwnd, unsigned long long inst)
 {
+#ifdef _WIN32
+	setValue(gstHwnd, hwnd);
+	setValue(gstHinstance, inst);
+#endif
+
+	flvr::ShaderProgram::init_shaders_supported();
+	long lval;
+	glbin_root->getValue(gstClPlatformId, lval);
+	flvr::KernelProgram::set_platform_id(lval);
+	glbin_root->getValue(gstClDeviceId, lval);
+	flvr::KernelProgram::set_device_id(lval);
+	flvr::KernelProgram::init_kernels_supported();
+#ifdef _DARWIN
+	CGLContextObj ctx = CGLGetCurrentContext();
+	if (ctx != flvr::TextureRenderer::gl_context_)
+		flvr::TextureRenderer::gl_context_ = ctx;
+#endif
+
 	Renderview* view = getObject();
 	if (!view)
 		return;
@@ -99,6 +122,12 @@ void RenderCanvasAgent::Init()
 	view->GetVolumeCalculator()->SetVolumeSelector(view->GetVolumeSelector());
 	view->GetScriptProc()->SetFrame(glbin_agtf->getRenderFrameAgent());
 	view->GetScriptProc()->SetView(view);
+
+	view->InitView(
+		Renderview::INIT_BOUNDS |
+		Renderview::INIT_CENTER |
+		Renderview::INIT_TRANSL |
+		Renderview::INIT_ROTATE);
 }
 
 void RenderCanvasAgent::CompSelection(fluo::Point& p, int mode)

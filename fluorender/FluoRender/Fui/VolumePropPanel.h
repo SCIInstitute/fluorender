@@ -35,10 +35,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/tglbtn.h>
 #include <VolumePropAgent.hpp>
 
-namespace fluo
-{
-	class VolumeData;
-}
 class VolumePropPanel: public wxPanel
 {
 	enum

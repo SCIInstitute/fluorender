@@ -52,7 +52,8 @@ END_EVENT_TABLE()
 ColocalDlg::ColocalDlg(RenderFrame* frame) :
 	wxPanel(frame, wxID_ANY,
 	wxDefaultPosition, wxSize(500, 500),
-	0, "ColocalDlg")
+	0, "ColocalDlg"),
+	m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

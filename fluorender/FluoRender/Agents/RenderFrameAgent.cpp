@@ -911,12 +911,14 @@ void RenderFrameAgent::AddView(RenderviewPanel* vrv, bool set_gl)
 
 	std::string str_name = gstRenderviewAgent + std::to_string(RenderviewPanel::m_max_id);
 	vrv->m_agent = glbin_agtf->addRenderviewAgent(str_name, *vrv);
+	str_name = vrv->GetName().ToStdString();
 	view->setName(str_name);
 
 	RenderCanvas* canvas = vrv->GetCanvas();
 	if (!canvas)
 		return;
-	canvas->m_agent = glbin_agtf->addRenderCanvasAgent(str_name, *canvas);
+	canvas->m_agent = glbin_agtf->
+		addRenderCanvasAgent(str_name, *canvas);
 	canvas->m_agent->setObject(view);
 	canvas->m_agent->setValue(gstSetGl, set_gl);
 }
@@ -938,3 +940,8 @@ wxString RenderFrameAgent::ScriptDialog(const wxString& title,
 	return result;
 }
 
+void RenderFrameAgent::UpdateSettings()
+{
+	fluo::SettingAgent* agent = glbin_agtf->getSettingAgent();
+	if (agent) agent->UpdateFui();
+}

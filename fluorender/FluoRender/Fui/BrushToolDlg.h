@@ -36,10 +36,6 @@ DEALINGS IN THE SOFTWARE.
 
 class RenderFrame;
 class TreePanel;
-namespace fluo
-{
-	class Renderview;
-}
 struct GridData
 {
 	int voxel_sum;

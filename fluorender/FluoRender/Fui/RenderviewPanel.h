@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VRENDERVIEW_H_
 #define _VRENDERVIEW_H_
 
-//#include "RenderCanvas.h"
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/clrpicker.h>

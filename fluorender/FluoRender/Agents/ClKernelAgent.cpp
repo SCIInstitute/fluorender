@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <KernelExecutor.h>
+#include <compatibility.h>
 
 using namespace fluo;
 

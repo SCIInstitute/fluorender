@@ -26,11 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <FLIVR/ShaderProgram.h>
 #include <RenderviewPanel.h>
 #include <RenderFrame.h>
 #include <RenderCanvas.h>
-#include <tiffio.h>
 #include <wx/utils.h>
 #include <wx/valnum.h>
 #include <algorithm>
@@ -38,9 +36,6 @@ DEALINGS IN THE SOFTWARE.
 #include <png_resource.h>
 #include "img/icons.h"
 #include <wx/stdpaths.h>
-#ifdef _DARWIN
-#include <OpenGL/CGLTypes.h>
-#endif
 
 int RenderviewPanel::m_max_id = 1;
 
@@ -122,7 +117,8 @@ RenderviewPanel::RenderviewPanel(RenderFrame* frame,
 	m_dft_z_rot(0.0),
 	m_dft_depth_atten_factor(0.0),
 	m_dft_scale_factor(1.0),
-	m_dft_scale_factor_mode(0)
+	m_dft_scale_factor_mode(0),
+	m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -222,8 +218,7 @@ RenderviewPanel::RenderviewPanel(RenderFrame* frame,
 	attriblist.DoubleBuffer();
 	attriblist.EndList();
 	m_canvas = new RenderCanvas(frame, this, attriblist, sharedContext);
-	//m_agent->setObject(glbin_revf->findFirst(name.ToStdString()));
-	//m_agent = m_canvas->m_agent;
+
 	if (!sharedContext)
 	{
 		wxGLContextAttrs contextAttrs;
@@ -318,16 +313,11 @@ RenderviewPanel::RenderviewPanel(RenderFrame* frame,
 	//	m_canvas->SetSBText(L"50 \u03BCm");
 	//	m_canvas->SetScaleBarLen(1.);
 	//}
-	LoadSettings();
+	//LoadSettings();
 	m_x_rotating = m_y_rotating = m_z_rotating = false;
 	m_skip_thumb = false;
 
-	m_agent->getObject()->InitView(
-		fluo::Renderview::INIT_BOUNDS |
-		fluo::Renderview::INIT_CENTER |
-		fluo::Renderview::INIT_TRANSL |
-		fluo::Renderview::INIT_ROTATE);
-	UpdateView();
+	//UpdateView();
 }
 
 RenderviewPanel::~RenderviewPanel()
@@ -396,20 +386,20 @@ void RenderviewPanel::CreateBar()
 	stb->SetBackgroundColour(wxColour(128,128,128));
 	m_options_toolbar->AddControl(stb);
 #endif
-	long lval;
-	m_agent->getValue(gstMixMethod, lval);
-	switch (lval)
-	{
-	case fluo::Renderview::MIX_METHOD_SEQ:
-		m_options_toolbar->ToggleTool(ID_VolumeSeqRd,true);
-		break;
-	case fluo::Renderview::MIX_METHOD_MULTI:
-		m_options_toolbar->ToggleTool(ID_VolumeMultiRd,true);
-		break;
-	case fluo::Renderview::MIX_METHOD_COMP:
-		m_options_toolbar->ToggleTool(ID_VolumeCompRd,true);
-		break;
-	}
+	//long lval;
+	//m_agent->getValue(gstMixMethod, lval);
+	//switch (lval)
+	//{
+	//case fluo::Renderview::MIX_METHOD_SEQ:
+	//	m_options_toolbar->ToggleTool(ID_VolumeSeqRd,true);
+	//	break;
+	//case fluo::Renderview::MIX_METHOD_MULTI:
+	//	m_options_toolbar->ToggleTool(ID_VolumeMultiRd,true);
+	//	break;
+	//case fluo::Renderview::MIX_METHOD_COMP:
+	//	m_options_toolbar->ToggleTool(ID_VolumeCompRd,true);
+	//	break;
+	//}
 	//camera
 	wxButton * cam = new wxButton(m_options_toolbar, ID_CaptureBtn, "Capture");
 	cam->SetBitmap(wxGetBitmapFromMemory(camera));
@@ -509,17 +499,17 @@ void RenderviewPanel::CreateBar()
 	st2 = new wxStaticText(m_options_toolbar, wxID_ANY, "Projection:");
 	m_aov_sldr = new wxSlider(m_options_toolbar, ID_AovSldr, 45, 10, 100,
 		wxDefaultPosition, wxSize(180, 20), wxSL_HORIZONTAL);
-	bool persp;
-	m_agent->getValue(gstPerspective, persp);
-	double aov;
-	m_agent->getValue(gstAov, aov);
-	m_aov_sldr->SetValue(persp ? aov : 10);
+	//bool persp;
+	//m_agent->getValue(gstPerspective, persp);
+	//double aov;
+	//m_agent->getValue(gstAov, aov);
+	//m_aov_sldr->SetValue(persp ? aov : 10);
 	m_aov_sldr->Connect(wxID_ANY, wxEVT_IDLE,
 		wxIdleEventHandler(RenderviewPanel::OnAovSldrIdle),
 		NULL, this);
 	m_aov_text = new wxTextCtrl(m_options_toolbar, ID_AovText, "",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	m_aov_text->ChangeValue(persp ? wxString::Format("%d", int(aov)) : "Ortho");
+	//m_aov_text->ChangeValue(persp ? wxString::Format("%d", int(aov)) : "Ortho");
 	m_options_toolbar->AddControl(st2);
 	m_options_toolbar->AddControl(m_aov_sldr);
 	m_options_toolbar->AddControl(m_aov_text);
@@ -531,12 +521,12 @@ void RenderviewPanel::CreateBar()
 		"Change the camera to a 'Free-Fly' Mode",
 		"Change the camera to a 'Free-Fly' Mode");
 
-	bool bval;
-	m_agent->getValue(gstFree, bval);
-	if (bval)
-		m_options_toolbar->ToggleTool(ID_FreeChk,true);
-	else
-		m_options_toolbar->ToggleTool(ID_FreeChk,false);
+	//bool bval;
+	//m_agent->getValue(gstFree, bval);
+	//if (bval)
+	//	m_options_toolbar->ToggleTool(ID_FreeChk,true);
+	//else
+	//	m_options_toolbar->ToggleTool(ID_FreeChk,false);
 
 #ifndef _DARWIN
 	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
@@ -2090,6 +2080,8 @@ void RenderviewPanel::OnScaleBar(wxCommandEvent& event)
 
 void RenderviewPanel::OnAovSldrIdle(wxIdleEvent& event)
 {
+	if (!m_agent)
+		return;
 	//RenderFrame* vr_frame = (RenderFrame*)m_frame;
 	//if (vr_frame && vr_frame->GetClippingView())
 	//{

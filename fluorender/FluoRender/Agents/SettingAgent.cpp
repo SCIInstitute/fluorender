@@ -32,6 +32,9 @@ DEALINGS IN THE SOFTWARE.
 #include <ShaderProgram.h>
 #include <TextRenderer.h>
 #include <KernelProgram.h>
+#include <compatibility.h>
+#include <wx/wfstream.h>
+#include <wx/fileconf.h>
 
 using namespace fluo;
 

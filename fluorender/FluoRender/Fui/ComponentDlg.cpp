@@ -169,12 +169,13 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_SPLITTER_DCLICK(wxID_ANY, ComponentDlg::OnSplitterDclick)
 END_EVENT_TABLE()
 
-ComponentDlg::ComponentDlg(RenderFrame *frame)
-	: wxPanel(frame, wxID_ANY,
-		wxDefaultPosition,
-		wxSize(600, 800),
-		0, "ComponentDlg"),
-	m_frame(frame)
+ComponentDlg::ComponentDlg(RenderFrame *frame):
+	wxPanel(frame, wxID_ANY,
+	wxDefaultPosition,
+	wxSize(600, 800),
+	0, "ComponentDlg"),
+	m_frame(frame),
+	m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

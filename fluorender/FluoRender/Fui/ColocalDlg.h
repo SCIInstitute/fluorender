@@ -37,12 +37,6 @@ DEALINGS IN THE SOFTWARE.
 #include <chrono>
 
 class RenderFrame;
-namespace fluo
-{
-	class Renderview;
-	class VolumeData;
-	class VolumeGroup;
-}
 class ColocalDlg : public wxPanel
 {
 public:

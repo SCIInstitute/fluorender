@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <AgentFactory.hpp>
 #include <RenderFrameAgent.hpp>
 #include <ClipPlaneAgent.hpp>
+#include <compatibility.h>
 
 using namespace fluo;
 

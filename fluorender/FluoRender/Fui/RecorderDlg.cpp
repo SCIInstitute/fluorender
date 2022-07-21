@@ -51,9 +51,10 @@ KeyListCtrl::KeyListCtrl(
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-wxListCtrl(parent, wxID_ANY, pos, size, style),
-m_editing_item(-1),
-m_dragging_to_item(-1)
+	wxListCtrl(parent, wxID_ANY, pos, size, style),
+	m_editing_item(-1),
+	m_dragging_to_item(-1),
+	m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -328,10 +329,11 @@ BEGIN_EVENT_TABLE(RecorderDlg, wxPanel)
 	EVT_BUTTON(ID_CamLockBtn, RecorderDlg::OnCamLockBtn)
 END_EVENT_TABLE()
 
-RecorderDlg::RecorderDlg(RenderFrame* frame, wxWindow* parent)
-: wxPanel(parent, wxID_ANY,
-wxPoint(500, 150), wxSize(450, 650),
-0, "RecorderDlg")
+RecorderDlg::RecorderDlg(RenderFrame* frame, wxWindow* parent):
+	wxPanel(parent, wxID_ANY,
+	wxPoint(500, 150), wxSize(450, 650),
+	0, "RecorderDlg"),
+	m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

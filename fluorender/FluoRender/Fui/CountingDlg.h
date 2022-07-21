@@ -32,10 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <CountingAgent.hpp>
 
 class RenderFrame;
-namespace fluo
-{
-	class VolumeData;
-}
 class CountingDlg : public wxPanel
 {
 public:

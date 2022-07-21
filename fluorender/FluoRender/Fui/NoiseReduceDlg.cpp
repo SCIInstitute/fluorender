@@ -42,7 +42,8 @@ END_EVENT_TABLE()
 NoiseReduceDlg::NoiseReduceDlg(RenderFrame *frame)
 : wxPanel(frame, wxID_ANY,
 	wxDefaultPosition, wxSize(400, 150),
-	0, "NoiseReduceDlg")
+	0, "NoiseReduceDlg"),
+	m_agent(nullptr)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

@@ -99,6 +99,8 @@ namespace fluo
 		wxString ScriptDialog(const wxString& title,
 			const wxString& wildcard, long style);
 
+		void UpdateSettings();
+
 	protected:
 		RenderFrame &frame_;
 

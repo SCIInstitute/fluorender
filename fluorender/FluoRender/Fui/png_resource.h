@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef PNG_RESOURCE_H
 #define PNG_RESOURCE_H
 
-#include <compatibility.h>
 #include <wx/wx.h>
 #include <wx/mstream.h>
 
