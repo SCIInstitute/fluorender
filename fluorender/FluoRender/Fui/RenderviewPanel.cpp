@@ -775,6 +775,7 @@ void RenderviewPanel::UpdateView(bool ui_update)
 
 void RenderviewPanel::UpdateScaleFactor(bool update_text)
 {
+	return;
 	double dval;
 	double scale;
 	m_agent->getValue(gstScaleFactor, scale);

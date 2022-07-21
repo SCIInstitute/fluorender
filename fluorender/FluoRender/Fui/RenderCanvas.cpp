@@ -131,8 +131,8 @@ void RenderCanvas::OnResize(wxSizeEvent& event)
 #endif
 	wxSize size = GetSize() * dval;
 	m_vrv->UpdateScaleFactor(false);
-	m_agent->setValue(gstSizeX, long(size.x));
-	m_agent->setValue(gstSizeY, long(size.y));
+	m_agent->changeValue(gstSizeX, long(size.x));
+	m_agent->changeValue(gstSizeY, long(size.y));
 
 	m_agent->resumeObserverNotificationAndUpdate();
 	//m_agent->getObject()->RefreshGL(1);

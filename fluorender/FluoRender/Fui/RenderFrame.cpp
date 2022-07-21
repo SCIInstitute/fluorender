@@ -687,9 +687,9 @@ RenderFrame::RenderFrame(
 		wxString(" started normally."));
 #endif // wxUSE_STATUSBAR
 
+	SetMinSize(wxSize(800, 600));
+
 	m_aui_mgr.Update();
-
-
 }
 
 RenderFrame::~RenderFrame()
@@ -751,8 +751,6 @@ void RenderFrame::Init(
 		m_main_tb->DeleteTool(ID_ImportVolume);
 		m_top_file->Enable(ID_ImportVolume, false);
 	}
-
-	SetMinSize(wxSize(800, 600));
 
 	if (!windowed)
 		Maximize();
