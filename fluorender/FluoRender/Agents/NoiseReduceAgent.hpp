@@ -46,7 +46,7 @@ namespace fluo
 
 		virtual const char* className() const { return "NoiseReduceAgent"; }
 
-		virtual void setObject(Renderview* an);
+		virtual void setObject(Renderview* view);
 		virtual Renderview* getObject();
 
 		virtual void UpdateFui(const ValueCollection &names = {});

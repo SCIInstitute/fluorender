@@ -831,8 +831,13 @@ void RenderFrameAgent::Select(const std::string &name)
 	if (!node)
 		return;
 
+	//as node
 	glbin_agtf->getOutAdjustAgent()->setObject(node);
 	glbin_agtf->getClipPlaneAgent()->setObject(node);
+
+	//as rederview
+	Renderview* view = dynamic_cast<Renderview*>(node);
+	VolumeGroup* vgroup = nullptr;
 
 	std::string type(node->className());
 	if (type == "VolumeData")
@@ -843,21 +848,30 @@ void RenderFrameAgent::Select(const std::string &name)
 			vd->getValue(gstDisplay, display);
 		if (display)
 		{
-			glbin_agtf->getVolumePropAgent()->setObject(vd);
 			frame_.ShowVolumePropPanel(vd->getName());
-
-			glbin_root->setRefValue(gstCurrentVolume, vd);
-			for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
-			{
-				fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
-				if (!view)
-					continue;
-				view->setRefValue(gstCurrentVolume, vd);
-			}
 		}
 		else
 		{
 			frame_.HidePropPanel();
+		}
+		if (vd)
+		{
+			glbin_root->setRefValue(gstCurrentVolume, vd);
+			glbin_agtf->getConvertAgent()->setObject(vd);
+			glbin_agtf->getCountingAgent()->setObject(vd);
+			glbin_agtf->getVolumePropAgent()->setObject(vd);
+
+			visitor.reset();
+			visitor.setTraversalMode(NodeVisitor::TRAVERSE_PARENTS);
+			visitor.matchClassName("Renderview");
+			vd->accept(visitor);
+			view = visitor.getRenderview();
+
+			visitor.reset();
+			visitor.setTraversalMode(NodeVisitor::TRAVERSE_PARENTS);
+			visitor.matchClassName("VolumeGroup");
+			vd->accept(visitor);
+			vgroup = visitor.getVolumeGroup();
 		}
 	}
 	else if (type == "MeshData")
@@ -868,13 +882,23 @@ void RenderFrameAgent::Select(const std::string &name)
 			md->getValue(gstDisplay, display);
 		if (display)
 		{
-			glbin_agtf->getMeshPropAgent()->setObject(md);
-			md->setValue(gstDrawBounds, true);
 			frame_.ShowMeshPropPanel(md->getName());
 		}
 		else
 		{
 			frame_.HidePropPanel();
+		}
+		if (md)
+		{
+			md->setValue(gstDrawBounds, true);
+			glbin_agtf->getMeshPropAgent()->setObject(md);
+			glbin_agtf->getMeshTransAgent()->setObject(md);
+
+			visitor.reset();
+			visitor.setTraversalMode(NodeVisitor::TRAVERSE_PARENTS);
+			visitor.matchClassName("Renderview");
+			md->accept(visitor);
+			view = visitor.getRenderview();
 		}
 	}
 	else if (type == "Annotations")
@@ -885,12 +909,21 @@ void RenderFrameAgent::Select(const std::string &name)
 			ann->getValue(gstDisplay, display);
 		if (display)
 		{
-			glbin_agtf->getAnnotationPropAgent()->setObject(ann);
 			frame_.ShowAnnoPropPanel(ann->getName());
 		}
 		else
 		{
 			frame_.HidePropPanel();
+		}
+		if (ann)
+		{
+			glbin_agtf->getAnnotationPropAgent()->setObject(ann);
+
+			visitor.reset();
+			visitor.setTraversalMode(NodeVisitor::TRAVERSE_PARENTS);
+			visitor.matchClassName("Renderview");
+			ann->accept(visitor);
+			view = visitor.getRenderview();
 		}
 	}
 	else
@@ -898,6 +931,23 @@ void RenderFrameAgent::Select(const std::string &name)
 		frame_.HidePropPanel();
 	}
 
+	//others
+	if (view)
+	{
+		glbin_agtf->getBrushToolAgent()->setObject(view);
+		glbin_agtf->getCalculationAgent()->setObject(view);
+		glbin_agtf->getClKernelAgent()->setObject(view);
+		glbin_agtf->getComponentAgent()->setObject(view);
+		glbin_agtf->getMeasureAgent()->setObject(view);
+		glbin_agtf->getMovieAgent()->setObject(view);
+		glbin_agtf->getNoiseReduceAgent()->setObject(view);
+		glbin_agtf->getRecorderAgent()->setObject(view);
+		glbin_agtf->getTrackAgent()->setObject(view);
+	}
+	if (vgroup)
+	{
+		glbin_agtf->getColocalAgent()->setObject(vgroup);
+	}
 }
 
 void RenderFrameAgent::AddView(RenderviewPanel* vrv, bool set_gl)
