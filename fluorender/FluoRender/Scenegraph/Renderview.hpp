@@ -49,7 +49,6 @@ DEALINGS IN THE SOFTWARE.
 #define WINDOWS_LEAN_AND_MEAN
 #include <windows.h>
 //wacom support
-//#include <wx/msw/private.h>
 #include <MSGPACK.h>
 #include <wintab.h>
 #define PACKETDATA	(/*PK_X | PK_Y | */PK_BUTTONS |\

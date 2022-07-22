@@ -41,7 +41,7 @@
 #include <StopWatch.hpp>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
-#include <wx/utils.h>
+#include <compatibility.h>
 
 using namespace std;
 
@@ -875,7 +875,7 @@ namespace flvr
 									rn_time = glbin.getStopWatch(gstStopWatch)->get_ticks();
 									elapsed = rn_time - st_time_;
 									t = up_time_ - elapsed;
-									if (t > 0) wxMilliSleep(t);
+									if (t > 0) SLEEP(t);
 								} while (elapsed <= up_time_);
 
 								if (brick->isLoaded())

@@ -36,11 +36,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Selection/VolumePoint.h>
 #include <Selection/VolumeSelector.h>
 #include <Calculate/Count.h>
+#include <compatibility.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <Nrrd/nrrd.h>
-#include <wx/fileconf.h>
 #include <string>
-#include <compatibility.h>
 
 using namespace flrd;
 
@@ -628,7 +627,7 @@ void RulerHandler::DeleteAll(bool cur_time)
 	m_pindex = -1;
 }
 
-void RulerHandler::Save(wxFileConfig &fconfig, int vi)
+/*void RulerHandler::Save(wxFileConfig &fconfig, int vi)
 {
 	if (m_ruler_list && m_ruler_list->size())
 	{
@@ -781,7 +780,7 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 			}
 		}
 	}
-}
+}*/
 
 int RulerHandler::Profile(int index)
 {

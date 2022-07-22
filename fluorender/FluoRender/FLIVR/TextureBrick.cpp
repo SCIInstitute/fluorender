@@ -35,7 +35,6 @@
 #include <utility>
 #include <iostream>
 #include <fstream>
-#include <wx/filefn.h>
 
 using namespace std;
 
@@ -569,8 +568,8 @@ namespace flvr
 		if (finfo->isurl)
 		{
 			bool found_cache = false;
-			wxString wxcfname = finfo->cache_filename;
-			if (finfo->cached && wxFileExists(wxcfname))
+			std::wstring wxcfname = finfo->cache_filename;
+			if (finfo->cached && FILE_EXISTS(wxcfname))
 				found_cache = true;
 			else
 			{
@@ -580,7 +579,7 @@ namespace flvr
 				if (itr != cache_table_.end())
 				{
 					wxcfname = itr->second;
-					if (wxFileExists(wxcfname))
+					if (FILE_EXISTS(wxcfname))
 						found_cache = true;
 				}
 

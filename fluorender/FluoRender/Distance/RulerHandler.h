@@ -34,7 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <algorithm>
 
-class wxFileConfig;
 namespace fluo
 {
 	class Renderview;
@@ -155,8 +154,10 @@ namespace flrd
 		void DeleteSelection(std::vector<int> &sel);
 		void DeleteAll(bool cur_time);
 
-		void Save(wxFileConfig &fconfig, int vi);
-		void Read(wxFileConfig &fconfig, int vi);
+		void Save(int vi) {}
+		void Read(int vi) {}
+		//void Save(wxFileConfig &fconfig, int vi);
+		//void Read(wxFileConfig &fconfig, int vi);
 
 		int Profile(int index);
 		int Distance(int index, std::string filename);

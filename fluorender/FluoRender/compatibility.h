@@ -376,11 +376,27 @@ inline bool FILE_EXISTS(const std::string& name)
 		return false;
 }
 
+inline bool FILE_EXISTS(const std::wstring& name)
+{
+	if (FILE *file = _wfopen(name.c_str(), L"r"))
+	{
+		fclose(file);
+		return true;
+	}
+	else
+		return false;
+}
+
 inline void SaveConfig(wxFileConfig &file, wxString str)
 {
 	str = "\x5c\x5c\x3f\x5c" + str;
 	wxFileOutputStream os(str);
 	file.Save(os);
+}
+
+inline void SLEEP(unsigned long t)
+{
+	Sleep(t);
 }
 
 #else // MAC OSX or LINUX
@@ -400,6 +416,7 @@ inline void SaveConfig(wxFileConfig &file, wxString str)
 #include <wx/wx.h>
 #include <wx/fileconf.h>
 #include <wx/wfstream.h>
+#include <unistd.h>
 
 #define GETCURRENTDIR getcwd
 
@@ -711,10 +728,21 @@ inline bool FILE_EXISTS(const std::string& name)
 	return (stat(name.c_str(), &buffer) == 0);
 }
 
+inline bool FILE_EXISTS(const std::wstring& name)
+{
+	struct stat buffer;
+	return (stat(name.c_str(), &buffer) == 0);
+}
+
 inline void SaveConfig(wxFileConfig &file, wxString str)
 {
 	wxFileOutputStream os(str);
 	file.Save(os);
+}
+
+inline void SLEEP(unsigned long t)
+{
+	usleep(t * 1000);
 }
 
 //LINUX SPECIFIC
