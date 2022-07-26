@@ -41,7 +41,6 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshFactory.hpp>
 #include <NodeVisitor.hpp>
 #include <SearchVisitor.hpp>
-#include <VolumeLoader.h>
 #include <compatibility.h>
 #include <Debug.hpp>
 #include <Animator/Interpolator.h>
@@ -97,7 +96,7 @@ Renderview::Renderview()
 	m_ruler_align = new flrd::RulerAlign(); m_ruler_align->SetView(this);
 	m_volume_point = new flrd::VolumePoint();
 	m_comp_analyzer = new flrd::ComponentAnalyzer();
-	m_loader = new VolumeLoader();
+	//m_loader = new VolumeLoader();
 	m_interpolator = new Interpolator();
 	m_text_renderer = new flvr::TextRenderer();
 }
@@ -120,7 +119,7 @@ Renderview::Renderview(const Renderview& view, const CopyOp& copyop) :
 	m_ruler_align = new flrd::RulerAlign(); m_ruler_align->SetView(this);
 	m_volume_point = new flrd::VolumePoint();
 	m_comp_analyzer = new flrd::ComponentAnalyzer();
-	m_loader = new VolumeLoader();
+	//m_loader = new VolumeLoader();
 	m_interpolator = new Interpolator();
 	m_text_renderer = new flvr::TextRenderer();
 }
@@ -161,7 +160,7 @@ Renderview::~Renderview()
 	}
 	//glbin.getStopWatch(gstStopWatch)->stop();
 	//m_selector->SaveBrushSettings();
-	m_loader->StopAll();
+	//m_loader->StopAll();
 
 	//temporary, dynamic data will be managed by global
 	delete m_mvr;
@@ -178,7 +177,7 @@ Renderview::~Renderview()
 	delete m_ruler_align;
 	delete m_volume_point;
 	delete m_comp_analyzer;
-	delete m_loader;
+	//delete m_loader;
 	delete m_interpolator;
 	delete m_text_renderer;
 }
@@ -341,7 +340,7 @@ void Renderview::Init()
 
 void Renderview::Clear()
 {
-	m_loader->RemoveAllLoadedBrick();
+	//m_loader->RemoveAllLoadedBrick();
 	flvr::TextureRenderer::clear_tex_pool();
 
 	setRefValue(gstCurrentVolume, (Referenced*)(0));
@@ -664,7 +663,7 @@ void Renderview::PopFullMeshList()
 
 void Renderview::ClearVolList()
 {
-	m_loader->RemoveAllLoadedBrick();
+	//m_loader->RemoveAllLoadedBrick();
 	flvr::TextureRenderer::clear_tex_pool();
 	m_vol_list.clear();
 }
@@ -1975,7 +1974,7 @@ void Renderview::StartLoopUpdate()
 			vd->GetRenderer()->set_done_loop(false);
 	}
 
-	std::vector<VolumeLoaderData> queues;
+	//std::vector<VolumeLoaderData> queues;
 	long mix_method;
 	getValue(gstMixMethod, mix_method);
 	if (mix_method == MIX_METHOD_MULTI)
@@ -1998,9 +1997,9 @@ void Renderview::StartLoopUpdate()
 			list.push_back(vd.get());
 		}
 
-		std::vector<VolumeLoaderData> tmp_shade;
-		std::vector<VolumeLoaderData> tmp_shadow;
-		for (auto vd : list)
+		//std::vector<VolumeLoaderData> tmp_shade;
+		//std::vector<VolumeLoaderData> tmp_shadow;
+/*		for (auto vd : list)
 		{
 			if (!vd) continue;
 			flvr::Texture* tex = vd->GetTexture();
@@ -2016,7 +2015,7 @@ void Renderview::StartLoopUpdate()
 			vd->getValue(gstShadowEnable, shadow);
 			for (j = 0; j < bricks->size(); j++)
 			{
-				VolumeLoaderData d;
+				//VolumeLoaderData d;
 				flvr::TextureBrick* b = (*bricks)[j];
 				if (b->get_disp())
 				{
@@ -2085,11 +2084,11 @@ void Renderview::StartLoopUpdate()
 					[](const VolumeLoaderData b1, const VolumeLoaderData b2)
 			{ return b2.brick->get_d() > b1.brick->get_d(); });
 			queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
-		}
+		}*/
 	}
 	else if (getNumChildren() > 0)
 	{
-		for (i = getNumChildren() - 1; i >= 0; i--)
+/*		for (i = getNumChildren() - 1; i >= 0; i--)
 		{
 			if (VolumeData* vd = getChild(i)->asVolumeData())
 			{
@@ -2348,17 +2347,17 @@ void Renderview::StartLoopUpdate()
 					}
 				}
 			}
-		}
+		}*/
 	}
 
-	if (queues.size() > 0)
+/*	if (queues.size() > 0)
 	//&& !m_interactive)
 	{
 		m_loader->Set(queues);
 		m_loader->SetMemoryLimitByte((long long)flvr::TextureRenderer::mainmem_buf_size_ * 1024LL * 1024LL);
 		flvr::TextureRenderer::set_load_on_main_thread(false);
 		m_loader->Run();
-	}
+	}*/
 
 	long draw_type;
 	getValue(gstDrawType, draw_type);

@@ -559,7 +559,7 @@ namespace flvr
 		return true;
 	}
 
-	bool TextureBrick::read_brick_without_decomp(char* &data, size_t &readsize, FileLocInfo* finfo, wxThread *th)
+	bool TextureBrick::read_brick_without_decomp(char* &data, size_t &readsize, FileLocInfo* finfo, std::thread *th)
 	{
 		readsize = -1;
 

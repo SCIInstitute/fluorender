@@ -61,7 +61,7 @@ DEALINGS IN THE SOFTWARE.
 #endif
 #endif
 
-class VolumeLoader;
+//class VolumeLoader;
 class Interpolator;
 namespace flrd
 {
@@ -508,7 +508,7 @@ namespace fluo
 		flrd::VolumePoint *m_volume_point;
 		//comps
 		flrd::ComponentAnalyzer *m_comp_analyzer;
-		VolumeLoader *m_loader;
+		//VolumeLoader *m_loader;
 		Interpolator* m_interpolator;
 		//text renderer
 		flvr::TextRenderer *m_text_renderer;
