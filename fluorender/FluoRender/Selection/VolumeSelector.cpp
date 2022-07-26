@@ -39,8 +39,6 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/VolumeRenderer.h>
 #include <Selection/PaintBoxes.h>
 #include <Selection/MaskBorder.h>
-#include <wx/wx.h>
-#include <wx/stdpaths.h>
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace flrd;
@@ -608,7 +606,7 @@ bool VolumeSelector::GetThUpdate()
 //load settings
 void VolumeSelector::LoadBrushSettings()
 {
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+/*	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
 	wxString dft = expath + GETSLASH() + "default_brush_settings.dft";
 	wxFileInputStream is(dft);
@@ -722,11 +720,12 @@ void VolumeSelector::LoadBrushSettings()
 	//brush size relation
 	if (fconfig.Read("brush_size_data", &bval))
 		m_brush_size_data = bval;
+*/
 }
 
 void VolumeSelector::SaveBrushSettings()
 {
-	wxString app_name = "FluoRender " +
+/*	wxString app_name = "FluoRender " +
 		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
 	wxString vendor_name = "FluoRender";
 	wxString local_name = "default_brush_settings.dft";
@@ -784,6 +783,7 @@ void VolumeSelector::SaveBrushSettings()
 	expath = wxPathOnly(expath);
 	wxString dft = expath + GETSLASH() + "default_brush_settings.dft";
 	SaveConfig(fconfig, dft);
+*/
 }
 
 void VolumeSelector::PopMask()

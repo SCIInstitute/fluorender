@@ -27,12 +27,13 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "ScriptProc.h"
-#include <RenderFrame.h>
 #include <InfoVisitor.hpp>
 #include <Renderview.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
 #include <AgentFactory.hpp>
+#include <MeasureAgent.hpp>
+#include <TrackAgent.hpp>
 #include <msk_reader.h>
 #include <msk_writer.h>
 #include <lbl_reader.h>
@@ -48,10 +49,9 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/VertexArray.h>
 #include <FLIVR/TextureRenderer.h>
 #include <FLIVR/VolumeRenderer.h>
+#include <compatibility.h>
 #include <utility.h>
 #include <Nrrd/nrrd.h>
-#include <wx/filefn.h>
-#include <wx/stdpaths.h>
 #include <iostream>
 #include <string> 
 #include <sstream>
@@ -72,12 +72,12 @@ ScriptProc::~ScriptProc()
 }
 
 //run 4d script
-void ScriptProc::Run4DScript(TimeMask tm, const wxString &scriptname, bool rewind)
+void ScriptProc::Run4DScript(TimeMask tm, const std::wstring &scriptname, bool rewind)
 {
-	m_fconfig = 0;
-	m_fconfig_name = "";
-	wxString scriptfile = GetInputFile(scriptname, "Scripts");
-	if (scriptfile.IsEmpty())
+/*	m_fconfig = 0;
+	m_fconfig_name = L"";
+	std::wstring scriptfile = GetInputFile(scriptname, L"Scripts");
+	if (scriptfile.empty())
 		return;
 	m_fconfig_name = scriptfile;
 	wxFileInputStream is(m_fconfig_name);
@@ -149,11 +149,11 @@ void ScriptProc::Run4DScript(TimeMask tm, const wxString &scriptname, bool rewin
 			}
 		}
 	}
-}
+*/}
 
 bool ScriptProc::TimeCondition()
 {
-	if (!m_fconfig || !m_view)
+/*	if (!m_fconfig || !m_view)
 		return false;
 	int time_mode;
 	wxString str;
@@ -181,12 +181,12 @@ bool ScriptProc::TimeCondition()
 	//time mode
 	if (m_time_mask & tm & time_mode)
 		return true;
-	return false;
+*/	return false;
 }
 
 bool ScriptProc::GetVolumes(fluo::VolumeList &list)
 {
-	if (!m_fconfig || !m_view)
+/*	if (!m_fconfig || !m_view)
 		return false;
 	int chan_mode;
 	m_fconfig->Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;2-shown vol;3-hidden vol
@@ -218,7 +218,7 @@ bool ScriptProc::GetVolumes(fluo::VolumeList &list)
 			if (!disp) list.push_back(vd);
 		}
 	}
-	return !list.empty();
+*/	return !list.empty();
 }
 
 //add traces to trace dialog
@@ -275,61 +275,61 @@ int ScriptProc::GetTimeNum()
 	return 0;
 }
 
-wxString ScriptProc::GetInputFile(const wxString &str, const wxString &subd)
+std::wstring ScriptProc::GetInputFile(const std::wstring &str, const std::wstring &subd)
 {
-	wxString result = str;
+	std::wstring result = str;
 	bool exist = false;
-	if (result.IsEmpty())
+	if (result.empty())
 		return result;
-	exist = wxFileExists(result);
+	exist = FILE_EXISTS(result);
 	if (!exist)
 	{
 		//find in default folder
-		std::wstring name = result.ToStdWstring();
+		std::wstring name = result;
 		name = GET_NAME(name);
-		wxString path = wxStandardPaths::Get().GetExecutablePath();
-		path = wxPathOnly(path);
+		std::wstring path = glbin.getExecutablePath();
+		path = GET_PATH(path);
 		result = path + GETSLASH() + subd + GETSLASH() + name;
-		exist = wxFileExists(result);
+		exist = FILE_EXISTS(result);
 	}
 	if (!exist)
 	{
 		//find in config file folder
-		wxString path = wxPathOnly(m_fconfig_name);
+		std::wstring path = GET_PATH(m_fconfig_name);
 		result = path + GETSLASH() + str;
-		exist = wxFileExists(result);
+		exist = FILE_EXISTS(result);
 	}
 	if (exist)
 		return result;
 	else
-		return "";
+		return L"";
 }
 
-wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool rep)
+std::wstring ScriptProc::GetSavePath(const std::wstring &str, const std::wstring &ext, bool rep)
 {
-	wxString temp = str;
-	wxString path;
+	std::wstring temp = str;
+	std::wstring path;
 	fluo::Node* node = m_output->getChild("savepath");
 	if (node)
 	{
-		std::string name;
+		std::wstring name;
 		node->getValue("path", name);
 		if (!name.empty())
 			return name;
 	}
 	//not found
-	if (temp.IsEmpty() ||
-		temp == "FILE_DLG")
+	if (temp.empty() ||
+		temp == L"FILE_DLG")
 	{
 		//file dialog
-		path = m_frame->ScriptDialog(
-			"Save Results",
-			"Output file(*." + ext + ")|*." + ext,
-			wxFD_SAVE);
-		if (path.IsEmpty())
+		//path = m_frame->ScriptDialog(
+		//	"Save Results",
+		//	"Output file(*." + ext + ")|*." + ext,
+		//	wxFD_SAVE);
+		if (path.empty())
 			path = GetDataDir(ext);
 	}
-	else if (temp == "DATA_DIR")
+	else if (temp == L"DATA_DIR")
 	{
 		path = GetDataDir(ext);
 	}
@@ -337,100 +337,99 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 	{
 		//specific dir
 		path = temp;
-		if (temp.Find('.') != wxNOT_FOUND)
-			path = wxPathOnly(temp);
-		if (!wxDirExists(path))
-			MkDirW(path.ToStdWstring());
-		if (!wxDirExists(path))
-			return "";
+		if (temp.find(L'.') != std::wstring::npos)
+			path = GET_PATH(temp);
+		if (!DIR_EXISTS(path))
+			MkDirW(path);
+		if (!DIR_EXISTS(path))
+			return L"";
 		if (path == temp)
 		{
-			wxString lc = path.Last();
-			if (lc != "/" &&
-				lc != "\\")
+			wchar_t lc = path.back();
+			if (lc != L'/' &&
+				lc != L'\\')
 				path += GETSLASH();
-			path += "output01." + ext;//not containing filename
+			path += L"output01." + ext;//not containing filename
 		}
 		else
 			path = temp;//containing filename
 	}
 	if (!rep)
 	{
-		while (wxFileExists(path))
+		while (FILE_EXISTS(path))
 			path = IncreaseNum(path);
 	}
 	node = m_output->getOrAddNode("savepath");
-	path = STR_DIR_SEP(path.ToStdString());
-	node->addSetValue("path", path.ToStdString());
+	path = GET_PATH(path);
+	node->addSetValue("path", path);
 	return path;
 }
 
-wxString ScriptProc::GetDataDir(const wxString &ext)
+std::wstring ScriptProc::GetDataDir(const std::wstring &ext)
 {
 	//data dir
 	if (!m_view)
-		return "";
+		return L"";
 	fluo::VolumeData* vol = m_view->GetCurrentVolume();
 	if (!vol)
-		return "";
+		return L"";
 	std::wstring str;
 	vol->getValue(gstDataPath, str);
-	wxString path = str;
-	path = wxPathOnly(path);
-	path += GETSLASH();
-	path += "output01." + ext;
-	return path;
-}
-
-wxString ScriptProc::RemoveExt(const wxString& str)
-{
-	int pos = str.Find('.', true);
-	if (pos != wxNOT_FOUND)
-		return str.Left(pos);
+	str = GET_PATH(str);
+	str += GETSLASH();
+	str += L"output01." + ext;
 	return str;
 }
 
-wxString ScriptProc::RemoveNum(const wxString& str)
+std::wstring ScriptProc::RemoveExt(const std::wstring& str)
 {
-	wxString tmp = RemoveExt(str);
-	while (wxIsdigit(tmp.Last()))
-		tmp.RemoveLast();
+	int pos = str.find_last_of(L'.');
+	if (pos != std::wstring::npos)
+		return str.substr(0, pos-1);
+	return str;
+}
+
+std::wstring ScriptProc::RemoveNum(const std::wstring& str)
+{
+	std::wstring tmp = RemoveExt(str);
+	while (std::iswdigit(tmp.back()))
+		tmp = tmp.substr(0, tmp.length()-1);
 	return tmp;
 }
 
-wxString ScriptProc::IncreaseNum(const wxString& str)
+std::wstring ScriptProc::IncreaseNum(const std::wstring& str)
 {
-	int pos = str.Find('.', true);
-	wxString ext;
-	if (pos != wxNOT_FOUND)
-		ext = str.Right(str.Length() - pos);
-	wxString tmp = str.Left(pos);
-	wxString digits;
-	while (wxIsdigit(tmp.Last()))
+	int pos = str.find_last_of(L'.');
+	std::wstring ext;
+	if (pos != std::wstring::npos)
+		ext = str.substr(pos, str.length() - pos);
+	std::wstring tmp = str.substr(0, pos-1);
+	std::wstring digits;
+	while (std::iswdigit(tmp.back()))
 	{
-		digits.Prepend(tmp.Last());
-		tmp.RemoveLast();
+		digits = tmp.back() + digits;
+		tmp = tmp.substr(0, tmp.length() - 1);
 	}
-	int len = digits.Length();
+	int len = digits.length();
 	if (!len)
 	{
-		return tmp + "01" + ext;
+		return tmp + L"01" + ext;
 	}
-	long num;
-	digits.ToLong(&num);
+	long num = std::stol(digits);
 	num++;
-	digits = wxString::Format("%d", num);
-	if (digits.Length() < len)
+	digits = std::to_wstring(num);
+	if (digits.length() < len)
 	{
-		wxString format = wxString::Format("%%0%dd", len);
-		digits = wxString::Format(format, num);
+		std::wostringstream ss;
+		ss << std::setw(len) << std::setfill(L'0') << num;
+		digits = ss.str();
 	}
 	return tmp + digits + ext;
 }
 
 void ScriptProc::RunNoiseReduction()
 {
-	if (!TimeCondition())
+/*	if (!TimeCondition())
 		return;
 	fluo::VolumeList vlist;
 	if (!GetVolumes(vlist))
@@ -454,11 +453,11 @@ void ScriptProc::RunNoiseReduction()
 		//delete
 		calculator->CalculateGroup(6, "", false);
 	}
-}
+*/}
 
 void ScriptProc::RunPreTracking()
 {
-	if (!TimeCondition())
+/*	if (!TimeCondition())
 		return;
 
 	fluo::VolumeData* cur_vol = m_view->GetCurrentVolume();
@@ -488,7 +487,7 @@ void ScriptProc::RunPreTracking()
 				(it->second->Id(), celp));
 		}
 	}
-}
+*/}
 
 void ScriptProc::RunPostTracking()
 {
@@ -550,7 +549,7 @@ void ScriptProc::RunPostTracking()
 
 void ScriptProc::RunMaskTracking()
 {
-	if (!TimeCondition())
+/*	if (!TimeCondition())
 		return;
 
 	fluo::VolumeData* cur_vol = m_view->GetCurrentVolume();
@@ -614,11 +613,11 @@ void ScriptProc::RunMaskTracking()
 	tm_processor.TrackStencils(prvf, curf, ext, mode, beginf, sim);
 
 	UpdateTraceDlg();
-}
+*/}
 
 void ScriptProc::RunRandomColors()
 {
-	if (!TimeCondition())
+/*	if (!TimeCondition())
 		return;
 	fluo::VolumeList vlist;
 	if (!GetVolumes(vlist))
@@ -638,11 +637,11 @@ void ScriptProc::RunRandomColors()
 		selector->SetVolume(*i);
 		selector->CompExportRandomColor(hmode, 0, 0, 0, false, false);
 	}
-}
+*/}
 
 void ScriptProc::RunCompSelect()
 {
-	if (!TimeCondition())
+/*	if (!TimeCondition())
 		return;
 	fluo::VolumeList vlist;
 	if (!GetVolumes(vlist))
@@ -677,11 +676,11 @@ void ScriptProc::RunCompSelect()
 			comp_selector.Select(true);
 		}
 	}
-}
+*/}
 
 void ScriptProc::RunCompEdit()
 {
-	if (!TimeCondition())
+/*	if (!TimeCondition())
 		return;
 	fluo::VolumeList vlist;
 	if (!GetVolumes(vlist))
@@ -705,11 +704,11 @@ void ScriptProc::RunCompEdit()
 			break;
 		}
 	}
-}
+*/}
 
 void ScriptProc::RunFetchMask()
 {
-	if (!TimeCondition())
+/*	if (!TimeCondition())
 		return;
 	fluo::VolumeList vlist;
 	if (!GetVolumes(vlist))
@@ -754,11 +753,11 @@ void ScriptProc::RunFetchMask()
 			//	(*i)->AddEmptyLabel(0, true);
 		}
 	}
-}
+*/}
 
 void ScriptProc::RunClearMask()
 {
-	if (!TimeCondition())
+/*	if (!TimeCondition())
 		return;
 	fluo::VolumeList vlist;
 	if (!GetVolumes(vlist))
@@ -779,11 +778,11 @@ void ScriptProc::RunClearMask()
 			(*i)->AddEmptyLabel(0, true);
 		(*i)->GetRenderer()->clear_tex_current();
 	}
-}
+*/}
 
 void ScriptProc::RunSaveMask()
 {
-	if (!TimeCondition())
+/*	if (!TimeCondition())
 		return;
 	fluo::VolumeList vlist;
 	if (!GetVolumes(vlist))
@@ -805,11 +804,11 @@ void ScriptProc::RunSaveMask()
 		if (blabel)
 			(*i)->SaveLabel(true, curf, chan);
 	}
-}
+*/}
 
 void ScriptProc::RunSaveVolume()
 {
-	if (!TimeCondition())
+/*	if (!TimeCondition())
 		return;
 
 	wxString source;
@@ -899,11 +898,11 @@ void ScriptProc::RunSaveVolume()
 		if (del_vol)
 			glbin_volf->remove(*i);
 	}
-}
+*/}
 
 void ScriptProc::RunCalculate()
 {
-	if (!TimeCondition())
+/*	if (!TimeCondition())
 		return;
 
 	VolumeCalculator* calculator = m_view->GetVolumeCalculator();
@@ -940,11 +939,11 @@ void ScriptProc::RunCalculate()
 		calculator->CalculateGroup(4, "", false);
 	else if (sOper == "fill")
 		calculator->CalculateGroup(9, "", false);
-}
+*/}
 
 void ScriptProc::RunOpenCL()
 {
-	if (!TimeCondition())
+/*	if (!TimeCondition())
 		return;
 	fluo::VolumeList vlist;
 	if (!GetVolumes(vlist))
@@ -968,11 +967,11 @@ void ScriptProc::RunOpenCL()
 		executor->SetDuplicate(true);
 		executor->Execute();
 	}
-}
+*/}
 
 void ScriptProc::RunCompAnalysis()
 {
-	if (!TimeCondition())
+/*	if (!TimeCondition())
 		return;
 	fluo::VolumeList vlist;
 	if (!GetVolumes(vlist))
@@ -1081,11 +1080,11 @@ void ScriptProc::RunCompAnalysis()
 			node->addSetValue("comp_pca_lens", lens.x());
 		}
 	}
-}
+*/}
 
 void ScriptProc::RunGenerateComp()
 {
-	if (!TimeCondition())
+/*	if (!TimeCondition())
 		return;
 	fluo::VolumeList vlist;
 	if (!GetVolumes(vlist))
@@ -1110,7 +1109,7 @@ void ScriptProc::RunGenerateComp()
 		glbin_agtf->getComponentAgent()->setValue(gstUseSelection, use_sel);
 		glbin_agtf->getComponentAgent()->PlayCmd(use_sel, tfac);
 	}
-}
+*/}
 
 void ScriptProc::RunRulerProfile()
 {
@@ -1152,8 +1151,8 @@ void ScriptProc::RunRulerProfile()
 		chg->addSetValue("type", std::string("channel"));
 		chg->addSetValue("ch", long(ch));
 		//script command
-		fluo::Group* cmdg = chg->getOrAddGroup(m_type.ToStdString());
-		cmdg->addSetValue("type", m_type.ToStdString());
+		fluo::Group* cmdg = chg->getOrAddGroup(m_type);
+		cmdg->addSetValue("type", m_type);
 
 		for (size_t i = 0; i < ruler_list->size(); ++i)
 		{
@@ -1270,7 +1269,7 @@ void ScriptProc::RunUnlinkCells()
 
 void ScriptProc::RunBackgroundStat()
 {
-	if (!TimeCondition())
+/*	if (!TimeCondition())
 		return;
 	fluo::VolumeList vlist;
 	if (!GetVolumes(vlist))
@@ -1319,18 +1318,18 @@ void ScriptProc::RunBackgroundStat()
 		chg->addSetValue("type", std::string("channel"));
 		chg->addSetValue("ch", long(ch));
 		//script command
-		fluo::Group* cmdg = chg->getOrAddGroup(m_type.ToStdString());
-		cmdg->addSetValue("type", m_type.ToStdString());
+		fluo::Group* cmdg = chg->getOrAddGroup(m_type);
+		cmdg->addSetValue("type", m_type);
 		//result node
 		fluo::Node* node = cmdg->getOrAddNode("result");
-		node->addSetValue("type", m_type.ToStdString());
+		node->addSetValue("type", m_type);
 		node->addSetValue(bgs.GetTypeName(iindx), result);
 	}
-}
+*/}
 
 void ScriptProc::ExportAnalysis()
 {
-	if (!TimeCondition())
+/*	if (!TimeCondition())
 		return;
 
 	//template
@@ -1497,7 +1496,7 @@ void ScriptProc::ExportAnalysis()
 	outputfile = "file://" + outputfile;
 #endif
 	::wxLaunchDefaultBrowser(outputfile);
-}
+*/}
 
 //read/delete volume cache
 void ScriptProc::ReadVolCache(flrd::VolCache& vol_cache)

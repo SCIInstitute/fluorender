@@ -32,8 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Flobject/Group.hpp>
 #include <Tracking/VolCache.h>
 #include <Tracking/Cell.h>
-#include <wx/string.h>
-#include <wx/fileconf.h>
 #include <vector>
 
 class RenderFrame;
@@ -74,7 +72,7 @@ namespace flrd
 		void SetView(fluo::Renderview* view) { m_view = view; }
 
 		//run 4d script
-		void Run4DScript(TimeMask tm, const wxString &scriptname, bool rewind);
+		void Run4DScript(TimeMask tm, const std::wstring &scriptname, bool rewind);
 
 		void ClearResults() { m_output->removeAllChildren(); }
 
@@ -82,10 +80,10 @@ namespace flrd
 		fluo::RenderFrameAgent* m_frame;
 		fluo::Renderview *m_view;
 
-		wxString m_type;
+		std::string m_type;
 		TimeMask m_time_mask;
-		wxFileConfig *m_fconfig;
-		wxString m_fconfig_name;
+		//wxFileConfig *m_fconfig;
+		std::wstring m_fconfig_name;
 		bool m_rewind;
 
 		//selected labels
@@ -103,12 +101,12 @@ namespace flrd
 		void UpdateTraceDlg();
 		int TimeMode(std::string &str);
 		int GetTimeNum();
-		wxString GetInputFile(const wxString &str, const wxString &subd);
-		wxString GetSavePath(const wxString &str, const wxString &ext, bool rep = true);
-		wxString GetDataDir(const wxString &ext);
-		wxString RemoveExt(const wxString& str);
-		wxString RemoveNum(const wxString& str);
-		wxString IncreaseNum(const wxString& str);
+		std::wstring GetInputFile(const std::wstring &str, const std::wstring &subd);
+		std::wstring GetSavePath(const std::wstring &str, const std::wstring &ext, bool rep = true);
+		std::wstring GetDataDir(const std::wstring &ext);
+		std::wstring RemoveExt(const std::wstring& str);
+		std::wstring RemoveNum(const std::wstring& str);
+		std::wstring IncreaseNum(const std::wstring& str);
 		void RunNoiseReduction();
 		void RunPreTracking();
 		void RunPostTracking();

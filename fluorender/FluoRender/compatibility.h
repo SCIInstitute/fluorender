@@ -53,6 +53,9 @@ DEALINGS IN THE SOFTWARE.
 #include <tiffio.h>
 #include <direct.h>
 #include <codecvt>
+#include <filesystem>
+#include <cctype>
+#include <cwctype>
 
 #define GETCURRENTDIR _getcwd
 
@@ -387,6 +390,18 @@ inline bool FILE_EXISTS(const std::wstring& name)
 		return false;
 }
 
+inline bool DIR_EXISTS(const std::string& name)
+{
+	const std::filesystem::path p(name);
+	return std::filesystem::exists(p);
+}
+
+inline bool DIR_EXISTS(const std::wstring& name)
+{
+	const std::filesystem::path p(name);
+	return std::filesystem::exists(p);
+}
+
 inline void SaveConfig(wxFileConfig &file, wxString str)
 {
 	str = "\x5c\x5c\x3f\x5c" + str;
@@ -417,6 +432,7 @@ inline void SLEEP(unsigned long t)
 #include <wx/fileconf.h>
 #include <wx/wfstream.h>
 #include <unistd.h>
+#include <filesystem>
 
 #define GETCURRENTDIR getcwd
 
@@ -732,6 +748,18 @@ inline bool FILE_EXISTS(const std::wstring& name)
 {
 	struct stat buffer;
 	return (stat(name.c_str(), &buffer) == 0);
+}
+
+inline bool DIR_EXISTS(const std::string& name)
+{
+	const std::filesystem::path p(name);
+	return std::filesystem::exists(p);
+}
+
+inline bool DIR_EXISTS(const std::wstring& name)
+{
+	const std::filesystem::path p(name);
+	return std::filesystem::exists(p);
 }
 
 inline void SaveConfig(wxFileConfig &file, wxString str)
