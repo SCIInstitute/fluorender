@@ -665,18 +665,9 @@ public:
 			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
 			//center object
 			drw_mat = glm::translate(drw_mat, glm::vec3(
-				-m_obj_rot_ctr_offx,
-				-m_obj_rot_ctr_offy,
-				-m_obj_rot_ctr_offz));
-
-			drw_mat = glm::translate(drw_mat, glm::vec3(
-				-m_obj_ctr_offx,
-				-m_obj_ctr_offy,
-				-m_obj_ctr_offz));
-			//drw_mat = glm::translate(drw_mat, glm::vec3(
-			//	m_obj_ctrx,
-			//	m_obj_ctry,
-			//	m_obj_ctrz));
+				-m_obj_rot_ctr_offx - m_obj_ctr_offx,
+				-m_obj_rot_ctr_offy - m_obj_ctr_offy,
+				-m_obj_rot_ctr_offz - m_obj_ctr_offz));
 		}
 		else
 		{
