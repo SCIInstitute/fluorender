@@ -2,7 +2,6 @@
 #include <FLIVR/TextureRenderer.h>
 #include <FLIVR/ShaderProgram.h>
 #include <Types/Utils.h>
-#include <compatibility.h>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -10,6 +9,7 @@
 #include <algorithm>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
+#include <compatibility.h>
 
 template <typename _T> void clear2DVector(std::vector<std::vector<_T>> &vec2d)
 {

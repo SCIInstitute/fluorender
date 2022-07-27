@@ -41,7 +41,6 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshFactory.hpp>
 #include <NodeVisitor.hpp>
 #include <SearchVisitor.hpp>
-#include <compatibility.h>
 #include <Debug.hpp>
 #include <Animator/Interpolator.h>
 #include <Script/ScriptProc.h>
@@ -71,6 +70,7 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <array>
+#include <compatibility.h>
 
 using namespace fluo;
 

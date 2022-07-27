@@ -26,10 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "lif_reader.h"
-#include <compatibility.h>
 #include <wx/sstream.h>
 #include <stdio.h>
-//#include <fstream>
+#include <compatibility.h>
 
 LIFReader::LIFReader()
 {

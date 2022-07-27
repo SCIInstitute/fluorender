@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "imageJ_reader.h"
+#include <Global.hpp>
 #include <compatibility.h>
-#include <wx/stdpaths.h>
 
 ImageJReader::ImageJReader()
 {
@@ -62,9 +62,9 @@ ImageJReader::ImageJReader()
 	m_time_id = L"_T";
 	
 	//Geting absolute path to class file.
-	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-	exePath = wxPathOnly(exePath);
-	std::string imageJPath = exePath + GETSLASH() + "Java_Code" + GETSLASH() + "ImageJ_Reader";
+	std::wstring exePath = glbin.getExecutablePath();
+	exePath = GET_PATH(exePath);
+	std::string imageJPath = ws2s(exePath) + GETSLASH() + "Java_Code" + GETSLASH() + "ImageJ_Reader";
 
 	//Java code to get the number of depth images.
 	m_pJVMInstance = JVMInitializer::getInstance();

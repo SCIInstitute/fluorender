@@ -782,7 +782,11 @@ void VolumeSelector::SaveBrushSettings()
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
 	wxString dft = expath + GETSLASH() + "default_brush_settings.dft";
-	SaveConfig(fconfig, dft);
+#ifdef _WIN32
+	dft = "\x5c\x5c\x3f\x5c" + dft;
+#endif
+	wxFileOutputStream os(dft);
+	fconfig.Save(os);
 */
 }
 

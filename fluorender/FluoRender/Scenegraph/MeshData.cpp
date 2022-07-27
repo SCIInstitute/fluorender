@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshData.hpp>
 #include <FLIVR/MeshRenderer.h>
 #include <FLIVR/glm.h>
-#include <compatibility.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <compatibility.h>
 
 using namespace fluo;
 

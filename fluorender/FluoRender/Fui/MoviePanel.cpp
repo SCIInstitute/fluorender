@@ -549,13 +549,13 @@ void MoviePanel::OnEditCrop(wxCommandEvent& event)
 	long x, y, w, h;
 	wxString temp;
 	temp = m_center_x_text->GetValue();
-	x = STOI(temp.fn_str());
+	temp.ToLong(&x);
 	temp = m_center_y_text->GetValue();
-	y = STOI(temp.fn_str());
+	temp.ToLong(&y);
 	temp = m_width_text->GetValue();
-	w = STOI(temp.fn_str());
+	temp.ToLong(&w);
 	temp = m_height_text->GetValue();
-	h = STOI(temp.fn_str());
+	temp.ToLong(&h);
 
 	m_agent->setValue(gstCropX, long(x - w / 2.0 + 0.5));
 	m_agent->setValue(gstCropY, long(y - h / 2.0 + 0.5));

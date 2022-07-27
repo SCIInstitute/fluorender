@@ -31,10 +31,10 @@
 #include <FLIVR/TextureBrick.h>
 #include <FLIVR/TextureRenderer.h>
 #include <Types/Utils.h>
-#include <compatibility.h>
 #include <utility>
 #include <iostream>
 #include <fstream>
+#include <compatibility.h>
 
 using namespace std;
 

@@ -37,8 +37,8 @@ DEALINGS IN THE SOFTWARE.
 #ifdef _WIN32 //WINDOWS ONLY
 
 #include <wx/wx.h>
-#include <wx/fileconf.h>
-#include <wx/wfstream.h>
+#define WINDOWS_LEAN_AND_MEAN
+#include <Windows.h>
 #include <cstdlib>
 #include <cstdio>
 #include <cstdarg>
@@ -249,12 +249,8 @@ inline int WSTOI(std::wstring s) { return _wtoi(s.c_str()); }
 inline double WSTOD(std::wstring s) { return _wtof(s.c_str()); }
 
 inline int STOI(const char * s) { return (s ? atoi(s) : 0); }
-inline int STOI(const wxChar * s) { return (s ? _wtoi(s) : 0); }
-inline int STOI(wxChar * s) { return (s ? _wtoi(s) : 0); }
 
 inline double STOD(const char * s) { return (s ? atof(s) : 0.0); }
-inline double STOD(wxChar * s) { return (s ? _wtof(s) : 0.0); }
-inline double STOD(const wxChar * s) { return (s ? _wtof(s) : 0.0); }
 
 inline std::string STR_DIR_SEP(const std::string pathname)
 {
@@ -400,13 +396,6 @@ inline bool DIR_EXISTS(const std::wstring& name)
 {
 	const std::filesystem::path p(name);
 	return std::filesystem::exists(p);
-}
-
-inline void SaveConfig(wxFileConfig &file, wxString str)
-{
-	str = "\x5c\x5c\x3f\x5c" + str;
-	wxFileOutputStream os(str);
-	file.Save(os);
 }
 
 inline void SLEEP(unsigned long t)
@@ -760,12 +749,6 @@ inline bool DIR_EXISTS(const std::wstring& name)
 {
 	const std::filesystem::path p(name);
 	return std::filesystem::exists(p);
-}
-
-inline void SaveConfig(wxFileConfig &file, wxString str)
-{
-	wxFileOutputStream os(str);
-	file.Save(os);
 }
 
 inline void SLEEP(unsigned long t)

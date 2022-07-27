@@ -32,9 +32,9 @@ DEALINGS IN THE SOFTWARE.
 #include <ShaderProgram.h>
 #include <TextRenderer.h>
 #include <KernelProgram.h>
-#include <compatibility.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
+#include <compatibility.h>
 
 using namespace fluo;
 
@@ -849,7 +849,12 @@ void SettingAgent::SaveSettings()
 
 	wxString expath = glbin.getExecutablePath();
 	wxString dft = expath + GETSLASH() + "fluorender.set";
-	SaveConfig(fconfig, dft);
+
+#ifdef _WIN32
+	dft = "\x5c\x5c\x3f\x5c" + dft;
+#endif
+	wxFileOutputStream os(dft);
+	fconfig.Save(os);
 }
 
 void SettingAgent::UpdateDeviceTree()

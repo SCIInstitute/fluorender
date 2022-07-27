@@ -36,6 +36,8 @@ DEALINGS IN THE SOFTWARE.
 #include <png_resource.h>
 #include "img/icons.h"
 #include <wx/stdpaths.h>
+#include <wx/fileconf.h>
+#include <wx/wfstream.h>
 
 int RenderviewPanel::m_max_id = 1;
 
@@ -762,11 +764,11 @@ void RenderviewPanel::UpdateView(bool ui_update)
 {
 	double rotx, roty, rotz;
 	wxString str_val = m_x_rot_text->GetValue();
-	rotx = STOD(str_val.fn_str());
+	str_val.ToDouble(&rotx);
 	str_val = m_y_rot_text->GetValue();
-	roty = STOD(str_val.fn_str());
+	str_val.ToDouble(&roty);
 	str_val = m_z_rot_text->GetValue();
-	rotz = STOD(str_val.fn_str());
+	str_val.ToDouble(&rotz);
 	m_agent->updateValue(gstCamRotX, rotx);
 	m_agent->updateValue(gstCamRotY, roty);
 	m_agent->updateValue(gstCamRotZ, rotz);
@@ -2365,7 +2367,11 @@ void RenderviewPanel::SaveDefault(unsigned int mask)
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
 	wxString dft = expath + GETSLASH() + "default_view_settings.dft";
-	SaveConfig(fconfig, dft);
+#ifdef _WIN32
+	dft = "\x5c\x5c\x3f\x5c" + dft;
+#endif
+	wxFileOutputStream os(dft);
+	fconfig.Save(os);
 
 	m_default_saved = true;
 }

@@ -34,12 +34,12 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
-#include <compatibility.h>
 #include <chrono>
 #include <vector>
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <compatibility.h>
 
 using namespace std::chrono;
 using namespace flrd;

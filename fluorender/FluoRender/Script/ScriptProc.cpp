@@ -49,13 +49,13 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/VertexArray.h>
 #include <FLIVR/TextureRenderer.h>
 #include <FLIVR/VolumeRenderer.h>
-#include <compatibility.h>
 #include <utility.h>
 #include <Nrrd/nrrd.h>
 #include <iostream>
 #include <string> 
 #include <sstream>
 #include <fstream> 
+#include <compatibility.h>
 
 using namespace flrd;
 

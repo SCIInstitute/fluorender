@@ -28,12 +28,12 @@
 
 #include "ShaderProgram.h"
 #include <Types/Utils.h>
-#include <compatibility.h>
 #include <ctime>
 #include <cstdio>
 #include <sstream>
 #include <iostream>
 #include <cfloat>
+#include <compatibility.h>
 
 using std::string;
 using std::ostringstream;

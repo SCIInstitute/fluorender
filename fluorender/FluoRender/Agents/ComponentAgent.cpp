@@ -44,10 +44,11 @@ DEALINGS IN THE SOFTWARE.
 #include <exmax.h>
 #include <dbscan.h>
 #include <VolumeRenderer.h>
-#include <compatibility.h>
 #include <wx/fileconf.h>
 #include <cctype>
 #include <fstream>
+#include <wx/wfstream.h>
+#include <compatibility.h>
 
 using namespace fluo;
 
@@ -411,7 +412,12 @@ void ComponentAgent::SaveSettings(const wxString &filename)
 	}
 	else
 		str = filename;
-	SaveConfig(fconfig, str);
+
+#ifdef _WIN32
+	str = "\x5c\x5c\x3f\x5c" + str;
+#endif
+	wxFileOutputStream os(str);
+	fconfig.Save(os);
 }
 
 void ComponentAgent::Analyze()
@@ -1102,7 +1108,13 @@ void ComponentAgent::SaveCmd(const wxString &filename)
 		}
 	}
 
-	SaveConfig(fconfig, filename);
+	wxString str = filename;
+#ifdef _WIN32
+	str = "\x5c\x5c\x3f\x5c" + str;
+#endif
+	wxFileOutputStream os(str);
+	fconfig.Save(os);
+
 	dlg_.m_cmd_file_text->SetValue(filename);
 }
 

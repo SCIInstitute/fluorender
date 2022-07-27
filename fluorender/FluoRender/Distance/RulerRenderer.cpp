@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <compatibility.h>
 #include "RulerRenderer.h"
 #include <Renderview.hpp>
 #include <Types/Vector.h>
@@ -37,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/TextureRenderer.h>
 #include <FLIVR/ImgShader.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <compatibility.h>
 
 using namespace flrd;
 
@@ -104,7 +104,7 @@ void RulerRenderer::Draw()
 
 	//draw text
 	if (m_draw_text)
-		DrawText(tseq_cur_num, nx, ny);
+		RenderText(tseq_cur_num, nx, ny);
 }
 
 unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
@@ -504,7 +504,7 @@ void RulerRenderer::DrawArc(fluo::Point & ppc, fluo::Point& pp0, fluo::Point& pp
 	}
 }
 
-void RulerRenderer::DrawText(int tseq_cur_num, int nx, int ny)
+void RulerRenderer::RenderText(int tseq_cur_num, int nx, int ny)
 {
 	float w = flvr::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
 	float sx, sy;

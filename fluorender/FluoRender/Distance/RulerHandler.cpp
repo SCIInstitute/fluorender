@@ -36,10 +36,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Selection/VolumePoint.h>
 #include <Selection/VolumeSelector.h>
 #include <Calculate/Count.h>
-#include <compatibility.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <Nrrd/nrrd.h>
 #include <string>
+#include <compatibility.h>
 
 using namespace flrd;
 

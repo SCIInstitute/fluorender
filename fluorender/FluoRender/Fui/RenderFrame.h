@@ -57,9 +57,9 @@ DEALINGS IN THE SOFTWARE.
 #include <ComponentDlg.h>
 #include <CalculationDlg.h>
 #include <Tester.h>
-#include <compatibility.h>
 #include <RenderFrameAgent.hpp>
 #include <vector>
+#include <compatibility.h>
 
 #define VERSION_CONTACT "http://www.sci.utah.edu/software/fluorender.html"
 #define VERSION_AUTHORS "YONG WAN\t\tHIDEO OTSUNA\nCHUCK HANSEN\tCHI-BIN CHIEN\n"\

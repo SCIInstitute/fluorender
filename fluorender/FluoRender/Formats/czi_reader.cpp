@@ -26,10 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "czi_reader.h"
-#include <compatibility.h>
 #include <wx/sstream.h>
 #include <stdio.h>
 #include <set>
+#include <compatibility.h>
 
 std::vector<std::string> CZIReader::m_types{
 	"ZISRAWFILE",

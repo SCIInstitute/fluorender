@@ -27,8 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "nd2_reader.h"
 #include <json.hpp>
-#include <compatibility.h>
 #include <stdio.h>
+#include <compatibility.h>
 
 ND2Reader::ND2Reader()
 {

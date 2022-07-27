@@ -26,9 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "msk_reader.h"
-#include <compatibility.h>
 #include <sstream>
 #include <inttypes.h>
+#include <compatibility.h>
 
 MSKReader::MSKReader()
 {

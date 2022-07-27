@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <compatibility.h>
 #include <MeasureAgent.hpp>
 #include <MeasureDlg.h>
 #include <DistCalculator.h>
@@ -41,6 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #include <sstream>
 #include <fstream>
 #include <iostream>
+#include <compatibility.h>
 
 using namespace fluo;
 

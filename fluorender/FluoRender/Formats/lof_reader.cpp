@@ -26,11 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "lof_reader.h"
-#include <compatibility.h>
 #include <wx/sstream.h>
 #include <stdio.h>
 #include <algorithm>
-//#include <fstream>
+#include <compatibility.h>
 
 LOFReader::LOFReader()
 {

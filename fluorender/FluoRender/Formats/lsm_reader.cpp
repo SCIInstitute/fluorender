@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "lsm_reader.h"
-#include <compatibility.h>
 #include <stdio.h>
+#include <compatibility.h>
 
 LSMReader::LSMReader()
 {

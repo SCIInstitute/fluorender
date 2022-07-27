@@ -33,11 +33,11 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeFactory.hpp>
 #include <FLIVR/Texture.h>
 #include <FLIVR/VolumeRenderer.h>
-#include <compatibility.h>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
+#include <compatibility.h>
 
 using namespace fluo;
 

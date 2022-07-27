@@ -26,9 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "nrrd_reader.h"
-#include <compatibility.h>
 #include <algorithm>
 #include <sstream>
+#include <compatibility.h>
 
 NRRDReader::NRRDReader()
 {

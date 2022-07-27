@@ -46,8 +46,6 @@ DEALINGS IN THE SOFTWARE.
 #include <openvr.h>
 
 #ifdef _WIN32
-#define WINDOWS_LEAN_AND_MEAN
-#include <windows.h>
 //wacom support
 #include <MSGPACK.h>
 #include <wintab.h>
@@ -59,6 +57,8 @@ DEALINGS IN THE SOFTWARE.
 #ifdef USE_XINPUT
 #include <XInput/XboxController.h>
 #endif
+#define WINDOWS_LEAN_AND_MEAN
+#include <windows.h>
 #endif
 
 //class VolumeLoader;

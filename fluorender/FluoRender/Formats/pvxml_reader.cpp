@@ -27,10 +27,10 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "pvxml_reader.h"
 #include <Utils.h>
-#include <compatibility.h>
 #include <wx/xml/xml.h>
 #include <fstream>
 #include <iostream>
+#include <compatibility.h>
 
 PVXMLReader::PVXMLReader()
 {
