@@ -200,6 +200,8 @@ VRenderGLView::VRenderGLView(VRenderFrame* frame,
 	m_obj_ctrx(0.0), m_obj_ctry(0.0), m_obj_ctrz(0.0),
 	//object rotation
 	m_obj_rotx(0.0), m_obj_roty(180.0), m_obj_rotz(180.0),
+	//flag for using offset values
+	m_offset(false),
 	//object center offset
 	m_obj_ctr_offx(0), m_obj_ctr_offy(0), m_obj_ctr_offz(0),
 	//object rotation center offset

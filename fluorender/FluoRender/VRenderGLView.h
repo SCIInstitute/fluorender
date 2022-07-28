@@ -290,18 +290,6 @@ public:
 		m_obj_ctry = ctry;
 		m_obj_ctrz = ctrz;
 	}
-	void GetObjCtrOff(double &dx, double &dy, double &dz)
-	{
-		dx = m_obj_ctr_offx;
-		dy = m_obj_ctr_offy;
-		dz = m_obj_ctr_offz;
-	}
-	void SetObjCtrOff(double dx, double dy, double dz)
-	{
-		m_obj_ctr_offx = dx;
-		m_obj_ctr_offy = dy;
-		m_obj_ctr_offz = dz;
-	}
 	void GetObjRot(double &rotx, double &roty, double &rotz)
 	{
 		rotx = m_obj_rotx;
@@ -314,6 +302,28 @@ public:
 		m_obj_roty = roty;
 		m_obj_rotz = rotz;
 	}
+	void SetOffset()
+	{
+		if (m_obj_ctr_offx != 0.0 || m_obj_ctr_offy != 0.0 || m_obj_ctr_offz != 0.0 ||
+			m_obj_rot_ctr_offx != 0.0 || m_obj_rot_ctr_offy != 0.0 || m_obj_rot_ctr_offz != 0.0 ||
+			m_obj_rot_offx != 0.0 || m_obj_rot_offy != 0.0 || m_obj_rot_offz != 0.0)
+			m_offset = true;
+		else
+			m_offset = false;
+	}
+	void GetObjCtrOff(double &dx, double &dy, double &dz)
+	{
+		dx = m_obj_ctr_offx;
+		dy = m_obj_ctr_offy;
+		dz = m_obj_ctr_offz;
+	}
+	void SetObjCtrOff(double dx, double dy, double dz)
+	{
+		m_obj_ctr_offx = dx;
+		m_obj_ctr_offy = dy;
+		m_obj_ctr_offz = dz;
+		SetOffset();
+	}
 	void GetObjRotCtrOff(double &dx, double &dy, double &dz)
 	{
 		dx = m_obj_rot_ctr_offx;
@@ -325,6 +335,7 @@ public:
 		m_obj_rot_ctr_offx = dx == 0.0 ? m_obj_ctrx : dx;
 		m_obj_rot_ctr_offy = dy == 0.0 ? m_obj_ctry : dy;
 		m_obj_rot_ctr_offz = dz == 0.0 ? m_obj_ctrz : dz;
+		SetOffset();
 	}
 	void GetObjRotOff(double &dx, double &dy, double &dz)
 	{
@@ -337,6 +348,7 @@ public:
 		m_obj_rot_offx = dx;
 		m_obj_rot_offy = dy;
 		m_obj_rot_offz = dz;
+		SetOffset();
 	}
 	void SetOffsetTransform(const fluo::Transform &tf)
 	{
@@ -633,14 +645,21 @@ public:
 	{
 		glm::mat4 obj_mat = m_mv_mat;
 		//translate object
-		obj_mat = glm::translate(obj_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
+		obj_mat = glm::translate(obj_mat, glm::vec3(
+			m_obj_transx,
+			m_obj_transy,
+			m_obj_transz));
+
 		//rotate object
-		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_roty+m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
-		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotz+m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
-		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotx+m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
 		//center object
-		obj_mat = glm::translate(obj_mat,
-			glm::vec3(-m_obj_ctrx-m_obj_ctr_offx, -m_obj_ctry-m_obj_ctr_offy, -m_obj_ctrz-m_obj_ctr_offz));
+		obj_mat = glm::translate(obj_mat, glm::vec3(
+			-m_obj_ctrx - m_obj_ctr_offx,
+			-m_obj_ctry - m_obj_ctr_offy,
+			-m_obj_ctrz - m_obj_ctr_offz));
+
 		return obj_mat;
 	}
 	glm::mat4 GetDrawMat()
@@ -652,8 +671,7 @@ public:
 			m_obj_transy,
 			m_obj_transz));
 
-		if (m_obj_rot_offx != 0 || m_obj_rot_offy != 0 || m_obj_rot_offz != 0 ||
-			m_obj_ctr_offx != 0 || m_obj_ctr_offy != 0 || m_obj_ctr_offz != 0)
+		if (m_offset)
 		{
 			drw_mat = glm::translate(drw_mat, glm::vec3(
 				m_obj_rot_ctr_offx - m_obj_ctrx,
@@ -684,38 +702,51 @@ public:
 
 		return drw_mat;
 	}
-	glm::mat4 GetDrawWorldMat()
-	{
-		glm::mat4 drw_mat = m_mv_mat;
-		//translate object
-		drw_mat = glm::translate(drw_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-		//rotate object
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-		//center object
-		drw_mat = glm::translate(drw_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
-		return drw_mat;
-	}
-	fluo::Transform GetInvOffsetMat()
-	{
-		return m_offset_tf;
-		//tf.invert();
-		//return tf;
-	}
 	glm::mat4 GetInvtMat()
 	{
 		glm::mat4 inv_mat = m_mv_mat;
 		//translate object
-		inv_mat = glm::translate(inv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
+		inv_mat = glm::translate(inv_mat, glm::vec3(
+			m_obj_transx,
+			m_obj_transy,
+			m_obj_transz));
+
 		//rotate object
 		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
 		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
 		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
 		//center object
-		inv_mat = glm::translate(inv_mat,
-			glm::vec3(-m_obj_ctrx - m_obj_ctr_offx, -m_obj_ctry - m_obj_ctr_offy, -m_obj_ctrz - m_obj_ctr_offz));
+		inv_mat = glm::translate(inv_mat, glm::vec3(
+			-m_obj_ctrx - m_obj_ctr_offx,
+			-m_obj_ctry - m_obj_ctr_offy,
+			-m_obj_ctrz - m_obj_ctr_offz));
+
 		return inv_mat;
+	}
+	glm::mat4 GetDrawWorldMat()
+	{
+		glm::mat4 drw_mat = m_mv_mat;
+		//translate object
+		drw_mat = glm::translate(drw_mat, glm::vec3(
+			m_obj_transx,
+			m_obj_transy,
+			m_obj_transz));
+
+		//rotate object
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
+		//center object
+		drw_mat = glm::translate(drw_mat, glm::vec3(
+			-m_obj_ctrx,
+			-m_obj_ctry,
+			-m_obj_ctrz));
+
+		return drw_mat;
+	}
+	fluo::Transform GetInvOffsetMat()
+	{
+		return m_offset_tf;
 	}
 
 	void UpdateClips();
@@ -922,6 +953,8 @@ private:
 	double m_obj_ctrx, m_obj_ctry, m_obj_ctrz;
 	//object rotation
 	double m_obj_rotx, m_obj_roty, m_obj_rotz;
+	//flag for using offset values
+	bool m_offset;
 	//obj center offset (for registration currently)
 	double m_obj_ctr_offx, m_obj_ctr_offy, m_obj_ctr_offz;
 	//obj rotation center offset
