@@ -650,15 +650,34 @@ public:
 			m_obj_transy,
 			m_obj_transz));
 
-		//rotate object
-		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
-		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
-		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
-		//center object
-		obj_mat = glm::translate(obj_mat, glm::vec3(
-			-m_obj_ctrx - m_obj_ctr_offx,
-			-m_obj_ctry - m_obj_ctr_offy,
-			-m_obj_ctrz - m_obj_ctr_offz));
+		if (m_offset)
+		{
+			obj_mat = glm::translate(obj_mat, glm::vec3(
+				m_obj_rot_ctr_offx - m_obj_ctrx,
+				m_obj_ctry - m_obj_rot_ctr_offy,
+				m_obj_rot_ctr_offz - m_obj_ctrz));
+			//rotate object
+			obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
+			obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
+			obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
+			//center object
+			obj_mat = glm::translate(obj_mat, glm::vec3(
+				-m_obj_rot_ctr_offx - m_obj_ctr_offx,
+				-m_obj_rot_ctr_offy - m_obj_ctr_offy,
+				-m_obj_rot_ctr_offz - m_obj_ctr_offz));
+		}
+		else
+		{
+			//rotate object
+			obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
+			obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
+			obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
+			//center object
+			obj_mat = glm::translate(obj_mat, glm::vec3(
+				-m_obj_ctrx,
+				-m_obj_ctry,
+				-m_obj_ctrz));
+		}
 
 		return obj_mat;
 	}
@@ -711,15 +730,34 @@ public:
 			m_obj_transy,
 			m_obj_transz));
 
-		//rotate object
-		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
-		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
-		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
-		//center object
-		inv_mat = glm::translate(inv_mat, glm::vec3(
-			-m_obj_ctrx - m_obj_ctr_offx,
-			-m_obj_ctry - m_obj_ctr_offy,
-			-m_obj_ctrz - m_obj_ctr_offz));
+		if (m_offset)
+		{
+			inv_mat = glm::translate(inv_mat, glm::vec3(
+				m_obj_rot_ctr_offx - m_obj_ctrx,
+				m_obj_ctry - m_obj_rot_ctr_offy,
+				m_obj_rot_ctr_offz - m_obj_ctrz));
+			//rotate object
+			inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
+			inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
+			inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
+			//center object
+			inv_mat = glm::translate(inv_mat, glm::vec3(
+				-m_obj_rot_ctr_offx - m_obj_ctr_offx,
+				-m_obj_rot_ctr_offy - m_obj_ctr_offy,
+				-m_obj_rot_ctr_offz - m_obj_ctr_offz));
+		}
+		else
+		{
+			//rotate object
+			inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
+			inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
+			inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
+			//center object
+			inv_mat = glm::translate(inv_mat, glm::vec3(
+				-m_obj_ctrx,
+				-m_obj_ctry,
+				-m_obj_ctrz));
+		}
 
 		return inv_mat;
 	}
