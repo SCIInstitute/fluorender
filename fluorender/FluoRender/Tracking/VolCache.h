@@ -84,6 +84,7 @@ namespace flrd
 		inline size_t size();
 		inline VolCache get(size_t frame);
 		inline void set_modified(size_t frame, bool value = true);
+		inline void clear(size_t frame);
 
 		void RegisterCacheQueueFuncs(const VolCacheFunc &fnew, const VolCacheFunc &fdel);
 		void UnregisterCacheQueueFuncs();
@@ -233,6 +234,22 @@ namespace flrd
 			{
 				if (m_queue[i].valid)
 					m_queue[i].modified = value;
+				return;
+			}
+		}
+	}
+
+	inline void CacheQueue::clear(size_t frame)
+	{
+		for (size_t i = 0; i < m_queue.size(); ++i)
+		{
+			if (m_queue[i].frame == frame)
+			{
+				if (m_del_cache)
+				{
+					m_del_cache(m_queue[i]);
+				}
+				m_queue.erase(m_queue.begin() + i);
 				return;
 			}
 		}

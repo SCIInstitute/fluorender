@@ -4624,5 +4624,9 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 	}
 
 	glbin_cache_queue.unprotect(f0);
+	if (mode == 0)
+		glbin_cache_queue.clear(f0);
+	else
+		glbin_cache_queue.clear(f2);
 	return true;
 }
