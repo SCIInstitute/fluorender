@@ -56,7 +56,8 @@ bool Registrator::Run(size_t f1, size_t f2,
 	int mode, size_t start)
 {
 	//get data
-	size_t f0 = mode == 1 ? start : f1;
+	//size_t f0 = mode == 1 ? start : f1;
+	size_t f0 = start;
 	glbin_cache_queue.set_max_size(2);
 	VolCache cache = glbin_cache_queue.get(f0);
 	if (!cache.data)
@@ -86,7 +87,6 @@ bool Registrator::Run(size_t f1, size_t f2,
 	s1.max_int = s2.max_int = m_vd->GetMaxValue();
 	s1.fsize = s2.fsize = m_fsize;
 	fluo::BBox extent(fluo::Point(0), fluo::Point(nx, ny, nz));
-	fluo::Vector off1, off2;
 	if (m_use_mask)
 	{
 		if (mask1)
@@ -98,28 +98,38 @@ bool Registrator::Run(size_t f1, size_t f2,
 		}
 	}
 	s1.box = s2.box = extent;
+	if (mode == 0)
+	{
+		m_offt = fluo::Vector(m_translate);
+		m_offa = fluo::Vector(m_euler);
+	}
+	else
+	{
+		m_offt = fluo::Vector();
+		m_offa = fluo::Vector();
+	}
 
 	StencilCompare compare(&s1, &s2,
-		m_extt, m_exta, off1, off2,
+		m_extt, m_exta, m_offt, m_offa,
 		m_iter, m_conv_num, m_method,
 		m_use_mask);
 	if (compare.Compare())
 	{
 		//get transformation
-		if (mode == 1)
-		{
+		//if (mode == 1)
+		//{
 			m_translate = compare.GetTranslate();
 			m_center = compare.GetCenter();
 			m_euler = compare.GetEuler();
 			m_tf = s2.tf;
-		}
-		else
-		{
-			m_translate += compare.GetTranslate();
-			m_center = compare.GetCenter();
-			m_euler += compare.GetEuler();
-			m_tf.post_trans(s2.tf);
-		}
+		//}
+		//else
+		//{
+		//	m_translate += compare.GetTranslate();
+		//	m_center = compare.GetCenter();
+		//	m_euler += compare.GetEuler();
+		//	m_tf.post_trans(s2.tf);
+		//}
 	}
 
 	glbin_cache_queue.unprotect(f0);

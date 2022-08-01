@@ -115,6 +115,8 @@ namespace flrd
 		bool m_use_mask;//only match img in the mask
 		fluo::Vector m_extt;//transform extension
 		fluo::Vector m_exta;//rotation extension
+		fluo::Vector m_offt;//offset for transformation
+		fluo::Vector m_offa;//offset for angle
 		int m_iter;//max iteration number
 		int m_conv_num;//max convergence for step size shrink
 		int m_method;//compare method
