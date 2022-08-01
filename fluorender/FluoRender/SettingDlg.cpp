@@ -1018,7 +1018,7 @@ void SettingDlg::GetSettings()
 	if (fconfig.Exists("/run script"))
 	{
 		fconfig.SetPath("/run script");
-		fconfig.Read("value", &m_run_script);
+		//fconfig.Read("value", &m_run_script);
 		fconfig.Read("file", &m_script_file);
 	}
 	//paint history depth

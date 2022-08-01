@@ -89,8 +89,9 @@ bool Registrator::Run(size_t f1, size_t f2,
 	fluo::Vector off1, off2;
 	if (m_use_mask)
 	{
-		extent = GetExtent(mask1, nx, ny, nz);
-		if (!extent.valid())
+		if (mask1)
+			extent = GetExtent(mask1, nx, ny, nz);
+		if (!extent.valid() || !mask1)
 		{
 			extent = fluo::BBox(fluo::Point(0), fluo::Point(nx, ny, nz));
 			m_use_mask = false;

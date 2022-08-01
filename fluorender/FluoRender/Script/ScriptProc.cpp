@@ -1698,11 +1698,13 @@ void ScriptProc::ReadVolCacheDataMask(flrd::VolCache& vol_cache)
 
 	Nrrd* data = reader->Convert(frame, chan, true);
 	vol_cache.nrrd_data = data;
-	vol_cache.data = data->data;
+	if (data)
+		vol_cache.data = data->data;
 
 	Nrrd* mask = cur_vol->GetMask(true);
 	vol_cache.nrrd_mask = mask;
-	vol_cache.mask = mask->data;
+	if (mask)
+		vol_cache.mask = mask->data;
 
 	if (data)
 		vol_cache.valid = true;
