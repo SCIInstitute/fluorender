@@ -27,13 +27,20 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <VolumePropAgent.hpp>
-#include <VolumePropPanel.h>
+#include <AgentFactory.hpp>
+//#include <VolumePropPanel.h>
 #include <VolumeFactory.hpp>
-#include <wx/valnum.h>
-#include <png_resource.h>
 #include <img/icons.h>
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class VolumePropPanel : public wxWindow
+{
+public:
+	VolumePropPanel() {}
+	~VolumePropPanel() {}
+};
 
 VolumePropAgent::VolumePropAgent(VolumePropPanel &panel) :
 	InterfaceAgent(),

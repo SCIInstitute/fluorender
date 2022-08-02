@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <ColocalAgent.hpp>
-#include <ColocalDlg.h>
+//#include <ColocalDlg.h>
 #include <VolumeData.hpp>
 #include <Renderview.hpp>
 #include <SearchVisitor.hpp>
@@ -37,6 +37,14 @@ DEALINGS IN THE SOFTWARE.
 #include <fstream>
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class ColocalDlg : public wxWindow
+{
+public:
+	ColocalDlg() {}
+	~ColocalDlg() {}
+};
 
 ColocalAgent::ColocalAgent(ColocalDlg &dlg) :
 	InterfaceAgent(),

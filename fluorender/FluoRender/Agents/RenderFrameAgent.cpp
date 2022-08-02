@@ -28,23 +28,42 @@ DEALINGS IN THE SOFTWARE.
 
 #include <RenderFrameAgent.hpp>
 #include <Main.h>
-#include <RenderFrame.h>
-#include <RenderviewPanel.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
 #include <VolumeFactory.hpp>
 #include <MeshFactory.hpp>
 #include <AnnotationFactory.hpp>
 #include <MovieAgent.hpp>
+#include <OutAdjustAgent.hpp>
+#include <ClipPlaneAgent.hpp>
+#include <ConvertAgent.hpp>
+#include <CountingAgent.hpp>
+#include <VolumePropAgent.hpp>
+#include <MeshPropAgent.hpp>
+#include <MeshTransAgent.hpp>
+#include <AnnotationPropAgent.hpp>
+#include <BrushToolAgent.hpp>
+#include <calculationagent.hpp>
+#include <clkernelagent.hpp>
+#include <componentagent.hpp>
+#include <measureagent.hpp>
+#include <movieagent.hpp>
+#include <noisereduceagent.hpp>
+#include <recorderagent.hpp>
+#include <trackagent.hpp>
+#include <colocalagent.hpp>
+#include <SettingAgent.hpp>
 #include <VolumeData.hpp>
 #include <RenderviewFactory.hpp>
 #include <Texture.h>
 #include <TextureRenderer.h>
-#include <imageJ_reader.h>
 #include <tif_reader.h>
 #include <nrrd_reader.h>
 #include <oib_reader.h>
 #include <oif_reader.h>
+#include <msk_reader.h>
+#include <lbl_reader.h>
+#include <imageJ_reader.h>
 #include <lsm_reader.h>
 #include <pvxml_reader.h>
 #include <brkxml_reader.h>
@@ -52,10 +71,6 @@ DEALINGS IN THE SOFTWARE.
 #include <nd2_reader.h>
 #include <lif_reader.h>
 #include <lof_reader.h>
-#include <msk_reader.h>
-#include <lbl_reader.h>
-#include <wx/string.h>
-#include <wx/progdlg.h>
 
 using namespace fluo;
 
@@ -109,40 +124,40 @@ void RenderFrameAgent::OpenProject(const std::wstring &filename)
 	setValue(gstProjectPath, wsval);
 }
 
-void RenderFrameAgent::StartupLoad(wxArrayString files, bool run_mov, bool with_imagej)
+void RenderFrameAgent::StartupLoad(const std::vector<std::wstring>& files, bool run_mov, bool with_imagej)
 {
 	//if (m_vrv_list[0])
 	//	m_vrv_list[0]->m_glview->Init();
 
-	if (files.Count())
+	if (files.size())
 	{
-		wxString filename = files[0];
-		wxString suffix = filename.Mid(filename.Find('.', true)).MakeLower();
+		std::wstring filename = files[0];
+		std::wstring suffix = GET_SUFFIX(filename);
 
-		if (suffix == ".vrp")
+		if (suffix == L".vrp")
 		{
-			OpenProject(files[0].ToStdWstring());
+			OpenProject(files[0]);
 		}
-		else if (suffix == ".nrrd" ||
-			suffix == ".msk" ||
-			suffix == ".lbl" ||
-			suffix == ".tif" ||
-			suffix == ".tiff" ||
-			suffix == ".oib" ||
-			suffix == ".oif" ||
-			suffix == ".lsm" ||
-			suffix == ".xml" ||
-			suffix == ".vvd" ||
+		else if (suffix == L".nrrd" ||
+			suffix == L".msk" ||
+			suffix == L".lbl" ||
+			suffix == L".tif" ||
+			suffix == L".tiff" ||
+			suffix == L".oib" ||
+			suffix == L".oif" ||
+			suffix == L".lsm" ||
+			suffix == L".xml" ||
+			suffix == L".vvd" ||
 #ifndef _DARWIN
-			suffix == ".nd2" ||
+			suffix == L".nd2" ||
 #endif
-			suffix == ".czi" ||
-			suffix == ".lif" ||
-			suffix == ".lof")
+			suffix == L".czi" ||
+			suffix == L".lif" ||
+			suffix == L".lof")
 		{
 			LoadVolumes(files, with_imagej);
 		}
-		else if (suffix == ".obj")
+		else if (suffix == L".obj")
 		{
 			LoadMeshes(files);
 		}
@@ -156,7 +171,7 @@ void RenderFrameAgent::StartupLoad(wxArrayString files, bool run_mov, bool with_
 		glbin_agtf->getMovieAgent()->Run();
 }
 
-void RenderFrameAgent::LoadVolumes(wxArrayString files, bool withImageJ)
+void RenderFrameAgent::LoadVolumes(const std::vector<std::wstring>& files, bool withImageJ)
 {
 	int j;
 
@@ -164,7 +179,7 @@ void RenderFrameAgent::LoadVolumes(wxArrayString files, bool withImageJ)
 	VolumeGroup* group_sel = 0;
 	Renderview* view = glbin_root->getCurrentRenderview();
 
-	wxProgressDialog *prg_diag = 0;
+	//wxProgressDialog *prg_diag = 0;
 	if (view)
 	{
 		bool streaming; getValue(gstStreamEnable, streaming);
@@ -172,58 +187,58 @@ void RenderFrameAgent::LoadVolumes(wxArrayString files, bool withImageJ)
 		double data_size; getValue(gstLargeDataSize, data_size);
 		long brick_size; getValue(gstBrickSize, brick_size);
 		long resp_time; getValue(gstResponseTime, resp_time);
-		wxString str_streaming;
-		if (streaming)
-		{
-			str_streaming = "Large data streaming is currently ON\n";
-			str_streaming += wxString::Format("FluoRender will use %dMB GPU Memory\n", int(gpu_size));
-			str_streaming += wxString::Format("Data channel larger than %dMB will be divided into bricks of %d voxels\n",
-				int(data_size), brick_size);
-			str_streaming += wxString::Format("System response time is %dms", resp_time);
-		}
-		else
-			str_streaming = "Large data streaming is currently OFF";
+		//wxString str_streaming;
+		//if (streaming)
+		//{
+		//	str_streaming = "Large data streaming is currently ON\n";
+		//	str_streaming += wxString::Format("FluoRender will use %dMB GPU Memory\n", int(gpu_size));
+		//	str_streaming += wxString::Format("Data channel larger than %dMB will be divided into bricks of %d voxels\n",
+		//		int(data_size), brick_size);
+		//	str_streaming += wxString::Format("System response time is %dms", resp_time);
+		//}
+		//else
+		//	str_streaming = "Large data streaming is currently OFF";
 
-		prg_diag = new wxProgressDialog(
-			"FluoRender: Loading volume data...",
-			"",
-			100, 0, wxPD_SMOOTH | wxPD_ELAPSED_TIME | wxPD_AUTO_HIDE);
+		//prg_diag = new wxProgressDialog(
+		//	"FluoRender: Loading volume data...",
+		//	"",
+		//	100, 0, wxPD_SMOOTH | wxPD_ELAPSED_TIME | wxPD_AUTO_HIDE);
 
 		bool enable_4d = false;
 
-		for (j = 0; j < (int)files.Count(); j++)
+		for (j = 0; j < (int)files.size(); j++)
 		{
-			wxGetApp().Yield();
-			prg_diag->Update(90 * (j + 1) / (int)files.Count(),
-				str_streaming);
+			//wxGetApp().Yield();
+			//prg_diag->Update(90 * (j + 1) / (int)files.Count(),
+			//	str_streaming);
 
 			int ch_num = 0;
-			wxString filename = files[j];
-			wxString suffix = filename.Mid(filename.Find('.', true)).MakeLower();
+			std::wstring filename = files[j];
+			std::wstring suffix = GET_SUFFIX(filename);
 
 			if (withImageJ)
 				ch_num = LoadVolumeData(filename, VLT_ImageJ, true); //The type of data doesnt matter.
-			else if (suffix == ".nrrd" || suffix == ".msk" || suffix == ".lbl")
+			else if (suffix == L".nrrd" || suffix == L".msk" || suffix == L".lbl")
 				ch_num = LoadVolumeData(filename, VLT_NRRD, false);
-			else if (suffix == ".tif" || suffix == ".tiff")
+			else if (suffix == L".tif" || suffix == L".tiff")
 				ch_num = LoadVolumeData(filename, VLT_TIFF, false);
-			else if (suffix == ".oib")
+			else if (suffix == L".oib")
 				ch_num = LoadVolumeData(filename, VLT_OIB, false);
-			else if (suffix == ".oif")
+			else if (suffix == L".oif")
 				ch_num = LoadVolumeData(filename, VLT_OIF, false);
-			else if (suffix == ".lsm")
+			else if (suffix == L".lsm")
 				ch_num = LoadVolumeData(filename, VLT_LSM, false);
-			else if (suffix == ".xml")
+			else if (suffix == L".xml")
 				ch_num = LoadVolumeData(filename, VLT_PVXML, false);
-			else if (suffix == ".vvd")
+			else if (suffix == L".vvd")
 				ch_num = LoadVolumeData(filename, VLT_BRKXML, false);
-			else if (suffix == ".czi")
+			else if (suffix == L".czi")
 				ch_num = LoadVolumeData(filename, VLT_CZI, false);
-			else if (suffix == ".nd2")
+			else if (suffix == L".nd2")
 				ch_num = LoadVolumeData(filename, VLT_ND2, false);
-			else if (suffix == ".lif")
+			else if (suffix == L".lif")
 				ch_num = LoadVolumeData(filename, VLT_LIF, false);
-			else if (suffix == ".lof")
+			else if (suffix == L".lof")
 				ch_num = LoadVolumeData(filename, VLT_LOF, false);
 
 			if (ch_num > 1)
@@ -237,11 +252,11 @@ void RenderFrameAgent::LoadVolumes(wxArrayString files, bool withImageJ)
 						if (vd)
 						{
 							view->addVolumeData(vd, group);
-							wxString vol_name = vd->getName();
-							if (vol_name.Find("_1ch") != -1 &&
+							std::string vol_name = vd->getName();
+							if (vol_name.find("_1ch") != std::string::npos &&
 								(i == 1 || i == 2))
 								vd->setValue(gstDisplay, false);
-							if (vol_name.Find("_2ch") != -1 && i == 1)
+							if (vol_name.find("_2ch") != std::string::npos && i == 1)
 								vd->setValue(gstDisplay, false);
 
 							if (i == ch_num)
@@ -314,13 +329,13 @@ void RenderFrameAgent::LoadVolumes(wxArrayString files, bool withImageJ)
 			//m_movie_view->SetCurrentTime(lval);
 		}
 
-		delete prg_diag;
+		//delete prg_diag;
 	}
 
 	//v->RefreshGL(39);//added by Takashi
 }
 
-void RenderFrameAgent::LoadMeshes(wxArrayString files)
+void RenderFrameAgent::LoadMeshes(const std::vector<std::wstring>& files)
 {
 	//if (!view)
 	//	view = GetView(0);
@@ -371,38 +386,38 @@ void RenderFrameAgent::LoadMeshes(wxArrayString files)
 	//delete prg_diag;
 }
 
-wxString RenderFrameAgent::SearchProjectPath(const wxString &filename)
+std::wstring RenderFrameAgent::SearchProjectPath(const std::wstring &filename)
 {
 	int i;
 
-	wxString pathname = filename;
+	std::wstring pathname = filename;
 
 	std::wstring wsval;
 	getValue(gstProjectPath, wsval);
-	if (wsval.empty()) return "";
-	wxString search_str;
-	for (i = pathname.Length() - 1; i >= 0; i--)
+	if (wsval.empty()) return L"";
+	std::wstring search_str;
+	for (i = pathname.length() - 1; i >= 0; i--)
 	{
-		if (pathname[i] == '\\' || pathname[i] == '/')
+		if (pathname[i] == L'\\' || pathname[i] == L'/')
 		{
-			search_str.Prepend(GETSLASH());
-			wxString name_temp = wsval + search_str;
-			if (wxFileExists(name_temp))
+			search_str = GETSLASH() + search_str;
+			std::wstring name_temp = wsval + search_str;
+			if (FILE_EXISTS(name_temp))
 				return name_temp;
 		}
 		else
-			search_str.Prepend(pathname[i]);
+			search_str = pathname[i] + search_str;
 	}
-	return "";
+	return L"";
 }
 
-int RenderFrameAgent::LoadVolumeData(const wxString &filename, int type, bool withImageJ, int ch_num, int t_num)
+int RenderFrameAgent::LoadVolumeData(const std::wstring &filename, int type, bool withImageJ, int ch_num, int t_num)
 {
-	wxString pathname = filename;
-	if (!wxFileExists(pathname))
+	std::wstring pathname = filename;
+	if (!FILE_EXISTS(pathname))
 	{
 		pathname = SearchProjectPath(filename);
-		if (!wxFileExists(pathname))
+		if (!FILE_EXISTS(pathname))
 			return 0;
 	}
 
@@ -412,7 +427,7 @@ int RenderFrameAgent::LoadVolumeData(const wxString &filename, int type, bool wi
 
 	for (i = 0; i < (int)m_reader_list.size(); i++)
 	{
-		std::wstring wstr = pathname.ToStdWstring();
+		std::wstring wstr = pathname;
 		if (m_reader_list[i]->Match(wstr))
 		{
 			reader = m_reader_list[i];
@@ -493,7 +508,7 @@ int RenderFrameAgent::LoadVolumeData(const wxString &filename, int type, bool wi
 		}
 
 		m_reader_list.push_back(reader);
-		reader->SetFile(pathname.ToStdWstring());
+		reader->SetFile(pathname);
 		getValue(gstOpenSlices, bval);
 		reader->SetSliceSeq(bval);
 		getValue(gstOpenChanns, bval);
@@ -546,19 +561,19 @@ int RenderFrameAgent::LoadVolumeData(const wxString &filename, int type, bool wi
 		Nrrd* data = reader->Convert(t_num >= 0 ? t_num : reader->GetCurTime(), i, true);
 		if (!data) continue;
 
-		wxString name;
+		std::wstring name;
 		if (type != VLT_BRKXML)
 		{
-			name = wxString(reader->GetDataName());
+			name = reader->GetDataName();
 			if (chan > 1)
-				name += wxString::Format("_Ch%d", i + 1);
+				name += L"_Ch" + std::to_wstring(i + 1);
 		}
 		else
 		{
 			BRKXMLReader* breader = (BRKXMLReader*)reader;
 			name = reader->GetDataName();
-			name = name.Mid(0, name.find_last_of(wxT('.')));
-			if (ch_num > 1) name = wxT("_Ch") + wxString::Format("%i", i);
+			name = GET_NAME(name);
+			if (ch_num > 1) name = L"_Ch" + std::to_wstring(i);
 			pathname = filename;
 			breader->SetCurChan(i);
 			breader->SetCurTime(0);
@@ -568,7 +583,7 @@ int RenderFrameAgent::LoadVolumeData(const wxString &filename, int type, bool wi
 		vd->setValue(gstHardwareCompress, hard_comp);
 
 		bool valid_spc = reader->IsSpcInfoValid();
-		if (vd->LoadData(data, name.ToStdString(), pathname.ToStdWstring()))
+		if (vd->LoadData(data, ws2s(name), pathname))
 		{
 			if (load_mask)
 			{
@@ -658,18 +673,18 @@ int RenderFrameAgent::LoadVolumeData(const wxString &filename, int type, bool wi
 	return result;
 }
 
-int RenderFrameAgent::LoadMeshData(const wxString &filename)
+int RenderFrameAgent::LoadMeshData(const std::wstring &filename)
 {
-	wxString pathname = filename;
-	if (!wxFileExists(pathname))
+	std::wstring pathname = filename;
+	if (!FILE_EXISTS(pathname))
 	{
 		pathname = SearchProjectPath(filename);
-		if (!wxFileExists(pathname))
+		if (!FILE_EXISTS(pathname))
 			return 0;
 	}
 
 	MeshData *md = glbin_mshf->build();
-	md->LoadData(pathname.ToStdWstring());
+	md->LoadData(pathname);
 
 	std::string name = md->getName();
 	std::string new_name = name;
@@ -848,11 +863,13 @@ void RenderFrameAgent::Select(const std::string &name)
 			vd->getValue(gstDisplay, display);
 		if (display)
 		{
-			frame_.ShowVolumePropPanel(vd->getName());
+#pragma message ("show panel")
+			//frame_.ShowVolumePropPanel(vd->getName());
 		}
 		else
 		{
-			frame_.HidePropPanel();
+#pragma message ("hide panel")
+			//frame_.HidePropPanel();
 		}
 		if (vd)
 		{
@@ -882,11 +899,13 @@ void RenderFrameAgent::Select(const std::string &name)
 			md->getValue(gstDisplay, display);
 		if (display)
 		{
-			frame_.ShowMeshPropPanel(md->getName());
+#pragma message ("show panel")
+			//frame_.ShowMeshPropPanel(md->getName());
 		}
 		else
 		{
-			frame_.HidePropPanel();
+#pragma message ("hide panel")
+			//frame_.HidePropPanel();
 		}
 		if (md)
 		{
@@ -909,11 +928,13 @@ void RenderFrameAgent::Select(const std::string &name)
 			ann->getValue(gstDisplay, display);
 		if (display)
 		{
-			frame_.ShowAnnoPropPanel(ann->getName());
+#pragma message ("show panel")
+			//frame_.ShowAnnoPropPanel(ann->getName());
 		}
 		else
 		{
-			frame_.HidePropPanel();
+#pragma message ("hide panel")
+			//frame_.HidePropPanel();
 		}
 		if (ann)
 		{
@@ -928,7 +949,8 @@ void RenderFrameAgent::Select(const std::string &name)
 	}
 	else
 	{
-		frame_.HidePropPanel();
+#pragma message ("hide panel")
+		//frame_.HidePropPanel();
 	}
 
 	//others
@@ -959,7 +981,8 @@ void RenderFrameAgent::AddView(RenderviewPanel* vrv, bool set_gl)
 	glbin_root->addChild(view);
 	glbin_root->setRefValue(gstCurrentView, view);
 
-	std::string str_name = gstRenderviewAgent + std::to_string(RenderviewPanel::m_max_id);
+#pragma message ("add render view")
+/*	std::string str_name = gstRenderviewAgent + std::to_string(RenderviewPanel::m_max_id);
 	vrv->m_agent = glbin_agtf->addRenderviewAgent(str_name, *vrv);
 	str_name = vrv->GetName().ToStdString();
 	view->setName(str_name);
@@ -970,22 +993,23 @@ void RenderFrameAgent::AddView(RenderviewPanel* vrv, bool set_gl)
 	canvas->m_agent = glbin_agtf->
 		addRenderCanvasAgent(str_name, *canvas);
 	canvas->m_agent->setObject(view);
-	canvas->m_agent->setValue(gstSetGl, set_gl);
+	canvas->m_agent->setValue(gstSetGl, set_gl);*/
 }
 
-wxString RenderFrameAgent::ScriptDialog(const wxString& title,
-	const wxString& wildcard, long style)
+std::string RenderFrameAgent::ScriptDialog(const std::string& title,
+	const std::string& wildcard, long style)
 {
 	fluo::MovieAgent* agent = glbin_agtf->getMovieAgent();
 	if (agent) agent->HoldRun();
-	wxString result;
-	wxFileDialog *dlg = new wxFileDialog(
+	std::string result;
+#pragma message ("get script file name")
+/*	wxFileDialog *dlg = new wxFileDialog(
 		&frame_, title, "", "",
 		wildcard, style);
 	int rval = dlg->ShowModal();
 	if (rval == wxID_OK)
 		result = dlg->GetPath();
-	delete dlg;
+	delete dlg;*/
 	if (agent) agent->ResumeRun();
 	return result;
 }

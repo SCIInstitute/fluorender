@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <NoiseReduceAgent.hpp>
-#include <NoiseReduceDlg.h>
+//#include <NoiseReduceDlg.h>
 #include <AgentFactory.hpp>
 #include <BrushToolAgent.hpp>
 #include <VolumeData.hpp>
@@ -36,6 +36,14 @@ DEALINGS IN THE SOFTWARE.
 #include <CompGenerator.h>
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class NoiseReduceDlg : public wxWindow
+{
+public:
+	NoiseReduceDlg() {}
+	~NoiseReduceDlg() {}
+};
 
 NoiseReduceAgent::NoiseReduceAgent(NoiseReduceDlg &dlg) :
 	InterfaceAgent(),

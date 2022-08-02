@@ -39,6 +39,44 @@ DEALINGS IN THE SOFTWARE.
 #define FOUND_VALUE(v) names.find(v) != names.end()
 #define DEFINE_ATTR(v) inline static const std::string v = gst ## v
 
+#pragma message ("dummy wxwidgets dataviewmodel base class")
+class wxVariant
+{
+
+};
+class wxString
+{
+
+};
+class wxDataViewItem
+{
+public:
+	wxDataViewItem() {}
+	wxDataViewItem(int i) {}
+};
+class wxDataViewItemArray
+{
+
+};
+class wxDataViewModel
+{
+	virtual int Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
+		unsigned int column, bool ascending) const = 0;
+	virtual unsigned int GetColumnCount() const = 0;
+	virtual wxString GetColumnType(unsigned int col) const = 0;
+	virtual void GetValue(wxVariant &variant,
+		const wxDataViewItem &item, unsigned int col) const = 0;
+	virtual bool SetValue(const wxVariant &variant,
+		const wxDataViewItem &item, unsigned int col) = 0;
+	virtual bool IsEnabled(const wxDataViewItem &item,
+		unsigned int col) const = 0;
+	virtual bool IsContainer(const wxDataViewItem &item) const = 0;
+	virtual bool HasContainerColumns(const wxDataViewItem & item) const = 0;
+	virtual wxDataViewItem GetParent(const wxDataViewItem &item) const = 0;
+	virtual unsigned int GetChildren(const wxDataViewItem &parent,
+		wxDataViewItemArray &array) const = 0;
+};
+
 namespace fluo
 {
 	class AnnotationPropAgent;

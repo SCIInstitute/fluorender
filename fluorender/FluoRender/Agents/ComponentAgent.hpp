@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <InterfaceAgent.hpp>
 #include <Renderview.hpp>
 #include <CompGenerator.h>
-#include <wx/string.h>
 #include <chrono>
 #include <set>
 
@@ -61,8 +60,8 @@ namespace fluo
 
 		friend class AgentFactory;
 
-		void LoadSettings(const wxString &filename);
-		void SaveSettings(const wxString &filename);
+		void LoadSettings(const std::string &filename);
+		void SaveSettings(const std::string &filename);
 		void Analyze();
 		void Analyze(bool use_sel);
 		void GenerateComp();
@@ -82,8 +81,8 @@ namespace fluo
 		void CompCombine();
 
 		//command
-		void LoadCmd(const wxString &filename);
-		void SaveCmd(const wxString &filename);
+		void LoadCmd(const std::string &filename);
+		void SaveCmd(const std::string &filename);
 		void AddCmd(const std::string &type);
 		void ResetCmd();
 		void PlayCmd(bool use_selection, double tfactor);

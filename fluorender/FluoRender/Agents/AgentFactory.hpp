@@ -30,7 +30,16 @@ DEALINGS IN THE SOFTWARE.
 
 #include <ObjectFactory.hpp>
 #include <InterfaceAgent.hpp>
-#include <wx/window.h>
+#include <Value.hpp>
+
+#pragma message ("replace dummy window class")
+class wxWindow
+{
+public:
+	wxWindow() {}
+	~wxWindow() {}
+	void UpdateWindow(const fluo::ValueCollection &names) {}
+};
 
 namespace fluo
 {

@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2022 Scientific Computing and Imaging Institute,
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -26,10 +26,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "lof_reader.h"
+#include "../compatibility.h"
 #include <wx/sstream.h>
 #include <stdio.h>
 #include <algorithm>
-#include <compatibility.h>
+//#include <fstream>
 
 LOFReader::LOFReader()
 {
@@ -59,7 +60,7 @@ LOFReader::~LOFReader()
 {
 }
 
-void LOFReader::SetFile(const std::string &file)
+void LOFReader::SetFile(string &file)
 {
 	if (!file.empty())
 	{
@@ -71,7 +72,7 @@ void LOFReader::SetFile(const std::string &file)
 	m_id_string = m_path_name;
 }
 
-void LOFReader::SetFile(const std::wstring &file)
+void LOFReader::SetFile(wstring &file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;
@@ -174,14 +175,14 @@ int LOFReader::GetDigitOrder()
 	return 0;
 }
 
-void LOFReader::SetTimeId(const std::wstring &id)
+void LOFReader::SetTimeId(wstring &id)
 {
 	//do nothing
 }
 
-std::wstring LOFReader::GetTimeId()
+wstring LOFReader::GetTimeId()
 {
-	return std::wstring(L"");
+	return wstring(L"");
 }
 
 void LOFReader::SetBatch(bool batch)
@@ -289,30 +290,30 @@ Nrrd* LOFReader::Convert(int t, int c, bool get_max)
 	return data;
 }
 
-std::wstring LOFReader::GetCurDataName(int t, int c)
+wstring LOFReader::GetCurDataName(int t, int c)
 {
 	return m_path_name;
 }
 
-std::wstring LOFReader::GetCurMaskName(int t, int c)
+wstring LOFReader::GetCurMaskName(int t, int c)
 {
-	std::wostringstream woss;
+	wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".msk";
-	std::wstring mask_name = woss.str();
+	wstring mask_name = woss.str();
 	return mask_name;
 }
 
-std::wstring LOFReader::GetCurLabelName(int t, int c)
+wstring LOFReader::GetCurLabelName(int t, int c)
 {
-	std::wostringstream woss;
+	wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".lbl";
-	std::wstring label_name = woss.str();
+	wstring label_name = woss.str();
 	return label_name;
 }
 

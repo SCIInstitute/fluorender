@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TREEAGENT_H_
 #define _TREEAGENT_H_
 
-#include <wx/dataview.h>
 #include <InterfaceAgent.hpp>
 #include <Node.hpp>
 #include <NodeVisitor.hpp>

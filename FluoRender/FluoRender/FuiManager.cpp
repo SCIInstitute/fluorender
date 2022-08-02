@@ -27,11 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <FuiManager.h>
-#include <JVMInitializer.h>
 #include <Global.hpp>
 #include <StopWatch.hpp>
 #include <AgentFactory.hpp>
-#include <RenderFrame.h>
+#include <RenderFrameAgent.hpp>
+#include <MovieAgent.hpp>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
@@ -43,10 +43,9 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/TextRenderer.h>
 #include <FLIVR/MultiVolumeRenderer.h>
 #include <Converters/VolumeMeshConv.h>
-#include <wx/stdpaths.h>
+#include <compatibility.h>
 
 FuiManager::FuiManager() :
-	m_frame(0),
 	m_benchmark(false),
 	m_fullscreen(false),
 	m_windowed(false),
@@ -60,20 +59,23 @@ FuiManager::FuiManager() :
 	m_mov_file(""),
 	m_imagej(false)
 {
-	char cpath[FILENAME_MAX];
+#pragma message ("set up working directory")
+/*	char cpath[FILENAME_MAX];
 	GETCURRENTDIR(cpath, sizeof(cpath));
 	std::wstring wstr_path = s2ws(std::string(cpath));
 	::wxSetWorkingDirectory(wstr_path);
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
 	glbin.setExecutablePath(expath.ToStdWstring());
+*/
 	//random numbers
 	srand((unsigned int)glbin.getStopWatch(gstStopWatch)->sys_time());
 }
 
 FuiManager::~FuiManager()
 {
-	JVMInitializer::destroyJVM();
+#pragma message ("destroy java")
+	//JVMInitializer::destroyJVM();
 	//release?
 	flvr::TextureRenderer::vol_kernel_factory_.clear();
 	flvr::TextureRenderer::framebuffer_manager_.clear();
@@ -86,39 +88,33 @@ FuiManager::~FuiManager()
 	flvr::KernelProgram::release();
 }
 
-RenderFrame* FuiManager::GetFrame()
-{
-	return m_frame;
-}
-
 void FuiManager::Init()
 {
-	//add png handler
-	wxImage::AddHandler(new wxPNGHandler);
-	glbin.initIcons();
-
+#pragma message ("initialize main frame")
 	//the frame
-	std::string title = std::string(FLUORENDER_TITLE) + std::string(" ") +
+/*	std::string title = std::string(FLUORENDER_TITLE) + std::string(" ") +
 		std::string(VERSION_MAJOR_TAG) + std::string(".") +
 		std::string(VERSION_MINOR_TAG);
 	m_frame = new RenderFrame(
 		wxString(title),
 		-1, -1,
-		m_win_width, m_win_height);
+		m_win_width, m_win_height);*/
 
 	SetupAgents();
 
 	fluo::RenderFrameAgent* renderframeagent = glbin_agtf->getRenderFrameAgent();
 
 	// Adding JVm initialization
-	JVMInitializer*	pInstance = nullptr;
-	if (renderframeagent)
-		pInstance = JVMInitializer::getInstance(renderframeagent->GetJvmArgs());
+	//JVMInitializer*	pInstance = nullptr;
+	//if (renderframeagent)
+	//	pInstance = JVMInitializer::getInstance(renderframeagent->GetJvmArgs());
 
-	m_frame->Init(m_benchmark, m_fullscreen, m_windowed, m_hidepanels, pInstance != nullptr);
+	//m_frame->Init(m_benchmark, m_fullscreen, m_windowed, m_hidepanels, pInstance != nullptr);
 
-	wxMemorySize free_mem_size = wxGetFreeMemory();
-	double mainmem_buf_size = free_mem_size.ToDouble() * 0.8 / 1024.0 / 1024.0;
+#pragma message ("get free memory size")
+	//wxMemorySize free_mem_size = wxGetFreeMemory();
+	//double mainmem_buf_size = free_mem_size.ToDouble() * 0.8 / 1024.0 / 1024.0;
+	double mainmem_buf_size = 1.6e5;//memory size in mb
 	if (mainmem_buf_size > flvr::TextureRenderer::get_mainmem_buf_size())
 		flvr::TextureRenderer::set_mainmem_buf_size(mainmem_buf_size);
 
@@ -126,7 +122,7 @@ void FuiManager::Init()
 	renderframeagent->SetTextureUndos();
 
 	bool bval; long lval; double dval;
-	m_frame->m_agent->getValue(gstSoftThresh, dval);
+	renderframeagent->getValue(gstSoftThresh, dval);
 	flvr::VolumeRenderer::set_soft_threshold(dval);
 	flvr::MultiVolumeRenderer::set_soft_threshold(dval);
 
@@ -134,17 +130,16 @@ void FuiManager::Init()
 	flvr::VolumeRenderer::set_soft_threshold(dval);
 	flvr::MultiVolumeRenderer::set_soft_threshold(dval);
 	VolumeMeshConv::SetSoftThreshold(dval);
-	std::string sval;
-	renderframeagent->getValue(gstFontFile, sval);
-	wxString font_file = sval;
-	wxString exePath = glbin.getExecutablePath();
+	std::string font_file;
+	renderframeagent->getValue(gstFontFile, font_file);
+	std::wstring exePath = glbin.getExecutablePath();
 	if (font_file != "")
-		font_file = exePath + GETSLASH() + "Fonts" +
-		GETSLASH() + font_file;
+		font_file = ws2s(exePath) + GETSLASHA() + "Fonts" +
+		GETSLASHA() + font_file;
 	else
-		font_file = exePath + GETSLASH() + "Fonts" +
-		GETSLASH() + "FreeSans.ttf";
-	flvr::TextRenderer::text_texture_manager_.load_face(font_file.ToStdString());
+		font_file = ws2s(exePath) + GETSLASHA() + "Fonts" +
+		GETSLASHA() + "FreeSans.ttf";
+	flvr::TextRenderer::text_texture_manager_.load_face(font_file);
 	renderframeagent->getValue(gstTextSize, dval);
 	flvr::TextRenderer::text_texture_manager_.SetSize(dval);
 
@@ -161,19 +156,20 @@ void FuiManager::Init()
 		if (movieagent)
 		{
 			movieagent->setValue(gstMovBitrate, m_bitrate);
-			movieagent->setValue(gstMovFilename, m_mov_file.ToStdWstring());
+			movieagent->setValue(gstMovFilename, m_mov_file);
 		}
 		run_mov = true;
 	}
 
-	if (m_files.GetCount() > 0 && renderframeagent)
+	if (m_files.size() > 0 && renderframeagent)
 		renderframeagent->StartupLoad(m_files, run_mov, m_imagej);
 
 }
 
 void FuiManager::SetupAgents()
 {
-	//renderframe
+#pragma message ("link agents with ui")
+/*	//renderframe
 	if (m_frame)
 	{
 		m_frame->m_agent = glbin_agtf->addRenderFrameAgent(gstRenderFrameAgent, *m_frame);
@@ -315,4 +311,5 @@ void FuiManager::SetupAgents()
 	{
 		vol_panel->m_agent = glbin_agtf->addVolumePropAgent(gstVolumePropAgent, *vol_panel);
 	}
+	*/
 }

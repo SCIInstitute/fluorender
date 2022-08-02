@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <ComponentAgent.hpp>
-#include <ComponentDlg.h>
+//#include <ComponentDlg.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
 #include <AnnotationFactory.hpp>
@@ -44,13 +44,19 @@ DEALINGS IN THE SOFTWARE.
 #include <exmax.h>
 #include <dbscan.h>
 #include <VolumeRenderer.h>
-#include <wx/fileconf.h>
 #include <cctype>
 #include <fstream>
-#include <wx/wfstream.h>
 #include <compatibility.h>
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class ComponentDlg : public wxWindow
+{
+public:
+	ComponentDlg() {}
+	~ComponentDlg() {}
+};
 
 ComponentAgent::ComponentAgent(ComponentDlg &dlg) :
 	InterfaceAgent(),
@@ -75,7 +81,7 @@ Renderview* ComponentAgent::getObject()
 
 void ComponentAgent::UpdateFui(const ValueCollection &names)
 {
-	bool update_all = names.empty();
+/*	bool update_all = names.empty();
 	bool bval;
 	int ival;
 	long lval;
@@ -293,11 +299,11 @@ void ComponentAgent::UpdateFui(const ValueCollection &names)
 		getValue(gstHoldHistory, bval);
 		dlg_.m_history_chk->SetValue(bval);
 	}
-}
+*/}
 
-void ComponentAgent::LoadSettings(const wxString &filename)
+void ComponentAgent::LoadSettings(const std::string &filename)
 {
-	bool get_basic = false;
+/*	bool get_basic = false;
 	wxString str;
 	if (!wxFileExists(filename))
 	{
@@ -352,11 +358,11 @@ void ComponentAgent::LoadSettings(const wxString &filename)
 	fconfig.Read("colocal", &bval); setValue(gstCompColocal, bval);
 	//output
 	fconfig.Read("output_type", &lval); setValue(gstCompOutputType, lval);
-}
+*/}
 
-void ComponentAgent::SaveSettings(const wxString &filename)
+void ComponentAgent::SaveSettings(const std::string &filename)
 {
-	wxString app_name = "FluoRender " +
+/*	wxString app_name = "FluoRender " +
 		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
 	wxString vendor_name = "FluoRender";
 	wxString local_name = "default_component_settings.dft";
@@ -418,7 +424,7 @@ void ComponentAgent::SaveSettings(const wxString &filename)
 #endif
 	wxFileOutputStream os(str);
 	fconfig.Save(os);
-}
+*/}
 
 void ComponentAgent::Analyze()
 {
@@ -487,7 +493,7 @@ void ComponentAgent::Analyze(bool sel)
 		string titles, values;
 		analyzer->OutputFormHeader(titles);
 		analyzer->OutputCompListStr(values, 0);
-		dlg_.SetOutput(titles, values);
+		//dlg_.SetOutput(titles, values);
 	}
 
 	//connection.disconnect();
@@ -685,9 +691,9 @@ void ComponentAgent::GenerateComp(bool use_sel, bool run_cmd)
 	{
 		titles += "Total time\n";
 	}
-	values += wxString::Format("%.4f", time_span.count());
+	values += std::to_string(time_span.count());
 	values += " sec.\n";
-	dlg_.SetOutput(titles, values);
+	//dlg_.SetOutput(titles, values);
 
 	//update
 	//m_view->Update(39);
@@ -949,9 +955,9 @@ void ComponentAgent::CompCombine()
 }
 
 //command
-void ComponentAgent::LoadCmd(const wxString &filename)
+void ComponentAgent::LoadCmd(const std::string &filename)
 {
-	wxFileInputStream is(filename);
+/*	wxFileInputStream is(filename);
 	if (!is.IsOk())
 		return;
 	wxFileConfig fconfig(is);
@@ -1050,11 +1056,11 @@ void ComponentAgent::LoadCmd(const wxString &filename)
 	//record
 	int ival = m_command.size();
 	dlg_.m_cmd_count_text->SetValue(wxString::Format("%d", ival));
-}
+*/}
 
-void ComponentAgent::SaveCmd(const wxString &filename)
+void ComponentAgent::SaveCmd(const std::string &filename)
 {
-	if (m_command.empty())
+/*	if (m_command.empty())
 	{
 		AddCmd("generate");
 	}
@@ -1116,7 +1122,7 @@ void ComponentAgent::SaveCmd(const wxString &filename)
 	fconfig.Save(os);
 
 	dlg_.m_cmd_file_text->SetValue(filename);
-}
+*/}
 
 //record
 void ComponentAgent::AddCmd(const std::string &type)
@@ -1178,13 +1184,13 @@ void ComponentAgent::AddCmd(const std::string &type)
 
 	//record
 	ival = m_command.size();
-	dlg_.m_cmd_count_text->SetValue(wxString::Format("%d", ival));
+	//dlg_.m_cmd_count_text->SetValue(wxString::Format("%d", ival));
 }
 
 void ComponentAgent::ResetCmd()
 {
 	m_command.clear();
-	dlg_.m_record_cmd_btn->SetValue(false);
+	//dlg_.m_record_cmd_btn->SetValue(false);
 	setValue(gstRecordCmd, false);
 	//m_record_cmd = false;
 	//record
@@ -1201,7 +1207,7 @@ void ComponentAgent::PlayCmd(bool use_selection, double tfactor)
 	//disable first
 	setValue(gstFixateEnable, false);
 	setValue(gstAutoUpdate, false);
-	dlg_.m_auto_update_btn->SetValue(false);
+	//dlg_.m_auto_update_btn->SetValue(false);
 
 	if (m_command.empty())
 	{
@@ -1940,13 +1946,14 @@ bool ComponentAgent::GetCellList(flrd::CelpList &cl, bool links)
 	int bn = analyzer->GetBrickNum();
 
 	//selected cells are retrieved using different functions
-	wxArrayInt seli = dlg_.m_output_grid->GetSelectedCols();
-	if (seli.GetCount() > 0)
+	//wxArrayInt seli = dlg_.m_output_grid->GetSelectedCols();
+	std::vector<unsigned int> seli;
+	if (seli.size() > 0)
 		sel_all = true;
 	if (!sel_all)
 	{
-		seli = dlg_.m_output_grid->GetSelectedRows();
-		dlg_.AddSelArrayInt(ids, bids, seli, bn > 1);
+		//seli = dlg_.m_output_grid->GetSelectedRows();
+		//dlg_.AddSelArrayInt(ids, bids, seli, bn > 1);
 		//wxGridCellCoordsArray sela =
 		//	m_output_grid->GetSelectionBlockBottomRight();
 		//AddSelCoordArray(ids, bids, sela, bn > 1);
@@ -2006,25 +2013,25 @@ void ComponentAgent::SetCompSelection(std::set<unsigned long long>& ids, int mod
 
 	int bn = analyzer->GetBrickNum();
 
-	wxString str;
+	std::string str;
 	unsigned long ulv;
 	unsigned long long ull;
 	bool flag = mode == 1;
 	int lasti = -1;
-	wxArrayInt sel = dlg_.m_output_grid->GetSelectedRows();
+	std::vector<unsigned int> sel;// = dlg_.m_output_grid->GetSelectedRows();
 	std::set<int> rows;
-	for (int i = 0; i < sel.GetCount(); ++i)
+	for (int i = 0; i < sel.size(); ++i)
 		rows.insert(sel[i]);
-	for (int i = 0; i < dlg_.m_output_grid->GetNumberRows(); ++i)
+/*	for (int i = 0; i < dlg_.m_output_grid->GetNumberRows(); ++i)
 	{
 		str = dlg_.m_output_grid->GetCellValue(i, 0);
-		if (!str.ToULong(&ulv))
-			continue;
+		try { ulv = std::stoul(str); }
+		catch (const std::invalid_argument) { continue; }
 		if (bn > 1)
 		{
 			str = dlg_.m_output_grid->GetCellValue(i, 1);
-			if (!str.ToULongLong(&ull))
-				continue;
+			try { ull = std::stoull(str); }
+			catch (const std::invalid_argument) { continue; }
 			ull = (ull << 32) | ulv;
 		}
 		else
@@ -2052,13 +2059,13 @@ void ComponentAgent::SetCompSelection(std::set<unsigned long long>& ids, int mod
 				}
 			}
 		}
-	}
+	}*/
 
 	if (flag)
 	{
 		GetCompSelection();
-		if (lasti >= 0)
-			dlg_.m_output_grid->GoToCell(lasti, 0);
+		//if (lasti >= 0)
+		//	dlg_.m_output_grid->GoToCell(lasti, 0);
 	}
 }
 
@@ -2087,11 +2094,11 @@ void ComponentAgent::IncludeComps()
 		//select cl
 		flrd::ComponentSelector comp_selector(vd);
 		comp_selector.SelectList(cl);
-		dlg_.ClearOutputGrid();
+		//dlg_.ClearOutputGrid();
 		string titles, values;
 		analyzer->OutputFormHeader(titles);
 		analyzer->OutputCompListStr(values, 0);
-		dlg_.SetOutput(titles, values);
+		//dlg_.SetOutput(titles, values);
 
 		cl.clear();
 		view->SetCellList(cl);
@@ -2135,11 +2142,11 @@ void ComponentAgent::ExcludeComps()
 			it != list->end(); ++it)
 			ids.push_back(it->second->GetEId());
 		comp_selector.Delete(ids);
-		dlg_.ClearOutputGrid();
+		//dlg_.ClearOutputGrid();
 		string titles, values;
 		analyzer->OutputFormHeader(titles);
 		analyzer->OutputCompListStr(values, 0);
-		dlg_.SetOutput(titles, values);
+		//dlg_.SetOutput(titles, values);
 
 		cl.clear();
 		view->SetCellList(cl);
@@ -2257,25 +2264,25 @@ void ComponentAgent::OnUseDistField(Event& event)
 	getValue(gstUseDistField, bval);
 	if (bval)
 	{
-		dlg_.m_dist_strength_sldr->Enable();
-		dlg_.m_dist_strength_text->Enable();
-		dlg_.m_dist_filter_size_sldr->Enable();
-		dlg_.m_dist_filter_size_text->Enable();
-		dlg_.m_max_dist_sldr->Enable();
-		dlg_.m_max_dist_text->Enable();
-		dlg_.m_dist_thresh_sldr->Enable();
-		dlg_.m_dist_thresh_text->Enable();
+		//dlg_.m_dist_strength_sldr->Enable();
+		//dlg_.m_dist_strength_text->Enable();
+		//dlg_.m_dist_filter_size_sldr->Enable();
+		//dlg_.m_dist_filter_size_text->Enable();
+		//dlg_.m_max_dist_sldr->Enable();
+		//dlg_.m_max_dist_text->Enable();
+		//dlg_.m_dist_thresh_sldr->Enable();
+		//dlg_.m_dist_thresh_text->Enable();
 	}
 	else
 	{
-		dlg_.m_dist_strength_sldr->Disable();
-		dlg_.m_dist_strength_text->Disable();
-		dlg_.m_dist_filter_size_sldr->Disable();
-		dlg_.m_dist_filter_size_text->Disable();
-		dlg_.m_max_dist_sldr->Disable();
-		dlg_.m_max_dist_text->Disable();
-		dlg_.m_dist_thresh_sldr->Disable();
-		dlg_.m_dist_thresh_text->Disable();
+		//dlg_.m_dist_strength_sldr->Disable();
+		//dlg_.m_dist_strength_text->Disable();
+		//dlg_.m_dist_filter_size_sldr->Disable();
+		//dlg_.m_dist_filter_size_text->Disable();
+		//dlg_.m_max_dist_sldr->Disable();
+		//dlg_.m_max_dist_text->Disable();
+		//dlg_.m_dist_thresh_sldr->Disable();
+		//dlg_.m_dist_thresh_text->Disable();
 	}
 	OnAutoUpdate(event);
 }
@@ -2286,13 +2293,13 @@ void ComponentAgent::OnUseDiffusion(Event& event)
 	getValue(gstUseDiffusion, bval);
 	if (bval)
 	{
-		dlg_.m_falloff_sldr->Enable();
-		dlg_.m_falloff_text->Enable();
+		//dlg_.m_falloff_sldr->Enable();
+		//dlg_.m_falloff_text->Enable();
 	}
 	else
 	{
-		dlg_.m_falloff_sldr->Disable();
-		dlg_.m_falloff_text->Disable();
+		//dlg_.m_falloff_sldr->Disable();
+		//dlg_.m_falloff_text->Disable();
 	}
 	OnAutoUpdate(event);
 }
@@ -2303,25 +2310,25 @@ void ComponentAgent::OnUseDensityField(Event& event)
 	getValue(gstUseDensityField, bval);
 	if (bval)
 	{
-		dlg_.m_density_sldr->Enable();
-		dlg_.m_density_text->Enable();
-		dlg_.m_varth_sldr->Enable();
-		dlg_.m_varth_text->Enable();
-		dlg_.m_density_window_size_sldr->Enable();
-		dlg_.m_density_window_size_text->Enable();
-		dlg_.m_density_stats_size_sldr->Enable();
-		dlg_.m_density_stats_size_text->Enable();
+		//dlg_.m_density_sldr->Enable();
+		//dlg_.m_density_text->Enable();
+		//dlg_.m_varth_sldr->Enable();
+		//dlg_.m_varth_text->Enable();
+		//dlg_.m_density_window_size_sldr->Enable();
+		//dlg_.m_density_window_size_text->Enable();
+		//dlg_.m_density_stats_size_sldr->Enable();
+		//dlg_.m_density_stats_size_text->Enable();
 	}
 	else
 	{
-		dlg_.m_density_sldr->Disable();
-		dlg_.m_density_text->Disable();
-		dlg_.m_varth_sldr->Disable();
-		dlg_.m_varth_text->Disable();
-		dlg_.m_density_window_size_sldr->Disable();
-		dlg_.m_density_window_size_text->Disable();
-		dlg_.m_density_stats_size_sldr->Disable();
-		dlg_.m_density_stats_size_text->Disable();
+		//dlg_.m_density_sldr->Disable();
+		//dlg_.m_density_text->Disable();
+		//dlg_.m_varth_sldr->Disable();
+		//dlg_.m_varth_text->Disable();
+		//dlg_.m_density_window_size_sldr->Disable();
+		//dlg_.m_density_window_size_text->Disable();
+		//dlg_.m_density_stats_size_sldr->Disable();
+		//dlg_.m_density_stats_size_text->Disable();
 	}
 	OnAutoUpdate(event);
 }
@@ -2332,15 +2339,15 @@ void ComponentAgent::OnFixateEnable(Event& event)
 	getValue(gstFixateEnable, bval);
 	if (bval)
 	{
-		dlg_.m_fix_update_btn->Enable();
-		dlg_.m_fix_size_sldr->Enable();
-		dlg_.m_fix_size_text->Enable();
+		//dlg_.m_fix_update_btn->Enable();
+		//dlg_.m_fix_size_sldr->Enable();
+		//dlg_.m_fix_size_text->Enable();
 	}
 	else
 	{
-		dlg_.m_fix_update_btn->Disable();
-		dlg_.m_fix_size_sldr->Disable();
-		dlg_.m_fix_size_text->Disable();
+		//dlg_.m_fix_update_btn->Disable();
+		//dlg_.m_fix_size_sldr->Disable();
+		//dlg_.m_fix_size_text->Disable();
 	}
 
 	if (bval)
@@ -2362,19 +2369,19 @@ void ComponentAgent::OnCleanEnable(Event& event)
 	getValue(gstCleanEnable, bval);
 	if (bval)
 	{
-		dlg_.m_clean_btn->Enable();
-		dlg_.m_clean_iter_sldr->Enable();
-		dlg_.m_clean_iter_text->Enable();
-		dlg_.m_clean_limit_sldr->Enable();
-		dlg_.m_clean_limit_text->Enable();
+		//dlg_.m_clean_btn->Enable();
+		//dlg_.m_clean_iter_sldr->Enable();
+		//dlg_.m_clean_iter_text->Enable();
+		//dlg_.m_clean_limit_sldr->Enable();
+		//dlg_.m_clean_limit_text->Enable();
 	}
 	else
 	{
-		dlg_.m_clean_btn->Disable();
-		dlg_.m_clean_iter_sldr->Disable();
-		dlg_.m_clean_iter_text->Disable();
-		dlg_.m_clean_limit_sldr->Disable();
-		dlg_.m_clean_limit_text->Disable();
+		//dlg_.m_clean_btn->Disable();
+		//dlg_.m_clean_iter_sldr->Disable();
+		//dlg_.m_clean_iter_text->Disable();
+		//dlg_.m_clean_limit_sldr->Disable();
+		//dlg_.m_clean_limit_text->Disable();
 	}
 	OnAutoUpdate(event);
 }
@@ -2386,39 +2393,39 @@ void ComponentAgent::OnClusterMethod(Event& event)
 	switch (lval)
 	{
 	case 0:
-		dlg_.m_cluster_method_kmeans_rd->SetValue(true);
-		dlg_.m_cluster_method_exmax_rd->SetValue(false);
-		dlg_.m_cluster_method_dbscan_rd->SetValue(false);
+		//dlg_.m_cluster_method_kmeans_rd->SetValue(true);
+		//dlg_.m_cluster_method_exmax_rd->SetValue(false);
+		//dlg_.m_cluster_method_dbscan_rd->SetValue(false);
 		break;
 	case 1:
-		dlg_.m_cluster_method_kmeans_rd->SetValue(false);
-		dlg_.m_cluster_method_exmax_rd->SetValue(true);
-		dlg_.m_cluster_method_dbscan_rd->SetValue(false);
+		//dlg_.m_cluster_method_kmeans_rd->SetValue(false);
+		//dlg_.m_cluster_method_exmax_rd->SetValue(true);
+		//dlg_.m_cluster_method_dbscan_rd->SetValue(false);
 		break;
 	case 2:
-		dlg_.m_cluster_method_kmeans_rd->SetValue(false);
-		dlg_.m_cluster_method_exmax_rd->SetValue(false);
-		dlg_.m_cluster_method_dbscan_rd->SetValue(true);
+		//dlg_.m_cluster_method_kmeans_rd->SetValue(false);
+		//dlg_.m_cluster_method_exmax_rd->SetValue(false);
+		//dlg_.m_cluster_method_dbscan_rd->SetValue(true);
 		break;
 	}
 	switch (lval)
 	{
 	case 0:
 	case 1:
-		dlg_.m_cluster_clnum_sldr->Enable();
-		dlg_.m_cluster_clnum_text->Enable();
-		dlg_.m_cluster_size_sldr->Disable();
-		dlg_.m_cluster_size_text->Disable();
-		dlg_.m_cluster_eps_sldr->Disable();
-		dlg_.m_cluster_eps_text->Disable();
+		//dlg_.m_cluster_clnum_sldr->Enable();
+		//dlg_.m_cluster_clnum_text->Enable();
+		//dlg_.m_cluster_size_sldr->Disable();
+		//dlg_.m_cluster_size_text->Disable();
+		//dlg_.m_cluster_eps_sldr->Disable();
+		//dlg_.m_cluster_eps_text->Disable();
 		break;
 	case 2:
-		dlg_.m_cluster_clnum_sldr->Disable();
-		dlg_.m_cluster_clnum_text->Disable();
-		dlg_.m_cluster_size_sldr->Enable();
-		dlg_.m_cluster_size_text->Enable();
-		dlg_.m_cluster_eps_sldr->Enable();
-		dlg_.m_cluster_eps_text->Enable();
+		//dlg_.m_cluster_clnum_sldr->Disable();
+		//dlg_.m_cluster_clnum_text->Disable();
+		//dlg_.m_cluster_size_sldr->Enable();
+		//dlg_.m_cluster_size_text->Enable();
+		//dlg_.m_cluster_eps_sldr->Enable();
+		//dlg_.m_cluster_eps_text->Enable();
 		break;
 	}
 }
@@ -2427,12 +2434,12 @@ void ComponentAgent::OnUseMin(Event& event)
 {
 	bool bval;
 	getValue(gstUseMin, bval);
-	dlg_.m_analysis_min_spin->Enable(bval);
+	//dlg_.m_analysis_min_spin->Enable(bval);
 }
 
 void ComponentAgent::OnUseMax(Event& event)
 {
 	bool bval;
 	getValue(gstUseMax, bval);
-	dlg_.m_analysis_max_spin->Enable(bval);
+	//dlg_.m_analysis_max_spin->Enable(bval);
 }

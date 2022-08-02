@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <CalculationAgent.hpp>
-#include <CalculationDlg.h>
+//#include <CalculationDlg.h>
 #include <Names.hpp>
 #include <Global.hpp>
 #include <Root.hpp>
@@ -38,6 +38,14 @@ DEALINGS IN THE SOFTWARE.
 #include <Calculate/CombineList.h>
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class CalculationDlg : public wxWindow
+{
+public:
+	CalculationDlg() {}
+	~CalculationDlg() {}
+};
 
 CalculationAgent::CalculationAgent(CalculationDlg &dlg) :
 	InterfaceAgent(),

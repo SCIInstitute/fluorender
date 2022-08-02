@@ -27,11 +27,18 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <MeshPropAgent.hpp>
-#include <MeshPropPanel.h>
-#include <wx/valnum.h>
-#include <wx/colour.h>
+#include <AgentFactory.hpp>
+//#include <MeshPropPanel.h>
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class MeshPropPanel : public wxWindow
+{
+public:
+	MeshPropPanel() {}
+	~MeshPropPanel() {}
+};
 
 MeshPropAgent::MeshPropAgent(MeshPropPanel &panel) :
 	InterfaceAgent(),
@@ -75,7 +82,7 @@ MeshData* MeshPropAgent::getObject()
 
 void MeshPropAgent::UpdateFui(const ValueCollection &names)
 {
-	bool update_all = names.empty();
+/*	bool update_all = names.empty();
 	wxString str;
 
 	if (update_all || FOUND_VALUE(Color))
@@ -156,4 +163,4 @@ void MeshPropAgent::UpdateFui(const ValueCollection &names)
 		panel_.m_size_sldr->SetValue(limit);
 		panel_.m_size_text->SetValue(wxString::Format("%d", limit));
 	}
-}
+*/}

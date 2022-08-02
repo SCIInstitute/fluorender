@@ -26,10 +26,19 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <ListAgent.hpp>
+#include <AgentFactory.hpp>
 #include <Global.hpp>
-#include <ListPanel.h>
+//#include <ListPanel.h>
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class ListPanel : public wxWindow
+{
+public:
+	ListPanel() {}
+	~ListPanel() {}
+};
 
 ListAgent::ListAgent(ListPanel &panel) :
 	panel_(panel)
@@ -45,7 +54,7 @@ void ListAgent::setupInputs()
 int ListAgent::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 	unsigned int column, bool ascending) const
 {
-	//return wxDataViewModel::Compare(item1, item2, column, ascending);
+/*	//return wxDataViewModel::Compare(item1, item2, column, ascending);
 	wxVariant var1, var2;
 	GetValue(var1, item1, column);
 	GetValue(var2, item2, column);
@@ -66,6 +75,8 @@ int ListAgent::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 		str2 = var2.GetString();
 	}
 	return ascending ? str1.CmpNoCase(str2) : str2.CmpNoCase(str1);
+*/
+	return 0;
 }
 
 //model definition
@@ -76,7 +87,7 @@ unsigned int ListAgent::GetColumnCount() const
 
 wxString ListAgent::GetColumnType(unsigned int col) const
 {
-	switch (col)
+/*	switch (col)
 	{
 	case 0:
 		return wxDataViewIconTextRenderer::GetDefaultType();
@@ -86,12 +97,14 @@ wxString ListAgent::GetColumnType(unsigned int col) const
 		return "string";
 	}
 	return "string";
+*/
+	return wxString();
 }
 
 void ListAgent::GetValue(wxVariant &variant,
 	const wxDataViewItem &item, unsigned int col) const
 {
-	//if (!item.IsOk())
+/*	//if (!item.IsOk())
 	//	return;
 	Node* node = (Node*)item.GetID();
 	if (!node)
@@ -116,12 +129,12 @@ void ListAgent::GetValue(wxVariant &variant,
 
 	}
 	}
-}
+*/}
 
 bool ListAgent::SetValue(const wxVariant &variant,
 	const wxDataViewItem &item, unsigned int col)
 {
-	if (!item.IsOk())
+/*	if (!item.IsOk())
 		return false;
 	Node* node = (Node*)item.GetID();
 	if (!node)
@@ -140,6 +153,8 @@ bool ListAgent::SetValue(const wxVariant &variant,
 	case 2:
 		return false;
 	}
+	return false;
+*/
 	return false;
 }
 
@@ -168,7 +183,7 @@ wxDataViewItem ListAgent::GetParent(const wxDataViewItem &item) const
 unsigned int ListAgent::GetChildren(const wxDataViewItem &parent,
 	wxDataViewItemArray &array) const
 {
-	Node *node = (Node*)parent.GetID();
+/*	Node *node = (Node*)parent.GetID();
 	if (!node)
 	{
 		size_t size = glbin.getObjNumInList();
@@ -181,6 +196,8 @@ unsigned int ListAgent::GetChildren(const wxDataViewItem &parent,
 	}
 	else
 		return 0;
+*/
+	return 0;
 }
 
 void ListAgent::setObject(Node* root)
@@ -197,9 +214,9 @@ void ListAgent::OnItemAdded(Event& event)
 {
 	if (event.child)
 	{
-		wxDataViewItem parent_item = wxDataViewItem(0);
-		wxDataViewItem child_item = wxDataViewItem(event.child);
-		ItemAdded(parent_item, child_item);
+		//wxDataViewItem parent_item = wxDataViewItem(0);
+		//wxDataViewItem child_item = wxDataViewItem(event.child);
+		//ItemAdded(parent_item, child_item);
 	}
 }
 
@@ -207,9 +224,9 @@ void ListAgent::OnItemRemoved(Event& event)
 {
 	if (event.child)
 	{
-		wxDataViewItem parent_item = wxDataViewItem(0);
-		wxDataViewItem child_item = wxDataViewItem(event.child);
-		ItemDeleted(parent_item, child_item);
+		//wxDataViewItem parent_item = wxDataViewItem(0);
+		//wxDataViewItem child_item = wxDataViewItem(event.child);
+		//ItemDeleted(parent_item, child_item);
 	}
 }
 

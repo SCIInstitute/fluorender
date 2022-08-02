@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <CountingAgent.hpp>
-#include <CountingDlg.h>
+//#include <CountingDlg.h>
 #include <Global.hpp>
 #include <Root.hpp>
 #include <Renderview.hpp>
@@ -37,6 +37,14 @@ DEALINGS IN THE SOFTWARE.
 #include <CompAnalyzer.h>
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class CountingDlg : public wxWindow
+{
+public:
+	CountingDlg() {}
+	~CountingDlg() {}
+};
 
 CountingAgent::CountingAgent(CountingDlg &dlg) :
 	InterfaceAgent(),

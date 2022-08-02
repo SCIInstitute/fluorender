@@ -27,7 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <Input.hpp>
 #include <Names.hpp>
-#include <wx/wx.h>
 
 // Default constructor
 //
@@ -140,6 +139,8 @@ Flinput::~Flinput()
 
 void Flinput::Update()
 {
+#pragma message ("get mouse and keyboard states")
+/*
 	//mouse
 	wxMouseState ms = wxGetMouseState();
 	updateState(gstMouseLeft, ms.LeftIsDown());
@@ -178,4 +179,5 @@ void Flinput::Update()
 	updateState(gstKbLbrkt, wxGetKeyState(wxKeyCode('[')));
 	updateState(gstKbRbrkt, wxGetKeyState(wxKeyCode(']')));
 	updateState(gstKbBslsh, wxGetKeyState(wxKeyCode('\\')));
+	*/
 }

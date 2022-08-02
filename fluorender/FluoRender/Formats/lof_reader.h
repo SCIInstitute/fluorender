@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2022 Scientific Computing and Imaging Institute,
+Copyright (c) 2020 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -34,6 +34,8 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <limits>
 
+using namespace std;
+
 #define LOFHSIZE	8
 #define LOFTEST0	0x70
 #define LOFTEXT1	0x2A
@@ -47,26 +49,26 @@ public:
 
 	int GetType() { return READER_LOF_TYPE; }
 
-	void SetFile(const std::string &file);
-	void SetFile(const std::wstring &file);
+	void SetFile(string &file);
+	void SetFile(wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
 	void SetChannSeq(bool cs);
 	bool GetChannSeq();
 	void SetDigitOrder(int order);
 	int GetDigitOrder();
-	void SetTimeId(const std::wstring &id);
-	std::wstring GetTimeId();
+	void SetTimeId(wstring &id);
+	wstring GetTimeId();
 	int Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	Nrrd* Convert(int t, int c, bool get_max);
-	std::wstring GetCurDataName(int t, int c);
-	std::wstring GetCurMaskName(int t, int c);
-	std::wstring GetCurLabelName(int t, int c);
+	wstring GetCurDataName(int t, int c);
+	wstring GetCurMaskName(int t, int c);
+	wstring GetCurLabelName(int t, int c);
 
-	std::wstring GetPathName() { return m_path_name; }
-	std::wstring GetDataName() { return m_data_name; }
+	wstring GetPathName() { return m_path_name; }
+	wstring GetDataName() { return m_data_name; }
 	int GetTimeNum() { return m_time_num; }
 	int GetCurTime() { return m_cur_time; }
 	int GetChanNum() { return m_chan_num; }
@@ -85,7 +87,7 @@ public:
 	int GetCurBatch() { return m_cur_batch; }
 
 private:
-	std::wstring m_data_name;
+	wstring m_data_name;
 
 	int m_time_num;
 	int m_cur_time;
@@ -107,7 +109,7 @@ private:
 		int chan_num;
 		double wavelength;
 	};
-	std::vector<WavelengthInfo> m_excitation_wavelength_list;
+	vector<WavelengthInfo> m_excitation_wavelength_list;
 
 	struct SubBlockInfo
 	{

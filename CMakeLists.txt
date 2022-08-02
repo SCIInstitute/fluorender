@@ -161,45 +161,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# wxWidgets
-set(wxWidgets_USE_REL_AND_DBG ON)
-if(${CMAKE_BUILD_TYPE} MATCHES "Release")
-  set(wxWidgets_CONFIGURATION mswu)
-elseif(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-  set(wxWidgets_CONFIGURATION mswud)
-endif()
-find_package(wxWidgets COMPONENTS core base aui html xml adv gl stc scintilla REQUIRED)
-include(${wxWidgets_USE_FILE})
-set(wxWidgets_USE_STATIC ON)
-if(UNIX OR APPLE OR MINGW)
-  find_package(TIFF REQUIRED)
-  include_directories(${TIFF_INCLUDE_DIR})
-  find_package(PNG REQUIRED)
-  include_directories(${PNG_INCLUDE_DIR})
-else()
-  include_directories(${wxWidgets_ROOT_DIR}/src/tiff/libtiff)
-endif()
-add_definitions(-DUNICODE)
-add_definitions(-D_UNICODE)
-# solution for wxWidgets linking "ambiguous" errors
-add_definitions(-D_WCHAR_H_CPLUSPLUS_98_CONFORMANCE_)
-# fix the library names for OSX if needed.
-if(APPLE)
-  foreach(arg ${wxWidgets_LIBRARIES})
-    set(wxlib_out "${wxlib_out} ${arg}")
-  endforeach()
-  string(STRIP ${wxlib_out} wxWidgets_LIBRARIES)
-  string(REGEX REPLACE "wx_osx_cocoau_scintilla" "wxscintilla"
-    wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
-elseif(UNIX OR MINGW)
-  foreach(arg ${wxWidgets_LIBRARIES})
-    set(wxlib_out "${wxlib_out} ${arg}")
-  endforeach()
-  string(STRIP ${wxlib_out} wxWidgets_LIBRARIES)
-  string(REGEX REPLACE "wx_gtk3u_scintilla" "wxscintilla"
-    wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
-endif()
-
 # OpenGL
 find_package(OpenGL REQUIRED)
 
@@ -220,7 +181,12 @@ if (JNI_FOUND)
    #target_link_libraries(FluoRender ${JNI_LIBRARIES})
 endif()
 
-# teem
+# tiff
+find_package(TIFF REQUIRED COMPONENTS CXX)
+if (TIFF_FOUND)
+  include_directories(${TIFF_INCLUDE_DIRS})
+endif()
+
 # add zlib
 find_package(ZLIB)
 if(ZLIB_FOUND)
@@ -358,13 +324,6 @@ file(GLOB fmt_hdr FluoRender/FluoRender/Formats/*.h)
 file(GLOB fmt_rsc FluoRender/FluoRender/Formats/*.class)
 add_library(FORMATS_OBJ OBJECT
   ${fmt_src} ${fmt_hdr} ${fmt_rsc})
-
-# Fui
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Fui)
-file(GLOB fui_src FluoRender/FluoRender/Fui/*.cpp)
-file(GLOB fui_hdr FluoRender/FluoRender/Fui/*.hpp FluoRender/FluoRender/Fui/*.h)
-add_library(FUI_OBJ OBJECT
-	${fui_src} ${fui_hdr})
 
 # Global
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Global)
@@ -552,7 +511,6 @@ if(APPLE)
     $<TARGET_OBJECTS:FLIVR_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
-    $<TARGET_OBJECTS:FUI_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGES_OBJ>
     $<TARGET_OBJECTS:INPUT_OBJ>
@@ -595,7 +553,6 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:FLIVR_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
-    $<TARGET_OBJECTS:FUI_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGES_OBJ>
     $<TARGET_OBJECTS:INPUT_OBJ>
@@ -665,7 +622,6 @@ elseif(WIN32)
       $<TARGET_OBJECTS:FLIVR_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
-      $<TARGET_OBJECTS:FUI_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:IMAGES_OBJ>
       $<TARGET_OBJECTS:INPUT_OBJ>
@@ -696,7 +652,6 @@ elseif(WIN32)
       $<TARGET_OBJECTS:FLIVR_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
-      $<TARGET_OBJECTS:FUI_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:IMAGES_OBJ>
       $<TARGET_OBJECTS:INPUT_OBJ>
@@ -744,8 +699,6 @@ if(APPLE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.11 -DWX_PRECOMP -std=c++11 -stdlib=libc++")
   # make sure png is static linked
   string(REGEX REPLACE "-lpng" "/usr/local/lib/libpng.a"
-    wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
-  string(REGEX REPLACE "-lpng" "/usr/local/lib/libpng.a"
     CMAKE_MAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
   string(REGEX REPLACE "/usr/local/lib/libfreetype.dylib" "/usr/local/lib/libfreetype.a;/usr/local/lib/libpng.a"
     FREETYPE_LIBRARIES ${FREETYPE_LIBRARIES})
@@ -764,7 +717,6 @@ if(UNIX OR APPLE OR MINGW)
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OpenCL_LIBRARIES}
-    ${wxWidgets_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${TIFF_LIBRARIES}
     ${PNG_LIBRARIES}
@@ -781,7 +733,6 @@ elseif(WIN32)
     ${OpenCL_LIBRARIES}
     ${OpenVR_LIBRARIES}
     ${FREETYPE_LIBRARIES}
-    ${wxWidgets_LIBRARIES}
     ${ND2_LIBRARIES})
 endif()
 

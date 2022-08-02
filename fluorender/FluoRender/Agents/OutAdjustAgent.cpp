@@ -27,13 +27,21 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <OutAdjustAgent.hpp>
-#include <OutAdjustPanel.h>
+#include <AgentFactory.hpp>
+//#include <OutAdjustPanel.h>
 #include <VolumeFactory.hpp>
-#include <wx/valnum.h>
-#include <png_resource.h>
+//#include <png_resource.h>
 #include <img/icons.h>
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class OutAdjustPanel : public wxWindow
+{
+public:
+	OutAdjustPanel() {}
+	~OutAdjustPanel() {}
+};
 
 OutAdjustAgent::OutAdjustAgent(OutAdjustPanel &panel) :
 	InterfaceAgent(),
@@ -59,7 +67,7 @@ Node* OutAdjustAgent::getObject()
 
 void OutAdjustAgent::UpdateFui(const ValueCollection &names)
 {
-	double dval = 0.0;
+/*	double dval = 0.0;
 	bool bval = false;
 	if (getValue(gstGammaR, dval))
 		panel_.EnableAll();
@@ -154,7 +162,7 @@ void OutAdjustAgent::UpdateFui(const ValueCollection &names)
 	}
 
 	//panel_.Layout();
-}
+*/}
 
 void OutAdjustAgent::ResetRed()
 {

@@ -27,17 +27,23 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <SettingAgent.hpp>
-#include <SettingDlg.h>
+#include <AgentFactory.hpp>
+//#include <SettingDlg.h>
 #include <Global.hpp>
 #include <ShaderProgram.h>
 #include <TextRenderer.h>
 #include <KernelProgram.h>
-#include <wx/wfstream.h>
-#include <wx/fileconf.h>
 #include <compatibility.h>
 
 using namespace fluo;
 
+#pragma message ("replace dummy dialog")
+class SettingDlg : public wxWindow
+{
+public:
+	SettingDlg() {}
+	~SettingDlg() {}
+};
 SettingAgent::SettingAgent(SettingDlg &dlg) :
 	InterfaceAgent(),
 	dlg_(dlg)
@@ -107,7 +113,7 @@ Root* SettingAgent::getObject()
 
 void SettingAgent::UpdateFui(const ValueCollection &names)
 {
-	bool bval; long lval; double dval;
+/*	bool bval; long lval; double dval;
 	std::string sval;
 	bool update_all = names.empty();
 
@@ -363,11 +369,11 @@ void SettingAgent::UpdateFui(const ValueCollection &names)
 			break;
 		}
 	}
-}
+*/}
 
 void SettingAgent::ReadSettings()
 {
-	wxString expath = glbin.getExecutablePath();
+/*	wxString expath = glbin.getExecutablePath();
 	wxString dft = expath + GETSLASH() + "fluorender.set";
 	wxFileInputStream is(dft);
 	if (!is.IsOk())
@@ -658,11 +664,11 @@ void SettingAgent::ReadSettings()
 		if (fconfig.Read("bioformats_path", &sval)) setValue(BioformatsPath, sval.ToStdString());
 		if (fconfig.Read("ij_mode", &lval)) setValue(ImagejMode, lval);
 	}
-}
+*/}
 
 void SettingAgent::SaveSettings()
 {
-	wxString app_name = "FluoRender " +
+/*	wxString app_name = "FluoRender " +
 		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
 	wxString vendor_name = "FluoRender";
 	wxString local_name = "fluorender.set";
@@ -855,11 +861,11 @@ void SettingAgent::SaveSettings()
 #endif
 	wxFileOutputStream os(dft);
 	fconfig.Save(os);
-}
+*/}
 
 void SettingAgent::UpdateDeviceTree()
 {
-	dlg_.m_device_tree->DeleteAllItems();
+/*	dlg_.m_device_tree->DeleteAllItems();
 	//cl device tree
 	std::vector<flvr::CLPlatform>* devices = flvr::KernelProgram::GetDeviceList();
 	int pid = flvr::KernelProgram::get_platform_id();
@@ -889,7 +895,7 @@ void SettingAgent::UpdateDeviceTree()
 	}
 	dlg_.m_device_tree->ExpandAll();
 	dlg_.m_device_tree->SetFocus();
-}
+*/}
 
 void SettingAgent::OnMaxTextureSizeEnable(Event& event)
 {
@@ -921,10 +927,10 @@ void SettingAgent::OnFontFile(Event& event)
 {
 	std::string sval;
 	getValue(FontFile, sval);
-	wxString exePath = glbin.getExecutablePath();
-	wxString loc = exePath + GETSLASH() + "Fonts" +
-		GETSLASH() + sval;
-	flvr::TextRenderer::text_texture_manager_.load_face(loc.ToStdString());
+	std::wstring exePath = glbin.getExecutablePath();
+	std::string loc = ws2s(exePath) + GETSLASHA() + "Fonts" +
+		GETSLASHA() + sval;
+	flvr::TextRenderer::text_texture_manager_.load_face(loc);
 	double dval;
 	getValue(TextSize, dval);
 	flvr::TextRenderer::text_texture_manager_.SetSize(dval);

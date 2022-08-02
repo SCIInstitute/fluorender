@@ -27,7 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <ConvertAgent.hpp>
-#include <ConvertDlg.h>
+#include <AgentFactory.hpp>
+//#include <ConvertDlg.h>
 #include <Global.hpp>
 #include <Root.hpp>
 #include <Renderview.hpp>
@@ -37,9 +38,16 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/Texture.h>
 #include <FLIVR/VolumeRenderer.h>
 #include <Converters/VolumeMeshConv.h>
-#include <wx/progdlg.h>
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class ConvertDlg : public wxWindow
+{
+public:
+	ConvertDlg() {}
+	~ConvertDlg() {}
+};
 
 ConvertAgent::ConvertAgent(ConvertDlg &dlg) :
 	InterfaceAgent(),
@@ -64,7 +72,7 @@ VolumeData* ConvertAgent::getObject()
 
 void ConvertAgent::UpdateFui(const ValueCollection &names)
 {
-	bool update_all = names.empty();
+/*	bool update_all = names.empty();
 	bool bval;
 	long lval;
 	double dval;
@@ -98,22 +106,22 @@ void ConvertAgent::UpdateFui(const ValueCollection &names)
 		getValue(gstVolMeshWeld, bval);
 		dlg_.m_cnv_vol_mesh_weld_chk->SetValue(bval);
 	}
-}
+*/}
 
 void ConvertAgent::Convert()
 {
 	VolumeData* vd = getObject();
 	if (!vd) return;
 
-	wxProgressDialog *prog_diag = new wxProgressDialog(
-		"FluoRender: Convert volume to polygon data",
-		"Converting... Please wait.",
-		100, 0,
-		wxPD_SMOOTH | wxPD_ELAPSED_TIME | wxPD_AUTO_HIDE);
+	//wxProgressDialog *prog_diag = new wxProgressDialog(
+	//	"FluoRender: Convert volume to polygon data",
+	//	"Converting... Please wait.",
+	//	100, 0,
+	//	wxPD_SMOOTH | wxPD_ELAPSED_TIME | wxPD_AUTO_HIDE);
 	int progress = 0;
 
 	progress = 50;
-	prog_diag->Update(progress);
+	//prog_diag->Update(progress);
 
 	VolumeMeshConv converter;
 	converter.SetVolume(vd->GetTexture()->get_nrrd(0));
@@ -163,7 +171,7 @@ void ConvertAgent::Convert()
 	GLMmodel* mesh = converter.GetMesh();
 
 	progress = 90;
-	prog_diag->Update(progress);
+	//prog_diag->Update(progress);
 
 	if (mesh)
 	{
@@ -183,12 +191,12 @@ void ConvertAgent::Convert()
 			view->addMeshData(md, 0);
 			//view->RefreshGL(39);
 		}
-		(*(dlg_.m_stat_text)) <<
-			"The surface area of mesh object " <<
-			md->getName() << " is " <<
-			wxString::Format("%f", area) << "\n";
+		//(*(dlg_.m_stat_text)) <<
+		//	"The surface area of mesh object " <<
+		//	md->getName() << " is " <<
+		//	wxString::Format("%f", area) << "\n";
 	}
 
-	delete prog_diag;
+	//delete prog_diag;
 
 }

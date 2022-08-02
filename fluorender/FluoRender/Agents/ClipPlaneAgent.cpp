@@ -27,18 +27,24 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <ClipPlaneAgent.hpp>
-#include <ClipPlanePanel.h>
+//#include <ClipPlanePanel.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
 #include <Renderview.hpp>
-#include <RenderCanvas.h>
+//#include <RenderCanvas.h>
 #include <SearchVisitor.hpp>
 #include <RenderCanvasAgent.hpp>
-#include <wx/valnum.h>
-#include <png_resource.h>
 #include <img/icons.h>
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class ClipPlanePanel : public wxWindow
+{
+public:
+	ClipPlanePanel() {}
+	~ClipPlanePanel() {}
+};
 
 ClipPlaneAgent::ClipPlaneAgent(ClipPlanePanel &panel) :
 	InterfaceAgent(),
@@ -64,7 +70,7 @@ Node* ClipPlaneAgent::getObject()
 
 void ClipPlaneAgent::UpdateFui(const ValueCollection &names)
 {
-	bool update_all = names.empty();
+/*	bool update_all = names.empty();
 
 	if (!getObject())
 	{
@@ -374,7 +380,7 @@ void ClipPlaneAgent::UpdateFui(const ValueCollection &names)
 		panel_.m_z_rot_sldr->SetThumbPosition(int(180.5 - clip_rot_z));
 		panel_.m_z_rot_text->ChangeValue(wxString::Format("%.1f", clip_rot_z));
 	}
-}
+*/}
 
 void ClipPlaneAgent::alignRenderViewRot()
 {
@@ -409,7 +415,7 @@ void ClipPlaneAgent::alignRenderViewRot()
 
 void ClipPlaneAgent::OnClipXChanged(Event& event)
 {
-	long res;
+/*	long res;
 	getValue(gstResX, res);
 	double x1, x2;
 	getValue(gstClipX1, x1);
@@ -433,11 +439,11 @@ void ClipPlaneAgent::OnClipXChanged(Event& event)
 	panel_.m_xBar->SetSize(wxSize(3, barsize*((double)
 		(ival - panel_.m_x1_clip_sldr->GetValue()) /
 		(double)panel_.m_x1_clip_sldr->GetMax())));
-}
+*/}
 
 void ClipPlaneAgent::OnClipYChanged(Event& event)
 {
-	long res;
+/*	long res;
 	getValue(gstResY, res);
 	double y1, y2;
 	getValue(gstClipY1, y1);
@@ -461,11 +467,11 @@ void ClipPlaneAgent::OnClipYChanged(Event& event)
 	panel_.m_yBar->SetSize(wxSize(3, barsize*((double)
 		(ival - panel_.m_y1_clip_sldr->GetValue()) /
 		(double)panel_.m_y1_clip_sldr->GetMax())));
-}
+*/}
 
 void ClipPlaneAgent::OnClipZChanged(Event& event)
 {
-	long res;
+/*	long res;
 	getValue(gstResZ, res);
 	double z1, z2;
 	getValue(gstClipZ1, z1);
@@ -489,11 +495,11 @@ void ClipPlaneAgent::OnClipZChanged(Event& event)
 	panel_.m_zBar->SetSize(wxSize(3, barsize*((double)
 		(ival - panel_.m_z1_clip_sldr->GetValue()) /
 		(double)panel_.m_z1_clip_sldr->GetMax())));
-}
+*/}
 
 void ClipPlaneAgent::OnClipDistXChanged(Event& event)
 {
-	double clip_dist;
+/*	double clip_dist;
 	getValue(gstClipDistX, clip_dist);
 	long res;
 	getValue(gstResX, res);
@@ -536,11 +542,11 @@ void ClipPlaneAgent::OnClipDistXChanged(Event& event)
 		panel_.m_x1_clip_sldr->SetPageSize(int(clip_dist*res + 0.5));
 		panel_.m_x2_clip_sldr->SetPageSize(int(clip_dist*res + 0.5));
 	}
-}
+*/}
 
 void ClipPlaneAgent::OnClipDistYChanged(Event& event)
 {
-	double clip_dist;
+/*	double clip_dist;
 	getValue(gstClipDistY, clip_dist);
 	long res;
 	getValue(gstResY, res);
@@ -583,11 +589,11 @@ void ClipPlaneAgent::OnClipDistYChanged(Event& event)
 		panel_.m_y1_clip_sldr->SetPageSize(int(clip_dist*res + 0.5));
 		panel_.m_y2_clip_sldr->SetPageSize(int(clip_dist*res + 0.5));
 	}
-}
+*/}
 
 void ClipPlaneAgent::OnClipDistZChanged(Event& event)
 {
-	double clip_dist;
+/*	double clip_dist;
 	getValue(gstClipDistZ, clip_dist);
 	long res;
 	getValue(gstResZ, res);
@@ -630,11 +636,11 @@ void ClipPlaneAgent::OnClipDistZChanged(Event& event)
 		panel_.m_z1_clip_sldr->SetPageSize(int(clip_dist*res + 0.5));
 		panel_.m_z2_clip_sldr->SetPageSize(int(clip_dist*res + 0.5));
 	}
-}
+*/}
 
 void ClipPlaneAgent::OnClipLinkXChanged(Event& event)
 {
-	bool bval;
+/*	bool bval;
 	getValue(gstClipLinkX, bval);
 	panel_.m_link_x_tb->ToggleTool(
 		ClipPlanePanel::ID_LinkXChk, bval);
@@ -658,11 +664,11 @@ void ClipPlaneAgent::OnClipLinkXChanged(Event& event)
 		panel_.m_x1_clip_sldr->SetPageSize(std::max(int(res) / 20, 1));
 		panel_.m_x2_clip_sldr->SetPageSize(std::max(int(res) / 20, 1));
 	}
-}
+*/}
 
 void ClipPlaneAgent::OnClipLinkYChanged(Event& event)
 {
-	bool bval;
+/*	bool bval;
 	getValue(gstClipLinkY, bval);
 	panel_.m_link_y_tb->ToggleTool(
 		ClipPlanePanel::ID_LinkYChk, bval);
@@ -686,11 +692,11 @@ void ClipPlaneAgent::OnClipLinkYChanged(Event& event)
 		panel_.m_y1_clip_sldr->SetPageSize(std::max(int(res) / 20, 1));
 		panel_.m_y2_clip_sldr->SetPageSize(std::max(int(res) / 20, 1));
 	}
-}
+*/}
 
 void ClipPlaneAgent::OnClipLinkZChanged(Event& event)
 {
-	bool bval;
+/*	bool bval;
 	getValue(gstClipLinkZ, bval);
 	panel_.m_link_z_tb->ToggleTool(
 		ClipPlanePanel::ID_LinkZChk, bval);
@@ -714,31 +720,31 @@ void ClipPlaneAgent::OnClipLinkZChanged(Event& event)
 		panel_.m_z1_clip_sldr->SetPageSize(std::max(int(res) / 20, 1));
 		panel_.m_z2_clip_sldr->SetPageSize(std::max(int(res) / 20, 1));
 	}
-}
+*/}
 
 void ClipPlaneAgent::OnClipRotXChanged(Event& event)
 {
-	double dval;
+/*	double dval;
 	getValue(gstClipRotX, dval);
 	panel_.m_x_rot_sldr->SetThumbPosition(int(180.5 - dval));
 	if (!panel_.m_x_rot_text->HasFocus())
 		panel_.m_x_rot_text->ChangeValue(wxString::Format("%.1f", dval));
-}
+*/}
 
 void ClipPlaneAgent::OnClipRotYChanged(Event& event)
 {
-	double dval;
+/*	double dval;
 	getValue(gstClipRotY, dval);
 	panel_.m_y_rot_sldr->SetThumbPosition(int(180.5 - dval));
 	if (!panel_.m_y_rot_text->HasFocus())
 		panel_.m_y_rot_text->ChangeValue(wxString::Format("%.1f", dval));
-}
+*/}
 
 void ClipPlaneAgent::OnClipRotZChanged(Event& event)
 {
-	double dval;
+/*	double dval;
 	getValue(gstClipRotZ, dval);
 	panel_.m_z_rot_sldr->SetThumbPosition(int(180.5 - dval));
 	if (!panel_.m_z_rot_text->HasFocus())
 		panel_.m_z_rot_text->ChangeValue(wxString::Format("%.1f", dval));
-}
+*/}

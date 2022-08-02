@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2022 Scientific Computing and Imaging Institute,
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "lsm_reader.h"
+#include "../compatibility.h"
 #include <stdio.h>
-#include <compatibility.h>
 
 LSMReader::LSMReader()
 {
@@ -60,7 +60,7 @@ LSMReader::~LSMReader()
 {
 }
 
-void LSMReader::SetFile(const std::string &file)
+void LSMReader::SetFile(string &file)
 {
 	if (!file.empty())
 	{
@@ -72,7 +72,7 @@ void LSMReader::SetFile(const std::string &file)
 	m_id_string = m_path_name;
 }
 
-void LSMReader::SetFile(const std::wstring &file)
+void LSMReader::SetFile(wstring &file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;
@@ -121,9 +121,9 @@ int LSMReader::Preprocess()
 			return READER_FORMAT_ERROR;
 		}
 
-		std::vector<unsigned int> offsets;
-		std::vector<unsigned int> offset_highs;
-		std::vector<unsigned int> sizes;
+		vector<unsigned int> offsets;
+		vector<unsigned int> offset_highs;
+		vector<unsigned int> sizes;
 
 		for (i = 0; i < entry_num; i++)
 		{
@@ -445,7 +445,7 @@ void LSMReader::ReadLsmInfo(FILE* pfile, unsigned char* pdata, unsigned int size
 			int track_cnt = 0;
 			int ill_chan_cnt = 0;
 			int last_sub = 0;//1:tracks; 2:track; 3:ill_chans; 4:ill_chan;
-			std::vector<unsigned int> entry_list;
+			vector<unsigned int> entry_list;
 			bool sub_tracks = false, sub_track = false, sub_ill_chans = false, sub_ill_chan = false;
 
 			while (fread(&uentry, sizeof(unsigned int), 1, pfile) == 1)
@@ -641,14 +641,14 @@ int LSMReader::GetDigitOrder()
 	return 0;
 }
 
-void LSMReader::SetTimeId(const std::wstring &id)
+void LSMReader::SetTimeId(wstring &id)
 {
 	//do nothing
 }
 
-std::wstring LSMReader::GetTimeId()
+wstring LSMReader::GetTimeId()
 {
-	return std::wstring(L"");
+	return wstring(L"");
 }
 
 void LSMReader::SetBatch(bool batch)
@@ -788,29 +788,29 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
 	return data;
 }
 
-std::wstring LSMReader::GetCurDataName(int t, int c)
+wstring LSMReader::GetCurDataName(int t, int c)
 {
 	return m_path_name;
 }
 
-std::wstring LSMReader::GetCurMaskName(int t, int c)
+wstring LSMReader::GetCurMaskName(int t, int c)
 {
-	std::wostringstream woss;
+	wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".msk";
-	std::wstring mask_name = woss.str();
+	wstring mask_name = woss.str();
 	return mask_name;
 }
 
-std::wstring LSMReader::GetCurLabelName(int t, int c)
+wstring LSMReader::GetCurLabelName(int t, int c)
 {
-	std::wostringstream woss;
+	wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".lbl";
-	std::wstring label_name = woss.str();
+	wstring label_name = woss.str();
 	return label_name;
 }

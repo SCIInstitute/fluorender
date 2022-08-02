@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <BrushToolAgent.hpp>
-#include <BrushToolDlg.h>
+//#include <BrushToolDlg.h>
 #include <VolumeSelector.h>
 #include <VolumeCalculator.h>
 #include <RulerAlign.h>
@@ -37,6 +37,14 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/Texture.h>
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class BrushToolDlg : public wxWindow
+{
+public:
+	BrushToolDlg() {}
+	~BrushToolDlg() {}
+};
 
 BrushToolAgent::BrushToolAgent(BrushToolDlg &dlg, TreePanel &panel) :
 	InterfaceAgent(),

@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Names.hpp>
 #include <Group.hpp>
-#include <IconList.hpp>
 #include <string>
 
 #define glbin fluo::Global::instance()
@@ -81,10 +80,6 @@ namespace fluo
 		//Renderer2DFactory* getRenderer2DFactory();
 		//Renderer3DFactory* getRenderer3DFactory();
 		Root* getRoot();
-		IconList& getIconList(bool shown)
-		{
-			return shown ? shown_icon_list_ : hidden_icon_list_;
-		}
 
 		//check name duplication
 		bool checkName(const std::string &name);
@@ -92,9 +87,6 @@ namespace fluo
 		//paths
 		void setExecutablePath(const std::wstring &path);
 		std::wstring getExecutablePath();
-
-		//icons
-		void initIcons();
 
 		//list panel operations
 		size_t getObjNumInList();
@@ -135,10 +127,6 @@ namespace fluo
 		static Global instance_;
 
 		ref_ptr<Group> origin_;//the root of everything else
-
-		//icon list
-		IconList shown_icon_list_;
-		IconList hidden_icon_list_;
 
 	private:
 #define BUILD_AND_ADD(cls, par) \

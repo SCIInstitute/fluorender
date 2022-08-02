@@ -27,13 +27,21 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <RenderviewAgent.hpp>
-#include <RenderviewPanel.h>
+//#include <RenderviewPanel.h>
 #include <AgentFactory.hpp>
 #include <RenderFrameAgent.hpp>
 #include <ClipPlaneAgent.hpp>
 #include <compatibility.h>
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class RenderviewPanel : public wxWindow
+{
+public:
+	RenderviewPanel() {}
+	~RenderviewPanel() {}
+};
 
 RenderviewAgent::RenderviewAgent(RenderviewPanel &panel) :
 	InterfaceAgent(),

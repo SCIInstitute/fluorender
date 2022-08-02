@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <ClKernelAgent.hpp>
-#include <ClKernelDlg.h>
+//#include <ClKernelDlg.h>
 #include <Global.hpp>
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
@@ -35,6 +35,14 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class ClKernelDlg : public wxWindow
+{
+public:
+	ClKernelDlg() {}
+	~ClKernelDlg() {}
+};
 
 ClKernelAgent::ClKernelAgent(ClKernelDlg &dlg) :
 	InterfaceAgent(),

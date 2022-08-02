@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <TrackAgent.hpp>
-#include <TrackDlg.h>
+//#include <TrackDlg.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
 #include <ComponentAgent.hpp>
@@ -47,6 +47,14 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class TrackDlg : public wxWindow
+{
+public:
+	TrackDlg() {}
+	~TrackDlg() {}
+};
 
 TrackAgent::TrackAgent(TrackDlg &dlg) :
 	InterfaceAgent(),

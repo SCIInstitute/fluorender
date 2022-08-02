@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2022 Scientific Computing and Imaging Institute,
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "imageJ_reader.h"
-#include <Global.hpp>
-#include <compatibility.h>
+#include "../compatibility.h"
+#include <wx/stdpaths.h>
 
 ImageJReader::ImageJReader()
 {
@@ -62,9 +62,9 @@ ImageJReader::ImageJReader()
 	m_time_id = L"_T";
 	
 	//Geting absolute path to class file.
-	std::wstring exePath = glbin.getExecutablePath();
-	exePath = GET_PATH(exePath);
-	std::string imageJPath = ws2s(exePath) + GETSLASH() + "Java_Code" + GETSLASH() + "ImageJ_Reader";
+	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+	exePath = wxPathOnly(exePath);
+	string imageJPath = exePath + GETSLASH() + "Java_Code" + GETSLASH() + "ImageJ_Reader";
 
 	//Java code to get the number of depth images.
 	m_pJVMInstance = JVMInitializer::getInstance();
@@ -74,10 +74,9 @@ ImageJReader::ImageJReader()
 	//fflush(stdout);
 
 	m_imageJ_cls = m_pJVMInstance->m_pEnv->FindClass("ImageJ_Reader");
-	if (m_imageJ_cls == nullptr)
-	{
-		m_pJVMInstance->m_pEnv->ExceptionDescribe();
-		std::cerr << "ERROR: class not found !";
+	if (m_imageJ_cls == nullptr) {
+        m_pJVMInstance->m_pEnv->ExceptionDescribe();
+		cerr << "ERROR: class not found !";
 	}
 }
 
@@ -87,7 +86,7 @@ ImageJReader::~ImageJReader()
 	//	tiff_stream.close();
 }
 
-void ImageJReader::SetFile(const std::string &file)
+void ImageJReader::SetFile(string &file)
 {
 	if (!file.empty())
 	{
@@ -99,7 +98,7 @@ void ImageJReader::SetFile(const std::string &file)
 	m_id_string = m_path_name;
 }
 
-void ImageJReader::SetFile(const std::wstring &file)
+void ImageJReader::SetFile(wstring &file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;	
@@ -109,20 +108,20 @@ int ImageJReader::Preprocess()
 {
 	int return_result = READER_OK;
 	//separate path and name
-	std::wstring path, name;
+	wstring path, name;
 	if (!SEP_PATH_NAME(m_path_name, path, name))
 		return READER_OPEN_FAIL;
 	m_data_name = name;	
 
 	// ImageJ code here..................
 	if (m_imageJ_cls == nullptr) {
-		std::cerr << "ERROR: class not found !";
+		cerr << "ERROR: class not found !";
 	}
 	else {
 		// getting the image metadata.
 		jmethodID method_handle = m_pJVMInstance->m_pEnv->GetStaticMethodID(m_imageJ_cls, "getMetaData", "([Ljava/lang/String;)[I");
 		if (method_handle == nullptr)
-			std::cerr << "ERROR: method void getDepth() not found !" << std::endl;
+			cerr << "ERROR: method void getDepth() not found !" << endl;
 		else {
 			// This part goes in setFile.
 			jobjectArray arr = m_pJVMInstance->m_pEnv->NewObjectArray(2,      // constructs java array of 2
@@ -131,7 +130,7 @@ int ImageJReader::Preprocess()
 			
 			//char* cstr = new char[m_path_name.length() + 1];
 			//sprintf(cstr, "%ws", m_path_name.c_str());
-			std::string path_name = ws2s(m_path_name);
+			string path_name = ws2s(m_path_name);
 
 			m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF(const_cast<char*>(path_name.c_str())));  // change an element
 			//m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 1, m_pJVMInstance->m_pEnv->NewStringUTF("4D_1ch.lsm"));  // change an element
@@ -260,40 +259,40 @@ int ImageJReader::GetDigitOrder()
 	return 0;
 }
 
-void ImageJReader::SetTimeId(const std::wstring &id)
+void ImageJReader::SetTimeId(wstring &id)
 {
 	m_time_id = id;
 }
 
-std::wstring ImageJReader::GetTimeId()
+wstring ImageJReader::GetTimeId()
 {
 	return m_time_id;
 }
 
-std::wstring ImageJReader::GetCurDataName(int t, int c)
+wstring ImageJReader::GetCurDataName(int t, int c)
 {
 	return m_path_name;
 }
 
-std::wstring ImageJReader::GetCurMaskName(int t, int c)
+wstring ImageJReader::GetCurMaskName(int t, int c)
 {
-	std::wostringstream woss;
+	wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".msk";
-	std::wstring mask_name = woss.str();
+	wstring mask_name = woss.str();
 	return mask_name;
 }
 
-std::wstring ImageJReader::GetCurLabelName(int t, int c)
+wstring ImageJReader::GetCurLabelName(int t, int c)
 {
-	std::wostringstream woss;
+	wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".lbl";
-	std::wstring label_name = woss.str();
+	wstring label_name = woss.str();
 	return label_name;
 }
 
@@ -346,10 +345,9 @@ Nrrd* ImageJReader::Convert(int t, int c, bool get_max)
 	return data;
 }
 
-Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max)
-{	
+Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {	
 	// ImageJ code to read the data.
-	std::string path_name = ws2s(m_path_name);
+	string path_name = ws2s(m_path_name);
 
 	jmethodID method_id = NULL;
 	if (m_eight_bit == true){
@@ -361,7 +359,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max)
 	
 	void* t_data = NULL;
 	if (method_id == nullptr) {
-		std::cerr << "ERROR: method void mymain() not found !" << std::endl;
+		cerr << "ERROR: method void mymain() not found !" << endl;
 		return NULL;
 	}
 	else if (m_eight_bit == true){
@@ -400,7 +398,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max)
 			jshortArray inner_data = static_cast<jshortArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, 0));
 			jshort* body = (jshort*)(m_pJVMInstance->m_pEnv->GetShortArrayElements(inner_data, 0));
 			int test = *(body);
-			std::cout << "Error";
+			cout << "Error";
 		}
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(val);
@@ -447,7 +445,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max)
 			jshortArray inner_data = static_cast<jshortArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, 0));
 			jshort* body = (jshort*)(m_pJVMInstance->m_pEnv->GetShortArrayElements(inner_data, 0));
 			int test = *(body);
-			std::cout << "Error";
+			cout << "Error";
 		}
 		unsigned short int test = ((unsigned short int *)(t_data))[10*488 + 10];
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);

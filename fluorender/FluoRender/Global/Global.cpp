@@ -204,12 +204,6 @@ void Global::BuildRoot()
 	origin_->addChild(root);
 }
 
-void Global::initIcons()
-{
-	shown_icon_list_.init(true);
-	hidden_icon_list_.init(false);
-}
-
 void Global::decycle()
 {
 	DecycleVisitor decycle(*origin_);

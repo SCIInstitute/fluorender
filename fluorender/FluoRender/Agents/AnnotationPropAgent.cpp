@@ -27,9 +27,17 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <AnnotationPropAgent.hpp>
-#include <AnnotationPropPanel.h>
+//#include <AnnotationPropPanel.h>
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class AnnotationPropPanel : public wxWindow
+{
+public:
+	AnnotationPropPanel() {}
+	~AnnotationPropPanel() {}
+};
 
 AnnotationPropAgent::AnnotationPropAgent(AnnotationPropPanel &panel) :
 	InterfaceAgent(),

@@ -27,9 +27,17 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <MeshTransAgent.hpp>
-#include <MeshTransPanel.h>
+//#include <MeshTransPanel.h>
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class MeshTransPanel : public wxWindow
+{
+public:
+	MeshTransPanel() {}
+	~MeshTransPanel() {}
+};
 
 MeshTransAgent::MeshTransAgent(MeshTransPanel &panel) :
 	InterfaceAgent(),

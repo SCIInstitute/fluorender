@@ -32,7 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Root.hpp>
 #include <base_reader.h>
 #include <glm.h>
-#include <wx/arrstr.h>
 
 class RenderFrame;
 class RenderviewPanel;
@@ -80,12 +79,12 @@ namespace fluo
 
 		void SaveProject(const std::wstring &filename);
 		void OpenProject(const std::wstring &filename);
-		void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
-		void LoadVolumes(wxArrayString files, bool withImageJ);
-		void LoadMeshes(wxArrayString files);
-		wxString SearchProjectPath(const wxString &filename);
-		int LoadVolumeData(const wxString &filename, int type, bool withImageJ, int ch_num = -1, int t_num = -1);
-		int LoadMeshData(const wxString &filename);
+		void StartupLoad(const std::vector<std::wstring>& files, bool run_mov, bool with_imagej);
+		void LoadVolumes(const std::vector<std::wstring>& files, bool withImageJ);
+		void LoadMeshes(const std::vector<std::wstring>& files);
+		std::wstring SearchProjectPath(const std::wstring &filename);
+		int LoadVolumeData(const std::wstring &filename, int type, bool withImageJ, int ch_num = -1, int t_num = -1);
+		int LoadMeshData(const std::wstring &filename);
 		int LoadMeshData(GLMmodel* mesh);
 		void SetTextureUndos();
 		void SetTextureRendererSettings();
@@ -96,8 +95,8 @@ namespace fluo
 		void Select(const std::string &name);//name of a node
 		void AddView(RenderviewPanel* vrv, bool set_gl);
 
-		wxString ScriptDialog(const wxString& title,
-			const wxString& wildcard, long style);
+		std::string ScriptDialog(const std::string& title,
+			const std::string& wildcard, long style);
 
 		void UpdateSettings();
 

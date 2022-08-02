@@ -29,16 +29,17 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FUI_MANAGER_H
 #define FUI_MANAGER_H
 
-#include <wx/wx.h>
+#include <string>
+#include <vector>
 
-class RenderFrame;
+//class RenderFrame;
 class FuiManager
 {
 public:
 	FuiManager();
 	~FuiManager();
 
-	RenderFrame* GetFrame();
+	//RenderFrame* GetFrame();
 
 	void Init();
 
@@ -53,11 +54,11 @@ public:
 	void SetWinWidth(long lval) { m_win_width = lval; }
 	void SetWinHeight(long lval) { m_win_height = lval; }
 	void SetBitRate(double dval) { m_bitrate = dval; }
-	void SetMovFile(const wxString& sval) { m_mov_file = sval; }
-	void AddFile(const wxString& sval) { m_files.Add(sval); }
+	void SetMovFile(const std::string& sval) { m_mov_file = sval; }
+	void AddFile(const std::vector<std::string>& saval) { m_files.insert(m_files.end(), saval.begin(), saval.end()); }
 
 private:
-	RenderFrame* m_frame;
+	//RenderFrame* m_frame;
 
 	bool m_benchmark;
 	bool m_fullscreen;
@@ -70,8 +71,8 @@ private:
 	int m_win_width;
 	int m_win_height;
 	double m_bitrate;
-	wxString m_mov_file;
-	wxArrayString m_files;
+	std::string m_mov_file;
+	std::vector<std::string> m_files;
 
 	void SetupAgents();
 };

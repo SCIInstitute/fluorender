@@ -27,13 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Main.h>
-#include <RenderFrame.h>
-#include <wx/cmdline.h>
-#include <wx/filefn.h>
+#pragma message ("replace main frame")
+//#include <RenderFrame.h>
 
-IMPLEMENT_APP(FluoRenderApp)
-
-static const wxCmdLineEntryDesc g_cmdLineDesc[] =
+#pragma message ("replace command line handling")
+/*static const wxCmdLineEntryDesc g_cmdLineDesc[] =
 {
 	{ wxCMD_LINE_SWITCH, "u", "usage", "list command line usage",
 		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
@@ -64,7 +62,7 @@ static const wxCmdLineEntryDesc g_cmdLineDesc[] =
 	{ wxCMD_LINE_PARAM, NULL, NULL, "a file or project to load",
 		wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE },
 	{ wxCMD_LINE_NONE }
-};
+};*/
 
 bool FluoRenderApp::OnInit()
 {
@@ -72,16 +70,17 @@ bool FluoRenderApp::OnInit()
 	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
 	// call default behaviour (mandatory)
-	if (!wxApp::OnInit())
-		return false;
+#pragma message ("replace app initialization")
+	//if (!wxApp::OnInit())
+	//	return false;
 
 	m_manager.Init();
-	RenderFrame* frame = m_manager.GetFrame();
-	if (!frame)
-		return false;
+	//RenderFrame* frame = m_manager.GetFrame();
+	//if (!frame)
+	//	return false;
 
-	SetTopWindow(frame);
-	frame->Show();
+	//SetTopWindow(frame);
+	//frame->Show();
 
 	return true;
 }
@@ -91,7 +90,7 @@ int FluoRenderApp::OnExit()
 	return 0;
 }
 
-void FluoRenderApp::OnInitCmdLine(wxCmdLineParser& parser)
+/*void FluoRenderApp::OnInitCmdLine(wxCmdLineParser& parser)
 {
 	parser.SetDesc(g_cmdLineDesc);
 	parser.SetSwitchChars("-");
@@ -134,4 +133,4 @@ bool FluoRenderApp::OnCmdLineParsed(wxCmdLineParser& parser)
 		m_manager.AddFile(parser.GetParam(i));
 
 	return true;
-}
+}*/

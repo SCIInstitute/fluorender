@@ -36,7 +36,6 @@ DEALINGS IN THE SOFTWARE.
 
 #ifdef _WIN32 //WINDOWS ONLY
 
-#include <wx/wx.h>
 #define WINDOWS_LEAN_AND_MEAN
 #include <Windows.h>
 #include <cstdlib>
@@ -417,9 +416,6 @@ inline void SLEEP(unsigned long t)
 #include <iostream>
 #include "tiffio.h"
 #include <codecvt>
-#include <wx/wx.h>
-#include <wx/fileconf.h>
-#include <wx/wfstream.h>
 #include <unistd.h>
 #include <filesystem>
 

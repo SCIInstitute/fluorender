@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ShaderProgram.h>
 #include <KernelProgram.h>
 #include <RenderCanvasAgent.hpp>
-#include <RenderCanvas.h>
+//#include <RenderCanvas.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
 #include <Renderview.hpp>
@@ -47,6 +47,14 @@ DEALINGS IN THE SOFTWARE.
 #endif
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class RenderCanvas : public wxWindow
+{
+public:
+	RenderCanvas() {}
+	~RenderCanvas() {}
+};
 
 RenderCanvasAgent::RenderCanvasAgent(RenderCanvas &canvas) :
 	InterfaceAgent(),

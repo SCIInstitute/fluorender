@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <InterfaceAgent.hpp>
 #include <Renderview.hpp>
 #include <QVideoEncoder.h>
-#include <wx/arrstr.h>
 
 class MoviePanel;
 namespace fluo
@@ -59,7 +58,7 @@ namespace fluo
 		friend class AgentFactory;
 
 		void Select(const std::string& name);
-		int GetScriptFiles(wxArrayString& list);
+		int GetScriptFiles(std::vector<std::string>& list);
 		void AddScriptToList();
 		void GetScriptSettings();
 		void SetProgress(double pcnt);

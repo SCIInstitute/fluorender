@@ -27,16 +27,22 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <RecorderAgent.hpp>
-#include <RecorderDlg.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
 #include <VolumeFactory.hpp>
 #include <Animator/Interpolator.h>
 #include <base_reader.h>
 #include <FLIVR/VolumeRenderer.h>
-#include <wx/wx.h>
 
 using namespace fluo;
+
+#pragma message ("replace dialog")
+class RecorderDlg : public wxWindow
+{
+public:
+	RecorderDlg() {};
+	~RecorderDlg() {};
+};
 
 RecorderAgent::RecorderAgent(RecorderDlg &dlg) :
 	InterfaceAgent(),
@@ -71,9 +77,8 @@ void RecorderAgent::AutoKeyChanComb(int comb)
 	Interpolator *interpolator = view->GetInterpolator();
 	if (!interpolator) return;
 
-	wxString str = dlg_.m_duration_text->GetValue();
-	double duration;
-	str.ToDouble(&duration);
+#pragma message ("get duration value from ui")
+	double duration = 10;
 
 	FlKeyCode keycode;
 	FlKeyBoolean* flkeyB = 0;
@@ -118,7 +123,7 @@ void RecorderAgent::AutoKeyChanComb(int comb)
 		t += duration;
 	} while (MoveOne(chan_mask));
 
-	dlg_.m_keylist->Update();
+	//dlg_.m_keylist->Update();
 }
 
 void RecorderAgent::AddKey()
@@ -128,7 +133,7 @@ void RecorderAgent::AddKey()
 	Interpolator* interpolator = view->GetInterpolator();
 	if (!interpolator) return;
 
-	wxString str;
+/*	wxString str;
 	long item = dlg_.m_keylist->GetNextItem(-1,
 		wxLIST_NEXT_ALL,
 		wxLIST_STATE_SELECTED);
@@ -180,7 +185,7 @@ void RecorderAgent::AddKey()
 
 	dlg_.m_keylist->Update();
 	dlg_.m_keylist->SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-}
+*/}
 
 void RecorderAgent::InsertKey(int index, double duration, int interpolation)
 {
@@ -363,7 +368,7 @@ void RecorderAgent::InsertKey(int index, double duration, int interpolation)
 	if (group)
 		group->type = interpolation;
 
-	dlg_.m_keylist->Update();
+	//dlg_.m_keylist->Update();
 }
 
 bool RecorderAgent::MoveOne(vector<bool>& chan_mask, int lv)
@@ -410,12 +415,12 @@ bool RecorderAgent::MoveOne(vector<bool>& chan_mask, int lv)
 
 void RecorderAgent::Append(int id, int time, int duration, int interp, string &description)
 {
-	long tmp = dlg_.m_keylist->InsertItem(dlg_.m_keylist->GetItemCount(), wxString::Format("%d", id), 0);
+/*	long tmp = dlg_.m_keylist->InsertItem(dlg_.m_keylist->GetItemCount(), wxString::Format("%d", id), 0);
 	dlg_.m_keylist->SetItem(tmp, 1, wxString::Format("%d", time));
 	dlg_.m_keylist->SetItem(tmp, 2, wxString::Format("%d", duration));
 	dlg_.m_keylist->SetItem(tmp, 3, interp == 0 ? "Linear" : "Smooth");
 	dlg_.m_keylist->SetItem(tmp, 4, description);
-}
+*/}
 
 void RecorderAgent::DeleteSel()
 {
@@ -439,7 +444,7 @@ void RecorderAgent::DeleteAll()
 
 void RecorderAgent::Update()
 {
-	dlg_.m_keylist->m_frame_text->Hide();
+/*	dlg_.m_keylist->m_frame_text->Hide();
 	dlg_.m_keylist->m_duration_text->Hide();
 	dlg_.m_keylist->m_interpolation_cmb->Hide();
 	dlg_.m_keylist->m_description_text->Hide();
@@ -458,11 +463,11 @@ void RecorderAgent::Update()
 		string desc = interpolator->GetKeyDesc(i);
 		Append(id, time, duration, interp, desc);
 	}
-}
+*/}
 
 void RecorderAgent::UpdateText()
 {
-	Interpolator* interpolator = getObject()->GetInterpolator();
+/*	Interpolator* interpolator = getObject()->GetInterpolator();
 	if (!interpolator) return;
 
 	wxString str;
@@ -486,7 +491,7 @@ void RecorderAgent::UpdateText()
 		str = desc;
 		dlg_.m_keylist->SetText(i, 4, str);
 	}
-}
+*/}
 
 void RecorderAgent::GotoKey()
 {
@@ -565,7 +570,7 @@ void RecorderAgent::MoveKeyAfter(long edit, long drag)
 
 void RecorderAgent::OnSelectedKey(Event& event)
 {
-	long lval;
+/*	long lval;
 	getValue(gstSelectedKey, lval);
 	long item = dlg_.m_keylist->GetNextItem(-1,
 		wxLIST_NEXT_ALL,
@@ -573,4 +578,4 @@ void RecorderAgent::OnSelectedKey(Event& event)
 	if (lval != item && item != -1)
 		dlg_.m_keylist->SetItemState(lval,
 			wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-}
+*/}

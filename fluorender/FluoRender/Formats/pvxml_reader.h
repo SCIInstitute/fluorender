@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2022 Scientific Computing and Imaging Institute,
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -31,8 +31,10 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <base_reader.h>
 
+using namespace std;
 class wxXmlNode;
 class wxString;
+
 class PVXMLReader : public BaseReader
 {
 public:
@@ -41,26 +43,26 @@ public:
 
 	int GetType() { return READER_PVXML_TYPE; }
 
-	void SetFile(const std::string &file);
-	void SetFile(const std::wstring &file);
+	void SetFile(string &file);
+	void SetFile(wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
 	void SetChannSeq(bool cs);
 	bool GetChannSeq();
 	void SetDigitOrder(int order);
 	int GetDigitOrder();
-	void SetTimeId(const std::wstring &id);
-	std::wstring GetTimeId();
+	void SetTimeId(wstring &id);
+	wstring GetTimeId();
 	int Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	Nrrd* Convert(int t, int c, bool get_max);
-	std::wstring GetCurDataName(int t, int c);
-	std::wstring GetCurMaskName(int t, int c);
-	std::wstring GetCurLabelName(int t, int c);
+	wstring GetCurDataName(int t, int c);
+	wstring GetCurMaskName(int t, int c);
+	wstring GetCurLabelName(int t, int c);
 
-	std::wstring GetPathName() {return m_path_name;}
-	std::wstring GetDataName() {return m_data_name;}
+	wstring GetPathName() {return m_path_name;}
+	wstring GetDataName() {return m_data_name;}
 	int GetTimeNum() {return m_time_num;}
 	int GetCurTime() {return m_cur_time;}
 	int GetChanNum()
@@ -85,13 +87,13 @@ public:
 	void SetSeqType(int value) { m_seq_type = value; }
 
 private:
-	std::wstring m_data_name;
+	wstring m_data_name;
 
 	bool m_force_stack;
 
 	struct ChannelInfo
 	{
-		std::wstring file_name;
+		wstring file_name;
 	};
 	struct FrameInfo
 	{
@@ -106,16 +108,16 @@ private:
 		double x_start;
 		double y_start;
 		double z_start;
-		std::vector<ChannelInfo> channels;
+		vector<ChannelInfo> channels;
 	};
 	struct SequenceInfo
 	{
 		int grid_index;
 		bool apart;
-		std::vector<FrameInfo> frames;
+		vector<FrameInfo> frames;
 	};
-	typedef std::vector<SequenceInfo> TimeDataInfo;
-	std::vector<TimeDataInfo> m_pvxml_info;
+	typedef vector<SequenceInfo> TimeDataInfo;
+	vector<TimeDataInfo> m_pvxml_info;
 
 	//struct for PVStateShard
 	struct StateShard
@@ -148,7 +150,7 @@ private:
 		int bit_depth;
 	};
 	StateShard m_current_state;
-	std::vector<StateShard> m_state_shard_stack;
+	vector<StateShard> m_state_shard_stack;
 
 	//struct for sequence bbox
 	struct SeqBox
@@ -183,7 +185,7 @@ private:
 			y_max = sb.y_max>y_max?sb.y_max:y_max;
 		}
 	};
-	std::vector<SeqBox> m_seq_boxes;
+	vector<SeqBox> m_seq_boxes;
 	bool m_new_seq;//starts a new sequence
 
 	double m_x_min, m_y_min, m_z_min;
@@ -210,7 +212,7 @@ private:
 	double m_scalar_scale;
 
 	//time sequence id
-	std::wstring m_time_id;
+	wstring m_time_id;
 
 	//user setting for flipping
 	//0:auto; -1:flip; 1:no flip

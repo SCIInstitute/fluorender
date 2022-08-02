@@ -29,21 +29,20 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
-#include <wx/wx.h>
 #include <FuiManager.h>
 
-class FluoRenderApp : public wxApp
+#pragma message ("replace wxwidgets app class")
+//class FluoRenderApp : public wxApp
+class FluoRenderApp
 {
 public:
 	virtual bool OnInit();
 	virtual int OnExit();
-	void OnInitCmdLine(wxCmdLineParser& parser);
-	bool OnCmdLineParsed(wxCmdLineParser& parser);
+	//void OnInitCmdLine(wxCmdLineParser& parser);
+	//bool OnCmdLineParsed(wxCmdLineParser& parser);
 
 private:
 	FuiManager m_manager;
 };
-
-DECLARE_APP(FluoRenderApp)
 
 #endif//_MAIN_H_

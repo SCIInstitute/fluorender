@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2022 Scientific Computing and Imaging Institute,
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -26,10 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "czi_reader.h"
+#include "../compatibility.h"
 #include <wx/sstream.h>
 #include <stdio.h>
 #include <set>
-#include <compatibility.h>
 
 std::vector<std::string> CZIReader::m_types{
 	"ZISRAWFILE",
@@ -77,7 +77,7 @@ CZIReader::~CZIReader()
 {
 }
 
-void CZIReader::SetFile(const std::string &file)
+void CZIReader::SetFile(string &file)
 {
 	if (!file.empty())
 	{
@@ -89,7 +89,7 @@ void CZIReader::SetFile(const std::string &file)
 	m_id_string = m_path_name;
 }
 
-void CZIReader::SetFile(const std::wstring &file)
+void CZIReader::SetFile(wstring &file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;
@@ -158,14 +158,14 @@ int CZIReader::GetDigitOrder()
 	return 0;
 }
 
-void CZIReader::SetTimeId(const std::wstring &id)
+void CZIReader::SetTimeId(wstring &id)
 {
 	//do nothing
 }
 
-std::wstring CZIReader::GetTimeId()
+wstring CZIReader::GetTimeId()
 {
-	return std::wstring(L"");
+	return wstring(L"");
 }
 
 void CZIReader::SetBatch(bool batch)
@@ -280,30 +280,30 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 	return data;
 }
 
-std::wstring CZIReader::GetCurDataName(int t, int c)
+wstring CZIReader::GetCurDataName(int t, int c)
 {
 	return m_path_name;
 }
 
-std::wstring CZIReader::GetCurMaskName(int t, int c)
+wstring CZIReader::GetCurMaskName(int t, int c)
 {
-	std::wostringstream woss;
+	wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".msk";
-	std::wstring mask_name = woss.str();
+	wstring mask_name = woss.str();
 	return mask_name;
 }
 
-std::wstring CZIReader::GetCurLabelName(int t, int c)
+wstring CZIReader::GetCurLabelName(int t, int c)
 {
-	std::wostringstream woss;
+	wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".lbl";
-	std::wstring label_name = woss.str();
+	wstring label_name = woss.str();
 	return label_name;
 }
 

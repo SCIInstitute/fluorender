@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <MeasureAgent.hpp>
-#include <MeasureDlg.h>
+//#include <MeasureDlg.h>
 #include <DistCalculator.h>
 #include <RulerHandler.h>
 #include <RulerAlign.h>
@@ -43,6 +43,14 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 
 using namespace fluo;
+
+#pragma message ("replace dummy dialog")
+class MeasureDlg : public wxWindow
+{
+public:
+	MeasureDlg() {}
+	~MeasureDlg() {}
+};
 
 MeasureAgent::MeasureAgent(MeasureDlg &dlg) :
 	InterfaceAgent(),
