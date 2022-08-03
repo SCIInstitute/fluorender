@@ -41,14 +41,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class ConvertDlg : public wxWindow
-{
-public:
-	ConvertDlg() {}
-	~ConvertDlg() {}
-};
-
 ConvertAgent::ConvertAgent(ConvertDlg &dlg) :
 	InterfaceAgent(),
 	dlg_(dlg)

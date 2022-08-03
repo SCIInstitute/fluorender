@@ -38,14 +38,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class ClipPlanePanel : public wxWindow
-{
-public:
-	ClipPlanePanel() {}
-	~ClipPlanePanel() {}
-};
-
 ClipPlaneAgent::ClipPlaneAgent(ClipPlanePanel &panel) :
 	InterfaceAgent(),
 	panel_(panel)

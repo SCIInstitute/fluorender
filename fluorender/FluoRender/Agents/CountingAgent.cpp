@@ -38,14 +38,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class CountingDlg : public wxWindow
-{
-public:
-	CountingDlg() {}
-	~CountingDlg() {}
-};
-
 CountingAgent::CountingAgent(CountingDlg &dlg) :
 	InterfaceAgent(),
 	dlg_(dlg)
@@ -72,7 +64,7 @@ void CountingAgent::UpdateFui(const ValueCollection &names)
 	bool update_all = names.empty();
 	bool bval;
 	long lval;
-	if (update_all || FOUND_VALUE(gstUseSelection))
+/*	if (update_all || FOUND_VALUE(gstUseSelection))
 	{
 		getValue(gstUseSelection, bval);
 		dlg_.m_ca_select_only_chk->SetValue(bval);
@@ -93,7 +85,7 @@ void CountingAgent::UpdateFui(const ValueCollection &names)
 		dlg_.m_ca_ignore_max_chk->SetValue(!bval);
 		dlg_.m_ca_max_text->Enable(!bval);
 	}
-}
+*/}
 
 void CountingAgent::Analyze()
 {
@@ -150,17 +142,17 @@ void CountingAgent::Analyze()
 		vd->accept(visitor);
 		Renderview* view = visitor.getRenderview();
 
-		dlg_.m_ca_comps_text->SetValue(wxString::Format("%d", count));
-		dlg_.m_ca_volume_text->SetValue(wxString::Format("%d", vox));
+		//dlg_.m_ca_comps_text->SetValue(wxString::Format("%d", count));
+		//dlg_.m_ca_volume_text->SetValue(wxString::Format("%d", vox));
 
 		double spcx, spcy, spcz;
 		vd->getValue(gstSpcX, spcx);
 		vd->getValue(gstSpcY, spcy);
 		vd->getValue(gstSpcZ, spcz);
 		double vol_unit = vox * spcx*spcy*spcz;
-		wxString vol_unit_text;
-		vol_unit_text = wxString::Format("%.0f", vol_unit);
-		vol_unit_text += " ";
+		std::wstring vol_unit_text;
+		vol_unit_text = std::to_wstring(vol_unit);
+		vol_unit_text += L" ";
 		long sb_unit = 1;
 		if (view) view->getValue(gstScaleBarUnit, sb_unit);
 		switch (sb_unit)
@@ -177,7 +169,7 @@ void CountingAgent::Analyze()
 			break;
 		}
 
-		dlg_.m_ca_vol_unit_text->SetValue(vol_unit_text);
+		//dlg_.m_ca_vol_unit_text->SetValue(vol_unit_text);
 	}
 }
 
@@ -185,5 +177,5 @@ void CountingAgent::OnUseMax(Event& event)
 {
 	bool bval;
 	getValue(gstUseMax, bval);
-	dlg_.m_ca_max_text->Enable(!bval);
+	//dlg_.m_ca_max_text->Enable(!bval);
 }

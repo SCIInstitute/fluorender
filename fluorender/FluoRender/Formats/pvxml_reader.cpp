@@ -26,9 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "pvxml_reader.h"
-#include <Utils.h>
-#include <wx/xml/xml.h>
-#include "../compatibility.h"
+#include <Types/Utils.h>
+#include <compatibility.h>
 #include <fstream>
 #include <iostream>
 
@@ -71,7 +70,7 @@ PVXMLReader::~PVXMLReader()
 {
 }
 
-void PVXMLReader::SetFile(string &file)
+void PVXMLReader::SetFile(const string &file)
 {
 	if (!file.empty())
 	{
@@ -84,7 +83,7 @@ void PVXMLReader::SetFile(string &file)
 	m_id_string = m_path_name;
 }
 
-void PVXMLReader::SetFile(wstring &file)
+void PVXMLReader::SetFile(const wstring &file)
 {
 	m_path_name = file;
 	m_data_name = GET_NAME(m_path_name);
@@ -106,28 +105,30 @@ int PVXMLReader::Preprocess()
 	if (!SEP_PATH_NAME(m_path_name, path, name))
 		return READER_OPEN_FAIL;
 
-	wxXmlDocument doc;
-	if (!doc.Load(m_path_name))
+	tinyxml2::XMLDocument doc;
+	if (doc.LoadFile(ws2s(m_path_name).c_str()) != 0)
 		return READER_OPEN_FAIL;
 
-	wxXmlNode *root = doc.GetRoot();
+	tinyxml2::XMLElement *root = doc.RootElement();
+	std::string strname(root->Name());
 
-	if (!root || root->GetName() != "PVScan")
+	if (!root || strname != "PVScan")
 		return READER_FORMAT_ERROR;
 
-	wxXmlNode *child = root->GetChildren();
+	tinyxml2::XMLElement *child = root->FirstChildElement();
 	while (child)
 	{
-		if (child->GetName() == "SystemConfiguration")
+		strname = child->Name();
+		if (strname == "SystemConfiguration")
 			ReadSystemConfig(child);
-		else if (child->GetName() == "PVStateShard")
+		else if (strname == "PVStateShard")
 		{
 			UpdateStateShard(child);
 			m_state_shard_stack.push_back(m_current_state);
 		}
-		else if (child->GetName() == "Sequence")
+		else if (strname == "Sequence")
 			ReadSequence(child);
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 
 	m_time_num = int(m_pvxml_info.size());
@@ -214,9 +215,7 @@ int PVXMLReader::Preprocess()
 	m_x_size = int((m_x_max - m_x_min) / m_xspc + 0.5);
 	m_y_size = int((m_y_max - m_y_min) / m_yspc + 0.5);
 	if (m_z_max == FLT_MAX) m_z_max = m_seq_slice_num;
-	double dt = m_z_max - m_z_min;
-	if (std::abs(dt) > fluo::Epsilon(10))
-		m_slice_num = int(dt / m_zspc + 0.5);
+	m_slice_num = int((m_z_max - m_z_min) / m_zspc + 0.5);
 
 	if (m_user_flip_y == 1 ||
 		m_user_flip_y == 0)
@@ -248,12 +247,7 @@ int PVXMLReader::Preprocess()
 					if (m_force_stack)
 						frame_info->z = k;
 					else
-					{
-						double dt = frame_info->z_start - m_z_min;
-						if (std::abs(dt) > fluo::Epsilon(10))
-							frame_info->z = int(dt / m_zspc + 0.5);
-						else frame_info->z = k;
-					}
+						frame_info->z = int((frame_info->z_start - m_z_min) / m_zspc + 0.5);
 				}
 				if (m_user_flip_y==0 && !flipy)
 				{
@@ -280,63 +274,63 @@ int PVXMLReader::Preprocess()
 	return READER_OK;
 }
 
-void PVXMLReader::ReadSystemConfig(wxXmlNode* systemNode)
+void PVXMLReader::ReadSystemConfig(tinyxml2::XMLElement* systemNode)
 {
 }
 
-void PVXMLReader::UpdateStateShard(wxXmlNode *stateNode)
+void PVXMLReader::UpdateStateShard(tinyxml2::XMLElement *stateNode)
 {
 	if (m_state_shard_stack.size())
 		m_current_state = m_state_shard_stack.back();
-	wxXmlNode *child = stateNode->GetChildren();
+	tinyxml2::XMLElement *child = stateNode->FirstChildElement();
 	while (child)
 	{
-		wxString child_name = child->GetName();
+		std::string child_name = child->Name();
 		if (child_name == "Key" ||
 			child_name == "PVStateValue")
 			ReadKey(child);
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 }
 
-void PVXMLReader::ReadKey(wxXmlNode* keyNode)
+void PVXMLReader::ReadKey(tinyxml2::XMLElement* keyNode)
 {
-	long ival;
+	int ival;
 	double dval;
-	wxString strKey = keyNode->GetAttribute("key");
-	wxString strValue = keyNode->GetAttribute("value");
+	std::string strKey = keyNode->Attribute("key");
+	std::string strValue = keyNode->Attribute("value");
 
 	if (strKey == "xYStageGridIndex")
 	{
-		strValue.ToLong(&ival);
+		fluo::Str2Int(strValue, ival);
 		m_current_state.grid_index = ival;
 	}
 	else if (strKey == "xYStageGridXIndex")
 	{
-		strValue.ToLong(&ival);
+		fluo::Str2Int(strValue, ival);
 		m_current_state.grid_index_x = ival;
 	}
 	else if (strKey == "xYStageGridYIndex")
 	{
-		strValue.ToLong(&ival);
+		fluo::Str2Int(strValue, ival);
 		m_current_state.grid_index_y = ival;
 	}
 	else if (strKey == "positionCurrent_XAxis")
 	{
-		strValue.ToDouble(&dval);
+		fluo::Str2Double(strValue, dval);
 		m_current_state.pos_x = dval;
 	}
 	else if (strKey == "positionCurrent_YAxis")
 	{
-		strValue.ToDouble(&dval);
+		fluo::Str2Double(strValue, dval);
 		m_current_state.pos_y = dval;
 	}
 	else if (strKey == "positionCurrent_ZAxis")
 	{
-		int pos = strValue.Find(',');
-		if (pos == wxNOT_FOUND)
+		size_t pos = strValue.find(',');
+		if (pos == std::string::npos)
 		{
-			strValue.ToDouble(&dval);
+			fluo::Str2Double(strValue, dval);
 			m_current_state.pos_z = dval;
 		}
 		else
@@ -344,13 +338,13 @@ void PVXMLReader::ReadKey(wxXmlNode* keyNode)
 			m_current_state.pos_z = 0.0;
 			do
 			{
-				strValue.Left(pos).ToDouble(&dval);
+				fluo::Str2Double(strValue.substr(0, pos), dval);
 				m_current_state.pos_z += dval;
-				strValue = strValue.Right(strValue.Length()-pos-1);
-				pos = strValue.Find(',');
-			} while (pos != wxNOT_FOUND);
-			if (strValue.Length() &&
-				strValue.ToDouble(&dval))
+				strValue = strValue.substr(pos + 1);
+				pos = strValue.find(',');
+			} while (pos != std::string::npos);
+			if (!strValue.empty() &&
+				fluo::Str2Double(strValue, dval))
 				m_current_state.pos_z += dval;
 		}
 	}
@@ -360,27 +354,27 @@ void PVXMLReader::ReadKey(wxXmlNode* keyNode)
 	}
 	else if (strKey == "zDevice")
 	{
-		strValue.ToLong(&ival);
+		fluo::Str2Int(strValue, ival);
 		m_current_state.z_device = ival;
 	}
 	else if (strKey == "pixelsPerLine")
 	{
-		strValue.ToLong(&ival);
+		fluo::Str2Int(strValue, ival);
 		m_current_state.ppl = ival;
 	}
 	else if (strKey == "linesPerFrame")
 	{
-		strValue.ToLong(&ival);
+		fluo::Str2Int(strValue, ival);
 		m_current_state.lpf = ival;
 	}
 	else if (strKey == "micronsPerPixel_XAxis")
 	{
-		strValue.ToDouble(&dval);
+		fluo::Str2Double(strValue, dval);
 		m_current_state.mpp_x = dval;
 	}
 	else if (strKey == "micronsPerPixel_YAxis")
 	{
-		strValue.ToDouble(&dval);
+		fluo::Str2Double(strValue, dval);
 		m_current_state.mpp_y = dval;
 	}
 	else if (strKey == "micronsPerPixel")
@@ -389,93 +383,87 @@ void PVXMLReader::ReadKey(wxXmlNode* keyNode)
 	}
 	else if (strKey == "bitDepth")
 	{
-		strValue.ToLong(&ival);
+		fluo::Str2Int(strValue, ival);
 		m_current_state.bit_depth = ival;
 	}
 	else if (strKey == "seqType")
 	{
-		strValue.ToLong(&ival);
+		fluo::Str2Int(strValue, ival);
 		m_seq_type = ival;
 	}
 }
 
-void PVXMLReader::ReadIndexedKey(wxXmlNode* keyNode, wxString &key)
+void PVXMLReader::ReadIndexedKey(tinyxml2::XMLElement* keyNode, std::string &key)
 {
 	double dval;
 
 	if (key == "positionCurrent")
 	{
-		wxXmlNode *child = keyNode->GetChildren();
+		tinyxml2::XMLElement *child = keyNode->FirstChildElement();
 		while (child)
 		{
-			wxString child_name = child->GetName();
+			std::string child_name = child->Name();
 			if (child_name == "SubindexedValues")
 			{
-				wxString strIndex = child->GetAttribute("index");
-				wxXmlNode *gchild = child->GetChildren();
+				std::string strIndex = child->Attribute("index");
+				tinyxml2::XMLElement *gchild = child->FirstChildElement();
 				while (gchild)
 				{
-					wxString strSubIndex = gchild->GetAttribute("subindex");
-					wxString strValue = gchild->GetAttribute("value");
+					std::string strSubIndex = gchild->Attribute("subindex");
+					std::string strValue = gchild->Attribute("value");
 					if (strSubIndex == "0")
 					{
 						if (strIndex == "XAxis")
 						{
-							strValue.ToDouble(&dval);
+							fluo::Str2Double(strValue, dval);
 							m_current_state.pos_x = dval;
 						}
 						else if (strIndex == "YAxis")
 						{
-							strValue.ToDouble(&dval);
+							fluo::Str2Double(strValue, dval);
 							m_current_state.pos_y = dval;
 						}
 						else if (strIndex == "ZAxis")
 						{
-							strValue.ToDouble(&dval);
+							fluo::Str2Double(strValue, dval);
 							m_current_state.pos_z = dval;
 						}
 					}
-					gchild = gchild->GetNext();
+					gchild = gchild->NextSiblingElement();
 				}
 			}
-			child = child->GetNext();
+			child = child->NextSiblingElement();
 		}
 	}
 	else if (key == "micronsPerPixel")
 	{
-		wxXmlNode *child = keyNode->GetChildren();
+		tinyxml2::XMLElement *child = keyNode->FirstChildElement();
 		while (child)
 		{
-			wxString child_name = child->GetName();
+			std::string child_name = child->Name();
 			if (child_name == "IndexedValue")
 			{
-				wxString strIndex = child->GetAttribute("index");
-				wxString strValue = child->GetAttribute("value");
+				std::string strIndex = child->Attribute("index");
+				std::string strValue = child->Attribute("value");
 				if (strIndex == "XAxis")
 				{
-					strValue.ToDouble(&dval);
+					fluo::Str2Double(strValue, dval);
 					m_current_state.mpp_x = dval;
 				}
 				else if (strIndex == "YAxis")
 				{
-					strValue.ToDouble(&dval);
+					fluo::Str2Double(strValue, dval);
 					m_current_state.mpp_y = dval;
 				}
 			}
-			child = child->GetNext();
+			child = child->NextSiblingElement();
 		}
 	}
 }
 
-void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
+void PVXMLReader::ReadSequence(tinyxml2::XMLElement* seqNode)
 {
-	//get type
-	wxString type = seqNode->GetAttribute("type");
-	if (type == "TSeries Timed Element" &&
-		!m_seq_type)
-		m_seq_type = 2;
-
-	if (m_seq_type == 1)
+	if (m_current_state.seq_type == 1)
 	{
 		if (!m_force_stack)
 		{
@@ -491,30 +479,23 @@ void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
 	}
 	m_seq_zspc = FLT_MAX;
 	m_seq_zpos = 0.0;
-	wxXmlNode *child = seqNode->GetChildren();
+	tinyxml2::XMLElement *child = seqNode->FirstChildElement();
 	int stack_push_count = 0;
 	while (child)
 	{
-		if (child->GetName() == "PVStateShard")
+		std::string child_name = child->Name();
+		if (child_name == "PVStateShard")
 		{
 			UpdateStateShard(child);
 			m_state_shard_stack.push_back(m_current_state);
 			stack_push_count++;
 		}
-		else if (child->GetName() == "Frame")
+		else if (child_name == "Frame")
 		{
-			if (m_seq_type == 2)
-			{
-				m_new_seq = true;
-				ReadFrame(child);
-			}
-			else
-			{
-				ReadFrame(child);
-				m_seq_slice_num++;
-			}
+			ReadFrame(child);
+			m_seq_slice_num++;
 		}
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 	//pop all stacked states
 	for (int i=0; i<stack_push_count; i++)
@@ -533,38 +514,36 @@ void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
 	}
 	else
 	{
-		if (m_seq_type == 2)
-			m_slice_num = 1;
-		else
-			m_slice_num = m_seq_slice_num;
+		m_slice_num = m_seq_slice_num;
 		m_zspc = m_seq_zspc;
 	}
 	m_pvxml_info.back().back().grid_index = m_current_state.grid_index;
 }
 
-void PVXMLReader::ReadFrame(wxXmlNode* frameNode)
+void PVXMLReader::ReadFrame(tinyxml2::XMLElement* frameNode)
 {
-	wxString str;
-	long ival;
+	std::string str;
+	int ival;
 	FrameInfo frame_info;
 
-	wxXmlNode *child = frameNode->GetChildren();
+	tinyxml2::XMLElement *child = frameNode->FirstChildElement();
 	while (child)
 	{
-		if (child->GetName() == "File")
+		std::string child_name = child->Name();
+		if (child_name == "File")
 		{
-			wxString filename = child->GetAttribute(
+			std::string filename = child->Attribute(
 				"filename");
 			ChannelInfo channel_info;
-			channel_info.file_name = filename.ToStdWstring();
+			channel_info.file_name = s2ws(filename);
 			frame_info.channels.push_back(channel_info);
 			int size = frame_info.channels.size();
 			m_chan_num = size>m_chan_num?size:m_chan_num;
 		}
-		else if (child->GetName() == "PVStateShard")
+		else if (child_name == "PVStateShard")
 			UpdateStateShard(child);
 
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 
 	frame_info.x_size = m_current_state.ppl;
@@ -579,15 +558,18 @@ void PVXMLReader::ReadFrame(wxXmlNode* frameNode)
 		m_seq_zspc = spc<m_seq_zspc?spc:m_seq_zspc;
 	}
 	m_seq_zpos = frame_info.z_start;
-	if (m_xspc == 0.0)
+	ival = 2<<(m_current_state.bit_depth-1);
+	if (m_max_value == 0.0)
 	{
 		m_xspc = m_current_state.mpp_x;
 		m_yspc = m_current_state.mpp_y;
+		m_max_value = ival;
 	}
 	else
 	{
 		m_xspc = m_current_state.mpp_x<m_xspc?m_current_state.mpp_x:m_xspc;
 		m_yspc = m_current_state.mpp_y<m_yspc?m_current_state.mpp_y:m_yspc;
+		m_max_value = ival>m_max_value?ival:m_max_value;
 	}
 
 	bool apart = false;
@@ -677,7 +659,7 @@ int PVXMLReader::GetDigitOrder()
 	return 0;
 }
 
-void PVXMLReader::SetTimeId(wstring &id)
+void PVXMLReader::SetTimeId(const wstring &id)
 {
 	m_time_id = id;
 }
@@ -897,18 +879,6 @@ Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
 			nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
 			nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
 			nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-
-			if (get_max)
-			{
-				double value;
-				unsigned long long totali = (unsigned long long)m_slice_num*
-					m_x_size*m_y_size;
-				for (unsigned long long i = 0; i < totali; ++i)
-				{
-					value = val[i];
-					m_max_value = value > m_max_value ? value : m_max_value;
-				}
-			}
 		}
 	}
 
@@ -1075,8 +1045,8 @@ void PVXMLReader::ReadTiff(char *pbyData, unsigned short *val)
 			{
 				unsigned short value;
 				value = *((unsigned short*)(pbyData+offset+2+12*i+8));
-				//if ((double)value > m_max_value)
-				m_max_value = (double)value;
+				if ((double)value > m_max_value)
+					m_max_value = (double)value;
 			}
 			break;
 		}

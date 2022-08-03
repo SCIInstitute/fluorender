@@ -113,7 +113,7 @@ fluo::VolumeData* KernelExecutor::GetResult(bool pop)
 	return vd;
 }
 
-bool KernelExecutor::GetMessage(std::string &msg)
+bool KernelExecutor::GetMessageString(std::string &msg)
 {
 	if (m_message == "")
 		return false;
@@ -318,7 +318,7 @@ bool KernelExecutor::ExecuteKernel(flvr::KernelProgram* kernel,
 	kernel->executeKernel(kernel_index, 3, global_size, local_size);
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-	wxString stime = wxString::Format("%.4f", time_span.count());
+	std::string stime = std::to_string(time_span.count());
 	m_message += "OpenCL time on ";
 	m_message += kernel->get_device_name().c_str();
 	m_message += ": ";

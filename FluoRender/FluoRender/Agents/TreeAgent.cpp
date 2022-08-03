@@ -36,14 +36,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class TreePanel : public wxWindow
-{
-public:
-	TreePanel() {}
-	~TreePanel() {}
-};
-
 TreeAgent::TreeAgent(TreePanel &panel):
 	InterfaceAgent(),
 	panel_(panel)

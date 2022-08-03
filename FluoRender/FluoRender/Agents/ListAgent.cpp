@@ -32,14 +32,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class ListPanel : public wxWindow
-{
-public:
-	ListPanel() {}
-	~ListPanel() {}
-};
-
 ListAgent::ListAgent(ListPanel &panel) :
 	panel_(panel)
 {

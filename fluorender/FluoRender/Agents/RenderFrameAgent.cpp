@@ -523,7 +523,7 @@ int RenderFrameAgent::LoadVolumeData(const std::wstring &filename, int type, boo
 	if (reader_return > 0)
 	{
 		string err_str = BaseReader::GetError(reader_return);
-		wxMessageBox(err_str);
+		//wxMessageBox(err_str);
 		int i = (int)m_reader_list.size() - 1;
 		if (m_reader_list[i]) {
 			delete m_reader_list[i];

@@ -35,14 +35,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class OutAdjustPanel : public wxWindow
-{
-public:
-	OutAdjustPanel() {}
-	~OutAdjustPanel() {}
-};
-
 OutAdjustAgent::OutAdjustAgent(OutAdjustPanel &panel) :
 	InterfaceAgent(),
 	panel_(panel)

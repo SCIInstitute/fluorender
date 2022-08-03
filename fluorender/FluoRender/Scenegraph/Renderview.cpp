@@ -1443,15 +1443,15 @@ void Renderview::ReloadVolumeData(int frame)
 					continue;
 				}
 
-				wxString data_name = wxString(reader->GetDataName());
+				std::wstring data_name = reader->GetDataName();
 				if (i > 0)
 					bat_folder += L"_";
 				bat_folder += data_name;
 
 				int chan_num = 0;
-				if (data_name.Find("_1ch") != -1)
+				if (data_name.find(L"_1ch") != std::wstring::npos)
 					chan_num = 1;
-				else if (data_name.Find("_2ch") != -1)
+				else if (data_name.find(L"_2ch") != std::wstring::npos)
 					chan_num = 2;
 				if (chan_num > 0 && chan >= chan_num)
 					vd->setValue(gstDisplay, false);
@@ -1459,8 +1459,8 @@ void Renderview::ReloadVolumeData(int frame)
 					vd->setValue(gstDisplay, true);
 
 				if (reader->GetChanNum() > 1)
-					data_name += wxString::Format("_%d", chan + 1);
-				vd->setName(data_name.ToStdString());
+					data_name += L"_" + std::to_wstring(chan + 1);
+				vd->setName(ws2s(data_name));
 				vd->setValue(gstDataPath, reader->GetPathName());
 				vd->setValue(gstTime, long(reader->GetCurTime()));
 				if (!reader->IsSpcInfoValid())

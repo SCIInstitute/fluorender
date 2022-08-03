@@ -60,7 +60,7 @@ LSMReader::~LSMReader()
 {
 }
 
-void LSMReader::SetFile(string &file)
+void LSMReader::SetFile(const string &file)
 {
 	if (!file.empty())
 	{
@@ -72,7 +72,7 @@ void LSMReader::SetFile(string &file)
 	m_id_string = m_path_name;
 }
 
-void LSMReader::SetFile(wstring &file)
+void LSMReader::SetFile(const wstring &file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;
@@ -641,7 +641,7 @@ int LSMReader::GetDigitOrder()
 	return 0;
 }
 
-void LSMReader::SetTimeId(wstring &id)
+void LSMReader::SetTimeId(const wstring &id)
 {
 	//do nothing
 }

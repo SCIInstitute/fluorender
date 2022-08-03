@@ -36,14 +36,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dialog")
-class RecorderDlg : public wxWindow
-{
-public:
-	RecorderDlg() {};
-	~RecorderDlg() {};
-};
-
 RecorderAgent::RecorderAgent(RecorderDlg &dlg) :
 	InterfaceAgent(),
 	dlg_(dlg)

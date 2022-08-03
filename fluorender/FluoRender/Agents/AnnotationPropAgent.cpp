@@ -27,17 +27,10 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <AnnotationPropAgent.hpp>
+#include <AgentFactory.hpp>
 //#include <AnnotationPropPanel.h>
 
 using namespace fluo;
-
-#pragma message ("replace dummy dialog")
-class AnnotationPropPanel : public wxWindow
-{
-public:
-	AnnotationPropPanel() {}
-	~AnnotationPropPanel() {}
-};
 
 AnnotationPropAgent::AnnotationPropAgent(AnnotationPropPanel &panel) :
 	InterfaceAgent(),
@@ -70,7 +63,7 @@ void AnnotationPropAgent::UpdateFui(const ValueCollection &names)
 	bool update_all = names.empty();
 
 	//memo
-	if (update_all || FOUND_VALUE(Memo))
+/*	if (update_all || FOUND_VALUE(Memo))
 	{
 		std::string memo;
 		getValue(Memo, memo);
@@ -88,4 +81,4 @@ void AnnotationPropAgent::UpdateFui(const ValueCollection &names)
 			panel_.m_memo_update_btn->Enable();
 		}
 	}
-}
+*/}

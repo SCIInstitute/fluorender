@@ -72,7 +72,7 @@ private:
 	int m_win_height;
 	double m_bitrate;
 	std::string m_mov_file;
-	std::vector<std::string> m_files;
+	std::vector<std::wstring> m_files;
 
 	void SetupAgents();
 };

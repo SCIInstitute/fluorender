@@ -37,14 +37,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class NoiseReduceDlg : public wxWindow
-{
-public:
-	NoiseReduceDlg() {}
-	~NoiseReduceDlg() {}
-};
-
 NoiseReduceAgent::NoiseReduceAgent(NoiseReduceDlg &dlg) :
 	InterfaceAgent(),
 	dlg_(dlg)
@@ -70,7 +62,7 @@ void NoiseReduceAgent::UpdateFui(const ValueCollection &names)
 {
 	bool update_all = names.empty();
 
-	if (update_all || FOUND_VALUE(gstNonObjectValues))
+/*	if (update_all || FOUND_VALUE(gstNonObjectValues))
 	{
 		Renderview* view = getObject();
 		if (!view) return;
@@ -101,7 +93,7 @@ void NoiseReduceAgent::UpdateFui(const ValueCollection &names)
 		dlg_.m_voxel_sldr->SetValue(size);
 		dlg_.m_voxel_text->ChangeValue(wxString::Format("%d", size));
 	}
-}
+*/}
 
 void NoiseReduceAgent::Preview()
 {

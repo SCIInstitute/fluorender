@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <cmath>
 #include <string>
 
-#include "JVMInitializer.h"
+//#include "JVMInitializer.h"
 
 using namespace std;
 
@@ -53,15 +53,15 @@ public:
 
 	int GetType() { return READER_IMAGEJ_TYPE; }
 
-	void SetFile(string &file);
-	void SetFile(wstring &file);
+	void SetFile(const string &file);
+	void SetFile(const wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
 	void SetChannSeq(bool cs);
 	bool GetChannSeq();
 	void SetDigitOrder(int order);
 	int GetDigitOrder();
-	void SetTimeId(wstring &id);
+	void SetTimeId(const wstring &id);
 	wstring GetTimeId();
 	int Preprocess();
 	
@@ -94,8 +94,8 @@ public:
 
 private:
 	// ImageJ related variables.
-	JVMInitializer* m_pJVMInstance;
-	jclass m_imageJ_cls;
+	//JVMInitializer* m_pJVMInstance;
+	//jclass m_imageJ_cls;
 	bool m_eight_bit;
 
 	wstring m_data_name;	

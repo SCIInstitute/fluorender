@@ -37,13 +37,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class SettingDlg : public wxWindow
-{
-public:
-	SettingDlg() {}
-	~SettingDlg() {}
-};
 SettingAgent::SettingAgent(SettingDlg &dlg) :
 	InterfaceAgent(),
 	dlg_(dlg)

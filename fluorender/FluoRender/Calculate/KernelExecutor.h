@@ -53,7 +53,7 @@ namespace flrd
 		void SetDuplicate(bool dup);
 		fluo::VolumeData* GetVolume();
 		fluo::VolumeData* GetResult(bool pop);
-		bool GetMessage(std::string &msg);
+		bool GetMessageString(std::string &msg);
 
 		bool Execute();
 

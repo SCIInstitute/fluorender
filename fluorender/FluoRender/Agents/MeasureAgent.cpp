@@ -44,14 +44,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class MeasureDlg : public wxWindow
-{
-public:
-	MeasureDlg() {}
-	~MeasureDlg() {}
-};
-
 MeasureAgent::MeasureAgent(MeasureDlg &dlg) :
 	InterfaceAgent(),
 	dlg_(dlg)
@@ -90,22 +82,22 @@ void MeasureAgent::UpdateFui(const ValueCollection &names)
 
 	if (update_all || FOUND_VALUE(gstInterMode))
 	{
-		dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_LocatorBtn, false);
-		dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProbeBtn, false);
-		dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProtractorBtn, false);
-		dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerBtn, false);
-		dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerMPBtn, false);
-		dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_EllipseBtn, false);
-		dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_GrowBtn, false);
-		dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_PencilBtn, false);
-		dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerEditBtn, false);
-		dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerDelBtn, false);
-		dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerMoveBtn, false);
-		dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_LockBtn, false);
+		//dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_LocatorBtn, false);
+		//dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProbeBtn, false);
+		//dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProtractorBtn, false);
+		//dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerBtn, false);
+		//dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerMPBtn, false);
+		//dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_EllipseBtn, false);
+		//dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_GrowBtn, false);
+		//dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_PencilBtn, false);
+		//dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerEditBtn, false);
+		//dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerDelBtn, false);
+		//dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerMoveBtn, false);
+		//dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_LockBtn, false);
 
 		long int_mode;
 		getValue(gstInterMode, int_mode);
-		if (int_mode == 5 || int_mode == 7)
+/*		if (int_mode == 5 || int_mode == 7)
 		{
 			Renderview* view = getObject();
 			if (!view) return;
@@ -138,13 +130,13 @@ void MeasureAgent::UpdateFui(const ValueCollection &names)
 			dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_PencilBtn, true);
 		else if (int_mode == 14)
 			dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerDelBtn, true);
-	}
+*/	}
 
 	if (update_all || FOUND_VALUE(gstPointVolumeMode))
 	{
 		long point_volume_mode;
 		getValue(gstPointVolumeMode, point_volume_mode);
-		switch (point_volume_mode)
+/*		switch (point_volume_mode)
 		{
 		case 0:
 			dlg_.m_view_plane_rd->SetValue(true);
@@ -162,19 +154,19 @@ void MeasureAgent::UpdateFui(const ValueCollection &names)
 			dlg_.m_acc_intensity_rd->SetValue(true);
 			break;
 		}
-	}
+*/	}
 
 	if (update_all || FOUND_VALUE(gstRulerUseTransf))
 	{
 		bool bval;
 		getValue(gstRulerUseTransf, bval);
-		dlg_.m_use_transfer_chk->SetValue(bval);
+		//dlg_.m_use_transfer_chk->SetValue(bval);
 	}
 	if (update_all || FOUND_VALUE(gstRulerTransient))
 	{
 		bool bval;
 		getValue(gstRulerTransient, bval);
-		dlg_.m_transient_chk->SetValue(bval);
+		//dlg_.m_transient_chk->SetValue(bval);
 	}
 	//if (m_frame && m_frame->GetSettingDlg())
 	//{
@@ -201,20 +193,20 @@ void MeasureAgent::UpdateRulers()
 	flrd::RulerList* ruler_list = view->GetRulerList();
 	if (!ruler_list) return;
 
-	dlg_.m_rulerlist->m_name_text->Hide();
-	dlg_.m_rulerlist->m_center_text->Hide();
-	dlg_.m_rulerlist->m_color_picker->Hide();
+	//dlg_.m_rulerlist->m_name_text->Hide();
+	//dlg_.m_rulerlist->m_center_text->Hide();
+	//dlg_.m_rulerlist->m_color_picker->Hide();
 
 	std::vector<int> sel;
-	dlg_.m_rulerlist->GetCurrSelection(sel);
+	//dlg_.m_rulerlist->GetCurrSelection(sel);
 
 	std::vector<unsigned int> groups;
 	int group_num = ruler_list->GetGroupNum(groups);
 	std::vector<int> group_count(group_num, 0);
 
-	dlg_.m_rulerlist->DeleteAllItems();
+	//dlg_.m_rulerlist->DeleteAllItems();
 
-	wxString points;
+	std::string points;
 	fluo::Point p;
 	int num_points;
 	long cur_frame, sb_unit;
@@ -228,18 +220,18 @@ void MeasureAgent::UpdateRulers()
 			ruler->GetTime() != cur_frame)
 			continue;
 
-		wxString unit;
+		std::wstring unit;
 		switch (sb_unit)
 		{
 		case 0:
-			unit = "nm";
+			unit = L"nm";
 			break;
 		case 1:
 		default:
 			unit = L"\u03BCm";
 			break;
 		case 2:
-			unit = "mm";
+			unit = L"mm";
 			break;
 		}
 
@@ -248,13 +240,13 @@ void MeasureAgent::UpdateRulers()
 		if (num_points > 0)
 		{
 			p = ruler->GetPoint(0)->GetPoint();
-			points += wxString::Format("(%.2f, %.2f, %.2f)", p.x(), p.y(), p.z());
+			points += "(" + std::to_string(p.x()) + ", " +  std::to_string(p.y()) + ", " + std::to_string(p.z()) + ")";
 		}
 		if (num_points > 1)
 		{
 			p = ruler->GetPoint(num_points - 1)->GetPoint();
 			points += ", ";
-			points += wxString::Format("(%.2f, %.2f, %.2f)", p.x(), p.y(), p.z());
+			points += "(" + std::to_string(p.x()) + ", " + std::to_string(p.y()) + ", " + std::to_string(p.z()) + ")";
 		}
 		unsigned int group = ruler->Group();
 		int count = 0;
@@ -264,34 +256,33 @@ void MeasureAgent::UpdateRulers()
 			int index = std::distance(groups.begin(), iter);
 			count = ++group_count[index];
 		}
-		wxString color;
+		std::string color;
 		if (ruler->GetUseColor())
-			color = wxString::Format("RGB(%d, %d, %d)",
-				int(ruler->GetColor().r() * 255),
-				int(ruler->GetColor().g() * 255),
-				int(ruler->GetColor().b() * 255));
+			color = "RGB(" +
+				std::to_string(int(ruler->GetColor().r() * 255)) + ", " +
+				std::to_string(int(ruler->GetColor().g() * 255)) + ", " +
+				std::to_string(int(ruler->GetColor().b() * 255)) + ")";
 		else
 			color = "N/A";
-		wxString center;
+		std::string center;
 		fluo::Point cp = ruler->GetCenter();
-		center = wxString::Format("(%.2f, %.2f, %.2f)",
-			cp.x(), cp.y(), cp.z());
-		wxString str = ruler->GetDelInfoValues(", ");
-		dlg_.m_rulerlist->Append(ruler->GetDisp(), ruler->Id(),
-			ruler->GetName(), group, count,
-			color, ruler->GetNumBranch(), ruler->GetLength(), unit,
-			ruler->GetAngle(), center, ruler->GetTimeDep(),
-			ruler->GetTime(), str, points);
+		center = "(" + std::to_string(cp.x()) + ", " + std::to_string(cp.y()) + ", " + std::to_string(cp.z()) + ")";
+		std::string str = ruler->GetDelInfoValues(", ");
+		//dlg_.m_rulerlist->Append(ruler->GetDisp(), ruler->Id(),
+		//	ruler->GetName(), group, count,
+		//	color, ruler->GetNumBranch(), ruler->GetLength(), unit,
+		//	ruler->GetAngle(), center, ruler->GetTimeDep(),
+		//	ruler->GetTime(), str, points);
 	}
 
-	dlg_.m_rulerlist->AdjustSize();
+	//dlg_.m_rulerlist->AdjustSize();
 
 	for (size_t i = 0; i < sel.size(); ++i)
 	{
 		int index = sel[i];
 		if (0 > index || ruler_list->size() <= index)
 			continue;
-		dlg_.m_rulerlist->SetItemState(index, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+		//dlg_.m_rulerlist->SetItemState(index, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	}
 
 	flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Rulers);
@@ -300,12 +291,12 @@ void MeasureAgent::UpdateRulers()
 void MeasureAgent::Relax()
 {
 	std::vector<int> sel;
-	if (dlg_.m_rulerlist->GetCurrSelection(sel))
+/*	if (dlg_.m_rulerlist->GetCurrSelection(sel))
 	{
 		for (size_t i = 0; i < sel.size(); ++i)
 			Relax(sel[i]);
 	}
-}
+*/}
 
 void MeasureAgent::Relax(int idx)
 {
@@ -377,7 +368,7 @@ void MeasureAgent::Project(int idx)
 	});
 
 	//export
-	wxFileDialog *fopendlg = new wxFileDialog(
+/*	wxFileDialog *fopendlg = new wxFileDialog(
 		&dlg_, "Save Analysis Data", "", "",
 		"Text file (*.txt)|*.txt",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
@@ -403,17 +394,17 @@ void MeasureAgent::Project(int idx)
 	}
 	if (fopendlg)
 		delete fopendlg;
-}
+*/}
 
 void MeasureAgent::Prune(int len)
 {
 	std::vector<int> sel;
-	if (dlg_.m_rulerlist->GetCurrSelection(sel))
+/*	if (dlg_.m_rulerlist->GetCurrSelection(sel))
 	{
 		for (size_t i = 0; i < sel.size(); ++i)
 			Prune(sel[i], len);
 	}
-	//if (m_view)
+*/	//if (m_view)
 	//	m_view->Update(39);
 	//GetSettings(m_view);
 }
@@ -437,8 +428,8 @@ void MeasureAgent::AlignRuler()
 	if (!aligner) return;
 
 	std::vector<int> sel;
-	if (!dlg_.m_rulerlist->GetCurrSelection(sel))
-		return;
+	//if (!dlg_.m_rulerlist->GetCurrSelection(sel))
+	//	return;
 	flrd::Ruler* ruler = ruler_list->at(sel[0]);
 	aligner->SetRuler(ruler);
 	long lval;
@@ -503,7 +494,7 @@ void MeasureAgent::AlignCenter(flrd::Ruler* ruler, flrd::RulerList* ruler_list)
 
 void MeasureAgent::SelectGroup(unsigned int group)
 {
-	dlg_.m_rulerlist->ClearSelection();
+/*	dlg_.m_rulerlist->ClearSelection();
 	Renderview* view = getObject();
 	if (!view) return;
 	flrd::RulerList* ruler_list = view->GetRulerList();
@@ -515,11 +506,11 @@ void MeasureAgent::SelectGroup(unsigned int group)
 		if (ruler->Group() == group)
 			dlg_.m_rulerlist->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	}
-}
+*/}
 
 void MeasureAgent::DeleteSelection()
 {
-	Renderview* view = getObject();
+/*	Renderview* view = getObject();
 	if (!view) return;
 	flrd::RulerHandler* handler = view->GetRulerHandler();
 	if (!handler) return;
@@ -528,7 +519,7 @@ void MeasureAgent::DeleteSelection()
 	handler->DeleteSelection(sel);
 	UpdateRulers();
 	//m_view->Update(39);
-}
+*/}
 
 void MeasureAgent::DeleteAll(bool cur_time)
 {
@@ -543,7 +534,7 @@ void MeasureAgent::DeleteAll(bool cur_time)
 
 void MeasureAgent::Export(const std::string &filename)
 {
-	Renderview* view = getObject();
+/*	Renderview* view = getObject();
 	if (!view) return;
 	flrd::RulerList* ruler_list = view->GetRulerList();
 	if (!ruler_list) return;
@@ -727,11 +718,11 @@ void MeasureAgent::Export(const std::string &filename)
 	}
 
 	os.close();
-}
+*/}
 
 void MeasureAgent::EndEdit(bool update)
 {
-	if (dlg_.m_rulerlist->m_name_text->IsShown())
+/*	if (dlg_.m_rulerlist->m_name_text->IsShown())
 	{
 		dlg_.m_rulerlist->m_name_text->Hide();
 		dlg_.m_rulerlist->m_center_text->Hide();
@@ -739,11 +730,11 @@ void MeasureAgent::EndEdit(bool update)
 		dlg_.m_rulerlist->m_editing_item = -1;
 		if (update) UpdateRulers();
 	}
-}
+*/}
 
 void MeasureAgent::SelectRuler(long i)
 {
-	flrd::Ruler* ruler = GetRuler(dlg_.m_rulerlist->GetItemData(i));
+/*	flrd::Ruler* ruler = GetRuler(dlg_.m_rulerlist->GetItemData(i));
 	if (!ruler || !ruler->GetDisp())
 		return;
 
@@ -777,7 +768,7 @@ void MeasureAgent::SelectRuler(long i)
 		dlg_.m_rulerlist->m_color_picker->SetColour(c);
 	}
 	dlg_.m_rulerlist->m_color_picker->Show();
-}
+*/}
 
 Point MeasureAgent::GetRulerCenter(unsigned int i)
 {
@@ -795,13 +786,13 @@ flrd::Ruler* MeasureAgent::GetRuler(unsigned int i)
 
 void MeasureAgent::SetRulerName(unsigned int i, const std::string &name)
 {
-	flrd::Ruler* ruler = GetRuler(i);
+/*	flrd::Ruler* ruler = GetRuler(i);
 	if (!ruler) return;
 	ruler->SetName(name);
 	wxString str(name);
 	dlg_.m_rulerlist->SetText(dlg_.m_rulerlist->m_editing_item, 0, str);
 	//m_view->Update(39);
-}
+*/}
 
 void MeasureAgent::SetRulerCenter(unsigned int i, const Point &p)
 {
@@ -809,12 +800,12 @@ void MeasureAgent::SetRulerCenter(unsigned int i, const Point &p)
 	if (!ruler || ruler->GetRulerType() != 2) return;
 	if (!ruler->GetPoint(0)) return;
 	ruler->GetPoint(0)->SetPoint(p);
-	wxString str = wxString::Format("(%.2f, %.2f, %.2f)",
+/*	wxString str = wxString::Format("(%.2f, %.2f, %.2f)",
 		p.x(), p.y(), p.z());
 	dlg_.m_rulerlist->SetText(dlg_.m_rulerlist->m_editing_item, 7, str);
 	dlg_.m_rulerlist->SetText(dlg_.m_rulerlist->m_editing_item, 9, str);
 	//m_view->Update(39);
-}
+*/}
 
 void MeasureAgent::SetRulerColor(unsigned int i, const Color &c)
 {
@@ -833,7 +824,7 @@ bool MeasureAgent::ToggleRulerDisp(unsigned int i)
 
 void MeasureAgent::ToggleToolBtns(bool val)
 {
-	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_LocatorBtn, val);
+/*	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_LocatorBtn, val);
 	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProbeBtn, val);
 	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProtractorBtn, val);
 	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerBtn, val);
@@ -845,7 +836,7 @@ void MeasureAgent::ToggleToolBtns(bool val)
 	dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerDelBtn, val);
 	dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerMoveBtn, val);
 	dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_LockBtn, val);
-}
+*/}
 
 void MeasureAgent::Locator()
 {
@@ -854,13 +845,14 @@ void MeasureAgent::Locator()
 	flrd::RulerHandler* handler = view->GetRulerHandler();
 	if (!handler) return;
 
-	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
+	bool bval = false;
+/*	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
 		handler->FinishRuler();
 
 	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_LocatorBtn);
 	ToggleToolBtns(false);
 	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_LocatorBtn, bval);
-
+*/
 	if (bval)
 	{
 		view->setValue(gstInterMode, long(5));
@@ -879,13 +871,14 @@ void MeasureAgent::Probe()
 	flrd::RulerHandler* handler = view->GetRulerHandler();
 	if (!handler) return;
 
-	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
+	bool bval = false;
+	/*	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
 		handler->FinishRuler();
 
 	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_ProbeBtn);
 	ToggleToolBtns(false);
 	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProbeBtn, bval);
-
+*/
 	if (bval)
 	{
 		view->setValue(gstInterMode, long(5));
@@ -904,13 +897,14 @@ void MeasureAgent::Protractor()
 	flrd::RulerHandler* handler = view->GetRulerHandler();
 	if (!handler) return;
 
-	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
+	bool bval = false;
+/*	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
 		handler->FinishRuler();
 
 	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_ProtractorBtn);
 	ToggleToolBtns(false);
 	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProtractorBtn, bval);
-
+*/
 	if (bval)
 	{
 		view->setValue(gstInterMode, long(5));
@@ -929,13 +923,14 @@ void MeasureAgent::Ruler()
 	flrd::RulerHandler* handler = view->GetRulerHandler();
 	if (!handler) return;
 
-	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
+	bool bval = false;
+/*	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
 		handler->FinishRuler();
 
 	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerBtn);
 	ToggleToolBtns(false);
 	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerBtn, bval);
-
+*/
 	if (bval)
 	{
 		view->setValue(gstInterMode, long(5));
@@ -954,10 +949,11 @@ void MeasureAgent::RulerMP()
 	flrd::RulerHandler* handler = view->GetRulerHandler();
 	if (!handler) return;
 
-	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn);
+	bool bval = false;
+/*	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn);
 	ToggleToolBtns(false);
 	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerMPBtn, bval);
-
+*/
 	if (bval)
 	{
 		view->setValue(gstInterMode, long(5));
@@ -977,13 +973,14 @@ void MeasureAgent::Ellipse()
 	flrd::RulerHandler* handler = view->GetRulerHandler();
 	if (!handler) return;
 
-	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
+	bool bval = false;
+/*	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
 		handler->FinishRuler();
 
 	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_EllipseBtn);
 	ToggleToolBtns(false);
 	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_EllipseBtn, bval);
-
+*/
 	if (bval)
 	{
 		view->setValue(gstInterMode, long(5));
@@ -1004,10 +1001,11 @@ void MeasureAgent::Grow()
 
 	handler->FinishRuler();
 
-	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_GrowBtn);
+	bool bval = false;
+/*	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_GrowBtn);
 	ToggleToolBtns(false);
 	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_GrowBtn, bval);
-
+*/
 	if (bval)
 	{
 		view->setValue(gstInterMode, long(12));
@@ -1041,10 +1039,11 @@ void MeasureAgent::Pencil()
 
 	handler->FinishRuler();
 
-	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_PencilBtn);
+	bool bval = false;
+/*	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_PencilBtn);
 	ToggleToolBtns(false);
 	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_PencilBtn, bval);
-
+*/
 	if (bval)
 	{
 		view->setValue(gstInterMode, long(13));
@@ -1068,7 +1067,7 @@ void MeasureAgent::RulerFlip()
 	int count = 0;
 	std::vector<int> sel;
 	flrd::RulerList* ruler_list = view->GetRulerList();
-	if (dlg_.m_rulerlist->GetCurrSelection(sel))
+/*	if (dlg_.m_rulerlist->GetCurrSelection(sel))
 	{
 		for (size_t i = 0; i < sel.size(); ++i)
 		{
@@ -1091,7 +1090,7 @@ void MeasureAgent::RulerFlip()
 			count++;
 		}
 	}
-
+*/
 	//if (count)
 	//{
 	//	m_view->Update(39);
@@ -1107,13 +1106,14 @@ void MeasureAgent::RulerEdit()
 	flrd::RulerHandler* handler = view->GetRulerHandler();
 	if (!handler) return;
 
-	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
+	bool bval = false;
+/*	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
 		handler->FinishRuler();
 
 	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerEditBtn);
 	ToggleToolBtns(false);
 	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerEditBtn, bval);
-
+*/
 	if (bval)
 		view->setValue(gstInterMode, long(6));
 	else
@@ -1129,13 +1129,14 @@ void MeasureAgent::RulerDelete()
 	flrd::RulerHandler* handler = view->GetRulerHandler();
 	if (!handler) return;
 
-	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
+	bool bval = false;
+/*	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
 		handler->FinishRuler();
 
 	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerDelBtn);
 	ToggleToolBtns(false);
 	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerDelBtn, bval);
-
+*/
 	if (bval)
 		view->setValue(gstInterMode, long(14));
 	else
@@ -1151,13 +1152,14 @@ void MeasureAgent::RulerMove()
 	flrd::RulerHandler* handler = view->GetRulerHandler();
 	if (!handler) return;
 
-	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
+	bool bval = false;
+/*	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
 		handler->FinishRuler();
 
 	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMoveBtn);
 	ToggleToolBtns(false);
 	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerMoveBtn, bval);
-
+*/
 	if (bval)
 		view->setValue(gstInterMode, long(9));
 	else
@@ -1175,7 +1177,7 @@ void MeasureAgent::RulerAvg()
 	int count = 0;
 	std::vector<int> sel;
 	flrd::RulerList* ruler_list = view->GetRulerList();
-	if (dlg_.m_rulerlist->GetCurrSelection(sel))
+/*	if (dlg_.m_rulerlist->GetCurrSelection(sel))
 	{
 		for (size_t i = 0; i < sel.size(); ++i)
 		{
@@ -1199,7 +1201,7 @@ void MeasureAgent::RulerAvg()
 			}
 		}
 	}
-
+*/
 	if (count)
 	{
 		avg /= double(count);
@@ -1228,7 +1230,7 @@ void MeasureAgent::Profile()
 
 	handler->SetVolumeData(view->GetCurrentVolume());
 	std::vector<int> sel;
-	if (dlg_.m_rulerlist->GetCurrSelection(sel))
+/*	if (dlg_.m_rulerlist->GetCurrSelection(sel))
 	{
 		//export selected
 		for (size_t i = 0; i < sel.size(); ++i)
@@ -1244,7 +1246,7 @@ void MeasureAgent::Profile()
 				handler->Profile(i);
 		}
 	}
-}
+*/}
 
 void MeasureAgent::Distance(const std::string& filename)
 {
@@ -1258,7 +1260,7 @@ void MeasureAgent::Distance(const std::string& filename)
 
 	std::vector<int> sel;
 	std::string fi;
-	if (dlg_.m_rulerlist->GetCurrSelection(sel))
+/*	if (dlg_.m_rulerlist->GetCurrSelection(sel))
 	{
 		//export selected
 		for (size_t i = 0; i < sel.size(); ++i)
@@ -1279,18 +1281,18 @@ void MeasureAgent::Distance(const std::string& filename)
 			}
 		}
 	}
-}
+*/}
 
 void MeasureAgent::Project()
 {
 	std::vector<int> sel;
-	if (dlg_.m_rulerlist->GetCurrSelection(sel))
+/*	if (dlg_.m_rulerlist->GetCurrSelection(sel))
 	{
 		//export selected
 		for (size_t i = 0; i < sel.size(); ++i)
 			Project(sel[i]);
 	}
-}
+*/}
 
 void MeasureAgent::Lock()
 {
@@ -1299,13 +1301,14 @@ void MeasureAgent::Lock()
 	flrd::RulerHandler* handler = view->GetRulerHandler();
 	if (!handler) return;
 
-	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
+	bool bval = false;
+/*	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
 		handler->FinishRuler();
 
 	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_LockBtn);
 	ToggleToolBtns(false);
 	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_LockBtn, bval);
-
+*/
 	if (bval)
 		view->setValue(gstInterMode, long(11));
 	else
@@ -1330,7 +1333,7 @@ void MeasureAgent::ChangeGroup(unsigned int ival)
 
 	//update group
 	std::vector<int> sel;
-	if (!dlg_.m_rulerlist->GetCurrSelection(sel))
+/*	if (!dlg_.m_rulerlist->GetCurrSelection(sel))
 		return;
 	for (size_t i = 0; i < sel.size(); ++i)
 	{
@@ -1341,7 +1344,7 @@ void MeasureAgent::ChangeGroup(unsigned int ival)
 			continue;
 		ruler->Group(ival);
 	}
-	UpdateRulers();
+*/	UpdateRulers();
 }
 
 void MeasureAgent::ToggleGroupDisp(unsigned int ival)
@@ -1364,11 +1367,11 @@ void MeasureAgent::ToggleGroupDisp(unsigned int ival)
 				disp = !ruler->GetDisp();
 			}
 			ruler->SetDisp(disp);
-			if (disp)
+/*			if (disp)
 				dlg_.m_rulerlist->SetItemBackgroundColour(i, wxColour(255, 255, 255));
 			else
 				dlg_.m_rulerlist->SetItemBackgroundColour(i, wxColour(200, 200, 200));
-		}
+*/		}
 	}
 	//m_view->Update(39);
 }

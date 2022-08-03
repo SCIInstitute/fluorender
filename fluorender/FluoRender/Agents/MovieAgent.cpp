@@ -43,14 +43,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class MoviePanel : public wxWindow
-{
-public:
-	MoviePanel() {}
-	~MoviePanel() {}
-};
-
 MovieAgent::MovieAgent(MoviePanel &panel) :
 	InterfaceAgent(),
 	panel_(panel)

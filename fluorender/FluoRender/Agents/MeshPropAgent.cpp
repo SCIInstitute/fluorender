@@ -32,14 +32,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class MeshPropPanel : public wxWindow
-{
-public:
-	MeshPropPanel() {}
-	~MeshPropPanel() {}
-};
-
 MeshPropAgent::MeshPropAgent(MeshPropPanel &panel) :
 	InterfaceAgent(),
 	panel_(panel)

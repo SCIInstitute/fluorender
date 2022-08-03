@@ -25,11 +25,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _LOF_READER_H_
-#define _LOF_READER_H_
+#ifndef LOF_READER_HPP
+#define LOF_READER_HPP
 
-#include <base_reader.h>
-#include <wx/xml/xml.h>
+#include "base_reader.h"
+#include "tinyxml2.h"
 #include <vector>
 #include <string>
 #include <limits>
@@ -49,15 +49,15 @@ public:
 
 	int GetType() { return READER_LOF_TYPE; }
 
-	void SetFile(string &file);
-	void SetFile(wstring &file);
+	void SetFile(const string &file);
+	void SetFile(const wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
 	void SetChannSeq(bool cs);
 	bool GetChannSeq();
 	void SetDigitOrder(int order);
 	int GetDigitOrder();
-	void SetTimeId(wstring &id);
+	void SetTimeId(const wstring &id);
 	wstring GetTimeId();
 	int Preprocess();
 	void SetBatch(bool batch);
@@ -298,8 +298,8 @@ private:
 private:
 	unsigned long long ReadMetadata(FILE* pfile, unsigned long long ioffset);
 	bool ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val);
-	void ReadImage(wxXmlNode* node);
-	void ReadSubBlockInfo(wxXmlNode* node);
+	void ReadImage(tinyxml2::XMLElement* node);
+	void ReadSubBlockInfo(tinyxml2::XMLElement* node);
 	void AddSubBlockInfo(unsigned int dim, unsigned int size,
 		double orig, double len, unsigned long long inc);
 	void FillLofInfo();
@@ -317,4 +317,4 @@ private:
 	}
 };
 
-#endif//_LOF_READER_H_
+#endif//LOF_READER_HPP

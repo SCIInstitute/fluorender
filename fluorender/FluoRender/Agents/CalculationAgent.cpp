@@ -39,14 +39,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class CalculationDlg : public wxWindow
-{
-public:
-	CalculationDlg() {}
-	~CalculationDlg() {}
-};
-
 CalculationAgent::CalculationAgent(CalculationDlg &dlg) :
 	InterfaceAgent(),
 	dlg_(dlg)
@@ -96,7 +88,7 @@ void CalculationAgent::LoadVolA()
 		}
 		break;
 	}
-	dlg_.m_calc_a_text->SetValue(str);
+	//dlg_.m_calc_a_text->SetValue(str);
 }
 
 void CalculationAgent::LoadVolB()
@@ -122,7 +114,7 @@ void CalculationAgent::LoadVolB()
 		}
 		break;
 	}
-	dlg_.m_calc_b_text->SetValue(str);
+	//dlg_.m_calc_b_text->SetValue(str);
 }
 
 void CalculationAgent::CalcSub()

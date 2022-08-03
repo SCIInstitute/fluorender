@@ -40,6 +40,151 @@ public:
 	~wxWindow() {}
 	void UpdateWindow(const fluo::ValueCollection &names) {}
 };
+#pragma message ("replace dummy dialog")
+class AnnotationPropPanel : public wxWindow
+{
+public:
+	AnnotationPropPanel() {}
+	~AnnotationPropPanel() {}
+};
+class BrushToolDlg : public wxWindow
+{
+public:
+	BrushToolDlg() {}
+	~BrushToolDlg() {}
+};
+class CalculationDlg : public wxWindow
+{
+public:
+	CalculationDlg() {}
+	~CalculationDlg() {}
+};
+class ClipPlanePanel : public wxWindow
+{
+public:
+	ClipPlanePanel() {}
+	~ClipPlanePanel() {}
+};
+class ClKernelDlg : public wxWindow
+{
+public:
+	ClKernelDlg() {}
+	~ClKernelDlg() {}
+};
+class ColocalDlg : public wxWindow
+{
+public:
+	ColocalDlg() {}
+	~ColocalDlg() {}
+};
+class ComponentDlg : public wxWindow
+{
+public:
+	ComponentDlg() {}
+	~ComponentDlg() {}
+};
+class ConvertDlg : public wxWindow
+{
+public:
+	ConvertDlg() {}
+	~ConvertDlg() {}
+};
+class CountingDlg : public wxWindow
+{
+public:
+	CountingDlg() {}
+	~CountingDlg() {}
+};
+class ListPanel : public wxWindow
+{
+public:
+	ListPanel() {}
+	~ListPanel() {}
+};
+class MeasureDlg : public wxWindow
+{
+public:
+	MeasureDlg() {}
+	~MeasureDlg() {}
+};
+class MeshPropPanel : public wxWindow
+{
+public:
+	MeshPropPanel() {}
+	~MeshPropPanel() {}
+};
+class MeshTransPanel : public wxWindow
+{
+public:
+	MeshTransPanel() {}
+	~MeshTransPanel() {}
+};
+class MoviePanel : public wxWindow
+{
+public:
+	MoviePanel() {}
+	~MoviePanel() {}
+};
+class NoiseReduceDlg : public wxWindow
+{
+public:
+	NoiseReduceDlg() {}
+	~NoiseReduceDlg() {}
+};
+class OutAdjustPanel : public wxWindow
+{
+public:
+	OutAdjustPanel() {}
+	~OutAdjustPanel() {}
+};
+class RecorderDlg : public wxWindow
+{
+public:
+	RecorderDlg() {};
+	~RecorderDlg() {};
+};
+class RenderCanvas : public wxWindow
+{
+public:
+	RenderCanvas() {}
+	~RenderCanvas() {}
+};
+class RenderFrame : public wxWindow
+{
+public:
+	RenderFrame() {}
+	~RenderFrame() {}
+};
+class RenderviewPanel : public wxWindow
+{
+public:
+	RenderviewPanel() {}
+	~RenderviewPanel() {}
+};
+class SettingDlg : public wxWindow
+{
+public:
+	SettingDlg() {}
+	~SettingDlg() {}
+};
+class TrackDlg : public wxWindow
+{
+public:
+	TrackDlg() {}
+	~TrackDlg() {}
+};
+class TreePanel : public wxWindow
+{
+public:
+	TreePanel() {}
+	~TreePanel() {}
+};
+class VolumePropPanel : public wxWindow
+{
+public:
+	VolumePropPanel() {}
+	~VolumePropPanel() {}
+};
 
 namespace fluo
 {

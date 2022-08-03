@@ -25,11 +25,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _LIF_READER_H_
-#define _LIF_READER_H_
+#ifndef LIF_READER_HPP
+#define LIF_READER_HPP
 
-#include <base_reader.h>
-#include <wx/xml/xml.h>
+#include "base_reader.h"
+#include "tinyxml2.h"
 #include <vector>
 #include <string>
 #include <limits>
@@ -48,15 +48,15 @@ public:
 
 	int GetType() { return READER_LIF_TYPE; }
 
-	void SetFile(string &file);
-	void SetFile(wstring &file);
+	void SetFile(const string &file);
+	void SetFile(const wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
 	void SetChannSeq(bool cs);
 	bool GetChannSeq();
 	void SetDigitOrder(int order);
 	int GetDigitOrder();
-	void SetTimeId(wstring &id);
+	void SetTimeId(const wstring &id);
 	wstring GetTimeId();
 	int Preprocess();
 	void SetBatch(bool batch);
@@ -102,7 +102,6 @@ private:
 	double m_max_value;
 	double m_scalar_scale;
 	unsigned int m_datatype;//pixel type of data: 0-na; 1-8bit; 2-16bit 4-32bit
-	bool m_tile_scan;
 
 	//wavelength info
 	struct WavelengthInfo
@@ -112,26 +111,10 @@ private:
 	};
 	vector<WavelengthInfo> m_excitation_wavelength_list;
 
-	struct TileScanInfo
-	{
-		int fieldx;
-		int fieldy;
-		int fieldz;
-		double posx;
-		double posy;
-		double posz;
-
-		TileScanInfo():
-			fieldx(0), fieldy(0), fieldz(0),
-			posx(0), posy(0), posz(0)
-		{}
-	};
-	typedef vector<TileScanInfo> TileList;
 	struct SubBlockInfo
 	{
 		int chan;//channel number
 		int time;//time number
-		unsigned long long inc;//inc for block
 		unsigned long long loc;//position in file
 		//inc for xyz
 		unsigned long long x_inc;
@@ -154,8 +137,7 @@ private:
 		double z_len;
 
 		SubBlockInfo():
-			chan(0), time(0),
-			inc(0), loc(0),
+			chan(0), time(0), loc(0),
 			x_inc(0), y_inc(0), z_inc(0),
 			x(0), y(0), z(0),
 			x_size(0), y_size(0), z_size(0),
@@ -208,9 +190,6 @@ private:
 			case 4:
 				inc = tinc;
 				break;
-			case 10:
-				sbi->inc = tinc;
-				break;
 			default:
 				if (!empty_dim)
 					break;
@@ -225,22 +204,13 @@ private:
 			{
 				blocks[i].chan = chan;
 				blocks[i].time = time;
-				if (blocks[i].z_inc)
-				{
-					blocks[i].loc = loc + blocks[i].z_inc * i;
-					if (blocks[i].x_size == 0)
-						blocks[i].x_size = 1;
-					if (blocks[i].y_size == 0)
-						blocks[i].y_size = 1;
-					if (blocks[i].z_size == 0)
-						blocks[i].z_size = 1;
-				}
-				else if (blocks[0].inc)
-				{
-					//tiled scan
-					blocks[i] = blocks[0];
-					blocks[i].loc = loc + blocks[0].inc * i;
-				}
+				blocks[i].loc = loc + blocks[i].z_inc * i;
+				if (blocks[i].x_size == 0)
+					blocks[i].x_size = 1;
+				if (blocks[i].y_size == 0)
+					blocks[i].y_size = 1;
+				if (blocks[i].z_size == 0)
+					blocks[i].z_size = 1;
 			}
 		}
 	};
@@ -280,14 +250,13 @@ private:
 	};
 	struct ImageInfo
 	{
-		std::wstring name;//image name for batch
-		std::wstring mbid;//memory block name
+		std::string name;//image name for batch
+		std::string mbid;//memory block name
 		unsigned long long loc;//location in file
 		unsigned long long size;//read size
 		double minv;//min value
 		double maxv;//max value
 		std::vector<ChannelInfo> channels;
-		TileList tile_list;
 
 		ImageInfo():
 			loc(0), size(0),
@@ -331,17 +300,13 @@ private:
 	unsigned long long ReadMetadata(FILE* pfile, unsigned long long ioffset);
 	unsigned long long PreReadMemoryBlock(FILE* pfile, unsigned long long ioffset);
 	bool ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val);
-	bool CopyMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val);
-	void ReadElement(wxXmlNode* node);
-	void ReadData(wxXmlNode* node, std::wstring &name);
-	ImageInfo* ReadImage(wxXmlNode* node, std::wstring &name);
-	void ReadSubBlockInfo(wxXmlNode* node, ImageInfo &imgi);
+	void ReadElement(tinyxml2::XMLElement* node);
+	void ReadData(tinyxml2::XMLElement* node, std::string &name);
+	ImageInfo* ReadImage(tinyxml2::XMLElement* node, std::string &name);
+	void ReadSubBlockInfo(tinyxml2::XMLElement* node, ImageInfo &imgi);
 	void AddSubBlockInfo(ImageInfo &imgi, unsigned int dim, unsigned int size,
 		double orig, double len, unsigned long long inc);
-	bool ReadTileScanInfo(wxXmlNode* node, TileList& list);
-	void GenImageInfo(ImageInfo* imgi);
-
-	ImageInfo* FindImageInfoMbid(std::wstring &mbid)
+	ImageInfo* FindImageInfoMbid(std::string &mbid)
 	{
 		for (auto it = m_lif_info.images.begin();
 			it != m_lif_info.images.end(); ++it)
@@ -372,4 +337,4 @@ private:
 	}
 };
 
-#endif//_LIF_READER_H_
+#endif//LIF_READER_HPP

@@ -50,14 +50,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class ComponentDlg : public wxWindow
-{
-public:
-	ComponentDlg() {}
-	~ComponentDlg() {}
-};
-
 ComponentAgent::ComponentAgent(ComponentDlg &dlg) :
 	InterfaceAgent(),
 	dlg_(dlg)

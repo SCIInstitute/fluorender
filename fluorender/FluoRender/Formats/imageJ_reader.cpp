@@ -26,13 +26,14 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "imageJ_reader.h"
-#include "../compatibility.h"
-#include <wx/stdpaths.h>
+#include <compatibility.h>
+
+using namespace std;
 
 ImageJReader::ImageJReader()
 {
-	m_pJVMInstance = 0;
-	m_imageJ_cls = 0;
+	//m_pJVMInstance = 0;
+	//m_imageJ_cls = 0;
 
 	m_resize_type = 0;
 	m_resample_type = 0;
@@ -62,7 +63,7 @@ ImageJReader::ImageJReader()
 	m_time_id = L"_T";
 	
 	//Geting absolute path to class file.
-	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+/*	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 	exePath = wxPathOnly(exePath);
 	string imageJPath = exePath + GETSLASH() + "Java_Code" + GETSLASH() + "ImageJ_Reader";
 
@@ -77,7 +78,7 @@ ImageJReader::ImageJReader()
 	if (m_imageJ_cls == nullptr) {
         m_pJVMInstance->m_pEnv->ExceptionDescribe();
 		cerr << "ERROR: class not found !";
-	}
+	}*/
 }
 
 ImageJReader::~ImageJReader()
@@ -86,7 +87,7 @@ ImageJReader::~ImageJReader()
 	//	tiff_stream.close();
 }
 
-void ImageJReader::SetFile(string &file)
+void ImageJReader::SetFile(const string &file)
 {
 	if (!file.empty())
 	{
@@ -98,7 +99,7 @@ void ImageJReader::SetFile(string &file)
 	m_id_string = m_path_name;
 }
 
-void ImageJReader::SetFile(wstring &file)
+void ImageJReader::SetFile(const wstring &file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;	
@@ -114,7 +115,7 @@ int ImageJReader::Preprocess()
 	m_data_name = name;	
 
 	// ImageJ code here..................
-	if (m_imageJ_cls == nullptr) {
+/*	if (m_imageJ_cls == nullptr) {
 		cerr << "ERROR: class not found !";
 	}
 	else {
@@ -224,7 +225,7 @@ int ImageJReader::Preprocess()
 		}
 	}
 	m_cur_time = 0;	
-	
+*/	
 	return return_result;
 }
 
@@ -259,7 +260,7 @@ int ImageJReader::GetDigitOrder()
 	return 0;
 }
 
-void ImageJReader::SetTimeId(wstring &id)
+void ImageJReader::SetTimeId(const wstring &id)
 {
 	m_time_id = id;
 }
@@ -349,7 +350,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 	// ImageJ code to read the data.
 	string path_name = ws2s(m_path_name);
 
-	jmethodID method_id = NULL;
+/*	jmethodID method_id = NULL;
 	if (m_eight_bit == true){
 		method_id = m_pJVMInstance->m_pEnv->GetStaticMethodID(m_imageJ_cls, "getByteData2D", "([Ljava/lang/String;II)[[B");
 	}
@@ -440,7 +441,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 			}
 			m_pJVMInstance->m_pEnv->ReleaseShortArrayElements(val, body, JNI_ABORT);
 			*/
-		}
+/*		}
 		else {
 			jshortArray inner_data = static_cast<jshortArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, 0));
 			jshort* body = (jshort*)(m_pJVMInstance->m_pEnv->GetShortArrayElements(inner_data, 0));
@@ -451,23 +452,23 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
 		m_pJVMInstance->m_pEnv->DeleteLocalRef(val);
 	}
-
+*/
 	// Creating Nrrd out of the data.
 	Nrrd *nrrdout = nrrdNew();	
 	
 	int numPages = m_slice_num;	
 	unsigned long long total_size = (unsigned long long)m_x_size*(unsigned long long)m_y_size*(unsigned long long)numPages;	
-	if (!t_data)
-		return NULL;
+	//if (!t_data)
+	//	return NULL;
 	
-	if (m_eight_bit)
-		nrrdWrap(nrrdout, (uint8_t*)t_data, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
-	else
-		nrrdWrap(nrrdout, (uint16_t*)t_data, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
-	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*numPages);
-	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
+	//if (m_eight_bit)
+	//	nrrdWrap(nrrdout, (uint8_t*)t_data, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
+	//else
+	//	nrrdWrap(nrrdout, (uint16_t*)t_data, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
+	//nrrdAxisInfoSet(nrrdout, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
+	//nrrdAxisInfoSet(nrrdout, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*numPages);
+	//nrrdAxisInfoSet(nrrdout, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+	//nrrdAxisInfoSet(nrrdout, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
 
 	if (!m_eight_bit) {
 		if (get_max) {

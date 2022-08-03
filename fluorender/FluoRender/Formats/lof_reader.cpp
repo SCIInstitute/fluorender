@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "lof_reader.h"
-#include "../compatibility.h"
-#include <wx/sstream.h>
+#include <Types/Utils.h>
+#include <compatibility.h>
 #include <stdio.h>
 #include <algorithm>
 //#include <fstream>
@@ -60,7 +60,7 @@ LOFReader::~LOFReader()
 {
 }
 
-void LOFReader::SetFile(string &file)
+void LOFReader::SetFile(const string &file)
 {
 	if (!file.empty())
 	{
@@ -72,7 +72,7 @@ void LOFReader::SetFile(string &file)
 	m_id_string = m_path_name;
 }
 
-void LOFReader::SetFile(wstring &file)
+void LOFReader::SetFile(const wstring &file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;
@@ -175,7 +175,7 @@ int LOFReader::GetDigitOrder()
 	return 0;
 }
 
-void LOFReader::SetTimeId(wstring &id)
+void LOFReader::SetTimeId(const wstring &id)
 {
 	//do nothing
 }
@@ -342,10 +342,11 @@ unsigned long long LOFReader::ReadMetadata(FILE* pfile, unsigned long long ioffs
 	if (!result || !xmlsize)
 		return 0;
 #ifdef _WIN32
-	std::wstring xmlstr(xmlsize + 1, 0);
-	result &= fread(&xmlstr[0], sizeof(wchar_t), xmlsize, pfile) == xmlsize;
+	std::wstring wxmlstr(xmlsize + 1, 0);
+	result &= fread(&wxmlstr[0], sizeof(wchar_t), xmlsize, pfile) == xmlsize;
 	if (!result)
 		return 0;
+	std::string xmlstr = ws2s(wxmlstr);
 #else
 	std::string temp(xmlsize * 2 + 2, 0);
 	result &= fread(&temp[0], 1, xmlsize * 2, pfile) == xmlsize * 2;
@@ -363,22 +364,21 @@ unsigned long long LOFReader::ReadMetadata(FILE* pfile, unsigned long long ioffs
 	//outfile.close();
 	//endof test
 
-	wxXmlDocument doc;
-	wxStringInputStream wxss(xmlstr);
-	result &= doc.Load(wxss);
-	wxXmlNode *root = doc.GetRoot();
+	tinyxml2::XMLDocument doc;
+	result &= doc.Parse(xmlstr.c_str()) == tinyxml2::XML_NO_ERROR;
+	tinyxml2::XMLElement *root = doc.RootElement();
 	ReadImage(root);
 
 	return LOFHSIZE + uisize;
 }
 
-void LOFReader::ReadImage(wxXmlNode* node)
+void LOFReader::ReadImage(tinyxml2::XMLElement* node)
 {
 	if (!node)
 		return;
 	std::string str;
-	wxXmlNode* child = node->GetChildren();
-	if (!child || child->GetName() != "Image")
+	tinyxml2::XMLElement* child = node->FirstChildElement();
+	if (!child || strcmp(child->Name(), "Image"))
 		return;
 	ReadSubBlockInfo(child);
 	for (size_t i = 0; i < m_lof_info.channels.size(); ++i)
@@ -403,35 +403,35 @@ void LOFReader::ReadImage(wxXmlNode* node)
 	}
 }
 
-void LOFReader::ReadSubBlockInfo(wxXmlNode* node)
+void LOFReader::ReadSubBlockInfo(tinyxml2::XMLElement* node)
 {
 	if (!node)
 		return;
-	wxString str;
+	std::string str;
 	unsigned long ulv;
 	double dval;
 	unsigned long long ull;
-	wxXmlNode *child = node->GetChildren();
+	tinyxml2::XMLElement *child = node->FirstChildElement();
 	while (child)
 	{
-		str = child->GetName();
+		str = child->Name();
 		if (str == "ChannelDescription")
 		{
 			ChannelInfo cinfo;
 			cinfo.chan = m_lof_info.channels.size();
-			str = child->GetAttribute("Resolution");
-			if (str.ToULong(&ulv))
+			str = child->Attribute("Resolution");
+			if (fluo::Str2Ul(str, ulv))
 				cinfo.res = ulv;
-			str = child->GetAttribute("Min");
-			if (str.ToDouble(&dval))
+			str = child->Attribute("Min");
+			if (fluo::Str2Double(str, dval))
 				cinfo.minv = dval;
-			str = child->GetAttribute("Max");
-			if (str.ToDouble(&dval))
+			str = child->Attribute("Max");
+			if (fluo::Str2Double(str, dval))
 				cinfo.maxv = dval;
-			str = child->GetAttribute("BytesInc");
-			if (str.ToULongLong(&ull))
+			str = child->Attribute("BytesInc");
+			if (fluo::Str2Ull(str, ull))
 				cinfo.inc = ull;
-			cinfo.lut = child->GetAttribute("LUTName");
+			cinfo.lut = child->Attribute("LUTName");
 			m_lof_info.channels.push_back(cinfo);
 			m_lof_info.minv = std::min(m_lof_info.minv, cinfo.minv);
 			m_lof_info.maxv = std::max(m_lof_info.maxv, cinfo.maxv);
@@ -441,31 +441,31 @@ void LOFReader::ReadSubBlockInfo(wxXmlNode* node)
 			unsigned long did = 0, size = 0;
 			double orig = 0, len = 0, sfactor = 1;
 			unsigned long long inc = 0;
-			str = child->GetAttribute("DimID");
-			if (str.ToULong(&did))
+			str = child->Attribute("DimID");
+			if (fluo::Str2Ul(str, did))
 			{
-				str = child->GetAttribute("Unit");
+				str = child->Attribute("Unit");
 				if (str == "m")
 					sfactor = 1e6;
 				else if (str == "mm")
 					sfactor = 1e3;
-				str = child->GetAttribute("NumberOfElements");
-				if (str.ToULong(&ulv))
+				str = child->Attribute("NumberOfElements");
+				if (fluo::Str2Ul(str, ulv))
 					size = ulv;
-				str = child->GetAttribute("Origin");
-				if (str.ToDouble(&dval))
+				str = child->Attribute("Origin");
+				if (fluo::Str2Double(str, dval))
 					orig = dval * sfactor;
-				str = child->GetAttribute("Length");
-				if (str.ToDouble(&dval))
+				str = child->Attribute("Length");
+				if (fluo::Str2Double(str, dval))
 					len = dval * sfactor;
-				str = child->GetAttribute("BytesInc");
-				if (str.ToULongLong(&ull))
+				str = child->Attribute("BytesInc");
+				if (fluo::Str2Ull(str, ull))
 					inc = ull;
 				AddSubBlockInfo(did, size, orig, len, inc);
 			}
 		}
 		ReadSubBlockInfo(child);
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 }
 

@@ -16,10 +16,10 @@ public:
 
 	int GetType() { return READER_BRKXML_TYPE; }
 
-	void SetFile(string &file);
-	void SetFile(wstring &file);
-	void SetDir(string &dir);
-	void SetDir(wstring &dir);
+	void SetFile(const string &file);
+	void SetFile(const wstring &file);
+	void SetDir(const string &dir);
+	void SetDir(const wstring &dir);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
 	void SetChannSeq(bool cs);
@@ -28,7 +28,7 @@ public:
 	int GetDigitOrder();
 	void SetTimeSeq(bool ss);
 	bool GetTimeSeq();
-	void SetTimeId(wstring &id);
+	void SetTimeId(const wstring &id);
 	void SetCurTime(int t);
 	void SetCurChan(int c);
 	wstring GetTimeId();

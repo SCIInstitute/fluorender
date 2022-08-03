@@ -35,14 +35,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class RenderviewPanel : public wxWindow
-{
-public:
-	RenderviewPanel() {}
-	~RenderviewPanel() {}
-};
-
 RenderviewAgent::RenderviewAgent(RenderviewPanel &panel) :
 	InterfaceAgent(),
 	panel_(panel)
@@ -102,7 +94,7 @@ void RenderviewAgent::UpdateFui(const ValueCollection &names)
 
 void RenderviewAgent::SaveProject(const std::wstring & dir, const std::wstring &filename)
 {
-	wxString cap_file = dir + GETSLASH() + filename;
+/*	wxString cap_file = dir + GETSLASH() + filename;
 	updateValue(gstCaptureFile, cap_file.ToStdWstring());
 	updateValue(gstCapture, true);
 	bool bval;
@@ -115,7 +107,7 @@ void RenderviewAgent::SaveProject(const std::wstring & dir, const std::wstring &
 		wxString prop_file = new_folder + GETSLASH() + filename + "_project.vrp";
 		glbin_agtf->getRenderFrameAgent()->SaveProject(prop_file.ToStdWstring());
 	}
-}
+*/}
 
 bool RenderviewAgent::GetClipHold()
 {

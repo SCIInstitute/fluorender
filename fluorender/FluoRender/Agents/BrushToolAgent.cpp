@@ -38,14 +38,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class BrushToolDlg : public wxWindow
-{
-public:
-	BrushToolDlg() {}
-	~BrushToolDlg() {}
-};
-
 BrushToolAgent::BrushToolAgent(BrushToolDlg &dlg, TreePanel &panel) :
 	InterfaceAgent(),
 	dlg_(dlg),
@@ -72,7 +64,7 @@ void BrushToolAgent::UpdateFui(const ValueCollection &names)
 {
 	bool update_all = names.empty();
 
-	if (update_all || FOUND_VALUE(gstNonObjectValues))
+/*	if (update_all || FOUND_VALUE(gstNonObjectValues))
 	{
 		double dval = 0.0;
 		long lval = 0;
@@ -197,11 +189,11 @@ void BrushToolAgent::UpdateFui(const ValueCollection &names)
 		UpdateUndoRedo();
 		UpdateMaskTb();
 	}
-}
+*/}
 
 void BrushToolAgent::UpdateUndoRedo()
 {
-	VolumeData* vd = getObject()->GetCurrentVolume();
+/*	VolumeData* vd = getObject()->GetCurrentVolume();
 	if (vd && vd->GetTexture())
 	{
 		dlg_.m_toolbar->EnableTool(BrushToolDlg::ID_BrushUndo,
@@ -209,17 +201,17 @@ void BrushToolAgent::UpdateUndoRedo()
 		dlg_.m_toolbar->EnableTool(BrushToolDlg::ID_BrushRedo,
 			vd->GetTexture()->get_redo());
 	}
-}
+*/}
 
 void BrushToolAgent::UpdateMaskTb()
 {
 	Referenced* ref;
 	glbin_root->getRefValue(gstSourceVolume, &ref);
 	bool bval = ref != nullptr;
-	dlg_.m_mask_tb->EnableTool(BrushToolDlg::ID_MaskPaste, bval);
-	dlg_.m_mask_tb->EnableTool(BrushToolDlg::ID_MaskMerge, bval);
-	dlg_.m_mask_tb->EnableTool(BrushToolDlg::ID_MaskExclude, bval);
-	dlg_.m_mask_tb->EnableTool(BrushToolDlg::ID_MaskIntersect, bval);
+	//dlg_.m_mask_tb->EnableTool(BrushToolDlg::ID_MaskPaste, bval);
+	//dlg_.m_mask_tb->EnableTool(BrushToolDlg::ID_MaskMerge, bval);
+	//dlg_.m_mask_tb->EnableTool(BrushToolDlg::ID_MaskExclude, bval);
+	//dlg_.m_mask_tb->EnableTool(BrushToolDlg::ID_MaskIntersect, bval);
 }
 
 //brush ops
@@ -543,7 +535,7 @@ void BrushToolAgent::UpdateSpeed()
 
 void BrushToolAgent::OnInterModeChanged(Event& event)
 {
-	dlg_.m_toolbar->ToggleTool(BrushToolDlg::ID_BrushAppend, false);
+/*	dlg_.m_toolbar->ToggleTool(BrushToolDlg::ID_BrushAppend, false);
 	dlg_.m_toolbar->ToggleTool(BrushToolDlg::ID_BrushDiffuse, false);
 	dlg_.m_toolbar->ToggleTool(BrushToolDlg::ID_BrushDesel, false);
 	dlg_.m_toolbar->ToggleTool(BrushToolDlg::ID_BrushSolid, false);
@@ -577,7 +569,7 @@ void BrushToolAgent::OnInterModeChanged(Event& event)
 		dlg_.m_toolbar->ToggleTool(BrushToolDlg::ID_BrushSolid, true);
 		break;
 	}
-}
+*/}
 
 void BrushToolAgent::OnSelUndo(Event& event)
 {

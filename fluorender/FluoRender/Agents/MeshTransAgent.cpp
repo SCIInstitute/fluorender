@@ -27,17 +27,10 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <MeshTransAgent.hpp>
+#include <AgentFactory.hpp>
 //#include <MeshTransPanel.h>
 
 using namespace fluo;
-
-#pragma message ("replace dummy dialog")
-class MeshTransPanel : public wxWindow
-{
-public:
-	MeshTransPanel() {}
-	~MeshTransPanel() {}
-};
 
 MeshTransAgent::MeshTransAgent(MeshTransPanel &panel) :
 	InterfaceAgent(),
@@ -77,7 +70,7 @@ void MeshTransAgent::UpdateFui(const ValueCollection &names)
 	bool update_all = names.empty();
 	wxString str;
 
-	if (update_all || FOUND_VALUE(TransX))
+/*	if (update_all || FOUND_VALUE(TransX))
 	{
 		double x;
 		getValue(TransX, x);
@@ -140,4 +133,4 @@ void MeshTransAgent::UpdateFui(const ValueCollection &names)
 		str = wxString::Format("%.2f", z);
 		panel_.m_z_scl_text->SetValue(str);
 	}
-}
+*/}

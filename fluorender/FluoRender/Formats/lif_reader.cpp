@@ -26,14 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "lif_reader.h"
-#include "../compatibility.h"
-#include <wx/sstream.h>
+#include <Types/Utils.h>
+#include <compatibility.h>
 #include <stdio.h>
 //#include <fstream>
 
 LIFReader::LIFReader()
 {
-	m_tile_scan = false;
 	m_time_num = 0;
 	m_cur_time = -1;
 	m_chan_num = 0;
@@ -59,7 +58,7 @@ LIFReader::~LIFReader()
 {
 }
 
-void LIFReader::SetFile(string &file)
+void LIFReader::SetFile(const string &file)
 {
 	if (!file.empty())
 	{
@@ -71,7 +70,7 @@ void LIFReader::SetFile(string &file)
 	m_id_string = m_path_name;
 }
 
-void LIFReader::SetFile(wstring &file)
+void LIFReader::SetFile(const wstring &file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;
@@ -139,7 +138,7 @@ int LIFReader::GetDigitOrder()
 	return 0;
 }
 
-void LIFReader::SetTimeId(wstring &id)
+void LIFReader::SetTimeId(const wstring &id)
 {
 	//do nothing
 }
@@ -160,7 +159,56 @@ int LIFReader::LoadBatch(int index)
 	{
 		ImageInfo* imgi = &(m_lif_info.images[index]);
 		if (imgi)
-			GenImageInfo(imgi);
+		{
+			m_chan_num = imgi->channels.size();
+			ChannelInfo* cinfo = imgi->GetChannelInfo(0);
+			if (cinfo)
+			{
+				m_time_num = cinfo->times.size();
+				if (cinfo->res == 8)
+					m_datatype = 1;
+				else if (cinfo->res > 8)
+					m_datatype = 2;
+			}
+			TimeInfo* tinfo = imgi->GetTimeInfo(0, 0);
+			if (tinfo && tinfo->blocks.size() > 0)
+			{
+				//pixel size
+				m_slice_num = tinfo->blocks[0].z_size;
+				m_x_size = tinfo->blocks[0].x_size;
+				m_y_size = tinfo->blocks[0].y_size;
+				//spacings
+				if (m_x_size)
+					m_xspc = tinfo->blocks[0].x_len / m_x_size;
+				if (m_y_size)
+					m_yspc = tinfo->blocks[0].y_len / m_y_size;
+				if (m_slice_num)
+					m_zspc = tinfo->blocks[0].z_len / m_slice_num;
+				if (m_xspc > 0.0 &&
+					m_yspc > 0.0 &&
+					m_zspc > 0.0)
+				{
+					m_valid_spc = true;
+				}
+				else
+				{
+					m_valid_spc = false;
+					m_xspc = 1.0;
+					m_yspc = 1.0;
+					m_zspc = 1.0;
+				}
+			}
+			if (m_datatype > 1)
+			{
+				m_max_value = imgi->maxv;
+				m_scalar_scale = 65535.0 / m_max_value;
+			}
+			else
+			{
+				m_max_value = 255.0;
+				m_scalar_scale = 1.0;
+			}
+		}
 
 		result = index;
 		m_cur_batch = result;
@@ -305,10 +353,11 @@ unsigned long long LIFReader::ReadMetadata(FILE* pfile, unsigned long long ioffs
 	if (!result || !xmlsize)
 		return 0;
 #ifdef _WIN32
-	std::wstring xmlstr(xmlsize + 1, 0);
-	result &= fread(&xmlstr[0], sizeof(wchar_t), xmlsize, pfile) == xmlsize;
+	std::wstring wxmlstr(xmlsize + 1, 0);
+	result &= fread(&wxmlstr[0], sizeof(wchar_t), xmlsize, pfile) == xmlsize;
 	if (!result)
 		return 0;
+	std::string xmlstr = ws2s(wxmlstr);
 #else
 	std::string temp(xmlsize * 2 + 2, 0);
 	result &= fread(&temp[0], 1, xmlsize * 2, pfile) == xmlsize * 2;
@@ -326,15 +375,14 @@ unsigned long long LIFReader::ReadMetadata(FILE* pfile, unsigned long long ioffs
 	//outfile.close();
 	//endof test
 
-	wxXmlDocument doc;
-	wxStringInputStream wxss(xmlstr);
-	result &= doc.Load(wxss);
-	wxXmlNode *root = doc.GetRoot();
-	if (!root || root->GetName() != "LMSDataContainerHeader")
+	tinyxml2::XMLDocument doc;
+	result &= doc.Parse(xmlstr.c_str()) == tinyxml2::XML_NO_ERROR;
+	tinyxml2::XMLElement *root = doc.RootElement();
+	if (!root || strcmp(root->Name(), "LMSDataContainerHeader"))
 		return 0;
-	wxString wstr = root->GetAttribute("Version");
-	unsigned long ival;
-	if (wstr.ToULong(&ival))
+	std::string str = root->Attribute("Version");
+	int ival;
+	if (fluo::Str2Int(str, ival))
 		m_version = ival;
 	ReadElement(root);
 
@@ -382,10 +430,11 @@ unsigned long long LIFReader::PreReadMemoryBlock(FILE* pfile, unsigned long long
 	unsigned int nsize;
 	result &= fread(&nsize, sizeof(unsigned int), 1, pfile) == 1;
 #ifdef _WIN32
-	std::wstring namestr(nsize, 0);
-	result &= fread(&namestr[0], sizeof(wchar_t), nsize, pfile) == nsize;
+	std::wstring wnamestr(nsize, 0);
+	result &= fread(&wnamestr[0], sizeof(wchar_t), nsize, pfile) == nsize;
 	if (!result)
 		return 0;
+	std::string namestr = ws2s(wnamestr);
 #else
 	std::string temp(nsize * 2 + 2, 0);
 	result &= fread(&temp[0], 1, nsize * 2, pfile) == nsize * 2;
@@ -422,7 +471,7 @@ bool LIFReader::ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 			//read slice
 			if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
 				return false;
-			result &= CopyMemoryBlock(pfile, sbi, val);
+			result &= fread((unsigned char*)val, 1, size, pfile) == size;
 		}
 		else
 		{
@@ -448,8 +497,7 @@ bool LIFReader::ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 			//read volume
 			if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
 				return false;
-			//result &= fread((unsigned char*)val, 1, size, pfile) == size;
-			result &= CopyMemoryBlock(pfile, sbi, val);
+			result &= fread((unsigned char*)val, 1, size, pfile) == size;
 		}
 		else
 		{
@@ -526,78 +574,50 @@ bool LIFReader::ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 	return result;
 }
 
-bool LIFReader::CopyMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
-{
-	if (!m_tile_scan)
-	{
-		unsigned long long blck_size = (unsigned long long)sbi->x_size
-			* sbi->y_size * sbi->z_size * m_datatype;
-		return (fread((unsigned char*)val, 1, blck_size, pfile) == blck_size);
-	}
-
-	unsigned long long line_size = (unsigned long long)sbi->x_size * m_datatype;
-	unsigned long long offset = ((unsigned long long)(sbi->z) * (m_x_size * m_y_size) +
-		sbi->y * m_x_size + sbi->x) * m_datatype;
-	unsigned char* pos = (unsigned char*)val + offset;
-	unsigned char* pos2;
-	bool result = true;
-	for (int i = 0; i < sbi->z_size; ++i)
-	{
-		pos2 = pos;
-		for (int j = 0; j < sbi->y_size; ++j)
-		{
-			result &= fread(pos2, 1, line_size, pfile) == line_size;
-			pos2 += m_x_size * m_datatype;
-		}
-		pos += (unsigned long long)m_x_size * m_y_size * m_datatype;
-	}
-	return result;
-}
-
-void LIFReader::ReadElement(wxXmlNode* node)
+void LIFReader::ReadElement(tinyxml2::XMLElement* node)
 {
 	if (!node)
 		return;
-	wxString str;
-	wxXmlNode *child = node->GetChildren();
+	std::string str;
+	tinyxml2::XMLElement *child = node->FirstChildElement();
 	while (child)
 	{
-		str = child->GetName();
+		str = child->Name();
 		if (str == "Element")
 		{
-			str = child->GetAttribute("Visibility");
+			str = child->Attribute("Visibility");
 			if (str != "0")
 			{
-				std::wstring name = child->GetAttribute("Name");
+				std::string name = child->Attribute("Name");
 				ReadData(child, name);
 			}
 		}
 		ReadElement(child);
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 }
 
-void LIFReader::ReadData(wxXmlNode* node, std::wstring &name)
+void LIFReader::ReadData(tinyxml2::XMLElement* node, std::string &name)
 {
 	if (!node)
 		return;
-	wxString str;
-	wxXmlNode *child = node->GetChildren();
+	std::string str;
+	tinyxml2::XMLElement *child = node->FirstChildElement();
 	ImageInfo* imgi = 0;
 	unsigned long long sbsize = 0;
-	std::wstring sbname;
+	std::string sbname;
 	while (child)
 	{
-		str = child->GetName();
+		str = child->Name();
 		if (str == "Data")
 			imgi = ReadImage(child, name);
 		else if (str == "Memory")
 		{
-			str = child->GetAttribute("Size");
-			str.ToULongLong(&sbsize);
-			sbname = child->GetAttribute("MemoryBlockID");
+			str = child->Attribute("Size");
+			fluo::Str2Ull(str, sbsize);
+			sbname = child->Attribute("MemoryBlockID");
 		}
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 	if (imgi && sbsize && sbname != "")
 	{
@@ -605,13 +625,13 @@ void LIFReader::ReadData(wxXmlNode* node, std::wstring &name)
 	}
 }
 
-LIFReader::ImageInfo* LIFReader::ReadImage(wxXmlNode* node, std::wstring &name)
+LIFReader::ImageInfo* LIFReader::ReadImage(tinyxml2::XMLElement* node, std::string &name)
 {
 	if (!node)
 		return 0;
 	std::string str;
-	wxXmlNode* child = node->GetChildren();
-	if (!child || child->GetName() != "Image")
+	tinyxml2::XMLElement* child = node->FirstChildElement();
+	if (!child || strcmp(child->Name(), "Image"))
 		return 0;
 	ImageInfo imgi;
 	imgi.name = name;
@@ -642,35 +662,35 @@ LIFReader::ImageInfo* LIFReader::ReadImage(wxXmlNode* node, std::wstring &name)
 	return &(m_lif_info.images.back());
 }
 
-void LIFReader::ReadSubBlockInfo(wxXmlNode* node, LIFReader::ImageInfo &imgi)
+void LIFReader::ReadSubBlockInfo(tinyxml2::XMLElement* node, LIFReader::ImageInfo &imgi)
 {
 	if (!node)
 		return;
-	wxString str;
+	std::string str;
 	unsigned long ulv;
 	double dval;
 	unsigned long long ull;
-	wxXmlNode *child = node->GetChildren();
+	tinyxml2::XMLElement *child = node->FirstChildElement();
 	while (child)
 	{
-		str = child->GetName();
+		str = child->Name();
 		if (str == "ChannelDescription")
 		{
 			ChannelInfo cinfo;
 			cinfo.chan = imgi.channels.size();
-			str = child->GetAttribute("Resolution");
-			if (str.ToULong(&ulv))
+			str = child->Attribute("Resolution");
+			if (fluo::Str2Ul(str, ulv))
 				cinfo.res = ulv;
-			str = child->GetAttribute("Min");
-			if (str.ToDouble(&dval))
+			str = child->Attribute("Min");
+			if (fluo::Str2Double(str, dval))
 				cinfo.minv = dval;
-			str = child->GetAttribute("Max");
-			if (str.ToDouble(&dval))
+			str = child->Attribute("Max");
+			if (fluo::Str2Double(str, dval))
 				cinfo.maxv = dval;
-			str = child->GetAttribute("BytesInc");
-			if (str.ToULongLong(&ull))
+			str = child->Attribute("BytesInc");
+			if (fluo::Str2Ull(str, ull))
 				cinfo.inc = ull;
-			cinfo.lut = child->GetAttribute("LUTName");
+			cinfo.lut = child->Attribute("LUTName");
 			imgi.channels.push_back(cinfo);
 			imgi.minv = std::min(imgi.minv, cinfo.minv);
 			imgi.maxv = std::max(imgi.maxv, cinfo.maxv);
@@ -680,36 +700,31 @@ void LIFReader::ReadSubBlockInfo(wxXmlNode* node, LIFReader::ImageInfo &imgi)
 			unsigned long did = 0, size = 0;
 			double orig = 0, len = 0, sfactor = 1;
 			unsigned long long inc = 0;
-			str = child->GetAttribute("DimID");
-			if (str.ToULong(&did))
+			str = child->Attribute("DimID");
+			if (fluo::Str2Ul(str, did))
 			{
-				str = child->GetAttribute("Unit");
+				str = child->Attribute("Unit");
 				if (str == "m")
 					sfactor = 1e6;
 				else if (str == "mm")
 					sfactor = 1e3;
-				str = child->GetAttribute("NumberOfElements");
-				if (str.ToULong(&ulv))
+				str = child->Attribute("NumberOfElements");
+				if (fluo::Str2Ul(str, ulv))
 					size = ulv;
-				str = child->GetAttribute("Origin");
-				if (str.ToDouble(&dval))
+				str = child->Attribute("Origin");
+				if (fluo::Str2Double(str, dval))
 					orig = dval * sfactor;
-				str = child->GetAttribute("Length");
-				if (str.ToDouble(&dval))
+				str = child->Attribute("Length");
+				if (fluo::Str2Double(str, dval))
 					len = dval * sfactor;
-				str = child->GetAttribute("BytesInc");
-				if (str.ToULongLong(&ull))
+				str = child->Attribute("BytesInc");
+				if (fluo::Str2Ull(str, ull))
 					inc = ull;
 				AddSubBlockInfo(imgi, did, size, orig, len, inc);
 			}
 		}
-		else if (str == "Attachment")
-		{
-			ReadTileScanInfo(child, imgi.tile_list);
-		}
-
 		ReadSubBlockInfo(child, imgi);
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 }
 
@@ -727,9 +742,7 @@ void LIFReader::AddSubBlockInfo(ImageInfo &imgi, unsigned int dim, unsigned int 
 	if (!tinfo)
 		return;
 	SubBlockInfo *sbi = 0;
-	if (dim == 10 && size > 1)
-		tinfo->blocks.resize(size);
-	else if (tinfo->blocks.empty())
+	if (tinfo->blocks.empty())
 		tinfo->blocks.resize(1);
 	sbi = &(tinfo->blocks[0]);
 	sbi->chan = chan;
@@ -737,228 +750,6 @@ void LIFReader::AddSubBlockInfo(ImageInfo &imgi, unsigned int dim, unsigned int 
 	unsigned int empty_dim = GetEmptyDim(cinfo, sbi);
 	tinfo->SetSubBlockInfo(dim, empty_dim,
 		size, orig, len, inc);
-}
-
-bool LIFReader::ReadTileScanInfo(wxXmlNode* node, TileList& list)
-{
-	if (!node)
-		return false;
-	wxString str;
-	str = node->GetName();
-	if (str != "Attachment")
-		return false;
-	str = node->GetAttribute("Name");
-	if (str != "TileScanInfo")
-		return false;
-	long lval;
-	double dval;
-	list.clear();
-	wxXmlNode* child = node->GetChildren();
-	while (child)
-	{
-		str = child->GetName();
-		if (str == "Tile")
-		{
-			TileScanInfo info;
-			str = child->GetAttribute("FieldX");
-			if (str.ToLong(&lval))
-				info.fieldx = lval;
-			str = child->GetAttribute("FieldY");
-			if (str.ToLong(&lval))
-				info.fieldy = lval;
-			str = child->GetAttribute("FieldZ");
-			if (str.ToLong(&lval))
-				info.fieldz = lval;
-			str = child->GetAttribute("PosX");
-			if (str.ToDouble(&dval))
-				info.posx = dval;
-			str = child->GetAttribute("PosY");
-			if (str.ToDouble(&dval))
-				info.posy = dval;
-			str = child->GetAttribute("PosZ");
-			if (str.ToDouble(&dval))
-				info.posz = dval;
-			list.push_back(info);
-		}
-		child = child->GetNext();
-	}
-	if (list.empty())
-		return false;
-	return true;
-}
-
-void LIFReader::GenImageInfo(ImageInfo* imgi)
-{
-	m_chan_num = imgi->channels.size();
-	if (m_chan_num < 1)
-		return;
-
-	ChannelInfo* cinfo = imgi->GetChannelInfo(0);
-	if (!cinfo)
-		return;
-	m_time_num = cinfo->times.size();
-	if (m_time_num < 1)
-		return;
-	if (cinfo->res == 8)
-		m_datatype = 1;
-	else if (cinfo->res > 8)
-		m_datatype = 2;
-
-	TimeInfo* tinfo = imgi->GetTimeInfo(0, 0);
-	if (!tinfo)
-		return;
-	int block_num = tinfo->blocks.size();
-	if (block_num < 1)
-		return;
-	else if (block_num > 1 &&
-		block_num == imgi->tile_list.size())
-	{
-		//tiled scan
-		SubBlockInfo &block0 = tinfo->blocks[0];
-		//spacings
-		if (block0.x_size)
-			m_xspc = block0.x_len / block0.x_size;
-		if (block0.y_size)
-			m_yspc = block0.y_len / block0.y_size;
-		if (block0.z_size)
-			m_zspc = block0.z_len / block0.z_size;
-
-		//determine if seq or pos is used
-		bool pos_valid = false;
-		TileScanInfo &tile0 = imgi->tile_list[0];
-		TileScanInfo &tile1 = imgi->tile_list[1];
-		if (tile0.posx != tile1.posx ||
-			tile0.posy != tile1.posy ||
-			tile0.posz != tile1.posz)
-			pos_valid = true;
-
-		//find extent
-		if (pos_valid)
-		{
-			double minx, maxx, miny, maxy, minz, maxz;
-			for (size_t i = 0; i < block_num; ++i)
-			{
-				SubBlockInfo &block = tinfo->blocks[i];
-				TileScanInfo &tile = imgi->tile_list[i];
-				//convert from m to um
-				block.x_start = tile.posx * 10e5;
-				block.y_start = tile.posy * 10e5;
-				block.z_start = tile.posz * 10e5;
-				if (i == 0)
-				{
-					minx = block.x_start;
-					maxx = minx + block.x_len;
-					miny = block.y_start;
-					maxy = miny + block.y_len;
-					minz = block.z_start;
-					maxz = minz + block.z_len;
-				}
-				else
-				{
-					minx = std::min(minx, block.x_start);
-					maxx = std::max(maxx, block.x_start + block.x_len);
-					miny = std::min(miny, block.y_start);
-					maxy = std::max(maxy, block.y_start + block.y_len);
-					minz = std::min(minz, block.z_start);
-					maxz = std::max(maxz, block.z_start + block.z_len);
-				}
-			}
-			m_x_size = int((maxx - minx) / m_xspc + 0.5);
-			m_y_size = int((maxy - miny) / m_yspc + 0.5);
-			m_slice_num = int((maxz - minz) / m_zspc + 0.5);
-
-			//assign corner coords
-			for (size_t i = 0; i < block_num; ++i)
-			{
-				SubBlockInfo &block = tinfo->blocks[i];
-				block.x = int((block.x_start - minx) / m_xspc + 0.5);
-				block.y = int((block.y_start - miny) / m_yspc + 0.5);
-				block.z = int((block.z_start - minz) / m_zspc + 0.5);
-			}
-		}
-		else
-		{
-			int minx, maxx, miny, maxy, minz, maxz;
-			for (size_t i = 0; i < block_num; ++i)
-			{
-				SubBlockInfo &block = tinfo->blocks[i];
-				TileScanInfo &tile = imgi->tile_list[i];
-				if (i == 0)
-				{
-					maxx = minx = tile.fieldx;
-					maxy = miny = tile.fieldy;
-					maxz = minz = tile.fieldz;
-				}
-				else
-				{
-					minx = std::min(minx, tile.fieldx);
-					maxx = std::max(maxx, tile.fieldx);
-					miny = std::min(miny, tile.fieldy);
-					maxy = std::max(maxy, tile.fieldy);
-					minz = std::min(minz, tile.fieldz);
-					maxz = std::max(maxz, tile.fieldz);
-				}
-			}
-			m_x_size = (maxx - minx + 1) * block0.x_size;
-			m_y_size = (maxy - miny + 1) * block0.y_size;
-			m_slice_num = (maxz - minz + 1) * block0.z_size;
-
-			//assign corner coords
-			for (size_t i = 0; i < block_num; ++i)
-			{
-				SubBlockInfo &block = tinfo->blocks[i];
-				TileScanInfo &tile = imgi->tile_list[i];
-				block.x = (tile.fieldx - minx) * block0.x_size;
-				block.y = (tile.fieldy - miny) * block0.y_size;
-				block.z = (tile.fieldz - minz) * block0.z_size;
-				block.x_start = block.x * m_xspc;
-				block.y_start = block.y * m_yspc;
-				block.z_start = block.z * m_zspc;
-			}
-		}
-
-		m_tile_scan = true;
-	}
-	else
-	{
-		SubBlockInfo &block0 = tinfo->blocks[0];
-		//pixel size
-		m_slice_num = block0.z_size;
-		m_x_size = block0.x_size;
-		m_y_size = block0.y_size;
-		//spacings
-		if (m_x_size)
-			m_xspc = block0.x_len / m_x_size;
-		if (m_y_size)
-			m_yspc = block0.y_len / m_y_size;
-		if (m_slice_num)
-			m_zspc = block0.z_len / m_slice_num;
-	}
-
-	if (m_xspc > 0.0 &&
-		m_yspc > 0.0 &&
-		m_zspc > 0.0)
-	{
-		m_valid_spc = true;
-	}
-	else
-	{
-		m_valid_spc = false;
-		m_xspc = 1.0;
-		m_yspc = 1.0;
-		m_zspc = 1.0;
-	}
-
-	if (m_datatype > 1)
-	{
-		m_max_value = imgi->maxv;
-		m_scalar_scale = 65535.0 / m_max_value;
-	}
-	else
-	{
-		m_max_value = 255.0;
-		m_scalar_scale = 1.0;
-	}
 }
 
 void LIFReader::FillLifInfo()

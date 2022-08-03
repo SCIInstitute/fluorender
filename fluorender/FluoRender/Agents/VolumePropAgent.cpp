@@ -34,14 +34,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class VolumePropPanel : public wxWindow
-{
-public:
-	VolumePropPanel() {}
-	~VolumePropPanel() {}
-};
-
 VolumePropAgent::VolumePropAgent(VolumePropPanel &panel) :
 	InterfaceAgent(),
 	panel_(panel)

@@ -36,14 +36,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class ClKernelDlg : public wxWindow
-{
-public:
-	ClKernelDlg() {}
-	~ClKernelDlg() {}
-};
-
 ClKernelAgent::ClKernelAgent(ClKernelDlg &dlg) :
 	InterfaceAgent(),
 	dlg_(dlg)
@@ -69,7 +61,7 @@ void ClKernelAgent::UpdateFui(const ValueCollection &names)
 {
 	bool update_all = names.empty();
 
-	if (update_all || FOUND_VALUE(gstNonObjectValues))
+/*	if (update_all || FOUND_VALUE(gstNonObjectValues))
 	{
 		wxString exePath = glbin.getExecutablePath();
 		dlg_.m_kernel_list->DeleteAllItems();
@@ -91,7 +83,7 @@ void ClKernelAgent::UpdateFui(const ValueCollection &names)
 				dlg_.m_kernel_list->GetItemCount(),
 				list[i]);
 	}
-}
+*/}
 
 void ClKernelAgent::RunKernel(int v)
 {
@@ -101,7 +93,7 @@ void ClKernelAgent::RunKernel(int v)
 
 void ClKernelAgent::RunKernel()
 {
-	dlg_.m_output_txt->SetValue("");
+/*	dlg_.m_output_txt->SetValue("");
 
 	Renderview* view = getObject();
 	if (!view)
@@ -139,7 +131,7 @@ void ClKernelAgent::RunKernel()
 	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
 	(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";*/
 
-	std::string str;
+/*	std::string str;
 	executor->GetMessage(str);
 	(*dlg_.m_output_txt) << str;
 
@@ -155,7 +147,7 @@ void ClKernelAgent::RunKernel()
 			//m_frame->UpdateList();
 			//m_frame->UpdateTree(vd_r->getName());
 	}
-
+*/
 	//m_view->Update(39);
 }
 

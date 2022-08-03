@@ -61,7 +61,7 @@ ND2Reader::~ND2Reader()
 {
 }
 
-void ND2Reader::SetFile(string &file)
+void ND2Reader::SetFile(const string &file)
 {
 	if (!file.empty())
 	{
@@ -73,7 +73,7 @@ void ND2Reader::SetFile(string &file)
 	m_id_string = m_path_name;
 }
 
-void ND2Reader::SetFile(wstring &file)
+void ND2Reader::SetFile(const wstring &file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;
@@ -133,7 +133,7 @@ int ND2Reader::GetDigitOrder()
 	return 0;
 }
 
-void ND2Reader::SetTimeId(wstring &id)
+void ND2Reader::SetTimeId(const wstring &id)
 {
 	//do nothing
 }

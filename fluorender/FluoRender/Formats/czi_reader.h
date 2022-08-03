@@ -25,11 +25,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _CZI_READER_H_
-#define _CZI_READER_H_
+#ifndef CZI_READER_HPP
+#define CZI_READER_HPP
 
-#include <base_reader.h>
-#include <wx/xml/xml.h>
+#include "base_reader.h"
+#include "tinyxml2.h"
 #include <vector>
 #include <string>
 #include <limits>
@@ -48,15 +48,15 @@ public:
 
 	int GetType() { return READER_CZI_TYPE; }
 
-	void SetFile(string &file);
-	void SetFile(wstring &file);
+	void SetFile(const string &file);
+	void SetFile(const wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
 	void SetChannSeq(bool cs);
 	bool GetChannSeq();
 	void SetDigitOrder(int order);
 	int GetDigitOrder();
-	void SetTimeId(wstring &id);
+	void SetTimeId(const wstring &id);
 	wstring GetTimeId();
 	int Preprocess();
 	void SetBatch(bool batch);
@@ -113,25 +113,6 @@ private:
 		unsigned int compress;
 		//pixel type
 		unsigned int pxtype;
-
-		SubBlockInfo():
-			dirpos(0),
-			chan(0),
-			time(0),
-			x(0),
-			y(0),
-			z(0),
-			x_size(1),
-			y_size(1),
-			z_size(1),
-			x_start(0),
-			y_start(0),
-			z_start(0),
-			loc(0),
-			size(0),
-			compress(0),
-			pxtype(0)
-		{}
 	};
 	struct ChannelInfo
 	{
@@ -260,7 +241,7 @@ private:
 	void GetMinMax16B(unsigned short* val, int nx, int ny, int nz, int sx, int sy,
 		unsigned short &minv, unsigned short &maxv);
 	//search metadata
-	void FindNodeRecursive(wxXmlNode* node);
+	void FindNodeRecursive(tinyxml2::XMLElement* node);
 };
 
-#endif//_CZI_READER_H_
+#endif//CZI_READER_HPP

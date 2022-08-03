@@ -1563,7 +1563,7 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 		val8 = new (std::nothrow) uint8[mem_size];
 		if (!val8)
 		{
-			wxMessageBox("Not enough memory. Please save project and restart.");
+			//wxMessageBox("Not enough memory. Please save project and restart.");
 			return;
 		}
 		double spcx, spcy, spcz;
@@ -1650,7 +1650,7 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 		val8 = new (std::nothrow) uint8[mem_size];
 		if (!val8)
 		{
-			wxMessageBox("Not enough memory. Please save project and restart.");
+			//wxMessageBox("Not enough memory. Please save project and restart.");
 			return;
 		}
 		double spcx, spcy, spcz;

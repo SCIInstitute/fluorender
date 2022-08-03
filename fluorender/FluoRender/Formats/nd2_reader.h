@@ -47,15 +47,15 @@ public:
 
 	int GetType() { return READER_ND2_TYPE; }
 
-	void SetFile(string &file);
-	void SetFile(wstring &file);
+	void SetFile(const string &file);
+	void SetFile(const wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
 	void SetChannSeq(bool cs);
 	bool GetChannSeq();
 	void SetDigitOrder(int order);
 	int GetDigitOrder();
-	void SetTimeId(wstring &id);
+	void SetTimeId(const wstring &id);
 	wstring GetTimeId();
 	int Preprocess();
 	void SetBatch(bool batch);

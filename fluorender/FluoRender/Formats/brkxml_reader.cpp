@@ -98,7 +98,7 @@ void BRKXMLReader::Clear()
 }
 
 //Use Before Preprocess()
-void BRKXMLReader::SetFile(string &file)
+void BRKXMLReader::SetFile(const string &file)
 {
    if (!file.empty())
    {
@@ -119,7 +119,7 @@ void BRKXMLReader::SetFile(string &file)
 }
 
 //Use Before Preprocess()
-void BRKXMLReader::SetFile(wstring &file)
+void BRKXMLReader::SetFile(const wstring &file)
 {
    m_path_name = file;
 #ifdef _WIN32
@@ -134,7 +134,7 @@ void BRKXMLReader::SetFile(wstring &file)
 }
 
 //Use Before Preprocess()
-void BRKXMLReader::SetDir(string &dir)
+void BRKXMLReader::SetDir(const string &dir)
 {
 	if (!dir.empty())
 	{
@@ -157,7 +157,7 @@ void BRKXMLReader::SetDir(string &dir)
 }
 
 //Use Before Preprocess()
-void BRKXMLReader::SetDir(wstring &dir)
+void BRKXMLReader::SetDir(const wstring &dir)
 {
 	if (!dir.empty())
 	{
@@ -739,7 +739,7 @@ bool BRKXMLReader::GetTimeSeq()
    return false;
 }
 
-void BRKXMLReader::SetTimeId(wstring &id)
+void BRKXMLReader::SetTimeId(const wstring &id)
 {
    m_time_id = id;
 }

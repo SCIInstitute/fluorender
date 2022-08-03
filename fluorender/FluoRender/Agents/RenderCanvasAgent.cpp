@@ -48,14 +48,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class RenderCanvas : public wxWindow
-{
-public:
-	RenderCanvas() {}
-	~RenderCanvas() {}
-};
-
 RenderCanvasAgent::RenderCanvasAgent(RenderCanvas &canvas) :
 	InterfaceAgent(),
 	canvas_(canvas)
@@ -90,7 +82,8 @@ void RenderCanvasAgent::UpdateFui(const ValueCollection &names)
 	view->Update(41);
 	bool bval = false;
 	getValue(gstRefreshErase, bval);
-	canvas_.Refresh(bval);
+#pragma message ("replace with canvas refresh code")
+	//canvas_.Refresh(bval);
 	setValue(gstRefreshErase, false);
 
 	resumeObserverNotification();
@@ -171,7 +164,8 @@ void RenderCanvasAgent::OnFocusChanged(Event& event)
 	getValue(gstFocus, focus);
 	if (focus)
 	{
-		canvas_.SetFocus();
+#pragma message ("replace with cavas focus code")
+		//canvas_.SetFocus();
 		setValue(gstFocus, false);
 	}
 }

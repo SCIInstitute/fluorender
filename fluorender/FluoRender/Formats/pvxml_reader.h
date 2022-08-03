@@ -25,15 +25,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _PVXML_READER_H_
-#define _PVXML_READER_H_
+#ifndef PVXML_READER_HPP
+#define PVXML_READER_HPP
 
 #include <vector>
-#include <base_reader.h>
+#include <string>
+#include "base_reader.h"
+#include "tinyxml2.h"
 
 using namespace std;
-class wxXmlNode;
-class wxString;
 
 class PVXMLReader : public BaseReader
 {
@@ -43,15 +43,15 @@ public:
 
 	int GetType() { return READER_PVXML_TYPE; }
 
-	void SetFile(string &file);
-	void SetFile(wstring &file);
+	void SetFile(const string &file);
+	void SetFile(const wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
 	void SetChannSeq(bool cs);
 	bool GetChannSeq();
 	void SetDigitOrder(int order);
 	int GetDigitOrder();
-	void SetTimeId(wstring &id);
+	void SetTimeId(const wstring &id);
 	wstring GetTimeId();
 	int Preprocess();
 	void SetBatch(bool batch);
@@ -134,7 +134,8 @@ private:
 			lpf(0),
 			mpp_x(0),
 			mpp_y(0),
-			bit_depth(0) {}
+			bit_depth(0),
+			seq_type(0) {}
 		int grid_index;
 		int grid_index_x;
 		int grid_index_y;
@@ -148,6 +149,7 @@ private:
 		double mpp_x;//microns per pixel x
 		double mpp_y;//microns per pixel y
 		int bit_depth;
+		int seq_type;//sequence type for non-standard formats
 	};
 	StateShard m_current_state;
 	vector<StateShard> m_state_shard_stack;
@@ -227,13 +229,13 @@ private:
 private:
 	bool ConvertS(int c, TimeDataInfo* time_data_info, unsigned short *val);
 	bool ConvertN(int c, TimeDataInfo* time_data_info, unsigned short *val);
-	void ReadSystemConfig(wxXmlNode *systemNode);
-	void UpdateStateShard(wxXmlNode *stateNode);
-	void ReadKey(wxXmlNode *keyNode);
-	void ReadIndexedKey(wxXmlNode *keyNode, wxString &key);
-	void ReadSequence(wxXmlNode *seqNode);
-	void ReadFrame(wxXmlNode *frameNode);
+	void ReadSystemConfig(tinyxml2::XMLElement *systemNode);
+	void UpdateStateShard(tinyxml2::XMLElement *stateNode);
+	void ReadKey(tinyxml2::XMLElement *keyNode);
+	void ReadIndexedKey(tinyxml2::XMLElement *keyNode, std::string &key);
+	void ReadSequence(tinyxml2::XMLElement *seqNode);
+	void ReadFrame(tinyxml2::XMLElement *frameNode);
 	void ReadTiff(char* pbyData, unsigned short *val);
 };
 
-#endif//_PVXML_READER_H_
+#endif//PVXML_READER_HPP

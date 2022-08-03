@@ -38,14 +38,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#pragma message ("replace dummy dialog")
-class ColocalDlg : public wxWindow
-{
-public:
-	ColocalDlg() {}
-	~ColocalDlg() {}
-};
-
 ColocalAgent::ColocalAgent(ColocalDlg &dlg) :
 	InterfaceAgent(),
 	dlg_(dlg)
@@ -303,7 +295,7 @@ void ColocalAgent::Run()
 
 void ColocalAgent::SetOutput(const std::string &titles, const std::string &values)
 {
-	wxString copy_data;
+/*	wxString copy_data;
 	wxString cur_field;
 	wxString cur_line;
 	int i, k;
@@ -384,7 +376,7 @@ void ColocalAgent::SetOutput(const std::string &titles, const std::string &value
 		dlg_.m_output_grid->SetDefaultColSize(70, true);
 	dlg_.m_output_grid->ForceRefresh();
 	dlg_.m_output_grid->ClearSelection();
-}
+*/}
 
 void ColocalAgent::OnAutoUpdateChanged(Event& event)
 {

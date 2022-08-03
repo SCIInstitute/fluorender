@@ -26,9 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "czi_reader.h"
-#include "../compatibility.h"
-#include <wx/sstream.h>
-#include <stdio.h>
+#include <compatibility.h>
+#include <Types/Utils.h>
 #include <set>
 
 std::vector<std::string> CZIReader::m_types{
@@ -77,7 +76,7 @@ CZIReader::~CZIReader()
 {
 }
 
-void CZIReader::SetFile(string &file)
+void CZIReader::SetFile(const string &file)
 {
 	if (!file.empty())
 	{
@@ -89,7 +88,7 @@ void CZIReader::SetFile(string &file)
 	m_id_string = m_path_name;
 }
 
-void CZIReader::SetFile(wstring &file)
+void CZIReader::SetFile(const wstring &file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;
@@ -113,12 +112,6 @@ int CZIReader::Preprocess()
 		if (m_dir_pos)
 			ReadSegment(pfile, m_dir_pos, SegDirectory);
 	}
-
-	//if 2d
-	if (m_czi_info.zmin == std::numeric_limits<int>::max())
-		m_czi_info.zmin = 0;
-	if (m_czi_info.zmax == std::numeric_limits<int>::min())
-		m_czi_info.zmax = 1;
 
 	fclose(pfile);
 
@@ -158,7 +151,7 @@ int CZIReader::GetDigitOrder()
 	return 0;
 }
 
-void CZIReader::SetTimeId(wstring &id)
+void CZIReader::SetTimeId(const wstring &id)
 {
 	//do nothing
 }
@@ -223,12 +216,6 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 		t < (int)m_czi_info.times.size() &&
 		c < (int)m_czi_info.times[t].channels.size())
 	{
-		ChannelInfo *cinfo = GetChaninfo(t, c);
-		if (!cinfo)
-		{
-			fclose(pfile);
-			return 0;
-		}
 		//allocate memory for nrrd
 		switch (m_datatype)
 		{
@@ -237,6 +224,7 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 			unsigned long long mem_size = (unsigned long long)m_x_size*
 				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
 			unsigned char *val = new (std::nothrow) unsigned char[mem_size];
+			ChannelInfo *cinfo = GetChaninfo(t, c);
 			for (i = 0; i < (int)cinfo->blocks.size(); i++)
 			{
 				SubBlockInfo* sbi = &(cinfo->blocks[i]);
@@ -256,6 +244,7 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 			unsigned long long mem_size = (unsigned long long)m_x_size*
 				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
 			unsigned short *val = new (std::nothrow) unsigned short[mem_size];
+			ChannelInfo *cinfo = GetChaninfo(t, c);
 			for (i = 0; i < (int)cinfo->blocks.size(); i++)
 			{
 				SubBlockInfo* sbi = &(cinfo->blocks[i]);
@@ -463,10 +452,6 @@ unsigned int CZIReader::ReadDirectoryEntry(FILE* pfile)
 
 	unsigned int dirpos = 32 + dim_count * 20;
 	sbi.dirpos = dirpos;
-
-	//skip pyramid levels for now
-	if (pyra_type > 0)
-		return dirpos;
 	//add info to list
 	TimeInfo *timeinfo = GetTimeinfo(sbi.time);
 	if (timeinfo)
@@ -526,13 +511,13 @@ bool CZIReader::ReadDirectory(FILE* pfile, unsigned long long ioffset)
 	std::set<int> channums;
 	std::set<int> timenums;
 	for (size_t i = 0; i < m_czi_info.times.size(); ++i)
-	for (size_t j = 0; j < m_czi_info.times[i].channels.size(); ++j)
-	for (size_t k = 0; k < m_czi_info.times[i].channels[j].blocks.size(); ++k)
-	{
-		channums.insert(m_czi_info.times[i].channels[j].blocks[k].chan);
-		timenums.insert(m_czi_info.times[i].channels[j].blocks[k].time);
-		pixtypes.insert(m_czi_info.times[i].channels[j].blocks[k].pxtype);
-	}
+		for (size_t j = 0; j < m_czi_info.times[i].channels.size(); ++j)
+			for (size_t k = 0; k < m_czi_info.times[i].channels[j].blocks.size(); ++k)
+			{
+				channums.insert(m_czi_info.times[i].channels[j].blocks[k].chan);
+				timenums.insert(m_czi_info.times[i].channels[j].blocks[k].time);
+				pixtypes.insert(m_czi_info.times[i].channels[j].blocks[k].pxtype);
+			}
 	m_time_num = timenums.size();
 	m_chan_num = channums.size();
 	m_slice_num = m_czi_info.zmax - m_czi_info.zmin;
@@ -598,11 +583,10 @@ bool CZIReader::ReadMetadata(FILE* pfile, unsigned long long ioffset)
 	if (!result)
 		return result;
 
-	wxXmlDocument doc;
-	wxStringInputStream wxss(xmlstr);
-	result &= doc.Load(wxss);
-	wxXmlNode *root = doc.GetRoot();
-	if (!root || root->GetName() != "ImageDocument")
+	tinyxml2::XMLDocument doc;
+	doc.Parse(xmlstr.c_str());
+	tinyxml2::XMLElement *root = doc.RootElement();
+	if (!root || strcmp(root->Name(), "ImageDocument"))
 		return false;
 
 	//get values
@@ -697,9 +681,7 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 	unsigned short minv = std::numeric_limits<unsigned short>::max();
 	unsigned short maxv = 0;
 	unsigned long long xysize = (unsigned long long)m_x_size * m_y_size;
-	unsigned long long pos = xysize * sbi->z +
-		(unsigned long long)m_x_size * sbi->y +
-		(unsigned long long)sbi->x;//consider it a brick
+	unsigned long long pos = xysize * sbi->z + m_x_size * sbi->y + sbi->x;//consider it a brick
 
 	if (bricks || compress)
 	{
@@ -722,7 +704,7 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 				for (int i = 0; i < sbi->z_size; ++i)
 				for (int j = 0; j < sbi->y_size; ++j)
 					memcpy((unsigned char*)val + pos + xysize * i + m_x_size * j,
-						block + i * sbi->x_size * sbi->y_size + j * sbi->x_size, sbi->x_size);
+						block + i * sbi->x_size * sbi->y_size + j * sbi->y_size, sbi->x_size);
 			}
 		}
 			break;
@@ -741,8 +723,7 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 				for (int i = 0; i < sbi->z_size; ++i)
 				for (int j = 0; j < sbi->y_size; ++j)
 					memcpy((unsigned short*)val + pos + xysize * i + m_x_size * j,
-						(unsigned short*)block + i * sbi->x_size * sbi->y_size + j * sbi->x_size,
-						2 * sbi->x_size);
+						block + i * sbi->x_size * sbi->y_size + j * sbi->y_size, sbi->x_size);
 			}
 			//get min max
 			GetMinMax16B((unsigned short*)val + pos,
@@ -802,38 +783,38 @@ void CZIReader::GetMinMax16B(unsigned short* val, int nx, int ny, int nz, int sx
 	}
 }
 
-void CZIReader::FindNodeRecursive(wxXmlNode* node)
+void CZIReader::FindNodeRecursive(tinyxml2::XMLElement* node)
 {
 	if (!node)
 		return;
-	wxString str;
+	std::string str;
 	double dval;
-	wxXmlNode *child = node->GetChildren();
+	tinyxml2::XMLElement *child = node->FirstChildElement();
 	while (child)
 	{
-		wxString name = child->GetName();
+		std::string name(child->Name());
 		if (name == "ScalingX")
 		{
-			str = child->GetNodeContent();
-			if (str.ToDouble(&dval))
+			str = child->GetText();
+			if (fluo::Str2Double(str, dval))
 				m_xspc = dval * 1e6;
 		}
 		else if (name == "ScalingY")
 		{
-			str = child->GetNodeContent();
-			if (str.ToDouble(&dval))
+			str = child->GetText();
+			if (fluo::Str2Double(str, dval))
 				m_yspc = dval * 1e6;
 		}
 		else if (name == "ScalingZ")
 		{
-			str = child->GetNodeContent();
-			if (str.ToDouble(&dval))
+			str = child->GetText();
+			if (fluo::Str2Double(str, dval))
 				m_zspc = dval * 1e6;
 		}
 		else if (name == "ExcitationWavelength")
 		{
-			str = child->GetNodeContent();
-			if (str.ToDouble(&dval))
+			str = child->GetText();
+			if (fluo::Str2Double(str, dval))
 			{
 				WavelengthInfo winfo;
 				winfo.chan_num = m_excitation_wavelength_list.size();
@@ -845,7 +826,7 @@ void CZIReader::FindNodeRecursive(wxXmlNode* node)
 		{
 			FindNodeRecursive(child);
 		}
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 	return;
 }
