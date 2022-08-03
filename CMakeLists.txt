@@ -733,7 +733,8 @@ elseif(WIN32)
     ${OpenCL_LIBRARIES}
     ${OpenVR_LIBRARIES}
     ${FREETYPE_LIBRARIES}
-    ${ND2_LIBRARIES})
+    ${ND2_LIBRARIES}
+	${TIFF_LIBRARIES})
 endif()
 
 

@@ -30,6 +30,18 @@ DEALINGS IN THE SOFTWARE.
 #pragma message ("replace main frame")
 //#include <RenderFrame.h>
 
+#ifdef _WIN32
+#include <Windows.h>
+int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nCmdShow)
+{
+	return 0;
+}
+#else
+void main()
+{
+
+}
+#endif
 #pragma message ("replace command line handling")
 /*static const wxCmdLineEntryDesc g_cmdLineDesc[] =
 {

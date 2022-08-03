@@ -55,7 +55,10 @@ public:
 	void SetWinHeight(long lval) { m_win_height = lval; }
 	void SetBitRate(double dval) { m_bitrate = dval; }
 	void SetMovFile(const std::string& sval) { m_mov_file = sval; }
-	void AddFile(const std::vector<std::string>& saval) { m_files.insert(m_files.end(), saval.begin(), saval.end()); }
+	void AddFile(const std::vector<std::wstring>& saval)
+	{
+		m_files.insert(m_files.end(), saval.begin(), saval.end());
+	}
 
 private:
 	//RenderFrame* m_frame;
