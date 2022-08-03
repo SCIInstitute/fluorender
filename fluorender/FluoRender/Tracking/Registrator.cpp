@@ -101,7 +101,7 @@ bool Registrator::Run(size_t f1, size_t f2,
 	if (mode == 0)
 	{
 		m_offt = fluo::Vector(m_translate);
-		m_offa = fluo::Vector(m_euler);
+		m_offa = -fluo::Vector(m_euler);
 	}
 	else
 	{
