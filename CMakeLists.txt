@@ -38,16 +38,25 @@ cmake_minimum_required(VERSION 2.8.12)
 
 IF(APPLE)
   set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "set to 10.15 to use std::filesystem")
-endif()
-
-# for MSVC builds
-if(WIN32)
+elseif(WIN32)
   if(MSVC)
     SET(MSVC_INCREMENTAL_DEFAULT OFF)
   endif()
 endif()
 
-project(FluoRender)
+project(FluoRender LANGUAGES CXX)
+
+############################# ARS
+set(FLUORENDER_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(FLUORENDER_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
+# Set up easy to use includes for the common directory
+SET(FLUORENDER_COMMON_INCLUDES
+    ${FLUORENDER_BINARY_DIR}/include
+    ${FLUORENDER_SOURCE_DIR}/include
+)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+############################# ARS
 
 IF((COMMAND cmake_policy) AND NOT (CMAKE_MAJOR_VERSION LESS 3))
   CMAKE_POLICY(SET CMP0040 NEW)
@@ -55,7 +64,7 @@ IF((COMMAND cmake_policy) AND NOT (CMAKE_MAJOR_VERSION LESS 3))
 ENDIF()
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/CMake/Modules/")
 
 if(UNIX OR APPLE OR MINGW)
   set(ARCHITECTURE 64)
@@ -197,6 +206,50 @@ if(ZLIB_FOUND)
   add_definitions(-DTEEM_ZLIB=1)
   include_directories(${ZLIB_INCLUDE_DIRS})
 endif()
+
+############################# ARS
+
+# Use the FluoRender specific Findqtadvanceddocking.cmake as the
+# default qtadvanceddockingConfig.cmake does not set everything needed.
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${FLUORENDER_SOURCE_DIR}/CMake)
+#set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${qtadvanceddocking_DIR}/lib/cmake/qtadvanceddocking)
+
+# Qt needs this package.
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${QT_DIR}/lib/cmake/Qt6/3rdparty/extra-cmake-modules/find-modules")
+find_package(XCB COMPONENTS XCB)
+
+# Find all of the Qt6 componenets.
+set(Qt6_DIR             "${QT_DIR}/lib/cmake/Qt6")
+set(Qt6Core_DIR         "${QT_DIR}/lib/cmake/Qt6Core")
+set(Qt6CoreTools_DIR    "${QT_DIR}/lib/cmake/Qt6CoreTools")
+set(Qt6GuiTools_DIR     "${QT_DIR}/lib/cmake/Qt6GuiTools")
+set(Qt6WidgetsTools_DIR "${QT_DIR}/lib/cmake/Qt6WidgetsTools")
+set(Qt6DBusTools_DIR    "${QT_DIR}/lib/cmake/Qt6DBusTools")
+
+set(QT_COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets UiPlugin)
+string(REGEX REPLACE "([^;]+)(;|$)" "Qt::\\1\\2" QT_LIBRARIES "${QT_COMPONENTS}")
+
+find_package(Qt6 REQUIRED COMPONENTS ${QT_COMPONENTS})
+
+# Qt specific bits.
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+# The Qt Advanced Docking package is optional just in case a minimal
+# build is desired.
+if(DEFINED qtadvanceddocking_DIR)
+  find_package(qtadvanceddocking REQUIRED COMPONENTS qtadvanceddocking)
+else(DEFINED qtadvanceddocking_DIR)
+  find_package(qtadvanceddocking OPTIONAL COMPONENTS qtadvanceddocking)
+endif(DEFINED qtadvanceddocking_DIR)
+
+# Sets up the FluoRender HAVE_* specific defines - must be done after
+# all packages are found.
+CONFIGURE_FILE(${FLUORENDER_SOURCE_DIR}/fluorender/FluoRender/include/fluorender-cmake.h.in
+               ${FLUORENDER_BINARY_DIR}/fluorender/FluoRender/include/fluorender-config.h @ONLY IMMEDIATE)
+
+############################# ARS
 
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem)
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Biff)

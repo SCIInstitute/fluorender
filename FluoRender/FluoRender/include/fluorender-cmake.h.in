@@ -1,0 +1,8 @@
+/* include/fluorender-config.h.in. */
+
+/*******************************************************************************
+ * Optional Qt libraries
+ ******************************************************************************/
+
+/* Define if the ADS (advanced docking system) library. */
+#cmakedefine HAVE_ADS
