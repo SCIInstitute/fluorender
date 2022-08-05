@@ -528,7 +528,7 @@ void ScriptProc::RunPostTracking()
 	cur_vol->getValue(gstResZ, nz);
 	//update the mask according to the new label
 	unsigned long long for_size = nx * ny * nz;
-	memset((void*)mask_data, 0, sizeof(uint8)*for_size);
+	memset((void*)mask_data, 0, sizeof(uint8_t)*for_size);
 	for (unsigned long long idx = 0;
 		idx < for_size; ++idx)
 	{

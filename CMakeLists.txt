@@ -36,6 +36,10 @@ endif()
 
 cmake_minimum_required(VERSION 2.8.12)
 
+IF(APPLE)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "set to 10.15 to use std::filesystem")
+endif()
+
 # for MSVC builds
 if(WIN32)
   if(MSVC)
@@ -182,7 +186,7 @@ if (JNI_FOUND)
 endif()
 
 # tiff
-find_package(TIFF REQUIRED COMPONENTS CXX)
+find_package(TIFF REQUIRED)
 if (TIFF_FOUND)
   include_directories(${TIFF_INCLUDE_DIRS})
 endif()
@@ -237,6 +241,9 @@ if(WIN32)
 elseif(APPLE)
   include_directories(${FluoRender_SOURCE_DIR}/FluoRender/ffmpeg/include)
   file(GLOB FFMPEG_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/ffmpeg/lib/OSX/*.a)
+
+  find_library(AUDIOTOOLBOX_LIBRARIES AudioToolbox REQUIRED)
+  MARK_AS_ADVANCED(AUDIOTOOLBOX_LIBRARIES)
 else()
   find_package(FFMPEG REQUIRED)
   #string(REPLACE "/usr/include/" "" FFMPEG_INCLUDE_DIR "${FFMPEG_INCLUDE_DIR}")
@@ -714,6 +721,7 @@ target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
 if(UNIX OR APPLE OR MINGW)
   target_link_libraries(FluoRender
     ${FFMPEG_LIBRARIES}
+    ${AUDIOTOOLBOX_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OpenCL_LIBRARIES}

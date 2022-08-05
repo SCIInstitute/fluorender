@@ -423,6 +423,7 @@ inline void SLEEP(unsigned long t)
 
 #define FSEEK64     fseek
 
+inline char GETSLASHA() { return '/'; }
 inline wchar_t GETSLASH() { return L'/'; }
 
 inline bool str_mat(std::wstring &s1, size_t p1, std::wstring &s2, size_t p2)
@@ -725,14 +726,14 @@ inline int MkDirW(std::wstring dirname)
 
 inline bool FILE_EXISTS(const std::string& name)
 {
-	struct stat buffer;
-	return (stat(name.c_str(), &buffer) == 0);
+	const std::filesystem::path p(name);
+	return std::filesystem::exists(p);
 }
 
 inline bool FILE_EXISTS(const std::wstring& name)
 {
-	struct stat buffer;
-	return (stat(name.c_str(), &buffer) == 0);
+	const std::filesystem::path p(name);
+	return std::filesystem::exists(p);
 }
 
 inline bool DIR_EXISTS(const std::string& name)

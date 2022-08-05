@@ -37,9 +37,9 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLin
 	return 0;
 }
 #else
-void main()
+int main()
 {
-
+  return 1;
 }
 #endif
 #pragma message ("replace command line handling")

@@ -84,7 +84,11 @@ Renderview::Renderview()
 	m_cur_ruler = 0;
 	m_trace_group = 0;
 	m_mvr = 0;
+#ifdef _WIN32
+#ifdef USE_XINPUT
 	m_controller = 0;
+#endif
+#endif
 	//temporary, dynamic data will be managed by global
 	m_ruler_list = new flrd::RulerList();
 	m_kernel_executor = new flrd::KernelExecutor();
@@ -107,7 +111,11 @@ Renderview::Renderview(const Renderview& view, const CopyOp& copyop) :
 	m_cur_ruler = 0;
 	m_trace_group = 0;
 	m_mvr = 0;
+#ifdef _WIN32
+#ifdef USE_XINPUT
 	m_controller = 0;
+#endif
+#endif
 	//temporary, dynamic data will be managed by global
 	m_ruler_list = new flrd::RulerList();
 	m_kernel_executor = new flrd::KernelExecutor();

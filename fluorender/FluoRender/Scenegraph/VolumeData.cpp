@@ -1329,13 +1329,13 @@ void VolumeData::AddEmptyData(int bits,
 	{
 		unsigned long long mem_size = (unsigned long long)nx*
 			(unsigned long long)ny*(unsigned long long)nz;
-		uint8 *val8 = new (std::nothrow) uint8[mem_size];
+		uint8_t *val8 = new (std::nothrow) uint8_t[mem_size];
 		if (!val8)
 		{
 			//wxMessageBox("Not enough memory. Please save project and restart.");
 			return;
 		}
-		memset((void*)val8, 0, sizeof(uint8)*nx*ny*nz);
+		memset((void*)val8, 0, sizeof(uint8_t)*nx*ny*nz);
         //nrrdWrap(nv, val8, nrrdTypeUChar, 3, (size_t)nx, (size_t)ny, (size_t)nz); //may be deprecated
         nrrdWrap_va(nv, val8, nrrdTypeUChar, 3, (size_t)nx, (size_t)ny, (size_t)nz);
 		setValue(gstBits, long(8));
@@ -1344,13 +1344,13 @@ void VolumeData::AddEmptyData(int bits,
 	{
 		unsigned long long mem_size = (unsigned long long)nx*
 			(unsigned long long)ny*(unsigned long long)nz;
-		uint16 *val16 = new (std::nothrow) uint16[mem_size];
+		uint16_t *val16 = new (std::nothrow) uint16_t[mem_size];
 		if (!val16)
 		{
 			//wxMessageBox("Not enough memory. Please save project and restart.");
 			return;
 		}
-		memset((void*)val16, 0, sizeof(uint16)*nx*ny*nz);
+		memset((void*)val16, 0, sizeof(uint16_t)*nx*ny*nz);
         //nrrdWrap(nv, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz); //may be deprecated
         nrrdWrap_va(nv, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz);
 		setValue(gstBits, long(16));
@@ -1479,7 +1479,7 @@ void VolumeData::AddEmptyMask(int mode, bool change)
 		return;
 
 	Nrrd *nrrd_mask = 0;
-	uint8 *val8 = 0;
+	uint8_t *val8 = 0;
 	long resx, resy, resz;
 	getValue(gstResX, resx);
 	getValue(gstResY, resy);
@@ -1492,7 +1492,7 @@ void VolumeData::AddEmptyMask(int mode, bool change)
 	{
 		//add the nrrd data for mask
 		nrrd_mask = nrrdNew();
-		val8 = new (std::nothrow) uint8[mem_size];
+		val8 = new (std::nothrow) uint8_t[mem_size];
 		if (!val8)
 		{
 			//wxMessageBox("Not enough memory. Please save project and restart.");
@@ -1522,7 +1522,7 @@ void VolumeData::AddEmptyMask(int mode, bool change)
 	else
 	{
 		nrrd_mask = m_tex->get_nrrd(m_tex->nmask());
-		val8 = (uint8*)nrrd_mask->data;
+		val8 = (uint8_t*)nrrd_mask->data;
 	}
 
 	if (empty || change)
@@ -1531,7 +1531,7 @@ void VolumeData::AddEmptyMask(int mode, bool change)
 		{
 			if (val8)
 				memset((void*)val8, mode ?
-					255 : 0, mem_size * sizeof(uint8));
+					255 : 0, mem_size * sizeof(uint8_t));
 		}
 	}
 }
@@ -1551,7 +1551,7 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 		return;
 
 	Nrrd *nrrd_mask = 0;
-	uint8 *val8 = 0;
+	uint8_t *val8 = 0;
 	unsigned long long mem_size = (unsigned long long)resx*
 		(unsigned long long)resy*(unsigned long long)resz;
 	//prepare the texture bricks for the mask
@@ -1560,7 +1560,7 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 	{
 		//add the nrrd data for mask
 		nrrd_mask = nrrdNew();
-		val8 = new (std::nothrow) uint8[mem_size];
+		val8 = new (std::nothrow) uint8_t[mem_size];
 		if (!val8)
 		{
 			//wxMessageBox("Not enough memory. Please save project and restart.");
@@ -1579,7 +1579,7 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 	else
 	{
 		nrrd_mask = m_tex->get_nrrd(m_tex->nmask());
-		val8 = (uint8*)nrrd_mask->data;
+		val8 = (uint8_t*)nrrd_mask->data;
 	}
 
 	if (val8)
@@ -1593,7 +1593,7 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 					index < mem_size; ++index)
 				{
 					val8[index] = std::max(val8[index],
-						((uint8*)(mask->data))[index]);
+						((uint8_t*)(mask->data))[index]);
 				}
 				break;
 			case 2://exclude
@@ -1601,7 +1601,7 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 					index < mem_size; ++index)
 				{
 					if (std::min(val8[index],
-						((uint8*)(mask->data))[index]) > 0)
+						((uint8_t*)(mask->data))[index]) > 0)
 						val8[index] = 0;
 				}
 				break;
@@ -1610,14 +1610,14 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 					index < mem_size; ++index)
 				{
 					val8[index] = std::min(val8[index],
-						((uint8*)(mask->data))[index]);
+						((uint8_t*)(mask->data))[index]);
 				}
 				break;
 			}
 		}
 		else//replace
 		{
-			memcpy(val8, mask->data, mem_size * sizeof(uint8));
+			memcpy(val8, mask->data, mem_size * sizeof(uint8_t));
 		}
 		m_vr->clear_tex_mask(false);
 	}
@@ -1638,7 +1638,7 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 		return;
 
 	Nrrd *nrrd_mask = 0;
-	uint8 *val8 = 0;
+	uint8_t *val8 = 0;
 	unsigned long long mem_size = (unsigned long long)resx*
 		(unsigned long long)resy*(unsigned long long)resz;
 	//prepare the texture bricks for the mask
@@ -1647,7 +1647,7 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 	{
 		//add the nrrd data for mask
 		nrrd_mask = nrrdNew();
-		val8 = new (std::nothrow) uint8[mem_size];
+		val8 = new (std::nothrow) uint8_t[mem_size];
 		if (!val8)
 		{
 			//wxMessageBox("Not enough memory. Please save project and restart.");
@@ -1666,7 +1666,7 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 	else
 	{
 		nrrd_mask = m_tex->get_nrrd(m_tex->nmask());
-		val8 = (uint8*)nrrd_mask->data;
+		val8 = (uint8_t*)nrrd_mask->data;
 	}
 
 	if (val8)
@@ -1680,7 +1680,7 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 					index < mem_size; ++index)
 				{
 					val8[index] = std::max(val8[index],
-						uint8(scale*((uint16*)(mask->data))[index]));
+						uint8_t(scale*((uint16_t*)(mask->data))[index]));
 				}
 				break;
 			case 2://exclude
@@ -1688,7 +1688,7 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 					index < mem_size; ++index)
 				{
 					if (std::min(val8[index],
-						uint8(scale*((uint16*)(mask->data))[index])) > 0)
+						uint8_t(scale*((uint16_t*)(mask->data))[index])) > 0)
 						val8[index] = 0;
 				}
 				break;
@@ -1697,7 +1697,7 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 					index < mem_size; ++index)
 				{
 					val8[index] = std::min(val8[index],
-						uint8(scale*((uint16*)(mask->data))[index]));
+						uint8_t(scale*((uint16_t*)(mask->data))[index]));
 				}
 				break;
 			}
@@ -1707,7 +1707,7 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 			for (unsigned long long index = 0;
 				index < mem_size; ++index)
 			{
-				val8[index] = uint8(scale*((uint16*)(mask->data))[index]);
+				val8[index] = uint8_t(scale*((uint16_t*)(mask->data))[index]);
 			}
 		}
 		m_vr->clear_tex_mask(false);
@@ -1944,13 +1944,13 @@ double VolumeData::GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b)
 	if (bits == 8)
 	{
 		uint64_t index = (nx)*(ny)*(kk)+(nx)*(jj)+(ii);
-		uint8 old_value = ((uint8*)(data_data))[index];
+		uint8_t old_value = ((uint8_t*)(data_data))[index];
 		return double(old_value) / 255.0;
 	}
 	else if (bits == 16)
 	{
 		uint64_t index = (nx)*(ny)*(kk)+(nx)*(jj)+(ii);
-		uint16 old_value = ((uint16*)(data_data))[index];
+		uint16_t old_value = ((uint16_t*)(data_data))[index];
 		return double(old_value)*int_scale / 65535.0;
 	}
 
@@ -2010,7 +2010,7 @@ double VolumeData::GetTransferValue(int i, int j, int k, flvr::TextureBrick* b)
 	if (bits == 8)
 	{
 		uint64_t index = nx*ny*kk + nx*jj + ii;
-		uint8 old_value = ((uint8*)(data_data))[index];
+		uint8_t old_value = ((uint8_t*)(data_data))[index];
 		double gm = 0.0;
 		double new_value = double(old_value) / 255.0;
 		if (m_vr->get_inversion())
@@ -2019,12 +2019,12 @@ double VolumeData::GetTransferValue(int i, int j, int k, flvr::TextureBrick* b)
 			j>0 && j<ny - 1 &&
 			k>0 && k<nz - 1)
 		{
-			double v1 = ((uint8*)(data_data))[nx*ny*kk + nx*jj + ii - 1];
-			double v2 = ((uint8*)(data_data))[nx*ny*kk + nx*jj + ii + 1];
-			double v3 = ((uint8*)(data_data))[nx*ny*kk + nx*(jj - 1) + ii];
-			double v4 = ((uint8*)(data_data))[nx*ny*kk + nx*(jj + 1) + ii];
-			double v5 = ((uint8*)(data_data))[nx*ny*(kk - 1) + nx*jj + ii];
-			double v6 = ((uint8*)(data_data))[nx*ny*(kk + 1) + nx*jj + ii];
+			double v1 = ((uint8_t*)(data_data))[nx*ny*kk + nx*jj + ii - 1];
+			double v2 = ((uint8_t*)(data_data))[nx*ny*kk + nx*jj + ii + 1];
+			double v3 = ((uint8_t*)(data_data))[nx*ny*kk + nx*(jj - 1) + ii];
+			double v4 = ((uint8_t*)(data_data))[nx*ny*kk + nx*(jj + 1) + ii];
+			double v5 = ((uint8_t*)(data_data))[nx*ny*(kk - 1) + nx*jj + ii];
+			double v6 = ((uint8_t*)(data_data))[nx*ny*(kk + 1) + nx*jj + ii];
 			double normal_x, normal_y, normal_z;
 			normal_x = (v2 - v1) / 255.0;
 			normal_y = (v4 - v3) / 255.0;
@@ -2055,7 +2055,7 @@ double VolumeData::GetTransferValue(int i, int j, int k, flvr::TextureBrick* b)
 	else if (bits == 16)
 	{
 		uint64_t index = nx*ny*kk + nx*jj + ii;
-		uint16 old_value = ((uint16*)(data_data))[index];
+		uint16_t old_value = ((uint16_t*)(data_data))[index];
 		double gm = 0.0;
 		double new_value = double(old_value)*int_scale / 65535.0;
 		if (m_vr->get_inversion())
@@ -2064,12 +2064,12 @@ double VolumeData::GetTransferValue(int i, int j, int k, flvr::TextureBrick* b)
 			jj>0 && jj<ny - 1 &&
 			kk>0 && kk<nz - 1)
 		{
-			double v1 = ((uint8*)(data_data))[nx*ny*kk + nx*jj + ii - 1];
-			double v2 = ((uint8*)(data_data))[nx*ny*kk + nx*jj + ii + 1];
-			double v3 = ((uint8*)(data_data))[nx*ny*kk + nx*(jj - 1) + ii];
-			double v4 = ((uint8*)(data_data))[nx*ny*kk + nx*(jj + 1) + ii];
-			double v5 = ((uint8*)(data_data))[nx*ny*(kk - 1) + nx*jj + ii];
-			double v6 = ((uint8*)(data_data))[nx*ny*(kk + 1) + nx*jj + ii];
+			double v1 = ((uint8_t*)(data_data))[nx*ny*kk + nx*jj + ii - 1];
+			double v2 = ((uint8_t*)(data_data))[nx*ny*kk + nx*jj + ii + 1];
+			double v3 = ((uint8_t*)(data_data))[nx*ny*kk + nx*(jj - 1) + ii];
+			double v4 = ((uint8_t*)(data_data))[nx*ny*kk + nx*(jj + 1) + ii];
+			double v5 = ((uint8_t*)(data_data))[nx*ny*(kk - 1) + nx*jj + ii];
+			double v6 = ((uint8_t*)(data_data))[nx*ny*(kk + 1) + nx*jj + ii];
 			double normal_x, normal_y, normal_z;
 			normal_x = (v2 - v1)*int_scale / 65535.0;
 			normal_y = (v4 - v3)*int_scale / 65535.0;

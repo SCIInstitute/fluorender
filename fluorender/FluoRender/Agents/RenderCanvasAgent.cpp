@@ -104,9 +104,10 @@ void RenderCanvasAgent::Init(unsigned long long hwnd, unsigned long long inst)
 	flvr::KernelProgram::set_device_id(lval);
 	flvr::KernelProgram::init_kernels_supported();
 #ifdef _DARWIN
-	CGLContextObj ctx = CGLGetCurrentContext();
-	if (ctx != flvr::TextureRenderer::gl_context_)
-		flvr::TextureRenderer::gl_context_ = ctx;
+#pragma message ("replace with canvas refresh code")
+	// CGLContextObj ctx = CGLGetCurrentContext();
+	// if (ctx != flvr::TextureRenderer::gl_context_)
+	// 	flvr::TextureRenderer::gl_context_ = ctx;
 #endif
 
 	Renderview* view = getObject();
