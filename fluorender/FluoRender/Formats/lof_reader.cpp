@@ -352,6 +352,7 @@ unsigned long long LOFReader::ReadMetadata(FILE* pfile, unsigned long long ioffs
 	result &= fread(&temp[0], 1, xmlsize * 2, pfile) == xmlsize * 2;
 	if (!result)
 		return 0;
+#pragma message ("FIXME OLD WX CODE")
 	// wxMBConvUTF16 conv;
 	// wxString xmlstr(temp.c_str(), conv);
 	std::string xmlstr;
