@@ -77,11 +77,11 @@ private:
 		bool bval;
 		getValue(hold, bval);
 		setValue(hold, state);
-		if (state && !bval)
+		if (state && !bval)//down = not hold before but hold now
 			setValue(down, true);
 		else
 			setValue(down, false);
-		if (!state && bval)
+		if (!state && bval)//up = hold before but not hold now
 			setValue(up, true);
 		else
 			setValue(up, false);
