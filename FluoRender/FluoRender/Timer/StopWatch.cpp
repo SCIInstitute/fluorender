@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <chrono>
 
 using namespace fluo;
-using namespace std::chrono;
+
 // Default constructor
 //
 StopWatch::StopWatch(unsigned int nBoxFilterSize) :
@@ -93,8 +93,8 @@ void
 StopWatch::start()
 {
 	if (_bClockRuns) return;
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	_nStartCount = time_point_cast<milliseconds>(t1).time_since_epoch().count();
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+	_nStartCount = std::chrono::time_point_cast<std::chrono::milliseconds>(t1).time_since_epoch().count();
 	_bClockRuns = true;
 }
 
@@ -104,8 +104,8 @@ void
 StopWatch::stop()
 {
 	if (!_bClockRuns) return;
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	_nStopCount = time_point_cast<milliseconds>(t1).time_since_epoch().count();
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+	_nStopCount = std::chrono::time_point_cast<std::chrono::milliseconds>(t1).time_since_epoch().count();
 	_nLastPeriod = static_cast<double>(_nStopCount - _nStartCount)
 		/ static_cast<double>(_nFrequency);
 
@@ -123,8 +123,8 @@ StopWatch::sample()
 {
 	if (!_bClockRuns) return;
 	unsigned long long nCurrentCount;
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	nCurrentCount = time_point_cast<milliseconds>(t1).time_since_epoch().count();
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+	nCurrentCount = std::chrono::time_point_cast<std::chrono::milliseconds>(t1).time_since_epoch().count();
 	_nLastPeriod = static_cast<double>(nCurrentCount - _nStartCount)
 		/ static_cast<double>(_nFrequency);
 	_nStartCount = nCurrentCount;
@@ -194,10 +194,10 @@ StopWatch::total_fps() const
 
 unsigned long long StopWatch::sys_time()
 {
-	return time_point_cast<seconds>(system_clock::now()).time_since_epoch().count();
+	return std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).time_since_epoch().count();
 }
 
 unsigned long long StopWatch::get_ticks()
 {
-	return time_point_cast<milliseconds>(steady_clock::now()).time_since_epoch().count();
+	return std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()).time_since_epoch().count();
 }
