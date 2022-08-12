@@ -28,13 +28,15 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_ClusterMethod_h
 #define FL_ClusterMethod_h
 
+#include "Cell.h"
+
 #include <boost/qvm/vec.hpp>
 #include <boost/qvm/mat.hpp>
 #include <boost/qvm/vec_operations.hpp>
 #include <boost/shared_ptr.hpp>
+
 #include <list>
 #include <vector>
-#include <Tracking/Cell.h>
 
 namespace flrd
 {
