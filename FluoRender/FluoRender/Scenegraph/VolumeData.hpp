@@ -31,8 +31,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Node.hpp>
 #include <Names.hpp>
+
 #include <Nrrd/nrrd.h>
 #include <glm/glm.hpp>
+
 #include <vector>
 
 namespace flvr
@@ -176,7 +178,7 @@ namespace fluo
 		std::vector<VD_Landmark> m_landmarks;
 		std::wstring m_metadata_id;
 		//save label
-		void* m_label_save;
+		unsigned int* m_label_save;
 
 	private:
 		//label functions

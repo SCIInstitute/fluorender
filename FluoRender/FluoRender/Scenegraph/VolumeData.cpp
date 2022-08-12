@@ -26,29 +26,30 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-//#include <Calculate/VolumeSampler.h>
+//#include "VolumeSampler.h"
 
 #include "VolumeData.hpp"
-#include <VolumeBaker.h>
-#include <VolumeSampler.h>
-#include <Global.hpp>
-#include <VolumeFactory.hpp>
-#include <Plane.h>
-#include <Types/Quaternion.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <Formats/base_reader.h>
-#include <Formats/oib_reader.h>
-#include <Formats/nrrd_reader.h>
-#include <Formats/tif_reader.h>
-#include <Formats/nrrd_writer.h>
-#include <Formats/tif_writer.h>
-#include <Formats/msk_reader.h>
-#include <Formats/msk_writer.h>
-#include <Formats/lsm_reader.h>
-#include <Formats/lbl_reader.h>
-#include <Formats/pvxml_reader.h>
-#include <Formats/brkxml_reader.h>
-//#include <Formats/imageJ_reader.hpp>
+#include "VolumeBaker.h"
+#include "VolumeSampler.h"
+#include "Global.hpp"
+#include "VolumeFactory.hpp"
+#include "Plane.h"
+#include "Quaternion.h"
+#include "VolumeRenderer.h"
+#include "base_reader.h"
+#include "oib_reader.h"
+#include "nrrd_reader.h"
+#include "tif_reader.h"
+#include "nrrd_writer.h"
+#include "tif_writer.h"
+#include "msk_reader.h"
+#include "msk_writer.h"
+#include "lsm_reader.h"
+#include "lbl_reader.h"
+#include "pvxml_reader.h"
+#include "brkxml_reader.h"
+//#include "imageJ_reader.hpp"
+
 #include <glm/gtc/matrix_transform.hpp>
 
 using namespace fluo;

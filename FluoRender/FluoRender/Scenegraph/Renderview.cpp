@@ -26,51 +26,53 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Renderview.hpp>
-#include <Global.hpp>
-#include <Input.hpp>
-#include <StopWatch.hpp>
-#include <AgentFactory.hpp>
-#include <ClipPlaneAgent.hpp>
-#include <ColocalAgent.hpp>
-#include <Group.hpp>
-#include <Root.hpp>
-#include <Annotations.hpp>
-#include <RenderviewFactory.hpp>
-#include <VolumeFactory.hpp>
-#include <MeshFactory.hpp>
-#include <NodeVisitor.hpp>
-#include <SearchVisitor.hpp>
-#include <Debug.hpp>
-#include <Animator/Interpolator.h>
-#include <Script/ScriptProc.h>
-#include <Selection/VolumeSelector.h>
-#include <Selection/VolumePoint.h>
-#include <Components/CompAnalyzer.h>
-#include <Calculate/VolumeCalculator.h>
-#include <Calculate/KernelExecutor.h>
-#include <Distance/Ruler.h>
-#include <Distance/RulerRenderer.h>
-#include <Distance/RulerHandler.h>
-#include <Distance/RulerAlign.h>
-#include <Distance/Cov.h>
-#include <Distance/SegGrow.h>
-#include <Tracking/Tracks.h>
-#include <FLIVR/TextureRenderer.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <FLIVR/MultiVolumeRenderer.h>
-#include <FLIVR/ShaderProgram.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/ImgShader.h>
-#include <FLIVR/VertexArray.h>
-#include <FLIVR/TextRenderer.h>
-#include <FLIVR/Framebuffer.h>
-#include <Formats/base_reader.h>
-#include <Formats/brkxml_reader.h>
+#include "Renderview.hpp"
+#include "Global.hpp"
+#include "Input.hpp"
+#include "StopWatch.hpp"
+#include "AgentFactory.hpp"
+#include "ClipPlaneAgent.hpp"
+#include "ColocalAgent.hpp"
+#include "Group.hpp"
+#include "Root.hpp"
+#include "Annotations.hpp"
+#include "RenderviewFactory.hpp"
+#include "VolumeFactory.hpp"
+#include "MeshFactory.hpp"
+#include "NodeVisitor.hpp"
+#include "SearchVisitor.hpp"
+#include "Debug.hpp"
+#include "Interpolator.h"
+#include "ScriptProc.h"
+#include "VolumeSelector.h"
+#include "VolumePoint.h"
+#include "CompAnalyzer.h"
+#include "VolumeCalculator.h"
+#include "KernelExecutor.h"
+#include "Ruler.h"
+#include "RulerRenderer.h"
+#include "RulerHandler.h"
+#include "RulerAlign.h"
+#include "Cov.h"
+#include "SegGrow.h"
+#include "Tracks.h"
+#include "TextureRenderer.h"
+#include "VolumeRenderer.h"
+#include "MultiVolumeRenderer.h"
+#include "ShaderProgram.h"
+#include "KernelProgram.h"
+#include "ImgShader.h"
+#include "VertexArray.h"
+#include "TextRenderer.h"
+#include "Framebuffer.h"
+#include "base_reader.h"
+#include "brkxml_reader.h"
+#include "compatibility_utilities.h"
+
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
 #include <array>
-#include <compatibility.h>
 
 using namespace fluo;
 
@@ -3189,7 +3191,7 @@ void Renderview::DrawLegend()
 		yoffset = ny - lh - ly + 10.0;
 	}
 
-	wstring wstr;
+	std::wstring wstr;
 	double length = 0.0;
 	double name_len = 0.0;
 	double gap_width = font_height * 1.5;
@@ -3413,7 +3415,7 @@ void Renderview::DrawCropFrame()
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
 	//draw frame
-	vector<std::pair<unsigned int, double>> params;
+	std::vector<std::pair<unsigned int, double>> params;
 	long lval;
 	getValue(gstCropX, lval);
 	params.push_back(std::pair<unsigned int, double>(0, lval));
@@ -3970,7 +3972,7 @@ void Renderview::DrawColormap()
 
 	glm::mat4 proj_mat = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
 
-	vector<float> vertex;
+	std::vector<float> vertex;
 	vertex.reserve(14 * 7);
 
 	float px, py;
@@ -4028,7 +4030,7 @@ void Renderview::DrawColormap()
 		vertex.push_back(py); vertex.push_back((0.5*lh + ly + offset) / ny); vertex.push_back(0.0);
 		vertex.push_back(c7.r()); vertex.push_back(c7.g()); vertex.push_back(c7.b()); vertex.push_back(1.0);
 
-		wstring wstr;
+		std::wstring wstr;
 
 		Color text_color;
 		getValue(gstTextColor, text_color);
@@ -4100,7 +4102,7 @@ void Renderview::DrawColormap()
 		vertex.push_back(0.05); vertex.push_back(0.5 + offset / ny); vertex.push_back(0.0);
 		vertex.push_back(c7.r()); vertex.push_back(c7.g()); vertex.push_back(c7.b()); vertex.push_back(1.0);
 
-		wstring wstr;
+		std::wstring wstr;
 
 		Color text_color;
 		getValue(gstTextColor, text_color);
@@ -4211,7 +4213,7 @@ void Renderview::DrawGradBg()
 			std::min(hsv_color1.val() + 0.5, 1.0)));
 	}
 
-	vector<float> vertex;
+	std::vector<float> vertex;
 	vertex.reserve(16 * 3);
 	vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
 	vertex.push_back(cbg.r()); vertex.push_back(cbg.g()); vertex.push_back(cbg.b());
@@ -4350,7 +4352,7 @@ void Renderview::DrawInfo()
 			cvol->getValue(gstSpcX, spcx);
 			cvol->getValue(gstSpcY, spcy);
 			cvol->getValue(gstSpcZ, spcz);
-			vector<Plane*> *planes = cvol->GetRenderer()->get_planes();
+			std::vector<Plane*> *planes = cvol->GetRenderer()->get_planes();
 			Plane* plane = (*planes)[4];
 			double abcd[4];
 			plane->get_copy(abcd);
@@ -4496,10 +4498,10 @@ void Renderview::CalcFogRange()
 		mv.set(glm::value_ptr(m_mv_mat));
 
 		double minz, maxz;
-		minz = numeric_limits<double>::max();
-		maxz = -numeric_limits<double>::max();
+		minz =  std::numeric_limits<double>::max();
+		maxz = -std::numeric_limits<double>::max();
 
-		vector<Point> points;
+		std::vector<Point> points;
 		points.push_back(Point(bbox.Min().x(), bbox.Min().y(), bbox.Min().z()));
 		points.push_back(Point(bbox.Min().x(), bbox.Min().y(), bbox.Max().z()));
 		points.push_back(Point(bbox.Min().x(), bbox.Max().y(), bbox.Min().z()));
@@ -6172,7 +6174,7 @@ void Renderview::DrawMIP(VolumeData* vd, long peel)
 	if (flvr::TextureRenderer::get_mem_swap() &&
 		flvr::TextureRenderer::get_done_current_chan())
 	{
-		vector<flvr::TextureBrick*> *bricks =
+		std::vector<flvr::TextureBrick*> *bricks =
 			vd->GetTexture()->get_bricks();
 		for (int i = 0; i < bricks->size(); i++)
 			(*bricks)[i]->set_drawn(false);
@@ -6391,7 +6393,7 @@ void Renderview::DrawOVER(VolumeData* vd, bool mask, int peel)
 	if (flvr::TextureRenderer::get_mem_swap() &&
 		flvr::TextureRenderer::get_done_current_chan())
 	{
-		vector<flvr::TextureBrick*> *bricks =
+		std::vector<flvr::TextureBrick*> *bricks =
 			vd->GetTexture()->get_bricks();
 		for (int i = 0; i < bricks->size(); i++)
 			(*bricks)[i]->set_drawn(false);
@@ -6496,9 +6498,9 @@ void Renderview::DrawOLShadows(VolumeList &vlist)
 
 	size_t i;
 	bool has_shadow = false;
-	vector<long> colormodes;
-	vector<bool> shadings;
-	vector<long> mip_modes;
+	std::vector<long> colormodes;
+	std::vector<bool> shadings;
+	std::vector<long> mip_modes;
 	VolumeList list;
 	//generate list
 	for (i = 0; i < vlist.size(); i++)
@@ -7011,7 +7013,7 @@ void Renderview::DrawBrush()
 		float px, py;
 		px = cx2 - 7 - nx / 2.0;
 		py = cy2 - 3 - ny / 2.0;
-		wstring wstr;
+		std::wstring wstr;
 		switch (mode)
 		{
 		case 1:
@@ -7383,8 +7385,13 @@ void Renderview::PostDraw()
 	getValue(gstCaptureFloat, fp32);
 	getValue(gstCaptureCompress, compress);
 	long x, y, w, h;
-	void* image = 0;
-	ReadPixels(chann, fp32, x, y, w, h, &image);
+	unsigned char* line_c = nullptr;
+	float*         line_f = nullptr;
+
+	if(fp32)
+	  ReadPixels(chann, fp32, x, y, w, h, (void **) &line_f);
+	else
+	  ReadPixels(chann, fp32, x, y, w, h, (void **) &line_c);
 
 	TIFF *out = TIFFOpenW(cap_file, "wb");
 	if (!out)
@@ -7412,16 +7419,16 @@ void Renderview::PostDraw()
 	void *buf = NULL;
 	buf = _TIFFmalloc(linebytes);
 	TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out, 0));
-	for (uint32 row = 0; row < (uint32)h; row++)
+	for (uint32_t row = 0; row < (uint32_t)h; row++)
 	{
 		if (fp32)
 		{
-			float* line = ((float*)image) + (h - row - 1) * chann * w;
+			float* line = line_f + (h - row - 1) * chann * w;
 			memcpy(buf, line, linebytes);
 		}
 		else
 		{// check the index here, and figure out why not using h*linebytes
-			unsigned char* line = ((unsigned char*)image) + (h - row - 1) * chann * w;
+			unsigned char* line = line_c + (h - row - 1) * chann * w;
 			memcpy(buf, line, linebytes);
 		}
 		if (TIFFWriteScanline(out, buf, row, 0) < 0)
@@ -7430,8 +7437,10 @@ void Renderview::PostDraw()
 	TIFFClose(out);
 	if (buf)
 		_TIFFfree(buf);
-	if (image)
-		delete[]image;
+	if (line_c)
+		delete[] line_c;
+	if (line_f)
+		delete[] line_f;
 
 	setValue(gstCapture, false);
 }
@@ -7715,7 +7724,7 @@ void Renderview::SetCenter()
 		vd->getValue(gstBounds, bbox);
 		flvr::VolumeRenderer *vr = vd->GetRenderer();
 		if (!vr) return;
-		vector<Plane*> *planes = vr->get_planes();
+		std::vector<Plane*> *planes = vr->get_planes();
 		if (planes->size() != 6) return;
 		double x1, x2, y1, y2, z1, z2;
 		double abcd[4];
@@ -7883,7 +7892,7 @@ void Renderview::switchLevel(VolumeData *vd)
 		}
 		if (prev_lv != new_lv)
 		{
-			vector<flvr::TextureBrick*> *bricks = vtex->get_bricks();
+			std::vector<flvr::TextureBrick*> *bricks = vtex->get_bricks();
 			if (bricks)
 			{
 				for (int i = 0; i < bricks->size(); i++)
@@ -8806,8 +8815,7 @@ void Renderview::HandleIdle()
 	{
 		double fps = 1.0 / glbin.getStopWatch(gstStopWatch)->average();
 		//wxString title = wxString(FLUORENDER_TITLE) +
-		//	" " + wxString(VERSION_MAJOR_TAG) +
-		//	"." + wxString(VERSION_MINOR_TAG) +
+		//	" " + wxString(FLUORENDER_VERSION_STRING) +
 		//	" Benchmarking... FPS = " +
 		//	wxString::Format("%.2f", fps);
 		//m_frame->SetTitle(title);

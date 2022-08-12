@@ -27,10 +27,10 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <MeshData.hpp>
-#include <FLIVR/MeshRenderer.h>
-#include <FLIVR/glm.h>
+#include <MeshRenderer.h>
+#include <glm.h>
 #include <glm/gtc/matrix_transform.hpp>
-#include <compatibility.h>
+#include <compatibility_utilities.h>
 
 using namespace fluo;
 

@@ -31,13 +31,13 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.hpp>
 #include <Names.hpp>
 #include <VolumeFactory.hpp>
-#include <FLIVR/Texture.h>
-#include <FLIVR/VolumeRenderer.h>
+#include <Texture.h>
+#include <VolumeRenderer.h>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
-#include <compatibility.h>
+#include <compatibility_utilities.h>
 
 using namespace fluo;
 

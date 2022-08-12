@@ -29,9 +29,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef ANNOTATIONS_HPP
 #define ANNOTATIONS_HPP
 
-#include <Node.hpp>
-#include <Names.hpp>
-#include <FLIVR/TextRenderer.h>
+#include "Node.hpp"
+#include "Names.hpp"
+#include "TextRenderer.h"
+
 #include <string>
 #include <vector>
 
