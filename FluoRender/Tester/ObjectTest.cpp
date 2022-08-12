@@ -1,9 +1,9 @@
 #include "tests.h"
 #include "asserts.h"
-#include <vector>
-#include <Flobject/Object.hpp>
+#include "Object.hpp"
 
-using namespace std;
+#include <vector>
+
 using namespace fluo;
 
 void ObjectTest()
@@ -15,7 +15,7 @@ void ObjectTest()
 	Object *obj1 = new Object();
 	obj1->setName("obj1");
 	//declaring a list of objects
-	vector<ref_ptr<Object>> obj_list;
+	std::vector<ref_ptr<Object>> obj_list;
 	//add the first object to the list
 	obj_list.push_back(obj1);
 	ASSERT_EQ(1, obj_list.size());
@@ -87,7 +87,7 @@ void ObjectTest()
 void ObjectTest2()
 {
 	Object* obj1 = new Object();
-	vector<ref_ptr<Object>> obj_list;
+	std::vector<ref_ptr<Object>> obj_list;
 	obj_list.push_back(obj1);
 	obj1->addValue("value1", 0.0);
 	obj1->addValue("value2", 0.0);
@@ -150,7 +150,7 @@ void ObjectTest2()
 void ObjectTest3()
 {
 	Object* obj1 = new Object();
-	vector<ref_ptr<Object>> obj_list;
+	std::vector<ref_ptr<Object>> obj_list;
 	obj_list.push_back(obj1);
 	obj1->addValue("value1", 0.0);
 	Object* obj2 = new Object(*obj1, CopyOp::DEEP_COPY_ALL);
@@ -197,11 +197,11 @@ void ObjectTest4()
 	};
 
 	TestObject* obj = new TestObject();
-	vector<ref_ptr<Object>> obj_list;
+	std::vector<ref_ptr<Object>> obj_list;
 	obj_list.push_back(obj);
 
 	Object* test_object = obj->getTest();
-	cout << test_object->getName() << endl;
+	std::cout << test_object->getName() << std::endl;
 
 	ref_ptr<Object> obj2 = obj;
 

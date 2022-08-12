@@ -4,8 +4,6 @@
 #include "tests.h"
 #include "reformat_data.h"
 
-using namespace std;
-
 int main(int argc, char* argv[])
 {
 	//char* leak = new char[1000];
@@ -28,7 +26,7 @@ int main(int argc, char* argv[])
 
 	//reformat_data();
 
-	cout << "All done. Quit." << endl;
-	cin.get();
+	std::cout << "All done. Quit." << std::endl;
+	std::cin.get();
 	return 0;
 }

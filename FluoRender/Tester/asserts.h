@@ -15,12 +15,12 @@
 
 #define ASSERT_TRUE(condition) \
 	if (condition) \
-		std::cout << "SUCCESS." << endl; \
+		std::cout << "SUCCESS." << std::endl; \
 	else \
-		std::cout <<"FAIL." << endl
+		std::cout <<"FAIL." << std::endl
 
 #define ASSERT_FALSE(condition) \
 	if (condition) \
-		std::cout << "FAIL." << endl; \
+		std::cout << "FAIL." << std::endl; \
 	else \
-		std::cout <<"SUCCESS." << endl
+		std::cout <<"SUCCESS." << std::endl

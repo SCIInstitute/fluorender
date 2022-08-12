@@ -1,12 +1,13 @@
 #include "tests.h"
 #include "asserts.h"
-#include <vector>
-#include <Flobject/Group.hpp>
-#include <Flobject/ValueUpdateVisitor.hpp>
-#include <Flobject/DecycleVisitor.hpp>
-#include <Flobject/InfoVisitor.hpp>
 
-using namespace std;
+#include "Group.hpp"
+#include "ValueUpdateVisitor.hpp"
+#include "DecycleVisitor.hpp"
+#include "InfoVisitor.hpp"
+
+#include <vector>
+
 using namespace fluo;
 
 void GroupTest()
@@ -20,7 +21,7 @@ void GroupTest()
 	for (int i = 0; i < num1; ++i)
 	{
 		Node* node = new Node();
-		string name = "node" + to_string(i + 1);
+		std::string name = "node" + std::to_string(i + 1);
 		node->setName(name);
 		group1->addChild(node);
 	}
@@ -74,14 +75,14 @@ void GroupTest()
 	group4->accept(visitor);
 
 	visitor.setTraversalMode(NodeVisitor::TRAVERSE_PARENTS);
-	cin.get();
+	std::cin.get();
 	group1->getChild(0)->accept(visitor);
 
 	DecycleVisitor decycle(*group4);
 	decycle.removeCycle();
 
 	visitor.setTraversalMode(NodeVisitor::TRAVERSE_PARENTS);
-	cin.get();
+	std::cin.get();
 	group1->getChild(0)->accept(visitor);
 
 }
