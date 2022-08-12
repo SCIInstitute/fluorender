@@ -28,11 +28,24 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_VALUE_HPP
 #define FL_VALUE_HPP
 
-#include <Referenced.hpp>
-#include <ref_ptr.hpp>
-#include <CopyOp.hpp>
-#include <Observer.hpp>
-#include <Event.hpp>
+#include "Referenced.hpp"
+#include "ref_ptr.hpp"
+#include "CopyOp.hpp"
+#include "Observer.hpp"
+#include "Event.hpp"
+
+//FluoRender's special types
+#include "BBox.h"
+#include "Color.h"
+#include "Plane.h"
+#include "Point.h"
+#include "Quaternion.h"
+#include "Ray.h"
+#include "Transform.h"
+#include "Vector.h"
+#include "Vector4f.h"
+#include "Vector4i.h"
+
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -41,17 +54,6 @@ DEALINGS IN THE SOFTWARE.
 #include <locale>
 #include <tuple>
 #include <unordered_set>
-//FluoRender's special types
-#include <BBox.h>
-#include <Color.h>
-#include <Plane.h>
-#include <Point.h>
-#include <Quaternion.h>
-#include <Ray.h>
-#include <Transform.h>
-#include <Vector.h>
-#include <Vector4f.h>
-#include <Vector4i.h>
 
 namespace fluo
 {
@@ -732,6 +734,9 @@ namespace fluo
 		case Value::vt_Vector4i:
 			os << dynamic_cast<const TemplateValue<Vector4i>*>(&v)->getValue();
 			break;
+		case Value::vt_null:
+		default:
+		  break;
 		}
 		return os;
 

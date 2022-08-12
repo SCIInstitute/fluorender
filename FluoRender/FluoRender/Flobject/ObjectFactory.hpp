@@ -279,7 +279,7 @@ namespace fluo
 
 		//if we want to resolve naming conflicts, more code is needed
 		inline bool rename(Object* obj, const std::string &name)
-		{ if (obj) obj->setName(name); }
+	        { if (obj) obj->setName(name); return true;}
 
 		virtual void clear(bool clear_default = false)
 		{
