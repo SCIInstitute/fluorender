@@ -27,8 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "VolumeMeshConv.h"
 #include "MCTable.h"
-#include <Types/Utils.h>
-#include <compatibility.h>
+#include <Utils.h>
+#include <compatibility_utilities.h>
 
 double VolumeMeshConv::m_sw = 0.0;
 
@@ -157,7 +157,7 @@ void VolumeMeshConv::Convert()
 		m_downsample_z = 1;
 
 	//triangle list
-	vector<MCTriangle> tri_list;
+	std::vector<MCTriangle> tri_list;
 
 	//add default group
 	GLMgroup* group = new GLMgroup;
