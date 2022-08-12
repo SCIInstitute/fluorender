@@ -28,11 +28,13 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Exmax1_h
 #define FL_Exmax1_h
 
-#include <Cluster/ClusterMethod.h>
+#include "ClusterMethod.h"
+
 #include <boost/qvm/vec.hpp>
 #include <boost/qvm/mat.hpp>
 #include <boost/qvm/vec_operations.hpp>
 #include <boost/shared_ptr.hpp>
+
 #include <list>
 #include <vector>
 

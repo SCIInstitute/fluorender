@@ -28,13 +28,15 @@ DEALINGS IN THE SOFTWARE.
 
 #include "TrackMap.h"
 #include "Stencil.h"
-#include "Cluster/dbscan.h"
-#include "Cluster/kmeans.h"
-#include "Cluster/exmax.h"
+#include "dbscan.h"
+#include "kmeans.h"
+#include "exmax.h"
+
+#include <boost/qvm/vec_access.hpp>
+
 #include <functional>
 #include <algorithm>
 #include <limits>
-#include <boost/qvm/vec_access.hpp>
 
 using namespace flrd;
 

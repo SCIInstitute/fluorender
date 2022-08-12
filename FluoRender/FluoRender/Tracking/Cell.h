@@ -28,14 +28,16 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Cell_h
 #define FL_Cell_h
 
-#include <Types/Point.h>
-#include <Types/BBox.h>
-#include <Types/Color.h>
-#include <Distance/Pca.h>
-#include <memory>
+#include "Point.h"
+#include "BBox.h"
+#include "Color.h"
+#include "Pca.h"
+
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/adjacency_iterator.hpp>
+
+#include <memory>
 
 namespace flrd
 {

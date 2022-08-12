@@ -27,9 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "Tracks.h"
-#include <FLIVR/VertexArray.h>
-#include <FLIVR/TextureRenderer.h>
-#include <compatibility.h>
+#include <VertexArray.h>
+#include <TextureRenderer.h>
+#include <compatibility_utilities.h>
 
 using namespace flrd;
 

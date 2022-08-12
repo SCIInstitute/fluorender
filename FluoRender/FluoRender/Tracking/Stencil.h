@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Debug.hpp>
 #endif
 #include <ExGauss.h>
-#include <Types/BBox.h>
+#include <BBox.h>
 #include <unordered_map>
 
 namespace flrd
