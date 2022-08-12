@@ -82,7 +82,7 @@ private:
 			setValue(down, true);
 		else
 			setValue(down, false);
-		if (!state, bval)
+		if (!state && bval)
 			setValue(up, true);
 		else
 			setValue(up, false);
