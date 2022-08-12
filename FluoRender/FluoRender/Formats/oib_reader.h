@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include "pole/pole.h"
 #include "base_reader.h"
-#include <compatibility.h>
+#include <compatibility_utilities.h>
 
 class OIBReader : public BaseReader
 {

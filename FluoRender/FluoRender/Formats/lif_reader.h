@@ -30,11 +30,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include "base_reader.h"
 #include "tinyxml2.h"
+
 #include <vector>
 #include <string>
 #include <limits>
-
-using namespace std;
 
 #define LIFHSIZE	8
 #define LIFTEST0	0x70
@@ -48,27 +47,27 @@ public:
 
 	int GetType() { return READER_LIF_TYPE; }
 
-	void SetFile(const string &file);
-	void SetFile(const wstring &file);
+	void SetFile(const std::string &file);
+	void SetFile(const std::wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
 	void SetChannSeq(bool cs);
 	bool GetChannSeq();
 	void SetDigitOrder(int order);
 	int GetDigitOrder();
-	void SetTimeId(const wstring &id);
-	wstring GetTimeId();
+	void SetTimeId(const std::wstring &id);
+	std::wstring GetTimeId();
 	int Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	int LoadOffset(int offset);
 	Nrrd* Convert(int t, int c, bool get_max);
-	wstring GetCurDataName(int t, int c);
-	wstring GetCurMaskName(int t, int c);
-	wstring GetCurLabelName(int t, int c);
+	std::wstring GetCurDataName(int t, int c);
+	std::wstring GetCurMaskName(int t, int c);
+	std::wstring GetCurLabelName(int t, int c);
 
-	wstring GetPathName() { return m_path_name; }
-	wstring GetDataName() { return m_data_name; }
+	std::wstring GetPathName() { return m_path_name; }
+	std::wstring GetDataName() { return m_data_name; }
 	int GetTimeNum() { return m_time_num; }
 	int GetCurTime() { return m_cur_time; }
 	int GetChanNum() { return m_chan_num; }
@@ -87,7 +86,7 @@ public:
 	int GetCurBatch() { return m_cur_batch; }
 
 private:
-	wstring m_data_name;
+	std::wstring m_data_name;
 
 	int m_time_num;
 	int m_cur_time;
@@ -109,7 +108,7 @@ private:
 		int chan_num;
 		double wavelength;
 	};
-	vector<WavelengthInfo> m_excitation_wavelength_list;
+	std::vector<WavelengthInfo> m_excitation_wavelength_list;
 
 	struct SubBlockInfo
 	{

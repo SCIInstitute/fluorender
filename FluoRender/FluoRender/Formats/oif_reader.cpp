@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "oif_reader.h"
 #include <algorithm>
-#include <compatibility.h>
+#include <compatibility_utilities.h>
 
 OIFReader::OIFReader()
 {

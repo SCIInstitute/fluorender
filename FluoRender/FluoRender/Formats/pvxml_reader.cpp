@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "pvxml_reader.h"
-#include <Types/Utils.h>
-#include <compatibility.h>
+#include <Utils.h>
+#include <compatibility_utilities.h>
 #include <fstream>
 #include <iostream>
 
@@ -70,7 +70,7 @@ PVXMLReader::~PVXMLReader()
 {
 }
 
-void PVXMLReader::SetFile(const string &file)
+void PVXMLReader::SetFile(const std::string &file)
 {
 	if (!file.empty())
 	{
@@ -83,7 +83,7 @@ void PVXMLReader::SetFile(const string &file)
 	m_id_string = m_path_name;
 }
 
-void PVXMLReader::SetFile(const wstring &file)
+void PVXMLReader::SetFile(const std::wstring &file)
 {
 	m_path_name = file;
 	m_data_name = GET_NAME(m_path_name);
@@ -101,7 +101,7 @@ int PVXMLReader::Preprocess()
 	m_force_stack = false;
 
 	//separate path and name
-	wstring path, name;
+	std::wstring path, name;
 	if (!SEP_PATH_NAME(m_path_name, path, name))
 		return READER_OPEN_FAIL;
 
@@ -138,7 +138,7 @@ int PVXMLReader::Preprocess()
 
 	int i, j, k, l;
 	double x_end, y_end, z_end;
-	wstring filename;
+	std::wstring filename;
 	bool first = true;
 	m_sep_seq = false;
 	for (i=0; i<(int)m_pvxml_info.size(); i++)
@@ -659,12 +659,12 @@ int PVXMLReader::GetDigitOrder()
 	return 0;
 }
 
-void PVXMLReader::SetTimeId(const wstring &id)
+void PVXMLReader::SetTimeId(const std::wstring &id)
 {
 	m_time_id = id;
 }
 
-wstring PVXMLReader::GetTimeId()
+std::wstring PVXMLReader::GetTimeId()
 {
 	return m_time_id;
 }
@@ -674,7 +674,7 @@ void PVXMLReader::SetBatch(bool batch)
 	if (batch)
 	{
 		//read the directory info
-		wstring search_path = GET_PATH(m_path_name);
+		std::wstring search_path = GET_PATH(m_path_name);
 		FIND_FILES(search_path,L"*.oib",m_batch_list,m_cur_batch);
 		m_batch = true;
 	}
@@ -722,21 +722,21 @@ bool PVXMLReader::ConvertN(int c, TimeDataInfo* time_data_info, unsigned short *
 			if (!val) return 0;
 
 			char *pbyData = 0;
-			wstring file_name = frame_info->channels[c].file_name;
+			std::wstring file_name = frame_info->channels[c].file_name;
 
 			//open file
-			ifstream is;
+			std::ifstream is;
 #ifdef _WIN32
-			is.open(file_name.c_str(), ios::binary);
+			is.open(file_name.c_str(), std::ios::binary);
 #else
-			is.open(ws2s(file_name).c_str(), ios::binary);
+			is.open(ws2s(file_name).c_str(), std::ios::binary);
 #endif
 			if (is.is_open())
 			{
-				is.seekg(0, ios::end);
+				is.seekg(0, std::ios::end);
 				size_t size = is.tellg();
 				pbyData = new char[size];
-				is.seekg(0, ios::beg);
+				is.seekg(0, std::ios::beg);
 				is.read(pbyData, size);
 				is.close();
 
@@ -793,21 +793,21 @@ bool PVXMLReader::ConvertS(int c, TimeDataInfo* time_data_info, unsigned short *
 				if (!val) return 0;
 
 				char *pbyData = 0;
-				wstring file_name = frame_info->channels[index].file_name;
+				std::wstring file_name = frame_info->channels[index].file_name;
 
 				//open file
-				ifstream is;
+				std::ifstream is;
 #ifdef _WIN32
-				is.open(file_name.c_str(), ios::binary);
+				is.open(file_name.c_str(), std::ios::binary);
 #else
-				is.open(ws2s(file_name).c_str(), ios::binary);
+				is.open(ws2s(file_name).c_str(), std::ios::binary);
 #endif
 				if (is.is_open())
 				{
-					is.seekg(0, ios::end);
+					is.seekg(0, std::ios::end);
 					size_t size = is.tellg();
 					pbyData = new char[size];
-					is.seekg(0, ios::beg);
+					is.seekg(0, std::ios::beg);
 					is.read(pbyData, size);
 					is.close();
 
@@ -891,7 +891,7 @@ Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
 	{
 		m_valid_spc = true;
 		if (m_zspc<=0.0 || m_zspc>100.0)
-			m_zspc = max(m_xspc, m_yspc);
+			m_zspc = std::max(m_xspc, m_yspc);
 	}
 	else
 	{
@@ -919,8 +919,8 @@ void PVXMLReader::ReadTiff(char *pbyData, unsigned short *val)
 	int strips = 0;
 	int rows = 0;
 	int width = 0;
-	vector <unsigned int> strip_offsets;
-	vector <unsigned int> strip_bytes;
+	std::vector<unsigned int> strip_offsets;
+	std::vector<unsigned int> strip_bytes;
 	//get strip info
 	unsigned int s_num1 = 0;
 	unsigned int s_num2 = 0;
@@ -1072,29 +1072,29 @@ void PVXMLReader::ReadTiff(char *pbyData, unsigned short *val)
 	}
 }
 
-wstring PVXMLReader::GetCurDataName(int t, int c)
+std::wstring PVXMLReader::GetCurDataName(int t, int c)
 {
 	return m_path_name;
 }
 
-wstring PVXMLReader::GetCurMaskName(int t, int c)
+std::wstring PVXMLReader::GetCurMaskName(int t, int c)
 {
-	wostringstream woss;
+  std::wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".msk";
-	wstring mask_name = woss.str();
+	std::wstring mask_name = woss.str();
 	return mask_name;
 }
 
-wstring PVXMLReader::GetCurLabelName(int t, int c)
+std::wstring PVXMLReader::GetCurLabelName(int t, int c)
 {
-	wostringstream woss;
+  std::wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".lbl";
-	wstring label_name = woss.str();
+	std::wstring label_name = woss.str();
 	return label_name;
 }

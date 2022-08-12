@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <boost/filesystem.hpp>
 #include <sstream>
 #include <iomanip>
-#include <compatibility.h>
+#include <compatibility_utilities.h>
 
 TIFReader::TIFReader()
 {

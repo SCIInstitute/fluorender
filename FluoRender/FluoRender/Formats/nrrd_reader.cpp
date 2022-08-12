@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "nrrd_reader.h"
 #include <algorithm>
 #include <sstream>
-#include <compatibility.h>
+#include <compatibility_utilities.h>
 
 NRRDReader::NRRDReader()
 {

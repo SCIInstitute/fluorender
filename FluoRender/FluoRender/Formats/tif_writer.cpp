@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "tif_writer.h"
 #include <tiffio.h>
 #include <sstream>
-#include <compatibility.h>
+#include <compatibility_utilities.h>
 
 TIFWriter::TIFWriter()
 {

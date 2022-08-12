@@ -26,630 +26,632 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "nd2_reader.h"
+#include "compatibility_utilities.h"
+
 #include <json.hpp>
-#include "../compatibility.h"
+
 #include <stdio.h>
 
 ND2Reader::ND2Reader()
 {
-	m_time_num = 0;
-	m_cur_time = -1;
-	m_chan_num = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
+        m_time_num = 0;
+        m_cur_time = -1;
+        m_chan_num = 0;
+        m_slice_num = 0;
+        m_x_size = 0;
+        m_y_size = 0;
 
-	m_valid_spc = false;
-	m_xspc = 0.0;
-	m_yspc = 0.0;
-	m_zspc = 0.0;
+        m_valid_spc = false;
+        m_xspc = 0.0;
+        m_yspc = 0.0;
+        m_zspc = 0.0;
 
-	m_max_value = 0.0;
-	m_scalar_scale = 1.0;
+        m_max_value = 0.0;
+        m_scalar_scale = 1.0;
 
-	m_batch = false;
-	m_cur_batch = -1;
+        m_batch = false;
+        m_cur_batch = -1;
 
-/*	m_compression = 0;
-	m_predictor = 0;
-	m_version = 0;
-	m_datatype = 0;
-	m_l4gb = false;*/
+/*      m_compression = 0;
+        m_predictor = 0;
+        m_version = 0;
+        m_datatype = 0;
+        m_l4gb = false;*/
 }
 
 ND2Reader::~ND2Reader()
 {
 }
 
-void ND2Reader::SetFile(const string &file)
+void ND2Reader::SetFile(const std::string &file)
 {
-	if (!file.empty())
-	{
-		if (!m_path_name.empty())
-			m_path_name.clear();
-		m_path_name.assign(file.length(), L' ');
-		copy(file.begin(), file.end(), m_path_name.begin());
-	}
-	m_id_string = m_path_name;
+        if (!file.empty())
+        {
+                if (!m_path_name.empty())
+                        m_path_name.clear();
+                m_path_name.assign(file.length(), L' ');
+                copy(file.begin(), file.end(), m_path_name.begin());
+        }
+        m_id_string = m_path_name;
 }
 
-void ND2Reader::SetFile(const wstring &file)
+void ND2Reader::SetFile(const std::wstring &file)
 {
-	m_path_name = file;
-	m_id_string = m_path_name;
+        m_path_name = file;
+        m_id_string = m_path_name;
 }
 
 int ND2Reader::Preprocess()
 {
-	LIMCWSTR filename = m_path_name.c_str();
-	LIMFILEHANDLE h = Lim_FileOpenForRead(filename);
-	if (h == nullptr)
-	{
-		Lim_FileClose(h);
-		return READER_OPEN_FAIL;
-	}
+        LIMCWSTR filename = m_path_name.c_str();
+        LIMFILEHANDLE h = Lim_FileOpenForRead(filename);
+        if (h == nullptr)
+        {
+                Lim_FileClose(h);
+                return READER_OPEN_FAIL;
+        }
 
-	//get attributes
-	ReadAttributes(h);
-	//get wavelength info
-	ReadTextInfo(h);
-	//get xyz voxel sizes
-	ReadMetadata(h);
-	//read sequence info
-	ReadSequences(h);
+        //get attributes
+        ReadAttributes(h);
+        //get wavelength info
+        ReadTextInfo(h);
+        //get xyz voxel sizes
+        ReadMetadata(h);
+        //read sequence info
+        ReadSequences(h);
 
-	Lim_FileClose(h);
+        Lim_FileClose(h);
 
-	return READER_OK;
+        return READER_OK;
 }
 
 void ND2Reader::SetSliceSeq(bool ss)
 {
-	//do nothing
+        //do nothing
 }
 
 bool ND2Reader::GetSliceSeq()
 {
-	return false;
+        return false;
 }
 
 void ND2Reader::SetChannSeq(bool cs)
 {
-	//do nothing
+        //do nothing
 }
 
 bool ND2Reader::GetChannSeq()
 {
-	return false;
+        return false;
 }
 
 void ND2Reader::SetDigitOrder(int order)
 {
-	//do nothing
+        //do nothing
 }
 
 int ND2Reader::GetDigitOrder()
 {
-	return 0;
+        return 0;
 }
 
-void ND2Reader::SetTimeId(const wstring &id)
+void ND2Reader::SetTimeId(const std::wstring &id)
 {
-	//do nothing
+        //do nothing
 }
 
-wstring ND2Reader::GetTimeId()
+std::wstring ND2Reader::GetTimeId()
 {
-	return wstring(L"");
+        return std::wstring(L"");
 }
 
 void ND2Reader::SetBatch(bool batch)
 {
-	if (batch)
-	{
-		//read the directory info
-		FIND_FILES(m_path_name, L"*.nd2", m_batch_list, m_cur_batch);
-		m_batch = true;
-	}
-	else
-		m_batch = false;
+        if (batch)
+        {
+                //read the directory info
+                FIND_FILES(m_path_name, L"*.nd2", m_batch_list, m_cur_batch);
+                m_batch = true;
+        }
+        else
+                m_batch = false;
 }
 
 int ND2Reader::LoadBatch(int index)
 {
-	int result = -1;
-	if (index >= 0 && index < (int)m_batch_list.size())
-	{
-		m_path_name = m_batch_list[index];
-		Preprocess();
-		result = index;
-		m_cur_batch = result;
-	}
-	else
-		result = -1;
+        int result = -1;
+        if (index >= 0 && index < (int)m_batch_list.size())
+        {
+                m_path_name = m_batch_list[index];
+                Preprocess();
+                result = index;
+                m_cur_batch = result;
+        }
+        else
+                result = -1;
 
-	return result;
+        return result;
 }
 
 double ND2Reader::GetExcitationWavelength(int chan)
 {
-	for (int i = 0; i < (int)m_excitation_wavelength_list.size(); i++)
-	{
-		if (m_excitation_wavelength_list[i].chan_num == chan)
-			return m_excitation_wavelength_list[i].wavelength;
-	}
-	return 0.0;
+        for (int i = 0; i < (int)m_excitation_wavelength_list.size(); i++)
+        {
+                if (m_excitation_wavelength_list[i].chan_num == chan)
+                        return m_excitation_wavelength_list[i].wavelength;
+        }
+        return 0.0;
 }
 
 Nrrd* ND2Reader::Convert(int t, int c, bool get_max)
 {
-	Nrrd *data = 0;
+        Nrrd *data = 0;
 
-	LIMCWSTR filename = m_path_name.c_str();
-	LIMFILEHANDLE h = Lim_FileOpenForRead(filename);
-	if (h == nullptr)
-	{
-		Lim_FileClose(h);
-		return 0;
-	}
+        LIMCWSTR filename = m_path_name.c_str();
+        LIMFILEHANDLE h = Lim_FileOpenForRead(filename);
+        if (h == nullptr)
+        {
+                Lim_FileClose(h);
+                return 0;
+        }
 
-	if (t >= 0 && t < m_time_num &&
-		c >= 0 && c < m_chan_num &&
-		m_slice_num > 0 &&
-		m_x_size > 0 &&
-		m_y_size > 0)
-	{
-		switch (m_bits)
-		{
-		case 8:
-		{
-			unsigned long long mem_size = (unsigned long long)m_x_size*
-				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
-			unsigned char *val = new (std::nothrow) unsigned char[mem_size];
-			ReadChannel(h, t, c, val);
-			//create nrrd
-			data = nrrdNew();
-			nrrdWrap(data, val, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-			nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-			nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
-			nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-			nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-		}
-		break;
-		case 16:
-		{
-			unsigned long long mem_size = (unsigned long long)m_x_size*
-				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
-			unsigned short *val = new (std::nothrow) unsigned short[mem_size];
-			ReadChannel(h, t, c, val);
-			//create nrrd
-			data = nrrdNew();
-			nrrdWrap(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-			nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-			nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
-			nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-			nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-		}
-		break;
-		}
-	}
+        if (t >= 0 && t < m_time_num &&
+                c >= 0 && c < m_chan_num &&
+                m_slice_num > 0 &&
+                m_x_size > 0 &&
+                m_y_size > 0)
+        {
+                switch (m_bits)
+                {
+                case 8:
+                {
+                        unsigned long long mem_size = (unsigned long long)m_x_size*
+                                (unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+                        unsigned char *val = new (std::nothrow) unsigned char[mem_size];
+                        ReadChannel(h, t, c, val);
+                        //create nrrd
+                        data = nrrdNew();
+                        nrrdWrap(data, val, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+                        nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
+                        nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
+                        nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+                        nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+                }
+                break;
+                case 16:
+                {
+                        unsigned long long mem_size = (unsigned long long)m_x_size*
+                                (unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+                        unsigned short *val = new (std::nothrow) unsigned short[mem_size];
+                        ReadChannel(h, t, c, val);
+                        //create nrrd
+                        data = nrrdNew();
+                        nrrdWrap(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+                        nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
+                        nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
+                        nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+                        nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+                }
+                break;
+                }
+        }
 
-	Lim_FileClose(h);
-	m_cur_time = t;
+        Lim_FileClose(h);
+        m_cur_time = t;
 
-	return data;
+        return data;
 }
 
-wstring ND2Reader::GetCurDataName(int t, int c)
+std::wstring ND2Reader::GetCurDataName(int t, int c)
 {
-	return m_path_name;
+        return m_path_name;
 }
 
-wstring ND2Reader::GetCurMaskName(int t, int c)
+std::wstring ND2Reader::GetCurMaskName(int t, int c)
 {
-	wostringstream woss;
-	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
-	if (m_time_num > 1) woss << "_T" << t;
-	if (m_chan_num > 1) woss << "_C" << c;
-	woss << ".msk";
-	wstring mask_name = woss.str();
-	return mask_name;
+        std::wostringstream woss;
+        woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
+        if (m_time_num > 1) woss << "_T" << t;
+        if (m_chan_num > 1) woss << "_C" << c;
+        woss << ".msk";
+        std::wstring mask_name = woss.str();
+        return mask_name;
 }
 
-wstring ND2Reader::GetCurLabelName(int t, int c)
+std::wstring ND2Reader::GetCurLabelName(int t, int c)
 {
-	wostringstream woss;
-	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
-	if (m_time_num > 1) woss << "_T" << t;
-	if (m_chan_num > 1) woss << "_C" << c;
-	woss << ".lbl";
-	wstring label_name = woss.str();
-	return label_name;
+        std::wostringstream woss;
+        woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
+        if (m_time_num > 1) woss << "_T" << t;
+        if (m_chan_num > 1) woss << "_C" << c;
+        woss << ".lbl";
+        std::wstring label_name = woss.str();
+        return label_name;
 }
 
 void ND2Reader::AddFrameInfo(FrameInfo &frame)
 {
-	int chan = frame.chan;
-	int time = frame.time;
-	int slice = frame.slice;
+        int chan = frame.chan;
+        int time = frame.time;
+        int slice = frame.slice;
 
-	TimeInfo *timeinfo;
-	if (m_nd2_info.times.size() <= time)
-	{
-		m_nd2_info.times.resize(time + 1);
-		timeinfo = &(m_nd2_info.times.back());
-		timeinfo->time = time;
-	}
-	else
-		timeinfo = &(m_nd2_info.times[time]);
+        TimeInfo *timeinfo;
+        if (m_nd2_info.times.size() <= time)
+        {
+                m_nd2_info.times.resize(time + 1);
+                timeinfo = &(m_nd2_info.times.back());
+                timeinfo->time = time;
+        }
+        else
+                timeinfo = &(m_nd2_info.times[time]);
 
-	ChannelInfo *chaninfo;
-	if (timeinfo->channels.size() <= chan)
-	{
-		timeinfo->channels.resize(chan + 1);
-		chaninfo = &(timeinfo->channels.back());
-		chaninfo->chan = chan;
-	}
-	else
-		chaninfo = &(timeinfo->channels[chan]);
+        ChannelInfo *chaninfo;
+        if (timeinfo->channels.size() <= chan)
+        {
+                timeinfo->channels.resize(chan + 1);
+                chaninfo = &(timeinfo->channels.back());
+                chaninfo->chan = chan;
+        }
+        else
+                chaninfo = &(timeinfo->channels[chan]);
 
-	chaninfo->chann.push_back(frame);
+        chaninfo->chann.push_back(frame);
 }
 
 bool ND2Reader::ReadChannel(LIMFILEHANDLE h, int t, int c, void* val)
 {
-	ChannelInfo* cinfo = GetChaninfo(t, 0);
-	if (!cinfo)
-		return false;
+        ChannelInfo* cinfo = GetChaninfo(t, 0);
+        if (!cinfo)
+                return false;
 
-	unsigned long long xysize = (unsigned long long)m_x_size * m_y_size;
-	unsigned long long pos;
-	int bytes = m_bits / 8;
-	unsigned char *dst, *src;
-	for (size_t i = 0; i < cinfo->chann.size(); ++i)
-	{
-		int seq = cinfo->chann[i].seq;
-		int z = cinfo->chann[i].slice;
-		int x = cinfo->chann[i].x;
-		int y = cinfo->chann[i].y;
-		LIMPICTURE pic = { 0 };
-		Lim_FileGetImageData(h, seq, &pic);
-		pos = xysize * z + m_x_size * y + x;//consider it a brick
-		for (unsigned int j = 0; j < pic.uiHeight; ++j)
-		for (unsigned int k = 0; k < pic.uiWidth; ++k)
-		{
-			dst = (unsigned char*)val;
-			dst += (pos + m_x_size * j + k) * bytes;
-			src = (unsigned char*)(pic.pImageData);
-			src += pic.uiWidthBytes * j + k * pic.uiComponents * bytes + c * bytes;
-			memcpy(dst, src, bytes);
-		}
+        unsigned long long xysize = (unsigned long long)m_x_size * m_y_size;
+        unsigned long long pos;
+        int bytes = m_bits / 8;
+        unsigned char *dst, *src;
+        for (size_t i = 0; i < cinfo->chann.size(); ++i)
+        {
+                int seq = cinfo->chann[i].seq;
+                int z = cinfo->chann[i].slice;
+                int x = cinfo->chann[i].x;
+                int y = cinfo->chann[i].y;
+                LIMPICTURE pic = { 0 };
+                Lim_FileGetImageData(h, seq, &pic);
+                pos = xysize * z + m_x_size * y + x;//consider it a brick
+                for (unsigned int j = 0; j < pic.uiHeight; ++j)
+                for (unsigned int k = 0; k < pic.uiWidth; ++k)
+                {
+                        dst = (unsigned char*)val;
+                        dst += (pos + m_x_size * j + k) * bytes;
+                        src = (unsigned char*)(pic.pImageData);
+                        src += pic.uiWidthBytes * j + k * pic.uiComponents * bytes + c * bytes;
+                        memcpy(dst, src, bytes);
+                }
 
-		Lim_DestroyPicture(&pic);
-	}
+                Lim_DestroyPicture(&pic);
+        }
 
-	return true;
+        return true;
 }
 
 void ND2Reader::ReadAttributes(LIMFILEHANDLE h)
 {
-	LIMSTR limstr = Lim_FileGetAttributes(h);
-	nlohmann::json j = nlohmann::json::parse(limstr);
-	Lim_FileFreeString(limstr);
-	std::string str;
-	for (nlohmann::json::iterator it = j.begin(); it != j.end(); ++it)
-	{
-		str = it.key();
-		if (str == "bitsPerComponentInMemory")
-			m_bits = it.value();
-		else if (str == "bitsPerComponentSignificant")
-			m_bits_used = it.value();
-		else if (str == "componentCount")
-			m_chan_num = it.value();
-		else if (str == "widthPx")
-			m_x_size = it.value();
-		else if (str == "heightPx")
-			m_y_size = it.value();
-	}
-	if (m_bits > 8)
-	{
-		m_max_value = std::pow(2.0, double(m_bits_used));
-		m_scalar_scale = 65535.0 / m_max_value;
-	}
+        LIMSTR limstr = Lim_FileGetAttributes(h);
+        nlohmann::json j = nlohmann::json::parse(limstr);
+        Lim_FileFreeString(limstr);
+        std::string str;
+        for (nlohmann::json::iterator it = j.begin(); it != j.end(); ++it)
+        {
+                str = it.key();
+                if (str == "bitsPerComponentInMemory")
+                        m_bits = it.value();
+                else if (str == "bitsPerComponentSignificant")
+                        m_bits_used = it.value();
+                else if (str == "componentCount")
+                        m_chan_num = it.value();
+                else if (str == "widthPx")
+                        m_x_size = it.value();
+                else if (str == "heightPx")
+                        m_y_size = it.value();
+        }
+        if (m_bits > 8)
+        {
+                m_max_value = std::pow(2.0, double(m_bits_used));
+                m_scalar_scale = 65535.0 / m_max_value;
+        }
 }
 
 void ND2Reader::ReadTextInfo(LIMFILEHANDLE h)
 {
-	LIMSTR limstr = Lim_FileGetTextinfo(h);
-	nlohmann::json j = nlohmann::json::parse(limstr);
-	Lim_FileFreeString(limstr);
-	std::string str, plane, exw;
-	for (nlohmann::json::iterator it = j.begin(); it != j.end(); ++it)
-	{
-		str = it.key();
-		if (str == "description")
-		{
-			str = it.value();
-			//search for wavelengths
-			size_t pos = 0, pos2 = 0, pt = 0;
-			do
-			{
-				pos = str.find("Plane #", pos);
-				if (pos == std::string::npos)
-					break;
-				pt = str.find(":", pos);
-				if (pt == std::string::npos)
-					break;
-				plane = str.substr(pos + 7, pt - pos - 7);//channel number
-				pos2 = str.find("Plane #", pos + 5);
-				if (pos2 == std::string::npos)
-					pos2 = str.length() - 1;
-				pos = str.find("; On", pos);
-				bool transmit = false;
-				if (pos > pos2 ||
-					pos == std::string::npos)
-					transmit = true;
-				if (!transmit)
-				{
-					pos = str.rfind("ExW:", pos);
-					if (pos == std::string::npos)
-						break;
-					pt = str.find(";", pos);
-					if (pt == std::string::npos)
-						break;
-					exw = str.substr(pos + 4, pt - pos - 4);//wavelength value
-				}
-				WavelengthInfo winfo;
-				winfo.chan_num = std::stoi(plane)-1;
-				winfo.wavelength = transmit ? -1 : std::stod(exw);
-				m_excitation_wavelength_list.push_back(winfo);
-				pos = pos2 - 1;
-			} while (pos != std::string::npos);
-			break;
-		}
-	}
+        LIMSTR limstr = Lim_FileGetTextinfo(h);
+        nlohmann::json j = nlohmann::json::parse(limstr);
+        Lim_FileFreeString(limstr);
+        std::string str, plane, exw;
+        for (nlohmann::json::iterator it = j.begin(); it != j.end(); ++it)
+        {
+                str = it.key();
+                if (str == "description")
+                {
+                        str = it.value();
+                        //search for wavelengths
+                        size_t pos = 0, pos2 = 0, pt = 0;
+                        do
+                        {
+                                pos = str.find("Plane #", pos);
+                                if (pos == std::string::npos)
+                                        break;
+                                pt = str.find(":", pos);
+                                if (pt == std::string::npos)
+                                        break;
+                                plane = str.substr(pos + 7, pt - pos - 7);//channel number
+                                pos2 = str.find("Plane #", pos + 5);
+                                if (pos2 == std::string::npos)
+                                        pos2 = str.length() - 1;
+                                pos = str.find("; On", pos);
+                                bool transmit = false;
+                                if (pos > pos2 ||
+                                        pos == std::string::npos)
+                                        transmit = true;
+                                if (!transmit)
+                                {
+                                        pos = str.rfind("ExW:", pos);
+                                        if (pos == std::string::npos)
+                                                break;
+                                        pt = str.find(";", pos);
+                                        if (pt == std::string::npos)
+                                                break;
+                                        exw = str.substr(pos + 4, pt - pos - 4);//wavelength value
+                                }
+                                WavelengthInfo winfo;
+                                winfo.chan_num = std::stoi(plane)-1;
+                                winfo.wavelength = transmit ? -1 : std::stod(exw);
+                                m_excitation_wavelength_list.push_back(winfo);
+                                pos = pos2 - 1;
+                        } while (pos != std::string::npos);
+                        break;
+                }
+        }
 }
 
 void ND2Reader::ReadMetadata(LIMFILEHANDLE h)
 {
-	LIMSTR limstr = Lim_FileGetMetadata(h);
-	nlohmann::json j = nlohmann::json::parse(limstr);
-	Lim_FileFreeString(limstr);
-	auto it = j.find("channels");
-	string str;
-	if (it != j.end())
-	{
-		str = it->dump();
-		size_t pos = str.find("axesCalibration");
-		if (pos == std::string::npos)
-			return;
-		pos = str.find("[", pos);
-		if (pos == std::string::npos)
-			return;
-		size_t pos2 = str.find("]", pos);
-		if (pos2 == std::string::npos)
-			return;
-		string x, y, z;
-		int count = 0;
-		bool flag = false;
-		for (size_t i = pos; i < pos2; ++i)
-		{
-			if (isdigit(str[i]) || str[i] == '.')
-			{
-				flag = true;
-				if (!count)
-					count++;
-				switch (count)
-				{
-				case 1:
-					x += str[i];
-					break;
-				case 2:
-					y += str[i];
-					break;
-				case 3:
-					z += str[i];
-					break;
-				}
-			}
-			else
-			{
-				if (flag)
-					count++;
-				flag = false;
-			}
-		}
-		if (count >= 3)
-		{
-			m_xspc = stod(x);
-			m_yspc = stod(y);
-			m_zspc = stod(z);
-			m_valid_spc = true;
-		}
-	}
+        LIMSTR limstr = Lim_FileGetMetadata(h);
+        nlohmann::json j = nlohmann::json::parse(limstr);
+        Lim_FileFreeString(limstr);
+        auto it = j.find("channels");
+        std::string str;
+        if (it != j.end())
+        {
+                str = it->dump();
+                size_t pos = str.find("axesCalibration");
+                if (pos == std::string::npos)
+                        return;
+                pos = str.find("[", pos);
+                if (pos == std::string::npos)
+                        return;
+                size_t pos2 = str.find("]", pos);
+                if (pos2 == std::string::npos)
+                        return;
+                std::string x, y, z;
+                int count = 0;
+                bool flag = false;
+                for (size_t i = pos; i < pos2; ++i)
+                {
+                        if (isdigit(str[i]) || str[i] == '.')
+                        {
+                                flag = true;
+                                if (!count)
+                                        count++;
+                                switch (count)
+                                {
+                                case 1:
+                                        x += str[i];
+                                        break;
+                                case 2:
+                                        y += str[i];
+                                        break;
+                                case 3:
+                                        z += str[i];
+                                        break;
+                                }
+                        }
+                        else
+                        {
+                                if (flag)
+                                        count++;
+                                flag = false;
+                        }
+                }
+                if (count >= 3)
+                {
+                        m_xspc = stod(x);
+                        m_yspc = stod(y);
+                        m_zspc = stod(z);
+                        m_valid_spc = true;
+                }
+        }
 }
 
 void ND2Reader::ReadSequences(LIMFILEHANDLE h)
 {
-	m_nd2_info.init();
+        m_nd2_info.init();
 
-	LIMCHAR buffer[ND2_STR_SIZE];
-	LIMSIZE coordsize = Lim_FileGetCoordSize(h);
-	LIMUINT fnum = Lim_FileGetSeqCount(h);
-	int ti = -1, zi = -1, xyi = -1;//indecis in coords
-	int maxz = 0;
-	std::vector<LIMUINT> vec(coordsize);
-	std::string str;
-	if (coordsize > 0)
-	{
-		for (size_t i = 0; i < coordsize; ++i)
-		{
-			Lim_FileGetCoordInfo(h, (LIMUINT)i, buffer, ND2_STR_SIZE);
-			str = buffer;
-			if (str == "TimeLoop" ||
-				str == "NETimeLoop")
-				ti = i;
-			else if (str == "XYPosLoop")
-				xyi = i;
-			else if (str == "ZStackLoop")
-				zi = i;
-		}
-		for (unsigned int i = 0; i < fnum; ++i)
-		{
-			FrameInfo frame;
-			Lim_FileGetCoordsFromSeqIndex(h, i, vec.data(), vec.size());
-			LIMSTR fmd = Lim_FileGetFrameMetadata(h, i);
-			GetFramePos(fmd, frame);
-			Lim_FileFreeString(fmd);
-			frame.chan = 0;
-			frame.time = ti >= 0 ? vec[ti] : 0;
-			frame.slice = zi >= 0 ? vec[zi] : 0;
-			frame.seq = i;
-			frame.x = 0;
-			frame.y = 0;
-			AddFrameInfo(frame);
-			maxz = frame.slice > maxz ? frame.slice : maxz;
-		}
-	}
-	else
-	{
-		if (fnum)
-		{
-			//single frame
-			FrameInfo frame;
-			frame.chan = 0;
-			frame.time = 0;
-			frame.slice = 0;
-			frame.seq = 0;
-			frame.x = 0;
-			frame.y = 0;
-			frame.xsize = m_x_size;
-			frame.ysize = m_y_size;
-			frame.posx = 0.0;
-			frame.posy = 0.0;
-			frame.posz = 0.0;
-			AddFrameInfo(frame);
-		}
-	}
+        LIMCHAR buffer[ND2_STR_SIZE];
+        LIMSIZE coordsize = Lim_FileGetCoordSize(h);
+        LIMUINT fnum = Lim_FileGetSeqCount(h);
+        int ti = -1, zi = -1, xyi = -1;//indecis in coords
+        int maxz = 0;
+        std::vector<LIMUINT> vec(coordsize);
+        std::string str;
+        if (coordsize > 0)
+        {
+                for (size_t i = 0; i < coordsize; ++i)
+                {
+                        Lim_FileGetCoordInfo(h, (LIMUINT)i, buffer, ND2_STR_SIZE);
+                        str = buffer;
+                        if (str == "TimeLoop" ||
+                                str == "NETimeLoop")
+                                ti = i;
+                        else if (str == "XYPosLoop")
+                                xyi = i;
+                        else if (str == "ZStackLoop")
+                                zi = i;
+                }
+                for (unsigned int i = 0; i < fnum; ++i)
+                {
+                        FrameInfo frame;
+                        Lim_FileGetCoordsFromSeqIndex(h, i, vec.data(), vec.size());
+                        LIMSTR fmd = Lim_FileGetFrameMetadata(h, i);
+                        GetFramePos(fmd, frame);
+                        Lim_FileFreeString(fmd);
+                        frame.chan = 0;
+                        frame.time = ti >= 0 ? vec[ti] : 0;
+                        frame.slice = zi >= 0 ? vec[zi] : 0;
+                        frame.seq = i;
+                        frame.x = 0;
+                        frame.y = 0;
+                        AddFrameInfo(frame);
+                        maxz = frame.slice > maxz ? frame.slice : maxz;
+                }
+        }
+        else
+        {
+                if (fnum)
+                {
+                        //single frame
+                        FrameInfo frame;
+                        frame.chan = 0;
+                        frame.time = 0;
+                        frame.slice = 0;
+                        frame.seq = 0;
+                        frame.x = 0;
+                        frame.y = 0;
+                        frame.xsize = m_x_size;
+                        frame.ysize = m_y_size;
+                        frame.posx = 0.0;
+                        frame.posy = 0.0;
+                        frame.posz = 0.0;
+                        AddFrameInfo(frame);
+                }
+        }
 
-	m_time_num = m_nd2_info.times.size();
-	m_slice_num = maxz + 1;
-	m_cur_time = 0;
-	m_data_name = GET_NAME(m_path_name);
+        m_time_num = m_nd2_info.times.size();
+        m_slice_num = maxz + 1;
+        m_cur_time = 0;
+        m_data_name = GET_NAME(m_path_name);
 
-	//get tiles
-	ChannelInfo* cinfo = GetChaninfo(0, 0);
-	if (cinfo && cinfo->chann.size() > m_slice_num &&
-		m_valid_spc)
-	{
-		for (int t = 0; t < m_time_num; ++t)
-		{
-			cinfo = GetChaninfo(t, 0);
-			if (!cinfo)
-				continue;
-			for (size_t i = 0; i < cinfo->chann.size(); ++i)
-			{
-				cinfo->chann[i].x = (cinfo->chann[i].posx - m_nd2_info.xmin) / m_xspc;
-				cinfo->chann[i].y = (cinfo->chann[i].posy - m_nd2_info.ymin) / m_yspc;
-				m_x_size = std::max(m_x_size, cinfo->chann[i].x + cinfo->chann[i].xsize);
-				m_y_size = std::max(m_y_size, cinfo->chann[i].y + cinfo->chann[i].ysize);
-			}
-		}
-	}
+        //get tiles
+        ChannelInfo* cinfo = GetChaninfo(0, 0);
+        if (cinfo && cinfo->chann.size() > m_slice_num &&
+                m_valid_spc)
+        {
+                for (int t = 0; t < m_time_num; ++t)
+                {
+                        cinfo = GetChaninfo(t, 0);
+                        if (!cinfo)
+                                continue;
+                        for (size_t i = 0; i < cinfo->chann.size(); ++i)
+                        {
+                                cinfo->chann[i].x = (cinfo->chann[i].posx - m_nd2_info.xmin) / m_xspc;
+                                cinfo->chann[i].y = (cinfo->chann[i].posy - m_nd2_info.ymin) / m_yspc;
+                                m_x_size = std::max(m_x_size, cinfo->chann[i].x + cinfo->chann[i].xsize);
+                                m_y_size = std::max(m_y_size, cinfo->chann[i].y + cinfo->chann[i].ysize);
+                        }
+                }
+        }
 }
 
 void ND2Reader::GetFramePos(LIMSTR fmd, FrameInfo& frame)
 {
-	std::string str(fmd);
-	size_t pos = str.find("stagePositionUm");
-	if (pos == std::string::npos)
-		return;
-	pos = str.find("[", pos);
-	if (pos == std::string::npos)
-		return;
-	size_t pos2 = str.find("]", pos);
-	if (pos2 == std::string::npos)
-		return;
-	std::string x, y, z;
-	int count = 0;
-	bool flag = false;
-	for (size_t i = pos; i < pos2; ++i)
-	{
-		if (isdigit(str[i]) || str[i] == '.')
-		{
-			flag = true;
-			if (!count)
-				count++;
-			switch (count)
-			{
-			case 1:
-				x += str[i];
-				break;
-			case 2:
-				y += str[i];
-				break;
-			case 3:
-				z += str[i];
-				break;
-			}
-		}
-		else
-		{
-			if (flag)
-				count++;
-			flag = false;
-		}
-	}
-	if (count >= 3)
-	{
-		frame.posx = stod(x);
-		frame.posy = stod(y);
-		frame.posz = stod(z);
-		m_nd2_info.update(frame.posx, frame.posy, frame.posz);
-	}
-	//get size
-	x = y = z = "";
-	pos = str.find("voxelCount");
-	if (pos == std::string::npos)
-		return;
-	pos = str.find("[", pos);
-	if (pos == std::string::npos)
-		return;
-	pos2 = str.find("]", pos);
-	if (pos2 == std::string::npos)
-		return;
-	count = 0;
-	flag = false;
-	for (size_t i = pos; i < pos2; ++i)
-	{
-		if (isdigit(str[i]))
-		{
-			flag = true;
-			if (!count)
-				count++;
-			switch (count)
-			{
-			case 1:
-				x += str[i];
-				break;
-			case 2:
-				y += str[i];
-				break;
-			case 3:
-				z += str[i];
-				break;
-			}
-		}
-		else
-		{
-			if (flag)
-				count++;
-			flag = false;
-		}
-	}
-	if (count >= 3)
-	{
-		frame.xsize = stoi(x);
-		frame.ysize = stoi(y);
-	}
+        std::string str(fmd);
+        size_t pos = str.find("stagePositionUm");
+        if (pos == std::string::npos)
+                return;
+        pos = str.find("[", pos);
+        if (pos == std::string::npos)
+                return;
+        size_t pos2 = str.find("]", pos);
+        if (pos2 == std::string::npos)
+                return;
+        std::string x, y, z;
+        int count = 0;
+        bool flag = false;
+        for (size_t i = pos; i < pos2; ++i)
+        {
+                if (isdigit(str[i]) || str[i] == '.')
+                {
+                        flag = true;
+                        if (!count)
+                                count++;
+                        switch (count)
+                        {
+                        case 1:
+                                x += str[i];
+                                break;
+                        case 2:
+                                y += str[i];
+                                break;
+                        case 3:
+                                z += str[i];
+                                break;
+                        }
+                }
+                else
+                {
+                        if (flag)
+                                count++;
+                        flag = false;
+                }
+        }
+        if (count >= 3)
+        {
+                frame.posx = stod(x);
+                frame.posy = stod(y);
+                frame.posz = stod(z);
+                m_nd2_info.update(frame.posx, frame.posy, frame.posz);
+        }
+        //get size
+        x = y = z = "";
+        pos = str.find("voxelCount");
+        if (pos == std::string::npos)
+                return;
+        pos = str.find("[", pos);
+        if (pos == std::string::npos)
+                return;
+        pos2 = str.find("]", pos);
+        if (pos2 == std::string::npos)
+                return;
+        count = 0;
+        flag = false;
+        for (size_t i = pos; i < pos2; ++i)
+        {
+                if (isdigit(str[i]))
+                {
+                        flag = true;
+                        if (!count)
+                                count++;
+                        switch (count)
+                        {
+                        case 1:
+                                x += str[i];
+                                break;
+                        case 2:
+                                y += str[i];
+                                break;
+                        case 3:
+                                z += str[i];
+                                break;
+                        }
+                }
+                else
+                {
+                        if (flag)
+                                count++;
+                        flag = false;
+                }
+        }
+        if (count >= 3)
+        {
+                frame.xsize = stoi(x);
+                frame.ysize = stoi(y);
+        }
 }
