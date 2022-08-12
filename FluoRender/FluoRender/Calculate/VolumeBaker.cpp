@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <base_reader.h>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
-#include <FLIVR/Texture.h>
+#include <Texture.h>
 #include <stdexcept>
 #include <string>
 

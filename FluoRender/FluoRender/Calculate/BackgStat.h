@@ -32,8 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <map>
 
-using namespace std;
-
 namespace fluo
 {
 	class VolumeData;

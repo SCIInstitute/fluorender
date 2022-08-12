@@ -28,8 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMESAMPLER_H_
 #define _VOLUMESAMPLER_H_
 
-#include <Types/Vector.h>
-#include <Types/Quaternion.h>
+#include "Vector.h"
+#include "Quaternion.h"
+
 #include <Nrrd/nrrd.h>
 
 namespace fluo

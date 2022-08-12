@@ -26,15 +26,15 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "VolumeCalculator.h"
-#include <Root.hpp>
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <VolumeGroup.hpp>
-#include <Global.hpp>
-#include <VolumeFactory.hpp>
-#include <FLIVR/VolumeRenderer.h>
-#include <FLIVR/Texture.h>
-#include <Selection/VolumeSelector.h>
+#include "Root.hpp"
+#include "Renderview.hpp"
+#include "VolumeData.hpp"
+#include "VolumeGroup.hpp"
+#include "Global.hpp"
+#include "VolumeFactory.hpp"
+#include "VolumeRenderer.h"
+#include "Texture.h"
+#include "VolumeSelector.h"
 
 using namespace flrd;
 

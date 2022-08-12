@@ -26,12 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "BasicStat.h"
-#include <VolumeData.hpp>
-#include <FLIVR/VolumeRenderer.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
-#include <FLIVR/TextureBrick.h>
-#include <FLIVR/Texture.h>
+#include "VolumeData.hpp"
+#include "VolumeRenderer.h"
+#include "KernelProgram.h"
+#include "VolKernel.h"
+#include "TextureBrick.h"
+#include "Texture.h"
+
 #include <algorithm>
 
 using namespace flrd;
@@ -307,7 +308,7 @@ void BasicStat::Run()
 	}
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 
 	m_sum = 0;
 	m_wsum = 0.0;

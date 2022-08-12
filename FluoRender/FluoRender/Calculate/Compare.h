@@ -30,8 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <boost/signals2.hpp>
 
-using namespace std;
-
 namespace fluo
 {
 	class VolumeData;

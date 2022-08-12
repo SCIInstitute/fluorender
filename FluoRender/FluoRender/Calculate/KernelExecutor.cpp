@@ -29,19 +29,18 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
-#include <FLIVR/Texture.h>
-#include <FLIVR/TextureBrick.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
+#include <Texture.h>
+#include <TextureBrick.h>
+#include <VolumeRenderer.h>
+#include <KernelProgram.h>
+#include <VolKernel.h>
 #include <chrono>
 #include <vector>
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <compatibility.h>
+#include <compatibility_utilities.h>
 
-using namespace std::chrono;
 using namespace flrd;
 
 KernelExecutor::KernelExecutor()
@@ -132,7 +131,7 @@ bool KernelExecutor::Execute()
 		return false;
 	}
 
-#ifdef _DARWIN
+#ifdef __APPLE__
 	CGLContextObj ctx = CGLGetCurrentContext();
 	if (ctx != flvr::KernelProgram::gl_context_)
 		CGLSetCurrentContext(flvr::KernelProgram::gl_context_);
@@ -245,7 +244,7 @@ bool KernelExecutor::Execute()
 				int brick_x = b->nx();
 				int brick_y = b->ny();
 				int brick_z = b->nz();
-				void* bresult = (void*)(new unsigned char[brick_x*brick_y*brick_z*chars]);
+				unsigned char * bresult = new unsigned char[brick_x*brick_y*brick_z*chars];
 				kernel_exe = ExecuteKernel(kernel, data_id, bresult, brick_x, brick_y, brick_z, chars);
 				if (!kernel_exe)
 					break;
@@ -314,10 +313,10 @@ bool KernelExecutor::ExecuteKernel(flvr::KernelProgram* kernel,
 	//execute
 	size_t global_size[3] = { brick_x, brick_y, brick_z };
 	size_t local_size[3] = { 1, 1, 1 };
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 	kernel->executeKernel(kernel_index, 3, global_size, local_size);
-	high_resolution_clock::time_point t2 = high_resolution_clock::now();
-	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 	std::string stime = std::to_string(time_span.count());
 	m_message += "OpenCL time on ";
 	m_message += kernel->get_device_name().c_str();

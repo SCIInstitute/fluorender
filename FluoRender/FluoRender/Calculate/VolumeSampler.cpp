@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
-#include <FLIVR/VolumeRenderer.h>
+#include <VolumeRenderer.h>
 #include <base_reader.h>
 #include <string>
 #include <vector>
