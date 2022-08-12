@@ -34,7 +34,17 @@ DEALINGS IN THE SOFTWARE.
 #ifndef __COMPATIBILITY_UTILITIES_H__
 #define __COMPATIBILITY_UTILITIES_H__
 
-#ifdef _WIN32 //WINDOWS ONLY
+#include <string>
+#include <cstring>
+#include <fstream>
+#include <locale>
+#include <vector>
+#include <codecvt>
+
+#include <tiffio.h>
+#include <dirent.h>
+
+#ifdef _WIN32 // WINDOWS ONLY
 
 #define WINDOWS_LEAN_AND_MEAN
 #include <Windows.h>
@@ -42,19 +52,10 @@ DEALINGS IN THE SOFTWARE.
 #include <cstdio>
 #include <cstdarg>
 #include <cstdint>
-#include <string>
-#include <cstring>
-#include <fstream>
-#include <locale>
-#include <vector>
-#include <sys/types.h>
-#include <ctype.h>
-#include <tiffio.h>
-#include <direct.h>
-#include <codecvt>
-#include <filesystem>
 #include <cctype>
 #include <cwctype>
+#include <ctype.h>
+#include <sys/types.h>
 
 #define GETCURRENTDIR _getcwd
 
@@ -403,21 +404,13 @@ inline void SLEEP(unsigned long t)
 }
 
 #else // MAC OSX or LINUX
+#include <iostream>
+#include <filesystem>
 
-#include <string>
-#include <cstring>
-#include <fstream>
-#include <locale>
-#include <unistd.h>
 #include <dirent.h>
+#include <unistd.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <vector>
-#include <iostream>
-#include "tiffio.h"
-#include <codecvt>
-#include <unistd.h>
-#include <filesystem>
 
 #define GETCURRENTDIR getcwd
 
@@ -753,14 +746,14 @@ inline void SLEEP(unsigned long t)
 	usleep(t * 1000);
 }
 
-//LINUX SPECIFIC
+// LINUX SPECIFIC
 #ifdef _LINUX
 #endif
-//MAC OSX SPECIFIC
+// MAC OSX SPECIFIC
 #ifdef __APPLE__
 #include <dlfcn.h>
 #endif
 
-#endif //END_IF_DEF__WIN32__
+#endif // end _WIN32
 
-#endif //END__COMPATIBILITY_H__
+#endif // end __COMPATIBILITY_UTILITIES_H__
