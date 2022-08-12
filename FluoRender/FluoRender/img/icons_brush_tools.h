@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "img/icons.h"
+#include "icons.h"
 
 /* brush_append.png - 766 bytes */
 const unsigned char icons::brush_append_png[766] = {

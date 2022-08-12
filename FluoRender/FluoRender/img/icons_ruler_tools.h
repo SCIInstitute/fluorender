@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "img/icons.h"
+#include "icons.h"
 
 /* multi_point.png - 812 bytes */
 const unsigned char icons::multi_point_png[812] = {
