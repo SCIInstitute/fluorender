@@ -3,12 +3,10 @@
 #include "Components/CompGenerator.h"
 #include "Formats/tif_reader.h"
 #include "Formats/msk_writer.h"
-#include "compatibility.h"
+#include "compatibility_utilities.h"
 #include "utility.cpp"
 #include <wx/wx.h>
 //#include <vld.h>
-
-using namespace std;
 
 //progress
 float m_prog_bit;
