@@ -25,15 +25,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <CompAnalyzer.h>
-#include <VolumeData.hpp>
-#include <Annotations.hpp>
-#include <Global.hpp>
-#include <VolumeFactory.hpp>
-#include <Distance/Pca.h>
-#include <FLIVR/TextureBrick.h>
-#include <FLIVR/Texture.h>
-#include <FLIVR/VolumeRenderer.h>
+#include "CompAnalyzer.h"
+#include "VolumeData.hpp"
+#include "Annotations.hpp"
+#include "Global.hpp"
+#include "VolumeFactory.hpp"
+#include "Pca.h"
+#include "TextureBrick.h"
+#include "Texture.h"
+#include "VolumeRenderer.h"
+
 #include <sstream>
 #include <iostream>
 #include <fstream>

@@ -26,14 +26,14 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "CompEditor.h"
-#include <VolumeData.hpp>
-#include <Renderview.hpp>
-#include <FLIVR/VolumeRenderer.h>
-#include <Tracking/Tracks.h>
-#include <Tracking/TrackMap.h>
-#include <Tracking/VolCache.h>
-#include <lbl_reader.h>
-#include <msk_writer.h>
+#include "VolumeData.hpp"
+#include "Renderview.hpp"
+#include "VolumeRenderer.h"
+#include "Tracks.h"
+#include "TrackMap.h"
+#include "VolCache.h"
+#include "lbl_reader.h"
+#include "msk_writer.h"
 
 using namespace flrd;
 

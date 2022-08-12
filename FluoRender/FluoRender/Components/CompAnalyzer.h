@@ -28,10 +28,12 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_CompAnalyzer_h
 #define FL_CompAnalyzer_h
 
-#include <Tracking/Cell.h>
+#include "Cell.h"
+
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/signals2.hpp>
+
 #include <string>
 #include <vector>
 #include <set>

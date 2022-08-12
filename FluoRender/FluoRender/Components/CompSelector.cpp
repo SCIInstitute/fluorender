@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #include "CompSelector.h"
 #include "CompAnalyzer.h"
 #include <VolumeData.hpp>
-#include <FLIVR/Texture.h>
-#include <FLIVR/VolumeRenderer.h>
+#include <Texture.h>
+#include <VolumeRenderer.h>
 #include <set>
 
 using namespace flrd;
