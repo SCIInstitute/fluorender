@@ -27,35 +27,37 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "ScriptProc.h"
-#include <InfoVisitor.hpp>
-#include <Renderview.hpp>
-#include <Global.hpp>
-#include <VolumeFactory.hpp>
-#include <AgentFactory.hpp>
-#include <MeasureAgent.hpp>
-#include <TrackAgent.hpp>
-#include <msk_reader.h>
-#include <msk_writer.h>
-#include <lbl_reader.h>
-#include <Calculate/BackgStat.h>
-#include <Calculate/VolumeCalculator.h>
-#include <Calculate/KernelExecutor.h>
-#include <Components/CompAnalyzer.h>
-#include <Components/CompSelector.h>
-#include <Components/CompEditor.h>
-#include <Distance/RulerHandler.h>
-#include <Tracking/Tracks.h>
-#include <Selection/VolumeSelector.h>
-#include <FLIVR/VertexArray.h>
-#include <FLIVR/TextureRenderer.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <utility.h>
-#include <Nrrd/nrrd.h>
+#include "InfoVisitor.hpp"
+#include "Renderview.hpp"
+#include "Global.hpp"
+#include "VolumeFactory.hpp"
+#include "AgentFactory.hpp"
+#include "MeasureAgent.hpp"
+#include "TrackAgent.hpp"
+#include "msk_reader.h"
+#include "msk_writer.h"
+#include "lbl_reader.h"
+#include "BackgStat.h"
+#include "VolumeCalculator.h"
+#include "KernelExecutor.h"
+#include "CompAnalyzer.h"
+#include "CompSelector.h"
+#include "CompEditor.h"
+#include "RulerHandler.h"
+#include "Tracks.h"
+#include "VolumeSelector.h"
+#include "VertexArray.h"
+#include "TextureRenderer.h"
+#include "VolumeRenderer.h"
+#include "utility.h"
+#include <compatibility_utilities.h>
+
+#include "Nrrd/nrrd.h"
+
 #include <iostream>
 #include <string> 
 #include <sstream>
 #include <fstream> 
-#include <compatibility.h>
 
 using namespace flrd;
 
@@ -732,7 +734,7 @@ void ScriptProc::RunFetchMask()
 		if (bmask)
 		{
 			MSKReader msk_reader;
-			wstring mskname = reader->GetCurMaskName(curf, chan);
+			std::wstring mskname = reader->GetCurMaskName(curf, chan);
 			msk_reader.SetFile(mskname);
 			Nrrd* mask_nrrd_new = msk_reader.Convert(curf, chan, true);
 			if (mask_nrrd_new)
@@ -744,7 +746,7 @@ void ScriptProc::RunFetchMask()
 		if (blabel)
 		{
 			LBLReader lbl_reader;
-			wstring lblname = reader->GetCurLabelName(curf, chan);
+			std::wstring lblname = reader->GetCurLabelName(curf, chan);
 			lbl_reader.SetFile(lblname);
 			Nrrd* label_nrrd_new = lbl_reader.Convert(curf, chan, true);
 			if (label_nrrd_new)
@@ -1163,7 +1165,7 @@ void ScriptProc::RunRulerProfile()
 			if (!ruler) continue;
 			if (!ruler->GetDisp()) continue;
 
-			vector<flrd::ProfileBin>* profile = ruler->GetProfile();
+			std::vector<flrd::ProfileBin>* profile = ruler->GetProfile();
 			if (profile && profile->size())
 			{
 				double dval;
@@ -1491,7 +1493,7 @@ void ScriptProc::ExportAnalysis()
 	ifs.close();
 	ofs.close();
 
-#ifdef _DARWIN
+#ifdef __APPLE__
 	outputfile.Replace(" ", "%20");
 	outputfile = "file://" + outputfile;
 #endif
@@ -1517,7 +1519,7 @@ void ScriptProc::ReadVolCache(flrd::VolCache& vol_cache)
 	Nrrd* data = reader->Convert(frame, chan, true);
 	vol_cache.nrrd_data = data;
 	vol_cache.data = data->data;
-	wstring lblname = reader->GetCurLabelName(frame, chan);
+	std::wstring lblname = reader->GetCurLabelName(frame, chan);
 	lbl_reader.SetFile(lblname);
 	Nrrd* label = lbl_reader.Convert(frame, chan, true);
 	if (!label)
@@ -1576,7 +1578,7 @@ void ScriptProc::DelVolCache(flrd::VolCache& vol_cache)
 		BaseReader* reader = cur_vol->GetReader();
 		if (reader)
 		{
-			wstring filename;
+			std::wstring filename;
 			filename = reader->GetCurLabelName(frame, chan);
 			msk_writer.Save(filename, 1);
 		}

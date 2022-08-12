@@ -28,10 +28,11 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _SCRIPTPROC_H_
 #define _SCRIPTPROC_H_
 
-#include <VolumeData.hpp>
-#include <Flobject/Group.hpp>
-#include <Tracking/VolCache.h>
-#include <Tracking/Cell.h>
+#include "VolumeData.hpp"
+#include "Group.hpp"
+#include "VolCache.h"
+#include "Cell.h"
+
 #include <vector>
 
 class RenderFrame;
