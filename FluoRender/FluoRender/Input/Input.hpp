@@ -28,7 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _INPUT_H_
 #define _INPUT_H_
 
-#include <Flobject/Node.hpp>
+#include "Node.hpp"
+
 #include <string>
 
 #define gstInput "default input"
