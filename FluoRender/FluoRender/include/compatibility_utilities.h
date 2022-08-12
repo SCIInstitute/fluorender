@@ -31,8 +31,8 @@ DEALINGS IN THE SOFTWARE.
  * @author Brig Bagley
  * @version 4 March 2014
  */
-#ifndef __COMPATIBILITY_H__
-#define __COMPATIBILITY_H__
+#ifndef __COMPATIBILITY_UTILITIES_H__
+#define __COMPATIBILITY_UTILITIES_H__
 
 #ifdef _WIN32 //WINDOWS ONLY
 
@@ -757,7 +757,7 @@ inline void SLEEP(unsigned long t)
 #ifdef _LINUX
 #endif
 //MAC OSX SPECIFIC
-#ifdef _DARWIN
+#ifdef __APPLE__
 #include <dlfcn.h>
 #endif
 

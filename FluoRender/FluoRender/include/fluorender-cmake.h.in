@@ -1,8 +1,17 @@
 /* include/fluorender-config.h.in. */
 
+#define FLUORENDER_VERSION       @FLUORENDER_VERSION_MAJOR@.@FLUORENDER_VERSION_MINOR@.@FLUORENDER_VERSION_PATCH@
+#define FLUORENDER_VERSION_MAJOR @FLUORENDER_VERSION_MAJOR@
+#define FLUORENDER_VERSION_MINOR @FLUORENDER_VERSION_MINOR@
+#define FLUORENDER_VERSION_PATCH @FLUORENDER_VERSION_PATCH@
+
+#define FLUORENDER_TITLE             "@FLUORENDER_TITLE@"
+#define FLUORENDER_VERSION_STRING    "@FLUORENDER_VERSION_MAJOR@.@FLUORENDER_VERSION_MINOR@"
+#define FLUORENDER_VERSION_COPYRIGHT "@FLUORENDER_VERSION_COPYRIGHT@"
+
 /*******************************************************************************
  * Optional Qt libraries
  ******************************************************************************/
 
-/* Define if the ADS (advanced docking system) library. */
+/* Define for the ADS (advanced docking system) library. */
 #cmakedefine HAVE_ADS
