@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
-#include <FuiManager.h>
+#include "FuiManager.h"
 
 #pragma message ("replace wxwidgets app class")
 //class FluoRenderApp : public wxApp

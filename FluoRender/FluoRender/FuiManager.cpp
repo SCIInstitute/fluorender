@@ -26,24 +26,24 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <FuiManager.h>
-#include <Global.hpp>
-#include <StopWatch.hpp>
-#include <AgentFactory.hpp>
-#include <RenderFrameAgent.hpp>
-#include <MovieAgent.hpp>
-#include <FLIVR/VolumeRenderer.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
-#include <FLIVR/Framebuffer.h>
-#include <FLIVR/VertexArray.h>
-#include <FLIVR/VolShader.h>
-#include <FLIVR/SegShader.h>
-#include <FLIVR/VolCalShader.h>
-#include <FLIVR/TextRenderer.h>
-#include <FLIVR/MultiVolumeRenderer.h>
-#include <Converters/VolumeMeshConv.h>
-#include <compatibility.h>
+#include "FuiManager.h"
+#include "Global.hpp"
+#include "StopWatch.hpp"
+#include "AgentFactory.hpp"
+#include "RenderFrameAgent.hpp"
+#include "MovieAgent.hpp"
+#include "VolumeRenderer.h"
+#include "KernelProgram.h"
+#include "VolKernel.h"
+#include "Framebuffer.h"
+#include "VertexArray.h"
+#include "VolShader.h"
+#include "SegShader.h"
+#include "VolCalShader.h"
+#include "TextRenderer.h"
+#include "MultiVolumeRenderer.h"
+#include "Converters/VolumeMeshConv.h"
+#include "compatibility_utilities.h"
 
 FuiManager::FuiManager() :
 	m_benchmark(false),
@@ -93,8 +93,7 @@ void FuiManager::Init()
 #pragma message ("initialize main frame")
 	//the frame
 /*	std::string title = std::string(FLUORENDER_TITLE) + std::string(" ") +
-		std::string(VERSION_MAJOR_TAG) + std::string(".") +
-		std::string(VERSION_MINOR_TAG);
+	  std::string(FLUORENDER_VERSION_STRING);
 	m_frame = new RenderFrame(
 		wxString(title),
 		-1, -1,

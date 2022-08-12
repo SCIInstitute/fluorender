@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Main.h>
+#include "Main.h"
 #pragma message ("replace main frame")
 //#include <RenderFrame.h>
 
