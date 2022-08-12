@@ -28,16 +28,15 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _INTERPOLATOR_H_
 #define _INTERPOLATOR_H_
 
-#include <vector>
-#include <string>
 #include "FlKey.h"
 #include "FlKeyDouble.h"
 #include "FlKeyQuaternion.h"
 #include "FlKeyBoolean.h"
 #include "FlKeyInt.h"
-#include <Types/Quaternion.h>
+#include "Quaternion.h"
 
-using namespace std;
+#include <vector>
+#include <string>
 
 typedef struct
 {
@@ -45,8 +44,8 @@ typedef struct
 	double t;	//key time
 	double dt;	//duration
 	int type;	//interpolation method: 0-linear; 1-spline
-	vector<FlKey*> keys; //keys
-	string desc;//descriptions
+        std::vector<FlKey*> keys; //keys
+        std::string desc;//descriptions
 } FlKeyGroup;
 
 class Interpolator
@@ -74,10 +73,10 @@ public:
 	double GetKeyTime(int index);
 	double GetKeyDuration(int index);
 	int GetKeyType(int index);
-	string GetKeyDesc(int index);
+	std::string GetKeyDesc(int index);
 	int GetLastIndex()
 	{ return (int)m_key_list.size() - 1;}
-	vector<FlKeyGroup*>* GetKeyList()
+	std::vector<FlKeyGroup*>* GetKeyList()
 	{ return &m_key_list; }
 
 	//modify
@@ -105,7 +104,7 @@ public:
 private:
 	//adding: 0-disabled; 1-enabled
 	int m_adding;
-	vector<FlKeyGroup*> m_key_list;
+	std::vector<FlKeyGroup*> m_key_list;
 
 private:
 	FlKey* SearchKey(FlKeyCode keycode, FlKeyGroup* g);

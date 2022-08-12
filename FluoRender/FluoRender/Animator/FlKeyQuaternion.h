@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _FLKEY_QUATERNION_H_
 
 #include "FlKey.h"
-#include <Types/Quaternion.h>
+#include "Quaternion.h"
 
 class FlKeyQuaternion : public FlKey
 {

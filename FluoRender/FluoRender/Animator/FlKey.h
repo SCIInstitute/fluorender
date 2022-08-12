@@ -30,8 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <string>
 
-using namespace std;
-
 #define FLKEY_TYPE_DOUBLE	1
 #define FLKEY_TYPE_QUATER	2
 #define FLKEY_TYPE_BOOLEAN	3
@@ -41,11 +39,11 @@ class FlKeyCode
 {
 public:
 	int l0;//view: 1
-	string l0_name;//view name
+        std::string l0_name;//view name
 	int l1;//volume: 2
-	string l1_name;//volume name
+	std::string l1_name;//volume name
 	int l2;//volume property: 0
-	string l2_name;//volume property name
+	std::string l2_name;//volume property name
 
 	FlKeyCode& operator=(const FlKeyCode& keycode)
 	{
