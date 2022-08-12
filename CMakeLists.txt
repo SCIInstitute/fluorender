@@ -28,47 +28,58 @@
 
 # This is an CMake configuration file for FluoRender
 
-# to build for Win7, disable xinput
-SET(USE_XINPUT ON CACHE BOOL "Use Xinput on Windows")
-if (USE_XINPUT)
-  add_definitions(-DUSE_XINPUT=1)
-endif()
-
-cmake_minimum_required(VERSION 2.8.12)
-
-IF(APPLE)
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "set to 10.15 to use std::filesystem")
-elseif(WIN32)
-  if(MSVC)
-    SET(MSVC_INCREMENTAL_DEFAULT OFF)
-  endif()
-endif()
-
-project(FluoRender LANGUAGES CXX)
-
-############################# ARS
-set(FLUORENDER_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(FLUORENDER_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
-
-# Set up easy to use includes for the common directory
-SET(FLUORENDER_COMMON_INCLUDES
-    ${FLUORENDER_BINARY_DIR}/include
-    ${FLUORENDER_SOURCE_DIR}/include
-)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-############################# ARS
+cmake_minimum_required(VERSION 3.19.0)
 
 IF((COMMAND cmake_policy) AND NOT (CMAKE_MAJOR_VERSION LESS 3))
   CMAKE_POLICY(SET CMP0040 NEW)
   CMAKE_POLICY(SET CMP0043 NEW)
 ENDIF()
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/CMake/Modules/")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(UNIX OR APPLE OR MINGW)
+project(FluoRender LANGUAGES C CXX)
+
+############################# ARS
+set(FLUORENDER_TITLE "FluoRender")
+set(FLUORENDER_VERSION_MAJOR 3)
+set(FLUORENDER_VERSION_MINOR 0)
+set(FLUORENDER_VERSION_PATCH 0)
+set(FLUORENDER_VERSION_COPYRIGHT "December 2022")
+
+set(FLUORENDER_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(FLUORENDER_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
+# Set up easy to use includes for the common directory
+SET(FLUORENDER_COMMON_INCLUDES
+    ${FLUORENDER_SOURCE_DIR}/FluoRender
+    ${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/include
+    ${FLUORENDER_BINARY_DIR}/FluoRender/FluoRender/include
+)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+############################# ARS
+
+set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${FLUORENDER_SOURCE_DIR}/CMake")
+
+if(APPLE)
+  set(ARCHITECTURE 64)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15")
+elseif(UNIX)
+  set(ARCHITECTURE 64)
+#  set(RELEASE_FLAGS ${RELEASE_FLAGS} -O3 -march=corei7-avx)
+#  set(DEBUG_FLAGS ${DEBUG_FLAGS} -O0 -march=corei7-avx -ggdb)
+elseif(MINGW)
   set(ARCHITECTURE 64)
 elseif(WIN32)
+  add_definitions(-D_WIN32_WINNT=0x0602)
+  add_definitions(-D_HAS_STD_BYTE=0)
+
+  if(MSVC)
+    SET(MSVC_INCREMENTAL_DEFAULT OFF)
+  endif()
+
   if(${CMAKE_SIZEOF_VOID_P} MATCHES "8")
     set(ARCHITECTURE 64)
   else()
@@ -76,103 +87,64 @@ elseif(WIN32)
   endif()
 endif()
 
+# architecture specific rules
 if(${ARCHITECTURE} MATCHES "64")
+  if(APPLE)
+    set(ARCH_FLAGS "-m64 -arch x86_64")
+  endif()
+
   add_definitions(-DFLUORENDER_ARCH="64bit")
 else()
+  if(APPLE)
+    set(ARCH_FLAGS "-m32 -arch i386")
+  endif()
+
   add_definitions(-DFLUORENDER_ARCH="32bit")
 endif()
-
-#if(UNIX)
-#  set(RELEASE_FLAGS ${RELEASE_FLAGS} -O3 -march=corei7-avx)
-#  set(DEBUG_FLAGS ${DEBUG_FLAGS} -O0 -march=corei7-avx -ggdb)
-#endif()
-
-add_definitions(-DFLUORENDER_TITLE="FluoRender")
-
-add_definitions(-DVERSION_MAJOR=2)						# Be sure to update the Versions and Date for each release!!!!
-add_definitions(-DVERSION_MINOR=27)						# 
-add_definitions(-DVERSION_MAJOR_TAG="2")				# 
-add_definitions(-DVERSION_MINOR_TAG="27")				# 
-add_definitions(-DVERSION_COPYRIGHT="December 2021")	# Up to here!
-
-#windows
-if(WIN32)
-add_definitions(-D_WIN32_WINNT=0x0602)
-add_definitions(-D_HAS_STD_BYTE=0)
-endif()
-
-#UI IDs
-add_definitions(-DID_START=5999)
-add_definitions(-DID_ADJUST_VIEW=ID_START+1)
-add_definitions(-DID_APROP_VIEW=ID_ADJUST_VIEW+31)
-add_definitions(-DID_BRUSH_TOOL=ID_APROP_VIEW+11)
-add_definitions(-DID_CALCULATION=ID_BRUSH_TOOL+51)
-add_definitions(-DID_CLIP_VIEW=ID_CALCULATION+21)
-add_definitions(-DID_COLOCALIZE=ID_CLIP_VIEW+41)
-add_definitions(-DID_COMPONENT=ID_COLOCALIZE+11)
-add_definitions(-DID_CONVERT=ID_COMPONENT+171)
-add_definitions(-DID_COUNTING=ID_CONVERT+21)
-add_definitions(-DID_LIST_PANEL1=ID_COUNTING+21)
-add_definitions(-DID_LIST_PANEL2=ID_LIST_PANEL1+11)
-add_definitions(-DID_MEASURE1=ID_LIST_PANEL2+11)
-add_definitions(-DID_MEASURE2=ID_MEASURE1+11)
-add_definitions(-DID_MANIPULATOR=ID_MEASURE2+21)
-add_definitions(-DID_MPROP_VIEW=ID_MANIPULATOR+21)
-add_definitions(-DID_NOISE_CANCEL=ID_MPROP_VIEW+21)
-add_definitions(-DID_OCL=ID_NOISE_CANCEL+11)
-add_definitions(-DID_RECORD1=ID_OCL+11)
-add_definitions(-DID_RECORD2=ID_RECORD1+11)
-add_definitions(-DID_SETTING=ID_RECORD2+11)
-add_definitions(-DID_TESTER=ID_SETTING+51)
-add_definitions(-DID_TRACE1=ID_TESTER+21)
-add_definitions(-DID_TRACE2=ID_TRACE1+11)
-add_definitions(-DID_TREE_PANEL1=ID_TRACE2+81)
-add_definitions(-DID_TREE_PANEL2=ID_TREE_PANEL1+31)
-add_definitions(-DID_MOVIEW_VIEW=ID_TREE_PANEL2+11)
-add_definitions(-DID_VPROP_VIEW=ID_MOVIEW_VIEW+61)
-add_definitions(-DID_VRENDER_FRAME=ID_VPROP_VIEW+71)
-add_definitions(-DID_VRENDER_VIEW1=ID_VRENDER_FRAME+51)
-add_definitions(-DID_VRENDER_VIEW2=ID_VRENDER_VIEW1+21)
-#dialog common IDs
-add_definitions(-DID_CROP=ID_VRENDER_VIEW2+61)
-add_definitions(-DID_LZW_COMP=ID_CROP+1)
-add_definitions(-DID_RESIZE_CHK=ID_LZW_COMP+1)
-add_definitions(-DID_RESIZE_X_TXT=ID_RESIZE_CHK+1)
-add_definitions(-DID_RESIZE_Y_TXT=ID_RESIZE_X_TXT+1)
-add_definitions(-DID_RESIZE_Z_TXT=ID_RESIZE_Y_TXT+1)
-add_definitions(-DID_SAVE_ALPHA=ID_RESIZE_Z_TXT+1)
-add_definitions(-DID_FILTER=ID_SAVE_ALPHA+1)
-add_definitions(-DID_EMBED_FILES=ID_FILTER+1)
-add_definitions(-DID_READ_ZSLICE=ID_EMBED_FILES+1)
-add_definitions(-DID_READ_CHANN=ID_READ_ZSLICE+1)
-add_definitions(-DID_DIGI_ORDER=ID_READ_CHANN+1)
-add_definitions(-DID_COMPRESS=ID_DIGI_ORDER+1)
-add_definitions(-DID_SKIP_BRICKS=ID_COMPRESS+1)
-add_definitions(-DID_TSEQ_ID=ID_SKIP_BRICKS+1)
-add_definitions(-DID_ENLARGE_SLDR=ID_TSEQ_ID+1)
-add_definitions(-DID_ENLARGE_TEXT=ID_ENLARGE_SLDR+1)
-add_definitions(-DID_ENLARGE_CHK=ID_ENLARGE_TEXT+1)
-add_definitions(-DID_SAVE_FLOAT=ID_ENLARGE_CHK+1)
-add_definitions(-DID_SER_NUM=ID_SAVE_FLOAT+1)
 
 # static compile
 add_definitions(-DSTATIC_COMPILE)
 
-# teem required definitions
-add_definitions(-DTEEM_DIO=0)
-add_definitions(-DTEEM_ENDIAN=1234)
-add_definitions(-DTEEM_QNANHIBIT=1)
+if(APPLE OR UNIX OR MINGW)
+  set(CFLAGS "-fPIC")
+  set(CXXFLAGS "-fPIC ")
+elseif(WIN32)
+  # windows
+  if(MSVC)
+    #add_definitions(-DSEQAN_C++11_STANDARD=ON)
+    add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
+    add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+    add_definitions(-Dinline=__inline)
+    add_definitions("/wd4273")
+    add_definitions(-D_XKEYCHECK_H)
+    add_definitions(-DNOMINMAX)
+    set(CFLAGS "")
+    set(CXXFLAGS "/EHsc")
+    # make sure the reference option is turned off and not incremental build linking
+    STRING(REPLACE "INCREMENTAL" "INCREMENTAL:NO" replacementFlags ${CMAKE_EXE_LINKER_FLAGS_DEBUG})
+    STRING(REPLACE "INCREMENTAL:NO:NO" "INCREMENTAL:NO" replacementFlags1 ${replacementFlags})
+    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "/INCREMENTAL:NO /OPT:NOREF ${replacementFlags1}")
+    STRING(REPLACE "INCREMENTAL" "INCREMENTAL:NO" replacementFlags2 ${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO})
+    STRING(REPLACE "INCREMENTAL:NO:NO" "INCREMENTAL:NO" replacementFlags3 ${replacementFlags2})
+    SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "/INCREMENTAL:NO /OPT:NOREF ${replacementFlags3}")
 
-# glm
-add_definitions(-DGLM_FORCE_RADIANS=1)
+    SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "/INCREMENTAL:NO /OPT:NOREF")
+    SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -MDd")
+    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -MDd")
+    SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -MD")
+    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -MD")
+  endif()
 
-# output directories
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+  # to build for Win7, disable xinput
+  SET(USE_XINPUT ON CACHE BOOL "Use Xinput on Windows")
+  if (USE_XINPUT)
+    add_definitions(-DUSE_XINPUT=1)
+  endif()
+endif()
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_FLAGS "${ARCH_FLAGS} ${CFLAGS}")
+set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
+set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
 
 # OpenGL
 find_package(OpenGL REQUIRED)
@@ -187,24 +159,32 @@ include_directories(${Boost_INCLUDE_DIR})
 
 # JNI includes
 find_package(JNI REQUIRED)
-if (JNI_FOUND)
-   message (STATUS "JNI_INCLUDE_DIRS=${JNI_INCLUDE_DIRS}")
-   message (STATUS "JNI_LIBRARIES=${JNI_LIBRARIES}")
-   include_directories(${JNI_INCLUDE_DIRS})
-   #target_link_libraries(FluoRender ${JNI_LIBRARIES})
-endif()
+include_directories(${JNI_INCLUDE_DIRS})
 
-# tiff
+# Tiff
 find_package(TIFF REQUIRED)
-if (TIFF_FOUND)
-  include_directories(${TIFF_INCLUDE_DIRS})
+include_directories(${TIFF_INCLUDE_DIRS})
+
+# Zlib
+find_package(ZLIB)
+include_directories(${ZLIB_INCLUDE_DIRS})
+
+# OpenCL
+if(UNIX OR APPLE OR MINGW)
+  find_package(OpenCL REQUIRED)
+  include_directories(${OpenCL_INCLUDE_DIRS})
 endif()
 
-# add zlib
-find_package(ZLIB)
-if(ZLIB_FOUND)
-  add_definitions(-DTEEM_ZLIB=1)
-  include_directories(${ZLIB_INCLUDE_DIRS})
+# FreeType
+if(UNIX OR APPLE OR MINGW)
+  find_package(Freetype REQUIRED)
+  include_directories(${FREETYPE_INCLUDE_DIRS})
+endif()
+
+# FFMEG
+if(UNIX OR APPLE OR MINGW)
+  find_package(FFMPEG REQUIRED)
+  include_directories(${FFMPEG_INCLUDE_DIR})
 endif()
 
 ############################# ARS
@@ -244,141 +224,184 @@ else(DEFINED qtadvanceddocking_DIR)
   find_package(qtadvanceddocking OPTIONAL COMPONENTS qtadvanceddocking)
 endif(DEFINED qtadvanceddocking_DIR)
 
+# OS X Frameworks
+if(APPLE)
+  find_library(BZ2_LIBRARIES bz2 REQUIRED)
+  find_library(ICONV_LIBRARIES Iconv REQUIRED)
+
+  find_library(CORE_FOUNDATION_LIBRARIES CoreFoundation REQUIRED)
+  find_library(CORE_MEDIA_LIBRARIES CoreMedia REQUIRED)
+  find_library(CORE_VIDEO_LIBRARIES CoreVideo REQUIRED)
+  find_library(AUDIO_TOOLBOX_LIBRARIES AudioToolbox REQUIRED)
+  find_library(VIDEO_TOOLBOX_LIBRARIES VideoToolbox REQUIRED)
+  find_library(VIDEO_DECODE_ACCELERATION_LIBRARIES VideoDecodeAcceleration REQUIRED)
+  find_library(SECURITY_LIBRARIES Security REQUIRED)
+
+  MARK_AS_ADVANCED(BZ2_LIBRARIES
+                   ICONV_LIBRARIES
+                   CORE_FOUNDATION_LIBRARIES
+                   CORE_MEDIA_LIBRARIES
+                   CORE_VIDEO_LIBRARIES
+                   AUDIO_TOOLBOX_LIBRARIES
+                   VIDEO_TOOLBOX_LIBRARIES
+                   VIDEO_DECODE_ACCELERATION_LIBRARIES
+                   SECURITY_LIBRARIES)
+endif()
+
 # Sets up the FluoRender HAVE_* specific defines - must be done after
 # all packages are found.
-CONFIGURE_FILE(${FLUORENDER_SOURCE_DIR}/fluorender/FluoRender/include/fluorender-cmake.h.in
-               ${FLUORENDER_BINARY_DIR}/fluorender/FluoRender/include/fluorender-config.h @ONLY IMMEDIATE)
+CONFIGURE_FILE(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/include/fluorender-cmake.h.in
+               ${FLUORENDER_BINARY_DIR}/FluoRender/FluoRender/include/fluorender-config.h @ONLY IMMEDIATE)
 
 ############################# ARS
 
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem)
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Biff)
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Air)
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Hest)
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Nrrd)
-file(GLOB airsrc FluoRender/teem/Air/*.c)
-file(GLOB airhdr FluoRender/teem/Air/*.h)
-file(GLOB hestsrc FluoRender/teem/Hest/*.c)
-file(GLOB hesthdr FluoRender/teem/Hest/*.h)
-file(GLOB biffsrc FluoRender/teem/Biff/*.c)
-file(GLOB biffhdr FluoRender/teem/Biff/*.h)
-file(GLOB nrrdsrc FluoRender/teem/Nrrd/*.c)
-file(GLOB nrrdhdr FluoRender/teem/Nrrd/*.h)
-add_library(TEEM_OBJ OBJECT
-  ${airsrc} ${hestsrc} ${nrrdsrc} ${biffsrc}
-  ${airhdr} ${hesthdr} ${nrrdhdr} ${biffhdr})
+# output directories
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-#eigen
-#include_directories(${FluoRender_SOURCE_DIR}/FluoRender/Eigen)
+# glm
+add_definitions(-DGLM_FORCE_RADIANS=1)
+
+# teem
+add_definitions(-DTEEM_DIO=0)
+add_definitions(-DTEEM_ENDIAN=1234)
+add_definitions(-DTEEM_QNANHIBIT=1)
+
+if(${ARCHITECTURE} MATCHES "64")
+  add_definitions(-DTEEM_32BIT=0)
+else()
+  add_definitions(-DTEEM_32BIT=1)
+endif()
+
+if(ZLIB_FOUND)
+  add_definitions(-DTEEM_ZLIB=1)
+endif()
+
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/teem)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/teem/Biff)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/teem/Air)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/teem/Hest)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/teem/Nrrd)
+file(GLOB air_src FluoRender/teem/Air/*.c)
+file(GLOB air_hdr FluoRender/teem/Air/*.h)
+file(GLOB hest_src FluoRender/teem/Hest/*.c)
+file(GLOB hest_hdr FluoRender/teem/Hest/*.h)
+file(GLOB biff_src FluoRender/teem/Biff/*.c)
+file(GLOB biff_hdr FluoRender/teem/Biff/*.h)
+file(GLOB nrrd_src FluoRender/teem/Nrrd/*.c)
+file(GLOB nrrd_hdr FluoRender/teem/Nrrd/*.h)
+add_library(TEEM_OBJ OBJECT ${air_src} ${hest_src} ${nrrd_src} ${biff_src}
+                            ${air_hdr} ${hest_hdr} ${nrrd_hdr} ${biff_hdr})
+
+# eigen
+#include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/Eigen)
 
 # glew
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/glew)
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/glew/GL)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/glew)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/glew/GL)
 file(GLOB gl_srcs FluoRender/glew/*.c)
 file(GLOB gl_hdrs1 FluoRender/glew/*.h)
 file(GLOB gl_hdrs2 FluoRender/glew/GL/*.h)
-add_library(GLEW_OBJ OBJECT
-  ${gl_srcs} ${gl_hdrs1} ${gl_hdrs2})
+add_library(GLEW_OBJ OBJECT ${gl_srcs} ${gl_hdrs1} ${gl_hdrs2})
 
 # pole
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/pole)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/pole)
 file(GLOB pole_srcs FluoRender/pole/pole.cpp)
 file(GLOB pole_hdrs FluoRender/pole/pole.h)
 add_library(POLE_OBJ OBJECT ${pole_srcs} ${pole_hdrs})
 
 # ffmpeg
 if(WIN32)
-  include_directories(${FluoRender_SOURCE_DIR}/FluoRender/ffmpeg/include)
-  file(GLOB FFMPEG_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/ffmpeg/lib/Win64/*.a ${FluoRender_SOURCE_DIR}/FluoRender/ffmpeg/lib/Win64/*.lib)
+  include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/ffmpeg/include)
+  file(GLOB FFMPEG_LIBRARIES ${FLUORENDER_SOURCE_DIR}/FluoRender/ffmpeg/lib/Win64/*.a ${FLUORENDER_SOURCE_DIR}/FluoRender/ffmpeg/lib/Win64/*.lib)
   add_definitions(-D__STDC_CONSTANT_MACROS)
 elseif(APPLE)
-  include_directories(${FluoRender_SOURCE_DIR}/FluoRender/ffmpeg/include)
-  file(GLOB FFMPEG_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/ffmpeg/lib/OSX/*.a)
-
-  find_library(AUDIOTOOLBOX_LIBRARIES AudioToolbox REQUIRED)
-  MARK_AS_ADVANCED(AUDIOTOOLBOX_LIBRARIES)
-else()
-  find_package(FFMPEG REQUIRED)
-  #string(REPLACE "/usr/include/" "" FFMPEG_INCLUDE_DIR "${FFMPEG_INCLUDE_DIR}")
-  include_directories(${FFMPEG_INCLUDE_DIR})
+  include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/ffmpeg/include)
+  file(GLOB FFMPEG_LIBRARIES ${FLUORENDER_SOURCE_DIR}/FluoRender/ffmpeg/lib/OSX/*.a)
 endif()
 
-# FluoRender
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender)
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender)
+############################# ARS
+
+# Utilities
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Utilities)
+file(GLOB utilities_src FluoRender/FluoRender/Utilities/*.cpp)
+file(GLOB utilities_hdr FluoRender/FluoRender/Utilities/*.h)
+add_library(UTILITIES_OBJ OBJECT
+  ${utilities_src} ${utilities_hdr})
 
 # Agents
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Agents)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Agents)
 file(GLOB agt_src FluoRender/FluoRender/Agents/*.cpp)
 file(GLOB agt_hdr FluoRender/FluoRender/Agents/*.hpp)
 add_library(AGENTS_OBJ OBJECT
   ${agt_src} ${agt_hdr})
 
 # Animators
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Animators)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Animator)
 file(GLOB ani_src FluoRender/FluoRender/Animator/*.cpp)
 file(GLOB ani_hdr FluoRender/FluoRender/Animator/*.h)
 add_library(ANIMATORS_OBJ OBJECT
   ${ani_src} ${ani_hdr})
 
 # Calculate
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Calculate)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Calculate)
 file(GLOB calc_src FluoRender/FluoRender/Calculate/*.cpp)
 file(GLOB calc_hdr FluoRender/FluoRender/Calculate/*.h)
 add_library(CALCULATE_OBJ OBJECT
   ${calc_src} ${calc_hdr})
 
 # Cluster
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Cluster)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Cluster)
 file(GLOB clstr_src FluoRender/FluoRender/Cluster/*.cpp)
 file(GLOB clstr_hdr FluoRender/FluoRender/Cluster/*.h)
 add_library(CLUSTER_OBJ OBJECT
   ${clstr_src} ${clstr_hdr})
 
 # Components
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Components)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Components)
 file(GLOB cmp_src FluoRender/FluoRender/Components/*.cpp)
 file(GLOB cmp_hdr FluoRender/FluoRender/Components/*.h)
 add_library(COMPONENTS_OBJ OBJECT
   ${cmp_src} ${cmp_hdr})
 
 # Converters
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Converters)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Converters)
 file(GLOB cvt_src FluoRender/FluoRender/Converters/*.cpp)
 file(GLOB cvt_hdr FluoRender/FluoRender/Converters/*.h)
 add_library(CONVERTERS_OBJ OBJECT
   ${cvt_src} ${cvt_hdr})
 
 # Debug
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Debug)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Debug)
 file(GLOB dbg_src FluoRender/FluoRender/Debug/*.cpp)
 file(GLOB dbg_hdr FluoRender/FluoRender/Debug/*.hpp)
 add_library(DEBUG_OBJ OBJECT
   ${dbg_src} ${dbg_hdr})
 
 # Distance
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Distance)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Distance)
 file(GLOB dist_src FluoRender/FluoRender/Distance/*.cpp)
 file(GLOB dist_hdr FluoRender/FluoRender/Distance/*.h)
 add_library(DISTANCE_OBJ OBJECT
   ${dist_src} ${dist_hdr})
 
 # FLIVR
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/FLIVR)
-file(GLOB fli_src FluoRender/FluoRender/FLIVR/*.cpp)
-file(GLOB fli_hdr FluoRender/FluoRender/FLIVR/*.h)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/FLIVR)
+file(GLOB flivr_src FluoRender/FluoRender/FLIVR/*.cpp)
+file(GLOB flivr_hdr FluoRender/FluoRender/FLIVR/*.h)
 add_library(FLIVR_OBJ OBJECT
-  ${fli_src} ${fli_hdr})
+  ${flivr_src} ${flivr_hdr})
 
 # Flobject
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Flobject)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Flobject)
 file(GLOB obj_src FluoRender/FluoRender/Flobject/*.cpp)
 file(GLOB obj_hdr FluoRender/FluoRender/Flobject/*.hpp)
 add_library(FLOBJECT_OBJ OBJECT
   ${obj_src} ${obj_hdr})
 
 # Formats
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Formats)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Formats)
 file(GLOB fmt_src FluoRender/FluoRender/Formats/*.cpp)
 file(GLOB fmt_hdr FluoRender/FluoRender/Formats/*.h)
 file(GLOB fmt_rsc FluoRender/FluoRender/Formats/*.class)
@@ -386,70 +409,70 @@ add_library(FORMATS_OBJ OBJECT
   ${fmt_src} ${fmt_hdr} ${fmt_rsc})
 
 # Global
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Global)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Global)
 file(GLOB glb_src FluoRender/FluoRender/Global/*.cpp)
 file(GLOB glb_hdr FluoRender/FluoRender/Global/*.hpp)
 add_library(GLOBAL_OBJ OBJECT
   ${glb_src} ${glb_hdr})
 
 # images
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/img)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/img)
 file(GLOB img_hdr FluoRender/FluoRender/img/*.h)
 file(GLOB img_src FluoRender/FluoRender/img/*.cpp)
 add_library(IMAGES_OBJ OBJECT
   ${img_hdr} ${img_src})
 
 # Input
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Input)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Input)
 file(GLOB input_src FluoRender/FluoRender/Input/*.cpp)
 file(GLOB input_hdr FluoRender/FluoRender/Input/*.hpp)
 add_library(INPUT_OBJ OBJECT
   ${input_src} ${input_hdr})
 
 # Scenegraph
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Scenegraph)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Scenegraph)
 file(GLOB scg_src FluoRender/FluoRender/Scenegraph/*.cpp)
 file(GLOB scg_hdr FluoRender/FluoRender/Scenegraph/*.hpp)
 add_library(SCENEGRAPH_OBJ OBJECT
   ${scg_src} ${scg_hdr})
 
 # Script
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Script)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Script)
 file(GLOB scr_src FluoRender/FluoRender/Script/*.cpp)
 file(GLOB scr_hdr FluoRender/FluoRender/Script/*.h)
 add_library(SCRIPT_OBJ OBJECT
   ${scr_src} ${scr_hdr})
 
 # Selection
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Selection)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Selection)
 file(GLOB sel_src FluoRender/FluoRender/Selection/*.cpp)
 file(GLOB sel_hdr FluoRender/FluoRender/Selection/*.h)
 add_library(SELECTION_OBJ OBJECT
   ${sel_src} ${sel_hdr})
 
 # Timer
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Timer)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Timer)
 file(GLOB timer_src FluoRender/FluoRender/Timer/*.cpp)
 file(GLOB timer_hdr FluoRender/FluoRender/Timer/*.hpp)
 add_library(TIMER_OBJ OBJECT
   ${timer_src} ${timer_hdr})
 
 # Tracking
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Tracking)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Tracking)
 file(GLOB trk_src FluoRender/FluoRender/Tracking/*.cpp)
 file(GLOB trk_hdr FluoRender/FluoRender/Tracking/*.h)
 add_library(TRACKING_OBJ OBJECT
   ${trk_src} ${trk_hdr})
 
 # Types
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Types)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Types)
 file(GLOB typ_src FluoRender/FluoRender/Types/*.cpp)
 file(GLOB typ_hdr FluoRender/FluoRender/Types/*.h)
 add_library(TYPES_OBJ OBJECT
   ${typ_src} ${typ_hdr})
 
 # Video
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Video)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Video)
 file(GLOB vid_src FluoRender/FluoRender/Video/*.cpp)
 file(GLOB vid_hdr FluoRender/FluoRender/Video/*.h)
 add_library(VIDEO_OBJ OBJECT
@@ -457,87 +480,88 @@ add_library(VIDEO_OBJ OBJECT
 
 # OpenCL
 if(WIN32)
-  include_directories(${FluoRender_SOURCE_DIR}/FluoRender/OpenCL/include)
+  include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/OpenCL/include)
   if(${ARCHITECTURE} MATCHES 64)
-    file(GLOB OpenCL_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/OpenCL/lib/x86_64/*.lib)
+    file(GLOB OpenCL_LIBRARIES ${FLUORENDER_SOURCE_DIR}/FluoRender/OpenCL/lib/x86_64/*.lib)
   elseif(${ARCHITECTURE} MATCHES 32)
-    file(GLOB OpenCL_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/OpenCL/lib/x86/*.lib)
+    file(GLOB OpenCL_LIBRARIES ${FLUORENDER_SOURCE_DIR}/FluoRender/OpenCL/lib/x86/*.lib)
   endif()
-elseif(UNIX OR APPLE OR MINGW)
-  #include(${CMAKE_SOURCE_DIR}/FindOpenCL.cmake)
-  find_package(OpenCL REQUIRED)
-  include_directories(${OpenCL_INCLUDE_DIRS})
 endif()
 
-#nikon
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/nd2/include)
+# nikon
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/nd2/include)
 if(WIN32)
-	if(${ARCHITECTURE} MATCHES 64)
-		file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/*.lib)
-	endif()
+  if(${ARCHITECTURE} MATCHES 64)
+    file(GLOB ND2_LIBRARIES ${FLUORENDER_SOURCE_DIR}/FluoRender/nd2/lib/*.lib)
+  endif()
 elseif(APPLE)
-   file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/*.dylib)
+   file(GLOB ND2_LIBRARIES ${FLUORENDER_SOURCE_DIR}/FluoRender/nd2/lib/*.dylib)
 endif()
 
 # freetype
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/freetype/include)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/freetype/include)
 if(WIN32)
-  file(GLOB FREETYPE_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/freetype/lib/*.lib)
-else()
-  find_package(Freetype REQUIRED)
-  include_directories(${FREETYPE_INCLUDE_DIRS})
+  file(GLOB FREETYPE_LIBRARIES ${FLUORENDER_SOURCE_DIR}/FluoRender/freetype/lib/*.lib)
 endif()
 
 # OpenVR
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/OpenVR/headers)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/OpenVR/headers)
 if(WIN32)
-	if(${ARCHITECTURE} MATCHES 64)
-		file(GLOB OpenVR_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/OpenVR/lib/win64/*.lib)
-	endif()
+  if(${ARCHITECTURE} MATCHES 64)
+    file(GLOB OpenVR_LIBRARIES ${FLUORENDER_SOURCE_DIR}/FluoRender/OpenVR/lib/win64/*.lib)
+  endif()
 endif()
 
-#XInput
-if(WIN32 AND USE_XINPUT)
-	include_directories(${FluoRender_SOURCE_DIR}/FluoRender/XInput)
-	file(GLOB xip_src FluoRender/XInput/*.cpp)
-	file(GLOB xip_hdr FluoRender/XInput/*.h)
-	add_library(XINPUT_OBJ OBJECT
-		${xip_src} ${xip_hdr})
+# XInput
+if(WIN32)
+  include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/Wacom/Include)
+  file(GLOB wac_src FluoRender/Wacom/*.cpp)
+  file(GLOB wac_hdr FluoRender/Wacom/*.h)
+  
+  add_library(WACUTILS_OBJ OBJECT
+    ${wac_src} ${wac_hdr})
+
+  if(USE_XINPUT)
+    include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/XInput)
+    file(GLOB xip_src FluoRender/XInput/*.cpp)
+    file(GLOB xip_hdr FluoRender/XInput/*.h)
+    add_library(XINPUT_OBJ OBJECT
+      ${xip_src} ${xip_hdr})
+  endif()
 endif()
 
-# other sources
+# Other sources
 file(GLOB src FluoRender/FluoRender/*.cpp)
 file(GLOB hdr FluoRender/FluoRender/*.h)
 file(GLOB rsc FluoRender/FluoRender/img/*.xpm)
 
 # SynthBB
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/SynthBB)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/SynthBB)
 file(GLOB synthbb_hdr FluoRender/SynthBB/*.h)
 file(GLOB synthbb_src FluoRender/SynthBB/*.cpp)
 
 # MaskInt
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/MaskInt)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/MaskInt)
 file(GLOB maskint_hdr FluoRender/MaskInt/*.h)
 file(GLOB maskint_src FluoRender/MaskInt/*.cpp)
 
 # ReadGMM
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/ReadGMM)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/ReadGMM)
 file(GLOB readgmm_hdr FluoRender/ReadGMM/*.h)
 file(GLOB readgmm_src FluoRender/ReadGMM/*.cpp)
 
 # Tester
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/Tester)
+include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/Tester)
 file(GLOB tester_hdr FluoRender/Tester/*.h)
 file(GLOB tester_src FluoRender/Tester/*.cpp)
 
-# For Apple set the icns file containing icons
+# For Apple and Windoz set the icns file containing icons
 IF(APPLE)
   # set how it shows up in the Info.plist file
   SET(MACOSX_BUNDLE_ICON_FILE FluoRender_icon.icns)
   # set where in the bundle to put the icns file
-  SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/img/FluoRender_icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-  # include the icns file in the target
-  SET(src ${src} ${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/img/FluoRender_icon.icns)
+  SET(icns "${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/img/FluoRender_icon.icns")
+  SET_SOURCE_FILES_PROPERTIES(${icns} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 ELSEIF(WIN32)
   SET(icon_rc "${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/img/FluoRender.rc")
   SET(icns "${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/img/fluorenderIcon.ico")
@@ -545,49 +569,14 @@ ELSEIF(WIN32)
   SET(src ${src} ${icon_rc})
 ENDIF()
 
-# platform specific rules
+# Platform specific rules for OpenGL
 if(APPLE)
-  # Mac OS X
   if(NOT OPEN_GL_HEADER_LOC)
     add_definitions(-DOPEN_GL_HEADER_LOC=<OpenGL/gl.h>)
   endif()
   if(NOT OPEN_GLU_HEADER_LOC)
     add_definitions(-DOPEN_GLU_HEADER_LOC=<OpenGL/glu.h>)
   endif()
-  add_definitions(-D_DARWIN)
-  set(CFLAGS "-fPIC")
-  set(CXXFLAGS "-fPIC ")
-  include(BundleUtilities)
-  add_executable(FluoRender MACOSX_BUNDLE
-    ${src} ${hdr} ${rsc} ${icns}
-    $<TARGET_OBJECTS:AGENTS_OBJ>
-    $<TARGET_OBJECTS:ANIMATORS_OBJ>
-    $<TARGET_OBJECTS:CALCULATE_OBJ>
-    $<TARGET_OBJECTS:CLUSTER_OBJ>
-    $<TARGET_OBJECTS:COMPONENTS_OBJ>
-    $<TARGET_OBJECTS:CONVERTERS_OBJ>
-    $<TARGET_OBJECTS:DEBUG_OBJ>
-    $<TARGET_OBJECTS:DISTANCE_OBJ>
-    $<TARGET_OBJECTS:FLIVR_OBJ>
-    $<TARGET_OBJECTS:FLOBJECT_OBJ>
-    $<TARGET_OBJECTS:FORMATS_OBJ>
-    $<TARGET_OBJECTS:GLOBAL_OBJ>
-    $<TARGET_OBJECTS:IMAGES_OBJ>
-    $<TARGET_OBJECTS:INPUT_OBJ>
-    $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
-    $<TARGET_OBJECTS:SCRIPT_OBJ>
-    $<TARGET_OBJECTS:SELECTION_OBJ>
-    $<TARGET_OBJECTS:TIMER_OBJ>
-    $<TARGET_OBJECTS:TRACKING_OBJ>
-    $<TARGET_OBJECTS:TYPES_OBJ>
-    $<TARGET_OBJECTS:VIDEO_OBJ>
-    $<TARGET_OBJECTS:GLEW_OBJ>
-    $<TARGET_OBJECTS:POLE_OBJ>
-    $<TARGET_OBJECTS:TEEM_OBJ>)
-  add_executable(Tester MACOSX_BUNDLE
-    ${tester_src} ${tester_hdr}
-    $<TARGET_OBJECTS:TYPES_OBJ>
-    $<TARGET_OBJECTS:FLOBJECT_OBJ>)
 elseif(UNIX OR MINGW)
   # Linux
   #if(NOT OPEN_GL_HEADER_LOC)
@@ -596,36 +585,6 @@ elseif(UNIX OR MINGW)
   #if(NOT OPEN_GLU_HEADER_LOC)
   #  add_definitions(-DOPEN_GLU_HEADER_LOC=<OpenGL/glu.h>)
   #endif()
-  #add_definitions(-D_DARWIN)
-  set(CFLAGS "-fPIC")
-  set(CXXFLAGS "-fPIC ")
-  #include(BundleUtilities)
-  add_executable(FluoRender
-    ${src} ${hdr} ${rsc} ${icns}
-    $<TARGET_OBJECTS:AGENTS_OBJ>
-    $<TARGET_OBJECTS:ANIMATORS_OBJ>
-    $<TARGET_OBJECTS:CALCULATE_OBJ>
-    $<TARGET_OBJECTS:CLUSTER_OBJ>
-    $<TARGET_OBJECTS:COMPONENTS_OBJ>
-    $<TARGET_OBJECTS:CONVERTERS_OBJ>
-    $<TARGET_OBJECTS:DEBUG_OBJ>
-    $<TARGET_OBJECTS:DISTANCE_OBJ>
-    $<TARGET_OBJECTS:FLIVR_OBJ>
-    $<TARGET_OBJECTS:FLOBJECT_OBJ>
-    $<TARGET_OBJECTS:FORMATS_OBJ>
-    $<TARGET_OBJECTS:GLOBAL_OBJ>
-    $<TARGET_OBJECTS:IMAGES_OBJ>
-    $<TARGET_OBJECTS:INPUT_OBJ>
-    $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
-    $<TARGET_OBJECTS:SCRIPT_OBJ>
-    $<TARGET_OBJECTS:SELECTION_OBJ>
-    $<TARGET_OBJECTS:TIMER_OBJ>
-    $<TARGET_OBJECTS:TRACKING_OBJ>
-    $<TARGET_OBJECTS:TYPES_OBJ>
-    $<TARGET_OBJECTS:VIDEO_OBJ>
-    $<TARGET_OBJECTS:GLEW_OBJ>
-    $<TARGET_OBJECTS:POLE_OBJ>
-    $<TARGET_OBJECTS:TEEM_OBJ>)
 elseif(WIN32)
   # Windows
   if(NOT OPEN_GL_HEADER_LOC)
@@ -634,271 +593,202 @@ elseif(WIN32)
   if(NOT OPEN_GLU_HEADER_LOC)
     add_definitions(-DOPEN_GLU_HEADER_LOC=<GL/glu.h>)
   endif()
-  # windows
-  if(WIN32)
-    add_definitions(-DWIN32)
-    add_definitions(-D_WIN32)
-    if(MSVC)
-      #add_definitions(-DSEQAN_C++11_STANDARD=ON)
-      add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
-      add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
-      add_definitions(-Dinline=__inline)
-      add_definitions("/wd4273")
-      add_definitions(-D_XKEYCHECK_H)
-      add_definitions(-DNOMINMAX)
-      set(CFLAGS "")
-      set(CXXFLAGS "/EHsc")
-      # make sure the reference option is turned off and not incremental build linking
-      STRING(REPLACE "INCREMENTAL" "INCREMENTAL:NO" replacementFlags ${CMAKE_EXE_LINKER_FLAGS_DEBUG})
-      STRING(REPLACE "INCREMENTAL:NO:NO" "INCREMENTAL:NO" replacementFlags1 ${replacementFlags})
-      SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "/INCREMENTAL:NO /OPT:NOREF ${replacementFlags1}")
-
-      STRING(REPLACE "INCREMENTAL" "INCREMENTAL:NO" replacementFlags2 ${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO})
-      STRING(REPLACE "INCREMENTAL:NO:NO" "INCREMENTAL:NO" replacementFlags3 ${replacementFlags2})
-      SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "/INCREMENTAL:NO /OPT:NOREF ${replacementFlags3}")
-
-      SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "/INCREMENTAL:NO /OPT:NOREF")
-      SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -MDd")
-      SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -MDd")
-      SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -MD")
-      SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -MD")
-    endif()
-    include_directories(${FluoRender_SOURCE_DIR}/FluoRender/Wacom/Include)
-    file(GLOB wac_src FluoRender/Wacom/*.cpp)
-    file(GLOB wac_hdr FluoRender/Wacom/*.h)
-    add_library(WACUTILS_OBJ OBJECT
-      ${wac_src} ${wac_hdr})
-    if (USE_XINPUT)
-    add_executable(FluoRender WIN32
-      ${src} ${hdr} ${rsc} ${icns}
-      $<TARGET_OBJECTS:AGENTS_OBJ>
-      $<TARGET_OBJECTS:ANIMATORS_OBJ>
-      $<TARGET_OBJECTS:CALCULATE_OBJ>
-      $<TARGET_OBJECTS:CLUSTER_OBJ>
-      $<TARGET_OBJECTS:COMPONENTS_OBJ>
-      $<TARGET_OBJECTS:CONVERTERS_OBJ>
-      $<TARGET_OBJECTS:DEBUG_OBJ>
-      $<TARGET_OBJECTS:DISTANCE_OBJ>
-      $<TARGET_OBJECTS:FLIVR_OBJ>
-      $<TARGET_OBJECTS:FLOBJECT_OBJ>
-      $<TARGET_OBJECTS:FORMATS_OBJ>
-      $<TARGET_OBJECTS:GLOBAL_OBJ>
-      $<TARGET_OBJECTS:IMAGES_OBJ>
-      $<TARGET_OBJECTS:INPUT_OBJ>
-      $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
-      $<TARGET_OBJECTS:SCRIPT_OBJ>
-      $<TARGET_OBJECTS:SELECTION_OBJ>
-      $<TARGET_OBJECTS:TIMER_OBJ>
-      $<TARGET_OBJECTS:TRACKING_OBJ>
-      $<TARGET_OBJECTS:TYPES_OBJ>
-      $<TARGET_OBJECTS:VIDEO_OBJ>
-      $<TARGET_OBJECTS:GLEW_OBJ>
-      $<TARGET_OBJECTS:POLE_OBJ>
-      $<TARGET_OBJECTS:TEEM_OBJ>
-      $<TARGET_OBJECTS:WACUTILS_OBJ>
-      $<TARGET_OBJECTS:XINPUT_OBJ>
-      )
-    else()
-    add_executable(FluoRender WIN32
-      ${src} ${hdr} ${rsc} ${icns}
-      $<TARGET_OBJECTS:AGENTS_OBJ>
-      $<TARGET_OBJECTS:ANIMATORS_OBJ>
-      $<TARGET_OBJECTS:CALCULATE_OBJ>
-      $<TARGET_OBJECTS:CLUSTER_OBJ>
-      $<TARGET_OBJECTS:COMPONENTS_OBJ>
-      $<TARGET_OBJECTS:CONVERTERS_OBJ>
-      $<TARGET_OBJECTS:DEBUG_OBJ>
-      $<TARGET_OBJECTS:DISTANCE_OBJ>
-      $<TARGET_OBJECTS:FLIVR_OBJ>
-      $<TARGET_OBJECTS:FLOBJECT_OBJ>
-      $<TARGET_OBJECTS:FORMATS_OBJ>
-      $<TARGET_OBJECTS:GLOBAL_OBJ>
-      $<TARGET_OBJECTS:IMAGES_OBJ>
-      $<TARGET_OBJECTS:INPUT_OBJ>
-      $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
-      $<TARGET_OBJECTS:SCRIPT_OBJ>
-      $<TARGET_OBJECTS:SELECTION_OBJ>
-      $<TARGET_OBJECTS:TIMER_OBJ>
-      $<TARGET_OBJECTS:TRACKING_OBJ>
-      $<TARGET_OBJECTS:TYPES_OBJ>
-      $<TARGET_OBJECTS:VIDEO_OBJ>
-      $<TARGET_OBJECTS:GLEW_OBJ>
-      $<TARGET_OBJECTS:POLE_OBJ>
-      $<TARGET_OBJECTS:TEEM_OBJ>
-      $<TARGET_OBJECTS:WACUTILS_OBJ>
-      )
-    endif()
-    add_executable(Tester
-      ${tester_src} ${tester_hdr}
-      $<TARGET_OBJECTS:TYPES_OBJ>
-      $<TARGET_OBJECTS:FLOBJECT_OBJ>)
-  endif()
 endif()
 
-# architecture specific rules
-if(${ARCHITECTURE} MATCHES 64)
-  if(APPLE)
-    set(ARCH_FLAGS "-m64 -arch x86_64")
-  endif()
-  add_definitions(-DTEEM_32BIT=0)
-  set(CMAKE_C_FLAGS "${ARCH_FLAGS} ${CFLAGS}")
-  set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
-  set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
-else()
-  if(APPLE)
-    set(ARCH_FLAGS "-m32 -arch i386")
-  endif()
-  add_definitions(-DTEEM_32BIT=1)
-  set(CMAKE_C_FLAGS "${ARCH_FLAGS} ${CFLAGS}")
-  set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
-  set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
-endif()
+add_executable(FluoRender MACOSX_BUNDLE WIN32
+  ${src} ${rsc} ${icns}
+  $<TARGET_OBJECTS:AGENTS_OBJ>
+  $<TARGET_OBJECTS:ANIMATORS_OBJ>
+  $<TARGET_OBJECTS:CALCULATE_OBJ>
+  $<TARGET_OBJECTS:CLUSTER_OBJ>
+  $<TARGET_OBJECTS:COMPONENTS_OBJ>
+  $<TARGET_OBJECTS:CONVERTERS_OBJ>
+  $<TARGET_OBJECTS:DEBUG_OBJ>
+  $<TARGET_OBJECTS:DISTANCE_OBJ>
+  $<TARGET_OBJECTS:FLIVR_OBJ>
+  $<TARGET_OBJECTS:FLOBJECT_OBJ>
+  $<TARGET_OBJECTS:FORMATS_OBJ>
+  $<TARGET_OBJECTS:GLOBAL_OBJ>
+  $<TARGET_OBJECTS:IMAGES_OBJ>
+  $<TARGET_OBJECTS:INPUT_OBJ>
+  $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
+  $<TARGET_OBJECTS:SCRIPT_OBJ>
+  $<TARGET_OBJECTS:SELECTION_OBJ>
+  $<TARGET_OBJECTS:TIMER_OBJ>
+  $<TARGET_OBJECTS:TRACKING_OBJ>
+  $<TARGET_OBJECTS:TYPES_OBJ>
+  $<TARGET_OBJECTS:UTILITIES_OBJ>
+  $<TARGET_OBJECTS:VIDEO_OBJ>
+  $<TARGET_OBJECTS:GLEW_OBJ>
+  $<TARGET_OBJECTS:POLE_OBJ>
+  $<TARGET_OBJECTS:TEEM_OBJ>)
 
-if(APPLE)
-  set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -L/usr/lib ${CMAKE_EXE_LINKER_FLAGS} -liconv -lbz2 -framework OpenCL -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration -framework VideoToolbox -framework Security -framework CoreMedia")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.11 -DWX_PRECOMP -std=c++11 -stdlib=libc++")
-  # make sure png is static linked
-  string(REGEX REPLACE "-lpng" "/usr/local/lib/libpng.a"
-    CMAKE_MAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
-  string(REGEX REPLACE "/usr/local/lib/libfreetype.dylib" "/usr/local/lib/libfreetype.a;/usr/local/lib/libpng.a"
-    FREETYPE_LIBRARIES ${FREETYPE_LIBRARIES})
-  message(STATUS "${FREETYPE_LIBRARIES}")
-elseif(UNIX OR MINGW)
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread -ldl")
+add_executable(Tester MACOSX_BUNDLE WIN32
+  ${tester_src}
+  $<TARGET_OBJECTS:TYPES_OBJ>
+  $<TARGET_OBJECTS:FLOBJECT_OBJ>)
+
+# FluoRender
+include_directories(${FLUORENDER_COMMON_INCLUDES})
+
+target_include_directories(FluoRender PUBLIC
+			   ${FLUORENDER_COMMON_INCLUDES})
+
+message(STATUS "FLUORENDER_COMMON_INCLUDES ${FLUORENDER_COMMON_INCLUDES}")
+
+
+# Platform specific sources
+if(WIN32)
+  target_sources(FluoRender PRIVATE
+    $<TARGET_OBJECTS:WACUTILS_OBJ>)
+
+  if (USE_XINPUT)
+    target_sources(FluoRender PRIVATE
+      $<TARGET_OBJECTS:XINPUT_OBJ>)
+  endif()
 endif()
 
 target_compile_options(FluoRender PRIVATE "$<$<CONFIG:RELEASE>:${RELEASE_FLAGS}>")
 target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
 
-# link the libraries
-if(UNIX OR APPLE OR MINGW)
+# Link libraries
+target_link_libraries(FluoRender
+  ${FFMPEG_LIBRARIES}
+  ${OPENGL_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${OpenCL_LIBRARIES}
+  ${FREETYPE_LIBRARIES}
+  ${TIFF_LIBRARIES}
+  ${PNG_LIBRARIES}
+  ${ZLIB_LIBRARIES}
+  ${ND2_LIBRARIES})
+
+# OS X frameworks
+if(APPLE)
   target_link_libraries(FluoRender
-    ${FFMPEG_LIBRARIES}
-    ${AUDIOTOOLBOX_LIBRARIES}
-    ${OPENGL_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${OpenCL_LIBRARIES}
-    ${FREETYPE_LIBRARIES}
-    ${TIFF_LIBRARIES}
-    ${PNG_LIBRARIES}
-    ${ZLIB_LIBRARIES}
-    ${ND2_LIBRARIES})
-	#${JNI_LIBRARIES})
+    ${BZ2_LIBRARIES}
+    ${ICONV_LIBRARIES}
+    ${CORE_FOUNDATION_LIBRARIES}
+    ${CORE_MEDIA_LIBRARIES}
+    ${CORE_VIDEO_LIBRARIES}
+    ${AUDIO_TOOLBOX_LIBRARIES}
+    ${VIDEO_TOOLBOX_LIBRARIES}
+    ${VIDEO_DECODE_ACCELERATION_LIBRARIES}
+    ${SECURITY_LIBRARIES}
+#    ${JNI_LIBRARIES}
+    )
+elseif(UNIX OR MINGW)
+  target_link_libraries(FluoRender
+    pthread
+    dl
+#    ${JNI_LIBRARIES}
+    )
+#  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread -ldl")
 elseif(WIN32)
   target_link_libraries(FluoRender
     secur32.lib
-    XInput.lib
-    ${FFMPEG_LIBRARIES}
-    ${OPENGL_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${OpenCL_LIBRARIES}
-    ${OpenVR_LIBRARIES}
-    ${FREETYPE_LIBRARIES}
-    ${ND2_LIBRARIES}
-	${TIFF_LIBRARIES})
+    XInput.lib)
 endif()
 
-
-
-# copy Java code dir to the binary directory
+# Copy Java code dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${FluoRender_SOURCE_DIR}/Java_Code/ImageJ_Reader/target/classes"
+  "${FLUORENDER_SOURCE_DIR}/Java_Code/ImageJ_Reader/target/classes"
   "$<TARGET_FILE_DIR:FluoRender>/Java_Code")
   
-# copy openCL examples to the binary directory
+# Copy openCL examples to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${FluoRender_SOURCE_DIR}/CL_code"
+  "${FLUORENDER_SOURCE_DIR}/CL_code"
   "$<TARGET_FILE_DIR:FluoRender>/CL_code")
 
-# copy font dir to the binary directory
+# Copy font dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${FluoRender_SOURCE_DIR}/Fonts"
+  "${FLUORENDER_SOURCE_DIR}/Fonts"
   "$<TARGET_FILE_DIR:FluoRender>/Fonts")
 
-# copy script dir to the binary directory
+# Copy script dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${FluoRender_SOURCE_DIR}/Scripts"
+  "${FLUORENDER_SOURCE_DIR}/Scripts"
   "$<TARGET_FILE_DIR:FluoRender>/Scripts")
 
-# copy template dir to the binary directory
+# Copy template dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${FluoRender_SOURCE_DIR}/Templates"
+  "${FLUORENDER_SOURCE_DIR}/Templates"
   "$<TARGET_FILE_DIR:FluoRender>/Templates")
 
-# copy command dir to the binary directory
+# Copy command dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${FluoRender_SOURCE_DIR}/Commands"
+  "${FLUORENDER_SOURCE_DIR}/Commands"
   "$<TARGET_FILE_DIR:FluoRender>/Commands")
 
-# settings files
+# Settings files
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${FluoRender_SOURCE_DIR}/Settings"
+  "${FLUORENDER_SOURCE_DIR}/Settings"
   "$<TARGET_FILE_DIR:FluoRender>")
+
 if(APPLE)
-	add_custom_command(TARGET FluoRender POST_BUILD
-	  COMMAND ${CMAKE_COMMAND} -E copy
-	  "${FluoRender_SOURCE_DIR}/Settings_Mac/fluorender.set"
-	  "$<TARGET_FILE_DIR:FluoRender>")
+  add_custom_command(TARGET FluoRender POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    "${FLUORENDER_SOURCE_DIR}/Settings_Mac/fluorender.set"
+    "$<TARGET_FILE_DIR:FluoRender>")
 endif()
 
-# copy data dir to the binary directory
+# Copy data dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${FluoRender_SOURCE_DIR}/Data"
+  "${FLUORENDER_SOURCE_DIR}/Data"
   "$<TARGET_FILE_DIR:FluoRender>/Data")
 
-# benchmark files
+# Benchmark files
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${FluoRender_SOURCE_DIR}/Benchmark"
+  "${FLUORENDER_SOURCE_DIR}/Benchmark"
   "$<TARGET_FILE_DIR:FluoRender>")
 
-# openvr
+# Openvr
 if(WIN32)
-add_custom_command(TARGET FluoRender POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy
-	"${FluoRender_SOURCE_DIR}/FluoRender/OpenVR/lib/win64/openvr_api.dll"
-	"$<TARGET_FILE_DIR:FluoRender>")
+  add_custom_command(TARGET FluoRender POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    "${FLUORENDER_SOURCE_DIR}/FluoRender/OpenVR/lib/win64/openvr_api.dll"
+    "$<TARGET_FILE_DIR:FluoRender>")
 endif()
 
-# nd2
-if(WIN32)
-add_custom_command(TARGET FluoRender POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy
-	"${FluoRender_SOURCE_DIR}/FluoRender/nd2/bin/limfile.dll"
-	"$<TARGET_FILE_DIR:FluoRender>"
-	COMMAND ${CMAKE_COMMAND} -E copy
-	"${FluoRender_SOURCE_DIR}/FluoRender/nd2/bin/nd2readsdk.dll"
-	"$<TARGET_FILE_DIR:FluoRender>"
-	COMMAND ${CMAKE_COMMAND} -E copy
-	"${FluoRender_SOURCE_DIR}/FluoRender/nd2/bin/tiff.dll"
-	"$<TARGET_FILE_DIR:FluoRender>"
-	COMMAND ${CMAKE_COMMAND} -E copy
-	"${FluoRender_SOURCE_DIR}/FluoRender/nd2/bin/zlib1.dll"
-	"$<TARGET_FILE_DIR:FluoRender>"
-	)
-elseif(APPLE)
-add_custom_command(TARGET FluoRender POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy
-	"${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/libNd2File.dylib"
-	"$<TARGET_FILE_DIR:FluoRender>"
-	COMMAND ${CMAKE_COMMAND} -E copy
-	"${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/libNd2ReadSdk.dylib"
-	"$<TARGET_FILE_DIR:FluoRender>"
-	)
-add_custom_command(TARGET FluoRender POST_BUILD COMMAND 
+# Nd2
+if(APPLE)
+  add_custom_command(TARGET FluoRender POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    "${FLUORENDER_SOURCE_DIR}/FluoRender/nd2/lib/libNd2File.dylib"
+    "$<TARGET_FILE_DIR:FluoRender>"
+    COMMAND ${CMAKE_COMMAND} -E copy
+    "${FLUORENDER_SOURCE_DIR}/FluoRender/nd2/lib/libNd2ReadSdk.dylib"
+    "$<TARGET_FILE_DIR:FluoRender>")
+  add_custom_command(TARGET FluoRender POST_BUILD COMMAND 
     ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/"
     $<TARGET_FILE:FluoRender>)
+elseif(WIN32)
+  add_custom_command(TARGET FluoRender POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    "${FLUORENDER_SOURCE_DIR}/FluoRender/nd2/bin/limfile.dll"
+    "$<TARGET_FILE_DIR:FluoRender>"
+    COMMAND ${CMAKE_COMMAND} -E copy
+    "${FLUORENDER_SOURCE_DIR}/FluoRender/nd2/bin/nd2readsdk.dll"
+    "$<TARGET_FILE_DIR:FluoRender>"
+    COMMAND ${CMAKE_COMMAND} -E copy
+    "${FLUORENDER_SOURCE_DIR}/FluoRender/nd2/bin/tiff.dll"
+    "$<TARGET_FILE_DIR:FluoRender>"
+    COMMAND ${CMAKE_COMMAND} -E copy
+    "${FLUORENDER_SOURCE_DIR}/FluoRender/nd2/bin/zlib1.dll"
+    "$<TARGET_FILE_DIR:FluoRender>"
+    )
 endif()
 
-# make the Executable dir
+# Make the executable directory
 if(WIN32)
   add_custom_target(make_exe_dir ALL 
     COMMAND ${CMAKE_COMMAND} -E make_directory
