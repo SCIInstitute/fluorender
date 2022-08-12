@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <wx/wx.h>
 #include <wx/xml/xml.h>
-#include "../compatibility.h"
+#include "compatibility_utilities.h"
 #include <nrrd.h>
 #include <Formats/msk_writer.h>
 #include <TrackMap.h>
