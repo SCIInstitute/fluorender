@@ -29,16 +29,17 @@ DEALINGS IN THE SOFTWARE.
 #include "VolumeSelector.h"
 //#include "RenderFrame.h"
 #include "utility.h"
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <VolumeGroup.hpp>
-#include <Global.hpp>
-#include <VolumeFactory.hpp>
-#include <FLIVR/Framebuffer.h>
-#include <FLIVR/TextureRenderer.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <Selection/PaintBoxes.h>
-#include <Selection/MaskBorder.h>
+#include "Renderview.hpp"
+#include "VolumeData.hpp"
+#include "VolumeGroup.hpp"
+#include "Global.hpp"
+#include "VolumeFactory.hpp"
+#include "Framebuffer.h"
+#include "TextureRenderer.h"
+#include "VolumeRenderer.h"
+#include "PaintBoxes.h"
+#include "MaskBorder.h"
+
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace flrd;

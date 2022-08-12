@@ -27,11 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "Diffusion.h"
 #include <VolumeData.hpp>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
-#include <FLIVR/Texture.h>
-#include <FLIVR/TextureBrick.h>
-#include <FLIVR/VolumeRenderer.h>
+#include <KernelProgram.h>
+#include <VolKernel.h>
+#include <Texture.h>
+#include <TextureBrick.h>
+#include <VolumeRenderer.h>
 #include <vector>
 #ifdef _DEBUG
 #include <fstream>

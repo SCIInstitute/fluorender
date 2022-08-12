@@ -29,9 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #include "VolumePoint.h"
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
-#include <FLIVR/Texture.h>
-#include <FLIVR/Texture.h>
-#include <FLIVR/VolumeRenderer.h>
+#include <Texture.h>
+#include <Texture.h>
+#include <VolumeRenderer.h>
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace flrd;

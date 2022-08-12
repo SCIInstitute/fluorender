@@ -27,11 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "MaskBorder.h"
 #include <VolumeData.hpp>
-#include <FLIVR/TextureBrick.h>
-#include <FLIVR/Texture.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
+#include <TextureBrick.h>
+#include <Texture.h>
+#include <VolumeRenderer.h>
+#include <KernelProgram.h>
+#include <VolKernel.h>
 #include <vector>
 
 using namespace flrd;

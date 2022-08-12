@@ -26,9 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Selection/PaintBoxes.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <Types/Point.h>
+#include "PaintBoxes.h"
+#include "VolumeRenderer.h"
+#include "Point.h"
 
 using namespace flrd;
 
@@ -95,7 +95,7 @@ void PaintBoxes::Compute()
 		return;
 	}
 
-	vector<BrickBox> bbs;
+	std::vector<BrickBox> bbs;
 	if (!GetBrickBoxes(bbs))
 		return;
 
@@ -178,7 +178,7 @@ void PaintBoxes::Compute()
 	delete[] hits;
 }
 
-bool PaintBoxes::GetBrickBoxes(vector<BrickBox> &bbs)
+bool PaintBoxes::GetBrickBoxes(std::vector<BrickBox> &bbs)
 {
 	if (!m_bricks)
 		return false;

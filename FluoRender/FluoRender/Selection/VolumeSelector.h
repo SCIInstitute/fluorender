@@ -28,10 +28,13 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMESELECTOR_H_
 #define _VOLUMESELECTOR_H_
 
-#include <Types/Point.h>
+#include "Point.h"
+
+#include <glm/glm.hpp>
+
 #include <vector>
 #include <algorithm>
-#include <glm/glm.hpp>
+
 #include <chrono>
 
 namespace fluo
