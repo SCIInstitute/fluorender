@@ -26,13 +26,12 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Types/BBox.h>
-#include <Types/Vector.h>
+#include <BBox.h>
+#include <Vector.h>
 #include <assert.h>
 #include <math.h>
 
 using namespace fluo;
-using namespace std;
 
 void BBox::extend_disk(const Point& cen, const Vector& normal, double r)
 {

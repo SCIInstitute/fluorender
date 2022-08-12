@@ -29,7 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _FLBPoint_h_
 #define _FLBPoint_h_
 
-#include <Types/Point.h>
+#include "Point.h"
+
 #include <ostream>
 
 namespace fluo

@@ -148,7 +148,7 @@ namespace fluo {
 } // End namespace fluo
 
 // This cannot be above due to circular dependencies
-#include <Types/Vector.h>
+#include "Vector.h"
 
 namespace fluo
 {

@@ -29,7 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _FLVECTOR_H_
 #define _FLVECTOR_H_
 
-#include <Utils.h>
+#include "Utils.h"
+
 #include <string>
 #include <iosfwd>
 #include <math.h>
@@ -39,8 +40,6 @@ DEALINGS IN THE SOFTWARE.
 
 namespace fluo
 {
-	using std::string;
-
 	class Point;
 
 	class Vector
@@ -121,7 +120,7 @@ namespace fluo
 
 		void rotz90(const int);
 
-		string get_string() const;
+	        std::string get_string() const;
 
 
 		friend class Point;
@@ -197,7 +196,7 @@ namespace fluo
 
 
 // This cannot be above due to circular dependencies
-#include <Types/Point.h>
+#include "Point.h"
 
 namespace fluo
 {

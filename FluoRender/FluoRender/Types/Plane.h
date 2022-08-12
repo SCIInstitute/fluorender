@@ -29,7 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _FLPLANE_H_
 #define _FLPLANE_H_
 
-#include <Types/Vector.h>
+#include "Vector.h"
+
 #include <vector>
 
 namespace fluo

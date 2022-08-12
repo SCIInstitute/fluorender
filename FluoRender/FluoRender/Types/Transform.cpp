@@ -26,15 +26,15 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Types/Transform.h>
-#include <Types/Point.h>
-#include <Types/Plane.h>
-#include <Types/Utils.h>
+#include "Transform.h"
+#include "Point.h"
+#include "Plane.h"
+#include "Utils.h"
+
 #include <cstring>
 #include <iostream>
 
 using namespace fluo;
-using namespace std;
 
 Transform::Transform()
 {
@@ -230,7 +230,7 @@ void Transform::build_shear(double mat[4][4], const Vector& s, const Plane& p)
 	double d=Dot(dn,p.normal());
 	if (fabs(d)<0.00001)
 	{
-		cerr << "Transform - shear vector lies in shear fixed plane.  Returning identity." << endl;
+	  std::cerr << "Transform - shear vector lies in shear fixed plane.  Returning identity." << std::endl;
 		return;
 	}
 	double yshear=sv.length()/d; // compute the length of the shear vector,
