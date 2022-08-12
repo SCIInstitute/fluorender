@@ -29,8 +29,9 @@
 #ifndef VolumeRenderer_h
 #define VolumeRenderer_h
 
-#include <Types/Color.h>
-#include <Types/Plane.h>
+#include "Color.h"
+#include "Plane.h"
+
 #include "Texture.h"
 #include "TextureRenderer.h"
 #include "ImgShader.h"

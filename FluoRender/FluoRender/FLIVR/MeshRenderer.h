@@ -31,13 +31,14 @@
 
 #include "ShaderProgram.h"
 #include "MshShader.h"
+#include "Plane.h"
+
 #include "glm.h"
-#include <Types/Plane.h>
-#include <vector>
-#include <cstring>
 #include <glm/glm.hpp>
 
-using namespace std;
+#include <vector>
+#include <cstring>
+
 
 namespace flvr
 {
@@ -68,8 +69,8 @@ namespace flvr
 		int get_depth_peel() {return depth_peel_;}
 
 		//clipping planes
-		void set_planes(vector<fluo::Plane*> *p);
-		vector<fluo::Plane*> *get_planes();
+		void set_planes(std::vector<fluo::Plane*> *p);
+		std::vector<fluo::Plane*> *get_planes();
 
 		//size limiter
 		void set_limit(int val) {limit_ = val;}
@@ -102,7 +103,7 @@ namespace flvr
 		//depth peeling
 		int depth_peel_;	//0:no peeling; 1:peel positive; 2:peel both; -1:peel negative
 		//planes
-		vector<fluo::Plane *> planes_;
+		std::vector<fluo::Plane *> planes_;
 		//draw with clipping
 		bool draw_clip_;
 		int limit_;

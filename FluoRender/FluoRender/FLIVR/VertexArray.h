@@ -28,12 +28,14 @@
 #ifndef VertexArray_h
 #define VertexArray_h
 
+#include "BBox.h"
+#include "Point.h"
+
 #include <GL/glew.h>
+
 #include <string>
 #include <vector>
 #include <map>
-#include <Types/BBox.h>
-#include <Types/Point.h>
 
 namespace flvr
 {
@@ -370,6 +372,11 @@ namespace flvr
 		case VA_Rulers:
 			draw_rulers();
 			break;
+		case VA_Unmanaged:
+		case VA_Clip_Planes:
+		case VA_Legend_Squares:
+		case VA_Cam_Jack:
+		  break;
 		}
 		//disable attrib array
 		for (auto it = attrib_pointer_list_.begin();

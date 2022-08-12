@@ -34,7 +34,7 @@
 #include "Texture.h"
 #include <stdint.h>
 #include <glm/glm.hpp>
-#ifdef _DARWIN
+#ifdef __APPLE__
 #include <OpenCL/cl.h>
 #include <OpenCL/cl_gl.h>
 #include <OpenCL/cl_gl_ext.h>
@@ -304,7 +304,7 @@ namespace flvr
 
 		int blend_num_bits_;
 
-#ifdef _DARWIN
+#ifdef __APPLE__
 		static CGLContextObj gl_context_;
 #endif
 		//memory management

@@ -38,7 +38,7 @@
 #include <CL/cl_gl.h>
 #include <CL/cl_gl_ext.h>
 #endif
-#ifdef _DARWIN
+#ifdef __APPLE__
 #include <OpenCL/cl.h>
 #include <OpenCL/cl_gl.h>
 #include <OpenCL/cl_gl_ext.h>
@@ -191,7 +191,7 @@ namespace flvr
 		unsigned int optimize_group_size_z(unsigned int nt, unsigned int target);
 
 		friend class VolKernel;
-#ifdef _DARWIN
+#ifdef __APPLE__
 		static CGLContextObj gl_context_;
 #endif
 	protected:

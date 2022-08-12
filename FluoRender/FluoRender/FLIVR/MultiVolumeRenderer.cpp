@@ -31,8 +31,8 @@
 #include <ShaderProgram.h>
 #include <Global.hpp>
 #include <StopWatch.hpp>
-#include <FLIVR/Framebuffer.h>
-#include <FLIVR/VertexArray.h>
+#include <Framebuffer.h>
+#include <VertexArray.h>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 

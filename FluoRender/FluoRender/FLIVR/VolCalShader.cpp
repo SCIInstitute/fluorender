@@ -29,9 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <sstream>
 #include <iostream>
-#include <FLIVR/VolCalShader.h>
-#include <FLIVR/ShaderProgram.h>
-#include <FLIVR/VolShaderCode.h>
+#include <VolCalShader.h>
+#include <ShaderProgram.h>
+#include <VolShaderCode.h>
 
 using std::string;
 using std::vector;

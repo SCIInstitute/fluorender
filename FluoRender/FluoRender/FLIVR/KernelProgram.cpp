@@ -43,7 +43,7 @@ namespace flvr
 	int KernelProgram::device_id_ = 0;
 	std::string KernelProgram::device_name_;
 	std::vector<CLPlatform> KernelProgram::device_list_;
-#ifdef _DARWIN
+#ifdef __APPLE__
 	CGLContextObj KernelProgram::gl_context_ = 0;
 #endif
 	KernelProgram::KernelProgram(const std::string& source) :
@@ -145,14 +145,14 @@ namespace flvr
 #else
 		cl_context_properties properties[] =
 		{
-			#if defined(_DARWIN) 
+#if defined(__APPLE__) 
 			CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE,
 			(cl_context_properties)CGLGetShareGroup(CGLGetCurrentContext()),
-			#elif defined(__linux__)
+#elif defined(__linux__)
 			// https://www.codeproject.com/Articles/685281/OpenGL-OpenCL-Interoperability-A-Case-Study-Using
 			CL_GL_CONTEXT_KHR , (cl_context_properties)glXGetCurrentContext() ,
 			CL_GLX_DISPLAY_KHR , (cl_context_properties)glXGetCurrentDisplay() ,
-			#endif
+#endif
 			CL_CONTEXT_PLATFORM, (cl_context_properties)0,
 			0
 		};

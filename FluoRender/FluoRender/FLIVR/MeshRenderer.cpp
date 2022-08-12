@@ -27,14 +27,14 @@
 //  
 
 #include "MeshRenderer.h"
-#include <VertexArray.h>
-#include <TextureRenderer.h>
-#include <iostream>
-#include <vector>
+#include "VertexArray.h"
+#include "TextureRenderer.h"
+
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
-using namespace std;
+#include <iostream>
+#include <vector>
 
 namespace flvr
 {

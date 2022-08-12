@@ -12,14 +12,14 @@ coordinate generation (spheremap and planar projections) + more.
 */
 
 #include <GL/glew.h>
-#include <Types/Color.h>
+#include <Color.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include "glm.h"
-#include <compatibility.h>
+#include <compatibility_utilities.h>
 
 #define T(x) (model->triangles[(x)])
 #define L(x) (model->lines[(x)])
@@ -325,12 +325,11 @@ static char* glmDirName(const char* path)
 	dir = STRDUP(path);
 
 	i = (int)strlen(dir);
-#ifdef _WIN32
+#if defined(_WIN32)
 	while (dir[i+1]!=GETSLASH() &&
 		   dir[i+1]!=GETSLASHALT() && i>0)
 		i--;
-#endif
-#ifdef _DARWIN
+#elif defined(__APPLE__)
 	while (dir[i + 1] != GETSLASH() && i>0)
 		i--;
 #endif

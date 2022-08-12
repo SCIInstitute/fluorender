@@ -29,14 +29,17 @@
 #ifndef TextureBrick_h
 #define TextureBrick_h
 
+#include "Ray.h"
+#include "BBox.h"
+#include "Plane.h"
+
+#include <nrrd.h>
+
 #include "GL/glew.h"
-#include <Types/Ray.h>
-#include <Types/BBox.h>
-#include <Types/Plane.h>
+
+#include <stdint.h>
 #include <thread>
 #include <vector>
-#include <nrrd.h>
-#include <stdint.h>
 #include <map>
 
 namespace flvr {

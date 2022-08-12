@@ -26,15 +26,15 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include <FLIVR/ShaderProgram.h>
-#include <FLIVR/Texture.h>
-#include <FLIVR/TextureRenderer.h>
-#include <Types/Utils.h>
-#include <algorithm>
-#include <inttypes.h>
+#include "ShaderProgram.h"
+#include "Texture.h"
+#include "TextureRenderer.h"
+#include "Utils.h"
+
 #include <glm/gtc/type_ptr.hpp>
 
-using namespace std;
+#include <algorithm>
+#include <inttypes.h>
 
 namespace flvr
 {
