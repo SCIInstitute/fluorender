@@ -27,9 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "Relax.h"
 #include <VolumeData.hpp>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
-#include <FLIVR/VolumeRenderer.h>
+#include <KernelProgram.h>
+#include <VolKernel.h>
+#include <VolumeRenderer.h>
 
 using namespace flrd;
 

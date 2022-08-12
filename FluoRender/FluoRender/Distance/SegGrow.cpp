@@ -28,10 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #include "SegGrow.h"
 #include <RulerHandler.h>
 #include <VolumeData.hpp>
-#include <FLIVR/Texture.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
+#include <Texture.h>
+#include <VolumeRenderer.h>
+#include <KernelProgram.h>
+#include <VolKernel.h>
 #include <algorithm>
 #include <unordered_map>
 #include <Debug.hpp>

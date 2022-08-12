@@ -28,10 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Cov_h
 #define FL_Cov_h
 
-#include <Types/Point.h>
-#include <vector>
+#include "Point.h"
 
-using namespace std;
+#include <vector>
 
 namespace fluo
 {

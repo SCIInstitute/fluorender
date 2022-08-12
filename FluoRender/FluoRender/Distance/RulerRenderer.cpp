@@ -27,16 +27,16 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "RulerRenderer.h"
-#include <Renderview.hpp>
-#include <Types/Vector.h>
-#include <Types/Quaternion.h>
-#include <FLIVR/TextRenderer.h>
-#include <FLIVR/ShaderProgram.h>
-#include <FLIVR/VertexArray.h>
-#include <FLIVR/TextureRenderer.h>
-#include <FLIVR/ImgShader.h>
-#include <glm/gtc/type_ptr.hpp>
-#include <compatibility.h>
+#include "Renderview.hpp"
+#include "Vector.h"
+#include "Quaternion.h"
+#include "TextRenderer.h"
+#include "ShaderProgram.h"
+#include "VertexArray.h"
+#include "TextureRenderer.h"
+#include "ImgShader.h"
+#include "glm/gtc/type_ptr.hpp"
+#include "compatibility_utilities.h"
 
 using namespace flrd;
 

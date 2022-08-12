@@ -28,9 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Pca_h
 #define FL_Pca_h
 
-#include <Types/Point.h>
-#include <Types/Vector.h>
-#include <Types/BPoint.h>
+#include "Point.h"
+#include "Vector.h"
+#include "BPoint.h"
+
 #include <vector>
 
 namespace flrd

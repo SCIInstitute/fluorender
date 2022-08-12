@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_SegGrow_h
 #define FL_SegGrow_h
 
-#include <Types/Point.h>
+#include <Point.h>
 #include <set>
 #include <unordered_map>
 

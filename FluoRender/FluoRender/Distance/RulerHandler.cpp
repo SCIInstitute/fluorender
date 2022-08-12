@@ -27,19 +27,21 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "RulerHandler.h"
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <Cov.h>
-#include <FLIVR/Texture.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <Components/CompAnalyzer.h>
-#include <Selection/VolumePoint.h>
-#include <Selection/VolumeSelector.h>
-#include <Calculate/Count.h>
+#include "Renderview.hpp"
+#include "VolumeData.hpp"
+#include "Cov.h"
+#include "Texture.h"
+#include "VolumeRenderer.h"
+#include "CompAnalyzer.h"
+#include "VolumePoint.h"
+#include "VolumeSelector.h"
+#include "Count.h"
+#include "compatibility_utilities.h"
+
 #include <glm/gtc/type_ptr.hpp>
 #include <Nrrd/nrrd.h>
+
 #include <string>
-#include <compatibility.h>
 
 using namespace flrd;
 

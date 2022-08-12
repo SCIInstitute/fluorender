@@ -27,8 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "Ruler.h"
-#include <Types/Quaternion.h>
-#include <Types/Utils.h>
+#include <Quaternion.h>
+#include <Utils.h>
 
 using namespace flrd;
 

@@ -27,11 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "Cov.h"
 #include <VolumeData.hpp>
-#include <FLIVR/VolumeRenderer.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
-#include <FLIVR/TextureBrick.h>
-#include <FLIVR/Texture.h>
+#include <VolumeRenderer.h>
+#include <KernelProgram.h>
+#include <VolKernel.h>
+#include <TextureBrick.h>
+#include <Texture.h>
 #include <algorithm>
 
 using namespace flrd;
@@ -167,11 +167,11 @@ bool Cov::ComputeCenter()
 		vol_kernel_factory_.kernel(str_cl_cov);
 	if (!kernel_prog)
 		return false;
-	string name = "kernel_0";
+	std::string name = "kernel_0";
 	int kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 
 	//get center
 	std::memset(m_center, 0, sizeof(float) * 3);
@@ -249,11 +249,11 @@ bool Cov::ComputeCov()
 		vol_kernel_factory_.kernel(str_cl_cov);
 	if (!kernel_prog)
 		return false;
-	string name = "kernel_1";
+	std::string name = "kernel_1";
 	int kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 
 	//get cov
 	for (size_t i = 0; i < brick_num; ++i)

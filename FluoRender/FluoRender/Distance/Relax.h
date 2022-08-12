@@ -28,8 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Relax_h
 #define FL_Relax_h
 
-#include <Ruler.h>
-#include <Types/Point.h>
+#include "Ruler.h"
+#include "Point.h"
+
 #include <vector>
 
 namespace fluo

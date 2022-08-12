@@ -28,9 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Ruler_h
 #define FL_Ruler_h
 
-#include <Types/Point.h>
-#include <Types/Color.h>
-#include <Types/Transform.h>
+#include "Point.h"
+#include "Color.h"
+#include "Transform.h"
+
 #include <memory>
 #include <vector>
 #include <set>
