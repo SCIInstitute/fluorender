@@ -26,14 +26,14 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <SettingAgent.hpp>
-#include <AgentFactory.hpp>
-//#include <SettingDlg.h>
-#include <Global.hpp>
-#include <ShaderProgram.h>
-#include <TextRenderer.h>
-#include <KernelProgram.h>
-#include <compatibility.h>
+#include "SettingAgent.hpp"
+#include "AgentFactory.hpp"
+//#include "SettingDlg.h"
+#include "Global.hpp"
+#include "ShaderProgram.h"
+#include "TextRenderer.h"
+#include "KernelProgram.h"
+#include "compatibility_utilities.h"
 
 using namespace fluo;
 
@@ -661,15 +661,13 @@ void SettingAgent::ReadSettings()
 
 void SettingAgent::SaveSettings()
 {
-/*	wxString app_name = "FluoRender " +
-		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
-	wxString vendor_name = "FluoRender";
+/*	wxString app_name = FLUORENDER_TITLE + " " + FLUORENDER_VERSION_STRING;
+	wxString vendor_name = FLUORENDER_TITLE;
 	wxString local_name = "fluorender.set";
 	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
 		wxCONFIG_USE_LOCAL_FILE);
 
-	fconfig.Write("ver_major", VERSION_MAJOR_TAG);
-	fconfig.Write("ver_minor", VERSION_MINOR_TAG);
+	fconfig.Write("version", VERSION_STRING);
 
 	bool bval; long lval; double dval;
 	std::wstring wsval; std::string sval;

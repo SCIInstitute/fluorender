@@ -42,7 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeSelector.h>
 #include <VolumeCalculator.h>
 #include <ScriptProc.h>
-#ifdef _DARWIN
+#ifdef __APPLE__
 #include <OpenGL/CGLTypes.h>
 #endif
 
@@ -103,7 +103,7 @@ void RenderCanvasAgent::Init(unsigned long long hwnd, unsigned long long inst)
 	glbin_root->getValue(gstClDeviceId, lval);
 	flvr::KernelProgram::set_device_id(lval);
 	flvr::KernelProgram::init_kernels_supported();
-#ifdef _DARWIN
+#ifdef __APPLE__
 #pragma message ("replace with canvas refresh code")
 	// CGLContextObj ctx = CGLGetCurrentContext();
 	// if (ctx != flvr::TextureRenderer::gl_context_)

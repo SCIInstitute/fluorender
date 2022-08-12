@@ -26,13 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <ClKernelAgent.hpp>
-//#include <ClKernelDlg.h>
-#include <Global.hpp>
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <KernelExecutor.h>
-#include <compatibility.h>
+#include "ClKernelAgent.hpp"
+//#include "ClKernelDlg.h"
+#include "Global.hpp"
+#include "Renderview.hpp"
+#include "VolumeData.hpp"
+#include "KernelExecutor.h"
+//#include "compatibility_utilities.h"
 
 using namespace fluo;
 
@@ -120,7 +120,7 @@ void ClKernelAgent::RunKernel()
 	executor->SetDuplicate(dup);
 	executor->Execute();
 
-	/*	Texture* tex = vd->GetTexture();
+/*	Texture* tex = vd->GetTexture();
 	void* result = executor->GetResult()->GetTexture()->get_nrrd(0)->data;
 	int res_x, res_y, res_z;
 	vd->GetResolution(res_x, res_y, res_z);

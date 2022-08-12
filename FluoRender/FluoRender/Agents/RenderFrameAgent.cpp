@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <RenderFrameAgent.hpp>
-#include <Main.h>
+//#include <Main.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
 #include <VolumeFactory.hpp>
@@ -43,15 +43,15 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshTransAgent.hpp>
 #include <AnnotationPropAgent.hpp>
 #include <BrushToolAgent.hpp>
-#include <calculationagent.hpp>
-#include <clkernelagent.hpp>
-#include <componentagent.hpp>
-#include <measureagent.hpp>
-#include <movieagent.hpp>
-#include <noisereduceagent.hpp>
-#include <recorderagent.hpp>
-#include <trackagent.hpp>
-#include <colocalagent.hpp>
+#include <CalculationAgent.hpp>
+#include <ClKernelAgent.hpp>
+#include <ComponentAgent.hpp>
+#include <MeasureAgent.hpp>
+#include <MovieAgent.hpp>
+#include <NoiseReduceAgent.hpp>
+#include <RecorderAgent.hpp>
+#include <TrackAgent.hpp>
+#include <ColocalAgent.hpp>
 #include <SettingAgent.hpp>
 #include <VolumeData.hpp>
 #include <RenderviewFactory.hpp>
@@ -148,7 +148,7 @@ void RenderFrameAgent::StartupLoad(const std::vector<std::wstring>& files, bool 
 			suffix == L".lsm" ||
 			suffix == L".xml" ||
 			suffix == L".vvd" ||
-#ifndef _DARWIN
+#ifndef __APPLE__
 			suffix == L".nd2" ||
 #endif
 			suffix == L".czi" ||

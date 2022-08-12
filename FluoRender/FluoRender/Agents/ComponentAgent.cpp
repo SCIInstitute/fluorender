@@ -26,27 +26,28 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <ComponentAgent.hpp>
-//#include <ComponentDlg.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
-#include <AnnotationFactory.hpp>
-#include <BrushToolAgent.hpp>
-#include <ColocalAgent.hpp>
-#include <VolumeData.hpp>
-#include <CompAnalyzer.h>
-#include <CompSelector.h>
-#include <CompEditor.h>
-#include <Ruler.h>
-#include <RulerAlign.h>
-#include <ClusterMethod.h>
-#include <kmeans.h>
-#include <exmax.h>
-#include <dbscan.h>
-#include <VolumeRenderer.h>
+#include "ComponentAgent.hpp"
+//#include "ComponentDlg.h"
+#include "Global.hpp"
+#include "AgentFactory.hpp"
+#include "AnnotationFactory.hpp"
+#include "BrushToolAgent.hpp"
+#include "ColocalAgent.hpp"
+#include "VolumeData.hpp"
+#include "CompAnalyzer.h"
+#include "CompSelector.h"
+#include "CompEditor.h"
+#include "Ruler.h"
+#include "RulerAlign.h"
+#include "ClusterMethod.h"
+#include "kmeans.h"
+#include "exmax.h"
+#include "dbscan.h"
+#include "VolumeRenderer.h"
+#include "compatibility_utilities.h"
+
 #include <cctype>
 #include <fstream>
-#include <compatibility.h>
 
 using namespace fluo;
 

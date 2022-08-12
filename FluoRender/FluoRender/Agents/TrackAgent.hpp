@@ -28,10 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TRACKAGENT_H_
 #define _TRACKAGENT_H_
 
-#include <InterfaceAgent.hpp>
-#include <Renderview.hpp>
-#include <Tracking/Cell.h>
-#include <Tracking/VolCache.h>
+#include "InterfaceAgent.hpp"
+#include "Renderview.hpp"
+#include "Cell.h"
+#include "VolCache.h"
 
 class TrackDlg;
 namespace fluo

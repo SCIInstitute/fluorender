@@ -26,13 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <RecorderAgent.hpp>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
-#include <VolumeFactory.hpp>
-#include <Animator/Interpolator.h>
-#include <base_reader.h>
-#include <FLIVR/VolumeRenderer.h>
+#include "RecorderAgent.hpp"
+#include "Global.hpp"
+#include "AgentFactory.hpp"
+#include "VolumeFactory.hpp"
+#include "Interpolator.h"
+#include "base_reader.h"
+#include "VolumeRenderer.h"
 
 using namespace fluo;
 
@@ -82,7 +82,7 @@ void RecorderAgent::AutoKeyChanComb(int comb)
 	int i;
 	fluo::VolumeList list = view->GetFullVolList();
 	int numChan = int(list.size());
-	vector<bool> chan_mask;
+	std::vector<bool> chan_mask;
 	//initiate mask
 	for (i = 0; i < numChan; i++)
 	{
@@ -363,7 +363,7 @@ void RecorderAgent::InsertKey(int index, double duration, int interpolation)
 	//dlg_.m_keylist->Update();
 }
 
-bool RecorderAgent::MoveOne(vector<bool>& chan_mask, int lv)
+bool RecorderAgent::MoveOne(std::vector<bool>& chan_mask, int lv)
 {
 	int i;
 	int cur_lv = 0;

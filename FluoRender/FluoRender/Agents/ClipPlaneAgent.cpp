@@ -26,15 +26,15 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <ClipPlaneAgent.hpp>
-//#include <ClipPlanePanel.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
-#include <Renderview.hpp>
-//#include <RenderCanvas.h>
-#include <SearchVisitor.hpp>
-#include <RenderCanvasAgent.hpp>
-#include <img/icons.h>
+#include "ClipPlaneAgent.hpp"
+//#include "ClipPlanePanel.h"
+#include "Global.hpp"
+#include "AgentFactory.hpp"
+#include "Renderview.hpp"
+//#include "RenderCanvas.h"
+#include "SearchVisitor.hpp"
+#include "RenderCanvasAgent.hpp"
+#include "icons.h"
 
 using namespace fluo;
 

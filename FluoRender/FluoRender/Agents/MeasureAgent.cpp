@@ -26,21 +26,22 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <MeasureAgent.hpp>
-//#include <MeasureDlg.h>
-#include <DistCalculator.h>
-#include <RulerHandler.h>
-#include <RulerAlign.h>
-#include <Ruler.h>
-#include <CompAnalyzer.h>
-#include <FLIVR/VertexArray.h>
-#include <RulerRenderer.h>
-#include <FLIVR/TextureRenderer.h>
-#include <FLIVR/VolumeRenderer.h>
+#include "MeasureAgent.hpp"
+//#include "MeasureDlg.h"
+#include "DistCalculator.h"
+#include "RulerHandler.h"
+#include "RulerAlign.h"
+#include "Ruler.h"
+#include "CompAnalyzer.h"
+#include "VertexArray.h"
+#include "RulerRenderer.h"
+#include "TextureRenderer.h"
+#include "VolumeRenderer.h"
+#include "compatibility_utilities.h"
+
 #include <sstream>
 #include <fstream>
 #include <iostream>
-#include <compatibility.h>
 
 using namespace fluo;
 

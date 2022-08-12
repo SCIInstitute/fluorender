@@ -26,12 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <ColocalAgent.hpp>
-//#include <ColocalDlg.h>
-#include <VolumeData.hpp>
-#include <Renderview.hpp>
-#include <SearchVisitor.hpp>
-#include <Calculate/Compare.h>
+#include "ColocalAgent.hpp"
+//#include "ColocalDlg.h"
+#include "VolumeData.hpp"
+#include "Renderview.hpp"
+#include "SearchVisitor.hpp"
+#include "Compare.h"
+
 #include <vector>
 #include <string>
 #include <fstream>

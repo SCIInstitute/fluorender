@@ -26,19 +26,20 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <MovieAgent.hpp>
-//#include <MoviePanel.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
-#include <RecorderAgent.hpp>
-#include <Root.hpp>
-#include <AsyncTimer.hpp>
-#include <AsyncTimerFactory.hpp>
-#include <Animator/Interpolator.h>
-#include <TextureRenderer.h>
-#include <tiffio.h>
-#include <img/icons.h>
-#include <compatibility.h>
+#include "MovieAgent.hpp"
+//#include "MoviePanel.h"
+#include "Global.hpp"
+#include "AgentFactory.hpp"
+#include "RecorderAgent.hpp"
+#include "Root.hpp"
+#include "AsyncTimer.hpp"
+#include "AsyncTimerFactory.hpp"
+#include "Interpolator.h"
+#include "TextureRenderer.h"
+#include "tiffio.h"
+#include "icons.h"
+#include "compatibility_utilities.h"
+
 #include <algorithm>
 
 using namespace fluo;

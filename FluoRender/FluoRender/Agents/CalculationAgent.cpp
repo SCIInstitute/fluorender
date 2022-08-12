@@ -26,16 +26,16 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <CalculationAgent.hpp>
-//#include <CalculationDlg.h>
-#include <Names.hpp>
-#include <Global.hpp>
-#include <Root.hpp>
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <VolumeGroup.hpp>
-#include <Calculate/VolumeCalculator.h>
-#include <Calculate/CombineList.h>
+#include "CalculationAgent.hpp"
+//#include "CalculationDlg.h"
+#include "Names.hpp"
+#include "Global.hpp"
+#include "Root.hpp"
+#include "Renderview.hpp"
+#include "VolumeData.hpp"
+#include "VolumeGroup.hpp"
+#include "VolumeCalculator.h"
+#include "CombineList.h"
 
 using namespace fluo;
 

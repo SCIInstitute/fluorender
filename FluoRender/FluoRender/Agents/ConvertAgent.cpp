@@ -26,18 +26,18 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <ConvertAgent.hpp>
-#include <AgentFactory.hpp>
-//#include <ConvertDlg.h>
-#include <Global.hpp>
-#include <Root.hpp>
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <MeshData.hpp>
-#include <MeshFactory.hpp>
-#include <FLIVR/Texture.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <Converters/VolumeMeshConv.h>
+#include "ConvertAgent.hpp"
+#include "AgentFactory.hpp"
+//#include "ConvertDlg.h"
+#include "Global.hpp"
+#include "Root.hpp"
+#include "Renderview.hpp"
+#include "VolumeData.hpp"
+#include "MeshData.hpp"
+#include "MeshFactory.hpp"
+#include "Texture.h"
+#include "VolumeRenderer.h"
+#include "VolumeMeshConv.h"
 
 using namespace fluo;
 

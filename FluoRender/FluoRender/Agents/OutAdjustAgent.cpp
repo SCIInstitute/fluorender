@@ -26,12 +26,12 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <OutAdjustAgent.hpp>
-#include <AgentFactory.hpp>
-//#include <OutAdjustPanel.h>
-#include <VolumeFactory.hpp>
-//#include <png_resource.h>
-#include <img/icons.h>
+#include "OutAdjustAgent.hpp"
+#include "AgentFactory.hpp"
+//#include "OutAdjustPanel.h"
+#include "VolumeFactory.hpp"
+//#include "png_resource.h"
+#include "icons.h"
 
 using namespace fluo;
 

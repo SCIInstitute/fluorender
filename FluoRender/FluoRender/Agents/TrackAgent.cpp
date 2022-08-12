@@ -44,7 +44,7 @@ DEALINGS IN THE SOFTWARE.
 #include <msk_writer.h>
 #include <fstream>
 #include <iostream>
-#include <compatibility.h>
+#include <compatibility_utilities.h>
 
 using namespace fluo;
 

@@ -26,11 +26,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <VolumePropAgent.hpp>
-#include <AgentFactory.hpp>
-//#include <VolumePropPanel.h>
-#include <VolumeFactory.hpp>
-#include <img/icons.h>
+#include "VolumePropAgent.hpp"
+#include "AgentFactory.hpp"
+//#include "VolumePropPanel.h"
+#include "VolumeFactory.hpp"
+#include "icons.h"
 
 using namespace fluo;
 

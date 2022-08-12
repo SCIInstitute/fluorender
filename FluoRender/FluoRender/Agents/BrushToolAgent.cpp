@@ -26,15 +26,15 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <BrushToolAgent.hpp>
-//#include <BrushToolDlg.h>
-#include <VolumeSelector.h>
-#include <VolumeCalculator.h>
-#include <RulerAlign.h>
-#include <Global.hpp>
-#include <Root.hpp>
-#include <Distance/Cov.h>
-#include <FLIVR/Texture.h>
+#include "BrushToolAgent.hpp"
+//#include "BrushToolDlg.h"
+#include "VolumeSelector.h"
+#include "VolumeCalculator.h"
+#include "RulerAlign.h"
+#include "Global.hpp"
+#include "Root.hpp"
+#include "Cov.h"
+#include "Texture.h"
 
 using namespace fluo;
 
