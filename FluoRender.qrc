@@ -1,0 +1,46 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Src/FluoRender/UI/images/copy.png</file>
+        <file>Src/FluoRender/UI/images/cut.png</file>
+        <file>Src/FluoRender/UI/images/new.png</file>
+        <file>Src/FluoRender/UI/images/open.png</file>
+        <file>Src/FluoRender/UI/images/paste.png</file>
+        <file>Src/FluoRender/UI/images/save.png</file>
+        <file>Src/FluoRender/UI/icons/animate/animate.xpm</file>
+        <file>Src/FluoRender/UI/icons/animate/animationforwardstep.xpm</file>
+        <file>Src/FluoRender/UI/icons/animate/animationplayoff.xpm</file>
+        <file>Src/FluoRender/UI/icons/animate/animationplayon.xpm</file>
+        <file>Src/FluoRender/UI/icons/animate/animationreverseplayoff.xpm</file>
+        <file>Src/FluoRender/UI/icons/animate/animationreverseplayon.xpm</file>
+        <file>Src/FluoRender/UI/icons/animate/animationreversestep.xpm</file>
+        <file>Src/FluoRender/UI/icons/animate/animationstopoff.xpm</file>
+        <file>Src/FluoRender/UI/icons/animate/animationstopon.xpm</file>
+        <file>Src/FluoRender/UI/icons/FluoRender_icon.icns</file>
+        <file>Src/FluoRender/UI/icons/FluoRender_icon.gif</file>
+        <file>Src/FluoRender/UI/icons/Tools/PaintBrush.png</file>
+        <file>Src/FluoRender/UI/icons/misc/TrashcanOutline.png</file>
+        <file>Src/FluoRender/UI/icons/misc/LightOn.png</file>
+        <file>Src/FluoRender/UI/icons/misc/LightBase.png</file>
+        <file>Src/FluoRender/UI/icons/misc/LightOff.png</file>
+        <file>Src/FluoRender/UI/icons/misc/LightBackground.png</file>
+        <file>Src/FluoRender/UI/icons/misc/Mask.png</file>
+        <file>Src/FluoRender/UI/icons/MainWindow/OpenMesh.png</file>
+        <file>Src/FluoRender/UI/icons/MainWindow/OpenProject.png</file>
+        <file>Src/FluoRender/UI/icons/MainWindow/OpenVolume.png</file>
+        <file>Src/FluoRender/UI/icons/MainWindow/SaveProject.png</file>
+        <file>Src/FluoRender/UI/icons/MainWindow/Visibility.png</file>
+        <file>Src/FluoRender/UI/icons/Tools/Calculation.png</file>
+        <file>Src/FluoRender/UI/icons/Tools/Colocalization.png</file>
+        <file>Src/FluoRender/UI/icons/Tools/ComponentAnalyzer.png</file>
+        <file>Src/FluoRender/UI/icons/Tools/Convert.png</file>
+        <file>Src/FluoRender/UI/icons/Tools/Measurement.png</file>
+        <file>Src/FluoRender/UI/icons/Tools/NoiseReduction.png</file>
+        <file>Src/FluoRender/UI/icons/Tools/OpenCLKernelEditor.png</file>
+        <file>Src/FluoRender/UI/icons/Tools/Tracking.png</file>
+        <file>Src/FluoRender/UI/icons/Tools/VolumeSize.png</file>
+        <file>Src/FluoRender/UI/icons/MainWindow/Preferences.png</file>
+        <file>Src/FluoRender/UI/icons/misc/TrashcanSolid.svg</file>
+        <file>Src/FluoRender/UI/icons/misc/CircleBackground.png</file>
+        <file>Src/FluoRender/UI/icons/misc/CircleBase.png</file>
+    </qresource>
+</RCC>
