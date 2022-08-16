@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisMessageDialog</class>
+ <widget class="QDialog" name="QvisMessageDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>500</width>
+    <height>95</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Messages</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <selectedon>:/Src/FluoRender/UI/icons/FluoRender_icon.gif</selectedon>
+   </iconset>
+  </property>
+  <layout class="QVBoxLayout" name="MainLayout">
+   <item>
+    <widget class="QTextEdit" name="MessageText"/>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

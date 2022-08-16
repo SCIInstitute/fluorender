@@ -1,0 +1,1421 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisPaintBrushDialog</class>
+ <widget class="QDialog" name="QvisPaintBrushDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>749</width>
+    <height>687</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Paint Brush</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <selectedon>:/Src/FluoRender/UI/icons/Tools/PaintBrush.png</selectedon>
+   </iconset>
+  </property>
+  <layout class="QVBoxLayout" name="MainLayout">
+   <item>
+    <layout class="QHBoxLayout" name="FullButtonLayout">
+     <item>
+      <layout class="QGridLayout" name="ButtonLayout">
+       <item row="1" column="6">
+        <widget class="QToolButton" name="IntersectButton">
+         <property name="text">
+          <string>Intersect</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QToolButton" name="DataButton">
+         <property name="text">
+          <string>Data</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="11">
+        <widget class="Line" name="ButtonLine2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="5">
+        <widget class="QToolButton" name="ExcludeButton">
+         <property name="text">
+          <string>Exclude</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="QToolButton" name="PasteButton">
+         <property name="text">
+          <string>Paste</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="4">
+        <widget class="QToolButton" name="SelectButton">
+         <property name="text">
+          <string>Select</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QToolButton" name="CopyButton">
+         <property name="text">
+          <string>Copy</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="7">
+        <widget class="QToolButton" name="UnselectButton">
+         <property name="text">
+          <string>Unselect</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QToolButton" name="GrowButton">
+         <property name="text">
+          <string>Grow</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="12">
+        <widget class="QToolButton" name="ResetButton">
+         <property name="text">
+          <string>Reset</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="8">
+        <widget class="Line" name="ButtonLine1">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="6">
+        <widget class="QToolButton" name="SolidButton">
+         <property name="text">
+          <string>Solid</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="10">
+        <widget class="QToolButton" name="ExtractButton">
+         <property name="text">
+          <string>Extract</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QToolButton" name="UndoButton">
+         <property name="text">
+          <string>Undo</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="Line" name="ButtonLine3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="Line" name="ButtonLine0">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="5">
+        <widget class="QToolButton" name="DifuseButton">
+         <property name="text">
+          <string>Difuse</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="9">
+        <widget class="QToolButton" name="EraseButton">
+         <property name="text">
+          <string>Erase</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QToolButton" name="RedoButton">
+         <property name="text">
+          <string>Redo</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="4">
+        <widget class="QToolButton" name="MergeButton">
+         <property name="text">
+          <string>Merge</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <spacer name="ButtonSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>10</width>
+         <height>10</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="ToolbarLine">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="SelectionOptionsGroupBox">
+     <property name="title">
+      <string>Selection Settings</string>
+     </property>
+     <layout class="QVBoxLayout" name="SelectionOptionsLayout">
+      <item>
+       <layout class="QHBoxLayout" name="SectionOptionsLayout">
+        <item>
+         <widget class="QCheckBox" name="AutoClearCheckBox">
+          <property name="text">
+           <string>Auto clear</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="EdgeDetectCheckBox">
+          <property name="text">
+           <string>Edge detect</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="VisibleOnlyCheckBox">
+          <property name="text">
+           <string>Visible only</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="CrossBricksCheckBox">
+          <property name="text">
+           <string>Cross bricks</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="ApplyToGroupCheckBox">
+          <property name="text">
+           <string>Apply to group</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="SelectionOptionsSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>10</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QGridLayout" name="ThresholdEdgeLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="ThresholdLabel">
+          <property name="text">
+           <string>Threshold</string>
+          </property>
+          <property name="buddy">
+           <cstring>ThresholdSpinBox</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QSlider" name="ThresholdSlider">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QDoubleSpinBox" name="ThresholdSpinBox"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="EdgeStrengthLabel">
+          <property name="text">
+           <string>Edge strength</string>
+          </property>
+          <property name="buddy">
+           <cstring>EdgeStrengthSpinBox</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QSlider" name="EdgeStrengthSlider">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QDoubleSpinBox" name="EdgeStrengthSpinBox"/>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="BrushPropertiesGroupBox">
+     <property name="title">
+      <string>Brush Properties</string>
+     </property>
+     <layout class="QVBoxLayout" name="BrushPropertiesLayout">
+      <item>
+       <layout class="QHBoxLayout" name="GrowthDependentLayout">
+        <item>
+         <layout class="QHBoxLayout" name="GrowthLayout">
+          <item>
+           <widget class="QLabel" name="GrowthLabel">
+            <property name="text">
+             <string>Growth</string>
+            </property>
+            <property name="buddy">
+             <cstring>GrowthComboBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="GrowthComboBox">
+            <property name="currentIndex">
+             <number>1</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>Weak</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Normal</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Strong</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="DependentLayout">
+          <item>
+           <widget class="QLabel" name="DependentLabel">
+            <property name="text">
+             <string>Dependent</string>
+            </property>
+            <property name="buddy">
+             <cstring>DependentComboBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="DependentComboBox">
+            <item>
+             <property name="text">
+              <string>Data</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Screen</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="GrowthDependentSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>10</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QGridLayout" name="CenterGrowSizeLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="CenterSizeLabel">
+          <property name="text">
+           <string>Center size</string>
+          </property>
+          <property name="buddy">
+           <cstring>CenterSizeSpinBox</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QSlider" name="CenterSizeSlider">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QSpinBox" name="CenterSizeSpinBox"/>
+        </item>
+        <item row="1" column="2">
+         <widget class="QSpinBox" name="GrowSizeSpinBox"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QCheckBox" name="GrowSizeCheckBox">
+          <property name="text">
+           <string>Grow size</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QSlider" name="GrowSizeSlider">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="AlignGroupBox">
+     <property name="title">
+      <string>Align Render View to Selection</string>
+     </property>
+     <layout class="QHBoxLayout" name="AlignLayout">
+      <item>
+       <layout class="QGridLayout" name="AlignGroupLayout">
+        <item row="0" column="5">
+         <widget class="QPushButton" name="ZXYButton">
+          <property name="text">
+           <string>Z X Y</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QPushButton" name="YZXButton">
+          <property name="text">
+           <string>Y Z X</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="TriAxisLabel">
+          <property name="text">
+           <string>Tri axis</string>
+          </property>
+          <property name="buddy">
+           <cstring>XYZButton</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="5">
+         <widget class="QPushButton" name="ZYXButton">
+          <property name="text">
+           <string>Z Y X</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QPushButton" name="YXZButton">
+          <property name="text">
+           <string>Y X Z</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="XZYButton">
+          <property name="text">
+           <string>X Z Y</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="XYZButton">
+          <property name="text">
+           <string>X Y Z</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="MoveToCenterCheckBox">
+        <property name="text">
+         <string>Move to center</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="AlignSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>10</width>
+          <height>10</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="OutputGroupBox">
+     <property name="title">
+      <string>Output</string>
+     </property>
+     <layout class="QVBoxLayout" name="OutputLayout">
+      <item>
+       <layout class="QHBoxLayout" name="SelectedSizeLayout">
+        <item>
+         <widget class="QPushButton" name="GetSelectedSizeButton">
+          <property name="text">
+           <string>Get Selected Size</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="AutoUpdateCheckBox">
+          <property name="text">
+           <string>Auto Update</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="SelectedSizeSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>10</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="HoldHistoryCheckBox">
+          <property name="text">
+           <string>Hold History</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ClearHistoryButton">
+          <property name="text">
+           <string>Clear History</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTableWidget" name="SelectionTableWidget">
+        <row>
+         <property name="text">
+          <string>Selection</string>
+         </property>
+        </row>
+        <column>
+         <property name="text">
+          <string>Voxel Count</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Weighted Voxel Count</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Average Intensity</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Physical Size</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Weighted Physical Size</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>UndoButton</tabstop>
+  <tabstop>RedoButton</tabstop>
+  <tabstop>GrowButton</tabstop>
+  <tabstop>SelectButton</tabstop>
+  <tabstop>DifuseButton</tabstop>
+  <tabstop>SolidButton</tabstop>
+  <tabstop>UnselectButton</tabstop>
+  <tabstop>EraseButton</tabstop>
+  <tabstop>ExtractButton</tabstop>
+  <tabstop>ResetButton</tabstop>
+  <tabstop>CopyButton</tabstop>
+  <tabstop>DataButton</tabstop>
+  <tabstop>PasteButton</tabstop>
+  <tabstop>MergeButton</tabstop>
+  <tabstop>ExcludeButton</tabstop>
+  <tabstop>IntersectButton</tabstop>
+  <tabstop>AutoClearCheckBox</tabstop>
+  <tabstop>EdgeDetectCheckBox</tabstop>
+  <tabstop>VisibleOnlyCheckBox</tabstop>
+  <tabstop>CrossBricksCheckBox</tabstop>
+  <tabstop>ApplyToGroupCheckBox</tabstop>
+  <tabstop>ThresholdSlider</tabstop>
+  <tabstop>ThresholdSpinBox</tabstop>
+  <tabstop>EdgeStrengthSlider</tabstop>
+  <tabstop>EdgeStrengthSpinBox</tabstop>
+  <tabstop>GrowthComboBox</tabstop>
+  <tabstop>DependentComboBox</tabstop>
+  <tabstop>CenterSizeSlider</tabstop>
+  <tabstop>CenterSizeSpinBox</tabstop>
+  <tabstop>GrowSizeCheckBox</tabstop>
+  <tabstop>GrowSizeSlider</tabstop>
+  <tabstop>GrowSizeSpinBox</tabstop>
+  <tabstop>XYZButton</tabstop>
+  <tabstop>YXZButton</tabstop>
+  <tabstop>ZXYButton</tabstop>
+  <tabstop>XZYButton</tabstop>
+  <tabstop>YZXButton</tabstop>
+  <tabstop>ZYXButton</tabstop>
+  <tabstop>MoveToCenterCheckBox</tabstop>
+  <tabstop>GetSelectedSizeButton</tabstop>
+  <tabstop>AutoUpdateCheckBox</tabstop>
+  <tabstop>HoldHistoryCheckBox</tabstop>
+  <tabstop>ClearHistoryButton</tabstop>
+  <tabstop>SelectionTableWidget</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>UndoButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>UndoButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>36</x>
+     <y>24</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>RedoButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>RedoButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>34</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GrowButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>GrowButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>167</x>
+     <y>34</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>SelectButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>219</x>
+     <y>34</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DifuseButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>DifuseButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>274</x>
+     <y>34</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SolidButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>SolidButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>337</x>
+     <y>34</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>UnselectButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>UnselectButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>407</x>
+     <y>34</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>EraseButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>EraseButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>488</x>
+     <y>35</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ExtractButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>ExtractButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>546</x>
+     <y>34</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ResetButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>ResetButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>621</x>
+     <y>35</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>CopyButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>CopyButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>49</x>
+     <y>68</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DataButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>DataButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>68</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>PasteButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>PasteButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>167</x>
+     <y>68</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MergeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>MergeButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>219</x>
+     <y>68</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ExcludeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>ExcludeButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>274</x>
+     <y>68</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>IntersectButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>IntersectButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>337</x>
+     <y>68</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AutoClearCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>AutoClearToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>78</x>
+     <y>130</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>140</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>EdgeDetectCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>EdgeDetectToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>192</x>
+     <y>137</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>140</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>VisibleOnlyCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>VisibleOnlyToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>291</x>
+     <y>137</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>140</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>CrossBricksCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>CrossBricksToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>385</x>
+     <y>137</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>140</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ApplyToGroupCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>ApplyToGroupToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>485</x>
+     <y>137</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>140</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ThresholdSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>ThresholdSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>247</x>
+     <y>163</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>176</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ThresholdSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>ThresholdValueChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>720</x>
+     <y>182</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>655</x>
+     <y>164</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>EdgeStrengthSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>EdgeStrengthSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>148</x>
+     <y>199</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>211</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>EdgeStrengthSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>EdgeStrengthValueChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>720</x>
+     <y>219</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>656</x>
+     <y>206</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GrowthComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>GrowthCurrentIndexChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>92</x>
+     <y>282</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>280</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DependentComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>DependentCurrentIndexChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>306</x>
+     <y>280</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>656</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>CenterSizeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>CenterSizeSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>143</x>
+     <y>317</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>321</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>CenterSizeSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>CenterSizeValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>720</x>
+     <y>339</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>654</x>
+     <y>323</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GrowSizeCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>GrowSizeToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>79</x>
+     <y>360</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>353</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GrowSizeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>GrowSizeSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>197</x>
+     <y>355</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>385</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GrowSizeSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>GrowSizeValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>720</x>
+     <y>376</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>656</x>
+     <y>360</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MoveToCenterCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>MoveToCenterToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>426</x>
+     <y>467</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>655</x>
+     <y>436</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GetSelectedSizeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>GetSelectedSizeButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>95</x>
+     <y>571</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>520</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>HoldHistoryCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>HoldHistoryToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>607</x>
+     <y>570</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>657</x>
+     <y>479</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ClearHistoryButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>ClearHistoryButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>627</x>
+     <y>577</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>655</x>
+     <y>531</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>XYZButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>TriAxisXYZButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>120</x>
+     <y>441</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>7</x>
+     <y>444</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>XZYButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>TriAxisXZYButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>146</x>
+     <y>490</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>475</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>YXZButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>TriAxisYXZButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>223</x>
+     <y>456</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>501</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>YZXButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>TriAxisYZXButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>223</x>
+     <y>490</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>715</x>
+     <y>458</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZXYButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>TriAxisZXYButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>300</x>
+     <y>456</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>715</x>
+     <y>497</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZYXButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>TriAxisZYXButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>300</x>
+     <y>490</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>714</x>
+     <y>551</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AutoUpdateCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisPaintBrushDialog</receiver>
+   <slot>AutoUpdateToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>227</x>
+     <y>553</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>569</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>UndoButtonClicked()</slot>
+  <slot>RedoButtonClicked()</slot>
+  <slot>GrowButtonClicked()</slot>
+  <slot>SelectButtonClicked()</slot>
+  <slot>DifuseButtonClicked()</slot>
+  <slot>SolidButtonClicked()</slot>
+  <slot>UnselectButtonClicked()</slot>
+  <slot>EraseButtonClicked()</slot>
+  <slot>ExtractButtonClicked()</slot>
+  <slot>ResetButtonClicked()</slot>
+  <slot>CopyButtonClicked()</slot>
+  <slot>DataButtonClicked()</slot>
+  <slot>PasteButtonClicked()</slot>
+  <slot>MergeButtonClicked()</slot>
+  <slot>ExcludeButtonClicked()</slot>
+  <slot>IntersectButtonClicked()</slot>
+  <slot>AutoClearToggled(bool)</slot>
+  <slot>EdgeDetectToggled(bool)</slot>
+  <slot>VisibleOnlyToggled(bool)</slot>
+  <slot>CrossBricksToggled(bool)</slot>
+  <slot>ApplyToGroupToggled(bool)</slot>
+  <slot>ThresholdSliderChanged(int)</slot>
+  <slot>ThresholdValueChanged(double)</slot>
+  <slot>EdgeStrengthSliderChanged(int)</slot>
+  <slot>EdgeStrengthValueChanged(double)</slot>
+  <slot>GrowthCurrentIndexChanged(int)</slot>
+  <slot>DependentCurrentIndexChanged(int)</slot>
+  <slot>CenterSizeSliderChanged(int)</slot>
+  <slot>CenterSizeValueChanged(int)</slot>
+  <slot>GrowSizeToggled(bool)</slot>
+  <slot>GrowSizeSliderChanged(int)</slot>
+  <slot>GrowSizeValueChanged(int)</slot>
+  <slot>TriAxisXYZButtonClicked()</slot>
+  <slot>TriAxisXZYButtonClicked()</slot>
+  <slot>TriAxisYXZButtonClicked()</slot>
+  <slot>TriAxisYZXButtonClicked()</slot>
+  <slot>TriAxisZXYButtonClicked()</slot>
+  <slot>TriAxisZYXButtonClicked()</slot>
+  <slot>MoveToCenterToggled(bool)</slot>
+  <slot>GetSelectedSizeButtonClicked()</slot>
+  <slot>AutoUpdateToggled(bool)</slot>
+  <slot>HoldHistoryToggled(bool)</slot>
+  <slot>ClearHistoryButtonClicked()</slot>
+  <slot>HoldHistoryValueChanged(int)</slot>
+  <slot>showDragDropToolBar()</slot>
+ </slots>
+</ui>

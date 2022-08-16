@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+
+    <Attribute name="VolumePropertiesAttributes" purpose="Attributes for the Volume Proerties">
+
+    <Enum name="RenderingMethod">
+        Volume
+        MIP
+    </Enum>
+
+    <Enum name="ColorSource">
+        Solid
+        ColorMap
+    </Enum>
+
+    <Enum name="ColorTable">
+        Rainbox
+        Hot
+        Cool
+        Diverging
+        Monchromo
+        HighKey
+        LowKey
+        HighTransparency
+    </Enum>
+
+    <Enum name="DataSource">
+        Intensity
+        Gradient
+        Differential
+        XValue
+        YValue
+        ZValue
+    </Enum>
+    
+
+    <Field name="XVoxel" label="X voxel size" type="double">
+        .1
+    </Field>
+    <Field name="YVoxel" label="Y voxel size" type="double">
+        .1
+    </Field>
+    <Field name="ZVoxel" label="Z voxel size" type="double">
+        .1
+    </Field>
+
+    <Field name="RenderingMethod" label="Rendering Method" type="enum" subtype="RenderingMethod">
+        Volume
+    </Field>
+
+    <Field name="ColorSource" label="Color source" type="enum" subtype="ColorSource">
+        Solid
+    </Field>
+
+    
+    <Field name="PrimaryColor" label="Primary Color" type="color">
+    </Field>
+
+    <Field name="SecondaryColor" label="Primary Color" type="color">
+    </Field>
+
+    </Attribute>
+    

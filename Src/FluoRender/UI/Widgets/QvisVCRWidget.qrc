@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>../icons/animate/animate.xpm</file>
+        <file>../icons/animate/animationforwardstep.xpm</file>
+        <file>../icons/animate/animationplayoff.xpm</file>
+        <file>../icons/animate/animationplayon.xpm</file>
+        <file>../icons/animate/animationreverseplayoff.xpm</file>
+        <file>../icons/animate/animationreverseplayon.xpm</file>
+        <file>../icons/animate/animationreversestep.xpm</file>
+        <file>../icons/animate/animationstopoff.xpm</file>
+        <file>../icons/animate/animationstopon.xpm</file>
+    </qresource>
+</RCC>

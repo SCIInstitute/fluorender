@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisMainWindow</class>
+ <widget class="QMainWindow" name="QvisMainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>FluoRender</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <selectedon>:/Src/FluoRender/UI/icons/FluoRender_icon.gif</selectedon>
+   </iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFiles">
+    <property name="title">
+     <string>Files</string>
+    </property>
+    <addaction name="actionOpenVolume"/>
+    <addaction name="actionOpenMesh"/>
+    <addaction name="separator"/>
+    <addaction name="actionOpenProject"/>
+    <addaction name="actionSaveProject"/>
+    <addaction name="actionSaveProjectAs"/>
+    <addaction name="separator"/>
+    <addaction name="actionCapturePreferences"/>
+   </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <widget class="QMenu" name="menuViewWindowLayout">
+     <property name="title">
+      <string>View Window Layout</string>
+     </property>
+     <addaction name="actionLayoutModeSingle"/>
+     <addaction name="actionLayoutModeVertical"/>
+     <addaction name="actionLayoutModeHorizontal"/>
+     <addaction name="actionLayoutModeQuad"/>
+    </widget>
+    <addaction name="menuViewWindowLayout"/>
+    <addaction name="separator"/>
+    <addaction name="actionViewWindowNew"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionFluoRenderWebsite"/>
+    <addaction name="actionCheckForUpdates"/>
+    <addaction name="actionDownloadManual"/>
+    <addaction name="actionDownloadTutorial"/>
+   </widget>
+   <widget class="QMenu" name="menuProperties">
+    <property name="title">
+     <string>Properties</string>
+    </property>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Options</string>
+    </property>
+    <widget class="QMenu" name="menuPerspectives">
+     <property name="title">
+      <string>Perspectives</string>
+     </property>
+     <widget class="QMenu" name="menuSavedPerspectives">
+      <property name="title">
+       <string>Saved</string>
+      </property>
+     </widget>
+     <widget class="QMenu" name="menuDeletePerspective">
+      <property name="title">
+       <string>Delete</string>
+      </property>
+     </widget>
+     <addaction name="actionCreatePerspective"/>
+     <addaction name="menuDeletePerspective"/>
+     <addaction name="actionDeleteAllPerspectives"/>
+     <addaction name="menuSavedPerspectives"/>
+    </widget>
+    <addaction name="menuPerspectives"/>
+    <addaction name="actionSaveLayout"/>
+   </widget>
+   <addaction name="menuFiles"/>
+   <addaction name="menuProperties"/>
+   <addaction name="menuTools"/>
+   <addaction name="menuView"/>
+   <addaction name="menuOptions"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionOpenProject">
+   <property name="icon">
+    <iconset>
+     <selectedon>:/UI/icons/MainWindow/OpenProject.png</selectedon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Open Project ...</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionLayoutModeVertical">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Vertical</string>
+   </property>
+   <property name="toolTip">
+    <string>Vertical view</string>
+   </property>
+  </action>
+  <action name="actionCheckForUpdates">
+   <property name="text">
+    <string>Check for Updates</string>
+   </property>
+  </action>
+  <action name="actionSaveProject">
+   <property name="icon">
+    <iconset>
+     <selectedon>:/UI/icons/MainWindow/SaveProject.png</selectedon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Save Project</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionOpenVolume">
+   <property name="icon">
+    <iconset>
+     <selectedon>:/UI/icons/MainWindow/OpenVolume.png</selectedon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Open Volume ...</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionOpenMesh">
+   <property name="icon">
+    <iconset>
+     <selectedon>:/UI/icons/MainWindow/OpenMesh.png</selectedon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Open Mesh ...</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionLayoutModeHorizontal">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Horizontal</string>
+   </property>
+   <property name="toolTip">
+    <string>Horizontal view</string>
+   </property>
+  </action>
+  <action name="actionLayoutModeQuad">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Quad</string>
+   </property>
+   <property name="toolTip">
+    <string>Quad view</string>
+   </property>
+  </action>
+  <action name="actionLayoutModeSingle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Single</string>
+   </property>
+   <property name="toolTip">
+    <string>Single view</string>
+   </property>
+  </action>
+  <action name="actionSaveProjectAs">
+   <property name="icon">
+    <iconset>
+     <selectedon>:/UI/icons/MainWindow/SaveProject.png</selectedon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Save Project As ...</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionSaveLayout">
+   <property name="text">
+    <string>Save as Default Layout</string>
+   </property>
+  </action>
+  <action name="actionRestoreLayout">
+   <property name="text">
+    <string>Restore Layout</string>
+   </property>
+  </action>
+  <action name="actionCreatePerspective">
+   <property name="text">
+    <string>Create</string>
+   </property>
+  </action>
+  <action name="actionDeleteAllPerspectives">
+   <property name="text">
+    <string>Delete All</string>
+   </property>
+  </action>
+  <action name="actionDownloadManual">
+   <property name="text">
+    <string>Download Manual</string>
+   </property>
+  </action>
+  <action name="actionDownloadTutorial">
+   <property name="text">
+    <string>Download Tutorial</string>
+   </property>
+  </action>
+  <action name="actionFluoRenderWebsite">
+   <property name="text">
+    <string>FluoRender Website</string>
+   </property>
+  </action>
+  <action name="actionViewWindowNew">
+   <property name="text">
+    <string>New View Window</string>
+   </property>
+  </action>
+  <action name="actionCapturePreferences">
+   <property name="text">
+    <string>Capture Preferences ...</string>
+   </property>
+  </action>
+  <action name="action12345">
+   <property name="text">
+    <string>12345</string>
+   </property>
+  </action>
+  <action name="actionMoviePreferences">
+   <property name="text">
+    <string>Movie Preferences ...</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>actionCheckForUpdates</sender>
+   <signal>triggered()</signal>
+   <receiver>QvisMainWindow</receiver>
+   <slot>ActionCheckForUpdates()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSaveLayout</sender>
+   <signal>triggered()</signal>
+   <receiver>QvisMainWindow</receiver>
+   <slot>ActionSaveLayoutState()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRestoreLayout</sender>
+   <signal>triggered()</signal>
+   <receiver>QvisMainWindow</receiver>
+   <slot>ActionRestoreLayoutState()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionCreatePerspective</sender>
+   <signal>triggered()</signal>
+   <receiver>QvisMainWindow</receiver>
+   <slot>ActionCreatePerspective()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDeleteAllPerspectives</sender>
+   <signal>triggered()</signal>
+   <receiver>QvisMainWindow</receiver>
+   <slot>ActionDeleteAllPerspectives()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDownloadManual</sender>
+   <signal>triggered()</signal>
+   <receiver>QvisMainWindow</receiver>
+   <slot>ActionDownloadManual()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDownloadTutorial</sender>
+   <signal>triggered()</signal>
+   <receiver>QvisMainWindow</receiver>
+   <slot>ActionDownloadTutorial()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionFluoRenderWebsite</sender>
+   <signal>triggered()</signal>
+   <receiver>QvisMainWindow</receiver>
+   <slot>ActionFluoRenderWebsite()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionViewWindowNew</sender>
+   <signal>triggered()</signal>
+   <receiver>QvisMainWindow</receiver>
+   <slot>ActionViewWindowNew()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionCapturePreferences</sender>
+   <signal>triggered()</signal>
+   <receiver>QvisMainWindow</receiver>
+   <slot>ActionCapturePreferences()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>ActionCheckForUpdates()</slot>
+  <slot>ActionClippingPlanes()</slot>
+  <slot>ActionOutputImageProperties()</slot>
+  <slot>ActionViewProperties()</slot>
+  <slot>ActionMeshProperties()</slot>
+  <slot>ActionVolumeProperties()</slot>
+  <slot>ActionConvertVolumeToMesh()</slot>
+  <slot>ActionPaintBrush()</slot>
+  <slot>ActionMeasurement()</slot>
+  <slot>ActionCalculations()</slot>
+  <slot>ActionNoiseReduction()</slot>
+  <slot>ActionVolumeSize()</slot>
+  <slot>ActionColocalization()</slot>
+  <slot>ActionComponentAnalyzer()</slot>
+  <slot>ActionOpenCLKernelEditor()</slot>
+  <slot>ActionTracking()</slot>
+  <slot>ActionExport()</slot>
+  <slot>ActionSaveLayoutState()</slot>
+  <slot>ActionRestoreLayoutState()</slot>
+  <slot>ActionCreatePerspective()</slot>
+  <slot>ActionDeletePerspective()</slot>
+  <slot>ActionDeleteAllPerspectives()</slot>
+  <slot>ActionSetPerspective(QString)</slot>
+  <slot>ActionToggleDockLayoutToolbar()</slot>
+  <slot>ActionToggleToolsToolbar()</slot>
+  <slot>ActionTogglePropertiesToolbar()</slot>
+  <slot>ActionDownloadManual()</slot>
+  <slot>ActionDownloadTutorial()</slot>
+  <slot>ActionFluoRenderWebsite()</slot>
+  <slot>ActionViewWindowNew()</slot>
+  <slot>ActionCapturePreferences()</slot>
+ </slots>
+</ui>

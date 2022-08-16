@@ -1,0 +1,1617 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisMeasurementDialog</class>
+ <widget class="QDialog" name="QvisMeasurementDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>743</width>
+    <height>584</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Measurement</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <selectedon>:/Src/FluoRender/UI/icons/Tools/Measurement.png</selectedon>
+   </iconset>
+  </property>
+  <layout class="QVBoxLayout" name="MainLayout">
+   <item>
+    <layout class="QHBoxLayout" name="ButtonLayout">
+     <item>
+      <layout class="QGridLayout" name="ButtonGridLayout">
+       <item row="0" column="0">
+        <widget class="QToolButton" name="LocatorButton">
+         <property name="text">
+          <string>Locator</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QToolButton" name="ProbeButton">
+         <property name="text">
+          <string>Probe</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QToolButton" name="LineButton">
+         <property name="text">
+          <string>Line</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QToolButton" name="ProtractorButton">
+         <property name="text">
+          <string>Protractor</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="4">
+        <widget class="QToolButton" name="EllipseButton">
+         <property name="text">
+          <string>Ellipse</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="5">
+        <widget class="QToolButton" name="MultiPointLineButton">
+         <property name="text">
+          <string>Multi Point Line</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="6">
+        <widget class="QToolButton" name="PencilButton">
+         <property name="text">
+          <string>Pencil</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="7">
+        <widget class="QToolButton" name="GrowButton">
+         <property name="text">
+          <string>Grow</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QToolButton" name="MoveButton">
+         <property name="text">
+          <string>Move</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QToolButton" name="EditButton">
+         <property name="text">
+          <string>Edit</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QToolButton" name="DeleteButton">
+         <property name="text">
+          <string>Delete</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="QToolButton" name="FlipButton">
+         <property name="text">
+          <string>Flip</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="4">
+        <widget class="QToolButton" name="AverageButton">
+         <property name="text">
+          <string>Average</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="5">
+        <widget class="QToolButton" name="PruneButton">
+         <property name="text">
+          <string>Prune</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="6">
+        <widget class="QToolButton" name="LockButton">
+         <property name="text">
+          <string>Lock</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="7">
+        <widget class="QToolButton" name="RelaxButton">
+         <property name="text">
+          <string>Relax</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QToolButton" name="DeleteRulerButton">
+         <property name="text">
+          <string>Delete Ruler</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QToolButton" name="DeleteAllRulersButton">
+         <property name="text">
+          <string>Delete All Rulers</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QToolButton" name="ProfileButton">
+         <property name="text">
+          <string>Profile</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="QToolButton" name="DistanceButton">
+         <property name="text">
+          <string>Distance</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="4">
+        <widget class="QToolButton" name="ProjectButton">
+         <property name="text">
+          <string>Project</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="5">
+        <widget class="QToolButton" name="ExportButton">
+         <property name="text">
+          <string>Export</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <spacer name="ButtonSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>10</width>
+         <height>10</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="ToolLine">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="SettingsGroupBox">
+     <property name="title">
+      <string>Settings</string>
+     </property>
+     <layout class="QHBoxLayout" name="SettingsLayout">
+      <item>
+       <layout class="QGridLayout" name="SettingsGridLayout">
+        <item row="4" column="1">
+         <widget class="QCheckBox" name="AutoRelaxCheckBox">
+          <property name="text">
+           <string>Auto Relax</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="ZDepthLabel">
+          <property name="text">
+           <string>Z-depth</string>
+          </property>
+          <property name="buddy">
+           <cstring>ZDepthViewPlaneRadioButton</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="2">
+         <layout class="QHBoxLayout" name="ConstraintLayout">
+          <item>
+           <widget class="QLabel" name="ConstraintLabel">
+            <property name="text">
+             <string>Constraint</string>
+            </property>
+            <property name="buddy">
+             <cstring>ConstraintComboBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="ConstraintComboBox">
+            <item>
+             <property name="text">
+              <string>Free</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Volume</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Selection</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Analyzed Comp.</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="2" column="1">
+         <widget class="QCheckBox" name="TransientCheckBox">
+          <property name="text">
+           <string>Transient</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QRadioButton" name="ZDepthViewPlaneRadioButton">
+          <property name="text">
+           <string>View plane</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">ZDepthButtonGroup</string>
+          </attribute>
+         </widget>
+        </item>
+        <item row="4" column="3">
+         <layout class="QHBoxLayout" name="ExInRatioLayout">
+          <item>
+           <widget class="QLabel" name="ExInRatioLabel">
+            <property name="text">
+             <string>Ex/In Ratio</string>
+            </property>
+            <property name="buddy">
+             <cstring>ExInRatioSpinBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="ExInRatioSpinBox">
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="RelaxLabel">
+          <property name="text">
+           <string>Relax</string>
+          </property>
+          <property name="buddy">
+           <cstring>AutoRelaxCheckBox</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QRadioButton" name="ZDepthMaxIntensityRadioButton">
+          <property name="text">
+           <string>Maximum intensity</string>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">ZDepthButtonGroup</string>
+          </attribute>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="Line" name="SettingLine0">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QRadioButton" name="ZDepthAccumIntensityRadioButton">
+          <property name="text">
+           <string>Accumulated intensity</string>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">ZDepthButtonGroup</string>
+          </attribute>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QCheckBox" name="UseVolumePropertiesCheckBox">
+          <property name="text">
+           <string>Use volume Properties</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="PropertiesLabel">
+          <property name="text">
+           <string>Properties</string>
+          </property>
+          <property name="buddy">
+           <cstring>TransientCheckBox</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3">
+         <widget class="QCheckBox" name="ComputeDeltaFFCheckBox">
+          <property name="text">
+           <string>Compute △F/F</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="Line" name="SettingLine1">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <spacer name="SettingSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>10</width>
+          <height>10</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="RulerListGroupBox">
+     <property name="title">
+      <string>Ruler List</string>
+     </property>
+     <layout class="QVBoxLayout" name="RulerlListLayout">
+      <item>
+       <layout class="QHBoxLayout" name="RulerlLayout">
+        <item>
+         <widget class="QPushButton" name="NewGroupButton">
+          <property name="text">
+           <string>New Group</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="GroupSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>10</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="GroupIDLayout">
+          <item>
+           <widget class="QLabel" name="GroupIDLabel">
+            <property name="text">
+             <string>Group id</string>
+            </property>
+            <property name="buddy">
+             <cstring>GroupIDSpinBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="GroupIDSpinBox"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ChangeGroupButton">
+          <property name="text">
+           <string>Change</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="SelectGroupButton">
+          <property name="text">
+           <string>Select</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="DisplayGroupButton">
+          <property name="text">
+           <string>Display</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTableWidget" name="RulerTableWidget">
+        <row>
+         <property name="text">
+          <string>0</string>
+         </property>
+        </row>
+        <column>
+         <property name="text">
+          <string>New Column</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Name</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Group</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Color</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Branch</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>New Column</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Angle/Pitch</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Center</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Time</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Start-End Points</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Voxels</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="AlignGroupBox">
+     <property name="title">
+      <string>Align Render View to Ruler(s)</string>
+     </property>
+     <layout class="QHBoxLayout" name="AlignLayout">
+      <item>
+       <layout class="QGridLayout" name="MonoAxisLayout">
+        <item row="0" column="5">
+         <widget class="QPushButton" name="ZPosButton">
+          <property name="text">
+           <string>+Z</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QPushButton" name="YNegButton">
+          <property name="text">
+           <string>-Y</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="MonoAxisLabel">
+          <property name="text">
+           <string>Mono axis</string>
+          </property>
+          <property name="buddy">
+           <cstring>XPosButton</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="5">
+         <widget class="QPushButton" name="ZNegButton">
+          <property name="text">
+           <string>-Z</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QPushButton" name="YPosButton">
+          <property name="text">
+           <string>+Y</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="XNegButton">
+          <property name="text">
+           <string>-X</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="XPosButton">
+          <property name="text">
+           <string>+X</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QGridLayout" name="TriAxisLayout">
+        <item row="0" column="5">
+         <widget class="QPushButton" name="ZXYButton">
+          <property name="text">
+           <string>Z X Y</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QPushButton" name="YZXButton">
+          <property name="text">
+           <string>Y Z X</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="TriAxisLabel">
+          <property name="text">
+           <string>Tri axis</string>
+          </property>
+          <property name="buddy">
+           <cstring>XYZButton</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="5">
+         <widget class="QPushButton" name="ZYXButton">
+          <property name="text">
+           <string>Z Y X</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QPushButton" name="YXZButton">
+          <property name="text">
+           <string>Y X Z</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="XZYButton">
+          <property name="text">
+           <string>X Z Y</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="XYZButton">
+          <property name="text">
+           <string>X Y Z</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="MoveToCenterCheckBox">
+        <property name="text">
+         <string>Move to center</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="AxisSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>10</width>
+          <height>10</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>LocatorButton</tabstop>
+  <tabstop>ProbeButton</tabstop>
+  <tabstop>LineButton</tabstop>
+  <tabstop>ProtractorButton</tabstop>
+  <tabstop>EllipseButton</tabstop>
+  <tabstop>MultiPointLineButton</tabstop>
+  <tabstop>PencilButton</tabstop>
+  <tabstop>GrowButton</tabstop>
+  <tabstop>MoveButton</tabstop>
+  <tabstop>EditButton</tabstop>
+  <tabstop>DeleteButton</tabstop>
+  <tabstop>FlipButton</tabstop>
+  <tabstop>AverageButton</tabstop>
+  <tabstop>PruneButton</tabstop>
+  <tabstop>LockButton</tabstop>
+  <tabstop>RelaxButton</tabstop>
+  <tabstop>DeleteRulerButton</tabstop>
+  <tabstop>DeleteAllRulersButton</tabstop>
+  <tabstop>ProfileButton</tabstop>
+  <tabstop>DistanceButton</tabstop>
+  <tabstop>ProjectButton</tabstop>
+  <tabstop>ExportButton</tabstop>
+  <tabstop>ZDepthViewPlaneRadioButton</tabstop>
+  <tabstop>ZDepthMaxIntensityRadioButton</tabstop>
+  <tabstop>ZDepthAccumIntensityRadioButton</tabstop>
+  <tabstop>TransientCheckBox</tabstop>
+  <tabstop>UseVolumePropertiesCheckBox</tabstop>
+  <tabstop>ComputeDeltaFFCheckBox</tabstop>
+  <tabstop>AutoRelaxCheckBox</tabstop>
+  <tabstop>ConstraintComboBox</tabstop>
+  <tabstop>ExInRatioSpinBox</tabstop>
+  <tabstop>NewGroupButton</tabstop>
+  <tabstop>GroupIDSpinBox</tabstop>
+  <tabstop>ChangeGroupButton</tabstop>
+  <tabstop>SelectGroupButton</tabstop>
+  <tabstop>DisplayGroupButton</tabstop>
+  <tabstop>RulerTableWidget</tabstop>
+  <tabstop>XPosButton</tabstop>
+  <tabstop>YPosButton</tabstop>
+  <tabstop>ZPosButton</tabstop>
+  <tabstop>XNegButton</tabstop>
+  <tabstop>YNegButton</tabstop>
+  <tabstop>ZNegButton</tabstop>
+  <tabstop>XYZButton</tabstop>
+  <tabstop>YXZButton</tabstop>
+  <tabstop>ZXYButton</tabstop>
+  <tabstop>XZYButton</tabstop>
+  <tabstop>YZXButton</tabstop>
+  <tabstop>ZYXButton</tabstop>
+  <tabstop>MoveToCenterCheckBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>XYZButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>TriAxisXYZButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>401</x>
+     <y>522</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>7</x>
+     <y>444</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>XZYButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>TriAxisXZYButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>401</x>
+     <y>556</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>475</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>YXZButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>TriAxisYXZButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>478</x>
+     <y>522</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>501</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>YZXButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>TriAxisYZXButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>478</x>
+     <y>556</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>715</x>
+     <y>458</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZXYButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>TriAxisZXYButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>555</x>
+     <y>522</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>715</x>
+     <y>497</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZYXButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>TriAxisZYXButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>555</x>
+     <y>556</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>714</x>
+     <y>551</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>XPosButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>MonoAxisXPosButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>149</x>
+     <y>522</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>7</x>
+     <y>444</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>XNegButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>MonoAxisXNegButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>149</x>
+     <y>556</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>475</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>YPosButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>MonoAxisYPosButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>209</x>
+     <y>522</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>501</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>YNegButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>MonoAxisYNegButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>209</x>
+     <y>556</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>715</x>
+     <y>458</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZPosButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>MonoAxisZPosButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>270</x>
+     <y>522</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>715</x>
+     <y>497</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZNegButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>MonoAxisZNegButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>270</x>
+     <y>556</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>714</x>
+     <y>551</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MoveToCenterCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>MoveToCenterToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>681</x>
+     <y>533</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>655</x>
+     <y>436</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>LocatorButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>LocatorButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>35</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ProbeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>ProbeButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>34</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>LineButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>LineButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>240</x>
+     <y>34</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ProtractorButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>ProtractorButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>296</x>
+     <y>34</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>EllipseButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>EllipseButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>370</x>
+     <y>34</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MultiPointLineButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>MultiPointLineButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>34</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>PencilButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>PencilButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>537</x>
+     <y>34</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GrowButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>GrowButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>593</x>
+     <y>34</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MoveButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>MoveButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>49</x>
+     <y>64</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>EditButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>EditButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>64</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DeleteButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>DeleteButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>240</x>
+     <y>64</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>FlipButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>FlipButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>294</x>
+     <y>64</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AverageButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>AverageButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>370</x>
+     <y>64</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>PruneButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>PruneButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>64</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>LockButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>LockButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>537</x>
+     <y>64</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>RelaxButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>RelaxButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>593</x>
+     <y>64</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DeleteRulerButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>DeleteRulerButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>49</x>
+     <y>96</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DeleteAllRulersButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>DeleteAllRulersButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>96</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ProfileButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>ProfileButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>240</x>
+     <y>96</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DistanceButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>DistanceButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>296</x>
+     <y>96</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ProjectButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>ProjectButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>370</x>
+     <y>96</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ExportButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>ExportButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>96</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZDepthViewPlaneRadioButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>ZDepthViewPlaneButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>189</x>
+     <y>177</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>155</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZDepthMaxIntensityRadioButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>ZDepthMaxIntensityButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>419</x>
+     <y>177</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>183</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZDepthAccumIntensityRadioButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>ZDepthAccumIntensityButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>483</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>212</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TransientCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>TransientToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>198</x>
+     <y>217</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>710</x>
+     <y>157</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>UseVolumePropertiesCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>UseVolumePropertiesToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>428</x>
+     <y>217</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>712</x>
+     <y>189</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ComputeDeltaFFCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>ComputeDeltaFFToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>517</x>
+     <y>199</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>711</x>
+     <y>222</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AutoRelaxCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>AutoRelaxToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>198</x>
+     <y>266</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>247</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ConstraintComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>ConstraintIndexChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>383</x>
+     <y>248</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>712</x>
+     <y>260</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ExInRatioSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>ExInRatioValueChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>586</x>
+     <y>266</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>711</x>
+     <y>293</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>NewGroupButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>NewGroupButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>64</x>
+     <y>332</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>3</x>
+     <y>340</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GroupIDSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>GroupIDValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>452</x>
+     <y>351</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>382</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ChangeGroupButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>ChangeGroupButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>493</x>
+     <y>334</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>713</x>
+     <y>336</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectGroupButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>SelectGroupButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>626</x>
+     <y>358</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>714</x>
+     <y>372</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DisplayGroupButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeasurementDialog</receiver>
+   <slot>DisplayGroupButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>667</x>
+     <y>328</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>711</x>
+     <y>414</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>LocatorButtonClicked()</slot>
+  <slot>ProbeButtonClicked()</slot>
+  <slot>LineButtonClicked()</slot>
+  <slot>ProtractorButtonClicked()</slot>
+  <slot>EllipseButtonClicked()</slot>
+  <slot>MultiPointLineButtonClicked()</slot>
+  <slot>PencilButtonClicked()</slot>
+  <slot>GrowButtonClicked()</slot>
+  <slot>MoveButtonClicked()</slot>
+  <slot>EditButtonClicked()</slot>
+  <slot>DeleteButtonClicked()</slot>
+  <slot>FlipButtonClicked()</slot>
+  <slot>AverageButtonClicked()</slot>
+  <slot>PruneButtonClicked()</slot>
+  <slot>LockButtonClicked()</slot>
+  <slot>RelaxButtonClicked()</slot>
+  <slot>DeleteRulerButtonClicked()</slot>
+  <slot>DeleteAllRulersButtonClicked()</slot>
+  <slot>ProfileButtonClicked()</slot>
+  <slot>DistanceButtonClicked()</slot>
+  <slot>ProjectButtonClicked()</slot>
+  <slot>ExportButtonClicked()</slot>
+  <slot>MonoAxisXPosButtonClicked()</slot>
+  <slot>MonoAxisXNegButtonClicked()</slot>
+  <slot>MonoAxisYPosButtonClicked()</slot>
+  <slot>MonoAxisYNegButtonClicked()</slot>
+  <slot>MonoAxisZPosButtonClicked()</slot>
+  <slot>MonoAxisZNegButtonClicked()</slot>
+  <slot>TriAxisXYZButtonClicked()</slot>
+  <slot>TriAxisXZYButtonClicked()</slot>
+  <slot>TriAxisYXZButtonClicked()</slot>
+  <slot>TriAxisYZXButtonClicked()</slot>
+  <slot>TriAxisZXYButtonClicked()</slot>
+  <slot>TriAxisZYXButtonClicked()</slot>
+  <slot>MoveToCenterToggled(bool)</slot>
+  <slot>ZDepthViewPlaneButtonClicked()</slot>
+  <slot>ZDepthMaxIntensityButtonClicked()</slot>
+  <slot>ZDepthAccumIntensityButtonClicked()</slot>
+  <slot>TransientToggled(bool)</slot>
+  <slot>UseVolumePropertiesToggled(bool)</slot>
+  <slot>ComputeDeltaFFToggled(bool)</slot>
+  <slot>AutoRelaxToggled(bool)</slot>
+  <slot>ConstraintIndexChanged(int)</slot>
+  <slot>ExInRatioValueChanged(double)</slot>
+  <slot>NewGroupButtonClicked()</slot>
+  <slot>GroupIDValueChanged(int)</slot>
+  <slot>ChangeGroupButtonClicked()</slot>
+  <slot>SelectGroupButtonClicked()</slot>
+  <slot>DisplayGroupButtonClicked()</slot>
+  <slot>showDragDropToolBar()</slot>
+ </slots>
+ <buttongroups>
+  <buttongroup name="ZDepthButtonGroup"/>
+ </buttongroups>
+</ui>

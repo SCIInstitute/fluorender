@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisVCRWidget</class>
+ <widget class="QWidget" name="QvisVCRWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>194</width>
+    <height>50</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QHBoxLayout" name="MainLayout">
+   <item>
+    <widget class="QToolButton" name="ReverseSingleStep">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>Reverse single step</string>
+     </property>
+     <property name="text">
+      <string>Reverse Single Step</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>.</normaloff>
+       <selectedon>:/icons/animate/animationreversestep.xpm</selectedon>.</iconset>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="Reverse">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>Reverse</string>
+     </property>
+     <property name="text">
+      <string>Reverse</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>.</normaloff>
+       <selectedoff>:/icons/animate/animationreverseplayoff.xpm</selectedoff>
+       <selectedon>:/icons/animate/animationreverseplayon.xpm</selectedon>.</iconset>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="Stop">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>Stop</string>
+     </property>
+     <property name="text">
+      <string>Stop</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>.</normaloff>
+       <selectedoff>:/icons/animate/animationstopoff.xpm</selectedoff>
+       <selectedon>:/icons/animate/animationstopon.xpm</selectedon>.</iconset>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="Play">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>Play</string>
+     </property>
+     <property name="text">
+      <string>Play</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>.</normaloff>
+       <selectedoff>:/icons/animate/animationplayoff.xpm</selectedoff>
+       <selectedon>:/icons/animate/animationplayon.xpm</selectedon>.</iconset>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="ForwardSingleStep">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>Forward single step</string>
+     </property>
+     <property name="text">
+      <string>Forward Single Step</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>.</normaloff>
+       <selectedon>:/icons/animate/animationforwardstep.xpm</selectedon>.</iconset>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>ReverseSingleStep</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisVCRWidget</receiver>
+   <slot>ReverseSingleStepClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>37</x>
+     <y>36</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>104</x>
+     <y>49</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Reverse</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisVCRWidget</receiver>
+   <slot>ReverseClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>73</x>
+     <y>37</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>193</x>
+     <y>49</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Stop</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisVCRWidget</receiver>
+   <slot>StopClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>109</x>
+     <y>35</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>193</x>
+     <y>49</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Play</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisVCRWidget</receiver>
+   <slot>PlayClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>145</x>
+     <y>36</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>193</x>
+     <y>49</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ForwardSingleStep</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisVCRWidget</receiver>
+   <slot>ForwardSingleStepClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>181</x>
+     <y>37</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>193</x>
+     <y>49</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>StopClicked()</slot>
+  <slot>PlayClicked()</slot>
+  <slot>ForwardSingleStepClicked()</slot>
+  <slot>ReverseClicked()</slot>
+  <slot>ReverseSingleStepClicked()</slot>
+ </slots>
+</ui>

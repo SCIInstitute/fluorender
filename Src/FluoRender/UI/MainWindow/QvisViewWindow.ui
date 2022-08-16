@@ -1,0 +1,902 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisViewWindow</class>
+ <widget class="QWidget" name="QvisViewWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>568</width>
+    <height>515</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>View Window</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <selectedon>:/Src/FluoRender/UI/icons/FluoRender_icon.gif</selectedon>
+   </iconset>
+  </property>
+  <layout class="QVBoxLayout" name="MainLayout">
+   <item>
+    <layout class="QHBoxLayout" name="ToolLayout">
+     <item>
+      <widget class="QToolButton" name="CaptureButton">
+       <property name="toolTip">
+        <string>Capture the current window</string>
+       </property>
+       <property name="text">
+        <string>Capture</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="ToolSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>130</width>
+         <height>16</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="ModeGroupBox">
+       <property name="title">
+        <string/>
+       </property>
+       <layout class="QHBoxLayout" name="ModeLayout">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="ViewModelLayout">
+          <item>
+           <widget class="QLabel" name="ViewModeLabel">
+            <property name="text">
+             <string>View</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="ViewModeComboBox">
+            <property name="toolTip">
+             <string>Set the cursor interaction mode</string>
+            </property>
+            <property name="currentText">
+             <string>3D</string>
+            </property>
+            <property name="currentIndex">
+             <number>3</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>X Axis</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Y Axis</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Z Axis</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>3D</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="ViewSplittersLayout">
+            <item>
+             <widget class="QLabel" name="SplitterModeLabel">
+              <property name="text">
+               <string>Splitters</string>
+              </property>
+              <property name="buddy">
+               <cstring>SplitterModeComboBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="SplitterModeComboBox">
+              <property name="toolTip">
+               <string>Set the splitter mode</string>
+              </property>
+              <property name="currentIndex">
+               <number>1</number>
+              </property>
+              <item>
+               <property name="text">
+                <string>Fixed</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Movable</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QSplitter" name="MainSplitter">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <widget class="QSplitter" name="TopSplitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QvisOpenGLWidget" name="OpenGLWidget_0">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+      <widget class="QvisOpenGLWidget" name="OpenGLWidget_1">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QSplitter" name="BottomSplitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QvisOpenGLWidget" name="OpenGLWidget_2">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+      <widget class="QvisOpenGLWidget" name="OpenGLWidget_3">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="OpenGLGridLayout"/>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="InfoGroupBox">
+     <property name="title">
+      <string/>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="ActiveVolumeLabel">
+        <property name="text">
+         <string>Volume:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="ActiveVolume">
+        <property name="text">
+         <string>Volume</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="ActiveMeshLabel">
+        <property name="text">
+         <string>Mesh:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="ActiveMesh">
+        <property name="text">
+         <string>Mesh</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="ActiveSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="ActiveToolModeLabel">
+        <property name="text">
+         <string> Cursor:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="ActiveTool">
+        <property name="text">
+         <string>Tool</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="ActiveMode">
+        <property name="text">
+         <string>Mode</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QvisOpenGLWidget</class>
+   <extends>QOpenGLWidget</extends>
+   <header>QvisOpenGLWidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>CaptureButton</tabstop>
+  <tabstop>OpenGLWidget_0</tabstop>
+  <tabstop>OpenGLWidget_1</tabstop>
+  <tabstop>OpenGLWidget_2</tabstop>
+  <tabstop>OpenGLWidget_3</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>OpenGLWidget_0</sender>
+   <signal>customContextMenuRequested(QPoint)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>ContextMenuRequested(QPoint)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>102</x>
+     <y>173</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>184</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_0</sender>
+   <signal>activeWindow(QString)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>ActiveSubWindow(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>260</x>
+     <y>253</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>203</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_0</sender>
+   <signal>mouseMove(QPointF)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>MouseMove(QPointF)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>260</x>
+     <y>253</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>241</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_0</sender>
+   <signal>mousePress(QPointF)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>MousePress(QPointF)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>260</x>
+     <y>253</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_0</sender>
+   <signal>mouseRelease(QPointF)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>MouseRelease(QPointF)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>259</x>
+     <y>241</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>120</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_0</sender>
+   <signal>initializeWindow(QString)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>InitializeWindow(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>260</x>
+     <y>253</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>484</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_0</sender>
+   <signal>paintWindow(QString)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>PaintWindow(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>260</x>
+     <y>253</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>514</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_0</sender>
+   <signal>resizeWindow(QString,int,int)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>ResizeWindow(QString,int,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>260</x>
+     <y>253</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>398</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_1</sender>
+   <signal>customContextMenuRequested(QPoint)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>ContextMenuRequested(QPoint)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>442</x>
+     <y>173</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>166</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_1</sender>
+   <signal>activeWindow(QString)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>ActiveSubWindow(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>457</x>
+     <y>217</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>203</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_1</sender>
+   <signal>mouseMove(QPointF)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>MouseMove(QPointF)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>516</x>
+     <y>253</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>241</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_1</sender>
+   <signal>mousePress(QPointF)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>MousePress(QPointF)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>516</x>
+     <y>253</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_1</sender>
+   <signal>mouseRelease(QPointF)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>MouseRelease(QPointF)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>515</x>
+     <y>169</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>120</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_1</sender>
+   <signal>initializeWindow(QString)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>InitializeWindow(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>516</x>
+     <y>253</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>484</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_1</sender>
+   <signal>paintWindow(QString)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>PaintWindow(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>516</x>
+     <y>253</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>514</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_1</sender>
+   <signal>resizeWindow(QString,int,int)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>ResizeWindow(QString,int,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>516</x>
+     <y>253</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>398</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_2</sender>
+   <signal>customContextMenuRequested(QPoint)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>ContextMenuRequested(QPoint)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>42</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>7</x>
+     <y>415</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_2</sender>
+   <signal>activeWindow(QString)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>ActiveSubWindow(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>260</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>203</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_2</sender>
+   <signal>mouseMove(QPointF)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>MouseMove(QPointF)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>260</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>241</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_2</sender>
+   <signal>mousePress(QPointF)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>MousePress(QPointF)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>260</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_2</sender>
+   <signal>mouseRelease(QPointF)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>MouseRelease(QPointF)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>260</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>120</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_2</sender>
+   <signal>initializeWindow(QString)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>InitializeWindow(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>260</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>484</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_2</sender>
+   <signal>paintWindow(QString)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>PaintWindow(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>260</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>514</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_2</sender>
+   <signal>resizeWindow(QString,int,int)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>ResizeWindow(QString,int,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>260</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>398</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_3</sender>
+   <signal>customContextMenuRequested(QPoint)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>ContextMenuRequested(QPoint)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>516</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>426</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_3</sender>
+   <signal>activeWindow(QString)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>ActiveSubWindow(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>516</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>203</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_3</sender>
+   <signal>mouseMove(QPointF)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>MouseMove(QPointF)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>516</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>241</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_3</sender>
+   <signal>mousePress(QPointF)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>MousePress(QPointF)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>516</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_3</sender>
+   <signal>mouseRelease(QPointF)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>MouseRelease(QPointF)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>516</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>120</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_3</sender>
+   <signal>initializeWindow(QString)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>InitializeWindow(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>516</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>484</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_3</sender>
+   <signal>paintWindow(QString)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>PaintWindow(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>516</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>514</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenGLWidget_3</sender>
+   <signal>resizeWindow(QString,int,int)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>ResizeWindow(QString,int,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>516</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>398</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SplitterModeComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>SplitterModeIndexChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>448</x>
+     <y>38</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>522</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ViewModeComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>ViewModeIndexChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>268</x>
+     <y>39</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>524</x>
+     <y>11</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>CaptureButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>CaptureButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>36</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>264</x>
+     <y>257</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TopSplitter</sender>
+   <signal>splitterMoved(int,int)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>SplitterMoved(int,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>264</x>
+     <y>154</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>264</x>
+     <y>257</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>BottomSplitter</sender>
+   <signal>splitterMoved(int,int)</signal>
+   <receiver>QvisViewWindow</receiver>
+   <slot>SplitterMoved(int,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>264</x>
+     <y>359</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>264</x>
+     <y>257</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>ContextMenuRequested(QPoint)</slot>
+  <slot>InitializeWindow(QString)</slot>
+  <slot>PaintWindow(QString)</slot>
+  <slot>ResizeWindow(QString,int,int)</slot>
+  <slot>ActiveSubWindow(QString)</slot>
+  <slot>MousePress(QPointF)</slot>
+  <slot>MouseRelease(QPointF)</slot>
+  <slot>MouseMove(QPointF)</slot>
+  <slot>SplitterModeIndexChanged(int)</slot>
+  <slot>ViewModeIndexChanged(int)</slot>
+  <slot>CaptureButtonClicked()</slot>
+  <slot>SplitterMoved(int,int)</slot>
+ </slots>
+</ui>

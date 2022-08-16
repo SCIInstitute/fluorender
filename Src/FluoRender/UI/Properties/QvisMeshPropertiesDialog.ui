@@ -1,0 +1,576 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisMeshPropertiesDialog</class>
+ <widget class="QDialog" name="QvisMeshPropertiesDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>250</width>
+    <height>362</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>250</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Mesh Properties</string>
+  </property>
+  <layout class="QGridLayout" name="MainLayout">
+   <item row="0" column="0">
+    <widget class="QLabel" name="DifuseColorLabel">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Difuse Color</string>
+     </property>
+     <property name="buddy">
+      <cstring>DifuseColorButton</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QToolButton" name="DifuseColorButton">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="SpecularColorabel">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Specular Color</string>
+     </property>
+     <property name="buddy">
+      <cstring>SpecularColorButton</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QToolButton" name="SpecularColorButton">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="ShininessLabel">
+     <property name="text">
+      <string>Shininess</string>
+     </property>
+     <property name="buddy">
+      <cstring>ShininessSpinBox</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QSlider" name="ShininessSlider">
+     <property name="maximum">
+      <number>128</number>
+     </property>
+     <property name="value">
+      <number>30</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QSpinBox" name="ShininessSpinBox">
+     <property name="maximum">
+      <number>128</number>
+     </property>
+     <property name="value">
+      <number>30</number>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="BlankSpaceLabel_1">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QLabel" name="BlankSpaceLabel_2">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="ScalingLabel">
+     <property name="text">
+      <string>Scaling</string>
+     </property>
+     <property name="buddy">
+      <cstring>ScalingSpinBox</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QSlider" name="ScalingSlider">
+     <property name="minimum">
+      <number>50</number>
+     </property>
+     <property name="maximum">
+      <number>200</number>
+     </property>
+     <property name="value">
+      <number>100</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="2">
+    <widget class="QDoubleSpinBox" name="ScalingSpinBox">
+     <property name="minimum">
+      <double>0.500000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>2.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.010000000000000</double>
+     </property>
+     <property name="value">
+      <double>1.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QCheckBox" name="SizeLimitCheckBox">
+     <property name="text">
+      <string>Size Limit</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QSlider" name="SizeLimitSlider">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="maximum">
+      <number>250</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="2">
+    <widget class="QSpinBox" name="SizeLimitSpinBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="maximum">
+      <number>250</number>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0">
+    <widget class="QLabel" name="TransparencyLabel">
+     <property name="text">
+      <string>Transparency</string>
+     </property>
+     <property name="buddy">
+      <cstring>TransparencySpinBox</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1">
+    <widget class="QSlider" name="TransparencySlider">
+     <property name="maximum">
+      <number>100</number>
+     </property>
+     <property name="sliderPosition">
+      <number>100</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="2">
+    <widget class="QDoubleSpinBox" name="TransparencySpinBox">
+     <property name="maximum">
+      <double>1.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.010000000000000</double>
+     </property>
+     <property name="value">
+      <double>1.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <widget class="QCheckBox" name="ShadowCheckBox">
+     <property name="text">
+      <string>Shadow</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="1">
+    <widget class="QSlider" name="ShadowSlider">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="maximum">
+      <number>100</number>
+     </property>
+     <property name="value">
+      <number>60</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="2">
+    <widget class="QDoubleSpinBox" name="ShadowSpinBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="maximum">
+      <double>1.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.010000000000000</double>
+     </property>
+     <property name="value">
+      <double>0.600000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="0">
+    <widget class="QCheckBox" name="LightingCheckBox">
+     <property name="text">
+      <string>Lighting </string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="0">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>DifuseColorButton</tabstop>
+  <tabstop>SpecularColorButton</tabstop>
+  <tabstop>ShininessSlider</tabstop>
+  <tabstop>ShininessSpinBox</tabstop>
+  <tabstop>ScalingSlider</tabstop>
+  <tabstop>ScalingSpinBox</tabstop>
+  <tabstop>SizeLimitCheckBox</tabstop>
+  <tabstop>SizeLimitSlider</tabstop>
+  <tabstop>SizeLimitSpinBox</tabstop>
+  <tabstop>TransparencySlider</tabstop>
+  <tabstop>TransparencySpinBox</tabstop>
+  <tabstop>ShadowCheckBox</tabstop>
+  <tabstop>ShadowSlider</tabstop>
+  <tabstop>ShadowSpinBox</tabstop>
+  <tabstop>LightingCheckBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>DifuseColorButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeshPropertiesDialog</receiver>
+   <slot>DifuseColorButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>255</x>
+     <y>32</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>336</x>
+     <y>53</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SpecularColorButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisMeshPropertiesDialog</receiver>
+   <slot>SpecularColorButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>255</x>
+     <y>62</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>336</x>
+     <y>106</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ShininessSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisMeshPropertiesDialog</receiver>
+   <slot>ShininessValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>323</x>
+     <y>227</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>336</x>
+     <y>166</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TransparencySpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisMeshPropertiesDialog</receiver>
+   <slot>TransparencyValueChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>323</x>
+     <y>265</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>336</x>
+     <y>203</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ShadowSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisMeshPropertiesDialog</receiver>
+   <slot>ShadowValueChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>323</x>
+     <y>302</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>336</x>
+     <y>239</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SizeLimitSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisMeshPropertiesDialog</receiver>
+   <slot>SizeLimitValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>323</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>336</x>
+     <y>321</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ShininessSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisMeshPropertiesDialog</receiver>
+   <slot>ShininessSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>251</x>
+     <y>225</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>157</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TransparencySlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisMeshPropertiesDialog</receiver>
+   <slot>TransparencySliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>251</x>
+     <y>263</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>200</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ShadowSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisMeshPropertiesDialog</receiver>
+   <slot>ShadowSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>251</x>
+     <y>300</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>8</x>
+     <y>234</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SizeLimitSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisMeshPropertiesDialog</receiver>
+   <slot>SizeLimitSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>251</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>320</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ScalingSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisMeshPropertiesDialog</receiver>
+   <slot>ScalingSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>136</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>3</x>
+     <y>111</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ScalingSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisMeshPropertiesDialog</receiver>
+   <slot>ScalingValueChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>303</x>
+     <y>119</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>335</x>
+     <y>257</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>LightingCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisMeshPropertiesDialog</receiver>
+   <slot>LightingToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>326</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>2</x>
+     <y>289</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ShadowCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisMeshPropertiesDialog</receiver>
+   <slot>ShadowToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>63</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1</x>
+     <y>269</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SizeLimitCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisMeshPropertiesDialog</receiver>
+   <slot>SizeLimitToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>50</x>
+     <y>152</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>0</x>
+     <y>95</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>DifuseColorButtonClicked()</slot>
+  <slot>SpecularColorButtonClicked()</slot>
+  <slot>ShininessSliderChanged(int)</slot>
+  <slot>ShininessValueChanged(int)</slot>
+  <slot>TransparencySliderChanged(int)</slot>
+  <slot>TransparencyValueChanged(double)</slot>
+  <slot>ShadowSliderChanged(int)</slot>
+  <slot>ShadowValueChanged(double)</slot>
+  <slot>LightingSliderChanged(int)</slot>
+  <slot>LightingValueChanged(double)</slot>
+  <slot>SizeLimitSliderChanged(int)</slot>
+  <slot>SizeLimitValueChanged(int)</slot>
+  <slot>ScalingSliderChanged(int)</slot>
+  <slot>ScalingValueChanged(double)</slot>
+  <slot>SizeLimitToggled(bool)</slot>
+  <slot>ShadowToggled(bool)</slot>
+  <slot>LightingToggled(bool)</slot>
+ </slots>
+</ui>

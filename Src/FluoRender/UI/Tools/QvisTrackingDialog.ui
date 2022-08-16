@@ -1,0 +1,2022 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisTrackingDialog</class>
+ <widget class="QDialog" name="QvisTrackingDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>705</width>
+    <height>566</height>
+   </rect>
+  </property>
+  <property name="baseSize">
+   <size>
+    <width>25</width>
+    <height>10</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Tracking</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <selectedon>:/Src/FluoRender/UI/icons/Tools/Tracking.png</selectedon>
+   </iconset>
+  </property>
+  <layout class="QVBoxLayout" name="MainLayout">
+   <item>
+    <widget class="QTabWidget" name="TrackingTabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="TrackMapTab">
+      <attribute name="title">
+       <string>Track Map</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="TrackMapLayout">
+       <item>
+        <layout class="QHBoxLayout" name="TrackMapSelectionLayout">
+         <item>
+          <widget class="QLabel" name="TrackMapLabel">
+           <property name="text">
+            <string>Track Map</string>
+           </property>
+           <property name="buddy">
+            <cstring>TrackMapTextEdit</cstring>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="TrackMapTextEdit">
+           <property name="clearButtonEnabled">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="TrackMapLoadButton">
+           <property name="text">
+            <string>Load</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="TrackMapSaveButton">
+           <property name="text">
+            <string>Save</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="TrackMapSaveAsButton">
+           <property name="text">
+            <string>Save As</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="TrackMapSelectionSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="TrackMapButtonLayout">
+         <item row="1" column="1">
+          <widget class="QDoubleSpinBox" name="TrackMapSimilaritySpinBox"/>
+         </item>
+         <item row="1" column="3">
+          <widget class="QDoubleSpinBox" name="TrackMapContractFactorSpinBox"/>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="IterationsLabel">
+           <property name="text">
+            <string>Iterations</string>
+           </property>
+           <property name="buddy">
+            <cstring>TrackMapIterationsSpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QLabel" name="ContractFactorLabel">
+           <property name="text">
+            <string>Contract factor</string>
+           </property>
+           <property name="buddy">
+            <cstring>TrackMapContractFactorSpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QLabel" name="SizeTresholdLabel">
+           <property name="text">
+            <string>Size threshold</string>
+           </property>
+           <property name="buddy">
+            <cstring>TrackMapSizeTresholdSpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="4">
+          <widget class="QPushButton" name="TrackMapGenerateButton">
+           <property name="text">
+            <string>Generate</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QSpinBox" name="TrackMapSizeTresholdSpinBox"/>
+         </item>
+         <item row="1" column="6">
+          <widget class="QCheckBox" name="TrackMapTrySplittingCheckBox">
+           <property name="text">
+            <string>Try splitting</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QSpinBox" name="TrackMapIterationsSpinBox"/>
+         </item>
+         <item row="0" column="5">
+          <widget class="QPushButton" name="TrackMapRefineTButton">
+           <property name="text">
+            <string>Refine T</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="SimilarityLabel">
+           <property name="text">
+            <string>Similarity</string>
+           </property>
+           <property name="buddy">
+            <cstring>TrackMapSimilaritySpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="5">
+          <widget class="QCheckBox" name="TrackMapTryMergingCheckBox">
+           <property name="text">
+            <string>Try merging</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="6">
+          <widget class="QPushButton" name="TrackMapRefineAllButton">
+           <property name="text">
+            <string>Refine All</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="4">
+          <widget class="QCheckBox" name="TrackMapConsistentColorCheckBox">
+           <property name="text">
+            <string>Consistent color</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="7">
+          <spacer name="TrackMapButtonSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="SelectionTab">
+      <attribute name="title">
+       <string>Selection</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="SelectionLayout">
+       <item>
+        <layout class="QHBoxLayout" name="SelectionSelectionLayout">
+         <item>
+          <widget class="QLabel" name="SelectionLabel">
+           <property name="text">
+            <string>Selection</string>
+           </property>
+           <property name="buddy">
+            <cstring>SelectionTextEdit</cstring>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="SelectionTextEdit">
+           <property name="minimumSize">
+            <size>
+             <width>50</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="clearButtonEnabled">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="SelectionAppendButton">
+           <property name="text">
+            <string>Append</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="SelectionClearButton">
+           <property name="text">
+            <string>Clear</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="SelectionReplaceButton">
+           <property name="text">
+            <string>Replace</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="SelectionSelectionSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="SelectionButtonLayout">
+         <item>
+          <widget class="QPushButton" name="SelectionFullComponentButton">
+           <property name="text">
+            <string>Full Component</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="SelectionShuffleButton">
+           <property name="text">
+            <string>Shuffle</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="SelectionButtonSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="SelectionComponentSizeLayout">
+         <item>
+          <widget class="QLabel" name="SelectionComponentSizeLabel">
+           <property name="text">
+            <string>Component size</string>
+           </property>
+           <property name="buddy">
+            <cstring>SelectionComponentSizeSpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="SelectionComponentSizeSlider">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="SelectionComponentSizeSpinBox"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="SelectionUncertaintyButton">
+           <property name="text">
+            <string>Uncertainty</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="SelectionUncertaintySlider">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="SelectionUncertaintySpinBox"/>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="ModifyTab">
+      <attribute name="title">
+       <string>Modify</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="ModifyLayout">
+       <item>
+        <layout class="QHBoxLayout" name="ModifySelectionLayout">
+         <item>
+          <widget class="QLabel" name="ModifySelectionLabel">
+           <property name="text">
+            <string>New ID/Selection</string>
+           </property>
+           <property name="buddy">
+            <cstring>ModifySelectionTextEdit</cstring>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="ModifySelectionTextEdit">
+           <property name="minimumSize">
+            <size>
+             <width>50</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="clearButtonEnabled">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="ModifyAppendButton">
+           <property name="text">
+            <string>Append</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="ModifyClearButton">
+           <property name="text">
+            <string>Clear</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="ModifySelectionSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="ModifyButtonLayout">
+         <item row="1" column="0">
+          <widget class="QPushButton" name="ModifyCombineButton">
+           <property name="text">
+            <string>Combine</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="4">
+          <widget class="QSpinBox" name="ModifyNumberOfComponentsSpinBox"/>
+         </item>
+         <item row="0" column="0">
+          <widget class="QPushButton" name="ModifyAssignIDButton">
+           <property name="text">
+            <string>Assign ID</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QPushButton" name="ModifyReplaceIDButton">
+           <property name="text">
+            <string>Replace ID</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3">
+          <widget class="QLabel" name="NumberOfComponentsLabel">
+           <property name="text">
+            <string>Number of components</string>
+           </property>
+           <property name="buddy">
+            <cstring>ModifyNumberOfComponentsSpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QPushButton" name="ModifySeparateButton">
+           <property name="text">
+            <string>Separate</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QPushButton" name="ModifyModifySegmentButton">
+           <property name="text">
+            <string>Segment</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="ModifyAddIDButton">
+           <property name="text">
+            <string>Add ID</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="5">
+          <spacer name="ModifyButtonSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="LinkageTab">
+      <attribute name="title">
+       <string>Linkage</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="LinkingLayout">
+       <item>
+        <layout class="QHBoxLayout" name="LinkageSelectionLayout">
+         <item>
+          <widget class="QLabel" name="LinkageSelectionLabel">
+           <property name="text">
+            <string>Selection</string>
+           </property>
+           <property name="buddy">
+            <cstring>LinkageSelectionTextEdit</cstring>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="LinkageSelectionTextEdit">
+           <property name="minimumSize">
+            <size>
+             <width>50</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="clearButtonEnabled">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="LinkageAppendButton">
+           <property name="text">
+            <string>Append</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="LinkageClearButton">
+           <property name="text">
+            <string>Clear</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="LinkageSelectionSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="LinkageButtonLayout">
+         <item row="0" column="1">
+          <widget class="QPushButton" name="LinkIDsButton">
+           <property name="text">
+            <string>Link IDs</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QPushButton" name="LinkExclusiveButton">
+           <property name="text">
+            <string>Link Exclusive</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QPushButton" name="UnlinkIDsButton">
+           <property name="text">
+            <string>Unlink IDs</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QPushButton" name="LinkNewIDsButton">
+           <property name="text">
+            <string>Link New IDs</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="LinkIsolateButton">
+           <property name="text">
+            <string>Isolate</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <spacer name="LinkageButtonSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="AnalysisTab">
+      <attribute name="title">
+       <string>Analysis</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="AnalysisLayout">
+       <item>
+        <layout class="QGridLayout" name="AnalysisButtonLayout">
+         <item row="1" column="1">
+          <widget class="QPushButton" name="AnalysisComputeButton">
+           <property name="text">
+            <string>Compute</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3">
+          <widget class="QPushButton" name="AnalysisUncertaintyButton">
+           <property name="text">
+            <string>Uncertainty</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QPushButton" name="AnalysisLinksButton">
+           <property name="text">
+            <string>Links</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="4">
+          <widget class="QPushButton" name="AnalysisPathsButton">
+           <property name="text">
+            <string>Paths</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QPushButton" name="AnalysisUniformIDsButton">
+           <property name="text">
+            <string>Uniform IDs</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="InformationLabel">
+           <property name="text">
+            <string>Information</string>
+           </property>
+           <property name="buddy">
+            <cstring>AnalysisComputeButton</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="ConvertToLabel">
+           <property name="text">
+            <string>Convert to</string>
+           </property>
+           <property name="buddy">
+            <cstring>AnalysisRulersButton</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QPushButton" name="AnalysisExportButton">
+           <property name="text">
+            <string>Export</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="AnalysisRulersButton">
+           <property name="text">
+            <string>Rulers</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="5">
+          <spacer name="AnalysisButtonSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="TracksGroupBox">
+     <property name="title">
+      <string>Tracks</string>
+     </property>
+     <layout class="QHBoxLayout" name="TracksLayout">
+      <item>
+       <widget class="QCheckBox" name="TracksTailCheckBox">
+        <property name="text">
+         <string>Tail</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="TracksSlider">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="TracksSpinBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="TracksLeadCheckBox">
+        <property name="text">
+         <string>Lead</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="IDListsGroupBox">
+     <property name="title">
+      <string>ID Lists</string>
+     </property>
+     <layout class="QVBoxLayout" name="IDListsLayout">
+      <item>
+       <layout class="QHBoxLayout" name="IDListsDirectionLayout">
+        <item>
+         <spacer name="IDListsDirectionLeftSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>10</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="CurrentTLabel">
+          <property name="text">
+           <string>Current T</string>
+          </property>
+          <property name="buddy">
+           <cstring>IDListsBackwardButton</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="IDListsBackwardButton">
+          <property name="text">
+           <string>&lt;- Backward (A)</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="IDListsDirectionLine">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="IDListsForewardButton">
+          <property name="text">
+           <string>Foreward (D) -&gt;</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="PreviousTLabel">
+          <property name="text">
+           <string>Previous T</string>
+          </property>
+          <property name="buddy">
+           <cstring>IDListsForewardButton</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="IDListsDirectionRightSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>10</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTableWidget" name="IDListsTableWidget">
+        <attribute name="horizontalHeaderCascadingSectionResizes">
+         <bool>false</bool>
+        </attribute>
+        <attribute name="horizontalHeaderDefaultSectionSize">
+         <number>63</number>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>ID</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Size</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>X</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Y</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Z</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string/>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>ID</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Size</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>X</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Y</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Z</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="OutputGroupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>2</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Output</string>
+     </property>
+     <layout class="QHBoxLayout" name="OutputLayout">
+      <item>
+       <widget class="QPlainTextEdit" name="OutputTextEdit">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>TrackingTabWidget</tabstop>
+  <tabstop>TrackMapTextEdit</tabstop>
+  <tabstop>TrackMapLoadButton</tabstop>
+  <tabstop>TrackMapSaveButton</tabstop>
+  <tabstop>TrackMapSaveAsButton</tabstop>
+  <tabstop>TrackMapIterationsSpinBox</tabstop>
+  <tabstop>TrackMapSizeTresholdSpinBox</tabstop>
+  <tabstop>TrackMapGenerateButton</tabstop>
+  <tabstop>TrackMapRefineTButton</tabstop>
+  <tabstop>TrackMapRefineAllButton</tabstop>
+  <tabstop>TrackMapSimilaritySpinBox</tabstop>
+  <tabstop>TrackMapContractFactorSpinBox</tabstop>
+  <tabstop>TrackMapConsistentColorCheckBox</tabstop>
+  <tabstop>TrackMapTryMergingCheckBox</tabstop>
+  <tabstop>TrackMapTrySplittingCheckBox</tabstop>
+  <tabstop>SelectionTextEdit</tabstop>
+  <tabstop>SelectionAppendButton</tabstop>
+  <tabstop>SelectionClearButton</tabstop>
+  <tabstop>SelectionReplaceButton</tabstop>
+  <tabstop>SelectionFullComponentButton</tabstop>
+  <tabstop>SelectionShuffleButton</tabstop>
+  <tabstop>SelectionComponentSizeSlider</tabstop>
+  <tabstop>SelectionComponentSizeSpinBox</tabstop>
+  <tabstop>SelectionUncertaintyButton</tabstop>
+  <tabstop>SelectionUncertaintySlider</tabstop>
+  <tabstop>SelectionUncertaintySpinBox</tabstop>
+  <tabstop>ModifySelectionTextEdit</tabstop>
+  <tabstop>ModifyAppendButton</tabstop>
+  <tabstop>ModifyClearButton</tabstop>
+  <tabstop>ModifyAssignIDButton</tabstop>
+  <tabstop>ModifyAddIDButton</tabstop>
+  <tabstop>ModifyReplaceIDButton</tabstop>
+  <tabstop>ModifyCombineButton</tabstop>
+  <tabstop>ModifySeparateButton</tabstop>
+  <tabstop>ModifyModifySegmentButton</tabstop>
+  <tabstop>ModifyNumberOfComponentsSpinBox</tabstop>
+  <tabstop>LinkageSelectionTextEdit</tabstop>
+  <tabstop>LinkageAppendButton</tabstop>
+  <tabstop>LinkageClearButton</tabstop>
+  <tabstop>LinkExclusiveButton</tabstop>
+  <tabstop>LinkIDsButton</tabstop>
+  <tabstop>LinkNewIDsButton</tabstop>
+  <tabstop>LinkIsolateButton</tabstop>
+  <tabstop>UnlinkIDsButton</tabstop>
+  <tabstop>AnalysisRulersButton</tabstop>
+  <tabstop>AnalysisUniformIDsButton</tabstop>
+  <tabstop>AnalysisComputeButton</tabstop>
+  <tabstop>AnalysisLinksButton</tabstop>
+  <tabstop>AnalysisUncertaintyButton</tabstop>
+  <tabstop>AnalysisPathsButton</tabstop>
+  <tabstop>AnalysisExportButton</tabstop>
+  <tabstop>TracksTailCheckBox</tabstop>
+  <tabstop>TracksSlider</tabstop>
+  <tabstop>TracksSpinBox</tabstop>
+  <tabstop>TracksLeadCheckBox</tabstop>
+  <tabstop>IDListsBackwardButton</tabstop>
+  <tabstop>IDListsForewardButton</tabstop>
+  <tabstop>IDListsTableWidget</tabstop>
+  <tabstop>OutputTextEdit</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>TracksTailCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>TracksTailToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>33</x>
+     <y>242</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>3</x>
+     <y>249</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TracksLeadCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>TracksLeadToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>726</x>
+     <y>250</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>682</x>
+     <y>263</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TracksSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>TracksSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>142</x>
+     <y>235</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>3</x>
+     <y>218</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TracksSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>TracksValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>661</x>
+     <y>250</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>684</x>
+     <y>227</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>IDListsBackwardButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>IDListsBackwardButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>247</x>
+     <y>326</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>332</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>IDListsForewardButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>IDListsForewardButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>462</x>
+     <y>319</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>686</x>
+     <y>335</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TrackMapTextEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>TrackMapTextEditFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>73</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>15</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TrackMapLoadButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>TrackMapLoadButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>298</x>
+     <y>84</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>686</x>
+     <y>34</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TrackMapSaveButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>TrackMapSaveButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>372</x>
+     <y>84</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>685</x>
+     <y>66</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TrackMapSaveAsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>TrackMapSaveAsButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>464</x>
+     <y>84</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>683</x>
+     <y>99</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TrackMapRefineAllButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>TrackMapRefineAllButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>646</x>
+     <y>133</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>687</x>
+     <y>137</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TrackMapRefineTButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>TrackMapRefineTButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>545</x>
+     <y>133</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>684</x>
+     <y>169</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TrackMapGenerateButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>TrackMapGenerateButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>133</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>689</x>
+     <y>197</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TrackMapTrySplittingCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>TrackMapTrySplittingToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>655</x>
+     <y>163</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>685</x>
+     <y>125</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TrackMapTryMergingCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>TrackMapTryMergingToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>554</x>
+     <y>163</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>686</x>
+     <y>16</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TrackMapConsistentColorCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>TrackMapConsistentColorToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>432</x>
+     <y>163</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>685</x>
+     <y>288</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TrackMapIterationsSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>TrackMapIterationsValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>155</x>
+     <y>128</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>50</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TrackMapSizeTresholdSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>TrackMapSizeTresholdValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>320</x>
+     <y>128</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>86</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TrackMapSimilaritySpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>TrackMapSimilarityValueChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>155</x>
+     <y>163</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>7</x>
+     <y>123</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TrackMapContractFactorSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>TrackMapContractFactorValueChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>320</x>
+     <y>163</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>165</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionTextEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>SelectionTextEditFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>125</x>
+     <y>58</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>6</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionAppendButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>SelectionAppendButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>280</x>
+     <y>62</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>42</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionClearButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>SelectionClearButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>351</x>
+     <y>58</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>77</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionReplaceButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>SelectionReplaceButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>448</x>
+     <y>62</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>676</x>
+     <y>2</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionFullComponentButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>SelectionFullComponentButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>75</x>
+     <y>102</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>3</x>
+     <y>113</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionShuffleButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>SelectionShuffleButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>234</x>
+     <y>103</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>152</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionComponentSizeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>SelectionComponentSizeSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>263</x>
+     <y>142</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>193</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionComponentSizeSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>SelectionComponentSizeValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>365</x>
+     <y>157</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>679</x>
+     <y>438</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionUncertaintyButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>SelectionUncertaintyButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>430</x>
+     <y>152</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>689</x>
+     <y>374</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionUncertaintySlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>SelectionUncertaintySliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>673</x>
+     <y>159</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>683</x>
+     <y>486</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionUncertaintySpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>SelectionUncertaintyValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>717</x>
+     <y>157</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>685</x>
+     <y>409</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifySelectionTextEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>ModifySelectionTextEditFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>154</x>
+     <y>61</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>366</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifyAppendButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>ModifyAppendButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>320</x>
+     <y>68</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>349</x>
+     <y>231</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifyClearButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>ModifyClearButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>403</x>
+     <y>68</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>384</x>
+     <y>245</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifyAssignIDButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>ModifyAssignIDButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>83</x>
+     <y>121</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>336</x>
+     <y>209</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifyCombineButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>ModifyCombineButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>152</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>415</x>
+     <y>257</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifyAddIDButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>ModifyAddIDButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>175</x>
+     <y>110</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>448</x>
+     <y>267</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifySeparateButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>ModifySeparateButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>199</x>
+     <y>150</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>411</x>
+     <y>243</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifyReplaceIDButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>ModifyReplaceIDButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>284</x>
+     <y>124</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>542</x>
+     <y>212</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifyModifySegmentButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>ModifySegmentButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>305</x>
+     <y>154</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>626</x>
+     <y>256</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifyNumberOfComponentsSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>ModifyNumberOfComponentsValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>514</x>
+     <y>149</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>657</x>
+     <y>234</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>LinkageSelectionTextEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>LinkageSelectionTextEditFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>138</x>
+     <y>63</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>362</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>LinkageAppendButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>LinkageAppendButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>287</x>
+     <y>70</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>3</x>
+     <y>420</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>LinkageClearButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>LinkageClearButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>354</x>
+     <y>66</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>7</x>
+     <y>471</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>LinkExclusiveButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>LinkExclusiveButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>149</x>
+     <y>133</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>769</x>
+     <y>47</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>LinkIDsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>LinkIDsButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>253</x>
+     <y>133</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>814</x>
+     <y>77</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>LinkNewIDsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>LinkNewIDsButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>375</x>
+     <y>133</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>859</x>
+     <y>112</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>LinkIsolateButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>LinkIsolateButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>146</x>
+     <y>148</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>879</x>
+     <y>159</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>UnlinkIDsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>UnlinkIDsButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>253</x>
+     <y>167</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>899</x>
+     <y>215</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AnalysisRulersButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>AnalysisRulersButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>165</x>
+     <y>63</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>156</x>
+     <y>572</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AnalysisUniformIDsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>AnalysisUniformIDsButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>256</x>
+     <y>59</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>215</x>
+     <y>577</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AnalysisComputeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>AnalysisComputeButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>154</x>
+     <y>103</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>282</x>
+     <y>560</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AnalysisExportButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>AnalysisExportButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>178</x>
+     <y>150</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>259</x>
+     <y>585</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AnalysisLinksButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>AnalysisLinksButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>284</x>
+     <y>104</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>504</x>
+     <y>575</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AnalysisPathsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>AnalysisPathsButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>472</x>
+     <y>104</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>717</x>
+     <y>562</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AnalysisUncertaintyButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisTrackingDialog</receiver>
+   <slot>AnalysisUncertaintyButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>391</x>
+     <y>104</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>774</x>
+     <y>474</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>TracksTailToggled(bool)</slot>
+  <slot>TracksLeadToggled(bool)</slot>
+  <slot>TracksSliderChanged(int)</slot>
+  <slot>TracksValueChanged(int)</slot>
+  <slot>IDListsBackwardButtonClicked()</slot>
+  <slot>IDListsForewardButtonClicked()</slot>
+  <slot>TrackMapTextEditFinished()</slot>
+  <slot>TrackMapLoadButtonClicked()</slot>
+  <slot>TrackMapSaveButtonClicked()</slot>
+  <slot>TrackMapSaveAsButtonClicked()</slot>
+  <slot>TrackMapIterationsValueChanged(int)</slot>
+  <slot>TrackMapSizeTresholdValueChanged(int)</slot>
+  <slot>TrackMapSimilarityValueChanged(double)</slot>
+  <slot>TrackMapContractFactorValueChanged(double)</slot>
+  <slot>TrackMapConsistentColorToggled(bool)</slot>
+  <slot>TrackMapTryMergingToggled(bool)</slot>
+  <slot>TrackMapTrySplittingToggled(bool)</slot>
+  <slot>TrackMapGenerateButtonClicked()</slot>
+  <slot>TrackMapRefineTButtonClicked()</slot>
+  <slot>TrackMapRefineAllButtonClicked()</slot>
+  <slot>SelectionTextEditFinished()</slot>
+  <slot>SelectionAppendButtonClicked()</slot>
+  <slot>SelectionClearButtonClicked()</slot>
+  <slot>SelectionReplaceButtonClicked()</slot>
+  <slot>SelectionFullComponentButtonClicked()</slot>
+  <slot>SelectionShuffleButtonClicked()</slot>
+  <slot>SelectionComponentSizeSliderChanged(int)</slot>
+  <slot>SelectionComponentSizeValueChanged(int)</slot>
+  <slot>SelectionUncertaintySliderChanged(int)</slot>
+  <slot>SelectionUncertaintyValueChanged(int)</slot>
+  <slot>SelectionUncertaintyButtonClicked()</slot>
+  <slot>ModifySelectionTextEditFinished()</slot>
+  <slot>ModifyAppendButtonClicked()</slot>
+  <slot>ModifyClearButtonClicked()</slot>
+  <slot>ModifyAssignIDButtonClicked()</slot>
+  <slot>ModifyAddIDButtonClicked()</slot>
+  <slot>ModifyReplaceIDButtonClicked()</slot>
+  <slot>ModifyCombineButtonClicked()</slot>
+  <slot>ModifySeparateButtonClicked()</slot>
+  <slot>ModifySegmentButtonClicked()</slot>
+  <slot>ModifyNumberOfComponentsValueChanged(int)</slot>
+  <slot>LinkageSelectionTextEditFinished()</slot>
+  <slot>LinkageAppendButtonClicked()</slot>
+  <slot>LinkageClearButtonClicked()</slot>
+  <slot>LinkExclusiveButtonClicked()</slot>
+  <slot>LinkIDsButtonClicked()</slot>
+  <slot>LinkNewIDsButtonClicked()</slot>
+  <slot>LinkIsolateButtonClicked()</slot>
+  <slot>UnlinkIDsButtonClicked()</slot>
+  <slot>AnalysisRulersButtonClicked()</slot>
+  <slot>AnalysisUniformIDsButtonClicked()</slot>
+  <slot>AnalysisComputeButtonClicked()</slot>
+  <slot>AnalysisLinksButtonClicked()</slot>
+  <slot>AnalysisUncertaintyButtonClicked()</slot>
+  <slot>AnalysisPathsButtonClicked()</slot>
+  <slot>AnalysisExportButtonClicked()</slot>
+ </slots>
+</ui>

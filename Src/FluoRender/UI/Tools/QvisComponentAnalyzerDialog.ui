@@ -1,0 +1,3746 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisComponentAnalyzerDialog</class>
+ <widget class="QDialog" name="QvisComponentAnalyzerDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>466</width>
+    <height>601</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Component Analyzer</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <selectedon>:/Src/FluoRender/UI/icons/Tools/ComponentAnalyzer.png</selectedon>
+   </iconset>
+  </property>
+  <layout class="QVBoxLayout" name="MainLayout">
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>5</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="currentIndex">
+      <number>2</number>
+     </property>
+     <widget class="QWidget" name="GenerateTab">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>5</verstretch>
+       </sizepolicy>
+      </property>
+      <attribute name="title">
+       <string>Generate</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="GenerateLayout">
+       <item>
+        <widget class="QScrollArea" name="GenerateScrollArea">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>5</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="QWidget" name="GenerateScrollAreaContentsWidget">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>395</width>
+            <height>1035</height>
+           </rect>
+          </property>
+          <layout class="QVBoxLayout" name="GenerateScrollAreaContentsLayout">
+           <item>
+            <widget class="QGroupBox" name="RegionGrowthMergeGroupBox">
+             <property name="title">
+              <string>Region growth and merge</string>
+             </property>
+             <layout class="QVBoxLayout" name="RegionGrowthMergeLayout">
+              <item>
+               <widget class="QGroupBox" name="TopGroupBox">
+                <property name="title">
+                 <string/>
+                </property>
+                <property name="checkable">
+                 <bool>false</bool>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
+                <layout class="QGridLayout" name="TopLayout">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="IterationsLabel">
+                   <property name="text">
+                    <string>Iterations</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>IterationsSpinBox</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QSlider" name="IterationsSlider">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="2" rowspan="2">
+                  <widget class="QSpinBox" name="IterationsSpinBox"/>
+                 </item>
+                 <item row="1" column="0" rowspan="2">
+                  <widget class="QLabel" name="ThresholdLabel">
+                   <property name="text">
+                    <string>Threshold</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>ThresholdSpinBox</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1" rowspan="2">
+                  <widget class="QSlider" name="ThresholdSlider">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="2">
+                  <widget class="QDoubleSpinBox" name="ThresholdSpinBox"/>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="DifusionGroupBox">
+                <property name="title">
+                 <string>Difusion</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
+                <layout class="QHBoxLayout" name="DifusionLayout">
+                 <item>
+                  <widget class="QLabel" name="DifusionSmoothnessLabel">
+                   <property name="text">
+                    <string>Smoothness</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>DifusionSmoothnessSpinBox</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QSlider" name="DifusionSmoothnessSlider">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QDoubleSpinBox" name="DifusionSmoothnessSpinBox"/>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="DensityFieldGroupBox">
+                <property name="title">
+                 <string>Density field</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
+                <layout class="QGridLayout" name="DensityFieldLayout">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="DensityFieldSeparationLabel">
+                   <property name="text">
+                    <string>Separation</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>DensityFieldSeparationSpinBox</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QSlider" name="DensityFieldSeparationSlider">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="DensityFieldNoiseLevelLabel">
+                   <property name="text">
+                    <string>Noise level</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>DensityFieldNoiseLevelSpinBox</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QSlider" name="DensityFieldNoiseLevelSlider">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="2">
+                  <widget class="QDoubleSpinBox" name="DensityFieldNoiseLevelSpinBox"/>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="DensityFieldFilterSizeLabel">
+                   <property name="text">
+                    <string>Filter size</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>DensityFieldFilterSizeSpinBox</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QSlider" name="DensityFieldFilterSizeSlider">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="2">
+                  <widget class="QSpinBox" name="DensityFieldFilterSizeSpinBox"/>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="DensityFieldFeatureSizeLabel">
+                   <property name="text">
+                    <string>Feature size</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>DensityFieldFeatureSizeSpinBox</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QSlider" name="DensityFieldFeatureSizeSlider">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="2">
+                  <widget class="QDoubleSpinBox" name="DensityFieldSeparationSpinBox"/>
+                 </item>
+                 <item row="3" column="2">
+                  <widget class="QSpinBox" name="DensityFieldFeatureSizeSpinBox"/>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="DistanceFieldGroupBox">
+                <property name="title">
+                 <string>Distance field</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
+                <layout class="QGridLayout" name="DistanceFieldLayout">
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="DistanceFieldPerimeterLabel">
+                   <property name="text">
+                    <string>Perimeter</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>DistanceFieldPerimeterSpinBox</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QSlider" name="DistanceFieldPerimeterSlider">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="2">
+                  <widget class="QDoubleSpinBox" name="DistanceFieldPerimeterSpinBox"/>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="DistanceFieldFeatureSizeLabel">
+                   <property name="text">
+                    <string>Feature size</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>DistanceFieldFeatureSizeSpinBox</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QSlider" name="DistanceFieldFilterSizeSlider">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QSlider" name="DistanceFieldFeatureSizeSlider">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="DistanceFieldFilterSizeLabel">
+                   <property name="text">
+                    <string>Filter size</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>DistanceFieldFilterSizeSpinBox</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="2">
+                  <widget class="QSpinBox" name="DistanceFieldFilterSizeSpinBox"/>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="DistanceFieldStrengthLabel">
+                   <property name="text">
+                    <string>Strength</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>DistanceFieldStrengthSpinBox</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QSlider" name="DistanceFieldStrengthSlider">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="2">
+                  <widget class="QDoubleSpinBox" name="DistanceFieldStrengthSpinBox"/>
+                 </item>
+                 <item row="3" column="2">
+                  <widget class="QSpinBox" name="DistanceFieldFeatureSizeSpinBox"/>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="FixateGrowthGroupBox">
+                <property name="title">
+                 <string>Fixate growth regions</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
+                <layout class="QVBoxLayout" name="FixateGrowthLayout">
+                 <item>
+                  <layout class="QHBoxLayout" name="FixateGrowthStopSizeLayout">
+                   <item>
+                    <widget class="QLabel" name="FixateGrowthStopSizeLabel">
+                     <property name="text">
+                      <string>Stop size</string>
+                     </property>
+                     <property name="buddy">
+                      <cstring>FixateGrowthStopSizeSpinBox</cstring>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QSlider" name="FixateGrowthStopSizeSlider">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QSpinBox" name="FixateGrowthStopSizeSpinBox"/>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="FixateGrowthRefixLayout">
+                   <item>
+                    <widget class="QPushButton" name="FixateGrowthRefixButton">
+                     <property name="text">
+                      <string>Refix</string>
+                     </property>
+                     <property name="autoDefault">
+                      <bool>false</bool>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <spacer name="FixateGrowthRefixSpacer">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>10</width>
+                       <height>10</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="PostCleanupGroupBox">
+             <property name="title">
+              <string>Post cleanup</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+             <layout class="QVBoxLayout" name="PostCleanupLayout">
+              <item>
+               <layout class="QGridLayout" name="PostCleanupSliderLayout">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="PostCleanupIterationsLabel">
+                  <property name="text">
+                   <string>Iterations</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>PostCleanupIterationsSpinBox</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QSlider" name="PostCleanupIterationsSlider">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="2">
+                 <widget class="QSpinBox" name="PostCleanupIterationsSpinBox"/>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="PostCleanupStopSizeLabel">
+                  <property name="text">
+                   <string>Stop size</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>PostCleanupStopSizeSpinBox</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QSlider" name="PostCleanupStopSizeSlider">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="2">
+                 <widget class="QSpinBox" name="PostCleanupStopSizeSpinBox"/>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="PostCleanupCleanMoreLayout">
+                <item>
+                 <widget class="QPushButton" name="PostCleanupCleanMoreButton">
+                  <property name="text">
+                   <string>Clean More</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="PostCleanupCleanMoreSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>10</width>
+                    <height>10</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="MacroGroupBox">
+             <property name="title">
+              <string>Macro command</string>
+             </property>
+             <layout class="QVBoxLayout" name="MacroLayout">
+              <item>
+               <layout class="QHBoxLayout" name="MacroRecordLayout">
+                <item>
+                 <widget class="QLabel" name="MacroRecorderLabel">
+                  <property name="text">
+                   <string>Recorder</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="MacroRecordTextEdit"/>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="MacroRecordButton">
+                  <property name="text">
+                   <string>Record</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="MacroPlayButton">
+                  <property name="text">
+                   <string>Play</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="MacroResetButton">
+                  <property name="text">
+                   <string>Reset</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="MacroSaveLayoout">
+                <item>
+                 <widget class="QLabel" name="MacroSaveFileLabel">
+                  <property name="text">
+                   <string>Save file</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="MacroSaveFileTextEdit"/>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="MacroLoadButton">
+                  <property name="text">
+                   <string>Load</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="MacroSaveButton">
+                  <property name="text">
+                   <string>Save</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="GenerateButtonLayout">
+         <item>
+          <widget class="QPushButton" name="GenerateButton">
+           <property name="text">
+            <string>Generate</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="GenerateAutoUpdateButton">
+           <property name="text">
+            <string>Auto Update</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="GenerateUseSelectionCheckBox">
+           <property name="text">
+            <string>Use selection</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="GenerateSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="GenerateShuffleButton">
+           <property name="text">
+            <string>Shuffle</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="ClusterTab">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>5</verstretch>
+       </sizepolicy>
+      </property>
+      <attribute name="title">
+       <string>Cluster</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="ClusterLayout">
+       <item>
+        <widget class="QGroupBox" name="MethodGroupBox">
+         <property name="title">
+          <string>Method</string>
+         </property>
+         <layout class="QVBoxLayout" name="MethodLayout">
+          <item>
+           <layout class="QHBoxLayout" name="MethodTypeLayout">
+            <item>
+             <widget class="QLabel" name="MethodLabel">
+              <property name="text">
+               <string>Method</string>
+              </property>
+              <property name="buddy">
+               <cstring>MethodKMeansButton</cstring>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="MethodKMeansButton">
+              <property name="text">
+               <string>K-Means</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">ClusterMethodButtonGroup</string>
+              </attribute>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="MethodEMButton">
+              <property name="text">
+               <string>EM</string>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">ClusterMethodButtonGroup</string>
+              </attribute>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="MethodDBSCANButton">
+              <property name="text">
+               <string>DBSCAN</string>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">ClusterMethodButtonGroup</string>
+              </attribute>
+             </widget>
+            </item>
+            <item>
+             <spacer name="MethodTypeSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>10</width>
+                <height>10</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="SettingsGroupBox">
+            <property name="title">
+             <string>Settings</string>
+            </property>
+            <layout class="QGridLayout" name="SettingsLayout">
+             <item row="0" column="0">
+              <widget class="QLabel" name="SettingsCusterNumberLabel">
+               <property name="text">
+                <string>Custer number</string>
+               </property>
+               <property name="buddy">
+                <cstring>SettingsCusterNumberSpinBox</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QSpinBox" name="SettingsCusterNumberSpinBox">
+               <property name="minimum">
+                <number>2</number>
+               </property>
+               <property name="maximum">
+                <number>10</number>
+               </property>
+               <property name="value">
+                <number>5</number>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QSlider" name="SettingsToleranceSlider">
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>90</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QSlider" name="SettingsNeighborhoodSlider">
+               <property name="minimum">
+                <number>5</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="singleStep">
+                <number>1</number>
+               </property>
+               <property name="pageStep">
+                <number>1</number>
+               </property>
+               <property name="value">
+                <number>25</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="SettingsMinimumSizeLabel">
+               <property name="text">
+                <string>Minimum size</string>
+               </property>
+               <property name="buddy">
+                <cstring>SettingsMinimumSizeSpinBox</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="SettingsNeighborhoodLabel">
+               <property name="text">
+                <string>Neighborhood</string>
+               </property>
+               <property name="buddy">
+                <cstring>SettingsNeighborhoodSpinBox</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QSlider" name="SettingsCusterNumberSlider">
+               <property name="minimum">
+                <number>2</number>
+               </property>
+               <property name="maximum">
+                <number>10</number>
+               </property>
+               <property name="value">
+                <number>5</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="SettingsToleranceLabel">
+               <property name="text">
+                <string>Tolerance</string>
+               </property>
+               <property name="buddy">
+                <cstring>SettingsToleranceSpinBox</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QSlider" name="SettingsMinimumSizeSlider">
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>62</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="SettingsMaxIterationsLabel">
+               <property name="text">
+                <string>Max iterations</string>
+               </property>
+               <property name="buddy">
+                <cstring>SettingsMaxIterationsSpinBox</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="1">
+              <widget class="QSlider" name="SettingsMaxIterationsSlider">
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>1000</number>
+               </property>
+               <property name="value">
+                <number>200</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2">
+              <widget class="QDoubleSpinBox" name="SettingsToleranceSpinBox">
+               <property name="minimum">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>1.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.900000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="2">
+              <widget class="QSpinBox" name="SettingsMaxIterationsSpinBox">
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>1000</number>
+               </property>
+               <property name="value">
+                <number>200</number>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="2">
+              <widget class="QDoubleSpinBox" name="SettingsNeighborhoodSpinBox">
+               <property name="decimals">
+                <number>1</number>
+               </property>
+               <property name="minimum">
+                <double>0.500000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>10.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="value">
+                <double>2.500000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="2">
+              <widget class="QSpinBox" name="SettingsMinimumSizeSpinBox">
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>62</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="ClusterNoteLabel">
+         <property name="text">
+          <string>First make a selection with the paint brush then compute clustering.</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="ClusterButtonLayout">
+         <item>
+          <widget class="QPushButton" name="ClusterButton">
+           <property name="text">
+            <string>Cluster</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="ClusterSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="ClusterShuffleButton">
+           <property name="text">
+            <string>Shuffle</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>10</width>
+           <height>10</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="AnalysisTab">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>5</verstretch>
+       </sizepolicy>
+      </property>
+      <attribute name="title">
+       <string>Analysis</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="AnalysisLayout">
+       <item>
+        <widget class="QScrollArea" name="AnalysisScrollArea">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>5</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="QWidget" name="AnalysisScrollAreaWidget">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>445</width>
+            <height>817</height>
+           </rect>
+          </property>
+          <layout class="QVBoxLayout" name="AnalysisScrollAreaLayout">
+           <item>
+            <widget class="QGroupBox" name="SelectionGroupBox">
+             <property name="title">
+              <string>Selection tools</string>
+             </property>
+             <layout class="QVBoxLayout" name="SelectionLayout">
+              <item>
+               <layout class="QHBoxLayout" name="SelectionIDLayout">
+                <item>
+                 <widget class="QLabel" name="SelectionIDLabel">
+                  <property name="text">
+                   <string>ID</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>SelectionIDTextEdit</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="SelectionIDTextEdit">
+                  <property name="clearButtonEnabled">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="SelectionIDMinimumCheckBox">
+                  <property name="text">
+                   <string>Minimum</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="SelectionIDMinimumSpinBox">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximum">
+                   <number>99999</number>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="SelectionIDMaximumCheckBox">
+                  <property name="text">
+                   <string>Maximum</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="SelectionIDMaximumSpinBox">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximum">
+                   <number>99999</number>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="SelectionIDSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>10</width>
+                    <height>10</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QGridLayout" name="SelectionGridLayout">
+                <item row="0" column="0">
+                 <widget class="QPushButton" name="SelectionAppendButton">
+                  <property name="text">
+                   <string>Append</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QPushButton" name="SelectionClearButton">
+                  <property name="text">
+                   <string>Clear</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="2">
+                 <widget class="QPushButton" name="SelectionAllVoxelsButton">
+                  <property name="text">
+                   <string>All Voxels</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QPushButton" name="SelectionFullfilButton">
+                  <property name="text">
+                   <string>Fullfill</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QPushButton" name="SelectionExclusiveButton">
+                  <property name="text">
+                   <string>Exclusive</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="3">
+                 <spacer name="SelectionGridSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>10</width>
+                    <height>10</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="ModifyIDsGroupBox">
+             <property name="title">
+              <string>Modify IDs</string>
+             </property>
+             <layout class="QVBoxLayout" name="ModifyIDsLayout">
+              <item>
+               <layout class="QHBoxLayout" name="ModifyIDLayout">
+                <item>
+                 <widget class="QLabel" name="ModifyIDLabel">
+                  <property name="text">
+                   <string>ID</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>ModifyIDTextEdit</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="ModifyIDTextEdit">
+                  <property name="clearButtonEnabled">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="ModifyIDSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>10</width>
+                    <height>10</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QGridLayout" name="ModiftGridLayout">
+                <item row="0" column="0">
+                 <widget class="QPushButton" name="ModifyAssignButton">
+                  <property name="text">
+                   <string>Assign</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="2">
+                 <widget class="QPushButton" name="ModifyReplaceButton">
+                  <property name="text">
+                   <string>Replace</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QPushButton" name="ModifyAddButton">
+                  <property name="text">
+                   <string>Add</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QPushButton" name="ModifyCleanSelectionButton">
+                  <property name="text">
+                   <string>Clean Selection</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QPushButton" name="ModifyCombineButton">
+                  <property name="text">
+                   <string>Combine</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="3">
+                 <spacer name="ModifyButtonSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>10</width>
+                    <height>10</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="ModifyOptionsGroupBox">
+                <property name="title">
+                 <string>Options</string>
+                </property>
+                <layout class="QVBoxLayout" name="ModifyOptionslayout">
+                 <item>
+                  <layout class="QHBoxLayout" name="ModifyOptionsContactSizeLayout">
+                   <item>
+                    <widget class="QLabel" name="ModifyOptionsContactSizeLabel">
+                     <property name="text">
+                      <string>Contact size</string>
+                     </property>
+                     <property name="buddy">
+                      <cstring>ModifyOptionsContactSizeSpinBox</cstring>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QSlider" name="ModifyOptionsContactSizeSlider">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QSpinBox" name="ModifyOptionsContactSizeSpinBox"/>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="ModifyOptionsConsistentColorCheckBox">
+                   <property name="text">
+                    <string>Make color consistent for multiple bricks</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="ModifyOptionsComputeColocalizationCheckBox">
+                   <property name="text">
+                    <string>Compute colocalization with other channels</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="ChannelGroupBox">
+             <property name="title">
+              <string>Output as New Channels</string>
+             </property>
+             <layout class="QVBoxLayout" name="ChannelLayout">
+              <item>
+               <layout class="QHBoxLayout" name="ChannelTypeLayout">
+                <item>
+                 <widget class="QLabel" name="ChannelTypeLabel">
+                  <property name="text">
+                   <string>Channel type:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="ChannelTypeEachComponentButton">
+                  <property name="text">
+                   <string>Each component</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                  <attribute name="buttonGroup">
+                   <string notr="true">ChannelTypeButtonGroup</string>
+                  </attribute>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="ChannelTypeRGBButton">
+                  <property name="text">
+                   <string>R+G+B</string>
+                  </property>
+                  <attribute name="buttonGroup">
+                   <string notr="true">ChannelTypeButtonGroup</string>
+                  </attribute>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="ChannelTypeSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>10</width>
+                    <height>10</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QGridLayout" name="ChannelOutputLayout">
+                <item row="1" column="1">
+                 <widget class="QPushButton" name="ChannelOutputIDButton">
+                  <property name="text">
+                   <string>IDs</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="2">
+                 <widget class="QPushButton" name="ChannelOutputSizeBasedButton">
+                  <property name="text">
+                   <string>Size Based</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="ChannelOutputLabel">
+                  <property name="text">
+                   <string>Output</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="2">
+                 <widget class="QPushButton" name="ChannelOutputSerialNumberButton">
+                  <property name="text">
+                   <string>Serial Number</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QPushButton" name="ChannelOutputRandonColorsButton">
+                  <property name="text">
+                   <string>Randon Colors</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="3">
+                 <spacer name="ChannelOutputSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>10</width>
+                    <height>10</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="DistancesGroupBox">
+             <property name="title">
+              <string>Distances</string>
+             </property>
+             <layout class="QVBoxLayout" name="DistancesLayout">
+              <item>
+               <layout class="QHBoxLayout" name="DistanceFilterLayout">
+                <item>
+                 <widget class="QCheckBox" name="DistancesFilterNearestNeighborsCheckBox">
+                  <property name="text">
+                   <string>Filter nearest neighbors</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSlider" name="DistancesFilterNearestNeighborsSlider">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="DistancesFilterNearestNeighborsSpinBox">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="DistanceComputeLayout">
+                <item>
+                 <widget class="QPushButton" name="DistancesComputeButton">
+                  <property name="text">
+                   <string>Compute</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="DistanceComputeSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>10</width>
+                    <height>10</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="DistancesAllChannelResultsCheckBox">
+                  <property name="text">
+                   <string>All channel results</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="AlignGroupBox">
+             <property name="title">
+              <string>Align Render View to Analyzed Components</string>
+             </property>
+             <layout class="QHBoxLayout" name="AlignLayout">
+              <item>
+               <layout class="QGridLayout" name="TriAxisLayout">
+                <item row="0" column="5">
+                 <widget class="QPushButton" name="ZXYButton">
+                  <property name="text">
+                   <string>Z X Y</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="3">
+                 <widget class="QPushButton" name="YZXButton">
+                  <property name="text">
+                   <string>Y Z X</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="TriAxisLabel">
+                  <property name="text">
+                   <string>Tri axis</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>XYZButton</cstring>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="5">
+                 <widget class="QPushButton" name="ZYXButton">
+                  <property name="text">
+                   <string>Z Y X</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="3">
+                 <widget class="QPushButton" name="YXZButton">
+                  <property name="text">
+                   <string>Y X Z</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QPushButton" name="XZYButton">
+                  <property name="text">
+                   <string>X Z Y</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QPushButton" name="XYZButton">
+                  <property name="text">
+                   <string>X Y Z</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="MoveToCenterCheckBox">
+                <property name="text">
+                 <string>Move to center</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="AnalyzeLayout">
+         <item>
+          <widget class="QPushButton" name="AnalyzeButton">
+           <property name="text">
+            <string>Analyze</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="AnalyzeSelectionButton">
+           <property name="text">
+            <string>Analyze Selection</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="AnalyzeSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="AnalysisShuffleButton">
+           <property name="text">
+            <string>Shuffle</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="OutputGroupBox">
+     <property name="title">
+      <string>Output</string>
+     </property>
+     <layout class="QVBoxLayout" name="OutputLayout">
+      <item>
+       <layout class="QHBoxLayout" name="OutputButtonLayout">
+        <item>
+         <widget class="QPushButton" name="IncludeButton">
+          <property name="toolTip">
+           <string>instantly show the result when a parameter or selection changes</string>
+          </property>
+          <property name="text">
+           <string>Include</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ExcludeButton">
+          <property name="toolTip">
+           <string>instantly show the result when a parameter or selection changes</string>
+          </property>
+          <property name="text">
+           <string>Exclude</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="OutputSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>10</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="HoldHistoryCheckBox">
+          <property name="text">
+           <string>Hold History</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ClearHistoryButton">
+          <property name="text">
+           <string>Clear History</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTableWidget" name="AnalysisTableWidget">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <row>
+         <property name="text">
+          <string>Analysis</string>
+         </property>
+        </row>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>GenerateScrollArea</tabstop>
+  <tabstop>IterationsSlider</tabstop>
+  <tabstop>IterationsSpinBox</tabstop>
+  <tabstop>ThresholdSlider</tabstop>
+  <tabstop>ThresholdSpinBox</tabstop>
+  <tabstop>DifusionGroupBox</tabstop>
+  <tabstop>DifusionSmoothnessSlider</tabstop>
+  <tabstop>DifusionSmoothnessSpinBox</tabstop>
+  <tabstop>DensityFieldGroupBox</tabstop>
+  <tabstop>DensityFieldSeparationSlider</tabstop>
+  <tabstop>DensityFieldSeparationSpinBox</tabstop>
+  <tabstop>DensityFieldNoiseLevelSlider</tabstop>
+  <tabstop>DensityFieldNoiseLevelSpinBox</tabstop>
+  <tabstop>DensityFieldFilterSizeSlider</tabstop>
+  <tabstop>DensityFieldFilterSizeSpinBox</tabstop>
+  <tabstop>DensityFieldFeatureSizeSlider</tabstop>
+  <tabstop>DensityFieldFeatureSizeSpinBox</tabstop>
+  <tabstop>DistanceFieldGroupBox</tabstop>
+  <tabstop>DistanceFieldStrengthSlider</tabstop>
+  <tabstop>DistanceFieldStrengthSpinBox</tabstop>
+  <tabstop>DistanceFieldPerimeterSlider</tabstop>
+  <tabstop>DistanceFieldPerimeterSpinBox</tabstop>
+  <tabstop>DistanceFieldFilterSizeSlider</tabstop>
+  <tabstop>DistanceFieldFilterSizeSpinBox</tabstop>
+  <tabstop>DistanceFieldFeatureSizeSlider</tabstop>
+  <tabstop>DistanceFieldFeatureSizeSpinBox</tabstop>
+  <tabstop>FixateGrowthGroupBox</tabstop>
+  <tabstop>FixateGrowthStopSizeSlider</tabstop>
+  <tabstop>FixateGrowthStopSizeSpinBox</tabstop>
+  <tabstop>FixateGrowthRefixButton</tabstop>
+  <tabstop>PostCleanupGroupBox</tabstop>
+  <tabstop>PostCleanupIterationsSlider</tabstop>
+  <tabstop>PostCleanupIterationsSpinBox</tabstop>
+  <tabstop>PostCleanupStopSizeSlider</tabstop>
+  <tabstop>PostCleanupStopSizeSpinBox</tabstop>
+  <tabstop>PostCleanupCleanMoreButton</tabstop>
+  <tabstop>MacroRecordTextEdit</tabstop>
+  <tabstop>MacroRecordButton</tabstop>
+  <tabstop>MacroPlayButton</tabstop>
+  <tabstop>MacroResetButton</tabstop>
+  <tabstop>MacroSaveFileTextEdit</tabstop>
+  <tabstop>MacroLoadButton</tabstop>
+  <tabstop>MacroSaveButton</tabstop>
+  <tabstop>GenerateButton</tabstop>
+  <tabstop>GenerateAutoUpdateButton</tabstop>
+  <tabstop>GenerateUseSelectionCheckBox</tabstop>
+  <tabstop>GenerateShuffleButton</tabstop>
+  <tabstop>MethodKMeansButton</tabstop>
+  <tabstop>MethodEMButton</tabstop>
+  <tabstop>MethodDBSCANButton</tabstop>
+  <tabstop>SettingsCusterNumberSlider</tabstop>
+  <tabstop>SettingsCusterNumberSpinBox</tabstop>
+  <tabstop>SettingsToleranceSlider</tabstop>
+  <tabstop>SettingsToleranceSpinBox</tabstop>
+  <tabstop>SettingsMinimumSizeSlider</tabstop>
+  <tabstop>SettingsMinimumSizeSpinBox</tabstop>
+  <tabstop>SettingsNeighborhoodSlider</tabstop>
+  <tabstop>SettingsNeighborhoodSpinBox</tabstop>
+  <tabstop>SettingsMaxIterationsSlider</tabstop>
+  <tabstop>SettingsMaxIterationsSpinBox</tabstop>
+  <tabstop>ClusterButton</tabstop>
+  <tabstop>ClusterShuffleButton</tabstop>
+  <tabstop>AnalysisScrollArea</tabstop>
+  <tabstop>ModifyIDTextEdit</tabstop>
+  <tabstop>ModifyAssignButton</tabstop>
+  <tabstop>ModifyAddButton</tabstop>
+  <tabstop>ModifyReplaceButton</tabstop>
+  <tabstop>ModifyCleanSelectionButton</tabstop>
+  <tabstop>ModifyCombineButton</tabstop>
+  <tabstop>ModifyOptionsContactSizeSlider</tabstop>
+  <tabstop>ModifyOptionsContactSizeSpinBox</tabstop>
+  <tabstop>ModifyOptionsConsistentColorCheckBox</tabstop>
+  <tabstop>ModifyOptionsComputeColocalizationCheckBox</tabstop>
+  <tabstop>ChannelTypeEachComponentButton</tabstop>
+  <tabstop>ChannelTypeRGBButton</tabstop>
+  <tabstop>ChannelOutputRandonColorsButton</tabstop>
+  <tabstop>ChannelOutputSizeBasedButton</tabstop>
+  <tabstop>ChannelOutputIDButton</tabstop>
+  <tabstop>ChannelOutputSerialNumberButton</tabstop>
+  <tabstop>DistancesFilterNearestNeighborsCheckBox</tabstop>
+  <tabstop>DistancesFilterNearestNeighborsSlider</tabstop>
+  <tabstop>DistancesFilterNearestNeighborsSpinBox</tabstop>
+  <tabstop>DistancesComputeButton</tabstop>
+  <tabstop>DistancesAllChannelResultsCheckBox</tabstop>
+  <tabstop>XYZButton</tabstop>
+  <tabstop>YXZButton</tabstop>
+  <tabstop>ZXYButton</tabstop>
+  <tabstop>XZYButton</tabstop>
+  <tabstop>YZXButton</tabstop>
+  <tabstop>ZYXButton</tabstop>
+  <tabstop>MoveToCenterCheckBox</tabstop>
+  <tabstop>AnalyzeButton</tabstop>
+  <tabstop>AnalyzeSelectionButton</tabstop>
+  <tabstop>AnalysisShuffleButton</tabstop>
+  <tabstop>IncludeButton</tabstop>
+  <tabstop>ExcludeButton</tabstop>
+  <tabstop>HoldHistoryCheckBox</tabstop>
+  <tabstop>ClearHistoryButton</tabstop>
+  <tabstop>AnalysisTableWidget</tabstop>
+  <tabstop>SelectionIDMaximumSpinBox</tabstop>
+  <tabstop>SelectionIDMinimumCheckBox</tabstop>
+  <tabstop>SelectionIDTextEdit</tabstop>
+  <tabstop>SelectionIDMinimumSpinBox</tabstop>
+  <tabstop>SelectionIDMaximumCheckBox</tabstop>
+  <tabstop>SelectionClearButton</tabstop>
+  <tabstop>SelectionAppendButton</tabstop>
+  <tabstop>SelectionExclusiveButton</tabstop>
+  <tabstop>SelectionAllVoxelsButton</tabstop>
+  <tabstop>SelectionFullfilButton</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>MethodKMeansButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>MethodKMeansButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>85</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>78</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MethodEMButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>MethodEMButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>227</x>
+     <y>85</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>7</x>
+     <y>110</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MethodDBSCANButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>MethodDBSCANButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>315</x>
+     <y>85</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>144</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SettingsCusterNumberSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SettingsCusterNumberSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>253</x>
+     <y>145</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>7</x>
+     <y>188</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SettingsToleranceSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SettingsToleranceSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>253</x>
+     <y>182</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>224</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SettingsMinimumSizeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SettingsMinimumSizeSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>253</x>
+     <y>219</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>249</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SettingsNeighborhoodSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SettingsNeighborhoodSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>253</x>
+     <y>256</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>281</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SettingsMaxIterationsSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SettingsMaxIterationsSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>253</x>
+     <y>293</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>312</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SettingsCusterNumberSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SettingsCusterNumberValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>593</x>
+     <y>143</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>473</x>
+     <y>129</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SettingsToleranceSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SettingsToleranceValueChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>593</x>
+     <y>180</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>473</x>
+     <y>169</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SettingsNeighborhoodSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SettingsNeighborhoodValueChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>593</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>473</x>
+     <y>247</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SettingsMaxIterationsSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SettingsMaxIterationsValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>593</x>
+     <y>291</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>473</x>
+     <y>286</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SettingsMinimumSizeSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SettingsMinimumSizeValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>593</x>
+     <y>217</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>473</x>
+     <y>208</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ClusterButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ClusterButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>70</x>
+     <y>393</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>370</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ClusterShuffleButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ShuffleButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>622</x>
+     <y>393</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>473</x>
+     <y>386</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>IncludeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>IncludeButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>43</x>
+     <y>810</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>487</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GenerateShuffleButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ShuffleButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>622</x>
+     <y>742</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>473</x>
+     <y>411</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ExcludeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ExcludeButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>159</x>
+     <y>811</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>2</x>
+     <y>527</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ClearHistoryButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ClearHistoryButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>622</x>
+     <y>825</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>473</x>
+     <y>488</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>HoldHistoryCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>HoldHistoryToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>509</x>
+     <y>817</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>473</x>
+     <y>530</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>IterationsSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>IterationsSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>234</x>
+     <y>117</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>70</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ThresholdSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ThresholdSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>234</x>
+     <y>157</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>8</x>
+     <y>137</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DifusionGroupBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DifusionToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>154</x>
+     <y>213</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1</x>
+     <y>178</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DifusionSmoothnessSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DifusionSmoothnessSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>249</x>
+     <y>241</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>217</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DensityFieldGroupBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DensityFieldToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>202</x>
+     <y>358</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>43</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DensityFieldSeparationSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DensityFieldSeparationSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>247</x>
+     <y>322</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>351</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DensityFieldNoiseLevelSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DensityFieldNoiseLevelSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>247</x>
+     <y>359</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>345</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DensityFieldFilterSizeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DensityFieldFilterSizeSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>247</x>
+     <y>396</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>8</x>
+     <y>214</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DensityFieldFeatureSizeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DensityFieldFeatureSizeSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>247</x>
+     <y>433</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>170</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DistanceFieldGroupBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DistanceFieldToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>202</x>
+     <y>550</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>397</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DistanceFieldStrengthSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DistanceFieldStrengthSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>247</x>
+     <y>514</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>425</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DistanceFieldPerimeterSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DistanceFieldPerimeterSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>247</x>
+     <y>551</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>8</x>
+     <y>277</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DistanceFieldFilterSizeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DistanceFieldFilterSizeSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>247</x>
+     <y>588</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>10</x>
+     <y>56</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DistanceFieldFeatureSizeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DistanceFieldFeatureSizeSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>247</x>
+     <y>625</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>461</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>FixateGrowthGroupBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>FixateGrowthToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>202</x>
+     <y>742</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>567</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>FixateGrowthStopSizeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>FixateGrowthStopSizeSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>230</x>
+     <y>707</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>601</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>FixateGrowthRefixButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>FixateGrowthRefixButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>130</x>
+     <y>748</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1</x>
+     <y>634</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>PostCleanupGroupBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>PostCleanupToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>175</x>
+     <y>853</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>3</x>
+     <y>668</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>PostCleanupIterationsSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>PostCleanupIterationsSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>216</x>
+     <y>847</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>702</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>PostCleanupStopSizeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>PostCleanupStopSizeSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>216</x>
+     <y>884</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>7</x>
+     <y>740</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>PostCleanupCleanMoreButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>PostCleanupCleanMoreButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>153</x>
+     <y>925</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>355</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MacroRecordTextEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>MacroRecordTextEditFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>218</x>
+     <y>1001</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>3</x>
+     <y>771</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MacroSaveFileTextEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>MacroSaveFileTextEditFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>214</x>
+     <y>1044</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>805</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MacroRecordButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>MacroRecordButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>430</x>
+     <y>1006</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>467</x>
+     <y>675</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MacroPlayButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>MacroPlayButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>500</x>
+     <y>1006</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>470</x>
+     <y>623</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MacroResetButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>MacroResetButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>579</x>
+     <y>1006</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>470</x>
+     <y>596</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MacroLoadButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>MacroLoadButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>505</x>
+     <y>1049</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>712</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MacroSaveButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>MacroSaveButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>579</x>
+     <y>1049</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>758</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GenerateButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>GenerateButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>66</x>
+     <y>742</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>841</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GenerateAutoUpdateButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>GenerateAutoUpdateButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>226</x>
+     <y>742</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>883</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GenerateShuffleButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ShuffleButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>622</x>
+     <y>742</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>796</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GenerateUseSelectionCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>GenerateUseSelectionToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>736</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>840</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>IterationsSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>IterationsValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>565</x>
+     <y>121</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>466</x>
+     <y>34</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ThresholdSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ThresholdValueChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>565</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>87</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DifusionSmoothnessSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DifusionSmoothnessValueChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>565</x>
+     <y>239</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>468</x>
+     <y>159</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DensityFieldSeparationSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DensityFieldSeparationValueChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>565</x>
+     <y>320</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>466</x>
+     <y>282</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DensityFieldNoiseLevelSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DensityFieldNoiseLevelValueChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>565</x>
+     <y>357</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>467</x>
+     <y>329</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DensityFieldFilterSizeSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DensityFieldFilterSizeValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>565</x>
+     <y>394</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>470</x>
+     <y>374</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DensityFieldFeatureSizeSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DensityFieldFeatureSizeValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>565</x>
+     <y>431</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>472</x>
+     <y>447</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DistanceFieldStrengthSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DistanceFieldStrengthValueChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>565</x>
+     <y>512</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>466</x>
+     <y>569</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DistanceFieldPerimeterSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DistanceFieldPerimeterValueChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>565</x>
+     <y>549</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>316</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DistanceFieldFilterSizeSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DistanceFieldFilterSizeValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>565</x>
+     <y>586</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>467</x>
+     <y>239</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DistanceFieldFeatureSizeSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DistanceFieldFeatureSizeValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>565</x>
+     <y>623</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>468</x>
+     <y>654</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>FixateGrowthStopSizeSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>FixateGrowthStopSizeValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>564</x>
+     <y>705</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>876</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>PostCleanupIterationsSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>PostCleanupIterationsValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>579</x>
+     <y>845</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>466</x>
+     <y>380</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>PostCleanupStopSizeSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>PostCleanupStopSizeValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>579</x>
+     <y>882</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>470</x>
+     <y>912</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionIDTextEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SelectionIDTextEditFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>133</x>
+     <y>-56</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>16</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionIDMinimumCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SelectionIDMinimumToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>291</x>
+     <y>-56</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>83</x>
+     <y>-2</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionIDMinimumSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SelectionIDMinimumValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>352</x>
+     <y>-56</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>124</x>
+     <y>3</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionIDMaximumCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SelectionIDMaximumToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>445</x>
+     <y>-56</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>440</x>
+     <y>2</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionIDMaximumSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SelectionIDMaximumValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>506</x>
+     <y>-56</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>644</x>
+     <y>29</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionAppendButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SelectionAppendButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>84</x>
+     <y>-10</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>150</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionExclusiveButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SelectionExclusiveButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>232</x>
+     <y>-10</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>34</x>
+     <y>196</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionAllVoxelsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SelectionAllVoxelsButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>333</x>
+     <y>-10</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>18</x>
+     <y>234</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionFullfilButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SelectionFullfilButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>132</x>
+     <y>24</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>32</x>
+     <y>260</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectionClearButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>SelectionClearButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>232</x>
+     <y>24</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>18</x>
+     <y>300</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifyIDTextEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ModifyIDTextEditFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>124</x>
+     <y>95</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>39</x>
+     <y>322</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifyAssignButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ModifyAssignButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>86</x>
+     <y>118</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>29</x>
+     <y>119</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifyAddButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ModifyAddButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>223</x>
+     <y>120</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>46</x>
+     <y>97</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifyReplaceButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ModifyReplaceButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>312</x>
+     <y>120</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>623</x>
+     <y>137</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifyCleanSelectionButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ModifyCleanSelectionButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>157</x>
+     <y>152</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>632</x>
+     <y>185</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifyCombineButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ModifyCombineButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>261</x>
+     <y>155</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>629</x>
+     <y>227</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifyOptionsContactSizeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ModifyOptionsContactSizeSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>194</x>
+     <y>217</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>18</x>
+     <y>365</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifyOptionsContactSizeSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ModifyOptionsContactSizeValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>544</x>
+     <y>218</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>633</x>
+     <y>287</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifyOptionsConsistentColorCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ModifyOptionsConsistentColorToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>325</x>
+     <y>249</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>633</x>
+     <y>331</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ModifyOptionsComputeColocalizationCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ModifyOptionsComputeColocalizationToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>337</x>
+     <y>274</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>642</x>
+     <y>365</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ChannelTypeEachComponentButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ChannelTypeEachComponentButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>176</x>
+     <y>351</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>38</x>
+     <y>391</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ChannelTypeRGBButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ChannelTypeRGBButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>308</x>
+     <y>352</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>633</x>
+     <y>407</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ChannelOutputRandonColorsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ChannelOutputRandonColorsButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>129</x>
+     <y>387</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>29</x>
+     <y>439</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ChannelOutputSizeBasedButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ChannelOutputSizeBasedButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>268</x>
+     <y>387</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>41</x>
+     <y>471</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ChannelOutputIDButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ChannelOutputIDButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>161</x>
+     <y>415</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>25</x>
+     <y>508</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ChannelOutputSerialNumberButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ChannelOutputSerialNumberButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>338</x>
+     <y>415</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>635</x>
+     <y>446</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DistancesFilterNearestNeighborsCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DistancesFilterNearestNeighborsToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>92</x>
+     <y>514</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>202</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DistancesFilterNearestNeighborsSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DistancesFilterNearestNeighborsSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>254</x>
+     <y>509</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>32</x>
+     <y>236</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DistancesFilterNearestNeighborsSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DistancesFilterNearestNeighborsValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>543</x>
+     <y>508</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>632</x>
+     <y>236</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DistancesComputeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DistancesComputeButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>64</x>
+     <y>550</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>30</x>
+     <y>329</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DistancesAllChannelResultsCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>DistancesAllChannelResultsToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>572</x>
+     <y>553</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>635</x>
+     <y>189</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>XYZButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>XYZButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>143</x>
+     <y>624</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>17</x>
+     <y>578</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>XZYButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>XZYButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>658</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>19</x>
+     <y>619</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>YXZButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>YXZButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>223</x>
+     <y>622</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>14</x>
+     <y>661</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>YZXButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>YZXButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>231</x>
+     <y>662</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>17</x>
+     <y>711</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZXYButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ZXYButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>306</x>
+     <y>626</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>636</x>
+     <y>576</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZYXButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ZYXButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>318</x>
+     <y>660</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>638</x>
+     <y>618</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MoveToCenterCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>MoveToCenterToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>426</x>
+     <y>642</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>513</x>
+     <y>709</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AnalyzeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>AnalyzeButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>68</x>
+     <y>731</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>7</x>
+     <y>766</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AnalyzeSelectionButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>AnalyzeSelectionButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>220</x>
+     <y>731</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>647</x>
+     <y>766</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AnalysisShuffleButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ShuffleButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>601</x>
+     <y>728</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>646</x>
+     <y>817</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ClusterMethodButtonGroup</sender>
+   <signal>idClicked(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ClusterMethodButtonClicked(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>276</x>
+     <y>323</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ChannelTypeButtonGroup</sender>
+   <signal>idClicked(int)</signal>
+   <receiver>QvisComponentAnalyzerDialog</receiver>
+   <slot>ChannelTypeButtonClicked(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>276</x>
+     <y>323</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>ShuffleButtonClicked()</slot>
+  <slot>IncludeButtonClicked()</slot>
+  <slot>ExcludeButtonClicked()</slot>
+  <slot>ClearHistoryButtonClicked()</slot>
+  <slot>HoldHistoryToggled(bool)</slot>
+  <slot>IterationsSliderChanged(int)</slot>
+  <slot>IterationsValueChanged(int)</slot>
+  <slot>ThresholdSliderChanged(int)</slot>
+  <slot>ThresholdValueChanged(double)</slot>
+  <slot>DifusionToggled(bool)</slot>
+  <slot>DifusionSmoothnessSliderChanged(int)</slot>
+  <slot>DifusionSmoothnessValueChanged(double)</slot>
+  <slot>DensityFieldToggled(bool)</slot>
+  <slot>DensityFieldSeparationSliderChanged(int)</slot>
+  <slot>DensityFieldSeparationValueChanged(double)</slot>
+  <slot>DensityFieldNoiseLevelSliderChanged(int)</slot>
+  <slot>DensityFieldNoiseLevelValueChanged(double)</slot>
+  <slot>DensityFieldFilterSizeSliderChanged(int)</slot>
+  <slot>DensityFieldFilterSizeValueChanged(int)</slot>
+  <slot>DensityFieldFeatureSizeSliderChanged(int)</slot>
+  <slot>DensityFieldFeatureSizeValueChanged(int)</slot>
+  <slot>DistanceFieldToggled(bool)</slot>
+  <slot>DistanceFieldStrengthSliderChanged(int)</slot>
+  <slot>DistanceFieldStrengthValueChanged(double)</slot>
+  <slot>DistanceFieldPerimeterSliderChanged(int)</slot>
+  <slot>DistanceFieldPerimeterValueChanged(double)</slot>
+  <slot>DistanceFieldFilterSizeSliderChanged(int)</slot>
+  <slot>DistanceFieldFilterSizeValueChanged(int)</slot>
+  <slot>DistanceFieldFeatureSizeSliderChanged(int)</slot>
+  <slot>DistanceFieldFeatureSizeValueChanged(int)</slot>
+  <slot>FixateGrowthToggled(bool)</slot>
+  <slot>FixateGrowthStopSizeSliderChanged(int)</slot>
+  <slot>FixateGrowthStopSizeValueChanged(int)</slot>
+  <slot>FixateGrowthRefixButtonClicked()</slot>
+  <slot>PostCleanupToggled(bool)</slot>
+  <slot>PostCleanupIterationsSliderChanged(int)</slot>
+  <slot>PostCleanupIterationsValueChanged(int)</slot>
+  <slot>PostCleanupStopSizeSliderChanged(int)</slot>
+  <slot>PostCleanupStopSizeValueChanged(int)</slot>
+  <slot>PostCleanupCleanMoreButtonClicked()</slot>
+  <slot>MacroRecordTextEditFinished()</slot>
+  <slot>MacroRecordButtonClicked()</slot>
+  <slot>MacroPlayButtonClicked()</slot>
+  <slot>MacroResetButtonClicked()</slot>
+  <slot>MacroSaveFileTextEditFinished()</slot>
+  <slot>MacroLoadButtonClicked()</slot>
+  <slot>MacroSaveButtonClicked()</slot>
+  <slot>GenerateButtonClicked()</slot>
+  <slot>GenerateAutoUpdateButtonClicked()</slot>
+  <slot>GenerateUseSelectionToggled(bool)</slot>
+  <slot>MethodKMeansButtonClicked()</slot>
+  <slot>MethodEMButtonClicked()</slot>
+  <slot>MethodDBSCANButtonClicked()</slot>
+  <slot>SettingsCusterNumberSliderChanged(int)</slot>
+  <slot>SettingsCusterNumberValueChanged(int)</slot>
+  <slot>SettingsToleranceSliderChanged(int)</slot>
+  <slot>SettingsToleranceValueChanged(double)</slot>
+  <slot>SettingsMinimumSizeSliderChanged(int)</slot>
+  <slot>SettingsMinimumSizeValueChanged(int)</slot>
+  <slot>SettingsNeighborhoodSliderChanged(int)</slot>
+  <slot>SettingsNeighborhoodValueChanged(double)</slot>
+  <slot>SettingsMaxIterationsSliderChanged(int)</slot>
+  <slot>SettingsMaxIterationsValueChanged(int)</slot>
+  <slot>ClusterButtonClicked()</slot>
+  <slot>SelectionIDTextEditFinished()</slot>
+  <slot>SelectionIDMinimumToggled(bool)</slot>
+  <slot>SelectionIDMinimumValueChanged(int)</slot>
+  <slot>SelectionIDMaximumToggled(bool)</slot>
+  <slot>SelectionIDMaximumValueChanged(int)</slot>
+  <slot>SelectionAppendButtonClicked()</slot>
+  <slot>SelectionExclusiveButtonClicked()</slot>
+  <slot>SelectionAllVoxelsButtonClicked()</slot>
+  <slot>SelectionFullfilButtonClicked()</slot>
+  <slot>SelectionClearButtonClicked()</slot>
+  <slot>ModifyIDTextEditFinished()</slot>
+  <slot>ModifyAssignButtonClicked()</slot>
+  <slot>ModifyAddButtonClicked()</slot>
+  <slot>ModifyReplaceButtonClicked()</slot>
+  <slot>ModifyCleanSelectionButtonClicked()</slot>
+  <slot>ModifyCombineButtonClicked()</slot>
+  <slot>ModifyOptionsContactSizeSliderChanged(int)</slot>
+  <slot>ModifyOptionsContactSizeValueChanged(int)</slot>
+  <slot>ModifyOptionsConsistentColorToggled(bool)</slot>
+  <slot>ModifyOptionsComputeColocalizationToggled(bool)</slot>
+  <slot>ChannelTypeEachComponentButtonClicked()</slot>
+  <slot>ChannelTypeRGBButtonClicked()</slot>
+  <slot>ChannelOutputRandonColorsButtonClicked()</slot>
+  <slot>ChannelOutputSizeBasedButtonClicked()</slot>
+  <slot>ChannelOutputIDButtonClicked()</slot>
+  <slot>ChannelOutputSerialNumberButtonClicked()</slot>
+  <slot>DistancesFilterNearestNeighborsToggled(bool)</slot>
+  <slot>DistancesFilterNearestNeighborsSliderChanged(int)</slot>
+  <slot>DistancesFilterNearestNeighborsValueChanged(int)</slot>
+  <slot>DistancesAllChannelResultsToggled(bool)</slot>
+  <slot>DistancesComputeButtonClicked()</slot>
+  <slot>XYZButtonClicked()</slot>
+  <slot>YXZButtonClicked()</slot>
+  <slot>ZXYButtonClicked()</slot>
+  <slot>XZYButtonClicked()</slot>
+  <slot>YZXButtonClicked()</slot>
+  <slot>ZYXButtonClicked()</slot>
+  <slot>MoveToCenterToggled(bool)</slot>
+  <slot>AnalyzeButtonClicked()</slot>
+  <slot>AnalyzeSelectionButtonClicked()</slot>
+  <slot>ClusterMethodButtonClicked(int)</slot>
+  <slot>ChannelTypeButtonClicked(int)</slot>
+ </slots>
+ <buttongroups>
+  <buttongroup name="ClusterMethodButtonGroup"/>
+  <buttongroup name="ChannelTypeButtonGroup"/>
+ </buttongroups>
+</ui>

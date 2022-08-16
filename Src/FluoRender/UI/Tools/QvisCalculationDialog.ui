@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisCalculationDialog</class>
+ <widget class="QDialog" name="QvisCalculationDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>409</width>
+    <height>270</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Caclulation</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <selectedon>:/Src/FluoRender/UI/icons/Tools/Calculation.png</selectedon>
+   </iconset>
+  </property>
+  <layout class="QVBoxLayout" name="MainLayout">
+   <item>
+    <layout class="QGridLayout" name="OperandLayout">
+     <item row="1" column="1">
+      <widget class="QComboBox" name="OperandBComboBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <item>
+        <property name="text">
+         <string>Current datasets</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="OperandBLlabel">
+       <property name="text">
+        <string>Operand B</string>
+       </property>
+       <property name="buddy">
+        <cstring>OperandBComboBox</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="OperandALabel">
+       <property name="text">
+        <string>Operand A</string>
+       </property>
+       <property name="buddy">
+        <cstring>OperandAComboBox</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="OperandAComboBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <item>
+        <property name="text">
+         <string>Current datasets</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="SingleValueGroupBox">
+     <property name="title">
+      <string>Single-value operations (Operand A only)</string>
+     </property>
+     <layout class="QHBoxLayout" name="SingleValueLayout">
+      <item>
+       <widget class="QPushButton" name="ConsolidateVoxelsButton">
+        <property name="text">
+         <string>Consolidate Voxels</string>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="CombineGroupButton">
+        <property name="text">
+         <string>Combine Group</string>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="SingleValueSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>57</width>
+          <height>13</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="TwoValueGroupBox">
+     <property name="title">
+      <string>Two-value operations(Operand A and B required)</string>
+     </property>
+     <layout class="QHBoxLayout" name="TwoValueLayout">
+      <item>
+       <widget class="QPushButton" name="AddButton">
+        <property name="text">
+         <string>Add</string>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="SubtractButton">
+        <property name="text">
+         <string>Subtract</string>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="DivideButton">
+        <property name="text">
+         <string>Divide</string>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="ColocalizeButton">
+        <property name="text">
+         <string>Colocalize</string>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="DoubleValueSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>13</width>
+          <height>13</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>10</width>
+       <height>10</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>OperandAComboBox</tabstop>
+  <tabstop>OperandBComboBox</tabstop>
+  <tabstop>ConsolidateVoxelsButton</tabstop>
+  <tabstop>CombineGroupButton</tabstop>
+  <tabstop>AddButton</tabstop>
+  <tabstop>SubtractButton</tabstop>
+  <tabstop>DivideButton</tabstop>
+  <tabstop>ColocalizeButton</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>ConsolidateVoxelsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisCalculationDialog</receiver>
+   <slot>ConsolidateVoxelsButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>106</x>
+     <y>164</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>166</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>CombineGroupButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisCalculationDialog</receiver>
+   <slot>CombineGroupButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>233</x>
+     <y>162</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>420</x>
+     <y>162</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AddButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisCalculationDialog</receiver>
+   <slot>AddButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>41</x>
+     <y>225</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>235</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SubtractButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisCalculationDialog</receiver>
+   <slot>SubtractButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>128</x>
+     <y>224</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>267</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DivideButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisCalculationDialog</receiver>
+   <slot>DivideButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>222</x>
+     <y>220</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>418</x>
+     <y>202</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ColocalizeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisCalculationDialog</receiver>
+   <slot>ColocalizeButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>307</x>
+     <y>225</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>420</x>
+     <y>239</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>OperandALoadButtonClicked()</slot>
+  <slot>OperandATextEditFinished()</slot>
+  <slot>OperandBLoadButtonClicked()</slot>
+  <slot>OperandBTextEditFinished()</slot>
+  <slot>ConsolidateVoxelsButtonClicked()</slot>
+  <slot>CombineGroupButtonClicked()</slot>
+  <slot>AddButtonClicked()</slot>
+  <slot>SubtractButtonClicked()</slot>
+  <slot>DivideButtonClicked()</slot>
+  <slot>ColocalizeButtonClicked()</slot>
+ </slots>
+</ui>

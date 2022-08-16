@@ -1,0 +1,523 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisColocalizationDialog</class>
+ <widget class="QDialog" name="QvisColocalizationDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>379</width>
+    <height>445</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Colocalization</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <selectedon>:/Src/FluoRender/UI/icons/Tools/Colocalization.png</selectedon>
+   </iconset>
+  </property>
+  <layout class="QVBoxLayout" name="MainLayout">
+   <item>
+    <widget class="QGroupBox" name="SettingsGroupBox">
+     <property name="title">
+      <string>Settings</string>
+     </property>
+     <layout class="QVBoxLayout" name="SettingsLayout">
+      <item>
+       <layout class="QGridLayout" name="SettingsGridLayout">
+        <item row="4" column="2">
+         <widget class="QCheckBox" name="PhysicalSizeCheckBox">
+          <property name="toolTip">
+           <string>voxel count or intensity weighted voxel count is scaled by the voxel size from metadata</string>
+          </property>
+          <property name="text">
+           <string>Physical size</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="OverlappingCalcLabel">
+          <property name="text">
+           <string>Overlapping calculation</string>
+          </property>
+          <property name="buddy">
+           <cstring>ThresholdLogicalANDRadioButton</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <spacer name="horizontalSpacer_1">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>10</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="3">
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>10</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="2" column="3">
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>10</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="4" column="3">
+         <spacer name="horizontalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>10</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="5" column="3">
+         <spacer name="horizontalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>10</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="0">
+         <widget class="QRadioButton" name="ThresholdLogicalANDRadioButton">
+          <property name="text">
+           <string>Threshold + Logical AND</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">OverlappingCalcButtonGroup</string>
+          </attribute>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="OutputFormatLabel">
+          <property name="text">
+           <string>Output format</string>
+          </property>
+          <property name="buddy">
+           <cstring>RatioCheckBox</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QRadioButton" name="MinimumValueRadioButton">
+          <property name="text">
+           <string>Minimum value</string>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">OverlappingCalcButtonGroup</string>
+          </attribute>
+         </widget>
+        </item>
+        <item row="5" column="2">
+         <widget class="QCheckBox" name="ColormapCheckBox">
+          <property name="toolTip">
+           <string>appliy colomap to the elements of the matrix</string>
+          </property>
+          <property name="text">
+           <string>Colormap</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QCheckBox" name="IntensityWeightedCheckBox">
+          <property name="toolTip">
+           <string>voxel count is weighted by the normalized intensity values</string>
+          </property>
+          <property name="text">
+           <string>Intensity weighted</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QRadioButton" name="ProductRadioButton">
+          <property name="text">
+           <string>Product</string>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">OverlappingCalcButtonGroup</string>
+          </attribute>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QCheckBox" name="RatioCheckBox">
+          <property name="toolTip">
+           <string>percentage of an overlapping (non-diagonals) versus the original channel (diagonals)</string>
+          </property>
+          <property name="text">
+           <string>Ratio (%)</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="SettingsMiscLayout">
+        <item>
+         <widget class="QCheckBox" name="SelectedStructuresOnlyCheckBox">
+          <property name="text">
+           <string>Selected structures only</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="MiscLayout">
+     <item>
+      <widget class="QPushButton" name="AnalyzeButton">
+       <property name="text">
+        <string>Analyze</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="AnalyzeSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>10</width>
+         <height>10</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="OutputGroupBox">
+     <property name="title">
+      <string>Output</string>
+     </property>
+     <layout class="QVBoxLayout" name="OutputLayout">
+      <item>
+       <layout class="QHBoxLayout" name="OutputHistoryLayout">
+        <item>
+         <widget class="QCheckBox" name="AutoUpdateCheckBox">
+          <property name="toolTip">
+           <string>instantly show the result when a parameter or selection changes</string>
+          </property>
+          <property name="text">
+           <string>Auto Update</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="OutputHistorySpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>10</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="HoldHistoryCheckBox">
+          <property name="text">
+           <string>Hold History</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ClearHistoryButton">
+          <property name="text">
+           <string>Clear History</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTableWidget" name="SelectionTableWidget">
+        <row>
+         <property name="text">
+          <string>Selection</string>
+         </property>
+        </row>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>ThresholdLogicalANDRadioButton</tabstop>
+  <tabstop>MinimumValueRadioButton</tabstop>
+  <tabstop>ProductRadioButton</tabstop>
+  <tabstop>RatioCheckBox</tabstop>
+  <tabstop>PhysicalSizeCheckBox</tabstop>
+  <tabstop>IntensityWeightedCheckBox</tabstop>
+  <tabstop>ColormapCheckBox</tabstop>
+  <tabstop>SelectedStructuresOnlyCheckBox</tabstop>
+  <tabstop>AnalyzeButton</tabstop>
+  <tabstop>AutoUpdateCheckBox</tabstop>
+  <tabstop>HoldHistoryCheckBox</tabstop>
+  <tabstop>ClearHistoryButton</tabstop>
+  <tabstop>SelectionTableWidget</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>ThresholdLogicalANDRadioButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisColocalizationDialog</receiver>
+   <slot>ThresholdLogicalANDButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>73</x>
+     <y>70</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>7</x>
+     <y>84</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MinimumValueRadioButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisColocalizationDialog</receiver>
+   <slot>MinimumValueButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>69</x>
+     <y>93</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>119</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ProductRadioButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisColocalizationDialog</receiver>
+   <slot>ProductButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>85</x>
+     <y>119</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>160</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>RatioCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisColocalizationDialog</receiver>
+   <slot>RatioToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>359</x>
+     <y>76</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>432</x>
+     <y>44</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>IntensityWeightedCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisColocalizationDialog</receiver>
+   <slot>IntensityWeightedToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>359</x>
+     <y>100</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>432</x>
+     <y>82</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>PhysicalSizeCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisColocalizationDialog</receiver>
+   <slot>PhysicalSizeToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>359</x>
+     <y>124</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>432</x>
+     <y>119</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ColormapCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisColocalizationDialog</receiver>
+   <slot>ColormapToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>359</x>
+     <y>148</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>432</x>
+     <y>158</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SelectedStructuresOnlyCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisColocalizationDialog</receiver>
+   <slot>SelectedStructuresOnlyToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>75</x>
+     <y>169</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>197</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AutoUpdateCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisColocalizationDialog</receiver>
+   <slot>AutoUpdateToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>61</x>
+     <y>245</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>251</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>HoldHistoryCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisColocalizationDialog</receiver>
+   <slot>HoldHistoryToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>227</x>
+     <y>255</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>432</x>
+     <y>206</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ClearHistoryButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisColocalizationDialog</receiver>
+   <slot>ClearHistoryButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>358</x>
+     <y>262</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>432</x>
+     <y>260</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AnalyzeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisColocalizationDialog</receiver>
+   <slot>AnalyzeButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>50</x>
+     <y>371</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>375</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>ThresholdLogicalANDButtonClicked()</slot>
+  <slot>MinimumValueButtonClicked()</slot>
+  <slot>ProductButtonClicked()</slot>
+  <slot>RatioToggled(bool)</slot>
+  <slot>IntensityWeightedToggled(bool)</slot>
+  <slot>PhysicalSizeToggled(bool)</slot>
+  <slot>ColormapToggled(bool)</slot>
+  <slot>SelectedStructuresOnlyToggled(bool)</slot>
+  <slot>AutoUpdateToggled(bool)</slot>
+  <slot>HoldHistoryToggled(bool)</slot>
+  <slot>ClearHistoryButtonClicked()</slot>
+  <slot>AnalyzeButtonClicked()</slot>
+  <slot>HoldHistoryValueChanged(int)</slot>
+ </slots>
+ <buttongroups>
+  <buttongroup name="OverlappingCalcButtonGroup"/>
+ </buttongroups>
+</ui>

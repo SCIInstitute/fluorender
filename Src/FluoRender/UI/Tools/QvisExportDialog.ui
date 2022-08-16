@@ -1,0 +1,1639 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisExportDialog</class>
+ <widget class="QDialog" name="QvisExportDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>538</width>
+    <height>506</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Export</string>
+  </property>
+  <layout class="QVBoxLayout" name="MainLayout">
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="BasicTab">
+      <attribute name="title">
+       <string>Basic</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="BasicLayout">
+       <item>
+        <widget class="QGroupBox" name="RotationGroupBox">
+         <property name="title">
+          <string>Rotation</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QGridLayout" name="RotationLayout">
+          <item row="0" column="0" colspan="2">
+           <widget class="QLabel" name="AxisLabel">
+            <property name="text">
+             <string>Axis of rotation</string>
+            </property>
+            <property name="buddy">
+             <cstring>AxisXButton</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <layout class="QHBoxLayout" name="AxisLayout">
+            <item>
+             <widget class="QRadioButton" name="AxisXButton">
+              <property name="text">
+               <string>X</string>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">AxisButtonGroup</string>
+              </attribute>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="AxisYButton">
+              <property name="text">
+               <string>Y</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+              <property name="autoRepeat">
+               <bool>false</bool>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">AxisButtonGroup</string>
+              </attribute>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="AxisZButton">
+              <property name="text">
+               <string>Z</string>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">AxisButtonGroup</string>
+              </attribute>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLabel" name="DegreesLabel">
+            <property name="text">
+             <string>Degrees</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QSpinBox" name="RotationDegreesSpinBox"/>
+          </item>
+          <item row="0" column="5">
+           <spacer name="RotationSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>98</width>
+              <height>13</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="RotationInterpolationLabel">
+            <property name="text">
+             <string>Interpolation</string>
+            </property>
+            <property name="buddy">
+             <cstring>RotationInterpolationComboBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="2">
+           <widget class="QComboBox" name="RotationInterpolationComboBox">
+            <item>
+             <property name="text">
+              <string>Linear</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Smooth</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="FrameGroupBox">
+         <property name="title">
+          <string>Frame</string>
+         </property>
+         <layout class="QGridLayout" name="FrameLayout">
+          <item row="0" column="0">
+           <widget class="QRadioButton" name="FrameTimeSquenceButton">
+            <property name="text">
+             <string>Time Squence</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">FrameButtonGroup</string>
+            </attribute>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <layout class="QHBoxLayout" name="EndLayout">
+            <item>
+             <widget class="QLabel" name="EndFrameLabel">
+              <property name="text">
+               <string>End</string>
+              </property>
+              <property name="buddy">
+               <cstring>FrameEndSpinBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="FrameEndSpinBox"/>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
+           <layout class="QHBoxLayout" name="StartLayout">
+            <item>
+             <widget class="QLabel" name="StartFrameLabel">
+              <property name="text">
+               <string>Start</string>
+              </property>
+              <property name="buddy">
+               <cstring>FrameStartSpinBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="FrameStartSpinBox"/>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="2">
+           <layout class="QHBoxLayout" name="CurrentLayout">
+            <item>
+             <widget class="QLabel" name="CurrentFrameLabel">
+              <property name="text">
+               <string>Current</string>
+              </property>
+              <property name="buddy">
+               <cstring>FrameCurrentSpinBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="FrameCurrentSpinBox"/>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="1">
+           <widget class="QRadioButton" name="FrameBatchProcessButton">
+            <property name="text">
+             <string>Batch process</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">FrameButtonGroup</string>
+            </attribute>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <spacer name="FrameSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>10</width>
+              <height>10</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="MovieLayout">
+         <item>
+          <widget class="QLabel" name="MovieTimeLabel">
+           <property name="text">
+            <string>Movie time</string>
+           </property>
+           <property name="buddy">
+            <cstring>MovieTimeSpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="MovieTimeSpinBox"/>
+         </item>
+         <item>
+          <widget class="QLabel" name="MovieTimeUnitsLabel">
+           <property name="text">
+            <string>seconds</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="MovieSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="BasicTabSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>10</width>
+           <height>10</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="AdvancedTab">
+      <attribute name="title">
+       <string>Advanced</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="AdvancedLayout">
+       <item>
+        <widget class="QLabel" name="KeyFramesLabel">
+         <property name="text">
+          <string>Key Frames</string>
+         </property>
+         <property name="buddy">
+          <cstring>KeyFrameTableWidget</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="KeyFrameTableWidget">
+         <attribute name="horizontalHeaderDefaultSectionSize">
+          <number>94</number>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>ID</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Frame</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Inbetweens</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Interpolation</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Description</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="KeyFrameLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="KeyFrameOffsetLabel">
+           <property name="text">
+            <string>Frame Offset</string>
+           </property>
+           <property name="buddy">
+            <cstring>KeyFrameOffsetSpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="KeyFrameAddButton">
+           <property name="text">
+            <string>Add</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QPushButton" name="KeyFrameDeleteButton">
+           <property name="text">
+            <string>Delete</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QLabel" name="KeyFrameInterpolationLabel">
+           <property name="text">
+            <string>Interpolation</string>
+           </property>
+           <property name="buddy">
+            <cstring>KeyFrameInterpolationComboBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QPushButton" name="KeyFrameDeleteAllButton">
+           <property name="text">
+            <string>Delete All</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QSpinBox" name="KeyFrameOffsetSpinBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>30</number>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="4">
+          <widget class="QComboBox" name="KeyFrameInterpolationComboBox">
+           <item>
+            <property name="text">
+             <string>Linear</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Smooth</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="0" column="5">
+          <spacer name="KeyFrameOffsetSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="KeyFrameLockTargetViewGroupBox">
+         <property name="title">
+          <string>Lock target view</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QHBoxLayout" name="KeyFrameLockTargetViewLayout">
+          <item>
+           <widget class="QLabel" name="TargetViewLabel">
+            <property name="text">
+             <string>Target view</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="KeyFrameLockTargetViewComboBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <item>
+             <property name="text">
+              <string>Image Center</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Ruler</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Selection</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Current View</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="KeyFrameLockTargetViewSetButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Set</string>
+            </property>
+            <property name="autoDefault">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="KeyFrameLockTargetViewSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>10</width>
+              <height>10</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="AutoKeyFrameTab">
+      <attribute name="title">
+       <string>Auto Key Frame</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="AutoKeyFrameLayout">
+       <item>
+        <layout class="QGridLayout" name="AutoKeyFrameGridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="AutoKeyFrameTypeLabel">
+           <property name="text">
+            <string>Auto key type</string>
+           </property>
+           <property name="buddy">
+            <cstring>AutoKeyFrameTypeComboBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="AutoKeyFrameTypeComboBox">
+           <item>
+            <property name="text">
+             <string>Channel combination nC1</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Channel combination nC2</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Channel combination nC3</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="AutoKeyFrameGenerateButton">
+           <property name="text">
+            <string>Generate</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <spacer name="AutoKeyFrameSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="AutoKeyFrameTabSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>10</width>
+           <height>10</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="CroppingTab">
+      <attribute name="title">
+       <string>Cropping</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="CroppingLayout">
+       <item>
+        <widget class="QGroupBox" name="CroppingGroupBox">
+         <property name="title">
+          <string>Cropping</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="CoppingLayout">
+          <item>
+           <layout class="QGridLayout" name="CroppingRectLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="CropXLabel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>X</string>
+              </property>
+              <property name="buddy">
+               <cstring>CropXSpinBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSpinBox" name="CropXSpinBox">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximum">
+               <number>1023</number>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="CropYLabel">
+              <property name="text">
+               <string>Y</string>
+              </property>
+              <property name="buddy">
+               <cstring>CropYSpinBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QSpinBox" name="CropYSpinBox">
+              <property name="maximum">
+               <number>1024</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="CropWidthLabel">
+              <property name="text">
+               <string>Width</string>
+              </property>
+              <property name="buddy">
+               <cstring>CropWidthSpinBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QSpinBox" name="CropWidthSpinBox">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>1023</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QLabel" name="CropHeightLabel">
+              <property name="text">
+               <string>Height</string>
+              </property>
+              <property name="buddy">
+               <cstring>CropHeightSpinBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QSpinBox" name="CropHeightSpinBox">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>1024</number>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4">
+             <spacer name="CroppingSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>10</width>
+                <height>10</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="CroppingButtonLayout">
+            <item>
+             <widget class="QPushButton" name="CroppingResetButton">
+              <property name="text">
+               <string>Reset</string>
+              </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="CroppingButtonSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>10</width>
+                <height>10</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="CroppingTabSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>10</width>
+           <height>10</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="ScriptingTab">
+      <attribute name="title">
+       <string>Scripting</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="ScriptingTabLayout">
+       <item>
+        <widget class="QGroupBox" name="ScriptingGroupBox">
+         <property name="title">
+          <string>Scripting</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="ScriptingLayout">
+          <item>
+           <layout class="QHBoxLayout" name="ScriptFileLayout">
+            <item>
+             <widget class="QLabel" name="ScriptFileLabel">
+              <property name="text">
+               <string>Script file</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="ScriptFileTextEdit">
+              <property name="clearButtonEnabled">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="ScriptFileBrowseButton">
+              <property name="text">
+               <string>Browse</string>
+              </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QTableWidget" name="ScriptFileTableWidget">
+            <column>
+             <property name="text">
+              <string>Builtin script files</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="MiscGroupBox">
+     <property name="title">
+      <string/>
+     </property>
+     <layout class="QVBoxLayout" name="MiscLayout">
+      <item>
+       <layout class="QHBoxLayout" name="FramesCaputreLayout">
+        <item>
+         <layout class="QHBoxLayout" name="FramesPerSecondLayout">
+          <item>
+           <widget class="QLabel" name="FramesPerSecondLabel">
+            <property name="text">
+             <string>Frames/second</string>
+            </property>
+            <property name="buddy">
+             <cstring>FramesPerSecondSpinBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="FramesPerSecondSpinBox">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="value">
+             <number>30</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="FramesCaputreSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>10</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="CaptureLayout">
+          <item>
+           <widget class="QLabel" name="CaptureLabel">
+            <property name="text">
+             <string>Capture</string>
+            </property>
+            <property name="buddy">
+             <cstring>CaptureComboBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="CaptureComboBox">
+            <item>
+             <property name="text">
+              <string>View Window 0</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="ControlsLayout">
+        <item>
+         <widget class="QToolButton" name="PlayButton">
+          <property name="text">
+           <string>Play</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="RewindButton">
+          <property name="text">
+           <string>Rewind</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="FrameTimeSlider">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="FrameTimeSpinBox"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="FrameTimeUnitsLabel">
+          <property name="text">
+           <string>seconds</string>
+          </property>
+          <property name="buddy">
+           <cstring>FrameTimeSpinBox</cstring>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="ButtonLayout">
+     <item>
+      <widget class="QPushButton" name="SaveButton">
+       <property name="text">
+        <string>Save</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="ButtonSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>10</width>
+         <height>10</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>RotationGroupBox</tabstop>
+  <tabstop>AxisXButton</tabstop>
+  <tabstop>AxisYButton</tabstop>
+  <tabstop>AxisZButton</tabstop>
+  <tabstop>RotationDegreesSpinBox</tabstop>
+  <tabstop>RotationInterpolationComboBox</tabstop>
+  <tabstop>FrameTimeSquenceButton</tabstop>
+  <tabstop>FrameBatchProcessButton</tabstop>
+  <tabstop>FrameStartSpinBox</tabstop>
+  <tabstop>FrameEndSpinBox</tabstop>
+  <tabstop>FrameCurrentSpinBox</tabstop>
+  <tabstop>MovieTimeSpinBox</tabstop>
+  <tabstop>KeyFrameTableWidget</tabstop>
+  <tabstop>KeyFrameOffsetSpinBox</tabstop>
+  <tabstop>KeyFrameInterpolationComboBox</tabstop>
+  <tabstop>KeyFrameAddButton</tabstop>
+  <tabstop>KeyFrameDeleteButton</tabstop>
+  <tabstop>KeyFrameDeleteAllButton</tabstop>
+  <tabstop>KeyFrameLockTargetViewGroupBox</tabstop>
+  <tabstop>KeyFrameLockTargetViewComboBox</tabstop>
+  <tabstop>KeyFrameLockTargetViewSetButton</tabstop>
+  <tabstop>AutoKeyFrameTypeComboBox</tabstop>
+  <tabstop>AutoKeyFrameGenerateButton</tabstop>
+  <tabstop>CroppingGroupBox</tabstop>
+  <tabstop>CropXSpinBox</tabstop>
+  <tabstop>CropYSpinBox</tabstop>
+  <tabstop>CropWidthSpinBox</tabstop>
+  <tabstop>CropHeightSpinBox</tabstop>
+  <tabstop>CroppingResetButton</tabstop>
+  <tabstop>ScriptingGroupBox</tabstop>
+  <tabstop>ScriptFileTextEdit</tabstop>
+  <tabstop>ScriptFileBrowseButton</tabstop>
+  <tabstop>ScriptFileTableWidget</tabstop>
+  <tabstop>FramesPerSecondSpinBox</tabstop>
+  <tabstop>CaptureComboBox</tabstop>
+  <tabstop>PlayButton</tabstop>
+  <tabstop>RewindButton</tabstop>
+  <tabstop>FrameTimeSlider</tabstop>
+  <tabstop>FrameTimeSpinBox</tabstop>
+  <tabstop>SaveButton</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>FramesPerSecondSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>FramesPerSecondValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>164</x>
+     <y>386</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>26</x>
+     <y>371</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>CaptureComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>CaptureIndexChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>416</x>
+     <y>382</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>13</x>
+     <y>396</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>PlayButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>PlayButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>64</x>
+     <y>427</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>21</x>
+     <y>437</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>RewindButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>RewindButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>124</x>
+     <y>427</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>47</x>
+     <y>458</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>FrameTimeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>FrameTimeSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>277</x>
+     <y>422</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>90</x>
+     <y>474</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>FrameTimeSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>FrameTimeValueChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>448</x>
+     <y>427</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>299</x>
+     <y>473</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>RotationGroupBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>RotationToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>114</x>
+     <y>45</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>23</x>
+     <y>57</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AxisXButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>AxisXButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>182</x>
+     <y>89</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>19</x>
+     <y>98</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AxisYButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>AxisYButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>226</x>
+     <y>89</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>46</x>
+     <y>114</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AxisZButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>AxisZButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>270</x>
+     <y>89</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>19</x>
+     <y>135</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>RotationDegreesSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>RotationDegreesValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>377</x>
+     <y>90</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>12</x>
+     <y>171</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>FrameTimeSquenceButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>FrameTimeSquenceButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>144</x>
+     <y>190</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>23</x>
+     <y>208</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>FrameBatchProcessButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>FrameBatchProcessButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>243</x>
+     <y>188</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>28</x>
+     <y>246</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>FrameStartSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>FrameStartValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>157</x>
+     <y>225</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>14</x>
+     <y>278</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>FrameEndSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>FrameEndValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>278</x>
+     <y>225</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>35</x>
+     <y>307</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>FrameCurrentSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>FrameCurrentValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>380</x>
+     <y>225</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>15</x>
+     <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>KeyFrameTableWidget</sender>
+   <signal>cellChanged(int,int)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>KeyFrameTableWidgetCellChanged(int,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>94</x>
+     <y>68</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>53</x>
+     <y>104</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>KeyFrameOffsetSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>KeyFrameOffsetValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>129</x>
+     <y>155</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>42</x>
+     <y>161</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>KeyFrameInterpolationComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>KeyFrameInterpolationIndexChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>401</x>
+     <y>151</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>545</x>
+     <y>205</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>KeyFrameAddButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>KeyFrameAddButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>36</x>
+     <y>192</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>39</x>
+     <y>224</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>KeyFrameDeleteButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>KeyFrameDeleteButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>129</x>
+     <y>192</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>41</x>
+     <y>262</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>KeyFrameDeleteAllButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>KeyFrameDeleteAllButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>212</x>
+     <y>192</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>24</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>KeyFrameLockTargetViewComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>KeyFrameLockTargetViewIndexChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>128</x>
+     <y>262</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>545</x>
+     <y>263</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>KeyFrameLockTargetViewSetButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>KeyFrameLockTargetViewSetButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>270</x>
+     <y>263</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>545</x>
+     <y>296</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AutoKeyFrameTypeComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>AutoKeyFrameTypeIndexChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>154</x>
+     <y>44</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>48</x>
+     <y>76</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AutoKeyFrameGenerateButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>AutoKeyFrameGenerateButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>52</x>
+     <y>85</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>45</x>
+     <y>144</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>CroppingGroupBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>CroppingToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>94</x>
+     <y>38</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>58</x>
+     <y>42</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>CroppingResetButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>CroppingResetButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>64</x>
+     <y>133</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>42</x>
+     <y>203</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>CropXSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>CropXValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>97</x>
+     <y>70</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>545</x>
+     <y>62</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>CropYSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>CropYValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>204</x>
+     <y>70</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>545</x>
+     <y>95</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>CropHeightSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>CropHeightValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>204</x>
+     <y>101</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>545</x>
+     <y>145</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>CropWidthSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>CropWidthValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>97</x>
+     <y>101</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>545</x>
+     <y>186</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ScriptingGroupBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>ScriptingToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>94</x>
+     <y>43</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>31</x>
+     <y>91</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ScriptFileTextEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>ScriptFileTextEditFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>119</x>
+     <y>73</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>48</x>
+     <y>71</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ScriptFileBrowseButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>ScriptFileBrowseButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>415</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>545</x>
+     <y>82</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>KeyFrameLockTargetViewGroupBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>KeyFrameLockTargetViewToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>93</x>
+     <y>231</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>541</x>
+     <y>139</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SaveButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisExportDialog</receiver>
+   <slot>SaveButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>42</x>
+     <y>477</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>268</x>
+     <y>252</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>FramesPerSecondValueChanged(int)</slot>
+  <slot>CaptureIndexChanged(int)</slot>
+  <slot>PlayButtonClicked()</slot>
+  <slot>RewindButtonClicked()</slot>
+  <slot>FrameTimeSliderChanged(int)</slot>
+  <slot>FrameTimeValueChanged(double)</slot>
+  <slot>SaveButtonClicked()</slot>
+  <slot>RotationToggled(bool)</slot>
+  <slot>AxisXButtonClicked()</slot>
+  <slot>AxisYButtonClicked()</slot>
+  <slot>AxisZButtonClicked()</slot>
+  <slot>RotationDegreesValueChanged(int)</slot>
+  <slot>RotationInterpolationIndexChanged(int)</slot>
+  <slot>FrameTimeSquenceButtonClicked()</slot>
+  <slot>FrameBatchProcessButtonClicked()</slot>
+  <slot>FrameStartValueChanged(int)</slot>
+  <slot>FrameEndValueChanged(int)</slot>
+  <slot>FrameCurrentValueChanged(int)</slot>
+  <slot>MovieTimeValueChanged(double)</slot>
+  <slot>KeyFrameTableWidgetCellChanged(int,int)</slot>
+  <slot>KeyFrameOffsetValueChanged(int)</slot>
+  <slot>KeyFrameInterpolationIndexChanged(int)</slot>
+  <slot>KeyFrameAddButtonClicked()</slot>
+  <slot>KeyFrameDeleteButtonClicked()</slot>
+  <slot>KeyFrameDeleteAllButtonClicked()</slot>
+  <slot>KeyFrameLockTargetViewToggled(bool)</slot>
+  <slot>KeyFrameLockTargetViewIndexChanged(int)</slot>
+  <slot>KeyFrameLockTargetViewSetButtonClicked()</slot>
+  <slot>AutoKeyFrameTypeIndexChanged(int)</slot>
+  <slot>AutoKeyFrameGenerateButtonClicked()</slot>
+  <slot>CroppingToggled(bool)</slot>
+  <slot>CropXValueChanged(int)</slot>
+  <slot>CropYValueChanged(int)</slot>
+  <slot>CropWidthValueChanged(int)</slot>
+  <slot>CropHeightValueChanged(int)</slot>
+  <slot>CroppingResetButtonClicked()</slot>
+  <slot>ScriptingToggled(bool)</slot>
+  <slot>ScriptFileTextEditFinished()</slot>
+  <slot>ScriptFileBrowseButtonClicked()</slot>
+ </slots>
+ <buttongroups>
+  <buttongroup name="AxisButtonGroup"/>
+  <buttongroup name="FrameButtonGroup"/>
+ </buttongroups>
+</ui>

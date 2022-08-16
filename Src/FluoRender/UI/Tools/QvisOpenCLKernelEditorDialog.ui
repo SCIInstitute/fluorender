@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisOpenCLKernelEditorDialog</class>
+ <widget class="QDialog" name="QvisOpenCLKernelEditorDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>668</width>
+    <height>366</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Open CL Kernel Editor</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <selectedon>:/Src/FluoRender/UI/icons/Tools/OpenCLKernelEditor.png</selectedon>
+   </iconset>
+  </property>
+  <layout class="QVBoxLayout" name="MainLayout">
+   <item>
+    <widget class="QGroupBox" name="KernelGroupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>5</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Kernel</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="KernelFileLayout">
+        <item>
+         <widget class="QLabel" name="KernelFileLabel">
+          <property name="text">
+           <string>Kernel File</string>
+          </property>
+          <property name="buddy">
+           <cstring>KernelFileTextEdit</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="KernelFileTextEdit">
+          <property name="clearButtonEnabled">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="BrowseButton">
+          <property name="text">
+           <string>Browse</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="SaveButton">
+          <property name="text">
+           <string>Save</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="SaveAsButton">
+          <property name="text">
+           <string>Save As</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="KernelLayout">
+        <property name="spacing">
+         <number>1</number>
+        </property>
+        <item>
+         <widget class="QTableWidget" name="KernelTableWidget">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="showGrid">
+           <bool>false</bool>
+          </property>
+          <property name="rowCount">
+           <number>0</number>
+          </property>
+          <property name="columnCount">
+           <number>1</number>
+          </property>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>Kernel</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPlainTextEdit" name="KernelPlainTextEdit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>5</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="ControlsGroupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Controls</string>
+     </property>
+     <layout class="QHBoxLayout" name="ControlsLayout">
+      <item>
+       <widget class="QPushButton" name="RunButton">
+        <property name="text">
+         <string>Run</string>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="IterationsLabel">
+        <property name="text">
+         <string>Number of iterations</string>
+        </property>
+        <property name="buddy">
+         <cstring>IterationsSpinBox</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="IterationsSpinBox"/>
+      </item>
+      <item>
+       <spacer name="ControlsSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>366</width>
+          <height>13</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="OutputGroupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>2</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Output</string>
+     </property>
+     <layout class="QHBoxLayout" name="OutputLayout">
+      <item>
+       <widget class="QPlainTextEdit" name="OutputTextEdit">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>KernelFileTextEdit</tabstop>
+  <tabstop>BrowseButton</tabstop>
+  <tabstop>SaveButton</tabstop>
+  <tabstop>SaveAsButton</tabstop>
+  <tabstop>KernelTableWidget</tabstop>
+  <tabstop>KernelPlainTextEdit</tabstop>
+  <tabstop>RunButton</tabstop>
+  <tabstop>IterationsSpinBox</tabstop>
+  <tabstop>OutputTextEdit</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>KernelFileTextEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>QvisOpenCLKernelEditorDialog</receiver>
+   <slot>KernelFileTextEditFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>195</x>
+     <y>51</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>59</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>BrowseButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisOpenCLKernelEditorDialog</receiver>
+   <slot>BrowseButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>451</x>
+     <y>47</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>674</x>
+     <y>17</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SaveButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisOpenCLKernelEditorDialog</receiver>
+   <slot>SaveButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>540</x>
+     <y>48</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>674</x>
+     <y>56</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SaveAsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisOpenCLKernelEditorDialog</receiver>
+   <slot>SaveAsButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>618</x>
+     <y>45</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>674</x>
+     <y>89</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>KernelTableWidget</sender>
+   <signal>cellClicked(int,int)</signal>
+   <receiver>QvisOpenCLKernelEditorDialog</receiver>
+   <slot>KernelTableWidgetCellChanged(int,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>60</x>
+     <y>159</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>8</x>
+     <y>168</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>RunButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisOpenCLKernelEditorDialog</receiver>
+   <slot>RunButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>54</x>
+     <y>384</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>8</x>
+     <y>381</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>IterationsSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisOpenCLKernelEditorDialog</receiver>
+   <slot>IterationsValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>237</x>
+     <y>383</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>673</x>
+     <y>377</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>KernelFileTextEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>QvisOpenCLKernelEditorDialog</receiver>
+   <slot>KernelFileTextEditFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>366</x>
+     <y>48</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>674</x>
+     <y>171</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>KernelFileTextEditFinished()</slot>
+  <slot>BrowseButtonClicked()</slot>
+  <slot>SaveButtonClicked()</slot>
+  <slot>SaveAsButtonClicked()</slot>
+  <slot>KernelTableWidgetCellChanged(int,int)</slot>
+  <slot>RunButtonClicked()</slot>
+  <slot>IterationsValueChanged(int)</slot>
+ </slots>
+</ui>

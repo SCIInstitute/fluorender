@@ -1,0 +1,1771 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisPreferencesDialog</class>
+ <widget class="QDialog" name="QvisPreferencesDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>701</width>
+    <height>654</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Preferences</string>
+  </property>
+  <layout class="QVBoxLayout" name="MainLayout">
+   <item>
+    <widget class="QTabWidget" name="PreferencesTabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="ProjectTab">
+      <attribute name="title">
+       <string>Project</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="ProjectLayout">
+       <item>
+        <widget class="QGroupBox" name="OpenSaveGroupBox">
+         <property name="title">
+          <string>Open / Save</string>
+         </property>
+         <layout class="QVBoxLayout" name="OpenSaveLayout">
+          <item>
+           <widget class="QCheckBox" name="CompressDataCheckBox">
+            <property name="text">
+             <string>Compress data in grpahics memory when loading.</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="SaveProjectCheckBox">
+            <property name="text">
+             <string>Save project when capturing the viewport or exporting a movie.</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="TextrueSizeGroupBox">
+         <property name="title">
+          <string>Texture size</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="TextrueSizeLayout">
+          <item>
+           <layout class="QHBoxLayout" name="TextrueMaxSizeLayout">
+            <item>
+             <widget class="QLabel" name="TextureMaxSizeLabel">
+              <property name="text">
+               <string>Maximum texture size</string>
+              </property>
+              <property name="buddy">
+               <cstring>TextureMaxSizeSpinBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="TextureMaxSizeSpinBox"/>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>10</width>
+                <height>10</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="TextureSizeNoteLabel">
+            <property name="text">
+             <string>Note: FluoRender must be restarted after setting the maximum texture value.
+
+Note: Set a texture size smaller than 1024 to correctly perform component analysis. When both the maximum texture size and data streaming are set, the smaller value is used to divide a large data set into bricks.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="PaintHistoryGroupBox">
+         <property name="title">
+          <string>Paint Undo/Redo History</string>
+         </property>
+         <layout class="QVBoxLayout" name="PaintHistoryLayout">
+          <item>
+           <layout class="QHBoxLayout" name="PaintUndoRedoLayout">
+            <item>
+             <widget class="QLabel" name="PaintUndoRedoLabel">
+              <property name="text">
+               <string>Number of paint brush selections to track for undo/redo.</string>
+              </property>
+              <property name="buddy">
+               <cstring>PaintUndoRedoSpinBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="PaintUndoRedoSpinBox">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="PaintUndoRedoSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>10</width>
+                <height>10</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="PaintUndoRedoNoteLabel">
+            <property name="text">
+             <string>Note: Large values can reduce the interaction speed and increase memory usage.</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="OpenCLGroupBox">
+         <property name="title">
+          <string>OpenCL devices</string>
+         </property>
+         <layout class="QVBoxLayout" name="OpenCLLayout">
+          <item>
+           <widget class="QLabel" name="OpenCLLabel">
+            <property name="text">
+             <string>Select an OpenCl device that is the rendering GPU</string>
+            </property>
+            <property name="buddy">
+             <cstring>OpenCLTreeWidget</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QTreeWidget" name="OpenCLTreeWidget">
+            <column>
+             <property name="text">
+              <string>Computer</string>
+             </property>
+            </column>
+            <item>
+             <property name="text">
+              <string>Hardware</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Device</string>
+              </property>
+             </item>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="OpenCLNoteLabel">
+            <property name="text">
+             <string>Note: FluoRender must be restarted after setting the OpenCL device.</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="PerformanceTab">
+      <attribute name="title">
+       <string>Performance</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="PerformanceLayout">
+       <item>
+        <widget class="QGroupBox" name="SampleRateGroupBox">
+         <property name="title">
+          <string>Sample rate</string>
+         </property>
+         <layout class="QVBoxLayout" name="SampleRateLayout">
+          <item>
+           <widget class="QCheckBox" name="ReduceSampleRateCheckBox">
+            <property name="text">
+             <string>Reduce volume sample rate for mouse interactions.</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="SampleRateNoteLabel">
+            <property name="text">
+             <string>Enable this option if the mpuse interaction is too slow.</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="DataStreamingGroupBox">
+         <property name="title">
+          <string>Data streaming</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <layout class="QVBoxLayout" name="DataStreamingLayout">
+          <item>
+           <layout class="QHBoxLayout" name="UpdateOrderLayout">
+            <item>
+             <widget class="QLabel" name="UpdateOrderLabel">
+              <property name="text">
+               <string>Update order</string>
+              </property>
+              <property name="buddy">
+               <cstring>UpdateOrderBackToFrontButton</cstring>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="UpdateOrderBackToFrontButton">
+              <property name="text">
+               <string>Back to front</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">UpdateOrderButtonGroup</string>
+              </attribute>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="UpdateOrderFrontToBackButton">
+              <property name="text">
+               <string>Front to back</string>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">UpdateOrderButtonGroup</string>
+              </attribute>
+             </widget>
+            </item>
+            <item>
+             <spacer name="UpdateOrderSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>10</width>
+                <height>10</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="DataStreamingGridLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="GraphicsMemoryLabel">
+              <property name="text">
+               <string>Graphics memory</string>
+              </property>
+              <property name="buddy">
+               <cstring>GraphicsMemorySpinBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSlider" name="GraphicsMemorySlider">
+              <property name="minimum">
+               <number>100</number>
+              </property>
+              <property name="maximum">
+               <number>10000</number>
+              </property>
+              <property name="singleStep">
+               <number>100</number>
+              </property>
+              <property name="value">
+               <number>4000</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QSpinBox" name="GraphicsMemorySpinBox">
+              <property name="minimum">
+               <number>100</number>
+              </property>
+              <property name="maximum">
+               <number>10000</number>
+              </property>
+              <property name="singleStep">
+               <number>100</number>
+              </property>
+              <property name="value">
+               <number>4000</number>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLabel" name="GraphicsMemoryUnitsLabel">
+              <property name="text">
+               <string>MB</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="LargeDataSizeLabel">
+              <property name="text">
+               <string>Large data size</string>
+              </property>
+              <property name="buddy">
+               <cstring>LargeDataSizeSpinBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QSlider" name="LargeDataSizeSlider">
+              <property name="minimum">
+               <number>0</number>
+              </property>
+              <property name="maximum">
+               <number>2000</number>
+              </property>
+              <property name="singleStep">
+               <number>20</number>
+              </property>
+              <property name="value">
+               <number>2000</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QSpinBox" name="LargeDataSizeSpinBox">
+              <property name="maximum">
+               <number>2000</number>
+              </property>
+              <property name="singleStep">
+               <number>20</number>
+              </property>
+              <property name="value">
+               <number>2000</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QLabel" name="LargeDataSizeUnitsLabel">
+              <property name="text">
+               <string>MB</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="BrickSizeLabel">
+              <property name="text">
+               <string>Brick size</string>
+              </property>
+              <property name="buddy">
+               <cstring>BrickSizeSpinBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QSlider" name="BrickSizeSlider">
+              <property name="minimum">
+               <number>64</number>
+              </property>
+              <property name="maximum">
+               <number>4096</number>
+              </property>
+              <property name="singleStep">
+               <number>64</number>
+              </property>
+              <property name="value">
+               <number>4096</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QSpinBox" name="BrickSizeSpinBox">
+              <property name="minimum">
+               <number>64</number>
+              </property>
+              <property name="maximum">
+               <number>4096</number>
+              </property>
+              <property name="singleStep">
+               <number>64</number>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="3">
+             <widget class="QLabel" name="BrickSizeUnitsLabel">
+              <property name="text">
+               <string>voxels</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="ResponseTimeLabel">
+              <property name="text">
+               <string>Response time</string>
+              </property>
+              <property name="buddy">
+               <cstring>ResponseTimeSpinBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QSlider" name="ResponseTimeSlider">
+              <property name="minimum">
+               <number>10</number>
+              </property>
+              <property name="maximum">
+               <number>1000</number>
+              </property>
+              <property name="value">
+               <number>1000</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="2">
+             <widget class="QSpinBox" name="ResponseTimeSpinBox">
+              <property name="minimum">
+               <number>10</number>
+              </property>
+              <property name="maximum">
+               <number>1000</number>
+              </property>
+              <property name="singleStep">
+               <number>10</number>
+              </property>
+              <property name="value">
+               <number>1000</number>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="3">
+             <widget class="QLabel" name="ResponseTimeUnitsLabel">
+              <property name="text">
+               <string>ms</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="DetailLevelOffsetLabel">
+              <property name="text">
+               <string>Detail level offset</string>
+              </property>
+              <property name="buddy">
+               <cstring>DetailLevelOffsetSpinBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QSlider" name="DetailLevelOffsetSlider">
+              <property name="minimum">
+               <number>-5</number>
+              </property>
+              <property name="maximum">
+               <number>5</number>
+              </property>
+              <property name="value">
+               <number>0</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="2">
+             <widget class="QSpinBox" name="DetailLevelOffsetSpinBox">
+              <property name="minimum">
+               <number>-5</number>
+              </property>
+              <property name="maximum">
+               <number>5</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="DataStreamingNoteLabel">
+            <property name="text">
+             <string>Note: Configure these settings before loading data.
+
+Data streaming allows rendering and processing datasets of larger size than available graphics memory. Datasets are divided into bricks. The bricks are sequentially loaded into graphics memory for rendering and processing. Different computer hardware may need different settings. You may need to experiment in order to find the best settings for your computer.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="AnimationGroupBox">
+         <property name="title">
+          <string>Animation</string>
+         </property>
+         <layout class="QHBoxLayout" name="AnimationLayout">
+          <item>
+           <widget class="QLabel" name="AnimationSliderModeLabel">
+            <property name="text">
+             <string>Mode</string>
+            </property>
+            <property name="buddy">
+             <cstring>AnimationSliderModeComboBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="AnimationSliderModeComboBox">
+            <item>
+             <property name="text">
+              <string>Single Step</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Continuous</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="AnimationPauseLabel">
+            <property name="text">
+             <string>Pause between frames</string>
+            </property>
+            <property name="buddy">
+             <cstring>AnimationPauseSpinBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="AnimationPauseSpinBox">
+            <property name="maximum">
+             <number>5000</number>
+            </property>
+            <property name="singleStep">
+             <number>50</number>
+            </property>
+            <property name="value">
+             <number>250</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="AnimationPauseUnitsLabel">
+            <property name="text">
+             <string>milliseconds</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="AnimationSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="PerformancetabSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="FileFormatTab">
+      <attribute name="title">
+       <string>File Format</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="FileFormatLayout">
+       <item>
+        <widget class="QGroupBox" name="VoxelSizeGroupBox">
+         <property name="title">
+          <string>Voxel size</string>
+         </property>
+         <layout class="QVBoxLayout" name="VoxelSizeLayout">
+          <item>
+           <widget class="QCheckBox" name="VoxelSizeFromFirstDatasetCheckBox">
+            <property name="text">
+             <string>Get voxel size from the first opened dataset.</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="DefaultColorsGroupBox">
+         <property name="title">
+          <string>Default colors for excitation wavelengths (nm) for raw microscaopy formats.</string>
+         </property>
+         <layout class="QVBoxLayout" name="DefaultColorsLayout">
+          <item>
+           <layout class="QGridLayout" name="ColorLayout">
+            <item row="1" column="1">
+             <widget class="QLabel" name="ColorDashLabel_1">
+              <property name="text">
+               <string>---</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QLabel" name="ColorDashLabel_2">
+              <property name="text">
+               <string>---</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="5">
+             <widget class="QLabel" name="ColorDashLabel_3">
+              <property name="text">
+               <string>---</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="7">
+             <widget class="QLabel" name="ColorDashLabel_4">
+              <property name="text">
+               <string>---</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="Color350Label">
+              <property name="text">
+               <string>350</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="buddy">
+               <cstring>DefaultColor0ComboBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="8">
+             <widget class="QLabel" name="Color700Label">
+              <property name="text">
+               <string>700</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="4">
+             <widget class="QLabel" name="Color543Label">
+              <property name="text">
+               <string>543</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="buddy">
+               <cstring>DefaultColor2ComboBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QLabel" name="Color450Label">
+              <property name="text">
+               <string>450</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="buddy">
+               <cstring>DefaultColor1ComboBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="2">
+             <widget class="QLabel" name="Color488Label">
+              <property name="text">
+               <string>488</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="6">
+             <widget class="QLabel" name="Color633Label">
+              <property name="text">
+               <string>633</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="buddy">
+               <cstring>DefaultColor3ComboBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QLabel" name="Color480Label">
+              <property name="text">
+               <string>480</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="4">
+             <widget class="QLabel" name="Color568Label">
+              <property name="text">
+               <string>568</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="DefaultColor0ComboBox">
+              <property name="currentText">
+               <string>Red</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>Red</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Blue</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Green</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Cyan</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Magenta</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Yellow</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Orange</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>White</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QComboBox" name="DefaultColor1ComboBox">
+              <property name="currentText">
+               <string>Red</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>Red</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Blue</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Green</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Cyan</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Magenta</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Yellow</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Orange</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>White</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="0" column="5">
+             <widget class="QComboBox" name="DefaultColor2ComboBox">
+              <item>
+               <property name="text">
+                <string>Red</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Blue</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Green</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Cyan</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Magenta</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Yellow</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Orange</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>White</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="0" column="7">
+             <widget class="QComboBox" name="DefaultColor3ComboBox">
+              <property name="currentText">
+               <string>Red</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>Red</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Green</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Blue</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Cyan</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Magenta</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Yellow</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Orange</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>White</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="FileFormatTabSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>10</width>
+           <height>10</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="ImageJTab">
+      <attribute name="title">
+       <string>ImageJ Link</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="ImageJLayout">
+       <item>
+        <widget class="QGroupBox" name="JavaGroupBox">
+         <property name="title">
+          <string>ImageJ preferences</string>
+         </property>
+         <layout class="QVBoxLayout" name="JavaLayout">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLabel" name="JavaPackageLabel">
+              <property name="text">
+               <string>ImageJ package</string>
+              </property>
+              <property name="buddy">
+               <cstring>JavaImageJButton</cstring>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="JavaImageJButton">
+              <property name="text">
+               <string>ImageJ</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">JavaButtonGroup</string>
+              </attribute>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="JavaFijiButton">
+              <property name="text">
+               <string>Fiji</string>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">JavaButtonGroup</string>
+              </attribute>
+             </widget>
+            </item>
+            <item>
+             <spacer name="JavaSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>10</width>
+                <height>10</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="JavaPathLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="JavaPathToAppFileLabel">
+              <property name="text">
+               <string>Path to app</string>
+              </property>
+              <property name="buddy">
+               <cstring>JavaPathToAppFileTextEdit</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="JavaPathToAppFileTextEdit">
+              <property name="clearButtonEnabled">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QPushButton" name="JavaPathToAppFileBrowseButton">
+              <property name="text">
+               <string>Browse</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="JavaPathToLibFileLabel">
+              <property name="text">
+               <string>Path to lib</string>
+              </property>
+              <property name="buddy">
+               <cstring>JavaPathToLibFileTextEdit</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="JavaPathToLibFileTextEdit">
+              <property name="clearButtonEnabled">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QPushButton" name="JavaPathToLibFileBrowseButton">
+              <property name="text">
+               <string>Browse</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="JavaPathToJarFileLabel">
+              <property name="text">
+               <string>Path to jar</string>
+              </property>
+              <property name="buddy">
+               <cstring>JavaPathToJarFileTextEdit</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="JavaPathToJarFileTextEdit">
+              <property name="clearButtonEnabled">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QPushButton" name="JavaPathToJarFileBrowseButton">
+              <property name="text">
+               <string>Browse</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="JavaNoteLabel">
+            <property name="text">
+             <string>Note: FluoRender must be restarted for Java setting to take affect.
+Note: Bioformats and JVM are required when ImageJ is selected.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="JavaTabSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>PreferencesTabWidget</tabstop>
+  <tabstop>CompressDataCheckBox</tabstop>
+  <tabstop>SaveProjectCheckBox</tabstop>
+  <tabstop>TextrueSizeGroupBox</tabstop>
+  <tabstop>TextureMaxSizeSpinBox</tabstop>
+  <tabstop>PaintUndoRedoSpinBox</tabstop>
+  <tabstop>OpenCLTreeWidget</tabstop>
+  <tabstop>ReduceSampleRateCheckBox</tabstop>
+  <tabstop>DataStreamingGroupBox</tabstop>
+  <tabstop>UpdateOrderBackToFrontButton</tabstop>
+  <tabstop>UpdateOrderFrontToBackButton</tabstop>
+  <tabstop>GraphicsMemorySlider</tabstop>
+  <tabstop>GraphicsMemorySpinBox</tabstop>
+  <tabstop>LargeDataSizeSlider</tabstop>
+  <tabstop>LargeDataSizeSpinBox</tabstop>
+  <tabstop>BrickSizeSlider</tabstop>
+  <tabstop>BrickSizeSpinBox</tabstop>
+  <tabstop>ResponseTimeSlider</tabstop>
+  <tabstop>ResponseTimeSpinBox</tabstop>
+  <tabstop>DetailLevelOffsetSlider</tabstop>
+  <tabstop>DetailLevelOffsetSpinBox</tabstop>
+  <tabstop>AnimationSliderModeComboBox</tabstop>
+  <tabstop>AnimationPauseSpinBox</tabstop>
+  <tabstop>VoxelSizeFromFirstDatasetCheckBox</tabstop>
+  <tabstop>DefaultColor0ComboBox</tabstop>
+  <tabstop>DefaultColor1ComboBox</tabstop>
+  <tabstop>DefaultColor2ComboBox</tabstop>
+  <tabstop>DefaultColor3ComboBox</tabstop>
+  <tabstop>JavaImageJButton</tabstop>
+  <tabstop>JavaFijiButton</tabstop>
+  <tabstop>JavaPathToAppFileTextEdit</tabstop>
+  <tabstop>JavaPathToAppFileBrowseButton</tabstop>
+  <tabstop>JavaPathToLibFileTextEdit</tabstop>
+  <tabstop>JavaPathToLibFileBrowseButton</tabstop>
+  <tabstop>JavaPathToJarFileTextEdit</tabstop>
+  <tabstop>JavaPathToJarFileBrowseButton</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>284</x>
+     <y>649</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>352</x>
+     <y>649</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>JavaFijiButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>JavaFijiButtonToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>275</x>
+     <y>85</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>475</x>
+     <y>90</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>JavaImageJButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>JavaImageJButtonToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>223</x>
+     <y>85</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>53</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>JavaPathToAppFileTextEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>JavaPathToAppFileTextEditFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>226</x>
+     <y>121</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>119</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>JavaPathToLibFileTextEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>JavaPathToLibFileTextEditFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>226</x>
+     <y>156</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>161</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>JavaPathToJarFileTextEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>JavaPathToJarFileTextEditFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>226</x>
+     <y>191</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>196</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>JavaPathToAppFileBrowseButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>JavaPathToAppFileBrowseButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>649</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>694</x>
+     <y>109</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>JavaPathToLibFileBrowseButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>JavaPathToLibFileBrowseButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>649</x>
+     <y>161</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>694</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>JavaPathToJarFileBrowseButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>JavaPathToJarFileBrowseButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>649</x>
+     <y>196</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>695</x>
+     <y>181</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ReduceSampleRateCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>ReduceSampleRateToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>56</x>
+     <y>72</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>70</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DataStreamingGroupBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>DataStreamingToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>59</x>
+     <y>138</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>108</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>UpdateOrderBackToFrontButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>UpdateOrderBackToFrontButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>174</x>
+     <y>172</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>152</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>UpdateOrderFrontToBackButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>UpdateOrderFrontToBackButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>288</x>
+     <y>167</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>186</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GraphicsMemorySpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>GraphicsMemoryValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>576</x>
+     <y>204</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>691</x>
+     <y>175</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>LargeDataSizeSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>LargeDataSizeValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>599</x>
+     <y>246</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>693</x>
+     <y>237</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>BrickSizeSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>BrickSizeValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>595</x>
+     <y>280</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>693</x>
+     <y>282</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ResponseTimeSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>ResponseTimeValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>590</x>
+     <y>319</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>693</x>
+     <y>328</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DetailLevelOffsetSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>DetailLevelOffsetValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>595</x>
+     <y>352</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>695</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DetailLevelOffsetSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>DetailLevelOffsetSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>194</x>
+     <y>348</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>7</x>
+     <y>359</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ResponseTimeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>ResponseTimeSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>194</x>
+     <y>317</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>317</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>BrickSizeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>BrickSizeSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>192</x>
+     <y>279</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>269</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>LargeDataSizeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>LargeDataSizeSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>203</x>
+     <y>240</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>238</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GraphicsMemorySlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>GraphicsMemorySliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>226</x>
+     <y>205</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>221</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>VoxelSizeFromFirstDatasetCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>VoxelSizeFromFirstDatasetToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>93</x>
+     <y>70</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>97</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DefaultColor0ComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>DefaultColor0ComboBoxIndexChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>94</x>
+     <y>140</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>7</x>
+     <y>146</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DefaultColor1ComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>DefaultColor1ComboBoxIndexChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>270</x>
+     <y>145</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>49</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DefaultColor2ComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>DefaultColor2ComboBoxIndexChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>447</x>
+     <y>138</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>695</x>
+     <y>96</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DefaultColor3ComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>DefaultColor3ComboBoxIndexChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>574</x>
+     <y>147</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>693</x>
+     <y>140</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AnimationPauseSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>AnimationPauseValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>379</x>
+     <y>534</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>8</x>
+     <y>609</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AnimationSliderModeComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>QvisPreferencesDialog</receiver>
+   <slot>AnimationSliderModeChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>148</x>
+     <y>536</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>8</x>
+     <y>538</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>CompressDataToggled(bool)</slot>
+  <slot>TextrueSizeToggled(bool)</slot>
+  <slot>TextureMaxSizeValueChanged(int)</slot>
+  <slot>PaintUndoRedoValueChanged(int)</slot>
+  <slot>ReduceSampleRateToggled(bool)</slot>
+  <slot>DataStreamingToggled(bool)</slot>
+  <slot>UpdateOrderBackToFrontButtonClicked()</slot>
+  <slot>UpdateOrderFrontToBackButtonClicked()</slot>
+  <slot>GraphicsMemorySliderChanged(int)</slot>
+  <slot>GraphicsMemoryValueChanged(int)</slot>
+  <slot>LargeDataSizeSliderChanged(int)</slot>
+  <slot>LargeDataSizeValueChanged(int)</slot>
+  <slot>BrickSizeSliderChanged(int)</slot>
+  <slot>BrickSizeValueChanged(int)</slot>
+  <slot>ResponseTimeSliderChanged(int)</slot>
+  <slot>ResponseTimeValueChanged(int)</slot>
+  <slot>DetailLevelOffsetSliderChanged(int)</slot>
+  <slot>DetailLevelOffsetValueChanged(int)</slot>
+  <slot>VoxelSizeFromFirstDatasetToggled(bool)</slot>
+  <slot>DefaultColor0ComboBoxIndexChanged(int)</slot>
+  <slot>DefaultColor1ComboBoxIndexChanged(int)</slot>
+  <slot>DefaultColor2ComboBoxIndexChanged(int)</slot>
+  <slot>DefaultColor3ComboBoxIndexChanged(int)</slot>
+  <slot>JavaImageJButtonToggled(bool)</slot>
+  <slot>JavaFijiButtonToggled(bool)</slot>
+  <slot>JavaPathToAppFileTextEditFinished()</slot>
+  <slot>JavaPathToAppFileBrowseButtonClicked()</slot>
+  <slot>JavaPathToLibFileTextEditFinished()</slot>
+  <slot>JavaPathToLibFileBrowseButtonClicked()</slot>
+  <slot>JavaPathToJarFileTextEditFinished()</slot>
+  <slot>JavaPathToJarFileBrowseButtonClicked()</slot>
+  <slot>SaveRestoreWindowLayoutToggled(bool)</slot>
+  <slot>AnimationPauseValueChanged(int)</slot>
+  <slot>AnimationSliderModeChanged(int)</slot>
+ </slots>
+ <buttongroups>
+  <buttongroup name="UpdateOrderButtonGroup"/>
+  <buttongroup name="JavaButtonGroup"/>
+ </buttongroups>
+</ui>

@@ -1,0 +1,1322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisClipDialog</class>
+ <widget class="QDialog" name="QvisClipDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>502</width>
+    <height>375</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Clipping Planes</string>
+  </property>
+  <layout class="QVBoxLayout" name="MainLayout">
+   <item>
+    <widget class="QTabWidget" name="ClippingTabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="ClippingPlanesTab">
+      <attribute name="title">
+       <string>Clipping Planes</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <layout class="QGridLayout" name="PlaneLayout">
+         <item row="1" column="0">
+          <widget class="QLabel" name="YPlaneLabel">
+           <property name="text">
+            <string>Y</string>
+           </property>
+           <property name="buddy">
+            <cstring>YPlaneStartSpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="7">
+          <widget class="QSpinBox" name="XPlaneSlabSpinBox">
+           <property name="toolTip">
+            <string>X slab width</string>
+           </property>
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="value">
+            <number>100</number>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="Line" name="ZPlaneStartLine">
+           <property name="styleSheet">
+            <string notr="true">background-color: blue</string>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QSpinBox" name="XPlaneStartSpinBox">
+           <property name="toolTip">
+            <string>X plane start location</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="5">
+          <widget class="QSpinBox" name="XPlaneEndSpinBox">
+           <property name="toolTip">
+            <string>X plane end location</string>
+           </property>
+           <property name="value">
+            <number>99</number>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="ZPlaneLabel">
+           <property name="text">
+            <string>Z</string>
+           </property>
+           <property name="buddy">
+            <cstring>ZPlaneStartSpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="6">
+          <widget class="QLabel" name="XPlaneSlabLabel">
+           <property name="toolTip">
+            <string>Set X slab width</string>
+           </property>
+           <property name="text">
+            <string>Slab width</string>
+           </property>
+           <property name="buddy">
+            <cstring>XPlaneSlabSpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="5">
+          <widget class="QSpinBox" name="ZPlaneEndSpinBox">
+           <property name="toolTip">
+            <string>Z plane end location</string>
+           </property>
+           <property name="value">
+            <number>99</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="5">
+          <widget class="QSpinBox" name="YPlaneEndSpinBox">
+           <property name="toolTip">
+            <string>Y plane end location</string>
+           </property>
+           <property name="value">
+            <number>99</number>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="XPlaneLabel">
+           <property name="text">
+            <string>X</string>
+           </property>
+           <property name="buddy">
+            <cstring>XPlaneStartSpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3">
+          <widget class="QvisRangeSlider" name="YPlaneSlider">
+           <property name="minimum" stdset="0">
+            <number>0</number>
+           </property>
+           <property name="maximum" stdset="0">
+            <number>99</number>
+           </property>
+           <property name="lowerValue" stdset="0">
+            <number>0</number>
+           </property>
+           <property name="upperValue" stdset="0">
+            <number>99</number>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="3">
+          <widget class="QvisRangeSlider" name="ZPlaneSlider">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimum" stdset="0">
+            <number>0</number>
+           </property>
+           <property name="maximum" stdset="0">
+            <number>99</number>
+           </property>
+           <property name="lowerValue" stdset="0">
+            <number>0</number>
+           </property>
+           <property name="upperValue" stdset="0">
+            <number>99</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="6">
+          <widget class="QLabel" name="YPlaneSlabLabel">
+           <property name="text">
+            <string>Slab width</string>
+           </property>
+           <property name="buddy">
+            <cstring>YPlaneSlabSpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="8">
+          <widget class="QCheckBox" name="YPlaneSlabLockCheckBox">
+           <property name="toolTip">
+            <string>Lock Y slab width</string>
+           </property>
+           <property name="text">
+            <string>Lock slab width</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="6">
+          <widget class="QLabel" name="ZPlaneSlabLabel">
+           <property name="text">
+            <string>Slab width</string>
+           </property>
+           <property name="buddy">
+            <cstring>ZPlaneSlabSpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QSpinBox" name="YPlaneStartSpinBox">
+           <property name="toolTip">
+            <string>Y plane start location</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="8">
+          <widget class="QCheckBox" name="ZPlaneSlabLockCheckBox">
+           <property name="toolTip">
+            <string>Lock Z slab width</string>
+           </property>
+           <property name="text">
+            <string>Lock slab width</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="7">
+          <widget class="QSpinBox" name="YPlaneSlabSpinBox">
+           <property name="toolTip">
+            <string>Y slab width</string>
+           </property>
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="value">
+            <number>100</number>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QSpinBox" name="ZPlaneStartSpinBox">
+           <property name="toolTip">
+            <string>Z plane start location</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="7">
+          <widget class="QSpinBox" name="ZPlaneSlabSpinBox">
+           <property name="toolTip">
+            <string>Z slab width</string>
+           </property>
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="value">
+            <number>100</number>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="8">
+          <widget class="QCheckBox" name="XPlaneSlabLockCheckBox">
+           <property name="toolTip">
+            <string>Lock X slab width</string>
+           </property>
+           <property name="text">
+            <string>Lock slab width</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="Line" name="YPlaneStartLine">
+           <property name="styleSheet">
+            <string notr="true">background-color: green</string>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="Line" name="XPlaneStartLine">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: red</string>
+           </property>
+           <property name="lineWidth">
+            <number>1</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QvisRangeSlider" name="XPlaneSlider">
+           <property name="minimum" stdset="0">
+            <number>0</number>
+           </property>
+           <property name="maximum" stdset="0">
+            <number>99</number>
+           </property>
+           <property name="lowerValue" stdset="0">
+            <number>0</number>
+           </property>
+           <property name="upperValue" stdset="0">
+            <number>99</number>
+           </property>
+           <property name="orientation" stdset="0">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="4">
+          <widget class="Line" name="XPlaneEndLine">
+           <property name="styleSheet">
+            <string notr="true">background-color: magenta</string>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="4">
+          <widget class="Line" name="YPlaneEndLine">
+           <property name="styleSheet">
+            <string notr="true">background-color: yellow</string>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="4">
+          <widget class="Line" name="ZPlaneEndLine">
+           <property name="styleSheet">
+            <string notr="true">background-color: cyan</string>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="ClippingPlanesMiscLayout">
+         <item>
+          <widget class="QPushButton" name="ResetPlanesButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Reset the clipping planes</string>
+           </property>
+           <property name="text">
+            <string>Reset clipping planes</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="ClippingPlanesMiscSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="ClippingPlaneOrientationTab">
+      <attribute name="title">
+       <string>Plane Orientation</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="ClippingPlaneOrientationTabLayout">
+       <item>
+        <layout class="QGridLayout" name="PlaneOrientationAxisLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="XPlaneOrientationLabel">
+           <property name="text">
+            <string>X</string>
+           </property>
+           <property name="buddy">
+            <cstring>XPlaneOrientationSpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QSlider" name="XPlaneOrientationSlider">
+           <property name="toolTip">
+            <string>Set the X plane orientation</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="minimum">
+            <number>-180</number>
+           </property>
+           <property name="maximum">
+            <number>180</number>
+           </property>
+           <property name="tracking">
+            <bool>true</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QSpinBox" name="XPlaneOrientationSpinBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Set the X plane orientation</string>
+           </property>
+           <property name="minimum">
+            <number>-180</number>
+           </property>
+           <property name="maximum">
+            <number>180</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="YPlaneOrientationLabel">
+           <property name="text">
+            <string>Y</string>
+           </property>
+           <property name="buddy">
+            <cstring>YPlaneOrientationSpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QSlider" name="YPlaneOrientationSlider">
+           <property name="toolTip">
+            <string>Set the Y plane orientation</string>
+           </property>
+           <property name="minimum">
+            <number>-180</number>
+           </property>
+           <property name="maximum">
+            <number>180</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QSpinBox" name="YPlaneOrientationSpinBox">
+           <property name="toolTip">
+            <string>Set the Y plane orientation</string>
+           </property>
+           <property name="minimum">
+            <number>-180</number>
+           </property>
+           <property name="maximum">
+            <number>180</number>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="ZPlaneOrientationLabel">
+           <property name="text">
+            <string>Z</string>
+           </property>
+           <property name="buddy">
+            <cstring>ZPlaneOrientationSpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QSlider" name="ZPlaneOrientationSlider">
+           <property name="toolTip">
+            <string>Set the Z plane orientation</string>
+           </property>
+           <property name="minimum">
+            <number>-180</number>
+           </property>
+           <property name="maximum">
+            <number>180</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QSpinBox" name="ZPlaneOrientationSpinBox">
+           <property name="toolTip">
+            <string>Set the Z plane orientation</string>
+           </property>
+           <property name="minimum">
+            <number>-180</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="PlaneOrientationButtonLayout">
+         <item>
+          <widget class="QPushButton" name="ResetOrientationButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Reset the plane orientation</string>
+           </property>
+           <property name="text">
+            <string>Reset Plane Orientation</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="PlaneOrientationButtonSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="AlignToViewButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Aligh the plane orientation to the current view</string>
+           </property>
+           <property name="text">
+            <string>Align to View</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="ClippingGridLayout">
+     <item row="2" column="0">
+      <widget class="QCheckBox" name="AlwaysDisplayCheckBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>Always display the clippng planes</string>
+       </property>
+       <property name="text">
+        <string>Always display the clippng planes</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="PlaneModeLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Clipping plane display mode</string>
+         </property>
+         <property name="buddy">
+          <cstring>PlaneModeComboBox</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="PlaneModeComboBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Set the clipping plane display mode</string>
+         </property>
+         <item>
+          <property name="text">
+           <string>None</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Wire frame</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Colored cube</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="1" column="0">
+      <widget class="QCheckBox" name="ApplytoAllCheckBox">
+       <property name="toolTip">
+        <string>Apply the clipping planes to all data channels </string>
+       </property>
+       <property name="text">
+        <string>Apply the clipping planes to all data channels </string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <spacer name="ClippingGridSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>10</width>
+         <height>10</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="ButtonLayout">
+     <item>
+      <widget class="QPushButton" name="ResetAllButton">
+       <property name="text">
+        <string>Reset All</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="MakeDefaultButton">
+       <property name="text">
+        <string>Make Default</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="ButtonSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>10</width>
+         <height>10</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>10</width>
+       <height>10</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QvisRangeSlider</class>
+   <extends>QWidget</extends>
+   <header>QvisRangeSlider.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>ClippingTabWidget</tabstop>
+  <tabstop>XPlaneStartSpinBox</tabstop>
+  <tabstop>XPlaneEndSpinBox</tabstop>
+  <tabstop>XPlaneSlabSpinBox</tabstop>
+  <tabstop>XPlaneSlabLockCheckBox</tabstop>
+  <tabstop>YPlaneStartSpinBox</tabstop>
+  <tabstop>YPlaneEndSpinBox</tabstop>
+  <tabstop>YPlaneSlabSpinBox</tabstop>
+  <tabstop>YPlaneSlabLockCheckBox</tabstop>
+  <tabstop>ZPlaneStartSpinBox</tabstop>
+  <tabstop>ZPlaneEndSpinBox</tabstop>
+  <tabstop>ZPlaneSlabSpinBox</tabstop>
+  <tabstop>ZPlaneSlabLockCheckBox</tabstop>
+  <tabstop>ResetPlanesButton</tabstop>
+  <tabstop>XPlaneOrientationSlider</tabstop>
+  <tabstop>XPlaneOrientationSpinBox</tabstop>
+  <tabstop>YPlaneOrientationSlider</tabstop>
+  <tabstop>YPlaneOrientationSpinBox</tabstop>
+  <tabstop>ZPlaneOrientationSlider</tabstop>
+  <tabstop>ZPlaneOrientationSpinBox</tabstop>
+  <tabstop>ResetOrientationButton</tabstop>
+  <tabstop>AlignToViewButton</tabstop>
+  <tabstop>PlaneModeComboBox</tabstop>
+  <tabstop>ApplytoAllCheckBox</tabstop>
+  <tabstop>AlwaysDisplayCheckBox</tabstop>
+  <tabstop>ResetAllButton</tabstop>
+  <tabstop>MakeDefaultButton</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>MakeDefaultButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>MakeDefaultClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>217</x>
+     <y>291</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>101</x>
+     <y>311</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ResetAllButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>ResetAllClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>91</x>
+     <y>291</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>311</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ResetOrientationButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>ResetOrientationClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>324</x>
+     <y>186</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>604</x>
+     <y>251</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AlignToViewButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>AlignToViewClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>143</x>
+     <y>186</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>605</x>
+     <y>212</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZPlaneOrientationSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>ZPlaneOrientationValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>578</x>
+     <y>141</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>605</x>
+     <y>134</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>YPlaneOrientationSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>YPlaneOrientationValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>594</x>
+     <y>104</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>97</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>XPlaneOrientationSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>XPlaneOrientationValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>561</x>
+     <y>61</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>605</x>
+     <y>62</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZPlaneOrientationSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>ZPlaneOrientationSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>68</x>
+     <y>139</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>8</x>
+     <y>144</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>YPlaneOrientationSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>YPlaneOrientationSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>61</x>
+     <y>100</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>97</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>XPlaneOrientationSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>XPlaneOrientationSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>59</x>
+     <y>61</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>58</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ResetPlanesButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>ResetPlanesClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>594</x>
+     <y>225</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>604</x>
+     <y>285</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ApplytoAllCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>ApplytoAllToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>167</x>
+     <y>217</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>267</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AlwaysDisplayCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>AlwaysDisplayToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>554</x>
+     <y>72</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>9</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>PlaneModeComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>PlaneDisplayModeChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>240</x>
+     <y>73</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>7</x>
+     <y>53</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZPlaneSlabLockCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>ZPlaneSlabLockToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>595</x>
+     <y>178</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>604</x>
+     <y>207</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>YPlaneSlabLockCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>YPlaneSlabLockToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>595</x>
+     <y>147</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>605</x>
+     <y>160</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>XPlaneSlabLockCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>XPlaneSlabLockToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>595</x>
+     <y>116</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>604</x>
+     <y>125</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>XPlaneSlabSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>XPlaneSlabValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>467</x>
+     <y>116</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>604</x>
+     <y>90</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>YPlaneSlabSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>YPlaneSlabValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>467</x>
+     <y>147</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>605</x>
+     <y>190</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZPlaneSlabSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>ZPlaneSlabValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>467</x>
+     <y>178</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>603</x>
+     <y>243</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZPlaneStartSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>ZPlaneStartValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>88</x>
+     <y>178</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>220</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>YPlaneStartSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>YPlaneStartValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>88</x>
+     <y>147</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>7</x>
+     <y>175</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>XPlaneStartSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>XPlaneStartValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>88</x>
+     <y>116</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>134</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZPlaneEndSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>ZPlaneEndValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>345</x>
+     <y>178</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>607</x>
+     <y>311</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>YPlaneEndSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>YPlaneEndValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>345</x>
+     <y>147</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>607</x>
+     <y>311</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>XPlaneEndSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>XPlaneEndValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>345</x>
+     <y>116</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>605</x>
+     <y>51</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>XPlaneSlider</sender>
+   <signal>lowerValueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>XPlaneSliderLowerChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>132</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>7</x>
+     <y>85</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>YPlaneSlider</sender>
+   <signal>lowerValueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>YPlaneSliderLowerChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>117</x>
+     <y>145</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>3</x>
+     <y>202</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZPlaneSlider</sender>
+   <signal>lowerValueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>ZPlaneSliderLowerChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>180</x>
+     <y>175</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>2</x>
+     <y>246</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>XPlaneSlider</sender>
+   <signal>upperValueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>XPlaneSliderUpperChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>284</x>
+     <y>108</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>7</x>
+     <y>10</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>YPlaneSlider</sender>
+   <signal>upperValueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>YPlaneSliderUpperChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>240</x>
+     <y>144</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>226</x>
+     <y>294</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ZPlaneSlider</sender>
+   <signal>upperValueChanged(int)</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>ZPlaneSliderUpperChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>225</x>
+     <y>177</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>622</x>
+     <y>262</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ResetPlanesButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisClipDialog</receiver>
+   <slot>ResetPlanesClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>550</x>
+     <y>211</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>623</x>
+     <y>224</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>MakeDefaultClicked()</slot>
+  <slot>ResetAllClicked()</slot>
+  <slot>AlignToViewClicked()</slot>
+  <slot>ResetOrientationClicked()</slot>
+  <slot>XPlaneOrientationValueChanged(int)</slot>
+  <slot>XPlaneOrientationSliderChanged(int)</slot>
+  <slot>YPlaneOrientationValueChanged(int)</slot>
+  <slot>YPlaneOrientationSliderChanged(int)</slot>
+  <slot>ZPlaneOrientationValueChanged(int)</slot>
+  <slot>ZPlaneOrientationSliderChanged(int)</slot>
+  <slot>PlaneDisplayModeChanged(int)</slot>
+  <slot>AlwaysDisplayToggled(bool)</slot>
+  <slot>ApplytoAllToggled(bool)</slot>
+  <slot>ResetPlanesClicked()</slot>
+  <slot>XPlaneStartValueChanged(int)</slot>
+  <slot>XPlaneEndValueChanged(int)</slot>
+  <slot>XPlaneSliderUpperChanged(int)</slot>
+  <slot>XPlaneSliderLowerChanged(int)</slot>
+  <slot>XPlaneSlabValueChanged(int)</slot>
+  <slot>XPlaneSlabLockToggled(bool)</slot>
+  <slot>YPlaneStartValueChanged(int)</slot>
+  <slot>YPlaneEndValueChanged(int)</slot>
+  <slot>YPlaneSliderUpperChanged(int)</slot>
+  <slot>YPlaneSliderLowerChanged(int)</slot>
+  <slot>YPlaneSlabValueChanged(int)</slot>
+  <slot>YPlaneSlabLockToggled(bool)</slot>
+  <slot>ZPlaneStartValueChanged(int)</slot>
+  <slot>ZPlaneEndValueChanged(int)</slot>
+  <slot>ZPlaneSliderUpperChanged(int)</slot>
+  <slot>ZPlaneSliderLowerChanged(int)</slot>
+  <slot>ZPlaneSlabValueChanged(int)</slot>
+  <slot>ZPlaneSlabLockToggled(bool)</slot>
+ </slots>
+</ui>

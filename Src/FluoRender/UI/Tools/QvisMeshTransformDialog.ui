@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisMeshTransformDialog</class>
+ <widget class="QDialog" name="QvisMeshTransformDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>332</width>
+    <height>221</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Mesh Transform</string>
+  </property>
+  <layout class="QVBoxLayout" name="MainLayout">
+   <item>
+    <widget class="QGroupBox" name="TranlateGroupBox">
+     <property name="title">
+      <string>Translate</string>
+     </property>
+     <layout class="QHBoxLayout" name="TranslateLayout">
+      <item>
+       <widget class="QLabel" name="TranslateXLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>X</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="TranslateXSpinBox">
+        <property name="minimum">
+         <double>-99.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="TranslateYLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Y</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="TranslateYSpinBox">
+        <property name="minimum">
+         <double>-99.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="TranslateZLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Z</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="TranslateZSpinBox">
+        <property name="minimum">
+         <double>-99.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="RotateGroupBox">
+     <property name="title">
+      <string>Rotate</string>
+     </property>
+     <layout class="QHBoxLayout" name="RotateLayout">
+      <item>
+       <widget class="QLabel" name="RotateXLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>X</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="RotateXSpinBox">
+        <property name="minimum">
+         <double>-180.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>180.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="RotateYLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Y</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="RotateYSpinBox">
+        <property name="minimum">
+         <double>-180.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>180.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="RotateZLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Z</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="RotateZSpinBox">
+        <property name="minimum">
+         <double>-180.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="ScaleGroupBox">
+     <property name="title">
+      <string>Scale</string>
+     </property>
+     <layout class="QHBoxLayout" name="ScaleLayout">
+      <item>
+       <widget class="QLabel" name="ScaleXLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>X</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="ScaleXSpinBox">
+        <property name="minimum">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="ScaleYLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Y</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="ScaleYSpinBox">
+        <property name="minimum">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="ScaleZLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Z</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="ScaleZSpinBox">
+        <property name="minimum">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>TranslateXSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisMeshTransformDialog</receiver>
+   <slot>TranslateXChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>79</x>
+     <y>43</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>165</x>
+     <y>110</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TranslateYSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisMeshTransformDialog</receiver>
+   <slot>TranslateYChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>79</x>
+     <y>43</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>165</x>
+     <y>110</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TranslateZSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisMeshTransformDialog</receiver>
+   <slot>TranslateZChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>79</x>
+     <y>43</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>165</x>
+     <y>110</y>
+    </hint>
+   </hints>
+  </connection>
+
+  <connection>
+   <sender>RotateXSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisMeshTransformDialog</receiver>
+   <slot>RotateXChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>79</x>
+     <y>43</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>165</x>
+     <y>110</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>RotateYSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisMeshTransformDialog</receiver>
+   <slot>RotateYChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>79</x>
+     <y>43</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>165</x>
+     <y>110</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>RotateZSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisMeshTransformDialog</receiver>
+   <slot>RotateZChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>79</x>
+     <y>43</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>165</x>
+     <y>110</y>
+    </hint>
+   </hints>
+  </connection>
+
+   <connection>
+   <sender>ScaleXSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisMeshTransformDialog</receiver>
+   <slot>ScaleXChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>79</x>
+     <y>43</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>165</x>
+     <y>110</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ScaleYSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisMeshTransformDialog</receiver>
+   <slot>ScaleYChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>79</x>
+     <y>43</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>165</x>
+     <y>110</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ScaleZSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>QvisMeshTransformDialog</receiver>
+   <slot>ScaleZChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>79</x>
+     <y>43</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>165</x>
+     <y>110</y>
+    </hint>
+   </hints>
+  </connection>
+</connections>
+ <slots>
+  <slot>TranslateXChanged(double)</slot>
+  <slot>TranslateYChanged(double)</slot>
+  <slot>TranslateZChanged(double)</slot>
+  <slot>RotateXChanged(double)</slot>
+  <slot>RotateYChanged(double)</slot>
+  <slot>RotateZChanged(double)</slot>
+  <slot>ScaleXChanged(double)</slot>
+  <slot>ScaleYChanged(double)</slot>
+  <slot>ScaleZChanged(double)</slot>
+ </slots>
+</ui>
