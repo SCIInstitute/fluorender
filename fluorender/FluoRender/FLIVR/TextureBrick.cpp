@@ -441,7 +441,7 @@ namespace flvr
 				delete[] ptr;
 				return NULL;
 			}
-			brkdata_ = (void *)ptr;
+			brkdata_ = (char*)ptr;
 		}
 		return ptr;
 	}

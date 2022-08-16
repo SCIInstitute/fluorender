@@ -214,8 +214,8 @@ namespace flvr {
 		int get_id_in_loadedbrks() { return id_in_loadedbrks; }
 		int getID() { return findex_; }
 
-		void set_brkdata(void *brkdata) { brkdata_ = brkdata; }
-		const void *getBrickData() { return brkdata_; }
+		void set_brkdata(char *brkdata) { brkdata_ = brkdata; }
+		const char *getBrickData() { return brkdata_; }
 		static bool read_brick_without_decomp(char* &data, size_t &readsize, FileLocInfo* finfo, wxThread *th = NULL);
 
 		void set_disp(bool disp) { disp_ = disp; }
@@ -287,7 +287,7 @@ namespace flvr {
 		int findex_;
 		long long offset_;
 		long long fsize_;
-		void *brkdata_;
+		char *brkdata_;
 		bool loading_;
 		int id_in_loadedbrks;
 		bool disp_;
