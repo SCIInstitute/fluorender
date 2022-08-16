@@ -265,7 +265,7 @@ void Diffusion::ReleaseMask(void* val, size_t brick_num, flvr::TextureBrick* b)
 		}
 		tp += b->sx()*b->sy()*nb;
 	}
-	delete[] val;
+	delete[] (unsigned char *) val;
 }
 
 void Diffusion::Init(fluo::Point &ip, double ini_thresh)
