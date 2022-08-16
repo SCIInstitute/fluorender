@@ -42,7 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VolCalShader.h"
 #include "TextRenderer.h"
 #include "MultiVolumeRenderer.h"
-#include "Converters/VolumeMeshConv.h"
+#include "VolumeMeshConv.h"
 #include "compatibility_utilities.h"
 
 FuiManager::FuiManager() :
