@@ -34,7 +34,6 @@ DEALINGS IN THE SOFTWARE.
 //#include "RenderCanvas.h"
 #include "SearchVisitor.hpp"
 #include "RenderCanvasAgent.hpp"
-#include "icons.h"
 
 using namespace fluo;
 

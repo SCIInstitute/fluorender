@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #include "AgentFactory.hpp"
 //#include "VolumePropPanel.h"
 #include "VolumeFactory.hpp"
-#include "icons.h"
 
 using namespace fluo;
 

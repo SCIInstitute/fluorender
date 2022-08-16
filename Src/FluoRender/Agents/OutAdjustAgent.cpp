@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 //#include "OutAdjustPanel.h"
 #include "VolumeFactory.hpp"
 //#include "png_resource.h"
-#include "icons.h"
 
 using namespace fluo;
 
