@@ -1037,7 +1037,7 @@ void ChannelCompare::Average(float weight, flvr::Argument& avg)
 		if (!avg.buffer)
 		{
 			sum = new float[nxyz];
-			std::memset(sum, 0, sizeof sum);
+			std::memset(sum, 0, sizeof(float)*(nxyz));
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(nxyz), (void*)(sum));
 		}
 		else
