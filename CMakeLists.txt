@@ -47,21 +47,21 @@ set(FLUORENDER_VERSION_MINOR 0)
 set(FLUORENDER_VERSION_PATCH 0)
 set(FLUORENDER_VERSION_COPYRIGHT "December 2022")
 
-set(FLUORENDER_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(FLUORENDER_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
+set(FLUORENDER_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Src/FluoRender)
+set(FLUORENDER_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/Src/FluoRender)
 
 # Set up easy to use includes for the common directory
 SET(FLUORENDER_COMMON_INCLUDES
-    ${FLUORENDER_SOURCE_DIR}/FluoRender
-    ${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/include
-    ${FLUORENDER_BINARY_DIR}/FluoRender/FluoRender/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/Src
+    ${FLUORENDER_SOURCE_DIR}/include
+    ${FLUORENDER_BINARY_DIR}/include
 )
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 ############################# ARS
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${FLUORENDER_SOURCE_DIR}/CMake")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 
 if(APPLE)
   set(ARCHITECTURE 64)
@@ -191,7 +191,7 @@ endif()
 
 # Use the FluoRender specific Findqtadvanceddocking.cmake as the
 # default qtadvanceddockingConfig.cmake does not set everything needed.
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${FLUORENDER_SOURCE_DIR}/CMake)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
 #set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${qtadvanceddocking_DIR}/lib/cmake/qtadvanceddocking)
 
 # Qt needs this package.
@@ -250,7 +250,7 @@ endif()
 
 # Sets up the FluoRender HAVE_* specific defines - must be done after
 # all packages are found.
-CONFIGURE_FILE(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/include/fluorender-cmake.h.in
+CONFIGURE_FILE(${FLUORENDER_SOURCE_DIR}/include/fluorender-cmake.h.in
                ${FLUORENDER_BINARY_DIR}/FluoRender/FluoRender/include/fluorender-config.h @ONLY IMMEDIATE)
 
 ############################# ARS
@@ -278,11 +278,11 @@ if(ZLIB_FOUND)
   add_definitions(-DTEEM_ZLIB=1)
 endif()
 
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/teem)
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/teem/Biff)
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/teem/Air)
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/teem/Hest)
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/teem/Nrrd)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/teem)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Biff)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Air)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Hest)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Nrrd)
 file(GLOB air_src FluoRender/teem/Air/*.c)
 file(GLOB air_hdr FluoRender/teem/Air/*.h)
 file(GLOB hest_src FluoRender/teem/Hest/*.c)
@@ -295,226 +295,231 @@ add_library(TEEM_OBJ OBJECT ${air_src} ${hest_src} ${nrrd_src} ${biff_src}
                             ${air_hdr} ${hest_hdr} ${nrrd_hdr} ${biff_hdr})
 
 # eigen
-#include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/Eigen)
+#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/Eigen)
 
 # glew
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/glew)
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/glew/GL)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/glew)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/glew/GL)
 file(GLOB gl_srcs FluoRender/glew/*.c)
 file(GLOB gl_hdrs1 FluoRender/glew/*.h)
 file(GLOB gl_hdrs2 FluoRender/glew/GL/*.h)
 add_library(GLEW_OBJ OBJECT ${gl_srcs} ${gl_hdrs1} ${gl_hdrs2})
 
 # pole
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/pole)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/pole)
 file(GLOB pole_srcs FluoRender/pole/pole.cpp)
 file(GLOB pole_hdrs FluoRender/pole/pole.h)
 add_library(POLE_OBJ OBJECT ${pole_srcs} ${pole_hdrs})
 
 # ffmpeg
 if(WIN32)
-  include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/ffmpeg/include)
-  file(GLOB FFMPEG_LIBRARIES ${FLUORENDER_SOURCE_DIR}/FluoRender/ffmpeg/lib/Win64/*.a ${FLUORENDER_SOURCE_DIR}/FluoRender/ffmpeg/lib/Win64/*.lib)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/ffmpeg/include)
+  file(GLOB FFMPEG_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/ffmpeg/lib/Win64/*.a ${CMAKE_CURRENT_SOURCE_DIR}/Src/ffmpeg/lib/Win64/*.lib)
   add_definitions(-D__STDC_CONSTANT_MACROS)
 elseif(APPLE)
-  include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/ffmpeg/include)
-  file(GLOB FFMPEG_LIBRARIES ${FLUORENDER_SOURCE_DIR}/FluoRender/ffmpeg/lib/OSX/*.a)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/ffmpeg/include)
+  file(GLOB FFMPEG_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/ffmpeg/lib/OSX/*.a)
 endif()
 
 ############################# ARS
 
+# Main sources
+file(GLOB main_src ${FLUORENDER_SOURCE_DIR}/Main/*.cpp)
+file(GLOB main_hdr ${FLUORENDER_SOURCE_DIR}/Main/*.h)
+file(GLOB img_rsc ${FLUORENDER_SOURCE_DIR}/img/*.xpm)
+
 # Utilities
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Utilities)
-file(GLOB utilities_src FluoRender/FluoRender/Utilities/*.cpp)
-file(GLOB utilities_hdr FluoRender/FluoRender/Utilities/*.h)
+include_directories(${FLUORENDER_SOURCE_DIR}/Utilities)
+file(GLOB utilities_src ${FLUORENDER_SOURCE_DIR}/Utilities/*.cpp)
+file(GLOB utilities_hdr ${FLUORENDER_SOURCE_DIR}/Utilities/*.h)
 add_library(UTILITIES_OBJ OBJECT
   ${utilities_src} ${utilities_hdr})
 
 # Agents
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Agents)
-file(GLOB agt_src FluoRender/FluoRender/Agents/*.cpp)
-file(GLOB agt_hdr FluoRender/FluoRender/Agents/*.hpp)
+include_directories(${FLUORENDER_SOURCE_DIR}/Agents)
+file(GLOB agt_src ${FLUORENDER_SOURCE_DIR}/Agents/*.cpp)
+file(GLOB agt_hdr ${FLUORENDER_SOURCE_DIR}/Agents/*.hpp)
 add_library(AGENTS_OBJ OBJECT
   ${agt_src} ${agt_hdr})
 
 # Animators
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Animator)
-file(GLOB ani_src FluoRender/FluoRender/Animator/*.cpp)
-file(GLOB ani_hdr FluoRender/FluoRender/Animator/*.h)
+include_directories(${FLUORENDER_SOURCE_DIR}/Animator)
+file(GLOB ani_src ${FLUORENDER_SOURCE_DIR}/Animator/*.cpp)
+file(GLOB ani_hdr ${FLUORENDER_SOURCE_DIR}/Animator/*.h)
 add_library(ANIMATORS_OBJ OBJECT
   ${ani_src} ${ani_hdr})
 
 # Calculate
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Calculate)
-file(GLOB calc_src FluoRender/FluoRender/Calculate/*.cpp)
-file(GLOB calc_hdr FluoRender/FluoRender/Calculate/*.h)
+include_directories(${FLUORENDER_SOURCE_DIR}/Calculate)
+file(GLOB calc_src ${FLUORENDER_SOURCE_DIR}/Calculate/*.cpp)
+file(GLOB calc_hdr ${FLUORENDER_SOURCE_DIR}/Calculate/*.h)
 add_library(CALCULATE_OBJ OBJECT
   ${calc_src} ${calc_hdr})
 
 # Cluster
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Cluster)
-file(GLOB clstr_src FluoRender/FluoRender/Cluster/*.cpp)
-file(GLOB clstr_hdr FluoRender/FluoRender/Cluster/*.h)
+include_directories(${FLUORENDER_SOURCE_DIR}/Cluster)
+file(GLOB clstr_src ${FLUORENDER_SOURCE_DIR}/Cluster/*.cpp)
+file(GLOB clstr_hdr ${FLUORENDER_SOURCE_DIR}/Cluster/*.h)
 add_library(CLUSTER_OBJ OBJECT
   ${clstr_src} ${clstr_hdr})
 
 # Components
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Components)
-file(GLOB cmp_src FluoRender/FluoRender/Components/*.cpp)
-file(GLOB cmp_hdr FluoRender/FluoRender/Components/*.h)
+include_directories(${FLUORENDER_SOURCE_DIR}/Components)
+file(GLOB cmp_src ${FLUORENDER_SOURCE_DIR}/Components/*.cpp)
+file(GLOB cmp_hdr ${FLUORENDER_SOURCE_DIR}/Components/*.h)
 add_library(COMPONENTS_OBJ OBJECT
   ${cmp_src} ${cmp_hdr})
 
 # Converters
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Converters)
-file(GLOB cvt_src FluoRender/FluoRender/Converters/*.cpp)
-file(GLOB cvt_hdr FluoRender/FluoRender/Converters/*.h)
+include_directories(${FLUORENDER_SOURCE_DIR}/Converters)
+file(GLOB cvt_src ${FLUORENDER_SOURCE_DIR}/Converters/*.cpp)
+file(GLOB cvt_hdr ${FLUORENDER_SOURCE_DIR}/Converters/*.h)
 add_library(CONVERTERS_OBJ OBJECT
   ${cvt_src} ${cvt_hdr})
 
 # Debug
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Debug)
-file(GLOB dbg_src FluoRender/FluoRender/Debug/*.cpp)
-file(GLOB dbg_hdr FluoRender/FluoRender/Debug/*.hpp)
+include_directories(${FLUORENDER_SOURCE_DIR}/Debug)
+file(GLOB dbg_src ${FLUORENDER_SOURCE_DIR}/Debug/*.cpp)
+file(GLOB dbg_hdr ${FLUORENDER_SOURCE_DIR}/Debug/*.hpp)
 add_library(DEBUG_OBJ OBJECT
   ${dbg_src} ${dbg_hdr})
 
 # Distance
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Distance)
-file(GLOB dist_src FluoRender/FluoRender/Distance/*.cpp)
-file(GLOB dist_hdr FluoRender/FluoRender/Distance/*.h)
+include_directories(${FLUORENDER_SOURCE_DIR}/Distance)
+file(GLOB dist_src ${FLUORENDER_SOURCE_DIR}/Distance/*.cpp)
+file(GLOB dist_hdr ${FLUORENDER_SOURCE_DIR}/Distance/*.h)
 add_library(DISTANCE_OBJ OBJECT
   ${dist_src} ${dist_hdr})
 
 # FLIVR
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/FLIVR)
-file(GLOB flivr_src FluoRender/FluoRender/FLIVR/*.cpp)
-file(GLOB flivr_hdr FluoRender/FluoRender/FLIVR/*.h)
+include_directories(${FLUORENDER_SOURCE_DIR}/FLIVR)
+file(GLOB flivr_src ${FLUORENDER_SOURCE_DIR}/FLIVR/*.cpp)
+file(GLOB flivr_hdr ${FLUORENDER_SOURCE_DIR}/FLIVR/*.h)
 add_library(FLIVR_OBJ OBJECT
   ${flivr_src} ${flivr_hdr})
 
 # Flobject
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Flobject)
-file(GLOB obj_src FluoRender/FluoRender/Flobject/*.cpp)
-file(GLOB obj_hdr FluoRender/FluoRender/Flobject/*.hpp)
+include_directories(${FLUORENDER_SOURCE_DIR}/Flobject)
+file(GLOB obj_src ${FLUORENDER_SOURCE_DIR}/Flobject/*.cpp)
+file(GLOB obj_hdr ${FLUORENDER_SOURCE_DIR}/Flobject/*.hpp)
 add_library(FLOBJECT_OBJ OBJECT
   ${obj_src} ${obj_hdr})
 
 # Formats
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Formats)
-file(GLOB fmt_src FluoRender/FluoRender/Formats/*.cpp)
-file(GLOB fmt_hdr FluoRender/FluoRender/Formats/*.h)
-file(GLOB fmt_rsc FluoRender/FluoRender/Formats/*.class)
+include_directories(${FLUORENDER_SOURCE_DIR}/Formats)
+file(GLOB fmt_src ${FLUORENDER_SOURCE_DIR}/Formats/*.cpp)
+file(GLOB fmt_hdr ${FLUORENDER_SOURCE_DIR}/Formats/*.h)
+file(GLOB fmt_rsc ${FLUORENDER_SOURCE_DIR}/Formats/*.class)
 add_library(FORMATS_OBJ OBJECT
   ${fmt_src} ${fmt_hdr} ${fmt_rsc})
 
 # Global
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Global)
-file(GLOB glb_src FluoRender/FluoRender/Global/*.cpp)
-file(GLOB glb_hdr FluoRender/FluoRender/Global/*.hpp)
+include_directories(${FLUORENDER_SOURCE_DIR}/Global)
+file(GLOB glb_src ${FLUORENDER_SOURCE_DIR}/Global/*.cpp)
+file(GLOB glb_hdr ${FLUORENDER_SOURCE_DIR}/Global/*.hpp)
 add_library(GLOBAL_OBJ OBJECT
   ${glb_src} ${glb_hdr})
 
 # images
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/img)
-file(GLOB img_hdr FluoRender/FluoRender/img/*.h)
-file(GLOB img_src FluoRender/FluoRender/img/*.cpp)
+include_directories(${FLUORENDER_SOURCE_DIR}/img)
+file(GLOB img_hdr ${FLUORENDER_SOURCE_DIR}/img/*.h)
+file(GLOB img_src ${FLUORENDER_SOURCE_DIR}/img/*.cpp)
 add_library(IMAGES_OBJ OBJECT
   ${img_hdr} ${img_src})
 
 # Input
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Input)
-file(GLOB input_src FluoRender/FluoRender/Input/*.cpp)
-file(GLOB input_hdr FluoRender/FluoRender/Input/*.hpp)
+include_directories(${FLUORENDER_SOURCE_DIR}/Input)
+file(GLOB input_src ${FLUORENDER_SOURCE_DIR}/Input/*.cpp)
+file(GLOB input_hdr ${FLUORENDER_SOURCE_DIR}/Input/*.hpp)
 add_library(INPUT_OBJ OBJECT
   ${input_src} ${input_hdr})
 
 # Scenegraph
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Scenegraph)
-file(GLOB scg_src FluoRender/FluoRender/Scenegraph/*.cpp)
-file(GLOB scg_hdr FluoRender/FluoRender/Scenegraph/*.hpp)
+include_directories(${FLUORENDER_SOURCE_DIR}/Scenegraph)
+file(GLOB scg_src ${FLUORENDER_SOURCE_DIR}/Scenegraph/*.cpp)
+file(GLOB scg_hdr ${FLUORENDER_SOURCE_DIR}/Scenegraph/*.hpp)
 add_library(SCENEGRAPH_OBJ OBJECT
   ${scg_src} ${scg_hdr})
 
 # Script
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Script)
-file(GLOB scr_src FluoRender/FluoRender/Script/*.cpp)
-file(GLOB scr_hdr FluoRender/FluoRender/Script/*.h)
+include_directories(${FLUORENDER_SOURCE_DIR}/Script)
+file(GLOB scr_src ${FLUORENDER_SOURCE_DIR}/Script/*.cpp)
+file(GLOB scr_hdr ${FLUORENDER_SOURCE_DIR}/Script/*.h)
 add_library(SCRIPT_OBJ OBJECT
   ${scr_src} ${scr_hdr})
 
 # Selection
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Selection)
-file(GLOB sel_src FluoRender/FluoRender/Selection/*.cpp)
-file(GLOB sel_hdr FluoRender/FluoRender/Selection/*.h)
+include_directories(${FLUORENDER_SOURCE_DIR}/Selection)
+file(GLOB sel_src ${FLUORENDER_SOURCE_DIR}/Selection/*.cpp)
+file(GLOB sel_hdr ${FLUORENDER_SOURCE_DIR}/Selection/*.h)
 add_library(SELECTION_OBJ OBJECT
   ${sel_src} ${sel_hdr})
 
 # Timer
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Timer)
-file(GLOB timer_src FluoRender/FluoRender/Timer/*.cpp)
-file(GLOB timer_hdr FluoRender/FluoRender/Timer/*.hpp)
+include_directories(${FLUORENDER_SOURCE_DIR}/Timer)
+file(GLOB timer_src ${FLUORENDER_SOURCE_DIR}/Timer/*.cpp)
+file(GLOB timer_hdr ${FLUORENDER_SOURCE_DIR}/Timer/*.hpp)
 add_library(TIMER_OBJ OBJECT
   ${timer_src} ${timer_hdr})
 
 # Tracking
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Tracking)
-file(GLOB trk_src FluoRender/FluoRender/Tracking/*.cpp)
-file(GLOB trk_hdr FluoRender/FluoRender/Tracking/*.h)
+include_directories(${FLUORENDER_SOURCE_DIR}/Tracking)
+file(GLOB trk_src ${FLUORENDER_SOURCE_DIR}/Tracking/*.cpp)
+file(GLOB trk_hdr ${FLUORENDER_SOURCE_DIR}/Tracking/*.h)
 add_library(TRACKING_OBJ OBJECT
   ${trk_src} ${trk_hdr})
 
 # Types
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Types)
-file(GLOB typ_src FluoRender/FluoRender/Types/*.cpp)
-file(GLOB typ_hdr FluoRender/FluoRender/Types/*.h)
+include_directories(${FLUORENDER_SOURCE_DIR}/Types)
+file(GLOB typ_src ${FLUORENDER_SOURCE_DIR}/Types/*.cpp)
+file(GLOB typ_hdr ${FLUORENDER_SOURCE_DIR}/Types/*.h)
 add_library(TYPES_OBJ OBJECT
   ${typ_src} ${typ_hdr})
 
 # Video
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/FluoRender/Video)
-file(GLOB vid_src FluoRender/FluoRender/Video/*.cpp)
-file(GLOB vid_hdr FluoRender/FluoRender/Video/*.h)
+include_directories(${FLUORENDER_SOURCE_DIR}/Video)
+file(GLOB vid_src ${FLUORENDER_SOURCE_DIR}/Video/*.cpp)
+file(GLOB vid_hdr ${FLUORENDER_SOURCE_DIR}/Video/*.h)
 add_library(VIDEO_OBJ OBJECT
   ${vid_src} ${vid_hdr})
 
 # OpenCL
 if(WIN32)
-  include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/OpenCL/include)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/OpenCL/include)
   if(${ARCHITECTURE} MATCHES 64)
-    file(GLOB OpenCL_LIBRARIES ${FLUORENDER_SOURCE_DIR}/FluoRender/OpenCL/lib/x86_64/*.lib)
+    file(GLOB OpenCL_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/OpenCL/lib/x86_64/*.lib)
   elseif(${ARCHITECTURE} MATCHES 32)
-    file(GLOB OpenCL_LIBRARIES ${FLUORENDER_SOURCE_DIR}/FluoRender/OpenCL/lib/x86/*.lib)
+    file(GLOB OpenCL_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/OpenCL/lib/x86/*.lib)
   endif()
 endif()
 
-# nikon
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/nd2/include)
+# Nikon
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/nd2/include)
 if(WIN32)
   if(${ARCHITECTURE} MATCHES 64)
-    file(GLOB ND2_LIBRARIES ${FLUORENDER_SOURCE_DIR}/FluoRender/nd2/lib/*.lib)
+    file(GLOB ND2_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/nd2/lib/*.lib)
   endif()
 elseif(APPLE)
-   file(GLOB ND2_LIBRARIES ${FLUORENDER_SOURCE_DIR}/FluoRender/nd2/lib/*.dylib)
+   file(GLOB ND2_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/nd2/lib/*.dylib)
 endif()
 
-# freetype
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/freetype/include)
+# Freetype
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/freetype/include)
 if(WIN32)
-  file(GLOB FREETYPE_LIBRARIES ${FLUORENDER_SOURCE_DIR}/FluoRender/freetype/lib/*.lib)
+  file(GLOB FREETYPE_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/freetype/lib/*.lib)
 endif()
 
 # OpenVR
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/OpenVR/headers)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/OpenVR/headers)
 if(WIN32)
   if(${ARCHITECTURE} MATCHES 64)
-    file(GLOB OpenVR_LIBRARIES ${FLUORENDER_SOURCE_DIR}/FluoRender/OpenVR/lib/win64/*.lib)
+    file(GLOB OpenVR_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/OpenVR/lib/win64/*.lib)
   endif()
 endif()
 
 # XInput
 if(WIN32)
-  include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/Wacom/Include)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/Wacom/Include)
   file(GLOB wac_src FluoRender/Wacom/*.cpp)
   file(GLOB wac_hdr FluoRender/Wacom/*.h)
   
@@ -522,7 +527,7 @@ if(WIN32)
     ${wac_src} ${wac_hdr})
 
   if(USE_XINPUT)
-    include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/XInput)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/XInput)
     file(GLOB xip_src FluoRender/XInput/*.cpp)
     file(GLOB xip_hdr FluoRender/XInput/*.h)
     add_library(XINPUT_OBJ OBJECT
@@ -530,28 +535,23 @@ if(WIN32)
   endif()
 endif()
 
-# Other sources
-file(GLOB src FluoRender/FluoRender/*.cpp)
-file(GLOB hdr FluoRender/FluoRender/*.h)
-file(GLOB rsc FluoRender/FluoRender/img/*.xpm)
-
 # SynthBB
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/SynthBB)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/SynthBB)
 file(GLOB synthbb_hdr FluoRender/SynthBB/*.h)
 file(GLOB synthbb_src FluoRender/SynthBB/*.cpp)
 
 # MaskInt
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/MaskInt)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/MaskInt)
 file(GLOB maskint_hdr FluoRender/MaskInt/*.h)
 file(GLOB maskint_src FluoRender/MaskInt/*.cpp)
 
 # ReadGMM
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/ReadGMM)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/ReadGMM)
 file(GLOB readgmm_hdr FluoRender/ReadGMM/*.h)
 file(GLOB readgmm_src FluoRender/ReadGMM/*.cpp)
 
 # Tester
-include_directories(${FLUORENDER_SOURCE_DIR}/FluoRender/Tester)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/Tester)
 file(GLOB tester_hdr FluoRender/Tester/*.h)
 file(GLOB tester_src FluoRender/Tester/*.cpp)
 
@@ -560,13 +560,13 @@ IF(APPLE)
   # set how it shows up in the Info.plist file
   SET(MACOSX_BUNDLE_ICON_FILE FluoRender_icon.icns)
   # set where in the bundle to put the icns file
-  SET(icns "${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/img/FluoRender_icon.icns")
+  SET(icns "${FLUORENDER_SOURCE_DIR}/img/FluoRender_icon.icns")
   SET_SOURCE_FILES_PROPERTIES(${icns} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 ELSEIF(WIN32)
-  SET(icon_rc "${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/img/FluoRender.rc")
-  SET(icns "${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/img/fluorenderIcon.ico")
+  SET(icon_rc "${FLUORENDER_SOURCE_DIR}/img/FluoRender.rc")
+  SET(icns "${FLUORENDER_SOURCE_DIR}/img/fluorenderIcon.ico")
   ADD_DEFINITIONS(-DICON_RC_FILE="${icns}")
-  SET(src ${src} ${icon_rc})
+  SET(main_src ${main_src} ${icon_rc})
 ENDIF()
 
 # Platform specific rules for OpenGL
@@ -596,7 +596,7 @@ elseif(WIN32)
 endif()
 
 add_executable(FluoRender MACOSX_BUNDLE WIN32
-  ${src} ${rsc} ${icns}
+  ${main_src} ${img_rsc} ${icns}
   $<TARGET_OBJECTS:AGENTS_OBJ>
   $<TARGET_OBJECTS:ANIMATORS_OBJ>
   $<TARGET_OBJECTS:CALCULATE_OBJ>
@@ -631,8 +631,8 @@ add_executable(Tester MACOSX_BUNDLE WIN32
 # FluoRender
 include_directories(${FLUORENDER_COMMON_INCLUDES})
 
-target_include_directories(FluoRender PUBLIC
-			   ${FLUORENDER_COMMON_INCLUDES})
+#target_include_directories(FluoRender PUBLIC
+#			   ${FLUORENDER_COMMON_INCLUDES})
 
 message(STATUS "FLUORENDER_COMMON_INCLUDES ${FLUORENDER_COMMON_INCLUDES}")
 
@@ -693,69 +693,69 @@ endif()
 # Copy Java code dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${FLUORENDER_SOURCE_DIR}/Java_Code/ImageJ_Reader/target/classes"
+  "${CMAKE_CURRENT_SOURCE_DIR}/Java_Code/ImageJ_Reader/target/classes"
   "$<TARGET_FILE_DIR:FluoRender>/Java_Code")
   
 # Copy openCL examples to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${FLUORENDER_SOURCE_DIR}/CL_code"
+  "${CMAKE_CURRENT_SOURCE_DIR}/CL_code"
   "$<TARGET_FILE_DIR:FluoRender>/CL_code")
 
 # Copy font dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${FLUORENDER_SOURCE_DIR}/Fonts"
+  "${CMAKE_CURRENT_SOURCE_DIR}/Fonts"
   "$<TARGET_FILE_DIR:FluoRender>/Fonts")
 
 # Copy script dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${FLUORENDER_SOURCE_DIR}/Scripts"
+  "${CMAKE_CURRENT_SOURCE_DIR}/Scripts"
   "$<TARGET_FILE_DIR:FluoRender>/Scripts")
 
 # Copy template dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${FLUORENDER_SOURCE_DIR}/Templates"
+  "${CMAKE_CURRENT_SOURCE_DIR}/Templates"
   "$<TARGET_FILE_DIR:FluoRender>/Templates")
 
 # Copy command dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${FLUORENDER_SOURCE_DIR}/Commands"
+  "${CMAKE_CURRENT_SOURCE_DIR}/Commands"
   "$<TARGET_FILE_DIR:FluoRender>/Commands")
 
 # Settings files
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${FLUORENDER_SOURCE_DIR}/Settings"
+  "${CMAKE_CURRENT_SOURCE_DIR}/Settings"
   "$<TARGET_FILE_DIR:FluoRender>")
 
 if(APPLE)
   add_custom_command(TARGET FluoRender POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
-    "${FLUORENDER_SOURCE_DIR}/Settings_Mac/fluorender.set"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Settings_Mac/fluorender.set"
     "$<TARGET_FILE_DIR:FluoRender>")
 endif()
 
 # Copy data dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${FLUORENDER_SOURCE_DIR}/Data"
+  "${CMAKE_CURRENT_SOURCE_DIR}/Data"
   "$<TARGET_FILE_DIR:FluoRender>/Data")
 
 # Benchmark files
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${FLUORENDER_SOURCE_DIR}/Benchmark"
+  "${CMAKE_CURRENT_SOURCE_DIR}/Benchmark"
   "$<TARGET_FILE_DIR:FluoRender>")
 
 # Openvr
 if(WIN32)
   add_custom_command(TARGET FluoRender POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
-    "${FLUORENDER_SOURCE_DIR}/FluoRender/OpenVR/lib/win64/openvr_api.dll"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Src/OpenVR/lib/win64/openvr_api.dll"
     "$<TARGET_FILE_DIR:FluoRender>")
 endif()
 
@@ -763,10 +763,10 @@ endif()
 if(APPLE)
   add_custom_command(TARGET FluoRender POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
-    "${FLUORENDER_SOURCE_DIR}/FluoRender/nd2/lib/libNd2File.dylib"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Src/nd2/lib/libNd2File.dylib"
     "$<TARGET_FILE_DIR:FluoRender>"
     COMMAND ${CMAKE_COMMAND} -E copy
-    "${FLUORENDER_SOURCE_DIR}/FluoRender/nd2/lib/libNd2ReadSdk.dylib"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Src/nd2/lib/libNd2ReadSdk.dylib"
     "$<TARGET_FILE_DIR:FluoRender>")
   add_custom_command(TARGET FluoRender POST_BUILD COMMAND 
     ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/"
@@ -774,16 +774,16 @@ if(APPLE)
 elseif(WIN32)
   add_custom_command(TARGET FluoRender POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
-    "${FLUORENDER_SOURCE_DIR}/FluoRender/nd2/bin/limfile.dll"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Src/nd2/bin/limfile.dll"
     "$<TARGET_FILE_DIR:FluoRender>"
     COMMAND ${CMAKE_COMMAND} -E copy
-    "${FLUORENDER_SOURCE_DIR}/FluoRender/nd2/bin/nd2readsdk.dll"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Src/nd2/bin/nd2readsdk.dll"
     "$<TARGET_FILE_DIR:FluoRender>"
     COMMAND ${CMAKE_COMMAND} -E copy
-    "${FLUORENDER_SOURCE_DIR}/FluoRender/nd2/bin/tiff.dll"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Src/nd2/bin/tiff.dll"
     "$<TARGET_FILE_DIR:FluoRender>"
     COMMAND ${CMAKE_COMMAND} -E copy
-    "${FLUORENDER_SOURCE_DIR}/FluoRender/nd2/bin/zlib1.dll"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Src/nd2/bin/zlib1.dll"
     "$<TARGET_FILE_DIR:FluoRender>"
     )
 endif()
