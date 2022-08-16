@@ -35,12 +35,12 @@ IF((COMMAND cmake_policy) AND NOT (CMAKE_MAJOR_VERSION LESS 3))
   CMAKE_POLICY(SET CMP0043 NEW)
 ENDIF()
 
-set(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_CXX_STANDARD 17 CACHE STRING "Default value for CXX_STANDARD property of targets")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(FluoRender LANGUAGES C CXX)
 
-############################# ARS
+# Be sure to update the Versions and Date for each release!!!!
 set(FLUORENDER_TITLE "FluoRender")
 set(FLUORENDER_VERSION_MAJOR 3)
 set(FLUORENDER_VERSION_MINOR 0)
@@ -58,9 +58,8 @@ SET(FLUORENDER_COMMON_INCLUDES
 )
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-############################# ARS
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
+#set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 
 if(APPLE)
@@ -187,13 +186,7 @@ if(UNIX OR APPLE OR MINGW)
   include_directories(${FFMPEG_INCLUDE_DIR})
 endif()
 
-############################# ARS
-
-# Use the FluoRender specific Findqtadvanceddocking.cmake as the
-# default qtadvanceddockingConfig.cmake does not set everything needed.
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
-#set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${qtadvanceddocking_DIR}/lib/cmake/qtadvanceddocking)
-
+# Qt
 # Qt needs this package.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${QT_DIR}/lib/cmake/Qt6/3rdparty/extra-cmake-modules/find-modules")
 find_package(XCB COMPONENTS XCB)
@@ -218,6 +211,11 @@ set(CMAKE_AUTOUIC ON)
 
 # The Qt Advanced Docking package is optional just in case a minimal
 # build is desired.
+
+# Use the FluoRender specific Findqtadvanceddocking.cmake as the
+# default qtadvanceddockingConfig.cmake does not set everything needed.
+#set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${qtadvanceddocking_DIR}/lib/cmake/qtadvanceddocking)
+
 if(DEFINED qtadvanceddocking_DIR)
   find_package(qtadvanceddocking REQUIRED COMPONENTS qtadvanceddocking)
 else(DEFINED qtadvanceddocking_DIR)
@@ -251,13 +249,11 @@ endif()
 # Sets up the FluoRender HAVE_* specific defines - must be done after
 # all packages are found.
 CONFIGURE_FILE(${FLUORENDER_SOURCE_DIR}/include/fluorender-cmake.h.in
-               ${FLUORENDER_BINARY_DIR}/FluoRender/FluoRender/include/fluorender-config.h @ONLY IMMEDIATE)
-
-############################# ARS
+               ${FLUORENDER_BINARY_DIR}/include/fluorender-config.h @ONLY IMMEDIATE)
 
 # output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # glm
@@ -283,35 +279,35 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Biff)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Air)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Hest)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Nrrd)
-file(GLOB air_src FluoRender/teem/Air/*.c)
-file(GLOB air_hdr FluoRender/teem/Air/*.h)
-file(GLOB hest_src FluoRender/teem/Hest/*.c)
-file(GLOB hest_hdr FluoRender/teem/Hest/*.h)
-file(GLOB biff_src FluoRender/teem/Biff/*.c)
-file(GLOB biff_hdr FluoRender/teem/Biff/*.h)
-file(GLOB nrrd_src FluoRender/teem/Nrrd/*.c)
-file(GLOB nrrd_hdr FluoRender/teem/Nrrd/*.h)
+file(GLOB air_src Src/teem/Air/*.c)
+file(GLOB air_hdr Src/teem/Air/*.h)
+file(GLOB hest_src Src/teem/Hest/*.c)
+file(GLOB hest_hdr Src/teem/Hest/*.h)
+file(GLOB biff_src Src/teem/Biff/*.c)
+file(GLOB biff_hdr Src/teem/Biff/*.h)
+file(GLOB nrrd_src Src/teem/Nrrd/*.c)
+file(GLOB nrrd_hdr Src/teem/Nrrd/*.h)
 add_library(TEEM_OBJ OBJECT ${air_src} ${hest_src} ${nrrd_src} ${biff_src}
                             ${air_hdr} ${hest_hdr} ${nrrd_hdr} ${biff_hdr})
 
-# eigen
+# Eigen
 #include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/Eigen)
 
-# glew
+# Glew
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/glew)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/glew/GL)
-file(GLOB gl_srcs FluoRender/glew/*.c)
-file(GLOB gl_hdrs1 FluoRender/glew/*.h)
-file(GLOB gl_hdrs2 FluoRender/glew/GL/*.h)
+file(GLOB gl_srcs Src/glew/*.c)
+file(GLOB gl_hdrs1 Src/glew/*.h)
+file(GLOB gl_hdrs2 Src/glew/GL/*.h)
 add_library(GLEW_OBJ OBJECT ${gl_srcs} ${gl_hdrs1} ${gl_hdrs2})
 
-# pole
+# Pole
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/pole)
-file(GLOB pole_srcs FluoRender/pole/pole.cpp)
-file(GLOB pole_hdrs FluoRender/pole/pole.h)
+file(GLOB pole_srcs Src/pole/pole.cpp)
+file(GLOB pole_hdrs Src/pole/pole.h)
 add_library(POLE_OBJ OBJECT ${pole_srcs} ${pole_hdrs})
 
-# ffmpeg
+# FFMpeg
 if(WIN32)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/ffmpeg/include)
   file(GLOB FFMPEG_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/ffmpeg/lib/Win64/*.a ${CMAKE_CURRENT_SOURCE_DIR}/Src/ffmpeg/lib/Win64/*.lib)
@@ -520,16 +516,16 @@ endif()
 # XInput
 if(WIN32)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/Wacom/Include)
-  file(GLOB wac_src FluoRender/Wacom/*.cpp)
-  file(GLOB wac_hdr FluoRender/Wacom/*.h)
+  file(GLOB wac_src Src/Wacom/*.cpp)
+  file(GLOB wac_hdr Src/Wacom/*.h)
   
   add_library(WACUTILS_OBJ OBJECT
     ${wac_src} ${wac_hdr})
 
   if(USE_XINPUT)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/XInput)
-    file(GLOB xip_src FluoRender/XInput/*.cpp)
-    file(GLOB xip_hdr FluoRender/XInput/*.h)
+    file(GLOB xip_src Src/XInput/*.cpp)
+    file(GLOB xip_hdr Src/XInput/*.h)
     add_library(XINPUT_OBJ OBJECT
       ${xip_src} ${xip_hdr})
   endif()
@@ -537,35 +533,35 @@ endif()
 
 # SynthBB
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/SynthBB)
-file(GLOB synthbb_hdr FluoRender/SynthBB/*.h)
-file(GLOB synthbb_src FluoRender/SynthBB/*.cpp)
+file(GLOB synthbb_hdr Src/SynthBB/*.h)
+file(GLOB synthbb_src Src/SynthBB/*.cpp)
 
 # MaskInt
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/MaskInt)
-file(GLOB maskint_hdr FluoRender/MaskInt/*.h)
-file(GLOB maskint_src FluoRender/MaskInt/*.cpp)
+file(GLOB maskint_hdr Src/MaskInt/*.h)
+file(GLOB maskint_src Src/MaskInt/*.cpp)
 
 # ReadGMM
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/ReadGMM)
-file(GLOB readgmm_hdr FluoRender/ReadGMM/*.h)
-file(GLOB readgmm_src FluoRender/ReadGMM/*.cpp)
+file(GLOB readgmm_hdr Src/ReadGMM/*.h)
+file(GLOB readgmm_src Src/ReadGMM/*.cpp)
 
 # Tester
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/Tester)
-file(GLOB tester_hdr FluoRender/Tester/*.h)
-file(GLOB tester_src FluoRender/Tester/*.cpp)
+file(GLOB tester_hdr Src/Tester/*.h)
+file(GLOB tester_src Src/Tester/*.cpp)
 
 # For Apple and Windoz set the icns file containing icons
 IF(APPLE)
   # set how it shows up in the Info.plist file
   SET(MACOSX_BUNDLE_ICON_FILE FluoRender_icon.icns)
   # set where in the bundle to put the icns file
-  SET(icns "${FLUORENDER_SOURCE_DIR}/img/FluoRender_icon.icns")
-  SET_SOURCE_FILES_PROPERTIES(${icns} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  SET(FLUORENDER_ICON "${FLUORENDER_SOURCE_DIR}/img/FluoRender_icon.icns")
+  SET_SOURCE_FILES_PROPERTIES(${FLUORENDER_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 ELSEIF(WIN32)
   SET(icon_rc "${FLUORENDER_SOURCE_DIR}/img/FluoRender.rc")
-  SET(icns "${FLUORENDER_SOURCE_DIR}/img/fluorenderIcon.ico")
-  ADD_DEFINITIONS(-DICON_RC_FILE="${icns}")
+  SET(FLUORENDER_ICON "${FLUORENDER_SOURCE_DIR}/img/fluorenderIcon.ico")
+  ADD_DEFINITIONS(-DICON_RC_FILE="${FLUORENDER_ICON}")
   SET(main_src ${main_src} ${icon_rc})
 ENDIF()
 
@@ -595,8 +591,14 @@ elseif(WIN32)
   endif()
 endif()
 
-add_executable(FluoRender MACOSX_BUNDLE WIN32
-  ${main_src} ${img_rsc} ${icns}
+# Build the UI library
+add_subdirectory(${FLUORENDER_SOURCE_DIR}/UI)
+
+qt_add_executable(FluoRender MACOSX_BUNDLE WIN32
+#  ${main_src}
+  ${FLUORENDER_SOURCE_DIR}/Main/main.cpp
+  FluoRender.qrc
+  ${FLUORENDER_ICON}
   $<TARGET_OBJECTS:AGENTS_OBJ>
   $<TARGET_OBJECTS:ANIMATORS_OBJ>
   $<TARGET_OBJECTS:CALCULATE_OBJ>
@@ -652,7 +654,8 @@ target_compile_options(FluoRender PRIVATE "$<$<CONFIG:RELEASE>:${RELEASE_FLAGS}>
 target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
 
 # Link libraries
-target_link_libraries(FluoRender
+target_link_libraries(FluoRender PUBLIC
+  FluoRenderUI
   ${FFMPEG_LIBRARIES}
   ${OPENGL_LIBRARIES}
   ${Boost_LIBRARIES}
@@ -665,7 +668,7 @@ target_link_libraries(FluoRender
 
 # OS X frameworks
 if(APPLE)
-  target_link_libraries(FluoRender
+  target_link_libraries(FluoRender PUBLIC
     ${BZ2_LIBRARIES}
     ${ICONV_LIBRARIES}
     ${CORE_FOUNDATION_LIBRARIES}
@@ -678,7 +681,7 @@ if(APPLE)
 #    ${JNI_LIBRARIES}
     )
 elseif(UNIX OR MINGW)
-  target_link_libraries(FluoRender
+  target_link_libraries(FluoRender PUBLIC
     pthread
     dl
 #    ${JNI_LIBRARIES}
