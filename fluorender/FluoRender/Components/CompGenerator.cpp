@@ -335,7 +335,7 @@ void ComponentGenerator::SetIDBit(int psize)
 	}
 }
 
-void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff, float sscale)
+void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff, float sscale, int fixed)
 {
 	if (!CheckBricks())
 		return;
@@ -397,6 +397,7 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&scl_ff));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&grad_ff));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&fixed));
 		if (m_use_mask)
 			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
@@ -417,7 +418,7 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 
 void ComponentGenerator::DensityField(int dsize, int wsize,
 	bool diffuse, int iter, float tran, float falloff,
-	float density, float varth, float sscale)
+	float density, float varth, float sscale, int fixed)
 {
 	//debug
 #ifdef _DEBUG
@@ -608,6 +609,7 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&density));
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&varth));
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&sscale));
+		kernel_prog_grow->setKernelArgConst(sizeof(int), (void*)(&fixed));
 		if (m_use_mask)
 			kernel_prog_grow->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
@@ -629,7 +631,7 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 
 void ComponentGenerator::DistGrow(bool diffuse, int iter,
 	float tran, float falloff, int dsize, int max_dist,
-	float dist_thresh, float sscale, float dist_strength)
+	float dist_thresh, float sscale, float dist_strength, int fixed)
 {
 	//debug
 #ifdef _DEBUG
@@ -766,6 +768,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&distscl));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&dist_strength));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&fixed));
 		if (m_use_mask)
 			kernel_prog->setKernelArgument(arg_mask);
 
@@ -788,7 +791,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 void ComponentGenerator::DistDensityField(
 	bool diffuse, int iter, float tran, float falloff,
 	int dsize1, int max_dist, float dist_thresh, float dist_strength,
-	int dsize2, int wsize, float density, float varth, float sscale)
+	int dsize2, int wsize, float density, float varth, float sscale, int fixed)
 {
 	//debug
 #ifdef _DEBUG
@@ -1055,6 +1058,7 @@ void ComponentGenerator::DistDensityField(
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&density));
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&varth));
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&sscale));
+		kernel_prog_grow->setKernelArgConst(sizeof(int), (void*)(&fixed));
 		if (m_use_mask)
 			kernel_prog_grow->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 

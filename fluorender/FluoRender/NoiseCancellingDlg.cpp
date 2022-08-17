@@ -180,7 +180,7 @@ void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
 	vd->AddEmptyLabel(0, !cg.GetUseMask());
 	cg.ShuffleID();
 	double scale = vd->GetScalarScale();
-	cg.Grow(false, -1, thresh, 0.0, scale);
+	cg.Grow(false, -1, thresh, 0.0, scale, 0);
 
 	flrd::ComponentAnalyzer ca(vd);
 	ca.Analyze(select, true, false);

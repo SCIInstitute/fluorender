@@ -57,16 +57,16 @@ namespace flrd
 		//segmentation functions
 		void ShuffleID();
 		void SetIDBit(int);
-		void Grow(bool, int, float, float, float);
+		void Grow(bool, int, float, float, float, int);
 		void DensityField(int dsize, int wsize,
 			bool diffuse, int iter, float tran, float falloff,
-			float density, float varth, float sscale);
+			float density, float varth, float sscale, int fixed);
 		void DistGrow(bool, int,
-			float, float, int, int, float, float, float);
+			float, float, int, int, float, float, float, int);
 		void DistDensityField(
 			bool diffuse, int iter, float tran, float falloff,
 			int dsize1, int max_dist, float dist_thresh, float dist_strength,
-			int dsize2, int wsize, float density, float varth, float sscale);
+			int dsize2, int wsize, float density, float varth, float sscale, int fixed);
 		void Cleanup(int, unsigned int);
 		void ClearBorders();
 		void FillBorders(float);

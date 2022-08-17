@@ -80,6 +80,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_TEXT(ID_DensityStatsSizeText, ComponentDlg::OnDensityStatsSizeText)
 	//fixate
 	EVT_CHECKBOX(ID_FixateCheck, ComponentDlg::OnFixateCheck)
+	EVT_CHECKBOX(ID_GrowFixedCheck, ComponentDlg::OnGrowFixedCheck)
 	EVT_BUTTON(ID_FixUpdateBtn, ComponentDlg::OnFixUpdateBtn)
 	EVT_COMMAND_SCROLL(ID_FixSizeSldr, ComponentDlg::OnFixSizeSldr)
 	EVT_TEXT(ID_FixSizeText, ComponentDlg::OnFixSizeText)
@@ -481,10 +482,14 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	wxBoxSizer* sizer14 = new wxBoxSizer(wxHORIZONTAL);
 	m_fixate_check = new wxCheckBox(page, ID_FixateCheck, "Fixate Grown Regions",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	m_grow_fixed_check = new wxCheckBox(page, ID_GrowFixedCheck, "Continue on Fixiated Regions",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_fix_update_btn = new wxButton(page, ID_FixUpdateBtn, "Refix",
 		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
 	sizer14->Add(2, 2);
 	sizer14->Add(m_fixate_check, 0, wxALIGN_CENTER);
+	sizer14->Add(2, 2);
+	sizer14->Add(m_grow_fixed_check, 0, wxALIGN_CENTER);
 	sizer14->AddStretchSpacer(1);
 	sizer14->Add(m_fix_update_btn, 0, wxALIGN_CENTER);
 	sizer14->Add(2, 2);
@@ -1103,6 +1108,7 @@ void ComponentDlg::Update()
 	//fixate
 	m_fixate_check->SetValue(m_fixate);
 	EnableFixate(m_fixate);
+	m_grow_fixed_check->SetValue(m_grow_fixed);
 	m_fix_size_text->SetValue(wxString::Format("%d", m_fix_size));
 	//clean
 	EnableClean(m_clean);
@@ -1197,6 +1203,7 @@ void ComponentDlg::GetSettings()
 	m_density_stats_size = 15;
 	m_fixate = false;
 	m_fix_size = 50;
+	m_grow_fixed = 1;
 	m_clean = false;
 	m_clean_iter = 5;
 	m_clean_size_vl = 5;
@@ -1275,6 +1282,7 @@ void ComponentDlg::LoadSettings(wxString filename)
 	fconfig.Read("clean", &m_clean);
 	fconfig.Read("clean_iter", &m_clean_iter);
 	fconfig.Read("clean_size_vl", &m_clean_size_vl);
+	fconfig.Read("grow_fixed", &m_grow_fixed);
 
 	//cluster
 	fconfig.Read("cluster_method_kmeans", &m_cluster_method_kmeans);
@@ -1330,6 +1338,7 @@ void ComponentDlg::SaveSettings(wxString filename)
 	fconfig.Write("clean", m_clean);
 	fconfig.Write("clean_iter", m_clean_iter);
 	fconfig.Write("clean_size_vl", m_clean_size_vl);
+	fconfig.Write("grow_fixed", m_grow_fixed);
 
 	//cluster
 	fconfig.Write("cluster_method_kmeans", m_cluster_method_kmeans);
@@ -1760,12 +1769,14 @@ void ComponentDlg::EnableFixate(bool value)
 {
 	if (value)
 	{
+		m_grow_fixed_check->Enable();
 		m_fix_update_btn->Enable();
 		m_fix_size_sldr->Enable();
 		m_fix_size_text->Enable();
 	}
 	else
 	{
+		m_grow_fixed_check->Disable();
 		m_fix_update_btn->Disable();
 		m_fix_size_sldr->Disable();
 		m_fix_size_text->Disable();
@@ -1779,6 +1790,19 @@ void ComponentDlg::OnFixateCheck(wxCommandEvent &event)
 
 	if (m_fixate)
 		Fixate();
+
+	if (m_auto_update)
+	{
+		bool bval = m_clean;
+		m_clean = false;
+		GenerateComp(m_use_sel, false);
+		m_clean = bval;
+	}
+}
+
+void ComponentDlg::OnGrowFixedCheck(wxCommandEvent &event)
+{
+	m_grow_fixed = m_grow_fixed_check->GetValue();
 
 	if (m_auto_update)
 	{
@@ -1930,6 +1954,7 @@ void ComponentDlg::AddCmd(const std::string &type)
 		params.push_back("cleanb"); params.push_back(std::to_string(m_clean));
 		params.push_back("clean_iter"); params.push_back(std::to_string(m_clean_iter));
 		params.push_back("clean_size_vl"); params.push_back(std::to_string(m_clean_size_vl));
+		params.push_back("grow_fixed"); params.push_back(std::to_string(m_grow_fixed));
 	}
 	else if (type == "clean")
 	{
@@ -2019,6 +2044,8 @@ void ComponentDlg::PlayCmd(bool use_sel, double tfactor)
 					m_clean_iter = std::stoi(*(++it2));
 				else if (*it2 == "clean_size_vl")
 					m_clean_size_vl = std::stoi(*(++it2));
+				else if (*it2 == "grow_fixed")
+					m_grow_fixed = std::stoi(*(++it2));
 			}
 			GenerateComp(use_sel, false);
 		}
@@ -3428,7 +3455,8 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 				m_density_stats_size,
 				m_density_thresh,
 				m_varth,
-				scale);
+				scale,
+				m_grow_fixed);
 		}
 		else
 		{
@@ -3440,7 +3468,8 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 				m_max_dist,
 				m_dist_thresh,
 				scale,
-				m_dist_strength);
+				m_dist_strength,
+				m_grow_fixed);
 		}
 	}
 	else
@@ -3455,7 +3484,8 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 				m_falloff,
 				m_density_thresh,
 				m_varth,
-				scale);
+				scale,
+				m_grow_fixed);
 		}
 		else
 		{
@@ -3464,7 +3494,8 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 				m_iter,
 				m_thresh*m_tfactor,
 				m_falloff,
-				scale);
+				scale,
+				m_grow_fixed);
 		}
 	}
 
@@ -4081,6 +4112,10 @@ void ComponentDlg::LoadCmd(const wxString &filename)
 		{
 			params.push_back("clean_size_vl"); params.push_back(std::to_string(lval));
 		}
+		if (fconfig.Read("grow_fixed", &lval))
+		{
+			params.push_back("grow_fixed"); params.push_back(std::to_string(lval));
+		}
 		if (fconfig.Read("fix_size", &lval))
 		{
 			params.push_back("fix_size"); params.push_back(std::to_string(lval));
@@ -4128,6 +4163,7 @@ void ComponentDlg::SaveCmd(const wxString &filename)
 	fconfig.DeleteAll();
 
 	int cmd_count = 0;
+	std::string str, str2;
 
 	for (auto it = m_command.begin();
 		it != m_command.end(); ++it)
@@ -4138,7 +4174,7 @@ void ComponentDlg::SaveCmd(const wxString &filename)
 			(*it)[0] == "clean" ||
 			(*it)[0] == "fixate")
 		{
-			std::string str = "/cmd" + std::to_string(cmd_count++);
+			str = "/cmd" + std::to_string(cmd_count++);
 			fconfig.SetPath(str);
 			str = (*it)[0];
 			fconfig.Write("type", wxString(str));
@@ -4157,9 +4193,13 @@ void ComponentDlg::SaveCmd(const wxString &filename)
 				*it2 == "cleanb" ||
 				*it2 == "clean_iter" ||
 				*it2 == "clean_size_vl" ||
-				*it2 == "fix_size")
+				*it2 == "fix_size" ||
+				*it2 == "grow_fixed")
 			{
-				fconfig.Write(*it2, std::stoi(*(++it2)));
+				str = (*it2);
+				++it2;
+				str2 = (*it2);
+				fconfig.Write(str, std::stoi(str2));
 			}
 			else if (*it2 == "thresh" ||
 				*it2 == "dist_strength" ||
@@ -4167,7 +4207,10 @@ void ComponentDlg::SaveCmd(const wxString &filename)
 				*it2 == "falloff" ||
 				*it2 == "density_thresh")
 			{
-				fconfig.Write(*it2, std::stod(*(++it2)));
+				str = (*it2);
+				++it2;
+				str2 = (*it2);
+				fconfig.Write(str, std::stod(str2));
 			}
 		}
 	}

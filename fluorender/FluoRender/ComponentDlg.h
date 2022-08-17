@@ -96,6 +96,7 @@ public:
 		ID_DensityStatsSizeText,
 		//fixate
 		ID_FixateCheck,
+		ID_GrowFixedCheck,
 		ID_FixUpdateBtn,
 		ID_FixSizeSldr,
 		ID_FixSizeText,
@@ -276,6 +277,7 @@ private:
 	//fixate
 	bool m_fixate;
 	int m_fix_size;
+	int m_grow_fixed;
 	//clean
 	bool m_clean;
 	int m_clean_iter;
@@ -385,6 +387,7 @@ private:
 	wxTextCtrl* m_density_stats_size_text;
 	//fixate
 	wxCheckBox* m_fixate_check;
+	wxCheckBox* m_grow_fixed_check;
 	wxButton* m_fix_update_btn;
 	wxSlider* m_fix_size_sldr;
 	wxTextCtrl* m_fix_size_text;
@@ -552,6 +555,7 @@ private:
 	//fixate
 	void OnFixateCheck(wxCommandEvent &event);
 	void EnableFixate(bool value);
+	void OnGrowFixedCheck(wxCommandEvent &event);
 	void OnFixUpdateBtn(wxCommandEvent &event);
 	void OnFixSizeSldr(wxScrollEvent &event);
 	void OnFixSizeText(wxCommandEvent &event);

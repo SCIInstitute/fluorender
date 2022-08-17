@@ -207,7 +207,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 	vd->AddEmptyLabel(0, !cg.GetUseMask());
 	cg.ShuffleID();
 	double scale = vd->GetScalarScale();
-	cg.Grow(false, -1, 0.0, 0.0, scale);
+	cg.Grow(false, -1, 0.0, 0.0, scale, 0);
 
 	flrd::ComponentAnalyzer ca(vd);
 	ca.Analyze(select, true, false);

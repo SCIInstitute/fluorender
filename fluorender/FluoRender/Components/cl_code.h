@@ -449,7 +449,8 @@ const char* str_cl_brainbow_3d = \
 "	float value_t,\n" \
 "	float value_f,\n" \
 "	float grad_f,\n" \
-"	float sscale)\n" \
+"	float sscale,\n" \
+"	int fixed)\n" \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
@@ -484,8 +485,8 @@ const char* str_cl_brainbow_3d = \
 "			continue;\n" \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
-"		if (!(m & 0x80000000) && m > label_v)\n" \
-"			label_v = m;\n" \
+"		if ((m <= label_v) || (!fixed && (m & 0x80000000))) continue;\n" \
+"		label_v = m;\n" \
 "	}\n" \
 "	atomic_xchg(label+index, label_v);\n" \
 "}\n" \
@@ -502,6 +503,7 @@ const char* str_cl_brainbow_3d = \
 "	float value_f,\n" \
 "	float grad_f,\n" \
 "	float sscale,\n" \
+"	int fixed,\n" \
 "	__read_only image3d_t mask)\n" \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
@@ -543,8 +545,8 @@ const char* str_cl_brainbow_3d = \
 "			continue;\n" \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
-"		if (!(m & 0x80000000) && m > label_v)\n" \
-"			label_v = m;\n" \
+"		if ((m <= label_v) || (!fixed && (m & 0x80000000))) continue;\n" \
+"		label_v = m;\n" \
 "	}\n" \
 "	atomic_xchg(label+index, label_v);\n" \
 "}\n" \
@@ -704,7 +706,8 @@ const char* str_cl_density_grow_3d = \
 "	float grad_f,\n" \
 "	float density,\n" \
 "	float varth,\n" \
-"	float sscale)\n" \
+"	float sscale,\n" \
+"	int fixed)\n" \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
@@ -752,8 +755,8 @@ const char* str_cl_density_grow_3d = \
 "			continue;\n" \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
-"		if (!(m & 0x80000000) && m > label_v)\n" \
-"			label_v = m;\n" \
+"		if ((m <= label_v) || (!fixed && (m & 0x80000000))) continue;\n" \
+"		label_v = m;\n" \
 "	}\n" \
 "	atomic_xchg(label+index, label_v);\n" \
 "}\n" \
@@ -777,6 +780,7 @@ const char* str_cl_density_grow_3d = \
 "	float density,\n" \
 "	float varth,\n" \
 "	float sscale,\n" \
+"	int fixed,\n" \
 "	__read_only image3d_t mask)\n" \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
@@ -831,8 +835,8 @@ const char* str_cl_density_grow_3d = \
 "			continue;\n" \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
-"		if (!(m & 0x80000000) && m > label_v)\n" \
-"			label_v = m;\n" \
+"		if ((m <= label_v) || (!fixed && (m & 0x80000000))) continue;\n" \
+"		label_v = m;\n" \
 "	}\n" \
 "	atomic_xchg(label+index, label_v);\n" \
 "}\n" \
@@ -1284,7 +1288,8 @@ const char* str_cl_dist_grow_3d = \
 "	float grad_f,\n" \
 "	float sscale,\n" \
 "	float distscl,\n" \
-"	float dist_strength)\n" \
+"	float dist_strength,\n" \
+"	int fixed)\n" \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
@@ -1321,8 +1326,8 @@ const char* str_cl_dist_grow_3d = \
 "			continue;\n" \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
-"		if (!(m & 0x80000000) && m > label_v)\n" \
-"			label_v = m;\n" \
+"		if ((m <= label_v) || (!fixed && (m & 0x80000000))) continue;\n" \
+"		label_v = m;\n" \
 "	}\n" \
 "	atomic_xchg(label+index, label_v);\n" \
 "}\n" \
@@ -1342,6 +1347,7 @@ const char* str_cl_dist_grow_3d = \
 "	float sscale,\n" \
 "	float distscl,\n" \
 "	float dist_strength,\n" \
+"	int fixed,\n" \
 "	__read_only image3d_t mask)\n" \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
@@ -1385,8 +1391,8 @@ const char* str_cl_dist_grow_3d = \
 "			continue;\n" \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
-"		if (!(m & 0x80000000) && m > label_v)\n" \
-"			label_v = m;\n" \
+"		if ((m <= label_v) || (!fixed && (m & 0x80000000))) continue;\n" \
+"		label_v = m;\n" \
 "	}\n" \
 "	atomic_xchg(label+index, label_v);\n" \
 "}\n" \
@@ -2613,7 +2619,7 @@ const char* str_cl_match_slices = \
 "	__global unsigned int* mask,\n" \
 "	__global unsigned int* label1,\n" \
 "	__global unsigned int* label2,\n" \
-"	__global bool* flag,\n" \
+"	__global int* flag,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny)\n" \
 "{\n" \
