@@ -108,7 +108,6 @@ if(APPLE OR UNIX OR MINGW)
   set(CFLAGS "-fPIC")
   set(CXXFLAGS "-fPIC ")
 elseif(WIN32)
-  # windows
   if(MSVC)
     #add_definitions(-DSEQAN_C++11_STANDARD=ON)
     add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
@@ -134,7 +133,7 @@ elseif(WIN32)
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -MD")
   endif()
 
-  # to build for Win7, disable xinput
+  # To build for Win7, disable xinput
   SET(USE_XINPUT ON CACHE BOOL "Use Xinput on Windows")
   if (USE_XINPUT)
     add_definitions(-DUSE_XINPUT=1)
@@ -145,49 +144,39 @@ set(CMAKE_C_FLAGS "${ARCH_FLAGS} ${CFLAGS}")
 set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
 set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
 
-# OpenGL
+# Get the required and optional packages. 
+
+# OpenGL - find first 
 find_package(OpenGL REQUIRED)
 
-# Boost
-# only find static libs:
-set(Boost_USE_STATIC_LIBS        ON)
-set(Boost_USE_MULTITHREADED      ON)
-set(Boost_USE_STATIC_RUNTIME    OFF)
-find_package(Boost COMPONENTS system chrono filesystem REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
-
-# JNI includes
-find_package(JNI REQUIRED)
-include_directories(${JNI_INCLUDE_DIRS})
-
-# Tiff
-find_package(TIFF REQUIRED)
-include_directories(${TIFF_INCLUDE_DIRS})
-
-# Zlib
-find_package(ZLIB)
-include_directories(${ZLIB_INCLUDE_DIRS})
-
-# OpenCL
-if(UNIX OR APPLE OR MINGW)
-  find_package(OpenCL REQUIRED)
-  include_directories(${OpenCL_INCLUDE_DIRS})
+# Platform specific rules for OpenGL
+if(APPLE)
+  if(NOT OPEN_GL_HEADER_LOC)
+    add_definitions(-DOPEN_GL_HEADER_LOC=<OpenGL/gl.h>)
+  endif()
+  if(NOT OPEN_GLU_HEADER_LOC)
+    add_definitions(-DOPEN_GLU_HEADER_LOC=<OpenGL/glu.h>)
+  endif()
+elseif(UNIX OR MINGW)
+  # Linux
+  #if(NOT OPEN_GL_HEADER_LOC)
+  #  add_definitions(-DOPEN_GL_HEADER_LOC=<OpenGL/gl.h>)
+  #endif()
+  #if(NOT OPEN_GLU_HEADER_LOC)
+  #  add_definitions(-DOPEN_GLU_HEADER_LOC=<OpenGL/glu.h>)
+  #endif()
+elseif(WIN32)
+  # Windows
+  if(NOT OPEN_GL_HEADER_LOC)
+    add_definitions(-DOPEN_GL_HEADER_LOC=<GL/gl.h>)
+  endif()
+  if(NOT OPEN_GLU_HEADER_LOC)
+    add_definitions(-DOPEN_GLU_HEADER_LOC=<GL/glu.h>)
+  endif()
 endif()
 
-# FreeType
-if(UNIX OR APPLE OR MINGW)
-  find_package(Freetype REQUIRED)
-  include_directories(${FREETYPE_INCLUDE_DIRS})
-endif()
-
-# FFMEG
-if(UNIX OR APPLE OR MINGW)
-  find_package(FFMPEG REQUIRED)
-  include_directories(${FFMPEG_INCLUDE_DIR})
-endif()
-
-# Qt
-# Qt needs this package.
+# Qt - find after OpenGL
+# Qt needs the XCB package
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${QT_DIR}/lib/cmake/Qt6/3rdparty/extra-cmake-modules/find-modules")
 find_package(XCB COMPONENTS XCB)
 
@@ -204,7 +193,7 @@ string(REGEX REPLACE "([^;]+)(;|$)" "Qt::\\1\\2" QT_LIBRARIES "${QT_COMPONENTS}"
 
 find_package(Qt6 REQUIRED COMPONENTS ${QT_COMPONENTS})
 
-# Qt specific bits.
+# Qt specific bits for building.
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
@@ -221,6 +210,43 @@ if(DEFINED qtadvanceddocking_DIR)
 else(DEFINED qtadvanceddocking_DIR)
   find_package(qtadvanceddocking OPTIONAL COMPONENTS qtadvanceddocking)
 endif(DEFINED qtadvanceddocking_DIR)
+
+# Boost - Only find static libraries.
+set(Boost_USE_STATIC_LIBS        ON)
+set(Boost_USE_MULTITHREADED      ON)
+set(Boost_USE_STATIC_RUNTIME    OFF)
+find_package(Boost COMPONENTS system chrono filesystem REQUIRED)
+include_directories(${Boost_INCLUDE_DIR})
+
+# FFMEG
+if(UNIX OR APPLE OR MINGW)
+  find_package(FFMPEG REQUIRED)
+  include_directories(${FFMPEG_INCLUDE_DIR})
+endif()
+
+# FreeType
+if(UNIX OR APPLE OR MINGW)
+  find_package(Freetype REQUIRED)
+  include_directories(${FREETYPE_INCLUDE_DIRS})
+endif()
+
+# JNI includes
+find_package(JNI REQUIRED)
+include_directories(${JNI_INCLUDE_DIRS})
+
+# OpenCL
+if(UNIX OR APPLE OR MINGW)
+  find_package(OpenCL REQUIRED)
+  include_directories(${OpenCL_INCLUDE_DIRS})
+endif()
+
+# Tiff
+find_package(TIFF REQUIRED)
+include_directories(${TIFF_INCLUDE_DIRS})
+
+# Zlib
+find_package(ZLIB)
+include_directories(${ZLIB_INCLUDE_DIRS})
 
 # OS X Frameworks
 if(APPLE)
@@ -251,15 +277,89 @@ endif()
 CONFIGURE_FILE(${FLUORENDER_SOURCE_DIR}/include/fluorender-cmake.h.in
                ${FLUORENDER_BINARY_DIR}/include/fluorender-config.h @ONLY IMMEDIATE)
 
-# output directories
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+# Thirdparty libraries - each should really be built as individual
+# shared libraries and linked accrodingly.
 
-# glm
+# Eigen
+#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/Eigen)
+
+# Glew
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/glew)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/glew/GL)
+file(GLOB glew_srcs    ${CMAKE_CURRENT_SOURCE_DIR}/Src/glew/*.c)
+file(GLOB glew_hdrs    ${CMAKE_CURRENT_SOURCE_DIR}/Src/glew/*.h)
+file(GLOB glew_gl_hdrs ${CMAKE_CURRENT_SOURCE_DIR}/Src/glew/GL/*.h)
+add_library(GLEW_OBJ OBJECT ${glew_srcs} ${glew_hdrs} ${glew_gl_hdrs})
+
+# Glm - headers only
 add_definitions(-DGLM_FORCE_RADIANS=1)
 
-# teem
+# FFMpeg
+if(WIN32)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/ffmpeg/include)
+  file(GLOB FFMPEG_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/ffmpeg/lib/Win64/*.a ${CMAKE_CURRENT_SOURCE_DIR}/Src/ffmpeg/lib/Win64/*.lib)
+  add_definitions(-D__STDC_CONSTANT_MACROS)
+elseif(APPLE)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/ffmpeg/include)
+  file(GLOB FFMPEG_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/ffmpeg/lib/OSX/*.a)
+endif()
+
+# Freetype
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/freetype/include)
+if(WIN32)
+  file(GLOB FREETYPE_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/freetype/lib/*.lib)
+endif()
+
+# MaskInt
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/MaskInt)
+file(GLOB maskint_hdr ${CMAKE_CURRENT_SOURCE_DIR}/Src/MaskInt/*.h)
+file(GLOB maskint_src ${CMAKE_CURRENT_SOURCE_DIR}/Src/MaskInt/*.cpp)
+
+# Nikon
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/nd2/include)
+if(WIN32)
+  if(${ARCHITECTURE} MATCHES 64)
+    file(GLOB ND2_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/nd2/lib/*.lib)
+  endif()
+elseif(APPLE)
+   file(GLOB ND2_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/nd2/lib/*.dylib)
+endif()
+
+# OpenCL
+if(WIN32)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/OpenCL/include)
+  if(${ARCHITECTURE} MATCHES 64)
+    file(GLOB OpenCL_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/OpenCL/lib/x86_64/*.lib)
+  elseif(${ARCHITECTURE} MATCHES 32)
+    file(GLOB OpenCL_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/OpenCL/lib/x86/*.lib)
+  endif()
+endif()
+
+# OpenVR
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/OpenVR/headers)
+if(WIN32)
+  if(${ARCHITECTURE} MATCHES 64)
+    file(GLOB OpenVR_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/OpenVR/lib/win64/*.lib)
+  endif()
+endif()
+
+# Pole
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/pole)
+file(GLOB pole_srcs ${CMAKE_CURRENT_SOURCE_DIR}/Src/pole/pole.cpp)
+file(GLOB pole_hdrs ${CMAKE_CURRENT_SOURCE_DIR}/Src/pole/pole.h)
+add_library(POLE_OBJ OBJECT ${pole_srcs} ${pole_hdrs})
+
+# ReadGMM
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/ReadGMM)
+file(GLOB readgmm_hdr ${CMAKE_CURRENT_SOURCE_DIR}/Src/ReadGMM/*.h)
+file(GLOB readgmm_src ${CMAKE_CURRENT_SOURCE_DIR}/Src/ReadGMM/*.cpp)
+
+# SynthBB
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/SynthBB)
+file(GLOB synthbb_hdr ${CMAKE_CURRENT_SOURCE_DIR}/Src/SynthBB/*.h)
+file(GLOB synthbb_src ${CMAKE_CURRENT_SOURCE_DIR}/Src/SynthBB/*.cpp)
+
+# Teem
 add_definitions(-DTEEM_DIO=0)
 add_definitions(-DTEEM_ENDIAN=1234)
 add_definitions(-DTEEM_QNANHIBIT=1)
@@ -279,50 +379,42 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Biff)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Air)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Hest)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Nrrd)
-file(GLOB air_src Src/teem/Air/*.c)
-file(GLOB air_hdr Src/teem/Air/*.h)
-file(GLOB hest_src Src/teem/Hest/*.c)
-file(GLOB hest_hdr Src/teem/Hest/*.h)
-file(GLOB biff_src Src/teem/Biff/*.c)
-file(GLOB biff_hdr Src/teem/Biff/*.h)
-file(GLOB nrrd_src Src/teem/Nrrd/*.c)
-file(GLOB nrrd_hdr Src/teem/Nrrd/*.h)
+file(GLOB air_src  ${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Air/*.c)
+file(GLOB air_hdr  ${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Air/*.h)
+file(GLOB hest_src ${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Hest/*.c)
+file(GLOB hest_hdr ${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Hest/*.h)
+file(GLOB biff_src ${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Biff/*.c)
+file(GLOB biff_hdr ${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Biff/*.h)
+file(GLOB nrrd_src ${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Nrrd/*.c)
+file(GLOB nrrd_hdr ${CMAKE_CURRENT_SOURCE_DIR}/Src/teem/Nrrd/*.h)
 add_library(TEEM_OBJ OBJECT ${air_src} ${hest_src} ${nrrd_src} ${biff_src}
                             ${air_hdr} ${hest_hdr} ${nrrd_hdr} ${biff_hdr})
 
-# Eigen
-#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/Eigen)
-
-# Glew
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/glew)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/glew/GL)
-file(GLOB gl_srcs Src/glew/*.c)
-file(GLOB gl_hdrs1 Src/glew/*.h)
-file(GLOB gl_hdrs2 Src/glew/GL/*.h)
-add_library(GLEW_OBJ OBJECT ${gl_srcs} ${gl_hdrs1} ${gl_hdrs2})
-
-# Pole
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/pole)
-file(GLOB pole_srcs Src/pole/pole.cpp)
-file(GLOB pole_hdrs Src/pole/pole.h)
-add_library(POLE_OBJ OBJECT ${pole_srcs} ${pole_hdrs})
-
-# FFMpeg
+# XInput
 if(WIN32)
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/ffmpeg/include)
-  file(GLOB FFMPEG_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/ffmpeg/lib/Win64/*.a ${CMAKE_CURRENT_SOURCE_DIR}/Src/ffmpeg/lib/Win64/*.lib)
-  add_definitions(-D__STDC_CONSTANT_MACROS)
-elseif(APPLE)
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/ffmpeg/include)
-  file(GLOB FFMPEG_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/ffmpeg/lib/OSX/*.a)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/Wacom/Include)
+  file(GLOB wac_src ${CMAKE_CURRENT_SOURCE_DIR}/Src/Wacom/*.cpp)
+  file(GLOB wac_hdr ${CMAKE_CURRENT_SOURCE_DIR}/Src/Wacom/*.h)
+  
+  add_library(WACUTILS_OBJ OBJECT
+    ${wac_src} ${wac_hdr})
+
+  if(USE_XINPUT)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/XInput)
+    file(GLOB xip_src ${CMAKE_CURRENT_SOURCE_DIR}/Src/XInput/*.cpp)
+    file(GLOB xip_hdr ${CMAKE_CURRENT_SOURCE_DIR}/Src/XInput/*.h)
+    add_library(XINPUT_OBJ OBJECT
+      ${xip_src} ${xip_hdr})
+  endif()
 endif()
 
-############################# ARS
+# Tester
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/Tester)
+file(GLOB tester_hdr ${CMAKE_CURRENT_SOURCE_DIR}/Src/Tester/*.h)
+file(GLOB tester_src ${CMAKE_CURRENT_SOURCE_DIR}/Src/Tester/*.cpp)
 
-# Main sources
-file(GLOB main_src ${FLUORENDER_SOURCE_DIR}/Main/*.cpp)
-file(GLOB main_hdr ${FLUORENDER_SOURCE_DIR}/Main/*.h)
-file(GLOB img_rsc ${FLUORENDER_SOURCE_DIR}/img/*.xpm)
+# FluoRender - Each directory should really be built as individual
+# shared libraries and linked accrodingly.
 
 # Utilities
 include_directories(${FLUORENDER_SOURCE_DIR}/Utilities)
@@ -416,13 +508,6 @@ file(GLOB glb_hdr ${FLUORENDER_SOURCE_DIR}/Global/*.hpp)
 add_library(GLOBAL_OBJ OBJECT
   ${glb_src} ${glb_hdr})
 
-# images
-include_directories(${FLUORENDER_SOURCE_DIR}/img)
-file(GLOB img_hdr ${FLUORENDER_SOURCE_DIR}/img/*.h)
-file(GLOB img_src ${FLUORENDER_SOURCE_DIR}/img/*.cpp)
-add_library(IMAGES_OBJ OBJECT
-  ${img_hdr} ${img_src})
-
 # Input
 include_directories(${FLUORENDER_SOURCE_DIR}/Input)
 file(GLOB input_src ${FLUORENDER_SOURCE_DIR}/Input/*.cpp)
@@ -479,120 +564,22 @@ file(GLOB vid_hdr ${FLUORENDER_SOURCE_DIR}/Video/*.h)
 add_library(VIDEO_OBJ OBJECT
   ${vid_src} ${vid_hdr})
 
-# OpenCL
-if(WIN32)
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/OpenCL/include)
-  if(${ARCHITECTURE} MATCHES 64)
-    file(GLOB OpenCL_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/OpenCL/lib/x86_64/*.lib)
-  elseif(${ARCHITECTURE} MATCHES 32)
-    file(GLOB OpenCL_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/OpenCL/lib/x86/*.lib)
-  endif()
-endif()
-
-# Nikon
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/nd2/include)
-if(WIN32)
-  if(${ARCHITECTURE} MATCHES 64)
-    file(GLOB ND2_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/nd2/lib/*.lib)
-  endif()
-elseif(APPLE)
-   file(GLOB ND2_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/nd2/lib/*.dylib)
-endif()
-
-# Freetype
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/freetype/include)
-if(WIN32)
-  file(GLOB FREETYPE_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/freetype/lib/*.lib)
-endif()
-
-# OpenVR
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/OpenVR/headers)
-if(WIN32)
-  if(${ARCHITECTURE} MATCHES 64)
-    file(GLOB OpenVR_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/Src/OpenVR/lib/win64/*.lib)
-  endif()
-endif()
-
-# XInput
-if(WIN32)
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/Wacom/Include)
-  file(GLOB wac_src Src/Wacom/*.cpp)
-  file(GLOB wac_hdr Src/Wacom/*.h)
-  
-  add_library(WACUTILS_OBJ OBJECT
-    ${wac_src} ${wac_hdr})
-
-  if(USE_XINPUT)
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/XInput)
-    file(GLOB xip_src Src/XInput/*.cpp)
-    file(GLOB xip_hdr Src/XInput/*.h)
-    add_library(XINPUT_OBJ OBJECT
-      ${xip_src} ${xip_hdr})
-  endif()
-endif()
-
-# SynthBB
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/SynthBB)
-file(GLOB synthbb_hdr Src/SynthBB/*.h)
-file(GLOB synthbb_src Src/SynthBB/*.cpp)
-
-# MaskInt
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/MaskInt)
-file(GLOB maskint_hdr Src/MaskInt/*.h)
-file(GLOB maskint_src Src/MaskInt/*.cpp)
-
-# ReadGMM
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/ReadGMM)
-file(GLOB readgmm_hdr Src/ReadGMM/*.h)
-file(GLOB readgmm_src Src/ReadGMM/*.cpp)
-
-# Tester
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/Tester)
-file(GLOB tester_hdr Src/Tester/*.h)
-file(GLOB tester_src Src/Tester/*.cpp)
+# Build the UI as a separate shared library
+add_subdirectory(${FLUORENDER_SOURCE_DIR}/UI)
 
 # For Apple and Windoz set the icns file containing icons
-IF(APPLE)
-  # set how it shows up in the Info.plist file
-  SET(MACOSX_BUNDLE_ICON_FILE FluoRender_icon.icns)
-  # set where in the bundle to put the icns file
-  SET(FLUORENDER_ICON "${FLUORENDER_SOURCE_DIR}/img/FluoRender_icon.icns")
-  SET_SOURCE_FILES_PROPERTIES(${FLUORENDER_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-ELSEIF(WIN32)
-  SET(icon_rc "${FLUORENDER_SOURCE_DIR}/img/FluoRender.rc")
-  SET(FLUORENDER_ICON "${FLUORENDER_SOURCE_DIR}/img/fluorenderIcon.ico")
-  ADD_DEFINITIONS(-DICON_RC_FILE="${FLUORENDER_ICON}")
-  SET(main_src ${main_src} ${icon_rc})
-ENDIF()
-
-# Platform specific rules for OpenGL
 if(APPLE)
-  if(NOT OPEN_GL_HEADER_LOC)
-    add_definitions(-DOPEN_GL_HEADER_LOC=<OpenGL/gl.h>)
-  endif()
-  if(NOT OPEN_GLU_HEADER_LOC)
-    add_definitions(-DOPEN_GLU_HEADER_LOC=<OpenGL/glu.h>)
-  endif()
-elseif(UNIX OR MINGW)
-  # Linux
-  #if(NOT OPEN_GL_HEADER_LOC)
-  #  add_definitions(-DOPEN_GL_HEADER_LOC=<OpenGL/gl.h>)
-  #endif()
-  #if(NOT OPEN_GLU_HEADER_LOC)
-  #  add_definitions(-DOPEN_GLU_HEADER_LOC=<OpenGL/glu.h>)
-  #endif()
+  # Icon property in the Info.plist
+  set(MACOSX_BUNDLE_ICON_FILE FluoRender_icon.icns)
+  # Where to find and install the icon
+  set(FLUORENDER_ICON "${FLUORENDER_SOURCE_DIR}/UI/icons/FluoRender_icon.icns")
+  set_SOURCE_FILES_PROPERTIES(${FLUORENDER_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 elseif(WIN32)
-  # Windows
-  if(NOT OPEN_GL_HEADER_LOC)
-    add_definitions(-DOPEN_GL_HEADER_LOC=<GL/gl.h>)
-  endif()
-  if(NOT OPEN_GLU_HEADER_LOC)
-    add_definitions(-DOPEN_GLU_HEADER_LOC=<GL/glu.h>)
-  endif()
+  set(FLUORENDER_ICON "${FLUORENDER_SOURCE_DIR}/UI/icons/fluorenderIcon.ico")
+  set(FLUORENDER_ICON_RC "${FLUORENDER_SOURCE_DIR}/UI/icons/FluoRender.rc")
+  add_definitions(-DICON_RC_FILE="${FLUORENDER_ICON}")
+  set(main_src ${main_src} ${FLUORENDER_ICON_RC})
 endif()
-
-# Build the UI library
-add_subdirectory(${FLUORENDER_SOURCE_DIR}/UI)
 
 qt_add_executable(FluoRender MACOSX_BUNDLE WIN32
 #  ${main_src}
@@ -611,7 +598,6 @@ qt_add_executable(FluoRender MACOSX_BUNDLE WIN32
   $<TARGET_OBJECTS:FLOBJECT_OBJ>
   $<TARGET_OBJECTS:FORMATS_OBJ>
   $<TARGET_OBJECTS:GLOBAL_OBJ>
-  $<TARGET_OBJECTS:IMAGES_OBJ>
   $<TARGET_OBJECTS:INPUT_OBJ>
   $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
   $<TARGET_OBJECTS:SCRIPT_OBJ>
@@ -630,14 +616,15 @@ add_executable(Tester MACOSX_BUNDLE WIN32
   $<TARGET_OBJECTS:TYPES_OBJ>
   $<TARGET_OBJECTS:FLOBJECT_OBJ>)
 
-# FluoRender
+# FluoRender specific.
+target_compile_options(FluoRender PRIVATE "$<$<CONFIG:RELEASE>:${RELEASE_FLAGS}>")
+target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
+
 include_directories(${FLUORENDER_COMMON_INCLUDES})
 
+# For some reason this call is not working.
 #target_include_directories(FluoRender PUBLIC
 #			   ${FLUORENDER_COMMON_INCLUDES})
-
-message(STATUS "FLUORENDER_COMMON_INCLUDES ${FLUORENDER_COMMON_INCLUDES}")
-
 
 # Platform specific sources
 if(WIN32)
@@ -649,9 +636,6 @@ if(WIN32)
       $<TARGET_OBJECTS:XINPUT_OBJ>)
   endif()
 endif()
-
-target_compile_options(FluoRender PRIVATE "$<$<CONFIG:RELEASE>:${RELEASE_FLAGS}>")
-target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
 
 # Link libraries
 target_link_libraries(FluoRender PUBLIC
@@ -692,6 +676,11 @@ elseif(WIN32)
     secur32.lib
     XInput.lib)
 endif()
+
+# Output directories
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Copy Java code dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
