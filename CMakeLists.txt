@@ -345,6 +345,13 @@ file(GLOB calc_hdr fluorender/FluoRender/Calculate/*.h)
 add_library(CALCULATE_OBJ OBJECT
   ${calc_src} ${calc_hdr})
 
+# Database
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Database)
+file(GLOB dbs_src fluorender/FluoRender/Database/*.cpp)
+file(GLOB dbs_hdr fluorender/FluoRender/Database/*.h)
+add_library(DATABASE_OBJ OBJECT
+  ${dbs_src} ${dbs_hdr})
+
 # Animators
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Animators)
 file(GLOB ani_src fluorender/FluoRender/Animator/*.cpp)
@@ -514,6 +521,7 @@ if(APPLE)
     $<TARGET_OBJECTS:CLUSTER_OBJ>
     $<TARGET_OBJECTS:DISTANCE_OBJ>
     $<TARGET_OBJECTS:CALCULATE_OBJ>
+    $<TARGET_OBJECTS:DATABASE_OBJ>
     $<TARGET_OBJECTS:GLEW_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
     $<TARGET_OBJECTS:TEEM_OBJ>)
@@ -551,6 +559,7 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:CLUSTER_OBJ>
     $<TARGET_OBJECTS:DISTANCE_OBJ>
     $<TARGET_OBJECTS:CALCULATE_OBJ>
+    $<TARGET_OBJECTS:DATABASE_OBJ>
     $<TARGET_OBJECTS:GLEW_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
     $<TARGET_OBJECTS:TEEM_OBJ>)
@@ -615,6 +624,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:CLUSTER_OBJ>
       $<TARGET_OBJECTS:DISTANCE_OBJ>
       $<TARGET_OBJECTS:CALCULATE_OBJ>
+      $<TARGET_OBJECTS:DATABASE_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>
@@ -640,6 +650,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:CLUSTER_OBJ>
       $<TARGET_OBJECTS:DISTANCE_OBJ>
       $<TARGET_OBJECTS:CALCULATE_OBJ>
+      $<TARGET_OBJECTS:DATABASE_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>
