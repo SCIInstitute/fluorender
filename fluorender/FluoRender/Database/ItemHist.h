@@ -38,7 +38,45 @@ namespace flrd
 		public:
 			ItemHist();
 			~ItemHist();
-			
+
+			void setRange(float min, float max)
+			{
+				m_min = min;
+				m_max = max;
+			}
+
+			void setPopulation(unsigned int pop)
+			{
+				m_population = pop;
+			}
+
+			void setData(unsigned int bins, float* d)
+			{
+				if (bins <= 0 || !d)
+					return;
+				m_bins = bins;
+				m_data.assign(d, d + m_bins);
+			}
+
+			void setData(unsigned int bins, unsigned int* d)
+			{
+				//need normalization
+				if (!m_population || bins <= 0 || !d)
+					return;
+				if (!m_data.empty())
+					m_data.clear();
+				m_bins = bins;
+				for (size_t i = 0; i < m_bins; ++i)
+					m_data.push_back(float(d[i]) / float(m_population));
+			}
+
+			float* getData()
+			{
+				if (m_data.empty())
+					return 0;
+				return &(m_data[0]);
+			}
+
 		private:
 			float m_min;//min value
 			float m_max;//max value

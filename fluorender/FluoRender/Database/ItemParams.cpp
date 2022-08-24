@@ -29,10 +29,96 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
+unsigned int ItemParams::m_size = 18;
+std::vector<std::string> ItemParams::m_names = {
+	"iter",//uint
+	"thresh",//float
+	"diff",//bool
+	"falloff",//float
+	"density",//bool
+	"density_thresh",//float
+	"varth",//float
+	"density_window_size",//uint
+	"density_stats_size",//uint
+	"use_dist_field",//bool
+	"dist_strength",//float
+	"dist_thresh",//float
+	"dist_filter_size",//uint
+	"max_dist",//uint
+	"cleanb",//bool
+	"clean_iter",//uint
+	"clean_size_vl",//uint
+	"grow_fixed"//bool
+	};
+std::unordered_map<std::string, size_t> ItemParams::m_name_index = {
+	{"iter", 0},
+	{"thresh", 1},
+	{"diff", 2},
+	{"falloff", 3},
+	{"density", 4},
+	{"density_thresh", 5},
+	{"varth", 6},
+	{"density_window_size", 7},
+	{"density_stats_size", 8},
+	{"use_dist_field", 9},
+	{"dist_strength", 10},
+	{"dist_thresh", 11},
+	{"dist_filter_size", 12},
+	{"max_dist", 13},
+	{"cleanb", 14},
+	{"clean_iter", 15},
+	{"clean_size_vl", 16},
+	{"grow_fixed", 17}
+};
+std::vector<ItemParams::ParamTypes> ItemParams::m_types = {
+	IPT_UINT,
+	IPT_FLOAT,
+	IPT_BOOL,
+	IPT_FLOAT,
+	IPT_BOOL,
+	IPT_FLOAT,
+	IPT_FLOAT,
+	IPT_UINT,
+	IPT_UINT,
+	IPT_BOOL,
+	IPT_FLOAT,
+	IPT_FLOAT,
+	IPT_UINT,
+	IPT_UINT,
+	IPT_BOOL,
+	IPT_UINT,
+	IPT_UINT,
+	IPT_BOOL
+	};
+
 ItemParams::ItemParams()
 {
+	//fixed size
+	if (m_size)
+		m_data.assign(m_size, 0);
 }
 
 ItemParams::~ItemParams()
 {
 }
+
+size_t ItemParams::getNameIndex(const std::string& name)
+{
+	size_t result = m_size;
+	std::unordered_map<std::string, size_t>::const_iterator i =
+		m_name_index.find(name);
+	if (i != m_name_index.end())
+	{
+		result = i->second;
+	}
+	return result;
+}
+
+template <typename T>
+void ItemParams::setParam(const std::string& name, T value)
+{
+	size_t i = getNameIndex(name);
+	if (i < m_size)
+		m_data[i] = float(value);
+}
+

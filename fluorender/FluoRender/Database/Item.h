@@ -34,7 +34,7 @@ namespace flrd
 	{
 		public:
 			Item();
-			~Item();
+			virtual ~Item();
 			
 		private:
 	};

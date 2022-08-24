@@ -36,9 +36,14 @@ namespace flrd
 	{
 		public:
 			Entry();
-			~Entry();
-			
-		private:
+			virtual ~Entry();
+
+			virtual Item* getInputItem() = 0;
+			virtual void setInputItem(Item* item) = 0;
+			virtual Item* getOutputItem() = 0;
+			virtual void setOutputItem(Item* item) = 0;
+
+		protected:
 			Item* m_input;
 			Item* m_output;
 	};

@@ -25,31 +25,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "Table.h"
+#include "EntryHistParams.h"
 
 using namespace flrd;
 
-Table::Table()
+EntryHistParams::EntryHistParams()
 {
 }
 
-Table::~Table()
+EntryHistParams::~EntryHistParams()
 {
-	clear();
-}
-
-void Table::clear()
-{
-	for (auto i : m_data)
-	{
-		delete i;
-	}
-	m_data.clear();
-}
-
-void Table::addEntry(Entry* entry)
-{
-	if (!entry)
-		return;
-	m_data.push_back(entry);
 }

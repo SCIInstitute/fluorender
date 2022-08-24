@@ -37,10 +37,13 @@ namespace flrd
 	{
 		public:
 			Table();
-			~Table();
+			virtual ~Table();
+
+			virtual void clear();
+			virtual void addEntry(Entry* entry);
 			
 		private:
-			std::vector<Entry> m_data;
+			std::vector<Entry*> m_data;
 	};
 }
 

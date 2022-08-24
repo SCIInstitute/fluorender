@@ -29,7 +29,11 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-ItemHist::ItemHist()
+ItemHist::ItemHist() :
+	m_min(0),
+	m_max(0),
+	m_bins(0),
+	m_population(0)
 {
 }
 

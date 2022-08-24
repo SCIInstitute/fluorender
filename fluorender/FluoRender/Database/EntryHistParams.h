@@ -25,31 +25,43 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "Table.h"
+#ifndef _ENTRYHISTPARAMS_H_
+#define _ENTRYHISTPARAMS_H_
 
-using namespace flrd;
+#include <Entry.h>
+#include <ItemHist.h>
+#include <ItemParams.h>
 
-Table::Table()
+namespace flrd
 {
-}
-
-Table::~Table()
-{
-	clear();
-}
-
-void Table::clear()
-{
-	for (auto i : m_data)
+	class EntryHistParams : public Entry
 	{
-		delete i;
-	}
-	m_data.clear();
+		public:
+			EntryHistParams();
+			~EntryHistParams();
+
+			virtual ItemHist* getInputItem()
+			{
+				return dynamic_cast<ItemHist*>(m_input);
+			}
+
+			virtual void setInputItem(ItemHist* item)
+			{
+				m_input = item;
+			}
+			
+			virtual ItemParams* getOutputItem()
+			{
+				return dynamic_cast<ItemParams*>(m_input);
+			}
+
+			virtual void setOutputItem(ItemParams* item)
+			{
+				m_input = item;
+			}
+
+	private:
+	};
 }
 
-void Table::addEntry(Entry* entry)
-{
-	if (!entry)
-		return;
-	m_data.push_back(entry);
-}
+#endif//_ENTRYHISTPARAMS_H_

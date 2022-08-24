@@ -4141,6 +4141,10 @@ void ComponentDlg::LoadCmd(const wxString &filename)
 		{
 			params.push_back("density_thresh"); params.push_back(std::to_string(dval));
 		}
+		if (fconfig.Read("varth", &dval))
+		{
+			params.push_back("varth"); params.push_back(std::to_string(dval));
+		}
 
 		m_command.push_back(params);
 		cmd_count++;
@@ -4205,7 +4209,8 @@ void ComponentDlg::SaveCmd(const wxString &filename)
 				*it2 == "dist_strength" ||
 				*it2 == "dist_thresh" ||
 				*it2 == "falloff" ||
-				*it2 == "density_thresh")
+				*it2 == "density_thresh" ||
+				*it2 == "varth")
 			{
 				str = (*it2);
 				++it2;

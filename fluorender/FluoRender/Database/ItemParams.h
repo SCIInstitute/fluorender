@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Item.h>
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 namespace flrd
 {
@@ -42,19 +43,27 @@ namespace flrd
 				IPT_VOID = 0,
 				IPT_BOOL,
 				IPT_CHAR,
+				IPT_UCHAR,
 				IPT_SHORT,
+				IPT_USHORT,
 				IPT_INT,
+				IPT_UINT,
 				IPT_FLOAT,
 				IPT_DOUBLE,
 			};
 
 			ItemParams();
 			~ItemParams();
-			
+
+			size_t getNameIndex(const std::string& name);
+			template <typename T>
+			void setParam(const std::string& name, T value);
+
 		private:
-			unsigned int m_size;//parameter size
-			std::vector<std::string> m_names;//parameter names
-			std::vector<ParamTypes> m_types;//parameter types for external program
+			static unsigned int m_size;//parameter size
+			static std::vector<std::string> m_names;//parameter names
+			static std::unordered_map<std::string, size_t> m_name_index;//index of names
+			static std::vector<ParamTypes> m_types;//parameter types for external program
 			std::vector<float> m_data;//parameter values, converted to float
 	};
 }
