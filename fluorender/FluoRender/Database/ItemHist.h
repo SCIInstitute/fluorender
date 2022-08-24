@@ -50,24 +50,18 @@ namespace flrd
 				m_population = pop;
 			}
 
-			void setData(unsigned int bins, float* d)
+			void setData(float* d)
 			{
-				if (bins <= 0 || !d)
-					return;
-				m_bins = bins;
 				m_data.assign(d, d + m_bins);
 			}
 
-			void setData(unsigned int bins, unsigned int* d)
+			void setData(unsigned int* d)
 			{
 				//need normalization
-				if (!m_population || bins <= 0 || !d)
+				if (!m_population)
 					return;
-				if (!m_data.empty())
-					m_data.clear();
-				m_bins = bins;
 				for (size_t i = 0; i < m_bins; ++i)
-					m_data.push_back(float(d[i]) / float(m_population));
+					m_data[i] = float(d[i]) / float(m_population);
 			}
 
 			float* getData()
@@ -78,9 +72,9 @@ namespace flrd
 			}
 
 		private:
+			static unsigned int m_bins;//bin size
 			float m_min;//min value
 			float m_max;//max value
-			unsigned int m_bins;//bin size
 			unsigned int m_population;//sample size
 			std::vector<float> m_data;//histogram, normalized
 	};

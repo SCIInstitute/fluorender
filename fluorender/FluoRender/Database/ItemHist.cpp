@@ -29,12 +29,14 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
+unsigned int ItemHist::m_bins = 256;//fixed size
+
 ItemHist::ItemHist() :
 	m_min(0),
 	m_max(0),
-	m_bins(0),
 	m_population(0)
 {
+	m_data.assign(m_bins, 0);
 }
 
 ItemHist::~ItemHist()
