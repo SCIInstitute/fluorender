@@ -47,9 +47,9 @@ void Table::clear()
 	m_data.clear();
 }
 
-void Table::addEntry(Entry* entry)
+void Table::addRecord(Record* rec)
 {
-	if (!entry)
+	if (!rec)
 		return;
-	m_data.push_back(entry);
+	m_data.push_back(rec);
 }

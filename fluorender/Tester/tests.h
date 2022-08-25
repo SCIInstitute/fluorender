@@ -13,3 +13,5 @@ void GroupTest4();
 void SpecialValueTest();
 
 void MyTest();
+
+void TableTest();

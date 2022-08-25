@@ -25,59 +25,52 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _ITEMHIST_H_
-#define _ITEMHIST_H_
+#ifndef _ENTRYPARAMS_H_
+#define _ENTRYPARAMS_H_
 
-#include <Item.h>
+#include <Entry.h>
 #include <vector>
+#include <string>
+#include <unordered_map>
 
 namespace flrd
 {
-	class ItemHist : public Item
+	class EntryParams : public Entry
 	{
 		public:
-			ItemHist();
-			~ItemHist();
-
-			void setRange(float min, float max)
+			enum ParamTypes
 			{
-				m_min = min;
-				m_max = max;
-			}
+				IPT_VOID = 0,
+				IPT_BOOL,
+				IPT_CHAR,
+				IPT_UCHAR,
+				IPT_SHORT,
+				IPT_USHORT,
+				IPT_INT,
+				IPT_UINT,
+				IPT_FLOAT,
+				IPT_DOUBLE,
+			};
 
-			void setPopulation(unsigned int pop)
-			{
-				m_population = pop;
-			}
+			EntryParams();
+			~EntryParams();
 
-			void setData(float* d)
+			size_t getNameIndex(const std::string& name);
+			template <typename T>
+			void setParam(const std::string& name, T value)
 			{
-				m_data.assign(d, d + m_bins);
-			}
-
-			void setData(unsigned int* d)
-			{
-				//need normalization
-				if (!m_population)
-					return;
-				for (size_t i = 0; i < m_bins; ++i)
-					m_data[i] = float(d[i]) / float(m_population);
-			}
-
-			float* getData()
-			{
-				if (m_data.empty())
-					return 0;
-				return &(m_data[0]);
+				size_t i = getNameIndex(name);
+				if (i < m_size)
+					m_data[i] = float(value);
 			}
 
 		private:
-			static unsigned int m_bins;//bin size
-			float m_min;//min value
-			float m_max;//max value
-			unsigned int m_population;//sample size
-			std::vector<float> m_data;//histogram, normalized
+			static unsigned int m_size;//parameter size
+			static std::vector<std::string> m_names;//parameter names
+			static std::unordered_map<std::string, size_t> m_name_index;//index of names
+			static std::vector<ParamTypes> m_types;//parameter types for external program
+			std::vector<float> m_data;//parameter values, converted to float
 	};
 }
 
-#endif//_ITEMHIST_H_
+#endif//_ENTRYPARAMS_H_

@@ -528,7 +528,8 @@ if(APPLE)
   add_executable(Tester MACOSX_BUNDLE
     ${tester_src} ${tester_hdr}
     $<TARGET_OBJECTS:TYPES_OBJ>
-    $<TARGET_OBJECTS:FLOBJECT_OBJ>)
+    $<TARGET_OBJECTS:FLOBJECT_OBJ>
+    $<TARGET_OBJECTS:DATABASE_OBJ>)
 elseif(UNIX OR MINGW)
   # Linux
   #if(NOT OPEN_GL_HEADER_LOC)
@@ -660,7 +661,8 @@ elseif(WIN32)
     add_executable(Tester
       ${tester_src} ${tester_hdr}
       $<TARGET_OBJECTS:TYPES_OBJ>
-      $<TARGET_OBJECTS:FLOBJECT_OBJ>)
+      $<TARGET_OBJECTS:FLOBJECT_OBJ>
+      $<TARGET_OBJECTS:DATABASE_OBJ>)
   endif()
 endif()
 

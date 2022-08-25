@@ -29,14 +29,10 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-Entry::Entry() :
-	m_input(0),
-	m_output(0)
+Entry::Entry()
 {
 }
 
 Entry::~Entry()
 {
-	if (m_input) delete m_input;
-	if (m_output) delete m_output;
 }

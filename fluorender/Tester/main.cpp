@@ -1,5 +1,5 @@
 #include <stdio.h>
-//#include <vld.h>
+#include <vld.h>
 #include "asserts.h"
 #include "tests.h"
 #include "reformat_data.h"
@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 	//ObjectTest();
 	//ObjectTest2();
 	//ObjectTest3();
-	ObjectTest4();
+	//ObjectTest4();
 
 	//GroupTest();
 	//GroupTest2();
@@ -26,6 +26,8 @@ int main(int argc, char* argv[])
 	//MyTest();
 
 	//reformat_data();
+
+	TableTest();
 
 	cout << "All done. Quit." << endl;
 	cin.get();

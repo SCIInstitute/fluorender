@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TABLE_H_
 #define _TABLE_H_
 
-#include <Entry.h>
+#include <Record.h>
 #include <vector>
 
 namespace flrd
@@ -40,10 +40,10 @@ namespace flrd
 			virtual ~Table();
 
 			virtual void clear();
-			virtual void addEntry(Entry* entry);
+			virtual void addRecord(Record* rec);
 			
 		private:
-			std::vector<Entry*> m_data;
+			std::vector<Record*> m_data;
 	};
 }
 

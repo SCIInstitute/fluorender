@@ -25,19 +25,43 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _ITEM_H_
-#define _ITEM_H_
+#ifndef _RECORDHISTPARAMS_H_
+#define _RECORDHISTPARAMS_H_
+
+#include <Record.h>
+#include <EntryHist.h>
+#include <EntryParams.h>
 
 namespace flrd
 {
-	class Item
+	class RecordHistParams : public Record
 	{
 		public:
-			Item();
-			virtual ~Item();
+			RecordHistParams();
+			virtual ~RecordHistParams();
+
+			virtual EntryHist* getInput()
+			{
+				return dynamic_cast<EntryHist*>(m_input);
+			}
+
+			virtual void setInput(Entry* entry)
+			{
+				m_input = entry;
+			}
 			
-		private:
+			virtual EntryParams* getOutput()
+			{
+				return dynamic_cast<EntryParams*>(m_input);
+			}
+
+			virtual void setOutput(Entry* entry)
+			{
+				m_output = entry;
+			}
+
+	private:
 	};
 }
 
-#endif//_ITEM_H_
+#endif//_RECORDHISTPARAMS_H_

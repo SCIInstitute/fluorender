@@ -25,12 +25,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "ItemParams.h"
+#include "EntryParams.h"
 
 using namespace flrd;
 
-unsigned int ItemParams::m_size = 18;
-std::vector<std::string> ItemParams::m_names = {
+unsigned int EntryParams::m_size = 18;
+std::vector<std::string> EntryParams::m_names = {
 	"iter",//uint
 	"thresh",//float
 	"diff",//bool
@@ -50,7 +50,7 @@ std::vector<std::string> ItemParams::m_names = {
 	"clean_size_vl",//uint
 	"grow_fixed"//bool
 	};
-std::unordered_map<std::string, size_t> ItemParams::m_name_index = {
+std::unordered_map<std::string, size_t> EntryParams::m_name_index = {
 	{"iter", 0},
 	{"thresh", 1},
 	{"diff", 2},
@@ -70,7 +70,7 @@ std::unordered_map<std::string, size_t> ItemParams::m_name_index = {
 	{"clean_size_vl", 16},
 	{"grow_fixed", 17}
 };
-std::vector<ItemParams::ParamTypes> ItemParams::m_types = {
+std::vector<EntryParams::ParamTypes> EntryParams::m_types = {
 	IPT_UINT,
 	IPT_FLOAT,
 	IPT_BOOL,
@@ -91,18 +91,18 @@ std::vector<ItemParams::ParamTypes> ItemParams::m_types = {
 	IPT_BOOL
 	};
 
-ItemParams::ItemParams()
+EntryParams::EntryParams()
 {
 	//fixed size
 	if (m_size)
 		m_data.assign(m_size, 0);
 }
 
-ItemParams::~ItemParams()
+EntryParams::~EntryParams()
 {
 }
 
-size_t ItemParams::getNameIndex(const std::string& name)
+size_t EntryParams::getNameIndex(const std::string& name)
 {
 	size_t result = m_size;
 	std::unordered_map<std::string, size_t>::const_iterator i =
@@ -112,13 +112,5 @@ size_t ItemParams::getNameIndex(const std::string& name)
 		result = i->second;
 	}
 	return result;
-}
-
-template <typename T>
-void ItemParams::setParam(const std::string& name, T value)
-{
-	size_t i = getNameIndex(name);
-	if (i < m_size)
-		m_data[i] = float(value);
 }
 

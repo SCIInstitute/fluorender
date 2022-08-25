@@ -25,20 +25,28 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "ItemHist.h"
+#ifndef _RECORD_H_
+#define _RECORD_H_
 
-using namespace flrd;
+#include <Entry.h>
 
-unsigned int ItemHist::m_bins = 256;//fixed size
-
-ItemHist::ItemHist() :
-	m_min(0),
-	m_max(0),
-	m_population(0)
+namespace flrd
 {
-	m_data.assign(m_bins, 0);
+	class Record
+	{
+		public:
+			Record();
+			virtual ~Record();
+
+			virtual Entry* getInput() = 0;
+			virtual void setInput(Entry* entry) = 0;
+			virtual Entry* getOutput() = 0;
+			virtual void setOutput(Entry* entry) = 0;
+
+		protected:
+			Entry* m_input;
+			Entry* m_output;
+	};
 }
 
-ItemHist::~ItemHist()
-{
-}
+#endif//_RECORD_H_

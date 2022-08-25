@@ -25,14 +25,59 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "EntryHistParams.h"
+#ifndef _ENTRYHIST_H_
+#define _ENTRYHIST_H_
 
-using namespace flrd;
+#include <Entry.h>
+#include <vector>
 
-EntryHistParams::EntryHistParams()
+namespace flrd
 {
+	class EntryHist : public Entry
+	{
+		public:
+			EntryHist();
+			~EntryHist();
+
+			void setRange(float min, float max)
+			{
+				m_min = min;
+				m_max = max;
+			}
+
+			void setPopulation(unsigned int pop)
+			{
+				m_population = pop;
+			}
+
+			void setData(float* d)
+			{
+				m_data.assign(d, d + m_bins);
+			}
+
+			void setData(unsigned int* d)
+			{
+				//need normalization
+				if (!m_population)
+					return;
+				for (size_t i = 0; i < m_bins; ++i)
+					m_data[i] = float(d[i]) / float(m_population);
+			}
+
+			float* getData()
+			{
+				if (m_data.empty())
+					return 0;
+				return &(m_data[0]);
+			}
+
+		private:
+			static unsigned int m_bins;//bin size
+			float m_min;//min value
+			float m_max;//max value
+			unsigned int m_population;//sample size
+			std::vector<float> m_data;//histogram, normalized
+	};
 }
 
-EntryHistParams::~EntryHistParams()
-{
-}
+#endif//_ENTRYHIST_H_

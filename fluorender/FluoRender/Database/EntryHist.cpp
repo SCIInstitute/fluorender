@@ -25,47 +25,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _ITEMPARAMS_H_
-#define _ITEMPARAMS_H_
+#include "EntryHist.h"
 
-#include <Item.h>
-#include <vector>
-#include <string>
-#include <unordered_map>
+using namespace flrd;
 
-namespace flrd
+unsigned int EntryHist::m_bins = 256;//fixed size
+
+EntryHist::EntryHist() :
+	m_min(0),
+	m_max(0),
+	m_population(0)
 {
-	class ItemParams : public Item
-	{
-		public:
-			enum ParamTypes
-			{
-				IPT_VOID = 0,
-				IPT_BOOL,
-				IPT_CHAR,
-				IPT_UCHAR,
-				IPT_SHORT,
-				IPT_USHORT,
-				IPT_INT,
-				IPT_UINT,
-				IPT_FLOAT,
-				IPT_DOUBLE,
-			};
-
-			ItemParams();
-			~ItemParams();
-
-			size_t getNameIndex(const std::string& name);
-			template <typename T>
-			void setParam(const std::string& name, T value);
-
-		private:
-			static unsigned int m_size;//parameter size
-			static std::vector<std::string> m_names;//parameter names
-			static std::unordered_map<std::string, size_t> m_name_index;//index of names
-			static std::vector<ParamTypes> m_types;//parameter types for external program
-			std::vector<float> m_data;//parameter values, converted to float
-	};
+	m_data.assign(m_bins, 0);
 }
 
-#endif//_ITEMPARAMS_H_
+EntryHist::~EntryHist()
+{
+}
