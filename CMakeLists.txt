@@ -1,22 +1,22 @@
 # /*
 # For more information, please see: http://software.sci.utah.edu
-# 
+#
 # The MIT License
-# 
+#
 # Copyright (c) 2022 Scientific Computing and Imaging Institute,
 # University of Utah.
-# 
-# 
+#
+#
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
 # to deal in the Software without restriction, including without limitation
 # the rights to use, copy, modify, merge, publish, distribute, sublicense,
 # and/or sell copies of the Software, and to permit persons to whom the
 # Software is furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included
 # in all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
@@ -144,9 +144,9 @@ set(CMAKE_C_FLAGS "${ARCH_FLAGS} ${CFLAGS}")
 set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
 set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
 
-# Get the required and optional packages. 
+# Get the required and optional packages.
 
-# OpenGL - find first 
+# OpenGL - find first
 find_package(OpenGL REQUIRED)
 
 # Platform specific rules for OpenGL
@@ -188,8 +188,11 @@ set(Qt6GuiTools_DIR     "${QT_DIR}/lib/cmake/Qt6GuiTools")
 set(Qt6WidgetsTools_DIR "${QT_DIR}/lib/cmake/Qt6WidgetsTools")
 set(Qt6DBusTools_DIR    "${QT_DIR}/lib/cmake/Qt6DBusTools")
 
+# The Qt components needed
 set(QT_COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets UiPlugin)
+# Use the component names to create the library names and the include dirs.
 string(REGEX REPLACE "([^;]+)(;|$)" "Qt::\\1\\2" QT_LIBRARIES "${QT_COMPONENTS}")
+string(REGEX REPLACE "([^;]+)(;|$)" "Qt6\\1_INCLUDE_DIRS\\2" QT_INCLUDE_DIRS "${QT_COMPONENTS}")
 
 find_package(Qt6 REQUIRED COMPONENTS ${QT_COMPONENTS})
 
@@ -242,7 +245,11 @@ endif()
 
 # Tiff
 find_package(TIFF REQUIRED)
-include_directories(${TIFF_INCLUDE_DIRS})
+if(TIFF_FOUND)
+  set(HAVE_TIFF true CACHE BOOL "Have Tiff lib")
+  include_directories(${TIFF_INCLUDE_DIRS})
+endif(TIFF_FOUND)
+
 
 # Zlib
 find_package(ZLIB)
@@ -395,7 +402,7 @@ if(WIN32)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Src/Wacom/Include)
   file(GLOB wac_src ${CMAKE_CURRENT_SOURCE_DIR}/Src/Wacom/*.cpp)
   file(GLOB wac_hdr ${CMAKE_CURRENT_SOURCE_DIR}/Src/Wacom/*.h)
-  
+
   add_library(WACUTILS_OBJ OBJECT
     ${wac_src} ${wac_hdr})
 
@@ -564,19 +571,58 @@ file(GLOB vid_hdr ${FLUORENDER_SOURCE_DIR}/Video/*.h)
 add_library(VIDEO_OBJ OBJECT
   ${vid_src} ${vid_hdr})
 
+#######################
+set(FLUORENDER_UI_DIR "${FLUORENDER_SOURCE_DIR}/UI")
+set(FLUORENDER_ICONS_DIR "${FLUORENDER_UI_DIR}/icons")
+
+file(GLOB ui_src
+          ${FLUORENDER_UI_DIR}/Interface/*.cpp
+          ${FLUORENDER_UI_DIR}/MainWindow/*.cpp
+          ${FLUORENDER_UI_DIR}/Preferences/*.cpp
+          ${FLUORENDER_UI_DIR}/Properties/*.cpp
+          ${FLUORENDER_UI_DIR}/Tools/*.cpp
+          ${FLUORENDER_UI_DIR}/ViewWindow/*.cpp
+          ${FLUORENDER_UI_DIR}/Widgets/*.cpp
+          )
+
+file(GLOB ui_hdr
+          ${FLUORENDER_UI_DIR}/Interface/*.h
+          ${FLUORENDER_UI_DIR}/MainWindow/*.h
+          ${FLUORENDER_UI_DIR}/Preferences/*.h
+          ${FLUORENDER_UI_DIR}/Properties/*.h
+          ${FLUORENDER_UI_DIR}/Tools/*.h
+          ${FLUORENDER_UI_DIR}/ViewWindow/*.h
+          ${FLUORENDER_UI_DIR}/Widgets/*.h
+          )
+
+file(GLOB ui_ui
+          ${FLUORENDER_UI_DIR}/Interface/*.ui
+          ${FLUORENDER_UI_DIR}/MainWindow/*.ui
+          ${FLUORENDER_UI_DIR}/Preferences/*.ui
+          ${FLUORENDER_UI_DIR}/Properties/*.ui
+          ${FLUORENDER_UI_DIR}/Tools/*.ui
+          ${FLUORENDER_UI_DIR}/ViewWindow/*.ui
+          ${FLUORENDER_UI_DIR}/Widgets/*.ui
+          )
+
+qt_add_library(UI_OBJ OBJECT
+  ${ui_src} ${ui_hdr} ${ui_ui})
+
+#######################
+
 # Build the UI as a separate shared library
-add_subdirectory(${FLUORENDER_SOURCE_DIR}/UI)
+#add_subdirectory(${FLUORENDER_SOURCE_DIR}/UI)
 
 # For Apple and Windoz set the icns file containing icons
 if(APPLE)
   # Icon property in the Info.plist
-  set(MACOSX_BUNDLE_ICON_FILE FluoRender_icon.icns)
+  set(MACOSX_BUNDLE_ICON_FILE FluoRenderIcon.icns)
   # Where to find and install the icon
-  set(FLUORENDER_ICON "${FLUORENDER_SOURCE_DIR}/UI/icons/FluoRender_icon.icns")
+  set(FLUORENDER_ICON "${FLUORENDER_ICONS_DIR}/FluoRenderIcon.icns")
   set_SOURCE_FILES_PROPERTIES(${FLUORENDER_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 elseif(WIN32)
-  set(FLUORENDER_ICON "${FLUORENDER_SOURCE_DIR}/UI/icons/fluorenderIcon.ico")
-  set(FLUORENDER_ICON_RC "${FLUORENDER_SOURCE_DIR}/UI/icons/FluoRender.rc")
+  set(FLUORENDER_ICON "${FLUORENDER_ICONS_DIR}/FluoRenderIcon.ico")
+  set(FLUORENDER_ICON_RC "${FLUORENDER_ICONS_DIR}/FluoRender.rc")
   add_definitions(-DICON_RC_FILE="${FLUORENDER_ICON}")
   set(main_src ${main_src} ${FLUORENDER_ICON_RC})
 endif()
@@ -586,6 +632,7 @@ qt_add_executable(FluoRender MACOSX_BUNDLE WIN32
   ${FLUORENDER_SOURCE_DIR}/Main/main.cpp
   FluoRender.qrc
   ${FLUORENDER_ICON}
+  $<TARGET_OBJECTS:UI_OBJ>
   $<TARGET_OBJECTS:AGENTS_OBJ>
   $<TARGET_OBJECTS:ANIMATORS_OBJ>
   $<TARGET_OBJECTS:CALCULATE_OBJ>
@@ -624,7 +671,7 @@ include_directories(${FLUORENDER_COMMON_INCLUDES})
 
 # For some reason this call is not working.
 #target_include_directories(FluoRender PUBLIC
-#			   ${FLUORENDER_COMMON_INCLUDES})
+#                          ${FLUORENDER_COMMON_INCLUDES})
 
 # Platform specific sources
 if(WIN32)
@@ -637,9 +684,37 @@ if(WIN32)
   endif()
 endif()
 
+
+#######################
+foreach(dir ${QT_INCLUDE_DIRS})
+  include_directories(#FluoRender PUBLIC # Should it be private??
+        ${${dir}})
+endforeach()
+
+include_directories(#FluoRender PUBLIC # Should it be private??
+    ${qtadvanceddocking_INCLUDE_DIR}
+    ${FLUORENDER_SOURCE_DIR}/UI/Interface
+    ${FLUORENDER_SOURCE_DIR}/UI/MainWindow
+    ${FLUORENDER_SOURCE_DIR}/UI/Preferences
+    ${FLUORENDER_SOURCE_DIR}/UI/Properties
+    ${FLUORENDER_SOURCE_DIR}/UI/Tools
+    ${FLUORENDER_SOURCE_DIR}/UI/ViewWindow
+    ${FLUORENDER_SOURCE_DIR}/UI/Widgets
+)
+
+target_link_directories(FluoRender PUBLIC # Should it be private??
+    ${qtadvanceddocking_LIBRARY_DIR}
+)
+
+target_link_libraries(FluoRender PUBLIC # Should it be private??
+    ${qtadvanceddocking_LIBRARIES}
+    ${QT_LIBRARIES}
+)
+
+#######################
 # Link libraries
 target_link_libraries(FluoRender PUBLIC
-  FluoRenderUI
+#  FluoRenderUI
   ${FFMPEG_LIBRARIES}
   ${OPENGL_LIBRARIES}
   ${Boost_LIBRARIES}
@@ -687,7 +762,7 @@ add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${CMAKE_CURRENT_SOURCE_DIR}/Java_Code/ImageJ_Reader/target/classes"
   "$<TARGET_FILE_DIR:FluoRender>/Java_Code")
-  
+
 # Copy openCL examples to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -760,7 +835,7 @@ if(APPLE)
     COMMAND ${CMAKE_COMMAND} -E copy
     "${CMAKE_CURRENT_SOURCE_DIR}/Src/nd2/lib/libNd2ReadSdk.dylib"
     "$<TARGET_FILE_DIR:FluoRender>")
-  add_custom_command(TARGET FluoRender POST_BUILD COMMAND 
+  add_custom_command(TARGET FluoRender POST_BUILD COMMAND
     ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/"
     $<TARGET_FILE:FluoRender>)
 elseif(WIN32)
@@ -782,11 +857,11 @@ endif()
 
 # Make the executable directory
 if(WIN32)
-  add_custom_target(make_exe_dir ALL 
+  add_custom_target(make_exe_dir ALL
     COMMAND ${CMAKE_COMMAND} -E make_directory
     "$<TARGET_FILE_DIR:FluoRender>/Executables")
 else()
-  add_custom_command(TARGET FluoRender POST_BUILD 
+  add_custom_command(TARGET FluoRender POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory
     "$<TARGET_FILE_DIR:FluoRender>/Executables")
 endif()
