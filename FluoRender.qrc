@@ -15,8 +15,8 @@
         <file>Src/FluoRender/UI/icons/animate/animationreversestep.xpm</file>
         <file>Src/FluoRender/UI/icons/animate/animationstopoff.xpm</file>
         <file>Src/FluoRender/UI/icons/animate/animationstopon.xpm</file>
-        <file>Src/FluoRender/UI/icons/FluoRender_icon.icns</file>
-        <file>Src/FluoRender/UI/icons/FluoRender_icon.gif</file>
+        <file>Src/FluoRender/UI/icons/FluoRenderIcon.icns</file>
+        <file>Src/FluoRender/UI/icons/FluoRenderIcon.gif</file>
         <file>Src/FluoRender/UI/icons/Tools/PaintBrush.png</file>
         <file>Src/FluoRender/UI/icons/misc/TrashcanOutline.png</file>
         <file>Src/FluoRender/UI/icons/misc/LightOn.png</file>
