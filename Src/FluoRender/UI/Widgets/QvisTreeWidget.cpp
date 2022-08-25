@@ -147,7 +147,7 @@ void QvisTreeWidget::dropEvent(QDropEvent *event)
     QList<QTreeWidgetItem *> parents;
 
     const QList<QModelIndex> indexes = selectedIndexes();
-    for(const auto &index : indexes)
+    for(const auto & index : indexes)
     {
         // The selectedIndexes returns all colums selected. Only record for column 0 as all
         // columns are moved together. Otherwise signals are emited for each column.
@@ -232,7 +232,7 @@ bool QvisTreeWidget::canDrop(QPoint position)
         // the same as the drop parent type.
         const QList<QModelIndex> indexes = selectedIndexes();
 
-        for(const auto &index : indexes)
+        for(const auto & index : indexes)
         {
             QTreeWidgetItem *item = itemFromIndex(index);
 
