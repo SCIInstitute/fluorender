@@ -55,7 +55,7 @@ void QvisOpenGLWidget::leaveEvent(QEvent * event)
 {
     QOpenGLWidget::leaveEvent(event);
 
-    std::cerr << __FUNCTION__ << "  " << __LINE__ << std::endl;
+    //std::cerr << __FUNCTION__ << "  " << __LINE__ << std::endl;
     emit activeWindow(QString());
 }
 

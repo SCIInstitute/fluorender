@@ -313,12 +313,12 @@ bool QvisViewWindow::eventFilter(QObject* watched, QEvent* event)
     if(//event->type() == QEvent::WindowActivate ||
        event->type() == QEvent::MouseButtonPress)
     {
-        std::cerr << __FUNCTION__ << "  " << __LINE__ << "  '" << this->windowTitle().toStdString() << "'  WindowActivate" << std::endl;
+        //std::cerr << __FUNCTION__ << "  " << __LINE__ << "  '" << this->windowTitle().toStdString() << "'  WindowActivate" << std::endl;
         emit activeViewWindowChanged(this->windowTitle(), QEvent::WindowActivate);
     }
     else if(event->type() == QEvent::WindowDeactivate)
     {
-        std::cerr << __FUNCTION__ << "  " << __LINE__ << "  '" << this->windowTitle().toStdString() << "'  WindowDeactivate" << std::endl;
+        //std::cerr << __FUNCTION__ << "  " << __LINE__ << "  '" << this->windowTitle().toStdString() << "'  WindowDeactivate" << std::endl;
         //emit activeViewWindowChanged(this->windowTitle(), QEvent::WindowDeactivate);
     }
 
@@ -618,7 +618,7 @@ void QvisViewWindow::ContextMenuRequested(const QPoint &pos)
     // Menu for the view modes
     QMenu viewModeMenu("View Mode", this);
     int cc = 0;
-    foreach(const auto mode, mViewModes[mLayoutMode])
+    for(const auto & mode : mViewModes[mLayoutMode])
     {
         // Use a lambda function to set the view mode state.
         QAction *action = viewModeMenu.addAction(mode, this, [=] { ui->ViewModeComboBox->setCurrentText(mode); });
@@ -638,7 +638,7 @@ void QvisViewWindow::ContextMenuRequested(const QPoint &pos)
     if(mLayoutMode != QvisViewWindow::LayoutSingle)
     {
         int cc = 0;
-        foreach(const auto mode, mSplitterModes)
+        for(const auto & mode : mSplitterModes)
         {
             // Use a lambda function to set the splitter mode state.
             QAction *action = splitterModeMenu.addAction(mode, this, [=] { ui->SplitterModeComboBox->setCurrentText(mode); });
@@ -683,7 +683,7 @@ void QvisViewWindow::InitializeWindow(const QString name)
 
 void QvisViewWindow::PaintWindow(const QString name)
 {
-    std::cerr << __FUNCTION__ << "  " << __LINE__ << "  " << name.toStdString() << "  " << mActiveSubWindowIndex << std::endl;
+    //std::cerr << __FUNCTION__ << "  " << __LINE__ << "  " << name.toStdString() << "  " << mActiveSubWindowIndex << std::endl;
 
     ActiveSubWindow(name);
 
@@ -746,9 +746,8 @@ void QvisViewWindow::ActiveSubWindow(const QString name)
         }
     }
 
-    std::cerr << __FUNCTION__ << "  " << __LINE__ << "  " << windowTitle().toStdString() << "  "
-              << name.toStdString() << "  "
-              << mActiveSubWindowIndex << "  " << std::endl;
+//    std::cerr << __FUNCTION__ << "  " << __LINE__ << "  " << windowTitle().toStdString() << "  "
+//              << name.toStdString() << "  " << mActiveSubWindowIndex << "  " << std::endl;
 }
 
 void QvisViewWindow::MousePress(const QPointF &point)
@@ -784,7 +783,7 @@ void QvisViewWindow::CaptureButtonClicked()
     // Get the full file name to be used.
     QString basename(mCapturePreferencesAttributes->getFullName().c_str());
 
-    foreach(const auto index, mViewLayoutWindows[mLayoutMode])
+    for(const auto & index : mViewLayoutWindows[mLayoutMode])
     {
         QString filename = basename;
 
