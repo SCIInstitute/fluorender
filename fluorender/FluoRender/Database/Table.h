@@ -30,18 +30,27 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Record.h>
 #include <vector>
+#include <string>
 
 namespace flrd
 {
 	class Table
 	{
 		public:
+			enum TableTags
+			{
+				TTAG_
+			};
+
 			Table();
 			virtual ~Table();
 
 			virtual void clear();
 			virtual void addRecord(Record* rec);
-			
+
+			virtual void open(const std::string& filename);
+			virtual void save(const std::string& filename);
+
 		private:
 			std::vector<Record*> m_data;
 	};

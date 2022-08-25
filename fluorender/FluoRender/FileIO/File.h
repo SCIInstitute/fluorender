@@ -25,36 +25,58 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef GLOBAL_H
-#define GLOBAL_H
+#ifndef _FILE_H_
+#define _FILE_H_
 
-#include <Tracking/VolCache.h>
-#include <Database/Table.h>
+#include <string>
+#include <fstream>
 
-#define glbin fluo::Global::instance()
-#define glbin_cache_queue fluo::Global::instance().get_cache_queue()
-#define glbin_reg_cache_queue_func(obj, read_func, del_func) \
-	fluo::Global::instance().get_cache_queue().\
-	RegisterCacheQueueFuncs(\
-	std::bind(&read_func, obj, std::placeholders::_1),\
-	std::bind(&del_func, obj, std::placeholders::_1))
-
-namespace fluo
+namespace flrd
 {
-	class Global
+	class File
 	{
 	public:
-		static Global& instance() { return instance_; }
-		flrd::CacheQueue& get_cache_queue() { return cache_queue_; }
+		File();
+		virtual ~File();
 
-	private:
-		Global();
-		static Global instance_;
+		virtual void beginWrite(const std::string& filename);
+		virtual void endWrite();
+		virtual void beginRead(const std::string& filename);
+		virtual void endRead();
 
-		flrd::CacheQueue cache_queue_;
+		void writeString(const std::string& s)
+		{
+			if (ofs_.bad()) return;
+			ofs_.write(s.c_str(), s.size());
+		}
+		template<typename T>
+		void writeValue(const T v)
+		{
+			if (ofs_.bad()) return;
+			ofs_.write(reinterpret_cast<const char*>(&v), sizeof(v));
+		}
+		std::string readString(size_t l)
+		{
+			if (ifs_.bad()) return "";
+			char* buf = new char[l + 1]();
+			ifs_.read(buf, l);
+			std::string str(buf);
+			delete[] buf;
+			return str;
+		}
+		template<typename T>
+		T readValue()
+		{
+			T v;
+			if (ifs_.bad()) return v;
+			ifs_.read(reinterpret_cast<char*>(&v), sizeof(v));
+			return v;
+		}
 
-		flrd::Table comp_analyzer_table_;//records for learning comp analyzer settings
+	protected:
+		std::ofstream ofs_;
+		std::ifstream ifs_;
 	};
-
 }
-#endif
+
+#endif//_FILE_H_

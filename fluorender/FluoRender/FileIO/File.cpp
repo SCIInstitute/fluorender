@@ -25,36 +25,37 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef GLOBAL_H
-#define GLOBAL_H
+#include "File.h"
 
-#include <Tracking/VolCache.h>
-#include <Database/Table.h>
+using namespace flrd;
 
-#define glbin fluo::Global::instance()
-#define glbin_cache_queue fluo::Global::instance().get_cache_queue()
-#define glbin_reg_cache_queue_func(obj, read_func, del_func) \
-	fluo::Global::instance().get_cache_queue().\
-	RegisterCacheQueueFuncs(\
-	std::bind(&read_func, obj, std::placeholders::_1),\
-	std::bind(&del_func, obj, std::placeholders::_1))
-
-namespace fluo
+File::File()
 {
-	class Global
-	{
-	public:
-		static Global& instance() { return instance_; }
-		flrd::CacheQueue& get_cache_queue() { return cache_queue_; }
-
-	private:
-		Global();
-		static Global instance_;
-
-		flrd::CacheQueue cache_queue_;
-
-		flrd::Table comp_analyzer_table_;//records for learning comp analyzer settings
-	};
 
 }
-#endif
+
+File::~File()
+{
+
+}
+
+void File::beginWrite(const std::string& filename)
+{
+	ofs_ = std::ofstream(filename, std::ios::out | std::ios::binary);
+}
+
+void File::endWrite()
+{
+	ofs_.close();
+}
+
+void File::beginRead(const std::string& filename)
+{
+	ifs_ = std::ifstream(filename, std::ios::out | std::ios::binary);
+}
+
+void File::endRead()
+{
+	ifs_.close();
+}
+

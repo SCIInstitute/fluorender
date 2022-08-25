@@ -366,6 +366,13 @@ file(GLOB obj_hdr fluorender/FluoRender/Flobject/*.hpp)
 add_library(FLOBJECT_OBJ OBJECT
   ${obj_src} ${obj_hdr})
 
+# FileIO
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/FileIO)
+file(GLOB file_src fluorender/FluoRender/FileIO/*.cpp)
+file(GLOB file_hdr fluorender/FluoRender/FileIO/*.h)
+add_library(FILEIO_OBJ OBJECT
+  ${file_src} ${file_hdr})
+
 # Types
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Types)
 file(GLOB typ_src fluorender/FluoRender/Types/*.cpp)
@@ -511,6 +518,7 @@ if(APPLE)
     $<TARGET_OBJECTS:ANIMATORS_OBJ>
     $<TARGET_OBJECTS:TYPES_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
+    $<TARGET_OBJECTS:FILEIO_OBJ>
     $<TARGET_OBJECTS:TIMER_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
@@ -529,6 +537,7 @@ if(APPLE)
     ${tester_src} ${tester_hdr}
     $<TARGET_OBJECTS:TYPES_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
+    $<TARGET_OBJECTS:FILEIO_OBJ>
     $<TARGET_OBJECTS:DATABASE_OBJ>)
 elseif(UNIX OR MINGW)
   # Linux
@@ -550,6 +559,7 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:ANIMATORS_OBJ>
     $<TARGET_OBJECTS:TYPES_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
+    $<TARGET_OBJECTS:FILEIO_OBJ>
     $<TARGET_OBJECTS:TIMER_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
@@ -611,6 +621,7 @@ elseif(WIN32)
       ${src} ${hdr} ${rsc} ${icns}
       $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
+      $<TARGET_OBJECTS:FILEIO_OBJ>
       $<TARGET_OBJECTS:IMAGES_OBJ>
       $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:FLIVR_OBJ>
@@ -637,6 +648,7 @@ elseif(WIN32)
       ${src} ${hdr} ${rsc} ${icns}
       $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
+      $<TARGET_OBJECTS:FILEIO_OBJ>
       $<TARGET_OBJECTS:IMAGES_OBJ>
       $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:FLIVR_OBJ>
@@ -662,6 +674,7 @@ elseif(WIN32)
       ${tester_src} ${tester_hdr}
       $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
+      $<TARGET_OBJECTS:FILEIO_OBJ>
       $<TARGET_OBJECTS:DATABASE_OBJ>)
   endif()
 endif()

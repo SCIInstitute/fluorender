@@ -26,6 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Table.h"
+#include <FileIO/File.h>
+#include <fstream>
 
 using namespace flrd;
 
@@ -52,4 +54,21 @@ void Table::addRecord(Record* rec)
 	if (!rec)
 		return;
 	m_data.push_back(rec);
+}
+
+void Table::open(const std::string& filename)
+{
+	flrd::File file;
+	file.beginRead(filename);
+	std::string str;
+	str = file.readString(16);
+	file.endRead();
+}
+
+void Table::save(const std::string& filename)
+{
+	flrd::File file;
+	file.beginWrite(filename);
+	file.writeString("FluoRender table");
+	file.endWrite();
 }
