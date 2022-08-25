@@ -34,6 +34,12 @@ DEALINGS IN THE SOFTWARE.
 #ifndef __COMPATIBILITY_UTILITIES_H__
 #define __COMPATIBILITY_UTILITIES_H__
 
+#include "fluorender-config.h"
+
+#ifdef HAVE_TIFF
+   #include <tiffio.h>
+#endif
+
 #include <string>
 #include <cstring>
 #include <fstream>
@@ -41,7 +47,6 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <codecvt>
 
-#include <tiffio.h>
 #include <dirent.h>
 
 #ifdef _WIN32 // WINDOWS ONLY
@@ -184,11 +189,13 @@ inline std::string ws2s(const std::wstring& utf16) {
 	return converter.to_bytes(utf16);
 }
 
+#ifdef HAVE_TIFF
 inline TIFF* TIFFOpenW(std::wstring fname, const char* opt)
 {
 	fname = L"\x5c\x5c\x3f\x5c" + fname;
 	return TIFFOpenW(fname.c_str(), opt);
 }
+#endif
 
 inline FILE* FOPEN(FILE** fp, const char *fname, const char* mode) {
 	fopen_s(fp, fname, mode);
@@ -540,9 +547,11 @@ inline char* STRCAT(char * d, size_t n, const char* s) {
 
 inline char* STRDUP(const char* s) { return strdup(s); }
 
+#ifdef HAVE_TIFF
 inline TIFF* TIFFOpenW(std::wstring fname, const char* opt) {
 	return TIFFOpen(ws2s(fname).c_str(), opt);
 }
+#endif
 
 inline int SPRINTF(char* buf, size_t n, const char * fmt, ...) {
 	va_list args;
