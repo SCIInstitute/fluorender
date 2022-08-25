@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <selectedon>:/Src/FluoRender/UI/icons/FluoRender_icon.gif</selectedon>
+    <selectedon>:/Src/FluoRender/UI/icons/FluoRenderIcon.gif</selectedon>
    </iconset>
   </property>
   <widget class="QWidget" name="centralwidget"/>

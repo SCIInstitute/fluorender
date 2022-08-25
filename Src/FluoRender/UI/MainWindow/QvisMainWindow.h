@@ -23,10 +23,11 @@ class QvisMainWindow;
 
 class QvisDialogBase;
 class QvisDragDropToolBar;
-class QvisMessageDialog;
 
-class QvisDataManager;
+// Main windows
+class QvisMainManager;
 class QvisViewWindow;
+class QvisMessageDialog;
 
 // Preferences
 class QvisPreferencesDialog;
@@ -144,9 +145,9 @@ private:
     std::vector<QvisDialogBase *> mDialogWidgets;
 
     // Main Windows
-    QvisDataManager           *mDataManager{nullptr};
-    QvisViewWindow            *mViewWindow{nullptr};
-    QvisMessageDialog         *mMessageDialog{nullptr};
+    QvisMainManager           *mMainManager         {nullptr};
+    QvisViewWindow            *mViewWindow          {nullptr};
+    QvisMessageDialog         *mMessageDialog       {nullptr};
 
     std::map<QString, QvisViewWindow *> mViewWindowMap;
 

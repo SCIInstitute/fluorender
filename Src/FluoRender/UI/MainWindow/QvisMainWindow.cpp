@@ -13,7 +13,6 @@
 #include <QSettings>
 #include <QSplitter>
 #include <QWidgetAction>
-#include <QXmlStreamWriter>
 
 // Advanced docking system.
 #ifdef HAVE_ADS
@@ -26,7 +25,11 @@
 #include "QvisDragDropToolBar.h"
 
 // Base windows.
-#include "QvisDataManager.h"
+#include "QvisMainManager.h"
+#include "QvisSourceManager.h"
+#include "QvisDatasetManager.h"
+#include "QvisWorkspaceManager.h"
+#include "QvisAnimationController.h"
 #include "QvisMessageDialog.h"
 #include "QvisViewWindow.h"
 #ifndef HAVE_ADS
@@ -71,9 +74,9 @@ QvisMainWindow::QvisMainWindow(QWidget *parent) :
     ui(new Ui::QvisMainWindow),
 
     // Main windows
-    mDataManager  (new QvisDataManager(this)),
-    mViewWindow   (new QvisViewWindow(this)),
-    mMessageDialog(new QvisMessageDialog(this)),
+    mMainManager         (new QvisMainManager         (this)),
+    mViewWindow          (new QvisViewWindow          (this)),
+    mMessageDialog       (new QvisMessageDialog       (this)),
 
     // Preferences dialog
     mPreferencesDialog          (new QvisPreferencesDialog(this)),
@@ -126,7 +129,7 @@ QvisMainWindow::QvisMainWindow(QWidget *parent) :
     mMainSplitter = new QSplitter(Qt::Horizontal);
 
     // Data manager on the left.
-    mMainSplitter->addWidget(mDataManager);
+    mMainSplitter->addWidget(mMainManager);
 
     // View window on the right
     mMainSplitter->addWidget(mViewWindow);
@@ -149,33 +152,41 @@ QvisMainWindow::QvisMainWindow(QWidget *parent) :
     QAction *preferencesAction = helpMenu->addAction(QIcon(":Src/FluoRender/UI/icons/MainWindow/Preferences.png"), tr("&Preferences"), this, &QvisMainWindow::ActionPreferences);
     preferencesAction->setStatusTip(tr("Show FluoRender's Preferences dialog"));
 
-    // These main menu signals go to the Data Manager - can not be set in the ui creator
-    QObject::connect(ui->actionOpenProject,   SIGNAL(triggered()), mDataManager, SLOT(ProjectOpenClicked()));
-    QObject::connect(ui->actionSaveProject,   SIGNAL(triggered()), mDataManager, SLOT(ProjectSaveClicked()));
-    QObject::connect(ui->actionSaveProjectAs, SIGNAL(triggered()), mDataManager, SLOT(ProjectSaveAsClicked()));
-    QObject::connect(ui->actionOpenVolume,    SIGNAL(triggered()), mDataManager, SLOT(VolumeOpenClicked()));
-    QObject::connect(ui->actionOpenMesh,      SIGNAL(triggered()), mDataManager, SLOT(MeshOpenClicked()));
+    // These main menu signals go to the Source Manager - can not be set in the ui creator
+    QObject::connect(ui->actionOpenProject,   SIGNAL(triggered()), mMainManager->getSourceManager(), SLOT(ProjectOpenClicked()));
+    QObject::connect(ui->actionSaveProject,   SIGNAL(triggered()), mMainManager->getSourceManager(), SLOT(ProjectSaveClicked()));
+    QObject::connect(ui->actionSaveProjectAs, SIGNAL(triggered()), mMainManager->getSourceManager(), SLOT(ProjectSaveAsClicked()));
+    QObject::connect(ui->actionOpenVolume,    SIGNAL(triggered()), mMainManager->getSourceManager(), SLOT(VolumeOpenClicked()));
+    QObject::connect(ui->actionOpenMesh,      SIGNAL(triggered()), mMainManager->getSourceManager(), SLOT(MeshOpenClicked()));
 
-    // These main menu signals come from the Data Manager - can not be set in the ui creator
-    QObject::connect(mDataManager, SIGNAL(updateViewWindow(QString)),        this, SLOT(UpdateViewWindow(QString)));
-    QObject::connect(mDataManager, SIGNAL(actionViewWindowAdd()),            this, SLOT(ActionViewWindowNew()));
-    QObject::connect(mDataManager, SIGNAL(actionViewWindowDelete(QString)),  this, SLOT(ActionViewWindowDelete(QString)));
-    QObject::connect(mDataManager, SIGNAL(actionVewWindowToggleView()),      this, SLOT(ActionViewWindowToggleView()));
+    // These main menu signals come from the Source Manager - can not be set in the ui creator
+    QObject::connect(mMainManager->getSourceManager(), SIGNAL(projectDirectoryChanged(QString)), this, SLOT(ProjectDirectoryChanged(QString)));
 
-    QObject::connect(mDataManager, SIGNAL(projectDirectoryChanged(QString)), this, SLOT(ProjectDirectoryChanged(QString)));
+    // These main menu signals come from the Workspace Manager - can not be set in the ui creator
+    QObject::connect(mMainManager->getWorkspaceManager(), SIGNAL(updateViewWindow(QString)),        this, SLOT(UpdateViewWindow(QString)));
+    QObject::connect(mMainManager->getWorkspaceManager(), SIGNAL(actionViewWindowAdd()),            this, SLOT(ActionViewWindowNew()));
+    QObject::connect(mMainManager->getWorkspaceManager(), SIGNAL(actionViewWindowDelete(QString)),  this, SLOT(ActionViewWindowDelete(QString)));
+    QObject::connect(mMainManager->getWorkspaceManager(), SIGNAL(actionVewWindowToggleView()),      this, SLOT(ActionViewWindowToggleView()));
 
-    ConnectToMessageDialog(mDataManager);
+    // Misc connections - should be handled through the preferences update.
+    QObject::connect(mPreferencesDialog, SIGNAL(animationSliderModeChanged(int)), mMainManager->getAnimationController(), SLOT(AnimationSliderModeChanged(int)));
+    QObject::connect(mPreferencesDialog, SIGNAL(animationPauseValueChanged(int)), mMainManager->getAnimationController(), SLOT(AnimationPauseValueChanged(int)));
+
+    // Connect the managers to the message dialog.
+    ConnectToMessageDialog(mMainManager->getSourceManager());
+    ConnectToMessageDialog(mMainManager->getDatasetManager());
+    ConnectToMessageDialog(mMainManager->getWorkspaceManager());
 
     ui->menuView->addSeparator();
 
 #ifdef HAVE_ADS
    // Add the data manager and view window to the dock manager.
     // Data manager on the left.
-    QString name = mDataManager->windowTitle();
+    QString name = mMainManager->windowTitle();
     ads::CDockWidget* dataManagerDockWidget = new ads::CDockWidget(name);
     dataManagerDockWidget->setObjectName(name.simplified().remove(" "));
-    // Create a dock widget and set the mDataManager as the dock widget content.
-    dataManagerDockWidget->setWidget(mDataManager);
+    // Create a dock widget and set the mMainManager as the dock widget content.
+    dataManagerDockWidget->setWidget(mMainManager);
     // Add the toggleViewAction of the dock widget to the menu to give
     // the user the ability to show the dock widget if it has been closed.
     ui->menuView->addAction(dataManagerDockWidget->toggleViewAction());
@@ -265,7 +276,7 @@ QvisMainWindow::QvisMainWindow(QWidget *parent) :
     // Use a functor so to be able to use ActionCreatePerspective for both the combobox
     // and the menu action. Note the menu action, set in the ui does NOT pass an argument.
     // As such the ActionCreatePerspective has a default value of true.
-    QObject::connect(mPerspectiveComboBox->lineEdit(),  &QLineEdit::returnPressed, this, [this]{ ActionCreatePerspective(false); });
+    QObject::connect(mPerspectiveComboBox->lineEdit(), &QLineEdit::returnPressed, this, [this]{ ActionCreatePerspective(false); });
 
     // The perspective delete and save menu triggers go to their own slots.
     QObject::connect(ui->menuDeletePerspective, SIGNAL(triggered(QAction*)), this, SLOT(ActionDeletePerspective(QAction*)));
@@ -289,9 +300,9 @@ QvisMainWindow::QvisMainWindow(QWidget *parent) :
     QObject::connect(mViewWindow, SIGNAL(activeViewWindowChanged(QString,QEvent::Type)), this, SLOT(ActiveViewWindowChanged(QString,QEvent::Type)));
 #endif
 
-    QObject::connect(mDataManager, SIGNAL(activeViewWindowChanged(QString)),               this, SLOT(ActiveViewWindowChanged(QString)));
-    QObject::connect(mDataManager, SIGNAL(activeViewWindowVolumeChanged(QString,QString)), this, SLOT(ActiveViewWindowVolumeChanged(QString,QString)));
-    QObject::connect(mDataManager, SIGNAL(activeViewWindowMeshChanged(QString,QString)),   this, SLOT(ActiveViewWindowMeshChanged(QString,QString)));
+    QObject::connect(mMainManager->getWorkspaceManager(), SIGNAL(activeViewWindowChanged(QString)),               this, SLOT(ActiveViewWindowChanged(QString)));
+    QObject::connect(mMainManager->getWorkspaceManager(), SIGNAL(activeViewWindowVolumeChanged(QString,QString)), this, SLOT(ActiveViewWindowVolumeChanged(QString,QString)));
+    QObject::connect(mMainManager->getWorkspaceManager(), SIGNAL(activeViewWindowMeshChanged(QString,QString)),   this, SLOT(ActiveViewWindowMeshChanged(QString,QString)));
 
     // The properties toolbar allows the user bring up properties dialogs so recieve those signals.
     mPropertiesToolbar = new QvisDragDropToolBar("Properties toolbar", this);
@@ -320,27 +331,27 @@ QvisMainWindow::QvisMainWindow(QWidget *parent) :
     this->addToolBar(mToolsToolbar);
 
     // Property dialogs as widgets
-    this->AddDialog(mVolumePropertiesDialog,      ui->menuProperties, mPropertiesToolbar, &mDataManager->getVolumeActionList());
-    this->AddDialog(mMeshPropertiesDialog,        ui->menuProperties, mPropertiesToolbar, &mDataManager->getMeshActionList());
+    this->AddDialog(mVolumePropertiesDialog,      ui->menuProperties, mPropertiesToolbar, &mMainManager->getWorkspaceManager()->getVolumeActionList());
+    this->AddDialog(mMeshPropertiesDialog,        ui->menuProperties, mPropertiesToolbar, &mMainManager->getWorkspaceManager()->getMeshActionList());
     ui->menuProperties->addSeparator();
-    this->AddDialog(mViewPropertiesDialog,        ui->menuProperties, mPropertiesToolbar, &mDataManager->getViewWindowActionList());
-    this->AddDialog(mOutputImagePropertiesDialog, ui->menuProperties, mPropertiesToolbar, &mDataManager->getViewWindowActionList());
+    this->AddDialog(mViewPropertiesDialog,        ui->menuProperties, mPropertiesToolbar, &mMainManager->getWorkspaceManager()->getViewWindowActionList());
+    this->AddDialog(mOutputImagePropertiesDialog, ui->menuProperties, mPropertiesToolbar, &mMainManager->getWorkspaceManager()->getViewWindowActionList());
 
     // Tool dialogs as widgets
-    this->AddDialog(mCalculationDialog,        ui->menuTools, mToolsToolbar, &mDataManager->getVolumeActionList());
-    this->AddDialog(mClipDialog,               ui->menuTools, mToolsToolbar, &mDataManager->getVolumeActionList());
-    this->AddDialog(mColocalizationDialog,     ui->menuTools, mToolsToolbar, &mDataManager->getVolumeActionList());
-    this->AddDialog(mComponentAnalyzerDialog,  ui->menuTools, mToolsToolbar, &mDataManager->getVolumeActionList());
-    this->AddDialog(mConvertDialog,            ui->menuTools, mToolsToolbar, &mDataManager->getVolumeActionList());
-    this->AddDialog(mExportDialog,             ui->menuTools, mToolsToolbar, &mDataManager->getVolumeActionList());
-    this->AddDialog(mMeasurementDialog,        ui->menuTools, mToolsToolbar, &mDataManager->getVolumeActionList());
-    this->AddDialog(mNoiseReductionDialog,     ui->menuTools, mToolsToolbar, &mDataManager->getVolumeActionList());
-    this->AddDialog(mOpenCLKernelEditorDialog, ui->menuTools, mToolsToolbar, &mDataManager->getVolumeActionList());
-    this->AddDialog(mPaintBrushDialog,         ui->menuTools, mToolsToolbar, &mDataManager->getVolumeActionList());
-    this->AddDialog(mTrackingDialog,           ui->menuTools, mToolsToolbar, &mDataManager->getVolumeActionList());
-    this->AddDialog(mVolumeSizeDialog,         ui->menuTools, mToolsToolbar, &mDataManager->getVolumeActionList());
+    this->AddDialog(mCalculationDialog,        ui->menuTools, mToolsToolbar, &mMainManager->getWorkspaceManager()->getVolumeActionList());
+    this->AddDialog(mClipDialog,               ui->menuTools, mToolsToolbar, &mMainManager->getWorkspaceManager()->getVolumeActionList());
+    this->AddDialog(mColocalizationDialog,     ui->menuTools, mToolsToolbar, &mMainManager->getWorkspaceManager()->getVolumeActionList());
+    this->AddDialog(mComponentAnalyzerDialog,  ui->menuTools, mToolsToolbar, &mMainManager->getWorkspaceManager()->getVolumeActionList());
+    this->AddDialog(mConvertDialog,            ui->menuTools, mToolsToolbar, &mMainManager->getWorkspaceManager()->getVolumeActionList());
+    this->AddDialog(mExportDialog,             ui->menuTools, mToolsToolbar, &mMainManager->getWorkspaceManager()->getVolumeActionList());
+    this->AddDialog(mMeasurementDialog,        ui->menuTools, mToolsToolbar, &mMainManager->getWorkspaceManager()->getVolumeActionList());
+    this->AddDialog(mNoiseReductionDialog,     ui->menuTools, mToolsToolbar, &mMainManager->getWorkspaceManager()->getVolumeActionList());
+    this->AddDialog(mOpenCLKernelEditorDialog, ui->menuTools, mToolsToolbar, &mMainManager->getWorkspaceManager()->getVolumeActionList());
+    this->AddDialog(mPaintBrushDialog,         ui->menuTools, mToolsToolbar, &mMainManager->getWorkspaceManager()->getVolumeActionList());
+    this->AddDialog(mTrackingDialog,           ui->menuTools, mToolsToolbar, &mMainManager->getWorkspaceManager()->getVolumeActionList());
+    this->AddDialog(mVolumeSizeDialog,         ui->menuTools, mToolsToolbar, &mMainManager->getWorkspaceManager()->getVolumeActionList());
     ui->menuTools->addSeparator();
-    this->AddDialog(mMeshTransformDialog,      ui->menuTools, mToolsToolbar, &mDataManager->getMeshActionList());
+    this->AddDialog(mMeshTransformDialog,      ui->menuTools, mToolsToolbar, &mMainManager->getWorkspaceManager()->getMeshActionList());
 
     ui->menuView->addSeparator();
 
@@ -348,7 +359,7 @@ QvisMainWindow::QvisMainWindow(QWidget *parent) :
 
     ConnectToMessageDialog(mViewWindow);
     // Actions for the view window context menu.
-    mViewWindow->setViewWindowActionList(mDataManager->getViewWindowActionList());
+    mViewWindow->setViewWindowActionList(mMainManager->getWorkspaceManager()->getViewWindowActionList());
     // Update attributes.
     mViewWindow->setCapturePreferencesAttributes(mCapturePreferencesAttributes);
 
@@ -358,14 +369,11 @@ QvisMainWindow::QvisMainWindow(QWidget *parent) :
     // Connenct the current view window to the main menu.
     UpdateViewWindowSignals(true);
 
-    mDataManager->WorkspaceViewWindowAddClicked(mViewWindow->windowTitle());
+    mMainManager->getWorkspaceManager()->WorkspaceViewWindowAddClicked(mViewWindow->windowTitle());
 
-    QObject::connect(QApplication::instance(), SIGNAL(focusWindowChanged(QWindow*)),
-            this, SLOT(onFocusWindowChanged(QWindow*)));
-
-    // Misc connections - should be handled through the preferences update.
-    QObject::connect(mPreferencesDialog, SIGNAL(animationSliderModeChanged(int)), mDataManager, SLOT(AnimationSliderModeChanged(int)));
-    QObject::connect(mPreferencesDialog, SIGNAL(animationPauseValueChanged(int)), mDataManager, SLOT(AnimationPauseValueChanged(int)));
+    // Needed for keeping track of the active window.
+//    QObject::connect(QApplication::instance(), SIGNAL(focusWindowChanged(QWindow*)),
+//            this, SLOT(onFocusWindowChanged(QWindow*)));
 
     // Restore the previous dock perspectives.
     this->RestorePerspectives();
@@ -382,11 +390,11 @@ QvisMainWindow::~QvisMainWindow()
 void QvisMainWindow::loadFile(QString filename)
 {
     if(filename.endsWith(".vrp"))
-        mDataManager->ProjectOpenClicked(filename);
+        mMainManager->getSourceManager()->ProjectOpenClicked(filename);
     else if(filename.endsWith(".obj"))
-        mDataManager->MeshOpenClicked(filename);
+        mMainManager->getSourceManager()->MeshOpenClicked(filename);
     else
-        mDataManager->VolumeOpenClicked(filename);
+        mMainManager->getSourceManager()->VolumeOpenClicked(filename);
 }
 
 void QvisMainWindow::closeEvent(QCloseEvent* event)
@@ -527,14 +535,14 @@ void QvisMainWindow::ActionViewWindowNew(QvisViewWindow *viewWindow)
 
     ConnectToMessageDialog(mViewWindow);
     // Actions for the view window context menu.
-    mViewWindow->setViewWindowActionList(mDataManager->getViewWindowActionList());
+    mViewWindow->setViewWindowActionList(mMainManager->getWorkspaceManager()->getViewWindowActionList());
     // Update attributes.
     mViewWindow->setCapturePreferencesAttributes(mCapturePreferencesAttributes);
 
     // Connenct the current view window to the main menu.
     UpdateViewWindowSignals(true);
 
-    mDataManager->WorkspaceViewWindowAddClicked(name);
+    mMainManager->getWorkspaceManager()->WorkspaceViewWindowAddClicked(name);
 
     // Find the last view window action so to insert a new toggle view action
     // for the new window.
@@ -681,7 +689,7 @@ void QvisMainWindow::ActionViewWindowDelete(QString name)
     }
 
     // Remove the view window from the data manager.
-    mDataManager->WorkspaceSelectionDeleteClicked(name);
+    mMainManager->getWorkspaceManager()->WorkspaceSelectionDeleteClicked(name);
 
     UpdateViewWindowList();
 }
@@ -772,7 +780,7 @@ void QvisMainWindow::FocusedDockWidgetChanged(ads::CDockWidget* previous, ads::C
         // Connenct the current view window to the main menu.
         UpdateViewWindowSignals(true);
 
-        mDataManager->WorkspaceViewWindowSelected(name);
+        mMainManager->getWorkspaceManager()->WorkspaceViewWindowSelected(name);
     }
 }
 #endif
@@ -848,7 +856,7 @@ void QvisMainWindow::ActiveViewWindowChanged(QString name, QEvent::Type type)
         // Connenct the current view window to the main menu.
         UpdateViewWindowSignals(true);
 
-        mDataManager->WorkspaceViewWindowSelected(name);
+        mMainManager->getWorkspaceManager()->WorkspaceViewWindowSelected(name);
 
         std::cerr << __FUNCTION__ << "  " << __LINE__ << "  "  << name.toStdString() << std::endl;
     }
@@ -882,6 +890,7 @@ void QvisMainWindow::UpdateViewWindowSignals(bool connect) const
     if(mViewWindow == nullptr)
         return;
 
+    // Connect the current view window to the main menu, paint and measurement dialog
     if(connect)
     {
         QObject::connect(ui->actionLayoutModeSingle,     SIGNAL(triggered()), mViewWindow, SLOT(LayoutModeSingle()));
@@ -899,6 +908,7 @@ void QvisMainWindow::UpdateViewWindowSignals(bool connect) const
 
         QObject::connect(mViewWindow, SIGNAL(updateViewWindowMenus(QString,bool)), this, SLOT(UpdateViewWindowMenus(QString,bool)));
     }
+    // Disconnect the current view window to the main menu, paint and measurement dialog
     else
     {
         QObject::disconnect(ui->actionLayoutModeSingle,     SIGNAL(triggered()), mViewWindow, SLOT(LayoutModeSingle()));
@@ -955,10 +965,10 @@ void QvisMainWindow::UpdateViewWindowList()
 
 void QvisMainWindow::ConnectToMessageDialog(QWidget *widget) const
 {
-    connect(widget, SIGNAL(postInformationalMessage(QString)), mMessageDialog, SLOT(postInformationalMessage(QString)));
-    connect(widget, SIGNAL(postWarningMessage(QString)),       mMessageDialog, SLOT(postWarningMessage(QString)));
-    connect(widget, SIGNAL(postErrorMessage(QString)),         mMessageDialog, SLOT(postErrorMessage(QString)));
-    connect(widget, SIGNAL(clearMessage()),                    mMessageDialog, SLOT(clearMessage()));
+    QObject::connect(widget, SIGNAL(postInformationalMessage(QString)), mMessageDialog, SLOT(postInformationalMessage(QString)));
+    QObject::connect(widget, SIGNAL(postWarningMessage(QString)),       mMessageDialog, SLOT(postWarningMessage(QString)));
+    QObject::connect(widget, SIGNAL(postErrorMessage(QString)),         mMessageDialog, SLOT(postErrorMessage(QString)));
+    QObject::connect(widget, SIGNAL(clearMessage()),                    mMessageDialog, SLOT(clearMessage()));
 }
 
 // Layout - Toolbar and menu
@@ -985,9 +995,9 @@ void QvisMainWindow::ActionSaveLayoutState()
     Settings.setValue("QvisMainWindow/ToolbarProperties", mPropertiesToolbar->saveState());
     Settings.setValue("QvisMainWindow/ToolbarTools",      mToolsToolbar->saveState());
 
-    mDataManager->saveState(Settings);
+    mMainManager->saveState(Settings);
 
-    for(const auto dialog : mDialogWidgets)
+    for(const auto & dialog : mDialogWidgets)
     {
         if(dialog->hasDragDropToolBar())
             Settings.setValue("QvisMainWindow/" + dialog->windowTitle(), dialog->dragDropToolBar()->saveState());
@@ -1073,8 +1083,8 @@ void QvisMainWindow::ActionRestoreLayoutState()
         mViewWindowMap.insert(std::move(nodeHandler));
 
         // Update the data manager with the new name too.
-        mDataManager->WorkspaceViewWindowRename(name, mViewWindow->windowTitle());
-        mDataManager->WorkspaceViewWindowSelected(mViewWindow->windowTitle());
+        mMainManager->WorkspaceViewWindowRename(name, mViewWindow->windowTitle());
+        mMainManager->WorkspaceViewWindowSelected(mViewWindow->windowTitle());
 
         start = 1;
 #endif
@@ -1096,7 +1106,7 @@ void QvisMainWindow::ActionRestoreLayoutState()
     mPropertiesToolbar->restoreState(Settings.value("QvisMainWindow/ToolbarProperties").toByteArray());
     mToolsToolbar->restoreState     (Settings.value("QvisMainWindow/ToolbarTools").toByteArray());
 
-    mDataManager->restoreState(Settings);
+    mMainManager->restoreState(Settings);
 
     for(auto dialog : mDialogWidgets)
     {
@@ -1229,6 +1239,6 @@ void QvisMainWindow::PopulatePerspectiveMenus()
 void QvisMainWindow::onFocusWindowChanged(QWindow* window)
 {
     if(window)
-    std::cerr << __FUNCTION__ << "  " << __LINE__ << "  "  << window->title().toStdString() << "  "
-              << std::endl;
+        std::cerr << __FUNCTION__ << "  " << __LINE__ << "  "  << window->title().toStdString() << "  "
+                  << std::endl;
 }
