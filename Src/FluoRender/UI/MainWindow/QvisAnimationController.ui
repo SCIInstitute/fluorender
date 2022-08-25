@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisAnimationController</class>
+ <widget class="QWidget" name="QvisAnimationController">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>147</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="MainLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QGroupBox" name="AnimationGroupBox">
+     <property name="title">
+      <string>Animation</string>
+     </property>
+     <layout class="QVBoxLayout" name="AnimationLayout">
+      <item>
+       <layout class="QHBoxLayout" name="AnimationIndexLayout">
+        <item>
+         <widget class="QSlider" name="AnimationIndexSlider">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>10</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="AnimationIndexSpinBox"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QvisVCRWidget" name="VCRWidget"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QvisVCRWidget</class>
+   <extends>QWidget</extends>
+   <header>QvisVCRWidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>AnimationIndexSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisAnimationController</receiver>
+   <slot>AnimationIndexSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>131</x>
+     <y>40</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>21</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AnimationIndexSlider</sender>
+   <signal>sliderReleased()</signal>
+   <receiver>QvisAnimationController</receiver>
+   <slot>AnimationIndexSliderReleased()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>67</x>
+     <y>47</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>59</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AnimationIndexSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QvisAnimationController</receiver>
+   <slot>AnimationIndexValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>345</x>
+     <y>43</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>395</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>VCRWidget</sender>
+   <signal>reverseSingleStep()</signal>
+   <receiver>QvisAnimationController</receiver>
+   <slot>AnimationReverseSingleStepClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>53</x>
+     <y>97</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>99</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>VCRWidget</sender>
+   <signal>reverse()</signal>
+   <receiver>QvisAnimationController</receiver>
+   <slot>AnimationReverseClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>91</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>26</x>
+     <y>139</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>VCRWidget</sender>
+   <signal>stop()</signal>
+   <receiver>QvisAnimationController</receiver>
+   <slot>AnimationStopClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>182</x>
+     <y>104</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>182</x>
+     <y>143</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>VCRWidget</sender>
+   <signal>forwardSingleStep()</signal>
+   <receiver>QvisAnimationController</receiver>
+   <slot>AnimationForwardSingleStepClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>267</x>
+     <y>98</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>266</x>
+     <y>142</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>VCRWidget</sender>
+   <signal>play()</signal>
+   <receiver>QvisAnimationController</receiver>
+   <slot>AnimationPlayClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>314</x>
+     <y>100</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>142</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>AnimationStopClicked()</slot>
+  <slot>AnimationPlayClicked()</slot>
+  <slot>AnimationForwardSingleStepClicked()</slot>
+  <slot>AnimationReverseClicked()</slot>
+  <slot>AnimationReverseSingleStepClicked()</slot>
+  <slot>AnimationIndexSliderReleased()</slot>
+  <slot>AnimationIndexSliderChanged(int)</slot>
+  <slot>AnimationIndexValueChanged(int)</slot>
+ </slots>
+</ui>
