@@ -1,6 +1,7 @@
 # Note the qt_add_* functions come from Qt6 Core component.
 
 file(GLOB ui_src
+	  Interface/*.cpp
 	  MainWindow/*.cpp
 	  Preferences/*.cpp
 	  Properties/*.cpp
@@ -10,6 +11,7 @@ file(GLOB ui_src
 	  )
 
 file(GLOB ui_hdr
+	  Interface/*.h
 	  MainWindow/*.h
 	  Preferences/*.h
 	  Properties/*.h
@@ -19,6 +21,7 @@ file(GLOB ui_hdr
 	  )
 
 file(GLOB ui_ui
+	  Interface/*.ui
 	  MainWindow/*.ui
 	  Preferences/*.ui
 	  Properties/*.ui
@@ -32,6 +35,7 @@ qt_add_library(FluoRenderUI SHARED ${ui_src} ${ui_hdr} ${ui_ui})
 target_include_directories(FluoRenderUI PUBLIC # Should it be private??
     ${FLUORENDER_COMMON_INCLUDES}
     ${qtadvanceddocking_INCLUDE_DIR}
+    Interface
     MainWindow
     Preferences
     Properties
@@ -51,8 +55,8 @@ target_link_libraries(FluoRenderUI PUBLIC # Should it be private??
 
 # Resources:
 set(FluoRender_resource_files
-    "icons/FluoRender_icon.gif"
-    "icons/FluoRender_icon.icns"
+    "icons/FluoRenderIcon.gif"
+    "icons/FluoRenderIcon.icns"
     "icons/MainWindow/OpenMesh.png"
     "icons/MainWindow/OpenProject.png"
     "icons/MainWindow/OpenVolume.png"
