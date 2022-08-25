@@ -13,5 +13,8 @@
  * Optional Qt libraries
  ******************************************************************************/
 
+/* Define for the Tiff */
+#cmakedefine HAVE_TIFF
+
 /* Define for the ADS (advanced docking system) library. */
 #cmakedefine HAVE_ADS
