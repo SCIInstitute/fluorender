@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisDatasetManager</class>
+ <widget class="QWidget" name="QvisDatasetManager">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>420</width>
+    <height>250</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>10</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>420</width>
+    <height>250</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>16777215</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Data Manager</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <selectedon>:/Src/FluoRender/UI/icons/FluoRenderIcon.gif</selectedon>
+   </iconset>
+  </property>
+  <layout class="QVBoxLayout" name="MainLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QGroupBox" name="DatasetGroupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>5</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>100</width>
+       <height>200</height>
+      </size>
+     </property>
+     <property name="title">
+      <string>Datasets</string>
+     </property>
+     <layout class="QVBoxLayout" name="DatasetsLayout">
+      <item>
+       <widget class="QGroupBox" name="DatasetMenuGoupBox">
+        <property name="minimumSize">
+         <size>
+          <width>250</width>
+          <height>45</height>
+         </size>
+        </property>
+        <property name="title">
+         <string/>
+        </property>
+        <layout class="QHBoxLayout" name="DatasetMenuLayout">
+         <item>
+          <widget class="QToolButton" name="DatasetAddButton">
+           <property name="toolTip">
+            <string>Add selected dataset to the current render view</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border: none;</string>
+           </property>
+           <property name="text">
+            <string>Add
+dataset</string>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="toolButtonStyle">
+            <enum>Qt::ToolButtonTextUnderIcon</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="DatasetRenameButton">
+           <property name="toolTip">
+            <string>Rename the selected dataset</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border: none;</string>
+           </property>
+           <property name="text">
+            <string>Rename
+dataset</string>
+           </property>
+           <property name="toolButtonStyle">
+            <enum>Qt::ToolButtonTextUnderIcon</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="DatasetSaveAsButton">
+           <property name="toolTip">
+            <string>Save the selected dataset</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border: none;</string>
+           </property>
+           <property name="text">
+            <string>Save
+dataset</string>
+           </property>
+           <property name="icon">
+            <iconset>
+             <selectedon>:/UI/icons/MainWindow/SaveProject.png</selectedon>
+            </iconset>
+           </property>
+           <property name="toolButtonStyle">
+            <enum>Qt::ToolButtonTextUnderIcon</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="DatasetDeleteButton">
+           <property name="toolTip">
+            <string>Delete the selected datasets</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border: none;</string>
+           </property>
+           <property name="text">
+            <string>Delete
+Dataset</string>
+           </property>
+           <property name="toolButtonStyle">
+            <enum>Qt::ToolButtonTextUnderIcon</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="DatasetDeleteAllButton">
+           <property name="toolTip">
+            <string>Delete all datasets</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border: none;</string>
+           </property>
+           <property name="text">
+            <string>Delete all
+datasets</string>
+           </property>
+           <property name="toolButtonStyle">
+            <enum>Qt::ToolButtonTextUnderIcon</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="DatasetLine">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="DatasetApplyPropertiesButton">
+           <property name="toolTip">
+            <string>Apply the volume properties and save</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border: none;</string>
+           </property>
+           <property name="text">
+            <string>Apply
+properties</string>
+           </property>
+           <property name="toolButtonStyle">
+            <enum>Qt::ToolButtonTextUnderIcon</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="DatasetSaveMaskButton">
+           <property name="toolTip">
+            <string>Save dataset mask</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border: none;</string>
+           </property>
+           <property name="text">
+            <string>Save
+mask</string>
+           </property>
+           <property name="toolButtonStyle">
+            <enum>Qt::ToolButtonTextUnderIcon</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="DatasetSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTableWidget" name="DatasetTableWidget">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>5</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>100</height>
+         </size>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::CustomContextMenu</enum>
+        </property>
+        <property name="sizeAdjustPolicy">
+         <enum>QAbstractScrollArea::AdjustIgnored</enum>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SingleSelection</enum>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
+        </property>
+        <property name="showGrid">
+         <bool>false</bool>
+        </property>
+        <property name="sortingEnabled">
+         <bool>true</bool>
+        </property>
+        <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+         <bool>true</bool>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>Type</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Name</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Path</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>DatasetAddButton</tabstop>
+  <tabstop>DatasetRenameButton</tabstop>
+  <tabstop>DatasetSaveAsButton</tabstop>
+  <tabstop>DatasetDeleteButton</tabstop>
+  <tabstop>DatasetDeleteAllButton</tabstop>
+  <tabstop>DatasetApplyPropertiesButton</tabstop>
+  <tabstop>DatasetSaveMaskButton</tabstop>
+  <tabstop>DatasetTableWidget</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>DatasetTableWidget</sender>
+   <signal>cellClicked(int,int)</signal>
+   <receiver>QvisDatasetManager</receiver>
+   <slot>DatasetSelected(int,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>290</x>
+     <y>344</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>413</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DatasetTableWidget</sender>
+   <signal>customContextMenuRequested(QPoint)</signal>
+   <receiver>QvisDatasetManager</receiver>
+   <slot>DatasetContextMenuRequested(QPoint)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>305</x>
+     <y>266</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>415</x>
+     <y>341</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DatasetAddButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisDatasetManager</receiver>
+   <slot>DatasetAddClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>87</x>
+     <y>203</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>8</x>
+     <y>87</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DatasetRenameButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisDatasetManager</receiver>
+   <slot>DatasetRenameClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>144</x>
+     <y>203</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>135</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DatasetSaveAsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisDatasetManager</receiver>
+   <slot>DatasetSaveAsClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>198</x>
+     <y>213</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>172</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DatasetDeleteButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisDatasetManager</receiver>
+   <slot>DatasetDeleteClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>254</x>
+     <y>203</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>2</x>
+     <y>202</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DatasetDeleteAllButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisDatasetManager</receiver>
+   <slot>DatasetDeleteAllClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>318</x>
+     <y>203</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>237</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DatasetApplyPropertiesButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisDatasetManager</receiver>
+   <slot>DatasetApplyPropertiesClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>403</x>
+     <y>203</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>760</x>
+     <y>76</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DatasetSaveMaskButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisDatasetManager</receiver>
+   <slot>DatasetSaveMaskClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>446</x>
+     <y>203</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>760</x>
+     <y>146</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DatasetTableWidget</sender>
+   <signal>cellChanged(int,int)</signal>
+   <receiver>QvisDatasetManager</receiver>
+   <slot>DatasetChanged(int,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>236</x>
+     <y>344</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>209</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DatasetTableWidget</sender>
+   <signal>itemDoubleClicked(QTableWidgetItem*)</signal>
+   <receiver>QvisDatasetManager</receiver>
+   <slot>DatasetDoubleClicked(QTableWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>236</x>
+     <y>344</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>209</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>DatasetSelected(int,int)</slot>
+  <slot>DatasetDoubleClicked(QTableWidgetItem*)</slot>
+  <slot>DatasetContextMenuRequested(QPoint)</slot>
+  <slot>DatasetChanged(int,int)</slot>
+  <slot>DatasetAddClicked()</slot>
+  <slot>DatasetRenameClicked()</slot>
+  <slot>DatasetSaveAsClicked()</slot>
+  <slot>DatasetDeleteClicked()</slot>
+  <slot>DatasetDeleteAllClicked()</slot>
+  <slot>DatasetApplyPropertiesClicked()</slot>
+  <slot>DatasetSaveMaskClicked()</slot>
+ </slots>
+</ui>

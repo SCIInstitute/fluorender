@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisSourceManager</class>
+ <widget class="QWidget" name="QvisSourceManager">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>420</width>
+    <height>125</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>10</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>420</width>
+    <height>125</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>16777215</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Data Manager</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <selectedon>:/Src/FluoRender/UI/icons/FluoRenderIcon.gif</selectedon>
+   </iconset>
+  </property>
+  <layout class="QVBoxLayout" name="MainLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QGroupBox" name="SourcesGroupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>100</height>
+      </size>
+     </property>
+     <property name="title">
+      <string>Sources</string>
+     </property>
+     <layout class="QHBoxLayout" name="SourcesLayout">
+      <item>
+       <widget class="QToolButton" name="OpenProject">
+        <property name="toolTip">
+         <string>Open a saved project</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">border: none;</string>
+        </property>
+        <property name="text">
+         <string>Open Project</string>
+        </property>
+        <property name="icon">
+         <iconset>
+          <selectedon>:/Src/FluoRender/UI/icons/MainWindow/OpenProject.png</selectedon>
+         </iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonTextUnderIcon</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="SaveProject">
+        <property name="toolTip">
+         <string>Tools for analyzing selected channel</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">border: none;</string>
+        </property>
+        <property name="text">
+         <string>Save Project</string>
+        </property>
+        <property name="icon">
+         <iconset>
+          <selectedon>:/Src/FluoRender/UI/icons/MainWindow/SaveProject.png</selectedon>
+         </iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonTextUnderIcon</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="OpenVolume">
+        <property name="toolTip">
+         <string>Open a single or multiple volume data file(s)</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">border: none;</string>
+        </property>
+        <property name="text">
+         <string>Open Volume</string>
+        </property>
+        <property name="icon">
+         <iconset>
+          <selectedon>:/Src/FluoRender/UI/icons/MainWindow/OpenVolume.png</selectedon>
+         </iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonTextUnderIcon</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="OpenMesh">
+        <property name="toolTip">
+         <string>Open a single or multiple mesh file(s)</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">border: none;</string>
+        </property>
+        <property name="text">
+         <string>Open Mesh</string>
+        </property>
+        <property name="icon">
+         <iconset>
+          <selectedon>:/Src/FluoRender/UI/icons/MainWindow/OpenMesh.png</selectedon>
+         </iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonTextUnderIcon</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="SourceSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>10</width>
+          <height>10</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>OpenProject</tabstop>
+  <tabstop>SaveProject</tabstop>
+  <tabstop>OpenVolume</tabstop>
+  <tabstop>OpenMesh</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>OpenProject</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisSourceManager</receiver>
+   <slot>ProjectOpenClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>88</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>412</x>
+     <y>76</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenVolume</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisSourceManager</receiver>
+   <slot>VolumeOpenClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>262</x>
+     <y>83</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>416</x>
+     <y>42</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>OpenMesh</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisSourceManager</receiver>
+   <slot>MeshOpenClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>335</x>
+     <y>83</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>414</x>
+     <y>18</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SaveProject</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisSourceManager</receiver>
+   <slot>ProjectSaveClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>179</x>
+     <y>83</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>414</x>
+     <y>132</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>ProjectOpenClicked()</slot>
+  <slot>ProjectSaveClicked()</slot>
+  <slot>VolumeOpenClicked()</slot>
+  <slot>MeshOpenClicked()</slot>
+ </slots>
+</ui>
