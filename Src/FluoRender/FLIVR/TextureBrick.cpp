@@ -430,7 +430,7 @@ namespace flvr
         void *TextureBrick::tex_data_brk(int c, const FileLocInfo* finfo)
         {
                 unsigned char *ptr = NULL;
-                if (brkdata_) ptr = (unsigned char *)(brkdata_);
+                if (brkdata_) ptr = brkdata_;
                 else
                 {
                         int bd = tex_type_size(tex_type(c));
@@ -440,7 +440,7 @@ namespace flvr
                                 delete[] ptr;
                                 return NULL;
                         }
-                        brkdata_ = (void *)ptr;
+                        brkdata_ = ptr;
                 }
                 return ptr;
         }
