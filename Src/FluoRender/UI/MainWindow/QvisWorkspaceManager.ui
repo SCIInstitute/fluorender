@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QvisWorkspaceManager</class>
+ <widget class="QWidget" name="QvisWorkspaceManager">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>469</width>
+    <height>250</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>10</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>420</width>
+    <height>250</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>16777215</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Data Manager</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <selectedon>:/Src/FluoRender/UI/icons/FluoRenderIcon.gif</selectedon>
+   </iconset>
+  </property>
+  <layout class="QVBoxLayout" name="MainLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QGroupBox" name="WorkspaceGroupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>5</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>100</width>
+       <height>200</height>
+      </size>
+     </property>
+     <property name="title">
+      <string>Workspace</string>
+     </property>
+     <layout class="QVBoxLayout" name="WorkspaceLayout">
+      <item>
+       <widget class="QGroupBox" name="WorkspaceMenuGroupBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>350</width>
+          <height>45</height>
+         </size>
+        </property>
+        <property name="title">
+         <string/>
+        </property>
+        <layout class="QHBoxLayout" name="WorkspaceMenuLayout">
+         <item>
+          <widget class="QToolButton" name="WorkspaceHideShowButton">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="toolTip">
+            <string>Hide/Show the current selction</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border: none;</string>
+           </property>
+           <property name="text">
+            <string>Hide/Show</string>
+           </property>
+           <property name="icon">
+            <iconset>
+             <selectedon>:/Src/FluoRender/UI/icons/MainWindow/Visibility.png</selectedon>
+            </iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="toolButtonStyle">
+            <enum>Qt::ToolButtonTextUnderIcon</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="ViewWindowAddButton">
+           <property name="styleSheet">
+            <string notr="true">border: none;</string>
+           </property>
+           <property name="text">
+            <string>Add
+view window</string>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="toolButtonStyle">
+            <enum>Qt::ToolButtonTextUnderIcon</enum>
+           </property>
+           <property name="arrowType">
+            <enum>Qt::NoArrow</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="VolumeGroupAddButton">
+           <property name="toolTip">
+            <string>Add a volume data group to the selected view</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border: none;</string>
+           </property>
+           <property name="text">
+            <string>Add
+volume group</string>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="toolButtonStyle">
+            <enum>Qt::ToolButtonTextUnderIcon</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="MeshGroupAddButton">
+           <property name="toolTip">
+            <string>Add a mesh group to the selected view</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border: none;</string>
+           </property>
+           <property name="text">
+            <string>Add
+mesh group</string>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="toolButtonStyle">
+            <enum>Qt::ToolButtonTextUnderIcon</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="DeleteSelectionButton">
+           <property name="toolTip">
+            <string>Delete the current selection</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border: none;</string>
+           </property>
+           <property name="text">
+            <string>Delete
+selection</string>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="toolButtonStyle">
+            <enum>Qt::ToolButtonTextUnderIcon</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="WorkshopSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QvisTreeWidget" name="WorkspaceTreeWidget">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>5</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>100</height>
+         </size>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::CustomContextMenu</enum>
+        </property>
+        <property name="dragEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="dragDropMode">
+         <enum>QAbstractItemView::DragDrop</enum>
+        </property>
+        <property name="defaultDropAction">
+         <enum>Qt::MoveAction</enum>
+        </property>
+        <property name="sortingEnabled">
+         <bool>false</bool>
+        </property>
+        <property name="expandsOnDoubleClick">
+         <bool>false</bool>
+        </property>
+        <property name="columnCount">
+         <number>3</number>
+        </property>
+        <column>
+         <property name="text">
+          <string/>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string/>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string/>
+         </property>
+        </column>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QvisTreeWidget</class>
+   <extends>QTreeWidget</extends>
+   <header>QvisTreeWidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>WorkspaceHideShowButton</tabstop>
+  <tabstop>VolumeGroupAddButton</tabstop>
+  <tabstop>MeshGroupAddButton</tabstop>
+  <tabstop>DeleteSelectionButton</tabstop>
+  <tabstop>WorkspaceTreeWidget</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>WorkspaceTreeWidget</sender>
+   <signal>itemClicked(QTreeWidgetItem*,int)</signal>
+   <receiver>QvisWorkspaceManager</receiver>
+   <slot>WorkspaceSelected(QTreeWidgetItem*,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>446</x>
+     <y>585</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>474</x>
+     <y>505</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>WorkspaceTreeWidget</sender>
+   <signal>customContextMenuRequested(QPoint)</signal>
+   <receiver>QvisWorkspaceManager</receiver>
+   <slot>WorkspaceContextMenuRequested(QPoint)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>446</x>
+     <y>585</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>474</x>
+     <y>505</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DeleteSelectionButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisWorkspaceManager</receiver>
+   <slot>WorkspaceSelectionDeleteClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>406</x>
+     <y>522</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>285</x>
+     <y>594</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>WorkspaceTreeWidget</sender>
+   <signal>itemChanged(QTreeWidgetItem*,int)</signal>
+   <receiver>QvisWorkspaceManager</receiver>
+   <slot>WorkspaceChanged(QTreeWidgetItem*,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>263</x>
+     <y>585</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>209</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>WorkspaceTreeWidget</sender>
+   <signal>itemDoubleClicked(QTreeWidgetItem*,int)</signal>
+   <receiver>QvisWorkspaceManager</receiver>
+   <slot>WorkspaceDoubleClicked(QTreeWidgetItem*,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>263</x>
+     <y>585</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>209</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>WorkspaceTreeWidget</sender>
+   <signal>iconClicked(QTreeWidgetItem*,int)</signal>
+   <receiver>QvisWorkspaceManager</receiver>
+   <slot>WorkspaceIconClicked(QTreeWidgetItem*,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>263</x>
+     <y>585</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>209</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>WorkspaceTreeWidget</sender>
+   <signal>itemMoved(QTreeWidgetItem*,int,QTreeWidgetItem*,int)</signal>
+   <receiver>QvisWorkspaceManager</receiver>
+   <slot>WorkspaceItemMoved(QTreeWidgetItem*,int,QTreeWidgetItem*,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>263</x>
+     <y>585</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>209</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>WorkspaceHideShowButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisWorkspaceManager</receiver>
+   <slot>WorkspaceHideShowClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>103</x>
+     <y>530</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>209</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ViewWindowAddButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QvisWorkspaceManager</receiver>
+   <slot>WorkspaceViewWindowAddClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>183</x>
+     <y>522</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>519</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>ProjectOpenClicked()</slot>
+  <slot>ProjectSaveClicked()</slot>
+  <slot>VolumeOpenClicked()</slot>
+  <slot>MeshOpenClicked()</slot>
+  <slot>WorkspaceSelected(QTreeWidgetItem*,int)</slot>
+  <slot>WorkspaceDoubleClicked(QTreeWidgetItem*,int)</slot>
+  <slot>WorkspaceContextMenuRequested(QPoint)</slot>
+  <slot>WorkspaceChanged(QTreeWidgetItem*,int)</slot>
+  <slot>WorkspaceHideShowClicked()</slot>
+  <slot>WorkspaceVolumeGroupAddClicked()</slot>
+  <slot>WorkspaceMeshGroupAddClicked()</slot>
+  <slot>WorkspaceSelectionDeleteClicked()</slot>
+  <slot>WorkspaceStructuresHighlightClicked()</slot>
+  <slot>WorkspaceStructuresDifuseClicked()</slot>
+  <slot>WorkspaceStructuresResetClicked()</slot>
+  <slot>WorkspaceStructuresExtractAllClicked()</slot>
+  <slot>WorkspaceStructuresEraseAllClicked()</slot>
+  <slot>WorkspaceStructuresResetAllClicked()</slot>
+  <slot>WorkspaceIconClicked(QTreeWidgetItem*,int)</slot>
+  <slot>WorkspaceItemMoved(QTreeWidgetItem*,int,QTreeWidgetItem*,int)</slot>
+  <slot>WorkspaceViewWindowAddClicked()</slot>
+ </slots>
+</ui>
