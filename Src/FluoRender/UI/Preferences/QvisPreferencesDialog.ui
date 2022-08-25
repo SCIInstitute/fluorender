@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="PreferencesTabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="ProjectTab">
       <attribute name="title">
@@ -1765,7 +1765,7 @@ Note: Bioformats and JVM are required when ImageJ is selected.</string>
   <slot>AnimationSliderModeChanged(int)</slot>
  </slots>
  <buttongroups>
-  <buttongroup name="UpdateOrderButtonGroup"/>
   <buttongroup name="JavaButtonGroup"/>
+  <buttongroup name="UpdateOrderButtonGroup"/>
  </buttongroups>
 </ui>

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>538</width>
-    <height>506</height>
+    <height>503</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -23,7 +23,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="BasicTab">
       <attribute name="title">
@@ -1633,7 +1633,7 @@
   <slot>ScriptFileBrowseButtonClicked()</slot>
  </slots>
  <buttongroups>
-  <buttongroup name="AxisButtonGroup"/>
   <buttongroup name="FrameButtonGroup"/>
+  <buttongroup name="AxisButtonGroup"/>
  </buttongroups>
 </ui>
