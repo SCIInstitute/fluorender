@@ -1,12 +1,14 @@
 QT += gui widgets opengl openglwidgets uiplugin
 
+DEFINES += "QT_CREATOR_ONLY=true"
+
 requires(qtConfig(filedialog))
 
 FLUORENDER_DIR = "Src/FluoRender"
 UI_DIR = "$${FLUORENDER_DIR}/UI"
 
 HEADERS       = \
-  $${UI_DIR}/MainWindow/QvisDataManager.h \
+  $${UI_DIR}/MainWindow/QvisMainManager.h \
   $${UI_DIR}/MainWindow/QvisMainWindow.h \
   $${UI_DIR}/MainWindow/QvisMessageDialog.h \
   $${UI_DIR}/MainWindow/QvisViewWindow.h \
@@ -40,10 +42,20 @@ HEADERS       = \
   $${UI_DIR}/Widgets/QvisDragDropToolBar.h \
   $${UI_DIR}/Widgets/QvisDragDropWidget.h \
   $${UI_DIR}/Widgets/QvisTreeWidget.h \
-  $${UI_DIR}/Widgets/QvisVCRWidget.h
+  $${UI_DIR}/Widgets/QvisVCRWidget.h \
+  Src/FluoRender/UI/Interface/DatasetAgent.h \
+  Src/FluoRender/UI/Interface/QvisInterfaceBase.h \
+  Src/FluoRender/UI/Interface/SourceAgent.h \
+  Src/FluoRender/UI/Interface/WorkspaceAgent.h \
+  Src/FluoRender/UI/MainWindow/DataTreeNode.h \
+  Src/FluoRender/UI/MainWindow/DatasetAttributes.h \
+  Src/FluoRender/UI/MainWindow/QvisAnimationController.h \
+  Src/FluoRender/UI/MainWindow/QvisDatasetManager.h \
+  Src/FluoRender/UI/MainWindow/QvisSourceManager.h \
+  Src/FluoRender/UI/MainWindow/QvisWorkspaceManager.h
 
 SOURCES = $${FLUORENDER_DIR}/Main/Main.cpp \
-  $${UI_DIR}/MainWindow/QvisDataManager.cpp \
+  $${UI_DIR}/MainWindow/QvisMainManager.cpp \
   $${UI_DIR}/MainWindow/QvisMainWindow.cpp \
   $${UI_DIR}/MainWindow/QvisMessageDialog.cpp \
   $${UI_DIR}/MainWindow/QvisViewWindow.cpp \
@@ -77,10 +89,16 @@ SOURCES = $${FLUORENDER_DIR}/Main/Main.cpp \
   $${UI_DIR}/Widgets/QvisDragDropToolBar.cpp \
   $${UI_DIR}/Widgets/QvisDragDropWidget.cpp \
   $${UI_DIR}/Widgets/QvisTreeWidget.cpp \
-  $${UI_DIR}/Widgets/QvisVCRWidget.cpp
+  $${UI_DIR}/Widgets/QvisVCRWidget.cpp \
+  Src/FluoRender/UI/Interface/QvisInterfaceBase.cpp \
+  Src/FluoRender/UI/MainWindow/DatasetAttributes.cpp \
+  Src/FluoRender/UI/MainWindow/QvisAnimationController.cpp \
+  Src/FluoRender/UI/MainWindow/QvisDatasetManager.cpp \
+  Src/FluoRender/UI/MainWindow/QvisSourceManager.cpp \
+  Src/FluoRender/UI/MainWindow/QvisWorkspaceManager.cpp
 
 FORMS += \
-  $${UI_DIR}/MainWindow/QvisDataManager.ui \
+  $${UI_DIR}/MainWindow/QvisMainManager.ui \
   $${UI_DIR}/MainWindow/QvisMainWindow.ui \
   $${UI_DIR}/MainWindow/QvisMessageDialog.ui \
   $${UI_DIR}/MainWindow/QvisViewWindow.ui \
@@ -106,11 +124,15 @@ FORMS += \
   $${UI_DIR}/Tools/QvisVolumeSizeDialog.ui \
   $${UI_DIR}/ViewWindow/QvisViewWindowDialog.ui \
   $${UI_DIR}/Widgets/QvisDragDropWidget.ui \
-  $${UI_DIR}/Widgets/QvisVCRWidget.ui
+  $${UI_DIR}/Widgets/QvisVCRWidget.ui \
+  Src/FluoRender/UI/MainWindow/QvisAnimationController.ui \
+  Src/FluoRender/UI/MainWindow/QvisDatasetManager.ui \
+  Src/FluoRender/UI/MainWindow/QvisSourceManager.ui \
+  Src/FluoRender/UI/MainWindow/QvisWorkspaceManager.ui
 
 RESOURCES = FluoRender.qrc
 
-ICON = $${PWD}/$${UI_DIR}/icons/FluoRender_icon.icns
+ICON = $${PWD}/$${UI_DIR}/icons/FluoRenderIcon.icns
 
 # install
 target.path = build/FluoRender
@@ -119,7 +141,9 @@ INSTALLS += target
 
 INCLUDEPATH += \
  ../build/$${FLUORENDER_DIR}/include \
+ $${FLUORENDER_DIR}/include \
  $${UI_DIR} \
+ $${UI_DIR}/Interface \
  $${UI_DIR}/MainWindow \
  $${UI_DIR}/Preferences \
  $${UI_DIR}/Properties \
