@@ -30,12 +30,16 @@ DEALINGS IN THE SOFTWARE.
 
 namespace flrd
 {
+	class File;
 	class Entry
 	{
 		public:
 			Entry();
 			virtual ~Entry();
-			
+
+			virtual void open(File& file);
+			virtual void save(File& file);
+
 		private:
 	};
 }

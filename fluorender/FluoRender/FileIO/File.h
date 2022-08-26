@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <string>
 #include <fstream>
+#include <vector>
 
 namespace flrd
 {
@@ -39,15 +40,35 @@ namespace flrd
 		File();
 		virtual ~File();
 
+		std::ofstream& getOfs()
+		{
+			return ofs_;
+		}
+		std::ifstream& getIfs()
+		{
+			return ifs_;
+		}
+
 		virtual void beginWrite(const std::string& filename);
 		virtual void endWrite();
 		virtual void beginRead(const std::string& filename);
 		virtual void endRead();
+		virtual void getPos();
+		virtual void setPos();
 
+		//output
 		void writeString(const std::string& s)
 		{
 			if (ofs_.bad()) return;
 			ofs_.write(s.c_str(), s.size());
+		}
+		template<typename T>
+		void writeVector(const std::vector<T>& v)
+		{
+			if (v.empty() || ofs_.bad())
+				return;
+			ofs_.write(reinterpret_cast<const char*>(&v[0]),
+				v.size() * sizeof(T));
 		}
 		template<typename T>
 		void writeValue(const T v)
@@ -55,6 +76,8 @@ namespace flrd
 			if (ofs_.bad()) return;
 			ofs_.write(reinterpret_cast<const char*>(&v), sizeof(v));
 		}
+
+		//input
 		std::string readString(size_t l)
 		{
 			if (ifs_.bad()) return "";
@@ -65,17 +88,24 @@ namespace flrd
 			return str;
 		}
 		template<typename T>
-		T readValue()
+		void readVector(std::vector<T>& v)
 		{
-			T v;
-			if (ifs_.bad()) return v;
-			ifs_.read(reinterpret_cast<char*>(&v), sizeof(v));
-			return v;
+			if (ifs_.bad()) return;
+			const size_t l = v.size();
+			ifs_.read(reinterpret_cast<char*>(&v[0]), l * sizeof(T));
+		}
+		template<typename T>
+		void readValue(T& v)
+		{
+			if (ifs_.bad()) return;
+			ifs_.read(reinterpret_cast<char*>(&v), sizeof(T));
 		}
 
 	protected:
+		int mode_;//0 invalid; 1 write; 2 read
 		std::ofstream ofs_;
 		std::ifstream ifs_;
+		std::streampos pos_;
 	};
 }
 

@@ -26,6 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Entry.h"
+#include <Table.h>
+#include <FileIO/File.h>
 
 using namespace flrd;
 
@@ -35,4 +37,14 @@ Entry::Entry()
 
 Entry::~Entry()
 {
+}
+
+void Entry::open(File& file)
+{
+
+}
+
+void Entry::save(File& file)
+{
+
 }

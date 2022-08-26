@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Table.h"
+#include "RecordHistParams.h"
 #include <FileIO/File.h>
 #include <fstream>
 
@@ -60,8 +61,49 @@ void Table::open(const std::string& filename)
 {
 	flrd::File file;
 	file.beginRead(filename);
+
+	//header
 	std::string str;
 	str = file.readString(16);
+	if (str != "FluoRender table")
+	{
+		file.endRead();
+		return;
+	}
+
+	//rec num
+	TableTags t;
+	file.readValue(t);
+	if (t != TAG_TABLE_REC_NUM)
+	{
+		file.endRead();
+		return;
+	}
+	size_t n;
+	file.readValue(n);
+
+	//data
+	if (!m_data.empty())
+		clear();
+	for (size_t i = 0; i < n; ++i)
+	{
+		file.readValue(t);
+		Record* rec = 0;
+		switch (t)
+		{
+		case TAG_TABLE_REC_HISTPARAM:
+			rec = new RecordHistParams();
+			break;
+		default:
+			break;
+		}
+		if (rec)
+		{
+			rec->open(file);
+			addRecord(rec);
+		}
+	}
+
 	file.endRead();
 }
 
@@ -69,6 +111,17 @@ void Table::save(const std::string& filename)
 {
 	flrd::File file;
 	file.beginWrite(filename);
+
+	//header
 	file.writeString("FluoRender table");
+
+	//rec num
+	file.writeValue(TAG_TABLE_REC_NUM);
+	file.writeValue(m_data.size());
+
+	//data
+	for (auto i : m_data)
+		i->save(file);
+
 	file.endWrite();
 }

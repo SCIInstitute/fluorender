@@ -36,6 +36,15 @@ namespace flrd
 	class EntryHist : public Entry
 	{
 		public:
+			enum EntryTags
+			{
+				TAG_ENT_BINS = 1,
+				TAG_ENT_MIN,
+				TAG_ENT_MAX,
+				TAG_ENT_POPL,
+				TAG_ENT_DATA
+			};
+
 			EntryHist();
 			~EntryHist();
 
@@ -71,7 +80,10 @@ namespace flrd
 				return &(m_data[0]);
 			}
 
-		private:
+			virtual void open(File& file);
+			virtual void save(File& file);
+
+	private:
 			static unsigned int m_bins;//bin size
 			float m_min;//min value
 			float m_max;//max value

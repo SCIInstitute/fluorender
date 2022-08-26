@@ -39,7 +39,12 @@ namespace flrd
 		public:
 			enum TableTags
 			{
-				TTAG_
+				TAG_TABLE_REC_NUM = 1,
+				TAG_TABLE_REC_HISTPARAM,
+				TAG_TABLE_ENT_IN,
+				TAG_TABLE_ENT_OUT,
+				TAG_TABLE_ENT_HIST,
+				TAG_TABLE_ENT_PARAMS
 			};
 
 			Table();

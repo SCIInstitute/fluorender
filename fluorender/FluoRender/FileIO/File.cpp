@@ -29,7 +29,8 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-File::File()
+File::File() :
+	mode_(0)
 {
 
 }
@@ -42,20 +43,53 @@ File::~File()
 void File::beginWrite(const std::string& filename)
 {
 	ofs_ = std::ofstream(filename, std::ios::out | std::ios::binary);
+	if (ofs_.bad()) return;
+	mode_ = 1;
 }
 
 void File::endWrite()
 {
 	ofs_.close();
+	mode_ = 0;
 }
 
 void File::beginRead(const std::string& filename)
 {
 	ifs_ = std::ifstream(filename, std::ios::out | std::ios::binary);
+	if (ifs_.bad()) return;
+	mode_ = 2;
 }
 
 void File::endRead()
 {
 	ifs_.close();
+	mode_ = 0;
 }
 
+void File::getPos()
+{
+	switch (mode_)
+	{
+	case 1:
+		break;
+	case 2:
+		pos_ = ifs_.tellg();
+		break;
+	default:
+		break;
+	}
+}
+
+void File::setPos()
+{
+	switch (mode_)
+	{
+	case 1:
+		break;
+	case 2:
+		ifs_.seekg(pos_);
+		break;
+	default:
+		break;
+	}
+}

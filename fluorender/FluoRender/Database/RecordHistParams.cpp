@@ -26,6 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "RecordHistParams.h"
+#include <Table.h>
+#include <FileIO/File.h>
 
 using namespace flrd;
 
@@ -36,4 +38,48 @@ RecordHistParams::RecordHistParams() :
 
 RecordHistParams::~RecordHistParams()
 {
+}
+
+void RecordHistParams::open(File& file)
+{
+	Table::TableTags t;
+	file.getPos();
+	file.readValue(t);
+	if (t == Table::TAG_TABLE_ENT_IN)
+	{
+		file.readValue(t);
+		if (t == Table::TAG_TABLE_ENT_HIST)
+		{
+			EntryHist* ent = new EntryHist();
+			if (ent)
+			{
+				ent->open(file);
+				setInput(ent);
+			}
+		}
+	}
+	else file.setPos();
+
+	file.readValue(t);
+	if (t == Table::TAG_TABLE_ENT_OUT)
+	{
+		file.readValue(t);
+		if (t == Table::TAG_TABLE_ENT_OUT)
+		{
+			EntryParams* ent = new EntryParams();
+			if (ent)
+			{
+				ent->open(file);
+				setOutput(ent);
+			}
+		}
+	}
+	else file.setPos();
+}
+
+void RecordHistParams::save(File& file)
+{
+	//type
+	file.writeValue(Table::TAG_TABLE_REC_HISTPARAM);
+	Record::save(file);
 }

@@ -29,9 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #define _RECORD_H_
 
 #include <Entry.h>
+#include <fstream>
 
 namespace flrd
 {
+	class File;
 	class Record
 	{
 		public:
@@ -42,6 +44,9 @@ namespace flrd
 			virtual void setInput(Entry* entry) = 0;
 			virtual Entry* getOutput() = 0;
 			virtual void setOutput(Entry* entry) = 0;
+
+			virtual void open(File& file);
+			virtual void save(File& file);
 
 		protected:
 			Entry* m_input;

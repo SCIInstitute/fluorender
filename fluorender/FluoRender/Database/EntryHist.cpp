@@ -26,6 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "EntryHist.h"
+#include <Table.h>
+#include <FileIO/File.h>
 
 using namespace flrd;
 
@@ -41,4 +43,57 @@ EntryHist::EntryHist() :
 
 EntryHist::~EntryHist()
 {
+}
+
+void EntryHist::open(File& file)
+{
+	EntryTags t;
+	//bins
+	file.readValue(t);
+	if (t != TAG_ENT_BINS) return;
+	unsigned int bins;
+	file.readValue(bins);
+	if (bins != m_bins) return;
+
+	//min/max
+	file.readValue(t);
+	if (t != TAG_ENT_MIN) return;
+	file.readValue(m_min);
+	file.readValue(t);
+	if (t != TAG_ENT_MAX) return;
+	file.readValue(m_max);
+
+	//population
+	file.readValue(t);
+	if (t != TAG_ENT_POPL) return;
+	file.readValue(m_population);
+
+	//data
+	file.readValue(t);
+	if (t != TAG_ENT_DATA) return;
+	file.readVector(m_data);
+}
+
+void EntryHist::save(File& file)
+{
+	//type
+	file.writeValue(Table::TAG_TABLE_ENT_HIST);
+
+	//bins
+	file.writeValue(TAG_ENT_BINS);
+	file.writeValue(m_bins);
+
+	//min/max
+	file.writeValue(TAG_ENT_MIN);
+	file.writeValue(m_min);
+	file.writeValue(TAG_ENT_MAX);
+	file.writeValue(m_max);
+
+	//population
+	file.writeValue(TAG_ENT_POPL);
+	file.writeValue(m_population);
+
+	//data
+	file.writeValue(TAG_ENT_DATA);
+	file.writeVector(m_data);
 }

@@ -38,6 +38,11 @@ namespace flrd
 	class EntryParams : public Entry
 	{
 		public:
+			enum EntryTags
+			{
+				TAG_ENT_SIZE = 1,
+				TAG_ENT_DATA
+			};
 			enum ParamTypes
 			{
 				IPT_VOID = 0,
@@ -64,7 +69,10 @@ namespace flrd
 					m_data[i] = float(value);
 			}
 
-		private:
+			virtual void open(File& file);
+			virtual void save(File& file);
+
+	private:
 			static unsigned int m_size;//parameter size
 			static std::vector<std::string> m_names;//parameter names
 			static std::unordered_map<std::string, size_t> m_name_index;//index of names

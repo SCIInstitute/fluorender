@@ -26,6 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "EntryParams.h"
+#include <Table.h>
+#include <FileIO/File.h>
 
 using namespace flrd;
 
@@ -114,3 +116,32 @@ size_t EntryParams::getNameIndex(const std::string& name)
 	return result;
 }
 
+void EntryParams::open(File& file)
+{
+	EntryTags t;
+	//size
+	file.readValue(t);
+	if (t != TAG_ENT_SIZE) return;
+	unsigned int size;
+	file.readValue(size);
+	if (size != m_size) return;
+
+	//data
+	file.readValue(t);
+	if (t != TAG_ENT_DATA) return;
+	file.readVector(m_data);
+}
+
+void EntryParams::save(File& file)
+{
+	//type
+	file.writeValue(Table::TAG_TABLE_ENT_PARAMS);
+
+	//size
+	file.writeValue(TAG_ENT_SIZE);
+	file.writeValue(m_size);
+
+	//data
+	file.writeValue(TAG_ENT_DATA);
+	file.writeVector(m_data);
+}

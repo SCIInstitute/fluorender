@@ -26,6 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Record.h"
+#include <Table.h>
+#include <FileIO/File.h>
 
 using namespace flrd;
 
@@ -39,4 +41,23 @@ Record::~Record()
 {
 	if (m_input) delete m_input;
 	if (m_output) delete m_output;
+}
+
+void Record::open(File& file)
+{
+
+}
+
+void Record::save(File& file)
+{
+	if (m_input)
+	{
+		file.writeValue(Table::TAG_TABLE_ENT_IN);
+		m_input->save(file);
+	}
+	if (m_output)
+	{
+		file.writeValue(Table::TAG_TABLE_ENT_OUT);
+		m_output->save(file);
+	}
 }

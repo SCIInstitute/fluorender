@@ -60,6 +60,9 @@ namespace flrd
 				m_output = entry;
 			}
 
+			virtual void open(File& file);
+			virtual void save(File& file);
+
 	private:
 	};
 }
