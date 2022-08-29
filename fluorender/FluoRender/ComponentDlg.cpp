@@ -167,6 +167,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	//execute
 	EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, ComponentDlg::OnNotebook)
 	EVT_CHECKBOX(ID_UseSelChk, ComponentDlg::OnUseSelChk)
+	EVT_BUTTON(ID_AddRecordBtn, ComponentDlg::OnAddRecord)
 	EVT_BUTTON(ID_GenerateBtn, ComponentDlg::OnGenerate)
 	EVT_TOGGLEBUTTON(ID_AutoUpdateBtn, ComponentDlg::OnAutoUpdate)
 	EVT_BUTTON(ID_ClusterBtn, ComponentDlg::OnCluster)
@@ -224,6 +225,8 @@ ComponentDlg::ComponentDlg(VRenderFrame *frame)
 		wxDefaultPosition, wxDefaultSize);
 	m_use_sel_chk = new wxCheckBox(panel_bot, ID_UseSelChk, "Use Sel.",
 		wxDefaultPosition, wxDefaultSize);
+	m_add_record_btn = new wxButton(panel_bot, ID_AddRecordBtn, "Add Rec.",
+		wxDefaultPosition, wxDefaultSize);
 	m_generate_btn = new wxButton(panel_bot, ID_GenerateBtn, "Generate",
 		wxDefaultPosition, wxSize(75, -1));
 	m_auto_update_btn = new wxToggleButton(panel_bot, ID_AutoUpdateBtn, "Auto Update",
@@ -237,6 +240,7 @@ ComponentDlg::ComponentDlg(VRenderFrame *frame)
 	sizer1->Add(m_shuffle_btn, 0, wxALIGN_CENTER);
 	sizer1->AddStretchSpacer();
 	sizer1->Add(m_use_sel_chk, 0, wxALIGN_CENTER);
+	sizer1->Add(m_add_record_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_generate_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_auto_update_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_cluster_btn, 0, wxALIGN_CENTER);
@@ -2613,6 +2617,7 @@ void ComponentDlg::EnableGenerate()
 	case 0:
 	default:
 		m_use_sel_chk->Show();
+		m_add_record_btn->Show();
 		m_generate_btn->Show();
 		m_auto_update_btn->Show();
 		m_cluster_btn->Hide();
@@ -2621,6 +2626,7 @@ void ComponentDlg::EnableGenerate()
 		break;
 	case 1:
 		m_use_sel_chk->Hide();
+		m_add_record_btn->Hide();
 		m_generate_btn->Hide();
 		m_auto_update_btn->Hide();
 		m_cluster_btn->Show();
@@ -2629,6 +2635,7 @@ void ComponentDlg::EnableGenerate()
 		break;
 	case 2:
 		m_use_sel_chk->Hide();
+		m_add_record_btn->Hide();
 		m_generate_btn->Hide();
 		m_auto_update_btn->Hide();
 		m_cluster_btn->Hide();
@@ -3150,6 +3157,11 @@ void ComponentDlg::OnNotebook(wxBookCtrlEvent &event)
 void ComponentDlg::OnUseSelChk(wxCommandEvent &event)
 {
 	m_use_sel = m_use_sel_chk->GetValue();
+}
+
+void ComponentDlg::OnAddRecord(wxCommandEvent &event)
+{
+	//get histogram and add a record to table
 }
 
 void ComponentDlg::OnGenerate(wxCommandEvent &event)
