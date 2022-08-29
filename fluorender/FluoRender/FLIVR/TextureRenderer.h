@@ -53,10 +53,7 @@ namespace flvr
 			m_pos(0)
 		{
 			if (m_limit >= 0)
-			{
-				m_queue = new int[m_limit];
-				memset(m_queue, 0, m_limit * sizeof(int));
-			}
+				m_queue = new int[m_limit]();
 		}
 		~BrickQueue()
 		{

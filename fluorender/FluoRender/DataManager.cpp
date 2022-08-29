@@ -554,26 +554,24 @@ void VolumeData::AddEmptyData(int bits,
 	{
 		unsigned long long mem_size = (unsigned long long)nx*
 			(unsigned long long)ny*(unsigned long long)nz;
-		uint8 *val8 = new (std::nothrow) uint8[mem_size];
+		uint8 *val8 = new (std::nothrow) uint8[mem_size]();
 		if (!val8)
 		{
 			wxMessageBox("Not enough memory. Please save project and restart.");
 			return;
 		}
-		memset((void*)val8, 0, sizeof(uint8)*nx*ny*nz);
 		nrrdWrap(nv, val8, nrrdTypeUChar, 3, (size_t)nx, (size_t)ny, (size_t)nz);
 	}
 	else if (bits == 16)
 	{
 		unsigned long long mem_size = (unsigned long long)nx*
 			(unsigned long long)ny*(unsigned long long)nz;
-		uint16 *val16 = new (std::nothrow) uint16[mem_size];
+		uint16 *val16 = new (std::nothrow) uint16[mem_size]();
 		if (!val16)
 		{
 			wxMessageBox("Not enough memory. Please save project and restart.");
 			return;
 		}
-		memset((void*)val16, 0, sizeof(uint16)*nx*ny*nz);
 		nrrdWrap(nv, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz);
 	}
 	nrrdAxisInfoSet(nv, nrrdAxisInfoSpacing, spcx, spcy, spcz);
@@ -699,7 +697,7 @@ void VolumeData::AddEmptyMask(int mode, bool change)
 		if (mode == 0 || mode == 1)
 		{
 			if (val8)
-				memset((void*)val8, mode ?
+				std::memset((void*)val8, mode ?
 					255 : 0, mem_size * sizeof(uint8));
 		}
 	}
@@ -996,7 +994,7 @@ void VolumeData::AddEmptyLabel(int mode, bool change)
 		switch (mode)
 		{
 		case 0://zeros
-			memset(val32, 0, sizeof(unsigned int)*m_res_x*m_res_y*m_res_z);
+			std::memset(val32, 0, sizeof(unsigned int)*m_res_x*m_res_y*m_res_z);
 			break;
 		case 1://ordered
 			SetOrderedID(val32);

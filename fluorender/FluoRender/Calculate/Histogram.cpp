@@ -37,8 +37,6 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 const char* str_cl_histogram =\
-"#define DWL unsigned char\n" \
-"#define VSCL 255\n" \
 "const sampler_t samp =\n" \
 "	CLK_NORMALIZED_COORDS_FALSE|\n" \
 "	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
@@ -47,41 +45,40 @@ const char* str_cl_histogram =\
 "//histogram\n" \
 "__kernel void kernel_0(\n" \
 "	__read_only image3d_t data,\n" \
-"	unsigned int dnxy, \n" \
-"	unsigned int dnx,\n" \
-"	unsigned int minv,\n" \
-"	unsigned int maxv,\n" \
+"	float minv,\n" \
+"	float maxv,\n" \
 "	unsigned int bin,\n" \
 "	__global unsigned int* hist)\n" \
 "{\n" \
 "	int4 coord = (int4)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2), 1);\n" \
-"	unsigned int index = dnxy* coord.z + dnx*coord.y + coord.x;\n" \
-"	unsigned int val = bkg[index];\n" \
+"	float val = read_imagef(data, samp, coord).x;\n" \
 "	if (val < minv || val > maxv)\n" \
 "		return;\n" \
-"	index = (val - minv) * (bin - 1) / (maxv - minv);\n" \
+"	unsigned int index = (val - minv) * (bin - 1) / (maxv - minv);\n" \
 "	atomic_inc(hist+index);\n" \
+"	atomic_inc(hist+bin);\n" \
 "}\n" \
 "//histogram in mask\n" \
 "__kernel void kernel_1(\n" \
 "	__read_only image3d_t data,\n" \
-"	unsigned int dnxy, \n" \
-"	unsigned int dnx,\n" \
-"	unsigned int minv,\n" \
-"	unsigned int maxv,\n" \
+"	float minv,\n" \
+"	float maxv,\n" \
 "	unsigned int bin,\n" \
 "	__global unsigned int* hist,\n" \
 "	__read_only image3d_t mask)\n" \
 "{\n" \
 "	int4 coord = (int4)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2), 1);\n" \
-"	unsigned int index = dnxy* coord.z + dnx*coord.y + coord.x;\n" \
-"	unsigned int val = bkg[index];\n" \
+"	float val = read_imagef(mask, samp, coord).x;\n" \
+"	if (val == 0.0f)\n" \
+"		return;\n" \
+"	val = read_imagef(data, samp, coord).x;\n" \
 "	if (val < minv || val > maxv)\n" \
 "		return;\n" \
-"	index = (val - minv) * (bin - 1) / (maxv - minv);\n" \
+"	unsigned int index = (val - minv) * (bin - 1) / (maxv - minv);\n" \
 "	atomic_inc(hist+index);\n" \
+"	atomic_inc(hist+bin);\n" \
 "}\n" \
 ;
 
@@ -127,6 +124,68 @@ EntryHist* Histogram::GetEntryHist()
 
 	if (!CheckBricks())
 		return hist;
+	long bits = m_vd->GetBits();
+	float minv = 0;
+	float maxv = 1;
+	if (bits > 8) maxv = float(1.0 / m_vd->GetScalarScale());
 
+	//create program and kernels
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
+		vol_kernel_factory_.kernel(str_cl_histogram, bits);
+	if (!kernel_prog)
+		return hist;
+	int kernel_index;
+	if (!m_use_mask)
+		kernel_index = kernel_prog->createKernel("kernel_0");
+	else
+		kernel_index = kernel_prog->createKernel("kernel_1");
+
+	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+
+	//sum histogram
+	unsigned int* sh = new unsigned int[m_bins + 1]();
+	flvr::Argument arg_sh;
+
+	for (size_t i = 0; i < brick_num; ++i)
+	{
+		flvr::TextureBrick* b = (*bricks)[i];
+		long nx, ny, nz;
+		if (!GetInfo(b, bits, nx, ny, nz))
+			continue;
+		//get tex ids
+		GLint tid = m_vd->GetVR()->load_brick(b);
+		GLint mid = 0;
+		if (m_use_mask)
+			mid = m_vd->GetVR()->load_brick_mask(b);
+
+		size_t local_size[3] = { 1, 1, 1 };
+		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+
+		unsigned int bin = m_bins;
+
+		kernel_prog->setKernelArgBegin(kernel_index);
+		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&minv));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&maxv));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&bin));
+		if (i == 0)
+			arg_sh = kernel_prog->setKernelArgBuf(
+				CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+				sizeof(unsigned int)*(bin + 1), (void*)(sh));
+		else
+			kernel_prog->setKernelArgument(arg_sh);
+		if (m_use_mask)
+			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+
+		//execute
+		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
+		//read back
+		kernel_prog->readBuffer(sizeof(unsigned int)*(bin+1), sh, sh);
+	}
+
+	kernel_prog->releaseAll();
+	hist->setData(sh);
+	delete[] sh;
 	return hist;
 }

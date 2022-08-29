@@ -4522,7 +4522,7 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 	//clear label2
 	unsigned long long clear_size = (unsigned long long)nx *
 		ny * nz * sizeof(unsigned int);
-	memset(label2, 0, clear_size);
+	std::memset(label2, 0, clear_size);
 
 	//get all stencils from frame1
 	StencilList stencil_list;

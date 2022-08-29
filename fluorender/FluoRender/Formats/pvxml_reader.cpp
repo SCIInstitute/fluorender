@@ -876,10 +876,8 @@ Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
 		//allocate memory for nrrd
 		unsigned long long mem_size = (unsigned long long)m_x_size*
 			(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
-		unsigned short *val = new (std::nothrow) unsigned short[mem_size];
+		unsigned short *val = new (std::nothrow) unsigned short[mem_size]();
 		if (!val) return 0;
-
-		//memset(val, 0, sizeof(unsigned short)*mem_size);
 
 		TimeDataInfo* time_data_info = &(m_pvxml_info[t]);
 		

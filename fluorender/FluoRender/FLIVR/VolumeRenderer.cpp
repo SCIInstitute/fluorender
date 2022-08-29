@@ -1523,8 +1523,7 @@ namespace flvr
 				else if (tex_->get_nrrd(0)->type == nrrdTypeUShort)
 					hist_size = 1024;
 			}
-			float* hist = new float[hist_size];
-			memset(hist, 0, hist_size*sizeof(float));
+			float* hist = new float[hist_size]();
 			kernel->setKernelArgBuf(CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, hist_size*sizeof(float), hist);
 			kernel->setKernelArgConst(sizeof(unsigned int), (void*)(&hist_size));
 			size_t global_size[3] = {brick_x, brick_y, brick_z};

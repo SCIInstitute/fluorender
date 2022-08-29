@@ -522,7 +522,7 @@ void ScriptProc::RunPostTracking()
 	cur_vol->GetResolution(nx, ny, nz);
 	//update the mask according to the new label
 	unsigned long long for_size = nx * ny * nz;
-	memset((void*)mask_data, 0, sizeof(uint8)*for_size);
+	std::memset((void*)mask_data, 0, sizeof(uint8)*for_size);
 	for (unsigned long long idx = 0;
 		idx < for_size; ++idx)
 	{
@@ -1739,8 +1739,7 @@ void ScriptProc::ReadVolCacheDataLabel(flrd::VolCache& vol_cache)
 		label = nrrdNew();
 		unsigned long long mem_size = (unsigned long long)resx*
 			(unsigned long long)resy*(unsigned long long)resz;
-		unsigned int *val32 = new (std::nothrow) unsigned int[mem_size];
-		memset(val32, 0, sizeof(unsigned int)*mem_size);
+		unsigned int *val32 = new (std::nothrow) unsigned int[mem_size]();
 		nrrdWrap(label, val32, nrrdTypeUInt, 3, (size_t)resx, (size_t)resy, (size_t)resz);
 		nrrdAxisInfoSet(label, nrrdAxisInfoSpacing, spcx, spcy, spcz);
 		nrrdAxisInfoSet(label, nrrdAxisInfoMin, 0.0, 0.0, 0.0);

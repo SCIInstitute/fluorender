@@ -408,8 +408,7 @@ namespace flvr
 			int n0 = 0;
 			double sum = 0.0;
 			int n = brick_queue_.GetLimit();
-			int *sorted_queue = new int[n];
-			memset(sorted_queue, 0, n*sizeof(int));
+			int *sorted_queue = new int[n]();
 			for (int i = 0; i < n; i++)
 			{
 				sorted_queue[i] = brick_queue_.Get(i);

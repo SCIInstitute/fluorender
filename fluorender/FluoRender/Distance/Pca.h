@@ -119,7 +119,7 @@ namespace flrd
 		{
 			m_num = 0;
 			m_mean = fluo::Point();
-			memset(m_cov, 0, sizeof(double) * 9);
+			std::memset(m_cov, 0, sizeof(double) * 9);
 			m_points.clear();
 		}
 		void Compute();

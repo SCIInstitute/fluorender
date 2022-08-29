@@ -1720,10 +1720,8 @@ void DataTreeCtrl::ChangeIconColor(int which, wxColor c, int type)
 			int len = strlen(orgn_data[i]);
 			int len_key = strlen(icon_key);
 			int len_chng = len+strlen(cc)-len_key+1;
-			data[i] = new char[len_chng];
-			memset(data[i], 0, len_chng);
-			char *temp = new char[len_key+1];
-			memset(temp, 0, len_key+1);
+			data[i] = new char[len_chng]();
+			char *temp = new char[len_key+1]();
 			int index = 0;
 			for (int j=0; j<len; j++)
 			{

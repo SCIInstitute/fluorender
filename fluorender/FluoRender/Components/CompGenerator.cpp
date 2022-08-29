@@ -260,8 +260,7 @@ void ComponentGenerator::SetIDBit(int psize)
 			(unsigned long long)ny *
 			(unsigned long long)nz;
 		unsigned long long label_size = data_size * 4;
-		size_buffer = new unsigned int[data_size];
-		memset(size_buffer, 0, label_size);
+		size_buffer = new unsigned int[data_size]();
 
 		//set
 		//kernel 0
@@ -1151,8 +1150,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 			(unsigned long long)ny *
 			(unsigned long long)nz;
 		unsigned long long label_size = data_size * 4;
-		size_buffer = new unsigned int[data_size];
-		memset(size_buffer, 0, label_size);
+		size_buffer = new unsigned int[data_size]();
 
 		//set
 		//kernel 0

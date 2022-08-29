@@ -416,8 +416,7 @@ void BasicStat::Run()
 		{
 			//meidan mode with known minmax
 			unsigned int bin = bmaxv - bminv + 1;
-			unsigned int* hist = new unsigned int[bin];
-			memset(hist, 0, sizeof(unsigned int)*bin);
+			unsigned int* hist = new unsigned int[bin]();
 			kernel_prog->setKernelArgBegin(kernel_index1);
 			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&bminv));

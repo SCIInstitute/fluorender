@@ -455,8 +455,7 @@ void BackgStat::Run()
 		{
 			//meidan mode with known minmax
 			unsigned int bin = bmaxv - bminv + 1;
-			unsigned int* hist = new unsigned int[bin];
-			memset(hist, 0, sizeof(unsigned int)*bin);
+			unsigned int* hist = new unsigned int[bin]();
 			kernel_prog->setKernelArgBegin(kernel_index2);
 			kernel_prog->setKernelArgument(arg_bkg);
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));

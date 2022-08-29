@@ -411,7 +411,7 @@ void ComponentSelector::All()
 	m_vd->GetResolution(nx, ny, nz);
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
-	memset(data_mask, 255, for_size);
+	std::memset(data_mask, 255, for_size);
 	m_vd->GetTexture()->valid_all_mask();
 	//invalidate label mask in gpu
 	m_vd->GetVR()->clear_tex_mask();
@@ -439,7 +439,7 @@ void ComponentSelector::Clear(bool invalidate)
 	m_vd->GetResolution(nx, ny, nz);
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
-	memset(data_mask, 0, for_size);
+	std::memset(data_mask, 0, for_size);
 	//invalidate label mask in gpu
 	if (invalidate)
 		m_vd->GetVR()->clear_tex_mask();

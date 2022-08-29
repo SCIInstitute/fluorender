@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 
 	//reformat_data();
 
-	TableTest();
+	//TableTest();
 
 	cout << "All done. Quit." << endl;
 	cin.get();
