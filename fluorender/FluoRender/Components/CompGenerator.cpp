@@ -1335,3 +1335,8 @@ void ComponentGenerator::FillBorders(float tol)
 		postwork(__FUNCTION__);
 	}
 }
+
+void ComponentGenerator::GenerateDB()
+{
+
+}

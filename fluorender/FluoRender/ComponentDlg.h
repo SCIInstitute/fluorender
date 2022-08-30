@@ -185,6 +185,7 @@ public:
 		ID_Notebook,
 		ID_UseSelChk,
 		ID_AddRecordBtn,
+		ID_ApplyRecordBtn,
 		ID_GenerateBtn,
 		ID_AutoUpdateBtn,
 		ID_ClusterBtn,
@@ -215,9 +216,10 @@ public:
 	void SelectFullComp();
 
 	//learning functions
-	void AddRecord();
 	void LoadTable();
 	void SaveTable();
+	void AddRecord();
+	void ApplyRecord();
 
 	flrd::ComponentAnalyzer* GetAnalyzer()
 	{
@@ -481,6 +483,7 @@ private:
 	//execute
 	wxCheckBox* m_use_sel_chk;
 	wxButton* m_add_record_btn;
+	wxButton* m_apply_record_btn;
 	wxButton* m_generate_btn;
 	wxToggleButton* m_auto_update_btn;
 	wxButton* m_cluster_btn;
@@ -645,6 +648,7 @@ private:
 	void OnNotebook(wxBookCtrlEvent &event);
 	void OnUseSelChk(wxCommandEvent &event);
 	void OnAddRecord(wxCommandEvent &event);
+	void OnApplyRecord(wxCommandEvent &event);
 	void OnGenerate(wxCommandEvent &event);
 	void OnAutoUpdate(wxCommandEvent &event);
 	void OnCluster(wxCommandEvent &event);

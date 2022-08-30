@@ -171,6 +171,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, ComponentDlg::OnNotebook)
 	EVT_CHECKBOX(ID_UseSelChk, ComponentDlg::OnUseSelChk)
 	EVT_BUTTON(ID_AddRecordBtn, ComponentDlg::OnAddRecord)
+	EVT_BUTTON(ID_ApplyRecordBtn, ComponentDlg::OnApplyRecord)
 	EVT_BUTTON(ID_GenerateBtn, ComponentDlg::OnGenerate)
 	EVT_TOGGLEBUTTON(ID_AutoUpdateBtn, ComponentDlg::OnAutoUpdate)
 	EVT_BUTTON(ID_ClusterBtn, ComponentDlg::OnCluster)
@@ -230,6 +231,8 @@ ComponentDlg::ComponentDlg(VRenderFrame *frame)
 		wxDefaultPosition, wxDefaultSize);
 	m_add_record_btn = new wxButton(panel_bot, ID_AddRecordBtn, "Add Rec.",
 		wxDefaultPosition, wxDefaultSize);
+	m_apply_record_btn = new wxButton(panel_bot, ID_ApplyRecordBtn, "Apply Rec.",
+		wxDefaultPosition, wxDefaultSize);
 	m_generate_btn = new wxButton(panel_bot, ID_GenerateBtn, "Generate",
 		wxDefaultPosition, wxSize(75, -1));
 	m_auto_update_btn = new wxToggleButton(panel_bot, ID_AutoUpdateBtn, "Auto Update",
@@ -242,8 +245,10 @@ ComponentDlg::ComponentDlg(VRenderFrame *frame)
 		wxDefaultPosition, wxSize(75, -1));
 	sizer1->Add(m_shuffle_btn, 0, wxALIGN_CENTER);
 	sizer1->AddStretchSpacer();
-	sizer1->Add(m_use_sel_chk, 0, wxALIGN_CENTER);
 	sizer1->Add(m_add_record_btn, 0, wxALIGN_CENTER);
+	sizer1->Add(m_apply_record_btn, 0, wxALIGN_CENTER);
+	sizer1->Add(10, 10);
+	sizer1->Add(m_use_sel_chk, 0, wxALIGN_CENTER);
 	sizer1->Add(m_generate_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_auto_update_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_cluster_btn, 0, wxALIGN_CENTER);
@@ -2623,6 +2628,7 @@ void ComponentDlg::EnableGenerate()
 	default:
 		m_use_sel_chk->Show();
 		m_add_record_btn->Show();
+		m_apply_record_btn->Show();
 		m_generate_btn->Show();
 		m_auto_update_btn->Show();
 		m_cluster_btn->Hide();
@@ -2632,6 +2638,7 @@ void ComponentDlg::EnableGenerate()
 	case 1:
 		m_use_sel_chk->Hide();
 		m_add_record_btn->Hide();
+		m_apply_record_btn->Hide();
 		m_generate_btn->Hide();
 		m_auto_update_btn->Hide();
 		m_cluster_btn->Show();
@@ -2641,6 +2648,7 @@ void ComponentDlg::EnableGenerate()
 	case 2:
 		m_use_sel_chk->Hide();
 		m_add_record_btn->Hide();
+		m_apply_record_btn->Hide();
 		m_generate_btn->Hide();
 		m_auto_update_btn->Hide();
 		m_cluster_btn->Hide();
@@ -3169,6 +3177,11 @@ void ComponentDlg::OnAddRecord(wxCommandEvent &event)
 	AddRecord();
 }
 
+void ComponentDlg::OnApplyRecord(wxCommandEvent &event)
+{
+	ApplyRecord();
+}
+
 void ComponentDlg::OnGenerate(wxCommandEvent &event)
 {
 	GenerateComp(m_use_sel);
@@ -3644,6 +3657,28 @@ void ComponentDlg::SelectFullComp()
 	}
 }
 
+void ComponentDlg::LoadTable()
+{
+	wxString filename;
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = wxPathOnly(expath);
+	filename = expath + GETSLASH() +
+		"Database" + GETSLASH() +
+		"comp_analysis.tbl";
+	glbin.get_ca_table().open(filename.ToStdString());
+}
+
+void ComponentDlg::SaveTable()
+{
+	wxString filename;
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = wxPathOnly(expath);
+	filename = expath + GETSLASH() +
+		"Database" + GETSLASH() +
+		"comp_analysis.tbl";
+	glbin.get_ca_table().save(filename.ToStdString());
+}
+
 void ComponentDlg::AddRecord()
 {
 	//get histogram and add a record to table
@@ -3689,26 +3724,24 @@ void ComponentDlg::AddRecord()
 	glbin.get_ca_table().addRecord(rec);
 }
 
-void ComponentDlg::LoadTable()
+void ComponentDlg::ApplyRecord()
 {
-	wxString filename;
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	filename = expath + GETSLASH() +
-		"Database" + GETSLASH() +
-		"comp_analysis.tbl";
-	glbin.get_ca_table().open(filename.ToStdString());
-}
+	//generate components using records
+	if (!m_view)
+		return;
+	VolumeData* vd = m_view->m_cur_vol;
+	if (!vd)
+		return;
 
-void ComponentDlg::SaveTable()
-{
-	wxString filename;
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	filename = expath + GETSLASH() +
-		"Database" + GETSLASH() +
-		"comp_analysis.tbl";
-	glbin.get_ca_table().save(filename.ToStdString());
+	flrd::ComponentGenerator cg(vd);
+	cg.GenerateDB();
+
+	int bn = vd->GetAllBrickNum();
+	if (bn > 1)
+		cg.FillBorders(0.1);
+
+	//update
+	m_view->RefreshGL(39);
 }
 
 void ComponentDlg::OnAnalyze(wxCommandEvent &event)

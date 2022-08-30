@@ -71,6 +71,9 @@ namespace flrd
 		void ClearBorders();
 		void FillBorders(float);
 
+		//learning functions
+		void GenerateDB();
+
 		//unused
 		void OrderID_2D();
 		void OrderID_3D();
