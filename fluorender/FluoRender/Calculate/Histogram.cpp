@@ -85,7 +85,7 @@ const char* str_cl_histogram =\
 Histogram::Histogram(VolumeData* vd) :
 	m_vd(vd),
 	m_use_mask(true),
-	m_bins(256)
+	m_bins(EntryHist::m_bins)
 {
 
 }
@@ -185,7 +185,12 @@ EntryHist* Histogram::GetEntryHist()
 	}
 
 	kernel_prog->releaseAll();
+
+	hist = new flrd::EntryHist();
+	hist->setRange(minv, maxv);
+	hist->setPopulation(sh[m_bins]);
 	hist->setData(sh);
 	delete[] sh;
+
 	return hist;
 }

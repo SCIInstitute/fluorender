@@ -64,7 +64,7 @@ void RecordHistParams::open(File& file)
 	if (t == Table::TAG_TABLE_ENT_OUT)
 	{
 		file.readValue(t);
-		if (t == Table::TAG_TABLE_ENT_OUT)
+		if (t == Table::TAG_TABLE_ENT_PARAMS)
 		{
 			EntryParams* ent = new EntryParams();
 			if (ent)

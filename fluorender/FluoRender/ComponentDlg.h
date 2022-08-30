@@ -214,6 +214,11 @@ public:
 	void Clean(bool use_sel, bool command = true);
 	void SelectFullComp();
 
+	//learning functions
+	void AddRecord();
+	void LoadTable();
+	void SaveTable();
+
 	flrd::ComponentAnalyzer* GetAnalyzer()
 	{
 		return &m_comp_analyzer;

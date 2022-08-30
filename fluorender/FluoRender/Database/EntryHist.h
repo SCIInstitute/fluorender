@@ -83,8 +83,9 @@ namespace flrd
 			virtual void open(File& file);
 			virtual void save(File& file);
 
-	private:
 			static unsigned int m_bins;//bin size
+
+	private:
 			float m_min;//min value
 			float m_max;//max value
 			unsigned int m_population;//sample size

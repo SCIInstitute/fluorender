@@ -758,6 +758,12 @@ add_custom_command(TARGET FluoRender POST_BUILD
   "${FluoRender_SOURCE_DIR}/CL_code"
   "$<TARGET_FILE_DIR:FluoRender>/CL_code")
 
+# copy database dir to the binary directory
+add_custom_command(TARGET FluoRender POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  "${FluoRender_SOURCE_DIR}/Database"
+  "$<TARGET_FILE_DIR:FluoRender>/Database")
+
 # copy font dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory

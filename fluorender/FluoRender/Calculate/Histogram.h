@@ -49,7 +49,7 @@ namespace flrd
 
 		void SetBins(unsigned int bins)
 		{
-			m_bins = bins;
+			//m_bins = bins;
 		}
 
 		EntryHist* GetEntryHist();

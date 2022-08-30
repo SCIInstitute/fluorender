@@ -45,7 +45,10 @@ namespace fluo
 	{
 	public:
 		static Global& instance() { return instance_; }
+
 		flrd::CacheQueue& get_cache_queue() { return cache_queue_; }
+
+		flrd::Table& get_ca_table() { return comp_analyzer_table_; }
 
 	private:
 		Global();
