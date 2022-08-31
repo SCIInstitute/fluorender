@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 #include "CompGenerator.h"
 #include "cl_code.h"
+#include "cl_code_db.h"
 #include <algorithm>
 #ifdef _DEBUG
 #include <fstream>
