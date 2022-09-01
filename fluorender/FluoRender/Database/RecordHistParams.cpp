@@ -83,3 +83,23 @@ void RecordHistParams::save(File& file)
 	file.writeValue(Table::TAG_TABLE_REC_HISTPARAM);
 	Record::save(file);
 }
+
+size_t RecordHistParams::getInputSize()
+{
+	return EntryHist::m_bins;
+}
+
+size_t RecordHistParams::getOutputSize()
+{
+	return EntryParams::m_size;
+}
+
+void RecordHistParams::getInputData(float* data)
+{
+	std::memcpy(data, &(m_input->m_data[0]), sizeof(float)*getInputSize());
+}
+
+void RecordHistParams::getOutputData(float* data)
+{
+	std::memcpy(data, &(m_output->m_data[0]), sizeof(float)*getOutputSize());
+}

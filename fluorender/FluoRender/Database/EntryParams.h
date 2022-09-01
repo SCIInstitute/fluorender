@@ -72,12 +72,13 @@ namespace flrd
 			virtual void open(File& file);
 			virtual void save(File& file);
 
-	private:
 			static unsigned int m_size;//parameter size
+
+	private:
 			static std::vector<std::string> m_names;//parameter names
 			static std::unordered_map<std::string, size_t> m_name_index;//index of names
 			static std::vector<ParamTypes> m_types;//parameter types for external program
-			std::vector<float> m_data;//parameter values, converted to float
+			//std::vector<float> m_data;//parameter values, converted to float
 	};
 }
 

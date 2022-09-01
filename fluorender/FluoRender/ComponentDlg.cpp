@@ -3734,7 +3734,7 @@ void ComponentDlg::ApplyRecord()
 		return;
 
 	flrd::ComponentGenerator cg(vd);
-	cg.GenerateDB();
+	cg.GenerateDB(m_iter);
 
 	int bn = vd->GetAllBrickNum();
 	if (bn > 1)

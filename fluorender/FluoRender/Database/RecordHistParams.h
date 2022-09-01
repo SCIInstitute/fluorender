@@ -63,6 +63,12 @@ namespace flrd
 			virtual void open(File& file);
 			virtual void save(File& file);
 
+			virtual size_t getInputSize();
+			virtual size_t getOutputSize();
+
+			virtual void getInputData(float* data);
+			virtual void getOutputData(float* data);
+
 	private:
 	};
 }

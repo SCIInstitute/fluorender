@@ -56,6 +56,29 @@ namespace flrd
 			virtual void open(const std::string& filename);
 			virtual void save(const std::string& filename);
 
+			virtual size_t getRecSize()
+			{
+				return m_data.size();
+			}
+			virtual void getRecInput(float* data)
+			{
+				float* p = data;
+				for (auto i : m_data)
+				{
+					i->getInputData(p);
+					p += i->getInputSize();
+				}
+			}
+			virtual void getRecOutput(float* data)
+			{
+				float* p = data;
+				for (auto i : m_data)
+				{
+					i->getOutputData(p);
+					p += i->getOutputSize();
+				}
+			}
+
 		private:
 			std::vector<Record*> m_data;
 	};

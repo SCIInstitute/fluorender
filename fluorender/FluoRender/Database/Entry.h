@@ -28,9 +28,12 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _ENTRY_H_
 #define _ENTRY_H_
 
+#include <vector>
+
 namespace flrd
 {
 	class File;
+	class RecordHistParams;
 	class Entry
 	{
 		public:
@@ -39,6 +42,11 @@ namespace flrd
 
 			virtual void open(File& file);
 			virtual void save(File& file);
+
+			friend class RecordHistParams;
+
+		protected:
+			std::vector<float> m_data;
 
 		private:
 	};

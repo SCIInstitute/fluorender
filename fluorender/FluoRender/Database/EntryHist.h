@@ -89,7 +89,7 @@ namespace flrd
 			float m_min;//min value
 			float m_max;//max value
 			unsigned int m_population;//sample size
-			std::vector<float> m_data;//histogram, normalized
+			//std::vector<float> m_data;//histogram, normalized
 	};
 }
 
