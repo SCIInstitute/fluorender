@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include "cl_code_db.h"
 #include <Global.h>
 #include <Database/EntryHist.h>
+#include <Database/EntryParams.h>
 #include <algorithm>
 #ifdef _DEBUG
 #include <fstream>
@@ -1622,7 +1623,17 @@ void ComponentGenerator::GenerateDB(int iter)
 		kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*hist_size, (void*)(histf));
 		unsigned int rec = glbin.get_ca_table().getRecSize();
 		//rechist
-		float* rechist = new float[bin*rec]();
+		size_t fsize = bin * rec;
+		float* rechist = new float[fsize]();
+		glbin.get_ca_table().getRecInput(rechist);
+		kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(rechist));
+		//params
+		fsize = EntryParams::m_size * rec;
+		float* params = new float[fsize]();
+		glbin.get_ca_table().getRecOutput(params);
+		kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(params));
+		//local histogram
+		kernel_prog_grow->setKernelArgLocal(sizeof(float)*bin);
 		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&seed));
 		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&gsx));
 		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&gsy));
@@ -1647,6 +1658,8 @@ void ComponentGenerator::GenerateDB(int iter)
 		kernel_prog_dist->releaseAll(false);
 		kernel_prog_dens->releaseAll(false);
 		delete[] histf;
+		delete[] rechist;
+		delete[] params;
 
 		postwork(__FUNCTION__);
 	}
