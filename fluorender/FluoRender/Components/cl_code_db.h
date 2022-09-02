@@ -46,7 +46,7 @@ const char* str_cl_comp_gen_db = \
 "	return grad;\n" \
 "}\n" \
 "\n" \
-"//compute histogram in blocks" \
+"//compute histogram in blocks\n" \
 "__kernel void kernel_0(\n" \
 "	__read_only image3d_t data,\n" \
 "	unsigned int gsx,\n" \
@@ -66,7 +66,7 @@ const char* str_cl_comp_gen_db = \
 "	int3 ijk = (int3)(0);\n" \
 "	uint2 index;//x:hist;y:block\n" \
 "	index.y = ngxy * gid.z + ngx * gid.y + gid.x;\n" \
-"	index.y *= bins + 1;\n" \
+"	index.y *= bin + 1;\n" \
 "	float val;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
@@ -79,7 +79,7 @@ const char* str_cl_comp_gen_db = \
 "	}\n" \
 "}\n" \
 "\n" \
-"//get record index" \
+"//get record index\n" \
 "unsigned int get_rec(\n" \
 "	__global float* hist,\n" \
 "	__global float* rechist,\n" \
@@ -94,7 +94,7 @@ const char* str_cl_comp_gen_db = \
 "	return 0;\n" \
 "}\n" \
 "\n" \
-"//grow by db lookup" \
+"//grow by db lookup\n" \
 "__kernel void kernel_1(\n" \
 "	__read_only image3d_t data,\n" \
 "	__global unsigned int* label,\n" \

@@ -1345,6 +1345,13 @@ void ComponentGenerator::GenerateDB(int iter)
 	if (!CheckBricks())
 		return;
 
+	//check table size
+	unsigned int rec = glbin.get_ca_table().getRecSize();
+	unsigned int bin = EntryHist::m_bins;
+	unsigned int par = EntryParams::m_size;
+	if (!(rec && bin && par))
+		return;
+
 	//constants for now
 	int wsize = 50;//division block size
 	int max_dist = 50;//max iteration for distance field
@@ -1576,7 +1583,6 @@ void ComponentGenerator::GenerateDB(int iter)
 		if (bits > 8) maxv = float(1.0 / m_vd->GetScalarScale());
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&minv));
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&maxv));
-		unsigned int bin = EntryHist::m_bins;
 		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&bin));
 		size_t hist_size = (bin + 1) * ngxyz;
 		unsigned int* hist = new unsigned int[hist_size]();
@@ -1621,14 +1627,13 @@ void ComponentGenerator::GenerateDB(int iter)
 		kernel_prog_grow->setKernelArgument(arg_var);
 		kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int), (void*)(&rcnt));
 		kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*hist_size, (void*)(histf));
-		unsigned int rec = glbin.get_ca_table().getRecSize();
 		//rechist
 		size_t fsize = bin * rec;
 		float* rechist = new float[fsize]();
 		glbin.get_ca_table().getRecInput(rechist);
 		kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(rechist));
 		//params
-		fsize = EntryParams::m_size * rec;
+		fsize = par * rec;
 		float* params = new float[fsize]();
 		glbin.get_ca_table().getRecOutput(params);
 		kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(params));
