@@ -1605,7 +1605,7 @@ void ComponentGenerator::GenerateDB(int iter)
 			float popl = float(hist[bin]);
 			for (int k = 0; k < bin; ++k)
 				pf[k] = float(p[k]) / popl;
-			histf += bin + 1;
+			histf += bin;
 			hist += bin + 1;
 		}
 		//release
@@ -1640,12 +1640,12 @@ void ComponentGenerator::GenerateDB(int iter)
 		//local histogram
 		kernel_prog_grow->setKernelArgLocal(sizeof(float)*bin);
 		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&seed));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&gsx));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&gsy));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&gsz));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
+		cl_int cl_gsxyz[3] = { cl_int(gsx), cl_int(gsy), cl_int(gsz) };
+		kernel_prog_grow->setKernelArgConst(sizeof(cl_int)*3, (void*)(cl_gsxyz));
+		cl_int cl_ngxyz[3] = { cl_int(ngx), cl_int(ngy), cl_int(ngz) };
+		kernel_prog_grow->setKernelArgConst(sizeof(cl_int)*3, (void*)(cl_ngxyz));
+		cl_int cl_nxyz[3] = { cl_int(nx), cl_int(ny), cl_int(nz) };
+		kernel_prog_grow->setKernelArgConst(sizeof(cl_int)*3, (void*)(cl_nxyz));
 		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
 		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&bin));
 		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&rec));

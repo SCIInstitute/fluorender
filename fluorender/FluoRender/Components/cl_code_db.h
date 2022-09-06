@@ -85,13 +85,52 @@ const char* str_cl_comp_gen_db = \
 "	__global float* rechist,\n" \
 "	__local float* lh,\n" \
 "	int3 ijk,\n" \
-"	unsigned int gsx,\n" \
-"	unsigned int gsy,\n" \
-"	unsigned int gsz,\n" \
+"	int3 gsxyz,\n" \
+"	int3 ngxyz,\n" \
 "	unsigned int bin,\n" \
 "	unsigned int rec)\n" \
 "{\n" \
-"	return 0;\n" \
+"	ijk -= (int3)(gsxyz.xy / 2, 0);\n" \
+"	int3 hc = ijk / gsxyz;\n" \
+"	int3 hd = ijk % gsxyz;\n" \
+"	int4 hi;\n" \
+"	int3 hc2 = hc;\n" \
+"	hc2 = clamp(hc2, (int3)(0), ngxyz - (int3)(1));\n" \
+"	hi.x = hc2.z * ngxyz.x * ngxyz.y + hc2.y * ngxyz.x + hc2.x;\n" \
+"	hc2 = hc + (int3)(1, 0, 0);\n" \
+"	hc2 = clamp(hc2, (int3)(0), ngxyz - (int3)(1));\n" \
+"	hi.y = hc2.z * ngxyz.x * ngxyz.y + hc2.y * ngxyz.x + hc2.x;\n" \
+"	hc2 = hc + (int3)(0, 1, 0);\n" \
+"	hc2 = clamp(hc2, (int3)(0), ngxyz - (int3)(1));\n" \
+"	hi.z = hc2.z * ngxyz.x * ngxyz.y + hc2.y * ngxyz.x + hc2.x;\n" \
+"	hc2 = hc + (int3)(0, 1, 0);\n" \
+"	hc2 = clamp(hc2, (int3)(0), ngxyz - (int3)(1));\n" \
+"	hi.w = hc2.z * ngxyz.x * ngxyz.y + hc2.y * ngxyz.x + hc2.x;\n" \
+"	hi *= (int)(bin);\n" \
+"	float4 ft;\n" \
+"	ft.x = (float)(hd.x) / (float)(gsxyz.x);\n" \
+"	ft.y = 1.0f - ft.x;\n" \
+"	ft.z = (float)(hd.y) / (float)(gsxyz.y);\n" \
+"	ft.w = 1.0f - ft.z;\n" \
+"	float f1, f2;\n" \
+"	for (int i = 0; i < bin; ++i)\n" \
+"	{\n" \
+"		f1 = hist[hi.x + i] * ft.y + hist[hi.y + i] * ft.x;\n" \
+"		f2 = hist[hi.z + i] * ft.y + hist[hi.w + i] * ft.x;\n" \
+"		lh[i] = f1 * ft.w + f2 * ft.z;\n" \
+"	}\n" \
+"	unsigned int r = 0;\n" \
+"	float* fp = rechist;\n" \
+"	for (int i = 0; i < rec; ++i)\n" \
+"	{\n" \
+"		f1 = 0.0f;\n" \
+"		for (int j = 0; j < bin; ++j)\n" \
+"			f1 += lh[j] * fp[j];\n" \
+"		fp += bin;\n" \
+"		f2 = i ? max(f1, f2) : f1;\n" \
+"		r = f1 == f2? i : r;\n" \
+"	}\n" \
+"	return r;\n" \
 "}\n" \
 "\n" \
 "//grow by db lookup\n" \
@@ -107,19 +146,16 @@ const char* str_cl_comp_gen_db = \
 "	__global float* params,\n" \
 "	__local float* lh,\n" \
 "	unsigned int seed,\n" \
-"	unsigned int gsx,\n" \
-"	unsigned int gsy,\n" \
-"	unsigned int gsz,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz,\n" \
+"	int3 gsxyz,\n" \
+"	int3 ngxyz,\n" \
+"	int3 nxyz,\n" \
 "	unsigned int nxy,\n" \
 "	unsigned int bin,\n" \
 "	unsigned int rec)\n" \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
-"	unsigned int index = get_rec(hist, rechist, lh, coord, gsx, gsy, gsz, bin, rec);\n" \
+"	unsigned int index = get_rec(hist, rechist, lh, coord, gsxyz, ngxyz, bin, rec);\n" \
 "}\n" \
 ;
 

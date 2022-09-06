@@ -3734,6 +3734,15 @@ void ComponentDlg::ApplyRecord()
 		return;
 
 	flrd::ComponentGenerator cg(vd);
+	cg.prework = std::bind(
+		&ComponentDlg::StartTimer, this, std::placeholders::_1);
+	cg.postwork = std::bind(
+		&ComponentDlg::StopTimer, this, std::placeholders::_1);
+	if (!vd->GetLabel(false))
+	{
+		vd->AddEmptyLabel(0);
+		cg.ShuffleID();
+	}
 	cg.GenerateDB(m_iter);
 
 	int bn = vd->GetAllBrickNum();
