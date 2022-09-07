@@ -1646,7 +1646,9 @@ void ComponentGenerator::GenerateDB(int iter)
 		kernel_prog_grow->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_ngxyz));
 		cl_int3 cl_nxyz = { cl_int(nx), cl_int(ny), cl_int(nz) };
 		kernel_prog_grow->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
+		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
+		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
+		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&sscale));
 		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&bin));
 		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&rec));
 

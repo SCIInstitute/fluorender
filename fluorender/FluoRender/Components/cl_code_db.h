@@ -29,6 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #define COMP_CL_CODE_DB_H
 
 const char* str_cl_comp_gen_db = \
+"#define IVALT 1\n" \
+"#define IVALF 3\n" \
+"#define IGRDF 3\n" \
+"#define IDENS 5\n" \
+"#define IVRTH 6\n" \
 "const sampler_t samp =\n" \
 "	CLK_NORMALIZED_COORDS_FALSE|\n" \
 "	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
@@ -130,7 +135,7 @@ const char* str_cl_comp_gen_db = \
 "		f2 = i ? max(f1, f2) : f1;\n" \
 "		r = f1 == f2? i : r;\n" \
 "	}\n" \
-"	return r;\n" \
+"	return r * rec;\n" \
 "}\n" \
 "\n" \
 "//grow by db lookup\n" \
@@ -149,13 +154,68 @@ const char* str_cl_comp_gen_db = \
 "	int3 gsxyz,\n" \
 "	int3 ngxyz,\n" \
 "	int3 nxyz,\n" \
-"	unsigned int nxy,\n" \
+"	unsigned int dnxy,\n" \
+"	unsigned int dnx,\n" \
+"	float sscale,\n" \
 "	unsigned int bin,\n" \
 "	unsigned int rec)\n" \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
-"	//unsigned int index = get_rec(hist, rechist, lh, coord, gsxyz, ngxyz, bin, rec);\n" \
+"	unsigned int index = get_rec(hist, rechist, lh, coord, gsxyz, ngxyz, bin, rec);\n" \
+"	float value_t = params[index + IVALT];\n" \
+"	float value_f = params[index + IVALF];\n" \
+"	float grad_f = params[index + IGRDF];\n" \
+"	float density = params[index + IDENS];\n" \
+"	float varth = params[index + IVRTH];\n" \
+"	index = nxyz.x*nxyz.y*coord.z + nxyz.x*coord.y + coord.x;\n" \
+"	unsigned int label_v = label[index];\n" \
+"	if (label_v == 0)\n" \
+"		return;\n" \
+"	//break if low density\n" \
+"	if (density > 0.0f)\n" \
+"	{\n" \
+"		unsigned int index2 = dnxy*coord.z + dnx*coord.y + coord.x;\n" \
+"		unsigned char vdf = df[index2];\n" \
+"		unsigned char vavg = avg[index2];\n" \
+"		unsigned char vvar = var[index2];\n" \
+"		//break if low variance\n" \
+"		if (vvar < varth * 255)\n" \
+"			return;\n" \
+"		if (vdf < vavg - (1.0f-density)*vvar)\n" \
+"			return;\n" \
+"	}\n" \
+"	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
+"	value *= sscale;\n" \
+"	float grad = length(sscale * vol_grad_func(data, (int4)(coord, 1)));\n" \
+"	//stop function\n" \
+"	float stop =\n" \
+"		(grad_f>0.0f?(grad>sqrt(grad_f)*2.12f?0.0f:exp(-grad*grad/grad_f)):1.0f)*\n" \
+"		(value>value_t?1.0f:(value_f>0.0f?(value<value_t-sqrt(value_f)*2.12f?0.0f:exp(-(value-value_t)*(value-value_t)/value_f)):0.0f));\n" \
+"	\n" \
+"	//max filter\n" \
+"	atomic_inc(rcnt);\n" \
+"	float random = (float)((*rcnt) % seed)/(float)(seed)+1e-4f;\n" \
+"	if (stop < random)\n" \
+"		return;\n" \
+"	int3 nb_coord;\n" \
+"	unsigned int nb_index;\n" \
+"	unsigned int m;\n" \
+"	for (int i=-1; i<2; ++i)\n" \
+"	for (int j=-1; j<2; ++j)\n" \
+"	for (int k=-1; k<2; ++k)\n" \
+"	{\n" \
+"		nb_coord = (int3)(coord.x+i, coord.y+j, coord.z+k);\n" \
+"		if (nb_coord.x < 0 || nb_coord.x > nxyz.x-1 ||\n" \
+"			nb_coord.y < 0 || nb_coord.y > nxyz.y-1 ||\n" \
+"			nb_coord.z < 0 || nb_coord.z > nxyz.z-1)\n" \
+"			continue;\n" \
+"		nb_index = nxyz.x*nxyz.y*nb_coord.z + nxyz.x*nb_coord.y + nb_coord.x;\n" \
+"		m = label[nb_index];\n" \
+"		if (m <= label_v) continue;\n" \
+"		label_v = m;\n" \
+"	}\n" \
+"	atomic_xchg(label+index, label_v);\n" \
 "}\n" \
 ;
 

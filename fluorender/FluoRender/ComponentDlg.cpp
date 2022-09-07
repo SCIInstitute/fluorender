@@ -3738,6 +3738,7 @@ void ComponentDlg::ApplyRecord()
 		&ComponentDlg::StartTimer, this, std::placeholders::_1);
 	cg.postwork = std::bind(
 		&ComponentDlg::StopTimer, this, std::placeholders::_1);
+	vd->AddEmptyMask(1);
 	if (!vd->GetLabel(false))
 	{
 		vd->AddEmptyLabel(0);
