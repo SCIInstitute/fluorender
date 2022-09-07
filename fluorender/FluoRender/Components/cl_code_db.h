@@ -155,7 +155,7 @@ const char* str_cl_comp_gen_db = \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
-"	unsigned int index = get_rec(hist, rechist, lh, coord, gsxyz, ngxyz, bin, rec);\n" \
+"	//unsigned int index = get_rec(hist, rechist, lh, coord, gsxyz, ngxyz, bin, rec);\n" \
 "}\n" \
 ;
 
