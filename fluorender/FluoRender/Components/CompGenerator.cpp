@@ -1355,6 +1355,7 @@ void ComponentGenerator::GenerateDB(int iter)
 
 	//constants for now
 	int wsize = 50;//division block size
+	int whist = 20;//histogram size
 	int max_dist = 50;//max iteration for distance field
 	int dsize1 = 3;//low-pass filter size for distance field
 	float dist_thresh = 0.25;
@@ -1568,6 +1569,9 @@ void ComponentGenerator::GenerateDB(int iter)
 		//get local histogram
 		//gsx, gsy, gsz stay the same
 		//ngx, ngy, ngz exclude margins
+		gsx = whist >= nx ? nx : whist;
+		gsy = whist >= ny ? ny : whist;
+		gsz = whist >= nz ? nz : whist;
 		ngx = nx / gsx;
 		ngy = ny / gsy;
 		ngz = nz / gsz;
@@ -1613,6 +1617,9 @@ void ComponentGenerator::GenerateDB(int iter)
 		//release
 		kernel_prog_grow->releaseMemObject(arg_hist);
 		delete[] hist;
+		//debug
+		DBMIFLOAT32 histmi;
+		histmi.nx = bin; histmi.ny = ngxyz; histmi.nc = 1; histmi.nt = bin * 4; histmi.data = histf;
 
 		//generate index volume
 		kernel_prog_grow->setKernelArgBegin(kernel_grow_index1);
@@ -1623,6 +1630,10 @@ void ComponentGenerator::GenerateDB(int iter)
 		size_t fsize = bin * rec;
 		float* rechist = new float[fsize]();
 		glbin.get_ca_table().getRecInput(rechist);
+		//debug
+		DBMIFLOAT32 histmi2;
+		histmi2.nx = bin; histmi2.ny = rec; histmi2.nc = 1; histmi2.nt = bin * 4; histmi2.data = rechist;
+		//debug
 		flvr::Argument arg_rechist =
 			kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(rechist));
 		fsize = nx * ny * nz;
