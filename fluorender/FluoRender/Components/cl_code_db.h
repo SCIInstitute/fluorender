@@ -99,6 +99,7 @@ const char* str_cl_comp_gen_db = \
 "{\n" \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
+"	uint index = nxyz.x*nxyz.y*ijk.z + nxyz.x*ijk.y + ijk.x;\n" \
 "	ijk -= (int3)(gsxyz.xy / 2, 0);\n" \
 "	int3 hc = ijk / gsxyz;\n" \
 "	int3 hd = ijk % gsxyz;\n" \
@@ -139,7 +140,6 @@ const char* str_cl_comp_gen_db = \
 "		f2 = i ? max(f1, f2) : f1;\n" \
 "		r = f1 == f2? (ushort)(i) : r;\n" \
 "	}\n" \
-"	uint index = nxyz.x*nxyz.y*ijk.z + nxyz.x*ijk.y + ijk.x;\n" \
 "	lut[index] = r;\n" \
 "}\n" \
 "\n" \
@@ -158,22 +158,17 @@ const char* str_cl_comp_gen_db = \
 "	unsigned int dnxy,\n" \
 "	unsigned int dnx,\n" \
 "	float sscale,\n" \
-"	unsigned int rec)\n" \
+"	unsigned int npar)\n" \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	unsigned int index = nxyz.x*nxyz.y*coord.z + nxyz.x*coord.y + coord.x;\n" \
-"	unsigned int lutr = (uint)(lut[index]) * rec;\n" \
-"	//float value_t = params[lutr + IVALT];\n" \
-"	//float value_f = params[lutr + IVALF];\n" \
-"	//float grad_f = params[lutr + IGRDF];\n" \
-"	//float density = params[lutr + IDENS];\n" \
-"	//float varth = params[lutr + IVRTH];\n" \
-"	float value_t = 0.2f;\n" \
-"	float value_f = 0.0f;\n" \
-"	float grad_f = 0.0f;\n" \
-"	float density = 0.1f;\n" \
-"	float varth = 0.0f;\n" \
+"	unsigned int lutr = (uint)(lut[index]) * npar;\n" \
+"	float value_t = params[lutr + IVALT];\n" \
+"	float value_f = params[lutr + IVALF];\n" \
+"	float grad_f = params[lutr + IGRDF];\n" \
+"	float density = params[lutr + IDENS];\n" \
+"	float varth = params[lutr + IVRTH];\n" \
 "	unsigned int label_v = label[index];\n" \
 "	if (label_v == 0)\n" \
 "		return;\n" \

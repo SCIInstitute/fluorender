@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 #ifdef _DEBUG
 #include <fstream>
+#include <Debug.h>
 #endif
 
 using namespace flrd;
@@ -1624,7 +1625,7 @@ void ComponentGenerator::GenerateDB(int iter)
 		glbin.get_ca_table().getRecInput(rechist);
 		flvr::Argument arg_rechist =
 			kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(rechist));
-		fsize = nx * ny*nz;
+		fsize = nx * ny * nz;
 		cl_ushort* lut = new cl_ushort[fsize]();
 		flvr::Argument arg_lut =
 			kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_ushort)*fsize, (void*)(lut));
@@ -1646,7 +1647,9 @@ void ComponentGenerator::GenerateDB(int iter)
 		kernel_prog_grow->executeKernel(kernel_grow_index1, 3, global_size, local_size);
 
 		//read back
-		//kernel_prog_grow->readBuffer(arg_lut, lut);
+		kernel_prog_grow->readBuffer(arg_lut, lut);
+		DBMIUINT16 mi;
+		mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = nx * 2; mi.data = lut;
 		//release
 		kernel_prog_grow->releaseMemObject(arg_histf);
 		kernel_prog_grow->releaseMemObject(arg_rechist);
@@ -1679,7 +1682,7 @@ void ComponentGenerator::GenerateDB(int iter)
 		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
 		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&sscale));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&rec));
+		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&par));
 
 		//execute
 		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
