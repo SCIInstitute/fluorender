@@ -1739,7 +1739,7 @@ void DataTreeCtrl::ChangeIconColor(int which, wxColor c, int type)
 				}
 				data[i][index++] = val;
 			}
-			delete [] temp;
+			delete[] temp;
 		}
 		else
 		{
@@ -1752,9 +1752,9 @@ void DataTreeCtrl::ChangeIconColor(int which, wxColor c, int type)
 	images->Replace(which, icon);
 	for (i=0; i<icon_lines; i++)
 	{
-		delete [] data[i];
+		delete[] data[i];
 	}
-	delete []data;
+	delete[] data;
 }
 
 //item operations

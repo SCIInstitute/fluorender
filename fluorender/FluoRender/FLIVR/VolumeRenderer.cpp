@@ -1547,7 +1547,7 @@ namespace flvr
 					break;
 				}
 			}
-			delete []hist;
+			delete[] hist;
 		}
 		return result;
 	}

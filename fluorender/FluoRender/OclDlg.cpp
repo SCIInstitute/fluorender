@@ -544,7 +544,7 @@ void OclDlg::median_filter(void* data, void* result,
 			id++;
 		}
 		((unsigned char*)result)[index] = rvalue[kx*ky*kz/2-1];
-		delete []rvalue;
+		delete[] rvalue;
 	}
 }
 

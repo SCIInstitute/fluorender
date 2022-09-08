@@ -762,7 +762,7 @@ bool PVXMLReader::ConvertN(int c, TimeDataInfo* time_data_info, unsigned short *
 				ReadTiff(pbyData, frame_val);
 
 				if (pbyData)
-					delete []pbyData;
+					delete[] pbyData;
 
 				//copy frame val to val
 				unsigned long long index = (unsigned long long)m_x_size*m_y_size*frame_info->z + m_x_size*(m_y_size-frame_info->y-frame_info->y_size) + frame_info->x;
@@ -781,7 +781,7 @@ bool PVXMLReader::ConvertN(int c, TimeDataInfo* time_data_info, unsigned short *
 			}
 
 			if (frame_val)
-				delete []frame_val;
+				delete[] frame_val;
 		}
 	}
 
@@ -833,7 +833,7 @@ bool PVXMLReader::ConvertS(int c, TimeDataInfo* time_data_info, unsigned short *
 					ReadTiff(pbyData, frame_val);
 
 					if (pbyData)
-						delete []pbyData;
+						delete[] pbyData;
 
 					//copy frame val to val
 					unsigned long long index = (unsigned long long)m_x_size*m_y_size*frame_info->z + m_x_size*(m_y_size-frame_info->y-frame_info->y_size) + frame_info->x;
@@ -852,7 +852,7 @@ bool PVXMLReader::ConvertS(int c, TimeDataInfo* time_data_info, unsigned short *
 				}
 
 				if (frame_val)
-					delete []frame_val;
+					delete[] frame_val;
 			}
 
 			break;

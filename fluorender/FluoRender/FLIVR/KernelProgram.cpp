@@ -267,7 +267,7 @@ namespace flvr
 				clGetProgramBuildInfo(program_, device_, CL_PROGRAM_BUILD_LOG,
 					log_size+1, program_log, NULL);
 				info_ = program_log;
-				delete []program_log;
+				delete[] program_log;
 				return -1;
 			}
 		}

@@ -84,17 +84,21 @@ const char* str_cl_comp_gen_db = \
 "	}\n" \
 "}\n" \
 "\n" \
-"//get record index\n" \
-"unsigned int get_rec(\n" \
+"//generate param index\n" \
+"__kernel void kernel_1(\n" \
+"	__read_only image3d_t data,\n" \
 "	__global float* hist,\n" \
 "	__global float* rechist,\n" \
+"	__global ushort* lut,\n" \
 "	__local float* lh,\n" \
-"	int3 ijk,\n" \
 "	int3 gsxyz,\n" \
 "	int3 ngxyz,\n" \
-"	unsigned int bin,\n" \
-"	unsigned int rec)\n" \
+"	int3 nxyz,\n" \
+"	ushort bin,\n" \
+"	ushort rec)\n" \
 "{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
 "	ijk -= (int3)(gsxyz.xy / 2, 0);\n" \
 "	int3 hc = ijk / gsxyz;\n" \
 "	int3 hd = ijk % gsxyz;\n" \
@@ -124,7 +128,7 @@ const char* str_cl_comp_gen_db = \
 "		f2 = hist[hi.z + i] * ft.y + hist[hi.w + i] * ft.x;\n" \
 "		lh[i] = f1 * ft.w + f2 * ft.z;\n" \
 "	}\n" \
-"	unsigned int r = 0;\n" \
+"	ushort r = 0;\n" \
 "	float* fp = rechist;\n" \
 "	for (int i = 0; i < rec; ++i)\n" \
 "	{\n" \
@@ -133,42 +137,43 @@ const char* str_cl_comp_gen_db = \
 "			f1 += lh[j] * fp[j];\n" \
 "		fp += bin;\n" \
 "		f2 = i ? max(f1, f2) : f1;\n" \
-"		r = f1 == f2? i : r;\n" \
+"		r = f1 == f2? (ushort)(i) : r;\n" \
 "	}\n" \
-"	return r * rec;\n" \
+"	uint index = nxyz.x*nxyz.y*ijk.z + nxyz.x*ijk.y + ijk.x;\n" \
+"	lut[index] = r;\n" \
 "}\n" \
 "\n" \
 "//grow by db lookup\n" \
-"__kernel void kernel_1(\n" \
+"__kernel void kernel_2(\n" \
 "	__read_only image3d_t data,\n" \
+"	__global ushort* lut,\n" \
 "	__global unsigned int* label,\n" \
 "	__global unsigned char* df,\n" \
 "	__global unsigned char* avg,\n" \
 "	__global unsigned char* var,\n" \
 "	__global unsigned int* rcnt,\n" \
-"	__global float* hist,\n" \
-"	__global float* rechist,\n" \
 "	__global float* params,\n" \
-"	__local float* lh,\n" \
 "	unsigned int seed,\n" \
-"	int3 gsxyz,\n" \
-"	int3 ngxyz,\n" \
 "	int3 nxyz,\n" \
 "	unsigned int dnxy,\n" \
 "	unsigned int dnx,\n" \
 "	float sscale,\n" \
-"	unsigned int bin,\n" \
 "	unsigned int rec)\n" \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
-"	unsigned int index = get_rec(hist, rechist, lh, coord, gsxyz, ngxyz, bin, rec);\n" \
-"	float value_t = params[index + IVALT];\n" \
-"	float value_f = params[index + IVALF];\n" \
-"	float grad_f = params[index + IGRDF];\n" \
-"	float density = params[index + IDENS];\n" \
-"	float varth = params[index + IVRTH];\n" \
-"	index = nxyz.x*nxyz.y*coord.z + nxyz.x*coord.y + coord.x;\n" \
+"	unsigned int index = nxyz.x*nxyz.y*coord.z + nxyz.x*coord.y + coord.x;\n" \
+"	unsigned int lutr = (uint)(lut[index]) * rec;\n" \
+"	//float value_t = params[lutr + IVALT];\n" \
+"	//float value_f = params[lutr + IVALF];\n" \
+"	//float grad_f = params[lutr + IGRDF];\n" \
+"	//float density = params[lutr + IDENS];\n" \
+"	//float varth = params[lutr + IVRTH];\n" \
+"	float value_t = 0.2f;\n" \
+"	float value_f = 0.0f;\n" \
+"	float grad_f = 0.0f;\n" \
+"	float density = 0.1f;\n" \
+"	float varth = 0.0f;\n" \
 "	unsigned int label_v = label[index];\n" \
 "	if (label_v == 0)\n" \
 "		return;\n" \

@@ -2658,7 +2658,7 @@ void MeshData::Save(wxString& filename)
 			str[i] = (char)filename[i];
 		str[filename.length()] = 0;
 		glmWriteOBJ(m_data, str, GLM_SMOOTH);
-		delete []str;
+		delete[] str;
 		m_data_path = filename;
 	}
 }

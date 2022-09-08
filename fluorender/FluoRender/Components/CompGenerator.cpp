@@ -1385,6 +1385,7 @@ void ComponentGenerator::GenerateDB(int iter)
 		return;
 	int kernel_grow_index0 = kernel_prog_grow->createKernel("kernel_0");
 	int kernel_grow_index1 = kernel_prog_grow->createKernel("kernel_1");
+	int kernel_grow_index2 = kernel_prog_grow->createKernel("kernel_2");
 
 	//processing by brick
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
@@ -1612,50 +1613,78 @@ void ComponentGenerator::GenerateDB(int iter)
 		kernel_prog_grow->releaseMemObject(arg_hist);
 		delete[] hist;
 
-		//grow
-		unsigned int rcnt = 0;
-		unsigned int seed = iter > 10 ? iter : 11;
-
-		//set
-		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
+		//generate index volume
 		kernel_prog_grow->setKernelArgBegin(kernel_grow_index1);
 		kernel_prog_grow->setKernelArgument(arg_img);
-		flvr::Argument arg_label =
-			kernel_prog_grow->setKernelArgTex3DBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
-		kernel_prog_grow->setKernelArgument(arg_densf);
-		kernel_prog_grow->setKernelArgument(arg_avg);
-		kernel_prog_grow->setKernelArgument(arg_var);
-		kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int), (void*)(&rcnt));
-		kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*hist_size, (void*)(histf));
+		flvr::Argument arg_histf =
+			kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*hist_size, (void*)(histf));
 		//rechist
 		size_t fsize = bin * rec;
 		float* rechist = new float[fsize]();
 		glbin.get_ca_table().getRecInput(rechist);
-		kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(rechist));
-		//params
-		fsize = par * rec;
-		float* params = new float[fsize]();
-		glbin.get_ca_table().getRecOutput(params);
-		kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(params));
+		flvr::Argument arg_rechist =
+			kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(rechist));
+		fsize = nx * ny*nz;
+		cl_ushort* lut = new cl_ushort[fsize]();
+		flvr::Argument arg_lut =
+			kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_ushort)*fsize, (void*)(lut));
 		//local histogram
 		kernel_prog_grow->setKernelArgLocal(sizeof(float)*bin);
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&seed));
 		cl_int3 cl_gsxyz = { cl_int(gsx), cl_int(gsy), cl_int(gsz) };
 		kernel_prog_grow->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_gsxyz));
 		cl_int3 cl_ngxyz = { cl_int(ngx), cl_int(ngy), cl_int(ngz) };
 		kernel_prog_grow->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_ngxyz));
 		cl_int3 cl_nxyz = { cl_int(nx), cl_int(ny), cl_int(nz) };
 		kernel_prog_grow->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
+		cl_ushort cl_bin = (cl_ushort)(bin);
+		kernel_prog_grow->setKernelArgConst(sizeof(cl_ushort), (void*)(&cl_bin));
+		cl_ushort cl_rec = (cl_ushort)(rec);
+		kernel_prog_grow->setKernelArgConst(sizeof(cl_ushort), (void*)(&cl_rec));
+
+		//execute
+		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
+		kernel_prog_grow->executeKernel(kernel_grow_index1, 3, global_size, local_size);
+
+		//read back
+		//kernel_prog_grow->readBuffer(arg_lut, lut);
+		//release
+		kernel_prog_grow->releaseMemObject(arg_histf);
+		kernel_prog_grow->releaseMemObject(arg_rechist);
+		delete[] histf;
+		delete[] rechist;
+		delete[] lut;
+
+		//grow
+		unsigned int rcnt = 0;
+		unsigned int seed = iter > 10 ? iter : 11;
+
+		//set
+		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
+		kernel_prog_grow->setKernelArgBegin(kernel_grow_index2);
+		kernel_prog_grow->setKernelArgument(arg_img);
+		kernel_prog_grow->setKernelArgument(arg_lut);
+		flvr::Argument arg_label =
+			kernel_prog_grow->setKernelArgTex3DBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
+		kernel_prog_grow->setKernelArgument(arg_densf);
+		kernel_prog_grow->setKernelArgument(arg_avg);
+		kernel_prog_grow->setKernelArgument(arg_var);
+		kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int), (void*)(&rcnt));
+		//params
+		fsize = par * rec;
+		float* params = new float[fsize]();
+		glbin.get_ca_table().getRecOutput(params);
+		kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(params));
+		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&seed));
+		kernel_prog_grow->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
 		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
 		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&sscale));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&bin));
 		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&rec));
 
 		//execute
 		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
 		for (int j = 0; j < iter; ++j)
-			kernel_prog_grow->executeKernel(kernel_grow_index1, 3, global_size, local_size);
+			kernel_prog_grow->executeKernel(kernel_grow_index2, 3, global_size, local_size);
 
 		//read back
 		kernel_prog_grow->copyBufTex3D(arg_label, lid,
@@ -1665,8 +1694,6 @@ void ComponentGenerator::GenerateDB(int iter)
 		kernel_prog_grow->releaseAll();
 		kernel_prog_dist->releaseAll(false);
 		kernel_prog_dens->releaseAll(false);
-		delete[] histf;
-		delete[] rechist;
 		delete[] params;
 
 		postwork(__FUNCTION__);
