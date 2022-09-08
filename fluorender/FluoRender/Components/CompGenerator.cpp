@@ -1618,8 +1618,10 @@ void ComponentGenerator::GenerateDB(int iter)
 		kernel_prog_grow->releaseMemObject(arg_hist);
 		delete[] hist;
 		//debug
+#ifdef _DEBUG
 		DBMIFLOAT32 histmi;
 		histmi.nx = bin; histmi.ny = ngxyz; histmi.nc = 1; histmi.nt = bin * 4; histmi.data = histf;
+#endif
 
 		//generate index volume
 		kernel_prog_grow->setKernelArgBegin(kernel_grow_index1);
@@ -1631,9 +1633,10 @@ void ComponentGenerator::GenerateDB(int iter)
 		float* rechist = new float[fsize]();
 		glbin.get_ca_table().getRecInput(rechist);
 		//debug
+#ifdef _DEBUG
 		DBMIFLOAT32 histmi2;
 		histmi2.nx = bin; histmi2.ny = rec; histmi2.nc = 1; histmi2.nt = bin * 4; histmi2.data = rechist;
-		//debug
+#endif
 		flvr::Argument arg_rechist =
 			kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(rechist));
 		fsize = nx * ny * nz;
@@ -1658,9 +1661,11 @@ void ComponentGenerator::GenerateDB(int iter)
 		kernel_prog_grow->executeKernel(kernel_grow_index1, 3, global_size, local_size);
 
 		//read back
+#ifdef _DEBUG
 		kernel_prog_grow->readBuffer(arg_lut, lut);
 		DBMIUINT16 mi;
 		mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = nx * 2; mi.data = lut;
+#endif
 		//release
 		kernel_prog_grow->releaseMemObject(arg_histf);
 		kernel_prog_grow->releaseMemObject(arg_rechist);
