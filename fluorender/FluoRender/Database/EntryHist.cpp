@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-unsigned int EntryHist::m_bins = 256;//fixed size
+unsigned int EntryHist::m_bins = 15;//fixed size
 
 EntryHist::EntryHist() :
 	m_min(0),
