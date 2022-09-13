@@ -59,6 +59,11 @@ namespace flrd
 				m_population = pop;
 			}
 
+			unsigned int getPopulation()
+			{
+				return m_population;
+			}
+
 			void setData(float* d)
 			{
 				m_data.assign(d, d + m_bins);

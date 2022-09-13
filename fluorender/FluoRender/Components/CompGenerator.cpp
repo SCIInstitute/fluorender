@@ -1353,9 +1353,18 @@ void ComponentGenerator::GenerateDB(int iter)
 	if (!(rec && bin && par))
 		return;
 
+	//histogram window size
+	int whist = 20;//histogram size
+	float hsize = glbin.get_ca_table().getHistSize();
+	int nx, ny, nz;
+	m_vd->GetResolution(nx, ny, nz);
+	float w;
+	if (nz < 5) w = std::sqrt(hsize);
+	else w = std::pow((double)hsize / (nx / nz) / (ny / nz), double(1)/3) * (nx / nz);
+	whist = (int)std::ceil(w);
+
 	//constants for now
 	int wsize = 50;//division block size
-	int whist = 20;//histogram size
 	int max_dist = 50;//max iteration for distance field
 	int dsize1 = 3;//low-pass filter size for distance field
 	float dist_thresh = 0.25;
@@ -1398,9 +1407,9 @@ void ComponentGenerator::GenerateDB(int iter)
 
 		flvr::TextureBrick* b = (*bricks)[i];
 		int bits = b->nb(0) * 8;
-		int nx = b->nx();
-		int ny = b->ny();
-		int nz = b->nz();
+		nx = b->nx();
+		ny = b->ny();
+		nz = b->nz();
 		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint lid = m_vd->GetVR()->load_brick_label(b);
 

@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define GLOBAL_H
 
 #include <Tracking/VolCache.h>
-#include <Database/Table.h>
+#include <Database/TableHistParams.h>
 
 #define glbin fluo::Global::instance()
 #define glbin_cache_queue fluo::Global::instance().get_cache_queue()
@@ -48,7 +48,7 @@ namespace fluo
 
 		flrd::CacheQueue& get_cache_queue() { return cache_queue_; }
 
-		flrd::Table& get_ca_table() { return comp_analyzer_table_; }
+		flrd::TableHistParams& get_ca_table() { return comp_analyzer_table_; }
 
 	private:
 		Global();
@@ -56,7 +56,7 @@ namespace fluo
 
 		flrd::CacheQueue cache_queue_;
 
-		flrd::Table comp_analyzer_table_;//records for learning comp analyzer settings
+		flrd::TableHistParams comp_analyzer_table_;//records for learning comp analyzer settings
 	};
 
 }

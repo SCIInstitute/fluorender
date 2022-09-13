@@ -25,63 +25,33 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _TABLE_H_
-#define _TABLE_H_
+#ifndef _TABLEHISTPARAMS_H_
+#define _TABLEHISTPARAMS_H_
 
-#include <Record.h>
-#include <vector>
-#include <string>
+#include "Table.h"
 
 namespace flrd
 {
-	class Table
+	class TableHistParams : public Table
 	{
-		public:
-			enum TableTags
-			{
-				TAG_TABLE_REC_NUM = 1,
-				TAG_TABLE_REC_HISTPARAM,
-				TAG_TABLE_ENT_IN,
-				TAG_TABLE_ENT_OUT,
-				TAG_TABLE_ENT_HIST,
-				TAG_TABLE_ENT_PARAMS
-			};
+	public:
+		TableHistParams();
+		virtual ~TableHistParams();
 
-			Table();
-			virtual ~Table();
+		virtual void addRecord(Record* rec);
 
-			virtual void clear();
-			virtual void addRecord(Record* rec);
+		virtual void open(const std::string& filename);
 
-			virtual void open(const std::string& filename);
-			virtual void save(const std::string& filename);
+		float getHistSize()
+		{
+			return m_hist_size;
+		}
 
-			virtual size_t getRecSize()
-			{
-				return m_data.size();
-			}
-			virtual void getRecInput(float* data)
-			{
-				float* p = data;
-				for (auto i : m_data)
-				{
-					i->getInputData(p);
-					p += i->getInputSize();
-				}
-			}
-			virtual void getRecOutput(float* data)
-			{
-				float* p = data;
-				for (auto i : m_data)
-				{
-					i->getOutputData(p);
-					p += i->getOutputSize();
-				}
-			}
+	private:
+		float m_hist_size;
 
-		protected:
-			std::vector<Record*> m_data;
+		void computeHistSize();
 	};
 }
 
-#endif//_TABLE_H_
+#endif//_TABLEHISTPARAMS_H_

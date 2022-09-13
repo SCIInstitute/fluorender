@@ -69,6 +69,8 @@ namespace flrd
 			virtual void getInputData(float* data);
 			virtual void getOutputData(float* data);
 
+			float getHistSize();
+
 	private:
 	};
 }

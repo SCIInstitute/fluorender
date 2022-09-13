@@ -25,63 +25,49 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _TABLE_H_
-#define _TABLE_H_
+#include "TableHistParams.h"
+#include "RecordHistParams.h"
 
-#include <Record.h>
-#include <vector>
-#include <string>
+using namespace flrd;
 
-namespace flrd
+TableHistParams::TableHistParams() :
+	Table()
 {
-	class Table
-	{
-		public:
-			enum TableTags
-			{
-				TAG_TABLE_REC_NUM = 1,
-				TAG_TABLE_REC_HISTPARAM,
-				TAG_TABLE_ENT_IN,
-				TAG_TABLE_ENT_OUT,
-				TAG_TABLE_ENT_HIST,
-				TAG_TABLE_ENT_PARAMS
-			};
-
-			Table();
-			virtual ~Table();
-
-			virtual void clear();
-			virtual void addRecord(Record* rec);
-
-			virtual void open(const std::string& filename);
-			virtual void save(const std::string& filename);
-
-			virtual size_t getRecSize()
-			{
-				return m_data.size();
-			}
-			virtual void getRecInput(float* data)
-			{
-				float* p = data;
-				for (auto i : m_data)
-				{
-					i->getInputData(p);
-					p += i->getInputSize();
-				}
-			}
-			virtual void getRecOutput(float* data)
-			{
-				float* p = data;
-				for (auto i : m_data)
-				{
-					i->getOutputData(p);
-					p += i->getOutputSize();
-				}
-			}
-
-		protected:
-			std::vector<Record*> m_data;
-	};
+	m_hist_size = 0;
 }
 
-#endif//_TABLE_H_
+TableHistParams::~TableHistParams()
+{
+
+}
+
+void TableHistParams::addRecord(Record* rec)
+{
+	Table::addRecord(rec);
+	computeHistSize();
+}
+
+void TableHistParams::open(const std::string& filename)
+{
+	Table::open(filename);
+	computeHistSize();
+}
+
+void TableHistParams::computeHistSize()
+{
+	double sum = 0;
+	if (m_data.empty())
+	{
+		m_hist_size = 0;
+		return;
+	}
+
+	for (auto i : m_data)
+	{
+		RecordHistParams* r = dynamic_cast<RecordHistParams*>(i);
+		if (r)
+			sum += r->getHistSize();
+	}
+
+	m_hist_size = (float)(sum / m_data.size());
+}
