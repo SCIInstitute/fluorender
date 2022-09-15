@@ -84,7 +84,7 @@ const char* str_cl_comp_gen_db = \
 "	}\n" \
 "}\n" \
 "\n" \
-"//generate param index\n" \
+"//generate param index by interpolation\n" \
 "__kernel void kernel_1(\n" \
 "	__read_only image3d_t data,\n" \
 "	__global float* hist,\n" \
@@ -143,8 +143,61 @@ const char* str_cl_comp_gen_db = \
 "	lut[index] = r;\n" \
 "}\n" \
 "\n" \
-"//grow by db lookup\n" \
+"//generate param index by direct hist\n" \
 "__kernel void kernel_2(\n" \
+"	__read_only image3d_t data,\n" \
+"	__global float* rechist,\n" \
+"	__global ushort* lut,\n" \
+"	__local float* lh,\n" \
+"	int3 histxyz,\n" \
+"	int3 nxyz,\n" \
+"	float minv,\n" \
+"	float maxv,\n" \
+"	ushort bin,\n" \
+"	ushort rec)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = gid - histxyz / 2;\n" \
+"	lb = max(lb, (int3)(0));\n" \
+"	int3 ub = lb + histxyz;\n" \
+"	ub = min(ub, nxyz - (int3)(1));\n" \
+"	lb = min(lb, ub - histxyz);\n" \
+"	uint index;\n" \
+"	for (index = 0; index < bin; ++ index)\n" \
+"		lh[index] = 0.0f;\n" \
+"	int3 ijk;\n" \
+"	float val;\n" \
+"	float popl = 0.0f;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		val = read_imagef(data, samp, (int4)(ijk, 1)).x;\n" \
+"		index = (val - minv) * (bin - 1) / (maxv - minv);\n" \
+"		lh[index] += 1.0f;\n" \
+"		popl += 1.0f;\n" \
+"	}\n" \
+"	for (index = 0; index < bin; ++ index)\n" \
+"		lh[index] /= popl;\n" \
+"	float f1, f2;\n" \
+"	ushort r = 0;\n" \
+"	float* fp = rechist;\n" \
+"	for (int i = 0; i < rec; ++i)\n" \
+"	{\n" \
+"		f1 = 0.0f;\n" \
+"		for (int j = 0; j < bin; ++j)\n" \
+"			f1 += (lh[j] - fp[j]) * (lh[j] - fp[j]);\n" \
+"		fp += bin;\n" \
+"		f2 = i ? min(f1, f2) : f1;\n" \
+"		r = f1 == f2? (ushort)(i) : r;\n" \
+"	}\n" \
+"	index = nxyz.x*nxyz.y*gid.z + nxyz.x*gid.y + gid.x;\n" \
+"	lut[index] = (ushort)(r);\n" \
+"}\n" \
+"\n" \
+"//grow by db lookup\n" \
+"__kernel void kernel_3(\n" \
 "	__read_only image3d_t data,\n" \
 "	__global ushort* lut,\n" \
 "	__global unsigned int* label,\n" \

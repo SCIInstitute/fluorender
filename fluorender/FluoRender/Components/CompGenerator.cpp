@@ -1354,14 +1354,24 @@ void ComponentGenerator::GenerateDB(int iter)
 		return;
 
 	//histogram window size
-	int whist = 20;//histogram size
+	int whistxy = 20;//histogram size
+	int whistz = 3;
 	float hsize = glbin.get_ca_table().getHistSize();
 	int nx, ny, nz;
 	m_vd->GetResolution(nx, ny, nz);
 	float w;
-	if (nz < 5) w = std::sqrt(hsize);
-	else w = std::pow((double)hsize / (nx / nz) / (ny / nz), double(1)/3) * (nx / nz);
-	whist = (int)std::ceil(w);
+	if (nz < 5)
+	{
+		w = std::sqrt(hsize);
+		whistxy = (int)std::ceil(w);
+		whistz = 1;
+	}
+	else
+	{
+		w = std::pow((double)hsize / (nx / nz) / (ny / nz), double(1) / 3);
+		whistz = (int)std::ceil(w);
+		whistxy = (int)std::ceil(w * nx / nz);
+	}
 
 	//constants for now
 	int wsize = 50;//division block size
@@ -1394,9 +1404,9 @@ void ComponentGenerator::GenerateDB(int iter)
 		vol_kernel_factory_.kernel(str_cl_comp_gen_db);
 	if (!kernel_prog_grow)
 		return;
-	int kernel_grow_index0 = kernel_prog_grow->createKernel("kernel_0");
-	int kernel_grow_index1 = kernel_prog_grow->createKernel("kernel_1");
-	int kernel_grow_index2 = kernel_prog_grow->createKernel("kernel_2");
+	int kernel_grow_index0 = kernel_prog_grow->createKernel("kernel_2");
+	int kernel_grow_index1 = kernel_prog_grow->createKernel("kernel_3");//
+	//int kernel_grow_index2 = kernel_prog_grow->createKernel("kernel_3");
 
 	//processing by brick
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
@@ -1578,9 +1588,9 @@ void ComponentGenerator::GenerateDB(int iter)
 		//get local histogram
 		//gsx, gsy, gsz stay the same
 		//ngx, ngy, ngz exclude margins
-		gsx = whist >= nx ? nx : whist;
-		gsy = whist >= ny ? ny : whist;
-		gsz = whist >= nz ? nz : whist;
+/*		gsx = whistxy >= nx ? nx : whistxy;
+		gsy = whistxy >= ny ? ny : whistxy;
+		gsz = whistz >= nz ? nz : whistz;
 		ngx = nx / gsx;
 		ngy = ny / gsy;
 		ngz = nz / gsz;
@@ -1681,6 +1691,55 @@ void ComponentGenerator::GenerateDB(int iter)
 		delete[] histf;
 		delete[] rechist;
 		delete[] lut;
+*/
+
+		kernel_prog_grow->setKernelArgBegin(kernel_grow_index0);
+		kernel_prog_grow->setKernelArgument(arg_img);
+		//rechist
+		size_t fsize = bin * rec;
+		float* rechist = new float[fsize]();
+		glbin.get_ca_table().getRecInput(rechist);
+		//debug
+#ifdef _DEBUG
+		DBMIFLOAT32 histmi2;
+		histmi2.nx = bin; histmi2.ny = rec; histmi2.nc = 1; histmi2.nt = bin * 4; histmi2.data = rechist;
+#endif
+		flvr::Argument arg_rechist =
+			kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(rechist));
+		fsize = nx * ny * nz;
+		cl_ushort* lut = new cl_ushort[fsize]();
+		flvr::Argument arg_lut =
+			kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_ushort)*fsize, (void*)(lut));
+		//local histogram
+		kernel_prog_grow->setKernelArgLocal(sizeof(float)*bin);
+		cl_int3 cl_histxyz = { cl_int(whistxy), cl_int(whistxy), cl_int(whistz) };
+		kernel_prog_grow->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_histxyz));
+		cl_int3 cl_nxyz = { cl_int(nx), cl_int(ny), cl_int(nz) };
+		kernel_prog_grow->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
+		float minv = 0;
+		float maxv = 1;
+		if (bits > 8) maxv = float(1.0 / m_vd->GetScalarScale());
+		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&minv));
+		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&maxv));
+		cl_ushort cl_bin = (cl_ushort)(bin);
+		kernel_prog_grow->setKernelArgConst(sizeof(cl_ushort), (void*)(&cl_bin));
+		cl_ushort cl_rec = (cl_ushort)(rec);
+		kernel_prog_grow->setKernelArgConst(sizeof(cl_ushort), (void*)(&cl_rec));
+
+		//execute
+		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
+		kernel_prog_grow->executeKernel(kernel_grow_index0, 3, global_size, local_size);
+		
+		//read back
+#ifdef _DEBUG
+		kernel_prog_grow->readBuffer(arg_lut, lut);
+		DBMIUINT16 mi;
+		mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = nx * 2; mi.data = lut;
+#endif
+		//release
+		kernel_prog_grow->releaseMemObject(arg_rechist);
+		delete[] rechist;
+		delete[] lut;
 
 		//grow
 		unsigned int rcnt = 0;
@@ -1688,7 +1747,7 @@ void ComponentGenerator::GenerateDB(int iter)
 
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
-		kernel_prog_grow->setKernelArgBegin(kernel_grow_index2);
+		kernel_prog_grow->setKernelArgBegin(kernel_grow_index1);
 		kernel_prog_grow->setKernelArgument(arg_img);
 		kernel_prog_grow->setKernelArgument(arg_lut);
 		flvr::Argument arg_label =
@@ -1712,7 +1771,7 @@ void ComponentGenerator::GenerateDB(int iter)
 		//execute
 		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
 		for (int j = 0; j < iter; ++j)
-			kernel_prog_grow->executeKernel(kernel_grow_index2, 3, global_size, local_size);
+			kernel_prog_grow->executeKernel(kernel_grow_index1, 3, global_size, local_size);
 
 		//read back
 		kernel_prog_grow->copyBufTex3D(arg_label, lid,
