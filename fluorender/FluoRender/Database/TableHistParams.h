@@ -42,15 +42,23 @@ namespace flrd
 
 		virtual void open(const std::string& filename);
 
-		float getHistSize()
+		float getHistPopl()
 		{
-			return m_hist_size;
+			return m_hist_popl;
+		}
+
+		float getParamIter()
+		{
+			return m_param_iter;
 		}
 
 	private:
-		float m_hist_size;
+		float m_hist_popl;
+		float m_param_iter;
 
-		void computeHistSize();
+		void compute(Record* rec = 0);
+		void computeHistSize(Record* rec = 0);
+		void computeParamIter(Record* rec = 0);
 	};
 }
 

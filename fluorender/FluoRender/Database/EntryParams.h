@@ -69,6 +69,14 @@ namespace flrd
 					m_data[i] = float(value);
 			}
 
+			float getParam(const std::string& name)
+			{
+				size_t i = getNameIndex(name);
+				if (i < m_size)
+					return m_data[i];
+				return 0;
+			}
+
 			virtual void open(File& file);
 			virtual void save(File& file);
 

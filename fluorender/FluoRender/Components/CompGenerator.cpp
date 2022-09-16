@@ -1341,7 +1341,7 @@ void ComponentGenerator::FillBorders(float tol)
 	}
 }
 
-void ComponentGenerator::GenerateDB(int iter)
+void ComponentGenerator::GenerateDB()
 {
 	if (!CheckBricks())
 		return;
@@ -1353,10 +1353,13 @@ void ComponentGenerator::GenerateDB(int iter)
 	if (!(rec && bin && par))
 		return;
 
+	//iterration maximum from db
+	int iter = glbin.get_ca_table().getParamIter();
+
 	//histogram window size
 	int whistxy = 20;//histogram size
 	int whistz = 3;
-	float hsize = glbin.get_ca_table().getHistSize();
+	float hsize = glbin.get_ca_table().getHistPopl();
 	int nx, ny, nz;
 	m_vd->GetResolution(nx, ny, nz);
 	float w;

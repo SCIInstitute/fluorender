@@ -72,7 +72,7 @@ namespace flrd
 		void FillBorders(float);
 
 		//learning functions
-		void GenerateDB(int iter);
+		void GenerateDB();
 
 		//unused
 		void OrderID_2D();

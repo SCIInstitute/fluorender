@@ -104,10 +104,18 @@ void RecordHistParams::getOutputData(float* data)
 	std::memcpy(data, &(m_output->m_data[0]), sizeof(float)*getOutputSize());
 }
 
-float RecordHistParams::getHistSize()
+float RecordHistParams::getHistPopl()
 {
 	EntryHist* e = dynamic_cast<EntryHist*>(m_input);
 	if (!e)
 		return 0;
 	return e->getPopulation();
+}
+
+float RecordHistParams::getParamIter()
+{
+	EntryParams* e = dynamic_cast<EntryParams*>(m_output);
+	if (!e)
+		return 0;
+	return e->getParam("iter");
 }

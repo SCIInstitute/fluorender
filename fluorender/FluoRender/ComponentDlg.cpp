@@ -3744,7 +3744,7 @@ void ComponentDlg::ApplyRecord()
 		vd->AddEmptyLabel(0);
 		cg.ShuffleID();
 	}
-	cg.GenerateDB(m_iter);
+	cg.GenerateDB();
 
 	int bn = vd->GetAllBrickNum();
 	if (bn > 1)

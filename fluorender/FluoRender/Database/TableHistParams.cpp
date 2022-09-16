@@ -27,13 +27,15 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "TableHistParams.h"
 #include "RecordHistParams.h"
+#include <algorithm>
 
 using namespace flrd;
 
 TableHistParams::TableHistParams() :
 	Table()
 {
-	m_hist_size = 0;
+	m_hist_popl = 0;
+	m_param_iter = 0;
 }
 
 TableHistParams::~TableHistParams()
@@ -44,21 +46,39 @@ TableHistParams::~TableHistParams()
 void TableHistParams::addRecord(Record* rec)
 {
 	Table::addRecord(rec);
-	computeHistSize();
+	compute(rec);
 }
 
 void TableHistParams::open(const std::string& filename)
 {
 	Table::open(filename);
-	computeHistSize();
+	compute();
 }
 
-void TableHistParams::computeHistSize()
+void TableHistParams::compute(Record* rec)
+{
+	computeHistSize(rec);
+	computeParamIter(rec);
+}
+
+void TableHistParams::computeHistSize(Record* rec)
 {
 	double sum = 0;
 	if (m_data.empty())
 	{
-		m_hist_size = 0;
+		m_hist_popl = 0;
+		return;
+	}
+
+	if (rec)
+	{
+		RecordHistParams* r = dynamic_cast<RecordHistParams*>(rec);
+		if (r)
+		{
+			m_hist_popl *= m_data.size() - 1;
+			m_hist_popl += r->getHistPopl();
+			m_hist_popl /= m_data.size();
+		}
 		return;
 	}
 
@@ -66,8 +86,32 @@ void TableHistParams::computeHistSize()
 	{
 		RecordHistParams* r = dynamic_cast<RecordHistParams*>(i);
 		if (r)
-			sum += r->getHistSize();
+			sum += r->getHistPopl();
 	}
 
-	m_hist_size = (float)(sum / m_data.size());
+	m_hist_popl = (float)(sum / m_data.size());
+}
+
+void TableHistParams::computeParamIter(Record* rec)
+{
+	if (m_data.empty())
+	{
+		m_param_iter = 0;
+		return;
+	}
+
+	if (rec)
+	{
+		RecordHistParams* r = dynamic_cast<RecordHistParams*>(rec);
+		if (r)
+			m_param_iter = std::max(m_param_iter, float(r->getParamIter()));
+		return;
+	}
+
+	for (auto i : m_data)
+	{
+		RecordHistParams* r = dynamic_cast<RecordHistParams*>(i);
+		if (r)
+			m_param_iter = std::max(m_param_iter, float(r->getParamIter()));
+	}
 }
