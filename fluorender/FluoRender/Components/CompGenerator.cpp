@@ -1387,12 +1387,12 @@ void ComponentGenerator::GenerateDB()
 
 	//create program and kernels
 	//prog dist
-	flvr::KernelProgram* kernel_prog_dist = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_dist_field_2d);
-	if (!kernel_prog_dist)
-		return;
-	int kernel_dist_index0 = kernel_prog_dist->createKernel("kernel_0");
-	int kernel_dist_index1 = kernel_prog_dist->createKernel("kernel_2");
+	//flvr::KernelProgram* kernel_prog_dist = flvr::VolumeRenderer::
+	//	vol_kernel_factory_.kernel(str_cl_dist_field_2d);
+	//if (!kernel_prog_dist)
+	//	return;
+	//int kernel_dist_index0 = kernel_prog_dist->createKernel("kernel_0");
+	//int kernel_dist_index1 = kernel_prog_dist->createKernel("kernel_2");
 	//prog density
 	flvr::KernelProgram* kernel_prog_dens = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_distdens_field_3d);
@@ -1402,14 +1402,15 @@ void ComponentGenerator::GenerateDB()
 	int kernel_dens_index1 = kernel_prog_dens->createKernel("kernel_1");
 	int kernel_dens_index2 = kernel_prog_dens->createKernel("kernel_2");
 
-	//prog grow
-	flvr::KernelProgram* kernel_prog_grow = flvr::VolumeRenderer::
+	//prog
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_comp_gen_db);
-	if (!kernel_prog_grow)
+	if (!kernel_prog)
 		return;
-	int kernel_grow_index0 = kernel_prog_grow->createKernel("kernel_0");
-	int kernel_grow_index1 = kernel_prog_grow->createKernel("kernel_1");
-	//int kernel_grow_index2 = kernel_prog_grow->createKernel("kernel_3");
+	int kernel_index0 = kernel_prog->createKernel("kernel_0");//generate lut
+	int kernel_index1 = kernel_prog->createKernel("kernel_1");//init dist field
+	int kernel_index2 = kernel_prog->createKernel("kernel_2");//generate dist field
+	int kernel_index3 = kernel_prog->createKernel("kernel_3");//grow
 
 	//processing by brick
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
@@ -1452,39 +1453,39 @@ void ComponentGenerator::GenerateDB()
 		unsigned char ini = 1;
 		//set
 		//kernel 0
-		kernel_prog_dist->setKernelArgBegin(kernel_dist_index0);
+		kernel_prog->setKernelArgBegin(kernel_index1);
 		flvr::Argument arg_img =
-			kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
-		flvr::Argument arg_distf = kernel_prog_dist->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*nx*ny*nz, NULL);
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog_dist->setKernelArgConst(sizeof(int), (void*)(&dsize1));
-		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&dist_thresh));
-		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&sscale));
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
+			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
+		flvr::Argument arg_distf = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*nx*ny*nz, NULL);
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&dsize1));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&dist_thresh));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
+		kernel_prog->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
 		//kernel 1
-		kernel_prog_dist->setKernelArgBegin(kernel_dist_index1);
-		kernel_prog_dist->setKernelArgument(arg_distf);
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
+		kernel_prog->setKernelArgBegin(kernel_index2);
+		kernel_prog->setKernelArgument(arg_distf);
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
 		//init
-		kernel_prog_dist->executeKernel(kernel_dist_index0, 3, global_size, local_size);
+		kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
 		unsigned char nn, re;
 		for (int j = 0; j < max_dist; ++j)
 		{
 			nn = j == 0 ? 0 : j + ini;
 			re = j + ini + 1;
-			kernel_prog_dist->setKernelArgBegin(kernel_dist_index1, 5);
-			kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&nn));
-			kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&re));
-			kernel_prog_dist->executeKernel(kernel_dist_index1, 3, global_size, local_size);
+			kernel_prog->setKernelArgBegin(kernel_index2, 5);
+			kernel_prog->setKernelArgConst(sizeof(unsigned char), (void*)(&nn));
+			kernel_prog->setKernelArgConst(sizeof(unsigned char), (void*)(&re));
+			kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
 		}
 		//debug
 		//val = new unsigned char[nx*ny*nz];
-		//kernel_prog_dist->readBuffer(arg_distf, val);
+		//kernel_prog->readBuffer(arg_distf, val);
 		//ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, nx*ny*nz);
 		//delete[] val;
@@ -1586,11 +1587,11 @@ void ComponentGenerator::GenerateDB()
 		//release buffer
 		kernel_prog_dens->releaseMemObject(arg_gavg);
 		kernel_prog_dens->releaseMemObject(arg_gvar);
-		kernel_prog_dens->releaseMemObject(arg_distf);
+		kernel_prog->releaseMemObject(arg_distf);
 
 		//compute local histogram and generate lut
-		kernel_prog_grow->setKernelArgBegin(kernel_grow_index0);
-		kernel_prog_grow->setKernelArgument(arg_img);
+		kernel_prog->setKernelArgBegin(kernel_index0);
+		kernel_prog->setKernelArgument(arg_img);
 		//rechist
 		size_t fsize = bin * rec;
 		float* rechist = new float[fsize]();
@@ -1601,39 +1602,39 @@ void ComponentGenerator::GenerateDB()
 		histmi2.nx = bin; histmi2.ny = rec; histmi2.nc = 1; histmi2.nt = bin * 4; histmi2.data = rechist;
 #endif
 		flvr::Argument arg_rechist =
-			kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(rechist));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(rechist));
 		fsize = nx * ny * nz;
 		cl_ushort* lut = new cl_ushort[fsize]();
 		flvr::Argument arg_lut =
-			kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_ushort)*fsize, (void*)(lut));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_ushort)*fsize, (void*)(lut));
 		//local histogram
-		kernel_prog_grow->setKernelArgLocal(sizeof(float)*bin);
+		kernel_prog->setKernelArgLocal(sizeof(float)*bin);
 		cl_int3 cl_histxyz = { cl_int(whistxy), cl_int(whistxy), cl_int(whistz) };
-		kernel_prog_grow->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_histxyz));
+		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_histxyz));
 		cl_int3 cl_nxyz = { cl_int(nx), cl_int(ny), cl_int(nz) };
-		kernel_prog_grow->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
+		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
 		float minv = 0;
 		float maxv = 1;
 		if (bits > 8) maxv = float(1.0 / m_vd->GetScalarScale());
-		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&minv));
-		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&maxv));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&minv));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&maxv));
 		cl_ushort cl_bin = (cl_ushort)(bin);
-		kernel_prog_grow->setKernelArgConst(sizeof(cl_ushort), (void*)(&cl_bin));
+		kernel_prog->setKernelArgConst(sizeof(cl_ushort), (void*)(&cl_bin));
 		cl_ushort cl_rec = (cl_ushort)(rec);
-		kernel_prog_grow->setKernelArgConst(sizeof(cl_ushort), (void*)(&cl_rec));
+		kernel_prog->setKernelArgConst(sizeof(cl_ushort), (void*)(&cl_rec));
 
 		//execute
 		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
-		kernel_prog_grow->executeKernel(kernel_grow_index0, 3, global_size, local_size);
+		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
 		
 		//read back
 #ifdef _DEBUG
-		kernel_prog_grow->readBuffer(arg_lut, lut);
+		kernel_prog->readBuffer(arg_lut, lut);
 		DBMIUINT16 mi;
 		mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = nx * 2; mi.data = lut;
 #endif
 		//release
-		kernel_prog_grow->releaseMemObject(arg_rechist);
+		kernel_prog->releaseMemObject(arg_rechist);
 		delete[] rechist;
 		delete[] lut;
 
@@ -1643,28 +1644,28 @@ void ComponentGenerator::GenerateDB()
 
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
-		kernel_prog_grow->setKernelArgBegin(kernel_grow_index1);
+		kernel_prog->setKernelArgBegin(kernel_index3);
 		float iterf = 0;
-		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&iterf));
-		kernel_prog_grow->setKernelArgument(arg_img);
-		kernel_prog_grow->setKernelArgument(arg_lut);
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&iterf));
+		kernel_prog->setKernelArgument(arg_img);
+		kernel_prog->setKernelArgument(arg_lut);
 		flvr::Argument arg_label =
-			kernel_prog_grow->setKernelArgTex3DBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
-		kernel_prog_grow->setKernelArgument(arg_densf);
-		kernel_prog_grow->setKernelArgument(arg_avg);
-		kernel_prog_grow->setKernelArgument(arg_var);
-		kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int), (void*)(&rcnt));
+			kernel_prog->setKernelArgTex3DBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
+		kernel_prog->setKernelArgument(arg_densf);
+		kernel_prog->setKernelArgument(arg_avg);
+		kernel_prog->setKernelArgument(arg_var);
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int), (void*)(&rcnt));
 		//params
 		fsize = par * rec;
 		float* params = new float[fsize]();
 		glbin.get_ca_table().getRecOutput(params);
-		kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(params));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&seed));
-		kernel_prog_grow->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
-		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&sscale));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&par));
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(params));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&seed));
+		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&par));
 
 		//execute
 		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
@@ -1673,19 +1674,18 @@ void ComponentGenerator::GenerateDB()
 			if (j)
 			{
 				iterf = j;
-				kernel_prog_grow->setKernelArgBegin(kernel_grow_index1);
-				kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&iterf));
+				kernel_prog->setKernelArgBegin(kernel_index3);
+				kernel_prog->setKernelArgConst(sizeof(float), (void*)(&iterf));
 			}
-			kernel_prog_grow->executeKernel(kernel_grow_index1, 3, global_size, local_size);
+			kernel_prog->executeKernel(kernel_index3, 3, global_size, local_size);
 		}
 
 		//read back
-		kernel_prog_grow->copyBufTex3D(arg_label, lid,
+		kernel_prog->copyBufTex3D(arg_label, lid,
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
-		kernel_prog_grow->releaseAll();
-		kernel_prog_dist->releaseAll(false);
+		kernel_prog->releaseAll();
 		kernel_prog_dens->releaseAll(false);
 		delete[] params;
 
