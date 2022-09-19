@@ -175,8 +175,71 @@ const char* str_cl_comp_gen_db = \
 "	}\n" \
 "}\n" \
 "\n" \
-"//grow by db lookup\n" \
+"//generate density field mixed with dist field\n" \
 "__kernel void kernel_3(\n" \
+"	__read_only image3d_t data,\n" \
+"	__global unsigned char* distf,\n" \
+"	__global unsigned char* densf,\n" \
+"	unsigned int nxy,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	int dsize,\n" \
+"	float sscale,\n" \
+"	float distscl,\n" \
+"	float dist_strength)\n" \
+"{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	float density = get_2d_density(data, (int4)(ijk, 1), dsize) * sscale;\n" \
+"	unsigned int index = nxy*clamp(ijk.z, 0, (int)(nz-1)) +\n" \
+"		nx*clamp(ijk.y, 0, (int)(ny-1)) + clamp(ijk.x, 0, (int)(nx-1));\n" \
+"	float distv = distscl * distf[index];\n" \
+"	density = density * (1.0f - dist_strength) + distv * dist_strength;\n" \
+"	index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	densf[index] = (unsigned char)(density * 255.0f);\n" \
+"}\n" \
+"\n" \
+"//generate statistics on density field\n" \
+"__kernel void kernel_4(\n" \
+"	__global unsigned char* df,\n" \
+"	__global unsigned char* avg,\n" \
+"	__global unsigned char* var,\n" \
+"	int3 histxyz,\n" \
+"	int3 nxyz,\n" \
+"	uint nxy)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = gid - histxyz / 2;\n" \
+"	int3 ub = lb + histxyz;\n" \
+"	lb = clamp(lb, (int3)(0), nxyz - (int3)(1));\n" \
+"	ub = clamp(ub, (int3)(0), nxyz - (int3)(1));\n" \
+"	int3 ijk;\n" \
+"	float gnum = 0.0f;\n" \
+"	float sum = 0.0f;\n" \
+"	float sum2 = 0.0f;\n" \
+"	float v;\n" \
+"	uint index;\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	{\n" \
+"		index = nxy*ijk.z + nxyz.x*ijk.y + ijk.x;\n" \
+"		v = df[index];\n" \
+"		sum += v;\n" \
+"		sum2 += v * v;\n" \
+"		gnum += 1.0f;\n" \
+"	}\n" \
+"	index = nxy * gid.z + nxyz.x * gid.y + gid.x;\n" \
+"	v = sum / gnum;\n" \
+"	avg[index] = v;\n" \
+"	v = clamp(sqrt((sum2 + v * v * gnum - 2.0f * v * sum) / gnum), 0.0f, 255.0f);\n" \
+"	var[index] = v;\n" \
+"}\n" \
+"\n" \
+"//grow by db lookup\n" \
+"__kernel void kernel_5(\n" \
 "	float iter,\n" \
 "	__read_only image3d_t data,\n" \
 "	__global ushort* lut,\n" \
@@ -188,8 +251,7 @@ const char* str_cl_comp_gen_db = \
 "	__global float* params,\n" \
 "	unsigned int seed,\n" \
 "	int3 nxyz,\n" \
-"	unsigned int dnxy,\n" \
-"	unsigned int dnx,\n" \
+"	uint nxy,\n" \
 "	float sscale,\n" \
 "	unsigned int npar)\n" \
 "{\n" \
@@ -209,7 +271,7 @@ const char* str_cl_comp_gen_db = \
 "	//break if low density\n" \
 "	if (density > 0.0f)\n" \
 "	{\n" \
-"		unsigned int index2 = dnxy*coord.z + dnx*coord.y + coord.x;\n" \
+"		unsigned int index2 = nxy*coord.z + nxyz.x*coord.y + coord.x;\n" \
 "		unsigned char vdf = df[index2];\n" \
 "		unsigned char vavg = avg[index2];\n" \
 "		unsigned char vvar = var[index2];\n" \
