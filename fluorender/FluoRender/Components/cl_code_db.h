@@ -35,6 +35,11 @@ const char* str_cl_comp_gen_db = \
 "#define IGRDF 3\n" \
 "#define IDENS 5\n" \
 "#define IVRTH 6\n" \
+"#define IDENSF 7\n" \
+"#define IDENSW 8\n" \
+"#define IDMIX 10\n" \
+"#define IDISTH 11\n" \
+"#define IDISTF 12\n" \
 "const sampler_t samp =\n" \
 "	CLK_NORMALIZED_COORDS_FALSE|\n" \
 "	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
@@ -114,31 +119,33 @@ const char* str_cl_comp_gen_db = \
 "	lut[index] = (ushort)(r);\n" \
 "}\n" \
 "\n" \
-"//init dist field\n" \
+"//init dist field by db lookup\n" \
 "__kernel void kernel_1(\n" \
 "	__read_only image3d_t data,\n" \
-"	__global unsigned char* df,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz,\n" \
-"	int dsize,\n" \
-"	float th,\n" \
+"	__global ushort* lut,\n" \
+"	__global float* params,\n" \
+"	__global uchar* df,\n" \
 "	float sscale,\n" \
-"	unsigned char ini)\n" \
+"	uchar ini,\n" \
+"	int3 nxyz,\n" \
+"	uint nxy,\n" \
+"	uint npar)\n" \
 "{\n" \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
-"	unsigned int index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
-"	if (ijk.x == 0 || ijk.x == nx-1 ||\n" \
-"		ijk.y == 0 || ijk.y == ny-1)\n" \
+"	uint index = nxy*ijk.z + nxyz.x*ijk.y + ijk.x;\n" \
+"	if (ijk.x == 0 || ijk.x == nxyz.x-1 ||\n" \
+"		ijk.y == 0 || ijk.y == nxyz.y-1)\n" \
 "	{\n" \
 "		df[index] = 0;\n" \
 "		return;\n" \
 "	}\n" \
-"	//float dval = read_imagef(data, samp, (int4)(ijk, 1)).x;\n" \
+"	uint lutr = (uint)(lut[index]) * npar;\n" \
+"	int dsize = (int)(params[lutr + IDISTF]);\n" \
+"	float dth = params[lutr + IDISTF];\n" \
 "	float dval = get_2d_density(data, (int4)(ijk, 1), dsize);\n" \
 "	dval *= sscale;\n" \
-"	if (dval > th)\n" \
+"	if (dval > dth)\n" \
 "		df[index] = ini;\n" \
 "	else\n" \
 "		df[index] = 0;\n" \
@@ -146,24 +153,22 @@ const char* str_cl_comp_gen_db = \
 "\n" \
 "//generate dist field\n" \
 "__kernel void kernel_2(\n" \
-"	__global unsigned char* df,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz,\n" \
-"	unsigned char ini,\n" \
-"	unsigned char nn,\n" \
-"	unsigned char re)\n" \
+"	__global uchar* df,\n" \
+"	uchar ini,\n" \
+"	int3 nxyz,\n" \
+"	uint nxy,\n" \
+"	uchar nn,\n" \
+"	uchar re)\n" \
 "{\n" \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
-"	unsigned int nxy = nx*ny;\n" \
-"	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	uint index = nxy*ijk.z + nxyz.x*ijk.y + ijk.x;\n" \
 "	if (df[index] == ini)\n" \
 "	{\n" \
-"		short v1 = df[nxy*ijk.z + nx*ijk.y + ijk.x - 1];\n" \
-"		short v2 = df[nxy*ijk.z + nx*ijk.y + ijk.x + 1];\n" \
-"		short v3 = df[nxy*ijk.z + nx*(ijk.y-1) + ijk.x];\n" \
-"		short v4 = df[nxy*ijk.z + nx*(ijk.y+1) + ijk.x];\n" \
+"		short v1 = df[nxy*ijk.z + nxyz.x*ijk.y + ijk.x - 1];\n" \
+"		short v2 = df[nxy*ijk.z + nxyz.x*ijk.y + ijk.x + 1];\n" \
+"		short v3 = df[nxy*ijk.z + nxyz.x*(ijk.y-1) + ijk.x];\n" \
+"		short v4 = df[nxy*ijk.z + nxyz.x*(ijk.y+1) + ijk.x];\n" \
 "		short rre = (ijk.x % 13 + ijk.y % 17) % 4;\n" \
 "		v1 = rre == 0 ? -1 : v1;\n" \
 "		v2 = rre == 3 ? -1 : v2;\n" \
@@ -257,7 +262,7 @@ const char* str_cl_comp_gen_db = \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
-"	unsigned int index = nxyz.x*nxyz.y*coord.z + nxyz.x*coord.y + coord.x;\n" \
+"	unsigned int index = nxy*coord.z + nxyz.x*coord.y + coord.x;\n" \
 "	unsigned int lutr = (uint)(lut[index]) * npar;\n" \
 "	if (params[lutr + IITER] < iter) return;\n" \
 "	float value_t = params[lutr + IVALT];\n" \
@@ -306,7 +311,7 @@ const char* str_cl_comp_gen_db = \
 "			nb_coord.y < 0 || nb_coord.y > nxyz.y-1 ||\n" \
 "			nb_coord.z < 0 || nb_coord.z > nxyz.z-1)\n" \
 "			continue;\n" \
-"		nb_index = nxyz.x*nxyz.y*nb_coord.z + nxyz.x*nb_coord.y + nb_coord.x;\n" \
+"		nb_index = nxy*nb_coord.z + nxyz.x*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
 "		if (m <= label_v) continue;\n" \
 "		label_v = m;\n" \
