@@ -1498,7 +1498,7 @@ void ComponentGenerator::GenerateDB()
 		{
 			nn = j == 0 ? 0 : j + ini;
 			re = j + ini + 1;
-			kernel_prog->setKernelArgBegin(kernel_index2, 5);
+			kernel_prog->setKernelArgBegin(kernel_index2, 4);
 			kernel_prog->setKernelArgConst(sizeof(unsigned char), (void*)(&nn));
 			kernel_prog->setKernelArgConst(sizeof(unsigned char), (void*)(&re));
 			kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);

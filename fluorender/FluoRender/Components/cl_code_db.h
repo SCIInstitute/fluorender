@@ -31,12 +31,15 @@ DEALINGS IN THE SOFTWARE.
 const char* str_cl_comp_gen_db = \
 "#define IITER 0\n" \
 "#define IVALT 1\n" \
+"#define IBDIF 2\n" \
 "#define IVALF 3\n" \
 "#define IGRDF 3\n" \
+"#define IBDEN 4\n" \
 "#define IDENS 5\n" \
 "#define IVRTH 6\n" \
 "#define IDENSF 7\n" \
 "#define IDENSW 8\n" \
+"#define IBDIST 9\n" \
 "#define IDMIX 10\n" \
 "#define IDISTH 11\n" \
 "#define IDISTF 12\n" \
@@ -209,7 +212,9 @@ const char* str_cl_comp_gen_db = \
 "	int dsize = (int)(params[lutr + IDENSF]);\n" \
 "	float distv = params[lutr + IMAXDT];\n" \
 "	distv = 5.0f / distv;\n" \
+"	float bdis = params[lutr + IBDIST];\n" \
 "	float diststr = params[lutr + IDMIX];\n" \
+"	diststr = bdis > 0.1f ? diststr : 0.0f;\n" \
 "	float density = get_2d_density(data, (int4)(ijk, 1), dsize) * sscale;\n" \
 "	distv = distv * distf[index];\n" \
 "	density = density * (1.0f - diststr) + distv * diststr;\n" \
@@ -283,16 +288,20 @@ const char* str_cl_comp_gen_db = \
 "	uint index = nxy*coord.z + nxyz.x*coord.y + coord.x;\n" \
 "	uint lutr = (uint)(lut[index]) * npar;\n" \
 "	if (params[lutr + IITER] < iter) return;\n" \
+"	float bdif = params[lutr + IBDIF];\n" \
+"	float bden = params[lutr + IBDEN];\n" \
+"	float bdis = params[lutr + IBDIST];\n" \
 "	float value_t = params[lutr + IVALT];\n" \
 "	float value_f = params[lutr + IVALF];\n" \
 "	float grad_f = params[lutr + IGRDF];\n" \
+"	grad_f = bdif > 0.1f ? grad_f : 0.0f;\n" \
 "	float density = params[lutr + IDENS];\n" \
 "	float varth = params[lutr + IVRTH];\n" \
 "	uint label_v = label[index];\n" \
 "	if (label_v == 0)\n" \
 "		return;\n" \
-"	//break if low density\n" \
-"	if (density > 0.0f)\n" \
+"	//use density\n" \
+"	if (density > 0.0f && bden > 0.1f)\n" \
 "	{\n" \
 "		uint index2 = nxy*coord.z + nxyz.x*coord.y + coord.x;\n" \
 "		uchar vdf = df[index2];\n" \

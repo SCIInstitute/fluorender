@@ -33,6 +33,9 @@
 #endif
 #include <algorithm>
 #include <cmath>
+#ifdef _DEBUG
+#include <Debug.h>
+#endif
 
 namespace flvr
 {
@@ -267,6 +270,7 @@ namespace flvr
 				clGetProgramBuildInfo(program_, device_, CL_PROGRAM_BUILD_LOG,
 					log_size+1, program_log, NULL);
 				info_ = program_log;
+				DBGPRINT(L"clBuildProgram error:\t%d\n", err);
 				delete[] program_log;
 				return -1;
 			}
@@ -383,7 +387,10 @@ namespace flvr
 		err = clEnqueueNDRangeKernel(queue_, kernels_[index].kernel, dim, NULL, global_size,
 			local_size, 0, NULL, NULL);
 		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"clEnqueueNDRangeKernel error:\t%d\n", err);
 			result = false;
+		}
 		for (i=0; i<arg_list_.size(); ++i)
 		{
 			if (arg_list_[i].find_kernel(index) &&
