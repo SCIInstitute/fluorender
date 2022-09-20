@@ -71,6 +71,7 @@ namespace flrd
 
 			float getHistPopl();
 			float getParamIter();
+			float getParamMxdist();
 
 	private:
 	};

@@ -92,6 +92,16 @@ void TableHistParams::computeHistSize(Record* rec)
 	m_hist_popl = (float)(sum / m_data.size());
 }
 
+void TableHistParams::getParams(Record* rec)
+{
+	RecordHistParams* r = dynamic_cast<RecordHistParams*>(rec);
+	if (r)
+	{
+		m_param_iter = std::max(m_param_iter, r->getParamIter());
+		m_param_mxdist = std::max(m_param_mxdist, r->getParamMxdist());
+	}
+}
+
 void TableHistParams::computeParamIter(Record* rec)
 {
 	if (m_data.empty())
@@ -102,16 +112,12 @@ void TableHistParams::computeParamIter(Record* rec)
 
 	if (rec)
 	{
-		RecordHistParams* r = dynamic_cast<RecordHistParams*>(rec);
-		if (r)
-			m_param_iter = std::max(m_param_iter, float(r->getParamIter()));
+		getParams(rec);
 		return;
 	}
 
 	for (auto i : m_data)
 	{
-		RecordHistParams* r = dynamic_cast<RecordHistParams*>(i);
-		if (r)
-			m_param_iter = std::max(m_param_iter, float(r->getParamIter()));
+		getParams(i);
 	}
 }

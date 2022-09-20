@@ -40,6 +40,7 @@ const char* str_cl_comp_gen_db = \
 "#define IDMIX 10\n" \
 "#define IDISTH 11\n" \
 "#define IDISTF 12\n" \
+"#define IMAXDT 13\n" \
 "const sampler_t samp =\n" \
 "	CLK_NORMALIZED_COORDS_FALSE|\n" \
 "	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
@@ -49,7 +50,9 @@ const char* str_cl_comp_gen_db = \
 "{\n" \
 "	float sum = 0.0f;\n" \
 "	int d = 2*r+1;\n" \
+"#pragma unroll\n" \
 "	for (int i=-r; i<=r; ++i)\n" \
+"#pragma unroll\n" \
 "	for (int j=-r; j<=r; ++j)\n" \
 "		sum += read_imagef(image, samp, pos+(int4)(i, j, 0, 0)).x;\n" \
 "	return sum / (float)(d * d);\n" \
@@ -87,13 +90,17 @@ const char* str_cl_comp_gen_db = \
 "	ub = min(ub, nxyz - (int3)(1));\n" \
 "	lb = min(lb, ub - histxyz);\n" \
 "	uint index;\n" \
+"#pragma unroll\n" \
 "	for (index = 0; index < bin; ++ index)\n" \
 "		lh[index] = 0.0f;\n" \
 "	int3 ijk;\n" \
 "	float val;\n" \
 "	float popl = 0.0f;\n" \
+"#pragma unroll\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"#pragma unroll\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"#pragma unroll\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
 "		val = read_imagef(data, samp, (int4)(ijk, 1)).x;\n" \
@@ -101,14 +108,17 @@ const char* str_cl_comp_gen_db = \
 "		lh[index] += 1.0f;\n" \
 "		popl += 1.0f;\n" \
 "	}\n" \
+"#pragma unroll\n" \
 "	for (index = 0; index < bin; ++ index)\n" \
 "		lh[index] /= popl;\n" \
 "	float f1, f2;\n" \
 "	ushort r = 0;\n" \
 "	float* fp = rechist;\n" \
+"#pragma unroll\n" \
 "	for (int i = 0; i < rec; ++i)\n" \
 "	{\n" \
 "		f1 = 0.0f;\n" \
+"#pragma unroll\n" \
 "		for (int j = 0; j < bin; ++j)\n" \
 "			f1 += (lh[j] - fp[j]) * (lh[j] - fp[j]);\n" \
 "		fp += bin;\n" \
@@ -183,39 +193,45 @@ const char* str_cl_comp_gen_db = \
 "//generate density field mixed with dist field\n" \
 "__kernel void kernel_3(\n" \
 "	__read_only image3d_t data,\n" \
-"	__global unsigned char* distf,\n" \
-"	__global unsigned char* densf,\n" \
-"	unsigned int nxy,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz,\n" \
-"	int dsize,\n" \
+"	__global uchar* distf,\n" \
+"	__global uchar* densf,\n" \
+"	__global ushort* lut,\n" \
+"	__global float* params,\n" \
 "	float sscale,\n" \
-"	float distscl,\n" \
-"	float dist_strength)\n" \
+"	int3 nxyz,\n" \
+"	uint nxy,\n" \
+"	uint npar)\n" \
 "{\n" \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
+"	uint index = nxy*ijk.z + nxyz.x*ijk.y + ijk.x;\n" \
+"	uint lutr = (uint)(lut[index]) * npar;\n" \
+"	int dsize = (int)(params[lutr + IDENSF]);\n" \
+"	float distv = params[lutr + IMAXDT];\n" \
+"	distv = 5.0f / distv;\n" \
+"	float diststr = params[lutr + IDMIX];\n" \
 "	float density = get_2d_density(data, (int4)(ijk, 1), dsize) * sscale;\n" \
-"	unsigned int index = nxy*clamp(ijk.z, 0, (int)(nz-1)) +\n" \
-"		nx*clamp(ijk.y, 0, (int)(ny-1)) + clamp(ijk.x, 0, (int)(nx-1));\n" \
-"	float distv = distscl * distf[index];\n" \
-"	density = density * (1.0f - dist_strength) + distv * dist_strength;\n" \
-"	index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"	densf[index] = (unsigned char)(density * 255.0f);\n" \
+"	distv = distv * distf[index];\n" \
+"	density = density * (1.0f - diststr) + distv * diststr;\n" \
+"	densf[index] = (uchar)(density * 255.0f);\n" \
 "}\n" \
 "\n" \
 "//generate statistics on density field\n" \
 "__kernel void kernel_4(\n" \
-"	__global unsigned char* df,\n" \
-"	__global unsigned char* avg,\n" \
-"	__global unsigned char* var,\n" \
-"	int3 histxyz,\n" \
+"	__global uchar* df,\n" \
+"	__global uchar* avg,\n" \
+"	__global uchar* var,\n" \
+"	__global ushort* lut,\n" \
+"	__global float* params,\n" \
 "	int3 nxyz,\n" \
-"	uint nxy)\n" \
+"	uint nxy,\n" \
+"	uint npar)\n" \
 "{\n" \
 "	int3 gid = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
+"	uint index = nxy*gid.z + nxyz.x*gid.y + gid.x;\n" \
+"	uint lutr = (uint)(lut[index]) * npar;\n" \
+"	int3 histxyz = (int3)(params[lutr + IMAXDT]);\n" \
 "	int3 lb = gid - histxyz / 2;\n" \
 "	int3 ub = lb + histxyz;\n" \
 "	lb = clamp(lb, (int3)(0), nxyz - (int3)(1));\n" \
@@ -225,9 +241,11 @@ const char* str_cl_comp_gen_db = \
 "	float sum = 0.0f;\n" \
 "	float sum2 = 0.0f;\n" \
 "	float v;\n" \
-"	uint index;\n" \
+"#pragma unroll\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"#pragma unroll\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"#pragma unroll\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	{\n" \
 "		index = nxy*ijk.z + nxyz.x*ijk.y + ijk.x;\n" \
@@ -247,39 +265,39 @@ const char* str_cl_comp_gen_db = \
 "__kernel void kernel_5(\n" \
 "	float iter,\n" \
 "	__read_only image3d_t data,\n" \
+"	__global uint* label,\n" \
+"	__global uchar* df,\n" \
+"	__global uchar* avg,\n" \
+"	__global uchar* var,\n" \
+"	__global uint* rcnt,\n" \
 "	__global ushort* lut,\n" \
-"	__global unsigned int* label,\n" \
-"	__global unsigned char* df,\n" \
-"	__global unsigned char* avg,\n" \
-"	__global unsigned char* var,\n" \
-"	__global unsigned int* rcnt,\n" \
 "	__global float* params,\n" \
-"	unsigned int seed,\n" \
+"	uint seed,\n" \
+"	float sscale,\n" \
 "	int3 nxyz,\n" \
 "	uint nxy,\n" \
-"	float sscale,\n" \
-"	unsigned int npar)\n" \
+"	uint npar)\n" \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
-"	unsigned int index = nxy*coord.z + nxyz.x*coord.y + coord.x;\n" \
-"	unsigned int lutr = (uint)(lut[index]) * npar;\n" \
+"	uint index = nxy*coord.z + nxyz.x*coord.y + coord.x;\n" \
+"	uint lutr = (uint)(lut[index]) * npar;\n" \
 "	if (params[lutr + IITER] < iter) return;\n" \
 "	float value_t = params[lutr + IVALT];\n" \
 "	float value_f = params[lutr + IVALF];\n" \
 "	float grad_f = params[lutr + IGRDF];\n" \
 "	float density = params[lutr + IDENS];\n" \
 "	float varth = params[lutr + IVRTH];\n" \
-"	unsigned int label_v = label[index];\n" \
+"	uint label_v = label[index];\n" \
 "	if (label_v == 0)\n" \
 "		return;\n" \
 "	//break if low density\n" \
 "	if (density > 0.0f)\n" \
 "	{\n" \
-"		unsigned int index2 = nxy*coord.z + nxyz.x*coord.y + coord.x;\n" \
-"		unsigned char vdf = df[index2];\n" \
-"		unsigned char vavg = avg[index2];\n" \
-"		unsigned char vvar = var[index2];\n" \
+"		uint index2 = nxy*coord.z + nxyz.x*coord.y + coord.x;\n" \
+"		uchar vdf = df[index2];\n" \
+"		uchar vavg = avg[index2];\n" \
+"		uchar vvar = var[index2];\n" \
 "		//break if low variance\n" \
 "		if (vvar < varth * 255)\n" \
 "			return;\n" \
@@ -300,10 +318,13 @@ const char* str_cl_comp_gen_db = \
 "	if (stop < random)\n" \
 "		return;\n" \
 "	int3 nb_coord;\n" \
-"	unsigned int nb_index;\n" \
-"	unsigned int m;\n" \
+"	uint nb_index;\n" \
+"	uint m;\n" \
+"#pragma unroll\n" \
 "	for (int i=-1; i<2; ++i)\n" \
+"#pragma unroll\n" \
 "	for (int j=-1; j<2; ++j)\n" \
+"#pragma unroll\n" \
 "	for (int k=-1; k<2; ++k)\n" \
 "	{\n" \
 "		nb_coord = (int3)(coord.x+i, coord.y+j, coord.z+k);\n" \

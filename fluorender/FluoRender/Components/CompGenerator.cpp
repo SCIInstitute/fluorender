@@ -1355,6 +1355,7 @@ void ComponentGenerator::GenerateDB()
 
 	//iterration maximum from db
 	int iter = glbin.get_ca_table().getParamIter();
+	int max_dist = glbin.get_ca_table().getParamMxdist();//max iteration for distance field
 
 	//histogram window size
 	int whistxy = 20;//histogram size
@@ -1375,13 +1376,8 @@ void ComponentGenerator::GenerateDB()
 		whistz = (int)std::ceil(w);
 		whistxy = (int)std::ceil(w * nx / nz);
 	}
-
+	//intensity scale
 	float sscale = float(m_vd->GetScalarScale());
-	//constants for now
-	int wsize = 50;//division block size
-	int max_dist = 50;//max iteration for distance field
-	int dsize2 = 5;//density filter size
-	float dist_strength = 0.5;//mixing factor for fields
 
 	//prog
 	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
@@ -1410,12 +1406,8 @@ void ComponentGenerator::GenerateDB()
 		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
-		//divide
-		unsigned int gsx, gsy, gsz;//pixel number in group
-		unsigned int nxy, nxyz;//precalculate
-		gsx = wsize >= nx ? nx : wsize;
-		gsy = wsize >= ny ? ny : wsize;
-		gsz = wsize >= nz ? nz : wsize;
+		//precalculate
+		unsigned int nxy, nxyz;
 		nxy = nx * ny;
 		nxyz = nxy * nz;
 		//sizes
@@ -1515,21 +1507,18 @@ void ComponentGenerator::GenerateDB()
 		//generate density field arg_densf
 		//set
 		//kernel 3
-		float distscl = 5.0f / max_dist;
 		kernel_prog->setKernelArgBegin(kernel_index3);
 		kernel_prog->setKernelArgument(arg_img);
 		kernel_prog->setKernelArgument(arg_distf);
 		flvr::Argument arg_densf =
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
 				sizeof(unsigned char)*nxyz, NULL);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&dsize2));
+		kernel_prog->setKernelArgument(arg_lut);
+		kernel_prog->setKernelArgument(arg_params);
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&distscl));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&dist_strength));
+		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&par));
 		//kernel 4
 		kernel_prog->setKernelArgBegin(kernel_index4);
 		kernel_prog->setKernelArgument(arg_densf);
@@ -1539,10 +1528,11 @@ void ComponentGenerator::GenerateDB()
 		flvr::Argument arg_var =
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
 				sizeof(unsigned char)*nxyz, NULL);
-		cl_int3 cl_dfxyz = { (cl_int)gsx, (cl_int)gsy, (cl_int)gsz };//placeholder
-		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_dfxyz));
+		kernel_prog->setKernelArgument(arg_lut);
+		kernel_prog->setKernelArgument(arg_params);
 		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&par));
 
 		//mix fields
 		kernel_prog->executeKernel(kernel_index3, 3, global_size, local_size);
@@ -1561,18 +1551,18 @@ void ComponentGenerator::GenerateDB()
 		float iterf = 0;
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&iterf));
 		kernel_prog->setKernelArgument(arg_img);
-		kernel_prog->setKernelArgument(arg_lut);
 		flvr::Argument arg_label =
 			kernel_prog->setKernelArgTex3DBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgument(arg_densf);
 		kernel_prog->setKernelArgument(arg_avg);
 		kernel_prog->setKernelArgument(arg_var);
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int), (void*)(&rcnt));
+		kernel_prog->setKernelArgument(arg_lut);
 		kernel_prog->setKernelArgument(arg_params);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&seed));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
 		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&par));
 
 		//execute

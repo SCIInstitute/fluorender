@@ -52,12 +52,19 @@ namespace flrd
 			return m_param_iter;
 		}
 
+		float getParamMxdist()
+		{
+			return m_param_mxdist;
+		}
+
 	private:
 		float m_hist_popl;
 		float m_param_iter;
+		float m_param_mxdist;
 
 		void compute(Record* rec = 0);
 		void computeHistSize(Record* rec = 0);
+		void getParams(Record* rec);
 		void computeParamIter(Record* rec = 0);
 	};
 }
