@@ -114,22 +114,25 @@ const char* str_cl_comp_gen_db = \
 "#pragma unroll\n" \
 "	for (index = 0; index < bin; ++ index)\n" \
 "		lh[index] /= popl;\n" \
-"	float f1, f2;\n" \
+"	float f1, f2, fmin;\n" \
 "	ushort r = 0;\n" \
-"	float* fp = rechist;\n" \
+"	int rhi = 0;\n" \
 "#pragma unroll\n" \
 "	for (int i = 0; i < rec; ++i)\n" \
 "	{\n" \
 "		f1 = 0.0f;\n" \
 "#pragma unroll\n" \
 "		for (int j = 0; j < bin; ++j)\n" \
-"			f1 += (lh[j] - fp[j]) * (lh[j] - fp[j]);\n" \
-"		fp += bin;\n" \
-"		f2 = i ? min(f1, f2) : f1;\n" \
-"		r = f1 == f2? (ushort)(i) : r;\n" \
+"		{\n" \
+"			f2 = lh[j] - rechist[rhi+j];\n" \
+"			f1 += f2 * f2;\n" \
+"		}\n" \
+"		rhi += bin;\n" \
+"		fmin = i ? min(f1, fmin) : f1;\n" \
+"		r = f1 == fmin? (ushort)(i) : r;\n" \
 "	}\n" \
 "	index = nxyz.x*nxyz.y*gid.z + nxyz.x*gid.y + gid.x;\n" \
-"	lut[index] = (ushort)(r);\n" \
+"	lut[index] = r;\n" \
 "}\n" \
 "\n" \
 "//init dist field by db lookup\n" \
