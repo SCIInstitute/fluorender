@@ -1,4 +1,5 @@
 use_sel=0
+use_exp=0
 iter=50
 thresh=0.5
 use_dist_field=0
@@ -18,6 +19,7 @@ density_stats_size=15
 clean=0
 clean_iter=5
 clean_size_vl=5
+grow_fixed=1
 cluster_method_kmeans=1
 cluster_method_exmax=0
 cluster_method_dbscan=0

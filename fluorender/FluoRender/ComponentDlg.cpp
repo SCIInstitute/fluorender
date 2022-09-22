@@ -171,7 +171,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, ComponentDlg::OnNotebook)
 	EVT_CHECKBOX(ID_UseSelChk, ComponentDlg::OnUseSelChk)
 	EVT_BUTTON(ID_AddRecordBtn, ComponentDlg::OnAddRecord)
-	EVT_BUTTON(ID_ApplyRecordBtn, ComponentDlg::OnApplyRecord)
+	EVT_CHECKBOX(ID_UseExpChk, ComponentDlg::OnUseExpChk)
 	EVT_BUTTON(ID_GenerateBtn, ComponentDlg::OnGenerate)
 	EVT_TOGGLEBUTTON(ID_AutoUpdateBtn, ComponentDlg::OnAutoUpdate)
 	EVT_BUTTON(ID_ClusterBtn, ComponentDlg::OnCluster)
@@ -200,7 +200,8 @@ ComponentDlg::ComponentDlg(VRenderFrame *frame)
 	m_hold_history(false),
 	m_test_speed(false),
 	m_cell_new_id(0),
-	m_cell_new_id_empty(true)
+	m_cell_new_id_empty(true),
+	m_rec_applied(false)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -231,7 +232,7 @@ ComponentDlg::ComponentDlg(VRenderFrame *frame)
 		wxDefaultPosition, wxDefaultSize);
 	m_add_record_btn = new wxButton(panel_bot, ID_AddRecordBtn, "Add Rec.",
 		wxDefaultPosition, wxDefaultSize);
-	m_apply_record_btn = new wxButton(panel_bot, ID_ApplyRecordBtn, "Apply Rec.",
+	m_use_exp_chk = new wxCheckBox(panel_bot, ID_UseExpChk, "Use Exp.",
 		wxDefaultPosition, wxDefaultSize);
 	m_generate_btn = new wxButton(panel_bot, ID_GenerateBtn, "Generate",
 		wxDefaultPosition, wxSize(75, -1));
@@ -246,8 +247,8 @@ ComponentDlg::ComponentDlg(VRenderFrame *frame)
 	sizer1->Add(m_shuffle_btn, 0, wxALIGN_CENTER);
 	sizer1->AddStretchSpacer();
 	sizer1->Add(m_add_record_btn, 0, wxALIGN_CENTER);
-	sizer1->Add(m_apply_record_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(10, 10);
+	sizer1->Add(m_use_exp_chk, 0, wxALIGN_CENTER);
 	sizer1->Add(m_use_sel_chk, 0, wxALIGN_CENTER);
 	sizer1->Add(m_generate_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_auto_update_btn, 0, wxALIGN_CENTER);
@@ -1097,6 +1098,7 @@ void ComponentDlg::Update()
 {
 	//update ui
 	m_use_sel_chk->SetValue(m_use_sel);
+	m_use_exp_chk->SetValue(m_use_exp);
 	//comp generate page
 	m_iter_text->SetValue(wxString::Format("%d", m_iter));
 	m_thresh_text->SetValue(wxString::Format("%.3f", m_thresh));
@@ -1198,6 +1200,7 @@ void ComponentDlg::GetSettings()
 	//defaults
 	//comp generate page
 	m_use_sel = false;
+	m_use_exp = false;
 	m_iter = 50;
 	m_thresh = 0.5;
 	m_tfactor = 1.0;
@@ -1277,6 +1280,7 @@ void ComponentDlg::LoadSettings(wxString filename)
 
 	//basic settings
 	fconfig.Read("use_sel", &m_use_sel);
+	fconfig.Read("use_exp", &m_use_exp);
 	fconfig.Read("iter", &m_iter);
 	fconfig.Read("thresh", &m_thresh);
 	fconfig.Read("use_dist_field", &m_use_dist_field);
@@ -1333,6 +1337,7 @@ void ComponentDlg::SaveSettings(wxString filename)
 
 	//comp generate settings
 	fconfig.Write("use_sel", m_use_sel);
+	fconfig.Write("use_exp", m_use_exp);
 	fconfig.Write("iter", m_iter);
 	fconfig.Write("thresh", m_thresh);
 	fconfig.Write("use_dist_field", m_use_dist_field);
@@ -2628,7 +2633,7 @@ void ComponentDlg::EnableGenerate()
 	default:
 		m_use_sel_chk->Show();
 		m_add_record_btn->Show();
-		m_apply_record_btn->Show();
+		m_use_exp_chk->Show();
 		m_generate_btn->Show();
 		m_auto_update_btn->Show();
 		m_cluster_btn->Hide();
@@ -2638,7 +2643,7 @@ void ComponentDlg::EnableGenerate()
 	case 1:
 		m_use_sel_chk->Hide();
 		m_add_record_btn->Hide();
-		m_apply_record_btn->Hide();
+		m_use_exp_chk->Hide();
 		m_generate_btn->Hide();
 		m_auto_update_btn->Hide();
 		m_cluster_btn->Show();
@@ -2648,7 +2653,7 @@ void ComponentDlg::EnableGenerate()
 	case 2:
 		m_use_sel_chk->Hide();
 		m_add_record_btn->Hide();
-		m_apply_record_btn->Hide();
+		m_use_exp_chk->Hide();
 		m_generate_btn->Hide();
 		m_auto_update_btn->Hide();
 		m_cluster_btn->Hide();
@@ -3177,14 +3182,17 @@ void ComponentDlg::OnAddRecord(wxCommandEvent &event)
 	AddRecord();
 }
 
-void ComponentDlg::OnApplyRecord(wxCommandEvent &event)
+void ComponentDlg::OnUseExpChk(wxCommandEvent &event)
 {
-	ApplyRecord();
+	m_use_exp = m_use_exp_chk->GetValue();
 }
 
 void ComponentDlg::OnGenerate(wxCommandEvent &event)
 {
-	GenerateComp(m_use_sel);
+	if (m_use_exp)
+		ApplyRecord();
+	else
+		GenerateComp(m_use_sel);
 }
 
 void ComponentDlg::OnAutoUpdate(wxCommandEvent &event)
@@ -3558,6 +3566,8 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 
 	if (command && m_record_cmd)
 		AddCmd("generate");
+
+	m_rec_applied = false;
 }
 
 void ComponentDlg::Fixate(bool command)
@@ -3739,12 +3749,22 @@ void ComponentDlg::ApplyRecord()
 	cg.postwork = std::bind(
 		&ComponentDlg::StopTimer, this, std::placeholders::_1);
 	vd->AddEmptyMask(1);
-	if (!vd->GetLabel(false))
+	if (!m_rec_applied)
 	{
 		vd->AddEmptyLabel(0);
 		cg.ShuffleID();
 	}
 	cg.GenerateDB();
+
+	//int clean_iter = m_clean_iter;
+	//int clean_size = m_clean_size_vl;
+	//if (!m_clean)
+	//{
+	//	clean_iter = 0;
+	//	clean_size = 0;
+	//}
+	//if (clean_iter > 0)
+	//	cg.Cleanup(clean_iter, clean_size);
 
 	int bn = vd->GetAllBrickNum();
 	if (bn > 1)
@@ -3752,6 +3772,8 @@ void ComponentDlg::ApplyRecord()
 
 	//update
 	m_view->RefreshGL(39);
+
+	m_rec_applied = true;
 }
 
 void ComponentDlg::OnAnalyze(wxCommandEvent &event)

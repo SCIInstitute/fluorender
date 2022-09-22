@@ -185,7 +185,7 @@ public:
 		ID_Notebook,
 		ID_UseSelChk,
 		ID_AddRecordBtn,
-		ID_ApplyRecordBtn,
+		ID_UseExpChk,
 		ID_GenerateBtn,
 		ID_AutoUpdateBtn,
 		ID_ClusterBtn,
@@ -261,6 +261,8 @@ private:
 
 	//generate settings
 	bool m_use_sel;
+	bool m_use_exp;
+	bool m_rec_applied;
 	int m_iter;
 	double m_thresh;
 	double m_tfactor;
@@ -481,9 +483,9 @@ private:
 	wxButton* m_align_zyx;
 
 	//execute
-	wxCheckBox* m_use_sel_chk;
 	wxButton* m_add_record_btn;
-	wxButton* m_apply_record_btn;
+	wxCheckBox* m_use_exp_chk;
+	wxCheckBox* m_use_sel_chk;
 	wxButton* m_generate_btn;
 	wxToggleButton* m_auto_update_btn;
 	wxButton* m_cluster_btn;
@@ -646,9 +648,9 @@ private:
 	//execute
 	void EnableGenerate();
 	void OnNotebook(wxBookCtrlEvent &event);
-	void OnUseSelChk(wxCommandEvent &event);
 	void OnAddRecord(wxCommandEvent &event);
-	void OnApplyRecord(wxCommandEvent &event);
+	void OnUseExpChk(wxCommandEvent &event);
+	void OnUseSelChk(wxCommandEvent &event);
 	void OnGenerate(wxCommandEvent &event);
 	void OnAutoUpdate(wxCommandEvent &event);
 	void OnCluster(wxCommandEvent &event);

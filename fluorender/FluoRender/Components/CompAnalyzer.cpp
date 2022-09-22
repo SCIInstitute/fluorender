@@ -353,7 +353,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			if (data_label) delete[] (unsigned int*)data_label;
 		}
 
-		m_sig_progress();
+		//m_sig_progress();
 	}
 
 	MatchBricks(sel);
@@ -503,7 +503,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 		if (data_mask) delete[] (unsigned char*)data_mask;
 		if (data_label) delete[] (unsigned int*)data_label;
 
-		m_sig_progress();
+		//m_sig_progress();
 	}
 }
 
@@ -600,7 +600,7 @@ void ComponentAnalyzer::MakeColorConsistent()
 			++i;
 	}
 
-	m_sig_progress();
+	//m_sig_progress();
 }
 
 size_t ComponentAnalyzer::GetListSize()
