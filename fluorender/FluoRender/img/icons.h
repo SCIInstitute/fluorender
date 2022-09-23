@@ -126,6 +126,10 @@ public:
 	const static unsigned char icon_calculations_png[4744];
 	/* icon_calculations_mini.png - 819 bytes */
 	const static unsigned char icon_calculations_mini_png[819];
+	/* icon_maching_learning.png - 4411 bytes */
+	const static unsigned char icon_machine_learning_png[4411];
+	/* icon_maching_learning_mini.png - 810 bytes */
+	const static unsigned char icon_machine_learning_mini_png[810];
 
 
 	//render view icons

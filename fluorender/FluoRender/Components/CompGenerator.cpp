@@ -1430,9 +1430,9 @@ void ComponentGenerator::GenerateDB()
 		flvr::Argument arg_rechist =
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(rechist));
 		fsize = nx * ny * nz;
-		cl_ushort* lut = new cl_ushort[fsize]();
+		cl_uchar* lut = new cl_uchar[fsize]();
 		flvr::Argument arg_lut =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_ushort)*fsize, (void*)(lut));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_uchar)*fsize, (void*)(lut));
 		//local histogram
 		kernel_prog->setKernelArgLocal(sizeof(float)*bin);
 		cl_int3 cl_histxyz = { cl_int(whistxy), cl_int(whistxy), cl_int(whistz) };
@@ -1444,10 +1444,10 @@ void ComponentGenerator::GenerateDB()
 		if (bits > 8) maxv = float(1.0 / m_vd->GetScalarScale());
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&minv));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&maxv));
-		cl_ushort cl_bin = (cl_ushort)(bin);
-		kernel_prog->setKernelArgConst(sizeof(cl_ushort), (void*)(&cl_bin));
-		cl_ushort cl_rec = (cl_ushort)(rec);
-		kernel_prog->setKernelArgConst(sizeof(cl_ushort), (void*)(&cl_rec));
+		cl_uchar cl_bin = (cl_uchar)(bin);
+		kernel_prog->setKernelArgConst(sizeof(cl_uchar), (void*)(&cl_bin));
+		cl_uchar cl_rec = (cl_uchar)(rec);
+		kernel_prog->setKernelArgConst(sizeof(cl_uchar), (void*)(&cl_rec));
 
 		//execute
 		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
@@ -1455,7 +1455,7 @@ void ComponentGenerator::GenerateDB()
 		//read back
 #ifdef _DEBUG
 		kernel_prog->readBuffer(arg_lut, lut);
-		DBMIUINT16 mi;
+		DBMIUINT8 mi;
 		mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = nx * 2; mi.data = lut;
 #endif
 		//release

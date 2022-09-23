@@ -53,6 +53,7 @@ DEALINGS IN THE SOFTWARE.
 #include "OclDlg.h"
 #include "ComponentDlg.h"
 #include "CalculationDlg.h"
+#include "MachineLearningDlg.h"
 #include "Tester.h"
 #include "Animator/Interpolator.h"
 #include "compatibility.h"
@@ -143,6 +144,7 @@ class VRenderFrame: public wxFrame
 		ID_Ocl,
 		ID_Component,
 		ID_Calculations,
+		ID_MachineLearning,
 		//
 		ID_Settings,
 		//UI menu
@@ -330,6 +332,7 @@ public:
 	void ShowOclDlg();
 	void ShowComponentDlg();
 	void ShowCalculationDlg();
+	void ShowMachineLearningDlg();
 
 	//get interpolator
 	Interpolator* GetInterpolator()
@@ -405,6 +408,7 @@ private:
 	OclDlg* m_ocl_dlg;
 	ComponentDlg* m_component_dlg;
 	CalculationDlg* m_calculation_dlg;
+	MachineLearningDlg* m_machine_learning_dlg;
 	//prop panel children
 	wxBoxSizer* m_prop_sizer;
 	VPropView* m_volume_prop;
@@ -527,6 +531,7 @@ private:
 	void OnOcl(wxCommandEvent& WXUNUSED(event));
 	void OnComponent(wxCommandEvent& WXUNUSED(event));
 	void OnCalculations(wxCommandEvent& WXUNUSED(event));
+	void OnMachineLearning(wxCommandEvent& WXUNUSED(event));
 
 	void OnDraw(wxPaintEvent& event);
 	void OnKeyDown(wxKeyEvent& event);

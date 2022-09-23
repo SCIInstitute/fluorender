@@ -71,6 +71,7 @@ class DataTreeCtrl: public wxTreeCtrl
 		ID_Colocalization,
 		ID_Convert,
 		ID_Ocl,
+		ID_MachineLearning,
 		ID_RandomizeColor,
 		ID_CopyMask,
 		ID_PasteMask,
@@ -177,6 +178,7 @@ private:
 	void OnOcl(wxCommandEvent& event);
 	void OnComponent(wxCommandEvent& event);
 	void OnCalculations(wxCommandEvent& event);
+	void OnMachineLearning(wxCommandEvent& event);
 	void OnRandomizeColor(wxCommandEvent& event);
 	void OnCopyMask(wxCommandEvent& event);
 	void OnPasteMask(wxCommandEvent& event);

@@ -83,6 +83,7 @@ BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 	EVT_MENU(ID_Ocl, VRenderFrame::OnOcl)
 	EVT_MENU(ID_Component, VRenderFrame::OnComponent)
 	EVT_MENU(ID_Calculations, VRenderFrame::OnCalculations)
+	EVT_MENU(ID_MachineLearning, VRenderFrame::OnMachineLearning)
 	//
 	EVT_MENU(ID_Youtube, VRenderFrame::OnYoutube)
 	EVT_MENU(ID_Twitter, VRenderFrame::OnTwitter)
@@ -151,6 +152,7 @@ VRenderFrame::VRenderFrame(
 	m_trace_dlg(0),
 	m_ocl_dlg(0),
 	m_component_dlg(0),
+	m_machine_learning_dlg(0),
 	m_volume_prop(0),
 	m_mesh_prop(0),
 	m_mesh_manip(0),
@@ -232,6 +234,9 @@ VRenderFrame::VRenderFrame(
 	m_tb_menu_edit->Append(m);
 	m = new wxMenuItem(m_tb_menu_edit, ID_Ocl, wxT("OpenCL Kernel Editor..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_MachineLearning, wxT("Machine Learning Manager..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_machine_learning_mini));
 	m_tb_menu_edit->Append(m);
 	//build the main toolbar
 	//add tools
@@ -524,6 +529,9 @@ VRenderFrame::VRenderFrame(
 	//calculation dialog
 	m_calculation_dlg = new CalculationDlg(this);
 
+	//machine learing dialog
+	m_machine_learning_dlg = new MachineLearningDlg(this);
+
 	//help dialog
 	m_help_dlg = new HelpDlg(this);
 	//m_help_dlg->LoadPage("C:\\!wanyong!\\TEMP\\wxHtmlWindow.htm");
@@ -642,6 +650,13 @@ VRenderFrame::VRenderFrame(
 		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_calculation_dlg).Float();
 	m_aui_mgr.GetPane(m_calculation_dlg).Hide();
+	//machine learning
+	m_aui_mgr.AddPane(m_machine_learning_dlg, wxAuiPaneInfo().
+		Name("m_machine_learning_dlg").Caption("Machine Learning").
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
+	m_aui_mgr.GetPane(m_machine_learning_dlg).Float();
+	m_aui_mgr.GetPane(m_machine_learning_dlg).Hide();
 	//settings
 	m_aui_mgr.AddPane(m_setting_dlg, wxAuiPaneInfo().
 		Name("m_setting_dlg").Caption("Settings").
@@ -761,6 +776,9 @@ VRenderFrame::VRenderFrame(
 	m = new wxMenuItem(m_top_tools, ID_Ocl, wxT("&OpenCL Kernel Editor..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
 	m_top_tools->Append(m);
+	m = new wxMenuItem(m_top_tools, ID_MachineLearning, wxT("M&achine Learning Manager..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_machine_learning_mini));
+	m_top_tools->Append(m);
 	m_top_tools->Append(wxID_SEPARATOR);
 	m = new wxMenuItem(m_top_tools,ID_Settings, wxT("&Settings..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_settings_mini));
@@ -876,6 +894,10 @@ VRenderFrame::VRenderFrame(
 		case TOOL_CALCULATIONS:
 			m_main_tb->SetToolNormalBitmap(ID_LastTool,
 				wxGetBitmapFromMemory(icon_calculations));
+			break;
+		case TOOL_MACHINE_LEARNING:
+			m_main_tb->SetToolNormalBitmap(ID_LastTool,
+				wxGetBitmapFromMemory(icon_machine_learning));
 			break;
 		}
 		SetSaveProject(m_setting_dlg->GetProjSave());
@@ -5090,6 +5112,9 @@ void VRenderFrame::OnLastTool(wxCommandEvent& WXUNUSED(event))
 	case TOOL_CALCULATIONS:
 		ShowCalculationDlg();
 		break;
+	case TOOL_MACHINE_LEARNING:
+		ShowMachineLearningDlg();
+		break;
 	}
 }
 
@@ -5141,6 +5166,11 @@ void VRenderFrame::OnComponent(wxCommandEvent& WXUNUSED(event))
 void VRenderFrame::OnCalculations(wxCommandEvent& WXUNUSED(event))
 {
 	ShowCalculationDlg();
+}
+
+void VRenderFrame::OnMachineLearning(wxCommandEvent& WXUNUSED(event))
+{
+	ShowMachineLearningDlg();
 }
 
 void VRenderFrame::ShowPaintTool()
@@ -5251,6 +5281,17 @@ void VRenderFrame::ShowCalculationDlg()
 		m_setting_dlg->SetLastTool(TOOL_CALCULATIONS);
 	m_main_tb->SetToolNormalBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_calculations));
+}
+
+void VRenderFrame::ShowMachineLearningDlg()
+{
+	m_aui_mgr.GetPane(m_machine_learning_dlg).Show();
+	m_aui_mgr.GetPane(m_machine_learning_dlg).Float();
+	m_aui_mgr.Update();
+	if (m_setting_dlg)
+		m_setting_dlg->SetLastTool(TOOL_MACHINE_LEARNING);
+	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+		wxGetBitmapFromMemory(icon_machine_learning));
 }
 
 void VRenderFrame::SetTextureUndos()

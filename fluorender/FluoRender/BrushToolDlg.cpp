@@ -432,7 +432,7 @@ BrushToolDlg::BrushToolDlg(
 		new wxStaticBox(this, wxID_ANY, "Output"),
 		wxVERTICAL);
 	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_update_btn = new wxButton(this, ID_UpdateBtn, "Get Sel. Size",
+	m_update_btn = new wxButton(this, ID_UpdateBtn, "Paint Size",
 		wxDefaultPosition, wxSize(75, -1));
 	m_auto_update_btn = new wxToggleButton(this, ID_AutoUpdateBtn,
 		"Auto Update", wxDefaultPosition, wxSize(75, -1));

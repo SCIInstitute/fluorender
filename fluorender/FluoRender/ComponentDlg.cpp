@@ -170,8 +170,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	//execute
 	EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, ComponentDlg::OnNotebook)
 	EVT_CHECKBOX(ID_UseSelChk, ComponentDlg::OnUseSelChk)
-	EVT_BUTTON(ID_AddRecordBtn, ComponentDlg::OnAddRecord)
-	EVT_CHECKBOX(ID_UseExpChk, ComponentDlg::OnUseExpChk)
+	EVT_CHECKBOX(ID_UseMlChk, ComponentDlg::OnUseMlChk)
 	EVT_BUTTON(ID_GenerateBtn, ComponentDlg::OnGenerate)
 	EVT_TOGGLEBUTTON(ID_AutoUpdateBtn, ComponentDlg::OnAutoUpdate)
 	EVT_BUTTON(ID_ClusterBtn, ComponentDlg::OnCluster)
@@ -228,11 +227,9 @@ ComponentDlg::ComponentDlg(VRenderFrame *frame)
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	m_shuffle_btn = new wxButton(panel_bot, ID_ShuffleBtn, "Shuffle",
 		wxDefaultPosition, wxDefaultSize);
-	m_use_sel_chk = new wxCheckBox(panel_bot, ID_UseSelChk, "Use Sel.",
+	m_use_sel_chk = new wxCheckBox(panel_bot, ID_UseSelChk, "Use Paint",
 		wxDefaultPosition, wxDefaultSize);
-	m_add_record_btn = new wxButton(panel_bot, ID_AddRecordBtn, "Add Rec.",
-		wxDefaultPosition, wxDefaultSize);
-	m_use_exp_chk = new wxCheckBox(panel_bot, ID_UseExpChk, "Use Exp.",
+	m_use_ml_chk = new wxCheckBox(panel_bot, ID_UseMlChk, "Use M.L.",
 		wxDefaultPosition, wxDefaultSize);
 	m_generate_btn = new wxButton(panel_bot, ID_GenerateBtn, "Generate",
 		wxDefaultPosition, wxSize(75, -1));
@@ -242,13 +239,11 @@ ComponentDlg::ComponentDlg(VRenderFrame *frame)
 		wxDefaultPosition, wxSize(75, -1));
 	m_analyze_btn = new wxButton(panel_bot, ID_AnalyzeBtn, "Analyze",
 		wxDefaultPosition, wxSize(75, -1));
-	m_analyze_sel_btn = new wxButton(panel_bot, ID_AnalyzeSelBtn, "Anlyz. Sel.",
+	m_analyze_sel_btn = new wxButton(panel_bot, ID_AnalyzeSelBtn, "Analyze Paint",
 		wxDefaultPosition, wxSize(75, -1));
 	sizer1->Add(m_shuffle_btn, 0, wxALIGN_CENTER);
 	sizer1->AddStretchSpacer();
-	sizer1->Add(m_add_record_btn, 0, wxALIGN_CENTER);
-	sizer1->Add(10, 10);
-	sizer1->Add(m_use_exp_chk, 0, wxALIGN_CENTER);
+	sizer1->Add(m_use_ml_chk, 0, wxALIGN_CENTER);
 	sizer1->Add(m_use_sel_chk, 0, wxALIGN_CENTER);
 	sizer1->Add(m_generate_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_auto_update_btn, 0, wxALIGN_CENTER);
@@ -895,7 +890,7 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize);
 	m_comp_replace_btn = new wxButton(page, ID_CompReplaceBtn, "Replace",
 		wxDefaultPosition, wxDefaultSize);
-	m_comp_clean_bkg_btn = new wxButton(page, ID_CompCleanBkgBtn, "Clean Sel.",
+	m_comp_clean_bkg_btn = new wxButton(page, ID_CompCleanBkgBtn, "Clear Paint",
 		wxDefaultPosition, wxDefaultSize);
 	m_comp_combine_btn = new wxButton(page, ID_CompCombineBtn, "Combine",
 		wxDefaultPosition, wxDefaultSize);
@@ -1098,7 +1093,7 @@ void ComponentDlg::Update()
 {
 	//update ui
 	m_use_sel_chk->SetValue(m_use_sel);
-	m_use_exp_chk->SetValue(m_use_exp);
+	m_use_ml_chk->SetValue(m_use_ml);
 	//comp generate page
 	m_iter_text->SetValue(wxString::Format("%d", m_iter));
 	m_thresh_text->SetValue(wxString::Format("%.3f", m_thresh));
@@ -1200,7 +1195,7 @@ void ComponentDlg::GetSettings()
 	//defaults
 	//comp generate page
 	m_use_sel = false;
-	m_use_exp = false;
+	m_use_ml = false;
 	m_iter = 50;
 	m_thresh = 0.5;
 	m_tfactor = 1.0;
@@ -1280,7 +1275,7 @@ void ComponentDlg::LoadSettings(wxString filename)
 
 	//basic settings
 	fconfig.Read("use_sel", &m_use_sel);
-	fconfig.Read("use_exp", &m_use_exp);
+	fconfig.Read("use_ml", &m_use_ml);
 	fconfig.Read("iter", &m_iter);
 	fconfig.Read("thresh", &m_thresh);
 	fconfig.Read("use_dist_field", &m_use_dist_field);
@@ -1337,7 +1332,7 @@ void ComponentDlg::SaveSettings(wxString filename)
 
 	//comp generate settings
 	fconfig.Write("use_sel", m_use_sel);
-	fconfig.Write("use_exp", m_use_exp);
+	fconfig.Write("use_ml", m_use_ml);
 	fconfig.Write("iter", m_iter);
 	fconfig.Write("thresh", m_thresh);
 	fconfig.Write("use_dist_field", m_use_dist_field);
@@ -2632,8 +2627,7 @@ void ComponentDlg::EnableGenerate()
 	case 0:
 	default:
 		m_use_sel_chk->Show();
-		m_add_record_btn->Show();
-		m_use_exp_chk->Show();
+		m_use_ml_chk->Show();
 		m_generate_btn->Show();
 		m_auto_update_btn->Show();
 		m_cluster_btn->Hide();
@@ -2642,8 +2636,7 @@ void ComponentDlg::EnableGenerate()
 		break;
 	case 1:
 		m_use_sel_chk->Hide();
-		m_add_record_btn->Hide();
-		m_use_exp_chk->Hide();
+		m_use_ml_chk->Hide();
 		m_generate_btn->Hide();
 		m_auto_update_btn->Hide();
 		m_cluster_btn->Show();
@@ -2652,8 +2645,7 @@ void ComponentDlg::EnableGenerate()
 		break;
 	case 2:
 		m_use_sel_chk->Hide();
-		m_add_record_btn->Hide();
-		m_use_exp_chk->Hide();
+		m_use_ml_chk->Hide();
 		m_generate_btn->Hide();
 		m_auto_update_btn->Hide();
 		m_cluster_btn->Hide();
@@ -3177,19 +3169,14 @@ void ComponentDlg::OnUseSelChk(wxCommandEvent &event)
 	m_use_sel = m_use_sel_chk->GetValue();
 }
 
-void ComponentDlg::OnAddRecord(wxCommandEvent &event)
+void ComponentDlg::OnUseMlChk(wxCommandEvent &event)
 {
-	AddRecord();
-}
-
-void ComponentDlg::OnUseExpChk(wxCommandEvent &event)
-{
-	m_use_exp = m_use_exp_chk->GetValue();
+	m_use_ml = m_use_ml_chk->GetValue();
 }
 
 void ComponentDlg::OnGenerate(wxCommandEvent &event)
 {
-	if (m_use_exp)
+	if (m_use_ml)
 		ApplyRecord();
 	else
 		GenerateComp(m_use_sel);

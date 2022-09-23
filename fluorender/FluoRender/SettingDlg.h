@@ -42,6 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #define TOOL_OPENCL			8
 #define TOOL_COMPONENT		9
 #define TOOL_CALCULATIONS	10
+#define TOOL_MACHINE_LEARNING	11
 
 //enum BitmapFontType;
 class VRenderFrame;

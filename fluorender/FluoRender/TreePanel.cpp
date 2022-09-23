@@ -55,6 +55,7 @@ BEGIN_EVENT_TABLE(DataTreeCtrl, wxTreeCtrl)
 	EVT_MENU(ID_Ocl, DataTreeCtrl::OnOcl)
 	EVT_MENU(ID_Component, DataTreeCtrl::OnComponent)
 	EVT_MENU(ID_Calculations, DataTreeCtrl::OnCalculations)
+	EVT_MENU(ID_MachineLearning, DataTreeCtrl::OnMachineLearning)
 	EVT_MENU(ID_RandomizeColor, DataTreeCtrl::OnRandomizeColor)
 	EVT_MENU(ID_CopyMask, DataTreeCtrl::OnCopyMask)
 	EVT_MENU(ID_PasteMask, DataTreeCtrl::OnPasteMask)
@@ -340,6 +341,7 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 				menu.Append(ID_Colocalization, "Colocalization...");
 				menu.Append(ID_Convert, "Convert...");
 				menu.Append(ID_Ocl, "OpenCL Kernel Editor...");
+				menu.Append(ID_MachineLearning, "Machine Learning Manager...");
 				break;
 			case 3:  //mesh data
 				menu.Append(ID_ToggleDisp, "Toggle Visibility");
@@ -893,6 +895,13 @@ void DataTreeCtrl::OnCalculations(wxCommandEvent& event)
 {
 	if (m_frame)
 		m_frame->ShowCalculationDlg();
+}
+
+//machine learning
+void DataTreeCtrl::OnMachineLearning(wxCommandEvent& event)
+{
+	if (m_frame)
+		m_frame->ShowMachineLearningDlg();
 }
 
 //randomize color

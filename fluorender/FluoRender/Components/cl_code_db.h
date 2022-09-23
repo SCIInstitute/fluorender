@@ -76,14 +76,14 @@ const char* str_cl_comp_gen_db = \
 "__kernel void kernel_0(\n" \
 "	__read_only image3d_t data,\n" \
 "	__global float* rechist,\n" \
-"	__global ushort* lut,\n" \
+"	__global uchar* lut,\n" \
 "	__local float* lh,\n" \
 "	int3 histxyz,\n" \
 "	int3 nxyz,\n" \
 "	float minv,\n" \
 "	float maxv,\n" \
-"	ushort bin,\n" \
-"	ushort rec)\n" \
+"	uchar bin,\n" \
+"	uchar rec)\n" \
 "{\n" \
 "	int3 gid = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
@@ -115,7 +115,7 @@ const char* str_cl_comp_gen_db = \
 "	for (index = 0; index < bin; ++ index)\n" \
 "		lh[index] /= popl;\n" \
 "	float f1, f2, fmin;\n" \
-"	ushort r = 0;\n" \
+"	uchar r = 0;\n" \
 "	int rhi = 0;\n" \
 "#pragma unroll\n" \
 "	for (int i = 0; i < rec; ++i)\n" \
@@ -129,7 +129,7 @@ const char* str_cl_comp_gen_db = \
 "		}\n" \
 "		rhi += bin;\n" \
 "		fmin = i ? min(f1, fmin) : f1;\n" \
-"		r = f1 == fmin? (ushort)(i) : r;\n" \
+"		r = f1 == fmin? (uchar)(i) : r;\n" \
 "	}\n" \
 "	index = nxyz.x*nxyz.y*gid.z + nxyz.x*gid.y + gid.x;\n" \
 "	lut[index] = r;\n" \
@@ -138,7 +138,7 @@ const char* str_cl_comp_gen_db = \
 "//init dist field by db lookup\n" \
 "__kernel void kernel_1(\n" \
 "	__read_only image3d_t data,\n" \
-"	__global ushort* lut,\n" \
+"	__global uchar* lut,\n" \
 "	__global float* params,\n" \
 "	__global uchar* df,\n" \
 "	float sscale,\n" \
@@ -201,7 +201,7 @@ const char* str_cl_comp_gen_db = \
 "	__read_only image3d_t data,\n" \
 "	__global uchar* distf,\n" \
 "	__global uchar* densf,\n" \
-"	__global ushort* lut,\n" \
+"	__global uchar* lut,\n" \
 "	__global float* params,\n" \
 "	float sscale,\n" \
 "	int3 nxyz,\n" \
@@ -229,7 +229,7 @@ const char* str_cl_comp_gen_db = \
 "	__global uchar* df,\n" \
 "	__global uchar* avg,\n" \
 "	__global uchar* var,\n" \
-"	__global ushort* lut,\n" \
+"	__global uchar* lut,\n" \
 "	__global float* params,\n" \
 "	int3 nxyz,\n" \
 "	uint nxy,\n" \
@@ -278,7 +278,7 @@ const char* str_cl_comp_gen_db = \
 "	__global uchar* avg,\n" \
 "	__global uchar* var,\n" \
 "	__global uint* rcnt,\n" \
-"	__global ushort* lut,\n" \
+"	__global uchar* lut,\n" \
 "	__global float* params,\n" \
 "	uint seed,\n" \
 "	float sscale,\n" \
@@ -392,13 +392,13 @@ const char* str_cl_comp_gen_db_unused = \
 "	__read_only image3d_t data,\n" \
 "	__global float* hist,\n" \
 "	__global float* rechist,\n" \
-"	__global ushort* lut,\n" \
+"	__global uchar* lut,\n" \
 "	__local float* lh,\n" \
 "	int3 gsxyz,\n" \
 "	int3 ngxyz,\n" \
 "	int3 nxyz,\n" \
-"	ushort bin,\n" \
-"	ushort rec)\n" \
+"	uchar bin,\n" \
+"	uchar rec)\n" \
 "{\n" \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
@@ -432,7 +432,7 @@ const char* str_cl_comp_gen_db_unused = \
 "		f2 = hist[hi.z + i] * ft.y + hist[hi.w + i] * ft.x;\n" \
 "		lh[i] = f1 * ft.w + f2 * ft.z;\n" \
 "	}\n" \
-"	ushort r = 0;\n" \
+"	uchar r = 0;\n" \
 "	float* fp = rechist;\n" \
 "	for (int i = 0; i < rec; ++i)\n" \
 "	{\n" \
@@ -441,7 +441,7 @@ const char* str_cl_comp_gen_db_unused = \
 "			f1 += lh[j] * fp[j];\n" \
 "		fp += bin;\n" \
 "		f2 = i ? max(f1, f2) : f1;\n" \
-"		r = f1 == f2? (ushort)(i) : r;\n" \
+"		r = f1 == f2? (uchar)(i) : r;\n" \
 "	}\n" \
 "	lut[index] = r;\n" \
 "}\n" \
