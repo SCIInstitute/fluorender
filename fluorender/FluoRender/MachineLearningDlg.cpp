@@ -73,6 +73,39 @@ MachineLearningPanel::MachineLearningPanel(
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);
+
+	wxBoxSizer *mainsizer = new wxBoxSizer(wxHORIZONTAL);
+	wxSplitterWindow *splittermain = new wxSplitterWindow(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxSP_THIN_SASH | wxSP_BORDER | wxSP_LIVE_UPDATE);
+	splittermain->SetMinimumPaneSize(160);
+	mainsizer->Add(splittermain, 1, wxBOTTOM | wxLEFT | wxEXPAND, 5);
+
+	wxPanel *panel_top = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
+	wxBoxSizer* sizerTop = new wxBoxSizer(wxVERTICAL);
+	m_top_grid = new wxGrid(panel_top, wxID_ANY);
+	m_top_grid->CreateGrid(1, 2);
+	m_top_grid->Fit();
+	sizerTop->Add(10, 10);
+	sizerTop->Add(m_top_grid, 0, wxEXPAND);
+	sizerTop->Add(10, 10);
+	panel_top->SetSizer(sizerTop);
+
+	wxPanel *panel_bot = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
+	wxBoxSizer* sizerBot = new wxBoxSizer(wxVERTICAL);
+	m_bot_grid = new wxGrid(panel_bot, wxID_ANY);
+	m_bot_grid->CreateGrid(10, 3);
+	m_bot_grid->Fit();
+	sizerBot->Add(10, 10);
+	sizerBot->Add(m_bot_grid, 0, wxEXPAND);
+	sizerBot->Add(10, 10);
+	panel_top->SetSizer(sizerBot);
+
+	splittermain->SetSashGravity(0.0);
+	splittermain->SplitHorizontally(panel_top, panel_bot, 500);
+
+	SetSizer(mainsizer);
+	panel_top->Layout();
+	panel_bot->Layout();
 }
 
 MachineLearningPanel::~MachineLearningPanel()

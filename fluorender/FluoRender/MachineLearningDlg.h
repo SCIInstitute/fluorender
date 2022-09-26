@@ -29,6 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #define _MACHINELEARNINGDLG_H_
 
 #include <wx/wx.h>
+#include <wx/notebook.h>
+#include <wx/grid.h>
+#include <wx/splitter.h>
 
 class VRenderFrame;
 class MachineLearningDlg : public wxPanel
@@ -53,6 +56,8 @@ public:
 
 protected:
 	VRenderFrame* m_frame;
+	wxGrid *m_top_grid;
+	wxGrid *m_bot_grid;
 
 	DECLARE_EVENT_TABLE()
 };
