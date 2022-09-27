@@ -54,22 +54,52 @@ public:
 		wxWindow* parent);
 	~MachineLearningPanel();
 
+	void Create();
+
 protected:
 	VRenderFrame* m_frame;
+	//
 	wxGrid *m_top_grid;
+	wxString m_top_grid_name;
+	wxWindowID m_top_grid_id;
+	wxButton* m_new_table_btn;
+	wxWindowID m_new_table_id;
+	wxButton* m_load_table_btn;
+	wxWindowID m_load_table_id;
+	wxButton* m_del_table_btn;
+	wxWindowID m_del_table_id;
+	wxButton* m_dup_table_btn;
+	wxWindowID m_dup_table_id;
+	//
 	wxGrid *m_bot_grid;
+	wxString m_bot_grid_name;
+	wxWindowID m_bot_grid_id;
+	wxButton* m_del_rec_btn;
+	wxWindowID m_del_rec_id;
 
-	DECLARE_EVENT_TABLE()
+protected:
+	virtual void OnNewTable(wxCommandEvent& event) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 class MLCompGenPanel : public MachineLearningPanel
 {
 public:
+	enum
+	{
+		ID_TopGrid = ID_LEARNING_COMP_GEN,
+		ID_NewTableBtn,
+		ID_LoadTableBtn,
+		ID_DelTableBtn,
+		ID_DupTableBtn,
+		ID_BotGrid,
+		ID_DelRecBtn
+	};
 	MLCompGenPanel(VRenderFrame* frame,
 		wxWindow* parent);
 	~MLCompGenPanel();
 
-private:
+protected:
+	virtual void OnNewTable(wxCommandEvent& event);
 };
 #endif//_MACHINELEARNINGDLG_H_

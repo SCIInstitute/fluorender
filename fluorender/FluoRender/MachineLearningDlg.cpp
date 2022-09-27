@@ -60,9 +60,6 @@ MachineLearningDlg::~MachineLearningDlg()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-BEGIN_EVENT_TABLE(MachineLearningPanel, wxPanel)
-END_EVENT_TABLE()
-
 MachineLearningPanel::MachineLearningPanel(
 	VRenderFrame* frame, wxWindow* parent) :
 	wxPanel(parent, wxID_ANY,
@@ -70,9 +67,18 @@ MachineLearningPanel::MachineLearningPanel(
 		0, "MachineLearningPanel"),
 	m_frame(frame)
 {
+}
+
+MachineLearningPanel::~MachineLearningPanel()
+{
+}
+
+void MachineLearningPanel::Create()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);
+	wxStaticText* st = 0;
 
 	wxBoxSizer *mainsizer = new wxBoxSizer(wxHORIZONTAL);
 	wxSplitterWindow *splittermain = new wxSplitterWindow(this, wxID_ANY,
@@ -82,9 +88,33 @@ MachineLearningPanel::MachineLearningPanel(
 
 	wxPanel *panel_top = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
 	wxBoxSizer* sizerTop = new wxBoxSizer(wxVERTICAL);
-	m_top_grid = new wxGrid(panel_top, wxID_ANY);
+	st = new wxStaticText(panel_top, wxID_ANY, m_top_grid_name,
+		wxDefaultPosition, wxDefaultSize);
+	m_top_grid = new wxGrid(panel_top, m_top_grid_id);
 	m_top_grid->CreateGrid(1, 2);
 	m_top_grid->Fit();
+	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	m_new_table_btn = new wxButton(panel_top, m_new_table_id, "New",
+		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
+	m_new_table_btn->Connect(m_new_table_id, wxEVT_BUTTON,
+		wxCommandEventHandler(MachineLearningPanel::OnNewTable), NULL, this);
+	m_load_table_btn = new wxButton(panel_top, m_load_table_id, "Load",
+		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
+	m_del_table_btn = new wxButton(panel_top, m_del_table_id, "Delete",
+		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
+	m_dup_table_btn = new wxButton(panel_top, m_dup_table_id, "Duplicate",
+		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
+	sizer1->Add(5, 5);
+	sizer1->Add(m_new_table_btn, 1, wxEXPAND);
+	sizer1->Add(m_load_table_btn, 1, wxEXPAND);
+	sizer1->Add(m_del_table_btn, 1, wxEXPAND);
+	sizer1->Add(m_dup_table_btn, 1, wxEXPAND);
+	sizer1->Add(5, 5);
+	//
+	sizerTop->Add(10, 10);
+	sizerTop->Add(st, 0, wxALIGN_CENTER);
+	sizerTop->Add(10, 10);
+	sizerTop->Add(sizer1, 0, wxEXPAND);
 	sizerTop->Add(10, 10);
 	sizerTop->Add(m_top_grid, 0, wxEXPAND);
 	sizerTop->Add(10, 10);
@@ -92,25 +122,33 @@ MachineLearningPanel::MachineLearningPanel(
 
 	wxPanel *panel_bot = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
 	wxBoxSizer* sizerBot = new wxBoxSizer(wxVERTICAL);
-	m_bot_grid = new wxGrid(panel_bot, wxID_ANY);
+	st = new wxStaticText(panel_bot, wxID_ANY, m_bot_grid_name,
+		wxDefaultPosition, wxDefaultSize);
+	m_bot_grid = new wxGrid(panel_bot, m_bot_grid_id);
 	m_bot_grid->CreateGrid(10, 3);
 	m_bot_grid->Fit();
+	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	m_del_rec_btn = new wxButton(panel_bot, m_del_rec_id, "Delete",
+		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
+	sizer2->AddStretchSpacer(1);
+	sizer2->Add(m_del_rec_btn, 0);
+	sizer2->Add(5, 5);
+	//
+	sizerBot->Add(10, 10);
+	sizerBot->Add(st, 0, wxALIGN_CENTER);
+	sizerBot->Add(10, 10);
+	sizerBot->Add(sizer2, 0, wxEXPAND);
 	sizerBot->Add(10, 10);
 	sizerBot->Add(m_bot_grid, 0, wxEXPAND);
 	sizerBot->Add(10, 10);
-	panel_top->SetSizer(sizerBot);
+	panel_bot->SetSizer(sizerBot);
 
 	splittermain->SetSashGravity(0.0);
-	splittermain->SplitHorizontally(panel_top, panel_bot, 500);
+	splittermain->SplitHorizontally(panel_top, panel_bot, 100);
 
 	SetSizer(mainsizer);
 	panel_top->Layout();
 	panel_bot->Layout();
-}
-
-MachineLearningPanel::~MachineLearningPanel()
-{
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -118,10 +156,24 @@ MLCompGenPanel::MLCompGenPanel(
 	VRenderFrame* frame, wxWindow* parent) :
 	MachineLearningPanel(frame, parent)
 {
-
+	m_top_grid_name = "Data Sets";
+	m_top_grid_id = ID_TopGrid;
+	m_new_table_id = ID_NewTableBtn;
+	m_load_table_id = ID_LoadTableBtn;
+	m_del_table_id = ID_DelTableBtn;
+	m_dup_table_id = ID_DupTableBtn;
+	m_bot_grid_name = "History Records";
+	m_bot_grid_id = ID_BotGrid;
+	m_del_rec_id = ID_DelRecBtn;
+	Create();
 }
 
 MLCompGenPanel::~MLCompGenPanel()
 {
 
+}
+
+void MLCompGenPanel::OnNewTable(wxCommandEvent& event)
+{
+	wxMessageBox("test");
 }
