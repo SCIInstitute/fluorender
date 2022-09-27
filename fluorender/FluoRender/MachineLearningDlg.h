@@ -79,6 +79,11 @@ protected:
 
 protected:
 	virtual void OnNewTable(wxCommandEvent& event) = 0;
+	virtual void OnLoadTable(wxCommandEvent& event) = 0;
+	virtual void OnDelTable(wxCommandEvent& event) = 0;
+	virtual void OnDupTable(wxCommandEvent& event) = 0;
+	//
+	virtual void OnDelRec(wxCommandEvent& event) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,5 +106,10 @@ public:
 
 protected:
 	virtual void OnNewTable(wxCommandEvent& event);
+	virtual void OnLoadTable(wxCommandEvent& event);
+	virtual void OnDelTable(wxCommandEvent& event);
+	virtual void OnDupTable(wxCommandEvent& event);
+	//
+	virtual void OnDelRec(wxCommandEvent& event);
 };
 #endif//_MACHINELEARNINGDLG_H_

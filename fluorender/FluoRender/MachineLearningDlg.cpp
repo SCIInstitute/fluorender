@@ -96,14 +96,20 @@ void MachineLearningPanel::Create()
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	m_new_table_btn = new wxButton(panel_top, m_new_table_id, "New",
 		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
-	m_new_table_btn->Connect(m_new_table_id, wxEVT_BUTTON,
-		wxCommandEventHandler(MachineLearningPanel::OnNewTable), NULL, this);
 	m_load_table_btn = new wxButton(panel_top, m_load_table_id, "Load",
 		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
 	m_del_table_btn = new wxButton(panel_top, m_del_table_id, "Delete",
 		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
 	m_dup_table_btn = new wxButton(panel_top, m_dup_table_id, "Duplicate",
 		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
+	m_new_table_btn->Connect(m_new_table_id, wxEVT_BUTTON,
+		wxCommandEventHandler(MachineLearningPanel::OnNewTable), NULL, this);
+	m_load_table_btn->Connect(m_load_table_id, wxEVT_BUTTON,
+		wxCommandEventHandler(MachineLearningPanel::OnLoadTable), NULL, this);
+	m_del_table_btn->Connect(m_del_table_id, wxEVT_BUTTON,
+		wxCommandEventHandler(MachineLearningPanel::OnDelTable), NULL, this);
+	m_dup_table_btn->Connect(m_dup_table_id, wxEVT_BUTTON,
+		wxCommandEventHandler(MachineLearningPanel::OnDupTable), NULL, this);
 	sizer1->Add(5, 5);
 	sizer1->Add(m_new_table_btn, 1, wxEXPAND);
 	sizer1->Add(m_load_table_btn, 1, wxEXPAND);
@@ -130,6 +136,8 @@ void MachineLearningPanel::Create()
 	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	m_del_rec_btn = new wxButton(panel_bot, m_del_rec_id, "Delete",
 		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
+	m_del_rec_btn->Connect(m_del_rec_id, wxEVT_BUTTON,
+		wxCommandEventHandler(MachineLearningPanel::OnDelRec), NULL, this);
 	sizer2->AddStretchSpacer(1);
 	sizer2->Add(m_del_rec_btn, 0);
 	sizer2->Add(5, 5);
@@ -175,5 +183,26 @@ MLCompGenPanel::~MLCompGenPanel()
 
 void MLCompGenPanel::OnNewTable(wxCommandEvent& event)
 {
-	wxMessageBox("test");
+	wxMessageBox("cg new tbl");
 }
+
+void MLCompGenPanel::OnLoadTable(wxCommandEvent& event)
+{
+	wxMessageBox("cg load tbl");
+}
+
+void MLCompGenPanel::OnDelTable(wxCommandEvent& event)
+{
+	wxMessageBox("cg del tbl");
+}
+
+void MLCompGenPanel::OnDupTable(wxCommandEvent& event)
+{
+	wxMessageBox("cg dup tbl");
+}
+
+void MLCompGenPanel::OnDelRec(wxCommandEvent& event)
+{
+	wxMessageBox("cg del rec");
+}
+
