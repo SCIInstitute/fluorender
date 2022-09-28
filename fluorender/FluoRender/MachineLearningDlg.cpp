@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "MachineLearningDlg.h"
 #include "VRenderFrame.h"
+#include <Global.h>
+#include <wx/stdpaths.h>
 
 BEGIN_EVENT_TABLE(MachineLearningDlg, wxPanel)
 END_EVENT_TABLE()
@@ -65,7 +67,8 @@ MachineLearningPanel::MachineLearningPanel(
 	wxPanel(parent, wxID_ANY,
 		wxDefaultPosition, wxSize(450, 750),
 		0, "MachineLearningPanel"),
-	m_frame(frame)
+	m_frame(frame),
+	m_record(false)
 {
 }
 
@@ -122,7 +125,7 @@ void MachineLearningPanel::Create()
 	sizerTop->Add(10, 10);
 	sizerTop->Add(sizer1, 0, wxEXPAND);
 	sizerTop->Add(10, 10);
-	sizerTop->Add(m_top_grid, 0, wxEXPAND);
+	sizerTop->Add(m_top_grid, 1, wxEXPAND);
 	sizerTop->Add(10, 10);
 	panel_top->SetSizer(sizerTop);
 
@@ -134,11 +137,26 @@ void MachineLearningPanel::Create()
 	m_bot_grid->CreateGrid(10, 3);
 	m_bot_grid->Fit();
 	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	m_start_rec_btn = new wxToggleButton(panel_bot, m_start_rec_id, "Start",
+		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
+	m_start_rec_btn->Connect(m_start_rec_id, wxEVT_TOGGLEBUTTON,
+		wxCommandEventHandler(MachineLearningPanel::OnStartRec), NULL, this);
+	if (m_record)
+	{
+		m_start_rec_btn->SetLabel("Started");
+		m_start_rec_btn->SetValue(true);
+	}
+	else
+	{
+		m_start_rec_btn->SetLabel("Start");
+		m_start_rec_btn->SetValue(false);
+	}
 	m_del_rec_btn = new wxButton(panel_bot, m_del_rec_id, "Delete",
 		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
 	m_del_rec_btn->Connect(m_del_rec_id, wxEVT_BUTTON,
 		wxCommandEventHandler(MachineLearningPanel::OnDelRec), NULL, this);
 	sizer2->AddStretchSpacer(1);
+	sizer2->Add(m_start_rec_btn, 0);
 	sizer2->Add(m_del_rec_btn, 0);
 	sizer2->Add(5, 5);
 	//
@@ -147,7 +165,7 @@ void MachineLearningPanel::Create()
 	sizerBot->Add(10, 10);
 	sizerBot->Add(sizer2, 0, wxEXPAND);
 	sizerBot->Add(10, 10);
-	sizerBot->Add(m_bot_grid, 0, wxEXPAND);
+	sizerBot->Add(m_bot_grid, 1, wxEXPAND);
 	sizerBot->Add(10, 10);
 	panel_bot->SetSizer(sizerBot);
 
@@ -172,6 +190,7 @@ MLCompGenPanel::MLCompGenPanel(
 	m_dup_table_id = ID_DupTableBtn;
 	m_bot_grid_name = "History Records";
 	m_bot_grid_id = ID_BotGrid;
+	m_start_rec_id = ID_StartRecBtn;
 	m_del_rec_id = ID_DelRecBtn;
 	Create();
 }
@@ -201,8 +220,50 @@ void MLCompGenPanel::OnDupTable(wxCommandEvent& event)
 	wxMessageBox("cg dup tbl");
 }
 
+void MLCompGenPanel::OnStartRec(wxCommandEvent& event)
+{
+	m_record = !m_record;
+	if (m_record)
+	{
+		m_start_rec_btn->SetLabel("Started");
+		m_start_rec_btn->SetValue(true);
+	}
+	else
+	{
+		m_start_rec_btn->SetLabel("Start");
+		m_start_rec_btn->SetValue(false);
+	}
+}
+
 void MLCompGenPanel::OnDelRec(wxCommandEvent& event)
 {
 	wxMessageBox("cg del rec");
+}
+
+void MLCompGenPanel::MakeList()
+{
+
+}
+
+void MLCompGenPanel::LoadTable(const std::string& filename)
+{
+	wxString str;
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = wxPathOnly(expath);
+	str = expath + GETSLASH() +
+		"Database" + GETSLASH() +
+		filename + ".cgtbl";
+	glbin.get_cg_table().open(str.ToStdString());
+}
+
+void MLCompGenPanel::SaveTable(const std::string& filename)
+{
+	wxString str;
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = wxPathOnly(expath);
+	str = expath + GETSLASH() +
+		"Database" + GETSLASH() +
+		filename + ".cgtbl";
+	glbin.get_cg_table().save(str.ToStdString());
 }
 

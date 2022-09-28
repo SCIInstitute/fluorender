@@ -215,8 +215,6 @@ public:
 	void SelectFullComp();
 
 	//learning functions
-	void LoadTable();
-	void SaveTable();
 	void AddRecord();
 	void ApplyRecord();
 

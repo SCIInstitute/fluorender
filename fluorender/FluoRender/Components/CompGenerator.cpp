@@ -1347,20 +1347,20 @@ void ComponentGenerator::GenerateDB()
 		return;
 
 	//check table size
-	unsigned int rec = glbin.get_ca_table().getRecSize();
+	unsigned int rec = glbin.get_cg_table().getRecSize();
 	unsigned int bin = EntryHist::m_bins;
 	unsigned int par = EntryParams::m_size;
 	if (!(rec && bin && par))
 		return;
 
 	//iterration maximum from db
-	int iter = glbin.get_ca_table().getParamIter();
-	int max_dist = glbin.get_ca_table().getParamMxdist();//max iteration for distance field
+	int iter = glbin.get_cg_table().getParamIter();
+	int max_dist = glbin.get_cg_table().getParamMxdist();//max iteration for distance field
 
 	//histogram window size
 	int whistxy = 20;//histogram size
 	int whistz = 3;
-	float hsize = glbin.get_ca_table().getHistPopl();
+	float hsize = glbin.get_cg_table().getHistPopl();
 	int nx, ny, nz;
 	m_vd->GetResolution(nx, ny, nz);
 	float w;
@@ -1421,7 +1421,7 @@ void ComponentGenerator::GenerateDB()
 		//rechist
 		size_t fsize = bin * rec;
 		float* rechist = new float[fsize]();
-		glbin.get_ca_table().getRecInput(rechist);
+		glbin.get_cg_table().getRecInput(rechist);
 		//debug
 #ifdef _DEBUG
 		DBMIFLOAT32 histmi2;
@@ -1473,7 +1473,7 @@ void ComponentGenerator::GenerateDB()
 		//params
 		fsize = par * rec;
 		float* params = new float[fsize]();
-		glbin.get_ca_table().getRecOutput(params);
+		glbin.get_cg_table().getRecOutput(params);
 		flvr::Argument arg_params =
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 			sizeof(float)*fsize, (void*)(params));

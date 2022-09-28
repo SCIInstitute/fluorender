@@ -32,6 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/notebook.h>
 #include <wx/grid.h>
 #include <wx/splitter.h>
+#include <wx/tglbtn.h>
+#include <string>
 
 class VRenderFrame;
 class MachineLearningDlg : public wxPanel
@@ -74,8 +76,12 @@ protected:
 	wxGrid *m_bot_grid;
 	wxString m_bot_grid_name;
 	wxWindowID m_bot_grid_id;
+	wxToggleButton* m_start_rec_btn;
+	wxWindowID m_start_rec_id;
 	wxButton* m_del_rec_btn;
 	wxWindowID m_del_rec_id;
+
+	bool m_record;//state for recording
 
 protected:
 	virtual void OnNewTable(wxCommandEvent& event) = 0;
@@ -83,6 +89,7 @@ protected:
 	virtual void OnDelTable(wxCommandEvent& event) = 0;
 	virtual void OnDupTable(wxCommandEvent& event) = 0;
 	//
+	virtual void OnStartRec(wxCommandEvent& event) = 0;
 	virtual void OnDelRec(wxCommandEvent& event) = 0;
 };
 
@@ -98,11 +105,16 @@ public:
 		ID_DelTableBtn,
 		ID_DupTableBtn,
 		ID_BotGrid,
+		ID_StartRecBtn,
 		ID_DelRecBtn
 	};
 	MLCompGenPanel(VRenderFrame* frame,
 		wxWindow* parent);
 	~MLCompGenPanel();
+
+	void MakeList();
+	void LoadTable(const std::string& filename);
+	void SaveTable(const std::string& filename);
 
 protected:
 	virtual void OnNewTable(wxCommandEvent& event);
@@ -110,6 +122,9 @@ protected:
 	virtual void OnDelTable(wxCommandEvent& event);
 	virtual void OnDupTable(wxCommandEvent& event);
 	//
+	virtual void OnStartRec(wxCommandEvent& event);
 	virtual void OnDelRec(wxCommandEvent& event);
+
+private:
 };
 #endif//_MACHINELEARNINGDLG_H_

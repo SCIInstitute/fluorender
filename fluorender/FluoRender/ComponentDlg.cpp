@@ -300,13 +300,13 @@ ComponentDlg::ComponentDlg(VRenderFrame *frame)
 	panel_bot->Layout();
 
 	GetSettings();
-	LoadTable();
+	//LoadTable();
 }
 
 ComponentDlg::~ComponentDlg()
 {
 	SaveSettings("");
-	SaveTable();
+	//SaveTable();
 }
 
 wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
@@ -3654,28 +3654,6 @@ void ComponentDlg::SelectFullComp()
 	}
 }
 
-void ComponentDlg::LoadTable()
-{
-	wxString filename;
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	filename = expath + GETSLASH() +
-		"Database" + GETSLASH() +
-		"comp_analysis.tbl";
-	glbin.get_ca_table().open(filename.ToStdString());
-}
-
-void ComponentDlg::SaveTable()
-{
-	wxString filename;
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	filename = expath + GETSLASH() +
-		"Database" + GETSLASH() +
-		"comp_analysis.tbl";
-	glbin.get_ca_table().save(filename.ToStdString());
-}
-
 void ComponentDlg::AddRecord()
 {
 	//get histogram and add a record to table
@@ -3718,7 +3696,7 @@ void ComponentDlg::AddRecord()
 	rec->setOutput(ep);
 
 	//table
-	glbin.get_ca_table().addRecord(rec);
+	glbin.get_cg_table().addRecord(rec);
 }
 
 void ComponentDlg::ApplyRecord()

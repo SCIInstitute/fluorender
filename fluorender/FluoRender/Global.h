@@ -48,7 +48,7 @@ namespace fluo
 
 		flrd::CacheQueue& get_cache_queue() { return cache_queue_; }
 
-		flrd::TableHistParams& get_ca_table() { return comp_analyzer_table_; }
+		flrd::TableHistParams& get_cg_table() { return comp_gen_table_; }
 
 	private:
 		Global();
@@ -56,7 +56,7 @@ namespace fluo
 
 		flrd::CacheQueue cache_queue_;
 
-		flrd::TableHistParams comp_analyzer_table_;//records for learning comp analyzer settings
+		flrd::TableHistParams comp_gen_table_;//records for learning comp generation settings
 	};
 
 }
