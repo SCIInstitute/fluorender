@@ -251,7 +251,16 @@ MLCompGenPanel::MLCompGenPanel(
 
 MLCompGenPanel::~MLCompGenPanel()
 {
-
+	flrd::TableHistParams& table = glbin.get_cg_table();
+	//save existing table if modified
+	if (table.getModified())
+	{
+		wxString str = m_exepath + GETSLASH() +
+			m_dir + GETSLASH();
+		std::string name = str.ToStdString();
+		name += table.getName() + m_ext.ToStdString();
+		table.save(name);
+	}
 }
 
 void MLCompGenPanel::OnNewTable(wxCommandEvent& event)
