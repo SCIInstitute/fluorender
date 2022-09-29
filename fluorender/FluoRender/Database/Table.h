@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Record.h>
 #include <vector>
 #include <string>
+#include <ctime>
 
 namespace flrd
 {
@@ -44,7 +45,13 @@ namespace flrd
 				TAG_TABLE_ENT_IN,
 				TAG_TABLE_ENT_OUT,
 				TAG_TABLE_ENT_HIST,
-				TAG_TABLE_ENT_PARAMS
+				TAG_TABLE_ENT_PARAMS,
+				TAG_TABLE_TIME_CREATE,
+				TAG_TABLE_TIME_MODIFY,
+				TAG_TABLE_NOTES,
+				TAG_TABLE_NOTE_SIZE,
+				TAG_TABLE_NAME,
+				TAG_TABLE_NAME_SIZE
 			};
 
 			Table();
@@ -52,13 +59,56 @@ namespace flrd
 
 			virtual void clear();
 			virtual void addRecord(Record* rec);
+			virtual void readRecord(Record* rec);
+			virtual void delRecord(size_t i);
+			virtual void setCreateTime(const std::time_t& t);
+			virtual std::time_t* getCreateTime()
+			{
+				return &m_create_time;
+			}
+			virtual std::time_t* getModifyTime()
+			{
+				return &m_modify_time;
+			}
+			virtual void setNotes(const std::string& text)
+			{
+				m_notes = text;
+				setModified();
+			}
+			virtual std::string getNotes()
+			{
+				return m_notes;
+			}
+			virtual void setModified()
+			{
+				m_modify_time = std::time(0);
+				m_modified = true;
+			}
+			virtual bool getModified()
+			{
+				return m_modified;
+			}
+			virtual void setName(const std::string& name)
+			{
+				m_name = name;
+				setModified();
+			}
+			virtual std::string getName()
+			{
+				return m_name;
+			}
 
 			virtual void open(const std::string& filename);
+			virtual void openinfo(const std::string& filename);//only read header
 			virtual void save(const std::string& filename);
 
 			virtual size_t getRecSize()
 			{
 				return m_data.size();
+			}
+			virtual size_t getRecNum()
+			{
+				return m_recnum;
 			}
 			virtual void getRecInput(float* data)
 			{
@@ -80,6 +130,12 @@ namespace flrd
 			}
 
 		protected:
+			bool m_modified;
+			std::time_t m_create_time;
+			std::time_t m_modify_time;
+			std::string m_name;
+			std::string m_notes;
+			size_t m_recnum;
 			std::vector<Record*> m_data;
 	};
 }

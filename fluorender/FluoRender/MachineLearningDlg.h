@@ -57,6 +57,7 @@ public:
 	~MachineLearningPanel();
 
 	void Create();
+	virtual void PopTopList();
 
 protected:
 	VRenderFrame* m_frame;
@@ -82,6 +83,9 @@ protected:
 	wxWindowID m_del_rec_id;
 
 	bool m_record;//state for recording
+	wxString m_dir;//dir for searching tables
+	wxString m_ext;//file extension for tables
+	wxString m_exepath;//path to executable
 
 protected:
 	virtual void OnNewTable(wxCommandEvent& event) = 0;
@@ -112,7 +116,7 @@ public:
 		wxWindow* parent);
 	~MLCompGenPanel();
 
-	void MakeList();
+	virtual void PopTopList();
 	void LoadTable(const std::string& filename);
 	void SaveTable(const std::string& filename);
 

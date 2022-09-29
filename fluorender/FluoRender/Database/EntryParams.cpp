@@ -118,18 +118,17 @@ size_t EntryParams::getNameIndex(const std::string& name)
 
 void EntryParams::open(File& file)
 {
-	EntryTags t;
 	//size
-	file.readValue(t);
-	if (t != TAG_ENT_SIZE) return;
-	unsigned int size;
-	file.readValue(size);
-	if (size != m_size) return;
+	if (file.check(TAG_ENT_SIZE))
+	{
+		unsigned int size;
+		file.readValue(size);
+		if (size != m_size) return;
+	}
 
 	//data
-	file.readValue(t);
-	if (t != TAG_ENT_DATA) return;
-	file.readVector(m_data);
+	if (file.check(TAG_ENT_DATA))
+		file.readVector(m_data);
 }
 
 void EntryParams::save(File& file)

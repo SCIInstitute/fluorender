@@ -42,13 +42,9 @@ RecordHistParams::~RecordHistParams()
 
 void RecordHistParams::open(File& file)
 {
-	Table::TableTags t;
-	file.getPos();
-	file.readValue(t);
-	if (t == Table::TAG_TABLE_ENT_IN)
+	if (file.check(Table::TAG_TABLE_ENT_IN))
 	{
-		file.readValue(t);
-		if (t == Table::TAG_TABLE_ENT_HIST)
+		if (file.check(Table::TAG_TABLE_ENT_HIST))
 		{
 			EntryHist* ent = new EntryHist();
 			if (ent)
@@ -58,13 +54,10 @@ void RecordHistParams::open(File& file)
 			}
 		}
 	}
-	else file.setPos();
 
-	file.readValue(t);
-	if (t == Table::TAG_TABLE_ENT_OUT)
+	if (file.check(Table::TAG_TABLE_ENT_OUT))
 	{
-		file.readValue(t);
-		if (t == Table::TAG_TABLE_ENT_PARAMS)
+		if (file.check(Table::TAG_TABLE_ENT_PARAMS))
 		{
 			EntryParams* ent = new EntryParams();
 			if (ent)
@@ -74,7 +67,6 @@ void RecordHistParams::open(File& file)
 			}
 		}
 	}
-	else file.setPos();
 }
 
 void RecordHistParams::save(File& file)

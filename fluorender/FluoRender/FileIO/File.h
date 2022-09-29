@@ -56,6 +56,20 @@ namespace flrd
 		virtual void getPos();
 		virtual void setPos();
 
+		template<typename T>
+		bool check(const T& t)
+		{
+			getPos();
+			T tt;
+			readValue(tt);
+			if (t != tt)
+			{
+				setPos();
+				return false;
+			}
+			return true;
+		}
+
 		//output
 		void writeString(const std::string& s)
 		{

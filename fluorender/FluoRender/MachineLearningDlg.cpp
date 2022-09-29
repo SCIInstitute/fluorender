@@ -70,6 +70,8 @@ MachineLearningPanel::MachineLearningPanel(
 	m_frame(frame),
 	m_record(false)
 {
+	m_exepath = wxStandardPaths::Get().GetExecutablePath();
+	m_exepath = wxPathOnly(m_exepath);
 }
 
 MachineLearningPanel::~MachineLearningPanel()
@@ -94,7 +96,12 @@ void MachineLearningPanel::Create()
 	st = new wxStaticText(panel_top, wxID_ANY, m_top_grid_name,
 		wxDefaultPosition, wxDefaultSize);
 	m_top_grid = new wxGrid(panel_top, m_top_grid_id);
-	m_top_grid->CreateGrid(1, 2);
+	m_top_grid->CreateGrid(1, 5);
+	m_top_grid->SetColLabelValue(0, "Name");
+	m_top_grid->SetColLabelValue(1, "Records");
+	m_top_grid->SetColLabelValue(2, "Notes");
+	m_top_grid->SetColLabelValue(3, "Date modified");
+	m_top_grid->SetColLabelValue(4, "Date created");
 	m_top_grid->Fit();
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	m_new_table_btn = new wxButton(panel_top, m_new_table_id, "New",
@@ -177,6 +184,52 @@ void MachineLearningPanel::Create()
 	panel_bot->Layout();
 }
 
+void MachineLearningPanel::PopTopList()
+{
+	int row = m_top_grid->GetNumberRows();
+	m_top_grid->DeleteRows(0, row, true);
+
+	wxString loc = m_exepath + GETSLASH() +
+		m_dir + GETSLASH() +
+		"*" + m_ext;
+	wxLogNull logNo;
+	wxArrayString list;
+	wxString file = wxFindFirstFile(loc);
+	while (!file.empty())
+	{
+		file = wxFileNameFromPath(file);
+		file = file.BeforeLast('.');
+		list.Add(file);
+		file = wxFindNextFile();
+	}
+	list.Sort();
+	std::string filename, name;
+	for (size_t i = 0; i < list.GetCount(); ++i)
+	{
+		filename = m_exepath + GETSLASH() +
+			m_dir + GETSLASH() +
+			list[i].ToStdString() + m_ext;
+		flrd::Table table;
+		table.openinfo(filename);
+		m_top_grid->InsertRows(i);
+		name = table.getName();
+		if (name.empty()) name = list[i].ToStdString();
+		m_top_grid->SetCellValue(i, 0, name);
+		m_top_grid->SetCellValue(i, 1, std::to_string(table.getRecNum()));
+		m_top_grid->SetCellValue(i, 2, table.getNotes());
+		char b[32];
+		std::tm* ptm;
+		ptm = std::localtime(table.getCreateTime());
+		std::strftime(b, 32, "%m/%d/%Y %H:%M:%S", ptm);
+		m_top_grid->SetCellValue(i, 3, std::string(b));
+		ptm = std::localtime(table.getModifyTime());
+		std::strftime(b, 32, "%m/%d/%Y %H:%M:%S", ptm);
+		m_top_grid->SetCellValue(i, 4, std::string(b));
+	}
+	m_top_grid->AutoSizeColumns();
+	m_top_grid->ClearSelection();
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 MLCompGenPanel::MLCompGenPanel(
 	VRenderFrame* frame, wxWindow* parent) :
@@ -193,6 +246,7 @@ MLCompGenPanel::MLCompGenPanel(
 	m_start_rec_id = ID_StartRecBtn;
 	m_del_rec_id = ID_DelRecBtn;
 	Create();
+	PopTopList();
 }
 
 MLCompGenPanel::~MLCompGenPanel()
@@ -207,7 +261,12 @@ void MLCompGenPanel::OnNewTable(wxCommandEvent& event)
 
 void MLCompGenPanel::OnLoadTable(wxCommandEvent& event)
 {
-	wxMessageBox("cg load tbl");
+	wxArrayInt seli = m_top_grid->GetSelectedRows();
+	if (seli.GetCount() > 0)
+	{
+		wxString name = m_top_grid->GetCellValue(seli[0], 0);
+		LoadTable(name.ToStdString());
+	}
 }
 
 void MLCompGenPanel::OnDelTable(wxCommandEvent& event)
@@ -240,30 +299,34 @@ void MLCompGenPanel::OnDelRec(wxCommandEvent& event)
 	wxMessageBox("cg del rec");
 }
 
-void MLCompGenPanel::MakeList()
+void MLCompGenPanel::PopTopList()
 {
-
+	m_dir = "Database";
+	m_ext = ".cgtbl";
+	MachineLearningPanel::PopTopList();
 }
 
 void MLCompGenPanel::LoadTable(const std::string& filename)
 {
-	wxString str;
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	str = expath + GETSLASH() +
-		"Database" + GETSLASH() +
-		filename + ".cgtbl";
-	glbin.get_cg_table().open(str.ToStdString());
+	wxString str = m_exepath + GETSLASH() +
+		m_dir + GETSLASH();
+	flrd::TableHistParams& table = glbin.get_cg_table();
+	//save existing table if modified
+	if (table.getModified())
+	{
+		std::string name = str.ToStdString();
+		name += table.getName() + m_ext.ToStdString();
+		table.save(name);
+	}
+	str += filename + m_ext;
+	table.open(str.ToStdString());
 }
 
 void MLCompGenPanel::SaveTable(const std::string& filename)
 {
-	wxString str;
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	str = expath + GETSLASH() +
-		"Database" + GETSLASH() +
-		filename + ".cgtbl";
+	wxString str = m_exepath + GETSLASH() +
+		m_dir + GETSLASH() +
+		filename + m_ext;
 	glbin.get_cg_table().save(str.ToStdString());
 }
 

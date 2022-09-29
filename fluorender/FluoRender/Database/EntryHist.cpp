@@ -47,31 +47,27 @@ EntryHist::~EntryHist()
 
 void EntryHist::open(File& file)
 {
-	EntryTags t;
 	//bins
-	file.readValue(t);
-	if (t != TAG_ENT_BINS) return;
-	unsigned int bins;
-	file.readValue(bins);
-	if (bins != m_bins) return;
+	if (file.check(TAG_ENT_BINS))
+	{
+		unsigned int bins;
+		file.readValue(bins);
+		if (bins != m_bins) return;
+	}
 
 	//min/max
-	file.readValue(t);
-	if (t != TAG_ENT_MIN) return;
-	file.readValue(m_min);
-	file.readValue(t);
-	if (t != TAG_ENT_MAX) return;
-	file.readValue(m_max);
+	if (file.check(TAG_ENT_MIN))
+		file.readValue(m_min);
+	if (file.check(TAG_ENT_MAX))
+		file.readValue(m_max);
 
 	//population
-	file.readValue(t);
-	if (t != TAG_ENT_POPL) return;
-	file.readValue(m_population);
+	if (file.check(TAG_ENT_POPL))
+		file.readValue(m_population);
 
 	//data
-	file.readValue(t);
-	if (t != TAG_ENT_DATA) return;
-	file.readVector(m_data);
+	if (file.check(TAG_ENT_DATA))
+		file.readVector(m_data);
 }
 
 void EntryHist::save(File& file)

@@ -32,8 +32,11 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-Table::Table()
+Table::Table():
+	m_recnum(0),
+	m_modified(false)
 {
+	m_modify_time = m_create_time = std::time(0);
 }
 
 Table::~Table()
@@ -55,6 +58,30 @@ void Table::addRecord(Record* rec)
 	if (!rec)
 		return;
 	m_data.push_back(rec);
+	m_modify_time = std::time(0);
+	setModified();
+}
+
+void Table::readRecord(Record* rec)
+{
+	if (!rec)
+		return;
+	m_data.push_back(rec);
+	m_modify_time = std::time(0);
+}
+
+void Table::delRecord(size_t i)
+{
+	if (i < m_data.size())
+	{
+		m_data.erase(m_data.begin() + i);
+		setModified();
+	}
+}
+
+void Table::setCreateTime(const std::time_t& t)
+{
+	m_create_time = t;
 }
 
 void Table::open(const std::string& filename)
@@ -71,21 +98,49 @@ void Table::open(const std::string& filename)
 		return;
 	}
 
-	//rec num
-	TableTags t;
-	file.readValue(t);
-	if (t != TAG_TABLE_REC_NUM)
+	//name
+	if (file.check(TAG_TABLE_NAME))
 	{
+		size_t ns;
+		if (file.check(TAG_TABLE_NAME_SIZE))
+			file.readValue(ns);
+		if (ns)
+			m_name = file.readString(ns);
+	}
+	//time of creation
+	if (file.check(TAG_TABLE_TIME_CREATE))
+		file.readValue(m_create_time);
+	//time of modification
+	if (file.check(TAG_TABLE_TIME_MODIFY))
+		file.readValue(m_modify_time);
+	//notes
+	if (file.check(TAG_TABLE_NOTES))
+	{
+		size_t ns;
+		if (file.check(TAG_TABLE_NOTE_SIZE))
+			file.readValue(ns);
+		if (ns)
+			m_notes = file.readString(ns);
+	}
+
+	//rec num
+	if (file.check(TAG_TABLE_REC_NUM))
+	{
+		file.readValue(m_recnum);
+	}
+	else
+	{
+		m_recnum = 0;
 		file.endRead();
 		return;
 	}
-	size_t n;
-	file.readValue(n);
 
 	//data
 	if (!m_data.empty())
 		clear();
-	for (size_t i = 0; i < n; ++i)
+	TableTags t;
+	file.getPos();
+	for (size_t i = 0; i < m_recnum; ++i)
 	{
 		file.readValue(t);
 		Record* rec = 0;
@@ -95,13 +150,63 @@ void Table::open(const std::string& filename)
 			rec = new RecordHistParams();
 			break;
 		default:
+			file.setPos();
 			break;
 		}
 		if (rec)
 		{
 			rec->open(file);
-			addRecord(rec);
+			readRecord(rec);
 		}
+	}
+
+	file.endRead();
+	m_modified = false;
+}
+
+void Table::openinfo(const std::string& filename)
+{
+	flrd::File file;
+	file.beginRead(filename);
+
+	//header
+	std::string str;
+	str = file.readString(16);
+	if (str != "FluoRender table")
+	{
+		file.endRead();
+		return;
+	}
+
+	//name
+	if (file.check(TAG_TABLE_NAME))
+	{
+		size_t ns;
+		if (file.check(TAG_TABLE_NAME_SIZE))
+			file.readValue(ns);
+		if (ns)
+			m_name = file.readString(ns);
+	}
+	//time of creation
+	if (file.check(TAG_TABLE_TIME_CREATE))
+		file.readValue(m_create_time);
+	//time of modification
+	if (file.check(TAG_TABLE_TIME_MODIFY))
+		file.readValue(m_modify_time);
+	//notes
+	if (file.check(TAG_TABLE_NOTES))
+	{
+		size_t ns;
+		if (file.check(TAG_TABLE_NOTE_SIZE))
+			file.readValue(ns);
+		if (ns)
+			m_notes = file.readString(ns);
+	}
+
+	//rec num
+	if (file.check(TAG_TABLE_REC_NUM))
+	{
+		file.readValue(m_recnum);
 	}
 
 	file.endRead();
@@ -115,6 +220,23 @@ void Table::save(const std::string& filename)
 	//header
 	file.writeString("FluoRender table");
 
+	//name
+	file.writeValue(TAG_TABLE_NAME);
+	file.writeValue(TAG_TABLE_NAME_SIZE);
+	file.writeValue(m_name.size());
+	file.writeString(m_name);
+	//time of creation
+	file.writeValue(TAG_TABLE_TIME_CREATE);
+	file.writeValue(m_create_time);
+	//time of modification
+	file.writeValue(TAG_TABLE_TIME_MODIFY);
+	file.writeValue(m_modify_time);
+	//notes
+	file.writeValue(TAG_TABLE_NOTES);
+	file.writeValue(TAG_TABLE_NOTE_SIZE);
+	file.writeValue(m_notes.size());
+	file.writeString(m_notes);
+
 	//rec num
 	file.writeValue(TAG_TABLE_REC_NUM);
 	file.writeValue(m_data.size());
@@ -124,4 +246,5 @@ void Table::save(const std::string& filename)
 		i->save(file);
 
 	file.endWrite();
+	m_modified = false;
 }

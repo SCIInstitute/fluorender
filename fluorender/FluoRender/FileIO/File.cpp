@@ -93,3 +93,4 @@ void File::setPos()
 		break;
 	}
 }
+
