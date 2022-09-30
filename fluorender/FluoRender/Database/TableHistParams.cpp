@@ -32,10 +32,20 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 TableHistParams::TableHistParams() :
-	Table()
+	Table(),
+	m_hist_popl(0),
+	m_param_iter(0),
+	m_param_mxdist(0)
 {
-	m_hist_popl = 0;
-	m_param_iter = 0;
+}
+
+TableHistParams::TableHistParams(const TableHistParams& table) :
+	Table(table),
+	m_hist_popl(table.m_hist_popl),
+	m_param_iter(table.m_param_iter),
+	m_param_mxdist(table.m_param_mxdist)
+{
+
 }
 
 TableHistParams::~TableHistParams()

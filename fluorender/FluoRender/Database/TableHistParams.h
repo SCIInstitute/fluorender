@@ -36,6 +36,7 @@ namespace flrd
 	{
 	public:
 		TableHistParams();
+		TableHistParams(const TableHistParams& table);
 		virtual ~TableHistParams();
 
 		virtual void addRecord(Record* rec);

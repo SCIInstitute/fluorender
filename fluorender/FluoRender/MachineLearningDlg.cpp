@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #include "MachineLearningDlg.h"
 #include "VRenderFrame.h"
 #include <Global.h>
+#include <EntryHist.h>
+#include <EntryParams.h>
 #include <wx/stdpaths.h>
 
 BEGIN_EVENT_TABLE(MachineLearningDlg, wxPanel)
@@ -141,7 +143,9 @@ void MachineLearningPanel::Create()
 	st = new wxStaticText(panel_bot, wxID_ANY, m_bot_grid_name,
 		wxDefaultPosition, wxDefaultSize);
 	m_bot_grid = new wxGrid(panel_bot, m_bot_grid_id);
-	m_bot_grid->CreateGrid(10, 3);
+	m_bot_grid->CreateGrid(1, 2);
+	m_bot_grid->SetColLabelValue(0, "Input");
+	m_bot_grid->SetColLabelValue(1, "Output");
 	m_bot_grid->Fit();
 	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	m_start_rec_btn = new wxToggleButton(panel_bot, m_start_rec_id, "Start",
@@ -275,6 +279,7 @@ void MLCompGenPanel::OnLoadTable(wxCommandEvent& event)
 	{
 		wxString name = m_top_grid->GetCellValue(seli[0], 0);
 		LoadTable(name.ToStdString());
+		PopBotList();
 	}
 }
 
@@ -285,7 +290,13 @@ void MLCompGenPanel::OnDelTable(wxCommandEvent& event)
 
 void MLCompGenPanel::OnDupTable(wxCommandEvent& event)
 {
-	wxMessageBox("cg dup tbl");
+	flrd::TableHistParams table(glbin.get_cg_table());
+	//save it
+	wxString str = m_exepath + GETSLASH() +
+		m_dir + GETSLASH() +
+		table.getName() + m_ext;
+	table.save(str.ToStdString());
+	PopTopList();
 }
 
 void MLCompGenPanel::OnStartRec(wxCommandEvent& event)
@@ -313,6 +324,44 @@ void MLCompGenPanel::PopTopList()
 	m_dir = "Database";
 	m_ext = ".cgtbl";
 	MachineLearningPanel::PopTopList();
+}
+
+void MLCompGenPanel::PopBotList()
+{
+	int row = m_bot_grid->GetNumberRows();
+	m_bot_grid->DeleteRows(0, row, true);
+
+	flrd::TableHistParams& table = glbin.get_cg_table();
+	wxString str_in, str_out;
+	std::vector<float> data_in, data_out;
+	for (int i = 0; i < table.getRecSize(); ++i)
+	{
+		m_bot_grid->InsertRows(0);
+
+		str_in.Clear();
+		table.getOneInput(i, data_in);
+		size_t len = data_in.size();
+		if (len)
+		{
+			for (size_t j = 0; j < data_in.size() - 1; ++j)
+				str_in += wxString::Format("%.2f", data_in[j]) + ", ";
+			str_in += wxString::Format("%.2f", data_in[len - 1]);
+		}
+		m_bot_grid->SetCellValue(0, 0, str_in);
+
+		str_out.Clear();
+		table.getOneOutput(i, data_out);
+		len = data_out.size();
+		if (len)
+		{
+			for (size_t j = 0; j < data_out.size() - 1; ++j)
+				str_out += wxString::Format("%.2f", data_out[j]) + ", ";
+			str_out += wxString::Format("%.2f", data_out[len - 1]);
+		}
+		m_bot_grid->SetCellValue(0, 1, str_out);
+	}
+	m_bot_grid->AutoSizeColumns();
+	m_bot_grid->ClearSelection();
 }
 
 void MLCompGenPanel::LoadTable(const std::string& filename)

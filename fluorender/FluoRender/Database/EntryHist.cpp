@@ -41,6 +41,15 @@ EntryHist::EntryHist() :
 	m_data.assign(m_bins, 0);
 }
 
+EntryHist::EntryHist(const EntryHist& ent) :
+	Entry(ent),
+	m_min(ent.m_min),
+	m_max(ent.m_max),
+	m_population(ent.m_population)
+{
+
+}
+
 EntryHist::~EntryHist()
 {
 }

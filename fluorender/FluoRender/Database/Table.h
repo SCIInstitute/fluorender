@@ -55,6 +55,7 @@ namespace flrd
 			};
 
 			Table();
+			Table(const Table& table);
 			virtual ~Table();
 
 			virtual void clear();
@@ -127,6 +128,16 @@ namespace flrd
 					i->getOutputData(p);
 					p += i->getOutputSize();
 				}
+			}
+			virtual void getOneInput(size_t i, std::vector<float>& data)
+			{
+				if (i < m_data.size())
+					m_data[i]->getInputData(data);
+			}
+			virtual void getOneOutput(size_t i, std::vector<float>& data)
+			{
+				if (i < m_data.size())
+					m_data[i]->getOutputData(data);
 			}
 
 		protected:

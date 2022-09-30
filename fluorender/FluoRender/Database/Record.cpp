@@ -37,6 +37,10 @@ Record::Record() :
 {
 }
 
+Record::Record(const Record& rec)
+{
+}
+
 Record::~Record()
 {
 	if (m_input) delete m_input;

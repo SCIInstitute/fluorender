@@ -46,7 +46,11 @@ namespace flrd
 			};
 
 			EntryHist();
+			EntryHist(const EntryHist& ent);
 			~EntryHist();
+
+			virtual EntryHist* asEntryHist() { return this; }
+			virtual const EntryHist* asEntryHist() const { return this; }
 
 			void setRange(float min, float max)
 			{

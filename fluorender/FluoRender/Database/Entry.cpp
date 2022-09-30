@@ -35,6 +35,12 @@ Entry::Entry()
 {
 }
 
+Entry::Entry(const Entry& ent) :
+	m_data(ent.m_data)
+{
+
+}
+
 Entry::~Entry()
 {
 }

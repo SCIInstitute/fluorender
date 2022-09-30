@@ -34,11 +34,16 @@ DEALINGS IN THE SOFTWARE.
 namespace flrd
 {
 	class File;
+	class RecordHistParams;
 	class Record
 	{
 		public:
 			Record();
+			Record(const Record& rec);
 			virtual ~Record();
+
+			virtual RecordHistParams* asRecordHistParams() { return 0; }
+			virtual const RecordHistParams* asRecordHistParams() const { return 0; }
 
 			virtual Entry* getInput() = 0;
 			virtual void setInput(Entry* entry) = 0;
@@ -53,6 +58,9 @@ namespace flrd
 
 			virtual void getInputData(float* data) = 0;
 			virtual void getOutputData(float* data) = 0;
+
+			virtual void getInputData(std::vector<float>& data) = 0;
+			virtual void getOutputData(std::vector<float>& data) = 0;
 
 		protected:
 			Entry* m_input;

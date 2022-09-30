@@ -39,6 +39,24 @@ Table::Table():
 	m_modify_time = m_create_time = std::time(0);
 }
 
+Table::Table(const Table& table) :
+	m_modified(true),
+	m_notes(table.m_notes),
+	m_recnum(table.m_recnum)
+{
+	m_name = table.m_name + "_copy";
+	m_modify_time = m_create_time = std::time(0);
+	for (auto i : table.m_data)
+	{
+		Record* rec = 0;
+		RecordHistParams* temp = i->asRecordHistParams();
+		if (temp)
+			rec = new RecordHistParams(*temp);
+		if (rec)
+			m_data.push_back(rec);
+	}
+}
+
 Table::~Table()
 {
 	clear();

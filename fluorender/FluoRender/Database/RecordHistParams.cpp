@@ -36,6 +36,17 @@ RecordHistParams::RecordHistParams() :
 {
 }
 
+RecordHistParams::RecordHistParams(const RecordHistParams& rec) :
+	Record(rec)
+{
+	EntryHist* input = rec.m_input->asEntryHist();
+	if (input)
+		m_input = new EntryHist(*input);
+	EntryParams* output = rec.m_output->asEntryParams();
+	if (output)
+		m_output = new EntryParams(*output);
+}
+
 RecordHistParams::~RecordHistParams()
 {
 }
@@ -88,12 +99,26 @@ size_t RecordHistParams::getOutputSize()
 
 void RecordHistParams::getInputData(float* data)
 {
-	std::memcpy(data, &(m_input->m_data[0]), sizeof(float)*getInputSize());
+	if (m_input)
+		std::memcpy(data, &(m_input->m_data[0]), sizeof(float)*getInputSize());
 }
 
 void RecordHistParams::getOutputData(float* data)
 {
-	std::memcpy(data, &(m_output->m_data[0]), sizeof(float)*getOutputSize());
+	if (m_output)
+		std::memcpy(data, &(m_output->m_data[0]), sizeof(float)*getOutputSize());
+}
+
+void RecordHistParams::getInputData(std::vector<float>& data)
+{
+	if (m_input)
+		data = m_input->getStdData();
+}
+
+void RecordHistParams::getOutputData(std::vector<float>& data)
+{
+	if (m_output)
+		data = m_output->getStdData();
 }
 
 float RecordHistParams::getHistPopl()

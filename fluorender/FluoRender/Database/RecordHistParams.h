@@ -38,7 +38,11 @@ namespace flrd
 	{
 		public:
 			RecordHistParams();
+			RecordHistParams(const RecordHistParams& rec);
 			virtual ~RecordHistParams();
+
+			virtual RecordHistParams* asRecordHistParams() { return this; }
+			virtual const RecordHistParams* asRecordHistParams() const { return this; }
 
 			virtual EntryHist* getInput()
 			{
@@ -68,6 +72,9 @@ namespace flrd
 
 			virtual void getInputData(float* data);
 			virtual void getOutputData(float* data);
+
+			virtual void getInputData(std::vector<float>& data);
+			virtual void getOutputData(std::vector<float>& data);
 
 			float getHistPopl();
 			float getParamIter();

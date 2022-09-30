@@ -100,6 +100,11 @@ EntryParams::EntryParams()
 		m_data.assign(m_size, 0);
 }
 
+EntryParams::EntryParams(const EntryParams& ent) :
+	Entry(ent)
+{
+}
+
 EntryParams::~EntryParams()
 {
 }

@@ -34,14 +34,26 @@ namespace flrd
 {
 	class File;
 	class RecordHistParams;
+	class EntryHist;
+	class EntryParams;
 	class Entry
 	{
 		public:
 			Entry();
+			Entry(const Entry& ent);
 			virtual ~Entry();
+
+			virtual EntryHist* asEntryHist() { return 0; }
+			virtual const EntryHist* asEntryHist() const { return 0; }
+			virtual EntryParams* asEntryParams() { return 0; }
+			virtual const EntryParams* asEntryParams() const { return 0; }
 
 			virtual void open(File& file);
 			virtual void save(File& file);
+			virtual std::vector<float>& getStdData()
+			{
+				return m_data;
+			}
 
 			friend class RecordHistParams;
 

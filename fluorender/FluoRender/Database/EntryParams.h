@@ -58,7 +58,11 @@ namespace flrd
 			};
 
 			EntryParams();
+			EntryParams(const EntryParams& ent);
 			~EntryParams();
+
+			virtual EntryParams* asEntryParams() { return this; }
+			virtual const EntryParams* asEntryParams() const { return this; }
 
 			size_t getNameIndex(const std::string& name);
 			template <typename T>
