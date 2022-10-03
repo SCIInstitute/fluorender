@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <EntryHist.h>
 #include <EntryParams.h>
 #include <wx/stdpaths.h>
+#include <format>
 
 BEGIN_EVENT_TABLE(MachineLearningDlg, wxPanel)
 END_EVENT_TABLE()

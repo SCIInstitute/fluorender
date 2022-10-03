@@ -64,7 +64,9 @@ ImageJReader::ImageJReader()
 	//Geting absolute path to class file.
 	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 	exePath = wxPathOnly(exePath);
-	string imageJPath = exePath + GETSLASH() + "Java_Code" + GETSLASH() + "ImageJ_Reader";
+	string imageJPath = exePath.ToStdString();
+	imageJPath += GETSLASH() + "Java_Code" + GETSLASH();
+	imageJPath += "ImageJ_Reader";
 
 	//Java code to get the number of depth images.
 	m_pJVMInstance = JVMInitializer::getInstance();

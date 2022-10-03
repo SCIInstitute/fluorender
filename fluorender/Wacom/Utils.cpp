@@ -41,7 +41,7 @@ WTMGRDEFCONTEXT gpWTMgrDefContext = NULL;
 WTMGRDEFCONTEXTEX gpWTMgrDefContextEx = NULL;
 
 // TODO - add more wintab32 function pointers as needed
-char* gpszProgramName = "FluoRender Wacom Support";
+char gpszProgramName[] = "FluoRender Wacom Support";
 char* pszProgramName = NULL;
 
 #define GETPROCADDRESS(type, func) \
@@ -161,7 +161,7 @@ void ShowError( char *pszErrorMessage )
 
 //////////////////////////////////////////////////////////////////////////////
 
-void WacomTrace( char *lpszFormat, ...)
+void WacomTrace( const char *lpszFormat, ...)
 {
 	char szTraceMessage[ 128 ];
 

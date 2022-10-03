@@ -4746,7 +4746,7 @@ void VRenderGLView::SetParams(double t)
 		clip_view->SetVolumeData(m_frame->GetCurSelVol());
 	if (m_frame)
 	{
-		m_frame->UpdateTree(m_cur_vol ? m_cur_vol->GetName() : "");
+		m_frame->UpdateTree(m_cur_vol ? m_cur_vol->GetName() : wxString(""));
 		int index = interpolator->GetKeyIndexFromTime(t);
 		m_frame->GetRecorderDlg()->SetSelection(index);
 	}
@@ -4966,7 +4966,7 @@ void VRenderGLView::ReloadVolumeData(int frame)
 		m_frame->UpdateTree(
 			m_frame->GetCurSelVol() ?
 			m_frame->GetCurSelVol()->GetName() :
-			"");
+			wxString(""));
 	}
 }
 

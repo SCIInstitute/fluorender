@@ -505,7 +505,7 @@ void VRenderView::CreateBar()
 	m_aov_text = new wxTextCtrl(m_options_toolbar, ID_AovText, "",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
 	m_aov_text->ChangeValue(m_glview->GetPersp()?wxString::Format("%d",
-		int(m_glview->GetAov())):"Ortho");
+		int(m_glview->GetAov())):wxString("Ortho"));
 	m_options_toolbar->AddControl(st2);
 	m_options_toolbar->AddControl(m_aov_sldr);
 	m_options_toolbar->AddControl(m_aov_text);

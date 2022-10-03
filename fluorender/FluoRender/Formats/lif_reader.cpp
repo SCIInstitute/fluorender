@@ -568,7 +568,7 @@ void LIFReader::ReadElement(wxXmlNode* node)
 			str = child->GetAttribute("Visibility");
 			if (str != "0")
 			{
-				std::wstring name = child->GetAttribute("Name");
+				std::wstring name = child->GetAttribute("Name").ToStdWstring();
 				ReadData(child, name);
 			}
 		}

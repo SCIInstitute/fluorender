@@ -179,7 +179,7 @@ public:
 
 	TreePanel *GetTree();
 	ListPanel *GetList();
-	void UpdateTree(wxString name = "");
+	void UpdateTree(const wxString& name = "");
 	void UpdateTreeColors();
 	void UpdateTreeIcons();
 	void UpdateList();

@@ -2030,7 +2030,7 @@ void VRenderFrame::UpdateTreeColors()
 	m_tree_panel->Refresh(false);
 }
 
-void VRenderFrame::UpdateTree(wxString name)
+void VRenderFrame::UpdateTree(const wxString& name)
 {
 	if (!m_tree_panel)
 		return;

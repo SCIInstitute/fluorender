@@ -90,7 +90,7 @@ void ShowError( char *pszErrorMessage );
 //////////////////////////////////////////////////////////////////////////////
 #ifdef WACOM_DEBUG
 
-void WacomTrace( char *lpszFormat, ...);
+void WacomTrace( const char *lpszFormat, ...);
 
 #define WACOM_ASSERT( x ) assert( x )
 #define WACOM_TRACE(...)  WacomTrace(__VA_ARGS__)
