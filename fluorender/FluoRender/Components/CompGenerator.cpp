@@ -418,6 +418,9 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 
 		postwork(__FUNCTION__);
 	}
+
+	if (glbin.get_cg_table_enable())
+		AddEntry(iter, tran, diffuse, falloff, fixed);
 }
 
 void ComponentGenerator::DensityField(int dsize, int wsize,
@@ -631,6 +634,10 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 
 		postwork(__FUNCTION__);
 	}
+
+	if (glbin.get_cg_table_enable())
+		AddEntry(iter, tran, diffuse, falloff, fixed,
+			true, density, varth, dsize, wsize);
 }
 
 void ComponentGenerator::DistGrow(bool diffuse, int iter,
@@ -790,6 +797,11 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 
 		postwork(__FUNCTION__);
 	}
+
+	if (glbin.get_cg_table_enable())
+		AddEntry(iter, tran, diffuse, falloff, fixed,
+			false, 1.0f, 0.0001f, 5, 15,
+			true, dist_strength, dist_thresh, dsize, max_dist);
 }
 
 void ComponentGenerator::DistDensityField(
@@ -1081,6 +1093,11 @@ void ComponentGenerator::DistDensityField(
 
 		postwork(__FUNCTION__);
 	}
+
+	if (glbin.get_cg_table_enable())
+		AddEntry(iter, tran, diffuse, falloff, fixed,
+			true, density, varth, dsize2, wsize,
+			true, dist_strength, dist_thresh, dsize1, max_dist);
 }
 
 void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
@@ -1341,6 +1358,70 @@ void ComponentGenerator::FillBorders(float tol)
 	}
 }
 
+void ComponentGenerator::AddEntry(
+	int iter,
+	float thresh,
+	bool diff,
+	float falloff,
+	bool grow_fixed,
+	bool density,
+	float density_thresh,
+	float varth,
+	int density_window_size,
+	int density_stats_size,
+	bool use_dist_field,
+	float dist_strength,
+	float dist_thresh,
+	int dist_filter_size,
+	int max_dist,
+	bool clean,
+	int clean_iter,
+	int clean_size_vl
+	)
+{
+	//get histogram and add a record to table
+	//if (!m_view)
+	//	return;
+	//VolumeData* vd = m_view->m_cur_vol;
+	//if (!vd)
+	//	return;
+
+	//histogram
+	//flrd::Histogram histogram(vd);
+	//histogram.SetUseMask(true);
+	//histogram.SetBins(256);
+	//flrd::EntryHist* eh = histogram.GetEntryHist();
+
+	//parameters
+	flrd::EntryParams ep;
+	ep.setParam("iter", iter);
+	ep.setParam("thresh", thresh);
+	ep.setParam("use_dist_field", use_dist_field);
+	ep.setParam("dist_strength", dist_strength);
+	ep.setParam("dist_filter_size", dist_filter_size);
+	ep.setParam("max_dist", max_dist);
+	ep.setParam("dist_thresh", dist_thresh);
+	ep.setParam("diff", diff);
+	ep.setParam("falloff", falloff);
+	ep.setParam("density", density);
+	ep.setParam("density_thresh", density_thresh);
+	ep.setParam("varth", varth);
+	ep.setParam("density_window_size", density_window_size);
+	ep.setParam("density_stats_size", density_stats_size);
+	ep.setParam("cleanb", clean);
+	ep.setParam("clean_iter", clean_iter);
+	ep.setParam("clean_size_vl", clean_size_vl);
+	ep.setParam("grow_fixed", grow_fixed);
+	glbin.set_cg_entry(ep);
+
+	//record
+	//flrd::RecordHistParams* rec = new flrd::RecordHistParams();
+	//rec->setInput(eh);
+	//rec->setOutput(ep);
+
+	//table
+}
+
 void ComponentGenerator::GenerateDB()
 {
 	if (!CheckBricks())
@@ -1456,7 +1537,7 @@ void ComponentGenerator::GenerateDB()
 #ifdef _DEBUG
 		kernel_prog->readBuffer(arg_lut, lut);
 		DBMIUINT8 mi;
-		mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = nx * 2; mi.data = lut;
+		mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = nx; mi.data = lut;
 #endif
 		//release
 		kernel_prog->releaseMemObject(arg_rechist);

@@ -307,11 +307,13 @@ void MLCompGenPanel::OnStartRec(wxCommandEvent& event)
 	{
 		m_start_rec_btn->SetLabel("Started");
 		m_start_rec_btn->SetValue(true);
+		glbin.set_cg_table_enable(true);
 	}
 	else
 	{
 		m_start_rec_btn->SetLabel("Start");
 		m_start_rec_btn->SetValue(false);
+		glbin.set_cg_table_enable(false);
 	}
 }
 

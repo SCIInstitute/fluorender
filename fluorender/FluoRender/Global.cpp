@@ -32,7 +32,8 @@ using namespace fluo;
 
 Global Global::instance_;
 
-Global::Global()
+Global::Global() :
+	comp_gen_table_enable_(false)
 {
 
 }

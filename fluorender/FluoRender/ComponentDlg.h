@@ -215,7 +215,6 @@ public:
 	void SelectFullComp();
 
 	//learning functions
-	void AddRecord();
 	void ApplyRecord();
 
 	flrd::ComponentAnalyzer* GetAnalyzer()

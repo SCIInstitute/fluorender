@@ -33,7 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Cluster/kmeans.h>
 #include <Cluster/exmax.h>
 #include <Global.h>
-#include <Calculate/Histogram.h>
 #include <Database/RecordHistParams.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
@@ -3652,51 +3651,6 @@ void ComponentDlg::SelectFullComp()
 			m_view->m_paint_colocalize)
 			m_frame->GetColocalizationDlg()->Colocalize();
 	}
-}
-
-void ComponentDlg::AddRecord()
-{
-	//get histogram and add a record to table
-	if (!m_view)
-		return;
-	VolumeData* vd = m_view->m_cur_vol;
-	if (!vd)
-		return;
-
-	//histogram
-	flrd::Histogram histogram(vd);
-	histogram.SetUseMask(true);
-	histogram.SetBins(256);
-	flrd::EntryHist* eh = histogram.GetEntryHist();
-
-	//parameters
-	flrd::EntryParams* ep = new flrd::EntryParams();
-	ep->setParam("iter", m_iter);
-	ep->setParam("thresh", m_thresh);
-	ep->setParam("use_dist_field", m_use_dist_field);
-	ep->setParam("dist_strength", m_dist_strength);
-	ep->setParam("dist_filter_size", m_dist_filter_size);
-	ep->setParam("max_dist", m_max_dist);
-	ep->setParam("dist_thresh", m_dist_thresh);
-	ep->setParam("diff", m_diff);
-	ep->setParam("falloff", m_falloff);
-	ep->setParam("density", m_density);
-	ep->setParam("density_thresh", m_density_thresh);
-	ep->setParam("varth", m_varth);
-	ep->setParam("density_window_size", m_density_window_size);
-	ep->setParam("density_stats_size", m_density_stats_size);
-	ep->setParam("cleanb", m_clean);
-	ep->setParam("clean_iter", m_clean_iter);
-	ep->setParam("clean_size_vl", m_clean_size_vl);
-	ep->setParam("grow_fixed", m_grow_fixed);
-
-	//record
-	flrd::RecordHistParams* rec = new flrd::RecordHistParams();
-	rec->setInput(eh);
-	rec->setOutput(ep);
-
-	//table
-	glbin.get_cg_table().addRecord(rec);
 }
 
 void ComponentDlg::ApplyRecord()

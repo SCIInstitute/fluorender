@@ -84,6 +84,8 @@ namespace flrd
 			virtual void open(File& file);
 			virtual void save(File& file);
 
+			virtual bool getValid() { return m_data.size() == m_size; }
+
 			static unsigned int m_size;//parameter size
 
 	private:

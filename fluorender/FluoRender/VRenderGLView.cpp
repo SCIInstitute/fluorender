@@ -29,8 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderGLView.h"
 #include "VRenderView.h"
 #include "VRenderFrame.h"
+#include <Global.h>
 #include <Components/CompAnalyzer.h>
 #include <Calculate/Count.h>
+#include <Calculate/Histogram.h>
+#include <Database/RecordHistParams.h>
 #include <Distance/SegGrow.h>
 #include <Distance/Cov.h>
 #include <FLIVR/Framebuffer.h>
@@ -2102,6 +2105,28 @@ void VRenderGLView::DisplayStroke()
 void VRenderGLView::Segment()
 {
 	int mode = m_selector.GetMode();
+
+	//add ml record
+	if (glbin.get_cg_table_enable() &&
+		glbin.get_cg_entry().getValid() &&
+		m_cur_vol)
+	{
+		//histogram
+		flrd::Histogram histogram(m_cur_vol);
+		histogram.SetUseMask(true);
+		histogram.SetBins(256);
+		flrd::EntryHist* eh = histogram.GetEntryHist();
+
+		//record
+		flrd::RecordHistParams* rec = new flrd::RecordHistParams();
+		rec->setInput(eh);
+		flrd::EntryParams* ep(&glbin.get_cg_entry());
+		rec->setOutput(ep);
+
+		//table
+		glbin.get_cg_table().addRecord(rec);
+	}
+
 	HandleCamera();
 	if (mode == 9)
 	{

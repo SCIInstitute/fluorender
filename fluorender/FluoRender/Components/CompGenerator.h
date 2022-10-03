@@ -72,6 +72,26 @@ namespace flrd
 		void FillBorders(float);
 
 		//learning functions
+		void AddEntry(
+			int iter,
+			float thresh,
+			bool diff,
+			float falloff,
+			bool grow_fixed,
+			bool density = false,
+			float density_thresh = 1.0f,
+			float varth = 0.0001f,
+			int density_window_size = 5,
+			int density_stats_size = 15,
+			bool use_dist_field = false,
+			float dist_strength = 0.5f,
+			float dist_thresh = 0.25f,
+			int dist_filter_size = 3,
+			int max_dist = 30,
+			bool clean = false,
+			int clean_iter = 5,
+			int clean_size_vl = 5
+			);
 		void GenerateDB();
 
 		//unused

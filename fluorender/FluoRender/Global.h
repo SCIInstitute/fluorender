@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define GLOBAL_H
 
 #include <Tracking/VolCache.h>
+#include <Database/EntryParams.h>
 #include <Database/TableHistParams.h>
 
 #define glbin fluo::Global::instance()
@@ -48,6 +49,12 @@ namespace fluo
 
 		flrd::CacheQueue& get_cache_queue() { return cache_queue_; }
 
+		//learning
+		//comp gen
+		void set_cg_table_enable(bool value) { comp_gen_table_enable_ = value; }
+		bool get_cg_table_enable() { return comp_gen_table_enable_; }
+		void set_cg_entry(flrd::EntryParams& ep) { comp_gen_entry_ = ep; }
+		flrd::EntryParams& get_cg_entry() { return comp_gen_entry_; }
 		flrd::TableHistParams& get_cg_table() { return comp_gen_table_; }
 
 	private:
@@ -56,6 +63,8 @@ namespace fluo
 
 		flrd::CacheQueue cache_queue_;
 
+		bool comp_gen_table_enable_;//add records from ui
+		flrd::EntryParams comp_gen_entry_;//temporary entry to save cg params
 		flrd::TableHistParams comp_gen_table_;//records for learning comp generation settings
 	};
 

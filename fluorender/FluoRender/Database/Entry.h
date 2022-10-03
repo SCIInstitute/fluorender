@@ -50,6 +50,8 @@ namespace flrd
 
 			virtual void open(File& file);
 			virtual void save(File& file);
+
+			virtual bool getValid() { return !m_data.empty(); }
 			virtual std::vector<float>& getStdData()
 			{
 				return m_data;
