@@ -333,31 +333,31 @@ void MLCompGenPanel::PopBotList()
 	m_bot_grid->DeleteRows(0, row, true);
 
 	flrd::TableHistParams& table = glbin.get_cg_table();
-	wxString str_in, str_out;
+	std::string str_in, str_out;
 	std::vector<float> data_in, data_out;
 	for (int i = 0; i < table.getRecSize(); ++i)
 	{
 		m_bot_grid->InsertRows(0);
 
-		str_in.Clear();
+		str_in.clear();
 		table.getOneInput(i, data_in);
 		size_t len = data_in.size();
 		if (len)
 		{
 			for (size_t j = 0; j < data_in.size() - 1; ++j)
-				str_in += wxString::Format("%.2f", data_in[j]) + ", ";
-			str_in += wxString::Format("%.2f", data_in[len - 1]);
+				str_in += std::format("{:.2f}", data_in[j]) + ", ";
+			str_in += std::format("{:.2f}", data_in[len - 1]);
 		}
 		m_bot_grid->SetCellValue(0, 0, str_in);
 
-		str_out.Clear();
+		str_out.clear();
 		table.getOneOutput(i, data_out);
 		len = data_out.size();
 		if (len)
 		{
 			for (size_t j = 0; j < data_out.size() - 1; ++j)
-				str_out += wxString::Format("%.2f", data_out[j]) + ", ";
-			str_out += wxString::Format("%.2f", data_out[len - 1]);
+				str_out += std::format("{:.2f}", data_out[j]) + ", ";
+			str_out += std::format("{:.2f}", data_out[len - 1]);
 		}
 		m_bot_grid->SetCellValue(0, 1, str_out);
 	}
