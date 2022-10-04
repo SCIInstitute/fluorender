@@ -32,9 +32,11 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <string>
 #include <ctime>
+#include <functional>
 
 namespace flrd
 {
+	typedef std::function<void(int)> TableUpdateFunc;
 	class Table
 	{
 		public:
@@ -62,6 +64,7 @@ namespace flrd
 			virtual void addRecord(Record* rec);
 			virtual void readRecord(Record* rec);
 			virtual void delRecord(size_t i);
+			virtual void delRecords(std::vector<size_t>& vi);
 			virtual void setCreateTime(const std::time_t& t);
 			virtual std::time_t* getCreateTime()
 			{
@@ -84,6 +87,8 @@ namespace flrd
 			{
 				m_modify_time = std::time(0);
 				m_modified = true;
+				if (m_update_func)
+					m_update_func(3);
 			}
 			virtual bool getModified()
 			{
@@ -99,8 +104,7 @@ namespace flrd
 				return m_name;
 			}
 
-			virtual void open(const std::string& filename);
-			virtual void openinfo(const std::string& filename);//only read header
+			virtual void open(const std::string& filename, bool info = false);
 			virtual void save(const std::string& filename);
 
 			virtual size_t getRecSize()
@@ -140,6 +144,11 @@ namespace flrd
 					m_data[i]->getOutputData(data);
 			}
 
+			void setUpdateFunc(TableUpdateFunc func)
+			{
+				m_update_func = func;
+			}
+
 		protected:
 			bool m_modified;
 			std::time_t m_create_time;
@@ -148,6 +157,9 @@ namespace flrd
 			std::string m_notes;
 			size_t m_recnum;
 			std::vector<Record*> m_data;
+
+			//update
+			TableUpdateFunc m_update_func;
 	};
 }
 

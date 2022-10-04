@@ -58,7 +58,9 @@ public:
 
 	void Create();
 	virtual void PopTopList();
-	virtual void PopBotList() {};
+	virtual void UpdateList(int index);
+	virtual void UpdateTopList();
+	virtual void UpdateBotList() {};
 
 protected:
 	VRenderFrame* m_frame;
@@ -118,7 +120,7 @@ public:
 	~MLCompGenPanel();
 
 	virtual void PopTopList();
-	virtual void PopBotList();
+	virtual void UpdateBotList();
 	void LoadTable(const std::string& filename);
 	void SaveTable(const std::string& filename);
 

@@ -136,6 +136,8 @@ void EntryParams::open(File& file)
 	//data
 	if (file.check(TAG_ENT_DATA))
 		file.readVector(m_data);
+
+	m_valid = true;
 }
 
 void EntryParams::save(File& file)

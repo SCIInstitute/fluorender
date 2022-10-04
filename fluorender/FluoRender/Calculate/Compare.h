@@ -33,8 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/VolKernel.h>
 #include <functional>
 
-using namespace std;
-
 class VolumeData;
 namespace flrd
 {

@@ -215,7 +215,7 @@ void MachineLearningPanel::PopTopList()
 			m_dir + GETSLASH() +
 			list[i].ToStdString() + m_ext;
 		flrd::Table table;
-		table.openinfo(filename);
+		table.open(filename, true);
 		m_top_grid->InsertRows(i);
 		name = table.getName();
 		if (name.empty()) name = list[i].ToStdString();
@@ -226,13 +226,44 @@ void MachineLearningPanel::PopTopList()
 		std::tm* ptm;
 		ptm = std::localtime(table.getCreateTime());
 		std::strftime(b, 32, "%m/%d/%Y %H:%M:%S", ptm);
-		m_top_grid->SetCellValue(i, 3, std::string(b));
+		m_top_grid->SetCellValue(i, 4, std::string(b));
 		ptm = std::localtime(table.getModifyTime());
 		std::strftime(b, 32, "%m/%d/%Y %H:%M:%S", ptm);
-		m_top_grid->SetCellValue(i, 4, std::string(b));
+		m_top_grid->SetCellValue(i, 3, std::string(b));
 	}
 	m_top_grid->AutoSizeColumns();
 	m_top_grid->ClearSelection();
+}
+
+void MachineLearningPanel::UpdateList(int index)
+{
+	if (index & 1)
+		this->UpdateTopList();
+	if (index & 2)
+		this->UpdateBotList();
+}
+
+void MachineLearningPanel::UpdateTopList()
+{
+	flrd::TableHistParams& table = glbin.get_cg_table();
+	std::string name = table.getName();
+	for (int i = 0; i < m_top_grid->GetNumberRows(); ++i)
+	{
+		if (m_top_grid->GetCellValue(i, 0) == wxString(name))
+		{
+			m_top_grid->SetCellValue(i, 1, std::to_string(table.getRecNum()));
+			m_top_grid->SetCellValue(i, 2, table.getNotes());
+			char b[32];
+			std::tm* ptm;
+			ptm = std::localtime(table.getCreateTime());
+			std::strftime(b, 32, "%m/%d/%Y %H:%M:%S", ptm);
+			m_top_grid->SetCellValue(i, 4, std::string(b));
+			ptm = std::localtime(table.getModifyTime());
+			std::strftime(b, 32, "%m/%d/%Y %H:%M:%S", ptm);
+			m_top_grid->SetCellValue(i, 3, std::string(b));
+			break;
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -252,6 +283,10 @@ MLCompGenPanel::MLCompGenPanel(
 	m_del_rec_id = ID_DelRecBtn;
 	Create();
 	PopTopList();
+
+	flrd::TableHistParams& table = glbin.get_cg_table();
+	table.setUpdateFunc(std::bind(
+		&MLCompGenPanel::UpdateList, this, std::placeholders::_1));
 }
 
 MLCompGenPanel::~MLCompGenPanel()
@@ -280,7 +315,7 @@ void MLCompGenPanel::OnLoadTable(wxCommandEvent& event)
 	{
 		wxString name = m_top_grid->GetCellValue(seli[0], 0);
 		LoadTable(name.ToStdString());
-		PopBotList();
+		UpdateBotList();
 	}
 }
 
@@ -319,7 +354,13 @@ void MLCompGenPanel::OnStartRec(wxCommandEvent& event)
 
 void MLCompGenPanel::OnDelRec(wxCommandEvent& event)
 {
-	wxMessageBox("cg del rec");
+	flrd::TableHistParams& table = glbin.get_cg_table();
+	wxArrayInt seli = m_bot_grid->GetSelectedRows();
+	std::vector<size_t> vi;
+	size_t count = table.getRecSize();
+	for (size_t i = 0; i < seli.GetCount(); ++i)
+		vi.push_back(count - 1 - seli[i]);
+	table.delRecords(vi);
 }
 
 void MLCompGenPanel::PopTopList()
@@ -329,7 +370,7 @@ void MLCompGenPanel::PopTopList()
 	MachineLearningPanel::PopTopList();
 }
 
-void MLCompGenPanel::PopBotList()
+void MLCompGenPanel::UpdateBotList()
 {
 	int row = m_bot_grid->GetNumberRows();
 	m_bot_grid->DeleteRows(0, row, true);
