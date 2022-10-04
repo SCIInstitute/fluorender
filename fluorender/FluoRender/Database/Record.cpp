@@ -65,3 +65,11 @@ void Record::save(File& file)
 		m_output->save(file);
 	}
 }
+
+bool Record::compare(Record* rec)
+{
+	if (!m_input || !m_output)
+		return false;
+	return m_input->compare(rec->m_input) &&
+		m_output->compare(rec->m_output);
+}

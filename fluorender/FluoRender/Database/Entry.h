@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _ENTRY_H_
 
 #include <vector>
+#include <algorithm>
 
 namespace flrd
 {
@@ -55,6 +56,12 @@ namespace flrd
 			virtual std::vector<float>& getStdData()
 			{
 				return m_data;
+			}
+
+			virtual bool compare(Entry* ent)
+			{
+				if (!ent) return false;
+				return std::equal(m_data.begin(), m_data.end(), ent->m_data.begin());
 			}
 
 			friend class RecordHistParams;

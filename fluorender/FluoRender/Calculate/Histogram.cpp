@@ -99,6 +99,8 @@ bool Histogram::CheckBricks()
 {
 	if (!m_vd)
 		return false;
+	if (m_use_mask && !m_vd->GetMask(false))
+		return false;
 	if (!m_vd->GetTexture())
 		return false;
 	int brick_num = m_vd->GetTexture()->get_brick_num();
@@ -184,13 +186,15 @@ EntryHist* Histogram::GetEntryHist()
 		kernel_prog->readBuffer(sizeof(unsigned int)*(bin+1), sh, sh);
 	}
 
+	if (sh[m_bins])
+	{
+		hist = new flrd::EntryHist();
+		hist->setRange(minv, maxv);
+		hist->setPopulation(sh[m_bins]);
+		hist->setData(sh);
+	}
+	
 	kernel_prog->releaseAll();
-
-	hist = new flrd::EntryHist();
-	hist->setRange(minv, maxv);
-	hist->setPopulation(sh[m_bins]);
-	hist->setData(sh);
 	delete[] sh;
-
 	return hist;
 }

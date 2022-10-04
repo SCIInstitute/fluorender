@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "RecordHistParams.h"
 #include <FileIO/File.h>
 #include <fstream>
+#include <filesystem>
 
 using namespace flrd;
 
@@ -75,6 +76,12 @@ void Table::addRecord(Record* rec)
 {
 	if (!rec)
 		return;
+	//make sure uniquness
+	for (auto i : m_data)
+	{
+		if (i->compare(rec))
+			return;
+	}
 	m_data.push_back(rec);
 	m_modify_time = std::time(0);
 	setModified();
@@ -119,11 +126,16 @@ void Table::open(const std::string& filename)
 	//name
 	if (file.check(TAG_TABLE_NAME))
 	{
-		size_t ns;
+		size_t ns = 0;
 		if (file.check(TAG_TABLE_NAME_SIZE))
 			file.readValue(ns);
 		if (ns)
 			m_name = file.readString(ns);
+	}
+	if (m_name.empty())
+	{
+		const std::filesystem::path p(filename);
+		m_name = p.stem().string();
 	}
 	//time of creation
 	if (file.check(TAG_TABLE_TIME_CREATE))
@@ -134,7 +146,7 @@ void Table::open(const std::string& filename)
 	//notes
 	if (file.check(TAG_TABLE_NOTES))
 	{
-		size_t ns;
+		size_t ns = 0;
 		if (file.check(TAG_TABLE_NOTE_SIZE))
 			file.readValue(ns);
 		if (ns)
@@ -199,11 +211,16 @@ void Table::openinfo(const std::string& filename)
 	//name
 	if (file.check(TAG_TABLE_NAME))
 	{
-		size_t ns;
+		size_t ns = 0;
 		if (file.check(TAG_TABLE_NAME_SIZE))
 			file.readValue(ns);
 		if (ns)
 			m_name = file.readString(ns);
+	}
+	if (m_name.empty())
+	{
+		const std::filesystem::path p(filename);
+		m_name = p.stem().string();
 	}
 	//time of creation
 	if (file.check(TAG_TABLE_TIME_CREATE))
@@ -214,7 +231,7 @@ void Table::openinfo(const std::string& filename)
 	//notes
 	if (file.check(TAG_TABLE_NOTES))
 	{
-		size_t ns;
+		size_t ns = 0;
 		if (file.check(TAG_TABLE_NOTE_SIZE))
 			file.readValue(ns);
 		if (ns)

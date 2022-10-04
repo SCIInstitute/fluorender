@@ -62,6 +62,8 @@ namespace flrd
 			virtual void getInputData(std::vector<float>& data) = 0;
 			virtual void getOutputData(std::vector<float>& data) = 0;
 
+			virtual bool compare(Record* rec);
+
 		protected:
 			Entry* m_input;
 			Entry* m_output;

@@ -37,62 +37,64 @@ namespace flrd
 {
 	class EntryParams : public Entry
 	{
-		public:
-			enum EntryTags
-			{
-				TAG_ENT_SIZE = 1,
-				TAG_ENT_DATA
-			};
-			enum ParamTypes
-			{
-				IPT_VOID = 0,
-				IPT_BOOL,
-				IPT_CHAR,
-				IPT_UCHAR,
-				IPT_SHORT,
-				IPT_USHORT,
-				IPT_INT,
-				IPT_UINT,
-				IPT_FLOAT,
-				IPT_DOUBLE,
-			};
+	public:
+		enum EntryTags
+		{
+			TAG_ENT_SIZE = 1,
+			TAG_ENT_DATA
+		};
+		enum ParamTypes
+		{
+			IPT_VOID = 0,
+			IPT_BOOL,
+			IPT_CHAR,
+			IPT_UCHAR,
+			IPT_SHORT,
+			IPT_USHORT,
+			IPT_INT,
+			IPT_UINT,
+			IPT_FLOAT,
+			IPT_DOUBLE,
+		};
 
-			EntryParams();
-			EntryParams(const EntryParams& ent);
-			~EntryParams();
+		EntryParams();
+		EntryParams(const EntryParams& ent);
+		~EntryParams();
 
-			virtual EntryParams* asEntryParams() { return this; }
-			virtual const EntryParams* asEntryParams() const { return this; }
+		virtual EntryParams* asEntryParams() { return this; }
+		virtual const EntryParams* asEntryParams() const { return this; }
 
-			size_t getNameIndex(const std::string& name);
-			template <typename T>
-			void setParam(const std::string& name, T value)
-			{
-				size_t i = getNameIndex(name);
-				if (i < m_size)
-					m_data[i] = float(value);
-			}
+		size_t getNameIndex(const std::string& name);
+		template <typename T>
+		void setParam(const std::string& name, T value)
+		{
+			size_t i = getNameIndex(name);
+			if (i < m_size)
+				m_data[i] = float(value);
+			m_valid = true;
+		}
 
-			float getParam(const std::string& name)
-			{
-				size_t i = getNameIndex(name);
-				if (i < m_size)
-					return m_data[i];
-				return 0;
-			}
+		float getParam(const std::string& name)
+		{
+			size_t i = getNameIndex(name);
+			if (i < m_size)
+				return m_data[i];
+			return 0;
+		}
 
-			virtual void open(File& file);
-			virtual void save(File& file);
+		virtual void open(File& file);
+		virtual void save(File& file);
 
-			virtual bool getValid() { return m_data.size() == m_size; }
+		virtual bool getValid() { return m_valid; }
 
-			static unsigned int m_size;//parameter size
+		static unsigned int m_size;//parameter size
 
 	private:
-			static std::vector<std::string> m_names;//parameter names
-			static std::unordered_map<std::string, size_t> m_name_index;//index of names
-			static std::vector<ParamTypes> m_types;//parameter types for external program
-			//std::vector<float> m_data;//parameter values, converted to float
+		bool m_valid;
+		static std::vector<std::string> m_names;//parameter names
+		static std::unordered_map<std::string, size_t> m_name_index;//index of names
+		static std::vector<ParamTypes> m_types;//parameter types for external program
+		//std::vector<float> m_data;//parameter values, converted to float
 	};
 }
 

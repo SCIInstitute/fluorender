@@ -55,7 +55,10 @@ namespace fluo
 		bool get_cg_table_enable() { return comp_gen_table_enable_; }
 		void set_cg_entry(flrd::EntryParams& ep) { comp_gen_entry_ = ep; }
 		flrd::EntryParams& get_cg_entry() { return comp_gen_entry_; }
-		flrd::TableHistParams& get_cg_table() { return comp_gen_table_; }
+		flrd::TableHistParams& get_cg_table()
+		{
+			return comp_gen_table_;
+		}
 
 	private:
 		Global();

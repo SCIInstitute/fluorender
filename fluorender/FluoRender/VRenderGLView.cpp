@@ -2114,17 +2114,19 @@ void VRenderGLView::Segment()
 		//histogram
 		flrd::Histogram histogram(m_cur_vol);
 		histogram.SetUseMask(true);
-		histogram.SetBins(256);
 		flrd::EntryHist* eh = histogram.GetEntryHist();
 
-		//record
-		flrd::RecordHistParams* rec = new flrd::RecordHistParams();
-		rec->setInput(eh);
-		flrd::EntryParams* ep(&glbin.get_cg_entry());
-		rec->setOutput(ep);
+		if (eh)
+		{
+			//record
+			flrd::RecordHistParams* rec = new flrd::RecordHistParams();
+			rec->setInput(eh);
+			flrd::EntryParams* ep = new flrd::EntryParams(glbin.get_cg_entry());
+			rec->setOutput(ep);
 
-		//table
-		glbin.get_cg_table().addRecord(rec);
+			//table
+			glbin.get_cg_table().addRecord(rec);
+		}
 	}
 
 	HandleCamera();

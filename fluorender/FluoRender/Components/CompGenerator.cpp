@@ -1379,19 +1379,6 @@ void ComponentGenerator::AddEntry(
 	int clean_size_vl
 	)
 {
-	//get histogram and add a record to table
-	//if (!m_view)
-	//	return;
-	//VolumeData* vd = m_view->m_cur_vol;
-	//if (!vd)
-	//	return;
-
-	//histogram
-	//flrd::Histogram histogram(vd);
-	//histogram.SetUseMask(true);
-	//histogram.SetBins(256);
-	//flrd::EntryHist* eh = histogram.GetEntryHist();
-
 	//parameters
 	flrd::EntryParams ep;
 	ep.setParam("iter", iter);
@@ -1413,13 +1400,6 @@ void ComponentGenerator::AddEntry(
 	ep.setParam("clean_size_vl", clean_size_vl);
 	ep.setParam("grow_fixed", grow_fixed);
 	glbin.set_cg_entry(ep);
-
-	//record
-	//flrd::RecordHistParams* rec = new flrd::RecordHistParams();
-	//rec->setInput(eh);
-	//rec->setOutput(ep);
-
-	//table
 }
 
 void ComponentGenerator::GenerateDB()

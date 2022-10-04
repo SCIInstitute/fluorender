@@ -98,11 +98,13 @@ EntryParams::EntryParams()
 	//fixed size
 	if (m_size)
 		m_data.assign(m_size, 0);
+	m_valid = false;
 }
 
 EntryParams::EntryParams(const EntryParams& ent) :
 	Entry(ent)
 {
+	m_valid = ent.m_valid;
 }
 
 EntryParams::~EntryParams()
