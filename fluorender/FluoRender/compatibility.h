@@ -360,6 +360,26 @@ inline bool IS_NUMBER(const std::string& s)
 		s.end(), [](unsigned char c) { return !std::isdigit(int(c)); }) == s.end();
 }
 
+inline void INC_NUMBER(std::string& s)
+{
+	if (s.empty())
+	{
+		s = "1";
+		return;
+	}
+	if (std::isdigit(s.back()))
+	{
+		size_t p = s.find_last_not_of("0123456789") + 1;
+		std::string sn = s.substr(p);
+		s = s.substr(0, p);
+		s += std::to_string(std::stoi(sn) + 1);
+	}
+	else
+	{
+		s += "1";
+	}
+}
+
 #else // MAC OSX or LINUX
 
 #include <string>
@@ -701,6 +721,21 @@ inline bool IS_NUMBER(const std::string& s)
 {
 	return !s.empty() && std::find_if(s.begin(),
 		s.end(), [](unsigned char c) { return !std::isdigit(int(c)); }) == s.end();
+}
+
+inline void INC_NUMBER(std::string& s)
+{
+	if (std::isdigit(s.back()))
+	{
+		size_t p = s.find_last_not_of("0123456789") + 1;
+		std::string sn = s.substr(p);
+		s = s.substr(0, p);
+		s += std::to_string(std::stoi(sn) + 1);
+	}
+	else
+	{
+		s += "1";
+	}
 }
 
 //LINUX SPECIFIC

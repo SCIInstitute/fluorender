@@ -80,17 +80,21 @@ protected:
 	wxGrid *m_bot_grid;
 	wxString m_bot_grid_name;
 	wxWindowID m_bot_grid_id;
+	wxStaticText* m_bot_table_name;
+	wxStaticText* m_start_prompt_text;
 	wxToggleButton* m_start_rec_btn;
 	wxWindowID m_start_rec_id;
 	wxButton* m_del_rec_btn;
 	wxWindowID m_del_rec_id;
 
 	bool m_record;//state for recording
-	wxString m_dir;//dir for searching tables
-	wxString m_ext;//file extension for tables
-	wxString m_exepath;//path to executable
+	std::string m_dir;//dir for searching tables
+	std::string m_ext;//file extension for tables
+	std::string m_exepath;//path to executable
 
 protected:
+	virtual bool MatchTableName(std::string& name);
+	//
 	virtual void OnNewTable(wxCommandEvent& event) = 0;
 	virtual void OnLoadTable(wxCommandEvent& event) = 0;
 	virtual void OnDelTable(wxCommandEvent& event) = 0;
@@ -119,7 +123,6 @@ public:
 		wxWindow* parent);
 	~MLCompGenPanel();
 
-	virtual void PopTopList();
 	virtual void UpdateBotList();
 	void LoadTable(const std::string& filename);
 	void SaveTable(const std::string& filename);

@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "Table.h"
 #include "RecordHistParams.h"
 #include <FileIO/File.h>
+#include <compatibility.h>
 #include <fstream>
 #include <filesystem>
 #include <algorithm>
@@ -48,7 +49,14 @@ Table::Table(const Table& table) :
 	m_recnum(table.m_recnum),
 	m_update_func(nullptr)
 {
-	m_name = table.m_name + "_copy";
+	std::string tname = table.m_name;
+	if (tname.empty())
+		m_name = "New_table";
+	else
+	{
+		INC_NUMBER(tname);
+		m_name = tname;
+	}
 	m_modify_time = m_create_time = std::time(0);
 	for (auto i : table.m_data)
 	{
@@ -73,6 +81,10 @@ void Table::clear()
 		delete i;
 	}
 	m_data.clear();
+	m_modified = false;
+	m_name = "";
+	m_notes = "";
+	m_recnum = 0;
 }
 
 void Table::addRecord(Record* rec)
@@ -135,6 +147,8 @@ void Table::setCreateTime(const std::time_t& t)
 
 void Table::open(const std::string& filename, bool info)
 {
+	clear();
+
 	flrd::File file;
 	file.beginRead(filename);
 
