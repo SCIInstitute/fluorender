@@ -106,6 +106,10 @@ void MachineLearningPanel::Create()
 	m_top_grid->SetColLabelValue(2, "Notes");
 	m_top_grid->SetColLabelValue(3, "Date modified");
 	m_top_grid->SetColLabelValue(4, "Date created");
+	m_top_grid->Connect(m_top_grid_id, wxEVT_GRID_CELL_CHANGING,
+		wxGridEventHandler(MachineLearningPanel::OnTopGridCellChanging), NULL, this);
+	m_top_grid->Connect(m_top_grid_id, wxEVT_GRID_CELL_CHANGED,
+		wxGridEventHandler(MachineLearningPanel::OnTopGridCellChanged), NULL, this);
 	m_top_grid->Fit();
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	m_new_table_btn = new wxButton(panel_top, m_new_table_id, "New",
@@ -148,6 +152,12 @@ void MachineLearningPanel::Create()
 	m_bot_grid->CreateGrid(1, 2);
 	m_bot_grid->SetColLabelValue(0, "Input");
 	m_bot_grid->SetColLabelValue(1, "Output");
+	m_bot_grid->Connect(m_bot_grid_id, wxEVT_GRID_COL_AUTO_SIZE,
+		wxGridSizeEventHandler(MachineLearningPanel::OnBotGridAutoSize), NULL, this);
+	m_bot_grid->Connect(m_bot_grid_id, wxEVT_GRID_CELL_CHANGING,
+		wxGridEventHandler(MachineLearningPanel::OnBotGridCellChanging), NULL, this);
+	m_bot_grid->Connect(m_bot_grid_id, wxEVT_GRID_CELL_CHANGED,
+		wxGridEventHandler(MachineLearningPanel::OnBotGridCellChanged), NULL, this);
 	m_bot_grid->Fit();
 	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	m_bot_table_name = new wxStaticText(panel_bot, wxID_ANY, "No table loaded");
@@ -290,6 +300,38 @@ bool MachineLearningPanel::MatchTableName(std::string& name)
 	return modified;
 }
 
+void MachineLearningPanel::EvenSizeBotGrid()
+{
+	int s0 = m_bot_grid->GetRowLabelSize();
+	int w, h;
+	m_bot_grid->GetSize(&w, &h);
+	int colw = (w - s0) / 2;
+	m_bot_grid->SetColSize(0, colw);
+	m_bot_grid->SetColMinimalWidth(0, colw);
+	m_bot_grid->SetColSize(1, colw);
+	m_bot_grid->SetColMinimalWidth(1, colw);
+}
+
+void MachineLearningPanel::OnTopGridCellChanging(wxGridEvent& event)
+{
+	int c = event.GetCol();
+	if (c != 0 && c != 2)
+		event.Veto();
+}
+
+void MachineLearningPanel::OnBotGridCellChanging(wxGridEvent& event)
+{
+	event.Veto();
+}
+
+void MachineLearningPanel::OnTopGridCellChanged(wxGridEvent& event)
+{
+}
+
+void MachineLearningPanel::OnBotGridCellChanged(wxGridEvent& event)
+{
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 MLCompGenPanel::MLCompGenPanel(
 	VRenderFrame* frame, wxWindow* parent) :
@@ -426,6 +468,55 @@ void MLCompGenPanel::OnDelRec(wxCommandEvent& event)
 	table.delRecords(vi);
 }
 
+void MLCompGenPanel::OnBotGridAutoSize(wxGridSizeEvent& event)
+{
+	EvenSizeBotGrid();
+}
+
+void MLCompGenPanel::OnTopGridCellChanged(wxGridEvent& event)
+{
+	int c = event.GetCol();
+	int r = event.GetRow();
+	std::string str0, str1;
+	flrd::TableHistParams& table = glbin.get_cg_table();
+	if (c == 0)
+	{
+		//name
+		str0 = event.GetString();
+		str1 = m_top_grid->GetCellValue(r, c).ToStdString();
+		if (str0 == table.getName())
+			table.setName(str1);
+		flrd::TableHistParams temptbl;
+		std::string filename = m_exepath;
+		filename += GETSLASH() + m_dir + GETSLASH();
+		temptbl.open(filename + str0 + m_ext);
+		temptbl.setName(str1);
+		temptbl.save(filename + str1 + m_ext);
+		PopTopList();
+		m_top_grid->ClearSelection();
+	}
+	else if (c == 2)
+	{
+		//notes
+		str0 = m_top_grid->GetCellValue(r, 0).ToStdString();
+		str1 = m_top_grid->GetCellValue(r, c).ToStdString();
+		if (str0 == table.getName())
+		{
+			table.setNotes(str1);
+		}
+		else
+		{
+			flrd::TableHistParams temptbl;
+			std::string filename = m_exepath;
+			filename += GETSLASH() + m_dir + GETSLASH() + str0 + m_ext;
+			temptbl.open(filename);
+			temptbl.setNotes(str1);
+			temptbl.save(filename);
+		}
+	}
+	event.Skip();
+}
+
 void MLCompGenPanel::UpdateBotList()
 {
 	int row = m_bot_grid->GetNumberRows();
@@ -476,7 +567,7 @@ void MLCompGenPanel::UpdateBotList()
 		}
 		m_bot_grid->SetCellValue(0, 1, str_out);
 	}
-	m_bot_grid->AutoSizeColumns();
+	EvenSizeBotGrid();
 	m_bot_grid->ClearSelection();
 	Layout();
 }

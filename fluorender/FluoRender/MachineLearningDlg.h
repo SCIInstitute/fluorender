@@ -94,6 +94,7 @@ protected:
 
 protected:
 	virtual bool MatchTableName(std::string& name);
+	virtual void EvenSizeBotGrid();
 	//
 	virtual void OnNewTable(wxCommandEvent& event) = 0;
 	virtual void OnLoadTable(wxCommandEvent& event) = 0;
@@ -102,6 +103,13 @@ protected:
 	//
 	virtual void OnStartRec(wxCommandEvent& event) = 0;
 	virtual void OnDelRec(wxCommandEvent& event) = 0;
+	//grid size
+	virtual void OnBotGridAutoSize(wxGridSizeEvent& event) = 0;
+	//grid edit
+	virtual void OnTopGridCellChanging(wxGridEvent& event);
+	virtual void OnBotGridCellChanging(wxGridEvent& event);
+	virtual void OnTopGridCellChanged(wxGridEvent& event);
+	virtual void OnBotGridCellChanged(wxGridEvent& event);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -135,6 +143,10 @@ protected:
 	//
 	virtual void OnStartRec(wxCommandEvent& event);
 	virtual void OnDelRec(wxCommandEvent& event);
+	//grid size
+	void OnBotGridAutoSize(wxGridSizeEvent& event);
+	//grid cell edit
+	void OnTopGridCellChanged(wxGridEvent& event);
 
 private:
 };
