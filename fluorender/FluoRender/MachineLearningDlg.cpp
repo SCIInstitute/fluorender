@@ -90,12 +90,12 @@ void MachineLearningPanel::Create()
 	wxStaticText* st = 0;
 
 	wxBoxSizer *mainsizer = new wxBoxSizer(wxHORIZONTAL);
-	wxSplitterWindow *splittermain = new wxSplitterWindow(this, wxID_ANY,
+	m_splitter = new wxSplitterWindow(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxSP_THIN_SASH | wxSP_BORDER | wxSP_LIVE_UPDATE);
-	splittermain->SetMinimumPaneSize(160);
-	mainsizer->Add(splittermain, 1, wxBOTTOM | wxLEFT | wxEXPAND, 5);
+	m_splitter->SetMinimumPaneSize(160);
+	mainsizer->Add(m_splitter, 1, wxBOTTOM | wxLEFT | wxEXPAND, 5);
 
-	wxPanel *panel_top = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
+	wxPanel *panel_top = new wxPanel(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
 	wxBoxSizer* sizerTop = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(panel_top, wxID_ANY, m_top_grid_name,
 		wxDefaultPosition, wxDefaultSize);
@@ -144,7 +144,7 @@ void MachineLearningPanel::Create()
 	sizerTop->Add(10, 10);
 	panel_top->SetSizer(sizerTop);
 
-	wxPanel *panel_bot = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
+	wxPanel *panel_bot = new wxPanel(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
 	wxBoxSizer* sizerBot = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(panel_bot, wxID_ANY, m_bot_grid_name,
 		wxDefaultPosition, wxDefaultSize);
@@ -197,8 +197,8 @@ void MachineLearningPanel::Create()
 	sizerBot->Add(10, 10);
 	panel_bot->SetSizer(sizerBot);
 
-	splittermain->SetSashGravity(0.0);
-	splittermain->SplitHorizontally(panel_top, panel_bot, 100);
+	m_splitter->SetSashGravity(0.0);
+	m_splitter->SplitHorizontally(panel_top, panel_bot, 100);
 
 	SetSizer(mainsizer);
 	panel_top->Layout();
@@ -241,6 +241,15 @@ void MachineLearningPanel::PopTopList()
 	}
 	m_top_grid->AutoSizeColumns();
 	m_top_grid->ClearSelection();
+	row = m_top_grid->GetNumberRows();
+	int w, h, x, y;
+	int s0 = m_top_grid->GetColLabelSize();
+	int s1 = m_top_grid->GetRowSize(0);
+	m_top_grid->GetPosition(&x, &y);
+	y += s0 + row * s1 + 50;
+	GetSize(&w, &h);
+	y = std::min(y, h/2);
+	m_splitter->SetSashPosition(y);
 }
 
 void MachineLearningPanel::UpdateList(int index)
@@ -372,14 +381,15 @@ MLCompGenPanel::~MLCompGenPanel()
 
 void MLCompGenPanel::OnNewTable(wxCommandEvent& event)
 {
-	flrd::TableHistParams table;
-	std::string name = "New_table";
-	MatchTableName(name);
-	table.setName(name);
-	std::string filename = m_exepath;
-	filename += GETSLASH() + m_dir + GETSLASH() + name + m_ext;
-	table.save(filename);
-	PopTopList();
+	//flrd::TableHistParams table;
+	//std::string name = "New_table";
+	//MatchTableName(name);
+	//table.setName(name);
+	//std::string filename = m_exepath;
+	//filename += GETSLASH() + m_dir + GETSLASH() + name + m_ext;
+	//table.save(filename);
+	//PopTopList();
+	m_top_grid->InsertRows(0);
 }
 
 void MLCompGenPanel::OnLoadTable(wxCommandEvent& event)

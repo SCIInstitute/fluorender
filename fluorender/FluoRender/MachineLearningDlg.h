@@ -64,6 +64,7 @@ public:
 
 protected:
 	VRenderFrame* m_frame;
+	wxSplitterWindow* m_splitter;
 	//
 	wxGrid *m_top_grid;
 	wxString m_top_grid_name;
