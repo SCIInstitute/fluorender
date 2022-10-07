@@ -244,7 +244,7 @@ void MachineLearningPanel::PopTopList()
 	row = m_top_grid->GetNumberRows();
 	int w, h, x, y;
 	int s0 = m_top_grid->GetColLabelSize();
-	int s1 = m_top_grid->GetRowSize(0);
+	int s1 = row > 0 ? m_top_grid->GetRowSize(0) : 0;
 	m_top_grid->GetPosition(&x, &y);
 	y += s0 + row * s1 + 50;
 	GetSize(&w, &h);

@@ -537,27 +537,20 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 
 		//init
 		kernel_prog_dens->executeKernel(kernel_dens_index0, 3, global_size2, local_size);
-		//debug
-		//val = new unsigned char[dnx*dny*dnz];
-		//kernel_prog_dens->readBuffer(arg_densf, val);
-		//ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
-		//ofs.write((char*)val, dnx*dny*dnz);
-		//delete[] val;
-		//ofs.close();
+#ifdef _DEBUG
+		//read back
+		DBMIUINT8 densf(dnx, dny, 1);
+		kernel_prog_dens->readBuffer(arg_densf, densf.data);
+#endif
 		//group avg and var
 		global_size[0] = size_t(ngx); global_size[1] = size_t(ngy); global_size[2] = size_t(ngz);
 		kernel_prog_dens->executeKernel(kernel_dens_index1, 3, global_size, local_size);
-		//debug
-		//val = new unsigned char[ngx*ngy*ngz];
-		//kernel_prog_dens->readBuffer(arg_gavg, val);
-		//ofs.open("E:/DATA/Test/density_field/arg_gavg.bin", std::ios::out | std::ios::binary);
-		//ofs.write((char*)val, ngx*ngy*ngz);
-		//ofs.close();
-		//kernel_prog_dens->readBuffer(arg_gvar, val);
-		//ofs.open("E:/DATA/Test/density_field/arg_gvar.bin", std::ios::out | std::ios::binary);
-		//ofs.write((char*)val, ngx*ngy*ngz);
-		//ofs.close();
-		//delete[] val;
+#ifdef _DEBUG
+		//read back
+		DBMIUINT8 gvar(ngx, ngy, 1);
+		kernel_prog_dens->readBuffer(arg_gavg, gvar.data);
+		kernel_prog_dens->readBuffer(arg_gvar, gvar.data);
+#endif
 		//compute avg
 		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2);
@@ -940,13 +933,11 @@ void ComponentGenerator::DistDensityField(
 			kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&re));
 			kernel_prog_dist->executeKernel(kernel_dist_index1, 3, global_size, local_size);
 		}
-		//debug
-		//val = new unsigned char[nx*ny*nz];
-		//kernel_prog_dist->readBuffer(arg_distf, val);
-		//ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
-		//ofs.write((char*)val, nx*ny*nz);
-		//delete[] val;
-		//ofs.close();
+//#ifdef _DEBUG
+//		//read back
+//		DBMIUINT8 distf(nx, ny, 1);
+//		kernel_prog_dist->readBuffer(arg_distf, distf.data);
+//#endif
 
 		//generate density field arg_densf
 		//set
@@ -994,27 +985,14 @@ void ComponentGenerator::DistDensityField(
 
 		//init
 		kernel_prog_dens->executeKernel(kernel_dens_index0, 3, global_size2, local_size);
-		//debug
-		//val = new unsigned char[dnx*dny*dnz];
-		//kernel_prog_dens->readBuffer(arg_densf, val);
-		//ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
-		//ofs.write((char*)val, dnx*dny*dnz);
-		//delete[] val;
-		//ofs.close();
+//#ifdef _DEBUG
+//		//read back
+//		DBMIUINT8 densf(dnx, dny, 1);
+//		kernel_prog_dens->readBuffer(arg_densf, densf.data);
+//#endif
 		//group avg and var
 		global_size[0] = size_t(ngx); global_size[1] = size_t(ngy); global_size[2] = size_t(ngz);
 		kernel_prog_dens->executeKernel(kernel_dens_index1, 3, global_size, local_size);
-		//debug
-		//val = new unsigned char[ngx*ngy*ngz];
-		//kernel_prog_dens->readBuffer(arg_gavg, val);
-		//ofs.open("E:/DATA/Test/density_field/arg_gavg.bin", std::ios::out | std::ios::binary);
-		//ofs.write((char*)val, ngx*ngy*ngz);
-		//ofs.close();
-		//kernel_prog_dens->readBuffer(arg_gvar, val);
-		//ofs.open("E:/DATA/Test/density_field/arg_gvar.bin", std::ios::out | std::ios::binary);
-		//ofs.write((char*)val, ngx*ngy*ngz);
-		//ofs.close();
-		//delete[] val;
 		//compute avg
 		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2);
@@ -1028,18 +1006,6 @@ void ComponentGenerator::DistDensityField(
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		kernel_prog_dens->setKernelArgument(arg_gvar);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
-
-		//debug
-		//val = new unsigned char[dnx*dny*dnz];
-		//kernel_prog_dens->readBuffer(arg_avg, val);
-		//ofs.open("E:/DATA/Test/density_field/avg.bin", std::ios::out | std::ios::binary);
-		//ofs.write((char*)val, dnx*dny*dnz);
-		//ofs.close();
-		//kernel_prog_dens->readBuffer(arg_var, val);
-		//ofs.open("E:/DATA/Test/density_field/var.bin", std::ios::out | std::ios::binary);
-		//ofs.write((char*)val, dnx*dny*dnz);
-		//ofs.close();
-		//delete[] val;
 
 		//release buffer
 		kernel_prog_dens->releaseMemObject(arg_gavg);
@@ -1484,10 +1450,10 @@ void ComponentGenerator::GenerateDB()
 		float* rechist = new float[fsize]();
 		glbin.get_cg_table().getRecInput(rechist);
 		//debug
-#ifdef _DEBUG
-		DBMIFLOAT32 histmi2;
-		histmi2.nx = bin; histmi2.ny = rec; histmi2.nc = 1; histmi2.nt = bin * 4; histmi2.data = rechist;
-#endif
+//#ifdef _DEBUG
+//		DBMIFLOAT32 histmi2;
+//		histmi2.nx = bin; histmi2.ny = rec; histmi2.nc = 1; histmi2.nt = bin * 4; histmi2.data = rechist;
+//#endif
 		flvr::Argument arg_rechist =
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(rechist));
 		fsize = nx * ny * nz;
@@ -1513,12 +1479,12 @@ void ComponentGenerator::GenerateDB()
 		//execute
 		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
 
-		//read back
-#ifdef _DEBUG
-		kernel_prog->readBuffer(arg_lut, lut);
-		DBMIUINT8 mi;
-		mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = nx; mi.data = lut;
-#endif
+//#ifdef _DEBUG
+//		//read back
+//		kernel_prog->readBuffer(arg_lut, lut);
+//		DBMIUINT8 mi;
+//		mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = nx; mi.data = lut;
+//#endif
 		//release
 		kernel_prog->releaseMemObject(arg_rechist);
 		delete[] rechist;
@@ -1599,6 +1565,14 @@ void ComponentGenerator::GenerateDB()
 		kernel_prog->executeKernel(kernel_index3, 3, global_size, local_size);
 		//gen avg and var
 		kernel_prog->executeKernel(kernel_index4, 3, global_size, local_size);
+#ifdef _DEBUG
+		//read back
+		DBMIUINT8 densf(nx, ny, 1);
+		kernel_prog->readBuffer(arg_densf, densf.data);
+		kernel_prog->readBuffer(arg_avg, densf.data);
+		kernel_prog->readBuffer(arg_var, densf.data);
+		//kernel_prog->readBuffer(arg_distf, densf.data);
+#endif
 
 		//release buffer
 		kernel_prog->releaseMemObject(arg_distf);

@@ -158,7 +158,7 @@ const char* str_cl_comp_gen_db = \
 "	}\n" \
 "	uint lutr = (uint)(lut[index]) * npar;\n" \
 "	int dsize = (int)(params[lutr + IDISTF]);\n" \
-"	float dth = params[lutr + IDISTF];\n" \
+"	float dth = params[lutr + IDISTH];\n" \
 "	float dval = get_2d_density(data, (int4)(ijk, 1), dsize);\n" \
 "	dval *= sscale;\n" \
 "	if (dval > dth)\n" \
@@ -219,7 +219,8 @@ const char* str_cl_comp_gen_db = \
 "	float diststr = params[lutr + IDMIX];\n" \
 "	diststr = bdis > 0.1f ? diststr : 0.0f;\n" \
 "	float density = get_2d_density(data, (int4)(ijk, 1), dsize) * sscale;\n" \
-"	distv = distv * distf[index];\n" \
+"	distv = distv * diststr * distf[index];\n" \
+"	distv = clamp(distv, 0.0f, 1.0f);\n" \
 "	density = density * (1.0f - diststr) + distv * diststr;\n" \
 "	densf[index] = (uchar)(density * 255.0f);\n" \
 "}\n" \
@@ -239,12 +240,12 @@ const char* str_cl_comp_gen_db = \
 "		get_global_id(1), get_global_id(2));\n" \
 "	uint index = nxy*gid.z + nxyz.x*gid.y + gid.x;\n" \
 "	uint lutr = (uint)(lut[index]) * npar;\n" \
-"	int3 histxyz = (int3)(params[lutr + IMAXDT]);\n" \
+"	int3 histxyz = (int3)(params[lutr + IDENSW]);\n" \
 "	int3 lb = gid - histxyz / 2;\n" \
 "	int3 ub = lb + histxyz;\n" \
 "	lb = clamp(lb, (int3)(0), nxyz - (int3)(1));\n" \
-"	ub = clamp(ub, (int3)(0), nxyz - (int3)(1));\n" \
-"	int3 ijk;\n" \
+"	ub = clamp(ub, (int3)(0), nxyz);\n" \
+"	int3 ijk = (int3)(0.0f);\n" \
 "	float gnum = 0.0f;\n" \
 "	float sum = 0.0f;\n" \
 "	float sum2 = 0.0f;\n" \
@@ -264,9 +265,9 @@ const char* str_cl_comp_gen_db = \
 "	}\n" \
 "	index = nxy * gid.z + nxyz.x * gid.y + gid.x;\n" \
 "	v = sum / gnum;\n" \
-"	avg[index] = v;\n" \
+"	avg[index] = (uchar)(v);\n" \
 "	v = clamp(sqrt((sum2 + v * v * gnum - 2.0f * v * sum) / gnum), 0.0f, 255.0f);\n" \
-"	var[index] = v;\n" \
+"	var[index] = (uchar)(v);\n" \
 "}\n" \
 "\n" \
 "//grow by db lookup\n" \

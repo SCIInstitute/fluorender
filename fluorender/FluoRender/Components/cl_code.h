@@ -1331,6 +1331,7 @@ const char* str_cl_dist_grow_3d = \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
 "	value *= sscale;\n" \
 "	float distv = distscl * distf[index];\n" \
+"	distv = clamp(distv, 0.0f, 1.0f);\n" \
 "	value = value * (1.0f - dist_strength) + distv * dist_strength;\n" \
 "	float grad = length(sscale * vol_grad_func(data, (int4)(coord, 1)));\n" \
 "	//stop function\n" \
@@ -1393,6 +1394,7 @@ const char* str_cl_dist_grow_3d = \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
 "	value *= sscale;\n" \
 "	float distv = distscl * distf[index];\n" \
+"	distv = clamp(distv, 0.0f, 1.0f);\n" \
 "	value = value * (1.0f - dist_strength) + distv * dist_strength;\n" \
 "	float grad = length(sscale * vol_grad_func(data, (int4)(coord, 1)));\n" \
 "	//stop function\n" \
@@ -1465,7 +1467,8 @@ const char* str_cl_distdens_field_3d = \
 "	float density = get_2d_density(data, (int4)(ijk, 1), dsize) * sscale;\n" \
 "	unsigned int index = nxy*clamp(ijk.z, 0, (int)(nz-1)) +\n" \
 "		nx*clamp(ijk.y, 0, (int)(ny-1)) + clamp(ijk.x, 0, (int)(nx-1));\n" \
-"	float distv = distscl * distf[index];\n" \
+"	float distv = distscl * dist_strength * distf[index];\n" \
+"	distv = clamp(distv, 0.0f, 1.0f);\n" \
 "	density = density * (1.0f - dist_strength) + distv * dist_strength;\n" \
 "	index = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
 "	densf[index] = (unsigned char)(density * 255.0f);\n" \
