@@ -1196,6 +1196,9 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 
 		postwork(__FUNCTION__);
 	}
+
+	if (glbin.get_cg_table_enable())
+		AddCleanEntry(iter, size_lm);
 }
 
 void ComponentGenerator::ClearBorders()
@@ -1339,14 +1342,11 @@ void ComponentGenerator::AddEntry(
 	float dist_strength,
 	float dist_thresh,
 	int dist_filter_size,
-	int max_dist,
-	bool clean,
-	int clean_iter,
-	int clean_size_vl
+	int max_dist
 	)
 {
 	//parameters
-	flrd::EntryParams ep;
+	flrd::EntryParams& ep = glbin.get_cg_entry();
 	ep.setParam("iter", iter);
 	ep.setParam("thresh", thresh);
 	ep.setParam("use_dist_field", use_dist_field);
@@ -1361,11 +1361,18 @@ void ComponentGenerator::AddEntry(
 	ep.setParam("varth", varth);
 	ep.setParam("density_window_size", density_window_size);
 	ep.setParam("density_stats_size", density_stats_size);
-	ep.setParam("cleanb", clean);
+	ep.setParam("grow_fixed", grow_fixed);
+}
+
+void ComponentGenerator::AddCleanEntry(
+	int clean_iter,
+	int clean_size_vl
+)
+{
+	flrd::EntryParams& ep = glbin.get_cg_entry();
+	ep.setParam("cleanb", 1.0f);
 	ep.setParam("clean_iter", clean_iter);
 	ep.setParam("clean_size_vl", clean_size_vl);
-	ep.setParam("grow_fixed", grow_fixed);
-	glbin.set_cg_entry(ep);
 }
 
 void ComponentGenerator::GenerateDB()
@@ -1373,21 +1380,24 @@ void ComponentGenerator::GenerateDB()
 	if (!CheckBricks())
 		return;
 
+	flrd::TableHistParams& table = glbin.get_cg_table();
 	//check table size
-	unsigned int rec = glbin.get_cg_table().getRecSize();
+	unsigned int rec = table.getRecSize();
 	unsigned int bin = EntryHist::m_bins;
 	unsigned int par = EntryParams::m_size;
 	if (!(rec && bin && par))
 		return;
 
 	//iterration maximum from db
-	int iter = glbin.get_cg_table().getParamIter();
-	int max_dist = glbin.get_cg_table().getParamMxdist();//max iteration for distance field
+	int iter = table.getParamIter();
+	int max_dist = table.getParamMxdist();//max iteration for distance field
+	bool cleanb = table.getParamCleanb() > 0.0f;
+	int clean_iter = table.getParamCleanIter();
 
 	//histogram window size
 	int whistxy = 20;//histogram size
 	int whistz = 3;
-	float hsize = glbin.get_cg_table().getHistPopl();
+	float hsize = table.getHistPopl();
 	int nx, ny, nz;
 	m_vd->GetResolution(nx, ny, nz);
 	float w;
@@ -1417,6 +1427,9 @@ void ComponentGenerator::GenerateDB()
 	int kernel_index3 = kernel_prog->createKernel("kernel_3");//mix den and dist fields
 	int kernel_index4 = kernel_prog->createKernel("kernel_4");//generate statistics
 	int kernel_index5 = kernel_prog->createKernel("kernel_5");//grow
+	int kernel_index6 = kernel_prog->createKernel("kernel_6");//count and store size
+	int kernel_index7 = kernel_prog->createKernel("kernel_7");//set size to same comp
+	int kernel_index8 = kernel_prog->createKernel("kernel_8");//size based grow
 
 	//processing by brick
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
@@ -1448,7 +1461,7 @@ void ComponentGenerator::GenerateDB()
 		//rechist
 		size_t fsize = bin * rec;
 		float* rechist = new float[fsize]();
-		glbin.get_cg_table().getRecInput(rechist);
+		table.getRecInput(rechist);
 		//debug
 //#ifdef _DEBUG
 //		DBMIFLOAT32 histmi2;
@@ -1500,7 +1513,7 @@ void ComponentGenerator::GenerateDB()
 		//params
 		fsize = par * rec;
 		float* params = new float[fsize]();
-		glbin.get_cg_table().getRecOutput(params);
+		table.getRecOutput(params);
 		flvr::Argument arg_params =
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 			sizeof(float)*fsize, (void*)(params));
@@ -1565,14 +1578,14 @@ void ComponentGenerator::GenerateDB()
 		kernel_prog->executeKernel(kernel_index3, 3, global_size, local_size);
 		//gen avg and var
 		kernel_prog->executeKernel(kernel_index4, 3, global_size, local_size);
-#ifdef _DEBUG
-		//read back
-		DBMIUINT8 densf(nx, ny, 1);
-		kernel_prog->readBuffer(arg_densf, densf.data);
-		kernel_prog->readBuffer(arg_avg, densf.data);
-		kernel_prog->readBuffer(arg_var, densf.data);
-		//kernel_prog->readBuffer(arg_distf, densf.data);
-#endif
+//#ifdef _DEBUG
+//		//read back
+//		DBMIUINT8 densf(nx, ny, 1);
+//		kernel_prog->readBuffer(arg_densf, densf.data);
+//		kernel_prog->readBuffer(arg_avg, densf.data);
+//		kernel_prog->readBuffer(arg_var, densf.data);
+//		//kernel_prog->readBuffer(arg_distf, densf.data);
+//#endif
 
 		//release buffer
 		kernel_prog->releaseMemObject(arg_distf);
@@ -1610,6 +1623,72 @@ void ComponentGenerator::GenerateDB()
 				kernel_prog->setKernelArgConst(sizeof(float), (void*)(&iterf));
 			}
 			kernel_prog->executeKernel(kernel_index5, 3, global_size, local_size);
+		}
+
+		//clean up
+		if (cleanb)
+		{
+			//temp
+			unsigned int size_lm = 5;
+			//set
+			unsigned int* size_buffer = 0;
+
+			//bit length
+			unsigned int lenx = 0;
+			unsigned int r = std::max(nx, ny);
+			while (r > 0)
+			{
+				r /= 2;
+				lenx++;
+			}
+			unsigned int lenz = 0;
+			r = nz;
+			while (r > 0)
+			{
+				r /= 2;
+				lenz++;
+			}
+			cl_int3 cl_lenxyz = { cl_int(lenx), cl_int(lenx), cl_int(lenz) };
+
+			unsigned long long data_size =
+				(unsigned long long)nx *
+				(unsigned long long)ny *
+				(unsigned long long)nz;
+			unsigned long long label_size = data_size * 4;
+			size_buffer = new unsigned int[data_size]();
+
+			//set
+			//kernel 6
+			kernel_prog->setKernelArgBegin(kernel_index6);
+			flvr::Argument arg_szbuf = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, label_size, size_buffer);
+			kernel_prog->setKernelArgument(arg_label);
+			kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
+			kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_lenxyz));
+			//kernel 7
+			kernel_prog->setKernelArgBegin(kernel_index7);
+			kernel_prog->setKernelArgument(arg_szbuf);
+			kernel_prog->setKernelArgument(arg_label);
+			kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenx));
+			kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_lenxyz));
+			//kernel 8
+			kernel_prog->setKernelArgBegin(kernel_index8);
+			kernel_prog->setKernelArgument(arg_img);
+			kernel_prog->setKernelArgument(arg_szbuf);
+			kernel_prog->setKernelArgument(arg_label);
+			kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&size_lm));
+
+			//execute
+			for (int j = 0; j < iter; ++j)
+			{
+				kernel_prog->executeKernel(kernel_index6, 3, global_size, local_size);
+				kernel_prog->executeKernel(kernel_index7, 3, global_size, local_size);
+				kernel_prog->executeKernel(kernel_index8, 3, global_size, local_size);
+			}
 		}
 
 		//read back

@@ -352,6 +352,127 @@ const char* str_cl_comp_gen_db = \
 "	}\n" \
 "	atomic_xchg(label+index, label_v);\n" \
 "}\n" \
+"//code for clean up\n" \
+"uint __attribute((always_inline)) reverse_bit(uint val, uint len)\n" \
+"{\n" \
+"	uint res = val;\n" \
+"	int s = len - 1;\n" \
+"	for (val >>= 1; val; val >>= 1)\n" \
+"	{\n" \
+"		res <<= 1;\n" \
+"		res |= val & 1;\n" \
+"		s--;\n" \
+"	}\n" \
+"	res <<= s;\n" \
+"	res <<= 32-len;\n" \
+"	res >>= 32-len;\n" \
+"	return res;\n" \
+"}\n" \
+"//count and store size in szbuf\n" \
+"__kernel void kernel_6(\n" \
+"	__global uint* szbuf,\n" \
+"	__global uint* label,\n" \
+"	int3 nxyz,\n" \
+"	uint nxy,\n" \
+"	int3 lenxyz)\n" \
+"{\n" \
+"	uint3 ijk = (uint3)(get_global_id(0), get_global_id(1), get_global_id(2));\n" \
+"	uint index = nxy*ijk.z + nxyz.x*ijk.y + ijk.x;\n" \
+"	uint value_l = label[index];\n" \
+"	if (value_l == 0)\n" \
+"		return;\n" \
+"	uint res = value_l - 1;\n" \
+"	uint3 xyz = (uint3)(0);\n" \
+"	uint ii;\n" \
+"	for (ii=0; ii<lenxyz.x; ++ii)\n" \
+"	{\n" \
+"		xyz.x |= (1<<(2*ii) & res)>>(ii);\n" \
+"		xyz.y |= (1<<(2*ii+1) & res)>>(ii+1);\n" \
+"	}\n" \
+"	xyz.z = res<<(32-lenxyz.x*2-lenxyz.z)>>(32-lenxyz.z);\n" \
+"	xyz.x = reverse_bit(xyz.x, lenxyz.x);\n" \
+"	xyz.y = reverse_bit(xyz.y, lenxyz.x);\n" \
+"	xyz.z = reverse_bit(xyz.z, lenxyz.z);\n" \
+"	index = nxy*xyz.z + nxyz.x*xyz.y + xyz.x;\n" \
+"	atomic_inc(szbuf+index);\n" \
+"}\n" \
+"//set size value to all\n" \
+"__kernel void kernel_7(\n" \
+"	__global uint* szbuf,\n" \
+"	__global uint* label,\n" \
+"	int3 nxyz,\n" \
+"	uint nxy,\n" \
+"	int3 lenxyz)\n" \
+"{\n" \
+"	uint3 ijk = (uint3)(get_global_id(0), get_global_id(1), get_global_id(2));\n" \
+"	uint index = nxy*ijk.z + nxyz.x*ijk.y + ijk.x;\n" \
+"	uint value_l = label[index];\n" \
+"	if (value_l == 0)\n" \
+"		return;\n" \
+"	uint res = value_l - 1;\n" \
+"	uint3 xyz = (uint3)(0);\n" \
+"	uint ii;\n" \
+"	for (ii=0; ii<lenxyz.x; ++ii)\n" \
+"	{\n" \
+"		xyz.x |= (1<<(2*ii) & res)>>(ii);\n" \
+"		xyz.y |= (1<<(2*ii+1) & res)>>(ii+1);\n" \
+"	}\n" \
+"	xyz.z = res<<(32-lenxyz.x*2-lenxyz.z)>>(32-lenxyz.z);\n" \
+"	xyz.x = reverse_bit(xyz.x, lenxyz.x);\n" \
+"	xyz.y = reverse_bit(xyz.y, lenxyz.x);\n" \
+"	xyz.z = reverse_bit(xyz.z, lenxyz.z);\n" \
+"	uint index2 = nxy*xyz.z + nxyz.x*xyz.y + xyz.x;\n" \
+"	if (index != index2)\n" \
+"		atomic_xchg(szbuf+index, szbuf[index2]);\n" \
+"}\n" \
+"//size based grow\n" \
+"__kernel void kernel_8(\n" \
+"	__read_only image3d_t data,\n" \
+"	__global uint* szbuf,\n" \
+"	__global uint* label,\n" \
+"	int3 nxyz,\n" \
+"	uint nxy,\n" \
+"	uint thresh)\n" \
+"{\n" \
+"	uint3 ijk = (uint3)(get_global_id(0), get_global_id(1), get_global_id(2));\n" \
+"	uint index = nxy*ijk.z + nxyz.x*ijk.y + ijk.x;\n" \
+"	//break if large enough\n" \
+"	if (label[index]==0 ||\n" \
+"		szbuf[index] > thresh)\n" \
+"		return;\n" \
+"	float value = read_imagef(data, samp, (int4)(convert_int3(ijk), 1)).x;\n" \
+"	uint nb_index;\n" \
+"	float min_dist = 10.0f;\n" \
+"	float dist;\n" \
+"	uint max_nb_index;\n" \
+"	float nb_value;\n" \
+"	int3 nijk;\n" \
+"	for (nijk.z=-1; nijk.z<2; ++nijk.z)\n" \
+"	for (nijk.y=-1; nijk.y<2; ++nijk.y)\n" \
+"	for (nijk.x=-1; nijk.x<2; ++nijk.x)\n" \
+"	{\n" \
+"		if ((ijk.x==0 && nijk.x==-1) ||\n" \
+"			(ijk.x==nxyz.x-1 && nijk.x==1) ||\n" \
+"			(ijk.y==0 && nijk.y==-1) ||\n" \
+"			(ijk.y==nxyz.y-1 && nijk.y==1) ||\n" \
+"			(ijk.z==0 && nijk.z==-1) ||\n" \
+"			(ijk.z==nxyz.z-1 && nijk.z==1))\n" \
+"			continue;\n" \
+"		nb_index = nxy*(ijk.z+nijk.z) + nxyz.x*(ijk.y+nijk.y) + ijk.x+nijk.x;\n" \
+"		dist = length(convert_float3(nijk));\n" \
+"		if (szbuf[nb_index]>thresh &&\n" \
+"			dist < min_dist)\n" \
+"		{\n" \
+"			nb_value = read_imagef(data, samp, (int4)(convert_int3(ijk) + nijk, 1)).x;\n" \
+"			if (nb_value < value)\n" \
+"				continue;\n" \
+"			min_dist = dist;\n" \
+"			max_nb_index = nb_index;\n" \
+"		}\n" \
+"	}\n" \
+"	if (min_dist < 10.f)\n" \
+"		atomic_xchg(label+index, label[max_nb_index]);\n" \
+"}\n" \
 ;
 
 const char* str_cl_comp_gen_db_unused = \

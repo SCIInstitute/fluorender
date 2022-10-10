@@ -35,7 +35,9 @@ TableHistParams::TableHistParams() :
 	Table(),
 	m_hist_popl(0),
 	m_param_iter(0),
-	m_param_mxdist(0)
+	m_param_mxdist(0),
+	m_param_cleanb(0),
+	m_param_clean_iter(0)
 {
 }
 
@@ -43,7 +45,9 @@ TableHistParams::TableHistParams(const TableHistParams& table) :
 	Table(table),
 	m_hist_popl(table.m_hist_popl),
 	m_param_iter(table.m_param_iter),
-	m_param_mxdist(table.m_param_mxdist)
+	m_param_mxdist(table.m_param_mxdist),
+	m_param_cleanb(table.m_param_cleanb),
+	m_param_clean_iter(table.m_param_clean_iter)
 {
 
 }
@@ -109,6 +113,8 @@ void TableHistParams::getParams(Record* rec)
 	{
 		m_param_iter = std::max(m_param_iter, r->getParamIter());
 		m_param_mxdist = std::max(m_param_mxdist, r->getParamMxdist());
+		m_param_cleanb = std::max(m_param_cleanb, r->getParamCleanb());
+		m_param_clean_iter = std::max(m_param_clean_iter, r->getParamCleanIter());
 	}
 }
 

@@ -87,11 +87,12 @@ namespace flrd
 			float dist_strength = 0.5f,
 			float dist_thresh = 0.25f,
 			int dist_filter_size = 3,
-			int max_dist = 30,
-			bool clean = false,
-			int clean_iter = 5,
-			int clean_size_vl = 5
+			int max_dist = 30
 			);
+		void AddCleanEntry(
+			int clean_iter,
+			int clean_size_vl
+		);
 		void GenerateDB();
 
 		//unused

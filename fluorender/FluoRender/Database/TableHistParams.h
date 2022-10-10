@@ -58,10 +58,22 @@ namespace flrd
 			return m_param_mxdist;
 		}
 
+		float getParamCleanb()
+		{
+			return m_param_cleanb;
+		}
+
+		float getParamCleanIter()
+		{
+			return m_param_clean_iter;
+		}
+
 	private:
 		float m_hist_popl;
 		float m_param_iter;
 		float m_param_mxdist;
+		float m_param_cleanb;
+		float m_param_clean_iter;
 
 		void compute(Record* rec = 0);
 		void computeHistSize(Record* rec = 0);

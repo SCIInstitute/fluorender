@@ -144,3 +144,19 @@ float RecordHistParams::getParamMxdist()
 		return 0;
 	return e->getParam("max_dist");
 }
+
+float RecordHistParams::getParamCleanb()
+{
+	EntryParams* e = dynamic_cast<EntryParams*>(m_output);
+	if (!e)
+		return 0;
+	return e->getParam("cleanb");
+}
+
+float RecordHistParams::getParamCleanIter()
+{
+	EntryParams* e = dynamic_cast<EntryParams*>(m_output);
+	if (!e)
+		return 0;
+	return e->getParam("clean_iter");
+}
