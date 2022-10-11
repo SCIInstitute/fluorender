@@ -545,9 +545,9 @@ VRenderGLView::~VRenderGLView()
 	}
 #endif
 
-#ifdef _WIN32
-	//if (m_controller)
-	//	delete m_controller;
+#if defined(_WIN32) && defined(USE_XINPUT)
+	if (m_controller)
+		delete m_controller;
 #endif
 
 	m_loader.StopAll();

@@ -3675,16 +3675,6 @@ void ComponentDlg::ApplyRecord()
 	}
 	cg.GenerateDB();
 
-	//int clean_iter = m_clean_iter;
-	//int clean_size = m_clean_size_vl;
-	//if (!m_clean)
-	//{
-	//	clean_iter = 0;
-	//	clean_size = 0;
-	//}
-	//if (clean_iter > 0)
-	//	cg.Cleanup(clean_iter, clean_size);
-
 	int bn = vd->GetAllBrickNum();
 	if (bn > 1)
 		cg.FillBorders(0.1);

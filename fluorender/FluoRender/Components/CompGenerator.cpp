@@ -241,9 +241,6 @@ void ComponentGenerator::SetIDBit(int psize)
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
-		//size buffer
-		unsigned int* size_buffer = 0;
-
 		//bit length
 		unsigned int lenx = 0;
 		unsigned int r = std::max(nx, ny);
@@ -265,14 +262,13 @@ void ComponentGenerator::SetIDBit(int psize)
 			(unsigned long long)ny *
 			(unsigned long long)nz;
 		unsigned long long label_size = data_size * 4;
-		size_buffer = new unsigned int[data_size]();
 
 		//set
 		//kernel 0
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgBegin(kernel_index0);
 		flvr::Argument arg_szbuf =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, label_size, size_buffer);
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE, label_size, nullptr);
 		flvr::Argument arg_label =
 			kernel_prog->setKernelArgTex3DBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
@@ -308,24 +304,7 @@ void ComponentGenerator::SetIDBit(int psize)
 		//execute
 		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
 		kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
-		//debug
-		//kernel_prog->readBuffer(arg_szbuf, size_buffer);
-		//ofs.open("E:/DATA/Test/density_field/size.bin", std::ios::out | std::ios::binary);
-		//ofs.write((char*)size_buffer, nx*ny*nz*sizeof(unsigned int));
-		//ofs.close();
-		//kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
-		//kernel_prog->readBuffer(arg_maxv, &maxv);
-		//maxv = (unsigned int)(psize * maxv + 0.5);
-		//kernel_prog->setKernelArgConst(kernel_index3, 5,
-		//	sizeof(unsigned int), (void*)(&maxv));
 		kernel_prog->executeKernel(kernel_index3, 3, global_size, local_size);
-		//debug
-		//val = new unsigned int[nx*ny*nz];
-		//kernel_prog->readBuffer(arg_szbuf, val);
-		//ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
-		//ofs.write((char*)val, nx*ny*nz*sizeof(unsigned int));
-		//delete[] val;
-		//ofs.close();
 
 		//read back
 		kernel_prog->copyBufTex3D(arg_label, lid,
@@ -333,7 +312,6 @@ void ComponentGenerator::SetIDBit(int psize)
 
 		//release buffer
 		kernel_prog->releaseAll();
-		delete[] size_buffer;
 
 		postwork(__FUNCTION__);
 	}
@@ -1114,9 +1092,6 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
-		//set
-		unsigned int* size_buffer = 0;
-
 		//bit length
 		unsigned int lenx = 0;
 		unsigned int r = std::max(nx, ny);
@@ -1138,13 +1113,13 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 			(unsigned long long)ny *
 			(unsigned long long)nz;
 		unsigned long long label_size = data_size * 4;
-		size_buffer = new unsigned int[data_size]();
 
 		//set
 		//kernel 0
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgBegin(kernel_index0);
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, label_size, size_buffer);
+		flvr::Argument arg_szbuf =
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE, label_size, nullptr);
 		flvr::Argument arg_label =
 			kernel_prog->setKernelArgTex3DBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
@@ -1157,7 +1132,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 			arg_mask = kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		//kernel 1
 		kernel_prog->setKernelArgBegin(kernel_index1);
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, label_size, size_buffer);
+		kernel_prog->setKernelArgument(arg_szbuf);
 		kernel_prog->setKernelArgument(arg_label);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
@@ -1169,7 +1144,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		//kernel 2
 		kernel_prog->setKernelArgBegin(kernel_index2);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, label_size, size_buffer);
+		kernel_prog->setKernelArgument(arg_szbuf);
 		kernel_prog->setKernelArgument(arg_label);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
@@ -1192,7 +1167,6 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 
 		//release buffer
 		kernel_prog->releaseAll();
-		delete[] size_buffer;
 
 		postwork(__FUNCTION__);
 	}
@@ -1630,8 +1604,6 @@ void ComponentGenerator::GenerateDB()
 		{
 			//temp
 			unsigned int size_lm = 5;
-			//set
-			unsigned int* size_buffer = 0;
 
 			//bit length
 			unsigned int lenx = 0;
@@ -1655,12 +1627,11 @@ void ComponentGenerator::GenerateDB()
 				(unsigned long long)ny *
 				(unsigned long long)nz;
 			unsigned long long label_size = data_size * 4;
-			size_buffer = new unsigned int[data_size]();
 
 			//set
 			//kernel 6
 			kernel_prog->setKernelArgBegin(kernel_index6);
-			flvr::Argument arg_szbuf = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, label_size, size_buffer);
+			flvr::Argument arg_szbuf = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE, label_size, nullptr);
 			kernel_prog->setKernelArgument(arg_label);
 			kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
@@ -1671,16 +1642,17 @@ void ComponentGenerator::GenerateDB()
 			kernel_prog->setKernelArgument(arg_label);
 			kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
-			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenx));
 			kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_lenxyz));
 			//kernel 8
 			kernel_prog->setKernelArgBegin(kernel_index8);
 			kernel_prog->setKernelArgument(arg_img);
 			kernel_prog->setKernelArgument(arg_szbuf);
 			kernel_prog->setKernelArgument(arg_label);
+			kernel_prog->setKernelArgument(arg_lut);
+			kernel_prog->setKernelArgument(arg_params);
 			kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
-			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&size_lm));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&par));
 
 			//execute
 			for (int j = 0; j < iter; ++j)

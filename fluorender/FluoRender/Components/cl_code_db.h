@@ -44,6 +44,7 @@ const char* str_cl_comp_gen_db = \
 "#define IDISTH 11\n" \
 "#define IDISTF 12\n" \
 "#define IMAXDT 13\n" \
+"#define ICLNSZ 16\n" \
 "const sampler_t samp =\n" \
 "	CLK_NORMALIZED_COORDS_FALSE|\n" \
 "	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
@@ -384,6 +385,7 @@ const char* str_cl_comp_gen_db = \
 "	uint res = value_l - 1;\n" \
 "	uint3 xyz = (uint3)(0);\n" \
 "	uint ii;\n" \
+"#pragma unroll\n" \
 "	for (ii=0; ii<lenxyz.x; ++ii)\n" \
 "	{\n" \
 "		xyz.x |= (1<<(2*ii) & res)>>(ii);\n" \
@@ -412,6 +414,7 @@ const char* str_cl_comp_gen_db = \
 "	uint res = value_l - 1;\n" \
 "	uint3 xyz = (uint3)(0);\n" \
 "	uint ii;\n" \
+"#pragma unroll\n" \
 "	for (ii=0; ii<lenxyz.x; ++ii)\n" \
 "	{\n" \
 "		xyz.x |= (1<<(2*ii) & res)>>(ii);\n" \
@@ -430,12 +433,16 @@ const char* str_cl_comp_gen_db = \
 "	__read_only image3d_t data,\n" \
 "	__global uint* szbuf,\n" \
 "	__global uint* label,\n" \
+"	__global uchar* lut,\n" \
+"	__global float* params,\n" \
 "	int3 nxyz,\n" \
 "	uint nxy,\n" \
-"	uint thresh)\n" \
+"	uint npar)\n" \
 "{\n" \
 "	uint3 ijk = (uint3)(get_global_id(0), get_global_id(1), get_global_id(2));\n" \
 "	uint index = nxy*ijk.z + nxyz.x*ijk.y + ijk.x;\n" \
+"	uint lutr = (uint)(lut[index]) * npar;\n" \
+"	uint thresh = (uint)(params[lutr + ICLNSZ]);\n" \
 "	//break if large enough\n" \
 "	if (label[index]==0 ||\n" \
 "		szbuf[index] > thresh)\n" \
@@ -447,8 +454,11 @@ const char* str_cl_comp_gen_db = \
 "	uint max_nb_index;\n" \
 "	float nb_value;\n" \
 "	int3 nijk;\n" \
+"#pragma unroll\n" \
 "	for (nijk.z=-1; nijk.z<2; ++nijk.z)\n" \
+"#pragma unroll\n" \
 "	for (nijk.y=-1; nijk.y<2; ++nijk.y)\n" \
+"#pragma unroll\n" \
 "	for (nijk.x=-1; nijk.x<2; ++nijk.x)\n" \
 "	{\n" \
 "		if ((ijk.x==0 && nijk.x==-1) ||\n" \
@@ -459,7 +469,7 @@ const char* str_cl_comp_gen_db = \
 "			(ijk.z==nxyz.z-1 && nijk.z==1))\n" \
 "			continue;\n" \
 "		nb_index = nxy*(ijk.z+nijk.z) + nxyz.x*(ijk.y+nijk.y) + ijk.x+nijk.x;\n" \
-"		dist = length(convert_float3(nijk));\n" \
+"		dist = abs(nijk.x) + abs(nijk.y) + abs(nijk.z);\n" \
 "		if (szbuf[nb_index]>thresh &&\n" \
 "			dist < min_dist)\n" \
 "		{\n" \
