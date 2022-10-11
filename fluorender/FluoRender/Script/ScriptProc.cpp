@@ -1104,10 +1104,14 @@ void ScriptProc::RunGenerateComp()
 	if (!(m_frame->GetComponentDlg()))
 		return;
 
+	wxString ml_table_file;
+	m_fconfig->Read("ml_table", &ml_table_file);
+	ml_table_file = GetInputFile(ml_table_file, "Database");
+	bool use_ml = !ml_table_file.empty();
 	bool use_sel;
-	m_fconfig->Read("use_sel", &use_sel);
-	double tfac = 1.0;
-	m_fconfig->Read("th_factor", &tfac);
+	m_fconfig->Read("use_sel", &use_sel, false);
+	double tfac;
+	m_fconfig->Read("th_factor", &tfac, 1.0);
 	wxString cmdfile;
 	m_fconfig->Read("comp_command", &cmdfile);
 	cmdfile = GetInputFile(cmdfile, "Commands");
@@ -1120,7 +1124,14 @@ void ScriptProc::RunGenerateComp()
 		i != vlist.end(); ++i)
 	{
 		m_view->m_cur_vol = *i;
-		m_frame->GetComponentDlg()->PlayCmd(use_sel, tfac);
+		if (use_ml)
+		{
+			flrd::TableHistParams& table = glbin.get_cg_table();
+			table.open(ml_table_file.ToStdString());
+			m_frame->GetComponentDlg()->ApplyRecord();
+		}
+		else
+			m_frame->GetComponentDlg()->PlayCmd(use_sel, tfac);
 	}
 }
 

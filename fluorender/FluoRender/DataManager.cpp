@@ -169,6 +169,9 @@ VolumeData::VolumeData()
 
 	//save label
 	m_label_save = 0;
+
+	//machine learning applied
+	m_ml_applied = false;
 }
 
 VolumeData::VolumeData(VolumeData &copy)
@@ -303,6 +306,9 @@ VolumeData::VolumeData(VolumeData &copy)
 	//background intensity
 	m_bg_valid = false;
 	m_bg_int = 0;
+
+	//machine learning applied
+	m_ml_applied = false;
 }
 
 VolumeData::~VolumeData()
@@ -1471,6 +1477,7 @@ int VolumeData::GetCurChannel()
 void VolumeData::SetCurTime(int time)
 {
 	m_time = time;
+	SetMlApplied(false);
 }
 
 int VolumeData::GetCurTime()

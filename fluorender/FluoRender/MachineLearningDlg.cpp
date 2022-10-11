@@ -406,20 +406,26 @@ void MLCompGenPanel::OnLoadTable(wxCommandEvent& event)
 void MLCompGenPanel::OnDelTable(wxCommandEvent& event)
 {
 	wxArrayInt seli = m_top_grid->GetSelectedRows();
-	if (seli.GetCount() > 0)
+	size_t count = seli.GetCount();
+	if (!count)
+		return;
+
+	flrd::TableHistParams& table = glbin.get_cg_table();
+	std::string name;
+	std::string filename = m_exepath;
+	filename += GETSLASH() + m_dir + GETSLASH();
+	for (size_t i = 0; i < count; ++i)
 	{
-		std::string name = m_top_grid->GetCellValue(seli[0], 0).ToStdString();
-		flrd::TableHistParams& table = glbin.get_cg_table();
+		name = m_top_grid->GetCellValue(seli[i], 0).ToStdString();
 		if (name == table.getName())
 		{
 			table.clear();
 			UpdateBotList();
 		}
-		std::string filename = m_exepath;
-		filename += GETSLASH() + m_dir + GETSLASH() + name + m_ext;
-		std::remove(filename.c_str());
-		PopTopList();
+		name = filename + name + m_ext;
+		std::remove(name.c_str());
 	}
+	PopTopList();
 }
 
 void MLCompGenPanel::OnDupTable(wxCommandEvent& event)

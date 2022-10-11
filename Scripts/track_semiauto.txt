@@ -4,6 +4,7 @@ tasknum=8
 type=generate_comp
 time_mode=TM_ALL_PRE
 chan_mode=0
+ml_table=
 use_sel=1
 th_factor=0.35
 [tasks/task1]

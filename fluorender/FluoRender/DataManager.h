@@ -505,6 +505,10 @@ public:
 			return 0;
 	}
 
+	//machine learning applied
+	bool GetMlApplied() { return m_ml_applied; }
+	void SetMlApplied(bool bval) { m_ml_applied = bval; }
+
 private:
 	//duplication indicator and counter
 	bool m_dup;
@@ -520,6 +524,9 @@ private:
 
 	int m_chan;	//channel index of the original file
 	int m_time;	//time index of the original file
+
+	//machine learning applied
+	bool m_ml_applied;
 
 	//modes (MIP & normal)
 	int m_mode;	//0-normal; 1-MIP; 2-white shading; 3-white mip

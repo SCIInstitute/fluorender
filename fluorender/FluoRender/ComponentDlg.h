@@ -258,7 +258,6 @@ private:
 	//generate settings
 	bool m_use_sel;
 	bool m_use_ml;
-	bool m_rec_applied;
 	int m_iter;
 	double m_thresh;
 	double m_tfactor;

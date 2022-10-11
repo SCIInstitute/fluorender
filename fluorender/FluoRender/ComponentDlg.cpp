@@ -198,8 +198,7 @@ ComponentDlg::ComponentDlg(VRenderFrame *frame)
 	m_hold_history(false),
 	m_test_speed(false),
 	m_cell_new_id(0),
-	m_cell_new_id_empty(true),
-	m_rec_applied(false)
+	m_cell_new_id_empty(true)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -3553,7 +3552,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	if (command && m_record_cmd)
 		AddCmd("generate");
 
-	m_rec_applied = false;
+	vd->SetMlApplied(false);
 }
 
 void ComponentDlg::Fixate(bool command)
@@ -3668,7 +3667,7 @@ void ComponentDlg::ApplyRecord()
 	cg.postwork = std::bind(
 		&ComponentDlg::StopTimer, this, std::placeholders::_1);
 	vd->AddEmptyMask(1);
-	if (!m_rec_applied)
+	if (!vd->GetMlApplied())
 	{
 		vd->AddEmptyLabel(0);
 		cg.ShuffleID();
@@ -3682,7 +3681,7 @@ void ComponentDlg::ApplyRecord()
 	//update
 	m_view->RefreshGL(39);
 
-	m_rec_applied = true;
+	vd->SetMlApplied(true);
 }
 
 void ComponentDlg::OnAnalyze(wxCommandEvent &event)

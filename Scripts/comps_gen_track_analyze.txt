@@ -4,6 +4,7 @@ tasknum=10
 type=generate_comp
 time_mode=TM_FIRST_PRE
 chan_mode=0
+ml_table=
 use_sel=0
 th_factor=1
 comp_command=cell_50.txt
