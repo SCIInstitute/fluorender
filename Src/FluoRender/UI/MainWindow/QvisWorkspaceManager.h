@@ -5,9 +5,11 @@
 #include "DatasetAttributes.h"
 
 #ifdef QT_CREATOR_ONLY
-  #include "WorkspaceAgent.h"
+  class WorkspaceAgent;
 #else
-  #include "WorkspaceAgent.hpp"
+  namespace fluo {
+    class WorkspaceAgent;
+  }
   using namespace fluo;
 #endif
 
@@ -20,6 +22,8 @@ class QvisDatasetManager;
 class QMenu;
 class QSignalMapper;
 class QTreeWidgetItem;
+
+class DataTreeNode;
 
 namespace Ui {
 class QvisWorkspaceManager;
@@ -147,7 +151,7 @@ private:
 private:
     Ui::QvisWorkspaceManager *ui;
 
-    void addChildItem(QTreeWidgetItem * praentItem, const DataTreeNode *childNode);
+    bool addChildItem(QTreeWidgetItem * praentItem, const DataTreeNode *childNode, bool createItem);
     QTreeWidgetItem * WorkspaceActiveDatasetsAdd(DataTreeNode *node = nullptr);
 
     void ViewWindowSelected (QTreeWidgetItem *item);
@@ -172,14 +176,11 @@ private:
     QIcon GetLightIcon(QColor color = QColor(255,255,255));
 
     // Helper methods.
-    inline void     setItemData(QTreeWidgetItem *item, ItemDataIndex index, QVariant value);
-    inline QVariant getItemData(QTreeWidgetItem *item, ItemDataIndex index);
-
     inline void setItemNode(QTreeWidgetItem *item, const DataTreeNode * node);
     inline DataTreeNode * getItemNode(QTreeWidgetItem *item);
 
     inline void setItemType(QTreeWidgetItem *item, const DatasetAttributes::DatasetType);
-    inline DatasetAttributes::DatasetType getItemType(QTreeWidgetItem *item);
+    inline DatasetAttributes::DatasetType getItemType(const QTreeWidgetItem *item) const;
 
     inline void     setNodeData(QTreeWidgetItem *item, NodeDataIndex index, QVariant value);
     inline QVariant getNodeData(QTreeWidgetItem *item, NodeDataIndex index);

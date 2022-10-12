@@ -20,11 +20,6 @@
 #include <filesystem>
 #include <iostream>
 
-// Used with the dataset table widget which has multiple columns;
-#define DATASET_TYPE 0
-#define DATASET_NAME 1
-#define DATASET_PATH 2
-
 // QvisDatasetManager
 QvisDatasetManager::QvisDatasetManager(QWidget *parent) :
     QWidget(parent),
@@ -32,11 +27,13 @@ QvisDatasetManager::QvisDatasetManager(QWidget *parent) :
 {
     ui->setupUi(this);
 
+//#ifdef QT_CREATOR_ONLY
     // Dummy entries.
     mAgent = new DatasetAgent();
 
     DatasetAdd(QString("/meshpath/Some_Mesh.obj"),     DatasetAttributes::Mesh);
     DatasetAdd(QString("/volumepath/Some_Volume.png"), DatasetAttributes::Volume);
+//#endif
 }
 
 QvisDatasetManager::~QvisDatasetManager()
@@ -136,8 +133,7 @@ void QvisDatasetManager::DatasetSelected(int row, int column)
     {
         QTableWidgetItem *tableItem = ui->DatasetTableWidget->item(mCurrentDataSetIndex, DATASET_NAME);
         mCurrentDataSetName = tableItem->text();
-        datasetType = ui->DatasetTableWidget->item(mCurrentDataSetIndex, DATASET_TYPE)->text() == "Volume" ?
-                    DatasetAttributes::Volume : DatasetAttributes::Mesh;
+        datasetType = getDatasetType(mCurrentDataSetIndex);
     }
     else
     {
@@ -183,7 +179,7 @@ void QvisDatasetManager::DatasetChanged(int row, int column)
 
     for(int i=0; i<ui->DatasetTableWidget->rowCount(); ++i)
     {
-        QString tmp = ui->DatasetTableWidget->item(i, DATASET_NAME)->text().simplified();
+        QString tmp = getDatasetName(i).simplified();
         tmp.remove(" "); // Remove all whitespace;
 
         if(i != row && tmpName == tmp)
@@ -198,13 +194,9 @@ void QvisDatasetManager::DatasetChanged(int row, int column)
         }
     }
 
-    item = ui->DatasetTableWidget->item(row, DATASET_TYPE);
-
-    DatasetAttributes::DatasetType datasetType = item->text() == "Volume" ?
-                DatasetAttributes::Volume : DatasetAttributes::Mesh;
-
-    // Get the original full name which is unique so to diambiguate as the local name could be different.
-    QString fullname = item->data(Qt::UserRole).toString();
+    // Get type and the original full name which is unique so to diambiguate as the local name could be different.
+    DatasetAttributes::DatasetType datasetType = getDatasetType(row);
+    QString fullname = getDatasetFullName(row);
 
     emit workspaceRename(mCurrentDataSetName, newName, datasetType, fullname);
 
@@ -228,8 +220,7 @@ void QvisDatasetManager::DatasetContextMenuRequested(const QPoint &pos)
 
         DatasetUpdate(mCurrentDataSetIndex, true);
 
-        DatasetAttributes::DatasetType datasetType = ui->DatasetTableWidget->item(mCurrentDataSetIndex, DATASET_TYPE)->text() == "Volume" ?
-                    DatasetAttributes::Volume : DatasetAttributes::Mesh;
+        DatasetAttributes::DatasetType datasetType = getDatasetType(mCurrentDataSetIndex);
 
         QMenu *contextMenu = new QMenu(this);
 
@@ -264,13 +255,9 @@ void QvisDatasetManager::DatasetAddClicked(const QString parentName)
         return;
     }
 
-    QTableWidgetItem *item = ui->DatasetTableWidget->item(mCurrentDataSetIndex, DATASET_TYPE);
-
-    DatasetAttributes::DatasetType datasetType = item->text() == "Volume" ?
-                DatasetAttributes::Volume : DatasetAttributes::Mesh;
-
-    // Get the original full name which is unique so to diambiguate as the local name could be different.
-    QString fullname = item->data(Qt::UserRole).toString();
+    // Get the type and original full name which is unique so to diambiguate as the local name could be different.
+    DatasetAttributes::DatasetType datasetType = getDatasetType(mCurrentDataSetIndex);
+    QString fullname = getDatasetFullName(mCurrentDataSetIndex);
 
     std::cerr << __FUNCTION__ << "  " << __LINE__ << "  '" << parentName.toStdString() << "'  "  << "  '" << mCurrentDataSetName.toStdString() << "'  " << datasetType << std::endl;
 
@@ -315,13 +302,9 @@ void QvisDatasetManager::DatasetDeleteClicked()
         return;
     }
 
-    QTableWidgetItem *item = ui->DatasetTableWidget->item(mCurrentDataSetIndex, DATASET_TYPE);
-
-    DatasetAttributes::DatasetType datasetType = item->text() == "Volume" ?
-                DatasetAttributes::Volume : DatasetAttributes::Mesh;
-
-    // Get the original full name which is unique so to diambiguate as the local name could be different.
-    QString fullname = item->data(Qt::UserRole).toString();
+    // Get the type and original full name which is unique so to diambiguate as the local name could be different.
+    DatasetAttributes::DatasetType datasetType = getDatasetType(mCurrentDataSetIndex);
+    QString fullname = getDatasetFullName(mCurrentDataSetIndex);
 
     // Delete the dataset from the table.
     const QSignalBlocker blocker(ui->DatasetTableWidget);
@@ -340,7 +323,7 @@ void QvisDatasetManager::DatasetDeleteClicked()
         if(ui->DatasetTableWidget->item(cc, DATASET_NAME)->isSelected())
         {
             mCurrentDataSetIndex = cc;
-            mCurrentDataSetName = ui->DatasetTableWidget->item(mCurrentDataSetIndex, DATASET_NAME)->text();
+            mCurrentDataSetName = getDatasetName(mCurrentDataSetIndex);
 
             break;
         }
@@ -366,7 +349,7 @@ void QvisDatasetManager::DatasetDeleteAllClicked()
     while(ui->DatasetTableWidget->rowCount())
     {
         mCurrentDataSetIndex = 0;
-        mCurrentDataSetName = ui->DatasetTableWidget->item(mCurrentDataSetIndex, DATASET_NAME)->text();
+        mCurrentDataSetName = getDatasetName(mCurrentDataSetIndex);
 
         DatasetDeleteClicked();
     }
@@ -421,22 +404,21 @@ void QvisDatasetManager::DatasetAdd(const QString &fullname, DatasetAttributes::
     else if (type == DatasetAttributes::Annotations)
         item = new QTableWidgetItem("Annotations");
 
-    // Keep the original fullname for the entry so that when deleting
-    // those with different names they are deleted too.
-    item->setData(Qt::UserRole, QVariant(fullname));
-
     if(item)
     {
         item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-        ui->DatasetTableWidget->setItem(row, 0, item);
+        ui->DatasetTableWidget->setItem(row, DATASET_TYPE, item);
 
         item = new QTableWidgetItem(fileInfo.baseName());
         item->setFlags(item->flags() | Qt::ItemIsEditable);
-        ui->DatasetTableWidget->setItem(row, 1, item);
+        // Keep the original fullname for the entry so that when deleting
+        // those with different names they are deleted too.
+        item->setData(Qt::UserRole, QVariant(fullname));
+        ui->DatasetTableWidget->setItem(row, DATASET_NAME, item);
 
         item = new QTableWidgetItem(fileInfo.absolutePath());
         item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-        ui->DatasetTableWidget->setItem(row, 2, item);
+        ui->DatasetTableWidget->setItem(row, DATASET_PATH, item);
     }
 }
 
@@ -494,4 +476,22 @@ QTableWidgetItem * QvisDatasetManager::GetTableWidgetItem(const QString &name, b
     }
 
     return nullptr;
+}
+
+DatasetAttributes::DatasetType QvisDatasetManager::getDatasetType(const int index) const
+{
+    return ui->DatasetTableWidget->item(index, DATASET_TYPE)->text() == "Volume" ?
+                DatasetAttributes::Volume : DatasetAttributes::Mesh;
+}
+
+QString QvisDatasetManager::getDatasetName(const int index) const
+{
+    // Get the base name.
+    return ui->DatasetTableWidget->item(index, DATASET_NAME)->text();
+}
+
+QString QvisDatasetManager::getDatasetFullName(const int index) const
+{
+    // Get the original full name which is unique so to diambiguate as the local name could be different.
+    return ui->DatasetTableWidget->item(index, DATASET_NAME)->data(Qt::UserRole).toString();
 }

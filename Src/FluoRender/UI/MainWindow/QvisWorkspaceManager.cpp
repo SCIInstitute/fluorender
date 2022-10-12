@@ -18,6 +18,13 @@
 #include <chrono>
 #include <thread>
 
+#ifdef QT_CREATOR_ONLY
+  #include "WorkspaceAgent.h"
+#else
+  #include "WorkspaceAgent.hpp"
+  using namespace fluo;
+#endif
+
 // QvisWorkspaceManager
 QvisWorkspaceManager::QvisWorkspaceManager(QWidget *parent) :
     QWidget(parent),
@@ -25,7 +32,9 @@ QvisWorkspaceManager::QvisWorkspaceManager(QWidget *parent) :
 {
     ui->setupUi(this);
 
+//#ifdef QT_CREATOR_ONLY
     mAgent = new WorkspaceAgent();
+//#endif
 
     const QSignalBlocker blocker(ui->WorkspaceTreeWidget);
 
@@ -65,7 +74,29 @@ void QvisWorkspaceManager::updateWindow(bool doAll)
 
     if(doAll)
     {
-        // Who is responsible for clearing the tree??
+        mNumVolumeGroups = 0;
+        mNumMeshGroups = 0;
+
+        mCurrentViewWindow = "";
+        mCurrentVolumeGroup = "";
+        mCurrentMeshGroup = "";
+        mCurrentVolume = "";
+        mCurrentMesh = "";
+
+        mLastSelections.clear();
+
+        mCurrentTreeWidgetItem = nullptr;
+
+        // Delete each view which deletes everything.
+        QTreeWidgetItemIterator it(ui->WorkspaceTreeWidget);
+
+        while(*it)
+        {
+            if(getItemType(*it) == DatasetAttributes::ViewWindow)
+                emit actionViewWindowDelete((*it)->text(ITEM_NAME));
+        }
+
+        // Now delete the top level item
         for(int i=0; i<ui->WorkspaceTreeWidget->topLevelItemCount(); ++i)
         {
             QTreeWidgetItem * item = ui->WorkspaceTreeWidget->topLevelItem(i);
@@ -78,26 +109,114 @@ void QvisWorkspaceManager::updateWindow(bool doAll)
         // Create an initial node for the tree
         QTreeWidgetItem * praentItem = WorkspaceActiveDatasetsAdd(node);
 
+        bool ok = true;
+
         // Now add all of the children.
         for(const auto childNode : node->children)
-            addChildItem(praentItem, childNode);
+        {
+            ok = addChildItem(praentItem, childNode, doAll);
+
+            if(!ok)
+                break;
+        }
+
+        // Bad tree so delete and create a basic start up.
+        if(!ok)
+        {
+            mNumVolumeGroups = 0;
+            mNumMeshGroups = 0;
+
+            mCurrentViewWindow = "";
+            mCurrentVolumeGroup = "";
+            mCurrentMeshGroup = "";
+            mCurrentVolume = "";
+            mCurrentMesh = "";
+
+            mLastSelections.clear();
+
+            mCurrentTreeWidgetItem = nullptr;
+
+            // Delete each view which deletes everything.
+            QTreeWidgetItemIterator it(ui->WorkspaceTreeWidget);
+
+            while(*it)
+            {
+                if(getItemType(*it) == DatasetAttributes::ViewWindow)
+                    emit actionViewWindowDelete((*it)->text(ITEM_NAME));
+            }
+
+            // Now delete the top level item
+            for(int i=0; i<ui->WorkspaceTreeWidget->topLevelItemCount(); ++i)
+            {
+                QTreeWidgetItem * item = ui->WorkspaceTreeWidget->topLevelItem(i);
+
+                delete this->getItemNode(item);
+            }
+
+            ui->WorkspaceTreeWidget->clear();
+
+            // Create an initial node for the tree
+            WorkspaceActiveDatasetsAdd();
+
+            // Add an initial view window
+            WorkspaceViewWindowAddClicked();
+        }
     }
 }
 
-void QvisWorkspaceManager::addChildItem(QTreeWidgetItem * parent, const DataTreeNode *node)
+bool QvisWorkspaceManager::addChildItem(QTreeWidgetItem * parent, const DataTreeNode *node, bool createItem)
 {
     QString name = node->name.c_str();
     QColor color = QColor(node->color[0], node->color[1], node->color[2]);
 
-    QTreeWidgetItem *child = new QTreeWidgetItem(QStringList({name, "", ""}));
+    QTreeWidgetItem *child;
+
+    if(createItem)
+    {
+        child = new QTreeWidgetItem(QStringList({name, "", ""}));
+
+        setItemNode(child, node);
+    }
+    else
+    {
+        child = GetTreeWidgetItem(name);
+
+        if(child == nullptr || getItemNode(child) != node)
+        {
+            QMessageBox dialog;
+            dialog.setText("Aborting, bad node tree from agent.");
+            dialog.setInformativeText("Cannot find node '" + name + "'.");
+            dialog.setStandardButtons(QMessageBox::Ok);
+            dialog.exec();
+
+            return false;
+        }
+    }
 
     if(node->type & (DatasetAttributes::VolumeGroup | DatasetAttributes::MeshGroup))
     {
-        // FIXME Set the index of group.
+        // Get the number from the group.
+        std::string number = name.toStdString();
+        number.erase(0, number.find_last_of(" ")+1);
+        int value = std::stoi(number);
+
+        if(value > 0)
+        {
+            if(node->type == DatasetAttributes::VolumeGroup && mNumVolumeGroups < value + 1)
+                mNumVolumeGroups = value + 1;
+            else if(node->type == DatasetAttributes::MeshGroup && mNumMeshGroups < value + 1)
+                mNumMeshGroups = value + 1;
+        }
+        else
+        {
+            if(node->type == DatasetAttributes::VolumeGroup)
+                ++mNumVolumeGroups;
+            else if(node->type == DatasetAttributes::MeshGroup)
+                ++mNumMeshGroups;
+        }
+
         child->setFlags(child->flags() | Qt::ItemIsEditable);
     }
-
-    setItemNode(child, node);
 
     if(node->visible)
         child->setIcon(ITEM_NAME,  GetLightIcon(color));
@@ -123,10 +242,16 @@ void QvisWorkspaceManager::addChildItem(QTreeWidgetItem * parent, const DataTree
 
     parent->addChild(child);
 
+
     for(const auto childNode : node->children)
-        addChildItem(child, childNode);
+    {
+        if(!addChildItem(child, childNode, createItem))
+            return false;
+    }
 
     WorkspaceUpdate(NODE_DATA_SELECTED, true);
+
+    return true;
 }
 
 void QvisWorkspaceManager::setDatasetManager(QvisDatasetManager *datasetManager)
@@ -178,7 +303,7 @@ void QvisWorkspaceManager::WorkspaceRename(const QString oldName, const QString 
         it++;
 
         // Only rename datasets with the same type.
-        DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType(treeItem->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+        DatasetAttributes::DatasetType dType = getItemType(treeItem);
         if(datasetType != dType)
             continue;
 
@@ -261,7 +386,7 @@ void QvisWorkspaceManager::WorkspaceAdd(const QString parentName, const QString 
     if(parentName.size())
     {
         parent = GetTreeWidgetItem(parentName);
-        DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType(parent->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+        DatasetAttributes::DatasetType dType = getItemType(parent);
 
         // If the parent is a view window then no volume or mesh group so create one.
         if(dType == DatasetAttributes::ViewWindow)
@@ -308,7 +433,7 @@ void QvisWorkspaceManager::WorkspaceAdd(const QString parentName, const QString 
             for(int i=0; i<item->childCount(); ++i)
             {
                 QTreeWidgetItem *child = item->child(i);
-                DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType(child->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+                DatasetAttributes::DatasetType dType = getItemType(child);
 
                 if(dType == DatasetAttributes::VolumeGroup)
                     ++nVolumes;
@@ -451,7 +576,7 @@ void QvisWorkspaceManager::WorkspaceSelected(QTreeWidgetItem *item, int column)
         return;
 
     QString text = mCurrentTreeWidgetItem->text(ITEM_NAME);
-    DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType(mCurrentTreeWidgetItem->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+    DatasetAttributes::DatasetType dType = getItemType(mCurrentTreeWidgetItem);
 
     // Based what item is selected set the up stream parents and down stream children
     // that can be considered to current (though not highlighted in the UI).
@@ -503,7 +628,7 @@ void QvisWorkspaceManager::WorkspaceSelected(QTreeWidgetItem *item, int column)
 
 void QvisWorkspaceManager::ViewWindowSelected(QTreeWidgetItem *item)
 {
-    DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType(item->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+    DatasetAttributes::DatasetType dType = getItemType(item);
 
     if(dType == DatasetAttributes::ViewWindow)
     {
@@ -522,7 +647,7 @@ void QvisWorkspaceManager::ViewWindowSelected(QTreeWidgetItem *item)
         {
             QTreeWidgetItem *child = item->child(i);
             QString text = child->text(ITEM_NAME);
-            DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType(child->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+            DatasetAttributes::DatasetType dType = getItemType(child);
 
             if(dType == DatasetAttributes::VolumeGroup && !multpleVolumes)
             {
@@ -592,7 +717,7 @@ void QvisWorkspaceManager::ViewWindowSelected(QTreeWidgetItem *item)
 
 void QvisWorkspaceManager::VolumeGroupSelected(QTreeWidgetItem *item)
 {
-    DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType(item->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+    DatasetAttributes::DatasetType dType = getItemType(item);
 
     if(dType == DatasetAttributes::VolumeGroup)
     {
@@ -629,7 +754,7 @@ void QvisWorkspaceManager::VolumeGroupSelected(QTreeWidgetItem *item)
 
 void QvisWorkspaceManager::MeshGroupSelected(QTreeWidgetItem *item)
 {
-    DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType(item->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+    DatasetAttributes::DatasetType dType = getItemType(item);
 
     if(dType == DatasetAttributes::MeshGroup)
     {
@@ -666,7 +791,7 @@ void QvisWorkspaceManager::MeshGroupSelected(QTreeWidgetItem *item)
 
 void QvisWorkspaceManager::VolumeSelected(QTreeWidgetItem *item)
 {
-    DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType(item->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+    DatasetAttributes::DatasetType dType = getItemType(item);
 
     if(dType == DatasetAttributes::Volume)
     {
@@ -693,7 +818,7 @@ void QvisWorkspaceManager::VolumeSelected(QTreeWidgetItem *item)
 
 void QvisWorkspaceManager::MeshSelected(QTreeWidgetItem *item)
 {
-    DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType(item->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+    DatasetAttributes::DatasetType dType = getItemType(item);
 
     if(dType == DatasetAttributes::Mesh)
     {
@@ -734,7 +859,7 @@ void QvisWorkspaceManager::WorkspaceDoubleClicked(QTreeWidgetItem *item, int col
 {
     Q_UNUSED(column);
 
-    DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType(item->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+    DatasetAttributes::DatasetType dType = getItemType(item);
 
     // Emit a signal to that will ALWAYS bring up the window.
     if(item == mCurrentTreeWidgetItem) // && column == ITEM_NAME)
@@ -755,7 +880,7 @@ void QvisWorkspaceManager::WorkspaceItemMoved(QTreeWidgetItem *item,      int iC
     Q_UNUSED(pColumn);
 
     // When moving data the views need to be updated.
-    if(DatasetAttributes::DatasetType(item->data(ITEM_DATA_TYPE, Qt::UserRole).toInt()) != DatasetAttributes::ViewWindow)
+    if(getItemType(item) != DatasetAttributes::ViewWindow)
     {
         // Update the view that the data was moved to.
         QTreeWidgetItem *viewItem = GetTreeWidgetItemViewWindow(item->text(ITEM_NAME));
@@ -799,7 +924,7 @@ void QvisWorkspaceManager::WorkspaceChanged(QTreeWidgetItem *item, int column)
         return;
 
     // Only volume and mesh groups can be renamed.
-    DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType(item->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+    DatasetAttributes::DatasetType dType = getItemType(item);
     if((dType & (DatasetAttributes::VolumeGroup | DatasetAttributes::MeshGroup)) == 0)
         return;
 
@@ -890,7 +1015,7 @@ QTreeWidgetItem * QvisWorkspaceManager::GetTreeWidgetItemViewWindow(const QStrin
 
     while(*it)
     {
-        DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType((*it)->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+        DatasetAttributes::DatasetType dType = getItemType(*it);
 
         if(dType == DatasetAttributes::ViewWindow)
             view = *it;
@@ -928,7 +1053,7 @@ QMenu * QvisWorkspaceManager::GetTreeWidgetMenu(QMenu *parent, const DatasetAttr
 void QvisWorkspaceManager::GetTreeWidgetMenu(const DatasetAttributes::DatasetType datasetType, const QTreeWidgetItem *item, QMenu *menu, QSignalMapper* signalMapper) const
 {
     QString text = item->text(ITEM_NAME);
-    DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType(item->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+    DatasetAttributes::DatasetType dType = getItemType(item);
 
     if(dType == DatasetAttributes::ActiveDatasets)
     {
@@ -946,7 +1071,7 @@ void QvisWorkspaceManager::GetTreeWidgetMenu(const DatasetAttributes::DatasetTyp
         for(int i=0; i<item->childCount(); ++i)
         {
             const QTreeWidgetItem *child = item->child(i);
-            DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType(child->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+            DatasetAttributes::DatasetType dType = getItemType(child);
 
             if((datasetType == DatasetAttributes::Volume && dType == DatasetAttributes::VolumeGroup) ||
                (datasetType == DatasetAttributes::Mesh && dType == DatasetAttributes::MeshGroup))
@@ -993,7 +1118,7 @@ void QvisWorkspaceManager::WorkspaceContextMenuRequested(const QPoint &pos)
     WorkspaceSelected(mCurrentTreeWidgetItem, ITEM_NAME);
 
     QString text = mCurrentTreeWidgetItem->text(ITEM_NAME);
-    DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType(mCurrentTreeWidgetItem->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+    DatasetAttributes::DatasetType dType = getItemType(mCurrentTreeWidgetItem);
     bool visible = getNodeData(mCurrentTreeWidgetItem, NODE_DATA_VISIBILE).toBool();
     QString visibleStr = tr("Toggle Visibility") + (visible ? tr(" - Hide") : tr(" - Show"));
 
@@ -1215,7 +1340,7 @@ void QvisWorkspaceManager::WorkspaceRandomizeColors(QTreeWidgetItem *item)
     if(item == nullptr)
         return;
 
-    DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType(item->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+    DatasetAttributes::DatasetType dType = getItemType(item);
 
     if(item->childCount())
     {
@@ -1294,7 +1419,7 @@ void QvisWorkspaceManager::WorkspaceHideShowClicked()
     if(mCurrentTreeWidgetItem == nullptr)
         return;
 
-    DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType(mCurrentTreeWidgetItem->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+    DatasetAttributes::DatasetType dType = getItemType(mCurrentTreeWidgetItem);
 
     if(dType != DatasetAttributes::ActiveDatasets)
     {
@@ -1325,7 +1450,7 @@ void QvisWorkspaceManager::WorkspaceSelectionDeleteClicked(QString name)
     {
         mCurrentTreeWidgetItem = GetTreeWidgetItem(name);
 
-        // If the item was not found that means the data manager deleted the view then signaled
+        // If the item was not found that means the workspace manager deleted the view then signaled
         // the main window (see the emit actionViewWindowDelete below). When the main window deletes
         // a view it calls this method. As view was already deleted there is nothing to be done.
         if(mCurrentTreeWidgetItem == nullptr)
@@ -1339,7 +1464,7 @@ void QvisWorkspaceManager::WorkspaceSelectionDeleteClicked(QString name)
         return;
     }
 
-    DatasetAttributes::DatasetType dataType = DatasetAttributes::DatasetType(mCurrentTreeWidgetItem->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+    DatasetAttributes::DatasetType dataType = getItemType(mCurrentTreeWidgetItem);
 
     if(dataType == DatasetAttributes::ActiveDatasets)
     {
@@ -1355,7 +1480,7 @@ void QvisWorkspaceManager::WorkspaceSelectionDeleteClicked(QString name)
 
     if(parent)
     {
-        DatasetAttributes::DatasetType dType = DatasetAttributes::DatasetType(parent->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
+        DatasetAttributes::DatasetType dType = getItemType(parent);
 
         std::cerr << __FUNCTION__ << "  " << __LINE__ << " parent " << parent->text(0).toStdString() << "  " << parent->childCount() << "  "
                   << dType << "  " << std::endl;
@@ -1425,7 +1550,7 @@ void QvisWorkspaceManager::WorkspaceViewWindowSelected(QString name)
         // Select the current item in the dataset list.
         emit datasetUpdateSelection(mCurrentMesh,   true);
         emit datasetUpdateSelection(mCurrentVolume, true);
-/* FIXME
+/* FIXME - not sure what needs fixing????
         // Volume item already selected - nothing to do
         QTableWidgetItem *volumeTableItem = GetTableWidgetItem(mCurrentVolume);
         if(volumeTableItem && mCurrentDataSetIndex == volumeTableItem->row())
@@ -1674,7 +1799,7 @@ QString QvisWorkspaceManager::WorkspaceExists(QString name, DatasetAttributes::D
     while(*it)
     {
         // Is it possible for a volume and mesh to have the same name???
-        //if(DatasetAttributes::DatasetType((*it)->data(ITEM_DATA_TYPE, Qt::UserRole).toInt()) == dType)
+        //if(getItemType(*it) == dType)
         {
             QString tmp = (*it)->text(ITEM_NAME);
 
@@ -1742,16 +1867,6 @@ QIcon QvisWorkspaceManager::GetColorIcon(QColor color)
     return QIcon(pixmap);
 }
 
-void QvisWorkspaceManager::setItemData(QTreeWidgetItem *item, ItemDataIndex index, QVariant value)
-{
-    item->setData(index, Qt::UserRole, value);
-}
-
-QVariant QvisWorkspaceManager::getItemData(QTreeWidgetItem *item, ItemDataIndex index)
-{
-    return item->data(index, Qt::UserRole);
-}
-
 inline void QvisWorkspaceManager::setItemNode(QTreeWidgetItem *item, const DataTreeNode * node)
 {
     // Save the pointer as qlonglong which allows it to work with the drag and drop.
@@ -1759,20 +1874,22 @@ inline void QvisWorkspaceManager::setItemNode(QTreeWidgetItem *item, const DataT
     nodeVar.setValue((qlonglong)node);
 
     item->setData(ITEM_DATA_NODE, Qt::UserRole, nodeVar);
+    // The node type is set as data because it is used by the WorkspaceTreeWidget so to control the drag and drop.
     item->setData(ITEM_DATA_TYPE, Qt::UserRole, node->type);
 }
 
 inline DataTreeNode * QvisWorkspaceManager::getItemNode(QTreeWidgetItem *item)
 {
-    return (DataTreeNode *) getItemData(item, ITEM_DATA_NODE).value<qlonglong>();
+    return (DataTreeNode *) item->data(ITEM_DATA_NODE, Qt::UserRole).value<qlonglong>();
 }
 
 inline void QvisWorkspaceManager::setItemType(QTreeWidgetItem *item, const DatasetAttributes::DatasetType dType)
 {
     item->setData(ITEM_DATA_TYPE, Qt::UserRole, dType);
+    getItemNode(item)->type = dType;
 }
 
-inline DatasetAttributes::DatasetType QvisWorkspaceManager::getItemType(QTreeWidgetItem *item)
+inline DatasetAttributes::DatasetType QvisWorkspaceManager::getItemType(const QTreeWidgetItem *item) const
 {
     return DatasetAttributes::DatasetType(item->data(ITEM_DATA_TYPE, Qt::UserRole).toInt());
 }

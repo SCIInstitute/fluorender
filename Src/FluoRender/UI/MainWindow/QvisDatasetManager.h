@@ -10,7 +10,14 @@
 class QTableWidgetItem;
 class QvisWorkspaceManager;
 
+#ifdef QT_CREATOR_ONLY
 class DatasetAgent;
+#else
+  namespace fluo {
+    class DatasetAgent;
+  }
+  using namespace fluo;
+#endif
 
 namespace Ui {
 class QvisDatasetManager;
@@ -62,9 +69,20 @@ public slots:
     void DatasetSaveMaskClicked();
 
 private:
+    // Used with the DatasetTableWidget which has multiple columns;
+    enum ItemColumnIndex
+    {
+        DATASET_TYPE = 0,
+        DATASET_NAME = 1,
+        DATASET_PATH = 2,
+    };
+
     Ui::QvisDatasetManager *ui;
 
     QTableWidgetItem * GetTableWidgetItem(const QString &name, bool exact = true) const;
+    DatasetAttributes::DatasetType getDatasetType(const int index) const;
+    QString getDatasetName(const int index) const;
+    QString getDatasetFullName(const int index) const;
 
     void DatasetAdd(const QString &fullname, DatasetAttributes::DatasetType type);
     void DatasetUpdate(int index, bool value);

@@ -20,7 +20,9 @@ QvisSourceManager::QvisSourceManager(QWidget *parent) :
 {
     ui->setupUi(this);
 
+//#ifdef QT_CREATOR_ONLY
     mAgent = new SourceAgent();
+//#endif
 }
 
 QvisSourceManager::~QvisSourceManager()
