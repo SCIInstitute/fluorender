@@ -639,7 +639,11 @@ void QvisMainWindow::ActionViewWindowDelete(QString name)
 
     // Get the first view window in the map and make it the current view window.
     if(mViewWindowMap.empty())
-        mViewWindow = nullptr; // This should not happen as there should always be one view window.
+    {
+        mViewWindow = nullptr; // Happens when clearing for new project.
+
+        QvisViewWindow::mNumViewWindows = 0;
+    }
     else
         mViewWindow = mViewWindowMap.begin()->second;
 
