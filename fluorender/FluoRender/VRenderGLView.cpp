@@ -3785,7 +3785,7 @@ void VRenderGLView::PickMesh()
 		{
 			if (m_frame && m_frame->GetTree())
 			{
-				m_frame->GetTree()->SetFocus();
+				//m_frame->GetTree()->SetFocus();
 				m_frame->GetTree()->Select(m_vrv->GetName(), md->GetName());
 			}
 			RefreshGL(27);
@@ -3853,7 +3853,7 @@ void VRenderGLView::PickVolume()
 	{
 		if (m_frame && m_frame->GetTree())
 		{
-			m_frame->GetTree()->SetFocus();
+			//m_frame->GetTree()->SetFocus();
 			m_frame->GetTree()->Select(m_vrv->GetName(), picked_vd->GetName());
 		}
 		//update label selection
@@ -3976,7 +3976,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	wxRect view_reg = GetScreenRect();
 
 	wxWindow *window = wxWindow::FindFocus();
-	if (window && view_reg.Contains(mouse_pos))
+	if (window == this && view_reg.Contains(mouse_pos))
 	{
 		UpdateBrushState();
 
@@ -9963,19 +9963,28 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		return;
 	//if (m_drawing) return;
 	wxWindow *window = wxWindow::FindFocus();
+	//if (window &&
+	//	(window->GetClassInfo()->
+	//		IsKindOf(CLASSINFO(wxTextCtrl)) ||
+	//		window->GetClassInfo()->
+	//		IsKindOf(CLASSINFO(wxComboBox))) &&
+	//		(event.LeftDown() ||
+	//			event.RightDown() ||
+	//			event.MiddleDown() ||
+	//			event.LeftUp() ||
+	//			event.MiddleUp() ||
+	//			event.RightUp() ||
+	//			event.Dragging() ||
+	//			event.GetWheelRotation()))
 	if (window &&
-		(window->GetClassInfo()->
-			IsKindOf(CLASSINFO(wxTextCtrl)) ||
-			window->GetClassInfo()->
-			IsKindOf(CLASSINFO(wxComboBox))) &&
-			(event.LeftDown() ||
-				event.RightDown() ||
-				event.MiddleDown() ||
-				event.LeftUp() ||
-				event.MiddleUp() ||
-				event.RightUp() ||
-				event.Dragging() ||
-				event.GetWheelRotation()))
+		(event.LeftDown() ||
+		event.RightDown() ||
+		event.MiddleDown() ||
+		event.LeftUp() ||
+		event.MiddleUp() ||
+		event.RightUp() ||
+		event.Dragging() ||
+		event.GetWheelRotation()))
 		SetFocus();
 
 	m_interactive = false;
