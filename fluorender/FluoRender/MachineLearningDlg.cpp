@@ -566,9 +566,15 @@ void MLCompGenPanel::UpdateBotList()
 		size_t len = data_in.size();
 		if (len)
 		{
+#ifdef _WIN32
 			for (size_t j = 0; j < data_in.size() - 1; ++j)
 				str_in += std::format("{:.2f}", data_in[j]) + ", ";
 			str_in += std::format("{:.2f}", data_in[len - 1]);
+#else
+            for (size_t j = 0; j < data_in.size() - 1; ++j)
+                str_in += wxString::Format("%.2f", data_in[j]).ToStdString() + ", ";
+            str_in += wxString::Format("%.2f", data_in[len - 1]).ToStdString();
+#endif
 		}
 		m_bot_grid->SetCellValue(0, 0, str_in);
 
@@ -577,9 +583,15 @@ void MLCompGenPanel::UpdateBotList()
 		len = data_out.size();
 		if (len)
 		{
+#ifdef _WIN32
 			for (size_t j = 0; j < data_out.size() - 1; ++j)
 				str_out += std::format("{:.2f}", data_out[j]) + ", ";
 			str_out += std::format("{:.2f}", data_out[len - 1]);
+#else
+            for (size_t j = 0; j < data_out.size() - 1; ++j)
+                str_out += wxString::Format("%.2f", data_out[j]).ToStdString() + ", ";
+            str_out += wxString::Format("%.2f", data_out[len - 1]).ToStdString();
+#endif
 		}
 		m_bot_grid->SetCellValue(0, 1, str_out);
 	}
