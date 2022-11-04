@@ -172,6 +172,7 @@ var data = d3.nest()
     .key(function (d) { return d.id; })
     .entries(dataFlat);
 
+var num = data.length;
 var gw = 1000,
 	gh = 800;
 var sclf = 0.5;
@@ -188,7 +189,6 @@ var line_type =
 var margin = { top: 10, right: 10, bottom: 50, left: 150 },
     width = gw - margin.left - margin.right,
     height = gh - margin.top - margin.bottom;
-var num = data.length;
 var x = function (d) { return d.time; };
 var y = function (d) { return d.value; };
 var extx = d3.extent(dataFlat, x);
