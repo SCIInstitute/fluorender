@@ -129,6 +129,10 @@ namespace flrd
 
 		void ExportAnalysis();
 
+		void ChangeData();
+		void ChangeScript();
+		void LoadProject();
+
 		//read/delete volume cache
 		void ReadVolCacheData(VolCache& vol_cache);
 		void ReadVolCacheDataMask(VolCache& vol_cache);

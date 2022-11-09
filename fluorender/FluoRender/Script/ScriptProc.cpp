@@ -135,6 +135,12 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 					RunRegistration();
 				else if (str == "export_analysis")
 					ExportAnalysis();
+				else if (str == "change_data")
+					ChangeData();
+				else if (str == "change_script")
+					ChangeScript();
+				else if (str == "load_project")
+					LoadProject();
 			}
 		}
 	}
@@ -276,7 +282,10 @@ wxString ScriptProc::GetInputFile(const wxString &str, const wxString &subd)
 		name = GET_NAME(name);
 		wxString path = wxStandardPaths::Get().GetExecutablePath();
 		path = wxPathOnly(path);
-		result = path + GETSLASH() + subd + GETSLASH() + name;
+		if (subd.IsEmpty())
+			result = path + GETSLASH() + name;
+		else
+			result = path + GETSLASH() + subd + GETSLASH() + name;
 		exist = wxFileExists(result);
 	}
 	if (!exist)
@@ -1671,6 +1680,69 @@ void ScriptProc::ExportAnalysis()
 	outputfile = "file://" + outputfile;
 #endif
 	::wxLaunchDefaultBrowser(outputfile);
+}
+
+void ScriptProc::ChangeData()
+{
+	if (!m_frame)
+		return;
+	if (!TimeCondition())
+		return;
+
+	bool clear;
+	m_fconfig->Read("clear", &clear, true);
+	wxString filename;
+	m_fconfig->Read("input", &filename, "");
+	filename = GetInputFile(filename, "Data");
+	bool imagej;
+	m_fconfig->Read("imagej", &imagej, false);
+
+	VolumeData* vd = 0;
+	if (clear)
+	{
+		m_frame->GetTree()->DeleteAll();
+		m_view->GetRulerHandler()->DeleteAll(false);
+	}
+	if (!filename.IsEmpty())
+	{
+		wxArrayString files;
+		files.Add(filename);
+		m_frame->LoadVolumes(files, imagej);
+	}
+}
+
+void ScriptProc::ChangeScript()
+{
+	if (!m_frame)
+		return;
+	if (!TimeCondition())
+		return;
+
+	bool run_script;
+	m_fconfig->Read("run_script", &run_script, false);
+	wxString filename;
+	m_fconfig->Read("script_file", &filename, "");
+	filename = GetInputFile(filename, "Scripts");
+
+	if (!run_script)
+		m_frame->GetSettingDlg()->SetRunScript(run_script);
+	if (!filename.IsEmpty())
+		m_frame->GetSettingDlg()->SetScriptFile(filename);
+	m_frame->GetMovieView()->GetScriptSettings();
+}
+
+void ScriptProc::LoadProject()
+{
+	if (!m_frame)
+		return;
+	if (!TimeCondition())
+		return;
+
+	wxString filename;
+	m_fconfig->Read("project_file", &filename, "");
+	filename = GetInputFile(filename, "Data");
+
+	m_frame->OpenProject(filename);
 }
 
 //read/delete volume cache
