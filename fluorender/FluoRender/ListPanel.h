@@ -135,6 +135,7 @@ public:
 	void Append(int type, wxString name, wxString path);
 	wxString GetText(long item, int col);
 	void SetText(long item, int col, wxString &str);
+	void DeleteAll();
 	void DeleteAllItems();
 	void SetSelection(int type, wxString &name);
 	void SaveAllMasks();

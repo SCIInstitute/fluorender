@@ -907,7 +907,7 @@ void VMovieView::Rewind()
 	m_cur_frame = m_start_frame;
 	m_cur_frame_text->ChangeValue(wxString::Format("%d", m_cur_frame));
 	SetProgress(0.);
-	SetRendering(0., false);
+	SetRendering(0., true);
 }
 
 void VMovieView::OnRewind(wxCommandEvent& event)

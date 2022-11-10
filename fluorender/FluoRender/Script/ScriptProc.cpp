@@ -42,7 +42,8 @@ DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include <string> 
 #include <sstream>
-#include <fstream> 
+#include <fstream>
+#include <filesystem>
 
 using namespace flrd;
 
@@ -155,8 +156,8 @@ bool ScriptProc::TimeCondition()
 	m_fconfig->Read("time_mode", &str, "TM_ALL_PRE");
 	std::string mode_str = str.ToStdString();
 	time_mode = TimeMode(mode_str);
-	if (m_rewind && !(time_mode & TM_REWIND))
-		return false;
+	if (m_rewind)
+		return time_mode & TM_REWIND;
 	int curf = m_view->m_tseq_cur_num;
 	int startf = m_view->m_begin_frame;
 	int endf = m_view->m_end_frame;
@@ -226,6 +227,8 @@ int ScriptProc::TimeMode(std::string &str)
 {
 	if (str == "TM_NONE")
 		return TM_NONE;
+	if (str == "TM_REWIND")
+		return TM_REWIND;
 	if (str == "TM_ALL_PRE")
 		return TM_ALL_PRE;
 	if (str == "TM_ALL_POST")
@@ -256,7 +259,16 @@ int ScriptProc::TimeMode(std::string &str)
 		return TM_ALL_POST_REWIND;
 	if (str == "TM_ALL")
 		return TM_ALL;
-	return std::stoi(str, nullptr, 0);
+	int result = 0;
+	try
+	{
+		result = std::stoi(str, nullptr, 0);
+	}
+	catch (...)
+	{
+		return result;
+	}
+	return result;
 }
 
 int ScriptProc::GetTimeNum()
@@ -296,7 +308,12 @@ wxString ScriptProc::GetInputFile(const wxString &str, const wxString &subd)
 		exist = wxFileExists(result);
 	}
 	if (exist)
+	{
+		//make slash consistent
+		std::filesystem::path p(result.ToStdWstring());
+		result = p.make_preferred().string();
 		return result;
+	}
 	else
 		return "";
 }
@@ -318,7 +335,11 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 			return name;
 		}
 	}
+
 	//not found
+	bool has_file = temp != wxPathOnly(temp);
+	bool absolute = wxIsAbsolutePath(temp);
+
 	if (temp.IsEmpty() ||
 		temp == "FILE_DLG")
 	{
@@ -336,15 +357,26 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 	}
 	else
 	{
-		//specific dir
-		path = temp;
-		if (temp.Find('.') != wxNOT_FOUND)
+		if (absolute)
+		{
+			//absolute dir
 			path = wxPathOnly(temp);
-		if (!wxDirExists(path))
-			MkDirW(path.ToStdWstring());
-		if (!wxDirExists(path))
-			return "";
-		if (path == temp)
+			if (!wxDirExists(path))
+				MkDirW(path.ToStdWstring());
+		}
+		else
+		{
+			//relative
+			wxString conf_path = wxPathOnly(m_fconfig_name);
+			path = conf_path + GETSLASH() + wxPathOnly(temp);
+			if (!wxDirExists(path))
+				MkDirW(path.ToStdWstring());
+		}
+		if (has_file)
+		{
+			path += GETSLASH() + wxFileNameFromPath(temp);
+		}
+		else
 		{
 			wxString lc = path.Last();
 			if (lc != "/" &&
@@ -352,8 +384,6 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 				path += GETSLASH();
 			path += "output01." + ext;//not containing filename
 		}
-		else
-			path = temp;//containing filename
 	}
 	if (!rep)
 	{
@@ -1700,7 +1730,8 @@ void ScriptProc::ChangeData()
 	VolumeData* vd = 0;
 	if (clear)
 	{
-		m_frame->GetTree()->DeleteAll();
+		//m_frame->GetTree()->DeleteAll();
+		m_frame->GetList()->DeleteAll();
 		m_view->GetRulerHandler()->DeleteAll(false);
 	}
 	if (!filename.IsEmpty())

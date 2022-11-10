@@ -1873,6 +1873,7 @@ void TIFReader::AnalyzeNamePattern(std::wstring &path_name)
 	m_name_patterns.clear();
 
 	boost::filesystem::path p(path_name);
+	p.make_preferred();
 	std::wstring path = p.stem().wstring();
 	std::wstring name = p.filename().wstring();
 	if (name.empty())

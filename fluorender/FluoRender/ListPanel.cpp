@@ -1132,6 +1132,12 @@ void ListPanel::SetText(long item, int col, wxString &str)
 		m_datalist->SetText(item, col, str);
 }
 
+void ListPanel::DeleteAll()
+{
+	if (m_datalist)
+		m_datalist->DeleteAll();
+}
+
 void ListPanel::DeleteAllItems()
 {
 	if (m_datalist)
@@ -1183,5 +1189,5 @@ void ListPanel::OnDelete(wxCommandEvent& event)
 
 void ListPanel::OnDeleteAll(wxCommandEvent &event)
 {
-	m_datalist->DeleteAll();
+	DeleteAll();
 }

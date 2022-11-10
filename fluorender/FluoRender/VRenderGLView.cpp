@@ -5023,7 +5023,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, int start_frame, int end_frame, boo
 
 	//run post-change script
 	if (update && m_run_script)
-		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_POST, m_script_file, rewind);
+		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_POST_REWIND, m_script_file, rewind);
 
 	//restore currently selected volume
 	m_cur_vol = cur_vd_save;
