@@ -837,6 +837,7 @@ public:
 	bool m_draw_rulers;
 	//current volume
 	VolumeData *m_cur_vol;
+	VolumeData* m_cur_vol_save;
 	//clipping settings
 	int m_clip_mask;
 	int m_clip_mode;//0-normal; 1-ortho planes; 2-rot difference

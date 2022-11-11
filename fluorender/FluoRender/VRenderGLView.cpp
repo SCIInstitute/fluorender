@@ -5007,7 +5007,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, int start_frame, int end_frame, boo
 	m_total_frames = std::abs(end_frame - start_frame + 1);
 
 	//save currently selected volume
-	VolumeData* cur_vd_save = m_cur_vol;
+	m_cur_vol_save = m_cur_vol;
 
 	//run pre-change script
 	if (update && m_run_script)
@@ -5026,7 +5026,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, int start_frame, int end_frame, boo
 		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_POST_REWIND, m_script_file, rewind);
 
 	//restore currently selected volume
-	m_cur_vol = cur_vd_save;
+	m_cur_vol = m_cur_vol_save;
 	m_selector.SetVolume(m_cur_vol);
 	m_calculator.SetVolumeA(m_cur_vol);
 

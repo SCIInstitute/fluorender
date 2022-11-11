@@ -157,7 +157,7 @@ bool ScriptProc::TimeCondition()
 	std::string mode_str = str.ToStdString();
 	time_mode = TimeMode(mode_str);
 	if (m_rewind)
-		return time_mode & TM_REWIND;
+		return time_mode & m_time_mask;
 	int curf = m_view->m_tseq_cur_num;
 	int startf = m_view->m_begin_frame;
 	int endf = m_view->m_end_frame;
@@ -1731,14 +1731,21 @@ void ScriptProc::ChangeData()
 	if (clear)
 	{
 		//m_frame->GetTree()->DeleteAll();
-		m_frame->GetList()->DeleteAll();
 		m_view->GetRulerHandler()->DeleteAll(false);
+		m_frame->GetDataManager()->ClearAll();
+		m_frame->GetAdjustView()->SetVolumeData(0);
+		m_frame->GetAdjustView()->SetGroup(0);
+		m_frame->GetAdjustView()->SetGroupLink(0);
+		m_frame->GetView(0)->ClearAll();
+		DataGroup::ResetID();
+		MeshGroup::ResetID();
 	}
 	if (!filename.IsEmpty())
 	{
 		wxArrayString files;
 		files.Add(filename);
 		m_frame->LoadVolumes(files, imagej);
+		m_view->m_cur_vol_save = m_view->GetAllVolumeData(0);
 	}
 }
 
@@ -1760,6 +1767,7 @@ void ScriptProc::ChangeScript()
 	if (!filename.IsEmpty())
 		m_frame->GetSettingDlg()->SetScriptFile(filename);
 	m_frame->GetMovieView()->GetScriptSettings();
+	m_fconfig_name = filename;
 }
 
 void ScriptProc::LoadProject()
