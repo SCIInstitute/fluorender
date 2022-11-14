@@ -71,8 +71,8 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 	wxFileInputStream is(m_fconfig_name);
 	if (!is.IsOk())
 		return;
-	wxFileConfig fconfig(is);
-	m_fconfig = &fconfig;
+	//wxFileConfig fconfig(is);
+	m_fconfig = new wxFileConfig(is);
 	m_time_mask = tm;
 	m_rewind = rewind;
 
@@ -80,17 +80,17 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 	wxString str;
 
 	//tasks
-	if (fconfig.Exists("/tasks"))
+	if (m_fconfig->Exists("/tasks"))
 	{
-		fconfig.SetPath("/tasks");
-		int tasknum = fconfig.Read("tasknum", 0l);
+		m_fconfig->SetPath("/tasks");
+		int tasknum = m_fconfig->Read("tasknum", 0l);
 		for (i = 0; i < tasknum; i++)
 		{
 			str = wxString::Format("/tasks/task%d", i);
-			if (fconfig.Exists(str))
+			if (m_fconfig->Exists(str))
 			{
-				fconfig.SetPath(str);
-				fconfig.Read("type", &str, "");
+				m_fconfig->SetPath(str);
+				m_fconfig->Read("type", &str, "");
 				m_type = str;
 				if (str == "noise_reduction")
 					RunNoiseReduction();
@@ -145,6 +145,8 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 			}
 		}
 	}
+
+	delete m_fconfig;
 }
 
 bool ScriptProc::TimeCondition()
@@ -1709,7 +1711,9 @@ void ScriptProc::ExportAnalysis()
 	outputfile.Replace(" ", "%20");
 	outputfile = "file://" + outputfile;
 #endif
+	m_frame->GetMovieView()->HoldRun();
 	::wxLaunchDefaultBrowser(outputfile);
+	m_frame->GetMovieView()->ResumeRun();
 }
 
 void ScriptProc::ChangeData()
