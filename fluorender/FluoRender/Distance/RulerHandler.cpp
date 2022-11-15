@@ -70,7 +70,7 @@ double RulerHandler::GetVolumeBgInt()
 	return m_vd->GetBackgroundInt();
 }
 
-bool RulerHandler::FindEditingRuler(double mx, double my)
+bool RulerHandler::FindEditingRuler(double mx, double my, unsigned int t)
 {
 	if (!m_view || !m_ruler_list)
 		return false;
@@ -113,7 +113,7 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 		{
 			point = ruler->GetPPoint(j, k);
 			if (!point) continue;
-			ptemp = point->GetPoint();
+			ptemp = point->GetPoint(t);
 			ptemp = mv.transform(ptemp);
 			ptemp = prj.transform(ptemp);
 			if ((persp && (ptemp.z() <= 0.0 || ptemp.z() >= 1.0)) ||
@@ -268,7 +268,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 
 	if (m_type == 1 && branch)
 	{
-		if (FindEditingRuler(mx, my))
+		if (FindEditingRuler(mx, my, 0))
 		{
 			if (m_ruler &&
 				m_ruler->GetDisp() &&
@@ -425,7 +425,7 @@ void RulerHandler::AddPaintRulerPoint()
 	Profile(m_ruler);
 }
 
-bool RulerHandler::MoveRuler(int mx, int my)
+bool RulerHandler::MoveRuler(int mx, int my, unsigned int tt)
 {
 	if (!m_point || !m_view || !m_ruler)
 		return false;
@@ -457,7 +457,7 @@ bool RulerHandler::MoveRuler(int mx, int my)
 	fluo::Vector displace = point - p0;
 	for (int i = 0; i < m_ruler->GetNumPoint(); ++i)
 	{
-		m_ruler->GetPoint(i)->DisplacePoint(displace);
+		m_ruler->GetPoint(i)->DisplacePoint(displace, tt);
 	}
 
 	Profile(m_ruler);
@@ -465,7 +465,7 @@ bool RulerHandler::MoveRuler(int mx, int my)
 	return true;
 }
 
-bool RulerHandler::EditPoint(int mx, int my, bool alt)
+bool RulerHandler::EditPoint(int mx, int my, bool alt, unsigned int t)
 {
 	if (!m_point || !m_view || !m_ruler)
 		return false;

@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <memory>
 #include <vector>
 #include <set>
+#include <map>
 #include <Types/Point.h>
 #include <Types/Color.h>
 #include <Types/Transform.h>
@@ -53,6 +54,8 @@ namespace flrd
 	class RulerPoint;
 	typedef std::shared_ptr<RulerPoint> pRulerPoint;
 	typedef std::vector<pRulerPoint> RulerBranch;
+	typedef std::map<unsigned int, fluo::Point> TimePoint;
+	typedef std::map<unsigned int, fluo::Point>::iterator TimePointIter;
 
 	class RulerPoint
 	{
@@ -61,52 +64,92 @@ namespace flrd
 			m_locked(false),
 			m_id(0)
 		{}
-		RulerPoint(fluo::Point& p):
-			m_p(p),
-			m_locked(false),
-			m_id(0)
-		{}
 		RulerPoint(bool locked):
 			m_locked(locked),
 			m_id(0)
 		{}
-		RulerPoint(fluo::Point& p, bool locked):
-			m_p(p),
+		RulerPoint(fluo::Point& p):
+			m_locked(false),
+			m_id(0)
+		{
+			m_tp.insert(std::pair<unsigned int, fluo::Point>(0, p));
+		}
+		RulerPoint(fluo::Point& p, unsigned int t) :
+			m_locked(false),
+			m_id(0)
+		{
+			m_tp.insert(std::pair<unsigned int, fluo::Point>(t, p));
+		}
+		RulerPoint(fluo::Point& p, bool locked, unsigned int t) :
 			m_locked(locked),
 			m_id(0)
-		{}
-		RulerPoint(fluo::Point& p, unsigned int id):
-			m_p(p),
+		{
+			m_tp.insert(std::pair<unsigned int, fluo::Point>(t, p));
+		}
+		RulerPoint(fluo::Point& p, unsigned int id, unsigned int t) :
 			m_locked(false),
 			m_id(id)
-		{}
+		{
+			m_tp.insert(std::pair<unsigned int, fluo::Point>(t, p));
+		}
 		RulerPoint(fluo::Point& p, unsigned int id, std::set<unsigned int> bid) :
-			m_p(p),
 			m_locked(false),
 			m_id(id),
 			m_bid(bid)
-		{}
-		RulerPoint(fluo::Point& p, unsigned int id, bool locked):
-			m_p(p),
+		{
+			m_tp.insert(std::pair<unsigned int, fluo::Point>(0, p));
+		}
+		RulerPoint(fluo::Point& p, unsigned int id, std::set<unsigned int> bid, unsigned int t) :
+			m_locked(false),
+			m_id(id),
+			m_bid(bid)
+		{
+			m_tp.insert(std::pair<unsigned int, fluo::Point>(t, p));
+		}
+		RulerPoint(fluo::Point& p, unsigned int id, bool locked, unsigned int t) :
 			m_locked(locked),
 			m_id(id)
-		{}
+		{
+			m_tp.insert(std::pair<unsigned int, fluo::Point>(t, p));
+		}
 
-		void SetPoint(fluo::Point& p)
+		void SetPoint(fluo::Point& p, unsigned int t = 0)
 		{
-			m_p = p;
+			TimePointIter i = m_tp.find(t);
+			if (i == m_tp.end())
+				m_tp.insert(std::pair<unsigned int, fluo::Point>(t, p));
+			else
+				i->second = p;
 		}
-		fluo::Point GetPoint()
+		fluo::Point GetPoint(unsigned int t = 0)
 		{
-			return m_p;
+			TimePointIter i = m_tp.find(t);
+			if (i == m_tp.end())
+			{
+				i = m_tp.find(0);
+				if (i == m_tp.end())
+					return fluo::Point();
+				else
+					return i->second;
+			}
+			else
+				return i->second;
 		}
-		void ScalePoint(double sx, double sy, double sz)
+		void ScalePoint(double sx, double sy, double sz, unsigned int t = 0)
 		{
-			m_p.scale(sx, sy, sz);
+			TimePointIter i = m_tp.find(t);
+			if (i != m_tp.end())
+				i->second.scale(sx, sy, sz);
 		}
-		void DisplacePoint(fluo::Vector& dp)
+		void DisplacePoint(fluo::Vector& dp, unsigned int t = 0)
 		{
-			m_p += dp;
+			TimePointIter i = m_tp.find(t);
+			if (i == m_tp.end())
+			{
+
+			}
+			else
+				i->second += dp;
 		}
 		void SetLocked(bool locked = true)
 		{
@@ -146,7 +189,7 @@ namespace flrd
 		friend class Ruler;
 
 	private:
-		fluo::Point m_p;
+		TimePoint m_tp;//points over time
 		bool m_locked;
 		unsigned int m_id;//from comp
 		std::set<unsigned int> m_bid;//merged ids from multiple bricks

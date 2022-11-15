@@ -932,7 +932,7 @@ private:
 					 //3-rotate clipping planes
 					 //4-one-time rendering update in painting mode
 					 //5-ruler mode
-					 //6-edit ruler
+					 //6-edit ruler by moving point
 					 //7-paint with locator
 					 //8-same as 4, but for paint ruler mode
 					 //9-move ruler
@@ -941,6 +941,7 @@ private:
 					 //12-grow with ruler
 					 //13-pencil with multipoint ruler
 					 //14-delete ruler point
+					 //15-edit ruler by pencil
 	bool m_force_clear;
 	bool m_interactive;
 	bool m_clear_buffer;

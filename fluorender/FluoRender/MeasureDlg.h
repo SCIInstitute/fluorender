@@ -135,7 +135,8 @@ public:
 		ID_GrowBtn,
 		ID_PencilBtn,
 		ID_RulerMoveBtn,
-		ID_RulerEditBtn,
+		ID_RulerMovePointBtn,
+		ID_RulerMovePencilBtn,
 		ID_RulerDelBtn,
 		ID_RulerFlipBtn,
 		ID_RulerAvgBtn,
@@ -253,7 +254,8 @@ private:
 	void OnGrow(wxCommandEvent& event);
 	void OnPencil(wxCommandEvent& event);
 	void OnRulerMove(wxCommandEvent& event);
-	void OnRulerEdit(wxCommandEvent& event);
+	void OnRulerMovePoint(wxCommandEvent& event);
+	void OnRulerMovePencil(wxCommandEvent& event);
 	void OnRulerDel(wxCommandEvent& event);
 	void OnRulerFlip(wxCommandEvent& event);
 	void OnRulerAvg(wxCommandEvent& event);

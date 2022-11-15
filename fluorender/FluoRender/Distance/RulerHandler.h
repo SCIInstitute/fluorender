@@ -126,7 +126,7 @@ namespace flrd
 			return m_type;
 		}
 
-		bool FindEditingRuler(double mx, double my);
+		bool FindEditingRuler(double mx, double my, unsigned int t);
 
 		void SetPoint(flrd::pRulerPoint point)
 		{
@@ -148,8 +148,8 @@ namespace flrd
 		bool GetMouseDist(int mx, int my, double dist);
 		void AddRulerPoint(int mx, int my, bool branch);
 		void AddPaintRulerPoint();
-		bool MoveRuler(int mx, int my);
-		bool EditPoint(int mx, int my, bool alt);
+		bool MoveRuler(int mx, int my, unsigned int t);
+		bool EditPoint(int mx, int my, bool alt, unsigned int t);
 		void Prune(int idx, int len);
 
 		void DeleteSelection(std::vector<int> &sel);
