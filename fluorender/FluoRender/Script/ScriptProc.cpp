@@ -159,7 +159,7 @@ bool ScriptProc::TimeCondition()
 	std::string mode_str = str.ToStdString();
 	time_mode = TimeMode(mode_str);
 	if (m_rewind)
-		return time_mode & m_time_mask;
+		return time_mode & m_time_mask & TM_REWIND;
 	int curf = m_view->m_tseq_cur_num;
 	int startf = m_view->m_begin_frame;
 	int endf = m_view->m_end_frame;
