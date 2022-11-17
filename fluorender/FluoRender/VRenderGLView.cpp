@@ -10006,7 +10006,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_int_mode == 14)
 		{
 			found_rp = m_ruler_handler.FindEditingRuler(
-				mp.x(), mp.y(), m_tseq_cur_num);
+				mp.x(), mp.y());
 		}
 		if (found_rp)
 		{
@@ -10353,10 +10353,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			bool rval = false;
 			if (m_int_mode == 6)
 				rval = m_ruler_handler.EditPoint(
-					mp.x(), mp.y(), event.AltDown(), m_tseq_cur_num);
+					mp.x(), mp.y(), event.AltDown());
 			else if (m_int_mode == 9)
 				rval = m_ruler_handler.MoveRuler(
-					mp.x(), mp.y(), m_tseq_cur_num);
+					mp.x(), mp.y());
 			if (rval)
 			{
 				RefreshGL(35);

@@ -48,18 +48,7 @@ namespace flrd
 			m_view = view;
 		}
 
-		void AddRuler(Ruler* ruler)
-		{
-			fluo::Point p;
-			for (size_t i = 0; i < ruler->GetNumPoint(); ++i)
-			{
-				RulerPoint* point = ruler->GetPoint(i);
-				if (!point)
-					continue;
-				p = point->GetPoint();
-				m_point_list.push_back(p);
-			}
-		}
+		void AddRuler(Ruler* ruler);
 
 		void SetRulerList(RulerList* list)
 		{

@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <memory>
 #include <vector>
 #include <set>
-#include <map>
+#include <unordered_map>
 #include <Types/Point.h>
 #include <Types/Color.h>
 #include <Types/Transform.h>
@@ -54,8 +54,10 @@ namespace flrd
 	class RulerPoint;
 	typedef std::shared_ptr<RulerPoint> pRulerPoint;
 	typedef std::vector<pRulerPoint> RulerBranch;
-	typedef std::map<unsigned int, fluo::Point> TimePoint;
-	typedef std::map<unsigned int, fluo::Point>::iterator TimePointIter;
+	typedef std::vector<std::pair<size_t, fluo::Point>> TimePoint;
+	typedef TimePoint::iterator TimePointIter;
+	typedef std::unordered_map<size_t, size_t> TimePointIndex;
+	typedef TimePointIndex::iterator TimePointIndexIter;
 
 	class RulerPoint
 	{
@@ -68,89 +70,90 @@ namespace flrd
 			m_locked(locked),
 			m_id(0)
 		{}
-		RulerPoint(fluo::Point& p):
+		RulerPoint(fluo::Point& p, size_t t) :
 			m_locked(false),
 			m_id(0)
 		{
-			m_tp.insert(std::pair<unsigned int, fluo::Point>(0, p));
+			SetPoint(p, t);
 		}
-		RulerPoint(fluo::Point& p, unsigned int t) :
-			m_locked(false),
-			m_id(0)
-		{
-			m_tp.insert(std::pair<unsigned int, fluo::Point>(t, p));
-		}
-		RulerPoint(fluo::Point& p, bool locked, unsigned int t) :
+		RulerPoint(fluo::Point& p, bool locked, size_t t) :
 			m_locked(locked),
 			m_id(0)
 		{
-			m_tp.insert(std::pair<unsigned int, fluo::Point>(t, p));
+			SetPoint(p, t);
 		}
-		RulerPoint(fluo::Point& p, unsigned int id, unsigned int t) :
+		RulerPoint(fluo::Point& p, unsigned int id, size_t t) :
 			m_locked(false),
 			m_id(id)
 		{
-			m_tp.insert(std::pair<unsigned int, fluo::Point>(t, p));
+			SetPoint(p, t);
 		}
-		RulerPoint(fluo::Point& p, unsigned int id, std::set<unsigned int> bid) :
+		RulerPoint(fluo::Point& p, unsigned int id, std::set<unsigned int> bid, size_t t) :
 			m_locked(false),
 			m_id(id),
 			m_bid(bid)
 		{
-			m_tp.insert(std::pair<unsigned int, fluo::Point>(0, p));
+			SetPoint(p, t);
 		}
-		RulerPoint(fluo::Point& p, unsigned int id, std::set<unsigned int> bid, unsigned int t) :
-			m_locked(false),
-			m_id(id),
-			m_bid(bid)
-		{
-			m_tp.insert(std::pair<unsigned int, fluo::Point>(t, p));
-		}
-		RulerPoint(fluo::Point& p, unsigned int id, bool locked, unsigned int t) :
+		RulerPoint(fluo::Point& p, unsigned int id, bool locked, size_t t) :
 			m_locked(locked),
 			m_id(id)
 		{
-			m_tp.insert(std::pair<unsigned int, fluo::Point>(t, p));
+			SetPoint(p, t);
 		}
 
-		void SetPoint(fluo::Point& p, unsigned int t = 0)
+		void SetPoint(const fluo::Point& p, size_t t)
 		{
-			TimePointIter i = m_tp.find(t);
-			if (i == m_tp.end())
-				m_tp.insert(std::pair<unsigned int, fluo::Point>(t, p));
-			else
-				i->second = p;
-		}
-		fluo::Point GetPoint(unsigned int t = 0)
-		{
-			TimePointIter i = m_tp.find(t);
-			if (i == m_tp.end())
+			TimePointIndexIter i = m_index.find(t);
+			if (i == m_index.end())
 			{
-				i = m_tp.find(0);
-				if (i == m_tp.end())
+				m_tp.push_back(std::make_pair(t, p));
+				m_index.insert(std::make_pair(t, m_tp.size() - 1));
+			}
+			else
+			{
+				m_tp[i->second].second = p;
+			}
+		}
+		fluo::Point GetPoint(size_t t)
+		{
+			TimePointIndexIter i = m_index.find(t);
+			if (i == m_index.end())
+			{
+				if (m_tp.empty())
 					return fluo::Point();
-				else
-					return i->second;
+				return m_tp.back().second;
 			}
 			else
-				return i->second;
+				return m_tp[i->second].second;
 		}
-		void ScalePoint(double sx, double sy, double sz, unsigned int t = 0)
+		void ScalePoint(double sx, double sy, double sz, size_t t)
 		{
-			TimePointIter i = m_tp.find(t);
-			if (i != m_tp.end())
-				i->second.scale(sx, sy, sz);
-		}
-		void DisplacePoint(fluo::Vector& dp, unsigned int t = 0)
-		{
-			TimePointIter i = m_tp.find(t);
-			if (i == m_tp.end())
+			TimePointIndexIter i = m_index.find(t);
+			if (i == m_index.end())
 			{
-
+				if (m_tp.empty())
+					return;
+				m_tp.back().second.scale(sx, sy, sz);
 			}
 			else
-				i->second += dp;
+			{
+				m_tp[i->second].second.scale(sx, sy, sz);
+			}
 		}
+		void DisplacePoint(fluo::Vector& dp, size_t t)
+		{
+			TimePointIndexIter i = m_index.find(t);
+			if (i == m_index.end())
+			{
+				if (m_tp.empty())
+					return;
+				m_tp.back().second += dp;
+			}
+			else
+				m_tp[i->second].second += dp;
+		}
+
 		void SetLocked(bool locked = true)
 		{
 			m_locked = locked;
@@ -190,6 +193,8 @@ namespace flrd
 
 	private:
 		TimePoint m_tp;//points over time
+		TimePointIndex m_index;//index for m_tp
+
 		bool m_locked;
 		unsigned int m_id;//from comp
 		std::set<unsigned int> m_bid;//merged ids from multiple bricks
@@ -245,22 +250,51 @@ namespace flrd
 		//data
 		int GetNumBranch();
 		int GetNumPoint();
+		int GetNumBranchPoint(int nbranch);
+		RulerPoint* GetRulerPoint(int index);
+		RulerPoint* GetLastRulerPoint();
+		pRulerPoint GetPRulerPoint(int index);
+		RulerPoint* GetRulerPoint(int nbranch, int index);
+		pRulerPoint GetPRulerPoint(int nbranch, int index);
+		pRulerPoint FindPRulerPoint(fluo::Point& point);
+		pRulerPoint FindNearestPRulerPoint(fluo::Point& point, size_t &ri, size_t &rj);
+		fluo::Point GetPoint(int index)
+		{
+			RulerPoint* p = GetRulerPoint(index);
+			if (p)
+				return p->GetPoint(m_work_time);
+			return fluo::Point();
+		}
+		bool GetPoint(int index, fluo::Point& point)
+		{
+			RulerPoint* p = GetRulerPoint(index);
+			if (p)
+			{
+				point = p->GetPoint(m_work_time);
+				return true;
+			}
+			return false;
+		}
 		fluo::Point GetPointTransformed(int index)
 		{
-			fluo::Point tfp;
-			RulerPoint* p = GetPoint(index);
-			if (p)
-				m_tform.project(p->GetPoint(), tfp);
+			fluo::Point p, tfp;
+			if (GetPoint(m_work_time, p))
+				m_tform.project(p, tfp);
 			return tfp;
 		}
-		RulerPoint* GetPoint(int index);
-		RulerPoint* GetLastPoint();
-		pRulerPoint GetPPoint(int index);
-		int GetNumBranchPoint(int nbranch);
-		RulerPoint* GetPoint(int nbranch, int index);
-		pRulerPoint GetPPoint(int nbranch, int index);
-		pRulerPoint FindPoint(fluo::Point& point);
-		pRulerPoint FindNearestPoint(fluo::Point& point, size_t &ri, size_t &rj);
+		fluo::Point GetPoint(int nbranch, int index)
+		{
+			RulerPoint* p = GetRulerPoint(nbranch, index);
+			if (p)
+				return p->GetPoint(m_work_time);
+			return fluo::Point();
+		}
+		void SetPoint(int index, const fluo::Point& point)
+		{
+			RulerPoint* p = GetRulerPoint(index);
+			if (p)
+				p->SetPoint(point, m_work_time);
+		}
 		int GetRulerType();
 		void SetRulerType(int type);
 		bool GetFinished();
@@ -296,22 +330,31 @@ namespace flrd
 			return m_disp;
 		}
 
-		//time-dependent
-		void SetTimeDep(bool time_dep)
+		//work time
+		void SetWorkTime(size_t t)
 		{
-			m_time_dep = time_dep;
+			m_work_time = t;
 		}
-		bool GetTimeDep()
+		size_t GetWorkTime()
 		{
-			return m_time_dep;
+			return m_work_time;
 		}
-		void SetTime(int time)
+		//transient
+		void SetTransient(bool bval)
 		{
-			m_time = time;
+			m_transient = bval;
 		}
-		int GetTime()
+		bool GetTransient()
 		{
-			return m_time;
+			return m_transient;
+		}
+		void SetTransTime(size_t t)
+		{
+			m_trans_time = t;
+		}
+		size_t GetTransTime()
+		{
+			return m_trans_time;
 		}
 
 		//extra info
@@ -414,9 +457,11 @@ namespace flrd
 		bool m_use_color;
 		fluo::Color m_color;
 
-		//time-dependent
-		bool m_time_dep;
-		int m_time;
+		//work time
+		size_t m_work_time;
+		//transient
+		bool m_transient;
+		size_t m_trans_time;
 
 		//extra info
 		wxString m_info_names;

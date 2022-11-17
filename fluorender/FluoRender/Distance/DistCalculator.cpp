@@ -109,6 +109,7 @@ void DistCalculator::BuildSpring()
 {
 	if (!m_ruler)
 		return;
+	size_t rwt = m_ruler->GetWorkTime();
 	int rn = m_ruler->GetNumPoint();
 	if (rn < 1)
 		return;
@@ -128,7 +129,7 @@ void DistCalculator::BuildSpring()
 			if (i == 0)
 			{
 				SpringNode node;
-				node.p = m_ruler->GetPoint(bi, i);
+				node.p = m_ruler->GetRulerPoint(bi, i);
 				node.prevd = 0.0;
 				node.nextd = 0.0;
 				node.dist = 0.0;
@@ -139,8 +140,8 @@ void DistCalculator::BuildSpring()
 			{
 				SpringNode &node1 = m_spring.back();
 				SpringNode node2;
-				node2.p = m_ruler->GetPoint(bi, i + 1);
-				dist = (node2.p->GetPoint() - node1.p->GetPoint()).length();
+				node2.p = m_ruler->GetRulerPoint(bi, i + 1);
+				dist = (node2.p->GetPoint(rwt) - node1.p->GetPoint(rwt)).length();
 				node1.nextd = dist;
 				node2.prevd = dist;
 				node2.nextd = 0.0;
@@ -201,6 +202,9 @@ double DistCalculator::GetRestDist()
 
 void DistCalculator::UpdateSpringNode(int idx)
 {
+	if (!m_ruler)
+		return;
+	size_t rwt = m_ruler->GetWorkTime();
 	int sz = m_spring.size();
 	int cz = m_cloud.size();
 	if (idx < 0 || idx >= sz)
@@ -208,7 +212,7 @@ void DistCalculator::UpdateSpringNode(int idx)
 	SpringNode& node = m_spring.at(idx);
 	if (node.p->GetLocked())
 		return;
-	fluo::Point pos = node.p->GetPoint();
+	fluo::Point pos = node.p->GetPoint(rwt);
 	fluo::Vector force, f1, f2, f3;
 
 	double dist, ang;
@@ -247,7 +251,7 @@ void DistCalculator::UpdateSpringNode(int idx)
 	if (idx > 0 && node.prevd > 0.0)
 	{
 		SpringNode& prev = m_spring.at(idx - 1);
-		dir = prev.p->GetPoint() - pos;
+		dir = prev.p->GetPoint(rwt) - pos;
 		dist = dir.length();
 		dir.normalize();
 		if (node.nextd == 0.0)
@@ -258,7 +262,7 @@ void DistCalculator::UpdateSpringNode(int idx)
 	if (idx < sz - 1 && node.nextd > 0.0)
 	{
 		SpringNode& next = m_spring.at(idx + 1);
-		dir = next.p->GetPoint() - pos;
+		dir = next.p->GetPoint(rwt) - pos;
 		dist = dir.length();
 		dir.normalize();
 		if (node.prevd == 0.0)
@@ -271,9 +275,9 @@ void DistCalculator::UpdateSpringNode(int idx)
 		node.prevd > 0.0 && node.nextd > 0.0)
 	{
 		SpringNode& prev = m_spring.at(idx - 1);
-		dir = prev.p->GetPoint() - pos;
+		dir = prev.p->GetPoint(rwt) - pos;
 		SpringNode& next = m_spring.at(idx + 1);
-		dir2 = next.p->GetPoint() - pos;
+		dir2 = next.p->GetPoint(rwt) - pos;
 		dir.normalize();
 		dir2.normalize();
 		ang = Dot(dir, dir2)+1.0;
@@ -305,13 +309,16 @@ void DistCalculator::UpdateSpringNode(int idx)
 	//f3.normalize();
 	//f3 *= norm;
 	force = ff1 * f1 + ff2 * f2;
-	node.p->DisplacePoint(force);
+	node.p->DisplacePoint(force, rwt);
 }
 
 void DistCalculator::UpdateSpringDist()
 {
 	if (m_spring.empty())
 		return;
+	if (!m_ruler)
+		return;
+	size_t rwt = m_ruler->GetWorkTime();
 
 	double dist;
 	fluo::Vector dir;
@@ -321,7 +328,7 @@ void DistCalculator::UpdateSpringDist()
 		if (node.prevd > 0.0)
 		{
 			SpringNode& prev = m_spring.at(i - 1);
-			dir = node.p->GetPoint() - prev.p->GetPoint();
+			dir = node.p->GetPoint(rwt) - prev.p->GetPoint(rwt);
 			dist = dir.length();
 			node.dist = prev.dist + dist;
 		}
@@ -332,10 +339,13 @@ void DistCalculator::SpringProject(fluo::Point &p0, fluo::Point &pp)
 {
 	if (m_spring.empty())
 		return;
+	if (!m_ruler)
+		return;
+	size_t rwt = m_ruler->GetWorkTime();
 	int sz = m_spring.size();
 	if (sz < 2)
 	{
-		pp = fluo::Point(p0 - m_spring[0].p->GetPoint());
+		pp = fluo::Point(p0 - m_spring[0].p->GetPoint(rwt));
 		return;
 	}
 
@@ -348,7 +358,7 @@ void DistCalculator::SpringProject(fluo::Point &p0, fluo::Point &pp)
 	{
 		SpringNode &node1 = m_spring.at(i);
 		SpringNode &node2 = m_spring.at(i + 1);
-		mp = fluo::Point((node1.p->GetPoint() + node2.p->GetPoint()) / 2.0);
+		mp = fluo::Point((node1.p->GetPoint(rwt) + node2.p->GetPoint(rwt)) / 2.0);
 		dist = (mp - p0).length2();
 		if (dist < mind)
 		{
@@ -361,8 +371,8 @@ void DistCalculator::SpringProject(fluo::Point &p0, fluo::Point &pp)
 		return;
 
 	//project
-	fluo::Point p1 = m_spring[minidx].p->GetPoint();
-	fluo::Point p2 = m_spring[minidx + 1].p->GetPoint();
+	fluo::Point p1 = m_spring[minidx].p->GetPoint(rwt);
+	fluo::Point p2 = m_spring[minidx + 1].p->GetPoint(rwt);
 	fluo::Vector axis = p2 - p1;
 	axis.normalize();
 	fluo::Vector vp0 = p0 - p1;

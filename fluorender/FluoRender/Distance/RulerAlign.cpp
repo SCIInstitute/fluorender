@@ -34,6 +34,17 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
+void RulerAlign::AddRuler(Ruler* ruler)
+{
+	fluo::Point p;
+	size_t t = m_view->m_tseq_cur_num;
+	for (size_t i = 0; i < ruler->GetNumPoint(); ++i)
+	{
+		if (ruler->GetPoint(t, p))
+			m_point_list.push_back(p);
+	}
+}
+
 void RulerAlign::AlignRuler(int axis_type)
 {
 	if (!m_view)

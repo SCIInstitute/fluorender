@@ -113,6 +113,7 @@ void Relax::BuildSpring()
 	int rn = m_ruler->GetNumPoint();
 	if (rn < 1)
 		return;
+	size_t rwt = m_ruler->GetWorkTime();
 
 	if (!m_spoints.empty())
 		m_spoints.clear();
@@ -134,10 +135,10 @@ void Relax::BuildSpring()
 		{
 			if (i == 0)
 			{
-				p = m_ruler->GetPoint(bi, i);
+				p = m_ruler->GetRulerPoint(bi, i);
 				if (p)
 				{
-					pp = p->GetPoint();
+					pp = p->GetPoint(rwt);
 					locked = p->GetLocked();
 					m_spoints.push_back(float(pp.x()));
 					m_spoints.push_back(float(pp.y()));
@@ -149,10 +150,10 @@ void Relax::BuildSpring()
 
 			if (rn > 1)
 			{
-				p = m_ruler->GetPoint(bi, i + 1);
+				p = m_ruler->GetRulerPoint(bi, i + 1);
 				if (p)
 				{
-					pp = p->GetPoint();
+					pp = p->GetPoint(rwt);
 					locked = p->GetLocked();
 					pp1 = fluo::Point(
 						m_spoints.end()[-3],

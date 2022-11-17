@@ -3831,7 +3831,7 @@ bool TraceGroup::GetMappedRulers(
 					ruler->SetRulerType(1);//multi-point
 					ruler->AddPoint(vertex1->GetCenter());
 					ruler->AddPoint(vertex2->GetCenter());
-					ruler->SetTimeDep(false);
+					ruler->SetTransient(false);
 					ruler->Id(vertex2->Id());
 					rulers.push_back(ruler);
 				}

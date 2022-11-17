@@ -221,8 +221,9 @@ void RulerListCtrl::UpdateRulers(VRenderGLView* vrv)
 	{
 		flrd::Ruler* ruler = (*ruler_list)[i];
 		if (!ruler) continue;
-		if (ruler->GetTimeDep() &&
-			ruler->GetTime() != m_view->m_tseq_cur_num)
+		ruler->SetWorkTime(m_view->m_tseq_cur_num);
+		if (ruler->GetTransient() &&
+			ruler->GetTransTime() != m_view->m_tseq_cur_num)
 			continue;
 
 		wxString unit;
@@ -244,12 +245,12 @@ void RulerListCtrl::UpdateRulers(VRenderGLView* vrv)
 		num_points = ruler->GetNumPoint();
 		if (num_points > 0)
 		{
-			p = ruler->GetPoint(0)->GetPoint();
+			p = ruler->GetPoint(0);
 			points += wxString::Format("(%.2f, %.2f, %.2f)", p.x(), p.y(), p.z());
 		}
 		if (num_points > 1)
 		{
-			p = ruler->GetPoint(num_points - 1)->GetPoint();
+			p = ruler->GetPoint(num_points - 1);
 			points += ", ";
 			points += wxString::Format("(%.2f, %.2f, %.2f)", p.x(), p.y(), p.z());
 		}
@@ -289,8 +290,8 @@ void RulerListCtrl::UpdateRulers(VRenderGLView* vrv)
 			ruler->GetName(), group, count,
 			intensity, color,
 			ruler->GetNumBranch(), ruler->GetLength(), unit,
-			ruler->GetAngle(), center, ruler->GetTimeDep(),
-			ruler->GetTime(), str, points);
+			ruler->GetAngle(), center, ruler->GetTransient(),
+			ruler->GetTransTime(), str, points);
 	}
 
 	AdjustSize();
@@ -440,6 +441,7 @@ void RulerListCtrl::Export(wxString filename)
 			//for each ruler
 			ruler = (*ruler_list)[i];
 			if (!ruler) continue;
+			ruler->SetWorkTime(m_view->m_tseq_cur_num);
 
 			os << ruler->GetName() << "\t";
 
@@ -481,12 +483,12 @@ void RulerListCtrl::Export(wxString filename)
 			num_points = ruler->GetNumPoint();
 			if (num_points > 0)
 			{
-				p = ruler->GetPoint(0)->GetPoint();
+				p = ruler->GetPoint(0);
 				str += wxString::Format("%.2f\t%.2f\t%.2f\t", p.x(), p.y(), p.z());
 			}
 			if (num_points > 1)
 			{
-				p = ruler->GetPoint(num_points - 1)->GetPoint();
+				p = ruler->GetPoint(num_points - 1);
 				str += wxString::Format("%.2f\t%.2f\t%.2f\t", p.x(), p.y(), p.z());
 			}
 			else
@@ -494,8 +496,8 @@ void RulerListCtrl::Export(wxString filename)
 			os << str;
 			
 			//time
-			if (ruler->GetTimeDep())
-				str = wxString::Format("%d", ruler->GetTime());
+			if (ruler->GetTransient())
+				str = wxString::Format("%d", ruler->GetTransTime());
 			else
 				str = "N/A";
 			os << str << "\t";
@@ -693,6 +695,7 @@ void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 		return;
 	flrd::Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
 	if (!ruler || ruler->GetRulerType() != 2) return;
+	ruler->SetWorkTime(m_view->m_tseq_cur_num);
 
 	wxString str = m_center_text->GetValue();
 	wxString old_str = GetText(m_editing_item, CenterCol);
@@ -728,10 +731,8 @@ void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 				return;
 		}
 	}
-	if (!ruler->GetPoint(0))
-		return;
 	fluo::Point tmp(x, y, z);
-	ruler->GetPoint(0)->SetPoint(tmp);
+	ruler->SetPoint(0, tmp);
 	str = wxString::Format("(%.2f, %.2f, %.2f)",
 		x, y, z);
 	SetText(m_editing_item, CenterCol, str);
@@ -1799,8 +1800,8 @@ void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
 		ruler->SetRulerType(2);
 		ruler->SetName("Average");
 		ruler->AddPoint(avg);
-		ruler->SetTimeDep(m_view->m_ruler_time_dep);
-		ruler->SetTime(m_view->m_tseq_cur_num);
+		ruler->SetTransient(m_view->m_ruler_time_dep);
+		ruler->SetTransTime(m_view->m_tseq_cur_num);
 		ruler_list->push_back(ruler);
 		m_view->RefreshGL(39);
 		GetSettings(m_view);
@@ -2159,7 +2160,7 @@ void MeasureDlg::OnTransientCheck(wxCommandEvent& event)
 			m_rulerlist->GetItemData(index));
 		if (!ruler)
 			continue;
-		ruler->SetTimeDep(val);
+		ruler->SetTransient(val);
 	}
 	m_rulerlist->UpdateRulers(m_view);
 }

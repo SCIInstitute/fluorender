@@ -134,14 +134,16 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 	flrd::RulerPoint *rp1, *rp2;
 	fluo::Color c;
 	fluo::Color text_color = m_view->GetTextColor();
+	size_t rwt = tseq_cur_num;
 	for (size_t i = 0; i < m_ruler_list->size(); i++)
 	{
 		flrd::Ruler* ruler = (*m_ruler_list)[i];
 		if (!ruler) continue;
+		ruler->SetWorkTime(rwt);
 		if (!ruler->GetDisp()) continue;
-		if (!ruler->GetTimeDep() ||
-			(ruler->GetTimeDep() &&
-				ruler->GetTime() == tseq_cur_num))
+		if (!ruler->GetTransient() ||
+			(ruler->GetTransient() &&
+				ruler->GetTransTime() == tseq_cur_num))
 		{
 			if (ruler->GetUseColor())
 				c = ruler->GetColor();
@@ -153,8 +155,8 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 				if (np == 1)
 				{
 					//draw square
-					rp1 = ruler->GetPoint(0);
-					p1 = rp1->GetPoint();
+					rp1 = ruler->GetRulerPoint(0);
+					p1 = rp1->GetPoint(rwt);
 					p1 = mv.transform(p1);
 					p1 = p.transform(p1);
 					if ((persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
@@ -172,15 +174,15 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 				{
 					//draw ellipse
 					flrd::RulerPoint* rps[4];
-					rps[0] = ruler->GetPoint(0);
-					rps[1] = ruler->GetPoint(1);
-					rps[2] = ruler->GetPoint(2);
-					rps[3] = ruler->GetPoint(3);
+					rps[0] = ruler->GetRulerPoint(0);
+					rps[1] = ruler->GetRulerPoint(1);
+					rps[2] = ruler->GetRulerPoint(2);
+					rps[3] = ruler->GetRulerPoint(3);
 					fluo::Point pps[4];
-					pps[0] = rps[0]->GetPoint();
-					pps[1] = rps[1]->GetPoint();
-					pps[2] = rps[2]->GetPoint();
-					pps[3] = rps[3]->GetPoint();
+					pps[0] = rps[0]->GetPoint(rwt);
+					pps[1] = rps[1]->GetPoint(rwt);
+					pps[2] = rps[2]->GetPoint(rwt);
+					pps[3] = rps[3]->GetPoint(rwt);
 					fluo::Point ppc = ruler->GetCenter();
 					double ra, rb;
 					ra = (pps[0] - pps[1]).length() / 2.0;
@@ -231,8 +233,8 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 				for (int bi = 0; bi < ruler->GetNumBranch(); ++bi)
 					for (size_t j = 0; j < ruler->GetNumBranchPoint(bi); ++j)
 					{
-						rp2 = ruler->GetPoint(bi, j);
-						p2 = rp2->GetPoint();
+						rp2 = ruler->GetRulerPoint(bi, j);
+						p2 = rp2->GetPoint(rwt);
 						p2 = mv.transform(p2);
 						p2 = p.transform(p2);
 						if ((persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||
@@ -257,7 +259,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 						num += 8;
 						if (j > 0)
 						{
-							p1 = ruler->GetPoint(bi, j - 1)->GetPoint();
+							p1 = ruler->GetPoint(bi, j - 1);
 							p1 = mv.transform(p1);
 							p1 = p.transform(p1);
 							if ((persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
@@ -277,8 +279,8 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 			{
 				for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
 				{
-					rp2 = ruler->GetPoint(j);
-					p2 = rp2->GetPoint();
+					rp2 = ruler->GetRulerPoint(j);
+					p2 = rp2->GetPoint(rwt);
 					p2 = mv.transform(p2);
 					p2 = p.transform(p2);
 					if ((persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||
@@ -303,7 +305,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 					num += 8;
 					if (j > 0)
 					{
-						p1 = ruler->GetPoint(j - 1)->GetPoint();
+						p1 = ruler->GetPoint(j - 1);
 						p1 = mv.transform(p1);
 						p1 = p.transform(p1);
 						if ((persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
@@ -321,9 +323,9 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 				if (ruler->GetRulerType() == 4 &&
 					ruler->GetNumPoint() >= 3)
 				{
-					fluo::Point center = ruler->GetPoint(1)->GetPoint();
-					fluo::Vector v1 = ruler->GetPoint(0)->GetPoint() - center;
-					fluo::Vector v2 = ruler->GetPoint(2)->GetPoint() - center;
+					fluo::Point center = ruler->GetPoint(1);
+					fluo::Vector v1 = ruler->GetPoint(0) - center;
+					fluo::Vector v2 = ruler->GetPoint(2) - center;
 					double len = std::min(v1.length(), v2.length());
 					if (len > w)
 					{
@@ -511,21 +513,23 @@ void RulerRenderer::DrawText(int tseq_cur_num, int nx, int ny)
 	flvr::TextRenderer* text_renderer = m_view->GetTextRenderer();
 	if (!text_renderer)
 		return;
+	size_t rwt = tseq_cur_num;
 	for (size_t i = 0; i < m_ruler_list->size(); i++)
 	{
 		flrd::Ruler* ruler = (*m_ruler_list)[i];
 		if (!ruler) continue;
+		ruler->SetWorkTime(rwt);
 		if (!ruler->GetDisp()) continue;
-		if (!ruler->GetTimeDep() ||
-			(ruler->GetTimeDep() &&
-				ruler->GetTime() == tseq_cur_num))
+		if (!ruler->GetTransient() ||
+			(ruler->GetTransient() &&
+				ruler->GetTransTime() == tseq_cur_num))
 		{
 			if (ruler->GetUseColor())
 				c = ruler->GetColor();
 			else
 				c = text_color;
 			size_t j = ruler->GetNumPoint() - 1;
-			p2 = ruler->GetPoint(j)->GetPoint();
+			p2 = ruler->GetPoint(j);
 			p2 = mv.transform(p2);
 			p2 = p.transform(p2);
 			p2x = p2.x()*nx / 2.0;

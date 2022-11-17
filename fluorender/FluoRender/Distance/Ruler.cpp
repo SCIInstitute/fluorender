@@ -46,9 +46,11 @@ Ruler::Ruler()
 	m_finished = false;
 	m_use_color = false;
 
-	//time-dependent
-	m_time_dep = false;
-	m_time = 0;
+	//work time
+	m_work_time = 0;
+	//transient
+	m_transient = false;
+	m_trans_time = 0;
 
 	//brush size
 	m_brush_size = 0.0;
@@ -83,7 +85,15 @@ int Ruler::GetNumPoint()
 	return count;
 }
 
-RulerPoint *Ruler::GetPoint(int index)
+int Ruler::GetNumBranchPoint(int nb)
+{
+	int branch_num = GetNumBranch();
+	if (nb < 0 || nb >= branch_num)
+		return 0;
+	return m_ruler.at(nb).size();
+}
+
+RulerPoint *Ruler::GetRulerPoint(int index)
 {
 	if (index < 0)
 		return 0;
@@ -108,7 +118,7 @@ RulerPoint *Ruler::GetPoint(int index)
 	return 0;
 }
 
-RulerPoint* Ruler::GetLastPoint()
+RulerPoint* Ruler::GetLastRulerPoint()
 {
 	for (auto it = m_ruler.rbegin();
 		it != m_ruler.rend(); ++it)
@@ -120,7 +130,7 @@ RulerPoint* Ruler::GetLastPoint()
 	return 0;
 }
 
-pRulerPoint Ruler::GetPPoint(int index)
+pRulerPoint Ruler::GetPRulerPoint(int index)
 {
 	if (index < 0)
 		return 0;
@@ -145,15 +155,7 @@ pRulerPoint Ruler::GetPPoint(int index)
 	return 0;
 }
 
-int Ruler::GetNumBranchPoint(int nb)
-{
-	int branch_num = GetNumBranch();
-	if (nb < 0 || nb >= branch_num)
-		return 0;
-	return m_ruler.at(nb).size();
-}
-
-RulerPoint* Ruler::GetPoint(int nb, int index)
+RulerPoint* Ruler::GetRulerPoint(int nb, int index)
 {
 	int branch_num = GetNumBranch();
 	if (nb < 0 || nb >= branch_num)
@@ -164,7 +166,7 @@ RulerPoint* Ruler::GetPoint(int nb, int index)
 	return branch[index].get();
 }
 
-pRulerPoint Ruler::GetPPoint(int nb, int index)
+pRulerPoint Ruler::GetPRulerPoint(int nb, int index)
 {
 	int branch_num = GetNumBranch();
 	if (nb < 0 || nb >= branch_num)
@@ -175,14 +177,14 @@ pRulerPoint Ruler::GetPPoint(int nb, int index)
 	return branch[index];
 }
 
-pRulerPoint Ruler::FindPoint(fluo::Point& point)
+pRulerPoint Ruler::FindPRulerPoint(fluo::Point& point)
 {
 	bool first = true;
 	for (size_t i = 0; i < m_ruler.size(); ++i)
 	{
 		for (size_t j = first ? 0 : 1; j < m_ruler[i].size(); ++j)
 		{
-			if (m_ruler[i][j]->GetPoint() == point)
+			if (m_ruler[i][j]->GetPoint(m_work_time) == point)
 			{
 				return m_ruler[i][j];
 			}
@@ -192,7 +194,7 @@ pRulerPoint Ruler::FindPoint(fluo::Point& point)
 	return nullptr;
 }
 
-pRulerPoint Ruler::FindNearestPoint(fluo::Point& point, size_t &ri, size_t &rj)
+pRulerPoint Ruler::FindNearestPRulerPoint(fluo::Point& point, size_t &ri, size_t &rj)
 {
 	bool first = true, found = false;
 	double dist, min_dist;
@@ -201,7 +203,7 @@ pRulerPoint Ruler::FindNearestPoint(fluo::Point& point, size_t &ri, size_t &rj)
 	{
 		for (int j = m_ruler[i].size()-1; j >= 0; --j)
 		{
-			dist = (m_ruler[i][j]->GetPoint() - point).length2();
+			dist = (m_ruler[i][j]->GetPoint(m_work_time) - point).length2();
 			if (first || dist < min_dist)
 			{
 				min_dist = dist;
@@ -251,8 +253,8 @@ double Ruler::GetLength()
 	{
 		for (size_t i = 1; i < it->size(); ++i)
 		{
-			p1 = (*it)[i - 1]->GetPoint();
-			p2 = (*it)[i]->GetPoint();
+			p1 = (*it)[i - 1]->GetPoint(m_work_time);
+			p2 = (*it)[i]->GetPoint(m_work_time);
 			length += (p2 - p1).length();
 		}
 	}
@@ -270,8 +272,8 @@ double Ruler::GetLengthObject(double spcx, double spcy, double spcz)
 	{
 		for (size_t i = 1; i < it->size(); ++i)
 		{
-			p1 = (*it)[i - 1]->GetPoint();
-			p2 = (*it)[i]->GetPoint();
+			p1 = (*it)[i - 1]->GetPoint(m_work_time);
+			p2 = (*it)[i]->GetPoint(m_work_time);
 			p1 = fluo::Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
 			p2 = fluo::Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
 			length += (p2 - p1).length();
@@ -293,7 +295,7 @@ double Ruler::GetAngle()
 	{
 		if (m_ruler[0].size() >= 2)
 		{
-			fluo::Vector v = m_ruler[0][1]->GetPoint() - m_ruler[0][0]->GetPoint();
+			fluo::Vector v = m_ruler[0][1]->GetPoint(m_work_time) - m_ruler[0][0]->GetPoint(m_work_time);
 			v.normalize();
 			angle = atan2(-v.y(), (v.x() > 0.0 ? 1.0 : -1.0)*sqrt(v.x()*v.x() + v.z()*v.z()));
 			angle = fluo::r2d(angle);
@@ -305,9 +307,9 @@ double Ruler::GetAngle()
 		if (m_ruler[0].size() >= 3)
 		{
 			fluo::Vector v1, v2;
-			v1 = m_ruler[0][0]->GetPoint() - m_ruler[0][1]->GetPoint();
+			v1 = m_ruler[0][0]->GetPoint(m_work_time) - m_ruler[0][1]->GetPoint(m_work_time);
 			v1.normalize();
-			v2 = m_ruler[0][2]->GetPoint() - m_ruler[0][1]->GetPoint();
+			v2 = m_ruler[0][2]->GetPoint(m_work_time) - m_ruler[0][1]->GetPoint(m_work_time);
 			v2.normalize();
 			angle = acos(Dot(v1, v2));
 			angle = fluo::r2d(angle);
@@ -324,7 +326,7 @@ void Ruler::Scale(double spcx, double spcy, double spcz)
 	{
 		for (size_t j = first ? 0 : 1; j < m_ruler[i].size(); ++j)
 		{
-			m_ruler[i][j]->ScalePoint(spcx, spcy, spcz);
+			m_ruler[i][j]->ScalePoint(spcx, spcy, spcz, m_work_time);
 		}
 		first = false;
 	}
@@ -336,7 +338,7 @@ bool Ruler::AddPoint(fluo::Point &point)
 	{
 		m_ruler.push_back(RulerBranch());
 		m_ruler.back().push_back(
-			std::make_shared<RulerPoint>(RulerPoint(point)));
+			std::make_shared<RulerPoint>(RulerPoint(point, m_work_time)));
 	}
 	else if (m_ruler_type == 2 &&
 		m_ruler.back().size() == 1)
@@ -350,7 +352,7 @@ bool Ruler::AddPoint(fluo::Point &point)
 		return false;
 	else
 		m_ruler.back().push_back(
-			std::make_shared<RulerPoint>(RulerPoint(point)));
+			std::make_shared<RulerPoint>(RulerPoint(point, m_work_time)));
 
 	if (m_ruler_type == 2 &&
 		m_ruler.back().size() == 1)
@@ -376,7 +378,7 @@ bool Ruler::AddPointAfterId(
 	{
 		m_ruler.push_back(RulerBranch());
 		m_ruler.back().push_back(
-			std::make_shared<RulerPoint>(RulerPoint(point, id, bid)));
+			std::make_shared<RulerPoint>(RulerPoint(point, id, bid, m_work_time)));
 		return true;
 	}
 
@@ -403,7 +405,7 @@ bool Ruler::AddPointAfterId(
 	//search for nearest point
 	if (!found)
 	{
-		if (FindNearestPoint(point, ri, rj))
+		if (FindNearestPRulerPoint(point, ri, rj))
 			found = true;
 	}
 
@@ -412,13 +414,13 @@ bool Ruler::AddPointAfterId(
 
 	if (rj == m_ruler[ri].size()-1)//last one
 		m_ruler[ri].push_back(
-			std::make_shared<RulerPoint>(RulerPoint(point, id, bid)));
+			std::make_shared<RulerPoint>(RulerPoint(point, id, bid, m_work_time)));
 	else
 	{
 		m_ruler.push_back(RulerBranch());
 		m_ruler.back().push_back(m_ruler[ri][rj]);
 		m_ruler.back().push_back(
-			std::make_shared<RulerPoint>(RulerPoint(point, id, bid)));
+			std::make_shared<RulerPoint>(RulerPoint(point, id, bid, m_work_time)));
 	}
 
 	return true;
@@ -553,7 +555,7 @@ wxString Ruler::GetPosValues()
 	for (size_t i = 0; i < m_ruler.size(); ++i)
 		for (size_t j = 0; j < m_ruler[i].size(); ++j)
 		{
-			output += std::to_string(m_ruler[i][j]->GetPoint().x());
+			output += std::to_string(m_ruler[i][j]->GetPoint(m_work_time).x());
 			if (i == m_ruler.size() - 1)
 				output += "\n";
 			else
@@ -564,7 +566,7 @@ wxString Ruler::GetPosValues()
 	for (size_t i = 0; i < m_ruler.size(); ++i)
 		for (size_t j = 0; j < m_ruler[i].size(); ++j)
 		{
-			output += std::to_string(m_ruler[i][j]->GetPoint().y());
+			output += std::to_string(m_ruler[i][j]->GetPoint(m_work_time).y());
 			if (i == m_ruler.size() - 1)
 				output += "\n";
 			else
@@ -575,7 +577,7 @@ wxString Ruler::GetPosValues()
 	for (size_t i = 0; i < m_ruler.size(); ++i)
 		for (size_t j = 0; j < m_ruler[i].size(); ++j)
 		{
-			output += std::to_string(m_ruler[i][j]->GetPoint().z());
+			output += std::to_string(m_ruler[i][j]->GetPoint(m_work_time).z());
 			if (i == m_ruler.size() - 1)
 				output += "\n";
 			else
@@ -661,8 +663,8 @@ void Ruler::FinishEllipse(fluo::Vector view)
 		m_ruler.back().size() != 2)
 		return;
 
-	fluo::Point p0 = m_ruler.back()[0]->GetPoint();
-	fluo::Point p1 = m_ruler.back()[1]->GetPoint();
+	fluo::Point p0 = m_ruler.back()[0]->GetPoint(m_work_time);
+	fluo::Point p1 = m_ruler.back()[1]->GetPoint(m_work_time);
 	fluo::Vector p01 = p0 - p1;
 	fluo::Vector axis = Cross(p01, view);
 	axis.normalize();
@@ -704,7 +706,7 @@ fluo::Point Ruler::GetCenter()
 	{
 		for (size_t i = first ? 0 : 1; i < it->size(); ++i)
 		{
-			result += (*it)[i]->GetPoint();
+			result += (*it)[i]->GetPoint(m_work_time);
 			count++;
 		}
 		first = false;

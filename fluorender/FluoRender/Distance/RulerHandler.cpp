@@ -70,10 +70,11 @@ double RulerHandler::GetVolumeBgInt()
 	return m_vd->GetBackgroundInt();
 }
 
-bool RulerHandler::FindEditingRuler(double mx, double my, unsigned int t)
+bool RulerHandler::FindEditingRuler(double mx, double my)
 {
 	if (!m_view || !m_ruler_list)
 		return false;
+	size_t rwt = m_view->m_tseq_cur_num;
 
 	//get view size
 	wxSize view_size = m_view->GetGLSize();
@@ -111,9 +112,9 @@ bool RulerHandler::FindEditingRuler(double mx, double my, unsigned int t)
 		for (j = 0; j < ruler->GetNumBranch(); j++)
 		for (k = 0; k < ruler->GetNumBranchPoint(j); ++k)
 		{
-			point = ruler->GetPPoint(j, k);
+			point = ruler->GetPRulerPoint(j, k);
 			if (!point) continue;
-			ptemp = point->GetPoint(t);
+			ptemp = point->GetPoint(rwt);
 			ptemp = mv.transform(ptemp);
 			ptemp = prj.transform(ptemp);
 			if ((persp && (ptemp.z() <= 0.0 || ptemp.z() >= 1.0)) ||
@@ -169,21 +170,21 @@ RulerPoint* RulerHandler::GetEllipsePoint(int index)
 	switch (m_pindex)
 	{
 	case 0:
-		return m_ruler->GetPoint(index);
+		return m_ruler->GetRulerPoint(index);
 	case 1:
 		{
 			int imap[4] = {1, 0, 3, 2};
-			return m_ruler->GetPoint(imap[index]);
+			return m_ruler->GetRulerPoint(imap[index]);
 		}
 	case 2:
 		{
 			int imap[4] = { 2, 3, 1, 0 };
-			return m_ruler->GetPoint(imap[index]);
+			return m_ruler->GetRulerPoint(imap[index]);
 		}
 	case 3:
 		{
 			int imap[4] = { 3, 2, 0, 1 };
-			return m_ruler->GetPoint(imap[index]);
+			return m_ruler->GetRulerPoint(imap[index]);
 		}
 	}
 
@@ -221,8 +222,8 @@ void RulerHandler::AddRulerPoint(fluo::Point &p)
 		m_ruler->Group(m_group);
 		m_ruler->SetRulerType(m_type);
 		m_ruler->AddPoint(p);
-		m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
-		m_ruler->SetTime(m_view->m_tseq_cur_num);
+		m_ruler->SetTransient(m_view->m_ruler_time_dep);
+		m_ruler->SetTransTime(m_view->m_tseq_cur_num);
 		m_ruler_list->push_back(m_ruler);
 	}
 
@@ -243,8 +244,8 @@ void RulerHandler::AddRulerPointAfterId(fluo::Point &p, unsigned int id,
 		m_ruler->Group(m_group);
 		m_ruler->SetRulerType(m_type);
 		m_ruler->AddPointAfterId(p, id, cid, bid);
-		m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
-		m_ruler->SetTime(m_view->m_tseq_cur_num);
+		m_ruler->SetTransient(m_view->m_ruler_time_dep);
+		m_ruler->SetTransTime(m_view->m_tseq_cur_num);
 		m_ruler_list->push_back(m_ruler);
 	}
 
@@ -268,7 +269,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 
 	if (m_type == 1 && branch)
 	{
-		if (FindEditingRuler(mx, my, 0))
+		if (FindEditingRuler(mx, my))
 		{
 			if (m_ruler &&
 				m_ruler->GetDisp() &&
@@ -290,8 +291,8 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 		m_vp.GetPointVolumeBox2(mx, my, p1, p2);
 		ruler->AddPoint(p1);
 		ruler->AddPoint(p2);
-		ruler->SetTimeDep(m_view->m_ruler_time_dep);
-		ruler->SetTime(m_view->m_tseq_cur_num);
+		ruler->SetTransient(m_view->m_ruler_time_dep);
+		ruler->SetTransTime(m_view->m_tseq_cur_num);
 		m_ruler_list->push_back(ruler);
 		//store brush size in ruler
 		flrd::VolumeSelector* selector = m_view->GetVolumeSelector();
@@ -312,10 +313,10 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 		{
 			if (m_ruler)
 			{
-				RulerPoint* pp = m_ruler->GetLastPoint();
+				RulerPoint* pp = m_ruler->GetLastRulerPoint();
 				if (pp)
 				{
-					planep = pp->GetPoint();
+					planep = pp->GetPoint(m_ruler->GetWorkTime());
 					pplanep = &planep;
 				}
 			}
@@ -364,8 +365,8 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 			m_ruler->Group(m_group);
 			m_ruler->SetRulerType(m_type);
 			m_ruler->AddPoint(p);
-			m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
-			m_ruler->SetTime(m_view->m_tseq_cur_num);
+			m_ruler->SetTransient(m_view->m_ruler_time_dep);
+			m_ruler->SetTransTime(m_view->m_tseq_cur_num);
 			m_ruler_list->push_back(m_ruler);
 		}
 	}
@@ -413,8 +414,8 @@ void RulerHandler::AddPaintRulerPoint()
 		m_ruler->Group(m_group);
 		m_ruler->SetRulerType(m_type);
 		m_ruler->AddPoint(center);
-		m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
-		m_ruler->SetTime(m_view->m_tseq_cur_num);
+		m_ruler->SetTransient(m_view->m_ruler_time_dep);
+		m_ruler->SetTransTime(m_view->m_tseq_cur_num);
 		str = "v0";
 		m_ruler->AddInfoNames(str);
 		str = wxString::Format("%.0f", size);
@@ -425,10 +426,11 @@ void RulerHandler::AddPaintRulerPoint()
 	Profile(m_ruler);
 }
 
-bool RulerHandler::MoveRuler(int mx, int my, unsigned int tt)
+bool RulerHandler::MoveRuler(int mx, int my)
 {
 	if (!m_point || !m_view || !m_ruler)
 		return false;
+	size_t rwt = m_ruler->GetWorkTime();
 
 	fluo::Point point, ip, tmp;
 	if (m_view->m_point_volume_mode)
@@ -439,7 +441,7 @@ bool RulerHandler::MoveRuler(int mx, int my, unsigned int tt)
 			point, ip);
 		if (t <= 0.0)
 		{
-			tmp = m_point->GetPoint();
+			tmp = m_point->GetPoint(rwt);
 			t = m_vp.GetPointPlane(mx, my, &tmp, true, point);
 		}
 		if (t <= 0.0)
@@ -447,17 +449,17 @@ bool RulerHandler::MoveRuler(int mx, int my, unsigned int tt)
 	}
 	else
 	{
-		tmp = m_point->GetPoint();
+		tmp = m_point->GetPoint(rwt);
 		double t = m_vp.GetPointPlane(mx, my, &tmp, true, point);
 		if (t <= 0.0)
 			return false;
 	}
 
-	fluo::Point p0 = m_point->GetPoint();
+	fluo::Point p0 = m_point->GetPoint(rwt);
 	fluo::Vector displace = point - p0;
 	for (int i = 0; i < m_ruler->GetNumPoint(); ++i)
 	{
-		m_ruler->GetPoint(i)->DisplacePoint(displace, tt);
+		m_ruler->GetRulerPoint(i)->DisplacePoint(displace, rwt);
 	}
 
 	Profile(m_ruler);
@@ -465,10 +467,11 @@ bool RulerHandler::MoveRuler(int mx, int my, unsigned int tt)
 	return true;
 }
 
-bool RulerHandler::EditPoint(int mx, int my, bool alt, unsigned int t)
+bool RulerHandler::EditPoint(int mx, int my, bool alt)
 {
 	if (!m_point || !m_view || !m_ruler)
 		return false;
+	size_t rwt = m_ruler->GetWorkTime();
 
 	fluo::Point point, ip, tmp;
 	if (m_view->m_point_volume_mode)
@@ -479,7 +482,7 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt, unsigned int t)
 			point, ip);
 		if (t <= 0.0)
 		{
-			tmp = m_point->GetPoint();
+			tmp = m_point->GetPoint(rwt);
 			t = m_vp.GetPointPlane(mx, my, &tmp, true, point);
 		}
 		if (t <= 0.0)
@@ -487,13 +490,13 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt, unsigned int t)
 	}
 	else
 	{
-		tmp = m_point->GetPoint();
+		tmp = m_point->GetPoint(rwt);
 		double t = m_vp.GetPointPlane(mx, my, &tmp, true, point);
 		if (t <= 0.0)
 			return false;
 	}
 
-	m_point->SetPoint(point);
+	m_point->SetPoint(point, rwt);
 
 	flrd::RulerPoint *p0 = m_point.get();
 	flrd::RulerPoint *p1 = GetEllipsePoint(1);
@@ -504,33 +507,33 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt, unsigned int t)
 
 	if (alt)
 	{
-		fluo::Point c((p2->GetPoint() + p3->GetPoint()) / 2.0);
-		fluo::Vector v0 = p0->GetPoint() - c;
-		fluo::Vector v2 = p2->GetPoint() - c;
+		fluo::Point c((p2->GetPoint(rwt) + p3->GetPoint(rwt)) / 2.0);
+		fluo::Vector v0 = p0->GetPoint(rwt) - c;
+		fluo::Vector v2 = p2->GetPoint(rwt) - c;
 		fluo::Vector axis = Cross(v2, v0);
 		axis = Cross(axis, v2);
 		axis.normalize();
 		tmp = fluo::Point(c + axis * v0.length());
-		p0->SetPoint(tmp);
-		tmp = c + (c - p0->GetPoint());
-		p1->SetPoint(tmp);
+		p0->SetPoint(tmp, rwt);
+		tmp = c + (c - p0->GetPoint(rwt));
+		p1->SetPoint(tmp, rwt);
 	}
 	else
 	{
-		fluo::Point c((p0->GetPoint() +
-			p1->GetPoint() + p2->GetPoint() +
-			p3->GetPoint()) / 4.0);
-		fluo::Vector v0 = p0->GetPoint() - c;
-		fluo::Vector v2 = p2->GetPoint() - c;
+		fluo::Point c((p0->GetPoint(rwt) +
+			p1->GetPoint(rwt) + p2->GetPoint(rwt) +
+			p3->GetPoint(rwt)) / 4.0);
+		fluo::Vector v0 = p0->GetPoint(rwt) - c;
+		fluo::Vector v2 = p2->GetPoint(rwt) - c;
 		fluo::Vector axis = Cross(v2, v0);
 		fluo::Vector a2 = Cross(v0, axis);
 		a2.normalize();
 		tmp = fluo::Point(c + a2 * v2.length());
-		p2->SetPoint(tmp);
+		p2->SetPoint(tmp, rwt);
 		tmp = fluo::Point(c - a2 * v2.length());
-		p3->SetPoint(tmp);
-		tmp = c + (c - p0->GetPoint());
-		p1->SetPoint(tmp);
+		p3->SetPoint(tmp, rwt);
+		tmp = c + (c - p0->GetPoint(rwt));
+		p1->SetPoint(tmp, rwt);
 	}
 
 	Profile(m_ruler);
@@ -592,9 +595,9 @@ void RulerHandler::DeleteAll(bool cur_time)
 		{
 			flrd::Ruler* ruler = (*m_ruler_list)[i];
 			if (ruler &&
-				((ruler->GetTimeDep() &&
-					ruler->GetTime() == tseq) ||
-					!ruler->GetTimeDep()))
+				((ruler->GetTransient() &&
+					ruler->GetTransTime() == tseq) ||
+					!ruler->GetTransient()))
 			{
 				m_ruler_list->erase(m_ruler_list->begin() + i);
 				delete ruler;
@@ -631,8 +634,8 @@ void RulerHandler::Save(wxFileConfig &fconfig, int vi)
 			fconfig.Write("group", ruler->Group());
 			fconfig.Write("type", ruler->GetRulerType());
 			fconfig.Write("display", ruler->GetDisp());
-			fconfig.Write("transient", ruler->GetTimeDep());
-			fconfig.Write("time", ruler->GetTime());
+			fconfig.Write("transient", ruler->GetTransient());
+			fconfig.Write("time", ruler->GetTransTime());
 			fconfig.Write("info_names", ruler->GetInfoNames());
 			fconfig.Write("info_values", ruler->GetInfoValues());
 			fconfig.Write("use_color", ruler->GetUseColor());
@@ -647,13 +650,13 @@ void RulerHandler::Save(wxFileConfig &fconfig, int vi)
 
 				for (size_t rpi = 0; rpi < ruler->GetNumBranchPoint(rbi); ++rpi)
 				{
-					RulerPoint* rp = ruler->GetPoint(rbi, rpi);
+					RulerPoint* rp = ruler->GetRulerPoint(rbi, rpi);
 					if (!rp) continue;
 					fconfig.Write(wxString::Format("point%d", (int)rpi),
 						wxString::Format("%f %f %f %d %d",
-						rp->GetPoint().x(),
-						rp->GetPoint().y(),
-						rp->GetPoint().z(),
+						rp->GetPoint(0).x(),
+						rp->GetPoint(0).y(),
+						rp->GetPoint(0).z(),
 						rp->GetLocked(),
 						rp->GetId()));
 				}
@@ -690,9 +693,9 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 				if (fconfig.Read("display", &bval))
 					ruler->SetDisp(bval);
 				if (fconfig.Read("transient", &bval))
-					ruler->SetTimeDep(bval);
+					ruler->SetTransient(bval);
 				if (fconfig.Read("time", &ival))
-					ruler->SetTime(ival);
+					ruler->SetTransTime(ival);
 				if (fconfig.Read("info_names", &str))
 					ruler->SetInfoNames(str);
 				if (fconfig.Read("info_values", &str))
@@ -749,14 +752,14 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 										fluo::Point point(x, y, z);
 										if (rbi > 0 && rpi == 0)
 										{
-											pRulerPoint pp = ruler->FindPoint(point);
+											pRulerPoint pp = ruler->FindPRulerPoint(point);
 											pp->SetLocked(l);
 											ruler->AddBranch(pp);
 										}
 										else
 										{
 											ruler->AddPoint(point);
-											pRulerPoint pp = ruler->FindPoint(point);
+											pRulerPoint pp = ruler->FindPRulerPoint(point);
 											pp->SetLocked(l);
 										}
 									}
@@ -778,6 +781,7 @@ int RulerHandler::Profile(flrd::Ruler* ruler)
 		return 0;
 	if (ruler->GetNumPoint() < 1)
 		return 0;
+	size_t rwt = ruler->GetWorkTime();
 
 	//set ruler transform
 	fluo::Transform tf = m_view->GetInvOffsetMat();
@@ -817,8 +821,8 @@ int RulerHandler::Profile(flrd::Ruler* ruler)
 		if (ruler->GetNumPoint() < 1)
 			return 0;
 		fluo::Point p1, p2;
-		p1 = ruler->GetPoint(0)->GetPoint();
-		p2 = ruler->GetPoint(1)->GetPoint();
+		p1 = ruler->GetPoint(0);
+		p2 = ruler->GetPoint(1);
 		//object space
 		p1 = fluo::Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
 		p2 = fluo::Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
