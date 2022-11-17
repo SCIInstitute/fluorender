@@ -122,7 +122,7 @@ namespace flrd
 			{
 				if (m_tp.empty())
 					return fluo::Point();
-				return m_tp.back().second;
+				return m_tp[get_prev(t)].second;
 			}
 			else
 				return m_tp[i->second].second;
@@ -134,7 +134,7 @@ namespace flrd
 			{
 				if (m_tp.empty())
 					return;
-				m_tp.back().second.scale(sx, sy, sz);
+				m_tp[get_prev(t)].second.scale(sx, sy, sz);
 			}
 			else
 			{
@@ -148,7 +148,7 @@ namespace flrd
 			{
 				if (m_tp.empty())
 					return;
-				m_tp.back().second += dp;
+				m_tp[get_prev(t)].second += dp;
 			}
 			else
 				m_tp[i->second].second += dp;
@@ -198,6 +198,20 @@ namespace flrd
 		bool m_locked;
 		unsigned int m_id;//from comp
 		std::set<unsigned int> m_bid;//merged ids from multiple bricks
+
+		size_t get_prev(size_t t)
+		{
+			size_t rt = 0;
+			for (auto i = m_tp.rbegin();
+				i != m_tp.rend(); ++i)
+			{
+				if (i->first == t - 1)
+					return i->first;
+				if (i->first < t && i->first > rt)
+					rt = i->first;
+			}
+			return rt;
+		}
 	};
 
 	class RulerList;

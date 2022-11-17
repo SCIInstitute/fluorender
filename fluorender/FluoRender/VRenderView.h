@@ -212,6 +212,7 @@ private:
 	void OnCh1Check(wxCommandEvent &event);
 	void OnChAlphaCheck(wxCommandEvent &event);
 	void OnChFloatCheck(wxCommandEvent &event);
+	void OnDpiText(wxCommandEvent& event);
 	void OnChEmbedCheck(wxCommandEvent &event);
 	void OnChEnlargeCheck(wxCommandEvent &event);
 	void OnSlEnlargeScroll(wxScrollEvent &event);

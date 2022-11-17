@@ -5222,6 +5222,7 @@ void VRenderGLView::PostDraw()
 
 		int chann = VRenderFrame::GetSaveAlpha() ? 4 : 3;
 		bool fp32 = VRenderFrame::GetSaveFloat();
+		float dpi = VRenderFrame::GetDpi();
 		int x, y, w, h;
 		void* image = 0;
 		ReadPixels(chann, fp32, x, y, w, h, &image);
@@ -5248,6 +5249,10 @@ void VRenderGLView::PostDraw()
 		TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 		if (VRenderFrame::GetCompression())
 			TIFFSetField(out, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
+		//dpi
+		TIFFSetField(out, TIFFTAG_XRESOLUTION, dpi);
+		TIFFSetField(out, TIFFTAG_YRESOLUTION, dpi);
+		TIFFSetField(out, TIFFTAG_RESOLUTIONUNIT, RESUNIT_INCH);
 
 		tsize_t linebytes = chann * w * (fp32?4:1);
 		void *buf = NULL;

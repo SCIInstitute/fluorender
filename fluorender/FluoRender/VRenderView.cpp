@@ -1103,6 +1103,36 @@ void VRenderView::OnChFloatCheck(wxCommandEvent &event)
 		VRenderFrame::SetSaveFloat(ch_float->GetValue());
 }
 
+//dpi
+void VRenderView::OnDpiText(wxCommandEvent& event)
+{
+	wxTextCtrl* tx_dpi = (wxTextCtrl*)event.GetEventObject();
+	wxString str = event.GetString();
+	long lval;
+	str.ToLong(&lval);
+	VRenderFrame::SetDpi(float(lval));
+	if (!tx_dpi)
+		return;
+	wxCheckBox* ch_enlarge = (wxCheckBox*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_CHK);
+	wxSlider* sl_enlarge = (wxSlider*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_SLDR);
+	wxTextCtrl* tx_enlarge = (wxTextCtrl*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_TEXT);
+	bool enlarge = lval > 72;
+	VRenderGLView::SetEnlarge(enlarge);
+	if (ch_enlarge)
+		ch_enlarge->SetValue(enlarge);
+	double enlarge_scale = (double)lval / 72.0;
+	if (sl_enlarge)
+	{
+		sl_enlarge->Enable(enlarge);
+		sl_enlarge->SetValue(int(enlarge_scale * 10 + 0.5));
+	}
+	if (tx_enlarge)
+	{
+		tx_enlarge->Enable(enlarge);
+		tx_enlarge->SetValue(wxString::Format("%.1f", enlarge_scale));
+	}
+}
+
 //embde project
 void VRenderView::OnChEmbedCheck(wxCommandEvent &event)
 {
@@ -1216,23 +1246,41 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 	sizer_1->Add(10, 10);
 	sizer_1->Add(ch_float, 0, wxALIGN_CENTER);
 
+	//dpi
+	wxStaticText* st = new wxStaticText(panel, wxID_ANY, "DPI: ",
+		wxDefaultPosition, wxDefaultSize);
+	wxIntegerValidator<unsigned int> vald_int;
+	wxTextCtrl* tx_dpi = new wxTextCtrl(panel, ID_DPI,
+		"", wxDefaultPosition, wxSize(60, 23), 0, vald_int);
+	tx_dpi->Connect(tx_dpi->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
+		wxCommandEventHandler(VRenderView::OnDpiText), NULL, panel);
+	float dpi = VRenderFrame::GetDpi();
+	tx_dpi->SetValue(wxString::Format("%.0f", dpi));
 	//enlarge
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	wxCheckBox* ch_enlarge = new wxCheckBox(panel, ID_ENLARGE_CHK,
 		"Enlarge output image");
 	ch_enlarge->Connect(ch_enlarge->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderView::OnChEnlargeCheck), NULL, panel);
+	bool enlarge = dpi > 72;
+	double enlarge_scale = dpi / 72.0;
+	ch_enlarge->SetValue(enlarge);
 	wxSlider* sl_enlarge = new wxSlider(panel, ID_ENLARGE_SLDR,
 		10, 10, 100);
 	sl_enlarge->Connect(sl_enlarge->GetId(), wxEVT_COMMAND_SLIDER_UPDATED,
 		wxScrollEventHandler(VRenderView::OnSlEnlargeScroll), NULL, panel);
-	sl_enlarge->Disable();
+	sl_enlarge->Enable(enlarge);
+	sl_enlarge->SetValue(int(enlarge_scale * 10 + 0.5));
 	wxFloatingPointValidator<double> vald_fp(1);
 	wxTextCtrl* tx_enlarge = new wxTextCtrl(panel, ID_ENLARGE_TEXT,
 		"1.0", wxDefaultPosition, wxSize(60, 23), 0, vald_fp);
 	tx_enlarge->Connect(tx_enlarge->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(VRenderView::OnTxEnlargeText), NULL, panel);
-	tx_enlarge->Disable();
+	tx_enlarge->Enable(enlarge);
+	tx_enlarge->SetValue(wxString::Format("%.1f", enlarge_scale));
+	sizer_2->Add(st, 0, wxALIGN_CENTER);
+	sizer_2->Add(tx_dpi, 0, wxALIGN_CENTER);
+	sizer_2->Add(10, 10);
 	sizer_2->Add(ch_enlarge, 0, wxALIGN_CENTER);
 	sizer_2->Add(10, 10);
 	sizer_2->Add(sl_enlarge, 1, wxEXPAND);
@@ -1284,6 +1332,7 @@ void VRenderView::OnCapture(wxCommandEvent& event)
 		VRenderFrame::SetSaveProject(vr_frame->GetSettingDlg()->GetProjSave());
 		VRenderFrame::SetSaveAlpha(vr_frame->GetSettingDlg()->GetSaveAlpha());
 		VRenderFrame::SetSaveFloat(vr_frame->GetSettingDlg()->GetSaveFloat());
+		VRenderFrame::SetDpi(vr_frame->GetSettingDlg()->GetDpi());
 	}
 
 	wxFileDialog file_dlg(m_frame, "Save captured image", "", "", "*.tif", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
@@ -1307,6 +1356,7 @@ void VRenderView::OnCapture(wxCommandEvent& event)
 			}
 			vr_frame->GetSettingDlg()->SetSaveAlpha(VRenderFrame::GetSaveAlpha());
 			vr_frame->GetSettingDlg()->SetSaveFloat(VRenderFrame::GetSaveFloat());
+			vr_frame->GetSettingDlg()->SetDpi(VRenderFrame::GetDpi());
 		}
 	}
 }

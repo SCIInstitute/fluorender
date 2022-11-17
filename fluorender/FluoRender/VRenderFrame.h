@@ -315,11 +315,16 @@ public:
 	{ m_save_alpha = value; }
 	static bool GetSaveAlpha()
 	{ return m_save_alpha; }
-	//save flaot
+	//save float
 	static void SetSaveFloat(bool value)
 	{ m_save_float = value; }
 	static bool GetSaveFloat()
 	{ return m_save_float; }
+	//dpi
+	static void SetDpi(float fval)
+	{ m_dpi = fval; }
+	static float GetDpi()
+	{ return m_dpi; }
 
 	//show dialogs
 	void ShowPaintTool();
@@ -462,6 +467,8 @@ private:
 	static bool m_save_alpha;
 	//save float
 	static bool m_save_float;
+	//dpi
+	static float m_dpi;
 
 	//mac address
 	wxString m_address;

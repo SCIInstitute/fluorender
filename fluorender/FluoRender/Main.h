@@ -54,6 +54,7 @@ private:
 	bool m_lzw;
 	bool m_save_alpha;
 	bool m_save_float;
+	float m_dpi;
 	bool m_imagej;
 };
 

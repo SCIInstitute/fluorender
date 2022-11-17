@@ -145,6 +145,8 @@ public:
 	void SetSaveAlpha(bool val) { m_save_alpha = val; }
 	bool GetSaveFloat() { return m_save_float; }
 	void SetSaveFloat(bool val) { m_save_float = val; }
+	float GetDpi() { return m_dpi; }
+	void SetDpi(float fval) { m_dpi = fval; }
 	bool GetRealtimeCompress() {return m_realtime_compress;}
 	void SetRealtimeCompress(bool val) {m_realtime_compress = val;}
 	bool GetSkipBricks() {return m_skip_bricks;}
@@ -325,6 +327,7 @@ private:
 	bool m_prj_save;		//save project automatically
 	bool m_save_alpha;		//save alpha channel in captured images
 	bool m_save_float;		//save float values in captured images
+	float m_dpi;			//dpi number of captured image
 	bool m_realtime_compress;//real time compress
 	bool m_skip_bricks;		//skip empty bricks
 	bool m_test_speed;		//test fps

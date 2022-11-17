@@ -124,6 +124,7 @@ bool VRenderFrame::m_vrp_embed = false;
 bool VRenderFrame::m_save_project = false;
 bool VRenderFrame::m_save_alpha = false;
 bool VRenderFrame::m_save_float = false;
+float VRenderFrame::m_dpi = 72.0f;
 
 VRenderFrame::VRenderFrame(
 	wxFrame* frame,
@@ -903,6 +904,7 @@ VRenderFrame::VRenderFrame(
 		SetSaveProject(m_setting_dlg->GetProjSave());
 		SetSaveAlpha(m_setting_dlg->GetSaveAlpha());
 		SetSaveFloat(m_setting_dlg->GetSaveFloat());
+		SetDpi(m_setting_dlg->GetDpi());
 	}
 
 	if (fullscreen)

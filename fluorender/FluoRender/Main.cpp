@@ -56,6 +56,8 @@ static const wxCmdLineEntryDesc g_cmdLineDesc[] =
 		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
 	{ wxCMD_LINE_SWITCH, "fp", "float", "save float channel of the exported movie",
 		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
+	{ wxCMD_LINE_SWITCH, "dpi", "dpi", "set dpi of the exported movie",
+		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
 	{ wxCMD_LINE_SWITCH, "j", "imagej", "use imagej to load volume files",
 		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
 	{ wxCMD_LINE_OPTION, "w", "width", "width of FluoRender's start window",
@@ -106,6 +108,7 @@ bool VRenderApp::OnInit()
 		VRenderFrame::SetCompression(m_lzw);
 		VRenderFrame::SetSaveAlpha(m_save_alpha);
 		VRenderFrame::SetSaveFloat(m_save_float);
+		VRenderFrame::SetDpi(m_dpi);
 		if (((VRenderFrame*)frame)->GetMovieView())
 		{
 			((VRenderFrame*)frame)->GetMovieView()->SetBitRate(m_bitrate);
@@ -145,6 +148,7 @@ bool VRenderApp::OnCmdLineParsed(wxCmdLineParser& parser)
 	m_lzw = false;
 	m_save_alpha = false;
 	m_save_float = false;
+	m_dpi = 72.0f;
 	m_bitrate = 10.0;
 	m_mov_file = "";
 	m_imagej = false;
@@ -176,6 +180,8 @@ bool VRenderApp::OnCmdLineParsed(wxCmdLineParser& parser)
 	double dVal;
 	if (parser.Found("br", &dVal))
 		m_bitrate = dVal;
+	if (parser.Found("dpi", &dVal))
+		m_dpi = float(dVal);
 	wxString str;
 	if (parser.Found("m", &str))
 		m_mov_file = str;

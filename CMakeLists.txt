@@ -141,7 +141,8 @@ add_definitions(-DID_ENLARGE_SLDR=ID_TSEQ_ID+1)
 add_definitions(-DID_ENLARGE_TEXT=ID_ENLARGE_SLDR+1)
 add_definitions(-DID_ENLARGE_CHK=ID_ENLARGE_TEXT+1)
 add_definitions(-DID_SAVE_FLOAT=ID_ENLARGE_CHK+1)
-add_definitions(-DID_SER_NUM=ID_SAVE_FLOAT+1)
+add_definitions(-DID_DPI=ID_SAVE_FLOAT+1)
+add_definitions(-DID_SER_NUM=ID_DPI+1)
 
 # static compile
 add_definitions(-DSTATIC_COMPILE)

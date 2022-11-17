@@ -798,6 +798,7 @@ void SettingDlg::GetSettings()
 	m_prj_save = false;
 	m_save_alpha = false;
 	m_save_float = false;
+	m_dpi = 72.0f;
 	m_realtime_compress = false;
 	m_skip_bricks = false;
 	m_test_speed = false;
@@ -925,6 +926,12 @@ void SettingDlg::GetSettings()
 	{
 		fconfig.SetPath("/save float");
 		fconfig.Read("mode", &m_save_float, false);
+	}
+	//dpi
+	if (fconfig.Exists("/dpi"))
+	{
+		fconfig.SetPath("/dpi");
+		fconfig.Read("value", &m_dpi, 72.0f);
 	}
 	//realtime compression
 	if (fconfig.Exists("/realtime compress"))
@@ -1368,6 +1375,9 @@ void SettingDlg::SaveSettings()
 
 	fconfig.SetPath("/save project");
 	fconfig.Write("mode", m_prj_save);
+
+	fconfig.SetPath("/dpi");
+	fconfig.Write("value", m_dpi);
 
 	fconfig.SetPath("/save alpha");
 	fconfig.Write("mode", m_save_alpha);

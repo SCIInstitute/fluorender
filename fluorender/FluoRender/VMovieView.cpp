@@ -1314,6 +1314,7 @@ void VMovieView::WriteFrameToFile(int total_frames)
 	bool bmov = filetype_.IsSameAs(".mov");
 	int chann = VRenderFrame::GetSaveAlpha() ? 4 : 3;
 	bool fp32 = bmov?false:VRenderFrame::GetSaveFloat();
+	float dpi = VRenderFrame::GetDpi();
 	int x, y, w, h;
 	void* image = 0;
 	m_view->ReadPixels(chann, fp32, x, y, w, h, &image);
@@ -1355,6 +1356,10 @@ void VMovieView::WriteFrameToFile(int total_frames)
 		TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 		if (VRenderFrame::GetCompression())
 			TIFFSetField(out, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
+		//dpi
+		TIFFSetField(out, TIFFTAG_XRESOLUTION, dpi);
+		TIFFSetField(out, TIFFTAG_YRESOLUTION, dpi);
+		TIFFSetField(out, TIFFTAG_RESOLUTIONUNIT, RESUNIT_INCH);
 
 		tsize_t linebytes = chann * w * (fp32 ? 4 : 1);
 		void *buf = NULL;
@@ -1414,6 +1419,7 @@ void VMovieView::Run()
 		VRenderFrame::SetSaveProject(m_frame->GetSettingDlg()->GetProjSave());
 		VRenderFrame::SetSaveAlpha(m_frame->GetSettingDlg()->GetSaveAlpha());
 		VRenderFrame::SetSaveFloat(m_frame->GetSettingDlg()->GetSaveFloat());
+		VRenderFrame::SetDpi(m_frame->GetSettingDlg()->GetDpi());
 	}
 
 	Rewind();
@@ -1445,6 +1451,7 @@ void VMovieView::Run()
 	{
 		m_frame->GetSettingDlg()->SetSaveAlpha(VRenderFrame::GetSaveAlpha());
 		m_frame->GetSettingDlg()->SetSaveFloat(VRenderFrame::GetSaveFloat());
+		m_frame->GetSettingDlg()->SetDpi(VRenderFrame::GetDpi());
 		if (m_frame->GetSettingDlg()->GetProjSave())
 		{
 			wxString new_folder;
@@ -1527,6 +1534,34 @@ void VMovieView::OnCh3Check(wxCommandEvent &event) {
 	wxCheckBox* ch3 = (wxCheckBox*)event.GetEventObject();
 	if (ch3)
 		VRenderFrame::SetSaveFloat(ch3->GetValue());
+}
+void VMovieView::OnDpiText(wxCommandEvent& event)
+{
+	wxTextCtrl* tx_dpi = (wxTextCtrl*)event.GetEventObject();
+	wxString str = event.GetString();
+	long lval;
+	str.ToLong(&lval);
+	VRenderFrame::SetDpi(float(lval));
+	if (!tx_dpi)
+		return;
+	wxCheckBox* ch_enlarge = (wxCheckBox*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_CHK);
+	wxSlider* sl_enlarge = (wxSlider*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_SLDR);
+	wxTextCtrl* tx_enlarge = (wxTextCtrl*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_TEXT);
+	bool enlarge = lval > 72;
+	VRenderGLView::SetEnlarge(enlarge);
+	if (ch_enlarge)
+		ch_enlarge->SetValue(enlarge);
+	double enlarge_scale = (double)lval / 72.0;
+	if (sl_enlarge)
+	{
+		sl_enlarge->Enable(enlarge);
+		sl_enlarge->SetValue(int(enlarge_scale * 10 + 0.5));
+	}
+	if (tx_enlarge)
+	{
+		tx_enlarge->Enable(enlarge);
+		tx_enlarge->SetValue(wxString::Format("%.1f", enlarge_scale));
+	}
 }
 //enlarge output image
 void VMovieView::OnChEnlargeCheck(wxCommandEvent &event)
@@ -1651,22 +1686,40 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
 	line1->Add(10, 10);
 	line1->Add(ch3, 0, wxALIGN_CENTER);
 
+	//dpi
+	wxStaticText* st = new wxStaticText(panel, wxID_ANY, "DPI: ",
+		wxDefaultPosition, wxDefaultSize);
+	wxIntegerValidator<unsigned int> vald_int;
+	wxTextCtrl* tx_dpi = new wxTextCtrl(panel, ID_DPI,
+		"", wxDefaultPosition, wxSize(60, 23), 0, vald_int);
+	tx_dpi->Connect(tx_dpi->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
+		wxCommandEventHandler(VMovieView::OnDpiText), NULL, panel);
+	float dpi = VRenderFrame::GetDpi();
+	tx_dpi->SetValue(wxString::Format("%.0f", dpi));
 	//enlarge
 	wxCheckBox* ch_enlarge = new wxCheckBox(panel, ID_ENLARGE_CHK,
 		"Enlarge output image");
 	ch_enlarge->Connect(ch_enlarge->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VMovieView::OnChEnlargeCheck), NULL, panel);
+	bool enlarge = dpi > 72;
+	double enlarge_scale = dpi / 72.0;
+	ch_enlarge->SetValue(enlarge);
 	wxSlider* sl_enlarge = new wxSlider(panel, ID_ENLARGE_SLDR,
 		10, 10, 100);
 	sl_enlarge->Connect(sl_enlarge->GetId(), wxEVT_COMMAND_SLIDER_UPDATED,
 		wxScrollEventHandler(VMovieView::OnSlEnlargeScroll), NULL, panel);
-	sl_enlarge->Disable();
+	sl_enlarge->Enable(enlarge);
+	sl_enlarge->SetValue(int(enlarge_scale * 10 + 0.5));
 	wxFloatingPointValidator<double> vald_fp(1);
 	wxTextCtrl* tx_enlarge = new wxTextCtrl(panel, ID_ENLARGE_TEXT,
 		"1.0", wxDefaultPosition, wxDefaultSize, 0, vald_fp);
 	tx_enlarge->Connect(tx_enlarge->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(VMovieView::OnTxEnlargeText), NULL, panel);
-	tx_enlarge->Disable();
+	tx_enlarge->Enable(enlarge);
+	tx_enlarge->SetValue(wxString::Format("%.1f", enlarge_scale));
+	line2->Add(st, 0, wxALIGN_CENTER);
+	line2->Add(tx_dpi, 0, wxALIGN_CENTER);
+	line2->Add(10, 10);
 	line2->Add(ch_enlarge, 0, wxALIGN_CENTER);
 	line2->Add(10, 10);
 	line2->Add(sl_enlarge, 1, wxEXPAND);
@@ -1681,7 +1734,7 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
 		wxDefaultPosition, wxDefaultSize);
 	bitrate_text->Connect(bitrate_text->GetId(), wxEVT_TEXT,
 		wxCommandEventHandler(VMovieView::OnMovieQuality), NULL, panel);
-	wxStaticText *st = new wxStaticText(panel, wxID_ANY, "Bitrate:",
+	st = new wxStaticText(panel, wxID_ANY, "Bitrate:",
 		wxDefaultPosition, wxDefaultSize);
 	wxStaticText *st2 = new wxStaticText(panel, wxID_ANY, "Mbps",
 		wxDefaultPosition, wxDefaultSize);

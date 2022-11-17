@@ -384,6 +384,7 @@ private:
 	void OnCh1Check(wxCommandEvent &event);
 	void OnCh2Check(wxCommandEvent &event);
 	void OnCh3Check(wxCommandEvent &event);
+	void OnDpiText(wxCommandEvent& event);
 	void OnChEmbedCheck(wxCommandEvent &event);
 	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
 
