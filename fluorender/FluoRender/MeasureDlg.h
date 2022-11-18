@@ -39,6 +39,7 @@ using namespace std;
 
 class VRenderFrame;
 class VRenderGLView;
+class MeasureDlg;
 namespace flrd
 {
 	class DistCalculator;
@@ -59,7 +60,7 @@ class RulerListCtrl : public wxListCtrl
 
 public:
 	RulerListCtrl(VRenderFrame *frame,
-		wxWindow* parent,
+		MeasureDlg* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style=wxLC_REPORT|wxLC_SINGLE_SEL);
@@ -90,6 +91,7 @@ public:
 private:
 	wxWindow* m_frame;
 	VRenderGLView *m_view;
+	MeasureDlg* m_measure_dlg;
 	wxImageList *m_images;
 	wxTextCtrl *m_name_text;
 	wxTextCtrl *m_center_text;
@@ -184,6 +186,7 @@ public:
 	~MeasureDlg();
 
 	void GetSettings(VRenderGLView* vrv);
+	void UpdateTransient();
 	VRenderGLView* GetView();
 	void UpdateList();
 

@@ -138,8 +138,6 @@ VRenderGLView::VRenderGLView(VRenderFrame* frame,
 	m_point_volume_mode(0),
 	//ruler use volume transfer function
 	m_ruler_use_transf(false),
-	//ruler time dependent
-	m_ruler_time_dep(true),
 	//private
 	m_frame(frame),
 	m_vrv(parent),

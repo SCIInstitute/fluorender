@@ -65,12 +65,13 @@ END_EVENT_TABLE()
 
 RulerListCtrl::RulerListCtrl(
 	VRenderFrame* frame,
-	wxWindow* parent,
+	MeasureDlg* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
 	wxListCtrl(parent, wxID_ANY, pos, size, style),
-	m_frame(frame)
+	m_frame(frame),
+	m_measure_dlg(parent)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -652,6 +653,8 @@ void RulerListCtrl::OnSelection(wxListEvent &event)
 		m_color_picker->SetColour(c);
 	}
 	m_color_picker->Show();
+
+	m_measure_dlg->UpdateTransient();
 }
 
 void RulerListCtrl::EndEdit(bool update)
@@ -1314,7 +1317,6 @@ void MeasureDlg::GetSettings(VRenderGLView* vrv)
 		}
 
 		m_use_transfer_chk->SetValue(m_view->m_ruler_use_transf);
-		m_transient_chk->SetValue(m_view->m_ruler_time_dep);
 		if (m_frame && m_frame->GetSettingDlg())
 		{
 			//ruler exports df/f
@@ -1334,6 +1336,27 @@ void MeasureDlg::GetSettings(VRenderGLView* vrv)
 	}
 }
 
+void MeasureDlg::UpdateTransient()
+{
+	bool trans = false;
+	if (m_view)
+	{
+		std::vector<int> sel;
+		flrd::RulerList* ruler_list = m_view->GetRulerList();
+		if (m_rulerlist->GetCurrSelection(sel))
+		{
+			int index = sel[0];
+			if (index >= 0 && index < ruler_list->size())
+			{
+				flrd::Ruler* r = (*ruler_list)[index];
+				if (r)
+					trans = r->GetTransient();
+			}
+		}
+	}
+	m_transient_chk->SetValue(trans);
+}
+
 VRenderGLView* MeasureDlg::GetView()
 {
 	return m_view;
@@ -1343,6 +1366,7 @@ void MeasureDlg::UpdateList()
 {
 	if (!m_view) return;
 	m_rulerlist->UpdateRulers(m_view);
+	UpdateTransient();
 }
 
 void MeasureDlg::OnNewLocator(wxCommandEvent& event)
@@ -1800,8 +1824,8 @@ void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
 		ruler->SetRulerType(2);
 		ruler->SetName("Average");
 		ruler->AddPoint(avg);
-		ruler->SetTransient(m_view->m_ruler_time_dep);
-		ruler->SetTransTime(m_view->m_tseq_cur_num);
+		ruler->SetTransient(false);
+		ruler->SetTransTime(0);
 		ruler_list->push_back(ruler);
 		m_view->RefreshGL(39);
 		GetSettings(m_view);
@@ -2145,9 +2169,6 @@ void MeasureDlg::OnTransientCheck(wxCommandEvent& event)
 		return;
 
 	bool val = m_transient_chk->GetValue();
-	m_view->m_ruler_time_dep = val;
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetRulerTimeDep(val);
 
 	//change ruler setting
 	std::vector<int> sel;
@@ -2161,6 +2182,8 @@ void MeasureDlg::OnTransientCheck(wxCommandEvent& event)
 		if (!ruler)
 			continue;
 		ruler->SetTransient(val);
+		if (val)
+			ruler->SetTransTime(m_view->m_tseq_cur_num);
 	}
 	m_rulerlist->UpdateRulers(m_view);
 }

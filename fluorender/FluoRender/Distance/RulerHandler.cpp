@@ -222,8 +222,6 @@ void RulerHandler::AddRulerPoint(fluo::Point &p)
 		m_ruler->Group(m_group);
 		m_ruler->SetRulerType(m_type);
 		m_ruler->AddPoint(p);
-		m_ruler->SetTransient(m_view->m_ruler_time_dep);
-		m_ruler->SetTransTime(m_view->m_tseq_cur_num);
 		m_ruler_list->push_back(m_ruler);
 	}
 
@@ -244,8 +242,8 @@ void RulerHandler::AddRulerPointAfterId(fluo::Point &p, unsigned int id,
 		m_ruler->Group(m_group);
 		m_ruler->SetRulerType(m_type);
 		m_ruler->AddPointAfterId(p, id, cid, bid);
-		m_ruler->SetTransient(m_view->m_ruler_time_dep);
-		m_ruler->SetTransTime(m_view->m_tseq_cur_num);
+		//m_ruler->SetTransient(m_view->m_ruler_time_dep);
+		//m_ruler->SetTransTime(m_view->m_tseq_cur_num);
 		m_ruler_list->push_back(m_ruler);
 	}
 
@@ -291,8 +289,6 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 		m_vp.GetPointVolumeBox2(mx, my, p1, p2);
 		ruler->AddPoint(p1);
 		ruler->AddPoint(p2);
-		ruler->SetTransient(m_view->m_ruler_time_dep);
-		ruler->SetTransTime(m_view->m_tseq_cur_num);
 		m_ruler_list->push_back(ruler);
 		//store brush size in ruler
 		flrd::VolumeSelector* selector = m_view->GetVolumeSelector();
@@ -365,8 +361,6 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 			m_ruler->Group(m_group);
 			m_ruler->SetRulerType(m_type);
 			m_ruler->AddPoint(p);
-			m_ruler->SetTransient(m_view->m_ruler_time_dep);
-			m_ruler->SetTransTime(m_view->m_tseq_cur_num);
 			m_ruler_list->push_back(m_ruler);
 		}
 	}
@@ -414,8 +408,6 @@ void RulerHandler::AddPaintRulerPoint()
 		m_ruler->Group(m_group);
 		m_ruler->SetRulerType(m_type);
 		m_ruler->AddPoint(center);
-		m_ruler->SetTransient(m_view->m_ruler_time_dep);
-		m_ruler->SetTransTime(m_view->m_tseq_cur_num);
 		str = "v0";
 		m_ruler->AddInfoNames(str);
 		str = wxString::Format("%.0f", size);

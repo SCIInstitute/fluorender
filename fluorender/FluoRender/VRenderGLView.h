@@ -405,7 +405,6 @@ public:
 	void SetGradBg(bool val) { m_grad_bg = val; }
 	void SetPointVolumeMode(int val) { m_point_volume_mode = val; }
 	void SetRulerUseTransf(bool val) { m_ruler_use_transf = val; }
-	void SetRulerTimeDep(bool val) { m_ruler_time_dep = val; }
 
 	//disply modes
 	int GetDrawType() { return m_draw_type; }
@@ -871,8 +870,6 @@ public:
 	int m_point_volume_mode;  //0: use view plane; 1: use max value; 2: use accumulated value
 							  //ruler use volume transfer function
 	bool m_ruler_use_transf;
-	//ruler time dependent
-	bool m_ruler_time_dep;
 	//linked rotation
 	static bool m_linked_rot;
 	static VRenderGLView* m_master_linked_view;

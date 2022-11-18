@@ -219,9 +219,6 @@ public:
 	//ruler use transfer function
 	bool GetRulerUseTransf() {return m_ruler_use_transf;}
 	void SetRulerUseTransf(bool val) {m_ruler_use_transf = val;}
-	//ruler time dependent
-	bool GetRulerTimeDep() {return m_ruler_time_dep;}
-	void SetRulerTimeDep(bool val) {m_ruler_time_dep = val;}
 	//ruler relax f1
 	double GetRulerRelaxF1() { return m_ruler_relax_f1; }
 	void SetRulerRelaxF1(double val) { m_ruler_relax_f1 = val; }
@@ -376,8 +373,6 @@ private:
 	int m_point_volume_mode;
 	//ruler use transfer function
 	bool m_ruler_use_transf;
-	//ruler time dependent
-	bool m_ruler_time_dep;
 	//ruler relax
 	double m_ruler_relax_f1;
 	double m_ruler_infr;//ruler influence range

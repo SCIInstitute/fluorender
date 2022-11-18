@@ -485,7 +485,6 @@ VRenderFrame::VRenderFrame(
 	m_vrv_list[0]->m_glview->SetGradBg(m_setting_dlg->GetGradBg());
 	m_vrv_list[0]->m_glview->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
 	m_vrv_list[0]->m_glview->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
-	m_vrv_list[0]->m_glview->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
 	m_vrv_list[0]->m_glview->SetStereo(m_setting_dlg->GetStereo());
 	m_vrv_list[0]->m_glview->SetEyeDist(m_setting_dlg->GetEyeDist());
 	if (m_setting_dlg->GetStereo()) m_vrv_list[0]->InitOpenVR();
@@ -995,7 +994,6 @@ wxString VRenderFrame::CreateView(int row)
 	view->SetGradBg(m_setting_dlg->GetGradBg());
 	view->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
 	view->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
-	view->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
 	vrv->SetPinThreshold(m_setting_dlg->GetPinThreshold());
 
 	//reset gl

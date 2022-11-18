@@ -192,8 +192,8 @@ namespace flrd
 		friend class Ruler;
 
 	private:
-		TimePoint m_tp;//points over time
-		TimePointIndex m_index;//index for m_tp
+		TimePoint m_tp;//points over time (t, point)
+		TimePointIndex m_index;//lookup for m_tp (t, index to m_tp)
 
 		bool m_locked;
 		unsigned int m_id;//from comp
@@ -206,11 +206,17 @@ namespace flrd
 				i != m_tp.rend(); ++i)
 			{
 				if (i->first == t - 1)
-					return i->first;
+				{
+					rt = i->first;
+					break;
+				}
 				if (i->first < t && i->first > rt)
 					rt = i->first;
 			}
-			return rt;
+			auto i = m_index.find(rt);
+			if (i != m_index.end())
+				return i->second;
+			return 0;
 		}
 	};
 
