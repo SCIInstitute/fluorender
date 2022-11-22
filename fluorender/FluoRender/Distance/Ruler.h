@@ -201,7 +201,10 @@ namespace flrd
 
 		size_t get_prev(size_t t)
 		{
+			if (m_tp.empty())
+				return 0;
 			size_t rt = 0;
+			size_t rt2 = m_tp.size();
 			for (auto i = m_tp.rbegin();
 				i != m_tp.rend(); ++i)
 			{
@@ -212,10 +215,19 @@ namespace flrd
 				}
 				if (i->first < t && i->first > rt)
 					rt = i->first;
+				if (i->first > t && i->first < rt2)
+					rt2 = i->first;
 			}
 			auto i = m_index.find(rt);
 			if (i != m_index.end())
 				return i->second;
+			else
+			{
+				//find other dir
+				i = m_index.find(rt2);
+				if (i != m_index.end())
+					return i->second;
+			}
 			return 0;
 		}
 	};
