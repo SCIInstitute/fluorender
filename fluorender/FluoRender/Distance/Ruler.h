@@ -102,6 +102,17 @@ namespace flrd
 			SetPoint(p, t);
 		}
 
+		size_t GetTimeNum() { return m_tp.size(); }
+		bool GetTimeAndPoint(size_t i, size_t& t, fluo::Point& p)
+		{
+			if (i < m_tp.size())
+			{
+				t = m_tp[i].first;
+				p = m_tp[i].second;
+				return true;
+			}
+			return false;
+		}
 		void SetPoint(const fluo::Point& p, size_t t)
 		{
 			TimePointIndexIter i = m_index.find(t);

@@ -640,21 +640,40 @@ void RulerHandler::Save(wxFileConfig &fconfig, int vi)
 			fconfig.Write("num", ruler->GetNumBranch());
 			for (size_t rbi = 0; rbi < ruler->GetNumBranch(); ++rbi)
 			{
-				fconfig.SetPath(wxString::Format(
-					"/views/%d/rulers/%d/branches/%d", vi, (int)ri, (int)rbi));
+				wxString path = wxString::Format(
+					"/views/%d/rulers/%d/branches/%d", vi, (int)ri, (int)rbi);
+				fconfig.SetPath(path);
 				fconfig.Write("num", ruler->GetNumBranchPoint(rbi));
-
+				fconfig.Write("time_point", true);
 				for (size_t rpi = 0; rpi < ruler->GetNumBranchPoint(rbi); ++rpi)
 				{
 					RulerPoint* rp = ruler->GetRulerPoint(rbi, rpi);
 					if (!rp) continue;
-					fconfig.Write(wxString::Format("point%d", (int)rpi),
-						wxString::Format("%f %f %f %d %d",
-						rp->GetPoint(0).x(),
-						rp->GetPoint(0).y(),
-						rp->GetPoint(0).z(),
-						rp->GetLocked(),
-						rp->GetId()));
+					//fconfig.Write(wxString::Format("point%d", (int)rpi),
+					//	wxString::Format("%f %f %f %d %d",
+					//	rp->GetPoint(0).x(),
+					//	rp->GetPoint(0).y(),
+					//	rp->GetPoint(0).z(),
+					//	rp->GetLocked(),
+					//	rp->GetId()));
+					wxString path2 = path + wxString::Format("point%d", (int)rpi);
+					fconfig.SetPath(path2);
+					fconfig.Write("num", rp->GetTimeNum());
+					fconfig.Write("locked", rp->GetLocked());
+					fconfig.Write("id", rp->GetId());
+					for (size_t tpi = 0; tpi < rp->GetTimeNum(); ++tpi)
+					{
+						wxString tpn = wxString::Format("tp%d", (int)tpi);
+						size_t t = 0;
+						fluo::Point p;
+						if (rp->GetTimeAndPoint(tpi, t, p))
+							fconfig.Write(tpn,
+								wxString::Format("%d %f %f %f",
+									(int)t,
+									p.x(),
+									p.y(),
+									p.z()));
+					}
 				}
 			}
 		}
@@ -735,28 +754,68 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 					else if (fconfig.Exists(wxString::Format(
 						"/views/%d/rulers/%d/branches/%d", vi, ri, rbi)))
 					{
-						fconfig.SetPath(wxString::Format(
-							"/views/%d/rulers/%d/branches/%d", vi, ri, rbi));
+						wxString path = wxString::Format(
+							"/views/%d/rulers/%d/branches/%d", vi, ri, rbi);
+						fconfig.SetPath(path);
 						if (fconfig.Read("num", &ival))
 						{
+							bool time_point = false;
+							fconfig.Read("time_point", &time_point, false);
 							for (rpi = 0; rpi < ival; ++rpi)
 							{
-								if (fconfig.Read(wxString::Format("point%d", rpi), &str))
+								if (time_point)
 								{
-									if (SSCANF(str.c_str(), "%f%f%f%d%u", &x, &y, &z, &l, &id))
+									wxString path2 = path + wxString::Format("point%d", rpi);
+									fconfig.SetPath(path2);
+									int tnum;
+									fconfig.Read("num", &tnum);
+									fconfig.Read("locked", &l);
+									//fconfig.Read("id", &id);
+									unsigned int t;
+									for (int tpi = 0; tpi < tnum; ++tpi)
 									{
-										fluo::Point point(x, y, z);
-										if (rbi > 0 && rpi == 0)
+										wxString tpn = wxString::Format("tp%d", tpi);
+										if (fconfig.Read(tpn, &str))
 										{
-											pRulerPoint pp = ruler->FindPRulerPoint(point);
-											pp->SetLocked(l);
-											ruler->AddBranch(pp);
+											if (SSCANF(str.c_str(), "%u%f%f%f", &t, &x, &y, &z))
+											{
+												ruler->SetWorkTime(t);
+												fluo::Point point(x, y, z);
+												if (rbi > 0 && rpi == 0)
+												{
+													pRulerPoint pp = ruler->FindPRulerPoint(point);
+													pp->SetLocked(l);
+													ruler->AddBranch(pp);
+												}
+												else
+												{
+													ruler->AddPoint(point);
+													pRulerPoint pp = ruler->FindPRulerPoint(point);
+													pp->SetLocked(l);
+												}
+											}
 										}
-										else
+									}
+								}
+								else
+								{
+									if (fconfig.Read(wxString::Format("point%d", rpi), &str))
+									{
+										if (SSCANF(str.c_str(), "%f%f%f%d%u", &x, &y, &z, &l, &id))
 										{
-											ruler->AddPoint(point);
-											pRulerPoint pp = ruler->FindPRulerPoint(point);
-											pp->SetLocked(l);
+											fluo::Point point(x, y, z);
+											if (rbi > 0 && rpi == 0)
+											{
+												pRulerPoint pp = ruler->FindPRulerPoint(point);
+												pp->SetLocked(l);
+												ruler->AddBranch(pp);
+											}
+											else
+											{
+												ruler->AddPoint(point);
+												pRulerPoint pp = ruler->FindPRulerPoint(point);
+												pp->SetLocked(l);
+											}
 										}
 									}
 								}
