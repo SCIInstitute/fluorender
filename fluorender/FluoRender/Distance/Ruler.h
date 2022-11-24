@@ -148,7 +148,8 @@ namespace flrd
 			{
 				if (m_tp.empty())
 					return;
-				m_tp[get_prev(t)].second += dp;
+				fluo::Point op = m_tp[get_prev(t)].second + dp;
+				SetPoint(op, t);
 			}
 			else
 				m_tp[i->second].second += dp;
