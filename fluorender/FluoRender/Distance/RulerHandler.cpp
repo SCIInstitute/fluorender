@@ -264,6 +264,8 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 		return;
 
 	int point_volume_mode = m_view->m_point_volume_mode;
+	size_t rwt = m_view->m_tseq_cur_num;
+	if (m_ruler) m_ruler->SetWorkTime(rwt);
 
 	if (m_type == 1 && branch)
 	{
@@ -283,6 +285,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 	{
 		fluo::Point p1, p2;
 		Ruler* ruler = new Ruler();
+		ruler->SetWorkTime(rwt);
 		ruler->Group(m_group);
 		ruler->SetRulerType(m_type);
 		m_vp.SetVolumeData(m_view->m_cur_vol);
@@ -358,6 +361,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 		if (new_ruler)
 		{
 			m_ruler = new Ruler();
+			m_ruler->SetWorkTime(rwt);
 			m_ruler->Group(m_group);
 			m_ruler->SetRulerType(m_type);
 			m_ruler->AddPoint(p);

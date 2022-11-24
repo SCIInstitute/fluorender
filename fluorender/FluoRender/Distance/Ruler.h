@@ -204,7 +204,7 @@ namespace flrd
 			if (m_tp.empty())
 				return 0;
 			size_t rt = 0;
-			size_t rt2 = m_tp.size();
+			size_t rt2 = std::numeric_limits<unsigned int>::max();
 			for (auto i = m_tp.rbegin();
 				i != m_tp.rend(); ++i)
 			{
