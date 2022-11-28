@@ -121,12 +121,14 @@ namespace flrd
 		void RunCompAnalysis();
 		void RunGenerateComp();
 		void RunRulerProfile();
+		void RunRulerInfo();
 		void RunAddCells();
 		void RunLinkCells();
 		void RunUnlinkCells();
 		void RunBackgroundStat();
 		void RunRegistration();
 
+		void ExportInfo();
 		void ExportAnalysis();
 
 		void ChangeData();

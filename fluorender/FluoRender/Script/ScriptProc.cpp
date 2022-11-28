@@ -120,6 +120,8 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 					RunGenerateComp();
 				else if (str == "ruler_profile")
 					RunRulerProfile();
+				else if (str == "ruler_info")
+					RunRulerInfo();
 				else if (str == "save_volume")
 					RunSaveVolume();
 				else if (str == "calculate")
@@ -134,6 +136,8 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 					RunBackgroundStat();
 				else if (str == "registration")
 					RunRegistration();
+				else if (str == "export_info")
+					ExportInfo();
 				else if (str == "export_analysis")
 					ExportAnalysis();
 				else if (str == "change_data")
@@ -1265,6 +1269,47 @@ void ScriptProc::RunRulerProfile()
 	ruler_handler->SetBackground(bg_int);
 }
 
+void ScriptProc::RunRulerInfo()
+{
+	if (!TimeCondition())
+		return;
+	RulerList* ruler_list = m_view->GetRulerList();
+	if (!ruler_list || ruler_list->empty()) return;
+
+	int curf = m_view->m_tseq_cur_num;
+	std::string fn = std::to_string(curf);
+	//output
+	//time group
+	fluo::Group* timeg = m_output->getOrAddGroup(fn);
+	timeg->addSetValue("type", std::string("time"));
+	timeg->addSetValue("t", long(curf));
+	//channel group
+	fluo::Group* chg = timeg->getOrAddGroup(std::to_string(0));
+	chg->addSetValue("type", std::string("channel"));
+	chg->addSetValue("ch", long(0));
+	//script command
+	fluo::Group* cmdg = chg->getOrAddGroup(m_type.ToStdString());
+	cmdg->addSetValue("type", m_type.ToStdString());
+
+	for (size_t i = 0; i < ruler_list->size(); ++i)
+	{
+		//for each ruler
+		flrd::Ruler* ruler = (*ruler_list)[i];
+		if (!ruler) continue;
+		if (!ruler->GetDisp()) continue;
+		fluo::Node* ruler_node = cmdg->getOrAddNode(std::to_string(ruler->Id() + 1));
+		ruler_node->addSetValue("type", std::string("ruler"));
+		ruler_node->addSetValue("name", ruler->GetName().ToStdString());
+
+		ruler->SetWorkTime(curf);
+		for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
+		{
+			fluo::Point point = ruler->GetPoint(j);
+			ruler_node->addSetValue(std::to_string(j), point);
+		}
+	}
+}
+
 void ScriptProc::RunAddCells()
 {
 	if (!TimeCondition())
@@ -1485,6 +1530,86 @@ void ScriptProc::RunRegistration()
 		m_view->SetObjRotOff(euler.x(), euler.y(), euler.z());
 		m_view->SetOffsetTransform(tf);
 	}
+}
+
+void ScriptProc::ExportInfo()
+{
+	if (!TimeCondition())
+		return;
+
+	wxString outputfile;
+	m_fconfig->Read("output", &outputfile);
+	outputfile = GetSavePath(outputfile, "txt", false);
+	if (outputfile.IsEmpty())
+		return;
+	int tnum;
+	m_fconfig->Read("type_num", &tnum, 0);
+	std::set<std::string> tnames;
+	for (int i = 0; i < tnum; ++i)
+	{
+		wxString str;
+		if (m_fconfig->Read(
+			wxString::Format("type_name%d", i),
+			&str))
+			tnames.insert(str.ToStdString());
+	}
+
+	//print lines
+	class CompVisitor : public fluo::NodeVisitor
+	{
+	public:
+		CompVisitor(std::ofstream& ofs,
+			std::set<std::string>& tnames) :
+			fluo::NodeVisitor(),
+			ofs_(&ofs),
+			tnames_(tnames)
+		{
+			setTraversalMode(fluo::NodeVisitor::TRAVERSE_CHILDREN);
+		}
+
+		virtual void apply(fluo::Node& node)
+		{
+			fluo::Group* group = node.getParent(0)->asGroup();
+			if (group)
+			{
+				std::string str;
+				group->getValue("type", str);
+				if (tnames_.find(str) != tnames_.end())
+					printValues(&node);
+			}
+			traverse(node);
+		}
+
+		virtual void apply(fluo::Group& group)
+		{
+			std::string type;
+			group.getValue("type", type);
+			if (type == "time")
+				t_ = group.getName();
+			traverse(group);
+		}
+
+	protected:
+		void printValues(fluo::Object* object)
+		{
+			if (!object)
+				return;
+			std::string str;
+			object->getValue("type", str);
+			//print
+		}
+
+	private:
+		std::ofstream* ofs_;
+		std::set<std::string> tnames_;
+		std::string t_;
+		std::unordered_map<std::string, std::string> gvalues_;
+	};
+
+	std::ofstream ofs(outputfile.ToStdString());
+	CompVisitor visitor(ofs, tnames);
+	m_output->accept(visitor);
+	ofs.close();
 }
 
 void ScriptProc::ExportAnalysis()
