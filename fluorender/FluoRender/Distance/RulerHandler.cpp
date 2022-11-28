@@ -638,11 +638,14 @@ void RulerHandler::Save(wxFileConfig &fconfig, int vi)
 			fconfig.Write("color", wxString::Format("%f %f %f",
 				ruler->GetColor().r(), ruler->GetColor().g(), ruler->GetColor().b()));
 			fconfig.Write("num", ruler->GetNumBranch());
+			wxString path = wxString::Format(
+				"/views/%d/rulers/%d/branches", vi, (int)ri);
+			fconfig.SetPath(path);
+			fconfig.Write("num", ruler->GetNumBranch());
 			for (size_t rbi = 0; rbi < ruler->GetNumBranch(); ++rbi)
 			{
-				wxString path = wxString::Format(
-					"/views/%d/rulers/%d/branches/%d", vi, (int)ri, (int)rbi);
-				fconfig.SetPath(path);
+				wxString path_br = path + wxString::Format("/%d", (int)rbi);
+				fconfig.SetPath(path_br);
 				fconfig.Write("num", ruler->GetNumBranchPoint(rbi));
 				fconfig.Write("time_point", true);
 				for (size_t rpi = 0; rpi < ruler->GetNumBranchPoint(rbi); ++rpi)
@@ -656,7 +659,7 @@ void RulerHandler::Save(wxFileConfig &fconfig, int vi)
 					//	rp->GetPoint(0).z(),
 					//	rp->GetLocked(),
 					//	rp->GetId()));
-					wxString path2 = path + wxString::Format("point%d", (int)rpi);
+					wxString path2 = path_br + wxString::Format("/point%d", (int)rpi);
 					fconfig.SetPath(path2);
 					fconfig.Write("num", rp->GetTimeNum());
 					fconfig.Write("locked", rp->GetLocked());
@@ -765,7 +768,7 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 							{
 								if (time_point)
 								{
-									wxString path2 = path + wxString::Format("point%d", rpi);
+									wxString path2 = path + wxString::Format("/point%d", rpi);
 									fconfig.SetPath(path2);
 									int tnum;
 									fconfig.Read("num", &tnum);
@@ -789,9 +792,21 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 												}
 												else
 												{
-													ruler->AddPoint(point);
-													pRulerPoint pp = ruler->FindPRulerPoint(point);
-													pp->SetLocked(l);
+													if (tpi == 0)
+													{
+														ruler->AddPoint(point);
+														pRulerPoint pp = ruler->FindPRulerPoint(point);
+														pp->SetLocked(l);
+													}
+													else
+													{
+														pRulerPoint pp = ruler->GetPRulerPoint(rpi);
+														if (pp)
+														{
+															pp->SetPoint(point, t);
+															pp->SetLocked(l);
+														}
+													}
 												}
 											}
 										}
