@@ -1642,8 +1642,6 @@ void ScriptProc::ExportInfo()
 	private:
 		std::ofstream* ofs_;
 		std::set<std::string> tnames_;
-		std::string t_;
-		std::unordered_map<std::string, std::string> gvalues_;
 	};
 
 	std::ofstream ofs(outputfile.ToStdString());
