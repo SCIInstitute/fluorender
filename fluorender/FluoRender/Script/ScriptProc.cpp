@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <utility.h>
 #include <wx/filefn.h>
 #include <wx/stdpaths.h>
+#include <wx/mimetype.h>
 #include <iostream>
 #include <string> 
 #include <sstream>
@@ -1279,16 +1280,8 @@ void ScriptProc::RunRulerInfo()
 	int curf = m_view->m_tseq_cur_num;
 	std::string fn = std::to_string(curf);
 	//output
-	//time group
-	fluo::Group* timeg = m_output->getOrAddGroup(fn);
-	timeg->addSetValue("type", std::string("time"));
-	timeg->addSetValue("t", long(curf));
-	//channel group
-	fluo::Group* chg = timeg->getOrAddGroup(std::to_string(0));
-	chg->addSetValue("type", std::string("channel"));
-	chg->addSetValue("ch", long(0));
 	//script command
-	fluo::Group* cmdg = chg->getOrAddGroup(m_type.ToStdString());
+	fluo::Group* cmdg = m_output->getOrAddGroup(m_type.ToStdString());
 	cmdg->addSetValue("type", m_type.ToStdString());
 
 	for (size_t i = 0; i < ruler_list->size(); ++i)
@@ -1297,15 +1290,15 @@ void ScriptProc::RunRulerInfo()
 		flrd::Ruler* ruler = (*ruler_list)[i];
 		if (!ruler) continue;
 		if (!ruler->GetDisp()) continue;
-		fluo::Node* ruler_node = cmdg->getOrAddNode(std::to_string(ruler->Id() + 1));
-		ruler_node->addSetValue("type", std::string("ruler"));
-		ruler_node->addSetValue("name", ruler->GetName().ToStdString());
-
+		fluo::Group* ruler_group = cmdg->getOrAddGroup(std::to_string(ruler->Id() + 1));
+		ruler_group->addSetValue("type", std::string("ruler"));
+		ruler_group->addSetValue("name", ruler->GetName().ToStdString());
 		ruler->SetWorkTime(curf);
 		for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
 		{
+			fluo::Node* point_node = ruler_group->getOrAddNode(std::to_string(j));
 			fluo::Point point = ruler->GetPoint(j);
-			ruler_node->addSetValue(std::to_string(j), point);
+			point_node->addSetValue(fn, point);
 		}
 	}
 }
@@ -1539,7 +1532,7 @@ void ScriptProc::ExportInfo()
 
 	wxString outputfile;
 	m_fconfig->Read("output", &outputfile);
-	outputfile = GetSavePath(outputfile, "txt", false);
+	outputfile = GetSavePath(outputfile, "csv", false);
 	if (outputfile.IsEmpty())
 		return;
 	int tnum;
@@ -1569,34 +1562,81 @@ void ScriptProc::ExportInfo()
 
 		virtual void apply(fluo::Node& node)
 		{
-			fluo::Group* group = node.getParent(0)->asGroup();
-			if (group)
-			{
-				std::string str;
-				group->getValue("type", str);
-				if (tnames_.find(str) != tnames_.end())
-					printValues(&node);
-			}
-			traverse(node);
 		}
 
 		virtual void apply(fluo::Group& group)
 		{
 			std::string type;
 			group.getValue("type", type);
-			if (type == "time")
-				t_ = group.getName();
+			if (tnames_.find(type) != tnames_.end())
+				printValues(&group);
 			traverse(group);
 		}
 
 	protected:
-		void printValues(fluo::Object* object)
+		void printValues(fluo::Group* group)
 		{
-			if (!object)
+			if (!group)
 				return;
+
 			std::string str;
-			object->getValue("type", str);
-			//print
+			for (size_t i = 0; i < group->getNumChildren(); ++i)
+			{
+				fluo::Group* ruler_group = group->getChild(i)->asGroup();
+				if (!ruler_group)
+					continue;
+				//name line
+				ruler_group->getValue("name", str);
+				*ofs_ << ruler_group->getName() << ", " << str << std::endl;
+				//value line
+				for (size_t j = 0; j < ruler_group->getNumChildren(); ++j)
+				{
+					fluo::Node* point_node = ruler_group->getChild(j);
+					if (!point_node)
+						continue;
+
+					std::vector<fluo::Point> coords;
+					fluo::Point point;
+					fluo::ValueVector names =
+						point_node->getValueNames(3);
+					for (auto it = names.begin();
+						it != names.end(); ++it)
+					{
+						if (!IS_NUMBER(*it))
+							continue;
+						if (point_node->getValue(*it, point))
+							coords.push_back(point);
+					}
+					*ofs_ << j << std::endl;
+					//x
+					for (size_t k = 0; k < coords.size(); ++k)
+					{
+						*ofs_ << coords[k].x();
+						if (k == coords.size() - 1)
+							*ofs_ << std::endl;
+						else
+							*ofs_ << ", ";
+					}
+					//y
+					for (size_t k = 0; k < coords.size(); ++k)
+					{
+						*ofs_ << coords[k].y();
+						if (k == coords.size() - 1)
+							*ofs_ << std::endl;
+						else
+							*ofs_ << ", ";
+					}
+					//z
+					for (size_t k = 0; k < coords.size(); ++k)
+					{
+						*ofs_ << coords[k].z();
+						if (k == coords.size() - 1)
+							*ofs_ << std::endl;
+						else
+							*ofs_ << ", ";
+					}
+				}
+			}
 		}
 
 	private:
@@ -1610,6 +1650,16 @@ void ScriptProc::ExportInfo()
 	CompVisitor visitor(ofs, tnames);
 	m_output->accept(visitor);
 	ofs.close();
+
+	wxMimeTypesManager manager;
+	wxFileType* filetype = manager.GetFileTypeFromExtension("csv");
+	if (filetype)
+	{
+		wxString command = filetype->GetOpenCommand(outputfile);
+		m_frame->GetMovieView()->HoldRun();
+		wxExecute(command);
+		m_frame->GetMovieView()->ResumeRun();
+	}
 }
 
 void ScriptProc::ExportAnalysis()
