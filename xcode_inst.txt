@@ -1,4 +1,4 @@
-Info Deployment Target: 10.13
+Info Deployment Target: 10.15
 FluoRender/Resources/Info.plist: NSHighResolutionCapable Yes
 Code Signing Identity: Developer ID Application...
 Codesign options --deep --timestamp
