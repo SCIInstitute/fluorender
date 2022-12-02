@@ -100,6 +100,7 @@ namespace flvr
 		void load_face(const std::string &lib_name);
 		void SetSize(unsigned int size);
 		inline unsigned int GetSize();
+		void SetEnlargeScale(double dval);
 
 		void clear();
 		TextTexture* text_texture(wchar_t p);
@@ -112,6 +113,7 @@ namespace flvr
 		bool m_valid;
 		FT_Face m_face;
 		unsigned int m_size;
+		double m_enlarge_scale;
 	};
 
 	inline unsigned int TextTextureManager::GetSize()
@@ -119,7 +121,7 @@ namespace flvr
 		if (!m_valid)
 			return 0;
 		else
-			return m_size;
+			return (unsigned int)(m_size * m_enlarge_scale + 0.5);
 	}
 
 	class TextRenderer

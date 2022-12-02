@@ -52,7 +52,6 @@ VRenderGLView* VRenderGLView::m_master_linked_view = 0;
 bool VRenderGLView::m_keep_enlarge = false;
 bool VRenderGLView::m_enlarge = false;
 double VRenderGLView::m_enlarge_scale = 1.0;
-unsigned int VRenderGLView::m_tsize = 14.0;
 #ifdef _WIN32
 HCTX VRenderGLView::m_hTab = 0;
 LOGCONTEXTA VRenderGLView::m_lc;
@@ -5291,7 +5290,7 @@ void VRenderGLView::ResetEnlarge()
 	if (m_keep_enlarge)
 		return;
 	m_enlarge = false;
-	flvr::TextRenderer::text_texture_manager_.SetSize(m_tsize);
+	flvr::TextRenderer::text_texture_manager_.SetEnlargeScale(1);
 	RefreshGL(19);
 }
 

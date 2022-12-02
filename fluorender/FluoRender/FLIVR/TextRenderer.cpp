@@ -89,7 +89,8 @@ namespace flvr
 	TextTextureManager::TextTextureManager():
 		m_init(false),
 		m_valid(false),
-		m_size(14)
+		m_size(14),
+		m_enlarge_scale(1)
 	{
 	}
 
@@ -129,7 +130,7 @@ namespace flvr
 		if (m_valid)
 		{
 			err = FT_Select_Charmap(m_face, FT_ENCODING_UNICODE);
-			err = FT_Set_Pixel_Sizes(m_face, 0, m_size);
+			err = FT_Set_Pixel_Sizes(m_face, 0, FT_UInt(m_size * m_enlarge_scale + 0.5));
 		}
 		clear();
 	}
@@ -138,9 +139,15 @@ namespace flvr
 	{
 		if (!m_valid)
 			return;
-		FT_Set_Pixel_Sizes(m_face, 0, size);
 		m_size = size;
+		FT_Set_Pixel_Sizes(m_face, 0, FT_UInt(m_size * m_enlarge_scale + 0.5));
 		clear();
+	}
+
+	void TextTextureManager::SetEnlargeScale(double dval)
+	{
+		m_enlarge_scale = dval;
+		SetSize(m_size);
 	}
 
 	void TextTextureManager::clear()

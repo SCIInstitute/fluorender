@@ -585,16 +585,15 @@ public:
 	}
 	static void SetEnlarge(bool value)
 	{
+		if (m_enlarge && !value)
+			flvr::TextRenderer::text_texture_manager_.SetEnlargeScale(1);
 		m_enlarge = value;
 	}
 	static void SetEnlargeScale(double value)
 	{
 		m_enlarge_scale = value;
 		if (m_enlarge)
-		{
-			m_tsize = flvr::TextRenderer::text_texture_manager_.GetSize();
-			flvr::TextRenderer::text_texture_manager_.SetSize(m_tsize * m_enlarge_scale);
-		}
+			flvr::TextRenderer::text_texture_manager_.SetEnlargeScale(m_enlarge_scale);
 	}
 	static bool GetEnlarge()
 	{
@@ -1146,7 +1145,6 @@ private:
 
 	//text renderer
 	flvr::TextRenderer m_text_renderer;
-	static unsigned int m_tsize;
 
 	//enlargement
 	static bool m_keep_enlarge;
