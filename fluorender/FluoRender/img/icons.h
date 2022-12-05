@@ -312,6 +312,8 @@ public:
 	const static unsigned char prune_png[824];
 	/* eyedrop.png - 692 bytes */
 	const static unsigned char eyedrop_png[692];
+	/* magnet.png - 917 bytes */
+	const static unsigned char magnet_png[917];
 
 	//movie play export icons
 	/* minus.png - 426 bytes */

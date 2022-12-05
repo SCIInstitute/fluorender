@@ -986,13 +986,13 @@ MeasureDlg::MeasureDlg(VRenderFrame* frame)
 		bitmap, wxNullBitmap,
 		"Select and move ruler");
 	bitmap = wxGetBitmapFromMemory(ruler_edit);
-	m_toolbar2->AddCheckTool(ID_RulerMovePointBtn, "MovePoint",
+	m_toolbar2->AddCheckTool(ID_RulerMovePointBtn, "MoveP",
 		bitmap, wxNullBitmap,
 		"Select and move a ruler point");
-	bitmap = wxGetBitmapFromMemory(pencil);
+	bitmap = wxGetBitmapFromMemory(magnet);
 	m_toolbar2->AddCheckTool(ID_RulerMovePencilBtn, "Edit",
 		bitmap, wxNullBitmap,
-		"Move ruler points by drawing");
+		"Move ruler points by magnet");
 	bitmap = wxGetBitmapFromMemory(ruler_del);
 	m_toolbar2->AddCheckTool(ID_RulerDelBtn, "Delete",
 		bitmap, wxNullBitmap,
