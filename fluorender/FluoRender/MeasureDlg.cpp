@@ -986,7 +986,7 @@ MeasureDlg::MeasureDlg(VRenderFrame* frame)
 		bitmap, wxNullBitmap,
 		"Select and move ruler");
 	bitmap = wxGetBitmapFromMemory(ruler_edit);
-	m_toolbar2->AddCheckTool(ID_RulerMovePointBtn, "MoveP",
+	m_toolbar2->AddCheckTool(ID_RulerMovePointBtn, "Edit",
 		bitmap, wxNullBitmap,
 		"Select and move a ruler point");
 	bitmap = wxGetBitmapFromMemory(magnet);
