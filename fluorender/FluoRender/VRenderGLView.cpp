@@ -10231,7 +10231,11 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_int_mode == 11 ||
 			m_int_mode == 12 ||
 			m_int_mode == 14) &&
-			!p0))
+			!p0) ||
+			(m_int_mode == 15 &&
+			(event.ControlDown() ||
+			event.MiddleIsDown() ||
+			event.RightIsDown())))
 		{
 			//disable picking
 			m_pick = false;
@@ -10401,6 +10405,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				dist = m_frame->GetSettingDlg()->GetPencilDist();
 			if (m_ruler_handler.GetMouseDist(mp.x(), mp.y(), dist))
 				m_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
+			m_ruler_handler.ApplyMagStroke();
+			RefreshGL(27);
 		}
 
 		//update mouse position

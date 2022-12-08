@@ -302,6 +302,7 @@ namespace flrd
 		pRulerPoint GetPRulerPoint(int nbranch, int index);
 		pRulerPoint FindPRulerPoint(fluo::Point& point);
 		pRulerPoint FindNearestPRulerPoint(fluo::Point& point, size_t &ri, size_t &rj);
+		pRulerPoint FindBranchPRulerPoint(fluo::Point& point, size_t& ri, size_t& rj);
 		fluo::Point GetPoint(int index)
 		{
 			RulerPoint* p = GetRulerPoint(index);

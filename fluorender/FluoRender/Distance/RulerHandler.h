@@ -368,7 +368,7 @@ namespace flrd
 		}
 
 		//snap ruler points to magnet stroke
-		RulerPoint* get_closest_point(fluo::Point& p, double r);
+		RulerPoint* get_closest_point(fluo::Point& p);
 		void snap_point();
 		void snap_stroke();
 

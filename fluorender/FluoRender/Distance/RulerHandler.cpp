@@ -1130,7 +1130,7 @@ int RulerHandler::Distance(int index, std::string filename)
 	return 1;
 }
 
-RulerPoint* RulerHandler::get_closest_point(fluo::Point& p, double r)
+RulerPoint* RulerHandler::get_closest_point(fluo::Point& p)
 {
 	if (!m_view)
 		return nullptr;
@@ -1171,7 +1171,7 @@ void RulerHandler::snap_point()
 	if (m_mag_stroke.empty())
 		return;
 	fluo::Point p = m_mag_stroke.front();
-	RulerPoint* p0 = get_closest_point(p, 30);
+	RulerPoint* p0 = get_closest_point(p);
 	if (p0)
 	{
 		p0->SetPoint(p, rwt);
@@ -1180,5 +1180,41 @@ void RulerHandler::snap_point()
 
 void RulerHandler::snap_stroke()
 {
+	if (!m_view)
+		return;
+	size_t rwt = m_view->m_tseq_cur_num;
+	if (m_mag_stroke.size() < 2)
+		return;
+	fluo::Point p = m_mag_stroke.front();
 
+	double dmin = std::numeric_limits<double>::max();
+	Ruler* ruler = 0;
+	size_t rmin;
+	//match branch
+	size_t ri, rj;
+	for (auto r : *m_ruler_list)
+	{
+		r->SetWorkTime(rwt);
+		pRulerPoint temp = r->FindBranchPRulerPoint(p, ri, rj);
+		if (!temp)
+			continue;
+		double d = (temp->GetPoint(rwt) - p).length();
+		if (d < dmin)
+		{
+			dmin = d;
+			ruler = r;
+			rmin = ri;
+		}
+	}
+	if (ruler && rmin < ruler->GetNumBranch())
+	{
+		for (int i = 0; i < ruler->GetNumBranchPoint(rmin); ++i)
+		{
+			RulerPoint* temp = ruler->GetRulerPoint(rmin, i);
+			if (!temp)
+				continue;
+			if (i < m_mag_stroke.size())
+				temp->SetPoint(m_mag_stroke[i], rwt);
+		}
+	}
 }

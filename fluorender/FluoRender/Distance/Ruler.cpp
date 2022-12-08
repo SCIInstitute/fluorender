@@ -223,6 +223,33 @@ pRulerPoint Ruler::FindNearestPRulerPoint(fluo::Point& point, size_t &ri, size_t
 	return nullptr;
 }
 
+pRulerPoint Ruler::FindBranchPRulerPoint(fluo::Point& point, size_t& ri, size_t& rj)
+{
+	bool found = false;
+	double dist;
+	double min_dist = std::numeric_limits<double>::max();
+	size_t mini;
+	for (int i = m_ruler.size() - 1; i >= 0; --i)
+	{
+		if (m_ruler[i].size() < 2)
+			continue;
+		dist = (m_ruler[i][0]->GetPoint(m_work_time) - point).length2();
+		if (dist < min_dist)
+		{
+			min_dist = dist;
+			mini = i;
+			found = true;
+		}
+	}
+	if (found)
+	{
+		ri = mini;
+		rj = 0;
+		return m_ruler[mini][0];
+	}
+	return nullptr;
+}
+
 int Ruler::GetRulerType()
 {
 	return m_ruler_type;
