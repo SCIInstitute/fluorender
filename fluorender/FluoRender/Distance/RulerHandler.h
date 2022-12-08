@@ -152,6 +152,12 @@ namespace flrd
 		bool EditPoint(int mx, int my, bool alt);
 		void Prune(int idx, int len);
 
+		//stroke for magnet
+		bool MagStrokeEmpty() { return m_mag_stroke.empty(); }
+		void ApplyMagStroke();
+		void ClearMagStroke();
+		void AddMagStrokePoint(int mx, int my);
+
 		void DeleteSelection(std::vector<int> &sel);
 		void DeleteAll(bool cur_time);
 
@@ -215,6 +221,9 @@ namespace flrd
 		//get point
 		flrd::pRulerPoint m_point;
 		int m_pindex;//index of point in ruler
+
+		//stroke for the magnet tool
+		std::vector<fluo::Point> m_mag_stroke;
 
 		//simple data sampler
 		int m_sample_type;//0-nn; 1-bilinear
@@ -357,6 +366,11 @@ namespace flrd
 			}
 			return 0;
 		}
+
+		//snap ruler points to magnet stroke
+		RulerPoint* get_closest_point(fluo::Point& p, double r);
+		void snap_point();
+		void snap_stroke();
 
 	private:
 	};

@@ -112,6 +112,9 @@ class SettingDlg : public wxPanel
 		//paint history depth
 		ID_PaintHistDepthSldr,
 		ID_PaintHistDepthText,
+		//pencil distance
+		ID_PencilDistSldr,
+		ID_PencilDistText,
 		//save/close
 		ID_SaveBtn,
 		ID_CloseBtn,
@@ -193,6 +196,9 @@ public:
 	//line width
 	void SetLineWidth(double val) { m_line_width = val; }
 	double GetLineWidth() { return m_line_width; }
+	//pencil distance
+	void SetPencilDist(double val) { m_pencil_dist = val; }
+	double GetPencilDist() { return m_pencil_dist; }
 	//full screen
 	bool GetStayTop() { return m_stay_top; }
 	bool GetShowCursor() { if (m_stereo) return false; else return m_show_cursor; }
@@ -356,6 +362,8 @@ private:
 	int m_text_color;		//text color: 0- contrast to bg; 1-same as bg; 2-volume sec color
 	//line width
 	double m_line_width;	//line width
+	//pencil ruler distance
+	double m_pencil_dist;	//distance between two points for pencil tool
 	//memory limit
 	bool m_mem_swap;		//enable memory swap
 	double m_graphics_mem;	//in MB
@@ -497,6 +505,9 @@ private:
 	//history depth
 	wxSlider *m_paint_hist_depth_sldr;
 	wxTextCtrl *m_paint_hist_depth_text;
+	//pencil distance
+	wxSlider* m_pencil_dist_sldr;
+	wxTextCtrl* m_pencil_dist_text;
 
 	// Java settings.
 	wxTextCtrl *m_java_jvm_text;
@@ -593,6 +604,9 @@ private:
 	//paint history depth
 	void OnPaintHistDepthChange(wxScrollEvent &event);
 	void OnPaintHistDepthEdit(wxCommandEvent &event);
+	//pencil distance
+	void OnPencilDistChange(wxScrollEvent& event);
+	void OnPencilDistEdit(wxCommandEvent& event);
 	// Java settings.
 	void OnJavaJvmEdit(wxCommandEvent &event);
 	void OnJavaIJEdit(wxCommandEvent &event);

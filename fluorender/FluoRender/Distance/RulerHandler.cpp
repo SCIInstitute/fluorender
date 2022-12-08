@@ -552,6 +552,57 @@ void RulerHandler::Prune(int idx, int len)
 	ruler->Prune(len);
 }
 
+//stroke for magnet
+void RulerHandler::ApplyMagStroke()
+{
+	if (m_mag_stroke.empty())
+		return;
+	size_t s = m_mag_stroke.size();
+	if (s == 1)
+		snap_point();
+	else
+		snap_stroke();
+}
+
+void RulerHandler::ClearMagStroke()
+{
+	m_mag_stroke.clear();
+	m_mouse = fluo::Point(-1);
+}
+
+void RulerHandler::AddMagStrokePoint(int mx, int my)
+{
+	if (!m_view)
+		return;
+
+	int point_volume_mode = m_view->m_point_volume_mode;
+	fluo::Point p, ip, planep;
+	fluo::Point* pplanep = 0;
+
+	if (point_volume_mode)
+	{
+		m_vp.SetVolumeData(m_view->m_cur_vol);
+		double t = m_vp.GetPointVolume(mx, my,
+			point_volume_mode, m_view->m_ruler_use_transf, 0.5,
+			p, ip);
+		if (t <= 0.0)
+		{
+			t = m_vp.GetPointPlane(mx, my, pplanep, true, p);
+			if (t <= 0.0)
+				return;
+		}
+	}
+	else
+	{
+		double t = m_vp.GetPointPlane(mx, my, pplanep, true, p);
+		if (t <= 0.0)
+			return;
+	}
+
+	m_mag_stroke.push_back(p);
+	m_mouse = fluo::Point(mx, my, 0);
+}
+
 void RulerHandler::DeleteSelection(std::vector<int> &sel)
 {
 	if (!m_ruler_list)
@@ -1079,3 +1130,55 @@ int RulerHandler::Distance(int index, std::string filename)
 	return 1;
 }
 
+RulerPoint* RulerHandler::get_closest_point(fluo::Point& p, double r)
+{
+	if (!m_view)
+		return nullptr;
+
+	size_t rwt = m_view->m_tseq_cur_num;
+	double dmin = std::numeric_limits<double>::max();
+	RulerPoint* result = 0;
+
+	size_t ri, rj;
+	for (auto r : *m_ruler_list)
+	{
+		r->SetWorkTime(rwt);
+		pRulerPoint temp = r->FindNearestPRulerPoint(p, ri, rj);
+		if (!temp)
+			continue;
+		double d = (temp->GetPoint(rwt) - p).length();
+		if (d < dmin)
+		{
+			result = temp.get();
+			dmin = d;
+		}
+	}
+
+	if (result)
+	{
+		//check range
+
+	}
+
+	return result;
+}
+
+void RulerHandler::snap_point()
+{
+	if (!m_view)
+		return;
+	size_t rwt = m_view->m_tseq_cur_num;
+	if (m_mag_stroke.empty())
+		return;
+	fluo::Point p = m_mag_stroke.front();
+	RulerPoint* p0 = get_closest_point(p, 30);
+	if (p0)
+	{
+		p0->SetPoint(p, rwt);
+	}
+}
+
+void RulerHandler::snap_stroke()
+{
+
+}

@@ -937,7 +937,7 @@ private:
 					 //12-grow with ruler
 					 //13-pencil with multipoint ruler
 					 //14-delete ruler point
-					 //15-edit ruler by pencil
+					 //15-edit ruler by magnet
 	bool m_force_clear;
 	bool m_interactive;
 	bool m_clear_buffer;

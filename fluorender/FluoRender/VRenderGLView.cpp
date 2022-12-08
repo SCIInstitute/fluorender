@@ -10158,6 +10158,17 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			RefreshGL(29);
 			return;
 		}
+		else if (m_int_mode == 15)
+		{
+			if (m_ruler_handler.MagStrokeEmpty())
+				m_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
+			m_ruler_handler.ApplyMagStroke();
+			m_ruler_handler.ClearMagStroke();
+			if (m_frame && m_frame->GetMeasureDlg())
+				m_frame->GetMeasureDlg()->GetSettings(this);
+			RefreshGL(29);
+			return;
+		}
 	}
 	if (event.MiddleUp())
 	{
@@ -10371,7 +10382,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		}
 		else if (m_int_mode == 13)
 		{
-			if (m_ruler_handler.GetMouseDist(mp.x(), mp.y(), 35))
+			double dist = 30;
+			if (m_frame && m_frame->GetSettingDlg())
+				dist = m_frame->GetSettingDlg()->GetPencilDist();
+			if (m_ruler_handler.GetMouseDist(mp.x(), mp.y(), dist))
 			{
 				//add one point to a ruler
 				m_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
@@ -10379,6 +10393,14 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_frame->GetMeasureDlg()->GetSettings(this);
 				RefreshGL(27);
 			}
+		}
+		else if (m_int_mode == 15)
+		{
+			double dist = 30;
+			if (m_frame && m_frame->GetSettingDlg())
+				dist = m_frame->GetSettingDlg()->GetPencilDist();
+			if (m_ruler_handler.GetMouseDist(mp.x(), mp.y(), dist))
+				m_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
 		}
 
 		//update mouse position

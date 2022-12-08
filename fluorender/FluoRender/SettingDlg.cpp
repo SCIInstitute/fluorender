@@ -94,6 +94,9 @@ EVT_TEXT(ID_LineWidthText, SettingDlg::OnLineWidthText)
 //paint history depth
 EVT_COMMAND_SCROLL(ID_PaintHistDepthSldr, SettingDlg::OnPaintHistDepthChange)
 EVT_TEXT(ID_PaintHistDepthText, SettingDlg::OnPaintHistDepthEdit)
+//pencil distance
+EVT_COMMAND_SCROLL(ID_PencilDistSldr, SettingDlg::OnPencilDistChange)
+EVT_TEXT(ID_PencilDistText, SettingDlg::OnPencilDistEdit)
 //Java settings
 EVT_TEXT(ID_JavaJVMText, SettingDlg::OnJavaJvmEdit)
 EVT_TEXT(ID_JavaIJText, SettingDlg::OnJavaIJEdit)
@@ -219,6 +222,24 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	group4->Add(st);
 	group4->Add(10, 5);
 
+	//pencil distance
+	wxBoxSizer* group5 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Ruler Point Distance"), wxVERTICAL);
+	wxBoxSizer* sizer5_1 = new wxBoxSizer(wxHORIZONTAL);
+	m_pencil_dist_sldr = new wxSlider(page, ID_PencilDistSldr, 30, 1, 100,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_pencil_dist_text = new wxTextCtrl(page, ID_PencilDistText, "30",
+		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+	st = new wxStaticText(page, 0,
+		"The pixel distance between two ruler points for pencil and magnet.\n");
+	sizer5_1->Add(m_pencil_dist_sldr, 1, wxEXPAND);
+	sizer5_1->Add(m_pencil_dist_text, 0, wxALIGN_CENTER);
+	group5->Add(10, 5);
+	group5->Add(sizer5_1, 0, wxEXPAND);
+	group5->Add(10, 5);
+	group5->Add(st);
+	group5->Add(10, 5);
+
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
 	sizerV->Add(group1, 0, wxEXPAND);
@@ -228,6 +249,8 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	sizerV->Add(group3, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(group4, 0, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(group5, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 
 	page->SetSizer(sizerV);
@@ -865,6 +888,7 @@ void SettingDlg::GetSettings()
 	m_cl_platform_id = 0;
 	m_cl_device_id = 0;
 	m_paint_hist_depth = 0;
+	m_pencil_dist = 30;
 	m_stay_top = false;
 	m_show_cursor = true;
 	m_last_tool = 0;
@@ -1032,6 +1056,12 @@ void SettingDlg::GetSettings()
 	{
 		fconfig.SetPath("/paint history");
 		fconfig.Read("value", &m_paint_hist_depth);
+	}
+	//pencil distance
+	if (fconfig.Exists("/pencil dist"))
+	{
+		fconfig.SetPath("/pencil dist");
+		fconfig.Read("value", &m_pencil_dist);
 	}
 	//text font
 	if (fconfig.Exists("/text font"))
@@ -1278,6 +1308,9 @@ void SettingDlg::UpdateUI()
 	//paint history depth
 	m_paint_hist_depth_text->ChangeValue(wxString::Format("%d", m_paint_hist_depth));
 	m_paint_hist_depth_sldr->SetValue(m_paint_hist_depth);
+	//pencil distance
+	m_pencil_dist_text->ChangeValue(wxString::Format("%.0f", m_pencil_dist));
+	m_pencil_dist_sldr->SetValue(m_pencil_dist);
 	//memory settings
 	m_streaming_chk->SetValue(m_mem_swap);
 	EnableStreaming(m_mem_swap);
@@ -1436,6 +1469,9 @@ void SettingDlg::SaveSettings()
 
 	fconfig.SetPath("/paint history");
 	fconfig.Write("value", m_paint_hist_depth);
+
+	fconfig.SetPath("/pencil dist");
+	fconfig.Write("value", m_pencil_dist);
 
 	fconfig.SetPath("/text font");
 	fconfig.Write("file", m_font_file);
@@ -2293,6 +2329,24 @@ void SettingDlg::OnPaintHistDepthEdit(wxCommandEvent &event)
 	m_paint_hist_depth = ival;
 	if (m_frame)
 		m_frame->SetTextureUndos();
+}
+
+//pencil distance
+void SettingDlg::OnPencilDistChange(wxScrollEvent& event)
+{
+	int ival = event.GetPosition();
+	wxString str = wxString::Format("%d", ival);
+	if (str != m_pencil_dist_text->GetValue())
+		m_pencil_dist_text->SetValue(str);
+}
+
+void SettingDlg::OnPencilDistEdit(wxCommandEvent& event)
+{
+	wxString str = m_pencil_dist_text->GetValue();
+	unsigned long ival;
+	str.ToULong(&ival);
+	m_pencil_dist_sldr->SetValue(ival);
+	m_pencil_dist = ival;
 }
 
 // Java settings.
