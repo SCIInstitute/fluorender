@@ -47,9 +47,9 @@ char JVMInitializer::getPathSeparator()
 
 bool JVMInitializer::create_JVM(std::vector<std::string> args)
 {
-	wxString jvm_path;
-	wxString ij_path;
-	wxString bioformats_path;
+	std::string jvm_path;
+	std::string ij_path;
+	std::string bioformats_path;
 	std::string jvm_ij_path = "";
 	std::string jvm_bioformats_path = "";
 
@@ -58,7 +58,7 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args)
 		jvm_path = args[0]; //inp_settingDlg->getJVMPath();
 		ij_path = args[1]; //inp_settingDlg->getIJPath();
 		bioformats_path = args[2]; //inp_settingDlg->getBioformatsPath();
-		std::string name = ij_path.ToStdString();
+		std::string name = ij_path;
 		// For Mac: ij_path is going to be ij.app or fiji.app.
 
 #ifdef _WIN32
@@ -173,7 +173,7 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args)
 
 	//jvm_path = "/Users/dev/Downloads/ImageJ/jre/lib/server/libjvm.dylib";
 #ifdef _WIN32
-	m_jvm_dll = LoadLibraryW(jvm_path.ToStdWstring().c_str());
+	m_jvm_dll = LoadLibrary(s2ws(jvm_path).c_str());
 #else
 	m_jvm_dll = dlopen((const char*)jvm_path.mb_str(wxConvUTF8), RTLD_NOW);
 #endif
@@ -206,9 +206,9 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args)
 
 
 	DBGPRINT(L"\n");
-	DBGPRINT(L"%sJVM\n", jvm_path.c_str());
-	DBGPRINT(L"%sIJ\n", jvm_ij_path.c_str());
-	DBGPRINT(L"%s\n", jvm_bioformats_path.c_str());
+	DBGPRINT(L"%lsJVM\n", s2ws(jvm_path).c_str());
+	DBGPRINT(L"%lsIJ\n", s2ws(jvm_ij_path).c_str());
+	DBGPRINT(L"%ls\n", s2ws(jvm_bioformats_path).c_str());
 	DBGPRINT(L"\n");
 	using namespace std;
 	JavaVMOption* options = new JavaVMOption[3];
@@ -220,16 +220,14 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args)
 	imageJPath.append(jvm_ij_path + getPathSeparator());
 	imageJPath.append(jvm_bioformats_path);
 
-	DBGPRINT(L"%s\n", imageJPath.c_str());
+	DBGPRINT(L"%ls\n", s2ws(imageJPath).c_str());
 
 	options[0].optionString = const_cast<char*>(imageJPath.c_str());
-	options[1].optionString = const_cast <char*>("-Xms1m"); // 1MB
-	options[2].optionString = const_cast <char*>("-Xmx1g"); // 1GB
 
 	m_VMargs.version = JNI_VERSION_1_6;             // minimum Java version
-	m_VMargs.nOptions = 3;                          // number of options
+	m_VMargs.nOptions = 1;                          // number of options
 	m_VMargs.options = options;
-	m_VMargs.ignoreUnrecognized = true;     // invalid options make the JVM init fail
+	m_VMargs.ignoreUnrecognized = false;     // invalid options make the JVM init fail
 
 	try
 	{
