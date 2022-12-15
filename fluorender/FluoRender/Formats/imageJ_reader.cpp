@@ -62,11 +62,11 @@ ImageJReader::ImageJReader()
 	m_time_id = L"_T";
 	
 	//Geting absolute path to class file.
-	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-	exePath = wxPathOnly(exePath);
-	string imageJPath = exePath.ToStdString();
-	imageJPath += GETSLASH() + "Java_Code" + GETSLASH();
-	imageJPath += "ImageJ_Reader";
+	//wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+	//exePath = wxPathOnly(exePath);
+	//string imageJPath = exePath.ToStdString();
+	//imageJPath += GETSLASHA() + "Java_Code" + GETSLASHA();
+	//imageJPath += "ImageJ_Reader";
 
 	//Java code to get the number of depth images.
 	m_pJVMInstance = JVMInitializer::getInstance();
@@ -76,8 +76,9 @@ ImageJReader::ImageJReader()
 	//fflush(stdout);
 
 	m_imageJ_cls = m_pJVMInstance->m_pEnv->FindClass("ImageJ_Reader");
-	if (m_imageJ_cls == nullptr) {
-        m_pJVMInstance->m_pEnv->ExceptionDescribe();
+	if (m_imageJ_cls == nullptr)
+	{
+		m_pJVMInstance->m_pEnv->ExceptionDescribe();
 		cerr << "ERROR: class not found !";
 	}
 }
@@ -140,6 +141,8 @@ int ImageJReader::Preprocess()
 			//m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);     // release the object
 
 			jintArray val = (jintArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_handle, arr));   // call the method with the arr as argument.					
+			if (!val)
+				return READER_OPEN_FAIL;
 			jsize len = m_pJVMInstance->m_pEnv->GetArrayLength(val);
 			jint* body = m_pJVMInstance->m_pEnv->GetIntArrayElements(val, 0);
 

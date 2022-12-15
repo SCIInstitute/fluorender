@@ -216,7 +216,7 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args)
 	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 	exePath = wxPathOnly(exePath);
 	string imageJPath = "-Djava.class.path=";
-	imageJPath += exePath.ToStdString() + GETSLASH() + "Java_Code" + GETSLASH() + getPathSeparator();
+	imageJPath += exePath.ToStdString() + GETSLASHA() + "Java_Code" + GETSLASHA() + getPathSeparator();
 	imageJPath.append(jvm_ij_path + getPathSeparator());
 	imageJPath.append(jvm_bioformats_path);
 

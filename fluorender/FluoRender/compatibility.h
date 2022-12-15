@@ -63,6 +63,8 @@ DEALINGS IN THE SOFTWARE.
 
 inline wchar_t GETSLASH() { return L'\\'; }
 inline wchar_t GETSLASHALT() { return L'/'; }
+inline char GETSLASHA() { return '\\'; }
+inline char GETSLASHALTA() { return '/'; }
 
 inline std::wstring GET_SUFFIX(std::wstring &pathname)
 {
@@ -404,6 +406,7 @@ inline void INC_NUMBER(std::string& s)
 #define FSEEK64     fseek
 
 inline wchar_t GETSLASH() { return L'/'; }
+inline char GETSLASHA() { return '\\'; }
 
 inline bool str_mat(std::wstring &s1, size_t p1, std::wstring &s2, size_t p2)
 {
