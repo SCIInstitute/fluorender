@@ -127,6 +127,8 @@ namespace flrd
 		}
 
 		bool FindEditingRuler(double mx, double my);
+		bool FindClosestRulerPoint(double mx, double my);
+		bool FindClosestRulerBranchPoint(double mx, double my);
 
 		void SetPoint(flrd::pRulerPoint point)
 		{
@@ -154,6 +156,7 @@ namespace flrd
 
 		//stroke for magnet
 		bool MagStrokeEmpty() { return m_mag_stroke.empty(); }
+		void ApplyMagPoint();
 		void ApplyMagStroke();
 		void ClearMagStroke();
 		void AddMagStrokePoint(int mx, int my);
@@ -206,6 +209,8 @@ namespace flrd
 		ComponentAnalyzer* m_ca;
 		VolumePoint m_vp;
 		Ruler *m_ruler;
+		Ruler* m_mag_ruler;
+		size_t m_mag_branch;
 		RulerList *m_ruler_list;
 		int m_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
 					//4: protractor; 5: ellipse
@@ -223,6 +228,7 @@ namespace flrd
 		int m_pindex;//index of point in ruler
 
 		//stroke for the magnet tool
+		int m_magx, m_magy;//2d coords for the starting point for searching closest ruler point
 		std::vector<fluo::Point> m_mag_stroke;
 
 		//simple data sampler
@@ -369,8 +375,6 @@ namespace flrd
 
 		//snap ruler points to magnet stroke
 		RulerPoint* get_closest_point(fluo::Point& p);
-		void snap_point();
-		void snap_stroke();
 
 	private:
 	};

@@ -10162,7 +10162,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		{
 			if (m_ruler_handler.MagStrokeEmpty())
 				m_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
-			m_ruler_handler.ApplyMagStroke();
+			m_ruler_handler.ApplyMagPoint();
 			m_ruler_handler.ClearMagStroke();
 			if (m_frame && m_frame->GetMeasureDlg())
 				m_frame->GetMeasureDlg()->GetSettings(this);
