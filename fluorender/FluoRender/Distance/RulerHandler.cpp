@@ -51,6 +51,8 @@ RulerHandler::RulerHandler() :
 	m_ruler(0),
 	m_mag_ruler(0),
 	m_mag_branch(0),
+	m_mag_branch_point(0),
+	m_mag_length(true),
 	m_ruler_list(0),
 	m_point(0),
 	m_pindex(-1),
@@ -209,7 +211,7 @@ bool RulerHandler::FindClosestRulerPoint(double mx, double my)
 	return false;
 }
 
-bool RulerHandler::FindClosestRulerBranchPoint(double mx, double my)
+bool RulerHandler::FindClosestRulerBranch(double mx, double my)
 {
 	if (!m_view || !m_ruler_list)
 		return false;
@@ -280,6 +282,89 @@ bool RulerHandler::FindClosestRulerBranchPoint(double mx, double my)
 		m_point = ppmin;
 		m_mag_ruler = rulermin;
 		m_mag_branch = rj;
+		m_mag_branch_point = 0;
+		return true;
+	}
+	return false;
+}
+
+bool RulerHandler::FindClosestRulerBranchPoint(double mx, double my)
+{
+	if (!m_view || !m_ruler_list)
+		return false;
+	size_t rwt = m_view->m_tseq_cur_num;
+
+	//get view size
+	wxSize view_size = m_view->GetGLSize();
+	int nx = view_size.x;
+	int ny = view_size.y;
+	if (nx <= 0 || ny <= 0)
+		return false;
+
+	//get aspect, norm xy
+	double x, y;
+	x = mx * 2.0 / double(nx) - 1.0;
+	y = 1.0 - my * 2.0 / double(ny);
+	double aspect = (double)nx / (double)ny;
+
+	//get persp
+	bool persp = m_view->GetPersp();
+
+	//get transform
+	glm::mat4 mv_temp = m_view->GetObjectMat();
+	glm::mat4 prj_temp = m_view->GetProjection();
+	fluo::Transform mv;
+	fluo::Transform prj;
+	mv.set(glm::value_ptr(mv_temp));
+	prj.set(glm::value_ptr(prj_temp));
+
+	pRulerPoint point, ppmin;
+	Ruler* rulermin = 0;
+	double dmin = std::numeric_limits<double>::max();
+	double dist;
+	size_t i, j, k, rj, rk;
+	fluo::Point ptemp;
+	for (i = 0; i < m_ruler_list->size(); i++)
+	{
+		Ruler* ruler = (*m_ruler_list)[i];
+		if (!ruler) continue;
+		if (!ruler->GetDisp()) continue;
+
+		for (j = 0; j < ruler->GetNumBranch(); j++)
+		{
+			int nbp = ruler->GetNumBranchPoint(j);
+			if (nbp < 2)
+				continue;
+			for (k = 0; k < nbp; ++k)
+			{
+				point = ruler->GetPRulerPoint(j, k);
+				if (!point) continue;
+				ptemp = point->GetPoint(rwt);
+				ptemp = mv.transform(ptemp);
+				ptemp = prj.transform(ptemp);
+				if ((persp && (ptemp.z() <= 0.0 || ptemp.z() >= 1.0)) ||
+					(!persp && (ptemp.z() >= 0.0 || ptemp.z() <= -1.0)))
+					continue;
+				dist = (x - ptemp.x()) * (x - ptemp.x()) +
+					(y - ptemp.y()) * (y - ptemp.y());
+				if (dist < dmin)
+				{
+					ppmin = point;
+					rulermin = ruler;
+					rj = j;
+					rk = k;
+					dmin = dist;
+				}
+			}
+		}
+	}
+
+	if (ppmin && rulermin)
+	{
+		m_point = ppmin;
+		m_mag_ruler = rulermin;
+		m_mag_branch = rj;
+		m_mag_branch_point = rk;
 		return true;
 	}
 	return false;
@@ -724,20 +809,83 @@ void RulerHandler::ApplyMagStroke()
 	size_t rwt = m_view->m_tseq_cur_num;
 	if (m_mag_stroke.size() < 2)
 		return;
-	fluo::Point p = m_mag_stroke.front();
 	if (!m_mag_ruler)
-		FindClosestRulerBranchPoint(m_magx, m_magy);
-	if (m_mag_ruler && m_mag_branch < m_mag_ruler->GetNumBranch())
 	{
-		for (int i = 0; i < m_mag_ruler->GetNumBranchPoint(m_mag_branch); ++i)
+		if (m_mag_length)
+			FindClosestRulerBranch(m_magx, m_magy);
+		else
+			FindClosestRulerBranchPoint(m_magx, m_magy);
+	}
+	if (!m_mag_ruler || m_mag_branch >= m_mag_ruler->GetNumBranch())
+		return;
+	int num = m_mag_ruler->GetNumBranchPoint(m_mag_branch);
+	if (m_mag_length && m_mag_branch_point >= num)
+		return;
+
+	if (m_mag_length)
+		InitMagStrokeLength(num);
+
+	for (size_t i = m_mag_branch_point; i < num; ++i)
+	{
+		pRulerPoint temp = m_mag_ruler->GetPRulerPoint(m_mag_branch, i);
+		if (!temp)
+			continue;
+		if (m_mag_length)
 		{
-			pRulerPoint temp = m_mag_ruler->GetPRulerPoint(m_mag_branch, i);
-			if (!temp)
-				continue;
-			if (i < m_mag_stroke.size())
-				temp->SetPoint(m_mag_stroke[i], rwt);
+			//make lengths equal
+			fluo::Point p = GetPointOnMagStroke(i);
+			temp->SetPoint(p, rwt);
+		}
+		else
+		{
+			//snap each point
+			size_t si = i - m_mag_branch_point;
+			if (si < m_mag_stroke.size())
+				temp->SetPoint(m_mag_stroke[si], rwt);
 		}
 	}
+}
+
+void RulerHandler::InitMagStrokeLength(int n)
+{
+	size_t stroke_num = m_mag_stroke.size();
+	m_mag_stroke_len.resize(stroke_num, 0);
+
+	//compute total length
+	for (size_t i = 0; i < stroke_num - 1; ++i)
+	{
+		fluo::Point p1 = m_mag_stroke[i];
+		fluo::Point p2 = m_mag_stroke[i+1];
+		m_mag_stroke_len[i+1] = m_mag_stroke_len[i] + (p2 - p1).length();
+	}
+	m_mag_stroke_int = m_mag_stroke_len.back() / (n - 1);
+}
+
+fluo::Point RulerHandler::GetPointOnMagStroke(int i)
+{
+	double len = m_mag_stroke_int * i;
+	double t;
+	fluo::Point p1, p2;
+	bool found = false;
+	size_t stroke_num = m_mag_stroke_len.size();
+	for (size_t i = 0; i < stroke_num - 1; ++i)
+	{
+		if (m_mag_stroke_len[i] <= len &&
+			m_mag_stroke_len[i + 1] >= len)
+		{
+			p1 = m_mag_stroke[i];
+			p2 = m_mag_stroke[i + 1];
+			t = (len - m_mag_stroke_len[i]) / 
+				(m_mag_stroke_len[i + 1] - m_mag_stroke_len[i]);
+			found = true;
+			break;
+		}
+	}
+	if (found)
+		return fluo::Point(p1 * (1 - t) + p2 * t);
+	if (i == 0)
+		return m_mag_stroke.front();
+	return m_mag_stroke.back();
 }
 
 void RulerHandler::ClearMagStroke()

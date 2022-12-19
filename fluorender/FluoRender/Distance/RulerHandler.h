@@ -128,6 +128,7 @@ namespace flrd
 
 		bool FindEditingRuler(double mx, double my);
 		bool FindClosestRulerPoint(double mx, double my);
+		bool FindClosestRulerBranch(double mx, double my);
 		bool FindClosestRulerBranchPoint(double mx, double my);
 
 		void SetPoint(flrd::pRulerPoint point)
@@ -158,6 +159,8 @@ namespace flrd
 		bool MagStrokeEmpty() { return m_mag_stroke.empty(); }
 		void ApplyMagPoint();
 		void ApplyMagStroke();
+		void InitMagStrokeLength(int n);
+		fluo::Point GetPointOnMagStroke(int i);
 		void ClearMagStroke();
 		void AddMagStrokePoint(int mx, int my);
 
@@ -202,6 +205,10 @@ namespace flrd
 			m_gauth = gauth;
 		}
 
+		//magnet mode
+		bool GetMagLength() { return m_mag_length; }
+		void SetMagLength(bool val) { m_mag_length = val; }
+
 	private:
 		unsigned int m_group;
 		VRenderGLView *m_view;
@@ -211,6 +218,8 @@ namespace flrd
 		Ruler *m_ruler;
 		Ruler* m_mag_ruler;
 		size_t m_mag_branch;
+		size_t m_mag_branch_point;
+		bool m_mag_length;
 		RulerList *m_ruler_list;
 		int m_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
 					//4: protractor; 5: ellipse
@@ -230,6 +239,8 @@ namespace flrd
 		//stroke for the magnet tool
 		int m_magx, m_magy;//2d coords for the starting point for searching closest ruler point
 		std::vector<fluo::Point> m_mag_stroke;
+		std::vector<double> m_mag_stroke_len;//interlval lengths on stroke
+		double m_mag_stroke_int;//interval length on ruler
 
 		//simple data sampler
 		int m_sample_type;//0-nn; 1-bilinear

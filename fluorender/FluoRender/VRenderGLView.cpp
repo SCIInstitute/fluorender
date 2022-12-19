@@ -10025,7 +10025,9 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		}
 
 		if (m_int_mode == 1 ||
-			(m_int_mode == 5 &&
+			((m_int_mode == 5 ||
+			m_int_mode == 13 ||
+			m_int_mode == 15) &&
 			event.AltDown()) ||
 			((m_int_mode == 6 ||
 			m_int_mode == 9 ||
@@ -10143,7 +10145,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_grow_on = false;
 			return;
 		}
-		else if (m_int_mode == 13)
+		else if (m_int_mode == 13 &&
+			!event.AltDown())
 		{
 			if (m_frame && m_frame->GetMeasureDlg())
 			{
@@ -10158,7 +10161,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			RefreshGL(29);
 			return;
 		}
-		else if (m_int_mode == 15)
+		else if (m_int_mode == 15 &&
+			!event.AltDown())
 		{
 			if (m_ruler_handler.MagStrokeEmpty())
 				m_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
@@ -10223,7 +10227,9 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		flrd::RulerPoint *p0 = m_ruler_handler.GetPoint();
 		bool hold_old = false;
 		if (m_int_mode == 1 ||
-			(m_int_mode == 5 &&
+			((m_int_mode == 5  ||
+			m_int_mode == 13 ||
+			m_int_mode == 15) &&
 			event.AltDown()) ||
 			((m_int_mode == 6 ||
 			m_int_mode == 9 ||
@@ -10232,7 +10238,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_int_mode == 12 ||
 			m_int_mode == 14) &&
 			!p0) ||
-			(m_int_mode == 15 &&
+			((m_int_mode == 15 ||
+			m_int_mode == 13) &&
 			(event.ControlDown() ||
 			event.MiddleIsDown() ||
 			event.RightIsDown())))
@@ -10384,7 +10391,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				}
 			}
 		}
-		else if (m_int_mode == 13)
+		else if (m_int_mode == 13 && !event.AltDown())
 		{
 			double dist = 30;
 			if (m_frame && m_frame->GetSettingDlg())
@@ -10398,7 +10405,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				RefreshGL(27);
 			}
 		}
-		else if (m_int_mode == 15)
+		else if (m_int_mode == 15 && !event.AltDown())
 		{
 			double dist = 30;
 			if (m_frame && m_frame->GetSettingDlg())

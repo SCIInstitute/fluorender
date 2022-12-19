@@ -138,6 +138,7 @@ public:
 		ID_PencilBtn,
 		ID_RulerMoveBtn,
 		ID_RulerMovePointBtn,
+		ID_MagnetBtn,
 		ID_RulerMovePencilBtn,
 		ID_RulerDelBtn,
 		ID_RulerFlipBtn,
@@ -258,6 +259,7 @@ private:
 	void OnPencil(wxCommandEvent& event);
 	void OnRulerMove(wxCommandEvent& event);
 	void OnRulerMovePoint(wxCommandEvent& event);
+	void OnMagnet(wxCommandEvent& event);
 	void OnRulerMovePencil(wxCommandEvent& event);
 	void OnRulerDel(wxCommandEvent& event);
 	void OnRulerFlip(wxCommandEvent& event);
