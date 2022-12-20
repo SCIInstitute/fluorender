@@ -255,8 +255,8 @@ bool RulerHandler::FindClosestRulerBranch(double mx, double my)
 
 		for (j = 0; j < ruler->GetNumBranch(); j++)
 		{
-			if (ruler->GetNumBranchPoint(j) < 2)
-				continue;
+			//if (ruler->GetNumBranchPoint(j) < 2)
+			//	continue;
 			point = ruler->GetPRulerPoint(j, 0);
 			if (!point) continue;
 			ptemp = point->GetPoint(rwt);
@@ -333,8 +333,8 @@ bool RulerHandler::FindClosestRulerBranchPoint(double mx, double my)
 		for (j = 0; j < ruler->GetNumBranch(); j++)
 		{
 			int nbp = ruler->GetNumBranchPoint(j);
-			if (nbp < 2)
-				continue;
+			//if (nbp < 2)
+			//	continue;
 			for (k = 0; k < nbp; ++k)
 			{
 				point = ruler->GetPRulerPoint(j, k);
@@ -822,10 +822,20 @@ void RulerHandler::ApplyMagStroke()
 	if (!m_mag_ruler || m_mag_branch >= m_mag_ruler->GetNumBranch())
 		return;
 	int num = m_mag_ruler->GetNumBranchPoint(m_mag_branch);
+	if (num == 1)
+	{
+		//move point
+		pRulerPoint temp = m_mag_ruler->GetPRulerPoint(m_mag_branch, 0);
+		if (!temp)
+			return;
+		fluo::Point p = m_mag_stroke.back();
+		temp->SetPoint(p, rwt);
+		return;
+	}
+
 	if (m_redist_len && m_mag_branch_point >= num)
 		return;
 
-	//if (m_redist_len)
 	InitMagStrokeLength(num);
 
 	for (size_t i = m_mag_branch_point; i < num; ++i)
