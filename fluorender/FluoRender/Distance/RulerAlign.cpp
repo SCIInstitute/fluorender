@@ -36,11 +36,14 @@ using namespace flrd;
 
 void RulerAlign::AddRuler(Ruler* ruler)
 {
+	if (!m_view)
+		return;
 	fluo::Point p;
 	size_t t = m_view->m_tseq_cur_num;
+	ruler->SetWorkTime(t);
 	for (size_t i = 0; i < ruler->GetNumPoint(); ++i)
 	{
-		if (ruler->GetPoint(t, p))
+		if (ruler->GetPoint(i, p))
 			m_point_list.push_back(p);
 	}
 }

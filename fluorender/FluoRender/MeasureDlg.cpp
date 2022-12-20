@@ -1264,7 +1264,7 @@ void MeasureDlg::GetSettings(VRenderGLView* vrv)
 		m_toolbar1->ToggleTool(ID_EllipseBtn, false);
 		m_toolbar1->ToggleTool(ID_GrowBtn, false);
 		m_toolbar1->ToggleTool(ID_PencilBtn, false);
-		m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
+		m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
 		m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 		m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
 		m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
@@ -1299,10 +1299,10 @@ void MeasureDlg::GetSettings(VRenderGLView* vrv)
 		else if (int_mode == 13)
 			m_toolbar1->ToggleTool(ID_PencilBtn, true);
 		else if (int_mode == 14)
-			m_toolbar2->ToggleTool(ID_RulerDelBtn, true);
+			m_toolbar3->ToggleTool(ID_RulerDelBtn, true);
 		else if (int_mode == 15)
 		{
-			bool mag_len = m_rhdl->GetMagLength();
+			bool mag_len = m_rhdl->GetRedistLength();
 			if (mag_len)
 				m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, true);
 			else
@@ -1395,7 +1395,7 @@ void MeasureDlg::OnNewLocator(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
 	m_toolbar1->ToggleTool(ID_GrowBtn, false);
 	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
+	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
@@ -1427,7 +1427,7 @@ void MeasureDlg::OnNewProbe(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
 	m_toolbar1->ToggleTool(ID_GrowBtn, false);
 	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
+	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
@@ -1459,7 +1459,7 @@ void MeasureDlg::OnNewProtractor(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
 	m_toolbar1->ToggleTool(ID_GrowBtn, false);
 	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
+	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
@@ -1491,7 +1491,7 @@ void MeasureDlg::OnNewRuler(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
 	m_toolbar1->ToggleTool(ID_GrowBtn, false);
 	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
+	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
@@ -1520,7 +1520,7 @@ void MeasureDlg::OnNewRulerMP(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
 	m_toolbar1->ToggleTool(ID_GrowBtn, false);
 	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
+	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
@@ -1553,7 +1553,7 @@ void MeasureDlg::OnEllipse(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
 	m_toolbar1->ToggleTool(ID_GrowBtn, false);
 	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
+	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
@@ -1584,7 +1584,7 @@ void MeasureDlg::OnGrow(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
 	m_toolbar1->ToggleTool(ID_PencilBtn, false);
 	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
+	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
@@ -1631,7 +1631,7 @@ void MeasureDlg::OnPencil(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
 	m_toolbar1->ToggleTool(ID_GrowBtn, false);
 	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
+	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
@@ -1744,7 +1744,7 @@ void MeasureDlg::OnMagnet(wxCommandEvent& event)
 	if (m_toolbar2->GetToolState(ID_MagnetBtn))
 	{
 		m_view->SetIntMode(15);
-		m_rhdl->SetMagLength(false);
+		m_rhdl->SetRedistLength(false);
 	}
 	else
 		m_view->SetIntMode(1);
@@ -1775,7 +1775,7 @@ void MeasureDlg::OnRulerMovePencil(wxCommandEvent& event)
 	if (m_toolbar2->GetToolState(ID_RulerMovePencilBtn))
 	{
 		m_view->SetIntMode(15);
-		m_rhdl->SetMagLength(true);
+		m_rhdl->SetRedistLength(true);
 	}
 	else
 		m_view->SetIntMode(1);
@@ -1804,7 +1804,7 @@ void MeasureDlg::OnRulerDel(wxCommandEvent& event)
 	m_toolbar2->ToggleTool(ID_MagnetBtn, false);
 	m_toolbar2->ToggleTool(ID_LockBtn, false);
 
-	if (m_toolbar2->GetToolState(ID_RulerDelBtn))
+	if (m_toolbar3->GetToolState(ID_RulerDelBtn))
 		m_view->SetIntMode(14);
 	else
 		m_view->SetIntMode(1);
@@ -1830,7 +1830,7 @@ void MeasureDlg::OnRulerMove(wxCommandEvent& event)
 	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
 	m_toolbar2->ToggleTool(ID_MagnetBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
+	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_LockBtn, false);
 
 	if (m_toolbar2->GetToolState(ID_RulerMoveBtn))
@@ -2136,7 +2136,7 @@ void MeasureDlg::OnLock(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
 	m_toolbar1->ToggleTool(ID_GrowBtn, false);
 	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
+	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);

@@ -160,7 +160,9 @@ namespace flrd
 		void ApplyMagPoint();
 		void ApplyMagStroke();
 		void InitMagStrokeLength(int n);
+		void InitMagRulerLength();
 		fluo::Point GetPointOnMagStroke(int i);
+		fluo::Point GetPointOnMagStroke(double d);
 		void ClearMagStroke();
 		void AddMagStrokePoint(int mx, int my);
 
@@ -206,8 +208,8 @@ namespace flrd
 		}
 
 		//magnet mode
-		bool GetMagLength() { return m_mag_length; }
-		void SetMagLength(bool val) { m_mag_length = val; }
+		bool GetRedistLength() { return m_redist_len; }
+		void SetRedistLength(bool val) { m_redist_len = val; }
 
 	private:
 		unsigned int m_group;
@@ -219,7 +221,7 @@ namespace flrd
 		Ruler* m_mag_ruler;
 		size_t m_mag_branch;
 		size_t m_mag_branch_point;
-		bool m_mag_length;
+		bool m_redist_len;
 		RulerList *m_ruler_list;
 		int m_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
 					//4: protractor; 5: ellipse
@@ -239,8 +241,9 @@ namespace flrd
 		//stroke for the magnet tool
 		int m_magx, m_magy;//2d coords for the starting point for searching closest ruler point
 		std::vector<fluo::Point> m_mag_stroke;
-		std::vector<double> m_mag_stroke_len;//interlval lengths on stroke
+		std::vector<double> m_mag_stroke_len;//interval lengths on stroke
 		double m_mag_stroke_int;//interval length on ruler
+		std::vector<double> m_mag_ruler_len;//interval lengths on ruler before editing
 
 		//simple data sampler
 		int m_sample_type;//0-nn; 1-bilinear
