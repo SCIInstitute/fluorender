@@ -142,6 +142,7 @@ namespace flrd
 		void DeletePoint();
 
 		RulerPoint* GetEllipsePoint(int index);
+		bool CompleteEllipse(int mode);
 
 		void FinishRuler();
 		bool GetRulerFinished();

@@ -199,6 +199,8 @@ bool RulerHandler::FindClosestRulerPoint(double mx, double my)
 			{
 				ppmin = point;
 				dmin = dist;
+				m_ruler = ruler;
+				m_pindex = k;
 			}
 		}
 	}
@@ -273,6 +275,7 @@ bool RulerHandler::FindClosestRulerBranch(double mx, double my)
 				rulermin = ruler;
 				rj = j;
 				dmin = dist;
+				m_pindex = 0;
 			}
 		}
 	}
@@ -423,6 +426,52 @@ RulerPoint* RulerHandler::GetEllipsePoint(int index)
 	}
 
 	return 0;
+}
+
+bool RulerHandler::CompleteEllipse(int mode)
+{
+	if (m_ruler->GetRulerType() != 5)
+		return false;
+	size_t rwt = m_ruler->GetWorkTime();
+	flrd::RulerPoint* p0 = m_point.get();
+	flrd::RulerPoint* p1 = GetEllipsePoint(1);
+	flrd::RulerPoint* p2 = GetEllipsePoint(2);
+	flrd::RulerPoint* p3 = GetEllipsePoint(3);
+	if (!p1 || !p2 || !p3)
+		return false;
+	fluo::Point tmp;
+	if (mode == 1)
+	{
+		fluo::Point c((p2->GetPoint(rwt) + p3->GetPoint(rwt)) / 2.0);
+		fluo::Vector v0 = p0->GetPoint(rwt) - c;
+		fluo::Vector v2 = p2->GetPoint(rwt) - c;
+		fluo::Vector axis = Cross(v2, v0);
+		axis = Cross(axis, v2);
+		axis.normalize();
+		tmp = fluo::Point(c + axis * v0.length());
+		p0->SetPoint(tmp, rwt);
+		tmp = c + (c - p0->GetPoint(rwt));
+		p1->SetPoint(tmp, rwt);
+	}
+	else if (mode == 0)
+	{
+		fluo::Point c((p0->GetPoint(rwt) +
+			p1->GetPoint(rwt) + p2->GetPoint(rwt) +
+			p3->GetPoint(rwt)) / 4.0);
+		fluo::Vector v0 = p0->GetPoint(rwt) - c;
+		fluo::Vector v2 = p2->GetPoint(rwt) - c;
+		fluo::Vector axis = Cross(v2, v0);
+		fluo::Vector a2 = Cross(v0, axis);
+		a2.normalize();
+		tmp = fluo::Point(c + a2 * v2.length());
+		p2->SetPoint(tmp, rwt);
+		tmp = fluo::Point(c - a2 * v2.length());
+		p3->SetPoint(tmp, rwt);
+		tmp = c + (c - p0->GetPoint(rwt));
+		p1->SetPoint(tmp, rwt);
+	}
+
+	return true;
 }
 
 void RulerHandler::FinishRuler()
@@ -728,47 +777,10 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 
 	m_point->SetPoint(point, rwt);
 
-	flrd::RulerPoint *p0 = m_point.get();
-	flrd::RulerPoint *p1 = GetEllipsePoint(1);
-	flrd::RulerPoint *p2 = GetEllipsePoint(2);
-	flrd::RulerPoint *p3 = GetEllipsePoint(3);
-	if (!p1 || !p2 || !p3)
-		return true;
-
-	if (alt)
-	{
-		fluo::Point c((p2->GetPoint(rwt) + p3->GetPoint(rwt)) / 2.0);
-		fluo::Vector v0 = p0->GetPoint(rwt) - c;
-		fluo::Vector v2 = p2->GetPoint(rwt) - c;
-		fluo::Vector axis = Cross(v2, v0);
-		axis = Cross(axis, v2);
-		axis.normalize();
-		tmp = fluo::Point(c + axis * v0.length());
-		p0->SetPoint(tmp, rwt);
-		tmp = c + (c - p0->GetPoint(rwt));
-		p1->SetPoint(tmp, rwt);
-	}
-	else
-	{
-		fluo::Point c((p0->GetPoint(rwt) +
-			p1->GetPoint(rwt) + p2->GetPoint(rwt) +
-			p3->GetPoint(rwt)) / 4.0);
-		fluo::Vector v0 = p0->GetPoint(rwt) - c;
-		fluo::Vector v2 = p2->GetPoint(rwt) - c;
-		fluo::Vector axis = Cross(v2, v0);
-		fluo::Vector a2 = Cross(v0, axis);
-		a2.normalize();
-		tmp = fluo::Point(c + a2 * v2.length());
-		p2->SetPoint(tmp, rwt);
-		tmp = fluo::Point(c - a2 * v2.length());
-		p3->SetPoint(tmp, rwt);
-		tmp = c + (c - p0->GetPoint(rwt));
-		p1->SetPoint(tmp, rwt);
-	}
-
+	CompleteEllipse(alt ? 1 : 0);
 	Profile(m_ruler);
-
 	return true;
+
 }
 
 void RulerHandler::Prune(int idx, int len)
@@ -800,6 +812,9 @@ void RulerHandler::ApplyMagPoint()
 	if (!m_point)
 		return;
 	m_point->SetPoint(p, rwt);
+
+	CompleteEllipse(0);
+	Profile(m_ruler);
 }
 
 void RulerHandler::ApplyMagStroke()
@@ -865,6 +880,9 @@ void RulerHandler::ApplyMagStroke()
 			temp->SetPoint(p, rwt);
 		}
 	}
+
+	CompleteEllipse(0);
+	Profile(m_ruler);
 }
 
 void RulerHandler::InitMagStrokeLength(int n)
