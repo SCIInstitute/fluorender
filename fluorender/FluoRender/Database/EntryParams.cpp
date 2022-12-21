@@ -87,7 +87,8 @@ void EntryParams::save(File& file)
 
 	//size
 	file.writeValue(TAG_ENT_SIZE);
-	file.writeValue(m_params->size());
+	unsigned int size = m_params->size();
+	file.writeValue(size);
 
 	//data
 	file.writeValue(TAG_ENT_DATA);

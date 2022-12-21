@@ -42,12 +42,11 @@ namespace flrd
 		public:
 			enum EntryTags
 			{
-				TAG_ENT_BINS = 1,
+				TAG_ENT_SIZE = 1,
 				TAG_ENT_MIN,
 				TAG_ENT_MAX,
 				TAG_ENT_POPL,
-				TAG_ENT_DATA,
-				TAG_ENT_SIZE
+				TAG_ENT_DATA
 			};
 
 			enum ParamTypes

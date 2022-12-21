@@ -57,7 +57,7 @@ EntryHist::~EntryHist()
 void EntryHist::open(File& file)
 {
 	//bins
-	if (file.check(TAG_ENT_BINS))
+	if (file.check(TAG_ENT_SIZE))
 	{
 		unsigned int bins;
 		file.readValue(bins);
@@ -85,7 +85,7 @@ void EntryHist::save(File& file)
 	file.writeValue(Table::TAG_TABLE_ENT_HIST);
 
 	//bins
-	file.writeValue(TAG_ENT_BINS);
+	file.writeValue(TAG_ENT_SIZE);
 	file.writeValue(m_bins);
 
 	//min/max
