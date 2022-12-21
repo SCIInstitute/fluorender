@@ -2,13 +2,15 @@
 #include "asserts.h"
 #include <Table.h>
 #include <RecordHistParams.h>
+#include <Global.h>
 
 void TableTest()
 {
 	flrd::Table table;
 
 	flrd::EntryHist* eh = new flrd::EntryHist();
-	flrd::EntryParams* ep = new flrd::EntryParams();
+	flrd::Params* params = glbin.get_params("comp_gen");
+	flrd::EntryParams* ep = new flrd::EntryParams(params);
 	flrd::RecordHistParams* rec = new flrd::RecordHistParams();
 
 	eh->setRange(0.0f, 255.0f);

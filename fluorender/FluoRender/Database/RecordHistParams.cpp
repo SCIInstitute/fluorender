@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "RecordHistParams.h"
 #include <Table.h>
 #include <FileIO/File.h>
+#include <Global.h>
 
 using namespace flrd;
 
@@ -70,7 +71,7 @@ void RecordHistParams::open(File& file)
 	{
 		if (file.check(Table::TAG_TABLE_ENT_PARAMS))
 		{
-			EntryParams* ent = new EntryParams();
+			EntryParams* ent = new EntryParams(glbin.get_params("comp_gen"));
 			if (ent)
 			{
 				ent->open(file);
@@ -94,7 +95,7 @@ size_t RecordHistParams::getInputSize()
 
 size_t RecordHistParams::getOutputSize()
 {
-	return EntryParams::m_size;
+	return glbin.get_params("comp_gen")->size();
 }
 
 void RecordHistParams::getInputData(float* data)

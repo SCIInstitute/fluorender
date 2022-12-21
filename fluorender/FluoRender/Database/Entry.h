@@ -40,6 +40,30 @@ namespace flrd
 	class Entry
 	{
 		public:
+			enum EntryTags
+			{
+				TAG_ENT_BINS = 1,
+				TAG_ENT_MIN,
+				TAG_ENT_MAX,
+				TAG_ENT_POPL,
+				TAG_ENT_DATA,
+				TAG_ENT_SIZE
+			};
+
+			enum ParamTypes
+			{
+				IPT_VOID = 0,
+				IPT_BOOL,
+				IPT_CHAR,
+				IPT_UCHAR,
+				IPT_SHORT,
+				IPT_USHORT,
+				IPT_INT,
+				IPT_UINT,
+				IPT_FLOAT,
+				IPT_DOUBLE,
+			};
+
 			Entry();
 			Entry(const Entry& ent);
 			virtual ~Entry();

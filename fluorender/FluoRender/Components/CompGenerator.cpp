@@ -1339,7 +1339,7 @@ void ComponentGenerator::GenerateDB()
 	//check table size
 	unsigned int rec = table.getRecSize();
 	unsigned int bin = EntryHist::m_bins;
-	unsigned int par = EntryParams::m_size;
+	unsigned int par = glbin.get_params("comp_gen")->size();
 	if (!(rec && bin && par))
 		return;
 

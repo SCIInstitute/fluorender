@@ -31,106 +31,44 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-unsigned int EntryParams::m_size = 18;
-std::vector<std::string> EntryParams::m_names = {
-	"iter",//uint
-	"thresh",//float
-	"diff",//bool
-	"falloff",//float
-	"density",//bool
-	"density_thresh",//float
-	"varth",//float
-	"density_window_size",//uint
-	"density_stats_size",//uint
-	"use_dist_field",//bool
-	"dist_strength",//float
-	"dist_thresh",//float
-	"dist_filter_size",//uint
-	"max_dist",//uint
-	"cleanb",//bool
-	"clean_iter",//uint
-	"clean_size_vl",//uint
-	"grow_fixed"//bool
-	};
-std::unordered_map<std::string, size_t> EntryParams::m_name_index = {
-	{"iter", 0},
-	{"thresh", 1},
-	{"diff", 2},
-	{"falloff", 3},
-	{"density", 4},
-	{"density_thresh", 5},
-	{"varth", 6},
-	{"density_window_size", 7},
-	{"density_stats_size", 8},
-	{"use_dist_field", 9},
-	{"dist_strength", 10},
-	{"dist_thresh", 11},
-	{"dist_filter_size", 12},
-	{"max_dist", 13},
-	{"cleanb", 14},
-	{"clean_iter", 15},
-	{"clean_size_vl", 16},
-	{"grow_fixed", 17}
-};
-std::vector<EntryParams::ParamTypes> EntryParams::m_types = {
-	IPT_UINT,
-	IPT_FLOAT,
-	IPT_BOOL,
-	IPT_FLOAT,
-	IPT_BOOL,
-	IPT_FLOAT,
-	IPT_FLOAT,
-	IPT_UINT,
-	IPT_UINT,
-	IPT_BOOL,
-	IPT_FLOAT,
-	IPT_FLOAT,
-	IPT_UINT,
-	IPT_UINT,
-	IPT_BOOL,
-	IPT_UINT,
-	IPT_UINT,
-	IPT_BOOL
-	};
+EntryParams::EntryParams() :
+	m_params(nullptr)
+{}
 
-EntryParams::EntryParams()
+EntryParams::EntryParams(Params* params) :
+	m_params(params)
 {
-	//fixed size
-	if (m_size)
-		m_data.assign(m_size, 0);
 	m_valid = false;
+	if (!params)
+		return;
+	size_t size = params->size();
+	//fixed size
+	if (size)
+		m_data.assign(size, 0);
 }
 
 EntryParams::EntryParams(const EntryParams& ent) :
 	Entry(ent)
 {
 	m_valid = ent.m_valid;
+	m_params = ent.m_params;
 }
 
 EntryParams::~EntryParams()
 {
 }
 
-size_t EntryParams::getNameIndex(const std::string& name)
-{
-	size_t result = m_size;
-	std::unordered_map<std::string, size_t>::const_iterator i =
-		m_name_index.find(name);
-	if (i != m_name_index.end())
-	{
-		result = i->second;
-	}
-	return result;
-}
-
 void EntryParams::open(File& file)
 {
+	if (!m_params)
+		return;
 	//size
 	if (file.check(TAG_ENT_SIZE))
 	{
 		unsigned int size;
 		file.readValue(size);
-		if (size != m_size) return;
+		if (size != m_params->size())
+			return;
 	}
 
 	//data
@@ -142,12 +80,14 @@ void EntryParams::open(File& file)
 
 void EntryParams::save(File& file)
 {
+	if (!m_params)
+		return;
 	//type
 	file.writeValue(Table::TAG_TABLE_ENT_PARAMS);
 
 	//size
 	file.writeValue(TAG_ENT_SIZE);
-	file.writeValue(m_size);
+	file.writeValue(m_params->size());
 
 	//data
 	file.writeValue(TAG_ENT_DATA);

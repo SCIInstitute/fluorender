@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define GLOBAL_H
 
 #include <Tracking/VolCache.h>
+#include <Database/Params.h>
 #include <Database/EntryParams.h>
 #include <Database/TableHistParams.h>
 
@@ -50,6 +51,14 @@ namespace fluo
 		flrd::CacheQueue& get_cache_queue() { return cache_queue_; }
 
 		//learning
+		void gen_params_list();
+		flrd::Params* get_params(const std::string& name)
+		{
+			auto it = params_list_.find(name);
+			if (it != params_list_.end())
+				return &(it->second);
+			return nullptr;
+		}
 		//comp gen
 		void set_cg_table_enable(bool value) { comp_gen_table_enable_ = value; }
 		bool get_cg_table_enable() { return comp_gen_table_enable_; }
@@ -61,6 +70,8 @@ namespace fluo
 		static Global instance_;
 
 		flrd::CacheQueue cache_queue_;
+
+		std::unordered_map<std::string, flrd::Params> params_list_;//available params
 
 		bool comp_gen_table_enable_;//add records from ui
 		flrd::EntryParams comp_gen_entry_;//temporary entry to save cg params

@@ -283,6 +283,13 @@ endif()
 include_directories(${FluoRender_SOURCE_DIR}/fluorender)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender)
 
+# Global
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Global)
+file(GLOB glb_src fluorender/FluoRender/Global/*.cpp)
+file(GLOB glb_hdr fluorender/FluoRender/Global/*.h)
+add_library(GLOBAL_OBJ OBJECT
+  ${glb_src} ${glb_hdr})
+
 # Formats
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Formats)
 file(GLOB fmt_src fluorender/FluoRender/Formats/*.cpp)
@@ -514,6 +521,7 @@ if(APPLE)
   include(BundleUtilities)
   add_executable(FluoRender MACOSX_BUNDLE
     ${src} ${hdr} ${rsc} ${icns}
+    $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGES_OBJ>
     $<TARGET_OBJECTS:CONVERTERS_OBJ>
     $<TARGET_OBJECTS:FLIVR_OBJ>
@@ -555,6 +563,7 @@ elseif(UNIX OR MINGW)
   #include(BundleUtilities)
   add_executable(FluoRender
     ${src} ${hdr} ${rsc} ${icns}
+    $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGES_OBJ>
     $<TARGET_OBJECTS:CONVERTERS_OBJ>
     $<TARGET_OBJECTS:FLIVR_OBJ>
@@ -621,6 +630,7 @@ elseif(WIN32)
     if (USE_XINPUT)
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
+      $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:FILEIO_OBJ>
@@ -648,6 +658,7 @@ elseif(WIN32)
     else()
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
+      $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:FILEIO_OBJ>
@@ -674,6 +685,7 @@ elseif(WIN32)
     endif()
     add_executable(Tester
       ${tester_src} ${tester_hdr}
+      $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:FILEIO_OBJ>

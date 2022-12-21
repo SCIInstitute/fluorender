@@ -29,55 +29,40 @@ DEALINGS IN THE SOFTWARE.
 #define _ENTRYPARAMS_H_
 
 #include <Entry.h>
-#include <vector>
-#include <string>
-#include <unordered_map>
+#include <Params.h>
 
 namespace flrd
 {
 	class EntryParams : public Entry
 	{
 	public:
-		enum EntryTags
-		{
-			TAG_ENT_SIZE = 1,
-			TAG_ENT_DATA
-		};
-		enum ParamTypes
-		{
-			IPT_VOID = 0,
-			IPT_BOOL,
-			IPT_CHAR,
-			IPT_UCHAR,
-			IPT_SHORT,
-			IPT_USHORT,
-			IPT_INT,
-			IPT_UINT,
-			IPT_FLOAT,
-			IPT_DOUBLE,
-		};
-
 		EntryParams();
+		EntryParams(Params* params);
 		EntryParams(const EntryParams& ent);
 		~EntryParams();
 
 		virtual EntryParams* asEntryParams() { return this; }
 		virtual const EntryParams* asEntryParams() const { return this; }
 
-		size_t getNameIndex(const std::string& name);
+		void setParams(Params* params) { m_params = params; }
+
 		template <typename T>
 		void setParam(const std::string& name, T value)
 		{
-			size_t i = getNameIndex(name);
-			if (i < m_size)
+			if (!m_params)
+				return;
+			size_t i;
+			if (m_params->getNameIndex(name, i))
 				m_data[i] = float(value);
 			m_valid = true;
 		}
 
 		float getParam(const std::string& name)
 		{
-			size_t i = getNameIndex(name);
-			if (i < m_size)
+			if (!m_params)
+				return 0;
+			size_t i;
+			if (m_params->getNameIndex(name, i))
 				return m_data[i];
 			return 0;
 		}
@@ -87,14 +72,9 @@ namespace flrd
 
 		virtual bool getValid() { return m_valid; }
 
-		static unsigned int m_size;//parameter size
-
 	private:
 		bool m_valid;
-		static std::vector<std::string> m_names;//parameter names
-		static std::unordered_map<std::string, size_t> m_name_index;//index of names
-		static std::vector<ParamTypes> m_types;//parameter types for external program
-		//std::vector<float> m_data;//parameter values, converted to float
+		Params* m_params;
 	};
 }
 

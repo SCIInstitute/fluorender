@@ -25,15 +25,48 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef _PARAMS_H_
+#define _PARAMS_H_
 
-#include <Global.h>
+#include <Entry.h>
+#include <vector>
+#include <string>
+#include <unordered_map>
 
-using namespace fluo;
-
-Global Global::instance_;
-
-Global::Global() :
-	comp_gen_table_enable_(false)
+namespace flrd
 {
+	class Params
+	{
+	public:
+		Params(
+			std::vector<std::string>& names,
+			std::unordered_map<std::string, size_t>& index,
+			std::vector<Entry::ParamTypes>& types) :
+			m_names(names),
+			m_name_index(index),
+			m_types(types)
+		{};
+		~Params() {};
 
+		size_t size() { return m_names.size(); }
+
+		bool getNameIndex(const std::string& name, size_t& i)
+		{
+			std::unordered_map<std::string, size_t>::const_iterator it =
+				m_name_index.find(name);
+			if (it != m_name_index.end())
+			{
+				i = it->second;
+				return true;
+			}
+			return false;
+		}
+
+	private:
+		std::vector<std::string> m_names;//parameter names
+		std::unordered_map<std::string, size_t> m_name_index;//index of names
+		std::vector<Entry::ParamTypes> m_types;//parameter types for external program
+	};
 }
+
+#endif//_PARAMS_H_

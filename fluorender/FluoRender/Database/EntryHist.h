@@ -36,14 +36,6 @@ namespace flrd
 	class EntryHist : public Entry
 	{
 		public:
-			enum EntryTags
-			{
-				TAG_ENT_BINS = 1,
-				TAG_ENT_MIN,
-				TAG_ENT_MAX,
-				TAG_ENT_POPL,
-				TAG_ENT_DATA
-			};
 
 			EntryHist();
 			EntryHist(const EntryHist& ent);
