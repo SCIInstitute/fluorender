@@ -71,9 +71,10 @@ void RecordHistParams::open(File& file)
 	{
 		if (file.check(Table::TAG_TABLE_ENT_PARAMS))
 		{
-			EntryParams* ent = new EntryParams(glbin.get_params("comp_gen"));
+			EntryParams* ent = new EntryParams();// glbin.get_params("comp_gen"));
 			if (ent)
 			{
+				ent->setParams(m_params);
 				ent->open(file);
 				setOutput(ent);
 			}
@@ -95,7 +96,9 @@ size_t RecordHistParams::getInputSize()
 
 size_t RecordHistParams::getOutputSize()
 {
-	return glbin.get_params("comp_gen")->size();
+	if (m_params)
+		return m_params->size();
+	return 0;
 }
 
 void RecordHistParams::getInputData(float* data)

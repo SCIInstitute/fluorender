@@ -36,51 +36,51 @@ namespace flrd
 {
 	class RecordHistParams : public Record
 	{
-		public:
-			RecordHistParams();
-			RecordHistParams(const RecordHistParams& rec);
-			virtual ~RecordHistParams();
+	public:
+		RecordHistParams();
+		RecordHistParams(const RecordHistParams& rec);
+		virtual ~RecordHistParams();
 
-			virtual RecordHistParams* asRecordHistParams() { return this; }
-			virtual const RecordHistParams* asRecordHistParams() const { return this; }
+		virtual RecordHistParams* asRecordHistParams() { return this; }
+		virtual const RecordHistParams* asRecordHistParams() const { return this; }
 
-			virtual EntryHist* getInput()
-			{
-				return dynamic_cast<EntryHist*>(m_input);
-			}
+		virtual EntryHist* getInput()
+		{
+			return dynamic_cast<EntryHist*>(m_input);
+		}
 
-			virtual void setInput(Entry* entry)
-			{
-				m_input = entry;
-			}
+		virtual void setInput(Entry* entry)
+		{
+			m_input = entry;
+		}
 			
-			virtual EntryParams* getOutput()
-			{
-				return dynamic_cast<EntryParams*>(m_input);
-			}
+		virtual EntryParams* getOutput()
+		{
+			return dynamic_cast<EntryParams*>(m_input);
+		}
 
-			virtual void setOutput(Entry* entry)
-			{
-				m_output = entry;
-			}
+		virtual void setOutput(Entry* entry)
+		{
+			m_output = entry;
+		}
 
-			virtual void open(File& file);
-			virtual void save(File& file);
+		virtual void open(File& file);
+		virtual void save(File& file);
 
-			virtual size_t getInputSize();
-			virtual size_t getOutputSize();
+		virtual size_t getInputSize();
+		virtual size_t getOutputSize();
 
-			virtual void getInputData(float* data);
-			virtual void getOutputData(float* data);
+		virtual void getInputData(float* data);
+		virtual void getOutputData(float* data);
 
-			virtual void getInputData(std::vector<float>& data);
-			virtual void getOutputData(std::vector<float>& data);
+		virtual void getInputData(std::vector<float>& data);
+		virtual void getOutputData(std::vector<float>& data);
 
-			float getHistPopl();
-			float getParamIter();
-			float getParamMxdist();
-			float getParamCleanb();
-			float getParamCleanIter();
+		float getHistPopl();
+		float getParamIter();
+		float getParamMxdist();
+		float getParamCleanb();
+		float getParamCleanIter();
 
 	private:
 	};

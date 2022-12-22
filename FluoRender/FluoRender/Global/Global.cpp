@@ -36,7 +36,12 @@ Global::Global() :
 	comp_gen_table_enable_(false)
 {
 	gen_params_list();
+	//comp gen
 	comp_gen_entry_.setParams(get_params("comp_gen"));
+	comp_gen_table_.setParams(get_params("comp_gen"));
+	//vol prop
+	vol_prop_entry_.setParams(get_params("vol_prop"));
+	vol_prop_table_.setParams(get_params("vol_prop"));
 }
 
 void Global::gen_params_list()
@@ -111,4 +116,96 @@ void Global::gen_params_list()
 	params_list_.insert(
 		std::pair<std::string, flrd::Params>(
 		"comp_gen", flrd::Params(names, index, types)));
+
+	//for volume property
+	names =
+	{
+		"extract_boundary",//float
+		"gamma3d",//float
+		"low_offset",//float
+		"high_offset",//float
+		"low_threshold",//float
+		"high_threshold",//float
+		"low_shading",//float
+		"high_shading",//float
+		"alpha",//float
+		"sample_rate",//float
+		"luminance",//float
+		"colormap_enable",//bool
+		"colormap_inv",//bool
+		"colormap_type",//uint
+		"colormap_proj",//uint
+		"colormap_low",//float
+		"colormap_hi",//float
+		"alpha_enable",//bool
+		"shading_enable",//bool
+		"interp_enable",//bool
+		"invert_enable",//bool
+		"mip_enable",//bool
+		"transparent_enable",//bool
+		"denoise_enable",//bool
+		"shadow_enable",//bool
+		"shadow_intensity"//float
+	};
+	index =
+	{
+		{"extract_boundary", 0},
+		{"gamma3d", 1},
+		{"low_offset", 2},
+		{"high_offset", 3},
+		{"low_threshold", 4},
+		{"high_threshold", 5},
+		{"low_shading", 6},
+		{"high_shading", 7},
+		{"alpha", 8},
+		{"sample_rate", 9},
+		{"luminance", 10},
+		{"colormap_enable", 11},
+		{"colormap_inv", 12},
+		{"colormap_type", 13},
+		{"colormap_proj", 14},
+		{"colormap_low", 15},
+		{"colormap_hi", 16},
+		{"alpha_enable", 17},
+		{"shading_enable", 18},
+		{"interp_enable", 19},
+		{"invert_enable", 20},
+		{"mip_enable", 21},
+		{"transparent_enable", 22},
+		{"denoise_enable", 23},
+		{"shadow_enable", 24},
+		{"shadow_intensity", 25}
+	};
+	types =
+	{
+		flrd::Entry::IPT_FLOAT,
+		flrd::Entry::IPT_FLOAT,
+		flrd::Entry::IPT_FLOAT,
+		flrd::Entry::IPT_FLOAT,
+		flrd::Entry::IPT_FLOAT,
+		flrd::Entry::IPT_FLOAT,
+		flrd::Entry::IPT_FLOAT,
+		flrd::Entry::IPT_FLOAT,
+		flrd::Entry::IPT_FLOAT,
+		flrd::Entry::IPT_FLOAT,
+		flrd::Entry::IPT_FLOAT,
+		flrd::Entry::IPT_BOOL,
+		flrd::Entry::IPT_BOOL,
+		flrd::Entry::IPT_UINT,
+		flrd::Entry::IPT_UINT,
+		flrd::Entry::IPT_FLOAT,
+		flrd::Entry::IPT_FLOAT,
+		flrd::Entry::IPT_BOOL,
+		flrd::Entry::IPT_BOOL,
+		flrd::Entry::IPT_BOOL,
+		flrd::Entry::IPT_BOOL,
+		flrd::Entry::IPT_BOOL,
+		flrd::Entry::IPT_BOOL,
+		flrd::Entry::IPT_BOOL,
+		flrd::Entry::IPT_BOOL,
+		flrd::Entry::IPT_FLOAT,
+	};
+	params_list_.insert(
+		std::pair<std::string, flrd::Params>(
+			"vol_prop", flrd::Params(names, index, types)));
 }

@@ -38,7 +38,8 @@ using namespace flrd;
 Table::Table():
 	m_recnum(0),
 	m_modified(false),
-	m_update_func(nullptr)
+	m_update_func(nullptr),
+	m_params(0)
 {
 	m_modify_time = m_create_time = std::time(0);
 }
@@ -47,7 +48,8 @@ Table::Table(const Table& table) :
 	m_modified(true),
 	m_notes(table.m_notes),
 	m_recnum(table.m_recnum),
-	m_update_func(nullptr)
+	m_update_func(nullptr),
+	m_params(table.m_params)
 {
 	std::string tname = table.m_name;
 	if (tname.empty())
@@ -233,6 +235,7 @@ void Table::open(const std::string& filename, bool info)
 		}
 		if (rec)
 		{
+			rec->setParams(m_params);
 			rec->open(file);
 			readRecord(rec);
 		}

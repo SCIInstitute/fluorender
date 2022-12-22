@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Entry.h>
 #include <fstream>
+#include <Params.h>
 
 namespace flrd
 {
@@ -64,7 +65,10 @@ namespace flrd
 
 			virtual bool compare(Record* rec);
 
-		protected:
+			void setParams(Params* params) { m_params = params; }
+
+	protected:
+			Params* m_params;//type of params
 			Entry* m_input;
 			Entry* m_output;
 	};

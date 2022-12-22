@@ -10,7 +10,8 @@ void TableTest()
 
 	flrd::EntryHist* eh = new flrd::EntryHist();
 	flrd::Params* params = glbin.get_params("comp_gen");
-	flrd::EntryParams* ep = new flrd::EntryParams(params);
+	flrd::EntryParams* ep = new flrd::EntryParams();
+	ep->setParams(params);
 	flrd::RecordHistParams* rec = new flrd::RecordHistParams();
 
 	eh->setRange(0.0f, 255.0f);

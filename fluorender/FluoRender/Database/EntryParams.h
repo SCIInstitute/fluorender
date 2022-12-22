@@ -37,14 +37,13 @@ namespace flrd
 	{
 	public:
 		EntryParams();
-		EntryParams(Params* params);
 		EntryParams(const EntryParams& ent);
 		~EntryParams();
 
 		virtual EntryParams* asEntryParams() { return this; }
 		virtual const EntryParams* asEntryParams() const { return this; }
 
-		void setParams(Params* params) { m_params = params; }
+		void setParams(Params* params);
 
 		template <typename T>
 		void setParam(const std::string& name, T value)

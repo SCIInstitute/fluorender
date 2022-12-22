@@ -35,18 +35,6 @@ EntryParams::EntryParams() :
 	m_params(nullptr)
 {}
 
-EntryParams::EntryParams(Params* params) :
-	m_params(params)
-{
-	m_valid = false;
-	if (!params)
-		return;
-	size_t size = params->size();
-	//fixed size
-	if (size)
-		m_data.assign(size, 0);
-}
-
 EntryParams::EntryParams(const EntryParams& ent) :
 	Entry(ent)
 {
@@ -56,6 +44,18 @@ EntryParams::EntryParams(const EntryParams& ent) :
 
 EntryParams::~EntryParams()
 {
+}
+
+void EntryParams::setParams(Params* params)
+{
+	m_valid = false;
+	if (!params)
+		return;
+	m_params = params;
+	size_t size = params->size();
+	//fixed size
+	if (size)
+		m_data.assign(size, 0);
 }
 
 void EntryParams::open(File& file)

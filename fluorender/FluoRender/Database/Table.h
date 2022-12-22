@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <ctime>
 #include <functional>
+#include <Params.h>
 
 namespace flrd
 {
@@ -149,6 +150,11 @@ namespace flrd
 				m_update_func = func;
 			}
 
+			void setParams(Params* params)
+			{
+				m_params = params;
+			}
+
 		protected:
 			bool m_modified;
 			std::time_t m_create_time;
@@ -157,6 +163,7 @@ namespace flrd
 			std::string m_notes;
 			size_t m_recnum;
 			std::vector<Record*> m_data;
+			Params* m_params;//type of records
 
 			//update
 			TableUpdateFunc m_update_func;
