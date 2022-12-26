@@ -151,4 +151,43 @@ protected:
 
 private:
 };
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+class MLVolPropPanel : public MachineLearningPanel
+{
+public:
+	enum
+	{
+		ID_TopGrid = ID_LEARNING_VOL_PROP,
+		ID_NewTableBtn,
+		ID_LoadTableBtn,
+		ID_DelTableBtn,
+		ID_DupTableBtn,
+		ID_BotGrid,
+		ID_StartRecBtn,
+		ID_DelRecBtn
+	};
+	MLVolPropPanel(VRenderFrame* frame,
+		wxWindow* parent);
+	~MLVolPropPanel();
+
+	virtual void UpdateBotList();
+	void LoadTable(const std::string& filename);
+	void SaveTable(const std::string& filename);
+
+protected:
+	virtual void OnNewTable(wxCommandEvent& event);
+	virtual void OnLoadTable(wxCommandEvent& event);
+	virtual void OnDelTable(wxCommandEvent& event);
+	virtual void OnDupTable(wxCommandEvent& event);
+	//
+	virtual void OnStartRec(wxCommandEvent& event);
+	virtual void OnDelRec(wxCommandEvent& event);
+	//grid size
+	void OnBotGridAutoSize(wxGridSizeEvent& event);
+	//grid cell edit
+	void OnTopGridCellChanged(wxGridEvent& event);
+
+private:
+};
 #endif//_MACHINELEARNINGDLG_H_

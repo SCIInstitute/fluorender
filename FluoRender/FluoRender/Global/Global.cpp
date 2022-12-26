@@ -40,7 +40,6 @@ Global::Global() :
 	comp_gen_entry_.setParams(get_params("comp_gen"));
 	comp_gen_table_.setParams(get_params("comp_gen"));
 	//vol prop
-	vol_prop_entry_.setParams(get_params("vol_prop"));
 	vol_prop_table_.setParams(get_params("vol_prop"));
 }
 

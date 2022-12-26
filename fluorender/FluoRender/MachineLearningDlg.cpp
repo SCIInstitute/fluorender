@@ -51,6 +51,8 @@ MachineLearningDlg::MachineLearningDlg(VRenderFrame *frame) :
 	wxNotebook *notebook = new wxNotebook(this, wxID_ANY);
 	MLCompGenPanel* panel1 = new MLCompGenPanel(frame, notebook);
 	notebook->AddPage(panel1, "Component Generator");
+	MLVolPropPanel* panel2 = new MLVolPropPanel(frame, notebook);
+	notebook->AddPage(panel2, "Volume Properties");
 
 	//interface
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
@@ -621,5 +623,287 @@ void MLCompGenPanel::SaveTable(const std::string& filename)
 	std::string str = m_exepath;
 	str += GETSLASH() + m_dir + GETSLASH() + filename + m_ext;
 	glbin.get_cg_table().save(str);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+MLVolPropPanel::MLVolPropPanel(
+	VRenderFrame* frame, wxWindow* parent) :
+	MachineLearningPanel(frame, parent)
+{
+	m_dir = "Database";
+	m_ext = ".vptbl";
+	m_top_grid_name = "Data Sets";
+	m_top_grid_id = ID_TopGrid;
+	m_new_table_id = ID_NewTableBtn;
+	m_load_table_id = ID_LoadTableBtn;
+	m_del_table_id = ID_DelTableBtn;
+	m_dup_table_id = ID_DupTableBtn;
+	m_bot_grid_name = "Machine Learning Records";
+	m_bot_grid_id = ID_BotGrid;
+	m_start_rec_id = ID_StartRecBtn;
+	m_del_rec_id = ID_DelRecBtn;
+	Create();
+	PopTopList();
+
+	flrd::TableHistParams& table = glbin.get_vp_table();
+	table.setUpdateFunc(std::bind(
+		&MLVolPropPanel::UpdateList, this, std::placeholders::_1));
+}
+
+MLVolPropPanel::~MLVolPropPanel()
+{
+	flrd::TableHistParams& table = glbin.get_vp_table();
+	//save existing table if modified
+	if (table.getModified())
+	{
+		std::string name = table.getName();
+		std::string filename = m_exepath;
+		filename += GETSLASH() + m_dir + GETSLASH() + name + m_ext;
+		table.save(filename);
+	}
+}
+
+void MLVolPropPanel::OnNewTable(wxCommandEvent& event)
+{
+	//flrd::TableHistParams table;
+	//std::string name = "New_table";
+	//MatchTableName(name);
+	//table.setName(name);
+	//std::string filename = m_exepath;
+	//filename += GETSLASH() + m_dir + GETSLASH() + name + m_ext;
+	//table.save(filename);
+	//PopTopList();
+	m_top_grid->InsertRows(0);
+}
+
+void MLVolPropPanel::OnLoadTable(wxCommandEvent& event)
+{
+	wxArrayInt seli = m_top_grid->GetSelectedRows();
+	if (seli.GetCount() > 0)
+	{
+		std::string name = m_top_grid->GetCellValue(seli[0], 0).ToStdString();
+		LoadTable(name);
+		UpdateBotList();
+	}
+}
+
+void MLVolPropPanel::OnDelTable(wxCommandEvent& event)
+{
+	wxArrayInt seli = m_top_grid->GetSelectedRows();
+	size_t count = seli.GetCount();
+	if (!count)
+		return;
+
+	flrd::TableHistParams& table = glbin.get_vp_table();
+	std::string name;
+	std::string filename = m_exepath;
+	filename += GETSLASH() + m_dir + GETSLASH();
+	for (size_t i = 0; i < count; ++i)
+	{
+		name = m_top_grid->GetCellValue(seli[i], 0).ToStdString();
+		if (name == table.getName())
+		{
+			table.clear();
+			UpdateBotList();
+		}
+		name = filename + name + m_ext;
+		std::remove(name.c_str());
+	}
+	PopTopList();
+}
+
+void MLVolPropPanel::OnDupTable(wxCommandEvent& event)
+{
+	flrd::TableHistParams& table = glbin.get_vp_table();
+	if (table.getRecSize() == 0)
+	{
+		OnNewTable(event);
+		return;
+	}
+
+	flrd::TableHistParams new_table(table);
+	std::string name = new_table.getName();
+	if (MatchTableName(name))
+		new_table.setName(name);
+	//save it
+	std::string str = m_exepath;
+	str += GETSLASH() + m_dir + GETSLASH() + name + m_ext;
+	new_table.save(str);
+	PopTopList();
+}
+
+void MLVolPropPanel::OnStartRec(wxCommandEvent& event)
+{
+	flrd::TableHistParams& table = glbin.get_vp_table();
+	if (table.getName().empty())
+	{
+		m_record = false;
+		m_start_rec_btn->SetValue(false);
+		return;
+	}
+
+	m_record = !m_record;
+	if (m_record)
+	{
+		m_start_rec_btn->SetLabel("Started");
+		m_start_rec_btn->SetValue(true);
+		glbin.set_vp_table_enable(true);
+	}
+	else
+	{
+		m_start_rec_btn->SetLabel("Start");
+		m_start_rec_btn->SetValue(false);
+		glbin.set_vp_table_enable(false);
+	}
+}
+
+void MLVolPropPanel::OnDelRec(wxCommandEvent& event)
+{
+	flrd::TableHistParams& table = glbin.get_vp_table();
+	wxArrayInt seli = m_bot_grid->GetSelectedRows();
+	std::vector<size_t> vi;
+	size_t count = table.getRecSize();
+	for (size_t i = 0; i < seli.GetCount(); ++i)
+		vi.push_back(count - 1 - seli[i]);
+	table.delRecords(vi);
+}
+
+void MLVolPropPanel::OnBotGridAutoSize(wxGridSizeEvent& event)
+{
+	EvenSizeBotGrid();
+}
+
+void MLVolPropPanel::OnTopGridCellChanged(wxGridEvent& event)
+{
+	int c = event.GetCol();
+	int r = event.GetRow();
+	std::string str0, str1;
+	flrd::TableHistParams& table = glbin.get_vp_table();
+	if (c == 0)
+	{
+		//name
+		str0 = event.GetString();
+		str1 = m_top_grid->GetCellValue(r, c).ToStdString();
+		if (str0 == table.getName())
+			table.setName(str1);
+		flrd::TableHistParams temptbl;
+		std::string filename = m_exepath;
+		filename += GETSLASH() + m_dir + GETSLASH();
+		temptbl.open(filename + str0 + m_ext);
+		temptbl.setName(str1);
+		temptbl.save(filename + str1 + m_ext);
+		PopTopList();
+		m_top_grid->ClearSelection();
+	}
+	else if (c == 2)
+	{
+		//notes
+		str0 = m_top_grid->GetCellValue(r, 0).ToStdString();
+		str1 = m_top_grid->GetCellValue(r, c).ToStdString();
+		if (str0 == table.getName())
+		{
+			table.setNotes(str1);
+		}
+		else
+		{
+			flrd::TableHistParams temptbl;
+			std::string filename = m_exepath;
+			filename += GETSLASH() + m_dir + GETSLASH() + str0 + m_ext;
+			temptbl.open(filename);
+			temptbl.setNotes(str1);
+			temptbl.save(filename);
+		}
+	}
+	event.Skip();
+}
+
+void MLVolPropPanel::UpdateBotList()
+{
+	int row = m_bot_grid->GetNumberRows();
+	if (row > 0)
+		m_bot_grid->DeleteRows(0, row, true);
+
+	flrd::TableHistParams& table = glbin.get_vp_table();
+	std::string name = table.getName();
+	if (name.empty())
+	{
+		m_bot_table_name->SetLabelText("No table loaded");
+		m_start_prompt_text->Hide();
+		m_record = false;
+		m_start_rec_btn->SetValue(false);
+		m_start_rec_btn->SetLabel("Start");
+		glbin.set_vp_table_enable(false);
+	}
+	else
+	{
+		m_bot_table_name->SetLabelText("Table loaded:" + name);
+		m_start_prompt_text->Show();
+	}
+	std::string str_in, str_out;
+	std::vector<float> data_in, data_out;
+	for (int i = 0; i < table.getRecSize(); ++i)
+	{
+		m_bot_grid->InsertRows(0);
+
+		str_in.clear();
+		table.getOneInput(i, data_in);
+		size_t len = data_in.size();
+		if (len)
+		{
+#ifdef _WIN32
+			for (size_t j = 0; j < data_in.size() - 1; ++j)
+				str_in += std::format("{:.2f}", data_in[j]) + ", ";
+			str_in += std::format("{:.2f}", data_in[len - 1]);
+#else
+			for (size_t j = 0; j < data_in.size() - 1; ++j)
+				str_in += wxString::Format("%.2f", data_in[j]).ToStdString() + ", ";
+			str_in += wxString::Format("%.2f", data_in[len - 1]).ToStdString();
+#endif
+		}
+		m_bot_grid->SetCellValue(0, 0, str_in);
+
+		str_out.clear();
+		table.getOneOutput(i, data_out);
+		len = data_out.size();
+		if (len)
+		{
+#ifdef _WIN32
+			for (size_t j = 0; j < data_out.size() - 1; ++j)
+				str_out += std::format("{:.2f}", data_out[j]) + ", ";
+			str_out += std::format("{:.2f}", data_out[len - 1]);
+#else
+			for (size_t j = 0; j < data_out.size() - 1; ++j)
+				str_out += wxString::Format("%.2f", data_out[j]).ToStdString() + ", ";
+			str_out += wxString::Format("%.2f", data_out[len - 1]).ToStdString();
+#endif
+		}
+		m_bot_grid->SetCellValue(0, 1, str_out);
+	}
+	EvenSizeBotGrid();
+	m_bot_grid->ClearSelection();
+	Layout();
+}
+
+void MLVolPropPanel::LoadTable(const std::string& filename)
+{
+	std::string str = m_exepath;
+	str += GETSLASH() + m_dir + GETSLASH();
+	flrd::TableHistParams& table = glbin.get_vp_table();
+	//save existing table if modified
+	if (table.getModified())
+	{
+		std::string name = table.getName();
+		str += name + m_ext;
+		table.save(str);
+	}
+	str += filename + m_ext;
+	table.open(str);
+}
+
+void MLVolPropPanel::SaveTable(const std::string& filename)
+{
+	std::string str = m_exepath;
+	str += GETSLASH() + m_dir + GETSLASH() + filename + m_ext;
+	glbin.get_vp_table().save(str);
 }
 

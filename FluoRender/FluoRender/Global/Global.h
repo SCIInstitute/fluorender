@@ -67,7 +67,6 @@ namespace fluo
 		//vol prop
 		void set_vp_table_enable(bool value) { vol_prop_table_enable_ = value; }
 		bool get_vp_table_enable() { return vol_prop_table_enable_; }
-		flrd::EntryParams& get_vp_entry() { return vol_prop_entry_; }
 		flrd::TableHistParams& get_vp_table() { return vol_prop_table_; }
 
 	private:
@@ -84,7 +83,6 @@ namespace fluo
 		flrd::TableHistParams comp_gen_table_;//records for learning comp generation settings
 		//vol prop
 		bool vol_prop_table_enable_;//add records for vol prop
-		flrd::EntryParams vol_prop_entry_;//temporary entry to save vol prop params
 		flrd::TableHistParams vol_prop_table_;//records for learning vol props
 	};
 
