@@ -2044,7 +2044,7 @@ void VPropView::OnUseMlChk(wxCommandEvent& event)
 		m_group->ApplyMlVolProp();
 	else if (m_vd)
 		m_vd->ApplyMlVolProp();
-
+	GetSettings();
 	RefreshVRenderViews(false, true);
 }
 
