@@ -73,3 +73,10 @@ bool Record::compare(Record* rec)
 	return m_input->compare(rec->m_input) &&
 		m_output->compare(rec->m_output);
 }
+
+float Record::compare(Entry* ent)
+{
+	if (!m_input || !m_output)
+		return std::numeric_limits<float>::max();
+	return m_input->distance(ent);
+}

@@ -57,6 +57,24 @@ TableHistParams::~TableHistParams()
 
 }
 
+EntryParams* TableHistParams::findNearestOutput(EntryHist* input)
+{
+	Record* result = 0;
+	float vmin = std::numeric_limits<float>::max();
+	for (auto i : m_data)
+	{
+		float v = i->compare(input);
+		if (v < vmin)
+		{
+			result = i;
+			vmin = v;
+		}
+	}
+	if (result)
+		return dynamic_cast<EntryParams*>(result->getOutput());
+	return 0;
+}
+
 void TableHistParams::addRecord(Record* rec)
 {
 	Table::addRecord(rec);

@@ -505,9 +505,12 @@ public:
 			return 0;
 	}
 
-	//machine learning applied
-	bool GetMlApplied() { return m_ml_applied; }
-	void SetMlApplied(bool bval) { m_ml_applied = bval; }
+	//machine learning for comp gen applied
+	bool GetMlCompGenApplied() { return m_ml_comp_gen_applied; }
+	void SetMlCompGenApplied(bool bval) { m_ml_comp_gen_applied = bval; }
+
+	//apply volume properties form machine learning
+	void ApplyMlVolProp();
 
 private:
 	//duplication indicator and counter
@@ -526,7 +529,7 @@ private:
 	int m_time;	//time index of the original file
 
 	//machine learning applied
-	bool m_ml_applied;
+	bool m_ml_comp_gen_applied;
 
 	//modes (MIP & normal)
 	int m_mode;	//0-normal; 1-MIP; 2-white shading; 3-white mip
@@ -1099,6 +1102,9 @@ public:
 	void SetNR(bool val);
 	void SetInterpolate(bool mode);
 	void SetInvert(bool mode);
+
+	//use ml
+	void ApplyMlVolProp();
 
 	//blend mode
 	void SetBlendMode(int mode);

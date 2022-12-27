@@ -64,6 +64,7 @@ namespace flrd
 			virtual void getOutputData(std::vector<float>& data) = 0;
 
 			virtual bool compare(Record* rec);
+			virtual float compare(Entry* ent);
 
 			void setParams(Params* params) { m_params = params; }
 

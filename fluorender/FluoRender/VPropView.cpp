@@ -119,6 +119,8 @@ BEGIN_EVENT_TABLE(VPropView, wxPanel)
 	EVT_TOOL(ID_TranspChk, VPropView::OnTranspChk)
 	//components
 	EVT_TOOL(ID_CompChk, VPropView::OnCompChk)
+	//ml
+	EVT_TOOL(ID_UseMlChk, VPropView::OnUseMlChk)
 END_EVENT_TABLE()
 
 VPropView::VPropView(VRenderFrame* frame,
@@ -400,11 +402,15 @@ VPropView::VPropView(VRenderFrame* frame,
 	//right ///////////////////////////////////////////////////
 	m_options_toolbar = new wxToolBar(this,wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	bitmap = wxGetBitmapFromMemory(transplo);
+	//ml
+	bitmap = wxGetBitmapFromMemory(no_depth_atten);
 #ifdef _DARWIN
 	m_options_toolbar->SetToolBitmapSize(bitmap.GetSize());
 #endif
+	m_options_toolbar->AddTool(ID_UseMlChk, "Use Machine Learning",
+		bitmap, "Generate properties using machine learning");
 	//transparency
+	bitmap = wxGetBitmapFromMemory(transplo);
 	m_options_toolbar->AddCheckTool(ID_TranspChk, "Increase Transpancy",
 		bitmap, wxNullBitmap,
 		"Enable High Tarnsparency mode",
@@ -2031,6 +2037,17 @@ void VPropView::OnCompChk(wxCommandEvent &event)
 	RefreshVRenderViews(false, true);
 }
 
+//ml
+void VPropView::OnUseMlChk(wxCommandEvent& event)
+{
+	if (m_sync_group && m_group)
+		m_group->ApplyMlVolProp();
+	else if (m_vd)
+		m_vd->ApplyMlVolProp();
+
+	RefreshVRenderViews(false, true);
+}
+
 //noise reduction
 void VPropView::OnNRCheck(wxCommandEvent &event)
 {
@@ -2596,7 +2613,7 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 	fconfig.Write("enable_shading", shading);
 	mgr->m_vol_esh = shading;
 	if (use_ml) ep->setParam("shading_enable", shading);
-	//inversion
+	//interpolation
 	bool interp = m_options_toolbar->GetToolState(ID_InterpolateChk);
 	fconfig.Write("enable_interp", interp);
 	mgr->m_vol_interp = interp;
@@ -2636,7 +2653,7 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 	double swi = val;
 	fconfig.Write("shadow_intensity", swi);
 	mgr->m_vol_swi = swi;
-	if (use_ml) ep->setParam("extract_boundary", float(val));
+	if (use_ml) ep->setParam("shadow_intensity", float(val));
 
 	if (use_ml)
 	{

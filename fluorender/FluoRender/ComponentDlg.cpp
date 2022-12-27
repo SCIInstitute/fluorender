@@ -3552,7 +3552,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	if (command && m_record_cmd)
 		AddCmd("generate");
 
-	vd->SetMlApplied(false);
+	vd->SetMlCompGenApplied(false);
 }
 
 void ComponentDlg::Fixate(bool command)
@@ -3667,7 +3667,7 @@ void ComponentDlg::ApplyRecord()
 	cg.postwork = std::bind(
 		&ComponentDlg::StopTimer, this, std::placeholders::_1);
 	vd->AddEmptyMask(1);
-	if (!vd->GetMlApplied())
+	if (!vd->GetMlCompGenApplied())
 	{
 		vd->AddEmptyLabel(0);
 		cg.ShuffleID();
@@ -3681,7 +3681,7 @@ void ComponentDlg::ApplyRecord()
 	//update
 	m_view->RefreshGL(39);
 
-	vd->SetMlApplied(true);
+	vd->SetMlCompGenApplied(true);
 }
 
 void ComponentDlg::OnAnalyze(wxCommandEvent &event)

@@ -108,6 +108,7 @@ class VPropView: public wxPanel
 		ID_DepthChk,
 		ID_TranspChk,
 		ID_CompChk,
+		ID_UseMlChk
 };
 
 public:
@@ -321,6 +322,8 @@ private:
 	void OnTranspChk(wxCommandEvent &event);
 	//component display
 	void OnCompChk(wxCommandEvent &event);
+	//ml
+	void OnUseMlChk(wxCommandEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };

@@ -39,6 +39,9 @@ namespace flrd
 		TableHistParams(const TableHistParams& table);
 		virtual ~TableHistParams();
 
+		//query funcs
+		EntryParams* findNearestOutput(EntryHist* input);
+
 		virtual void addRecord(Record* rec);
 
 		virtual void open(const std::string& filename);

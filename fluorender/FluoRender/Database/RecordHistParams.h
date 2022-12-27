@@ -56,7 +56,7 @@ namespace flrd
 			
 		virtual EntryParams* getOutput()
 		{
-			return dynamic_cast<EntryParams*>(m_input);
+			return dynamic_cast<EntryParams*>(m_output);
 		}
 
 		virtual void setOutput(Entry* entry)

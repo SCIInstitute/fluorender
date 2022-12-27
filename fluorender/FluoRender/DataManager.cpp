@@ -26,8 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "DataManager.h"
+#include <Global/Global.h>
 #include <Calculate/VolumeSampler.h>
 #include <Calculate/VolumeBaker.h>
+#include <Calculate/Histogram.h>
 #include "teem/Nrrd/nrrd.h"
 #include <wx/msgdlg.h>
 #include <wx/progdlg.h>
@@ -171,7 +173,7 @@ VolumeData::VolumeData()
 	m_label_save = 0;
 
 	//machine learning applied
-	m_ml_applied = false;
+	m_ml_comp_gen_applied = false;
 }
 
 VolumeData::VolumeData(VolumeData &copy)
@@ -308,7 +310,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_bg_int = 0;
 
 	//machine learning applied
-	m_ml_applied = false;
+	m_ml_comp_gen_applied = false;
 }
 
 VolumeData::~VolumeData()
@@ -1477,7 +1479,7 @@ int VolumeData::GetCurChannel()
 void VolumeData::SetCurTime(int time)
 {
 	m_time = time;
-	SetMlApplied(false);
+	SetMlCompGenApplied(false);
 }
 
 int VolumeData::GetCurTime()
@@ -2450,6 +2452,107 @@ void VolumeData::LoadLabel2()
 		memcpy(data->data, m_label_save, size * sizeof(unsigned int));
 		m_vr->clear_tex_current();
 	}
+}
+
+void VolumeData::ApplyMlVolProp()
+{
+	//get histogram
+	flrd::Histogram histogram(this);
+	histogram.SetUseMask(false);
+	flrd::EntryHist* eh = histogram.GetEntryHist();
+	if (!eh)
+		return;
+	//get entry from table
+	flrd::TableHistParams& table = glbin.get_vp_table();
+	flrd::EntryParams* ep = table.findNearestOutput(eh);
+	if (ep)
+	{
+		//set parameters
+		double dval, dval2;
+		//extract boundary
+		dval = ep->getParam("extract_boundary");
+		SetBoundary(dval);
+		//gamma
+		dval = ep->getParam("gamma3d");
+		Set3DGamma(dval);
+		//low offset
+		dval = ep->getParam("low_offset");
+		SetOffset(dval);
+		//high offset
+		dval = ep->getParam("high_offset");
+		//low thresholding
+		dval = ep->getParam("low_threshold");
+		SetLeftThresh(dval);
+		//high thresholding
+		dval = ep->getParam("high_threshold");
+		SetRightThresh(dval);
+		//low shading
+		dval = ep->getParam("low_shading");
+		//high shading
+		dval2 = ep->getParam("high_shading");
+		double amb, diff, spec, shine;
+		GetMaterial(amb, diff, spec, shine);
+		SetMaterial(dval, diff, spec, dval2);
+		//alpha
+		dval = ep->getParam("alpha");
+		SetAlpha(dval);
+		//sample rate
+		dval = ep->getParam("sample_rate");
+		SetSampleRate(dval);
+		//luminance
+		dval = ep->getParam("luminance");
+		double h, s, v;
+		GetHSV(h, s, v);
+		fluo::HSVColor hsv(h, s, dval);
+		fluo::Color color(hsv);
+		ResetMaskColorSet();
+		SetColor(color);
+		//colormap enable
+		dval = ep->getParam("colormap_enable");
+		SetColormapMode(dval>0.5);
+		//colormap inv
+		dval = ep->getParam("colormap_inv");
+		SetColormapInv(dval > 0.5 ? -1.0 : 1.0);
+		//colormap type
+		dval = ep->getParam("colormap_type");
+		SetColormap(int(dval+0.5));
+		//colormap projection
+		dval = ep->getParam("colormap_proj");
+		SetColormapProj(int(dval + 0.5));
+		//colormap low value
+		dval = ep->getParam("colormap_low");
+		//colormap high value
+		dval2 = ep->getParam("colormap_hi");
+		SetColormapValues(dval, dval2);
+		//alpha
+		dval = ep->getParam("alpha_enable");
+		SetEnableAlpha(dval > 0.5);
+		//enable shading
+		dval = ep->getParam("shading_enable");
+		SetShading(dval > 0.5);
+		//interpolation
+		dval = ep->getParam("interp_enable");
+		SetInterpolate(dval > 0.5);
+		//inversion
+		dval = ep->getParam("invert_enable");
+		SetInvert(dval > 0.5);
+		//enable mip
+		dval = ep->getParam("mip_enable");
+		SetMode(int(dval +0.5));
+		//enable hi transp
+		dval = ep->getParam("transparent_enable");
+		SetAlphaPower(dval > 0.5 ? 2.0 : 1.0);
+		//noise reduction
+		dval = ep->getParam("denoise_enable");
+		SetNR(dval > 0.5);
+		//shadow
+		dval = ep->getParam("shadow_enable");
+		SetShadow(dval > 0.5);
+		//shadow intensity
+		dval = ep->getParam("shadow_intensity");
+		SetShadowParams(dval);
+	}
+	delete eh;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4331,6 +4434,17 @@ void DataGroup::SetInvert(bool mode)
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
 			vd->SetInvert(mode);
+	}
+}
+
+//use ml
+void DataGroup::ApplyMlVolProp()
+{
+	for (int i = 0; i < GetVolumeNum(); i++)
+	{
+		VolumeData* vd = GetVolumeData(i);
+		if (vd)
+			vd->ApplyMlVolProp();
 	}
 }
 

@@ -87,6 +87,22 @@ namespace flrd
 				return std::equal(m_data.begin(), m_data.end(), ent->m_data.begin());
 			}
 
+			virtual float distance(Entry* ent)
+			{
+				float d = std::numeric_limits<float>::max();
+				if (!ent)
+					return d;
+				if (m_data.empty() || ent->m_data.size() != m_data.size())
+					return d;
+				d = 0;
+				for (size_t i = 0; i < m_data.size(); ++i)
+				{
+					float temp = m_data[i] - ent->m_data[i];
+					d += temp * temp;
+				}
+				return d;
+			}
+
 			friend class RecordHistParams;
 
 		protected:
