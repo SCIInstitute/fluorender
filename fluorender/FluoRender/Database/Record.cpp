@@ -37,7 +37,8 @@ Record::Record() :
 {
 }
 
-Record::Record(const Record& rec)
+Record::Record(const Record& rec) :
+	m_params(rec.m_params)
 {
 }
 
@@ -50,6 +51,11 @@ Record::~Record()
 void Record::open(File& file)
 {
 
+}
+
+void Record::assign(Record* rec)
+{
+	m_params = rec->m_params;
 }
 
 void Record::save(File& file)
@@ -68,10 +74,9 @@ void Record::save(File& file)
 
 bool Record::compare(Record* rec)
 {
-	if (!m_input || !m_output)
+	if (!m_input || !rec || !rec->m_input)
 		return false;
-	return m_input->compare(rec->m_input) &&
-		m_output->compare(rec->m_output);
+	return m_input->compare(rec->m_input);
 }
 
 float Record::compare(Entry* ent)

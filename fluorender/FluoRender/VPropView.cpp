@@ -2487,173 +2487,284 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 	//extract boundary
 	str = m_boundary_text->GetValue();
 	str.ToDouble(&val);
-	fconfig.Write("extract_boundary", val);
-	mgr->m_vol_exb = val;
-	if (use_ml) ep->setParam("extract_boundary", float(val));
+	if (use_ml)
+		ep->setParam("extract_boundary", float(val));
+	else
+	{
+		fconfig.Write("extract_boundary", val);
+		mgr->m_vol_exb = val;
+	}
 	//gamma
 	str = m_gamma_text->GetValue();
 	str.ToDouble(&val);
-	fconfig.Write("gamma", val);
-	mgr->m_vol_gam = val;
-	if (use_ml) ep->setParam("gamma3d", float(val));
+	if (use_ml)
+		ep->setParam("gamma3d", float(val));
+	else
+	{
+		fconfig.Write("gamma", val);
+		mgr->m_vol_gam = val;
+	}
 	//low offset
 	str = m_saturation_text->GetValue();
 	str.ToDouble(&val);
 	val /= m_max_val;
-	fconfig.Write("low_offset", val);
-	mgr->m_vol_of1 = val;
-	if (use_ml) ep->setParam("low_offset", float(val));
+	if (use_ml)
+		ep->setParam("low_offset", float(val));
+	else
+	{
+		fconfig.Write("low_offset", val);
+		mgr->m_vol_of1 = val;
+	}
 	//high offset
 	val = 1.0;
-	fconfig.Write("high_offset", val);
-	mgr->m_vol_of2 = val;
-	if (use_ml) ep->setParam("high_offset", float(val));
+	if (use_ml)
+		ep->setParam("high_offset", float(val));
+	else
+	{
+		fconfig.Write("high_offset", val);
+		mgr->m_vol_of2 = val;
+	}
 	//low thresholding
 	str = m_left_thresh_text->GetValue();
 	str.ToDouble(&val);
 	val /= m_max_val;
-	fconfig.Write("low_thresholding", val);
-	mgr->m_vol_lth = val;
-	if (use_ml) ep->setParam("low_threshold", float(val));
+	if (use_ml)
+		ep->setParam("low_threshold", float(val));
+	else
+	{
+		fconfig.Write("low_thresholding", val);
+		mgr->m_vol_lth = val;
+	}
 	//high thresholding
 	str = m_right_thresh_text->GetValue();
 	str.ToDouble(&val);
 	val /= m_max_val;
-	fconfig.Write("high_thresholding", val);
-	mgr->m_vol_hth = val;
-	if (use_ml) ep->setParam("high_threshold", float(val));
+	if (use_ml)
+		ep->setParam("high_threshold", float(val));
+	else
+	{
+		fconfig.Write("high_thresholding", val);
+		mgr->m_vol_hth = val;
+	}
 	//low shading
 	str = m_low_shading_text->GetValue();
 	str.ToDouble(&val);
-	fconfig.Write("low_shading", val);
-	mgr->m_vol_lsh = val;
-	if (use_ml) ep->setParam("low_shading", float(val));
+	if (use_ml)
+		ep->setParam("low_shading", float(val));
+	else
+	{
+		fconfig.Write("low_shading", val);
+		mgr->m_vol_lsh = val;
+	}
 	//high shading
 	str = m_hi_shading_text->GetValue();
 	str.ToDouble(&val);
-	fconfig.Write("high_shading", val);
-	mgr->m_vol_hsh = val;
-	if (use_ml) ep->setParam("high_shading", float(val));
+	if (use_ml)
+		ep->setParam("high_shading", float(val));
+	else
+	{
+		fconfig.Write("high_shading", val);
+		mgr->m_vol_hsh = val;
+	}
 	//alpha
 	str = m_alpha_text->GetValue();
 	str.ToDouble(&val);
 	val /= m_max_val;
-	fconfig.Write("alpha", val);
-	mgr->m_vol_alf = val;
-	if (use_ml) ep->setParam("alpha", float(val));
+	if (use_ml)
+		ep->setParam("alpha", float(val));
+	else
+	{
+		fconfig.Write("alpha", val);
+		mgr->m_vol_alf = val;
+	}
 	//sample rate
 	str = m_sample_text->GetValue();
 	str.ToDouble(&val);
-	fconfig.Write("sample_rate", val);
-	mgr->m_vol_spr = val;
-	if (use_ml) ep->setParam("sample_rate", float(val));
-	//x spacing
-	str = m_space_x_text->GetValue();
-	str.ToDouble(&val);
-	fconfig.Write("x_spacing", val);
-	mgr->m_vol_xsp = val;
-	//y spacing
-	str = m_space_y_text->GetValue();
-	str.ToDouble(&val);
-	fconfig.Write("y_spacing", val);
-	mgr->m_vol_ysp = val;
-	//z spacing
-	str = m_space_z_text->GetValue();
-	str.ToDouble(&val);
-	fconfig.Write("z_spacing", val);
-	mgr->m_vol_zsp = val;
+	if (use_ml)
+		ep->setParam("sample_rate", float(val));
+	else
+	{
+		fconfig.Write("sample_rate", val);
+		mgr->m_vol_spr = val;
+	}
+	//spacings
+	if (!use_ml)
+	{
+		//x spacing
+		str = m_space_x_text->GetValue();
+		str.ToDouble(&val);
+		fconfig.Write("x_spacing", val);
+		mgr->m_vol_xsp = val;
+		//y spacing
+		str = m_space_y_text->GetValue();
+		str.ToDouble(&val);
+		fconfig.Write("y_spacing", val);
+		mgr->m_vol_ysp = val;
+		//z spacing
+		str = m_space_z_text->GetValue();
+		str.ToDouble(&val);
+		fconfig.Write("z_spacing", val);
+		mgr->m_vol_zsp = val;
+	}
 	//luminance
 	str = m_luminance_text->GetValue();
 	str.ToDouble(&val);
 	val /= m_max_val;
-	fconfig.Write("luminance", val);
-	mgr->m_vol_lum = val;
-	if (use_ml) ep->setParam("luminance", float(val));
+	if (use_ml)
+		ep->setParam("luminance", float(val));
+	else
+	{
+		fconfig.Write("luminance", val);
+		mgr->m_vol_lum = val;
+	}
 	//colormap enable
 	bool bval = m_colormap_tool->GetToolState(ID_ColormapEnableChk);
-	fconfig.Write("colormap_mode", bval);
-	mgr->m_vol_cmm = bval;
-	if (use_ml) ep->setParam("colormap_enable", bval);
+	if (use_ml)
+		ep->setParam("colormap_enable", bval);
+	else
+	{
+		fconfig.Write("colormap_mode", bval);
+		mgr->m_vol_cmm = bval;
+	}
 	//colormap inv
 	bval = m_colormap_inv_btn->GetValue();
-	fconfig.Write("colormap_inv", bval);
-	mgr->m_vol_cmi = bval;
-	if (use_ml) ep->setParam("colormap_inv", bval);
+	if (use_ml)
+		ep->setParam("colormap_inv", bval);
+	else
+	{
+		fconfig.Write("colormap_inv", bval);
+		mgr->m_vol_cmi = bval;
+	}
 	//colormap type
 	ival = m_colormap_combo->GetCurrentSelection();
-	fconfig.Write("colormap", ival);
-	mgr->m_vol_cmp = ival;
-	if (use_ml) ep->setParam("colormap_type", ival);
+	if (use_ml)
+		ep->setParam("colormap_type", ival);
+	else
+	{
+		fconfig.Write("colormap", ival);
+		mgr->m_vol_cmp = ival;
+	}
 	//colormap projection
 	ival = m_colormap_combo2->GetCurrentSelection();
-	fconfig.Write("colormap_proj", ival);
-	mgr->m_vol_cmj = ival;
-	if (use_ml) ep->setParam("colormap_proj", ival);
+	if (use_ml)
+		ep->setParam("colormap_proj", ival);
+	else
+	{
+		fconfig.Write("colormap_proj", ival);
+		mgr->m_vol_cmj = ival;
+	}
 	//colormap low value
 	str = m_colormap_low_value_text->GetValue();
 	str.ToDouble(&val);
 	val /= m_max_val;
-	fconfig.Write("colormap_low", val);
-	mgr->m_vol_lcm = val;
-	if (use_ml) ep->setParam("colormap_low", float(val));
+	if (use_ml)
+		ep->setParam("colormap_low", float(val));
+	else
+	{
+		fconfig.Write("colormap_low", val);
+		mgr->m_vol_lcm = val;
+	}
 	//colormap high value
 	str = m_colormap_high_value_text->GetValue();
 	str.ToDouble(&val);
 	val /= m_max_val;
-	fconfig.Write("colormap_hi", val);
-	mgr->m_vol_hcm = val;
-	if (use_ml) ep->setParam("colormap_hi", float(val));
+	if (use_ml)
+		ep->setParam("colormap_hi", float(val));
+	else
+	{
+		fconfig.Write("colormap_hi", val);
+		mgr->m_vol_hcm = val;
+	}
 	//alpha
 	bool alpha = m_alpha_tool->GetToolState(ID_AlphaChk);
-	fconfig.Write("enable_alpha", alpha);
-	mgr->m_vol_eap = alpha;
-	if (use_ml) ep->setParam("alpha_enable", alpha);
+	if (use_ml)
+		ep->setParam("alpha_enable", alpha);
+	else
+	{
+		fconfig.Write("enable_alpha", alpha);
+		mgr->m_vol_eap = alpha;
+	}
 	//enable shading
 	bool shading = m_shade_tool->GetToolState(ID_ShadingEnableChk);
-	fconfig.Write("enable_shading", shading);
-	mgr->m_vol_esh = shading;
-	if (use_ml) ep->setParam("shading_enable", shading);
+	if (use_ml)
+		ep->setParam("shading_enable", shading);
+	else
+	{
+		fconfig.Write("enable_shading", shading);
+		mgr->m_vol_esh = shading;
+	}
 	//interpolation
 	bool interp = m_options_toolbar->GetToolState(ID_InterpolateChk);
-	fconfig.Write("enable_interp", interp);
-	mgr->m_vol_interp = interp;
-	if (use_ml) ep->setParam("interp_enable", interp);
+	if (use_ml)
+		ep->setParam("interp_enable", interp);
+	else
+	{
+		fconfig.Write("enable_interp", interp);
+		mgr->m_vol_interp = interp;
+	}
 	//inversion
 	bool inv = m_options_toolbar->GetToolState(ID_InvChk);
-	fconfig.Write("enable_inv", inv);
-	mgr->m_vol_inv = inv;
-	if (use_ml) ep->setParam("invert_enable", inv);
+	if (use_ml)
+		ep->setParam("invert_enable", inv);
+	else
+	{
+		fconfig.Write("enable_inv", inv);
+		mgr->m_vol_inv = inv;
+	}
 	//enable mip
 	bool mip = m_options_toolbar->GetToolState(ID_MipChk);
-	fconfig.Write("enable_mip", mip);
-	mgr->m_vol_mip = mip;
-	if (use_ml) ep->setParam("mip_enable", mip);
+	if (use_ml)
+		ep->setParam("mip_enable", mip);
+	else
+	{
+		fconfig.Write("enable_mip", mip);
+		mgr->m_vol_mip = mip;
+	}
 	//enable hi transp
 	bool trp = m_options_toolbar->GetToolState(ID_TranspChk);
-	fconfig.Write("enable_trp", trp);
-	mgr->m_vol_trp = trp;
-	if (use_ml) ep->setParam("transparent_enable", trp);
+	if (use_ml)
+		ep->setParam("transparent_enable", trp);
+	else
+	{
+		fconfig.Write("enable_trp", trp);
+		mgr->m_vol_trp = trp;
+	}
 	//enable component display
-	int comp = m_options_toolbar->GetToolState(ID_CompChk);
-	fconfig.Write("enable_comp", comp);
-	mgr->m_vol_com = comp;
+	if (!use_ml)
+	{
+		int comp = m_options_toolbar->GetToolState(ID_CompChk);
+		fconfig.Write("enable_comp", comp);
+		mgr->m_vol_com = comp;
+	}
 	//noise reduction
 	bool nrd = m_options_toolbar->GetToolState(ID_NRChk);
-	fconfig.Write("noise_rd", nrd);
-	mgr->m_vol_nrd = nrd;
-	if (use_ml) ep->setParam("denoise_enable", nrd);
+	if (use_ml)
+		ep->setParam("denoise_enable", nrd);
+	else
+	{
+		fconfig.Write("noise_rd", nrd);
+		mgr->m_vol_nrd = nrd;
+	}
 	//shadow
 	bool shw = m_shadow_tool->GetToolState(ID_ShadowChk);
-	fconfig.Write("enable_shadow", shw);
-	mgr->m_vol_shw = shw;
-	if (use_ml) ep->setParam("shadow_enable", shw);
+	if (use_ml)
+		ep->setParam("shadow_enable", shw);
+	else
+	{
+		fconfig.Write("enable_shadow", shw);
+		mgr->m_vol_shw = shw;
+	}
 	//shadow intensity
 	str = m_shadow_text->GetValue();
 	str.ToDouble(&val);
 	double swi = val;
-	fconfig.Write("shadow_intensity", swi);
-	mgr->m_vol_swi = swi;
-	if (use_ml) ep->setParam("shadow_intensity", float(val));
+	if (use_ml)
+		ep->setParam("shadow_intensity", float(val));
+	else
+	{
+		fconfig.Write("shadow_intensity", swi);
+		mgr->m_vol_swi = swi;
+	}
 
 	if (use_ml)
 	{
@@ -2672,11 +2783,13 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 			glbin.get_vp_table().addRecord(rec);
 		}
 	}
-
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	wxString dft = expath + GETSLASH() + "default_volume_settings.dft";
-	SaveConfig(fconfig, dft);
+	else
+	{
+		wxString expath = wxStandardPaths::Get().GetExecutablePath();
+		expath = wxPathOnly(expath);
+		wxString dft = expath + GETSLASH() + "default_volume_settings.dft";
+		SaveConfig(fconfig, dft);
+	}
 }
 
 void VPropView::OnResetDefault(wxCommandEvent &event)

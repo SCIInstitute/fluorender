@@ -52,6 +52,17 @@ RecordHistParams::~RecordHistParams()
 {
 }
 
+void RecordHistParams::assign(RecordHistParams* rec)
+{
+	Record::assign(rec);
+	EntryHist* input = rec->m_input->asEntryHist();
+	if (input)
+		m_input = new EntryHist(*input);
+	EntryParams* output = rec->m_output->asEntryParams();
+	if (output)
+		m_output = new EntryParams(*output);
+}
+
 void RecordHistParams::open(File& file)
 {
 	if (file.check(Table::TAG_TABLE_ENT_IN))

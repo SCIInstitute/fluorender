@@ -94,10 +94,16 @@ void Table::addRecord(Record* rec)
 	if (!rec)
 		return;
 	//make sure of uniquness
-	for (auto i : m_data)
+	for (auto i = m_data.begin();
+		i != m_data.end(); ++i)
 	{
-		if (i->compare(rec))
-			return;
+		if ((*i)->compare(rec))
+		{
+			//overwrite
+			delete (*i);
+			m_data.erase(i);
+			break;
+		}
 	}
 	m_data.push_back(rec);
 	m_recnum = m_data.size();

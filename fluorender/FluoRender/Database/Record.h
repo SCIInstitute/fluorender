@@ -43,6 +43,8 @@ namespace flrd
 			Record(const Record& rec);
 			virtual ~Record();
 
+			virtual void assign(Record* rec);
+
 			virtual RecordHistParams* asRecordHistParams() { return 0; }
 			virtual const RecordHistParams* asRecordHistParams() const { return 0; }
 
