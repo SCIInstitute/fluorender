@@ -61,6 +61,9 @@ public:
 	virtual void UpdateList(int index);
 	virtual void UpdateTopList();
 	virtual void UpdateBotList() {};
+	virtual void LoadFirstTable();
+	virtual void LoadTable(const std::string& filename) = 0;
+	virtual void SaveTable(const std::string& filename) = 0;
 
 protected:
 	VRenderFrame* m_frame;
@@ -133,8 +136,8 @@ public:
 	~MLCompGenPanel();
 
 	virtual void UpdateBotList();
-	void LoadTable(const std::string& filename);
-	void SaveTable(const std::string& filename);
+	virtual void LoadTable(const std::string& filename);
+	virtual void SaveTable(const std::string& filename);
 
 protected:
 	virtual void OnNewTable(wxCommandEvent& event);
@@ -172,8 +175,8 @@ public:
 	~MLVolPropPanel();
 
 	virtual void UpdateBotList();
-	void LoadTable(const std::string& filename);
-	void SaveTable(const std::string& filename);
+	virtual void LoadTable(const std::string& filename);
+	virtual void SaveTable(const std::string& filename);
 
 protected:
 	virtual void OnNewTable(wxCommandEvent& event);

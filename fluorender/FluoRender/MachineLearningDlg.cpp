@@ -61,6 +61,9 @@ MachineLearningDlg::MachineLearningDlg(VRenderFrame *frame) :
 	Layout();
 
 	//GetSettings();
+
+	panel1->LoadFirstTable();
+	panel2->LoadFirstTable();
 }
 
 MachineLearningDlg::~MachineLearningDlg()
@@ -282,6 +285,17 @@ void MachineLearningPanel::UpdateTopList()
 			m_top_grid->SetCellValue(i, 3, std::string(b));
 			break;
 		}
+	}
+}
+
+void MachineLearningPanel::LoadFirstTable()
+{
+	int count = m_top_grid->GetNumberRows();
+	if (count > 0)
+	{
+		std::string name = m_top_grid->GetCellValue(0, 0).ToStdString();
+		LoadTable(name);
+		UpdateBotList();
 	}
 }
 
