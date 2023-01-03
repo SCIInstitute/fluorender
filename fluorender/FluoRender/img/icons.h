@@ -126,10 +126,10 @@ public:
 	const static unsigned char icon_calculations_png[4744];
 	/* icon_calculations_mini.png - 819 bytes */
 	const static unsigned char icon_calculations_mini_png[819];
-	/* icon_maching_learning.png - 4411 bytes */
-	const static unsigned char icon_machine_learning_png[4411];
-	/* icon_maching_learning_mini.png - 810 bytes */
-	const static unsigned char icon_machine_learning_mini_png[810];
+	/* icon_maching_learning.png - 4767 bytes */
+	const static unsigned char icon_machine_learning_png[4767];
+	/* icon_maching_learning_mini.png - 1174 bytes */
+	const static unsigned char icon_machine_learning_mini_png[1174];
 
 
 	//render view icons
@@ -360,6 +360,8 @@ public:
 	const static unsigned char comp_png[1159];
 	/* comp_off.png - 1151 bytes */
 	const static unsigned char comp_off_png[1151];
+	/* starknot.png - 1174 bytes */
+	const static unsigned char starknot_png[1174];
 
 	//tracking dialog icons
 	/* auto_assign_off.png - 2258 bytes */

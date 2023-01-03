@@ -320,6 +320,18 @@ public:
 
 	bool getIJMode() { return m_ij_mode; }
 
+	//machine learning settings
+	void SetCgTable(const std::string& str) { m_cg_table = str; }
+	std::string GetCgTable() { return m_cg_table; }
+	void SetVpTable(const std::string& str) { m_vp_table = str; }
+	std::string GetVpTable() { return m_vp_table; }
+	void SetMlAutoStartAll(bool bval) { m_ml_auto_start_all = bval; }
+	bool GetMlAutoStartAll() { return m_ml_auto_start_all; }
+	void SetCgAutoStart(bool bval) { m_cg_auto_start = bval; }
+	bool GetCgAutoStart() { return m_cg_auto_start; }
+	void SetVpAutoStart(bool bval) { m_vp_auto_start = bval; }
+	bool GetVpAutoStart() { return m_vp_auto_start; }
+
 private:
 	VRenderFrame* m_frame;
 
@@ -444,6 +456,13 @@ private:
 	wxString m_ij_path;
 	wxString m_bioformats_path;
 	int m_ij_mode;//0: imagej; 1: fiji
+
+	//machine learning settings
+	std::string m_cg_table;
+	std::string m_vp_table;
+	bool m_ml_auto_start_all;
+	bool m_cg_auto_start;
+	bool m_vp_auto_start;
 
 private:
 	//save project

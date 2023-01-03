@@ -133,6 +133,8 @@ public:
 	void SetView(VRenderGLView* view);
 	VRenderGLView* GetView();
 
+	void ApplyMl();
+
 private:
 	VRenderFrame* m_frame;
 	VolumeData* m_vd;

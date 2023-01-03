@@ -403,7 +403,7 @@ VPropView::VPropView(VRenderFrame* frame,
 	m_options_toolbar = new wxToolBar(this,wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	//ml
-	bitmap = wxGetBitmapFromMemory(no_depth_atten);
+	bitmap = wxGetBitmapFromMemory(starknot);
 #ifdef _DARWIN
 	m_options_toolbar->SetToolBitmapSize(bitmap.GetSize());
 #endif
@@ -959,6 +959,16 @@ void VPropView::SetView(VRenderGLView *view)
 VRenderGLView* VPropView::GetView()
 {
 	return m_view;
+}
+
+void VPropView::ApplyMl()
+{
+	if (m_sync_group && m_group)
+		m_group->ApplyMlVolProp();
+	else if (m_vd)
+		m_vd->ApplyMlVolProp();
+	GetSettings();
+	RefreshVRenderViews(false, true);
 }
 
 //1
@@ -2040,12 +2050,7 @@ void VPropView::OnCompChk(wxCommandEvent &event)
 //ml
 void VPropView::OnUseMlChk(wxCommandEvent& event)
 {
-	if (m_sync_group && m_group)
-		m_group->ApplyMlVolProp();
-	else if (m_vd)
-		m_vd->ApplyMlVolProp();
-	GetSettings();
-	RefreshVRenderViews(false, true);
+	ApplyMl();
 }
 
 //noise reduction

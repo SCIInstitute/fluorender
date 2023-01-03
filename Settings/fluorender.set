@@ -130,3 +130,9 @@ bioformats_path=
 ij_mode=0
 [clipping\ planes]
 mode=0
+[ml]
+cg_table=
+vp_table=
+auto_start_all=0
+cg_auto_start=0
+vp_auto_start=0

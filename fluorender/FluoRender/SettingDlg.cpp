@@ -905,6 +905,9 @@ void SettingDlg::GetSettings()
 	m_no_tex_pack = false;
 	m_plane_mode = 0;
 	m_ij_mode = 0;
+	m_ml_auto_start_all = false;
+	m_cg_auto_start = false;
+	m_vp_auto_start = false;
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
@@ -1225,7 +1228,21 @@ void SettingDlg::GetSettings()
 		fconfig.Read("bioformats_path", &m_bioformats_path);
 		fconfig.Read("ij_mode", &m_ij_mode);
 	}
-    
+
+	//machine learning settings
+	if (fconfig.Exists("/ml"))
+	{
+		wxString str;
+		fconfig.SetPath("/ml");
+		fconfig.Read("cg_table", &str);
+		m_cg_table = str.ToStdString();
+		fconfig.Read("vp_table", &str);
+		m_vp_table = str.ToStdString();
+		fconfig.Read("auto_start_all", &m_ml_auto_start_all);
+		fconfig.Read("cg_auto_start", &m_cg_auto_start);
+		fconfig.Read("vp_auto_start", &m_vp_auto_start);
+	}
+
 	UpdateUI();
 }
 
@@ -1578,7 +1595,7 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("device_id", m_cl_device_id);
 
 	// java paths
-	fconfig.SetPath("/Java");	
+	fconfig.SetPath("/Java");
  	fconfig.Write("jvm_path", getJVMPath());
 	fconfig.Write("ij_path", getIJPath());
 	fconfig.Write("bioformats_path", getBioformatsPath());
@@ -1589,6 +1606,14 @@ void SettingDlg::SaveSettings()
 	if (m_frame && m_frame->GetClippingView())
 		m_plane_mode = m_frame->GetClippingView()->GetPlaneMode();
 	fconfig.Write("mode", m_plane_mode);
+
+	//machine learning
+	fconfig.SetPath("/ml");
+	fconfig.Write("cg_table", wxString(m_cg_table));
+	fconfig.Write("vp_table", wxString(m_vp_table));
+	fconfig.Write("auto_start_all", m_ml_auto_start_all);
+	fconfig.Write("cg_auto_start", m_cg_auto_start);
+	fconfig.Write("vp_auto_start", m_vp_auto_start);
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);

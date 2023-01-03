@@ -36,14 +36,27 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 
 class VRenderFrame;
+class MLCompGenPanel;
+class MLVolPropPanel;
 class MachineLearningDlg : public wxPanel
 {
 public:
+	enum
+	{
+		ID_AutoStartAll = ID_LEARNING
+	};
 	MachineLearningDlg(VRenderFrame* frame);
 	~MachineLearningDlg();
 
 private:
 	VRenderFrame* m_frame;
+	//
+	wxCheckBox* m_auto_start_all;
+	MLCompGenPanel* m_panel1;
+	MLVolPropPanel* m_panel2;
+
+private:
+	void OnAutoStartAll(wxCommandEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };
@@ -61,9 +74,10 @@ public:
 	virtual void UpdateList(int index);
 	virtual void UpdateTopList();
 	virtual void UpdateBotList() {};
-	virtual void LoadFirstTable();
+	virtual void AutoLoadTable() = 0;
 	virtual void LoadTable(const std::string& filename) = 0;
 	virtual void SaveTable(const std::string& filename) = 0;
+	virtual void SetAutoStart(bool bval) { m_auto_start_check->SetValue(bval); }
 
 protected:
 	VRenderFrame* m_frame;
@@ -80,16 +94,22 @@ protected:
 	wxWindowID m_del_table_id;
 	wxButton* m_dup_table_btn;
 	wxWindowID m_dup_table_id;
+	wxButton* m_auto_load_btn;
+	wxWindowID m_auto_load_id;
 	//
 	wxGrid *m_bot_grid;
 	wxString m_bot_grid_name;
 	wxWindowID m_bot_grid_id;
 	wxStaticText* m_bot_table_name;
 	wxStaticText* m_start_prompt_text;
+	wxCheckBox* m_auto_start_check;
+	wxWindowID m_auto_start_id;
 	wxToggleButton* m_start_rec_btn;
 	wxWindowID m_start_rec_id;
 	wxButton* m_del_rec_btn;
 	wxWindowID m_del_rec_id;
+	wxButton* m_apply_rec_btn;
+	wxWindowID m_apply_rec_id;
 
 	bool m_record;//state for recording
 	std::string m_dir;//dir for searching tables
@@ -104,9 +124,12 @@ protected:
 	virtual void OnLoadTable(wxCommandEvent& event) = 0;
 	virtual void OnDelTable(wxCommandEvent& event) = 0;
 	virtual void OnDupTable(wxCommandEvent& event) = 0;
+	virtual void OnAutoLoad(wxCommandEvent& event) = 0;
 	//
+	virtual void OnAutoStartRec(wxCommandEvent& event) = 0;
 	virtual void OnStartRec(wxCommandEvent& event) = 0;
 	virtual void OnDelRec(wxCommandEvent& event) = 0;
+	virtual void OnApplyRec(wxCommandEvent& event) = 0;
 	//grid size
 	virtual void OnBotGridAutoSize(wxGridSizeEvent& event) = 0;
 	//grid edit
@@ -127,15 +150,19 @@ public:
 		ID_LoadTableBtn,
 		ID_DelTableBtn,
 		ID_DupTableBtn,
+		ID_AutoLoadBtn,
 		ID_BotGrid,
+		ID_AutoStartChk,
 		ID_StartRecBtn,
-		ID_DelRecBtn
+		ID_DelRecBtn,
+		ID_ApplyRecBtn
 	};
 	MLCompGenPanel(VRenderFrame* frame,
 		wxWindow* parent);
 	~MLCompGenPanel();
 
 	virtual void UpdateBotList();
+	virtual void AutoLoadTable();
 	virtual void LoadTable(const std::string& filename);
 	virtual void SaveTable(const std::string& filename);
 
@@ -144,9 +171,12 @@ protected:
 	virtual void OnLoadTable(wxCommandEvent& event);
 	virtual void OnDelTable(wxCommandEvent& event);
 	virtual void OnDupTable(wxCommandEvent& event);
+	virtual void OnAutoLoad(wxCommandEvent& event);
 	//
+	virtual void OnAutoStartRec(wxCommandEvent& event);
 	virtual void OnStartRec(wxCommandEvent& event);
 	virtual void OnDelRec(wxCommandEvent& event);
+	virtual void OnApplyRec(wxCommandEvent& event);
 	//grid size
 	void OnBotGridAutoSize(wxGridSizeEvent& event);
 	//grid cell edit
@@ -166,15 +196,19 @@ public:
 		ID_LoadTableBtn,
 		ID_DelTableBtn,
 		ID_DupTableBtn,
+		ID_AutoLoadBtn,
 		ID_BotGrid,
+		ID_AutoStartChk,
 		ID_StartRecBtn,
-		ID_DelRecBtn
+		ID_DelRecBtn,
+		ID_ApplyRecBtn
 	};
 	MLVolPropPanel(VRenderFrame* frame,
 		wxWindow* parent);
 	~MLVolPropPanel();
 
 	virtual void UpdateBotList();
+	virtual void AutoLoadTable();
 	virtual void LoadTable(const std::string& filename);
 	virtual void SaveTable(const std::string& filename);
 
@@ -183,9 +217,12 @@ protected:
 	virtual void OnLoadTable(wxCommandEvent& event);
 	virtual void OnDelTable(wxCommandEvent& event);
 	virtual void OnDupTable(wxCommandEvent& event);
+	virtual void OnAutoLoad(wxCommandEvent& event);
 	//
+	virtual void OnAutoStartRec(wxCommandEvent& event);
 	virtual void OnStartRec(wxCommandEvent& event);
 	virtual void OnDelRec(wxCommandEvent& event);
+	virtual void OnApplyRec(wxCommandEvent& event);
 	//grid size
 	void OnBotGridAutoSize(wxGridSizeEvent& event);
 	//grid cell edit
