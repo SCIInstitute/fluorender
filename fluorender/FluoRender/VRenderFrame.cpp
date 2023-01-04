@@ -1517,6 +1517,8 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_LIF, false);
 			else if (suffix == ".lof")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_LOF, false);
+			else if (suffix == ".mp4" || suffix == ".m4v" || suffix == ".mov" || suffix == ".avi" || suffix == ".wmv")
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_MPG, false);
 
 			if (ch_num > 1)
 			{
@@ -1635,7 +1637,12 @@ void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imag
 #endif
 			suffix == ".czi" ||
 			suffix == ".lif" ||
-			suffix == ".lof")
+			suffix == ".lof" ||
+			suffix == ".mp4" ||
+			suffix == ".m4v" ||
+			suffix == ".mov" ||
+			suffix == ".avi" ||
+			suffix == ".wmv")
 		{
 			LoadVolumes(files, with_imagej);
 		}
@@ -3668,6 +3675,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_LIF, false, cur_chan, cur_time);
 					else if (suffix == ".lof")
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_LOF, false, cur_chan, cur_time);
+					else if (suffix == ".mp4" || suffix == ".m4v" || suffix == ".mov" || suffix == ".avi" || suffix == ".wmv")
+						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_MPG, false, cur_chan, cur_time);
 				}
 				VolumeData* vd = 0;
 				if (loaded_num)

@@ -4856,6 +4856,8 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 				reader = new LIFReader();
 			else if (type == LOAD_TYPE_LOF)
 				reader = new LOFReader();
+			else if (type == LOAD_TYPE_MPG)
+				reader = new MPGReader();
 		}
 		
 		

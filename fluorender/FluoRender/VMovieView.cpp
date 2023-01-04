@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VMovieView.h"
 #include "VRenderFrame.h"
 #include "RecorderDlg.h"
+#include <Global/Global.h>
 #include <tiffio.h>
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
@@ -889,7 +890,7 @@ void VMovieView::Stop()
 	m_timer.Stop();
 	m_running = false;
 	m_record = false;
-	encoder_.close();
+	glbin.get_video_encoder().close();
 	flvr::TextureRenderer::maximize_uptime_ = false;
 }
 
@@ -1327,8 +1328,8 @@ void VMovieView::WriteFrameToFile(int total_frames)
 		for (size_t yy = 0; yy < (size_t)h; yy++)
 			for (size_t xx = 0; xx < (size_t)w; xx++)
 				memcpy(flip + 3 * (w * yy + xx), (unsigned char*)image + chann * (w * (h - yy - 1) + xx), 3);
-		bool worked = encoder_.set_frame_rgb_data(flip);
-		worked = encoder_.write_video_frame(m_last_frame);
+		bool worked = glbin.get_video_encoder().set_frame_rgb_data(flip);
+		worked = glbin.get_video_encoder().write_video_frame(m_last_frame);
 		if (flip)
 			delete[]flip;
 		if (image)
@@ -1442,7 +1443,7 @@ void VMovieView::Run()
 			m_crop_h *= scale;
 		}
 
-		encoder_.open(m_filename.ToStdString(), m_crop_w, m_crop_h, m_fps,
+		glbin.get_video_encoder().open(m_filename.ToStdString(), m_crop_w, m_crop_h, m_fps,
 			m_Mbitrate * 1e6);
 	}
 	m_filename = m_filename.SubString(0, m_filename.Len() - 5);

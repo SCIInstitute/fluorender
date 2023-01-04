@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _VMovieView_H_
 
 #include "compatibility.h"
-#include "QVideoEncoder.h"
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/spinbutt.h>
@@ -326,7 +325,6 @@ private:
 	bool m_timer_run;//for temporary hold
 	//save
 	wxString m_filename;
-	QVideoEncoder encoder_;
 	wxString filetype_;
 
 private:

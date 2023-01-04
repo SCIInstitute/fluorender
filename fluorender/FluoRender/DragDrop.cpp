@@ -77,7 +77,12 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 #endif
 					 suffix == ".czi" ||
 					 suffix == ".lif" ||
-					 suffix == ".lof")
+					 suffix == ".lof" ||
+					 suffix == ".mp4" ||
+					 suffix == ".m4v" ||
+					 suffix == ".mov" ||
+					 suffix == ".avi" ||
+					 suffix == ".wmv")
 			{
 				vr_frame->LoadVolumes(filenames, false);
 			}

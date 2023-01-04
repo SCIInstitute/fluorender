@@ -691,6 +691,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:FILEIO_OBJ>
+      $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:DATABASE_OBJ>)
   endif()
 endif()
@@ -745,7 +746,8 @@ if(UNIX OR APPLE OR MINGW)
     ${PNG_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${ND2_LIBRARIES})
-	#${JNI_LIBRARIES})
+  target_link_libraries(Tester
+    ${FFMPEG_LIBRARIES})
 elseif(WIN32)
   target_link_libraries(FluoRender
     secur32.lib
@@ -758,6 +760,9 @@ elseif(WIN32)
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES}
     ${ND2_LIBRARIES})
+  target_link_libraries(Tester
+    secur32.lib
+    ${FFMPEG_LIBRARIES})
 endif()
 
 

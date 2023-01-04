@@ -42,25 +42,26 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/VertexArray.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
-#include "Formats/base_reader.h"
-#include "Formats/oib_reader.h"
-#include "Formats/oif_reader.h"
-#include "Formats/nrrd_reader.h"
-#include "Formats/tif_reader.h"
-#include "Formats/nrrd_writer.h"
-#include "Formats/tif_writer.h"
-#include "Formats/msk_reader.h"
-#include "Formats/msk_writer.h"
-#include "Formats/lsm_reader.h"
-#include "Formats/lbl_reader.h"
-#include "Formats/pvxml_reader.h"
-#include "Formats/brkxml_reader.h"
-#include "Formats/imageJ_reader.h"
-#include "Formats/czi_reader.h"
-#include "Formats/nd2_reader.h"
-#include "Formats/lif_reader.h"
-#include "Formats/lof_reader.h"
-#include "Tracking/TrackMap.h"
+#include <Formats/base_reader.h>
+#include <Formats/oib_reader.h>
+#include <Formats/oif_reader.h>
+#include <Formats/nrrd_reader.h>
+#include <Formats/tif_reader.h>
+#include <Formats/nrrd_writer.h>
+#include <Formats/tif_writer.h>
+#include <Formats/msk_reader.h>
+#include <Formats/msk_writer.h>
+#include <Formats/lsm_reader.h>
+#include <Formats/lbl_reader.h>
+#include <Formats/pvxml_reader.h>
+#include <Formats/brkxml_reader.h>
+#include <Formats/imageJ_reader.h>
+#include <Formats/czi_reader.h>
+#include <Formats/nd2_reader.h>
+#include <Formats/lif_reader.h>
+#include <Formats/lof_reader.h>
+#include <Formats/mpg_reader.h>
+#include <Tracking/TrackMap.h>
 #include <Distance/Ruler.h>
 
 using namespace std;
@@ -81,6 +82,7 @@ using namespace std;
 #define LOAD_TYPE_ND2		9
 #define LOAD_TYPE_LIF		10
 #define LOAD_TYPE_LOF		11
+#define LOAD_TYPE_MPG		12
 
 class TreeLayer
 {

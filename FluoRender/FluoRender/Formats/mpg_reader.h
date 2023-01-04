@@ -29,6 +29,13 @@ DEALINGS IN THE SOFTWARE.
 #define _MPG_READER_H_
 
 #include <base_reader.h>
+extern "C" {
+	namespace ffmpeg {
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libswscale/swscale.h>
+	}
+}
 
 using namespace std;
 
@@ -38,7 +45,7 @@ public:
 	MPGReader();
 	~MPGReader();
 
-	int GetType() { return READER_LOF_TYPE; }
+	int GetType() { return READER_MPG_TYPE; }
 
 	void SetFile(string &file);
 	void SetFile(wstring &file);

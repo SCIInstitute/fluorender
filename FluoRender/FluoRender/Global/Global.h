@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Database/Params.h>
 #include <Database/EntryParams.h>
 #include <Database/TableHistParams.h>
+#include <QVideoEncoder.h>
 
 #define glbin fluo::Global::instance()
 #define glbin_cache_queue fluo::Global::instance().get_cache_queue()
@@ -49,6 +50,9 @@ namespace fluo
 		static Global& instance() { return instance_; }
 
 		flrd::CacheQueue& get_cache_queue() { return cache_queue_; }
+
+		//video encoder
+		QVideoEncoder& get_video_encoder() { return encoder_; }
 
 		//learning
 		void gen_params_list();
@@ -74,6 +78,9 @@ namespace fluo
 		static Global instance_;
 
 		flrd::CacheQueue cache_queue_;
+
+		//video encoder
+		QVideoEncoder encoder_;
 
 		//machine learning
 		std::unordered_map<std::string, flrd::Params> params_list_;//available params
