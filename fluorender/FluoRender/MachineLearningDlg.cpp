@@ -189,8 +189,8 @@ void MachineLearningPanel::Create()
 		wxDefaultPosition, wxDefaultSize);
 	m_bot_grid = new wxGrid(panel_bot, m_bot_grid_id);
 	m_bot_grid->CreateGrid(1, 2);
-	m_bot_grid->SetColLabelValue(0, "Input");
-	m_bot_grid->SetColLabelValue(1, "Output");
+	m_bot_grid->SetColLabelValue(0, "Features");
+	m_bot_grid->SetColLabelValue(1, "Parameters");
 	m_bot_grid->Connect(m_bot_grid_id, wxEVT_GRID_COL_AUTO_SIZE,
 		wxGridSizeEventHandler(MachineLearningPanel::OnBotGridAutoSize), NULL, this);
 	m_bot_grid->Connect(m_bot_grid_id, wxEVT_GRID_CELL_CHANGING,
@@ -692,6 +692,7 @@ void MLCompGenPanel::AutoLoadTable()
 {
 	std::string name, str;
 	int count = m_top_grid->GetNumberRows();
+	bool found = false;
 	if (m_frame)
 	{
 		name = m_frame->GetSettingDlg()->GetCgTable();
@@ -699,11 +700,13 @@ void MLCompGenPanel::AutoLoadTable()
 		{
 			str = m_top_grid->GetCellValue(i, 0).ToStdString();
 			if (str == name)
+			{
+				found = true;
 				break;
+			}
 		}
-		name = "";
 	}
-	if (name.empty() && count > 0)
+	if (!found && count > 0)
 		name = m_top_grid->GetCellValue(0, 0).ToStdString();
 	LoadTable(name);
 	UpdateBotList();
@@ -1033,6 +1036,7 @@ void MLVolPropPanel::AutoLoadTable()
 {
 	std::string name, str;
 	int count = m_top_grid->GetNumberRows();
+	bool found = false;
 	if (m_frame)
 	{
 		name = m_frame->GetSettingDlg()->GetVpTable();
@@ -1040,11 +1044,13 @@ void MLVolPropPanel::AutoLoadTable()
 		{
 			str = m_top_grid->GetCellValue(i, 0).ToStdString();
 			if (str == name)
+			{
+				found = true;
 				break;
+			}
 		}
-		name = "";
 	}
-	if (name.empty() && count > 0)
+	if (!found && count > 0)
 		name = m_top_grid->GetCellValue(0, 0).ToStdString();
 	LoadTable(name);
 	UpdateBotList();
