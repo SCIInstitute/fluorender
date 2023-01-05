@@ -1352,7 +1352,7 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose the volume data file", "", "",
 #ifndef _DARWIN
-		"All Supported|*.tif;*.tiff;*.lif;*.lof;*.nd2;*.oib;*.oif;*.xml;*.lsm;*.czi;*.nrrd;*.vvd|"\
+		"All Supported|*.tif;*.tiff;*.lif;*.lof;*.nd2;*.oib;*.oif;*.xml;*.lsm;*.czi;*.nrrd;*.vvd;*.mp4;*.m4v;*.mov;*.avi;*.wmv|"\
 		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
 		"Leica Image File Format (*.lif)|*.lif|"\
 		"Leica Microsystems Object File Format (*.lof)|*.lof|"\
@@ -1363,7 +1363,8 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 		"Zeiss Laser Scanning Microscope (*.lsm)|*.lsm|"\
 		"Zeiss ZISRAW File Format (*.czi)|*.czi|"\
 		"Utah Nrrd files (*.nrrd)|*.nrrd|"\
-		"Janelia Brick files (*.vvd)|*.vvd",
+		"Janelia Brick files (*.vvd)|*.vvd"\
+		"Video files (*.mp4, *.m4v, *.mov, *.avi, *.wmv)|*.mp4;*.m4v;*.mov;*.avi;*.wmv|",
 #else
 		"All Supported|*.tif;*.tiff;*.lif;*.lof;*.oib;*.oif;*.xml;*.lsm;*.czi;*.nrrd;*.vvd|"\
 		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
@@ -1375,7 +1376,8 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 		"Zeiss Laser Scanning Microscope (*.lsm)|*.lsm|"\
 		"Zeiss ZISRAW File Format (*.czi)|*.czi|"\
 		"Utah Nrrd files (*.nrrd)|*.nrrd|"\
-		"Janelia Brick files (*.vvd)|*.vvd",
+		"Janelia Brick files (*.vvd)|*.vvd"\
+		"Video files (*.mp4, *.m4v, *.mov, *.avi, *.wmv)|*.mp4;*.m4v;*.mov;*.avi;*.wmv|",
 #endif
 		wxFD_OPEN|wxFD_MULTIPLE);
 	fopendlg->SetExtraControlCreator(CreateExtraControlVolume);
