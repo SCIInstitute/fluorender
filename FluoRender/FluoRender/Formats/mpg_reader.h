@@ -104,53 +104,16 @@ private:
 	{
 		int64_t pts;
 		int64_t dts;
-		size_t key;
-		size_t tgt;
-		size_t pos;
 	};
 	std::vector<FrameInfo> m_mpg_info;
 
+	//ffmpeg structs
+	int m_stream_index;
+	ffmpeg::AVFormatContext* m_av_format_context;
+	ffmpeg::AVCodecContext* m_av_codec_context;
+
 private:
-	FrameInfo get_frame_info(int64_t dts, int64_t pts)
-	{
-		FrameInfo info;
-		info.pts = pts < 0 ? 0 : pts;
-		info.dts = dts < 0 ? 0 : dts;
-		if (m_mpg_info.empty())
-		{
-			info.pos = 0;
-			info.key = 1;
-			info.tgt = 1;
-			return info;//first frame
-		}
-		if (info.dts == 0)
-		{
-			info.pos = m_mpg_info.size();
-			info.key = 0;
-			info.tgt = 1;
-			return info;//head frames
-		}
-		if (info.dts == info.pts || info.dts == info.pts - 1)
-		{
-			info.pos = 0;
-			info.key = m_mpg_info.back().key + 1;
-			info.tgt = info.key;
-			return info;//keyframe
-		}
-		size_t r = 1;
-		for (auto i = m_mpg_info.rbegin();
-			i != m_mpg_info.rend(); ++i, ++r)
-		{
-			if (info.dts == i->pts || info.dts == i->pts - 1)
-			{
-				info.pos = r;
-				info.key = m_mpg_info.back().key;
-				info.tgt = info.key;
-				break;//dependent frame
-			}
-		}
-		return info;
-	}
+	FrameInfo get_frame_info(int64_t dts, int64_t pts);
 };
 
 #endif//_MPG_READER_H_
