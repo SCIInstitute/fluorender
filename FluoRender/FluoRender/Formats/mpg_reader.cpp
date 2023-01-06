@@ -51,10 +51,21 @@ MPGReader::MPGReader()
 	m_stream_index = -1;
 	m_av_format_context = NULL;
 	m_av_codec_context = NULL;
+	m_sws_context = NULL;
+	m_frame_yuv = NULL;
+	m_frame_rgb = NULL;
+	m_frame_buffer = NULL;
 }
 
 MPGReader::~MPGReader()
 {
+	//release frame cache
+	if (m_frame_yuv)
+		ffmpeg::av_frame_free(&m_frame_yuv);
+	if (m_frame_rgb)
+		ffmpeg::av_frame_free(&m_frame_rgb);
+	if (m_frame_buffer)
+		ffmpeg::av_free(m_frame_buffer);
 	// Close the codecs
 	if (m_av_codec_context)
 		ffmpeg::avcodec_close(m_av_codec_context);
@@ -130,18 +141,34 @@ int MPGReader::Preprocess()
 	if (ffmpeg::avcodec_open2(m_av_codec_context, pCodec, NULL) < 0)
 		return READER_OPEN_FAIL; // Could not open codec
 
+	// initialize SWS context for software scaling
+	m_sws_context = ffmpeg::sws_getContext(
+		m_av_codec_context->width,
+		m_av_codec_context->height,
+		m_av_codec_context->pix_fmt,
+		m_av_codec_context->width,
+		m_av_codec_context->height,
+		ffmpeg::AV_PIX_FMT_RGB24,
+		SWS_BILINEAR,
+		NULL,
+		NULL,
+		NULL);
+	if (!m_sws_context)
+		return READER_OPEN_FAIL;
+
 	m_mpg_info.clear();
 	m_mpg_info.reserve(m_av_format_context->streams[m_stream_index]->nb_frames);
 
 	// Allocate video frame
-	ffmpeg::AVFrame* pFrame = ffmpeg::av_frame_alloc();
+	if (!m_frame_yuv)
+		m_frame_yuv = ffmpeg::av_frame_alloc();
 	//read frame
 	while (ffmpeg::av_read_frame(m_av_format_context, &packet) >= 0)
 	{
 		if (packet.stream_index == m_stream_index)
 		{
 			// Decode video frame
-			ffmpeg::avcodec_decode_video2(m_av_codec_context, pFrame, &frameFinished, &packet);
+			ffmpeg::avcodec_decode_video2(m_av_codec_context, m_frame_yuv, &frameFinished, &packet);
 
 			// Did we get a video frame?
 			if (frameFinished)
@@ -171,7 +198,6 @@ int MPGReader::Preprocess()
 	m_max_value = 255.0;
 	m_scalar_scale = 1;
 
-	ffmpeg::av_frame_free(&pFrame);
 	// Close the codecs
 	ffmpeg::avcodec_close(pCodecCtxOrig);
 
@@ -249,7 +275,8 @@ Nrrd* MPGReader::Convert(int t, int c, bool get_max)
 	if (m_mpg_info.empty() ||
 		m_stream_index == -1 ||
 		!m_av_format_context||
-		!m_av_codec_context)
+		!m_av_codec_context ||
+		!m_sws_context)
 		return data;
 
 	if (t < 0) t = 0;
@@ -257,39 +284,35 @@ Nrrd* MPGReader::Convert(int t, int c, bool get_max)
 	if (c < 0) c = 0;
 	if (c > 2) c = 2;
 
+	if (t == m_cur_time && m_frame_rgb)
+	{
+		return get_nrrd(m_frame_rgb, c);
+	}
+	m_cur_time = t;
+
 	int frameFinished;
-	struct ffmpeg::SwsContext* sws_ctx = NULL;
 	ffmpeg::AVPacket packet;
 
 	// Allocate video frame
-	ffmpeg::AVFrame* pFrame = ffmpeg::av_frame_alloc();
-
-	// Allocate an AVFrame structure
-	ffmpeg::AVFrame* pFrameRGB = ffmpeg::av_frame_alloc();
-	if (pFrameRGB == NULL)
+	if (!m_frame_yuv)
 		return data;
 
-	// Determine required buffer size and allocate buffer
-	int numBytes = ffmpeg::avpicture_get_size(ffmpeg::AV_PIX_FMT_RGB24, m_x_size, m_y_size);
-	uint8_t* buffer = (uint8_t*)ffmpeg::av_malloc(numBytes * sizeof(uint8_t));
+	// Allocate an AVFrame structure
+	if (!m_frame_rgb)
+	{
+		m_frame_rgb = ffmpeg::av_frame_alloc();
+		if (m_frame_rgb == NULL)
+			return data;
 
-	// Assign appropriate parts of buffer to image planes in pFrameRGB
-	// Note that pFrameRGB is an AVFrame, but AVFrame is a superset
-	// of AVPicture
-	ffmpeg::avpicture_fill((ffmpeg::AVPicture*)pFrameRGB, buffer, ffmpeg::AV_PIX_FMT_RGB24, m_x_size, m_y_size);
+		// Determine required buffer size and allocate buffer
+		int numBytes = ffmpeg::avpicture_get_size(ffmpeg::AV_PIX_FMT_RGB24, m_x_size, m_y_size);
+		m_frame_buffer = (uint8_t*)ffmpeg::av_malloc(numBytes * sizeof(uint8_t));
 
-	// initialize SWS context for software scaling
-	sws_ctx = ffmpeg::sws_getContext(
-		m_av_codec_context->width,
-		m_av_codec_context->height,
-		m_av_codec_context->pix_fmt,
-		m_av_codec_context->width,
-		m_av_codec_context->height,
-		ffmpeg::AV_PIX_FMT_RGB24,
-		SWS_BILINEAR,
-		NULL,
-		NULL,
-		NULL);
+		// Assign appropriate parts of buffer to image planes in pFrameRGB
+		// Note that pFrameRGB is an AVFrame, but AVFrame is a superset
+		// of AVPicture
+		ffmpeg::avpicture_fill((ffmpeg::AVPicture*)m_frame_rgb, m_frame_buffer, ffmpeg::AV_PIX_FMT_RGB24, m_x_size, m_y_size);
+	}
 
 	//seek frame
 	int64_t target = m_mpg_info[t].dts;
@@ -302,32 +325,18 @@ Nrrd* MPGReader::Convert(int t, int c, bool get_max)
 		if (packet.stream_index == m_stream_index)
 		{
 			// Decode video frame
-			ffmpeg::avcodec_decode_video2(m_av_codec_context, pFrame, &frameFinished, &packet);
+			ffmpeg::avcodec_decode_video2(m_av_codec_context, m_frame_yuv, &frameFinished, &packet);
 
 			// Did we get a video frame?
 			if (frameFinished &&
 				packet.pts == m_mpg_info[t].pts)
 			{
 				// Convert the image from its native format to RGB
-				ffmpeg::sws_scale(sws_ctx, (uint8_t const* const*)pFrame->data,
-					pFrame->linesize, 0, m_av_codec_context->height,
-					pFrameRGB->data, pFrameRGB->linesize);
+				ffmpeg::sws_scale(m_sws_context, (uint8_t const* const*)m_frame_yuv->data,
+					m_frame_yuv->linesize, 0, m_av_codec_context->height,
+					m_frame_rgb->data, m_frame_rgb->linesize);
 
-				//extract channel
-				unsigned long long total_size = (unsigned long long)m_x_size * (unsigned long long)m_y_size;
-				uint8_t* val = new unsigned char[total_size];
-				unsigned long long index;
-				for (index = 0; index < total_size; ++index)
-					val[index] = *(pFrameRGB->data[0] + index * 3 + c);
-
-				//create nrrd
-				data = nrrdNew();
-				nrrdWrap(data, (uint8_t*)val, nrrdTypeUChar,
-					3, (size_t)m_x_size, (size_t)m_y_size, (size_t)1);
-				nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-				nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc * m_x_size, m_yspc * m_y_size, m_zspc);
-				nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-				nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)1);
+				data = get_nrrd(m_frame_rgb, c);
 
 				ffmpeg::av_free_packet(&packet);
 				break;
@@ -336,12 +345,6 @@ Nrrd* MPGReader::Convert(int t, int c, bool get_max)
 		// Free the packet that was allocated by av_read_frame
 		ffmpeg::av_free_packet(&packet);
 	}
-
-	// Free the RGB image
-	ffmpeg::av_free(buffer);
-	ffmpeg::av_frame_free(&pFrameRGB);
-	// Free the YUV frame
-	ffmpeg::av_frame_free(&pFrame);
 
 	return data;
 }
@@ -377,40 +380,27 @@ MPGReader::FrameInfo MPGReader::get_frame_info(int64_t dts, int64_t pts)
 {
 	FrameInfo info;
 	info.pts = pts;
-	info.dts = dts;
-/*	if (m_mpg_info.empty())
-	{
-		info.pos = 0;
-		info.key = 1;
-		info.tgt = 1;
-		return info;//first frame
-	}
-	if (info.dts == 0)
-	{
-		info.pos = m_mpg_info.size();
-		info.key = 0;
-		info.tgt = 1;
-		return info;//head frames
-	}
-	if (info.dts == info.pts || info.dts == info.pts - 1)
-	{
-		info.pos = 0;
-		info.key = m_mpg_info.back().key + 1;
-		info.tgt = info.key;
-		return info;//keyframe
-	}
-	size_t r = 1;
-	for (auto i = m_mpg_info.rbegin();
-		i != m_mpg_info.rend(); ++i, ++r)
-	{
-		if (info.dts == i->pts || info.dts == i->pts - 1)
-		{
-			info.pos = r;
-			info.key = m_mpg_info.back().key;
-			info.tgt = info.key;
-			break;//dependent frame
-		}
-	}
-*/
+	info.dts = dts < 0 ? 0 : dts;
 	return info;
+}
+
+Nrrd* MPGReader::get_nrrd(ffmpeg::AVFrame* frame, int c)
+{
+	//extract channel
+	unsigned long long total_size = (unsigned long long)m_x_size * (unsigned long long)m_y_size;
+	uint8_t* val = new unsigned char[total_size];
+	unsigned long long index;
+	for (index = 0; index < total_size; ++index)
+		val[index] = *(frame->data[0] + index * 3 + c);
+
+	//create nrrd
+	Nrrd* data = nrrdNew();
+	nrrdWrap(data, (uint8_t*)val, nrrdTypeUChar,
+		3, (size_t)m_x_size, (size_t)m_y_size, (size_t)1);
+	nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
+	nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc * m_x_size, m_yspc * m_y_size, m_zspc);
+	nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+	nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)1);
+
+	return data;
 }

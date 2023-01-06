@@ -111,9 +111,15 @@ private:
 	int m_stream_index;
 	ffmpeg::AVFormatContext* m_av_format_context;
 	ffmpeg::AVCodecContext* m_av_codec_context;
+	ffmpeg::SwsContext* m_sws_context;
+	//frame cache
+	ffmpeg::AVFrame* m_frame_yuv;//frame cache, should all be the same size
+	ffmpeg::AVFrame* m_frame_rgb;//frame cache
+	uint8_t* m_frame_buffer;
 
 private:
 	FrameInfo get_frame_info(int64_t dts, int64_t pts);
+	Nrrd* get_nrrd(ffmpeg::AVFrame* frame, int c);
 };
 
 #endif//_MPG_READER_H_
