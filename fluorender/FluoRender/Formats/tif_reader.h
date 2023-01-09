@@ -306,6 +306,9 @@ private:
 		//next page offset
 		bool b_next_page_offset;
 		unsigned long long ull_next_page_offset;
+		//sample format
+		bool b_sample_format;
+		unsigned short us_sample_format;
 	};
 	PageInfo m_page_info;
 
@@ -359,6 +362,8 @@ private:
 	static const uint64_t kTileBytesCountsTag = 325;
 	/** The tiff tag number of entries on current page */
 	static const uint64_t kNextPageOffsetTag = 500;
+	/** how to interpret each data sample in a pixel*/
+	static const uint64_t kSampleFormat = 339;
 	/** The BYTE type */
 	static const uint8_t kByte = 1;
 	/** The ASCII type */

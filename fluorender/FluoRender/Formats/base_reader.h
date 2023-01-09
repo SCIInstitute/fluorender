@@ -46,7 +46,7 @@ using namespace std;
 #define READER_OPEN_FAIL	1
 #define READER_FORMAT_ERROR	2
 #define READER_EMPTY_DATA	3
-#define READER_FP32_DATA	4
+#define READER_FP64_DATA	4
 #define READER_JAVA_ARRAY_SIZE_ERROR 5
 
 //define reader types
@@ -222,6 +222,11 @@ public:
 
 	static string GetError(int code);
 
+	//range for fp32
+	bool GetFpConvert() { return m_fp_convert; }
+	void GetFpRange(double& min_val, double& max_val) { min_val = m_fp_min; max_val = m_fp_max; }
+	void SetFpRange(double min_val, double max_val) { m_fp_min = min_val; m_fp_max = max_val; }
+
 protected:
 	wstring m_id_string;	//the path and file name used to read files
 	//resizing
@@ -237,6 +242,10 @@ protected:
 	wstring m_path_name;
 
 	wstring m_info;
+
+	bool m_fp_convert;
+	double m_fp_min;
+	double m_fp_max;
 
 	//all the lzw decoding stuff
 	#define MAXCODE(n)	((1L<<(n))-1)
@@ -323,6 +332,7 @@ protected:
 
 	//read number after a position in a string
 	int get_number(string &str, int64_t pos);
+	double get_double(string& str, int64_t pos);
 };
 
 #endif//_BASE_READER_H_

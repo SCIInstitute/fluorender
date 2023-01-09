@@ -304,6 +304,23 @@ int BaseReader::get_number(string &str, int64_t pos)
 		return 0;
 }
 
+double BaseReader::get_double(string& str, int64_t pos)
+{
+	string num_str;
+	for (int64_t i = pos; i < str.length(); ++i)
+	{
+		if (isdigit(str[i]) || str[i] == '.' ||
+			(i == pos && str[i] == '-'))
+			num_str.push_back(str[i]);
+		else
+			break;
+	}
+	if (num_str != "")
+		return stod(num_str.c_str());
+	else
+		return 0;
+}
+
 string BaseReader::GetError(int code)
 {
 	string err_str;
@@ -321,8 +338,8 @@ string BaseReader::GetError(int code)
 	case READER_EMPTY_DATA:
 		err_str = "File is empty.";
 		break;
-	case READER_FP32_DATA:
-		err_str = "Floating point data are unsupported.";
+	case READER_FP64_DATA:
+		err_str = "Sample format is unsupported.";
 		break;
 	case READER_JAVA_ARRAY_SIZE_ERROR:
 		err_str = "File contains too many voxels for Java.\n" \

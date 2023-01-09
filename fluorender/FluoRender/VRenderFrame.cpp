@@ -175,6 +175,8 @@ VRenderFrame::VRenderFrame(
 	// tell wxAuiManager to manage this frame
 	m_aui_mgr.SetManagedWindow(this);
 
+	m_data_mgr.SetFrame(this);
+
 	// set frame icon
 	wxIcon icon;
 	icon.CopyFromBitmap(wxGetBitmapFromMemory(icon_32));

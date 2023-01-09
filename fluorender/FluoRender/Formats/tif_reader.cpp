@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "tif_reader.h"
 #include <boost/filesystem.hpp>
-#include "../compatibility.h"
+#include <compatibility.h>
 #include <sstream>
 #include <iomanip>
 
@@ -48,12 +48,16 @@ TIFReader::TIFReader()
 	m_y_size = 0;
 
 	m_valid_spc = false;
-	m_xspc = 1.0;
-	m_yspc = 1.0;
-	m_zspc = 1.0;
+	m_xspc = 1;
+	m_yspc = 1;
+	m_zspc = 1;
 
-	m_max_value = 0.0;
-	m_scalar_scale = 1.0;
+	m_max_value = 0;
+	m_scalar_scale = 1;
+
+	m_fp_convert = false;
+	m_fp_min = 0;
+	m_fp_max = 1;
 
 	m_batch = false;
 	m_cur_batch = -1;
@@ -113,10 +117,15 @@ int TIFReader::Preprocess()
 	string img_desc;
 	OpenTiff(m_path_name.c_str());
 	uint64_t bits = GetTiffField(kBitsPerSampleTag);
-	if (bits > 16)
+	uint64_t smpf = GetTiffField(kSampleFormat);
+	if (bits > 16 && smpf == 3)
+		m_fp_convert = true;
+	else
+		m_fp_convert = false;
+	if (bits > 32)
 	{
 		CloseTiff();
-		return READER_FP32_DATA;
+		return READER_FP64_DATA;
 	}
 	GetImageDescription(img_desc);
 	string search_str = "hyperstack=true";
@@ -130,138 +139,159 @@ int TIFReader::Preprocess()
 	bool imagej = str_pos != -1;
 	search_str = "images=";
 	bool imagej_raw = str_pos != -1;
-	if (imagej && hyperstack)
+	if (imagej)
 	{
-		//it is an ImageJ hyperstack, get information from the description
-		int num;
-		//channels
-		search_str = "channels=";
-		str_pos = img_desc.find(search_str);
-		if (str_pos != -1)
-			num = get_number(img_desc, str_pos + search_str.length());
-		else
-			num = 1;
-		if (num)
-			m_chan_num = num;
-		else
-			m_chan_num = 1;
-		//slices
-		search_str = "slices=";
-		str_pos = img_desc.find(search_str);
-		if (str_pos != -1)
-			num = get_number(img_desc, str_pos + search_str.length());
-		else
-			num = 1;
-		if (num)
-			m_slice_num = num;
-		else
-			m_slice_num = 1;
-		//frames
-		search_str = "frames=";
-		str_pos = img_desc.find(search_str);
-		if (str_pos != -1)
-			num = get_number(img_desc, str_pos + search_str.length());
-		else
-			num = 1;
-		if (num)
-			m_time_num = num;
-		else
-			m_time_num = 1;
 		//max
-		if (bits == 16)
+		if (bits > 8)
 		{
+			double dval = 0;
+			search_str = "min=";
+			str_pos = img_desc.find(search_str);
+			if (str_pos != -1)
+				dval = get_double(img_desc, str_pos + search_str.length());
+			if (dval)
+				m_fp_min = dval;
+
+			dval = 0;
 			search_str = "max=";
+			str_pos = img_desc.find(search_str);
+			if (str_pos != -1)
+				dval = get_double(img_desc, str_pos + search_str.length());
+			if (dval)
+			{
+				if (bits == 16)
+				{
+					m_max_value = dval;
+					m_scalar_scale = 65535.0 / m_max_value;
+				}
+				else
+				{
+					m_fp_max = dval;
+					m_max_value = 65535;
+					m_scalar_scale = 1;
+				}
+			}
+		}
+
+		if (hyperstack)
+		{
+			//it is an ImageJ hyperstack, get information from the description
+			int num;
+			//channels
+			search_str = "channels=";
 			str_pos = img_desc.find(search_str);
 			if (str_pos != -1)
 				num = get_number(img_desc, str_pos + search_str.length());
 			else
-				num = 0;
+				num = 1;
+			if (num)
+				m_chan_num = num;
+			else
+				m_chan_num = 1;
+			//slices
+			search_str = "slices=";
+			str_pos = img_desc.find(search_str);
+			if (str_pos != -1)
+				num = get_number(img_desc, str_pos + search_str.length());
+			else
+				num = 1;
+			if (num)
+				m_slice_num = num;
+			else
+				m_slice_num = 1;
+			//frames
+			search_str = "frames=";
+			str_pos = img_desc.find(search_str);
+			if (str_pos != -1)
+				num = get_number(img_desc, str_pos + search_str.length());
+			else
+				num = 1;
+			if (num)
+				m_time_num = num;
+			else
+				m_time_num = 1;
+
+			std::vector<std::wstring> list;
+			if (m_time_num == 1)
+			{
+				if (FIND_FILES_4D(m_path_name, m_time_id, list, m_cur_time))
+				{
+					isHsTimeSeq_ = true;
+					m_time_num = list.size();
+				}
+			}
+
+			//build sequence information for the hyperstack
+			isHyperstack_ = true;
+			m_data_name = name;
+			int page_cnt = 0;
+			for (int i = 0; i < m_time_num; ++i)
+			{
+				TimeDataInfo info;
+
+				info.type = 0;
+				std::wstring str;
+				if (isHsTimeSeq_)
+				{
+					page_cnt = 0;
+					int64_t begin = m_path_name.find(m_time_id);
+					size_t id_len = m_time_id.length();
+					str = list.at(i);
+					std::wstring t_num;
+					for (size_t j = begin + id_len; j < str.size(); j++)
+					{
+						wchar_t c = str[j];
+						if (iswdigit(c))
+							t_num.push_back(c);
+						else break;
+					}
+					if (t_num.size() > 0)
+						info.filenumber = WSTOI(t_num);
+					else
+						info.filenumber = 0;
+				}
+				else
+				{
+					info.filenumber = 0;
+				}
+
+				//add slices
+				for (int j = 0; j < m_slice_num; ++j)
+				{
+					SliceInfo sliceinfo;
+					sliceinfo.slicenumber = 0;
+					if (isHsTimeSeq_)
+						sliceinfo.slice = str;
+					sliceinfo.pagenumber = page_cnt;
+					page_cnt += m_chan_num;
+					info.slices.push_back(sliceinfo);
+				}
+				m_4d_seq.push_back(info);
+			}
+			if (isHsTimeSeq_ && m_4d_seq.size() > 0)
+				std::sort(m_4d_seq.begin(), m_4d_seq.end(), TIFReader::tif_sort);
+
+			m_cur_time = 0;
+		}
+		else if (imagej_raw)
+		{
+			int num;
+			//slices
+			search_str = "images=";
+			str_pos = img_desc.find(search_str);
+			if (str_pos != -1)
+				num = get_number(img_desc, str_pos + search_str.length());
+			else
+				num = 1;
 			if (num)
 			{
-				m_max_value = num;
-				m_scalar_scale = 65535.0 / m_max_value;
-			}
-		}
-
-		std::vector<std::wstring> list;
-		if (m_time_num == 1)
-		{
-			if (FIND_FILES_4D(m_path_name, m_time_id, list, m_cur_time))
-			{
-				isHsTimeSeq_ = true;
-				m_time_num = list.size();
-			}
-		}
-
-		//build sequence information for the hyperstack
-		isHyperstack_ = true;
-		m_data_name = name;
-		int page_cnt = 0;
-		for (int i = 0; i < m_time_num; ++i)
-		{
-			TimeDataInfo info;
-
-			info.type = 0;
-			std::wstring str;
-			if (isHsTimeSeq_)
-			{
-				page_cnt = 0;
-				int64_t begin = m_path_name.find(m_time_id);
-				size_t id_len = m_time_id.length();
-				str = list.at(i);
-				std::wstring t_num;
-				for (size_t j = begin + id_len; j < str.size(); j++)
-				{
-					wchar_t c = str[j];
-					if (iswdigit(c))
-						t_num.push_back(c);
-					else break;
-				}
-				if (t_num.size() > 0)
-					info.filenumber = WSTOI(t_num);
-				else
-					info.filenumber = 0;
+				m_slice_num = num;
+				imagej_raw_possible_ = true;
 			}
 			else
-			{
-				info.filenumber = 0;
-			}
-
-			//add slices
-			for (int j = 0; j < m_slice_num; ++j)
-			{
-				SliceInfo sliceinfo;
-				sliceinfo.slicenumber = 0;
-				if (isHsTimeSeq_)
-					sliceinfo.slice = str;
-				sliceinfo.pagenumber = page_cnt;
-				page_cnt += m_chan_num;
-				info.slices.push_back(sliceinfo);
-			}
-			m_4d_seq.push_back(info);
+				m_slice_num = 1;
 		}
-		if (isHsTimeSeq_ && m_4d_seq.size() > 0)
-			std::sort(m_4d_seq.begin(), m_4d_seq.end(), TIFReader::tif_sort);
 
-		m_cur_time = 0;
-	}
-	else if (imagej && imagej_raw)
-	{
-		int num;
-		//slices
-		search_str = "images=";
-		str_pos = img_desc.find(search_str);
-		if (str_pos != -1)
-			num = get_number(img_desc, str_pos + search_str.length());
-		else
-			num = 1;
-		if (num)
-		{
-			m_slice_num = num;
-			imagej_raw_possible_ = true;
-		}
-		else
-			m_slice_num = 1;
 	}
 	CloseTiff();
 	
@@ -451,6 +481,10 @@ uint64_t TIFReader::GetTiffField(const uint64_t in_tag)
 			if (m_page_info.b_tile_length)
 				return m_page_info.ul_tile_length;
 			break;
+		case kSampleFormat:
+			if (m_page_info.b_sample_format)
+				return m_page_info.us_sample_format;
+			break;
 		}
 	}
 
@@ -524,7 +558,8 @@ bool TIFReader::TagInInfo(uint16_t tag)
 		tag == kTileWidthTag ||
 		tag == kTileLengthTag ||
 		tag == kTileOffsetsTag ||
-		tag == kTileBytesCountsTag)
+		tag == kTileBytesCountsTag ||
+		tag == kSampleFormat)
 		return true;
 	else
 		return false;
@@ -613,6 +648,11 @@ void TIFReader::SetPageInfo(uint16_t tag, uint64_t answer)
 		m_page_info.b_tile_byte_counts = true;
 		m_page_info.ull_tile_byte_counts.resize(1);
 		m_page_info.ull_tile_byte_counts[0] = static_cast<unsigned long long>(answer);
+		break;
+	case kSampleFormat:
+		m_page_info.b_sample_format = true;
+		if (answer)
+			m_page_info.us_sample_format = static_cast<unsigned short>(answer);
 		break;
 	}
 }
@@ -1322,7 +1362,8 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
 	char *temp = new char[byte_count];
 	//unsigned long long pos = tiff_stream.tellg();
 	tiff_stream.read((char*)temp, byte_count);
-	bool eight_bits = 8 == GetTiffField(kBitsPerSampleTag);
+	int bits = GetTiffField(kBitsPerSampleTag);
+	bool eight_bits = 8 == bits;
 	//get compression tag, decompress if necessary
 	uint64_t tmp = GetTiffField(kCompressionTag);
 	uint64_t prediction = GetTiffField(kPredictionTag);
@@ -1347,13 +1388,41 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
 		}
 	}
 	else
-		memcpy(data, temp, byte_count);
+	{
+		if (bits == 32)
+		{
+			uint64_t index = 0;
+			for (index = 0; index < strip_size / 4; ++index)
+			{
+				uint16_t vs;
+				uint32_t vi = *reinterpret_cast<uint32_t*>(temp + index * 4);
+				if (swap_)
+					vi = SwapWord(vi);
+				if (m_fp_convert)
+				{
+					//convert
+					float vf = reinterpret_cast<float&>(vi);
+					vf = (vf - m_fp_min) * 65535 / (m_fp_max - m_fp_min);
+					vf = std::clamp(vf, 0.0f, 65535.0f);
+					vs = uint16_t(vf);
+				}
+				else
+				{
+					//truncate
+					vs = (uint16_t)(vi);
+				}
+				memcpy((char*)data + index * 2, &vs, 2);
+			}
+		}
+		else
+			memcpy(data, temp, byte_count);
+	}
 	delete[] temp;
 
 	//swap after decompression
-	if (swap_ && !eight_bits)
+	if (swap_ && bits == 16)
 	{
-		short * data2 = reinterpret_cast<short*>(data);
+		uint16_t* data2 = reinterpret_cast<uint16_t*>(data);
 		for (uint64_t sh = 0; sh < strip_size / 2; sh++)
 			data2[sh] = SwapShort(data2[sh]);
 	}
@@ -1369,7 +1438,8 @@ void TIFReader::GetTiffTile(uint64_t page, uint64_t tile,
 	char *temp = new char[byte_count];
 	//unsigned long long pos = tiff_stream.tellg();
 	tiff_stream.read((char*)temp, byte_count);
-	bool eight_bits = 8 == GetTiffField(kBitsPerSampleTag);
+	int bits = GetTiffField(kBitsPerSampleTag);
+	bool eight_bits = 8 == bits;
 	//get compression tag, decompress if necessary
 	uint64_t tmp = GetTiffField(kCompressionTag);
 	uint64_t prediction = GetTiffField(kPredictionTag);
@@ -1390,13 +1460,41 @@ void TIFReader::GetTiffTile(uint64_t page, uint64_t tile,
 		}
 	}
 	else
-		memcpy(data, temp, byte_count);
+	{
+		if (bits == 32)
+		{
+			uint64_t index = 0;
+			for (index = 0; index < tile_size / 4; ++index)
+			{
+				uint16_t vs;
+				uint32_t vi = *reinterpret_cast<uint32_t*>(temp + index * 4);
+				if (swap_)
+					vi = SwapWord(vi);
+				if (m_fp_convert)
+				{
+					//convert
+					float vf = reinterpret_cast<float&>(vi);
+					vf = (vf - m_fp_min) * 65535 / (m_fp_max - m_fp_min);
+					vf = std::clamp(vf, 0.0f, 65535.0f);
+					vs = uint16_t(vf);
+				}
+				else
+				{
+					//truncate
+					vs = (uint16_t)(vi);
+				}
+				memcpy((char*)data + index * 2, &vs, 2);
+			}
+		}
+		else
+			memcpy(data, temp, byte_count);
+	}
 	delete[] temp;
 
 	//swap after decompression
 	if (swap_ && !eight_bits)
 	{
-		short * data2 = reinterpret_cast<short*>(data);
+		uint16_t* data2 = reinterpret_cast<uint16_t*>(data);
 		for (uint64_t sh = 0; sh < tile_size / 2; sh++)
 			data2[sh] = SwapShort(data2[sh]);
 	}
@@ -1549,7 +1647,6 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 
 	unsigned long long total_size = (unsigned long long)m_x_size*
 		(unsigned long long)m_y_size*(unsigned long long)numPages;
-	//val = malloc(total_size * (eight_bit?1:2));
 	val = eight_bit ? (void*)(new unsigned char[total_size]) :
 		(void*)(new unsigned short[total_size]);
 	if (!val)
@@ -1612,7 +1709,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 				unsigned long long valindex;
 				valindex = (unsigned long long)pagepixels * (unsigned long long)i +
 					(unsigned long long)strip * (unsigned long long)strip_size /
-					(unsigned long long)(eight_bit ? 1 : 2);
+					(unsigned long long)(bits / 8);
 
 				if (eight_bit)
 					GetTiffStrip(pageindex, strip,
@@ -1686,7 +1783,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 					if (samples > 1)
 					{
 						GetTiffTile(sequence ? 0 : val_pageindex, tile, buf, tile_size, tile_h);
-						int num_pixels = tile_size / samples / (eight_bit ? 1 : 2);
+						int num_pixels = tile_size / samples / (bits / 8);
 						uint64_t tx, ty;//tile coord
 						tx = tile % x_tile_num;
 						ty = tile / x_tile_num;
@@ -1781,7 +1878,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 					if (samples > 1)
 					{
 						GetTiffStrip(sequence ? 0 : val_pageindex, strip, buf, strip_size);
-						int num_pixels = strip_size / samples / (eight_bit ? 1 : 2);
+						int num_pixels = strip_size / samples / (bits / 8);
 						indexinpage = strip*num_pixels;
 						valindex = val_pageindex *pagepixels + indexinpage;
 						for (int i = 0; i<num_pixels; i++)
@@ -1802,10 +1899,10 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 					else
 					{
 						valindex = val_pageindex *pagepixels +
-							strip*strip_size / (eight_bit ? 1 : 2);
+							strip*strip_size / (bits / 8);
 						uint64_t strip_size_used = strip_size;
-						if (valindex + strip_size / (eight_bit ? 1 : 2) >= total_size)
-							strip_size_used = (total_size - valindex) * (eight_bit ? 1 : 2);
+						if (valindex + strip_size / (bits / 8) >= total_size)
+							strip_size_used = (total_size - valindex) * (bits / 8);
 						if (strip_size_used > 0)
 						{
 							if (eight_bit)

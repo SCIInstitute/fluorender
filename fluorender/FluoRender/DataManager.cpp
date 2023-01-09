@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Calculate/VolumeSampler.h>
 #include <Calculate/VolumeBaker.h>
 #include <Calculate/Histogram.h>
+#include <VRenderFrame.h>
+#include <FpRangeDlg.h>
 #include "teem/Nrrd/nrrd.h"
 #include <wx/msgdlg.h>
 #include <wx/progdlg.h>
@@ -4666,6 +4668,11 @@ DataManager::~DataManager()
 			delete m_annotation_list[i];
 }
 
+void DataManager::SetFrame(VRenderFrame* frame)
+{
+	m_frame = frame;
+}
+
 void DataManager::ClearAll()
 {
 	for (int i=0 ; i<(int)m_vd_list.size() ; i++)
@@ -4870,6 +4877,23 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 		str_w = m_timeId.ToStdWstring();
 		reader->SetTimeId(str_w);
 		reader_return = reader->Preprocess();
+	}
+
+	if (type == LOAD_TYPE_TIFF && reader->GetFpConvert())
+	{
+		double minv, maxv;
+		reader->GetFpRange(minv, maxv);
+		FpRangeDlg* dlg = new FpRangeDlg(m_frame);
+		dlg->SetRange(minv, maxv);
+		dlg->CenterOnParent();
+		int rval = dlg->ShowModal();
+		if (rval == wxID_OK)
+		{
+			minv = dlg->GetMinValue();
+			maxv = dlg->GetMaxValue();
+			reader->SetFpRange(minv, maxv);
+		}
+		delete dlg;
 	}
 
 	if (reader_return > 0)
