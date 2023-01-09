@@ -1,5 +1,5 @@
 ver_major=2
-ver_minor=28
+ver_minor=29
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -8,6 +8,8 @@ value=1
 mode=0
 [save\ project]
 mode=1
+[dpi]
+value=72
 [save\ alpha]
 mode=0
 [save\ float]
@@ -51,6 +53,8 @@ value=0
 file=
 [paint\ history]
 value=1
+[pencil\ dist]
+value=30
 [text\ font]
 file=FreeSans.ttf
 value=14
@@ -85,7 +89,6 @@ value=0
 value=0
 [ruler]
 use\ transf=0
-time\ dep=1
 relax\ f1=2
 infr=5
 df_f=0
