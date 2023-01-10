@@ -127,6 +127,16 @@ int TIFReader::Preprocess()
 		CloseTiff();
 		return READER_FP64_DATA;
 	}
+	//get min max from tag
+	bool got_minmax = false;
+	double tag_min = GetTiffField(kMinSampleValue);
+	double tag_max = GetTiffField(kMaxSampleValue);
+	if (tag_min != 0.0 && tag_max != 0.0)
+	{
+		m_fp_min = tag_min;
+		m_fp_max = tag_max;
+		got_minmax = true;
+	}
 	GetImageDescription(img_desc);
 	string search_str = "hyperstack=true";
 	int64_t str_pos = img_desc.find(search_str);
@@ -141,35 +151,36 @@ int TIFReader::Preprocess()
 	bool imagej_raw = str_pos != -1;
 	if (imagej)
 	{
-		//max
-		if (bits > 8)
+		//min/max
+		if (bits == 16)
 		{
 			double dval = 0;
-			search_str = "min=";
-			str_pos = img_desc.find(search_str);
-			if (str_pos != -1)
-				dval = get_double(img_desc, str_pos + search_str.length());
-			if (dval)
-				m_fp_min = dval;
+			//search_str = "min=";
+			//str_pos = img_desc.find(search_str);
+			//if (str_pos != -1)
+			//	dval = get_double(img_desc, str_pos + search_str.length());
+			//if (dval)
+			//	m_fp_min = dval;
 
-			dval = 0;
+			//dval = 0;
 			search_str = "max=";
 			str_pos = img_desc.find(search_str);
 			if (str_pos != -1)
 				dval = get_double(img_desc, str_pos + search_str.length());
 			if (dval)
 			{
-				if (bits == 16)
-				{
+				//if (bits == 16)
+				//{
 					m_max_value = dval;
 					m_scalar_scale = 65535.0 / m_max_value;
-				}
-				else
-				{
-					m_fp_max = dval;
-					m_max_value = 65535;
-					m_scalar_scale = 1;
-				}
+				//}
+				//else
+				//{
+				//	m_fp_max = dval;
+				//	m_max_value = 65535;
+				//	m_scalar_scale = 1;
+				//}
+				//got_minmax = true;
 			}
 		}
 
@@ -425,6 +436,10 @@ int TIFReader::Preprocess()
 		else m_chan_num = 0;
 	}
 
+	//float get minmax
+	if (bits > 16 && !got_minmax)
+		GetFloatMinMax();
+
 	return READER_OK;
 }
 
@@ -491,6 +506,35 @@ uint64_t TIFReader::GetTiffField(const uint64_t in_tag)
 	return 0;
 }
 
+double TIFReader::GetTiffFieldD(const uint64_t tag)
+{
+	if (!m_page_info.b_valid)
+		ReadTiffFields();
+
+	if (m_page_info.b_valid)
+	{
+		switch (tag)
+		{
+			case kXResolutionTag:
+				if (m_page_info.b_x_resolution)
+					return m_page_info.d_x_resolution;
+				break;
+			case kYResolutionTag:
+				if (m_page_info.b_y_resolution)
+					return m_page_info.d_y_resolution;
+				break;
+			case kMinSampleValue:
+				if (m_page_info.b_min_sample_value)
+					return m_page_info.d_min_sample_value;
+				break;
+			case kMaxSampleValue:
+				if (m_page_info.b_max_sample_value)
+					return m_page_info.d_max_sample_value;
+				break;
+		}
+	}
+	return 0;
+}
 /*uint64_t TIFReader::GetTiffStripOffsetOrCount(uint64_t tag, uint64_t strip)
 {
 	//search for the offset that tells us the byte count for this strip
@@ -559,7 +603,9 @@ bool TIFReader::TagInInfo(uint16_t tag)
 		tag == kTileLengthTag ||
 		tag == kTileOffsetsTag ||
 		tag == kTileBytesCountsTag ||
-		tag == kSampleFormat)
+		tag == kSampleFormat ||
+		tag == kMinSampleValue ||
+		tag == kMaxSampleValue)
 		return true;
 	else
 		return false;
@@ -653,6 +699,16 @@ void TIFReader::SetPageInfo(uint16_t tag, uint64_t answer)
 		m_page_info.b_sample_format = true;
 		if (answer)
 			m_page_info.us_sample_format = static_cast<unsigned short>(answer);
+		break;
+	case kMinSampleValue:
+		m_page_info.b_min_sample_value = true;
+		if (answer)
+			memcpy(&(m_page_info.d_min_sample_value), &answer, sizeof(double));
+		break;
+	case kMaxSampleValue:
+		m_page_info.b_max_sample_value = true;
+		if (answer)
+			memcpy(&(m_page_info.d_max_sample_value), &answer, sizeof(double));
 		break;
 	}
 }
@@ -1403,7 +1459,7 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
 					//convert
 					float vf = reinterpret_cast<float&>(vi);
 					vf = (vf - m_fp_min) * 65535 / (m_fp_max - m_fp_min);
-					vf = std::clamp(vf, 0.0f, 65535.0f);
+					vf = std::roundf(std::clamp(vf, 0.0f, 65535.0f));
 					vs = uint16_t(vf);
 				}
 				else
@@ -1475,7 +1531,7 @@ void TIFReader::GetTiffTile(uint64_t page, uint64_t tile,
 					//convert
 					float vf = reinterpret_cast<float&>(vi);
 					vf = (vf - m_fp_min) * 65535 / (m_fp_max - m_fp_min);
-					vf = std::clamp(vf, 0.0f, 65535.0f);
+					vf = std::roundf(std::clamp(vf, 0.0f, 65535.0f));
 					vs = uint16_t(vf);
 				}
 				else
@@ -1498,6 +1554,115 @@ void TIFReader::GetTiffTile(uint64_t page, uint64_t tile,
 		for (uint64_t sh = 0; sh < tile_size / 2; sh++)
 			data2[sh] = SwapShort(data2[sh]);
 	}
+}
+
+//get minmax
+void TIFReader::GetTiffStripMinMax(uint64_t page, uint64_t strip, uint64_t strip_size)
+{
+	//make sure we are on the correct page,
+	//reset if ahead
+	if (current_page_ > page)
+		ResetTiff();
+	// fast forward if we are behind.
+	if (!imagej_raw_)
+	{
+		while (current_page_ < page)
+		{
+			tiff_stream.seekg(current_offset_, tiff_stream.beg);
+			if (GetTiffField(kSubFileTypeTag) != 1) current_page_++;
+			current_offset_ = GetTiffNextPageOffset();
+		}
+	}
+	//get the byte count and the strip offset to read data from.
+	uint64_t byte_count = 0;
+	if (current_offset_ && !imagej_raw_)
+	{
+		uint64_t strip_byte_count = GetTiffStripCount(strip);
+		if (!strip_byte_count)
+		{
+			uint64_t bits = GetTiffField(kBitsPerSampleTag);
+			m_page_info.ull_strip_byte_counts.resize(1);
+			m_page_info.ull_strip_byte_counts[0] = strip_size * bits / 8;
+			m_page_info.b_strip_byte_counts = true;
+			m_page_info.b_strip_offsets = true;
+		}
+		byte_count = GetTiffStripCount(strip);
+		tiff_stream.seekg(GetTiffStripOffset(strip), tiff_stream.beg);
+	}
+	else
+	{
+		//if (m_page_info.b_strip_byte_count)
+		byte_count = m_page_info.ull_strip_byte_counts[0];
+		//if (m_page_info.b_strip_offset)
+		tiff_stream.seekg(m_page_info.ull_strip_offsets[0] + page * byte_count, tiff_stream.beg);
+		imagej_raw_ = true;
+	}
+	//actually read the data now
+	char* temp = new char[byte_count];
+	//unsigned long long pos = tiff_stream.tellg();
+	tiff_stream.read((char*)temp, byte_count);
+	int bits = GetTiffField(kBitsPerSampleTag);
+	bool eight_bits = 8 == bits;
+	//get compression tag, decompress if necessary
+	uint64_t tmp = GetTiffField(kCompressionTag);
+	uint64_t prediction = GetTiffField(kPredictionTag);
+	uint64_t samples = GetTiffField(kSamplesPerPixelTag);
+	samples = samples == 0 ? 1 : samples;
+	tsize_t stride = (GetTiffField(kPlanarConfigurationTag) == 2) ? 1 : samples;
+	//uint64_t rows_per_strip = GetTiffField(kRowsPerStripTag,NULL,0);
+	uint64_t rows_per_strip = strip_size /
+		GetTiffField(kImageWidthTag) /
+		samples;
+	bool isCompressed = tmp == 5;
+	if (!isCompressed && bits == 32 && m_fp_convert)
+	{
+		uint64_t index = 0;
+		for (index = 0; index < strip_size / 4; ++index)
+		{
+			uint32_t vi = *reinterpret_cast<uint32_t*>(temp + index * 4);
+			if (swap_)
+				vi = SwapWord(vi);
+			//convert
+			float vf = reinterpret_cast<float&>(vi);
+			m_fp_min = std::min(m_fp_min, double(vf));
+			m_fp_max = std::max(m_fp_max, double(vf));
+		}
+	}
+	delete[] temp;
+}
+
+void TIFReader::GetTiffTileMinMax(uint64_t page, uint64_t tile, uint64_t tile_size, uint64_t tile_height)
+{
+	uint64_t byte_count = GetTiffTileCount(tile);
+	tiff_stream.seekg(GetTiffTileOffset(tile), tiff_stream.beg);
+	//actually read the data now
+	char* temp = new char[byte_count];
+	//unsigned long long pos = tiff_stream.tellg();
+	tiff_stream.read((char*)temp, byte_count);
+	int bits = GetTiffField(kBitsPerSampleTag);
+	bool eight_bits = 8 == bits;
+	//get compression tag, decompress if necessary
+	uint64_t tmp = GetTiffField(kCompressionTag);
+	uint64_t prediction = GetTiffField(kPredictionTag);
+	uint64_t samples = GetTiffField(kSamplesPerPixelTag);
+	samples = samples == 0 ? 1 : samples;
+	tsize_t stride = (GetTiffField(kPlanarConfigurationTag) == 2) ? 1 : samples;
+	bool isCompressed = tmp == 5;
+	if (!isCompressed && bits == 32 && m_fp_convert)
+	{
+		uint64_t index = 0;
+		for (index = 0; index < tile_size / 4; ++index)
+		{
+			uint32_t vi = *reinterpret_cast<uint32_t*>(temp + index * 4);
+			if (swap_)
+				vi = SwapWord(vi);
+			//convert
+			float vf = reinterpret_cast<float&>(vi);
+			m_fp_min = std::min(m_fp_min, double(vf));
+			m_fp_max = std::max(m_fp_max, double(vf));
+		}
+	}
+	delete[] temp;
 }
 
 void TIFReader::ResetTiff()
@@ -2172,4 +2337,151 @@ int TIFReader::GetPatternNumber(std::wstring &path_name, int mode, bool count)
 	}
 
 	return number;
+}
+
+void TIFReader::GetFloatMinMax()
+{
+	m_fp_min = std::numeric_limits<double>::max();
+	m_fp_max = -m_fp_min;
+	OpenTiff(m_path_name.c_str());
+	InvalidatePageInfo();
+
+	uint64_t width = GetTiffField(kImageWidthTag);
+	uint64_t height = GetTiffField(kImageLengthTag);
+	uint64_t bits = GetTiffField(kBitsPerSampleTag);
+	uint64_t samples = GetTiffField(kSamplesPerPixelTag);
+	if (samples == 0 && width > 0 && height > 0) samples = 1;
+	unsigned long long total_size = (unsigned long long)width *
+		(unsigned long long)height * (unsigned long long)m_slice_num;
+
+	uint64_t strip_size;
+	uint64_t tile_size;
+	uint64_t tile_w;
+	uint64_t tile_h;
+	uint64_t tile_w_last;//last tile width
+	uint64_t x_tile_num;
+	uint64_t y_tile_num;
+	if (GetTiffUseTiles())
+	{
+		uint64_t tile_num = GetTiffTileNum();
+		if (tile_num > 0)
+		{
+			tile_w = GetTiffField(kTileWidthTag);
+			tile_h = GetTiffField(kTileLengthTag);
+			tile_size = tile_w * tile_h * samples * (bits / 8);
+			x_tile_num = (width + tile_w - 1) / tile_w;
+			y_tile_num = (height + tile_h - 1) / tile_h;
+			tile_w_last = width - tile_w * (x_tile_num - 1);
+		}
+		else
+		{
+			tile_size = height * width * samples * (bits / 8);
+			tile_w = width;
+			tile_h = height;
+			tile_w_last = width;
+			x_tile_num = y_tile_num = 1;
+		}
+	}
+	else
+	{
+		uint64_t rowsperstrip = GetTiffField(kRowsPerStripTag);
+		if (rowsperstrip > 0)
+			strip_size = rowsperstrip * width * samples * (bits / 8);
+		else
+			strip_size = height * width * samples * (bits / 8);
+	}
+
+	int64_t pagepixels = (unsigned long long)width * (unsigned long long)height;
+	if (isHyperstack_)
+	{
+		uint64_t pageindex = m_4d_seq[0].slices[0].pagenumber;
+		for (int i = 0; i < m_slice_num; ++i)
+		{
+			if (!imagej_raw_)
+				TurnToPage(pageindex);
+			if (!imagej_raw_)
+				ReadTiffFields();
+			uint64_t num_strips = GetTiffStripNum();
+
+			//read file
+			for (uint64_t strip = 0; strip < num_strips; strip++)
+			{
+				GetTiffStripMinMax(pageindex, strip, strip_size);
+			}
+			pageindex += m_chan_num;
+		}
+	}
+	else
+	{
+		uint64_t val_pageindex = 0;
+		uint64_t for_size = m_slice_num;
+		for (uint64_t pageindex = 0; pageindex < for_size; ++pageindex)
+		{
+			if (!imagej_raw_)
+				TurnToPage(pageindex);
+			if (!imagej_raw_)
+				ReadTiffFields();
+
+			//this is a thumbnail, skip
+			if (GetTiffField(kSubFileTypeTag) == 1)
+			{
+				continue;
+			}
+
+			//tile storage
+			if (GetTiffUseTiles())
+			{
+				uint64_t num_tiles = GetTiffTileNum();
+				num_tiles = num_tiles ? num_tiles : 1;
+
+				//read file
+				for (uint64_t tile = 0; tile < num_tiles; ++tile)
+				{
+					GetTiffTileMinMax(val_pageindex, tile, tile_size, tile_h);
+				}
+			}
+			else//strip storage
+			{
+				uint64_t num_strips = GetTiffStripNum();
+				num_strips = num_strips ? num_strips : 1;
+
+				//read file
+				for (uint64_t strip = 0; strip < num_strips; ++strip)
+				{
+					long long valindex;
+					int indexinpage;
+					if (samples > 1)
+					{
+						GetTiffStripMinMax(val_pageindex, strip, strip_size);
+					}
+					else
+					{
+						valindex = val_pageindex * pagepixels +
+							strip * strip_size / (bits / 8);
+						uint64_t strip_size_used = strip_size;
+						if (valindex + strip_size / (bits / 8) >= total_size)
+							strip_size_used = (total_size - valindex) * (bits / 8);
+						if (strip_size_used > 0)
+						{
+							GetTiffStripMinMax(val_pageindex, strip, strip_size_used);
+						}
+					}
+				}
+			}
+			val_pageindex++;
+			if (val_pageindex >= m_slice_num)
+				break;
+		}
+	}
+
+	CloseTiff();
+
+	if (m_fp_min == std::numeric_limits<double>::max() ||
+		m_fp_max == -std::numeric_limits<double>::max())
+	{
+		m_fp_min = 0;
+		m_fp_max = 1;
+	}
+	m_max_value = 65535;
+	m_scalar_scale = 1;
 }

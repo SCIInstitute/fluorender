@@ -77,6 +77,7 @@ public:
 	 * @return The value in the header denoted by tag.
 	 */
 	uint64_t GetTiffField(const uint64_t tag);
+	double GetTiffFieldD(const uint64_t tag);
 	//next page
 	uint64_t GetTiffNextPageOffset();
 	uint64_t TurnToPage(uint64_t page);
@@ -117,6 +118,16 @@ public:
 		uint64_t page,
 		uint64_t tile,
 		void *data,
+		uint64_t tile_size,
+		uint64_t tile_height);
+	//scan for minmax
+	void GetTiffStripMinMax(
+		uint64_t page,
+		uint64_t strip,
+		uint64_t strip_size);
+	void GetTiffTileMinMax(
+		uint64_t page,
+		uint64_t tile,
 		uint64_t tile_size,
 		uint64_t tile_height);
 	/**
@@ -309,6 +320,12 @@ private:
 		//sample format
 		bool b_sample_format;
 		unsigned short us_sample_format;
+		//min sample value
+		bool b_min_sample_value;
+		double d_min_sample_value;
+		//max sample value
+		bool b_max_sample_value;
+		double d_max_sample_value;
 	};
 	PageInfo m_page_info;
 
@@ -364,6 +381,10 @@ private:
 	static const uint64_t kNextPageOffsetTag = 500;
 	/** how to interpret each data sample in a pixel*/
 	static const uint64_t kSampleFormat = 339;
+	/** The minimum sample value*/
+	static const uint64_t kMinSampleValue = 340;
+	/** The maximum sample value*/
+	static const uint64_t kMaxSampleValue = 341;
 	/** The BYTE type */
 	static const uint8_t kByte = 1;
 	/** The ASCII type */
@@ -414,6 +435,9 @@ private:
 	void SetPageInfoVector(uint16_t tag, uint16_t type, uint64_t cnt, void* data);
 	void ReadTiffFields();
 	inline void InvalidatePageInfo();
+
+	//get min max for conversion
+	void GetFloatMinMax();
 };
 
 void TIFReader::InvalidatePageInfo()
