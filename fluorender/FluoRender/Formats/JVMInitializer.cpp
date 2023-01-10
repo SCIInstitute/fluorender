@@ -175,7 +175,7 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args)
 #ifdef _WIN32
 	m_jvm_dll = LoadLibrary(s2ws(jvm_path).c_str());
 #else
-	m_jvm_dll = dlopen((const char*)jvm_path.mb_str(wxConvUTF8), RTLD_NOW);
+	m_jvm_dll = dlopen((const char*)jvm_path.c_str(), RTLD_NOW);
 #endif
 	if (m_jvm_dll == nullptr)
 	{
