@@ -4879,21 +4879,28 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 		reader_return = reader->Preprocess();
 	}
 
-	if (type == LOAD_TYPE_TIFF && reader->GetFpConvert())
+	if (type == LOAD_TYPE_TIFF)
 	{
-		double minv, maxv;
-		reader->GetFpRange(minv, maxv);
-		FpRangeDlg* dlg = new FpRangeDlg(m_frame);
-		dlg->SetRange(minv, maxv);
-		dlg->CenterOnParent();
-		int rval = dlg->ShowModal();
-		if (rval == wxID_OK)
+		if (m_fp_convert)
 		{
-			minv = dlg->GetMinValue();
-			maxv = dlg->GetMaxValue();
-			reader->SetFpRange(minv, maxv);
+			reader->SetFpRange(m_fp_min, m_fp_max);
 		}
-		delete dlg;
+		else if (reader->GetFpConvert())
+		{
+			double minv, maxv;
+			reader->GetFpRange(minv, maxv);
+			FpRangeDlg* dlg = new FpRangeDlg(m_frame);
+			dlg->SetRange(minv, maxv);
+			dlg->CenterOnParent();
+			int rval = dlg->ShowModal();
+			if (rval == wxID_OK)
+			{
+				minv = dlg->GetMinValue();
+				maxv = dlg->GetMaxValue();
+				reader->SetFpRange(minv, maxv);
+			}
+			delete dlg;
+		}
 	}
 
 	if (reader_return > 0)

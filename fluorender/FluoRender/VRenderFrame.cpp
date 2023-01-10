@@ -1483,6 +1483,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 		m_data_mgr.SetSkipBrick(m_skip_brick);
 		m_data_mgr.SetTimeId(m_time_id);
 		m_data_mgr.SetLoadMask(m_load_mask);
+		m_data_mgr.SetReaderFpConvert(false, 0, 1);
 		m_setting_dlg->SetTimeId(m_time_id);
 
 		bool enable_4d = false;
@@ -2933,13 +2934,20 @@ void VRenderFrame::SaveProject(wxString& filename)
 			}
 			else
 				fconfig.Write("path", str);
-			if (vd->GetReader())
+			BaseReader* reader = vd->GetReader();
+			if (reader)
 			{
 				//reader type
-				fconfig.Write("reader_type", vd->GetReader()->GetType());
-				fconfig.Write("slice_seq", vd->GetReader()->GetSliceSeq());
-				str = vd->GetReader()->GetTimeId();
+				fconfig.Write("reader_type", reader->GetType());
+				fconfig.Write("slice_seq", reader->GetSliceSeq());
+				str = reader->GetTimeId();
 				fconfig.Write("time_id", str);
+				//float convert
+				fconfig.Write("fp_convert", reader->GetFpConvert());
+				double minv, maxv;
+				reader->GetFpRange(minv, maxv);
+				fconfig.Write("fp_min", minv);
+				fconfig.Write("fp_max", maxv);
 			}
 			else
 			{
@@ -3654,6 +3662,12 @@ void VRenderFrame::OpenProject(wxString& filename)
 					wxString time_id;
 					fconfig.Read("time_id", &time_id);
 					m_data_mgr.SetTimeId(time_id);
+					bool fp_convert = false;
+					double minv, maxv;
+					fconfig.Read("fp_convert", &fp_convert, false);
+					fconfig.Read("fp_min", &minv, 0);
+					fconfig.Read("fp_max", &maxv, 1);
+					m_data_mgr.SetReaderFpConvert(fp_convert, minv, maxv);
 					wxString suffix = str.Mid(str.Find('.', true)).MakeLower();
 					if (reader_type == READER_IMAGEJ_TYPE)
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_IMAGEJ, true, cur_chan, cur_time);

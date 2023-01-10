@@ -32,6 +32,10 @@ DEALINGS IN THE SOFTWARE.
 
 MSKReader::MSKReader()
 {
+	m_fp_convert = false;
+	m_fp_min = 0;
+	m_fp_max = 1;
+
 	m_id_string = L"FluoRender_mask_reader_id";
 }
 

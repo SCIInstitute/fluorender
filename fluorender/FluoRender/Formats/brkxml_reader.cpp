@@ -51,6 +51,10 @@ BRKXMLReader::BRKXMLReader()
    m_max_value = 0.0;
    m_scalar_scale = 1.0;
 
+   m_fp_convert = false;
+   m_fp_min = 0;
+   m_fp_max = 1;
+
    m_batch = false;
    m_cur_batch = -1;
    m_file_type = BRICK_FILE_TYPE_NONE;
