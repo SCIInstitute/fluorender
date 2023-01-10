@@ -92,7 +92,7 @@ m_frame(frame)
 	sizer_v->Add(sizer1, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer2, 0, wxEXPAND);
-	sizer_v->Add(10, 10);
+	sizer_v->AddStretchSpacer(1);
 	sizer_v->Add(sizer3, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 

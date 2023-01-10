@@ -1462,10 +1462,10 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 		if (streaming)
 		{
 			str_streaming = "Large data streaming is currently ON\n";
-			str_streaming += wxString::Format("FluoRender will use %dMB GPU Memory\n", int(gpu_size));
-			str_streaming += wxString::Format("Data channel larger than %dMB will be divided into bricks of %d voxels\n",
+			str_streaming += wxString::Format("FluoRender uses up to %dMB GPU memory\n", int(gpu_size));
+			str_streaming += wxString::Format("Data >%dMB are divided into %d voxel bricks\n",
 				int (data_size), brick_size);
-			str_streaming += wxString::Format("System response time is %dms", resp_time);
+			str_streaming += wxString::Format("System response time: %dms", resp_time);
 		}
 		else
 			str_streaming = "Large data streaming is currently OFF";
@@ -1473,7 +1473,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 		prg_diag = new wxProgressDialog(
 			"FluoRender: Loading volume data...",
 			"",
-			100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
+			100, this, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
 		m_data_mgr.SetSliceSequence(m_sliceSequence);
 		m_data_mgr.SetChannSequence(m_channSequence);
@@ -1493,6 +1493,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 			wxGetApp().Yield();
 			prg_diag->Update(90*(j+1)/(int)files.Count(),
 				str_streaming);
+			prg_diag->CenterOnParent();
 
 			int ch_num = 0;
 			wxString filename = files[j];
@@ -1675,7 +1676,7 @@ void VRenderFrame::LoadMeshes(wxArrayString files, VRenderGLView* view)
 	wxProgressDialog *prg_diag = new wxProgressDialog(
 		"FluoRender: Loading mesh data...",
 		"Reading and processing selected mesh data. Please wait.",
-		100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
+		100, this, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
 	MeshGroup* group = 0;
 	if (files.Count() > 1)
@@ -2881,7 +2882,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 	prg_diag = new wxProgressDialog(
 		"FluoRender: Saving project...",
 		"Saving project file. Please wait.",
-		100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
+		100, this, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
 	wxString str;
 
@@ -3590,7 +3591,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 	prg_diag = new wxProgressDialog(
 		"FluoRender: Loading project...",
 		"Reading project file. Please wait.",
-		100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
+		100, this, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
 	//read streaming mode
 	if (fconfig.Exists("/memory settings"))
