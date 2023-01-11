@@ -53,7 +53,7 @@ m_frame(frame)
 	wxFloatingPointValidator<double> vald_fp(10);
 
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Select data conversion range:");
+	st = new wxStaticText(this, 0, "Converting floating-point data. Use the conversion range below?");
 	sizer1->Add(10, 10);
 	sizer1->Add(st, 0, wxALIGN_CENTER);
 
@@ -65,6 +65,7 @@ m_frame(frame)
 		wxDefaultPosition, wxDefaultSize , 0, vald_fp);
 	sizer2->Add(10, 10);
 	sizer2->Add(st, 0, wxALIGN_CENTER);
+	sizer2->Add(10, 10);
 	sizer2->Add(m_min_text, 0, wxALIGN_CENTER);
 	st = new wxStaticText(this, 0, "Maximum:",
 		wxDefaultPosition, wxDefaultSize);
@@ -72,13 +73,14 @@ m_frame(frame)
 		wxDefaultPosition, wxDefaultSize, 0, vald_fp);
 	sizer2->Add(10, 10);
 	sizer2->Add(st, 0, wxALIGN_CENTER);
+	sizer2->Add(10, 10);
 	sizer2->Add(m_max_text, 0, wxALIGN_CENTER);
 
 	//buttons
 	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
-	m_ok_btn = new wxButton(this, wxID_OK, "OK",
+	m_ok_btn = new wxButton(this, wxID_OK, "Yes",
 		wxDefaultPosition, wxDefaultSize);
-	m_cancel_btn = new wxButton(this, wxID_CANCEL, "Cancel",
+	m_cancel_btn = new wxButton(this, wxID_CANCEL, "Use Default",
 		wxDefaultPosition, wxDefaultSize);
 	sizer3->AddStretchSpacer(1);
 	sizer3->Add(m_ok_btn, 0, wxALIGN_CENTER);

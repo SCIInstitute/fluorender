@@ -395,6 +395,10 @@ private:
 	static const uint8_t kLong = 4;
 	/** The RATIONAL type */
 	static const uint8_t kRational = 5;
+	/** The Float type 32-bit*/
+	static const uint8_t kFloat = 11;
+	/** The Float type 64-bit*/
+	static const uint8_t kDouble = 12;
 	/** The TIFF_LONG8 type (unsigned 8-byte int)*/
 	static const uint8_t kLong8 = 16;
 	/** The TIFF_SLONG8 type (signed 8-byte int)*/
@@ -437,7 +441,8 @@ private:
 	inline void InvalidatePageInfo();
 
 	//get min max for conversion
-	void GetFloatMinMax();
+	bool GetTagMinMax();
+	bool GetFloatMinMax();
 };
 
 void TIFReader::InvalidatePageInfo()
@@ -470,6 +475,8 @@ void TIFReader::InvalidatePageInfo()
 	m_page_info.ull_strip_byte_counts.clear();
 	m_page_info.ull_tile_offsets.clear();
 	m_page_info.ull_tile_byte_counts.clear();
+	m_page_info.b_min_sample_value = false;
+	m_page_info.b_max_sample_value = false;
 }
 
 //get description

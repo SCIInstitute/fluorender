@@ -127,16 +127,6 @@ int TIFReader::Preprocess()
 		CloseTiff();
 		return READER_FP64_DATA;
 	}
-	//get min max from tag
-	bool got_minmax = false;
-	double tag_min = GetTiffField(kMinSampleValue);
-	double tag_max = GetTiffField(kMaxSampleValue);
-	if (tag_min != 0.0 && tag_max != 0.0)
-	{
-		m_fp_min = tag_min;
-		m_fp_max = tag_max;
-		got_minmax = true;
-	}
 	GetImageDescription(img_desc);
 	string search_str = "hyperstack=true";
 	int64_t str_pos = img_desc.find(search_str);
@@ -155,32 +145,14 @@ int TIFReader::Preprocess()
 		if (bits == 16)
 		{
 			double dval = 0;
-			//search_str = "min=";
-			//str_pos = img_desc.find(search_str);
-			//if (str_pos != -1)
-			//	dval = get_double(img_desc, str_pos + search_str.length());
-			//if (dval)
-			//	m_fp_min = dval;
-
-			//dval = 0;
 			search_str = "max=";
 			str_pos = img_desc.find(search_str);
 			if (str_pos != -1)
 				dval = get_double(img_desc, str_pos + search_str.length());
 			if (dval)
 			{
-				//if (bits == 16)
-				//{
-					m_max_value = dval;
-					m_scalar_scale = 65535.0 / m_max_value;
-				//}
-				//else
-				//{
-				//	m_fp_max = dval;
-				//	m_max_value = 65535;
-				//	m_scalar_scale = 1;
-				//}
-				//got_minmax = true;
+				m_max_value = dval;
+				m_scalar_scale = 65535.0 / m_max_value;
 			}
 		}
 
@@ -436,9 +408,15 @@ int TIFReader::Preprocess()
 		else m_chan_num = 0;
 	}
 
-	//float get minmax
-	if (bits > 16 && !got_minmax)
-		GetFloatMinMax();
+	if (bits > 16)
+	{
+		//get min max from tag
+		bool bval = GetTagMinMax();
+		if (!bval)
+			GetFloatMinMax(); //float get minmax
+		m_max_value = 65535;
+		m_scalar_scale = 1;
+	}
 
 	return READER_OK;
 }
@@ -702,13 +680,11 @@ void TIFReader::SetPageInfo(uint16_t tag, uint64_t answer)
 		break;
 	case kMinSampleValue:
 		m_page_info.b_min_sample_value = true;
-		if (answer)
-			memcpy(&(m_page_info.d_min_sample_value), &answer, sizeof(double));
+		memcpy(&(m_page_info.d_min_sample_value), &answer, sizeof(double));
 		break;
 	case kMaxSampleValue:
 		m_page_info.b_max_sample_value = true;
-		if (answer)
-			memcpy(&(m_page_info.d_max_sample_value), &answer, sizeof(double));
+		memcpy(&(m_page_info.d_max_sample_value), &answer, sizeof(double));
 		break;
 	}
 }
@@ -977,6 +953,34 @@ void TIFReader::ReadTiffFields()
 				double rat = static_cast<double>(num) /
 					static_cast<double>(den);
 				memcpy(&answer, &rat, sizeof(double));
+			}
+			else if (type == kFloat)
+			{
+				uint32_t value = 0;
+				if (cnt > (isBig_ ? 2 : 1))
+				{
+					if (isBig_)
+					{
+						tiff_stream.read((char*)&addr64, sizeof(uint64_t));
+						addr64 = swap_ ? SwapLong(addr64) : addr64;
+					}
+					else
+					{
+						tiff_stream.read((char*)&addr32, sizeof(uint32_t));
+						addr64 = static_cast<uint64_t>(swap_ ? SwapWord(addr32) : addr32);
+					}
+					tiff_stream.seekg(addr64, tiff_stream.beg);
+					buf = (char*)(new uint32_t[cnt]);
+					tiff_stream.read((char*)buf, sizeof(uint32_t) * cnt);
+				}
+				else
+				{
+					tiff_stream.read((char*)&value, sizeof(uint32_t));
+					if (swap_) value = SwapWord(value);
+					float fval = reinterpret_cast<float&>(value);
+					double dval = static_cast<double>(fval);
+					memcpy(&answer, &dval, sizeof(double));
+				}
 			}
 			else
 			{
@@ -2339,11 +2343,66 @@ int TIFReader::GetPatternNumber(std::wstring &path_name, int mode, bool count)
 	return number;
 }
 
-void TIFReader::GetFloatMinMax()
+bool TIFReader::GetTagMinMax()
 {
 	m_fp_min = std::numeric_limits<double>::max();
 	m_fp_max = -m_fp_min;
 	OpenTiff(m_path_name.c_str());
+	uint64_t numPages = GetNumTiffPages();
+	InvalidatePageInfo();
+
+	if (isHyperstack_)
+	{
+		uint64_t pageindex = m_4d_seq[0].slices[0].pagenumber;
+		for (int i = 0; i < numPages; ++i)
+		{
+			TurnToPage(pageindex);
+			ReadTiffFields();
+			m_fp_min = std::min(m_fp_min, GetTiffFieldD(kMinSampleValue));
+			m_fp_max = std::max(m_fp_max, GetTiffFieldD(kMaxSampleValue));
+			pageindex += m_chan_num;
+		}
+	}
+	else
+	{
+		uint64_t val_pageindex = 0;
+		uint64_t for_size = numPages;
+		for (uint64_t pageindex = 0; pageindex < for_size; ++pageindex)
+		{
+			TurnToPage(pageindex);
+			ReadTiffFields();
+
+			//this is a thumbnail, skip
+			if (GetTiffField(kSubFileTypeTag) == 1)
+				continue;
+
+			m_fp_min = std::min(m_fp_min, GetTiffFieldD(kMinSampleValue));
+			m_fp_max = std::max(m_fp_max, GetTiffFieldD(kMaxSampleValue));
+
+			val_pageindex++;
+			if (val_pageindex >= numPages)
+				break;
+		}
+	}
+
+	CloseTiff();
+
+	if (m_fp_min == 0.0 ||
+		m_fp_max == 0.0)
+	{
+		m_fp_min = 0;
+		m_fp_max = 1;
+		return false;
+	}
+	return true;
+}
+
+bool TIFReader::GetFloatMinMax()
+{
+	m_fp_min = std::numeric_limits<double>::max();
+	m_fp_max = -m_fp_min;
+	OpenTiff(m_path_name.c_str());
+	uint64_t numPages = GetNumTiffPages();
 	InvalidatePageInfo();
 
 	uint64_t width = GetTiffField(kImageWidthTag);
@@ -2352,7 +2411,7 @@ void TIFReader::GetFloatMinMax()
 	uint64_t samples = GetTiffField(kSamplesPerPixelTag);
 	if (samples == 0 && width > 0 && height > 0) samples = 1;
 	unsigned long long total_size = (unsigned long long)width *
-		(unsigned long long)height * (unsigned long long)m_slice_num;
+		(unsigned long long)height * (unsigned long long)numPages;
 
 	uint64_t strip_size;
 	uint64_t tile_size;
@@ -2395,7 +2454,7 @@ void TIFReader::GetFloatMinMax()
 	if (isHyperstack_)
 	{
 		uint64_t pageindex = m_4d_seq[0].slices[0].pagenumber;
-		for (int i = 0; i < m_slice_num; ++i)
+		for (int i = 0; i < numPages; ++i)
 		{
 			if (!imagej_raw_)
 				TurnToPage(pageindex);
@@ -2414,7 +2473,7 @@ void TIFReader::GetFloatMinMax()
 	else
 	{
 		uint64_t val_pageindex = 0;
-		uint64_t for_size = m_slice_num;
+		uint64_t for_size = numPages;
 		for (uint64_t pageindex = 0; pageindex < for_size; ++pageindex)
 		{
 			if (!imagej_raw_)
@@ -2469,7 +2528,7 @@ void TIFReader::GetFloatMinMax()
 				}
 			}
 			val_pageindex++;
-			if (val_pageindex >= m_slice_num)
+			if (val_pageindex >= numPages)
 				break;
 		}
 	}
@@ -2481,7 +2540,7 @@ void TIFReader::GetFloatMinMax()
 	{
 		m_fp_min = 0;
 		m_fp_max = 1;
+		return false;
 	}
-	m_max_value = 65535;
-	m_scalar_scale = 1;
+	return true;
 }
