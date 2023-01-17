@@ -1,0 +1,27 @@
+Thank you for using FluoRender. Download the installer package for your operating system from the list of assets down below. Videos demonstrating the latest functions of FluoRender can be found on YouTube.
+FluoRender Version 2.29 added a machine-learning module for training and applying various settings in FluoRender. The current version implemented machine learning for localized component generation (for volume segmentation) and volume property settings (for visualization). We also improved the ruler tools to enable measurement over time. Combined with the ability to directly load video files, the improved ruler tools can be used for analyzing movements and gestures in videos. Several issues in previous versions were also fixed.
+
+A unified user interface, called the machine learning manager, is added for the management of all machine-learning related operations. These operations are organized into categories, each having a similar workflow to manage training tables and start/stop training.
+Machine learning results can be applied to generate components at local level for more accurate and easier volume segmentation.
+Machine learning results can be applied to generate volume property settings.
+The locations of ruler points can be modified over time. Rulers can be animated over time to track the movements of single points or complex behaviors.
+A Magnet tool allows drawing a 3D curve and attracting closest ruler points to the curve. Rulers with multiple points can be modified easily with the magnet tool, especially for tracking over time.
+A Redraw tool allows drawing a 3D curve and redistributing all points of the closest ruler on the curve. Rulers with multiple points can be redrawn quickly without changing their topology.
+A setting is added to adjust the distance between two ruler points in the screen space when the pencil tool or magnet tool is used for drawing a curve.
+A script task for exporting ruler coordinates over time. Rulers can be used to track complex movements over time. Use this script to export the analysis results.
+A script task for replacing a volume channel. Use this script to change volume data upon finishing and rewinding of a script.
+A script task for switching the current script. Use this script to load a new script upon finishing and rewinding of a script.
+A script task for loading a project. Use this script to load a project upon finishing and rewinding of a script.
+Image registration can now be constrained using a paint mask. Only the data within the mask are considered, which can improve efficiency and accuracy.
+A DPI setting is added to the screen capture options. It can be used to automatically enlarge the captured image when a high DPI value is set. A base value of 72DPI is used. The DPI value is also saved in TIFF metadata.
+Commonly used video files can be directly loaded into FluoRender as 3-channel time-dependent volumes of single Z slices. Supported video containers include MP4, M4V, MOV, AVI, WMV, etc.
+When loading TIFF images of the 32-bit floating point format, the intensity values are converted to 16-bit integers.
+FluoRender Version 2.29 made these improvements or fixed issues:
+
+An option to customize the behavior of the fixation operation in component generation. It determines whether the fixated regions can continue growing into other regions or they need to be constrained.
+A memory allocation issue when a time-dependent data set was processed using scripts.
+An issue that FluoRender crashed when an external program, such as a web browser or spreadsheet editor, was called to display analysis results using a script.
+Other user interface issues.
+Notes:
+
+The Windows installer was updated on Jan-17-2023 to grant access permissions to the machine-learning tables in the installed directory. This is necessary for the machine-learning module to work. Otherwise, copy the FluoRender folder to a user directory.

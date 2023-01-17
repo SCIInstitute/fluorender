@@ -1,0 +1,8 @@
+#!/bin/bash
+PRODUCT_HOME=/Applications/FluoRender.app/Contents
+echo "Post installation process started"
+#Change permissions in home directory
+echo "Change permissions in product home"
+cd ${PRODUCT_HOME}
+chmod -R a+rwx MacOS
+echo "Post installation process finished"

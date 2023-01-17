@@ -1,0 +1,2 @@
+ReadGMM:
+"E:/DATA/TGMM_test/TGMMruns/GMEMtracking3D_2016_9_2_17_22_38/XML_finalResult_lht_bckgRm/GMEMfinalResult_frame0000.xml" "E:/DATA/TGMM_test/data/B4D_T" 512 512 33 "E:/DATA/TGMM_test/data/track.track"

@@ -1,5 +1,0 @@
-C/C++, Debug Information Format: NA -> C7 compatible (/Z7)
-Linker, Debugging, Generate Debug Info: No -> Generate Debug Information (/DEBUG)
-Linker, Optimization, References: No (/OPT:NOREF) -> Yes (/OPT:REF)
-OBJ, C/C++, Debug Information Format: NA -> C7 compatible (/Z7)
-OBJ, C/C++, Optimization, Optimization: Maximum Optimization (Favor Speed) (/O2) -> Disabled (/Od)
