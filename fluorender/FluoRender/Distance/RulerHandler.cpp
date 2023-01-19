@@ -1517,6 +1517,16 @@ int RulerHandler::Profile(int index)
 	return Profile(ruler);
 }
 
+int RulerHandler::ProfileAll()
+{
+	if (!m_ruler_list)
+		return 0;
+	int c = 0;
+	for (size_t i = 0; i < m_ruler_list->size(); ++i)
+		c += Profile(i);
+	return c;
+}
+
 int RulerHandler::Distance(int index, std::string filename)
 {
 	if (!m_view || !m_ruler_list || !m_ca)

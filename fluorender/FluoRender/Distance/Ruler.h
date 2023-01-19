@@ -323,7 +323,7 @@ namespace flrd
 		fluo::Point GetPointTransformed(int index)
 		{
 			fluo::Point p, tfp;
-			if (GetPoint(m_work_time, p))
+			if (GetPoint(index, p))
 				m_tform.project(p, tfp);
 			return tfp;
 		}

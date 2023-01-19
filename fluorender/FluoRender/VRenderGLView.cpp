@@ -5027,6 +5027,14 @@ void VRenderGLView::Set4DSeqFrame(int frame, int start_frame, int end_frame, boo
 	m_selector.SetVolume(m_cur_vol);
 	m_calculator.SetVolumeA(m_cur_vol);
 
+	//update ruler intensity values
+	m_ruler_handler.ProfileAll();
+	m_frame->GetMeasureDlg()->UpdateList();
+
+	//clear results if rewind
+	if (rewind)
+		m_scriptor.ClearResults();
+
 	RefreshGL(17);
 }
 

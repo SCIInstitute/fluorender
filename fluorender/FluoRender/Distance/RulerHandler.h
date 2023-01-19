@@ -175,6 +175,7 @@ namespace flrd
 
 		int Profile(flrd::Ruler* ruler);
 		int Profile(int index);
+		int ProfileAll();
 		int Distance(int index, std::string filename);
 
 		void SetFsize(int ival)
