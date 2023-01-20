@@ -165,7 +165,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 if (WIN32 OR APPLE)
   set(CMAKE_CXX_STANDARD 20)
-else
+else()
   set(CMAKE_CXX_STANDARD 17)
   add_definitions(-DCMAKE_C_COMPILER=gcc-11)
 endif()
