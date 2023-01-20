@@ -420,7 +420,7 @@ bool QVideoEncoder::set_frame_rgb_data(unsigned char * data) {
 	}
 	//this is where data gets cropped if width/height are not divisible by 16
 	for (size_t i = 0; i < height_; i++)
-		std::memcpy(
+		memcpy(
 			aligned_data + (3 * i * width_),
 			data + (3 * i * actual_width_),
 			3 * width_);

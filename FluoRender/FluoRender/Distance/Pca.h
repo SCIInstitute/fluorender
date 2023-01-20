@@ -102,7 +102,7 @@ namespace flrd
 				return;
 			if (size > 9)
 				size = 9;
-			std::memcpy(m_cov, &cov[0], size * sizeof(double));
+			memcpy(m_cov, &cov[0], size * sizeof(double));
 			if (size < 9)
 			{
 				m_cov[2][2] = m_cov[1][2];
