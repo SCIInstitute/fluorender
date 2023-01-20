@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Table.h>
 #include <FileIO/File.h>
 #include <Global.h>
+#include <cstring>
 
 using namespace flrd;
 
