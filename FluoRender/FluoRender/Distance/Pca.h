@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Point.h>
 #include <Types/Vector.h>
 #include <Types/BPoint.h>
+#include <cstring>
 #include <vector>
 
 namespace flrd
@@ -102,7 +103,7 @@ namespace flrd
 				return;
 			if (size > 9)
 				size = 9;
-			memcpy(m_cov, &cov[0], size * sizeof(double));
+			std::memcpy(m_cov, &cov[0], size * sizeof(double));
 			if (size < 9)
 			{
 				m_cov[2][2] = m_cov[1][2];

@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "RecordHistParams.h"
 #include <Table.h>
 #include <FileIO/File.h>
+#include <cstring>
 #include <Global.h>
 
 using namespace flrd;
@@ -115,13 +116,13 @@ size_t RecordHistParams::getOutputSize()
 void RecordHistParams::getInputData(float* data)
 {
 	if (m_input)
-		memcpy(data, &(m_input->m_data[0]), sizeof(float)*getInputSize());
+		std::memcpy(data, &(m_input->m_data[0]), sizeof(float)*getInputSize());
 }
 
 void RecordHistParams::getOutputData(float* data)
 {
 	if (m_output)
-		memcpy(data, &(m_output->m_data[0]), sizeof(float)*getOutputSize());
+		std::memcpy(data, &(m_output->m_data[0]), sizeof(float)*getOutputSize());
 }
 
 void RecordHistParams::getInputData(std::vector<float>& data)
