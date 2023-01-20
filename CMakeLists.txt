@@ -43,6 +43,12 @@ if(WIN32)
   endif()
 endif()
 
+if (WIN32 OR APPLE)
+else()
+  set(CMAKE_C_COMPILER "gcc-12")
+  set(CMAKE_CXX_COMPILER "/usr/bin/g++-12")
+endif()
+
 project(FluoRender)
 
 IF((COMMAND cmake_policy) AND NOT (CMAKE_MAJOR_VERSION LESS 3))
@@ -167,7 +173,6 @@ if (WIN32 OR APPLE)
   set(CMAKE_CXX_STANDARD 20)
 else()
   set(CMAKE_CXX_STANDARD 17)
-  add_definitions(-DCMAKE_C_COMPILER=gcc-11)
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
