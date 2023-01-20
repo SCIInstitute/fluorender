@@ -283,8 +283,6 @@ else()
   find_library(AVFORMAT_LIBRARY avformat)
   find_path(AVUTIL_INCLUDE_DIR libavutil/avutil.h)
   find_library(AVUTIL_LIBRARY avutil)
-  find_path(AVDEVICE_INCLUDE_DIR libavdevice/avdevice.h)
-  find_library(AVDEVICE_LIBRARY avdevice)
 endif()
 
 # FluoRender
