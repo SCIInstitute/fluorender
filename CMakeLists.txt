@@ -750,8 +750,8 @@ if(UNIX OR APPLE OR MINGW)
     ${PNG_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${ND2_LIBRARIES})
-  target_link_libraries(Tester
-    ${FFMPEG_LIBRARIES})
+#  target_link_libraries(Tester
+#    ${FFMPEG_LIBRARIES})
 elseif(WIN32)
   target_link_libraries(FluoRender
     secur32.lib
