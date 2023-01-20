@@ -212,6 +212,7 @@ elseif(UNIX OR MINGW)
 endif()
 
 # OpenGL
+set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 
 # Boost
