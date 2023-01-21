@@ -34,7 +34,6 @@
   //in order to enable C++ to use them you have to append -D__STDC_CONSTANT_MACROS to your CXXFLAGS
 
 #include "QVideoEncoder.h"
-#include <cstring>
 
 QVideoEncoder::QVideoEncoder() {
 	/* Initialize libavcodec, and register all codecs and formats. */

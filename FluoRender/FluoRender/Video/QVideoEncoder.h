@@ -17,6 +17,7 @@ THIS SOFTWARE IS PROVIDED BY COPYRIGHT HOLDERS ``AS IS'' AND ANY EXPRESS OR IMPL
 #define __QVideoEncoder_H
 
 #include <string>
+#include <cstring>
 #include <stdint.h>
 #include <cstdio>
 #include <iostream>
