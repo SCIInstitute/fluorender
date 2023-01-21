@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/Pca.h>
 #include <Types/Transform.h>
 #include <utility.h>
-#include <Algorithm>
+#include <algorithm>
 #include <cmath>
 #include <functional>
 

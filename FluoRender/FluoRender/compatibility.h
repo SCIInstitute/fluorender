@@ -385,7 +385,6 @@ inline void INC_NUMBER(std::string& s)
 #else // MAC OSX or LINUX
 
 #include <string>
-#include <cstring>
 #include <fstream>
 #include <locale>
 #include <unistd.h>
@@ -400,6 +399,7 @@ inline void INC_NUMBER(std::string& s)
 #include <wx/fileconf.h>
 #include <wx/wfstream.h>
 #include <cctype>
+#include <cstring>
 
 #define GETCURRENTDIR getcwd
 

@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <GL/glew.h>
 #include "compatibility.h"
 #include <vector>
-#include <string.h>
 #include <tiffio.h>
 #include <Types/BBox.h>
 #include <Types/Color.h>

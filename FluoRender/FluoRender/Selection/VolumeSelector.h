@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 #include <glm/glm.hpp>
 #include <chrono>
+#include <cstring>
 
 #define BRUSH_TOOL_ITER_WEAK	10
 #define BRUSH_TOOL_ITER_NORMAL	30
@@ -66,8 +67,8 @@ namespace flrd
 		}
 		void SetProjection(double* mvmat, double *prjmat)
 		{
-			memcpy(m_mvmat, mvmat, 16 * sizeof(double));
-			memcpy(m_prjmat, prjmat, 16 * sizeof(double));
+			std::memcpy(m_mvmat, mvmat, 16 * sizeof(double));
+			std::memcpy(m_prjmat, prjmat, 16 * sizeof(double));
 		}
 		void SetBrushIteration(int num) { m_iter_num = num; }
 		int GetBrushIteration() { return m_iter_num; }
