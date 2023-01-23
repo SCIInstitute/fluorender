@@ -206,6 +206,7 @@ VRenderView::VRenderView(VRenderFrame* frame,
 	attriblist.Depth(depth_bit);
 	attriblist.SampleBuffers(1);
 	attriblist.Samplers(samples);
+#ifdef _DARWIN
 	if (gl_major_ver == 3)
 	{
 		attriblist.AddAttribute(kCGLPFAOpenGLProfile);
@@ -216,6 +217,9 @@ VRenderView::VRenderView(VRenderFrame* frame,
 		attriblist.AddAttribute(kCGLPFAOpenGLProfile);
 		attriblist.AddAttribute(kCGLOGLPVersion_GL4_Core);
 	}
+#else
+	attriblist.AddAttribute(GLX_CONTEXT_CORE_PROFILE_BIT_ARB);
+#endif
 #endif
 	attriblist.DoubleBuffer();
 	attriblist.EndList();
