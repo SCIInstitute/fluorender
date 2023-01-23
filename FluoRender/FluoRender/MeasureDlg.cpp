@@ -2282,15 +2282,11 @@ void MeasureDlg::OnRelaxValueSpin(wxSpinDoubleEvent& event)
 
 void MeasureDlg::OnRelaxValueText(wxCommandEvent& event)
 {
-	wxString str = m_relax_value_spin->GetText()->GetValue();
-	double dval;
-	if (str.ToDouble(&dval))
-	{
-		m_calculator->SetF1(dval);
-		//relax
-		if (m_frame && m_frame->GetSettingDlg())
-			m_frame->GetSettingDlg()->SetRulerRelaxF1(dval);
-	}
+	double dval = m_relax_value_spin->GetValue();
+	m_calculator->SetF1(dval);
+	//relax
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetRulerRelaxF1(dval);
 }
 
 void MeasureDlg::OnRelaxData(wxCommandEvent& event)
