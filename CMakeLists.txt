@@ -284,11 +284,28 @@ elseif(APPLE)
   include_directories(${FluoRender_SOURCE_DIR}/FluoRender/ffmpeg/include)
   file(GLOB FFMPEG_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/ffmpeg/lib/OSX/*.a)
 else()
-  find_path(FFMPEG_INCLUDE_DIR libavcodec/avcodec.h)
-  include_directories(${FFMPEG_INCLUDE_DIR})
-  find_library(AVCODEC_LIBRARY avcodec)
-  find_library(AVFORMAT_LIBRARY avformat)
-  find_library(AVUTIL_LIBRARY avutil)
+  #find_path(FFMPEG_INCLUDE_DIR libavcodec/avcodec.h)
+  #include_directories(${FFMPEG_INCLUDE_DIR})
+  #find_library(AVCODEC_LIBRARY avcodec)
+  #find_library(AVFORMAT_LIBRARY avformat)
+  #find_library(AVUTIL_LIBRARY avutil)
+  find_package( avformat )
+  find_package( avcodec )
+  find_package( avutil )
+  find_package( swscale )
+  include_directories(
+    ${AVFORMAT_INCLUDE_DIR}
+    ${AVCODEC_INCLUDE_DIR}
+    ${AVUTIL_INCLUDE_DIR}
+    ${SWSCALE_INCLUDE_DIR}
+  )
+  set(
+    FFMPEG_LIBRARIES
+    ${AVFORMAT_LIBRARY}
+    ${AVCODEC_LIBRARY}
+    ${AVUTIL_LIBRARY}
+    ${SWSCALE_LIBRARY}
+)
 endif()
 
 # FluoRender
