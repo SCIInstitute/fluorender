@@ -747,7 +747,7 @@ if(APPLE)
     FREETYPE_LIBRARIES ${FREETYPE_LIBRARIES})
   message(STATUS "${FREETYPE_LIBRARIES}")
 elseif(UNIX OR MINGW)
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread -ldl LDLIBS=-lstdc++fs")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread -ldl")
 endif()
 
 target_compile_options(FluoRender PRIVATE "$<$<CONFIG:RELEASE>:${RELEASE_FLAGS}>")
@@ -756,6 +756,7 @@ target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
 # link the libraries
 if(UNIX OR APPLE OR MINGW)
   target_link_libraries(FluoRender
+    stdc++fs
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
