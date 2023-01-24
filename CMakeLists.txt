@@ -290,12 +290,14 @@ else()
   find_library(AVFORMAT_LIBRARY avformat)
   find_library(AVUTIL_LIBRARY avutil)
   find_library(SWSCALE_LIBRARY swscale)
+  find_library(SWRESAMPLE_LIBRARY swresample)
   set(
     FFMPEG_LIBRARIES
     ${AVFORMAT_LIBRARY}
     ${AVCODEC_LIBRARY}
     ${AVUTIL_LIBRARY}
     ${SWSCALE_LIBRARY}
+    ${SWRESAMPLE_LIBRARY}
 )
 endif()
 
