@@ -218,6 +218,11 @@ VRenderView::VRenderView(VRenderFrame* frame,
 		attriblist.AddAttribute(kCGLOGLPVersion_GL4_Core);
 	}
 #else
+	attriblist.AddAttribute(GLX_CONTEXT_MAJOR_VERSION_ARB);
+	attriblist.AddAttribute(gl_major_ver);
+	attriblist.AddAttribute(GLX_CONTEXT_MINOR_VERSION_ARB);
+	attriblist.AddAttribute(gl_minor_ver);
+	attriblist.AddAttribute(GLX_CONTEXT_PROFILE_MASK_ARB);
 	attriblist.AddAttribute(GLX_CONTEXT_CORE_PROFILE_BIT_ARB);
 #endif
 #endif
