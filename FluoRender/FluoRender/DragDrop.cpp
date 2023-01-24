@@ -72,7 +72,7 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 					 suffix == ".lsm" ||
 					 suffix == ".xml" ||
 					 suffix == ".vvd" ||
-#ifndef _DARWIN
+#ifdef _WIN32
 					 suffix == ".nd2" ||
 #endif
 					 suffix == ".czi" ||

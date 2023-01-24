@@ -85,6 +85,7 @@ void ND2Reader::SetFile(wstring &file)
 
 int ND2Reader::Preprocess()
 {
+#ifdef _WIN32
 	LIMCWSTR filename = m_path_name.c_str();
 	LIMFILEHANDLE h = Lim_FileOpenForRead(filename);
 	if (h == nullptr)
@@ -103,8 +104,10 @@ int ND2Reader::Preprocess()
 	ReadSequences(h);
 
 	Lim_FileClose(h);
-
 	return READER_OK;
+#else
+	return READER_OPEN_FAIL;
+#endif
 }
 
 void ND2Reader::SetSliceSeq(bool ss)
@@ -188,7 +191,7 @@ double ND2Reader::GetExcitationWavelength(int chan)
 Nrrd* ND2Reader::Convert(int t, int c, bool get_max)
 {
 	Nrrd *data = 0;
-
+#ifdef _WIN32
 	LIMCWSTR filename = m_path_name.c_str();
 	LIMFILEHANDLE h = Lim_FileOpenForRead(filename);
 	if (h == nullptr)
@@ -240,7 +243,7 @@ Nrrd* ND2Reader::Convert(int t, int c, bool get_max)
 
 	Lim_FileClose(h);
 	m_cur_time = t;
-
+#endif
 	return data;
 }
 
@@ -300,6 +303,7 @@ void ND2Reader::AddFrameInfo(FrameInfo &frame)
 	chaninfo->chann.push_back(frame);
 }
 
+#ifdef _WIN32
 bool ND2Reader::ReadChannel(LIMFILEHANDLE h, int t, int c, void* val)
 {
 	ChannelInfo* cinfo = GetChaninfo(t, 0);
@@ -657,3 +661,34 @@ void ND2Reader::GetFramePos(LIMSTR fmd, FrameInfo& frame)
 		frame.ysize = stoi(y);
 	}
 }
+#else
+void ND2Reader::ReadSequences(void* h)
+{
+
+}
+
+void ND2Reader::ReadAttributes(void* h)
+{
+
+}
+
+void ND2Reader::ReadTextInfo(void* h)
+{
+
+}
+
+void ND2Reader::ReadMetadata(void* h)
+{
+
+}
+
+void ND2Reader::GetFramePos(void* fmd, FrameInfo& frame)
+{
+
+}
+
+bool ND2Reader::ReadChannel(void* h, int t, int c, void* val)
+{
+	return false;
+}
+#endif

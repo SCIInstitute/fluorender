@@ -1353,7 +1353,7 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose the volume data file", "", "",
-#ifndef _DARWIN
+#ifdef _WIN32
 		"All Supported|*.tif;*.tiff;*.lif;*.lof;*.nd2;*.oib;*.oif;*.xml;*.lsm;*.czi;*.nrrd;*.vvd;*.mp4;*.m4v;*.mov;*.avi;*.wmv|"\
 		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
 		"Leica Image File Format (*.lif)|*.lif|"\
