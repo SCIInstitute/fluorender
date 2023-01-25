@@ -142,6 +142,42 @@ We recommend building FluoRender outside of the source tree. <br/>
     <key>NSHighResolutionCapable</key>
     <true/>
 
+<h4>Linux</h4> 
+
+1) Make sure OpenGL and OpenCL drivers are correctly installed and configured.
+
+   Libs needed: libOpenCL1; headers needed: opencl-headers, glu-devel.
+
+2) Other dependencies include: git, cmake, jdk, gtk3-devel, ffmpeg-4-libavcodec-devel, ffmpeg-4-libavformat-devel, ffmpeg-4-libavutil-devel, ffmpeg-4-libswscale-devel, ffmpeg-4-libswresample-devel, etc.
+
+3) Clone and build boost.
+
+   * <code>git clone --recursive https://github.com/boostorg/boost.git</code>
+
+   * <code>cd boost</code>
+
+   * <code>./bootstrap.sh</code>
+
+   * <code>./b2</code>
+
+4) Clone and build wxWidgets.
+
+   * <code>git clone --recursive https://github.com/wxWidgets/wxWidgets.git</code>
+
+   * <code>cd wxwidgets</code>
+
+   * <code>mkdir mybuild</code>
+
+   * <code>cd mybuild</code>
+
+   * <code>../configure --disable-shared --enable-cxx11 --with-cxx=11 --enable-stl --enable-std_containers --enable-std_iostreams --enable-std_string_conv_in_wxstring --with-libpng=builtin --with-libtiff=builtin --with-libjpeg=builtin --with-zlib=builtin --with-opengl</code>
+
+   * <code>make</code>
+
+5) Use CMake to generate FluoRender project.
+
+6) Build FluoRender. An IDE such as CodeBlocks can be used.
+
 Contact
 ========
 
