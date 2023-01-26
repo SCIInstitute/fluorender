@@ -33,7 +33,7 @@ Building FluoRender
 
    Libs needed: libOpenCL1, glu-devel; headers needed: opencl-headers.
 
-2) Other dependencies include: gcc-12, git, cmake, jdk, gtk3-devel, ffmpeg-4-libavcodec-devel, ffmpeg-4-libavformat-devel, ffmpeg-4-libavutil-devel, ffmpeg-4-libswscale-devel, ffmpeg-4-libswresample-devel, etc.
+2) Other dependencies include: gcc, g++, git, cmake, jdk, gtk3-devel, ffmpeg-4-libavcodec-devel, ffmpeg-4-libavformat-devel, ffmpeg-4-libavutil-devel, ffmpeg-4-libswscale-devel, ffmpeg-4-libswresample-devel, etc.
 
 3) Clone and build boost.
 
