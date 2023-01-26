@@ -370,10 +370,13 @@ void MachineLearningPanel::EvenSizeBotGrid()
 	int w, h;
 	m_bot_grid->GetSize(&w, &h);
 	int colw = (w - s0) / 2;
-	m_bot_grid->SetColSize(0, colw);
-	m_bot_grid->SetColMinimalWidth(0, colw);
-	m_bot_grid->SetColSize(1, colw);
-	m_bot_grid->SetColMinimalWidth(1, colw);
+	if (colw > 0)
+	{
+		m_bot_grid->SetColSize(0, colw);
+		m_bot_grid->SetColMinimalWidth(0, colw);
+		m_bot_grid->SetColSize(1, colw);
+		m_bot_grid->SetColMinimalWidth(1, colw);
+	}
 }
 
 void MachineLearningPanel::OnTopGridCellChanging(wxGridEvent& event)
