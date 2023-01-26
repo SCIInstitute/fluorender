@@ -28,10 +28,22 @@
 
 # This is an CMake configuration file for FluoRender
 
+#??
+if (NOT WIN32 AND NOT APPLE)
+  SET(ENABLE_GDB ON CACHE BOOL "Enable GDB")
+  if (ENABLE_GDB)
+    set(CMAKE_BUILD_TYPE Debug)
+    set(CMAKE_C_FLAGS_DEBUG "-g -O0")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+  endif()
+endif()
+
 # to build for Win7, disable xinput
-SET(USE_XINPUT ON CACHE BOOL "Use Xinput on Windows")
-if (USE_XINPUT)
-  add_definitions(-DUSE_XINPUT=1)
+if (WIN32)
+  SET(USE_XINPUT ON CACHE BOOL "Use Xinput on Windows")
+  if (USE_XINPUT)
+    add_definitions(-DUSE_XINPUT=1)
+  endif()
 endif()
 
 cmake_minimum_required(VERSION 2.8.12)
