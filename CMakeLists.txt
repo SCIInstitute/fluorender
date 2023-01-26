@@ -55,11 +55,11 @@ if(WIN32)
   endif()
 endif()
 
-if (WIN32 OR APPLE)
-else()
-  set(CMAKE_C_COMPILER "gcc-12")
-  set(CMAKE_CXX_COMPILER "/usr/bin/g++-12")
-endif()
+#if (WIN32 OR APPLE)
+#else()
+#  set(CMAKE_C_COMPILER "gcc-12")
+#  set(CMAKE_CXX_COMPILER "/usr/bin/g++-12")
+#endif()
 
 project(FluoRender)
 
