@@ -880,7 +880,7 @@ void VRenderGLView::Draw()
 
 	// clear color and depth buffers
 	glClearDepth(1.0);
-	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 0.0);
+	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, (GLint)nx, (GLint)ny);
 
@@ -953,7 +953,7 @@ void VRenderGLView::DrawDP()
 	//clear
 	//	glDrawBuffer(GL_BACK);
 	glClearDepth(1.0);
-	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 0.0);
+	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, (GLint)nx, (GLint)ny);
 
