@@ -3,7 +3,7 @@
 
 #define MyAppName "FluoRender"   
 #define MyAppSetupName 'FluoRender'
-#define MyAppVersion "2.29"
+#define MyAppVersion "2.29.1"
 #define MyAppPublisher "SCI"
 #define MyAppURL "http://sci.utah.edu"
 #define MyAppExeName "FluoRender.exe"
@@ -12,8 +12,8 @@
 #include "common_include.iss" 
 
 [Setup]
-OutputDir=.\build
-OutputBaseFilename=FluoRender2.29_win64
+OutputDir=..\build
+OutputBaseFilename=FluoRender2.29.1_win64
 SetupIconFile=.\Images\FluoRenderIcon.ico
 WizardImageFile=.\Images\fluorender_logo_cut.bmp
 WizardSmallImageFile=.\Images\fluorender_logo_square.bmp
