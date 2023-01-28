@@ -9,7 +9,7 @@ Enable Hardened runtime Yes
 
 xcrun notarytool submit FluoRender.app.zip --apple-id "wanyong@cs.utah.edu" --team-id WG354P62PL --password igac-miqg-pgub-fuwl --wait
 
-productsign --sign WG354P62PL FluoRender.pkg FluoRender2.29_mac64.pkg
+productsign --sign WG354P62PL FluoRender.pkg FluoRender2.29.1_mac64.pkg
 
 
 xcrun notarytool log 3ed09ce2-88b7-4d5b-aad4-42889b66ff37 --apple-id "wanyong@cs.utah.edu" --team-id WG354P62PL --password igac-miqg-pgub-fuwl fluo_log.json
