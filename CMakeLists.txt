@@ -766,22 +766,7 @@ target_compile_options(FluoRender PRIVATE "$<$<CONFIG:RELEASE>:${RELEASE_FLAGS}>
 target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
 
 # link the libraries
-if(UNIX OR APPLE OR MINGW)
-  target_link_libraries(FluoRender
-    stdc++fs
-    ${FFMPEG_LIBRARIES}
-    ${OPENGL_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${OpenCL_LIBRARIES}
-    ${wxWidgets_LIBRARIES}
-    ${FREETYPE_LIBRARIES}
-    ${TIFF_LIBRARIES}
-    ${PNG_LIBRARIES}
-    ${ZLIB_LIBRARIES}
-    ${ND2_LIBRARIES})
-#  target_link_libraries(Tester
-#    ${FFMPEG_LIBRARIES})
-elseif(WIN32)
+if(WIN32)
   target_link_libraries(FluoRender
     secur32.lib
     XInput.lib
@@ -796,6 +781,31 @@ elseif(WIN32)
   target_link_libraries(Tester
     secur32.lib
     ${FFMPEG_LIBRARIES})
+elseif(APPLE)
+  target_link_libraries(FluoRender
+    ${FFMPEG_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${OpenCL_LIBRARIES}
+    ${wxWidgets_LIBRARIES}
+    ${FREETYPE_LIBRARIES}
+    ${TIFF_LIBRARIES}
+    ${PNG_LIBRARIES}
+    ${ZLIB_LIBRARIES}
+    ${ND2_LIBRARIES})
+else()
+  target_link_libraries(FluoRender
+    stdc++fs
+    ${FFMPEG_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${OpenCL_LIBRARIES}
+    ${wxWidgets_LIBRARIES}
+    ${FREETYPE_LIBRARIES}
+    ${TIFF_LIBRARIES}
+    ${PNG_LIBRARIES}
+    ${ZLIB_LIBRARIES}
+    ${ND2_LIBRARIES})
 endif()
 
 
