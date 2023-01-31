@@ -1,0 +1,14 @@
+[tasks]
+tasknum=2
+[tasks/task0]
+type=roi
+time_mode=TM_ALL_PRE_LAST_BOTH
+chan_mode=0
+[tasks/task1]
+type=export_analysis
+time_mode=TM_LAST_POST
+template=ridgeline.html
+output=
+value_num=1
+value_name0=mean_int
+js_value=(+d.mean_int)
