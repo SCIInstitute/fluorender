@@ -49,12 +49,38 @@ namespace flrd
 		{
 			return m_use_mask;
 		}
+		void SetTransform(fluo::Transform& tf)
+		{
+			m_tf = tf;
+		}
+		fluo::Transform GetTransform()
+		{
+			return m_tf;
+		}
+		void SetRoi(Ruler* ruler)
+		{
+			m_ruler = ruler;
+		}
+		Ruler* GetRoi()
+		{
+			return m_ruler;
+		}
 
-		void Compute();
+		void Run();
+		float GetResultf()
+		{
+			return m_sum > 0 ? m_wsum / m_sum : 0;
+		}
 
 	private:
 		VolumeData* m_vd;
 		bool m_use_mask;//use mask instead of data
+		fluo::Transform m_tf;//view transform
+		Ruler* m_ruler;//a closed ruler for roi
+
+		//result
+		unsigned int m_sum;
+		float m_wsum;
 
 		bool CheckBricks();
 		bool GetInfo(flvr::TextureBrick* b,

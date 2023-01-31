@@ -173,9 +173,12 @@ namespace flrd
 		void Save(wxFileConfig &fconfig, int vi);
 		void Read(wxFileConfig &fconfig, int vi);
 
-		int Profile(flrd::Ruler* ruler);
+		int Profile(Ruler* ruler);
 		int Profile(int index);
 		int ProfileAll();
+		int Roi(Ruler* ruler);
+		int Roi(int index);
+		int RoiAll();
 		int Distance(int index, std::string filename);
 
 		void SetFsize(int ival)

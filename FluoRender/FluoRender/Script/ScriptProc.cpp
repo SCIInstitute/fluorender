@@ -121,6 +121,8 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 					RunGenerateComp();
 				else if (str == "ruler_profile")
 					RunRulerProfile();
+				else if (str == "roi")
+					RunRoi();
 				else if (str == "ruler_info")
 					RunRulerInfo();
 				else if (str == "save_volume")
@@ -1268,6 +1270,62 @@ void ScriptProc::RunRulerProfile()
 		}
 	}
 	ruler_handler->SetBackground(bg_int);
+}
+
+void ScriptProc::RunRoi()
+{
+	if (!m_frame) return;
+	if (!TimeCondition())
+		return;
+	std::vector<VolumeData*> vlist;
+	if (!GetVolumes(vlist))
+		return;
+
+	RulerHandler* ruler_handler = m_view->GetRulerHandler();
+	if (!ruler_handler) return;
+	RulerList* ruler_list = m_view->GetRulerList();
+	if (!ruler_list || ruler_list->empty()) return;
+
+	int curf = m_view->m_tseq_cur_num;
+	int chan_num = vlist.size();
+	int ch = 0;
+	std::string fn = std::to_string(curf);
+
+	for (auto itvol = vlist.begin();
+		itvol != vlist.end(); ++itvol, ++ch)
+	{
+		ruler_handler->SetVolumeData(*itvol);
+
+		//output
+		//time group
+		fluo::Group* timeg = m_output->getOrAddGroup(fn);
+		timeg->addSetValue("type", std::string("time"));
+		timeg->addSetValue("t", long(curf));
+		//channel group
+		fluo::Group* chg = timeg->getOrAddGroup(std::to_string(ch));
+		chg->addSetValue("type", std::string("channel"));
+		chg->addSetValue("ch", long(ch));
+		//script command
+		fluo::Group* cmdg = chg->getOrAddGroup(m_type.ToStdString());
+		cmdg->addSetValue("type", m_type.ToStdString());
+
+		for (size_t i = 0; i < ruler_list->size(); ++i)
+		{
+			//for each ruler
+			flrd::Ruler* ruler = (*ruler_list)[i];
+			if (!ruler) continue;
+			if (!ruler->GetDisp()) continue;
+
+			if (ruler_handler->Roi(ruler))
+			{
+				fluo::Node* ruler_node = cmdg->getOrAddNode(std::to_string(ruler->Id() + 1));
+				ruler_node->addSetValue("type", std::string("ruler"));
+
+				double mean_int = ruler->GetMeanInt();
+				ruler_node->addSetValue("mean_int", mean_int);
+			}
+		}
+	}
 }
 
 void ScriptProc::RunRulerInfo()

@@ -56,6 +56,8 @@ Ruler::Ruler()
 	m_brush_size = 0.0;
 
 	m_scale = 1;
+
+	m_mean_int = 0;
 }
 
 Ruler::~Ruler()

@@ -121,6 +121,7 @@ namespace flrd
 		void RunCompAnalysis();
 		void RunGenerateComp();
 		void RunRulerProfile();
+		void RunRoi();
 		void RunRulerInfo();
 		void RunAddCells();
 		void RunLinkCells();

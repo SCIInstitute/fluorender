@@ -483,6 +483,15 @@ namespace flrd
 		void FinishEllipse(fluo::Vector view);
 		fluo::Point GetCenter();
 
+		void SetMeanInt(double val)
+		{
+			m_mean_int = val;
+		}
+		double GetMeanInt()
+		{
+			return m_mean_int;
+		}
+
 	private:
 		static int m_num;
 		wxString m_name;
@@ -497,6 +506,8 @@ namespace flrd
 		//a profile
 		wxString m_info_profile;
 		std::vector<ProfileBin> m_profile;
+		//mean intensity in roi
+		double m_mean_int;
 		double m_scale;
 		//color
 		bool m_use_color;

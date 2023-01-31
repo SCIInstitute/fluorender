@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/Cov.h>
 #include <Calculate/Count.h>
 #include <Calculate/BackgStat.h>
+#include <Calculate/VolumeRoi.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <Nrrd/nrrd.h>
 #include <wx/fileconf.h>
@@ -1316,7 +1317,7 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 	}
 }
 
-int RulerHandler::Profile(flrd::Ruler* ruler)
+int RulerHandler::Profile(Ruler* ruler)
 {
 	if (!m_view || !m_vd || !ruler)
 		return 0;
@@ -1524,6 +1525,80 @@ int RulerHandler::ProfileAll()
 	int c = 0;
 	for (size_t i = 0; i < m_ruler_list->size(); ++i)
 		c += Profile(i);
+	return c;
+}
+
+int RulerHandler::Roi(Ruler* ruler)
+{
+	if (!m_view || !m_vd || !ruler)
+		return 0;
+	if (ruler->GetRulerType() != 5 ||
+		ruler->GetNumPoint() != 4)
+		return 0;
+	size_t rwt = ruler->GetWorkTime();
+
+	//set ruler transform
+	fluo::Transform tf = m_view->GetInvOffsetMat();
+	ruler->SetTransform(tf);
+
+	double spcx, spcy, spcz;
+	m_vd->GetSpacings(spcx, spcy, spcz);
+	int nx, ny, nz;
+	m_vd->GetResolution(nx, ny, nz);
+	if (spcx <= 0.0 || spcy <= 0.0 || spcz <= 0.0 ||
+		nx <= 0 || ny <= 0 || nz <= 0)
+		return 0;
+
+	//get data
+	m_vd->GetVR()->return_mask();
+	flvr::Texture* tex = m_vd->GetTexture();
+	if (!tex) return 0;
+	Nrrd* nrrd_data = tex->get_nrrd(0);
+	if (!nrrd_data) return 0;
+	void* data = nrrd_data->data;
+	if (!data) return 0;
+	//mask
+	Nrrd* nrrd_mask = tex->get_nrrd(tex->nmask());
+	void* mask = 0;
+	if (nrrd_mask)
+		mask = nrrd_mask->data;
+	double scale = m_vd->GetScalarScale();
+	//set up sampler
+	m_data = data;
+	m_nx = nx; m_ny = ny; m_nz = nz;
+	m_bits = m_vd->GetBits();
+	m_scale = m_vd->GetScalarScale();
+	ruler->SetScalarScale(m_bits == 8 ? 255 : 65535);
+	if (!valid()) return 0;
+
+	//get volume roi
+	VolumeRoi vr(m_vd);
+	vr.SetTransform(tf);
+	vr.SetRoi(ruler);
+	vr.Run();
+	ruler->SetMeanInt(vr.GetResultf());
+
+	return 1;
+}
+
+int RulerHandler::Roi(int index)
+{
+	if (!m_ruler_list)
+		return 0;
+	if (index < 0 ||
+		index >= m_ruler_list->size())
+		return 0;
+	flrd::Ruler* ruler = (*m_ruler_list)[index];
+	return Roi(ruler);
+}
+
+int RulerHandler::RoiAll()
+{
+	if (!m_ruler_list)
+		return 0;
+	int c = 0;
+	for (size_t i = 0; i < m_ruler_list->size(); ++i)
+		c += Roi(i);
 	return c;
 }
 
