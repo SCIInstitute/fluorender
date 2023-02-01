@@ -51,17 +51,18 @@ const char* str_cl_volume_roi_ellipse = \
 "//count\n" \
 "__kernel void kernel_0(\n" \
 "	__read_only image3d_t data,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz,\n" \
-"	unsigned int gsxy,\n" \
-"	unsigned int gsx,\n" \
+"	uint ngx,\n" \
+"	uint ngy,\n" \
+"	uint ngz,\n" \
+"	uint gsxy,\n" \
+"	uint gsx,\n" \
+"	float4 spaces,\n" \
 "	float4 mat0,\n" \
 "	float4 mat1,\n" \
 "	float4 mat2,\n" \
 "	float4 mat3,\n" \
 "	float4 elps,\n" \
-"	__global unsigned int* count,\n" \
+"	__global uint* count,\n" \
 "	__global float* wcount)\n" \
 "{\n" \
 "	int3 gid = (int3)(get_global_id(0),\n" \
@@ -69,7 +70,7 @@ const char* str_cl_volume_roi_ellipse = \
 "	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	unsigned int lsum = 0;\n" \
+"	uint lsum = 0;\n" \
 "	float lwsum = 0.0f;\n" \
 "	float val;\n" \
 "	float4 coord;\n" \
@@ -77,7 +78,7 @@ const char* str_cl_volume_roi_ellipse = \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
+"		coord = (convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f)) * spaces;\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
 "		coord /= coord.w;\n" \
 "		if (eval_ellipse(coord, elps) > 1.0f)\n" \
@@ -89,7 +90,7 @@ const char* str_cl_volume_roi_ellipse = \
 "			lwsum += val;\n" \
 "		}\n" \
 "	}\n" \
-"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	uint index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
 "	atomic_xchg(count+index, lsum);\n" \
 "	atomic_xchg(wcount+index, lwsum);\n" \
 "}\n" \
@@ -150,25 +151,28 @@ void VolumeRoi::Run()
 	//init
 	m_sum = 0;
 	m_wsum = 0.0;
+	double spcx, spcy, spcz;
+	m_vd->GetSpacings(spcx, spcy, spcz);
+	cl_float4 spaces = { cl_float(spcx), cl_float(spcy), cl_float(spcz), cl_float(1) };
 	cl_float4 tf0 = {
 		float(m_tf.get_mat_val(0, 0)),
-		float(m_tf.get_mat_val(0, 1)),
-		float(m_tf.get_mat_val(0, 2)),
-		float(m_tf.get_mat_val(0, 3)) };
-	cl_float4 tf1 = {
 		float(m_tf.get_mat_val(1, 0)),
-		float(m_tf.get_mat_val(1, 1)),
-		float(m_tf.get_mat_val(1, 2)),
-		float(m_tf.get_mat_val(1, 3)) };
-	cl_float4 tf2 = {
 		float(m_tf.get_mat_val(2, 0)),
+		float(m_tf.get_mat_val(3, 0)) };
+	cl_float4 tf1 = {
+		float(m_tf.get_mat_val(0, 1)),
+		float(m_tf.get_mat_val(1, 1)),
 		float(m_tf.get_mat_val(2, 1)),
+		float(m_tf.get_mat_val(3, 1)) };
+	cl_float4 tf2 = {
+		float(m_tf.get_mat_val(0, 2)),
+		float(m_tf.get_mat_val(1, 2)),
 		float(m_tf.get_mat_val(2, 2)),
-		float(m_tf.get_mat_val(2, 3)) };
+		float(m_tf.get_mat_val(3, 2)) };
 	cl_float4 tf3 = {
-		float(m_tf.get_mat_val(3, 0)),
-		float(m_tf.get_mat_val(3, 1)),
-		float(m_tf.get_mat_val(3, 2)),
+		float(m_tf.get_mat_val(0, 3)),
+		float(m_tf.get_mat_val(1, 3)),
+		float(m_tf.get_mat_val(2, 3)),
 		float(m_tf.get_mat_val(3, 3)) };
 	fluo::Point p0 = m_ruler->GetPoint(0);
 	fluo::Point p1 = m_ruler->GetPoint(1);
@@ -214,6 +218,7 @@ void VolumeRoi::Run()
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
+		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&spaces));
 		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf0));
 		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf1));
 		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf2));

@@ -1535,11 +1535,11 @@ int RulerHandler::Roi(Ruler* ruler)
 	if (ruler->GetRulerType() != 5 ||
 		ruler->GetNumPoint() != 4)
 		return 0;
-	size_t rwt = ruler->GetWorkTime();
+	//size_t rwt = ruler->GetWorkTime();
 
 	//set ruler transform
-	fluo::Transform tf = m_view->GetInvOffsetMat();
-	ruler->SetTransform(tf);
+	fluo::Transform tf;// = m_view->GetInvOffsetMat();
+	//ruler->SetTransform(tf);
 
 	double spcx, spcy, spcz;
 	m_vd->GetSpacings(spcx, spcy, spcz);
@@ -1571,6 +1571,11 @@ int RulerHandler::Roi(Ruler* ruler)
 	ruler->SetScalarScale(m_bits == 8 ? 255 : 65535);
 	if (!valid()) return 0;
 
+	//get transform
+	glm::mat4 mv = m_view->GetObjectMat();
+	glm::mat4 prj = m_view->GetProjection();
+	glm::mat4 mvprj = prj * mv;
+	tf.set(glm::value_ptr(mvprj));
 	//get volume roi
 	VolumeRoi vr(m_vd);
 	vr.SetTransform(tf);

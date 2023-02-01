@@ -1239,6 +1239,7 @@ void ScriptProc::RunRulerProfile()
 			flrd::Ruler* ruler = (*ruler_list)[i];
 			if (!ruler) continue;
 			if (!ruler->GetDisp()) continue;
+			ruler->SetWorkTime(curf);
 			fluo::Node* ruler_node = cmdg->getOrAddNode(std::to_string(ruler->Id()+1));
 			ruler_node->addSetValue("type", std::string("ruler"));
 
@@ -1315,6 +1316,7 @@ void ScriptProc::RunRoi()
 			flrd::Ruler* ruler = (*ruler_list)[i];
 			if (!ruler) continue;
 			if (!ruler->GetDisp()) continue;
+			ruler->SetWorkTime(curf);
 
 			if (ruler_handler->Roi(ruler))
 			{
