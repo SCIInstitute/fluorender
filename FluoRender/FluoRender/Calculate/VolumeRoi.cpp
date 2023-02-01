@@ -42,11 +42,12 @@ const char* str_cl_volume_roi_ellipse = \
 "	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
 "	CLK_FILTER_NEAREST;\n" \
 "\n" \
-"float eval_ellipse(float4 coord, float4 elps)\n" \
+"float eval_ellipse(float2 coord, float2 ectr, float4 eaxis)\n" \
 "{\n" \
-"	float v1 = (coord.x - elps.x) / elps.z;\n" \
-"	float v2 = (coord.y - elps.y) / elps.w;\n" \
-"	return v1 * v1 + v2 * v2;\n" \
+"	float2 v = coord - ectr;\n" \
+"	float2 p = (float2)(dot(v, eaxis.xy), dot(v, eaxis.zw));\n" \
+"	p = p / (float2)(length(eaxis.xy), length(eaxis.zw));\n" \
+"	return p.x * p.x + p.y + p.y;\n" \
 "}\n" \
 "//count\n" \
 "__kernel void kernel_0(\n" \
@@ -61,7 +62,8 @@ const char* str_cl_volume_roi_ellipse = \
 "	float4 mat1,\n" \
 "	float4 mat2,\n" \
 "	float4 mat3,\n" \
-"	float4 elps,\n" \
+"	float2 ectr,\n" \
+"	float4 eaxis,\n" \
 "	__global uint* count,\n" \
 "	__global float* wcount)\n" \
 "{\n" \
@@ -81,7 +83,7 @@ const char* str_cl_volume_roi_ellipse = \
 "		coord = (convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f)) * spaces;\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
 "		coord /= coord.w;\n" \
-"		if (eval_ellipse(coord, elps) > 1.0f)\n" \
+"		if (eval_ellipse(coord.xy, ectr, eaxis) > 1.0f)\n" \
 "			continue;\n" \
 "		val = read_imagef(data, samp, ijk).x;\n" \
 "		if (val > 0.0f)\n" \
@@ -178,15 +180,19 @@ void VolumeRoi::Run()
 	fluo::Point p1 = m_ruler->GetPoint(1);
 	fluo::Point p2 = m_ruler->GetPoint(2);
 	fluo::Point p3 = m_ruler->GetPoint(3);
-	p0 = m_tf.transform(p0);
-	p1 = m_tf.transform(p1);
-	p2 = m_tf.transform(p2);
-	p3 = m_tf.transform(p3);
-	cl_float4 elps = {
-		cl_float(((p0 + p1) / 2).x()),
-		cl_float(((p0 + p1) / 2).y()),
-		cl_float((p0 - p1).length() / 2),
-		cl_float((p2 - p3).length() / 2)};
+	p0 = m_tf.transform(p0); p0.z(0);
+	p1 = m_tf.transform(p1); p1.z(0);
+	p2 = m_tf.transform(p2); p2.z(0);
+	p3 = m_tf.transform(p3); p3.z(0);
+	fluo::Point pc((p0 + p1) / 2);
+	cl_float2 ectr = {
+		cl_float(pc.x()),
+		cl_float(pc.y())};
+	cl_float4 eaxis = {
+		cl_float((p2 - pc).x()),
+		cl_float((p2 - pc).y()),
+		cl_float((p0 - pc).x()),
+		cl_float((p0 - pc).y())};
 
 	//go through bricks
 	for (size_t i = 0; i < brick_num; ++i)
@@ -223,7 +229,8 @@ void VolumeRoi::Run()
 		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf1));
 		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf2));
 		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf3));
-		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&elps));
+		kernel_prog->setKernelArgConst(sizeof(cl_float2), (void*)(&ectr));
+		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&eaxis));
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int) * (gsize.gsxyz), (void*)(sum));
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float) * (gsize.gsxyz), (void*)(wsum));
 		//if (m_use_mask)
