@@ -46,6 +46,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Timer.h>
 #include "png_resource.h"
 #include "img/icons.h"
+#include <array>
 
 bool VRenderGLView::m_linked_rot = false;
 VRenderGLView* VRenderGLView::m_master_linked_view = 0;
