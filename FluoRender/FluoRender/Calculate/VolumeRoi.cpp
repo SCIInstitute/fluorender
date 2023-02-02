@@ -31,6 +31,9 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/VolKernel.h>
 #include <FLIVR/TextureBrick.h>
 #include <FLIVR/Texture.h>
+#ifdef _DEBUG
+#include <Debug.h>
+#endif
 
 using namespace flrd;
 
@@ -45,9 +48,10 @@ const char* str_cl_volume_roi_ellipse = \
 "float eval_ellipse(float2 coord, float2 ectr, float4 eaxis)\n" \
 "{\n" \
 "	float2 v = coord - ectr;\n" \
-"	float2 p = (float2)(dot(v, eaxis.xy), dot(v, eaxis.zw));\n" \
-"	p = p / (float2)(length(eaxis.xy), length(eaxis.zw));\n" \
-"	return p.x * p.x + p.y + p.y;\n" \
+"	float2 l = (float2)(length(eaxis.xy), length(eaxis.zw));\n" \
+"	float2 p = (float2)(dot(v, eaxis.xy / l.x), dot(v, eaxis.zw / l.y));\n" \
+"	p = p / l;\n" \
+"	return p.x * p.x + p.y * p.y;\n" \
 "}\n" \
 "//count\n" \
 "__kernel void kernel_0(\n" \
@@ -242,6 +246,12 @@ void VolumeRoi::Run()
 		kernel_prog->readBuffer(sizeof(unsigned int) * (gsize.gsxyz), sum, sum);
 		kernel_prog->readBuffer(sizeof(float) * (gsize.gsxyz), wsum, wsum);
 
+		//debug
+#ifdef _DEBUG
+		DBMIFLOAT32 mi;
+		mi.nx = gsize.gsx; mi.ny = gsize.gsy; mi.nc = 1; mi.nt = mi.nx * mi.nc * 4;
+		mi.data = wsum;
+#endif
 		//sum
 		for (int ii = 0; ii < gsize.gsxyz; ++ii)
 		{
@@ -253,4 +263,26 @@ void VolumeRoi::Run()
 	}
 
 	kernel_prog->releaseAll();
+}
+
+double VolumeRoi::GetResult()
+{
+	if (!m_vd)
+		return 0;
+	if (m_sum == 0)
+		return 0;
+	double result = m_wsum;
+	int bits = m_vd->GetBits();
+	switch (bits)
+	{
+	case 8:
+		result *= 255;
+		break;
+	case 16:
+		result *= 65535;
+		break;
+	}
+	result /= m_sum;
+
+	return result;
 }

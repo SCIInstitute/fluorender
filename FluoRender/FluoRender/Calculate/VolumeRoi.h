@@ -67,7 +67,8 @@ namespace flrd
 		}
 
 		void Run();
-		float GetResultf()
+		double GetResult();
+		double GetResultf()
 		{
 			return m_sum > 0 ? m_wsum / m_sum : 0;
 		}

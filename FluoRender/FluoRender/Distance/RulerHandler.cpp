@@ -442,7 +442,7 @@ bool RulerHandler::CompleteEllipse(int mode)
 	if (!p1 || !p2 || !p3)
 		return false;
 	fluo::Point tmp;
-	if (mode == 1)
+	if (mode == 0)
 	{
 		fluo::Point c((p2->GetPoint(rwt) + p3->GetPoint(rwt)) / 2.0);
 		fluo::Vector v0 = p0->GetPoint(rwt) - c;
@@ -455,7 +455,7 @@ bool RulerHandler::CompleteEllipse(int mode)
 		tmp = c + (c - p0->GetPoint(rwt));
 		p1->SetPoint(tmp, rwt);
 	}
-	else if (mode == 0)
+	else if (mode == 1)
 	{
 		fluo::Point c((p0->GetPoint(rwt) +
 			p1->GetPoint(rwt) + p2->GetPoint(rwt) +
@@ -815,7 +815,7 @@ void RulerHandler::ApplyMagPoint()
 		return;
 	m_point->SetPoint(p, rwt);
 
-	CompleteEllipse(0);
+	CompleteEllipse(1);
 	Profile(m_ruler);
 }
 
@@ -883,7 +883,7 @@ void RulerHandler::ApplyMagStroke()
 		}
 	}
 
-	CompleteEllipse(0);
+	CompleteEllipse(1);
 	Profile(m_ruler);
 }
 
@@ -1582,7 +1582,7 @@ int RulerHandler::Roi(Ruler* ruler)
 	vr.SetTransform(tf);
 	vr.SetRoi(ruler);
 	vr.Run();
-	ruler->SetMeanInt(vr.GetResultf());
+	ruler->SetMeanInt(vr.GetResult());
 
 	return 1;
 }
