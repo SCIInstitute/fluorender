@@ -551,6 +551,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 	int point_volume_mode = m_view->m_point_volume_mode;
 	size_t rwt = m_view->m_tseq_cur_num;
 	if (m_ruler) m_ruler->SetWorkTime(rwt);
+	//DBGPRINT(L"Ruler:%d\n", m_ruler);
 
 	if (m_type == 1 && branch)
 	{

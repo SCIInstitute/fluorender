@@ -10408,7 +10408,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			if (m_ruler_handler.GetMouseDist(mp.x(), mp.y(), dist))
 			{
 				//add one point to a ruler
-				m_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
+				m_ruler_handler.AddRulerPoint(mp.x(), mp.y(), false);
 				if (m_frame && m_frame->GetMeasureDlg())
 					m_frame->GetMeasureDlg()->GetSettings(this);
 				RefreshGL(27);
