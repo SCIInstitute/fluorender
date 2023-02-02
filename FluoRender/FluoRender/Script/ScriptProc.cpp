@@ -123,6 +123,8 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 					RunRulerProfile();
 				else if (str == "roi")
 					RunRoi();
+				else if (str == "roi_base")
+					RunRoiBase();
 				else if (str == "ruler_info")
 					RunRulerInfo();
 				else if (str == "save_volume")
@@ -1275,7 +1277,6 @@ void ScriptProc::RunRulerProfile()
 
 void ScriptProc::RunRoi()
 {
-	if (!m_frame) return;
 	if (!TimeCondition())
 		return;
 	std::vector<VolumeData*> vlist;
@@ -1328,6 +1329,130 @@ void ScriptProc::RunRoi()
 			}
 		}
 	}
+}
+
+void ScriptProc::RunRoiBase()
+{
+	if (!TimeCondition())
+		return;
+
+	int vnum;
+	m_fconfig->Read("value_num", &vnum, 0);
+	std::set<std::string> vnames;
+	for (int i = 0; i < vnum; ++i)
+	{
+		wxString str;
+		if (m_fconfig->Read(
+			wxString::Format("value_name%d", i),
+			&str))
+			vnames.insert(str.ToStdString());
+	}
+
+	class RoiVisitor : public fluo::NodeVisitor
+	{
+	public:
+		RoiVisitor(std::set<std::string>& vnames,
+			int num) :
+			fluo::NodeVisitor(),
+			vnames_(vnames),
+			chnum_(num)
+		{
+			setTraversalMode(fluo::NodeVisitor::TRAVERSE_CHILDREN);
+		}
+
+		virtual void apply(fluo::Node& node)
+		{
+			getValues(&node);
+			traverse(node);
+		}
+
+		virtual void apply(fluo::Group& group)
+		{
+			std::string type;
+			group.getValue("type", type);
+			if (type == "time")
+				t_ = group.getName();
+			if (type == "channel")
+				ch_ = group.getName();
+			traverse(group);
+		}
+
+		void addBase(fluo::Group* group)
+		{
+			//compute base
+			for (auto it1 = in_values_.begin();
+				it1 != in_values_.end(); ++it1)
+			{
+				RulerValues& rv = *it1;
+				for (auto it2 = rv.begin();
+					it2 != rv.end(); ++it2)
+				{
+					BaseValues& bv = it2->second;
+
+				}
+			}
+		}
+
+	protected:
+		void getValues(fluo::Object* object)
+		{
+			if (!object)
+				return;
+			std::string str;
+			object->getValue("type", str);
+			if (str == "backg_stat")
+			{
+			}
+			else if (str == "comp")
+			{
+			}
+			else if (str == "ruler")
+			{
+				for (auto it = vnames_.begin();
+					it != vnames_.end(); ++it)
+				{
+					//local value
+					fluo::ValueTuple vt{ *it, "", "" };
+					if (object->getValue(vt))
+					{
+						int time = std::stoi(t_);
+						int chann = std::stoi(ch_);
+						std::string rid = object->getName();
+						//expand chann
+						if (in_values_.size() <= chann)
+							in_values_.resize(chann + 1);
+						//get ruler
+						RulerValues& rv = in_values_.at(chann);
+						auto rit = rv.find(rid);
+						if (rit == rv.end())
+						{
+							rv.insert(std::pair<std::string, BaseValues>(rid, BaseValues()));
+							rit = rv.find(rid);
+						}
+						BaseValues& bv = rit->second;
+						if (time >= bv.size())
+							bv.resize(time + 1);
+						double dval = std::stod(std::get<2>(vt));
+						bv[time] = dval;
+					}
+				}
+			}
+		}
+
+	private:
+		std::set<std::string> vnames_;
+		int chnum_;
+		std::string t_;
+		std::string ch_;
+		typedef std::vector<double> BaseValues;
+		typedef std::unordered_map<std::string, BaseValues> RulerValues;
+		typedef std::vector<RulerValues> ChannValues;
+		ChannValues in_values_;
+	};
+
+	RoiVisitor visitor(vnames, m_view->GetAllVolumeNum());
+	m_output->accept(visitor);
+	visitor.addBase(m_output.get());
 }
 
 void ScriptProc::RunRulerInfo()

@@ -1,10 +1,15 @@
 [tasks]
-tasknum=2
+tasknum=3
 [tasks/task0]
 type=roi
 time_mode=TM_ALL_PRE_LAST_BOTH
 chan_mode=0
 [tasks/task1]
+type=roi_base
+time_mode=TM_LAST_POST
+value_num=1
+value_name0=mean_int
+[tasks/task2]
 type=export_analysis
 time_mode=TM_LAST_POST
 template=ridgeline.html
