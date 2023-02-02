@@ -1852,7 +1852,7 @@ void VRenderGLView::DrawCircles(double cx, double cy,
 	shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
 	//apply translate first
 	glm::mat4 mat0 = matrix * glm::translate(
-			glm::mat4(), glm::vec3(cx, cy, 0.0));
+			glm::mat4(1), glm::vec3(cx, cy, 0.0));
 	shader->setLocalParamMatrix(0, glm::value_ptr(mat0));
 
 	flvr::VertexArray* va_circles =
@@ -10128,7 +10128,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		}
 		else if (m_int_mode == 6 ||
 			m_int_mode == 9 ||
-			m_int_mode ==11)
+			m_int_mode == 11)
 		{
 			m_ruler_handler.SetPoint(0);
 		}

@@ -284,6 +284,7 @@ bool RulerHandler::FindClosestRulerBranch(double mx, double my)
 	if (ppmin && rulermin)
 	{
 		m_point = ppmin;
+		m_ruler = rulermin;
 		m_mag_ruler = rulermin;
 		m_mag_branch = rj;
 		m_mag_branch_point = 0;

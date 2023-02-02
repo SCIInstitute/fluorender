@@ -268,6 +268,12 @@ namespace flrd
 			y = std::trunc(std::clamp(y, 0.0, double(m_ny - 1)));
 			z = std::trunc(std::clamp(z, 0.0, double(m_nz - 1)));
 		}
+		bool excldxyz(double x, double y, double z)
+		{
+			return (x >= 0 && x < m_nx&&
+				y >= 0 && y < m_ny&&
+				z >= 0 && z < m_nz);
+		}
 		double get_data(double x, double y, double z)
 		{
 			switch (m_sample_type)
@@ -281,7 +287,9 @@ namespace flrd
 		}
 		double get_data_nn(double x, double y, double z)
 		{
-			clampxyz(x, y, z);
+			//clampxyz(x, y, z);
+			if (!excldxyz(x, y, z))
+				return 0;
 			unsigned long long index =
 				(unsigned long long)m_nx * m_ny * z +
 				(unsigned long long)m_nx * y +
@@ -330,6 +338,8 @@ namespace flrd
 		double get_data_bl(double x, double y, double z)
 		{
 			//clampxyz(x, y, z);
+			if (!excldxyz(x, y, z))
+				return 0;
 			int i, j, k;
 			double tx, ty, tz;
 			xyz2ijkt(x, y, z, i, j, k, tx, ty, tz);
