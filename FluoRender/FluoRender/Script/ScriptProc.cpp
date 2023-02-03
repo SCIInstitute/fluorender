@@ -123,8 +123,8 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 					RunRulerProfile();
 				else if (str == "roi")
 					RunRoi();
-				else if (str == "roi_base")
-					RunRoiBase();
+				else if (str == "roi_dff")
+					RunRoiDff();
 				else if (str == "ruler_info")
 					RunRulerInfo();
 				else if (str == "save_volume")
@@ -144,7 +144,9 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 				else if (str == "export_info")
 					ExportInfo();
 				else if (str == "export_analysis")
-					ExportAnalysis();
+					ExportTemplate();
+				else if (str == "export_spreadsheet")
+					ExportSpreadsheet();
 				else if (str == "change_data")
 					ChangeData();
 				else if (str == "change_script")
@@ -1325,37 +1327,36 @@ void ScriptProc::RunRoi()
 				ruler_node->addSetValue("type", std::string("ruler"));
 
 				double mean_int = ruler->GetMeanInt();
-				ruler_node->addSetValue("mean_int", mean_int);
+				ruler_node->addSetValue("roi_mean", mean_int);
 			}
 		}
 	}
 }
 
-void ScriptProc::RunRoiBase()
+void ScriptProc::RunRoiDff()
 {
 	if (!TimeCondition())
 		return;
 
-	int vnum;
-	m_fconfig->Read("value_num", &vnum, 0);
-	std::set<std::string> vnames;
-	for (int i = 0; i < vnum; ++i)
-	{
-		wxString str;
-		if (m_fconfig->Read(
-			wxString::Format("value_name%d", i),
-			&str))
-			vnames.insert(str.ToStdString());
-	}
+	wxString str;
+	std::string valname, bgname;
+	if (m_fconfig->Read("value_name", &str))
+		valname = str.ToStdString();
+	if (m_fconfig->Read("bg_name", &str))
+		bgname = str.ToStdString();
+	double var = 0.001;
+	m_fconfig->Read("var_cut", &var);
 
 	class RoiVisitor : public fluo::NodeVisitor
 	{
 	public:
-		RoiVisitor(std::set<std::string>& vnames,
-			int num) :
+		RoiVisitor(std::string& valname,
+			std::string& bgname,
+			double var) :
 			fluo::NodeVisitor(),
-			vnames_(vnames),
-			chnum_(num)
+			valname_(valname),
+			bgname_(bgname),
+			var_cut_(var)
 		{
 			setTraversalMode(fluo::NodeVisitor::TRAVERSE_CHILDREN);
 		}
@@ -1377,18 +1378,73 @@ void ScriptProc::RunRoiBase()
 			traverse(group);
 		}
 
-		void addBase(fluo::Group* group)
+		void computeOut()
 		{
-			//compute base
-			for (auto it1 = in_values_.begin();
-				it1 != in_values_.end(); ++it1)
+			bool has_bg = !bg_values_.empty();
+			out_values_ = in_values_;//dup
+			if (has_bg)
 			{
-				RulerValues& rv = *it1;
-				for (auto it2 = rv.begin();
-					it2 != rv.end(); ++it2)
+				//get ratio
+				for (auto it1 = out_values_.begin();
+					it1 != out_values_.end(); ++it1)
+				{
+					CompValues& cv = *it1;
+					for (auto it2 = cv.begin();
+						it2 != cv.end(); ++it2)
+					{
+						BaseValues& bv = it2->second;
+						size_t size = std::min(bg_values_.size(), bv.size());
+						for (size_t i = 0; i < size; ++i)
+							bv[i] = bg_values_[i] < 0.0 ? bv[i] : bv[i] / bg_values_[i];
+
+					}
+				}
+			}
+			//filter ratio to get the constant
+			int ch = 0;
+			for (auto it1 = out_values_.begin();
+				it1 != out_values_.end(); ++it1, ++ch)
+			{
+				CompValues& cv = *it1;
+				for (auto it2 = cv.begin();
+					it2 != cv.end(); ++it2)
 				{
 					BaseValues& bv = it2->second;
+					double mean = filter(bv);
+					for (size_t i = 0; i < bv.size(); ++i)
+					{
+						//dff = (in - mean * bkg) / (mean * bkg)
+						auto it = in_values_[ch].find(it2->first);
+						if (it == in_values_[ch].end())
+							continue;
+						double in = it->second[i];
+						double f = mean * bg_values_[i];
+						bv[i] = (in - f) / f;
+					}
+				}
+			}
+		}
 
+		void output(fluo::Group* group)
+		{
+			int ch = 0;
+			for (auto it1 = out_values_.begin();
+				it1 != out_values_.end(); ++it1, ++ch)
+			{
+				CompValues& cv = *it1;
+				for (auto it2 = cv.begin();
+					it2 != cv.end(); ++it2)
+				{
+					BaseValues& bv = it2->second;
+					for (size_t i = 0; i < bv.size(); ++i)
+					{
+						//write values
+						fluo::Group* timeg = group->getOrAddGroup(std::to_string(i));
+						fluo::Group* chg = timeg->getOrAddGroup(std::to_string(ch));
+						fluo::Group* cmdg = chg->getOrAddGroup("roi");
+						fluo::Node* rnode = cmdg->getOrAddNode(it2->first);
+						rnode->addSetValue("roi_dff", bv[i]);
+					}
 				}
 			}
 		}
@@ -1398,61 +1454,117 @@ void ScriptProc::RunRoiBase()
 		{
 			if (!object)
 				return;
+			int time = std::stoi(t_);
+			int chann = std::stoi(ch_);
 			std::string str;
 			object->getValue("type", str);
 			if (str == "backg_stat")
 			{
+				//get background mean value
+				fluo::ValueTuple vt{ bgname_, "", "" };
+				if (object->getValue(vt))
+				{
+					//expand bg values
+					if (bg_values_.size() <= time)
+						bg_values_.resize(time + 1);
+					double dval = std::stod(std::get<2>(vt));
+					bg_values_[time] = dval;
+				}
 			}
 			else if (str == "comp")
 			{
 			}
 			else if (str == "ruler")
 			{
-				for (auto it = vnames_.begin();
-					it != vnames_.end(); ++it)
+				//local value
+				fluo::ValueTuple vt{ valname_, "", "" };
+				if (object->getValue(vt))
 				{
-					//local value
-					fluo::ValueTuple vt{ *it, "", "" };
-					if (object->getValue(vt))
+					std::string rid = object->getName();
+					//expand chann
+					if (in_values_.size() <= chann)
+						in_values_.resize(chann + 1);
+					//get ruler
+					CompValues& cv = in_values_.at(chann);
+					auto rit = cv.find(rid);
+					if (rit == cv.end())
 					{
-						int time = std::stoi(t_);
-						int chann = std::stoi(ch_);
-						std::string rid = object->getName();
-						//expand chann
-						if (in_values_.size() <= chann)
-							in_values_.resize(chann + 1);
-						//get ruler
-						RulerValues& rv = in_values_.at(chann);
-						auto rit = rv.find(rid);
-						if (rit == rv.end())
-						{
-							rv.insert(std::pair<std::string, BaseValues>(rid, BaseValues()));
-							rit = rv.find(rid);
-						}
-						BaseValues& bv = rit->second;
-						if (time >= bv.size())
-							bv.resize(time + 1);
-						double dval = std::stod(std::get<2>(vt));
-						bv[time] = dval;
+						cv.insert(std::pair<std::string, BaseValues>(rid, BaseValues()));
+						rit = cv.find(rid);
 					}
+					BaseValues& bv = rit->second;
+					if (time >= bv.size())
+						bv.resize(time + 1);
+					double dval = std::stod(std::get<2>(vt));
+					bv[time] = dval;
 				}
 			}
 		}
 
 	private:
-		std::set<std::string> vnames_;
-		int chnum_;
+		std::string valname_;
+		std::string bgname_;
+		double var_cut_;
 		std::string t_;
 		std::string ch_;
 		typedef std::vector<double> BaseValues;
-		typedef std::unordered_map<std::string, BaseValues> RulerValues;
-		typedef std::vector<RulerValues> ChannValues;
+		typedef std::unordered_map<std::string, BaseValues> CompValues;
+		typedef std::vector<CompValues> ChannValues;
 		ChannValues in_values_;
+		ChannValues out_values_;
+		BaseValues bg_values_;
+
+		double filter(BaseValues& bv)
+		{
+			BaseValues temp = bv;//copy
+			double mean = 0, var = 0;
+			do
+			{
+				stats(temp, mean, var);
+				if (var < var_cut_)
+					break;
+				//remove outliers
+				size_t n = temp.size();
+				double d, z = 1;
+				int c = 0;
+				do
+				{
+					for (auto it = temp.begin();
+						it != temp.end();)
+					{
+						d = (*it - mean) / var;//z value
+						if (d > z)
+							it = temp.erase(it);
+						else
+							++it;
+					}
+					if (temp.size() == n)
+						z /= 2;
+					c++;
+				} while (c < 10);//run 10 times max
+			} while (!temp.empty());
+			return mean;
+		}
+
+		void stats(BaseValues& bv, double& mean, double& var)
+		{
+			if (bv.empty())
+				return;
+			double sum = 0;
+			for (auto it : bv)
+				sum += it;
+			mean = sum / bv.size();
+			sum = 0;
+			for (auto it : bv)
+				sum += (it - mean) * (it - mean);
+			var = sum / bv.size();
+		}
 	};
 
-	RoiVisitor visitor(vnames, m_view->GetAllVolumeNum());
+	RoiVisitor visitor(valname, bgname, var);
 	m_output->accept(visitor);
-	visitor.addBase(m_output.get());
+	visitor.computeOut();
+	visitor.output(m_output.get());
 }
 
 void ScriptProc::RunRulerInfo()
@@ -1845,7 +1957,7 @@ void ScriptProc::ExportInfo()
 	}
 }
 
-void ScriptProc::ExportAnalysis()
+void ScriptProc::ExportTemplate()
 {
 	if (!m_frame) return;
 	if (!TimeCondition())
@@ -2072,6 +2184,182 @@ void ScriptProc::ExportAnalysis()
 	m_frame->GetMovieView()->HoldRun();
 	::wxLaunchDefaultBrowser(outputfile);
 	m_frame->GetMovieView()->ResumeRun();
+}
+
+void ScriptProc::ExportSpreadsheet()
+{
+	if (!TimeCondition())
+		return;
+
+	wxString outputfile;
+	m_fconfig->Read("output", &outputfile);
+	outputfile = GetSavePath(outputfile, "csv", false);
+	if (outputfile.IsEmpty())
+		return;
+	int vnum;
+	m_fconfig->Read("value_num", &vnum, 0);
+	std::set<std::string> vnames;
+	for (int i = 0; i < vnum; ++i)
+	{
+		wxString str;
+		if (m_fconfig->Read(
+			wxString::Format("value_name%d", i),
+			&str))
+			vnames.insert(str.ToStdString());
+	}
+
+	//print lines
+	class CompVisitor : public fluo::NodeVisitor
+	{
+	public:
+		CompVisitor(std::ofstream& ofs,
+			std::set<std::string>& vnames,
+			int num) : fluo::NodeVisitor(),
+			ofs_(&ofs),
+			vnames_(vnames),
+			chnum_(num)
+		{
+			setTraversalMode(fluo::NodeVisitor::TRAVERSE_CHILDREN);
+		}
+
+		virtual void apply(fluo::Node& node)
+		{
+			printValues(&node);
+			traverse(node);
+		}
+
+		virtual void apply(fluo::Group& group)
+		{
+			std::string type;
+			group.getValue("type", type);
+			if (type == "time")
+				t_ = group.getName();
+			if (type == "channel")
+				ch_ = group.getName();
+			traverse(group);
+		}
+
+	protected:
+		void printValues(fluo::Object* object)
+		{
+			if (!object)
+				return;
+			std::string str;
+			object->getValue("type", str);
+			if (str == "backg_stat")
+			{
+				for (auto it = vnames_.begin();
+					it != vnames_.end(); ++it)
+				{
+					//local value
+					fluo::ValueTuple vt{ *it, "", "" };
+					if (object->getValue(vt))
+					{
+						auto vit = gvalues_.find(*it);
+						if (vit == gvalues_.end())
+							gvalues_.insert(std::pair<std::string, std::string>(
+								*it, std::get<2>(vt)));
+						else
+							vit->second = std::get<2>(vt);
+					}
+				}
+			}
+			else if (str == "comp")
+			{
+				if (chnum_ > 1)
+					*ofs_ << "CH-" << ch_ << " ";
+				str = object->getName();
+				*ofs_ << "ID-" << str << "," << t_;
+				for (auto it = vnames_.begin();
+					it != vnames_.end(); ++it)
+				{
+					*ofs_ << ",";
+					//local value
+					fluo::ValueTuple vt{ *it, "", "" };
+					if (object->getValue(vt))
+						*ofs_ << std::get<2>(vt);
+					else
+					{
+						//global value
+						auto vit = gvalues_.find(*it);
+						if (vit == gvalues_.end())
+							*ofs_ << "0";
+						else
+							*ofs_ << vit->second;
+					}
+				}
+				*ofs_ << std::endl;
+			}
+			else if (str == "ruler")
+			{
+				if (chnum_ > 1)
+					*ofs_ << "CH-" << ch_ << " ";
+				str = object->getName();
+				*ofs_ << "ID-" << str << "," << t_;
+				for (auto it = vnames_.begin();
+					it != vnames_.end(); ++it)
+				{
+					*ofs_ << ",";
+					//local value
+					fluo::ValueTuple vt{ *it, "", "" };
+					if (object->getValue(vt))
+						*ofs_ << std::get<2>(vt);
+					else
+					{
+						//global value
+						auto vit = gvalues_.find(*it);
+						if (vit == gvalues_.end())
+							*ofs_ << "0";
+						else
+							*ofs_ << vit->second;
+					}
+				}
+				if (vnames_.find("intensity") != vnames_.end())
+				{
+					fluo::ValueVector names =
+						object->getValueNames(3);
+					for (auto it = names.begin();
+						it != names.end(); ++it)
+					{
+						if (!IS_NUMBER(*it))
+							continue;
+						fluo::ValueTuple vt;
+						std::get<0>(vt) = *it;
+						if (object->getValue(vt))
+						{
+							*ofs_ << ",";
+							*ofs_ << std::get<2>(vt);
+						}
+					}
+				}
+				*ofs_ << std::endl;
+			}
+		}
+
+	private:
+		std::ofstream* ofs_;
+		std::set<std::string> vnames_;
+		int chnum_;
+		std::string t_;
+		std::string ch_;
+		std::unordered_map<std::string, std::string> gvalues_;
+	};
+
+	std::ofstream ofs(outputfile.ToStdString());
+	CompVisitor visitor(ofs, vnames,
+		m_view->GetAllVolumeNum());
+	m_output->accept(visitor);
+	ofs.close();
+
+	wxMimeTypesManager manager;
+	wxFileType* filetype = manager.GetFileTypeFromExtension("csv");
+	if (filetype)
+	{
+		wxString command = filetype->GetOpenCommand(outputfile);
+		m_frame->GetMovieView()->HoldRun();
+		wxExecute(command);
+		m_frame->GetMovieView()->ResumeRun();
+	}
 }
 
 void ScriptProc::ChangeData()

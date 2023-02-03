@@ -122,7 +122,7 @@ namespace flrd
 		void RunGenerateComp();
 		void RunRulerProfile();
 		void RunRoi();
-		void RunRoiBase();
+		void RunRoiDff();
 		void RunRulerInfo();
 		void RunAddCells();
 		void RunLinkCells();
@@ -131,7 +131,8 @@ namespace flrd
 		void RunRegistration();
 
 		void ExportInfo();
-		void ExportAnalysis();
+		void ExportTemplate();
+		void ExportSpreadsheet();
 
 		void ChangeData();
 		void ChangeScript();
