@@ -787,6 +787,8 @@ public:
 
 	void UpdateClips();
 
+	void GetRenderSize(int& nx, int& ny);
+
 public:
 	VRenderView* m_vrv;
 	//set gl context
@@ -1244,7 +1246,6 @@ private:
 	void DrawAnnotations();
 	//framebuffer
 	void BindRenderBuffer();
-	void GetRenderSize(int &nx, int &ny);
 	//draw out the framebuffer after composition
 	void PrepFinalBuffer();
 	void ClearFinalBuffer();

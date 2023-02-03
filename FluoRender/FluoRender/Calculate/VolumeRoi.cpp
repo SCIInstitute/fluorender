@@ -45,9 +45,11 @@ const char* str_cl_volume_roi_ellipse = \
 "	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
 "	CLK_FILTER_NEAREST;\n" \
 "\n" \
-"float eval_ellipse(float2 coord, float2 ectr, float4 eaxis)\n" \
+"float eval_ellipse(float2 coord, float3 ectr, float4 eaxis)\n" \
 "{\n" \
-"	float2 v = coord - ectr;\n" \
+"	float2 v = coord;\n" \
+"	v.x *= ectr.z;\n" \
+"	v -= ectr.xy; \n" \
 "	float2 l = (float2)(length(eaxis.xy), length(eaxis.zw));\n" \
 "	float2 p = (float2)(dot(v, eaxis.xy / l.x), dot(v, eaxis.zw / l.y));\n" \
 "	p = p / l;\n" \
@@ -66,7 +68,7 @@ const char* str_cl_volume_roi_ellipse = \
 "	float4 mat1,\n" \
 "	float4 mat2,\n" \
 "	float4 mat3,\n" \
-"	float2 ectr,\n" \
+"	float3 ectr,\n" \
 "	float4 eaxis,\n" \
 "	__global uint* count,\n" \
 "	__global float* wcount)\n" \
@@ -105,7 +107,8 @@ const char* str_cl_volume_roi_ellipse = \
 VolumeRoi::VolumeRoi(VolumeData* vd):
 	m_vd(vd),
 	m_use_mask(false),
-	m_ruler(0)
+	m_ruler(0),
+	m_aspect(1)
 {}
 
 VolumeRoi::~VolumeRoi()
@@ -188,10 +191,16 @@ void VolumeRoi::Run()
 	p1 = m_tf.transform(p1); p1.z(0);
 	p2 = m_tf.transform(p2); p2.z(0);
 	p3 = m_tf.transform(p3); p3.z(0);
+	//adjust for aspect
+	p0.x(p0.x() * m_aspect);
+	p1.x(p1.x() * m_aspect);
+	p2.x(p2.x() * m_aspect);
+	p3.x(p3.x() * m_aspect);
 	fluo::Point pc((p0 + p1) / 2);
-	cl_float2 ectr = {
+	cl_float3 ectr = {
 		cl_float(pc.x()),
-		cl_float(pc.y())};
+		cl_float(pc.y()),
+		cl_float(m_aspect)};
 	cl_float4 eaxis = {
 		cl_float((p2 - pc).x()),
 		cl_float((p2 - pc).y()),
@@ -233,7 +242,7 @@ void VolumeRoi::Run()
 		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf1));
 		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf2));
 		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf3));
-		kernel_prog->setKernelArgConst(sizeof(cl_float2), (void*)(&ectr));
+		kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&ectr));
 		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&eaxis));
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int) * (gsize.gsxyz), (void*)(sum));
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float) * (gsize.gsxyz), (void*)(wsum));

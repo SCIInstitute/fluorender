@@ -1582,6 +1582,9 @@ int RulerHandler::Roi(Ruler* ruler)
 	VolumeRoi vr(m_vd);
 	vr.SetTransform(tf);
 	vr.SetRoi(ruler);
+	int vx, vy;
+	m_view->GetRenderSize(vx, vy);
+	vr.SetAspect(vx, vy);
 	vr.Run();
 	ruler->SetMeanInt(vr.GetResult());
 

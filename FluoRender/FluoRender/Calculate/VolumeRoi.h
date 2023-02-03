@@ -65,6 +65,17 @@ namespace flrd
 		{
 			return m_ruler;
 		}
+		void SetAspect(int nx, int ny)
+		{
+			if (ny > 0)
+				m_aspect = double(nx) / double(ny);
+			else
+				m_aspect = 1;
+		}
+		double GetAspect()
+		{
+			return m_aspect;
+		}
 
 		void Run();
 		double GetResult();
@@ -78,6 +89,7 @@ namespace flrd
 		bool m_use_mask;//use mask instead of data
 		fluo::Transform m_tf;//view transform
 		Ruler* m_ruler;//a closed ruler for roi
+		double m_aspect;//nx/ny of render view
 
 		//result
 		unsigned int m_sum;
