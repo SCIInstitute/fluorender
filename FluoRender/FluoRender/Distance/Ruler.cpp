@@ -59,7 +59,7 @@ Ruler::Ruler()
 
 	m_mean_int = 0;
 
-	m_interp = 2;
+	m_interp = 1;
 }
 
 Ruler::~Ruler()
