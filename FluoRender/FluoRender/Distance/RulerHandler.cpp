@@ -1123,6 +1123,7 @@ void RulerHandler::Save(wxFileConfig &fconfig, int vi)
 			fconfig.Write("use_color", ruler->GetUseColor());
 			fconfig.Write("color", wxString::Format("%f %f %f",
 				ruler->GetColor().r(), ruler->GetColor().g(), ruler->GetColor().b()));
+			fconfig.Write("interp", ruler->GetInterp());
 			fconfig.Write("num", ruler->GetNumBranch());
 			wxString path = wxString::Format(
 				"/views/%d/rulers/%d/branches", vi, (int)ri);
@@ -1219,6 +1220,8 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 						}
 					}
 				}
+				if (fconfig.Read("interp", &ival))
+					ruler->SetInterp(ival);
 				int num = fconfig.Read("num", 0l);
 				//num could be points or branch
 				for (int ii = 0; ii < num; ++ii)

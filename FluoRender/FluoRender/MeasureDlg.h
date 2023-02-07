@@ -167,6 +167,10 @@ public:
 		ID_ChgGroup,
 		ID_SelGroup,
 		ID_DispTglGroup,
+		//interpolation/key
+		ID_InterpCmb,
+		ID_DeleteKeyBtn,
+		ID_DeleteAllKeyBtn,
 		//align
 		ID_AlignCenter,
 		ID_AlignX,
@@ -187,7 +191,7 @@ public:
 	~MeasureDlg();
 
 	void GetSettings(VRenderGLView* vrv);
-	void UpdateTransient();
+	void UpdateRulerProps();
 	VRenderGLView* GetView();
 	void UpdateList();
 
@@ -211,6 +215,11 @@ private:
 	wxButton* m_chg_group;
 	wxButton* m_sel_group;
 	wxButton* m_disptgl_group;
+	//interpolate/key
+	wxComboBox* m_interp_cmb;
+	wxButton* m_delete_key_btn;
+	wxButton* m_delete_all_key_btn;
+	//list
 	RulerListCtrl *m_rulerlist;
 	//tool bar
 	wxToolBar *m_toolbar1;
@@ -286,6 +295,10 @@ private:
 	void OnChgGroup(wxCommandEvent& event);
 	void OnSelGroup(wxCommandEvent& event);
 	void OnDispTglGroup(wxCommandEvent& event);
+	//interpolate/key
+	void OnInterpCmb(wxCommandEvent& event);
+	void OnDeleteKeyBtn(wxCommandEvent& event);
+	void OnDeleteAllKeyBtn(wxCommandEvent& event);
 	//align
 	void OnAlignRuler(wxCommandEvent& event);
 	void OnAlignPca(wxCommandEvent& event);

@@ -162,6 +162,22 @@ namespace flrd
 				SetPoint(np, t);
 			}
 		}
+		void DeletePoint(size_t t)
+		{
+			if (m_tp.size() == 1)
+				return;
+			auto i = m_tp.find(t);
+			if (i != m_tp.end())
+				m_tp.erase(i);
+		}
+		void DeleteAllPoint(size_t t, int interp)
+		{
+			if (m_tp.size() == 1)
+				return;
+			fluo::Point p = GetPoint(t, interp);
+			m_tp.clear();
+			SetPoint(p, 0);
+		}
 
 		void SetLocked(bool locked = true)
 		{
@@ -587,6 +603,27 @@ namespace flrd
 		int GetInterp()
 		{
 			return m_interp;
+		}
+		//delete key
+		void DeleteKey()
+		{
+			for (size_t i = 0; i < GetNumPoint(); ++i)
+			{
+				RulerPoint* p = GetRulerPoint(i);
+				if (!p)
+					continue;
+				p->DeletePoint(m_work_time);
+			}
+		}
+		void DeleteAllKey()
+		{
+			for (size_t i = 0; i < GetNumPoint(); ++i)
+			{
+				RulerPoint* p = GetRulerPoint(i);
+				if (!p)
+					continue;
+				p->DeleteAllPoint(m_work_time, m_interp);
+			}
 		}
 
 	private:

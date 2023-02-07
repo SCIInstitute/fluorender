@@ -654,7 +654,7 @@ void RulerListCtrl::OnSelection(wxListEvent &event)
 	}
 	m_color_picker->Show();
 
-	m_measure_dlg->UpdateTransient();
+	m_measure_dlg->UpdateRulerProps();
 }
 
 void RulerListCtrl::EndEdit(bool update)
@@ -905,6 +905,10 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_BUTTON(ID_ChgGroup, MeasureDlg::OnChgGroup)
 	EVT_BUTTON(ID_SelGroup, MeasureDlg::OnSelGroup)
 	EVT_BUTTON(ID_DispTglGroup, MeasureDlg::OnDispTglGroup)
+	//interpolate/key
+	EVT_COMBOBOX(ID_InterpCmb, MeasureDlg::OnInterpCmb)
+	EVT_BUTTON(ID_DeleteKeyBtn, MeasureDlg::OnDeleteKeyBtn)
+	EVT_BUTTON(ID_DeleteAllKeyBtn, MeasureDlg::OnDeleteAllKeyBtn)
 	//align
 	EVT_BUTTON(ID_AlignX, MeasureDlg::OnAlignRuler)
 	EVT_BUTTON(ID_AlignY, MeasureDlg::OnAlignRuler)
@@ -1086,6 +1090,7 @@ MeasureDlg::MeasureDlg(VRenderFrame* frame)
 	sizer_12->Add(m_use_transfer_chk, 0, wxALIGN_CENTER);
 	sizer_12->Add(10, 10);
 	sizer_12->Add(m_df_f_chk, 0, wxALIGN_CENTER);
+	m_df_f_chk->Hide();
 	//relax settings
 	wxBoxSizer* sizer_13 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Relax:",
@@ -1126,6 +1131,7 @@ MeasureDlg::MeasureDlg(VRenderFrame* frame)
 	//list
 	wxBoxSizer *sizer_2 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY, "Ruler List"), wxVERTICAL);
+	//group
 	wxBoxSizer* sizer21 = new wxBoxSizer(wxHORIZONTAL);
 	m_new_group = new wxButton(this, ID_NewGroup, "New Group",
 		wxDefaultPosition, wxSize(65, 22));
@@ -1146,9 +1152,31 @@ MeasureDlg::MeasureDlg(VRenderFrame* frame)
 	sizer21->Add(m_chg_group, 0, wxALIGN_CENTER);
 	sizer21->Add(m_sel_group, 0, wxALIGN_CENTER);
 	sizer21->Add(m_disptgl_group, 0, wxALIGN_CENTER);
+	//interpolate/key
+	wxBoxSizer* sizer22 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, 0, "Time Interpolation: ",
+		wxDefaultPosition, wxDefaultSize);
+	m_interp_cmb = new wxComboBox(this, ID_InterpCmb, "",
+		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+	m_interp_cmb->Append("Step");
+	m_interp_cmb->Append("Linear");
+	m_interp_cmb->Append("Smooth");
+	m_interp_cmb->Select(1);
+	m_delete_key_btn = new wxButton(this, ID_DeleteKeyBtn, "Del. Key",
+		wxDefaultPosition, wxDefaultSize);
+	m_delete_all_key_btn = new wxButton(this, ID_DeleteAllKeyBtn, "Del. All Keys",
+		wxDefaultPosition, wxDefaultSize);
+	sizer22->AddStretchSpacer();
+	sizer22->Add(st, 0, wxALIGN_CENTER);
+	sizer22->Add(m_interp_cmb, 0, wxALIGN_CENTER);
+	sizer22->Add(m_delete_key_btn, 0, wxALIGN_CENTER);
+	sizer22->Add(m_delete_all_key_btn, 0, wxALIGN_CENTER);
+	//list
 	m_rulerlist = new RulerListCtrl(frame, this,
 		wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
 	sizer_2->Add(sizer21, 0, wxEXPAND);
+	sizer_2->Add(5, 5);
+	sizer_2->Add(sizer22, 0, wxEXPAND);
 	sizer_2->Add(5, 5);
 	sizer_2->Add(m_rulerlist, 1, wxEXPAND);
 
@@ -1348,9 +1376,10 @@ void MeasureDlg::GetSettings(VRenderGLView* vrv)
 	}
 }
 
-void MeasureDlg::UpdateTransient()
+void MeasureDlg::UpdateRulerProps()
 {
 	bool trans = false;
+	int interp = 0;
 	if (m_view)
 	{
 		std::vector<int> sel;
@@ -1362,11 +1391,15 @@ void MeasureDlg::UpdateTransient()
 			{
 				flrd::Ruler* r = (*ruler_list)[index];
 				if (r)
+				{
 					trans = r->GetTransient();
+					interp = r->GetInterp();
+				}
 			}
 		}
 	}
 	m_transient_chk->SetValue(trans);
+	m_interp_cmb->Select(interp);
 }
 
 VRenderGLView* MeasureDlg::GetView()
@@ -1378,7 +1411,7 @@ void MeasureDlg::UpdateList()
 {
 	if (!m_view) return;
 	m_rulerlist->UpdateRulers(m_view);
-	UpdateTransient();
+	UpdateRulerProps();
 }
 
 void MeasureDlg::OnNewLocator(wxCommandEvent& event)
@@ -2367,6 +2400,92 @@ void MeasureDlg::OnDispTglGroup(wxCommandEvent& event)
 		}
 	}
 	m_view->RefreshGL(39);
+}
+
+//interpolation/key
+void MeasureDlg::OnInterpCmb(wxCommandEvent& event)
+{
+	bool refresh = false;
+	if (!m_view)
+		return;
+	flrd::RulerList* ruler_list = m_view->GetRulerList();
+	if (!ruler_list)
+		return;
+	int interp = m_interp_cmb->GetSelection();
+	std::vector<int> sel;
+	if (m_rulerlist->GetCurrSelection(sel))
+	{
+		for (size_t i = 0; i < sel.size(); ++i)
+		{
+			if (sel[i] < 0 || sel[i] >= ruler_list->size())
+				continue;
+			flrd::Ruler* ruler = ruler_list->at(sel[i]);
+			if (!ruler)
+				continue;
+			ruler->SetInterp(interp);
+			refresh = true;
+		}
+	}
+	if (refresh)
+	{
+		m_rulerlist->UpdateRulers();
+		m_view->RefreshGL(39);
+	}
+}
+
+void MeasureDlg::OnDeleteKeyBtn(wxCommandEvent& event)
+{
+	bool refresh = false;
+	if (!m_view)
+		return;
+	flrd::RulerList* ruler_list = m_view->GetRulerList();
+	if (!ruler_list)
+		return;
+	int interp = m_interp_cmb->GetSelection();
+	std::vector<int> sel;
+	if (m_rulerlist->GetCurrSelection(sel))
+	{
+		for (size_t i = 0; i < sel.size(); ++i)
+		{
+			if (sel[i] < 0 || sel[i] >= ruler_list->size())
+				continue;
+			flrd::Ruler* ruler = ruler_list->at(sel[i]);
+			if (!ruler)
+				continue;
+			ruler->SetWorkTime(m_view->m_tseq_cur_num);
+			ruler->DeleteKey();
+			refresh = true;
+		}
+	}
+	if (refresh)
+	{
+		m_rulerlist->UpdateRulers();
+		m_view->RefreshGL(39);
+	}
+}
+
+void MeasureDlg::OnDeleteAllKeyBtn(wxCommandEvent& event)
+{
+	if (!m_view)
+		return;
+	flrd::RulerList* ruler_list = m_view->GetRulerList();
+	if (!ruler_list)
+		return;
+	int interp = m_interp_cmb->GetSelection();
+	std::vector<int> sel;
+	if (m_rulerlist->GetCurrSelection(sel))
+	{
+		for (size_t i = 0; i < sel.size(); ++i)
+		{
+			if (sel[i] < 0 || sel[i] >= ruler_list->size())
+				continue;
+			flrd::Ruler* ruler = ruler_list->at(sel[i]);
+			if (!ruler)
+				continue;
+			ruler->SetWorkTime(m_view->m_tseq_cur_num);
+			ruler->DeleteAllKey();
+		}
+	}
 }
 
 void MeasureDlg::AlignCenter(flrd::Ruler* ruler, flrd::RulerList* ruler_list)
