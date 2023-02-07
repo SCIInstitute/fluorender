@@ -141,6 +141,8 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 		if (!ruler) continue;
 		ruler->SetWorkTime(rwt);
 		if (!ruler->GetDisp()) continue;
+		int interp = ruler->GetInterp();
+
 		if (!ruler->GetTransient() ||
 			(ruler->GetTransient() &&
 				ruler->GetTransTime() == tseq_cur_num))
@@ -156,7 +158,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 				{
 					//draw square
 					rp1 = ruler->GetRulerPoint(0);
-					p1 = rp1->GetPoint(rwt);
+					p1 = rp1->GetPoint(rwt, interp);
 					p1 = mv.transform(p1);
 					p1 = p.transform(p1);
 					if ((persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
@@ -179,10 +181,10 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 					rps[2] = ruler->GetRulerPoint(2);
 					rps[3] = ruler->GetRulerPoint(3);
 					fluo::Point pps[4];
-					pps[0] = rps[0]->GetPoint(rwt);
-					pps[1] = rps[1]->GetPoint(rwt);
-					pps[2] = rps[2]->GetPoint(rwt);
-					pps[3] = rps[3]->GetPoint(rwt);
+					pps[0] = rps[0]->GetPoint(rwt, interp);
+					pps[1] = rps[1]->GetPoint(rwt, interp);
+					pps[2] = rps[2]->GetPoint(rwt, interp);
+					pps[3] = rps[3]->GetPoint(rwt, interp);
 					fluo::Point ppc = ruler->GetCenter();
 					double ra, rb;
 					ra = (pps[0] - pps[1]).length() / 2.0;
@@ -234,7 +236,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 					for (size_t j = 0; j < ruler->GetNumBranchPoint(bi); ++j)
 					{
 						rp2 = ruler->GetRulerPoint(bi, j);
-						p2 = rp2->GetPoint(rwt);
+						p2 = rp2->GetPoint(rwt, interp);
 						p2 = mv.transform(p2);
 						p2 = p.transform(p2);
 						if ((persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||
@@ -280,7 +282,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 				for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
 				{
 					rp2 = ruler->GetRulerPoint(j);
-					p2 = rp2->GetPoint(rwt);
+					p2 = rp2->GetPoint(rwt, interp);
 					p2 = mv.transform(p2);
 					p2 = p.transform(p2);
 					if ((persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||

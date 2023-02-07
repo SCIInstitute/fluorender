@@ -114,13 +114,14 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 		Ruler* ruler = (*m_ruler_list)[i];
 		if (!ruler) continue;
 		if (!ruler->GetDisp()) continue;
+		int interp = ruler->GetInterp();
 
 		for (j = 0; j < ruler->GetNumBranch(); j++)
 		for (k = 0; k < ruler->GetNumBranchPoint(j); ++k)
 		{
 			point = ruler->GetPRulerPoint(j, k);
 			if (!point) continue;
-			ptemp = point->GetPoint(rwt);
+			ptemp = point->GetPoint(rwt, interp);
 			ptemp = mv.transform(ptemp);
 			ptemp = prj.transform(ptemp);
 			if ((persp && (ptemp.z() <= 0.0 || ptemp.z() >= 1.0)) ||
@@ -182,13 +183,14 @@ bool RulerHandler::FindClosestRulerPoint(double mx, double my)
 		Ruler* ruler = (*m_ruler_list)[i];
 		if (!ruler) continue;
 		if (!ruler->GetDisp()) continue;
+		int interp = ruler->GetInterp();
 
 		for (j = 0; j < ruler->GetNumBranch(); j++)
 		for (k = 0; k < ruler->GetNumBranchPoint(j); ++k)
 		{
 			point = ruler->GetPRulerPoint(j, k);
 			if (!point) continue;
-			ptemp = point->GetPoint(rwt);
+			ptemp = point->GetPoint(rwt, interp);
 			ptemp = mv.transform(ptemp);
 			ptemp = prj.transform(ptemp);
 			if ((persp && (ptemp.z() <= 0.0 || ptemp.z() >= 1.0)) ||
@@ -255,6 +257,7 @@ bool RulerHandler::FindClosestRulerBranch(double mx, double my)
 		Ruler* ruler = (*m_ruler_list)[i];
 		if (!ruler) continue;
 		if (!ruler->GetDisp()) continue;
+		int interp = ruler->GetInterp();
 
 		for (j = 0; j < ruler->GetNumBranch(); j++)
 		{
@@ -262,7 +265,7 @@ bool RulerHandler::FindClosestRulerBranch(double mx, double my)
 			//	continue;
 			point = ruler->GetPRulerPoint(j, 0);
 			if (!point) continue;
-			ptemp = point->GetPoint(rwt);
+			ptemp = point->GetPoint(rwt, interp);
 			ptemp = mv.transform(ptemp);
 			ptemp = prj.transform(ptemp);
 			if ((persp && (ptemp.z() <= 0.0 || ptemp.z() >= 1.0)) ||
@@ -334,6 +337,7 @@ bool RulerHandler::FindClosestRulerBranchPoint(double mx, double my)
 		Ruler* ruler = (*m_ruler_list)[i];
 		if (!ruler) continue;
 		if (!ruler->GetDisp()) continue;
+		int interp = ruler->GetInterp();
 
 		for (j = 0; j < ruler->GetNumBranch(); j++)
 		{
@@ -344,7 +348,7 @@ bool RulerHandler::FindClosestRulerBranchPoint(double mx, double my)
 			{
 				point = ruler->GetPRulerPoint(j, k);
 				if (!point) continue;
-				ptemp = point->GetPoint(rwt);
+				ptemp = point->GetPoint(rwt, interp);
 				ptemp = mv.transform(ptemp);
 				ptemp = prj.transform(ptemp);
 				if ((persp && (ptemp.z() <= 0.0 || ptemp.z() >= 1.0)) ||
@@ -435,6 +439,7 @@ bool RulerHandler::CompleteEllipse(int mode)
 	if (m_ruler->GetRulerType() != 5)
 		return false;
 	size_t rwt = m_ruler->GetWorkTime();
+	int interp = m_ruler->GetInterp();
 	flrd::RulerPoint* p0 = m_point.get();
 	flrd::RulerPoint* p1 = GetEllipsePoint(1);
 	flrd::RulerPoint* p2 = GetEllipsePoint(2);
@@ -444,24 +449,27 @@ bool RulerHandler::CompleteEllipse(int mode)
 	fluo::Point tmp;
 	if (mode == 0)
 	{
-		fluo::Point c((p2->GetPoint(rwt) + p3->GetPoint(rwt)) / 2.0);
-		fluo::Vector v0 = p0->GetPoint(rwt) - c;
-		fluo::Vector v2 = p2->GetPoint(rwt) - c;
+		fluo::Point c((p2->GetPoint(rwt, interp) +
+			p3->GetPoint(rwt, interp)) / 2.0);
+		fluo::Vector v0 = p0->GetPoint(rwt, interp) - c;
+		fluo::Vector v2 = p2->GetPoint(rwt, interp) - c;
 		fluo::Vector axis = Cross(v2, v0);
 		axis = Cross(axis, v2);
 		axis.normalize();
 		tmp = fluo::Point(c + axis * v0.length());
 		p0->SetPoint(tmp, rwt);
-		tmp = c + (c - p0->GetPoint(rwt));
+		tmp = c + (c - p0->GetPoint(rwt, interp));
 		p1->SetPoint(tmp, rwt);
 	}
 	else if (mode == 1)
 	{
-		fluo::Point c((p0->GetPoint(rwt) +
-			p1->GetPoint(rwt) + p2->GetPoint(rwt) +
-			p3->GetPoint(rwt)) / 4.0);
-		fluo::Vector v0 = p0->GetPoint(rwt) - c;
-		fluo::Vector v2 = p2->GetPoint(rwt) - c;
+		fluo::Point c((
+			p0->GetPoint(rwt, interp) +
+			p1->GetPoint(rwt, interp) +
+			p2->GetPoint(rwt, interp) +
+			p3->GetPoint(rwt, interp)) / 4.0);
+		fluo::Vector v0 = p0->GetPoint(rwt, interp) - c;
+		fluo::Vector v2 = p2->GetPoint(rwt, interp) - c;
 		fluo::Vector axis = Cross(v2, v0);
 		fluo::Vector a2 = Cross(v0, axis);
 		a2.normalize();
@@ -469,7 +477,7 @@ bool RulerHandler::CompleteEllipse(int mode)
 		p2->SetPoint(tmp, rwt);
 		tmp = fluo::Point(c - a2 * v2.length());
 		p3->SetPoint(tmp, rwt);
-		tmp = c + (c - p0->GetPoint(rwt));
+		tmp = c + (c - p0->GetPoint(rwt, interp));
 		p1->SetPoint(tmp, rwt);
 	}
 
@@ -601,7 +609,9 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 				RulerPoint* pp = m_ruler->GetLastRulerPoint();
 				if (pp)
 				{
-					planep = pp->GetPoint(m_ruler->GetWorkTime());
+					size_t rwt = m_ruler->GetWorkTime();
+					int interp = m_ruler->GetInterp();
+					planep = pp->GetPoint(rwt, interp);
 					pplanep = &planep;
 				}
 			}
@@ -713,6 +723,7 @@ bool RulerHandler::MoveRuler(int mx, int my)
 	if (!m_point || !m_view || !m_ruler)
 		return false;
 	size_t rwt = m_ruler->GetWorkTime();
+	int interp = m_ruler->GetInterp();
 
 	fluo::Point point, ip, tmp;
 	if (m_view->m_point_volume_mode)
@@ -723,7 +734,7 @@ bool RulerHandler::MoveRuler(int mx, int my)
 			point, ip);
 		if (t <= 0.0)
 		{
-			tmp = m_point->GetPoint(rwt);
+			tmp = m_point->GetPoint(rwt, interp);
 			t = m_vp.GetPointPlane(mx, my, &tmp, true, point);
 		}
 		if (t <= 0.0)
@@ -731,17 +742,17 @@ bool RulerHandler::MoveRuler(int mx, int my)
 	}
 	else
 	{
-		tmp = m_point->GetPoint(rwt);
+		tmp = m_point->GetPoint(rwt, interp);
 		double t = m_vp.GetPointPlane(mx, my, &tmp, true, point);
 		if (t <= 0.0)
 			return false;
 	}
 
-	fluo::Point p0 = m_point->GetPoint(rwt);
+	fluo::Point p0 = m_point->GetPoint(rwt, interp);
 	fluo::Vector displace = point - p0;
 	for (int i = 0; i < m_ruler->GetNumPoint(); ++i)
 	{
-		m_ruler->GetRulerPoint(i)->DisplacePoint(displace, rwt);
+		m_ruler->GetRulerPoint(i)->DisplacePoint(displace, rwt, interp);
 	}
 
 	Profile(m_ruler);
@@ -754,6 +765,7 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 	if (!m_point || !m_view || !m_ruler)
 		return false;
 	size_t rwt = m_ruler->GetWorkTime();
+	int interp = m_ruler->GetInterp();
 
 	fluo::Point point, ip, tmp;
 	if (m_view->m_point_volume_mode)
@@ -764,7 +776,7 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 			point, ip);
 		if (t <= 0.0)
 		{
-			tmp = m_point->GetPoint(rwt);
+			tmp = m_point->GetPoint(rwt, interp);
 			t = m_vp.GetPointPlane(mx, my, &tmp, true, point);
 		}
 		if (t <= 0.0)
@@ -772,7 +784,7 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 	}
 	else
 	{
-		tmp = m_point->GetPoint(rwt);
+		tmp = m_point->GetPoint(rwt, interp);
 		double t = m_vp.GetPointPlane(mx, my, &tmp, true, point);
 		if (t <= 0.0)
 			return false;
@@ -1658,10 +1670,11 @@ RulerPoint* RulerHandler::get_closest_point(fluo::Point& p)
 	for (auto r : *m_ruler_list)
 	{
 		r->SetWorkTime(rwt);
+		int interp = r->GetInterp();
 		pRulerPoint temp = r->FindNearestPRulerPoint(p, ri, rj);
 		if (!temp)
 			continue;
-		double d = (temp->GetPoint(rwt) - p).length();
+		double d = (temp->GetPoint(rwt, interp) - p).length();
 		if (d < dmin)
 		{
 			result = temp.get();

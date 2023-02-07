@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <memory>
 #include <vector>
 #include <set>
-#include <unordered_map>
+#include <map>
 #include <Types/Point.h>
 #include <Types/Color.h>
 #include <Types/Transform.h>
@@ -54,10 +54,10 @@ namespace flrd
 	class RulerPoint;
 	typedef std::shared_ptr<RulerPoint> pRulerPoint;
 	typedef std::vector<pRulerPoint> RulerBranch;
-	typedef std::vector<std::pair<size_t, fluo::Point>> TimePoint;
+	typedef std::map<size_t, fluo::Point> TimePoint;
 	typedef TimePoint::iterator TimePointIter;
-	typedef std::unordered_map<size_t, size_t> TimePointIndex;
-	typedef TimePointIndex::iterator TimePointIndexIter;
+	//typedef std::map<size_t, size_t> TimePointIndex;
+	//typedef TimePointIndex::iterator TimePointIndexIter;
 
 	class RulerPoint
 	{
@@ -105,65 +105,62 @@ namespace flrd
 		size_t GetTimeNum() { return m_tp.size(); }
 		bool GetTimeAndPoint(size_t i, size_t& t, fluo::Point& p)
 		{
-			if (i < m_tp.size())
+			size_t c = 0;
+			for (auto &it : m_tp)
 			{
-				t = m_tp[i].first;
-				p = m_tp[i].second;
-				return true;
+				if (c == i)
+				{
+					t = it.first;
+					p = it.second;
+					return true;
+				}
+				c++;
 			}
 			return false;
 		}
 		void SetPoint(const fluo::Point& p, size_t t)
 		{
-			TimePointIndexIter i = m_index.find(t);
-			if (i == m_index.end())
-			{
-				m_tp.push_back(std::make_pair(t, p));
-				m_index.insert(std::make_pair(t, m_tp.size() - 1));
-			}
+			fluo::Point* op = get_point(t);
+			if (op)
+				*op = p;
 			else
+				m_tp.insert(std::make_pair(t, p));
+		}
+		fluo::Point GetPoint(size_t t, int interp)//interp:0-step; 1-linear; 2-smooth
+		{
+			fluo::Point* op = get_point(t);
+			if (op)
+				return* op;
+
+			//not found
+			switch (interp)
 			{
-				m_tp[i->second].second = p;
+			case 0:
+			default:
+				//step
+				return get_point_step(t);
+			case 1:
+				return get_point_linear(t);
+			case 2:
+				return get_point_smooth(t);
 			}
 		}
-		fluo::Point GetPoint(size_t t)
+		void ScalePoint(double sx, double sy, double sz)
 		{
-			TimePointIndexIter i = m_index.find(t);
-			if (i == m_index.end())
-			{
-				if (m_tp.empty())
-					return fluo::Point();
-				return m_tp[get_prev(t)].second;
-			}
-			else
-				return m_tp[i->second].second;
+			//scale all points
+			for (auto &i : m_tp)
+				i.second.scale(sx, sy, sz);
 		}
-		void ScalePoint(double sx, double sy, double sz, size_t t)
+		void DisplacePoint(fluo::Vector& dp, size_t t, int interp)
 		{
-			TimePointIndexIter i = m_index.find(t);
-			if (i == m_index.end())
-			{
-				if (m_tp.empty())
-					return;
-				m_tp[get_prev(t)].second.scale(sx, sy, sz);
-			}
+			fluo::Point* op = get_point(t);
+			if (op)
+				*op += dp;
 			else
 			{
-				m_tp[i->second].second.scale(sx, sy, sz);
+				fluo::Point np = GetPoint(t, interp) + dp;
+				SetPoint(np, t);
 			}
-		}
-		void DisplacePoint(fluo::Vector& dp, size_t t)
-		{
-			TimePointIndexIter i = m_index.find(t);
-			if (i == m_index.end())
-			{
-				if (m_tp.empty())
-					return;
-				fluo::Point op = m_tp[get_prev(t)].second + dp;
-				SetPoint(op, t);
-			}
-			else
-				m_tp[i->second].second += dp;
 		}
 
 		void SetLocked(bool locked = true)
@@ -205,42 +202,132 @@ namespace flrd
 
 	private:
 		TimePoint m_tp;//points over time (t, point)
-		TimePointIndex m_index;//lookup for m_tp (t, index to m_tp)
+		//TimePointIndex m_index;//lookup for m_tp (t, index to m_tp)
 
 		bool m_locked;
 		unsigned int m_id;//from comp
 		std::set<unsigned int> m_bid;//merged ids from multiple bricks
 
-		size_t get_prev(size_t t)
+		//no interpolation
+		fluo::Point* get_point(size_t t)
+		{
+			auto i = m_tp.find(t);
+			if (i == m_tp.end())
+				return 0;
+			return &(i->second);
+		}
+		//interpolated point
+		fluo::Point get_point_step(size_t t)
+		{
+			size_t pt, nt;
+			int r = get_nb(t, pt, nt);
+			switch (r)
+			{
+			case 0:
+			default:
+				return fluo::Point();
+			case 1:
+			case 3:
+				t = pt;
+				break;
+			case 2:
+				t = nt;
+				break;
+			}
+			fluo::Point* op = get_point(t);
+			if (op)
+				return *op;
+			return fluo::Point();
+		}
+		fluo::Point get_point_linear(size_t t)
+		{
+			size_t pt, nt;
+			int r = get_nb(t, pt, nt);
+			switch (r)
+			{
+			case 0:
+			default:
+				return fluo::Point();
+			case 1:
+				t = pt;
+				break;
+			case 2:
+				t = nt;
+				break;
+			case 3:
+			{
+				fluo::Point* p0 = get_point(pt);
+				fluo::Point* p1 = get_point(nt);
+				if (!p0 || !p1)
+					return fluo::Point();
+				double d = nt - pt;
+				if (d == 0.0)
+					return fluo::Point();
+				double w0, w1;
+				w0 = (nt - t) / d;
+				w1 = (t - pt) / d;
+				return fluo::Point(w0 * (*p0) + w1 * (*p1));
+			}
+			}
+			fluo::Point* op = get_point(t);
+			if (op)
+				return *op;
+			return fluo::Point();
+		}
+		fluo::Point get_point_smooth(size_t t)
+		{
+			size_t pt, nt;
+			int r = get_nb(t, pt, nt);
+			switch (r)
+			{
+			case 0:
+			default:
+				return fluo::Point();
+			case 1:
+				t = pt;
+				break;
+			case 2:
+				t = nt;
+				break;
+			case 3:
+			{
+				fluo::Point* p0 = get_point(pt);
+				fluo::Point* p1 = get_point(nt);
+				if (!p0 || !p1)
+					return fluo::Point();
+				double d = nt - pt;
+				if (d == 0.0)
+					return fluo::Point();
+				double w0, w1;
+				w1 = (t - pt) / d;
+				w0 = -2.0 * w1 * w1 * w1 + 3.0 * w1 * w1;
+				return fluo::Point((*p0) + w0 * ((*p1) - (*p0)));
+			}
+			}
+			fluo::Point* op = get_point(t);
+			if (op)
+				return *op;
+			return fluo::Point();
+		}
+
+		//return 0-not found (can't be); 1-found prt; 2-found nxt; 3-found both;
+		int get_nb(size_t t, size_t& prt, size_t& nxt)//get previous and next
 		{
 			if (m_tp.empty())
-				return 0;
-			size_t rt = 0;
-			size_t rt2 = std::numeric_limits<unsigned int>::max();
-			for (auto i = m_tp.rbegin();
-				i != m_tp.rend(); ++i)
+				return false;
+
+			prt = -1; nxt = -1;//init
+			for (auto& i : m_tp)
 			{
-				if (i->first == t - 1)
-				{
-					rt = i->first;
+				size_t iv = i.first;
+				if (iv < t)
+					prt = iv;
+				if (iv > t)
+					nxt = iv;
+				if (prt != -1 && nxt != -1)
 					break;
-				}
-				if (i->first < t && i->first > rt)
-					rt = i->first;
-				if (i->first > t && i->first < rt2)
-					rt2 = i->first;
 			}
-			auto i = m_index.find(rt);
-			if (i != m_index.end())
-				return i->second;
-			else
-			{
-				//find other dir
-				i = m_index.find(rt2);
-				if (i != m_index.end())
-					return i->second;
-			}
-			return 0;
+			return int(prt != -1) | (int(nxt != -1) << 1);
 		}
 	};
 
@@ -307,7 +394,7 @@ namespace flrd
 		{
 			RulerPoint* p = GetRulerPoint(index);
 			if (p)
-				return p->GetPoint(m_work_time);
+				return p->GetPoint(m_work_time, m_interp);
 			return fluo::Point();
 		}
 		bool GetPoint(int index, fluo::Point& point)
@@ -315,7 +402,7 @@ namespace flrd
 			RulerPoint* p = GetRulerPoint(index);
 			if (p)
 			{
-				point = p->GetPoint(m_work_time);
+				point = p->GetPoint(m_work_time, m_interp);
 				return true;
 			}
 			return false;
@@ -331,7 +418,7 @@ namespace flrd
 		{
 			RulerPoint* p = GetRulerPoint(nbranch, index);
 			if (p)
-				return p->GetPoint(m_work_time);
+				return p->GetPoint(m_work_time, m_interp);
 			return fluo::Point();
 		}
 		void SetPoint(int index, const fluo::Point& point)
@@ -492,6 +579,16 @@ namespace flrd
 			return m_mean_int;
 		}
 
+		//interp mode
+		void SetInterp(int mode)
+		{
+			m_interp = mode;
+		}
+		int GetInterp()
+		{
+			return m_interp;
+		}
+
 	private:
 		static int m_num;
 		wxString m_name;
@@ -525,6 +622,9 @@ namespace flrd
 
 		//brush size if brush is used along with the ruler
 		double m_brush_size;
+
+		//interp mode for time interpolation
+		int m_interp;
 	};
 
 	class RulerList : public std::vector<Ruler*>

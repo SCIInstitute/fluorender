@@ -58,6 +58,8 @@ Ruler::Ruler()
 	m_scale = 1;
 
 	m_mean_int = 0;
+
+	m_interp = 2;
 }
 
 Ruler::~Ruler()
@@ -186,7 +188,7 @@ pRulerPoint Ruler::FindPRulerPoint(fluo::Point& point)
 	{
 		for (size_t j = first ? 0 : 1; j < m_ruler[i].size(); ++j)
 		{
-			if (m_ruler[i][j]->GetPoint(m_work_time) == point)
+			if (m_ruler[i][j]->GetPoint(m_work_time, m_interp) == point)
 			{
 				return m_ruler[i][j];
 			}
@@ -205,7 +207,7 @@ pRulerPoint Ruler::FindNearestPRulerPoint(fluo::Point& point, size_t &ri, size_t
 	{
 		for (int j = m_ruler[i].size()-1; j >= 0; --j)
 		{
-			dist = (m_ruler[i][j]->GetPoint(m_work_time) - point).length2();
+			dist = (m_ruler[i][j]->GetPoint(m_work_time, m_interp) - point).length2();
 			if (first || dist < min_dist)
 			{
 				min_dist = dist;
@@ -235,7 +237,7 @@ pRulerPoint Ruler::FindBranchPRulerPoint(fluo::Point& point, size_t& ri, size_t&
 	{
 		if (m_ruler[i].size() < 2)
 			continue;
-		dist = (m_ruler[i][0]->GetPoint(m_work_time) - point).length2();
+		dist = (m_ruler[i][0]->GetPoint(m_work_time, m_interp) - point).length2();
 		if (dist < min_dist)
 		{
 			min_dist = dist;
@@ -282,8 +284,8 @@ double Ruler::GetLength()
 	{
 		for (size_t i = 1; i < it->size(); ++i)
 		{
-			p1 = (*it)[i - 1]->GetPoint(m_work_time);
-			p2 = (*it)[i]->GetPoint(m_work_time);
+			p1 = (*it)[i - 1]->GetPoint(m_work_time, m_interp);
+			p2 = (*it)[i]->GetPoint(m_work_time, m_interp);
 			length += (p2 - p1).length();
 		}
 	}
@@ -301,8 +303,8 @@ double Ruler::GetLengthObject(double spcx, double spcy, double spcz)
 	{
 		for (size_t i = 1; i < it->size(); ++i)
 		{
-			p1 = (*it)[i - 1]->GetPoint(m_work_time);
-			p2 = (*it)[i]->GetPoint(m_work_time);
+			p1 = (*it)[i - 1]->GetPoint(m_work_time, m_interp);
+			p2 = (*it)[i]->GetPoint(m_work_time, m_interp);
 			p1 = fluo::Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
 			p2 = fluo::Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
 			length += (p2 - p1).length();
@@ -324,9 +326,11 @@ double Ruler::GetAngle()
 	{
 		if (m_ruler[0].size() >= 2)
 		{
-			fluo::Vector v = m_ruler[0][1]->GetPoint(m_work_time) - m_ruler[0][0]->GetPoint(m_work_time);
+			fluo::Vector v = m_ruler[0][1]->GetPoint(m_work_time, m_interp) -
+				m_ruler[0][0]->GetPoint(m_work_time, m_interp);
 			v.normalize();
-			angle = atan2(-v.y(), (v.x() > 0.0 ? 1.0 : -1.0)*sqrt(v.x()*v.x() + v.z()*v.z()));
+			angle = atan2(-v.y(), (v.x() > 0.0 ? 1.0 : -1.0)*
+				sqrt(v.x()*v.x() + v.z()*v.z()));
 			angle = fluo::r2d(angle);
 			angle = angle < 0.0 ? angle + 180.0 : angle;
 		}
@@ -336,9 +340,11 @@ double Ruler::GetAngle()
 		if (m_ruler[0].size() >= 3)
 		{
 			fluo::Vector v1, v2;
-			v1 = m_ruler[0][0]->GetPoint(m_work_time) - m_ruler[0][1]->GetPoint(m_work_time);
+			v1 = m_ruler[0][0]->GetPoint(m_work_time, m_interp) -
+				m_ruler[0][1]->GetPoint(m_work_time, m_interp);
 			v1.normalize();
-			v2 = m_ruler[0][2]->GetPoint(m_work_time) - m_ruler[0][1]->GetPoint(m_work_time);
+			v2 = m_ruler[0][2]->GetPoint(m_work_time, m_interp) -
+				m_ruler[0][1]->GetPoint(m_work_time, m_interp);
 			v2.normalize();
 			angle = acos(Dot(v1, v2));
 			angle = fluo::r2d(angle);
@@ -355,7 +361,7 @@ void Ruler::Scale(double spcx, double spcy, double spcz)
 	{
 		for (size_t j = first ? 0 : 1; j < m_ruler[i].size(); ++j)
 		{
-			m_ruler[i][j]->ScalePoint(spcx, spcy, spcz, m_work_time);
+			m_ruler[i][j]->ScalePoint(spcx, spcy, spcz);
 		}
 		first = false;
 	}
@@ -582,36 +588,39 @@ wxString Ruler::GetPosValues()
 	//x string
 	output += "x\t";
 	for (size_t i = 0; i < m_ruler.size(); ++i)
-		for (size_t j = 0; j < m_ruler[i].size(); ++j)
-		{
-			output += std::to_string(m_ruler[i][j]->GetPoint(m_work_time).x());
-			if (i == m_ruler.size() - 1)
-				output += "\n";
-			else
-				output += "\t";
-		}
+	for (size_t j = 0; j < m_ruler[i].size(); ++j)
+	{
+		output += std::to_string(
+			m_ruler[i][j]->GetPoint(m_work_time, m_interp).x());
+		if (i == m_ruler.size() - 1)
+			output += "\n";
+		else
+			output += "\t";
+	}
 	//y string
 	output += "y\t";
 	for (size_t i = 0; i < m_ruler.size(); ++i)
-		for (size_t j = 0; j < m_ruler[i].size(); ++j)
-		{
-			output += std::to_string(m_ruler[i][j]->GetPoint(m_work_time).y());
-			if (i == m_ruler.size() - 1)
-				output += "\n";
-			else
-				output += "\t";
-		}
+	for (size_t j = 0; j < m_ruler[i].size(); ++j)
+	{
+		output += std::to_string(
+			m_ruler[i][j]->GetPoint(m_work_time, m_interp).y());
+		if (i == m_ruler.size() - 1)
+			output += "\n";
+		else
+			output += "\t";
+	}
 	//z string
 	output += "z\t";
 	for (size_t i = 0; i < m_ruler.size(); ++i)
-		for (size_t j = 0; j < m_ruler[i].size(); ++j)
-		{
-			output += std::to_string(m_ruler[i][j]->GetPoint(m_work_time).z());
-			if (i == m_ruler.size() - 1)
-				output += "\n";
-			else
-				output += "\t";
-		}
+	for (size_t j = 0; j < m_ruler[i].size(); ++j)
+	{
+		output += std::to_string(
+			m_ruler[i][j]->GetPoint(m_work_time, m_interp).z());
+		if (i == m_ruler.size() - 1)
+			output += "\n";
+		else
+			output += "\t";
+	}
 
 	return output;
 }
@@ -692,8 +701,8 @@ void Ruler::FinishEllipse(fluo::Vector view)
 		m_ruler.back().size() != 2)
 		return;
 
-	fluo::Point p0 = m_ruler.back()[0]->GetPoint(m_work_time);
-	fluo::Point p1 = m_ruler.back()[1]->GetPoint(m_work_time);
+	fluo::Point p0 = m_ruler.back()[0]->GetPoint(m_work_time, m_interp);
+	fluo::Point p1 = m_ruler.back()[1]->GetPoint(m_work_time, m_interp);
 	fluo::Vector p01 = p0 - p1;
 	fluo::Vector axis = Cross(p01, view);
 	axis.normalize();
@@ -735,7 +744,7 @@ fluo::Point Ruler::GetCenter()
 	{
 		for (size_t i = first ? 0 : 1; i < it->size(); ++i)
 		{
-			result += (*it)[i]->GetPoint(m_work_time);
+			result += (*it)[i]->GetPoint(m_work_time, m_interp);
 			count++;
 		}
 		first = false;
