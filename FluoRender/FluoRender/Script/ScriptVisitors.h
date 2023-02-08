@@ -85,7 +85,7 @@ public:
 					BaseValues& bv = it2->second;
 					size_t size = std::min(bg_values_.size(), bv.size());
 					for (size_t i = 0; i < size; ++i)
-						bv[i] = bg_values_[i] < 0.0 ? bv[i] : bv[i] / bg_values_[i];
+						bv[i] = bg_values_[i] <= 0.0 ? bv[i] : bv[i] / bg_values_[i];
 
 				}
 			}
@@ -109,7 +109,7 @@ public:
 						continue;
 					double in = it->second[i];
 					double f = mean * bg_values_[i];
-					bv[i] = (in - f) / f;
+					bv[i] = f <= 0.0 ? in : (in - f) / f;
 				}
 			}
 		}
