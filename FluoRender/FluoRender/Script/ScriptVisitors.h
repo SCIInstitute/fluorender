@@ -151,10 +151,8 @@ protected:
 				bg_values_[time] = dval;
 			}
 		}
-		else if (str == "comp")
-		{
-		}
-		else if (str == "ruler")
+		else if (str == "comp" ||
+			str == "ruler")
 		{
 			//local value
 			fluo::ValueTuple vt{ valname_, "", "" };
@@ -250,6 +248,10 @@ private:
 
 	double filter(BaseValues& bv)
 	{
+		size_t on = bv.size();
+		if (!on)
+			return 0;
+		on = std::max(size_t(1), on / 10);
 		BaseValues temp = bv;//copy
 		double mean = 0, var = 0;
 		do
@@ -274,9 +276,11 @@ private:
 				}
 				if (temp.size() == n)
 					z /= 2;
+				else
+					break;
 				c++;
 			} while (c < 10);//run 10 times max
-		} while (!temp.empty());
+		} while (temp.size() > on);
 		return mean;
 	}
 
