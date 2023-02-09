@@ -41,12 +41,14 @@ public:
 	RoiVisitor(std::string& valname,
 		std::string& bgname,
 		double var,
-		int mode) :
+		int mode, 
+		int filter) :
 		fluo::NodeVisitor(),
 		valname_(valname),
 		bgname_(bgname),
 		var_cut_(var),
-		out_mode_(mode)
+		out_mode_(mode),
+		filter_mode_(filter)
 	{
 		setTraversalMode(fluo::NodeVisitor::TRAVERSE_CHILDREN);
 	}
@@ -100,7 +102,12 @@ public:
 				it2 != cv.end(); ++it2)
 			{
 				BaseValues& bv = it2->second;
-				double mean = filter(bv);
+				//double mean = filter(bv);
+				double mean1, mean2;
+				if (filter_mode_ == 0)
+					mean1 = filter(bv);
+				else
+					filter2(bv, mean1, mean2);
 				for (size_t i = 0; i < bv.size(); ++i)
 				{
 					//dff = (in - mean * bkg) / (mean * bkg)
@@ -108,7 +115,11 @@ public:
 					if (it == in_values_[ch].end())
 						continue;
 					double in = it->second[i];
-					double f = mean * bg_values_[i];
+					double f = 0;
+					if (filter_mode_ == 0)
+						f = mean1 * bg_values_[i];
+					else
+						f = (mean1 * i + mean2) * bg_values_[i];
 					bv[i] = f <= 0.0 ? in : (in - f) / f;
 				}
 			}
@@ -234,6 +245,7 @@ protected:
 
 private:
 	int out_mode_;
+	int filter_mode_;//0-constant; 1-ls
 	std::string valname_;
 	std::string bgname_;
 	double var_cut_;
@@ -284,6 +296,48 @@ private:
 		return mean;
 	}
 
+	//least squares
+	bool filter2(BaseValues& bv, double& b1, double& b2)
+	{
+		size_t on = bv.size();
+		if (!on)
+			return false;
+		on = std::max(size_t(1), on / 10);
+		BaseValues temp = bv;//copy
+		double mean1 = 0, mean2 = 0, var = 0;
+		do
+		{
+			stats2(temp, mean1, mean2, var);
+			if (var < var_cut_)
+				break;
+			//remove outliers
+			size_t n = temp.size();
+			double d, z = 1;
+			int c = 0;
+			do
+			{
+				int i = 0;
+				for (auto it = temp.begin();
+					it != temp.end();)
+				{
+					d = (*it - mean1 * i + mean2) / var;//z value
+					if (d > z)
+						it = temp.erase(it);
+					else
+						++it;
+					i++;
+				}
+				if (temp.size() == n)
+					z /= 2;
+				else
+					break;
+				c++;
+			} while (c < 10);//run 10 times max
+		} while (temp.size() > on);
+		b1 = mean1; b2 = mean2;
+		return true;
+	}
+
 	void stats(BaseValues& bv, double& mean, double& var)
 	{
 		if (bv.empty())
@@ -296,6 +350,34 @@ private:
 		for (auto it : bv)
 			sum += (it - mean) * (it - mean);
 		var = sum / bv.size();
+	}
+
+	void stats2(BaseValues& bv, double& mean1, double& mean2, double& var)
+	{
+		if (bv.empty())
+			return;
+		double x, y;
+		double sumx = 0, sumy = 0, sumxy = 0, sumxx = 0;
+		for (size_t i = 0; i < bv.size(); ++i)
+		{
+			x = i;
+			y = bv[i];
+			sumx += x;
+			sumxx += x * x;
+			sumy += y;
+			sumxy += x * y;
+		}
+		double n = bv.size();
+		mean1 = (n * sumxy - sumx * sumy) / (n * sumxx - sumx * sumx);
+		mean2 = (sumy - mean1 * sumx) / n;
+		sumy = 0;
+		for (size_t i = 0; i < bv.size(); ++i)
+		{
+			x = i;
+			y = mean1 * x + mean2;
+			sumy += (bv[i] - y) * (bv[i] - y);
+		}
+		var = sumy / n;
 	}
 };
 

@@ -1348,8 +1348,10 @@ void ScriptProc::RunRoiDff()
 	m_fconfig->Read("var_cut", &var);
 	int mode = 0;
 	m_fconfig->Read("output_mode", &mode);//0:output to template; 1:output to csv
+	int filter = 0;
+	m_fconfig->Read("filter_mode", &filter);//0:constant; 1:ls
 
-	RoiVisitor visitor(valname, bgname, var, mode);
+	RoiVisitor visitor(valname, bgname, var, mode, filter);
 	m_output->accept(visitor);
 	visitor.computeOut();
 	visitor.output(m_output.get());
