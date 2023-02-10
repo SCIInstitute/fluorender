@@ -26,11 +26,54 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "PyBase.h"
+#include <Debug.h>
 
 using namespace flrd;
 
+#ifdef _WIN32
+HMODULE PyBase::python_dll = nullptr;
+decltype(&Py_SetProgramName) PyBase::SetProgramName = nullptr;
+decltype(&Py_Initialize) PyBase::Initialize = nullptr;
+decltype(&PyDict_New) PyBase::Dict_New = nullptr;
+decltype(&PyRun_SimpleString) PyBase::Run_SimpleString = nullptr;
+decltype(&PyRun_String) PyBase::Run_String = nullptr;
+decltype(&PyObject_Repr) PyBase::Object_Repr = nullptr;
+decltype(&Py_FinalizeEx) PyBase::FinalizeEx = nullptr;
+#else
+void* PyBase::python_dll = nullptr;
+#endif
+
 PyBase::PyBase()
 {
+	m_valid = true;
+#ifdef _WIN32
+	python_dll = LoadLibrary(L"python310.dll");
+	if (!SetValid(python_dll)) return;
+
+	SetProgramName = (decltype(&Py_SetProgramName))GetProcAddress(python_dll, "Py_SetProgramName");
+	if (!SetValid(SetProgramName)) return;
+
+	Initialize = (decltype(&Py_Initialize))GetProcAddress(python_dll, "Py_Initialize");
+	if (!SetValid(Initialize)) return;
+
+	Dict_New = (decltype(&PyDict_New))GetProcAddress(python_dll, "PyDict_New");
+	if (!SetValid(Dict_New)) return;
+
+	Run_SimpleString = (decltype(&PyRun_SimpleString))GetProcAddress(python_dll, "PyRun_SimpleString");
+	if (!SetValid(Run_SimpleString)) return;
+
+	Run_String = (decltype(&PyRun_String))GetProcAddress(python_dll, "PyRun_String");
+	if (!SetValid(Run_String)) return;
+
+	Object_Repr = (decltype(&PyObject_Repr))GetProcAddress(python_dll, "PyObject_Repr");
+	if (!SetValid(Object_Repr)) return;
+
+	FinalizeEx = (decltype(&Py_FinalizeEx))GetProcAddress(python_dll, "Py_FinalizeEx");
+	if (!SetValid(FinalizeEx)) return;
+
+#else
+	python_dll = dlopen("python3.so", RTLD_NOW);
+#endif
 }
 
 PyBase::~PyBase()
@@ -39,21 +82,22 @@ PyBase::~PyBase()
 
 bool PyBase::Run()
 {
+	if (!m_valid)
+		return false;
+
 	wchar_t program[] = L"teset";
-	Py_SetProgramName(program);  /* optional but recommended */
-	Py_Initialize();
-	PyObject* py_dict = PyDict_New();
-	PyRun_SimpleString("from time import time,ctime\n"
+	SetProgramName(program);  /* optional but recommended */
+	Initialize();
+	PyObject* py_dict = Dict_New();
+	Run_SimpleString("from time import time,ctime\n"
 		"print('Today is', ctime(time()))\n");
-	PyObject* pr = PyRun_String("from time import time,ctime\n"
-		"print('Today is', ctime(time()))\n",
-		Py_single_input,
-		py_dict,
-		py_dict);
-	PyObject* objectsRepresentation = PyObject_Repr(pr);
-	if (Py_FinalizeEx() < 0)
-	{
-		exit(120);
-	}
+	//PyObject* pr = PyRun_String("from time import time,ctime\n"
+	//	"print('Today is', ctime(time()))\n",
+	//	Py_single_input,
+	//	py_dict,
+	//	py_dict);
+	//PyObject* objectsRepresentation = PyObject_Repr(pr);
+	if (FinalizeEx() < 0)
+		return false;
 	return true;
 }
