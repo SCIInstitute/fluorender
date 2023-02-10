@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "oif_reader.h"
-#include "../compatibility.h"
+#include <compatibility.h>
 #include <algorithm>
 
 OIFReader::OIFReader()

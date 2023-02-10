@@ -37,7 +37,7 @@
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
 #include "utility.h"
-#include "../compatibility.h"
+#include <compatibility.h>
 #include <fstream>
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>

@@ -291,7 +291,7 @@ private:
 				else
 					break;
 				c++;
-			} while (c < 10);//run 10 times max
+			} while (c < 7 && temp.size() > on);//run 7 times max
 		} while (temp.size() > on);
 		return mean;
 	}
@@ -304,10 +304,11 @@ private:
 			return false;
 		on = std::max(size_t(1), on / 10);
 		BaseValues temp = bv;//copy
-		double mean1 = 0, mean2 = 0, var = 0;
+		double mean = 0, var = 0;
+		b1 = b2 = 0;
 		do
 		{
-			stats2(temp, mean1, mean2, var);
+			stats2(temp, mean, b1, b2, var);
 			if (var < var_cut_)
 				break;
 			//remove outliers
@@ -320,7 +321,7 @@ private:
 				for (auto it = temp.begin();
 					it != temp.end();)
 				{
-					d = (*it - mean1 * i + mean2) / var;//z value
+					d = (*it - mean) / var;//z value
 					if (d > z)
 						it = temp.erase(it);
 					else
@@ -332,9 +333,8 @@ private:
 				else
 					break;
 				c++;
-			} while (c < 10);//run 10 times max
+			} while (c < 7 && temp.size() > on);//run 7 times max
 		} while (temp.size() > on);
-		b1 = mean1; b2 = mean2;
 		return true;
 	}
 
@@ -352,7 +352,7 @@ private:
 		var = sum / bv.size();
 	}
 
-	void stats2(BaseValues& bv, double& mean1, double& mean2, double& var)
+	void stats2(BaseValues& bv, double& mean, double& b1, double& b2, double& var)
 	{
 		if (bv.empty())
 			return;
@@ -368,13 +368,14 @@ private:
 			sumxy += x * y;
 		}
 		double n = bv.size();
-		mean1 = (n * sumxy - sumx * sumy) / (n * sumxx - sumx * sumx);
-		mean2 = (sumy - mean1 * sumx) / n;
+		mean = sumy / n;
+		b1 = (n * sumxy - sumx * sumy) / (n * sumxx - sumx * sumx);
+		b2 = (sumy - b1 * sumx) / n;
 		sumy = 0;
 		for (size_t i = 0; i < bv.size(); ++i)
 		{
 			x = i;
-			y = mean1 * x + mean2;
+			y = b1 * x + b2;
 			sumy += (bv[i] - y) * (bv[i] - y);
 		}
 		var = sumy / n;

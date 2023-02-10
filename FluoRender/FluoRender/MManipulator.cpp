@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "MManipulator.h"
 #include "VRenderFrame.h"
 #include "DataManager.h"
-#include "compatibility.h"
+#include <compatibility.h>
 
 BEGIN_EVENT_TABLE(MManipulator, wxPanel)
 	EVT_SPIN_UP(wxID_ANY, MManipulator::OnSpinUp)

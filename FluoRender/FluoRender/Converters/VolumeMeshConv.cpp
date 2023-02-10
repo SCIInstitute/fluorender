@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VolumeMeshConv.h"
 #include "MCTable.h"
 #include <Types/Utils.h>
-#include "../compatibility.h"
+#include <compatibility.h>
 
 double VolumeMeshConv::m_sw = 0.0;
 

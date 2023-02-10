@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _OIB_READER_H_
 
 #include <stdio.h>
-#include "../compatibility.h"
+#include <compatibility.h>
 #include <vector>
 #include "pole/pole.h"
 #include "base_reader.h"

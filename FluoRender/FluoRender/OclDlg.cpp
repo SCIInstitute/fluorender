@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/txtstrm.h>
 #include <wx/stdpaths.h>
 #include <wx/valnum.h>
-#include "compatibility.h"
+#include <compatibility.h>
 //#include <boost/chrono.hpp>
 //using namespace boost::chrono;
 

@@ -2,7 +2,7 @@
 #include <FLIVR/TextureRenderer.h>
 #include <FLIVR/ShaderProgram.h>
 #include <Types/Utils.h>
-#include "../compatibility.h"
+#include <compatibility.h>
 #include <fstream>
 #include <iostream>
 #include <sstream>

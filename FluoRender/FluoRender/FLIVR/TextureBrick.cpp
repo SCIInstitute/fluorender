@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
-#include "../compatibility.h"
+#include <compatibility.h>
 #include "Texture.h"
 #include <math.h>
 #include <FLIVR/TextureBrick.h>

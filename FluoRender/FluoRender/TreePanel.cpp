@@ -27,9 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "TreePanel.h"
 #include "VRenderFrame.h"
-#include "compatibility.h"
+#include <compatibility.h>
 //resources
-#include "Formats/png_resource.h"
+#include <Formats/png_resource.h>
 #include "tick.xpm"
 #include "cross.xpm"
 #include "img/icons.h"

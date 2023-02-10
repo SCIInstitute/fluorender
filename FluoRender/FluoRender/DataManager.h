@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _DATAMANAGER_H_
 
 #include <GL/glew.h>
-#include "compatibility.h"
+#include <compatibility.h>
 #include <vector>
 #include <tiffio.h>
 #include <Types/BBox.h>

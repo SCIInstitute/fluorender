@@ -21,6 +21,7 @@ value_name=roi_mean
 bg_name=bkg_mean
 var_cut=0.001
 output_mode=1
+filter_mode=0
 [tasks/task3]
 type=export_spreadsheet
 time_mode=TM_LAST_POST

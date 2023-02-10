@@ -49,7 +49,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Color.h>
 #include <Types/BBox.h>
 #include <Types/Quaternion.h>
-#include "compatibility.h"
+#include <compatibility.h>
 #include <Timer.h>
 
 #include <wx/wx.h>

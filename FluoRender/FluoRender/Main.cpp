@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stdpaths.h>
 #include <wx/filefn.h>
 #include "VRenderFrame.h"
-#include "compatibility.h"
+#include <compatibility.h>
 #include "JVMInitializer.h"
 
 IMPLEMENT_APP(VRenderApp)

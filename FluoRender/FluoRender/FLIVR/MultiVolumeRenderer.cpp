@@ -31,7 +31,7 @@
 #include "ShaderProgram.h"
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
-#include "../compatibility.h"
+#include <compatibility.h>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 
