@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 
 #ifdef __linux__
-  #include <dlfcn.h>
+#include <dlfcn.h>
 #endif
 
 #ifndef _JVMINITIALIZER_H_
