@@ -129,6 +129,7 @@ namespace flrd
 		void RunUnlinkCells();
 		void RunBackgroundStat();
 		void RunRegistration();
+		void RunPython();
 
 		void ExportInfo();
 		void ExportTemplate();

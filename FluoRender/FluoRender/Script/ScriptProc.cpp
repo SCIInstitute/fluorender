@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Components/CompSelector.h>
 #include <Components/CompEditor.h>
 #include <Tracking/Registrator.h>
+#include <Python/PyBase.h>
 #include <utility.h>
 #include <wx/filefn.h>
 #include <wx/stdpaths.h>
@@ -141,6 +142,8 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 					RunBackgroundStat();
 				else if (str == "registration")
 					RunRegistration();
+				else if (str == "python")
+					RunPython();
 				else if (str == "export_info")
 					ExportInfo();
 				else if (str == "export_analysis")
@@ -1610,6 +1613,15 @@ void ScriptProc::RunRegistration()
 		m_view->SetObjRotOff(euler.x(), euler.y(), euler.z());
 		m_view->SetOffsetTransform(tf);
 	}
+}
+
+void ScriptProc::RunPython()
+{
+	if (!TimeCondition())
+		return;
+
+	flrd::PyBase test;
+	test.Run();
 }
 
 void ScriptProc::ExportInfo()

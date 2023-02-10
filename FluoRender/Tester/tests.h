@@ -15,3 +15,5 @@ void SpecialValueTest();
 void MyTest();
 
 void TableTest();
+
+void PythonTest();

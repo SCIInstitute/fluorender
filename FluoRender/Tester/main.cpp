@@ -29,6 +29,8 @@ int main(int argc, char* argv[])
 
 	//TableTest();
 
+	PythonTest();
+
 	cout << "All done. Quit." << endl;
 	cin.get();
 	return 0;

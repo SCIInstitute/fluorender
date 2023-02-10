@@ -235,6 +235,11 @@ set(Boost_USE_STATIC_RUNTIME    OFF)
 find_package(Boost COMPONENTS system chrono filesystem REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
+#python
+set(Python_ADDITIONAL_VERSIONS 3.10)
+find_package(Python3 COMPONENTS Interpreter Development)
+include_directories(${Python3_INCLUDE_DIRS})
+
 # JNI includes
 find_package(JNI REQUIRED)
 if (JNI_FOUND)
@@ -450,6 +455,12 @@ file(GLOB pngs_hdr FluoRender/FluoRender/img/*.h)
 file(GLOB pngs_src FluoRender/FluoRender/img/*.cpp)
 add_library(IMAGES_OBJ OBJECT  ${pngs_hdr} ${pngs_src})
 
+# Python
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Python)
+file(GLOB pyth_hdr FluoRender/FluoRender/Python/*.h)
+file(GLOB pyth_src FluoRender/FluoRender/Python/*.cpp)
+add_library(PYTHON_OBJ OBJECT  ${pyth_hdr} ${pyth_src})
+
 # OpenCL
 if(WIN32)
   include_directories(${FluoRender_SOURCE_DIR}/FluoRender/OpenCL/include)
@@ -574,15 +585,11 @@ if(APPLE)
     $<TARGET_OBJECTS:DISTANCE_OBJ>
     $<TARGET_OBJECTS:CALCULATE_OBJ>
     $<TARGET_OBJECTS:DATABASE_OBJ>
+    $<TARGET_OBJECTS:PYTHON_OBJ>
     $<TARGET_OBJECTS:GLEW_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
-    $<TARGET_OBJECTS:TEEM_OBJ>)
-  add_executable(Tester MACOSX_BUNDLE
-    ${tester_src} ${tester_hdr}
-    $<TARGET_OBJECTS:TYPES_OBJ>
-    $<TARGET_OBJECTS:FLOBJECT_OBJ>
-    $<TARGET_OBJECTS:FILEIO_OBJ>
-    $<TARGET_OBJECTS:DATABASE_OBJ>)
+    $<TARGET_OBJECTS:TEEM_OBJ>
+    )
 elseif(UNIX OR MINGW)
   # Linux
   #if(NOT OPEN_GL_HEADER_LOC)
@@ -616,9 +623,11 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:DISTANCE_OBJ>
     $<TARGET_OBJECTS:CALCULATE_OBJ>
     $<TARGET_OBJECTS:DATABASE_OBJ>
+    $<TARGET_OBJECTS:PYTHON_OBJ>
     $<TARGET_OBJECTS:GLEW_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
-    $<TARGET_OBJECTS:TEEM_OBJ>)
+    $<TARGET_OBJECTS:TEEM_OBJ>
+    )
 elseif(WIN32)
   # Windows
   if(NOT OPEN_GL_HEADER_LOC)
@@ -683,12 +692,13 @@ elseif(WIN32)
       $<TARGET_OBJECTS:DISTANCE_OBJ>
       $<TARGET_OBJECTS:CALCULATE_OBJ>
       $<TARGET_OBJECTS:DATABASE_OBJ>
+      $<TARGET_OBJECTS:PYTHON_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>
       $<TARGET_OBJECTS:WACUTILS_OBJ>
       $<TARGET_OBJECTS:XINPUT_OBJ>
-      )
+    )
     else()
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
@@ -711,11 +721,12 @@ elseif(WIN32)
       $<TARGET_OBJECTS:DISTANCE_OBJ>
       $<TARGET_OBJECTS:CALCULATE_OBJ>
       $<TARGET_OBJECTS:DATABASE_OBJ>
+      $<TARGET_OBJECTS:PYTHON_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>
       $<TARGET_OBJECTS:WACUTILS_OBJ>
-      )
+    )
     endif()
     add_executable(Tester
       ${tester_src} ${tester_hdr}
@@ -724,7 +735,9 @@ elseif(WIN32)
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:FILEIO_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
-      $<TARGET_OBJECTS:DATABASE_OBJ>)
+      $<TARGET_OBJECTS:DATABASE_OBJ>
+      $<TARGET_OBJECTS:PYTHON_OBJ>
+    )
   endif()
 endif()
 
@@ -773,39 +786,47 @@ if(WIN32)
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
+    ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
     ${OpenVR_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES}
-    ${ND2_LIBRARIES})
+    ${ND2_LIBRARIES}
+  )
   target_link_libraries(Tester
     secur32.lib
-    ${FFMPEG_LIBRARIES})
+    ${FFMPEG_LIBRARIES}
+    ${Python3_LIBRARIES}
+  )
 elseif(APPLE)
   target_link_libraries(FluoRender
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
+    ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
     ${wxWidgets_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${TIFF_LIBRARIES}
     ${PNG_LIBRARIES}
     ${ZLIB_LIBRARIES}
-    ${ND2_LIBRARIES})
+    ${ND2_LIBRARIES}
+  )
 else()
   target_link_libraries(FluoRender
     stdc++fs
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
+    ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
     ${wxWidgets_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${TIFF_LIBRARIES}
     ${PNG_LIBRARIES}
     ${ZLIB_LIBRARIES}
-    ${ND2_LIBRARIES})
+    ${ND2_LIBRARIES}
+  )
 endif()
 
 
