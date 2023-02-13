@@ -68,9 +68,13 @@ namespace flrd
 
 		void SetFrame(VRenderFrame* frame) { m_frame = frame; }
 		void SetView(VRenderGLView* view) { m_view = view; }
+		void SetBreak(bool bval) { m_break = bval; }
+		bool GetBreak() { return m_break; }
+		void SetBreakCount(int val = 0) { m_break_count = val; }
 
 		//run 4d script
-		void Run4DScript(TimeMask tm, wxString &scriptname, bool rewind);
+		//return 0:failure; 1:normal; 2:break
+		int Run4DScript(TimeMask tm, wxString &scriptname, bool rewind);
 
 		void ClearResults() { m_output->removeAllChildren(); }
 
@@ -83,6 +87,8 @@ namespace flrd
 		wxFileConfig *m_fconfig;
 		wxString m_fconfig_name;
 		bool m_rewind;
+		bool m_break;
+		int m_break_count;
 
 		//selected labels
 		CelpList m_sel_labels;
@@ -130,6 +136,7 @@ namespace flrd
 		void RunBackgroundStat();
 		void RunRegistration();
 		void RunPython();
+		void RunBreak();
 
 		void ExportInfo();
 		void ExportTemplate();

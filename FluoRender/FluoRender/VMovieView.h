@@ -209,6 +209,10 @@ public:
 	int GetCurrentPage() { return m_current_page; }
 	void SetCurrentPage(int page);
 
+	//play
+	void Prev();
+	void Stop();
+	void Rewind();
 	//timer
 	void TimerRun()
 	{
@@ -357,11 +361,8 @@ private:
 
 	//left column
 	void OnRun(wxCommandEvent& event);
-	void Prev();
 	void OnPrev(wxCommandEvent& event);
-	void Stop();
 	void OnStop(wxCommandEvent& event);
-	void Rewind();
 	void OnRewind(wxCommandEvent& event);
 
 	void OnViewSelected(wxCommandEvent& event);

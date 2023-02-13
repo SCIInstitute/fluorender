@@ -54,6 +54,8 @@ class SettingDlg : public wxPanel
 		ID_PrjSaveChk = ID_SETTING,
 		//real time compress
 		ID_RealtimeCmpChk,
+		//allow script break
+		ID_ScriptBreakChk,
 		//mouse interactions
 		ID_MouseIntChk,
 		//depth peeling
@@ -152,6 +154,8 @@ public:
 	void SetDpi(float fval) { m_dpi = fval; }
 	bool GetRealtimeCompress() {return m_realtime_compress;}
 	void SetRealtimeCompress(bool val) {m_realtime_compress = val;}
+	bool GetScriptBreak() { return m_script_break; }
+	void SetScriptBreak(bool val);
 	bool GetSkipBricks() {return m_skip_bricks;}
 	void SetSkipBricks(bool val) {m_skip_bricks = val;}
 	bool GetTestMode(int type);	//type	1:speed test
@@ -344,6 +348,7 @@ private:
 	bool m_save_float;		//save float values in captured images
 	float m_dpi;			//dpi number of captured image
 	bool m_realtime_compress;//real time compress
+	bool m_script_break;	//allow script break
 	bool m_skip_bricks;		//skip empty bricks
 	bool m_test_speed;		//test fps
 	bool m_test_param;		//using parameter test window
@@ -469,6 +474,8 @@ private:
 	wxCheckBox *m_prj_save_chk;
 	//realtime compress
 	wxCheckBox *m_realtime_cmp_chk;
+	//script break
+	wxCheckBox *m_script_break_chk;
 	//mouse interations
 	wxCheckBox *m_mouse_int_chk;
 	//depth peeling
@@ -568,6 +575,7 @@ private:
 	//projec save
 	void OnProjectSaveCheck(wxCommandEvent &event);
 	void OnRealtimeCompressCheck(wxCommandEvent &event);
+	void OnScriptBreakCheck(wxCommandEvent& event);
 	//mouse interaction
 	void OnMouseIntCheck(wxCommandEvent &event);
 	//peeling

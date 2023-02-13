@@ -789,6 +789,11 @@ public:
 
 	void GetRenderSize(int& nx, int& ny);
 
+	void SetScriptBreak(bool val)
+	{
+		m_scriptor.SetBreak(val);
+	}
+
 public:
 	VRenderView* m_vrv;
 	//set gl context

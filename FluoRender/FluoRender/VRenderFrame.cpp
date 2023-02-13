@@ -154,6 +154,7 @@ VRenderFrame::VRenderFrame(
 	m_ocl_dlg(0),
 	m_component_dlg(0),
 	m_machine_learning_dlg(0),
+	m_script_break_dlg(0),
 	m_volume_prop(0),
 	m_mesh_prop(0),
 	m_mesh_manip(0),
@@ -534,6 +535,9 @@ VRenderFrame::VRenderFrame(
 	//machine learing dialog
 	m_machine_learning_dlg = new MachineLearningDlg(this);
 
+	//script break dialog
+	m_script_break_dlg = new ScriptBreakDlg(this);
+
 	//help dialog
 	m_help_dlg = new HelpDlg(this);
 	//m_help_dlg->LoadPage("C:\\!wanyong!\\TEMP\\wxHtmlWindow.htm");
@@ -673,6 +677,13 @@ VRenderFrame::VRenderFrame(
 		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_help_dlg).Float();
 	m_aui_mgr.GetPane(m_help_dlg).Hide();
+	//script break
+	m_aui_mgr.AddPane(m_script_break_dlg, wxAuiPaneInfo().
+		Name("m_script_break_dlg").Caption("Script").
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
+	m_aui_mgr.GetPane(m_script_break_dlg).Float();
+	m_aui_mgr.GetPane(m_script_break_dlg).Hide();
 
 	UpdateTree();
 
@@ -5320,6 +5331,17 @@ void VRenderFrame::ShowMachineLearningDlg()
 		m_setting_dlg->SetLastTool(TOOL_MACHINE_LEARNING);
 	m_main_tb->SetToolNormalBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_machine_learning));
+}
+
+void VRenderFrame::ShowScriptBreakDlg(bool show)
+{
+	if (show)
+		m_aui_mgr.GetPane(m_script_break_dlg).
+			Show().Float().Caption(
+			m_script_break_dlg->GetLabel());
+	else
+		m_aui_mgr.GetPane(m_script_break_dlg).Hide();
+	m_aui_mgr.Update();
 }
 
 void VRenderFrame::SetTextureUndos()

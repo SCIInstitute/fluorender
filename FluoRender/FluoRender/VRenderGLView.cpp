@@ -373,6 +373,9 @@ VRenderGLView::VRenderGLView(VRenderFrame* frame,
 		int type, kx, ky; double varth, gauth;
 		m_frame->GetSettingDlg()->GetBgParams(type, kx, ky, varth, gauth);
 		m_ruler_handler.SetBgParams(type, kx, ky, varth, gauth);
+		bool bval;
+		bval = m_frame->GetSettingDlg()->GetScriptBreak();
+		m_scriptor.SetBreak(bval);
 	}
 	m_ruler_renderer.SetView(this);
 	m_ruler_renderer.SetRulerList(&m_ruler_list);
@@ -5009,7 +5012,11 @@ void VRenderGLView::Set4DSeqFrame(int frame, int start_frame, int end_frame, boo
 
 	//run pre-change script
 	if (update && m_run_script)
-		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, m_script_file, rewind);
+	{
+		int r = m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, m_script_file, rewind);
+		if (r == 2)
+			return;
+	}
 
 	//change time frame
 	m_tseq_prv_num = m_tseq_cur_num;

@@ -38,6 +38,8 @@ EVT_BUTTON(ID_CloseBtn, SettingDlg::OnClose)
 EVT_CHECKBOX(ID_PrjSaveChk, SettingDlg::OnProjectSaveCheck)
 //real time compress
 EVT_CHECKBOX(ID_RealtimeCmpChk, SettingDlg::OnRealtimeCompressCheck)
+//script break
+EVT_CHECKBOX(ID_ScriptBreakChk, SettingDlg::OnScriptBreakCheck)
 //mouse interactions
 EVT_CHECKBOX(ID_MouseIntChk, SettingDlg::OnMouseIntCheck)
 //depth peeling
@@ -121,15 +123,19 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 
 	//project save
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Open/Save"), wxVERTICAL);
+		new wxStaticBox(page, wxID_ANY, "Open/Save/Script Run"), wxVERTICAL);
 	m_prj_save_chk = new wxCheckBox(page, ID_PrjSaveChk,
 		"Save project when capture viewport or export movie.");
 	m_realtime_cmp_chk = new wxCheckBox(page, ID_RealtimeCmpChk,
 		"Compress data in graphics memory when loading.");
+	m_script_break_chk = new wxCheckBox(page, ID_ScriptBreakChk,
+		"Allow script information prompts.");
 	group1->Add(10, 5);
 	group1->Add(m_prj_save_chk);
 	group1->Add(10, 5);
 	group1->Add(m_realtime_cmp_chk);
+	group1->Add(10, 5);
+	group1->Add(m_script_break_chk);
 	group1->Add(10, 5);
 
 	//font
@@ -823,6 +829,7 @@ void SettingDlg::GetSettings()
 	m_save_float = false;
 	m_dpi = 72.0f;
 	m_realtime_compress = false;
+	m_script_break = true;
 	m_skip_bricks = false;
 	m_test_speed = false;
 	m_test_param = false;
@@ -964,6 +971,12 @@ void SettingDlg::GetSettings()
 	{
 		fconfig.SetPath("/realtime compress");
 		fconfig.Read("mode", &m_realtime_compress, false);
+	}
+	//script break
+	if (fconfig.Exists("/script break"))
+	{
+		fconfig.SetPath("/script break");
+		fconfig.Read("mode", &m_script_break, true);
 	}
 	//skip empty bricks
 	if (fconfig.Exists("/skip bricks"))
@@ -1253,6 +1266,8 @@ void SettingDlg::UpdateUI()
 	m_prj_save_chk->SetValue(m_prj_save);
 	//realtime compression
 	m_realtime_cmp_chk->SetValue(m_realtime_compress);
+	//script break
+	m_script_break_chk->SetValue(m_script_break);
 	//mouse interactions
 	m_mouse_int_chk->SetValue(m_mouse_int);
 	//depth peeling
@@ -1435,6 +1450,9 @@ void SettingDlg::SaveSettings()
 
 	fconfig.SetPath("/realtime compress");
 	fconfig.Write("mode", m_realtime_compress);
+
+	fconfig.SetPath("/script break");
+	fconfig.Write("mode", m_script_break);
 
 	fconfig.SetPath("/skip bricks");
 	fconfig.Write("mode", m_skip_bricks);
@@ -1633,6 +1651,23 @@ void SettingDlg::UpdateTextureSize()
 		flvr::ShaderProgram::set_max_texture_size(m_max_texture_size);
 }
 
+void SettingDlg::SetScriptBreak(bool val)
+{
+	m_script_break = val;
+	m_script_break_chk->SetValue(m_script_break);
+	if (m_frame)
+	{
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
+		{
+			VRenderGLView* view = m_frame->GetView(i);
+			if (view)
+			{
+				view->SetScriptBreak(m_script_break);
+			}
+		}
+	}
+}
+
 bool SettingDlg::GetTestMode(int type)
 {
 	switch (type)
@@ -1699,6 +1734,11 @@ void SettingDlg::OnRealtimeCompressCheck(wxCommandEvent &event)
 		m_realtime_compress = false;
 
 	VRenderFrame::SetRealtimeCompression(m_realtime_compress);
+}
+
+void SettingDlg::OnScriptBreakCheck(wxCommandEvent& event)
+{
+	SetScriptBreak(m_script_break_chk->GetValue());
 }
 
 void SettingDlg::OnMouseIntCheck(wxCommandEvent &event)

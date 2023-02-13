@@ -54,6 +54,7 @@ DEALINGS IN THE SOFTWARE.
 #include "ComponentDlg.h"
 #include "CalculationDlg.h"
 #include "MachineLearningDlg.h"
+#include "ScriptBreakDlg.h"
 #include "Tester.h"
 #include <Animator/Interpolator.h>
 #include <compatibility.h>
@@ -259,6 +260,9 @@ public:
 	//calculation dialog
 	CalculationDlg* GetCalculationDlg()
 	{ return m_calculation_dlg; }
+	//script break dialog
+	ScriptBreakDlg* GetScriptBreakDlg()
+	{ return m_script_break_dlg; }
 
 	//selection
 	int GetCurSelType()
@@ -338,6 +342,7 @@ public:
 	void ShowComponentDlg();
 	void ShowCalculationDlg();
 	void ShowMachineLearningDlg();
+	void ShowScriptBreakDlg(bool show=true);
 
 	//get interpolator
 	Interpolator* GetInterpolator()
@@ -414,6 +419,7 @@ private:
 	ComponentDlg* m_component_dlg;
 	CalculationDlg* m_calculation_dlg;
 	MachineLearningDlg* m_machine_learning_dlg;
+	ScriptBreakDlg* m_script_break_dlg;
 	//prop panel children
 	wxBoxSizer* m_prop_sizer;
 	VPropView* m_volume_prop;

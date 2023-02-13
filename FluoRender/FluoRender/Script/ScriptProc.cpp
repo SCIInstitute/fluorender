@@ -52,7 +52,9 @@ using namespace flrd;
 ScriptProc::ScriptProc() :
 	m_frame(0),
 	m_view(0),
-	m_rewind(false)
+	m_break(true),
+	m_rewind(false),
+	m_break_count(0)
 {
 	m_output = fluo::ref_ptr<fluo::Group>(new fluo::Group());
 }
@@ -62,21 +64,24 @@ ScriptProc::~ScriptProc()
 }
 
 //run 4d script
-void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
+//return 0:failure; 1:normal; 2:break
+int ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 {
 	m_fconfig = 0;
 	m_fconfig_name = "";
 	wxString scriptfile = GetInputFile(scriptname, "Scripts");
 	if (scriptfile.IsEmpty())
-		return;
+		return 0;
 	m_fconfig_name = scriptfile;
 	wxFileInputStream is(m_fconfig_name);
 	if (!is.IsOk())
-		return;
+		return 0;
 	//wxFileConfig fconfig(is);
 	m_fconfig = new wxFileConfig(is);
 	m_time_mask = tm;
 	m_rewind = rewind;
+	if (m_rewind)
+		SetBreakCount();
 
 	int i;
 	wxString str;
@@ -94,7 +99,16 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 				m_fconfig->SetPath(str);
 				m_fconfig->Read("type", &str, "");
 				m_type = str;
-				if (str == "noise_reduction")
+				if (str == "break")
+				{
+					RunBreak();
+					if (m_break_count == 1)
+					{
+						delete m_fconfig;
+						return 2;
+					}
+				}
+				else if (str == "noise_reduction")
 					RunNoiseReduction();
 				else if (str == "pre_tracking")
 					RunPreTracking();
@@ -161,6 +175,7 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 	}
 
 	delete m_fconfig;
+	return 1;
 }
 
 bool ScriptProc::TimeCondition()
@@ -1865,6 +1880,28 @@ void ScriptProc::LoadProject()
 	filename = GetInputFile(filename, "Data");
 
 	m_frame->OpenProject(filename);
+}
+
+void ScriptProc::RunBreak()
+{
+	if (!m_frame)
+		return;
+	if (!m_break)
+		return;
+	if (!TimeCondition())
+		return;
+
+	wxString info;
+	m_fconfig->Read("info", &info, "");
+	//info.Replace("\n", "\n");
+
+	ScriptBreakDlg* dlg = m_frame->GetScriptBreakDlg();
+	if (!dlg)
+		return;
+	dlg->SetScriptName(m_fconfig_name);
+	dlg->SetInfo(info);
+	dlg->Hold();
+	m_break_count++;
 }
 
 //read/delete volume cache
