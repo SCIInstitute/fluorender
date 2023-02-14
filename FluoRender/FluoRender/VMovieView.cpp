@@ -911,6 +911,21 @@ void VMovieView::Rewind()
 	SetRendering(0., true);
 }
 
+void VMovieView::Reset()
+{
+	if (!m_view)
+		return;
+	m_view->m_tseq_cur_num = 
+		m_view->m_tseq_prv_num = 0;
+	m_view->SetParams(0.);
+	m_cur_time = 0;
+	m_cur_frame = m_start_frame;
+	m_last_frame = -1;
+	m_cur_frame_text->ChangeValue(wxString::Format("%d", m_cur_frame));
+	SetProgress(0.);
+	SetRendering(0., false);
+}
+
 void VMovieView::OnRewind(wxCommandEvent& event)
 {
 	Rewind();

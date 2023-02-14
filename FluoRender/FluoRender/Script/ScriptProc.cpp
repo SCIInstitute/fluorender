@@ -102,7 +102,7 @@ int ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 				if (str == "break")
 				{
 					RunBreak();
-					if (m_break_count == 1)
+					if (m_break && m_break_count == 1)
 					{
 						delete m_fconfig;
 						return 2;
@@ -1888,6 +1888,7 @@ void ScriptProc::RunBreak()
 		return;
 	if (!m_break)
 		return;
+	m_break_count++;
 	if (!TimeCondition())
 		return;
 
@@ -1901,7 +1902,6 @@ void ScriptProc::RunBreak()
 	dlg->SetScriptName(m_fconfig_name);
 	dlg->SetInfo(info);
 	dlg->Hold();
-	m_break_count++;
 }
 
 //read/delete volume cache

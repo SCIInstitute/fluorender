@@ -213,6 +213,7 @@ public:
 	void Prev();
 	void Stop();
 	void Rewind();
+	void Reset();
 	//timer
 	void TimerRun()
 	{

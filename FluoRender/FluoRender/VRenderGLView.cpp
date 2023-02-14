@@ -5015,7 +5015,10 @@ void VRenderGLView::Set4DSeqFrame(int frame, int start_frame, int end_frame, boo
 	{
 		int r = m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, m_script_file, rewind);
 		if (r == 2)
+		{
+			m_frame->GetMovieView()->Reset();
 			return;
+		}
 	}
 
 	//change time frame
