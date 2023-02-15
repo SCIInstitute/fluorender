@@ -5103,7 +5103,14 @@ void VRenderGLView::Set3DBatFrame(int frame, int start_frame, int end_frame, boo
 
 	//run pre-change script
 	if (update && m_run_script)
-		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, m_script_file, rewind);
+	{
+		int r = m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, m_script_file, rewind);
+		if (r == 2)
+		{
+			m_frame->GetMovieView()->Reset();
+			return;
+		}
+	}
 
 	//change time frame
 	m_tseq_prv_num = m_tseq_cur_num;

@@ -25,49 +25,22 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef PYBASE_H
-#define PYBASE_H
+#ifndef PYDLC_H
+#define PYDLC_H
 
-#define PY_SSIZE_T_CLEAN
-#include <Python.h>
-#include <compatibility.h>
-#ifdef __linux__
-#include <dlfcn.h>
-#endif
+#include <PyBase.h>
 
 namespace flrd
 {
-	class PyBase
+	class PyDlc : public PyBase
 	{
 	public:
-		PyBase();
-		~PyBase();
+		PyDlc();
+		~PyDlc();
 
-		virtual bool Init() = 0;
-
-	protected:
-		static bool m_valid;
-#ifdef _WIN32
-		static HMODULE python_dll;//lib
-		//functions
-		static decltype(&Py_SetProgramName) SetProgramName;
-		static decltype(&Py_Initialize) Initialize;
-		static decltype(&PyDict_New) Dict_New;
-		static decltype(&PyRun_SimpleString) Run_SimpleString;
-		static decltype(&PyRun_String) Run_String;
-		static decltype(&PyObject_Repr) Object_Repr;
-		static decltype(&Py_FinalizeEx) FinalizeEx;
-#else
-		static void* python_dll;
-		//functions
-#endif
-	private:
-		bool SetValid(void* val)
-		{
-			m_valid = val != nullptr;
-			return m_valid;
-		}
+		virtual bool Init();
+		virtual bool Run();
 	};
 }
 
-#endif//PYBASE_H
+#endif//PYDLC_H

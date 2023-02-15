@@ -1635,8 +1635,8 @@ void ScriptProc::RunPython()
 	if (!TimeCondition())
 		return;
 
-	flrd::PyBase test;
-	test.Run();
+	//flrd::PyBase test;
+	//test.Run();
 }
 
 void ScriptProc::ExportInfo()

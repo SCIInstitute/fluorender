@@ -1,9 +1,10 @@
 #include "tests.h"
 #include "asserts.h"
-#include <Python/PyBase.h>
+#include <Python/PyDlc.h>
 
 void PythonTest()
 {
-	flrd::PyBase test;
+	flrd::PyDlc test;
+	test.Init();
 	test.Run();
 }

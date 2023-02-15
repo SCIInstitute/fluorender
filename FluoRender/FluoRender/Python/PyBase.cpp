@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
+bool PyBase::m_valid = false;
 #ifdef _WIN32
 HMODULE PyBase::python_dll = nullptr;
 decltype(&Py_SetProgramName) PyBase::SetProgramName = nullptr;
@@ -78,26 +79,5 @@ PyBase::PyBase()
 
 PyBase::~PyBase()
 {
-}
-
-bool PyBase::Run()
-{
-	if (!m_valid)
-		return false;
-
-	wchar_t program[] = L"teset";
-	SetProgramName(program);  /* optional but recommended */
-	Initialize();
-	PyObject* py_dict = Dict_New();
-	Run_SimpleString("from time import time,ctime\n"
-		"print('Today is', ctime(time()))\n");
-	//PyObject* pr = PyRun_String("from time import time,ctime\n"
-	//	"print('Today is', ctime(time()))\n",
-	//	Py_single_input,
-	//	py_dict,
-	//	py_dict);
-	//PyObject* objectsRepresentation = PyObject_Repr(pr);
-	if (FinalizeEx() < 0)
-		return false;
-	return true;
+	FinalizeEx();
 }

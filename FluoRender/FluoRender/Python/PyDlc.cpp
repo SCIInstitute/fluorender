@@ -25,49 +25,35 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef PYBASE_H
-#define PYBASE_H
+#include <PyDlc.h>
 
-#define PY_SSIZE_T_CLEAN
-#include <Python.h>
-#include <compatibility.h>
-#ifdef __linux__
-#include <dlfcn.h>
-#endif
+using namespace flrd;
 
-namespace flrd
+PyDlc::PyDlc()
 {
-	class PyBase
-	{
-	public:
-		PyBase();
-		~PyBase();
 
-		virtual bool Init() = 0;
-
-	protected:
-		static bool m_valid;
-#ifdef _WIN32
-		static HMODULE python_dll;//lib
-		//functions
-		static decltype(&Py_SetProgramName) SetProgramName;
-		static decltype(&Py_Initialize) Initialize;
-		static decltype(&PyDict_New) Dict_New;
-		static decltype(&PyRun_SimpleString) Run_SimpleString;
-		static decltype(&PyRun_String) Run_String;
-		static decltype(&PyObject_Repr) Object_Repr;
-		static decltype(&Py_FinalizeEx) FinalizeEx;
-#else
-		static void* python_dll;
-		//functions
-#endif
-	private:
-		bool SetValid(void* val)
-		{
-			m_valid = val != nullptr;
-			return m_valid;
-		}
-	};
 }
 
-#endif//PYBASE_H
+PyDlc::~PyDlc()
+{
+
+}
+
+bool PyDlc::Init()
+{
+	if (!m_valid)
+		return false;
+
+	//wchar_t program[] = L"teset";
+	//SetProgramName(program);  /* optional but recommended */
+	Initialize();
+	Run_SimpleString("import deeplabcut\n");
+	return true;
+}
+
+bool PyDlc::Run()
+{
+	if (!m_valid)
+		return false;
+	return true;
+}
