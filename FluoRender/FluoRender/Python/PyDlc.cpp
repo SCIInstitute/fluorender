@@ -44,8 +44,6 @@ bool PyDlc::Init()
 	if (!m_valid)
 		return false;
 
-	//wchar_t program[] = L"teset";
-	//SetProgramName(program);  /* optional but recommended */
 	Initialize();
 	Run_SimpleString("import deeplabcut\n");
 	return true;
