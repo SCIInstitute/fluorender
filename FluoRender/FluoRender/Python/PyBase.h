@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <compatibility.h>
-#include <thread>
+#include <future>
 #include <atomic>
 #include <chrono>
 #include <queue>
@@ -119,15 +119,14 @@ namespace flrd
 		virtual void Run(OpType func, const std::string& par = "");
 
 	protected:
-		static bool m_valid;//if get python
-
 		//thread for running
-		std::thread m_thread;
-		static std::atomic<int> m_state;//0-idle;1-busy;
-		static std::chrono::milliseconds m_interval;//intereval for query
+		std::future<void> m_thread;
+		std::atomic<int> m_state;//0-idle;1-busy;
+		std::chrono::milliseconds m_interval;//intereval for query
 		//message queue
-		static PyQueue <std::pair<OpType, std::string>> m_queue;
+		PyQueue <std::pair<OpType, std::string>> m_queue;
 
+		static bool m_valid;//if get python
 #ifdef _WIN32
 		static HMODULE python_dll;//lib
 		//functions

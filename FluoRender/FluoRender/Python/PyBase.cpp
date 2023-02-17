@@ -31,10 +31,6 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 bool PyBase::m_valid = false;
-std::atomic<int> PyBase::m_state = 0;
-std::chrono::milliseconds PyBase::m_interval = std::chrono::milliseconds(100);
-PyQueue <std::pair<PyBase::OpType, std::string>> PyBase::m_queue;
-
 #ifdef _WIN32
 HMODULE PyBase::python_dll = nullptr;
 decltype(&Py_SetProgramName) PyBase::SetProgramName = nullptr;
@@ -48,7 +44,9 @@ decltype(&Py_FinalizeEx) PyBase::FinalizeEx = nullptr;
 void* PyBase::python_dll = nullptr;
 #endif
 
-PyBase::PyBase()
+PyBase::PyBase() :
+	m_state(1),
+	m_interval(std::chrono::milliseconds(100))
 {
 	m_valid = true;
 #ifdef _WIN32
@@ -83,6 +81,7 @@ PyBase::PyBase()
 
 PyBase::~PyBase()
 {
+	m_thread.get();
 }
 
 bool PyBase::Init()
@@ -90,10 +89,9 @@ bool PyBase::Init()
 	if (!m_valid)
 		return false;
 
+	m_state = 1;
 	//configure the thread
-	m_thread = std::thread(&PyBase::ThreadFunc, this);
-	//let it run
-	m_thread.detach();
+	m_thread = std::async(std::launch::async, &PyBase::ThreadFunc, this);
 
 	return true;
 }
@@ -107,7 +105,6 @@ void PyBase::ThreadFunc()
 {
 	Initialize();
 
-	m_state = 0;
 	bool run = true;
 	while (run)
 	{
