@@ -39,19 +39,3 @@ PyDlc::~PyDlc()
 
 }
 
-bool PyDlc::Init()
-{
-	if (!m_valid)
-		return false;
-
-	Initialize();
-	Run_SimpleString("import deeplabcut\n");
-	return true;
-}
-
-bool PyDlc::Run()
-{
-	if (!m_valid)
-		return false;
-	return true;
-}

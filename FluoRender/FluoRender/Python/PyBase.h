@@ -31,22 +31,103 @@ DEALINGS IN THE SOFTWARE.
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <compatibility.h>
+#include <thread>
+#include <atomic>
+#include <chrono>
+#include <queue>
+#include <mutex>
+#include <condition_variable>
+#include <string>
 #ifdef __linux__
 #include <dlfcn.h>
 #endif
 
 namespace flrd
 {
+	// Thread-safe queue
+	template <typename T>
+	class PyQueue
+	{
+	private:
+		// Underlying queue
+		std::queue<T> m_queue;
+
+		// mutex for thread synchronization
+		std::mutex m_mutex;
+
+		// Condition variable for signaling
+		std::condition_variable m_cond;
+
+	public:
+		// Pushes an element to the queue
+		void push(T item)
+		{
+
+			// Acquire lock
+			std::unique_lock<std::mutex> lock(m_mutex);
+
+			// Add item
+			m_queue.push(item);
+
+			// Notify one thread that
+			// is waiting
+			m_cond.notify_one();
+		}
+
+		// Pops an element off the queue
+		T pop()
+		{
+
+			// acquire lock
+			std::unique_lock<std::mutex> lock(m_mutex);
+
+			// wait until queue is not empty
+			m_cond.wait(lock,
+				[this]() { return !m_queue.empty(); });
+
+			// retrieve item
+			T item = m_queue.front();
+			m_queue.pop();
+
+			// return item
+			return item;
+		}
+	};
+
 	class PyBase
 	{
 	public:
 		PyBase();
 		~PyBase();
 
-		virtual bool Init() = 0;
+		enum OpType
+		{
+			ot_Initialize,
+			ot_Run_SimpleString,
+			ot_Quit
+		};
+
+		virtual bool Init();
+		void SetInterval(int t)
+		{
+			m_interval = std::chrono::milliseconds(t);
+		}
+		int GetState()
+		{
+			return m_state;
+		}
+		virtual void Run(OpType func, const std::string& par = "");
 
 	protected:
-		static bool m_valid;
+		static bool m_valid;//if get python
+
+		//thread for running
+		std::thread m_thread;
+		static std::atomic<int> m_state;//0-idle;1-busy;
+		static std::chrono::milliseconds m_interval;//intereval for query
+		//message queue
+		static PyQueue <std::pair<OpType, std::string>> m_queue;
+
 #ifdef _WIN32
 		static HMODULE python_dll;//lib
 		//functions
@@ -61,6 +142,7 @@ namespace flrd
 		static void* python_dll;
 		//functions
 #endif
+		void ThreadFunc();
 	private:
 		bool SetValid(void* val)
 		{

@@ -38,8 +38,7 @@ namespace flrd
 		PyDlc();
 		~PyDlc();
 
-		virtual bool Init();
-		virtual bool Run();
+	protected:
 	};
 }
 

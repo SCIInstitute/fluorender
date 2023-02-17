@@ -31,6 +31,10 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 bool PyBase::m_valid = false;
+std::atomic<int> PyBase::m_state = 0;
+std::chrono::milliseconds PyBase::m_interval = std::chrono::milliseconds(100);
+PyQueue <std::pair<PyBase::OpType, std::string>> PyBase::m_queue;
+
 #ifdef _WIN32
 HMODULE PyBase::python_dll = nullptr;
 decltype(&Py_SetProgramName) PyBase::SetProgramName = nullptr;
@@ -79,5 +83,57 @@ PyBase::PyBase()
 
 PyBase::~PyBase()
 {
+}
+
+bool PyBase::Init()
+{
+	if (!m_valid)
+		return false;
+
+	//configure the thread
+	m_thread = std::thread(&PyBase::ThreadFunc, this);
+	//let it run
+	m_thread.detach();
+
+	return true;
+}
+
+void PyBase::Run(OpType func, const std::string& par)
+{
+	m_queue.push(std::pair<OpType, std::string>(func, par));
+}
+
+void PyBase::ThreadFunc()
+{
+	Initialize();
+
+	m_state = 0;
+	bool run = true;
+	while (run)
+	{
+		//set an interval
+		std::this_thread::sleep_for(m_interval);
+
+		auto m = m_queue.pop();
+
+		m_state = 1;
+		switch (m.first)
+		{
+		case ot_Initialize:
+			//should already be done
+			break;
+		case ot_Run_SimpleString:
+		{
+			std::string str = m.second + "\n";
+			Run_SimpleString(str.c_str());
+		}
+		break;
+		case ot_Quit:
+			run = false;
+			break;
+		}
+		m_state = 0;
+	}
+
 	FinalizeEx();
 }
