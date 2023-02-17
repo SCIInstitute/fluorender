@@ -107,7 +107,6 @@ namespace flrd
 			ot_Quit
 		};
 
-		virtual bool Init();
 		void SetInterval(int t)
 		{
 			m_interval = std::chrono::milliseconds(t);
@@ -116,6 +115,7 @@ namespace flrd
 		{
 			return m_state;
 		}
+		virtual bool Init();
 		virtual void Run(OpType func, const std::string& par = "");
 
 	protected:
@@ -141,7 +141,7 @@ namespace flrd
 		static void* python_dll;
 		//functions
 #endif
-		void ThreadFunc();
+		virtual void ThreadFunc();
 	private:
 		bool SetValid(void* val)
 		{
