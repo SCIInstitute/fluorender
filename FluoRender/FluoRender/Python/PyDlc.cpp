@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <PyDlc.h>
+#include <filesystem>
 
 using namespace flrd;
 
@@ -49,9 +50,35 @@ void PyDlc::AnalyzeVideo()
 {
 	std::string cmd =
 		"deeplabcut.analyze_videos(";
-	cmd += "\"" + m_config_file + "\", ";
-	cmd += "\"" + m_video_file + "\", ";
+	cmd += "\"" + m_config_file_py + "\", ";
+	cmd += "\"" + m_video_file_py + "\", ";
 	cmd += "save_as_csv=True)";
 	Run(ot_Run_SimpleString,
 		cmd);
+}
+
+bool PyDlc::GetResultFile()
+{
+	if (m_state)
+		return false;//busy
+
+	std::filesystem::path p = m_video_file;
+	m_result_file = p.replace_extension().string();
+	std::filesystem::path path = p.parent_path();
+	m_result_file += "*.csv";
+	std::regex rgx = REGEX(m_result_file);
+	bool result = false;
+	for (auto& it : std::filesystem::directory_iterator(path))
+	{
+		if (!std::filesystem::is_regular_file(it))
+			continue;
+		const std::string str = it.path().string();
+		if (std::regex_match(str, rgx))
+		{
+			m_result_file = str;
+			result = true;
+			break;
+		}
+	}
+	return result;
 }

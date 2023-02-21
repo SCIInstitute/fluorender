@@ -751,4 +751,30 @@ inline void INC_NUMBER(std::string& s)
 
 #endif //END_IF_DEF__WIN32__
 
+#include <regex>
+inline std::regex REGEX(const std::string& wildcard, bool caseSensitive = true)
+{
+	// Note It is possible to automate checking if filesystem is case sensitive or not (e.g. by performing a test first time this function is ran)
+	std::string regexString{ wildcard };
+	// Escape all regex special chars:
+	regexString = std::regex_replace(regexString, std::regex("\\\\"), "\\\\");
+	regexString = std::regex_replace(regexString, std::regex("\\^"), "\\^");
+	regexString = std::regex_replace(regexString, std::regex("\\."), "\\.");
+	regexString = std::regex_replace(regexString, std::regex("\\$"), "\\$");
+	regexString = std::regex_replace(regexString, std::regex("\\|"), "\\|");
+	regexString = std::regex_replace(regexString, std::regex("\\("), "\\(");
+	regexString = std::regex_replace(regexString, std::regex("\\)"), "\\)");
+	regexString = std::regex_replace(regexString, std::regex("\\{"), "\\{");
+	regexString = std::regex_replace(regexString, std::regex("\\{"), "\\}");
+	regexString = std::regex_replace(regexString, std::regex("\\["), "\\[");
+	regexString = std::regex_replace(regexString, std::regex("\\]"), "\\]");
+	regexString = std::regex_replace(regexString, std::regex("\\+"), "\\+");
+	regexString = std::regex_replace(regexString, std::regex("\\/"), "\\/");
+	// Convert wildcard specific chars '*?' to their regex equivalents:
+	regexString = std::regex_replace(regexString, std::regex("\\?"), ".");
+	regexString = std::regex_replace(regexString, std::regex("\\*"), ".*");
+
+	return std::regex(regexString, caseSensitive ? std::regex_constants::ECMAScript : std::regex_constants::icase);
+}
+
 #endif //END__COMPATIBILITY_H__

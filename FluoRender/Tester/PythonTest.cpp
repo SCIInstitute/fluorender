@@ -12,5 +12,8 @@ void PythonTest()
 	test.SetVideoFile(
 		"E:\\DATA\\Holly\\MouseTracking\\videos\\10June2019_M_P119_GAD2-Cre-GCaMP5G_02L.m4v");
 	test.AnalyzeVideo();
+	while (test.GetState())
+		Sleep(1000);
+	test.GetResultFile();
 	test.Exit();
 }
