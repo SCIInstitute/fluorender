@@ -134,3 +134,8 @@ void PyBase::ThreadFunc()
 
 	FinalizeEx();
 }
+
+void PyBase::Exit()
+{
+	Run(ot_Quit);
+}

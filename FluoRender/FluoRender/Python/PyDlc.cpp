@@ -39,3 +39,19 @@ PyDlc::~PyDlc()
 
 }
 
+void PyDlc::LoadDlc()
+{
+	Run(ot_Run_SimpleString,
+		"import deeplabcut");
+}
+
+void PyDlc::AnalyzeVideo()
+{
+	std::string cmd =
+		"deeplabcut.analyze_videos(";
+	cmd += "\"" + m_config_file + "\", ";
+	cmd += "\"" + m_video_file + "\", ";
+	cmd += "save_as_csv=True)";
+	Run(ot_Run_SimpleString,
+		cmd);
+}

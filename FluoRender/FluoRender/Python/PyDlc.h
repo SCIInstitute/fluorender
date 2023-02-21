@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define PYDLC_H
 
 #include <PyBase.h>
+#include <regex>
+#include <compatibility.h>
 
 namespace flrd
 {
@@ -38,7 +40,28 @@ namespace flrd
 		PyDlc();
 		~PyDlc();
 
+		void LoadDlc();
+		void SetConfigFile(const std::string& str)
+		{
+			m_config_file = str;
+#ifdef _WIN32
+			m_config_file = std::regex_replace(m_config_file,
+				std::regex(R"(\\)"), R"(\\)");
+#endif
+		}
+		void SetVideoFile(const std::string& str)
+		{
+			m_video_file = str;
+#ifdef _WIN32
+			m_video_file = std::regex_replace(m_video_file,
+				std::regex(R"(\\)"), R"(\\)");
+#endif
+		}
+		void AnalyzeVideo();
+
 	protected:
+		std::string m_config_file;
+		std::string m_video_file;
 	};
 }
 

@@ -6,10 +6,11 @@ void PythonTest()
 {
 	flrd::PyDlc test;
 	test.Init();
-	test.Run(flrd::PyBase::ot_Run_SimpleString,
-		"from time import time,ctime\n" \
-		"print('Today is', ctime(time()))\n");
-	while (test.GetState()) {}
-	test.Run(flrd::PyBase::ot_Quit);
-	while (test.GetState()) {}
+	test.LoadDlc();
+	test.SetConfigFile(
+		"E:\\DATA\\Holly\\MouseTracking\\test-nb-2023-01-30\\config.yaml");
+	test.SetVideoFile(
+		"E:\\DATA\\Holly\\MouseTracking\\videos\\10June2019_M_P119_GAD2-Cre-GCaMP5G_02L.m4v");
+	test.AnalyzeVideo();
+	test.Exit();
 }

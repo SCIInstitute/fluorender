@@ -117,6 +117,7 @@ namespace flrd
 		}
 		virtual bool Init();
 		virtual void Run(OpType func, const std::string& par = "");
+		virtual void Exit();
 
 	protected:
 		//thread for running
