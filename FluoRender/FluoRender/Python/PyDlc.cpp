@@ -90,8 +90,8 @@ bool PyDlc::GetResultFile()
 
 bool PyDlc::AddRulers(RulerHandler* rhdl)
 {
-	//if (!rhdl)
-	//	return false;
+	if (!rhdl)
+		return false;
 	std::ifstream f(m_result_file);
 	if (!f.good())
 		return false;
@@ -99,6 +99,7 @@ bool PyDlc::AddRulers(RulerHandler* rhdl)
 	std::string line;
 	bool start = false;
 	std::vector<std::string> props;
+	std::vector<Ruler*> rlist;
 	int ln = 0;
 	while (std::getline(f, line))
 	{
@@ -119,7 +120,12 @@ bool PyDlc::AddRulers(RulerHandler* rhdl)
 				start = true;
 				std::vector<fluo::Point> points;
 				getPoints(entry, props, points);
-
+				size_t t = std::stoi(entry[0]);
+				for (auto& i : points)
+				{
+					Ruler* r = rhdl->AddRuler(i, t);
+					rlist.push_back(r);
+				}
 			}
 			else
 			{
@@ -131,6 +137,20 @@ bool PyDlc::AddRulers(RulerHandler* rhdl)
 		else
 		{
 			//add points
+			if (all_float)
+			{
+				std::vector<fluo::Point> points;
+				getPoints(entry, props, points);
+				size_t t = std::stoi(entry[0]);
+				size_t i = 0;
+				for (auto r : rlist)
+				{
+					r->SetWorkTime(t);
+					if (i < points.size())
+						r->SetPoint(0, points[i]);
+					i++;
+				}
+			}
 		}
 
 		ln++;

@@ -737,7 +737,6 @@ elseif(WIN32)
       $<TARGET_OBJECTS:FILEIO_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:DATABASE_OBJ>
-      $<TARGET_OBJECTS:PYTHON_OBJ>
     )
   endif()
 endif()

@@ -147,6 +147,7 @@ namespace flrd
 		void FinishRuler();
 		bool GetRulerFinished();
 
+		Ruler* AddRuler(fluo::Point& p, size_t t);
 		void AddRulerPoint(fluo::Point &p);
 		void AddRulerPointAfterId(fluo::Point &p, unsigned int id, std::set<unsigned int> &cid, std::set<unsigned int> &bid);
 		bool GetMouseDist(int mx, int my, double dist);

@@ -501,6 +501,17 @@ bool RulerHandler::GetRulerFinished()
 		return true;
 }
 
+Ruler* RulerHandler::AddRuler(fluo::Point& p, size_t t)
+{
+	Ruler* r = new Ruler();
+	r->SetWorkTime(t);
+	r->Group(m_group);
+	r->SetRulerType(2);
+	r->AddPoint(p);
+	m_ruler_list->push_back(r);
+	return r;
+}
+
 void RulerHandler::AddRulerPoint(fluo::Point &p)
 {
 	if (m_ruler &&
