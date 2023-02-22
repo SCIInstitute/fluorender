@@ -26,7 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <PyDlc.h>
+#include <Distance/RulerHandler.h>
 #include <filesystem>
+#include <iostream>
+#include <vector>
 
 using namespace flrd;
 
@@ -83,4 +86,55 @@ bool PyDlc::GetResultFile()
 		}
 	}
 	return result;
+}
+
+bool PyDlc::AddRulers(RulerHandler* rhdl)
+{
+	//if (!rhdl)
+	//	return false;
+	std::ifstream f(m_result_file);
+	if (!f.good())
+		return false;
+
+	std::string line;
+	bool start = false;
+	std::vector<std::string> props;
+	int ln = 0;
+	while (std::getline(f, line))
+	{
+		std::istringstream s(line);
+		std::string item;
+		std::vector<std::string> entry;
+		while (std::getline(s, item, ','))
+			entry.push_back(item);
+
+		bool all_float = true;
+		for (auto& i : entry)
+			all_float = all_float && isFloat(i);
+		if (!start)
+		{
+			if (all_float)
+			{
+				//add rulers
+				start = true;
+				std::vector<fluo::Point> points;
+				getPoints(entry, props, points);
+
+			}
+			else
+			{
+				//get other info
+				if (ln == 2)
+					props = entry;
+			}
+		}
+		else
+		{
+			//add points
+		}
+
+		ln++;
+	}
+
+	return true;
 }

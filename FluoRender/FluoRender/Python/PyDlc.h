@@ -29,11 +29,14 @@ DEALINGS IN THE SOFTWARE.
 #define PYDLC_H
 
 #include <PyBase.h>
-#include <regex>
 #include <compatibility.h>
+#include <Types/Point.h>
+#include <regex>
+#include <boost/lexical_cast.hpp>
 
 namespace flrd
 {
+	class RulerHandler;
 	class PyDlc : public PyBase
 	{
 	public:
@@ -63,6 +66,7 @@ namespace flrd
 		}
 		void AnalyzeVideo();
 		bool GetResultFile();
+		bool AddRulers(RulerHandler* rhdl);
 
 	protected:
 		std::string m_config_file;
@@ -70,6 +74,41 @@ namespace flrd
 		std::string m_video_file;
 		std::string m_video_file_py;
 		std::string m_result_file;
+
+		bool isFloat(const std::string& someString)
+		{
+			using boost::lexical_cast;
+			using boost::bad_lexical_cast;
+
+			try
+			{
+				boost::lexical_cast<float>(someString);
+			}
+			catch (bad_lexical_cast&)
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		bool getPoints(std::vector<std::string>& entry,
+			std::vector<std::string>& props,
+			std::vector<fluo::Point>& points)
+		{
+			fluo::Point p;
+			for (size_t i = 0; i < entry.size(); ++i)
+			{
+				if (props[i] == "x")
+					p.x(std::stof(entry[i]));
+				if (props[i] == "y")
+				{
+					p.y(std::stof(entry[i]));
+					points.push_back(p);
+				}
+			}
+			return true;
+		}
 	};
 }
 
