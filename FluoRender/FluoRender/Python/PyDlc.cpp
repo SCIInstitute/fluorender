@@ -65,6 +65,8 @@ bool PyDlc::GetResultFile()
 	std::filesystem::path p = m_video_file;
 	m_result_file = p.replace_extension().string();
 	std::filesystem::path path = p.parent_path();
+	if (!std::filesystem::exists(path))
+		return false;//doesn't exist
 	m_result_file += "*.csv";
 	std::regex rgx = REGEX(m_result_file);
 	bool result = false;
