@@ -36,7 +36,7 @@
 #include <FLIVR/VolKernel.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
-#include "utility.h"
+#include <utility.h>
 #include <compatibility.h>
 #include <fstream>
 #include <iostream>

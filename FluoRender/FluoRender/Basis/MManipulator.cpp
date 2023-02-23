@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "MManipulator.h"
 #include "VRenderFrame.h"
-#include "DataManager.h"
+#include <DataManager.h>
 #include <compatibility.h>
 
 BEGIN_EVENT_TABLE(MManipulator, wxPanel)

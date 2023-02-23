@@ -6,6 +6,14 @@
 
 using namespace std;
 
+class VRenderApp
+{};
+VRenderApp dummy;
+VRenderApp& wxGetApp()
+{
+	return dummy;
+}
+
 int main(int argc, char* argv[])
 {
 	//char* leak = new char[1000];

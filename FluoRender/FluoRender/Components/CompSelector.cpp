@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "CompSelector.h"
 #include "CompAnalyzer.h"
-#include "DataManager.h"
+#include <DataManager.h>
 #include <set>
 
 using namespace flrd;

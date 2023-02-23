@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "APropView.h"
 #include "VRenderFrame.h"
-#include "DataManager.h"
+#include <DataManager.h>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(APropView, wxPanel)

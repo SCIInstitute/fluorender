@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ClippingView.h"
 #include "VRenderFrame.h"
-#include "DataManager.h"
+#include <DataManager.h>
 #include <compatibility.h>
 #include <wx/valnum.h>
 #include "png_resource.h"

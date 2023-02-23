@@ -27,7 +27,7 @@
 //  
 
 #include "VertexArray.h"
-#include "utility.h"
+#include <utility.h>
 
 namespace flvr
 {

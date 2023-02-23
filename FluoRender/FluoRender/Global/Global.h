@@ -33,6 +33,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Database/EntryParams.h>
 #include <Database/TableHistParams.h>
 #include <QVideoEncoder.h>
+#include <Python/PyBase.h>
+#include <Python/PyDlc.h>
 
 #define glbin fluo::Global::instance()
 #define glbin_cache_queue fluo::Global::instance().get_cache_queue()
@@ -73,6 +75,23 @@ namespace fluo
 		bool get_vp_table_enable() { return vol_prop_table_enable_; }
 		flrd::TableHistParams& get_vp_table() { return vol_prop_table_; }
 
+		//python
+		template <typename T>
+		bool get_add_python(const std::string& name, T* py)
+		{
+			auto it = python_list_.find(name);
+			if (it == python_list_.end())
+			{
+				py = new T;
+				return python_list_.insert(std::pair<std::string, flrd::PyBase*>(
+					name, py)).first;
+			}
+			else
+				return dynamic_cast<T*>(it->second);
+		}
+		flrd::PyBase* get_add_pybase(const std::string& name);
+		flrd::PyDlc* get_add_pydlc(const std::string& name);
+
 	private:
 		Global();
 		static Global instance_;
@@ -91,6 +110,9 @@ namespace fluo
 		//vol prop
 		bool vol_prop_table_enable_;//add records for vol prop
 		flrd::TableHistParams vol_prop_table_;//records for learning vol props
+
+		//python
+		std::unordered_map<std::string, flrd::PyBase*> python_list_;
 	};
 
 }

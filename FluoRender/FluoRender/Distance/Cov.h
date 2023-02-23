@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Cov_h
 #define FL_Cov_h
 
-#include "DataManager.h"
+#include <DataManager.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
 #include <Types/Point.h>

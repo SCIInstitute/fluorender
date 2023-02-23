@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <vector>
 #include <functional>
-#include "DataManager.h"
+#include <DataManager.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
 

@@ -29,10 +29,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VRENDERGLVIEW_H_
 #define _VRENDERGLVIEW_H_
 
-#include "DataManager.h"
-#include "VolumeLoader.h"
-#include "utility.h"
-#include "KernelExecutor.h"
+#include <DataManager.h>
+#include <VolumeLoader.h>
+#include <utility.h>
+#include <KernelExecutor.h>
 #include <Calculate/VolumeCalculator.h>
 #include <Selection/VolumeSelector.h>
 #include <Script/ScriptProc.h>

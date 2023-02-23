@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <set>
 #include <Tracking/Cell.h>
-#include "DataManager.h"
+#include <DataManager.h>
 
 class VolumeData;
 class Annotations;

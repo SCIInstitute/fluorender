@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "AdjustView.h"
 #include "VRenderFrame.h"
-#include "DataManager.h"
+#include <DataManager.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include "png_resource.h"

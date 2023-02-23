@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ConvertDlg.h"
 #include "VRenderFrame.h"
-#include "DataManager.h"
+#include <DataManager.h>
 #include "Converters/VolumeMeshConv.h"
 #include <wx/progdlg.h>
 #include <wx/valnum.h>

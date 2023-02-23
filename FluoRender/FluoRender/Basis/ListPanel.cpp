@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ListPanel.h"
-#include "DataManager.h"
+#include <DataManager.h>
 #include "VRenderFrame.h"
 #include "Formats/png_resource.h"
 #include <wx/valnum.h>

@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VRENDERFRAME_H_
 #define _VRENDERFRAME_H_
 
-#include "DataManager.h"
+#include <DataManager.h>
 #include "TreePanel.h"
 #include "ListPanel.h"
 #include "VRenderView.h"

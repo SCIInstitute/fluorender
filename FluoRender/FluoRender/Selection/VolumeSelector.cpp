@@ -27,10 +27,10 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "VolumeSelector.h"
-#include "DataManager.h"
+#include <DataManager.h>
 #include "VRenderGLView.h"
 #include "VRenderFrame.h"
-#include "utility.h"
+#include <utility.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/TextureRenderer.h>
 #include <Selection/PaintBoxes.h>

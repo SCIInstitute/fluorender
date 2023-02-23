@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMESAMPLER_H_
 #define _VOLUMESAMPLER_H_
 
-#include "DataManager.h"
+#include <DataManager.h>
 #include <Types/Vector.h>
 #include <Types/Quaternion.h>
 

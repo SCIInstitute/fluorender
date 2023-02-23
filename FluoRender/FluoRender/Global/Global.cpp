@@ -208,3 +208,32 @@ void Global::gen_params_list()
 		std::pair<std::string, flrd::Params>(
 			"vol_prop", flrd::Params(names, index, types)));
 }
+
+//python
+flrd::PyBase* Global::get_add_pybase(const std::string& name)
+{
+	auto it = python_list_.find(name);
+	if (it == python_list_.end())
+	{
+		flrd::PyBase* pybase = new flrd::PyBase();
+		python_list_.insert(std::pair<std::string, flrd::PyBase*>(
+			name, pybase));
+		return pybase;
+	}
+	else
+		return it->second;
+}
+
+flrd::PyDlc* Global::get_add_pydlc(const std::string& name)
+{
+	auto it = python_list_.find(name);
+	if (it == python_list_.end())
+	{
+		flrd::PyDlc* pydlc = new flrd::PyDlc();
+		python_list_.insert(std::pair<std::string, flrd::PyBase*>(
+			name, pydlc));
+		return pydlc;
+	}
+	else
+		return dynamic_cast<flrd::PyDlc*>(it->second);
+}

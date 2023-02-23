@@ -323,6 +323,14 @@ endif()
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender)
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender)
 
+# Basis
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Basis)
+file(GLOB bss_src FluoRender/FluoRender/Basis/*.cpp)
+file(GLOB bss_hdr FluoRender/FluoRender/Basis/*.h)
+file(GLOB bss_nvs FluoRender/FluoRender/Basis/*.natvis)
+add_library(BASIS_OBJ OBJECT
+  ${bss_src} ${bss_hdr} ${bss_nvs})
+
 # Global
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Global)
 file(GLOB glb_src FluoRender/FluoRender/Global/*.cpp)
@@ -567,6 +575,7 @@ if(APPLE)
   include(BundleUtilities)
   add_executable(FluoRender MACOSX_BUNDLE
     ${src} ${hdr} ${rsc} ${icns}
+    $<TARGET_OBJECTS:BASIS_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGES_OBJ>
     $<TARGET_OBJECTS:CONVERTERS_OBJ>
@@ -605,6 +614,7 @@ elseif(UNIX OR MINGW)
   #include(BundleUtilities)
   add_executable(FluoRender
     ${src} ${hdr} ${rsc} ${icns}
+    $<TARGET_OBJECTS:BASIS_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGES_OBJ>
     $<TARGET_OBJECTS:CONVERTERS_OBJ>
@@ -674,6 +684,7 @@ elseif(WIN32)
     if (USE_XINPUT)
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
+      $<TARGET_OBJECTS:BASIS_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
@@ -703,6 +714,7 @@ elseif(WIN32)
     else()
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
+      $<TARGET_OBJECTS:BASIS_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
@@ -731,12 +743,32 @@ elseif(WIN32)
     endif()
     add_executable(Tester
       ${tester_src} ${tester_hdr}
+      $<TARGET_OBJECTS:BASIS_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:FILEIO_OBJ>
+      $<TARGET_OBJECTS:IMAGES_OBJ>
+      $<TARGET_OBJECTS:CONVERTERS_OBJ>
+      $<TARGET_OBJECTS:FLIVR_OBJ>
+      $<TARGET_OBJECTS:ANIMATORS_OBJ>
+      $<TARGET_OBJECTS:TIMER_OBJ>
+      $<TARGET_OBJECTS:FORMATS_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
+      $<TARGET_OBJECTS:TRACKING_OBJ>
+      $<TARGET_OBJECTS:COMPONENTS_OBJ>
+      $<TARGET_OBJECTS:SELECTION_OBJ>
+      $<TARGET_OBJECTS:SCRIPT_OBJ>
+      $<TARGET_OBJECTS:CLUSTER_OBJ>
+      $<TARGET_OBJECTS:DISTANCE_OBJ>
+      $<TARGET_OBJECTS:CALCULATE_OBJ>
       $<TARGET_OBJECTS:DATABASE_OBJ>
+      $<TARGET_OBJECTS:PYTHON_OBJ>
+      $<TARGET_OBJECTS:GLEW_OBJ>
+      $<TARGET_OBJECTS:POLE_OBJ>
+      $<TARGET_OBJECTS:TEEM_OBJ>
+      $<TARGET_OBJECTS:WACUTILS_OBJ>
+      $<TARGET_OBJECTS:XINPUT_OBJ>
     )
   endif()
 endif()
@@ -795,8 +827,16 @@ if(WIN32)
   )
   target_link_libraries(Tester
     secur32.lib
+    XInput.lib
     ${FFMPEG_LIBRARIES}
     ${Python3_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${wxWidgets_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+    ${OpenCL_LIBRARIES}
+    ${ND2_LIBRARIES}
+    ${FREETYPE_LIBRARIES}
+    ${OpenVR_LIBRARIES}
   )
 elseif(APPLE)
   target_link_libraries(FluoRender

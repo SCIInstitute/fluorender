@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Compare_h
 #define FL_Compare_h
 
-#include "DataManager.h"
+#include <DataManager.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
 #include <functional>

@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _COMPONENTDLG_H_
 
 #include "Main.h"
-#include "DataManager.h"
+#include <DataManager.h>
 #include <Components/CompGenerator.h>
 #include <Components/CompAnalyzer.h>
 #include <Distance/RulerAlign.h>

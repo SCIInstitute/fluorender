@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_SegGrow_h
 #define FL_SegGrow_h
 
-#include "DataManager.h"
+#include <DataManager.h>
 #include <FLIVR/KernelProgram.h>
 #include <Types/Point.h>
 #include <set>
