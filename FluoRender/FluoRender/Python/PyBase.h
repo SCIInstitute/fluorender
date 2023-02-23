@@ -122,7 +122,7 @@ namespace flrd
 	protected:
 		//thread for running
 		std::future<void> m_thread;
-		std::atomic<int> m_state;//0-idle;1-busy;
+		std::atomic<int> m_state;//0-idle;1-just created;2-busy
 		std::chrono::milliseconds m_interval;//intereval for query
 		//message queue
 		PyQueue <std::pair<OpType, std::string>> m_queue;

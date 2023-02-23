@@ -158,6 +158,10 @@ int ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 					RunRegistration();
 				else if (str == "python")
 					RunPython();
+				else if (str == "video_analysis")
+					RunDlcVideoAnalyze();
+				else if (str == "get_rulers")
+					RunDlcGetRulers();
 				else if (str == "export_info")
 					ExportInfo();
 				else if (str == "export_analysis")
@@ -486,6 +490,17 @@ wxString ScriptProc::IncreaseNum(const wxString& str)
 		digits = wxString::Format(format, num);
 	}
 	return tmp + digits + ext;
+}
+
+wxString ScriptProc::GetConfigFile(const wxString& str, const wxString& ext, const wxString& type)
+{
+	if (wxFileExists(str))
+		return str;
+
+	return m_frame->ScriptDialog(
+		"Choose "+type+" file",
+		type+" file(*." + ext + ")|*." + ext,
+		wxFD_OPEN);
 }
 
 void ScriptProc::RunNoiseReduction()
@@ -1635,8 +1650,73 @@ void ScriptProc::RunPython()
 	if (!TimeCondition())
 		return;
 
-	//flrd::PyBase test;
-	//test.Run();
+	wxString cmd;
+	m_fconfig->Read("command", &cmd);
+	if (cmd.IsEmpty())
+		return;
+	flrd::PyBase* python = glbin.get_add_pybase("python");
+	if (!python)
+		return;
+	python->Init();
+	python->Run(flrd::PyBase::ot_Run_SimpleString, cmd.ToStdString());
+	python->Exit();
+}
+
+void ScriptProc::RunDlcVideoAnalyze()
+{
+	if (!m_view)
+		return;
+	if (!TimeCondition())
+		return;
+
+	//always work on the selected volume
+	VolumeData* cur_vol = m_view->m_cur_vol;
+	if (!cur_vol) return;
+
+	flrd::PyDlc* dlc = glbin.get_add_python<flrd::PyDlc>("dlc");
+	if (!dlc)
+		return;
+	if (dlc->GetState() == 2)
+		return;//busy, already created
+
+	wxString filename;
+	m_fconfig->Read("config", &filename);
+	filename = GetConfigFile(filename, "yaml", "Config");
+	std::string fn = cur_vol->GetPath().ToStdString();
+	std::string cfg = filename.ToStdString();
+	if (fn.empty() || cfg.empty())
+		return;
+
+	//run dlc
+	dlc->Init();
+	dlc->LoadDlc();
+	dlc->SetConfigFile(cfg);
+	dlc->SetVideoFile(fn);
+	dlc->AnalyzeVideo();
+}
+
+void ScriptProc::RunDlcGetRulers()
+{
+	if (!m_frame || !m_view)
+		return;
+	if (!TimeCondition())
+		return;
+
+	flrd::PyDlc* dlc = glbin.get_add_python<flrd::PyDlc>("dlc");
+	if (!dlc)
+		return;
+	int state = dlc->GetState();
+	if (!dlc->GetResultFile() && state == 2)
+	{
+		m_frame->GetMovieView()->Reset();//busy, rewind and restart video
+		return;
+	}
+
+	RulerHandler* rhdl = m_view->GetRulerHandler();
+	if (!rhdl)
+		return;
+	dlc->AddRulers(rhdl);
+	dlc->Exit();
 }
 
 void ScriptProc::ExportInfo()

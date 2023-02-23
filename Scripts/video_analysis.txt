@@ -1,0 +1,9 @@
+[tasks]
+tasknum=2
+[tasks/task0]
+type=video_analysis
+time_mode=TM_FIRST_PRE
+config=""
+[tasks/task1]
+type=get_rulers
+time_mode=TM_LAST_POST

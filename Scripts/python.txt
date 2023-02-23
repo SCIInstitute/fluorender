@@ -3,3 +3,4 @@ tasknum=1
 [tasks/task0]
 type=python
 time_mode=TM_FIRST_PRE
+command="print(\"This is Python\")"

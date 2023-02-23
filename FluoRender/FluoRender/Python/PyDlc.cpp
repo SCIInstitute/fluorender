@@ -40,7 +40,6 @@ PyDlc::PyDlc()
 
 PyDlc::~PyDlc()
 {
-
 }
 
 void PyDlc::LoadDlc()

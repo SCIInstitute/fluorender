@@ -111,6 +111,7 @@ namespace flrd
 		wxString RemoveExt(const wxString& str);
 		wxString RemoveNum(const wxString& str);
 		wxString IncreaseNum(const wxString& str);
+		wxString GetConfigFile(const wxString& str, const wxString& ext, const wxString& type);
 		void RunNoiseReduction();
 		void RunPreTracking();
 		void RunPostTracking();
@@ -135,8 +136,11 @@ namespace flrd
 		void RunUnlinkCells();
 		void RunBackgroundStat();
 		void RunRegistration();
-		void RunPython();
 		void RunBreak();
+		//python
+		void RunPython();
+		void RunDlcVideoAnalyze();
+		void RunDlcGetRulers();
 
 		void ExportInfo();
 		void ExportTemplate();

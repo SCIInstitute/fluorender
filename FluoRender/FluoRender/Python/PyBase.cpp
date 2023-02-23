@@ -113,7 +113,7 @@ void PyBase::ThreadFunc()
 
 		auto m = m_queue.pop();
 
-		m_state = 1;
+		m_state = 2;
 		switch (m.first)
 		{
 		case ot_Initialize:

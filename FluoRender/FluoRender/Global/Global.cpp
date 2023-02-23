@@ -237,3 +237,12 @@ flrd::PyDlc* Global::get_add_pydlc(const std::string& name)
 	else
 		return dynamic_cast<flrd::PyDlc*>(it->second);
 }
+
+void Global::clear_python()
+{
+	for (auto i : python_list_)
+	{
+		i.second->Exit();
+		delete i.second;
+	}
+}

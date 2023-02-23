@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include <compatibility.h>
 #include <DragDrop.h>
+#include <Global/Global.h>
 #include <Formats/png_resource.h>
 #include <Formats/msk_writer.h>
 #include <Formats/msk_reader.h>
@@ -970,6 +971,7 @@ void VRenderFrame::OnClose(wxCloseEvent &event)
 	}
 	if (!vrv_saved && !m_vrv_list.empty())
 		m_vrv_list[0]->SaveDefault(0xaff);
+	glbin.clear_python();
 	event.Skip();
 }
 
