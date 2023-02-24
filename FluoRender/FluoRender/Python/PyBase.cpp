@@ -67,13 +67,13 @@ PyBase::PyBase() :
 	if (!SetValid(python_dll)) return;
 
 	Initialize = (Initialize_tp*)dlsym(python_dll, "Py_Initialize");
-	if (!SetValid(Initialize)) return;
+	if (!SetValid((void*)Initialize)) return;
 
 	Run_SimpleString = (PyRun_SimpleString_tp*)dlsym(python_dll, "PyRun_SimpleString");
-	if (!SetValid(Run_SimpleString)) return;
+	if (!SetValid((void*)Run_SimpleString)) return;
 
 	FinalizeEx = (Py_FinalizeEx_tp*)dlsym(python_dll, "Py_FinalizeEx");
-	if (!SetValid(FinalizeEx)) return;
+	if (!SetValid((void*)FinalizeEx)) return;
 #endif
 }
 
