@@ -35,12 +35,15 @@ using namespace flrd;
 bool PyBase::m_valid = false;
 #ifdef _WIN32
 HMODULE PyBase::python_dll = nullptr;
-#else
-void* PyBase::python_dll = nullptr;
-#endif
 decltype(&Py_Initialize) PyBase::Initialize = nullptr;
 decltype(&PyRun_SimpleString) PyBase::Run_SimpleString = nullptr;
 decltype(&Py_FinalizeEx) PyBase::FinalizeEx = nullptr;
+#else
+void* PyBase::python_dll = nullptr;
+PyBase::Initialize_tp* PyBase::Initialize = nullptr;
+PyBase::PyRun_SimpleString_tp* PyBase::Run_SimpleString = nullptr;
+PyBase::Py_FinalizeEx_tp* PyBase::FinalizeEx = nullptr;
+#endif
 
 PyBase::PyBase() :
 	m_state(1),
@@ -60,16 +63,16 @@ PyBase::PyBase() :
 	FinalizeEx = (decltype(&Py_FinalizeEx))GetProcAddress(python_dll, "Py_FinalizeEx");
 	if (!SetValid(FinalizeEx)) return;
 #else
-	python_dll = dlopen("python3.so", RTLD_NOW);
+	python_dll = dlopen("python310.dylib", RTLD_NOW);
 	if (!SetValid(python_dll)) return;
 
-	Initialize = (decltype(&Py_Initialize))dlsym(python_dll, "Py_Initialize");
+	Initialize = (Initialize_tp*)dlsym(python_dll, "Py_Initialize");
 	if (!SetValid(Initialize)) return;
 
-	Run_SimpleString = (decltype(&PyRun_SimpleString))dlsym(python_dll, "PyRun_SimpleString");
+	Run_SimpleString = (PyRun_SimpleString_tp*)dlsym(python_dll, "PyRun_SimpleString");
 	if (!SetValid(Run_SimpleString)) return;
 
-	FinalizeEx = (decltype(&Py_FinalizeEx))dlsym(python_dll, "Py_FinalizeEx");
+	FinalizeEx = (Py_FinalizeEx_tp*)dlsym(python_dll, "Py_FinalizeEx");
 	if (!SetValid(FinalizeEx)) return;
 #endif
 }

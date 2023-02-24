@@ -137,13 +137,20 @@ namespace flrd
 		static bool m_valid;//if get python
 #ifdef _WIN32
 		static HMODULE python_dll;//lib
-#else
-		static void* python_dll;
-#endif
 		//functions
 		static decltype(&Py_Initialize) Initialize;
 		static decltype(&PyRun_SimpleString) Run_SimpleString;
 		static decltype(&Py_FinalizeEx) FinalizeEx;
+#else
+		static void* python_dll;
+		//functions
+		typedef void(Initialize_tp)();
+		static Initialize_tp* Initialize;
+		typedef int(PyRun_SimpleString_tp)(const char *s);
+		static PyRun_SimpleString_tp* Run_SimpleString;
+		typedef int(Py_FinalizeEx_tp)();
+		static Py_FinalizeEx_tp* FinalizeEx;
+#endif
 
 		virtual void ThreadFunc();
 
