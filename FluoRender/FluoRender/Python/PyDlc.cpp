@@ -46,6 +46,11 @@ void PyDlc::LoadDlc()
 {
 	Run(ot_Run_SimpleString,
 		"import deeplabcut");
+	//disable tqdm
+	Run(ot_Run_SimpleString,
+		"from tqdm import tqdm\n"\
+		"from functools import partialmethod\n"\
+		"tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)");
 }
 
 void PyDlc::AnalyzeVideo()

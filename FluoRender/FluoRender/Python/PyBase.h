@@ -92,6 +92,13 @@ namespace flrd
 			// return item
 			return item;
 		}
+
+		bool empty()
+		{
+			// acquire lock
+			std::unique_lock<std::mutex> lock(m_mutex);
+			return m_queue.empty();
+		}
 	};
 
 	class PyBase
@@ -130,19 +137,16 @@ namespace flrd
 		static bool m_valid;//if get python
 #ifdef _WIN32
 		static HMODULE python_dll;//lib
-		//functions
-		static decltype(&Py_SetProgramName) SetProgramName;
-		static decltype(&Py_Initialize) Initialize;
-		static decltype(&PyDict_New) Dict_New;
-		static decltype(&PyRun_SimpleString) Run_SimpleString;
-		static decltype(&PyRun_String) Run_String;
-		static decltype(&PyObject_Repr) Object_Repr;
-		static decltype(&Py_FinalizeEx) FinalizeEx;
 #else
 		static void* python_dll;
-		//functions
 #endif
+		//functions
+		static decltype(&Py_Initialize) Initialize;
+		static decltype(&PyRun_SimpleString) Run_SimpleString;
+		static decltype(&Py_FinalizeEx) FinalizeEx;
+
 		virtual void ThreadFunc();
+
 	private:
 		bool SetValid(void* val)
 		{
