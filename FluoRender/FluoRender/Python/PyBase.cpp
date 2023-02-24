@@ -63,17 +63,20 @@ PyBase::PyBase() :
 	FinalizeEx = (decltype(&Py_FinalizeEx))GetProcAddress(python_dll, "Py_FinalizeEx");
 	if (!SetValid(FinalizeEx)) return;
 #else
-	python_dll = dlopen("python310.dylib", RTLD_NOW);
-	if (!SetValid(python_dll)) return;
+	//python_dll = dlopen("Python", RTLD_NOW);
+	//if (!SetValid(python_dll)) return;
 
-	Initialize = (Initialize_tp*)dlsym(python_dll, "Py_Initialize");
-	if (!SetValid((void*)Initialize)) return;
+	//Initialize = (Initialize_tp*)dlsym(python_dll, "Py_Initialize");
+	//if (!SetValid((void*)Initialize)) return;
+	Initialize = Py_Initialize;
 
-	Run_SimpleString = (PyRun_SimpleString_tp*)dlsym(python_dll, "PyRun_SimpleString");
-	if (!SetValid((void*)Run_SimpleString)) return;
+	//Run_SimpleString = (PyRun_SimpleString_tp*)dlsym(python_dll, "PyRun_SimpleString");
+	//if (!SetValid((void*)Run_SimpleString)) return;
+	Run_SimpleString = PyRun_SimpleString;
 
-	FinalizeEx = (Py_FinalizeEx_tp*)dlsym(python_dll, "Py_FinalizeEx");
-	if (!SetValid((void*)FinalizeEx)) return;
+	//FinalizeEx = (Py_FinalizeEx_tp*)dlsym(python_dll, "Py_FinalizeEx");
+	//if (!SetValid((void*)FinalizeEx)) return;
+	FinalizeEx = Py_FinalizeEx;
 #endif
 }
 
