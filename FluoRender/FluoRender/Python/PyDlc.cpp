@@ -76,7 +76,6 @@ bool PyDlc::GetResultFile()
 		return false;//doesn't exist
 	m_result_file += "*.csv";
 	std::regex rgx = REGEX(m_result_file);
-	bool result = false;
 	for (auto& it : std::filesystem::directory_iterator(path))
 	{
 		if (!std::filesystem::is_regular_file(it))
@@ -85,14 +84,13 @@ bool PyDlc::GetResultFile()
 		if (std::regex_match(str, rgx))
 		{
 			m_result_file = str;
-			result = true;
 			break;
 		}
 	}
-	return result;
+	return std::filesystem::exists(m_result_file);
 }
 
-bool PyDlc::AddRulers(RulerHandler* rhdl)
+bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 {
 	if (!rhdl)
 		return false;
@@ -103,6 +101,8 @@ bool PyDlc::AddRulers(RulerHandler* rhdl)
 	std::string line;
 	bool start = false;
 	std::vector<std::string> props;
+	std::vector<std::string> names;
+	std::vector<int> sn;
 	std::vector<Ruler*> rlist;
 	int ln = 0;
 	while (std::getline(f, line))
@@ -124,17 +124,35 @@ bool PyDlc::AddRulers(RulerHandler* rhdl)
 				start = true;
 				std::vector<fluo::Point> points;
 				getPoints(entry, props, points);
-				size_t t = std::stoi(entry[0]);
+				size_t t = std::stoi(entry[0]) + toff;
+				size_t c = 0;
+				Ruler* r = 0;
+				int rst;
 				for (auto& i : points)
 				{
-					Ruler* r = rhdl->AddRuler(i, t);
-					rlist.push_back(r);
+					rst = 0;
+					if (c < sn.size())
+						rst = sn[c];
+					if (rst < 1)
+					{
+						r = rhdl->AddRuler(i, t);
+						if (c < names.size())
+							r->SetName(names[c]);
+						r->SetRulerType(rst == -2 ? 2 : 1);
+						rlist.push_back(r);
+					}
+					else if (r)
+						r->AddPoint(i);
+
+					c++;
 				}
 			}
 			else
 			{
 				//get other info
-				if (ln == 2)
+				if (ln == 1)
+					getNames(entry, names, sn);
+				else if (ln == 2)
 					props = entry;
 			}
 		}
@@ -145,14 +163,30 @@ bool PyDlc::AddRulers(RulerHandler* rhdl)
 			{
 				std::vector<fluo::Point> points;
 				getPoints(entry, props, points);
-				size_t t = std::stoi(entry[0]);
-				size_t i = 0;
-				for (auto r : rlist)
+				size_t t = std::stoi(entry[0]) + toff;
+				size_t c = 0, ri = 0, rpi = 0;
+				Ruler* r = 0;
+				int rst;
+				for (auto& i : points)
 				{
-					r->SetWorkTime(t);
-					if (i < points.size())
-						r->SetPoint(0, points[i]);
-					i++;
+					rst = 0;
+					if (c < sn.size())
+						rst = sn[c];
+					if (rst < 1)
+					{
+						if (ri < rlist.size())
+							r = rlist[ri];
+						ri++;
+						rpi = 0;
+					}
+					if (r)
+					{
+						r->SetWorkTime(t);
+						r->SetPoint(rpi, i);
+						rpi++;
+					}
+
+					c++;
 				}
 			}
 		}

@@ -6,4 +6,5 @@ time_mode=TM_FIRST_PRE
 config=""
 [tasks/task1]
 type=get_rulers
-time_mode=TM_LAST_POST
+time_mode=TM_ALL_POST
+time_offset=7

@@ -49,6 +49,8 @@ PyBase::PyBase() :
 	m_state(1),
 	m_interval(std::chrono::milliseconds(100))
 {
+	if (m_valid)
+		return;
 	m_valid = true;
 #ifdef _WIN32
 	python_dll = LoadLibrary(L"python310.dll");
@@ -90,7 +92,8 @@ bool PyBase::Init()
 	if (!m_valid)
 		return false;
 
-	m_state = 1;
+	if (m_state != 1)
+		return false;
 	//configure the thread
 	m_thread = std::async(std::launch::async, &PyBase::ThreadFunc, this);
 
@@ -134,6 +137,7 @@ void PyBase::ThreadFunc()
 	}
 
 	FinalizeEx();
+	m_state = 1;
 }
 
 void PyBase::Exit()

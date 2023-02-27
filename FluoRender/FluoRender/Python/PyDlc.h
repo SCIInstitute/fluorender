@@ -66,7 +66,7 @@ namespace flrd
 		}
 		void AnalyzeVideo();
 		bool GetResultFile();
-		bool AddRulers(RulerHandler* rhdl);
+		bool AddRulers(RulerHandler* rhdl, size_t toff);//time offset: dlc may have decoding error causing the offset
 
 	protected:
 		std::string m_config_file;
@@ -108,6 +108,63 @@ namespace flrd
 				}
 			}
 			return true;
+		}
+
+		bool getNames(std::vector<std::string>& entry,
+			std::vector<std::string>& names,
+			std::vector<int>& sn)
+		{
+			for (size_t i = 1; i < entry.size(); ++i)
+			{
+				std::string str = entry[i];
+				std::string base = getBase(str);//separate digits
+				if (names.empty())
+				{
+					//first
+					names.push_back(base);
+					sn.push_back(0);
+					continue;
+				}
+				std::string last_base = names.back();
+				std::string last_str = entry[i - 1];
+				bool inc = false;
+				if (base == last_base)
+				{
+					if (str == last_str)
+						continue;//same point
+					else
+						inc = true;//same ruler
+				}
+				names.push_back(base);
+				if (inc)
+					sn.push_back(sn.back() + 1);//same ruler
+				else
+					sn.push_back(0);//new ruler
+			}
+			//also use sn for ruler type
+			for (size_t i = 0; i < sn.size(); ++i)
+			{
+				if (sn[i] == 0)
+				{
+					if (i == sn.size() - 1)
+						sn[i] = -2;//locator
+					else if (names[i] != names[i + 1])
+						sn[i] = -2;//locator
+				}
+			}
+			return true;
+		}
+
+		std::string getBase(const std::string& str)
+		{
+			std::string base = str;
+			while (std::isdigit(base.back()))
+				base.pop_back();
+			while (base.back() == '_')
+				base.pop_back();
+			while (base.back() == ' ')
+				base.pop_back();
+			return base;
 		}
 	};
 }

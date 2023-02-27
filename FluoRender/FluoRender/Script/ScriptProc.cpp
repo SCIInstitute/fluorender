@@ -1687,6 +1687,9 @@ void ScriptProc::RunDlcVideoAnalyze()
 	if (fn.empty() || cfg.empty())
 		return;
 
+	fluo::Group* dlcg = m_output->getOrAddGroup("dlc");
+	dlcg->addSetValue("analyzed", false);
+
 	//run dlc
 	dlc->Init();
 	dlc->LoadDlc();
@@ -1701,22 +1704,42 @@ void ScriptProc::RunDlcGetRulers()
 		return;
 	if (!TimeCondition())
 		return;
+	
+	int toff = 0;
+	m_fconfig->Read("time_offset", &toff, 0);
+	fluo::Group* dlcg = m_output->getOrAddGroup("dlc");
+	bool analyzed = false;
+	dlcg->getValue("analyzed", analyzed);
+	if (analyzed)
+		return;
 
 	flrd::PyDlc* dlc = glbin.get_add_python<flrd::PyDlc>("dlc");
 	if (!dlc)
 		return;
-	int state = dlc->GetState();
-	if (!dlc->GetResultFile() && state == 2)
+	if (!dlc->GetResultFile())
 	{
-		m_frame->GetMovieView()->Reset();//busy, rewind and restart video
+		//busy
+		if (m_view->m_tseq_cur_num == m_view->m_end_frame)
+			m_frame->GetMovieView()->Reset();//rewind and restart video
 		return;
 	}
 
 	RulerHandler* rhdl = m_view->GetRulerHandler();
 	if (!rhdl)
 		return;
-	dlc->AddRulers(rhdl);
+	//always work on the selected volume
+	VolumeData* cur_vol = m_view->m_cur_vol;
+	if (cur_vol)
+	{
+		std::string fn = cur_vol->GetPath().ToStdString();
+		std::filesystem::path p(fn);
+		if (p.extension().string() != ".m4v")//dlc may have problem decoding m4v files
+			toff = 0;
+	}
+
+	dlc->AddRulers(rhdl, toff);
 	dlc->Exit();
+	dlcg->addSetValue("analyzed", true);
 }
 
 void ScriptProc::ExportInfo()

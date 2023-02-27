@@ -16,4 +16,5 @@ void MyTest();
 
 void TableTest();
 
-void PythonTest();
+#include <string>
+void PythonTest(const std::string& config, const std::string& video);
