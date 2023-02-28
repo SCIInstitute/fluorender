@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 bool PyBase::m_valid = false;
+int PyBase::m_high_ver = 10;
 #ifdef _WIN32
 HMODULE PyBase::python_dll = nullptr;
 decltype(&Py_Initialize) PyBase::Initialize = nullptr;
@@ -53,7 +54,15 @@ PyBase::PyBase() :
 		return;
 	m_valid = true;
 #ifdef _WIN32
-	python_dll = LoadLibrary(L"python310.dll");
+	std::wstring libstr;
+	for (int i = m_high_ver; i > 0; --i)
+	{
+		//highest supported python version
+		libstr = L"python3" + std::to_wstring(i) + L".dll";
+		python_dll = LoadLibrary(libstr.c_str());
+		if (python_dll != nullptr)
+			break;
+	}
 	if (!SetValid(python_dll)) return;
 
 	Initialize = (decltype(&Py_Initialize))GetProcAddress(python_dll, "Py_Initialize");

@@ -930,6 +930,9 @@ VRenderFrame::VRenderFrame(
 	double mainmem_buf_size = free_mem_size.ToDouble() * 0.8 / 1024.0 / 1024.0;
 	if (mainmem_buf_size > flvr::TextureRenderer::get_mainmem_buf_size())
 		flvr::TextureRenderer::set_mainmem_buf_size(mainmem_buf_size);
+
+	//python
+	flrd::PyBase::SetHighVer(m_setting_dlg->GetPythonVer());
 }
 
 VRenderFrame::~VRenderFrame()

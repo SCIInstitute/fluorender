@@ -114,6 +114,10 @@ namespace flrd
 			ot_Quit
 		};
 
+		static void SetHighVer(int ver)
+		{
+			m_high_ver = ver;
+		}
 		void SetInterval(int t)
 		{
 			m_interval = std::chrono::milliseconds(t);
@@ -135,6 +139,7 @@ namespace flrd
 		PyQueue <std::pair<OpType, std::string>> m_queue;
 
 		static bool m_valid;//if get python
+		static int m_high_ver;//highest version of python to search
 #ifdef _WIN32
 		static HMODULE python_dll;//lib
 		//functions

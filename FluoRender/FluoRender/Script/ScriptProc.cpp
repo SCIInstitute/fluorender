@@ -1668,7 +1668,6 @@ void ScriptProc::RunDlcVideoAnalyze()
 		return;
 	if (!TimeCondition())
 		return;
-
 	//always work on the selected volume
 	VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
@@ -1688,7 +1687,7 @@ void ScriptProc::RunDlcVideoAnalyze()
 		return;
 
 	fluo::Group* dlcg = m_output->getOrAddGroup("dlc");
-	dlcg->addSetValue("analyzed", false);
+	dlcg->addSetValue(fn, false);
 
 	//run dlc
 	dlc->Init();
@@ -1704,12 +1703,16 @@ void ScriptProc::RunDlcGetRulers()
 		return;
 	if (!TimeCondition())
 		return;
-	
+	//always work on the selected volume
+	VolumeData* cur_vol = m_view->m_cur_vol;
+	if (!cur_vol) return;
+
 	int toff = 0;
 	m_fconfig->Read("time_offset", &toff, 0);
 	fluo::Group* dlcg = m_output->getOrAddGroup("dlc");
 	bool analyzed = false;
-	dlcg->getValue("analyzed", analyzed);
+	std::string fn = cur_vol->GetPath().ToStdString();
+	dlcg->getValue(fn, analyzed);
 	if (analyzed)
 		return;
 
@@ -1727,19 +1730,13 @@ void ScriptProc::RunDlcGetRulers()
 	RulerHandler* rhdl = m_view->GetRulerHandler();
 	if (!rhdl)
 		return;
-	//always work on the selected volume
-	VolumeData* cur_vol = m_view->m_cur_vol;
-	if (cur_vol)
-	{
-		std::string fn = cur_vol->GetPath().ToStdString();
-		std::filesystem::path p(fn);
-		if (p.extension().string() != ".m4v")//dlc may have problem decoding m4v files
-			toff = 0;
-	}
+	std::filesystem::path p(fn);
+	if (p.extension().string() != ".m4v")//dlc may have problem decoding m4v files
+		toff = 0;
 
 	dlc->AddRulers(rhdl, toff);
 	dlc->Exit();
-	dlcg->addSetValue("analyzed", true);
+	dlcg->addSetValue(fn, true);
 }
 
 void ScriptProc::ExportInfo()

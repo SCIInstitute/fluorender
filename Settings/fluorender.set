@@ -1,5 +1,5 @@
 ver_major=2
-ver_minor=29
+ver_minor=29.1
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -16,6 +16,8 @@ mode=0
 mode=0
 [realtime\ compress]
 mode=0
+[script\ break]
+mode=1
 [skip\ bricks]
 mode=0
 [mouse\ int]
@@ -139,3 +141,5 @@ vp_table=
 auto_start_all=0
 cg_auto_start=0
 vp_auto_start=0
+[python]
+version=10
