@@ -136,7 +136,7 @@ namespace flrd
 		void RunUnlinkCells();
 		void RunBackgroundStat();
 		void RunRegistration();
-		void RunBreak();
+		bool RunBreak();
 		//python
 		void RunPython();
 		void RunDlcVideoAnalyze();

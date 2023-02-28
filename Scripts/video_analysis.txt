@@ -1,10 +1,15 @@
 [tasks]
-tasknum=2
+tasknum=3
 [tasks/task0]
+type=break
+time_mode=TM_FIRST_PRE
+reset=0
+info="This script analyzes postures in a video using the Deeplabcut.\nChoose a training project and then let it run until tracking results are displayed in the render view.\n"
+[tasks/task1]
 type=video_analysis
 time_mode=TM_FIRST_PRE
 config=""
-[tasks/task1]
+[tasks/task2]
 type=get_rulers
 time_mode=TM_ALL_POST
 time_offset=7

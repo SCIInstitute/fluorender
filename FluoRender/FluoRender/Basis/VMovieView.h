@@ -221,18 +221,19 @@ public:
 	}
 	void ResumeRun()
 	{
-		if (m_timer_run)
+		if (m_timer_hold)
+		{
 			TimerRun();
+			m_timer_hold = false;
+		}
 	}
 	void HoldRun()
 	{
-		if (m_timer.IsRunning())
+		if (!m_timer_hold && m_timer.IsRunning())
 		{
-			m_timer_run = true;
+			m_timer_hold = true;
 			m_timer.Stop();
 		}
-		else
-			m_timer_run = false;
 	}
 
 private:
@@ -327,7 +328,7 @@ private:
 	double m_starting_rot;//starting degree of rotation
 	bool m_running, m_record;
 	bool m_delayed_stop;
-	bool m_timer_run;//for temporary hold
+	bool m_timer_hold;//for temporary hold
 	//save
 	wxString m_filename;
 	wxString filetype_;

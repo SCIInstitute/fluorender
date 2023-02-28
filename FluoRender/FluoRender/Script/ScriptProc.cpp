@@ -101,9 +101,10 @@ int ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 				m_type = str;
 				if (str == "break")
 				{
-					RunBreak();
-					if (m_break && m_break_count == 1)
+					if (RunBreak())
+					if (m_break_count == 1)
 					{
+						//reset on first break
 						delete m_fconfig;
 						return 2;
 					}
@@ -1982,26 +1983,29 @@ void ScriptProc::LoadProject()
 	m_frame->OpenProject(filename);
 }
 
-void ScriptProc::RunBreak()
+bool ScriptProc::RunBreak()
 {
 	if (!m_frame)
-		return;
+		return false;
 	if (!m_break)
-		return;
+		return false;
 	m_break_count++;
 	if (!TimeCondition())
-		return;
+		return false;
 
 	wxString info;
 	m_fconfig->Read("info", &info, "");
 	//info.Replace("\n", "\n");
+	bool reset = false;
+	m_fconfig->Read("reset", &reset, false);
 
 	ScriptBreakDlg* dlg = m_frame->GetScriptBreakDlg();
 	if (!dlg)
-		return;
+		return false;
 	dlg->SetScriptName(m_fconfig_name);
 	dlg->SetInfo(info);
 	dlg->Hold();
+	return reset;
 }
 
 //read/delete volume cache

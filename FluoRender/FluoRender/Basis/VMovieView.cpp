@@ -438,7 +438,8 @@ VMovieView::VMovieView(VRenderFrame* frame,
 	m_seq_mode(0),
 	m_fps(30),
 	m_timer(this, ID_Timer),
-	m_crop(false)
+	m_crop(false),
+	m_timer_hold(false)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

@@ -3,7 +3,8 @@ tasknum=5
 [tasks/task0]
 type=break
 time_mode=TM_FIRST_PRE
-info="This script analyzes the fluorescence intensity change over time (df/f).\nDefine ROIs using the Ellipse ruler to start analysis.\n"
+reset=1
+info="This script analyzes the fluorescence intensity change over time (df/f).\nDefine ROIs using the Ellipse ruler and then start analysis.\n"
 [tasks/task1]
 type=backg_stat
 time_mode=TM_ALL_PRE_LAST_BOTH
