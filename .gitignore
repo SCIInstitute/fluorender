@@ -8,3 +8,4 @@ build64
 ~*
 *.svn
 .vs/
+*.entitlements

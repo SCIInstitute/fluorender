@@ -1,9 +1,10 @@
 Info Deployment Target: 10.15
-FluoRender/Resources/Info.plist: NSHighResolutionCapable Yes
+FluoRender/Resources/Info.plist: NSHighResolutionCapable No
 Code Signing Identity: Developer ID Application...
 Codesign options --deep --timestamp
 Code signing inject base entitlements No
 Enable Hardened runtime Yes
+Targets/FluoRender/Signing & Capabilities/Hardened Runtime/Runtime Exceptions/Disable Library Validation Yes
 
 //codesign -f -s WG354P62PL libNd2File.dylib
 
