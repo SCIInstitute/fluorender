@@ -4695,7 +4695,14 @@ void DataManager::ClearAll()
 
 void DataManager::SetVolumeDefault(VolumeData* vd)
 {
-	if (m_use_defaults)
+	bool use_ml = false;
+	if (m_frame && m_frame->GetSettingDlg())
+		use_ml = m_frame->GetSettingDlg()->GetVpAutoApply();
+	if (use_ml)
+	{
+		vd->ApplyMlVolProp();
+	}
+	else if (m_use_defaults)
 	{
 		vd->SetWireframe(m_vol_test_wiref);
 		vd->Set3DGamma(m_vol_gam);

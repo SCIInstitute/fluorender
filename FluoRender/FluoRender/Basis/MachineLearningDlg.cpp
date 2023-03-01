@@ -129,11 +129,11 @@ void MachineLearningPanel::Create()
 	m_splitter->SetMinimumPaneSize(160);
 	mainsizer->Add(m_splitter, 1, wxBOTTOM | wxLEFT | wxEXPAND, 5);
 
-	wxPanel *panel_top = new wxPanel(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
+	m_panel_top = new wxPanel(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
 	wxBoxSizer* sizerTop = new wxBoxSizer(wxVERTICAL);
-	st = new wxStaticText(panel_top, wxID_ANY, m_top_grid_name,
+	st = new wxStaticText(m_panel_top, wxID_ANY, m_top_grid_name,
 		wxDefaultPosition, wxDefaultSize);
-	m_top_grid = new wxGrid(panel_top, m_top_grid_id);
+	m_top_grid = new wxGrid(m_panel_top, m_top_grid_id);
 	m_top_grid->CreateGrid(1, 5);
 	m_top_grid->SetColLabelValue(0, "Name");
 	m_top_grid->SetColLabelValue(1, "Records");
@@ -146,15 +146,15 @@ void MachineLearningPanel::Create()
 		wxGridEventHandler(MachineLearningPanel::OnTopGridCellChanged), NULL, this);
 	m_top_grid->Fit();
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	m_new_table_btn = new wxButton(panel_top, m_new_table_id, "New",
+	m_new_table_btn = new wxButton(m_panel_top, m_new_table_id, "New",
 		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
-	m_load_table_btn = new wxButton(panel_top, m_load_table_id, "Load",
+	m_load_table_btn = new wxButton(m_panel_top, m_load_table_id, "Load",
 		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
-	m_del_table_btn = new wxButton(panel_top, m_del_table_id, "Delete",
+	m_del_table_btn = new wxButton(m_panel_top, m_del_table_id, "Delete",
 		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
-	m_dup_table_btn = new wxButton(panel_top, m_dup_table_id, "Duplicate",
+	m_dup_table_btn = new wxButton(m_panel_top, m_dup_table_id, "Duplicate",
 		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
-	m_auto_load_btn = new wxButton(panel_top, m_auto_load_id, "Auto Load",
+	m_auto_load_btn = new wxButton(m_panel_top, m_auto_load_id, "Auto Load",
 		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
 	m_new_table_btn->Connect(m_new_table_id, wxEVT_BUTTON,
 		wxCommandEventHandler(MachineLearningPanel::OnNewTable), NULL, this);
@@ -181,13 +181,13 @@ void MachineLearningPanel::Create()
 	sizerTop->Add(10, 10);
 	sizerTop->Add(m_top_grid, 1, wxEXPAND);
 	sizerTop->Add(10, 10);
-	panel_top->SetSizer(sizerTop);
+	m_panel_top->SetSizer(sizerTop);
 
-	wxPanel *panel_bot = new wxPanel(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
+	m_panel_bot = new wxPanel(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
 	wxBoxSizer* sizerBot = new wxBoxSizer(wxVERTICAL);
-	st = new wxStaticText(panel_bot, wxID_ANY, m_bot_grid_name,
+	st = new wxStaticText(m_panel_bot, wxID_ANY, m_bot_grid_name,
 		wxDefaultPosition, wxDefaultSize);
-	m_bot_grid = new wxGrid(panel_bot, m_bot_grid_id);
+	m_bot_grid = new wxGrid(m_panel_bot, m_bot_grid_id);
 	m_bot_grid->CreateGrid(1, 2);
 	m_bot_grid->SetColLabelValue(0, "Features");
 	m_bot_grid->SetColLabelValue(1, "Parameters");
@@ -198,13 +198,13 @@ void MachineLearningPanel::Create()
 	m_bot_grid->Connect(m_bot_grid_id, wxEVT_GRID_CELL_CHANGED,
 		wxGridEventHandler(MachineLearningPanel::OnBotGridCellChanged), NULL, this);
 	m_bot_grid->Fit();
-	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
-	m_bot_table_name = new wxStaticText(panel_bot, wxID_ANY, "No table loaded");
-	m_auto_start_check = new wxCheckBox(panel_bot, m_auto_start_id, "Auto Start",
+	m_sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	m_bot_table_name = new wxStaticText(m_panel_bot, wxID_ANY, "No table loaded");
+	m_auto_start_check = new wxCheckBox(m_panel_bot, m_auto_start_id, "Auto Start",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_auto_start_check->Connect(m_auto_start_id, wxEVT_CHECKBOX,
 		wxCommandEventHandler(MachineLearningPanel::OnAutoStartRec), NULL, this);
-	m_start_rec_btn = new wxToggleButton(panel_bot, m_start_rec_id, "Start",
+	m_start_rec_btn = new wxToggleButton(m_panel_bot, m_start_rec_id, "Start",
 		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
 	m_start_rec_btn->Connect(m_start_rec_id, wxEVT_TOGGLEBUTTON,
 		wxCommandEventHandler(MachineLearningPanel::OnStartRec), NULL, this);
@@ -218,25 +218,25 @@ void MachineLearningPanel::Create()
 		m_start_rec_btn->SetLabel("Start");
 		m_start_rec_btn->SetValue(false);
 	}
-	m_del_rec_btn = new wxButton(panel_bot, m_del_rec_id, "Delete",
+	m_del_rec_btn = new wxButton(m_panel_bot, m_del_rec_id, "Delete",
 		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
 	m_del_rec_btn->Connect(m_del_rec_id, wxEVT_BUTTON,
 		wxCommandEventHandler(MachineLearningPanel::OnDelRec), NULL, this);
-	m_apply_rec_btn = new wxButton(panel_bot, m_apply_rec_id, "Apply",
+	m_apply_rec_btn = new wxButton(m_panel_bot, m_apply_rec_id, "Apply",
 		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
 	m_apply_rec_btn->Connect(m_apply_rec_id, wxEVT_BUTTON,
 		wxCommandEventHandler(MachineLearningPanel::OnApplyRec), NULL, this);
-	sizer2->Add(5, 5);
-	sizer2->Add(m_bot_table_name, 0, wxALIGN_CENTER);
-	sizer2->AddStretchSpacer(1);
-	sizer2->Add(m_auto_start_check, 0, wxALIGN_CENTER);
-	sizer2->Add(m_start_rec_btn, 0);
-	sizer2->Add(m_del_rec_btn, 0);
-	sizer2->Add(m_apply_rec_btn, 0);
-	sizer2->Add(5, 5);
+	m_sizer2->Add(5, 5);
+	m_sizer2->Add(m_bot_table_name, 0, wxALIGN_CENTER);
+	m_sizer2->AddStretchSpacer(1);
+	m_sizer2->Add(m_auto_start_check, 0, wxALIGN_CENTER);
+	m_sizer2->Add(m_start_rec_btn, 0);
+	m_sizer2->Add(m_del_rec_btn, 0);
+	m_sizer2->Add(m_apply_rec_btn, 0);
+	m_sizer2->Add(5, 5);
 	//
 	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
-	m_start_prompt_text = new wxStaticText(panel_bot, wxID_ANY, "Click Start to begin/stop learning");
+	m_start_prompt_text = new wxStaticText(m_panel_bot, wxID_ANY, "Click Start to begin/stop learning");
 	sizer3->AddStretchSpacer(1);
 	sizer3->Add(m_start_prompt_text, 0, wxALIGN_CENTER);
 	sizer3->Add(5, 5);
@@ -244,20 +244,20 @@ void MachineLearningPanel::Create()
 	sizerBot->Add(10, 10);
 	sizerBot->Add(st, 0, wxALIGN_CENTER);
 	sizerBot->Add(10, 10);
-	sizerBot->Add(sizer2, 0, wxEXPAND);
+	sizerBot->Add(m_sizer2, 0, wxEXPAND);
 	sizerBot->Add(10, 10);
 	sizerBot->Add(sizer3, 0, wxEXPAND);
 	sizerBot->Add(10, 10);
 	sizerBot->Add(m_bot_grid, 1, wxEXPAND);
 	sizerBot->Add(10, 10);
-	panel_bot->SetSizer(sizerBot);
+	m_panel_bot->SetSizer(sizerBot);
 
 	m_splitter->SetSashGravity(0.0);
-	m_splitter->SplitHorizontally(panel_top, panel_bot, 100);
+	m_splitter->SplitHorizontally(m_panel_top, m_panel_bot, 100);
 
 	SetSizer(mainsizer);
-	panel_top->Layout();
-	panel_bot->Layout();
+	m_panel_top->Layout();
+	m_panel_bot->Layout();
 }
 
 void MachineLearningPanel::PopTopList()
@@ -766,15 +766,29 @@ MLVolPropPanel::MLVolPropPanel(
 	m_apply_rec_id = ID_ApplyRecBtn;
 	Create();
 	PopTopList();
+	//add more options
+	m_auto_apply_chk = new wxCheckBox(m_panel_bot, ID_AutoApplyChk, "Auto Apply",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	m_auto_apply_chk->Connect(ID_AutoApplyChk, wxEVT_CHECKBOX,
+		wxCommandEventHandler(MLVolPropPanel::OnAutoApply), NULL, this);
+	m_sizer2->Add(m_auto_apply_chk, 0);
+	m_sizer2->Add(5, 5);
+	m_panel_bot->Layout();
 
 	flrd::TableHistParams& table = glbin.get_vp_table();
 	table.setUpdateFunc(std::bind(
 		&MLVolPropPanel::UpdateList, this, std::placeholders::_1));
 
-	if (m_frame && m_frame->GetSettingDlg()->GetVpAutoStart())
-		m_auto_start_check->SetValue(true);
+	if (m_frame && m_frame->GetSettingDlg())
+	{
+		m_auto_start_check->SetValue(m_frame->GetSettingDlg()->GetVpAutoStart());
+		m_auto_apply_chk->SetValue(m_frame->GetSettingDlg()->GetVpAutoApply());
+	}
 	else
+	{
 		m_auto_start_check->SetValue(false);
+		m_auto_apply_chk->SetValue(false);
+	}
 }
 
 MLVolPropPanel::~MLVolPropPanel()
@@ -1088,3 +1102,10 @@ void MLVolPropPanel::SaveTable(const std::string& filename)
 	glbin.get_vp_table().save(str);
 }
 
+void MLVolPropPanel::OnAutoApply(wxCommandEvent& event)
+{
+	if (!m_frame || !m_frame->GetSettingDlg())
+		return;
+	bool bval = m_auto_apply_chk->GetValue();
+	m_frame->GetSettingDlg()->SetVpAutoApply(bval);
+}

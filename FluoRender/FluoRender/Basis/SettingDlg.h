@@ -335,6 +335,8 @@ public:
 	bool GetCgAutoStart() { return m_cg_auto_start; }
 	void SetVpAutoStart(bool bval) { m_vp_auto_start = bval; }
 	bool GetVpAutoStart() { return m_vp_auto_start; }
+	void SetVpAutoApply(bool bval) { m_vp_auto_apply = bval; }
+	bool GetVpAutoApply() { return m_vp_auto_apply; }
 
 	//python settings
 	int GetPythonVer() { return m_python_ver; }
@@ -471,6 +473,7 @@ private:
 	bool m_ml_auto_start_all;
 	bool m_cg_auto_start;
 	bool m_vp_auto_start;
+	bool m_vp_auto_apply;
 
 	//python settings
 	int m_python_ver;//minor version no of python3

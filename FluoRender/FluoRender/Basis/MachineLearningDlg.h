@@ -83,6 +83,7 @@ protected:
 	VRenderFrame* m_frame;
 	wxSplitterWindow* m_splitter;
 	//
+	wxPanel* m_panel_top;
 	wxGrid *m_top_grid;
 	wxString m_top_grid_name;
 	wxWindowID m_top_grid_id;
@@ -97,9 +98,11 @@ protected:
 	wxButton* m_auto_load_btn;
 	wxWindowID m_auto_load_id;
 	//
+	wxPanel* m_panel_bot;
 	wxGrid *m_bot_grid;
 	wxString m_bot_grid_name;
 	wxWindowID m_bot_grid_id;
+	wxBoxSizer* m_sizer2;
 	wxStaticText* m_bot_table_name;
 	wxStaticText* m_start_prompt_text;
 	wxCheckBox* m_auto_start_check;
@@ -201,7 +204,8 @@ public:
 		ID_AutoStartChk,
 		ID_StartRecBtn,
 		ID_DelRecBtn,
-		ID_ApplyRecBtn
+		ID_ApplyRecBtn,
+		ID_AutoApplyChk
 	};
 	MLVolPropPanel(VRenderFrame* frame,
 		wxWindow* parent);
@@ -229,5 +233,9 @@ protected:
 	void OnTopGridCellChanged(wxGridEvent& event);
 
 private:
+	wxCheckBox* m_auto_apply_chk;
+
+private:
+	void OnAutoApply(wxCommandEvent& event);
 };
 #endif//_MACHINELEARNINGDLG_H_

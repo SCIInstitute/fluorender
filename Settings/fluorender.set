@@ -141,5 +141,6 @@ vp_table=
 auto_start_all=0
 cg_auto_start=0
 vp_auto_start=0
+vp_auto_apply=0
 [python]
 version=10

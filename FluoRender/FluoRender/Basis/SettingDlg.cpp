@@ -915,6 +915,7 @@ void SettingDlg::GetSettings()
 	m_ml_auto_start_all = false;
 	m_cg_auto_start = false;
 	m_vp_auto_start = false;
+	m_vp_auto_apply = false;
 	m_python_ver = 10;
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
@@ -1255,6 +1256,7 @@ void SettingDlg::GetSettings()
 		fconfig.Read("auto_start_all", &m_ml_auto_start_all);
 		fconfig.Read("cg_auto_start", &m_cg_auto_start);
 		fconfig.Read("vp_auto_start", &m_vp_auto_start);
+		fconfig.Read("vp_auto_apply", &m_vp_auto_apply);
 	}
 
 	//python settings
@@ -1640,6 +1642,7 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("auto_start_all", m_ml_auto_start_all);
 	fconfig.Write("cg_auto_start", m_cg_auto_start);
 	fconfig.Write("vp_auto_start", m_vp_auto_start);
+	fconfig.Write("vp_auto_apply", m_vp_auto_apply);
 
 	//python
 	fconfig.SetPath("/python");
