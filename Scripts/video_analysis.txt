@@ -12,4 +12,4 @@ config=""
 [tasks/task2]
 type=get_rulers
 time_mode=TM_ALL_POST
-time_offset=7
+time_offset=0

@@ -1731,11 +1731,12 @@ void ScriptProc::RunDlcGetRulers()
 	RulerHandler* rhdl = m_view->GetRulerHandler();
 	if (!rhdl)
 		return;
-	std::filesystem::path p(fn);
-	if (p.extension().string() != ".m4v")//dlc may have problem decoding m4v files
-		toff = 0;
+	//std::filesystem::path p(fn);
+	//if (p.extension().string() != ".m4v")//dlc may have problem decoding m4v files
+	//	toff = 0;
 
-	dlc->AddRulers(rhdl, toff);
+	int errs = dlc->GetDecodeErrorCount();
+	dlc->AddRulers(rhdl, toff + errs);
 	dlc->Exit();
 	dlcg->addSetValue(fn, true);
 }

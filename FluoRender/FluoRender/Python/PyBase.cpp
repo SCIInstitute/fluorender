@@ -48,6 +48,10 @@ void* PyBase::python_dll = nullptr;
 PyBase::Initialize_tp* PyBase::Initialize = nullptr;
 PyBase::PyRun_SimpleString_tp* PyBase::Run_SimpleString = nullptr;
 PyBase::Py_FinalizeEx_tp* PyBase::FinalizeEx = nullptr;
+PyBase::PyImport_AddModule_tp* PyBase::Import_AddModule = nullptr;
+PyBase::PyObject_GetAttrString_tp* PyBase::Object_GetAttrString = nullptr;
+PyBase::PyUnicode_AsEncodedString_tp* PyBase::Unicode_AsEncodedString = nullptr;
+PyBase::PyBytes_AsString_tp* PyBase::Bytes_AsString = nullptr;
 #endif
 
 PyBase::PyBase() :
@@ -104,6 +108,14 @@ PyBase::PyBase() :
 	//FinalizeEx = (Py_FinalizeEx_tp*)dlsym(python_dll, "Py_FinalizeEx");
 	//if (!SetValid((void*)FinalizeEx)) return;
 	FinalizeEx = Py_FinalizeEx;
+
+	Import_AddModule = PyImport_AddModule;
+
+	Object_GetAttrString = PyObject_GetAttrString;
+
+	Unicode_AsEncodedString = PyUnicode_AsEncodedString;
+
+	Bytes_AsString = PyBytes_AsString;
 #endif
 }
 
