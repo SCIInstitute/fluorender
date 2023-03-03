@@ -59,8 +59,9 @@ void PyDlc::AnalyzeVideo()
 		"deeplabcut.analyze_videos(";
 	cmd += "\"" + m_config_file_py + "\", ";
 	cmd += "\"" + m_video_file_py + "\", ";
+	cmd += "robust_nframes=True,";
 	cmd += "save_as_csv=True)";
-	Run(ot_Run_SimpleString,
+	Run(ot_Run_SimpleStringEx,
 		cmd);
 }
 
@@ -88,6 +89,23 @@ bool PyDlc::GetResultFile()
 		}
 	}
 	return std::filesystem::exists(m_result_file);
+}
+
+int PyDlc::GetDecodeErrorCount()
+{
+	int c = 0;
+	if (m_output.empty())
+		return c;
+
+	std::string target("UserWarning: Could not decode frame");
+	std::string::size_type pos = 0;
+	while ((pos = m_output.find(target, pos)) != std::string::npos)
+	{
+		++c;
+		pos += target.length();
+	}
+
+	return c;
 }
 
 bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)

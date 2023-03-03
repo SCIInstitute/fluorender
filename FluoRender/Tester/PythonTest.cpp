@@ -13,6 +13,7 @@ void PythonTest(const std::string& config, const std::string& video)
 	while (test.GetState())
 		Sleep(1000);
 	test.GetResultFile();
-	test.AddRulers(NULL, 0);
+	int err = test.GetDecodeErrorCount();
+	//test.AddRulers(NULL, 0);
 	test.Exit();
 }

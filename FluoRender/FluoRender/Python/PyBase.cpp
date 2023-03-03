@@ -39,6 +39,10 @@ HMODULE PyBase::python_dll = nullptr;
 decltype(&Py_Initialize) PyBase::Initialize = nullptr;
 decltype(&PyRun_SimpleString) PyBase::Run_SimpleString = nullptr;
 decltype(&Py_FinalizeEx) PyBase::FinalizeEx = nullptr;
+decltype(&PyImport_AddModule) PyBase::Import_AddModule = nullptr;
+decltype(&PyObject_GetAttrString) PyBase::Object_GetAttrString = nullptr;
+decltype(&PyUnicode_AsEncodedString) PyBase::Unicode_AsEncodedString = nullptr;
+decltype(&PyBytes_AsString) PyBase::Bytes_AsString = nullptr;
 #else
 void* PyBase::python_dll = nullptr;
 PyBase::Initialize_tp* PyBase::Initialize = nullptr;
@@ -73,6 +77,18 @@ PyBase::PyBase() :
 
 	FinalizeEx = (decltype(&Py_FinalizeEx))GetProcAddress(python_dll, "Py_FinalizeEx");
 	if (!SetValid(FinalizeEx)) return;
+
+	Import_AddModule = (decltype(&PyImport_AddModule))GetProcAddress(python_dll, "PyImport_AddModule");
+	if (!SetValid(Import_AddModule)) return;
+
+	Object_GetAttrString = (decltype(&PyObject_GetAttrString))GetProcAddress(python_dll, "PyObject_GetAttrString");
+	if (!SetValid(Object_GetAttrString)) return;
+
+	Unicode_AsEncodedString = (decltype(&PyUnicode_AsEncodedString))GetProcAddress(python_dll, "PyUnicode_AsEncodedString");
+	if (!SetValid(Unicode_AsEncodedString)) return;
+
+	Bytes_AsString = (decltype(&PyBytes_AsString))GetProcAddress(python_dll, "PyBytes_AsString");
+	if (!SetValid(Bytes_AsString)) return;
 #else
 	//python_dll = dlopen("Python", RTLD_NOW);
 	//if (!SetValid(python_dll)) return;
@@ -138,6 +154,9 @@ void PyBase::ThreadFunc()
 			Run_SimpleString(str.c_str());
 		}
 		break;
+		case ot_Run_SimpleStringEx:
+			Run_SimpleStringEx(m.second);
+			break;
 		case ot_Quit:
 			run = false;
 			break;
@@ -152,4 +171,29 @@ void PyBase::ThreadFunc()
 void PyBase::Exit()
 {
 	Run(ot_Quit);
+}
+
+void PyBase::Run_SimpleStringEx(const std::string& str)
+{
+	std::string stdOutErr =
+		"import sys\n" \
+		"class CatchOut :\n" \
+		"\tdef __init__(self) :\n" \
+		"\t\tself.value = ''\n" \
+		"\tdef write(self, txt) :\n" \
+		"\t\tself.value += txt\n" \
+		"catchOut = CatchOut()\n" \
+		"sys.stdout = catchOut\n" \
+		"sys.stderr = catchOut\n"; //this is python code to redirect stdouts/stderr
+
+	PyObject* pModule = Import_AddModule("__main__"); //create main module
+	Run_SimpleString(stdOutErr.c_str()); //invoke code to redirect
+
+	std::string cmd = str + "\n";
+	Run_SimpleString(cmd.c_str());
+	PyObject* catcher = Object_GetAttrString(pModule, "catchOut");
+
+	PyObject* output = Object_GetAttrString(catcher, "value");
+	PyObject* outstr = Unicode_AsEncodedString(output, "utf-8", "~E~");
+	m_output = Bytes_AsString(outstr);
 }

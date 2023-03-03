@@ -66,6 +66,7 @@ namespace flrd
 		}
 		void AnalyzeVideo();
 		bool GetResultFile();
+		int GetDecodeErrorCount();
 		bool AddRulers(RulerHandler* rhdl, size_t toff);//time offset: dlc may have decoding error causing the offset
 
 	protected:

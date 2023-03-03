@@ -111,6 +111,7 @@ namespace flrd
 		{
 			ot_Initialize,
 			ot_Run_SimpleString,
+			ot_Run_SimpleStringEx,
 			ot_Quit
 		};
 
@@ -126,6 +127,10 @@ namespace flrd
 		{
 			return m_state;
 		}
+		std::string GetOutput()
+		{
+			return m_output;
+		}
 		virtual bool Init();
 		virtual void Run(OpType func, const std::string& par = "");
 		virtual void Exit();
@@ -134,6 +139,7 @@ namespace flrd
 		//thread for running
 		std::future<void> m_thread;
 		std::atomic<int> m_state;//0-idle;1-just created;2-busy
+		std::string m_output;//console output from run string ex
 		std::chrono::milliseconds m_interval;//intereval for query
 		//message queue
 		PyQueue <std::pair<OpType, std::string>> m_queue;
@@ -146,6 +152,10 @@ namespace flrd
 		static decltype(&Py_Initialize) Initialize;
 		static decltype(&PyRun_SimpleString) Run_SimpleString;
 		static decltype(&Py_FinalizeEx) FinalizeEx;
+		static decltype(&PyImport_AddModule) Import_AddModule;
+		static decltype(&PyObject_GetAttrString) Object_GetAttrString;
+		static decltype(&PyUnicode_AsEncodedString) Unicode_AsEncodedString;
+		static decltype(&PyBytes_AsString) Bytes_AsString;
 #else
 		static void* python_dll;
 		//functions
@@ -158,6 +168,8 @@ namespace flrd
 #endif
 
 		virtual void ThreadFunc();
+
+		void Run_SimpleStringEx(const std::string& str);
 
 	private:
 		bool SetValid(void* val)
