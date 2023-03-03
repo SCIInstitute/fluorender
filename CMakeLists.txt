@@ -237,7 +237,7 @@ find_package(Boost COMPONENTS system chrono filesystem REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
 #python
-set(Python_ADDITIONAL_VERSIONS 3.10)
+#set(Python_ADDITIONAL_VERSIONS 3.10 3.9 3.8 3.7)
 find_package(Python3 COMPONENTS Interpreter Development)
 include_directories(${Python3_INCLUDE_DIRS})
 
