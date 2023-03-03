@@ -165,13 +165,13 @@ namespace flrd
 		static PyRun_SimpleString_tp* Run_SimpleString;
 		typedef int(Py_FinalizeEx_tp)();
 		static Py_FinalizeEx_tp* FinalizeEx;
-		typedef int(PyImport_AddModule_tp)();
+		typedef PyObject*(PyImport_AddModule_tp)(const char *name);
 		static PyImport_AddModule_tp* Import_AddModule;
-		typedef int(PyObject_GetAttrString_tp)();
+		typedef PyObject*(PyObject_GetAttrString_tp)(PyObject*, const char*);
 		static PyObject_GetAttrString_tp* Object_GetAttrString;
-		typedef int(PyUnicode_AsEncodedString_tp)();
+		typedef PyObject* (PyUnicode_AsEncodedString_tp)(PyObject *unicode, const char *encoding, const char *errors);
 		static PyUnicode_AsEncodedString_tp* Unicode_AsEncodedString;
-		typedef int(PyBytes_AsString_tp)();
+		typedef char*(PyBytes_AsString_tp)(PyObject*);
 		static PyBytes_AsString_tp* Bytes_AsString;
 #endif
 
