@@ -245,4 +245,5 @@ void Global::clear_python()
 		i.second->Exit();
 		delete i.second;
 	}
+	flrd::PyBase::Free();
 }

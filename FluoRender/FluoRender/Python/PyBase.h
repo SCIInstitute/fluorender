@@ -119,6 +119,12 @@ namespace flrd
 		{
 			m_high_ver = ver;
 		}
+		static void Free()
+		{
+#ifdef _WIN32
+			FreeLibrary(python_dll);
+#endif
+		}
 		void SetInterval(int t)
 		{
 			m_interval = std::chrono::milliseconds(t);
