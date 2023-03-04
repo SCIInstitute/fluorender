@@ -122,8 +122,10 @@ namespace flrd
 		static void Free()
 		{
 #ifdef _WIN32
-			FreeLibrary(python_dll);
+			if (python_dll)
+				FreeLibrary(python_dll);
 #endif
+			m_valid = false;
 		}
 		void SetInterval(int t)
 		{
