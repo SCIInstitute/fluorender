@@ -247,7 +247,7 @@ void PyDlc::CreateConfigFile(
 	cf << std::endl;
 	cf << "    # Annotation data set configuration(and individual video cropping parameters)" << std::endl;
 	cf << "video_sets:" << std::endl;
-	cf << "  " << m_video_file << std::endl;
+	cf << "  " << m_video_file << ":" << std::endl;
 	cf << "    crop: 0, 1280, 0, 720" << std::endl;
 	cf << "bodyparts:" << std::endl;
 	if (rhdl)
