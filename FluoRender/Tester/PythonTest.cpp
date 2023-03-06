@@ -1,6 +1,20 @@
 #include "tests.h"
 #include "asserts.h"
 #include <Python/PyDlc.h>
+#include <wx/wx.h>
+
+void PythonTest0()
+{
+	wxString cmd;
+	cmd = "python -c \"exec('";
+	cmd += "import deeplabcut\n";
+	//cmd += "deeplabcut.analyze_videos(";
+	//cmd += "\"E:\\\\DATA\\\\Holly\\\\MouseTracking\\\\test-nb-2023-01-30\\\\config.yaml\",";
+	//cmd += "\"E:\\\\DATA\\\\Holly\\\\MouseTracking\\\\videos\\\\10June2019_M_P119_GAD2-Cre-GCaMP5G_01L.mp4\",";
+	//cmd += "save_as_csv=True)\n";
+	cmd += "')\"";
+	wxExecute(cmd);
+}
 
 void PythonTest1(const std::string& config, const std::string& video)
 {
