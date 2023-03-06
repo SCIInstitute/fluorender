@@ -64,6 +64,12 @@ namespace flrd
 			m_video_file_py = m_video_file;
 #endif
 		}
+		//train
+		void CreateConfigFile(const std::string& prj_name,
+			const std::string& usr_name,
+			RulerHandler* rhdl);
+		void Train();
+		//analysis
 		void AnalyzeVideo();
 		bool GetResultFile();
 		int GetDecodeErrorCount();

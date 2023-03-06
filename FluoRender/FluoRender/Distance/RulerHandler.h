@@ -173,6 +173,7 @@ namespace flrd
 
 		void Save(wxFileConfig &fconfig, int vi);
 		void Read(wxFileConfig &fconfig, int vi);
+		std::string PrintRulers(bool h);//h-if prints hierarchy
 
 		int Profile(Ruler* ruler);
 		int Profile(int index);

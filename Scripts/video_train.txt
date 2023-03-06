@@ -1,0 +1,6 @@
+[tasks]
+tasknum=1
+[tasks/task0]
+type=create_va_config
+time_mode=TM_FIRST_PRE
+conifg=""

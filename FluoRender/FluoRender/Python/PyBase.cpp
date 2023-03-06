@@ -121,7 +121,8 @@ PyBase::PyBase() :
 
 PyBase::~PyBase()
 {
-	m_thread.get();
+	if (m_thread.valid())
+		m_thread.get();
 }
 
 bool PyBase::Init()

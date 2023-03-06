@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <filesystem>
 #include <iostream>
 #include <vector>
+#include <iomanip>
+#include <ctime>
 
 using namespace flrd;
 
@@ -213,4 +215,109 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 	}
 
 	return true;
+}
+
+//training
+void PyDlc::CreateConfigFile(
+	const std::string& prj_name,
+	const std::string& usr_name,
+	RulerHandler* rhdl)
+{
+	std::filesystem::path p = m_config_file;
+	p = p.parent_path();
+	if (!std::filesystem::exists(p))
+		std::filesystem::create_directory(p);
+	if (!std::filesystem::exists(p))
+		return;
+
+	std::ofstream cf;
+	cf.open(m_config_file, std::ofstream::out);
+
+	cf << "    # Project definitions (do not edit)" << std::endl;
+	cf << "Task: " << prj_name << std::endl;
+	cf << "scorer: " << usr_name << std::endl;
+	auto t = std::time(nullptr);
+	auto tm = *std::localtime(&t);
+	cf << "date: " << std::put_time(&tm, "%b%d") << std::endl;
+	cf << "multianimalproject: false" << std::endl;
+	cf << "identity:" << std::endl;
+	cf << std::endl;
+	cf << "    # Project path (change when moving around)" << std::endl;
+	cf << "project_path: " << p.string() << std::endl;
+	cf << std::endl;
+	cf << "    # Annotation data set configuration(and individual video cropping parameters)" << std::endl;
+	cf << "video_sets:" << std::endl;
+	cf << "  " << m_video_file << std::endl;
+	cf << "    crop: 0, 1280, 0, 720" << std::endl;
+	cf << "bodyparts:" << std::endl;
+	if (rhdl)
+	{
+		std::string str = rhdl->PrintRulers(false);
+		cf << str;
+	}
+	cf << std::endl;
+	cf << "    # Fraction of video to start/stop when extracting frames for labeling/refinement" << std::endl;
+	cf << "start: 0" << std::endl;
+	cf << "stop: 1" << std::endl;
+	cf << "numframes2pick: 20" << std::endl;
+	cf << std::endl;
+	cf << "    # Plotting configuration" << std::endl;
+	cf << "skeleton:" << std::endl;
+	if (rhdl)
+	{
+		std::string str = rhdl->PrintRulers(true);
+		cf << str;
+	}
+	cf << "skeleton_color: black" << std::endl;
+	cf << "pcutoff: 0.6" << std::endl;
+	cf << "dotsize: 12" << std::endl;
+	cf << "alphavalue: 0.7" << std::endl;
+	cf << "colormap: rainbow" << std::endl;
+	cf << std::endl;
+	cf << "    # Training,Evaluation and Analysis configuration" << std::endl;
+	cf << "TrainingFraction:" << std::endl;
+	cf << "- 0.95" << std::endl;
+	cf << "iteration: 0" << std::endl;
+	cf << "default_net_type: resnet_50" << std::endl;
+	cf << "default_augmenter: default" << std::endl;
+	cf << "snapshotindex: -1" << std::endl;
+	cf << "batch_size: 8" << std::endl;
+	cf << std::endl;
+	cf << "    # Cropping Parameters (for analysis and outlier frame detection)" << std::endl;
+	cf << "cropping: false" << std::endl;
+	cf << "    #if cropping is true for analysis, then set the values here:" << std::endl;
+	cf << "x1: 0" << std::endl;
+	cf << "x2: 640" << std::endl;
+	cf << "y1: 277" << std::endl;
+	cf << "y2: 624" << std::endl;
+	cf << std::endl;
+	cf << "    # Refinement configuration (parameters from annotation dataset configuration also relevant in this stage)" << std::endl;
+	cf << "corner2move2:" << std::endl;
+	cf << "- 50" << std::endl;
+	cf << "- 50" << std::endl;
+	cf << "move2corner: true" << std::endl;
+
+	cf.close();
+
+	//create dirs
+	std::filesystem::path child_path;
+	child_path = p;
+	child_path.append("dlc-models");
+	std::filesystem::create_directory(child_path);
+	child_path = p;
+	child_path.append("labeled-data");
+	std::filesystem::create_directory(child_path);
+	child_path.append(prj_name);
+	std::filesystem::create_directory(child_path);
+	child_path = p;
+	child_path.append("training-datasets");
+	std::filesystem::create_directory(child_path);
+	child_path = p;
+	child_path.append("videos");
+	std::filesystem::create_directory(child_path);
+}
+
+void PyDlc::Train()
+{
+
 }

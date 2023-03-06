@@ -17,4 +17,5 @@ void MyTest();
 void TableTest();
 
 #include <string>
-void PythonTest(const std::string& config, const std::string& video);
+void PythonTest1(const std::string& config, const std::string& video);
+void PythonTest2(const std::string& config, const std::string& video);

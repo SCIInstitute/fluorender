@@ -1345,6 +1345,37 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 	}
 }
 
+std::string RulerHandler::PrintRulers(bool h)
+{
+	std::string s;
+	for (size_t ri = 0; ri < m_ruler_list->size(); ++ri)
+	{
+		Ruler* ruler = (*m_ruler_list)[ri];
+		if (!ruler) continue;
+		std::string rname = ruler->GetName().ToStdString();
+		std::string line;
+		int rpn = ruler->GetNumPoint();
+		for (size_t rpi = 0; rpi < rpn; ++rpi)
+		{
+			if (h)
+			{
+				if (rpi == 0)
+					line = "- - ";
+				else
+					line = "  - ";
+			}
+			else
+				line = "- ";
+			line += rname;
+			if (rpn > 1)
+				line += "_" + std::to_string(rpi + 1);
+			line += "\n";
+			s += line;
+		}
+	}
+	return s;
+}
+
 int RulerHandler::Profile(Ruler* ruler)
 {
 	if (!m_view || !m_vd || !ruler)

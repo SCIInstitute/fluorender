@@ -102,12 +102,12 @@ int ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 				if (str == "break")
 				{
 					if (RunBreak())
-					if (m_break_count == 1)
-					{
-						//reset on first break
-						delete m_fconfig;
-						return 2;
-					}
+						if (m_break_count == 1)
+						{
+							//reset on first break
+							delete m_fconfig;
+							return 2;
+						}
 				}
 				else if (str == "noise_reduction")
 					RunNoiseReduction();
@@ -163,6 +163,8 @@ int ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 					RunDlcVideoAnalyze();
 				else if (str == "get_rulers")
 					RunDlcGetRulers();
+				else if (str == "create_va_config")
+					RunDlcCreateProj();
 				else if (str == "export_info")
 					ExportInfo();
 				else if (str == "export_analysis")
@@ -493,15 +495,21 @@ wxString ScriptProc::IncreaseNum(const wxString& str)
 	return tmp + digits + ext;
 }
 
-wxString ScriptProc::GetConfigFile(const wxString& str, const wxString& ext, const wxString& type)
+wxString ScriptProc::GetConfigFile(
+	const wxString& str,
+	const wxString& ext,
+	const wxString& type,
+	int mode)
 {
 	if (wxFileExists(str))
 		return str;
-
+	long style = wxFD_OPEN | wxFD_FILE_MUST_EXIST;
+	if (mode == 1)
+		style = wxFD_SAVE | wxFD_OVERWRITE_PROMPT;
 	return m_frame->ScriptDialog(
 		"Choose "+type+" file",
 		type+" file(*." + ext + ")|*." + ext,
-		wxFD_OPEN);
+		style);
 }
 
 void ScriptProc::RunNoiseReduction()
@@ -1681,7 +1689,7 @@ void ScriptProc::RunDlcVideoAnalyze()
 
 	wxString filename;
 	m_fconfig->Read("config", &filename);
-	filename = GetConfigFile(filename, "yaml", "Config");
+	filename = GetConfigFile(filename, "yaml", "Config", 0);
 	std::string fn = cur_vol->GetPath().ToStdString();
 	std::string cfg = filename.ToStdString();
 	if (fn.empty() || cfg.empty())
@@ -1739,6 +1747,34 @@ void ScriptProc::RunDlcGetRulers()
 	dlc->AddRulers(rhdl, toff + errs);
 	dlc->Exit();
 	dlcg->addSetValue(fn, true);
+}
+
+void ScriptProc::RunDlcCreateProj()
+{
+	if (!m_frame || !m_view)
+		return;
+	if (!TimeCondition())
+		return;
+	//always work on the selected volume
+	VolumeData* cur_vol = m_view->m_cur_vol;
+	if (!cur_vol) return;
+
+	flrd::PyDlc* dlc = glbin.get_add_python<flrd::PyDlc>("dlc");
+	if (!dlc)
+		return;
+	RulerHandler* rhdl = m_view->GetRulerHandler();
+	if (!rhdl)
+		return;
+
+	wxString filename;
+	m_fconfig->Read("config", &filename);
+	filename = GetConfigFile(filename, "yaml", "Config", 1);
+	dlc->SetConfigFile(filename.ToStdString());
+	std::string str = cur_vol->GetPath().ToStdString();
+	dlc->SetVideoFile(str);
+	std::filesystem::path p(str);
+	str = p.stem().string();
+	dlc->CreateConfigFile(str, "FluoRender", rhdl);
 }
 
 void ScriptProc::ExportInfo()

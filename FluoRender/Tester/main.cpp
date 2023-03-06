@@ -37,7 +37,9 @@ int main(int argc, char* argv[])
 
 	//TableTest();
 
-	PythonTest(argv[1], argv[2]);
+	//PythonTest1(argv[1], argv[2]);
+
+	PythonTest2(argv[1], argv[2]);
 
 	cout << "All done. Quit." << endl;
 	cin.get();
