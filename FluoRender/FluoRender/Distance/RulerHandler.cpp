@@ -1702,6 +1702,37 @@ int RulerHandler::Distance(int index, std::string filename)
 	return 1;
 }
 
+//get time points where keys exist
+bool RulerHandler::GetKeyFrames(std::set<size_t>& kf)
+{
+	if (!m_ruler_list)
+		return false;
+	if (m_ruler_list->empty())
+		return false;
+	kf.clear();
+
+	for (auto i : *m_ruler_list)
+	{
+		if (!i)
+			continue;
+		for (size_t j = 0; j < i->GetNumPoint(); ++j)
+		{
+			RulerPoint* p = i->GetRulerPoint(j);
+			if (!j)
+				continue;
+			size_t tn = p->GetTimeNum();
+			for (size_t k = 0; k < tn; ++k)
+			{
+				size_t t;
+				fluo::Point pp;
+				if (p->GetTimeAndPoint(k, t, pp))
+					kf.insert(t);
+			}
+		}
+	}
+	return !kf.empty();
+}
+
 RulerPoint* RulerHandler::get_closest_point(fluo::Point& p)
 {
 	if (!m_view)

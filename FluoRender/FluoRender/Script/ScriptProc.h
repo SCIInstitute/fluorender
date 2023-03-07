@@ -142,6 +142,7 @@ namespace flrd
 		void RunDlcVideoAnalyze();
 		void RunDlcGetRulers();
 		void RunDlcCreateProj();
+		void RunDlcLabel();
 
 		void ExportInfo();
 		void ExportTemplate();

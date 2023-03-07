@@ -68,6 +68,7 @@ namespace flrd
 		void CreateConfigFile(const std::string& prj_name,
 			const std::string& usr_name,
 			RulerHandler* rhdl);
+		void WriteHDF(RulerHandler* rhdl);
 		void Train();
 		//analysis
 		void AnalyzeVideo();
@@ -81,6 +82,9 @@ namespace flrd
 		std::string m_video_file;
 		std::string m_video_file_py;
 		std::string m_result_file;
+		std::string m_label_path;
+		std::string m_prj_name;
+		std::string m_usr_name;
 
 		bool isFloat(const std::string& someString)
 		{

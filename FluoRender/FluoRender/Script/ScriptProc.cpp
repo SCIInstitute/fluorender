@@ -165,6 +165,8 @@ int ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 					RunDlcGetRulers();
 				else if (str == "create_va_config")
 					RunDlcCreateProj();
+				else if (str == "create_va_label")
+					RunDlcLabel();
 				else if (str == "export_info")
 					ExportInfo();
 				else if (str == "export_analysis")
@@ -1775,6 +1777,21 @@ void ScriptProc::RunDlcCreateProj()
 	std::filesystem::path p(str);
 	str = p.stem().string();
 	dlc->CreateConfigFile(str, "FluoRender", rhdl);
+}
+
+void ScriptProc::RunDlcLabel()
+{
+	if (!TimeCondition())
+		return;
+
+	flrd::PyDlc* dlc = glbin.get_add_python<flrd::PyDlc>("dlc");
+	if (!dlc)
+		return;
+	RulerHandler* rhdl = m_view->GetRulerHandler();
+	if (!rhdl)
+		return;
+
+	dlc->WriteHDF(rhdl);
 }
 
 void ScriptProc::ExportInfo()

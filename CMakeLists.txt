@@ -241,6 +241,11 @@ include_directories(${Boost_INCLUDE_DIR})
 find_package(Python3 COMPONENTS Interpreter Development)
 include_directories(${Python3_INCLUDE_DIRS})
 
+#hdf5
+set(HDF5_USE_STATIC_LIBRARIES ON)
+find_package(HDF5 REQUIRED)
+include_directories(${HDF5_INCLUDE_DIRS})
+
 # JNI includes
 find_package(JNI REQUIRED)
 if (JNI_FOUND)
@@ -824,6 +829,7 @@ if(WIN32)
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES}
     ${ND2_LIBRARIES}
+    ${HDF5_LIBRARIES}
   )
   target_link_libraries(Tester
     secur32.lib
@@ -837,6 +843,7 @@ if(WIN32)
     ${ND2_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${OpenVR_LIBRARIES}
+    ${HDF5_LIBRARIES}
   )
 elseif(APPLE)
   target_link_libraries(FluoRender
@@ -851,6 +858,7 @@ elseif(APPLE)
     ${PNG_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${ND2_LIBRARIES}
+    ${HDF5_LIBRARIES}
   )
 else()
   target_link_libraries(FluoRender
@@ -866,6 +874,7 @@ else()
     ${PNG_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${ND2_LIBRARIES}
+    ${HDF5_LIBRARIES}
   )
 endif()
 

@@ -218,6 +218,9 @@ namespace flrd
 		bool GetRedistLength() { return m_redist_len; }
 		void SetRedistLength(bool val) { m_redist_len = val; }
 
+		//get time points where keys exist
+		bool GetKeyFrames(std::set<size_t>& kf);
+
 	private:
 		unsigned int m_group;
 		VRenderGLView *m_view;

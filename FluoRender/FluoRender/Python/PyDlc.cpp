@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <iomanip>
 #include <ctime>
+#include <hdf5.h>
 
 using namespace flrd;
 
@@ -230,12 +231,15 @@ void PyDlc::CreateConfigFile(
 	if (!std::filesystem::exists(p))
 		return;
 
+	m_prj_name = prj_name;
+	m_usr_name = m_usr_name;
+
 	std::ofstream cf;
 	cf.open(m_config_file, std::ofstream::out);
 
 	cf << "    # Project definitions (do not edit)" << std::endl;
-	cf << "Task: " << prj_name << std::endl;
-	cf << "scorer: " << usr_name << std::endl;
+	cf << "Task: " << m_prj_name << std::endl;
+	cf << "scorer: " << m_usr_name << std::endl;
 	auto t = std::time(nullptr);
 	auto tm = *std::localtime(&t);
 	cf << "date: " << std::put_time(&tm, "%b%d") << std::endl;
@@ -307,14 +311,50 @@ void PyDlc::CreateConfigFile(
 	child_path = p;
 	child_path.append("labeled-data");
 	std::filesystem::create_directory(child_path);
-	child_path.append(prj_name);
-	std::filesystem::create_directory(child_path);
+	child_path.append(m_prj_name);
+	std::filesystem::create_directory(child_path);//put extracted frames here
+	m_label_path = child_path.string();
 	child_path = p;
 	child_path.append("training-datasets");
 	std::filesystem::create_directory(child_path);
 	child_path = p;
 	child_path.append("videos");
 	std::filesystem::create_directory(child_path);
+}
+
+void PyDlc::WriteHDF(RulerHandler* rhdl)
+{
+	if (!rhdl)
+		return;
+	//get keyframes
+	std::set<size_t> keys;
+	if (!rhdl->GetKeyFrames(keys))
+		return;
+	size_t kn = keys.size();
+
+	hid_t file_id, group_id, data_id, dspace_id;
+	herr_t status;
+	hsize_t dims1[1];
+	//data
+	std::vector<char> cvals(kn * 2, 0);
+
+	//open a file
+	std::string fn = m_label_path + GETSLASHA() + "CollectedData_" + m_usr_name + ".h5";
+	file_id = H5Fcreate(fn.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+	//create keypoints group
+	group_id = H5Gcreate2(file_id, "/keypoints", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+	//axis0
+	//label0
+	dims1[0] = kn * 2;
+	dspace_id = H5Screate_simple(1, dims1, NULL);
+	data_id = H5Dcreate2(group_id, "axis0_label0", H5T_STD_I8LE, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+	status = H5Dwrite(data_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, cvals.data());
+	status = H5Dclose(data_id);
+
+	// Close the file
+	status = H5Fclose(file_id);
 }
 
 void PyDlc::Train()

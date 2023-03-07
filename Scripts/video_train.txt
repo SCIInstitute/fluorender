@@ -1,6 +1,9 @@
 [tasks]
-tasknum=1
+tasknum=2
 [tasks/task0]
 type=create_va_config
 time_mode=TM_FIRST_PRE
 conifg=""
+[tasks/task1]
+type=create_va_label
+time_mode=TM_LAST_POST
