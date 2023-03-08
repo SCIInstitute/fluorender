@@ -232,7 +232,7 @@ void PyDlc::CreateConfigFile(
 		return;
 
 	m_prj_name = prj_name;
-	m_usr_name = m_usr_name;
+	m_usr_name = usr_name;
 
 	std::ofstream cf;
 	cf.open(m_config_file, std::ofstream::out);
@@ -333,26 +333,69 @@ void PyDlc::WriteHDF(RulerHandler* rhdl)
 	size_t kn = keys.size();
 
 	hid_t file_id, group_id, data_id, dspace_id;
+	hid_t attr_id, aidc, aidi, aids, astype;
 	herr_t status;
 	hsize_t dims1[1];
 	//data
 	std::vector<char> cvals(kn * 2, 0);
+	std::string str;
+	aids = H5Screate(H5S_SCALAR);
+	astype = H5Tcopy(H5T_C_S1);
+	aidi = H5Screate(H5S_SCALAR);
+	int ival;
 
 	//open a file
 	std::string fn = m_label_path + GETSLASHA() + "CollectedData_" + m_usr_name + ".h5";
 	file_id = H5Fcreate(fn.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+	//attributes
+	H5Tset_size(astype, 5);
+	attr_id = H5Acreate2(file_id, "CLASS", astype, aids, H5P_DEFAULT, H5P_DEFAULT);
+	str = "GROUP";
+	status = H5Awrite(attr_id, astype, str.c_str());
+	status = H5Aclose(attr_id);
 
 	//create keypoints group
 	group_id = H5Gcreate2(file_id, "/keypoints", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+	//attributes
+	//class
+	H5Tset_size(astype, 5);
+	attr_id = H5Acreate(group_id, "CLASS", astype, aids, H5P_DEFAULT, H5P_DEFAULT);
+	str = "GROUP";
+	status = H5Awrite(attr_id, astype, str.c_str());
+	status = H5Aclose(attr_id);
+	//axis0_nlevels
+	attr_id = H5Acreate(group_id, "axis0_nlevels", H5T_NATIVE_INT, aidi, H5P_DEFAULT, H5P_DEFAULT);
+	ival = 3;
+	status = H5Awrite(attr_id, H5T_NATIVE_INT, &ival);
+	status = H5Aclose(attr_id);
+	//axis0_variety
+	H5Tset_size(astype, 5);
+	attr_id = H5Acreate(group_id, "axis0_variety", astype, aids, H5P_DEFAULT, H5P_DEFAULT);
+	str = "multi";
+	status = H5Awrite(attr_id, astype, str.c_str());
+	status = H5Aclose(attr_id);
+	//axis1_nlevels
+	attr_id = H5Acreate(group_id, "axis1_nlevels", H5T_NATIVE_INT, aidi, H5P_DEFAULT, H5P_DEFAULT);
+	ival = 3;
+	status = H5Awrite(attr_id, H5T_NATIVE_INT, &ival);
+	status = H5Aclose(attr_id);
+	//axis1_variety
+	H5Tset_size(astype, 5);
+	attr_id = H5Acreate(group_id, "axis1_variety", astype, aids, H5P_DEFAULT, H5P_DEFAULT);
+	str = "multi";
+	status = H5Awrite(attr_id, astype, str.c_str());
+	status = H5Aclose(attr_id);
 
 	//axis0
 	//label0
 	dims1[0] = kn * 2;
 	dspace_id = H5Screate_simple(1, dims1, NULL);
 	data_id = H5Dcreate2(group_id, "axis0_label0", H5T_STD_I8LE, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-	status = H5Dwrite(data_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, cvals.data());
+	status = H5Dwrite(data_id, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, cvals.data());
 	status = H5Dclose(data_id);
 
+	//close group
+	status = H5Gclose(group_id);
 	// Close the file
 	status = H5Fclose(file_id);
 }
