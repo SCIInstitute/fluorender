@@ -1781,17 +1781,108 @@ void ScriptProc::RunDlcCreateProj()
 
 void ScriptProc::RunDlcLabel()
 {
-	if (!TimeCondition())
+	if (!m_view)
 		return;
-
-	flrd::PyDlc* dlc = glbin.get_add_python<flrd::PyDlc>("dlc");
-	if (!dlc)
+	if (!TimeCondition())
 		return;
 	RulerHandler* rhdl = m_view->GetRulerHandler();
 	if (!rhdl)
 		return;
+	flrd::PyDlc* dlc = glbin.get_add_python<flrd::PyDlc>("dlc");
+	if (!dlc)
+		return;
 
-	dlc->WriteHDF(rhdl);
+	int curf = m_view->m_tseq_cur_num;
+	int endf = m_view->m_end_frame;
+	int fn = m_view->m_total_frames;
+	int temp = fn;
+	int fn_len = 0;
+	while (temp)
+	{
+		temp /= 10;
+		fn_len++;
+	}
+	//write frame
+	std::set<size_t> keys;
+	rhdl->GetKeyFrames(keys);
+	if (keys.find(size_t(curf)) != keys.end())
+	{
+		int vn = std::min(m_view->GetAllVolumeNum(), 3);
+		VolumeData* vd_rgb[3] = { 0, 0, 0 };
+		int nx, ny, nz;
+		for (int i = 0; i < vn; ++i)
+			vd_rgb[i] = m_view->GetAllVolumeData(i);
+
+		//get data
+		vd_rgb[0]->GetResolution(nx, ny, nz);
+		char* image = new char[nx*ny*3](0);
+		size_t isize = nx * ny;
+		char* datar = 0;
+		if (vd_rgb[0])
+			datar = (char*)(vd_rgb[0]->GetTexture()->get_nrrd(0)->data);
+		char* datag = 0;
+		if (vd_rgb[1])
+			datag = (char*)(vd_rgb[1]->GetTexture()->get_nrrd(0)->data);
+		char* datab = 0;
+		if (vd_rgb[2])
+			datab = (char*)(vd_rgb[2]->GetTexture()->get_nrrd(0)->data);
+		for (int i = 0; i < isize; ++i)
+		{
+			if (datar)
+				image[i * 3] = datar[i];
+			if (datag)
+				image[i * 3 + 1] = datag[i];
+			if (datab)
+				image[i * 3 + 2] = datab[i];
+		}
+
+		//get path
+		std::string filename = dlc->GetLabelPath();
+		std::ostringstream oss;
+		oss << std::setw(fn_len) << std::setfill('0') << curf;
+		filename = filename + GETSLASHA() + "img" + oss.str() + ".tif";
+
+		//write tiff
+		TIFF* out = TIFFOpen(filename.c_str(), "wb");
+		if (!out)
+			return;
+		TIFFSetField(out, TIFFTAG_IMAGEWIDTH, nx);
+		TIFFSetField(out, TIFFTAG_IMAGELENGTH, ny);
+		TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, 3);
+		TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 8);
+		TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+		TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+		TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+		if (VRenderFrame::GetCompression())
+			TIFFSetField(out, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
+		//dpi
+		TIFFSetField(out, TIFFTAG_XRESOLUTION, 72);
+		TIFFSetField(out, TIFFTAG_YRESOLUTION, 72);
+		TIFFSetField(out, TIFFTAG_RESOLUTIONUNIT, RESUNIT_INCH);
+
+		tsize_t linebytes = 3 * nx;
+		void* buf = NULL;
+		buf = _TIFFmalloc(linebytes);
+		for (uint32 row = 0; row < (uint32)ny; row++)
+		{
+			unsigned char* line = ((unsigned char*)image) + row * 3 * nx;
+			memcpy(buf, line, linebytes);
+			if (TIFFWriteScanline(out, buf, row, 0) < 0)
+				break;
+		}
+		TIFFClose(out);
+		if (buf)
+			_TIFFfree(buf);
+		if (image)
+			delete[]image;
+	}
+	
+	//write hdf
+	if (curf == endf)
+	{
+		dlc->SetFrameNumber(fn);
+		dlc->WriteHDF(rhdl);
+	}
 }
 
 void ScriptProc::ExportInfo()

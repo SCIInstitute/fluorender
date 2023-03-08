@@ -220,6 +220,9 @@ namespace flrd
 
 		//get time points where keys exist
 		bool GetKeyFrames(std::set<size_t>& kf);
+		size_t GetRulerPointNum();
+		bool GetRulerPointNames(std::vector<std::string>& names);
+		bool GetRulerPointCoords(std::vector<double>& coords);
 
 	private:
 		unsigned int m_group;

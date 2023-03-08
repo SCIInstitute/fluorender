@@ -331,71 +331,148 @@ void PyDlc::WriteHDF(RulerHandler* rhdl)
 	if (!rhdl->GetKeyFrames(keys))
 		return;
 	size_t kn = keys.size();
+	//get ruler point num
+	size_t rpn = rhdl->GetRulerPointNum();
+	size_t rpn2 = rpn * 2;
 
-	hid_t file_id, group_id, data_id, dspace_id;
-	hid_t attr_id, aidc, aidi, aids, astype;
-	herr_t status;
-	hsize_t dims1[1];
-	//data
-	std::vector<char> cvals(kn * 2, 0);
-	std::string str;
-	aids = H5Screate(H5S_SCALAR);
-	astype = H5Tcopy(H5T_C_S1);
-	aidi = H5Screate(H5S_SCALAR);
-	int ival;
+	//array data
+	std::vector<char> cvals;
 
 	//open a file
 	std::string fn = m_label_path + GETSLASHA() + "CollectedData_" + m_usr_name + ".h5";
-	file_id = H5Fcreate(fn.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+	hid_t file_id = H5Fcreate(fn.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 	//attributes
-	H5Tset_size(astype, 5);
-	attr_id = H5Acreate2(file_id, "CLASS", astype, aids, H5P_DEFAULT, H5P_DEFAULT);
-	str = "GROUP";
-	status = H5Awrite(attr_id, astype, str.c_str());
-	status = H5Aclose(attr_id);
+	hdf_write_attr_utf(file_id, "CLASS", u8"GROUP");
+	hdf_write_attr_utf(file_id, "PYTABLES_FORMAT_VERSION", u8"2.1");
+	hdf_write_attr_utf(file_id, "TITLE", u8"");
+	hdf_write_attr_utf(file_id, "VERSION", u8"1.0");
 
 	//create keypoints group
-	group_id = H5Gcreate2(file_id, "/keypoints", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+	hid_t group_id = H5Gcreate2(file_id, "/keypoints", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 	//attributes
 	//class
-	H5Tset_size(astype, 5);
-	attr_id = H5Acreate(group_id, "CLASS", astype, aids, H5P_DEFAULT, H5P_DEFAULT);
-	str = "GROUP";
-	status = H5Awrite(attr_id, astype, str.c_str());
-	status = H5Aclose(attr_id);
+	hdf_write_attr_utf(group_id, "CLASS", u8"GROUP");
+	//title
+	hdf_write_attr_utf(group_id, "TITLE", u8"");
+	//version
+	hdf_write_attr_utf(group_id, "VERSION", u8"1.0");
 	//axis0_nlevels
-	attr_id = H5Acreate(group_id, "axis0_nlevels", H5T_NATIVE_INT, aidi, H5P_DEFAULT, H5P_DEFAULT);
-	ival = 3;
-	status = H5Awrite(attr_id, H5T_NATIVE_INT, &ival);
-	status = H5Aclose(attr_id);
+	hdf_write_attr_int(group_id, "axis0_nlevels", 3);
 	//axis0_variety
-	H5Tset_size(astype, 5);
-	attr_id = H5Acreate(group_id, "axis0_variety", astype, aids, H5P_DEFAULT, H5P_DEFAULT);
-	str = "multi";
-	status = H5Awrite(attr_id, astype, str.c_str());
-	status = H5Aclose(attr_id);
+	hdf_write_attr_utf(group_id, "axis0_variety", u8"multi");
 	//axis1_nlevels
-	attr_id = H5Acreate(group_id, "axis1_nlevels", H5T_NATIVE_INT, aidi, H5P_DEFAULT, H5P_DEFAULT);
-	ival = 3;
-	status = H5Awrite(attr_id, H5T_NATIVE_INT, &ival);
-	status = H5Aclose(attr_id);
+	hdf_write_attr_int(group_id, "axis1_nlevels", 3);
 	//axis1_variety
-	H5Tset_size(astype, 5);
-	attr_id = H5Acreate(group_id, "axis1_variety", astype, aids, H5P_DEFAULT, H5P_DEFAULT);
-	str = "multi";
-	status = H5Awrite(attr_id, astype, str.c_str());
-	status = H5Aclose(attr_id);
+	hdf_write_attr_utf(group_id, "axis1_variety", u8"multi");
+	//block0_items_nlevels
+	hdf_write_attr_int(group_id, "block0_items_nlevels", 3);
+	//block0_items_variety
+	hdf_write_attr_utf(group_id, "block0_items_variety", u8"multi");
+	//encoding
+	hdf_write_attr_utf(group_id, "encoding", u8"UTF-8");
+	//errors
+	hdf_write_attr_utf(group_id, "errors", u8"strict");
+	//nblocks
+	hdf_write_attr_int(group_id, "nblocks", 1);
+	//ndim
+	hdf_write_attr_int(group_id, "ndim", 2);
+	//pandas_type
+	hdf_write_attr_utf(group_id, "pandas_type", u8"frame");
+	//pandas_version
+	hdf_write_attr_utf(group_id, "pandas_version", u8"0.15.2");
 
+	std::vector<char> vals(rpn2, 0);
+	std::vector<std::string> strs;
+	std::vector<double> coords;
 	//axis0
 	//label0
-	dims1[0] = kn * 2;
-	dspace_id = H5Screate_simple(1, dims1, NULL);
-	data_id = H5Dcreate2(group_id, "axis0_label0", H5T_STD_I8LE, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-	status = H5Dwrite(data_id, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, cvals.data());
-	status = H5Dclose(data_id);
+	hdf_write_array_char(group_id, "axis0_label0", vals);
+	//label1
+	for (size_t i = 0; i < rpn; ++i)
+		vals[i * 2] = vals[i * 2 + 1] = char(i);
+	hdf_write_array_char(group_id, "axis0_label1", vals);
+	//label2
+	for (size_t i = 0; i < rpn; ++i)
+	{
+		vals[i * 2] = 0;
+		vals[i * 2 + 1] = 1;
+	}
+	hdf_write_array_char(group_id, "axis0_label2", vals);
+	//level0
+	strs = {m_usr_name};
+	hdf_write_array_str(group_id, "axis0_level0",
+		"axis0_namescorer", u8"scorer", strs);
+	//level1
+	rhdl->GetRulerPointNames(strs);
+	hdf_write_array_str(group_id, "axis0_level1",
+		"axis0_namebodyparts", u8"bodyparts", strs);
+	//level2
+	strs = { "x", "y" };
+	hdf_write_array_str(group_id, "axis0_level2",
+		"axis0_namecoords", u8"coords", strs);
+	//axis1
+	//label0
+	vals = std::vector<char>(kn, 0);
+	hdf_write_array_char(group_id, "axis1_label0", vals);
+	//label1
+	hdf_write_array_char(group_id, "axis1_label1", vals);
+	//label2
+	for (size_t i = 0; i < kn; ++i)
+		vals[i] = i;
+	hdf_write_array_char(group_id, "axis1_label2", vals);
+	//level0
+	strs = { "labeled-data" };
+	hdf_write_array_str(group_id, "axis1_level0",
+		"axis1_nameNone", u8"N.", strs);
+	//level1
+	strs = { m_prj_name };
+	hdf_write_array_str(group_id, "axis1_level1",
+		"axis1_nameNone", u8"N.", strs);
+	//level2
+	strs.clear();
+	for (auto i : keys)
+	{
+		std::ostringstream oss;
+		oss << std::setw(m_fn_length) << std::setfill('0') << i;
+		std::string str = "img" + oss.str() + ".tif";
+		strs.push_back(str);
+	}
+	hdf_write_array_str(group_id, "axis1_level2",
+		"axis1_nameNone", u8"N.", strs);
+	//block0_items
+	//label0
+	vals = std::vector<char>(rpn2, 0);
+	hdf_write_array_char(group_id, "block0_items_label0", vals);
+	//label1
+	for (size_t i = 0; i < rpn; ++i)
+		vals[i * 2] = vals[i * 2 + 1] = char(i);
+	hdf_write_array_char(group_id, "block0_items_label1", vals);
+	//label2
+	for (size_t i = 0; i < rpn; ++i)
+	{
+		vals[i * 2] = 0;
+		vals[i * 2 + 1] = 1;
+	}
+	hdf_write_array_char(group_id, "block0_items_label2", vals);
+	//level0
+	strs = { m_usr_name };
+	hdf_write_array_str(group_id, "block0_items_level0",
+		"block0_items_namescorer", u8"scorer", strs);
+	//level1
+	rhdl->GetRulerPointNames(strs);
+	hdf_write_array_str(group_id, "block0_items_level1",
+		"block0_items_namebodyparts", u8"bodyparts", strs);
+	//level2
+	strs = { "x", "y" };
+	hdf_write_array_str(group_id, "block0_items_level2",
+		"block0_items_namecoords", u8"coords", strs);
+	//values
+	rhdl->GetRulerPointCoords(coords);
+	hdf_write_array2_double(group_id, "block0_values",
+		kn, rpn2, coords);
 
 	//close group
-	status = H5Gclose(group_id);
+	herr_t status = H5Gclose(group_id);
 	// Close the file
 	status = H5Fclose(file_id);
 }
@@ -403,4 +480,149 @@ void PyDlc::WriteHDF(RulerHandler* rhdl)
 void PyDlc::Train()
 {
 
+}
+
+bool PyDlc::hdf_write_attr_b8(hid_t item, const std::string& name, char cval)
+{
+	bool r = true;
+	herr_t status;
+	hid_t aidi = H5Screate(H5S_SCALAR);
+	hid_t attr_id = H5Acreate(item, name.c_str(), H5T_STD_B8LE, aidi, H5P_DEFAULT, H5P_DEFAULT);
+	status = H5Awrite(attr_id, H5T_STD_B8LE, &cval); r = r && (status >= 0);
+	status = H5Aclose(attr_id); r = r && (status >= 0);
+	status = H5Sclose(aidi); r = r && (status >= 0);
+	return r;
+}
+
+bool PyDlc::hdf_write_attr_int(hid_t item, const std::string& name, int ival)
+{
+	bool r = true;
+	herr_t status;
+	hid_t aidi = H5Screate(H5S_SCALAR);
+	hid_t attr_id = H5Acreate(item, name.c_str(), H5T_NATIVE_INT, aidi, H5P_DEFAULT, H5P_DEFAULT);
+	status = H5Awrite(attr_id, H5T_NATIVE_INT, &ival); r = r && (status >= 0);
+	status = H5Aclose(attr_id); r = r && (status >= 0);
+	status = H5Sclose(aidi); r = r && (status >= 0);
+	return r;
+}
+
+bool PyDlc::hdf_write_attr_utf(hid_t item, const std::string& name, const std::u8string& str)
+{
+	bool r = true;
+	herr_t status;
+	hid_t aids = H5Screate(H5S_SCALAR);
+	hid_t astype = H5Tcopy(H5T_C_S1);
+	H5Tset_cset(astype, H5T_CSET_UTF8);
+	H5Tset_size(astype, str.size());
+	hid_t attr_id = H5Acreate(item, name.c_str(), astype, aids, H5P_DEFAULT, H5P_DEFAULT);
+	status = H5Awrite(attr_id, astype, str.c_str()); r = r && (status >= 0);
+	status = H5Aclose(attr_id); r = r && (status >= 0);
+	status = H5Sclose(aids); r = r && (status >= 0);
+	status = H5Tclose(astype); r = r && (status >= 0);
+	return r;
+}
+
+bool PyDlc::hdf_write_array_char(hid_t group, const std::string& name, const std::vector<char>& vals)
+{
+	bool r = true;
+	herr_t status;
+	hsize_t dims1[1];
+	dims1[0] = vals.size();
+	hid_t dspace_id = H5Screate_simple(1, dims1, NULL);
+	hid_t data_id = H5Dcreate2(group, name.c_str(), H5T_STD_I8LE, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+	//attrs
+	//class
+	hdf_write_attr_utf(data_id, "CLASS", u8"ARRAY");
+	//flavor
+	hdf_write_attr_utf(data_id, "FLAVOR", u8"numpy");
+	//title
+	hdf_write_attr_utf(data_id, "TITLE", u8"");
+	//version
+	hdf_write_attr_utf(data_id, "VERSION", u8"2.4");
+	//transposed
+	hdf_write_attr_b8(data_id, "transposed", 1);
+
+	status = H5Dwrite(data_id, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, vals.data()); r = r && (status >= 0);
+	status = H5Dclose(data_id); r = r && (status >= 0);
+	status = H5Sclose(dspace_id); r = r && (status >= 0);
+	return r;
+}
+
+bool PyDlc::hdf_write_array_str(hid_t group,
+	const std::string& name,
+	const std::string& str1,
+	const std::u8string& str2,
+	const std::vector<std::string>& vals)
+{
+	bool r = true;
+	herr_t status;
+	hsize_t dims1[1];
+	dims1[0] = vals.size();
+	hid_t dspace_id = H5Screate_simple(1, dims1, NULL);
+	hid_t astype = H5Tcopy(H5T_C_S1);
+	H5Tset_cset(astype, H5T_CSET_ASCII);
+	size_t mx = 0;
+	for (auto i : vals)
+		mx = std::max(mx, i.size());
+	H5Tset_size(astype, mx);
+	hid_t data_id = H5Dcreate2(group, name.c_str(), astype, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+	//attrs
+	//class
+	hdf_write_attr_utf(data_id, "CLASS", u8"ARRAY");
+	//flavor
+	hdf_write_attr_utf(data_id, "FLAVOR", u8"numpy");
+	//title
+	hdf_write_attr_utf(data_id, "TITLE", u8"");
+	//version
+	hdf_write_attr_utf(data_id, "VERSION", u8"2.4");
+	//str1
+	hdf_write_attr_utf(data_id, str1, str2);
+	//kind
+	hdf_write_attr_utf(data_id, "kind", u8"string");
+	//name
+	hdf_write_attr_utf(data_id, "name", str2);
+	//transposed
+	hdf_write_attr_b8(data_id, "transposed", 1);
+
+	char* raw = new char[mx*vals.size()](0);
+	size_t c = 0;
+	for (auto i : vals)
+	{
+		memcpy(raw + c, i.c_str(), i.size());
+		c += mx;
+	}
+	status = H5Dwrite(data_id, astype, H5S_ALL, H5S_ALL, H5P_DEFAULT, raw); r = r && (status >= 0);
+	delete[] raw;
+	status = H5Dclose(data_id); r = r && (status >= 0);
+	status = H5Sclose(dspace_id); r = r && (status >= 0);
+	status = H5Tclose(astype); r = r && (status >= 0);
+	return r;
+}
+
+bool PyDlc::hdf_write_array2_double(hid_t group, const std::string& name,
+	int nx, int ny, const std::vector<double>& vals)
+{
+	bool r = true;
+	herr_t status;
+	hsize_t dims2[2];
+	dims2[0] = nx;
+	dims2[1] = ny;
+	hid_t dspace_id = H5Screate_simple(2, dims2, NULL);
+	hid_t data_id = H5Dcreate2(group, name.c_str(), H5T_IEEE_F64LE, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+	//attrs
+	//class
+	hdf_write_attr_utf(data_id, "CLASS", u8"ARRAY");
+	//flavor
+	hdf_write_attr_utf(data_id, "FLAVOR", u8"numpy");
+	//title
+	hdf_write_attr_utf(data_id, "TITLE", u8"");
+	//version
+	hdf_write_attr_utf(data_id, "VERSION", u8"2.4");
+	//transposed
+	hdf_write_attr_b8(data_id, "transposed", 1);
+
+	status = H5Dwrite(data_id, H5T_IEEE_F64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, vals.data()); r = r && (status >= 0);
+	status = H5Dclose(data_id); r = r && (status >= 0);
+	status = H5Sclose(dspace_id); r = r && (status >= 0);
+	return r;
 }

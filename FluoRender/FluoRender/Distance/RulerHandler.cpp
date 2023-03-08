@@ -1733,6 +1733,85 @@ bool RulerHandler::GetKeyFrames(std::set<size_t>& kf)
 	return !kf.empty();
 }
 
+size_t RulerHandler::GetRulerPointNum()
+{
+	if (!m_ruler_list)
+		return 0;
+	if (m_ruler_list->empty())
+		return 0;
+
+	size_t sum = 0;
+	for (auto i : *m_ruler_list)
+	{
+		if (!i)
+			continue;
+		sum += i->GetNumPoint();
+	}
+	return sum;
+}
+
+bool RulerHandler::GetRulerPointNames(std::vector<std::string>& names)
+{
+	if (!m_ruler_list)
+		return false;
+	if (m_ruler_list->empty())
+		return false;
+
+	names.clear();
+	for (auto i : *m_ruler_list)
+	{
+		if (!i)
+			continue;
+		int rpn = i->GetNumPoint();
+		std::string name = i->GetName().ToStdString();
+		std::string str;
+		if (rpn == 1)
+		{
+			names.push_back(name);
+		}
+		else if (rpn > 1)
+		{
+			for (size_t j = 0; j < rpn; ++j)
+			{
+				str = name + "_" + std::to_string(j + 1);
+				names.push_back(str);
+			}
+		}
+	}
+	return true;
+}
+
+bool RulerHandler::GetRulerPointCoords(std::vector<double>& coords)
+{
+	if (!m_ruler_list)
+		return false;
+	if (m_ruler_list->empty())
+		return false;
+
+	std::set<size_t> kf;
+	GetKeyFrames(kf);
+	if (kf.empty())
+		return false;
+
+	coords.clear();
+	for (auto t : kf)
+	{
+		for (auto i : *m_ruler_list)
+		{
+			if (!i)
+				continue;
+			i->SetWorkTime(t);
+			for (int k = 0; k < i->GetNumPoint(); ++k)
+			{
+				fluo::Point p = i->GetPoint(k);
+				coords.push_back(p.x());
+				coords.push_back(p.y());
+			}
+		}
+	}
+	return true;
+}
+
 RulerPoint* RulerHandler::get_closest_point(fluo::Point& p)
 {
 	if (!m_view)

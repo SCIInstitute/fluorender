@@ -64,6 +64,21 @@ namespace flrd
 			m_video_file_py = m_video_file;
 #endif
 		}
+		void SetFrameNumber(int n)
+		{
+			m_frame_num = n;
+			m_fn_length = 0;
+			int temp = n;
+			while (temp)
+			{
+				temp /= 10;
+				m_fn_length++;
+			}
+		}
+		std::string GetLabelPath()
+		{
+			return m_label_path;
+		}
 		//train
 		void CreateConfigFile(const std::string& prj_name,
 			const std::string& usr_name,
@@ -85,6 +100,8 @@ namespace flrd
 		std::string m_label_path;
 		std::string m_prj_name;
 		std::string m_usr_name;
+		int m_frame_num;
+		int m_fn_length;
 
 		bool isFloat(const std::string& someString)
 		{
@@ -177,6 +194,21 @@ namespace flrd
 				base.pop_back();
 			return base;
 		}
+
+		typedef int64_t hid_t;
+		bool hdf_write_attr_b8(hid_t item, const std::string& name, char cval);
+		bool hdf_write_attr_int(hid_t item, const std::string& name, int ival);
+		bool hdf_write_attr_utf(hid_t item, const std::string& name, const std::u8string& str);
+		bool hdf_write_array_char(hid_t group, const std::string& name, const std::vector<char>& vals);
+		bool hdf_write_array_str(hid_t group,
+			const std::string& name,
+			const std::string& str1,
+			const std::u8string& str2,
+			const std::vector<std::string>& vals);
+		bool hdf_write_array2_double(hid_t group,
+			const std::string& name,
+			int nx, int ny,
+			const std::vector<double>& vals);
 	};
 }
 

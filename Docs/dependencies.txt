@@ -1,0 +1,4 @@
+Mac:
+otool -L <thebinary>
+Win
+dumpbin /dependents <thebinary>
