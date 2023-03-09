@@ -79,12 +79,15 @@ namespace flrd
 		{
 			return m_label_path;
 		}
+		std::string GetConfigFile()
+		{
+			return m_config_file_py;
+		}
 		//train
 		void CreateConfigFile(const std::string& prj_name,
 			const std::string& usr_name,
 			RulerHandler* rhdl);
 		void WriteHDF(RulerHandler* rhdl);
-		void Train();
 		//analysis
 		void AnalyzeVideo();
 		bool GetResultFile();

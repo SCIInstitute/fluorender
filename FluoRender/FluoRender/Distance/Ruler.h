@@ -330,7 +330,7 @@ namespace flrd
 		int get_nb(size_t t, size_t& prt, size_t& nxt)//get previous and next
 		{
 			if (m_tp.empty())
-				return false;
+				return 0;
 
 			prt = -1; nxt = -1;//init
 			for (auto& i : m_tp)
@@ -339,9 +339,10 @@ namespace flrd
 				if (iv < t)
 					prt = iv;
 				if (iv > t)
+				{
 					nxt = iv;
-				if (prt != -1 && nxt != -1)
 					break;
+				}
 			}
 			return int(prt != -1) | (int(nxt != -1) << 1);
 		}

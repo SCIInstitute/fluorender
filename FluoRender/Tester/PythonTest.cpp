@@ -5,14 +5,22 @@
 
 void PythonTest0()
 {
-	wxString cmd;
-	cmd = "python -c \"exec('";
+	int displayiters = 1000;
+	int maxiters = 1;
+	maxiters *= displayiters;
+	int saveiters = maxiters / 2;
+	wxString cmd = "python -c \"";
 	cmd += "import deeplabcut\n";
-	//cmd += "deeplabcut.analyze_videos(";
-	//cmd += "\"E:\\\\DATA\\\\Holly\\\\MouseTracking\\\\test-nb-2023-01-30\\\\config.yaml\",";
-	//cmd += "\"E:\\\\DATA\\\\Holly\\\\MouseTracking\\\\videos\\\\10June2019_M_P119_GAD2-Cre-GCaMP5G_01L.mp4\",";
-	//cmd += "save_as_csv=True)\n";
-	cmd += "')\"";
+	cmd += "deeplabcut.create_training_dataset(\\\"";
+	cmd += "E:\\\\DATA\\\\Holly\\\\MouseTracking\\\\test02\\\\config.yaml";
+	cmd += "\\\", augmenter_type='imgaug')\n";
+	cmd += "deeplabcut.train_network(\\\"";
+	cmd += "E:\\\\DATA\\\\Holly\\\\MouseTracking\\\\test02\\\\config.yaml";
+	cmd += "\\\", ";
+	cmd += "displayiters=" + std::to_string(displayiters) + ", ";
+	cmd += "saveiters=" + std::to_string(saveiters) + ", ";
+	cmd += "maxiters=" + std::to_string(maxiters) + ")\n";
+	cmd += "print('Done. Quit.')\"";
 	wxExecute(cmd);
 }
 

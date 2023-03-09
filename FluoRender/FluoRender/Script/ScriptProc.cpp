@@ -1877,11 +1877,36 @@ void ScriptProc::RunDlcLabel()
 			delete[]image;
 	}
 	
-	//write hdf
 	if (curf == endf)
 	{
+		//write hdf
 		dlc->SetFrameNumber(fn);
 		dlc->WriteHDF(rhdl);
+
+		int displayiters = 1000;
+		int maxiters = 100;
+		m_fconfig->Read("maxiters", &maxiters, 100);
+		maxiters *= displayiters;
+		int saveiters = maxiters / 2;
+		//start training
+		std::string config_file = dlc->GetConfigFile();
+		wxString cmd = "python -c \"";
+		cmd += "print('START TRAINING WITH DEEPLABCUT. FLUORENDER CAN BE CLOSED.')\n";
+		cmd += "import deeplabcut\n";
+		cmd += "deeplabcut.create_training_dataset(\\\"";
+		cmd += config_file;
+		cmd += "\\\", augmenter_type='imgaug')\n";
+		cmd += "deeplabcut.train_network(\\\"";
+		cmd += config_file;
+		cmd += "\\\", ";
+		cmd += "displayiters=" + std::to_string(displayiters) + ", ";
+		cmd += "saveiters=" + std::to_string(saveiters) + ", ";
+		cmd += "maxiters=" + std::to_string(maxiters) + ")\n";
+		cmd += "print('Done. Quit.')\"";
+		m_frame->GetMovieView()->HoldRun();
+		wxExecute(cmd);
+		m_frame->GetMovieView()->ResumeRun();
+
 	}
 }
 

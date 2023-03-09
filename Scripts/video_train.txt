@@ -7,3 +7,4 @@ conifg=""
 [tasks/task1]
 type=create_va_label
 time_mode=TM_ALL_POST
+maxiters=10

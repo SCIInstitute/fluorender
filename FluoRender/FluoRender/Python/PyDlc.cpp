@@ -326,6 +326,10 @@ void PyDlc::WriteHDF(RulerHandler* rhdl)
 {
 	if (!rhdl)
 		return;
+	if (m_label_path.empty() ||
+		m_usr_name.empty() ||
+		m_prj_name.empty())
+		return;
 	//get keyframes
 	std::set<size_t> keys;
 	if (!rhdl->GetKeyFrames(keys))
@@ -475,11 +479,6 @@ void PyDlc::WriteHDF(RulerHandler* rhdl)
 	herr_t status = H5Gclose(group_id);
 	// Close the file
 	status = H5Fclose(file_id);
-}
-
-void PyDlc::Train()
-{
-
 }
 
 bool PyDlc::hdf_write_attr_b8(hid_t item, const std::string& name, char cval)
