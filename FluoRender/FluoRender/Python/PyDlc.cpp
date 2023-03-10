@@ -239,6 +239,7 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 		outf << "time_offset," << toff << std::endl;
 		std::ostream_iterator<char> output_iterator(outf, "\n");
 		std::copy(std::begin(buffer), std::end(buffer), output_iterator);
+		outf.close();
 	}
 	return true;
 }
@@ -293,7 +294,7 @@ void PyDlc::CreateConfigFile(
 	m_usr_name = usr_name;
 
 	std::ofstream cf;
-	cf.open(m_config_file, std::ofstream::out);
+	OutputStreamOpen(cf, m_config_file);
 
 	cf << "    # Project definitions (do not edit)" << std::endl;
 	cf << "Task: " << m_prj_name << std::endl;
