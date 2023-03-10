@@ -119,6 +119,7 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 	if (!f.good())
 		return false;
 
+	bool has_toff = false;
 	std::string line;
 	bool start = false;
 	std::vector<std::string> props;
@@ -133,6 +134,13 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 		std::vector<std::string> entry;
 		while (std::getline(s, item, ','))
 			entry.push_back(item);
+
+		if (entry[0] == "time_offset")
+		{
+			has_toff = true;
+			toff = std::stoi(entry[1]);
+			continue;
+		}
 
 		bool all_float = true;
 		for (auto& i : entry)
@@ -214,11 +222,52 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 
 		ln++;
 	}
+	f.close();
 
+	if (toff > 0 && !has_toff)
+	{
+		//append info to the head
+		std::ifstream inf(m_result_file);
+		std::streamsize size = inf.tellg();
+		inf.seekg(0, std::ios::beg);
+		std::vector<char> buffer(size);
+		if (!inf.read(buffer.data(), size))
+			return true;
+		inf.close();
+		std::ofstream outf;
+		OutputStreamOpen(outf, m_result_file);
+		outf << "time_offset," << toff << std::endl;
+		std::ostream_iterator<char> output_iterator(outf, "\n");
+		std::copy(std::begin(buffer), std::end(buffer), output_iterator);
+	}
 	return true;
 }
 
 //training
+std::string PyDlc::GetTrainCmd(int maxiters)
+{
+	std::string cmd;
+	int displayiters = 1000;
+	maxiters *= displayiters;
+	int saveiters = maxiters;
+	//start training
+	cmd = "python -c \"";
+	cmd += "print('START TRAINING WITH DEEPLABCUT. FLUORENDER CAN BE CLOSED.')\n";
+	cmd += "import deeplabcut\n";
+	cmd += "deeplabcut.create_training_dataset(\\\"";
+	cmd += m_config_file_py;
+	cmd += "\\\", augmenter_type='imgaug')\n";
+	cmd += "deeplabcut.train_network(\\\"";
+	cmd += m_config_file_py;
+	cmd += "\\\", ";
+	cmd += "displayiters=" + std::to_string(displayiters) + ", ";
+	cmd += "saveiters=" + std::to_string(saveiters) + ", ";
+	cmd += "maxiters=" + std::to_string(maxiters) + ")\n";
+	cmd += "wait=input('DONE. QUIT.')\"";
+
+	return cmd;
+}
+
 void PyDlc::CreateConfigFile(
 	const std::string& prj_name,
 	const std::string& usr_name,
@@ -227,7 +276,16 @@ void PyDlc::CreateConfigFile(
 	std::filesystem::path p = m_config_file;
 	p = p.parent_path();
 	if (!std::filesystem::exists(p))
-		std::filesystem::create_directory(p);
+	{
+		try
+		{
+			std::filesystem::create_directory(p);
+		}
+		catch (...)
+		{
+			return;
+		}
+	}
 	if (!std::filesystem::exists(p))
 		return;
 

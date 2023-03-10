@@ -84,6 +84,7 @@ namespace flrd
 			return m_config_file_py;
 		}
 		//train
+		std::string GetTrainCmd(int maxiters);
 		void CreateConfigFile(const std::string& prj_name,
 			const std::string& usr_name,
 			RulerHandler* rhdl);
