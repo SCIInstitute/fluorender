@@ -228,17 +228,22 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 	{
 		//append info to the head
 		std::ifstream inf(m_result_file);
+		if (!inf.good())
+			return true;
+		inf.seekg(0, inf.end);
 		std::streamsize size = inf.tellg();
-		inf.seekg(0, std::ios::beg);
+		inf.seekg(0, inf.beg);
 		std::vector<char> buffer(size);
 		if (!inf.read(buffer.data(), size))
 			return true;
 		inf.close();
 		std::ofstream outf;
 		OutputStreamOpen(outf, m_result_file);
+		if (!outf.good())
+			return true;
 		outf << "time_offset," << toff << std::endl;
-		std::ostream_iterator<char> output_iterator(outf, "\n");
-		std::copy(std::begin(buffer), std::end(buffer), output_iterator);
+		std::copy(std::begin(buffer), std::end(buffer),
+			std::ostream_iterator<char>(outf, "\n"));
 		outf.close();
 	}
 	return true;
