@@ -1815,7 +1815,7 @@ void ScriptProc::RunDlcLabel()
 
 		//get data
 		vd_rgb[0]->GetResolution(nx, ny, nz);
-		char* image = new char[nx*ny*3](0);
+		char* image = new char[nx*ny*3]();
 		size_t isize = nx * ny;
 		char* datar = 0;
 		if (vd_rgb[0])

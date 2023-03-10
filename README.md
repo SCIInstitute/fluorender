@@ -76,7 +76,7 @@ Building FluoRender
    
    * <code>cd mybuild</code>
    
-   * <code>../configure --disable-shared --enable-macosx_arch=x86_64 --with-cocoa --with-macosx-version-min=10.11 --enable-cxx11 --with-cxx=11 --enable-stl --enable-std_containers --enable-std_iostreams --enable-std_string --enable-std_string_conv_in_wxstring --with-libpng=builtin --with-libtiff=builtin --with-libjpeg=builtin --with-zlib=builtin</code>
+   * <code>../configure --disable-shared --enable-macosx_arch=x86_64 --with-cocoa --with-macosx-version-min=10.15 --enable-cxx11 --with-cxx=11 --enable-stl --enable-std_containers --enable-std_iostreams --enable-std_string --enable-std_string_conv_in_wxstring --with-libpng=builtin --with-libtiff=builtin --with-libjpeg=builtin --with-zlib=builtin</code>
    
    * <code>make</code>
 
@@ -90,7 +90,7 @@ Building FluoRender
 
 4) Get homebrew, libtiff, and freetype
 
-   * <code>ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"</code>
+   * <code>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</code>
    
    * <code>brew install libtiff</code>
 

@@ -647,7 +647,7 @@ bool PyDlc::hdf_write_array_str(hid_t group,
 	//transposed
 	hdf_write_attr_b8(data_id, "transposed", 1);
 
-	char* raw = new char[mx*vals.size()](0);
+	char* raw = new char[mx*vals.size()]();
 	size_t c = 0;
 	for (auto i : vals)
 	{
