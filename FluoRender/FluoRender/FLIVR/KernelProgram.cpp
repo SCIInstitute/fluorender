@@ -163,6 +163,8 @@ namespace flvr
 		CLPlatform* platform = &(device_list_[platform_id_]);
 		if (!platform)
 			return;
+		if (platform->devices.empty())
+			return;
 #ifdef _WIN32
 		properties[5] = (cl_context_properties)(platform->id);
 #else
