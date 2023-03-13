@@ -268,7 +268,7 @@ double ND2Reader::GetExcitationWavelength(int chan)
 Nrrd* ND2Reader::Convert(int t, int c, bool get_max)
 {
 	Nrrd *data = 0;
-#ifdef _WIN32
+
 	LIMCWSTR filename = m_path_name.c_str();
 	LIMFILEHANDLE h = Lim_FileOpenForRead(filename);
 	if (h == nullptr)
@@ -320,7 +320,7 @@ Nrrd* ND2Reader::Convert(int t, int c, bool get_max)
 
 	Lim_FileClose(h);
 	m_cur_time = t;
-#endif
+
 	return data;
 }
 
