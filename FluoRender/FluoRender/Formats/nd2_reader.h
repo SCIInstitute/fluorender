@@ -28,9 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _ND2_READER_H_
 #define _ND2_READER_H_
 
-#ifdef _WIN32
-#include <Nd2ReadSdk.h>
-#endif
 #include <base_reader.h>
 #include <vector>
 #include <string>
@@ -167,21 +164,15 @@ private:
 		}
 		return 0;
 	}
-#ifdef _WIN32
+
+	typedef void* LIMFILEHANDLE;
+	typedef char* LIMSTR;
 	void ReadSequences(LIMFILEHANDLE h);
 	void ReadAttributes(LIMFILEHANDLE h);
 	void ReadTextInfo(LIMFILEHANDLE h);
 	void ReadMetadata(LIMFILEHANDLE h);
 	void GetFramePos(LIMSTR fmd, FrameInfo& frame);
 	bool ReadChannel(LIMFILEHANDLE h, int t, int c, void* val);
-#else
-	void ReadSequences(void* h);
-	void ReadAttributes(void* h);
-	void ReadTextInfo(void* h);
-	void ReadMetadata(void* h);
-	void GetFramePos(void* fmd, FrameInfo& frame);
-	bool ReadChannel(void* h, int t, int c, void* val);
-#endif
 };
 
 #endif//_ND2_READER_H_

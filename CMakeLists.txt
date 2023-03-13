@@ -168,6 +168,7 @@ add_definitions(-DID_SER_NUM=ID_DPI+1)
 
 # static compile
 add_definitions(-DSTATIC_COMPILE)
+add_definitions(-DLX_STATIC_LINKING)
 
 # teem required definitions
 add_definitions(-DTEEM_DIO=0)
@@ -492,11 +493,9 @@ endif()
 #nikon
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/nd2/include)
 if(WIN32)
-	if(${ARCHITECTURE} MATCHES 64)
-		file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/*.lib)
-	endif()
+  file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/*.lib)
 elseif(APPLE)
-   file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/*.dylib)
+  file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/*.a)
 endif()
 
 # freetype
@@ -956,20 +955,6 @@ endif()
 
 # nd2
 if(WIN32)
-add_custom_command(TARGET FluoRender POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy
-	"${FluoRender_SOURCE_DIR}/FluoRender/nd2/bin/limfile.dll"
-	"$<TARGET_FILE_DIR:FluoRender>"
-	COMMAND ${CMAKE_COMMAND} -E copy
-	"${FluoRender_SOURCE_DIR}/FluoRender/nd2/bin/nd2readsdk.dll"
-	"$<TARGET_FILE_DIR:FluoRender>"
-	COMMAND ${CMAKE_COMMAND} -E copy
-	"${FluoRender_SOURCE_DIR}/FluoRender/nd2/bin/tiff.dll"
-	"$<TARGET_FILE_DIR:FluoRender>"
-	COMMAND ${CMAKE_COMMAND} -E copy
-	"${FluoRender_SOURCE_DIR}/FluoRender/nd2/bin/zlib1.dll"
-	"$<TARGET_FILE_DIR:FluoRender>"
-	)
 elseif(APPLE)
 add_custom_command(TARGET FluoRender POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy

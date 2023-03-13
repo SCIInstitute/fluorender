@@ -26,9 +26,90 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "nd2_reader.h"
-#include <json.hpp>
 #include <compatibility.h>
 #include <stdio.h>
+#include <json.hpp>
+#ifdef _DEBUG
+typedef char                     LIMCHAR;
+typedef LIMCHAR*                 LIMSTR;
+typedef LIMCHAR const*           LIMCSTR;
+typedef wchar_t                  LIMWCHAR;
+typedef LIMWCHAR*                LIMWSTR;
+typedef LIMWCHAR const*          LIMCWSTR;
+typedef unsigned int             LIMUINT;
+typedef unsigned long long       LIMUINT64;
+typedef size_t                   LIMSIZE;
+typedef int                      LIMINT;
+typedef int                      LIMBOOL;
+typedef int                      LIMRESULT;
+struct _LIMPICTURE
+{
+	LIMUINT     uiWidth;
+	LIMUINT     uiHeight;
+	LIMUINT     uiBitsPerComp;
+	LIMUINT     uiComponents;
+	LIMSIZE     uiWidthBytes;
+	LIMSIZE     uiSize;
+	void* pImageData;
+};
+typedef struct _LIMPICTURE LIMPICTURE; //!< Picture description and data pointer
+typedef void* LIMFILEHANDLE;
+LIMFILEHANDLE Lim_FileOpenForRead(LIMCWSTR wszFileName)
+{
+	return 0;
+}
+void Lim_FileClose(LIMFILEHANDLE hFile)
+{
+}
+LIMRESULT Lim_FileGetImageData(LIMFILEHANDLE hFile, LIMUINT uiSeqIndex, LIMPICTURE* pPicture)
+{
+	return 0;
+}
+LIMSIZE Lim_InitPicture(LIMPICTURE* pPicture, LIMUINT width, LIMUINT height, LIMUINT bpc, LIMUINT components)
+{
+	return 0;
+}
+void Lim_DestroyPicture(LIMPICTURE* pPicture)
+{
+}
+LIMSTR Lim_FileGetAttributes(LIMFILEHANDLE hFile)
+{
+	return 0;
+}
+LIMSTR Lim_FileGetTextinfo(LIMFILEHANDLE hFile)
+{
+	return 0;
+}
+void Lim_FileFreeString(LIMSTR str)
+{
+}
+LIMSTR Lim_FileGetMetadata(LIMFILEHANDLE hFile)
+{
+	return 0;
+}
+LIMSIZE Lim_FileGetCoordSize(LIMFILEHANDLE hFile)
+{
+	return 0;
+}
+LIMUINT Lim_FileGetSeqCount(LIMFILEHANDLE hFile)
+{
+	return 0;
+}
+LIMUINT Lim_FileGetCoordInfo(LIMFILEHANDLE hFile, LIMUINT coord, LIMSTR type, LIMSIZE maxTypeSize)
+{
+	return 0;
+}
+LIMSIZE Lim_FileGetCoordsFromSeqIndex(LIMFILEHANDLE hFile, LIMUINT seqIdx, LIMUINT* coords, LIMSIZE maxCoordCount)
+{
+	return 0;
+}
+LIMSTR Lim_FileGetFrameMetadata(LIMFILEHANDLE hFile, LIMUINT uiSeqIndex)
+{
+	return 0;
+}
+#else
+#include <Nd2ReadSdk.h>
+#endif
 
 ND2Reader::ND2Reader()
 {
@@ -85,7 +166,6 @@ void ND2Reader::SetFile(wstring &file)
 
 int ND2Reader::Preprocess()
 {
-#ifdef _WIN32
 	LIMCWSTR filename = m_path_name.c_str();
 	LIMFILEHANDLE h = Lim_FileOpenForRead(filename);
 	if (h == nullptr)
@@ -105,9 +185,6 @@ int ND2Reader::Preprocess()
 
 	Lim_FileClose(h);
 	return READER_OK;
-#else
-	return READER_OPEN_FAIL;
-#endif
 }
 
 void ND2Reader::SetSliceSeq(bool ss)
@@ -303,7 +380,6 @@ void ND2Reader::AddFrameInfo(FrameInfo &frame)
 	chaninfo->chann.push_back(frame);
 }
 
-#ifdef _WIN32
 bool ND2Reader::ReadChannel(LIMFILEHANDLE h, int t, int c, void* val)
 {
 	ChannelInfo* cinfo = GetChaninfo(t, 0);
@@ -661,34 +737,3 @@ void ND2Reader::GetFramePos(LIMSTR fmd, FrameInfo& frame)
 		frame.ysize = stoi(y);
 	}
 }
-#else
-void ND2Reader::ReadSequences(void* h)
-{
-
-}
-
-void ND2Reader::ReadAttributes(void* h)
-{
-
-}
-
-void ND2Reader::ReadTextInfo(void* h)
-{
-
-}
-
-void ND2Reader::ReadMetadata(void* h)
-{
-
-}
-
-void ND2Reader::GetFramePos(void* fmd, FrameInfo& frame)
-{
-
-}
-
-bool ND2Reader::ReadChannel(void* h, int t, int c, void* val)
-{
-	return false;
-}
-#endif
