@@ -456,39 +456,35 @@ void ND2Reader::ReadTextInfo(LIMFILEHANDLE h)
 			str = it.value();
 			//search for wavelengths
 			size_t pos = 0, pos2 = 0, pt = 0;
+			pos = str.find("Plane #", pos);
+			if (pos == std::string::npos)
+				break;
+			pt = str.find(":", pos);
+			if (pt == std::string::npos)
+				break;
+			plane = str.substr(pos + 7, pt - pos - 7);//channel number
+			pos2 = str.find("Plane #", pos + 5);
+			if (pos2 == std::string::npos)
+				pos2 = str.length() - 1;
+			int c = 0;
 			do
 			{
-				pos = str.find("Plane #", pos);
-				if (pos == std::string::npos)
-					break;
-				pt = str.find(":", pos);
-				if (pt == std::string::npos)
-					break;
-				plane = str.substr(pos + 7, pt - pos - 7);//channel number
-				pos2 = str.find("Plane #", pos + 5);
-				if (pos2 == std::string::npos)
-					pos2 = str.length() - 1;
-				pos = str.find("; On", pos);
-				bool transmit = false;
-				if (pos > pos2 ||
-					pos == std::string::npos)
-					transmit = true;
-				if (!transmit)
+				pos = str.find("{Laser Wavelength}: ", pos);
+				if (pos != std::string::npos &&
+					pos < pos2)
 				{
-					pos = str.rfind("ExW:", pos);
-					if (pos == std::string::npos)
-						break;
-					pt = str.find(";", pos);
-					if (pt == std::string::npos)
-						break;
-					exw = str.substr(pos + 4, pt - pos - 4);//wavelength value
+					pt = str.find("\t", pos);
+					exw = str.substr(pos + 20, pt - pos - 20);
+					WavelengthInfo winfo;
+					winfo.chan_num = c;
+					winfo.wavelength = std::stod(exw);
+					m_excitation_wavelength_list.push_back(winfo);
+					c++;
+					pos = pt;
 				}
-				WavelengthInfo winfo;
-				winfo.chan_num = std::stoi(plane)-1;
-				winfo.wavelength = transmit ? -1 : std::stod(exw);
-				m_excitation_wavelength_list.push_back(winfo);
-				pos = pos2 - 1;
-			} while (pos != std::string::npos);
+				else
+					break;
+			} while (pos < pos2);
 			break;
 		}
 	}
