@@ -953,22 +953,6 @@ add_custom_command(TARGET FluoRender POST_BUILD
 	"$<TARGET_FILE_DIR:FluoRender>")
 endif()
 
-# nd2
-if(WIN32)
-elseif(APPLE)
-add_custom_command(TARGET FluoRender POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy
-	"${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/libNd2File.dylib"
-	"$<TARGET_FILE_DIR:FluoRender>"
-	COMMAND ${CMAKE_COMMAND} -E copy
-	"${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/libNd2ReadSdk.dylib"
-	"$<TARGET_FILE_DIR:FluoRender>"
-	)
-add_custom_command(TARGET FluoRender POST_BUILD COMMAND 
-    ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/"
-    $<TARGET_FILE:FluoRender>)
-endif()
-
 # make the Executable dir
 if(WIN32)
   add_custom_target(make_exe_dir ALL 
