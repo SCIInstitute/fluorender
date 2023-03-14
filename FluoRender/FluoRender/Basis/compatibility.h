@@ -406,7 +406,7 @@ inline void INC_NUMBER(std::string& s)
 #define FSEEK64     fseek
 
 inline wchar_t GETSLASH() { return L'/'; }
-inline char GETSLASHA() { return '\\'; }
+inline char GETSLASHA() { return '/'; }
 
 inline bool str_mat(std::wstring &s1, size_t p1, std::wstring &s2, size_t p2)
 {

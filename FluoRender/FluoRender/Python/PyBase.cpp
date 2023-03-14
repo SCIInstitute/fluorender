@@ -267,10 +267,22 @@ std::string PyBase::GetPythonPath()
 	double max_ver = 0, dval = 0;
 	for (auto& it1 : std::filesystem::directory_iterator(par_path))
 	{
-		if (!std::filesytem::is_directory(it1))
+		if (!std::filesystem::is_directory(it1))
 			continue;
-		std::string strv = it1.path().parent_path().filename().string();
-		dval = std::stod(strv);
+		std::string strv = it1.path().filename().string();
+		bool flag = true;
+		for (auto c : strv)
+		{
+			if (!std::isdigit(c) && c != '.')
+			{
+				flag = false;
+				break;
+			}
+		}
+		if (!flag)
+			continue;
+		try { dval = std::stod(strv); }
+		catch (...) { continue; }
 		if (dval > max_ver)
 		{
 			max_ver = dval;
