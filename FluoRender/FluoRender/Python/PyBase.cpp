@@ -216,17 +216,14 @@ void PyBase::Run_SimpleStringEx(const std::string& str)
 std::string PyBase::GetPythonPath()
 {
 	std::string result;
+#ifdef _WIN32
 	std::string ps("python");
 	std::string env_path = std::getenv("PATH");
 	std::istringstream ss(env_path);
 	while (ss.good())
 	{
 		std::string str;
-#ifdef _WIN32
 		std::getline(ss, str, ';');
-#else
-		std::getline(ss, str, ':');
-#endif
 		auto it = std::search(str.begin(), str.end(),
 			ps.begin(), ps.end(),
 			[](unsigned char ch1, unsigned char ch2)
@@ -263,5 +260,51 @@ std::string PyBase::GetPythonPath()
 		if (std::filesystem::exists(result))
 			break;
 	}
+#endif
+#ifdef _DARWIN
+	std::string par_path("/Library/Frameworks/Python.framework/Versions/");
+	std::filesystem::path env_path;
+	double max_ver = 0, dval = 0;
+	for (auto& it1 : std::filesystem::directory_iterator(par_path))
+	{
+		if (!std::filesytem::is_directory(it1))
+			continue;
+		std::string strv = it1.path().parent_path().filename().string();
+		dval = std::stod(strv);
+		if (dval > max_ver)
+		{
+			max_ver = dval;
+			env_path = it1.path();
+		}
+	}
+	if (std::filesystem::exists(env_path))
+	{
+		env_path /= "lib";
+		std::string str = env_path.string();
+		if (str.back() != GETSLASHA())
+			str += GETSLASHA();
+		std::filesystem::path path(str);
+		str += "*.dylib";
+		std::regex rgx = REGEX(str);
+		for (auto& it : std::filesystem::directory_iterator(path))
+		{
+			if (!std::filesystem::is_regular_file(it))
+				continue;
+			const std::string st = it.path().string();
+			if (std::regex_match(st, rgx))
+			{
+				//check pattern
+				size_t pos = st.rfind("python3.");
+				if (pos == std::string::npos)
+					continue;
+				if (std::isdigit(st[pos + 8]))
+				{
+					result = st;
+					break;
+				}
+			}
+		}
+	}
+#endif
 	return result;
 }
