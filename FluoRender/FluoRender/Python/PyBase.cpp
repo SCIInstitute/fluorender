@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <sys/types.h>
 #include <algorithm>
 #include <filesystem>
+#include <sstream>
 #include <compatibility.h>
 
 using namespace flrd;
@@ -216,7 +217,7 @@ std::string PyBase::GetPythonPath()
 {
 	std::string result;
 	std::string ps("python");
-	std::string env_path = getenv("PATH");
+	std::string env_path = std::getenv("PATH");
 	std::istringstream ss(env_path);
 	while (ss.good())
 	{
