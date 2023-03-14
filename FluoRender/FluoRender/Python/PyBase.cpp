@@ -94,28 +94,31 @@ PyBase::PyBase() :
 	Bytes_AsString = (decltype(&PyBytes_AsString))GetProcAddress(python_dll, "PyBytes_AsString");
 	if (!SetValid(Bytes_AsString)) return;
 #else
-	//python_dll = dlopen("Python", RTLD_NOW);
-	//if (!SetValid(python_dll)) return;
+	std::string libstr;
+	libstr = "/Library/Frameworks/Python.framework/Versions/3.10/lib/libpython3.10.dylib";
+	python_dll = dlopen(libstr.c_str(), RTLD_NOW);
+	if (!SetValid(python_dll)) return;
 
 	//Initialize = (Initialize_tp*)dlsym(python_dll, "Py_Initialize");
 	//if (!SetValid((void*)Initialize)) return;
-	Initialize = Py_Initialize;
 
 	//Run_SimpleString = (PyRun_SimpleString_tp*)dlsym(python_dll, "PyRun_SimpleString");
 	//if (!SetValid((void*)Run_SimpleString)) return;
-	Run_SimpleString = PyRun_SimpleString;
 
 	//FinalizeEx = (Py_FinalizeEx_tp*)dlsym(python_dll, "Py_FinalizeEx");
 	//if (!SetValid((void*)FinalizeEx)) return;
-	FinalizeEx = Py_FinalizeEx;
 
-	Import_AddModule = PyImport_AddModule;
+	//Import_AddModule = (PyImport_AddModule_tp*)dlsym(python_dll, "PyImport_AddModule");
+	//if (!SetValid((void*)Import_AddModule)) return;
 
-	Object_GetAttrString = PyObject_GetAttrString;
+	//Object_GetAttrString = (PyObject_GetAttrString_tp*)dlsym(python_dll, "PyObject_GetAttrString");
+	//if (!SetValid((void*)Object_GetAttrString)) return;
 
-	Unicode_AsEncodedString = PyUnicode_AsEncodedString;
+	//Unicode_AsEncodedString = (PyUnicode_AsEncodedString_tp*)dlsym(python_dll, "PyUnicode_AsEncodedString");
+	//if (!SetValid((void*)Unicode_AsEncodedString)) return;
 
-	Bytes_AsString = PyBytes_AsString;
+	//Bytes_AsString = (PyBytes_AsString_tp*)dlsym(python_dll, "PyBytes_AsString");
+	//if (!SetValid((void*)Bytes_AsString)) return;
 #endif
 }
 

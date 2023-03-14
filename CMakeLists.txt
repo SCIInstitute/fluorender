@@ -241,6 +241,9 @@ include_directories(${Boost_INCLUDE_DIR})
 #set(Python_ADDITIONAL_VERSIONS 3.10 3.9 3.8 3.7)
 find_package(Python3 COMPONENTS Interpreter Development)
 include_directories(${Python3_INCLUDE_DIRS})
+if (PYTHON3_FOUND)
+  message (STATUS "Python3_INCLUDE_DIRS=${Python3_INCLUDE_DIRS}")
+endif()
 
 #hdf5
 set(HDF5_USE_STATIC_LIBRARIES ON)

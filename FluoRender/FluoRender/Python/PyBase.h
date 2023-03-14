@@ -124,6 +124,9 @@ namespace flrd
 #ifdef _WIN32
 			if (python_dll)
 				FreeLibrary(python_dll);
+#else
+			if (python_dll)
+				dlclose(python_dll);
 #endif
 			m_valid = false;
 		}
