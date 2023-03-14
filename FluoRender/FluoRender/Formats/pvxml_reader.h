@@ -94,6 +94,7 @@ private:
 	struct ChannelInfo
 	{
 		wstring file_name;
+		int chan;//channel index on file
 	};
 	struct FrameInfo
 	{
@@ -224,6 +225,14 @@ private:
 	//seq type
 	int m_seq_type;
 
+	//wavelength info
+	struct WavelengthInfo
+	{
+		int chan_num;
+		double wavelength;
+	};
+	vector<WavelengthInfo> m_excitation_wavelength_list;
+
 private:
 	bool ConvertS(int c, TimeDataInfo* time_data_info, unsigned short *val);
 	bool ConvertN(int c, TimeDataInfo* time_data_info, unsigned short *val);
@@ -234,6 +243,7 @@ private:
 	void ReadSequence(wxXmlNode *seqNode);
 	void ReadFrame(wxXmlNode *frameNode);
 	void ReadTiff(char* pbyData, unsigned short *val);
+	void ReadLaser(wxXmlNode* node);
 };
 
 #endif//_PVXML_READER_H_

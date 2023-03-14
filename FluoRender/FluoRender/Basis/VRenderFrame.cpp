@@ -1564,19 +1564,22 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 				VolumeData* vd = m_data_mgr.GetVolumeData(m_data_mgr.GetVolumeNum()-1);
 				if (vd)
 				{
-					int chan_num = v->GetDispVolumeNum();
-					fluo::Color color(1.0, 1.0, 1.0);
-					if (chan_num == 0)
-						color = fluo::Color(1.0, 0.0, 0.0);
-					else if (chan_num == 1)
-						color = fluo::Color(0.0, 1.0, 0.0);
-					else if (chan_num == 2)
-						color = fluo::Color(0.0, 0.0, 1.0);
+					if (!vd->GetWlColor())
+					{
+						int chan_num = v->GetDispVolumeNum();
+						fluo::Color color(1.0, 1.0, 1.0);
+						if (chan_num == 0)
+							color = fluo::Color(1.0, 0.0, 0.0);
+						else if (chan_num == 1)
+							color = fluo::Color(0.0, 1.0, 0.0);
+						else if (chan_num == 2)
+							color = fluo::Color(0.0, 0.0, 1.0);
 
-					if (chan_num >=0 && chan_num <3)
-						vd->SetColor(color);
-					else
-						vd->RandomizeColor();
+						if (chan_num >= 0 && chan_num < 3)
+							vd->SetColor(color);
+						else
+							vd->RandomizeColor();
+					}
 
 					v->AddVolumeData(vd);
 					vd_sel = vd;

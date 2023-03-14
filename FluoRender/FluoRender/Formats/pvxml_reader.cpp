@@ -401,6 +401,10 @@ void PVXMLReader::ReadKey(wxXmlNode* keyNode)
 		strValue.ToLong(&ival);
 		m_seq_type = ival;
 	}
+	else if (strKey == "laserPower")
+	{
+		ReadLaser(keyNode);
+	}
 }
 
 void PVXMLReader::ReadIndexedKey(wxXmlNode* keyNode, wxString &key)
@@ -557,10 +561,14 @@ void PVXMLReader::ReadFrame(wxXmlNode* frameNode)
 	{
 		if (child->GetName() == "File")
 		{
-			wxString filename = child->GetAttribute(
-				"filename");
+			wxString channel = child->GetAttribute("channel");
+			long chn;
+			channel.ToLong(&chn);
+			wxString filename = child->GetAttribute("filename");
+
 			ChannelInfo channel_info;
 			channel_info.file_name = filename.ToStdWstring();
+			channel_info.chan = chn;
 			frame_info.channels.push_back(channel_info);
 			int size = frame_info.channels.size();
 			m_chan_num = size>m_chan_num?size:m_chan_num;
@@ -722,6 +730,23 @@ int PVXMLReader::LoadBatch(int index)
 
 double PVXMLReader::GetExcitationWavelength(int chan)
 {
+	if (chan < 0)
+		return 0.0;
+	//get channel from info
+	if (!m_pvxml_info.empty())
+	{
+		TimeDataInfo* ti = &(m_pvxml_info[0]);
+		if (ti && !ti->empty())
+		{
+			if (chan < (*ti)[0].frames[0].channels.size())
+				chan = (*ti)[0].frames[0].channels[chan].chan;
+		}
+	}
+	for (int i = 0; i < (int)m_excitation_wavelength_list.size(); i++)
+	{
+		if (m_excitation_wavelength_list[i].chan_num == chan)
+			return m_excitation_wavelength_list[i].wavelength;
+	}
 	return 0.0;
 }
 
@@ -1101,6 +1126,43 @@ void PVXMLReader::ReadTiff(char *pbyData, unsigned short *val)
 				LZWDecode((tidata_t)(pbyData+data_pos), (tidata_t)(val+val_pos), m_x_size*rows*2);
 			val_pos += rows*width;
 		}
+	}
+}
+
+void PVXMLReader::ReadLaser(wxXmlNode* node)
+{
+	wxXmlNode* child = node->GetChildren();
+	while (child)
+	{
+		wxString child_name = child->GetName();
+		if (child_name == "IndexedValue")
+		{
+			wxString strIndex = child->GetAttribute("index");
+			wxString strValue = child->GetAttribute("value");
+			wxString strDesc = child->GetAttribute("description");
+			long ch = 0;
+			long wl = 0;
+			strIndex.ToLong(&ch);
+			wxString strWl;
+			if (strDesc.Find("LED") != wxNOT_FOUND)
+				wl = -1;
+			else
+			{
+				for (int i = 0; i < strDesc.size(); ++i)
+				{
+					if (wxIsdigit(strDesc[i]))
+						strWl += strDesc[i];
+					else
+						break;
+				}
+				strWl.ToLong(&wl);
+			}
+			WavelengthInfo winfo;
+			winfo.chan_num = ch;
+			winfo.wavelength = wl;
+			m_excitation_wavelength_list.push_back(winfo);
+		}
+		child = child->GetNext();
 	}
 }
 

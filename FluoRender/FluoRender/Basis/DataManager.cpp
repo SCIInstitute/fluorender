@@ -102,6 +102,7 @@ VolumeData::VolumeData()
 	m_lo_thresh = 0.0;
 	m_hi_thresh = 1.0;
 	m_color = fluo::Color(1.0, 1.0, 1.0);
+	m_wl_color = false;
 	SetHSV();
 	m_alpha = 1.0;
 	m_sample_rate = 1.0;
@@ -234,6 +235,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_lo_thresh = copy.m_lo_thresh;
 	m_hi_thresh = copy.m_hi_thresh;
 	m_color = copy.m_color;
+	m_wl_color = copy.m_wl_color;
 	SetHSV();
 	m_alpha = copy.m_alpha;
 	m_sample_rate = copy.m_sample_rate;
@@ -1793,6 +1795,16 @@ void VolumeData::SetColor(fluo::Color &color, bool update_hsv)
 fluo::Color VolumeData::GetColor()
 {
 	return m_color;
+}
+
+void VolumeData::SetWlColor(bool bval)
+{
+	m_wl_color = bval;
+}
+
+bool VolumeData::GetWlColor()
+{
+	return m_wl_color;
 }
 
 void VolumeData::SetMaskColor(fluo::Color &color, bool set)
@@ -5013,13 +5025,17 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 
 		//get excitation wavelength
 		double wavelength = reader->GetExcitationWavelength(i);
-		if (wavelength > 0.0) {
+		if (wavelength > 0.0)
+		{
 			fluo::Color col = GetWavelengthColor(wavelength);
 			vd->SetColor(col);
+			vd->SetWlColor();
 		}
-		else if (wavelength < 0.) {
+		else if (wavelength < 0.)
+		{
 			fluo::Color white(1.0, 1.0, 1.0);
 			vd->SetColor(white);
+			vd->SetWlColor();
 		}
 		else
 		{
@@ -5027,7 +5043,8 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 			fluo::Color red(1.0, 0.0, 0.0);
 			fluo::Color green(0.0, 1.0, 0.0);
 			fluo::Color blue(0.0, 0.0, 1.0);
-			if (chan == 1) {
+			if (chan == 1)
+			{
 				vd->SetColor(white);
 			}
 			else

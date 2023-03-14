@@ -317,6 +317,8 @@ public:
 	double GetRightThresh();
 	void SetColor(fluo::Color &color, bool update_hsv=true);
 	fluo::Color GetColor();
+	void SetWlColor(bool bval = true);
+	bool GetWlColor();
 	void SetMaskColor(fluo::Color &color, bool set=true);
 	fluo::Color GetMaskColor();
 	bool GetMaskColorSet();
@@ -554,6 +556,7 @@ private:
 	double m_lo_thresh;
 	double m_hi_thresh;
 	fluo::Color m_color;
+	bool m_wl_color;//if color has been set by wavelength
 	fluo::HSVColor m_hsv;
 	double m_alpha;
 	double m_sample_rate;
