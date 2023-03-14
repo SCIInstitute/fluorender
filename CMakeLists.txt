@@ -825,7 +825,7 @@ if(WIN32)
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${Python3_LIBRARIES}
+    #${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
     ${OpenVR_LIBRARIES}
     ${FREETYPE_LIBRARIES}

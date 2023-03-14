@@ -256,7 +256,11 @@ std::string PyDlc::GetTrainCmd(int maxiters)
 	maxiters *= displayiters;
 	int saveiters = maxiters;
 	//start training
+#ifdef _WIN32
 	cmd = "python -c \"";
+#else
+	cmd = "python3 -c \"";
+#endif
 	cmd += "print('START TRAINING WITH DEEPLABCUT. FLUORENDER CAN BE CLOSED.')\n";
 	cmd += "import deeplabcut\n";
 	cmd += "deeplabcut.create_training_dataset(\\\"";
