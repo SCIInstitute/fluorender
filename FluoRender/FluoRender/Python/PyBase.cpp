@@ -29,6 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #include <Debug.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <algorithm>
+#include <filesystem>
+#include <compatibility.h>
 
 using namespace flrd;
 
@@ -60,17 +63,13 @@ PyBase::PyBase() :
 {
 	if (m_valid)
 		return;
+
+	std::string py_path = GetPythonPath();
+
 	m_valid = true;
 #ifdef _WIN32
-	std::wstring libstr;
-	for (int i = m_high_ver; i > 0; --i)
-	{
-		//highest supported python version
-		libstr = L"python3" + std::to_wstring(i) + L".dll";
-		python_dll = LoadLibrary(libstr.c_str());
-		if (python_dll != nullptr)
-			break;
-	}
+	std::wstring libstr = s2ws(py_path);
+	python_dll = LoadLibrary(libstr.c_str());
 	if (!SetValid(python_dll)) return;
 
 	Initialize = (decltype(&Py_Initialize))GetProcAddress(python_dll, "Py_Initialize");
@@ -94,31 +93,30 @@ PyBase::PyBase() :
 	Bytes_AsString = (decltype(&PyBytes_AsString))GetProcAddress(python_dll, "PyBytes_AsString");
 	if (!SetValid(Bytes_AsString)) return;
 #else
-	std::string libstr;
-	libstr = "/Library/Frameworks/Python.framework/Versions/3.10/lib/libpython3.10.dylib";
+	std::string libstr = py_path;
 	python_dll = dlopen(libstr.c_str(), RTLD_NOW);
 	if (!SetValid(python_dll)) return;
 
-	//Initialize = (Initialize_tp*)dlsym(python_dll, "Py_Initialize");
-	//if (!SetValid((void*)Initialize)) return;
+	Initialize = (Initialize_tp*)dlsym(python_dll, "Py_Initialize");
+	if (!SetValid((void*)Initialize)) return;
 
-	//Run_SimpleString = (PyRun_SimpleString_tp*)dlsym(python_dll, "PyRun_SimpleString");
-	//if (!SetValid((void*)Run_SimpleString)) return;
+	Run_SimpleString = (PyRun_SimpleString_tp*)dlsym(python_dll, "PyRun_SimpleString");
+	if (!SetValid((void*)Run_SimpleString)) return;
 
-	//FinalizeEx = (Py_FinalizeEx_tp*)dlsym(python_dll, "Py_FinalizeEx");
-	//if (!SetValid((void*)FinalizeEx)) return;
+	FinalizeEx = (Py_FinalizeEx_tp*)dlsym(python_dll, "Py_FinalizeEx");
+	if (!SetValid((void*)FinalizeEx)) return;
 
-	//Import_AddModule = (PyImport_AddModule_tp*)dlsym(python_dll, "PyImport_AddModule");
-	//if (!SetValid((void*)Import_AddModule)) return;
+	Import_AddModule = (PyImport_AddModule_tp*)dlsym(python_dll, "PyImport_AddModule");
+	if (!SetValid((void*)Import_AddModule)) return;
 
-	//Object_GetAttrString = (PyObject_GetAttrString_tp*)dlsym(python_dll, "PyObject_GetAttrString");
-	//if (!SetValid((void*)Object_GetAttrString)) return;
+	Object_GetAttrString = (PyObject_GetAttrString_tp*)dlsym(python_dll, "PyObject_GetAttrString");
+	if (!SetValid((void*)Object_GetAttrString)) return;
 
-	//Unicode_AsEncodedString = (PyUnicode_AsEncodedString_tp*)dlsym(python_dll, "PyUnicode_AsEncodedString");
-	//if (!SetValid((void*)Unicode_AsEncodedString)) return;
+	Unicode_AsEncodedString = (PyUnicode_AsEncodedString_tp*)dlsym(python_dll, "PyUnicode_AsEncodedString");
+	if (!SetValid((void*)Unicode_AsEncodedString)) return;
 
-	//Bytes_AsString = (PyBytes_AsString_tp*)dlsym(python_dll, "PyBytes_AsString");
-	//if (!SetValid((void*)Bytes_AsString)) return;
+	Bytes_AsString = (PyBytes_AsString_tp*)dlsym(python_dll, "PyBytes_AsString");
+	if (!SetValid((void*)Bytes_AsString)) return;
 #endif
 }
 
@@ -212,4 +210,57 @@ void PyBase::Run_SimpleStringEx(const std::string& str)
 	PyObject* output = Object_GetAttrString(catcher, "value");
 	PyObject* outstr = Unicode_AsEncodedString(output, "utf-8", "~E~");
 	m_output = Bytes_AsString(outstr);
+}
+
+std::string PyBase::GetPythonPath()
+{
+	std::string result;
+	std::string ps("python");
+	std::string env_path = getenv("PATH");
+	std::istringstream ss(env_path);
+	while (ss.good())
+	{
+		std::string str;
+#ifdef _WIN32
+		std::getline(ss, str, ';');
+#else
+		std::getline(ss, str, ':');
+#endif
+		auto it = std::search(str.begin(), str.end(),
+			ps.begin(), ps.end(),
+			[](unsigned char ch1, unsigned char ch2)
+			{
+				return std::toupper(ch1) == std::toupper(ch2);
+			});
+		if (it == str.end())
+			continue;
+
+		//potential path
+		if (str.back() != GETSLASHA())
+			str += GETSLASHA();
+		std::filesystem::path path(str);
+		str += "*.dll";
+		std::regex rgx = REGEX(str);
+		for (auto& it : std::filesystem::directory_iterator(path))
+		{
+			if (!std::filesystem::is_regular_file(it))
+				continue;
+			const std::string st = it.path().string();
+			if (std::regex_match(st, rgx))
+			{
+				//check pattern
+				size_t pos = st.rfind("3");
+				if (pos == std::string::npos)
+					continue;
+				if (std::isdigit(st[pos + 1]))
+				{
+					result = st;
+					break;
+				}
+			}
+		}
+		if (std::filesystem::exists(result))
+			break;
+	}
+	return result;
 }

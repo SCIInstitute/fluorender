@@ -196,6 +196,7 @@ namespace flrd
 			m_valid = val != nullptr;
 			return m_valid;
 		}
+		std::string GetPythonPath();
 	};
 }
 
