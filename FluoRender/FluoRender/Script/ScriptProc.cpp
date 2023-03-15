@@ -1884,12 +1884,17 @@ void ScriptProc::RunDlcLabel()
 		dlc->WriteHDF(rhdl);
 		int maxiters = 100;
 		m_fconfig->Read("maxiters", &maxiters, 100);
-		std::string cmd = dlc->GetTrainCmd(maxiters);
 
+#ifdef _DARWIN
+		dlc->Init();
+		dlc->LoadDlc();
+		dlc->Train(maxiters);
+#else
+		std::string cmd = dlc->GetTrainCmd(maxiters);
 		m_frame->GetMovieView()->HoldRun();
 		wxExecute(cmd);
 		m_frame->GetMovieView()->ResumeRun();
-
+#endif
 	}
 }
 

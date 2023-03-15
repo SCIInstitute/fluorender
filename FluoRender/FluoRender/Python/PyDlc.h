@@ -85,6 +85,7 @@ namespace flrd
 		}
 		//train
 		std::string GetTrainCmd(int maxiters);
+		void Train(int maxiters);
 		void CreateConfigFile(const std::string& prj_name,
 			const std::string& usr_name,
 			RulerHandler* rhdl);

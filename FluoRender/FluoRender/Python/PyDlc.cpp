@@ -277,6 +277,26 @@ std::string PyDlc::GetTrainCmd(int maxiters)
 	return cmd;
 }
 
+void PyDlc::Train(int maxiters)
+{
+	std::string cmd;
+	int displayiters = 1000;
+	maxiters *= displayiters;
+	int saveiters = maxiters;
+
+	cmd += "deeplabcut.create_training_dataset(";
+	cmd += "\"" + m_config_file_py + "\", ";
+	cmd += "augmenter_type='imgaug')\n";
+	cmd += "deeplabcut.train_network(";
+	cmd += "\"" + m_config_file_py + "\", ";
+	cmd += "displayiters=" + std::to_string(displayiters) + ", ";
+	cmd += "saveiters=" + std::to_string(saveiters) + ", ";
+	cmd += "maxiters=" + std::to_string(maxiters) + ")\n";
+
+	Run(ot_Run_SimpleStringEx,
+		cmd);
+}
+
 void PyDlc::CreateConfigFile(
 	const std::string& prj_name,
 	const std::string& usr_name,
