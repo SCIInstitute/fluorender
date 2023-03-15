@@ -1718,7 +1718,7 @@ bool RulerHandler::GetKeyFrames(std::set<size_t>& kf)
 		for (size_t j = 0; j < i->GetNumPoint(); ++j)
 		{
 			RulerPoint* p = i->GetRulerPoint(j);
-			if (!j)
+			if (!p)
 				continue;
 			size_t tn = p->GetTimeNum();
 			for (size_t k = 0; k < tn; ++k)
