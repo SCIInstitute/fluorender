@@ -56,8 +56,8 @@ bool Registrator::Run(size_t f1, size_t f2,
 	int mode, size_t start)
 {
 	//get data
-	//size_t f0 = mode == 1 ? start : f1;
-	size_t f0 = start;
+	size_t f0 = mode == 1 ? start : f1;
+	//size_t f0 = start;
 	glbin_cache_queue.set_max_size(2);
 	VolCache cache = glbin_cache_queue.get(f0);
 	if (!cache.data)
