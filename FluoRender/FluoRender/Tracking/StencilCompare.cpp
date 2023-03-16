@@ -105,7 +105,8 @@ const char* str_cl_stencil = \
 "__kernel void kernel_2(\n" \
 "	__global unsigned char* img1,\n" \
 "	__global unsigned char* img2,\n" \
-"	__global float* sum,\n" \
+"	__global float* sumf,\n" \
+"	__global uint* sumi,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
@@ -130,10 +131,12 @@ const char* str_cl_stencil = \
 "	ub += bmin;\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int index;\n" \
-"	float lsum = 0.0f;\n" \
+"	float lsumf = 0.0f;\n" \
+"	uint lsumi = 0;\n" \
 "	float v1, v2;\n" \
 "	float4 coord;\n" \
 "	int4 coordi;\n" \
+"	int flag;\n" \
 "#pragma unroll\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "#pragma unroll\n" \
@@ -141,35 +144,41 @@ const char* str_cl_stencil = \
 "#pragma unroll\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
-"			v1 = 0.0f;\n" \
-"		else\n" \
+"		flag = 0;\n" \
+"		if (ijk.x >= 0 && ijk.x < nx && ijk.y >= 0 && ijk.y < ny && ijk.z >= 0 && ijk.z < nz)\n" \
 "		{\n" \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
 "			v1 = convert_float(img1[index]) / 255.0f;\n" \
+"			flag++;\n" \
 "		}\n" \
 "		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
 "		coord /= coord.w;\n" \
 "		coordi = convert_int4_rtz(coord);\n" \
-"		if (coordi.x < 0 || coordi.x >= nx || coordi.y < 0 || coordi.y >= ny || coordi.z < 0 || coordi.z >= nz)\n" \
-"			v2 = 0.0f;\n" \
-"		else\n" \
+"		if (coordi.x >= 0 && coordi.x < nx && coordi.y >= 0 && coordi.y < ny && coordi.z >= 0 && coordi.z < nz)\n" \
 "		{\n" \
 "			index = nxy*coordi.z + nx*coordi.y + coordi.x;\n" \
 "			v2 = convert_float(img2[index]) / 255.0f;\n" \
+"			flag++;\n" \
 "		}\n" \
-"		v1 = v1 * v2;\n" \
-"		lsum += v1;\n" \
+"		if (flag == 2)\n" \
+"		{\n" \
+"			v1 = v1 * v2;\n" \
+"			//v1 = pown(v1, 2);\n" \
+"			lsumf += v1;\n" \
+"			lsumi++;\n" \
+"		}\n" \
 "	}\n" \
 "	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(sum+index, lsum);\n" \
+"	atomic_xchg(sumf+index, lsumf);\n" \
+"	atomic_xchg(sumi+index, lsumi);\n" \
 "}\n" \
 "//compare0 16 bit\n" \
 "__kernel void kernel_3(\n" \
 "	__global unsigned short* img1,\n" \
 "	__global unsigned short* img2,\n" \
-"	__global float* sum,\n" \
+"	__global float* sumf,\n" \
+"	__global uint* sumi,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
@@ -194,10 +203,12 @@ const char* str_cl_stencil = \
 "	ub += bmin;\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int index;\n" \
-"	float lsum = 0.0f;\n" \
+"	float lsumf = 0.0f;\n" \
+"	uint lsumi = 0;\n" \
 "	float v1, v2;\n" \
 "	float4 coord;\n" \
 "	int4 coordi;\n" \
+"	int flag;\n" \
 "#pragma unroll\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "#pragma unroll\n" \
@@ -205,36 +216,41 @@ const char* str_cl_stencil = \
 "#pragma unroll\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
-"			v1 = 0.0f;\n" \
-"		else\n" \
+"		flag = 0;\n" \
+"		if (ijk.x >= 0 && ijk.x < nx && ijk.y >= 0 && ijk.y < ny && ijk.z >= 0 && ijk.z < nz)\n" \
 "		{\n" \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
 "			v1 = convert_float(img1[index]) / intmax;\n" \
+"			flag++;\n" \
 "		}\n" \
 "		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
 "		coord /= coord.w;\n" \
 "		coordi = convert_int4_rtz(coord);\n" \
-"		if (coordi.x < 0 || coordi.x >= nx || coordi.y < 0 || coordi.y >= ny || coordi.z < 0 || coordi.z >= nz)\n" \
-"			v2 = 0.0f;\n" \
-"		else\n" \
+"		if (coordi.x >= 0 && coordi.x < nx && coordi.y >= 0 && coordi.y < ny && coordi.z >= 0 && coordi.z < nz)\n" \
 "		{\n" \
 "			index = nxy*coordi.z + nx*coordi.y + coordi.x;\n" \
 "			v2 = convert_float(img2[index]) / intmax;\n" \
+"			flag++;\n" \
 "		}\n" \
-"		v1 = v1 * v2;\n" \
-"		//v1 = pown(v1, 2);\n" \
-"		lsum += v1;\n" \
+"		if (flag == 2)\n" \
+"		{\n" \
+"			v1 = v1 * v2;\n" \
+"			//v1 = pown(v1, 2);\n" \
+"			lsumf += v1;\n" \
+"			lsumi++;\n" \
+"		}\n" \
 "	}\n" \
 "	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(sum+index, lsum);\n" \
+"	atomic_xchg(sumf+index, lsumf);\n" \
+"	atomic_xchg(sumi+index, lsumi);\n" \
 "}\n" \
 "//compare1 8 bit\n" \
 "__kernel void kernel_4(\n" \
 "	__global unsigned char* img1,\n" \
 "	__global unsigned char* img2,\n" \
-"	__global float* sum,\n" \
+"	__global float* sumf,\n" \
+"	__global uint* sumi,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
@@ -259,10 +275,12 @@ const char* str_cl_stencil = \
 "	ub += bmin;\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int index;\n" \
-"	float lsum = 0.0f;\n" \
+"	float lsumf = 0.0f;\n" \
+"	uint lsumi = 0;\n" \
 "	float v1, v2, w;\n" \
 "	float4 coord;\n" \
 "	int4 coordi;\n" \
+"	int flag;\n" \
 "#pragma unroll\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "#pragma unroll\n" \
@@ -270,38 +288,43 @@ const char* str_cl_stencil = \
 "#pragma unroll\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
-"			v1 = 0.0f;\n" \
-"		else\n" \
+"		flag = 0;\n" \
+"		if (ijk.x >= 0 && ijk.x < nx && ijk.y >= 0 && ijk.y < ny && ijk.z >= 0 && ijk.z < nz)\n" \
 "		{\n" \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
 "			v1 = convert_float(img1[index]) / 255.0f;\n" \
+"			flag++;\n" \
 "		}\n" \
 "		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
 "		coord /= coord.w;\n" \
 "		coordi = convert_int4_rtz(coord);\n" \
-"		if (coordi.x < 0 || coordi.x >= nx || coordi.y < 0 || coordi.y >= ny || coordi.z < 0 || coordi.z >= nz)\n" \
-"			v2 = 0.0f;\n" \
-"		else\n" \
+"		if (coordi.x >= 0 && coordi.x < nx && coordi.y >= 0 && coordi.y < ny && coordi.z >= 0 && coordi.z < nz)\n" \
 "		{\n" \
 "			index = nxy*coordi.z + nx*coordi.y + coordi.x;\n" \
 "			v2 = convert_float(img2[index]) / 255.0f;\n" \
+"			flag++;\n" \
 "		}\n" \
-"		w = min(v1, v2);\n" \
-"		v1 = v1 - v2;\n" \
-"		v1 *= v1;\n" \
-"		v1 = 1.0f - v1;\n" \
-"		lsum += v1 * w;\n" \
+"		if (flag == 2)\n" \
+"		{\n" \
+"			w = min(v1, v2);\n" \
+"			v1 = v1 - v2;\n" \
+"			v1 *= v1;\n" \
+"			v1 = 1.0f - v1;\n" \
+"			lsumf += v1 * w;\n" \
+"			lsumi++;\n" \
+"		}\n" \
 "	}\n" \
 "	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(sum+index, lsum);\n" \
+"	atomic_xchg(sumf+index, lsumf);\n" \
+"	atomic_xchg(sumi+index, lsumi);\n" \
 "}\n" \
 "//compare1 16 bit\n" \
 "__kernel void kernel_5(\n" \
 "	__global unsigned short* img1,\n" \
 "	__global unsigned short* img2,\n" \
-"	__global float* sum,\n" \
+"	__global float* sumf,\n" \
+"	__global uint* sumi,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
@@ -326,10 +349,12 @@ const char* str_cl_stencil = \
 "	ub += bmin;\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int index;\n" \
-"	float lsum = 0.0f;\n" \
+"	float lsumf = 0.0f;\n" \
+"	uint lsumi = 0;\n" \
 "	float v1, v2, w;\n" \
 "	float4 coord;\n" \
 "	int4 coordi;\n" \
+"	int flag;\n" \
 "#pragma unroll\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "#pragma unroll\n" \
@@ -337,32 +362,36 @@ const char* str_cl_stencil = \
 "#pragma unroll\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
-"			v1 = 0.0f;\n" \
-"		else\n" \
+"		flag = 0;\n" \
+"		if (ijk.x >= 0 && ijk.x < nx && ijk.y >= 0 && ijk.y < ny && ijk.z >= 0 && ijk.z < nz)\n" \
 "		{\n" \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
 "			v1 = convert_float(img1[index]) / intmax;\n" \
+"			flag++;\n" \
 "		}\n" \
 "		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
 "		coord /= coord.w;\n" \
 "		coordi = convert_int4_rtz(coord);\n" \
-"		if (coordi.x < 0 || coordi.x >= nx || coordi.y < 0 || coordi.y >= ny || coordi.z < 0 || coordi.z >= nz)\n" \
-"			v2 = 0.0f;\n" \
-"		else\n" \
+"		if (coordi.x >= 0 && coordi.x < nx && coordi.y >= 0 && coordi.y < ny && coordi.z >= 0 && coordi.z < nz)\n" \
 "		{\n" \
 "			index = nxy*coordi.z + nx*coordi.y + coordi.x;\n" \
 "			v2 = convert_float(img2[index]) / intmax;\n" \
+"			flag++;\n" \
 "		}\n" \
-"		w = min(v1, v2);\n" \
-"		v1 = v1 - v2;\n" \
-"		v1 *= v1;\n" \
-"		v1 = 1.0f - v1;\n" \
-"		lsum += v1 * w;\n" \
+"		if (flag == 2)\n" \
+"		{\n" \
+"			w = min(v1, v2);\n" \
+"			v1 = v1 - v2;\n" \
+"			v1 *= v1;\n" \
+"			v1 = 1.0f - v1;\n" \
+"			lsumf += v1 * w;\n" \
+"			lsumi++;\n" \
+"		}\n" \
 "	}\n" \
 "	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(sum+index, lsum);\n" \
+"	atomic_xchg(sumf+index, lsumf);\n" \
+"	atomic_xchg(sumi+index, lsumi);\n" \
 "}\n" \
 ;
 
@@ -438,7 +467,8 @@ const char* str_cl_stencil_mask = \
 "	__global unsigned char* img1,\n" \
 "	__global unsigned char* mask,\n" \
 "	__global unsigned char* img2,\n" \
-"	__global float* sum,\n" \
+"	__global float* sumf,\n" \
+"	__global uint* sumi,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
@@ -463,11 +493,12 @@ const char* str_cl_stencil_mask = \
 "	ub += bmin;\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int index;\n" \
-"	float lsum = 0.0f;\n" \
+"	float lsumf = 0.0f;\n" \
+"	uint lsumi = 0;\n" \
 "	float v1, v2;\n" \
-"	unsigned char m1;\n" \
 "	float4 coord;\n" \
 "	int4 coordi;\n" \
+"	int flag;\n" \
 "#pragma unroll\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "#pragma unroll\n" \
@@ -475,38 +506,45 @@ const char* str_cl_stencil_mask = \
 "#pragma unroll\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
-"			v1 = 0.0f;\n" \
-"		else\n" \
+"		flag = 0;\n" \
+"		if (ijk.x >= 0 && ijk.x < nx && ijk.y >= 0 && ijk.y < ny && ijk.z >= 0 && ijk.z < nz)\n" \
 "		{\n" \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"			v1 = convert_float(img1[index]) / 255.0f;\n" \
-"			m1 = mask[index];\n" \
-"			v1 = m1 ? v1 : 0.0f;\n" \
+"			if (mask[index])\n" \
+"			{\n" \
+"				v1 = convert_float(img1[index]) / 255.0f;\n" \
+"				flag++;\n" \
+"			}\n" \
 "		}\n" \
 "		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
 "		coord /= coord.w;\n" \
 "		coordi = convert_int4_rtz(coord);\n" \
-"		if (coordi.x < 0 || coordi.x >= nx || coordi.y < 0 || coordi.y >= ny || coordi.z < 0 || coordi.z >= nz)\n" \
-"			v2 = 0.0f;\n" \
-"		else\n" \
+"		if (coordi.x >= 0 && coordi.x < nx && coordi.y >= 0 && coordi.y < ny && coordi.z >= 0 && coordi.z < nz)\n" \
 "		{\n" \
 "			index = nxy*coordi.z + nx*coordi.y + coordi.x;\n" \
 "			v2 = convert_float(img2[index]) / 255.0f;\n" \
+"			flag++;\n" \
 "		}\n" \
-"		v1 = v1 * v2;\n" \
-"		lsum += v1;\n" \
+"		if (flag == 2)\n" \
+"		{\n" \
+"			v1 = v1 * v2;\n" \
+"			//v1 = pown(v1, 2);\n" \
+"			lsumf += v1;\n" \
+"			lsumi++;\n" \
+"		}\n" \
 "	}\n" \
 "	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(sum+index, lsum);\n" \
+"	atomic_xchg(sumf+index, lsumf);\n" \
+"	atomic_xchg(sumi+index, lsumi);\n" \
 "}\n" \
 "//compare0 16 bit\n" \
 "__kernel void kernel_3(\n" \
 "	__global unsigned short* img1,\n" \
 "	__global unsigned char* mask,\n" \
 "	__global unsigned short* img2,\n" \
-"	__global float* sum,\n" \
+"	__global float* sumf,\n" \
+"	__global uint* sumi,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
@@ -531,11 +569,12 @@ const char* str_cl_stencil_mask = \
 "	ub += bmin;\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int index;\n" \
-"	float lsum = 0.0f;\n" \
+"	float lsumf = 0.0f;\n" \
+"	uint lsumi = 0;\n" \
 "	float v1, v2;\n" \
-"	unsigned short m1;\n" \
 "	float4 coord;\n" \
 "	int4 coordi;\n" \
+"	int flag;\n" \
 "#pragma unroll\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "#pragma unroll\n" \
@@ -543,39 +582,45 @@ const char* str_cl_stencil_mask = \
 "#pragma unroll\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
-"			v1 = 0.0f;\n" \
-"		else\n" \
+"		flag = 0;\n" \
+"		if (ijk.x >= 0 && ijk.x < nx && ijk.y >= 0 && ijk.y < ny && ijk.z >= 0 && ijk.z < nz)\n" \
 "		{\n" \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"			v1 = convert_float(img1[index]) / intmax;\n" \
-"			m1 = mask[index];\n" \
-"			v1 = m1 ? v1 : 0.0f;\n" \
+"			if (mask[index])\n" \
+"			{\n" \
+"				v1 = convert_float(img1[index]) / intmax;\n" \
+"				flag++;\n" \
+"			}\n" \
 "		}\n" \
 "		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
 "		coord /= coord.w;\n" \
 "		coordi = convert_int4_rtz(coord);\n" \
-"		if (coordi.x < 0 || coordi.x >= nx || coordi.y < 0 || coordi.y >= ny || coordi.z < 0 || coordi.z >= nz)\n" \
-"			v2 = 0.0f;\n" \
-"		else\n" \
+"		if (coordi.x >= 0 && coordi.x < nx && coordi.y >= 0 && coordi.y < ny && coordi.z >= 0 && coordi.z < nz)\n" \
 "		{\n" \
 "			index = nxy*coordi.z + nx*coordi.y + coordi.x;\n" \
 "			v2 = convert_float(img2[index]) / intmax;\n" \
+"			flag++;\n" \
 "		}\n" \
-"		v1 = v1 * v2;\n" \
-"		//v1 = pown(v1, 2);\n" \
-"		lsum += v1;\n" \
+"		if (flag == 2)\n" \
+"		{\n" \
+"			v1 = v1 * v2;\n" \
+"			//v1 = pown(v1, 2);\n" \
+"			lsumf += v1;\n" \
+"			lsumi++;\n" \
+"		}\n" \
 "	}\n" \
 "	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(sum+index, lsum);\n" \
+"	atomic_xchg(sumf+index, lsumf);\n" \
+"	atomic_xchg(sumi+index, lsumi);\n" \
 "}\n" \
 "//compare1 8 bit\n" \
 "__kernel void kernel_4(\n" \
 "	__global unsigned char* img1,\n" \
 "	__global unsigned char* mask,\n" \
 "	__global unsigned char* img2,\n" \
-"	__global float* sum,\n" \
+"	__global float* sumf,\n" \
+"	__global uint* sumi,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
@@ -600,11 +645,12 @@ const char* str_cl_stencil_mask = \
 "	ub += bmin;\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int index;\n" \
-"	float lsum = 0.0f;\n" \
+"	float lsumf = 0.0f;\n" \
+"	uint lsumi = 0;\n" \
 "	float v1, v2, w;\n" \
-"	unsigned char m1;\n" \
 "	float4 coord;\n" \
 "	int4 coordi;\n" \
+"	int flag;\n" \
 "#pragma unroll\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "#pragma unroll\n" \
@@ -612,41 +658,47 @@ const char* str_cl_stencil_mask = \
 "#pragma unroll\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
-"			v1 = 0.0f;\n" \
-"		else\n" \
+"		flag = 0;\n" \
+"		if (ijk.x >= 0 && ijk.x < nx && ijk.y >= 0 && ijk.y < ny && ijk.z >= 0 && ijk.z < nz)\n" \
 "		{\n" \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"			v1 = convert_float(img1[index]) / 255.0f;\n" \
-"			m1 = mask[index];\n" \
-"			v1 = m1 ? v1 : 0.0f;\n" \
+"			if (mask[index])\n" \
+"			{\n" \
+"				v1 = convert_float(img1[index]) / 255.0f;\n" \
+"				flag++;\n" \
+"			}\n" \
 "		}\n" \
 "		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
 "		coord /= coord.w;\n" \
 "		coordi = convert_int4_rtz(coord);\n" \
-"		if (coordi.x < 0 || coordi.x >= nx || coordi.y < 0 || coordi.y >= ny || coordi.z < 0 || coordi.z >= nz)\n" \
-"			v2 = 0.0f;\n" \
-"		else\n" \
+"		if (coordi.x >= 0 && coordi.x < nx && coordi.y >= 0 && coordi.y < ny && coordi.z >= 0 && coordi.z < nz)\n" \
 "		{\n" \
 "			index = nxy*coordi.z + nx*coordi.y + coordi.x;\n" \
 "			v2 = convert_float(img2[index]) / 255.0f;\n" \
+"			flag++;\n" \
 "		}\n" \
-"		w = min(v1, v2);\n" \
-"		v1 = v1 - v2;\n" \
-"		v1 *= v1;\n" \
-"		v1 = 1.0f - v1;\n" \
-"		lsum += v1 * w;\n" \
+"		if (flag == 2)\n" \
+"		{\n" \
+"			w = min(v1, v2);\n" \
+"			v1 = v1 - v2;\n" \
+"			v1 *= v1;\n" \
+"			v1 = 1.0f - v1;\n" \
+"			lsumf += v1 * w;\n" \
+"			lsumi++;\n" \
+"		}\n" \
 "	}\n" \
 "	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(sum+index, lsum);\n" \
+"	atomic_xchg(sumf+index, lsumf);\n" \
+"	atomic_xchg(sumi+index, lsumi);\n" \
 "}\n" \
 "//compare1 16 bit\n" \
 "__kernel void kernel_5(\n" \
 "	__global unsigned short* img1,\n" \
 "	__global unsigned char* mask,\n" \
 "	__global unsigned short* img2,\n" \
-"	__global float* sum,\n" \
+"	__global float* sumf,\n" \
+"	__global uint* sumi,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
@@ -671,11 +723,12 @@ const char* str_cl_stencil_mask = \
 "	ub += bmin;\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int index;\n" \
-"	float lsum = 0.0f;\n" \
+"	float lsumf = 0.0f;\n" \
+"	uint lsumi = 0;\n" \
 "	float v1, v2, w;\n" \
-"	unsigned short m1;\n" \
 "	float4 coord;\n" \
 "	int4 coordi;\n" \
+"	int flag;\n" \
 "#pragma unroll\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "#pragma unroll\n" \
@@ -683,34 +736,39 @@ const char* str_cl_stencil_mask = \
 "#pragma unroll\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
-"			v1 = 0.0f;\n" \
-"		else\n" \
+"		flag = 0;\n" \
+"		if (ijk.x >= 0 && ijk.x < nx && ijk.y >= 0 && ijk.y < ny && ijk.z >= 0 && ijk.z < nz)\n" \
 "		{\n" \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"			v1 = convert_float(img1[index]) / intmax;\n" \
-"			m1 = mask[index];\n" \
-"			v1 = m1 ? v1 : 0.0f;\n" \
+"			if (mask[index])\n" \
+"			{\n" \
+"				v1 = convert_float(img1[index]) / intmax;\n" \
+"				flag++;\n" \
+"			}\n" \
 "		}\n" \
 "		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
 "		coord /= coord.w;\n" \
 "		coordi = convert_int4_rtz(coord);\n" \
-"		if (coordi.x < 0 || coordi.x >= nx || coordi.y < 0 || coordi.y >= ny || coordi.z < 0 || coordi.z >= nz)\n" \
-"			v2 = 0.0f;\n" \
-"		else\n" \
+"		if (coordi.x >= 0 && coordi.x < nx && coordi.y >= 0 && coordi.y < ny && coordi.z >= 0 && coordi.z < nz)\n" \
 "		{\n" \
 "			index = nxy*coordi.z + nx*coordi.y + coordi.x;\n" \
 "			v2 = convert_float(img2[index]) / intmax;\n" \
+"			flag++;\n" \
 "		}\n" \
-"		w = min(v1, v2);\n" \
-"		v1 = v1 - v2;\n" \
-"		v1 *= v1;\n" \
-"		v1 = 1.0f - v1;\n" \
-"		lsum += v1 * w;\n" \
+"		if (flag == 2)\n" \
+"		{\n" \
+"			w = min(v1, v2);\n" \
+"			v1 = v1 - v2;\n" \
+"			v1 *= v1;\n" \
+"			v1 = 1.0f - v1;\n" \
+"			lsumf += v1 * w;\n" \
+"			lsumi++;\n" \
+"		}\n" \
 "	}\n" \
 "	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(sum+index, lsum);\n" \
+"	atomic_xchg(sumf+index, lsumf);\n" \
+"	atomic_xchg(sumi+index, lsumi);\n" \
 "}\n" \
 ;
 
@@ -1053,14 +1111,16 @@ float StencilCompare::Similar(const std::string& name)
 		float(m_s2->tf.get_mat_val(3, 1)),
 		float(m_s2->tf.get_mat_val(3, 2)),
 		float(m_s2->tf.get_mat_val(3, 3)) };
-	float *sum = new float[gsize.gsxyz];
+	cl_float* sumf = new cl_float[gsize.gsxyz];
+	cl_uint* sumi = new cl_uint[gsize.gsxyz];
 	//
 	m_prog->setKernelArgBegin(kernel_index);
 	m_prog->setKernelArgument(m_img1);
 	if (m_use_mask)
 		m_prog->setKernelArgument(m_mask1);
 	m_prog->setKernelArgument(m_img2);
-	flvr::Argument arg_sum = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(sum));
+	flvr::Argument arg_sumf = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_float)*(gsize.gsxyz), (void*)(sumf));
+	flvr::Argument arg_sumi = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_uint) * (gsize.gsxyz), (void*)(sumi));
 	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
@@ -1080,13 +1140,21 @@ float StencilCompare::Similar(const std::string& name)
 	//execute
 	m_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
 	//read back
-	m_prog->readBuffer(sizeof(float)*(gsize.gsxyz), sum, sum);
-	m_prog->releaseMemObject(arg_sum);
+	m_prog->readBuffer(sizeof(cl_float)*(gsize.gsxyz), sumf, sumf);
+	m_prog->readBuffer(sizeof(cl_uint) * (gsize.gsxyz), sumi, sumi);
+	m_prog->releaseMemObject(arg_sumf);
+	m_prog->releaseMemObject(arg_sumi);
 
 	//sum
 	for (int i = 0; i < gsize.gsxyz; ++i)
-		result += sum[i];
-	delete[] sum;
+		result += sumf[i];
+	unsigned int num = 0;
+	for (int i = 0; i < gsize.gsxyz; ++i)
+		num += sumi[i];
+	delete[] sumf;
+	delete[] sumi;
 
+	if (num)
+		return result / num;
 	return result;
 }
