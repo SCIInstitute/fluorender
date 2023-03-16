@@ -514,6 +514,66 @@ wxString ScriptProc::GetConfigFile(
 		style);
 }
 
+bool ScriptProc::GetRegistrationTransform(
+	fluo::Point& transl,
+	fluo::Point& center,
+	fluo::Point& euler,
+	int sn)
+{
+	if (!m_view)
+		return false;
+
+	int curf = m_view->m_tseq_cur_num;
+	int bgnf = m_view->m_begin_play_frame;
+	typedef struct
+	{
+		fluo::Point t;
+		fluo::Point c;
+		fluo::Point e;
+	} RegTrans;
+	std::vector<RegTrans> list;
+
+	int ln = std::max(bgnf + 1, curf - sn);
+	for (int i = curf; i >= ln; --i)
+	{
+		std::string fstr = std::to_string(i);
+		fluo::Node* n = m_output->getChild(fstr);
+		if (!n)
+			continue;
+		fluo::Group* timeg = n->asGroup();
+		if (!timeg)
+			continue;
+		fluo::Node* regg = timeg->getChild("registrator");
+		if (regg)
+		{
+			RegTrans value;
+			regg->getValue("transl", value.t);
+			regg->getValue("center", value.c);
+			regg->getValue("euler", value.e);
+			list.push_back(value);
+		}
+	}
+
+	if (list.empty())
+		return false;
+	double nf = (double)(list.size());
+	//compute average
+	RegTrans avg;
+	for (auto& i : list)
+	{
+		avg.t += i.t;
+		avg.c += i.c;
+		avg.e += i.e;
+	}
+	avg.t /= nf;
+	avg.c /= nf;
+	avg.e /= nf;
+	transl = avg.t;
+	center = avg.c;
+	euler = avg.e;
+	return true;
+}
+
 void ScriptProc::RunNoiseReduction()
 {
 	if (!TimeCondition())
@@ -922,6 +982,9 @@ void ScriptProc::RunSaveVolume()
 	m_fconfig->Read("savepath", &pathname, "");
 	bool del_vol;
 	m_fconfig->Read("delete", &del_vol, false);
+	int smooth;
+	m_fconfig->Read("smooth", &smooth, 0);
+
 	fluo::Quaternion rot;
 	fluo::Point transl, center;
 	bool fix_size = false;
@@ -958,24 +1021,13 @@ void ScriptProc::RunSaveVolume()
 	else if (source == "registrator")
 	{
 		GetVolumes(vlist);
-		std::string curfstr = std::to_string(m_view->m_tseq_cur_num);
-		fluo::Node* n = m_output->getChild(curfstr);
-		if (n)
+		fluo::Point euler;
+		if (GetRegistrationTransform(transl, center, euler, smooth))
 		{
-			fluo::Group* timeg = n->asGroup();
-			if (timeg)
-			{
-				fluo::Node* regg = timeg->getChild("registrator");
-				if (regg)
-				{
-					regg->getValue("transl", transl);
-					regg->getValue("center", center);
-					regg->getValue("rot", rot);
-					crop = true;
-					fix_size = true;
-					neg_mask = true;
-				}
-			}
+			rot.FromEuler(euler.x(), euler.y(), euler.z());
+			crop = true;
+			fix_size = true;
+			neg_mask = true;
 		}
 	}
 	int chan_num = vlist.size();

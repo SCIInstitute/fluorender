@@ -112,6 +112,7 @@ namespace flrd
 		wxString RemoveNum(const wxString& str);
 		wxString IncreaseNum(const wxString& str);
 		wxString GetConfigFile(const wxString& str, const wxString& ext, const wxString& type, int mode);//mode-0 open;1-save
+		bool GetRegistrationTransform(fluo::Point& transl, fluo::Point& center, fluo::Point& euler, int sn);//sn: smooth frame number
 		void RunNoiseReduction();
 		void RunPreTracking();
 		void RunPostTracking();
