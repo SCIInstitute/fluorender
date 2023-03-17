@@ -497,7 +497,7 @@ endif()
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/nd2/include)
 if(WIN32)
   file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/*.lib)
-elseif(APPLE)
+else()
   file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/*.a)
 endif()
 
