@@ -200,6 +200,7 @@ namespace flrd
 			return base;
 		}
 
+#if defined(_WIN32) || defined(_DARWIN)
 		typedef int64_t hid_t;
 		bool hdf_write_attr_b8(hid_t item, const std::string& name, char cval);
 		bool hdf_write_attr_int(hid_t item, const std::string& name, int ival);
@@ -215,6 +216,7 @@ namespace flrd
 			int nx, int ny,
 			const std::vector<double>& vals);
 	};
+#endif
 }
 
 #endif//PYDLC_H

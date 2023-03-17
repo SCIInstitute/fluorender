@@ -246,9 +246,11 @@ if (PYTHON3_FOUND)
 endif()
 
 #hdf5
-set(HDF5_USE_STATIC_LIBRARIES ON)
-find_package(HDF5 REQUIRED)
-include_directories(${HDF5_INCLUDE_DIRS})
+if (WIN32 OR APPLE)
+  set(HDF5_USE_STATIC_LIBRARIES ON)
+  find_package(HDF5 REQUIRED)
+  include_directories(${HDF5_INCLUDE_DIRS})
+endif()
 
 # JNI includes
 find_package(JNI REQUIRED)
@@ -874,7 +876,6 @@ else()
     ${PNG_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${ND2_LIBRARIES}
-    ${HDF5_LIBRARIES}
   )
 endif()
 

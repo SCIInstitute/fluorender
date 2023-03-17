@@ -32,7 +32,9 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <iomanip>
 #include <ctime>
+#if defined(_WIN32) || defined (_DARWIN)
 #include <hdf5.h>
+#endif
 
 using namespace flrd;
 
@@ -409,6 +411,7 @@ void PyDlc::CreateConfigFile(
 	std::filesystem::create_directory(child_path);
 }
 
+#if defined(_WIN32) || defined(_DARWIN)
 void PyDlc::WriteHDF(RulerHandler* rhdl)
 {
 	if (!rhdl)
@@ -712,3 +715,8 @@ bool PyDlc::hdf_write_array2_double(hid_t group, const std::string& name,
 	status = H5Sclose(dspace_id); r = r && (status >= 0);
 	return r;
 }
+#else
+void PyDlc::WriteHDF(RulerHandler* rhdl)
+{}
+
+#endif
