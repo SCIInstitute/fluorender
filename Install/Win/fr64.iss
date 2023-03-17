@@ -127,11 +127,6 @@ Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\FluoRender_benchmark_fullsc
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\FluoRender_benchmark_fullscreen.command"; DestDir: "{app}"; Flags: ignoreversion      
 ; OpenVR      
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\openvr_api.dll"; DestDir: "{app}"; Flags: ignoreversion
-; ND2     
-Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\limfile.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\nd2readsdk.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\tiff.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\zlib1.dll"; DestDir: "{app}"; Flags: ignoreversion
 
 [Registry]
 Root: HKCR; Subkey: ".vrp"; ValueType: string; ValueName: ""; ValueData: "FluoRenderProject"; Flags: uninsdeletevalue
