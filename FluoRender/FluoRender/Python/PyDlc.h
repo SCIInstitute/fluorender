@@ -215,8 +215,8 @@ namespace flrd
 			const std::string& name,
 			int nx, int ny,
 			const std::vector<double>& vals);
-	};
 #endif
+	};
 }
 
 #endif//PYDLC_H
