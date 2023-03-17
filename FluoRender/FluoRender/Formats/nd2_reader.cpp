@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 #include <stdio.h>
 #include <json.hpp>
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(__linux__)
 typedef char                     LIMCHAR;
 typedef LIMCHAR*                 LIMSTR;
 typedef LIMCHAR const*           LIMCSTR;
