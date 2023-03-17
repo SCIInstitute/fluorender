@@ -239,7 +239,7 @@ include_directories(${Boost_INCLUDE_DIR})
 
 #python
 #set(Python_ADDITIONAL_VERSIONS 3.10 3.9 3.8 3.7)
-find_package(Python3 COMPONENTS Interpreter Development)
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 include_directories(${Python3_INCLUDE_DIRS})
 if (PYTHON3_FOUND)
   message (STATUS "Python3_INCLUDE_DIRS=${Python3_INCLUDE_DIRS}")
