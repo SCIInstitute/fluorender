@@ -205,7 +205,7 @@ public:
 	void SetFileName(wxString &filename) { m_filename = filename; }
 	void Run();
 	bool GetRunning() { return m_running; }
-	void GetScriptSettings();
+	void GetScriptSettings(bool sel);
 	int GetCurrentPage() { return m_current_page; }
 	void SetCurrentPage(int page);
 

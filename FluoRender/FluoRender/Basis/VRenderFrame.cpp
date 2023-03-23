@@ -4720,7 +4720,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 			m_setting_dlg->SetRunScript(bVal);
 		if (fconfig.Read("script_file", &sVal))
 			m_setting_dlg->SetScriptFile(sVal);
-		m_movie_view->GetScriptSettings();
+		m_movie_view->GetScriptSettings(false);
 	}
 
 	//tracking diag

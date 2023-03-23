@@ -527,12 +527,12 @@ void VMovieView::GetSettings()
 	SetCurrentTime(m_start_frame);
 	SetCrop(m_view->m_draw_frame);
 	AddScriptToList();
-	GetScriptSettings();
+	GetScriptSettings(true);
 	if (m_advanced_movie)
 		m_advanced_movie->GetSettings(m_view);
 }
 
-void VMovieView::GetScriptSettings()
+void VMovieView::GetScriptSettings(bool sel)
 {
 	//script
 	if (!m_view || !m_frame || !m_frame->GetSettingDlg())
@@ -558,7 +558,7 @@ void VMovieView::GetScriptSettings()
 				break;
 			}
 		}
-		if (idx >= 0)
+		if (idx >= 0 && sel)
 		{
 			m_script_list->SetItemState(idx,
 				wxLIST_STATE_SELECTED,

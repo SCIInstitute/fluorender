@@ -2207,7 +2207,7 @@ void ScriptProc::ChangeScript()
 		m_frame->GetSettingDlg()->SetRunScript(run_script);
 	if (!filename.IsEmpty())
 		m_frame->GetSettingDlg()->SetScriptFile(filename);
-	m_frame->GetMovieView()->GetScriptSettings();
+	m_frame->GetMovieView()->GetScriptSettings(false);
 	m_fconfig_name = filename;
 }
 
