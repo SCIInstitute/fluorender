@@ -1,3 +1,5 @@
+cmake set static libs: libsz, libtiff, libpng, libfreetype
+
 Info Deployment Target: 10.15
 FluoRender/Resources/Info.plist: NSHighResolutionCapable No
 Code Signing Identity: Developer ID Application...
