@@ -38,7 +38,9 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-PyDlc::PyDlc()
+PyDlc::PyDlc() :
+	m_nx(1280),
+	m_ny(720)
 {
 
 }
@@ -341,7 +343,7 @@ void PyDlc::CreateConfigFile(
 	cf << "    # Annotation data set configuration(and individual video cropping parameters)" << std::endl;
 	cf << "video_sets:" << std::endl;
 	cf << "  " << m_video_file << ":" << std::endl;
-	cf << "    crop: 0, 1280, 0, 720" << std::endl;
+	cf << "    crop: 0, " << m_nx << ", 0, " << m_ny << std::endl;
 	cf << "bodyparts:" << std::endl;
 	if (rhdl)
 	{
@@ -350,9 +352,17 @@ void PyDlc::CreateConfigFile(
 	}
 	cf << std::endl;
 	cf << "    # Fraction of video to start/stop when extracting frames for labeling/refinement" << std::endl;
-	cf << "start: 0" << std::endl;
-	cf << "stop: 1" << std::endl;
-	cf << "numframes2pick: 20" << std::endl;
+	cf << "start: " << double(m_start_fn) / double(m_frame_num - 1) << std::endl;
+	cf << "stop: " << double(m_end_fn) / double(m_frame_num - 1) << std::endl;
+	int key_num = 20;
+	if (rhdl)
+	{
+		std::set<size_t> keys;
+		if (!rhdl->GetKeyFrames(keys))
+			return;
+		key_num = keys.size();
+	}
+	cf << "numframes2pick: " << key_num << std::endl;
 	cf << std::endl;
 	cf << "    # Plotting configuration" << std::endl;
 	cf << "skeleton:" << std::endl;
@@ -380,9 +390,9 @@ void PyDlc::CreateConfigFile(
 	cf << "cropping: false" << std::endl;
 	cf << "    #if cropping is true for analysis, then set the values here:" << std::endl;
 	cf << "x1: 0" << std::endl;
-	cf << "x2: 640" << std::endl;
-	cf << "y1: 277" << std::endl;
-	cf << "y2: 624" << std::endl;
+	cf << "x2: " << m_nx << std::endl;
+	cf << "y1: 0" << std::endl;
+	cf << "y2: " << m_ny << std::endl;
 	cf << std::endl;
 	cf << "    # Refinement configuration (parameters from annotation dataset configuration also relevant in this stage)" << std::endl;
 	cf << "corner2move2:" << std::endl;

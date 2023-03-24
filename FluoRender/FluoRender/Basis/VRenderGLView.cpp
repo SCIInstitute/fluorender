@@ -4829,6 +4829,7 @@ void VRenderGLView::Get4DSeqRange(int &start_frame, int &end_frame)
 			}
 		}
 	}
+	m_end_all_frame = end_frame;
 }
 
 void VRenderGLView::UpdateVolumeData(int frame, VolumeData* vd)
@@ -5087,6 +5088,7 @@ void VRenderGLView::Get3DBatRange(int &start_frame, int &end_frame)
 	}
 	end_frame -= start_frame;
 	start_frame = 0;
+	m_end_all_frame = end_frame;
 }
 
 void VRenderGLView::Set3DBatFrame(int frame, int start_frame, int end_frame, bool rewind)

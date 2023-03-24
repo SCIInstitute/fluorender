@@ -812,6 +812,7 @@ public:
 	int m_begin_frame;
 	int m_begin_play_frame;//frame number when the play button is clicked
 	int m_end_frame;
+	int m_end_all_frame;//end of all frames
 	//counters
 	int m_tseq_cur_num;
 	int m_tseq_prv_num;

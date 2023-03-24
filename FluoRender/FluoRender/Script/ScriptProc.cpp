@@ -1852,6 +1852,14 @@ void ScriptProc::RunDlcCreateProj()
 	if (!rhdl)
 		return;
 
+	//resoultion
+	int nx, ny, nz;
+	cur_vol->GetResolution(nx, ny, nz);
+	dlc->SetFrameSize(nx, ny);
+	//range
+	dlc->SetFrameNumber(m_view->m_end_all_frame);
+	dlc->SetFrameRange(m_view->m_begin_frame, m_view->m_end_frame);
+
 	wxString filename;
 	m_fconfig->Read("config", &filename);
 	filename = GetConfigFile(filename, "yaml", "Config", 1);

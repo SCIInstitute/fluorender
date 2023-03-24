@@ -67,6 +67,8 @@ namespace flrd
 		void SetFrameNumber(int n)
 		{
 			m_frame_num = n;
+			m_start_fn = 0;
+			m_end_fn = n - 1;
 			m_fn_length = 0;
 			int temp = n;
 			while (temp)
@@ -74,6 +76,16 @@ namespace flrd
 				temp /= 10;
 				m_fn_length++;
 			}
+		}
+		void SetFrameRange(int start, int end)
+		{
+			m_start_fn = start;
+			m_end_fn = end;
+		}
+		void SetFrameSize(int nx, int ny)
+		{
+			m_nx = nx;
+			m_ny = ny;
 		}
 		std::string GetLabelPath()
 		{
@@ -106,7 +118,11 @@ namespace flrd
 		std::string m_prj_name;
 		std::string m_usr_name;
 		int m_frame_num;
+		int m_start_fn;
+		int m_end_fn;
 		int m_fn_length;
+		int m_nx;
+		int m_ny;
 
 		bool isFloat(const std::string& someString)
 		{
