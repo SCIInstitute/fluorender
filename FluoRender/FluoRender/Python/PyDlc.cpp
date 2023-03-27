@@ -485,23 +485,23 @@ void PyDlc::WriteHDF(RulerHandler* rhdl)
 	//pandas_version
 	hdf_write_attr_utf(group_id, "pandas_version", u8"0.15.2");
 
-	std::vector<char> vals(rpn2, 0);
+	std::vector<int> vals(rpn2, 0);
 	std::vector<std::string> strs;
 	std::vector<double> coords;
 	//axis0
 	//label0
-	hdf_write_array_char(group_id, "axis0_label0", vals);
+	hdf_write_array(group_id, "axis0_label0", vals);
 	//label1
 	for (size_t i = 0; i < rpn; ++i)
-		vals[i * 2] = vals[i * 2 + 1] = char(i);
-	hdf_write_array_char(group_id, "axis0_label1", vals);
+		vals[i * 2] = vals[i * 2 + 1] = int(i);
+	hdf_write_array(group_id, "axis0_label1", vals);
 	//label2
 	for (size_t i = 0; i < rpn; ++i)
 	{
 		vals[i * 2] = 0;
 		vals[i * 2 + 1] = 1;
 	}
-	hdf_write_array_char(group_id, "axis0_label2", vals);
+	hdf_write_array(group_id, "axis0_label2", vals);
 	//level0
 	strs = {m_usr_name};
 	hdf_write_array_str(group_id, "axis0_level0",
@@ -516,14 +516,14 @@ void PyDlc::WriteHDF(RulerHandler* rhdl)
 		"axis0_namecoords", u8"coords", strs);
 	//axis1
 	//label0
-	vals = std::vector<char>(kn, 0);
-	hdf_write_array_char(group_id, "axis1_label0", vals);
+	vals = std::vector<int>(kn, 0);
+	hdf_write_array(group_id, "axis1_label0", vals);
 	//label1
-	hdf_write_array_char(group_id, "axis1_label1", vals);
+	hdf_write_array(group_id, "axis1_label1", vals);
 	//label2
 	for (size_t i = 0; i < kn; ++i)
-		vals[i] = i;
-	hdf_write_array_char(group_id, "axis1_label2", vals);
+		vals[i] = int(i);
+	hdf_write_array(group_id, "axis1_label2", vals);
 	//level0
 	strs = { "labeled-data" };
 	hdf_write_array_str(group_id, "axis1_level0",
@@ -545,19 +545,19 @@ void PyDlc::WriteHDF(RulerHandler* rhdl)
 		"axis1_nameNone", u8"N.", strs);
 	//block0_items
 	//label0
-	vals = std::vector<char>(rpn2, 0);
-	hdf_write_array_char(group_id, "block0_items_label0", vals);
+	vals = std::vector<int>(rpn2, 0);
+	hdf_write_array(group_id, "block0_items_label0", vals);
 	//label1
 	for (size_t i = 0; i < rpn; ++i)
-		vals[i * 2] = vals[i * 2 + 1] = char(i);
-	hdf_write_array_char(group_id, "block0_items_label1", vals);
+		vals[i * 2] = vals[i * 2 + 1] = int(i);
+	hdf_write_array(group_id, "block0_items_label1", vals);
 	//label2
 	for (size_t i = 0; i < rpn; ++i)
 	{
 		vals[i * 2] = 0;
 		vals[i * 2 + 1] = 1;
 	}
-	hdf_write_array_char(group_id, "block0_items_label2", vals);
+	hdf_write_array(group_id, "block0_items_label2", vals);
 	//level0
 	strs = { m_usr_name };
 	hdf_write_array_str(group_id, "block0_items_level0",
@@ -621,6 +621,28 @@ bool PyDlc::hdf_write_attr_utf(hid_t item, const std::string& name, const std::u
 	return r;
 }
 
+bool PyDlc::hdf_write_array(hid_t group, const std::string& name, const std::vector<int>& vals)
+{
+	size_t num = vals.size();
+	if (num < 128)
+	{
+		std::vector<char> cvals;
+		for (auto& i : vals)
+			cvals.push_back(char(i));
+		return hdf_write_array_char(group, name, cvals);
+	}
+	else if (num < 32768)
+	{
+		std::vector<short> svals;
+		for (auto& i : vals)
+			svals.push_back(short(i));
+		return hdf_write_array_short(group, name, svals);
+	}
+	else
+		return hdf_write_array_int(group, name, vals);
+	return false;
+}
+
 bool PyDlc::hdf_write_array_char(hid_t group, const std::string& name, const std::vector<char>& vals)
 {
 	bool r = true;
@@ -642,6 +664,58 @@ bool PyDlc::hdf_write_array_char(hid_t group, const std::string& name, const std
 	hdf_write_attr_b8(data_id, "transposed", 1);
 
 	status = H5Dwrite(data_id, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, vals.data()); r = r && (status >= 0);
+	status = H5Dclose(data_id); r = r && (status >= 0);
+	status = H5Sclose(dspace_id); r = r && (status >= 0);
+	return r;
+}
+
+bool PyDlc::hdf_write_array_short(hid_t group, const std::string& name, const std::vector<short>& vals)
+{
+	bool r = true;
+	herr_t status;
+	hsize_t dims1[1];
+	dims1[0] = vals.size();
+	hid_t dspace_id = H5Screate_simple(1, dims1, NULL);
+	hid_t data_id = H5Dcreate2(group, name.c_str(), H5T_STD_I16LE, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+	//attrs
+	//class
+	hdf_write_attr_utf(data_id, "CLASS", u8"ARRAY");
+	//flavor
+	hdf_write_attr_utf(data_id, "FLAVOR", u8"numpy");
+	//title
+	hdf_write_attr_utf(data_id, "TITLE", u8"");
+	//version
+	hdf_write_attr_utf(data_id, "VERSION", u8"2.4");
+	//transposed
+	hdf_write_attr_b8(data_id, "transposed", 1);
+
+	status = H5Dwrite(data_id, H5T_NATIVE_SHORT, H5S_ALL, H5S_ALL, H5P_DEFAULT, vals.data()); r = r && (status >= 0);
+	status = H5Dclose(data_id); r = r && (status >= 0);
+	status = H5Sclose(dspace_id); r = r && (status >= 0);
+	return r;
+}
+
+bool PyDlc::hdf_write_array_int(hid_t group, const std::string& name, const std::vector<int>& vals)
+{
+	bool r = true;
+	herr_t status;
+	hsize_t dims1[1];
+	dims1[0] = vals.size();
+	hid_t dspace_id = H5Screate_simple(1, dims1, NULL);
+	hid_t data_id = H5Dcreate2(group, name.c_str(), H5T_STD_I32LE, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+	//attrs
+	//class
+	hdf_write_attr_utf(data_id, "CLASS", u8"ARRAY");
+	//flavor
+	hdf_write_attr_utf(data_id, "FLAVOR", u8"numpy");
+	//title
+	hdf_write_attr_utf(data_id, "TITLE", u8"");
+	//version
+	hdf_write_attr_utf(data_id, "VERSION", u8"2.4");
+	//transposed
+	hdf_write_attr_b8(data_id, "transposed", 1);
+
+	status = H5Dwrite(data_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, vals.data()); r = r && (status >= 0);
 	status = H5Dclose(data_id); r = r && (status >= 0);
 	status = H5Sclose(dspace_id); r = r && (status >= 0);
 	return r;

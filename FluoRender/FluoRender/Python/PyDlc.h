@@ -221,7 +221,10 @@ namespace flrd
 		bool hdf_write_attr_b8(hid_t item, const std::string& name, char cval);
 		bool hdf_write_attr_int(hid_t item, const std::string& name, int ival);
 		bool hdf_write_attr_utf(hid_t item, const std::string& name, const std::u8string& str);
+		bool hdf_write_array(hid_t group, const std::string& name, const std::vector<int>& vals);
 		bool hdf_write_array_char(hid_t group, const std::string& name, const std::vector<char>& vals);
+		bool hdf_write_array_short(hid_t group, const std::string& name, const std::vector<short>& vals);
+		bool hdf_write_array_int(hid_t group, const std::string& name, const std::vector<int>& vals);
 		bool hdf_write_array_str(hid_t group,
 			const std::string& name,
 			const std::string& str1,
