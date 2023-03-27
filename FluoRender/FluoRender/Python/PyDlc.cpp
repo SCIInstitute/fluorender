@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <iomanip>
 #include <ctime>
+#include <algorithm>
 #if defined(_WIN32) || defined (_DARWIN)
 #include <hdf5.h>
 #endif
@@ -623,15 +624,17 @@ bool PyDlc::hdf_write_attr_utf(hid_t item, const std::string& name, const std::u
 
 bool PyDlc::hdf_write_array(hid_t group, const std::string& name, const std::vector<int>& vals)
 {
-	size_t num = vals.size();
-	if (num < 128)
+	auto mm = std::minmax_element(vals.begin(), vals.end());
+	int minval = *mm.first;
+	int maxval = *mm.second;
+	if (maxval < 128 && minval > -129)
 	{
 		std::vector<char> cvals;
 		for (auto& i : vals)
 			cvals.push_back(char(i));
 		return hdf_write_array_char(group, name, cvals);
 	}
-	else if (num < 32768)
+	else if (maxval < 32768 && minval > -32769)
 	{
 		std::vector<short> svals;
 		for (auto& i : vals)
