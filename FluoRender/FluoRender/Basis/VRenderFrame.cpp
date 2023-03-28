@@ -4722,12 +4722,12 @@ void VRenderFrame::OpenProject(wxString& filename)
 		{
 			if (curf && curf >= startf && curf <= endf)
 			{
+				m_movie_view->SetCurrentTime(curf);
 				VRenderGLView* view = GetLastView();
 				if (view)
 				{
 					view->Set4DSeqFrame(curf, startf, endf, false);
 				}
-				//m_measure_dlg->UpdateList();
 			}
 		}
 		if (fconfig.Read("run_script", &bVal))
