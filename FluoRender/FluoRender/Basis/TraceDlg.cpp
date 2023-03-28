@@ -2906,6 +2906,10 @@ int TraceDlg::GetTrackFileExist(bool save)
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return 0;
+	if (!trace_group->GetTrackMap())
+		return 0;
+	if (!trace_group->GetTrackMap()->GetFrameNum())
+		return 0;
 	wxString filename = trace_group->GetPath();
 	if (wxFileExists(filename))
 	{

@@ -188,6 +188,7 @@ public:
 		m_end_frame_text->SetValue(wxString::Format("%d", m_end_frame));
 	}
 	int GetEndFrame() { return m_end_frame; }
+	int GetCurFrame() { return m_cur_frame; }
 	//cropping
 	void SetCrop(bool value);
 	bool GetCrop() { return m_crop; }

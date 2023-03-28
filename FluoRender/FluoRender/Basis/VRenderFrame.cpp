@@ -3409,6 +3409,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.Write("crop_y", m_movie_view->GetCropY());
 	fconfig.Write("crop_w", m_movie_view->GetCropW());
 	fconfig.Write("crop_h", m_movie_view->GetCropH());
+	fconfig.Write("cur_frame", m_movie_view->GetCurFrame());
 	fconfig.Write("start_frame", m_movie_view->GetStartFrame());
 	fconfig.Write("end_frame", m_movie_view->GetEndFrame());
 	fconfig.Write("run_script", m_setting_dlg->GetRunScript());
@@ -4712,10 +4713,23 @@ void VRenderFrame::OpenProject(wxString& filename)
 		{
 			m_movie_view->UpdateCrop();
 		}
-		if (fconfig.Read("start_frame", &iVal))
-			m_movie_view->SetStartFrame(iVal);
-		if (fconfig.Read("end_frame", &iVal))
-			m_movie_view->SetEndFrame(iVal);
+		int startf = 0, endf = 0, curf = 0;
+		if (fconfig.Read("start_frame", &startf))
+			m_movie_view->SetStartFrame(startf);
+		if (fconfig.Read("end_frame", &endf))
+			m_movie_view->SetEndFrame(endf);
+		if (fconfig.Read("cur_frame", &curf))
+		{
+			if (curf && curf >= startf && curf <= endf)
+			{
+				VRenderGLView* view = GetLastView();
+				if (view)
+				{
+					view->Set4DSeqFrame(curf, startf, endf, false);
+				}
+				//m_measure_dlg->UpdateList();
+			}
+		}
 		if (fconfig.Read("run_script", &bVal))
 			m_setting_dlg->SetRunScript(bVal);
 		if (fconfig.Read("script_file", &sVal))
