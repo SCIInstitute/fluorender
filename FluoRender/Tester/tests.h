@@ -20,3 +20,5 @@ void PythonTest0();
 #include <string>
 void PythonTest1(const std::string& config, const std::string& video);
 void PythonTest2(const std::string& config, const std::string& video);
+
+void OpenCVTest0();

@@ -41,7 +41,9 @@ int main(int argc, char* argv[])
 
 	//PythonTest2(argv[1], argv[2]);
 
-	PythonTest0();
+	//PythonTest0();
+
+	OpenCVTest0();
 
 	cout << "All done. Quit." << endl;
 	cin.get();

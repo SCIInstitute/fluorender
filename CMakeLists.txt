@@ -237,6 +237,13 @@ set(Boost_USE_STATIC_RUNTIME    OFF)
 find_package(Boost COMPONENTS system chrono filesystem REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
+#opencv
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+if (OPENCV_FOUND)
+  message (STATUS "OpenCV_INCLUDE_DIRS=${OpenCV_INCLUDE_DIRS}")
+endif()
+
 #python
 #set(Python_ADDITIONAL_VERSIONS 3.10 3.9 3.8 3.7)
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
@@ -834,6 +841,7 @@ if(WIN32)
     ${wxWidgets_LIBRARIES}
     ${ND2_LIBRARIES}
     ${HDF5_LIBRARIES}
+    ${OpenCV_LIBS}
   )
   target_link_libraries(Tester
     secur32.lib
@@ -848,6 +856,7 @@ if(WIN32)
     ${FREETYPE_LIBRARIES}
     ${OpenVR_LIBRARIES}
     ${HDF5_LIBRARIES}
+    ${OpenCV_LIBS}
   )
 elseif(APPLE)
   target_link_libraries(FluoRender
@@ -862,6 +871,7 @@ elseif(APPLE)
     ${ZLIB_LIBRARIES}
     ${ND2_LIBRARIES}
     ${HDF5_LIBRARIES}
+    ${OpenCV_LIBS}
   )
 else()
   target_link_libraries(FluoRender
@@ -876,6 +886,7 @@ else()
     ${PNG_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${ND2_LIBRARIES}
+    ${OpenCV_LIBS}
   )
 endif()
 
