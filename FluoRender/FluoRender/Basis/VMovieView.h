@@ -50,7 +50,9 @@ class VMovieView : public wxPanel
 		ID_BatChk,//batch mutual exclusive with seq(4d)
 		ID_IncTimeBtn,
 		ID_DecTimeBtn,
+		ID_StartFrameSync,
 		ID_StartFrameText,
+		ID_EndFrameSync,
 		ID_EndFrameText,
 		ID_CurFrameText,
 		//movie len
@@ -254,7 +256,9 @@ private:
 	wxButton *m_inc_time_btn;
 	wxButton *m_dec_time_btn;
 	wxTextCtrl *m_cur_frame_text;
+	wxStaticText* m_start_frame_st;
 	wxTextCtrl *m_start_frame_text;
+	wxStaticText* m_end_frame_st;
 	wxTextCtrl *m_end_frame_text;
 	wxTextCtrl *m_movie_len_text;
 
@@ -407,7 +411,9 @@ private:
 	void OnUpFrame(wxCommandEvent& event);
 	void OnDownFrame(wxCommandEvent& event);
 	void OnCurFrameText(wxCommandEvent& event);
+	void OnStartFrameSync(wxMouseEvent& event);
 	void OnStartFrameText(wxCommandEvent& event);
+	void OnEndFrameSync(wxMouseEvent& event);
 	void OnEndFrameText(wxCommandEvent& event);
 	void OnMovieLenText(wxCommandEvent& event);
 	void OnFpsEdit(wxCommandEvent& event);

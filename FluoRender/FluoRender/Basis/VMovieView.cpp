@@ -121,7 +121,6 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent)
 		wxDefaultPosition, wxSize(40, -1));
 	m_end_frame_text = new wxTextCtrl(page, ID_EndFrameText, "10",
 		wxDefaultPosition, wxSize(40, -1));
-	st2 = new wxStaticText(page, wxID_ANY, "End Frame: ");
 	//sizer 1
 	sizer_1->Add(m_seq_chk, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_bat_chk, 0, wxALIGN_CENTER);
@@ -130,12 +129,21 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent)
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(20, 5, 0);
 	//sizer 2
-	st = new wxStaticText(page, wxID_ANY, "Start Frame: ");
+	m_start_frame_st = new wxStaticText(page, ID_StartFrameSync, "Start Frame: ");
+	m_start_frame_st->Connect(ID_StartFrameSync, wxEVT_LEFT_DCLICK,
+		wxMouseEventHandler(VMovieView::OnStartFrameSync), NULL, this);
+	m_start_frame_st->Connect(ID_StartFrameSync, wxEVT_RIGHT_DCLICK,
+		wxMouseEventHandler(VMovieView::OnStartFrameSync), NULL, this);
+	m_end_frame_st = new wxStaticText(page, ID_EndFrameSync, "End Frame: ");
+	m_end_frame_st->Connect(ID_EndFrameSync, wxEVT_LEFT_DCLICK,
+		wxMouseEventHandler(VMovieView::OnEndFrameSync), NULL, this);
+	m_end_frame_st->Connect(ID_EndFrameSync, wxEVT_RIGHT_DCLICK,
+		wxMouseEventHandler(VMovieView::OnEndFrameSync), NULL, this);
 	sizer_2->Add(5, 5, 0);
-	sizer_2->Add(st, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_start_frame_st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_start_frame_text, 0, wxALIGN_CENTER);
 	sizer_2->Add(5, 5, 0);
-	sizer_2->Add(st2, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_end_frame_st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_end_frame_text, 0, wxALIGN_CENTER);
 	m_inc_time_btn = new wxButton(page, ID_IncTimeBtn, "",
 		wxDefaultPosition, wxSize(30, 30));
@@ -1497,6 +1505,12 @@ void VMovieView::OnCurFrameText(wxCommandEvent& event)
 	SetRendering(pcnt);
 }
 
+void VMovieView::OnStartFrameSync(wxMouseEvent& event)
+{
+	wxString str = m_cur_frame_text->GetValue();
+	m_start_frame_text->SetValue(str);
+}
+
 void VMovieView::OnStartFrameText(wxCommandEvent& event)
 {
 	wxString str = m_start_frame_text->GetValue();
@@ -1504,6 +1518,12 @@ void VMovieView::OnStartFrameText(wxCommandEvent& event)
 	if (str.ToLong(&lval))
 		m_start_frame = lval;
 	OnFpsEdit(event);
+}
+
+void VMovieView::OnEndFrameSync(wxMouseEvent& event)
+{
+	wxString str = m_cur_frame_text->GetValue();
+	m_end_frame_text->SetValue(str);
 }
 
 void VMovieView::OnEndFrameText(wxCommandEvent& event)
