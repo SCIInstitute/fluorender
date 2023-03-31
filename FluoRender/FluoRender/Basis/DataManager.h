@@ -1240,6 +1240,7 @@ public:
 	//if data's directory doesn't exist
 	void SetProjectPath(wxString path);
 	wxString SearchProjectPath(wxString &filename);
+	wxString GetProjectFile();
 
 	//load volume
 	void SetReaderFpConvert(bool fp_convert, double minv, double maxv)
@@ -1398,6 +1399,7 @@ private:
 	bool m_load_mask;
 	//project path
 	wxString m_prj_path;
+	wxString m_prj_file;
 	//override voxel size
 	bool m_override_vox;
 	//flgs for pvxml flipping

@@ -777,4 +777,58 @@ inline std::regex REGEX(const std::string& wildcard, bool caseSensitive = true)
 	return std::regex(regexString, caseSensitive ? std::regex_constants::ECMAScript : std::regex_constants::icase);
 }
 
+inline wxString REM_EXT(const wxString& str)
+{
+	int pos = str.Find('.', true);
+	if (pos != wxNOT_FOUND)
+		return str.Left(pos);
+	return str;
+}
+
+inline wxString REM_NUM(const wxString& str)
+{
+	wxString tmp = REM_EXT(str);
+	while (wxIsdigit(tmp.Last()))
+		tmp.RemoveLast();
+	return tmp;
+}
+
+inline wxString INC_NUM(const wxString& str)
+{
+	int pos = str.Find('.', true);
+	wxString ext;
+	if (pos != wxNOT_FOUND)
+		ext = str.Right(str.Length() - pos);
+	wxString tmp = str.Left(pos);
+	wxString digits;
+	while (wxIsdigit(tmp.Last()))
+	{
+		digits.Prepend(tmp.Last());
+		tmp.RemoveLast();
+	}
+	int len = digits.Length();
+	if (!len)
+	{
+		return tmp + "01" + ext;
+	}
+	long num;
+	digits.ToLong(&num);
+	num++;
+	digits = wxString::Format("%d", num);
+	if (digits.Length() < len)
+	{
+		wxString format = wxString::Format("%%0%dd", len);
+		digits = wxString::Format(format, num);
+	}
+	return tmp + digits + ext;
+}
+
+inline wxString INC_NUM_EXIST(const wxString& str)
+{
+	wxString str2 = str;
+	while (wxFileExists(str2))
+		str2 = INC_NUM(str2);
+	return str2;
+}
+
 #endif //END__COMPATIBILITY_H__

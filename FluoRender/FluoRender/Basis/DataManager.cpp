@@ -4762,6 +4762,7 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 //if data's directory doesn't exist
 void DataManager::SetProjectPath(wxString path)
 {
+	m_prj_file = path;
 	m_prj_path.Clear();
 	m_prj_path = wxPathOnly(path);
 }
@@ -4788,6 +4789,11 @@ wxString DataManager::SearchProjectPath(wxString &filename)
 			search_str.Prepend(pathname[i]);
 	}
 	return "";
+}
+
+wxString DataManager::GetProjectFile()
+{
+	return m_prj_file;
 }
 
 int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, int ch_num, int t_num)

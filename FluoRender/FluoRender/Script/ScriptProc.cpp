@@ -426,10 +426,8 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 		}
 	}
 	if (!rep)
-	{
-		while (wxFileExists(path))
-			path = IncreaseNum(path);
-	}
+			path = INC_NUM_EXIST(path);
+
 	node = m_output->getOrAddNode("savepath");
 	path = STR_DIR_SEP(path.ToStdString());
 	node->addSetValue("path", path.ToStdString());
@@ -449,52 +447,6 @@ wxString ScriptProc::GetDataDir(const wxString &ext)
 	path += GETSLASH();
 	path += "output01." + ext;
 	return path;
-}
-
-wxString ScriptProc::RemoveExt(const wxString& str)
-{
-	int pos = str.Find('.', true);
-	if (pos != wxNOT_FOUND)
-		return str.Left(pos);
-	return str;
-}
-
-wxString ScriptProc::RemoveNum(const wxString& str)
-{
-	wxString tmp = RemoveExt(str);
-	while (wxIsdigit(tmp.Last()))
-		tmp.RemoveLast();
-	return tmp;
-}
-
-wxString ScriptProc::IncreaseNum(const wxString& str)
-{
-	int pos = str.Find('.', true);
-	wxString ext;
-	if (pos != wxNOT_FOUND)
-		ext = str.Right(str.Length() - pos);
-	wxString tmp = str.Left(pos);
-	wxString digits;
-	while (wxIsdigit(tmp.Last()))
-	{
-		digits.Prepend(tmp.Last());
-		tmp.RemoveLast();
-	}
-	int len = digits.Length();
-	if (!len)
-	{
-		return tmp + "01" + ext;
-	}
-	long num;
-	digits.ToLong(&num);
-	num++;
-	digits = wxString::Format("%d", num);
-	if (digits.Length() < len)
-	{
-		wxString format = wxString::Format("%%0%dd", len);
-		digits = wxString::Format(format, num);
-	}
-	return tmp + digits + ext;
 }
 
 wxString ScriptProc::GetConfigFile(
@@ -1039,8 +991,8 @@ void ScriptProc::RunSaveVolume()
 	else if (mode == 2)
 		ext = "nrrd";
 	str = GetSavePath(pathname, ext);
-	str = RemoveExt(str);
-	str = RemoveNum(str);
+	str = REM_EXT(str);
+	str = REM_NUM(str);
 	if (str.IsEmpty())
 		return;
 	for (auto i = vlist.begin();

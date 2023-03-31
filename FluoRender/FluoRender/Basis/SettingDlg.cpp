@@ -36,6 +36,7 @@ EVT_BUTTON(ID_SaveBtn, SettingDlg::OnSave)
 EVT_BUTTON(ID_CloseBtn, SettingDlg::OnClose)
 //project save
 EVT_CHECKBOX(ID_PrjSaveChk, SettingDlg::OnProjectSaveCheck)
+EVT_CHECKBOX(ID_PrjSaveIncChk, SettingDlg::OnProjectSaveIncCheck)
 //real time compress
 EVT_CHECKBOX(ID_RealtimeCmpChk, SettingDlg::OnRealtimeCompressCheck)
 //script break
@@ -126,12 +127,16 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 		new wxStaticBox(page, wxID_ANY, "Open/Save/Script Run"), wxVERTICAL);
 	m_prj_save_chk = new wxCheckBox(page, ID_PrjSaveChk,
 		"Save project when capture viewport or export movie.");
+	m_prj_save_inc_chk = new wxCheckBox(page, ID_PrjSaveIncChk,
+		"Save project in new files with incremental serial numbers.");
 	m_realtime_cmp_chk = new wxCheckBox(page, ID_RealtimeCmpChk,
 		"Compress data in graphics memory when loading.");
 	m_script_break_chk = new wxCheckBox(page, ID_ScriptBreakChk,
 		"Allow script information prompts.");
 	group1->Add(10, 5);
 	group1->Add(m_prj_save_chk);
+	group1->Add(10, 5);
+	group1->Add(m_prj_save_inc_chk);
 	group1->Add(10, 5);
 	group1->Add(m_realtime_cmp_chk);
 	group1->Add(10, 5);
@@ -825,6 +830,7 @@ void SettingDlg::GetSettings()
 {
 	m_gmc_mode = 2;
 	m_prj_save = false;
+	m_prj_save_inc = false;
 	m_save_alpha = false;
 	m_save_float = false;
 	m_dpi = 72.0f;
@@ -949,6 +955,7 @@ void SettingDlg::GetSettings()
 	{
 		fconfig.SetPath("/save project");
 		fconfig.Read("mode", &m_prj_save, false);
+		fconfig.Read("inc", &m_prj_save_inc, false);
 	}
 	//save alpha
 	if (fconfig.Exists("/save alpha"))
@@ -1274,6 +1281,7 @@ void SettingDlg::UpdateUI()
 	//update user interface
 	//save project
 	m_prj_save_chk->SetValue(m_prj_save);
+	m_prj_save_inc_chk->SetValue(m_prj_save_inc);
 	//realtime compression
 	m_realtime_cmp_chk->SetValue(m_realtime_compress);
 	//script break
@@ -1448,6 +1456,7 @@ void SettingDlg::SaveSettings()
 
 	fconfig.SetPath("/save project");
 	fconfig.Write("mode", m_prj_save);
+	fconfig.Write("inc", m_prj_save_inc);
 
 	fconfig.SetPath("/dpi");
 	fconfig.Write("value", m_dpi);
@@ -1739,6 +1748,14 @@ void SettingDlg::OnProjectSaveCheck(wxCommandEvent &event)
 		m_prj_save = true;
 	else
 		m_prj_save = false;
+}
+
+void SettingDlg::OnProjectSaveIncCheck(wxCommandEvent& event)
+{
+	if (m_prj_save_inc_chk->GetValue())
+		m_prj_save_inc = true;
+	else
+		m_prj_save_inc = false;
 }
 
 void SettingDlg::OnRealtimeCompressCheck(wxCommandEvent &event)

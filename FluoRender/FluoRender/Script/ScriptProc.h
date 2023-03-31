@@ -108,9 +108,6 @@ namespace flrd
 		wxString GetInputFile(const wxString &str, const wxString &subd);
 		wxString GetSavePath(const wxString &str, const wxString &ext, bool rep = true);
 		wxString GetDataDir(const wxString &ext);
-		wxString RemoveExt(const wxString& str);
-		wxString RemoveNum(const wxString& str);
-		wxString IncreaseNum(const wxString& str);
 		wxString GetConfigFile(const wxString& str, const wxString& ext, const wxString& type, int mode);//mode-0 open;1-save
 		bool GetRegistrationTransform(fluo::Point& transl, fluo::Point& center, fluo::Point& euler, int sn);//sn: smooth frame number
 		void RunNoiseReduction();

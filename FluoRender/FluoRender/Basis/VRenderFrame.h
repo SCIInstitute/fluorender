@@ -115,6 +115,7 @@ class VRenderFrame: public wxFrame
 		//file\new
 		ID_Save = ID_VRENDER_FRAME,
 		ID_SaveProject,
+		ID_SaveAsProject,
 		//file\open
 		ID_Open,
 		ID_OpenProject,
@@ -276,7 +277,7 @@ public:
 
 	void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
 	void OpenProject(wxString& filename);
-	void SaveProject(wxString& filename);
+	void SaveProject(wxString& filename, bool inc);//inc: save incrementally
 	void LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLView* view = 0);
 	void LoadMeshes(wxArrayString files, VRenderGLView* view = 0);
 
@@ -482,6 +483,8 @@ private:
 	//benchmark mode
 	bool m_benchmark;
 
+	wxString m_title;
+
 private:
 	//views
 	wxString CreateView(int row=1);
@@ -529,6 +532,7 @@ private:
 	void OnCreateCone(wxCommandEvent& WXUNUSED(event));
 
 	void OnSaveProject(wxCommandEvent& WXUNUSED(event));
+	void OnSaveAsProject(wxCommandEvent& WXUNUSED(event));
 	void OnOpenProject(wxCommandEvent& WXUNUSED(event));
 
 	void OnSettings(wxCommandEvent& WXUNUSED(event));

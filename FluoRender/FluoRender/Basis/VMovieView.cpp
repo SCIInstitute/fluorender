@@ -1486,7 +1486,9 @@ void VMovieView::Run()
 			name = GET_NAME(name);
 			wxString prop_file = new_folder + GETSLASH()
 				+ name + "_project.vrp";
-			m_frame->SaveProject(prop_file);
+			bool inc = wxFileExists(prop_file) &&
+				m_frame->GetSettingDlg()->GetProjSaveInc();
+			m_frame->SaveProject(prop_file, inc);
 		}
 	}
 

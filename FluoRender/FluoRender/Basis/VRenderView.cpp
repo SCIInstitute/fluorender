@@ -1354,7 +1354,9 @@ void VRenderView::OnCapture(wxCommandEvent& event)
 				new_folder = m_glview->m_cap_file + "_project";
 				MkDirW(new_folder.ToStdWstring());
 				wxString prop_file = new_folder + GETSLASH() + file_dlg.GetFilename() + "_project.vrp";
-				vr_frame->SaveProject(prop_file);
+				bool inc = wxFileExists(prop_file) && 
+					vr_frame->GetSettingDlg()->GetProjSaveInc();
+				vr_frame->SaveProject(prop_file, inc);
 			}
 			vr_frame->GetSettingDlg()->SetSaveAlpha(VRenderFrame::GetSaveAlpha());
 			vr_frame->GetSettingDlg()->SetSaveFloat(VRenderFrame::GetSaveFloat());

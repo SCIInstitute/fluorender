@@ -69,6 +69,7 @@ BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 	EVT_MENU(ID_CreateSphere, VRenderFrame::OnCreateSphere)
 	EVT_MENU(ID_CreateCone, VRenderFrame::OnCreateCone)
 	EVT_MENU(ID_SaveProject, VRenderFrame::OnSaveProject)
+	EVT_MENU(ID_SaveAsProject, VRenderFrame::OnSaveAsProject)
 	EVT_MENU(ID_OpenProject, VRenderFrame::OnOpenProject)
 	EVT_MENU(ID_Settings, VRenderFrame::OnSettings)
 	EVT_MENU(ID_ImportVolume, VRenderFrame::OnImportVolume)
@@ -137,6 +138,7 @@ VRenderFrame::VRenderFrame(
 	bool windowed,
 	bool hidepanels)
 	: wxFrame(frame, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE),
+	m_title(title),
 	m_movie_view(0),
 	m_tree_panel(0),
 	m_list_panel(0),
@@ -752,6 +754,10 @@ VRenderFrame::VRenderFrame(
 	m_top_file->Append(m);
 
 	m = new wxMenuItem(m_top_file,ID_SaveProject, wxT("&Save Project"));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_save_project_mini));
+	m_top_file->Append(m);
+
+	m = new wxMenuItem(m_top_file, ID_SaveAsProject, wxT("Save &As Project"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_save_project_mini));
 	m_top_file->Append(m);
 
@@ -2835,16 +2841,38 @@ wxWindow* VRenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
 
 void VRenderFrame::OnSaveProject(wxCommandEvent& WXUNUSED(event))
 {
-	wxFileDialog *fopendlg = new wxFileDialog(
+	std::wstring default_path = m_data_mgr.GetProjectFile().ToStdWstring();
+	if (default_path.empty())
+	{
+		wxCommandEvent e;
+		OnSaveAsProject(e);
+	}
+	else
+	{
+		wxString filename = default_path;
+		bool inc = m_setting_dlg->GetProjSaveInc();
+		SaveProject(filename, inc);
+	}
+}
+
+void VRenderFrame::OnSaveAsProject(wxCommandEvent& WXUNUSED(event))
+{
+	std::wstring default_path = m_data_mgr.GetProjectFile().ToStdWstring();
+	std::wstring path;
+	std::wstring filename;
+	bool default_valid = SEP_PATH_NAME(default_path, path, filename);
+
+	wxFileDialog* fopendlg = new wxFileDialog(
 		this, "Save Project File",
-		"", "", "*.vrp", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+		default_valid ? path : L"", default_valid ? filename : L"",
+		"*.vrp", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 	fopendlg->SetExtraControlCreator(CreateExtraControlProjectSave);
 
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
 		wxString filename = fopendlg->GetPath();
-		SaveProject(filename);
+		SaveProject(filename, false);
 	}
 
 	delete fopendlg;
@@ -2866,12 +2894,16 @@ void VRenderFrame::OnOpenProject(wxCommandEvent& WXUNUSED(event))
 	delete fopendlg;
 }
 
-void VRenderFrame::SaveProject(wxString& filename)
+void VRenderFrame::SaveProject(wxString& filename, bool inc)
 {
+	wxString filename2 = filename;
+	if (inc)
+		filename2 = INC_NUM_EXIST(filename);
+
 	wxString app_name = "FluoRender " +
 		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
 	wxString vendor_name = "FluoRender";
-	wxString local_name = filename;
+	wxString local_name = filename2;
 	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
 		wxCONFIG_USE_LOCAL_FILE);
 
@@ -2928,7 +2960,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			if (str == "" || m_vrp_embed)
 			{
 				wxString new_folder;
-				new_folder = filename + "_files";
+				new_folder = filename2 + "_files";
 				MkDirW(new_folder.ToStdWstring());
 				str = new_folder + GETSLASH() + vd->GetName() + ".tif";
 				vd->Save(str, 0, 3, false,
@@ -3110,7 +3142,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			if (md->GetPath() == "" || m_vrp_embed)
 			{
 				wxString new_folder;
-				new_folder = filename + "_files";
+				new_folder = filename2 + "_files";
 				MkDirW(new_folder.ToStdWstring());
 				str = new_folder + GETSLASH() + md->GetName() + ".obj";
 				md->Save(str);
@@ -3179,7 +3211,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			if (ann->GetPath() == "")
 			{
 				wxString new_folder;
-				new_folder = filename + "_files";
+				new_folder = filename2 + "_files";
 				MkDirW(new_folder.ToStdWstring());
 				str = new_folder + GETSLASH() + ann->GetName() + ".txt";
 				ann->Save(str);
@@ -3420,9 +3452,9 @@ void VRenderFrame::SaveProject(wxString& filename)
 	if (ival == 1)
 	{
 		wxString new_folder;
-		new_folder = filename + "_files";
+		new_folder = filename2 + "_files";
 		MkDirW(new_folder.ToStdWstring());
-		std::wstring wstr = filename.ToStdWstring();
+		std::wstring wstr = filename2.ToStdWstring();
 		str = new_folder + GETSLASH() + GET_NAME(wstr) + ".track";
 		m_trace_dlg->SaveTrackFile(str);
 	}
@@ -3540,15 +3572,18 @@ void VRenderFrame::SaveProject(wxString& filename)
 		}
 	}
 
-	SaveConfig(fconfig, filename);
+	SaveConfig(fconfig, filename2);
 	UpdateList();
 
 	delete prg_diag;
+	m_data_mgr.SetProjectPath(filename2);
+	SetTitle(m_title + " - " + filename2);
 }
 
 void VRenderFrame::OpenProject(wxString& filename)
 {
 	m_data_mgr.SetProjectPath(filename);
+	SetTitle(m_title + " - " + filename);
 
 	int iVal;
 	int i, j, k;

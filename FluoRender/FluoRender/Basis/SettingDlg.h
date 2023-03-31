@@ -52,6 +52,7 @@ class SettingDlg : public wxPanel
 	{
 		//project save
 		ID_PrjSaveChk = ID_SETTING,
+		ID_PrjSaveIncChk,
 		//real time compress
 		ID_RealtimeCmpChk,
 		//allow script break
@@ -146,6 +147,7 @@ public:
 	//get settings from ui
 	int GetGMCMode() {return m_gmc_mode;}
 	bool GetProjSave() {return m_prj_save;}
+	bool GetProjSaveInc() { return m_prj_save_inc; }
 	bool GetSaveAlpha() { return m_save_alpha; }
 	void SetSaveAlpha(bool val) { m_save_alpha = val; }
 	bool GetSaveFloat() { return m_save_float; }
@@ -349,6 +351,7 @@ private:
 							//3-real-time 4 samples (removed);
 							//4-pre-calculated 4 samples (removed);
 	bool m_prj_save;		//save project automatically
+	bool m_prj_save_inc;	//save project incrementally
 	bool m_save_alpha;		//save alpha channel in captured images
 	bool m_save_float;		//save float values in captured images
 	float m_dpi;			//dpi number of captured image
@@ -481,6 +484,7 @@ private:
 private:
 	//save project
 	wxCheckBox *m_prj_save_chk;
+	wxCheckBox* m_prj_save_inc_chk;
 	//realtime compress
 	wxCheckBox *m_realtime_cmp_chk;
 	//script break
@@ -583,6 +587,7 @@ private:
 
 	//projec save
 	void OnProjectSaveCheck(wxCommandEvent &event);
+	void OnProjectSaveIncCheck(wxCommandEvent& event);
 	void OnRealtimeCompressCheck(wxCommandEvent &event);
 	void OnScriptBreakCheck(wxCommandEvent& event);
 	//mouse interaction
