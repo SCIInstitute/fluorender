@@ -10145,8 +10145,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			RefreshGL(27);
 			return;
 		}
-		else if (m_int_mode == 6 ||
-			m_int_mode == 9 ||
+		else if (m_int_mode == 9 ||
 			m_int_mode == 11)
 		{
 			m_ruler_handler.SetPoint(0);
@@ -10189,10 +10188,16 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			RefreshGL(29);
 			return;
 		}
-		else if (m_int_mode == 15 &&
+		else if ((m_int_mode == 6 ||
+			m_int_mode == 15) &&
 			!event.AltDown())
 		{
-			if (m_ruler_handler.MagStrokeEmpty())
+			if (m_int_mode == 6)
+			{
+				m_ruler_handler.ClearMagStroke();
+				m_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
+			}
+			else if (m_ruler_handler.MagStrokeEmpty())
 				m_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
 			m_ruler_handler.ApplyMagPoint();
 			m_ruler_handler.ClearMagStroke();
