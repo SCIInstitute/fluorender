@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Components/CompEditor.h>
 #include <Tracking/Registrator.h>
 #include <Python/PyBase.h>
+#include <Script/Camera2Ruler.h>
 #include <utility.h>
 #include <wx/filefn.h>
 #include <wx/stdpaths.h>
@@ -157,6 +158,8 @@ int ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 					RunBackgroundStat();
 				else if (str == "registration")
 					RunRegistration();
+				else if (str == "camera_points")
+					RunCameraPoints();
 				else if (str == "python")
 					RunPython();
 				else if (str == "video_analysis")
@@ -1689,6 +1692,41 @@ void ScriptProc::RunRegistration()
 		m_view->SetObjRotCtrOff(center2.x(), center2.y(), center2.z());
 		m_view->SetObjRotOff(euler.x(), euler.y(), euler.z());
 		m_view->SetOffsetTransform(tf);
+	}
+}
+
+void ScriptProc::RunCameraPoints()
+{
+	if (!m_view)
+		return;
+	if (!TimeCondition())
+		return;
+
+	wxString prj2;
+	m_fconfig->Read("project_file", prj2);
+	prj2 = GetConfigFile(prj2, "vrp", "FluoRender Project", 0);
+
+	RulerList* ruler_list = m_view->GetRulerList();
+	if (!ruler_list || ruler_list->empty()) return;
+	VolumeData* cur_vol = m_view->m_cur_vol;
+	if (!cur_vol)
+		return;
+	int nx, ny, nz;
+	cur_vol->GetResolution(nx, ny, nz);
+
+	Camera2Ruler c2r;
+	c2r.SetImageSize(nx, ny);
+	c2r.SetScale(1000);
+	c2r.SetList(1, ruler_list);
+	c2r.SetRange(1, m_view->m_begin_frame, m_view->m_end_frame);
+	c2r.SetList(2, prj2.ToStdString());
+	c2r.Run();
+	RulerList* result_list = c2r.GetResult();
+	if (result_list && !result_list->empty())
+	{
+		ruler_list->DeleteRulers();
+		ruler_list->assign(result_list->begin(), result_list->end());
+		delete result_list;
 	}
 }
 

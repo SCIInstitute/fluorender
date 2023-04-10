@@ -134,6 +134,8 @@ namespace flrd
 		void RunUnlinkCells();
 		void RunBackgroundStat();
 		void RunRegistration();
+		void RunCameraPoints();
+		//break
 		bool RunBreak();
 		//python
 		void RunPython();

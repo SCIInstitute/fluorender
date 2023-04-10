@@ -1,0 +1,6 @@
+[tasks]
+tasknum=1
+[tasks/task0]
+type=camera_points
+time_mode=TM_FIRST_PRE
+project_file=

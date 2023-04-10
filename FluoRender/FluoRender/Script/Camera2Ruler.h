@@ -41,6 +41,28 @@ namespace flrd
 
 		void SetList(int i, RulerList* list);
 		void SetList(int i, const std::string& config);//read list from a project
+		void SetRange(int i, size_t start, size_t end)
+		{
+			if (i == 1)
+			{
+				m_start_list1 = start;
+				m_end_list1 = end;
+			}
+			else if (i == 2)
+			{
+				m_start_list2 = start;
+				m_end_list2 = end;
+			}
+		}
+		void SetImageSize(int nx, int ny)
+		{
+			m_nx = nx;
+			m_ny = ny;
+		}
+		void SetScale(double s)
+		{
+			m_scale = s;
+		}
 
 		void Run();//compute 3D
 
@@ -50,11 +72,19 @@ namespace flrd
 		}
 
 	private:
+		double m_scale;
+		int m_nx;
+		int m_ny;
+		size_t m_start_list1;
+		size_t m_start_list2;
+		size_t m_end_list1;
+		size_t m_end_list2;
 		bool m_del_list1;
 		bool m_del_list2;
 		RulerList* m_list1;
 		RulerList* m_list2;
 		RulerList* m_list_out;
+
 	};
 }
 
