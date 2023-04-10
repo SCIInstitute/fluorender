@@ -668,6 +668,11 @@ namespace flrd
 	class RulerList : public std::vector<Ruler*>
 	{
 	public:
+		void DeleteRulers()
+		{
+			for (auto i : *this)
+				delete i;
+		}
 		int GetGroupNum(std::vector<unsigned int> &groups)
 		{
 			for (auto iter = this->begin();

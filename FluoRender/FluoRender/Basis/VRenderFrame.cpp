@@ -4601,13 +4601,14 @@ void VRenderFrame::OpenProject(wxString& filename)
 						selector->SetW2d(dVal);
 				}
 
-				//rulers
-				if (view->GetRulerList() &&
-					fconfig.Exists(wxString::Format("/views/%d/rulers", i)))
-				{
-					fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
-					view->GetRulerHandler()->Read(fconfig, i);
-				}
+			}
+
+			//rulers
+			if (view->GetRulerList() &&
+				fconfig.Exists(wxString::Format("/views/%d/rulers", i)))
+			{
+				fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
+				view->GetRulerHandler()->Read(fconfig, i);
 			}
 		}
 	}

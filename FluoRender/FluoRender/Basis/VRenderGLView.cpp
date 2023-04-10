@@ -572,11 +572,7 @@ VRenderGLView::~VRenderGLView()
 	}
 
 	//delete rulers
-	for (i = 0; i<(int)m_ruler_list.size(); i++)
-	{
-		if (m_ruler_list[i])
-			delete m_ruler_list[i];
-	}
+	m_ruler_list.DeleteRulers();
 
 	if (m_trace_group)
 		delete m_trace_group;
