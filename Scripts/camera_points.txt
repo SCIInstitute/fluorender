@@ -7,5 +7,5 @@ project_file=
 scale=1000
 focal=2
 correct=2
-name1=beam_top
+name1=beam
 name2=beam_bot
