@@ -63,6 +63,10 @@ namespace flrd
 		{
 			m_scale = s;
 		}
+		void SetFocal(double f)
+		{
+			m_focal = f;
+		}
 
 		void Run();//compute 3D
 
@@ -86,7 +90,7 @@ namespace flrd
 		RulerList* m_list1;
 		RulerList* m_list2;
 		RulerList* m_list_out;
-
+		double m_focal;
 	};
 }
 

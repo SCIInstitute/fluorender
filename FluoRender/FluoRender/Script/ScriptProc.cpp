@@ -1705,6 +1705,10 @@ void ScriptProc::RunCameraPoints()
 	wxString prj2;
 	m_fconfig->Read("project_file", &prj2);
 	prj2 = GetConfigFile(prj2, "vrp", "FluoRender Project", 0);
+	double scale;
+	m_fconfig->Read("scale", &scale, 1000);
+	double focal;
+	m_fconfig->Read("focal", &focal, 2);
 	int correct;
 	m_fconfig->Read("correct", &correct);
 	wxString name1, name2;
@@ -1721,7 +1725,8 @@ void ScriptProc::RunCameraPoints()
 
 	Camera2Ruler c2r;
 	c2r.SetImageSize(nx, ny);
-	c2r.SetScale(1000);
+	c2r.SetScale(scale);
+	c2r.SetFocal(focal);
 	c2r.SetList(1, ruler_list);
 	c2r.SetRange(1, m_view->m_begin_frame, m_view->m_end_frame);
 	c2r.SetList(2, prj2.ToStdString());

@@ -46,7 +46,8 @@ Camera2Ruler::Camera2Ruler() :
 	m_del_list2(false),
 	m_list1(0),
 	m_list2(0),
-	m_list_out(0)
+	m_list_out(0),
+	m_focal(2)
 {
 
 }
@@ -178,7 +179,7 @@ void Camera2Ruler::Run()
 	else if (pp2.size() > pp1.size())
 		pp2.resize(pp1.size());
 
-	cv::Mat essential = cv::findEssentialMat(pp1, pp2, 2);
+	cv::Mat essential = cv::findEssentialMat(pp1, pp2, m_focal);
 	// recover relative camera pose from essential matrix
 	cv::Mat rotation, translation;
 	cv::recoverPose(essential, pp1, pp2, rotation, translation);
