@@ -4,3 +4,6 @@ tasknum=1
 type=camera_points
 time_mode=TM_FIRST_PRE
 project_file=
+correct=2
+name1=beam_top
+name2=beam_bot

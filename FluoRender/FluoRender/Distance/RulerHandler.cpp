@@ -1812,6 +1812,59 @@ bool RulerHandler::GetRulerPointCoords(std::vector<double>& coords)
 	return true;
 }
 
+bool RulerHandler::PerspCorrect2(const std::string& name1, const std::string& name2)
+{
+	if (!m_ruler_list)
+		return false;
+	if (m_ruler_list->empty())
+		return false;
+
+	Ruler* r1 = GetRuler(name1);
+	Ruler* r2 = GetRuler(name2);
+	if (!r1 || !r2)
+		return false;
+	if (r1->GetNumPoint() < 2 ||
+		r2->GetNumPoint() < 2)
+		return false;
+
+	double d0, d1, s0, l0;
+	fluo::Point p0 = r1->GetPoint(0);
+	fluo::Point p1 = r1->GetPoint(1);
+	fluo::Ray ray(p0, p1 - p0);
+	ray.normalize();
+	d0 = ray.distance(r2->GetPoint(0));
+	d1 = ray.distance(r2->GetPoint(1));
+	s0 = d0 / d1 - 1;
+	l0 = (p1 - p0).length();
+
+	//scale based on v0 and s in cylindrical system
+	for (auto r : *m_ruler_list)
+	{
+		if (!r)
+			continue;
+		for (int i = 0; i < r->GetNumPoint(); ++i)
+		{
+			RulerPoint* rp = r->GetRulerPoint(i);
+			if (!rp)
+				continue;
+			for (size_t tpi = 0; tpi < rp->GetTimeNum(); ++tpi)
+			{
+				size_t t = 0;
+				fluo::Point p;
+				if (rp->GetTimeAndPoint(tpi, t, p))
+				{
+					double l = ray.length(p);
+					double s = s0 * l / l0 + 1;
+					fluo::Vector v = p - p0;
+					p = p0 + s * v;
+					rp->SetPoint(p, t);
+				}
+			}
+		}
+	}
+	return true;
+}
+
 RulerPoint* RulerHandler::get_closest_point(fluo::Point& p)
 {
 	if (!m_view)

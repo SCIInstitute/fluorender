@@ -82,7 +82,7 @@ void Camera2Ruler::SetList(int i, const std::string& config)
 	wxFileConfig fconfig(is);
 
 	//movie panel
-	int startf, endf;
+	int startf = 0, endf = 0;
 	if (fconfig.Exists("/movie_panel"))
 	{
 		fconfig.SetPath("/movie_panel");
@@ -145,7 +145,11 @@ void Camera2Ruler::Run()
 			{
 				ruler->SetWorkTime(t);
 				fluo::Point p = ruler->GetPoint(i);
-				cv::Point2f cvp = { float(p.x()), float(p.y()) };
+				cv::Point2f cvp =
+				{
+					float(p.x()/m_nx - 0.5),
+					float(p.y()/m_ny - 0.5)
+				};
 				pp1.push_back(cvp);
 			}
 		}
@@ -158,7 +162,11 @@ void Camera2Ruler::Run()
 			{
 				ruler->SetWorkTime(t);
 				fluo::Point p = ruler->GetPoint(i);
-				cv::Point2f cvp = { float(p.x()), float(p.y()) };
+				cv::Point2f cvp =
+				{
+					float(p.x() / m_nx - 0.5),
+					float(p.y() / m_ny - 0.5)
+				};
 				pp2.push_back(cvp);
 			}
 		}
@@ -170,7 +178,7 @@ void Camera2Ruler::Run()
 	else if (pp2.size() > pp1.size())
 		pp2.resize(pp1.size());
 
-	cv::Mat essential = cv::findEssentialMat(pp1, pp2);
+	cv::Mat essential = cv::findEssentialMat(pp1, pp2, 2);
 	// recover relative camera pose from essential matrix
 	cv::Mat rotation, translation;
 	cv::recoverPose(essential, pp1, pp2, rotation, translation);
@@ -225,6 +233,8 @@ void Camera2Ruler::Run()
 	for (auto ruler : *m_list1)
 	{
 		Ruler* r0 = new Ruler;
+		r0->SetName(ruler->GetName());
+		r0->SetColor(ruler->GetColor());
 		int rn = ruler->GetNumPoint();
 		if (rn > 1)
 			r0->SetRulerType(1);
@@ -255,3 +265,12 @@ void Camera2Ruler::Run()
 	}
 }
 
+void Camera2Ruler::Correct(const std::string& name1, const std::string& name2)
+{
+	if (!m_list_out)
+		return;
+
+	RulerHandler rhdl;
+	rhdl.SetRulerList(m_list_out);
+	rhdl.PerspCorrect2(name1, name2);
+}

@@ -1703,8 +1703,13 @@ void ScriptProc::RunCameraPoints()
 		return;
 
 	wxString prj2;
-	m_fconfig->Read("project_file", prj2);
+	m_fconfig->Read("project_file", &prj2);
 	prj2 = GetConfigFile(prj2, "vrp", "FluoRender Project", 0);
+	int correct;
+	m_fconfig->Read("correct", &correct);
+	wxString name1, name2;
+	m_fconfig->Read("name1", &name1);
+	m_fconfig->Read("name2", &name2);
 
 	RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list || ruler_list->empty()) return;
@@ -1721,6 +1726,8 @@ void ScriptProc::RunCameraPoints()
 	c2r.SetRange(1, m_view->m_begin_frame, m_view->m_end_frame);
 	c2r.SetList(2, prj2.ToStdString());
 	c2r.Run();
+	if (correct == 2)
+		c2r.Correct(name1.ToStdString(), name2.ToStdString());
 	RulerList* result_list = c2r.GetResult();
 	if (result_list && !result_list->empty())
 	{

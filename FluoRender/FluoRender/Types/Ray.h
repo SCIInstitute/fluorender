@@ -73,6 +73,12 @@ namespace fluo
 		bool planeIntersectParameter(Vector& N, Point& P,
 			double& t);
 
+		//distance of a point to the ray
+		double distance(const Point& p);
+
+		//length of a point projected on the ray
+		double length(const Point& p);
+
 		//! Modifiers
 		void normalize(); //! normalizes the direction vector d
 
@@ -91,7 +97,6 @@ namespace fluo
 			return is;
 		}
 	};
-
 
 } // End namespace fluo
 #endif

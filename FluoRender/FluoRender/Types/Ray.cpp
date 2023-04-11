@@ -91,6 +91,20 @@ namespace fluo
 		}
 	}
 
+	//distance of a point to the ray
+	double Ray::distance(const Point& p)
+	{
+		Vector v1 = p - o_;
+		Vector v2 = Dot(v1, d_) * d_;
+		return (v1 - v2).length();
+	}
+
+	//length of a point projected on the ray
+	double Ray::length(const Point& p)
+	{
+		return Dot(p - o_, d_);
+	}
+
 	void Ray::normalize()
 	{
 		d_.normalize();

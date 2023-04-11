@@ -86,14 +86,26 @@ namespace flrd
 			m_ca = ca;
 		}
 
-		void SetRuler(flrd::Ruler* ruler)
+		void SetRuler(Ruler* ruler)
 		{
 			m_ruler = ruler;
 		}
 
-		flrd::Ruler* GetRuler()
+		Ruler* GetRuler()
 		{
 			return m_ruler;
+		}
+
+		Ruler* GetRuler(const std::string& name)
+		{
+			if (!m_ruler_list)
+				return 0;
+			for (auto ruler : *m_ruler_list)
+			{
+				if (ruler->GetName() == name)
+					return ruler;
+			}
+			return 0;
 		}
 
 		int GetRulerIndex()
@@ -106,12 +118,12 @@ namespace flrd
 			return -1;
 		}
 
-		void SetRulerList(flrd::RulerList* ruler_list)
+		void SetRulerList(RulerList* ruler_list)
 		{
 			m_ruler_list = ruler_list;
 		}
 
-		flrd::RulerList* GetRulerList()
+		RulerList* GetRulerList()
 		{
 			return m_ruler_list;
 		}
@@ -131,7 +143,7 @@ namespace flrd
 		bool FindClosestRulerBranch(double mx, double my);
 		bool FindClosestRulerBranchPoint(double mx, double my);
 
-		void SetPoint(flrd::pRulerPoint point)
+		void SetPoint(pRulerPoint point)
 		{
 			m_point = point;
 		}
@@ -224,6 +236,8 @@ namespace flrd
 		bool GetRulerPointNames(std::vector<std::string>& names);
 		bool GetRulerPointCoords(std::vector<double>& coords);
 
+		bool PerspCorrect2(const std::string& name1, const std::string& name2);
+
 	private:
 		unsigned int m_group;
 		VRenderGLView *m_view;
@@ -248,7 +262,7 @@ namespace flrd
 		//find moving distance
 		fluo::Point m_mouse;//mouse position
 		//get point
-		flrd::pRulerPoint m_point;
+		pRulerPoint m_point;
 		int m_pindex;//index of point in ruler
 
 		//stroke for the magnet tool

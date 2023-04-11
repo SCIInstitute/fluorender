@@ -66,6 +66,8 @@ namespace flrd
 
 		void Run();//compute 3D
 
+		void Correct(const std::string& name1, const std::string& name2);
+
 		RulerList* GetResult()
 		{
 			return m_list_out;
