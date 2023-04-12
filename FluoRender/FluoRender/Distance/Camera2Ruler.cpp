@@ -147,10 +147,13 @@ void Camera2Ruler::Run()
 			continue;//ignore non-calib points
 		for (int i = 0; i < ruler->GetNumPoint(); ++i)
 		{
-			ruler->SetWorkTime(0);
-			fluo::Point p = ruler->GetPoint(i);
-			cv::Point2f cvp = normalize(p);
-			pp1.push_back(cvp);
+			for (size_t t = m_start_list1 + 1; t < m_end_list1; ++t)
+			{
+				ruler->SetWorkTime(t);
+				fluo::Point p = ruler->GetPoint(i);
+				cv::Point2f cvp = normalize(p);
+				pp1.push_back(cvp);
+			}
 		}
 	}
 	for (auto ruler : *m_list2)
@@ -162,10 +165,13 @@ void Camera2Ruler::Run()
 			continue;//ignore non-calib points
 		for (int i = 0; i < ruler->GetNumPoint(); ++i)
 		{
-				ruler->SetWorkTime(0);
+			for (size_t t = m_start_list2 + 1; t < m_end_list2; ++t)
+			{
+				ruler->SetWorkTime(t);
 				fluo::Point p = ruler->GetPoint(i);
 				cv::Point2f cvp = normalize(p);
 				pp2.push_back(cvp);
+			}
 		}
 	}
 
@@ -249,7 +255,6 @@ void Camera2Ruler::Run()
 			}
 		}
 	}
-
 	// Triangulation
 	std::vector<cv::Vec3d> points3D;
 	for (size_t i = 0; i < pp1.size(); ++i)
