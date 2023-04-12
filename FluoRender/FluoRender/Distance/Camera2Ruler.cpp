@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include "Camera2Ruler.h"
 #include <Distance/RulerHandler.h>
-#include <opencv2/opencv.hpp>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
 
@@ -138,36 +137,59 @@ void Camera2Ruler::Run()
 
 	std::vector<cv::Point2f> pp1, pp2;
 
+	//connvert ruler points
 	for (auto ruler : *m_list1)
 	{
+		if (!ruler)
+			continue;
+		bool use_t = true;
+		if (m_names.find(ruler->GetName().ToStdString()) != m_names.end())
+			use_t = false;
 		for (int i = 0; i < ruler->GetNumPoint(); ++i)
 		{
-			for (size_t t = m_start_list1+1; t < m_end_list1; ++t)
+			if (use_t)
 			{
-				ruler->SetWorkTime(t);
-				fluo::Point p = ruler->GetPoint(i);
-				cv::Point2f cvp =
+				for (size_t t = m_start_list1 + 1; t < m_end_list1; ++t)
 				{
-					float(p.x()/m_nx - 0.5),
-					float(p.y()/m_ny - 0.5)
-				};
+					ruler->SetWorkTime(t);
+					fluo::Point p = ruler->GetPoint(i);
+					cv::Point2f cvp = normalize(p);
+					pp1.push_back(cvp);
+				}
+			}
+			else
+			{
+				ruler->SetWorkTime(0);
+				fluo::Point p = ruler->GetPoint(i);
+				cv::Point2f cvp = normalize(p);
 				pp1.push_back(cvp);
 			}
 		}
 	}
 	for (auto ruler : *m_list2)
 	{
+		if (!ruler)
+			continue;
+		bool use_t = true;
+		if (m_names.find(ruler->GetName().ToStdString()) != m_names.end())
+			use_t = false;
 		for (int i = 0; i < ruler->GetNumPoint(); ++i)
 		{
-			for (size_t t = m_start_list2+1; t < m_end_list2; ++t)
+			if (use_t)
 			{
-				ruler->SetWorkTime(t);
-				fluo::Point p = ruler->GetPoint(i);
-				cv::Point2f cvp =
+				for (size_t t = m_start_list2 + 1; t < m_end_list2; ++t)
 				{
-					float(p.x() / m_nx - 0.5),
-					float(p.y() / m_ny - 0.5)
-				};
+					ruler->SetWorkTime(t);
+					fluo::Point p = ruler->GetPoint(i);
+					cv::Point2f cvp = normalize(p);
+					pp2.push_back(cvp);
+				}
+			}
+			else
+			{
+				ruler->SetWorkTime(0);
+				fluo::Point p = ruler->GetPoint(i);
+				cv::Point2f cvp = normalize(p);
 				pp2.push_back(cvp);
 			}
 		}
@@ -233,6 +255,11 @@ void Camera2Ruler::Run()
 	size_t c = 0;
 	for (auto ruler : *m_list1)
 	{
+		if (!ruler)
+			continue;
+		bool use_t = true;
+		if (m_names.find(ruler->GetName().ToStdString()) != m_names.end())
+			use_t = false;
 		Ruler* r0 = new Ruler;
 		r0->SetName(ruler->GetName());
 		r0->SetColor(ruler->GetColor());
@@ -243,22 +270,35 @@ void Camera2Ruler::Run()
 			r0->SetRulerType(2);
 		for (int i = 0; i < rn; ++i)
 		{
-			for (size_t t = m_start_list1 + 1; t < m_end_list1; ++t)
+			if (use_t)
+			{
+				for (size_t t = m_start_list1 + 1; t < m_end_list1; ++t)
+				{
+					fluo::Point p(
+						(points3D[c])(0),
+						(points3D[c])(1),
+						(points3D[c])(2));
+					if (t == m_start_list1 + 1)
+					{
+						r0->SetWorkTime(t);
+						r0->AddPoint(p);
+					}
+					else
+					{
+						pRulerPoint pp = r0->GetPRulerPoint(i);
+						pp->SetPoint(p, t);
+					}
+					c++;
+				}
+			}
+			else
 			{
 				fluo::Point p(
 					(points3D[c])(0),
 					(points3D[c])(1),
 					(points3D[c])(2));
-				if (t == m_start_list1 + 1)
-				{
-					r0->SetWorkTime(t);
-					r0->AddPoint(p);
-				}
-				else
-				{
-					pRulerPoint pp = r0->GetPRulerPoint(i);
-					pp->SetPoint(p, t);
-				}
+				r0->SetWorkTime(0);
+				r0->AddPoint(p);
 				c++;
 			}
 		}

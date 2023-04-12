@@ -29,7 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #define _CAMERA2RULER_H_
 
 #include <Distance/Ruler.h>
+#include <opencv2/opencv.hpp>
 #include <string>
+#include <set>
 
 namespace flrd
 {
@@ -67,6 +69,10 @@ namespace flrd
 		{
 			m_focal = f;
 		}
+		void SetNames(const std::set<std::string>& names)
+		{
+			m_names = names;
+		}
 
 		void Run();//compute 3D
 
@@ -91,6 +97,18 @@ namespace flrd
 		RulerList* m_list2;
 		RulerList* m_list_out;
 		double m_focal;
+		std::set<std::string> m_names;
+
+	private:
+		cv::Point2f normalize(fluo::Point& p)
+		{
+			cv::Point2f cvp =
+			{
+				float(p.x() / m_nx - 0.5),
+				float(p.y() / m_nx - 0.5 * double(m_ny) / double(m_nx))
+			};
+			return cvp;
+		}
 	};
 }
 

@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "ScriptProc.h"
+#include <Distance/Camera2Ruler.h>
 #include <ScriptVisitors.h>
 #include <Global.h>
 #include <DataManager.h>
@@ -37,7 +38,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Components/CompEditor.h>
 #include <Tracking/Registrator.h>
 #include <Python/PyBase.h>
-#include <Script/Camera2Ruler.h>
 #include <utility.h>
 #include <wx/filefn.h>
 #include <wx/stdpaths.h>
@@ -1730,6 +1730,10 @@ void ScriptProc::RunCameraPoints()
 	c2r.SetList(1, ruler_list);
 	c2r.SetRange(1, m_view->m_begin_frame, m_view->m_end_frame);
 	c2r.SetList(2, prj2.ToStdString());
+	std::set<std::string> names;
+	names.insert(name1.ToStdString());
+	names.insert(name2.ToStdString());
+	c2r.SetNames(names);
 	c2r.Run();
 	if (correct == 2)
 		c2r.Correct(name1.ToStdString(), name2.ToStdString());
