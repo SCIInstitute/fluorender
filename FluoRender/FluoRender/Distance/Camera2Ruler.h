@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/Ruler.h>
 #include <opencv2/opencv.hpp>
 #include <string>
-#include <set>
+#include <vector>
 
 namespace flrd
 {
@@ -69,14 +69,14 @@ namespace flrd
 		{
 			m_focal = f;
 		}
-		void SetNames(const std::set<std::string>& names)
+		void SetNames(const std::vector<std::string>& names)
 		{
 			m_names = names;
 		}
 
 		void Run();//compute 3D
 
-		void Correct(const std::string& name1, const std::string& name2);
+		void Correct();
 
 		RulerList* GetResult()
 		{
@@ -97,7 +97,7 @@ namespace flrd
 		RulerList* m_list2;
 		RulerList* m_list_out;
 		double m_focal;
-		std::set<std::string> m_names;
+		std::vector<std::string> m_names;
 
 	private:
 		cv::Point2f normalize(fluo::Point& p)

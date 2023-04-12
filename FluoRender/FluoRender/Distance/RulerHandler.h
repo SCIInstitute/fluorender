@@ -237,6 +237,7 @@ namespace flrd
 		bool GetRulerPointCoords(std::vector<double>& coords);
 
 		bool PerspCorrect2(const std::string& name1, const std::string& name2);
+		bool PerspCorrect6(const std::vector<std::string>& names);//names to six lines for a coord system
 
 	private:
 		unsigned int m_group;

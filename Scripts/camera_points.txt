@@ -6,6 +6,4 @@ time_mode=TM_FIRST_PRE
 project_file=
 scale=1000
 focal=2
-correct=2
-name1=beam
-name2=beam_bot
+names=beam,beam_bot,y1,y2,z1,z2

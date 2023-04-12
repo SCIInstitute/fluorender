@@ -109,7 +109,9 @@ namespace flrd
 		wxString GetSavePath(const wxString &str, const wxString &ext, bool rep = true);
 		wxString GetDataDir(const wxString &ext);
 		wxString GetConfigFile(const wxString& str, const wxString& ext, const wxString& type, int mode);//mode-0 open;1-save
+		int GetItems(const wxString& str, std::vector<std::string>& items);
 		bool GetRegistrationTransform(fluo::Point& transl, fluo::Point& center, fluo::Point& euler, int sn);//sn: smooth frame number
+		
 		void RunNoiseReduction();
 		void RunPreTracking();
 		void RunPostTracking();

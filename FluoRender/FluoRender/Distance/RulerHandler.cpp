@@ -1865,6 +1865,90 @@ bool RulerHandler::PerspCorrect2(const std::string& name1, const std::string& na
 	return true;
 }
 
+bool RulerHandler::PerspCorrect6(const std::vector<std::string>& names)
+{
+	//name order x1, x2, y1, y2, z1, z2
+	//each pointing to the axis direction from p0 to p1
+	if (names.size() < 6)
+		return false;
+	if (!m_ruler_list)
+		return false;
+	if (m_ruler_list->empty())
+		return false;
+
+	std::vector<Ruler*> rulers;
+	for (size_t i = 0; i < 6; ++i)
+	{
+		rulers.push_back(GetRuler(names[i]));
+		if (!rulers[i])
+			return false;
+		if (rulers[i]->GetNumPoint() < 2)
+			return false;
+	}
+	std::vector<fluo::Point> pp;//12
+	for (auto r : rulers)
+	{
+		pp.push_back(r->GetPoint(0));
+		pp.push_back(r->GetPoint(1));
+	}
+
+	//find plane from yz
+	fluo::Point p0;
+	for (size_t i = 4; i < 12; ++i)
+		p0 += pp[i];
+	p0 = p0 / 8;
+	std::vector<fluo::Vector> pv;
+	pv.push_back(pp[7] - pp[4]);//0
+	pv.push_back(pp[6] - pp[5]);//1
+	pv.push_back(pp[11] - pp[8]);//2
+	pv.push_back(pp[9] - pp[10]);//3
+	pv.push_back(fluo::Cross(pv[0], pv[1]));//4
+	pv.push_back(fluo::Cross(pv[2], pv[3]));//5
+	fluo::Vector v0 = pv[4] + pv[5];
+	v0.normalize();
+	fluo::Plane pl(p0, v0);
+	//x axis
+	fluo::Ray axisx(pp[0], pp[1] - pp[0]);
+	axisx.normalize();
+	//intersection plane axisx
+	fluo::Point o;
+	pl.Intersect(axisx.origin(), axisx.direction(), o);
+	//find each axis
+	fluo::Vector x = pp[1] + pp[3] - pp[0] - pp[2];
+	x.normalize();
+	fluo::Vector y = pp[5] + pp[7] - pp[4] - pp[6];
+	y.normalize();
+	fluo::Vector z = pp[9] + pp[11] - pp[8] - pp[10];
+	z.normalize();
+	//build transform
+	fluo::Transform tf(o, x, y, z);
+	//tf.invert();
+
+	//correct points
+	for (auto r : *m_ruler_list)
+	{
+		if (!r)
+			continue;
+		for (int i = 0; i < r->GetNumPoint(); ++i)
+		{
+			RulerPoint* rp = r->GetRulerPoint(i);
+			if (!rp)
+				continue;
+			for (size_t tpi = 0; tpi < rp->GetTimeNum(); ++tpi)
+			{
+				size_t t = 0;
+				fluo::Point p;
+				if (rp->GetTimeAndPoint(tpi, t, p))
+				{
+					tf.unproject_inplace(p);
+					rp->SetPoint(p, t);
+				}
+			}
+		}
+	}
+	return true;
+}
+
 RulerPoint* RulerHandler::get_closest_point(fluo::Point& p)
 {
 	if (!m_view)

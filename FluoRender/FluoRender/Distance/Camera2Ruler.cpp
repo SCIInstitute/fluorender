@@ -143,8 +143,9 @@ void Camera2Ruler::Run()
 		if (!ruler)
 			continue;
 		bool use_t = true;
-		if (m_names.find(ruler->GetName().ToStdString()) != m_names.end())
-			use_t = false;
+		//if (std::find(m_names.begin(), m_names.end(),
+		//	ruler->GetName().ToStdString()) != m_names.end())
+		//	use_t = false;
 		for (int i = 0; i < ruler->GetNumPoint(); ++i)
 		{
 			if (use_t)
@@ -171,8 +172,9 @@ void Camera2Ruler::Run()
 		if (!ruler)
 			continue;
 		bool use_t = true;
-		if (m_names.find(ruler->GetName().ToStdString()) != m_names.end())
-			use_t = false;
+		//if (std::find(m_names.begin(), m_names.end(),
+		//	ruler->GetName().ToStdString()) != m_names.end())
+		//	use_t = false;
 		for (int i = 0; i < ruler->GetNumPoint(); ++i)
 		{
 			if (use_t)
@@ -258,8 +260,9 @@ void Camera2Ruler::Run()
 		if (!ruler)
 			continue;
 		bool use_t = true;
-		if (m_names.find(ruler->GetName().ToStdString()) != m_names.end())
-			use_t = false;
+		//if (std::find(m_names.begin(), m_names.end(),
+		//	ruler->GetName().ToStdString()) != m_names.end())
+		//	use_t = false;
 		Ruler* r0 = new Ruler;
 		r0->SetName(ruler->GetName());
 		r0->SetColor(ruler->GetColor());
@@ -306,12 +309,16 @@ void Camera2Ruler::Run()
 	}
 }
 
-void Camera2Ruler::Correct(const std::string& name1, const std::string& name2)
+void Camera2Ruler::Correct()
 {
 	if (!m_list_out)
 		return;
 
 	RulerHandler rhdl;
 	rhdl.SetRulerList(m_list_out);
-	rhdl.PerspCorrect2(name1, name2);
+	size_t n = m_names.size();
+	if (n > 1)
+		rhdl.PerspCorrect2(m_names[0], m_names[1]);
+	if (n > 5)
+		rhdl.PerspCorrect6(m_names);
 }

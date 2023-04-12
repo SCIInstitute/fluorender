@@ -469,6 +469,17 @@ wxString ScriptProc::GetConfigFile(
 		style);
 }
 
+int ScriptProc::GetItems(const wxString& str, std::vector<std::string>& items)
+{
+	if (!items.empty())
+		items.clear();
+	std::istringstream s(str.ToStdString());
+	std::string item;
+	while (std::getline(s, item, ','))
+		items.push_back(item);
+	return int(items.size());
+}
+
 bool ScriptProc::GetRegistrationTransform(
 	fluo::Point& transl,
 	fluo::Point& center,
@@ -1709,11 +1720,10 @@ void ScriptProc::RunCameraPoints()
 	m_fconfig->Read("scale", &scale, 1000);
 	double focal;
 	m_fconfig->Read("focal", &focal, 2);
-	int correct;
-	m_fconfig->Read("correct", &correct);
-	wxString name1, name2;
-	m_fconfig->Read("name1", &name1);
-	m_fconfig->Read("name2", &name2);
+	wxString str;
+	m_fconfig->Read("names", &str);
+	std::vector<std::string> names;
+	int correct = GetItems(str, names);
 
 	RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list || ruler_list->empty()) return;
@@ -1730,13 +1740,10 @@ void ScriptProc::RunCameraPoints()
 	c2r.SetList(1, ruler_list);
 	c2r.SetRange(1, m_view->m_begin_frame, m_view->m_end_frame);
 	c2r.SetList(2, prj2.ToStdString());
-	std::set<std::string> names;
-	names.insert(name1.ToStdString());
-	names.insert(name2.ToStdString());
 	c2r.SetNames(names);
 	c2r.Run();
-	if (correct == 2)
-		c2r.Correct(name1.ToStdString(), name2.ToStdString());
+	c2r.Correct();
+
 	RulerList* result_list = c2r.GetResult();
 	if (result_list && !result_list->empty())
 	{
