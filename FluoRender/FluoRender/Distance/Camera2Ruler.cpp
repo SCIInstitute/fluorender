@@ -142,10 +142,63 @@ void Camera2Ruler::Run()
 	{
 		if (!ruler)
 			continue;
+		if (std::find(m_names.begin(), m_names.end(),
+			ruler->GetName().ToStdString()) == m_names.end())
+			continue;//ignore non-calib points
+		for (int i = 0; i < ruler->GetNumPoint(); ++i)
+		{
+			ruler->SetWorkTime(0);
+			fluo::Point p = ruler->GetPoint(i);
+			cv::Point2f cvp = normalize(p);
+			pp1.push_back(cvp);
+		}
+	}
+	for (auto ruler : *m_list2)
+	{
+		if (!ruler)
+			continue;
+		if (std::find(m_names.begin(), m_names.end(),
+			ruler->GetName().ToStdString()) == m_names.end())
+			continue;//ignore non-calib points
+		for (int i = 0; i < ruler->GetNumPoint(); ++i)
+		{
+				ruler->SetWorkTime(0);
+				fluo::Point p = ruler->GetPoint(i);
+				cv::Point2f cvp = normalize(p);
+				pp2.push_back(cvp);
+		}
+	}
+
+	//trim
+	if (pp1.size() > pp2.size())
+		pp1.resize(pp2.size());
+	else if (pp2.size() > pp1.size())
+		pp2.resize(pp1.size());
+
+	cv::Mat essential = cv::findEssentialMat(pp1, pp2, m_focal);
+	// recover relative camera pose from essential matrix
+	cv::Mat rotation, translation;
+	cv::recoverPose(essential, pp1, pp2, rotation, translation);
+	// compose projection matrix from R,T
+	cv::Mat p2(3, 4, CV_64F); // the 3x4 projection matrix
+	rotation.copyTo(p2(cv::Rect(0, 0, 3, 3)));
+	translation.copyTo(p2.colRange(3, 4));
+	// compose generic projection matrix
+	cv::Mat p1(3, 4, CV_64F, 0.); // the 3x4 projection matrix
+	cv::Mat diag(cv::Mat::eye(3, 3, CV_64F));
+	diag.copyTo(p1(cv::Rect(0, 0, 3, 3)));
+
+	//rebuild points
+	pp1.clear();
+	pp2.clear();
+	for (auto ruler : *m_list1)
+	{
+		if (!ruler)
+			continue;
 		bool use_t = true;
-		//if (std::find(m_names.begin(), m_names.end(),
-		//	ruler->GetName().ToStdString()) != m_names.end())
-		//	use_t = false;
+		if (std::find(m_names.begin(), m_names.end(),
+			ruler->GetName().ToStdString()) != m_names.end())
+			use_t = false;
 		for (int i = 0; i < ruler->GetNumPoint(); ++i)
 		{
 			if (use_t)
@@ -172,9 +225,9 @@ void Camera2Ruler::Run()
 		if (!ruler)
 			continue;
 		bool use_t = true;
-		//if (std::find(m_names.begin(), m_names.end(),
-		//	ruler->GetName().ToStdString()) != m_names.end())
-		//	use_t = false;
+		if (std::find(m_names.begin(), m_names.end(),
+			ruler->GetName().ToStdString()) != m_names.end())
+			use_t = false;
 		for (int i = 0; i < ruler->GetNumPoint(); ++i)
 		{
 			if (use_t)
@@ -197,27 +250,8 @@ void Camera2Ruler::Run()
 		}
 	}
 
-	//trim
-	if (pp1.size() > pp2.size())
-		pp1.resize(pp2.size());
-	else if (pp2.size() > pp1.size())
-		pp2.resize(pp1.size());
-
-	cv::Mat essential = cv::findEssentialMat(pp1, pp2, m_focal);
-	// recover relative camera pose from essential matrix
-	cv::Mat rotation, translation;
-	cv::recoverPose(essential, pp1, pp2, rotation, translation);
-	// compose projection matrix from R,T
-	cv::Mat p2(3, 4, CV_64F); // the 3x4 projection matrix
-	rotation.copyTo(p2(cv::Rect(0, 0, 3, 3)));
-	translation.copyTo(p2.colRange(3, 4));
-	// compose generic projection matrix
-	cv::Mat p1(3, 4, CV_64F, 0.); // the 3x4 projection matrix
-	cv::Mat diag(cv::Mat::eye(3, 3, CV_64F));
-	diag.copyTo(p1(cv::Rect(0, 0, 3, 3)));
 	// Triangulation
 	std::vector<cv::Vec3d> points3D;
-	//cal.triangulate(projection1, projection2, points1u, points2u, points3D);
 	for (size_t i = 0; i < pp1.size(); ++i)
 	{
 		cv::Vec2d u1(pp1[i].x, pp1[i].y);
@@ -260,9 +294,9 @@ void Camera2Ruler::Run()
 		if (!ruler)
 			continue;
 		bool use_t = true;
-		//if (std::find(m_names.begin(), m_names.end(),
-		//	ruler->GetName().ToStdString()) != m_names.end())
-		//	use_t = false;
+		if (std::find(m_names.begin(), m_names.end(),
+			ruler->GetName().ToStdString()) != m_names.end())
+			use_t = false;
 		Ruler* r0 = new Ruler;
 		r0->SetName(ruler->GetName());
 		r0->SetColor(ruler->GetColor());
