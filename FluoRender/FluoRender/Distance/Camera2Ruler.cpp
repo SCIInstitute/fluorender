@@ -46,7 +46,8 @@ Camera2Ruler::Camera2Ruler() :
 	m_list1(0),
 	m_list2(0),
 	m_list_out(0),
-	m_focal(2)
+	m_focal(2),
+	m_slope(0)
 {
 
 }
@@ -359,5 +360,5 @@ void Camera2Ruler::Correct()
 	if (n > 1)
 		rhdl.PerspCorrect2(m_names[0], m_names[1]);
 	if (n > 5)
-		rhdl.PerspCorrect6(m_names);
+		rhdl.PerspCorrect6(m_names, m_slope, m_nx, m_ny, m_scale);
 }

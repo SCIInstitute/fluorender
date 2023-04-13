@@ -7,3 +7,4 @@ project_file=
 scale=1000
 focal=2
 names=beam,beam_bot,y1,y2,z1,z2
+slope=5.336

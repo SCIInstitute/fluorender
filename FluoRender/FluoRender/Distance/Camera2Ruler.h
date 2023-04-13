@@ -73,6 +73,10 @@ namespace flrd
 		{
 			m_names = names;
 		}
+		void SetSlope(double dval)
+		{
+			m_slope = dval;
+		}
 
 		void Run();//compute 3D
 
@@ -97,6 +101,7 @@ namespace flrd
 		RulerList* m_list2;
 		RulerList* m_list_out;
 		double m_focal;
+		double m_slope;
 		std::vector<std::string> m_names;
 
 	private:

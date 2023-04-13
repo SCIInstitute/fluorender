@@ -1865,7 +1865,9 @@ bool RulerHandler::PerspCorrect2(const std::string& name1, const std::string& na
 	return true;
 }
 
-bool RulerHandler::PerspCorrect6(const std::vector<std::string>& names)
+bool RulerHandler::PerspCorrect6(
+	const std::vector<std::string>& names,
+	double slope, double w, double h, double s)
 {
 	//name order x1, x2, y1, y2, z1, z2
 	//each pointing to the axis direction from p0 to p1
@@ -1914,7 +1916,7 @@ bool RulerHandler::PerspCorrect6(const std::vector<std::string>& names)
 	fluo::Point o;
 	pl.Intersect(axisx.origin(), axisx.direction(), o);
 	//find each axis
-	fluo::Vector x = pp[1] + pp[3] - pp[0] - pp[2];
+	fluo::Vector x = pp[0] + pp[2] - pp[1] - pp[3];
 	x.normalize();
 	fluo::Vector y = pp[5] + pp[7] - pp[4] - pp[6];
 	y.normalize();
@@ -1922,7 +1924,13 @@ bool RulerHandler::PerspCorrect6(const std::vector<std::string>& names)
 	z.normalize();
 	//build transform
 	fluo::Transform tf(o, x, y, z);
-	//tf.invert();
+	//second transform
+	x = fluo::Vector(std::cos(d2r(slope)), std::sin(d2r(slope)), 0);
+	//x = fluo::Vector(1, 0, 0);
+	y = fluo::Vector(0, 1, 0);
+	z = fluo::Vector(0, 0, 1);
+	o = fluo::Point((w - s) / 2, h / 2, 0);
+	fluo::Transform tf2(o, x, y, z);
 
 	//correct points
 	for (auto r : *m_ruler_list)
@@ -1941,6 +1949,7 @@ bool RulerHandler::PerspCorrect6(const std::vector<std::string>& names)
 				if (rp->GetTimeAndPoint(tpi, t, p))
 				{
 					tf.unproject_inplace(p);
+					tf2.project_inplace(p);
 					rp->SetPoint(p, t);
 				}
 			}

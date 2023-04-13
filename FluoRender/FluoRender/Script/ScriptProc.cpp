@@ -1724,6 +1724,8 @@ void ScriptProc::RunCameraPoints()
 	m_fconfig->Read("names", &str);
 	std::vector<std::string> names;
 	int correct = GetItems(str, names);
+	double slope;
+	m_fconfig->Read("slope", &slope, 0);
 
 	RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list || ruler_list->empty()) return;
@@ -1742,6 +1744,7 @@ void ScriptProc::RunCameraPoints()
 	c2r.SetList(2, prj2.ToStdString());
 	c2r.SetNames(names);
 	c2r.Run();
+	c2r.SetSlope(slope);
 	c2r.Correct();
 
 	RulerList* result_list = c2r.GetResult();
