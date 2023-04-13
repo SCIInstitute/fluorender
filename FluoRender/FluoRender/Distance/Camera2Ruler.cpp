@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include "Camera2Ruler.h"
 #include <Distance/RulerHandler.h>
+#include <Types/Ray.h>
+#include <Types/Plane.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
 
@@ -195,6 +197,9 @@ void Camera2Ruler::Run()
 	cv::Mat diag(cv::Mat::eye(3, 3, CV_64F));
 	diag.copyTo(p1(cv::Rect(0, 0, 3, 3)));
 
+	//calib
+	calib_affine(p1, p2);
+
 	//rebuild points
 	pp1.clear();
 	pp2.clear();
@@ -354,11 +359,199 @@ void Camera2Ruler::Correct()
 	if (!m_list_out)
 		return;
 
-	RulerHandler rhdl;
-	rhdl.SetRulerList(m_list_out);
 	size_t n = m_names.size();
-	if (n > 1)
-		rhdl.PerspCorrect2(m_names[0], m_names[1]);
 	if (n > 5)
-		rhdl.PerspCorrect6(m_names, m_slope, m_nx, m_ny, m_scale);
+	{
+		//calib_affine();
+		calib_metric();
+	}
 }
+
+bool Camera2Ruler::calib_affine(cv::Mat& p1, cv::Mat& p2)
+{
+	//name order x1, x2, y1, y2, z1, z2
+	//each pointing to the axis direction from p0 to p1
+	if (m_names.size() < 6)
+		return false;
+	if (!m_list1 || !m_list2)
+		return false;
+	if (m_list1->empty() || m_list2->empty())
+		return false;
+
+	std::vector<Ruler*> rulers;//6
+	std::vector<fluo::Point> pp;//12
+	std::vector<fluo::Vector> lines;//6
+	std::vector<fluo::Point> intp;
+	fluo::Point p;
+	fluo::Vector v;
+
+	//img1
+	for (size_t i = 0; i < 6; ++i)
+	{
+		rulers.push_back(m_list1->GetRuler(m_names[i]));
+		if (!rulers[i])
+			return false;
+		if (rulers[i]->GetNumPoint() < 2)
+			return false;
+	}
+	for (auto r : rulers)
+	{
+		p = r->GetPoint(0);
+		p.z(0);
+		pp.push_back(p);
+		p = r->GetPoint(1);
+		p.z(0);
+		pp.push_back(p);
+	}
+	v = pp[1] - pp[0];
+	v.normalize();
+	v.z(-(pp[0].x() * v.x() + pp[1].y() * v.y())));
+	lines.push_back(v);
+	//intersection
+	return true;
+}
+
+/*bool Camera2Ruler::calib_affine()
+{
+	if (!m_list_out)
+		return false;
+	if (m_list_out->empty())
+		return false;
+
+	Ruler* r1 = m_list_out->GetRuler(m_names[0]);
+	Ruler* r2 = m_list_out->GetRuler(m_names[1]);
+	if (!r1 || !r2)
+		return false;
+	if (r1->GetNumPoint() < 2 ||
+		r2->GetNumPoint() < 2)
+		return false;
+
+	double d0, d1, s0, l0;
+	fluo::Point p0 = r1->GetPoint(0);
+	fluo::Point p1 = r1->GetPoint(1);
+	fluo::Ray ray(p0, p1 - p0);
+	ray.normalize();
+	d0 = ray.distance(r2->GetPoint(0));
+	d1 = ray.distance(r2->GetPoint(1));
+	s0 = d0 / d1 - 1;
+	l0 = (p1 - p0).length();
+
+	//scale based on v0 and s in cylindrical system
+	for (auto r : *m_list_out)
+	{
+		if (!r)
+			continue;
+		for (int i = 0; i < r->GetNumPoint(); ++i)
+		{
+			RulerPoint* rp = r->GetRulerPoint(i);
+			if (!rp)
+				continue;
+			for (size_t tpi = 0; tpi < rp->GetTimeNum(); ++tpi)
+			{
+				size_t t = 0;
+				fluo::Point p;
+				if (rp->GetTimeAndPoint(tpi, t, p))
+				{
+					double l = ray.length(p);
+					double s = s0 * l / l0 + 1;
+					fluo::Vector v = p - p0;
+					p = p0 + s * v;
+					rp->SetPoint(p, t);
+				}
+			}
+		}
+	}
+	return true;
+}*/
+
+bool Camera2Ruler::calib_metric()
+{
+	//name order x1, x2, y1, y2, z1, z2
+	//each pointing to the axis direction from p0 to p1
+	if (m_names.size() < 6)
+		return false;
+	if (!m_list_out)
+		return false;
+	if (m_list_out->empty())
+		return false;
+
+	std::vector<Ruler*> rulers;
+	for (size_t i = 0; i < 6; ++i)
+	{
+		rulers.push_back(m_list_out->GetRuler(m_names[i]));
+		if (!rulers[i])
+			return false;
+		if (rulers[i]->GetNumPoint() < 2)
+			return false;
+	}
+	std::vector<fluo::Point> pp;//12
+	for (auto r : rulers)
+	{
+		pp.push_back(r->GetPoint(0));
+		pp.push_back(r->GetPoint(1));
+	}
+
+	//find plane from yz
+	fluo::Point p0;
+	for (size_t i = 4; i < 12; ++i)
+		p0 += pp[i];
+	p0 = p0 / 8;
+	std::vector<fluo::Vector> pv;
+	pv.push_back(pp[7] - pp[4]);//0
+	pv.push_back(pp[6] - pp[5]);//1
+	pv.push_back(pp[11] - pp[8]);//2
+	pv.push_back(pp[9] - pp[10]);//3
+	pv.push_back(fluo::Cross(pv[0], pv[1]));//4
+	pv.push_back(fluo::Cross(pv[2], pv[3]));//5
+	fluo::Vector v0 = pv[4] + pv[5];
+	v0.normalize();
+	fluo::Plane pl(p0, v0);
+	//x axis
+	fluo::Ray axisx(pp[0], pp[1] - pp[0]);
+	axisx.normalize();
+	//intersection plane axisx
+	fluo::Point o;
+	pl.Intersect(axisx.origin(), axisx.direction(), o);
+	//find each axis
+	fluo::Vector x = pp[0] + pp[2] - pp[1] - pp[3];
+	x.normalize();
+	fluo::Vector y = pp[5] + pp[7] - pp[4] - pp[6];
+	y.normalize();
+	fluo::Vector z = pp[9] + pp[11] - pp[8] - pp[10];
+	z.normalize();
+	//build transform
+	fluo::Transform tf(o, x, y, z);
+	//second transform
+	x = fluo::Vector(std::cos(fluo::d2r(m_slope)), std::sin(fluo::d2r(m_slope)), 0);
+	//x = fluo::Vector(1, 0, 0);
+	y = fluo::Vector(0, 1, 0);
+	z = fluo::Vector(0, 0, 1);
+	o = fluo::Point((m_nx - m_scale) / 2, m_ny / 2, 0);
+	fluo::Transform tf2(o, x, y, z);
+
+	//correct points
+	for (auto r : *m_list_out)
+	{
+		if (!r)
+			continue;
+		for (int i = 0; i < r->GetNumPoint(); ++i)
+		{
+			RulerPoint* rp = r->GetRulerPoint(i);
+			if (!rp)
+				continue;
+			for (size_t tpi = 0; tpi < rp->GetTimeNum(); ++tpi)
+			{
+				size_t t = 0;
+				fluo::Point p;
+				if (rp->GetTimeAndPoint(tpi, t, p))
+				{
+					tf.unproject_inplace(p);
+					tf2.project_inplace(p);
+					rp->SetPoint(p, t);
+				}
+			}
+		}
+	}
+	return true;
+}
+

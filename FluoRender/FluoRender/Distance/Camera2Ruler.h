@@ -114,6 +114,9 @@ namespace flrd
 			};
 			return cvp;
 		}
+		bool calib_affine(cv::Mat& p1, cv::Mat& p2);
+		bool calib_metric();
+
 	};
 }
 

@@ -706,6 +706,16 @@ namespace flrd
 			}
 			return groups.size();
 		}
+
+		Ruler* GetRuler(const std::string& name)
+		{
+			for (auto ruler : *this)
+			{
+				if (ruler->GetName() == name)
+					return ruler;
+			}
+			return 0;
+		}
 	};
 	typedef RulerList::iterator RulerListIter;
 }
