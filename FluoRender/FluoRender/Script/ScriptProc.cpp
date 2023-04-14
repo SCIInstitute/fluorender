@@ -1748,6 +1748,21 @@ void ScriptProc::RunCameraPoints()
 		ruler_list->assign(result_list->begin(), result_list->end());
 		delete result_list;
 	}
+
+	//turn off all channels
+	for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
+	{
+		VolumeData* vd = m_view->GetDispVolumeData(i);
+		if (!vd)
+			continue;
+		vd->SetDisp(false);
+	}
+	//turn off script
+	if (m_frame)
+	{
+		m_frame->GetSettingDlg()->SetRunScript(false);
+		m_frame->GetMovieView()->GetScriptSettings(false);
+	}
 }
 
 void ScriptProc::RunPython()
