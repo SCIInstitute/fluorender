@@ -61,14 +61,6 @@ namespace flrd
 			m_nx = nx;
 			m_ny = ny;
 		}
-		void SetScale(double s)
-		{
-			m_scale = s;
-		}
-		void SetFocal(double f)
-		{
-			m_focal = f;
-		}
 		void SetNames(const std::vector<std::string>& names)
 		{
 			m_names = names;
@@ -88,7 +80,6 @@ namespace flrd
 		}
 
 	private:
-		double m_scale;
 		int m_nx;
 		int m_ny;
 		size_t m_start_list1;
@@ -100,11 +91,14 @@ namespace flrd
 		RulerList* m_list1;
 		RulerList* m_list2;
 		RulerList* m_list_out;
-		double m_focal;
 		double m_slope;
 		std::vector<std::string> m_names;
+		cv::Mat m_h;//homogeneours matrix from affine correction
 
 	private:
+		bool get_affine(const cv::Mat& p1, const cv::Mat& p2);
+		cv::Vec3d calib_affine(const cv::Vec3d& pp);
+		bool calib_metric();
 		cv::Point2f normalize(fluo::Point& p)
 		{
 			cv::Point2f cvp =
@@ -114,9 +108,23 @@ namespace flrd
 			};
 			return cvp;
 		}
-		bool calib_affine(cv::Mat& p1, cv::Mat& p2);
-		bool calib_metric();
-
+		cv::Point3f normalize_homo(fluo::Point& p)
+		{
+			cv::Point3f cvp =
+			{
+				float(p.x() / m_nx - 0.5),
+				float(p.y() / m_nx - 0.5 * double(m_ny) / double(m_nx)),
+				1
+			};
+			return cvp;
+		}
+		cv::Vec3d triangulate(
+			const cv::Point2f& pp1, const cv::Point2f& pp2,
+			const cv::Mat& p1, const cv::Mat& p2);
+		cv::Vec4d get_plane(
+			const cv::Vec4d& pp1,
+			const cv::Vec4d& pp2,
+			const cv::Vec4d& pp3);
 	};
 }
 

@@ -36,7 +36,6 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 Camera2Ruler::Camera2Ruler() :
-	m_scale(100),
 	m_nx(0),
 	m_ny(0),
 	m_start_list1(0),
@@ -48,10 +47,9 @@ Camera2Ruler::Camera2Ruler() :
 	m_list1(0),
 	m_list2(0),
 	m_list_out(0),
-	m_focal(2),
 	m_slope(0)
 {
-
+	m_h = cv::Mat::eye(4, 4, CV_64F);
 }
 
 Camera2Ruler::~Camera2Ruler()
@@ -150,13 +148,9 @@ void Camera2Ruler::Run()
 			continue;//ignore non-calib points
 		for (int i = 0; i < ruler->GetNumPoint(); ++i)
 		{
-			for (size_t t = m_start_list1 + 1; t < m_end_list1; ++t)
-			{
-				ruler->SetWorkTime(t);
-				fluo::Point p = ruler->GetPoint(i);
-				cv::Point2f cvp = normalize(p);
-				pp1.push_back(cvp);
-			}
+			ruler->SetWorkTime(0);
+			fluo::Point p = ruler->GetPoint(i);
+			pp1.push_back(normalize(p));
 		}
 	}
 	for (auto ruler : *m_list2)
@@ -168,13 +162,9 @@ void Camera2Ruler::Run()
 			continue;//ignore non-calib points
 		for (int i = 0; i < ruler->GetNumPoint(); ++i)
 		{
-			for (size_t t = m_start_list2 + 1; t < m_end_list2; ++t)
-			{
-				ruler->SetWorkTime(t);
-				fluo::Point p = ruler->GetPoint(i);
-				cv::Point2f cvp = normalize(p);
-				pp2.push_back(cvp);
-			}
+			ruler->SetWorkTime(0);
+			fluo::Point p = ruler->GetPoint(i);
+			pp2.push_back(normalize(p));
 		}
 	}
 
@@ -184,10 +174,10 @@ void Camera2Ruler::Run()
 	else if (pp2.size() > pp1.size())
 		pp2.resize(pp1.size());
 
-	cv::Mat essential = cv::findEssentialMat(pp1, pp2, m_focal);
+	cv::Mat f = cv::findFundamentalMat(pp1, pp2, cv::FM_LMEDS);
 	// recover relative camera pose from essential matrix
 	cv::Mat rotation, translation;
-	cv::recoverPose(essential, pp1, pp2, rotation, translation);
+	cv::recoverPose(f, pp1, pp2, rotation, translation);
 	// compose projection matrix from R,T
 	cv::Mat p2(3, 4, CV_64F); // the 3x4 projection matrix
 	rotation.copyTo(p2(cv::Rect(0, 0, 3, 3)));
@@ -198,7 +188,7 @@ void Camera2Ruler::Run()
 	diag.copyTo(p1(cv::Rect(0, 0, 3, 3)));
 
 	//calib
-	calib_affine(p1, p2);
+	get_affine(p1, p2);
 
 	//rebuild points
 	pp1.clear();
@@ -219,16 +209,14 @@ void Camera2Ruler::Run()
 				{
 					ruler->SetWorkTime(t);
 					fluo::Point p = ruler->GetPoint(i);
-					cv::Point2f cvp = normalize(p);
-					pp1.push_back(cvp);
+					pp1.push_back(normalize(p));
 				}
 			}
 			else
 			{
 				ruler->SetWorkTime(0);
 				fluo::Point p = ruler->GetPoint(i);
-				cv::Point2f cvp = normalize(p);
-				pp1.push_back(cvp);
+				pp1.push_back(normalize(p));
 			}
 		}
 	}
@@ -248,16 +236,14 @@ void Camera2Ruler::Run()
 				{
 					ruler->SetWorkTime(t);
 					fluo::Point p = ruler->GetPoint(i);
-					cv::Point2f cvp = normalize(p);
-					pp2.push_back(cvp);
+					pp2.push_back(normalize(p));
 				}
 			}
 			else
 			{
 				ruler->SetWorkTime(0);
 				fluo::Point p = ruler->GetPoint(i);
-				cv::Point2f cvp = normalize(p);
-				pp2.push_back(cvp);
+				pp2.push_back(normalize(p));
 			}
 		}
 	}
@@ -265,31 +251,9 @@ void Camera2Ruler::Run()
 	std::vector<cv::Vec3d> points3D;
 	for (size_t i = 0; i < pp1.size(); ++i)
 	{
-		cv::Vec2d u1(pp1[i].x, pp1[i].y);
-		cv::Vec2d u2(pp2[i].x, pp2[i].y);
-		cv::Matx43d A(
-			u1(0) * p1.at<double>(2, 0) - p1.at<double>(0, 0),
-			u1(0) * p1.at<double>(2, 1) - p1.at<double>(0, 1),
-			u1(0) * p1.at<double>(2, 2) - p1.at<double>(0, 2),
-			u1(1) * p1.at<double>(2, 0) - p1.at<double>(1, 0),
-			u1(1) * p1.at<double>(2, 1) - p1.at<double>(1, 1),
-			u1(1) * p1.at<double>(2, 2) - p1.at<double>(1, 2),
-			u2(0) * p2.at<double>(2, 0) - p2.at<double>(0, 0),
-			u2(0) * p2.at<double>(2, 1) - p2.at<double>(0, 1),
-			u2(0) * p2.at<double>(2, 2) - p2.at<double>(0, 2),
-			u2(1) * p2.at<double>(2, 0) - p2.at<double>(1, 0),
-			u2(1) * p2.at<double>(2, 1) - p2.at<double>(1, 1),
-			u2(1) * p2.at<double>(2, 2) - p2.at<double>(1, 2));
-		cv::Matx41d B(
-			p1.at<double>(0, 3) - u1(0) * p1.at<double>(2, 3),
-			p1.at<double>(1, 3) - u1(1) * p1.at<double>(2, 3),
-			p2.at<double>(0, 3) - u2(0) * p2.at<double>(2, 3),
-			p2.at<double>(1, 3) - u2(1) * p2.at<double>(2, 3));
-		// X contains the 3D coordinate of the reconstructed point
-		cv::Vec3d X;
-		// solve AX=B
-		cv::solve(A, B, X, cv::DECOMP_SVD);
-		points3D.push_back(X * m_scale);
+		cv::Vec3d X = triangulate(pp1[i], pp2[i], p1, p2);
+		//X = calib_affine(X);
+		points3D.push_back(X);
 	}
 
 	if (m_list_out)
@@ -367,7 +331,7 @@ void Camera2Ruler::Correct()
 	}
 }
 
-bool Camera2Ruler::calib_affine(cv::Mat& p1, cv::Mat& p2)
+bool Camera2Ruler::get_affine(const cv::Mat& p1, const cv::Mat& p2)
 {
 	//name order x1, x2, y1, y2, z1, z2
 	//each pointing to the axis direction from p0 to p1
@@ -379,13 +343,17 @@ bool Camera2Ruler::calib_affine(cv::Mat& p1, cv::Mat& p2)
 		return false;
 
 	std::vector<Ruler*> rulers;//6
-	std::vector<fluo::Point> pp;//12
-	std::vector<fluo::Vector> lines;//6
-	std::vector<fluo::Point> intp;
+	//reused for img1 and img2
+	std::vector<cv::Point3f> pp;//12
+	std::vector<cv::Point3f> lines;//6
+	//
+	std::vector<cv::Point3f> intp1;//3, img1
+	std::vector<cv::Point3f> intp2;//3, img2
+	std::vector<cv::Vec4d> intp4;//3, 3d
 	fluo::Point p;
-	fluo::Vector v;
 
 	//img1
+	//get rulers
 	for (size_t i = 0; i < 6; ++i)
 	{
 		rulers.push_back(m_list1->GetRuler(m_names[i]));
@@ -394,21 +362,88 @@ bool Camera2Ruler::calib_affine(cv::Mat& p1, cv::Mat& p2)
 		if (rulers[i]->GetNumPoint() < 2)
 			return false;
 	}
+	//get points
 	for (auto r : rulers)
 	{
+		r->SetWorkTime(0);
 		p = r->GetPoint(0);
-		p.z(0);
-		pp.push_back(p);
+		pp.push_back(normalize_homo(p));
 		p = r->GetPoint(1);
-		p.z(0);
-		pp.push_back(p);
+		pp.push_back(normalize_homo(p));
 	}
-	v = pp[1] - pp[0];
-	v.normalize();
-	v.z(-(pp[0].x() * v.x() + pp[1].y() * v.y())));
-	lines.push_back(v);
-	//intersection
+	//get lines
+	for (size_t i = 0; i < pp.size(); i+=2)
+	{
+		lines.push_back(pp[i].cross(pp[i + 1]));
+	}
+	//get intersections in 2d
+	for (size_t i = 0; i < lines.size(); i += 2)
+	{
+		intp1.push_back(lines[i].cross(lines[i + 1]));
+	}
+
+	rulers.clear();
+	pp.clear();
+	lines.clear();
+	//img2
+	//get rulers
+	for (size_t i = 0; i < 6; ++i)
+	{
+		rulers.push_back(m_list2->GetRuler(m_names[i]));
+		if (!rulers[i])
+			return false;
+		if (rulers[i]->GetNumPoint() < 2)
+			return false;
+	}
+	//get points
+	for (auto r : rulers)
+	{
+		r->SetWorkTime(0);
+		p = r->GetPoint(0);
+		pp.push_back(normalize_homo(p));
+		p = r->GetPoint(1);
+		pp.push_back(normalize_homo(p));
+	}
+	//get lines
+	for (size_t i = 0; i < pp.size(); i += 2)
+	{
+		lines.push_back(pp[i].cross(pp[i + 1]));
+	}
+	//get intersections in 2d
+	for (size_t i = 0; i < lines.size(); i += 2)
+	{
+		intp2.push_back(lines[i].cross(lines[i + 1]));
+	}
+
+	//get intersections in 3d
+	for (size_t i = 0; i < intp1.size(); ++i)
+	{
+		cv::Point2f pp1(intp1[i].x / intp1[i].z, intp1[i].y / intp1[i].z);
+		cv::Point2f pp2(intp2[i].x / intp2[i].z, intp2[i].y / intp2[i].z);
+		cv::Vec3d intp = triangulate(pp1, pp2, p1, p2);
+		intp4.push_back(cv::Vec4d(intp(0), intp(1), intp(2), 1));
+	}
+	//get plane in 3d
+	cv::Vec4d plane = get_plane(
+		intp4[0], intp4[1], intp4[2]);
+	//get homogeneous matrix
+	m_h = cv::Mat::eye(4, 4, CV_64F);
+	m_h.at<double>(3, 0) = plane(0);
+	m_h.at<double>(3, 1) = plane(1);
+	m_h.at<double>(3, 2) = plane(2);
+	m_h.at<double>(3, 3) = plane(3);
 	return true;
+}
+
+cv::Vec3d Camera2Ruler::calib_affine(const cv::Vec3d& pp)
+{
+	cv::Vec4d rhp(
+		m_h.at<double>(0, 0) * pp(0) + m_h.at<double>(0, 1) * pp(1) + m_h.at<double>(0, 2) * pp(2) + m_h.at<double>(0, 3),
+		m_h.at<double>(1, 0) * pp(0) + m_h.at<double>(1, 1) * pp(1) + m_h.at<double>(1, 2) * pp(2) + m_h.at<double>(1, 3),
+		m_h.at<double>(2, 0) * pp(0) + m_h.at<double>(2, 1) * pp(1) + m_h.at<double>(2, 2) * pp(2) + m_h.at<double>(2, 3),
+		m_h.at<double>(3, 0) * pp(0) + m_h.at<double>(3, 1) * pp(1) + m_h.at<double>(3, 2) * pp(2) + m_h.at<double>(3, 3)
+		);
+	return cv::Vec3d(rhp(0) / rhp(3), rhp(1) / rhp(3), rhp(2) / rhp(3));
 }
 
 /*bool Camera2Ruler::calib_affine()
@@ -470,10 +505,20 @@ bool Camera2Ruler::calib_metric()
 	//each pointing to the axis direction from p0 to p1
 	if (m_names.size() < 6)
 		return false;
+	if (!m_list1)
+		return false;
+	if (m_list_out->empty())
+		return false;
 	if (!m_list_out)
 		return false;
 	if (m_list_out->empty())
 		return false;
+
+	//find scale from first ruler in names
+	Ruler* r1 = m_list1->GetRuler(m_names[0]);
+	Ruler* ro = m_list_out->GetRuler(m_names[0]);
+	double length = r1->GetLength();
+	double scale = length / ro->GetLength();
 
 	std::vector<Ruler*> rulers;
 	for (size_t i = 0; i < 6; ++i)
@@ -526,8 +571,9 @@ bool Camera2Ruler::calib_metric()
 	//x = fluo::Vector(1, 0, 0);
 	y = fluo::Vector(0, 1, 0);
 	z = fluo::Vector(0, 0, 1);
-	o = fluo::Point((m_nx - m_scale) / 2, m_ny / 2, 0);
+	o = fluo::Point((m_nx - length) / 2, m_ny / 2, 0);
 	fluo::Transform tf2(o, x, y, z);
+	tf2.post_scale(fluo::Vector(scale));
 
 	//correct points
 	for (auto r : *m_list_out)
@@ -555,3 +601,67 @@ bool Camera2Ruler::calib_metric()
 	return true;
 }
 
+cv::Vec3d Camera2Ruler::triangulate(
+	const cv::Point2f& pp1, const cv::Point2f& pp2,
+	const cv::Mat& p1, const cv::Mat& p2)
+{
+	cv::Vec2d u1(pp1.x, pp1.y);
+	cv::Vec2d u2(pp2.x, pp2.y);
+	cv::Matx43d A(
+		u1(0) * p1.at<double>(2, 0) - p1.at<double>(0, 0),
+		u1(0) * p1.at<double>(2, 1) - p1.at<double>(0, 1),
+		u1(0) * p1.at<double>(2, 2) - p1.at<double>(0, 2),
+		u1(1) * p1.at<double>(2, 0) - p1.at<double>(1, 0),
+		u1(1) * p1.at<double>(2, 1) - p1.at<double>(1, 1),
+		u1(1) * p1.at<double>(2, 2) - p1.at<double>(1, 2),
+		u2(0) * p2.at<double>(2, 0) - p2.at<double>(0, 0),
+		u2(0) * p2.at<double>(2, 1) - p2.at<double>(0, 1),
+		u2(0) * p2.at<double>(2, 2) - p2.at<double>(0, 2),
+		u2(1) * p2.at<double>(2, 0) - p2.at<double>(1, 0),
+		u2(1) * p2.at<double>(2, 1) - p2.at<double>(1, 1),
+		u2(1) * p2.at<double>(2, 2) - p2.at<double>(1, 2));
+	cv::Matx41d B(
+		p1.at<double>(0, 3) - u1(0) * p1.at<double>(2, 3),
+		p1.at<double>(1, 3) - u1(1) * p1.at<double>(2, 3),
+		p2.at<double>(0, 3) - u2(0) * p2.at<double>(2, 3),
+		p2.at<double>(1, 3) - u2(1) * p2.at<double>(2, 3));
+	// X contains the 3D coordinate of the reconstructed point
+	cv::Vec3d X;
+	// solve AX=B
+	cv::solve(A, B, X, cv::DECOMP_SVD);
+	return X;
+}
+
+cv::Vec4d Camera2Ruler::get_plane(
+	const cv::Vec4d& pp1,
+	const cv::Vec4d& pp2,
+	const cv::Vec4d& pp3)
+{
+	//D234
+	cv::Matx33d d123(
+		pp1(1), pp2(1), pp3(1),
+		pp1(2), pp2(2), pp3(2),
+		pp1(3), pp2(3), pp3(3));
+	//D134
+	cv::Matx33d d023(
+		pp1(0), pp2(0), pp3(0),
+		pp1(2), pp2(2), pp3(2),
+		pp1(3), pp2(3), pp3(3));
+	//D124
+	cv::Matx33d d013(
+		pp1(0), pp2(0), pp3(0),
+		pp1(1), pp2(1), pp3(1),
+		pp1(3), pp2(3), pp3(3));
+	//D123
+	cv::Matx33d d012(
+		pp1(0), pp2(0), pp3(0),
+		pp1(1), pp2(1), pp3(1),
+		pp1(2), pp2(2), pp3(2));
+	cv::Vec4d X(
+		cv::determinant(d123),
+		-cv::determinant(d023),
+		cv::determinant(d013),
+		-cv::determinant(d012)
+	);
+	return X;
+}
