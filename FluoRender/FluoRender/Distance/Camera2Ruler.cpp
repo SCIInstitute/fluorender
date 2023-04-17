@@ -47,7 +47,10 @@ Camera2Ruler::Camera2Ruler() :
 	m_list1(0),
 	m_list2(0),
 	m_list_out(0),
-	m_slope(0)
+	m_slope(0),
+	m_persp(true),
+	m_affine(false),
+	m_metric(true)
 {
 	m_h = cv::Mat::eye(4, 4, CV_64F);
 }
@@ -187,8 +190,11 @@ void Camera2Ruler::Run()
 	cv::Mat diag(cv::Mat::eye(3, 3, CV_64F));
 	diag.copyTo(p1(cv::Rect(0, 0, 3, 3)));
 
-	//calib
-	get_affine(p1, p2);
+	if (m_affine)
+	{
+		//calib
+		get_affine(p1, p2);
+	}
 
 	//rebuild points
 	pp1.clear();
@@ -252,7 +258,8 @@ void Camera2Ruler::Run()
 	for (size_t i = 0; i < pp1.size(); ++i)
 	{
 		cv::Vec3d X = triangulate(pp1[i], pp2[i], p1, p2);
-		//X = calib_affine(X);
+		if (m_affine)
+			X = calib_affine(X);
 		points3D.push_back(X);
 	}
 
@@ -326,8 +333,10 @@ void Camera2Ruler::Correct()
 	size_t n = m_names.size();
 	if (n > 5)
 	{
-		//calib_affine();
-		calib_metric();
+		if (m_persp)
+			calib_persp();
+		if (m_metric)
+			calib_metric();
 	}
 }
 
@@ -446,7 +455,7 @@ cv::Vec3d Camera2Ruler::calib_affine(const cv::Vec3d& pp)
 	return cv::Vec3d(rhp(0) / rhp(3), rhp(1) / rhp(3), rhp(2) / rhp(3));
 }
 
-/*bool Camera2Ruler::calib_affine()
+bool Camera2Ruler::calib_persp()
 {
 	if (!m_list_out)
 		return false;
@@ -497,7 +506,7 @@ cv::Vec3d Camera2Ruler::calib_affine(const cv::Vec3d& pp)
 		}
 	}
 	return true;
-}*/
+}
 
 bool Camera2Ruler::calib_metric()
 {

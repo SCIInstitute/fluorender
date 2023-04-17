@@ -69,6 +69,18 @@ namespace flrd
 		{
 			m_slope = dval;
 		}
+		void SetPersp(bool val)
+		{
+			m_persp = val;
+		}
+		void SetAffine(bool val)
+		{
+			m_affine = val;
+		}
+		void SetMetric(bool val)
+		{
+			m_metric = val;
+		}
 
 		void Run();//compute 3D
 
@@ -93,11 +105,15 @@ namespace flrd
 		RulerList* m_list_out;
 		double m_slope;
 		std::vector<std::string> m_names;
+		bool m_persp;
+		bool m_affine;
+		bool m_metric;
 		cv::Mat m_h;//homogeneours matrix from affine correction
 
 	private:
 		bool get_affine(const cv::Mat& p1, const cv::Mat& p2);
 		cv::Vec3d calib_affine(const cv::Vec3d& pp);
+		bool calib_persp();
 		bool calib_metric();
 		cv::Point2f normalize(fluo::Point& p)
 		{

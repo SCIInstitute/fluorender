@@ -1722,6 +1722,12 @@ void ScriptProc::RunCameraPoints()
 	int correct = GetItems(str, names);
 	double slope;
 	m_fconfig->Read("slope", &slope, 0);
+	bool affine;
+	m_fconfig->Read("affine", &affine, false);
+	bool persp;
+	m_fconfig->Read("persp", &persp, true);
+	bool metric;
+	m_fconfig->Read("metric", &metric, true);
 
 	RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list || ruler_list->empty()) return;
@@ -1737,6 +1743,9 @@ void ScriptProc::RunCameraPoints()
 	c2r.SetRange(1, m_view->m_begin_frame, m_view->m_end_frame);
 	c2r.SetList(2, prj2.ToStdString());
 	c2r.SetNames(names);
+	c2r.SetAffine(affine);
+	c2r.SetPersp(persp);
+	c2r.SetMetric(metric);
 	c2r.Run();
 	c2r.SetSlope(slope);
 	c2r.Correct();
