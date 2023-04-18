@@ -433,15 +433,25 @@ protected:
 				fluo::Point point;
 				fluo::ValueVector names =
 					point_node->getValueNames(3);
+				*ofs_ << j << std::endl;
 				for (auto it = names.begin();
-					it != names.end(); ++it)
+					it != names.end();)
 				{
 					if (!IS_NUMBER(*it))
+					{
+						++it;
 						continue;
+					}
 					if (point_node->getValue(*it, point))
 						coords.push_back(point);
+					//t
+					*ofs_ << *it;
+					++it;
+					if (it == names.end())
+						*ofs_ << std::endl;
+					else
+						*ofs_ << ", ";
 				}
-				*ofs_ << j << std::endl;
 				//x
 				for (size_t k = 0; k < coords.size(); ++k)
 				{
