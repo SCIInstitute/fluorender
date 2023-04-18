@@ -144,6 +144,10 @@ int ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 					RunRoiDff();
 				else if (str == "ruler_info")
 					RunRulerInfo();
+				else if (str == "ruler_transform")
+					RunRulerTransform();
+				else if (str == "ruler_speed")
+					RunRulerSpeed();
 				else if (str == "save_volume")
 					RunSaveVolume();
 				else if (str == "calculate")
@@ -1430,39 +1434,6 @@ void ScriptProc::RunRoiDff()
 	visitor.output(m_output.get());
 }
 
-void ScriptProc::RunRulerInfo()
-{
-	if (!TimeCondition())
-		return;
-	RulerList* ruler_list = m_view->GetRulerList();
-	if (!ruler_list || ruler_list->empty()) return;
-
-	int curf = m_view->m_tseq_cur_num;
-	std::string fn = std::to_string(curf);
-	//output
-	//script command
-	fluo::Group* cmdg = m_output->getOrAddGroup(m_type.ToStdString());
-	cmdg->addSetValue("type", m_type.ToStdString());
-
-	for (size_t i = 0; i < ruler_list->size(); ++i)
-	{
-		//for each ruler
-		flrd::Ruler* ruler = (*ruler_list)[i];
-		if (!ruler) continue;
-		if (!ruler->GetDisp()) continue;
-		fluo::Group* ruler_group = cmdg->getOrAddGroup(std::to_string(ruler->Id() + 1));
-		ruler_group->addSetValue("type", std::string("ruler"));
-		ruler_group->addSetValue("name", ruler->GetName().ToStdString());
-		ruler->SetWorkTime(curf);
-		for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
-		{
-			fluo::Node* point_node = ruler_group->getOrAddNode(std::to_string(j));
-			fluo::Point point = ruler->GetPoint(j);
-			point_node->addSetValue(fn, point);
-		}
-	}
-}
-
 void ScriptProc::RunAddCells()
 {
 	if (!TimeCondition())
@@ -1771,6 +1742,186 @@ void ScriptProc::RunCameraPoints()
 	{
 		m_frame->GetSettingDlg()->SetRunScript(false);
 		m_frame->GetMovieView()->GetScriptSettings(false);
+	}
+}
+
+void ScriptProc::RunRulerInfo()
+{
+	if (!TimeCondition())
+		return;
+	RulerList* ruler_list = m_view->GetRulerList();
+	if (!ruler_list || ruler_list->empty()) return;
+
+	int curf = m_view->m_tseq_cur_num;
+	std::string fn = std::to_string(curf);
+	//output
+	//script command
+	fluo::Group* cmdg = m_output->getOrAddGroup(m_type.ToStdString());
+	cmdg->addSetValue("type", m_type.ToStdString());
+
+	for (size_t i = 0; i < ruler_list->size(); ++i)
+	{
+		//for each ruler
+		flrd::Ruler* ruler = (*ruler_list)[i];
+		if (!ruler) continue;
+		if (!ruler->GetDisp()) continue;
+		fluo::Group* ruler_group = cmdg->getOrAddGroup(std::to_string(ruler->Id() + 1));
+		ruler_group->addSetValue("type", std::string("ruler"));
+		ruler_group->addSetValue("name", ruler->GetName().ToStdString());
+		ruler->SetWorkTime(curf);
+		for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
+		{
+			fluo::Node* point_node = ruler_group->getOrAddNode(std::to_string(j));
+			fluo::Point point = ruler->GetPoint(j);
+			point_node->addSetValue(fn, point);
+		}
+	}
+}
+
+void ScriptProc::RunRulerTransform()
+{
+	if (!TimeCondition())
+		return;
+	RulerList* ruler_list = m_view->GetRulerList();
+	if (!ruler_list || ruler_list->empty()) return;
+
+	int dim;
+	m_fconfig->Read("dim", &dim);//2 or 3
+	wxString name;
+	m_fconfig->Read("name", &name);
+	double len;
+	m_fconfig->Read("length", &len);//physical length
+	flrd::Ruler* ruler = ruler_list->GetRuler(name.ToStdString());
+	if (!ruler)
+		return;
+	if (ruler->GetNumPoint() < 2)
+		return;
+
+	//
+	ruler->SetWorkTime(0);
+	fluo::Point o = ruler->GetPoint(0);
+	if (dim < 3)
+		o.z(0);
+	fluo::Point p = ruler->GetPoint(1);
+	if (dim < 3)
+		p.z(0);
+	fluo::Vector vx = p - o;
+	double rl = vx.length();//length of ruler
+	if (rl == 0)
+		return;
+	vx.normalize();
+	fluo::Vector vy;
+	fluo::Vector vz(vx.x(), 0, vx.z());
+	if (vz.length() > 0)
+	{
+		vz = fluo::Cross(vx, vz);
+		vz.normalize();
+		vy = fluo::Cross(vz, vx);
+	}
+	else
+	{
+		vy = fluo::Vector(1, 0, 0);
+		vz = fluo::Vector(0, 0, -1);
+	}
+	fluo::Transform tf(o, vx, vy, vz);
+	tf.post_scale(fluo::Vector(len / rl));
+
+	int curf = m_view->m_tseq_cur_num;
+	std::string fn = std::to_string(curf);
+	//output
+	//script command
+	fluo::Group* cmdg = m_output->getOrAddGroup(m_type.ToStdString());
+	cmdg->addSetValue("type", m_type.ToStdString());//ruler_transform
+
+	for (size_t i = 0; i < ruler_list->size(); ++i)
+	{
+		//for each ruler
+		flrd::Ruler* ruler = (*ruler_list)[i];
+		if (!ruler) continue;
+		if (!ruler->GetDisp()) continue;
+		fluo::Group* ruler_group = cmdg->getOrAddGroup(std::to_string(ruler->Id() + 1));
+		ruler_group->addSetValue("type", std::string("ruler"));
+		ruler_group->addSetValue("name", ruler->GetName().ToStdString());
+		ruler->SetWorkTime(curf);
+		for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
+		{
+			fluo::Node* point_node = ruler_group->getOrAddNode(std::to_string(j));
+			fluo::Point point = ruler->GetPoint(j);
+			if (dim < 3)
+				point.z(0);
+			tf.project_inplace(point);
+			point_node->addSetValue(fn, point);
+		}
+	}
+}
+
+void ScriptProc::RunRulerSpeed()
+{
+	if (!TimeCondition())
+		return;
+
+	wxString type;
+	m_fconfig->Read("type_name", &type);
+	double time;//time between two samples
+	m_fconfig->Read("time", &time, 1);
+	double fps;//alternative
+	if (m_fconfig->Read("fps", &fps, 1))
+	{
+		time = 1 / fps;
+	}
+
+	fluo::Node* node = m_output->getChild(type.ToStdString());
+	if (!node)
+		return;
+	fluo::Group* cmdg_old = node->asGroup();
+	if (!cmdg_old)
+		return;
+
+	fluo::Point p0, p1;
+	std::string str;
+	//output
+	//script command
+	fluo::Group* cmdg = m_output->getOrAddGroup(m_type.ToStdString());
+	cmdg->addSetValue("type", m_type.ToStdString());//ruler_speed
+
+	for (size_t i = 0; i < cmdg_old->getNumChildren(); ++i)
+	{
+		node = cmdg_old->getChild(i);
+		if (!node)
+			continue;
+		fluo::Group* ruler_group_old = node->asGroup();
+		if (!ruler_group_old)
+			continue;
+
+		str = ruler_group_old->getName();
+		fluo::Group* ruler_group = cmdg->getOrAddGroup(str);
+		ruler_group_old->getValue("type", str);
+		ruler_group->addSetValue("type", str);
+		ruler_group_old->getValue("name", str);
+		ruler_group->addSetValue("name", str);
+		for (size_t j = 0; j < ruler_group_old->getNumChildren(); ++j)
+		{
+			node = ruler_group_old->getChild(j);
+			if (!node)
+				continue;
+
+			fluo::Node* point_node = ruler_group->getOrAddNode(std::to_string(j));
+
+			fluo::ValueVector names = node->getValueNames(3);
+			for (size_t k = 0; k < names.size(); ++k)
+			{
+				if (k == 0)
+				{
+					node->getValue(names[k], p0);
+					continue;
+				}
+				node->getValue(names[k], p1);
+				//speed vector
+				fluo::Vector speed = (p1 - p0) / time;
+				point_node->addSetValue(names[k], fluo::Point(speed));//save as point
+				p0 = p1;
+			}
+		}
 	}
 }
 

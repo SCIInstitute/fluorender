@@ -130,13 +130,15 @@ namespace flrd
 		void RunRulerProfile();
 		void RunRoi();
 		void RunRoiDff();
-		void RunRulerInfo();
 		void RunAddCells();
 		void RunLinkCells();
 		void RunUnlinkCells();
 		void RunBackgroundStat();
 		void RunRegistration();
 		void RunCameraPoints();
+		void RunRulerInfo();
+		void RunRulerTransform();
+		void RunRulerSpeed();
 		//break
 		bool RunBreak();
 		//python
