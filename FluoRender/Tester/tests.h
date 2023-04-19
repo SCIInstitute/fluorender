@@ -22,3 +22,5 @@ void PythonTest1(const std::string& config, const std::string& video);
 void PythonTest2(const std::string& config, const std::string& video);
 
 void OpenCVTest0();
+
+void WalkCycleTest(const std::string& file, int l, int r);

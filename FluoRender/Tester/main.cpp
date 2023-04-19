@@ -43,7 +43,9 @@ int main(int argc, char* argv[])
 
 	//PythonTest0();
 
-	OpenCVTest0();
+	//OpenCVTest0();
+
+	WalkCycleTest(argv[1], std::stoi(argv[2]), std::stoi(argv[3]));
 
 	cout << "All done. Quit." << endl;
 	cin.get();
