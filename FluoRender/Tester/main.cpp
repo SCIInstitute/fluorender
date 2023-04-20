@@ -45,7 +45,16 @@ int main(int argc, char* argv[])
 
 	//OpenCVTest0();
 
-	WalkCycleTest(argv[1], std::stoi(argv[2]), std::stoi(argv[3]));
+	int type = std::stoi(argv[1]);
+	switch (type)
+	{
+	case 0:
+		WalkCycleInit(argv[2], std::stoi(argv[3]), std::stoi(argv[4]));
+		break;
+	case 1:
+		WalkCycleRefine(argv[2], argv[3]);
+		break;
+	}
 
 	cout << "All done. Quit." << endl;
 	cin.get();

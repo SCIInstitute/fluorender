@@ -222,6 +222,10 @@ namespace flrd
 		{
 			win_ = win;
 		}
+		Window GetWin()
+		{
+			return win_;
+		}
 		void LoadCycle();//from data
 		void LoadCycle(const std::string& name);//from file
 		void SaveCycle(const std::string& name);

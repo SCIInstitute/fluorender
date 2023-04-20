@@ -184,6 +184,7 @@ void WalkCycle::LoadCycle(const std::string& name)
 		cycle_.add_seq(seq);
 	}
 	f.close();
+	win_ = Window(0, cycle_.length() -1);
 }
 
 void WalkCycle::SaveCycle(const std::string& name)
