@@ -109,7 +109,7 @@ namespace flrd
 			w = w ? w : 1;
 			r = l + w - 1;
 		}
-		void scaleto(size_t i)
+		void resize(size_t i)
 		{
 			w = i;
 			r = l + w - 1;
@@ -135,8 +135,9 @@ namespace flrd
 	class WalkData
 	{
 	public:
-		WalkData();
-		~WalkData();
+		WalkData() : length_(0), auto_corr_(0) {}
+		WalkData(WalkData& d) : length_(d.length_), auto_corr_(d.auto_corr_), data_(d.data_) {}
+		~WalkData() {}
 
 		size_t length() { return length_; }
 		size_t size() { return data_.size(); }
@@ -153,6 +154,7 @@ namespace flrd
 		{
 			data_.clear();
 			length_ = 0;
+			auto_corr_ = 0;
 		}
 		void zero()
 		{
@@ -166,6 +168,12 @@ namespace flrd
 			for (auto& i : data_)
 				std::transform(i.begin(), i.end(), i.begin(),
 					[d](double& c) { return c / d; });
+		}
+		void mul(double d)
+		{
+			for (auto& i : data_)
+				std::transform(i.begin(), i.end(), i.begin(),
+					[d](double& c) { return c * d; });
 		}
 		double get(size_t i, size_t j)
 		{
@@ -184,9 +192,19 @@ namespace flrd
 			if (i < data_.size() && j < length_)
 				data_[i][j] += v;
 		}
+		double get_auto_corr()
+		{
+			if (auto_corr_ > 0)
+				return auto_corr_;
+			for (auto& i : data_)
+				for (auto& j : i)
+					auto_corr_ += j * j;
+			return auto_corr_;
+		}
 
 	private:
 		size_t length_;
+		double auto_corr_;//auto correlation
 		std::vector<Sequence> data_;
 	};
 
@@ -197,23 +215,42 @@ namespace flrd
 		~WalkCycle();
 
 		void ReadData(const std::string& name);
+		void Extract();
+		void Reset();//reset for win change not the data
+
 		void SetInitWin(Window& win)
 		{
 			win_ = win;
 		}
-		void Extract();
-
-		void LoadCycle();
+		void LoadCycle();//from data
+		void LoadCycle(const std::string& name);//from file
 		void SaveCycle(const std::string& name);
-		Window Match(const Window& target);
-		double Correlate(const Window& win);
+
+		WalkData GetCycle()
+		{
+			return cycle_;
+		}
+		double GetCorr()
+		{
+			return corr_;
+		}
+		double GetNormalizedCorr()
+		{
+			return corr_ / cycle_.get_auto_corr();
+		}
 
 	private:
 		std::vector<size_t> time_;
 		WalkData data_;
+
+		Window win_;
 		WalkData cycle_;
 		double corr_;//sum correlation
-		Window win_;
+		double in_corr_;//input correlation if cycle is read from file
+
+	private:
+		Window Match(const Window& target);
+		double Correlate(const Window& win);
 	};
 }
 

@@ -32,18 +32,9 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-WalkData::WalkData() :
-	length_(0)
-{
-
-}
-
-WalkData::~WalkData()
-{
-
-}
-
-WalkCycle::WalkCycle()
+WalkCycle::WalkCycle() :
+	corr_(0),
+	in_corr_(0)
 {
 
 }
@@ -117,9 +108,9 @@ void WalkCycle::Extract()
 	}
 
 	//correlation
-	corr_ = 0;
+	corr_ = in_corr_;
 	//average cycle
-	cycle_.zero();
+	cycle_.mul(in_corr_);
 	for (auto& w : wins)
 	{
 		corr_ += w.c;
@@ -128,11 +119,21 @@ void WalkCycle::Extract()
 			for (size_t j = 0; j < cycle_.length(); ++j)
 			{
 				double val = data_.get(i, w, double(j) / double(cycle_.length() - 1));
+				val *= w.c;
 				cycle_.inc(i, j, val);
 			}
 		}
 	}
-	cycle_.div(wins.size());
+	cycle_.div(corr_);
+	in_corr_ = corr_;
+}
+
+void WalkCycle::Reset()
+{
+	cycle_.clear();
+	corr_ = 0;
+	in_corr_ = 0;
+	win_ = Window();
 }
 
 void WalkCycle::LoadCycle()
@@ -149,11 +150,50 @@ void WalkCycle::LoadCycle()
 	}
 }
 
+void WalkCycle::LoadCycle(const std::string& name)
+{
+	std::ifstream f(name);
+	if (!f.good())
+		return;
+
+	cycle_.clear();
+	std::string line;
+	while (std::getline(f, line))
+	{
+		std::istringstream s(line);
+		std::string item;
+		std::vector<std::string> entry;
+		while (std::getline(s, item, ','))
+			entry.push_back(item);
+		size_t en = 0;
+		for (auto& it : entry)
+			if (it != "")
+				en++;
+		if (en < 2)
+		{
+			if (en == 1)
+			{
+				//correlation
+				in_corr_ = std::stod(entry[0]);
+			}
+			continue;
+		}
+		Sequence seq;
+		for (auto& it : entry)
+			seq.push_back(std::stod(it));
+		cycle_.add_seq(seq);
+	}
+	f.close();
+}
+
 void WalkCycle::SaveCycle(const std::string& name)
 {
 	std::ofstream f(name);
 	if (!f.good())
 		return;
+
+	//correlation
+	f << corr_ << std::endl;
 
 	for (size_t i = 0; i < cycle_.size(); ++i)
 	{
@@ -197,7 +237,7 @@ Window WalkCycle::Match(const Window& target)
 		}
 	}
 	Window result = target;
-	result.scaleto(low.w + max_ind);
+	result.resize(low.w + max_ind);
 	result.c = max_corr;
 	return result;
 }
