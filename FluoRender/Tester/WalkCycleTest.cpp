@@ -3,6 +3,20 @@
 #include <Distance/WalkCycle.h>
 #include <filesystem>
 
+void WalkCycleAvg(const std::string& f1,
+	const std::string& f2,
+	const std::string& fo)
+{
+	flrd::WalkCycle wc1, wc2;
+	wc1.ReadData(f1);
+	wc2.ReadData(f2);
+	flrd::WalkData& d1 = wc1.GetData();
+	flrd::WalkData& d2 = wc2.GetData();
+	d1 += d2;
+	d1.div(2);
+	wc1.SaveData(fo);
+}
+
 void WalkCycleInit(const std::string& file, int l, int r)
 {
 	flrd::WalkCycle wc;

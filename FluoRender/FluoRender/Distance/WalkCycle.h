@@ -161,6 +161,19 @@ namespace flrd
 			for (auto& i : data_)
 				std::fill(i.begin(), i.end(), 0);
 		}
+		WalkData& operator+=(const WalkData& d)
+		{
+			for (size_t i = 0; i < data_.size(); ++i)
+				for (size_t j = 0; j < data_[i].size(); ++j)
+				{
+					if (i >= d.data_.size())
+						continue;
+					if (j >= d.data_[i].size())
+						continue;
+					data_[i][j] += d.data_[i][j];
+				}
+			return *this;
+		}
 		void div(double d)
 		{
 			if (d == 0)
@@ -215,6 +228,11 @@ namespace flrd
 		~WalkCycle();
 
 		void ReadData(const std::string& name);
+		void SaveData(const std::string& name);
+		WalkData& GetData()
+		{
+			return data_;
+		}
 		void Extract();
 		void Reset();//reset for win change not the data
 
@@ -245,6 +263,13 @@ namespace flrd
 
 	private:
 		std::vector<size_t> time_;
+		struct Name
+		{
+			std::string s;
+			size_t n;
+			size_t d;
+		};
+		std::vector<Name> names_;//ruler names and point size
 		WalkData data_;
 
 		Window win_;

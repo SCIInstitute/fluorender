@@ -389,7 +389,8 @@ public:
 		std::set<std::string>& tnames) :
 		fluo::NodeVisitor(),
 		ofs_(&ofs),
-		tnames_(tnames)
+		tnames_(tnames),
+		dim_(0)
 	{
 		setTraversalMode(fluo::NodeVisitor::TRAVERSE_CHILDREN);
 	}
@@ -402,6 +403,7 @@ public:
 	{
 		std::string type;
 		group.getValue("type", type);
+		group.getValue("dim", dim_);
 		if (tnames_.find(type) != tnames_.end())
 			printValues(&group);
 		traverse(group);
@@ -471,13 +473,16 @@ protected:
 						*ofs_ << ", ";
 				}
 				//z
-				for (size_t k = 0; k < coords.size(); ++k)
+				if (dim_ == 0 || dim_ == 3)
 				{
-					*ofs_ << coords[k].z();
-					if (k == coords.size() - 1)
-						*ofs_ << std::endl;
-					else
-						*ofs_ << ", ";
+					for (size_t k = 0; k < coords.size(); ++k)
+					{
+						*ofs_ << coords[k].z();
+						if (k == coords.size() - 1)
+							*ofs_ << std::endl;
+						else
+							*ofs_ << ", ";
+					}
 				}
 			}
 		}
@@ -486,6 +491,7 @@ protected:
 private:
 	std::ofstream* ofs_;
 	std::set<std::string> tnames_;
+	long dim_;
 };
 
 class OutTempVisitor : public fluo::NodeVisitor

@@ -6282,6 +6282,8 @@ void VRenderGLView::RemoveVolumeDataDup(wxString &name)
 
 	if (!vd_main)
 		return;
+
+	m_ruler_handler.SetVolumeData(0);
 	
 	for (auto iter = m_layer_list.begin();
 		iter != m_layer_list.end();)

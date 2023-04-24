@@ -25,3 +25,4 @@ void OpenCVTest0();
 
 void WalkCycleInit(const std::string& file, int l, int r);
 void WalkCycleRefine(const std::string& datafile, const std::string& cyclefile);
+void WalkCycleAvg(const std::string& f1, const std::string& f2, const std::string& fo);

@@ -46,6 +46,10 @@ WalkCycle::~WalkCycle()
 
 void WalkCycle::ReadData(const std::string& name)
 {
+	time_.clear();
+	names_.clear();
+	data_.clear();
+
 	std::ifstream f(name);
 	if (!f.good())
 		return;
@@ -66,6 +70,15 @@ void WalkCycle::ReadData(const std::string& name)
 		if (en < 5)
 		{
 			ln = 0;//reset
+
+			//get names
+			if (en == 2)
+				names_.push_back(Name(entry[1], 0, 0));
+			else if (en == 1 && !names_.empty())
+			{
+				names_.back().n++;
+				names_.back().d = 0;
+			}
 			continue;
 		}
 		if (ln == 0)
@@ -84,10 +97,55 @@ void WalkCycle::ReadData(const std::string& name)
 			for (auto& it : entry)
 				seq.push_back(std::stod(it));
 			data_.add_seq(seq);
+			if (!names_.empty())
+				names_.back().d++;
 		}
 		ln++;
 	}
 
+	f.close();
+}
+
+void WalkCycle::SaveData(const std::string& name)
+{
+	std::ofstream f(name);
+	if (!f.good())
+		return;
+
+	size_t cnt = 0;
+	for (size_t i = 0; i < names_.size(); ++i)
+	{
+		//name
+		f << i + 1 << ", " << names_[i].s << std::endl;
+		for (size_t j = 0; j < names_[i].n; ++j)
+		{
+			//sn
+			f << j << std::endl;
+			//time
+			for (size_t k = 0; k < time_.size(); ++k)
+			{
+				f << time_[k];
+				if (k < time_.size() - 1)
+					f << ", ";
+				else
+					f << std::endl;
+			}
+			//values
+			for (size_t k = 0; k < names_[i].d; ++k)
+			{
+				for (size_t l = 0; l < data_.length(); ++l)
+				{
+					double val = data_.get(cnt, l);
+					f << val;
+					if (l < data_.length() - 1)
+						f << ", ";
+					else
+						f << std::endl;
+				}
+				cnt++;
+			}
+		}
+	}
 	f.close();
 }
 

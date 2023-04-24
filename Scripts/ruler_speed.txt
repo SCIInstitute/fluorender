@@ -5,7 +5,7 @@ type=ruler_transform
 time_mode=TM_ALL_PRE
 dim=3
 name=beam
-length=0.8
+length=0.6096
 [tasks/task1]
 type=ruler_speed
 time_mode=TM_LAST_POST

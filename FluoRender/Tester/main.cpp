@@ -54,6 +54,9 @@ int main(int argc, char* argv[])
 	case 1:
 		WalkCycleRefine(argv[2], argv[3]);
 		break;
+	case 2:
+		WalkCycleAvg(argv[2], argv[3], argv[4]);
+
 	}
 
 	cout << "All done. Quit." << endl;

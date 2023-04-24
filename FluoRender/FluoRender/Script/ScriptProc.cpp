@@ -1832,6 +1832,7 @@ void ScriptProc::RunRulerTransform()
 	//script command
 	fluo::Group* cmdg = m_output->getOrAddGroup(m_type.ToStdString());
 	cmdg->addSetValue("type", m_type.ToStdString());//ruler_transform
+	cmdg->addSetValue("dim", (long)dim);
 
 	for (size_t i = 0; i < ruler_list->size(); ++i)
 	{
@@ -1876,6 +1877,8 @@ void ScriptProc::RunRulerSpeed()
 	fluo::Group* cmdg_old = node->asGroup();
 	if (!cmdg_old)
 		return;
+	long dim;
+	cmdg_old->getValue("dim", dim);
 
 	fluo::Point p0, p1;
 	std::string str;
@@ -1883,6 +1886,7 @@ void ScriptProc::RunRulerSpeed()
 	//script command
 	fluo::Group* cmdg = m_output->getOrAddGroup(m_type.ToStdString());
 	cmdg->addSetValue("type", m_type.ToStdString());//ruler_speed
+	cmdg->addSetValue("dim", dim);
 
 	for (size_t i = 0; i < cmdg_old->getNumChildren(); ++i)
 	{
