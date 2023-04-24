@@ -1705,6 +1705,12 @@ int RulerHandler::Distance(int index, std::string filename)
 //get time points where keys exist
 bool RulerHandler::GetKeyFrames(std::set<size_t>& kf)
 {
+	if (!m_view)
+		return false;
+	size_t startf, endf;
+	startf = m_view->m_begin_frame;
+	endf = m_view->m_end_frame;
+
 	if (!m_ruler_list)
 		return false;
 	if (m_ruler_list->empty())
@@ -1725,7 +1731,8 @@ bool RulerHandler::GetKeyFrames(std::set<size_t>& kf)
 			{
 				size_t t;
 				fluo::Point pp;
-				if (p->GetTimeAndPoint(k, t, pp))
+				if (p->GetTimeAndPoint(k, t, pp) &&
+					t > startf && t <= endf)
 					kf.insert(t);
 			}
 		}
