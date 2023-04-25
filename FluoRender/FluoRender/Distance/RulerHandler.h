@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define _RulerHandler_H_
 
 #include <Distance/Ruler.h>
+#include <Distance/WalkCycle.h>
 #include <Selection/VolumePoint.h>
 #include <string>
 #include <algorithm>
@@ -235,6 +236,9 @@ namespace flrd
 		size_t GetRulerPointNum();
 		bool GetRulerPointNames(std::vector<std::string>& names);
 		bool GetRulerPointCoords(std::vector<double>& coords);
+
+		//generate walk
+		void GenerateWalk(size_t length, WalkCycle& cycle);
 
 	private:
 		unsigned int m_group;

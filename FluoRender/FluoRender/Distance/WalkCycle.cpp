@@ -73,7 +73,7 @@ void WalkCycle::ReadData(const std::string& name)
 
 			//get names
 			if (en == 2)
-				names_.push_back(Name(entry[1], 0, 0));
+				names_.push_back(WcName(entry[1], 0, 0));
 			else if (en == 1 && !names_.empty())
 			{
 				names_.back().n++;
@@ -87,7 +87,18 @@ void WalkCycle::ReadData(const std::string& name)
 			{
 				//time index
 				for (auto& it : entry)
-					time_.push_back(std::stoi(it));
+				{
+					size_t t;
+					try
+					{
+						t = std::stoi(it);
+					}
+					catch (...)
+					{
+						continue;
+					}
+					time_.push_back(t);
+				}
 			}
 		}
 		else
@@ -95,7 +106,18 @@ void WalkCycle::ReadData(const std::string& name)
 			//speed data
 			Sequence seq;
 			for (auto& it : entry)
-				seq.push_back(std::stod(it));
+			{
+				double v;
+				try
+				{
+					v = std::stod(it);
+				}
+				catch (...)
+				{
+					continue;
+				}
+				seq.push_back(v);
+			}
 			data_.add_seq(seq);
 			if (!names_.empty())
 				names_.back().d++;

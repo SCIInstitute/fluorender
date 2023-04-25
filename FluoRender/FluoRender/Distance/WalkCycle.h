@@ -221,6 +221,13 @@ namespace flrd
 		std::vector<Sequence> data_;
 	};
 
+	struct WcName
+	{
+		std::string s;
+		size_t n;
+		size_t d;
+	};
+
 	class WalkCycle
 	{
 	public:
@@ -261,15 +268,14 @@ namespace flrd
 			return corr_ / cycle_.get_auto_corr();
 		}
 
+		void GetNames(std::vector<WcName>& names)
+		{
+			std::copy(names_.begin(), names_.end(), names);
+		}
+
 	private:
 		std::vector<size_t> time_;
-		struct Name
-		{
-			std::string s;
-			size_t n;
-			size_t d;
-		};
-		std::vector<Name> names_;//ruler names and point size
+		std::vector<WcName> names_;//ruler names and point size
 		WalkData data_;
 
 		Window win_;

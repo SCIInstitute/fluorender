@@ -1853,3 +1853,39 @@ RulerPoint* RulerHandler::get_closest_point(fluo::Point& p)
 	return result;
 }
 
+void RulerHandler::GenerateWalk(size_t length, WalkCycle& cycle)
+{
+	if (!m_view)
+		return;
+	if (!m_ruler_list)
+		return;
+	if (m_ruler_list->empty())
+		return;
+
+	std::vector<WcName> names;
+	cycle.GetNames(names);
+	if (names.empty())
+		return;
+	int dim = names[0].d;
+	size_t period = names[0].n;
+	std::set<std::string> rlist;
+	for (auto& i : names)
+		rlist.insert(i.s);
+
+	for (size_t i = 0; i < length; ++i)
+	{
+		size_t t = i + 1;
+		for (auto r : *m_ruler_list)
+		{
+			std::string str = r->GetName().ToStdString();
+			if (rlist.find(str) == rlist.end())
+				continue;
+			//compute integral for each point
+			for (size_t j = 0; j < r->GetNumPoint(); ++j)
+			{
+
+			}
+		}
+	}
+
+}
