@@ -137,7 +137,7 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 		std::istringstream s(line);
 		std::string item;
 		std::vector<std::string> entry;
-		while (std::getline(s, item, ','))
+		while (std::getline(s >> std::ws, item, ','))
 			entry.push_back(item);
 
 		if (entry[0] == "time_offset")

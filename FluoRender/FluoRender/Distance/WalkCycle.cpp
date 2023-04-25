@@ -61,7 +61,7 @@ void WalkCycle::ReadData(const std::string& name)
 		std::istringstream s(line);
 		std::string item;
 		std::vector<std::string> entry;
-		while (std::getline(s, item, ','))
+		while (std::getline(s >> std::ws, item, ','))
 			entry.push_back(item);
 		size_t en = 0;
 		for (auto& it : entry)
@@ -243,7 +243,7 @@ void WalkCycle::LoadCycle(const std::string& name)
 		std::istringstream s(line);
 		std::string item;
 		std::vector<std::string> entry;
-		while (std::getline(s, item, ','))
+		while (std::getline(s >> std::ws, item, ','))
 			entry.push_back(item);
 		size_t en = 0;
 		for (auto& it : entry)
@@ -337,4 +337,32 @@ double WalkCycle::Correlate(const Window& win)
 		}
 	}
 	return result;
+}
+
+void WalkCycle::Correct(int mode)
+{
+	if (names_.empty())
+		return;
+	int dim;
+	switch (mode)
+	{
+	case 0:
+		data_.normalize(0, 3);
+		data_.set_leng(data_.length() + 1);
+		dim = names_[0].d;
+		if (dim > 1)
+			data_.correct(1, 3);
+		if (dim > 2)
+			data_.correct(2, 3);
+	break;
+	case 1:
+		cycle_.normalize(0, 3);
+		cycle_.set_leng(cycle_.length() + 1);
+		dim = names_[0].d;
+		if (dim > 1)
+			cycle_.correct(1, 3);
+		if (dim > 2)
+			cycle_.correct(2, 3);
+		break;
+	}
 }

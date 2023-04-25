@@ -130,6 +130,20 @@ namespace flrd
 				return at(i0) * (1 - p) + at(i1) * p;
 			return 0;
 		}
+		void correct()
+		{
+			double sum = 0;
+			for (auto i : *this)
+				sum += i;
+			back() = -sum;
+		}
+		double sum()
+		{
+			double v = 0;
+			for (auto i : *this)
+				v += i;
+			return v;
+		}
 	};
 
 	class WalkData
@@ -142,6 +156,13 @@ namespace flrd
 		size_t length() { return length_; }
 		size_t size() { return data_.size(); }
 
+		void set_leng(size_t l)
+		{
+			for (auto& i : data_)
+				i.resize(l, 0);
+			length_ = l;
+			auto_corr_ = 0;
+		}
 		void add_seq(Sequence& seq)
 		{
 			length_ = std::max(length_, seq.size());
@@ -215,6 +236,34 @@ namespace flrd
 			return auto_corr_;
 		}
 
+		void correct(size_t x, size_t n)
+		{
+			for (size_t i = 0; i < data_.size(); ++i)
+			{
+				if (x == i % n)
+					data_[i].correct();
+			}
+		}
+		void normalize(size_t x, size_t n)
+		{
+			double maxv = 0;
+			for (size_t i = 0; i < data_.size(); ++i)
+			{
+				if (x == i % n)
+					maxv = std::max(maxv, data_[i].sum());
+			}
+			for (size_t i = 0; i < data_.size(); ++i)
+			{
+				if (x == i % n)
+				{
+					double d = data_[i].sum();
+					d = maxv / d;
+					std::transform(data_[i].begin(), data_[i].end(), data_[i].begin(),
+						[d](double& c) { return c * d; });
+				}
+			}
+		}
+
 	private:
 		size_t length_;
 		double auto_corr_;//auto correlation
@@ -270,8 +319,20 @@ namespace flrd
 
 		void GetNames(std::vector<WcName>& names)
 		{
-			std::copy(names_.begin(), names_.end(), names);
+			//std::copy(names_.begin(), names_.end(), names);
+			if (!names.empty())
+				names.clear();
+			for (auto& i : names_)
+			{
+				WcName name;
+				name.s = i.s;
+				name.d = i.d;
+				name.n = i.n;
+				names.push_back(name);
+			}
 		}
+
+		void Correct(int mode);//0: data, 1: cycle
 
 	private:
 		std::vector<size_t> time_;

@@ -139,6 +139,7 @@ namespace flrd
 		void RunRulerInfo();
 		void RunRulerTransform();
 		void RunRulerSpeed();
+		void RunGenerateWalk();
 		//break
 		bool RunBreak();
 		//python

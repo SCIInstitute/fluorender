@@ -1,0 +1,8 @@
+[tasks]
+tasknum=1
+[tasks/task0]
+type=generate_walk
+time_mode=TM_FIRST_PRE
+cycle=
+length=100
+dir=-46.42

@@ -4773,6 +4773,7 @@ void VRenderGLView::SetParams(double t)
 		m_frame->UpdateTree(m_cur_vol ? m_cur_vol->GetName() : wxString(""));
 		int index = interpolator->GetKeyIndexFromTime(t);
 		m_frame->GetRecorderDlg()->SetSelection(index);
+		m_frame->GetMeasureDlg()->UpdateList();
 	}
 	SetVolPopDirty();
 }

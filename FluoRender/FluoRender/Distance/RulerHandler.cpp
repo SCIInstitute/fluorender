@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Selection/VolumePoint.h>
 #include <Selection/VolumeSelector.h>
 #include <Distance/Cov.h>
+#include <Distance/WalkCycle.h>
 #include <Calculate/Count.h>
 #include <Calculate/BackgStat.h>
 #include <Calculate/VolumeRoi.h>
@@ -1853,7 +1854,7 @@ RulerPoint* RulerHandler::get_closest_point(fluo::Point& p)
 	return result;
 }
 
-void RulerHandler::GenerateWalk(size_t length, WalkCycle& cycle)
+void RulerHandler::GenerateWalk(size_t length, double dir, WalkCycle& cycle)
 {
 	if (!m_view)
 		return;
@@ -1866,26 +1867,34 @@ void RulerHandler::GenerateWalk(size_t length, WalkCycle& cycle)
 	cycle.GetNames(names);
 	if (names.empty())
 		return;
-	int dim = names[0].d;
-	size_t period = names[0].n;
-	std::set<std::string> rlist;
-	for (auto& i : names)
-		rlist.insert(i.s);
+	WalkData& data = cycle.GetData();
+	size_t period = data.length();
 
 	for (size_t i = 0; i < length; ++i)
 	{
+		size_t cnt = 0;
 		size_t t = i + 1;
-		for (auto r : *m_ruler_list)
+		size_t f = i % period;//phase
+		for (auto& name : names)
 		{
-			std::string str = r->GetName().ToStdString();
-			if (rlist.find(str) == rlist.end())
+			Ruler* r = m_ruler_list->GetRuler(name.s);
+			if (!r)
 				continue;
+			int dim = name.d;
 			//compute integral for each point
 			for (size_t j = 0; j < r->GetNumPoint(); ++j)
 			{
-
+				r->SetWorkTime(i);
+				fluo::Point p = r->GetPoint(j);
+				double x, y, z;
+				x = dim > 0 ? data.get(cnt++, f) : 0;
+				y = dim > 1 ? data.get(cnt++, f) : 0;
+				z = dim > 2 ? data.get(cnt++, f) : 0;
+				fluo::Vector v(x, y, z);
+				p += v * dir;
+				r->SetWorkTime(t);
+				r->SetPoint(j, p);
 			}
 		}
 	}
-
 }

@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Calculate/BackgStat.h>
 #include <Components/CompSelector.h>
 #include <Components/CompEditor.h>
+#include <Distance/WalkCycle.h>
 #include <Tracking/Registrator.h>
 #include <Python/PyBase.h>
 #include <utility.h>
@@ -148,6 +149,8 @@ int ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 					RunRulerTransform();
 				else if (str == "ruler_speed")
 					RunRulerSpeed();
+				else if (str == "generate_walk")
+					RunGenerateWalk();
 				else if (str == "save_volume")
 					RunSaveVolume();
 				else if (str == "calculate")
@@ -479,7 +482,7 @@ int ScriptProc::GetItems(const wxString& str, std::vector<std::string>& items)
 		items.clear();
 	std::istringstream s(str.ToStdString());
 	std::string item;
-	while (std::getline(s, item, ','))
+	while (std::getline(s >> std::ws, item, ','))
 		items.push_back(item);
 	return int(items.size());
 }
@@ -1927,6 +1930,30 @@ void ScriptProc::RunRulerSpeed()
 			}
 		}
 	}
+}
+
+void ScriptProc::RunGenerateWalk()
+{
+	if (!TimeCondition())
+		return;
+	if (!m_view)
+		return;
+	RulerHandler* rhdl = m_view->GetRulerHandler();
+	if (!rhdl)
+		return;
+
+	wxString filename;
+	m_fconfig->Read("cycle", &filename);
+	filename = GetConfigFile(filename, "csv", "Cycle", 0);
+	int length;
+	m_fconfig->Read("length", &length);
+	double dir;
+	m_fconfig->Read("dir", &dir);
+
+	flrd::WalkCycle cycle;
+	cycle.ReadData(filename.ToStdString());
+	cycle.Correct(0);
+	rhdl->GenerateWalk(length, dir, cycle);
 }
 
 void ScriptProc::RunPython()
