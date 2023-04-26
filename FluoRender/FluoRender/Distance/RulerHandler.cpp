@@ -1854,7 +1854,7 @@ RulerPoint* RulerHandler::get_closest_point(fluo::Point& p)
 	return result;
 }
 
-void RulerHandler::GenerateWalk(size_t length, double dir, WalkCycle& cycle)
+void RulerHandler::GenerateWalk(size_t nl, double dir, WalkCycle& cycle)
 {
 	if (!m_view)
 		return;
@@ -1869,6 +1869,7 @@ void RulerHandler::GenerateWalk(size_t length, double dir, WalkCycle& cycle)
 		return;
 	WalkData& data = cycle.GetData();
 	size_t period = data.length();
+	size_t length = nl * period;
 
 	for (size_t i = 0; i < length; ++i)
 	{

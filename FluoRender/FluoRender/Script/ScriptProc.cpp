@@ -1952,7 +1952,7 @@ void ScriptProc::RunGenerateWalk()
 
 	flrd::WalkCycle cycle;
 	cycle.ReadData(filename.ToStdString());
-	cycle.Correct(0);
+	//cycle.Correct(0);
 	rhdl->GenerateWalk(length, dir, cycle);
 }
 

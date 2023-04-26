@@ -238,7 +238,7 @@ namespace flrd
 		bool GetRulerPointCoords(std::vector<double>& coords);
 
 		//generate walk
-		void GenerateWalk(size_t length, double dir, WalkCycle& cycle);
+		void GenerateWalk(size_t nl, double dir, WalkCycle& cycle);
 
 	private:
 		unsigned int m_group;

@@ -4,5 +4,5 @@ tasknum=1
 type=generate_walk
 time_mode=TM_FIRST_PRE
 cycle=
-length=100
+length=10
 dir=-46.42

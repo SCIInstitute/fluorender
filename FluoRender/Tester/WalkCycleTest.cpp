@@ -44,6 +44,7 @@ void WalkCycleInit(const std::string& file, int l, int r)
 	wc.SetInitWin(maxwin);
 	wc.LoadCycle();
 	wc.Extract();
+	wc.Correct(1);
 
 	//save
 	std::filesystem::path p(file);
@@ -59,6 +60,7 @@ void WalkCycleRefine(const std::string& datafile, const std::string& cyclefile)
 	wc.ReadData(datafile);
 	wc.LoadCycle(cyclefile);
 	wc.Extract();
+	wc.Correct(1);
 	//save
 	std::filesystem::path p(cyclefile);
 	p.replace_extension();

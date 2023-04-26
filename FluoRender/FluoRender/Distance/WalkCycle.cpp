@@ -67,13 +67,20 @@ void WalkCycle::ReadData(const std::string& name)
 		for (auto& it : entry)
 			if (it != "")
 				en++;
-		if (en < 5)
+		if (en < 3)
 		{
 			ln = 0;//reset
 
 			//get names
 			if (en == 2)
-				names_.push_back(WcName(entry[1], 0, 0));
+			{
+				if (entry[0] == "correlation")
+				{
+					//correlation for cycle averaging
+				}
+				else //point index
+					names_.push_back(WcName(entry[1], 0, 0));
+			}
 			else if (en == 1 && !names_.empty())
 			{
 				names_.back().n++;
@@ -135,6 +142,7 @@ void WalkCycle::SaveData(const std::string& name)
 		return;
 
 	size_t cnt = 0;
+	size_t length = data_.length();
 	for (size_t i = 0; i < names_.size(); ++i)
 	{
 		//name
@@ -155,11 +163,11 @@ void WalkCycle::SaveData(const std::string& name)
 			//values
 			for (size_t k = 0; k < names_[i].d; ++k)
 			{
-				for (size_t l = 0; l < data_.length(); ++l)
+				for (size_t l = 0; l < length; ++l)
 				{
 					double val = data_.get(cnt, l);
 					f << val;
-					if (l < data_.length() - 1)
+					if (l < length - 1)
 						f << ", ";
 					else
 						f << std::endl;
@@ -232,12 +240,14 @@ void WalkCycle::LoadCycle()
 
 void WalkCycle::LoadCycle(const std::string& name)
 {
+	cycle_.clear();
+
 	std::ifstream f(name);
 	if (!f.good())
 		return;
 
-	cycle_.clear();
 	std::string line;
+	int ln = 0;
 	while (std::getline(f, line))
 	{
 		std::istringstream s(line);
@@ -249,20 +259,55 @@ void WalkCycle::LoadCycle(const std::string& name)
 		for (auto& it : entry)
 			if (it != "")
 				en++;
-		if (en < 2)
+		if (en < 3)
 		{
-			if (en == 1)
+			ln = 0;//reset
+
+			if (en == 2)
 			{
-				//correlation
-				in_corr_ = std::stod(entry[0]);
+				if (entry[0] == "correlation")
+				{
+					//correlation
+					double v;
+					try
+					{
+						v = std::stod(entry[1]);
+					}
+					catch (...)
+					{
+						v = 0;
+					}
+					in_corr_ = v;
+				}
 			}
 			continue;
 		}
-		Sequence seq;
-		for (auto& it : entry)
-			seq.push_back(std::stod(it));
-		cycle_.add_seq(seq);
+		if (ln == 0)
+		{
+			//time
+		}
+		else
+		{
+			//speed data
+			Sequence seq;
+			for (auto& it : entry)
+			{
+				double v;
+				try
+				{
+					v = std::stod(it);
+				}
+				catch (...)
+				{
+					continue;
+				}
+				seq.push_back(v);
+			}
+			cycle_.add_seq(seq);
+		}
+		ln++;
 	}
+
 	f.close();
 	win_ = Window(0, cycle_.length() -1);
 }
@@ -274,18 +319,42 @@ void WalkCycle::SaveCycle(const std::string& name)
 		return;
 
 	//correlation
-	f << corr_ << std::endl;
+	f << "correlation, " << corr_ << std::endl;
 
-	for (size_t i = 0; i < cycle_.size(); ++i)
+	size_t cnt = 0;
+	size_t length = cycle_.length();
+	for (size_t i = 0; i < names_.size(); ++i)
 	{
-		for (size_t j = 0; j < cycle_.length(); ++j)
+		//name
+		f << i + 1 << ", " << names_[i].s << std::endl;
+		for (size_t j = 0; j < names_[i].n; ++j)
 		{
-			double val = cycle_.get(i, j);
-			f << val;
-			if (j < cycle_.length() - 1)
-				f << ", ";
+			//sn
+			f << j << std::endl;
+			//time
+			for (size_t k = 0; k < length; ++k)
+			{
+				f << k + 1;
+				if (k < length - 1)
+					f << ", ";
+				else
+					f << std::endl;
+			}
+			//values
+			for (size_t k = 0; k < names_[i].d; ++k)
+			{
+				for (size_t l = 0; l < length; ++l)
+				{
+					double val = cycle_.get(cnt, l);
+					f << val;
+					if (l < length - 1)
+						f << ", ";
+					else
+						f << std::endl;
+				}
+				cnt++;
+			}
 		}
-		f << std::endl;
 	}
 	f.close();
 }
