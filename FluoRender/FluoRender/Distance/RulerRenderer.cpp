@@ -60,7 +60,6 @@ void RulerRenderer::Draw()
 	if (m_ruler_list->empty())
 		return;
 
-	int tseq_cur_num = m_view->m_tseq_cur_num;
 	int nx = m_view->GetGLSize().x;
 	int ny = m_view->GetGLSize().y;
 
@@ -100,7 +99,7 @@ void RulerRenderer::Draw()
 
 	//draw text
 	if (m_draw_text)
-		DrawText(tseq_cur_num, nx, ny);
+		DrawText(nx, ny);
 }
 
 unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
@@ -108,7 +107,11 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 	if (!m_view || !m_ruler_list)
 		return 0;
 
-	int tseq_cur_num = m_view->m_tseq_cur_num;
+	size_t tseq_cur_num;
+	if (m_view->m_frame_num_type == 1)
+		tseq_cur_num = m_view->m_param_cur_num;
+	else
+		tseq_cur_num = m_view->m_tseq_cur_num;
 	bool persp = m_view->GetPersp();
 	int nx = m_view->GetGLSize().x;
 	int ny = m_view->GetGLSize().y;
@@ -497,8 +500,13 @@ void RulerRenderer::DrawArc(fluo::Point & ppc, fluo::Point& pp0, fluo::Point& pp
 	}
 }
 
-void RulerRenderer::DrawText(int tseq_cur_num, int nx, int ny)
+void RulerRenderer::DrawText(int nx, int ny)
 {
+	size_t tseq_cur_num;
+	if (m_view->m_frame_num_type == 1)
+		tseq_cur_num = m_view->m_param_cur_num;
+	else
+		tseq_cur_num = m_view->m_tseq_cur_num;
 	float w = flvr::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
 	float sx, sy;
 	sx = 2.0 / nx;

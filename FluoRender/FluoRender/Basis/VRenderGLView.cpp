@@ -4777,6 +4777,8 @@ void VRenderGLView::SetParams(double t)
 		int index = interpolator->GetKeyIndexFromTime(t);
 		m_frame->GetRecorderDlg()->SetSelection(index);
 		m_frame->GetMeasureDlg()->GetSettings(this);
+		//update ruler intensity values
+		m_ruler_handler.ProfileAll();
 		m_frame->GetMeasureDlg()->UpdateList();
 	}
 	SetVolPopDirty();
@@ -5134,6 +5136,10 @@ void VRenderGLView::Set3DBatFrame(int frame, int start_frame, int end_frame, boo
 	m_cur_vol = cur_vd_save;
 	m_selector.SetVolume(m_cur_vol);
 	m_calculator.SetVolumeA(m_cur_vol);
+
+	//update ruler intensity values
+	m_ruler_handler.ProfileAll();
+	m_frame->GetMeasureDlg()->UpdateList();
 
 	RefreshGL(18);
 }

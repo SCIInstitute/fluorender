@@ -84,7 +84,7 @@ namespace flrd
 		void DrawArc(fluo::Point & ppc, fluo::Point& pp0, fluo::Point& pp1,
 			fluo::Color &c, fluo::Transform& mv, fluo::Transform& p,
 			std::vector<float> &verts, unsigned int& num);
-		void DrawText(int, int, int);
+		void DrawText(int, int);
 	};
 
 }
