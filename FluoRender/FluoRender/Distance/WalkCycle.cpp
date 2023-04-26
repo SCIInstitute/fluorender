@@ -412,24 +412,22 @@ void WalkCycle::Correct(int mode)
 {
 	if (names_.empty())
 		return;
-	int dim;
+	int dim = names_[0].d;
 	switch (mode)
 	{
 	case 0:
-		data_.normalize(0, 3);
-		dim = names_[0].d;
+		data_.normalize(0, dim);
 		if (dim > 1)
-			data_.correct(1, 3);
+			data_.correct(1, dim);
 		if (dim > 2)
-			data_.correct(2, 3);
+			data_.correct(2, dim);
 	break;
 	case 1:
-		cycle_.normalize(0, 3);
-		dim = names_[0].d;
+		cycle_.normalize(0, dim);
 		if (dim > 1)
-			cycle_.correct(1, 3);
+			cycle_.correct(1, dim);
 		if (dim > 2)
-			cycle_.correct(2, 3);
+			cycle_.correct(2, dim);
 		break;
 	}
 }
