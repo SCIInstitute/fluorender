@@ -218,13 +218,18 @@ void RulerListCtrl::UpdateRulers(VRenderGLView* vrv)
 	wxString points;
 	fluo::Point p;
 	int num_points;
+	size_t t;
+	if (m_view->m_frame_num_type == 1)
+		t = m_view->m_param_cur_num;
+	else
+		t = m_view->m_tseq_cur_num;
 	for (int i=0; i<(int)ruler_list->size(); i++)
 	{
 		flrd::Ruler* ruler = (*ruler_list)[i];
 		if (!ruler) continue;
-		ruler->SetWorkTime(m_view->m_tseq_cur_num);
+		ruler->SetWorkTime(t);
 		if (ruler->GetTransient() &&
-			ruler->GetTransTime() != m_view->m_tseq_cur_num)
+			ruler->GetTransTime() != t)
 			continue;
 
 		wxString unit;

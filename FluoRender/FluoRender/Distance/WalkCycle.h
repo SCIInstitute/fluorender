@@ -132,10 +132,11 @@ namespace flrd
 		}
 		void correct()
 		{
-			double sum = 0;
-			for (auto i : *this)
-				sum += i;
-			back() = -sum;
+			if (empty())
+				return;
+			double d = sum() / size();
+			std::transform(begin(), end(), begin(),
+				[d](double& c) { return c - d; });
 		}
 		double sum()
 		{

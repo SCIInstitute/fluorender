@@ -94,6 +94,7 @@ VRenderGLView::VRenderGLView(VRenderFrame* frame,
 	m_tseq_cur_num(0),
 	m_tseq_prv_num(0),
 	m_param_cur_num(0),
+	m_frame_num_type(0),
 	m_total_frames(0),
 	//hud
 	m_updating(true),
@@ -4609,6 +4610,8 @@ void VRenderGLView::SetParams(double t)
 	Interpolator *interpolator = m_frame->GetInterpolator();
 	if (!interpolator)
 		return;
+	m_frame_num_type = 1;
+	m_param_cur_num = int(std::round(t));
 	FlKeyCode keycode;
 	keycode.l0 = 1;
 	keycode.l0_name = m_vrv->GetName();
@@ -4773,6 +4776,7 @@ void VRenderGLView::SetParams(double t)
 		m_frame->UpdateTree(m_cur_vol ? m_cur_vol->GetName() : wxString(""));
 		int index = interpolator->GetKeyIndexFromTime(t);
 		m_frame->GetRecorderDlg()->SetSelection(index);
+		m_frame->GetMeasureDlg()->GetSettings(this);
 		m_frame->GetMeasureDlg()->UpdateList();
 	}
 	SetVolPopDirty();
@@ -4998,6 +5002,8 @@ void VRenderGLView::ReloadVolumeData(int frame)
 
 void VRenderGLView::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind)
 {
+	m_frame_num_type = 0;
+
 	//skip update if frame num unchanged
 	bool update = m_tseq_cur_num == frame ? false : true;
 	//compute frame number
@@ -5090,6 +5096,8 @@ void VRenderGLView::Get3DBatRange(int &start_frame, int &end_frame)
 
 void VRenderGLView::Set3DBatFrame(int frame, int start_frame, int end_frame, bool rewind)
 {
+	m_frame_num_type = 0;
+
 	//skip update if frame num unchanged
 	bool update = m_tseq_cur_num == frame ? false : true;
 	//compute frame number

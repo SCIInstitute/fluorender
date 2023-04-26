@@ -348,7 +348,6 @@ void WalkCycle::Correct(int mode)
 	{
 	case 0:
 		data_.normalize(0, 3);
-		data_.set_leng(data_.length() + 1);
 		dim = names_[0].d;
 		if (dim > 1)
 			data_.correct(1, 3);
@@ -357,7 +356,6 @@ void WalkCycle::Correct(int mode)
 	break;
 	case 1:
 		cycle_.normalize(0, 3);
-		cycle_.set_leng(cycle_.length() + 1);
 		dim = names_[0].d;
 		if (dim > 1)
 			cycle_.correct(1, 3);

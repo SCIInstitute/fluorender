@@ -816,6 +816,7 @@ public:
 	//counters
 	int m_tseq_cur_num;
 	int m_tseq_prv_num;
+	int m_frame_num_type;//0:tseq;1:param
 	int m_param_cur_num;
 	int m_total_frames;
 	//file name for capturing
