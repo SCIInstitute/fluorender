@@ -56,7 +56,10 @@ int main(int argc, char* argv[])
 		break;
 	case 2:
 		WalkCycleAvg(argv[2], argv[3], argv[4]);
-
+		break;
+	case 3:
+		WalkCycleCompare(argv[2], argv[3]);
+		break;
 	}
 
 	cout << "All done. Quit." << endl;

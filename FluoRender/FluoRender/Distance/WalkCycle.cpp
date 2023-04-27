@@ -216,6 +216,84 @@ void WalkCycle::Extract()
 	in_corr_ = corr_;
 }
 
+//void WalkCycle::Compare()
+//{
+//	dist_.clear();
+//	if (data_.length() < 1 ||
+//		cycle_.length() < 1 ||
+//		data_.length() < cycle_.length() ||
+//		data_.size() != cycle_.size())
+//		return;
+//
+//	size_t leng = data_.length() - cycle_.length();
+//	size_t size = data_.size();
+//	size_t width = cycle_.size();
+//	dist_.set_size(size);
+//	dist_.set_leng(leng);
+//	for (size_t i = 0; i < size; ++i)
+//	{
+//		for (size_t j = 0; j < leng; ++j)
+//		{
+//			double d = 0;
+//			for (size_t k = 0; k < width; ++k)
+//			{
+//				double v1 = data_.get(i, j + k);
+//				double v2 = cycle_.get(i, k);
+//				d += (v1 - v2) * (v1 - v2);
+//			}
+//			dist_.set(i, j, d);
+//		}
+//	}
+//}
+
+void WalkCycle::Compare()
+{
+	dist_.clear();
+
+	if (win_.w < 5)
+		return;
+
+	std::vector<Window> wins;
+	Window target = win_;
+	target.moveto(0);
+	while (target.r < data_.length())
+	{
+		Window win2 = Match(target);
+		wins.push_back(win2);
+		//update target
+		target.moveto(win2.r + 1);
+	}
+
+	if (wins.empty())
+		return;
+
+	size_t size = data_.size();
+	size_t leng = data_.length();
+	dist_.set_size(size);
+	dist_.set_leng(leng);
+	Window w2(0, cycle_.length() - 1);
+	for (auto& w : wins)
+	{
+		w2.moveto(0);
+		for (size_t i = 0; i < size; ++i)
+		{
+			double v = 0;
+			double v1, v2;
+			for (size_t k = 0; k < w.w; ++k)
+			{
+				v1 = data_.get(i, k + w.l);
+				v2 = cycle_.get(i, w2, double(k) / double(w.w - 1));
+				v += v1 * v2;
+			}
+			double c = cycle_.get_auto_corr(i);
+			if (c != 0)
+				v /= c;
+			for (size_t j = w.l; j <= w.r; ++j)
+				dist_.set(i, j, v);
+		}
+	}
+}
+
 void WalkCycle::Reset()
 {
 	cycle_.clear();
@@ -430,4 +508,48 @@ void WalkCycle::Correct(int mode)
 			cycle_.correct(2, dim);
 		break;
 	}
+}
+
+void WalkCycle::SaveDist(const std::string& name)
+{
+	std::ofstream f(name);
+	if (!f.good())
+		return;
+
+	size_t cnt = 0;
+	size_t length = dist_.length();
+	for (size_t i = 0; i < names_.size(); ++i)
+	{
+		//name
+		f << i + 1 << ", " << names_[i].s << std::endl;
+		for (size_t j = 0; j < names_[i].n; ++j)
+		{
+			//sn
+			f << j << std::endl;
+			//time
+			for (size_t k = 0; k < length; ++k)
+			{
+				f << time_[k];
+				if (k < length - 1)
+					f << ", ";
+				else
+					f << std::endl;
+			}
+			//values
+			for (size_t k = 0; k < names_[i].d; ++k)
+			{
+				for (size_t l = 0; l < length; ++l)
+				{
+					double val = dist_.get(cnt, l);
+					f << val;
+					if (l < length - 1)
+						f << ", ";
+					else
+						f << std::endl;
+				}
+				cnt++;
+			}
+		}
+	}
+	f.close();
 }

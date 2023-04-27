@@ -84,3 +84,34 @@ void WalkCycleRefine(const std::string& datafile, const std::string& cyclefile)
 	}
 	wc.SaveCycle(str);
 }
+
+void WalkCycleCompare(const std::string& datafile, const std::string& cyclefile)
+{
+	flrd::WalkCycle wc;
+	wc.ReadData(datafile);
+	wc.LoadCycle(cyclefile);
+	wc.Compare();
+	//save
+	std::filesystem::path p(cyclefile);
+	p.remove_filename();
+	p += "compare0";
+	std::string str_base = p.string();
+	for (auto it = str_base.rbegin();
+		it != str_base.rend(); ++it)
+	{
+		if (std::isdigit(*it))
+			str_base.pop_back();
+		else
+			break;
+	}
+	int sn = 1;
+	std::string str = str_base + std::to_string(sn) + ".csv";
+	p = std::filesystem::path(str);
+	while (std::filesystem::exists(p))
+	{
+		sn++;
+		str = str_base + std::to_string(sn) + ".csv";
+		p = std::filesystem::path(str);
+	}
+	wc.SaveDist(str);
+}

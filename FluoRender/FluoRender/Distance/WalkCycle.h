@@ -157,6 +157,10 @@ namespace flrd
 		size_t length() { return length_; }
 		size_t size() { return data_.size(); }
 
+		void set_size(size_t s)
+		{
+			data_.resize(s);
+		}
 		void set_leng(size_t l)
 		{
 			for (auto& i : data_)
@@ -216,6 +220,11 @@ namespace flrd
 				return data_[i][j];
 			return 0;
 		}
+		void set(size_t i, size_t j, double v)
+		{
+			if (i < data_.size() && j < length_)
+				data_[i][j] = v;
+		}
 		double get(size_t i, const Window& win, double j)
 		{
 			if (i < data_.size() && j >= 0 && j <= 1)
@@ -235,6 +244,15 @@ namespace flrd
 				for (auto& j : i)
 					auto_corr_ += j * j;
 			return auto_corr_;
+		}
+		double get_auto_corr(size_t i)//correlation of ith row
+		{
+			if (i >= size())
+				return 0;
+			double corr = 0;
+			for (auto& j : data_[i])
+				corr += j * j;
+			return corr;
 		}
 
 		void correct(size_t x, size_t n)
@@ -292,6 +310,7 @@ namespace flrd
 		}
 		void Extract();
 		void Reset();//reset for win change not the data
+		void Compare();//compare data with cycle
 
 		void SetInitWin(Window& win)
 		{
@@ -335,6 +354,8 @@ namespace flrd
 
 		void Correct(int mode);//0: data, 1: cycle
 
+		void SaveDist(const std::string& name);
+
 	private:
 		std::vector<size_t> time_;
 		std::vector<WcName> names_;//ruler names and point size
@@ -344,6 +365,8 @@ namespace flrd
 		WalkData cycle_;
 		double corr_;//sum correlation
 		double in_corr_;//input correlation if cycle is read from file
+
+		WalkData dist_;//distance between data and cycle from compare
 
 	private:
 		Window Match(const Window& target);
