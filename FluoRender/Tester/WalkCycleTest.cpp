@@ -17,7 +17,7 @@ void WalkCycleAvg(const std::string& f1,
 	wc1.SaveData(fo);
 }
 
-void WalkCycleInit(const std::string& file, int l, int r)
+void WalkCycleInit(const std::string& file, int l, int r, size_t ol)
 {
 	flrd::WalkCycle wc;
 	wc.ReadData(file);
@@ -33,7 +33,7 @@ void WalkCycleInit(const std::string& file, int l, int r)
 			win = flrd::Window(i, i + j - 1);
 			wc.SetInitWin(win);
 			wc.LoadCycle();
-			wc.Extract();
+			wc.Extract(ol);
 			double c = wc.GetNormalizedCorr();
 			corrs.push_back(c);
 			if (c == *std::max_element(corrs.begin(), corrs.end()))
@@ -43,7 +43,7 @@ void WalkCycleInit(const std::string& file, int l, int r)
 	wc.Reset();
 	wc.SetInitWin(maxwin);
 	wc.LoadCycle();
-	wc.Extract();
+	wc.Extract(ol);
 	//wc.Correct(1);
 
 	//save
@@ -54,12 +54,12 @@ void WalkCycleInit(const std::string& file, int l, int r)
 	wc.SaveCycle(str);
 }
 
-void WalkCycleRefine(const std::string& datafile, const std::string& cyclefile)
+void WalkCycleRefine(const std::string& datafile, const std::string& cyclefile, size_t ol)
 {
 	flrd::WalkCycle wc;
 	wc.ReadData(datafile);
 	wc.LoadCycle(cyclefile);
-	wc.Extract();
+	wc.Extract(ol);
 	//wc.Correct(1);
 	//save
 	std::filesystem::path p(cyclefile);
@@ -85,12 +85,12 @@ void WalkCycleRefine(const std::string& datafile, const std::string& cyclefile)
 	wc.SaveCycle(str);
 }
 
-void WalkCycleCompare(const std::string& datafile, const std::string& cyclefile)
+void WalkCycleCompare(const std::string& datafile, const std::string& cyclefile, size_t ol)
 {
 	flrd::WalkCycle wc;
 	wc.ReadData(datafile);
 	wc.LoadCycle(cyclefile);
-	wc.Compare();
+	wc.Compare(ol);
 	//save
 	std::filesystem::path p(cyclefile);
 	p.remove_filename();

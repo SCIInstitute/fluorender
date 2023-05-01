@@ -179,9 +179,9 @@ void WalkCycle::SaveData(const std::string& name)
 	f.close();
 }
 
-void WalkCycle::Extract()
+void WalkCycle::Extract(size_t ol)
 {
-	if (win_.w < 5)
+	if (win_.w < 3 + ol)
 		return;
 
 	std::vector<Window> wins;
@@ -192,7 +192,7 @@ void WalkCycle::Extract()
 		Window win2 = Match(target);
 		wins.push_back(win2);
 		//update target
-		target.moveto(win2.r + 1);
+		target.moveto(win2.r + 1 - ol);
 	}
 
 	//correlation
@@ -246,11 +246,11 @@ void WalkCycle::Extract()
 //	}
 //}
 
-void WalkCycle::Compare()
+void WalkCycle::Compare(size_t ol)
 {
 	dist_.clear();
 
-	if (win_.w < 5)
+	if (win_.w < 3 + ol)
 		return;
 
 	std::vector<Window> wins;
@@ -261,7 +261,7 @@ void WalkCycle::Compare()
 		Window win2 = Match(target);
 		wins.push_back(win2);
 		//update target
-		target.moveto(win2.r + 1);
+		target.moveto(win2.r + 1 - ol);
 	}
 
 	if (wins.empty())

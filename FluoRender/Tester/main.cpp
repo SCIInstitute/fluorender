@@ -45,20 +45,21 @@ int main(int argc, char* argv[])
 
 	//OpenCVTest0();
 
+	size_t ol = 2;
 	int type = std::stoi(argv[1]);
 	switch (type)
 	{
 	case 0:
-		WalkCycleInit(argv[2], std::stoi(argv[3]), std::stoi(argv[4]));
+		WalkCycleInit(argv[2], std::stoi(argv[3]), std::stoi(argv[4]), ol);
 		break;
 	case 1:
-		WalkCycleRefine(argv[2], argv[3]);
+		WalkCycleRefine(argv[2], argv[3], ol);
 		break;
 	case 2:
 		WalkCycleAvg(argv[2], argv[3], argv[4]);
 		break;
 	case 3:
-		WalkCycleCompare(argv[2], argv[3]);
+		WalkCycleCompare(argv[2], argv[3], ol);
 		break;
 	}
 

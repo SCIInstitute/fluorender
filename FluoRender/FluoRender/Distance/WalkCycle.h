@@ -308,9 +308,9 @@ namespace flrd
 		{
 			return data_;
 		}
-		void Extract();
+		void Extract(size_t ol);
 		void Reset();//reset for win change not the data
-		void Compare();//compare data with cycle
+		void Compare(size_t ol);//compare data with cycle
 
 		void SetInitWin(Window& win)
 		{
