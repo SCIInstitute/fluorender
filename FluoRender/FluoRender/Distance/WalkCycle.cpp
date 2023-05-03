@@ -268,7 +268,7 @@ void WalkCycle::Compare(size_t ol)
 		return;
 
 	size_t size = data_.size();
-	size_t leng = data_.length();
+	size_t leng = std::min(wins.back().r + 1, data_.length());
 	dist_.set_size(size);
 	dist_.set_leng(leng);
 	Window w2(0, cycle_.length() - 1);
@@ -288,8 +288,12 @@ void WalkCycle::Compare(size_t ol)
 			double c = cycle_.get_auto_corr(i);
 			if (c != 0)
 				v /= c;
+			//log
+			v = v > 0.0 ? std::log2(v + 1.0) : -std::log2(1.0 - v);
 			for (size_t j = w.l; j <= w.r; ++j)
+			{
 				dist_.set(i, j, v);
+			}
 		}
 	}
 }
