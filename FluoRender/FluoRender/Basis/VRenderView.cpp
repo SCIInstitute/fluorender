@@ -729,6 +729,7 @@ void VRenderView::CreateBar()
 	bitmap = wxGetBitmapFromMemory(reset);
 	m_lower_toolbar->AddTool(ID_RotResetBtn,"Reset",
 		bitmap, "Reset Rotations");
+	m_lower_toolbar->SetMaxRowsCols(1, 1);
 	m_lower_toolbar->Realize();
 
 	sizer_h_2->AddSpacer(40);
