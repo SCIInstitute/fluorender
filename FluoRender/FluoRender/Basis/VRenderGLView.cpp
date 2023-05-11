@@ -4083,9 +4083,9 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 
 		//move time sequence
 		//forward
-		if (!m_tseq_forward &&
-			(wxGetKeyState(wxKeyCode('d')) ||
-				wxGetKeyState(WXK_SPACE)))
+		if ((!m_tseq_forward &&
+			wxGetKeyState(wxKeyCode('d'))) ||
+			wxGetKeyState(WXK_SPACE))
 		{
 			m_tseq_forward = true;
 			if (m_frame && m_frame->GetMovieView())
@@ -4094,8 +4094,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			set_focus = true;
 		}
 		if (m_tseq_forward &&
-			!wxGetKeyState(wxKeyCode('d')) &&
-			!wxGetKeyState(WXK_SPACE))
+			!wxGetKeyState(wxKeyCode('d')))
 			m_tseq_forward = false;
 		//backforward
 		if (!m_tseq_backward &&

@@ -2051,6 +2051,21 @@ void VPropView::OnCompChk(wxCommandEvent &event)
 void VPropView::OnUseMlChk(wxCommandEvent& event)
 {
 	ApplyMl();
+	//settings not managed by ml
+	if (!m_frame)
+		return;
+	DataManager* mgr = m_frame->GetDataManager();
+	if (!mgr)
+		return;
+	if (!m_vd)
+		return;
+	//component display
+	int ival = mgr->m_vol_com;
+	m_options_toolbar->ToggleTool(ID_CompChk, ival ? true : false);
+	if (m_sync_group && m_group)
+		m_group->SetLabelMode(ival);
+	else
+		m_vd->SetLabelMode(ival);
 }
 
 //noise reduction
