@@ -27,3 +27,4 @@ void WalkCycleInit(const std::string& file, int l, int r, size_t ol);
 void WalkCycleRefine(const std::string& datafile, const std::string& cyclefile, size_t ol);
 void WalkCycleAvg(const std::string& f1, const std::string& f2, const std::string& fo);
 void WalkCycleCompare(const std::string& datafile, const std::string& cyclefile, size_t ol);
+void PhaseGraph(const std::string& infile, const std::string& cyclefile, size_t ol);

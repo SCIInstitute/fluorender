@@ -115,3 +115,17 @@ void WalkCycleCompare(const std::string& datafile, const std::string& cyclefile,
 	}
 	wc.SaveDist(str);
 }
+
+void PhaseGraph(const std::string& infile, const std::string& cyclefile, size_t ol)
+{
+	flrd::WalkCycle wc;
+	wc.ReadData(infile);
+	wc.LoadCycle(cyclefile);
+	wc.Align(ol);
+
+	//save
+	std::filesystem::path p(infile);
+	p.replace_extension();
+	std::string outfile = p.string() + "_aligned.csv";
+	wc.SaveAligned(outfile);
+}

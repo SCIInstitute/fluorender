@@ -61,6 +61,9 @@ int main(int argc, char* argv[])
 	case 3:
 		WalkCycleCompare(argv[2], argv[3], ol);
 		break;
+	case 4:
+		PhaseGraph(argv[2], argv[3], ol);
+		break;
 	}
 
 	cout << "All done. Quit." << endl;

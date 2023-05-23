@@ -311,6 +311,7 @@ namespace flrd
 		void Extract(size_t ol);
 		void Reset();//reset for win change not the data
 		void Compare(size_t ol);//compare data with cycle
+		void Align(size_t ol);//resize each cycle to the average
 
 		void SetInitWin(Window& win)
 		{
@@ -355,11 +356,13 @@ namespace flrd
 		void Correct(int mode);//0: data, 1: cycle
 
 		void SaveDist(const std::string& name);
+		void SaveAligned(const std::string& name);
 
 	private:
 		std::vector<size_t> time_;
 		std::vector<WcName> names_;//ruler names and point size
 		WalkData data_;
+		WalkData aligned_;//data aligned to cycles
 
 		Window win_;
 		WalkData cycle_;

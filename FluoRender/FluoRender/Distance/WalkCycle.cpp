@@ -298,6 +298,45 @@ void WalkCycle::Compare(size_t ol)
 	}
 }
 
+void WalkCycle::Align(size_t ol)
+{
+	if (win_.w < 3 + ol)
+		return;
+
+	std::vector<Window> wins;
+	Window target = win_;
+	target.moveto(0);
+	while (target.r < data_.length())
+	{
+		Window win2 = Match(target);
+		wins.push_back(win2);
+		//update target
+		target.moveto(win2.r + 1 - ol);
+	}
+
+	if (wins.empty())
+		return;
+
+	size_t size = data_.size();
+	size_t leng = wins.size() * (cycle_.length() - ol);
+	aligned_.set_size(size);
+	aligned_.set_leng(leng);
+	Window w2(0, cycle_.length() - 1);
+	for (size_t c = 0; c < wins.size(); ++c)
+	{
+		Window w = wins[c];
+		w2.moveto(c * (cycle_.length() - ol));
+		for (size_t j = 0; j < w2.w; ++j)
+		{
+			for (size_t i = 0; i < size; ++i)
+			{
+				double v = data_.get(i, w, double(j) / double(w2.w - 1));
+				aligned_.set(i, w2.l + j, v);
+			}
+		}
+	}
+}
+
 void WalkCycle::Reset()
 {
 	cycle_.clear();
@@ -545,6 +584,50 @@ void WalkCycle::SaveDist(const std::string& name)
 				for (size_t l = 0; l < length; ++l)
 				{
 					double val = dist_.get(cnt, l);
+					f << val;
+					if (l < length - 1)
+						f << ", ";
+					else
+						f << std::endl;
+				}
+				cnt++;
+			}
+		}
+	}
+	f.close();
+}
+
+void WalkCycle::SaveAligned(const std::string& name)
+{
+	std::ofstream f(name);
+	if (!f.good())
+		return;
+
+	size_t cnt = 0;
+	size_t length = aligned_.length();
+	for (size_t i = 0; i < names_.size(); ++i)
+	{
+		//name
+		f << i + 1 << ", " << names_[i].s << std::endl;
+		for (size_t j = 0; j < names_[i].n; ++j)
+		{
+			//sn
+			f << j << std::endl;
+			//time
+			//for (size_t k = 0; k < length; ++k)
+			//{
+			//	f << time_[k];
+			//	if (k < length - 1)
+			//		f << ", ";
+			//	else
+			//		f << std::endl;
+			//}
+			//values
+			for (size_t k = 0; k < names_[i].d; ++k)
+			{
+				for (size_t l = 0; l < length; ++l)
+				{
+					double val = aligned_.get(cnt, l);
 					f << val;
 					if (l < length - 1)
 						f << ", ";
