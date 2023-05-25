@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cmath>
 
 using namespace flrd;
 
@@ -79,7 +80,13 @@ void WalkCycle::ReadData(const std::string& name)
 					//correlation for cycle averaging
 				}
 				else //point index
-					names_.push_back(WcName(entry[1], 0, 0));
+				{
+					WcName wcn;
+					wcn.s = entry[1];
+					wcn.n = 0;
+					wcn.d = 0;
+					names_.push_back(wcn);
+				}
 			}
 			else if (en == 1 && !names_.empty())
 			{
