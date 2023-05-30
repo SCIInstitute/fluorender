@@ -4713,6 +4713,15 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 	if (use_ml)
 	{
 		vd->ApplyMlVolProp();
+		if (m_use_defaults)
+		{
+			//props not managed by ml
+			vd->SetWireframe(m_vol_test_wiref);
+			vd->SetSampleRate(m_vol_spr);
+			if (!vd->GetSpcFromFile())
+				vd->SetBaseSpacings(m_vol_xsp, m_vol_ysp, m_vol_zsp);
+			vd->SetLabelMode(m_vol_com);
+		}
 	}
 	else if (m_use_defaults)
 	{
