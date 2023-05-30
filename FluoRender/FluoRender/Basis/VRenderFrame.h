@@ -113,7 +113,7 @@ class VRenderFrame: public wxFrame
 	{
 		//file
 		//file\new
-		ID_Save = ID_VRENDER_FRAME,
+		ID_NewProject = ID_VRENDER_FRAME,
 		ID_SaveProject,
 		ID_SaveAsProject,
 		//file\open
@@ -354,10 +354,10 @@ public:
 	void SetTextureUndos();
 
 	//quit option
-	void OnQuit(wxCommandEvent& WXUNUSED(event))
+	void OnQuit(wxCommandEvent& event)
 	{ Close(true); }
 	//show info
-	void OnInfo(wxCommandEvent& WXUNUSED(event));
+	void OnInfo(wxCommandEvent& event);
 
 	bool GetBenchmark()
 	{ return m_benchmark; }
@@ -505,50 +505,51 @@ private:
 	void OnChSaveCmpCheck(wxCommandEvent &event);
 
 	void OnClose(wxCloseEvent &event);
-	void OnExit(wxCommandEvent& WXUNUSED(event));
-	void OnNewView(wxCommandEvent& WXUNUSED(event));
-	void OnLayout(wxCommandEvent& WXUNUSED(event));
-	void OnFullScreen(wxCommandEvent& WXUNUSED(event));
-	void OnOpenVolume(wxCommandEvent& WXUNUSED(event));
-	void OnImportVolume(wxCommandEvent& WXUNUSED(event));
-	void OnOpenMesh(wxCommandEvent& WXUNUSED(event));
-	void OnOrganize(wxCommandEvent& WXUNUSED(event));
-	void OnCheckUpdates(wxCommandEvent& WXUNUSED(event));
-	void OnFacebook(wxCommandEvent& WXUNUSED(event));
-	void OnManual(wxCommandEvent& WXUNUSED(event));
-	void OnTutorial(wxCommandEvent& WXUNUSED(event));
-	void OnYoutube(wxCommandEvent& WXUNUSED(event));
-	void OnTwitter(wxCommandEvent& WXUNUSED(event));
-	void OnShowHideUI(wxCommandEvent& WXUNUSED(event));
-	void OnShowHideToolbar(wxCommandEvent& WXUNUSED(event));
+	void OnExit(wxCommandEvent& event);
+	void OnNewView(wxCommandEvent& event);
+	void OnLayout(wxCommandEvent& event);
+	void OnFullScreen(wxCommandEvent& event);
+	void OnOpenVolume(wxCommandEvent& event);
+	void OnImportVolume(wxCommandEvent& event);
+	void OnOpenMesh(wxCommandEvent& event);
+	void OnOrganize(wxCommandEvent& event);
+	void OnCheckUpdates(wxCommandEvent& event);
+	void OnFacebook(wxCommandEvent& event);
+	void OnManual(wxCommandEvent& event);
+	void OnTutorial(wxCommandEvent& event);
+	void OnYoutube(wxCommandEvent& event);
+	void OnTwitter(wxCommandEvent& event);
+	void OnShowHideUI(wxCommandEvent& event);
+	void OnShowHideToolbar(wxCommandEvent& event);
 	void OnShowHideView(wxCommandEvent &event);
 
 	//panes
 	void OnPaneClose(wxAuiManagerEvent& event);
 
 	//test
-	void OnCreateCube(wxCommandEvent& WXUNUSED(event));
-	void OnCreateSphere(wxCommandEvent& WXUNUSED(event));
-	void OnCreateCone(wxCommandEvent& WXUNUSED(event));
+	void OnCreateCube(wxCommandEvent& event);
+	void OnCreateSphere(wxCommandEvent& event);
+	void OnCreateCone(wxCommandEvent& event);
 
-	void OnSaveProject(wxCommandEvent& WXUNUSED(event));
-	void OnSaveAsProject(wxCommandEvent& WXUNUSED(event));
-	void OnOpenProject(wxCommandEvent& WXUNUSED(event));
+	void OnNewProject(wxCommandEvent& event);
+	void OnSaveProject(wxCommandEvent& event);
+	void OnSaveAsProject(wxCommandEvent& event);
+	void OnOpenProject(wxCommandEvent& event);
 
-	void OnSettings(wxCommandEvent& WXUNUSED(event));
+	void OnSettings(wxCommandEvent& event);
 	//tools
-	void OnLastTool(wxCommandEvent& WXUNUSED(event));
-	void OnPaintTool(wxCommandEvent& WXUNUSED(event));
-	void OnMeasure(wxCommandEvent& WXUNUSED(event));
-	void OnTrace(wxCommandEvent& WXUNUSED(event));
-	void OnNoiseCancelling(wxCommandEvent& WXUNUSED(event));
-	void OnCounting(wxCommandEvent& WXUNUSED(event));
-	void OnColocalization(wxCommandEvent& WXUNUSED(event));
-	void OnConvert(wxCommandEvent& WXUNUSED(event));
-	void OnOcl(wxCommandEvent& WXUNUSED(event));
-	void OnComponent(wxCommandEvent& WXUNUSED(event));
-	void OnCalculations(wxCommandEvent& WXUNUSED(event));
-	void OnMachineLearning(wxCommandEvent& WXUNUSED(event));
+	void OnLastTool(wxCommandEvent& event);
+	void OnPaintTool(wxCommandEvent& event);
+	void OnMeasure(wxCommandEvent& event);
+	void OnTrace(wxCommandEvent& event);
+	void OnNoiseCancelling(wxCommandEvent& event);
+	void OnCounting(wxCommandEvent& event);
+	void OnColocalization(wxCommandEvent& event);
+	void OnConvert(wxCommandEvent& event);
+	void OnOcl(wxCommandEvent& event);
+	void OnComponent(wxCommandEvent& event);
+	void OnCalculations(wxCommandEvent& event);
+	void OnMachineLearning(wxCommandEvent& event);
 
 	void OnDraw(wxPaintEvent& event);
 	void OnKeyDown(wxKeyEvent& event);

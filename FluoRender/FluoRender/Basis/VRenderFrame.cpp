@@ -68,6 +68,7 @@ BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 	EVT_MENU(ID_CreateCube, VRenderFrame::OnCreateCube)
 	EVT_MENU(ID_CreateSphere, VRenderFrame::OnCreateSphere)
 	EVT_MENU(ID_CreateCone, VRenderFrame::OnCreateCone)
+	EVT_MENU(ID_NewProject, VRenderFrame::OnNewProject)
 	EVT_MENU(ID_SaveProject, VRenderFrame::OnSaveProject)
 	EVT_MENU(ID_SaveAsProject, VRenderFrame::OnSaveAsProject)
 	EVT_MENU(ID_OpenProject, VRenderFrame::OnOpenProject)
@@ -735,6 +736,10 @@ VRenderFrame::VRenderFrame(
 	m_top_help = new wxMenu;
 
 	//file options
+	m = new wxMenuItem(m_top_file, ID_NewProject, wxT("&New Project"));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_new_project_mini));
+	m_top_file->Append(m);
+
 	m = new wxMenuItem(m_top_file,ID_OpenVolume, wxT("Open &Volume"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_volume_mini));
 	m_top_file->Append(m);
@@ -961,7 +966,7 @@ VRenderFrame::~VRenderFrame()
 	flvr::KernelProgram::release();
 }
 
-void VRenderFrame::OnExit(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnExit(wxCommandEvent& event)
 {
 	Close(true);
 }
@@ -1114,17 +1119,17 @@ VRenderGLView* VRenderFrame::GetView(wxString& name)
 	return 0;
 }
 
-void VRenderFrame::OnNewView(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnNewView(wxCommandEvent& event)
 {
 	wxString str = CreateView();
 }
 
-void VRenderFrame::OnLayout(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnLayout(wxCommandEvent& event)
 {
 	OrganizeVRenderViews(1);
 }
 
-void VRenderFrame::OnFullScreen(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnFullScreen(wxCommandEvent& event)
 {
 	if (IsFullScreen())
 	{
@@ -1365,7 +1370,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 	return panel;
 }
 
-void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnOpenVolume(wxCommandEvent& event)
 {
 	if (m_setting_dlg)
 	{
@@ -1411,7 +1416,7 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 	delete fopendlg;
 }
 
-void VRenderFrame::OnImportVolume(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnImportVolume(wxCommandEvent& event)
 {
 	if (m_setting_dlg)
 	{
@@ -1727,7 +1732,7 @@ void VRenderFrame::LoadMeshes(wxArrayString files, VRenderGLView* view)
 	delete prg_diag;
 }
 
-void VRenderFrame::OnOpenMesh(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnOpenMesh(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose the mesh data file",
@@ -1747,7 +1752,7 @@ void VRenderFrame::OnOpenMesh(wxCommandEvent& WXUNUSED(event))
 		delete fopendlg;
 }
 
-void VRenderFrame::OnOrganize(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnOrganize(wxCommandEvent& event)
 {
 	int w, h;
 	GetClientSize(&w, &h);
@@ -1767,7 +1772,7 @@ void VRenderFrame::OnCheckUpdates(wxCommandEvent &)
 	::wxLaunchDefaultBrowser(VERSION_UPDATES);
 }
 
-void VRenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnInfo(wxCommandEvent& event)
 {
 
 	wxString time = wxNow();
@@ -2332,6 +2337,7 @@ void VRenderFrame::OnSelection(int type,
 			}
 			break;
 		}
+		m_clip_view->GetSettings(view);
 	}
 
 	m_cur_sel_type = type;
@@ -2839,7 +2845,45 @@ wxWindow* VRenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
 	return panel;
 }
 
-void VRenderFrame::OnSaveProject(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnNewProject(wxCommandEvent& event)
+{
+	m_data_mgr.SetProjectPath("");
+	SetTitle(m_title);
+	//clear
+	m_data_mgr.ClearAll();
+	DataGroup::ResetID();
+	MeshGroup::ResetID();
+	m_adjust_view->SetVolumeData(0);
+	m_adjust_view->SetGroup(0);
+	m_adjust_view->SetGroupLink(0);
+	GetView(0)->ClearAll();
+	for (int i = m_vrv_list.size() - 1; i > 0; i--)
+		DeleteVRenderView(i);
+	VRenderView::ResetID();
+	DataGroup::ResetID();
+	MeshGroup::ResetID();
+	m_cur_sel_type = 0;
+	m_cur_sel_vol = 0;
+	m_cur_sel_mesh = 0;
+	m_movie_view->Stop();
+	m_movie_view->SetView(0);
+	m_movie_view->SetRotate(true);
+	m_movie_view->SetRotAxis(1);
+	m_movie_view->SetTimeSeq(false);
+	m_movie_view->SetStartFrame(0);
+	m_movie_view->SetEndFrame(360);
+	m_movie_view->SetCurrentTime(0);
+	m_movie_view->GetScriptSettings(false);
+	m_movie_view->SetCrop(false);
+	m_trace_dlg->GetSettings(GetView(0));
+	m_interpolator.Clear();
+	m_recorder_dlg->UpdateList();
+	UpdateList();
+	UpdateTree();
+	RefreshVRenderViews(true, true);
+}
+
+void VRenderFrame::OnSaveProject(wxCommandEvent& event)
 {
 	std::wstring default_path = m_data_mgr.GetProjectFile().ToStdWstring();
 	if (default_path.empty())
@@ -2855,7 +2899,7 @@ void VRenderFrame::OnSaveProject(wxCommandEvent& WXUNUSED(event))
 	}
 }
 
-void VRenderFrame::OnSaveAsProject(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnSaveAsProject(wxCommandEvent& event)
 {
 	std::wstring default_path = m_data_mgr.GetProjectFile().ToStdWstring();
 	std::wstring path;
@@ -2878,7 +2922,7 @@ void VRenderFrame::OnSaveAsProject(wxCommandEvent& WXUNUSED(event))
 	delete fopendlg;
 }
 
-void VRenderFrame::OnOpenProject(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnOpenProject(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose Project File",
@@ -5142,7 +5186,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 	RefreshVRenderViews(true, true);
 }
 
-void VRenderFrame::OnSettings(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnSettings(wxCommandEvent& event)
 {
 	m_setting_dlg->UpdateDeviceTree();
 	m_aui_mgr.GetPane(m_setting_dlg).Show();
@@ -5151,7 +5195,7 @@ void VRenderFrame::OnSettings(wxCommandEvent& WXUNUSED(event))
 }
 
 //tools
-void VRenderFrame::OnLastTool(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnLastTool(wxCommandEvent& event)
 {
 	if (!m_setting_dlg)
 	{
@@ -5200,57 +5244,57 @@ void VRenderFrame::OnLastTool(wxCommandEvent& WXUNUSED(event))
 	}
 }
 
-void VRenderFrame::OnPaintTool(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnPaintTool(wxCommandEvent& event)
 {
 	ShowPaintTool();
 }
 
-void VRenderFrame::OnMeasure(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnMeasure(wxCommandEvent& event)
 {
 	ShowMeasureDlg();
 }
 
-void VRenderFrame::OnNoiseCancelling(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnNoiseCancelling(wxCommandEvent& event)
 {
 	ShowNoiseCancellingDlg();
 }
 
-void VRenderFrame::OnCounting(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnCounting(wxCommandEvent& event)
 {
 	ShowCountingDlg();
 }
 
-void VRenderFrame::OnColocalization(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnColocalization(wxCommandEvent& event)
 {
 	ShowColocalizationDlg();
 }
 
-void VRenderFrame::OnConvert(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnConvert(wxCommandEvent& event)
 {
 	ShowConvertDlg();
 }
 
-void VRenderFrame::OnTrace(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnTrace(wxCommandEvent& event)
 {
 	ShowTraceDlg();
 }
 
-void VRenderFrame::OnOcl(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnOcl(wxCommandEvent& event)
 {
 	ShowOclDlg();
 }
 
-void VRenderFrame::OnComponent(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnComponent(wxCommandEvent& event)
 {
 	ShowComponentDlg();
 }
 
-void VRenderFrame::OnCalculations(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnCalculations(wxCommandEvent& event)
 {
 	ShowCalculationDlg();
 }
 
-void VRenderFrame::OnMachineLearning(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnMachineLearning(wxCommandEvent& event)
 {
 	ShowMachineLearningDlg();
 }
@@ -5425,38 +5469,38 @@ void VRenderFrame::SetTextureRendererSettings()
 	flvr::TextureRenderer::set_invalidate_tex(m_setting_dlg->GetInvalidateTex());
 }
 
-void VRenderFrame::OnFacebook(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnFacebook(wxCommandEvent& event)
 {
 	::wxLaunchDefaultBrowser(FACEBOOK_URL);
 }
 
-void VRenderFrame::OnManual(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnManual(wxCommandEvent& event)
 {
 	::wxLaunchDefaultBrowser(HELP_MANUAL);
 }
 
 
-void VRenderFrame::OnTutorial(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnTutorial(wxCommandEvent& event)
 {
 	::wxLaunchDefaultBrowser(HELP_TUTORIAL);
 }
 
-void VRenderFrame::OnTwitter(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnTwitter(wxCommandEvent& event)
 {
 	::wxLaunchDefaultBrowser(TWITTER_URL);
 }
 
-void VRenderFrame::OnYoutube(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnYoutube(wxCommandEvent& event)
 {
 	::wxLaunchDefaultBrowser(YOUTUBE_URL);
 }
 
-void VRenderFrame::OnShowHideUI(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnShowHideUI(wxCommandEvent& event)
 {
 	ToggleAllTools(true);
 }
 
-void VRenderFrame::OnShowHideToolbar(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnShowHideToolbar(wxCommandEvent& event)
 {
 	if (m_aui_mgr.GetPane(m_main_tb).IsShown()) {
 		m_aui_mgr.GetPane(m_main_tb).Hide();
@@ -5578,15 +5622,15 @@ void VRenderFrame::OnPaneClose(wxAuiManagerEvent& event)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-void VRenderFrame::OnCreateCube(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnCreateCube(wxCommandEvent& event)
 {
 }
 
-void VRenderFrame::OnCreateSphere(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnCreateSphere(wxCommandEvent& event)
 {
 }
 
-void VRenderFrame::OnCreateCone(wxCommandEvent& WXUNUSED(event))
+void VRenderFrame::OnCreateCone(wxCommandEvent& event)
 {
 }
 

@@ -625,8 +625,8 @@ void VRenderGLView::Init()
 		flvr::KernelProgram::init_kernels_supported();
 #ifdef _DARWIN
 		CGLContextObj ctx = CGLGetCurrentContext();
-        if (ctx != flvr::TextureRenderer::gl_context_)
-            flvr::TextureRenderer::gl_context_ = ctx;
+		if (ctx != flvr::TextureRenderer::gl_context_)
+			flvr::TextureRenderer::gl_context_ = ctx;
 #endif
 		if (m_frame)
 		{
@@ -648,6 +648,15 @@ void VRenderGLView::ClearAll()
 	Clear();
 	ClearVolList();
 	ClearMeshList();
+	m_cur_vol = 0;
+	m_cur_vol_save = 0;
+	m_ruler_list.clear();
+	m_cur_ruler = 0;
+	if (m_trace_group)
+		m_trace_group->Clear();
+	m_cell_list.clear();
+	InitView();
+	SetClippingPlaneRotations(0, 0, 0);
 }
 
 void VRenderGLView::Clear()
@@ -4769,7 +4778,10 @@ void VRenderGLView::SetParams(double t)
 	}
 
 	if (m_frame && clip_view)
+	{
 		clip_view->SetVolumeData(m_frame->GetCurSelVol());
+		clip_view->GetSettings(this);
+	}
 	if (m_frame)
 	{
 		m_frame->UpdateTree(m_cur_vol ? m_cur_vol->GetName() : wxString(""));

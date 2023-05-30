@@ -46,6 +46,7 @@ enum PLANE_MODES
 };
 
 class VRenderFrame;
+class VRenderGLView;
 class VolumeData;
 class MeshData;
 class DataManager;
@@ -102,13 +103,13 @@ public:
 		const wxString& name="ClippingView");
 	~ClippingView();
 
+	void GetSettings(VRenderGLView* view);
 	void SetVolumeData(VolumeData* vd);
 	void SetMeshData(MeshData* md);
 	void SetDataManager(DataManager* mgr);
 	int GetSelType();
 	VolumeData* GetVolumeData();
 	MeshData* GetMeshData();
-	void RefreshVRenderViews(bool interactive=true);
 
 	bool GetChannLink()
 	{ return m_toolbar->GetToolState(ID_LinkChannelsBtn); }
@@ -169,7 +170,7 @@ public:
 	void MoveLinkedClippingPlanes(int dir);
 
 private:
-	VRenderFrame* m_frame;
+	VRenderGLView* m_view;
 	int m_sel_type;		//curent selection type
 	VolumeData* m_vd;	//current volume data
 	MeshData* m_md;		//current mesh data
@@ -239,8 +240,6 @@ private:
 	wxTextCtrl *m_xy_dist_text;
 
 private:
-	void GetSettings();
-	
 	void OnIdle(wxIdleEvent &event);
 
 	void OnLinkChannelsBtn(wxCommandEvent &event);

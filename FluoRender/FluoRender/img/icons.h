@@ -130,6 +130,8 @@ public:
 	const static unsigned char icon_machine_learning_png[4767];
 	/* icon_machine_learning_mini.png - 844 bytes */
 	const static unsigned char icon_machine_learning_mini_png[844];
+	/* icon_new_project_mini.png - 818 bytes */
+	const static unsigned char icon_new_project_mini_png[818];
 
 
 	//render view icons
