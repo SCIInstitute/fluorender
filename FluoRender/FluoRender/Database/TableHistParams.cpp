@@ -64,7 +64,7 @@ EntryParams* TableHistParams::findNearestOutput(EntryHist* input)
 	for (auto i : m_data)
 	{
 		float v = i->compare(input);
-		if (v < vmin)
+		if (v <= vmin)
 		{
 			result = i;
 			vmin = v;
