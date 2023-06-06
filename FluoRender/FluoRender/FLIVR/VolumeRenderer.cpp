@@ -802,12 +802,12 @@ namespace flvr
 		for (unsigned int i=0; i < bricks->size(); i++)
 		{
 			//comment off when debug_ds
-			//if (mem_swap_)
-			//{
-			//	unsigned long long rn_time = GET_TICK_COUNT();
-			//	if (rn_time - st_time_ > get_up_time())
-			//		break;
-			//}
+			if (mem_swap_)
+			{
+				unsigned long long rn_time = GET_TICK_COUNT();
+				if (rn_time - st_time_ > get_up_time())
+					break;
+			}
 
 			TextureBrick* b = (*bricks)[i];
 			if (tex_->isBrxml() && !b->isLoaded())
