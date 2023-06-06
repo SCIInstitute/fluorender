@@ -1,5 +1,5 @@
 ver_major=2
-ver_minor=29.2
+ver_minor=29.3
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -8,6 +8,7 @@ value=1
 mode=0
 [save\ project]
 mode=1
+inc=0
 [dpi]
 value=72
 [save\ alpha]
