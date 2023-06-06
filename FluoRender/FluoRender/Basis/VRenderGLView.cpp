@@ -1317,7 +1317,7 @@ void VRenderGLView::DrawVolumes(int peel)
 		{
 			if (m_interactive)
 				ClearFinalBuffer();
-			else if (m_clear_buffer)
+			else/* if (m_clear_buffer)*/
 			{
 				ClearFinalBuffer();
 				m_clear_buffer = false;
