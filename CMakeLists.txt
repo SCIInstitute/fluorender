@@ -965,14 +965,3 @@ add_custom_command(TARGET FluoRender POST_BUILD
 	"${FluoRender_SOURCE_DIR}/FluoRender/OpenVR/lib/win64/openvr_api.dll"
 	"$<TARGET_FILE_DIR:FluoRender>")
 endif()
-
-# make the Executable dir
-if(WIN32)
-  add_custom_target(make_exe_dir ALL 
-    COMMAND ${CMAKE_COMMAND} -E make_directory
-    "$<TARGET_FILE_DIR:FluoRender>/Executables")
-else()
-  add_custom_command(TARGET FluoRender POST_BUILD 
-    COMMAND ${CMAKE_COMMAND} -E make_directory
-    "$<TARGET_FILE_DIR:FluoRender>/Executables")
-endif()
