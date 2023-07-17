@@ -35,7 +35,8 @@ using namespace flrd;
 
 WalkCycle::WalkCycle() :
 	corr_(0),
-	in_corr_(0)
+	in_corr_(0),
+	cycle_size_(0)
 {
 
 }
@@ -344,11 +345,54 @@ void WalkCycle::Align(size_t ol)
 	}
 }
 
+void WalkCycle::ComputeVar(size_t ol)
+{
+	if (win_.w < 3 + ol)
+		return;
+
+	std::vector<Window> wins;
+	Window target = win_;
+	target.moveto(0);
+	while (target.r < data_.length())
+	{
+		Window win2 = Match(target);
+		wins.push_back(win2);
+		//update target
+		target.moveto(win2.r + 1 - ol);
+	}
+
+	if (wins.empty())
+		return;
+
+	cycle_size_ = wins.size();
+	diff2_ = 0;
+	size_t size = data_.size();
+	size_t leng = std::min(wins.back().r + 1, data_.length());
+	Window w2(0, cycle_.length() - 1);
+	for (auto& w : wins)
+	{
+		double diff = 0;
+		w2.moveto(0);
+		for (size_t i = 0; i < size; ++i)
+		{
+			double v1, v2;
+			for (size_t k = 0; k < w.w; ++k)
+			{
+				v1 = data_.get(i, k + w.l);
+				v2 = cycle_.get(i, w2, double(k) / double(w.w - 1));
+				diff += v1 - v2;
+			}
+		}
+		diff2_ += diff * diff;
+	}
+}
+
 void WalkCycle::Reset()
 {
 	cycle_.clear();
 	corr_ = 0;
 	in_corr_ = 0;
+	cycle_size_ = 0;
 	win_ = Window();
 }
 

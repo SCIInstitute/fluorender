@@ -18,6 +18,7 @@ void TableTest();
 
 void PythonTest0();
 #include <string>
+#include <vector>
 void PythonTest1(const std::string& config, const std::string& video);
 void PythonTest2(const std::string& config, const std::string& video);
 
@@ -28,3 +29,4 @@ void WalkCycleRefine(const std::string& datafile, const std::string& cyclefile, 
 void WalkCycleAvg(const std::string& f1, const std::string& f2, const std::string& fo);
 void WalkCycleCompare(const std::string& datafile, const std::string& cyclefile, size_t ol);
 void PhaseGraph(const std::string& infile, const std::string& cyclefile, size_t ol);
+void ComputeVariance(const std::string& cycle_file, const std::vector<std::string>& sample_list, size_t ol);

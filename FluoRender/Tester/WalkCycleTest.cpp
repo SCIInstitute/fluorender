@@ -129,3 +129,23 @@ void PhaseGraph(const std::string& infile, const std::string& cyclefile, size_t 
 	std::string outfile = p.string() + "_aligned.csv";
 	wc.SaveAligned(outfile);
 }
+
+void ComputeVariance(const std::string& cycle_file, const std::vector<std::string>& sample_list, size_t ol)
+{
+	flrd::WalkCycle wc;
+	wc.LoadCycle(cycle_file);
+	int count = 0;
+	double sum2 = 0;
+	for (auto& f : sample_list)
+	{
+		wc.ReadData(f);
+		wc.ComputeVar(ol);
+		count += wc.GetCycleSize();
+		sum2 += wc.GetDiff2();
+	}
+	if (count > 0)
+	{
+		double var = sum2 / count;
+		std::cout << "variance:\t" << var << " in " << count << " cycles" << std::endl;
+	}
+}

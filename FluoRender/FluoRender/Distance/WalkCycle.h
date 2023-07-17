@@ -357,6 +357,19 @@ namespace flrd
 
 		void SaveDist(const std::string& name);
 		void SaveAligned(const std::string& name);
+		WalkData GetAligned()
+		{
+			return aligned_;
+		}
+		size_t GetCycleSize()
+		{
+			return cycle_size_;
+		}
+		void ComputeVar(size_t ol);
+		double GetDiff2()
+		{
+			return diff2_;
+		}
 
 	private:
 		std::vector<size_t> time_;
@@ -368,6 +381,8 @@ namespace flrd
 		WalkData cycle_;
 		double corr_;//sum correlation
 		double in_corr_;//input correlation if cycle is read from file
+		size_t cycle_size_;//number of cycles
+		double diff2_;
 
 		WalkData dist_;//distance between data and cycle from compare
 

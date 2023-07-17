@@ -64,6 +64,14 @@ int main(int argc, char* argv[])
 	case 4:
 		PhaseGraph(argv[2], argv[3], ol);
 		break;
+	case 5:
+		{
+			std::vector<std::string> list;
+			for (int i = 3; i < argc; ++i)
+				list.push_back(argv[i]);
+			ComputeVariance(argv[2], list, ol);
+		}
+		break;
 	}
 
 	cout << "All done. Quit." << endl;
