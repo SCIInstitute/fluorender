@@ -370,6 +370,15 @@ namespace flrd
 		{
 			return diff2_;
 		}
+		void ComputeFrames(size_t ol, double d);
+		size_t GetFrames()
+		{
+			return frames_;
+		}
+		double GetCycleSpeed()
+		{
+			return cycle_speed_;
+		}
 
 	private:
 		std::vector<size_t> time_;
@@ -383,6 +392,8 @@ namespace flrd
 		double in_corr_;//input correlation if cycle is read from file
 		size_t cycle_size_;//number of cycles
 		double diff2_;
+		size_t frames_;//frames of movement
+		double cycle_speed_;
 
 		WalkData dist_;//distance between data and cycle from compare
 

@@ -72,6 +72,13 @@ int main(int argc, char* argv[])
 			ComputeVariance(argv[2], list, ol);
 		}
 		break;
+	case 6:
+		{
+			std::vector<std::string> list;
+			for (int i = 3; i < argc; ++i)
+				list.push_back(argv[i]);
+			ComputeTime(argv[2], list, ol, 0.05);
+		}
 	}
 
 	cout << "All done. Quit." << endl;

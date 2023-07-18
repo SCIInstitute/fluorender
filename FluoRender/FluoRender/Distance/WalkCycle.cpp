@@ -387,6 +387,55 @@ void WalkCycle::ComputeVar(size_t ol)
 	}
 }
 
+void WalkCycle::ComputeFrames(size_t ol, double d)
+{
+	if (win_.w < 3 + ol)
+		return;
+
+	std::vector<Window> wins;
+	Window target = win_;
+	target.moveto(0);
+	while (target.r < data_.length())
+	{
+		Window win2 = Match(target);
+		wins.push_back(win2);
+		//update target
+		target.moveto(win2.r + 1 - ol);
+	}
+
+	if (wins.empty())
+		return;
+
+	cycle_size_ = 0;
+	frames_ = 0;
+	cycle_speed_ = 0;
+	size_t size = cycle_.size();
+	size_t n = size / 18;
+	size_t leng = std::min(wins.back().r + 1, data_.length());
+	Window w2(0, cycle_.length() - 1);
+	for (auto& w : wins)
+	{
+		double diff = 0;
+		w2.moveto(0);
+		for (size_t i = 0; i < n*7; i=i+n)//first 7 points including head and body
+		{
+			double v1;
+			for (size_t k = 0; k < w.w; ++k)
+			{
+				v1 = data_.get(i, k + w.l);
+				diff += v1;
+			}
+		}
+		double av = std::fabs(diff / (7 * w.w));
+		if (av > d)
+		{
+			cycle_size_++;
+			frames_ += w.w - ol;
+			cycle_speed_ += av;
+		}
+	}
+}
+
 void WalkCycle::Reset()
 {
 	cycle_.clear();

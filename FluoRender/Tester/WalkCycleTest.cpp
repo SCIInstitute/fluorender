@@ -149,3 +149,26 @@ void ComputeVariance(const std::string& cycle_file, const std::vector<std::strin
 		std::cout << "variance:\t" << var << " in " << count << " cycles" << std::endl;
 	}
 }
+
+void ComputeTime(const std::string& cycle_file, const std::vector<std::string>& sample_list, size_t ol, double d)
+{
+	flrd::WalkCycle wc;
+	wc.LoadCycle(cycle_file);
+	int count = 0;
+	int cycles = 0;
+	double speed = 0;
+	for (auto& f : sample_list)
+	{
+		wc.ReadData(f);
+		wc.ComputeFrames(ol, d);
+		count += wc.GetFrames();
+		cycles += wc.GetCycleSize();
+		speed += wc.GetCycleSpeed();
+	}
+	if (count > 0)
+	{
+		double t = double(count) / 30.0;
+		speed = speed / cycles;
+		std::cout << "time:\t" << t << " in " << cycles << " cycles with speed " << speed << std::endl;
+	}
+}
