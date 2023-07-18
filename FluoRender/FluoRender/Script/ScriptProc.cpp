@@ -135,6 +135,8 @@ int ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 					RunOpenCL();
 				else if (str == "comp_analysis")
 					RunCompAnalysis();
+				else if (str == "comp_ruler")
+					RunCompRuler();
 				else if (str == "generate_comp")
 					RunGenerateComp();
 				else if (str == "ruler_profile")
@@ -1221,6 +1223,95 @@ void ScriptProc::RunCompAnalysis()
 			node->addSetValue("comp_max", itc->second->GetMax(maxscale));
 			node->addSetValue("comp_distp", itc->second->GetDistp());
 			node->addSetValue("comp_pca_lens", lens.x());
+		}
+	}
+}
+
+void ScriptProc::RunCompRuler()
+{
+	if (!TimeCondition())
+		return;
+	std::vector<VolumeData*> vlist;
+	if (!GetVolumes(vlist))
+		return;
+	RulerList* ruler_list = m_view->GetRulerList();
+	if (!ruler_list || ruler_list->empty()) return;
+
+	int dim;
+	m_fconfig->Read("dim", &dim);//2 or 3
+	wxString name;
+	m_fconfig->Read("name", &name);
+	double len;
+	m_fconfig->Read("length", &len);//physical length
+	flrd::Ruler* ruler = ruler_list->GetRuler(name.ToStdString());
+	if (!ruler)
+		return;
+	if (ruler->GetNumPoint() < 2)
+		return;
+
+	ruler->SetWorkTime(0);
+	fluo::Point o = ruler->GetPoint(0);
+	if (dim < 3)
+		o.z(0);
+	fluo::Point p = ruler->GetPoint(1);
+	if (dim < 3)
+		p.z(0);
+	fluo::Vector vx = p - o;
+	double rl = vx.length();//length of ruler
+	if (rl == 0)
+		return;
+	vx.normalize();
+	fluo::Vector vy;
+	fluo::Vector vz(vx.x(), 0, vx.z());
+	if (vz.length() > 0)
+	{
+		vz = fluo::Cross(vx, vz);
+		vz.normalize();
+		vy = fluo::Cross(vz, vx);
+	}
+	else
+	{
+		vy = fluo::Vector(1, 0, 0);
+		vz = fluo::Vector(0, 0, -1);
+	}
+	fluo::Transform tf(o, vx, vy, vz);
+	tf.post_scale(fluo::Vector(len / rl));
+
+	int curf = m_view->m_tseq_cur_num;
+	std::string fn = std::to_string(curf);
+	//output
+	//script command
+	fluo::Group* cmdg = m_output->getOrAddGroup(m_type.ToStdString());
+	cmdg->addSetValue("type", m_type.ToStdString());//ruler_transform
+	cmdg->addSetValue("dim", (long)dim);
+
+	//convert comp to ruler
+	//time group
+	fluo::Group* timeg = m_output->getOrAddGroup(fn);
+	//channel group
+	int ch = 0;
+	for (auto itvol = vlist.begin();
+		itvol != vlist.end(); ++itvol, ++ch)
+	{
+		fluo::Group* chg = timeg->getOrAddGroup(std::to_string(ch));
+		//script command
+		fluo::Group* compg = chg->getOrAddGroup("comp_analysis");
+		//comps
+		for (int i = 0; i < compg->getNumChildren(); ++i)
+		{
+			fluo::Node* node = compg->getChild(i);
+			std::string comp_name = node->getName();
+			fluo::Point point;
+			node->getValue("comp_center", point);
+			//convert
+			fluo::Group* ruler_group = cmdg->getOrAddGroup(std::to_string(i+1));
+			ruler_group->addSetValue("type", std::string("ruler"));
+			ruler_group->addSetValue("name", comp_name);
+			fluo::Node* point_node = ruler_group->getOrAddNode(std::to_string(0));
+			if (dim < 3)
+				point.z(0);
+			tf.project_inplace(point);
+			point_node->addSetValue(fn, point);
 		}
 	}
 }

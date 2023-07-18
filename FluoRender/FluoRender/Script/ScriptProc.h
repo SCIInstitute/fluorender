@@ -126,6 +126,7 @@ namespace flrd
 		void RunCalculate();
 		void RunOpenCL();
 		void RunCompAnalysis();
+		void RunCompRuler();
 		void RunGenerateComp();
 		void RunRulerProfile();
 		void RunRoi();
