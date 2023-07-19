@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/sstream.h>
 #include <stdio.h>
 #include <set>
+#include <Debug.h>
 
 std::vector<std::string> CZIReader::m_types{
 	"ZISRAWFILE",
@@ -701,9 +702,13 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 	unsigned short minv = std::numeric_limits<unsigned short>::max();
 	unsigned short maxv = 0;
 	unsigned long long xysize = (unsigned long long)m_x_size * m_y_size;
-	unsigned long long pos = xysize * sbi->z +
+	unsigned long long pos = 0;
+	if (bricks)
+		pos = xysize * sbi->z +
 		(unsigned long long)m_x_size * sbi->y +
 		(unsigned long long)sbi->x;//consider it a brick
+	else
+		pos = xysize * sbi->z;
 
 	if (bricks || compress)
 	{
