@@ -89,7 +89,7 @@ void ComponentEditor::Clean(int mode)
 	m_vd->GetVR()->clear_tex_current();
 }
 
-void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append)
+void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append, bool track)
 {
 	if (!m_view)
 		return;
@@ -224,7 +224,7 @@ void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append)
 	int cur_time = m_view->m_tseq_cur_num;
 	vd->SaveLabel(true, cur_time, vd->GetCurChannel());
 
-	if (new_id)
+	if (new_id && track)
 	{
 		//trace_group->AddCell(cell, m_cur_time);
 		pTrackMap track_map = trace_group->GetTrackMap();

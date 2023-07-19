@@ -2545,7 +2545,7 @@ void ComponentDlg::OnCompNew(wxCommandEvent& event)
 	flrd::ComponentEditor editor;
 	editor.SetView(m_view);
 	editor.NewId(m_cell_new_id,
-		m_cell_new_id_empty, false);
+		m_cell_new_id_empty, false, false);
 	m_view->RefreshGL(39);
 }
 
@@ -2556,7 +2556,7 @@ void ComponentDlg::OnCompAdd(wxCommandEvent& event)
 	flrd::ComponentEditor editor;
 	editor.SetView(m_view);
 	editor.NewId(m_cell_new_id,
-		m_cell_new_id_empty, true);
+		m_cell_new_id_empty, true, false);
 	m_view->RefreshGL(39);
 }
 

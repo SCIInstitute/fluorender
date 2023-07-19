@@ -1968,7 +1968,7 @@ void TraceDlg::CellNewID(bool append)
 	flrd::ComponentEditor editor;
 	editor.SetView(m_view);
 	editor.NewId(m_cell_new_id,
-		m_cell_new_id_empty, append);
+		m_cell_new_id_empty, append, true);
 	CellUpdate();
 }
 

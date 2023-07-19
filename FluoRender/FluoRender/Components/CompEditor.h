@@ -63,7 +63,7 @@ namespace flrd
 		wxString GetOutput();
 
 		void Clean(int mode);
-		void NewId(unsigned int id, bool id_empty, bool append);
+		void NewId(unsigned int id, bool id_empty, bool append, bool track);
 		void Replace(unsigned int id, bool id_empty);
 		void Replace(unsigned int id, bool id_empty, CelpList &list);
 		void Combine();
