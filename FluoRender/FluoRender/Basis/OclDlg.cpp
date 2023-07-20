@@ -56,7 +56,7 @@ m_view(0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
-	SetDoubleBuffered(true);
+	//SetDoubleBuffered(true);
 
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
