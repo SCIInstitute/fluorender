@@ -3,7 +3,7 @@
 
 #define MyAppName "FluoRender"   
 #define MyAppSetupName 'FluoRender'
-#define MyAppVersion "2.29.2"
+#define MyAppVersion "2.29.3"
 #define MyAppPublisher "SCI"
 #define MyAppURL "http://sci.utah.edu"
 #define MyAppExeName "FluoRender.exe"
@@ -13,7 +13,7 @@
 
 [Setup]
 OutputDir=..\build
-OutputBaseFilename=FluoRender2.29.2_win64
+OutputBaseFilename=FluoRender2.29.3_win64
 SetupIconFile=.\Images\FluoRenderIcon.ico
 WizardImageFile=.\Images\fluorender_logo_cut.bmp
 WizardSmallImageFile=.\Images\fluorender_logo_square.bmp
@@ -83,6 +83,7 @@ Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Java_Code\ImageJ_Reader.cla
 ; Scripts directory
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\background_stat.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\calculate.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
+Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\comp_ruler_export.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\comps_analyze.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\comps_dff.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\comps_gen_track_analyze.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
@@ -90,6 +91,7 @@ Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\comps_generate.txt"
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\execute_opencl.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\export_random_colors.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\export_separate_chann.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
+Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\gen_walk.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\mask_clear.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\mask_fetch.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\mask_save_fetch.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
@@ -100,6 +102,8 @@ Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\registrate.txt"; De
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\roi_dff.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\ruler_info.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\ruler_profile.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\ruler_speed.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\stereo_reconstruct.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\track_mask.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\track_mask_analyze.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
 Source: "E:\PROJECTS\fluorender_work_sln\bin\Release\Scripts\track_selected_results.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
