@@ -609,6 +609,10 @@ public:
 	{
 		m_enable_vr = bval;
 	}
+	void SetSBS(bool bval)
+	{
+		m_enable_sbs = bval;
+	}
 	void SetEyeDist(double dval)
 	{
 		m_vr_eye_offset = dval / 2.0;
@@ -1192,6 +1196,7 @@ private:
 
 	//enable vr
 	bool m_enable_vr;
+	bool m_enable_sbs;
 	bool m_use_openvr;
 	uint32_t m_vr_size[2];
 	double m_vr_eye_offset;

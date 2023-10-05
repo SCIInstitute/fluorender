@@ -319,6 +319,7 @@ VRenderGLView::VRenderGLView(VRenderFrame* frame,
 	m_ruler_autorelax(false),
 	//vr settings
 	m_enable_vr(false),
+	m_enable_sbs(false),
 	m_use_openvr(false),
 	m_vr_eye_offset(6.0),
 	m_vr_eye_idx(0)
@@ -2287,7 +2288,9 @@ void VRenderGLView::GetRenderSize(int &nx, int &ny)
 		nx = GetGLSize().x;
 		ny = GetGLSize().y;
 		if (m_enable_vr)
+		{
 			nx /= 2;
+		}
 	}
 }
 
@@ -2356,6 +2359,8 @@ void VRenderGLView::DrawVRBuffer()
 	gl_x = GetGLSize().x;
 	gl_y = GetGLSize().y;
 	int vp_y = int((double)gl_x * vr_y / vr_x / 2.0);
+	if (m_enable_sbs)
+		gl_x *= 2;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, gl_x, vp_y);
 	glDisable(GL_BLEND);

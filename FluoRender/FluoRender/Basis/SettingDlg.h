@@ -77,6 +77,7 @@ class SettingDlg : public wxPanel
 		ID_RotLinkChk,
 		//stereo
 		ID_StereoChk,
+		ID_SBSChk,
 		ID_EyeDistSldr,
 		ID_EyeDistText,
 		//override vox
@@ -177,7 +178,10 @@ public:
 	double GetPinThreshold() { return m_pin_threshold; }
 	//stereo
 	bool GetStereo() { return m_stereo; }
+	//sbs
+	bool GetSBS() { return m_sbs; }
 	double GetEyeDist() { return m_eye_dist; }
+
 	//override vox
 	bool GetOverrideVox() {return m_override_vox;}
 	void SetOverrideVox(bool val) {m_override_vox = val;}
@@ -377,6 +381,7 @@ private:
 	double m_soft_threshold;
 	//stereo
 	bool m_stereo;
+	bool m_sbs;
 	double m_eye_dist;
 	//script
 	bool m_run_script;
@@ -509,6 +514,7 @@ private:
 	wxCheckBox *m_rot_link_chk;
 	//stereo
 	wxCheckBox *m_stereo_chk;
+	wxCheckBox* m_sbs_chk;
 	wxSlider *m_eye_dist_sldr;
 	wxTextCtrl *m_eye_dist_text;
 	//override vox
@@ -610,6 +616,7 @@ private:
 	void OnRotLink(wxCommandEvent& event);
 	//stereo
 	void OnStereoCheck(wxCommandEvent &event);
+	void OnSBSCheck(wxCommandEvent& event);
 	void OnEyeDistChange(wxScrollEvent &event);
 	void OnEyeDistEdit(wxCommandEvent &event);
 	//override vox
