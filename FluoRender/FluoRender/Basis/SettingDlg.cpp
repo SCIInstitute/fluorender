@@ -379,7 +379,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	sizer6_1->Add(m_stereo_chk, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer6_2 = new wxBoxSizer(wxHORIZONTAL);
 	m_sbs_chk = new wxCheckBox(page, ID_SBSChk,
-		"Enable SBS (Side-By_Side)");
+		"Aspect Ratio for 3D TV");
 	sizer6_2->Add(m_sbs_chk, 0, wxALIGN_CENTER);
 	wxBoxSizer *sizer6_3 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Eye distance");
@@ -1327,6 +1327,10 @@ void SettingDlg::UpdateUI()
 	m_grad_bg_chk->SetValue(m_grad_bg);
 	//stereo
 	m_stereo_chk->SetValue(m_stereo);
+	if (m_stereo)
+		m_sbs_chk->Enable();
+	else
+		m_sbs_chk->Disable();
 	m_sbs_chk->SetValue(m_sbs);
 	m_eye_dist_sldr->SetValue(int(m_eye_dist*10.0));
 	m_eye_dist_text->ChangeValue(wxString::Format("%.1f", m_eye_dist));
@@ -2059,6 +2063,10 @@ void SettingDlg::OnRotLink(wxCommandEvent& event)
 void SettingDlg::OnStereoCheck(wxCommandEvent &event)
 {
 	m_stereo = m_stereo_chk->GetValue();
+	if (m_stereo)
+		m_sbs_chk->Enable();
+	else
+		m_sbs_chk->Disable();
 	if (m_frame && 0 < m_frame->GetViewNum())
 	{
 		VRenderGLView* view = m_frame->GetView(0);
