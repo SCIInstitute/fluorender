@@ -2289,7 +2289,8 @@ void VRenderGLView::GetRenderSize(int &nx, int &ny)
 		ny = GetGLSize().y;
 		if (m_enable_vr)
 		{
-			nx /= 2;
+			if (!m_enable_sbs)
+				nx /= 2;
 		}
 	}
 }
@@ -2358,9 +2359,9 @@ void VRenderGLView::DrawVRBuffer()
 	GetRenderSize(vr_x, vr_y);
 	gl_x = GetGLSize().x;
 	gl_y = GetGLSize().y;
-	int vp_y = int((double)gl_x * vr_y / vr_x / 2.0);
 	if (m_enable_sbs)
-		gl_x *= 2;
+		vr_x /= 2;
+	int vp_y = int((double)gl_x * vr_y / vr_x / 2.0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, gl_x, vp_y);
 	glDisable(GL_BLEND);

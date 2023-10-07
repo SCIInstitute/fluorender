@@ -493,6 +493,7 @@ VRenderFrame::VRenderFrame(
 	m_vrv_list[0]->m_glview->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
 	m_vrv_list[0]->m_glview->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
 	m_vrv_list[0]->m_glview->SetStereo(m_setting_dlg->GetStereo());
+	m_vrv_list[0]->m_glview->SetSBS(m_setting_dlg->GetSBS());
 	m_vrv_list[0]->m_glview->SetEyeDist(m_setting_dlg->GetEyeDist());
 	if (m_setting_dlg->GetStereo()) m_vrv_list[0]->InitOpenVR();
 	m_time_id = m_setting_dlg->GetTimeId();
