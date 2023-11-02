@@ -1460,7 +1460,7 @@ void VMovieView::Run()
 			m_crop_w = m_view->GetGLSize().x;
 			m_crop_h = m_view->GetGLSize().y;
 		}
-		if (VRenderGLView::GetEnlarge())
+		else if (VRenderGLView::GetEnlarge())
 		{
 			double scale = VRenderGLView::GetEnlargeScale();
 			m_crop_w *= scale;
