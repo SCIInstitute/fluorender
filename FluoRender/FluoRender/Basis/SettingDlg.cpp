@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 #include <wx/notebook.h>
 #include <wx/stdpaths.h>
+#include <wx/display.h>
 
 BEGIN_EVENT_TABLE(SettingDlg, wxPanel)
 EVT_BUTTON(ID_SaveBtn, SettingDlg::OnSave)
@@ -64,6 +65,9 @@ EVT_CHECKBOX(ID_StereoChk, SettingDlg::OnStereoCheck)
 EVT_CHECKBOX(ID_SBSChk, SettingDlg::OnSBSCheck)
 EVT_COMMAND_SCROLL(ID_EyeDistSldr, SettingDlg::OnEyeDistChange)
 EVT_TEXT(ID_EyeDistText, SettingDlg::OnEyeDistEdit)
+//display id
+EVT_COMMAND_SCROLL(ID_DispIdSldr, SettingDlg::OnDispIdChange)
+EVT_TEXT(ID_DispIdText, SettingDlg::OnDispIdEdit)
 //override vox
 EVT_CHECKBOX(ID_OverrideVoxChk, SettingDlg::OnOverrideVoxCheck)
 //wavelength to color
@@ -370,34 +374,6 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	group5->Add(sizer5_1, 0, wxEXPAND);
 	group5->Add(10, 5);
 
-	//stereo
-	wxBoxSizer* group6 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Stereo && SteamVR"), wxVERTICAL);
-	wxBoxSizer *sizer6_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_stereo_chk = new wxCheckBox(page, ID_StereoChk,
-		"Enable stereo (Install SteamVR and restart. Otherwise side-by-side only.)");
-	sizer6_1->Add(m_stereo_chk, 0, wxALIGN_CENTER);
-	wxBoxSizer* sizer6_2 = new wxBoxSizer(wxHORIZONTAL);
-	m_sbs_chk = new wxCheckBox(page, ID_SBSChk,
-		"Aspect Ratio for 3D TV");
-	sizer6_2->Add(m_sbs_chk, 0, wxALIGN_CENTER);
-	wxBoxSizer *sizer6_3 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Eye distance");
-	m_eye_dist_sldr = new wxSlider(page, ID_EyeDistSldr, 200, 0, 2000,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_eye_dist_text = new wxTextCtrl(page, ID_EyeDistText, "20.0",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_fp1);
-	sizer6_3->Add(st, 0, wxALIGN_CENTER);
-	sizer6_3->Add(m_eye_dist_sldr, 1, wxEXPAND);
-	sizer6_3->Add(m_eye_dist_text, 0, wxALIGN_CENTER);
-	group6->Add(10, 5);
-	group6->Add(sizer6_1, 0, wxEXPAND);
-	group6->Add(10, 5);
-	group6->Add(sizer6_2, 0, wxEXPAND);
-	group6->Add(10, 5);
-	group6->Add(sizer6_3, 0, wxEXPAND);
-	group6->Add(10, 5);
-
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 
 	sizerV->Add(10, 10);
@@ -410,8 +386,6 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	sizerV->Add(group4, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(group5, 0, wxEXPAND);
-	sizerV->Add(10, 10);
-	sizerV->Add(group6, 0, wxEXPAND);
 
 	page->SetSizer(sizerV);
 	return page;
@@ -533,6 +507,68 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	group2->Add(10, 5);
 
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
+	sizerV->Add(10, 10);
+	sizerV->Add(group1, 0, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(group2, 0, wxEXPAND);
+
+	page->SetSizer(sizerV);
+	return page;
+}
+
+wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
+{
+	wxIntegerValidator<unsigned int> vald_int;
+	wxFloatingPointValidator<double> vald_fp1(1);
+	wxStaticText* st;
+	wxPanel* page = new wxPanel(parent);
+
+	//stereo
+	wxBoxSizer* group1 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Stereo && SteamVR"), wxVERTICAL);
+	wxBoxSizer* sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
+	m_stereo_chk = new wxCheckBox(page, ID_StereoChk,
+		"Enable stereo (Install SteamVR and restart. Otherwise side-by-side only.)");
+	sizer1_1->Add(m_stereo_chk, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
+	m_sbs_chk = new wxCheckBox(page, ID_SBSChk,
+		"Aspect Ratio for 3D TV");
+	sizer1_2->Add(m_sbs_chk, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Eye distance");
+	m_eye_dist_sldr = new wxSlider(page, ID_EyeDistSldr, 200, 0, 2000,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_eye_dist_text = new wxTextCtrl(page, ID_EyeDistText, "20.0",
+		wxDefaultPosition, wxSize(40, 20), 0, vald_fp1);
+	sizer1_3->Add(st, 0, wxALIGN_CENTER);
+	sizer1_3->Add(m_eye_dist_sldr, 1, wxEXPAND);
+	sizer1_3->Add(m_eye_dist_text, 0, wxALIGN_CENTER);
+	group1->Add(10, 5);
+	group1->Add(sizer1_1, 0, wxEXPAND);
+	group1->Add(10, 5);
+	group1->Add(sizer1_2, 0, wxEXPAND);
+	group1->Add(10, 5);
+	group1->Add(sizer1_3, 0, wxEXPAND);
+	group1->Add(10, 5);
+
+	//full screen display
+	wxBoxSizer* group2 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Fullscreen on Display"), wxVERTICAL);
+	wxBoxSizer* sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Display ID");
+	m_disp_id_sldr = new wxSlider(page, ID_DispIdSldr, 0, 0, 10,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_disp_id_text = new wxTextCtrl(page, ID_DispIdText, "0",
+		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+	sizer2_1->Add(st, 0, wxALIGN_CENTER);
+	sizer2_1->Add(m_disp_id_sldr, 1, wxEXPAND);
+	sizer2_1->Add(m_disp_id_text, 0, wxALIGN_CENTER);
+	group2->Add(10, 5);
+	group2->Add(sizer2_1, 0, wxEXPAND);
+	group2->Add(10, 5);
+
+	wxBoxSizer* sizerV = new wxBoxSizer(wxVERTICAL);
+
 	sizerV->Add(10, 10);
 	sizerV->Add(group1, 0, wxEXPAND);
 	sizerV->Add(10, 10);
@@ -806,6 +842,7 @@ SettingDlg::SettingDlg(VRenderFrame *frame) :
 	notebook->AddPage(CreateProjectPage(notebook), "Project");
 	notebook->AddPage(CreateRenderingPage(notebook), "Rendering");
 	notebook->AddPage(CreatePerformancePage(notebook), "Performance");
+	notebook->AddPage(CreateDisplayPage(notebook), "Display");
 	notebook->AddPage(CreateFormatPage(notebook), "File format");
 	notebook->AddPage(CreateJavaPage(notebook), "ImageJ Link");
 
@@ -863,6 +900,7 @@ void SettingDlg::GetSettings()
 	m_stereo = false;
 	m_sbs = false;
 	m_eye_dist = 20.0;
+	m_disp_id = 0;
 	m_override_vox = true;
 	m_soft_threshold = 0.0;
 	m_run_script = false;
@@ -1028,6 +1066,12 @@ void SettingDlg::GetSettings()
 		fconfig.Read("enable_stereo", &m_stereo, false);
 		fconfig.Read("enable_sbs", &m_sbs, false);
 		fconfig.Read("eye dist", &m_eye_dist, 20.0);
+	}
+	//display id
+	if (fconfig.Exists("/disp id"))
+	{
+		fconfig.SetPath("/disp id");
+		fconfig.Read("disp_id", &m_disp_id, 0);
 	}
 	//test mode
 	if (fconfig.Exists("/test mode"))
@@ -1334,6 +1378,9 @@ void SettingDlg::UpdateUI()
 	m_sbs_chk->SetValue(m_sbs);
 	m_eye_dist_sldr->SetValue(int(m_eye_dist*10.0));
 	m_eye_dist_text->ChangeValue(wxString::Format("%.1f", m_eye_dist));
+	//display id
+	m_disp_id_sldr->SetValue(m_disp_id);
+	m_disp_id_text->ChangeValue(wxString::Format("%d", m_disp_id));
 	//override vox
 	m_override_vox_chk->SetValue(m_override_vox);
 	//wavelength to color
@@ -1505,6 +1552,9 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("enable_stereo", m_stereo);
 	fconfig.Write("enable_sbs", m_sbs);
 	fconfig.Write("eye dist", m_eye_dist);
+
+	fconfig.SetPath("/disp id");
+	fconfig.Write("disp_id", m_disp_id);
 
 	fconfig.SetPath("/test mode");
 	fconfig.Write("speed", m_test_speed);
@@ -1998,16 +2048,23 @@ void SettingDlg::OnGradBgCheck(wxCommandEvent &event)
 }
 
 // Get jvm paths.
-wxString SettingDlg::getJVMPath() {
+wxString SettingDlg::getJVMPath()
+{
 	return m_java_jvm_text->GetValue(); 
 }
-wxString SettingDlg::getIJPath() {
+
+wxString SettingDlg::getIJPath()
+{
 	return m_java_ij_text->GetValue(); 
 }
-wxString SettingDlg::getBioformatsPath() {
+
+wxString SettingDlg::getBioformatsPath()
+{
 	return m_java_bioformats_text->GetValue(); 
 }
-std::vector<std::string> SettingDlg::GetJvmArgs() {
+
+std::vector<std::string> SettingDlg::GetJvmArgs()
+{
 	std::vector<std::string> args;
 	args.push_back(getJVMPath().ToStdString());
 	args.push_back(getIJPath().ToStdString());
@@ -2015,6 +2072,11 @@ std::vector<std::string> SettingDlg::GetJvmArgs() {
 	return args;
 }
 
+//display settings
+unsigned int SettingDlg::GetDisplayNum()
+{
+	return wxDisplay::GetCount();
+}
 
 //rot center anchor thresh
 void SettingDlg::OnPinThresholdChange(wxScrollEvent &event)
@@ -2117,6 +2179,24 @@ void SettingDlg::OnEyeDistEdit(wxCommandEvent &event)
 			view->RefreshGL(39);
 		}
 	}
+}
+
+//display id
+void SettingDlg::OnDispIdChange(wxScrollEvent& event)
+{
+	m_disp_id = m_disp_id_sldr->GetValue();
+	wxString str = wxString::Format("%d", m_disp_id);
+	if (str != m_disp_id_text->GetValue())
+		m_disp_id_text->SetValue(str);
+}
+
+void SettingDlg::OnDispIdEdit(wxCommandEvent& event)
+{
+	wxString str = m_disp_id_text->GetValue();
+	long ival;
+	str.ToLong(&ival);
+	m_disp_id_sldr->SetValue(ival);
+	m_disp_id = ival;
 }
 
 //override vox

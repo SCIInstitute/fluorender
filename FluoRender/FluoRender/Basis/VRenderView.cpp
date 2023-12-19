@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include "png_resource.h"
 #include "img/icons.h"
 #include <wx/stdpaths.h>
+#include <wx/display.h>
 
 int VRenderView::m_max_id = 1;
 
@@ -2187,12 +2188,20 @@ void VRenderView::SetFullScreen()
 {
 	if (m_glview->GetParent() != m_full_frame)
 	{
+		VRenderFrame* frame = (VRenderFrame*)m_frame;
 		m_view_sizer->Detach(m_glview);
 		m_glview->Reparent(m_full_frame);
+		//get display id
+		int disp_id = frame->GetSettingDlg()->GetDispId();
+		if (disp_id >= frame->GetSettingDlg()->GetDisplayNum())
+			disp_id = 0;
+		wxDisplay display(disp_id);
+		wxRect rect = display.GetGeometry();
+		m_full_frame->SetSize(rect.GetSize());
+		m_full_frame->SetPosition(rect.GetPosition());
 		m_full_frame->ShowFullScreen(true);
 		m_glview->SetPosition(wxPoint(0, 0));
 		m_glview->SetSize(m_full_frame->GetSize());
-		VRenderFrame* frame = (VRenderFrame*)m_frame;
 		if (frame && frame->GetSettingDlg())
 		{
 			if (frame->GetSettingDlg()->GetStayTop())

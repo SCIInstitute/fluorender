@@ -80,6 +80,9 @@ class SettingDlg : public wxPanel
 		ID_SBSChk,
 		ID_EyeDistSldr,
 		ID_EyeDistText,
+		//display id
+		ID_DispIdSldr,
+		ID_DispIdText,
 		//override vox
 		ID_OverrideVoxChk,
 		//component size
@@ -181,7 +184,9 @@ public:
 	//sbs
 	bool GetSBS() { return m_sbs; }
 	double GetEyeDist() { return m_eye_dist; }
-
+	//display id
+	unsigned int GetDispId() { return m_disp_id; }
+	void SetDispId(unsigned int val) { m_disp_id = val; }
 	//override vox
 	bool GetOverrideVox() {return m_override_vox;}
 	void SetOverrideVox(bool val) {m_override_vox = val;}
@@ -347,6 +352,9 @@ public:
 	//python settings
 	int GetPythonVer() { return m_python_ver; }
 
+	//display settings
+	unsigned int GetDisplayNum();
+
 private:
 	VRenderFrame* m_frame;
 
@@ -383,6 +391,8 @@ private:
 	bool m_stereo;
 	bool m_sbs;
 	double m_eye_dist;
+	//display
+	int m_disp_id;
 	//script
 	bool m_run_script;
 	wxString m_script_file;
@@ -517,6 +527,9 @@ private:
 	wxCheckBox* m_sbs_chk;
 	wxSlider *m_eye_dist_sldr;
 	wxTextCtrl *m_eye_dist_text;
+	//display
+	wxSlider* m_disp_id_sldr;
+	wxTextCtrl* m_disp_id_text;
 	//override vox
 	wxCheckBox *m_override_vox_chk;
 	//wavelength to color
@@ -586,8 +599,9 @@ private:
 	void OnShow(wxShowEvent &event);
 
 	wxWindow* CreateProjectPage(wxWindow *parent);
-	wxWindow* CreatePerformancePage(wxWindow *parent);
 	wxWindow* CreateRenderingPage(wxWindow *parent);
+	wxWindow* CreatePerformancePage(wxWindow *parent);
+	wxWindow* CreateDisplayPage(wxWindow* parent);
 	wxWindow* CreateFormatPage(wxWindow *parent);
 	wxWindow* CreateJavaPage(wxWindow *parent);
 
@@ -619,6 +633,9 @@ private:
 	void OnSBSCheck(wxCommandEvent& event);
 	void OnEyeDistChange(wxScrollEvent &event);
 	void OnEyeDistEdit(wxCommandEvent &event);
+	//display id
+	void OnDispIdChange(wxScrollEvent& event);
+	void OnDispIdEdit(wxCommandEvent& event);
 	//override vox
 	void OnOverrideVoxCheck(wxCommandEvent &event);
 	//wavelength color
