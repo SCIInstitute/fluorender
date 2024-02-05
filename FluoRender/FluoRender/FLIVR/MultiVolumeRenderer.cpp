@@ -744,9 +744,9 @@ namespace flvr
 
 			if (blend_slices_ /*&& colormap_mode_!=2*/)
 			{
-				glUseProgram(0);
 				//set buffer back
 				glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_);
+				glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 				micro_blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 				//blend
 				glBlendEquation(GL_FUNC_ADD);
@@ -767,6 +767,7 @@ namespace flvr
 				if (img_shader && img_shader->valid())
 					img_shader->release();
 				glBindTexture(GL_TEXTURE_2D, 0);
+				glViewport(0, 0, w, h);
 			}
 		}
 
