@@ -542,6 +542,7 @@ namespace flvr
 				glEnable(GL_BLEND);
 				glBlendEquationSeparate(GL_FUNC_ADD, GL_MAX);
 				glBlendFunc(GL_ONE, GL_ONE);
+				//glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
 			}
 
 			if (va_slices_)
