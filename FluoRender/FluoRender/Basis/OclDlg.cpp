@@ -49,7 +49,8 @@ END_EVENT_TABLE()
 
 OclDlg::OclDlg(VRenderFrame* frame) :
 wxPanel(frame, wxID_ANY,
-wxDefaultPosition, wxSize(550, 600),
+wxDefaultPosition,
+frame->FromDIP(wxSize(550, 600)),
 0, "OclDlg"),
 m_frame(frame),
 m_view(0)

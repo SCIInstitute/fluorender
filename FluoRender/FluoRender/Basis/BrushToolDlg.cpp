@@ -114,7 +114,7 @@ BrushToolDlg::BrushToolDlg(
 	VRenderFrame *frame)
 	: wxPanel(frame, wxID_ANY,
 	wxDefaultPosition,
-	wxSize(500, 620),
+	frame->FromDIP(wxSize(500, 620)),
 	0, "BrushToolDlg"),
 	m_frame(frame),
 	m_view(0),

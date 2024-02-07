@@ -53,7 +53,8 @@ END_EVENT_TABLE()
 
 ColocalizationDlg::ColocalizationDlg(VRenderFrame* frame) :
 wxPanel(frame, wxID_ANY,
-wxDefaultPosition, wxSize(500, 500),
+wxDefaultPosition,
+frame->FromDIP(wxSize(500, 500)),
 0, "ColocalizationDlg"),
 m_frame(frame),
 m_view(0),

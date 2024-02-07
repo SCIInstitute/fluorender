@@ -191,7 +191,7 @@ END_EVENT_TABLE()
 ComponentDlg::ComponentDlg(VRenderFrame *frame)
 	: wxPanel(frame, wxID_ANY,
 		wxDefaultPosition,
-		wxSize(600, 800),
+		frame->FromDIP(wxSize(600, 800)),
 		0, "ComponentDlg"),
 	m_frame(frame),
 	m_view(0),

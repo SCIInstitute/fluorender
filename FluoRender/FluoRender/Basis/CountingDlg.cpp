@@ -38,7 +38,8 @@ END_EVENT_TABLE()
 
 CountingDlg::CountingDlg(VRenderFrame *frame)
 : wxPanel(frame, wxID_ANY,
-wxDefaultPosition, wxSize(400, 150),
+wxDefaultPosition,
+frame->FromDIP(wxSize(400, 150)),
 0, "CountingDlg"),
 m_frame(frame),
 m_view(0),

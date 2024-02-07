@@ -41,4 +41,15 @@ inline wxBitmap _wxGetBitmapFromMemory(const unsigned char *data, int length)
 	return wxBitmap(wxImage(is, wxBITMAP_TYPE_ANY, -1), -1);
 }
 
+#define wxGetBitmap(name, f) _wxGetBitmap(icons::name ## _png, sizeof(icons::name ## _png), f)
+
+inline wxBitmap _wxGetBitmap(const unsigned char* data, int length, double f)
+{
+	wxLogNull logNo;
+	wxMemoryInputStream is(data, length);
+	wxImage image(is, wxBITMAP_TYPE_ANY, -1);
+	image.Rescale(image.GetWidth() * f, image.GetHeight() * f, wxIMAGE_QUALITY_HIGH);
+	return wxBitmap(image, -1);
+}
+
 #endif//PNG_RESOURCE_H

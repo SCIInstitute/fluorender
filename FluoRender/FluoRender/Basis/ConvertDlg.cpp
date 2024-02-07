@@ -45,7 +45,8 @@ END_EVENT_TABLE()
 
 ConvertDlg::ConvertDlg(VRenderFrame *frame) :
 wxPanel(frame, wxID_ANY,
-	wxDefaultPosition, wxSize(400, 300),
+	wxDefaultPosition,
+	frame->FromDIP(wxSize(400, 300)),
 	0, "ConvertDlg"),
 	m_frame(frame)
 {

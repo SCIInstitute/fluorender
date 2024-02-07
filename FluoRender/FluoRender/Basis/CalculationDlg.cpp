@@ -47,7 +47,7 @@ END_EVENT_TABLE()
 CalculationDlg::CalculationDlg(VRenderFrame *frame)
 	: wxPanel(frame, wxID_ANY,
 	wxDefaultPosition,
-	wxSize(500, 350),
+	frame->FromDIP(wxSize(500, 350)),
 	0, "CalculationDlg"),
 	m_frame(frame),
 	m_group(0)

@@ -251,20 +251,14 @@ VRenderFrame::VRenderFrame(
 	wxBitmap bitmap;
 
 	bitmap = wxGetBitmapFromMemory(icon_open_volume);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
+	//m_main_tb->SetToolBitmapSize(FromDIP(wxSize(100, 42)));
 	m_main_tb->AddTool(ID_OpenVolume, "Open Volume",
 		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Open single or multiple volume data file(s)",
 		"Open single or multiple volume data file(s)");
-	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
 
 	if (JVMInitializer::getInstance(m_setting_dlg->GetJvmArgs()) != nullptr) {
 		bitmap = wxGetBitmapFromMemory(icon_import);
-#ifdef _DARWIN
-		m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
 		m_main_tb->AddTool(ID_ImportVolume, "Import Volume",
 			bitmap, wxNullBitmap, wxITEM_NORMAL,
 			"Import single or multiple volume data file(s) using ImageJ",
@@ -273,34 +267,22 @@ VRenderFrame::VRenderFrame(
 	}
 
 	bitmap = wxGetBitmapFromMemory(icon_open_project);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_main_tb->AddTool(ID_OpenProject, "Open Project",
 		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Open a saved project",
 		"Open a saved project");
 	bitmap = wxGetBitmapFromMemory(icon_save_project);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_main_tb->AddTool(ID_SaveProject, "Save Project",
 		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Save current work as a project",
 		"Save current work as a project");
 	m_main_tb->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(icon_new_view);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_main_tb->AddTool(ID_ViewNew, "New View",
 		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Create a new render viewport",
 		"Create a new render viewport");
 	bitmap = wxGetBitmapFromMemory(icon_show_hide_ui);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_main_tb->AddTool(ID_ShowHideUI, "Show/Hide UI",
 		bitmap, wxNullBitmap, wxITEM_DROPDOWN,
 		"Show or hide all control panels",
@@ -308,17 +290,11 @@ VRenderFrame::VRenderFrame(
 	m_main_tb->SetDropdownMenu(ID_ShowHideUI, m_tb_menu_ui);
 	m_main_tb->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(icon_open_mesh);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_main_tb->AddTool(ID_OpenMesh, "Open Mesh",
 		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Open single or multiple mesh file(s)",
 		"Open single or multiple mesh file(s)");
 	bitmap = wxGetBitmapFromMemory(icon_paint_brush);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_main_tb->AddTool(ID_LastTool, "Analyze",
 		bitmap, wxNullBitmap,
 		wxITEM_DROPDOWN,
@@ -327,9 +303,6 @@ VRenderFrame::VRenderFrame(
 	m_main_tb->SetDropdownMenu(ID_LastTool, m_tb_menu_edit);
 	m_main_tb->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(icon_settings);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_main_tb->AddTool(ID_Settings, "Settings",
 		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Settings of FluoRender",
@@ -395,9 +368,6 @@ VRenderFrame::VRenderFrame(
 		item_id = ID_Info;
 		break;
 	}
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_main_tb->AddTool(item_id, str1,
 		bitmap, wxNullBitmap, wxITEM_DROPDOWN,
 		str2, str3);
@@ -411,11 +381,7 @@ VRenderFrame::VRenderFrame(
 	vrv->UpdateView();
 	m_vrv_list.push_back(vrv);
 
-#ifdef _WIN32
 	wxSize panel_size(FromDIP(wxSize(350, 300)));
-#else
-	wxSize panel_size(FromDIP(wxSize(400, 300)));
-#endif
 	//create list view
 	m_list_panel = new ListPanel(this,
 		wxDefaultPosition, panel_size);
@@ -556,10 +522,12 @@ VRenderFrame::VRenderFrame(
 	else
 		m_tester->Show(false);
 
+	double dpi_sf = GetDPIScaleFactor() - 0.1;
+	wxSize tb_size(w * std::round(dpi_sf), 46 * std::round(dpi_sf));
 	//Add to the manager
 	m_aui_mgr.AddPane(m_main_tb, wxAuiPaneInfo().
 		Name("m_main_tb").Caption("Toolbar").CaptionVisible(false).
-		MinSize(FromDIP(wxSize(-1, 49))).MaxSize(FromDIP(wxSize(-1, 50))).
+		BestSize(tb_size).
 		Top().CloseButton(false).Layer(4));
 	m_aui_mgr.AddPane(m_list_panel, wxAuiPaneInfo().
 		Name("m_list_panel").Caption(UITEXT_DATAVIEW).

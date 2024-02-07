@@ -48,9 +48,10 @@ END_EVENT_TABLE()
 
 TesterDlg::TesterDlg(VRenderFrame *frame)
 : wxDialog(frame, wxID_ANY, wxString("Tester"),
-		   wxDefaultPosition, wxSize(600, 600),
-		   wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER|
-		   wxMAXIMIZE_BOX|wxMINIMIZE_BOX),
+	wxDefaultPosition,
+	frame->FromDIP(wxSize(600, 600)),
+	wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER|
+	wxMAXIMIZE_BOX|wxMINIMIZE_BOX),
 m_p1(1.0),
 m_p2(0.0),
 m_p3(0.0),

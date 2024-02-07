@@ -517,7 +517,8 @@ END_EVENT_TABLE()
 
 RecorderDlg::RecorderDlg(VRenderFrame* frame, wxWindow* parent)
 : wxPanel(parent, wxID_ANY,
-wxPoint(500, 150), wxSize(450, 650),
+wxDefaultPosition,
+frame->FromDIP(wxSize(450, 650)),
 0, "RecorderDlg"),
 m_frame(frame),
 m_view(0),

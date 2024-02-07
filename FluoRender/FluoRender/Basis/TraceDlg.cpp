@@ -775,7 +775,8 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 
 TraceDlg::TraceDlg(VRenderFrame* frame)
 	: wxPanel(frame, wxID_ANY,
-		wxDefaultPosition, wxSize(550, 650),
+		wxDefaultPosition,
+		frame->FromDIP(wxSize(550, 650)),
 		0, "TraceDlg"),
 	m_frame(frame),
 	m_view(0),

@@ -37,9 +37,10 @@ END_EVENT_TABLE()
 
 FpRangeDlg::FpRangeDlg(VRenderFrame *frame)
 : wxDialog(frame, wxID_ANY, wxString("Data Conversion"),
-		   wxDefaultPosition, wxSize(400, 200),
-		   wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER|
-		   wxMAXIMIZE_BOX|wxMINIMIZE_BOX| wxSTAY_ON_TOP),
+	wxDefaultPosition,
+	frame->FromDIP(wxSize(400, 200)),
+	wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER|
+	wxMAXIMIZE_BOX|wxMINIMIZE_BOX| wxSTAY_ON_TOP),
 m_min_val(0),
 m_max_val(0),
 m_frame(frame)

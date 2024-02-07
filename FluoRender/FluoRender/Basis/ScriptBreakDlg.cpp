@@ -36,7 +36,8 @@ END_EVENT_TABLE()
 
 ScriptBreakDlg::ScriptBreakDlg(VRenderFrame* frame) :
 	wxPanel(frame, wxID_ANY,
-		wxDefaultPosition, wxSize(400, 300),
+		wxDefaultPosition,
+		frame->FromDIP(wxSize(400, 300)),
 		0, ""),
 	m_frame(frame)
 {

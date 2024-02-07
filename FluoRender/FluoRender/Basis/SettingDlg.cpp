@@ -829,7 +829,8 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 
 SettingDlg::SettingDlg(VRenderFrame *frame) :
 	wxPanel(frame, wxID_ANY,
-		wxDefaultPosition, wxSize(450, 750),
+		wxDefaultPosition,
+		frame->FromDIP(wxSize(450, 750)),
 		0, "SettingDlg"),
 	m_frame(frame)
 {

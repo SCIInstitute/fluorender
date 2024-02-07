@@ -931,7 +931,8 @@ END_EVENT_TABLE()
 
 MeasureDlg::MeasureDlg(VRenderFrame* frame)
 	: wxPanel(frame, wxID_ANY,
-	wxDefaultPosition, wxSize(500, 600),
+	wxDefaultPosition,
+	frame->FromDIP(wxSize(500, 600)),
 	0, "MeasureDlg"),
 	m_frame(frame),
 	m_view(0),

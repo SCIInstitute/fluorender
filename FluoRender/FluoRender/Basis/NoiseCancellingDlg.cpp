@@ -42,7 +42,8 @@ END_EVENT_TABLE()
 
 NoiseCancellingDlg::NoiseCancellingDlg(VRenderFrame *frame)
 : wxPanel(frame, wxID_ANY,
-	wxDefaultPosition, wxSize(400, 150),
+	wxDefaultPosition,
+	frame->FromDIP(wxSize(400, 150)),
 	0, "NoiseCancellingDlg"),
 	m_frame(frame),
 	m_view(0),
