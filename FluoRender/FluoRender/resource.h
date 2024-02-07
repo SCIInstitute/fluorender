@@ -41,3 +41,7 @@ DEALINGS IN THE SOFTWARE.
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
+
+#include <wx/msw/wx.rc>
+
+#define wxUSE_DPI_AWARE_MANIFEST 2

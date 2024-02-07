@@ -258,6 +258,7 @@ VRenderFrame::VRenderFrame(
 		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Open single or multiple volume data file(s)",
 		"Open single or multiple volume data file(s)");
+	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
 
 	if (JVMInitializer::getInstance(m_setting_dlg->GetJvmArgs()) != nullptr) {
 		bitmap = wxGetBitmapFromMemory(icon_import);
@@ -411,9 +412,9 @@ VRenderFrame::VRenderFrame(
 	m_vrv_list.push_back(vrv);
 
 #ifdef _WIN32
-	wxSize panel_size(350, 300);
+	wxSize panel_size(FromDIP(wxSize(350, 300)));
 #else
-	wxSize panel_size(400, 300);
+	wxSize panel_size(FromDIP(wxSize(400, 300)));
 #endif
 	//create list view
 	m_list_panel = new ListPanel(this,
@@ -448,14 +449,14 @@ VRenderFrame::VRenderFrame(
 
 	//clipping view
 	m_clip_view = new ClippingView(this,
-		wxDefaultPosition, wxSize(130,700));
+		wxDefaultPosition, FromDIP(wxSize(130,700)));
 	m_clip_view->SetDataManager(&m_data_mgr);
 	m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(
 		m_setting_dlg->GetPlaneMode()));
 
 	//adjust view
 	m_adjust_view = new AdjustView(this,
-		wxDefaultPosition, wxSize(130, 700));
+		wxDefaultPosition, FromDIP(wxSize(130, 700)));
 
 	wxString font_file = m_setting_dlg->GetFontFile();
 	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
@@ -558,36 +559,36 @@ VRenderFrame::VRenderFrame(
 	//Add to the manager
 	m_aui_mgr.AddPane(m_main_tb, wxAuiPaneInfo().
 		Name("m_main_tb").Caption("Toolbar").CaptionVisible(false).
-		MinSize(wxSize(-1, 49)).MaxSize(wxSize(-1, 50)).
+		MinSize(FromDIP(wxSize(-1, 49))).MaxSize(FromDIP(wxSize(-1, 50))).
 		Top().CloseButton(false).Layer(4));
 	m_aui_mgr.AddPane(m_list_panel, wxAuiPaneInfo().
 		Name("m_list_panel").Caption(UITEXT_DATAVIEW).
 		Left().CloseButton(true).BestSize(panel_size).
-		FloatingSize(wxSize(400, 600)).Layer(3));
+		FloatingSize(FromDIP(wxSize(400, 600))).Layer(3));
 	m_aui_mgr.AddPane(m_tree_panel, wxAuiPaneInfo().
 		Name("m_tree_panel").Caption(UITEXT_TREEVIEW).
 		Left().CloseButton(true).BestSize(panel_size).
-		FloatingSize(wxSize(400, 600)).Layer(3));
+		FloatingSize(FromDIP(wxSize(400, 600))).Layer(3));
 	m_aui_mgr.AddPane(m_movie_view, wxAuiPaneInfo().
 		Name("m_movie_view").Caption(UITEXT_MAKEMOVIE).
 		Left().CloseButton(true).BestSize(panel_size).
-		FloatingSize(wxSize(400, 600)).Layer(3));
+		FloatingSize(FromDIP(wxSize(400, 600))).Layer(3));
 	m_aui_mgr.AddPane(m_prop_panel, wxAuiPaneInfo().
 		Name("m_prop_panel").Caption(UITEXT_PROPERTIES).
-		Bottom().CloseButton(true).MinSize(wxSize(300, 130)).
-		FloatingSize(wxSize(1100, 130)).Layer(2));
+		Bottom().CloseButton(true).MinSize(FromDIP(wxSize(300, 130))).
+		FloatingSize(FromDIP(wxSize(1100, 130))).Layer(2));
 	m_aui_mgr.AddPane(m_adjust_view, wxAuiPaneInfo().
 		Name("m_adjust_view").Caption(UITEXT_ADJUST).
-		Left().CloseButton(true).MinSize(wxSize(110, 700)).
-		FloatingSize(wxSize(110, 700)).Layer(1));
+		Left().CloseButton(true).MinSize(FromDIP(wxSize(110, 700))).
+		FloatingSize(FromDIP(wxSize(110, 700))).Layer(1));
 	m_aui_mgr.AddPane(m_clip_view, wxAuiPaneInfo().
 		Name("m_clip_view").Caption(UITEXT_CLIPPING).
-		Right().CloseButton(true).MinSize(wxSize(130, 700)).
-		FloatingSize(wxSize(130, 700)).Layer(1));
+		Right().CloseButton(true).MinSize(FromDIP(wxSize(130, 700))).
+		FloatingSize(FromDIP(wxSize(130, 700))).Layer(1));
 	m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
 		Name(vrv->GetName()).Caption(vrv->GetName()).
 		Dockable(true).CloseButton(false).
-		FloatingSize(wxSize(600, 400)).MinSize(wxSize(300, 200)).
+		FloatingSize(FromDIP(wxSize(600, 400))).MinSize(FromDIP(wxSize(300, 200))).
 		Layer(0).Centre());
 
 	//dialogs
@@ -692,7 +693,7 @@ VRenderFrame::VRenderFrame(
 
 	UpdateTree();
 
-	SetMinSize(wxSize(800,600));
+	SetMinSize(FromDIP(wxSize(800,600)));
 
 	m_aui_mgr.Update();
 	
@@ -1780,7 +1781,7 @@ void VRenderFrame::OnInfo(wxCommandEvent& event)
 	int psJan = time.Find("Jan");
 	int psDec = time.Find("Dec");
 	wxDialog* d = new wxDialog(this,wxID_ANY,"About FluoRender",wxDefaultPosition,
-		wxSize(600,200),wxDEFAULT_DIALOG_STYLE );
+		FromDIP(wxSize(600,200)),wxDEFAULT_DIALOG_STYLE );
 	wxBoxSizer * main = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer * left = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer * right = new wxBoxSizer(wxVERTICAL);
@@ -1801,30 +1802,30 @@ void VRenderFrame::OnInfo(wxCommandEvent& event)
 	left->Add(logo,0,wxEXPAND);
 	//right
 	wxStaticText *txt = new wxStaticText(d,wxID_ANY,FLUORENDER_TITLE,
-		wxDefaultPosition,wxSize(-1,-1));
+		wxDefaultPosition, FromDIP(wxSize(-1,-1)));
 	wxFont font = wxFont(15,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
 	txt->SetFont(font);
 	right->Add(txt,0,wxEXPAND);
 	txt = new wxStaticText(d,wxID_ANY,"Version: " +
 		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR)),
-		wxDefaultPosition,wxSize(50,-1));
+		wxDefaultPosition, FromDIP(wxSize(50,-1)));
 	font = wxFont(12,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
 	txt->SetFont(font);
 	right->Add(txt,0,wxEXPAND);
 	txt = new wxStaticText(d,wxID_ANY,wxString("Copyright (c) ") + VERSION_COPYRIGHT,
-		wxDefaultPosition,wxSize(-1,-1));
+		wxDefaultPosition, FromDIP(wxSize(-1,-1)));
 	font = wxFont(11,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
 	txt->SetFont(font);
 	right->Add(txt,0,wxEXPAND);
 	right->Add(3,5,0);
 	txt = new wxStaticText(d,wxID_ANY,VERSION_AUTHORS,
-		wxDefaultPosition,wxSize(300,-1));
+		wxDefaultPosition, FromDIP(wxSize(300,-1)));
 	font = wxFont(7,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
 	txt->SetFont(font);
 	right->Add(txt,0,wxEXPAND);
 	wxHyperlinkCtrl* hyp = new wxHyperlinkCtrl(d,wxID_ANY,"Contact Info",
 		VERSION_CONTACT,
-		wxDefaultPosition,wxSize(-1,-1));
+		wxDefaultPosition, FromDIP(wxSize(-1,-1)));
 	right->Add(hyp,0,wxEXPAND);
 	right->AddStretchSpacer();
 	//put together
