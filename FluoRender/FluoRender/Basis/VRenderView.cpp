@@ -402,9 +402,10 @@ void VRenderView::CreateBar()
 		break;
 	}
 	//camera
-	wxButton * cam = new wxButton(m_options_toolbar, ID_CaptureBtn, "Capture",
+	wxButton* cam = new wxButton(m_options_toolbar, ID_CaptureBtn, "Capture",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
-	//bitmap = wxGetBitmap(camera, dpi_sf);
+	cam->SetBitmap(wxGetBitmapFromMemory(camera));
+	bitmap = wxGetBitmap(camera, dpi_sf);
 	m_options_toolbar->AddControl(cam);
 #ifndef _DARWIN
 	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
