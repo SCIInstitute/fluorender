@@ -32,6 +32,9 @@ public:
 	void OnLeftUp(wxMouseEvent& event);
 	void OnWheel(wxMouseEvent& event);
 
+	void SetRangeColor(const wxColor& c);
+	void DisableRangeColor();
+
 protected:
 	void paintNow();
 	void render(wxDC& dc);
@@ -39,13 +42,16 @@ protected:
 	
 
 private:
+	wxWindow* parent_;
+	wxWindowID id_;
 	int margin;
 	double scale;
 	int leftval, rightval, minval, maxval;
 	int selectedslider;
-	int prevx, prevy;
-	wxBitmap upthumb, downthumb;
+	//int prevx, prevy;
 	bool floatlabel;
+	bool use_range_color_;
+	wxColor range_color_;
 
 };
 

@@ -361,6 +361,8 @@ void VRenderView::CreateBar()
 	wxBitmap bitmap;
 	wxImage image;
 	double dpi_sf = GetDPIScaleFactor();
+	double dpi_sf2 = std::round(dpi_sf - 0.1);
+	dpi_sf = dpi_sf2 < dpi_sf ? dpi_sf : 1;
 	bitmap = wxGetBitmap(layers, dpi_sf);
 	m_options_toolbar->AddRadioTool(
 		ID_VolumeSeqRd, "Layered",

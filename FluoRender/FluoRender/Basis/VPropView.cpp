@@ -59,6 +59,7 @@ BEGIN_EVENT_TABLE(VPropView, wxPanel)
 	EVT_COMMAND_SCROLL(ID_SaturationSldr, VPropView::OnSaturationChange)
 	EVT_TEXT(ID_SaturationText, VPropView::OnSaturationText)
 	EVT_COMMAND_SCROLL(ID_LeftThreshSldr, VPropView::OnLeftThreshChange)
+	//EVT_COMMAND(ID_LeftThreshSldr, wxEVT_SCROLL_CHANGED, VPropView::OnLeftThreshChange)
 	EVT_TEXT(ID_LeftThreshText, VPropView::OnLeftThreshText)
 	//EVT_COMMAND_SCROLL(ID_RightThreshSldr, VPropView::OnRightThreshChange)
 	EVT_TEXT(ID_RightThreshText, VPropView::OnRightThreshText)
@@ -308,6 +309,7 @@ VPropView::VPropView(VRenderFrame* frame,
 		wxMouseEventHandler(VPropView::OnThreshSync), NULL, this);
 	m_left_thresh_sldr = new wxDoubleSlider(this, ID_LeftThreshSldr, 0, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_left_thresh_sldr->SetRangeColor(wxColor(0, 0, 255));
 	m_left_thresh_text = new wxTextCtrl(this, ID_LeftThreshText, "5",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_int);
 	//m_right_thresh_sldr = new wxSlider(this, ID_RightThreshSldr, 230, 0, 255,
@@ -1106,10 +1108,15 @@ void VPropView::OnThreshSync(wxMouseEvent& event)
 
 void VPropView::OnLeftThreshChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_left_thresh_sldr->GetLeftValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_left_thresh_text->GetValue())
 		m_left_thresh_text->SetValue(str);
+
+	ival = m_left_thresh_sldr->GetRightValue();
+	str = wxString::Format("%d", ival);
+	if (str != m_right_thresh_text->GetValue())
+		m_right_thresh_text->SetValue(str);
 }
 
 void VPropView::OnLeftThreshText(wxCommandEvent &event)
