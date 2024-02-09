@@ -14,21 +14,24 @@ wxDoubleSlider::wxDoubleSlider(wxWindow *parent,
 	parent_(parent),
 	id_(id),
 	use_range_color_(false),
+	horizontal_(style | wxSL_VERTICAL),
 	wxControl(parent, id, pos,
-		wxSize(1, int(std::round(23* parent->GetDPIScaleFactor()))), wxBORDER_NONE)
+		wxSize(style | wxSL_VERTICAL? int(std::round(23 * parent->GetDPIScaleFactor())) : 1,
+			style | wxSL_VERTICAL ? 1 : int(std::round(23* parent->GetDPIScaleFactor()))), wxBORDER_NONE)
 {
 	scale = parent->GetDPIScaleFactor();
 	margin = int(std::round(12 * scale));
 	SetBackgroundColour(parent->GetBackgroundColour());
 	SetDoubleBuffered(true);
 	leftval = leftValue; rightval = rightValue; minval = minValue; maxval = maxValue;
-	selectedslider = 0;
+	sel_ = 0;
+	last_sel_ = 1;
 	floatlabel = false;
 	Bind(wxEVT_PAINT, &wxDoubleSlider::OnPaint, this);
 	Bind(wxEVT_LEFT_DOWN,&wxDoubleSlider::OnLeftDown, this);
 	Bind(wxEVT_MOTION,&wxDoubleSlider::OnMotion, this);
 	Bind(wxEVT_LEFT_UP,&wxDoubleSlider::OnLeftUp, this);
-	Bind(wxEVT_LEAVE_WINDOW, &wxDoubleSlider::OnLeftUp, this);
+	//Bind(wxEVT_LEAVE_WINDOW, &wxDoubleSlider::OnLeftUp, this);
 	Bind(wxEVT_MOUSEWHEEL, &wxDoubleSlider::OnWheel, this);
 	Refresh();
 	Update();
@@ -85,61 +88,89 @@ void  wxDoubleSlider::DrawThumb(wxDC& dc, wxCoord x, wxCoord y)
 	wxColor color = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
 	dc.SetPen(color);
 	dc.SetBrush(wxBrush(color, wxBRUSHSTYLE_SOLID));
-	wxPoint p[] = {
+	wxPoint ph[] = {
 		wxPoint(x - 5 * scale, y - 7 * scale),
 		wxPoint(x + 5 * scale, y - 7 * scale),
 		wxPoint(x + 5 * scale, y + 6 * scale),
 		wxPoint(x, y + 11 * scale),
 		wxPoint(x - 5 * scale, y + 6 * scale)
 	};
+	wxPoint pv[] = {
+		wxPoint(x - 7 * scale, y - 5 * scale),
+		wxPoint(x - 7 * scale, y + 5 * scale),
+		wxPoint(x + 6 * scale, y + 5 * scale),
+		wxPoint(x + 11 * scale, y),
+		wxPoint(x + 6 * scale, y - 5 * scale)
+	};
 	int num = 5;
-	dc.DrawPolygon(num, p, wxODDEVEN_RULE);
+	dc.DrawPolygon(num, horizontal_? ph : pv, wxODDEVEN_RULE);
 }
 
 void wxDoubleSlider::render(wxDC& dc)
 {
 	int w, h;
 	GetSize(&w, &h);
-	int tw, th;
 	
 	dc.SetPen(*wxGREY_PEN);
 	dc.SetBrush(*wxLIGHT_GREY_BRUSH);
-	wxPoint p1[] = {
+	wxPoint p1h[] = {
 		wxPoint(margin, h / 2 - scale),
 		wxPoint(w-margin+1, h / 2 - scale),
 		wxPoint(w - margin + 1, h / 2 + 2 * scale),
 		wxPoint(margin, h / 2 + 2 * scale)
 	};
+	wxPoint p1v[] = {
+		wxPoint(w / 2 - scale, margin),
+		wxPoint(w / 2 - scale, h - margin + 1),
+		wxPoint(w / 2 + 2 * scale, h - margin + 1),
+		wxPoint(w / 2 + 2 * scale, margin)
+	};
 	int num = 4;
-	dc.DrawPolygon(num, p1, wxODDEVEN_RULE);
+	dc.DrawPolygon(num, horizontal_ ? p1h : p1v, wxODDEVEN_RULE);
 
 	//left slider:
 	int posl = std::max(minval, leftval);
-	posl = std::round(double(posl - minval) * (w - margin * 2) / (maxval - minval));
+	posl = std::round(double(posl - minval) * ((horizontal_?w:h) - margin * 2) / (maxval - minval));
 	//right slider:
 	int posr = std::min(maxval, rightval);
-	posr = std::round(double(posr - minval) * (w - margin * 2) / (maxval - minval));
+	posr = std::round(double(posr - minval) * ((horizontal_ ? w : h) - margin * 2) / (maxval - minval));
 
 	//range color
 	dc.SetPen(range_color_);
 	dc.SetBrush(range_color_);
-	wxPoint p2[] = {
+	wxPoint p2h[] = {
 		wxPoint(margin + posl, h / 2 - scale),
 		wxPoint(margin + posr, h / 2 - scale),
 		wxPoint(margin + posr, h / 2 + 2 * scale),
 		wxPoint(margin + posl, h / 2 + 2 * scale)
 	};
+	wxPoint p2v[] = {
+		wxPoint(w / 2 - scale, margin + posl),
+		wxPoint(w / 2 - scale, margin + posr),
+		wxPoint(w / 2 + 2 * scale, margin + posr),
+		wxPoint(w / 2 + 2 * scale, margin + posl)
+	};
 	num = 4;
-	dc.DrawPolygon(num, p2, wxODDEVEN_RULE);
+	dc.DrawPolygon(num, horizontal_ ? p2h : p2v, wxODDEVEN_RULE);
 
-
-	DrawThumb(dc,margin + posl, h*0.5);
-	DrawThumb(dc, margin + posr, h * 0.5);
+	if (horizontal_)
+	{
+		DrawThumb(dc, margin + posl, h * 0.5);
+		DrawThumb(dc, margin + posr, h * 0.5);
+	}
+	else
+	{
+		DrawThumb(dc, w * 0.5, margin + posl);
+		DrawThumb(dc, w * 0.5, margin + posr);
+	}
 }
 
 
 void wxDoubleSlider::OnLeftDown(wxMouseEvent& event)
 {
+	SetFocus();
+	CaptureMouse();
+
 	int w, h;
 	wxClientDC dc(this);
 	dc.GetSize(&w, &h);
@@ -147,29 +178,31 @@ void wxDoubleSlider::OnLeftDown(wxMouseEvent& event)
 
 	//left slider:
 	int posl = std::max(minval, leftval);
-	posl = std::round(double(posl - minval) * (w - margin * 2) / (maxval - minval)) + margin;
+	posl = std::round(double(posl - minval) * ((horizontal_ ? w : h) - margin * 2) / (maxval - minval)) + margin;
 	//right slider:
 	int posr = std::min(maxval, rightval);
-	posr = std::round(double(posr - minval) * (w - margin * 2) / (maxval - minval)) + margin;
+	posr = std::round(double(posr - minval) * ((horizontal_ ? w : h) - margin * 2) / (maxval - minval)) + margin;
 
-	int distl = std::abs(pos.x - posl);
-	int distr = std::abs(pos.x - posr);
+	int distl = std::abs((horizontal_?pos.x:pos.y) - posl);
+	int distr = std::abs((horizontal_ ? pos.x : pos.y) - posr);
 	if (distl <= distr)
-		selectedslider = 1;
+		sel_ = 1;
 	else
-		selectedslider = 2;
+		sel_ = 2;
+	last_sel_ = sel_;
 
 	posl = margin;
 	posr = w - margin;
-	int val = std::round(double(minval) + double(maxval - minval) * (pos.x - posl) / (posr - posl));
+	int val = std::round(double(minval) + double(maxval - minval) *
+		((horizontal_ ? pos.x : pos.y) - posl) / (posr - posl));
 
-	if (selectedslider == 1)
+	if (sel_ == 1)
 	{
 		leftval = val;
 		if (leftval < minval)  leftval = minval;
 		if (leftval >= rightval) leftval = rightval - 1;
 	}
-	else if (selectedslider == 2)
+	else if (sel_ == 2)
 	{
 		rightval = val;
 		if (rightval > maxval) rightval = maxval;
@@ -184,7 +217,7 @@ void wxDoubleSlider::OnLeftDown(wxMouseEvent& event)
 
 void wxDoubleSlider::OnMotion(wxMouseEvent& event)
 {
-	if (selectedslider != 0)
+	if (sel_ != 0)
 	{
 		int w, h;
 		wxClientDC dc(this);
@@ -192,20 +225,21 @@ void wxDoubleSlider::OnMotion(wxMouseEvent& event)
 		wxPoint pos = event.GetLogicalPosition(dc);
 
 		int posl = margin;
-		int posr = w - margin;
-		int val = std::round(double(minval) + double(maxval - minval) * (pos.x - posl) / (posr - posl));
+		int posr = (horizontal_ ? w : h) - margin;
+		int val = std::round(double(minval) + double(maxval - minval) *
+			((horizontal_ ? pos.x : pos.y) - posl) / (posr - posl));
 
-		if (selectedslider == 1)
+		if (sel_ == 1)
 		{
 			leftval = val;
 			if (leftval < minval)  leftval = minval;
-			if (leftval >= rightval) leftval = rightval-1;
+			if (leftval >= rightval) leftval = rightval - 1;
 		}
-		else if (selectedslider == 2)
+		else if (sel_ == 2)
 		{
 			rightval = val;
 			if (rightval > maxval) rightval = maxval;
-			if (rightval <= leftval) rightval = leftval+1;
+			if (rightval <= leftval) rightval = leftval + 1;
 		}
 
 		Refresh();
@@ -217,20 +251,25 @@ void wxDoubleSlider::OnMotion(wxMouseEvent& event)
 		ProcessWindowEvent(e);
 		wxPostEvent(parent_, e);
 	}
+
 	event.Skip();
 }
 
 void wxDoubleSlider::OnLeftUp(wxMouseEvent& event)
 {
+	ReleaseMouse();
+
 	event.Skip();
-	if (selectedslider != 0)
+
+	if (sel_)
 	{
-		selectedslider = 0;
+		sel_ = 0;
 		wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
 		e.SetEventObject(this);
 		e.SetString("update");
 		ProcessWindowEvent(e);
 		wxPostEvent(parent_, e);
+
 	}
 }
 
@@ -240,18 +279,24 @@ void wxDoubleSlider::OnWheel(wxMouseEvent& event)
 	wxClientDC dc(this);
 	dc.GetSize(&w, &h);
 	wxPoint pos = event.GetLogicalPosition(dc);
-	//pos.x = pos.x-margin;
-	//pos.y = h-margin-pos.y;
+
 	if (event.GetWheelRotation() > 0)
 		m=-1;
 	else
 		m=1;
-	if (pos.y >= h/2) {
+	//bool rotl = true;
+	//if (horizontal_)
+	//	rotl = pos.y >= h / 2;
+	//else
+	//	rotl = pos.x >= w / 2;
+	if (last_sel_ == 1)
+	{
 		leftval -= m;
 		if (leftval < minval)  leftval = minval;
 		if (leftval >= rightval) leftval = rightval-1;
 	}
-	else if (pos.y < h/2) {
+	else
+	{
 		rightval -= m;
 		if (rightval > maxval) rightval = maxval;
 		if (rightval <= leftval) rightval = leftval+1;

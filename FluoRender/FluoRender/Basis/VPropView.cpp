@@ -406,6 +406,8 @@ VPropView::VPropView(VRenderFrame* frame,
 	m_options_toolbar = new wxToolBar(this,wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	double dpi_sf = GetDPIScaleFactor();
+	double dpi_sf2 = std::round(dpi_sf - 0.1);
+	dpi_sf = dpi_sf2 < dpi_sf ? dpi_sf : 1;
 	//ml
 	bitmap = wxGetBitmap(starknot, dpi_sf);
 #ifdef _DARWIN

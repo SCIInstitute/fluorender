@@ -44,10 +44,11 @@ protected:
 private:
 	wxWindow* parent_;
 	wxWindowID id_;
+	bool horizontal_;
 	int margin;
 	double scale;
 	int leftval, rightval, minval, maxval;
-	int selectedslider;
+	int sel_, last_sel_;
 	//int prevx, prevy;
 	bool floatlabel;
 	bool use_range_color_;
