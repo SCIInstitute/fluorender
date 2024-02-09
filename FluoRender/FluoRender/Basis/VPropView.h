@@ -40,6 +40,7 @@ class VRenderFrame;
 class VRenderGLView;
 class VolumeData;
 class DataGroup;
+class wxDoubleSlider;
 class VPropView: public wxPanel
 {
 	enum
@@ -162,9 +163,9 @@ private:
 	wxTextCtrl *m_saturation_text;
 	//thresholds
 	wxStaticText *m_threh_st;
-	wxSlider *m_left_thresh_sldr;
+	wxDoubleSlider *m_left_thresh_sldr;
 	wxTextCtrl *m_left_thresh_text;
-	wxSlider *m_right_thresh_sldr;
+	//wxSlider *m_right_thresh_sldr;
 	wxTextCtrl *m_right_thresh_text;
 
 	//3rd line
@@ -252,7 +253,7 @@ private:
 	void OnThreshSync(wxMouseEvent& event);
 	void OnLeftThreshChange(wxScrollEvent &event);
 	void OnLeftThreshText(wxCommandEvent &event);
-	void OnRightThreshChange(wxScrollEvent &event);
+	//void OnRightThreshChange(wxScrollEvent &event);
 	void OnRightThreshText(wxCommandEvent &event);
 	//3
 	void OnLuminanceSync(wxMouseEvent& event);

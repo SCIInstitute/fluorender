@@ -94,7 +94,7 @@ m_dft_sync_b(false)
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);
 
-	this->SetSize(75,-1);
+	//this->SetSize(75,-1);
 	//validator: floating point 2
 	wxFloatingPointValidator<double> vald_fp2(2);
 	//validator: integer
@@ -142,7 +142,7 @@ m_dft_sync_b(false)
 	sizer_v->Add(3,3,0);
 
 	//third line: red bar
-	st = new wxStaticText(this, 0, "", wxDefaultPosition, wxSize(5,5));
+	st = new wxStaticText(this, 0, "", wxDefaultPosition, FromDIP(wxSize(5,5)));
 	st->SetBackgroundColour(wxColor(255, 0, 0));
 	sizer_v->Add(st, 0, wxEXPAND);
 
@@ -162,10 +162,10 @@ m_dft_sync_b(false)
 	//fifth line: reset buttons
 #ifndef _DARWIN
 	m_r_reset_btn = new wxButton(this, ID_RResetBtn, "Reset",
-								 wxDefaultPosition, wxSize(30, 22));
+								 wxDefaultPosition, FromDIP(wxSize(30, 22)));
 #else
 	m_r_reset_btn = new wxButton(this, ID_RResetBtn, "Reset",
-								 wxDefaultPosition, wxSize(30, 30));
+								 wxDefaultPosition, FromDIP(wxSize(30, 30)));
 #endif
 	m_r_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	sizer_v->Add(m_r_reset_btn, 0, wxEXPAND);
@@ -174,14 +174,14 @@ m_dft_sync_b(false)
 	wxBoxSizer *sizer_h_5 = new wxBoxSizer(wxHORIZONTAL);
 	vald_fp2.SetRange(0.0, 10.0);
 	m_r_gamma_text = new wxTextCtrl(this, ID_RGammaText, "1.00",
-		wxDefaultPosition, wxSize(30, 20), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
 	sizer_h_5->Add(m_r_gamma_text, 1, wxEXPAND);
 	m_r_brightness_text = new wxTextCtrl(this, ID_RBrightnessText, "0",
-		wxDefaultPosition, wxSize(30, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_int);
 	sizer_h_5->Add(m_r_brightness_text, 1, wxEXPAND);
 	vald_fp2.SetRange(0.0, 1.0);
 	m_r_hdr_text = new wxTextCtrl(this, ID_RHdrText, "0.00",
-                                  wxDefaultPosition, wxSize(30, 20), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
 	sizer_h_5->Add(m_r_hdr_text, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_5, 0, wxEXPAND);
 
@@ -210,7 +210,7 @@ m_dft_sync_b(false)
 	sizer_v->Add(3,3,0);
 
 	//8th line: green bar
-	st = new wxStaticText(this, 0, "", wxDefaultPosition, wxSize(5, 5));
+	st = new wxStaticText(this, 0, "", wxDefaultPosition, FromDIP(wxSize(5, 5)));
 	st->SetBackgroundColour(wxColor(0, 255, 0));
 	sizer_v->Add(st, 0, wxEXPAND);
 
@@ -230,10 +230,10 @@ m_dft_sync_b(false)
 	//10th line: reset buttons
 #ifndef _DARWIN
 	m_g_reset_btn = new wxButton(this, ID_GResetBtn, "Reset",
-								 wxDefaultPosition, wxSize(30, 22));
+								 wxDefaultPosition, FromDIP(wxSize(30, 22)));
 #else
 	m_g_reset_btn = new wxButton(this, ID_GResetBtn, "Reset",
-								 wxDefaultPosition, wxSize(30, 30));
+								 wxDefaultPosition, FromDIP(wxSize(30, 30)));
 #endif
 	m_g_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	sizer_v->Add(m_g_reset_btn, 0, wxEXPAND);
@@ -242,14 +242,14 @@ m_dft_sync_b(false)
 	wxBoxSizer *sizer_h_9 = new wxBoxSizer(wxHORIZONTAL);
 	vald_fp2.SetRange(0.0, 10.0);
 	m_g_gamma_text = new wxTextCtrl(this, ID_GGammaText, "1.00",
-		wxDefaultPosition, wxSize(30, 20), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
 	sizer_h_9->Add(m_g_gamma_text, 1, wxEXPAND);
 	m_g_brightness_text = new wxTextCtrl(this, ID_GBrightnessText, "0",
-		wxDefaultPosition, wxSize(30, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_int);
 	sizer_h_9->Add(m_g_brightness_text, 1, wxEXPAND);
 	vald_fp2.SetRange(0.0, 1.0);
 	m_g_hdr_text = new wxTextCtrl(this, ID_GHdrText, "0.00",
-                                  wxDefaultPosition, wxSize(30, 20), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
 	sizer_h_9->Add(m_g_hdr_text, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_9, 0, wxEXPAND);
 
@@ -278,7 +278,7 @@ m_dft_sync_b(false)
 	sizer_v->Add(3,3,0);
 
 	//13th line:blue bar
-	st = new wxStaticText(this, 0, "", wxDefaultPosition, wxSize(5, 5));
+	st = new wxStaticText(this, 0, "", wxDefaultPosition, FromDIP(wxSize(5, 5)));
 	st->SetBackgroundColour(wxColor(0, 0, 255));
 	sizer_v->Add(st, 0, wxEXPAND);
 
@@ -298,10 +298,10 @@ m_dft_sync_b(false)
 	//15th line: reset buttons
 #ifndef _DARWIN
 	m_b_reset_btn = new wxButton(this, ID_BResetBtn, "Reset",
-								 wxDefaultPosition, wxSize(30, 22));
+								 wxDefaultPosition, FromDIP(wxSize(30, 22)));
 #else
 	m_b_reset_btn = new wxButton(this, ID_BResetBtn, "Reset",
-								 wxDefaultPosition, wxSize(30, 30));
+								 wxDefaultPosition, FromDIP(wxSize(30, 30)));
 #endif
 	m_b_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	sizer_v->Add(m_b_reset_btn, 0, wxEXPAND);
@@ -310,24 +310,24 @@ m_dft_sync_b(false)
 	wxBoxSizer *sizer_h_13 = new wxBoxSizer(wxHORIZONTAL);
 	vald_fp2.SetRange(0.0, 10.0);
 	m_b_gamma_text = new wxTextCtrl(this, ID_BGammaText, "1.00",
-		wxDefaultPosition, wxSize(30, 20), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
 	sizer_h_13->Add(m_b_gamma_text, 1, wxEXPAND);
 	m_b_brightness_text = new wxTextCtrl(this, ID_BBrightnessText, "0",
-		wxDefaultPosition, wxSize(30, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_int);
 	sizer_h_13->Add(m_b_brightness_text, 1, wxEXPAND);
 	vald_fp2.SetRange(0.0, 1.0);
 	m_b_hdr_text = new wxTextCtrl(this, ID_BHdrText, "0.00",
-                                  wxDefaultPosition, wxSize(30, 20), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
 	sizer_h_13->Add(m_b_hdr_text, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_13, 0, wxEXPAND);
 
 	//17th line: default button
 #ifndef _DARWIN
 	m_dft_btn = new wxButton(this, ID_DefaultBtn, "Set Default",
-							 wxDefaultPosition, wxSize(95, 22));
+							 wxDefaultPosition, FromDIP(wxSize(95, 22)));
 #else
 	m_dft_btn = new wxButton(this, ID_DefaultBtn, "Set Default",
-							 wxDefaultPosition, wxSize(95, 30));
+							 wxDefaultPosition, FromDIP(wxSize(95, 30)));
 #endif
 	m_dft_btn->SetBitmap(wxGetBitmapFromMemory(save_settings));
 	sizer_v->Add(m_dft_btn, 0, wxEXPAND);

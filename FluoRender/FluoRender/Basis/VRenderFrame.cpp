@@ -422,7 +422,7 @@ VRenderFrame::VRenderFrame(
 
 	//adjust view
 	m_adjust_view = new AdjustView(this,
-		wxDefaultPosition, FromDIP(wxSize(130, 700)));
+		wxDefaultPosition, FromDIP(wxSize(75, 700)));
 
 	wxString font_file = m_setting_dlg->GetFontFile();
 	wxString exePath = wxStandardPaths::Get().GetExecutablePath();

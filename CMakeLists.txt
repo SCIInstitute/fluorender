@@ -572,8 +572,9 @@ IF(APPLE)
 ELSEIF(WIN32)
   SET(icon_rc "${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/img/FluoRender.rc")
   SET(icns "${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/img/fluorenderIcon.ico")
+  SET(manifest_file "${CMAKE_CURRENT_SOURCE_DIR}/Manifest/fluorender.manifest")
   ADD_DEFINITIONS(-DICON_RC_FILE="${icns}")
-  SET(src ${src} ${icon_rc})
+  SET(src ${src} ${icon_rc} ${manifest_file})
 ENDIF()
 
 # platform specific rules
