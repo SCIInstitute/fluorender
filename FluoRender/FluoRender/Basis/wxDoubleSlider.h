@@ -32,8 +32,13 @@ public:
 	void OnLeftUp(wxMouseEvent& event);
 	void OnWheel(wxMouseEvent& event);
 
+	void SetRange(int min_val, int max_val);
+	int GetMax();
+	int GetMin();
 	void SetRangeColor(const wxColor& c);
 	void DisableRangeColor();
+	void SetThumbColor(const wxColor& c1, const wxColor& c2);
+	void DisableThumbColor();
 
 protected:
 	void paintNow();
@@ -53,7 +58,9 @@ private:
 	bool floatlabel;
 	bool use_range_color_;
 	wxColor range_color_;
-
+	bool use_thumb_color_;
+	wxColor thumb_color1_;
+	wxColor thumb_color2_;
 };
 
 

@@ -50,6 +50,7 @@ class VRenderGLView;
 class VolumeData;
 class MeshData;
 class DataManager;
+class wxDoubleSlider;
 class ClippingView: public wxPanel
 {
 	enum
@@ -206,27 +207,27 @@ private:
 
 	//sliders for clipping planes
 	//x1
-	wxSlider *m_x1_clip_sldr;
+	wxDoubleSlider *m_x1_clip_sldr;
 	wxTextCtrl *m_x1_clip_text;
 	//x2
-	wxSlider *m_x2_clip_sldr;
+	//wxSlider *m_x2_clip_sldr;
 	wxTextCtrl *m_x2_clip_text;
 	//y1
-	wxSlider *m_y1_clip_sldr;
+	wxDoubleSlider *m_y1_clip_sldr;
 	wxTextCtrl *m_y1_clip_text;
 	//y2
-	wxSlider *m_y2_clip_sldr;
+	//wxSlider *m_y2_clip_sldr;
 	wxTextCtrl *m_y2_clip_text;
 	//z1
-	wxSlider *m_z1_clip_sldr;
+	wxDoubleSlider *m_z1_clip_sldr;
 	wxTextCtrl *m_z1_clip_text;
 	//z2
-	wxSlider *m_z2_clip_sldr;
+	//wxSlider *m_z2_clip_sldr;
 	wxTextCtrl *m_z2_clip_text;
 	//keep 1 panel for sizing reasons
 	wxPanel * m_xpanel;
 	//highlighters
-	wxStaticText * m_xBar, * m_yBar, * m_zBar;
+	//wxStaticText * m_xBar, * m_yBar, * m_zBar;
 
 	wxToolBar * m_check_tb;
 
@@ -251,11 +252,11 @@ private:
 	void DisableAll();
 
 	void OnX1ClipChange(wxScrollEvent &event);
-	void OnX2ClipChange(wxScrollEvent &event);
+	//void OnX2ClipChange(wxScrollEvent &event);
 	void OnY1ClipChange(wxScrollEvent &event);
-	void OnY2ClipChange(wxScrollEvent &event);
+	//void OnY2ClipChange(wxScrollEvent &event);
 	void OnZ1ClipChange(wxScrollEvent &event);
-	void OnZ2ClipChange(wxScrollEvent &event);
+	//void OnZ2ClipChange(wxScrollEvent &event);
 	void OnX1ClipEdit(wxCommandEvent &event);
 	void OnX2ClipEdit(wxCommandEvent &event);
 	void OnY1ClipEdit(wxCommandEvent &event);
