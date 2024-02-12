@@ -16,6 +16,7 @@ wxDoubleSlider::wxDoubleSlider(wxWindow *parent,
 	use_range_color_(false),
 	use_thumb_color_(false),
 	horizontal_(!(style & wxSL_VERTICAL)),
+	inverse_(style & wxSL_INVERSE),
 	wxControl(parent, id, pos,
 		wxSize(!(style& wxSL_VERTICAL) ? int(std::round(23 * parent->GetDPIScaleFactor())) : 1,
 			!(style& wxSL_VERTICAL) ? 1 : int(std::round(23* parent->GetDPIScaleFactor()))), wxBORDER_NONE)
@@ -107,14 +108,22 @@ void  wxDoubleSlider::DrawThumb(wxDC& dc, wxCoord x, wxCoord y, const wxColor& c
 
 void wxDoubleSlider::render(wxDC& dc)
 {
+	if (inverse_)
+		renderInverse(dc);
+	else
+		renderNormal(dc);
+}
+
+void wxDoubleSlider::renderNormal(wxDC& dc)
+{
 	int w, h;
 	GetSize(&w, &h);
-	
+
 	dc.SetPen(*wxGREY_PEN);
 	dc.SetBrush(*wxLIGHT_GREY_BRUSH);
 	wxPoint p1h[] = {
 		wxPoint(margin_, h / 2 - scale_),
-		wxPoint(w-margin_+1, h / 2 - scale_),
+		wxPoint(w - margin_ + 1, h / 2 - scale_),
 		wxPoint(w - margin_ + 1, h / 2 + 2 * scale_),
 		wxPoint(margin_, h / 2 + 2 * scale_)
 	};
@@ -129,7 +138,7 @@ void wxDoubleSlider::render(wxDC& dc)
 
 	//left slider:
 	int posl = std::max(min_val_, low_val_);
-	posl = std::round(double(posl - min_val_) * ((horizontal_?w:h) - margin_ * 2) / (max_val_ - min_val_));
+	posl = std::round(double(posl - min_val_) * ((horizontal_ ? w : h) - margin_ * 2) / (max_val_ - min_val_));
 	//right slider:
 	int posr = std::min(max_val_, hi_val_);
 	posr = std::round(double(posr - min_val_) * ((horizontal_ ? w : h) - margin_ * 2) / (max_val_ - min_val_));
@@ -202,6 +211,102 @@ void wxDoubleSlider::render(wxDC& dc)
 	}
 }
 
+void wxDoubleSlider::renderInverse(wxDC& dc)
+{
+	int w, h;
+	GetSize(&w, &h);
+
+	dc.SetPen(*wxGREY_PEN);
+	dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+	wxPoint p1h[] = {
+		wxPoint(margin_, h / 2 - scale_),
+		wxPoint(w - margin_ + 1, h / 2 - scale_),
+		wxPoint(w - margin_ + 1, h / 2 + 2 * scale_),
+		wxPoint(margin_, h / 2 + 2 * scale_)
+	};
+	wxPoint p1v[] = {
+		wxPoint(w / 2 - scale_, margin_),
+		wxPoint(w / 2 - scale_, h - margin_ + 1),
+		wxPoint(w / 2 + 2 * scale_, h - margin_ + 1),
+		wxPoint(w / 2 + 2 * scale_, margin_)
+	};
+	int num = 4;
+	dc.DrawPolygon(num, horizontal_ ? p1h : p1v, wxODDEVEN_RULE);
+
+	//left slider:
+	int posl = std::max(min_val_, low_val_);
+	posl = std::round(double(posl - min_val_) * ((horizontal_ ? w : h) - margin_ * 2) / (max_val_ - min_val_));
+	//right slider:
+	int posr = std::min(max_val_, hi_val_);
+	posr = std::round(double(posr - min_val_) * ((horizontal_ ? w : h) - margin_ * 2) / (max_val_ - min_val_));
+
+	//range color
+	if (use_range_color_)
+	{
+		dc.SetPen(range_color_);
+		dc.SetBrush(range_color_);
+		wxPoint p2h[] = {
+			wxPoint(w - margin_ - posl, h / 2 - scale_),
+			wxPoint(w - margin_ - posr, h / 2 - scale_),
+			wxPoint(w - margin_ - posr, h / 2 + 2 * scale_),
+			wxPoint(w - margin_ - posl, h / 2 + 2 * scale_)
+		};
+		wxPoint p2v[] = {
+			wxPoint(w / 2 - scale_, h - margin_ - posl),
+			wxPoint(w / 2 - scale_, h - margin_ - posr),
+			wxPoint(w / 2 + 2 * scale_, h - margin_ - posr),
+			wxPoint(w / 2 + 2 * scale_, h - margin_ - posl)
+		};
+		num = 4;
+		dc.DrawPolygon(num, horizontal_ ? p2h : p2v, wxODDEVEN_RULE);
+	}
+
+	wxColor color1 = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
+	wxColor color2 = color1;
+	switch (thumb_state1_)
+	{
+	case 0:
+		if (use_thumb_color_)
+			color1 = thumb_color1_;
+		break;
+	case 1:
+		color1 = wxColor(128, 128, 128);
+		break;
+	case 2:
+		if (use_thumb_color_)
+			color1 = thumb_color1_;
+		else
+			color1 = *wxLIGHT_GREY;
+		break;
+	}
+	switch (thumb_state2_)
+	{
+	case 0:
+		if (use_thumb_color_)
+			color2 = thumb_color2_;
+		break;
+	case 1:
+		color2 = wxColor(128, 128, 128);
+		break;
+	case 2:
+		if (use_thumb_color_)
+			color2 = thumb_color2_;
+		else
+			color2 = *wxLIGHT_GREY;
+		break;
+	}
+
+	if (horizontal_)
+	{
+		DrawThumb(dc, w - margin_ - posl, h * 0.5, color1);
+		DrawThumb(dc, w - margin_ - posr, h * 0.5, color2);
+	}
+	else
+	{
+		DrawThumb(dc, w * 0.5, h - margin_ - posl, color1);
+		DrawThumb(dc, w * 0.5, h - margin_ - posr, color2);
+	}
+}
 
 void wxDoubleSlider::OnLeftDown(wxMouseEvent& event)
 {
@@ -215,12 +320,14 @@ void wxDoubleSlider::OnLeftDown(wxMouseEvent& event)
 
 	//left slider:
 	int posl = std::max(min_val_, low_val_);
-	posl = std::round(double(posl - min_val_) * ((horizontal_ ? w : h) - margin_ * 2) / (max_val_ - min_val_)) + margin_;
+	posl = std::round(double(posl - min_val_) * ((horizontal_ ? w : h) - margin_ * 2) / (max_val_ - min_val_));
+	posl = inverse_ ? (horizontal_ ? w - margin_ - posl : h - margin_ - posl) : (posl + margin_);
 	//right slider:
 	int posr = std::min(max_val_, hi_val_);
-	posr = std::round(double(posr - min_val_) * ((horizontal_ ? w : h) - margin_ * 2) / (max_val_ - min_val_)) + margin_;
+	posr = std::round(double(posr - min_val_) * ((horizontal_ ? w : h) - margin_ * 2) / (max_val_ - min_val_));
+	posr = inverse_ ? (horizontal_ ? w - margin_ - posr : h - margin_ - posr) : (posr + margin_);
 
-	int distl = std::abs((horizontal_?pos.x:pos.y) - posl);
+	int distl = std::abs((horizontal_ ? pos.x : pos.y) - posl);
 	int distr = std::abs((horizontal_ ? pos.x : pos.y) - posr);
 	if (distl <= distr)
 		sel_ = 1;
@@ -230,8 +337,13 @@ void wxDoubleSlider::OnLeftDown(wxMouseEvent& event)
 
 	posl = margin_;
 	posr = (horizontal_ ? w : h) - margin_;
-	int val = std::round(double(min_val_) + double(max_val_ - min_val_) *
-		((horizontal_ ? pos.x : pos.y) - posl) / (posr - posl));
+	int val;
+	if (inverse_)
+		val = std::round(double(min_val_) + double(max_val_ - min_val_) *
+			(posr - (horizontal_ ? pos.x : pos.y)) / (posr - posl));
+	else
+		val = std::round(double(min_val_) + double(max_val_ - min_val_) *
+			((horizontal_ ? pos.x : pos.y) - posl) / (posr - posl));
 
 	if (sel_ == 1)
 	{
@@ -268,23 +380,47 @@ void wxDoubleSlider::OnMotion(wxMouseEvent& event)
 		int posr = std::min(max_val_, hi_val_);
 		posr = std::round(double(posr - min_val_) * ((horizontal_ ? w : h) - margin_ * 2) / (max_val_ - min_val_));
 		wxRect rect1, rect2;
-		if (horizontal_)
+		if (inverse_)
 		{
-			rect1 = wxRect(margin_ + posl - 5 * scale_,
-				h * 0.5 - 7 * scale_,
-				10 * scale_, 13 * scale_);
-			rect2 = wxRect(margin_ + posr - 5 * scale_,
-				h * 0.5 - 7 * scale_,
-				10 * scale_, 13 * scale_);
+			if (horizontal_)
+			{
+				rect1 = wxRect(w - margin_ - posl - 5 * scale_,
+					h * 0.5 - 7 * scale_,
+					10 * scale_, 13 * scale_);
+				rect2 = wxRect(w - margin_ - posr - 5 * scale_,
+					h * 0.5 - 7 * scale_,
+					10 * scale_, 13 * scale_);
+			}
+			else
+			{
+				rect1 = wxRect(w * 0.5 - 7 * scale_,
+					h - margin_ - posl - 5 * scale_,
+					13 * scale_, 10 * scale_);
+				rect2 = wxRect(w * 0.5 - 7 * scale_,
+					h - margin_ - posr - 5 * scale_,
+					13 * scale_, 10 * scale_);
+			}
 		}
 		else
 		{
-			rect1 = wxRect(w * 0.5 - 7 * scale_,
-				margin_ + posl - 5 * scale_,
-				13 * scale_, 10 * scale_);
-			rect2 = wxRect(w * 0.5 - 7 * scale_,
-				margin_ + posr - 5 * scale_,
-				13 * scale_, 10 * scale_);
+			if (horizontal_)
+			{
+				rect1 = wxRect(margin_ + posl - 5 * scale_,
+					h * 0.5 - 7 * scale_,
+					10 * scale_, 13 * scale_);
+				rect2 = wxRect(margin_ + posr - 5 * scale_,
+					h * 0.5 - 7 * scale_,
+					10 * scale_, 13 * scale_);
+			}
+			else
+			{
+				rect1 = wxRect(w * 0.5 - 7 * scale_,
+					margin_ + posl - 5 * scale_,
+					13 * scale_, 10 * scale_);
+				rect2 = wxRect(w * 0.5 - 7 * scale_,
+					margin_ + posr - 5 * scale_,
+					13 * scale_, 10 * scale_);
+			}
 		}
 		bool refresh = false;
 		if (thumb_state1_ == 0 && rect1.Contains(pos))
@@ -317,8 +453,13 @@ void wxDoubleSlider::OnMotion(wxMouseEvent& event)
 	{
 		int posl = margin_;
 		int posr = (horizontal_ ? w : h) - margin_;
-		int val = std::round(double(min_val_) + double(max_val_ - min_val_) *
-			((horizontal_ ? pos.x : pos.y) - posl) / (posr - posl));
+		int val;
+		if (inverse_)
+			val = std::round(double(min_val_) + double(max_val_ - min_val_) *
+				(posr - (horizontal_ ? pos.x : pos.y)) / (posr - posl));
+		else
+			val = std::round(double(min_val_) + double(max_val_ - min_val_) *
+				((horizontal_ ? pos.x : pos.y) - posl) / (posr - posl));
 
 		if (sel_ == 1)
 		{

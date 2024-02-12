@@ -141,91 +141,96 @@ m_link_z(false)
 	sizer_1->Add(m_toolbar, 0, wxALIGN_CENTER, 0);
 
 	//sliders for clipping planes
+	bool inverse_slider = frame->GetSettingDlg()->GetInverseSlider();
+	long ls = inverse_slider ? (wxSL_VERTICAL | wxSL_INVERSE) : wxSL_VERTICAL;
 	//x
 	wxBoxSizer* sizer_cx = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(this, 0, "X");
 	m_x1_clip_sldr = new wxDoubleSlider(this, ID_X1ClipSldr, 0, 512, 0, 512,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+		wxDefaultPosition, wxDefaultSize, ls);
 	m_x1_clip_sldr->SetRangeColor(wxColor(255, 128, 128));
 	m_x1_clip_sldr->SetThumbColor(wxColor(255, 128, 128), wxColor(255, 128, 255));
 	m_x1_clip_text = new wxTextCtrl(this, ID_X1ClipText, "0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
-	//st_cb = new wxStaticText(this, 0, "",
-	//	wxDefaultPosition, FromDIP(wxSize(5, 5)));
-	//st_cb->SetBackgroundColour(wxColor(255, 128, 128));
 	m_x2_clip_text = new wxTextCtrl(this, ID_X2ClipText, "512",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
 	//add the items
 	sizer_cx->Add(5, 5, 0);
 	sizer_cx->Add(st, 0, wxALIGN_CENTER, 0);
-	sizer_cx->Add(m_x1_clip_text, 0, wxALIGN_CENTER, 0);
-	sizer_cx->Add(5, 5, 0);
-	//sizer_cx->Add(st_cb, 0, wxEXPAND);
-	sizer_cx->Add(m_x1_clip_sldr, 1, wxEXPAND, 0);
-	//st_cb = new wxStaticText(this, 0, "",
-	//	wxDefaultPosition, FromDIP(wxSize(5, 5)));
-	//st_cb->SetBackgroundColour(wxColor(255, 128, 255));
-	//sizer_cx->Add(st_cb, 0, wxEXPAND);
-	//sizer_cx->Add(5, 5, 0);
-	sizer_cx->Add(m_x2_clip_text, 0, wxALIGN_CENTER, 0);
+	if (inverse_slider)
+	{
+		sizer_cx->Add(m_x2_clip_text, 0, wxALIGN_CENTER, 0);
+		sizer_cx->Add(5, 5, 0);
+		sizer_cx->Add(m_x1_clip_sldr, 1, wxEXPAND, 0);
+		sizer_cx->Add(m_x1_clip_text, 0, wxALIGN_CENTER, 0);
+	}
+	else
+	{
+		sizer_cx->Add(m_x1_clip_text, 0, wxALIGN_CENTER, 0);
+		sizer_cx->Add(5, 5, 0);
+		sizer_cx->Add(m_x1_clip_sldr, 1, wxEXPAND, 0);
+		sizer_cx->Add(m_x2_clip_text, 0, wxALIGN_CENTER, 0);
+	}
 
 	//y
 	wxBoxSizer* sizer_cy = new wxBoxSizer(wxVERTICAL);
 	//wxPanel * ypanel = new wxPanel(this);
 	st = new wxStaticText(this, 0, "Y");
 	m_y1_clip_sldr = new wxDoubleSlider(this, ID_Y1ClipSldr, 0, 512, 0, 512,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+		wxDefaultPosition, wxDefaultSize, ls);
 	m_y1_clip_sldr->SetRangeColor(wxColor(128, 255, 128));
 	m_y1_clip_sldr->SetThumbColor(wxColor(128, 255, 128), wxColor(255, 255, 128));
 	m_y1_clip_text = new wxTextCtrl(this, ID_Y1ClipText, "0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
-	//st_cb = new wxStaticText(this, 0, "",
-	//	wxDefaultPosition, FromDIP(wxSize(5, 5)));
-	//st_cb->SetBackgroundColour(wxColor(128, 255, 128));
 	m_y2_clip_text = new wxTextCtrl(this, ID_Y2ClipText, "512",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
 	//add the items
 	sizer_cy->Add(5, 5, 0);
 	sizer_cy->Add(st, 0, wxALIGN_CENTER, 0);
-	sizer_cy->Add(m_y1_clip_text, 0, wxALIGN_CENTER, 0);
-	sizer_cy->Add(5, 5, 0);
-	//sizer_cy->Add(st_cb, 0, wxEXPAND);
-	sizer_cy->Add(m_y1_clip_sldr, 1, wxEXPAND, 0);
-	//st_cb = new wxStaticText(this, 0, "",
-	//	wxDefaultPosition, FromDIP(wxSize(5, 5)));
-	//st_cb->SetBackgroundColour(wxColor(255, 255, 128));
-	//sizer_cy->Add(st_cb, 0, wxEXPAND);
-	//sizer_cy->Add(5, 5, 0);
-	sizer_cy->Add(m_y2_clip_text, 0, wxALIGN_CENTER, 0);
+	if (inverse_slider)
+	{
+		sizer_cy->Add(m_y2_clip_text, 0, wxALIGN_CENTER, 0);
+		sizer_cy->Add(5, 5, 0);
+		sizer_cy->Add(m_y1_clip_sldr, 1, wxEXPAND, 0);
+		sizer_cy->Add(m_y1_clip_text, 0, wxALIGN_CENTER, 0);
+	}
+	else
+	{
+		sizer_cy->Add(m_y1_clip_text, 0, wxALIGN_CENTER, 0);
+		sizer_cy->Add(5, 5, 0);
+		sizer_cy->Add(m_y1_clip_sldr, 1, wxEXPAND, 0);
+		sizer_cy->Add(m_y2_clip_text, 0, wxALIGN_CENTER, 0);
+	}
 
 	//z
 	wxBoxSizer* sizer_cz = new wxBoxSizer(wxVERTICAL);
 	//wxPanel * zpanel = new wxPanel(this);
 	st = new wxStaticText(this, 0, "Z");
 	m_z1_clip_sldr = new wxDoubleSlider(this, ID_Z1ClipSldr, 0, 512, 0, 512,
-		wxPoint(0,0), wxDefaultSize, wxSL_VERTICAL);
+		wxPoint(0,0), wxDefaultSize, ls);
 	m_z1_clip_sldr->SetRangeColor(wxColor(128, 128, 255));
 	m_z1_clip_sldr->SetThumbColor(wxColor(128, 128, 255), wxColor(128, 255, 255));
 	m_z1_clip_text = new wxTextCtrl(this, ID_Z1ClipText, "0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
-	//st_cb = new wxStaticText(this, 0, "",
-	//	wxDefaultPosition, FromDIP(wxSize(5, 5)));
-	//st_cb->SetBackgroundColour(wxColor(128, 128, 255));
 	m_z2_clip_text = new wxTextCtrl(this, ID_Z2ClipText, "512",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
 	//add the items
 	sizer_cz->Add(5, 5, 0);
 	sizer_cz->Add(st, 0, wxALIGN_CENTER, 0);
-	sizer_cz->Add(m_z1_clip_text, 0, wxALIGN_CENTER, 0);
-	sizer_cz->Add(5, 5, 0);
-	//sizer_cz->Add(st_cb, 0, wxEXPAND);
-	sizer_cz->Add(m_z1_clip_sldr, 1, wxEXPAND, 0);
-	//st_cb = new wxStaticText(this, 0, "",
-	//	wxDefaultPosition, FromDIP(wxSize(5, 5)));
-	//st_cb->SetBackgroundColour(wxColor(128, 255, 255));
-	//sizer_cz->Add(st_cb, 0, wxEXPAND);
-	//sizer_cz->Add(5, 5, 0);
-	sizer_cz->Add(m_z2_clip_text, 0, wxALIGN_CENTER, 0);
+	if (inverse_slider)
+	{
+		sizer_cz->Add(m_z2_clip_text, 0, wxALIGN_CENTER, 0);
+		sizer_cz->Add(5, 5, 0);
+		sizer_cz->Add(m_z1_clip_sldr, 1, wxEXPAND, 0);
+		sizer_cz->Add(m_z1_clip_text, 0, wxALIGN_CENTER, 0);
+	}
+	else
+	{
+		sizer_cz->Add(m_z1_clip_text, 0, wxALIGN_CENTER, 0);
+		sizer_cz->Add(5, 5, 0);
+		sizer_cz->Add(m_z1_clip_sldr, 1, wxEXPAND, 0);
+		sizer_cz->Add(m_z2_clip_text, 0, wxALIGN_CENTER, 0);
+	}
 
 	//link sliders
 	m_x1_clip_sldr->Connect(ID_X1ClipSldr, wxEVT_RIGHT_DOWN,

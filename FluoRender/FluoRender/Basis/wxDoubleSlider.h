@@ -72,6 +72,8 @@ protected:
 private:
 	wxWindow* parent_;
 	wxWindowID id_;
+
+	bool inverse_;
 	bool horizontal_;
 	int margin_;
 	double scale_;
@@ -87,6 +89,10 @@ private:
 
 	int thumb_state1_;//0-normal;1-mouse on;2-moving
 	int thumb_state2_;//0-normal;1-mouse on;2-moving
+
+private:
+	void renderNormal(wxDC& dc);
+	void renderInverse(wxDC& dc);
 };
 
 #endif//_WXDOUBLESLIDER_H_

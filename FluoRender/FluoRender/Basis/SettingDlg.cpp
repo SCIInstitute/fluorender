@@ -42,6 +42,8 @@ EVT_CHECKBOX(ID_PrjSaveIncChk, SettingDlg::OnProjectSaveIncCheck)
 EVT_CHECKBOX(ID_RealtimeCmpChk, SettingDlg::OnRealtimeCompressCheck)
 //script break
 EVT_CHECKBOX(ID_ScriptBreakChk, SettingDlg::OnScriptBreakCheck)
+//inverse sliders
+EVT_CHECKBOX(ID_InverseSliderChk, SettingDlg::OnInverseSliderCheck)
 //mouse interactions
 EVT_CHECKBOX(ID_MouseIntChk, SettingDlg::OnMouseIntCheck)
 //depth peeling
@@ -129,7 +131,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 
 	//project save
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Open/Save/Script Run"), wxVERTICAL);
+		new wxStaticBox(page, wxID_ANY, "Open/Save/Script Run/UI"), wxVERTICAL);
 	m_prj_save_chk = new wxCheckBox(page, ID_PrjSaveChk,
 		"Save project when capture viewport or export movie.");
 	m_prj_save_inc_chk = new wxCheckBox(page, ID_PrjSaveIncChk,
@@ -138,6 +140,8 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 		"Compress data in graphics memory when loading.");
 	m_script_break_chk = new wxCheckBox(page, ID_ScriptBreakChk,
 		"Allow script information prompts.");
+	m_inverse_slider_chk = new wxCheckBox(page, ID_InverseSliderChk,
+		"Invert vertical slider orientation.");
 	group1->Add(10, 5);
 	group1->Add(m_prj_save_chk);
 	group1->Add(10, 5);
@@ -146,6 +150,8 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	group1->Add(m_realtime_cmp_chk);
 	group1->Add(10, 5);
 	group1->Add(m_script_break_chk);
+	group1->Add(10, 5);
+	group1->Add(m_inverse_slider_chk);
 	group1->Add(10, 5);
 
 	//font
@@ -881,6 +887,7 @@ void SettingDlg::GetSettings()
 	m_dpi = 72.0f;
 	m_realtime_compress = false;
 	m_script_break = true;
+	m_inverse_slider = false;
 	m_skip_bricks = false;
 	m_test_speed = false;
 	m_test_param = false;
@@ -1033,6 +1040,12 @@ void SettingDlg::GetSettings()
 	{
 		fconfig.SetPath("/script break");
 		fconfig.Read("mode", &m_script_break, true);
+	}
+	//inverse slider
+	if (fconfig.Exists("/inverse slider"))
+	{
+		fconfig.SetPath("/inverse slider");
+		fconfig.Read("mode", &m_inverse_slider, false);
 	}
 	//skip empty bricks
 	if (fconfig.Exists("/skip bricks"))
@@ -1340,6 +1353,8 @@ void SettingDlg::UpdateUI()
 	m_realtime_cmp_chk->SetValue(m_realtime_compress);
 	//script break
 	m_script_break_chk->SetValue(m_script_break);
+	//inverse slider
+	m_inverse_slider_chk->SetValue(m_inverse_slider);
 	//mouse interactions
 	m_mouse_int_chk->SetValue(m_mouse_int);
 	//depth peeling
@@ -1534,6 +1549,9 @@ void SettingDlg::SaveSettings()
 
 	fconfig.SetPath("/script break");
 	fconfig.Write("mode", m_script_break);
+
+	fconfig.SetPath("/inverse slider");
+	fconfig.Write("mode", m_inverse_slider);
 
 	fconfig.SetPath("/skip bricks");
 	fconfig.Write("mode", m_skip_bricks);
@@ -1837,6 +1855,11 @@ void SettingDlg::OnRealtimeCompressCheck(wxCommandEvent &event)
 void SettingDlg::OnScriptBreakCheck(wxCommandEvent& event)
 {
 	SetScriptBreak(m_script_break_chk->GetValue());
+}
+
+void SettingDlg::OnInverseSliderCheck(wxCommandEvent& event)
+{
+	m_inverse_slider = m_inverse_slider_chk->GetValue();
 }
 
 void SettingDlg::OnMouseIntCheck(wxCommandEvent &event)

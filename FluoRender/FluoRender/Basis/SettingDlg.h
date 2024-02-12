@@ -57,6 +57,8 @@ class SettingDlg : public wxPanel
 		ID_RealtimeCmpChk,
 		//allow script break
 		ID_ScriptBreakChk,
+		//inverse vertical sliders
+		ID_InverseSliderChk,
 		//mouse interactions
 		ID_MouseIntChk,
 		//depth peeling
@@ -162,6 +164,8 @@ public:
 	void SetRealtimeCompress(bool val) {m_realtime_compress = val;}
 	bool GetScriptBreak() { return m_script_break; }
 	void SetScriptBreak(bool val);
+	bool GetInverseSlider() { return m_inverse_slider; }
+	void SetInverseSlider(bool val) { m_inverse_slider = val; }
 	bool GetSkipBricks() {return m_skip_bricks;}
 	void SetSkipBricks(bool val) {m_skip_bricks = val;}
 	bool GetTestMode(int type);	//type	1:speed test
@@ -369,6 +373,7 @@ private:
 	float m_dpi;			//dpi number of captured image
 	bool m_realtime_compress;//real time compress
 	bool m_script_break;	//allow script break
+	bool m_inverse_slider;	//invert vertical sliders
 	bool m_skip_bricks;		//skip empty bricks
 	bool m_test_speed;		//test fps
 	bool m_test_param;		//using parameter test window
@@ -504,6 +509,8 @@ private:
 	wxCheckBox *m_realtime_cmp_chk;
 	//script break
 	wxCheckBox *m_script_break_chk;
+	//inverse sliders
+	wxCheckBox* m_inverse_slider_chk;
 	//mouse interations
 	wxCheckBox *m_mouse_int_chk;
 	//depth peeling
@@ -610,6 +617,7 @@ private:
 	void OnProjectSaveIncCheck(wxCommandEvent& event);
 	void OnRealtimeCompressCheck(wxCommandEvent &event);
 	void OnScriptBreakCheck(wxCommandEvent& event);
+	void OnInverseSliderCheck(wxCommandEvent& event);
 	//mouse interaction
 	void OnMouseIntCheck(wxCommandEvent &event);
 	//peeling
