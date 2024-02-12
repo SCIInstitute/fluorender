@@ -44,12 +44,18 @@ public:
 		const wxValidator& val = wxDefaultValidator,
 		const wxString& name = "wxDoubleSlider");
 
+	void SetLink(bool val);
+	bool GetLink();
+	void SetLinkDist(int val);
+	int GetLinkDist();
+
 	int GetLowValue();
 	int GetHighValue();
-	void SetLowValue(int val);
-	void SetHighValue(int val);
+	bool SetLowValue(int val);
+	bool SetHighValue(int val);
 	int GetMax();
 	int GetMin();
+
 	wxSize DoGetBestSize();
 	void OnPaint(wxPaintEvent&);
 	void OnLeftDown(wxMouseEvent& event);
@@ -73,13 +79,16 @@ private:
 	wxWindow* parent_;
 	wxWindowID id_;
 
+	bool link_;
 	bool inverse_;
 	bool horizontal_;
 	int margin_;
 	double scale_;
 	int low_val_, hi_val_;
 	int min_val_, max_val_;
+	int link_dist_;
 	int sel_, last_sel_;
+	int sel_pos_;
 
 	bool use_range_color_;
 	wxColor range_color_;

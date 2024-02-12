@@ -122,39 +122,12 @@ public:
 	{ return m_plane_mode; }
 	void SetPlaneMode(PLANE_MODES mode);
 
-	bool GetXLink()
-	{
-		return m_check_tb->GetToolState(ID_LinkXChk);
-	}
-	bool GetYLink()
-	{
-		return m_check_tb->GetToolState(ID_LinkYChk);
-	}
-	bool GetZLink()
-	{
-		return m_check_tb->GetToolState(ID_LinkZChk);
-	}
-	void SetXLink(bool link)
-	{
-		m_check_tb->ToggleTool(ID_LinkXChk,link);
-		m_link_x = link;
-		wxCommandEvent ev;
-		OnLinkXCheck(ev);
-	}
-	void SetYLink(bool link)
-	{
-		m_check_tb->ToggleTool(ID_LinkYChk,link);
-		m_link_y = link;
-		wxCommandEvent ev;
-		OnLinkYCheck(ev);
-	}
-	void SetZLink(bool link)
-	{
-		m_check_tb->ToggleTool(ID_LinkZChk,link);
-		m_link_z  = link;
-		wxCommandEvent ev;
-		OnLinkZCheck(ev);
-	}
+	bool GetXLink();
+	bool GetYLink();
+	bool GetZLink();
+	void SetXLink(bool val);
+	void SetYLink(bool val);
+	void SetZLink(bool val);
 
 	void SetClippingPlaneRotations(double rotx, double roty, double rotz)
 	{
@@ -180,12 +153,12 @@ private:
 	bool m_hold_planes;
 	PLANE_MODES m_plane_mode;
 
-	int m_x_sldr_dist;
-	int m_y_sldr_dist;
-	int m_z_sldr_dist;
-	bool m_link_x;
-	bool m_link_y;
-	bool m_link_z;
+	//int m_x_sldr_dist;
+	//int m_y_sldr_dist;
+	//int m_z_sldr_dist;
+	//bool m_link_x;
+	//bool m_link_y;
+	//bool m_link_z;
 
 	//1st line
 	wxToolBar *m_toolbar;
@@ -225,11 +198,13 @@ private:
 	//wxSlider *m_z2_clip_sldr;
 	wxTextCtrl *m_z2_clip_text;
 	//keep 1 panel for sizing reasons
-	wxPanel * m_xpanel;
+	//wxPanel * m_xpanel;
 	//highlighters
 	//wxStaticText * m_xBar, * m_yBar, * m_zBar;
 
-	wxToolBar * m_check_tb;
+	wxToolBar *m_linkx_tb;
+	wxToolBar* m_linky_tb;
+	wxToolBar* m_linkz_tb;
 
 	//buttons
 	wxButton *m_yz_clip_btn;

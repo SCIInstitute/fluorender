@@ -5,7 +5,7 @@
 wxDoubleSlider::wxDoubleSlider(wxWindow *parent,
 		wxWindowID id,
 		//const wxString& label,
-		int leftValue, int rightValue, int minValue, int maxValue,
+		int lowValue, int hiValue, int minValue, int maxValue,
 		const wxPoint& pos,
 		const wxSize& size,
 		long style,
@@ -17,6 +17,7 @@ wxDoubleSlider::wxDoubleSlider(wxWindow *parent,
 	use_thumb_color_(false),
 	horizontal_(!(style & wxSL_VERTICAL)),
 	inverse_(style & wxSL_INVERSE),
+	link_(false),
 	wxControl(parent, id, pos,
 		wxSize(!(style& wxSL_VERTICAL) ? int(std::round(23 * parent->GetDPIScaleFactor())) : 1,
 			!(style& wxSL_VERTICAL) ? 1 : int(std::round(23* parent->GetDPIScaleFactor()))), wxBORDER_NONE)
@@ -25,7 +26,7 @@ wxDoubleSlider::wxDoubleSlider(wxWindow *parent,
 	margin_ = int(std::round(12 * scale_));
 	SetBackgroundColour(parent->GetBackgroundColour());
 	SetDoubleBuffered(true);
-	low_val_ = leftValue; hi_val_ = rightValue;
+	low_val_ = lowValue; hi_val_ = hiValue;
 	min_val_ = minValue; max_val_ = maxValue;
 	sel_ = 0;
 	last_sel_ = 1;
@@ -41,20 +42,88 @@ wxDoubleSlider::wxDoubleSlider(wxWindow *parent,
 	Update();
 }
 
-void wxDoubleSlider::SetLowValue(int val)
+bool wxDoubleSlider::SetLowValue(int val)
 {
-	low_val_ = val < min_val_ ? min_val_ : 
-		(val >= hi_val_ ? hi_val_ - 1 : val);
+	int old = low_val_;
+	if (!link_)
+		low_val_ = val < min_val_ ? min_val_ : 
+			(val >= hi_val_ ? hi_val_ - 1 : val);
+	else
+		low_val_ = val < min_val_ ? min_val_ :
+		(val >= max_val_ ? max_val_ - 1 : val);
+	bool changed = old != low_val_;
+	if (!changed)
+		return changed;
+	if (link_)
+	{
+		hi_val_ = low_val_ + link_dist_;
+		if (hi_val_ > max_val_)
+		{
+			hi_val_ = max_val_;
+			low_val_ = hi_val_ - link_dist_;
+		}
+	}
+	Refresh();
+	Update();
+	return changed;
+}
+
+bool wxDoubleSlider::SetHighValue(int val)
+{
+	int old = hi_val_;
+	if (!link_)
+		hi_val_ = val <= low_val_ ? low_val_ + 1 :
+		(val > max_val_ ? max_val_ : val);
+	else
+		hi_val_ = val <= min_val_ ? min_val_ + 1 :
+		(val > max_val_ ? max_val_ : val);
+	bool changed = old != hi_val_;
+	if (!changed)
+		return changed;
+	if (link_)
+	{
+		low_val_ = hi_val_ - link_dist_;
+		if (low_val_ < min_val_)
+		{
+			low_val_ = min_val_;
+			hi_val_ = low_val_ + link_dist_;
+		}
+	}
+	Refresh();
+	Update();
+	return changed;
+}
+
+void wxDoubleSlider::SetLink(bool val)
+{
+	link_ = val;
+	if (link_)
+		link_dist_ = hi_val_ - low_val_;
+}
+
+bool wxDoubleSlider::GetLink()
+{
+	return link_;
+}
+
+void wxDoubleSlider::SetLinkDist(int val)
+{
+	link_dist_ = val;
+	if (link_dist_ > max_val_ - min_val_)
+		link_dist_ = max_val_ - min_val_;
+	hi_val_ = low_val_ + link_dist_;
+	if (hi_val_ > max_val_)
+	{
+		hi_val_ = max_val_;
+		low_val_ = hi_val_ - link_dist_;
+	}
 	Refresh();
 	Update();
 }
 
-void wxDoubleSlider::SetHighValue(int val)
+int wxDoubleSlider::GetLinkDist()
 {
-	hi_val_ = val <= low_val_ ? low_val_ + 1 :
-		(val > max_val_ ? max_val_ : val);
-	Refresh();
-	Update();
+	return link_dist_;
 }
 
 int wxDoubleSlider::GetLowValue()
@@ -327,39 +396,76 @@ void wxDoubleSlider::OnLeftDown(wxMouseEvent& event)
 	posr = std::round(double(posr - min_val_) * ((horizontal_ ? w : h) - margin_ * 2) / (max_val_ - min_val_));
 	posr = inverse_ ? (horizontal_ ? w - margin_ - posr : h - margin_ - posr) : (posr + margin_);
 
-	int distl = std::abs((horizontal_ ? pos.x : pos.y) - posl);
-	int distr = std::abs((horizontal_ ? pos.x : pos.y) - posr);
-	if (distl <= distr)
-		sel_ = 1;
+	if (link_)
+	{
+		sel_ = 3;//both
+		last_sel_ = sel_;
+		sel_pos_ = horizontal_ ? pos.x : pos.y;
+	}
 	else
-		sel_ = 2;
-	last_sel_ = sel_;
+	{
+		int pp = horizontal_ ? pos.x : pos.y;
+		int distl = std::abs(pp - posl);
+		int distr = std::abs(pp - posr);
+		if (distl < distr)
+			sel_ = 1;
+		else if (distl > distr)
+			sel_ = 2;
+		else
+		{
+			if (pp < posl)
+				sel_ = 1;
+			else
+				sel_ = 2;
+		}
+		last_sel_ = sel_;
+	}
 
-	posl = margin_;
-	posr = (horizontal_ ? w : h) - margin_;
 	int val;
-	if (inverse_)
-		val = std::round(double(min_val_) + double(max_val_ - min_val_) *
-			(posr - (horizontal_ ? pos.x : pos.y)) / (posr - posl));
+
+	if (link_)
+	{
+		if (sel_pos_ < posl)
+		{
+			posl = margin_;
+			posr = (horizontal_ ? w : h) - margin_;
+			if (inverse_)
+				val = std::round(double(min_val_) + double(max_val_ - min_val_) *
+					(posr - (horizontal_ ? pos.x : pos.y)) / (posr - posl));
+			else
+				val = std::round(double(min_val_) + double(max_val_ - min_val_) *
+					((horizontal_ ? pos.x : pos.y) - posl) / (posr - posl));
+			SetLowValue(val);
+		}
+		else if (sel_pos_ > posr)
+		{
+			posl = margin_;
+			posr = (horizontal_ ? w : h) - margin_;
+			if (inverse_)
+				val = std::round(double(min_val_) + double(max_val_ - min_val_) *
+					(posr - (horizontal_ ? pos.x : pos.y)) / (posr - posl));
+			else
+				val = std::round(double(min_val_) + double(max_val_ - min_val_) *
+					((horizontal_ ? pos.x : pos.y) - posl) / (posr - posl));
+			SetHighValue(val);
+		}
+	}
 	else
-		val = std::round(double(min_val_) + double(max_val_ - min_val_) *
-			((horizontal_ ? pos.x : pos.y) - posl) / (posr - posl));
-
-	if (sel_ == 1)
 	{
-		low_val_ = val;
-		if (low_val_ < min_val_)  low_val_ = min_val_;
-		if (low_val_ >= hi_val_) low_val_ = hi_val_ - 1;
-	}
-	else if (sel_ == 2)
-	{
-		hi_val_ = val;
-		if (hi_val_ > max_val_) hi_val_ = max_val_;
-		if (hi_val_ <= low_val_) hi_val_ = low_val_ + 1;
-	}
+		posl = margin_;
+		posr = (horizontal_ ? w : h) - margin_;
+		if (inverse_)
+			val = std::round(double(min_val_) + double(max_val_ - min_val_) *
+				(posr - (horizontal_ ? pos.x : pos.y)) / (posr - posl));
+		else
+			val = std::round(double(min_val_) + double(max_val_ - min_val_) *
+				((horizontal_ ? pos.x : pos.y) - posl) / (posr - posl));
 
-	Refresh();
-	Update();
+		if (sel_ == 1)
+			SetLowValue(val);
+		else if (sel_ == 2)
+			SetHighValue(val);
+	}
 
 	event.Skip();
 }
@@ -449,7 +555,7 @@ void wxDoubleSlider::OnMotion(wxMouseEvent& event)
 			Update();
 		}
 	}
-	else
+	else if (sel_ == 1 || sel_ == 2)
 	{
 		int posl = margin_;
 		int posr = (horizontal_ ? w : h) - margin_;
@@ -464,20 +570,29 @@ void wxDoubleSlider::OnMotion(wxMouseEvent& event)
 		if (sel_ == 1)
 		{
 			thumb_state1_ = 2;
-			low_val_ = val;
-			if (low_val_ < min_val_)  low_val_ = min_val_;
-			if (low_val_ >= hi_val_) low_val_ = hi_val_ - 1;
+			bool changed = SetLowValue(val);
+			//if (!changed && low_value_ < max_)
 		}
 		else if (sel_ == 2)
 		{
 			thumb_state2_ = 2;
-			hi_val_ = val;
-			if (hi_val_ > max_val_) hi_val_ = max_val_;
-			if (hi_val_ <= low_val_) hi_val_ = low_val_ + 1;
+			SetHighValue(val);
 		}
 
-		Refresh();
-		Update();
+		wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
+		e.SetEventObject(this);
+		e.SetString("update");
+		ProcessWindowEvent(e);
+		wxPostEvent(parent_, e);
+	}
+	else if (sel_ == 3)
+	{
+		int diff = (horizontal_ ? pos.x : pos.y) - sel_pos_;
+		int posl = margin_;
+		int posr = (horizontal_ ? w : h) - margin_;
+		int val = std::round(double(max_val_ - min_val_) * diff / (posr - posl));
+		SetLowValue(low_val_ + val);
+		sel_pos_ = (horizontal_ ? pos.x : pos.y);
 
 		wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
 		e.SetEventObject(this);
@@ -527,28 +642,15 @@ void wxDoubleSlider::OnWheel(wxMouseEvent& event)
 	wxPoint pos = event.GetLogicalPosition(dc);
 
 	if (event.GetWheelRotation() > 0)
-		m=-1;
-	else
 		m=1;
-	//bool rotl = true;
-	//if (horizontal_)
-	//	rotl = pos.y >= h / 2;
-	//else
-	//	rotl = pos.x >= w / 2;
-	if (last_sel_ == 1)
-	{
-		low_val_ -= m;
-		if (low_val_ < min_val_)  low_val_ = min_val_;
-		if (low_val_ >= hi_val_) low_val_ = hi_val_-1;
-	}
 	else
-	{
-		hi_val_ -= m;
-		if (hi_val_ > max_val_) hi_val_ = max_val_;
-		if (hi_val_ <= low_val_) hi_val_ = low_val_+1;
-	}
-	Refresh();
-	Update();
+		m=-1;
+
+	if (last_sel_ == 1)
+		SetLowValue(low_val_ + m);
+	else
+		SetLowValue(hi_val_ + m);
+
 	wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
 	e.SetEventObject(this);
 	e.SetString("update");
@@ -561,6 +663,8 @@ void wxDoubleSlider::SetRange(int min_val, int max_val)
 {
 	min_val_ = min_val;
 	max_val_ = max_val;
+	Refresh();
+	Update();
 }
 
 int wxDoubleSlider::GetMax()
