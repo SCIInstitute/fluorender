@@ -669,7 +669,7 @@ void ClippingView::GetSettings(VRenderGLView* view)
 	plane = (*planes)[0];
 	plane->get_copy(abcd);
 	val = fabs(abcd[3]*resx)+0.499;
-	m_x1_clip_sldr->SetLeftValue(val);
+	m_x1_clip_sldr->SetLowValue(val);
 	double percent = (double)val/(double)m_x1_clip_sldr->GetMax();
 	int barsize = (m_x1_clip_sldr->GetSize().GetHeight() - 20);
 	str = wxString::Format("%d", val);
@@ -678,14 +678,14 @@ void ClippingView::GetSettings(VRenderGLView* view)
 	plane = (*planes)[1];
 	plane->get_copy(abcd);
 	val = fabs(abcd[3]*resx)+0.499;
-	m_x1_clip_sldr->SetRightValue(val);
+	m_x1_clip_sldr->SetHighValue(val);
 	str = wxString::Format("%d", val);
 	m_x2_clip_text->ChangeValue(str);
 	//y1
 	plane = (*planes)[2];
 	plane->get_copy(abcd);
 	val = fabs(abcd[3]*resy)+0.499;
-	m_y1_clip_sldr->SetLeftValue(val);
+	m_y1_clip_sldr->SetLowValue(val);
 	percent = (double)val/(double)m_y1_clip_sldr->GetMax();
 	barsize = (m_y1_clip_sldr->GetSize().GetHeight() - 20);
 	str = wxString::Format("%d", val);
@@ -694,14 +694,14 @@ void ClippingView::GetSettings(VRenderGLView* view)
 	plane = (*planes)[3];
 	plane->get_copy(abcd);
 	val = fabs(abcd[3]*resy)+0.499;
-	m_y1_clip_sldr->SetRightValue(val);
+	m_y1_clip_sldr->SetHighValue(val);
 	str = wxString::Format("%d", val);
 	m_y2_clip_text->ChangeValue(str);
 	//z1
 	plane = (*planes)[4];
 	plane->get_copy(abcd);
 	val = fabs(abcd[3]*resz)+0.499;
-	m_z1_clip_sldr->SetLeftValue(val);
+	m_z1_clip_sldr->SetLowValue(val);
 	percent = (double)val/(double)m_z1_clip_sldr->GetMax();
 	barsize = (m_z1_clip_sldr->GetSize().GetHeight() - 20);
 	str = wxString::Format("%d", val);
@@ -710,7 +710,7 @@ void ClippingView::GetSettings(VRenderGLView* view)
 	plane = (*planes)[5];
 	plane->get_copy(abcd);
 	val = fabs(abcd[3]*resz)+0.499;
-	m_z1_clip_sldr->SetRightValue(val);
+	m_z1_clip_sldr->SetHighValue(val);
 	str = wxString::Format("%d", val);
 	m_z2_clip_text->ChangeValue(str);
 
@@ -887,12 +887,12 @@ void ClippingView::OnClipResetBtn(wxCommandEvent &event)
 
 	//controls
 	//sliders
-	m_x1_clip_sldr->SetLeftValue(0);
-	m_x1_clip_sldr->SetRightValue(resx);
-	m_y1_clip_sldr->SetLeftValue(0);
-	m_y1_clip_sldr->SetRightValue(resy);
-	m_z1_clip_sldr->SetLeftValue(0);
-	m_z1_clip_sldr->SetRightValue(resz);
+	m_x1_clip_sldr->SetLowValue(0);
+	m_x1_clip_sldr->SetHighValue(resx);
+	m_y1_clip_sldr->SetLowValue(0);
+	m_y1_clip_sldr->SetHighValue(resy);
+	m_z1_clip_sldr->SetLowValue(0);
+	m_z1_clip_sldr->SetHighValue(resz);
 	//texts
 	m_x1_clip_text->SetValue("0");
 	m_x2_clip_text->SetValue(wxString::Format("%d", resx));
@@ -939,12 +939,12 @@ void ClippingView::OnClipResetBtn(wxCommandEvent &event)
 
 void ClippingView::OnX1ClipChange(wxScrollEvent &event)
 {
-	int ival = m_x1_clip_sldr->GetLeftValue();
+	int ival = m_x1_clip_sldr->GetLowValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_x1_clip_text->GetValue())
 		m_x1_clip_text->SetValue(str);
 
-	ival = m_x1_clip_sldr->GetRightValue();
+	ival = m_x1_clip_sldr->GetHighValue();
 	str = wxString::Format("%d", ival);
 	if (str != m_x2_clip_text->GetValue())
 		m_x2_clip_text->SetValue(str);
@@ -969,7 +969,7 @@ void ClippingView::OnX1ClipEdit(wxCommandEvent &event)
 	wxString str = m_x1_clip_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
-	int ival2 = m_x1_clip_sldr->GetRightValue();
+	int ival2 = m_x1_clip_sldr->GetHighValue();
 	double val, val2;
 
 	if (m_link_x)
@@ -988,7 +988,7 @@ void ClippingView::OnX1ClipEdit(wxCommandEvent &event)
 	val = (double)ival/(double)resx;
 	//str = wxString::Format("%d", ival);
 	//m_x1_clip_text->ChangeValue(str);
-	m_x1_clip_sldr->SetLeftValue(ival);
+	m_x1_clip_sldr->SetLowValue(ival);
 	int barsize = (m_x1_clip_sldr->GetSize().GetHeight() - 20);
 	fluo::Plane* plane = (*planes)[0];
 	plane->ChangePlane(fluo::Point(val, 0.0, 0.0), fluo::Vector(1.0, 0.0, 0.0));
@@ -997,7 +997,7 @@ void ClippingView::OnX1ClipEdit(wxCommandEvent &event)
 		val2 = (double)ival2/(double)resx;
 		str = wxString::Format("%d", ival2);
 		m_x2_clip_text->ChangeValue(str);
-		m_x1_clip_sldr->SetRightValue(ival2);
+		m_x1_clip_sldr->SetHighValue(ival2);
 		plane = (*planes)[1];
 		plane->ChangePlane(fluo::Point(val2, 0.0, 0.0), fluo::Vector(-1.0, 0.0, 0.0));
 	}
@@ -1069,7 +1069,7 @@ void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
 	wxString str = m_x2_clip_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
-	int ival2 = m_x1_clip_sldr->GetLeftValue();
+	int ival2 = m_x1_clip_sldr->GetLowValue();
 	double val, val2;
 
 	if (m_link_x)
@@ -1088,7 +1088,7 @@ void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
 	val = (double)ival/(double)resx;
 	//str = wxString::Format("%d", ival);
 	//m_x2_clip_text->ChangeValue(str);
-	m_x1_clip_sldr->SetRightValue(ival);
+	m_x1_clip_sldr->SetHighValue(ival);
 	fluo::Plane* plane = (*planes)[1];
 	plane->ChangePlane(fluo::Point(val, 0.0, 0.0), fluo::Vector(-1.0, 0.0, 0.0));
 	if (m_link_x)
@@ -1096,7 +1096,7 @@ void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
 		val2 = (double)ival2/(double)resx;
 		str = wxString::Format("%d", ival2);
 		m_x1_clip_text->ChangeValue(str);
-		m_x1_clip_sldr->SetLeftValue(ival2);
+		m_x1_clip_sldr->SetLowValue(ival2);
 		plane = (*planes)[0];
 		plane->ChangePlane(fluo::Point(val2, 0.0, 0.0), fluo::Vector(1.0, 0.0, 0.0));
 	}
@@ -1137,12 +1137,12 @@ void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
 
 void ClippingView::OnY1ClipChange(wxScrollEvent &event)
 {
-	int ival = m_y1_clip_sldr->GetLeftValue();
+	int ival = m_y1_clip_sldr->GetLowValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_y1_clip_text->GetValue())
 		m_y1_clip_text->SetValue(str);
 
-	ival = m_y1_clip_sldr->GetRightValue();
+	ival = m_y1_clip_sldr->GetHighValue();
 	str = wxString::Format("%d", ival);
 	if (str != m_y2_clip_text->GetValue())
 		m_y2_clip_text->SetValue(str);
@@ -1166,7 +1166,7 @@ void ClippingView::OnY1ClipEdit(wxCommandEvent &event)
 	wxString str = m_y1_clip_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
-	int ival2 = m_y1_clip_sldr->GetRightValue();
+	int ival2 = m_y1_clip_sldr->GetHighValue();
 	double val, val2;
 
 	if (m_link_y)
@@ -1185,7 +1185,7 @@ void ClippingView::OnY1ClipEdit(wxCommandEvent &event)
 	val = (double)ival/(double)resy;
 	//str = wxString::Format("%d", ival);
 	//m_y1_clip_text->ChangeValue(str);
-	m_y1_clip_sldr->SetLeftValue(ival);
+	m_y1_clip_sldr->SetLowValue(ival);
 	fluo::Plane* plane = (*planes)[2];
 	plane->ChangePlane(fluo::Point(0.0, val, 0.0), fluo::Vector(0.0, 1.0, 0.0));
 	if (m_link_y)
@@ -1193,7 +1193,7 @@ void ClippingView::OnY1ClipEdit(wxCommandEvent &event)
 		val2 = (double)ival2/(double)resy;
 		str = wxString::Format("%d", ival2);
 		m_y2_clip_text->ChangeValue(str);
-		m_y1_clip_sldr->SetRightValue(ival2);
+		m_y1_clip_sldr->SetHighValue(ival2);
 		plane = (*planes)[3];
 		plane->ChangePlane(fluo::Point(0.0, val2, 0.0), fluo::Vector(0.0, -1.0, 0.0));
 	}
@@ -1265,7 +1265,7 @@ void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
 	wxString str = m_y2_clip_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
-	int ival2 = m_y1_clip_sldr->GetLeftValue();
+	int ival2 = m_y1_clip_sldr->GetLowValue();
 	double val, val2;
 
 	if (m_link_y)
@@ -1284,7 +1284,7 @@ void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
 	val = (double)ival/(double)resy;
 	//str = wxString::Format("%d", ival);
 	//m_y2_clip_text->ChangeValue(str);
-	m_y1_clip_sldr->SetRightValue(ival);
+	m_y1_clip_sldr->SetHighValue(ival);
 	fluo::Plane* plane = (*planes)[3];
 	plane->ChangePlane(fluo::Point(0.0, val, 0.0), fluo::Vector(0.0, -1.0, 0.0));
 	if (m_link_y)
@@ -1292,7 +1292,7 @@ void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
 		val2 = (double)ival2/(double)resy;
 		str = wxString::Format("%d", ival2);
 		m_y1_clip_text->ChangeValue(str);
-		m_y1_clip_sldr->SetLeftValue(ival2);
+		m_y1_clip_sldr->SetLowValue(ival2);
 		plane = (*planes)[2];
 		plane->ChangePlane(fluo::Point(0.0, val2, 0.0), fluo::Vector(0.0, 1.0, 0.0));
 	}
@@ -1334,12 +1334,12 @@ void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
 
 void ClippingView::OnZ1ClipChange(wxScrollEvent &event)
 {
-	int ival = m_z1_clip_sldr->GetLeftValue();
+	int ival = m_z1_clip_sldr->GetLowValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_z1_clip_text->GetValue())
 		m_z1_clip_text->SetValue(str);
 
-	ival = m_z1_clip_sldr->GetRightValue();
+	ival = m_z1_clip_sldr->GetHighValue();
 	str = wxString::Format("%d", ival);
 	if (str != m_z2_clip_text->GetValue())
 		m_z2_clip_text->SetValue(str);
@@ -1362,7 +1362,7 @@ void ClippingView::OnZ1ClipEdit(wxCommandEvent &event)
 	wxString str = m_z1_clip_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
-	int ival2 = m_z1_clip_sldr->GetRightValue();
+	int ival2 = m_z1_clip_sldr->GetHighValue();
 	double val, val2;
 
 	if (m_link_z)
@@ -1381,7 +1381,7 @@ void ClippingView::OnZ1ClipEdit(wxCommandEvent &event)
 	val = (double)ival/(double)resz;
 	//str = wxString::Format("%d", ival);
 	//m_z1_clip_text->ChangeValue(str);
-	m_z1_clip_sldr->SetLeftValue(ival);
+	m_z1_clip_sldr->SetLowValue(ival);
 	fluo::Plane* plane = (*planes)[4];
 	plane->ChangePlane(fluo::Point(0.0, 0.0, val), fluo::Vector(0.0, 0.0, 1.0));
 	if (m_link_z)
@@ -1389,7 +1389,7 @@ void ClippingView::OnZ1ClipEdit(wxCommandEvent &event)
 		val2 = (double)ival2/(double)resz;
 		str = wxString::Format("%d", ival2);
 		m_z2_clip_text->ChangeValue(str);
-		m_z1_clip_sldr->SetRightValue(ival2);
+		m_z1_clip_sldr->SetHighValue(ival2);
 		plane = (*planes)[5];
 		plane->ChangePlane(fluo::Point(0.0, 0.0, val2), fluo::Vector(0.0, 0.0, -1.0));
 	}
@@ -1461,7 +1461,7 @@ void ClippingView::OnZ2ClipEdit(wxCommandEvent &event)
 	wxString str = m_z2_clip_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
-	int ival2 = m_z1_clip_sldr->GetLeftValue();
+	int ival2 = m_z1_clip_sldr->GetLowValue();
 	double val, val2;
 
 	if (m_link_z)
@@ -1480,7 +1480,7 @@ void ClippingView::OnZ2ClipEdit(wxCommandEvent &event)
 	val = (double)ival/(double)resz;
 	//str = wxString::Format("%d", ival);
 	//m_z2_clip_text->ChangeValue(str);
-	m_z1_clip_sldr->SetRightValue(ival);
+	m_z1_clip_sldr->SetHighValue(ival);
 	fluo::Plane* plane = (*planes)[5];
 	plane->ChangePlane(fluo::Point(0.0, 0.0, val), fluo::Vector(0.0, 0.0, -1.0));
 	if (m_link_z)
@@ -1488,7 +1488,7 @@ void ClippingView::OnZ2ClipEdit(wxCommandEvent &event)
 		val2 = (double)ival2/(double)resz;
 		str = wxString::Format("%d", ival2);
 		m_z1_clip_text->ChangeValue(str);
-		m_z1_clip_sldr->SetLeftValue(ival2);
+		m_z1_clip_sldr->SetLowValue(ival2);
 		plane = (*planes)[4];
 		plane->ChangePlane(fluo::Point(0.0, 0.0, val2), fluo::Vector(0.0, 0.0, 1.0));
 	}

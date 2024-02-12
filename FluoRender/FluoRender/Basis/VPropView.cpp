@@ -664,7 +664,7 @@ void VPropView::GetSettings()
 	ival = int(dval*m_max_val+0.5);
 	//m_left_thresh_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
-	m_left_thresh_sldr->SetLeftValue(ival);
+	m_left_thresh_sldr->SetLowValue(ival);
 	m_left_thresh_text->ChangeValue(str);
 	//right threshold
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_right_thresh_text->GetValidator()))
@@ -673,7 +673,7 @@ void VPropView::GetSettings()
 	ival = int(dval*m_max_val+0.5);
 	//m_right_thresh_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
-	m_left_thresh_sldr->SetRightValue(ival);
+	m_left_thresh_sldr->SetHighValue(ival);
 	//m_right_thresh_sldr->SetValue(ival);
 	m_right_thresh_text->ChangeValue(str);
 	//luminance
@@ -1110,12 +1110,12 @@ void VPropView::OnThreshSync(wxMouseEvent& event)
 
 void VPropView::OnLeftThreshChange(wxScrollEvent &event)
 {
-	int ival = m_left_thresh_sldr->GetLeftValue();
+	int ival = m_left_thresh_sldr->GetLowValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_left_thresh_text->GetValue())
 		m_left_thresh_text->SetValue(str);
 
-	ival = m_left_thresh_sldr->GetRightValue();
+	ival = m_left_thresh_sldr->GetHighValue();
 	str = wxString::Format("%d", ival);
 	if (str != m_right_thresh_text->GetValue())
 		m_right_thresh_text->SetValue(str);
@@ -1133,7 +1133,7 @@ void VPropView::OnLeftThreshText(wxCommandEvent &event)
 		m_left_thresh_text->ChangeValue(str);
 	}
 	double val = double(ival) / m_max_val;
-	double right_val = (double)m_left_thresh_sldr->GetRightValue() / m_max_val;
+	double right_val = (double)m_left_thresh_sldr->GetHighValue() / m_max_val;
 
 	if (val > right_val)
 	{
@@ -1142,7 +1142,7 @@ void VPropView::OnLeftThreshText(wxCommandEvent &event)
 		wxString str2 = wxString::Format("%d", ival);
 		m_left_thresh_text->ChangeValue(str2);
 	}
-	m_left_thresh_sldr->SetLeftValue(ival);
+	m_left_thresh_sldr->SetLowValue(ival);
 
 	//set left threshold value
 	if (m_sync_group && m_group)
@@ -1185,11 +1185,11 @@ void VPropView::OnRightThreshText(wxCommandEvent &event)
 		m_right_thresh_text->ChangeValue(str);
 	}
 	double val = double(ival) / m_max_val;
-	double left_val = (double)m_left_thresh_sldr->GetLeftValue() / m_max_val;
+	double left_val = (double)m_left_thresh_sldr->GetLowValue() / m_max_val;
 
 	if (val >= left_val)
 	{
-		m_left_thresh_sldr->SetRightValue(ival);
+		m_left_thresh_sldr->SetHighValue(ival);
 
 		//set right threshold value
 		if (m_sync_group && m_group)
@@ -2865,14 +2865,14 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	ival = int(dval*m_max_val+0.5);
 	str = wxString::Format("%d", ival);
 	m_left_thresh_text->ChangeValue(str);
-	m_left_thresh_sldr->SetLeftValue(ival);
+	m_left_thresh_sldr->SetLowValue(ival);
 	m_vd->SetLeftThresh(dval);
 	//high thresholding
 	dval = mgr->m_vol_hth;
 	ival = int(dval*m_max_val+0.5);
 	str = wxString::Format("%d", ival);
 	m_right_thresh_text->ChangeValue(str);
-	m_left_thresh_sldr->SetRightValue(ival);
+	m_left_thresh_sldr->SetHighValue(ival);
 	m_vd->SetRightThresh(dval);
 	//low shading
 	dval = mgr->m_vol_lsh;
