@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/clrpicker.h>
-#include <wx/slider.h>
 #include <wx/tglbtn.h>
 
 using namespace std;
@@ -41,6 +40,7 @@ class VRenderGLView;
 class VolumeData;
 class DataGroup;
 class wxDoubleSlider;
+class wxSingleSlider;
 class VPropView: public wxPanel
 {
 	enum
@@ -149,58 +149,58 @@ private:
 	//1st line
 	//gamma
 	wxStaticText *m_gamma_st;
-	wxSlider *m_gamma_sldr;
+	wxSingleSlider *m_gamma_sldr;
 	wxTextCtrl *m_gamma_text;
 	//boundary
 	wxStaticText *m_boundary_st;
-	wxSlider *m_boundary_sldr;
+	wxSingleSlider *m_boundary_sldr;
 	wxTextCtrl *m_boundary_text;
 
 	//2nd line
 	//saturation point
 	wxStaticText *m_saturation_st;
-	wxSlider *m_saturation_sldr;
+	wxSingleSlider *m_saturation_sldr;
 	wxTextCtrl *m_saturation_text;
 	//thresholds
 	wxStaticText *m_threh_st;
 	wxDoubleSlider *m_left_thresh_sldr;
 	wxTextCtrl *m_left_thresh_text;
-	//wxSlider *m_right_thresh_sldr;
+	//wxSingleSlider *m_right_thresh_sldr;
 	wxTextCtrl *m_right_thresh_text;
 
 	//3rd line
 	//luminance
 	wxStaticText *m_luminance_st;
-	wxSlider *m_luminance_sldr;
+	wxSingleSlider *m_luminance_sldr;
 	wxTextCtrl* m_luminance_text;
 	//shadow
-	wxSlider *m_shadow_sldr;
+	wxSingleSlider *m_shadow_sldr;
 	wxTextCtrl *m_shadow_text;
 	wxToolBar *m_shadow_tool;
 
 	//4th line
 	//alpha
 	wxToolBar *m_alpha_tool;
-	wxSlider *m_alpha_sldr;
+	wxSingleSlider *m_alpha_sldr;
 	wxTextCtrl* m_alpha_text;
 	//sample rate
 	wxStaticText* m_sample_st;
-	wxSlider *m_sample_sldr;
+	wxSingleSlider *m_sample_sldr;
 	wxTextCtrl *m_sample_text;
 
 	//5th line
 	//highlight
-	wxSlider *m_hi_shading_sldr;
+	wxSingleSlider *m_hi_shading_sldr;
 	wxTextCtrl *m_hi_shading_text;
 	//shading
-	wxSlider *m_low_shading_sldr;
+	wxSingleSlider *m_low_shading_sldr;
 	wxTextCtrl *m_low_shading_text;
 	wxToolBar *m_shade_tool;
 	//colormap
 	wxToolBar *m_colormap_tool;
-	wxSlider *m_colormap_high_value_sldr;
+	//wxSingleSlider *m_colormap_high_value_sldr;
 	wxTextCtrl *m_colormap_high_value_text;
-	wxSlider *m_colormap_low_value_sldr;
+	wxDoubleSlider *m_colormap_low_value_sldr;
 	wxTextCtrl *m_colormap_low_value_text;
 
 	//others
@@ -283,7 +283,7 @@ private:
 	//colormap
 	void OnColormapSync(wxMouseEvent& event);
 	void OnEnableColormap(wxCommandEvent &event);
-	void OnColormapHighValueChange(wxScrollEvent &event);
+	//void OnColormapHighValueChange(wxScrollEvent &event);
 	void OnColormapHighValueText(wxCommandEvent &event);
 	void OnColormapLowValueChange(wxScrollEvent &event);
 	void OnColormapLowValueText(wxCommandEvent &event);

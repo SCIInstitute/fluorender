@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <DataManager.h>
 #include <compatibility.h>
 #include <wxDoubleSlider.h>
+#include <wxSingleSlider.h>
 #include <wx/valnum.h>
 #include "png_resource.h"
 #include "img/icons.h"
@@ -351,8 +352,9 @@ m_plane_mode(kNormal)
 	//x
 	wxBoxSizer* sizer_rx = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(this, 0, "X");
-	m_x_rot_sldr = new wxSlider(this, ID_XRotSldr, 0, -180, 180,
+	m_x_rot_sldr = new wxSingleSlider(this, ID_XRotSldr, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL|wxSL_INVERSE);
+	m_x_rot_sldr->SetRangeColor(wxColor(0, 0, 255));
 	m_x_rot_text = new wxTextCtrl(this, ID_XRotText, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_fp1);
 	m_x_rot_spin = new wxSpinButton(this, ID_XRotSpin,
@@ -363,12 +365,13 @@ m_plane_mode(kNormal)
 	sizer_rx->Add(st, 0, wxALIGN_CENTER, 0);
 	sizer_rx->Add(5, 5, 0);
 	sizer_rx->Add(m_x_rot_spin, 0, wxALIGN_CENTER, 0);
-	sizer_rx->Add(m_x_rot_sldr, 1, wxALIGN_CENTER, 0);
+	sizer_rx->Add(m_x_rot_sldr, 1, wxEXPAND, 0);
 	//y
 	wxBoxSizer* sizer_ry = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(this, 0, "Y");
-	m_y_rot_sldr = new wxSlider(this, ID_YRotSldr, 0, -180, 180,
+	m_y_rot_sldr = new wxSingleSlider(this, ID_YRotSldr, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL|wxSL_INVERSE);
+	m_y_rot_sldr->SetRangeColor(wxColor(0, 0, 255));
 	m_y_rot_text = new wxTextCtrl(this, ID_YRotText, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_fp1);
 	m_y_rot_spin = new wxSpinButton(this, ID_YRotSpin,
@@ -379,12 +382,13 @@ m_plane_mode(kNormal)
 	sizer_ry->Add(st, 0, wxALIGN_CENTER, 0);
 	sizer_ry->Add(5, 5, 0);
 	sizer_ry->Add(m_y_rot_spin, 0, wxALIGN_CENTER, 0);
-	sizer_ry->Add(m_y_rot_sldr, 1, wxALIGN_CENTER, 0);
+	sizer_ry->Add(m_y_rot_sldr, 1, wxEXPAND, 0);
 	//z
 	wxBoxSizer* sizer_rz = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(this, 0, "Z");
-	m_z_rot_sldr = new wxSlider(this, ID_ZRotSldr, 0, -180, 180,
+	m_z_rot_sldr = new wxSingleSlider(this, ID_ZRotSldr, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL|wxSL_INVERSE);
+	m_z_rot_sldr->SetRangeColor(wxColor(0, 0, 255));
 	m_z_rot_text = new wxTextCtrl(this, ID_ZRotText, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_fp1);
 	m_z_rot_spin = new wxSpinButton(this, ID_ZRotSpin,
@@ -395,7 +399,7 @@ m_plane_mode(kNormal)
 	sizer_rz->Add(st, 0, wxALIGN_CENTER, 0);
 	sizer_rz->Add(5, 5, 0);
 	sizer_rz->Add(m_z_rot_spin, 0, wxALIGN_CENTER, 0);
-	sizer_rz->Add(m_z_rot_sldr, 1, wxALIGN_CENTER, 0);
+	sizer_rz->Add(m_z_rot_sldr, 1, wxEXPAND, 0);
 	
 
 	//sizer 9
@@ -913,12 +917,12 @@ void ClippingView::OnX1ClipChange(wxScrollEvent &event)
 	int ival = m_x1_clip_sldr->GetLowValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_x1_clip_text->GetValue())
-		m_x1_clip_text->SetValue(str);
+		m_x1_clip_text->ChangeValue(str);
 
 	ival = m_x1_clip_sldr->GetHighValue();
 	str = wxString::Format("%d", ival);
 	if (str != m_x2_clip_text->GetValue())
-		m_x2_clip_text->SetValue(str);
+		m_x2_clip_text->ChangeValue(str);
 }
 
 void ClippingView::OnX1ClipEdit(wxCommandEvent &event)
@@ -1006,21 +1010,6 @@ void ClippingView::OnX1ClipEdit(wxCommandEvent &event)
 	m_view->UpdateClips();
 	m_view->RefreshGL(51);
 }
-
-//void ClippingView::OnX2ClipChange(wxScrollEvent &event)
-//{
-//	int ival = event.GetPosition();
-//	int ival2 = m_x1_clip_sldr->GetValue();
-//
-//	if (!m_link_x && ival<ival2)
-//	{
-//		ival = ival2;
-//		m_x2_clip_sldr->SetValue(ival);
-//	}
-//	wxString str = wxString::Format("%d", ival);
-//	if (str != m_x2_clip_text->GetValue())
-//		m_x2_clip_text->SetValue(str);
-//}
 
 void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
 {
@@ -1112,12 +1101,12 @@ void ClippingView::OnY1ClipChange(wxScrollEvent &event)
 	int ival = m_y1_clip_sldr->GetLowValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_y1_clip_text->GetValue())
-		m_y1_clip_text->SetValue(str);
+		m_y1_clip_text->ChangeValue(str);
 
 	ival = m_y1_clip_sldr->GetHighValue();
 	str = wxString::Format("%d", ival);
 	if (str != m_y2_clip_text->GetValue())
-		m_y2_clip_text->SetValue(str);
+		m_y2_clip_text->ChangeValue(str);
 }
 
 void ClippingView::OnY1ClipEdit(wxCommandEvent &event)
@@ -1205,21 +1194,6 @@ void ClippingView::OnY1ClipEdit(wxCommandEvent &event)
 
 	m_view->RefreshGL(51);
 }
-
-//void ClippingView::OnY2ClipChange(wxScrollEvent &event)
-//{
-//	int ival = event.GetPosition();
-//	int ival2 = m_y1_clip_sldr->GetValue();
-//
-//	if (!m_link_y && ival<ival2)
-//	{
-//		ival = ival2;
-//		m_y2_clip_sldr->SetValue(ival);
-//	}
-//	wxString str = wxString::Format("%d", ival);
-//	if (str != m_y2_clip_text->GetValue())
-//		m_y2_clip_text->SetValue(str);
-//}
 
 void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
 {
@@ -1311,12 +1285,12 @@ void ClippingView::OnZ1ClipChange(wxScrollEvent &event)
 	int ival = m_z1_clip_sldr->GetLowValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_z1_clip_text->GetValue())
-		m_z1_clip_text->SetValue(str);
+		m_z1_clip_text->ChangeValue(str);
 
 	ival = m_z1_clip_sldr->GetHighValue();
 	str = wxString::Format("%d", ival);
 	if (str != m_z2_clip_text->GetValue())
-		m_z2_clip_text->SetValue(str);
+		m_z2_clip_text->ChangeValue(str);
 }
 
 void ClippingView::OnZ1ClipEdit(wxCommandEvent &event)
@@ -1403,21 +1377,6 @@ void ClippingView::OnZ1ClipEdit(wxCommandEvent &event)
 
 	m_view->RefreshGL(51);
 }
-
-//void ClippingView::OnZ2ClipChange(wxScrollEvent &event)
-//{
-//	int ival = event.GetPosition();
-//	int ival2 = m_z1_clip_sldr->GetValue();
-//
-//	if (!m_link_z && ival<ival2)
-//	{
-//		ival = ival2;
-//		m_z2_clip_sldr->SetValue(ival);
-//	}
-//	wxString str = wxString::Format("%d", ival);
-//	if (str != m_z2_clip_text->GetValue())
-//		m_z2_clip_text->SetValue(str);
-//}
 
 void ClippingView::OnZ2ClipEdit(wxCommandEvent &event)
 {
@@ -1594,6 +1553,16 @@ void ClippingView::SetZLink(bool val)
 			wxGetBitmapFromMemory(unlink));
 }
 
+void ClippingView::SetClippingPlaneRotations(double rotx, double roty, double rotz)
+{
+	m_x_rot_sldr->SetValue(int(rotx));
+	m_y_rot_sldr->SetValue(int(roty));
+	m_z_rot_sldr->SetValue(int(rotz));
+	m_x_rot_text->SetValue(wxString::Format("%.1f", rotx));
+	m_y_rot_text->SetValue(wxString::Format("%.1f", roty));
+	m_z_rot_text->SetValue(wxString::Format("%.1f", rotz));
+}
+
 void ClippingView::OnLinkXCheck(wxCommandEvent &event)
 {
 	bool link = m_linkx_tb->GetToolState(ID_LinkXChk);
@@ -1649,7 +1618,7 @@ void ClippingView::OnRotResetBtn(wxCommandEvent &event)
 
 void ClippingView::OnXRotChange(wxScrollEvent &event)
 {
-	int val = event.GetPosition();
+	int val = m_x_rot_sldr->GetValue();
 	wxString str = wxString::Format("%.1f", double(val));
 	if (str != m_x_rot_text->GetValue())
 		m_x_rot_text->SetValue(str);
@@ -1673,7 +1642,7 @@ void ClippingView::OnXRotEdit(wxCommandEvent &event)
 
 void ClippingView::OnYRotChange(wxScrollEvent &event)
 {
-	int val = event.GetPosition();
+	int val = m_y_rot_sldr->GetValue();
 	wxString str = wxString::Format("%.1f", double(val));
 	if (str != m_y_rot_text->GetValue())
 		m_y_rot_text->SetValue(str);
@@ -1697,7 +1666,7 @@ void ClippingView::OnYRotEdit(wxCommandEvent &event)
 
 void ClippingView::OnZRotChange(wxScrollEvent &event)
 {
-	int val = event.GetPosition();
+	int val = m_z_rot_sldr->GetValue();
 	wxString str = wxString::Format("%.1f", double(val));
 	if (str != m_z_rot_text->GetValue())
 		m_z_rot_text->SetValue(str);

@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 #include <wx/panel.h>
-#include <wx/slider.h>
 #include <wx/spinbutt.h>
 
 //plane modes
@@ -51,6 +50,7 @@ class VolumeData;
 class MeshData;
 class DataManager;
 class wxDoubleSlider;
+class wxSingleSlider;
 class ClippingView: public wxPanel
 {
 	enum
@@ -129,15 +129,7 @@ public:
 	void SetYLink(bool val);
 	void SetZLink(bool val);
 
-	void SetClippingPlaneRotations(double rotx, double roty, double rotz)
-	{
-		m_x_rot_sldr->SetValue(int(rotx));
-		m_y_rot_sldr->SetValue(int(roty));
-		m_z_rot_sldr->SetValue(int(rotz));
-		m_x_rot_text->SetValue(wxString::Format("%.1f", rotx));
-		m_y_rot_text->SetValue(wxString::Format("%.1f", roty));
-		m_z_rot_text->SetValue(wxString::Format("%.1f", rotz));
-	}
+	void SetClippingPlaneRotations(double rotx, double roty, double rotz);
 
 	//move linked clipping planes
 	//dir: 0-lower; 1-higher
@@ -168,9 +160,9 @@ private:
 	wxButton *m_rot_reset_btn;
 
 	//sliders for rotating clipping planes
-	wxSlider *m_x_rot_sldr;
-	wxSlider *m_y_rot_sldr;
-	wxSlider *m_z_rot_sldr;
+	wxSingleSlider *m_x_rot_sldr;
+	wxSingleSlider *m_y_rot_sldr;
+	wxSingleSlider *m_z_rot_sldr;
 	wxTextCtrl *m_x_rot_text;
 	wxTextCtrl *m_y_rot_text;
 	wxTextCtrl *m_z_rot_text;
@@ -183,19 +175,16 @@ private:
 	wxDoubleSlider *m_x1_clip_sldr;
 	wxTextCtrl *m_x1_clip_text;
 	//x2
-	//wxSlider *m_x2_clip_sldr;
 	wxTextCtrl *m_x2_clip_text;
 	//y1
 	wxDoubleSlider *m_y1_clip_sldr;
 	wxTextCtrl *m_y1_clip_text;
 	//y2
-	//wxSlider *m_y2_clip_sldr;
 	wxTextCtrl *m_y2_clip_text;
 	//z1
 	wxDoubleSlider *m_z1_clip_sldr;
 	wxTextCtrl *m_z1_clip_text;
 	//z2
-	//wxSlider *m_z2_clip_sldr;
 	wxTextCtrl *m_z2_clip_text;
 	//keep 1 panel for sizing reasons
 	//wxPanel * m_xpanel;
