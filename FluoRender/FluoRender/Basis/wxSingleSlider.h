@@ -57,6 +57,7 @@ public:
 	void OnWheel(wxMouseEvent& event);
 	void OnLeave(wxMouseEvent& event);
 
+	void SetRangeStyle(int val);
 	void SetRange(int min_val, int max_val);
 	void SetRangeColor(const wxColor& c);
 	void DisableRangeColor();
@@ -82,6 +83,7 @@ private:
 	//int sel_, last_sel_;
 	//int sel_pos_;
 
+	int range_style_;//0-low value;1-high value;2-center
 	bool use_range_color_;
 	wxColor range_color_;
 	bool use_thumb_color_;

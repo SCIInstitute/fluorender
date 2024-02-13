@@ -24,7 +24,8 @@ THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
-*/#include "wxSingleSlider.h"
+*/
+#include "wxSingleSlider.h"
 
 wxSingleSlider::wxSingleSlider(
 	wxWindow *parent,
@@ -43,6 +44,7 @@ wxSingleSlider::wxSingleSlider(
 	use_thumb_color_(false),
 	horizontal_(!(style & wxSL_VERTICAL)),
 	inverse_(style & wxSL_INVERSE),
+	range_style_(0),
 	wxControl(parent, id, pos,
 		wxSize(!(style& wxSL_VERTICAL) ? int(std::round(23 * parent->GetDPIScaleFactor())) : 1,
 			!(style& wxSL_VERTICAL) ? 1 : int(std::round(23* parent->GetDPIScaleFactor()))), wxBORDER_NONE)
@@ -69,7 +71,7 @@ bool wxSingleSlider::SetValue(int val)
 {
 	int old = val_;
 	val_ = val < min_val_ ? min_val_ :
-		(val >= max_val_ ? max_val_ - 1 : val);
+		(val > max_val_ ? max_val_ : val);
 	bool changed = old != val_;
 	if (!changed)
 		return changed;
@@ -154,6 +156,10 @@ void wxSingleSlider::renderNormal(wxDC& dc)
 
 	//left slider:
 	int posl = 0;
+	if (range_style_ == 1)
+		posl = (horizontal_ ? w : h) - margin_ * 2;
+	else if (range_style_ == 2)
+		posl = ((horizontal_ ? w : h) - margin_ * 2) / 2;
 	//right slider:
 	int posr = std::min(max_val_, val_);
 	posr = std::round(double(posr - min_val_) * ((horizontal_ ? w : h) - margin_ * 2) / (max_val_ - min_val_));
@@ -231,6 +237,10 @@ void wxSingleSlider::renderInverse(wxDC& dc)
 
 	//left slider:
 	int posl = 0;
+	if (range_style_ == 1)
+		posl = (horizontal_ ? w : h) - margin_ * 2;
+	else if (range_style_ == 2)
+		posl = ((horizontal_ ? w : h) - margin_ * 2) / 2;
 	//right slider:
 	int posr = std::min(max_val_, val_);
 	posr = std::round(double(posr - min_val_) * ((horizontal_ ? w : h) - margin_ * 2) / (max_val_ - min_val_));
@@ -447,6 +457,11 @@ void wxSingleSlider::OnWheel(wxMouseEvent& event)
 	ProcessWindowEvent(e);
 	wxPostEvent(parent_, e);
 	event.Skip();
+}
+
+void wxSingleSlider::SetRangeStyle(int val)
+{
+	range_style_ = val;
 }
 
 void wxSingleSlider::SetRange(int min_val, int max_val)

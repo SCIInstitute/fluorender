@@ -192,6 +192,7 @@ VPropView::VPropView(VRenderFrame* frame,
 	m_gamma_sldr = new wxSingleSlider(this, ID_GammaSldr, 100, 10, 400,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_INVERSE);
 	m_gamma_sldr->SetRangeColor(wxColor(0, 0, 255));
+	m_gamma_sldr->SetRangeStyle(1);
 	m_gamma_text = new wxTextCtrl(this, ID_GammaText, "1.00",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_fp2);
 	sizer_l1->Add(m_gamma_sldr, 1, wxEXPAND);

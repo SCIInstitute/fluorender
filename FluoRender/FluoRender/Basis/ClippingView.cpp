@@ -355,6 +355,7 @@ m_plane_mode(kNormal)
 	m_x_rot_sldr = new wxSingleSlider(this, ID_XRotSldr, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL|wxSL_INVERSE);
 	m_x_rot_sldr->SetRangeColor(wxColor(0, 0, 255));
+	m_x_rot_sldr->SetRangeStyle(2);
 	m_x_rot_text = new wxTextCtrl(this, ID_XRotText, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_fp1);
 	m_x_rot_spin = new wxSpinButton(this, ID_XRotSpin,
@@ -372,6 +373,7 @@ m_plane_mode(kNormal)
 	m_y_rot_sldr = new wxSingleSlider(this, ID_YRotSldr, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL|wxSL_INVERSE);
 	m_y_rot_sldr->SetRangeColor(wxColor(0, 0, 255));
+	m_y_rot_sldr->SetRangeStyle(2);
 	m_y_rot_text = new wxTextCtrl(this, ID_YRotText, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_fp1);
 	m_y_rot_spin = new wxSpinButton(this, ID_YRotSpin,
@@ -389,6 +391,7 @@ m_plane_mode(kNormal)
 	m_z_rot_sldr = new wxSingleSlider(this, ID_ZRotSldr, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL|wxSL_INVERSE);
 	m_z_rot_sldr->SetRangeColor(wxColor(0, 0, 255));
+	m_z_rot_sldr->SetRangeStyle(2);
 	m_z_rot_text = new wxTextCtrl(this, ID_ZRotText, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_fp1);
 	m_z_rot_spin = new wxSpinButton(this, ID_ZRotSpin,
