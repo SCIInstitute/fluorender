@@ -64,6 +64,9 @@ public:
 	void SetThumbColor(const wxColor& c);
 	void DisableThumbColor();
 
+	bool Disable();
+	virtual bool Enable(bool enable = true);
+
 protected:
 	void paintNow();
 	void render(wxDC& dc);
@@ -80,8 +83,6 @@ private:
 	int val_;
 	int min_val_, max_val_;
 	bool sel_;
-	//int sel_, last_sel_;
-	//int sel_pos_;
 
 	int range_style_;//0-low value;1-high value;2-center
 	bool use_range_color_;

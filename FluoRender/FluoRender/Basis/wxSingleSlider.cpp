@@ -46,8 +46,8 @@ wxSingleSlider::wxSingleSlider(
 	inverse_(style & wxSL_INVERSE),
 	range_style_(0),
 	wxControl(parent, id, pos,
-		wxSize(!(style& wxSL_VERTICAL) ? int(std::round(23 * parent->GetDPIScaleFactor())) : 1,
-			!(style& wxSL_VERTICAL) ? 1 : int(std::round(23* parent->GetDPIScaleFactor()))), wxBORDER_NONE)
+		wxSize(!(style& wxSL_VERTICAL) ? int(std::round(24 * parent->GetDPIScaleFactor())) : 1,
+			!(style& wxSL_VERTICAL) ? 1 : int(std::round(24* parent->GetDPIScaleFactor()))), wxBORDER_NONE)
 {
 	scale_ = parent->GetDPIScaleFactor();
 	margin_ = int(std::round(12 * scale_));
@@ -87,7 +87,7 @@ int wxSingleSlider::GetValue()
 
 wxSize wxSingleSlider::DoGetBestSize()
 {
-	return (wxSize(1,1));
+	return (parent_->FromDIP(wxSize(24,24)));
 }
 
 void wxSingleSlider::OnPaint(wxPaintEvent&)
@@ -164,11 +164,14 @@ void wxSingleSlider::renderNormal(wxDC& dc)
 	int posr = std::min(max_val_, val_);
 	posr = std::round(double(posr - min_val_) * ((horizontal_ ? w : h) - margin_ * 2) / (max_val_ - min_val_));
 
+	bool enabled = IsEnabled();
+	wxColor color;
 	//range color
 	if (use_range_color_)
 	{
-		dc.SetPen(range_color_);
-		dc.SetBrush(range_color_);
+		color = enabled ? range_color_ : *wxBLACK;
+		dc.SetPen(color);
+		dc.SetBrush(color);
 		wxPoint p2h[] = {
 			wxPoint(margin_ + posl, h / 2 - scale_),
 			wxPoint(margin_ + posr, h / 2 - scale_),
@@ -185,23 +188,28 @@ void wxSingleSlider::renderNormal(wxDC& dc)
 		dc.DrawPolygon(num, horizontal_ ? p2h : p2v, wxODDEVEN_RULE);
 	}
 
-	wxColor color = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
-	switch (thumb_state_)
+	if (enabled)
 	{
-	case 0:
-		if (use_thumb_color_)
-			color = thumb_color_;
-		break;
-	case 1:
-		color = wxColor(128, 128, 128);
-		break;
-	case 2:
-		if (use_thumb_color_)
-			color = thumb_color_;
-		else
-			color = *wxLIGHT_GREY;
-		break;
+		color = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
+		switch (thumb_state_)
+		{
+		case 0:
+			if (use_thumb_color_)
+				color = thumb_color_;
+			break;
+		case 1:
+			color = wxColor(128, 128, 128);
+			break;
+		case 2:
+			if (use_thumb_color_)
+				color = thumb_color_;
+			else
+				color = *wxLIGHT_GREY;
+			break;
+		}
 	}
+	else
+		color = *wxLIGHT_GREY;
 
 	if (horizontal_)
 	{
@@ -245,11 +253,14 @@ void wxSingleSlider::renderInverse(wxDC& dc)
 	int posr = std::min(max_val_, val_);
 	posr = std::round(double(posr - min_val_) * ((horizontal_ ? w : h) - margin_ * 2) / (max_val_ - min_val_));
 
+	bool enabled = IsEnabled();
+	wxColor color;
 	//range color
 	if (use_range_color_)
 	{
-		dc.SetPen(range_color_);
-		dc.SetBrush(range_color_);
+		color = enabled ? range_color_ : *wxBLACK;
+		dc.SetPen(color);
+		dc.SetBrush(color);
 		wxPoint p2h[] = {
 			wxPoint(w - margin_ - posl, h / 2 - scale_),
 			wxPoint(w - margin_ - posr, h / 2 - scale_),
@@ -266,23 +277,28 @@ void wxSingleSlider::renderInverse(wxDC& dc)
 		dc.DrawPolygon(num, horizontal_ ? p2h : p2v, wxODDEVEN_RULE);
 	}
 
-	wxColor color = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
-	switch (thumb_state_)
+	if (enabled)
 	{
-	case 0:
-		if (use_thumb_color_)
-			color = thumb_color_;
-		break;
-	case 1:
-		color = wxColor(128, 128, 128);
-		break;
-	case 2:
-		if (use_thumb_color_)
-			color = thumb_color_;
-		else
-			color = *wxLIGHT_GREY;
-		break;
+		color = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
+		switch (thumb_state_)
+		{
+		case 0:
+			if (use_thumb_color_)
+				color = thumb_color_;
+			break;
+		case 1:
+			color = wxColor(128, 128, 128);
+			break;
+		case 2:
+			if (use_thumb_color_)
+				color = thumb_color_;
+			else
+				color = *wxLIGHT_GREY;
+			break;
+		}
 	}
+	else
+		color = *wxLIGHT_GREY;
 
 	if (horizontal_)
 	{
@@ -411,7 +427,8 @@ void wxSingleSlider::OnMotion(wxMouseEvent& event)
 
 void wxSingleSlider::OnLeftUp(wxMouseEvent& event)
 {
-	ReleaseMouse();
+	if (HasCapture())
+		ReleaseMouse();
 	event.Skip();
 
 	if (sel_)
@@ -445,9 +462,9 @@ void wxSingleSlider::OnWheel(wxMouseEvent& event)
 	wxPoint pos = event.GetLogicalPosition(dc);
 
 	if (event.GetWheelRotation() > 0)
-		m=1;
+		m = inverse_ == horizontal_ ? -1 : 1;
 	else
-		m=-1;
+		m = inverse_ == horizontal_ ? 1 : -1;
 
 	SetValue(val_ + m);
 
@@ -502,4 +519,20 @@ void wxSingleSlider::SetThumbColor(const wxColor& c)
 void wxSingleSlider::DisableThumbColor()
 {
 	use_thumb_color_ = false;
+}
+
+bool wxSingleSlider::Disable()
+{
+	bool val = wxControl::Disable();
+	Refresh();
+	Update();
+	return val;
+}
+
+bool wxSingleSlider::Enable(bool enable)
+{
+	bool val = wxControl::Enable(enable);
+	Refresh();
+	Update();
+	return val;
 }

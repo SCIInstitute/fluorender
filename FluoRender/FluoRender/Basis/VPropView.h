@@ -69,8 +69,8 @@ class VPropView: public wxPanel
 		ID_ThreshSync,
 		ID_LeftThreshSldr,
 		ID_LeftThreshText,
-		ID_RightThreshSldr,
 		ID_RightThreshText,
+		ID_ThreshLinkTb,
 		ID_HiShadingSync,
 		ID_HiShadingSldr,
 		ID_HiShadingText,
@@ -83,10 +83,10 @@ class VPropView: public wxPanel
 		ID_SampleText,
 		ID_ColormapSync,
 		ID_ColormapEnableChk,
-		ID_ColormapHighValueSldr,
 		ID_ColormapHighValueText,
 		ID_ColormapLowValueSldr,
 		ID_ColormapLowValueText,
+		ID_ColormapLinkTb,
 
 		ID_ColorText,
 		ID_Color2Text,
@@ -165,8 +165,8 @@ private:
 	wxStaticText *m_threh_st;
 	wxDoubleSlider *m_left_thresh_sldr;
 	wxTextCtrl *m_left_thresh_text;
-	//wxSingleSlider *m_right_thresh_sldr;
 	wxTextCtrl *m_right_thresh_text;
+	wxToolBar* m_thresh_link_tb;
 
 	//3rd line
 	//luminance
@@ -198,10 +198,10 @@ private:
 	wxToolBar *m_shade_tool;
 	//colormap
 	wxToolBar *m_colormap_tool;
-	//wxSingleSlider *m_colormap_high_value_sldr;
 	wxTextCtrl *m_colormap_high_value_text;
 	wxDoubleSlider *m_colormap_low_value_sldr;
 	wxTextCtrl *m_colormap_low_value_text;
+	wxToolBar* m_colormap_link_tb;
 
 	//others
 	//color
@@ -253,8 +253,8 @@ private:
 	void OnThreshSync(wxMouseEvent& event);
 	void OnLeftThreshChange(wxScrollEvent &event);
 	void OnLeftThreshText(wxCommandEvent &event);
-	//void OnRightThreshChange(wxScrollEvent &event);
 	void OnRightThreshText(wxCommandEvent &event);
+	void OnThreshLink(wxCommandEvent& event);
 	//3
 	void OnLuminanceSync(wxMouseEvent& event);
 	void OnLuminanceChange(wxScrollEvent &event);
@@ -283,11 +283,11 @@ private:
 	//colormap
 	void OnColormapSync(wxMouseEvent& event);
 	void OnEnableColormap(wxCommandEvent &event);
-	//void OnColormapHighValueChange(wxScrollEvent &event);
 	void OnColormapHighValueText(wxCommandEvent &event);
 	void OnColormapLowValueChange(wxScrollEvent &event);
 	void OnColormapLowValueText(wxCommandEvent &event);
-	
+	void OnColormapLink(wxCommandEvent& event);
+
 	//others
 	void OnColormapInvBtn(wxCommandEvent &event);
 	void OnColormapCombo(wxCommandEvent &event);

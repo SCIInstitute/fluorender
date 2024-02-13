@@ -186,10 +186,6 @@ private:
 	wxTextCtrl *m_z1_clip_text;
 	//z2
 	wxTextCtrl *m_z2_clip_text;
-	//keep 1 panel for sizing reasons
-	//wxPanel * m_xpanel;
-	//highlighters
-	//wxStaticText * m_xBar, * m_yBar, * m_zBar;
 
 	wxToolBar *m_linkx_tb;
 	wxToolBar* m_linky_tb;

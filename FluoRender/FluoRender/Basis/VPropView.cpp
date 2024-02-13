@@ -60,10 +60,9 @@ BEGIN_EVENT_TABLE(VPropView, wxPanel)
 	EVT_COMMAND_SCROLL(ID_SaturationSldr, VPropView::OnSaturationChange)
 	EVT_TEXT(ID_SaturationText, VPropView::OnSaturationText)
 	EVT_COMMAND_SCROLL(ID_LeftThreshSldr, VPropView::OnLeftThreshChange)
-	//EVT_COMMAND(ID_LeftThreshSldr, wxEVT_SCROLL_CHANGED, VPropView::OnLeftThreshChange)
 	EVT_TEXT(ID_LeftThreshText, VPropView::OnLeftThreshText)
-	//EVT_COMMAND_SCROLL(ID_RightThreshSldr, VPropView::OnRightThreshChange)
 	EVT_TEXT(ID_RightThreshText, VPropView::OnRightThreshText)
+	EVT_TOOL(ID_ThreshLinkTb, VPropView::OnThreshLink)
 	//3
 	EVT_COMMAND_SCROLL(ID_LuminanceSldr, VPropView::OnLuminanceChange)
 	EVT_TEXT(ID_LuminanceText, VPropView::OnLuminanceText)
@@ -87,6 +86,7 @@ BEGIN_EVENT_TABLE(VPropView, wxPanel)
 	EVT_TEXT(ID_ColormapHighValueText, VPropView::OnColormapHighValueText)
 	EVT_COMMAND_SCROLL(ID_ColormapLowValueSldr, VPropView::OnColormapLowValueChange)
 	EVT_TEXT(ID_ColormapLowValueText, VPropView::OnColormapLowValueText)
+	EVT_TOOL(ID_ColormapLinkTb, VPropView::OnColormapLink)
 	EVT_TOGGLEBUTTON(ID_ColormapInvBtn, VPropView::OnColormapInvBtn)
 	EVT_COMBOBOX(ID_ColormapCombo, VPropView::OnColormapCombo)
 	EVT_COMBOBOX(ID_ColormapCombo2, VPropView::OnColormapCombo2)
@@ -322,10 +322,16 @@ VPropView::VPropView(VRenderFrame* frame,
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_int);
 	m_right_thresh_text = new wxTextCtrl(this, ID_RightThreshText, "230",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_int);
+	m_thresh_link_tb = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	m_thresh_link_tb->AddCheckTool(ID_ThreshLinkTb, "Lock Threshold Range",
+		wxGetBitmapFromMemory(unlink), wxNullBitmap, "Lock Threshold Range");
 	sizer_m2->Add(m_threh_st, 0, wxALIGN_CENTER);
 	sizer_m2->Add(m_left_thresh_text, 0, wxALIGN_CENTER);
 	sizer_m2->Add(m_left_thresh_sldr, 1, wxEXPAND);
 	sizer_m2->Add(m_right_thresh_text, 0, wxALIGN_CENTER);
+	sizer_m2->Add(m_thresh_link_tb, 0, wxALIGN_CENTER, 0);
+	m_thresh_link_tb->Realize();
 	//shadow
 	m_shadow_tool = new wxToolBar(this, ID_ShadowSync,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -405,10 +411,12 @@ VPropView::VPropView(VRenderFrame* frame,
 		ID_ColormapHighValueText, "255",
 		wxDefaultPosition + wxPoint(10,0), FromDIP(wxSize(50, 20)), 0, vald_int);
 	sizer_m5->Add(m_colormap_high_value_text, 0, wxALIGN_CENTER);
-	//m_colormap_high_value_sldr = new wxSingleSlider(this, 
-	//	ID_ColormapHighValueSldr, 255, 0, 255,
-	//	wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	//sizer_m5->Add(m_colormap_high_value_sldr, 1, wxEXPAND);
+	m_colormap_link_tb = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	m_colormap_link_tb->AddCheckTool(ID_ColormapLinkTb, "Lock Colormap Range",
+		wxGetBitmapFromMemory(unlink), wxNullBitmap, "Lock Colormap Range");
+	sizer_m5->Add(m_colormap_link_tb, 0, wxALIGN_CENTER, 0);
+	m_colormap_link_tb->Realize();
 
 	//right ///////////////////////////////////////////////////
 	m_options_toolbar = new wxToolBar(this,wxID_ANY,
@@ -593,20 +601,31 @@ VPropView::VPropView(VRenderFrame* frame,
 
 	//ADD COLUMNS//////////////////////////////////////
 	//left
+	sizer_left->Add(3, 3, 0);
 	sizer_left->Add(sizer_l1, 0, wxEXPAND);
+	sizer_left->Add(3, 3, 0);
 	sizer_left->Add(sizer_l2, 0, wxEXPAND);
+	sizer_left->Add(3, 3, 0);
 	sizer_left->Add(sizer_l3, 0, wxEXPAND);
+	sizer_left->Add(3, 3, 0);
 	sizer_left->Add(sizer_l4, 0, wxEXPAND);
+	sizer_left->Add(3, 3, 0);
 	sizer_left->Add(sizer_l5, 0, wxEXPAND);
 	//middle
+	sizer_middle->Add(3, 3, 0);
 	sizer_middle->Add(sizer_m1, 0, wxEXPAND);
+	sizer_middle->Add(3, 3, 0);
 	sizer_middle->Add(sizer_m2, 0, wxEXPAND);
+	sizer_middle->Add(3, 3, 0);
 	sizer_middle->Add(sizer_m3, 0, wxEXPAND);
+	sizer_middle->Add(3, 3, 0);
 	sizer_middle->Add(sizer_m4, 0, wxEXPAND);
+	sizer_middle->Add(3, 3, 0);
 	sizer_middle->Add(sizer_m5, 0, wxEXPAND);
 	//right
+	sizer_right->Add(3, 3, 0);
 	sizer_right->Add(sizer_r1, 0, wxEXPAND);
-	sizer_right->Add(-1, 3);
+	sizer_right->Add(3, 3, 0);
 	sizer_right->Add(sizer_r2, 0, wxEXPAND);
 	sizer_right->Add(sizer_r3, 0, wxEXPAND);
 	sizer_right->Add(sizer_r4, 0, wxEXPAND);
@@ -670,7 +689,7 @@ void VPropView::GetSettings()
 		vald_i->SetMin(0);
 	dval = m_vd->GetLeftThresh();
 	ival = int(dval*m_max_val+0.5);
-	//m_left_thresh_sldr->SetRange(0, int(m_max_val));
+	m_left_thresh_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
 	m_left_thresh_sldr->SetLowValue(ival);
 	m_left_thresh_text->ChangeValue(str);
@@ -1200,6 +1219,20 @@ void VPropView::OnRightThreshText(wxCommandEvent &event)
 
 }
 
+void VPropView::OnThreshLink(wxCommandEvent& event)
+{
+	bool val = m_left_thresh_sldr->GetLink();
+	val = !val;
+	m_left_thresh_sldr->SetLink(val);
+	m_thresh_link_tb->ToggleTool(ID_ThreshLinkTb, val);
+	if (val)
+		m_thresh_link_tb->SetToolNormalBitmap(ID_ThreshLinkTb,
+			wxGetBitmapFromMemory(link));
+	else
+		m_thresh_link_tb->SetToolNormalBitmap(ID_ThreshLinkTb,
+			wxGetBitmapFromMemory(unlink));
+}
+
 //3
 void VPropView::OnLuminanceSync(wxMouseEvent& event)
 {
@@ -1566,21 +1599,6 @@ void VPropView::OnEnableColormap(wxCommandEvent &event)
 	RefreshVRenderViews(false, true);
 }
 
-//void VPropView::OnColormapHighValueChange(wxScrollEvent &event)
-//{
-//	int iVal = m_colormap_low_value_sldr->GetHighValue();
-//	int iVal2 = m_colormap_low_value_sldr->GetLowValue();
-//
-//	//if (iVal < iVal2)
-//	//{
-//	//	iVal = iVal2;
-//	//	m_colormap_high_value_sldr->SetValue(iVal);
-//	//}
-//	wxString str = wxString::Format("%d", iVal);
-//	if (str != m_colormap_high_value_text->GetValue())
-//		m_colormap_high_value_text->SetValue(str);
-//}
-
 void VPropView::OnColormapHighValueText(wxCommandEvent &event)
 {
 	wxString str = m_colormap_high_value_text->GetValue();
@@ -1659,6 +1677,20 @@ void VPropView::OnColormapLowValueText(wxCommandEvent &event)
 	}
 
 	RefreshVRenderViews(false, true);
+}
+
+void VPropView::OnColormapLink(wxCommandEvent& event)
+{
+	bool val = m_colormap_low_value_sldr->GetLink();
+	val = !val;
+	m_colormap_low_value_sldr->SetLink(val);
+	m_colormap_link_tb->ToggleTool(ID_ColormapLinkTb, val);
+	if (val)
+		m_colormap_link_tb->SetToolNormalBitmap(ID_ColormapLinkTb,
+			wxGetBitmapFromMemory(link));
+	else
+		m_colormap_link_tb->SetToolNormalBitmap(ID_ColormapLinkTb,
+			wxGetBitmapFromMemory(unlink));
 }
 
 void VPropView::OnColormapInvBtn(wxCommandEvent &event)

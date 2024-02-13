@@ -140,7 +140,7 @@ m_plane_mode(kNormal)
 
 	//sliders for clipping planes
 	bool inverse_slider = frame->GetSettingDlg()->GetInverseSlider();
-	long ls = inverse_slider ? (wxSL_VERTICAL | wxSL_INVERSE) : wxSL_VERTICAL;
+	long ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
 	//x
 	wxBoxSizer* sizer_cx = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(this, 0, "X");
@@ -162,17 +162,17 @@ m_plane_mode(kNormal)
 	sizer_cx->Add(st, 0, wxALIGN_CENTER, 0);
 	if (inverse_slider)
 	{
-		sizer_cx->Add(m_x2_clip_text, 0, wxALIGN_CENTER, 0);
+		sizer_cx->Add(m_x1_clip_text, 0, wxALIGN_CENTER, 0);
 		sizer_cx->Add(5, 5, 0);
 		sizer_cx->Add(m_x1_clip_sldr, 1, wxEXPAND, 0);
-		sizer_cx->Add(m_x1_clip_text, 0, wxALIGN_CENTER, 0);
+		sizer_cx->Add(m_x2_clip_text, 0, wxALIGN_CENTER, 0);
 	}
 	else
 	{
-		sizer_cx->Add(m_x1_clip_text, 0, wxALIGN_CENTER, 0);
+		sizer_cx->Add(m_x2_clip_text, 0, wxALIGN_CENTER, 0);
 		sizer_cx->Add(5, 5, 0);
 		sizer_cx->Add(m_x1_clip_sldr, 1, wxEXPAND, 0);
-		sizer_cx->Add(m_x2_clip_text, 0, wxALIGN_CENTER, 0);
+		sizer_cx->Add(m_x1_clip_text, 0, wxALIGN_CENTER, 0);
 	}
 	sizer_cx->Add(5, 5, 0);
 	sizer_cx->Add(m_linkx_tb, 0, wxALIGN_CENTER, 0);
@@ -199,17 +199,17 @@ m_plane_mode(kNormal)
 	sizer_cy->Add(st, 0, wxALIGN_CENTER, 0);
 	if (inverse_slider)
 	{
-		sizer_cy->Add(m_y2_clip_text, 0, wxALIGN_CENTER, 0);
+		sizer_cy->Add(m_y1_clip_text, 0, wxALIGN_CENTER, 0);
 		sizer_cy->Add(5, 5, 0);
 		sizer_cy->Add(m_y1_clip_sldr, 1, wxEXPAND, 0);
-		sizer_cy->Add(m_y1_clip_text, 0, wxALIGN_CENTER, 0);
+		sizer_cy->Add(m_y2_clip_text, 0, wxALIGN_CENTER, 0);
 	}
 	else
 	{
-		sizer_cy->Add(m_y1_clip_text, 0, wxALIGN_CENTER, 0);
+		sizer_cy->Add(m_y2_clip_text, 0, wxALIGN_CENTER, 0);
 		sizer_cy->Add(5, 5, 0);
 		sizer_cy->Add(m_y1_clip_sldr, 1, wxEXPAND, 0);
-		sizer_cy->Add(m_y2_clip_text, 0, wxALIGN_CENTER, 0);
+		sizer_cy->Add(m_y1_clip_text, 0, wxALIGN_CENTER, 0);
 	}
 	sizer_cy->Add(5, 5, 0);
 	sizer_cy->Add(m_linky_tb, 0, wxALIGN_CENTER, 0);
@@ -236,17 +236,17 @@ m_plane_mode(kNormal)
 	sizer_cz->Add(st, 0, wxALIGN_CENTER, 0);
 	if (inverse_slider)
 	{
-		sizer_cz->Add(m_z2_clip_text, 0, wxALIGN_CENTER, 0);
+		sizer_cz->Add(m_z1_clip_text, 0, wxALIGN_CENTER, 0);
 		sizer_cz->Add(5, 5, 0);
 		sizer_cz->Add(m_z1_clip_sldr, 1, wxEXPAND, 0);
-		sizer_cz->Add(m_z1_clip_text, 0, wxALIGN_CENTER, 0);
+		sizer_cz->Add(m_z2_clip_text, 0, wxALIGN_CENTER, 0);
 	}
 	else
 	{
-		sizer_cz->Add(m_z1_clip_text, 0, wxALIGN_CENTER, 0);
+		sizer_cz->Add(m_z2_clip_text, 0, wxALIGN_CENTER, 0);
 		sizer_cz->Add(5, 5, 0);
 		sizer_cz->Add(m_z1_clip_sldr, 1, wxEXPAND, 0);
-		sizer_cz->Add(m_z2_clip_text, 0, wxALIGN_CENTER, 0);
+		sizer_cz->Add(m_z1_clip_text, 0, wxALIGN_CENTER, 0);
 	}
 	sizer_cz->Add(5, 5, 0);
 	sizer_cz->Add(m_linkz_tb, 0, wxALIGN_CENTER, 0);
@@ -348,12 +348,13 @@ m_plane_mode(kNormal)
 	sizer_8->Add(5, 5, 0);
 	sizer_8->Add(m_rot_reset_btn, 0, wxALIGN_CENTER);
 
+	ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
 	//sliders for rotating clipping planes 
 	//x
 	wxBoxSizer* sizer_rx = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(this, 0, "X");
 	m_x_rot_sldr = new wxSingleSlider(this, ID_XRotSldr, 0, -180, 180,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL|wxSL_INVERSE);
+		wxDefaultPosition, wxDefaultSize, ls);
 	m_x_rot_sldr->SetRangeColor(wxColor(0, 0, 255));
 	m_x_rot_sldr->SetRangeStyle(2);
 	m_x_rot_text = new wxTextCtrl(this, ID_XRotText, "0.0",
@@ -371,7 +372,7 @@ m_plane_mode(kNormal)
 	wxBoxSizer* sizer_ry = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(this, 0, "Y");
 	m_y_rot_sldr = new wxSingleSlider(this, ID_YRotSldr, 0, -180, 180,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL|wxSL_INVERSE);
+		wxDefaultPosition, wxDefaultSize, ls);
 	m_y_rot_sldr->SetRangeColor(wxColor(0, 0, 255));
 	m_y_rot_sldr->SetRangeStyle(2);
 	m_y_rot_text = new wxTextCtrl(this, ID_YRotText, "0.0",
@@ -389,7 +390,7 @@ m_plane_mode(kNormal)
 	wxBoxSizer* sizer_rz = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(this, 0, "Z");
 	m_z_rot_sldr = new wxSingleSlider(this, ID_ZRotSldr, 0, -180, 180,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL|wxSL_INVERSE);
+		wxDefaultPosition, wxDefaultSize, ls);
 	m_z_rot_sldr->SetRangeColor(wxColor(0, 0, 255));
 	m_z_rot_sldr->SetRangeStyle(2);
 	m_z_rot_text = new wxTextCtrl(this, ID_ZRotText, "0.0",
@@ -404,7 +405,6 @@ m_plane_mode(kNormal)
 	sizer_rz->Add(m_z_rot_spin, 0, wxALIGN_CENTER, 0);
 	sizer_rz->Add(m_z_rot_sldr, 1, wxEXPAND, 0);
 	
-
 	//sizer 9
 	wxBoxSizer *sizer_9 = new wxBoxSizer(wxHORIZONTAL);
 	sizer_9->Add(sizer_rx, 1, wxEXPAND);
@@ -657,8 +657,6 @@ void ClippingView::GetSettings(VRenderGLView* view)
 	plane->get_copy(abcd);
 	val = fabs(abcd[3]*resx)+0.499;
 	m_x1_clip_sldr->SetLowValue(val);
-	double percent = (double)val/(double)m_x1_clip_sldr->GetMax();
-	int barsize = (m_x1_clip_sldr->GetSize().GetHeight() - 20);
 	str = wxString::Format("%d", val);
 	m_x1_clip_text->ChangeValue(str);
 	//x2
@@ -673,8 +671,6 @@ void ClippingView::GetSettings(VRenderGLView* view)
 	plane->get_copy(abcd);
 	val = fabs(abcd[3]*resy)+0.499;
 	m_y1_clip_sldr->SetLowValue(val);
-	percent = (double)val/(double)m_y1_clip_sldr->GetMax();
-	barsize = (m_y1_clip_sldr->GetSize().GetHeight() - 20);
 	str = wxString::Format("%d", val);
 	m_y1_clip_text->ChangeValue(str);
 	//y2
@@ -689,8 +685,6 @@ void ClippingView::GetSettings(VRenderGLView* view)
 	plane->get_copy(abcd);
 	val = fabs(abcd[3]*resz)+0.499;
 	m_z1_clip_sldr->SetLowValue(val);
-	percent = (double)val/(double)m_z1_clip_sldr->GetMax();
-	barsize = (m_z1_clip_sldr->GetSize().GetHeight() - 20);
 	str = wxString::Format("%d", val);
 	m_z1_clip_text->ChangeValue(str);
 	//z2
@@ -864,13 +858,6 @@ void ClippingView::OnClipResetBtn(wxCommandEvent &event)
 	SetZLink(false);
 
 	//controls
-	//sliders
-	m_x1_clip_sldr->SetLowValue(0);
-	m_x1_clip_sldr->SetHighValue(resx);
-	m_y1_clip_sldr->SetLowValue(0);
-	m_y1_clip_sldr->SetHighValue(resy);
-	m_z1_clip_sldr->SetLowValue(0);
-	m_z1_clip_sldr->SetHighValue(resz);
 	//texts
 	m_x1_clip_text->SetValue("0");
 	m_x2_clip_text->SetValue(wxString::Format("%d", resx));
