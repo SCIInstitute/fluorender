@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Color.h>
 #include <wx/wx.h>
 #include <wx/panel.h>
-#include <wx/slider.h>
 
 //all convert v1 to v2
 #define GammaUI2(v1, v2) \
@@ -57,6 +56,7 @@ class VRenderFrame;
 class VRenderGLView;
 class VolumeData;
 class DataGroup;
+class wxSingleSlider;
 class AdjustView: public wxPanel
 {
 	enum
@@ -177,9 +177,9 @@ private:
 	//sync red
 	wxToolBar *m_sync_r_chk;
 	//red sliders
-	wxSlider *m_r_gamma_sldr;
-	wxSlider *m_r_brightness_sldr;
-	wxSlider *m_r_hdr_sldr;
+	wxSingleSlider *m_r_gamma_sldr;
+	wxSingleSlider *m_r_brightness_sldr;
+	wxSingleSlider *m_r_hdr_sldr;
 	//red reset buttons
 	wxButton *m_r_reset_btn;
 	//wxButton *m_r_brightness_reset_btn;
@@ -191,9 +191,9 @@ private:
 	//sync green
 	wxToolBar *m_sync_g_chk;
 	//green sliders
-	wxSlider *m_g_gamma_sldr;
-	wxSlider *m_g_brightness_sldr;
-	wxSlider *m_g_hdr_sldr;
+	wxSingleSlider *m_g_gamma_sldr;
+	wxSingleSlider *m_g_brightness_sldr;
+	wxSingleSlider *m_g_hdr_sldr;
 	//green reset buttons
 	wxButton *m_g_reset_btn;
 	//wxButton *m_g_brightness_reset_btn;
@@ -205,9 +205,9 @@ private:
 	//sync blue
 	wxToolBar *m_sync_b_chk;
 	//blue sliders
-	wxSlider *m_b_gamma_sldr;
-	wxSlider *m_b_brightness_sldr;
-	wxSlider *m_b_hdr_sldr;
+	wxSingleSlider *m_b_gamma_sldr;
+	wxSingleSlider *m_b_brightness_sldr;
+	wxSingleSlider *m_b_hdr_sldr;
 	//blue reset buttons
 	wxButton *m_b_reset_btn;
 	//wxButton *m_b_brightness_reset_btn;

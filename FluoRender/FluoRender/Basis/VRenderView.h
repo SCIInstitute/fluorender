@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderGLView.h"
 
 class VRenderFrame;
+class wxSingleSlider;
 class VRenderView: public wxPanel
 {
 public:
@@ -135,10 +136,10 @@ public:
 	wxPanel* m_panel_1;
 	wxColourPickerCtrl *m_bg_color_picker;
 	wxButton* m_bg_inv_btn;
-	wxSlider* m_aov_sldr;
+	wxSingleSlider* m_aov_sldr;
 	wxTextCtrl* m_aov_text;
 	wxToolBar * m_options_toolbar;
-	//wxToolBar * m_options_toolbar2;
+	wxToolBar * m_options_toolbar2;
 	wxToolBar * m_left_toolbar;
 	wxToolBar * m_right_toolbar2;
 	wxToolBar * m_lower_toolbar;
@@ -162,7 +163,7 @@ public:
 
 	//left bar///////////////////////////////////////////////////
 	wxPanel* m_panel_3;
-	wxSlider *m_depth_atten_factor_sldr;
+	wxSingleSlider *m_depth_atten_factor_sldr;
 	wxToolBar *m_depth_atten_reset_btn;
 	wxTextCtrl *m_depth_atten_factor_text;
 
@@ -172,7 +173,7 @@ public:
 	wxToolBar *m_pin_btn;
 	wxToolBar *m_center_btn;
 	wxToolBar *m_scale_121_btn;
-	wxSlider *m_scale_factor_sldr;
+	wxSingleSlider *m_scale_factor_sldr;
 	wxTextCtrl *m_scale_factor_text;
 	wxToolBar *m_scale_mode_btn;
 	wxToolBar *m_scale_reset_btn;

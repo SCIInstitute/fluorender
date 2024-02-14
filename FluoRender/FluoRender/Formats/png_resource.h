@@ -49,7 +49,7 @@ inline wxBitmap _wxGetBitmap(const unsigned char* data, int length, double f)
 	wxMemoryInputStream is(data, length);
 	wxImage image(is, wxBITMAP_TYPE_ANY, -1);
 	if (f < 0.9 || f > 1.1)
-		image.Rescale(image.GetWidth() * f, image.GetHeight() * f, wxIMAGE_QUALITY_NEAREST);
+		image.Rescale(image.GetWidth() * f, image.GetHeight() * f, wxIMAGE_QUALITY_HIGH);
 	return wxBitmap(image, -1);
 }
 

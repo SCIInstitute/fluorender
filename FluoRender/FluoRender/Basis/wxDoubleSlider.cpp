@@ -39,14 +39,15 @@ wxDoubleSlider::wxDoubleSlider(wxWindow *parent,
 		const wxString& name):
 	parent_(parent),
 	id_(id),
-	use_range_color_(false),
+	use_range_color_(true),
+	range_color_(wxColor(100, 149, 237)),
 	use_thumb_color_(false),
 	horizontal_(!(style & wxSL_VERTICAL)),
 	inverse_(style & wxSL_INVERSE),
 	link_(false),
 	wxControl(parent, id, pos,
-		wxSize(!(style& wxSL_VERTICAL) ? int(std::round(24 * parent->GetDPIScaleFactor())) : 1,
-			!(style& wxSL_VERTICAL) ? 1 : int(std::round(24* parent->GetDPIScaleFactor()))), wxBORDER_NONE)
+		wxSize(std::max(size.GetWidth(), int(std::round(24 * parent->GetDPIScaleFactor()))),
+			std::max(size.GetHeight(), int(std::round(24 * parent->GetDPIScaleFactor())))), wxBORDER_NONE)
 {
 	scale_ = parent->GetDPIScaleFactor();
 	margin_ = int(std::round(12 * scale_));

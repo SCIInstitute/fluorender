@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "AdjustView.h"
 #include "VRenderFrame.h"
 #include <DataManager.h>
+#include <wxSingleSlider.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include "png_resource.h"
@@ -101,6 +102,8 @@ m_dft_sync_b(false)
 	wxIntegerValidator<int> vald_int;
 	vald_int.SetRange(-256, 256);
 
+	bool inverse_slider = m_frame->GetSettingDlg()->GetInverseSlider();
+	long ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
 	wxBoxSizer *sizer_v = new wxBoxSizer(wxVERTICAL);
 	wxStaticText *st;
 
@@ -148,14 +151,15 @@ m_dft_sync_b(false)
 
 	//fourth line: sliders
 	wxBoxSizer *sizer_h_3 = new wxBoxSizer(wxHORIZONTAL);
-	m_r_gamma_sldr = new wxSlider(this, ID_RGammaSldr, 100, 10, 400,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+	m_r_gamma_sldr = new wxSingleSlider(this, ID_RGammaSldr, 100, 10, 400,
+		wxDefaultPosition, wxDefaultSize, ls);
 	sizer_h_3->Add(m_r_gamma_sldr, 1, wxEXPAND);
-	m_r_brightness_sldr = new wxSlider(this, ID_RBrightnessSldr, 0, -256, 256,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+	m_r_brightness_sldr = new wxSingleSlider(this, ID_RBrightnessSldr, 0, -256, 256,
+		wxDefaultPosition, wxDefaultSize, ls);
+	m_r_brightness_sldr->SetRangeStyle(2);
 	sizer_h_3->Add(m_r_brightness_sldr, 1, wxEXPAND);
-	m_r_hdr_sldr = new wxSlider(this, ID_RHdrSldr, 0, 0, 100,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+	m_r_hdr_sldr = new wxSingleSlider(this, ID_RHdrSldr, 0, 0, 100,
+		wxDefaultPosition, wxDefaultSize, ls);
 	sizer_h_3->Add(m_r_hdr_sldr, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_3, 1, wxEXPAND);
 
@@ -216,14 +220,15 @@ m_dft_sync_b(false)
 
 	//9th line: sliders
 	wxBoxSizer *sizer_h_7 = new wxBoxSizer(wxHORIZONTAL);
-	m_g_gamma_sldr = new wxSlider(this, ID_GGammaSldr, 100, 10, 400,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+	m_g_gamma_sldr = new wxSingleSlider(this, ID_GGammaSldr, 100, 10, 400,
+		wxDefaultPosition, wxDefaultSize, ls);
 	sizer_h_7->Add(m_g_gamma_sldr, 1, wxEXPAND);
-	m_g_brightness_sldr = new wxSlider(this, ID_GBrightnessSldr, 0, -256, 256,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+	m_g_brightness_sldr = new wxSingleSlider(this, ID_GBrightnessSldr, 0, -256, 256,
+		wxDefaultPosition, wxDefaultSize, ls);
+	m_g_brightness_sldr->SetRangeStyle(2);
 	sizer_h_7->Add(m_g_brightness_sldr, 1, wxEXPAND);
-	m_g_hdr_sldr = new wxSlider(this, ID_GHdrSldr, 0, 0, 100,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+	m_g_hdr_sldr = new wxSingleSlider(this, ID_GHdrSldr, 0, 0, 100,
+		wxDefaultPosition, wxDefaultSize, ls);
 	sizer_h_7->Add(m_g_hdr_sldr, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_7, 1, wxEXPAND);
 
@@ -284,14 +289,15 @@ m_dft_sync_b(false)
 
 	//14th line: sliders
 	wxBoxSizer *sizer_h_11 = new wxBoxSizer(wxHORIZONTAL);
-	m_b_gamma_sldr = new wxSlider(this, ID_BGammaSldr, 100, 10, 400,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+	m_b_gamma_sldr = new wxSingleSlider(this, ID_BGammaSldr, 100, 10, 400,
+		wxDefaultPosition, wxDefaultSize, ls);
 	sizer_h_11->Add(m_b_gamma_sldr, 1, wxEXPAND);
-	m_b_brightness_sldr = new wxSlider(this, ID_BBrightnessSldr, 0, -256, 256,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+	m_b_brightness_sldr = new wxSingleSlider(this, ID_BBrightnessSldr, 0, -256, 256,
+		wxDefaultPosition, wxDefaultSize, ls);
+	m_b_brightness_sldr->SetRangeStyle(2);
 	sizer_h_11->Add(m_b_brightness_sldr, 1, wxEXPAND);
-	m_b_hdr_sldr = new wxSlider(this, ID_BHdrSldr, 0, 0, 100,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+	m_b_hdr_sldr = new wxSingleSlider(this, ID_BHdrSldr, 0, 0, 100,
+		wxDefaultPosition, wxDefaultSize, ls);
 	sizer_h_11->Add(m_b_hdr_sldr, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_11, 1, wxEXPAND);
 
@@ -610,7 +616,7 @@ void AdjustView::SetGroupLink(DataGroup *group)
 
 void AdjustView::OnRGammaChange(wxScrollEvent & event)
 {
-	double val = (double)event.GetPosition() / 100.0;
+	double val = m_r_gamma_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
 	if (str != m_r_gamma_text->GetValue())
 		m_r_gamma_text->SetValue(str);
@@ -678,7 +684,7 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 
 void AdjustView::OnGGammaChange(wxScrollEvent & event)
 {
-	double val = (double)event.GetPosition() / 100.0;
+	double val = m_g_gamma_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
 	if (str != m_g_gamma_text->GetValue())
 		m_g_gamma_text->SetValue(str);
@@ -746,7 +752,7 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 
 void AdjustView::OnBGammaChange(wxScrollEvent & event)
 {
-	double val = (double)event.GetPosition() / 100.0;
+	double val = m_b_gamma_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
 	if (str != m_b_gamma_text->GetValue())
 		m_b_gamma_text->SetValue(str);
@@ -815,7 +821,7 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 //brightness
 void AdjustView::OnRBrightnessChange(wxScrollEvent & event)
 {
-	double val = (double)event.GetPosition();
+	double val = m_r_brightness_sldr->GetValue();
 	wxString str = wxString::Format("%d", int(val));
 	if (str != m_r_brightness_text->GetValue())
 		m_r_brightness_text->SetValue(str);
@@ -883,7 +889,7 @@ void AdjustView::OnRBrightnessText(wxCommandEvent& event)
 
 void AdjustView::OnGBrightnessChange(wxScrollEvent & event)
 {
-	double val = (double)event.GetPosition();
+	double val = m_g_brightness_sldr->GetValue();
 	wxString str = wxString::Format("%d", int(val));
 	if (str != m_g_brightness_text->GetValue())
 		m_g_brightness_text->SetValue(str);
@@ -951,7 +957,7 @@ void AdjustView::OnGBrightnessText(wxCommandEvent& event)
 
 void AdjustView::OnBBrightnessChange(wxScrollEvent & event)
 {
-	double val = (double)event.GetPosition();
+	double val = m_b_brightness_sldr->GetValue();
 	wxString str = wxString::Format("%d", int(val));
 	if (str != m_b_brightness_text->GetValue())
 		m_b_brightness_text->SetValue(str);
@@ -1019,7 +1025,7 @@ void AdjustView::OnBBrightnessText(wxCommandEvent& event)
 
 void AdjustView::OnRHdrChange(wxScrollEvent &event)
 {
-	double val = (double)event.GetPosition() / 100.0;
+	double val = m_r_hdr_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
 	if (str != m_r_hdr_text->GetValue())
 		m_r_hdr_text->SetValue(str);
@@ -1087,7 +1093,7 @@ void AdjustView::OnRHdrText(wxCommandEvent &event)
 
 void AdjustView::OnGHdrChange(wxScrollEvent &event)
 {
-	double val = (double)event.GetPosition() / 100.0;
+	double val = m_g_hdr_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
 	if (str != m_g_hdr_text->GetValue())
 		m_g_hdr_text->SetValue(str);
@@ -1155,7 +1161,7 @@ void AdjustView::OnGHdrText(wxCommandEvent &event)
 
 void AdjustView::OnBHdrChange(wxScrollEvent &event)
 {
-	double val = (double)event.GetPosition() / 100.0;
+	double val = m_b_hdr_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
 	if (str != m_b_hdr_text->GetValue())
 		m_b_hdr_text->SetValue(str);

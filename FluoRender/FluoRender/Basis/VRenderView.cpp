@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderView.h"
 #include "VRenderFrame.h"
 #include <tiffio.h>
+#include <wxSingleSlider.h>
 #include <wx/utils.h>
 #include <wx/valnum.h>
 #include <algorithm>
@@ -346,6 +347,7 @@ void VRenderView::CreateBar()
 	wxBoxSizer* sizer_m = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText *st1, *st2, *st3;
 
+	bool inverse_slider = ((VRenderFrame*)m_frame)->GetSettingDlg()->GetInverseSlider();
 	//bar top///////////////////////////////////////////////////
 	//toolbar 1
 	m_options_toolbar = new wxToolBar(this,wxID_ANY,
@@ -473,72 +475,84 @@ void VRenderView::CreateBar()
 	m_options_toolbar->AddControl(m_scale_text);
 	m_options_toolbar->AddControl(m_scale_cmb);
 
+	sizer_h_1->Add(40, 40);
+	sizer_h_1->Add(m_options_toolbar, 1, wxALIGN_CENTER);
+	m_options_toolbar->Realize();
+
 	//m_options_toolbar->Realize();
-#ifndef _DARWIN
-	m_options_toolbar->AddStretchableSpace();
-#endif
+//#ifndef _DARWIN
+//	m_options_toolbar->AddStretchableSpace();
+//#endif
+	sizer_h_1->AddStretchSpacer(1);
 
 	//background option
-	m_bg_color_picker = new wxColourPickerCtrl(m_options_toolbar,
+	m_bg_color_picker = new wxColourPickerCtrl(this,
 		ID_BgColorPicker, wxColor(), wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	wxSize bs = m_bg_color_picker->GetSize();
-	m_bg_inv_btn = new wxButton(m_options_toolbar, ID_BgInvBtn, L"\u262f",
+	m_bg_inv_btn = new wxButton(this, ID_BgInvBtn, L"\u262f",
 		wxDefaultPosition, FromDIP(wxSize(20, 20)));
 	wxFont font(15 * GetDPIScaleFactor(), wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
 	m_bg_inv_btn->SetFont(font);
-	m_options_toolbar->AddControl(m_bg_color_picker);
-	m_options_toolbar->AddControl(m_bg_inv_btn);
+	sizer_h_1->Add(m_bg_color_picker, 0, wxALIGN_CENTER);
+	sizer_h_1->Add(m_bg_inv_btn, 0, wxALIGN_CENTER);
+	//m_options_toolbar->AddControl(m_bg_color_picker);
+	//m_options_toolbar->AddControl(m_bg_inv_btn);
 
-#ifndef _DARWIN
-	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(1, tbs.y-2)));
-	stb->SetBackgroundColour(wxColour(128, 128, 128));
-	m_options_toolbar->AddControl(stb);
-#endif
+//#ifndef _DARWIN
+//	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
+//		wxDefaultPosition, FromDIP(wxSize(1, tbs.y-2)));
+//	stb->SetBackgroundColour(wxColour(128, 128, 128));
+//	m_options_toolbar->AddControl(stb);
+//#endif
 
 	//angle of view
-	st2 = new wxStaticText(m_options_toolbar, wxID_ANY, "Projection:");
-	m_aov_sldr = new wxSlider(m_options_toolbar, ID_AovSldr, 45, 10, 100,
-		wxDefaultPosition, FromDIP(wxSize(180, 20)), wxSL_HORIZONTAL);
+	st2 = new wxStaticText(this, wxID_ANY, "Projection:");
+	m_aov_sldr = new wxSingleSlider(this, ID_AovSldr, 45, 10, 100,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_aov_sldr->SetValue(m_glview->GetPersp()? m_glview->GetAov():10);
 	m_aov_sldr->Connect(wxID_ANY, wxEVT_IDLE,
 		wxIdleEventHandler(VRenderView::OnAovSldrIdle),
 		NULL, this);
-	m_aov_text = new wxTextCtrl(m_options_toolbar, ID_AovText, "",
+	m_aov_text = new wxTextCtrl(this, ID_AovText, "",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), 0, vald_int);
 	m_aov_text->ChangeValue(m_glview->GetPersp()?wxString::Format("%d",
 		int(m_glview->GetAov())):wxString("Ortho"));
-	m_options_toolbar->AddControl(st2);
-	m_options_toolbar->AddControl(m_aov_sldr);
-	m_options_toolbar->AddControl(m_aov_text);
+	sizer_h_1->Add(st2, 0, wxALIGN_CENTER);
+	sizer_h_1->Add(m_aov_sldr, 1, wxEXPAND);
+	sizer_h_1->Add(m_aov_text, 0, wxALIGN_CENTER);
 
+	
+	m_options_toolbar2 = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	m_options_toolbar2->SetDoubleBuffered(true);
 	bitmap = wxGetBitmap(freefly, dpi_sf);
-	m_options_toolbar->AddCheckTool(
+	m_options_toolbar2->AddCheckTool(
 		ID_FreeChk, "Free Fly",
 		bitmap, wxNullBitmap,
 		"Change the camera to a 'Free-Fly' Mode",
 		"Change the camera to a 'Free-Fly' Mode");
 
 	if (m_glview->GetFree())
-		m_options_toolbar->ToggleTool(ID_FreeChk,true);
+		m_options_toolbar2->ToggleTool(ID_FreeChk,true);
 	else
-		m_options_toolbar->ToggleTool(ID_FreeChk,false);
+		m_options_toolbar2->ToggleTool(ID_FreeChk,false);
 
-#ifndef _DARWIN
-	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(1, tbs.y-2)));
-	stb->SetBackgroundColour(wxColour(128, 128, 128));
-	m_options_toolbar->AddControl(stb);
-#endif
+//#ifndef _DARWIN
+//	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
+//		wxDefaultPosition, FromDIP(wxSize(1, tbs.y-2)));
+//	stb->SetBackgroundColour(wxColour(128, 128, 128));
+//	m_options_toolbar->AddControl(stb);
+//#endif
 
 	//save default
 	bitmap = wxGetBitmap(save_settings, dpi_sf);
-	m_options_toolbar->AddTool(
+	m_options_toolbar2->AddTool(
 		ID_DefaultBtn, "Save", bitmap,
 		"Set Default Render View Settings");
 
-	m_options_toolbar->SetRows(1);
-	m_options_toolbar->Realize();
+	//m_options_toolbar->SetRows(1);
+	sizer_h_1->Add(m_options_toolbar2, 0, wxALIGN_CENTER);
+	m_options_toolbar2->Realize();
 
 	m_full_screen_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_NODIVIDER);
@@ -550,8 +564,6 @@ void VRenderView::CreateBar()
 	m_full_screen_btn->Realize();
 
 	//add the toolbars and other options in order
-	sizer_h_1->AddSpacer(40);
-	sizer_h_1->Add(m_options_toolbar,1, wxALIGN_CENTER);
 	sizer_h_1->Add(m_full_screen_btn, 0, wxALIGN_CENTER);
 
 	//bar left///////////////////////////////////////////////////
@@ -565,8 +577,9 @@ void VRenderView::CreateBar()
 		"Enable adjustment of the Depth Attenuation Interval",
 		"Enable adjustment of the Depth Attenuation Interval");
 	m_left_toolbar->ToggleTool(ID_DepthAttenChk, true);
-	m_depth_atten_factor_sldr = new wxSlider(this, ID_DepthAttenFactorSldr, 0, 0, 100,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL|wxSL_INVERSE);
+	long ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
+	m_depth_atten_factor_sldr = new wxSingleSlider(this, ID_DepthAttenFactorSldr, 0, 0, 100,
+		wxDefaultPosition, wxDefaultSize, ls);
 	m_depth_atten_factor_sldr->Disable();
 	m_depth_atten_reset_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -583,7 +596,7 @@ void VRenderView::CreateBar()
 
 	sizer_v_3->AddSpacer(50);
 	sizer_v_3->Add(m_left_toolbar, 0, wxALIGN_CENTER);
-	sizer_v_3->Add(m_depth_atten_factor_sldr, 1, wxALIGN_CENTER);
+	sizer_v_3->Add(m_depth_atten_factor_sldr, 1, wxEXPAND);
 	sizer_v_3->Add(m_depth_atten_factor_text, 0, wxALIGN_CENTER);
 	sizer_v_3->Add(m_depth_atten_reset_btn, 0, wxALIGN_CENTER);
 	sizer_v_3->AddSpacer(50);
@@ -611,8 +624,9 @@ void VRenderView::CreateBar()
 	m_scale_121_btn->AddTool(ID_Scale121Btn, "1 to 1",
 		bitmap, "Auto-size the data to a 1:1 ratio");
 	m_scale_121_btn->Realize();
-	m_scale_factor_sldr = new wxSlider(this, ID_ScaleFactorSldr, 100, 50, 999,
-		wxDefaultPosition, wxDefaultSize, wxSL_VERTICAL);
+	ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
+	m_scale_factor_sldr = new wxSingleSlider(this, ID_ScaleFactorSldr, 100, 50, 999,
+		wxDefaultPosition, wxDefaultSize, ls);
 	m_scale_reset_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmap(reset, dpi_sf);
@@ -635,7 +649,7 @@ void VRenderView::CreateBar()
 	sizer_v_4->Add(m_pin_btn, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_center_btn, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_scale_121_btn, 0, wxALIGN_CENTER);
-	sizer_v_4->Add(m_scale_factor_sldr, 1, wxALIGN_CENTER);
+	sizer_v_4->Add(m_scale_factor_sldr, 1, wxEXPAND);
 	sizer_v_4->Add(m_scale_factor_spin, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_scale_factor_text, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_scale_mode_btn, 0, wxALIGN_CENTER);
@@ -649,9 +663,6 @@ void VRenderView::CreateBar()
 
 	//bar bottom///////////////////////////////////////////////////
 	wxBoxSizer* sizer_h_2 = new wxBoxSizer(wxHORIZONTAL);
-	m_lower_toolbar = new wxToolBar(this,wxID_ANY,
-		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_lower_toolbar->SetDoubleBuffered(true);
 	st1 = new wxStaticText(this, 0, "X:");
 	m_x_rot_sldr = new wxScrollBar(this, ID_XRotSldr);
 	m_x_rot_sldr->SetScrollbar(180,60,420,15);
@@ -685,8 +696,8 @@ void VRenderView::CreateBar()
 	m_rot_lock_btn->Realize();
 
 	//ortho view selector
-	m_ortho_view_cmb = new wxComboBox(m_lower_toolbar, ID_OrthoViewCmb, "",
-		wxDefaultPosition, FromDIP(wxSize(50, 30)), 0, NULL, wxCB_READONLY);
+	m_ortho_view_cmb = new wxComboBox(this, ID_OrthoViewCmb, "",
+		wxDefaultPosition, wxDefaultSize,/*FromDIP(wxSize(50, 30)),*/ 0, NULL, wxCB_READONLY);
 	m_ortho_view_cmb->Append("+X");
 	m_ortho_view_cmb->Append("-X");
 	m_ortho_view_cmb->Append("+Y");
@@ -695,14 +706,17 @@ void VRenderView::CreateBar()
 	m_ortho_view_cmb->Append("-Z");
 	m_ortho_view_cmb->Append("NA");
 	m_ortho_view_cmb->Select(6);
-	m_lower_toolbar->AddControl(m_ortho_view_cmb);
+	m_lower_toolbar = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	m_lower_toolbar->SetDoubleBuffered(true);
+	//m_lower_toolbar->AddControl(m_ortho_view_cmb);
 	bitmap = wxGetBitmap(zrot, dpi_sf);
 	m_lower_toolbar->AddTool(ID_ZeroRotBtn, "Set Zeros",
 		bitmap, "Set current angles as zeros");
 	bitmap = wxGetBitmap(reset, dpi_sf);
 	m_lower_toolbar->AddTool(ID_RotResetBtn,"Reset",
 		bitmap, "Reset Rotations");
-	m_lower_toolbar->SetMaxRowsCols(1, 1);
+	//m_lower_toolbar->SetMaxRowsCols(1, 1);
 	m_lower_toolbar->Realize();
 
 	sizer_h_2->AddSpacer(40);
@@ -719,6 +733,7 @@ void VRenderView::CreateBar()
 	sizer_h_2->Add(m_z_rot_sldr, 1, wxALIGN_CENTER);
 	sizer_h_2->Add(m_z_rot_text, 0, wxALIGN_CENTER);
 	sizer_h_2->Add(5, 5, 0);
+	sizer_h_2->Add(m_ortho_view_cmb, 0, wxALIGN_CENTER, 2);
 	sizer_h_2->Add(m_lower_toolbar, 0, wxALIGN_CENTER);
 	sizer_h_2->AddSpacer(40);
 
@@ -2151,7 +2166,7 @@ void VRenderView::OnAovText(wxCommandEvent& event)
 
 void VRenderView::OnFreeChk(wxCommandEvent& event)
 {
-	if (m_options_toolbar->GetToolState(ID_FreeChk))
+	if (m_options_toolbar2->GetToolState(ID_FreeChk))
 		m_glview->SetFree(true);
 	else
 	{
@@ -2275,7 +2290,7 @@ void VRenderView::SaveDefault(unsigned int mask)
 	{
 		fconfig.Write("persp", m_glview->m_persp);
 		fconfig.Write("aov", m_glview->m_aov);
-		bVal = m_options_toolbar->GetToolState(ID_FreeChk);
+		bVal = m_options_toolbar2->GetToolState(ID_FreeChk);
 		fconfig.Write("free_rd", bVal);
 	}
 	//rotations
@@ -2429,7 +2444,7 @@ void VRenderView::LoadSettings()
 	}
 	if (fconfig.Read("free_rd", &bVal))
 	{
-		m_options_toolbar->ToggleTool(ID_FreeChk,bVal);
+		m_options_toolbar2->ToggleTool(ID_FreeChk,bVal);
 		if (bVal)
 			m_glview->SetFree(true);
 	}
