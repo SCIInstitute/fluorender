@@ -288,7 +288,7 @@ VPropView::VPropView(VRenderFrame* frame,
 	sizer_l5->Add(30,10,0);
 	//middle///////////////////////////////////////////////////
 	//extract boundary
-	m_boundary_st = new wxStaticText(this, ID_BoundarySync, "Extract Boundary : ",
+	m_boundary_st = new wxStaticText(this, ID_BoundarySync, "Boundary : ",
 		wxDefaultPosition, FromDIP(wxSize(127, -1)), wxALIGN_RIGHT);
 	m_boundary_st->Connect(ID_BoundarySync, wxEVT_LEFT_DCLICK,
 		wxMouseEventHandler(VPropView::OnBoundarySync), NULL, this);

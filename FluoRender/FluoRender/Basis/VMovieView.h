@@ -41,6 +41,7 @@ DEALINGS IN THE SOFTWARE.
 class VRenderFrame;
 class VRenderGLView;
 class RecorderDlg;
+class wxSingleSlider;
 class VMovieView : public wxPanel
 {
 	enum
@@ -246,7 +247,7 @@ private:
 
 	wxButton *m_play_btn;
 	wxButton *m_rewind_btn;
-	wxSlider *m_progress_sldr;
+	wxSingleSlider *m_progress_sldr;
 	wxTextCtrl *m_progress_text;
 	wxButton *m_save_btn;
 

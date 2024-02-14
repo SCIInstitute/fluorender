@@ -202,6 +202,8 @@ public:
 	double m_dft_scale_factor;
 	int m_dft_scale_factor_mode;//0:view; 1:pixel; 2:data(pixel * xy spc)
 
+	double m_dpi_sf, m_dpi_sf2;
+
 private:
 	//called when updated from bars
 	void CreateBar();

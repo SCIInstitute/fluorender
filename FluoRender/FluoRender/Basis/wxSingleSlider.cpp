@@ -26,11 +26,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "wxSingleSlider.h"
+#include "Debug.h"
 
 wxSingleSlider::wxSingleSlider(
 	wxWindow *parent,
 	wxWindowID id,
-	//const wxString& label,
 	int value, int minValue, int maxValue,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -39,16 +39,23 @@ wxSingleSlider::wxSingleSlider(
 	const wxString& name):
 	parent_(parent),
 	id_(id),
+#ifdef _WIN32
+	thumb_style_(0),
+#else
+	thumb_style_(1),
+#endif
+	enabled_(true),
 	sel_(false),
 	use_range_color_(true),
-	range_color_(wxColor(100, 149, 237)),
+	range_color_(wxColor(75, 154, 255)),
 	use_thumb_color_(false),
 	horizontal_(!(style & wxSL_VERTICAL)),
 	inverse_(style & wxSL_INVERSE),
 	range_style_(0),
 	wxControl(parent, id, pos,
 		wxSize(std::max(size.GetWidth(), int(std::round(24 * parent->GetDPIScaleFactor()))),
-			std::max(size.GetHeight(), int(std::round(24 * parent->GetDPIScaleFactor())))), wxBORDER_NONE)
+			std::max(size.GetHeight(), int(std::round(24 * parent->GetDPIScaleFactor())))),
+		wxBORDER_NONE, val, name)
 {
 	scale_ = parent->GetDPIScaleFactor();
 	margin_ = int(std::round(12 * scale_));
@@ -107,24 +114,39 @@ void wxSingleSlider::paintNow()
 
 void  wxSingleSlider::DrawThumb(wxDC& dc, wxCoord x, wxCoord y, const wxColor& c)
 {
-	wxPoint ph[] = {
-		wxPoint(x - 5 * scale_, y - 7 * scale_),
-		wxPoint(x + 5 * scale_, y - 7 * scale_),
-		wxPoint(x + 5 * scale_, y + 6 * scale_),
-		wxPoint(x, y + 11 * scale_),
-		wxPoint(x - 5 * scale_, y + 6 * scale_)
-	};
-	wxPoint pv[] = {
-		wxPoint(x - 7 * scale_, y - 5 * scale_),
-		wxPoint(x - 7 * scale_, y + 5 * scale_),
-		wxPoint(x + 6 * scale_, y + 5 * scale_),
-		wxPoint(x + 11 * scale_, y),
-		wxPoint(x + 6 * scale_, y - 5 * scale_)
-	};
-	int num = 5;
-	dc.SetPen(c);
-	dc.SetBrush(wxBrush(c, wxBRUSHSTYLE_SOLID));
-	dc.DrawPolygon(num, horizontal_? ph : pv, wxODDEVEN_RULE);
+	if (thumb_style_ == 0)
+	{
+		wxPoint ph[] = {
+			wxPoint(x - 5 * scale_, y - 7 * scale_),
+			wxPoint(x + 5 * scale_, y - 7 * scale_),
+			wxPoint(x + 5 * scale_, y + 6 * scale_),
+			wxPoint(x, y + 11 * scale_),
+			wxPoint(x - 5 * scale_, y + 6 * scale_)
+		};
+		wxPoint pv[] = {
+			wxPoint(x - 7 * scale_, y - 5 * scale_),
+			wxPoint(x - 7 * scale_, y + 5 * scale_),
+			wxPoint(x + 6 * scale_, y + 5 * scale_),
+			wxPoint(x + 11 * scale_, y),
+			wxPoint(x + 6 * scale_, y - 5 * scale_)
+		};
+		int num = 5;
+
+		dc.SetPen(c);
+		dc.SetBrush(wxBrush(c, wxBRUSHSTYLE_SOLID));
+		dc.DrawPolygon(num, horizontal_ ? ph : pv, wxODDEVEN_RULE);
+	}
+	else
+	{
+		dc.SetPen(*wxWHITE);
+		//dc.SetBrush(wxBrush(*wxWHITE, wxBRUSHSTYLE_SOLID));
+		int xx = horizontal_ ? x : x + scale_;
+		int yy = horizontal_ ? y + scale_ : y;
+		//dc.DrawCircle(xx, yy, 7 * scale_);
+		//dc.SetPen(c);
+		dc.SetBrush(wxBrush(c, wxBRUSHSTYLE_SOLID));
+		dc.DrawCircle(xx, yy, 6 * scale_);
+	}
 }
 
 void wxSingleSlider::render(wxDC& dc)
@@ -167,12 +189,11 @@ void wxSingleSlider::renderNormal(wxDC& dc)
 	int posr = std::min(max_val_, val_);
 	posr = std::round(double(posr - min_val_) * ((horizontal_ ? w : h) - margin_ * 2) / (max_val_ - min_val_));
 
-	bool enabled = IsEnabled();
 	wxColor color;
 	//range color
 	if (use_range_color_)
 	{
-		color = enabled ? range_color_ : *wxBLACK;
+		color = enabled_ ? range_color_ : *wxBLACK;
 		dc.SetPen(color);
 		dc.SetBrush(color);
 		wxPoint p2h[] = {
@@ -191,7 +212,7 @@ void wxSingleSlider::renderNormal(wxDC& dc)
 		dc.DrawPolygon(num, horizontal_ ? p2h : p2v, wxODDEVEN_RULE);
 	}
 
-	if (enabled)
+	if (enabled_)
 	{
 		color = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
 		switch (thumb_state_)
@@ -256,12 +277,11 @@ void wxSingleSlider::renderInverse(wxDC& dc)
 	int posr = std::min(max_val_, val_);
 	posr = std::round(double(posr - min_val_) * ((horizontal_ ? w : h) - margin_ * 2) / (max_val_ - min_val_));
 
-	bool enabled = IsEnabled();
 	wxColor color;
 	//range color
 	if (use_range_color_)
 	{
-		color = enabled ? range_color_ : *wxBLACK;
+		color = enabled_ ? range_color_ : *wxBLACK;
 		dc.SetPen(color);
 		dc.SetBrush(color);
 		wxPoint p2h[] = {
@@ -280,7 +300,7 @@ void wxSingleSlider::renderInverse(wxDC& dc)
 		dc.DrawPolygon(num, horizontal_ ? p2h : p2v, wxODDEVEN_RULE);
 	}
 
-	if (enabled)
+	if (enabled_)
 	{
 		color = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
 		switch (thumb_state_)
@@ -527,6 +547,7 @@ void wxSingleSlider::DisableThumbColor()
 bool wxSingleSlider::Disable()
 {
 	bool val = wxControl::Disable();
+	enabled_ = false;
 	Refresh();
 	Update();
 	return val;
@@ -535,6 +556,7 @@ bool wxSingleSlider::Disable()
 bool wxSingleSlider::Enable(bool enable)
 {
 	bool val = wxControl::Enable(enable);
+	enabled_ = enable;
 	Refresh();
 	Update();
 	return val;

@@ -1,7 +1,7 @@
 cmake set static libs: libsz, libtiff, libpng, libfreetype
 
 Info Deployment Target: 10.15
-FluoRender/Resources/Info.plist: NSHighResolutionCapable No
+FluoRender/Resources/Info.plist: NSHighResolutionCapable YES
 Code Signing Identity: Developer ID Application...
 Codesign options --deep --timestamp
 Code signing inject base entitlements No

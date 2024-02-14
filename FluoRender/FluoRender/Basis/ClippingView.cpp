@@ -91,6 +91,7 @@ ClippingView::ClippingView(
 	long style,
 	const wxString& name) :
 wxPanel(frame, wxID_ANY, pos, size, style, name),
+m_frame(frame),
 m_view(0),
 m_sel_type(0),
 m_vd(0),
@@ -1538,8 +1539,11 @@ void ClippingView::OnZRotEdit(wxCommandEvent &event)
 
 void ClippingView::OnXRotSpinUp(wxSpinEvent& event)
 {
+	bool inverse = m_frame->GetSettingDlg()->GetInverseSlider();
 	wxString str_val = m_x_rot_text->GetValue();
-	double val = STOD(str_val.fn_str()) + 1.0;
+	double val;
+	str_val.ToDouble(&val);
+	val += inverse ? -1 : 1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1548,8 +1552,11 @@ void ClippingView::OnXRotSpinUp(wxSpinEvent& event)
 
 void ClippingView::OnXRotSpinDown(wxSpinEvent& event)
 {
+	bool inverse = m_frame->GetSettingDlg()->GetInverseSlider();
 	wxString str_val = m_x_rot_text->GetValue();
-	double val = STOD(str_val.fn_str()) - 1.0;
+	double val;
+	str_val.ToDouble(&val);
+	val += inverse ? 1 : -1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1558,8 +1565,11 @@ void ClippingView::OnXRotSpinDown(wxSpinEvent& event)
 
 void ClippingView::OnYRotSpinUp(wxSpinEvent& event)
 {
+	bool inverse = m_frame->GetSettingDlg()->GetInverseSlider();
 	wxString str_val = m_y_rot_text->GetValue();
-	double val = STOD(str_val.fn_str()) + 1.0;
+	double val;
+	str_val.ToDouble(&val);
+	val += inverse ? -1 : 1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1568,8 +1578,11 @@ void ClippingView::OnYRotSpinUp(wxSpinEvent& event)
 
 void ClippingView::OnYRotSpinDown(wxSpinEvent& event)
 {
+	bool inverse = m_frame->GetSettingDlg()->GetInverseSlider();
 	wxString str_val = m_y_rot_text->GetValue();
-	double val = STOD(str_val.fn_str()) - 1.0;
+	double val;
+	str_val.ToDouble(&val);
+	val += inverse ? 1 : -1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1578,8 +1591,11 @@ void ClippingView::OnYRotSpinDown(wxSpinEvent& event)
 
 void ClippingView::OnZRotSpinUp(wxSpinEvent& event)
 {
+	bool inverse = m_frame->GetSettingDlg()->GetInverseSlider();
 	wxString str_val = m_z_rot_text->GetValue();
-	double val = STOD(str_val.fn_str()) + 1.0;
+	double val;
+	str_val.ToDouble(&val);
+	val += inverse ? -1 : 1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1588,8 +1604,11 @@ void ClippingView::OnZRotSpinUp(wxSpinEvent& event)
 
 void ClippingView::OnZRotSpinDown(wxSpinEvent& event)
 {
+	bool inverse = m_frame->GetSettingDlg()->GetInverseSlider();
 	wxString str_val = m_z_rot_text->GetValue();
-	double val = STOD(str_val.fn_str()) - 1.0;
+	double val;
+	str_val.ToDouble(&val);
+	val += inverse ? 1 : -1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);

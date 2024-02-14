@@ -136,6 +136,7 @@ public:
 	void MoveLinkedClippingPlanes(int dir);
 
 private:
+	VRenderFrame* m_frame;
 	VRenderGLView* m_view;
 	int m_sel_type;		//curent selection type
 	VolumeData* m_vd;	//current volume data

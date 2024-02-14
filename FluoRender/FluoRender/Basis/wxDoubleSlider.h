@@ -82,6 +82,7 @@ private:
 	wxWindow* parent_;
 	wxWindowID id_;
 
+	bool enabled_;
 	bool link_;
 	bool inverse_;
 	bool horizontal_;
@@ -99,6 +100,7 @@ private:
 	wxColor thumb_color1_;
 	wxColor thumb_color2_;
 
+	int thumb_style_;//0-windows;1-others
 	int thumb_state1_;//0-normal;1-mouse on;2-moving
 	int thumb_state2_;//0-normal;1-mouse on;2-moving
 

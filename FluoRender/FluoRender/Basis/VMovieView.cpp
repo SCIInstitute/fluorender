@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include "RecorderDlg.h"
 #include <Global/Global.h>
+#include <wxSingleSlider.h>
 #include <tiffio.h>
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
@@ -118,9 +119,9 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent)
 	m_seq_chk = new wxCheckBox(page, ID_SeqChk, "Time Sequence");
 	m_bat_chk = new wxCheckBox(page, ID_BatChk, "Batch Process");
 	m_start_frame_text = new wxTextCtrl(page, ID_StartFrameText, "1",
-		wxDefaultPosition, wxSize(40, -1));
+		wxDefaultPosition, FromDIP(wxSize(40, -1)));
 	m_end_frame_text = new wxTextCtrl(page, ID_EndFrameText, "10",
-		wxDefaultPosition, wxSize(40, -1));
+		wxDefaultPosition, FromDIP(wxSize(40, -1)));
 	//sizer 1
 	sizer_1->Add(m_seq_chk, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_bat_chk, 0, wxALIGN_CENTER);
@@ -146,11 +147,11 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent)
 	sizer_2->Add(m_end_frame_st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_end_frame_text, 0, wxALIGN_CENTER);
 	m_inc_time_btn = new wxButton(page, ID_IncTimeBtn, "",
-		wxDefaultPosition, wxSize(30, 30));
+		wxDefaultPosition, FromDIP(wxSize(30, 30)));
 	m_dec_time_btn = new wxButton(page, ID_DecTimeBtn, "",
-		wxDefaultPosition, wxSize(30, 30));
+		wxDefaultPosition, FromDIP(wxSize(30, 30)));
 	m_cur_frame_text = new wxTextCtrl(page, ID_CurFrameText, "0",
-		wxDefaultPosition, wxSize(40, -1));
+		wxDefaultPosition, FromDIP(wxSize(40, -1)));
 	m_inc_time_btn->SetBitmap(wxGetBitmapFromMemory(plus));
 	m_dec_time_btn->SetBitmap(wxGetBitmapFromMemory(minus));
 	sizer_2->AddStretchSpacer();
@@ -164,15 +165,15 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent)
 	m_rot_chk = new wxCheckBox(page, ID_RotChk, "Rotation");
 	//axis
 	m_x_rd = new wxRadioButton(page, ID_XRd, "X",
-		wxDefaultPosition, wxSize(30, 22));
+		wxDefaultPosition, FromDIP(wxSize(30, 22)));
 	m_y_rd = new wxRadioButton(page, ID_YRd, "Y",
-		wxDefaultPosition, wxSize(30, 22));
+		wxDefaultPosition, FromDIP(wxSize(30, 22)));
 	m_z_rd = new wxRadioButton(page, ID_ZRd, "Z",
-		wxDefaultPosition, wxSize(30, 22));
+		wxDefaultPosition, FromDIP(wxSize(30, 22)));
 	m_y_rd->SetValue(true);
 	//degrees
 	m_degree_text = new wxTextCtrl(page, ID_DegreeText, "360",
-		wxDefaultPosition, wxSize(40, -1));
+		wxDefaultPosition, FromDIP(wxSize(40, -1)));
 	st2 = new wxStaticText(page, wxID_ANY, "Deg.");
 	//sizer3
 	sizer_3->Add(m_rot_chk, 0, wxALIGN_CENTER);
@@ -189,7 +190,7 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent)
 	//rotation interpolation
 	st2 = new wxStaticText(page, wxID_ANY, "Interpolation");
 	m_rot_int_cmb = new wxComboBox(page, ID_RotIntCmb, "",
-		wxDefaultPosition, wxSize(65, -1), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, FromDIP(wxSize(65, -1)), 0, NULL, wxCB_READONLY);
 	m_rot_int_cmb->Append("Linear");
 	m_rot_int_cmb->Append("Smooth");
 	m_rot_int_cmb->Select(0);
@@ -205,7 +206,7 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent)
 	st = new wxStaticText(page, wxID_ANY, "Movie Time: ");
 	st2 = new wxStaticText(page, wxID_ANY, "Sec.");
 	m_movie_len_text = new wxTextCtrl(page, ID_MovieLenText, "5.00",
-		wxDefaultPosition, wxSize(50, -1));
+		wxDefaultPosition, FromDIP(wxSize(50, -1)));
 	//sizer 7
 	sizer_7->AddStretchSpacer();
 	sizer_7->Add(st, 0, wxALIGN_CENTER);
@@ -302,10 +303,10 @@ wxWindow* VMovieView::CreateCroppingPage(wxWindow *parent) {
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	//8th line
 	st = new wxStaticText(page, 0, "Enable cropping:",
-		wxDefaultPosition, wxSize(110, 20));
+		wxDefaultPosition, FromDIP(wxSize(110, 20)));
 	m_crop_chk = new wxCheckBox(page, ID_CropChk, "");
 	m_reset_btn = new wxButton(page, ID_ResetBtn, "Reset",
-		wxDefaultPosition, wxSize(110, 30));
+		wxDefaultPosition, FromDIP(wxSize(110, 30)));
 	m_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	sizer_8->Add(5, 5, 0);
 	sizer_8->Add(st, 0, wxALIGN_CENTER);
@@ -314,44 +315,44 @@ wxWindow* VMovieView::CreateCroppingPage(wxWindow *parent) {
 	sizer_8->Add(m_reset_btn, 0, wxALIGN_CENTER);
 	//9th line
 	st = new wxStaticText(page, 0, "Center:  X:",
-		wxDefaultPosition, wxSize(85, 20));
+		wxDefaultPosition, FromDIP(wxSize(85, 20)));
 	m_center_x_text = new wxTextCtrl(page, ID_CenterXText, "",
-		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), 0, vald_int);
 	m_center_x_spin = new wxSpinButton(page, ID_CenterXSpin,
-		wxDefaultPosition, wxSize(20, 20));
+		wxDefaultPosition, FromDIP(wxSize(20, 20)));
 	m_center_x_spin->SetRange(-0x8000, 0x7fff);
 	sizer_9->Add(5, 5, 0);
 	sizer_9->Add(st, 0, wxALIGN_CENTER);
 	sizer_9->Add(m_center_x_text, 0, wxALIGN_CENTER);
 	sizer_9->Add(m_center_x_spin, 0, wxALIGN_CENTER);
 	st = new wxStaticText(page, 0, "       Y:",
-		wxDefaultPosition, wxSize(50, 20));
+		wxDefaultPosition, FromDIP(wxSize(50, 20)));
 	m_center_y_text = new wxTextCtrl(page, ID_CenterYText, "",
-		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), 0, vald_int);
 	m_center_y_spin = new wxSpinButton(page, ID_CenterYSpin,
-		wxDefaultPosition, wxSize(20, 20));
+		wxDefaultPosition, FromDIP(wxSize(20, 20)));
 	m_center_y_spin->SetRange(-0x8000, 0x7fff);
 	sizer_9->Add(st, 0, wxALIGN_CENTER);
 	sizer_9->Add(m_center_y_text, 0, wxALIGN_CENTER);
 	sizer_9->Add(m_center_y_spin, 0, wxALIGN_CENTER);
 	//10th line
 	st = new wxStaticText(page, 0, "Size:    Width:",
-		wxDefaultPosition, wxSize(85, 20));
+		wxDefaultPosition, FromDIP(wxSize(85, 20)));
 	m_width_text = new wxTextCtrl(page, ID_WidthText, "",
-		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), 0, vald_int);
 	m_width_spin = new wxSpinButton(page, ID_WidthSpin,
-		wxDefaultPosition, wxSize(20, 20));
+		wxDefaultPosition, FromDIP(wxSize(20, 20)));
 	m_width_spin->SetRange(-0x8000, 0x7fff);
 	sizer_10->Add(5, 5, 0);
 	sizer_10->Add(st, 0, wxALIGN_CENTER);
 	sizer_10->Add(m_width_text, 0, wxALIGN_CENTER);
 	sizer_10->Add(m_width_spin, 0, wxALIGN_CENTER);
 	st = new wxStaticText(page, 0, "   Height:",
-		wxDefaultPosition, wxSize(50, 20));
+		wxDefaultPosition, FromDIP(wxSize(50, 20)));
 	m_height_text = new wxTextCtrl(page, ID_HeightText, "",
-		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), 0, vald_int);
 	m_height_spin = new wxSpinButton(page, ID_HeightSpin,
-		wxDefaultPosition, wxSize(20, 20));
+		wxDefaultPosition, FromDIP(wxSize(20, 20)));
 	m_height_spin->SetRange(-0x8000, 0x7fff);
 	sizer_10->Add(st, 0, wxALIGN_CENTER);
 	sizer_10->Add(m_height_text, 0, wxALIGN_CENTER);
@@ -386,9 +387,9 @@ wxWindow* VMovieView::CreateScriptPage(wxWindow *parent)
 	//browse button
 	wxBoxSizer *sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Script File:",
-		wxDefaultPosition, wxSize(80, -1));
+		wxDefaultPosition, FromDIP(wxSize(80, -1)));
 	m_script_file_btn = new wxButton(page, ID_ScriptFileBtn, "Browse...",
-		wxDefaultPosition, wxSize(80, -1));
+		wxDefaultPosition, FromDIP(wxSize(80, -1)));
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->AddStretchSpacer(1);
 	sizer_1->Add(m_script_file_btn, 0, wxALIGN_CENTER);
@@ -398,13 +399,13 @@ wxWindow* VMovieView::CreateScriptPage(wxWindow *parent)
 	m_script_file_text = new wxTextCtrl(page, ID_ScriptFileText, "",
 		wxDefaultPosition, wxDefaultSize);
 	m_script_clear_btn = new wxButton(page, ID_ScriptClearBtn, "X",
-		wxDefaultPosition, wxSize(25, -1));
+		wxDefaultPosition, FromDIP(wxSize(25, -1)));
 	sizer_2->Add(m_script_file_text, 1, wxEXPAND);
 	sizer_2->Add(m_script_clear_btn, 0, wxALIGN_CENTER);
 
 	//script list
 	m_script_list = new wxListCtrl(page, ID_ScriptList,
-		wxDefaultPosition, wxSize(-1, -1), wxLC_REPORT | wxLC_SINGLE_SEL);
+		wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL);
 	wxListItem itemCol;
 	itemCol.SetText("Built-in Scripte Files");
 	m_script_list->InsertColumn(0, itemCol);
@@ -466,10 +467,10 @@ VMovieView::VMovieView(VRenderFrame* frame,
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	//FPS
 	m_fps_text = new wxTextCtrl(this, ID_FPS_Text, "30",
-		wxDefaultPosition, wxSize(50, -1));
+		wxDefaultPosition, FromDIP(wxSize(50, -1)));
 	//other
 	m_views_cmb = new wxComboBox(this, ID_ViewsCombo, "",
-		wxDefaultPosition, wxSize(120, -1), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, FromDIP(wxSize(120, -1)), 0, NULL, wxCB_READONLY);
 	//sizer 1
 	sizer_1->Add(5, 5, 0);
 	wxStaticText * st = new wxStaticText(this, wxID_ANY, "FPS: ");
@@ -483,24 +484,24 @@ VMovieView::VMovieView(VRenderFrame* frame,
 	//the play/rewind/slider/save
 	wxBoxSizer *sizerH = new wxBoxSizer(wxHORIZONTAL);
 	m_play_btn = new wxButton(this, ID_PlayPause, "",
-		wxDefaultPosition, wxSize(30, 30));
+		wxDefaultPosition, FromDIP(wxSize(30, 30)));
 	//m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
 	sizerH->Add(m_play_btn, 0, wxEXPAND);
 	m_rewind_btn = new wxButton(this, ID_Rewind, "",
-		wxDefaultPosition, wxSize(30, 30));
+		wxDefaultPosition, FromDIP(wxSize(30, 30)));
 	m_rewind_btn->SetBitmap(wxGetBitmapFromMemory(rewind));
 	sizerH->Add(m_rewind_btn, 0, wxEXPAND);
-	m_progress_sldr = new wxSlider(this, ID_ProgressSldr, 0, 0, PROG_SLDR_MAX);
+	m_progress_sldr = new wxSingleSlider(this, ID_ProgressSldr, 0, 0, PROG_SLDR_MAX);
 	sizerH->Add(m_progress_sldr, 1, wxEXPAND);
 	m_progress_text = new wxTextCtrl(this, ID_ProgressText, "0.00",
-		wxDefaultPosition, wxSize(50, -1));
+		wxDefaultPosition, FromDIP(wxSize(50, -1)));
 	sizerH->Add(m_progress_text, 0, wxEXPAND);
 	wxStaticText * st3 = new wxStaticText(this, 0, "Sec.");
 	sizerH->Add(5, 5, 0);
 	sizerH->Add(st3, 0, wxALIGN_CENTER);
 	sizerH->Add(5, 5);
 	m_save_btn = new wxButton(this, ID_SaveMovie, "",
-		wxDefaultPosition, wxSize(30, 30));
+		wxDefaultPosition, FromDIP(wxSize(30, 30)));
 	m_save_btn->SetBitmap(wxGetBitmapFromMemory(save));
 	sizerH->Add(m_save_btn, 0, wxEXPAND);
 	//interface
@@ -1163,7 +1164,7 @@ void VMovieView::OnGenKey(wxCommandEvent& event) {
 void VMovieView::OnTimeChange(wxScrollEvent &event)
 {
 	if (m_running) return;
-	int prg = event.GetPosition();
+	int prg = m_progress_sldr->GetValue();
 	double pcnt = (double)prg / PROG_SLDR_MAX;
 	m_cur_time = pcnt * m_movie_len;
 	wxString str = wxString::Format("%.2f", m_cur_time);
@@ -1730,7 +1731,7 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
 		wxDefaultPosition, wxDefaultSize);
 	wxIntegerValidator<unsigned int> vald_int;
 	wxTextCtrl* tx_dpi = new wxTextCtrl(panel, ID_DPI,
-		"", wxDefaultPosition, wxSize(60, 23), 0, vald_int);
+		"", wxDefaultPosition, wxDefaultSize, 0, vald_int);
 	tx_dpi->Connect(tx_dpi->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(VMovieView::OnDpiText), NULL, panel);
 	float dpi = VRenderFrame::GetDpi();

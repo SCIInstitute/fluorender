@@ -9105,7 +9105,7 @@ void VRenderGLView::SetClippingPlaneRotations(double rotx, double roty, double r
 
 void VRenderGLView::GetClippingPlaneRotations(double &rotx, double &roty, double &rotz)
 {
-	rotx = -m_rotx_cl;
+	rotx = m_rotx_cl == 0.0 ? m_rotx_cl : -m_rotx_cl;
 	roty = m_roty_cl;
 	rotz = m_rotz_cl;
 }
