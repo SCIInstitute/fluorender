@@ -35,6 +35,7 @@ class VRenderFrame;
 class VRenderGLView;
 class VolumeData;
 class DataGroup;
+class wxSingleSlider;
 class NoiseCancellingDlg : public wxPanel
 {
 public:
@@ -77,10 +78,10 @@ private:
 
 	wxCheckBox *m_ca_select_only_chk;
 	//threshold
-	wxSlider *m_threshold_sldr;
+	wxSingleSlider *m_threshold_sldr;
 	wxTextCtrl *m_threshold_text;
 	//voxel size threhsold
-	wxSlider *m_voxel_sldr;
+	wxSingleSlider *m_voxel_sldr;
 	wxTextCtrl *m_voxel_text;
 	//preview
 	wxButton *m_preview_btn;

@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "Tester.h"
 #include "VRenderFrame.h"
 #include "Formats/tif_reader.h"
+#include <wxSingleSlider.h>
 
 BEGIN_EVENT_TABLE(TesterDlg, wxDialog)
 	//sliders
@@ -68,7 +69,7 @@ m_frame(frame)
 	wxBoxSizer *sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "resizing",
 		wxDefaultPosition, wxSize(50, 20));
-	m_p1_sldr = new wxSlider(this, ID_P1Slider, 250, 0, 1000,
+	m_p1_sldr = new wxSingleSlider(this, ID_P1Slider, 250, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_p1_text = new wxTextCtrl(this, ID_P1Text, "1.0",
 		wxDefaultPosition, wxSize(40, 20), wxTE_PROCESS_ENTER);
@@ -83,7 +84,7 @@ m_frame(frame)
 	wxBoxSizer *sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "min filter",
 		wxDefaultPosition, wxSize(50, 20));
-	m_p2_sldr = new wxSlider(this, ID_P2Slider, 0, 0, 1000,
+	m_p2_sldr = new wxSingleSlider(this, ID_P2Slider, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_p2_text = new wxTextCtrl(this, ID_P2Text, "0",
 		wxDefaultPosition, wxSize(40, 20), wxTE_PROCESS_ENTER);
@@ -98,7 +99,7 @@ m_frame(frame)
 	wxBoxSizer *sizer_3 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "max filter",
 		wxDefaultPosition, wxSize(50, 20));
-	m_p3_sldr = new wxSlider(this, ID_P3Slider, 0, 0, 1000,
+	m_p3_sldr = new wxSingleSlider(this, ID_P3Slider, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_p3_text = new wxTextCtrl(this, ID_P3Text, "0",
 		wxDefaultPosition, wxSize(40, 20), wxTE_PROCESS_ENTER);
@@ -113,7 +114,7 @@ m_frame(frame)
 	wxBoxSizer *sizer_4 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "shp filter",
 		wxDefaultPosition, wxSize(50, 20));
-	m_p4_sldr = new wxSlider(this, ID_P4Slider, 0, 0, 1000,
+	m_p4_sldr = new wxSingleSlider(this, ID_P4Slider, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_p4_text = new wxTextCtrl(this, ID_P4Text, "0",
 		wxDefaultPosition, wxSize(40, 20), wxTE_PROCESS_ENTER);

@@ -38,6 +38,7 @@ using namespace std;
 class VRenderFrame;
 class VRenderGLView;
 class MeshData;
+class wxSingleSlider;
 class MPropView: public wxPanel
 {
 	enum
@@ -83,20 +84,20 @@ private:
 	wxCheckBox *m_light_chk;
 	wxColourPickerCtrl *m_diff_picker;
 	wxColourPickerCtrl *m_spec_picker;
-	wxSlider *m_shine_sldr;
+	wxSingleSlider *m_shine_sldr;
 	wxTextCtrl* m_shine_text;
 
-	wxSlider *m_alpha_sldr;
+	wxSingleSlider *m_alpha_sldr;
 	wxTextCtrl* m_alpha_text;
 	wxCheckBox* m_shadow_chk;
-	wxSlider* m_shadow_sldr;
+	wxSingleSlider* m_shadow_sldr;
 	wxTextCtrl* m_shadow_text;
 
-	wxSlider *m_scale_sldr;
+	wxSingleSlider *m_scale_sldr;
 	wxTextCtrl* m_scale_text;
 	//size limiter
 	wxCheckBox *m_size_chk;
-	wxSlider *m_size_sldr;
+	wxSingleSlider *m_size_sldr;
 	wxTextCtrl *m_size_text;
 
 private:

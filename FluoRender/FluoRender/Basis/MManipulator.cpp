@@ -50,7 +50,7 @@ MManipulator::MManipulator(VRenderFrame* frame,
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);
 
-	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer* sizer_v = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
@@ -59,17 +59,17 @@ MManipulator::MManipulator(VRenderFrame* frame,
 
 	m_x_trans_st = new wxStaticText(this, 0, "X:");
 	m_x_trans_text = new wxTextCtrl(this, ID_XTransText, "",
-		wxDefaultPosition, wxSize(60, 20), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER);
 	m_x_trans_spin = new wxSpinButton(this, ID_XTransSpin);
 	m_x_trans_spin->SetRange(-0x8000, 0x7fff);
 	m_y_trans_st = new wxStaticText(this, 0, "Y:");
 	m_y_trans_text = new wxTextCtrl(this, ID_YTransText, "",
-		wxDefaultPosition, wxSize(60, 20), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER);
 	m_y_trans_spin = new wxSpinButton(this, ID_YTransSpin);
 	m_y_trans_spin->SetRange(-0x8000, 0x7fff);
 	m_z_trans_st = new wxStaticText(this, 0, "Z:");
 	m_z_trans_text = new wxTextCtrl(this, ID_ZTransText, "",
-		wxDefaultPosition, wxSize(60, 20), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER);
 	m_z_trans_spin = new wxSpinButton(this, ID_ZTransSpin);
 	m_z_trans_spin->SetRange(-0x8000, 0x7fff);
 	sizer_1->Add(m_x_trans_st, 0, wxALIGN_CENTER);
@@ -86,17 +86,17 @@ MManipulator::MManipulator(VRenderFrame* frame,
 
 	m_x_rot_st = new wxStaticText(this, 0, "X:");
 	m_x_rot_text = new wxTextCtrl(this, ID_XRotText, "",
-		wxDefaultPosition, wxSize(60, 20), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER);
 	m_x_rot_spin = new wxSpinButton(this, ID_XRotSpin);
 	m_x_rot_spin->SetRange(-0x8000, 0x7fff);
 	m_y_rot_st = new wxStaticText(this, 0, "Y:");
 	m_y_rot_text = new wxTextCtrl(this, ID_YRotText, "",
-		wxDefaultPosition, wxSize(60, 20), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER);
 	m_y_rot_spin = new wxSpinButton(this, ID_YRotSpin);
 	m_y_rot_spin->SetRange(-0x8000, 0x7fff);
 	m_z_rot_st = new wxStaticText(this, 0, "Z:");
 	m_z_rot_text = new wxTextCtrl(this, ID_ZRotText, "",
-		wxDefaultPosition, wxSize(60, 20), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER);
 	m_z_rot_spin = new wxSpinButton(this, ID_ZRotSpin);
 	m_z_rot_spin->SetRange(-0x8000, 0x7fff);
 	sizer_2->Add(m_x_rot_st, 0, wxALIGN_CENTER);
@@ -113,17 +113,17 @@ MManipulator::MManipulator(VRenderFrame* frame,
 
 	m_x_scl_st = new wxStaticText(this, 0, "X:");
 	m_x_scl_text = new wxTextCtrl(this, ID_XScalText, "",
-		wxDefaultPosition, wxSize(60, 20), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER);
 	m_x_scl_spin = new wxSpinButton(this, ID_XScalSpin);
 	m_x_scl_spin->SetRange(-0x8000, 0x7fff);
 	m_y_scl_st = new wxStaticText(this, 0, "Y:");
 	m_y_scl_text = new wxTextCtrl(this, ID_YScalText, "",
-		wxDefaultPosition, wxSize(60, 20), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER);
 	m_y_scl_spin = new wxSpinButton(this, ID_YScalSpin);
 	m_y_scl_spin->SetRange(-0x8000, 0x7fff);
 	m_z_scl_st = new wxStaticText(this, 0, "Z:");
 	m_z_scl_text = new wxTextCtrl(this, ID_ZScalText, "",
-		wxDefaultPosition, wxSize(60, 20), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER);
 	m_z_scl_spin = new wxSpinButton(this, ID_ZScalSpin);
 	m_z_scl_spin->SetRange(-0x8000, 0x7fff);
 	sizer_3->Add(m_x_scl_st, 0, wxALIGN_CENTER);
@@ -136,12 +136,16 @@ MManipulator::MManipulator(VRenderFrame* frame,
 	sizer_3->Add(m_z_scl_text, 0, wxALIGN_CENTER);
 	sizer_3->Add(m_z_scl_spin, 0, wxALIGN_CENTER);
 
-	sizer_v->Add(m_trans_st, 0, wxALIGN_LEFT);
-	sizer_v->Add(sizer_1, 0, wxALIGN_LEFT);
-	sizer_v->Add(m_rot_st, 0, wxALIGN_LEFT);
-	sizer_v->Add(sizer_2, 0, wxALIGN_LEFT);
-	sizer_v->Add(m_scl_st, 0, wxALIGN_LEFT);
-	sizer_v->Add(sizer_3, 0, wxALIGN_LEFT);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(m_trans_st, 0, wxALIGN_CENTER);
+	sizer_v->Add(sizer_1, 1, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(m_rot_st, 0, wxALIGN_CENTER);
+	sizer_v->Add(sizer_2, 1, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(m_scl_st, 0, wxALIGN_CENTER);
+	sizer_v->Add(sizer_3, 1, wxEXPAND);
+
 	SetSizer(sizer_v);
 	Layout();
 }
@@ -242,7 +246,7 @@ void MManipulator::OnSpinUp(wxSpinEvent& event)
 	if (text_ctrl)
 	{
 		wxString str_val = text_ctrl->GetValue();
-		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str())+1.0);
+		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str())+0.01);
 		text_ctrl->SetValue(str);
 		UpdateData();
 	}
@@ -285,7 +289,7 @@ void MManipulator::OnSpinDown(wxSpinEvent& event)
 	if (text_ctrl)
 	{
 		wxString str_val = text_ctrl->GetValue();
-		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str())-1.0);
+		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str())-0.01);
 		text_ctrl->SetValue(str);
 		UpdateData();
 	}

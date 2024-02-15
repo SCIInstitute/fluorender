@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 
 class VRenderFrame;
+class wxSingleSlider;
 class ConvertDlg : public wxPanel
 {
 public:
@@ -57,11 +58,11 @@ private:
 	VRenderFrame* m_frame;
 
 	//convert from volume to polygon mesh
-	wxSlider* m_cnv_vol_mesh_thresh_sldr;
+	wxSingleSlider* m_cnv_vol_mesh_thresh_sldr;
 	wxTextCtrl* m_cnv_vol_mesh_thresh_text;
-	wxSlider* m_cnv_vol_mesh_downsample_sldr;
+	wxSingleSlider* m_cnv_vol_mesh_downsample_sldr;
 	wxTextCtrl* m_cnv_vol_mesh_downsample_text;
-	wxSlider* m_cnv_vol_mesh_downsample_z_sldr;
+	wxSingleSlider* m_cnv_vol_mesh_downsample_z_sldr;
 	wxTextCtrl* m_cnv_vol_mesh_downsample_z_text;
 	wxCheckBox* m_cnv_vol_mesh_usetransf_chk;
 	wxCheckBox* m_cnv_vol_mesh_selected_chk;

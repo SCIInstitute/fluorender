@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "MPropView.h"
 #include <DataManager.h>
 #include "VRenderFrame.h"
+#include <wxSingleSlider.h>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(MPropView, wxPanel)
@@ -82,22 +83,22 @@ MPropView::MPropView(VRenderFrame* frame,
 	wxIntegerValidator<unsigned int> vald_int;
 
 	st = new wxStaticText(this, 0, " Transparency: ",
-		wxDefaultPosition, wxSize(100, 20));
-	m_alpha_sldr = new wxSlider(this, ID_alpha_sldr, 255, 0, 255, 
-		wxDefaultPosition, wxSize(200, 20), wxSL_HORIZONTAL);
+		wxDefaultPosition, FromDIP(wxSize(100, 20)));
+	m_alpha_sldr = new wxSingleSlider(this, ID_alpha_sldr, 255, 0, 255, 
+		wxDefaultPosition, FromDIP(wxSize(200, 20)), wxSL_HORIZONTAL);
 	m_alpha_text = new wxTextCtrl(this, ID_alpha_text, "1.00",
-		wxDefaultPosition, wxSize(50, 20), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp2);
 	sizer_1->Add(20, 5, 0);
 	sizer_1->Add(st, 0, wxALIGN_CENTER, 0);
 	sizer_1->Add(m_alpha_sldr, 0, wxALIGN_CENTER, 0);
 	sizer_1->Add(m_alpha_text, 0, wxALIGN_CENTER, 0);
 
 	m_shadow_chk = new wxCheckBox(this, ID_shadow_chk, "Shadow: ",
-		wxDefaultPosition, wxSize(100, 20));
-	m_shadow_sldr = new wxSlider(this, ID_shadow_sldr, 60, 0, 100,
-		wxDefaultPosition, wxSize(200, 20), wxSL_HORIZONTAL);
+		wxDefaultPosition, FromDIP(wxSize(100, 20)));
+	m_shadow_sldr = new wxSingleSlider(this, ID_shadow_sldr, 60, 0, 100,
+		wxDefaultPosition, FromDIP(wxSize(200, 20)), wxSL_HORIZONTAL);
 	m_shadow_text = new wxTextCtrl(this, ID_shadow_text, "0.60",
-		wxDefaultPosition, wxSize(50, 20), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp2);
 	sizer_2->Add(20, 5, 0);
 	sizer_2->Add(m_shadow_chk, 0, wxALIGN_CENTER, 0);
 	sizer_2->Add(m_shadow_sldr, 0, wxALIGN_CENTER, 0);
@@ -113,25 +114,25 @@ MPropView::MPropView(VRenderFrame* frame,
 		wxVERTICAL);
 
 	st = new wxStaticText(this, 0, " Diffuse Color: ",
-		wxDefaultPosition, wxSize(110, 20));
+		wxDefaultPosition, FromDIP(wxSize(110, 20)));
 	m_diff_picker = new wxColourPickerCtrl(this, ID_diff_picker, *wxWHITE, 
-		wxDefaultPosition, wxSize(180, 30));
+		wxDefaultPosition, FromDIP(wxSize(180, 30)));
 	sizer_4->Add(st, 0, wxALIGN_LEFT, 0);
 	sizer_4->Add(m_diff_picker, 0, wxALIGN_CENTER, 0);
 
 	st = new wxStaticText(this, 0, " Specular Color: ",
-		wxDefaultPosition, wxSize(110, 20));
+		wxDefaultPosition, FromDIP(wxSize(110, 20)));
 	m_spec_picker = new wxColourPickerCtrl(this, ID_spec_picker, *wxWHITE, 
-		wxDefaultPosition, wxSize(180, 30));
+		wxDefaultPosition, FromDIP(wxSize(180, 30)));
 	sizer_5->Add(st, 0, wxALIGN_LEFT, 0);
 	sizer_5->Add(m_spec_picker, 0, wxALIGN_CENTER, 0);
 
 	st = new wxStaticText(this, 0, " Shininess: ",
-		wxDefaultPosition, wxSize(100, 20));
-	m_shine_sldr = new wxSlider(this, ID_shine_sldr, 30, 0, 128, 
-		wxDefaultPosition, wxSize(200, 20), wxSL_HORIZONTAL);
+		wxDefaultPosition, FromDIP(wxSize(100, 20)));
+	m_shine_sldr = new wxSingleSlider(this, ID_shine_sldr, 30, 0, 128, 
+		wxDefaultPosition, FromDIP(wxSize(200, 20)), wxSL_HORIZONTAL);
 	m_shine_text = new wxTextCtrl(this, ID_shine_text, "30",
-		wxDefaultPosition, wxSize(50, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_int);
 	sizer_6->Add(st, 0, wxALIGN_CENTER, 0);
 	sizer_6->Add(m_shine_sldr, 0, wxALIGN_CENTER, 0);
 	sizer_6->Add(m_shine_text, 0, wxALIGN_CENTER, 0);
@@ -146,11 +147,11 @@ MPropView::MPropView(VRenderFrame* frame,
 
 	wxBoxSizer* sizer_7 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, " Scaling: ",
-		wxDefaultPosition, wxSize(100, 20));
-	m_scale_sldr = new wxSlider(this, ID_scale_sldr, 100, 50, 200, 
-		wxDefaultPosition, wxSize(200, 20), wxSL_HORIZONTAL);
+		wxDefaultPosition, FromDIP(wxSize(100, 20)));
+	m_scale_sldr = new wxSingleSlider(this, ID_scale_sldr, 100, 50, 200, 
+		wxDefaultPosition, FromDIP(wxSize(200, 20)), wxSL_HORIZONTAL);
 	m_scale_text = new wxTextCtrl(this, ID_scale_text, "1.00",
-		wxDefaultPosition, wxSize(50, 20), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp2);
 	sizer_7->Add(20, 5, 0);
 	sizer_7->Add(st, 0, wxALIGN_CENTER, 0);
 	sizer_7->Add(m_scale_sldr, 0, wxALIGN_CENTER, 0);
@@ -159,11 +160,11 @@ MPropView::MPropView(VRenderFrame* frame,
 	//size limiter
 	wxBoxSizer* sizer_8 = new wxBoxSizer(wxHORIZONTAL);
 	m_size_chk = new wxCheckBox(this, ID_size_chk, " Size limit: ",
-		wxDefaultPosition, wxSize(100, 20));
-	m_size_sldr = new wxSlider(this, ID_size_sldr, 50, 0, 250,
-		wxDefaultPosition, wxSize(200, 20), wxSL_HORIZONTAL);
+		wxDefaultPosition, FromDIP(wxSize(100, 20)));
+	m_size_sldr = new wxSingleSlider(this, ID_size_sldr, 50, 0, 250,
+		wxDefaultPosition, FromDIP(wxSize(200, 20)), wxSL_HORIZONTAL);
 	m_size_text = new wxTextCtrl(this, ID_size_text, "50",
-		wxDefaultPosition, wxSize(50, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_int);
 	sizer_8->Add(20, 5, 0);
 	sizer_8->Add(m_size_chk, 0, wxALIGN_CENTER);
 	sizer_8->Add(m_size_sldr, 0, wxALIGN_CENTER);
@@ -299,7 +300,7 @@ void MPropView::OnSpecChange(wxColourPickerEvent& event)
 
 void MPropView::OnShineChange(wxScrollEvent & event)
 {
-	double val = (double)event.GetPosition();
+	double val = m_shine_sldr->GetValue();
 	wxString str = wxString::Format("%.0f", val);
 	if (str != m_shine_text->GetValue())
 		m_shine_text->SetValue(str);
@@ -321,7 +322,7 @@ void MPropView::OnShineText(wxCommandEvent& event)
 
 void MPropView::OnAlphaChange(wxScrollEvent & event)
 {
-	double val = (double)event.GetPosition() / 255.0;
+	double val = m_alpha_sldr->GetValue() / 255.0;
 	wxString str = wxString::Format("%.2f", val);
 	if (str != m_alpha_text->GetValue())
 		m_alpha_text->SetValue(str);
@@ -343,7 +344,7 @@ void MPropView::OnAlphaText(wxCommandEvent& event)
 
 void MPropView::OnScaleChange(wxScrollEvent & event)
 {
-	double val = event.GetPosition() / 100.0;
+	double val = m_scale_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
 	if (str != m_scale_text->GetValue())
 		m_scale_text->SetValue(str);
@@ -382,7 +383,7 @@ void MPropView::OnShadowCheck(wxCommandEvent& event)
 
 void MPropView::OnShadowChange(wxScrollEvent& event)
 {
-	double val = event.GetPosition() / 100.0;
+	double val = m_shadow_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
 	if (str != m_shadow_text->GetValue())
 		m_shadow_text->SetValue(str);
@@ -421,7 +422,7 @@ void MPropView::OnSizeCheck(wxCommandEvent& event)
 
 void MPropView::OnSizeChange(wxScrollEvent& event)
 {
-	int val = event.GetPosition();
+	int val = m_size_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
 	if (str != m_size_text->GetValue())
 		m_size_text->SetValue(str);

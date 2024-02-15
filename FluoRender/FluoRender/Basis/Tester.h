@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/dialog.h>
 
 class VRenderFrame;
+class wxSingleSlider;
 class TesterDlg : public wxDialog
 {
 	enum
@@ -65,10 +66,10 @@ public:
 	double m_p4;
 
 	//sliders
-	wxSlider* m_p1_sldr;
-	wxSlider* m_p2_sldr;
-	wxSlider* m_p3_sldr;
-	wxSlider* m_p4_sldr;
+	wxSingleSlider* m_p1_sldr;
+	wxSingleSlider* m_p2_sldr;
+	wxSingleSlider* m_p3_sldr;
+	wxSingleSlider* m_p4_sldr;
 
 	//text boxes
 	wxTextCtrl* m_p1_text;

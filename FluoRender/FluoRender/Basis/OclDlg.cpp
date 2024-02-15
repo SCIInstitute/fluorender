@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "OclDlg.h"
 #include <DataManager.h>
 #include "VRenderFrame.h"
+#include <wxSingleSlider.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/stdpaths.h>
@@ -66,15 +67,15 @@ m_view(0)
 	//
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Kernel file:",
-		wxDefaultPosition, wxSize(70, 20));
+		wxDefaultPosition, FromDIP(wxSize(70, 20)));
 	m_kernel_file_txt = new wxTextCtrl(this, ID_KernelFileTxt, "",
 		wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 	m_browse_btn = new wxButton(this, ID_BrowseBtn, "Browse",
-		wxDefaultPosition, wxSize(70, 23));
+		wxDefaultPosition, FromDIP(wxSize(70, 23)));
 	m_save_btn = new wxButton(this, ID_SaveBtn, "Save",
-		wxDefaultPosition, wxSize(70, 23));
+		wxDefaultPosition, FromDIP(wxSize(70, 23)));
 	m_saveas_btn = new wxButton(this, ID_SaveAsBtn, "Save As",
-		wxDefaultPosition, wxSize(70, 23));
+		wxDefaultPosition, FromDIP(wxSize(70, 23)));
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_kernel_file_txt, 1, wxEXPAND);
@@ -85,15 +86,15 @@ m_view(0)
 	//controls
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Controls:",
-		wxDefaultPosition, wxSize(70, 20));
+		wxDefaultPosition, FromDIP(wxSize(70, 20)));
 	m_execute_btn = new wxButton(this, ID_ExecuteBtn, "Run",
-		wxDefaultPosition, wxSize(60, 23));
+		wxDefaultPosition, FromDIP(wxSize(60, 23)));
 	m_execute_n_btn = new wxButton(this, ID_ExecuteNBtn, "Run N Times",
-		wxDefaultPosition, wxSize(80, 23));
-	m_iterations_sldr = new wxSlider(this, ID_IterationsSldr, 1, 1, 100,
+		wxDefaultPosition, FromDIP(wxSize(80, 23)));
+	m_iterations_sldr = new wxSingleSlider(this, ID_IterationsSldr, 1, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_iterations_txt = new wxTextCtrl(this, ID_IterationsTxt, "1",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
 	sizer_2->Add(5, 5);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_execute_btn, 0, wxALIGN_CENTER);
@@ -105,11 +106,11 @@ m_view(0)
 
 	//output
 	m_output_txt = new wxTextCtrl(this, ID_OutputTxt, "",
-		wxDefaultPosition, wxSize(-1, 100), wxTE_READONLY|wxTE_MULTILINE);
+		wxDefaultPosition, FromDIP(wxSize(-1, 100)), wxTE_READONLY|wxTE_MULTILINE);
 
 	//list
 	m_kernel_list = new wxListCtrl(this, ID_KernelList,
-		wxDefaultPosition, wxSize(-1, -1), wxLC_REPORT | wxLC_SINGLE_SEL);
+		wxDefaultPosition, FromDIP(wxSize(-1, -1)), wxLC_REPORT | wxLC_SINGLE_SEL);
 	wxListItem itemCol;
 	itemCol.SetText("Kernel Files");
 	m_kernel_list->InsertColumn(0, itemCol);
@@ -171,7 +172,7 @@ m_view(0)
 	//sizer
 	wxBoxSizer *sizer_3 = new wxBoxSizer(wxHORIZONTAL);
 	sizer_3->Add(m_kernel_list, 0, wxEXPAND);
-	wxStaticText * separator = new wxStaticText(this, 0, "", wxDefaultPosition, wxSize(5, -1));
+	wxStaticText * separator = new wxStaticText(this, 0, "", wxDefaultPosition, FromDIP(wxSize(5, -1)));
 	sizer_3->Add(separator, 0, wxEXPAND);
 	sizer_3->Add(m_kernel_edit_stc, 1, wxEXPAND);
 
@@ -283,7 +284,7 @@ void OclDlg::OnExecuteNBtn(wxCommandEvent& event)
 
 void OclDlg::OnIterationsChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_iterations_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_iterations_txt->GetValue())
 		m_iterations_txt->SetValue(str);

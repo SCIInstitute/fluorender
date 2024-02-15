@@ -104,7 +104,8 @@ void MachineLearningDlg::OnAutoStartAll(wxCommandEvent& event)
 MachineLearningPanel::MachineLearningPanel(
 	VRenderFrame* frame, wxWindow* parent) :
 	wxPanel(parent, wxID_ANY,
-		wxDefaultPosition, wxSize(450, 750),
+		wxDefaultPosition,
+		frame->FromDIP(wxSize(450, 750)),
 		0, "MachineLearningPanel"),
 	m_frame(frame),
 	m_record(false)
@@ -148,15 +149,15 @@ void MachineLearningPanel::Create()
 	m_top_grid->Fit();
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	m_new_table_btn = new wxButton(m_panel_top, m_new_table_id, "New",
-		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
+		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
 	m_load_table_btn = new wxButton(m_panel_top, m_load_table_id, "Load",
-		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
+		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
 	m_del_table_btn = new wxButton(m_panel_top, m_del_table_id, "Delete",
-		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
+		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
 	m_dup_table_btn = new wxButton(m_panel_top, m_dup_table_id, "Duplicate",
-		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
+		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
 	m_auto_load_btn = new wxButton(m_panel_top, m_auto_load_id, "Auto Load",
-		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
+		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
 	m_new_table_btn->Connect(m_new_table_id, wxEVT_BUTTON,
 		wxCommandEventHandler(MachineLearningPanel::OnNewTable), NULL, this);
 	m_load_table_btn->Connect(m_load_table_id, wxEVT_BUTTON,
@@ -206,7 +207,7 @@ void MachineLearningPanel::Create()
 	m_auto_start_check->Connect(m_auto_start_id, wxEVT_CHECKBOX,
 		wxCommandEventHandler(MachineLearningPanel::OnAutoStartRec), NULL, this);
 	m_start_rec_btn = new wxToggleButton(m_panel_bot, m_start_rec_id, "Start",
-		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
+		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
 	m_start_rec_btn->Connect(m_start_rec_id, wxEVT_TOGGLEBUTTON,
 		wxCommandEventHandler(MachineLearningPanel::OnStartRec), NULL, this);
 	if (m_record)
@@ -220,11 +221,11 @@ void MachineLearningPanel::Create()
 		m_start_rec_btn->SetValue(false);
 	}
 	m_del_rec_btn = new wxButton(m_panel_bot, m_del_rec_id, "Delete",
-		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
+		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
 	m_del_rec_btn->Connect(m_del_rec_id, wxEVT_BUTTON,
 		wxCommandEventHandler(MachineLearningPanel::OnDelRec), NULL, this);
 	m_apply_rec_btn = new wxButton(m_panel_bot, m_apply_rec_id, "Apply",
-		wxDefaultPosition, wxSize(75, -1), wxALIGN_LEFT);
+		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
 	m_apply_rec_btn->Connect(m_apply_rec_id, wxEVT_BUTTON,
 		wxCommandEventHandler(MachineLearningPanel::OnApplyRec), NULL, this);
 	m_sizer2->Add(5, 5);

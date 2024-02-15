@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include <DataManager.h>
 #include "Converters/VolumeMeshConv.h"
+#include <wxSingleSlider.h>
 #include <wx/progdlg.h>
 #include <wx/valnum.h>
 
@@ -69,11 +70,11 @@ wxPanel(frame, wxID_ANY,
 	//threshold slider and text
 	wxBoxSizer *sizer11 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Threshold:",
-		wxDefaultPosition, wxSize(100, 23));
-	m_cnv_vol_mesh_thresh_sldr = new wxSlider(this, ID_CnvVolMeshThreshSldr, 30, 1, 99,
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
+	m_cnv_vol_mesh_thresh_sldr = new wxSingleSlider(this, ID_CnvVolMeshThreshSldr, 30, 1, 99,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_cnv_vol_mesh_thresh_text = new wxTextCtrl(this, ID_CnvVolMeshThreshText, "0.30",
-		wxDefaultPosition, wxSize(40, 23), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(40, 23)), 0, vald_fp2);
 	sizer11->Add(st, 0, wxALIGN_CENTER);
 	sizer11->Add(10, 10);
 	sizer11->Add(m_cnv_vol_mesh_thresh_sldr, 1, wxEXPAND);
@@ -82,11 +83,11 @@ wxPanel(frame, wxID_ANY,
 	//downsampling slider and text
 	wxBoxSizer *sizer12 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Downsmp. XY:",
-		wxDefaultPosition, wxSize(100, 23));
-	m_cnv_vol_mesh_downsample_sldr = new wxSlider(this, ID_CnvVolMeshDownsampleSldr, 2, 1, 10,
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
+	m_cnv_vol_mesh_downsample_sldr = new wxSingleSlider(this, ID_CnvVolMeshDownsampleSldr, 2, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_cnv_vol_mesh_downsample_text = new wxTextCtrl(this, ID_CnvVolMeshDownsampleText, "2",
-		wxDefaultPosition, wxSize(40, 23), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 23)), 0, vald_int);
 	sizer12->Add(st, 0, wxALIGN_CENTER);
 	sizer12->Add(10, 10);
 	sizer12->Add(m_cnv_vol_mesh_downsample_sldr, 1, wxEXPAND);
@@ -95,11 +96,11 @@ wxPanel(frame, wxID_ANY,
 	//downsampling in z slider and text
 	wxBoxSizer *sizer13 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Downsmp. Z:",
-		wxDefaultPosition, wxSize(100, 23));
-	m_cnv_vol_mesh_downsample_z_sldr = new wxSlider(this, ID_CnvVolMeshDownsampleZSldr, 1, 1, 10,
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
+	m_cnv_vol_mesh_downsample_z_sldr = new wxSingleSlider(this, ID_CnvVolMeshDownsampleZSldr, 1, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_cnv_vol_mesh_downsample_z_text = new wxTextCtrl(this, ID_CnvVolMeshDownsampleZText, "1",
-		wxDefaultPosition, wxSize(40, 23), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 23)), 0, vald_int);
 	sizer13->Add(st, 0, wxALIGN_CENTER);
 	sizer13->Add(10, 10);
 	sizer13->Add(m_cnv_vol_mesh_downsample_z_sldr, 1, wxEXPAND);
@@ -108,12 +109,12 @@ wxPanel(frame, wxID_ANY,
 	//check options and convert button
 	wxBoxSizer *sizer14 = new wxBoxSizer(wxHORIZONTAL);
 	m_cnv_vol_mesh_usetransf_chk = new wxCheckBox(this, ID_CnvVolMeshUsetransfChk, "Use transfer function",
-		wxDefaultPosition, wxSize(-1, 23));
+		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
 	m_cnv_vol_mesh_selected_chk = new wxCheckBox(this, ID_CnvVolMeshSelectedChk, "Selected Only",
-		wxDefaultPosition, wxSize(-1, 23));
+		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
 	m_cnv_vol_mesh_selected_chk->SetValue(true);
 	m_cnv_vol_mesh_weld_chk = new wxCheckBox(this, ID_CnvVolMeshWeldChk, "Weld vertices",
-		wxDefaultPosition, wxSize(-1, 23));
+		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
 	m_cnv_vol_mesh_weld_chk->SetValue(false);
 	sizer14->Add(m_cnv_vol_mesh_usetransf_chk, 0, wxALIGN_CENTER);
 	sizer14->Add(m_cnv_vol_mesh_selected_chk, 0, wxALIGN_CENTER);
@@ -121,7 +122,7 @@ wxPanel(frame, wxID_ANY,
 	//button
 	wxBoxSizer *sizer15 = new wxBoxSizer(wxHORIZONTAL);
 	m_cnv_vol_mesh_convert_btn = new wxButton(this, ID_CnvVolMeshConvertBtn, "Convert",
-		wxDefaultPosition, wxSize(-1, 23));
+		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
 	sizer15->AddStretchSpacer();
 	sizer15->Add(m_cnv_vol_mesh_convert_btn, 0, wxALIGN_CENTER);
 	
@@ -143,7 +144,7 @@ wxPanel(frame, wxID_ANY,
 		new wxStaticBox(this, wxID_ANY, "Output"),
 		wxVERTICAL);
 	m_stat_text = new wxTextCtrl(this, ID_StatText, "",
-		wxDefaultPosition, wxSize(-1, 100), wxTE_MULTILINE);
+		wxDefaultPosition, FromDIP(wxSize(-1, 100)), wxTE_MULTILINE);
 	m_stat_text->SetEditable(false);
 	sizer2->Add(m_stat_text, 1, wxEXPAND);
 
@@ -166,7 +167,7 @@ ConvertDlg::~ConvertDlg()
 //threshold
 void ConvertDlg::OnCnvVolMeshThreshChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_cnv_vol_mesh_thresh_sldr->GetValue();
 	double val = double(ival)/100.0;
 	wxString str = wxString::Format("%.2f", val);
 	if (str != m_cnv_vol_mesh_thresh_text->GetValue())
@@ -184,7 +185,7 @@ void ConvertDlg::OnCnvVolMeshThreshText(wxCommandEvent &event)
 //downsampling
 void ConvertDlg::OnCnvVolMeshDownsampleChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_cnv_vol_mesh_downsample_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_cnv_vol_mesh_downsample_text->GetValue())
 		m_cnv_vol_mesh_downsample_text->SetValue(str);
@@ -201,7 +202,7 @@ void ConvertDlg::OnCnvVolMeshDownsampleText(wxCommandEvent &event)
 //downsampling Z
 void ConvertDlg::OnCnvVolMeshDownsampleZChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_cnv_vol_mesh_downsample_z_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_cnv_vol_mesh_downsample_z_text->GetValue())
 		m_cnv_vol_mesh_downsample_z_text->SetValue(str);

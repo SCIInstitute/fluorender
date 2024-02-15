@@ -164,28 +164,48 @@ void wxSingleSlider::renderNormal(wxDC& dc)
 
 	dc.SetPen(*wxGREY_PEN);
 	dc.SetBrush(*wxLIGHT_GREY_BRUSH);
-	wxPoint p1h[] = {
-		wxPoint(margin_, h / 2 - scale_),
-		wxPoint(w - margin_ + 1, h / 2 - scale_),
-		wxPoint(w - margin_ + 2, h / 2),
-		wxPoint(w - margin_ + 2, h / 2 + scale_),
-		wxPoint(w - margin_ + 1, h / 2 + 2 * scale_),
-		wxPoint(margin_, h / 2 + 2 * scale_),
-		wxPoint(margin_ - 1, h / 2 + scale_),
-		wxPoint(margin_ - 1, h / 2)
-	};
-	wxPoint p1v[] = {
-		wxPoint(w / 2 - scale_, margin_),
-		wxPoint(w / 2 - scale_, h - margin_ + 1),
-		wxPoint(w / 2, h - margin_ + 2),
-		wxPoint(w / 2 + scale_, h - margin_ + 2),
-		wxPoint(w / 2 + 2 * scale_, h - margin_ + 1),
-		wxPoint(w / 2 + 2 * scale_, margin_),
-		wxPoint(w / 2 + scale_ , margin_ - 1),
-		wxPoint(w / 2, margin_ - 1)
-	};
-	int num = 8;
-	dc.DrawPolygon(num, horizontal_ ? p1h : p1v, wxODDEVEN_RULE);
+	if (horizontal_)
+	{
+		int a, b, c, d, e, f;
+		a = std::round(h / 2.0 - scale_);
+		b = std::round(w - margin_ + 1.0 + 1.5 * scale_);
+		c = std::round(h / 2.0 - 0.2 * scale_);
+		d = std::round(h / 2.0 + scale_ + 0.5 * scale_);
+		e = std::round(h / 2.0 + 2.0 * scale_);
+		f = std::round(margin_ - 1.5 * scale_);
+		wxPoint p1h[] = {
+			wxPoint(margin_, a),
+			wxPoint(w - margin_ + 1, a),
+			wxPoint(b, c),
+			wxPoint(b, d),
+			wxPoint(w - margin_ + 1, e),
+			wxPoint(margin_, e),
+			wxPoint(f, d),
+			wxPoint(f, c)
+		};
+		dc.DrawPolygon(8, p1h, wxODDEVEN_RULE);
+	}
+	else
+	{
+		int a, b, c, d, e, f;
+		a = std::round(w / 2.0 - scale_);
+		b = std::round(h - margin_ + 1.0 + 1.5 * scale_);
+		c = std::round(w / 2.0 - 0.2 * scale_);
+		d = std::round(w / 2.0 + scale_ + 0.5 * scale_);
+		e = std::round(w / 2.0 + 2.0 * scale_);
+		f = std::round(margin_ - 1.5 * scale_);
+		wxPoint p1v[] = {
+			wxPoint(a, margin_),
+			wxPoint(a, h - margin_ + 1),
+			wxPoint(c, b),
+			wxPoint(d, b),
+			wxPoint(e, h - margin_ + 1),
+			wxPoint(e, margin_),
+			wxPoint(d, f),
+			wxPoint(c, f)
+		};
+		dc.DrawPolygon(8, p1v, wxODDEVEN_RULE);
+	}
 
 	//left slider:
 	int posl = 0;
@@ -204,20 +224,32 @@ void wxSingleSlider::renderNormal(wxDC& dc)
 		color = enabled_ ? range_color_ : *wxBLACK;
 		dc.SetPen(color);
 		dc.SetBrush(color);
-		wxPoint p2h[] = {
-			wxPoint(margin_ + posl, h / 2 - scale_),
-			wxPoint(margin_ + posr, h / 2 - scale_),
-			wxPoint(margin_ + posr, h / 2 + 2 * scale_),
-			wxPoint(margin_ + posl, h / 2 + 2 * scale_)
-		};
-		wxPoint p2v[] = {
-			wxPoint(w / 2 - scale_, margin_ + posl),
-			wxPoint(w / 2 - scale_, margin_ + posr),
-			wxPoint(w / 2 + 2 * scale_, margin_ + posr),
-			wxPoint(w / 2 + 2 * scale_, margin_ + posl)
-		};
-		num = 4;
-		dc.DrawPolygon(num, horizontal_ ? p2h : p2v, wxODDEVEN_RULE);
+		if (horizontal_)
+		{
+			int a, b;
+			a = std::round(h / 2.0 - scale_);
+			b = std::round(h / 2.0 + 2.0 * scale_);
+			wxPoint p2h[] = {
+				wxPoint(margin_ + posl, a),
+				wxPoint(margin_ + posr, a),
+				wxPoint(margin_ + posr, b),
+				wxPoint(margin_ + posl, b)
+			};
+			dc.DrawPolygon(4, p2h, wxODDEVEN_RULE);
+		}
+		else
+		{
+			int a, b;
+			a = std::round(w / 2.0 - scale_);
+			b = std::round(w / 2.0 + 2.0 * scale_);
+			wxPoint p2v[] = {
+				wxPoint(a, margin_ + posl),
+				wxPoint(a, margin_ + posr),
+				wxPoint(b, margin_ + posr),
+				wxPoint(b, margin_ + posl)
+			};
+			dc.DrawPolygon(4, p2v, wxODDEVEN_RULE);
+		}
 	}
 
 	if (enabled_)
@@ -260,20 +292,48 @@ void wxSingleSlider::renderInverse(wxDC& dc)
 
 	dc.SetPen(*wxGREY_PEN);
 	dc.SetBrush(*wxLIGHT_GREY_BRUSH);
-	wxPoint p1h[] = {
-		wxPoint(margin_, h / 2 - scale_),
-		wxPoint(w - margin_ + 1, h / 2 - scale_),
-		wxPoint(w - margin_ + 1, h / 2 + 2 * scale_),
-		wxPoint(margin_, h / 2 + 2 * scale_)
-	};
-	wxPoint p1v[] = {
-		wxPoint(w / 2 - scale_, margin_),
-		wxPoint(w / 2 - scale_, h - margin_ + 1),
-		wxPoint(w / 2 + 2 * scale_, h - margin_ + 1),
-		wxPoint(w / 2 + 2 * scale_, margin_)
-	};
-	int num = 4;
-	dc.DrawPolygon(num, horizontal_ ? p1h : p1v, wxODDEVEN_RULE);
+	if (horizontal_)
+	{
+		int a, b, c, d, e, f;
+		a = std::round(h / 2.0 - scale_);
+		b = std::round(w - margin_ + 1.0 + 1.5 * scale_);
+		c = std::round(h / 2.0 - 0.2 * scale_);
+		d = std::round(h / 2.0 + scale_ + 0.5 * scale_);
+		e = std::round(h / 2.0 + 2.0 * scale_);
+		f = std::round(margin_ - 1.5 * scale_);
+		wxPoint p1h[] = {
+			wxPoint(margin_, a),
+			wxPoint(w - margin_ + 1, a),
+			wxPoint(b, c),
+			wxPoint(b, d),
+			wxPoint(w - margin_ + 1, e),
+			wxPoint(margin_, e),
+			wxPoint(f, d),
+			wxPoint(f, c)
+		};
+		dc.DrawPolygon(8, p1h, wxODDEVEN_RULE);
+	}
+	else
+	{
+		int a, b, c, d, e, f;
+		a = std::round(w / 2.0 - scale_);
+		b = std::round(h - margin_ + 1.0 + 1.5 * scale_);
+		c = std::round(w / 2.0 - 0.2 * scale_);
+		d = std::round(w / 2.0 + scale_ + 0.5 * scale_);
+		e = std::round(w / 2.0 + 2.0 * scale_);
+		f = std::round(margin_ - 1.5 * scale_);
+		wxPoint p1v[] = {
+			wxPoint(a, margin_),
+			wxPoint(a, h - margin_ + 1),
+			wxPoint(c, b),
+			wxPoint(d, b),
+			wxPoint(e, h - margin_ + 1),
+			wxPoint(e, margin_),
+			wxPoint(d, f),
+			wxPoint(c, f)
+		};
+		dc.DrawPolygon(8, p1v, wxODDEVEN_RULE);
+	}
 
 	//left slider:
 	int posl = 0;
@@ -292,20 +352,32 @@ void wxSingleSlider::renderInverse(wxDC& dc)
 		color = enabled_ ? range_color_ : *wxBLACK;
 		dc.SetPen(color);
 		dc.SetBrush(color);
-		wxPoint p2h[] = {
-			wxPoint(w - margin_ - posl, h / 2 - scale_),
-			wxPoint(w - margin_ - posr, h / 2 - scale_),
-			wxPoint(w - margin_ - posr, h / 2 + 2 * scale_),
-			wxPoint(w - margin_ - posl, h / 2 + 2 * scale_)
-		};
-		wxPoint p2v[] = {
-			wxPoint(w / 2 - scale_, h - margin_ - posl),
-			wxPoint(w / 2 - scale_, h - margin_ - posr),
-			wxPoint(w / 2 + 2 * scale_, h - margin_ - posr),
-			wxPoint(w / 2 + 2 * scale_, h - margin_ - posl)
-		};
-		num = 4;
-		dc.DrawPolygon(num, horizontal_ ? p2h : p2v, wxODDEVEN_RULE);
+		if (horizontal_)
+		{
+			int a, b;
+			a = std::round(h / 2.0 - scale_);
+			b = std::round(h / 2.0 + 2.0 * scale_);
+			wxPoint p2h[] = {
+			wxPoint(w - margin_ - posl, a),
+			wxPoint(w - margin_ - posr, a),
+			wxPoint(w - margin_ - posr, b),
+			wxPoint(w - margin_ - posl, b)
+			};
+			dc.DrawPolygon(4, p2h, wxODDEVEN_RULE);
+		}
+		else
+		{
+			int a, b;
+			a = std::round(w / 2.0 - scale_);
+			b = std::round(w / 2.0 + 2.0 * scale_);
+			wxPoint p2v[] = {
+			wxPoint(a, h - margin_ - posl),
+			wxPoint(a, h - margin_ - posr),
+			wxPoint(b, h - margin_ - posr),
+			wxPoint(b, h - margin_ - posl)
+			};
+			dc.DrawPolygon(4, p2v, wxODDEVEN_RULE);
+		}
 	}
 
 	if (enabled_)

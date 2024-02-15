@@ -1060,7 +1060,7 @@ MeasureDlg::MeasureDlg(VRenderFrame* frame)
 		new wxStaticBox(this, wxID_ANY, "Settings"), wxVERTICAL);
 	wxBoxSizer* sizer_11 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Z-Depth Comp.:",
-		wxDefaultPosition, wxSize(90, -1));
+		wxDefaultPosition, FromDIP(wxSize(90, -1)));
 	m_view_plane_rd = new wxRadioButton(this, ID_ViewPlaneRd, "View Plane",
 		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 	m_max_intensity_rd = new wxRadioButton(this, ID_MaxIntensityRd, "Maximum Intensity",
@@ -1081,7 +1081,7 @@ MeasureDlg::MeasureDlg(VRenderFrame* frame)
 	//more options
 	wxBoxSizer* sizer_12 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Properties:",
-		wxDefaultPosition, wxSize(90, -1));
+		wxDefaultPosition, FromDIP(wxSize(90, -1)));
 	m_transient_chk = new wxCheckBox(this, ID_TransientChk, "Transient",
 		wxDefaultPosition, wxDefaultSize);
 	m_use_transfer_chk = new wxCheckBox(this, ID_UseTransferChk, "Use Volume Properties",
@@ -1100,18 +1100,18 @@ MeasureDlg::MeasureDlg(VRenderFrame* frame)
 	//relax settings
 	wxBoxSizer* sizer_13 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Relax:",
-		wxDefaultPosition, wxSize(90, -1));
+		wxDefaultPosition, FromDIP(wxSize(90, -1)));
 	sizer_13->Add(10, 10);
 	sizer_13->Add(st, 0, wxALIGN_CENTER);
 	m_auto_relax_btn = new wxToggleButton(this, ID_AutoRelaxBtn,
-		"Auto Relax", wxDefaultPosition, wxSize(75, -1));
+		"Auto Relax", wxDefaultPosition, FromDIP(wxSize(75, -1)));
 	sizer_13->Add(10, 10);
 	sizer_13->Add(m_auto_relax_btn, 0, wxALIGN_CENTER);
 	st = new wxStaticText(this, 0, "Constraint ");
 	sizer_13->Add(10, 10);
 	sizer_13->Add(st, 0, wxALIGN_CENTER);
 	m_relax_data_cmb = new wxComboBox(this, ID_RelaxDataCmb, "",
-		wxDefaultPosition, wxSize(100, -1), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
 	m_relax_data_cmb->Append("Free");
 	m_relax_data_cmb->Append("Volume");
 	m_relax_data_cmb->Append("Selection");
@@ -1123,7 +1123,7 @@ MeasureDlg::MeasureDlg(VRenderFrame* frame)
 	sizer_13->Add(st, 0, wxALIGN_CENTER);
 	m_relax_value_spin = new wxSpinCtrlDouble(
 		this, ID_RelaxValueSpin, "2",
-		wxDefaultPosition, wxSize(50, 23),
+		wxDefaultPosition, FromDIP(wxSize(50, 23)),
 		wxSP_ARROW_KEYS | wxSP_WRAP,
 		0, 100, 2, 0.1);
 	sizer_13->Add(m_relax_value_spin, 0, wxALIGN_CENTER);
@@ -1140,17 +1140,17 @@ MeasureDlg::MeasureDlg(VRenderFrame* frame)
 	//group
 	wxBoxSizer* sizer21 = new wxBoxSizer(wxHORIZONTAL);
 	m_new_group = new wxButton(this, ID_NewGroup, "New Group",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	st = new wxStaticText(this, 0, "Group ID:",
-		wxDefaultPosition, wxSize(65, -1));
+		wxDefaultPosition, FromDIP(wxSize(65, -1)));
 	m_group_text = new wxTextCtrl(this, ID_GroupText, "0",
-		wxDefaultPosition, wxSize(40, 22), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 22)), 0, vald_int);
 	m_chg_group = new wxButton(this, ID_ChgGroup, "Change",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_sel_group = new wxButton(this, ID_SelGroup, "Select",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_disptgl_group = new wxButton(this, ID_DispTglGroup, "Display",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	sizer21->Add(m_new_group, 0, wxALIGN_CENTER);
 	sizer21->AddStretchSpacer();
 	sizer21->Add(st, 0, wxALIGN_CENTER);
@@ -1196,19 +1196,19 @@ MeasureDlg::MeasureDlg(VRenderFrame* frame)
 	sizer31->Add(m_align_center, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer32 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Mono Axis:",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_x = new wxButton(this, ID_AlignX, "X",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_y = new wxButton(this, ID_AlignY, "Y",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_z = new wxButton(this, ID_AlignZ, "Z",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_nx = new wxButton(this, ID_AlignNX, "-X",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_ny = new wxButton(this, ID_AlignNY, "-Y",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_nz = new wxButton(this, ID_AlignNZ, "-Z",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	sizer32->Add(5, 5);
 	sizer32->Add(st, 0, wxALIGN_CENTER);
 	sizer32->Add(m_align_x, 0, wxALIGN_CENTER);
@@ -1219,19 +1219,19 @@ MeasureDlg::MeasureDlg(VRenderFrame* frame)
 	sizer32->Add(m_align_nz, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer33 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Tri Axes:",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_xyz = new wxButton(this, ID_AlignXYZ, "XYZ",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_yxz = new wxButton(this, ID_AlignYXZ, "YXZ",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_zxy = new wxButton(this, ID_AlignZXY, "ZXY",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_xzy = new wxButton(this, ID_AlignXZY, "XZY",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_yzx = new wxButton(this, ID_AlignYZX, "YZX",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_zyx = new wxButton(this, ID_AlignZYX, "ZYX",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	sizer33->Add(5, 5);
 	sizer33->Add(st, 0, wxALIGN_CENTER);
 	sizer33->Add(m_align_xyz, 0, wxALIGN_CENTER);

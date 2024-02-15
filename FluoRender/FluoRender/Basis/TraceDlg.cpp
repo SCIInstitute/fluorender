@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Components/CompSelector.h>
 #include <Components/CompAnalyzer.h>
 #include <Components/CompEditor.h>
+#include <wxSingleSlider.h>
 #include <wx/valnum.h>
 #include <wx/clipbrd.h>
 #include <wx/wfstream.h>
@@ -385,23 +386,24 @@ END_EVENT_TABLE()
 wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
+	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	wxStaticText *st = 0;
 
 	//load trace
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Track map:",
-		wxDefaultPosition, wxSize(70, 20));
+		wxDefaultPosition, FromDIP(wxSize(70, 20)));
 	m_load_trace_text = new wxTextCtrl(page, ID_LoadTraceText, "",
 		wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 	m_clear_trace_btn = new wxButton(page, ID_ClearTraceBtn, "X",
-		wxDefaultPosition, wxSize(23, 23));
+		wxDefaultPosition, FromDIP(wxSize(23, 23)));
 	m_load_trace_btn = new wxButton(page, ID_LoadTraceBtn, "Load",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, FromDIP(wxSize(65, 23)));
 	m_save_trace_btn = new wxButton(page, ID_SaveTraceBtn, "Save",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, FromDIP(wxSize(65, 23)));
 	m_saveas_trace_btn = new wxButton(page, ID_SaveasTraceBtn, "Save As",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, FromDIP(wxSize(65, 23)));
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_load_trace_text, 1, wxEXPAND);
@@ -416,7 +418,7 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Iterations:",
 		wxDefaultPosition, wxDefaultSize);
 	m_map_iter_spin = new wxSpinCtrl(page, ID_MapIterSpin, "3",
-		wxDefaultPosition, wxSize(50, 23));
+		wxDefaultPosition, FromDIP(wxSize(50, 23)));
 	sizer_2->Add(5, 5);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(5, 5);
@@ -424,18 +426,18 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Size Threshold:",
 		wxDefaultPosition, wxDefaultSize);
 	m_map_size_spin = new wxSpinCtrl(page, ID_MapSizeSpin, "100",
-		wxDefaultPosition, wxSize(50, 23));
+		wxDefaultPosition, FromDIP(wxSize(50, 23)));
 	m_map_size_spin->SetRange(1, std::numeric_limits<int>::max());
 	sizer_2->Add(5, 5);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(5, 5);
 	sizer_2->Add(m_map_size_spin, 0, wxALIGN_CENTER);
 	m_gen_map_btn = new wxButton(page, ID_GenMapBtn, "Generate",
-		wxDefaultPosition, wxSize(100, 23));
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_refine_t_btn = new wxButton(page, ID_RefineTBtn, "Refine T",
-		wxDefaultPosition, wxSize(100, 23));
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_refine_all_btn = new wxButton(page, ID_RefineAllBtn, "Refine All",
-		wxDefaultPosition, wxSize(100, 23));
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	sizer_2->Add(5, 5);
 	sizer_2->Add(m_gen_map_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_refine_t_btn, 0, wxALIGN_CENTER);
@@ -447,7 +449,7 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize);
 	m_map_similar_spin = new wxSpinCtrlDouble(
 		page, ID_MapSimilarSpin, "0.2",
-		wxDefaultPosition, wxSize(50, 23),
+		wxDefaultPosition, FromDIP(wxSize(50, 23)),
 		wxSP_ARROW_KEYS| wxSP_WRAP,
 		0, 1, 0.2, 0.01);
 	sizer_3->Add(5, 5);
@@ -458,7 +460,7 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize);
 	m_map_contact_spin = new wxSpinCtrlDouble(
 		page, ID_MapContactSpin, "0.6",
-		wxDefaultPosition, wxSize(50, 23),
+		wxDefaultPosition, FromDIP(wxSize(50, 23)),
 		wxSP_ARROW_KEYS | wxSP_WRAP,
 		0, 1, 0.6, 0.01);
 	sizer_3->Add(5, 5);
@@ -466,13 +468,13 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 	sizer_3->Add(5, 5);
 	sizer_3->Add(m_map_contact_spin, 0, wxALIGN_CENTER);
 	m_map_consistent_btn = new wxToggleButton(page, ID_MapConsistentBtn,
-		"Consistent Colors", wxDefaultPosition, wxSize(100, 23));
+		"Consistent Colors", wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_map_merge_btn = new wxToggleButton(
 		page, ID_MapMergeBtn, "Try Merging",
-		wxDefaultPosition, wxSize(100, 23));
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_map_split_btn = new wxToggleButton(
 		page, ID_MapSplitBtn, "Try Splitting",
-		wxDefaultPosition, wxSize(100, 23));
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	sizer_3->Add(5, 5);
 	sizer_3->Add(m_map_consistent_btn, 0, wxALIGN_CENTER);
 	sizer_3->Add(m_map_merge_btn, 0, wxALIGN_CENTER);
@@ -496,6 +498,7 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 wxWindow* TraceDlg::CreateSelectPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
+	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
@@ -504,21 +507,21 @@ wxWindow* TraceDlg::CreateSelectPage(wxWindow *parent)
 	//selection tools
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Selection tools:",
-		wxDefaultPosition, wxSize(100, 20));
+		wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	m_comp_id_text = new wxTextCtrl(page, ID_CompIDText, "",
-		wxDefaultPosition, wxSize(77, 23), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(77, 23)), wxTE_PROCESS_ENTER);
 	m_comp_id_x_btn = new wxButton(page, ID_CompIDXBtn, "X",
-		wxDefaultPosition, wxSize(23, 23));
+		wxDefaultPosition, FromDIP(wxSize(23, 23)));
 	m_comp_full_btn = new wxButton(page, ID_CompFullBtn, "FullCompt",
-		wxDefaultPosition, wxSize(64, 23));
+		wxDefaultPosition, FromDIP(wxSize(64, 23)));
 	m_comp_exclusive_btn = new wxButton(page, ID_CompExclusiveBtn, "Replace",
-		wxDefaultPosition, wxSize(64, 23));
+		wxDefaultPosition, FromDIP(wxSize(64, 23)));
 	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Append",
-		wxDefaultPosition, wxSize(64, 23));
+		wxDefaultPosition, FromDIP(wxSize(64, 23)));
 	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
-		wxDefaultPosition, wxSize(64, 23));
+		wxDefaultPosition, FromDIP(wxSize(64, 23)));
 	m_shuffle_btn = new wxButton(page, ID_ShuffleBtn, "Shuffle",
-		wxDefaultPosition, wxSize(64, 23));
+		wxDefaultPosition, FromDIP(wxSize(64, 23)));
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_comp_id_text, 0, wxALIGN_CENTER);
@@ -532,11 +535,11 @@ wxWindow* TraceDlg::CreateSelectPage(wxWindow *parent)
 	//cell size filter
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Component size:",
-		wxDefaultPosition, wxSize(110, 20));
-	m_cell_size_sldr = new wxSlider(page, ID_CellSizeSldr, 20, 0, 100,
+		wxDefaultPosition, FromDIP(wxSize(110, 20)));
+	m_cell_size_sldr = new wxSingleSlider(page, ID_CellSizeSldr, 20, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_cell_size_text = new wxTextCtrl(page, ID_CellSizeText, "20",
-		wxDefaultPosition, wxSize(60, 23), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(60, 23)), 0, vald_int);
 	sizer_2->Add(5, 5);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_size_sldr, 1, wxEXPAND);
@@ -544,11 +547,11 @@ wxWindow* TraceDlg::CreateSelectPage(wxWindow *parent)
 	//uncertainty filter
 	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
 	m_comp_uncertain_btn = new wxButton(page, ID_CompUncertainBtn, "Uncertainty",
-		wxDefaultPosition, wxSize(80, 23));
-	m_comp_uncertain_low_sldr = new wxSlider(page, ID_CompUncertainLowSldr, 0, 0, 20,
+		wxDefaultPosition, FromDIP(wxSize(80, 23)));
+	m_comp_uncertain_low_sldr = new wxSingleSlider(page, ID_CompUncertainLowSldr, 0, 0, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_comp_uncertain_low_text = new wxTextCtrl(page, ID_CompUncertainLowText, "0",
-		wxDefaultPosition, wxSize(60, 23), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(60, 23)), 0, vald_int);
 	sizer_3->Add(5, 5);
 	sizer_3->Add(m_comp_uncertain_btn, 0, wxALIGN_CENTER);
 	sizer_3->Add(30, 23);
@@ -573,21 +576,22 @@ wxWindow* TraceDlg::CreateSelectPage(wxWindow *parent)
 wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
+	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	wxStaticText *st = 0;
 
 	//selection
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Selection tools:",
-		wxDefaultPosition, wxSize(100, 20));
+		wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	m_comp_id_text2 = new wxTextCtrl(page, ID_CompIDText2, "",
-		wxDefaultPosition, wxSize(77, 23), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(77, 23)), wxTE_PROCESS_ENTER);
 	m_comp_id_x_btn = new wxButton(page, ID_CompIDXBtn, "X",
-		wxDefaultPosition, wxSize(23, 23));
+		wxDefaultPosition, FromDIP(wxSize(23, 23)));
 	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Append",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, FromDIP(wxSize(80, 23)));
 	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, FromDIP(wxSize(80, 23)));
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_comp_id_text2, 0, wxALIGN_CENTER);
@@ -600,11 +604,11 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 	//ID link controls
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	m_cell_exclusive_link_btn = new wxButton(page, ID_CellExclusiveLinkBtn, "Excl. Link",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, FromDIP(wxSize(80, 23)));
 	m_cell_link_btn = new wxButton(page, ID_CellLinkBtn, "Link IDs",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, FromDIP(wxSize(80, 23)));
 	m_cell_link_all_btn = new wxButton(page, ID_CellLinkAllBtn, "Link New IDs",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, FromDIP(wxSize(80, 23)));
 	sizer_2->AddStretchSpacer();
 	sizer_2->Add(m_cell_exclusive_link_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_link_btn, 0, wxALIGN_CENTER);
@@ -614,9 +618,9 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 	//ID unlink controls
 	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
 	m_cell_isolate_btn = new wxButton(page, ID_CellIsolateBtn, "Isolate",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, FromDIP(wxSize(80, 23)));
 	m_cell_unlink_btn = new wxButton(page, ID_CellUnlinkBtn, "Unlink IDs",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, FromDIP(wxSize(80, 23)));
 	sizer_3->AddStretchSpacer();
 	sizer_3->Add(m_cell_isolate_btn, 0, wxALIGN_CENTER);
 	sizer_3->Add(m_cell_unlink_btn, 0, wxALIGN_CENTER);
@@ -640,21 +644,22 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
+	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	wxStaticText *st = 0;
 
 	//ID input
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "New ID/Selection:",
-		wxDefaultPosition, wxSize(100, 20));
+		wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	m_cell_new_id_text = new wxTextCtrl(page, ID_CellNewIDText, "",
-		wxDefaultPosition, wxSize(77, 23), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(77, 23)), wxTE_PROCESS_ENTER);
 	m_cell_new_id_x_btn = new wxButton(page, ID_CellNewIDXBtn, "X",
-		wxDefaultPosition, wxSize(23, 23));
+		wxDefaultPosition, FromDIP(wxSize(23, 23)));
 	m_comp_append2_btn = new wxButton(page, ID_CompAppend2Btn, "Append",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, FromDIP(wxSize(80, 23)));
 	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, FromDIP(wxSize(80, 23)));
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_cell_new_id_text, 0, wxALIGN_CENTER);
@@ -667,11 +672,11 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 	//controls
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	m_cell_new_id_btn = new wxButton(page, ID_CellNewIDBtn, "Assign ID",
-		wxDefaultPosition, wxSize(85, 23));
+		wxDefaultPosition, FromDIP(wxSize(85, 23)));
 	m_cell_append_id_btn = new wxButton(page, ID_CellAppendIDBtn, "Add ID",
-		wxDefaultPosition, wxSize(85, 23));
+		wxDefaultPosition, FromDIP(wxSize(85, 23)));
 	m_cell_replace_id_btn = new wxButton(page, ID_CellReplaceIDBtn, "Replace ID",
-		wxDefaultPosition, wxSize(85, 23));
+		wxDefaultPosition, FromDIP(wxSize(85, 23)));
 	sizer_2->AddStretchSpacer();
 	sizer_2->Add(m_cell_new_id_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_append_id_btn, 0, wxALIGN_CENTER);
@@ -680,13 +685,13 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 
 	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
 	m_cell_combine_id_btn = new wxButton(page, ID_CellCombineIDBtn, "Combine",
-		wxDefaultPosition, wxSize(85, 23));
+		wxDefaultPosition, FromDIP(wxSize(85, 23)));
 	m_cell_separate_id_btn = new wxButton(page, ID_CellSeparateBtn, "Separate",
-		wxDefaultPosition, wxSize(85, 23));
+		wxDefaultPosition, FromDIP(wxSize(85, 23)));
 	m_cell_segment_text = new wxSpinCtrl(page, ID_CellSegText, "2",
-		wxDefaultPosition, wxSize(40, 21));
+		wxDefaultPosition, FromDIP(wxSize(40, 21)));
 	m_cell_segment_btn = new wxButton(page, ID_CellSegBtn, "Segment",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, FromDIP(wxSize(65, 23)));
 	sizer_3->AddStretchSpacer();
 	sizer_3->Add(m_cell_combine_id_btn, 0, wxALIGN_CENTER);
 	sizer_3->Add(m_cell_separate_id_btn, 0, wxALIGN_CENTER);
@@ -713,17 +718,18 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
+	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	wxStaticText *st = 0;
 
 	//conversion
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Convert to:",
-		wxDefaultPosition, wxSize(100, 20));
+		wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	m_convert_to_rulers_btn = new wxButton(page, ID_ConvertToRulersBtn, "Rulers",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, FromDIP(wxSize(80, 23)));
 	m_convert_consistent_btn = new wxButton(page, ID_ConvertConsistentBtn, "UniIDs",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, FromDIP(wxSize(80, 23)));
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_convert_to_rulers_btn, 0, wxALIGN_CENTER);
@@ -732,15 +738,15 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 	//analysis
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Information:",
-		wxDefaultPosition, wxSize(100, 20));
+		wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	m_analyze_comp_btn = new wxButton(page, ID_AnalyzeCompBtn, "Compnts",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, FromDIP(wxSize(80, 23)));
 	m_analyze_link_btn = new wxButton(page, ID_AnalyzeLinkBtn, "Links",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, FromDIP(wxSize(80, 23)));
 	m_analyze_uncertain_hist_btn = new wxButton(page, ID_AnalyzeUncertainHistBtn, "Uncertainty",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, FromDIP(wxSize(80, 23)));
 	m_analyze_path_btn = new wxButton(page, ID_AnalyzePathBtn, "Paths",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, FromDIP(wxSize(80, 23)));
 	sizer_2->Add(5, 5);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_analyze_comp_btn, 0, wxALIGN_CENTER);
@@ -751,9 +757,9 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 	//Export
 	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Export:",
-		wxDefaultPosition, wxSize(100, 20));
+		wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	m_save_result_btn = new wxButton(page, ID_SaveResultBtn, "Save As",
-		wxDefaultPosition, wxSize(80, 23));
+		wxDefaultPosition, FromDIP(wxSize(80, 23)));
 	sizer_3->Add(5, 5);
 	sizer_3->Add(st, 0, wxALIGN_CENTER);
 	sizer_3->Add(m_save_result_btn, 0, wxALIGN_CENTER);
@@ -813,13 +819,13 @@ TraceDlg::TraceDlg(VRenderFrame* frame)
 	//ghost num
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Tracks:",
-		wxDefaultPosition, wxSize(70, 20));
+		wxDefaultPosition, FromDIP(wxSize(70, 20)));
 	m_ghost_show_tail_chk = new wxCheckBox(this, ID_GhostShowTailChk, "Tail",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
-	m_ghost_num_sldr = new wxSlider(this, ID_GhostNumSldr, 10, 0, 20,
+	m_ghost_num_sldr = new wxSingleSlider(this, ID_GhostNumSldr, 10, 0, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_ghost_num_text = new wxTextCtrl(this, ID_GhostNumText, "10",
-		wxDefaultPosition, wxSize(60, 23), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(60, 23)), 0, vald_int);
 	m_ghost_show_lead_chk = new wxCheckBox(this, ID_GhostShowLeadChk, "Lead",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	sizer_1->Add(5, 5);
@@ -842,9 +848,9 @@ TraceDlg::TraceDlg(VRenderFrame* frame)
 	m_cell_time_prev_st = new wxStaticText(this, 0, "\tPrevious T",
 		wxDefaultPosition, wxDefaultSize);
 	m_cell_prev_btn = new wxButton(this, ID_CellPrevBtn, L"\u21e6 Backward (A)",
-		wxDefaultPosition, wxSize(100, 23));
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_cell_next_btn = new wxButton(this, ID_CellNextBtn, L"Forward (D) \u21e8",
-		wxDefaultPosition, wxSize(100, 23));
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	sizer_21->Add(m_cell_time_curr_st, 1, wxEXPAND);
 	sizer_21->Add(m_cell_prev_btn, 0, wxALIGN_CENTER);
 	sizer_21->Add(m_cell_next_btn, 0, wxALIGN_CENTER);
@@ -866,7 +872,7 @@ TraceDlg::TraceDlg(VRenderFrame* frame)
 		new wxStaticBox(this, wxID_ANY, "Output"),
 		wxVERTICAL);
 	m_stat_text = new wxTextCtrl(this, ID_StatText, "",
-		wxDefaultPosition, wxSize(-1, 100), wxTE_MULTILINE);
+		wxDefaultPosition, FromDIP(wxSize(-1, 100)), wxTE_MULTILINE);
 	m_stat_text->SetEditable(false);
 	sizer_3->Add(m_stat_text, 1, wxEXPAND);
 
@@ -1116,7 +1122,7 @@ void TraceDlg::OnSaveasTrace(wxCommandEvent& event)
 
 void TraceDlg::OnGhostNumChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_ghost_num_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_ghost_num_text->GetValue())
 		m_ghost_num_text->SetValue(str);
@@ -1173,7 +1179,7 @@ void TraceDlg::OnGhostShowLead(wxCommandEvent &event)
 //cell size filter
 void TraceDlg::OnCellSizeChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_cell_size_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_cell_size_text->GetValue())
 		m_cell_size_text->SetValue(str);
@@ -1266,7 +1272,7 @@ void TraceDlg::OnCompUncertainBtn(wxCommandEvent &event)
 
 void TraceDlg::OnCompUncertainLowChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_comp_uncertain_low_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_comp_uncertain_low_text->GetValue())
 		m_comp_uncertain_low_text->SetValue(str);

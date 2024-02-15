@@ -42,7 +42,7 @@ using namespace std;
 
 class VRenderFrame;
 class VRenderGLView;
-
+class wxSingleSlider;
 class TraceListCtrl : public wxListCtrl
 {
 	enum
@@ -267,11 +267,11 @@ private:
 	wxButton* m_comp_clear_btn;
 	wxButton* m_shuffle_btn;
 	//cell size filter
-	wxSlider* m_cell_size_sldr;
+	wxSingleSlider* m_cell_size_sldr;
 	wxTextCtrl* m_cell_size_text;
 	//uncertainty filter
 	wxButton* m_comp_uncertain_btn;
-	wxSlider* m_comp_uncertain_low_sldr;
+	wxSingleSlider* m_comp_uncertain_low_sldr;
 	wxTextCtrl* m_comp_uncertain_low_text;
 
 	//link page
@@ -309,7 +309,7 @@ private:
 	wxButton* m_save_result_btn;
 
 	//ghost num
-	wxSlider* m_ghost_num_sldr;
+	wxSingleSlider* m_ghost_num_sldr;
 	wxTextCtrl* m_ghost_num_text;
 	wxCheckBox* m_ghost_show_tail_chk;
 	wxCheckBox* m_ghost_show_lead_chk;

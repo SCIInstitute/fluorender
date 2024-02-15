@@ -60,27 +60,27 @@ m_max_value(255.0)
 	//size of ccl
 	wxBoxSizer *sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_ca_select_only_chk = new wxCheckBox(this, ID_CASelectOnlyChk, "Selct. Only",
-		wxDefaultPosition, wxSize(95, 20));
+		wxDefaultPosition, FromDIP(wxSize(95, 20)));
 	sizer_1->Add(m_ca_select_only_chk, 0, wxALIGN_CENTER);
 	sizer_1->AddStretchSpacer();
 	st = new wxStaticText(this, 0, "Min:",
-		wxDefaultPosition, wxSize(35, 15));
+		wxDefaultPosition, FromDIP(wxSize(35, 15)));
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	m_ca_min_text = new wxTextCtrl(this, ID_CAMinText, "0",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
 	sizer_1->Add(m_ca_min_text, 0, wxALIGN_CENTER);
 	st = new wxStaticText(this, 0, "vx",
-		wxDefaultPosition, wxSize(15, 15));
+		wxDefaultPosition, FromDIP(wxSize(15, 15)));
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->AddStretchSpacer();
 	st = new wxStaticText(this, 0, "Max:",
-		wxDefaultPosition, wxSize(35, 15));
+		wxDefaultPosition, FromDIP(wxSize(35, 15)));
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	m_ca_max_text = new wxTextCtrl(this, ID_CAMaxText, "1000",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
 	sizer_1->Add(m_ca_max_text, 0, wxALIGN_CENTER);
 	st = new wxStaticText(this, 0, "vx",
-		wxDefaultPosition, wxSize(15, 15));
+		wxDefaultPosition, FromDIP(wxSize(15, 15)));
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->AddStretchSpacer();
 	m_ca_ignore_max_chk = new wxCheckBox(this, ID_CAIgnoreMaxChk, "Ignore Max");
@@ -90,25 +90,25 @@ m_max_value(255.0)
 	st = new wxStaticText(this, 0, "Components:  ");
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	m_ca_comps_text = new wxTextCtrl(this, ID_CACompsText, "0",
-		wxDefaultPosition, wxSize(60, 20), wxTE_READONLY);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_READONLY);
 	sizer_2->Add(m_ca_comps_text, 2, wxALIGN_CENTER);
 	st = new wxStaticText(this, 0, "Total Volume:  ");
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	m_ca_volume_text = new wxTextCtrl(this, ID_CAVolumeText, "0",
-		wxDefaultPosition, wxSize(60, 20), wxTE_READONLY);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_READONLY);
 	sizer_2->Add(m_ca_volume_text, 2, wxALIGN_CENTER);
 	st = new wxStaticText(this, 0, "vx",
-		wxDefaultPosition, wxSize(15, 15));
+		wxDefaultPosition, FromDIP(wxSize(15, 15)));
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(5, 5);
 	m_ca_vol_unit_text = new wxTextCtrl(this, ID_CAVolUnitText, "0",
-		wxDefaultPosition, wxSize(90, 20), wxTE_READONLY);
+		wxDefaultPosition, FromDIP(wxSize(90, 20)), wxTE_READONLY);
 	sizer_2->Add(m_ca_vol_unit_text, 3, wxALIGN_CENTER);
 	//export
 	wxBoxSizer *sizer_3 = new wxBoxSizer(wxHORIZONTAL);
 	sizer_3->AddStretchSpacer();
 	m_ca_analyze_btn = new wxButton(this, ID_CAAnalyzeBtn, "Analyze",
-		wxDefaultPosition, wxSize(-1, 23));
+		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
 	sizer_3->Add(m_ca_analyze_btn, 0, wxALIGN_CENTER);
 
 	//all controls

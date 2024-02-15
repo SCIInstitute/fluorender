@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "NoiseCancellingDlg.h"
 #include "VRenderFrame.h"
 #include "Components/CompSelector.h"
+#include <wxSingleSlider.h>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(NoiseCancellingDlg, wxPanel)
@@ -43,7 +44,7 @@ END_EVENT_TABLE()
 NoiseCancellingDlg::NoiseCancellingDlg(VRenderFrame *frame)
 : wxPanel(frame, wxID_ANY,
 	wxDefaultPosition,
-	frame->FromDIP(wxSize(400, 150)),
+	frame->FromDIP(wxSize(450, 200)),
 	0, "NoiseCancellingDlg"),
 	m_frame(frame),
 	m_view(0),
@@ -66,13 +67,13 @@ NoiseCancellingDlg::NoiseCancellingDlg(VRenderFrame *frame)
 	//group1
 	wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Threshold:",
-		wxDefaultPosition, wxSize(75, 23));
-	m_threshold_sldr = new wxSlider(this, ID_ThresholdSldr, 0, 0, 2550,
+		wxDefaultPosition, FromDIP(wxSize(75, 23)));
+	m_threshold_sldr = new wxSingleSlider(this, ID_ThresholdSldr, 0, 0, 2550,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_threshold_text = new wxTextCtrl(this, ID_ThresholdText, "0.0",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_fp1);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_fp1);
 	m_preview_btn = new wxButton(this, ID_PreviewBtn, "Preview",
-		wxDefaultPosition, wxSize(70, 23));
+		wxDefaultPosition, FromDIP(wxSize(70, 23)));
 	sizer1->Add(st, 0, wxALIGN_CENTER);
 	sizer1->Add(m_threshold_sldr, 1, wxEXPAND);
 	sizer1->Add(m_threshold_text, 0, wxALIGN_CENTER);
@@ -82,13 +83,13 @@ NoiseCancellingDlg::NoiseCancellingDlg(VRenderFrame *frame)
 	//group2
 	wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Voxel Size:",
-		wxDefaultPosition, wxSize(75, 23));
-	m_voxel_sldr = new wxSlider(this, ID_VoxelSldr, 1, 1, 500,
+		wxDefaultPosition, FromDIP(wxSize(75, 23)));
+	m_voxel_sldr = new wxSingleSlider(this, ID_VoxelSldr, 1, 1, 500,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_voxel_text = new wxTextCtrl(this, ID_VoxelText, "1",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
 	m_erase_btn = new wxButton(this, ID_EraseBtn, "Erase",
-		wxDefaultPosition, wxSize(70, 23));
+		wxDefaultPosition, FromDIP(wxSize(70, 23)));
 	sizer2->Add(st, 0, wxALIGN_CENTER);
 	sizer2->Add(m_voxel_sldr, 1, wxEXPAND);
 	sizer2->Add(m_voxel_text, 0, wxALIGN_CENTER);
@@ -98,7 +99,7 @@ NoiseCancellingDlg::NoiseCancellingDlg(VRenderFrame *frame)
 	//group3
 	wxBoxSizer *sizer3 = new wxBoxSizer(wxHORIZONTAL);
 	m_ca_select_only_chk = new wxCheckBox(this, ID_CASelectOnlyChk, "Selct. Only",
-		wxDefaultPosition, wxSize(95, 20));
+		wxDefaultPosition, FromDIP(wxSize(95, 20)));
 	sizer3->Add(m_ca_select_only_chk, 0, wxALIGN_CENTER);
 
 	//group4
@@ -199,7 +200,7 @@ void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
 //threshold
 void NoiseCancellingDlg::OnThresholdChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_threshold_sldr->GetValue();
 	wxString str = wxString::Format("%.1f", double (ival)/10.0);
 	if (str != m_threshold_text->GetValue())
 		m_threshold_text->SetValue(str);
@@ -225,7 +226,7 @@ void NoiseCancellingDlg::OnThresholdText(wxCommandEvent &event)
 //voxel size
 void NoiseCancellingDlg::OnVoxelChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_voxel_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_voxel_text->GetValue())
 		m_voxel_text->SetValue(str);

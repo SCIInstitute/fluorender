@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "SettingDlg.h"
 #include "VRenderFrame.h"
+#include <wxSingleSlider.h>
 #include <wx/valnum.h>
 #include <wx/notebook.h>
 #include <wx/stdpaths.h>
@@ -128,6 +129,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	wxIntegerValidator<unsigned int> vald_int;
 	wxStaticText* st;
 	wxPanel *page = new wxPanel(parent);
+	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	//project save
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
@@ -160,7 +162,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Font:");
 	m_font_cmb = new wxComboBox(page, ID_FontCmb, "",
-		wxDefaultPosition, wxSize(150, -1), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, FromDIP(wxSize(150, -1)), 0, NULL, wxCB_READONLY);
 	//populate fonts
 	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 	exePath = wxPathOnly(exePath);
@@ -185,7 +187,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	sizer2_1->Add(10, 10);
 	st = new wxStaticText(page, 0, "Size:");
 	m_font_size_cmb = new wxComboBox(page, ID_FontSizeCmb, "",
-		wxDefaultPosition, wxSize(50, -1), 0, NULL);
+		wxDefaultPosition, FromDIP(wxSize(50, -1)), 0, NULL);
 	for (int df = 3; df < 18; ++df)
 		m_font_size_cmb->Append(wxString::Format("%d", int(std::pow(df, 1.5))));
 	sizer2_1->Add(st);
@@ -194,7 +196,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	sizer2_1->Add(10, 10);
 	st = new wxStaticText(page, 0, "Color:");
 	m_text_color_cmb = new wxComboBox(page, ID_TextColorCmb, "",
-		wxDefaultPosition, wxSize(100, -1), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
 	m_text_color_cmb->Append("BG inverted");
 	m_text_color_cmb->Append("Background");
 	m_text_color_cmb->Append("Vol sec color");
@@ -214,10 +216,10 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	wxBoxSizer *group3 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Line Width"), wxVERTICAL);
 	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_line_width_sldr = new wxSlider(page, ID_LineWidthSldr, 3, 1, 10,
+	m_line_width_sldr = new wxSingleSlider(page, ID_LineWidthSldr, 3, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_line_width_text = new wxTextCtrl(page, ID_LineWidthText, "3",
-		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), 0, vald_int);
 	sizer3_1->Add(m_line_width_sldr, 1, wxEXPAND);
 	sizer3_1->Add(m_line_width_text, 0, wxALIGN_CENTER);
 	group3->Add(10, 5);
@@ -228,10 +230,10 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	wxBoxSizer *group4 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Paint History"), wxVERTICAL);
 	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_paint_hist_depth_sldr = new wxSlider(page, ID_PaintHistDepthSldr, 0, 0, 10,
+	m_paint_hist_depth_sldr = new wxSingleSlider(page, ID_PaintHistDepthSldr, 0, 0, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_paint_hist_depth_text = new wxTextCtrl(page, ID_PaintHistDepthText, "0",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
 	st = new wxStaticText(page, 0,
 		"The number of undo steps for paint brush selection.\n" \
 		"Set the value to 0 to disable history.\n" \
@@ -248,10 +250,10 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	wxBoxSizer* group5 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Ruler Point Distance"), wxVERTICAL);
 	wxBoxSizer* sizer5_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_pencil_dist_sldr = new wxSlider(page, ID_PencilDistSldr, 30, 1, 100,
+	m_pencil_dist_sldr = new wxSingleSlider(page, ID_PencilDistSldr, 30, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_pencil_dist_text = new wxTextCtrl(page, ID_PencilDistText, "30",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
 	st = new wxStaticText(page, 0,
 		"The pixel distance between two ruler points for pencil and magnet.\n");
 	sizer5_1->Add(m_pencil_dist_sldr, 1, wxEXPAND);
@@ -290,6 +292,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	wxStaticText* st;
 
 	wxPanel *page = new wxPanel(parent);
+	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	//micro blending
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
@@ -310,10 +313,10 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	wxBoxSizer *group2 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Mesh Transparency Quality"), wxVERTICAL);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_peeling_layers_sldr = new wxSlider(page, ID_PeelingLayersSldr, 1, 1, 10,
+	m_peeling_layers_sldr = new wxSingleSlider(page, ID_PeelingLayersSldr, 1, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_peeling_layers_text = new wxTextCtrl(page, ID_PeelingLayersText, "1",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
 	st = new wxStaticText(page, 0,
 		"The number of depth peeling layers for rendering transparent mesh objects.\n"\
 		"Set higher numbers only for complex geometries.\n"\
@@ -332,10 +335,11 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_shadow_dir_chk = new wxCheckBox(page, ID_ShadowDirChk,
 		"Enable directional shadow");
-	m_shadow_dir_sldr = new wxSlider(page, ID_ShadowDirSldr, -45, -180, 180,
+	m_shadow_dir_sldr = new wxSingleSlider(page, ID_ShadowDirSldr, -45, -180, 180,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_shadow_dir_sldr->SetRangeStyle(2);
 	m_shadow_dir_text = new wxTextCtrl(page, ID_ShadowDirText, "-45",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_fp2);
 	st = new wxStaticText(page, 0,
 		"The direction of the shadows, when shadow is enabled for volume data.");
 	sizer3_1->Add(m_shadow_dir_chk, 0, wxALIGN_CENTER);
@@ -352,10 +356,10 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 		new wxStaticBox(page, wxID_ANY, "Rotations"), wxVERTICAL);
 	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Rot. center anchor start");
-	m_pin_threshold_sldr = new wxSlider(page, ID_PinThreshSldr, 100, 10, 500,
+	m_pin_threshold_sldr = new wxSingleSlider(page, ID_PinThreshSldr, 100, 10, 500,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_pin_threshold_text = new wxTextCtrl(page, ID_PinThreshText, "1000",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
 	sizer4_1->Add(st, 0, wxALIGN_CENTER);
 	sizer4_1->Add(m_pin_threshold_sldr, 1, wxEXPAND);
 	sizer4_1->Add(m_pin_threshold_text, 0, wxALIGN_CENTER);
@@ -404,6 +408,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	wxIntegerValidator<int> vald_int2;
 	wxStaticText* st;
 	wxPanel *page = new wxPanel(parent);
+	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	//mouse interactions
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
@@ -426,64 +431,64 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 		2, choices, 0, wxRA_SPECIFY_COLS);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Graphics Memory:",
-		wxDefaultPosition, wxSize(110, -1));
+		wxDefaultPosition, FromDIP(wxSize(110, -1)));
 	sizer2_1->Add(st);
-	m_graphics_mem_sldr = new wxSlider(page, ID_GraphicsMemSldr, 10, 1, 100,
+	m_graphics_mem_sldr = new wxSingleSlider(page, ID_GraphicsMemSldr, 10, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_graphics_mem_text = new wxTextCtrl(page, ID_GraphicsMemText, "1000",
-		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), 0, vald_int);
 	st = new wxStaticText(page, 0, "MB",
-		wxDefaultPosition, wxSize(20, -1));
+		wxDefaultPosition, FromDIP(wxSize(20, -1)));
 	sizer2_1->Add(m_graphics_mem_sldr, 1, wxEXPAND);
 	sizer2_1->Add(m_graphics_mem_text, 0, wxALIGN_CENTER);
 	sizer2_1->Add(st);
 	wxBoxSizer *sizer2_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Large Data Size:",
-		wxDefaultPosition, wxSize(110, -1));
+		wxDefaultPosition, FromDIP(wxSize(110, -1)));
 	sizer2_2->Add(st);
-	m_large_data_sldr = new wxSlider(page, ID_LargeDataSldr, 20, 0, 200,
+	m_large_data_sldr = new wxSingleSlider(page, ID_LargeDataSldr, 20, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_large_data_text = new wxTextCtrl(page, ID_LargeDataText, "200",
-		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), 0, vald_int);
 	st = new wxStaticText(page, 0, "MB",
-		wxDefaultPosition, wxSize(20, -1));
+		wxDefaultPosition, FromDIP(wxSize(20, -1)));
 	sizer2_2->Add(m_large_data_sldr, 1, wxEXPAND);
 	sizer2_2->Add(m_large_data_text, 0, wxALIGN_CENTER);
 	sizer2_2->Add(st);
 	wxBoxSizer *sizer2_3 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Brick Size:",
-		wxDefaultPosition, wxSize(110, -1));
+		wxDefaultPosition, FromDIP(wxSize(110, -1)));
 	sizer2_3->Add(st);
-	m_block_size_sldr = new wxSlider(page, ID_BlockSizeSldr, 7, 6, 12,
+	m_block_size_sldr = new wxSingleSlider(page, ID_BlockSizeSldr, 7, 6, 12,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_block_size_text = new wxTextCtrl(page, ID_BlockSizeText, "128",
-		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), 0, vald_int);
 	st = new wxStaticText(page, 0, "vx",
-		wxDefaultPosition, wxSize(20, -1));
+		wxDefaultPosition, FromDIP(wxSize(20, -1)));
 	sizer2_3->Add(m_block_size_sldr, 1, wxEXPAND);
 	sizer2_3->Add(m_block_size_text, 0, wxALIGN_CENTER);
 	sizer2_3->Add(st);
 	wxBoxSizer *sizer2_4 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Response Time:",
-		wxDefaultPosition, wxSize(110, -1));
+		wxDefaultPosition, FromDIP(wxSize(110, -1)));
 	sizer2_4->Add(st);
-	m_response_time_sldr = new wxSlider(page, ID_ResponseTimeSldr, 10, 1, 100,
+	m_response_time_sldr = new wxSingleSlider(page, ID_ResponseTimeSldr, 10, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_response_time_text = new wxTextCtrl(page, ID_ResponseTimeText, "100",
-		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), 0, vald_int);
 	st = new wxStaticText(page, 0, "ms",
-		wxDefaultPosition, wxSize(20, -1));
+		wxDefaultPosition, FromDIP(wxSize(20, -1)));
 	sizer2_4->Add(m_response_time_sldr, 1, wxEXPAND);
 	sizer2_4->Add(m_response_time_text, 0, wxALIGN_CENTER);
 	sizer2_4->Add(st);
 	wxBoxSizer *sizer2_5 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Detail Level Offset:",
-		wxDefaultPosition, wxSize(110, -1));
+		wxDefaultPosition, FromDIP(wxSize(110, -1)));
 	sizer2_5->Add(st);
-	m_detail_level_offset_sldr = new wxSlider(page, ID_DetailLevelOffsetSldr, 0, -5, 5,
+	m_detail_level_offset_sldr = new wxSingleSlider(page, ID_DetailLevelOffsetSldr, 0, -5, 5,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_detail_level_offset_text = new wxTextCtrl(page, ID_DetailLevelOffsetText, "0",
-		wxDefaultPosition, wxSize(40, -1), 0, vald_int2);
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), 0, vald_int2);
 	sizer2_5->Add(m_detail_level_offset_sldr, 1, wxEXPAND);
 	sizer2_5->Add(m_detail_level_offset_text, 0, wxALIGN_CENTER);
 	sizer2_5->Add(20, 5);
@@ -528,6 +533,7 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	wxFloatingPointValidator<double> vald_fp1(1);
 	wxStaticText* st;
 	wxPanel* page = new wxPanel(parent);
+	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	//stereo
 	wxBoxSizer* group1 = new wxStaticBoxSizer(
@@ -542,10 +548,10 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	sizer1_2->Add(m_sbs_chk, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Eye distance");
-	m_eye_dist_sldr = new wxSlider(page, ID_EyeDistSldr, 200, 0, 2000,
+	m_eye_dist_sldr = new wxSingleSlider(page, ID_EyeDistSldr, 200, 0, 2000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_eye_dist_text = new wxTextCtrl(page, ID_EyeDistText, "20.0",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_fp1);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_fp1);
 	sizer1_3->Add(st, 0, wxALIGN_CENTER);
 	sizer1_3->Add(m_eye_dist_sldr, 1, wxEXPAND);
 	sizer1_3->Add(m_eye_dist_text, 0, wxALIGN_CENTER);
@@ -562,10 +568,10 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 		new wxStaticBox(page, wxID_ANY, "Fullscreen on Display"), wxVERTICAL);
 	wxBoxSizer* sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Display ID");
-	m_disp_id_sldr = new wxSlider(page, ID_DispIdSldr, 0, 0, 10,
+	m_disp_id_sldr = new wxSingleSlider(page, ID_DispIdSldr, 0, 0, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_disp_id_text = new wxTextCtrl(page, ID_DispIdText, "0",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
 	sizer2_1->Add(st, 0, wxALIGN_CENTER);
 	sizer2_1->Add(m_disp_id_sldr, 1, wxEXPAND);
 	sizer2_1->Add(m_disp_id_text, 0, wxALIGN_CENTER);
@@ -592,6 +598,7 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	wxFloatingPointValidator<double> vald_fp1(2);
 	wxStaticText* st;
 	wxPanel *page = new wxPanel(parent);
+	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	//override vox
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
@@ -610,13 +617,13 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	//combo box line
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_wav_color1_cmb = new wxComboBox(page, ID_WavColor1Cmb, "",
-		wxDefaultPosition, wxSize(75, 23), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, FromDIP(wxSize(75, 23)), 0, NULL, wxCB_READONLY);
 	m_wav_color2_cmb = new wxComboBox(page, ID_WavColor2Cmb, "",
-		wxDefaultPosition, wxSize(75, 23), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, FromDIP(wxSize(75, 23)), 0, NULL, wxCB_READONLY);
 	m_wav_color3_cmb = new wxComboBox(page, ID_WavColor3Cmb, "",
-		wxDefaultPosition, wxSize(75, 23), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, FromDIP(wxSize(75, 23)), 0, NULL, wxCB_READONLY);
 	m_wav_color4_cmb = new wxComboBox(page, ID_WavColor4Cmb, "",
-		wxDefaultPosition, wxSize(75, 23), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, FromDIP(wxSize(75, 23)), 0, NULL, wxCB_READONLY);
 	//1
 	m_wav_color1_cmb->Append("Red");
 	m_wav_color1_cmb->Append("Green");
@@ -665,31 +672,31 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	//static text line
 	wxBoxSizer *sizer2_2 = new wxBoxSizer(wxHORIZONTAL);
 	sizer2_2->Add(10, 20);
-	st = new wxStaticText(page, 0, "350", wxDefaultPosition, wxSize(30, 20));
+	st = new wxStaticText(page, 0, "350", wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	sizer2_2->Add(st);
 	sizer2_2->Add(20, 20);
-	st = new wxStaticText(page, 0, "--", wxDefaultPosition, wxSize(30, 20));
+	st = new wxStaticText(page, 0, "--", wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	sizer2_2->Add(st);
 	sizer2_2->Add(20, 20);
-	st = new wxStaticText(page, 0, "450\n480\n488", wxDefaultPosition, wxSize(30, 50));
+	st = new wxStaticText(page, 0, "450\n480\n488", wxDefaultPosition, FromDIP(wxSize(30, 50)));
 	sizer2_2->Add(st);
 	sizer2_2->Add(20, 20);
-	st = new wxStaticText(page, 0, "--", wxDefaultPosition, wxSize(30, 20));
+	st = new wxStaticText(page, 0, "--", wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	sizer2_2->Add(st);
 	sizer2_2->Add(20, 20);
-	st = new wxStaticText(page, 0, "543\n568", wxDefaultPosition, wxSize(30, 35));
+	st = new wxStaticText(page, 0, "543\n568", wxDefaultPosition, FromDIP(wxSize(30, 35)));
 	sizer2_2->Add(st);
 	sizer2_2->Add(20, 20);
-	st = new wxStaticText(page, 0, "--", wxDefaultPosition, wxSize(30, 20));
+	st = new wxStaticText(page, 0, "--", wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	sizer2_2->Add(st);
 	sizer2_2->Add(20, 20);
-	st = new wxStaticText(page, 0, "633", wxDefaultPosition, wxSize(30, 20));
+	st = new wxStaticText(page, 0, "633", wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	sizer2_2->Add(st);
 	sizer2_2->Add(20, 20);
-	st = new wxStaticText(page, 0, "--", wxDefaultPosition, wxSize(30, 20));
+	st = new wxStaticText(page, 0, "--", wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	sizer2_2->Add(st);
 	sizer2_2->Add(20, 20);
-	st = new wxStaticText(page, 0, "700", wxDefaultPosition, wxSize(30, 20));
+	st = new wxStaticText(page, 0, "700", wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	sizer2_2->Add(st);
 	group2->Add(10, 5);
 	group2->Add(sizer2_1, 0);
@@ -704,7 +711,7 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	m_max_texture_size_chk = new wxCheckBox(page, ID_MaxTextureSizeChk,
 		"Set max texture size");
 	m_max_texture_size_text = new wxTextCtrl(page, ID_MaxTextureSizeText, "2048",
-		wxDefaultPosition, wxSize(40, -1), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), 0, vald_int);
 	sizer3_1->Add(m_max_texture_size_chk, 0, wxALIGN_CENTER);
 	sizer3_1->Add(10, 10);
 	sizer3_1->Add(m_max_texture_size_text, 0, wxALIGN_CENTER);
@@ -753,7 +760,8 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 {
 	wxStaticText* st;
 	wxPanel *page = new wxPanel(parent);
-	
+	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
+
 	//JVM settings.
 	wxBoxSizer *group1 = new wxStaticBoxSizer(new wxStaticBox(page, wxID_ANY, "Java Settings"), wxVERTICAL);
 	wxBoxSizer *sizer1_0 = new wxBoxSizer(wxHORIZONTAL);
@@ -1885,7 +1893,7 @@ void SettingDlg::OnMouseIntCheck(wxCommandEvent &event)
 
 void SettingDlg::OnPeelingLayersChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_peeling_layers_sldr->GetValue();;
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_peeling_layers_text->GetValue())
 		m_peeling_layers_text->SetValue(str);
@@ -1973,7 +1981,7 @@ void SettingDlg::OnShadowDirCheck(wxCommandEvent &event)
 
 void SettingDlg::OnShadowDirChange(wxScrollEvent &event)
 {
-	double deg = double(m_shadow_dir_sldr->GetValue());
+	double deg = m_shadow_dir_sldr->GetValue();
 	wxString str = wxString::Format("%.2f", deg);
 	if (str != m_shadow_dir_text->GetValue())
 		m_shadow_dir_text->SetValue(str);
@@ -2105,7 +2113,7 @@ unsigned int SettingDlg::GetDisplayNum()
 //rot center anchor thresh
 void SettingDlg::OnPinThresholdChange(wxScrollEvent &event)
 {
-	double dval = double(m_pin_threshold_sldr->GetValue());
+	double dval = m_pin_threshold_sldr->GetValue();
 	wxString str = wxString::Format("%.0f", dval*10.0);
 	if (str != m_pin_threshold_text->GetValue())
 		m_pin_threshold_text->SetValue(str);
@@ -2180,7 +2188,7 @@ void SettingDlg::OnSBSCheck(wxCommandEvent& event)
 
 void SettingDlg::OnEyeDistChange(wxScrollEvent &event)
 {
-	m_eye_dist = double(m_eye_dist_sldr->GetValue()) / 10.0;
+	m_eye_dist = m_eye_dist_sldr->GetValue() / 10.0;
 	wxString str = wxString::Format("%.1f", m_eye_dist);
 	if (str != m_eye_dist_text->GetValue())
 		m_eye_dist_text->SetValue(str);
@@ -2354,7 +2362,7 @@ void SettingDlg::OnUpdateOrderChange(wxCommandEvent &event)
 
 void SettingDlg::OnGraphicsMemChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_graphics_mem_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival * 100);
 	if (str != m_graphics_mem_text->GetValue())
 		m_graphics_mem_text->SetValue(str);
@@ -2373,7 +2381,7 @@ void SettingDlg::OnGraphicsMemEdit(wxCommandEvent &event)
 
 void SettingDlg::OnLargeDataChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_large_data_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival * 10);
 	if (str != m_large_data_text->GetValue())
 		m_large_data_text->SetValue(str);
@@ -2392,7 +2400,7 @@ void SettingDlg::OnLargeDataEdit(wxCommandEvent &event)
 
 void SettingDlg::OnBlockSizeChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_block_size_sldr->GetValue();
 	wxString str = wxString::Format("%d", 2 << (ival - 1));
 	if (str != m_block_size_text->GetValue())
 		m_block_size_text->SetValue(str);
@@ -2411,7 +2419,7 @@ void SettingDlg::OnBlockSizeEdit(wxCommandEvent &event)
 
 void SettingDlg::OnResponseTimeChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_response_time_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival * 10);
 	if (str != m_response_time_text->GetValue())
 		m_response_time_text->SetValue(str);
@@ -2430,7 +2438,7 @@ void SettingDlg::OnResponseTimeEdit(wxCommandEvent &event)
 
 void SettingDlg::OnDetailLevelOffsetChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_detail_level_offset_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_detail_level_offset_text->GetValue())
 		m_detail_level_offset_text->SetValue(str);
@@ -2519,7 +2527,7 @@ void SettingDlg::OnTextColorChange(wxCommandEvent &event)
 //line width
 void SettingDlg::OnLineWidthSldr(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_line_width_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_line_width_text->GetValue())
 		m_line_width_text->SetValue(str);
@@ -2548,7 +2556,7 @@ void SettingDlg::OnLineWidthText(wxCommandEvent &event)
 //paint history depth
 void SettingDlg::OnPaintHistDepthChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_paint_hist_depth_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_paint_hist_depth_text->GetValue())
 		m_paint_hist_depth_text->SetValue(str);
@@ -2568,7 +2576,7 @@ void SettingDlg::OnPaintHistDepthEdit(wxCommandEvent &event)
 //pencil distance
 void SettingDlg::OnPencilDistChange(wxScrollEvent& event)
 {
-	int ival = event.GetPosition();
+	int ival = m_pencil_dist_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_pencil_dist_text->GetValue())
 		m_pencil_dist_text->SetValue(str);

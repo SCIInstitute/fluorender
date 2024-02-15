@@ -46,6 +46,7 @@ DEALINGS IN THE SOFTWARE.
 
 //enum BitmapFontType;
 class VRenderFrame;
+class wxSingleSlider;
 class SettingDlg : public wxPanel
 {
 	enum
@@ -514,28 +515,28 @@ private:
 	//mouse interations
 	wxCheckBox *m_mouse_int_chk;
 	//depth peeling
-	wxSlider *m_peeling_layers_sldr;
+	wxSingleSlider *m_peeling_layers_sldr;
 	wxTextCtrl *m_peeling_layers_text;
 	//micro blending
 	wxCheckBox *m_micro_blend_chk;
 	//shaodw direction
 	wxCheckBox *m_shadow_dir_chk;
-	wxSlider *m_shadow_dir_sldr;
+	wxSingleSlider *m_shadow_dir_sldr;
 	wxTextCtrl *m_shadow_dir_text;
 	//gradient background
 	wxCheckBox *m_grad_bg_chk;
 	//rot center anchor
-	wxSlider *m_pin_threshold_sldr;
+	wxSingleSlider *m_pin_threshold_sldr;
 	wxTextCtrl *m_pin_threshold_text;
 	//rotations link
 	wxCheckBox *m_rot_link_chk;
 	//stereo
 	wxCheckBox *m_stereo_chk;
 	wxCheckBox* m_sbs_chk;
-	wxSlider *m_eye_dist_sldr;
+	wxSingleSlider *m_eye_dist_sldr;
 	wxTextCtrl *m_eye_dist_text;
 	//display
-	wxSlider* m_disp_id_sldr;
+	wxSingleSlider* m_disp_id_sldr;
 	wxTextCtrl* m_disp_id_text;
 	//override vox
 	wxCheckBox *m_override_vox_chk;
@@ -550,28 +551,28 @@ private:
 	//memory settings
 	wxCheckBox *m_streaming_chk;
 	wxRadioBox *m_update_order_rbox;
-	wxSlider *m_graphics_mem_sldr;
+	wxSingleSlider *m_graphics_mem_sldr;
 	wxTextCtrl *m_graphics_mem_text;
-	wxSlider *m_large_data_sldr;
+	wxSingleSlider *m_large_data_sldr;
 	wxTextCtrl *m_large_data_text;
-	wxSlider *m_block_size_sldr;
+	wxSingleSlider *m_block_size_sldr;
 	wxTextCtrl *m_block_size_text;
-	wxSlider *m_response_time_sldr;
+	wxSingleSlider *m_response_time_sldr;
 	wxTextCtrl *m_response_time_text;
-	wxSlider *m_detail_level_offset_sldr;
+	wxSingleSlider *m_detail_level_offset_sldr;
 	wxTextCtrl *m_detail_level_offset_text;
 	//font
 	wxComboBox *m_font_cmb;
 	wxComboBox *m_font_size_cmb;
 	wxComboBox *m_text_color_cmb;
 	//line width
-	wxSlider *m_line_width_sldr;
+	wxSingleSlider *m_line_width_sldr;
 	wxTextCtrl *m_line_width_text;
 	//history depth
-	wxSlider *m_paint_hist_depth_sldr;
+	wxSingleSlider *m_paint_hist_depth_sldr;
 	wxTextCtrl *m_paint_hist_depth_text;
 	//pencil distance
-	wxSlider* m_pencil_dist_sldr;
+	wxSingleSlider* m_pencil_dist_sldr;
 	wxTextCtrl* m_pencil_dist_text;
 
 	// Java settings.

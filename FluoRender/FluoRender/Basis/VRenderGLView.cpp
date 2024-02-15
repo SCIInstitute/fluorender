@@ -5677,7 +5677,7 @@ void VRenderGLView::SetPersp(bool persp)
 		//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
 		//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
 		//m_vrv->m_scale_factor_text->ChangeValue(str);
-		m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FreeChk, false);
+		m_vrv->m_options_toolbar2->ToggleTool(VRenderView::ID_FreeChk, false);
 
 		SetRotations(m_rotx, m_roty, m_rotz);
 	}
@@ -5687,8 +5687,8 @@ void VRenderGLView::SetPersp(bool persp)
 void VRenderGLView::SetFree(bool free)
 {
 	m_free = free;
-	if (m_vrv->m_options_toolbar->GetToolState(VRenderView::ID_FreeChk) != m_free)
-		m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FreeChk, m_free);
+	if (m_vrv->m_options_toolbar2->GetToolState(VRenderView::ID_FreeChk) != m_free)
+		m_vrv->m_options_toolbar2->ToggleTool(VRenderView::ID_FreeChk, m_free);
 	if (free)
 	{
 		m_persp = true;

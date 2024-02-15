@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 
 class VRenderFrame;
 class VRenderGLView;
+class wxSingleSlider;
 class OclDlg : public wxPanel
 {
 public:
@@ -70,7 +71,7 @@ private:
 	wxButton* m_saveas_btn;
 	wxButton* m_execute_btn;
 	wxButton* m_execute_n_btn;
-	wxSlider* m_iterations_sldr;
+	wxSingleSlider* m_iterations_sldr;
 	wxTextCtrl* m_iterations_txt;
 	wxTextCtrl* m_output_txt;
 
