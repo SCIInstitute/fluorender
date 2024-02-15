@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 class VRenderFrame;
 class VRenderGLView;
 class VolumeData;
+class wxSingleSlider;
 namespace flrd
 {
 	class RulerAlign;
@@ -177,21 +178,21 @@ private:
 	wxCheckBox* m_accurate_bricks_chk;
 	//selection strength
 	//translate
-	wxSlider* m_brush_scl_translate_sldr;
+	wxSingleSlider* m_brush_scl_translate_sldr;
 	wxTextCtrl* m_brush_scl_translate_text;
 	//gm falloff
-	wxSlider* m_brush_gm_falloff_sldr;
+	wxSingleSlider* m_brush_gm_falloff_sldr;
 	wxTextCtrl* m_brush_gm_falloff_text;
 	//2d influence
-	wxSlider* m_brush_2dinfl_sldr;
+	wxSingleSlider* m_brush_2dinfl_sldr;
 	wxTextCtrl* m_brush_2dinfl_text;
 	//brush properties
 	//size 1
-	wxSlider* m_brush_size1_sldr;
+	wxSingleSlider* m_brush_size1_sldr;
 	wxTextCtrl *m_brush_size1_text;
 	//size 2
 	wxCheckBox* m_brush_size2_chk;
-	wxSlider* m_brush_size2_sldr;
+	wxSingleSlider* m_brush_size2_sldr;
 	wxTextCtrl* m_brush_size2_text;
 	//growth
 	wxRadioButton* m_brush_iterw_rb;

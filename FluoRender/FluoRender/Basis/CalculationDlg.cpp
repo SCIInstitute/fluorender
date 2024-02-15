@@ -61,22 +61,22 @@ CalculationDlg::CalculationDlg(VRenderFrame *frame)
 	//operand A
 	wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Operand A:",
-		wxDefaultPosition, wxSize(75, 20));
+		wxDefaultPosition, FromDIP(wxSize(75, 20)));
 	m_calc_load_a_btn = new wxButton(this, ID_CalcLoadABtn, "Load",
-		wxDefaultPosition, wxSize(50, 20));
+		wxDefaultPosition, FromDIP(wxSize(50, 20)));
 	m_calc_a_text = new wxTextCtrl(this, ID_CalcAText, "",
-		wxDefaultPosition, wxSize(200, 20));
+		wxDefaultPosition, FromDIP(wxSize(200, 20)));
 	sizer1->Add(st, 0, wxALIGN_CENTER);
 	sizer1->Add(m_calc_load_a_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_calc_a_text, 1, wxEXPAND);
 	//operand B
 	wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Operand B:",
-		wxDefaultPosition, wxSize(75, 20));
+		wxDefaultPosition, FromDIP(wxSize(75, 20)));
 	m_calc_load_b_btn = new wxButton(this, ID_CalcLoadBBtn, "Load",
-		wxDefaultPosition, wxSize(50, 20));
+		wxDefaultPosition, FromDIP(wxSize(50, 20)));
 	m_calc_b_text = new wxTextCtrl(this, ID_CalcBText, "",
-		wxDefaultPosition, wxSize(200, 20));
+		wxDefaultPosition, FromDIP(wxSize(200, 20)));
 	sizer2->Add(st, 0, wxALIGN_CENTER);
 	sizer2->Add(m_calc_load_b_btn, 0, wxALIGN_CENTER);
 	sizer2->Add(m_calc_b_text, 1, wxEXPAND);
@@ -86,9 +86,9 @@ CalculationDlg::CalculationDlg(VRenderFrame *frame)
 			"Single-valued Operators (Require only A)"), wxHORIZONTAL);
 	//sizer3
 	m_calc_fill_btn = new wxButton(this, ID_CalcFillBtn, "Consolidate Voxels",
-		wxDefaultPosition, wxSize(50, 25));
+		wxDefaultPosition, FromDIP(wxSize(50, 25)));
 	m_calc_combine_btn = new wxButton(this, ID_CalcCombineBtn, "Combine Group",
-		wxDefaultPosition, wxSize(50, 25));
+		wxDefaultPosition, FromDIP(wxSize(50, 25)));
 	sizer3->Add(m_calc_fill_btn, 1, wxEXPAND);
 	sizer3->Add(m_calc_combine_btn, 1, wxEXPAND);
 	//two operators
@@ -96,13 +96,13 @@ CalculationDlg::CalculationDlg(VRenderFrame *frame)
 		new wxStaticBox(this, wxID_ANY,
 			"Two-valued Operators (Require both A and B)"), wxHORIZONTAL);
 	m_calc_sub_btn = new wxButton(this, ID_CalcSubBtn, "Subtract",
-		wxDefaultPosition, wxSize(50, 25));
+		wxDefaultPosition, FromDIP(wxSize(50, 25)));
 	m_calc_add_btn = new wxButton(this, ID_CalcAddBtn, "Add",
-		wxDefaultPosition, wxSize(50, 25));
+		wxDefaultPosition, FromDIP(wxSize(50, 25)));
 	m_calc_div_btn = new wxButton(this, ID_CalcDivBtn, "Divide",
-		wxDefaultPosition, wxSize(50, 25));
+		wxDefaultPosition, FromDIP(wxSize(50, 25)));
 	m_calc_isc_btn = new wxButton(this, ID_CalcIscBtn, "Colocalize",
-		wxDefaultPosition, wxSize(50, 25));
+		wxDefaultPosition, FromDIP(wxSize(50, 25)));
 	sizer4->Add(m_calc_sub_btn, 1, wxEXPAND);
 	sizer4->Add(m_calc_add_btn, 1, wxEXPAND);
 	sizer4->Add(m_calc_div_btn, 1, wxEXPAND);

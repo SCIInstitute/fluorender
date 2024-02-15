@@ -283,8 +283,8 @@ void KeyListCtrl::OnSelection(wxListEvent &event)
 		//add interpolation combo
 		GetSubItemRect(item, 3, rect);
 		str = GetText(item, 3);
-		m_interpolation_cmb->SetPosition(rect.GetTopLeft()-wxSize(0,5));
-		m_interpolation_cmb->SetSize(wxSize(rect.GetSize().GetWidth(),-1));
+		m_interpolation_cmb->SetPosition(rect.GetTopLeft()-FromDIP(wxSize(0,5)));
+		m_interpolation_cmb->SetSize(FromDIP(wxSize(rect.GetSize().GetWidth(),-1)));
 		int sel = 0;
 		if (str == "Linear")
 			sel = 0;
@@ -542,11 +542,11 @@ m_cam_lock_type(0)
 
 	//default duration
 	wxBoxSizer *group3 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, wxID_ANY, "Default:",wxDefaultPosition,wxSize(50,-1));
+	st = new wxStaticText(this, wxID_ANY, "Default:",wxDefaultPosition,FromDIP(wxSize(50,-1)));
 	m_duration_text = new wxTextCtrl(this, ID_DurationText, "30",
-		wxDefaultPosition, wxSize(30, 23), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(30, 23)), 0, vald_int);
 	m_interpolation_cmb = new wxComboBox(this, ID_InterpolationCmb, "",
-		wxDefaultPosition, wxSize(65,-1), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, FromDIP(wxSize(65,-1)), 0, NULL, wxCB_READONLY);
 	m_interpolation_cmb->Append("Linear");
 	m_interpolation_cmb->Append("Smooth");
 	m_interpolation_cmb->Select(0);
@@ -554,11 +554,11 @@ m_cam_lock_type(0)
 	//key buttons
 	//wxBoxSizer *group4 = new wxBoxSizer(wxHORIZONTAL);
 	m_set_key_btn = new wxButton(this, ID_SetKeyBtn, "Add",
-		wxDefaultPosition, wxSize(50, 23));
+		wxDefaultPosition, FromDIP(wxSize(50, 23)));
 	m_del_key_btn = new wxButton(this, ID_DelKeyBtn, "Delete",
-		wxDefaultPosition, wxSize(55, 23));
+		wxDefaultPosition, FromDIP(wxSize(55, 23)));
 	m_del_all_btn = new wxButton(this, ID_DelAllBtn, "Del. All",
-		wxDefaultPosition, wxSize(60, 23));
+		wxDefaultPosition, FromDIP(wxSize(60, 23)));
 
 	group3->Add(st, 0, wxALIGN_CENTER);
 	group3->Add(5, 5);

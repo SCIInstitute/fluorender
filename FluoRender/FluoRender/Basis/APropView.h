@@ -30,8 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 #include <wx/panel.h>
-#include <wx/clrpicker.h>
-#include <wx/slider.h>
 
 using namespace std;
 

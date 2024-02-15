@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/Cov.h>
 #include <Distance/RulerAlign.h>
 #include <Selection/VolumeSelector.h>
+#include <wxSingleSlider.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 //resources
@@ -250,11 +251,11 @@ BrushToolDlg::BrushToolDlg(
 	//threshold4
 	wxBoxSizer *sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Threshold:",
-		wxDefaultPosition, wxSize(70, 20));
-	m_brush_scl_translate_sldr = new wxSlider(this, ID_BrushSclTranslateSldr, 0, 0, 2550,
+		wxDefaultPosition, FromDIP(wxSize(70, 20)));
+	m_brush_scl_translate_sldr = new wxSingleSlider(this, ID_BrushSclTranslateSldr, 0, 0, 2550,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_scl_translate_text = new wxTextCtrl(this, ID_BrushSclTranslateText, "0.0",
-		wxDefaultPosition, wxSize(50, 20), 0, vald_fp1);
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp1);
 	sizer1_2->Add(5, 5);
 	sizer1_2->Add(st, 0, wxALIGN_CENTER);
 	sizer1_2->Add(m_brush_scl_translate_sldr, 1, wxEXPAND);
@@ -263,11 +264,11 @@ BrushToolDlg::BrushToolDlg(
 	//gm falloff
 	wxBoxSizer *sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Edge STR:",
-		wxDefaultPosition, wxSize(70, 20));
-	m_brush_gm_falloff_sldr = new wxSlider(this, ID_BrushGmFalloffSldr, 0, 0, 1000,
+		wxDefaultPosition, FromDIP(wxSize(70, 20)));
+	m_brush_gm_falloff_sldr = new wxSingleSlider(this, ID_BrushGmFalloffSldr, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_gm_falloff_text = new wxTextCtrl(this, ID_BrushGmFalloffText, "0.000",
-		wxDefaultPosition, wxSize(50, 20), 0, vald_fp3);
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp3);
 	sizer1_3->Add(5, 5);
 	sizer1_3->Add(st, 0, wxALIGN_CENTER);
 	sizer1_3->Add(m_brush_gm_falloff_sldr, 1, wxEXPAND);
@@ -276,11 +277,11 @@ BrushToolDlg::BrushToolDlg(
 	//2d
 	wxBoxSizer *sizer1_4 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "2D Adj. Infl.:",
-		wxDefaultPosition, wxSize(70, 20));
-	m_brush_2dinfl_sldr = new wxSlider(this, ID_Brush2dinflSldr, 100, 0, 200,
+		wxDefaultPosition, FromDIP(wxSize(70, 20)));
+	m_brush_2dinfl_sldr = new wxSingleSlider(this, ID_Brush2dinflSldr, 100, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_INVERSE);
 	m_brush_2dinfl_text = new wxTextCtrl(this, ID_Brush2dinflText, "1.00",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_fp2);
 	sizer1_4->Add(5, 5);
 	sizer1_4->Add(st, 0, wxALIGN_CENTER);
 	sizer1_4->Add(m_brush_2dinfl_sldr, 1, wxEXPAND);
@@ -307,11 +308,11 @@ BrushToolDlg::BrushToolDlg(
 	//brush size 1
 	wxBoxSizer *sizer2_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Center Size:",
-		wxDefaultPosition, wxSize(80, 20), wxALIGN_RIGHT);
-	m_brush_size1_sldr = new wxSlider(this, ID_BrushSize1Sldr, 10, 1, 300,
+		wxDefaultPosition, FromDIP(wxSize(80, 20)), wxALIGN_RIGHT);
+	m_brush_size1_sldr = new wxSingleSlider(this, ID_BrushSize1Sldr, 10, 1, 300,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_size1_text = new wxTextCtrl(this, ID_BrushSize1Text, "10",
-		wxDefaultPosition, wxSize(50, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_int);
 	sizer2_2->Add(5, 5);
 	sizer2_2->Add(st, 0, wxALIGN_CENTER);
 	sizer2_2->Add(m_brush_size1_sldr, 1, wxEXPAND);
@@ -320,13 +321,13 @@ BrushToolDlg::BrushToolDlg(
 	//brush size 2
 	wxBoxSizer *sizer2_3 = new wxBoxSizer(wxHORIZONTAL);
 	m_brush_size2_chk = new wxCheckBox(this, ID_BrushSize2Chk, "GrowSize",
-		wxDefaultPosition, wxSize(80, 20), wxALIGN_RIGHT);
+		wxDefaultPosition, FromDIP(wxSize(80, 20)), wxALIGN_RIGHT);
 	st = new wxStaticText(this, 0, ":",
-		wxDefaultPosition, wxSize(5, 20), wxALIGN_RIGHT);
-	m_brush_size2_sldr = new wxSlider(this, ID_BrushSize2Sldr, 30, 1, 300,
+		wxDefaultPosition, FromDIP(wxSize(5, 20)), wxALIGN_RIGHT);
+	m_brush_size2_sldr = new wxSingleSlider(this, ID_BrushSize2Sldr, 30, 1, 300,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_size2_text = new wxTextCtrl(this, ID_BrushSize2Text, "30",
-		wxDefaultPosition, wxSize(50, 20), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_int);
 	m_brush_size2_chk->SetValue(true);
 	m_brush_size2_sldr->Enable();
 	m_brush_size2_text->Enable();
@@ -338,7 +339,7 @@ BrushToolDlg::BrushToolDlg(
 	//iterations
 	wxBoxSizer *sizer2_4 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Growth:",
-		wxDefaultPosition, wxSize(70, 20));
+		wxDefaultPosition, FromDIP(wxSize(70, 20)));
 	m_brush_iterw_rb = new wxRadioButton(this, ID_BrushIterWRd, "Weak",
 		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 	m_brush_iters_rb = new wxRadioButton(this, ID_BrushIterSRd, "Normal",
@@ -358,7 +359,7 @@ BrushToolDlg::BrushToolDlg(
 	//size relation
 	wxBoxSizer *sizer2_5 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Dependent:",
-		wxDefaultPosition, wxSize(70, 20));
+		wxDefaultPosition, FromDIP(wxSize(70, 20)));
 	m_brush_size_data_rb = new wxRadioButton(this, ID_BrushSizeDataRd, "Data",
 		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 	m_brush_size_screen_rb = new wxRadioButton(this, ID_BrushSizeScreenRd, "Screen",
@@ -394,17 +395,17 @@ BrushToolDlg::BrushToolDlg(
 	st = new wxStaticText(this, 0, "Tri Axes:",
 		wxDefaultPosition, wxDefaultSize);
 	m_align_xyz = new wxButton(this, ID_AlignXYZ, "XYZ",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_yxz = new wxButton(this, ID_AlignYXZ, "YXZ",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_zxy = new wxButton(this, ID_AlignZXY, "ZXY",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_xzy = new wxButton(this, ID_AlignXZY, "XZY",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_yzx = new wxButton(this, ID_AlignYZX, "YZX",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_zyx = new wxButton(this, ID_AlignZYX, "ZYX",
-		wxDefaultPosition, wxSize(65, 22));
+		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	sizer32->Add(5, 5);
 	sizer32->Add(st, 0, wxALIGN_CENTER);
 	sizer32->Add(5, 5);
@@ -433,13 +434,13 @@ BrushToolDlg::BrushToolDlg(
 		wxVERTICAL);
 	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_update_btn = new wxButton(this, ID_UpdateBtn, "Paint Size",
-		wxDefaultPosition, wxSize(75, -1));
+		wxDefaultPosition, FromDIP(wxSize(75, -1)));
 	m_auto_update_btn = new wxToggleButton(this, ID_AutoUpdateBtn,
-		"Auto Update", wxDefaultPosition, wxSize(75, -1));
+		"Auto Update", wxDefaultPosition, FromDIP(wxSize(75, -1)));
 	m_history_chk = new wxCheckBox(this, ID_HistoryChk,
-		"Hold History", wxDefaultPosition, wxSize(85, 20), wxALIGN_LEFT);
+		"Hold History", wxDefaultPosition, FromDIP(wxSize(85, 20)), wxALIGN_LEFT);
 	m_clear_hist_btn = new wxButton(this, ID_ClearHistBtn,
-		"Clear History", wxDefaultPosition, wxSize(75, -1));
+		"Clear History", wxDefaultPosition, FromDIP(wxSize(75, -1)));
 	sizer4_1->Add(m_update_btn, 0, wxALIGN_CENTER);
 	sizer4_1->Add(m_auto_update_btn, 0, wxALIGN_CENTER);
 	sizer4_1->AddStretchSpacer(1);
@@ -849,7 +850,7 @@ void BrushToolDlg::OnMaskIntersect(wxCommandEvent& event)
 //scalar translate
 void BrushToolDlg::OnBrushSclTranslateChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_brush_scl_translate_sldr->GetValue();
 	double val = double(ival)/10.0;
 	wxString str = wxString::Format("%.1f", val);
 	if (str != m_brush_scl_translate_text->GetValue())
@@ -880,7 +881,7 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent &event)
 //gm falloff
 void BrushToolDlg::OnBrushGmFalloffChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_brush_gm_falloff_sldr->GetValue();
 	double val = double(ival) / 1000.0;
 	wxString str = wxString::Format("%.3f", val);
 	if (str != m_brush_gm_falloff_text->GetValue())
@@ -911,7 +912,7 @@ void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent &event)
 //2d influence
 void BrushToolDlg::OnBrush2dinflChange(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_brush_2dinfl_sldr->GetValue();
 	double val = double(ival)/100.0;
 	wxString str = wxString::Format("%.2f", val);
 	if (str != m_brush_2dinfl_text->GetValue())
@@ -1017,7 +1018,7 @@ void BrushToolDlg::OnAccurateBricksCheck(wxCommandEvent &event)
 //brush size 1
 void BrushToolDlg::OnBrushSize1Change(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_brush_size1_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_brush_size1_text->GetValue())
 		m_brush_size1_text->SetValue(str);
@@ -1075,7 +1076,7 @@ void BrushToolDlg::OnBrushSize2Chk(wxCommandEvent &event)
 
 void BrushToolDlg::OnBrushSize2Change(wxScrollEvent &event)
 {
-	int ival = event.GetPosition();
+	int ival = m_brush_size2_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_brush_size2_text->GetValue())
 		m_brush_size2_text->SetValue(str);

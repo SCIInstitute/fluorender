@@ -590,34 +590,37 @@ VPropView::VPropView(VRenderFrame* frame,
 
 	//ADD COLUMNS//////////////////////////////////////
 	//left
-	sizer_left->Add(3, 3, 0);
+	sizer_left->Add(2, 2, 0);
 	sizer_left->Add(sizer_l1, 0, wxEXPAND);
-	sizer_left->Add(3, 3, 0);
+	sizer_left->Add(2, 2, 0);
 	sizer_left->Add(sizer_l2, 0, wxEXPAND);
-	sizer_left->Add(3, 3, 0);
+	sizer_left->Add(2, 2, 0);
 	sizer_left->Add(sizer_l3, 0, wxEXPAND);
-	sizer_left->Add(3, 3, 0);
+	sizer_left->Add(2, 2, 0);
 	sizer_left->Add(sizer_l4, 0, wxEXPAND);
-	sizer_left->Add(3, 3, 0);
+	sizer_left->Add(2, 2, 0);
 	sizer_left->Add(sizer_l5, 0, wxEXPAND);
 	//middle
-	sizer_middle->Add(3, 3, 0);
+	sizer_middle->Add(2, 2, 0);
 	sizer_middle->Add(sizer_m1, 0, wxEXPAND);
-	sizer_middle->Add(3, 3, 0);
+	sizer_middle->Add(2, 2, 0);
 	sizer_middle->Add(sizer_m2, 0, wxEXPAND);
-	sizer_middle->Add(3, 3, 0);
+	sizer_middle->Add(2, 2, 0);
 	sizer_middle->Add(sizer_m3, 0, wxEXPAND);
-	sizer_middle->Add(3, 3, 0);
+	sizer_middle->Add(2, 2, 0);
 	sizer_middle->Add(sizer_m4, 0, wxEXPAND);
-	sizer_middle->Add(3, 3, 0);
+	sizer_middle->Add(2, 2, 0);
 	sizer_middle->Add(sizer_m5, 0, wxEXPAND);
 	//right
-	sizer_right->Add(3, 3, 0);
+	sizer_right->Add(2, 2, 0);
 	sizer_right->Add(sizer_r1, 0, wxEXPAND);
-	sizer_right->Add(3, 3, 0);
+	sizer_right->Add(2, 2, 0);
 	sizer_right->Add(sizer_r2, 0, wxEXPAND);
+	sizer_right->Add(2, 2, 0);
 	sizer_right->Add(sizer_r3, 0, wxEXPAND);
+	sizer_right->Add(2, 2, 0);
 	sizer_right->Add(sizer_r4, 0, wxEXPAND);
+	sizer_right->Add(2, 2, 0);
 	sizer_right->Add(sizer_r5, 0, wxEXPAND);
 	//ADD ALL TOGETHER
 	sizer_all->Add(sizer_left, 1, wxEXPAND);

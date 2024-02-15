@@ -59,7 +59,7 @@ APropView::APropView(VRenderFrame* frame,
 
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	m_memo_text = new wxTextCtrl(this, ID_MemoText, "",
-		wxDefaultPosition, wxSize(400, 100), wxTE_MULTILINE);
+		wxDefaultPosition, FromDIP(wxSize(400, 100)), wxTE_MULTILINE);
 	sizer_2->Add(10, 10);
 	sizer_2->Add(m_memo_text, 1, wxEXPAND);
 

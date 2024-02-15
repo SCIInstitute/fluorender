@@ -543,8 +543,8 @@ VRenderFrame::VRenderFrame(
 		FloatingSize(FromDIP(wxSize(400, 600))).Layer(3));
 	m_aui_mgr.AddPane(m_prop_panel, wxAuiPaneInfo().
 		Name("m_prop_panel").Caption(UITEXT_PROPERTIES).
-		Bottom().CloseButton(true).MinSize(FromDIP(wxSize(300, 130))).
-		FloatingSize(FromDIP(wxSize(1100, 130))).Layer(2));
+		Bottom().CloseButton(true).MinSize(FromDIP(wxSize(300, 135))).
+		FloatingSize(FromDIP(wxSize(1100, 135))).Layer(2));
 	m_aui_mgr.AddPane(m_adjust_view, wxAuiPaneInfo().
 		Name("m_adjust_view").Caption(UITEXT_ADJUST).
 		Left().CloseButton(true).MinSize(FromDIP(wxSize(110, 700))).

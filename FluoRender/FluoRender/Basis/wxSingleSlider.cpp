@@ -167,16 +167,24 @@ void wxSingleSlider::renderNormal(wxDC& dc)
 	wxPoint p1h[] = {
 		wxPoint(margin_, h / 2 - scale_),
 		wxPoint(w - margin_ + 1, h / 2 - scale_),
+		wxPoint(w - margin_ + 2, h / 2),
+		wxPoint(w - margin_ + 2, h / 2 + scale_),
 		wxPoint(w - margin_ + 1, h / 2 + 2 * scale_),
-		wxPoint(margin_, h / 2 + 2 * scale_)
+		wxPoint(margin_, h / 2 + 2 * scale_),
+		wxPoint(margin_ - 1, h / 2 + scale_),
+		wxPoint(margin_ - 1, h / 2)
 	};
 	wxPoint p1v[] = {
 		wxPoint(w / 2 - scale_, margin_),
 		wxPoint(w / 2 - scale_, h - margin_ + 1),
+		wxPoint(w / 2, h - margin_ + 2),
+		wxPoint(w / 2 + scale_, h - margin_ + 2),
 		wxPoint(w / 2 + 2 * scale_, h - margin_ + 1),
-		wxPoint(w / 2 + 2 * scale_, margin_)
+		wxPoint(w / 2 + 2 * scale_, margin_),
+		wxPoint(w / 2 + scale_ , margin_ - 1),
+		wxPoint(w / 2, margin_ - 1)
 	};
-	int num = 4;
+	int num = 8;
 	dc.DrawPolygon(num, horizontal_ ? p1h : p1v, wxODDEVEN_RULE);
 
 	//left slider:

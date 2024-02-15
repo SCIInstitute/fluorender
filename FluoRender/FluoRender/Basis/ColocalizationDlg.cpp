@@ -97,13 +97,13 @@ m_test_speed(false)
 	st = new wxStaticText(this, 0, "Output Format:",
 		wxDefaultPosition, wxDefaultSize);
 	m_int_weight_btn = new wxToggleButton(this, ID_IntWeightBtn, "Int. Weighted",
-		wxDefaultPosition, wxSize(75, -1));
+		wxDefaultPosition, FromDIP(wxSize(75, -1)));
 	m_ratio_btn = new wxToggleButton(this, ID_RatioBtn, "Ratio (%)",
-		wxDefaultPosition, wxSize(75, -1));
+		wxDefaultPosition, FromDIP(wxSize(75, -1)));
 	m_physical_btn = new wxToggleButton(this, ID_PhysicalBtn, "Physical Size",
-		wxDefaultPosition, wxSize(75, -1));
+		wxDefaultPosition, FromDIP(wxSize(75, -1)));
 	m_colormap_btn = new wxToggleButton(this, ID_ColorMapBtn, "Color Map",
-		wxDefaultPosition, wxSize(75, -1));
+		wxDefaultPosition, FromDIP(wxSize(75, -1)));
 	m_int_weight_btn->SetValue(false);
 	m_ratio_btn->SetValue(false);
 	m_physical_btn->SetValue(false);
@@ -122,9 +122,9 @@ m_test_speed(false)
 	m_use_sel_chk = new wxCheckBox(this, ID_UseSelChk, "Use Selection",
 		wxDefaultPosition, wxDefaultSize);
 	m_colocalize_btn = new wxButton(this, ID_ColocalizeBtn, "Colocalize",
-		wxDefaultPosition, wxSize(75, -1));
+		wxDefaultPosition, FromDIP(wxSize(75, -1)));
 	m_auto_update_btn = new wxToggleButton(this, ID_AutoUpdateBtn, "Auto Update",
-		wxDefaultPosition, wxSize(75, -1));
+		wxDefaultPosition, FromDIP(wxSize(75, -1)));
 	sizer1_3->AddStretchSpacer(1);
 	sizer1_3->Add(m_use_sel_chk, 0, wxALIGN_CENTER);
 	sizer1_3->Add(m_colocalize_btn, 0, wxALIGN_CENTER);
@@ -143,9 +143,9 @@ m_test_speed(false)
 		wxVERTICAL);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_history_chk = new wxCheckBox(this, ID_HistoryChk,
-		"Hold History", wxDefaultPosition, wxSize(85, 20), wxALIGN_LEFT);
+		"Hold History", wxDefaultPosition, FromDIP(wxSize(85, 20)), wxALIGN_LEFT);
 	m_clear_hist_btn = new wxButton(this, ID_ClearHistBtn,
-		"Clear History", wxDefaultPosition, wxSize(75, -1));
+		"Clear History", wxDefaultPosition, FromDIP(wxSize(75, -1)));
 	sizer2_1->AddStretchSpacer(1);
 	sizer2_1->Add(m_history_chk, 0, wxALIGN_CENTER);
 	sizer2_1->Add(5, 5);

@@ -130,6 +130,10 @@ VRenderView::VRenderView(VRenderFrame* frame,
 	m_full_frame = new wxFrame((wxFrame*)NULL, wxID_ANY, "FluoRender");
 	m_view_sizer = new wxBoxSizer(wxVERTICAL);
 
+	m_dpi_sf = GetDPIScaleFactor();
+	m_dpi_sf2 = std::round(m_dpi_sf - 0.1);
+	m_dpi_sf2 = m_dpi_sf2 < m_dpi_sf ? m_dpi_sf : 1;
+
 	m_id = m_max_id;
 	wxString name = wxString::Format("Render View:%d", m_max_id++);
 	SetName(name);
@@ -347,22 +351,20 @@ void VRenderView::CreateBar()
 	wxBoxSizer* sizer_m = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText *st1, *st2, *st3;
 
-	double m_dpi_sf = GetDPIScaleFactor();
-	double m_dpi_sf2 = std::round(m_dpi_sf - 0.1);
-	m_dpi_sf2 = m_dpi_sf2 < m_dpi_sf ? m_dpi_sf : 1;
 	bool inverse_slider = ((VRenderFrame*)m_frame)->GetSettingDlg()->GetInverseSlider();
 	//bar top///////////////////////////////////////////////////
 	//toolbar 1
 	m_options_toolbar = new wxToolBar(this,wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_options_toolbar->SetToolBitmapSize(wxSize(16 * m_dpi_sf, 16 * m_dpi_sf));
 	m_options_toolbar->SetDoubleBuffered(true);
 	wxBoxSizer* sizer_h_1 = new wxBoxSizer(wxHORIZONTAL);
 	wxSize tbs = m_options_toolbar->GetSize();
-#ifndef _DARWIN
+	wxSize toolsize = FromDIP(wxSize(tbs.y, tbs.y));
+	m_options_toolbar->SetToolBitmapSize(toolsize);
+
 	//the spacer
 	wxStaticText * stb;
-#endif
+
 	//add the options
 	wxBitmap bitmap;
 	wxImage image;
@@ -388,12 +390,12 @@ void VRenderView::CreateBar()
 	m_options_toolbar->ToggleTool(ID_VolumeSeqRd,false);
 	m_options_toolbar->ToggleTool(ID_VolumeMultiRd,false);
 	m_options_toolbar->ToggleTool(ID_VolumeCompRd,false);
-#ifndef _DARWIN
+
 	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(1,tbs.y-2)));
 	stb->SetBackgroundColour(wxColour(128,128,128));
 	m_options_toolbar->AddControl(stb);
-#endif
+
 	switch (m_glview->GetVolMethod())
 	{
 	case VOL_METHOD_SEQ:
@@ -412,12 +414,11 @@ void VRenderView::CreateBar()
 	cam->SetBitmap(wxGetBitmapFromMemory(camera));
 	bitmap = wxGetBitmap(camera, m_dpi_sf2);
 	m_options_toolbar->AddControl(cam);
-#ifndef _DARWIN
+
 	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(1, tbs.y-2)));
 	stb->SetBackgroundColour(wxColour(128,128,128));
 	m_options_toolbar->AddControl(stb);
-#endif
 
 	bitmap = wxGetBitmap(info, m_dpi_sf2);
 	m_options_toolbar->AddCheckTool(
@@ -525,7 +526,7 @@ void VRenderView::CreateBar()
 	
 	m_options_toolbar2 = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_options_toolbar2->SetToolBitmapSize(wxSize(16 * m_dpi_sf, 16 * m_dpi_sf));
+	m_options_toolbar2->SetToolBitmapSize(toolsize);
 	m_options_toolbar2->SetDoubleBuffered(true);
 	bitmap = wxGetBitmap(freefly, m_dpi_sf2);
 	m_options_toolbar2->AddCheckTool(
@@ -558,7 +559,7 @@ void VRenderView::CreateBar()
 
 	m_full_screen_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_NODIVIDER);
-	m_full_screen_btn->SetToolBitmapSize(wxSize(16 * m_dpi_sf, 16 * m_dpi_sf));
+	m_full_screen_btn->SetToolBitmapSize(toolsize);
 	m_full_screen_btn->SetDoubleBuffered(true);
 	bitmap = wxGetBitmap(full_view, m_dpi_sf2);
 	m_full_screen_btn->AddTool(
@@ -573,7 +574,7 @@ void VRenderView::CreateBar()
 	wxBoxSizer* sizer_v_3 = new wxBoxSizer(wxVERTICAL);
 	m_left_toolbar = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_left_toolbar->SetToolBitmapSize(wxSize(16 * m_dpi_sf, 16 * m_dpi_sf));
+	m_left_toolbar->SetToolBitmapSize(toolsize);
 	m_left_toolbar->SetDoubleBuffered(true);
 	bitmap = wxGetBitmap(no_depth_atten, m_dpi_sf2);
 	m_left_toolbar->AddCheckTool(ID_DepthAttenChk, "Depth Interval",
@@ -587,7 +588,7 @@ void VRenderView::CreateBar()
 	m_depth_atten_factor_sldr->Disable();
 	m_depth_atten_reset_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_depth_atten_reset_btn->SetToolBitmapSize(wxSize(16 * m_dpi_sf, 16 * m_dpi_sf));
+	m_depth_atten_reset_btn->SetToolBitmapSize(toolsize);
 	m_depth_atten_reset_btn->SetDoubleBuffered(true);
 	bitmap = wxGetBitmap(reset, m_dpi_sf2);
 	m_depth_atten_reset_btn->AddTool(
@@ -611,7 +612,7 @@ void VRenderView::CreateBar()
 	wxBoxSizer* sizer_v_4 = new wxBoxSizer(wxVERTICAL);
 	m_pin_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_pin_btn->SetToolBitmapSize(wxSize(16 * m_dpi_sf, 16 * m_dpi_sf));
+	m_pin_btn->SetToolBitmapSize(toolsize);
 	m_pin_btn->SetDoubleBuffered(true);
 	bitmap = wxGetBitmap(anchor_dark, m_dpi_sf2);
 	m_pin_btn->AddCheckTool(ID_PinBtn, "Pin",
@@ -622,7 +623,7 @@ void VRenderView::CreateBar()
 	m_pin_btn->Realize();
 	m_center_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_center_btn->SetToolBitmapSize(wxSize(16 * m_dpi_sf, 16 * m_dpi_sf));
+	m_center_btn->SetToolBitmapSize(toolsize);
 	m_center_btn->SetDoubleBuffered(true);
 	bitmap = wxGetBitmap(center, m_dpi_sf2);
 	m_center_btn->AddTool(ID_CenterBtn, "Center",
@@ -630,7 +631,7 @@ void VRenderView::CreateBar()
 	m_center_btn->Realize();
 	m_scale_121_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_scale_121_btn->SetToolBitmapSize(wxSize(16 * m_dpi_sf, 16 * m_dpi_sf));
+	m_scale_121_btn->SetToolBitmapSize(toolsize);
 	m_scale_121_btn->SetDoubleBuffered(true);
 	bitmap = wxGetBitmap(ratio, m_dpi_sf2);
 	m_scale_121_btn->AddTool(ID_Scale121Btn, "1 to 1",
@@ -641,7 +642,7 @@ void VRenderView::CreateBar()
 		wxDefaultPosition, wxDefaultSize, ls, wxDefaultValidator, "test");
 	m_scale_reset_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_scale_reset_btn->SetToolBitmapSize(wxSize(16 * m_dpi_sf, 16 * m_dpi_sf));
+	m_scale_reset_btn->SetToolBitmapSize(toolsize);
 	m_scale_reset_btn->SetDoubleBuffered(true);
 	bitmap = wxGetBitmap(reset, m_dpi_sf2);
 	m_scale_reset_btn->AddTool(ID_ScaleResetBtn, "Reset",
@@ -654,7 +655,7 @@ void VRenderView::CreateBar()
 	m_scale_factor_spin->SetRange(-0x8000, 0x7fff);
 	m_scale_mode_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_scale_mode_btn->SetToolBitmapSize(wxSize(16 * m_dpi_sf, 16 * m_dpi_sf));
+	m_scale_mode_btn->SetToolBitmapSize(toolsize);
 	m_scale_mode_btn->SetDoubleBuffered(true);
 	bitmap = wxGetBitmap(zoom_view, m_dpi_sf2);
 	m_scale_mode_btn->AddTool(
@@ -698,7 +699,7 @@ void VRenderView::CreateBar()
 	//45 lock
 	m_rot_lock_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_rot_lock_btn->SetToolBitmapSize(wxSize(16 * m_dpi_sf, 16 * m_dpi_sf));
+	m_rot_lock_btn->SetToolBitmapSize(toolsize);
 	m_rot_lock_btn->SetDoubleBuffered(true);
 	bitmap = wxGetBitmap(gear_dark, m_dpi_sf2);
 	m_rot_lock_btn->AddCheckTool(ID_RotLockChk, "45 Angles",
@@ -726,7 +727,7 @@ void VRenderView::CreateBar()
 	m_ortho_view_cmb->Select(6);
 	m_lower_toolbar = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_lower_toolbar->SetToolBitmapSize(wxSize(16 * m_dpi_sf, 16 * m_dpi_sf));
+	m_lower_toolbar->SetToolBitmapSize(toolsize);
 	m_lower_toolbar->SetDoubleBuffered(true);
 	//m_lower_toolbar->AddControl(m_ortho_view_cmb);
 	bitmap = wxGetBitmap(zrot, m_dpi_sf2);
