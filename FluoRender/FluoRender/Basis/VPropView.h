@@ -45,49 +45,66 @@ class VPropView: public wxPanel
 {
 	enum
 	{
+		//1
 		ID_GammaSync = ID_VPROP_VIEW,
+		ID_GammaChk,
 		ID_GammaSldr,
 		ID_GammaText,
+		//
 		ID_SaturationSync,
+		ID_SaturationChk,
 		ID_SaturationSldr,
 		ID_SaturationText,
+		//
 		ID_LuminanceSync,
+		ID_LuminanceChk,
 		ID_LuminanceSldr,
 		ID_LuminanceText,
+		//
 		ID_AlphaSync,
 		ID_AlphaChk,
 		ID_AlphaSldr,
 		ID_Alpha_Text,
+		//
 		ID_ShadingSync,
-		ID_ShadingEnableChk,
+		ID_ShadingChk,
 		ID_LowShadingSldr,
 		ID_LowShadingText,
-
-		ID_BoundarySync,
-		ID_BoundarySldr,
-		ID_BoundaryText,
-		ID_ThreshSync,
-		ID_LeftThreshSldr,
-		ID_LeftThreshText,
-		ID_RightThreshText,
-		ID_ThreshLinkTb,
 		ID_HiShadingSync,
 		ID_HiShadingSldr,
 		ID_HiShadingText,
+
+		//2
+		ID_BoundarySync,
+		ID_BoundaryChk,
+		ID_BoundarySldr,
+		ID_BoundaryText,
+		//
+		ID_ThreshSync,
+		ID_ThreshChk,
+		ID_ThreshSldr,
+		ID_ThreshLowText,
+		ID_TreshHiText,
+		ID_ThreshLinkTb,
+		//
 		ID_ShadowSync,
 		ID_ShadowChk,
 		ID_ShadowSldr,
 		ID_ShadowText,
+		//
 		ID_SampleSync,
+		ID_SampleChk,
 		ID_SampleSldr,
 		ID_SampleText,
+		//
 		ID_ColormapSync,
-		ID_ColormapEnableChk,
-		ID_ColormapHighValueText,
-		ID_ColormapLowValueSldr,
-		ID_ColormapLowValueText,
+		ID_ColormapChk,
+		ID_ColormapSldr,
+		ID_ColormapHiText,
+		ID_ColormapLowText,
 		ID_ColormapLinkTb,
 
+		//3
 		ID_ColorText,
 		ID_Color2Text,
 		ID_ColorBtn,
@@ -146,64 +163,67 @@ private:
 	VRenderGLView* m_view;
 	double m_max_val;
 
-	//1st line
+	//1
 	//gamma
-	wxStaticText *m_gamma_st;
+	wxButton *m_gamma_st;
 	wxSingleSlider *m_gamma_sldr;
 	wxTextCtrl *m_gamma_text;
-	//boundary
-	wxStaticText *m_boundary_st;
-	wxSingleSlider *m_boundary_sldr;
-	wxTextCtrl *m_boundary_text;
-
-	//2nd line
+	wxCheckBox* m_gamma_chk;
 	//saturation point
-	wxStaticText *m_saturation_st;
+	wxButton *m_saturation_st;
 	wxSingleSlider *m_saturation_sldr;
 	wxTextCtrl *m_saturation_text;
+	wxCheckBox* m_saturation_chk;
+	//luminance
+	wxButton *m_luminance_st;
+	wxSingleSlider *m_luminance_sldr;
+	wxTextCtrl* m_luminance_text;
+	wxCheckBox* m_luminance_chk;
+	//alpha
+	wxButton *m_alpha_st;
+	wxSingleSlider *m_alpha_sldr;
+	wxTextCtrl* m_alpha_text;
+	wxCheckBox* m_alpha_chk;
+	//shading
+	wxButton* m_shade_st;
+	wxSingleSlider *m_hi_shading_sldr;
+	wxTextCtrl *m_hi_shading_text;
+	wxSingleSlider *m_low_shading_sldr;
+	wxTextCtrl *m_low_shading_text;
+	wxCheckBox* m_shade_chk;
+
+	//2
+	//boundary
+	wxButton* m_boundary_st;
+	wxSingleSlider *m_boundary_sldr;
+	wxTextCtrl *m_boundary_text;
+	wxCheckBox* m_boundary_chk;
 	//thresholds
-	wxStaticText *m_threh_st;
-	wxDoubleSlider *m_left_thresh_sldr;
+	wxButton* m_thresh_st;
+	wxDoubleSlider *m_thresh_sldr;
 	wxTextCtrl *m_left_thresh_text;
 	wxTextCtrl *m_right_thresh_text;
 	wxToolBar* m_thresh_link_tb;
-
-	//3rd line
-	//luminance
-	wxStaticText *m_luminance_st;
-	wxSingleSlider *m_luminance_sldr;
-	wxTextCtrl* m_luminance_text;
+	wxCheckBox* m_thresh_chk;
 	//shadow
+	wxButton* m_shadow_st;
 	wxSingleSlider *m_shadow_sldr;
 	wxTextCtrl *m_shadow_text;
-	wxToolBar *m_shadow_tool;
-
-	//4th line
-	//alpha
-	wxToolBar *m_alpha_tool;
-	wxSingleSlider *m_alpha_sldr;
-	wxTextCtrl* m_alpha_text;
+	wxCheckBox*m_shadow_chk;
 	//sample rate
-	wxStaticText* m_sample_st;
+	wxButton* m_sample_st;
 	wxSingleSlider *m_sample_sldr;
 	wxTextCtrl *m_sample_text;
-
-	//5th line
-	//highlight
-	wxSingleSlider *m_hi_shading_sldr;
-	wxTextCtrl *m_hi_shading_text;
-	//shading
-	wxSingleSlider *m_low_shading_sldr;
-	wxTextCtrl *m_low_shading_text;
-	wxToolBar *m_shade_tool;
+	wxCheckBox* m_sample_chk;
 	//colormap
-	wxToolBar *m_colormap_tool;
-	wxTextCtrl *m_colormap_high_value_text;
-	wxDoubleSlider *m_colormap_low_value_sldr;
-	wxTextCtrl *m_colormap_low_value_text;
+	wxButton* m_colormap_st;
+	wxDoubleSlider *m_colormap_sldr;
+	wxTextCtrl *m_colormap_low_text;
+	wxTextCtrl *m_colormap_hi_text;
+	wxCheckBox* m_colormap_chk;
 	wxToolBar* m_colormap_link_tb;
 
-	//others
+	//3
 	//color
 	wxTextCtrl *m_color_text;
 	wxColourPickerCtrl *m_color_btn;
@@ -225,14 +245,29 @@ private:
 	bool SetSpacings();
 
 	//enable/disable
+	//1
+	void EnableGamma();
+	void DisableGamma();
+	void EnableSaturation();
+	void DisableSaturation();
+	void EnableLuminance();
+	void DisableLuminance();
 	void EnableAlpha();
 	void DisableAlpha();
 	void EnableShading();
 	void DisableShading();
+	//2
+	void EnableBoundary();
+	void DisableBoundary();
+	void EnableThresh();
+	void DisableThresh();
 	void EnableShadow();
 	void DisableShadow();
+	void EnableSample();
+	void DisableSample();
 	void EnableColormap();
 	void DisableColormap();
+	//3
 	void EnableMip();
 	void DisableMip();
 
@@ -240,53 +275,62 @@ private:
 	void UpdateMaxVal(double value);
 
 	//1
-	void OnGammaSync(wxMouseEvent& event);
+	void OnGammaSync(wxCommandEvent& event);
 	void OnGammaChange(wxScrollEvent &event);
 	void OnGammaText(wxCommandEvent &event);
-	void OnBoundarySync(wxMouseEvent& event);
-	void OnBoundaryChange(wxScrollEvent &event);
-	void OnBoundaryText(wxCommandEvent &event);
-	//2
-	void OnSaturationSync(wxMouseEvent& event);
+	void OnGammaChk(wxCommandEvent& event);
+	//
+	void OnSaturationSync(wxCommandEvent& event);
 	void OnSaturationChange(wxScrollEvent &event);
 	void OnSaturationText(wxCommandEvent &event);
-	void OnThreshSync(wxMouseEvent& event);
-	void OnLeftThreshChange(wxScrollEvent &event);
-	void OnLeftThreshText(wxCommandEvent &event);
-	void OnRightThreshText(wxCommandEvent &event);
+	void OnSaturationChk(wxCommandEvent& event);
+	//
+	void OnLuminanceSync(wxCommandEvent& event);
+	void OnLuminanceChange(wxScrollEvent& event);
+	void OnLuminanceText(wxCommandEvent& event);
+	void OnLuminanceChk(wxCommandEvent& event);
+	//
+	void OnAlphaSync(wxCommandEvent& event);
+	void OnAlphaChange(wxScrollEvent& event);
+	void OnAlphaText(wxCommandEvent& event);
+	void OnAlphaCheck(wxCommandEvent& event);
+	//
+	void OnShadingSync(wxCommandEvent& event);
+	void OnLowShadingChange(wxScrollEvent& event);
+	void OnLowShadingText(wxCommandEvent& event);
+	void OnHiShadingChange(wxScrollEvent& event);
+	void OnHiShadingText(wxCommandEvent& event);
+	void OnShadingChk(wxCommandEvent& event);
+
+	//2
+	void OnBoundarySync(wxCommandEvent& event);
+	void OnBoundaryChange(wxScrollEvent &event);
+	void OnBoundaryText(wxCommandEvent &event);
+	void OnBoundaryChk(wxCommandEvent& event);
+	//
+	void OnThreshSync(wxCommandEvent& event);
+	void OnThreshChange(wxScrollEvent &event);
+	void OnThreshLowText(wxCommandEvent &event);
+	void OnThreshHiText(wxCommandEvent &event);
 	void OnThreshLink(wxCommandEvent& event);
-	//3
-	void OnLuminanceSync(wxMouseEvent& event);
-	void OnLuminanceChange(wxScrollEvent &event);
-	void OnLuminanceText(wxCommandEvent &event);
-	//shading
-	void OnHiShadingChange(wxScrollEvent &event);
-	void OnHiShadingText(wxCommandEvent &event);
-	//shadow
-	void OnShadowSync(wxMouseEvent& event);
-	void OnShadowEnable(wxCommandEvent &event);
+	void OnThreshChk(wxCommandEvent& event);
+	//
+	void OnShadowSync(wxCommandEvent& event);
 	void OnShadowChange(wxScrollEvent &event);
 	void OnShadowText(wxCommandEvent &event);
-	//4
-	void OnAlphaSync(wxMouseEvent& event);
-	void OnAlphaCheck(wxCommandEvent &event);
-	void OnAlphaChange(wxScrollEvent & event);
-	void OnAlphaText(wxCommandEvent& event);
-	void OnSampleSync(wxMouseEvent& event);
+	void OnShadowChk(wxCommandEvent &event);
+	//
+	void OnSampleSync(wxCommandEvent& event);
 	void OnSampleChange(wxScrollEvent &event);
 	void OnSampleText(wxCommandEvent &event);
-	//5
-	void OnShadingSync(wxMouseEvent& event);
-	void OnLowShadingChange(wxScrollEvent &event);
-	void OnLowShadingText(wxCommandEvent &event);
-	void OnShadingEnable(wxCommandEvent &event);
-	//colormap
-	void OnColormapSync(wxMouseEvent& event);
-	void OnEnableColormap(wxCommandEvent &event);
-	void OnColormapHighValueText(wxCommandEvent &event);
-	void OnColormapLowValueChange(wxScrollEvent &event);
-	void OnColormapLowValueText(wxCommandEvent &event);
+	void OnSampleChk(wxCommandEvent& event);
+	//
+	void OnColormapSync(wxCommandEvent& event);
+	void OnColormapChange(wxScrollEvent &event);
+	void OnColormapHiText(wxCommandEvent &event);
+	void OnColormapLowText(wxCommandEvent &event);
 	void OnColormapLink(wxCommandEvent& event);
+	void OnColormapChk(wxCommandEvent &event);
 
 	//others
 	void OnColormapInvBtn(wxCommandEvent &event);
