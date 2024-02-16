@@ -300,6 +300,7 @@ VPropView::VPropView(VRenderFrame* frame,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_thresh_link_tb->AddCheckTool(ID_ThreshLinkTb, "Lock Threshold Range",
 		wxGetBitmapFromMemory(unlink), wxNullBitmap, "Lock Threshold Range");
+	m_thresh_link_tb->SetToolBitmapSize(wxSize(20, 20));
 	m_thresh_chk = new wxCheckBox(this, ID_ThreshChk, "");
 	sizer_m2->Add(m_thresh_st, 0, wxALIGN_CENTER);
 	sizer_m2->Add(m_thresh_chk, 0, wxALIGN_CENTER);
@@ -348,6 +349,7 @@ VPropView::VPropView(VRenderFrame* frame,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_colormap_link_tb->AddCheckTool(ID_ColormapLinkTb, "Lock Colormap Range",
 		wxGetBitmapFromMemory(unlink), wxNullBitmap, "Lock Colormap Range");
+	m_colormap_link_tb->SetToolBitmapSize(wxSize(20, 20));
 	m_colormap_chk = new wxCheckBox(this, ID_ColormapChk, "");
 	sizer_m5->Add(m_colormap_st, 0, wxALIGN_CENTER);
 	sizer_m5->Add(m_colormap_chk, 0, wxALIGN_CENTER);
@@ -792,13 +794,13 @@ void VPropView::GetSettings()
 	{
 		m_options_toolbar->ToggleTool(ID_MipChk,true);
 		if (m_thresh_st)
-			m_thresh_st->SetLabel("Shade Thresh.");
+			m_thresh_st->SetLabel("Shade Thresh. :");
 	}
 	else
 	{
 		m_options_toolbar->ToggleTool(ID_MipChk,false);
 		if (m_thresh_st)
-			m_thresh_st->SetLabel("Threshold");
+			m_thresh_st->SetLabel("Threshold :");
 	}
 
 	//transparency
@@ -1991,13 +1993,13 @@ void VPropView::OnMIPCheck(wxCommandEvent &event)
 	{
 		EnableMip();
 		if (m_thresh_st)
-			m_thresh_st->SetLabel("Shade Thresh.");
+			m_thresh_st->SetLabel("Shade Thresh. :");
 	}
 	else
 	{
 		DisableMip();
 		if (m_thresh_st)
-			m_thresh_st->SetLabel("Threshold");
+			m_thresh_st->SetLabel("Threshold :");
 	}
 
 	Layout();
