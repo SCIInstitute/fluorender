@@ -738,9 +738,9 @@ void wxDoubleSlider::SetThumbColor(const wxColor& c1, const wxColor& c2)
 void wxDoubleSlider::Scroll(int val)
 {
 	if (last_sel_ == 1)
-		setLowValue(low_val_ + val);
+		SetLowValue(low_val_ + val);
 	else
-		setHighValue(hi_val_ + val);
+		SetHighValue(hi_val_ + val);
 	wxBasisSlider::Scroll(val);
 }
 
