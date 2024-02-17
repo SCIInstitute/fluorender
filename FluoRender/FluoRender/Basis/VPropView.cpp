@@ -913,6 +913,21 @@ void VPropView::InitVRenderViews(unsigned int type)
 	}
 }
 
+void VPropView::SetFocusVRenderViews(wxBasisSlider* slider)
+{
+	if (m_frame)
+	{
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
+		{
+			VRenderGLView* view = m_frame->GetView(i);
+			if (view)
+			{
+				view->SetFocusedSlider(slider);
+			}
+		}
+	}
+}
+
 void VPropView::SetGroup(DataGroup* group)
 {
 	m_group = group;
@@ -951,11 +966,28 @@ void VPropView::ApplyMl()
 //1
 void VPropView::OnGammaSync(wxCommandEvent& event)
 {
-	wxString str = m_gamma_text->GetValue();
-	double dVal;
-	str.ToDouble(&dVal);
-	if (m_group)
-		m_group->Set3DGamma(dVal);
+	switch (glbin.get_mul_func())
+	{
+	case 0:
+		{
+		wxString str = m_gamma_text->GetValue();
+		double dVal;
+		str.ToDouble(&dVal);
+		if (m_group)
+			m_group->Set3DGamma(dVal);
+		}
+		break;
+	case 1:
+		SetFocusVRenderViews(m_gamma_sldr);
+		break;
+	case 2:
+		break;
+	case 3:
+		break;
+	case 4:
+		m_gamma_sldr->Undo();
+		break;
+	}
 	RefreshVRenderViews(false, true);
 }
 

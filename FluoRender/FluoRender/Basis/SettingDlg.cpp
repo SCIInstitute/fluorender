@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "SettingDlg.h"
 #include "VRenderFrame.h"
 #include <wxSingleSlider.h>
+#include <Global/Global.h>
 #include <wx/valnum.h>
 #include <wx/notebook.h>
 #include <wx/stdpaths.h>
@@ -45,6 +46,8 @@ EVT_CHECKBOX(ID_RealtimeCmpChk, SettingDlg::OnRealtimeCompressCheck)
 EVT_CHECKBOX(ID_ScriptBreakChk, SettingDlg::OnScriptBreakCheck)
 //inverse sliders
 EVT_CHECKBOX(ID_InverseSliderChk, SettingDlg::OnInverseSliderCheck)
+//multi function button
+EVT_COMBOBOX(ID_MulFuncBtnComb, SettingDlg::OnMulFuncBtnComb)
 //mouse interactions
 EVT_CHECKBOX(ID_MouseIntChk, SettingDlg::OnMouseIntCheck)
 //depth peeling
@@ -144,6 +147,16 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 		"Allow script information prompts.");
 	m_inverse_slider_chk = new wxCheckBox(page, ID_InverseSliderChk,
 		"Invert vertical slider orientation.");
+	wxBoxSizer* sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Set multifunction buttons to:");
+	m_mul_func_btn_comb = new wxComboBox(page, ID_MulFuncBtnComb, "",
+		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
+	std::vector<wxString> items = {"Sync Channels", "Focused Scroll", "Use Default", "Use ML", "Undo"};
+	m_mul_func_btn_comb->Append(items);
+	sizer1_1->Add(st);
+	sizer1_1->Add(10, 10);
+	sizer1_1->Add(m_mul_func_btn_comb);
+	sizer1_1->Add(10, 10);
 	group1->Add(10, 5);
 	group1->Add(m_prj_save_chk);
 	group1->Add(10, 5);
@@ -154,6 +167,8 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	group1->Add(m_script_break_chk);
 	group1->Add(10, 5);
 	group1->Add(m_inverse_slider_chk);
+	group1->Add(10, 5);
+	group1->Add(sizer1_1);
 	group1->Add(10, 5);
 
 	//font
@@ -1055,6 +1070,14 @@ void SettingDlg::GetSettings()
 		fconfig.SetPath("/inverse slider");
 		fconfig.Read("mode", &m_inverse_slider, false);
 	}
+	//multi func button
+	if (fconfig.Exists("/multifunc button"))
+	{
+		fconfig.SetPath("/multifunc button");
+		int val;
+		fconfig.Read("mode", &val, false);
+		glbin.set_mul_func(val);
+	}
 	//skip empty bricks
 	if (fconfig.Exists("/skip bricks"))
 	{
@@ -1363,6 +1386,8 @@ void SettingDlg::UpdateUI()
 	m_script_break_chk->SetValue(m_script_break);
 	//inverse slider
 	m_inverse_slider_chk->SetValue(m_inverse_slider);
+	//multifunc button
+	m_mul_func_btn_comb->Select(glbin.get_mul_func());
 	//mouse interactions
 	m_mouse_int_chk->SetValue(m_mouse_int);
 	//depth peeling
@@ -1560,6 +1585,9 @@ void SettingDlg::SaveSettings()
 
 	fconfig.SetPath("/inverse slider");
 	fconfig.Write("mode", m_inverse_slider);
+
+	fconfig.SetPath("/multifunc button");
+	fconfig.Write("mode", glbin.get_mul_func());
 
 	fconfig.SetPath("/skip bricks");
 	fconfig.Write("mode", m_skip_bricks);
@@ -1868,6 +1896,12 @@ void SettingDlg::OnScriptBreakCheck(wxCommandEvent& event)
 void SettingDlg::OnInverseSliderCheck(wxCommandEvent& event)
 {
 	m_inverse_slider = m_inverse_slider_chk->GetValue();
+}
+
+void SettingDlg::OnMulFuncBtnComb(wxCommandEvent& event)
+{
+	int val = m_mul_func_btn_comb->GetCurrentSelection();
+	glbin.set_mul_func(val);
 }
 
 void SettingDlg::OnMouseIntCheck(wxCommandEvent &event)

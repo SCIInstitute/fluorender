@@ -97,6 +97,10 @@ namespace fluo
 		flrd::PyDlc* get_add_pydlc(const std::string& name);
 		void clear_python();
 
+		//multifunc button use
+		void set_mul_func(int val) { mul_func_btn_use_ = val; }
+		int get_mul_func() { return mul_func_btn_use_; }
+
 	private:
 		Global();
 		static Global instance_;
@@ -118,6 +122,9 @@ namespace fluo
 
 		//python
 		std::unordered_map<std::string, flrd::PyBase*> python_list_;
+
+		//multifunc button use
+		int mul_func_btn_use_;//0-sync;1-focus;2-default;3-ml;4-undo
 	};
 
 }

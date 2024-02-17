@@ -28,10 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _WXDOUBLESLIDER_H_
 #define _WXDOUBLESLIDER_H_
 
-#include <wx/wx.h>
-#include <wx/slider.h>
+#include <wxBasisSlider.h>
 
-class wxDoubleSlider : public wxControl
+class wxDoubleSlider : public wxBasisSlider
 {
 public:
 	wxDoubleSlider(
@@ -53,60 +52,43 @@ public:
 	int GetHighValue();
 	bool SetLowValue(int val);
 	bool SetHighValue(int val);
-	int GetMax();
-	int GetMin();
 
-	wxSize DoGetBestSize();
-	void OnPaint(wxPaintEvent&);
-	void OnLeftDown(wxMouseEvent& event);
-	void OnMotion(wxMouseEvent& event);
-	void OnLeftUp(wxMouseEvent& event);
-	void OnWheel(wxMouseEvent& event);
-	void OnLeave(wxMouseEvent& event);
+	virtual void OnLeftDown(wxMouseEvent& event);
+	virtual void OnMotion(wxMouseEvent& event);
+	virtual void OnLeftUp(wxMouseEvent& event);
+	virtual void OnLeave(wxMouseEvent& event);
 
-	void SetRange(int min_val, int max_val);
-	void SetRangeColor(const wxColor& c);
-	void DisableRangeColor();
-	void SetThumbColor(const wxColor& c1, const wxColor& c2);
-	void DisableThumbColor();
+	virtual void SetThumbColor(const wxColor& c1, const wxColor& c2);
 
-	bool Disable();
-	virtual bool Enable(bool enable = true);
+	virtual void Scroll(int val);
 
-protected:
-	void paintNow();
-	void render(wxDC& dc);
-	void DrawThumb(wxDC& dc, wxCoord x, wxCoord y, const wxColor& c);
-	
 private:
-	wxWindow* parent_;
-	wxWindowID id_;
-
-	bool enabled_;
 	bool link_;
-	bool inverse_;
-	bool horizontal_;
-	int margin_;
-	double scale_;
 	int low_val_, hi_val_;
-	int min_val_, max_val_;
 	int link_dist_;
-	int sel_, last_sel_;
+	int last_sel_;
 	int sel_val_;
 
-	bool use_range_color_;
-	wxColor range_color_;
-	bool use_thumb_color_;
 	wxColor thumb_color1_;
 	wxColor thumb_color2_;
 
-	int thumb_style_;//0-windows;1-others
 	int thumb_state1_;//0-normal;1-mouse on;2-moving
 	int thumb_state2_;//0-normal;1-mouse on;2-moving
 
-private:
-	void renderNormal(wxDC& dc);
-	void renderInverse(wxDC& dc);
+	std::vector<int> stack1_;
+	std::vector<int> stack2_;
+
+protected:
+	virtual void renderNormal(wxDC& dc);
+	virtual void renderInverse(wxDC& dc);
+
+	bool setLowValue(int val);
+	bool setHighValue(int val);
+	virtual void replace();
+	virtual void push();
+	virtual void pop();
+	virtual void backward();
+	virtual void forward();
 };
 
 #endif//_WXDOUBLESLIDER_H_

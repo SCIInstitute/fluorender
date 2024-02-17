@@ -37,30 +37,8 @@ wxSingleSlider::wxSingleSlider(
 	long style,
 	const wxValidator& val,
 	const wxString& name):
-	parent_(parent),
-	id_(id),
-#ifdef _WIN32
-	thumb_style_(0),
-#else
-	thumb_style_(1),
-#endif
-	enabled_(true),
-	sel_(false),
-	use_range_color_(true),
-	range_color_(wxColor(75, 154, 255)),
-	use_thumb_color_(false),
-	horizontal_(!(style & wxSL_VERTICAL)),
-	inverse_(style & wxSL_INVERSE),
-	range_style_(0),
-	wxControl(parent, id, pos,
-		wxSize(std::max(size.GetWidth(), int(std::round(24 * parent->GetDPIScaleFactor()))),
-			std::max(size.GetHeight(), int(std::round(24 * parent->GetDPIScaleFactor())))),
-		wxBORDER_NONE, val, name)
+	wxBasisSlider(parent, id, pos, size, style, val, name)
 {
-	scale_ = parent->GetDPIScaleFactor();
-	margin_ = int(std::round(12 * scale_));
-	SetBackgroundColour(parent->GetBackgroundColour());
-	SetDoubleBuffered(true);
 	val_ = value;
 	min_val_ = minValue;
 	max_val_ = maxValue;
@@ -75,7 +53,7 @@ wxSingleSlider::wxSingleSlider(
 	Update();
 }
 
-bool wxSingleSlider::SetValue(int val)
+bool wxSingleSlider::setValue(int val)
 {
 	int old = val_;
 	val_ = val < min_val_ ? min_val_ :
@@ -85,76 +63,28 @@ bool wxSingleSlider::SetValue(int val)
 		return changed;
 	Refresh();
 	Update();
+	wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
+	e.SetEventObject(this);
+	e.SetString("update");
+	ProcessWindowEvent(e);
+	wxPostEvent(parent_, e);
+
+	return changed;
+}
+
+bool wxSingleSlider::SetValue(int val)
+{
+	bool changed = setValue(val);
+	if (time_sample())
+		push();
+	else
+		replace();
 	return changed;
 }
 
 int wxSingleSlider::GetValue()
 {
 	return val_;
-}
-
-wxSize wxSingleSlider::DoGetBestSize()
-{
-	if (horizontal_)
-		return (parent_->FromDIP(wxSize(200,24)));
-	return (parent_->FromDIP(wxSize(24, 200)));
-}
-
-void wxSingleSlider::OnPaint(wxPaintEvent&)
-{
-	wxPaintDC dc(this);
-	render(dc);
-}
-
-void wxSingleSlider::paintNow()
-{
-	wxClientDC dc(this);
-	render(dc);
-}
-
-void  wxSingleSlider::DrawThumb(wxDC& dc, wxCoord x, wxCoord y, const wxColor& c)
-{
-	if (thumb_style_ == 0)
-	{
-		wxPoint ph[] = {
-			wxPoint(x - 5 * scale_, y - 7 * scale_),
-			wxPoint(x + 5 * scale_, y - 7 * scale_),
-			wxPoint(x + 5 * scale_, y + 6 * scale_),
-			wxPoint(x, y + 11 * scale_),
-			wxPoint(x - 5 * scale_, y + 6 * scale_)
-		};
-		wxPoint pv[] = {
-			wxPoint(x - 7 * scale_, y - 5 * scale_),
-			wxPoint(x - 7 * scale_, y + 5 * scale_),
-			wxPoint(x + 6 * scale_, y + 5 * scale_),
-			wxPoint(x + 11 * scale_, y),
-			wxPoint(x + 6 * scale_, y - 5 * scale_)
-		};
-		int num = 5;
-
-		dc.SetPen(c);
-		dc.SetBrush(wxBrush(c, wxBRUSHSTYLE_SOLID));
-		dc.DrawPolygon(num, horizontal_ ? ph : pv, wxODDEVEN_RULE);
-	}
-	else
-	{
-		dc.SetPen(*wxWHITE);
-		//dc.SetBrush(wxBrush(*wxWHITE, wxBRUSHSTYLE_SOLID));
-		int xx = horizontal_ ? x : x + scale_;
-		int yy = horizontal_ ? y + scale_ : y;
-		//dc.DrawCircle(xx, yy, 7 * scale_);
-		//dc.SetPen(c);
-		dc.SetBrush(wxBrush(c, wxBRUSHSTYLE_SOLID));
-		dc.DrawCircle(xx, yy, 6 * scale_);
-	}
-}
-
-void wxSingleSlider::render(wxDC& dc)
-{
-	if (inverse_)
-		renderInverse(dc);
-	else
-		renderNormal(dc);
 }
 
 void wxSingleSlider::renderNormal(wxDC& dc)
@@ -435,7 +365,7 @@ void wxSingleSlider::OnLeftDown(wxMouseEvent& event)
 		val = std::round(double(min_val_) + double(max_val_ - min_val_) *
 			((horizontal_ ? pos.x : pos.y) - posl) / (posr - posl));
 
-	SetValue(val);
+	setValue(val);
 
 	event.Skip();
 }
@@ -515,7 +445,7 @@ void wxSingleSlider::OnMotion(wxMouseEvent& event)
 				((horizontal_ ? pos.x : pos.y) - posl) / (posr - posl));
 
 		thumb_state_ = 2;
-		bool changed = SetValue(val);
+		bool changed = setValue(val);
 		//if (!changed && low_value_ < max_)
 
 		wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
@@ -530,114 +460,67 @@ void wxSingleSlider::OnMotion(wxMouseEvent& event)
 
 void wxSingleSlider::OnLeftUp(wxMouseEvent& event)
 {
-	if (HasCapture())
-		ReleaseMouse();
-	event.Skip();
-
-	if (sel_)
-	{
-		sel_ = false;
-		thumb_state_ = 0;
-		Refresh();
-		Update();
-		wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
-		e.SetEventObject(this);
-		e.SetString("update");
-		ProcessWindowEvent(e);
-		wxPostEvent(parent_, e);
-
-	}
+	thumb_state_ = 0;
+	wxBasisSlider::OnLeftUp(event);
 }
 
 void wxSingleSlider::OnLeave(wxMouseEvent& event)
 {
 	thumb_state_ = 0;
-	Refresh();
-	Update();
-	event.Skip();
-}
-
-void wxSingleSlider::OnWheel(wxMouseEvent& event)
-{
-	int m, w, h;
-	wxClientDC dc(this);
-	dc.GetSize(&w, &h);
-	wxPoint pos = event.GetLogicalPosition(dc);
-
-	if (event.GetWheelRotation() > 0)
-		m = inverse_ == horizontal_ ? -1 : 1;
-	else
-		m = inverse_ == horizontal_ ? 1 : -1;
-
-	SetValue(val_ + m);
-
-	wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
-	e.SetEventObject(this);
-	e.SetString("update");
-	ProcessWindowEvent(e);
-	wxPostEvent(parent_, e);
-	event.Skip();
-}
-
-void wxSingleSlider::SetRangeStyle(int val)
-{
-	range_style_ = val;
-}
-
-void wxSingleSlider::SetRange(int min_val, int max_val)
-{
-	min_val_ = min_val;
-	max_val_ = max_val;
-	Refresh();
-	Update();
-}
-
-int wxSingleSlider::GetMax()
-{
-	return max_val_;
-}
-
-int wxSingleSlider::GetMin()
-{
-	return min_val_;
-}
-
-void wxSingleSlider::SetRangeColor(const wxColor& c)
-{
-	range_color_ = c;
-	use_range_color_ = true;
-}
-
-void wxSingleSlider::DisableRangeColor()
-{
-	use_range_color_ = false;
+	wxBasisSlider::OnLeave(event);
 }
 
 void wxSingleSlider::SetThumbColor(const wxColor& c)
 {
 	thumb_color_ = c;
-	use_thumb_color_ = true;
+	wxBasisSlider::SetThumbColor(c);
 }
 
-void wxSingleSlider::DisableThumbColor()
+void wxSingleSlider::Scroll(int val)
 {
-	use_thumb_color_ = false;
+	setValue(val_ + val);
+	wxBasisSlider::Scroll(val);
 }
 
-bool wxSingleSlider::Disable()
+void wxSingleSlider::replace()
 {
-	bool val = wxControl::Disable();
-	enabled_ = false;
-	Refresh();
-	Update();
-	return val;
+	if (stack_.empty())
+		return;
+	stack_.back() = val_;
 }
 
-bool wxSingleSlider::Enable(bool enable)
+void wxSingleSlider::push()
 {
-	bool val = wxControl::Enable(enable);
-	enabled_ = enable;
-	Refresh();
-	Update();
-	return val;
+	if (!stack_size_ || val_ != stack_[stack_pointer_])
+	{
+		if (!stack_size_ ||
+			stack_pointer_ == stack_size_ - 1)
+			stack_.push_back(val_);
+		else
+			stack_.insert(stack_.begin() + stack_pointer_, val_);
+		stack_pointer_++;
+		stack_size_++;
+		DBGPRINT(L"\tsize:%d,pointer:%d,last:%d\n", stack_size_, stack_pointer_, stack_.back());
+	}
 }
+
+void wxSingleSlider::pop()
+{
+	if (stack_size_)
+	{
+		stack_.pop_back();
+		stack_pointer_--;
+		stack_size_--;
+	}
+}
+
+void wxSingleSlider::backward()
+{
+	setValue(stack_[stack_pointer_]);
+}
+
+void wxSingleSlider::forward()
+{
+	setValue(stack_[stack_pointer_]);
+}
+

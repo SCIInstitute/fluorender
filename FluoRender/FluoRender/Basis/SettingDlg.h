@@ -60,6 +60,8 @@ class SettingDlg : public wxPanel
 		ID_ScriptBreakChk,
 		//inverse vertical sliders
 		ID_InverseSliderChk,
+		//multi function button
+		ID_MulFuncBtnComb,
 		//mouse interactions
 		ID_MouseIntChk,
 		//depth peeling
@@ -512,6 +514,8 @@ private:
 	wxCheckBox *m_script_break_chk;
 	//inverse sliders
 	wxCheckBox* m_inverse_slider_chk;
+	//multifunc button use
+	wxComboBox* m_mul_func_btn_comb;
 	//mouse interations
 	wxCheckBox *m_mouse_int_chk;
 	//depth peeling
@@ -619,6 +623,7 @@ private:
 	void OnRealtimeCompressCheck(wxCommandEvent &event);
 	void OnScriptBreakCheck(wxCommandEvent& event);
 	void OnInverseSliderCheck(wxCommandEvent& event);
+	void OnMulFuncBtnComb(wxCommandEvent& event);
 	//mouse interaction
 	void OnMouseIntCheck(wxCommandEvent &event);
 	//peeling

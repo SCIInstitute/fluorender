@@ -51,6 +51,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Quaternion.h>
 #include <compatibility.h>
 #include <Timer.h>
+#include <wxBasisSlider.h>
 
 #include <wx/wx.h>
 #include <wx/clrpicker.h>
@@ -798,6 +799,11 @@ public:
 		m_scriptor.SetBreak(val);
 	}
 
+	void SetFocusedSlider(wxBasisSlider* slider)
+	{
+		m_focused_slider = slider;
+	}
+
 public:
 	VRenderView* m_vrv;
 	//set gl context
@@ -1212,6 +1218,9 @@ private:
 	flrd::RulerHandler m_ruler_handler;
 	flrd::RulerRenderer m_ruler_renderer;
 	flrd::VolumePoint m_vp;
+
+	//focused slider
+	wxBasisSlider* m_focused_slider;
 
 private:
 #ifdef _WIN32

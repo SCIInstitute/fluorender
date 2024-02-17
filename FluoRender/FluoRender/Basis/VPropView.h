@@ -39,6 +39,7 @@ class VRenderFrame;
 class VRenderGLView;
 class VolumeData;
 class DataGroup;
+class wxBasisSlider;
 class wxDoubleSlider;
 class wxSingleSlider;
 class VPropView: public wxPanel
@@ -142,6 +143,7 @@ public:
 	VolumeData* GetVolumeData();
 	void RefreshVRenderViews(bool tree=false, bool interactive=false);
 	void InitVRenderViews(unsigned int type);
+	void SetFocusVRenderViews(wxBasisSlider* slider);
 
 	//sync group
 	void SetGroup(DataGroup* group);

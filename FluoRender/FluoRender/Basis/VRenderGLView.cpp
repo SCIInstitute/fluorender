@@ -318,6 +318,7 @@ VRenderGLView::VRenderGLView(VRenderFrame* frame,
 	m_paint_count(false),
 	m_paint_colocalize(false),
 	m_ruler_autorelax(false),
+	m_focused_slider(0),
 	//vr settings
 	m_enable_vr(false),
 	m_enable_sbs(false),
@@ -10060,6 +10061,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	m_ruler_handler.SetVolumeData(m_cur_vol);
 	if (event.LeftDown())
 	{
+		m_focused_slider = 0;
+
 		bool found_rp = false;
 		if (m_int_mode == 6 ||
 			m_int_mode == 9 ||
@@ -10127,12 +10130,14 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	}
 	if (event.RightDown())
 	{
+		m_focused_slider = 0;
 		old_mouse_X = mp.x();
 		old_mouse_Y = mp.y();
 		return;
 	}
 	if (event.MiddleDown())
 	{
+		m_focused_slider = 0;
 		old_mouse_X = mp.x();
 		old_mouse_Y = mp.y();
 		return;
@@ -10505,23 +10510,31 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	int wheel = event.GetWheelRotation();
 	if (wheel)  //if rotation
 	{
-		if (m_int_mode == 2 || m_int_mode == 7)
+		if (m_focused_slider)
 		{
-			ChangeBrushSize(wheel);
+			int value = -wheel / event.GetWheelDelta();
+			m_focused_slider->Scroll(value);
 		}
 		else
 		{
-			m_interactive = true;
-			m_rot_center_dirty = true;
-			double value = wheel*m_scale_factor / 1000.0;
-			if (m_scale_factor + value > 0.01)
-				m_scale_factor += value;
-			//if (m_scale_factor < 0.01)
-			//	m_scale_factor = 0.01;
-			m_vrv->UpdateScaleFactor(false);
-			//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
-			//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
-			//m_vrv->m_scale_factor_text->ChangeValue(str);
+			if (m_int_mode == 2 || m_int_mode == 7)
+			{
+				ChangeBrushSize(wheel);
+			}
+			else
+			{
+				m_interactive = true;
+				m_rot_center_dirty = true;
+				double value = wheel * m_scale_factor / 1000.0;
+				if (m_scale_factor + value > 0.01)
+					m_scale_factor += value;
+				//if (m_scale_factor < 0.01)
+				//	m_scale_factor = 0.01;
+				m_vrv->UpdateScaleFactor(false);
+				//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
+				//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
+				//m_vrv->m_scale_factor_text->ChangeValue(str);
+			}
 		}
 
 		RefreshGL(36);
