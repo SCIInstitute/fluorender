@@ -124,20 +124,22 @@ bool wxDoubleSlider::setHighValue(int val)
 bool wxDoubleSlider::SetLowValue(int val)
 {
 	bool changed = setLowValue(val);
-	if (time_sample())
-		push();
+	double t;
+	if (time_sample(t))
+		push(t);
 	else
-		replace();
+		replace(t);
 	return changed;
 }
 
 bool wxDoubleSlider::SetHighValue(int val)
 {
 	bool changed = setHighValue(val);
-	if (time_sample())
-		push();
+	double t;
+	if (time_sample(t))
+		push(t);
 	else
-		replace();
+		replace(t);
 	return changed;
 }
 
@@ -744,30 +746,39 @@ void wxDoubleSlider::Scroll(int val)
 	wxBasisSlider::Scroll(val);
 }
 
-void wxDoubleSlider::replace()
+double wxDoubleSlider::GetTime()
+{
+	if (stack1_.empty() || stack_pointer_ < 0 || stack_pointer_ >= stack1_.size())
+		return 0;
+	return stack1_[stack_pointer_].first;
+}
+
+void wxDoubleSlider::replace(double t)
 {
 	if (stack1_.empty() || stack2_.empty())
 		return;
-	stack1_.back() = low_val_;
-	stack2_.back() = hi_val_;
+	stack1_[stack_pointer_] = std::pair<double, int>(t, low_val_);
+	stack2_[stack_pointer_] = std::pair<double, int>(t, hi_val_);
 }
 
-void wxDoubleSlider::push()
+void wxDoubleSlider::push(double t)
 {
 	if (!stack_size_ ||
-		low_val_ != stack1_[stack_pointer_] ||
-		hi_val_ != stack2_[stack_pointer_])
+		low_val_ != stack1_[stack_pointer_].second ||
+		hi_val_ != stack2_[stack_pointer_].second)
 	{
 		if (!stack_size_ ||
 			stack_pointer_ == stack_size_ - 1)
 		{
-			stack1_.push_back(low_val_);
-			stack2_.push_back(hi_val_);
+			stack1_.push_back(std::pair<double, int>(t, low_val_));
+			stack2_.push_back(std::pair<double, int>(t, hi_val_));
 		}
 		else
 		{
-			stack1_.insert(stack1_.begin() + stack_pointer_, low_val_);
-			stack2_.insert(stack2_.begin() + stack_pointer_, hi_val_);
+			stack1_.insert(stack1_.begin() + stack_pointer_,
+				std::pair<double, int>(t, low_val_));
+			stack2_.insert(stack2_.begin() + stack_pointer_,
+				std::pair<double, int>(t, hi_val_));
 		}
 		stack_pointer_++;
 		stack_size_++;
@@ -787,13 +798,23 @@ void wxDoubleSlider::pop()
 
 void wxDoubleSlider::backward()
 {
-	setLowValue(stack1_[stack_pointer_]);
-	setHighValue(stack2_[stack_pointer_]);
+	setLowValue(stack1_[stack_pointer_].second);
+	setHighValue(stack2_[stack_pointer_].second);
 }
 
 void wxDoubleSlider::forward()
 {
-	setLowValue(stack1_[stack_pointer_]);
-	setHighValue(stack2_[stack_pointer_]);
+	setLowValue(stack1_[stack_pointer_].second);
+	setHighValue(stack2_[stack_pointer_].second);
 }
 
+bool wxDoubleSlider::time_sample(double& t)
+{
+	std::chrono::duration<double> time_span =
+		std::chrono::system_clock::now().time_since_epoch();
+	t = time_span.count();
+	if (!stack_size_)
+		return true;
+	double d = std::fabs(t - stack1_[stack_pointer_].first);
+	return d > time_span_;
+}

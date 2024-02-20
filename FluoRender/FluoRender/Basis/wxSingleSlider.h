@@ -56,23 +56,27 @@ public:
 
 	virtual void Scroll(int val);
 
+	virtual double GetTime();
+
 private:
 	int val_;
 	wxColor thumb_color_;
 	int thumb_state_;//0-normal;1-mouse on;2-moving
 
-	std::vector<int> stack_;
+	std::vector<std::pair<double, int>> stack_;
 
 private:
 	virtual void renderNormal(wxDC& dc);
 	virtual void renderInverse(wxDC& dc);
 
 	bool setValue(int val);
-	virtual void replace();
-	virtual void push();
+	virtual void replace(double t);
+	virtual void push(double t);
 	virtual void pop();
 	virtual void backward();
 	virtual void forward();
+
+	virtual bool time_sample(double& t);
 };
 
 #endif//_WXSINGLESLIDER_H_

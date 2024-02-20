@@ -69,6 +69,7 @@ public:
 
 	virtual void Undo();
 	virtual void Redo();
+	virtual double GetTime() = 0;
 
 protected:
 	wxWindow* parent_;
@@ -94,7 +95,6 @@ protected:
 	size_t stack_size_;
 
 	//timer
-	std::chrono::high_resolution_clock::time_point time_;
 	static double time_span_;
 
 protected:
@@ -104,13 +104,13 @@ protected:
 	virtual void renderNormal(wxDC& dc) = 0;
 	virtual void renderInverse(wxDC& dc) = 0;
 
-	virtual void replace() = 0;
-	virtual void push() = 0;
+	virtual void replace(double t) = 0;
+	virtual void push(double t) = 0;
 	virtual void pop() = 0;
 	virtual void backward() = 0;
 	virtual void forward() = 0;
 
-	bool time_sample();
+	virtual bool time_sample(double& t) = 0;
 };
 
 #endif//_WXBASISSLIDER_H_

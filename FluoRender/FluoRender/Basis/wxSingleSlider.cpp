@@ -75,10 +75,11 @@ bool wxSingleSlider::setValue(int val)
 bool wxSingleSlider::SetValue(int val)
 {
 	bool changed = setValue(val);
-	if (time_sample())
-		push();
+	double t;
+	if (time_sample(t))
+		push(t);
 	else
-		replace();
+		replace(t);
 	return changed;
 }
 
@@ -482,22 +483,29 @@ void wxSingleSlider::Scroll(int val)
 	wxBasisSlider::Scroll(val);
 }
 
-void wxSingleSlider::replace()
+double wxSingleSlider::GetTime()
+{
+	if (stack_.empty() || stack_pointer_ < 0 || stack_pointer_ >= stack_.size())
+		return 0;
+	return stack_[stack_pointer_].first;
+}
+
+void wxSingleSlider::replace(double t)
 {
 	if (stack_.empty())
 		return;
-	stack_.back() = val_;
+	stack_[stack_pointer_] = std::pair<double, int>(t, val_);
 }
 
-void wxSingleSlider::push()
+void wxSingleSlider::push(double t)
 {
-	if (!stack_size_ || val_ != stack_[stack_pointer_])
+	if (!stack_size_ || val_ != stack_[stack_pointer_].second)
 	{
 		if (!stack_size_ ||
 			stack_pointer_ == stack_size_ - 1)
-			stack_.push_back(val_);
+			stack_.push_back(std::pair<double, int>(t, val_));
 		else
-			stack_.insert(stack_.begin() + stack_pointer_, val_);
+			stack_.insert(stack_.begin() + stack_pointer_, std::pair<double, int>(t, val_));
 		stack_pointer_++;
 		stack_size_++;
 		DBGPRINT(L"\tsize:%d,pointer:%d,last:%d\n", stack_size_, stack_pointer_, stack_.back());
@@ -516,11 +524,21 @@ void wxSingleSlider::pop()
 
 void wxSingleSlider::backward()
 {
-	setValue(stack_[stack_pointer_]);
+	setValue(stack_[stack_pointer_].second);
 }
 
 void wxSingleSlider::forward()
 {
-	setValue(stack_[stack_pointer_]);
+	setValue(stack_[stack_pointer_].second);
 }
 
+bool wxSingleSlider::time_sample(double& t)
+{
+	std::chrono::duration<double> time_span =
+		std::chrono::system_clock::now().time_since_epoch();
+	t = time_span.count();
+	if (!stack_size_)
+		return true;
+	double d = std::fabs(t - stack_[stack_pointer_].first);
+	return d > time_span_;
+}

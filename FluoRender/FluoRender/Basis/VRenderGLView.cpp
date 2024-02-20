@@ -5505,7 +5505,7 @@ void VRenderGLView::ForceDraw()
 	m_timer->sample();
 	m_drawing = false;
 
-	DBGPRINT(L"buffer swapped\t%d\n", m_interactive);
+	//DBGPRINT(L"buffer swapped\t%d\n", m_interactive);
 
 	if (m_resize)
 		m_resize = false;
@@ -9574,7 +9574,7 @@ void VRenderGLView::RefreshGL(int debug_code,
 	//m_interactive = interactive;
 
 	//for debugging refresh events
-	DBGPRINT(L"%d\trefresh\t%d\t%d\n", m_vrv->m_id, debug_code, m_interactive);
+	//DBGPRINT(L"%d\trefresh\t%d\t%d\n", m_vrv->m_id, debug_code, m_interactive);
 	m_updating = true;
 	if (start_loop)
 		StartLoopUpdate();

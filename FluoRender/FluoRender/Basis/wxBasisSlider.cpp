@@ -65,7 +65,7 @@ wxBasisSlider::wxBasisSlider(
 	SetBackgroundColour(parent->GetBackgroundColour());
 	SetDoubleBuffered(true);
 
-	time_ = std::chrono::high_resolution_clock::now();
+	//time_ = std::chrono::high_resolution_clock::now();
 }
 
 wxSize wxBasisSlider::DoGetBestSize()
@@ -285,13 +285,3 @@ void wxBasisSlider::Redo()
 	forward();
 }
 
-bool wxBasisSlider::time_sample()
-{
-	std::chrono::high_resolution_clock::time_point t =
-		std::chrono::high_resolution_clock::now();
-	std::chrono::duration<double> time_span =
-		std::chrono::duration_cast<std::chrono::duration<double>>(
-			t - time_);
-	time_ = t;
-	return time_span.count() > time_span_;
-}

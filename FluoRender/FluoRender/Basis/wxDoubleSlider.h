@@ -62,6 +62,8 @@ public:
 
 	virtual void Scroll(int val);
 
+	virtual double GetTime();
+
 private:
 	bool link_;
 	int low_val_, hi_val_;
@@ -75,8 +77,8 @@ private:
 	int thumb_state1_;//0-normal;1-mouse on;2-moving
 	int thumb_state2_;//0-normal;1-mouse on;2-moving
 
-	std::vector<int> stack1_;
-	std::vector<int> stack2_;
+	std::vector<std::pair<double, int>> stack1_;
+	std::vector<std::pair<double, int>> stack2_;
 
 protected:
 	virtual void renderNormal(wxDC& dc);
@@ -84,11 +86,13 @@ protected:
 
 	bool setLowValue(int val);
 	bool setHighValue(int val);
-	virtual void replace();
-	virtual void push();
+	virtual void replace(double t);
+	virtual void push(double t);
 	virtual void pop();
 	virtual void backward();
 	virtual void forward();
+
+	virtual bool time_sample(double& t);
 };
 
 #endif//_WXDOUBLESLIDER_H_
