@@ -259,7 +259,8 @@ void wxBasisSlider::Undo()
 {
 	if (!stack_size_)
 		return;
-	if (stack_pointer_ <= 0 ||
+	if (stack_pointer_ == 0 ||
+		stack_pointer_ == -1 ||
 		stack_pointer_ > stack_size_ - 1)
 		return;
 
@@ -272,9 +273,10 @@ void wxBasisSlider::Undo()
 
 void wxBasisSlider::Redo()
 {
-	if (!stack_size_)
+	if (!stack_size_ ||
+		stack_size_ == 1)
 		return;
-	if (stack_pointer_ < 0 ||
+	if (stack_pointer_ == -1 ||
 		stack_pointer_ > stack_size_ - 2)
 		return;
 

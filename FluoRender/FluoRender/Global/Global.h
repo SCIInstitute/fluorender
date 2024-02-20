@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Database/Params.h>
 #include <Database/EntryParams.h>
 #include <Database/TableHistParams.h>
+#include <wxBasisSlider.h>
 #include <QVideoEncoder.h>
 #include <Python/PyBase.h>
 #include <Python/PyDlc.h>
@@ -101,6 +102,11 @@ namespace fluo
 		void set_mul_func(int val) { mul_func_btn_use_ = val; }
 		int get_mul_func() { return mul_func_btn_use_; }
 
+		//undo sliders
+		void add_slider(wxBasisSlider* slider) { undo_sliders_.push_back(slider); }
+		void undo();
+		void redo();
+
 	private:
 		Global();
 		static Global instance_;
@@ -125,6 +131,10 @@ namespace fluo
 
 		//multifunc button use
 		int mul_func_btn_use_;//0-sync;1-focus;2-default;3-ml;4-undo
+
+		//sliders for undo and redo
+		std::vector<wxBasisSlider*> undo_sliders_;
+		double time_span_;//time span to find sliders undo together
 	};
 
 }

@@ -151,7 +151,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Set multifunction buttons to:");
 	m_mul_func_btn_comb = new wxComboBox(page, ID_MulFuncBtnComb, "",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
-	std::vector<wxString> items = {"Sync Channels", "Focused Scroll", "Use Default", "Use ML", "Undo"};
+	std::vector<wxString> items = {"Sync Channels", "Focused Scroll", "Use Default", "Use ML", "Undo", "Enable/Disable"};
 	m_mul_func_btn_comb->Append(items);
 	sizer1_1->Add(st);
 	sizer1_1->Add(10, 10);

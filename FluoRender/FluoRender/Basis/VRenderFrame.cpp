@@ -47,6 +47,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/progdlg.h>
 #include <wx/hyperlink.h>
 #include <wx/stdpaths.h>
+#include <wx/accel.h>
 #include <cstdio>
 #include <iostream>
 #include <sstream>
@@ -65,15 +66,14 @@ BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 	EVT_MENU(ID_ViewOrganize, VRenderFrame::OnOrganize)
 	EVT_MENU(ID_CheckUpdates, VRenderFrame::OnCheckUpdates)
 	EVT_MENU(ID_Info, VRenderFrame::OnInfo)
-	EVT_MENU(ID_CreateCube, VRenderFrame::OnCreateCube)
-	EVT_MENU(ID_CreateSphere, VRenderFrame::OnCreateSphere)
-	EVT_MENU(ID_CreateCone, VRenderFrame::OnCreateCone)
 	EVT_MENU(ID_NewProject, VRenderFrame::OnNewProject)
 	EVT_MENU(ID_SaveProject, VRenderFrame::OnSaveProject)
 	EVT_MENU(ID_SaveAsProject, VRenderFrame::OnSaveAsProject)
 	EVT_MENU(ID_OpenProject, VRenderFrame::OnOpenProject)
 	EVT_MENU(ID_Settings, VRenderFrame::OnSettings)
 	EVT_MENU(ID_ImportVolume, VRenderFrame::OnImportVolume)
+	EVT_MENU(ID_Undo, VRenderFrame::OnUndo)
+	EVT_MENU(ID_Redo, VRenderFrame::OnRedo)
 	//tools
 	EVT_MENU(ID_LastTool, VRenderFrame::OnLastTool)
 	EVT_MENU(ID_PaintTool, VRenderFrame::OnPaintTool)
@@ -307,6 +307,17 @@ VRenderFrame::VRenderFrame(
 		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Settings of FluoRender",
 		"Settings of FluoRender");
+	m_main_tb->AddSeparator();
+	bitmap = wxGetBitmapFromMemory(icon_undo);
+	m_main_tb->AddTool(ID_Undo, "Undo",
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
+		"Undo",
+		"Undo");
+	bitmap = wxGetBitmapFromMemory(icon_redo);
+	m_main_tb->AddTool(ID_Redo, "Redo",
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
+		"Redo",
+		"Redo");
 
 	m_main_tb->AddStretchableSpace();
 	m_tb_menu_update = new wxMenu;
@@ -914,6 +925,15 @@ VRenderFrame::VRenderFrame(
 
 	//python
 	flrd::PyBase::SetHighVer(m_setting_dlg->GetPythonVer());
+
+	//keyboard shortcuts
+	wxAcceleratorEntry entries[4];
+	entries[0].Set(wxACCEL_CTRL, (int)'N', ID_NewProject);
+	entries[0].Set(wxACCEL_CTRL, (int)'S', ID_SaveProject);
+	entries[1].Set(wxACCEL_CTRL, (int)'Z', ID_Undo);
+	entries[2].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'Z', ID_Redo);
+	wxAcceleratorTable accel(4, entries);
+	SetAcceleratorTable(accel);
 }
 
 VRenderFrame::~VRenderFrame()
@@ -5164,6 +5184,17 @@ void VRenderFrame::OnSettings(wxCommandEvent& event)
 	m_aui_mgr.Update();
 }
 
+//undo redo
+void VRenderFrame::OnUndo(wxCommandEvent& event)
+{
+	glbin.undo();
+}
+
+void VRenderFrame::OnRedo(wxCommandEvent& event)
+{
+	glbin.redo();
+}
+
 //tools
 void VRenderFrame::OnLastTool(wxCommandEvent& event)
 {
@@ -5592,18 +5623,6 @@ void VRenderFrame::OnPaneClose(wxAuiManagerEvent& event)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-void VRenderFrame::OnCreateCube(wxCommandEvent& event)
-{
-}
-
-void VRenderFrame::OnCreateSphere(wxCommandEvent& event)
-{
-}
-
-void VRenderFrame::OnCreateCone(wxCommandEvent& event)
-{
-}
-
 void VRenderFrame::OnDraw(wxPaintEvent& event)
 {
 	//wxPaintDC dc(this);

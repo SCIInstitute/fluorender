@@ -580,6 +580,19 @@ VPropView::VPropView(VRenderFrame* frame,
 	sizer_all->Add(sizer_right, 0, wxSHRINK);
 	SetSizer(sizer_all);
 	Layout();
+
+	//add sliders for undo and redo
+	glbin.add_slider(m_gamma_sldr);
+	glbin.add_slider(m_saturation_sldr);
+	glbin.add_slider(m_luminance_sldr);
+	glbin.add_slider(m_alpha_sldr);
+	glbin.add_slider(m_hi_shading_sldr);
+	glbin.add_slider(m_low_shading_sldr);
+	glbin.add_slider(m_boundary_sldr);
+	glbin.add_slider(m_thresh_sldr);
+	glbin.add_slider(m_shadow_sldr);
+	glbin.add_slider(m_sample_sldr);
+	glbin.add_slider(m_colormap_sldr);
 }
 
 VPropView::~VPropView()
@@ -882,6 +895,9 @@ void VPropView::GetSettings()
 
 void VPropView::SetVolumeData(VolumeData* vd)
 {
+	if (m_vd != vd)
+		ClearUndo();
+
 	m_vd = vd;
 	GetSettings();
 }
@@ -961,6 +977,21 @@ void VPropView::ApplyMl()
 		m_vd->ApplyMlVolProp();
 	GetSettings();
 	RefreshVRenderViews(false, true);
+}
+
+void VPropView::ClearUndo()
+{
+	m_gamma_sldr->Clear();
+	m_saturation_sldr->Clear();
+	m_luminance_sldr->Clear();
+	m_alpha_sldr->Clear();
+	m_hi_shading_sldr->Clear();
+	m_low_shading_sldr->Clear();
+	m_boundary_sldr->Clear();
+	m_thresh_sldr->Clear();
+	m_shadow_sldr->Clear();
+	m_sample_sldr->Clear();
+	m_colormap_sldr->Clear();
 }
 
 //1

@@ -483,11 +483,25 @@ void wxSingleSlider::Scroll(int val)
 	wxBasisSlider::Scroll(val);
 }
 
-double wxSingleSlider::GetTime()
+void wxSingleSlider::Clear()
 {
-	if (stack_.empty() || stack_pointer_ < 0 || stack_pointer_ >= stack_.size())
+	stack_size_ = 0;
+	stack_pointer_ = -1;
+	stack_.clear();
+}
+
+double wxSingleSlider::GetTimeUndo()
+{
+	if (!stack_size_ || stack_pointer_ == -1 || stack_pointer_ >= stack_size_)
 		return 0;
 	return stack_[stack_pointer_].first;
+}
+
+double wxSingleSlider::GetTimeRedo()
+{
+	if (!stack_size_ || stack_pointer_ == -1 || stack_pointer_ + 1 >= stack_size_)
+		return std::numeric_limits<double>::max();
+	return stack_[stack_pointer_ + 1].first;
 }
 
 void wxSingleSlider::replace(double t)
@@ -508,7 +522,8 @@ void wxSingleSlider::push(double t)
 			stack_.insert(stack_.begin() + stack_pointer_, std::pair<double, int>(t, val_));
 		stack_pointer_++;
 		stack_size_++;
-		DBGPRINT(L"\tsize:%d,pointer:%d,last:%d\n", stack_size_, stack_pointer_, stack_.back());
+		DBGPRINT(L"\tsize:%d,pointer:%d,last:(%f, %d)\n",
+			stack_size_, stack_pointer_, stack_.back().first, stack_.back().second);
 	}
 }
 

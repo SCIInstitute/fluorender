@@ -62,7 +62,9 @@ public:
 
 	virtual void Scroll(int val);
 
-	virtual double GetTime();
+	virtual void Clear();
+	virtual double GetTimeUndo();
+	virtual double GetTimeRedo();
 
 private:
 	bool link_;

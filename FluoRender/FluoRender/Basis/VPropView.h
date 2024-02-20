@@ -155,6 +155,8 @@ public:
 
 	void ApplyMl();
 
+	void ClearUndo();
+
 private:
 	VRenderFrame* m_frame;
 	VolumeData* m_vd;

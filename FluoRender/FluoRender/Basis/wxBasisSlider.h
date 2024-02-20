@@ -67,9 +67,11 @@ public:
 
 	virtual void Scroll(int val);
 
+	virtual void Clear() = 0;
 	virtual void Undo();
 	virtual void Redo();
-	virtual double GetTime() = 0;
+	virtual double GetTimeUndo() = 0;
+	virtual double GetTimeRedo() = 0;
 
 protected:
 	wxWindow* parent_;

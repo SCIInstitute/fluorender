@@ -152,6 +152,8 @@ public:
 
 	void UpdateSync();
 
+	void ClearUndo();
+
 private:
 	VRenderFrame* m_frame;
 	int m_type;

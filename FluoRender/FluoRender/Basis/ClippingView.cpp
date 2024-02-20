@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "ClippingView.h"
 #include "VRenderFrame.h"
 #include <DataManager.h>
+#include <Global/Global.h>
 #include <compatibility.h>
 #include <wxDoubleSlider.h>
 #include <wxSingleSlider.h>
@@ -443,6 +444,13 @@ m_plane_mode(kNormal)
 	Layout();
 
 	DisableAll();
+
+	glbin.add_slider(m_x1_clip_sldr);
+	glbin.add_slider(m_y1_clip_sldr);
+	glbin.add_slider(m_z1_clip_sldr);
+	glbin.add_slider(m_x_rot_sldr);
+	glbin.add_slider(m_y_rot_sldr);
+	glbin.add_slider(m_z_rot_sldr);
 }
 
 ClippingView::~ClippingView()
@@ -521,6 +529,10 @@ MeshData* ClippingView::GetMeshData()
 void ClippingView::SetVolumeData(VolumeData* vd)
 {
 	if (!vd) return;
+
+	if (m_vd != vd)
+		ClearUndo();
+
 	m_vd = vd;
 	m_sel_type = 2;
 }
@@ -2061,6 +2073,16 @@ void ClippingView::MoveLinkedClippingPlanes(int dir)
 				wxString::Format("%d", z2));
 		}
 	}*/
+}
+
+void ClippingView::ClearUndo()
+{
+	m_x1_clip_sldr->Clear();
+	m_y1_clip_sldr->Clear();
+	m_z1_clip_sldr->Clear();
+	m_x_rot_sldr->Clear();
+	m_y_rot_sldr->Clear();
+	m_z_rot_sldr->Clear();
 }
 
 void ClippingView::OnSliderKeyDown(wxKeyEvent& event)

@@ -123,12 +123,9 @@ class VRenderFrame: public wxFrame
 		ID_OpenMesh,
 		//ImageJ\open
 		ID_ImportVolume,
-		//Mesh
-		//Mesh\Create
-		ID_Create,
-		ID_CreateCube,
-		ID_CreateSphere,
-		ID_CreateCone,
+		//undo/redo
+		ID_Undo,
+		ID_Redo,
 		//view
 		ID_FullScreen,
 		ID_ViewNew,
@@ -526,17 +523,18 @@ private:
 	//panes
 	void OnPaneClose(wxAuiManagerEvent& event);
 
-	//test
-	void OnCreateCube(wxCommandEvent& event);
-	void OnCreateSphere(wxCommandEvent& event);
-	void OnCreateCone(wxCommandEvent& event);
-
+	//project
 	void OnNewProject(wxCommandEvent& event);
 	void OnSaveProject(wxCommandEvent& event);
 	void OnSaveAsProject(wxCommandEvent& event);
 	void OnOpenProject(wxCommandEvent& event);
 
 	void OnSettings(wxCommandEvent& event);
+
+	//undo redo
+	void OnUndo(wxCommandEvent& event);
+	void OnRedo(wxCommandEvent& event);
+
 	//tools
 	void OnLastTool(wxCommandEvent& event);
 	void OnPaintTool(wxCommandEvent& event);

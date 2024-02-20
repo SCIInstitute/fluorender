@@ -135,6 +135,8 @@ public:
 	//dir: 0-lower; 1-higher
 	void MoveLinkedClippingPlanes(int dir);
 
+	void ClearUndo();
+
 private:
 	VRenderFrame* m_frame;
 	VRenderGLView* m_view;

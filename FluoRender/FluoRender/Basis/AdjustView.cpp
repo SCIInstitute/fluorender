@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "AdjustView.h"
 #include "VRenderFrame.h"
 #include <DataManager.h>
+#include <Global/Global.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
@@ -116,7 +117,7 @@ m_dft_sync_b(false)
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	sizer_h_1->Add(st, 1, wxEXPAND);
 	st = new wxStaticText(this, 0, "Eql.",
-                          wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
+		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	sizer_h_1->Add(st, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_1, 0, wxEXPAND);
 	//space
@@ -344,6 +345,17 @@ m_dft_sync_b(false)
 	DisableAll();
 
 	LoadSettings();
+
+	//add sliders for undo and redo
+	glbin.add_slider(m_r_gamma_sldr);
+	glbin.add_slider(m_r_brightness_sldr);
+	glbin.add_slider(m_r_hdr_sldr);
+	glbin.add_slider(m_g_gamma_sldr);
+	glbin.add_slider(m_g_brightness_sldr);
+	glbin.add_slider(m_g_hdr_sldr);
+	glbin.add_slider(m_b_gamma_sldr);
+	glbin.add_slider(m_b_brightness_sldr);
+	glbin.add_slider(m_b_hdr_sldr);
 }
 
 AdjustView::~AdjustView()
@@ -560,6 +572,9 @@ VRenderGLView* AdjustView::GetRenderView()
 //set volume data
 void AdjustView::SetVolumeData(VolumeData* vd)
 {
+	if (m_vd != vd)
+		ClearUndo();
+
 	if (vd)
 	{
 		m_vd = vd;
@@ -614,6 +629,19 @@ void AdjustView::SetGroupLink(DataGroup *group)
 	}
 }
 
+void AdjustView::ClearUndo()
+{
+	m_r_gamma_sldr->Clear();
+	m_r_brightness_sldr->Clear();
+	m_r_hdr_sldr->Clear();
+	m_g_gamma_sldr->Clear();
+	m_g_brightness_sldr->Clear();
+	m_g_hdr_sldr->Clear();
+	m_b_gamma_sldr->Clear();
+	m_b_brightness_sldr->Clear();
+	m_b_hdr_sldr->Clear();
+}
+
 void AdjustView::OnRGammaChange(wxScrollEvent & event)
 {
 	double val = m_r_gamma_sldr->GetValue() / 100.0;
@@ -627,18 +655,18 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 	wxString str = m_r_gamma_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_r_gamma_sldr->SetValue(int(val*100));
+	m_r_gamma_sldr->SetValue(std::round(val*100));
 
 	if (m_sync_r)
 	{
 		if (m_sync_g)
 		{
-			m_g_gamma_sldr->SetValue(int(val*100));
+			m_g_gamma_sldr->SetValue(std::round(val*100));
 			m_g_gamma_text->ChangeValue(str);
 		}
 		if (m_sync_b)
 		{
-			m_b_gamma_sldr->SetValue(int(val*100));
+			m_b_gamma_sldr->SetValue(std::round(val*100));
 			m_b_gamma_text->ChangeValue(str);
 		}
 	}
@@ -695,18 +723,18 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 	wxString str = m_g_gamma_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_g_gamma_sldr->SetValue(int(val*100));
+	m_g_gamma_sldr->SetValue(std::round(val*100));
 
 	if (m_sync_g)
 	{
 		if (m_sync_r)
 		{
-			m_r_gamma_sldr->SetValue(int(val*100));
+			m_r_gamma_sldr->SetValue(std::round(val*100));
 			m_r_gamma_text->ChangeValue(str);
 		}
 		if (m_sync_b)
 		{
-			m_b_gamma_sldr->SetValue(int(val*100));
+			m_b_gamma_sldr->SetValue(std::round(val*100));
 			m_b_gamma_text->ChangeValue(str);
 		}
 	}
@@ -763,18 +791,18 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 	wxString str = m_b_gamma_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_b_gamma_sldr->SetValue(int(val*100));
+	m_b_gamma_sldr->SetValue(std::round(val*100));
 
 	if (m_sync_b)
 	{
 		if (m_sync_r)
 		{
-			m_r_gamma_sldr->SetValue(int(val*100));
+			m_r_gamma_sldr->SetValue(std::round(val*100));
 			m_r_gamma_text->ChangeValue(str);
 		}
 		if (m_sync_g)
 		{
-			m_g_gamma_sldr->SetValue(int(val*100));
+			m_g_gamma_sldr->SetValue(std::round(val*100));
 			m_g_gamma_text->ChangeValue(str);
 		}
 	}
@@ -821,8 +849,8 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 //brightness
 void AdjustView::OnRBrightnessChange(wxScrollEvent & event)
 {
-	double val = m_r_brightness_sldr->GetValue();
-	wxString str = wxString::Format("%d", int(val));
+	int val = m_r_brightness_sldr->GetValue();
+	wxString str = wxString::Format("%d", val);
 	if (str != m_r_brightness_text->GetValue())
 		m_r_brightness_text->SetValue(str);
 }
@@ -832,18 +860,18 @@ void AdjustView::OnRBrightnessText(wxCommandEvent& event)
 	wxString str = m_r_brightness_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_r_brightness_sldr->SetValue(int(val));
+	m_r_brightness_sldr->SetValue(std::round(val));
 
 	if (m_sync_r)
 	{
 		if (m_sync_g)
 		{
-			m_g_brightness_sldr->SetValue(int(val));
+			m_g_brightness_sldr->SetValue(std::round(val));
 			m_g_brightness_text->ChangeValue(str);
 		}
 		if (m_sync_b)
 		{
-			m_b_brightness_sldr->SetValue(int(val));
+			m_b_brightness_sldr->SetValue(std::round(val));
 			m_b_brightness_text->ChangeValue(str);
 		}
 	}
@@ -889,8 +917,8 @@ void AdjustView::OnRBrightnessText(wxCommandEvent& event)
 
 void AdjustView::OnGBrightnessChange(wxScrollEvent & event)
 {
-	double val = m_g_brightness_sldr->GetValue();
-	wxString str = wxString::Format("%d", int(val));
+	int val = m_g_brightness_sldr->GetValue();
+	wxString str = wxString::Format("%d", val);
 	if (str != m_g_brightness_text->GetValue())
 		m_g_brightness_text->SetValue(str);
 }
@@ -900,18 +928,18 @@ void AdjustView::OnGBrightnessText(wxCommandEvent& event)
 	wxString str = m_g_brightness_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_g_brightness_sldr->SetValue(int(val));
+	m_g_brightness_sldr->SetValue(std::round(val));
 
 	if (m_sync_g)
 	{
 		if (m_sync_r)
 		{
-			m_r_brightness_sldr->SetValue(int(val));
+			m_r_brightness_sldr->SetValue(std::round(val));
 			m_r_brightness_text->ChangeValue(str);
 		}
 		if (m_sync_b)
 		{
-			m_b_brightness_sldr->SetValue(int(val));
+			m_b_brightness_sldr->SetValue(std::round(val));
 			m_b_brightness_text->ChangeValue(str);
 		}
 	}
@@ -957,8 +985,8 @@ void AdjustView::OnGBrightnessText(wxCommandEvent& event)
 
 void AdjustView::OnBBrightnessChange(wxScrollEvent & event)
 {
-	double val = m_b_brightness_sldr->GetValue();
-	wxString str = wxString::Format("%d", int(val));
+	int val = m_b_brightness_sldr->GetValue();
+	wxString str = wxString::Format("%d", val);
 	if (str != m_b_brightness_text->GetValue())
 		m_b_brightness_text->SetValue(str);
 }
@@ -968,18 +996,18 @@ void AdjustView::OnBBrightnessText(wxCommandEvent& event)
 	wxString str = m_b_brightness_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_b_brightness_sldr->SetValue(int(val));
+	m_b_brightness_sldr->SetValue(std::round(val));
 
 	if (m_sync_b)
 	{
 		if (m_sync_r)
 		{
-			m_r_brightness_sldr->SetValue(int(val));
+			m_r_brightness_sldr->SetValue(std::round(val));
 			m_r_brightness_text->ChangeValue(str);
 		}
 		if (m_sync_g)
 		{
-			m_g_brightness_sldr->SetValue(int(val));
+			m_g_brightness_sldr->SetValue(std::round(val));
 			m_g_brightness_text->ChangeValue(str);
 		}
 	}
@@ -1036,18 +1064,18 @@ void AdjustView::OnRHdrText(wxCommandEvent &event)
 	wxString str = m_r_hdr_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_r_hdr_sldr->SetValue(int(val*100));
+	m_r_hdr_sldr->SetValue(std::round(val*100));
 
 	if (m_sync_r)
 	{
 		if (m_sync_g)
 		{
-			m_g_hdr_sldr->SetValue(int(val*100));
+			m_g_hdr_sldr->SetValue(std::round(val*100));
 			m_g_hdr_text->ChangeValue(str);
 		}
 		if (m_sync_b)
 		{
-			m_b_hdr_sldr->SetValue(int(val*100));
+			m_b_hdr_sldr->SetValue(std::round(val*100));
 			m_b_hdr_text->ChangeValue(str);
 		}
 	}
@@ -1104,18 +1132,18 @@ void AdjustView::OnGHdrText(wxCommandEvent &event)
 	wxString str = m_g_hdr_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_g_hdr_sldr->SetValue(int(val*100));
+	m_g_hdr_sldr->SetValue(std::round(val*100));
 
 	if (m_sync_g)
 	{
 		if (m_sync_r)
 		{
-			m_r_hdr_sldr->SetValue(int(val*100));
+			m_r_hdr_sldr->SetValue(std::round(val*100));
 			m_r_hdr_text->ChangeValue(str);
 		}
 		if (m_sync_b)
 		{
-			m_b_hdr_sldr->SetValue(int(val*100));
+			m_b_hdr_sldr->SetValue(std::round(val*100));
 			m_b_hdr_text->ChangeValue(str);
 		}
 	}
@@ -1172,18 +1200,18 @@ void AdjustView::OnBHdrText(wxCommandEvent &event)
 	wxString str = m_b_hdr_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_b_hdr_sldr->SetValue(int(val*100));
+	m_b_hdr_sldr->SetValue(std::round(val*100));
 
 	if (m_sync_b)
 	{
 		if (m_sync_r)
 		{
-			m_r_hdr_sldr->SetValue(int(val*100));
+			m_r_hdr_sldr->SetValue(std::round(val*100));
 			m_r_hdr_text->ChangeValue(str);
 		}
 		if (m_sync_g)
 		{
-			m_g_hdr_sldr->SetValue(int(val*100));
+			m_g_hdr_sldr->SetValue(std::round(val*100));
 			m_g_hdr_text->ChangeValue(str);
 		}
 	}
@@ -1683,19 +1711,19 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 	if (m_use_dft_settings)
 		dft_value = m_dft_gamma.r();
 
-	m_r_gamma_sldr->SetValue(int(dft_value*100.0));
+	m_r_gamma_sldr->SetValue(std::round(dft_value*100.0));
 	wxString str = wxString::Format("%.2f", dft_value);
 	m_r_gamma_text->ChangeValue(str);
 	if (m_sync_r)
 	{
 		if (m_sync_g)
 		{
-			m_g_gamma_sldr->SetValue(int(dft_value*100.0));
+			m_g_gamma_sldr->SetValue(std::round(dft_value*100.0));
 			m_g_gamma_text->ChangeValue(str);
 		}
 		if (m_sync_b)
 		{
-			m_b_gamma_sldr->SetValue(int(dft_value*100.0));
+			m_b_gamma_sldr->SetValue(std::round(dft_value*100.0));
 			m_b_gamma_text->ChangeValue(str);
 		}
 	}
@@ -1741,19 +1769,19 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 	if (m_use_dft_settings)
 		dft_value = m_dft_brightness.r();
 
-	m_r_brightness_sldr->SetValue(int(dft_value));
-	str = wxString::Format("%d", int(dft_value));
+	m_r_brightness_sldr->SetValue(std::round(dft_value));
+	str = wxString::Format("%d", std::round(dft_value));
 	m_r_brightness_text->ChangeValue(str);
 	if (m_sync_r)
 	{
 		if (m_sync_g)
 		{
-			m_g_brightness_sldr->SetValue(int(dft_value));
+			m_g_brightness_sldr->SetValue(std::round(dft_value));
 			m_g_brightness_text->ChangeValue(str);
 		}
 		if (m_sync_b)
 		{
-			m_b_brightness_sldr->SetValue(int(dft_value));
+			m_b_brightness_sldr->SetValue(std::round(dft_value));
 			m_b_brightness_text->ChangeValue(str);
 		}
 	}
@@ -1794,19 +1822,19 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 	if (m_use_dft_settings)
 		dft_value = m_dft_hdr.r();
 
-	m_r_hdr_sldr->SetValue(int(dft_value*100.0));
+	m_r_hdr_sldr->SetValue(std::round(dft_value*100.0));
 	str = wxString::Format("%.2f", dft_value);
 	m_r_hdr_text->ChangeValue(str);
 	if (m_sync_r)
 	{
 		if (m_sync_g)
 		{
-			m_g_hdr_sldr->SetValue(int(dft_value*100.0));
+			m_g_hdr_sldr->SetValue(std::round(dft_value*100.0));
 			m_g_hdr_text->ChangeValue(str);
 		}
 		if (m_sync_b)
 		{
-			m_b_hdr_sldr->SetValue(int(dft_value*100.0));
+			m_b_hdr_sldr->SetValue(std::round(dft_value*100.0));
 			m_b_hdr_text->ChangeValue(str);
 		}
 	}
@@ -1852,19 +1880,19 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 	if (m_use_dft_settings)
 		dft_value = m_dft_gamma.g();
 
-	m_g_gamma_sldr->SetValue(int(dft_value*100.0));
+	m_g_gamma_sldr->SetValue(std::round(dft_value*100.0));
 	wxString str = wxString::Format("%.2f", dft_value);
 	m_g_gamma_text->ChangeValue(str);
 	if (m_sync_g)
 	{
 		if (m_sync_r)
 		{
-			m_r_gamma_sldr->SetValue(int(dft_value*100.0));
+			m_r_gamma_sldr->SetValue(std::round(dft_value*100.0));
 			m_r_gamma_text->ChangeValue(str);
 		}
 		if (m_sync_b)
 		{
-			m_b_gamma_sldr->SetValue(int(dft_value*100.0));
+			m_b_gamma_sldr->SetValue(std::round(dft_value*100.0));
 			m_b_gamma_text->ChangeValue(str);
 		}
 	}
@@ -1910,19 +1938,19 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 	if (m_use_dft_settings)
 		dft_value = m_dft_brightness.g();
 
-	m_g_brightness_sldr->SetValue(int(dft_value));
-	str = wxString::Format("%d", int(dft_value));
+	m_g_brightness_sldr->SetValue(std::round(dft_value));
+	str = wxString::Format("%d", std::round(dft_value));
 	m_g_brightness_text->ChangeValue(str);
 	if (m_sync_g)
 	{
 		if (m_sync_r)
 		{
-			m_r_brightness_sldr->SetValue(int(dft_value));
+			m_r_brightness_sldr->SetValue(std::round(dft_value));
 			m_r_brightness_text->ChangeValue(str);
 		}
 		if (m_sync_b)
 		{
-			m_b_brightness_sldr->SetValue(int(dft_value));
+			m_b_brightness_sldr->SetValue(std::round(dft_value));
 			m_b_brightness_text->ChangeValue(str);
 		}
 	}
@@ -1963,19 +1991,19 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 	if (m_use_dft_settings)
 		dft_value = m_dft_hdr.g();
 
-	m_g_hdr_sldr->SetValue(int(dft_value*100.0));
+	m_g_hdr_sldr->SetValue(std::round(dft_value*100.0));
 	str = wxString::Format("%.2f", dft_value);
 	m_g_hdr_text->ChangeValue(str);
 	if (m_sync_g)
 	{
 		if (m_sync_r)
 		{
-			m_r_hdr_sldr->SetValue(int(dft_value*100.0));
+			m_r_hdr_sldr->SetValue(std::round(dft_value*100.0));
 			m_r_hdr_text->ChangeValue(str);
 		}
 		if (m_sync_b)
 		{
-			m_b_hdr_sldr->SetValue(int(dft_value*100.0));
+			m_b_hdr_sldr->SetValue(std::round(dft_value*100.0));
 			m_b_hdr_text->ChangeValue(str);
 		}
 	}
@@ -2021,19 +2049,19 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 	if (m_use_dft_settings)
 		dft_value = m_dft_gamma.b();
 
-	m_b_gamma_sldr->SetValue(int(dft_value*100.0));
+	m_b_gamma_sldr->SetValue(std::round(dft_value*100.0));
 	wxString str = wxString::Format("%.2f", dft_value);
 	m_b_gamma_text->ChangeValue(str);
 	if (m_sync_b)
 	{
 		if (m_sync_r)
 		{
-			m_r_gamma_sldr->SetValue(int(dft_value*100.0));
+			m_r_gamma_sldr->SetValue(std::round(dft_value*100.0));
 			m_r_gamma_text->ChangeValue(str);
 		}
 		if (m_sync_g)
 		{
-			m_g_gamma_sldr->SetValue(int(dft_value*100.0));
+			m_g_gamma_sldr->SetValue(std::round(dft_value*100.0));
 			m_g_gamma_text->ChangeValue(str);
 		}
 	}
@@ -2079,19 +2107,19 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 	if (m_use_dft_settings)
 		dft_value = m_dft_brightness.b();
 
-	m_b_brightness_sldr->SetValue(int(dft_value));
-	str = wxString::Format("%d", int(dft_value));
+	m_b_brightness_sldr->SetValue(std::round(dft_value));
+	str = wxString::Format("%d", std::round(dft_value));
 	m_b_brightness_text->ChangeValue(str);
 	if (m_sync_b)
 	{
 		if (m_sync_r)
 		{
-			m_r_brightness_sldr->SetValue(int(dft_value));
+			m_r_brightness_sldr->SetValue(std::round(dft_value));
 			m_r_brightness_text->ChangeValue(str);
 		}
 		if (m_sync_g)
 		{
-			m_g_brightness_sldr->SetValue(int(dft_value));
+			m_g_brightness_sldr->SetValue(std::round(dft_value));
 			m_g_brightness_text->ChangeValue(str);
 		}
 	}
@@ -2132,19 +2160,19 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 	if (m_use_dft_settings)
 		dft_value = m_dft_hdr.b();
 
-	m_b_hdr_sldr->SetValue(int(dft_value*100.0));
+	m_b_hdr_sldr->SetValue(std::round(dft_value*100.0));
 	str = wxString::Format("%.2f", dft_value);
 	m_b_hdr_text->ChangeValue(str);
 	if (m_sync_b)
 	{
 		if (m_sync_r)
 		{
-			m_r_hdr_sldr->SetValue(int(dft_value*100.0));
+			m_r_hdr_sldr->SetValue(std::round(dft_value*100.0));
 			m_r_hdr_text->ChangeValue(str);
 		}
 		if (m_sync_g)
 		{
-			m_g_hdr_sldr->SetValue(int(dft_value*100.0));
+			m_g_hdr_sldr->SetValue(std::round(dft_value*100.0));
 			m_g_hdr_text->ChangeValue(str);
 		}
 	}

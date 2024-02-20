@@ -132,6 +132,11 @@ public:
 	const static unsigned char icon_machine_learning_mini_png[844];
 	/* icon_new_project_mini.png - 818 bytes */
 	const static unsigned char icon_new_project_mini_png[818];
+	//undo
+	/* icon_undo.png - 2343 bytes */
+	const static unsigned char icon_undo_png[2343];
+	/* icon_redo.png - 2412 bytes */
+	const static unsigned char icon_redo_png[2412];
 
 
 	//render view icons
@@ -260,9 +265,9 @@ public:
 	/* grow.png - 1038 bytes */
 	const static unsigned char grow_png[1038];
 	/* redo.png - 873 bytes */
-	const static unsigned char redo_png[873];
+	const static unsigned char redo_png[867];
 	/* undo.png - 853 bytes */
-	const static unsigned char undo_png[853];
+	const static unsigned char undo_png[868];
 	/* mask_copy.png - 727 bytes */
 	const static unsigned char mask_copy_png[727];
 	/* mask_exclude.png - 774 bytes */
