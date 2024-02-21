@@ -204,7 +204,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	m_font_size_cmb = new wxComboBox(page, ID_FontSizeCmb, "",
 		wxDefaultPosition, FromDIP(wxSize(50, -1)), 0, NULL);
 	for (int df = 3; df < 18; ++df)
-		m_font_size_cmb->Append(wxString::Format("%d", int(std::pow(df, 1.5))));
+		m_font_size_cmb->Append(wxString::Format("%d", int(std::round(std::pow(df, 1.5)))));
 	sizer2_1->Add(st);
 	sizer2_1->Add(10, 10);
 	sizer2_1->Add(m_font_size_cmb);
@@ -1411,10 +1411,10 @@ void SettingDlg::UpdateUI()
 		m_shadow_dir_y = 0.0;
 	}
 	double deg = GetShadowDir();
-	m_shadow_dir_sldr->SetValue(int(deg + 0.5));
+	m_shadow_dir_sldr->SetValue(std::round(deg));
 	m_shadow_dir_text->ChangeValue(wxString::Format("%.2f", deg));
 	//rot center anchor thresh
-	m_pin_threshold_sldr->SetValue(int(m_pin_threshold*10.0));
+	m_pin_threshold_sldr->SetValue(std::round(m_pin_threshold*10.0));
 	m_pin_threshold_text->ChangeValue(wxString::Format("%.0f", m_pin_threshold*100.0));
 	//gradient background
 	m_grad_bg_chk->SetValue(m_grad_bg);
@@ -1425,7 +1425,7 @@ void SettingDlg::UpdateUI()
 	else
 		m_sbs_chk->Disable();
 	m_sbs_chk->SetValue(m_sbs);
-	m_eye_dist_sldr->SetValue(int(m_eye_dist*10.0));
+	m_eye_dist_sldr->SetValue(std::round(m_eye_dist*10.0));
 	m_eye_dist_text->ChangeValue(wxString::Format("%.1f", m_eye_dist));
 	//display id
 	m_disp_id_sldr->SetValue(m_disp_id);
@@ -1464,7 +1464,7 @@ void SettingDlg::UpdateUI()
 	m_text_color_cmb->Select(m_text_color);
 	//line width
 	m_line_width_text->SetValue(wxString::Format("%.0f", m_line_width));
-	m_line_width_sldr->SetValue(int(m_line_width+0.5));
+	m_line_width_sldr->SetValue(std::round(m_line_width));
 	//paint history depth
 	m_paint_hist_depth_text->ChangeValue(wxString::Format("%d", m_paint_hist_depth));
 	m_paint_hist_depth_sldr->SetValue(m_paint_hist_depth);
@@ -1476,13 +1476,13 @@ void SettingDlg::UpdateUI()
 	EnableStreaming(m_mem_swap);
 	m_update_order_rbox->SetSelection(m_update_order);
 	m_graphics_mem_text->ChangeValue(wxString::Format("%d", (int)m_graphics_mem));
-	m_graphics_mem_sldr->SetValue((int)(m_graphics_mem / 100.0));
+	m_graphics_mem_sldr->SetValue(std::round(m_graphics_mem / 100.0));
 	m_large_data_text->ChangeValue(wxString::Format("%d", (int)m_large_data_size));
-	m_large_data_sldr->SetValue((int)(m_large_data_size / 10.0));
+	m_large_data_sldr->SetValue(std::round(m_large_data_size / 10.0));
 	m_block_size_text->ChangeValue(wxString::Format("%d", m_force_brick_size));
-	m_block_size_sldr->SetValue(int(log(m_force_brick_size) / log(2.0) + 0.5));
+	m_block_size_sldr->SetValue(std::round(log(m_force_brick_size) / log(2.0)));
 	m_response_time_text->ChangeValue(wxString::Format("%d", m_up_time));
-	m_response_time_sldr->SetValue(int(m_up_time / 10.0));
+	m_response_time_sldr->SetValue(std::round(m_up_time / 10.0));
 	m_detail_level_offset_text->ChangeValue(wxString::Format("%d", -m_detail_level_offset));
 	m_detail_level_offset_sldr->SetValue(-m_detail_level_offset);
 
@@ -2026,7 +2026,7 @@ void SettingDlg::OnShadowDirEdit(wxCommandEvent &event)
 	wxString str = m_shadow_dir_text->GetValue();
 	double deg;
 	str.ToDouble(&deg);
-	m_shadow_dir_sldr->SetValue(int(deg));
+	m_shadow_dir_sldr->SetValue(std::round(deg));
 	SetShadowDir(deg);
 
 	if (m_frame)
@@ -2158,7 +2158,7 @@ void SettingDlg::OnPinThresholdEdit(wxCommandEvent &event)
 	wxString str = m_pin_threshold_text->GetValue();
 	double dval;
 	str.ToDouble(&dval);
-	m_pin_threshold_sldr->SetValue(int(dval/10.0));
+	m_pin_threshold_sldr->SetValue(std::round(dval/10.0));
 	m_pin_threshold = dval / 100.0;
 
 	if (m_frame)
@@ -2233,7 +2233,7 @@ void SettingDlg::OnEyeDistEdit(wxCommandEvent &event)
 	wxString str = m_eye_dist_text->GetValue();
 	double dval;
 	str.ToDouble(&dval);
-	m_eye_dist_sldr->SetValue(int(dval * 10.0));
+	m_eye_dist_sldr->SetValue(std::round(dval * 10.0));
 	m_eye_dist = dval;
 
 	if (m_frame && 0 < m_frame->GetViewNum())
@@ -2409,7 +2409,7 @@ void SettingDlg::OnGraphicsMemEdit(wxCommandEvent &event)
 	str.ToDouble(&val);
 	if (val <= 0.0)
 		return;
-	m_graphics_mem_sldr->SetValue(int(val / 100.0));
+	m_graphics_mem_sldr->SetValue(std::round(val / 100.0));
 	m_graphics_mem = val;
 }
 
@@ -2428,7 +2428,7 @@ void SettingDlg::OnLargeDataEdit(wxCommandEvent &event)
 	str.ToDouble(&val);
 	if (val < 0.0)
 		return;
-	m_large_data_sldr->SetValue(int(val / 10.0));
+	m_large_data_sldr->SetValue(std::round(val / 10.0));
 	m_large_data_size = val;
 }
 
@@ -2447,7 +2447,7 @@ void SettingDlg::OnBlockSizeEdit(wxCommandEvent &event)
 	str.ToDouble(&val);
 	if (val <= 0.0)
 		return;
-	m_block_size_sldr->SetValue(int(log(val) / log(2.0) + 0.5));
+	m_block_size_sldr->SetValue(std::round(log(val) / log(2.0)));
 	m_force_brick_size = val;
 }
 
@@ -2466,7 +2466,7 @@ void SettingDlg::OnResponseTimeEdit(wxCommandEvent &event)
 	str.ToDouble(&val);
 	if (val <= 0.0)
 		return;
-	m_response_time_sldr->SetValue(int(val / 10.0));
+	m_response_time_sldr->SetValue(std::round(val / 10.0));
 	m_up_time = val;
 }
 

@@ -927,7 +927,7 @@ namespace flvr
 		{
 			dt = cell_diag.length() /
 				vr_list_[0]->compute_rate_scale(snapview.direction())/rate;
-			num_slices_ = (int)(diag.length()/dt);
+			num_slices_ = std::round(diag.length()/dt);
 		}
 		else
 		{

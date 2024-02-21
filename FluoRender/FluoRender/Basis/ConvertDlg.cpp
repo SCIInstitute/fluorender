@@ -179,7 +179,7 @@ void ConvertDlg::OnCnvVolMeshThreshText(wxCommandEvent &event)
 	wxString str = m_cnv_vol_mesh_thresh_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_cnv_vol_mesh_thresh_sldr->SetValue(int(val*100.0+0.5));
+	m_cnv_vol_mesh_thresh_sldr->SetValue(std::round(val*100.0));
 }
 
 //downsampling

@@ -155,15 +155,15 @@ void NoiseCancellingDlg::GetSettings(VRenderGLView* view)
 	{
 		m_max_value = sel_vol->GetMaxValue();
 		//threshold
-		m_threshold_sldr->SetRange(0, int(m_max_value*10.0));
-		m_threshold_sldr->SetValue(int(m_dft_thresh*m_max_value*10.0+0.5));
+		m_threshold_sldr->SetRange(0, std::round(m_max_value*10.0));
+		m_threshold_sldr->SetValue(std::round(m_dft_thresh*m_max_value*10.0));
 		m_threshold_text->ChangeValue(wxString::Format("%.1f", m_dft_thresh*m_max_value));
 		//voxel
 		int nx, ny, nz;
 		sel_vol->GetResolution(nx, ny, nz);
 		m_voxel_sldr->SetRange(1, nx);
-		m_voxel_sldr->SetValue(int(m_dft_size));
-		m_voxel_text->ChangeValue(wxString::Format("%d", int(m_dft_size)));
+		m_voxel_sldr->SetValue(std::round(m_dft_size));
+		m_voxel_text->ChangeValue(wxString::Format("%d", int(std::round(m_dft_size))));
 		m_previewed = false;
 	}
 }
@@ -212,7 +212,7 @@ void NoiseCancellingDlg::OnThresholdText(wxCommandEvent &event)
 	double val;
 	str.ToDouble(&val);
 	m_dft_thresh = val/m_max_value;
-	m_threshold_sldr->SetValue(int(val*10.0+0.5));
+	m_threshold_sldr->SetValue(std::round(val*10.0));
 
 	//change mask threshold
 	VolumeData* sel_vol = 0;

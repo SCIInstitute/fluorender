@@ -1478,7 +1478,7 @@ void ComponentDlg::OnThreshText(wxCommandEvent &event)
 	double val = 0.0;
 	m_thresh_text->GetValue().ToDouble(&val);
 	m_thresh = val;
-	m_thresh_sldr->SetValue(int(m_thresh * 1000.0 + 0.5));
+	m_thresh_sldr->SetValue(std::round(m_thresh * 1000.0));
 
 	if (m_auto_update)
 		GenerateComp(m_use_sel);
@@ -1539,7 +1539,7 @@ void ComponentDlg::OnDistStrengthText(wxCommandEvent &event)
 	double val = 0.0;
 	m_dist_strength_text->GetValue().ToDouble(&val);
 	m_dist_strength = val;
-	m_dist_strength_sldr->SetValue(int(m_dist_strength * 1000.0 + 0.5));
+	m_dist_strength_sldr->SetValue(std::round(m_dist_strength * 1000.0));
 
 	if (m_auto_update)
 		GenerateComp(m_use_sel);
@@ -1606,7 +1606,7 @@ void ComponentDlg::OnDistThreshText(wxCommandEvent &event)
 	double val = 0.0;
 	m_dist_thresh_text->GetValue().ToDouble(&val);
 	m_dist_thresh = val;
-	m_dist_thresh_sldr->SetValue(int(m_dist_thresh * 1000.0 + 0.5));
+	m_dist_thresh_sldr->SetValue(std::round(m_dist_thresh * 1000.0));
 
 	if (m_auto_update)
 		GenerateComp(m_use_sel);
@@ -1633,7 +1633,7 @@ void ComponentDlg::OnFalloffText(wxCommandEvent &event)
 	double val = 0.0;
 	m_falloff_text->GetValue().ToDouble(&val);
 	m_falloff = val;
-	m_falloff_sldr->SetValue(int(m_falloff * 1000.0 + 0.5));
+	m_falloff_sldr->SetValue(std::round(m_falloff * 1000.0));
 
 	if (m_auto_update)
 		GenerateComp(m_use_sel);
@@ -1721,7 +1721,7 @@ void ComponentDlg::OnDensityText(wxCommandEvent &event)
 	double val = 0.0;
 	m_density_text->GetValue().ToDouble(&val);
 	m_density_thresh = val;
-	m_density_sldr->SetValue(int(m_density_thresh * 1000.0 + 0.5));
+	m_density_sldr->SetValue(std::round(m_density_thresh * 1000.0));
 
 	if (m_auto_update)
 		GenerateComp(m_use_sel);
@@ -1740,7 +1740,7 @@ void ComponentDlg::OnVarthText(wxCommandEvent &event)
 	double val = 0.0;
 	m_varth_text->GetValue().ToDouble(&val);
 	m_varth = val;
-	m_varth_sldr->SetValue(int(m_varth * 10000.0 + 0.5));
+	m_varth_sldr->SetValue(std::round(m_varth * 10000.0));
 
 	if (m_auto_update)
 		GenerateComp(m_use_sel);
@@ -2241,7 +2241,7 @@ void ComponentDlg::OnClusterTolText(wxCommandEvent &event)
 	double val = 0.9;
 	m_cluster_tol_text->GetValue().ToDouble(&val);
 	m_cluster_tol = (float)val;
-	m_cluster_tol_sldr->SetValue(int(val * 100));
+	m_cluster_tol_sldr->SetValue(std::round(val * 100));
 }
 
 void ComponentDlg::OnClusterSizeSldr(wxScrollEvent &event)
@@ -2273,7 +2273,7 @@ void ComponentDlg::OnClusterepsText(wxCommandEvent &event)
 	double val = 0.0;
 	m_cluster_eps_text->GetValue().ToDouble(&val);
 	m_cluster_eps = val;
-	m_cluster_eps_sldr->SetValue(int(m_cluster_eps * 10.0 + 0.5));
+	m_cluster_eps_sldr->SetValue(std::round(m_cluster_eps * 10.0));
 }
 
 //analysis page

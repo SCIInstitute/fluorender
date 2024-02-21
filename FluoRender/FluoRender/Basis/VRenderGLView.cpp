@@ -514,7 +514,7 @@ VRenderGLView::~VRenderGLView()
 {
 	if (m_benchmark)
 	{
-		int msec = int(m_timer->total_time() * 1000.0);
+		int msec = std::round(m_timer->total_time() * 1000.0);
 		double fps = m_timer->total_fps();
 		wxString string = wxString("FluoRender has finished benchmarking.\n") +
 			wxString("Results:\n") +
@@ -2014,7 +2014,7 @@ void VRenderGLView::PaintStroke()
 		double py = double(old_mouse_Y - prv_mouse_Y);
 		double dist = sqrt(px*px + py*py);
 		double step = radius1 * pressure * bspc;
-		int repeat = int(dist / step + 0.5);
+		int repeat = std::round(dist / step);
 		double spx = (double)prv_mouse_X;
 		double spy = (double)prv_mouse_Y;
 		if (repeat > 0)
@@ -2363,7 +2363,7 @@ void VRenderGLView::DrawVRBuffer()
 	gl_y = GetGLSize().y;
 	if (m_enable_sbs)
 		vr_x /= 2;
-	int vp_y = int((double)gl_x * vr_y / vr_x / 2.0);
+	int vp_y = std::round((double)gl_x * vr_y / vr_x / 2.0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, gl_x, vp_y);
 	glDisable(GL_BLEND);
@@ -4021,7 +4021,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
 			m_head.normalize();
 			fluo::Vector side = fluo::Cross(m_up, m_head);
-			fluo::Vector trans = -(side*(int(0.8*(m_ortho_right - m_ortho_left))));
+			fluo::Vector trans = -(side*(std::round(0.8*(m_ortho_right - m_ortho_left))));
 			m_obj_transx += trans.x();
 			m_obj_transy += trans.y();
 			m_obj_transz += trans.z();
@@ -4043,7 +4043,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
 			m_head.normalize();
 			fluo::Vector side = fluo::Cross(m_up, m_head);
-			fluo::Vector trans = side*(int(0.8*(m_ortho_right - m_ortho_left)));
+			fluo::Vector trans = side*(std::round(0.8*(m_ortho_right - m_ortho_left)));
 			m_obj_transx += trans.x();
 			m_obj_transy += trans.y();
 			m_obj_transz += trans.z();
@@ -4064,7 +4064,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 
 			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
 			m_head.normalize();
-			fluo::Vector trans = -m_up*(int(0.8*(m_ortho_top - m_ortho_bottom)));
+			fluo::Vector trans = -m_up*(std::round(0.8*(m_ortho_top - m_ortho_bottom)));
 			m_obj_transx += trans.x();
 			m_obj_transy += trans.y();
 			m_obj_transz += trans.z();
@@ -4085,7 +4085,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 
 			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
 			m_head.normalize();
-			fluo::Vector trans = m_up*(int(0.8*(m_ortho_top - m_ortho_bottom)));
+			fluo::Vector trans = m_up*(std::round(0.8*(m_ortho_top - m_ortho_bottom)));
 			m_obj_transx += trans.x();
 			m_obj_transy += trans.y();
 			m_obj_transz += trans.z();
@@ -4445,9 +4445,9 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			m_vrv->m_z_rot_text->ChangeValue(str);
 			if (!m_vrv->m_rot_slider)
 			{
-				m_vrv->m_x_rot_sldr->SetThumbPosition(int(m_rotx));
-				m_vrv->m_y_rot_sldr->SetThumbPosition(int(m_roty));
-				m_vrv->m_z_rot_sldr->SetThumbPosition(int(m_rotz));
+				m_vrv->m_x_rot_sldr->SetThumbPosition(std::round(m_rotx));
+				m_vrv->m_y_rot_sldr->SetThumbPosition(std::round(m_roty));
+				m_vrv->m_z_rot_sldr->SetThumbPosition(std::round(m_rotz));
 			}
 			m_interactive = true;
 			refresh = true;
@@ -4627,7 +4627,7 @@ void VRenderGLView::SetParams(double t)
 	if (!interpolator)
 		return;
 	m_frame_num_type = 1;
-	m_param_cur_num = int(std::round(t));
+	m_param_cur_num = std::round(t);
 	FlKeyCode keycode;
 	keycode.l0 = 1;
 	keycode.l0_name = m_vrv->GetName();
@@ -4700,7 +4700,7 @@ void VRenderGLView::SetParams(double t)
 		keycode.l2 = 0;
 		keycode.l2_name = "frame";
 		if (interpolator->GetDouble(keycode, t, frame))
-			UpdateVolumeData(int(frame + 0.5), vd);
+			UpdateVolumeData(std::round(frame), vd);
 		//primary color
 		fluo::Color pc;
 		keycode.l2 = 0;
@@ -5719,7 +5719,7 @@ void VRenderGLView::SetFree(bool free)
 		m_obj_transz_saved = m_obj_transz;
 		//save scale factor
 		m_scale_factor_saved = m_scale_factor;
-		m_vrv->m_aov_text->ChangeValue(wxString::Format("%d", int(m_aov)));
+		m_vrv->m_aov_text->ChangeValue(wxString::Format("%d", int(std::round(m_aov))));
 		m_vrv->m_aov_sldr->SetValue(m_aov);
 	}
 	else
@@ -5761,8 +5761,8 @@ void VRenderGLView::SetAov(double aov)
 	m_aov = aov;
 	if (m_persp)
 	{
-		m_vrv->m_aov_text->ChangeValue(wxString::Format("%d", int(m_aov)));
-		m_vrv->m_aov_sldr->SetValue(int(m_aov));
+		m_vrv->m_aov_text->ChangeValue(wxString::Format("%d", int(std::round(m_aov))));
+		m_vrv->m_aov_sldr->SetValue(std::round(m_aov));
 	}
 }
 
@@ -8529,7 +8529,7 @@ void VRenderGLView::DrawColormap()
 		//value 2
 		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
 		py = (0.1 + 0.4*m_value_2)*m_frame_h + m_frame_y + offset - ny / 2.0;
-		str = wxString::Format("%d", int(m_value_2*max_val));
+		str = wxString::Format("%d", int(std::round(m_value_2*max_val)));
 		wstr = str.ToStdWstring();
 		m_text_renderer.RenderText(
 			wstr, text_color,
@@ -8537,7 +8537,7 @@ void VRenderGLView::DrawColormap()
 		//value 4
 		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
 		py = (0.1 + 0.4*m_value_4)*m_frame_h + m_frame_y + offset - ny / 2.0;
-		str = wxString::Format("%d", int(m_value_4*max_val));
+		str = wxString::Format("%d", int(std::round(m_value_4*max_val)));
 		wstr = str.ToStdWstring();
 		m_text_renderer.RenderText(
 			wstr, text_color,
@@ -8545,7 +8545,7 @@ void VRenderGLView::DrawColormap()
 		//value 6
 		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
 		py = (0.1 + 0.4*m_value_6)*m_frame_h + m_frame_y + offset - ny / 2.0;
-		str = wxString::Format("%d", int(m_value_6*max_val));
+		str = wxString::Format("%d", int(std::round(m_value_6*max_val)));
 		wstr = str.ToStdWstring();
 		m_text_renderer.RenderText(
 			wstr, text_color,
@@ -8553,7 +8553,7 @@ void VRenderGLView::DrawColormap()
 		//value 7
 		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
 		py = 0.5*m_frame_h + m_frame_y + offset - ny / 2.0;
-		str = wxString::Format("%d", int(max_val));
+		str = wxString::Format("%d", int(std::round(max_val)));
 		wstr = str.ToStdWstring();
 		m_text_renderer.RenderText(
 			wstr, text_color,
@@ -8606,7 +8606,7 @@ void VRenderGLView::DrawColormap()
 		//value 2
 		px = 0.052*nx - nx / 2.0;
 		py = ny / 2.0 - (0.9 - 0.4*m_value_2)*ny + offset;
-		str = wxString::Format("%d", int(m_value_2*max_val));
+		str = wxString::Format("%d", int(std::round(m_value_2*max_val)));
 		wstr = str.ToStdWstring();
 		m_text_renderer.RenderText(
 			wstr, text_color,
@@ -8614,7 +8614,7 @@ void VRenderGLView::DrawColormap()
 		//value 4
 		px = 0.052*nx - nx / 2.0;
 		py = ny / 2.0 - (0.9 - 0.4*m_value_4)*ny + offset;
-		str = wxString::Format("%d", int(m_value_4*max_val));
+		str = wxString::Format("%d", int(std::round(m_value_4*max_val)));
 		wstr = str.ToStdWstring();
 		m_text_renderer.RenderText(
 			wstr, text_color,
@@ -8622,7 +8622,7 @@ void VRenderGLView::DrawColormap()
 		//value 6
 		px = 0.052*nx - nx / 2.0;
 		py = ny / 2.0 - (0.9 - 0.4*m_value_6)*ny + offset;
-		str = wxString::Format("%d", int(m_value_6*max_val));
+		str = wxString::Format("%d", int(std::round(m_value_6*max_val)));
 		wstr = str.ToStdWstring();
 		m_text_renderer.RenderText(
 			wstr, text_color,
@@ -8630,7 +8630,7 @@ void VRenderGLView::DrawColormap()
 		//value 7
 		px = 0.052*nx - nx / 2.0;
 		py = ny / 2.0 - 0.5*ny + offset;
-		str = wxString::Format("%d", int(max_val));
+		str = wxString::Format("%d", int(std::round(max_val)));
 		wstr = str.ToStdWstring();
 		m_text_renderer.RenderText(
 			wstr, text_color,
@@ -8858,7 +8858,7 @@ fluo::Quaternion VRenderGLView::Trackball(double dx, double dy)
 		a = fluo::Vector(aq.x, aq.y, aq.z);
 		a.normalize();
 		//snap to 45 deg
-		phi = int(phi / 45.0) * 45.0;
+		phi = std::round(phi / 45.0) * 45.0;
 	}
 	else
 	{
@@ -10288,7 +10288,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	if (event.Dragging())
 	{
 		flvr::TextureRenderer::set_cor_up_time(
-			int(sqrt(double(old_mouse_X - mp.x())*
+			std::round(sqrt(double(old_mouse_X - mp.x())*
 				double(old_mouse_X - mp.x()) +
 				double(old_mouse_Y - mp.y())*
 				double(old_mouse_Y - mp.y()))));
@@ -10352,9 +10352,9 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_vrv->m_z_rot_text->ChangeValue(str);
 					if (!m_vrv->m_rot_slider)
 					{
-						m_vrv->m_x_rot_sldr->SetThumbPosition(int(m_rotx));
-						m_vrv->m_y_rot_sldr->SetThumbPosition(int(m_roty));
-						m_vrv->m_z_rot_sldr->SetThumbPosition(int(m_rotz));
+						m_vrv->m_x_rot_sldr->SetThumbPosition(std::round(m_rotx));
+						m_vrv->m_y_rot_sldr->SetThumbPosition(std::round(m_roty));
+						m_vrv->m_z_rot_sldr->SetThumbPosition(std::round(m_rotz));
 					}
 
 					m_interactive = true;
@@ -10630,7 +10630,7 @@ void VRenderGLView::SetBackgroundColor(fluo::Color &color)
 	}
 	if (m_vrv)
 	{
-		wxColor c(int(color.r()*255.0), int(color.g()*255.0), int(color.b()*255.0));
+		wxColor c(std::round(color.r()*255.0), std::round(color.g()*255.0), std::round(color.b()*255.0));
 		m_vrv->m_bg_color_picker->SetColour(c);
 	}
 }
@@ -10689,9 +10689,9 @@ void VRenderGLView::SetRotations(double rotx, double roty, double rotz, bool ui_
 		}
 		else
 		{
-			m_vrv->m_x_rot_sldr->SetThumbPosition(int(m_rotx));
-			m_vrv->m_y_rot_sldr->SetThumbPosition(int(m_roty));
-			m_vrv->m_z_rot_sldr->SetThumbPosition(int(m_rotz));
+			m_vrv->m_x_rot_sldr->SetThumbPosition(std::round(m_rotx));
+			m_vrv->m_y_rot_sldr->SetThumbPosition(std::round(m_roty));
+			m_vrv->m_z_rot_sldr->SetThumbPosition(std::round(m_rotz));
 		}
 	}
 
@@ -10784,10 +10784,10 @@ void VRenderGLView::CalcFrame()
 		miny = fluo::Clamp(miny, -1.0, 1.0);
 		maxy = fluo::Clamp(maxy, -1.0, 1.0);
 
-		m_frame_x = int((minx + 1.0)*w / 2.0 + 1.0);
-		m_frame_y = int((miny + 1.0)*h / 2.0 + 1.0);
-		m_frame_w = int((maxx - minx)*w / 2.0 - 1.5);
-		m_frame_h = int((maxy - miny)*h / 2.0 - 1.5);
+		m_frame_x = std::round((minx + 1.0)*w / 2.0 + 1.0);
+		m_frame_y = std::round((miny + 1.0)*h / 2.0 + 1.0);
+		m_frame_w = std::round((maxx - minx)*w / 2.0 - 1.5);
+		m_frame_h = std::round((maxy - miny)*h / 2.0 - 1.5);
 
 	}
 	else
@@ -10796,14 +10796,14 @@ void VRenderGLView::CalcFrame()
 		if (w > h)
 		{
 			size = h;
-			m_frame_x = int((w - h) / 2.0);
+			m_frame_x = std::round((w - h) / 2.0);
 			m_frame_y = 0;
 		}
 		else
 		{
 			size = w;
 			m_frame_x = 0;
-			m_frame_y = int((h - w) / 2.0);
+			m_frame_y = std::round((h - w) / 2.0);
 		}
 		m_frame_w = m_frame_h = size;
 	}
@@ -10825,8 +10825,8 @@ void VRenderGLView::switchLevel(VolumeData *vd)
 	GetRenderSize(nx, ny);
 	if (m_enlarge)
 	{
-		nx = int(nx * m_enlarge_scale);
-		ny = int(ny * m_enlarge_scale);
+		nx = std::round(nx * m_enlarge_scale);
+		ny = std::round(ny * m_enlarge_scale);
 	}
 
 	flvr::Texture *vtex = vd->GetTexture();

@@ -741,8 +741,8 @@ void VMovieView::SetCrop(bool value)
 	{
 		m_view->CalcFrame();
 		m_view->GetFrame(m_crop_x, m_crop_y, m_crop_w, m_crop_h);
-		m_crop_x = int(m_crop_x + m_crop_w / 2.0 + 0.5);
-		m_crop_y = int(m_crop_y + m_crop_h / 2.0 + 0.5);
+		m_crop_x = std::round(m_crop_x + m_crop_w / 2.0);
+		m_crop_y = std::round(m_crop_y + m_crop_h / 2.0);
 		m_center_x_text->ChangeValue(wxString::Format("%d", m_crop_x));
 		m_center_y_text->ChangeValue(wxString::Format("%d", m_crop_y));
 		m_width_text->ChangeValue(wxString::Format("%d", m_crop_w));
@@ -760,8 +760,8 @@ void VMovieView::UpdateCrop()
 	if (!m_view)
 		return;
 
-	m_view->SetFrame(int(m_crop_x - m_crop_w / 2.0 + 0.5),
-		int(m_crop_y - m_crop_h / 2.0 + 0.5), m_crop_w, m_crop_h);
+	m_view->SetFrame(std::round(m_crop_x - m_crop_w / 2.0),
+		std::round(m_crop_y - m_crop_h / 2.0), m_crop_w, m_crop_h);
 	if (m_crop)
 		m_view->RefreshGL(39);
 }
@@ -772,7 +772,7 @@ void VMovieView::OnTimer(wxTimerEvent& event)
 	if (m_delayed_stop)
 	{
 		if (m_record)
-			WriteFrameToFile(int(m_fps*m_movie_len + 0.5));
+			WriteFrameToFile(std::round(m_fps*m_movie_len));
 		m_delayed_stop = false;
 		Stop();
 		VRenderGLView::SetKeepEnlarge(false);
@@ -793,7 +793,7 @@ void VMovieView::OnTimer(wxTimerEvent& event)
 	m_cur_time += 1.0 / m_fps;
 	//frame only increments when time passes a whole number
 	int time = m_end_frame - m_start_frame + 1;
-	m_cur_frame = (int)(m_start_frame + time * m_cur_time / m_movie_len + 0.5);
+	m_cur_frame = std::round(m_start_frame + time * m_cur_time / m_movie_len);
 	double pcnt = (double)(m_cur_frame - m_start_frame) / (double)time;
 	SetProgress(pcnt);
 	//update the rendering frame since we have advanced.
@@ -801,7 +801,7 @@ void VMovieView::OnTimer(wxTimerEvent& event)
 	{
 		m_cur_frame_text->ChangeValue(wxString::Format("%d", m_cur_frame));
 		if (m_record)
-			WriteFrameToFile(int(m_fps*m_movie_len + 0.5));
+			WriteFrameToFile(std::round(m_fps*m_movie_len));
 		m_last_frame = m_cur_frame;
 		SetRendering(m_cur_time / m_movie_len);
 	}
@@ -854,7 +854,7 @@ void VMovieView::Prev()
 		Interpolator *interpolator = m_frame->GetInterpolator();
 		if (interpolator && interpolator->GetLastIndex() > 0)
 		{
-			int frames = int(interpolator->GetLastT() + 1);
+			int frames = std::round(interpolator->GetLastT()) + 1;
 			m_start_frame = 0; m_end_frame = frames;
 			m_movie_len = (double)frames / m_fps;
 			m_movie_len_text->ChangeValue(wxString::Format("%.2f", m_movie_len));
@@ -1181,7 +1181,7 @@ void VMovieView::OnTimeText(wxCommandEvent& event)
 	double pcnt = (m_cur_time / m_movie_len);
 	m_progress_sldr->SetValue(PROG_SLDR_MAX * pcnt);
 	int time = m_end_frame - m_start_frame + 1;
-	m_cur_frame = (int)(m_start_frame + time * pcnt);
+	m_cur_frame = std::round(m_start_frame + time * pcnt);
 	m_cur_frame_text->ChangeValue(wxString::Format("%d", m_cur_frame));
 
 	SetRendering(pcnt);
@@ -1201,7 +1201,7 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 		{
 			if (m_advanced_movie->GetCamLock() && m_timer.IsRunning())
 				m_view->SetLockCamObject(true);
-			int end_frame = int(interpolator->GetLastT());
+			int end_frame = std::round(interpolator->GetLastT());
 			m_view->SetParams(pcnt * end_frame);
 			m_view->SetInteractive(false);
 			m_view->RefreshGL(39);
@@ -1210,7 +1210,7 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 	}
 	//basic options
 	int time = m_end_frame - m_start_frame + 1;
-	time = int(m_start_frame + time * pcnt + 0.5);
+	time = std::round(m_start_frame + time * pcnt);
 
 	if (m_seq_mode == 1)
 	{
@@ -1595,7 +1595,7 @@ void VMovieView::OnDpiText(wxCommandEvent& event)
 	if (sl_enlarge)
 	{
 		sl_enlarge->Enable(enlarge);
-		sl_enlarge->SetValue(int(enlarge_scale * 10 + 0.5));
+		sl_enlarge->SetValue(std::round(enlarge_scale * 10));
 	}
 	if (tx_enlarge)
 	{
@@ -1659,7 +1659,7 @@ void VMovieView::OnTxEnlargeText(wxCommandEvent &event)
 	double dval;
 	str.ToDouble(&dval);
 	VRenderGLView::SetEnlargeScale(dval);
-	int ival = int(dval * 10 + 0.5);
+	int ival = std::round(dval * 10);
 	wxTextCtrl* tx_enlarge = (wxTextCtrl*)event.GetEventObject();
 	if (tx_enlarge && tx_enlarge->GetParent())
 	{
@@ -1749,7 +1749,7 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
 	sl_enlarge->Connect(sl_enlarge->GetId(), wxEVT_COMMAND_SLIDER_UPDATED,
 		wxScrollEventHandler(VMovieView::OnSlEnlargeScroll), NULL, panel);
 	sl_enlarge->Enable(enlarge);
-	sl_enlarge->SetValue(int(enlarge_scale * 10 + 0.5));
+	sl_enlarge->SetValue(std::round(enlarge_scale * 10));
 	wxFloatingPointValidator<double> vald_fp(1);
 	wxTextCtrl* tx_enlarge = new wxTextCtrl(panel, ID_ENLARGE_TEXT,
 		"1.0", wxDefaultPosition, wxDefaultSize, 0, vald_fp);

@@ -72,9 +72,9 @@ private:
 	virtual void renderInverse(wxDC& dc);
 
 	bool setValue(int val);
-	virtual void replace(double t);
-	virtual void push(double t);
-	virtual void pop();
+	void replace(double t);
+	void push(double t);
+	void pop();
 	virtual void backward();
 	virtual void forward();
 

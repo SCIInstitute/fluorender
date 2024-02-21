@@ -106,9 +106,6 @@ protected:
 	virtual void renderNormal(wxDC& dc) = 0;
 	virtual void renderInverse(wxDC& dc) = 0;
 
-	virtual void replace(double t) = 0;
-	virtual void push(double t) = 0;
-	virtual void pop() = 0;
 	virtual void backward() = 0;
 	virtual void forward() = 0;
 

@@ -2350,12 +2350,12 @@ void VolumeData::GetClipValues(int &ox, int &oy, int &oz,
 	fluo::Plane* pz1 = (*planes)[4];
 	fluo::Plane* pz2 = (*planes)[5];
 
-	ox = int(-resx*px1->d() + 0.499);
-	oy = int(-resy*py1->d() + 0.499);
-	oz = int(-resz*pz1->d() + 0.499);
-	nx = int(resx*px2->d() + 0.499) - ox;
-	ny = int(resy*py2->d() + 0.499) - oy;
-	nz = int(resz*pz2->d() + 0.499) - oz;
+	ox = std::round(-resx*px1->d());
+	oy = std::round(-resy*py1->d());
+	oz = std::round(-resz*pz1->d());
+	nx = std::round(resx*px2->d()) - ox;
+	ny = std::round(resy*py2->d()) - oy;
+	nz = std::round(resz*pz2->d()) - oz;
 }
 
 //clip distance
@@ -2529,10 +2529,10 @@ void VolumeData::ApplyMlVolProp()
 		SetColormapInv(dval > 0.5 ? -1.0 : 1.0);
 		//colormap type
 		dval = ep->getParam("colormap_type");
-		SetColormap(int(dval+0.5));
+		SetColormap(std::round(dval));
 		//colormap projection
 		dval = ep->getParam("colormap_proj");
-		SetColormapProj(int(dval + 0.5));
+		SetColormapProj(std::round(dval));
 		//colormap low value
 		dval = ep->getParam("colormap_low");
 		//colormap high value
@@ -2552,7 +2552,7 @@ void VolumeData::ApplyMlVolProp()
 		SetInvert(dval > 0.5);
 		//enable mip
 		dval = ep->getParam("mip_enable");
-		SetMode(int(dval +0.5));
+		SetMode(std::round(dval));
 		//enable hi transp
 		dval = ep->getParam("transparent_enable");
 		SetAlphaPower(dval > 0.5 ? 2.0 : 1.0);

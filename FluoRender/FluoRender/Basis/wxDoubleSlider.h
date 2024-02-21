@@ -86,11 +86,12 @@ protected:
 	virtual void renderNormal(wxDC& dc);
 	virtual void renderInverse(wxDC& dc);
 
-	bool setLowValue(int val);
-	bool setHighValue(int val);
-	virtual void replace(double t);
-	virtual void push(double t);
-	virtual void pop();
+	bool setLowValue(int val, bool send_msg = true);
+	bool setHighValue(int val, bool send_msg = true);
+	void replace(double t);
+	void push_low(double t);
+	void push_hi(double t);
+	void pop();
 	virtual void backward();
 	virtual void forward();
 

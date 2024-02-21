@@ -658,9 +658,9 @@ void ComponentAnalyzer::GetCompsPoint(fluo::Point& p, std::set<unsigned long lon
 		return;
 	int nx, ny, nz;
 	vd->GetResolution(nx, ny, nz);
-	int ix = (int)(p.x() + 0.5);
-	int iy = (int)(p.y() + 0.5);
-	int iz = (int)(p.z() + 0.5);
+	int ix = std::round(p.x());
+	int iy = std::round(p.y());
+	int iz = std::round(p.z());
 	if (ix < 0 || ix >= nx ||
 		iy < 0 || iy >= ny ||
 		iz < 0 || iz >= nz)

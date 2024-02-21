@@ -282,9 +282,9 @@ void RulerListCtrl::UpdateRulers(VRenderGLView* vrv)
 		wxString color;
 		if (ruler->GetUseColor())
 			color = wxString::Format("RGB(%d, %d, %d)",
-			int(ruler->GetColor().r()*255),
-			int(ruler->GetColor().g()*255),
-			int(ruler->GetColor().b()*255));
+			int(std::round(ruler->GetColor().r()*255)),
+			int(std::round(ruler->GetColor().g()*255)),
+			int(std::round(ruler->GetColor().b()*255)));
 		else
 			color = "N/A";
 		wxString center;
@@ -468,7 +468,9 @@ void RulerListCtrl::Export(wxString filename)
 			{
 				color = ruler->GetColor();
 				str = wxString::Format("RGB(%d, %d, %d)",
-					int(color.r()*255), int(color.g()*255), int(color.b()*255));
+					int(std::round(color.r()*255)),
+					int(std::round(color.g()*255)),
+					int(std::round(color.b()*255)));
 			}
 			else
 				str = "N/A";
@@ -654,7 +656,9 @@ void RulerListCtrl::OnSelection(wxListEvent &event)
 	if (ruler->GetUseColor())
 	{
 		fluo::Color color = ruler->GetColor();
-		wxColor c(int(color.r()*255.0), int(color.g()*255.0), int(color.b()*255.0));
+		wxColor c(int(std::round(color.r()*255.0)),
+			int(std::round(color.g()*255.0)),
+			int(std::round(color.b()*255.0)));
 		m_color_picker->SetColour(c);
 	}
 	m_color_picker->Show();
@@ -762,9 +766,9 @@ void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	wxString str_color;
 	str_color = wxString::Format("RGB(%d, %d, %d)",
-		int(color.r()*255),
-		int(color.g()*255),
-		int(color.b()*255));
+		int(std::round(color.r()*255)),
+		int(std::round(color.g()*255)),
+		int(std::round(color.b()*255)));
 	SetText(m_editing_item, ColorCol, str_color);
 
 	for (size_t i = 0; i < sel.size(); ++i)

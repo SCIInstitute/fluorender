@@ -518,7 +518,7 @@ void VRenderView::CreateBar()
 	m_aov_text = new wxTextCtrl(this, ID_AovText, "",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), 0, vald_int);
 	m_aov_text->ChangeValue(m_glview->GetPersp()?wxString::Format("%d",
-		int(m_glview->GetAov())):wxString("Ortho"));
+		std::round(m_glview->GetAov())):wxString("Ortho"));
 	sizer_h_1->Add(st2, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_aov_sldr, 1, wxEXPAND);
 	sizer_h_1->Add(m_aov_text, 0, wxALIGN_CENTER);
@@ -806,7 +806,7 @@ void VRenderView::UpdateScaleFactor(bool update_text)
 		}
 		break;
 	}
-	int val = int(scale * 100 + 0.5);
+	int val = std::round(scale * 100);
 	m_scale_factor_sldr->SetValue(val);
 	wxString str = wxString::Format("%d", val);
 	if (update_text)
@@ -1135,7 +1135,7 @@ void VRenderView::OnDpiText(wxCommandEvent& event)
 	if (sl_enlarge)
 	{
 		sl_enlarge->Enable(enlarge);
-		sl_enlarge->SetValue(int(enlarge_scale * 10 + 0.5));
+		sl_enlarge->SetValue(std::round(enlarge_scale * 10));
 	}
 	if (tx_enlarge)
 	{
@@ -1208,7 +1208,7 @@ void VRenderView::OnTxEnlargeText(wxCommandEvent &event)
 	double dval;
 	str.ToDouble(&dval);
 	VRenderGLView::SetEnlargeScale(dval);
-	int ival = int(dval * 10 + 0.5);
+	int ival = std::round(dval * 10);
 	wxTextCtrl* tx_enlarge = (wxTextCtrl*)event.GetEventObject();
 	if (tx_enlarge && tx_enlarge->GetParent())
 	{
@@ -1281,7 +1281,7 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 	sl_enlarge->Connect(sl_enlarge->GetId(), wxEVT_COMMAND_SLIDER_UPDATED,
 		wxScrollEventHandler(VRenderView::OnSlEnlargeScroll), NULL, panel);
 	sl_enlarge->Enable(enlarge);
-	sl_enlarge->SetValue(int(enlarge_scale * 10 + 0.5));
+	sl_enlarge->SetValue(std::round(enlarge_scale * 10));
 	wxFloatingPointValidator<double> vald_fp(1);
 	wxTextCtrl* tx_enlarge = new wxTextCtrl(panel, ID_ENLARGE_TEXT,
 		"1.0", wxDefaultPosition, parent->FromDIP(wxSize(60, 23)), 0, vald_fp);
@@ -1412,7 +1412,7 @@ void VRenderView::OnDepthAttenFactorEdit(wxCommandEvent& event)
 	double val;
 	str.ToDouble(&val);
 	m_glview->SetFogIntensity(val);
-	m_depth_atten_factor_sldr->SetValue(int(val*100.0));
+	m_depth_atten_factor_sldr->SetValue(std::round(val*100.0));
 	RefreshGL(true);
 }
 
@@ -1589,8 +1589,6 @@ void VRenderView::OnScaleReset(wxCommandEvent &event)
 {
 	if (m_use_dft_settings)
 		m_glview->m_scale_factor = m_dft_scale_factor;
-	//wxString str = wxString::Format("%d", int(m_dft_scale_factor));
-	//m_scale_factor_text->SetValue(str);
 	else
 		m_glview->m_scale_factor = 1.0;
 	UpdateScaleFactor();
@@ -1606,9 +1604,9 @@ void VRenderView::OnValueEdit(wxCommandEvent& event)
 	{
 		double rotx, roty, rotz;
 		m_glview->GetRotations(rotx, roty, rotz);
-		m_x_rot_sldr->SetThumbPosition(int(rotx));
-		m_y_rot_sldr->SetThumbPosition(int(roty));
-		m_z_rot_sldr->SetThumbPosition(int(rotz));
+		m_x_rot_sldr->SetThumbPosition(std::round(rotx));
+		m_y_rot_sldr->SetThumbPosition(std::round(roty));
+		m_z_rot_sldr->SetThumbPosition(std::round(rotz));
 	}
 }
 
@@ -1769,7 +1767,7 @@ void VRenderView::OnXRotScroll(wxScrollEvent& event)
 	{
 		int pos = m_x_rot_sldr->GetThumbPosition();
 		if (lock)
-			pos = int(double(pos) / 45.0) * 45;
+			pos = std::round(double(pos) / 45.0) * 45;
 		str = wxString::Format("%.1f", double(pos));
 		if (str != m_x_rot_text->GetValue())
 			m_x_rot_text->SetValue(str);
@@ -1823,7 +1821,7 @@ void VRenderView::OnYRotScroll(wxScrollEvent& event)
 	{
 		int pos = m_y_rot_sldr->GetThumbPosition();
 		if (lock)
-			pos = int(double(pos) / 45.0) * 45;
+			pos = std::round(double(pos) / 45.0) * 45;
 		str = wxString::Format("%.1f", double(pos));
 		if (str != m_y_rot_text->GetValue())
 			m_y_rot_text->SetValue(str);
@@ -1877,7 +1875,7 @@ void VRenderView::OnZRotScroll(wxScrollEvent& event)
 	{
 		int pos = m_z_rot_sldr->GetThumbPosition();
 		if (lock)
-			pos = int(double(pos) / 45.0) * 45;
+			pos = std::round(double(pos) / 45.0) * 45;
 		str = wxString::Format("%.1f", double(pos));
 		if (str != m_z_rot_text->GetValue())
 			m_z_rot_text->SetValue(str);
@@ -1930,9 +1928,9 @@ void VRenderView::OnRotSliderType(wxCommandEvent& event)
 			wxGetBitmap(slider_type_pos, m_dpi_sf2));
 		double rotx, roty, rotz;
 		m_glview->GetRotations(rotx, roty, rotz);
-		m_x_rot_sldr->SetThumbPosition(int(rotx));
-		m_y_rot_sldr->SetThumbPosition(int(roty));
-		m_z_rot_sldr->SetThumbPosition(int(rotz));
+		m_x_rot_sldr->SetThumbPosition(std::round(rotx));
+		m_y_rot_sldr->SetThumbPosition(std::round(roty));
+		m_z_rot_sldr->SetThumbPosition(std::round(rotz));
 	}
 }
 
@@ -2553,7 +2551,7 @@ void VRenderView::LoadSettings()
 	{
 		m_depth_atten_factor_text->ChangeValue(str);
 		str.ToDouble(&dVal);
-		m_depth_atten_factor_sldr->SetValue(int(dVal*100));
+		m_depth_atten_factor_sldr->SetValue(std::round(dVal*100));
 		m_glview->SetFogIntensity(dVal);
 		m_dft_depth_atten_factor = dVal;
 	}

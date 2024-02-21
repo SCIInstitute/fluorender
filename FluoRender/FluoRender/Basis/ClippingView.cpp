@@ -45,11 +45,8 @@ BEGIN_EVENT_TABLE(ClippingView, wxPanel)
 	EVT_BUTTON(ID_ClipResetBtn, ClippingView::OnClipResetBtn)
 
 	EVT_COMMAND_SCROLL(ID_X1ClipSldr, ClippingView::OnX1ClipChange)
-	//EVT_COMMAND_SCROLL(ID_X2ClipSldr, ClippingView::OnX2ClipChange)
 	EVT_COMMAND_SCROLL(ID_Y1ClipSldr, ClippingView::OnY1ClipChange)
-	//EVT_COMMAND_SCROLL(ID_Y2ClipSldr, ClippingView::OnY2ClipChange)
 	EVT_COMMAND_SCROLL(ID_Z1ClipSldr, ClippingView::OnZ1ClipChange)
-	//EVT_COMMAND_SCROLL(ID_Z2ClipSldr, ClippingView::OnZ2ClipChange)
 
 	EVT_TEXT(ID_X1ClipText, ClippingView::OnX1ClipEdit)
 	EVT_TEXT(ID_X2ClipText, ClippingView::OnX2ClipEdit)
@@ -593,17 +590,17 @@ void ClippingView::GetSettings(VRenderGLView* view)
 	//text range
 	wxIntegerValidator<int>* vald_i;
 	if ((vald_i = (wxIntegerValidator<int>*)m_x1_clip_text->GetValidator()))
-		vald_i->SetRange(0, int(resx));
+		vald_i->SetRange(0, resx);
 	if ((vald_i = (wxIntegerValidator<int>*)m_x2_clip_text->GetValidator()))
-		vald_i->SetRange(0, int(resx));
+		vald_i->SetRange(0, resx);
 	if ((vald_i = (wxIntegerValidator<int>*)m_y1_clip_text->GetValidator()))
-		vald_i->SetRange(0, int(resy));
+		vald_i->SetRange(0, resy);
 	if ((vald_i = (wxIntegerValidator<int>*)m_y2_clip_text->GetValidator()))
-		vald_i->SetRange(0, int(resy));
+		vald_i->SetRange(0, resy);
 	if ((vald_i = (wxIntegerValidator<int>*)m_z1_clip_text->GetValidator()))
-		vald_i->SetRange(0, int(resz));
+		vald_i->SetRange(0, resz);
 	if ((vald_i = (wxIntegerValidator<int>*)m_z2_clip_text->GetValidator()))
-		vald_i->SetRange(0, int(resz));
+		vald_i->SetRange(0, resz);
 
 	//clip distance
 	switch (m_sel_type)
@@ -710,13 +707,13 @@ void ClippingView::GetSettings(VRenderGLView* view)
 	m_view->GetClippingPlaneRotations(rotx, roty, rotz);
 	//x
 	m_x_rot_text->ChangeValue(wxString::Format("%.1f", double(rotx)));
-	m_x_rot_sldr->SetValue(int(std::round(rotx)));
+	m_x_rot_sldr->SetValue(std::round(rotx));
 	//y
 	m_y_rot_text->ChangeValue(wxString::Format("%.1f", double(roty)));
-	m_y_rot_sldr->SetValue(int(std::round(roty)));
+	m_y_rot_sldr->SetValue(std::round(roty));
 	//z
 	m_z_rot_text->ChangeValue(wxString::Format("%.1f", double(rotz)));
-	m_z_rot_sldr->SetValue(int(std::round(rotz)));
+	m_z_rot_sldr->SetValue(std::round(rotz));
 }
 
 void ClippingView::OnLinkChannelsBtn(wxCommandEvent &event)
@@ -914,6 +911,18 @@ void ClippingView::OnClipResetBtn(wxCommandEvent &event)
 
 void ClippingView::OnX1ClipChange(wxScrollEvent &event)
 {
+	bool bval = m_x1_clip_sldr->GetLink();
+	if (bval != m_linkx_tb->GetToolState(ID_LinkXChk))
+	{
+		m_linkx_tb->ToggleTool(ID_LinkXChk, bval);
+		if (bval)
+			m_linkx_tb->SetToolNormalBitmap(ID_LinkXChk,
+				wxGetBitmapFromMemory(link));
+		else
+			m_linkx_tb->SetToolNormalBitmap(ID_LinkXChk,
+				wxGetBitmapFromMemory(unlink));
+	}
+
 	int ival = m_x1_clip_sldr->GetLowValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_x1_clip_text->GetValue())
@@ -1052,6 +1061,18 @@ void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
 
 void ClippingView::OnY1ClipChange(wxScrollEvent &event)
 {
+	bool bval = m_y1_clip_sldr->GetLink();
+	if (bval != m_linky_tb->GetToolState(ID_LinkYChk))
+	{
+		m_linky_tb->ToggleTool(ID_LinkYChk, bval);
+		if (bval)
+			m_linky_tb->SetToolNormalBitmap(ID_LinkYChk,
+				wxGetBitmapFromMemory(link));
+		else
+			m_linky_tb->SetToolNormalBitmap(ID_LinkYChk,
+				wxGetBitmapFromMemory(unlink));
+	}
+
 	int ival = m_y1_clip_sldr->GetLowValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_y1_clip_text->GetValue())
@@ -1190,6 +1211,18 @@ void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
 
 void ClippingView::OnZ1ClipChange(wxScrollEvent &event)
 {
+	bool bval = m_z1_clip_sldr->GetLink();
+	if (bval != m_linkz_tb->GetToolState(ID_LinkZChk))
+	{
+		m_linkz_tb->ToggleTool(ID_LinkZChk, bval);
+		if (bval)
+			m_linkz_tb->SetToolNormalBitmap(ID_LinkZChk,
+				wxGetBitmapFromMemory(link));
+		else
+			m_linkz_tb->SetToolNormalBitmap(ID_LinkZChk,
+				wxGetBitmapFromMemory(unlink));
+	}
+
 	int ival = m_z1_clip_sldr->GetLowValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_z1_clip_text->GetValue())
@@ -1417,9 +1450,9 @@ void ClippingView::SetZLink(bool val)
 
 void ClippingView::SetClippingPlaneRotations(double rotx, double roty, double rotz)
 {
-	m_x_rot_sldr->SetValue(int(rotx));
-	m_y_rot_sldr->SetValue(int(roty));
-	m_z_rot_sldr->SetValue(int(rotz));
+	m_x_rot_sldr->SetValue(std::round(rotx));
+	m_y_rot_sldr->SetValue(std::round(roty));
+	m_z_rot_sldr->SetValue(std::round(rotz));
 	m_x_rot_text->SetValue(wxString::Format("%.1f", rotx));
 	m_y_rot_text->SetValue(wxString::Format("%.1f", roty));
 	m_z_rot_text->SetValue(wxString::Format("%.1f", rotz));
@@ -1452,9 +1485,9 @@ void ClippingView::OnSetZeroBtn(wxCommandEvent &event)
 	m_view->RefreshGL(51);
 	double rotx, roty, rotz;
 	m_view->GetClippingPlaneRotations(rotx, roty, rotz);
-	m_x_rot_sldr->SetValue(int(std::round(rotx)));
-	m_y_rot_sldr->SetValue(int(std::round(roty)));
-	m_z_rot_sldr->SetValue(int(std::round(rotz)));
+	m_x_rot_sldr->SetValue(std::round(rotx));
+	m_y_rot_sldr->SetValue(std::round(roty));
+	m_z_rot_sldr->SetValue(std::round(rotz));
 	m_x_rot_text->ChangeValue(wxString::Format("%.1f", rotx));
 	m_y_rot_text->ChangeValue(wxString::Format("%.1f", roty));
 	m_z_rot_text->ChangeValue(wxString::Format("%.1f", rotz));
@@ -1494,7 +1527,7 @@ void ClippingView::OnXRotEdit(wxCommandEvent &event)
 	wxString str = m_x_rot_text->GetValue();
 	double val = 0.0;
 	str.ToDouble(&val);
-	m_x_rot_sldr->SetValue(int(std::round(val)));
+	m_x_rot_sldr->SetValue(std::round(val));
 
 	double rotx, roty, rotz;
 	m_view->GetClippingPlaneRotations(rotx, roty, rotz);
@@ -1518,7 +1551,7 @@ void ClippingView::OnYRotEdit(wxCommandEvent &event)
 	wxString str = m_y_rot_text->GetValue();
 	double val = 0.0;
 	str.ToDouble(&val);
-	m_y_rot_sldr->SetValue(int(std::round(val)));
+	m_y_rot_sldr->SetValue(std::round(val));
 
 	double rotx, roty, rotz;
 	m_view->GetClippingPlaneRotations(rotx, roty, rotz);
@@ -1541,7 +1574,7 @@ void ClippingView::OnZRotEdit(wxCommandEvent &event)
 	wxString str = m_z_rot_text->GetValue();
 	double val = 0.0;
 	str.ToDouble(&val);
-	m_z_rot_sldr->SetValue(int(std::round(val)));
+	m_z_rot_sldr->SetValue(std::round(val));
 
 	double rotx, roty, rotz;
 	m_view->GetClippingPlaneRotations(rotx, roty, rotz);

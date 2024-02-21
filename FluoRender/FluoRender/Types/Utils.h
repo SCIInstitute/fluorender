@@ -223,7 +223,7 @@ inline int Clamp(int i, int min, int max)
 
 inline int Round(double d)
 {
-	return (int)(d+0.5);
+	return std::round(d);
 }
 
 // Absolute value

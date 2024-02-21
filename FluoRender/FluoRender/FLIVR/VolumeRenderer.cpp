@@ -600,7 +600,7 @@ namespace flvr
 		if (rate > 0.0)
 		{
 			dt = cell_diag.length() / compute_rate_scale(snapview.direction()) / rate;
-			num_slices_ = (int)(diag.length()/dt);
+			num_slices_ = std::round(diag.length()/dt);
 		}
 		else
 		{
@@ -1073,7 +1073,7 @@ namespace flvr
 		if (rate > 0.0)
 		{
 			dt = cell_diag.length() / compute_rate_scale(snapview.direction()) / rate;
-			num_slices = (int)(diag.length()/dt);
+			num_slices = std::round(diag.length()/dt);
 		}
 		else
 		{

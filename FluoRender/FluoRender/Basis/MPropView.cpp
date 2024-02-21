@@ -208,24 +208,24 @@ void MPropView::GetSettings()
 	//lighting
 	m_light_chk->SetValue(m_md->GetLighting());
 	//shine
-	m_shine_sldr->SetValue(int(shine));
+	m_shine_sldr->SetValue(std::round(shine));
 	str = wxString::Format("%.0f", shine);
 	m_shine_text->ChangeValue(str);
 	//alpha
-	m_alpha_sldr->SetValue(int(alpha*255));
+	m_alpha_sldr->SetValue(std::round(alpha*255));
 	str = wxString::Format("%.2f", alpha);
 	m_alpha_text->ChangeValue(str);
 	//scaling
 	double sx, sy, sz;
 	m_md->GetScaling(sx, sy, sz);
-	m_scale_sldr->SetValue(int(sx*100.0+0.5));
+	m_scale_sldr->SetValue(std::round(sx*100.0));
 	str = wxString::Format("%.2f", sx);
 	m_scale_text->ChangeValue(str);
 	//shadow
 	double darkness;
 	m_shadow_chk->SetValue(m_md->GetShadow());
 	m_md->GetShadowParams(darkness);
-	m_shadow_sldr->SetValue(int(darkness*100.0+0.5));
+	m_shadow_sldr->SetValue(std::round(darkness*100.0));
 	str = wxString::Format("%.2f", darkness);
 	m_shadow_text->ChangeValue(str);
 	//size limiter
@@ -311,7 +311,7 @@ void MPropView::OnShineText(wxCommandEvent& event)
 	wxString str = m_shine_text->GetValue();
 	double shine;
 	str.ToDouble(&shine);
-	m_shine_sldr->SetValue(int(shine));
+	m_shine_sldr->SetValue(std::round(shine));
 
 	if (m_md)
 	{
@@ -333,7 +333,7 @@ void MPropView::OnAlphaText(wxCommandEvent& event)
 	wxString str = m_alpha_text->GetValue();
 	double alpha;
 	str.ToDouble(&alpha);
-	m_alpha_sldr->SetValue(int(alpha*255.0+0.5));
+	m_alpha_sldr->SetValue(std::round(alpha*255.0));
 
 	if (m_md)
 	{
@@ -355,7 +355,7 @@ void MPropView::OnScaleText(wxCommandEvent& event)
 	wxString str = m_scale_text->GetValue();
 	double dval;
 	str.ToDouble(&dval);
-	m_scale_sldr->SetValue(int(dval*100.0+0.5));
+	m_scale_sldr->SetValue(std::round(dval*100.0));
 
 	if (m_md)
 	{
@@ -394,7 +394,7 @@ void MPropView::OnShadowText(wxCommandEvent& event)
 	wxString str = m_shadow_text->GetValue();
 	double dval;
 	str.ToDouble(&dval);
-	m_shadow_sldr->SetValue(int(dval*100.0+0.5));
+	m_shadow_sldr->SetValue(std::round(dval*100.0));
 
 	if (m_md && m_view)
 	{

@@ -449,11 +449,11 @@ void wxSingleSlider::OnMotion(wxMouseEvent& event)
 		bool changed = setValue(val);
 		//if (!changed && low_value_ < max_)
 
-		wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
-		e.SetEventObject(this);
-		e.SetString("update");
-		ProcessWindowEvent(e);
-		wxPostEvent(parent_, e);
+		//wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
+		//e.SetEventObject(this);
+		//e.SetString("update");
+		//ProcessWindowEvent(e);
+		//wxPostEvent(parent_, e);
 	}
 
 	event.Skip();

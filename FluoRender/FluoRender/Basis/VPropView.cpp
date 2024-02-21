@@ -622,22 +622,22 @@ void VPropView::GetSettings()
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_gamma_text->GetValidator()))
 		vald_fp->SetRange(0.0, 10.0);
 	dval = m_vd->Get3DGamma();
-	m_gamma_sldr->SetValue(int(dval*100.0+0.5));
+	m_gamma_sldr->SetValue(std::round(dval*100.0));
 	str = wxString::Format("%.2f", dval);
 	m_gamma_text->ChangeValue(str);
 	//boundary
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_boundary_text->GetValidator()))
 		vald_fp->SetRange(0.0, 1.0);
 	dval = m_vd->GetBoundary();
-	m_boundary_sldr->SetValue(int(dval*2000.0+0.5));
+	m_boundary_sldr->SetValue(std::round(dval*2000.0));
 	str = wxString::Format("%.4f", dval);
 	m_boundary_text->ChangeValue(str);
 	//contrast
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_saturation_text->GetValidator()))
 		vald_i->SetMin(0);
 	dval = m_vd->GetOffset();
-	ival = int(dval*m_max_val+0.5);
-	m_saturation_sldr->SetRange(0, int(m_max_val));
+	ival = std::round(dval*m_max_val);
+	m_saturation_sldr->SetRange(0, std::round(m_max_val));
 	str = wxString::Format("%d", ival);
 	m_saturation_sldr->SetValue(ival);
 	m_saturation_text->ChangeValue(str);
@@ -645,8 +645,8 @@ void VPropView::GetSettings()
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_left_thresh_text->GetValidator()))
 		vald_i->SetMin(0);
 	dval = m_vd->GetLeftThresh();
-	ival = int(dval*m_max_val+0.5);
-	m_thresh_sldr->SetRange(0, int(m_max_val));
+	ival = std::round(dval*m_max_val);
+	m_thresh_sldr->SetRange(0, std::round(m_max_val));
 	str = wxString::Format("%d", ival);
 	m_thresh_sldr->SetLowValue(ival);
 	m_left_thresh_text->ChangeValue(str);
@@ -654,18 +654,16 @@ void VPropView::GetSettings()
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_right_thresh_text->GetValidator()))
 		vald_i->SetMin(0);
 	dval = m_vd->GetRightThresh();
-	ival = int(dval*m_max_val+0.5);
-	//m_right_thresh_sldr->SetRange(0, int(m_max_val));
+	ival = std::round(dval*m_max_val);
 	str = wxString::Format("%d", ival);
 	m_thresh_sldr->SetHighValue(ival);
-	//m_right_thresh_sldr->SetValue(ival);
 	m_right_thresh_text->ChangeValue(str);
 	//luminance
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_luminance_text->GetValidator()))
 		vald_i->SetMin(0);
 	dval = m_vd->GetLuminance();
-	ival = int(dval*m_max_val+0.5);
-	m_luminance_sldr->SetRange(0, int(m_max_val));
+	ival = std::round(dval*m_max_val);
+	m_luminance_sldr->SetRange(0, std::round(m_max_val));
 	str = wxString::Format("%d", ival);
 	m_luminance_sldr->SetValue(ival);
 	m_luminance_text->ChangeValue(str);
@@ -688,8 +686,8 @@ void VPropView::GetSettings()
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_alpha_text->GetValidator()))
 		vald_i->SetMin(0);
 	dval = m_vd->GetAlpha();
-	ival = int(dval*m_max_val+0.5);
-	m_alpha_sldr->SetRange(0, int(m_max_val));
+	ival = std::round(dval*m_max_val);
+	m_alpha_sldr->SetRange(0, std::round(m_max_val));
 	str = wxString::Format("%d", ival);
 	m_alpha_sldr->SetValue(ival);
 	m_alpha_text->ChangeValue(str);
@@ -719,7 +717,7 @@ void VPropView::GetSettings()
 	m_shadow_chk->SetValue(shadow);
 	double shadow_int;
 	m_vd->GetShadowParams(shadow_int);
-	m_shadow_sldr->SetValue(int(shadow_int*100.0+0.5));
+	m_shadow_sldr->SetValue(std::round(shadow_int*100.0));
 	str = wxString::Format("%.2f", shadow_int);
 	m_shadow_text->ChangeValue(str);
 
@@ -771,15 +769,15 @@ void VPropView::GetSettings()
 	//low
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_colormap_low_text->GetValidator()))
 		vald_i->SetMin(0);
-	ival = int(low*m_max_val+0.5);
-	m_colormap_sldr->SetRange(0, int(m_max_val));
+	ival = std::round(low*m_max_val);
+	m_colormap_sldr->SetRange(0, std::round(m_max_val));
 	str = wxString::Format("%d", ival);
 	m_colormap_sldr->SetLowValue(ival);
 	m_colormap_low_text->ChangeValue(str);
 	//high
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_colormap_hi_text->GetValidator()))
 		vald_i->SetMin(0);
-	ival = int(high*m_max_val+0.5);
+	ival = std::round(high*m_max_val);
 	str = wxString::Format("%d", ival);
 	m_colormap_sldr->SetHighValue(ival);
 	m_colormap_hi_text->ChangeValue(str);
@@ -1035,7 +1033,7 @@ void VPropView::OnGammaText(wxCommandEvent& event)
 	wxString str = m_gamma_text->GetValue();
 	double val = 0.0;
 	str.ToDouble(&val);
-	int ival = int(val*100.0+0.5);
+	int ival = std::round(val*100.0);
 	m_gamma_sldr->SetValue(ival);
 
 	//set gamma value
@@ -1247,7 +1245,7 @@ void VPropView::OnHiShadingText(wxCommandEvent& event)
 	wxString str = m_hi_shading_text->GetValue();
 	double val = 0.0;
 	str.ToDouble(&val);
-	m_hi_shading_sldr->SetValue(int(val * 10.0 + 0.5));
+	m_hi_shading_sldr->SetValue(std::round(val * 10.0));
 
 	//set high shading value
 	if (m_sync_group && m_group)
@@ -1271,7 +1269,7 @@ void VPropView::OnLowShadingText(wxCommandEvent& event)
 	wxString str = m_low_shading_text->GetValue();
 	double val = 0.0;
 	str.ToDouble(&val);
-	m_low_shading_sldr->SetValue(int(val * 100.0 + 0.5));
+	m_low_shading_sldr->SetValue(std::round(val * 100.0));
 
 	//set low shading value
 	if (m_sync_group && m_group)
@@ -1321,7 +1319,7 @@ void VPropView::OnBoundaryText(wxCommandEvent& event)
 	wxString str = m_boundary_text->GetValue();
 	double val = 0.0;
 	str.ToDouble(&val);
-	int ival = int(val * 2000.0 + 0.5);
+	int ival = std::round(val * 2000.0);
 	m_boundary_sldr->SetValue(ival);
 
 	//set boundary value
@@ -1356,6 +1354,17 @@ void VPropView::OnThreshSync(wxCommandEvent& event)
 
 void VPropView::OnThreshChange(wxScrollEvent &event)
 {
+	bool bval = m_thresh_sldr->GetLink();
+	if (bval != m_thresh_link_tb->GetToolState(ID_ThreshLinkTb))
+	{
+		m_thresh_link_tb->ToggleTool(ID_ThreshLinkTb, bval);
+		if (bval)
+			m_thresh_link_tb->SetToolNormalBitmap(ID_ThreshLinkTb,
+				wxGetBitmapFromMemory(link));
+		else
+			m_thresh_link_tb->SetToolNormalBitmap(ID_ThreshLinkTb,
+				wxGetBitmapFromMemory(unlink));
+	}
 	int ival = m_thresh_sldr->GetLowValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_left_thresh_text->GetValue())
@@ -1384,7 +1393,7 @@ void VPropView::OnThreshLowText(wxCommandEvent &event)
 	if (val > right_val)
 	{
 		val = right_val;
-		ival = int(val*m_max_val+0.5);
+		ival = std::round(val*m_max_val);
 		wxString str2 = wxString::Format("%d", ival);
 		m_left_thresh_text->ChangeValue(str2);
 	}
@@ -1502,7 +1511,7 @@ void VPropView::OnShadowText(wxCommandEvent &event)
 	wxString str = m_shadow_text->GetValue();
 	double val = 0.0;
 	str.ToDouble(&val);
-	m_shadow_sldr->SetValue(int(val*100.0+0.5));
+	m_shadow_sldr->SetValue(std::round(val*100.0));
 
 	//set shadow darkness
 	if (m_sync_group && m_group)
@@ -1539,7 +1548,7 @@ void VPropView::OnSampleText(wxCommandEvent& event)
 	double srate = 0.0;
 	str.ToDouble(&srate);
 	double val = srate*10.0;
-	m_sample_sldr->SetValue(int(val));
+	m_sample_sldr->SetValue(std::round(val));
 
 	//set sample rate value
 	if (m_view && m_view->GetVolMethod()==VOL_METHOD_MULTI)
@@ -1664,6 +1673,18 @@ void VPropView::OnColormapHiText(wxCommandEvent &event)
 
 void VPropView::OnColormapChange(wxScrollEvent &event)
 {
+	bool bval = m_colormap_sldr->GetLink();
+	if (bval != m_colormap_link_tb->GetToolState(ID_ColormapLinkTb))
+	{
+		m_colormap_link_tb->ToggleTool(ID_ColormapLinkTb, bval);
+		if (bval)
+			m_colormap_link_tb->SetToolNormalBitmap(ID_ColormapLinkTb,
+				wxGetBitmapFromMemory(link));
+		else
+			m_colormap_link_tb->SetToolNormalBitmap(ID_ColormapLinkTb,
+				wxGetBitmapFromMemory(unlink));
+	}
+
 	int iVal = m_colormap_sldr->GetLowValue();
 	wxString str = wxString::Format("%d", iVal);
 	if (str != m_colormap_low_text->GetValue())
@@ -1799,7 +1820,7 @@ void VPropView::OnColorChange(wxColor c)
 			m_vd->SetColor(color);
 
 		double lum = m_vd->GetLuminance();
-		int ilum = int(lum*m_max_val+0.5);
+		int ilum = std::round(lum*m_max_val);
 		m_luminance_sldr->SetValue(ilum);
 		wxString str = wxString::Format("%d", ilum);
 		m_luminance_text->ChangeValue(str);
@@ -2957,33 +2978,33 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	dval = mgr->m_vol_gam;
 	str = wxString::Format("%.2f", dval);
 	m_gamma_text->ChangeValue(str);
-	ival = int(dval*100.0+0.5);
+	ival = std::round(dval*100.0);
 	m_gamma_sldr->SetValue(ival);
 	m_vd->Set3DGamma(dval);
 	//extract boundary
 	dval = mgr->m_vol_exb;
 	str = wxString::Format("%.4f", dval);
 	m_boundary_text->ChangeValue(str);
-	ival = int(dval*2000.0+0.5);
+	ival = std::round(dval*2000.0);
 	m_boundary_sldr->SetValue(ival);
 	m_vd->SetBoundary(dval);
 	//low offset
 	dval = mgr->m_vol_of1;
-	ival = int(dval*m_max_val+0.5);
+	ival = std::round(dval*m_max_val);
 	str = wxString::Format("%d", ival);
 	m_saturation_text->ChangeValue(str);
 	m_saturation_sldr->SetValue(ival);
 	m_vd->SetOffset(dval);
 	//low thresholding
 	dval = mgr->m_vol_lth;
-	ival = int(dval*m_max_val+0.5);
+	ival = std::round(dval*m_max_val);
 	str = wxString::Format("%d", ival);
 	m_left_thresh_text->ChangeValue(str);
 	m_thresh_sldr->SetLowValue(ival);
 	m_vd->SetLeftThresh(dval);
 	//high thresholding
 	dval = mgr->m_vol_hth;
-	ival = int(dval*m_max_val+0.5);
+	ival = std::round(dval*m_max_val);
 	str = wxString::Format("%d", ival);
 	m_right_thresh_text->ChangeValue(str);
 	m_thresh_sldr->SetHighValue(ival);
@@ -2992,7 +3013,7 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	dval = mgr->m_vol_lsh;
 	str = wxString::Format("%.2f", dval);
 	m_low_shading_text->ChangeValue(str);
-	ival = int(dval*100.0+0.5);
+	ival = std::round(dval*100.0);
 	m_low_shading_sldr->SetValue(ival);
 	double amb, diff, spec, shine;
 	m_vd->GetMaterial(amb, diff, spec, shine);
@@ -3001,13 +3022,13 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	dval = mgr->m_vol_hsh;
 	str = wxString::Format("%.2f", dval);
 	m_hi_shading_text->ChangeValue(str);
-	ival = int(dval*10.0+0.5);
+	ival = std::round(dval*10.0);
 	m_hi_shading_sldr->SetValue(ival);
 	m_vd->GetMaterial(amb, diff, spec, shine);
 	m_vd->SetMaterial(amb, diff, spec, dval);
 	//alpha
 	dval = mgr->m_vol_alf;
-	ival = int(dval*m_max_val+0.5);
+	ival = std::round(dval*m_max_val);
 	str = wxString::Format("%d", ival);
 	m_alpha_text->ChangeValue(str);
 	m_alpha_sldr->SetValue(ival);
@@ -3016,12 +3037,12 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	dval = mgr->m_vol_spr;
 	str = wxString::Format("%.1f", dval);
 	m_sample_text->ChangeValue(str);
-	ival = int(dval*10.0+0.5);
+	ival = std::round(dval*10.0);
 	m_sample_sldr->SetValue(ival);
 	m_vd->SetSampleRate(dval);
 	//luminance
 	dval = mgr->m_vol_lum;
-	ival = int(dval*m_max_val+0.5);
+	ival = std::round(dval*m_max_val);
 	str = wxString::Format("%d", ival);
 	m_luminance_text->ChangeValue(str);
 	m_luminance_sldr->SetValue(ival);
@@ -3059,13 +3080,13 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	m_vd->SetColormapProj(mgr->m_vol_cmj);
 	//colormap low value
 	dval = mgr->m_vol_lcm;
-	ival = int(dval*m_max_val+0.5);
+	ival = std::round(dval*m_max_val);
 	str = wxString::Format("%d", ival);
 	m_colormap_low_text->ChangeValue(str);
 	m_colormap_sldr->SetLowValue(ival);
 	double lcm = dval;
 	dval = mgr->m_vol_hcm;
-	ival = int(dval*m_max_val+0.5);
+	ival = std::round(dval*m_max_val);
 	str = wxString::Format("%d", ival);
 	m_colormap_hi_text->ChangeValue(str);
 	m_colormap_sldr->SetHighValue(ival);
@@ -3073,7 +3094,7 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	//shadow intensity
 	dval = mgr->m_vol_swi;
 	str = wxString::Format("%.2f", dval);
-	ival = int(dval*100.0+0.5);
+	ival = std::round(dval*100.0);
 	m_shadow_text->ChangeValue(str);
 	m_shadow_sldr->SetValue(ival);
 	m_vd->SetShadowParams(dval);

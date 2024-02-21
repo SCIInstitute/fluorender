@@ -1464,7 +1464,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 		if (streaming)
 		{
 			str_streaming = "Large data streaming is currently ON\n";
-			str_streaming += wxString::Format("FluoRender uses up to %dMB GPU memory\n", int(gpu_size));
+			str_streaming += wxString::Format("FluoRender uses up to %dMB GPU memory\n", int(std::round(gpu_size)));
 			str_streaming += wxString::Format("Data >%dMB are divided into %d voxel bricks\n",
 				int (data_size), brick_size);
 			str_streaming += wxString::Format("System response time: %dms", resp_time);
