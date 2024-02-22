@@ -349,6 +349,13 @@ file(GLOB bss_nvs FluoRender/FluoRender/Basis/*.natvis)
 add_library(BASIS_OBJ OBJECT
   ${bss_src} ${bss_hdr} ${bss_nvs})
 
+# Controls
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Controls)
+file(GLOB ctrl_src FluoRender/FluoRender/Controls/*.cpp)
+file(GLOB ctrl_hdr FluoRender/FluoRender/Controls/*.h)
+add_library(CONTROLS_OBJ OBJECT
+  ${ctrl_src} ${ctrl_hdr})
+
 # Global
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Global)
 file(GLOB glb_src FluoRender/FluoRender/Global/*.cpp)
@@ -593,6 +600,7 @@ if(APPLE)
   add_executable(FluoRender MACOSX_BUNDLE
     ${src} ${hdr} ${rsc} ${icns}
     $<TARGET_OBJECTS:BASIS_OBJ>
+    $<TARGET_OBJECTS:CONTROLS_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGES_OBJ>
     $<TARGET_OBJECTS:CONVERTERS_OBJ>
@@ -632,6 +640,7 @@ elseif(UNIX OR MINGW)
   add_executable(FluoRender
     ${src} ${hdr} ${rsc} ${icns}
     $<TARGET_OBJECTS:BASIS_OBJ>
+    $<TARGET_OBJECTS:CONTROLS_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGES_OBJ>
     $<TARGET_OBJECTS:CONVERTERS_OBJ>
@@ -702,6 +711,7 @@ elseif(WIN32)
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
       $<TARGET_OBJECTS:BASIS_OBJ>
+      $<TARGET_OBJECTS:CONTROLS_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
@@ -732,6 +742,7 @@ elseif(WIN32)
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
       $<TARGET_OBJECTS:BASIS_OBJ>
+      $<TARGET_OBJECTS:CONTROLS_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
@@ -761,6 +772,7 @@ elseif(WIN32)
     add_executable(Tester
       ${tester_src} ${tester_hdr}
       $<TARGET_OBJECTS:BASIS_OBJ>
+      $<TARGET_OBJECTS:CONTROLS_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
