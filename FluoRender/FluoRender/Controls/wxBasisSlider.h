@@ -28,11 +28,11 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _WXBASISSLIDER_H_
 #define _WXBASISSLIDER_H_
 
+#include <Undoable.h>
 #include <wx/wx.h>
 #include <wx/slider.h>
-#include <chrono>
 
-class wxBasisSlider : public wxControl
+class wxBasisSlider : public wxControl, public Undoable
 {
 public:
 	wxBasisSlider(
@@ -67,12 +67,6 @@ public:
 
 	virtual void Scroll(int val);
 
-	virtual void Clear() = 0;
-	virtual void Undo();
-	virtual void Redo();
-	virtual double GetTimeUndo() = 0;
-	virtual double GetTimeRedo() = 0;
-
 protected:
 	wxWindow* parent_;
 	wxWindowID id_;
@@ -92,13 +86,6 @@ protected:
 
 	int thumb_style_;//0-windows;1-others
 
-	//value stack
-	size_t stack_pointer_;
-	size_t stack_size_;
-
-	//timer
-	static double time_span_;
-
 protected:
 	virtual void paintNow();
 	virtual void render(wxDC& dc);
@@ -106,10 +93,9 @@ protected:
 	virtual void renderNormal(wxDC& dc) = 0;
 	virtual void renderInverse(wxDC& dc) = 0;
 
-	virtual void backward() = 0;
-	virtual void forward() = 0;
-
-	virtual bool time_sample(double& t) = 0;
+	virtual void replace(double t) = 0;
+	virtual void push(double t) = 0;
+	virtual void update() = 0;
 };
 
 #endif//_WXBASISSLIDER_H_

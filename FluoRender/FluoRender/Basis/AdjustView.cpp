@@ -347,15 +347,15 @@ m_dft_sync_b(false)
 	LoadSettings();
 
 	//add sliders for undo and redo
-	glbin.add_slider(m_r_gamma_sldr);
-	glbin.add_slider(m_r_brightness_sldr);
-	glbin.add_slider(m_r_hdr_sldr);
-	glbin.add_slider(m_g_gamma_sldr);
-	glbin.add_slider(m_g_brightness_sldr);
-	glbin.add_slider(m_g_hdr_sldr);
-	glbin.add_slider(m_b_gamma_sldr);
-	glbin.add_slider(m_b_brightness_sldr);
-	glbin.add_slider(m_b_hdr_sldr);
+	glbin.add_undo_control(m_r_gamma_sldr);
+	glbin.add_undo_control(m_r_brightness_sldr);
+	glbin.add_undo_control(m_r_hdr_sldr);
+	glbin.add_undo_control(m_g_gamma_sldr);
+	glbin.add_undo_control(m_g_brightness_sldr);
+	glbin.add_undo_control(m_g_hdr_sldr);
+	glbin.add_undo_control(m_b_gamma_sldr);
+	glbin.add_undo_control(m_b_brightness_sldr);
+	glbin.add_undo_control(m_b_hdr_sldr);
 }
 
 AdjustView::~AdjustView()

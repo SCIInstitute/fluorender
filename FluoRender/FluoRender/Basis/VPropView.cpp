@@ -582,17 +582,17 @@ VPropView::VPropView(VRenderFrame* frame,
 	Layout();
 
 	//add sliders for undo and redo
-	glbin.add_slider(m_gamma_sldr);
-	glbin.add_slider(m_saturation_sldr);
-	glbin.add_slider(m_luminance_sldr);
-	glbin.add_slider(m_alpha_sldr);
-	glbin.add_slider(m_hi_shading_sldr);
-	glbin.add_slider(m_low_shading_sldr);
-	glbin.add_slider(m_boundary_sldr);
-	glbin.add_slider(m_thresh_sldr);
-	glbin.add_slider(m_shadow_sldr);
-	glbin.add_slider(m_sample_sldr);
-	glbin.add_slider(m_colormap_sldr);
+	glbin.add_undo_control(m_gamma_sldr);
+	glbin.add_undo_control(m_saturation_sldr);
+	glbin.add_undo_control(m_luminance_sldr);
+	glbin.add_undo_control(m_alpha_sldr);
+	glbin.add_undo_control(m_hi_shading_sldr);
+	glbin.add_undo_control(m_low_shading_sldr);
+	glbin.add_undo_control(m_boundary_sldr);
+	glbin.add_undo_control(m_thresh_sldr);
+	glbin.add_undo_control(m_shadow_sldr);
+	glbin.add_undo_control(m_sample_sldr);
+	glbin.add_undo_control(m_colormap_sldr);
 }
 
 VPropView::~VPropView()

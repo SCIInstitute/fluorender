@@ -71,7 +71,7 @@ void Undoable::Undo()
 	stack_pointer_--;
 
 	//update
-	backward();
+	update();
 }
 
 void Undoable::Redo()
@@ -88,7 +88,18 @@ void Undoable::Redo()
 	stack_pointer_++;
 
 	//update
-	forward();
+	update();
+}
+
+void Undoable::pop()
+{
+	if (!stack_.empty())
+	{
+		size_t size = stack_.size();
+		if (stack_pointer_ == size - 1)
+			stack_pointer_--;
+		stack_.pop_back();
+	}
 }
 
 bool Undoable::time_sample(double& t)

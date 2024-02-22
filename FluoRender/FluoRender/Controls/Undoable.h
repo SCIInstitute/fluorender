@@ -48,14 +48,13 @@ protected:
 	static double time_span_;
 	//value stack
 	size_t stack_pointer_;
-	std::vector < std::pair<double, std::any>> stack_;
+	std::vector <std::pair<double, std::any>> stack_;
 
 protected:
 	virtual void replace(double t) = 0;
 	virtual void push(double t) = 0;
-	virtual void pop() = 0;
-	virtual void backward() = 0;
-	virtual void forward() = 0;
+	virtual void pop();
+	virtual void update() = 0;
 
 	virtual bool time_sample(double& t);
 };

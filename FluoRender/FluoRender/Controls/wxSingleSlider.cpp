@@ -447,13 +447,6 @@ void wxSingleSlider::OnMotion(wxMouseEvent& event)
 
 		thumb_state_ = 2;
 		bool changed = setValue(val);
-		//if (!changed && low_value_ < max_)
-
-		//wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
-		//e.SetEventObject(this);
-		//e.SetString("update");
-		//ProcessWindowEvent(e);
-		//wxPostEvent(parent_, e);
 	}
 
 	event.Skip();
@@ -483,27 +476,6 @@ void wxSingleSlider::Scroll(int val)
 	wxBasisSlider::Scroll(val);
 }
 
-void wxSingleSlider::Clear()
-{
-	stack_size_ = 0;
-	stack_pointer_ = -1;
-	stack_.clear();
-}
-
-double wxSingleSlider::GetTimeUndo()
-{
-	if (!stack_size_ || stack_pointer_ == -1 || stack_pointer_ >= stack_size_)
-		return 0;
-	return stack_[stack_pointer_].first;
-}
-
-double wxSingleSlider::GetTimeRedo()
-{
-	if (!stack_size_ || stack_pointer_ == -1 || stack_pointer_ + 1 >= stack_size_)
-		return std::numeric_limits<double>::max();
-	return stack_[stack_pointer_ + 1].first;
-}
-
 void wxSingleSlider::replace(double t)
 {
 	if (stack_.empty())
@@ -513,47 +485,24 @@ void wxSingleSlider::replace(double t)
 
 void wxSingleSlider::push(double t)
 {
-	if (!stack_size_ || val_ != stack_[stack_pointer_].second)
+	size_t size = stack_.size();
+	int val = size ? std::any_cast<int>(stack_[stack_pointer_].second) : 0;
+	if (!size || val_ != val)
 	{
-		if (!stack_size_ ||
-			stack_pointer_ == stack_size_ - 1)
+		if (!size ||
+			stack_pointer_ == size - 1)
 			stack_.push_back(std::pair<double, int>(t, val_));
 		else
 			stack_.insert(stack_.begin() + stack_pointer_, std::pair<double, int>(t, val_));
 		stack_pointer_++;
-		stack_size_++;
-		DBGPRINT(L"\tsize:%d,pointer:%d,last:(%f, %d)\n",
-			stack_size_, stack_pointer_, stack_.back().first, stack_.back().second);
+		//DBGPRINT(L"\tsize:%d,pointer:%d,last:(%f, %d)\n",
+		//	stack_.size(), stack_pointer_, stack_.back().first,
+		//	std::any_cast<int>(stack_.back().second));
 	}
 }
 
-void wxSingleSlider::pop()
+void wxSingleSlider::update()
 {
-	if (stack_size_)
-	{
-		stack_.pop_back();
-		stack_pointer_--;
-		stack_size_--;
-	}
-}
-
-void wxSingleSlider::backward()
-{
-	setValue(stack_[stack_pointer_].second);
-}
-
-void wxSingleSlider::forward()
-{
-	setValue(stack_[stack_pointer_].second);
-}
-
-bool wxSingleSlider::time_sample(double& t)
-{
-	std::chrono::duration<double> time_span =
-		std::chrono::system_clock::now().time_since_epoch();
-	t = time_span.count();
-	if (!stack_size_)
-		return true;
-	double d = std::fabs(t - stack_[stack_pointer_].first);
-	return d > time_span_;
+	int val = std::any_cast<int>(stack_[stack_pointer_].second);
+	setValue(val);
 }

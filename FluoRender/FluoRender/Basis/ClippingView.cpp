@@ -431,12 +431,12 @@ m_plane_mode(kNormal)
 
 	DisableAll();
 
-	glbin.add_slider(m_x1_clip_sldr);
-	glbin.add_slider(m_y1_clip_sldr);
-	glbin.add_slider(m_z1_clip_sldr);
-	glbin.add_slider(m_x_rot_sldr);
-	glbin.add_slider(m_y_rot_sldr);
-	glbin.add_slider(m_z_rot_sldr);
+	glbin.add_undo_control(m_x1_clip_sldr);
+	glbin.add_undo_control(m_y1_clip_sldr);
+	glbin.add_undo_control(m_z1_clip_sldr);
+	glbin.add_undo_control(m_x_rot_sldr);
+	glbin.add_undo_control(m_y_rot_sldr);
+	glbin.add_undo_control(m_z_rot_sldr);
 }
 
 ClippingView::~ClippingView()

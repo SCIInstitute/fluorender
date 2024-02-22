@@ -134,7 +134,7 @@ bool wxDoubleSlider::SetLowValue(int val)
 	bool changed = setLowValue(val);
 	double t;
 	if (time_sample(t))
-		push_low(t);
+		push(t);
 	else
 		replace(t);
 	return changed;
@@ -145,7 +145,7 @@ bool wxDoubleSlider::SetHighValue(int val)
 	bool changed = setHighValue(val);
 	double t;
 	if (time_sample(t))
-		push_hi(t);
+		push(t);
 	else
 		replace(t);
 	return changed;
@@ -754,60 +754,31 @@ void wxDoubleSlider::Scroll(int val)
 	wxBasisSlider::Scroll(val);
 }
 
-void wxDoubleSlider::Clear()
-{
-	stack_size_ = 0;
-	stack_pointer_ = -1;
-	stack1_.clear();
-	stack2_.clear();
-}
-
-double wxDoubleSlider::GetTimeUndo()
-{
-	if (!stack_size_ || stack_pointer_ == -1 || stack_pointer_ >= stack_size_)
-		return 0;
-	return stack1_[stack_pointer_].first;
-}
-
-double wxDoubleSlider::GetTimeRedo()
-{
-	if (!stack_size_ || stack_pointer_ == -1 || stack_pointer_ + 1 >= stack_size_)
-		return std::numeric_limits<double>::max();
-	return stack1_[stack_pointer_ + 1].first;
-}
-
 void wxDoubleSlider::replace(double t)
 {
-	if (stack1_.empty() || stack2_.empty())
+	if (stack_.empty())
 		return;
-	stack1_[stack_pointer_] = std::pair<double, int>(t, low_val_);
-	stack2_[stack_pointer_] = std::pair<double, int>(t, hi_val_);
+	stack_[stack_pointer_] = std::pair<double, ValueDSL>(t, ValueDSL(low_val_, hi_val_));
 	//DBGPRINT(L"\tsize:%d,pointer:%d,last:((%f, %d), (%f, %d))\n",
 	//	stack_size_, stack_pointer_,
 	//	stack1_.back().first, stack1_.back().second,
 	//	stack2_.back().first, stack2_.back().second);
 }
 
-void wxDoubleSlider::push_low(double t)
+void wxDoubleSlider::push(double t)
 {
-	if (!stack_size_ ||
-		low_val_ != stack1_[stack_pointer_].second)
+	size_t size = stack_.size();
+	ValueDSL val_(low_val_, hi_val_);
+	ValueDSL val = size ? std::any_cast<ValueDSL>(stack_[stack_pointer_].second) : val_;
+	if (!size || !val_.Equals(val))
 	{
-		if (!stack_size_ ||
-			stack_pointer_ == stack_size_ - 1)
-		{
-			stack1_.push_back(std::pair<double, int>(t, low_val_));
-			stack2_.push_back(std::pair<double, int>(t, hi_val_));
-		}
+		if (!size ||
+			stack_pointer_ == size - 1)
+			stack_.push_back(std::pair<double, ValueDSL>(t, val_));
 		else
-		{
-			stack1_.insert(stack1_.begin() + stack_pointer_,
-				std::pair<double, int>(t, low_val_));
-			stack2_.insert(stack2_.begin() + stack_pointer_,
-				std::pair<double, int>(t, hi_val_));
-		}
+			stack_.insert(stack_.begin() + stack_pointer_,
+				std::pair<double, ValueDSL>(t, val_));
 		stack_pointer_++;
-		stack_size_++;
 		//DBGPRINT(L"\tsize:%d,pointer:%d,last:((%f, %d), (%f, %d))\n",
 		//	stack_size_, stack_pointer_,
 		//	stack1_.back().first, stack1_.back().second,
@@ -815,54 +786,17 @@ void wxDoubleSlider::push_low(double t)
 	}
 }
 
-void wxDoubleSlider::push_hi(double t)
+void wxDoubleSlider::update()
 {
-	if (!stack_size_ ||
-		hi_val_ != stack2_[stack_pointer_].second)
-	{
-		if (!stack_size_ ||
-			stack_pointer_ == stack_size_ - 1)
-		{
-			stack1_.push_back(std::pair<double, int>(t, low_val_));
-			stack2_.push_back(std::pair<double, int>(t, hi_val_));
-		}
-		else
-		{
-			stack1_.insert(stack1_.begin() + stack_pointer_,
-				std::pair<double, int>(t, low_val_));
-			stack2_.insert(stack2_.begin() + stack_pointer_,
-				std::pair<double, int>(t, hi_val_));
-		}
-		stack_pointer_++;
-		stack_size_++;
-		//DBGPRINT(L"\tsize:%d,pointer:%d,last:((%f, %d), (%f, %d))\n",
-		//	stack_size_, stack_pointer_,
-		//	stack1_.back().first, stack1_.back().second,
-		//	stack2_.back().first, stack2_.back().second);
-	}
-}
-
-void wxDoubleSlider::pop()
-{
-	if (stack_size_)
-	{
-		stack1_.pop_back();
-		stack2_.pop_back();
-		stack_pointer_--;
-		stack_size_--;
-	}
-}
-
-void wxDoubleSlider::backward()
-{
-	int lv = stack1_[stack_pointer_].second;
-	int hv = stack2_[stack_pointer_].second;
-	if (hv - lv != link_dist_ && link_)
+	ValueDSL val = std::any_cast<ValueDSL>(stack_[stack_pointer_].second);
+	if (val.hv - val.lv != link_dist_ && link_)
 		link_ = false;
-	low_val_ = lv;
-	setHighValue(hv, false);
+	low_val_ = val.lv;
+	hi_val_ = val.hv;
+
 	Refresh();
 	Update();
+
 	wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
 	e.SetEventObject(this);
 	e.SetString("update");
@@ -870,30 +804,3 @@ void wxDoubleSlider::backward()
 	wxPostEvent(parent_, e);
 }
 
-void wxDoubleSlider::forward()
-{
-	int lv = stack1_[stack_pointer_].second;
-	int hv = stack2_[stack_pointer_].second;
-	if (hv - lv != link_dist_ && link_)
-		link_ = false;
-	low_val_ = lv;
-	setHighValue(hv, false);
-	Refresh();
-	Update();
-	wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
-	e.SetEventObject(this);
-	e.SetString("update");
-	ProcessWindowEvent(e);
-	wxPostEvent(parent_, e);
-}
-
-bool wxDoubleSlider::time_sample(double& t)
-{
-	std::chrono::duration<double> time_span =
-		std::chrono::system_clock::now().time_since_epoch();
-	t = time_span.count();
-	if (!stack_size_)
-		return true;
-	double d = std::fabs(t - stack1_[stack_pointer_].first);
-	return d > time_span_;
-}

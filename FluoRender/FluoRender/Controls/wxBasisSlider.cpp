@@ -28,8 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #include "wxBasisSlider.h"
 #include "Debug.h"
 
-double wxBasisSlider::time_span_ = 1;
-
 wxBasisSlider::wxBasisSlider(
 	wxWindow *parent,
 	wxWindowID id,
@@ -53,19 +51,16 @@ wxBasisSlider::wxBasisSlider(
 	horizontal_(!(style & wxSL_VERTICAL)),
 	inverse_(style & wxSL_INVERSE),
 	range_style_(0),
-	stack_pointer_(-1),
-	stack_size_(0),
 	wxControl(parent, id, pos,
 		wxSize(std::max(size.GetWidth(), int(std::round(24 * parent->GetDPIScaleFactor()))),
 			std::max(size.GetHeight(), int(std::round(24 * parent->GetDPIScaleFactor())))),
-		wxBORDER_NONE, val, name)
+		wxBORDER_NONE, val, name),
+	Undoable()
 {
 	scale_ = parent->GetDPIScaleFactor();
 	margin_ = std::round(12 * scale_);
 	SetBackgroundColour(parent->GetBackgroundColour());
 	SetDoubleBuffered(true);
-
-	//time_ = std::chrono::high_resolution_clock::now();
 }
 
 wxSize wxBasisSlider::DoGetBestSize()
@@ -254,36 +249,3 @@ void wxBasisSlider::Scroll(int val)
 	ProcessWindowEvent(e);
 	wxPostEvent(parent_, e);
 }
-
-void wxBasisSlider::Undo()
-{
-	if (!stack_size_)
-		return;
-	if (stack_pointer_ == 0 ||
-		stack_pointer_ == -1 ||
-		stack_pointer_ > stack_size_ - 1)
-		return;
-
-	//move pointer
-	stack_pointer_--;
-
-	//update
-	backward();
-}
-
-void wxBasisSlider::Redo()
-{
-	if (!stack_size_ ||
-		stack_size_ == 1)
-		return;
-	if (stack_pointer_ == -1 ||
-		stack_pointer_ > stack_size_ - 2)
-		return;
-
-	//move pointer
-	stack_pointer_++;
-
-	//update
-	forward();
-}
-

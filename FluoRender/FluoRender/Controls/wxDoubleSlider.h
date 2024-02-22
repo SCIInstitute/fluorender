@@ -62,10 +62,6 @@ public:
 
 	virtual void Scroll(int val);
 
-	virtual void Clear();
-	virtual double GetTimeUndo();
-	virtual double GetTimeRedo();
-
 private:
 	bool link_;
 	int low_val_, hi_val_;
@@ -79,8 +75,16 @@ private:
 	int thumb_state1_;//0-normal;1-mouse on;2-moving
 	int thumb_state2_;//0-normal;1-mouse on;2-moving
 
-	std::vector<std::pair<double, int>> stack1_;
-	std::vector<std::pair<double, int>> stack2_;
+	//struct stored in stack
+	struct ValueDSL
+	{
+		ValueDSL(int v1, int v2) { lv = v1; hv = v2; }
+		ValueDSL(ValueDSL const& v) { lv = v.lv; hv = v.hv; }
+		ValueDSL& operator=(ValueDSL const& v) { lv = v.lv; hv = v.hv; return *this; }
+		bool Equals(const ValueDSL& v) const { return lv == v.lv && hv == v.hv; }
+		int lv;
+		int hv;
+	};
 
 protected:
 	virtual void renderNormal(wxDC& dc);
@@ -88,14 +92,10 @@ protected:
 
 	bool setLowValue(int val, bool send_msg = true);
 	bool setHighValue(int val, bool send_msg = true);
-	void replace(double t);
-	void push_low(double t);
-	void push_hi(double t);
-	void pop();
-	virtual void backward();
-	virtual void forward();
 
-	virtual bool time_sample(double& t);
+	virtual void replace(double t);
+	virtual void push(double t);
+	virtual void update();
 };
 
 #endif//_WXDOUBLESLIDER_H_

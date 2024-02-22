@@ -258,21 +258,21 @@ void Global::undo()
 {
 	//find lastest slider
 	double t = 0;
-	wxBasisSlider* slider = 0;
-	for (auto i : undo_sliders_)
+	Undoable* c = 0;
+	for (auto i : undo_ctrls_)
 	{
 		double time = i->GetTimeUndo();
 		if (time > t)
 		{
 			t = time;
-			slider = i;
+			c = i;
 		}
 	}
 
-	if (!slider)
+	if (!c)
 		return;
 
-	for (auto i : undo_sliders_)
+	for (auto i : undo_ctrls_)
 	{
 		double time = i->GetTimeUndo();
 		if (std::fabs(time - t) < time_span_)
@@ -284,21 +284,21 @@ void Global::redo()
 {
 	//find earliest slider
 	double t = std::numeric_limits<double>::max();
-	wxBasisSlider* slider = 0;
-	for (auto i : undo_sliders_)
+	Undoable* c = 0;
+	for (auto i : undo_ctrls_)
 	{
 		double time = i->GetTimeRedo();
 		if (time < t)
 		{
 			t = time;
-			slider = i;
+			c = i;
 		}
 	}
 
-	if (!slider)
+	if (!c)
 		return;
 
-	for (auto i : undo_sliders_)
+	for (auto i : undo_ctrls_)
 	{
 		double time = i->GetTimeRedo();
 		if (std::fabs(time - t) < time_span_)
