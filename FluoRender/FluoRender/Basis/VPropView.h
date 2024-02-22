@@ -42,6 +42,7 @@ class DataGroup;
 class wxBasisSlider;
 class wxDoubleSlider;
 class wxSingleSlider;
+class wxUndoableCheckBox;
 class VPropView: public wxPanel
 {
 	enum
@@ -172,59 +173,59 @@ private:
 	wxButton *m_gamma_st;
 	wxSingleSlider *m_gamma_sldr;
 	wxTextCtrl *m_gamma_text;
-	wxCheckBox* m_gamma_chk;
+	wxUndoableCheckBox* m_gamma_chk;
 	//saturation point
 	wxButton *m_saturation_st;
 	wxSingleSlider *m_saturation_sldr;
 	wxTextCtrl *m_saturation_text;
-	wxCheckBox* m_saturation_chk;
+	wxUndoableCheckBox* m_saturation_chk;
 	//luminance
 	wxButton *m_luminance_st;
 	wxSingleSlider *m_luminance_sldr;
 	wxTextCtrl* m_luminance_text;
-	wxCheckBox* m_luminance_chk;
+	wxUndoableCheckBox* m_luminance_chk;
 	//alpha
 	wxButton *m_alpha_st;
 	wxSingleSlider *m_alpha_sldr;
 	wxTextCtrl* m_alpha_text;
-	wxCheckBox* m_alpha_chk;
+	wxUndoableCheckBox* m_alpha_chk;
 	//shading
 	wxButton* m_shade_st;
 	wxSingleSlider *m_hi_shading_sldr;
 	wxTextCtrl *m_hi_shading_text;
 	wxSingleSlider *m_low_shading_sldr;
 	wxTextCtrl *m_low_shading_text;
-	wxCheckBox* m_shade_chk;
+	wxUndoableCheckBox* m_shade_chk;
 
 	//2
 	//boundary
 	wxButton* m_boundary_st;
 	wxSingleSlider *m_boundary_sldr;
 	wxTextCtrl *m_boundary_text;
-	wxCheckBox* m_boundary_chk;
+	wxUndoableCheckBox* m_boundary_chk;
 	//thresholds
 	wxButton* m_thresh_st;
 	wxDoubleSlider *m_thresh_sldr;
 	wxTextCtrl *m_left_thresh_text;
 	wxTextCtrl *m_right_thresh_text;
 	wxToolBar* m_thresh_link_tb;
-	wxCheckBox* m_thresh_chk;
+	wxUndoableCheckBox* m_thresh_chk;
 	//shadow
 	wxButton* m_shadow_st;
 	wxSingleSlider *m_shadow_sldr;
 	wxTextCtrl *m_shadow_text;
-	wxCheckBox*m_shadow_chk;
+	wxUndoableCheckBox* m_shadow_chk;
 	//sample rate
 	wxButton* m_sample_st;
 	wxSingleSlider *m_sample_sldr;
 	wxTextCtrl *m_sample_text;
-	wxCheckBox* m_sample_chk;
+	wxUndoableCheckBox* m_sample_chk;
 	//colormap
 	wxButton* m_colormap_st;
 	wxDoubleSlider *m_colormap_sldr;
 	wxTextCtrl *m_colormap_low_text;
 	wxTextCtrl *m_colormap_hi_text;
-	wxCheckBox* m_colormap_chk;
+	wxUndoableCheckBox* m_colormap_chk;
 	wxToolBar* m_colormap_link_tb;
 
 	//3

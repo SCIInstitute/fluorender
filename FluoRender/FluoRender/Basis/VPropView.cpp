@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Point.h>
 #include <wxDoubleSlider.h>
 #include <wxSingleSlider.h>
+#include <wxUndoableCheckBox.h>
 #include "png_resource.h"
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
@@ -213,7 +214,7 @@ VPropView::VPropView(VRenderFrame* frame,
 	m_gamma_sldr->SetRangeStyle(1);
 	m_gamma_text = new wxTextCtrl(this, ID_GammaText, "1.00",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_fp2);
-	m_gamma_chk = new wxCheckBox(this, ID_GammaChk, "");
+	m_gamma_chk = new wxUndoableCheckBox(this, ID_GammaChk, "");
 	sizer_l1->Add(m_gamma_sldr, 1, wxEXPAND);
 	sizer_l1->Add(m_gamma_text, 0, wxALIGN_CENTER);
 	sizer_l1->Add(m_gamma_chk, 0, wxALIGN_CENTER);
@@ -225,7 +226,7 @@ VPropView::VPropView(VRenderFrame* frame,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_saturation_text = new wxTextCtrl(this, ID_SaturationText, "50",
 		wxDefaultPosition, FromDIP(wxSize(40, 20))/*, 0, vald_int*/);
-	m_saturation_chk = new wxCheckBox(this, ID_SaturationChk, "");
+	m_saturation_chk = new wxUndoableCheckBox(this, ID_SaturationChk, "");
 	sizer_l2->Add(m_saturation_sldr, 1, wxEXPAND);
 	sizer_l2->Add(m_saturation_text, 0, wxALIGN_CENTER);
 	sizer_l2->Add(m_saturation_chk, 0, wxALIGN_CENTER);
@@ -237,7 +238,7 @@ VPropView::VPropView(VRenderFrame* frame,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_luminance_text = new wxTextCtrl(this, ID_LuminanceText, "128",
 		wxDefaultPosition, FromDIP(wxSize(40, 20))/*, 0, vald_int*/);
-	m_luminance_chk = new wxCheckBox(this, ID_LuminanceChk, "");
+	m_luminance_chk = new wxUndoableCheckBox(this, ID_LuminanceChk, "");
 	sizer_l3->Add(m_luminance_sldr, 1, wxEXPAND, 0);
 	sizer_l3->Add(m_luminance_text, 0, wxALIGN_CENTER, 0);
 	sizer_l3->Add(m_luminance_chk, 0, wxALIGN_CENTER);
@@ -249,7 +250,7 @@ VPropView::VPropView(VRenderFrame* frame,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_alpha_text = new wxTextCtrl(this, ID_Alpha_Text, "127",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
-	m_alpha_chk = new wxCheckBox(this, ID_AlphaChk, "");
+	m_alpha_chk = new wxUndoableCheckBox(this, ID_AlphaChk, "");
 	sizer_l4->Add(m_alpha_sldr, 1, wxEXPAND);
 	sizer_l4->Add(m_alpha_text, 0, wxALIGN_CENTER);
 	sizer_l4->Add(m_alpha_chk, 0, wxALIGN_CENTER);
@@ -266,7 +267,7 @@ VPropView::VPropView(VRenderFrame* frame,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_low_shading_text = new wxTextCtrl(this, ID_LowShadingText, "0.00",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_fp2);
-	m_shade_chk = new wxCheckBox(this, ID_ShadingChk, "");
+	m_shade_chk = new wxUndoableCheckBox(this, ID_ShadingChk, "");
 	sizer_l5->Add(m_hi_shading_sldr, 1, wxEXPAND);
 	sizer_l5->Add(m_hi_shading_text, 0, wxALIGN_CENTER);
 	sizer_l5->Add(m_low_shading_sldr, 1, wxEXPAND);
@@ -282,7 +283,7 @@ VPropView::VPropView(VRenderFrame* frame,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_boundary_text = new wxTextCtrl(this, ID_BoundaryText, "0.0000",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp4);
-	m_boundary_chk = new wxCheckBox(this, ID_BoundaryChk, "");
+	m_boundary_chk = new wxUndoableCheckBox(this, ID_BoundaryChk, "");
 	sizer_m1->Add(m_boundary_st, 0, wxALIGN_CENTER);
 	sizer_m1->Add(m_boundary_chk, 0, wxALIGN_CENTER);
 	sizer_m1->Add(m_boundary_text, 0, wxALIGN_CENTER);
@@ -301,7 +302,7 @@ VPropView::VPropView(VRenderFrame* frame,
 	m_thresh_link_tb->AddCheckTool(ID_ThreshLinkTb, "Lock Threshold Range",
 		wxGetBitmapFromMemory(unlink), wxNullBitmap, "Lock Threshold Range");
 	m_thresh_link_tb->SetToolBitmapSize(wxSize(20, 20));
-	m_thresh_chk = new wxCheckBox(this, ID_ThreshChk, "");
+	m_thresh_chk = new wxUndoableCheckBox(this, ID_ThreshChk, "");
 	sizer_m2->Add(m_thresh_st, 0, wxALIGN_CENTER);
 	sizer_m2->Add(m_thresh_chk, 0, wxALIGN_CENTER);
 	sizer_m2->Add(m_left_thresh_text, 0, wxALIGN_CENTER);
@@ -316,7 +317,7 @@ VPropView::VPropView(VRenderFrame* frame,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shadow_text = new wxTextCtrl(this, ID_ShadowText, "0.00",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp2);
-	m_shadow_chk = new wxCheckBox(this, ID_ShadowChk, "");
+	m_shadow_chk = new wxUndoableCheckBox(this, ID_ShadowChk, "");
 	sizer_m3->Add(m_shadow_st, 0, wxALIGN_CENTER);
 	sizer_m3->Add(m_shadow_chk, 0, wxALIGN_CENTER);
 	sizer_m3->Add(m_shadow_text, 0, wxALIGN_CENTER);
@@ -328,7 +329,7 @@ VPropView::VPropView(VRenderFrame* frame,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_sample_text = new wxTextCtrl(this, ID_SampleText, "1.0",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp2);
-	m_sample_chk = new wxCheckBox(this, ID_SampleChk, "");
+	m_sample_chk = new wxUndoableCheckBox(this, ID_SampleChk, "");
 	sizer_m4->Add(m_sample_st, 0, wxALIGN_CENTER);
 	sizer_m4->Add(m_sample_chk, 0, wxALIGN_CENTER);
 	sizer_m4->Add(m_sample_text, 0, wxALIGN_CENTER);
@@ -350,7 +351,7 @@ VPropView::VPropView(VRenderFrame* frame,
 	m_colormap_link_tb->AddCheckTool(ID_ColormapLinkTb, "Lock Colormap Range",
 		wxGetBitmapFromMemory(unlink), wxNullBitmap, "Lock Colormap Range");
 	m_colormap_link_tb->SetToolBitmapSize(wxSize(20, 20));
-	m_colormap_chk = new wxCheckBox(this, ID_ColormapChk, "");
+	m_colormap_chk = new wxUndoableCheckBox(this, ID_ColormapChk, "");
 	sizer_m5->Add(m_colormap_st, 0, wxALIGN_CENTER);
 	sizer_m5->Add(m_colormap_chk, 0, wxALIGN_CENTER);
 	sizer_m5->Add(m_colormap_low_text, 0, wxALIGN_CENTER);
@@ -593,6 +594,17 @@ VPropView::VPropView(VRenderFrame* frame,
 	glbin.add_undo_control(m_shadow_sldr);
 	glbin.add_undo_control(m_sample_sldr);
 	glbin.add_undo_control(m_colormap_sldr);
+	//add checkboxes
+	glbin.add_undo_control(m_gamma_chk);
+	glbin.add_undo_control(m_saturation_chk);
+	glbin.add_undo_control(m_luminance_chk);
+	glbin.add_undo_control(m_alpha_chk);
+	glbin.add_undo_control(m_shade_chk);
+	glbin.add_undo_control(m_boundary_chk);
+	glbin.add_undo_control(m_thresh_chk);
+	glbin.add_undo_control(m_shadow_chk);
+	glbin.add_undo_control(m_sample_chk);
+	glbin.add_undo_control(m_colormap_chk);
 }
 
 VPropView::~VPropView()
