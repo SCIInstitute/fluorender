@@ -931,8 +931,8 @@ void MLVolPropPanel::OnDelRec(wxCommandEvent& event)
 
 void MLVolPropPanel::OnApplyRec(wxCommandEvent& event)
 {
-	if (m_frame)
-		m_frame->GetPropView()->ApplyMl();
+	//if (m_frame)
+	//	m_frame->GetPropView()->ApplyMl();
 }
 
 void MLVolPropPanel::OnBotGridAutoSize(wxGridSizeEvent& event)

@@ -6138,6 +6138,9 @@ DataGroup* VRenderGLView::AddVolumeData(VolumeData* vd, wxString group_name)
 
 	if (m_frame)
 	{
+		//add ui
+		m_frame->AddProps(2, this, group, vd);
+		//
 		AdjustView* adjust_view = m_frame->GetAdjustView();
 		if (adjust_view)
 		{

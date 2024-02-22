@@ -63,6 +63,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <wx/menu.h>
 #include <wx/aui/aui.h>
+#include <wx/aui/auibook.h>
 
 #include <vector>
 
@@ -209,11 +210,21 @@ public:
 		MeshData* md=0,
 		Annotations* ann=0);
 
+	void AddProps(int type,//follow above
+		VRenderGLView* view = 0,
+		DataGroup* group = 0,
+		VolumeData* vd = 0,
+		MeshData* md = 0,
+		Annotations* ann = 0);
+	wxWindow* FindPropPage(const wxString& name);
+	void ShowPropPage(const wxString& name, bool show = true);
+	VPropView* FindVolumeProps(VolumeData* vd);
+
 	//prop view
 	AdjustView* GetAdjustView();
 	//tool views
-	VPropView* GetPropView()
-	{ return m_volume_prop; }
+	//VPropView* GetPropView()
+	//{ return m_volume_prop; }
 	//movie view
 	VMovieView* GetMovieView()
 	{ return m_movie_view; }
@@ -401,7 +412,7 @@ private:
 	ListPanel *m_list_panel;
 	vector <VRenderView*> m_vrv_list;
 	DataManager m_data_mgr;
-	wxPanel *m_prop_panel;
+	wxAuiNotebook *m_prop_panel;
 	ClippingView *m_clip_view;
 	AdjustView* m_adjust_view;
 	SettingDlg* m_setting_dlg;
@@ -419,11 +430,11 @@ private:
 	MachineLearningDlg* m_machine_learning_dlg;
 	ScriptBreakDlg* m_script_break_dlg;
 	//prop panel children
-	wxBoxSizer* m_prop_sizer;
-	VPropView* m_volume_prop;
-	MPropView* m_mesh_prop;
-	MManipulator* m_mesh_manip;
-	APropView* m_annotation_prop;
+	std::vector<wxWindow*> m_prop_pages;
+	//VPropView* m_volume_prop;
+	//MPropView* m_mesh_prop;
+	//MManipulator* m_mesh_manip;
+	//APropView* m_annotation_prop;
 	//tester
 	TesterDlg* m_tester;
 	//flag for show/hide views
@@ -522,6 +533,9 @@ private:
 
 	//panes
 	void OnPaneClose(wxAuiManagerEvent& event);
+
+	//prop pages
+	void OnPropPageClose(wxAuiNotebookEvent& event);
 
 	//project
 	void OnNewProject(wxCommandEvent& event);

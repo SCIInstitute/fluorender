@@ -104,6 +104,8 @@ BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 	EVT_MENU(ID_UIPropView, VRenderFrame::OnShowHideView)
 	//panes
 	EVT_AUI_PANE_CLOSE(VRenderFrame::OnPaneClose)
+	//prop panel
+	EVT_AUINOTEBOOK_PAGE_CLOSE(wxID_ANY, VRenderFrame::OnPropPageClose)
 	//draw background
 	EVT_PAINT(VRenderFrame::OnDraw)
 	//process key event
@@ -159,10 +161,10 @@ VRenderFrame::VRenderFrame(
 	m_component_dlg(0),
 	m_machine_learning_dlg(0),
 	m_script_break_dlg(0),
-	m_volume_prop(0),
-	m_mesh_prop(0),
-	m_mesh_manip(0),
-	m_annotation_prop(0),
+	//m_volume_prop(0),
+	//m_mesh_prop(0),
+	//m_mesh_manip(0),
+	//m_annotation_prop(0),
 	m_ui_state(true),
 	m_cur_sel_type(-1),
 	m_cur_sel_vol(-1),
@@ -406,23 +408,23 @@ VRenderFrame::VRenderFrame(
 		wxDefaultPosition, panel_size);
 
 	//create prop panel
-	m_prop_panel = new wxPanel(this, wxID_ANY,
-		wxDefaultPosition, wxDefaultSize, 0, "PropPanel");
+	m_prop_panel = new wxAuiNotebook(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize,
+		wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
 	//prop panel chidren
-	m_prop_sizer = new wxBoxSizer(wxHORIZONTAL);
-	m_volume_prop = new VPropView(this, m_prop_panel);
-	m_mesh_prop = new MPropView(this, m_prop_panel);
-	m_mesh_manip = new MManipulator(this, m_prop_panel);
-	m_annotation_prop = new APropView(this, m_prop_panel);
-	m_prop_panel->SetSizer(m_prop_sizer);
-	m_prop_sizer->Add(m_volume_prop, 1, wxEXPAND, 0);
-	m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
-	m_prop_sizer->Add(m_mesh_manip, 1, wxEXPAND, 0);
-	m_prop_sizer->Add(m_annotation_prop, 1, wxEXPAND, 0);
-	m_volume_prop->Show(false);
-	m_mesh_prop->Show(false);
-	m_mesh_manip->Show(false);
-	m_annotation_prop->Show(false);
+	//m_volume_prop = new VPropView(this, m_prop_panel);
+	//m_mesh_prop = new MPropView(this, m_prop_panel);
+	//m_mesh_manip = new MManipulator(this, m_prop_panel);
+	//m_annotation_prop = new APropView(this, m_prop_panel);
+	//m_prop_panel->SetSizer(m_prop_sizer);
+	//m_prop_sizer->Add(m_volume_prop, 1, wxEXPAND, 0);
+	//m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
+	//m_prop_sizer->Add(m_mesh_manip, 1, wxEXPAND, 0);
+	//m_prop_sizer->Add(m_annotation_prop, 1, wxEXPAND, 0);
+	//m_volume_prop->Show(false);
+	//m_mesh_prop->Show(false);
+	//m_mesh_manip->Show(false);
+	//m_annotation_prop->Show(false);
 
 	//clipping view
 	m_clip_view = new ClippingView(this,
@@ -554,8 +556,8 @@ VRenderFrame::VRenderFrame(
 		FloatingSize(FromDIP(wxSize(400, 600))).Layer(3));
 	m_aui_mgr.AddPane(m_prop_panel, wxAuiPaneInfo().
 		Name("m_prop_panel").Caption(UITEXT_PROPERTIES).
-		Bottom().CloseButton(true).MinSize(FromDIP(wxSize(300, 135))).
-		FloatingSize(FromDIP(wxSize(1100, 135))).Layer(2));
+		Bottom().CloseButton(true).MinSize(FromDIP(wxSize(300, 155))).
+		FloatingSize(FromDIP(wxSize(1100, 155))).Layer(2));
 	m_aui_mgr.AddPane(m_adjust_view, wxAuiPaneInfo().
 		Name("m_adjust_view").Caption(UITEXT_ADJUST).
 		Left().CloseButton(true).MinSize(FromDIP(wxSize(110, 700))).
@@ -2359,14 +2361,14 @@ void VRenderFrame::OnSelection(int type,
 	case 0:  //root
 		break;
 	case 1:  //view
-		if (m_volume_prop)
-			m_volume_prop->Show(false);
-		if (m_mesh_prop)
-			m_mesh_prop->Show(false);
-		if (m_mesh_manip)
-			m_mesh_manip->Show(false);
-		if (m_annotation_prop)
-			m_annotation_prop->Show(false);
+		//if (m_volume_prop)
+		//	m_volume_prop->Show(false);
+		//if (m_mesh_prop)
+		//	m_mesh_prop->Show(false);
+		//if (m_mesh_manip)
+		//	m_mesh_manip->Show(false);
+		//if (m_annotation_prop)
+		//	m_annotation_prop->Show(false);
 		if (m_colocalization_dlg)
 			m_colocalization_dlg->SetGroup(group);
 		m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
@@ -2375,21 +2377,24 @@ void VRenderFrame::OnSelection(int type,
 	case 2:  //volume
 		if (vd && vd->GetDisp())
 		{
-			m_volume_prop->SetVolumeData(vd);
-			m_volume_prop->SetGroup(group);
-			m_volume_prop->SetView(view);
-			if (!m_volume_prop->IsShown())
-			{
-				m_volume_prop->Show(true);
-				m_prop_sizer->Clear();
-				m_prop_sizer->Add(m_volume_prop, 1, wxEXPAND, 0);
-				m_prop_panel->SetSizer(m_prop_sizer);
-				m_prop_panel->Layout();
-			}
-			m_aui_mgr.GetPane(m_prop_panel).Caption(
-				wxString(UITEXT_PROPERTIES)+wxString(" - ")+vd->GetName());
-			m_aui_mgr.Update();
+			//m_volume_prop->SetVolumeData(vd);
+			//m_volume_prop->SetGroup(group);
+			//m_volume_prop->SetView(view);
+			//if (!m_volume_prop->IsShown())
+			//{
+			//	m_volume_prop->Show(true);
+			//	m_prop_sizer->Clear();
+			//	m_prop_sizer->Add(m_volume_prop, 1, wxEXPAND, 0);
+			//	m_prop_panel->SetSizer(m_prop_sizer);
+			//	m_prop_panel->Layout();
+			//}
+			//m_aui_mgr.GetPane(m_prop_panel).Caption(
+			//	wxString(UITEXT_PROPERTIES)+wxString(" - ")+vd->GetName());
+			//m_aui_mgr.Update();
+
+			
 			wxString str = vd->GetName();
+			ShowPropPage(str);
 			m_cur_sel_vol = m_data_mgr.GetVolumeIndex(str);
 
 			for (size_t i=0; i< GetViewNum(); ++i)
@@ -2400,25 +2405,25 @@ void VRenderFrame::OnSelection(int type,
 				v->m_cur_vol = vd;
 			}
 
-			if (m_volume_prop)
-				m_volume_prop->Show(true);
-			if (m_mesh_prop)
-				m_mesh_prop->Show(false);
-			if (m_mesh_manip)
-				m_mesh_manip->Show(false);
-			if (m_annotation_prop)
-				m_annotation_prop->Show(false);
+			//if (m_volume_prop)
+			//	m_volume_prop->Show(true);
+			//if (m_mesh_prop)
+			//	m_mesh_prop->Show(false);
+			//if (m_mesh_manip)
+			//	m_mesh_manip->Show(false);
+			//if (m_annotation_prop)
+			//	m_annotation_prop->Show(false);
 		}
 		else
 		{
-			if (m_volume_prop)
-				m_volume_prop->Show(false);
-			if (m_mesh_prop)
-				m_mesh_prop->Show(false);
-			if (m_mesh_manip)
-				m_mesh_manip->Show(false);
-			if (m_annotation_prop)
-				m_annotation_prop->Show(false);
+			//if (m_volume_prop)
+			//	m_volume_prop->Show(false);
+			//if (m_mesh_prop)
+			//	m_mesh_prop->Show(false);
+			//if (m_mesh_manip)
+			//	m_mesh_manip->Show(false);
+			//if (m_annotation_prop)
+			//	m_annotation_prop->Show(false);
 		}
 		if (m_colocalization_dlg)
 			m_colocalization_dlg->SetGroup(group);
@@ -2426,60 +2431,60 @@ void VRenderFrame::OnSelection(int type,
 	case 3:  //mesh
 		if (md)
 		{
-			m_mesh_prop->SetView(view);
-			m_mesh_prop->SetMeshData(md);
-			if (!m_mesh_prop->IsShown())
-			{
-				m_mesh_prop->Show(true);
-				m_prop_sizer->Clear();
-				m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
-				m_prop_panel->SetSizer(m_prop_sizer);
-				m_prop_panel->Layout();
-			}
-			m_aui_mgr.GetPane(m_prop_panel).Caption(
-				wxString(UITEXT_PROPERTIES)+wxString(" - ")+md->GetName());
-			m_aui_mgr.Update();
+			//m_mesh_prop->SetView(view);
+			//m_mesh_prop->SetMeshData(md);
+			//if (!m_mesh_prop->IsShown())
+			//{
+			//	m_mesh_prop->Show(true);
+			//	m_prop_sizer->Clear();
+			//	m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
+			//	m_prop_panel->SetSizer(m_prop_sizer);
+			//	m_prop_panel->Layout();
+			//}
+			//m_aui_mgr.GetPane(m_prop_panel).Caption(
+			//	wxString(UITEXT_PROPERTIES)+wxString(" - ")+md->GetName());
+			//m_aui_mgr.Update();
 			wxString str = md->GetName();
 			m_cur_sel_mesh = m_data_mgr.GetMeshIndex(str);
 			md->SetDrawBounds(true);
 		}
 
-		if (m_volume_prop)
-			m_volume_prop->Show(false);
-		if (m_mesh_prop && md)
-			m_mesh_prop->Show(true);
-		if (m_mesh_manip)
-			m_mesh_manip->Show(false);
-		if (m_annotation_prop)
-			m_annotation_prop->Show(false);
+		//if (m_volume_prop)
+		//	m_volume_prop->Show(false);
+		//if (m_mesh_prop && md)
+		//	m_mesh_prop->Show(true);
+		//if (m_mesh_manip)
+		//	m_mesh_manip->Show(false);
+		//if (m_annotation_prop)
+		//	m_annotation_prop->Show(false);
 		if (m_colocalization_dlg)
 			m_colocalization_dlg->SetGroup(0);
 		break;
 	case 4:  //annotations
 		if (ann)
 		{
-			m_annotation_prop->SetAnnotations(ann);
-			if (!m_annotation_prop->IsShown())
-			{
-				m_annotation_prop->Show(true);
-				m_prop_sizer->Clear();
-				m_prop_sizer->Add(m_annotation_prop, 1, wxEXPAND, 0);
-				m_prop_panel->SetSizer(m_prop_sizer);
-				m_prop_panel->Layout();
-			}
-			m_aui_mgr.GetPane(m_prop_panel).Caption(
-				wxString(UITEXT_PROPERTIES)+wxString(" - ")+ann->GetName());
-			m_aui_mgr.Update();
+			//m_annotation_prop->SetAnnotations(ann);
+			//if (!m_annotation_prop->IsShown())
+			//{
+			//	m_annotation_prop->Show(true);
+			//	m_prop_sizer->Clear();
+			//	m_prop_sizer->Add(m_annotation_prop, 1, wxEXPAND, 0);
+			//	m_prop_panel->SetSizer(m_prop_sizer);
+			//	m_prop_panel->Layout();
+			//}
+			//m_aui_mgr.GetPane(m_prop_panel).Caption(
+			//	wxString(UITEXT_PROPERTIES)+wxString(" - ")+ann->GetName());
+			//m_aui_mgr.Update();
 		}
 
-		if (m_volume_prop)
-			m_volume_prop->Show(false);
-		if (m_mesh_prop)
-			m_mesh_prop->Show(false);
-		if (m_mesh_manip)
-			m_mesh_manip->Show(false);
-		if (m_annotation_prop && ann)
-			m_annotation_prop->Show(true);
+		//if (m_volume_prop)
+		//	m_volume_prop->Show(false);
+		//if (m_mesh_prop)
+		//	m_mesh_prop->Show(false);
+		//if (m_mesh_manip)
+		//	m_mesh_manip->Show(false);
+		//if (m_annotation_prop && ann)
+		//	m_annotation_prop->Show(true);
 		if (m_colocalization_dlg)
 			m_colocalization_dlg->SetGroup(0);
 		break;
@@ -2488,14 +2493,14 @@ void VRenderFrame::OnSelection(int type,
 			m_adjust_view->SetGroup(group);
 		if (m_calculation_dlg)
 			m_calculation_dlg->SetGroup(group);
-		if (m_volume_prop)
-			m_volume_prop->Show(false);
-		if (m_mesh_prop)
-			m_mesh_prop->Show(false);
-		if (m_mesh_manip)
-			m_mesh_manip->Show(false);
-		if (m_annotation_prop)
-			m_annotation_prop->Show(false);
+		//if (m_volume_prop)
+		//	m_volume_prop->Show(false);
+		//if (m_mesh_prop)
+		//	m_mesh_prop->Show(false);
+		//if (m_mesh_manip)
+		//	m_mesh_manip->Show(false);
+		//if (m_annotation_prop)
+		//	m_annotation_prop->Show(false);
 		if (m_colocalization_dlg)
 			m_colocalization_dlg->SetGroup(group);
 		m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
@@ -2504,46 +2509,121 @@ void VRenderFrame::OnSelection(int type,
 	case 6:  //mesh manip
 		if (md)
 		{
-			m_mesh_manip->SetMeshData(md);
-			m_mesh_manip->GetData();
-			if (!m_mesh_manip->IsShown())
-			{
-				m_mesh_manip->Show(true);
-				m_prop_sizer->Clear();
-				m_prop_sizer->Add(m_mesh_manip, 1, wxEXPAND, 0);
-				m_prop_panel->SetSizer(m_prop_sizer);
-				m_prop_panel->Layout();
-			}
-			m_aui_mgr.GetPane(m_prop_panel).Caption(
-				wxString("Manipulations - ")+md->GetName());
-			m_aui_mgr.Update();
+			//m_mesh_manip->SetMeshData(md);
+			//m_mesh_manip->GetData();
+			//if (!m_mesh_manip->IsShown())
+			//{
+			//	m_mesh_manip->Show(true);
+			//	m_prop_sizer->Clear();
+			//	m_prop_sizer->Add(m_mesh_manip, 1, wxEXPAND, 0);
+			//	m_prop_panel->SetSizer(m_prop_sizer);
+			//	m_prop_panel->Layout();
+			//}
+			//m_aui_mgr.GetPane(m_prop_panel).Caption(
+			//	wxString("Manipulations - ")+md->GetName());
+			//m_aui_mgr.Update();
 		}
 
-		if (m_volume_prop)
-			m_volume_prop->Show(false);
-		if (m_mesh_prop)
-			m_mesh_prop->Show(false);
-		if (m_mesh_manip && md)
-			m_mesh_manip->Show(true);
-		if (m_annotation_prop)
-			m_annotation_prop->Show(false);
+		//if (m_volume_prop)
+		//	m_volume_prop->Show(false);
+		//if (m_mesh_prop)
+		//	m_mesh_prop->Show(false);
+		//if (m_mesh_manip && md)
+		//	m_mesh_manip->Show(true);
+		//if (m_annotation_prop)
+		//	m_annotation_prop->Show(false);
 		if (m_colocalization_dlg)
 			m_colocalization_dlg->SetGroup(0);
 		break;
 	default:
-		if (m_volume_prop)
-			m_volume_prop->Show(false);
-		if (m_mesh_prop)
-			m_mesh_prop->Show(false);
-		if (m_mesh_manip)
-			m_mesh_manip->Show(false);
-		if (m_annotation_prop)
-			m_annotation_prop->Show(false);
+		//if (m_volume_prop)
+		//	m_volume_prop->Show(false);
+		//if (m_mesh_prop)
+		//	m_mesh_prop->Show(false);
+		//if (m_mesh_manip)
+		//	m_mesh_manip->Show(false);
+		//if (m_annotation_prop)
+		//	m_annotation_prop->Show(false);
 		if (m_colocalization_dlg)
 			m_colocalization_dlg->SetGroup(0);
 		m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
 		m_aui_mgr.Update();
 	}
+}
+
+void VRenderFrame::AddProps(int type,
+	VRenderGLView* view,
+	DataGroup* group,
+	VolumeData* vd,
+	MeshData* md,
+	Annotations* ann)
+{
+	switch (type)
+	{
+	case 2://volume
+		if (vd)
+		{
+			VPropView* pane = new VPropView(this, m_prop_panel);
+			pane->SetVolumeData(vd);
+			pane->SetGroup(group);
+			pane->SetView(view);
+			pane->SetName(vd->GetName());
+			m_prop_pages.push_back(pane);
+			//m_prop_panel->AddPage(pane, vd->GetName(), true);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+wxWindow* VRenderFrame::FindPropPage(const wxString& name)
+{
+	for (auto i : m_prop_pages)
+	{
+		if (i && i->GetName() == name)
+			return i;
+	}
+	return 0;
+}
+
+void VRenderFrame::ShowPropPage(const wxString& name, bool show)
+{
+	wxWindow* page = FindPropPage(name);
+	if (!page)
+		return;
+	int page_no = m_prop_panel->FindPage(page);
+	bool added = page_no != wxNOT_FOUND;
+
+	if (added && show)
+		m_prop_panel->SetSelection(page_no);
+	if (!added && show)
+	{
+		m_prop_panel->AddPage(page, page->GetName(), true);
+		page->Show();
+	}
+	if (added && !show)
+	{
+		page->Hide();
+		m_prop_panel->RemovePage(page_no);
+	}
+
+}
+
+VPropView* VRenderFrame::FindVolumeProps(VolumeData* vd)
+{
+	wxString name = vd->GetName();
+	VPropView* result = 0;
+	for (auto i : m_prop_pages)
+	{
+		if (i && i->GetName() == name)
+		{
+			result = dynamic_cast<VPropView*>(i);
+			if (result)
+				return result;
+		}
+	}
+	return 0;
 }
 
 void VRenderFrame::RefreshVRenderViews(bool tree, bool interactive)
@@ -5620,6 +5700,16 @@ void VRenderFrame::OnPaneClose(wxAuiManagerEvent& event)
 		m_tb_menu_ui->Check(ID_UIAdjView, false);
 	else if (name == "ClippingView")
 		m_tb_menu_ui->Check(ID_UIClipView, false);
+}
+
+//prop pages
+void VRenderFrame::OnPropPageClose(wxAuiNotebookEvent& event)
+{
+	wxAuiNotebook* panel = (wxAuiNotebook*)event.GetEventObject();
+	wxWindow* page = panel->GetPage(event.GetSelection());
+	if (page)
+		ShowPropPage(page->GetName(), false);
+	event.Veto();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
