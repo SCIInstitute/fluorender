@@ -84,7 +84,7 @@ private:
 	double m_spcx, m_spcy, m_spcz;
 	//volume info
 	bool m_use_transfer;
-	double m_gamma, m_lo_thresh, m_hi_thresh, m_offset, m_gm_thresh;
+	double m_gamma, m_lo_thresh, m_hi_thresh, m_saturation, m_boundary;
 	bool m_use_mask;
 
 	//soft threshold

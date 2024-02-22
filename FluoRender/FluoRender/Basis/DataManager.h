@@ -112,19 +112,19 @@ public:
 
 	//layer adjustment
 	//gamma
-	const fluo::Color GetGamma()
+	const fluo::Color GetGammaColor()
 	{return m_gamma;}
-	void SetGamma(fluo::Color gamma)
+	void SetGammaColor(const fluo::Color &gamma)
 	{m_gamma = gamma;}
 	//brightness
 	const fluo::Color GetBrightness()
 	{return m_brightness;}
-	void SetBrightness(fluo::Color brightness)
+	void SetBrightness(const fluo::Color &brightness)
 	{m_brightness = brightness;}
 	//hdr settings
 	const fluo::Color GetHdr()
 	{return m_hdr;}
-	void SetHdr(fluo::Color hdr)
+	void SetHdr(const fluo::Color &hdr)
 	{m_hdr = hdr;}
 	//sync values
 	bool GetSyncR()
@@ -305,16 +305,59 @@ public:
 
 	//properties
 	//transfer function
-	void Set3DGamma(double dVal);
-	double Get3DGamma();
+	void SetGammaEnable(bool);
+	bool GetGammaEnable();
+	void SetGamma(double dVal);
+	double GetGamma();
+
+	void SetBoundaryEnable(bool);
+	bool GetBoundaryEnable();
 	void SetBoundary(double dVal);
 	double GetBoundary();
-	void SetOffset(double dVal);
-	double GetOffset();
+
+	void SetSaturationEnable(bool);
+	bool GetSaturationEnable();
+	void SetSaturation(double dVal);
+	double GetSaturation();
+
+	void SetThreshEnable(bool);
+	bool GetThreshEnable();
 	void SetLeftThresh(double dVal);
 	double GetLeftThresh();
 	void SetRightThresh(double dVal);
 	double GetRightThresh();
+
+	void SetLuminanceEnable(bool);
+	bool GetLumimanceEnable();
+	fluo::Color SetLuminance(double dVal);
+	double GetLuminance();
+
+	void SetAlphaEnable(bool mode);
+	bool GetAlphaEnable();
+	void SetAlpha(double alpha);
+	double GetAlpha();
+
+	//shading
+	void SetShadingEnable(bool bVal);
+	bool GetShadingEnable();
+	void SetMaterial(double amb, double diff, double spec, double shine);
+	void GetMaterial(double& amb, double& diff, double& spec, double& shine);
+	void SetLowShading(double dVal);
+	void SetHiShading(double dVal);
+
+	//shadow
+	void SetShadowEnable(bool bVal);
+	bool GetShadowEnable();
+	void SetShadowIntensity(double val);
+	void GetShadowIntensity(double& val);
+
+	//sample rate
+	void SetSampleRateEnable(bool bval);
+	bool GetSampleRateEnable();
+	void SetSampleRate(double rate);
+	double GetSampleRate();
+
+	//colors
 	void SetColor(fluo::Color &color, bool update_hsv=true);
 	fluo::Color GetColor();
 	void SetWlColor(bool bval = true);
@@ -323,34 +366,12 @@ public:
 	fluo::Color GetMaskColor();
 	bool GetMaskColorSet();
 	void ResetMaskColorSet();
-	fluo::Color SetLuminance(double dVal);
-	double GetLuminance();
-	void SetAlpha(double alpha);
-	double GetAlpha();
-	void SetEnableAlpha(bool mode);
-	bool GetEnableAlpha();
 	void SetHSV(double hue = -1, double sat = -1, double val = -1);
 	void GetHSV(double &hue, double &sat, double &val);
 
 	//mask threshold
 	void SetMaskThreshold(double thresh);
 	void SetUseMaskThreshold(bool mode);
-
-	//shading
-	void SetShading(bool bVal);
-	bool GetShading();
-	void SetMaterial(double amb, double diff, double spec, double shine);
-	void GetMaterial(double &amb, double &diff, double &spec, double &shine);
-	void SetLowShading(double dVal);
-	void SetHiShading(double dVal);
-	//shadow
-	void SetShadow(bool bVal);
-	bool GetShadow();
-	void SetShadowParams(double val);
-	void GetShadowParams(double &val);
-	//sample rate
-	void SetSampleRate(double rate);
-	double GetSampleRate();
 
 	//colormap mode
 	void SetColormapMode(int mode);
@@ -549,28 +570,45 @@ private:
 	double m_scalar_scale;
 	double m_gm_scale;
 	double m_max_value;
-	//gamma
-	double m_gamma3d;
-	double m_gm_thresh;
-	double m_offset;
+
+	//transfer function settings
+	bool m_gamma_enable;
+	double m_gamma;
+
+	bool m_boundary_enable;
+	double m_boundary;
+
+	bool m_saturation_enable;
+	double m_saturation;
+
+	bool m_thresh_enable;
 	double m_lo_thresh;
 	double m_hi_thresh;
-	fluo::Color m_color;
-	bool m_wl_color;//if color has been set by wavelength
-	fluo::HSVColor m_hsv;
+
+	bool m_luminance_enable;
+
+	bool m_alpha_enable;
 	double m_alpha;
-	double m_sample_rate;
+
+	//shading
+	bool m_shading_enable;
 	double m_mat_amb;
 	double m_mat_diff;
 	double m_mat_spec;
 	double m_mat_shine;
+
+	//shadow
+	bool m_shadow_enable;
+	double m_shadow_intensity;
+
+	bool m_sample_rate_enable;
+	double m_sample_rate;
+
+	fluo::Color m_color;
+	bool m_wl_color;//if color has been set by wavelength
+	fluo::HSVColor m_hsv;
 	//noise reduction
 	bool m_noise_rd;
-	//shading
-	bool m_shading;
-	//shadow
-	bool m_shadow;
-	double m_shadow_darkness;
 
 	//resolution, scaling, spacing
 	int m_res_x, m_res_y, m_res_z;
@@ -705,10 +743,10 @@ public:
 		double& shine, double& alpha);
 	bool IsTransp();
 	//shadow
-	void SetShadow(bool bVal);
-	bool GetShadow();
-	void SetShadowParams(double val);
-	void GetShadowParams(double &val);
+	void SetShadowEnable(bool bVal);
+	bool GetShadowEnable();
+	void SetShadowIntensity(double val);
+	void GetShadowIntensity(double &val);
 
 	void SetTranslation(double x, double y, double z);
 	void GetTranslation(double &x, double &y, double &z);
@@ -750,8 +788,8 @@ private:
 	double m_mat_shine;
 	double m_mat_alpha;
 	//shadow
-	bool m_shadow;
-	double m_shadow_darkness;
+	bool m_shadow_enable;
+	double m_shadow_intensity;
 	//size limiter
 	bool m_enable_limit;
 	int m_limit;
@@ -1067,11 +1105,11 @@ public:
 	int GetBlendMode();
 
 	//set gamma to all
-	void SetGammaAll(fluo::Color &gamma);
+	void SetGammaAll(const fluo::Color &gamma);
 	//set brightness to all
-	void SetBrightnessAll(fluo::Color &brightness);
+	void SetBrightnessAll(const fluo::Color &brightness);
 	//set hdr to all
-	void SetHdrAll(fluo::Color &hdr);
+	void SetHdrAll(const fluo::Color &hdr);
 	//set sync to all
 	void SetSyncRAll(bool sync_r);
 	void SetSyncGAll(bool sync_g);
@@ -1080,12 +1118,12 @@ public:
 	void ResetSync();
 
 	//volume properties
-	void SetEnableAlpha(bool mode);
+	void SetAlphaEnable(bool mode);
 	void SetAlpha(double dVal);
 	void SetSampleRate(double dVal);
 	void SetBoundary(double dVal);
-	void Set3DGamma(double dVal);
-	void SetOffset(double dVal);
+	void SetGamma(double dVal);
+	void SetSaturation(double dVal);
 	void SetLeftThresh(double dVal);
 	void SetRightThresh(double dVal);
 	void SetLowShading(double dVal);
@@ -1097,9 +1135,9 @@ public:
 	void SetColormapInv(double val);
 	void SetColormap(int value);
 	void SetColormapProj(int value);
-	void SetShading(bool shading);
-	void SetShadow(bool shadow);
-	void SetShadowParams(double val);
+	void SetShadingEnable(bool shading);
+	void SetShadowEnable(bool shadow);
+	void SetShadowIntensity(double val);
 	void SetMode(int mode);
 	void SetAlphaPower(double val);
 	void SetLabelMode(int mode);

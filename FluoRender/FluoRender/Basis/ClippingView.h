@@ -132,7 +132,6 @@ public:
 	void SetClippingPlaneRotations(double rotx, double roty, double rotz);
 
 	//move linked clipping planes
-	//dir: 0-lower; 1-higher
 	void MoveLinkedClippingPlanes(int dir);
 
 	void ClearUndo();
@@ -256,9 +255,6 @@ private:
 	void OnYZClipBtn(wxCommandEvent& event);
 	void OnXZClipBtn(wxCommandEvent& event);
 	void OnXYClipBtn(wxCommandEvent& event);
-
-	//key down
-	void OnSliderKeyDown(wxKeyEvent& event);
 
 	DECLARE_EVENT_TABLE()
 

@@ -250,30 +250,19 @@ private:
 
 	//enable/disable
 	//1
-	void EnableGamma();
-	void DisableGamma();
-	void EnableSaturation();
-	void DisableSaturation();
-	void EnableLuminance();
-	void DisableLuminance();
-	void EnableAlpha();
-	void DisableAlpha();
-	void EnableShading();
-	void DisableShading();
+	void EnableGamma(bool);
+	void EnableSaturation(bool);
+	void EnableLuminance(bool);
+	void EnableAlpha(bool);
+	void EnableShading(bool);
 	//2
-	void EnableBoundary();
-	void DisableBoundary();
-	void EnableThresh();
-	void DisableThresh();
-	void EnableShadow();
-	void DisableShadow();
-	void EnableSample();
-	void DisableSample();
-	void EnableColormap();
-	void DisableColormap();
+	void EnableBoundary(bool);
+	void EnableThresh(bool);
+	void EnableShadow(bool);
+	void EnableSample(bool);
+	void EnableColormap(bool);
 	//3
-	void EnableMip();
-	void DisableMip();
+	void EnableMip(bool);
 
 	//update max value
 	void UpdateMaxVal(double value);

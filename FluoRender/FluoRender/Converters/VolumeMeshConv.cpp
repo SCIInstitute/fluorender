@@ -45,8 +45,8 @@ VolumeMeshConv::VolumeMeshConv() :
 	m_gamma(1.0),
 	m_lo_thresh(0.0),
 	m_hi_thresh(1.0),
-	m_offset(1.0),
-	m_gm_thresh(0.0),
+	m_saturation(1.0),
+	m_boundary(0.0),
 	m_use_mask(false)
 {
 	m_mesh = new GLMmodel;
@@ -111,8 +111,8 @@ void VolumeMeshConv::SetVolumeTransfer(double gamma, double lo_thresh,
 	m_gamma = gamma;
 	m_lo_thresh = lo_thresh;
 	m_hi_thresh = hi_thresh;
-	m_offset = offset;
-	m_gm_thresh = gm_thresh;
+	m_saturation = offset;
+	m_boundary = gm_thresh;
 }
 
 void VolumeMeshConv::SetVolumeUseMask(bool use)
@@ -329,10 +329,10 @@ double VolumeMeshConv::GetValue(int x, int y, int z)
 					(m_sw - m_lo_thresh + value) / m_sw :
 					(value > m_hi_thresh ?
 					(m_sw - value + m_hi_thresh) / m_sw : 1.0));
-				value *= (m_gm_thresh > 0.0 ?
-					fluo::Clamp(gm / m_gm_thresh, 0.0,
-					1.0 + m_gm_thresh*10.0) : 1.0);
-				value = pow(fluo::Clamp(value/m_offset,
+				value *= (m_boundary > 0.0 ?
+					fluo::Clamp(gm / m_boundary, 0.0,
+					1.0 + m_boundary*10.0) : 1.0);
+				value = pow(fluo::Clamp(value/m_saturation,
 					gamma<1.0?-(gamma-1.0)*0.00001:0.0,
 					gamma>1.0?0.9999:1.0), gamma);
 			}
@@ -371,10 +371,10 @@ double VolumeMeshConv::GetValue(int x, int y, int z)
 					(m_sw - m_lo_thresh + value) / m_sw :
 					(value > m_hi_thresh ?
 					(m_sw - value + m_hi_thresh) / m_sw : 1.0));
-				value *= (m_gm_thresh > 0.0 ?
-					fluo::Clamp(gm / m_gm_thresh, 0.0,
-						1.0 + m_gm_thresh*10.0) : 1.0);
-				value = pow(fluo::Clamp(value/m_offset,
+				value *= (m_boundary > 0.0 ?
+					fluo::Clamp(gm / m_boundary, 0.0,
+						1.0 + m_boundary*10.0) : 1.0);
+				value = pow(fluo::Clamp(value/m_saturation,
 					gamma<1.0?-(gamma-1.0)*0.00001:0.0,
 					gamma>1.0?0.9999:1.0), gamma);
 			}

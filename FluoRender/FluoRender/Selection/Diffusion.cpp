@@ -409,9 +409,9 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		scalar_scale = m_vd->GetScalarScale();
 		lo_thresh = m_vd->GetLeftThresh();
 		hi_thresh = m_vd->GetRightThresh();
-		gamma3d = m_vd->Get3DGamma();
+		gamma3d = m_vd->GetGamma();
 		gm_thresh = m_vd->GetBoundary();
-		offset = m_vd->GetOffset();
+		offset = m_vd->GetSaturation();
 		sw = m_vd->GetSoftThreshold();
 	}
 

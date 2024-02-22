@@ -205,29 +205,29 @@ bool KernelExecutor::Execute()
 			if (planes && vd->GetVR())
 				vd->GetVR()->set_planes(planes);
 			//transfer function
-			vd->Set3DGamma(m_vd->Get3DGamma());
+			vd->SetGamma(m_vd->GetGamma());
 			vd->SetBoundary(m_vd->GetBoundary());
-			vd->SetOffset(m_vd->GetOffset());
+			vd->SetSaturation(m_vd->GetSaturation());
 			vd->SetLeftThresh(m_vd->GetLeftThresh());
 			vd->SetRightThresh(m_vd->GetRightThresh());
 			fluo::Color col = m_vd->GetColor();
 			vd->SetColor(col);
 			vd->SetAlpha(m_vd->GetAlpha());
 			//shading
-			vd->SetShading(m_vd->GetShading());
+			vd->SetShadingEnable(m_vd->GetShadingEnable());
 			double amb, diff, spec, shine;
 			m_vd->GetMaterial(amb, diff, spec, shine);
 			vd->SetMaterial(amb, diff, spec, shine);
 			//shadow
-			vd->SetShadow(m_vd->GetShadow());
+			vd->SetShadowEnable(m_vd->GetShadowEnable());
 			double shadow;
-			m_vd->GetShadowParams(shadow);
-			vd->SetShadowParams(shadow);
+			m_vd->GetShadowIntensity(shadow);
+			vd->SetShadowIntensity(shadow);
 			//sample rate
 			vd->SetSampleRate(m_vd->GetSampleRate());
 			//2d adjusts
-			col = m_vd->GetGamma();
-			vd->SetGamma(col);
+			col = m_vd->GetGammaColor();
+			vd->SetGammaColor(col);
 			col = m_vd->GetBrightness();
 			vd->SetBrightness(col);
 			col = m_vd->GetHdr();

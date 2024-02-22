@@ -393,17 +393,17 @@ void AdjustView::GetSettings()
 		{
 			//red
 			sync_r = m_view->GetSyncR();
-			Gamma2UI(m_view->GetGamma().r(), r_gamma);
+			Gamma2UI(m_view->GetGammaColor().r(), r_gamma);
 			Brightness2UI(m_view->GetBrightness().r(), r_brightness);
 			Hdr2UI(m_view->GetHdr().r(), r_hdr);
 			//green
 			sync_g = m_view->GetSyncG();
-			Gamma2UI(m_view->GetGamma().g(), g_gamma);
+			Gamma2UI(m_view->GetGammaColor().g(), g_gamma);
 			Brightness2UI(m_view->GetBrightness().g(), g_brightness);
 			Hdr2UI(m_view->GetHdr().g(), g_hdr);
 			//blue
 			sync_b = m_view->GetSyncB();
-			Gamma2UI(m_view->GetGamma().b(), b_gamma);
+			Gamma2UI(m_view->GetGammaColor().b(), b_gamma);
 			Brightness2UI(m_view->GetBrightness().b(), b_brightness);
 			Hdr2UI(m_view->GetHdr().b(), b_hdr);
 		}
@@ -421,17 +421,17 @@ void AdjustView::GetSettings()
 			{
 				//red
 				sync_r = layer->GetSyncR();
-				Gamma2UI(layer->GetGamma().r(), r_gamma);
+				Gamma2UI(layer->GetGammaColor().r(), r_gamma);
 				Brightness2UI(layer->GetBrightness().r(), r_brightness);
 				Hdr2UI(layer->GetHdr().r(), r_hdr);
 				//green
 				sync_g = layer->GetSyncG();
-				Gamma2UI(layer->GetGamma().g(), g_gamma);
+				Gamma2UI(layer->GetGammaColor().g(), g_gamma);
 				Brightness2UI(layer->GetBrightness().g(), g_brightness);
 				Hdr2UI(layer->GetHdr().g(), g_hdr);
 				//blue
 				sync_b = layer->GetSyncB();
-				Gamma2UI(layer->GetGamma().b(), b_gamma);
+				Gamma2UI(layer->GetGammaColor().b(), b_gamma);
 				Brightness2UI(layer->GetBrightness().b(), b_brightness);
 				Hdr2UI(layer->GetHdr().b(), b_hdr);
 			}
@@ -673,7 +673,7 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 
 	if (m_view && m_type==1)
 	{
-		fluo::Color gamma = m_view->GetGamma();
+		fluo::Color gamma = m_view->GetGammaColor();
 		GammaUI2(val, gamma[0]);
 		if (m_sync_r)
 		{
@@ -682,7 +682,7 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 			if (m_sync_b)
 				GammaUI2(val, gamma[2]);
 		}
-		m_view->SetGamma(gamma);
+		m_view->SetGammaColor(gamma);
 	}
 
 	TreeLayer *layer = 0;
@@ -692,7 +692,7 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 		layer = (TreeLayer*)m_group;
 	if (layer)
 	{
-		fluo::Color gamma = layer->GetGamma();
+		fluo::Color gamma = layer->GetGammaColor();
 		GammaUI2(val, gamma[0]);
 		if (m_sync_r)
 		{
@@ -701,7 +701,7 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 			if (m_sync_b)
 				GammaUI2(val, gamma[2]);
 		}
-		layer->SetGamma(gamma);
+		layer->SetGammaColor(gamma);
 
 		if (m_link_group && m_group)
 			m_group->SetGammaAll(gamma);
@@ -741,7 +741,7 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 
 	if (m_view && m_type==1)
 	{
-		fluo::Color gamma = m_view->GetGamma();
+		fluo::Color gamma = m_view->GetGammaColor();
 		GammaUI2(val, gamma[1]);
 		if (m_sync_g)
 		{
@@ -750,7 +750,7 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 			if (m_sync_b)
 				GammaUI2(val, gamma[2]);
 		}
-		m_view->SetGamma(gamma);
+		m_view->SetGammaColor(gamma);
 	}
 
 	TreeLayer *layer = 0;
@@ -760,7 +760,7 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 		layer = (TreeLayer*)m_group;
 	if (layer)
 	{
-		fluo::Color gamma = layer->GetGamma();
+		fluo::Color gamma = layer->GetGammaColor();
 		GammaUI2(val, gamma[1]);
 		if (m_sync_g)
 		{
@@ -769,7 +769,7 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 			if (m_sync_b)
 				GammaUI2(val, gamma[2]);
 		}
-		layer->SetGamma(gamma);
+		layer->SetGammaColor(gamma);
 
 		if (m_link_group && m_group)
 			m_group->SetGammaAll(gamma);
@@ -809,7 +809,7 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 
 	if (m_view && m_type==1)
 	{
-		fluo::Color gamma = m_view->GetGamma();
+		fluo::Color gamma = m_view->GetGammaColor();
 		GammaUI2(val, gamma[2]);
 		if (m_sync_b)
 		{
@@ -818,7 +818,7 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 			if (m_sync_g)
 				GammaUI2(val, gamma[1]);
 		}
-		m_view->SetGamma(gamma);
+		m_view->SetGammaColor(gamma);
 	}
 
 	TreeLayer *layer = 0;
@@ -828,7 +828,7 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 		layer = (TreeLayer*)m_group;
 	if (layer)
 	{
-		fluo::Color gamma = layer->GetGamma();
+		fluo::Color gamma = layer->GetGammaColor();
 		GammaUI2(val, gamma[2]);
 		if (m_sync_b)
 		{
@@ -837,7 +837,7 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 			if (m_sync_g)
 				GammaUI2(val, gamma[1]);
 		}
-		layer->SetGamma(gamma);
+		layer->SetGammaColor(gamma);
 
 		if (m_link_group && m_group)
 			m_group->SetGammaAll(gamma);
@@ -1597,13 +1597,13 @@ void AdjustView::UpdateSync()
 			double gamma = 1.0, brightness = 1.0, hdr = 0.0;
 			if (r_v)
 			{
-				gamma = m_group->GetGamma().r();
+				gamma = m_group->GetGammaColor().r();
 				brightness = m_group->GetBrightness().r();
 				hdr = m_group->GetHdr().r();
 			}
 			else if (g_v)
 			{
-				gamma = m_group->GetGamma().g();
+				gamma = m_group->GetGammaColor().g();
 				brightness = m_group->GetBrightness().g();
 				hdr = m_group->GetHdr().g();
 			}
@@ -1676,13 +1676,13 @@ void AdjustView::UpdateSync()
 			double gamma = 1.0, brightness = 1.0, hdr = 0.0;
 			if (r_v)
 			{
-				gamma = m_view->GetGamma().r();
+				gamma = m_view->GetGammaColor().r();
 				brightness = m_view->GetBrightness().r();
 				hdr = m_view->GetHdr().r();
 			}
 			else if (g_v)
 			{
-				gamma = m_view->GetGamma().g();
+				gamma = m_view->GetGammaColor().g();
 				brightness = m_view->GetBrightness().g();
 				hdr = m_view->GetHdr().g();
 			}
@@ -1730,7 +1730,7 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 
 	if (m_view)
 	{
-		fluo::Color gamma = m_view->GetGamma();
+		fluo::Color gamma = m_view->GetGammaColor();
 		GammaUI2(dft_value, gamma[0]);
 		if (m_sync_r)
 		{
@@ -1739,7 +1739,7 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 			if (m_sync_b)
 				GammaUI2(dft_value, gamma[2]);
 		}
-		m_view->SetGamma(gamma);
+		m_view->SetGammaColor(gamma);
 	}
 
 	TreeLayer *layer = 0;
@@ -1749,7 +1749,7 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 		layer = (TreeLayer*)m_group;
 	if (layer)
 	{
-		fluo::Color gamma = layer->GetGamma();
+		fluo::Color gamma = layer->GetGammaColor();
 		GammaUI2(dft_value, gamma[0]);
 		if (m_sync_r)
 		{
@@ -1758,7 +1758,7 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 			if (m_sync_b)
 				GammaUI2(dft_value, gamma[2]);
 		}
-		layer->SetGamma(gamma);
+		layer->SetGammaColor(gamma);
 
 		if (m_link_group && m_group)
 			m_group->SetGammaAll(gamma);
@@ -1899,7 +1899,7 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 
 	if (m_view)
 	{
-		fluo::Color gamma = m_view->GetGamma();
+		fluo::Color gamma = m_view->GetGammaColor();
 		GammaUI2(dft_value, gamma[1]);
 		if (m_sync_g)
 		{
@@ -1908,7 +1908,7 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 			if (m_sync_b)
 				GammaUI2(dft_value, gamma[2]);
 		}
-		m_view->SetGamma(gamma);
+		m_view->SetGammaColor(gamma);
 	}
 
 	TreeLayer *layer = 0;
@@ -1918,7 +1918,7 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 		layer = (TreeLayer*)m_group;
 	if (layer)
 	{
-		fluo::Color gamma = layer->GetGamma();
+		fluo::Color gamma = layer->GetGammaColor();
 		GammaUI2(dft_value, gamma[1]);
 		if (m_sync_g)
 		{
@@ -1927,7 +1927,7 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 			if (m_sync_b)
 				GammaUI2(dft_value, gamma[2]);
 		}
-		layer->SetGamma(gamma);
+		layer->SetGammaColor(gamma);
 
 		if (m_link_group && m_group)
 			m_group->SetGammaAll(gamma);
@@ -2068,7 +2068,7 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 
 	if (m_view)
 	{
-		fluo::Color gamma = m_view->GetGamma();
+		fluo::Color gamma = m_view->GetGammaColor();
 		GammaUI2(dft_value, gamma[2]);
 		if (m_sync_b)
 		{
@@ -2077,7 +2077,7 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 			if (m_sync_g)
 				GammaUI2(dft_value, gamma[1]);
 		}
-		m_view->SetGamma(gamma);
+		m_view->SetGammaColor(gamma);
 	}
 
 	TreeLayer *layer = 0;
@@ -2087,7 +2087,7 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 		layer = (TreeLayer*)m_group;
 	if (layer)
 	{
-		fluo::Color gamma = layer->GetGamma();
+		fluo::Color gamma = layer->GetGammaColor();
 		GammaUI2(dft_value, gamma[2]);
 		if (m_sync_b)
 		{
@@ -2096,7 +2096,7 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 			if (m_sync_g)
 				GammaUI2(dft_value, gamma[1]);
 		}
-		layer->SetGamma(gamma);
+		layer->SetGammaColor(gamma);
 
 		if (m_link_group && m_group)
 			m_group->SetGammaAll(gamma);

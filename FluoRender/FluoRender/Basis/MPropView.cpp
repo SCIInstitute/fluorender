@@ -223,8 +223,8 @@ void MPropView::GetSettings()
 	m_scale_text->ChangeValue(str);
 	//shadow
 	double darkness;
-	m_shadow_chk->SetValue(m_md->GetShadow());
-	m_md->GetShadowParams(darkness);
+	m_shadow_chk->SetValue(m_md->GetShadowEnable());
+	m_md->GetShadowIntensity(darkness);
 	m_shadow_sldr->SetValue(std::round(darkness*100.0));
 	str = wxString::Format("%.2f", darkness);
 	m_shadow_text->ChangeValue(str);
@@ -370,12 +370,12 @@ void MPropView::OnShadowCheck(wxCommandEvent& event)
 	if (m_md && m_view)
 	{
 		bool val = m_shadow_chk->GetValue();
-		m_md->SetShadow(val);
+		m_md->SetShadowEnable(val);
 		for (int i=0; i< m_view->GetMeshNum(); i++)
 		{
 			MeshData* md = m_view->GetMeshData(i);
 			if (md)
-				md->SetShadow(val);
+				md->SetShadowEnable(val);
 		}
 		RefreshVRenderViews();
 	}
@@ -398,12 +398,12 @@ void MPropView::OnShadowText(wxCommandEvent& event)
 
 	if (m_md && m_view)
 	{
-		m_md->SetShadowParams(dval);
+		m_md->SetShadowIntensity(dval);
 		for (int i=0; i< m_view->GetMeshNum(); i++)
 		{
 			MeshData* md = m_view->GetMeshData(i);
 			if (md)
-				md->SetShadowParams(dval);
+				md->SetShadowIntensity(dval);
 		}
 		RefreshVRenderViews();
 	}

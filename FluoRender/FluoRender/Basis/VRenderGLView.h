@@ -470,8 +470,8 @@ public:
 	void SetSBText(wxString text) { m_sb_text = text; }
 
 	//gamma settings
-	fluo::Color GetGamma() { return m_gamma; }
-	void SetGamma(fluo::Color gamma) { m_gamma = gamma; }
+	fluo::Color GetGammaColor() { return m_gamma; }
+	void SetGammaColor(fluo::Color gamma) { m_gamma = gamma; }
 	//brightness adjustment
 	fluo::Color GetBrightness() { return m_brightness; }
 	void SetBrightness(fluo::Color brightness) { m_brightness = brightness; }

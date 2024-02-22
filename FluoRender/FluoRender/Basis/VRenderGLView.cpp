@@ -2614,7 +2614,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
 	}
 
-	if (vd->GetShadow())
+	if (vd->GetShadowEnable())
 	{
 		vector<VolumeData*> list;
 		list.push_back(vd);
@@ -2729,9 +2729,9 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 	}
 
 	bool shading = vd->GetVR()->get_shading();
-	bool shadow = vd->GetShadow();
+	bool shadow = vd->GetShadowEnable();
 	int color_mode = vd->GetColormapMode();
-	bool enable_alpha = vd->GetEnableAlpha();
+	bool enable_alpha = vd->GetAlphaEnable();
 	flvr::ShaderProgram* img_shader = 0;
 
 	flvr::Framebuffer* chann_buffer =
@@ -2819,7 +2819,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		}
 		//turn off alpha
 		if (color_mode == 1)
-			vd->SetEnableAlpha(false);
+			vd->SetAlphaEnable(false);
 		//draw
 		vd->SetStreamMode(1);
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
@@ -2834,7 +2834,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		{
 			vd->RestoreMode();
 			//restore alpha
-			vd->SetEnableAlpha(enable_alpha);
+			vd->SetAlphaEnable(enable_alpha);
 		}
 
 		//bind channel fbo for final composition
@@ -3037,8 +3037,8 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	vd->GetVR()->set_shading(true);
-	bool alpha = vd->GetEnableAlpha();
-	vd->SetEnableAlpha(true);
+	bool alpha = vd->GetAlphaEnable();
+	vd->SetAlphaEnable(true);
 	vd->SetMode(2);
 	int colormode = vd->GetColormapMode();
 	vd->SetStreamMode(2);
@@ -3047,7 +3047,7 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
 	vd->RestoreMode();
 	vd->SetColormapMode(colormode);
-	vd->SetEnableAlpha(alpha);
+	vd->SetAlphaEnable(alpha);
 
 	//bind fbo for final composition
 	flvr::Framebuffer* chann_buffer =
@@ -3094,8 +3094,8 @@ bool VRenderGLView::GetMeshShadow(double &val)
 			MeshData* md = (MeshData*)m_layer_list[i];
 			if (md && md->GetDisp())
 			{
-				md->GetShadowParams(val);
-				return md->GetShadow();
+				md->GetShadowIntensity(val);
+				return md->GetShadowEnable();
 			}
 		}
 		else if (m_layer_list[i]->IsA() == 6)
@@ -3108,8 +3108,8 @@ bool VRenderGLView::GetMeshShadow(double &val)
 					MeshData* md = group->GetMeshData(j);
 					if (md && md->GetDisp())
 					{
-						md->GetShadowParams(val);
-						return md->GetShadow();
+						md->GetShadowIntensity(val);
+						return md->GetShadowEnable();
 					}
 				}
 			}
@@ -3237,7 +3237,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 	for (i = 0; i<vlist.size(); i++)
 	{
 		VolumeData* vd = vlist[i];
-		if (vd && vd->GetShadow())
+		if (vd && vd->GetShadowEnable())
 		{
 			colormodes.push_back(vd->GetColormapMode());
 			shadings.push_back(vd->GetVR()->get_shading());
@@ -3257,7 +3257,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 		if (rn_time - flvr::TextureRenderer::get_st_time() >
 			flvr::TextureRenderer::get_up_time())
 			return;
-		if (list.size() == 1 && list[0]->GetShadow())
+		if (list.size() == 1 && list[0]->GetShadowEnable())
 			if (list[0]->GetVR()->get_done_loop(3))
 				return;
 	}
@@ -3314,7 +3314,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 		vd->SetMaskMode(msk_mode);
 		vd->SetColormapMode(colormode);
 		vd->GetVR()->set_shading(shading);
-		vd->GetShadowParams(shadow_darkness);
+		vd->GetShadowIntensity(shadow_darkness);
 	}
 	else
 	{
@@ -3350,7 +3350,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 			vd->SetColormapMode(colormodes[i]);
 			vd->GetVR()->set_shading(shadings[i]);
 		}
-		list[0]->GetShadowParams(shadow_darkness);
+		list[0]->GetShadowIntensity(shadow_darkness);
 	}
 
 	//
@@ -4134,7 +4134,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		{
 			m_clip_up = true;
 			if (m_frame && m_frame->GetClippingView())
-				m_frame->GetClippingView()->MoveLinkedClippingPlanes(1);
+				m_frame->GetClippingView()->MoveLinkedClippingPlanes(-1);
 			refresh = true;
 			set_focus = true;
 		}
@@ -4147,7 +4147,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		{
 			m_clip_down = true;
 			if (m_frame && m_frame->GetClippingView())
-				m_frame->GetClippingView()->MoveLinkedClippingPlanes(0);
+				m_frame->GetClippingView()->MoveLinkedClippingPlanes(1);
 			refresh = true;
 			set_focus = true;
 		}
@@ -6114,8 +6114,8 @@ DataGroup* VRenderGLView::AddVolumeData(VolumeData* vd, wxString group_name)
 
 	if (group && vd)
 	{
-		fluo::Color gamma = group->GetGamma();
-		vd->SetGamma(gamma);
+		fluo::Color gamma = group->GetGammaColor();
+		vd->SetGammaColor(gamma);
 		fluo::Color brightness = group->GetBrightness();
 		vd->SetBrightness(brightness);
 		fluo::Color hdr = group->GetHdr();
@@ -6835,8 +6835,8 @@ void VRenderGLView::MoveLayertoGroup(wxString &group_name, wxString &src_name, w
 	}
 
 	//set the 2d adjustment settings of the volume the same as the group
-	fluo::Color gamma = group->GetGamma();
-	src_vd->SetGamma(gamma);
+	fluo::Color gamma = group->GetGammaColor();
+	src_vd->SetGammaColor(gamma);
 	fluo::Color brightness = group->GetBrightness();
 	src_vd->SetBrightness(brightness);
 	fluo::Color hdr = group->GetHdr();
@@ -6895,8 +6895,8 @@ void VRenderGLView::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst
 	//src_group->ResetSync();
 
 	//set the 2d adjustment settings of the volume the same as the group
-	fluo::Color gamma = dst_group->GetGamma();
-	src_vd->SetGamma(gamma);
+	fluo::Color gamma = dst_group->GetGammaColor();
+	src_vd->SetGammaColor(gamma);
 	fluo::Color brightness = dst_group->GetBrightness();
 	src_vd->SetBrightness(brightness);
 	fluo::Color hdr = dst_group->GetHdr();
@@ -7141,7 +7141,7 @@ wxString VRenderGLView::AddGroup(wxString str, wxString prev_group)
 			fluo::Color gamma, brightness, hdr;
 			bool sync_r, sync_g, sync_b;
 			adjust_view->GetDefaults(gamma, brightness, hdr, sync_r, sync_g, sync_b);
-			group->SetGamma(gamma);
+			group->SetGammaColor(gamma);
 			group->SetBrightness(brightness);
 			group->SetHdr(hdr);
 			group->SetSyncR(sync_r);
@@ -7186,7 +7186,7 @@ DataGroup* VRenderGLView::AddOrGetGroup()
 			fluo::Color gamma, brightness, hdr;
 			bool sync_r, sync_g, sync_b;
 			adjust_view->GetDefaults(gamma, brightness, hdr, sync_r, sync_g, sync_b);
-			group->SetGamma(gamma);
+			group->SetGammaColor(gamma);
 			group->SetBrightness(brightness);
 			group->SetHdr(hdr);
 			group->SetSyncR(sync_r);
@@ -8456,7 +8456,7 @@ void VRenderGLView::DrawColormap()
 		m_value_3 = (low + m_value_4) / 2.0;
 		m_value_5 = (m_value_4 + high) / 2.0;
 		max_val = m_cur_vol->GetMaxValue();
-		enable_alpha = m_cur_vol->GetEnableAlpha();
+		enable_alpha = m_cur_vol->GetAlphaEnable();
 		fluo::Color vd_color = m_cur_vol->GetColor();
 		SetColormapColors(m_cur_vol->GetColormap(),
 			vd_color, m_cur_vol->GetColormapInv());
@@ -9194,9 +9194,9 @@ void VRenderGLView::StartLoopUpdate()
 						total_num++;
 						num_chan++;
 						if (vd->GetMode() == 1 &&
-							vd->GetShading())
+							vd->GetShadingEnable())
 							total_num++;
-						if (vd->GetShadow())
+						if (vd->GetShadowEnable())
 							total_num++;
 						//mask
 						if (vd->GetTexture() &&
@@ -9240,8 +9240,8 @@ void VRenderGLView::StartLoopUpdate()
 				fluo::Ray view_ray = vd->GetVR()->compute_view();
 				vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 				int mode = vd->GetMode() == 1 ? 1 : 0;
-				bool shade = (mode == 1 && vd->GetShading());
-				bool shadow = vd->GetShadow();
+				bool shade = (mode == 1 && vd->GetShadingEnable());
+				bool shadow = vd->GetShadowEnable();
 				for (j = 0; j < bricks->size(); j++)
 				{
 					VolumeLoaderData d;
@@ -9326,8 +9326,8 @@ void VRenderGLView::StartLoopUpdate()
 						if (!bricks || bricks->size() == 0)
 							continue;
 						int mode = vd->GetMode() == 1 ? 1 : 0;
-						bool shade = (mode == 1 && vd->GetShading());
-						bool shadow = vd->GetShadow();
+						bool shade = (mode == 1 && vd->GetShadingEnable());
+						bool shadow = vd->GetShadowEnable();
 						for (j = 0; j<bricks->size(); j++)
 						{
 							VolumeLoaderData d;
@@ -9408,8 +9408,8 @@ void VRenderGLView::StartLoopUpdate()
 							fluo::Ray view_ray = vd->GetVR()->compute_view();
 							vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 							int mode = vd->GetMode() == 1 ? 1 : 0;
-							bool shade = (mode == 1 && vd->GetShading());
-							bool shadow = vd->GetShadow();
+							bool shade = (mode == 1 && vd->GetShadingEnable());
+							bool shadow = vd->GetShadowEnable();
 							for (j = 0; j < bricks->size(); j++)
 							{
 								VolumeLoaderData d;
@@ -9483,8 +9483,8 @@ void VRenderGLView::StartLoopUpdate()
 							fluo::Ray view_ray = vd->GetVR()->compute_view();
 							vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 							int mode = vd->GetMode() == 1 ? 1 : 0;
-							bool shade = (mode == 1 && vd->GetShading());
-							bool shadow = vd->GetShadow();
+							bool shade = (mode == 1 && vd->GetShadingEnable());
+							bool shadow = vd->GetShadowEnable();
 							for (k = 0; k<bricks->size(); k++)
 							{
 								VolumeLoaderData d;

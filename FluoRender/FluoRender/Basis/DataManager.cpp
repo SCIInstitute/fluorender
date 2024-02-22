@@ -96,9 +96,9 @@ VolumeData::VolumeData()
 	m_gm_scale = 1.0;
 	m_max_value = 255.0;
 	//gamma
-	m_gamma3d = 1.0;
-	m_gm_thresh = 0.0;
-	m_offset = 1.0;
+	m_gamma = 1.0;
+	m_boundary = 0.0;
+	m_saturation = 1.0;
 	m_lo_thresh = 0.0;
 	m_hi_thresh = 1.0;
 	m_color = fluo::Color(1.0, 1.0, 1.0);
@@ -113,10 +113,10 @@ VolumeData::VolumeData()
 	//noise reduction
 	m_noise_rd = false;
 	//shading
-	m_shading = false;
+	m_shading_enable = false;
 	//shadow
-	m_shadow = false;
-	m_shadow_darkness = 0.0;
+	m_shadow_enable = false;
+	m_shadow_intensity = 0.0;
 
 	//resolution, scaling, spacing
 	m_res_x = 0;	m_res_y = 0;	m_res_z = 0;
@@ -229,9 +229,9 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_gm_scale = copy.m_gm_scale;
 	m_max_value = copy.m_max_value;
 	//gamma
-	m_gamma3d = copy.m_gamma3d;
-	m_gm_thresh = copy.m_gm_thresh;
-	m_offset = copy.m_offset;
+	m_gamma = copy.m_gamma;
+	m_boundary = copy.m_boundary;
+	m_saturation = copy.m_saturation;
 	m_lo_thresh = copy.m_lo_thresh;
 	m_hi_thresh = copy.m_hi_thresh;
 	m_color = copy.m_color;
@@ -246,10 +246,10 @@ VolumeData::VolumeData(VolumeData &copy)
 	//noise reduction
 	m_noise_rd = copy.m_noise_rd;
 	//shading
-	m_shading = copy.m_shading;
+	m_shading_enable = copy.m_shading_enable;
 	//shadow
-	m_shadow = copy.m_shadow;
-	m_shadow_darkness = copy.m_shadow_darkness;
+	m_shadow_enable = copy.m_shadow_enable;
+	m_shadow_intensity = copy.m_shadow_intensity;
 
 	//resolution, scaling, spacing
 	m_res_x = copy.m_res_x;	m_res_y = copy.m_res_y;	m_res_z = copy.m_res_z;
@@ -1188,16 +1188,16 @@ double VolumeData::GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b
 			new_value = 0.0;
 		else
 		{
-			double gamma = 1.0 / m_gamma3d;
+			double gamma = 1.0 / m_gamma;
 			new_value = (new_value<m_lo_thresh?
 				(m_sw-m_lo_thresh+new_value)/m_sw:
 			(new_value>m_hi_thresh?
 				(m_sw-new_value+m_hi_thresh)/m_sw:1.0))
 				*new_value;
-			new_value *= (m_gm_thresh > 0.0 ?
-				fluo::Clamp(gm / m_gm_thresh, 0.0,
-					1.0 + m_gm_thresh*10.0) : 1.0);
-			new_value = pow(fluo::Clamp(new_value/m_offset,
+			new_value *= (m_boundary > 0.0 ?
+				fluo::Clamp(gm / m_boundary, 0.0,
+					1.0 + m_boundary*10.0) : 1.0);
+			new_value = pow(fluo::Clamp(new_value/m_saturation,
 				gamma<1.0?-(gamma-1.0)*0.00001:0.0,
 				gamma>1.0?0.9999:1.0), gamma);
 			new_value *= m_alpha;
@@ -1233,16 +1233,16 @@ double VolumeData::GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b
 			new_value = 0.0;
 		else
 		{
-			double gamma = 1.0 / m_gamma3d;
+			double gamma = 1.0 / m_gamma;
 			new_value = (new_value<m_lo_thresh?
 				(m_sw-m_lo_thresh+new_value)/m_sw:
 			(new_value>m_hi_thresh?
 				(m_sw-new_value+m_hi_thresh)/m_sw:1.0))
 				*new_value;
-			new_value *= (m_gm_thresh > 0.0 ?
-				fluo::Clamp(gm / m_gm_thresh, 0.0,
-					1.0 + m_gm_thresh*10.0) : 1.0);
-			new_value = pow(fluo::Clamp(new_value/m_offset,
+			new_value *= (m_boundary > 0.0 ?
+				fluo::Clamp(gm / m_boundary, 0.0,
+					1.0 + m_boundary*10.0) : 1.0);
+			new_value = pow(fluo::Clamp(new_value/m_saturation,
 				gamma<1.0?-(gamma-1.0)*0.00001:0.0,
 				gamma>1.0?0.9999:1.0), gamma);
 			new_value *= m_alpha;
@@ -1509,9 +1509,9 @@ void VolumeData::SetMode(int mode)
 		m_vr->set_alpha(m_alpha);
 		m_vr->set_lo_thresh(m_lo_thresh);
 		m_vr->set_hi_thresh(m_hi_thresh);
-		m_vr->set_gm_thresh(m_gm_thresh);
-		m_vr->set_gamma3d(m_gamma3d);
-		m_vr->set_offset(m_offset);
+		m_vr->set_gm_thresh(m_boundary);
+		m_vr->set_gamma3d(m_gamma);
+		m_vr->set_offset(m_saturation);
 		break;
 	case 1://MIP
 		m_vr->set_mode(flvr::TextureRenderer::MODE_MIP);
@@ -1526,8 +1526,8 @@ void VolumeData::SetMode(int mode)
 		m_vr->set_lo_thresh(0.0);
 		m_vr->set_hi_thresh(1.0);
 		m_vr->set_gm_thresh(0.0);
-		m_vr->set_gamma3d(m_gamma3d);
-		m_vr->set_offset(m_offset);
+		m_vr->set_gamma3d(m_gamma);
+		m_vr->set_offset(m_saturation);
 		break;
 	case 2://white shading
 		m_vr->set_mode(flvr::TextureRenderer::MODE_OVER);
@@ -1537,9 +1537,9 @@ void VolumeData::SetMode(int mode)
 		m_vr->set_alpha(1.0);
 		m_vr->set_lo_thresh(m_lo_thresh);
 		m_vr->set_hi_thresh(m_hi_thresh);
-		m_vr->set_gm_thresh(m_gm_thresh);
-		m_vr->set_gamma3d(m_gamma3d);
-		m_vr->set_offset(m_offset);
+		m_vr->set_gm_thresh(m_boundary);
+		m_vr->set_gamma3d(m_gamma);
+		m_vr->set_offset(m_saturation);
 		break;
 	case 3://white mip
 		m_vr->set_mode(flvr::TextureRenderer::MODE_MIP);
@@ -1721,42 +1721,81 @@ void VolumeData::Set2dDmap(GLuint dmap)
 		m_vr->set_2d_dmap(m_2d_dmap);
 }
 
-//properties
-//transfer function
-void VolumeData::Set3DGamma(double dVal)
+//transfer function properties
+void VolumeData::SetGammaEnable(bool bval)
 {
-	m_gamma3d = dVal;
-	if (m_vr)
-		m_vr->set_gamma3d(m_gamma3d);
+	m_gamma_enable = bval;
 }
 
-double VolumeData::Get3DGamma()
+bool VolumeData::GetGammaEnable()
 {
-	return m_gamma3d;
+	return m_gamma_enable;
+}
+
+void VolumeData::SetGamma(double dVal)
+{
+	m_gamma = dVal;
+	if (m_vr)
+		m_vr->set_gamma3d(m_gamma);
+}
+
+double VolumeData::GetGamma()
+{
+	return m_gamma;
+}
+
+void VolumeData::SetBoundaryEnable(bool bval)
+{
+	m_boundary_enable = bval;
+}
+
+bool VolumeData::GetBoundaryEnable()
+{
+	return m_boundary_enable;
 }
 
 void VolumeData::SetBoundary(double dVal)
 {
-	m_gm_thresh = dVal;
+	m_boundary = dVal;
 	if (m_vr)
-		m_vr->set_gm_thresh(m_gm_thresh);
+		m_vr->set_gm_thresh(m_boundary);
 }
 
 double VolumeData::GetBoundary()
 {
-	return m_gm_thresh;
+	return m_boundary;
 }
 
-void VolumeData::SetOffset(double dVal)
+void VolumeData::SetSaturationEnable(bool bval)
 {
-	m_offset = dVal;
+	m_saturation_enable = bval;
+}
+
+bool VolumeData::GetSaturationEnable()
+{
+	return m_saturation_enable;
+}
+
+void VolumeData::SetSaturation(double dVal)
+{
+	m_saturation = dVal;
 	if (m_vr)
-		m_vr->set_offset(m_offset);
+		m_vr->set_offset(m_saturation);
 }
 
-double VolumeData::GetOffset()
+double VolumeData::GetSaturation()
 {
-	return m_offset;
+	return m_saturation;
+}
+
+void VolumeData::SetThreshEnable(bool bval)
+{
+	m_thresh_enable = bval;
+}
+
+bool VolumeData::GetThreshEnable()
+{
+	return m_thresh_enable;
 }
 
 void VolumeData::SetLeftThresh(double dVal)
@@ -1781,6 +1820,156 @@ void VolumeData::SetRightThresh(double dVal)
 double VolumeData::GetRightThresh()
 {
 	return m_hi_thresh;
+}
+
+void VolumeData::SetLuminanceEnable(bool bval)
+{
+	m_luminance_enable = bval;
+}
+
+bool VolumeData::GetLumimanceEnable()
+{
+	return m_luminance_enable;
+}
+
+fluo::Color VolumeData::SetLuminance(double dVal)
+{
+	double h, s, v;
+	GetHSV(h, s, v);
+	fluo::HSVColor hsv(h, s, dVal);
+	m_color = fluo::Color(hsv);
+	if (m_vr)
+		m_vr->set_color(m_color);
+	return m_color;
+}
+
+double VolumeData::GetLuminance()
+{
+	fluo::HSVColor hsv(m_color);
+	return hsv.val();
+}
+
+void VolumeData::SetAlphaEnable(bool bval)
+{
+	m_alpha_enable = bval;
+	if (m_vr)
+	{
+		m_vr->set_solid(!bval);
+		if (bval)
+			m_vr->set_alpha(m_alpha);
+		else
+			m_vr->set_alpha(1.0);
+	}
+}
+
+bool VolumeData::GetAlphaEnable()
+{
+	return m_alpha_enable;
+	//if (m_vr)
+	//	return !m_vr->get_solid();
+	//else
+	//	return true;
+}
+
+void VolumeData::SetAlpha(double alpha)
+{
+	m_alpha = alpha;
+	if (m_vr)
+		m_vr->set_alpha(m_alpha);
+}
+
+double VolumeData::GetAlpha()
+{
+	return m_alpha;
+}
+
+//shading
+void VolumeData::SetShadingEnable(bool bVal)
+{
+	m_shading_enable = bVal;
+	if (m_vr)
+		m_vr->set_shading(bVal);
+}
+
+bool VolumeData::GetShadingEnable()
+{
+	return m_shading_enable;
+}
+
+void VolumeData::SetMaterial(double amb, double diff, double spec, double shine)
+{
+	m_mat_amb = amb;
+	m_mat_diff = diff;
+	m_mat_spec = spec;
+	m_mat_shine = shine;
+	if (m_vr)
+		m_vr->set_material(m_mat_amb, m_mat_diff, m_mat_spec, m_mat_shine);
+}
+
+void VolumeData::GetMaterial(double& amb, double& diff, double& spec, double& shine)
+{
+	amb = m_mat_amb;
+	diff = m_mat_diff;
+	spec = m_mat_spec;
+	shine = m_mat_shine;
+}
+
+void VolumeData::SetLowShading(double dVal)
+{
+	double amb, diff, spec, shine;
+	GetMaterial(amb, diff, spec, shine);
+	SetMaterial(dVal, diff, spec, shine);
+}
+
+void VolumeData::SetHiShading(double dVal)
+{
+	double amb, diff, spec, shine;
+	GetMaterial(amb, diff, spec, shine);
+	SetMaterial(amb, diff, spec, dVal);
+}
+
+//shadow
+void VolumeData::SetShadowEnable(bool bVal)
+{
+	m_shadow_enable = bVal;
+}
+
+bool VolumeData::GetShadowEnable()
+{
+	return m_shadow_enable;
+}
+
+void VolumeData::SetShadowIntensity(double val)
+{
+	m_shadow_intensity = val;
+}
+
+void VolumeData::GetShadowIntensity(double& val)
+{
+	val = m_shadow_intensity;
+}
+
+//sample rate
+void VolumeData::SetSampleRateEnable(bool bval)
+{
+	m_sample_rate_enable = bval;
+}
+
+bool VolumeData::GetSampleRateEnable()
+{
+	return m_sample_rate_enable;
+}
+
+void VolumeData::SetSampleRate(double rate)
+{
+	m_sample_rate = rate;
+	if (m_vr)
+		m_vr->set_sampling_rate(m_sample_rate);
+}
+
+double VolumeData::GetSampleRate()
+{
+	return m_sample_rate;
 }
 
 void VolumeData::SetColor(fluo::Color &color, bool update_hsv)
@@ -1835,55 +2024,6 @@ void VolumeData::ResetMaskColorSet()
 		m_vr->reset_mask_color_set();
 }
 
-fluo::Color VolumeData::SetLuminance(double dVal)
-{
-	double h, s, v;
-	GetHSV(h, s, v);
-	fluo::HSVColor hsv(h, s, dVal);
-	m_color = fluo::Color(hsv);
-	if (m_vr)
-		m_vr->set_color(m_color);
-	return m_color;
-}
-
-double VolumeData::GetLuminance()
-{
-	fluo::HSVColor hsv(m_color);
-	return hsv.val();
-}
-
-void VolumeData::SetAlpha(double alpha)
-{
-	m_alpha = alpha;
-	if (m_vr)
-		m_vr->set_alpha(m_alpha);
-}
-
-double VolumeData::GetAlpha()
-{
-	return m_alpha;
-}
-
-void VolumeData::SetEnableAlpha(bool mode)
-{
-	if (m_vr)
-	{
-		m_vr->set_solid(!mode);
-		if (mode)
-			m_vr->set_alpha(m_alpha);
-		else
-			m_vr->set_alpha(1.0);
-	}
-}
-
-bool VolumeData::GetEnableAlpha()
-{
-	if (m_vr)
-		return !m_vr->get_solid();
-	else
-		return true;
-}
-
 void VolumeData::SetHSV(double hue, double sat, double val)
 {
 	if (hue < 0 || sat < 0 || val < 0)
@@ -1915,85 +2055,6 @@ void VolumeData::SetUseMaskThreshold(bool mode)
 	m_use_mask_threshold = mode;
 	if (m_vr && !m_use_mask_threshold)
 		m_vr->set_mask_thresh(0.0);
-}
-
-//shading
-void VolumeData::SetShading(bool bVal)
-{
-	m_shading = bVal;
-	if (m_vr)
-		m_vr->set_shading(bVal);
-}
-
-bool VolumeData::GetShading()
-{
-	return m_shading;
-}
-
-//shadow
-void VolumeData::SetShadow(bool bVal)
-{
-	m_shadow = bVal;
-}
-
-bool VolumeData::GetShadow()
-{
-	return m_shadow;
-}
-
-void VolumeData::SetShadowParams(double val)
-{
-	m_shadow_darkness = val;
-}
-
-void VolumeData::GetShadowParams(double &val)
-{
-	val = m_shadow_darkness;
-}
-
-void VolumeData::SetMaterial(double amb, double diff, double spec, double shine)
-{
-	m_mat_amb = amb;
-	m_mat_diff = diff;
-	m_mat_spec = spec;
-	m_mat_shine = shine;
-	if (m_vr)
-		m_vr->set_material(m_mat_amb, m_mat_diff, m_mat_spec, m_mat_shine);
-}
-
-void VolumeData::GetMaterial(double &amb, double &diff, double &spec, double &shine)
-{
-	amb = m_mat_amb;
-	diff = m_mat_diff;
-	spec = m_mat_spec;
-	shine = m_mat_shine;
-}
-
-void VolumeData::SetLowShading(double dVal)
-{
-	double amb, diff, spec, shine;
-	GetMaterial(amb, diff, spec, shine);
-	SetMaterial(dVal, diff, spec, shine);
-}
-
-void VolumeData::SetHiShading(double dVal)
-{
-	double amb, diff, spec, shine;
-	GetMaterial(amb, diff, spec, shine);
-	SetMaterial(amb, diff, spec, dVal);
-}
-
-//sample rate
-void VolumeData::SetSampleRate(double rate)
-{
-	m_sample_rate = rate;
-	if (m_vr)
-		m_vr->set_sampling_rate(m_sample_rate);
-}
-
-double VolumeData::GetSampleRate()
-{
-	return m_sample_rate;
 }
 
 //colormap mode
@@ -2488,10 +2549,10 @@ void VolumeData::ApplyMlVolProp()
 		SetBoundary(dval);
 		//gamma
 		dval = ep->getParam("gamma3d");
-		Set3DGamma(dval);
+		SetGamma(dval);
 		//low offset
 		dval = ep->getParam("low_offset");
-		SetOffset(dval);
+		SetSaturation(dval);
 		//high offset
 		dval = ep->getParam("high_offset");
 		//low thresholding
@@ -2540,10 +2601,10 @@ void VolumeData::ApplyMlVolProp()
 		SetColormapValues(dval, dval2);
 		//alpha
 		dval = ep->getParam("alpha_enable");
-		SetEnableAlpha(dval > 0.5);
+		SetAlphaEnable(dval > 0.5);
 		//enable shading
 		dval = ep->getParam("shading_enable");
-		SetShading(dval > 0.5);
+		SetShadingEnable(dval > 0.5);
 		//interpolation
 		dval = ep->getParam("interp_enable");
 		SetInterpolate(dval > 0.5);
@@ -2561,10 +2622,10 @@ void VolumeData::ApplyMlVolProp()
 		SetNR(dval > 0.5);
 		//shadow
 		dval = ep->getParam("shadow_enable");
-		SetShadow(dval > 0.5);
+		SetShadowEnable(dval > 0.5);
 		//shadow intensity
 		dval = ep->getParam("shadow_intensity");
-		SetShadowParams(dval);
+		SetShadowIntensity(dval);
 	}
 	delete eh;
 }
@@ -2582,8 +2643,8 @@ m_data(0),
 	m_mat_spec(0.2, 0.2, 0.2),
 	m_mat_shine(30.0),
 	m_mat_alpha(1.0),
-	m_shadow(true),
-	m_shadow_darkness(0.6),
+	m_shadow_enable(true),
+	m_shadow_intensity(0.6),
 	m_enable_limit(false),
 	m_limit(50)
 {
@@ -2989,24 +3050,24 @@ bool MeshData::IsTransp()
 }
 
 //shadow
-void MeshData::SetShadow(bool bVal)
+void MeshData::SetShadowEnable(bool bVal)
 {
-	m_shadow= bVal;
+	m_shadow_enable= bVal;
 }
 
-bool MeshData::GetShadow()
+bool MeshData::GetShadowEnable()
 {
-	return m_shadow;
+	return m_shadow_enable;
 }
 
-void MeshData::SetShadowParams(double val)
+void MeshData::SetShadowIntensity(double val)
 {
-	m_shadow_darkness = val;
+	m_shadow_intensity = val;
 }
 
-void MeshData::GetShadowParams(double &val)
+void MeshData::GetShadowIntensity(double &val)
 {
-	val = m_shadow_darkness;
+	val = m_shadow_intensity;
 }
 
 wxString MeshData::GetPath()
@@ -4079,19 +4140,19 @@ int DataGroup::GetBlendMode()
 }
 
 //set gamma to all
-void DataGroup::SetGammaAll(fluo::Color &gamma)
+void DataGroup::SetGammaAll(const fluo::Color &gamma)
 {
-	SetGamma(gamma);
+	SetGammaColor(gamma);
 	for (int i=0; i<(int)m_vd_list.size(); i++)
 	{
 		VolumeData* vd = m_vd_list[i];
 		if (vd)
-			vd->SetGamma(gamma);
+			vd->SetGammaColor(gamma);
 	}
 }
 
 //set brightness to all
-void DataGroup::SetBrightnessAll(fluo::Color &brightness)
+void DataGroup::SetBrightnessAll(const fluo::Color &brightness)
 {
 	SetBrightness(brightness);
 	for (int i=0; i<(int)m_vd_list.size(); i++)
@@ -4103,7 +4164,7 @@ void DataGroup::SetBrightnessAll(fluo::Color &brightness)
 }
 
 //set Hdr to all
-void DataGroup::SetHdrAll(fluo::Color &hdr)
+void DataGroup::SetHdrAll(const fluo::Color &hdr)
 {
 	SetHdr(hdr);
 	for (int i=0; i<(int)m_vd_list.size(); i++)
@@ -4186,13 +4247,13 @@ void DataGroup::ResetSync()
 }
 
 //volume properties
-void DataGroup::SetEnableAlpha(bool mode)
+void DataGroup::SetAlphaEnable(bool mode)
 {
 	for (int i=0; i<GetVolumeNum(); i++)
 	{
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
-			vd->SetEnableAlpha(mode);
+			vd->SetAlphaEnable(mode);
 	}
 }
 
@@ -4226,23 +4287,23 @@ void DataGroup::SetBoundary(double dVal)
 	}
 }
 
-void DataGroup::Set3DGamma(double dVal)
+void DataGroup::SetGamma(double dVal)
 {
 	for (int i=0; i<GetVolumeNum(); i++)
 	{
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
-			vd->Set3DGamma(dVal);
+			vd->SetGamma(dVal);
 	}
 }
 
-void DataGroup::SetOffset(double dVal)
+void DataGroup::SetSaturation(double dVal)
 {
 	for (int i=0; i<GetVolumeNum(); i++)
 	{
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
-			vd->SetOffset(dVal);
+			vd->SetSaturation(dVal);
 	}
 }
 
@@ -4360,33 +4421,33 @@ void DataGroup::SetColormapProj(int value)
 	}
 }
 
-void DataGroup::SetShading(bool shading)
+void DataGroup::SetShadingEnable(bool shading)
 {
 	for (int i=0; i<GetVolumeNum(); i++)
 	{
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
-			vd->SetShading(shading);
+			vd->SetShadingEnable(shading);
 	}
 }
 
-void DataGroup::SetShadow(bool shadow)
+void DataGroup::SetShadowEnable(bool shadow)
 {
 	for (int i=0; i<GetVolumeNum(); i++)
 	{
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
-			vd->SetShadow(shadow);
+			vd->SetShadowEnable(shadow);
 	}
 }
 
-void DataGroup::SetShadowParams(double val)
+void DataGroup::SetShadowIntensity(double val)
 {
 	for (int i=0; i<GetVolumeNum(); i++)
 	{
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
-			vd->SetShadowParams(val);
+			vd->SetShadowIntensity(val);
 	}
 }
 
@@ -4726,9 +4787,9 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 	else if (m_use_defaults)
 	{
 		vd->SetWireframe(m_vol_test_wiref);
-		vd->Set3DGamma(m_vol_gam);
+		vd->SetGamma(m_vol_gam);
 		vd->SetBoundary(m_vol_exb);
-		vd->SetOffset(m_vol_of1);
+		vd->SetSaturation(m_vol_of1);
 		vd->SetLeftThresh(m_vol_lth);
 		vd->SetRightThresh(m_vol_hth);
 		vd->SetAlpha(m_vol_alf);
@@ -4744,13 +4805,13 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 		vd->SetColormapProj(m_vol_cmj);
 		vd->SetColormapValues(m_vol_lcm, m_vol_hcm);
 
-		vd->SetEnableAlpha(m_vol_eap);
+		vd->SetAlphaEnable(m_vol_eap);
 		int resx, resy, resz;
 		vd->GetResolution(resx, resy, resz);
 		if (resz > 1)
-			vd->SetShading(m_vol_esh);
+			vd->SetShadingEnable(m_vol_esh);
 		else
-			vd->SetShading(false);
+			vd->SetShadingEnable(false);
 		vd->SetMode(m_vol_mip?1:0);
 		vd->SetAlphaPower(m_vol_trp ? 2.0 : 1.0);
 		vd->SetNR(m_vol_nrd);
@@ -4761,8 +4822,8 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 		vd->SetInvert(m_vol_inv);
 
 		//shadow
-		vd->SetShadow(m_vol_shw);
-		vd->SetShadowParams(m_vol_swi);
+		vd->SetShadowEnable(m_vol_shw);
+		vd->SetShadowIntensity(m_vol_swi);
 	}
 }
 

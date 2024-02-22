@@ -95,29 +95,29 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 		if (planes && vd->GetVR())
 			vd->GetVR()->set_planes(planes);
 		//transfer function
-		vd->Set3DGamma(vd_a->Get3DGamma());
+		vd->SetGamma(vd_a->GetGamma());
 		vd->SetBoundary(vd_a->GetBoundary());
-		vd->SetOffset(vd_a->GetOffset());
+		vd->SetSaturation(vd_a->GetSaturation());
 		vd->SetLeftThresh(vd_a->GetLeftThresh());
 		vd->SetRightThresh(vd_a->GetRightThresh());
 		fluo::Color col = vd_a->GetColor();
 		vd->SetColor(col);
 		vd->SetAlpha(vd_a->GetAlpha());
 		//shading
-		vd->SetShading(vd_a->GetShading());
+		vd->SetShadingEnable(vd_a->GetShadingEnable());
 		double amb, diff, spec, shine;
 		vd_a->GetMaterial(amb, diff, spec, shine);
 		vd->SetMaterial(amb, diff, spec, shine);
 		//shadow
-		vd->SetShadow(vd_a->GetShadow());
+		vd->SetShadowEnable(vd_a->GetShadowEnable());
 		double shadow;
-		vd_a->GetShadowParams(shadow);
-		vd->SetShadowParams(shadow);
+		vd_a->GetShadowIntensity(shadow);
+		vd->SetShadowIntensity(shadow);
 		//sample rate
 		vd->SetSampleRate(vd_a->GetSampleRate());
 		//2d adjusts
-		col = vd_a->GetGamma();
-		vd->SetGamma(col);
+		col = vd_a->GetGammaColor();
+		vd->SetGammaColor(col);
 		col = vd_a->GetBrightness();
 		vd->SetBrightness(col);
 		col = vd_a->GetHdr();

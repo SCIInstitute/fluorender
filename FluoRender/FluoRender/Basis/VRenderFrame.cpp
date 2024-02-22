@@ -3033,9 +3033,9 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 			fconfig.Write("display", vd->GetDisp());
 
 			//properties
-			fconfig.Write("3dgamma", vd->Get3DGamma());
+			fconfig.Write("3dgamma", vd->GetGamma());
 			fconfig.Write("boundary", vd->GetBoundary());
-			fconfig.Write("contrast", vd->GetOffset());
+			fconfig.Write("contrast", vd->GetSaturation());
 			fconfig.Write("left_thresh", vd->GetLeftThresh());
 			fconfig.Write("right_thresh", vd->GetRightThresh());
 			fluo::Color color = vd->GetColor();
@@ -3049,7 +3049,7 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 			str = wxString::Format("%f %f %f", color.r(), color.g(), color.b());
 			fconfig.Write("mask_color", str);
 			fconfig.Write("mask_color_set", vd->GetMaskColorSet());
-			fconfig.Write("enable_alpha", vd->GetEnableAlpha());
+			fconfig.Write("enable_alpha", vd->GetAlphaEnable());
 			fconfig.Write("alpha", vd->GetAlpha());
 			double amb, diff, spec, shine;
 			vd->GetMaterial(amb, diff, spec, shine);
@@ -3057,7 +3057,7 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 			fconfig.Write("diffuse", diff);
 			fconfig.Write("specular", spec);
 			fconfig.Write("shininess", shine);
-			fconfig.Write("shading", vd->GetShading());
+			fconfig.Write("shading", vd->GetShadingEnable());
 			fconfig.Write("samplerate", vd->GetSampleRate());
 
 			//resolution scale
@@ -3114,7 +3114,7 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 			}
 
 			//2d adjustment settings
-			str = wxString::Format("%f %f %f", vd->GetGamma().r(), vd->GetGamma().g(), vd->GetGamma().b());
+			str = wxString::Format("%f %f %f", vd->GetGammaColor().r(), vd->GetGammaColor().g(), vd->GetGammaColor().b());
 			fconfig.Write("gamma", str);
 			str = wxString::Format("%f %f %f", vd->GetBrightness().r(), vd->GetBrightness().g(), vd->GetBrightness().b());
 			fconfig.Write("brightness", str);
@@ -3146,10 +3146,10 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 			fconfig.Write("depth_ovrd", vd->GetBlendMode());
 
 			//shadow
-			fconfig.Write("shadow", vd->GetShadow());
+			fconfig.Write("shadow", vd->GetShadowEnable());
 			//shadow intensity
 			double shadow_int;
-			vd->GetShadowParams(shadow_int);
+			vd->GetShadowIntensity(shadow_int);
 			fconfig.Write("shadow_darkness", shadow_int);
 
 			//legend
@@ -3205,7 +3205,7 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 			fconfig.Write("shininess", shine);
 			fconfig.Write("alpha", alpha);
 			//2d adjustment settings
-			str = wxString::Format("%f %f %f", md->GetGamma().r(), md->GetGamma().g(), md->GetGamma().b());
+			str = wxString::Format("%f %f %f", md->GetGammaColor().r(), md->GetGammaColor().g(), md->GetGammaColor().b());
 			fconfig.Write("gamma", str);
 			str = wxString::Format("%f %f %f", md->GetBrightness().r(), md->GetBrightness().g(), md->GetBrightness().b());
 			fconfig.Write("brightness", str);
@@ -3215,9 +3215,9 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 			fconfig.Write("sync_g", md->GetSyncG());
 			fconfig.Write("sync_b", md->GetSyncB());
 			//shadow
-			fconfig.Write("shadow", md->GetShadow());
+			fconfig.Write("shadow", md->GetShadowEnable());
 			double darkness;
-			md->GetShadowParams(darkness);
+			md->GetShadowIntensity(darkness);
 			fconfig.Write("shadow_darkness", darkness);
 
 			//mesh transform
@@ -3303,8 +3303,8 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 						//dispaly
 						fconfig.Write("display", group->GetDisp());
 						//2d adjustment
-						str = wxString::Format("%f %f %f", group->GetGamma().r(),
-							group->GetGamma().g(), group->GetGamma().b());
+						str = wxString::Format("%f %f %f", group->GetGammaColor().r(),
+							group->GetGammaColor().g(), group->GetGammaColor().b());
 						fconfig.Write("gamma", str);
 						str = wxString::Format("%f %f %f", group->GetBrightness().r(),
 							group->GetBrightness().g(), group->GetBrightness().b());
@@ -3410,8 +3410,8 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 			fconfig.Write("sb_unit", view->m_sb_unit);
 
 			//2d adjustment
-			str = wxString::Format("%f %f %f", view->GetGamma().r(),
-				view->GetGamma().g(), view->GetGamma().b());
+			str = wxString::Format("%f %f %f", view->GetGammaColor().r(),
+				view->GetGammaColor().g(), view->GetGammaColor().b());
 			fconfig.Write("gamma", str);
 			str = wxString::Format("%f %f %f", view->GetBrightness().r(),
 				view->GetBrightness().g(), view->GetBrightness().b());
@@ -3800,9 +3800,9 @@ void VRenderFrame::OpenProject(wxString& filename)
 							while(!isspace(c)) ss.read(&c,1);
 							ss >> type >> left_x >> left_y >> width >>
 								height >> offset1 >> offset2 >> gamma;
-							vd->Set3DGamma(gamma);
+							vd->SetGamma(gamma);
 							vd->SetBoundary(left_y);
-							vd->SetOffset(offset1);
+							vd->SetSaturation(offset1);
 							vd->SetLeftThresh(left_x);
 							vd->SetRightThresh(left_x+width);
 							if (fconfig.Read("widgetcolor", &str))
@@ -3822,11 +3822,11 @@ void VRenderFrame::OpenProject(wxString& filename)
 						double dval;
 						bool bval;
 						if (fconfig.Read("3dgamma", &dval))
-							vd->Set3DGamma(dval);
+							vd->SetGamma(dval);
 						if (fconfig.Read("boundary", &dval))
 							vd->SetBoundary(dval);
 						if (fconfig.Read("contrast", &dval))
-							vd->SetOffset(dval);
+							vd->SetSaturation(dval);
 						if (fconfig.Read("left_thresh", &dval))
 							vd->SetLeftThresh(dval);
 						if (fconfig.Read("right_thresh", &dval))
@@ -3857,7 +3857,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 							}
 						}
 						if (fconfig.Read("enable_alpha", &bval))
-							vd->SetEnableAlpha(bval);
+							vd->SetAlphaEnable(bval);
 						if (fconfig.Read("alpha", &dval))
 							vd->SetAlpha(dval);
 
@@ -3870,7 +3870,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 							vd->SetMaterial(amb, diff, spec, shine);
 						bool shading;
 						if (fconfig.Read("shading", &shading))
-							vd->SetShading(shading);
+							vd->SetShadingEnable(shading);
 						double srate;
 						if (fconfig.Read("samplerate", &srate))
 						{
@@ -3977,7 +3977,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 							float r, g, b;
 							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
 								fluo::Color col(r,g,b);
-								vd->SetGamma(col);
+								vd->SetGammaColor(col);
 							}
 						}
 						if (fconfig.Read("brightness", &str))
@@ -4038,10 +4038,10 @@ void VRenderFrame::OpenProject(wxString& filename)
 
 						//shadow
 						if (fconfig.Read("shadow", &bVal))
-							vd->SetShadow(bVal);
+							vd->SetShadowEnable(bVal);
 						//shaodw intensity
 						if (fconfig.Read("shadow_darkness", &dval))
-							vd->SetShadowParams(dval);
+							vd->SetShadowIntensity(dval);
 
 						//legend
 						if (fconfig.Read("legend", &bVal))
@@ -4120,7 +4120,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 							float r, g, b;
 							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
 								fluo::Color col(r,g,b);
-								md->SetGamma(col);
+								md->SetGammaColor(col);
 							}
 						}
 						if (fconfig.Read("brightness", &str))
@@ -4148,10 +4148,10 @@ void VRenderFrame::OpenProject(wxString& filename)
 							md->SetSyncB(bVal);
 						//shadow
 						if (fconfig.Read("shadow", &bVal))
-							md->SetShadow(bVal);
+							md->SetShadowEnable(bVal);
 						double darkness;
 						if (fconfig.Read("shadow_darkness", &darkness))
-							md->SetShadowParams(darkness);
+							md->SetShadowIntensity(darkness);
 
 						//mesh transform
 						if (fconfig.Exists("../transform"))
@@ -4327,7 +4327,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 												float r, g, b;
 												if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
 													fluo::Color col(r,g,b);
-													group->SetGamma(col);
+													group->SetGammaColor(col);
 												}
 											}
 											if (fconfig.Read("brightness", &str))
@@ -4573,7 +4573,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 					float r, g, b;
 					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
 						fluo::Color col(r,g,b);
-						view->SetGamma(col);
+						view->SetGammaColor(col);
 					}
 				}
 				if (fconfig.Read("brightness", &str))

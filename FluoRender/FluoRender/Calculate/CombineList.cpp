@@ -163,30 +163,30 @@ int CombineList::Execute()
 
 	if (vd)
 	{
-		bool bval = vd->GetEnableAlpha();
-		vd_r->SetEnableAlpha(bval);
-		vd_g->SetEnableAlpha(bval);
-		vd_b->SetEnableAlpha(bval);
-		bval = vd->GetShading();
-		vd_r->SetShading(bval);
-		vd_g->SetShading(bval);
-		vd_b->SetShading(bval);
-		vd_r->SetShadow(false);
-		vd_g->SetShadow(false);
-		vd_b->SetShadow(false);
+		bool bval = vd->GetAlphaEnable();
+		vd_r->SetAlphaEnable(bval);
+		vd_g->SetAlphaEnable(bval);
+		vd_b->SetAlphaEnable(bval);
+		bval = vd->GetShadingEnable();
+		vd_r->SetShadingEnable(bval);
+		vd_g->SetShadingEnable(bval);
+		vd_b->SetShadingEnable(bval);
+		vd_r->SetShadowEnable(false);
+		vd_g->SetShadowEnable(false);
+		vd_b->SetShadowEnable(false);
 		//other settings
-		double dval = vd->Get3DGamma();
-		vd_r->Set3DGamma(dval);
-		vd_g->Set3DGamma(dval);
-		vd_b->Set3DGamma(dval);
+		double dval = vd->GetGamma();
+		vd_r->SetGamma(dval);
+		vd_g->SetGamma(dval);
+		vd_b->SetGamma(dval);
 		dval = vd->GetBoundary();
 		vd_r->SetBoundary(dval);
 		vd_g->SetBoundary(dval);
 		vd_b->SetBoundary(dval);
-		dval = vd->GetOffset();
-		vd_r->SetOffset(dval);
-		vd_g->SetOffset(dval);
-		vd_b->SetOffset(dval);
+		dval = vd->GetSaturation();
+		vd_r->SetSaturation(dval);
+		vd_g->SetSaturation(dval);
+		vd_b->SetSaturation(dval);
 		dval = vd->GetLeftThresh();
 		vd_r->SetLeftThresh(dval);
 		vd_g->SetLeftThresh(dval);
