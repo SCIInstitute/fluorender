@@ -2370,7 +2370,7 @@ void VRenderFrame::OnSelection(int type,
 		if (vd && vd->GetDisp())
 		{
 			wxString str = vd->GetName();
-			ShowPropPage(2, str);
+			ShowPropPage(2, view, group, vd, md, ann);
 			m_cur_sel_vol = m_data_mgr.GetVolumeIndex(str);
 
 			for (size_t i=0; i< GetViewNum(); ++i)
@@ -2388,7 +2388,7 @@ void VRenderFrame::OnSelection(int type,
 		if (md)
 		{
 			wxString str = md->GetName();
-			ShowPropPage(3, str);
+			ShowPropPage(3, view, group, vd, md, ann);
 			m_cur_sel_mesh = m_data_mgr.GetMeshIndex(str);
 			md->SetDrawBounds(true);
 		}
@@ -2399,7 +2399,7 @@ void VRenderFrame::OnSelection(int type,
 		if (ann)
 		{
 			wxString str = ann->GetName();
-			ShowPropPage(4, str);
+			ShowPropPage(4, view, group, vd, md, ann);
 		}
 		if (m_colocalization_dlg)
 			m_colocalization_dlg->SetGroup(0);
@@ -2418,7 +2418,7 @@ void VRenderFrame::OnSelection(int type,
 		if (md)
 		{
 			wxString str = md->GetName();
-			ShowPropPage(6, str);
+			ShowPropPage(6, view, group, vd, md, ann);
 		}
 		if (m_colocalization_dlg)
 			m_colocalization_dlg->SetGroup(0);
@@ -2431,7 +2431,7 @@ void VRenderFrame::OnSelection(int type,
 	}
 }
 
-void VRenderFrame::AddProps(int type,
+wxWindow* VRenderFrame::AddProps(int type,
 	VRenderGLView* view,
 	DataGroup* group,
 	VolumeData* vd,
@@ -2441,7 +2441,7 @@ void VRenderFrame::AddProps(int type,
 	//wxString str;
 	//if (view)
 	//	str = view->GetName() + ":";
-
+	wxWindow* result = 0;
 	switch (type)
 	{
 	case 2://volume
@@ -2454,6 +2454,7 @@ void VRenderFrame::AddProps(int type,
 			pane->SetName(vd->GetName());
 			pane->Hide();
 			m_prop_pages.push_back(pane);
+			result = pane;
 		}
 		break;
 	case 3://mesh
@@ -2466,6 +2467,7 @@ void VRenderFrame::AddProps(int type,
 			pane->SetName(md->GetName());
 			pane->Hide();
 			m_prop_pages.push_back(pane);
+			result = pane;
 		}
 		break;
 	case 4://annotations
@@ -2476,6 +2478,7 @@ void VRenderFrame::AddProps(int type,
 			pane->SetName(md->GetName());
 			pane->Hide();
 			m_prop_pages.push_back(pane);
+			result = pane;
 		}
 		break;
 	case 6://mesh manip
@@ -2487,11 +2490,14 @@ void VRenderFrame::AddProps(int type,
 			pane->SetName(md->GetName());
 			pane->Hide();
 			m_prop_pages.push_back(pane);
+			result = pane;
 		}
 		break;
 	default:
 		break;
 	}
+
+	return result;
 }
 
 void VRenderFrame::DeleteProps(int type, const wxString& name)
@@ -2527,27 +2533,54 @@ void VRenderFrame::DeleteProps(int type, const wxString& name)
 	}
 }
 
-void VRenderFrame::ShowPropPage(int type, const wxString& name, bool show)
+void VRenderFrame::ShowPropPage(int type,
+	VRenderGLView* view,
+	DataGroup* group,
+	VolumeData* vd,
+	MeshData* md,
+	Annotations* ann,
+	bool show )
 {
 	//find page
 	wxWindow* page = 0;
+	wxString name;
 	switch (type)
 	{
 	case 2://volume
-		page = FindVolumeProps(name);
+		if (vd)
+		{
+			name = vd->GetName();
+			page = FindVolumeProps(name);
+		}
 		break;
 	case 3://mesh
-		page = FindMeshProps(name);
+		if (md)
+		{
+			name = md->GetName();
+			page = FindMeshProps(name);
+		}
 		break;
 	case 4://annotations
-		page = FindAnnotationProps(name);
+		if (ann)
+		{
+			name = ann->GetName();
+			page = FindAnnotationProps(name);
+		}
 		break;
 	case 6://mesh manip
-		page = FindMeshManip(name);
+		if (md)
+		{
+			name = md->GetName();
+			page = FindMeshManip(name);
+		}
 		break;
 	}
 	if (!page)
-		return;
+	{
+		page = AddProps(type, view, group, vd, md, ann);
+		if (page)
+			return;
+	}
 	int page_no = m_prop_panel->FindPage(page);
 	bool added = page_no != wxNOT_FOUND;
 
@@ -4476,7 +4509,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 														if (vd)
 														{
 															group->InsertVolumeData(k-1, vd);
-															AddProps(2, view, group, vd);
+															//AddProps(2, view, group, vd);
 														}
 													}
 												}
@@ -4516,8 +4549,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 														if (md)
 														{
 															group->InsertMeshData(k-1, md);
-															AddProps(3, view, 0, 0, md);
-															AddProps(6, view, 0, 0, md);
+															//AddProps(3, view, 0, 0, md);
+															//AddProps(6, view, 0, 0, md);
 														}
 													}
 												}

@@ -6174,7 +6174,7 @@ DataGroup* VRenderGLView::AddVolumeData(VolumeData* vd, wxString group_name)
 	if (m_frame)
 	{
 		//add ui
-		m_frame->AddProps(2, this, group, vd);
+		//m_frame->AddProps(2, this, group, vd);
 		//
 		AdjustView* adjust_view = m_frame->GetAdjustView();
 		if (adjust_view)
@@ -6195,15 +6195,15 @@ void VRenderGLView::AddMeshData(MeshData* md)
 	m_md_pop_dirty = true;
 
 	//add ui
-	m_frame->AddProps(3, this, 0, 0, md);
-	m_frame->AddProps(6, this, 0, 0, md);
+	//m_frame->AddProps(3, this, 0, 0, md);
+	//m_frame->AddProps(6, this, 0, 0, md);
 }
 
 void VRenderGLView::AddAnnotations(Annotations* ann)
 {
 	m_layer_list.push_back(ann);
 	//add ui
-	m_frame->AddProps(4, this, 0, 0, 0, ann);
+	//m_frame->AddProps(4, this, 0, 0, 0, ann);
 }
 
 void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)

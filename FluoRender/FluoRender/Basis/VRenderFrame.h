@@ -210,14 +210,20 @@ public:
 		MeshData* md=0,
 		Annotations* ann=0);
 
-	void AddProps(int type,//follow above
+	wxWindow* AddProps(int type,//follow above
 		VRenderGLView* view = 0,
 		DataGroup* group = 0,
 		VolumeData* vd = 0,
 		MeshData* md = 0,
 		Annotations* ann = 0);
 	void DeleteProps(int type, const wxString& name);
-	void ShowPropPage(int type, const wxString& name, bool show = true);
+	void ShowPropPage(int type,
+		VRenderGLView* view = 0,
+		DataGroup* group = 0,
+		VolumeData* vd = 0,
+		MeshData* md = 0,
+		Annotations* ann = 0,
+		bool show = true);
 	VPropView* FindVolumeProps(VolumeData* vd);
 	MPropView* FindMeshProps(MeshData* md);
 	APropView* FindAnnotationProps(Annotations* ad);
