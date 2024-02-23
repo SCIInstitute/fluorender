@@ -29,12 +29,12 @@ DEALINGS IN THE SOFTWARE.
 #define _MMANIPULATOR_H_
 
 #include <wx/wx.h>
-#include <wx/panel.h>
+#include <wx/scrolwin.h>
 #include <wx/spinbutt.h>
 
 class VRenderFrame;
 class MeshData;
-class MManipulator: public wxPanel
+class MManipulator: public wxScrolledWindow
 {
 	enum
 	{

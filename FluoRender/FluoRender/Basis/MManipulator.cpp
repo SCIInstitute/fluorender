@@ -42,7 +42,7 @@ MManipulator::MManipulator(VRenderFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	wxPanel(parent, wxID_ANY, pos, size, style, name),
+	wxScrolledWindow(parent, wxID_ANY, pos, size, style, name),
 	m_frame(frame),
 	m_md(0)
 {
@@ -148,6 +148,7 @@ MManipulator::MManipulator(VRenderFrame* frame,
 
 	SetSizer(sizer_v);
 	Layout();
+	SetScrollRate(10, 10);
 }
 
 MManipulator::~MManipulator()

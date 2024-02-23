@@ -29,13 +29,13 @@ DEALINGS IN THE SOFTWARE.
 #define _APROPVIEW_H_
 
 #include <wx/wx.h>
-#include <wx/panel.h>
+#include <wx/scrolwin.h>
 
 using namespace std;
 
 class VRenderFrame;
 class Annotations;
-class APropView : public wxPanel
+class APropView : public wxScrolledWindow
 {
 	enum
 	{

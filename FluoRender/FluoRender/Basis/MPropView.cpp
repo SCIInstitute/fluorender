@@ -58,7 +58,7 @@ MPropView::MPropView(VRenderFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	wxPanel(parent, wxID_ANY, pos, size,style, name),
+	wxScrolledWindow(parent, wxID_ANY, pos, size,style, name),
 	m_frame(frame),
 	m_md(0),
 	m_view(0)
@@ -183,6 +183,7 @@ MPropView::MPropView(VRenderFrame* frame,
 
 	SetSizer(sizer_all);
 	Layout();
+	SetScrollRate(10, 10);
 }
 
 MPropView::~MPropView()

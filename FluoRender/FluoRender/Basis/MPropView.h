@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _MPROPVIEW_H_
 
 #include <wx/wx.h>
-#include <wx/panel.h>
+#include <wx/scrolwin.h>
 #include <wx/clrpicker.h>
 #include <wx/slider.h>
 
@@ -39,7 +39,7 @@ class VRenderFrame;
 class VRenderGLView;
 class MeshData;
 class wxSingleSlider;
-class MPropView: public wxPanel
+class MPropView: public wxScrolledWindow
 {
 	enum
 	{

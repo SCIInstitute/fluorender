@@ -2361,40 +2361,16 @@ void VRenderFrame::OnSelection(int type,
 	case 0:  //root
 		break;
 	case 1:  //view
-		//if (m_volume_prop)
-		//	m_volume_prop->Show(false);
-		//if (m_mesh_prop)
-		//	m_mesh_prop->Show(false);
-		//if (m_mesh_manip)
-		//	m_mesh_manip->Show(false);
-		//if (m_annotation_prop)
-		//	m_annotation_prop->Show(false);
 		if (m_colocalization_dlg)
 			m_colocalization_dlg->SetGroup(group);
-		m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
-		m_aui_mgr.Update();
+		//m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
+		//m_aui_mgr.Update();
 		break;
 	case 2:  //volume
 		if (vd && vd->GetDisp())
 		{
-			//m_volume_prop->SetVolumeData(vd);
-			//m_volume_prop->SetGroup(group);
-			//m_volume_prop->SetView(view);
-			//if (!m_volume_prop->IsShown())
-			//{
-			//	m_volume_prop->Show(true);
-			//	m_prop_sizer->Clear();
-			//	m_prop_sizer->Add(m_volume_prop, 1, wxEXPAND, 0);
-			//	m_prop_panel->SetSizer(m_prop_sizer);
-			//	m_prop_panel->Layout();
-			//}
-			//m_aui_mgr.GetPane(m_prop_panel).Caption(
-			//	wxString(UITEXT_PROPERTIES)+wxString(" - ")+vd->GetName());
-			//m_aui_mgr.Update();
-
-			
 			wxString str = vd->GetName();
-			ShowPropPage(str);
+			ShowPropPage(2, str);
 			m_cur_sel_vol = m_data_mgr.GetVolumeIndex(str);
 
 			for (size_t i=0; i< GetViewNum(); ++i)
@@ -2404,26 +2380,6 @@ void VRenderFrame::OnSelection(int type,
 					continue;
 				v->m_cur_vol = vd;
 			}
-
-			//if (m_volume_prop)
-			//	m_volume_prop->Show(true);
-			//if (m_mesh_prop)
-			//	m_mesh_prop->Show(false);
-			//if (m_mesh_manip)
-			//	m_mesh_manip->Show(false);
-			//if (m_annotation_prop)
-			//	m_annotation_prop->Show(false);
-		}
-		else
-		{
-			//if (m_volume_prop)
-			//	m_volume_prop->Show(false);
-			//if (m_mesh_prop)
-			//	m_mesh_prop->Show(false);
-			//if (m_mesh_manip)
-			//	m_mesh_manip->Show(false);
-			//if (m_annotation_prop)
-			//	m_annotation_prop->Show(false);
 		}
 		if (m_colocalization_dlg)
 			m_colocalization_dlg->SetGroup(group);
@@ -2431,60 +2387,20 @@ void VRenderFrame::OnSelection(int type,
 	case 3:  //mesh
 		if (md)
 		{
-			//m_mesh_prop->SetView(view);
-			//m_mesh_prop->SetMeshData(md);
-			//if (!m_mesh_prop->IsShown())
-			//{
-			//	m_mesh_prop->Show(true);
-			//	m_prop_sizer->Clear();
-			//	m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
-			//	m_prop_panel->SetSizer(m_prop_sizer);
-			//	m_prop_panel->Layout();
-			//}
-			//m_aui_mgr.GetPane(m_prop_panel).Caption(
-			//	wxString(UITEXT_PROPERTIES)+wxString(" - ")+md->GetName());
-			//m_aui_mgr.Update();
 			wxString str = md->GetName();
+			ShowPropPage(3, str);
 			m_cur_sel_mesh = m_data_mgr.GetMeshIndex(str);
 			md->SetDrawBounds(true);
 		}
-
-		//if (m_volume_prop)
-		//	m_volume_prop->Show(false);
-		//if (m_mesh_prop && md)
-		//	m_mesh_prop->Show(true);
-		//if (m_mesh_manip)
-		//	m_mesh_manip->Show(false);
-		//if (m_annotation_prop)
-		//	m_annotation_prop->Show(false);
 		if (m_colocalization_dlg)
 			m_colocalization_dlg->SetGroup(0);
 		break;
 	case 4:  //annotations
 		if (ann)
 		{
-			//m_annotation_prop->SetAnnotations(ann);
-			//if (!m_annotation_prop->IsShown())
-			//{
-			//	m_annotation_prop->Show(true);
-			//	m_prop_sizer->Clear();
-			//	m_prop_sizer->Add(m_annotation_prop, 1, wxEXPAND, 0);
-			//	m_prop_panel->SetSizer(m_prop_sizer);
-			//	m_prop_panel->Layout();
-			//}
-			//m_aui_mgr.GetPane(m_prop_panel).Caption(
-			//	wxString(UITEXT_PROPERTIES)+wxString(" - ")+ann->GetName());
-			//m_aui_mgr.Update();
+			wxString str = ann->GetName();
+			ShowPropPage(4, str);
 		}
-
-		//if (m_volume_prop)
-		//	m_volume_prop->Show(false);
-		//if (m_mesh_prop)
-		//	m_mesh_prop->Show(false);
-		//if (m_mesh_manip)
-		//	m_mesh_manip->Show(false);
-		//if (m_annotation_prop && ann)
-		//	m_annotation_prop->Show(true);
 		if (m_colocalization_dlg)
 			m_colocalization_dlg->SetGroup(0);
 		break;
@@ -2493,61 +2409,25 @@ void VRenderFrame::OnSelection(int type,
 			m_adjust_view->SetGroup(group);
 		if (m_calculation_dlg)
 			m_calculation_dlg->SetGroup(group);
-		//if (m_volume_prop)
-		//	m_volume_prop->Show(false);
-		//if (m_mesh_prop)
-		//	m_mesh_prop->Show(false);
-		//if (m_mesh_manip)
-		//	m_mesh_manip->Show(false);
-		//if (m_annotation_prop)
-		//	m_annotation_prop->Show(false);
 		if (m_colocalization_dlg)
 			m_colocalization_dlg->SetGroup(group);
-		m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
-		m_aui_mgr.Update();
+		//m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
+		//m_aui_mgr.Update();
 		break;
 	case 6:  //mesh manip
 		if (md)
 		{
-			//m_mesh_manip->SetMeshData(md);
-			//m_mesh_manip->GetData();
-			//if (!m_mesh_manip->IsShown())
-			//{
-			//	m_mesh_manip->Show(true);
-			//	m_prop_sizer->Clear();
-			//	m_prop_sizer->Add(m_mesh_manip, 1, wxEXPAND, 0);
-			//	m_prop_panel->SetSizer(m_prop_sizer);
-			//	m_prop_panel->Layout();
-			//}
-			//m_aui_mgr.GetPane(m_prop_panel).Caption(
-			//	wxString("Manipulations - ")+md->GetName());
-			//m_aui_mgr.Update();
+			wxString str = md->GetName();
+			ShowPropPage(6, str);
 		}
-
-		//if (m_volume_prop)
-		//	m_volume_prop->Show(false);
-		//if (m_mesh_prop)
-		//	m_mesh_prop->Show(false);
-		//if (m_mesh_manip && md)
-		//	m_mesh_manip->Show(true);
-		//if (m_annotation_prop)
-		//	m_annotation_prop->Show(false);
 		if (m_colocalization_dlg)
 			m_colocalization_dlg->SetGroup(0);
 		break;
 	default:
-		//if (m_volume_prop)
-		//	m_volume_prop->Show(false);
-		//if (m_mesh_prop)
-		//	m_mesh_prop->Show(false);
-		//if (m_mesh_manip)
-		//	m_mesh_manip->Show(false);
-		//if (m_annotation_prop)
-		//	m_annotation_prop->Show(false);
 		if (m_colocalization_dlg)
 			m_colocalization_dlg->SetGroup(0);
-		m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
-		m_aui_mgr.Update();
+		//m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
+		//m_aui_mgr.Update();
 	}
 }
 
@@ -2558,6 +2438,10 @@ void VRenderFrame::AddProps(int type,
 	MeshData* md,
 	Annotations* ann)
 {
+	//wxString str;
+	//if (view)
+	//	str = view->GetName() + ":";
+
 	switch (type)
 	{
 	case 2://volume
@@ -2568,8 +2452,41 @@ void VRenderFrame::AddProps(int type,
 			pane->SetGroup(group);
 			pane->SetView(view);
 			pane->SetName(vd->GetName());
+			pane->Hide();
 			m_prop_pages.push_back(pane);
-			//m_prop_panel->AddPage(pane, vd->GetName(), true);
+		}
+		break;
+	case 3://mesh
+		if (md)
+		{
+			MPropView* pane = new MPropView(this, m_prop_panel);
+			pane->SetMeshData(md);
+			//pane->SetMGroup(group);
+			pane->SetView(view);
+			pane->SetName(md->GetName());
+			pane->Hide();
+			m_prop_pages.push_back(pane);
+		}
+		break;
+	case 4://annotations
+		if (ann)
+		{
+			APropView* pane = new APropView(this, m_prop_panel);
+			pane->SetAnnotations(ann);
+			pane->SetName(md->GetName());
+			pane->Hide();
+			m_prop_pages.push_back(pane);
+		}
+		break;
+	case 6://mesh manip
+		if (md)
+		{
+			MManipulator* pane = new MManipulator(this, m_prop_panel);
+			pane->SetMeshData(md);
+			pane->GetData();
+			pane->SetName(md->GetName());
+			pane->Hide();
+			m_prop_pages.push_back(pane);
 		}
 		break;
 	default:
@@ -2577,19 +2494,58 @@ void VRenderFrame::AddProps(int type,
 	}
 }
 
-wxWindow* VRenderFrame::FindPropPage(const wxString& name)
+void VRenderFrame::DeleteProps(int type, const wxString& name)
 {
-	for (auto i : m_prop_pages)
+	//find page
+	wxWindow* page = 0;
+	switch (type)
 	{
-		if (i && i->GetName() == name)
-			return i;
+		case 2://volume
+			page = FindVolumeProps(name);
+			break;
+		case 3://mesh
+			page = FindMeshProps(name);
+			break;
+		case 4://annotations
+			page = FindAnnotationProps(name);
+			break;
+		case 6://mesh manip
+			page = FindMeshManip(name);
+			break;
 	}
-	return 0;
+	if (!page)
+		return;
+
+	auto it = std::find(m_prop_pages.begin(), m_prop_pages.end(), page);
+	if (it != m_prop_pages.end())
+	{
+		m_prop_pages.erase(it);
+		int page_no = m_prop_panel->FindPage(page);
+		if (page_no != wxNOT_FOUND)
+			m_prop_panel->DeletePage(page_no);
+		delete page;
+	}
 }
 
-void VRenderFrame::ShowPropPage(const wxString& name, bool show)
+void VRenderFrame::ShowPropPage(int type, const wxString& name, bool show)
 {
-	wxWindow* page = FindPropPage(name);
+	//find page
+	wxWindow* page = 0;
+	switch (type)
+	{
+	case 2://volume
+		page = FindVolumeProps(name);
+		break;
+	case 3://mesh
+		page = FindMeshProps(name);
+		break;
+	case 4://annotations
+		page = FindAnnotationProps(name);
+		break;
+	case 6://mesh manip
+		page = FindMeshManip(name);
+		break;
+	}
 	if (!page)
 		return;
 	int page_no = m_prop_panel->FindPage(page);
@@ -2610,9 +2566,8 @@ void VRenderFrame::ShowPropPage(const wxString& name, bool show)
 
 }
 
-VPropView* VRenderFrame::FindVolumeProps(VolumeData* vd)
+VPropView* VRenderFrame::FindVolumeProps(const wxString& name)
 {
-	wxString name = vd->GetName();
 	VPropView* result = 0;
 	for (auto i : m_prop_pages)
 	{
@@ -2623,6 +2578,79 @@ VPropView* VRenderFrame::FindVolumeProps(VolumeData* vd)
 				return result;
 		}
 	}
+	return 0;
+}
+
+VPropView* VRenderFrame::FindVolumeProps(VolumeData* vd)
+{
+	if (vd)
+		return FindVolumeProps(vd->GetName());
+	return 0;
+}
+
+MPropView* VRenderFrame::FindMeshProps(const wxString& name)
+{
+	MPropView* result = 0;
+	for (auto i : m_prop_pages)
+	{
+		if (i && i->GetName() == name)
+		{
+			result = dynamic_cast<MPropView*>(i);
+			if (result)
+				return result;
+		}
+	}
+	return 0;
+}
+
+MPropView* VRenderFrame::FindMeshProps(MeshData* md)
+{
+	if (md)
+		return FindMeshProps(md->GetName());
+	return 0;
+}
+
+APropView* VRenderFrame::FindAnnotationProps(const wxString& name)
+{
+	APropView* result = 0;
+	for (auto i : m_prop_pages)
+	{
+		if (i && i->GetName() == name)
+		{
+			result = dynamic_cast<APropView*>(i);
+			if (result)
+				return result;
+		}
+	}
+	return 0;
+}
+
+APropView* VRenderFrame::FindAnnotationProps(Annotations* ad)
+{
+	if (ad)
+		return FindAnnotationProps(ad->GetName());
+	return 0;
+}
+
+MManipulator* VRenderFrame::FindMeshManip(const wxString& name)
+{
+	MManipulator* result = 0;
+	for (auto i : m_prop_pages)
+	{
+		if (i && i->GetName() == name)
+		{
+			result = dynamic_cast<MManipulator*>(i);
+			if (result)
+				return result;
+		}
+	}
+	return 0;
+}
+
+MManipulator* VRenderFrame::FindMeshManip(MeshData* md)
+{
+	if (md)
+		return FindMeshManip(md->GetName());
 	return 0;
 }
 
@@ -5708,7 +5736,11 @@ void VRenderFrame::OnPropPageClose(wxAuiNotebookEvent& event)
 	wxAuiNotebook* panel = (wxAuiNotebook*)event.GetEventObject();
 	wxWindow* page = panel->GetPage(event.GetSelection());
 	if (page)
-		ShowPropPage(page->GetName(), false);
+	{
+		int page_no = m_prop_panel->FindPage(page);
+		page->Hide();
+		m_prop_panel->RemovePage(page_no);
+	}
 	event.Veto();
 }
 

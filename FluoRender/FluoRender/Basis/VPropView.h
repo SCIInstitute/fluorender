@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _VPROPVIEW_H_
 
 #include <wx/wx.h>
-#include <wx/panel.h>
+#include <wx/scrolwin.h>
 #include <wx/clrpicker.h>
 #include <wx/tglbtn.h>
 
@@ -43,7 +43,7 @@ class wxBasisSlider;
 class wxDoubleSlider;
 class wxSingleSlider;
 class wxUndoableCheckBox;
-class VPropView: public wxPanel
+class VPropView: public wxScrolledWindow
 {
 	enum
 	{

@@ -104,6 +104,12 @@ namespace fluo
 
 		//undo sliders
 		void add_undo_control(Undoable* control) { undo_ctrls_.push_back(control); }
+		void del_undo_control(Undoable* control)
+		{
+			auto it = std::find(undo_ctrls_.begin(), undo_ctrls_.end(), control);
+			if (it != undo_ctrls_.end())
+				undo_ctrls_.erase(it);
+		}
 		void undo();
 		void redo();
 

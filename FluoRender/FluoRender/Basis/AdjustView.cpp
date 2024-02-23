@@ -360,6 +360,16 @@ m_dft_sync_b(false)
 
 AdjustView::~AdjustView()
 {
+	//delete sliders for undo and redo
+	glbin.del_undo_control(m_r_gamma_sldr);
+	glbin.del_undo_control(m_r_brightness_sldr);
+	glbin.del_undo_control(m_r_hdr_sldr);
+	glbin.del_undo_control(m_g_gamma_sldr);
+	glbin.del_undo_control(m_g_brightness_sldr);
+	glbin.del_undo_control(m_g_hdr_sldr);
+	glbin.del_undo_control(m_b_gamma_sldr);
+	glbin.del_undo_control(m_b_brightness_sldr);
+	glbin.del_undo_control(m_b_hdr_sldr);
 }
 
 void AdjustView::RefreshVRenderViews(bool interactive)

@@ -531,7 +531,7 @@ VRenderGLView::~VRenderGLView()
 
 	m_selector.SaveBrushSettings();
 
-#ifdef _WIN32
+#ifdef _WIN3
 	//tablet
 	if (m_hTab)
 	{
@@ -557,20 +557,55 @@ VRenderGLView::~VRenderGLView()
 
 	m_loader.StopAll();
 
+	wxString str = GetName() + ":";
+
 	int i;
 	//delete groups
 	for (i = 0; i<(int)m_layer_list.size(); i++)
 	{
 		if (!m_layer_list[i])
 			continue;
+		if (m_layer_list[i]->IsA() == 2)
+		{
+			VolumeData* vd = (VolumeData*)m_layer_list[i];
+			if (vd)
+				m_frame->DeleteProps(2, vd->GetName());
+		}
+		if (m_layer_list[i]->IsA() == 3)
+		{
+			MeshData* md = (MeshData*)m_layer_list[i];
+			if (md)
+			{
+				m_frame->DeleteProps(3, md->GetName());
+				m_frame->DeleteProps(6, md->GetName());
+			}
+		}
+		if (m_layer_list[i]->IsA() == 4)
+		{
+			Annotations* ad = (Annotations*)m_layer_list[i];
+			if (ad)
+				m_frame->DeleteProps(4, ad->GetName());
+		}
 		if (m_layer_list[i]->IsA() == 5)//group
 		{
 			DataGroup* group = (DataGroup*)m_layer_list[i];
+			for (size_t j = 0; j < group->GetVolumeNum(); ++j)
+			{
+				VolumeData* vd = group->GetVolumeData(j);
+				if (vd)
+					m_frame->DeleteProps(2, vd->GetName());
+			}
 			delete group;
 		}
 		else if (m_layer_list[i]->IsA() == 6)//mesh group
 		{
 			MeshGroup* group = (MeshGroup*)m_layer_list[i];
+			for (size_t j = 0; j < group->GetMeshNum(); ++j)
+			{
+				MeshData* md = group->GetMeshData(j);
+				if (md)
+					m_frame->DeleteProps(3, md->GetName());
+			}
 			delete group;
 		}
 	}
@@ -5625,7 +5660,7 @@ void VRenderGLView::SetScale121()
 			vd = m_cur_vol;
 		else if (m_vd_pop_list.size())
 			vd = m_vd_pop_list[0];
-		double spcx, spcy, spcz;
+		double spcx = 0, spcy = 0, spcz = 0;
 		if (vd)
 			vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
 		if (spcx > 0.0)
@@ -6158,11 +6193,17 @@ void VRenderGLView::AddMeshData(MeshData* md)
 {
 	m_layer_list.push_back(md);
 	m_md_pop_dirty = true;
+
+	//add ui
+	m_frame->AddProps(3, this, 0, 0, md);
+	m_frame->AddProps(6, this, 0, 0, md);
 }
 
 void VRenderGLView::AddAnnotations(Annotations* ann)
 {
 	m_layer_list.push_back(ann);
+	//add ui
+	m_frame->AddProps(4, this, 0, 0, 0, ann);
 }
 
 void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)
@@ -6233,6 +6274,9 @@ void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)
 				if (!group) adjust_view->SetGroupLink(group);
 				adjust_view->UpdateSync();
 			}
+			VPropView* vprop_view = m_frame->FindVolumeProps(name);
+			if (vprop_view)
+				vprop_view->SetVolumeData(dst);
 		}
 	}
 }
@@ -6277,6 +6321,8 @@ void VRenderGLView::RemoveVolumeData(wxString &name)
 		}
 		}
 	}
+	wxString str = GetName() + ":";
+	m_frame->DeleteProps(2, name);
 }
 
 void VRenderGLView::RemoveVolumeDataDup(wxString &name)
@@ -6391,6 +6437,8 @@ void VRenderGLView::RemoveVolumeDataDup(wxString &name)
 			break;
 		}
 	}
+	wxString str = GetName() + ":";
+	m_frame->DeleteProps(2, name);
 }
 
 void VRenderGLView::RemoveMeshData(wxString &name)
@@ -6432,6 +6480,8 @@ void VRenderGLView::RemoveMeshData(wxString &name)
 		break;
 		}
 	}
+	wxString str = GetName() + ":";
+	m_frame->DeleteProps(3, name);
 }
 
 void VRenderGLView::RemoveAnnotations(wxString &name)
@@ -6449,10 +6499,13 @@ void VRenderGLView::RemoveAnnotations(wxString &name)
 			}
 		}
 	}
+	wxString str = GetName() + ":";
+	m_frame->DeleteProps(4, name);
 }
 
 void VRenderGLView::RemoveGroup(wxString &name)
 {
+	wxString str = GetName() + ":";
 	int i, j;
 	for (i = 0; i<(int)m_layer_list.size(); i++)
 	{
@@ -6472,6 +6525,7 @@ void VRenderGLView::RemoveGroup(wxString &name)
 					{
 						group->RemoveVolumeData(j);
 						//if add back to view
+						m_frame->DeleteProps(2, vd->GetName());
 					}
 				}
 				m_layer_list.erase(m_layer_list.begin() + i);
@@ -6491,6 +6545,7 @@ void VRenderGLView::RemoveGroup(wxString &name)
 					if (md)
 					{
 						group->RemoveMeshData(j);
+						m_frame->DeleteProps(3, md->GetName());
 					}
 				}
 				m_layer_list.erase(m_layer_list.begin() + i);

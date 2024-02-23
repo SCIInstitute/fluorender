@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Database/RecordHistParams.h>
 #include <wxSingleSlider.h>
+#include <wx/scrolwin.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include <limits>

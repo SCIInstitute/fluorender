@@ -154,7 +154,7 @@ VPropView::VPropView(VRenderFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	wxPanel(parent, wxID_ANY, pos, size,style, name),
+	wxScrolledWindow(parent, wxID_ANY, pos, size,style, name),
 	m_frame(frame),
 	m_vd(0),
 	m_lumi_change(false),
@@ -581,6 +581,7 @@ VPropView::VPropView(VRenderFrame* frame,
 	sizer_all->Add(sizer_right, 0, wxSHRINK);
 	SetSizer(sizer_all);
 	Layout();
+	SetScrollRate(10, 10);
 
 	//add sliders for undo and redo
 	glbin.add_undo_control(m_gamma_sldr);
@@ -609,6 +610,29 @@ VPropView::VPropView(VRenderFrame* frame,
 
 VPropView::~VPropView()
 {
+	//delete sliders for undo and redo
+	glbin.del_undo_control(m_gamma_sldr);
+	glbin.del_undo_control(m_saturation_sldr);
+	glbin.del_undo_control(m_luminance_sldr);
+	glbin.del_undo_control(m_alpha_sldr);
+	glbin.del_undo_control(m_hi_shading_sldr);
+	glbin.del_undo_control(m_low_shading_sldr);
+	glbin.del_undo_control(m_boundary_sldr);
+	glbin.del_undo_control(m_thresh_sldr);
+	glbin.del_undo_control(m_shadow_sldr);
+	glbin.del_undo_control(m_sample_sldr);
+	glbin.del_undo_control(m_colormap_sldr);
+	//delete checkboxes
+	glbin.del_undo_control(m_gamma_chk);
+	glbin.del_undo_control(m_saturation_chk);
+	glbin.del_undo_control(m_luminance_chk);
+	glbin.del_undo_control(m_alpha_chk);
+	glbin.del_undo_control(m_shade_chk);
+	glbin.del_undo_control(m_boundary_chk);
+	glbin.del_undo_control(m_thresh_chk);
+	glbin.del_undo_control(m_shadow_chk);
+	glbin.del_undo_control(m_sample_chk);
+	glbin.del_undo_control(m_colormap_chk);
 }
 
 void VPropView::GetSettings()

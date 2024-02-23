@@ -431,6 +431,7 @@ m_plane_mode(kNormal)
 
 	DisableAll();
 
+	//add controls
 	glbin.add_undo_control(m_x1_clip_sldr);
 	glbin.add_undo_control(m_y1_clip_sldr);
 	glbin.add_undo_control(m_z1_clip_sldr);
@@ -441,6 +442,13 @@ m_plane_mode(kNormal)
 
 ClippingView::~ClippingView()
 {
+	//delete controls
+	glbin.del_undo_control(m_x1_clip_sldr);
+	glbin.del_undo_control(m_y1_clip_sldr);
+	glbin.del_undo_control(m_z1_clip_sldr);
+	glbin.del_undo_control(m_x_rot_sldr);
+	glbin.del_undo_control(m_y_rot_sldr);
+	glbin.del_undo_control(m_z_rot_sldr);
 }
 
 void ClippingView::SetChannLink(bool chann)

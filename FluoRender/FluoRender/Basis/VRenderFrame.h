@@ -216,15 +216,19 @@ public:
 		VolumeData* vd = 0,
 		MeshData* md = 0,
 		Annotations* ann = 0);
-	wxWindow* FindPropPage(const wxString& name);
-	void ShowPropPage(const wxString& name, bool show = true);
+	void DeleteProps(int type, const wxString& name);
+	void ShowPropPage(int type, const wxString& name, bool show = true);
 	VPropView* FindVolumeProps(VolumeData* vd);
+	MPropView* FindMeshProps(MeshData* md);
+	APropView* FindAnnotationProps(Annotations* ad);
+	MManipulator* FindMeshManip(MeshData* md);
+	VPropView* FindVolumeProps(const wxString& str);
+	MPropView* FindMeshProps(const wxString& str);
+	APropView* FindAnnotationProps(const wxString& str);
+	MManipulator* FindMeshManip(const wxString& str);
 
 	//prop view
 	AdjustView* GetAdjustView();
-	//tool views
-	//VPropView* GetPropView()
-	//{ return m_volume_prop; }
 	//movie view
 	VMovieView* GetMovieView()
 	{ return m_movie_view; }
@@ -431,10 +435,6 @@ private:
 	ScriptBreakDlg* m_script_break_dlg;
 	//prop panel children
 	std::vector<wxWindow*> m_prop_pages;
-	//VPropView* m_volume_prop;
-	//MPropView* m_mesh_prop;
-	//MManipulator* m_mesh_manip;
-	//APropView* m_annotation_prop;
 	//tester
 	TesterDlg* m_tester;
 	//flag for show/hide views

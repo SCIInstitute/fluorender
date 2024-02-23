@@ -40,7 +40,7 @@ APropView::APropView(VRenderFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	wxPanel(parent, wxID_ANY, pos, size, style, name),
+	wxScrolledWindow(parent, wxID_ANY, pos, size, style, name),
 	m_frame(frame),
 	m_ann(0)
 {
@@ -74,6 +74,7 @@ APropView::APropView(VRenderFrame* frame,
 
 	SetSizer(sizer_v1);
 	Layout();
+	SetScrollRate(10, 10);
 }
 
 APropView::~APropView()
