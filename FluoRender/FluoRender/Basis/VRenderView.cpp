@@ -363,7 +363,7 @@ void VRenderView::CreateBar()
 	m_options_toolbar->SetToolBitmapSize(toolsize);
 
 	//the spacer
-	wxStaticText * stb;
+	//wxStaticText * stb;
 
 	//add the options
 	wxBitmap bitmap;
@@ -391,10 +391,11 @@ void VRenderView::CreateBar()
 	m_options_toolbar->ToggleTool(ID_VolumeMultiRd,false);
 	m_options_toolbar->ToggleTool(ID_VolumeCompRd,false);
 
-	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(1,tbs.y-2)));
-	stb->SetBackgroundColour(wxColour(128,128,128));
-	m_options_toolbar->AddControl(stb);
+	//stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
+	//	wxDefaultPosition, FromDIP(wxSize(1,tbs.y-2)));
+	//stb->SetBackgroundColour(wxColour(128,128,128));
+	//m_options_toolbar->AddControl(stb);
+	m_options_toolbar->AddSeparator();
 
 	switch (m_glview->GetVolMethod())
 	{
@@ -415,10 +416,11 @@ void VRenderView::CreateBar()
 	bitmap = wxGetBitmap(camera, m_dpi_sf2);
 	m_options_toolbar->AddControl(cam);
 
-	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(1, tbs.y-2)));
-	stb->SetBackgroundColour(wxColour(128,128,128));
-	m_options_toolbar->AddControl(stb);
+	//stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
+	//	wxDefaultPosition, FromDIP(wxSize(1, tbs.y-2)));
+	//stb->SetBackgroundColour(wxColour(128,128,128));
+	//m_options_toolbar->AddControl(stb);
+	m_options_toolbar->AddSeparator();
 
 	bitmap = wxGetBitmap(info, m_dpi_sf2);
 	m_options_toolbar->AddCheckTool(
@@ -451,35 +453,36 @@ void VRenderView::CreateBar()
 		"Toggle View of the Colormap Sample",
 		"Toggle View of the Colormap Sample");
 	m_options_toolbar->ToggleTool(ID_ColormapChk, false);
-#ifndef _DARWIN
-	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(1, tbs.y-2)));
-	stb->SetBackgroundColour(wxColour(128,128,128));
-	m_options_toolbar->AddControl(stb);
-#endif
+//#ifndef _DARWIN
+//	stb = new wxStaticText(m_options_toolbar, wxID_ANY, "",
+//		wxDefaultPosition, FromDIP(wxSize(1, tbs.y-2)));
+//	stb->SetBackgroundColour(wxColour(128,128,128));
+//	m_options_toolbar->AddControl(stb);
+//#endif
+	m_options_toolbar->AddSeparator();
 
 	//scale bar
 	bitmap = wxGetBitmap(scalebar, m_dpi_sf2);
 	m_options_toolbar->AddTool(
 		ID_ScaleBar, "Scale Bar", bitmap,
 		"Toggle Scalebar Options (Off, On, On with text)");
-	m_scale_text = new wxTextCtrl(m_options_toolbar, ID_ScaleText, "50",
+
+	sizer_h_1->Add(40, 40);
+	sizer_h_1->Add(m_options_toolbar, 1, wxALIGN_CENTER);
+	m_options_toolbar->Realize();
+
+	m_scale_text = new wxTextCtrl(this, ID_ScaleText, "50",
 		wxDefaultPosition, FromDIP(wxSize(35, 20)), 0, vald_int);
 	m_scale_text->Disable();
-	m_scale_cmb = new wxComboBox(m_options_toolbar, ID_ScaleCmb, "",
+	m_scale_cmb = new wxComboBox(this, ID_ScaleCmb, "",
 		wxDefaultPosition, FromDIP(wxSize(50, 30)), 0, NULL, wxCB_READONLY);
 	m_scale_cmb->Append("nm");
 	m_scale_cmb->Append(L"\u03BCm");
 	m_scale_cmb->Append("mm");
 	m_scale_cmb->Select(1);
 	m_scale_cmb->Disable();
-
-	m_options_toolbar->AddControl(m_scale_text);
-	m_options_toolbar->AddControl(m_scale_cmb);
-
-	sizer_h_1->Add(40, 40);
-	sizer_h_1->Add(m_options_toolbar, 1, wxALIGN_CENTER);
-	m_options_toolbar->Realize();
+	sizer_h_1->Add(m_scale_text, 0, wxALIGN_CENTER);
+	sizer_h_1->Add(m_scale_cmb, 0, wxALIGN_CENTER);
 
 	//m_options_toolbar->Realize();
 //#ifndef _DARWIN

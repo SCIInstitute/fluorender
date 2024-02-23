@@ -111,11 +111,11 @@ namespace fluo
 
 	Color::Color(const HSVColor& hsv)
 	{
-		int hh(std::round(hsv.hue_/360.0));
+		int hh((int)(hsv.hue_ / 360.0));
 		double hue(hsv.hue_-hh*360.0);
 
 		double h6(hue/60.0);
-		int i(std::round(h6));
+		int i((int)(h6));
 		double f(h6-i);
 		double p1(hsv.val_*(1.0-hsv.sat_));
 		double p2(hsv.val_*(1.0-(hsv.sat_*f)));

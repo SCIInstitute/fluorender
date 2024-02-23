@@ -6283,6 +6283,9 @@ void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)
 
 void VRenderGLView::RemoveVolumeData(wxString &name)
 {
+	wxString str = GetName() + ":";
+	m_frame->DeleteProps(2, name);
+
 	for (auto iter = m_layer_list.begin();
 		iter != m_layer_list.end(); ++iter)
 	{
@@ -6321,12 +6324,12 @@ void VRenderGLView::RemoveVolumeData(wxString &name)
 		}
 		}
 	}
-	wxString str = GetName() + ":";
-	m_frame->DeleteProps(2, name);
 }
 
 void VRenderGLView::RemoveVolumeDataDup(wxString &name)
 {
+	wxString str = GetName() + ":";
+	m_frame->DeleteProps(2, name);
 	VolumeData* vd_main = 0;
 	for (auto iter = m_layer_list.begin();
 		iter != m_layer_list.end() && !vd_main;
@@ -6437,12 +6440,13 @@ void VRenderGLView::RemoveVolumeDataDup(wxString &name)
 			break;
 		}
 	}
-	wxString str = GetName() + ":";
-	m_frame->DeleteProps(2, name);
 }
 
 void VRenderGLView::RemoveMeshData(wxString &name)
 {
+	wxString str = GetName() + ":";
+	m_frame->DeleteProps(3, name);
+
 	int i, j;
 
 	for (i = 0; i<(int)m_layer_list.size(); i++)
@@ -6480,12 +6484,12 @@ void VRenderGLView::RemoveMeshData(wxString &name)
 		break;
 		}
 	}
-	wxString str = GetName() + ":";
-	m_frame->DeleteProps(3, name);
 }
 
 void VRenderGLView::RemoveAnnotations(wxString &name)
 {
+	wxString str = GetName() + ":";
+	m_frame->DeleteProps(4, name);
 	for (int i = 0; i<(int)m_layer_list.size(); i++)
 	{
 		if (!m_layer_list[i])
@@ -6499,8 +6503,6 @@ void VRenderGLView::RemoveAnnotations(wxString &name)
 			}
 		}
 	}
-	wxString str = GetName() + ":";
-	m_frame->DeleteProps(4, name);
 }
 
 void VRenderGLView::RemoveGroup(wxString &name)

@@ -191,6 +191,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	else
 		m_dup_data = &copy;
 
+	m_vr = new flvr::VolumeRenderer(*copy.m_vr);
 	//layer properties
 	type = 2;//volume
 	SetName(copy.GetName()+wxString::Format("_%d", m_dup_counter));
@@ -206,7 +207,6 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_bounds = copy.m_bounds;
 
 	//volume renderer and texture
-	m_vr = new flvr::VolumeRenderer(*copy.m_vr);
 	m_tex = copy.m_tex;
 
 	//current channel index

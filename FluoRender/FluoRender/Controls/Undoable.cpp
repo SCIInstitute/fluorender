@@ -37,8 +37,11 @@ Undoable::Undoable() :
 
 void Undoable::Clear()
 {
-	stack_pointer_ = -1;
-	stack_.clear();
+	if (stack_.size() > 1)
+	{
+		stack_pointer_ = 0;
+		stack_.erase(stack_.begin() + 1, stack_.end());
+	}
 }
 
 double Undoable::GetTimeUndo()

@@ -556,8 +556,8 @@ VRenderFrame::VRenderFrame(
 		FloatingSize(FromDIP(wxSize(400, 600))).Layer(3));
 	m_aui_mgr.AddPane(m_prop_panel, wxAuiPaneInfo().
 		Name("m_prop_panel").Caption(UITEXT_PROPERTIES).
-		Bottom().CloseButton(true).MinSize(FromDIP(wxSize(300, 155))).
-		FloatingSize(FromDIP(wxSize(1100, 155))).Layer(2));
+		Bottom().CloseButton(true).MinSize(FromDIP(wxSize(500, 160))).
+		FloatingSize(FromDIP(wxSize(1100, 160))).Layer(2));
 	m_aui_mgr.AddPane(m_adjust_view, wxAuiPaneInfo().
 		Name("m_adjust_view").Caption(UITEXT_ADJUST).
 		Left().CloseButton(true).MinSize(FromDIP(wxSize(110, 700))).
@@ -2523,7 +2523,7 @@ void VRenderFrame::DeleteProps(int type, const wxString& name)
 		int page_no = m_prop_panel->FindPage(page);
 		if (page_no != wxNOT_FOUND)
 			m_prop_panel->DeletePage(page_no);
-		delete page;
+		//delete page;
 	}
 }
 
@@ -4474,7 +4474,10 @@ void VRenderFrame::OpenProject(wxString& filename)
 													{
 														VolumeData* vd = m_data_mgr.GetVolumeData(str);
 														if (vd)
+														{
 															group->InsertVolumeData(k-1, vd);
+															AddProps(2, view, group, vd);
+														}
 													}
 												}
 											}
@@ -4511,7 +4514,11 @@ void VRenderFrame::OpenProject(wxString& filename)
 													{
 														MeshData* md = m_data_mgr.GetMeshData(str);
 														if (md)
+														{
 															group->InsertMeshData(k-1, md);
+															AddProps(3, view, 0, 0, md);
+															AddProps(6, view, 0, 0, md);
+														}
 													}
 												}
 											}
