@@ -47,7 +47,7 @@ void Undoable::Clear()
 double Undoable::GetTimeUndo()
 {
 	size_t size = stack_.size();
-	if (!size || stack_pointer_ == -1 || stack_pointer_ >= size)
+	if (!size || stack_pointer_ < 1 || stack_pointer_ >= size)
 		return 0;
 	return stack_[stack_pointer_].first;
 }
