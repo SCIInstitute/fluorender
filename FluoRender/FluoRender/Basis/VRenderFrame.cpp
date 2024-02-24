@@ -2578,7 +2578,7 @@ void VRenderFrame::ShowPropPage(int type,
 	if (!page)
 	{
 		page = AddProps(type, view, group, vd, md, ann);
-		if (page)
+		if (!page)
 			return;
 	}
 	int page_no = m_prop_panel->FindPage(page);
