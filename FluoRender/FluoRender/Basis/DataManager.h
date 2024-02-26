@@ -349,7 +349,7 @@ public:
 	void SetShadowEnable(bool bVal);
 	bool GetShadowEnable();
 	void SetShadowIntensity(double val);
-	void GetShadowIntensity(double& val);
+	double GetShadowIntensity();
 
 	//sample rate
 	void SetSampleRateEnable(bool bval);
@@ -586,6 +586,7 @@ private:
 	double m_hi_thresh;
 
 	bool m_luminance_enable;
+	double m_luminance;
 
 	bool m_alpha_enable;
 	double m_alpha;
@@ -746,7 +747,7 @@ public:
 	void SetShadowEnable(bool bVal);
 	bool GetShadowEnable();
 	void SetShadowIntensity(double val);
-	void GetShadowIntensity(double &val);
+	double GetShadowIntensity();
 
 	void SetTranslation(double x, double y, double z);
 	void GetTranslation(double &x, double &y, double &z);
@@ -1118,26 +1119,33 @@ public:
 	void ResetSync();
 
 	//volume properties
-	void SetAlphaEnable(bool mode);
-	void SetAlpha(double dVal);
-	void SetSampleRate(double dVal);
-	void SetBoundary(double dVal);
+	void SetGammaEnable(bool);
 	void SetGamma(double dVal);
+	void SetBoundaryEnable(bool);
+	void SetBoundary(double dVal);
+	void SetSaturationEnable(bool);
 	void SetSaturation(double dVal);
+	void SetThreshEnable(bool);
 	void SetLeftThresh(double dVal);
 	void SetRightThresh(double dVal);
+	void SetLuminanceEnable(bool);
+	void SetLuminance(double dVal);
+	void SetAlphaEnable(bool mode);
+	void SetAlpha(double dVal);
+	void SetShadingEnable(bool shading);
 	void SetLowShading(double dVal);
 	void SetHiShading(double dVal);
-	void SetLuminance(double dVal);
+	void SetShadowEnable(bool shadow);
+	void SetShadowIntensity(double val);
+	void SetSampleRateEnable(bool bval);
+	void SetSampleRate(double dVal);
+
 	void SetColormapMode(int mode);
 	void SetColormapDisp(bool disp);
 	void SetColormapValues(double low, double high);
 	void SetColormapInv(double val);
 	void SetColormap(int value);
 	void SetColormapProj(int value);
-	void SetShadingEnable(bool shading);
-	void SetShadowEnable(bool shadow);
-	void SetShadowIntensity(double val);
 	void SetMode(int mode);
 	void SetAlphaPower(double val);
 	void SetLabelMode(int mode);

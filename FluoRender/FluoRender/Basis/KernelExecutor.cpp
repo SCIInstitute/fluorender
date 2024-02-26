@@ -220,9 +220,7 @@ bool KernelExecutor::Execute()
 			vd->SetMaterial(amb, diff, spec, shine);
 			//shadow
 			vd->SetShadowEnable(m_vd->GetShadowEnable());
-			double shadow;
-			m_vd->GetShadowIntensity(shadow);
-			vd->SetShadowIntensity(shadow);
+			vd->SetShadowIntensity(m_vd->GetShadowIntensity());
 			//sample rate
 			vd->SetSampleRate(m_vd->GetSampleRate());
 			//2d adjusts

@@ -3129,7 +3129,7 @@ bool VRenderGLView::GetMeshShadow(double &val)
 			MeshData* md = (MeshData*)m_layer_list[i];
 			if (md && md->GetDisp())
 			{
-				md->GetShadowIntensity(val);
+				val = md->GetShadowIntensity();
 				return md->GetShadowEnable();
 			}
 		}
@@ -3143,7 +3143,7 @@ bool VRenderGLView::GetMeshShadow(double &val)
 					MeshData* md = group->GetMeshData(j);
 					if (md && md->GetDisp())
 					{
-						md->GetShadowIntensity(val);
+						val = md->GetShadowIntensity();
 						return md->GetShadowEnable();
 					}
 				}
@@ -3349,7 +3349,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 		vd->SetMaskMode(msk_mode);
 		vd->SetColormapMode(colormode);
 		vd->GetVR()->set_shading(shading);
-		vd->GetShadowIntensity(shadow_darkness);
+		shadow_darkness = vd->GetShadowIntensity();
 	}
 	else
 	{
@@ -3385,7 +3385,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 			vd->SetColormapMode(colormodes[i]);
 			vd->GetVR()->set_shading(shadings[i]);
 		}
-		list[0]->GetShadowIntensity(shadow_darkness);
+		shadow_darkness = list[0]->GetShadowIntensity();
 	}
 
 	//

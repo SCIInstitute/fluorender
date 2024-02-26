@@ -3289,9 +3289,7 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 			//shadow
 			fconfig.Write("shadow", vd->GetShadowEnable());
 			//shadow intensity
-			double shadow_int;
-			vd->GetShadowIntensity(shadow_int);
-			fconfig.Write("shadow_darkness", shadow_int);
+			fconfig.Write("shadow_darkness", vd->GetShadowIntensity());
 
 			//legend
 			fconfig.Write("legend", vd->GetLegend());
@@ -3357,9 +3355,7 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 			fconfig.Write("sync_b", md->GetSyncB());
 			//shadow
 			fconfig.Write("shadow", md->GetShadowEnable());
-			double darkness;
-			md->GetShadowIntensity(darkness);
-			fconfig.Write("shadow_darkness", darkness);
+			fconfig.Write("shadow_darkness", md->GetShadowIntensity());
 
 			//mesh transform
 			fconfig.SetPath("../transform");

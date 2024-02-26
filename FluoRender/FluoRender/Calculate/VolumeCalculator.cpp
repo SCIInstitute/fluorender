@@ -110,9 +110,7 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 		vd->SetMaterial(amb, diff, spec, shine);
 		//shadow
 		vd->SetShadowEnable(vd_a->GetShadowEnable());
-		double shadow;
-		vd_a->GetShadowIntensity(shadow);
-		vd->SetShadowIntensity(shadow);
+		vd->SetShadowIntensity(vd_a->GetShadowIntensity());
 		//sample rate
 		vd->SetSampleRate(vd_a->GetSampleRate());
 		//2d adjusts

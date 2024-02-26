@@ -225,7 +225,7 @@ void MPropView::GetSettings()
 	//shadow
 	double darkness;
 	m_shadow_chk->SetValue(m_md->GetShadowEnable());
-	m_md->GetShadowIntensity(darkness);
+	darkness = m_md->GetShadowIntensity();
 	m_shadow_sldr->SetValue(std::round(darkness*100.0));
 	str = wxString::Format("%.2f", darkness);
 	m_shadow_text->ChangeValue(str);
