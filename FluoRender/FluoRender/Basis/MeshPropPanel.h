@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2024 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -25,21 +25,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _MPROPVIEW_H_
-#define _MPROPVIEW_H_
+#ifndef _MESHPROPPANEL_H_
+#define _MESHPROPPANEL_H_
 
-#include <wx/wx.h>
+#include <PropPanel.h>
 #include <wx/scrolwin.h>
 #include <wx/clrpicker.h>
 #include <wx/slider.h>
 
 using namespace std;
 
-class VRenderFrame;
 class VRenderGLView;
 class MeshData;
 class wxSingleSlider;
-class MPropView: public wxScrolledWindow
+class MeshPropPanel: public PropPanel
 {
 	enum
 	{
@@ -61,23 +60,21 @@ class MPropView: public wxScrolledWindow
 	};
 
 public:
-	MPropView(VRenderFrame* frame,
+	MeshPropPanel(VRenderFrame* frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
-		const wxString& name = "MPropView");
-	~MPropView();
+		const wxString& name = "MeshPropPanel");
+	~MeshPropPanel();
 
 	void SetView(VRenderGLView* view);
 	void SetMeshData(MeshData* md);
 	MeshData* GetMeshData();
-	void RefreshVRenderViews(bool tree=false);
 
-	void GetSettings();
+	virtual void GetSettings();
 
 private:
-	VRenderFrame* m_frame;
 	VRenderGLView* m_view;
 	MeshData* m_md;
 
@@ -123,4 +120,4 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 
-#endif//_MPROPVIEW_H_
+#endif//_MESHPROPPANEL_H_

@@ -53,7 +53,7 @@ wxSingleSlider::wxSingleSlider(
 	Update();
 }
 
-bool wxSingleSlider::setValue(int val)
+bool wxSingleSlider::setValue(int val, bool notify)
 {
 	int old = val_;
 	val_ = val < min_val_ ? min_val_ :
@@ -63,11 +63,15 @@ bool wxSingleSlider::setValue(int val)
 		return changed;
 	Refresh();
 	Update();
-	wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
-	e.SetEventObject(this);
-	e.SetString("update");
-	ProcessWindowEvent(e);
-	wxPostEvent(parent_, e);
+
+	if (notify)
+	{
+		wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
+		e.SetEventObject(this);
+		e.SetString("update");
+		ProcessWindowEvent(e);
+		wxPostEvent(parent_, e);
+	}
 
 	return changed;
 }
@@ -75,6 +79,17 @@ bool wxSingleSlider::setValue(int val)
 bool wxSingleSlider::SetValue(int val)
 {
 	bool changed = setValue(val);
+	double t;
+	if (time_sample(t))
+		push(t);
+	else
+		replace(t);
+	return changed;
+}
+
+bool wxSingleSlider::ChangeValue(int val)
+{
+	bool changed = setValue(val, false);
 	double t;
 	if (time_sample(t))
 		push(t);

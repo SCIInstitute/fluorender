@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2024 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -25,25 +25,24 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "MManipulator.h"
+#include "ManipPropPanel.h"
 #include "VRenderFrame.h"
 #include <DataManager.h>
 #include <compatibility.h>
 
-BEGIN_EVENT_TABLE(MManipulator, wxPanel)
-	EVT_SPIN_UP(wxID_ANY, MManipulator::OnSpinUp)
-	EVT_SPIN_DOWN(wxID_ANY, MManipulator::OnSpinDown)
-	EVT_TEXT_ENTER(wxID_ANY, MManipulator::OnValueEnter)
+BEGIN_EVENT_TABLE(ManipPropPanel, wxPanel)
+	EVT_SPIN_UP(wxID_ANY, ManipPropPanel::OnSpinUp)
+	EVT_SPIN_DOWN(wxID_ANY, ManipPropPanel::OnSpinDown)
+	EVT_TEXT_ENTER(wxID_ANY, ManipPropPanel::OnValueEnter)
 END_EVENT_TABLE()
 
-MManipulator::MManipulator(VRenderFrame* frame,
+ManipPropPanel::ManipPropPanel(VRenderFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	wxScrolledWindow(parent, wxID_ANY, pos, size, style, name),
-	m_frame(frame),
+	PropPanel(frame, parent, pos, size, style, name),
 	m_md(0)
 {
 	// temporarily block events during constructor:
@@ -151,27 +150,26 @@ MManipulator::MManipulator(VRenderFrame* frame,
 	SetScrollRate(10, 10);
 }
 
-MManipulator::~MManipulator()
+ManipPropPanel::~ManipPropPanel()
 {
 }
 
-void MManipulator::SetMeshData(MeshData* md)
+void ManipPropPanel::GetSettings()
+{
+
+}
+
+void ManipPropPanel::SetMeshData(MeshData* md)
 {
 	m_md = md;
 }
 
-MeshData* MManipulator::GetMeshData()
+MeshData* ManipPropPanel::GetMeshData()
 {
 	return m_md;
 }
 
-void MManipulator::RefreshVRenderViews()
-{
-	if (m_frame)
-		m_frame->RefreshVRenderViews();
-}
-
-void MManipulator::GetData()
+void ManipPropPanel::GetData()
 {
 	if (!m_md)
 		return;
@@ -210,7 +208,7 @@ void MManipulator::GetData()
 	m_z_scl_text->SetValue(str);
 }
 
-void MManipulator::OnSpinUp(wxSpinEvent& event)
+void ManipPropPanel::OnSpinUp(wxSpinEvent& event)
 {
 	int sender_id = event.GetId();
 	wxTextCtrl* text_ctrl = 0;
@@ -253,7 +251,7 @@ void MManipulator::OnSpinUp(wxSpinEvent& event)
 	}
 }
 
-void MManipulator::OnSpinDown(wxSpinEvent& event)
+void ManipPropPanel::OnSpinDown(wxSpinEvent& event)
 {
 	int sender_id = event.GetId();
 	wxTextCtrl* text_ctrl = 0;
@@ -296,7 +294,7 @@ void MManipulator::OnSpinDown(wxSpinEvent& event)
 	}
 }
 
-void MManipulator::UpdateData()
+void ManipPropPanel::UpdateData()
 {
 	if (!m_md)
 		return;
@@ -329,7 +327,7 @@ void MManipulator::UpdateData()
 	RefreshVRenderViews();
 }
 
-void MManipulator::OnValueEnter(wxCommandEvent& event)
+void ManipPropPanel::OnValueEnter(wxCommandEvent& event)
 {
 	int sender_id = event.GetId();
 	wxTextCtrl* text_ctrl = 0;

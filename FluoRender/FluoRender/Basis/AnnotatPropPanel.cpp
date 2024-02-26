@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2024 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -25,23 +25,22 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "APropView.h"
+#include "AnnotatPropPanel.h"
 #include "VRenderFrame.h"
 #include <DataManager.h>
 #include <wx/valnum.h>
 
-BEGIN_EVENT_TABLE(APropView, wxPanel)
-	EVT_BUTTON(ID_MemoUpdateBtn, APropView::OnMemoUpdateBtn)
+BEGIN_EVENT_TABLE(AnnotatPropPanel, wxPanel)
+	EVT_BUTTON(ID_MemoUpdateBtn, AnnotatPropPanel::OnMemoUpdateBtn)
 END_EVENT_TABLE()
 
-APropView::APropView(VRenderFrame* frame,
+AnnotatPropPanel::AnnotatPropPanel(VRenderFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	wxScrolledWindow(parent, wxID_ANY, pos, size, style, name),
-	m_frame(frame),
+	PropPanel(frame, parent, pos, size, style, name),
 	m_ann(0)
 {
 	// temporarily block events during constructor:
@@ -77,11 +76,11 @@ APropView::APropView(VRenderFrame* frame,
 	SetScrollRate(10, 10);
 }
 
-APropView::~APropView()
+AnnotatPropPanel::~AnnotatPropPanel()
 {
 }
 
-void APropView::GetSettings()
+void AnnotatPropPanel::GetSettings()
 {
 	if (!m_ann)
 		return;
@@ -100,25 +99,19 @@ void APropView::GetSettings()
 	}
 }
 
-void APropView::SetAnnotations(Annotations* ann)
+void AnnotatPropPanel::SetAnnotations(Annotations* ann)
 {
 	m_ann = ann;
 
 	GetSettings();
 }
 
-Annotations* APropView::GetAnnotations()
+Annotations* AnnotatPropPanel::GetAnnotations()
 {
 	return m_ann;
 }
 
-void APropView::RefreshVRenderViews(bool tree)
-{
-	if (m_frame)
-		m_frame->RefreshVRenderViews(tree);
-}
-
-void APropView::OnMemoUpdateBtn(wxCommandEvent& event)
+void AnnotatPropPanel::OnMemoUpdateBtn(wxCommandEvent& event)
 {
 	if (m_ann)
 	{

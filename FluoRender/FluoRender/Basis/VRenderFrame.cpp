@@ -412,10 +412,10 @@ VRenderFrame::VRenderFrame(
 		wxDefaultPosition, wxDefaultSize,
 		wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
 	//prop panel chidren
-	//m_volume_prop = new VPropView(this, m_prop_panel);
-	//m_mesh_prop = new MPropView(this, m_prop_panel);
-	//m_mesh_manip = new MManipulator(this, m_prop_panel);
-	//m_annotation_prop = new APropView(this, m_prop_panel);
+	//m_volume_prop = new VolumePropPanel(this, m_prop_panel);
+	//m_mesh_prop = new MeshPropPanel(this, m_prop_panel);
+	//m_mesh_manip = new ManipPropPanel(this, m_prop_panel);
+	//m_annotation_prop = new AnnotatPropPanel(this, m_prop_panel);
 	//m_prop_panel->SetSizer(m_prop_sizer);
 	//m_prop_sizer->Add(m_volume_prop, 1, wxEXPAND, 0);
 	//m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
@@ -2447,7 +2447,7 @@ wxWindow* VRenderFrame::AddProps(int type,
 	case 2://volume
 		if (vd)
 		{
-			VPropView* pane = new VPropView(this, m_prop_panel);
+			VolumePropPanel* pane = new VolumePropPanel(this, m_prop_panel);
 			pane->SetVolumeData(vd);
 			pane->SetGroup(group);
 			pane->SetView(view);
@@ -2460,7 +2460,7 @@ wxWindow* VRenderFrame::AddProps(int type,
 	case 3://mesh
 		if (md)
 		{
-			MPropView* pane = new MPropView(this, m_prop_panel);
+			MeshPropPanel* pane = new MeshPropPanel(this, m_prop_panel);
 			pane->SetMeshData(md);
 			//pane->SetMGroup(group);
 			pane->SetView(view);
@@ -2473,7 +2473,7 @@ wxWindow* VRenderFrame::AddProps(int type,
 	case 4://annotations
 		if (ann)
 		{
-			APropView* pane = new APropView(this, m_prop_panel);
+			AnnotatPropPanel* pane = new AnnotatPropPanel(this, m_prop_panel);
 			pane->SetAnnotations(ann);
 			pane->SetName(md->GetName());
 			pane->Hide();
@@ -2484,7 +2484,7 @@ wxWindow* VRenderFrame::AddProps(int type,
 	case 6://mesh manip
 		if (md)
 		{
-			MManipulator* pane = new MManipulator(this, m_prop_panel);
+			ManipPropPanel* pane = new ManipPropPanel(this, m_prop_panel);
 			pane->SetMeshData(md);
 			pane->GetData();
 			pane->SetName(md->GetName());
@@ -2599,14 +2599,20 @@ void VRenderFrame::ShowPropPage(int type,
 
 }
 
-VPropView* VRenderFrame::FindVolumeProps(const wxString& name)
+void VRenderFrame::UpdateProps()
 {
-	VPropView* result = 0;
+	for (auto i : m_prop_pages)
+		i->GetSettings();
+}
+
+VolumePropPanel* VRenderFrame::FindVolumeProps(const wxString& name)
+{
+	VolumePropPanel* result = 0;
 	for (auto i : m_prop_pages)
 	{
 		if (i && i->GetName() == name)
 		{
-			result = dynamic_cast<VPropView*>(i);
+			result = dynamic_cast<VolumePropPanel*>(i);
 			if (result)
 				return result;
 		}
@@ -2614,21 +2620,21 @@ VPropView* VRenderFrame::FindVolumeProps(const wxString& name)
 	return 0;
 }
 
-VPropView* VRenderFrame::FindVolumeProps(VolumeData* vd)
+VolumePropPanel* VRenderFrame::FindVolumeProps(VolumeData* vd)
 {
 	if (vd)
 		return FindVolumeProps(vd->GetName());
 	return 0;
 }
 
-MPropView* VRenderFrame::FindMeshProps(const wxString& name)
+MeshPropPanel* VRenderFrame::FindMeshProps(const wxString& name)
 {
-	MPropView* result = 0;
+	MeshPropPanel* result = 0;
 	for (auto i : m_prop_pages)
 	{
 		if (i && i->GetName() == name)
 		{
-			result = dynamic_cast<MPropView*>(i);
+			result = dynamic_cast<MeshPropPanel*>(i);
 			if (result)
 				return result;
 		}
@@ -2636,21 +2642,21 @@ MPropView* VRenderFrame::FindMeshProps(const wxString& name)
 	return 0;
 }
 
-MPropView* VRenderFrame::FindMeshProps(MeshData* md)
+MeshPropPanel* VRenderFrame::FindMeshProps(MeshData* md)
 {
 	if (md)
 		return FindMeshProps(md->GetName());
 	return 0;
 }
 
-APropView* VRenderFrame::FindAnnotationProps(const wxString& name)
+AnnotatPropPanel* VRenderFrame::FindAnnotationProps(const wxString& name)
 {
-	APropView* result = 0;
+	AnnotatPropPanel* result = 0;
 	for (auto i : m_prop_pages)
 	{
 		if (i && i->GetName() == name)
 		{
-			result = dynamic_cast<APropView*>(i);
+			result = dynamic_cast<AnnotatPropPanel*>(i);
 			if (result)
 				return result;
 		}
@@ -2658,21 +2664,21 @@ APropView* VRenderFrame::FindAnnotationProps(const wxString& name)
 	return 0;
 }
 
-APropView* VRenderFrame::FindAnnotationProps(Annotations* ad)
+AnnotatPropPanel* VRenderFrame::FindAnnotationProps(Annotations* ad)
 {
 	if (ad)
 		return FindAnnotationProps(ad->GetName());
 	return 0;
 }
 
-MManipulator* VRenderFrame::FindMeshManip(const wxString& name)
+ManipPropPanel* VRenderFrame::FindMeshManip(const wxString& name)
 {
-	MManipulator* result = 0;
+	ManipPropPanel* result = 0;
 	for (auto i : m_prop_pages)
 	{
 		if (i && i->GetName() == name)
 		{
-			result = dynamic_cast<MManipulator*>(i);
+			result = dynamic_cast<ManipPropPanel*>(i);
 			if (result)
 				return result;
 		}
@@ -2680,7 +2686,7 @@ MManipulator* VRenderFrame::FindMeshManip(const wxString& name)
 	return 0;
 }
 
-MManipulator* VRenderFrame::FindMeshManip(MeshData* md)
+ManipPropPanel* VRenderFrame::FindMeshManip(MeshData* md)
 {
 	if (md)
 		return FindMeshManip(md->GetName());
@@ -2699,6 +2705,9 @@ void VRenderFrame::RefreshVRenderViews(bool tree, bool interactive)
 	//change icon color of the tree panel
 	if (tree)
 		UpdateTreeColors();
+
+	if (!interactive)
+		UpdateProps();
 }
 
 void VRenderFrame::DeleteVRenderView(int i)

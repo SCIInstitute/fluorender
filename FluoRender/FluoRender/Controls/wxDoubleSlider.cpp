@@ -92,7 +92,7 @@ bool wxDoubleSlider::setLowValue(int val, bool send_msg)
 	return changed;
 }
 
-bool wxDoubleSlider::setHighValue(int val, bool send_msg)
+bool wxDoubleSlider::setHighValue(int val, bool notify)
 {
 	int old = hi_val_;
 	if (!link_)
@@ -117,7 +117,7 @@ bool wxDoubleSlider::setHighValue(int val, bool send_msg)
 	Refresh();
 	Update();
 
-	if (send_msg)
+	if (notify)
 	{
 		wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
 		e.SetEventObject(this);
@@ -143,6 +143,28 @@ bool wxDoubleSlider::SetLowValue(int val)
 bool wxDoubleSlider::SetHighValue(int val)
 {
 	bool changed = setHighValue(val);
+	double t;
+	if (time_sample(t))
+		push(t);
+	else
+		replace(t);
+	return changed;
+}
+
+bool wxDoubleSlider::ChangeLowValue(int val)
+{
+	bool changed = setLowValue(val, false);
+	double t;
+	if (time_sample(t))
+		push(t);
+	else
+		replace(t);
+	return changed;
+}
+
+bool wxDoubleSlider::ChangeHighValue(int val)
+{
+	bool changed = setHighValue(val, false);
 	double t;
 	if (time_sample(t))
 		push(t);

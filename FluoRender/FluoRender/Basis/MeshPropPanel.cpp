@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2024 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -25,41 +25,40 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "MPropView.h"
+#include "MeshPropPanel.h"
 #include <DataManager.h>
-#include "VRenderFrame.h"
+#include <VRenderFrame.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 
-BEGIN_EVENT_TABLE(MPropView, wxPanel)
+BEGIN_EVENT_TABLE(MeshPropPanel, wxPanel)
 	//lighting
-	EVT_CHECKBOX(ID_light_chk, MPropView::OnLightingCheck)
-	EVT_COLOURPICKER_CHANGED(ID_diff_picker, MPropView::OnDiffChange)
-	EVT_COLOURPICKER_CHANGED(ID_spec_picker, MPropView::OnSpecChange)
-	EVT_COMMAND_SCROLL(ID_shine_sldr, MPropView::OnShineChange)
-	EVT_COMMAND_SCROLL(ID_alpha_sldr, MPropView::OnAlphaChange)
-	EVT_COMMAND_SCROLL(ID_scale_sldr, MPropView::OnScaleChange)
-	EVT_TEXT(ID_shine_text, MPropView::OnShineText)
-	EVT_TEXT(ID_alpha_text, MPropView::OnAlphaText)
-	EVT_TEXT(ID_scale_text, MPropView::OnScaleText)
+	EVT_CHECKBOX(ID_light_chk, MeshPropPanel::OnLightingCheck)
+	EVT_COLOURPICKER_CHANGED(ID_diff_picker, MeshPropPanel::OnDiffChange)
+	EVT_COLOURPICKER_CHANGED(ID_spec_picker, MeshPropPanel::OnSpecChange)
+	EVT_COMMAND_SCROLL(ID_shine_sldr, MeshPropPanel::OnShineChange)
+	EVT_COMMAND_SCROLL(ID_alpha_sldr, MeshPropPanel::OnAlphaChange)
+	EVT_COMMAND_SCROLL(ID_scale_sldr, MeshPropPanel::OnScaleChange)
+	EVT_TEXT(ID_shine_text, MeshPropPanel::OnShineText)
+	EVT_TEXT(ID_alpha_text, MeshPropPanel::OnAlphaText)
+	EVT_TEXT(ID_scale_text, MeshPropPanel::OnScaleText)
 	//shadow
-	EVT_CHECKBOX(ID_shadow_chk, MPropView::OnShadowCheck)
-	EVT_COMMAND_SCROLL(ID_shadow_sldr, MPropView::OnShadowChange)
-	EVT_TEXT(ID_shadow_text, MPropView::OnShadowText)
+	EVT_CHECKBOX(ID_shadow_chk, MeshPropPanel::OnShadowCheck)
+	EVT_COMMAND_SCROLL(ID_shadow_sldr, MeshPropPanel::OnShadowChange)
+	EVT_TEXT(ID_shadow_text, MeshPropPanel::OnShadowText)
 	//size limiter
-	EVT_CHECKBOX(ID_size_chk, MPropView::OnSizeCheck)
-	EVT_COMMAND_SCROLL(ID_size_sldr, MPropView::OnSizeChange)
-	EVT_TEXT(ID_size_text, MPropView::OnSizeText)
+	EVT_CHECKBOX(ID_size_chk, MeshPropPanel::OnSizeCheck)
+	EVT_COMMAND_SCROLL(ID_size_sldr, MeshPropPanel::OnSizeChange)
+	EVT_TEXT(ID_size_text, MeshPropPanel::OnSizeText)
 END_EVENT_TABLE()
 
-MPropView::MPropView(VRenderFrame* frame,
+MeshPropPanel::MeshPropPanel(VRenderFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	wxScrolledWindow(parent, wxID_ANY, pos, size,style, name),
-	m_frame(frame),
+	PropPanel(frame, parent, pos, size,style, name),
 	m_md(0),
 	m_view(0)
 {
@@ -186,11 +185,11 @@ MPropView::MPropView(VRenderFrame* frame,
 	SetScrollRate(10, 10);
 }
 
-MPropView::~MPropView()
+MeshPropPanel::~MeshPropPanel()
 {
 }
 
-void MPropView::GetSettings()
+void MeshPropPanel::GetSettings()
 {
 	if (!m_md)
 		return;
@@ -236,30 +235,24 @@ void MPropView::GetSettings()
 	m_size_text->SetValue(wxString::Format("%d", limit));
 }
 
-void MPropView::SetView(VRenderGLView* view)
+void MeshPropPanel::SetView(VRenderGLView* view)
 {
 	m_view = view;
 }
 
-void MPropView::SetMeshData(MeshData* md)
+void MeshPropPanel::SetMeshData(MeshData* md)
 {
 	m_md = md;
 	GetSettings();
 }
 
-MeshData* MPropView::GetMeshData()
+MeshData* MeshPropPanel::GetMeshData()
 {
 	return m_md;
 }
 
-void MPropView::RefreshVRenderViews(bool tree)
-{
-	if (m_frame)
-		m_frame->RefreshVRenderViews(tree);
-}
-
 //lighting
-void MPropView::OnLightingCheck(wxCommandEvent& event)
+void MeshPropPanel::OnLightingCheck(wxCommandEvent& event)
 {
 	if (m_md && m_view)
 	{
@@ -275,7 +268,7 @@ void MPropView::OnLightingCheck(wxCommandEvent& event)
 	}
 }
 
-void MPropView::OnDiffChange(wxColourPickerEvent& event)
+void MeshPropPanel::OnDiffChange(wxColourPickerEvent& event)
 {
 	wxColor c = event.GetColour();
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
@@ -288,7 +281,7 @@ void MPropView::OnDiffChange(wxColourPickerEvent& event)
 	}
 }
 
-void MPropView::OnSpecChange(wxColourPickerEvent& event)
+void MeshPropPanel::OnSpecChange(wxColourPickerEvent& event)
 {
 	wxColor c = event.GetColour();
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
@@ -299,7 +292,7 @@ void MPropView::OnSpecChange(wxColourPickerEvent& event)
 	}
 }
 
-void MPropView::OnShineChange(wxScrollEvent & event)
+void MeshPropPanel::OnShineChange(wxScrollEvent & event)
 {
 	double val = m_shine_sldr->GetValue();
 	wxString str = wxString::Format("%.0f", val);
@@ -307,7 +300,7 @@ void MPropView::OnShineChange(wxScrollEvent & event)
 		m_shine_text->SetValue(str);
 }
 
-void MPropView::OnShineText(wxCommandEvent& event)
+void MeshPropPanel::OnShineText(wxCommandEvent& event)
 {
 	wxString str = m_shine_text->GetValue();
 	double shine;
@@ -321,7 +314,7 @@ void MPropView::OnShineText(wxCommandEvent& event)
 	}
 }
 
-void MPropView::OnAlphaChange(wxScrollEvent & event)
+void MeshPropPanel::OnAlphaChange(wxScrollEvent & event)
 {
 	double val = m_alpha_sldr->GetValue() / 255.0;
 	wxString str = wxString::Format("%.2f", val);
@@ -329,7 +322,7 @@ void MPropView::OnAlphaChange(wxScrollEvent & event)
 		m_alpha_text->SetValue(str);
 }
 
-void MPropView::OnAlphaText(wxCommandEvent& event)
+void MeshPropPanel::OnAlphaText(wxCommandEvent& event)
 {
 	wxString str = m_alpha_text->GetValue();
 	double alpha;
@@ -343,7 +336,7 @@ void MPropView::OnAlphaText(wxCommandEvent& event)
 	}
 }
 
-void MPropView::OnScaleChange(wxScrollEvent & event)
+void MeshPropPanel::OnScaleChange(wxScrollEvent & event)
 {
 	double val = m_scale_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
@@ -351,7 +344,7 @@ void MPropView::OnScaleChange(wxScrollEvent & event)
 		m_scale_text->SetValue(str);
 }
 
-void MPropView::OnScaleText(wxCommandEvent& event)
+void MeshPropPanel::OnScaleText(wxCommandEvent& event)
 {
 	wxString str = m_scale_text->GetValue();
 	double dval;
@@ -366,7 +359,7 @@ void MPropView::OnScaleText(wxCommandEvent& event)
 }
 
 //shadow
-void MPropView::OnShadowCheck(wxCommandEvent& event)
+void MeshPropPanel::OnShadowCheck(wxCommandEvent& event)
 {
 	if (m_md && m_view)
 	{
@@ -382,7 +375,7 @@ void MPropView::OnShadowCheck(wxCommandEvent& event)
 	}
 }
 
-void MPropView::OnShadowChange(wxScrollEvent& event)
+void MeshPropPanel::OnShadowChange(wxScrollEvent& event)
 {
 	double val = m_shadow_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
@@ -390,7 +383,7 @@ void MPropView::OnShadowChange(wxScrollEvent& event)
 		m_shadow_text->SetValue(str);
 }
 
-void MPropView::OnShadowText(wxCommandEvent& event)
+void MeshPropPanel::OnShadowText(wxCommandEvent& event)
 {
 	wxString str = m_shadow_text->GetValue();
 	double dval;
@@ -411,7 +404,7 @@ void MPropView::OnShadowText(wxCommandEvent& event)
 }
 
 //size limiter
-void MPropView::OnSizeCheck(wxCommandEvent& event)
+void MeshPropPanel::OnSizeCheck(wxCommandEvent& event)
 {
 	bool bval = m_size_chk->GetValue();
 	if (m_md)
@@ -421,7 +414,7 @@ void MPropView::OnSizeCheck(wxCommandEvent& event)
 	}
 }
 
-void MPropView::OnSizeChange(wxScrollEvent& event)
+void MeshPropPanel::OnSizeChange(wxScrollEvent& event)
 {
 	int val = m_size_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
@@ -429,7 +422,7 @@ void MPropView::OnSizeChange(wxScrollEvent& event)
 		m_size_text->SetValue(str);
 }
 
-void MPropView::OnSizeText(wxCommandEvent& event)
+void MeshPropPanel::OnSizeText(wxCommandEvent& event)
 {
 	wxString str = m_size_text->GetValue();
 	long val;

@@ -33,10 +33,11 @@ DEALINGS IN THE SOFTWARE.
 #include "TreePanel.h"
 #include "ListPanel.h"
 #include "VRenderView.h"
-#include "VPropView.h"
-#include "MPropView.h"
-#include "APropView.h"
-#include "MManipulator.h"
+#include "PropPanel.h"
+#include "VolumePropPanel.h"
+#include "MeshPropPanel.h"
+#include "AnnotatPropPanel.h"
+#include "ManipPropPanel.h"
 #include "VMovieView.h"
 #include "ClippingView.h"
 #include "AdjustView.h"
@@ -224,14 +225,15 @@ public:
 		MeshData* md = 0,
 		Annotations* ann = 0,
 		bool show = true);
-	VPropView* FindVolumeProps(VolumeData* vd);
-	MPropView* FindMeshProps(MeshData* md);
-	APropView* FindAnnotationProps(Annotations* ad);
-	MManipulator* FindMeshManip(MeshData* md);
-	VPropView* FindVolumeProps(const wxString& str);
-	MPropView* FindMeshProps(const wxString& str);
-	APropView* FindAnnotationProps(const wxString& str);
-	MManipulator* FindMeshManip(const wxString& str);
+	void UpdateProps();
+	VolumePropPanel* FindVolumeProps(VolumeData* vd);
+	MeshPropPanel* FindMeshProps(MeshData* md);
+	AnnotatPropPanel* FindAnnotationProps(Annotations* ad);
+	ManipPropPanel* FindMeshManip(MeshData* md);
+	VolumePropPanel* FindVolumeProps(const wxString& str);
+	MeshPropPanel* FindMeshProps(const wxString& str);
+	AnnotatPropPanel* FindAnnotationProps(const wxString& str);
+	ManipPropPanel* FindMeshManip(const wxString& str);
 
 	//prop view
 	AdjustView* GetAdjustView();
@@ -440,7 +442,7 @@ private:
 	MachineLearningDlg* m_machine_learning_dlg;
 	ScriptBreakDlg* m_script_break_dlg;
 	//prop panel children
-	std::vector<wxWindow*> m_prop_pages;
+	std::vector<PropPanel*> m_prop_pages;
 	//tester
 	TesterDlg* m_tester;
 	//flag for show/hide views

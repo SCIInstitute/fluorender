@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2024 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "VPropView.h"
+#include "VolumePropPanel.h"
 #include <DataManager.h>
 #include "VRenderFrame.h"
 #include <Global/Global.h>
@@ -50,112 +50,112 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stdpaths.h>
 #include "img/icons.h"
 #include <limits>
+#include <Debug.h>
 
-BEGIN_EVENT_TABLE(VPropView, wxPanel)
+BEGIN_EVENT_TABLE(VolumePropPanel, wxPanel)
 	//1
-	EVT_BUTTON(ID_GammaSync, VPropView::OnGammaSync)
-	EVT_COMMAND_SCROLL(ID_GammaSldr, VPropView::OnGammaChange)
-	EVT_TEXT(ID_GammaText, VPropView::OnGammaText)
-	EVT_CHECKBOX(ID_GammaChk, VPropView::OnGammaChk)
+	EVT_BUTTON(ID_GammaSync, VolumePropPanel::OnGammaSync)
+	EVT_COMMAND_SCROLL(ID_GammaSldr, VolumePropPanel::OnGammaChange)
+	EVT_TEXT(ID_GammaText, VolumePropPanel::OnGammaText)
+	EVT_CHECKBOX(ID_GammaChk, VolumePropPanel::OnGammaChk)
 	//
-	EVT_BUTTON(ID_SaturationSync, VPropView::OnSaturationSync)
-	EVT_COMMAND_SCROLL(ID_SaturationSldr, VPropView::OnSaturationChange)
-	EVT_TEXT(ID_SaturationText, VPropView::OnSaturationText)
-	EVT_CHECKBOX(ID_SaturationChk, VPropView::OnSaturationChk)
+	EVT_BUTTON(ID_SaturationSync, VolumePropPanel::OnSaturationSync)
+	EVT_COMMAND_SCROLL(ID_SaturationSldr, VolumePropPanel::OnSaturationChange)
+	EVT_TEXT(ID_SaturationText, VolumePropPanel::OnSaturationText)
+	EVT_CHECKBOX(ID_SaturationChk, VolumePropPanel::OnSaturationChk)
 	//
-	EVT_BUTTON(ID_LuminanceSync, VPropView::OnLuminanceSync)
-	EVT_COMMAND_SCROLL(ID_LuminanceSldr, VPropView::OnLuminanceChange)
-	EVT_TEXT(ID_LuminanceText, VPropView::OnLuminanceText)
-	EVT_CHECKBOX(ID_LuminanceChk, VPropView::OnLuminanceChk)
+	EVT_BUTTON(ID_LuminanceSync, VolumePropPanel::OnLuminanceSync)
+	EVT_COMMAND_SCROLL(ID_LuminanceSldr, VolumePropPanel::OnLuminanceChange)
+	EVT_TEXT(ID_LuminanceText, VolumePropPanel::OnLuminanceText)
+	EVT_CHECKBOX(ID_LuminanceChk, VolumePropPanel::OnLuminanceChk)
 	//
-	EVT_BUTTON(ID_AlphaSync, VPropView::OnAlphaSync)
-	EVT_COMMAND_SCROLL(ID_AlphaSldr, VPropView::OnAlphaChange)
-	EVT_TEXT(ID_Alpha_Text, VPropView::OnAlphaText)
-	EVT_CHECKBOX(ID_AlphaChk, VPropView::OnAlphaCheck)
+	EVT_BUTTON(ID_AlphaSync, VolumePropPanel::OnAlphaSync)
+	EVT_COMMAND_SCROLL(ID_AlphaSldr, VolumePropPanel::OnAlphaChange)
+	EVT_TEXT(ID_Alpha_Text, VolumePropPanel::OnAlphaText)
+	EVT_CHECKBOX(ID_AlphaChk, VolumePropPanel::OnAlphaCheck)
 	//
-	EVT_BUTTON(ID_ShadingSync, VPropView::OnShadingSync)
-	EVT_COMMAND_SCROLL(ID_HiShadingSldr, VPropView::OnHiShadingChange)
-	EVT_TEXT(ID_HiShadingText, VPropView::OnHiShadingText)
-	EVT_COMMAND_SCROLL(ID_LowShadingSldr, VPropView::OnLowShadingChange)
-	EVT_TEXT(ID_LowShadingText, VPropView::OnLowShadingText)
-	EVT_CHECKBOX(ID_ShadingChk, VPropView::OnShadingChk)
+	EVT_BUTTON(ID_ShadingSync, VolumePropPanel::OnShadingSync)
+	EVT_COMMAND_SCROLL(ID_HiShadingSldr, VolumePropPanel::OnHiShadingChange)
+	EVT_TEXT(ID_HiShadingText, VolumePropPanel::OnHiShadingText)
+	EVT_COMMAND_SCROLL(ID_LowShadingSldr, VolumePropPanel::OnLowShadingChange)
+	EVT_TEXT(ID_LowShadingText, VolumePropPanel::OnLowShadingText)
+	EVT_CHECKBOX(ID_ShadingChk, VolumePropPanel::OnShadingChk)
 
 	//2
-	EVT_BUTTON(ID_BoundarySync, VPropView::OnBoundarySync)
-	EVT_COMMAND_SCROLL(ID_BoundarySldr, VPropView::OnBoundaryChange)
-	EVT_TEXT(ID_BoundaryText, VPropView::OnBoundaryText)
-	EVT_CHECKBOX(ID_BoundaryChk, VPropView::OnBoundaryChk)
+	EVT_BUTTON(ID_BoundarySync, VolumePropPanel::OnBoundarySync)
+	EVT_COMMAND_SCROLL(ID_BoundarySldr, VolumePropPanel::OnBoundaryChange)
+	EVT_TEXT(ID_BoundaryText, VolumePropPanel::OnBoundaryText)
+	EVT_CHECKBOX(ID_BoundaryChk, VolumePropPanel::OnBoundaryChk)
 	//
-	EVT_BUTTON(ID_ThreshSync, VPropView::OnThreshSync)
-	EVT_COMMAND_SCROLL(ID_ThreshSldr, VPropView::OnThreshChange)
-	EVT_TEXT(ID_ThreshLowText, VPropView::OnThreshLowText)
-	EVT_TEXT(ID_TreshHiText, VPropView::OnThreshHiText)
-	EVT_TOOL(ID_ThreshLinkTb, VPropView::OnThreshLink)
-	EVT_CHECKBOX(ID_ThreshChk, VPropView::OnThreshChk)
+	EVT_BUTTON(ID_ThreshSync, VolumePropPanel::OnThreshSync)
+	EVT_COMMAND_SCROLL(ID_ThreshSldr, VolumePropPanel::OnThreshChange)
+	EVT_TEXT(ID_ThreshLowText, VolumePropPanel::OnThreshLowText)
+	EVT_TEXT(ID_TreshHiText, VolumePropPanel::OnThreshHiText)
+	EVT_TOOL(ID_ThreshLinkTb, VolumePropPanel::OnThreshLink)
+	EVT_CHECKBOX(ID_ThreshChk, VolumePropPanel::OnThreshChk)
 	//
-	EVT_BUTTON(ID_ShadowSync, VPropView::OnShadowSync)
-	EVT_COMMAND_SCROLL(ID_ShadowSldr, VPropView::OnShadowChange)
-	EVT_TEXT(ID_ShadowText, VPropView::OnShadowText)
-	EVT_CHECKBOX(ID_ShadowChk, VPropView::OnShadowChk)
+	EVT_BUTTON(ID_ShadowSync, VolumePropPanel::OnShadowSync)
+	EVT_COMMAND_SCROLL(ID_ShadowSldr, VolumePropPanel::OnShadowChange)
+	EVT_TEXT(ID_ShadowText, VolumePropPanel::OnShadowText)
+	EVT_CHECKBOX(ID_ShadowChk, VolumePropPanel::OnShadowChk)
 	//
-	EVT_BUTTON(ID_SampleSync, VPropView::OnSampleSync)
-	EVT_COMMAND_SCROLL(ID_SampleSldr, VPropView::OnSampleChange)
-	EVT_TEXT(ID_SampleText, VPropView::OnSampleText)
-	EVT_CHECKBOX(ID_SampleChk, VPropView::OnSampleChk)
+	EVT_BUTTON(ID_SampleSync, VolumePropPanel::OnSampleSync)
+	EVT_COMMAND_SCROLL(ID_SampleSldr, VolumePropPanel::OnSampleChange)
+	EVT_TEXT(ID_SampleText, VolumePropPanel::OnSampleText)
+	EVT_CHECKBOX(ID_SampleChk, VolumePropPanel::OnSampleChk)
 	//
-	EVT_BUTTON(ID_ColormapSync, VPropView::OnColormapSync)
-	EVT_COMMAND_SCROLL(ID_ColormapSldr, VPropView::OnColormapChange)
-	EVT_TEXT(ID_ColormapHiText, VPropView::OnColormapHiText)
-	EVT_TEXT(ID_ColormapLowText, VPropView::OnColormapLowText)
-	EVT_TOOL(ID_ColormapLinkTb, VPropView::OnColormapLink)
-	EVT_CHECKBOX(ID_ColormapChk, VPropView::OnColormapChk)
+	EVT_BUTTON(ID_ColormapSync, VolumePropPanel::OnColormapSync)
+	EVT_COMMAND_SCROLL(ID_ColormapSldr, VolumePropPanel::OnColormapChange)
+	EVT_TEXT(ID_ColormapHiText, VolumePropPanel::OnColormapHiText)
+	EVT_TEXT(ID_ColormapLowText, VolumePropPanel::OnColormapLowText)
+	EVT_TOOL(ID_ColormapLinkTb, VolumePropPanel::OnColormapLink)
+	EVT_CHECKBOX(ID_ColormapChk, VolumePropPanel::OnColormapChk)
 
 	//3
-	EVT_TOGGLEBUTTON(ID_ColormapInvBtn, VPropView::OnColormapInvBtn)
-	EVT_COMBOBOX(ID_ColormapCombo, VPropView::OnColormapCombo)
-	EVT_COMBOBOX(ID_ColormapCombo2, VPropView::OnColormapCombo2)
+	EVT_TOGGLEBUTTON(ID_ColormapInvBtn, VolumePropPanel::OnColormapInvBtn)
+	EVT_COMBOBOX(ID_ColormapCombo, VolumePropPanel::OnColormapCombo)
+	EVT_COMBOBOX(ID_ColormapCombo2, VolumePropPanel::OnColormapCombo2)
 	//color 1
-	EVT_TEXT(ID_ColorText, VPropView::OnColorTextChange)
-	EVT_COLOURPICKER_CHANGED(ID_ColorBtn, VPropView::OnColorBtn)
-	EVT_TEXT(ID_Color2Text, VPropView::OnColor2TextChange)
-	EVT_COLOURPICKER_CHANGED(ID_Color2Btn, VPropView::OnColor2Btn)
+	EVT_TEXT(ID_ColorText, VolumePropPanel::OnColorTextChange)
+	EVT_COLOURPICKER_CHANGED(ID_ColorBtn, VolumePropPanel::OnColorBtn)
+	EVT_TEXT(ID_Color2Text, VolumePropPanel::OnColor2TextChange)
+	EVT_COLOURPICKER_CHANGED(ID_Color2Btn, VolumePropPanel::OnColor2Btn)
 	//spacings
-	EVT_TEXT(ID_SpaceXText, VPropView::OnSpaceText)
-	EVT_TEXT(ID_SpaceYText, VPropView::OnSpaceText)
-	EVT_TEXT(ID_SpaceZText, VPropView::OnSpaceText)
+	EVT_TEXT(ID_SpaceXText, VolumePropPanel::OnSpaceText)
+	EVT_TEXT(ID_SpaceYText, VolumePropPanel::OnSpaceText)
+	EVT_TEXT(ID_SpaceZText, VolumePropPanel::OnSpaceText)
 	//legend
-	EVT_TOOL(ID_LegendChk, VPropView::OnLegendCheck)
+	EVT_TOOL(ID_LegendChk, VolumePropPanel::OnLegendCheck)
 	//EVT_TOOL
-	EVT_TOOL(ID_InterpolateChk, VPropView::OnInterpolateCheck)
+	EVT_TOOL(ID_InterpolateChk, VolumePropPanel::OnInterpolateCheck)
 	//sync within group
-	EVT_TOOL(ID_SyncGroupChk, VPropView::OnSyncGroupCheck)
+	EVT_TOOL(ID_SyncGroupChk, VolumePropPanel::OnSyncGroupCheck)
 	//save default
-	EVT_TOOL(ID_SaveDefault, VPropView::OnSaveDefault)
-	EVT_TOOL(ID_ResetDefault, VPropView::OnResetDefault)
+	EVT_TOOL(ID_SaveDefault, VolumePropPanel::OnSaveDefault)
+	EVT_TOOL(ID_ResetDefault, VolumePropPanel::OnResetDefault)
 	//inversion
-	EVT_TOOL(ID_InvChk, VPropView::OnInvCheck)
+	EVT_TOOL(ID_InvChk, VolumePropPanel::OnInvCheck)
 	//MIP
-	EVT_TOOL(ID_MipChk, VPropView::OnMIPCheck)
+	EVT_TOOL(ID_MipChk, VolumePropPanel::OnMIPCheck)
 	//noise reduction
-	EVT_TOOL(ID_NRChk, VPropView::OnNRCheck)
+	EVT_TOOL(ID_NRChk, VolumePropPanel::OnNRCheck)
 	//depth mode
-	EVT_TOOL(ID_DepthChk, VPropView::OnDepthCheck)
+	EVT_TOOL(ID_DepthChk, VolumePropPanel::OnDepthCheck)
 	//transp
-	EVT_TOOL(ID_TranspChk, VPropView::OnTranspChk)
+	EVT_TOOL(ID_TranspChk, VolumePropPanel::OnTranspChk)
 	//components
-	EVT_TOOL(ID_CompChk, VPropView::OnCompChk)
+	EVT_TOOL(ID_CompChk, VolumePropPanel::OnCompChk)
 	//ml
-	EVT_TOOL(ID_UseMlChk, VPropView::OnUseMlChk)
+	EVT_TOOL(ID_UseMlChk, VolumePropPanel::OnUseMlChk)
 END_EVENT_TABLE()
 
-VPropView::VPropView(VRenderFrame* frame,
+VolumePropPanel::VolumePropPanel(VRenderFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	wxScrolledWindow(parent, wxID_ANY, pos, size,style, name),
-	m_frame(frame),
+	PropPanel(frame, parent, pos, size, style, name),
 	m_vd(0),
 	m_lumi_change(false),
 	m_sync_group(false),
@@ -478,7 +478,7 @@ VPropView::VPropView(VRenderFrame* frame,
 	m_color_text = new wxTextCtrl(this, ID_ColorText, "255 , 255 , 255",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)));
 	m_color_text->Connect(ID_ColorText, wxEVT_LEFT_DCLICK,
-		wxCommandEventHandler(VPropView::OnColorTextFocus),
+		wxCommandEventHandler(VolumePropPanel::OnColorTextFocus),
 		NULL, this);
 	m_color_btn = new wxColourPickerCtrl(this, ID_ColorBtn, *wxRED,
 		wxDefaultPosition, FromDIP(wxSize(50, 25)));
@@ -492,7 +492,7 @@ VPropView::VPropView(VRenderFrame* frame,
 	m_color2_text = new wxTextCtrl(this, ID_Color2Text, "255 , 255 , 255",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)));
 	m_color2_text->Connect(ID_Color2Text, wxEVT_LEFT_DCLICK,
-		wxCommandEventHandler(VPropView::OnColor2TextFocus),
+		wxCommandEventHandler(VolumePropPanel::OnColor2TextFocus),
 		NULL, this);
 	m_color2_btn = new wxColourPickerCtrl(this, ID_Color2Btn, *wxRED,
 		wxDefaultPosition, FromDIP(wxSize(50, 25)));
@@ -581,6 +581,7 @@ VPropView::VPropView(VRenderFrame* frame,
 	sizer_all->Add(sizer_right, 0, wxSHRINK);
 	SetSizer(sizer_all);
 	Layout();
+	SetAutoLayout(true);
 	SetScrollRate(10, 10);
 
 	//add sliders for undo and redo
@@ -608,7 +609,7 @@ VPropView::VPropView(VRenderFrame* frame,
 	glbin.add_undo_control(m_colormap_chk);
 }
 
-VPropView::~VPropView()
+VolumePropPanel::~VolumePropPanel()
 {
 	//delete sliders for undo and redo
 	glbin.del_undo_control(m_gamma_sldr);
@@ -635,10 +636,12 @@ VPropView::~VPropView()
 	glbin.del_undo_control(m_colormap_chk);
 }
 
-void VPropView::GetSettings()
+void VolumePropPanel::GetSettings()
 {
 	if (!m_vd)
 		return;
+
+	std::chrono::time_point t = std::chrono::high_resolution_clock::now();
 
 	wxString str;
 	double dval = 0.0;
@@ -661,7 +664,8 @@ void VPropView::GetSettings()
 	dval = m_vd->GetGamma();
 	bval = m_vd->GetGammaEnable();
 	str = wxString::Format("%.2f", dval);
-	m_gamma_text->SetValue(str);
+	m_gamma_sldr->ChangeValue(std::round(dval * 100.0));
+	m_gamma_text->ChangeValue(str);
 	m_gamma_chk->SetValue(bval);
 	m_gamma_sldr->Enable(bval);
 	m_gamma_text->Enable(bval);
@@ -672,7 +676,8 @@ void VPropView::GetSettings()
 	dval = m_vd->GetBoundary();
 	bval = m_vd->GetBoundaryEnable();
 	str = wxString::Format("%.4f", dval);
-	m_boundary_text->SetValue(str);
+	m_boundary_sldr->ChangeValue(std::round(dval * 2000.0));
+	m_boundary_text->ChangeValue(str);
 	m_boundary_chk->SetValue(bval);
 	m_boundary_sldr->Enable(bval);
 	m_boundary_text->Enable(bval);
@@ -683,9 +688,10 @@ void VPropView::GetSettings()
 	dval = m_vd->GetSaturation();
 	bval = m_vd->GetSaturationEnable();
 	ival = std::round(dval*m_max_val);
-	m_saturation_sldr->SetRange(0, std::round(m_max_val));
 	str = wxString::Format("%d", ival);
-	m_saturation_text->SetValue(str);
+	m_saturation_sldr->SetRange(0, std::round(m_max_val));
+	m_saturation_sldr->ChangeValue(ival);
+	m_saturation_text->ChangeValue(str);
 	m_saturation_chk->SetValue(bval);
 	m_saturation_sldr->Enable(bval);
 	m_saturation_text->Enable(bval);
@@ -697,14 +703,27 @@ void VPropView::GetSettings()
 	ival = std::round(dval*m_max_val);
 	m_thresh_sldr->SetRange(0, std::round(m_max_val));
 	str = wxString::Format("%d", ival);
-	m_left_thresh_text->SetValue(str);
+	m_thresh_sldr->ChangeLowValue(ival);
+	m_left_thresh_text->ChangeValue(str);
 	//right threshold
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_right_thresh_text->GetValidator()))
 		vald_i->SetMin(0);
 	dval = m_vd->GetRightThresh();
 	ival = std::round(dval*m_max_val);
 	str = wxString::Format("%d", ival);
-	m_right_thresh_text->SetValue(str);
+	m_thresh_sldr->ChangeHighValue(ival);
+	m_right_thresh_text->ChangeValue(str);
+	bval = m_thresh_sldr->GetLink();
+	if (bval != m_thresh_link_tb->GetToolState(ID_ThreshLinkTb))
+	{
+		m_thresh_link_tb->ToggleTool(ID_ThreshLinkTb, bval);
+		if (bval)
+			m_thresh_link_tb->SetToolNormalBitmap(ID_ThreshLinkTb,
+				wxGetBitmapFromMemory(link));
+		else
+			m_thresh_link_tb->SetToolNormalBitmap(ID_ThreshLinkTb,
+				wxGetBitmapFromMemory(unlink));
+	}
 	bval = m_vd->GetThreshEnable();
 	m_thresh_chk->SetValue(bval);
 	m_thresh_sldr->Enable(bval);
@@ -720,7 +739,8 @@ void VPropView::GetSettings()
 	ival = std::round(dval*m_max_val);
 	m_luminance_sldr->SetRange(0, std::round(m_max_val));
 	str = wxString::Format("%d", ival);
-	m_luminance_text->SetValue(str);
+	m_luminance_sldr->ChangeValue(ival);
+	m_luminance_text->ChangeValue(str);
 	m_luminance_chk->SetValue(bval);
 	m_luminance_sldr->Enable(bval);
 	m_luminance_text->Enable(bval);
@@ -732,7 +752,8 @@ void VPropView::GetSettings()
 	ival = std::round(dval*m_max_val);
 	m_alpha_sldr->SetRange(0, std::round(m_max_val));
 	str = wxString::Format("%d", ival);
-	m_alpha_text->SetValue(str);
+	m_alpha_sldr->ChangeValue(ival);
+	m_alpha_text->ChangeValue(str);
 	bval = m_vd->GetAlphaEnable();
 	m_alpha_chk->SetValue(bval);
 	m_alpha_sldr->Enable(bval);
@@ -747,9 +768,11 @@ void VPropView::GetSettings()
 	double amb, diff, spec, shine;
 	m_vd->GetMaterial(amb, diff, spec, shine);
 	str = wxString::Format("%.2f", amb);
-	m_low_shading_text->SetValue(str);
+	m_low_shading_sldr->ChangeValue(amb * 100.0);
+	m_low_shading_text->ChangeValue(str);
 	str = wxString::Format("%.2f", shine);
-	m_hi_shading_text->SetValue(str);
+	m_hi_shading_sldr->ChangeValue(shine * 10.0);
+	m_hi_shading_text->ChangeValue(str);
 	bval = m_vd->GetShadingEnable();
 	m_shade_chk->SetValue(bval);
 	m_low_shading_sldr->Enable(bval);
@@ -764,7 +787,8 @@ void VPropView::GetSettings()
 	bval = m_vd->GetShadowEnable();
 	dval = m_vd->GetShadowIntensity();
 	str = wxString::Format("%.2f", dval);
-	m_shadow_text->SetValue(str);
+	m_shadow_sldr->ChangeValue(std::round(dval * 100.0));
+	m_shadow_text->ChangeValue(str);
 	m_shadow_chk->SetValue(bval);
 	m_shadow_sldr->Enable(bval);
 	m_shadow_text->Enable(bval);
@@ -775,7 +799,8 @@ void VPropView::GetSettings()
 		vald_fp->SetRange(0.0, 100.0);
 	dval = m_vd->GetSampleRate();
 	str = wxString::Format("%.1f", dval);
-	m_sample_text->SetValue(str);
+	m_sample_sldr->ChangeValue(dval * 10.0);
+	m_sample_text->ChangeValue(str);
 	m_sample_chk->SetValue(bval);
 	m_sample_sldr->Enable(bval);
 	m_sample_text->Enable(bval);
@@ -824,13 +849,26 @@ void VPropView::GetSettings()
 	ival = std::round(low*m_max_val);
 	m_colormap_sldr->SetRange(0, std::round(m_max_val));
 	str = wxString::Format("%d", ival);
+	m_colormap_sldr->ChangeLowValue(ival);
 	m_colormap_low_text->ChangeValue(str);
 	//high
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_colormap_hi_text->GetValidator()))
 		vald_i->SetMin(0);
 	ival = std::round(high*m_max_val);
 	str = wxString::Format("%d", ival);
+	m_colormap_sldr->ChangeHighValue(ival);
 	m_colormap_hi_text->ChangeValue(str);
+	bval = m_colormap_sldr->GetLink();
+	if (bval != m_colormap_link_tb->GetToolState(ID_ColormapLinkTb))
+	{
+		m_colormap_link_tb->ToggleTool(ID_ColormapLinkTb, bval);
+		if (bval)
+			m_colormap_link_tb->SetToolNormalBitmap(ID_ColormapLinkTb,
+				wxGetBitmapFromMemory(link));
+		else
+			m_colormap_link_tb->SetToolNormalBitmap(ID_ColormapLinkTb,
+				wxGetBitmapFromMemory(unlink));
+	}
 	//mode
 	bval = m_vd->GetColormapMode() == 1;
 	m_colormap_chk->SetValue(bval);
@@ -939,16 +977,14 @@ void VPropView::GetSettings()
 		m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmapFromMemory(depth_off));
 	}
 
-	//EnableAlpha(alpha);
-	//EnableShading(shade);
-	//EnableShadow(shadow);
-	//EnableColormap(colormap);
-	//EnableMip(mode == 1);
+	//std::chrono::duration<double> ts = std::chrono::duration_cast<std::chrono::duration<double>>(
+	//	std::chrono::high_resolution_clock::now() - t);
+	//DBGPRINT(L"update settings, time: %f\n", ts);
+	//return;
 
-	Layout();
 }
 
-void VPropView::SetVolumeData(VolumeData* vd)
+void VolumePropPanel::SetVolumeData(VolumeData* vd)
 {
 	if (m_vd != vd)
 		ClearUndo();
@@ -957,18 +993,12 @@ void VPropView::SetVolumeData(VolumeData* vd)
 	GetSettings();
 }
 
-VolumeData* VPropView::GetVolumeData()
+VolumeData* VolumePropPanel::GetVolumeData()
 {
 	return m_vd;
 }
 
-void VPropView::RefreshVRenderViews(bool tree, bool interactive)
-{
-	if (m_frame)
-		m_frame->RefreshVRenderViews(tree, interactive);
-}
-
-void VPropView::InitVRenderViews(unsigned int type)
+void VolumePropPanel::InitVRenderViews(unsigned int type)
 {
 	if (m_frame)
 	{
@@ -984,7 +1014,7 @@ void VPropView::InitVRenderViews(unsigned int type)
 	}
 }
 
-void VPropView::SetFocusVRenderViews(wxBasisSlider* slider)
+void VolumePropPanel::SetFocusVRenderViews(wxBasisSlider* slider)
 {
 	if (m_frame)
 	{
@@ -999,7 +1029,7 @@ void VPropView::SetFocusVRenderViews(wxBasisSlider* slider)
 	}
 }
 
-void VPropView::SetGroup(DataGroup* group)
+void VolumePropPanel::SetGroup(DataGroup* group)
 {
 	m_group = group;
 	if (m_group)
@@ -1009,32 +1039,32 @@ void VPropView::SetGroup(DataGroup* group)
 	}
 }
 
-DataGroup* VPropView::GetGroup()
+DataGroup* VolumePropPanel::GetGroup()
 {
 	return m_group;
 }
 
-void VPropView::SetView(VRenderGLView *view)
+void VolumePropPanel::SetView(VRenderGLView *view)
 {
 	m_view = view;
 }
 
-VRenderGLView* VPropView::GetView()
+VRenderGLView* VolumePropPanel::GetView()
 {
 	return m_view;
 }
 
-void VPropView::ApplyMl()
+void VolumePropPanel::ApplyMl()
 {
 	if (m_sync_group && m_group)
 		m_group->ApplyMlVolProp();
 	else if (m_vd)
 		m_vd->ApplyMlVolProp();
-	GetSettings();
+	//GetSettings();
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::ClearUndo()
+void VolumePropPanel::ClearUndo()
 {
 	m_gamma_sldr->Clear();
 	m_saturation_sldr->Clear();
@@ -1050,7 +1080,7 @@ void VPropView::ClearUndo()
 }
 
 //1
-void VPropView::OnGammaSync(wxCommandEvent& event)
+void VolumePropPanel::OnGammaSync(wxCommandEvent& event)
 {
 	switch (glbin.get_mul_func())
 	{
@@ -1077,21 +1107,12 @@ void VPropView::OnGammaSync(wxCommandEvent& event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnGammaChange(wxScrollEvent & event)
+void VolumePropPanel::OnGammaChange(wxScrollEvent & event)
 {
 	double val = m_gamma_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
 	if (str != m_gamma_text->GetValue())
-		m_gamma_text->SetValue(str);
-}
-
-void VPropView::OnGammaText(wxCommandEvent& event)
-{
-	wxString str = m_gamma_text->GetValue();
-	double val = 0.0;
-	str.ToDouble(&val);
-	int ival = std::round(val*100.0);
-	m_gamma_sldr->SetValue(ival);
+		m_gamma_text->ChangeValue(str);
 
 	//set gamma value
 	if (m_sync_group && m_group)
@@ -1099,16 +1120,32 @@ void VPropView::OnGammaText(wxCommandEvent& event)
 	else if (m_vd)
 		m_vd->SetGamma(val);
 
-	RefreshVRenderViews(false, true);
+	DBGPRINT(L"gamma: %f\n", val);
+	RefreshVRenderViews(false, true, false);
 }
 
-void VPropView::OnGammaChk(wxCommandEvent& event)
+void VolumePropPanel::OnGammaText(wxCommandEvent& event)
+{
+	wxString str = m_gamma_text->GetValue();
+	double val = 0.0;
+	str.ToDouble(&val);
+
+	//set gamma value
+	if (m_sync_group && m_group)
+		m_group->SetGamma(val);
+	else if (m_vd)
+		m_vd->SetGamma(val);
+
+	RefreshVRenderViews(false, true, false);
+}
+
+void VolumePropPanel::OnGammaChk(wxCommandEvent& event)
 {
 	bool val = m_gamma_chk->GetValue();
 	EnableGamma(val);
 }
 
-void VPropView::OnSaturationSync(wxCommandEvent& event)
+void VolumePropPanel::OnSaturationSync(wxCommandEvent& event)
 {
 	wxString str = m_saturation_text->GetValue();
 	long iVal;
@@ -1119,7 +1156,7 @@ void VPropView::OnSaturationSync(wxCommandEvent& event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnSaturationChange(wxScrollEvent & event)
+void VolumePropPanel::OnSaturationChange(wxScrollEvent & event)
 {
 	int ival = m_saturation_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
@@ -1127,7 +1164,7 @@ void VPropView::OnSaturationChange(wxScrollEvent & event)
 		m_saturation_text->SetValue(str);
 }
 
-void VPropView::OnSaturationText(wxCommandEvent& event)
+void VolumePropPanel::OnSaturationText(wxCommandEvent& event)
 {
 	wxString str = m_saturation_text->GetValue();
 	long ival = 0;
@@ -1135,10 +1172,10 @@ void VPropView::OnSaturationText(wxCommandEvent& event)
 	if (double(ival) > m_max_val)
 	{
 		UpdateMaxVal(ival);
-		str = wxString::Format("%d", ival);
-		m_saturation_text->ChangeValue(str);
+		//str = wxString::Format("%d", ival);
+		//m_saturation_text->ChangeValue(str);
 	}
-	m_saturation_sldr->SetValue(ival);
+	//m_saturation_sldr->SetValue(ival);
 	double val = double(ival) / m_max_val;
 
 	//set contrast value
@@ -1150,13 +1187,13 @@ void VPropView::OnSaturationText(wxCommandEvent& event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnSaturationChk(wxCommandEvent& event)
+void VolumePropPanel::OnSaturationChk(wxCommandEvent& event)
 {
 	bool val = m_saturation_chk->GetValue();
 	EnableSaturation(val);
 }
 
-void VPropView::OnLuminanceSync(wxCommandEvent& event)
+void VolumePropPanel::OnLuminanceSync(wxCommandEvent& event)
 {
 	wxString str = m_luminance_text->GetValue();
 	long iVal;
@@ -1167,7 +1204,7 @@ void VPropView::OnLuminanceSync(wxCommandEvent& event)
 	RefreshVRenderViews(true, true);
 }
 
-void VPropView::OnLuminanceChange(wxScrollEvent& event)
+void VolumePropPanel::OnLuminanceChange(wxScrollEvent& event)
 {
 	int ival = m_luminance_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
@@ -1175,7 +1212,7 @@ void VPropView::OnLuminanceChange(wxScrollEvent& event)
 		m_luminance_text->SetValue(str);
 }
 
-void VPropView::OnLuminanceText(wxCommandEvent& event)
+void VolumePropPanel::OnLuminanceText(wxCommandEvent& event)
 {
 	wxString str = m_luminance_text->GetValue();
 	long ival = 0;
@@ -1183,39 +1220,40 @@ void VPropView::OnLuminanceText(wxCommandEvent& event)
 	if (double(ival) > m_max_val)
 	{
 		UpdateMaxVal(ival);
-		str = wxString::Format("%d", ival);
-		m_luminance_text->ChangeValue(str);
+		//str = wxString::Format("%d", ival);
+		//m_luminance_text->ChangeValue(str);
 	}
 	double val = double(ival) / m_max_val;
-	m_luminance_sldr->SetValue(ival);
+	//m_luminance_sldr->SetValue(ival);
 
 	if (m_sync_group && m_group)
 		m_group->SetLuminance(val);
 	else if (m_vd)
 		m_vd->SetLuminance(val);
 
-	if (m_vd)
-	{
-		fluo::Color color = m_vd->GetColor();
-		wxColor wxc((unsigned char)(color.r() * 255),
-			(unsigned char)(color.g() * 255),
-			(unsigned char)(color.b() * 255));
-		m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
-			wxc.Red(), wxc.Green(), wxc.Blue()));
-		m_color_btn->SetBackgroundColour(wxc);
-		m_lumi_change = true;
-	}
+	m_lumi_change = true;
+	//if (m_vd)
+	//{
+	//	fluo::Color color = m_vd->GetColor();
+	//	wxColor wxc((unsigned char)(color.r() * 255),
+	//		(unsigned char)(color.g() * 255),
+	//		(unsigned char)(color.b() * 255));
+	//	m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
+	//		wxc.Red(), wxc.Green(), wxc.Blue()));
+	//	m_color_btn->SetBackgroundColour(wxc);
+	//	m_lumi_change = true;
+	//}
 
 	RefreshVRenderViews(true, true);
 }
 
-void VPropView::OnLuminanceChk(wxCommandEvent& event)
+void VolumePropPanel::OnLuminanceChk(wxCommandEvent& event)
 {
 	bool val = m_luminance_chk->GetValue();
 	EnableLuminance(val);
 }
 
-void VPropView::OnAlphaSync(wxCommandEvent& event)
+void VolumePropPanel::OnAlphaSync(wxCommandEvent& event)
 {
 	wxString str = m_alpha_text->GetValue();
 	long iVal;
@@ -1226,13 +1264,13 @@ void VPropView::OnAlphaSync(wxCommandEvent& event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnAlphaCheck(wxCommandEvent& event)
+void VolumePropPanel::OnAlphaCheck(wxCommandEvent& event)
 {
 	bool val = m_alpha_chk->GetValue();
 	EnableAlpha(val);
 }
 
-void VPropView::OnAlphaChange(wxScrollEvent& event)
+void VolumePropPanel::OnAlphaChange(wxScrollEvent& event)
 {
 	int ival = m_alpha_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
@@ -1240,7 +1278,7 @@ void VPropView::OnAlphaChange(wxScrollEvent& event)
 		m_alpha_text->SetValue(str);
 }
 
-void VPropView::OnAlphaText(wxCommandEvent& event)
+void VolumePropPanel::OnAlphaText(wxCommandEvent& event)
 {
 	wxString str = m_alpha_text->GetValue();
 	long ival = 0;
@@ -1248,11 +1286,11 @@ void VPropView::OnAlphaText(wxCommandEvent& event)
 	if (double(ival) > m_max_val)
 	{
 		UpdateMaxVal(ival);
-		str = wxString::Format("%d", ival);
-		m_alpha_text->ChangeValue(str);
+		//str = wxString::Format("%d", ival);
+		//m_alpha_text->ChangeValue(str);
 	}
 	double val = double(ival) / m_max_val;
-	m_alpha_sldr->SetValue(ival);
+	//m_alpha_sldr->SetValue(ival);
 
 	//set alpha value
 	if (m_sync_group && m_group)
@@ -1263,7 +1301,7 @@ void VPropView::OnAlphaText(wxCommandEvent& event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnShadingSync(wxCommandEvent& event)
+void VolumePropPanel::OnShadingSync(wxCommandEvent& event)
 {
 	bool bVal = m_shade_chk->GetValue();
 	wxString str = m_low_shading_text->GetValue();
@@ -1282,7 +1320,7 @@ void VPropView::OnShadingSync(wxCommandEvent& event)
 }
 
 //hi shading
-void VPropView::OnHiShadingChange(wxScrollEvent& event)
+void VolumePropPanel::OnHiShadingChange(wxScrollEvent& event)
 {
 	double val = m_hi_shading_sldr->GetValue() / 10.0;
 	wxString str = wxString::Format("%.2f", val);
@@ -1290,12 +1328,12 @@ void VPropView::OnHiShadingChange(wxScrollEvent& event)
 		m_hi_shading_text->SetValue(str);
 }
 
-void VPropView::OnHiShadingText(wxCommandEvent& event)
+void VolumePropPanel::OnHiShadingText(wxCommandEvent& event)
 {
 	wxString str = m_hi_shading_text->GetValue();
 	double val = 0.0;
 	str.ToDouble(&val);
-	m_hi_shading_sldr->SetValue(std::round(val * 10.0));
+	//m_hi_shading_sldr->SetValue(std::round(val * 10.0));
 
 	//set high shading value
 	if (m_sync_group && m_group)
@@ -1306,7 +1344,7 @@ void VPropView::OnHiShadingText(wxCommandEvent& event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnLowShadingChange(wxScrollEvent& event)
+void VolumePropPanel::OnLowShadingChange(wxScrollEvent& event)
 {
 	double val = m_low_shading_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
@@ -1314,12 +1352,12 @@ void VPropView::OnLowShadingChange(wxScrollEvent& event)
 		m_low_shading_text->SetValue(str);
 }
 
-void VPropView::OnLowShadingText(wxCommandEvent& event)
+void VolumePropPanel::OnLowShadingText(wxCommandEvent& event)
 {
 	wxString str = m_low_shading_text->GetValue();
 	double val = 0.0;
 	str.ToDouble(&val);
-	m_low_shading_sldr->SetValue(std::round(val * 100.0));
+	//m_low_shading_sldr->SetValue(std::round(val * 100.0));
 
 	//set low shading value
 	if (m_sync_group && m_group)
@@ -1330,13 +1368,13 @@ void VPropView::OnLowShadingText(wxCommandEvent& event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnShadingChk(wxCommandEvent& event)
+void VolumePropPanel::OnShadingChk(wxCommandEvent& event)
 {
 	bool val = m_shade_chk->GetValue();
 	EnableShading(val);
 }
 
-void VPropView::OnBoundarySync(wxCommandEvent& event)
+void VolumePropPanel::OnBoundarySync(wxCommandEvent& event)
 {
 	wxString str = m_boundary_text->GetValue();
 	double dVal;
@@ -1346,7 +1384,7 @@ void VPropView::OnBoundarySync(wxCommandEvent& event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnBoundaryChange(wxScrollEvent& event)
+void VolumePropPanel::OnBoundaryChange(wxScrollEvent& event)
 {
 	double val = m_boundary_sldr->GetValue() / 2000.0;
 	wxString str = wxString::Format("%.4f", val);
@@ -1354,13 +1392,13 @@ void VPropView::OnBoundaryChange(wxScrollEvent& event)
 		m_boundary_text->SetValue(str);
 }
 
-void VPropView::OnBoundaryText(wxCommandEvent& event)
+void VolumePropPanel::OnBoundaryText(wxCommandEvent& event)
 {
 	wxString str = m_boundary_text->GetValue();
 	double val = 0.0;
 	str.ToDouble(&val);
-	int ival = std::round(val * 2000.0);
-	m_boundary_sldr->SetValue(ival);
+	//int ival = std::round(val * 2000.0);
+	//m_boundary_sldr->SetValue(ival);
 
 	//set boundary value
 	if (m_sync_group && m_group)
@@ -1371,13 +1409,13 @@ void VPropView::OnBoundaryText(wxCommandEvent& event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnBoundaryChk(wxCommandEvent& event)
+void VolumePropPanel::OnBoundaryChk(wxCommandEvent& event)
 {
 	bool val = m_boundary_chk->GetValue();
 	EnableBoundary(val);
 }
 
-void VPropView::OnThreshSync(wxCommandEvent& event)
+void VolumePropPanel::OnThreshSync(wxCommandEvent& event)
 {
 	wxString str = m_left_thresh_text->GetValue();
 	long iVal;
@@ -1393,58 +1431,26 @@ void VPropView::OnThreshSync(wxCommandEvent& event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnThreshChange(wxScrollEvent &event)
+void VolumePropPanel::OnThreshChange(wxScrollEvent &event)
 {
-	bool bval = m_thresh_sldr->GetLink();
-	if (bval != m_thresh_link_tb->GetToolState(ID_ThreshLinkTb))
-	{
-		m_thresh_link_tb->ToggleTool(ID_ThreshLinkTb, bval);
-		if (bval)
-			m_thresh_link_tb->SetToolNormalBitmap(ID_ThreshLinkTb,
-				wxGetBitmapFromMemory(link));
-		else
-			m_thresh_link_tb->SetToolNormalBitmap(ID_ThreshLinkTb,
-				wxGetBitmapFromMemory(unlink));
-	}
-	int ival = m_thresh_sldr->GetLowValue();
-	wxString str = wxString::Format("%d", ival);
-	if (str != m_left_thresh_text->GetValue())
-		m_left_thresh_text->SetValue(str);
-
-	ival = m_thresh_sldr->GetHighValue();
-	str = wxString::Format("%d", ival);
-	if (str != m_right_thresh_text->GetValue())
-		m_right_thresh_text->SetValue(str);
-}
-
-void VPropView::OnThreshLowText(wxCommandEvent &event)
-{
-	wxString str = m_left_thresh_text->GetValue();
-	long ival = 0;
-	str.ToLong(&ival);
-	if (double(ival) > m_max_val)
-	{
-		UpdateMaxVal(ival);
-		str = wxString::Format("%d", ival);
-		m_left_thresh_text->ChangeValue(str);
-	}
-	double val = double(ival) / m_max_val;
-	double right_val = (double)m_thresh_sldr->GetHighValue() / m_max_val;
-
-	if (val > right_val)
-	{
-		val = right_val;
-		ival = std::round(val*m_max_val);
-		wxString str2 = wxString::Format("%d", ival);
-		m_left_thresh_text->ChangeValue(str2);
-	}
-	m_thresh_sldr->SetLowValue(ival);
+	int ival1 = m_thresh_sldr->GetLowValue();
+	int ival2 = m_thresh_sldr->GetHighValue();
+	if (double(ival2) > m_max_val)
+		UpdateMaxVal(ival2);
+	double val1 = double(ival1) / m_max_val;
+	double val2 = double(ival2) / m_max_val;
 
 	//set left threshold value
 	if (m_sync_group && m_group)
-		m_group->SetLeftThresh(val);
+	{
+		m_group->SetLeftThresh(val1);
+		m_group->SetRightThresh(val2);
+	}
 	else if (m_vd)
-		m_vd->SetLeftThresh(val);
+	{
+		m_vd->SetLeftThresh(val1);
+		m_vd->SetLeftThresh(val2);
+	}
 
 	RefreshVRenderViews(false, true);
 
@@ -1454,40 +1460,23 @@ void VPropView::OnThreshLowText(wxCommandEvent &event)
 		m_frame->GetColocalizationDlg()->Colocalize();
 }
 
-void VPropView::OnThreshHiText(wxCommandEvent &event)
+void VolumePropPanel::OnThreshLowText(wxCommandEvent &event)
+{
+	wxString str = m_left_thresh_text->GetValue();
+	long ival = 0;
+	str.ToLong(&ival);
+	m_thresh_sldr->SetLowValue(ival);
+}
+
+void VolumePropPanel::OnThreshHiText(wxCommandEvent &event)
 {
 	wxString str = m_right_thresh_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
-	if (double(ival) > m_max_val)
-	{
-		UpdateMaxVal(ival);
-		str = wxString::Format("%d", ival);
-		m_right_thresh_text->ChangeValue(str);
-	}
-	double val = double(ival) / m_max_val;
-	double left_val = m_thresh_sldr->GetLowValue() / m_max_val;
-
-	if (val >= left_val)
-	{
-		m_thresh_sldr->SetHighValue(ival);
-
-		//set right threshold value
-		if (m_sync_group && m_group)
-			m_group->SetRightThresh(val);
-		else if (m_vd)
-			m_vd->SetRightThresh(val);
-
-		RefreshVRenderViews(false, true);
-	}
-
-	//update colocalization
-	if (m_frame && m_frame->GetColocalizationDlg() &&
-		m_frame->GetColocalizationDlg()->GetThreshUpdate())
-		m_frame->GetColocalizationDlg()->Colocalize();
+	m_thresh_sldr->SetHighValue(ival);
 }
 
-void VPropView::OnThreshLink(wxCommandEvent& event)
+void VolumePropPanel::OnThreshLink(wxCommandEvent& event)
 {
 	bool val = m_thresh_sldr->GetLink();
 	val = !val;
@@ -1501,14 +1490,14 @@ void VPropView::OnThreshLink(wxCommandEvent& event)
 			wxGetBitmapFromMemory(unlink));
 }
 
-void VPropView::OnThreshChk(wxCommandEvent& event)
+void VolumePropPanel::OnThreshChk(wxCommandEvent& event)
 {
 	bool val = m_thresh_chk->GetValue();
 	EnableThresh(val);
 }
 
 //shadow
-void VPropView::OnShadowSync(wxCommandEvent& event)
+void VolumePropPanel::OnShadowSync(wxCommandEvent& event)
 {
 	bool bVal = m_shadow_chk->GetValue();
 	wxString str = m_shadow_text->GetValue();
@@ -1522,13 +1511,13 @@ void VPropView::OnShadowSync(wxCommandEvent& event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnShadowChk(wxCommandEvent &event)
+void VolumePropPanel::OnShadowChk(wxCommandEvent &event)
 {
 	bool val = m_shadow_chk->GetValue();
 	EnableShadow(val);
 }
 
-void VPropView::OnShadowChange(wxScrollEvent &event)
+void VolumePropPanel::OnShadowChange(wxScrollEvent &event)
 {
 	double val = m_shadow_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
@@ -1536,12 +1525,12 @@ void VPropView::OnShadowChange(wxScrollEvent &event)
 		m_shadow_text->SetValue(str);
 }
 
-void VPropView::OnShadowText(wxCommandEvent &event)
+void VolumePropPanel::OnShadowText(wxCommandEvent &event)
 {
 	wxString str = m_shadow_text->GetValue();
 	double val = 0.0;
 	str.ToDouble(&val);
-	m_shadow_sldr->SetValue(std::round(val*100.0));
+	//m_shadow_sldr->SetValue(std::round(val*100.0));
 
 	//set shadow darkness
 	if (m_sync_group && m_group)
@@ -1554,7 +1543,7 @@ void VPropView::OnShadowText(wxCommandEvent &event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnSampleSync(wxCommandEvent& event)
+void VolumePropPanel::OnSampleSync(wxCommandEvent& event)
 {
 	wxString str = m_sample_text->GetValue();
 	double srate = 0.0;
@@ -1564,7 +1553,7 @@ void VPropView::OnSampleSync(wxCommandEvent& event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnSampleChange(wxScrollEvent & event)
+void VolumePropPanel::OnSampleChange(wxScrollEvent & event)
 {
 	double val = m_sample_sldr->GetValue() / 10.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1572,13 +1561,13 @@ void VPropView::OnSampleChange(wxScrollEvent & event)
 		m_sample_text->SetValue(str);
 }
 
-void VPropView::OnSampleText(wxCommandEvent& event)
+void VolumePropPanel::OnSampleText(wxCommandEvent& event)
 {
 	wxString str = m_sample_text->GetValue();
 	double srate = 0.0;
 	str.ToDouble(&srate);
-	double val = srate*10.0;
-	m_sample_sldr->SetValue(std::round(val));
+	//double val = srate*10.0;
+	//m_sample_sldr->SetValue(std::round(val));
 
 	//set sample rate value
 	if (m_view && m_view->GetVolMethod()==VOL_METHOD_MULTI)
@@ -1603,14 +1592,14 @@ void VPropView::OnSampleText(wxCommandEvent& event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnSampleChk(wxCommandEvent& event)
+void VolumePropPanel::OnSampleChk(wxCommandEvent& event)
 {
 	bool val = m_sample_chk->GetValue();
 	EnableSample(val);
 }
 
 //colormap controls
-void VPropView::OnColormapSync(wxCommandEvent& event)
+void VolumePropPanel::OnColormapSync(wxCommandEvent& event)
 {
 	if (m_group)
 	{
@@ -1639,105 +1628,47 @@ void VPropView::OnColormapSync(wxCommandEvent& event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnColormapChk(wxCommandEvent &event)
+void VolumePropPanel::OnColormapChk(wxCommandEvent &event)
 {
 	bool val = m_colormap_chk->GetValue();
 	EnableColormap(val);
 }
 
-void VPropView::OnColormapHiText(wxCommandEvent &event)
+void VolumePropPanel::OnColormapChange(wxScrollEvent &event)
 {
-	wxString str = m_colormap_hi_text->GetValue();
-	long iVal = 0;
-	str.ToLong(&iVal);
-	if (double(iVal) > m_max_val)
-	{
-		UpdateMaxVal(iVal);
-		str = wxString::Format("%d", iVal);
-		m_colormap_hi_text->ChangeValue(str);
-	}
-	long iVal2 = m_colormap_sldr->GetLowValue();
+	int ival1 = m_colormap_sldr->GetLowValue();
+	int ival2 = m_colormap_sldr->GetHighValue();
+	if (double(ival2) > m_max_val)
+		UpdateMaxVal(ival2);
+	double val1 = double(ival1) / m_max_val;
+	double val2 = double(ival2) / m_max_val;
 
-	if (iVal >= iVal2)
-	{
-		m_colormap_sldr->SetHighValue(iVal);
-
-		double val = double(iVal)/m_max_val;
-
-		if (m_sync_group && m_group)
-			m_group->SetColormapValues(-1, val);
-		else if (m_vd)
-		{
-			double low, high;
-			m_vd->GetColormapValues(low, high);
-			m_vd->SetColormapValues(low, val);
-		}
-
-		RefreshVRenderViews(false, true);
-	}
-}
-
-void VPropView::OnColormapChange(wxScrollEvent &event)
-{
-	bool bval = m_colormap_sldr->GetLink();
-	if (bval != m_colormap_link_tb->GetToolState(ID_ColormapLinkTb))
-	{
-		m_colormap_link_tb->ToggleTool(ID_ColormapLinkTb, bval);
-		if (bval)
-			m_colormap_link_tb->SetToolNormalBitmap(ID_ColormapLinkTb,
-				wxGetBitmapFromMemory(link));
-		else
-			m_colormap_link_tb->SetToolNormalBitmap(ID_ColormapLinkTb,
-				wxGetBitmapFromMemory(unlink));
-	}
-
-	int iVal = m_colormap_sldr->GetLowValue();
-	wxString str = wxString::Format("%d", iVal);
-	if (str != m_colormap_low_text->GetValue())
-		m_colormap_low_text->SetValue(str);
-
-	iVal = m_colormap_sldr->GetHighValue();
-	str = wxString::Format("%d", iVal);
-	if (str != m_colormap_hi_text->GetValue())
-		m_colormap_hi_text->SetValue(str);
-}
-
-void VPropView::OnColormapLowText(wxCommandEvent &event)
-{
-	wxString str = m_colormap_low_text->GetValue();
-	long iVal = 0;
-	str.ToLong(&iVal);
-	if (double(iVal) > m_max_val)
-	{
-		UpdateMaxVal(iVal);
-		str = wxString::Format("%d", iVal);
-		m_colormap_low_text->ChangeValue(str);
-	}
-	//long iVal2 = m_colormap_high_value_sldr->GetValue();
-
-	//if (iVal > iVal2)
-	//{
-	//	iVal = iVal2;
-	//	str = wxString::Format("%d", iVal);
-	//	m_colormap_low_text->ChangeValue(str);
-	//}
-	m_colormap_sldr->SetLowValue(iVal);
-
-	double val = double(iVal)/m_max_val;
-
+	//set left threshold value
 	if (m_sync_group && m_group)
-		m_group->SetColormapValues(val, -1);
+		m_group->SetColormapValues(val1, val2);
 	else if (m_vd)
-	{
-		double low, high;
-		m_vd->GetColormapValues(low, high);
-		m_vd->SetColormapValues(val, high);
-	}
+		m_vd->SetColormapValues(val1, val2);
 
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnColormapLink(wxCommandEvent& event)
+void VolumePropPanel::OnColormapLowText(wxCommandEvent &event)
+{
+	wxString str = m_colormap_low_text->GetValue();
+	long iVal = 0;
+	str.ToLong(&iVal);
+	m_colormap_sldr->SetLowValue(iVal);
+}
+
+void VolumePropPanel::OnColormapHiText(wxCommandEvent& event)
+{
+	wxString str = m_colormap_hi_text->GetValue();
+	long iVal = 0;
+	str.ToLong(&iVal);
+	m_colormap_sldr->SetHighValue(iVal);
+}
+
+void VolumePropPanel::OnColormapLink(wxCommandEvent& event)
 {
 	bool val = m_colormap_sldr->GetLink();
 	val = !val;
@@ -1751,7 +1682,7 @@ void VPropView::OnColormapLink(wxCommandEvent& event)
 			wxGetBitmapFromMemory(unlink));
 }
 
-void VPropView::OnColormapInvBtn(wxCommandEvent &event)
+void VolumePropPanel::OnColormapInvBtn(wxCommandEvent &event)
 {
 	bool val = m_colormap_inv_btn->GetValue();
 
@@ -1771,7 +1702,7 @@ void VPropView::OnColormapInvBtn(wxCommandEvent &event)
 		m_frame->GetColocalizationDlg()->Colocalize();
 }
 
-void VPropView::OnColormapCombo(wxCommandEvent &event)
+void VolumePropPanel::OnColormapCombo(wxCommandEvent &event)
 {
 	int colormap = m_colormap_combo->GetCurrentSelection();
 
@@ -1796,7 +1727,7 @@ void VPropView::OnColormapCombo(wxCommandEvent &event)
 		m_frame->GetColocalizationDlg()->Colocalize();
 }
 
-void VPropView::OnColormapCombo2(wxCommandEvent &event)
+void VolumePropPanel::OnColormapCombo2(wxCommandEvent &event)
 {
 	int colormap_proj = m_colormap_combo2->GetCurrentSelection();
 
@@ -1812,7 +1743,7 @@ void VPropView::OnColormapCombo2(wxCommandEvent &event)
 }
 
 //6
-void VPropView::OnColorChange(wxColor c)
+void VolumePropPanel::OnColorChange(wxColor c)
 {
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	if (m_vd)
@@ -1853,7 +1784,7 @@ void VPropView::OnColorChange(wxColor c)
 	}
 }
 
-void VPropView::OnColor2Change(wxColor c)
+void VolumePropPanel::OnColor2Change(wxColor c)
 {
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	if (m_vd)
@@ -1863,7 +1794,7 @@ void VPropView::OnColor2Change(wxColor c)
 	}
 }
 
-int VPropView::GetColorString(wxString& str, wxColor& wxc)
+int VolumePropPanel::GetColorString(wxString& str, wxColor& wxc)
 {
 	int filled = 3;
 	if (str == "a" || str == "A")
@@ -1990,7 +1921,7 @@ int VPropView::GetColorString(wxString& str, wxColor& wxc)
 	return filled;
 }
 
-void VPropView::OnColorTextChange(wxCommandEvent& event)
+void VolumePropPanel::OnColorTextChange(wxCommandEvent& event)
 {
 	wxString str = m_color_text->GetValue();
 	wxColor wxc;
@@ -2006,7 +1937,7 @@ void VPropView::OnColorTextChange(wxCommandEvent& event)
 	}
 }
 
-void VPropView::OnColor2TextChange(wxCommandEvent& event)
+void VolumePropPanel::OnColor2TextChange(wxCommandEvent& event)
 {
 	wxString str = m_color2_text->GetValue();
 	wxColor wxc;
@@ -2022,7 +1953,7 @@ void VPropView::OnColor2TextChange(wxCommandEvent& event)
 	}
 }
 
-void VPropView::OnColorBtn(wxColourPickerEvent& event)
+void VolumePropPanel::OnColorBtn(wxColourPickerEvent& event)
 {
 	wxColor wxc = event.GetColour();
 
@@ -2032,7 +1963,7 @@ void VPropView::OnColorBtn(wxColourPickerEvent& event)
 	OnColorChange(wxc);
 }
 
-void VPropView::OnColor2Btn(wxColourPickerEvent& event)
+void VolumePropPanel::OnColor2Btn(wxColourPickerEvent& event)
 {
 	wxColor wxc = event.GetColour();
 
@@ -2042,17 +1973,17 @@ void VPropView::OnColor2Btn(wxColourPickerEvent& event)
 	OnColor2Change(wxc);
 }
 
-void VPropView::OnColorTextFocus(wxCommandEvent& event)
+void VolumePropPanel::OnColorTextFocus(wxCommandEvent& event)
 {
 	m_color_text->SetSelection(0, -1);
 }
 
-void VPropView::OnColor2TextFocus(wxCommandEvent& event)
+void VolumePropPanel::OnColor2TextFocus(wxCommandEvent& event)
 {
 	m_color2_text->SetSelection(0, -1);
 }
 
-void VPropView::OnInvCheck(wxCommandEvent &event)
+void VolumePropPanel::OnInvCheck(wxCommandEvent &event)
 {
 	bool inv = m_options_toolbar->GetToolState(ID_InvChk);
 	if(inv) 
@@ -2070,13 +2001,13 @@ void VPropView::OnInvCheck(wxCommandEvent &event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnMIPCheck(wxCommandEvent &event)
+void VolumePropPanel::OnMIPCheck(wxCommandEvent &event)
 {
 	int val = m_options_toolbar->GetToolState(ID_MipChk)?1:0;
 	EnableMip(val);
 }
 
-void VPropView::OnTranspChk(wxCommandEvent &event)
+void VolumePropPanel::OnTranspChk(wxCommandEvent &event)
 {
 	bool bval = m_options_toolbar->GetToolState(ID_TranspChk);
 	if (bval)
@@ -2101,7 +2032,7 @@ void VPropView::OnTranspChk(wxCommandEvent &event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnCompChk(wxCommandEvent &event)
+void VolumePropPanel::OnCompChk(wxCommandEvent &event)
 {
 	bool bval = m_options_toolbar->GetToolState(ID_CompChk);
 	if (bval)
@@ -2127,7 +2058,7 @@ void VPropView::OnCompChk(wxCommandEvent &event)
 }
 
 //ml
-void VPropView::OnUseMlChk(wxCommandEvent& event)
+void VolumePropPanel::OnUseMlChk(wxCommandEvent& event)
 {
 	ApplyMl();
 	//settings not managed by ml
@@ -2148,7 +2079,7 @@ void VPropView::OnUseMlChk(wxCommandEvent& event)
 }
 
 //noise reduction
-void VPropView::OnNRCheck(wxCommandEvent &event)
+void VolumePropPanel::OnNRCheck(wxCommandEvent &event)
 {
 	bool val = m_options_toolbar->GetToolState(ID_NRChk);
 	if(val) 
@@ -2180,14 +2111,14 @@ void VPropView::OnNRCheck(wxCommandEvent &event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnFluoRender(wxCommandEvent &event)
+void VolumePropPanel::OnFluoRender(wxCommandEvent &event)
 {
 	if (!m_frame) return;
 	m_frame->OnInfo(event);
 }
 
 //depth mode
-void VPropView::OnDepthCheck(wxCommandEvent &event)
+void VolumePropPanel::OnDepthCheck(wxCommandEvent &event)
 {
 	bool val = m_options_toolbar->GetToolState(ID_DepthChk);
 	if(val) 
@@ -2218,7 +2149,7 @@ void VPropView::OnDepthCheck(wxCommandEvent &event)
 	RefreshVRenderViews(false, true);
 }
 
-bool VPropView::SetSpacings()
+bool VolumePropPanel::SetSpacings()
 {
 	if (!m_space_x_text || !m_space_y_text || !m_space_z_text)
 		return false;
@@ -2265,7 +2196,7 @@ bool VPropView::SetSpacings()
 }
 
 //enable/disable
-void VPropView::EnableGamma(bool bval)
+void VolumePropPanel::EnableGamma(bool bval)
 {
 	//double val = 1.0;
 	//if (bval)
@@ -2286,7 +2217,7 @@ void VPropView::EnableGamma(bool bval)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::EnableSaturation(bool bval)
+void VolumePropPanel::EnableSaturation(bool bval)
 {
 	//double val = 0.0;
 	//if (bval)
@@ -2308,7 +2239,7 @@ void VPropView::EnableSaturation(bool bval)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::EnableLuminance(bool bval)
+void VolumePropPanel::EnableLuminance(bool bval)
 {
 	if (m_sync_group && m_group)
 		m_group->SetLuminanceEnable(bval);
@@ -2323,7 +2254,7 @@ void VPropView::EnableLuminance(bool bval)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::EnableAlpha(bool bval)
+void VolumePropPanel::EnableAlpha(bool bval)
 {
 	//if (m_vd->GetMode() != 1)
 	if (m_sync_group && m_group)
@@ -2339,7 +2270,7 @@ void VPropView::EnableAlpha(bool bval)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::EnableShading(bool bval)
+void VolumePropPanel::EnableShading(bool bval)
 {
 	if (m_sync_group && m_group)
 		m_group->SetShadingEnable(bval);
@@ -2360,7 +2291,7 @@ void VPropView::EnableShading(bool bval)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::EnableBoundary(bool bval)
+void VolumePropPanel::EnableBoundary(bool bval)
 {
 	if (m_sync_group && m_group)
 		m_group->SetBoundaryEnable(bval);
@@ -2375,7 +2306,7 @@ void VPropView::EnableBoundary(bool bval)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::EnableThresh(bool bval)
+void VolumePropPanel::EnableThresh(bool bval)
 {
 	if (m_sync_group && m_group)
 		m_group->SetThreshEnable(bval);
@@ -2392,7 +2323,7 @@ void VPropView::EnableThresh(bool bval)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::EnableShadow(bool bval)
+void VolumePropPanel::EnableShadow(bool bval)
 {
 	if (m_sync_group && m_group)
 		m_group->SetShadowEnable(bval);
@@ -2414,7 +2345,7 @@ void VPropView::EnableShadow(bool bval)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::EnableSample(bool bval)
+void VolumePropPanel::EnableSample(bool bval)
 {
 	if (m_sync_group && m_group)
 		m_group->SetShadowEnable(bval);
@@ -2429,7 +2360,7 @@ void VPropView::EnableSample(bool bval)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::EnableColormap(bool bval)
+void VolumePropPanel::EnableColormap(bool bval)
 {
 	if (m_sync_group && m_group)
 	{
@@ -2459,7 +2390,7 @@ void VPropView::EnableColormap(bool bval)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::EnableMip(bool bval)
+void VolumePropPanel::EnableMip(bool bval)
 {
 	if (m_sync_group && m_group)
 		m_group->SetMode(bval?1:0);
@@ -2476,7 +2407,7 @@ void VPropView::EnableMip(bool bval)
 		if (m_thresh_st)
 			m_thresh_st->SetLabel("Threshold :");
 	}
-	Layout();
+	//Layout();
 
 	RefreshVRenderViews(false, true);
 	//DisableAlpha();
@@ -2491,7 +2422,7 @@ void VPropView::EnableMip(bool bval)
 	//	DisableShading();
 }
 
-//void VPropView::DisableMip()
+//void VolumePropPanel::DisableMip()
 //{
 //	if (m_vd->GetAlphaEnable())
 //		EnableAlpha();
@@ -2512,7 +2443,7 @@ void VPropView::EnableMip(bool bval)
 //}
 
 //update max value
-void VPropView::UpdateMaxVal(double value)
+void VolumePropPanel::UpdateMaxVal(double value)
 {
 	if (!m_vd) return;
 	int bits = m_vd->GetBits();
@@ -2528,17 +2459,17 @@ void VPropView::UpdateMaxVal(double value)
 	m_max_val = value;
 	m_vd->SetMaxValue(m_max_val);
 	m_vd->SetScalarScale(65535.0 / m_max_val);
-	GetSettings();
+	//GetSettings();
 }
 
-void VPropView::OnSpaceText(wxCommandEvent& event)
+void VolumePropPanel::OnSpaceText(wxCommandEvent& event)
 {
 	if (SetSpacings())
 		InitVRenderViews(INIT_BOUNDS|INIT_CENTER);
 }
 
 //legend
-void VPropView::OnLegendCheck(wxCommandEvent& event)
+void VolumePropPanel::OnLegendCheck(wxCommandEvent& event)
 {
 	bool leg = m_options_toolbar->GetToolState(ID_LegendChk);
 	if (m_vd)
@@ -2548,7 +2479,7 @@ void VPropView::OnLegendCheck(wxCommandEvent& event)
 }
 
 //interpolation
-void VPropView::OnInterpolateCheck(wxCommandEvent& event)
+void VolumePropPanel::OnInterpolateCheck(wxCommandEvent& event)
 {
 	bool inv = m_options_toolbar->GetToolState(ID_InterpolateChk);
 	if(inv) 
@@ -2568,7 +2499,7 @@ void VPropView::OnInterpolateCheck(wxCommandEvent& event)
 }
 
 //sync within group
-void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
+void VolumePropPanel::OnSyncGroupCheck(wxCommandEvent& event)
 {
 	m_sync_group = m_options_toolbar->GetToolState(ID_SyncGroupChk);
 	if (m_group)
@@ -2678,7 +2609,7 @@ void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnSaveDefault(wxCommandEvent& event)
+void VolumePropPanel::OnSaveDefault(wxCommandEvent& event)
 {
 	if (!m_frame)
 		return;
@@ -3011,7 +2942,7 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 	}
 }
 
-void VPropView::OnResetDefault(wxCommandEvent &event)
+void VolumePropPanel::OnResetDefault(wxCommandEvent &event)
 {
 	if (!m_frame)
 		return;

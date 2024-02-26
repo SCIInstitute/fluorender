@@ -52,6 +52,8 @@ public:
 	int GetHighValue();
 	bool SetLowValue(int val);
 	bool SetHighValue(int val);
+	bool ChangeLowValue(int val);
+	bool ChangeHighValue(int val);
 
 	virtual void OnLeftDown(wxMouseEvent& event);
 	virtual void OnMotion(wxMouseEvent& event);
@@ -90,8 +92,8 @@ protected:
 	virtual void renderNormal(wxDC& dc);
 	virtual void renderInverse(wxDC& dc);
 
-	bool setLowValue(int val, bool send_msg = true);
-	bool setHighValue(int val, bool send_msg = true);
+	bool setLowValue(int val, bool notify = true);
+	bool setHighValue(int val, bool notify = true);
 
 	virtual void replace(double t);
 	virtual void push(double t);

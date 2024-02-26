@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2024 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -25,10 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _VPROPVIEW_H_
-#define _VPROPVIEW_H_
+#ifndef _VOLUMEPROPPANEL_H_
+#define _VOLUMEPROPPANEL_H_
 
-#include <wx/wx.h>
+#include <PropPanel.h>
 #include <wx/scrolwin.h>
 #include <wx/clrpicker.h>
 #include <wx/tglbtn.h>
@@ -43,7 +43,7 @@ class wxBasisSlider;
 class wxDoubleSlider;
 class wxSingleSlider;
 class wxUndoableCheckBox;
-class VPropView: public wxScrolledWindow
+class VolumePropPanel: public PropPanel
 {
 	enum
 	{
@@ -132,17 +132,18 @@ class VPropView: public wxScrolledWindow
 };
 
 public:
-	VPropView(VRenderFrame* frame,
+	VolumePropPanel(VRenderFrame* frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
-		const wxString& name = "VPropView");
-	~VPropView();
+		const wxString& name = "VolumePropPanel");
+	~VolumePropPanel();
+
+	virtual void GetSettings();
 
 	void SetVolumeData(VolumeData* vd);
 	VolumeData* GetVolumeData();
-	void RefreshVRenderViews(bool tree=false, bool interactive=false);
 	void InitVRenderViews(unsigned int type);
 	void SetFocusVRenderViews(wxBasisSlider* slider);
 
@@ -159,7 +160,6 @@ public:
 	void ClearUndo();
 
 private:
-	VRenderFrame* m_frame;
 	VolumeData* m_vd;
 
 	bool m_lumi_change;
@@ -246,7 +246,6 @@ private:
 	wxToolBar *m_options_toolbar;
 
 private:
-	void GetSettings();
 	bool SetSpacings();
 
 	//enable/disable
@@ -369,4 +368,4 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 
-#endif//_VPROPVIEW_H_
+#endif//_VOLUMEPROPPANEL_H_

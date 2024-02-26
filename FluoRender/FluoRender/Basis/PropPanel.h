@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2024 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -25,49 +25,29 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _APROPVIEW_H_
-#define _APROPVIEW_H_
+#ifndef _PROPPANEL_H_
+#define _PROPPANEL_H_
 
 #include <wx/wx.h>
-#include <wx/scrolwin.h>
-
-using namespace std;
 
 class VRenderFrame;
-class Annotations;
-class APropView : public wxScrolledWindow
+class PropPanel: public wxScrolledWindow
 {
-	enum
-	{
-		ID_MemoText = ID_APROP_VIEW,
-		ID_MemoUpdateBtn
-	};
-
 public:
-	APropView(VRenderFrame* frame,
+	PropPanel(VRenderFrame* frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
-		const wxString& name = "APropView");
-	~APropView();
+		const wxString& name = "PropPanel");
+	~PropPanel();
 
-	void SetAnnotations(Annotations* ann);
-	Annotations* GetAnnotations();
-	void RefreshVRenderViews(bool tree=false);
+	virtual void GetSettings() = 0;
+	void RefreshVRenderViews(bool tree = false, bool interactive = false);
 
-	void GetSettings();
-
-private:
+protected:
 	VRenderFrame* m_frame;
-	Annotations* m_ann;
 
-	wxTextCtrl* m_memo_text;
-	wxButton* m_memo_update_btn;
-
-	//memo
-	void OnMemoUpdateBtn(wxCommandEvent& event);
-	DECLARE_EVENT_TABLE()
 };
 
-#endif//_APROPVIEW_H_
+#endif//_PROPPANEL_H_

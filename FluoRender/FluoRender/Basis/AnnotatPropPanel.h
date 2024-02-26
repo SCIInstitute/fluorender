@@ -25,52 +25,46 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _WXSINGLESLIDER_H_
-#define _WXSINGLESLIDER_H_
+#ifndef _ANNOTATPROPPANEL_H_
+#define _ANNOTATPROPPANEL_H_
 
-#include <wxBasisSlider.h>
-#include <vector>
+#include <PropPanel.h>
+#include <wx/scrolwin.h>
 
-class wxSingleSlider : public wxBasisSlider
+using namespace std;
+
+class Annotations;
+class AnnotatPropPanel : public PropPanel
 {
+	enum
+	{
+		ID_MemoText = ID_APROP_VIEW,
+		ID_MemoUpdateBtn
+	};
+
 public:
-	wxSingleSlider(
-		wxWindow *parent,
-		wxWindowID id,
-		int value, int minValue, int maxValue,
+	AnnotatPropPanel(VRenderFrame* frame,
+		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
-		long style = wxSL_HORIZONTAL,
-		const wxValidator& val = wxDefaultValidator,
-		const wxString& name = "wxSingleSlider");
+		long style = 0,
+		const wxString& name = "AnnotatPropPanel");
+	~AnnotatPropPanel();
 
-	int GetValue();
-	bool SetValue(int val);
-	bool ChangeValue(int val);
+	void SetAnnotations(Annotations* ann);
+	Annotations* GetAnnotations();
 
-	virtual void OnLeftDown(wxMouseEvent& event);
-	virtual void OnMotion(wxMouseEvent& event);
-	virtual void OnLeftUp(wxMouseEvent& event);
-	virtual void OnLeave(wxMouseEvent& event);
-
-	virtual void SetThumbColor(const wxColor& c);
-
-	virtual void Scroll(int val);
+	virtual void GetSettings();
 
 private:
-	int val_;
-	wxColor thumb_color_;
-	int thumb_state_;//0-normal;1-mouse on;2-moving
+	Annotations* m_ann;
 
-private:
-	virtual void renderNormal(wxDC& dc);
-	virtual void renderInverse(wxDC& dc);
+	wxTextCtrl* m_memo_text;
+	wxButton* m_memo_update_btn;
 
-	bool setValue(int val, bool notify = true);
-
-	virtual void replace(double t);
-	virtual void push(double t);
-	virtual void update();
+	//memo
+	void OnMemoUpdateBtn(wxCommandEvent& event);
+	DECLARE_EVENT_TABLE()
 };
 
-#endif//_WXSINGLESLIDER_H_
+#endif//_ANNOTATPROPPANEL_H_

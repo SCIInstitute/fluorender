@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2024 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -25,16 +25,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _MMANIPULATOR_H_
-#define _MMANIPULATOR_H_
+#ifndef _MANIPPROPPANEL_H_
+#define _MANIPPROPPANEL_H_
 
-#include <wx/wx.h>
+#include <PropPanel.h>
 #include <wx/scrolwin.h>
 #include <wx/spinbutt.h>
 
-class VRenderFrame;
 class MeshData;
-class MManipulator: public wxScrolledWindow
+class ManipPropPanel: public PropPanel
 {
 	enum
 	{
@@ -59,22 +58,22 @@ class MManipulator: public wxScrolledWindow
 	};
 
 public:
-	MManipulator(VRenderFrame* frame,
+	ManipPropPanel(VRenderFrame* frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
-		const wxString& name = "MManipulator");
-	~MManipulator();
+		const wxString& name = "ManipPropPanel");
+	~ManipPropPanel();
+
+	virtual void GetSettings();
 
 	void SetMeshData(MeshData* md);
 	MeshData* GetMeshData();
-	void RefreshVRenderViews();
 	void GetData();
 	void UpdateData();
 
 private:
-	VRenderFrame* m_frame;
 	MeshData* m_md;
 
 	wxStaticText* m_trans_st;
@@ -118,4 +117,4 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 
-#endif//_MMANIPULATOR_H_
+#endif//_MANIPPROPPANEL_H_

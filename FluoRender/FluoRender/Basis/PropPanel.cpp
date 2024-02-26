@@ -25,52 +25,30 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _WXSINGLESLIDER_H_
-#define _WXSINGLESLIDER_H_
+#include "PropPanel.h"
+#include <VRenderFrame.h>
 
-#include <wxBasisSlider.h>
-#include <vector>
-
-class wxSingleSlider : public wxBasisSlider
+PropPanel::PropPanel(VRenderFrame* frame,
+	wxWindow* parent,
+	const wxPoint& pos,
+	const wxSize& size,
+	long style,
+	const wxString& name) :
+	wxScrolledWindow(parent, wxID_ANY, pos, size,style, name),
+	m_frame(frame)
 {
-public:
-	wxSingleSlider(
-		wxWindow *parent,
-		wxWindowID id,
-		int value, int minValue, int maxValue,
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = wxSL_HORIZONTAL,
-		const wxValidator& val = wxDefaultValidator,
-		const wxString& name = "wxSingleSlider");
+}
 
-	int GetValue();
-	bool SetValue(int val);
-	bool ChangeValue(int val);
+PropPanel::~PropPanel()
+{
+}
 
-	virtual void OnLeftDown(wxMouseEvent& event);
-	virtual void OnMotion(wxMouseEvent& event);
-	virtual void OnLeftUp(wxMouseEvent& event);
-	virtual void OnLeave(wxMouseEvent& event);
+void PropPanel::RefreshVRenderViews(bool tree, bool interactive)
+{
+	if (!m_frame)
+		return;
+	m_frame->RefreshVRenderViews(tree, interactive);
+	//if (ui)
+	//	m_frame->UpdateProps();
+}
 
-	virtual void SetThumbColor(const wxColor& c);
-
-	virtual void Scroll(int val);
-
-private:
-	int val_;
-	wxColor thumb_color_;
-	int thumb_state_;//0-normal;1-mouse on;2-moving
-
-private:
-	virtual void renderNormal(wxDC& dc);
-	virtual void renderInverse(wxDC& dc);
-
-	bool setValue(int val, bool notify = true);
-
-	virtual void replace(double t);
-	virtual void push(double t);
-	virtual void update();
-};
-
-#endif//_WXSINGLESLIDER_H_

@@ -165,7 +165,7 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 		}
 		else if (type == 7)
 		{
-			VPropView* page = m_frame->FindVolumeProps(vd);
+			VolumePropPanel* page = m_frame->FindVolumeProps(vd);
 			vd_a->Replace(vd);
 			delete vd;
 			//m_frame->GetPropView()->SetVolumeData(vd_a);
