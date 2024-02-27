@@ -1121,7 +1121,7 @@ void VolumePropPanel::OnGammaChange(wxScrollEvent & event)
 		m_vd->SetGamma(val);
 
 	DBGPRINT(L"gamma: %f\n", val);
-	RefreshVRenderViews(false, true, false);
+	RefreshVRenderViews(false, true);
 }
 
 void VolumePropPanel::OnGammaText(wxCommandEvent& event)
@@ -1136,7 +1136,7 @@ void VolumePropPanel::OnGammaText(wxCommandEvent& event)
 	else if (m_vd)
 		m_vd->SetGamma(val);
 
-	RefreshVRenderViews(false, true, false);
+	RefreshVRenderViews(false, true);
 }
 
 void VolumePropPanel::OnGammaChk(wxCommandEvent& event)
