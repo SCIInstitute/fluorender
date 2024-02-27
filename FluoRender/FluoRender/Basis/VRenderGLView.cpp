@@ -9634,7 +9634,10 @@ void VRenderGLView::RefreshGL(int debug_code,
 	//m_interactive = interactive;
 
 	//for debugging refresh events
-	DBGPRINT(L"%d\trefresh\t%d\t%d\n", m_vrv->m_id, debug_code, m_interactive);
+	//DBGPRINT(L"%d\trefresh\t%d\t%d\n", m_vrv->m_id, debug_code, m_interactive);
+	if (!m_interactive)
+		m_frame->UpdateProps();
+
 	m_updating = true;
 	if (start_loop)
 		StartLoopUpdate();

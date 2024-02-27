@@ -2705,9 +2705,6 @@ void VRenderFrame::RefreshVRenderViews(bool tree, bool interactive)
 	//change icon color of the tree panel
 	if (tree)
 		UpdateTreeColors();
-
-	if (!interactive)
-		UpdateProps();
 }
 
 void VRenderFrame::DeleteVRenderView(int i)
