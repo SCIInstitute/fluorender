@@ -54,7 +54,7 @@ public:
 	void SetAnnotations(Annotations* ann);
 	Annotations* GetAnnotations();
 
-	virtual void GetSettings();
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 private:
 	Annotations* m_ann;

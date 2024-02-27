@@ -45,12 +45,16 @@ wxUndoableCheckBox::wxUndoableCheckBox(
 
 void wxUndoableCheckBox::SetValue(bool val)
 {
-	wxCheckBox::SetValue(val);
-	double t;
-	if (time_sample(t))
-		push(t);
-	else
-		replace(t);
+	bool val_ = GetValue();
+	if (val_ != val)
+	{
+		wxCheckBox::SetValue(val);
+		double t;
+		if (time_sample(t))
+			push(t);
+		else
+			replace(t);
+	}
 }
 
 void wxUndoableCheckBox::OnChange(wxCommandEvent& event)
@@ -85,9 +89,9 @@ void wxUndoableCheckBox::push(double t)
 		else
 			stack_.insert(stack_.begin() + stack_pointer_, std::pair<double, bool>(t, val_));
 		stack_pointer_++;
-		DBGPRINT(L"\tsize:%d,pointer:%d,last:(%f, %d)\n",
-			stack_.size(), stack_pointer_, stack_.back().first,
-			std::any_cast<bool>(stack_.back().second));
+		//DBGPRINT(L"\tsize:%d,pointer:%d,last:(%f, %d)\n",
+		//	stack_.size(), stack_pointer_, stack_.back().first,
+		//	std::any_cast<bool>(stack_.back().second));
 	}
 }
 

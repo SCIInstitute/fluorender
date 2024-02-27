@@ -2599,10 +2599,10 @@ void VRenderFrame::ShowPropPage(int type,
 
 }
 
-void VRenderFrame::UpdateProps()
+void VRenderFrame::UpdateProps(const fluo::ValueCollection& vc)
 {
 	for (auto i : m_prop_pages)
-		i->GetSettings();
+		i->FluoUpdate(vc);
 }
 
 VolumePropPanel* VRenderFrame::FindVolumeProps(const wxString& name)

@@ -189,7 +189,7 @@ MeshPropPanel::~MeshPropPanel()
 {
 }
 
-void MeshPropPanel::GetSettings()
+void MeshPropPanel::FluoUpdate(const fluo::ValueCollection& values)
 {
 	if (!m_md)
 		return;
@@ -243,7 +243,7 @@ void MeshPropPanel::SetView(VRenderGLView* view)
 void MeshPropPanel::SetMeshData(MeshData* md)
 {
 	m_md = md;
-	GetSettings();
+	FluoUpdate();
 }
 
 MeshData* MeshPropPanel::GetMeshData()
@@ -264,7 +264,7 @@ void MeshPropPanel::OnLightingCheck(wxCommandEvent& event)
 			if (md)
 				md->SetLighting(val);
 		}
-		RefreshVRenderViews();
+		FluoRefresh();
 	}
 }
 
@@ -277,7 +277,7 @@ void MeshPropPanel::OnDiffChange(wxColourPickerEvent& event)
 		m_md->SetColor(color, MESH_COLOR_DIFF);
 		fluo::Color amb = color * 0.3;
 		m_md->SetColor(amb, MESH_COLOR_AMB);
-		RefreshVRenderViews(true);
+		FluoRefresh(true);
 	}
 }
 
@@ -288,7 +288,7 @@ void MeshPropPanel::OnSpecChange(wxColourPickerEvent& event)
 	if (m_md)
 	{
 		m_md->SetColor(color, MESH_COLOR_SPEC);
-		RefreshVRenderViews();
+		FluoRefresh();
 	}
 }
 
@@ -310,7 +310,7 @@ void MeshPropPanel::OnShineText(wxCommandEvent& event)
 	if (m_md)
 	{
 		m_md->SetFloat(shine, MESH_FLOAT_SHN);
-		RefreshVRenderViews();
+		FluoRefresh();
 	}
 }
 
@@ -332,7 +332,7 @@ void MeshPropPanel::OnAlphaText(wxCommandEvent& event)
 	if (m_md)
 	{
 		m_md->SetFloat(alpha, MESH_FLOAT_ALPHA);
-		RefreshVRenderViews();
+		FluoRefresh();
 	}
 }
 
@@ -354,7 +354,7 @@ void MeshPropPanel::OnScaleText(wxCommandEvent& event)
 	if (m_md)
 	{
 		m_md->SetScaling(dval, dval, dval);
-		RefreshVRenderViews();
+		FluoRefresh();
 	}
 }
 
@@ -371,7 +371,7 @@ void MeshPropPanel::OnShadowCheck(wxCommandEvent& event)
 			if (md)
 				md->SetShadowEnable(val);
 		}
-		RefreshVRenderViews();
+		FluoRefresh();
 	}
 }
 
@@ -399,7 +399,7 @@ void MeshPropPanel::OnShadowText(wxCommandEvent& event)
 			if (md)
 				md->SetShadowIntensity(dval);
 		}
-		RefreshVRenderViews();
+		FluoRefresh();
 	}
 }
 
@@ -410,7 +410,7 @@ void MeshPropPanel::OnSizeCheck(wxCommandEvent& event)
 	if (m_md)
 	{
 		m_md->SetLimit(bval);
-		RefreshVRenderViews();
+		FluoRefresh();
 	}
 }
 
@@ -433,6 +433,6 @@ void MeshPropPanel::OnSizeText(wxCommandEvent& event)
 	{
 		m_md->SetLimitNumer(val);
 		if (m_md->GetLimit())
-			RefreshVRenderViews();
+			FluoRefresh();
 	}
 }

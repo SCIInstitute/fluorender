@@ -29,6 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #define _PROPPANEL_H_
 
 #include <wx/wx.h>
+#include <Value.hpp>
+
+#define FOUND_VALUE(v) vc.find(v) != vc.end()
 
 class VRenderFrame;
 class PropPanel: public wxScrolledWindow
@@ -42,8 +45,9 @@ public:
 		const wxString& name = "PropPanel");
 	~PropPanel();
 
-	virtual void GetSettings() = 0;
-	void RefreshVRenderViews(bool tree = false, bool interactive = false);
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {}) = 0;
+	void FluoRefresh(bool tree = false, bool interactive = false,
+		const fluo::ValueCollection& vc = {});
 
 protected:
 	VRenderFrame* m_frame;

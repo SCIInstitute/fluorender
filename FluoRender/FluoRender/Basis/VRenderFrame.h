@@ -225,7 +225,7 @@ public:
 		MeshData* md = 0,
 		Annotations* ann = 0,
 		bool show = true);
-	void UpdateProps();
+	void UpdateProps(const fluo::ValueCollection &vc);
 	VolumePropPanel* FindVolumeProps(VolumeData* vd);
 	MeshPropPanel* FindMeshProps(MeshData* md);
 	AnnotatPropPanel* FindAnnotationProps(Annotations* ad);

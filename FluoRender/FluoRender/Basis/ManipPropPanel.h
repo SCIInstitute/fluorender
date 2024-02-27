@@ -66,7 +66,7 @@ public:
 		const wxString& name = "ManipPropPanel");
 	~ManipPropPanel();
 
-	virtual void GetSettings();
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 	void SetMeshData(MeshData* md);
 	MeshData* GetMeshData();

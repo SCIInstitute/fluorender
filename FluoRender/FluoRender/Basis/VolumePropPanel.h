@@ -140,7 +140,7 @@ public:
 		const wxString& name = "VolumePropPanel");
 	~VolumePropPanel();
 
-	virtual void GetSettings();
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 	void SetVolumeData(VolumeData* vd);
 	VolumeData* GetVolumeData();

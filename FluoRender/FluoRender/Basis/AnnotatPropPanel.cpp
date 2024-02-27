@@ -80,7 +80,7 @@ AnnotatPropPanel::~AnnotatPropPanel()
 {
 }
 
-void AnnotatPropPanel::GetSettings()
+void AnnotatPropPanel::FluoUpdate(const fluo::ValueCollection& values)
 {
 	if (!m_ann)
 		return;
@@ -103,7 +103,7 @@ void AnnotatPropPanel::SetAnnotations(Annotations* ann)
 {
 	m_ann = ann;
 
-	GetSettings();
+	FluoUpdate();
 }
 
 Annotations* AnnotatPropPanel::GetAnnotations()

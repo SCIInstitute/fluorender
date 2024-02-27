@@ -43,12 +43,12 @@ PropPanel::~PropPanel()
 {
 }
 
-void PropPanel::RefreshVRenderViews(bool tree, bool interactive)
+void PropPanel::FluoRefresh(bool tree, bool interactive,
+	const fluo::ValueCollection& vc)
 {
 	if (!m_frame)
 		return;
 	m_frame->RefreshVRenderViews(tree, interactive);
-	//if (ui)
-	//	m_frame->UpdateProps();
+	m_frame->UpdateProps(vc);
 }
 

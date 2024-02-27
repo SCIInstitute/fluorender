@@ -154,7 +154,7 @@ ManipPropPanel::~ManipPropPanel()
 {
 }
 
-void ManipPropPanel::GetSettings()
+void ManipPropPanel::FluoUpdate(const fluo::ValueCollection& values)
 {
 
 }
@@ -324,7 +324,7 @@ void ManipPropPanel::UpdateData()
 	z = STOD(str.fn_str());
 	m_md->SetScaling(x, y, z);
 
-	RefreshVRenderViews();
+	FluoRefresh();
 }
 
 void ManipPropPanel::OnValueEnter(wxCommandEvent& event)

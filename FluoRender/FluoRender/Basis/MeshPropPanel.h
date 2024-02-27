@@ -72,7 +72,7 @@ public:
 	void SetMeshData(MeshData* md);
 	MeshData* GetMeshData();
 
-	virtual void GetSettings();
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 private:
 	VRenderGLView* m_view;
