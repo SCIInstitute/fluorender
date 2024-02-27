@@ -49,6 +49,6 @@ void PropPanel::FluoRefresh(bool tree, bool interactive,
 	if (!m_frame)
 		return;
 	m_frame->RefreshVRenderViews(tree, interactive);
-	m_frame->UpdateProps(vc);
+	m_frame->UpdateProps(vc, this);//update ui but exclude this
 }
 

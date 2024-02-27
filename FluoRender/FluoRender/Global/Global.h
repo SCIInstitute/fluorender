@@ -136,7 +136,7 @@ namespace fluo
 		std::unordered_map<std::string, flrd::PyBase*> python_list_;
 
 		//multifunc button use
-		int mul_func_btn_use_;//0-sync;1-focus;2-default;3-ml;4-undo
+		int mul_func_btn_use_;//0-sync;1-focus;2-default;3-ml;4-undo;5-enable
 
 		//controls for undo and redo
 		std::vector<Undoable*> undo_ctrls_;

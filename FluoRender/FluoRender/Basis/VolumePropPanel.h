@@ -248,6 +248,9 @@ private:
 private:
 	bool SetSpacings();
 
+	//update max value
+	void UpdateMaxVal(double value);
+
 	//enable/disable
 	//1
 	void EnableGamma(bool);
@@ -264,31 +267,54 @@ private:
 	//3
 	void EnableMip(bool);
 
-	//update max value
-	void UpdateMaxVal(double value);
+	//set values
+	void SetGamma(double);
+	void SetSaturation(double);
+	void SetLuminance(double);
+	void SetAlpha(double);
+	void SetLowShading(double);
+	void SetHiShading(double);
+	void SetBoundary(double);
+	void SetThresh(double, double);
+	void SetShadowInt(double);
+	void SetSampleRate(double);
+	void SetColormapVal(double, double);
+
+	//sync values
+	void SyncGamma(double);
+	void SyncSaturation(double);
+	void SyncLuminance(double);
+	void SyncAlpha(double);
+	void SyncLowShading(double);
+	void SyncHiShading(double);
+	void SyncBoundary(double);
+	void SyncThresh(double, double);
+	void SyncShadowInt(double);
+	void SyncSampleRate(double);
+	void SyncColormapVal(double, double);
 
 	//1
-	void OnGammaSync(wxCommandEvent& event);
+	void OnGammaMF(wxCommandEvent& event);
 	void OnGammaChange(wxScrollEvent &event);
 	void OnGammaText(wxCommandEvent &event);
 	void OnGammaChk(wxCommandEvent& event);
 	//
-	void OnSaturationSync(wxCommandEvent& event);
+	void OnSaturationMF(wxCommandEvent& event);
 	void OnSaturationChange(wxScrollEvent &event);
 	void OnSaturationText(wxCommandEvent &event);
 	void OnSaturationChk(wxCommandEvent& event);
 	//
-	void OnLuminanceSync(wxCommandEvent& event);
+	void OnLuminanceMF(wxCommandEvent& event);
 	void OnLuminanceChange(wxScrollEvent& event);
 	void OnLuminanceText(wxCommandEvent& event);
 	void OnLuminanceChk(wxCommandEvent& event);
 	//
-	void OnAlphaSync(wxCommandEvent& event);
+	void OnAlphaMF(wxCommandEvent& event);
 	void OnAlphaChange(wxScrollEvent& event);
 	void OnAlphaText(wxCommandEvent& event);
 	void OnAlphaCheck(wxCommandEvent& event);
 	//
-	void OnShadingSync(wxCommandEvent& event);
+	void OnShadingMF(wxCommandEvent& event);
 	void OnLowShadingChange(wxScrollEvent& event);
 	void OnLowShadingText(wxCommandEvent& event);
 	void OnHiShadingChange(wxScrollEvent& event);
@@ -296,29 +322,29 @@ private:
 	void OnShadingChk(wxCommandEvent& event);
 
 	//2
-	void OnBoundarySync(wxCommandEvent& event);
+	void OnBoundaryMF(wxCommandEvent& event);
 	void OnBoundaryChange(wxScrollEvent &event);
 	void OnBoundaryText(wxCommandEvent &event);
 	void OnBoundaryChk(wxCommandEvent& event);
 	//
-	void OnThreshSync(wxCommandEvent& event);
+	void OnThreshMF(wxCommandEvent& event);
 	void OnThreshChange(wxScrollEvent &event);
 	void OnThreshLowText(wxCommandEvent &event);
 	void OnThreshHiText(wxCommandEvent &event);
 	void OnThreshLink(wxCommandEvent& event);
 	void OnThreshChk(wxCommandEvent& event);
 	//
-	void OnShadowSync(wxCommandEvent& event);
+	void OnShadowMF(wxCommandEvent& event);
 	void OnShadowChange(wxScrollEvent &event);
 	void OnShadowText(wxCommandEvent &event);
 	void OnShadowChk(wxCommandEvent &event);
 	//
-	void OnSampleSync(wxCommandEvent& event);
+	void OnSampleMF(wxCommandEvent& event);
 	void OnSampleChange(wxScrollEvent &event);
 	void OnSampleText(wxCommandEvent &event);
 	void OnSampleChk(wxCommandEvent& event);
 	//
-	void OnColormapSync(wxCommandEvent& event);
+	void OnColormapMF(wxCommandEvent& event);
 	void OnColormapChange(wxScrollEvent &event);
 	void OnColormapHiText(wxCommandEvent &event);
 	void OnColormapLowText(wxCommandEvent &event);

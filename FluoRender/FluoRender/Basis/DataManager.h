@@ -328,7 +328,7 @@ public:
 	double GetRightThresh();
 
 	void SetLuminanceEnable(bool);
-	bool GetLumimanceEnable();
+	bool GetLuminanceEnable();
 	fluo::Color SetLuminance(double dVal);
 	double GetLuminance();
 

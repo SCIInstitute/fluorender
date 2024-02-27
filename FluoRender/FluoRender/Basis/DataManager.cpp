@@ -1853,7 +1853,7 @@ void VolumeData::SetLuminanceEnable(bool bval)
 		SetLuminance(1.0);
 }
 
-bool VolumeData::GetLumimanceEnable()
+bool VolumeData::GetLuminanceEnable()
 {
 	return m_luminance_enable;
 }
