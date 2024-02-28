@@ -54,64 +54,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Debug.h>
 
 BEGIN_EVENT_TABLE(VolumePropPanel, wxPanel)
-	//1
-	EVT_BUTTON(ID_GammaSync, VolumePropPanel::OnGammaMF)
-	EVT_COMMAND_SCROLL(ID_GammaSldr, VolumePropPanel::OnGammaChange)
-	//EVT_TEXT(ID_GammaText, VolumePropPanel::OnGammaText)
-	EVT_CHECKBOX(ID_GammaChk, VolumePropPanel::OnGammaChk)
-	//
-	EVT_BUTTON(ID_SaturationSync, VolumePropPanel::OnSaturationMF)
-	EVT_COMMAND_SCROLL(ID_SaturationSldr, VolumePropPanel::OnSaturationChange)
-	EVT_TEXT(ID_SaturationText, VolumePropPanel::OnSaturationText)
-	EVT_CHECKBOX(ID_SaturationChk, VolumePropPanel::OnSaturationChk)
-	//
-	EVT_BUTTON(ID_LuminanceSync, VolumePropPanel::OnLuminanceMF)
-	EVT_COMMAND_SCROLL(ID_LuminanceSldr, VolumePropPanel::OnLuminanceChange)
-	EVT_TEXT(ID_LuminanceText, VolumePropPanel::OnLuminanceText)
-	EVT_CHECKBOX(ID_LuminanceChk, VolumePropPanel::OnLuminanceChk)
-	//
-	EVT_BUTTON(ID_AlphaSync, VolumePropPanel::OnAlphaMF)
-	EVT_COMMAND_SCROLL(ID_AlphaSldr, VolumePropPanel::OnAlphaChange)
-	EVT_TEXT(ID_Alpha_Text, VolumePropPanel::OnAlphaText)
-	EVT_CHECKBOX(ID_AlphaChk, VolumePropPanel::OnAlphaCheck)
-	//
-	EVT_BUTTON(ID_ShadingSync, VolumePropPanel::OnShadingMF)
-	EVT_COMMAND_SCROLL(ID_HiShadingSldr, VolumePropPanel::OnHiShadingChange)
-	EVT_TEXT(ID_HiShadingText, VolumePropPanel::OnHiShadingText)
-	EVT_COMMAND_SCROLL(ID_LowShadingSldr, VolumePropPanel::OnLowShadingChange)
-	EVT_TEXT(ID_LowShadingText, VolumePropPanel::OnLowShadingText)
-	EVT_CHECKBOX(ID_ShadingChk, VolumePropPanel::OnShadingChk)
-
-	//2
-	EVT_BUTTON(ID_BoundarySync, VolumePropPanel::OnBoundaryMF)
-	EVT_COMMAND_SCROLL(ID_BoundarySldr, VolumePropPanel::OnBoundaryChange)
-	EVT_TEXT(ID_BoundaryText, VolumePropPanel::OnBoundaryText)
-	EVT_CHECKBOX(ID_BoundaryChk, VolumePropPanel::OnBoundaryChk)
-	//
-	EVT_BUTTON(ID_ThreshSync, VolumePropPanel::OnThreshMF)
-	EVT_COMMAND_SCROLL(ID_ThreshSldr, VolumePropPanel::OnThreshChange)
-	EVT_TEXT(ID_ThreshLowText, VolumePropPanel::OnThreshLowText)
-	EVT_TEXT(ID_TreshHiText, VolumePropPanel::OnThreshHiText)
-	EVT_TOOL(ID_ThreshLinkTb, VolumePropPanel::OnThreshLink)
-	EVT_CHECKBOX(ID_ThreshChk, VolumePropPanel::OnThreshChk)
-	//
-	EVT_BUTTON(ID_ShadowSync, VolumePropPanel::OnShadowMF)
-	EVT_COMMAND_SCROLL(ID_ShadowSldr, VolumePropPanel::OnShadowChange)
-	EVT_TEXT(ID_ShadowText, VolumePropPanel::OnShadowText)
-	EVT_CHECKBOX(ID_ShadowChk, VolumePropPanel::OnShadowChk)
-	//
-	EVT_BUTTON(ID_SampleSync, VolumePropPanel::OnSampleMF)
-	EVT_COMMAND_SCROLL(ID_SampleSldr, VolumePropPanel::OnSampleChange)
-	EVT_TEXT(ID_SampleText, VolumePropPanel::OnSampleText)
-	EVT_CHECKBOX(ID_SampleChk, VolumePropPanel::OnSampleChk)
-	//
-	EVT_BUTTON(ID_ColormapSync, VolumePropPanel::OnColormapMF)
-	EVT_COMMAND_SCROLL(ID_ColormapSldr, VolumePropPanel::OnColormapChange)
-	EVT_TEXT(ID_ColormapHiText, VolumePropPanel::OnColormapHiText)
-	EVT_TEXT(ID_ColormapLowText, VolumePropPanel::OnColormapLowText)
-	EVT_TOOL(ID_ColormapLinkTb, VolumePropPanel::OnColormapLink)
-	EVT_CHECKBOX(ID_ColormapChk, VolumePropPanel::OnColormapChk)
-
 	//3
 	EVT_TOGGLEBUTTON(ID_ColormapInvBtn, VolumePropPanel::OnColormapInvBtn)
 	EVT_COMBOBOX(ID_ColormapCombo, VolumePropPanel::OnColormapCombo)
@@ -169,6 +111,7 @@ VolumePropPanel::VolumePropPanel(VRenderFrame* frame,
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	Freeze();
 	SetDoubleBuffered(true);
 
 	wxBoxSizer* sizer_all = new wxBoxSizer(wxHORIZONTAL);
@@ -208,105 +151,156 @@ VolumePropPanel::VolumePropPanel(VRenderFrame* frame,
 	wxBitmap bitmap;
 	//left///////////////////////////////////////////////////
 	//gamma
-	m_gamma_st = new wxButton(this, ID_GammaSync, ": Gamma",
-		wxDefaultPosition, FromDIP(wxSize(100, -1)), wxBU_LEFT);
-	m_gamma_sldr = new wxSingleSlider(this, ID_GammaSldr, 100, 10, 400,
+	m_gamma_st = new wxButton(this, wxID_ANY, ": Gamma",
+		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_LEFT);
+	m_gamma_sldr = new wxSingleSlider(this, wxID_ANY, 100, 10, 400,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_INVERSE);
 	m_gamma_sldr->SetRangeStyle(1);
 	m_gamma_text = new wxTextCtrl(this, wxID_ANY, "1.00",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_fp2);
-	m_gamma_text->Connect(wxID_ANY, wxEVT_TEXT,
-		wxCommandEventHandler(VolumePropPanel::OnGammaText), NULL, this);
-	m_gamma_chk = new wxUndoableCheckBox(this, ID_GammaChk, "");
+	m_gamma_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
+	//bind events
+	m_gamma_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnGammaMF, this);
+	m_gamma_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnGammaChange, this);
+	m_gamma_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnGammaText, this);
+	m_gamma_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnGammaChk, this);
+	//add to sizer
 	sizer_l1->Add(m_gamma_sldr, 1, wxEXPAND);
 	sizer_l1->Add(m_gamma_text, 0, wxALIGN_CENTER);
+	sizer_l1->Add(5, 5);
 	sizer_l1->Add(m_gamma_chk, 0, wxALIGN_CENTER);
 	sizer_l1->Add(m_gamma_st, 0, wxALIGN_CENTER);
 	//saturation point
-	m_saturation_st = new wxButton(this, ID_SaturationSync, ": Saturation",
-		wxDefaultPosition, FromDIP(wxSize(100, -1)), wxBU_LEFT);
-	m_saturation_sldr = new wxSingleSlider(this, ID_SaturationSldr, 255, 0, 255,
+	m_saturation_st = new wxButton(this, wxID_ANY, ": Saturation",
+		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_LEFT);
+	m_saturation_sldr = new wxSingleSlider(this, wxID_ANY, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_saturation_text = new wxTextCtrl(this, ID_SaturationText, "50",
+	m_saturation_text = new wxTextCtrl(this, wxID_ANY, "50",
 		wxDefaultPosition, FromDIP(wxSize(40, 20))/*, 0, vald_int*/);
-	m_saturation_chk = new wxUndoableCheckBox(this, ID_SaturationChk, "");
+	m_saturation_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
+	//bind events
+	m_saturation_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnSaturationMF, this);
+	m_saturation_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnSaturationChange, this);
+	m_saturation_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnSaturationText, this);
+	m_saturation_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnSaturationChk, this);
+	//add to sizer
 	sizer_l2->Add(m_saturation_sldr, 1, wxEXPAND);
 	sizer_l2->Add(m_saturation_text, 0, wxALIGN_CENTER);
+	sizer_l2->Add(5, 5);
 	sizer_l2->Add(m_saturation_chk, 0, wxALIGN_CENTER);
 	sizer_l2->Add(m_saturation_st, 0, wxALIGN_CENTER);
 	//luminance
-	m_luminance_st = new wxButton(this, ID_LuminanceSync, ": Luminance",
-		wxDefaultPosition, FromDIP(wxSize(100, -1)), wxBU_LEFT);
-	m_luminance_sldr = new wxSingleSlider(this, ID_LuminanceSldr, 128, 0, 255,
+	m_luminance_st = new wxButton(this, wxID_ANY, ": Luminance",
+		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_LEFT);
+	m_luminance_sldr = new wxSingleSlider(this, wxID_ANY, 128, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_luminance_text = new wxTextCtrl(this, ID_LuminanceText, "128",
+	m_luminance_text = new wxTextCtrl(this, wxID_ANY, "128",
 		wxDefaultPosition, FromDIP(wxSize(40, 20))/*, 0, vald_int*/);
-	m_luminance_chk = new wxUndoableCheckBox(this, ID_LuminanceChk, "");
+	m_luminance_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
+	//bind events
+	m_luminance_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnLuminanceMF, this);
+	m_luminance_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnLuminanceChange, this);
+	m_luminance_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnLuminanceText, this);
+	m_luminance_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnLuminanceChk, this);
+	//add to sizer
 	sizer_l3->Add(m_luminance_sldr, 1, wxEXPAND, 0);
 	sizer_l3->Add(m_luminance_text, 0, wxALIGN_CENTER, 0);
+	sizer_l3->Add(5, 5);
 	sizer_l3->Add(m_luminance_chk, 0, wxALIGN_CENTER);
 	sizer_l3->Add(m_luminance_st, 0, wxALIGN_CENTER, 0);
 	//alpha
-	m_alpha_st = new wxButton(this, ID_AlphaSync, ": Alpha",
-		wxDefaultPosition, FromDIP(wxSize(100, -1)), wxBU_LEFT);
-	m_alpha_sldr = new wxSingleSlider(this, ID_AlphaSldr, 127, 0, 255,
+	m_alpha_st = new wxButton(this, wxID_ANY, ": Alpha",
+		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_LEFT);
+	m_alpha_sldr = new wxSingleSlider(this, wxID_ANY, 127, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_alpha_text = new wxTextCtrl(this, ID_Alpha_Text, "127",
+	m_alpha_text = new wxTextCtrl(this, wxID_ANY, "127",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
-	m_alpha_chk = new wxUndoableCheckBox(this, ID_AlphaChk, "");
+	m_alpha_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
+	//bind events
+	m_alpha_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnAlphaMF, this);
+	m_alpha_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnAlphaChange, this);
+	m_alpha_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnAlphaText, this);
+	m_alpha_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnAlphaCheck, this);
+	//add to sizer
 	sizer_l4->Add(m_alpha_sldr, 1, wxEXPAND);
 	sizer_l4->Add(m_alpha_text, 0, wxALIGN_CENTER);
+	sizer_l4->Add(5, 5);
 	sizer_l4->Add(m_alpha_chk, 0, wxALIGN_CENTER);
 	sizer_l4->Add(m_alpha_st, 0, wxALIGN_CENTER);
 	//highlight
-	m_shade_st = new wxButton(this, ID_ShadingSync, ": Shading",
-		wxDefaultPosition, FromDIP(wxSize(100, -1)), wxBU_LEFT);
-	m_hi_shading_sldr = new wxSingleSlider(this, ID_HiShadingSldr, 0, 0, 100,
+	m_shade_st = new wxButton(this, wxID_ANY, ": Shading",
+		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_LEFT);
+	m_hi_shading_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_hi_shading_text = new wxTextCtrl(this, ID_HiShadingText, "0.00",
+	m_hi_shading_text = new wxTextCtrl(this, wxID_ANY, "0.00",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp2);
 	//shading
-	m_low_shading_sldr = new wxSingleSlider(this, ID_LowShadingSldr, 0, 0, 200,
+	m_low_shading_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_low_shading_text = new wxTextCtrl(this, ID_LowShadingText, "0.00",
+	m_low_shading_text = new wxTextCtrl(this, wxID_ANY, "0.00",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_fp2);
-	m_shade_chk = new wxUndoableCheckBox(this, ID_ShadingChk, "");
+	m_shade_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
+	//bind events
+	m_shade_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnShadingMF, this);
+	m_hi_shading_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnHiShadingChange, this);
+	m_hi_shading_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnHiShadingText, this);
+	m_low_shading_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnLowShadingChange, this);
+	m_low_shading_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnLowShadingText, this);
+	m_shade_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnShadingChk, this);
+	//add to sizer
 	sizer_l5->Add(m_hi_shading_sldr, 1, wxEXPAND);
 	sizer_l5->Add(m_hi_shading_text, 0, wxALIGN_CENTER);
 	sizer_l5->Add(m_low_shading_sldr, 1, wxEXPAND);
 	sizer_l5->Add(m_low_shading_text, 0, wxALIGN_CENTER);
+	sizer_l5->Add(5, 5);
 	sizer_l5->Add(m_shade_chk, 0, wxALIGN_CENTER);
 	sizer_l5->Add(m_shade_st, 0, wxALIGN_CENTER);
 
 	//middle///////////////////////////////////////////////////
 	//extract boundary
-	m_boundary_st = new wxButton(this, ID_BoundarySync, "Boundary :",
-		wxDefaultPosition, FromDIP(wxSize(100, -1)), wxBU_RIGHT);
-	m_boundary_sldr = new wxSingleSlider(this, ID_BoundarySldr, 0, 0, 1000,
+	m_boundary_st = new wxButton(this, wxID_ANY, "Boundary :",
+		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_RIGHT);
+	m_boundary_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_boundary_text = new wxTextCtrl(this, ID_BoundaryText, "0.0000",
+	m_boundary_text = new wxTextCtrl(this, wxID_ANY, "0.0000",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp4);
-	m_boundary_chk = new wxUndoableCheckBox(this, ID_BoundaryChk, "");
+	m_boundary_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
+	//bind events
+	m_boundary_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnBoundaryMF, this);
+	m_boundary_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnBoundaryChange, this);
+	m_boundary_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnBoundaryText, this);
+	m_boundary_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnBoundaryChk, this);
+	//add to sizer
 	sizer_m1->Add(m_boundary_st, 0, wxALIGN_CENTER);
+	sizer_m1->Add(5, 5);
 	sizer_m1->Add(m_boundary_chk, 0, wxALIGN_CENTER);
 	sizer_m1->Add(m_boundary_text, 0, wxALIGN_CENTER);
 	sizer_m1->Add(m_boundary_sldr, 1, wxEXPAND);
 	//thresholds
-	m_thresh_st = new wxButton(this, ID_ThreshSync, "Threshold :",
-		wxDefaultPosition, FromDIP(wxSize(100, -1)), wxBU_RIGHT);
-	m_thresh_sldr = new wxDoubleSlider(this, ID_ThreshSldr, 0, 255, 0, 255,
+	m_thresh_st = new wxButton(this, wxID_ANY, "Threshold :",
+		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_RIGHT);
+	m_thresh_sldr = new wxDoubleSlider(this, wxID_ANY, 0, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_left_thresh_text = new wxTextCtrl(this, ID_ThreshLowText, "0",
+	m_left_thresh_text = new wxTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_int);
-	m_right_thresh_text = new wxTextCtrl(this, ID_TreshHiText, "255",
+	m_right_thresh_text = new wxTextCtrl(this, wxID_ANY, "255",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_int);
 	m_thresh_link_tb = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_thresh_link_tb->AddCheckTool(ID_ThreshLinkTb, "Lock Threshold Range",
+	m_thresh_link_tb->AddCheckTool(0, "Lock Threshold Range",
 		wxGetBitmapFromMemory(unlink), wxNullBitmap, "Lock Threshold Range");
 	m_thresh_link_tb->SetToolBitmapSize(wxSize(20, 20));
-	m_thresh_chk = new wxUndoableCheckBox(this, ID_ThreshChk, "");
+	m_thresh_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
+	//bind events
+	m_thresh_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnThreshMF, this);
+	m_thresh_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnThreshChange, this);
+	m_left_thresh_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnThreshLowText, this);
+	m_right_thresh_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnThreshHiText, this);
+	m_thresh_link_tb->Bind(wxEVT_TOOL, &VolumePropPanel::OnThreshLink, this);
+	m_thresh_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnThreshChk, this);
+	//add to sizer
 	sizer_m2->Add(m_thresh_st, 0, wxALIGN_CENTER);
+	sizer_m2->Add(5, 5);
 	sizer_m2->Add(m_thresh_chk, 0, wxALIGN_CENTER);
 	sizer_m2->Add(m_left_thresh_text, 0, wxALIGN_CENTER);
 	sizer_m2->Add(m_thresh_sldr, 1, wxEXPAND);
@@ -314,48 +308,71 @@ VolumePropPanel::VolumePropPanel(VRenderFrame* frame,
 	sizer_m2->Add(m_thresh_link_tb, 0, wxALIGN_CENTER, 0);
 	m_thresh_link_tb->Realize();
 	//shadow
-	m_shadow_st = new wxButton(this, ID_ShadowSync, "Shadow :",
-		wxDefaultPosition, FromDIP(wxSize(100, -1)), wxBU_RIGHT);
-	m_shadow_sldr = new wxSingleSlider(this, ID_ShadowSldr, 0, 0, 100,
+	m_shadow_st = new wxButton(this, wxID_ANY, "Shadow :",
+		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_RIGHT);
+	m_shadow_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_shadow_text = new wxTextCtrl(this, ID_ShadowText, "0.00",
+	m_shadow_text = new wxTextCtrl(this, wxID_ANY, "0.00",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp2);
-	m_shadow_chk = new wxUndoableCheckBox(this, ID_ShadowChk, "");
+	m_shadow_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
+	//bind events
+	m_shadow_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnShadowMF, this);
+	m_shadow_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnShadowChange, this);
+	m_shadow_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnShadowText, this);
+	m_shadow_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnShadowChk, this);
+	//add to sizer
 	sizer_m3->Add(m_shadow_st, 0, wxALIGN_CENTER);
+	sizer_m3->Add(5, 5);
 	sizer_m3->Add(m_shadow_chk, 0, wxALIGN_CENTER);
 	sizer_m3->Add(m_shadow_text, 0, wxALIGN_CENTER);
 	sizer_m3->Add(m_shadow_sldr, 1, wxEXPAND);
 	//sample rate
-	m_sample_st = new wxButton(this, ID_SampleSync, "Sample Rate :",
-		wxDefaultPosition, FromDIP(wxSize(100, -1)), wxBU_RIGHT);
-	m_sample_sldr = new wxSingleSlider(this, ID_SampleSldr, 10, 1, 50,
+	m_sample_st = new wxButton(this, wxID_ANY, "Samp. Rate :",
+		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_RIGHT);
+	m_sample_sldr = new wxSingleSlider(this, wxID_ANY, 10, 1, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_sample_text = new wxTextCtrl(this, ID_SampleText, "1.0",
+	m_sample_text = new wxTextCtrl(this, wxID_ANY, "1.0",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp2);
-	m_sample_chk = new wxUndoableCheckBox(this, ID_SampleChk, "");
+	m_sample_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
+	//bind events
+	m_sample_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnSampleMF, this);
+	m_sample_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnSampleChange, this);
+	m_sample_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnSampleText, this);
+	m_sample_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnSampleChk, this);
+	//add to sizer
 	sizer_m4->Add(m_sample_st, 0, wxALIGN_CENTER);
+	sizer_m4->Add(5, 5);
 	sizer_m4->Add(m_sample_chk, 0, wxALIGN_CENTER);
 	sizer_m4->Add(m_sample_text, 0, wxALIGN_CENTER);
 	sizer_m4->Add(m_sample_sldr, 1, wxEXPAND);
 	//colormap
-	m_colormap_st = new wxButton(this, ID_ColormapSync, "Colormap :",
-		wxDefaultPosition, FromDIP(wxSize(100, -1)), wxBU_RIGHT);
-	m_colormap_low_text = new wxTextCtrl(this,
-		ID_ColormapLowText, "0",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_int);
+	m_colormap_st = new wxButton(this, wxID_ANY, "Colormap :",
+		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_RIGHT);
 	m_colormap_sldr = new wxDoubleSlider(this,
-		ID_ColormapSldr, 0, 255, 0, 255,
+		wxID_ANY, 0, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_colormap_low_text = new wxTextCtrl(this,
+		wxID_ANY, "0",
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_int);
 	m_colormap_hi_text = new wxTextCtrl(this,
-		ID_ColormapHiText, "255",
+		wxID_ANY, "255",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_int);
 	m_colormap_link_tb = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_colormap_link_tb->AddCheckTool(ID_ColormapLinkTb, "Lock Colormap Range",
+	m_colormap_link_tb->AddCheckTool(0, "Lock Colormap Range",
 		wxGetBitmapFromMemory(unlink), wxNullBitmap, "Lock Colormap Range");
 	m_colormap_link_tb->SetToolBitmapSize(wxSize(20, 20));
-	m_colormap_chk = new wxUndoableCheckBox(this, ID_ColormapChk, "");
+	m_colormap_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
+	//bind events
+	m_colormap_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnColormapMF, this);
+	m_colormap_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnColormapChange, this);
+	m_colormap_low_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnColormapHiText, this);
+	m_colormap_hi_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnColormapLowText, this);
+	m_colormap_link_tb->Bind(wxEVT_TOOL, &VolumePropPanel::OnColormapLink, this);
+	m_colormap_link_tb->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnColormapChk, this);
+	//add to sizer
 	sizer_m5->Add(m_colormap_st, 0, wxALIGN_CENTER);
+	sizer_m5->Add(5, 5);
 	sizer_m5->Add(m_colormap_chk, 0, wxALIGN_CENTER);
 	sizer_m5->Add(m_colormap_low_text, 0, wxALIGN_CENTER);
 	sizer_m5->Add(m_colormap_sldr, 1, wxEXPAND);
@@ -610,6 +627,8 @@ VolumePropPanel::VolumePropPanel(VRenderFrame* frame,
 	glbin.add_undo_control(m_shadow_chk);
 	glbin.add_undo_control(m_sample_chk);
 	glbin.add_undo_control(m_colormap_chk);
+
+	Thaw();
 }
 
 VolumePropPanel::~VolumePropPanel()
@@ -732,14 +751,14 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_thresh_sldr->ChangeHighValue(ival);
 		m_right_thresh_text->ChangeValue(str);
 		bval = m_thresh_sldr->GetLink();
-		if (bval != m_thresh_link_tb->GetToolState(ID_ThreshLinkTb))
+		if (bval != m_thresh_link_tb->GetToolState(0))
 		{
-			m_thresh_link_tb->ToggleTool(ID_ThreshLinkTb, bval);
+			m_thresh_link_tb->ToggleTool(0, bval);
 			if (bval)
-				m_thresh_link_tb->SetToolNormalBitmap(ID_ThreshLinkTb,
+				m_thresh_link_tb->SetToolNormalBitmap(0,
 					wxGetBitmapFromMemory(link));
 			else
-				m_thresh_link_tb->SetToolNormalBitmap(ID_ThreshLinkTb,
+				m_thresh_link_tb->SetToolNormalBitmap(0,
 					wxGetBitmapFromMemory(unlink));
 		}
 		bval = m_vd->GetThreshEnable();
@@ -905,14 +924,14 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_colormap_sldr->ChangeHighValue(ival);
 		m_colormap_hi_text->ChangeValue(str);
 		bval = m_colormap_sldr->GetLink();
-		if (bval != m_colormap_link_tb->GetToolState(ID_ColormapLinkTb))
+		if (bval != m_colormap_link_tb->GetToolState(0))
 		{
-			m_colormap_link_tb->ToggleTool(ID_ColormapLinkTb, bval);
+			m_colormap_link_tb->ToggleTool(0, bval);
 			if (bval)
-				m_colormap_link_tb->SetToolNormalBitmap(ID_ColormapLinkTb,
+				m_colormap_link_tb->SetToolNormalBitmap(0,
 					wxGetBitmapFromMemory(link));
 			else
-				m_colormap_link_tb->SetToolNormalBitmap(ID_ColormapLinkTb,
+				m_colormap_link_tb->SetToolNormalBitmap(0,
 					wxGetBitmapFromMemory(unlink));
 		}
 		//mode
@@ -1160,7 +1179,7 @@ void VolumePropPanel::EnableGamma(bool bval)
 	m_gamma_st->Enable(bval);
 	m_gamma_chk->SetValue(bval);
 
-	FluoRefresh(false, true, { gstGamma3d });
+	FluoRefresh(false, true, false, { gstGamma3d });
 }
 
 void VolumePropPanel::EnableSaturation(bool bval)
@@ -1182,7 +1201,7 @@ void VolumePropPanel::EnableSaturation(bool bval)
 	m_saturation_st->Enable(bval);
 	m_saturation_chk->SetValue(bval);
 
-	FluoRefresh(false, true, { gstSaturation });
+	FluoRefresh(false, true, false, { gstSaturation });
 }
 
 void VolumePropPanel::EnableLuminance(bool bval)
@@ -1197,7 +1216,7 @@ void VolumePropPanel::EnableLuminance(bool bval)
 	m_luminance_st->Enable(bval);
 	m_luminance_chk->SetValue(bval);
 
-	FluoRefresh(false, true, { gstColor });
+	FluoRefresh(false, true, false, { gstColor });
 }
 
 void VolumePropPanel::EnableAlpha(bool bval)
@@ -1213,7 +1232,7 @@ void VolumePropPanel::EnableAlpha(bool bval)
 	m_alpha_st->Enable(bval);
 	m_alpha_chk->SetValue(bval);
 
-	FluoRefresh(false, true, { gstAlpha });
+	FluoRefresh(false, true, false, { gstAlpha });
 }
 
 void VolumePropPanel::EnableShading(bool bval)
@@ -1234,7 +1253,7 @@ void VolumePropPanel::EnableShading(bool bval)
 	//m_thresh_sldr->Enable();
 	//m_left_thresh_text->Enable();
 	//m_right_thresh_text->Enable();
-	FluoRefresh(false, true, { gstShading });
+	FluoRefresh(false, true, false, { gstShading });
 }
 
 void VolumePropPanel::EnableBoundary(bool bval)
@@ -1249,7 +1268,7 @@ void VolumePropPanel::EnableBoundary(bool bval)
 	m_boundary_st->Enable(bval);
 	m_boundary_chk->SetValue(bval);
 
-	FluoRefresh(false, true, { gstBoundary });
+	FluoRefresh(false, true, false, { gstBoundary });
 }
 
 void VolumePropPanel::EnableThresh(bool bval)
@@ -1266,7 +1285,7 @@ void VolumePropPanel::EnableThresh(bool bval)
 	m_thresh_link_tb->Enable(bval);
 	m_thresh_chk->SetValue(bval);
 
-	FluoRefresh(false, true, { gstThreshold });
+	FluoRefresh(false, true, false, { gstThreshold });
 }
 
 void VolumePropPanel::EnableShadow(bool bval)
@@ -1288,7 +1307,7 @@ void VolumePropPanel::EnableShadow(bool bval)
 	//	m_left_thresh_text->Enable();
 	//	m_right_thresh_text->Enable();
 	//}
-	FluoRefresh(false, true, { gstShadow });
+	FluoRefresh(false, true, false, { gstShadow });
 }
 
 void VolumePropPanel::EnableSample(bool bval)
@@ -1303,7 +1322,7 @@ void VolumePropPanel::EnableSample(bool bval)
 	m_sample_st->Enable(bval);
 	m_sample_chk->SetValue(bval);
 
-	FluoRefresh(false, true, { gstSampleRate });
+	FluoRefresh(false, true, false, { gstSampleRate });
 }
 
 void VolumePropPanel::EnableColormap(bool bval)
@@ -1333,7 +1352,7 @@ void VolumePropPanel::EnableColormap(bool bval)
 	m_colormap_st->Enable(bval);
 	m_colormap_chk->SetValue(bval);
 
-	FluoRefresh(false, true, { gstColormap });
+	FluoRefresh(false, true, false, { gstColormap });
 }
 
 void VolumePropPanel::EnableMip(bool bval)
@@ -1355,7 +1374,7 @@ void VolumePropPanel::EnableMip(bool bval)
 	}
 	//Layout();
 
-	FluoRefresh(false, true, { gstMipMode });
+	FluoRefresh(false, true, false, { gstMipMode });
 	//DisableAlpha();
 	//m_boundary_sldr->Disable();
 	//m_boundary_text->Disable();
@@ -1375,7 +1394,7 @@ void VolumePropPanel::SetGamma(double val)
 		return;
 
 	m_vd->SetGamma(val);
-	FluoRefresh(false, true, { gstNull });
+	FluoRefresh(false, true, true, { gstNull });
 }
 
 void VolumePropPanel::SetSaturation(double val)
@@ -1384,7 +1403,7 @@ void VolumePropPanel::SetSaturation(double val)
 		return;
 
 	m_vd->SetSaturation(val);
-	FluoRefresh(false, true, { gstNull });
+	FluoRefresh(false, true, true, { gstNull });
 }
 
 void VolumePropPanel::SetLuminance(double val)
@@ -1393,7 +1412,7 @@ void VolumePropPanel::SetLuminance(double val)
 		return;
 
 	m_vd->SetLuminance(val);
-	FluoRefresh(false, true, { gstNull });
+	FluoRefresh(false, true, true, { gstNull });
 }
 
 void VolumePropPanel::SetAlpha(double val)
@@ -1402,7 +1421,7 @@ void VolumePropPanel::SetAlpha(double val)
 		return;
 
 	m_vd->SetAlpha(val);
-	FluoRefresh(false, true, { gstNull });
+	FluoRefresh(false, true, true, { gstNull });
 }
 
 void VolumePropPanel::SetLowShading(double val)
@@ -1411,7 +1430,7 @@ void VolumePropPanel::SetLowShading(double val)
 		return;
 
 	m_vd->SetLowShading(val);
-	FluoRefresh(false, true, { gstNull });
+	FluoRefresh(false, true, true, { gstNull });
 }
 
 void VolumePropPanel::SetHiShading(double val)
@@ -1420,7 +1439,7 @@ void VolumePropPanel::SetHiShading(double val)
 		return;
 
 	m_vd->SetHiShading(val);
-	FluoRefresh(false, true, { gstNull });
+	FluoRefresh(false, true, true, { gstNull });
 }
 
 void VolumePropPanel::SetBoundary(double val)
@@ -1429,7 +1448,7 @@ void VolumePropPanel::SetBoundary(double val)
 		return;
 
 	m_vd->SetBoundary(val);
-	FluoRefresh(false, true, { gstNull });
+	FluoRefresh(false, true, true, { gstNull });
 }
 
 void VolumePropPanel::SetThresh(double val1, double val2)
@@ -1439,7 +1458,7 @@ void VolumePropPanel::SetThresh(double val1, double val2)
 
 	m_vd->SetLeftThresh(val1);
 	m_vd->SetRightThresh(val2);
-	FluoRefresh(false, true, { gstNull });
+	FluoRefresh(false, true, true, { gstNull });
 }
 
 void VolumePropPanel::SetShadowInt(double val)
@@ -1448,7 +1467,7 @@ void VolumePropPanel::SetShadowInt(double val)
 		return;
 
 	m_vd->SetShadowIntensity(val);
-	FluoRefresh(false, true, { gstNull });
+	FluoRefresh(false, true, true, { gstNull });
 }
 
 void VolumePropPanel::SetSampleRate(double val)
@@ -1457,7 +1476,7 @@ void VolumePropPanel::SetSampleRate(double val)
 		return;
 
 	m_vd->SetSampleRate(val);
-	FluoRefresh(false, true, { gstNull });
+	FluoRefresh(false, true, true, { gstNull });
 }
 
 void VolumePropPanel::SetColormapVal(double val1, double val2)
@@ -1466,7 +1485,7 @@ void VolumePropPanel::SetColormapVal(double val1, double val2)
 		return;
 
 	m_vd->SetColormapValues(val1, val2);
-	FluoRefresh(false, true, { gstNull });
+	FluoRefresh(false, true, true, { gstNull });
 }
 
 
@@ -1477,7 +1496,7 @@ void VolumePropPanel::SyncGamma(double val)
 		return;
 
 	m_group->SetGamma(val);
-	FluoRefresh(false, true, { gstGamma3d });
+	FluoRefresh(false, true, true, { gstGamma3d });
 }
 
 void VolumePropPanel::SyncSaturation(double val)
@@ -1486,7 +1505,7 @@ void VolumePropPanel::SyncSaturation(double val)
 		return;
 
 	m_group->SetSaturation(val);
-	FluoRefresh(false, true, { gstSaturation });
+	FluoRefresh(false, true, true, { gstSaturation });
 }
 
 void VolumePropPanel::SyncLuminance(double val)
@@ -1495,7 +1514,7 @@ void VolumePropPanel::SyncLuminance(double val)
 		return;
 
 	m_group->SetLuminance(val);
-	FluoRefresh(false, true, { gstColor });
+	FluoRefresh(false, true, true, { gstColor });
 }
 
 void VolumePropPanel::SyncAlpha(double val)
@@ -1504,7 +1523,7 @@ void VolumePropPanel::SyncAlpha(double val)
 		return;
 
 	m_group->SetAlpha(val);
-	FluoRefresh(false, true, { gstAlpha });
+	FluoRefresh(false, true, true, { gstAlpha });
 }
 
 void VolumePropPanel::SyncLowShading(double val)
@@ -1513,7 +1532,7 @@ void VolumePropPanel::SyncLowShading(double val)
 		return;
 
 	m_group->SetLowShading(val);
-	FluoRefresh(false, true, { gstShading });
+	FluoRefresh(false, true, true, { gstShading });
 }
 
 void VolumePropPanel::SyncHiShading(double val)
@@ -1522,7 +1541,7 @@ void VolumePropPanel::SyncHiShading(double val)
 		return;
 
 	m_group->SetHiShading(val);
-	FluoRefresh(false, true, { gstShading });
+	FluoRefresh(false, true, true, { gstShading });
 }
 
 void VolumePropPanel::SyncBoundary(double val)
@@ -1531,7 +1550,7 @@ void VolumePropPanel::SyncBoundary(double val)
 		return;
 
 	m_group->SetBoundary(val);
-	FluoRefresh(false, true, { gstBoundary });
+	FluoRefresh(false, true, true, { gstBoundary });
 }
 
 void VolumePropPanel::SyncThresh(double val1, double val2)
@@ -1541,7 +1560,7 @@ void VolumePropPanel::SyncThresh(double val1, double val2)
 
 	m_group->SetLeftThresh(val1);
 	m_group->SetRightThresh(val2);
-	FluoRefresh(false, true, { gstThreshold });
+	FluoRefresh(false, true, true, { gstThreshold });
 }
 
 void VolumePropPanel::SyncShadowInt(double val)
@@ -1550,7 +1569,7 @@ void VolumePropPanel::SyncShadowInt(double val)
 		return;
 
 	m_group->SetShadowIntensity(val);
-	FluoRefresh(false, true, { gstShadow });
+	FluoRefresh(false, true, true, { gstShadow });
 }
 
 void VolumePropPanel::SyncSampleRate(double val)
@@ -1567,7 +1586,7 @@ void VolumePropPanel::SyncSampleRate(double val)
 		}
 	else
 		m_group->SetSampleRate(val);
-	FluoRefresh(false, true, { gstSampleRate });
+	FluoRefresh(false, true, true, { gstSampleRate });
 }
 
 void VolumePropPanel::SyncColormapVal(double val1, double val2)
@@ -1576,7 +1595,7 @@ void VolumePropPanel::SyncColormapVal(double val1, double val2)
 		return;
 
 	m_group->SetColormapValues(val1, val2);
-	FluoRefresh(false, true, { gstColormap });
+	FluoRefresh(false, true, true, { gstColormap });
 }
 
 
@@ -2020,12 +2039,12 @@ void VolumePropPanel::OnThreshLink(wxCommandEvent& event)
 	bool val = m_thresh_sldr->GetLink();
 	val = !val;
 	m_thresh_sldr->SetLink(val);
-	m_thresh_link_tb->ToggleTool(ID_ThreshLinkTb, val);
+	m_thresh_link_tb->ToggleTool(0, val);
 	if (val)
-		m_thresh_link_tb->SetToolNormalBitmap(ID_ThreshLinkTb,
+		m_thresh_link_tb->SetToolNormalBitmap(0,
 			wxGetBitmapFromMemory(link));
 	else
-		m_thresh_link_tb->SetToolNormalBitmap(ID_ThreshLinkTb,
+		m_thresh_link_tb->SetToolNormalBitmap(0,
 			wxGetBitmapFromMemory(unlink));
 }
 
@@ -2245,12 +2264,12 @@ void VolumePropPanel::OnColormapLink(wxCommandEvent& event)
 	bool val = m_colormap_sldr->GetLink();
 	val = !val;
 	m_colormap_sldr->SetLink(val);
-	m_colormap_link_tb->ToggleTool(ID_ColormapLinkTb, val);
+	m_colormap_link_tb->ToggleTool(0, val);
 	if (val)
-		m_colormap_link_tb->SetToolNormalBitmap(ID_ColormapLinkTb,
+		m_colormap_link_tb->SetToolNormalBitmap(0,
 			wxGetBitmapFromMemory(link));
 	else
-		m_colormap_link_tb->SetToolNormalBitmap(ID_ColormapLinkTb,
+		m_colormap_link_tb->SetToolNormalBitmap(0,
 			wxGetBitmapFromMemory(unlink));
 }
 

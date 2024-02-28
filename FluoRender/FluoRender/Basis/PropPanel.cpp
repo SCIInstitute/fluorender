@@ -43,12 +43,12 @@ PropPanel::~PropPanel()
 {
 }
 
-void PropPanel::FluoRefresh(bool tree, bool interactive,
+void PropPanel::FluoRefresh(bool tree, bool interactive, bool excl_self,
 	const fluo::ValueCollection& vc)
 {
 	if (!m_frame)
 		return;
 	m_frame->RefreshVRenderViews(tree, interactive);
-	m_frame->UpdateProps(vc, this);//update ui but exclude this
+	m_frame->UpdateProps(vc, excl_self?this:0);//update ui but exclude this
 }
 

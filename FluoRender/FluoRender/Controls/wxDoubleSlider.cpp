@@ -114,6 +114,16 @@ bool wxDoubleSlider::setHighValue(int val, bool notify)
 		}
 	}
 	changed = old != hi_val_;
+
+	if (changed)
+	{
+		double t;
+		if (time_sample(t))
+			push(t);
+		else
+			replace(t);
+	}
+
 	Refresh();
 	Update();
 
@@ -131,58 +141,22 @@ bool wxDoubleSlider::setHighValue(int val, bool notify)
 
 bool wxDoubleSlider::SetLowValue(int val)
 {
-	bool changed = setLowValue(val);
-	if (changed)
-	{
-		double t;
-		if (time_sample(t))
-			push(t);
-		else
-			replace(t);
-	}
-	return changed;
+	return setLowValue(val);
 }
 
 bool wxDoubleSlider::SetHighValue(int val)
 {
-	bool changed = setHighValue(val);
-	if (changed)
-	{
-		double t;
-		if (time_sample(t))
-			push(t);
-		else
-			replace(t);
-	}
-	return changed;
+	return setHighValue(val);
 }
 
 bool wxDoubleSlider::ChangeLowValue(int val)
 {
-	bool changed = setLowValue(val, false);
-	if (changed)
-	{
-		double t;
-		if (time_sample(t))
-			push(t);
-		else
-			replace(t);
-	}
-	return changed;
+	return setLowValue(val, false);
 }
 
 bool wxDoubleSlider::ChangeHighValue(int val)
 {
-	bool changed = setHighValue(val, false);
-	if (changed)
-	{
-		double t;
-		if (time_sample(t))
-			push(t);
-		else
-			replace(t);
-	}
-	return changed;
+	return setHighValue(val, false);
 }
 
 void wxDoubleSlider::SetLink(bool val)

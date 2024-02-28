@@ -47,67 +47,8 @@ class VolumePropPanel: public PropPanel
 {
 	enum
 	{
-		//1
-		ID_GammaSync = ID_VPROP_VIEW,
-		ID_GammaChk,
-		ID_GammaSldr,
-		ID_GammaText,
-		//
-		ID_SaturationSync,
-		ID_SaturationChk,
-		ID_SaturationSldr,
-		ID_SaturationText,
-		//
-		ID_LuminanceSync,
-		ID_LuminanceChk,
-		ID_LuminanceSldr,
-		ID_LuminanceText,
-		//
-		ID_AlphaSync,
-		ID_AlphaChk,
-		ID_AlphaSldr,
-		ID_Alpha_Text,
-		//
-		ID_ShadingSync,
-		ID_ShadingChk,
-		ID_LowShadingSldr,
-		ID_LowShadingText,
-		ID_HiShadingSync,
-		ID_HiShadingSldr,
-		ID_HiShadingText,
-
-		//2
-		ID_BoundarySync,
-		ID_BoundaryChk,
-		ID_BoundarySldr,
-		ID_BoundaryText,
-		//
-		ID_ThreshSync,
-		ID_ThreshChk,
-		ID_ThreshSldr,
-		ID_ThreshLowText,
-		ID_TreshHiText,
-		ID_ThreshLinkTb,
-		//
-		ID_ShadowSync,
-		ID_ShadowChk,
-		ID_ShadowSldr,
-		ID_ShadowText,
-		//
-		ID_SampleSync,
-		ID_SampleChk,
-		ID_SampleSldr,
-		ID_SampleText,
-		//
-		ID_ColormapSync,
-		ID_ColormapChk,
-		ID_ColormapSldr,
-		ID_ColormapHiText,
-		ID_ColormapLowText,
-		ID_ColormapLinkTb,
-
 		//3
-		ID_ColorText,
+		ID_ColorText = ID_VPROP_VIEW,
 		ID_Color2Text,
 		ID_ColorBtn,
 		ID_Color2Btn,

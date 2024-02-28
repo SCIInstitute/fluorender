@@ -307,34 +307,34 @@ public:
 	//transfer function
 	void SetGammaEnable(bool);
 	bool GetGammaEnable();
-	void SetGamma(double dVal);
+	void SetGamma(double val, bool set_this = true);
 	double GetGamma();
 
 	void SetBoundaryEnable(bool);
 	bool GetBoundaryEnable();
-	void SetBoundary(double dVal);
+	void SetBoundary(double val, bool set_this = true);
 	double GetBoundary();
 
 	void SetSaturationEnable(bool);
 	bool GetSaturationEnable();
-	void SetSaturation(double dVal);
+	void SetSaturation(double val, bool set_this = true);
 	double GetSaturation();
 
 	void SetThreshEnable(bool);
 	bool GetThreshEnable();
-	void SetLeftThresh(double dVal);
+	void SetLeftThresh(double val, bool set_this = true);
 	double GetLeftThresh();
-	void SetRightThresh(double dVal);
+	void SetRightThresh(double val, bool set_this = true);
 	double GetRightThresh();
 
 	void SetLuminanceEnable(bool);
 	bool GetLuminanceEnable();
-	fluo::Color SetLuminance(double dVal);
+	fluo::Color SetLuminance(double val, bool set_this = true);
 	double GetLuminance();
 
 	void SetAlphaEnable(bool mode);
 	bool GetAlphaEnable();
-	void SetAlpha(double alpha);
+	void SetAlpha(double val, bool set_this = true);
 	double GetAlpha();
 
 	//shading
@@ -342,8 +342,8 @@ public:
 	bool GetShadingEnable();
 	void SetMaterial(double amb, double diff, double spec, double shine);
 	void GetMaterial(double& amb, double& diff, double& spec, double& shine);
-	void SetLowShading(double dVal);
-	void SetHiShading(double dVal);
+	void SetLowShading(double val);
+	void SetHiShading(double val);
 
 	//shadow
 	void SetShadowEnable(bool bVal);
@@ -354,7 +354,7 @@ public:
 	//sample rate
 	void SetSampleRateEnable(bool bval);
 	bool GetSampleRateEnable();
-	void SetSampleRate(double rate);
+	void SetSampleRate(double val, bool set_this = true);
 	double GetSampleRate();
 
 	//colors
@@ -1120,25 +1120,25 @@ public:
 
 	//volume properties
 	void SetGammaEnable(bool);
-	void SetGamma(double dVal);
+	void SetGamma(double val, bool set_this = true);
 	void SetBoundaryEnable(bool);
-	void SetBoundary(double dVal);
+	void SetBoundary(double, bool set_this = true);
 	void SetSaturationEnable(bool);
-	void SetSaturation(double dVal);
+	void SetSaturation(double, bool set_this = true);
 	void SetThreshEnable(bool);
-	void SetLeftThresh(double dVal);
-	void SetRightThresh(double dVal);
+	void SetLeftThresh(double, bool set_this = true);
+	void SetRightThresh(double, bool set_this = true);
 	void SetLuminanceEnable(bool);
-	void SetLuminance(double dVal);
-	void SetAlphaEnable(bool mode);
-	void SetAlpha(double dVal);
-	void SetShadingEnable(bool shading);
-	void SetLowShading(double dVal);
-	void SetHiShading(double dVal);
-	void SetShadowEnable(bool shadow);
-	void SetShadowIntensity(double val);
-	void SetSampleRateEnable(bool bval);
-	void SetSampleRate(double dVal);
+	void SetLuminance(double, bool set_this = true);
+	void SetAlphaEnable(bool);
+	void SetAlpha(double, bool set_this = true);
+	void SetShadingEnable(bool);
+	void SetLowShading(double);
+	void SetHiShading(double);
+	void SetShadowEnable(bool);
+	void SetShadowIntensity(double);
+	void SetSampleRateEnable(bool);
+	void SetSampleRate(double, bool set_this = true);
 
 	void SetColormapMode(int mode);
 	void SetColormapDisp(bool disp);

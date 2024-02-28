@@ -1726,9 +1726,9 @@ void VolumeData::SetGammaEnable(bool bval)
 {
 	m_gamma_enable = bval;
 	if (bval)
-		SetGamma(m_gamma);
+		SetGamma(m_gamma, false);
 	else
-		SetGamma(1.0);
+		SetGamma(1.0, false);
 }
 
 bool VolumeData::GetGammaEnable()
@@ -1736,11 +1736,12 @@ bool VolumeData::GetGammaEnable()
 	return m_gamma_enable;
 }
 
-void VolumeData::SetGamma(double dVal)
+void VolumeData::SetGamma(double val, bool set_this)
 {
-	m_gamma = dVal;
+	if (set_this)
+		m_gamma = val;
 	if (m_vr)
-		m_vr->set_gamma3d(m_gamma);
+		m_vr->set_gamma3d(val);
 }
 
 double VolumeData::GetGamma()
@@ -1752,9 +1753,9 @@ void VolumeData::SetBoundaryEnable(bool bval)
 {
 	m_boundary_enable = bval;
 	if (bval)
-		SetBoundary(m_boundary);
+		SetBoundary(m_boundary, false);
 	else
-		SetBoundary(0.0);
+		SetBoundary(0.0, false);
 }
 
 bool VolumeData::GetBoundaryEnable()
@@ -1762,11 +1763,12 @@ bool VolumeData::GetBoundaryEnable()
 	return m_boundary_enable;
 }
 
-void VolumeData::SetBoundary(double dVal)
+void VolumeData::SetBoundary(double val, bool set_this)
 {
-	m_boundary = dVal;
+	if (set_this)
+		m_boundary = val;
 	if (m_vr)
-		m_vr->set_gm_thresh(m_boundary);
+		m_vr->set_gm_thresh(val);
 }
 
 double VolumeData::GetBoundary()
@@ -1778,9 +1780,9 @@ void VolumeData::SetSaturationEnable(bool bval)
 {
 	m_saturation_enable = bval;
 	if (bval)
-		SetSaturation(m_saturation);
+		SetSaturation(m_saturation, false);
 	else
-		SetSaturation(0.0);
+		SetSaturation(0.0, false);
 }
 
 bool VolumeData::GetSaturationEnable()
@@ -1788,11 +1790,12 @@ bool VolumeData::GetSaturationEnable()
 	return m_saturation_enable;
 }
 
-void VolumeData::SetSaturation(double dVal)
+void VolumeData::SetSaturation(double val, bool set_this)
 {
-	m_saturation = dVal;
+	if (set_this)
+		m_saturation = val;
 	if (m_vr)
-		m_vr->set_offset(m_saturation);
+		m_vr->set_offset(val);
 }
 
 double VolumeData::GetSaturation()
@@ -1805,13 +1808,13 @@ void VolumeData::SetThreshEnable(bool bval)
 	m_thresh_enable = bval;
 	if (bval)
 	{
-		SetLeftThresh(m_lo_thresh);
-		SetRightThresh(m_hi_thresh);
+		SetLeftThresh(m_lo_thresh, false);
+		SetRightThresh(m_hi_thresh, false);
 	}
 	else
 	{
-		SetLeftThresh(0);
-		SetRightThresh(m_max_value);
+		SetLeftThresh(0, false);
+		SetRightThresh(m_max_value, false);
 	}
 }
 
@@ -1820,11 +1823,12 @@ bool VolumeData::GetThreshEnable()
 	return m_thresh_enable;
 }
 
-void VolumeData::SetLeftThresh(double dVal)
+void VolumeData::SetLeftThresh(double val, bool set_this)
 {
-	m_lo_thresh = dVal;
+	if (set_this)
+		m_lo_thresh = val;
 	if (m_vr)
-		m_vr->set_lo_thresh(m_lo_thresh);
+		m_vr->set_lo_thresh(val);
 }
 
 double VolumeData::GetLeftThresh()
@@ -1832,11 +1836,12 @@ double VolumeData::GetLeftThresh()
 	return m_lo_thresh;
 }
 
-void VolumeData::SetRightThresh(double dVal)
+void VolumeData::SetRightThresh(double val, bool set_this)
 {
-	m_hi_thresh = dVal;
+	if (set_this)
+		m_hi_thresh = val;
 	if (m_vr)
-		m_vr->set_hi_thresh(m_hi_thresh);
+		m_vr->set_hi_thresh(val);
 }
 
 double VolumeData::GetRightThresh()
@@ -1848,9 +1853,9 @@ void VolumeData::SetLuminanceEnable(bool bval)
 {
 	m_luminance_enable = bval;
 	if (bval)
-		SetLuminance(m_luminance);
+		SetLuminance(m_luminance, false);
 	else
-		SetLuminance(1.0);
+		SetLuminance(1.0, false);
 }
 
 bool VolumeData::GetLuminanceEnable()
@@ -1858,12 +1863,13 @@ bool VolumeData::GetLuminanceEnable()
 	return m_luminance_enable;
 }
 
-fluo::Color VolumeData::SetLuminance(double dVal)
+fluo::Color VolumeData::SetLuminance(double val, bool set_this)
 {
-	m_luminance = dVal;
+	if (set_this)
+		m_luminance = val;
 	double h, s, v;
 	GetHSV(h, s, v);
-	fluo::HSVColor hsv(h, s, dVal);
+	fluo::HSVColor hsv(h, s, val);
 	m_color = fluo::Color(hsv);
 	if (m_vr)
 		m_vr->set_color(m_color);
@@ -1880,13 +1886,13 @@ double VolumeData::GetLuminance()
 void VolumeData::SetAlphaEnable(bool bval)
 {
 	m_alpha_enable = bval;
+	if (m_vr)
+		m_vr->set_solid(!bval);
 	if (bval)
-		SetAlpha(m_alpha);
+		SetAlpha(m_alpha, false);
 	else
 	{
-		if (m_vr)
-			m_vr->set_solid(!bval);
-		SetAlpha(1.0);
+		SetAlpha(1.0, false);
 	}
 }
 
@@ -1895,11 +1901,12 @@ bool VolumeData::GetAlphaEnable()
 	return m_alpha_enable;
 }
 
-void VolumeData::SetAlpha(double alpha)
+void VolumeData::SetAlpha(double val, bool set_this)
 {
-	m_alpha = alpha;
+	if (set_this)
+		m_alpha = val;
 	if (m_vr)
-		m_vr->set_alpha(m_alpha);
+		m_vr->set_alpha(val);
 }
 
 double VolumeData::GetAlpha()
@@ -1938,18 +1945,18 @@ void VolumeData::GetMaterial(double& amb, double& diff, double& spec, double& sh
 	shine = m_mat_shine;
 }
 
-void VolumeData::SetLowShading(double dVal)
+void VolumeData::SetLowShading(double val)
 {
 	double amb, diff, spec, shine;
 	GetMaterial(amb, diff, spec, shine);
-	SetMaterial(dVal, diff, spec, shine);
+	SetMaterial(val, diff, spec, shine);
 }
 
-void VolumeData::SetHiShading(double dVal)
+void VolumeData::SetHiShading(double val)
 {
 	double amb, diff, spec, shine;
 	GetMaterial(amb, diff, spec, shine);
-	SetMaterial(amb, diff, spec, dVal);
+	SetMaterial(amb, diff, spec, val);
 }
 
 //shadow
@@ -1978,9 +1985,9 @@ void VolumeData::SetSampleRateEnable(bool bval)
 {
 	m_sample_rate_enable = bval;
 	if (bval)
-		SetSampleRate(m_sample_rate);
+		SetSampleRate(m_sample_rate, false);
 	else
-		SetSampleRate(2.0);
+		SetSampleRate(2.0, false);
 }
 
 bool VolumeData::GetSampleRateEnable()
@@ -1988,11 +1995,12 @@ bool VolumeData::GetSampleRateEnable()
 	return m_sample_rate_enable;
 }
 
-void VolumeData::SetSampleRate(double rate)
+void VolumeData::SetSampleRate(double val, bool set_this)
 {
-	m_sample_rate = rate;
+	if (set_this)
+		m_sample_rate = val;
 	if (m_vr)
-		m_vr->set_sampling_rate(m_sample_rate);
+		m_vr->set_sampling_rate(val);
 }
 
 double VolumeData::GetSampleRate()
@@ -4286,13 +4294,13 @@ void DataGroup::SetGammaEnable(bool bval)
 	}
 }
 
-void DataGroup::SetGamma(double dVal)
+void DataGroup::SetGamma(double val, bool set_this)
 {
 	for (int i = 0; i < GetVolumeNum(); i++)
 	{
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
-			vd->SetGamma(dVal);
+			vd->SetGamma(val, set_this);
 	}
 }
 
@@ -4306,13 +4314,13 @@ void DataGroup::SetBoundaryEnable(bool bval)
 	}
 }
 
-void DataGroup::SetBoundary(double dVal)
+void DataGroup::SetBoundary(double val, bool set_this)
 {
 	for (int i = 0; i < GetVolumeNum(); i++)
 	{
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
-			vd->SetBoundary(dVal);
+			vd->SetBoundary(val, set_this);
 	}
 }
 
@@ -4326,13 +4334,13 @@ void DataGroup::SetSaturationEnable(bool bval)
 	}
 }
 
-void DataGroup::SetSaturation(double dVal)
+void DataGroup::SetSaturation(double val, bool set_this)
 {
 	for (int i = 0; i < GetVolumeNum(); i++)
 	{
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
-			vd->SetSaturation(dVal);
+			vd->SetSaturation(val, set_this);
 	}
 }
 
@@ -4346,23 +4354,23 @@ void DataGroup::SetThreshEnable(bool bval)
 	}
 }
 
-void DataGroup::SetLeftThresh(double dVal)
+void DataGroup::SetLeftThresh(double val, bool set_this)
 {
 	for (int i = 0; i < GetVolumeNum(); i++)
 	{
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
-			vd->SetLeftThresh(dVal);
+			vd->SetLeftThresh(val, set_this);
 	}
 }
 
-void DataGroup::SetRightThresh(double dVal)
+void DataGroup::SetRightThresh(double val, bool set_this)
 {
 	for (int i = 0; i < GetVolumeNum(); i++)
 	{
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
-			vd->SetRightThresh(dVal);
+			vd->SetRightThresh(val, set_this);
 	}
 }
 
@@ -4376,13 +4384,13 @@ void DataGroup::SetLuminanceEnable(bool bval)
 	}
 }
 
-void DataGroup::SetLuminance(double dVal)
+void DataGroup::SetLuminance(double val, bool set_this)
 {
 	for (int i = 0; i < GetVolumeNum(); i++)
 	{
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
-			vd->SetLuminance(dVal);
+			vd->SetLuminance(val, set_this);
 	}
 }
 
@@ -4396,13 +4404,13 @@ void DataGroup::SetAlphaEnable(bool mode)
 	}
 }
 
-void DataGroup::SetAlpha(double dVal)
+void DataGroup::SetAlpha(double val, bool set_this)
 {
 	for (int i=0; i<GetVolumeNum(); i++)
 	{
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
-			vd->SetAlpha(dVal);
+			vd->SetAlpha(val, set_this);
 	}
 }
 
@@ -4416,23 +4424,23 @@ void DataGroup::SetShadingEnable(bool shading)
 	}
 }
 
-void DataGroup::SetLowShading(double dVal)
+void DataGroup::SetLowShading(double val)
 {
 	for (int i = 0; i < GetVolumeNum(); i++)
 	{
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
-			vd->SetLowShading(dVal);
+			vd->SetLowShading(val);
 	}
 }
 
-void DataGroup::SetHiShading(double dVal)
+void DataGroup::SetHiShading(double val)
 {
 	for (int i = 0; i < GetVolumeNum(); i++)
 	{
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
-			vd->SetHiShading(dVal);
+			vd->SetHiShading(val);
 	}
 }
 
@@ -4466,13 +4474,13 @@ void DataGroup::SetSampleRateEnable(bool bval)
 	}
 }
 
-void DataGroup::SetSampleRate(double dVal)
+void DataGroup::SetSampleRate(double val, bool set_this)
 {
 	for (int i=0; i<GetVolumeNum(); i++)
 	{
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
-			vd->SetSampleRate(dVal);
+			vd->SetSampleRate(val, set_this);
 	}
 }
 

@@ -61,6 +61,15 @@ bool wxSingleSlider::setValue(int val, bool notify)
 	bool changed = old != val_;
 	if (!changed)
 		return changed;
+	else
+	{
+		double t;
+		if (time_sample(t))
+			push(t);
+		else
+			replace(t);
+	}
+
 	Refresh();
 	Update();
 
@@ -78,30 +87,12 @@ bool wxSingleSlider::setValue(int val, bool notify)
 
 bool wxSingleSlider::SetValue(int val)
 {
-	bool changed = setValue(val);
-	if (changed)
-	{
-		double t;
-		if (time_sample(t))
-			push(t);
-		else
-			replace(t);
-	}
-	return changed;
+	return setValue(val);
 }
 
 bool wxSingleSlider::ChangeValue(int val)
 {
-	bool changed = setValue(val, false);
-	if (changed)
-	{
-		double t;
-		if (time_sample(t))
-			push(t);
-		else
-			replace(t);
-	}
-	return changed;
+	return setValue(val, false);
 }
 
 int wxSingleSlider::GetValue()

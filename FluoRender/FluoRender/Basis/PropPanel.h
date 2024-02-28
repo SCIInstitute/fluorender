@@ -46,7 +46,7 @@ public:
 	~PropPanel();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {}) = 0;
-	void FluoRefresh(bool tree = false, bool interactive = false,
+	void FluoRefresh(bool tree = false, bool interactive = false, bool excl_self = true,
 		const fluo::ValueCollection& vc = {});
 
 protected:
