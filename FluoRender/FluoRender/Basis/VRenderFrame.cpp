@@ -931,9 +931,9 @@ VRenderFrame::VRenderFrame(
 	//keyboard shortcuts
 	wxAcceleratorEntry entries[4];
 	entries[0].Set(wxACCEL_CTRL, (int)'N', ID_NewProject);
-	entries[0].Set(wxACCEL_CTRL, (int)'S', ID_SaveProject);
-	entries[1].Set(wxACCEL_CTRL, (int)'Z', ID_Undo);
-	entries[2].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'Z', ID_Redo);
+	entries[1].Set(wxACCEL_CTRL, (int)'S', ID_SaveProject);
+	entries[2].Set(wxACCEL_CTRL, (int)'Z', ID_Undo);
+	entries[3].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'Z', ID_Redo);
 	wxAcceleratorTable accel(4, entries);
 	SetAcceleratorTable(accel);
 }
