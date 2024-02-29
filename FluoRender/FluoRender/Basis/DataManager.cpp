@@ -95,39 +95,47 @@ VolumeData::VolumeData()
 	m_scalar_scale = 1.0;
 	m_gm_scale = 1.0;
 	m_max_value = 255.0;
-	//gamma
+
+	//transfer function settings
+	m_gamma_enable = true;
 	m_gamma = 1.0;
+
+	m_boundary_enable = true;
 	m_boundary = 0.0;
+
+	m_saturation_enable = true;
 	m_saturation = 1.0;
+
+	m_thresh_enable = true;
 	m_lo_thresh = 0.0;
 	m_hi_thresh = 1.0;
-	m_color = fluo::Color(1.0, 1.0, 1.0);
-	m_wl_color = false;
-	SetHSV();
+
+	m_luminance_enable = true;
+	m_luminance = 1.0;
+
+	m_alpha_enable = true;
 	m_alpha = 1.0;
-	m_sample_rate = 1.0;
+
+	//shading
+	m_shading_enable = false;
 	m_mat_amb = 1.0;
 	m_mat_diff = 1.0;
 	m_mat_spec = 1.0;
 	m_mat_shine = 10;
-	//noise reduction
-	m_noise_rd = false;
-	//shading
-	m_shading_enable = false;
+
 	//shadow
 	m_shadow_enable = false;
 	m_shadow_intensity = 0.0;
 
-	//resolution, scaling, spacing
-	m_res_x = 0;	m_res_y = 0;	m_res_z = 0;
-	m_sclx = 1.0;	m_scly = 1.0;	m_sclz = 1.0;
-	m_spcx = 1.0;	m_spcy = 1.0;	m_spcz = 1.0;
-	m_spc_from_file = false;
+	m_sample_rate_enable = true;
+	m_sample_rate = 2.0;
 
-	//display control
-	m_disp = true;
-	m_draw_bounds = false;
-	m_test_wiref = false;
+	m_color = fluo::Color(1.0, 1.0, 1.0);
+	m_wl_color = false;
+	SetHSV();
+
+	//noise reduction
+	m_noise_rd = false;
 
 	//colormap mode
 	m_colormap_inv = 1.0;
@@ -142,6 +150,17 @@ VolumeData::VolumeData()
 	m_blend_mode = 0;
 
 	m_saved_mode = 0;
+
+	//resolution, scaling, spacing
+	m_res_x = 0;	m_res_y = 0;	m_res_z = 0;
+	m_sclx = 1.0;	m_scly = 1.0;	m_sclz = 1.0;
+	m_spcx = 1.0;	m_spcy = 1.0;	m_spcz = 1.0;
+	m_spc_from_file = false;
+
+	//display control
+	m_disp = true;
+	m_draw_bounds = false;
+	m_test_wiref = false;
 
 	m_2d_mask = 0;
 	m_2d_weight1 = 0;
@@ -1582,10 +1601,11 @@ double VolumeData::GetAlphaPower()
 }
 
 //inversion
-void VolumeData::SetInvert(bool mode)
+void VolumeData::SetInvert(bool val)
 {
+	m_invert = val;
 	if (m_vr)
-		m_vr->set_inversion(mode);
+		m_vr->set_inversion(val);
 }
 
 bool VolumeData::GetInvert()
@@ -4689,117 +4709,11 @@ void MeshGroup::RandomizeColor()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 DataManager::DataManager() :
-m_vol_exb(0.0),
-	m_vol_gam(1.0),
-	m_vol_of1(1.0),
-	m_vol_of2(1.0),
-	m_vol_lth(0.0),
-	m_vol_hth(1.0),
-	m_vol_lsh(0.5),
-	m_vol_hsh(10.0),
-	m_vol_alf(0.5),
-	m_vol_spr(1.5),
-	m_vol_xsp(1.0),
-	m_vol_ysp(1.0),
-	m_vol_zsp(2.5),
-	m_vol_lum(1.0),
-	m_vol_cmm(0),
-	m_vol_cmi(false),
-	m_vol_cmp(0),
-	m_vol_cmj(0),
-	m_vol_lcm(0.0),
-	m_vol_hcm(1.0),
-	m_vol_eap(true),
-	m_vol_esh(true),
-	m_vol_interp(true),
-	m_vol_inv(false),
-	m_vol_mip(false),
-	m_vol_trp(false),
-	m_vol_com(0),
-	m_vol_nrd(false),
-	m_vol_shw(false),
-	m_vol_swi(0.0),
 	m_vol_test_wiref(false),
 	m_use_defaults(true),
 	m_override_vox(true),
 	m_ser_num(0)
 {
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	wxString dft = expath + GETSLASH() + "default_volume_settings.dft";
-	wxFileInputStream is(dft);
-	if (!is.IsOk())
-		return;
-	wxFileConfig fconfig(is);
-
-	double val;
-	int ival;
-	if (fconfig.Read("extract_boundary", &val))
-		m_vol_exb = val;
-	if (fconfig.Read("gamma", &val))
-		m_vol_gam = val;
-	if (fconfig.Read("low_offset", &val))
-		m_vol_of1 = val;
-	if (fconfig.Read("high_offset", &val))
-		m_vol_of2 = val;
-	if (fconfig.Read("low_thresholding", &val))
-		m_vol_lth = val;
-	if (fconfig.Read("high_thresholding", &val))
-		m_vol_hth = val;
-	if (fconfig.Read("low_shading", &val))
-		m_vol_lsh = val;
-	if (fconfig.Read("high_shading", &val))
-		m_vol_hsh = val;
-	if (fconfig.Read("alpha", &val))
-		m_vol_alf = val;
-	if (fconfig.Read("sample_rate", &val))
-		m_vol_spr = val;
-	if (fconfig.Read("x_spacing", &val))
-		m_vol_xsp = val;
-	if (fconfig.Read("y_spacing", &val))
-		m_vol_ysp = val;
-	if (fconfig.Read("z_spacing", &val))
-		m_vol_zsp = val;
-	if (fconfig.Read("luminance", &val))
-		m_vol_lum = val;
-	if (fconfig.Read("colormap_mode", &ival))
-		m_vol_cmm = ival;
-	bool bval;
-	if (fconfig.Read("colormap_inv", &bval))
-		m_vol_cmi = bval;
-	if (fconfig.Read("colormap", &ival))
-		m_vol_cmp = ival;
-	if (fconfig.Read("colormap_proj", &ival))
-		m_vol_cmj = ival;
-
-	if (fconfig.Read("colormap_low", &val))
-		m_vol_lcm = val;
-	if (fconfig.Read("colormap_hi", &val))
-		m_vol_hcm = val;
-
-	if (fconfig.Read("enable_alpha", &bval))
-		m_vol_eap = bval;
-	if (fconfig.Read("enable_shading", &bval))
-		m_vol_esh = bval;
-	if (fconfig.Read("enable_interp", &bval))
-		m_vol_interp = bval;
-	if (fconfig.Read("enable_inv", &bval))
-		m_vol_inv = bval;
-	if (fconfig.Read("enable_mip", &bval))
-		m_vol_mip = bval;
-	if (fconfig.Read("enable_trp", &bval))
-		m_vol_trp = bval;
-	if (fconfig.Read("enable_comp", &ival))
-		m_vol_com = ival;
-	if (fconfig.Read("noise_rd", &bval))
-		m_vol_nrd = bval;
-
-	//shadow
-	if (fconfig.Read("enable_shadow", &bval))
-		m_vol_shw = bval;
-	if (fconfig.Read("shadow_intensity", &val))
-		m_vol_swi = val;
-
 	//wavelength to color table
 	m_vol_wav[0] = fluo::Color(1.0, 1.0, 1.0);
 	m_vol_wav[1] = fluo::Color(1.0, 1.0, 1.0);
@@ -4875,16 +4789,19 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 		{
 			//props not managed by ml
 			vd->SetWireframe(m_vol_test_wiref);
-			vd->SetSampleRate(m_vol_spr);
+			vd->SetSampleRate(glbin_vol_def.m_sample_rate);
 			if (!vd->GetSpcFromFile())
-				vd->SetBaseSpacings(m_vol_xsp, m_vol_ysp, m_vol_zsp);
-			vd->SetLabelMode(m_vol_com);
+				vd->SetBaseSpacings(
+					glbin_vol_def.m_spcx,
+					glbin_vol_def.m_spcy,
+					glbin_vol_def.m_spcz);
+			vd->SetLabelMode(glbin_vol_def.m_label_mode);
 		}
 	}
 	else if (m_use_defaults)
 	{
 		vd->SetWireframe(m_vol_test_wiref);
-		vd->SetGamma(m_vol_gam);
+		vd->SetGamma(glbin_vol_def.m_gamma);
 		vd->SetBoundary(m_vol_exb);
 		vd->SetSaturation(m_vol_of1);
 		vd->SetLeftThresh(m_vol_lth);
@@ -5636,3 +5553,4 @@ fluo::Color DataManager::GetWavelengthColor(double wavelength)
 	else
 		return fluo::Color(1.0, 1.0, 1.0);
 }
+

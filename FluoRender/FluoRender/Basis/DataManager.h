@@ -637,6 +637,9 @@ private:
 	//blend mode
 	int m_blend_mode;	//0: ignore; 1: layered; 2: depth; 3: composite
 
+	//inverted
+	bool m_invert;
+
 	//2d mask texture for segmentation
 	GLuint m_2d_mask;
 	//2d weight map for segmentation
@@ -1380,39 +1383,6 @@ public:
 	int GetPvxmlSeqType() { return m_pvxml_seq_type; }
 
 public:
-	//default values
-	//volume
-	double m_vol_exb;	//extract_boundary
-	double m_vol_gam;	//gamma
-	double m_vol_of1;	//offset1
-	double m_vol_of2;	//offset2
-	double m_vol_lth;	//low_thresholding
-	double m_vol_hth;	//high_thresholding
-	double m_vol_lsh;	//low_shading
-	double m_vol_hsh;	//high_shading
-	double m_vol_alf;	//alpha
-	double m_vol_spr;	//sample_rate
-	double m_vol_xsp;	//x_spacing
-	double m_vol_ysp;	//y_spacing
-	double m_vol_zsp;	//z_spacing
-	double m_vol_lum;	//luminance
-	bool m_vol_cmi;		//colormap inversion
-	int m_vol_cmp;		//colormap type (rainbow, warm, etc)
-	int m_vol_cmm;		//colormap mode (enable)
-	int m_vol_cmj;		//colormap projection
-	double m_vol_lcm;	//colormap low value
-	double m_vol_hcm;	//colormap high value
-	bool m_vol_eap;		//enable alpha
-	bool m_vol_esh;		//enable_shading
-	bool m_vol_interp;	//enable interpolation
-	bool m_vol_inv;		//enable inversion
-	bool m_vol_mip;		//enable_mip
-	bool m_vol_nrd;		//noise reduction
-	bool m_vol_shw;		//enable shadow
-	double m_vol_swi;	//shadow intensity
-	bool m_vol_trp;		//hi transp
-	int m_vol_com;		//component display
-
 	bool m_vol_test_wiref;		//wireframe mode
 
 	//wavelength to color table

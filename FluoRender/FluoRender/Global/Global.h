@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
+#include <Names.h>
+#include <VolumeDefault.h>
 #include <Tracking/VolCache.h>
 #include <Database/Params.h>
 #include <Database/EntryParams.h>
@@ -44,6 +46,7 @@ DEALINGS IN THE SOFTWARE.
 	RegisterCacheQueueFuncs(\
 	std::bind(&read_func, obj, std::placeholders::_1),\
 	std::bind(&del_func, obj, std::placeholders::_1))
+#define glbin_vol_def fluo::Global::instance().get_vol_def()
 
 namespace fluo
 {
@@ -113,6 +116,9 @@ namespace fluo
 		void undo();
 		void redo();
 
+		//default volume data settings
+		VolumeDataDefault& get_vol_def() { return volume_default_; }
+
 	private:
 		Global();
 		static Global instance_;
@@ -141,6 +147,9 @@ namespace fluo
 		//controls for undo and redo
 		std::vector<Undoable*> undo_ctrls_;
 		double time_span_;//time span to find sliders undo together
+
+		//default volume settings
+		VolumeDataDefault volume_default_;
 	};
 
 }
