@@ -2661,7 +2661,7 @@ void VolumePropPanel::OnUseMlChk(wxCommandEvent& event)
 	if (!m_vd)
 		return;
 	//component display
-	int ival = mgr->m_vol_com;
+	int ival = glbin_vol_def.m_label_mode;
 	m_options_toolbar->ToggleTool(ID_CompChk, ival ? true : false);
 	if (m_sync_group && m_group)
 		m_group->SetLabelMode(ival);

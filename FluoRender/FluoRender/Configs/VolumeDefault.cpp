@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <VolumeDefault.h>
+#include <DataManager.h>
 #include <Names.h>
 
 VolumeDataDefault::VolumeDataDefault()
@@ -196,6 +197,28 @@ void VolumeDataDefault::SaveDefault(wxFileConfig& f)
 
 void VolumeDataDefault::SetDefault(VolumeData* vd)
 {
+	if (!vd)
+		return;
+
+	m_gamma_enable = vd->GetGammaEnable();
+	m_gamma = vd->GetGamma();
+
+	m_boundary_enable = vd->GetBoundaryEnable();
+	m_boundary = vd->GetBoundary();
+
+	m_saturation_enable = vd->GetSaturationEnable();
+	m_saturation = vd->GetSaturation();
+
+	m_thresh_enable = vd->GetThreshEnable();
+	m_lo_thresh = vd->GetLeftThresh();
+	m_hi_thresh = vd->GetRightThresh();
+
+	m_luminance_enable = vd->GetLuminanceEnable();
+	m_luminance = vd->GetLuminance();
+
+	m_alpha_enable = vd->GetAlphaEnable();
+	m_alpha = vd->GetAlpha();
+
 
 }
 

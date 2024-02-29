@@ -32,18 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/treectrl.h>
 #include <vector>
 
-#define TOOL_PAINT_BRUSH	1
-#define TOOL_MEASUREMENT	2
-#define TOOL_TRACKING		3
-#define TOOL_NOISE_REDUCTION	4
-#define TOOL_VOLUME_SIZE	5
-#define TOOL_COLOCALIZATION	6
-#define TOOL_CONVERT		7
-#define TOOL_OPENCL			8
-#define TOOL_COMPONENT		9
-#define TOOL_CALCULATIONS	10
-#define TOOL_MACHINE_LEARNING	11
-
 //enum BitmapFontType;
 class VRenderFrame;
 class wxSingleSlider;
@@ -147,217 +135,34 @@ public:
 	SettingDlg(VRenderFrame* frame);
 	~SettingDlg();
 
-	void GetSettings();
 	void UpdateUI();
 	void UpdateDeviceTree();
-	void SaveSettings();
 	void UpdateTextureSize();
 
 	//get settings from ui
-	int GetGMCMode() {return m_gmc_mode;}
-	bool GetProjSave() {return m_prj_save;}
-	bool GetProjSaveInc() { return m_prj_save_inc; }
-	bool GetSaveAlpha() { return m_save_alpha; }
-	void SetSaveAlpha(bool val) { m_save_alpha = val; }
-	bool GetSaveFloat() { return m_save_float; }
-	void SetSaveFloat(bool val) { m_save_float = val; }
-	float GetDpi() { return m_dpi; }
-	void SetDpi(float fval) { m_dpi = fval; }
-	bool GetRealtimeCompress() {return m_realtime_compress;}
-	void SetRealtimeCompress(bool val) {m_realtime_compress = val;}
-	bool GetScriptBreak() { return m_script_break; }
 	void SetScriptBreak(bool val);
-	bool GetInverseSlider() { return m_inverse_slider; }
-	void SetInverseSlider(bool val) { m_inverse_slider = val; }
-	bool GetSkipBricks() {return m_skip_bricks;}
-	void SetSkipBricks(bool val) {m_skip_bricks = val;}
-	bool GetTestMode(int type);	//type	1:speed test
-								//		2:parameter test
-								//		3:wireframe mode
+	//bool GetTestMode(int type);	//type	1:speed test
+	//							//		2:parameter test
+	//							//		3:wireframe mode
 	int GetPeelingLyers();
 	bool GetMicroBlend();
 	void GetShadowDir(double& x, double &y);
-	bool GetMouseInt() {return m_mouse_int;}
 	int GetWavelengthColor(int n);
-	wxString GetTimeId() {return m_time_id;}
-	void SetTimeId(wxString id) {m_time_id = id;}
-	//gradient background
-	bool GetGradBg() {return m_grad_bg;}
-	void SetGradBg(bool val) {m_grad_bg = val;}
-	//rot center anchor thresh
-	double GetPinThreshold() { return m_pin_threshold; }
-	//stereo
-	bool GetStereo() { return m_stereo; }
-	//sbs
-	bool GetSBS() { return m_sbs; }
-	double GetEyeDist() { return m_eye_dist; }
-	//display id
-	unsigned int GetDispId() { return m_disp_id; }
-	void SetDispId(unsigned int val) { m_disp_id = val; }
-	//override vox
-	bool GetOverrideVox() {return m_override_vox;}
-	void SetOverrideVox(bool val) {m_override_vox = val;}
-	//soft threshold
-	double GetSoftThreshold() {return m_soft_threshold;}
-	void SetSoftThreshold(double val) {m_soft_threshold = val;}
-	//run script
-	bool GetRunScript() {return m_run_script;}
-	void SetRunScript(bool val) {m_run_script = val;}
-	wxString GetScriptFile() { return m_script_file; }
-	void SetScriptFile(wxString &file) { m_script_file = file; }
-	//paint history depth
-	int GetPaintHistDepth() {return m_paint_hist_depth;}
-	void SetPaintHistDepth(int val) {m_paint_hist_depth = val;}
-	//text font
-	wxString GetFontFile() { return m_font_file; }
-	void SetFontFile(wxString &file) { m_font_file = file; }
-	int GetTextSize() {return m_text_size;}
-	void SetTextSize(int size) {m_text_size = size;}
-	int GetTextColor() { return m_text_color; }
-	void SetTextColor(int text_color) { m_text_color = text_color; }
-	//line width
-	void SetLineWidth(double val) { m_line_width = val; }
-	double GetLineWidth() { return m_line_width; }
-	//pencil distance
-	void SetPencilDist(double val) { m_pencil_dist = val; }
-	double GetPencilDist() { return m_pencil_dist; }
-	//full screen
-	bool GetStayTop() { return m_stay_top; }
-	bool GetShowCursor() { if (m_stereo) return false; else return m_show_cursor; }
-	//memory settings
-	bool GetMemSwap() {return m_mem_swap;}
-	void SetMemSwap(bool val) {m_mem_swap = val;}
-	double GetGraphicsMem() {return m_graphics_mem;}
-	void SetGraphicsMem(double val) {m_graphics_mem = val;}
-	double GetLargeDataSize() {return m_large_data_size;}
-	void SetLargeDataSize(double val) {m_large_data_size = val;}
-	int GetForceBrickSize() {return m_force_brick_size;}
-	void SetForceBrickSize(int val) {m_force_brick_size = val;}
-	int GetResponseTime() {return m_up_time;}
-	void SetResponseTime(int val) {m_up_time = val;}
-	int GetUpdateOrder() {return m_mem_swap?m_update_order:0;}
-	void SetUpdateOrder(int val) {m_update_order = val;}
-	bool GetInvalidateTex() { return m_invalidate_tex; }
-	void SetInvalidateTex(bool val) { m_invalidate_tex = val; }
-	int GetDetailLevelOffset() { return m_detail_level_offset; }
-	void SetDetailLevelOffset(int val) { m_detail_level_offset = val; }
-	//point volume mode
-	int GetPointVolumeMode() {return m_point_volume_mode;}
-	void SetPointVolumeMode(int mode) {m_point_volume_mode = mode;}
-	//ruler use transfer function
-	bool GetRulerUseTransf() {return m_ruler_use_transf;}
-	void SetRulerUseTransf(bool val) {m_ruler_use_transf = val;}
-	//ruler relax f1
-	double GetRulerRelaxF1() { return m_ruler_relax_f1; }
-	void SetRulerRelaxF1(double val) { m_ruler_relax_f1 = val; }
-	//ruler influence range
-	double GetRulerInfr() { return m_ruler_infr; }
-	void SetRulerInfr(double val) { m_ruler_infr = val; }
-	//ruler relax iter
-	int GetRulerRelaxIter() { return m_ruler_relax_iter; }
-	void SetRulerRelaxIter(int iter) { m_ruler_relax_iter = iter; }
-	//ruler auto relax
-	bool GetRulerAutoRelax() { return m_ruler_auto_relax; }
-	void SetRulerAutoRelax(bool val) { m_ruler_auto_relax = val; }
-	//ruler relax type
-	int GetRulerRelaxType() { return m_ruler_relax_type; }
-	void SetRulerRelaxType(int val) { m_ruler_relax_type = val; }
-	//ruler exports df/f
-	bool GetRulerDF_F() { return m_ruler_df_f; }
-	void SetRulerDF_F(bool val) { m_ruler_df_f = val; }
 	//background parameters
-	void GetBgParams(int &type, int &kx, int &ky, double &varth, double &gauth)
-	{
-		type = m_bg_type;
-		kx = m_kx;
-		ky = m_ky;
-		varth = m_varth;
-		gauth = m_gauth;
-	}
-	//ruler size thresh
-	int GetRulerSizeThresh() { return m_ruler_size_thresh; }
-	void SetRulerSizeThresh(int val) { m_ruler_size_thresh = val; }
-	//flags for pvxml settings
-	bool GetPvxmlFlipX() {return m_pvxml_flip_x;}
-	void SetPvxmlFlipX(bool flip) {m_pvxml_flip_x = flip;}
-	bool GetPvxmlFlipY() {return m_pvxml_flip_y;}
-	void SetPvxmlFlipY(bool flip) {m_pvxml_flip_y = flip;}
-	void SetPvxmlSeqType(int value) { m_pvxml_seq_type = value; }
-	int GetPvxmlSeqType() { return m_pvxml_seq_type; }
-	//pixel format
-	int GetApiType() { return m_api_type; }
-	int GetRedBit() {return m_red_bit;}
-	void SetRedBit(int ival) { m_red_bit = ival; }
-	int GetGreenBit() {return m_green_bit;}
-	void SetGreenBit(int ival) { m_green_bit = ival; }
-	int GetBlueBit() {return m_blue_bit;}
-	void SetBlueBit(int ival) { m_blue_bit = ival; }
-	int GetAlphaBit() {return m_alpha_bit;}
-	void SetAlphaBit(int ival) { m_alpha_bit = ival; }
-	int GetDepthBit() {return m_depth_bit;}
-	int GetSamples() {return m_samples;}
-	//context attrib
-	int GetGLMajorVer() {return m_gl_major_ver;}
-	void SetGLMajorVer(int v) {m_gl_major_ver = v;}
-	int GetGLMinorVer() {return m_gl_minor_ver;}
-	void SetGLMinorVer(int v) {m_gl_minor_ver = v;}
-	int GetGLProfileMask() {return m_gl_profile_mask;}
-	//cl device
-	int GetCLPlatformID() { return m_cl_platform_id; }
-	void SetCLPlatformID(int val) { m_cl_platform_id = val; }
-	int GetCLDeviceID() {return m_cl_device_id;}
-	void SetCLDeviceID(int val) { m_cl_device_id = val; }
-	//last tool
-	void SetLastTool(int tool) { m_last_tool = tool; }
-	int GetLastTool() { return m_last_tool; }
-	//tracking settings
-	void SetTrackIter(int val) { m_track_iter = val; }
-	int GetTrackIter() { return m_track_iter; }
-	void SetComponentSize(double size) { m_component_size = size; }
-	double GetComponentSize() { return m_component_size; }
-	void SetConsistentColor(bool val) { m_consistent_color = val; }
-	bool GetConsistentColor() { return m_consistent_color; }
-	void SetTryMerge(bool val) { m_try_merge = val; }
-	bool GetTryMerge() { return m_try_merge; }
-	void SetTrySplit(bool val) { m_try_split = val; }
-	bool GetTrySplit() { return m_try_split; }
-	void SetContactFactor(double fact) { m_contact_factor = fact; }
-	double GetContactFactor() { return m_contact_factor; }
-	void SetSimilarity(double siml) { m_similarity = siml; }
-	double GetSimilarity() { return m_similarity; }
-	//texture size
-	void SetUseMaxtextureSize(bool val) { m_use_max_texture_size = val; }
-	bool GetUseMaxTextureSize() { return m_use_max_texture_size; }
-	void SetMaxTextureSize(int size) { m_max_texture_size = size; }
-	int GetMaxTextureSize() { return m_max_texture_size; }
-	int GetPlaneMode() { return m_plane_mode; }
-	//no tex pack
-	void SetNoTexPack(bool val) { m_no_tex_pack = val; }
+	//void GetBgParams(int &type, int &kx, int &ky, double &varth, double &gauth)
+	//{
+	//	type = m_bg_type;
+	//	kx = m_kx;
+	//	ky = m_ky;
+	//	varth = m_varth;
+	//	gauth = m_gauth;
+	//}
 	
 	//Getting the java paths.
-	wxString getJVMPath();
-	wxString getIJPath();
-	wxString getBioformatsPath();
-	std::vector<std::string> GetJvmArgs();
-
-	bool getIJMode() { return m_ij_mode; }
-
-	//machine learning settings
-	void SetCgTable(const std::string& str) { m_cg_table = str; }
-	std::string GetCgTable() { return m_cg_table; }
-	void SetVpTable(const std::string& str) { m_vp_table = str; }
-	std::string GetVpTable() { return m_vp_table; }
-	void SetMlAutoStartAll(bool bval) { m_ml_auto_start_all = bval; }
-	bool GetMlAutoStartAll() { return m_ml_auto_start_all; }
-	void SetCgAutoStart(bool bval) { m_cg_auto_start = bval; }
-	bool GetCgAutoStart() { return m_cg_auto_start; }
-	void SetVpAutoStart(bool bval) { m_vp_auto_start = bval; }
-	bool GetVpAutoStart() { return m_vp_auto_start; }
-	void SetVpAutoApply(bool bval) { m_vp_auto_apply = bval; }
-	bool GetVpAutoApply() { return m_vp_auto_apply; }
-
-	//python settings
-	int GetPythonVer() { return m_python_ver; }
+	//wxString getJVMPath();
+	//wxString getIJPath();
+	//wxString getBioformatsPath();
+	//std::vector<std::string> GetJvmArgs();
 
 	//display settings
 	unsigned int GetDisplayNum();
@@ -365,144 +170,6 @@ public:
 private:
 	VRenderFrame* m_frame;
 
-	int m_gmc_mode;			//1-pre-calculated (removed);
-							//2-real-time 7 sample;
-							//3-real-time 4 samples (removed);
-							//4-pre-calculated 4 samples (removed);
-	bool m_prj_save;		//save project automatically
-	bool m_prj_save_inc;	//save project incrementally
-	bool m_save_alpha;		//save alpha channel in captured images
-	bool m_save_float;		//save float values in captured images
-	float m_dpi;			//dpi number of captured image
-	bool m_realtime_compress;//real time compress
-	bool m_script_break;	//allow script break
-	bool m_inverse_slider;	//invert vertical sliders
-	bool m_skip_bricks;		//skip empty bricks
-	bool m_test_speed;		//test fps
-	bool m_test_param;		//using parameter test window
-	bool m_test_wiref;		//draw wireframe of volumes
-	int m_peeling_layers;	//peeling layer number
-	bool m_micro_blend;		//blending slice in depth mode
-	bool m_shadow_dir;		//enable directional shaow
-	double m_shadow_dir_x;	//x comp of shadow direction
-	double m_shadow_dir_y;	//y comp of shadow direction
-	bool m_mouse_int;		//enable lower sample rate for mouse interactions
-	int m_wav_color1;		//wavelength to color
-	int m_wav_color2;		//1-red; 2-green; 3-blue; 4-purple; 5-white
-	int m_wav_color3;
-	int m_wav_color4;
-	wxString m_time_id;		//identfier for time sequence
-	bool m_grad_bg;
-	bool m_override_vox;
-	double m_soft_threshold;
-	//stereo
-	bool m_stereo;
-	bool m_sbs;
-	double m_eye_dist;
-	//display
-	int m_disp_id;
-	//script
-	bool m_run_script;
-	wxString m_script_file;
-	//text size
-	wxString m_font_file;	//font lib file in the Fonts folder
-	int m_text_size;		//text size in viewport
-	int m_text_color;		//text color: 0- contrast to bg; 1-same as bg; 2-volume sec color
-	//line width
-	double m_line_width;	//line width
-	//pencil ruler distance
-	double m_pencil_dist;	//distance between two points for pencil tool
-	//memory limit
-	bool m_mem_swap;		//enable memory swap
-	double m_graphics_mem;	//in MB
-							//it's the user setting
-							//final value is determined by both reading from the card and this value
-	double m_large_data_size;//data size considered as large and needs forced bricking
-	int m_force_brick_size;	//in pixels
-							//it's the user setting
-							//final value is determined by both reading from the card and this value
-	int m_up_time;			//response time in ms
-	int m_update_order;		//0:back-to-front; 1:front-to-back
-	bool m_invalidate_tex;	//invalidate texture in every loop
-	int m_detail_level_offset;	//an offset value to current level of detail (for multiresolution data only)
-	//point volume mode
-	int m_point_volume_mode;
-	//ruler use transfer function
-	bool m_ruler_use_transf;
-	//ruler relax
-	double m_ruler_relax_f1;
-	double m_ruler_infr;//ruler influence range
-	int m_ruler_relax_iter;
-	bool m_ruler_auto_relax;
-	int m_ruler_relax_type;
-	//ruler exports df/f
-	bool m_ruler_df_f;
-	//background parameters
-	int m_bg_type;//0-mean; 1-minmax; 2-median
-	int m_kx, m_ky;//windows size
-	double m_varth, m_gauth;//thresholds
-	//grow ruler size thresh
-	int m_ruler_size_thresh;
-	//flip pvxml frame
-	bool m_pvxml_flip_x;
-	bool m_pvxml_flip_y;
-	int m_pvxml_seq_type;
-	//pixel format
-	int m_api_type;//0-default; 1-amd; 2-nv
-	int m_red_bit;
-	int m_green_bit;
-	int m_blue_bit;
-	int m_alpha_bit;
-	int m_depth_bit;
-	int m_samples;
-	//context attrib
-	int m_gl_major_ver;
-	int m_gl_minor_ver;
-	int m_gl_profile_mask;
-	//cl device
-	int m_cl_platform_id;
-	int m_cl_device_id;
-	//paint history depth
-	int m_paint_hist_depth;
-	//full screen
-	bool m_stay_top;
-	bool m_show_cursor;
-	//last tool
-	int m_last_tool;
-	//tracking settings
-	int m_track_iter;
-	double m_component_size;
-	bool m_consistent_color;
-	bool m_try_merge;
-	bool m_try_split;
-	double m_contact_factor;
-	double m_similarity;
-	//max texture size
-	bool m_use_max_texture_size;
-	int m_max_texture_size;
-	//rot center anchor thresh
-	double m_pin_threshold;
-	//clipping plane display mode
-	int m_plane_mode;
-	//no tex pack
-	bool m_no_tex_pack;
-
-	// java settings strings.
-	wxString m_jvm_path;
-	wxString m_ij_path;
-	wxString m_bioformats_path;
-	int m_ij_mode;//0: imagej; 1: fiji
-
-	//machine learning settings
-	std::string m_cg_table;
-	std::string m_vp_table;
-	bool m_ml_auto_start_all;
-	bool m_cg_auto_start;
-	bool m_vp_auto_start;
-	bool m_vp_auto_apply;
-
-	//python settings
-	int m_python_ver;//minor version no of python3
 
 private:
 	//save project

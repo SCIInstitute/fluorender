@@ -356,6 +356,13 @@ file(GLOB ctrl_hdr FluoRender/FluoRender/Controls/*.h)
 add_library(CONTROLS_OBJ OBJECT
   ${ctrl_src} ${ctrl_hdr})
 
+# Configs
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Configs)
+file(GLOB config_src FluoRender/FluoRender/Configs/*.cpp)
+file(GLOB config_hdr FluoRender/FluoRender/Configs/*.h)
+add_library(CONFIGS_OBJ OBJECT
+  ${config_src} ${config_hdr})
+
 # Global
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Global)
 file(GLOB glb_src FluoRender/FluoRender/Global/*.cpp)
@@ -601,6 +608,7 @@ if(APPLE)
     ${src} ${hdr} ${rsc} ${icns}
     $<TARGET_OBJECTS:BASIS_OBJ>
     $<TARGET_OBJECTS:CONTROLS_OBJ>
+    $<TARGET_OBJECTS:CONFIGS_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGES_OBJ>
     $<TARGET_OBJECTS:CONVERTERS_OBJ>
@@ -641,6 +649,7 @@ elseif(UNIX OR MINGW)
     ${src} ${hdr} ${rsc} ${icns}
     $<TARGET_OBJECTS:BASIS_OBJ>
     $<TARGET_OBJECTS:CONTROLS_OBJ>
+    $<TARGET_OBJECTS:CONFIGS_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGES_OBJ>
     $<TARGET_OBJECTS:CONVERTERS_OBJ>
@@ -712,6 +721,7 @@ elseif(WIN32)
       ${src} ${hdr} ${rsc} ${icns}
       $<TARGET_OBJECTS:BASIS_OBJ>
       $<TARGET_OBJECTS:CONTROLS_OBJ>
+      $<TARGET_OBJECTS:CONFIGS_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
@@ -743,6 +753,7 @@ elseif(WIN32)
       ${src} ${hdr} ${rsc} ${icns}
       $<TARGET_OBJECTS:BASIS_OBJ>
       $<TARGET_OBJECTS:CONTROLS_OBJ>
+      $<TARGET_OBJECTS:CONFIGS_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
@@ -773,6 +784,7 @@ elseif(WIN32)
       ${tester_src} ${tester_hdr}
       $<TARGET_OBJECTS:BASIS_OBJ>
       $<TARGET_OBJECTS:CONTROLS_OBJ>
+      $<TARGET_OBJECTS:CONFIGS_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>

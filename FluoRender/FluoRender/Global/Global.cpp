@@ -41,12 +41,6 @@ Global::Global() :
 	comp_gen_table_.setParams(get_params("comp_gen"));
 	//vol prop
 	vol_prop_table_.setParams(get_params("vol_prop"));
-
-	//mul func
-	mul_func_btn_use_ = 0;
-
-	//time span for undo redo
-	time_span_ = 1;
 }
 
 void Global::gen_params_list()
@@ -272,10 +266,11 @@ void Global::undo()
 	if (!c)
 		return;
 
+	double time_span = main_settings_.m_time_span;
 	for (auto i : undo_ctrls_)
 	{
 		double time = i->GetTimeUndo();
-		if (std::fabs(time - t) < time_span_)
+		if (std::fabs(time - t) < time_span)
 			i->Undo();
 	}
 }
@@ -298,10 +293,11 @@ void Global::redo()
 	if (!c)
 		return;
 
+	double time_span = main_settings_.m_time_span;
 	for (auto i : undo_ctrls_)
 	{
 		double time = i->GetTimeRedo();
-		if (std::fabs(time - t) < time_span_)
+		if (std::fabs(time - t) < time_span)
 			i->Redo();
 	}
 }

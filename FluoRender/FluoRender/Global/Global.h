@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Names.h>
 #include <VolumeDefault.h>
+#include <MainSettings.h>
 #include <Tracking/VolCache.h>
 #include <Database/Params.h>
 #include <Database/EntryParams.h>
@@ -46,6 +47,7 @@ DEALINGS IN THE SOFTWARE.
 	RegisterCacheQueueFuncs(\
 	std::bind(&read_func, obj, std::placeholders::_1),\
 	std::bind(&del_func, obj, std::placeholders::_1))
+#define glbin_settings fluo::Globla::instance().get_settings()
 #define glbin_vol_def fluo::Global::instance().get_vol_def()
 
 namespace fluo
@@ -101,10 +103,6 @@ namespace fluo
 		flrd::PyDlc* get_add_pydlc(const std::string& name);
 		void clear_python();
 
-		//multifunc button use
-		void set_mul_func(int val) { mul_func_btn_use_ = val; }
-		int get_mul_func() { return mul_func_btn_use_; }
-
 		//undo sliders
 		void add_undo_control(Undoable* control) { undo_ctrls_.push_back(control); }
 		void del_undo_control(Undoable* control)
@@ -117,7 +115,8 @@ namespace fluo
 		void redo();
 
 		//default volume data settings
-		VolumeDataDefault& get_vol_def() { return volume_default_; }
+		MainSettings& get_settings() { return main_settings_; }
+		VolumeDataDefault& get_vol_def() { return main_settings_.m_vol_def; }
 
 	private:
 		Global();
@@ -141,15 +140,11 @@ namespace fluo
 		//python
 		std::unordered_map<std::string, flrd::PyBase*> python_list_;
 
-		//multifunc button use
-		int mul_func_btn_use_;//0-sync;1-focus;2-default;3-ml;4-undo;5-enable
-
 		//controls for undo and redo
 		std::vector<Undoable*> undo_ctrls_;
-		double time_span_;//time span to find sliders undo together
 
-		//default volume settings
-		VolumeDataDefault volume_default_;
+		//settings
+		MainSettings main_settings_;
 	};
 
 }
