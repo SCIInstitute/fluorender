@@ -254,11 +254,15 @@ private:
 	float m_prog_bit;
 	float m_prog;
 
+	//modify
+	unsigned int m_cell_new_id;
+	bool m_cell_new_id_empty;
 
 	//record
 	bool m_record_cmd;
 	flrd::CompCommand m_command;
 
+	flrd::ComponentGenerator m_comp_generator;
 	flrd::ComponentAnalyzer m_comp_analyzer;
 	flrd::RulerAlign m_aligner;
 

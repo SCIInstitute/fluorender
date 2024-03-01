@@ -3244,35 +3244,35 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	int bn = vd->GetAllBrickNum();
 	double scale = vd->GetScalarScale();
 
-	flrd::ComponentGenerator cg(vd);
-	cg.prework = std::bind(
+	m_comp_generator.SetVolumeData(vd);
+	m_comp_generator.prework = std::bind(
 			&ComponentDlg::StartTimer, this, std::placeholders::_1);
-	cg.postwork = std::bind(
+	m_comp_generator.postwork = std::bind(
 			&ComponentDlg::StopTimer, this, std::placeholders::_1);
 	m_titles.Clear();
 	m_values.Clear();
 	m_tps.clear();
 	m_tps.push_back(std::chrono::high_resolution_clock::now());
 
-	cg.SetUseMask(use_sel);
+	m_comp_generator.SetUseMask(use_sel);
 
-	vd->AddEmptyMask(1, !cg.GetUseMask());//select all if no mask, otherwise keep
+	vd->AddEmptyMask(1, !m_comp_generator.GetUseMask());//select all if no mask, otherwise keep
 	if (m_fixate && vd->GetLabel(false))
 	{
 		vd->LoadLabel2();
-		cg.SetIDBit(m_fix_size);
+		m_comp_generator.SetIDBit(m_fix_size);
 	}
 	else
 	{
 		vd->AddEmptyLabel(0, !use_sel);
-		cg.ShuffleID();
+		m_comp_generator.ShuffleID();
 	}
 
 	if (m_use_dist_field)
 	{
 		if (m_density)
 		{
-			cg.DistDensityField(
+			m_comp_generator.DistDensityField(
 				m_diff, m_iter,
 				m_thresh*m_tfactor,
 				m_falloff,
@@ -3289,7 +3289,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 		}
 		else
 		{
-			cg.DistGrow(
+			m_comp_generator.DistGrow(
 				m_diff, m_iter,
 				m_thresh*m_tfactor,
 				m_falloff ,
@@ -3305,7 +3305,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	{
 		if (m_density)
 		{
-			cg.DensityField(
+			m_comp_generator.DensityField(
 				m_density_window_size,
 				m_density_stats_size,
 				m_diff, m_iter,
@@ -3318,7 +3318,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 		}
 		else
 		{
-			cg.Grow(
+			m_comp_generator.Grow(
 				m_diff,
 				m_iter,
 				m_thresh*m_tfactor,
@@ -3329,10 +3329,10 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	}
 
 	if (clean_iter > 0)
-		cg.Cleanup(clean_iter, clean_size);
+		m_comp_generator.Cleanup(clean_iter, clean_size);
 
 	if (bn > 1)
-		cg.FillBorders(0.1);
+		m_comp_generator.FillBorders(0.1);
 
 	m_tps.push_back(std::chrono::high_resolution_clock::now());
 	std::chrono::duration<double> time_span =
@@ -3393,20 +3393,20 @@ void ComponentDlg::Clean(bool use_sel, bool command)
 	//get brick number
 	int bn = vd->GetAllBrickNum();
 
-	flrd::ComponentGenerator cg(vd);
+	m_comp_generator.SetVolumeData(vd);
 
-	cg.SetUseMask(use_sel);
+	m_comp_generator.SetUseMask(use_sel);
 
 	vd->AddEmptyMask(1, !use_sel);
 
 	if (bn > 1)
-		cg.ClearBorders();
+		m_comp_generator.ClearBorders();
 
 	if (clean_iter > 0)
-		cg.Cleanup(clean_iter, clean_size);
+		m_comp_generator.Cleanup(clean_iter, clean_size);
 
 	if (bn > 1)
-		cg.FillBorders(0.1);
+		m_comp_generator.FillBorders(0.1);
 
 	m_view->RefreshGL(39);
 
@@ -3467,22 +3467,22 @@ void ComponentDlg::ApplyRecord()
 	if (!vd)
 		return;
 
-	flrd::ComponentGenerator cg(vd);
-	cg.prework = std::bind(
+	m_comp_generator.SetVolumeData(vd);
+	m_comp_generator.prework = std::bind(
 		&ComponentDlg::StartTimer, this, std::placeholders::_1);
-	cg.postwork = std::bind(
+	m_comp_generator.postwork = std::bind(
 		&ComponentDlg::StopTimer, this, std::placeholders::_1);
 	vd->AddEmptyMask(1);
 	if (!vd->GetMlCompGenApplied())
 	{
 		vd->AddEmptyLabel(0);
-		cg.ShuffleID();
+		m_comp_generator.ShuffleID();
 	}
-	cg.GenerateDB();
+	m_comp_generator.GenerateDB();
 
 	int bn = vd->GetAllBrickNum();
 	if (bn > 1)
-		cg.FillBorders(0.1);
+		m_comp_generator.FillBorders(0.1);
 
 	//update
 	m_view->RefreshGL(39);

@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/ShaderProgram.h>
 #include "VRenderView.h"
 #include "VRenderFrame.h"
+#include <Global/Global.h>
 #include <tiffio.h>
 #include <wxSingleSlider.h>
 #include <wx/utils.h>
@@ -351,7 +352,7 @@ void VRenderView::CreateBar()
 	wxBoxSizer* sizer_m = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText *st1, *st2, *st3;
 
-	bool inverse_slider = ((VRenderFrame*)m_frame)->GetSettingDlg()->GetInverseSlider();
+	bool inverse_slider = glbin_settings.m_inverse_slider;
 	//bar top///////////////////////////////////////////////////
 	//toolbar 1
 	m_options_toolbar = new wxToolBar(this,wxID_ANY,
@@ -1562,11 +1563,10 @@ void VRenderView::OnScaleMode(wxCommandEvent& event)
 
 void VRenderView::OnScaleFactorSpinUp(wxSpinEvent& event)
 {
-	bool inverse = ((VRenderFrame*)m_frame)->GetSettingDlg()->GetInverseSlider();
 	wxString str_val = m_scale_factor_text->GetValue();
 	long val;
 	str_val.ToLong(&val);
-	if (inverse)
+	if (glbin_settings.m_inverse_slider)
 		val++;
 	else
 		val--;
@@ -1576,11 +1576,10 @@ void VRenderView::OnScaleFactorSpinUp(wxSpinEvent& event)
 
 void VRenderView::OnScaleFactorSpinDown(wxSpinEvent& event)
 {
-	bool inverse = ((VRenderFrame*)m_frame)->GetSettingDlg()->GetInverseSlider();
 	wxString str_val = m_scale_factor_text->GetValue();
 	long val;
 	str_val.ToLong(&val);
-	if (inverse)
+	if (glbin_settings.m_inverse_slider)
 		val--;
 	else
 		val++;

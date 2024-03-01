@@ -138,7 +138,7 @@ m_plane_mode(kNormal)
 	sizer_1->Add(m_toolbar, 0, wxALIGN_CENTER, 0);
 
 	//sliders for clipping planes
-	bool inverse_slider = frame->GetSettingDlg()->GetInverseSlider();
+	bool inverse_slider = glbin_settings.m_inverse_slider;
 	long ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
 	//x
 	wxBoxSizer* sizer_cx = new wxBoxSizer(wxVERTICAL);
@@ -1581,11 +1581,10 @@ void ClippingView::OnZRotEdit(wxCommandEvent &event)
 
 void ClippingView::OnXRotSpinUp(wxSpinEvent& event)
 {
-	bool inverse = m_frame->GetSettingDlg()->GetInverseSlider();
 	wxString str_val = m_x_rot_text->GetValue();
 	double val;
 	str_val.ToDouble(&val);
-	val += inverse ? -1 : 1;
+	val += glbin_settings.m_inverse_slider ? -1 : 1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1594,11 +1593,10 @@ void ClippingView::OnXRotSpinUp(wxSpinEvent& event)
 
 void ClippingView::OnXRotSpinDown(wxSpinEvent& event)
 {
-	bool inverse = m_frame->GetSettingDlg()->GetInverseSlider();
 	wxString str_val = m_x_rot_text->GetValue();
 	double val;
 	str_val.ToDouble(&val);
-	val += inverse ? 1 : -1;
+	val += glbin_settings.m_inverse_slider ? 1 : -1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1607,11 +1605,10 @@ void ClippingView::OnXRotSpinDown(wxSpinEvent& event)
 
 void ClippingView::OnYRotSpinUp(wxSpinEvent& event)
 {
-	bool inverse = m_frame->GetSettingDlg()->GetInverseSlider();
 	wxString str_val = m_y_rot_text->GetValue();
 	double val;
 	str_val.ToDouble(&val);
-	val += inverse ? -1 : 1;
+	val += glbin_settings.m_inverse_slider ? -1 : 1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1620,11 +1617,10 @@ void ClippingView::OnYRotSpinUp(wxSpinEvent& event)
 
 void ClippingView::OnYRotSpinDown(wxSpinEvent& event)
 {
-	bool inverse = m_frame->GetSettingDlg()->GetInverseSlider();
 	wxString str_val = m_y_rot_text->GetValue();
 	double val;
 	str_val.ToDouble(&val);
-	val += inverse ? 1 : -1;
+	val += glbin_settings.m_inverse_slider ? 1 : -1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1633,11 +1629,10 @@ void ClippingView::OnYRotSpinDown(wxSpinEvent& event)
 
 void ClippingView::OnZRotSpinUp(wxSpinEvent& event)
 {
-	bool inverse = m_frame->GetSettingDlg()->GetInverseSlider();
 	wxString str_val = m_z_rot_text->GetValue();
 	double val;
 	str_val.ToDouble(&val);
-	val += inverse ? -1 : 1;
+	val += glbin_settings.m_inverse_slider ? -1 : 1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -1646,11 +1641,10 @@ void ClippingView::OnZRotSpinUp(wxSpinEvent& event)
 
 void ClippingView::OnZRotSpinDown(wxSpinEvent& event)
 {
-	bool inverse = m_frame->GetSettingDlg()->GetInverseSlider();
 	wxString str_val = m_z_rot_text->GetValue();
 	double val;
 	str_val.ToDouble(&val);
-	val += inverse ? 1 : -1;
+	val += glbin_settings.m_inverse_slider ? 1 : -1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	wxString str = wxString::Format("%.1f", val);

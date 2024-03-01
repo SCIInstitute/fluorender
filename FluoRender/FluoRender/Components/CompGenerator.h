@@ -46,9 +46,13 @@ namespace flrd
 	class ComponentGenerator
 	{
 	public:
-		ComponentGenerator(VolumeData* vd);
+		ComponentGenerator();
 		~ComponentGenerator();
 
+		void SetVolumeData(VolumeData* vd)
+		{
+			m_vd = vd;
+		}
 		void SetUseMask(bool use_mask)
 		{ m_use_mask = use_mask; }
 		bool GetUseMask()

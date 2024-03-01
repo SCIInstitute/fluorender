@@ -44,8 +44,8 @@ public:
 	void Save(const std::string& filename);
 	void Read(wxFileConfig& f);
 	void Save(wxFileConfig& f);
-	void Set(flrd::ComponentAnalyzer* ca);
-	void Apply(flrd::ComponentAnalyzer* ca);
+	//void Set(flrd::ComponentAnalyzer* ca);
+	//void Apply(flrd::ComponentAnalyzer* ca);
 
 public:
 	//default values

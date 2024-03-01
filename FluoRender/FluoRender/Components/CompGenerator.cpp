@@ -40,8 +40,8 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-ComponentGenerator::ComponentGenerator(VolumeData* vd)
-	: m_vd(vd),
+ComponentGenerator::ComponentGenerator()
+	: m_vd(0),
 	m_use_mask(false),
 	prework(0),
 	postwork(0)

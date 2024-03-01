@@ -96,8 +96,7 @@ m_sync_b(false)
 	wxIntegerValidator<int> vald_int;
 	vald_int.SetRange(-256, 256);
 
-	bool inverse_slider = m_frame->GetSettingDlg()->GetInverseSlider();
-	long ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
+	long ls = glbin_settings.m_inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
 	wxBoxSizer *sizer_v = new wxBoxSizer(wxVERTICAL);
 	wxStaticText *st;
 

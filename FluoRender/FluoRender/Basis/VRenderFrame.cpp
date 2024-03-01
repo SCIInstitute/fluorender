@@ -177,7 +177,7 @@ VRenderFrame::VRenderFrame(
 	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
 #endif
 	//create this first to read the settings
-	m_setting_dlg = new SettingDlg(this);
+	glbin_settings.Read();
 
 	// tell wxAuiManager to manage this frame
 	m_aui_mgr.SetManagedWindow(this);
@@ -450,6 +450,8 @@ VRenderFrame::VRenderFrame(
 	flvr::TextRenderer::text_texture_manager_.SetSize(m_setting_dlg->GetTextSize());
 
 	//settings dialog
+	m_setting_dlg = new SettingDlg(this);
+
 	if (m_setting_dlg->GetTestMode(1))
 		m_vrv_list[0]->m_glview->m_test_speed = true;
 	if (m_setting_dlg->GetTestMode(3))
@@ -961,6 +963,8 @@ VRenderFrame::~VRenderFrame()
 	}
 	m_aui_mgr.UnInit();
 	flvr::KernelProgram::release();
+
+	glbin_settings.Save();
 }
 
 void VRenderFrame::OnExit(wxCommandEvent& event)

@@ -226,12 +226,11 @@ void ComponentDefault::Save(wxFileConfig& f)
 	f.Write("output_type", m_output_type);
 }
 
-void ComponentDefault::Set(flrd::ComponentAnalyzer* ca)
-{
-
-}
-
-void ComponentDefault::Apply(flrd::ComponentAnalyzer* ca)
-{
-
-}
+//void ComponentDefault::Set(flrd::ComponentAnalyzer* ca)
+//{
+//}
+//
+//void ComponentDefault::Apply(flrd::ComponentAnalyzer* ca)
+//{
+//
+//}
