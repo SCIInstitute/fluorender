@@ -162,7 +162,7 @@ MainSettings::~MainSettings()
 
 }
 
-void MainSettings::ReadDefault()
+void MainSettings::Read()
 {
 	double dval;
 	int ival;
@@ -384,14 +384,14 @@ void MainSettings::ReadDefault()
 	}
 
 	//EnableStreaming(m_mem_swap);
-	m_brush_def.ReadDefault(fconfig);
-	m_comp_def.ReadDefault(fconfig);
-	m_outadj_def.ReadDefault(fconfig);
-	m_view_def.ReadDefault(fconfig);
-	m_vol_def.ReadDefault(fconfig);
+	m_brush_def.Read(fconfig);
+	m_comp_def.Read(fconfig);
+	m_outadj_def.Read(fconfig);
+	m_view_def.Read(fconfig);
+	m_vol_def.Read(fconfig);
 }
 
-void MainSettings::SaveDefault()
+void MainSettings::Save()
 {
 	wxString app_name = "FluoRender " +
 		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
@@ -568,11 +568,11 @@ void MainSettings::SaveDefault()
 	fconfig.SetPath("/python");
 	fconfig.Write("version", m_python_ver);
 
-	m_brush_def.SaveDefault(fconfig);
-	m_comp_def.SaveDefault(fconfig);
-	m_outadj_def.SaveDefault(fconfig);
-	m_view_def.SaveDefault(fconfig);
-	m_vol_def.SaveDefault(fconfig);
+	m_brush_def.Save(fconfig);
+	m_comp_def.Save(fconfig);
+	m_outadj_def.Save(fconfig);
+	m_view_def.Save(fconfig);
+	m_vol_def.Save(fconfig);
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);

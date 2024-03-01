@@ -40,11 +40,13 @@ DEALINGS IN THE SOFTWARE.
 #define TOOL_CALCULATIONS	10
 #define TOOL_MACHINE_LEARNING	11
 
-#include <VolumeDefault.h>
 #include <BrushDefault.h>
 #include <ComponentDefault.h>
 #include <OutAdjDefault.h>
 #include <ViewDefault.h>
+#include <VolumeDefault.h>
+#include <wx/string.h>
+#include <string>
 
 class MainSettings
 {
@@ -52,10 +54,8 @@ public:
 	MainSettings();
 	~MainSettings();
 
-	void ReadDefault();
-	void SaveDefault();
-	//void SetDefault(VolumeData* vd);
-	//void ApplyDefault(VolumeData* vd);
+	void Read();
+	void Save();
 
 	BrushDefault m_brush_def;
 	ComponentDefault m_comp_def;

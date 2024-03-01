@@ -344,6 +344,8 @@ public:
 	void GetMaterial(double& amb, double& diff, double& spec, double& shine);
 	void SetLowShading(double val);
 	void SetHiShading(double val);
+	double GetLowShading();
+	double GetHiShading();
 
 	//shadow
 	void SetShadowEnable(bool bVal);
@@ -380,6 +382,8 @@ public:
 	bool GetColormapDisp();
 	void SetColormapValues(double low, double high);
 	void GetColormapValues(double &low, double &high);
+	double GetColormapLow();
+	double GetColormapHigh();
 	void SetColormapInv(double val);
 	double GetColormapInv();
 	void SetColormap(int value);
@@ -455,6 +459,10 @@ public:
 	//blend mode
 	void SetBlendMode(int mode);
 	int GetBlendMode();
+
+	//transparent
+	void SetTransparent(bool val);
+	bool GetTransparent();
 
 	//scalar value info
 	double GetMaxScale()
@@ -630,6 +638,9 @@ private:
 	double m_colormap_hi_value;
 	int m_colormap;//index to a colormap
 	int m_colormap_proj;//index to a way of projection
+
+	//transparent
+	bool m_transparent;
 
 	//save the mode for restoring
 	int m_saved_mode;
@@ -1155,6 +1166,7 @@ public:
 	void SetNR(bool val);
 	void SetInterpolate(bool mode);
 	void SetInvert(bool mode);
+	void SetTransparent(bool val);
 
 	//use ml
 	void ApplyMlVolProp();

@@ -38,7 +38,7 @@ ViewDefault::~ViewDefault()
 
 }
 
-void ViewDefault::ReadDefault(wxFileConfig& f)
+void ViewDefault::Read(wxFileConfig& f)
 {
 	double dval;
 	int ival;
@@ -49,16 +49,16 @@ void ViewDefault::ReadDefault(wxFileConfig& f)
 
 }
 
-void ViewDefault::SaveDefault(wxFileConfig& f)
+void ViewDefault::Save(wxFileConfig& f)
 {
 
 }
 
-//void ViewDefault::SetDefault(VolumeData* vd)
+//void ViewDefault::Set(VolumeData* vd)
 //{
 //}
 //
-//void ViewDefault::ApplyDefault(VolumeData* vd)
+//void ViewDefault::Apply(VolumeData* vd)
 //{
 //
 //}

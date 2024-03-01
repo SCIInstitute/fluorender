@@ -334,6 +334,9 @@ VolumeData::VolumeData(VolumeData &copy)
 
 	//machine learning applied
 	m_ml_comp_gen_applied = false;
+
+	//transparent
+	m_transparent = false;
 }
 
 VolumeData::~VolumeData()
@@ -1979,6 +1982,20 @@ void VolumeData::SetHiShading(double val)
 	SetMaterial(amb, diff, spec, val);
 }
 
+double VolumeData::GetLowShading()
+{
+	double amb, diff, spec, shine;
+	GetMaterial(amb, diff, spec, shine);
+	return amb;
+}
+
+double VolumeData::GetHiShading()
+{
+	double amb, diff, spec, shine;
+	GetMaterial(amb, diff, spec, shine);
+	return shine;
+}
+
 //shadow
 void VolumeData::SetShadowEnable(bool bVal)
 {
@@ -2153,6 +2170,16 @@ void VolumeData::GetColormapValues(double &low, double &high)
 {
 	low = m_colormap_low_value;
 	high = m_colormap_hi_value;
+}
+
+double VolumeData::GetColormapLow()
+{
+	return m_colormap_low_value;
+}
+
+double VolumeData::GetColormapHigh()
+{
+	return m_colormap_hi_value;
 }
 
 void VolumeData::SetColormapInv(double val)
@@ -2446,6 +2473,21 @@ void VolumeData::SetBlendMode(int mode)
 int VolumeData::GetBlendMode()
 {
 	return m_blend_mode;
+}
+
+//transparent
+void VolumeData::SetTransparent(bool val)
+{
+	m_transparent = val;
+	if (val)
+		SetAlphaPower(2);
+	else
+		SetAlphaPower(1);
+}
+
+bool VolumeData::GetTransparent()
+{
+	return m_transparent;
 }
 
 //clip size
@@ -4629,6 +4671,16 @@ void DataGroup::SetInvert(bool mode)
 	}
 }
 
+void DataGroup::SetTransparent(bool val)
+{
+	for (int i = 0; i < GetVolumeNum(); i++)
+	{
+		VolumeData* vd = GetVolumeData(i);
+		if (vd)
+			vd->SetTransparent(val);
+	}
+}
+
 //use ml
 void DataGroup::ApplyMlVolProp()
 {
@@ -4779,9 +4831,7 @@ void DataManager::ClearAll()
 
 void DataManager::SetVolumeDefault(VolumeData* vd)
 {
-	bool use_ml = false;
-	if (m_frame && m_frame->GetSettingDlg())
-		use_ml = m_frame->GetSettingDlg()->GetVpAutoApply();
+	bool use_ml = glbin_settings.m_vp_auto_apply;
 	if (use_ml)
 	{
 		vd->ApplyMlVolProp();
@@ -4800,44 +4850,45 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 	}
 	else if (m_use_defaults)
 	{
-		vd->SetWireframe(m_vol_test_wiref);
-		vd->SetGamma(glbin_vol_def.m_gamma);
-		vd->SetBoundary(m_vol_exb);
-		vd->SetSaturation(m_vol_of1);
-		vd->SetLeftThresh(m_vol_lth);
-		vd->SetRightThresh(m_vol_hth);
-		vd->SetAlpha(m_vol_alf);
-		vd->SetSampleRate(m_vol_spr);
-		double amb, diff, spec, shine;
-		vd->GetMaterial(amb, diff, spec, shine);
-		vd->SetMaterial(m_vol_lsh, diff, spec, m_vol_hsh);
-		if (!vd->GetSpcFromFile())
-			vd->SetBaseSpacings(m_vol_xsp, m_vol_ysp, m_vol_zsp);
-		vd->SetColormapMode(m_vol_cmm);
-		vd->SetColormapInv(m_vol_cmi?-1.0:1.0);
-		vd->SetColormap(m_vol_cmp);
-		vd->SetColormapProj(m_vol_cmj);
-		vd->SetColormapValues(m_vol_lcm, m_vol_hcm);
+		glbin_vol_def.Apply(vd);
+		//vd->SetWireframe(m_vol_test_wiref);
+		//vd->SetGamma(glbin_vol_def.m_gamma);
+		//vd->SetBoundary(m_vol_exb);
+		//vd->SetSaturation(m_vol_of1);
+		//vd->SetLeftThresh(m_vol_lth);
+		//vd->SetRightThresh(m_vol_hth);
+		//vd->SetAlpha(m_vol_alf);
+		//vd->SetSampleRate(m_vol_spr);
+		//double amb, diff, spec, shine;
+		//vd->GetMaterial(amb, diff, spec, shine);
+		//vd->SetMaterial(m_vol_lsh, diff, spec, m_vol_hsh);
+		//if (!vd->GetSpcFromFile())
+		//	vd->SetBaseSpacings(m_vol_xsp, m_vol_ysp, m_vol_zsp);
+		//vd->SetColormapMode(m_vol_cmm);
+		//vd->SetColormapInv(m_vol_cmi?-1.0:1.0);
+		//vd->SetColormap(m_vol_cmp);
+		//vd->SetColormapProj(m_vol_cmj);
+		//vd->SetColormapValues(m_vol_lcm, m_vol_hcm);
 
-		vd->SetAlphaEnable(m_vol_eap);
-		int resx, resy, resz;
-		vd->GetResolution(resx, resy, resz);
-		if (resz > 1)
-			vd->SetShadingEnable(m_vol_esh);
-		else
-			vd->SetShadingEnable(false);
-		vd->SetMode(m_vol_mip?1:0);
-		vd->SetAlphaPower(m_vol_trp ? 2.0 : 1.0);
-		vd->SetNR(m_vol_nrd);
-		vd->SetLabelMode(m_vol_com);
-		//interpolation
-		vd->SetInterpolate(m_vol_interp);
-		//inversion
-		vd->SetInvert(m_vol_inv);
+		//vd->SetAlphaEnable(m_vol_eap);
+		//int resx, resy, resz;
+		//vd->GetResolution(resx, resy, resz);
+		//if (resz > 1)
+		//	vd->SetShadingEnable(m_vol_esh);
+		//else
+		//	vd->SetShadingEnable(false);
+		//vd->SetMode(m_vol_mip?1:0);
+		//vd->SetAlphaPower(m_vol_trp ? 2.0 : 1.0);
+		//vd->SetNR(m_vol_nrd);
+		//vd->SetLabelMode(m_vol_com);
+		////interpolation
+		//vd->SetInterpolate(m_vol_interp);
+		////inversion
+		//vd->SetInvert(m_vol_inv);
 
-		//shadow
-		vd->SetShadowEnable(m_vol_shw);
-		vd->SetShadowIntensity(m_vol_swi);
+		////shadow
+		//vd->SetShadowEnable(m_vol_shw);
+		//vd->SetShadowIntensity(m_vol_swi);
 	}
 }
 

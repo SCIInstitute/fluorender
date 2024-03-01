@@ -35,10 +35,6 @@ DEALINGS IN THE SOFTWARE.
 #include <chrono>
 #include <cstring>
 
-#define BRUSH_TOOL_ITER_WEAK	10
-#define BRUSH_TOOL_ITER_NORMAL	30
-#define BRUSH_TOOL_ITER_STRONG	60
-
 class VRenderGLView;
 class VolumeData;
 namespace flrd
@@ -200,10 +196,6 @@ namespace flrd
 		//th udpate
 		bool GetThUpdate();
 
-		//load default;
-		void LoadBrushSettings();
-		void SaveBrushSettings();
-
 		void Segment(int mx = 0, int my = 0);
 		void Select(double radius);
 		void CompExportRandomColor(int hmode, VolumeData* vd_r, VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide);
@@ -240,6 +232,10 @@ namespace flrd
 							//9-grow from point
 		int m_init_mask;	//0; 1-init only; 2-diffuse only; 3-init & diffuse
 		bool m_use2d;
+
+		int m_iter_weak;
+		int m_iter_normal;
+		int m_iter_strong;
 
 		int m_iter;
 		bool m_update_order;

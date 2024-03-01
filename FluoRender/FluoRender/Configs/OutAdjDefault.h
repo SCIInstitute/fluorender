@@ -36,8 +36,8 @@ public:
 	OutAdjDefault();
 	~OutAdjDefault();
 
-	void ReadDefault(wxFileConfig& f);
-	void SaveDefault(wxFileConfig& f);
+	void Read(wxFileConfig& f);
+	void Save(wxFileConfig& f);
 
 public:
 	//default values

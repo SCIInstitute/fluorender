@@ -301,3 +301,33 @@ void Global::redo()
 			i->Redo();
 	}
 }
+
+MainSettings& Global::get_settings()
+{
+	return main_settings_;
+}
+
+BrushDefault& Global::get_brush_def()
+{
+	return main_settings_.m_brush_def;
+}
+
+ComponentDefault& Global::get_comp_def()
+{
+	return main_settings_.m_comp_def;
+}
+
+OutAdjDefault& Global::get_outadj_def()
+{
+	return main_settings_.m_outadj_def;
+}
+
+ViewDefault& Global::get_view_def()
+{
+	return main_settings_.m_view_def;
+}
+
+VolumeDataDefault& Global::get_vol_def()
+{
+	return main_settings_.m_vol_def;
+}

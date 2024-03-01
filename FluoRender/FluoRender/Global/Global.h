@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define GLOBAL_H
 
 #include <Names.h>
-#include <VolumeDefault.h>
 #include <MainSettings.h>
 #include <Tracking/VolCache.h>
 #include <Database/Params.h>
@@ -47,7 +46,11 @@ DEALINGS IN THE SOFTWARE.
 	RegisterCacheQueueFuncs(\
 	std::bind(&read_func, obj, std::placeholders::_1),\
 	std::bind(&del_func, obj, std::placeholders::_1))
-#define glbin_settings fluo::Globla::instance().get_settings()
+#define glbin_settings fluo::Global::instance().get_settings()
+#define glbin_brush_def fluo::Global::instance().get_brush_def()
+#define glbin_comp_def fluo::Global::instance().get_comp_def()
+#define glbin_outadj_def fluo::Global::instance().get_outadj_def()
+#define glbin_view_def fluo::Global::instance().get_view_def()
 #define glbin_vol_def fluo::Global::instance().get_vol_def()
 
 namespace fluo
@@ -115,8 +118,12 @@ namespace fluo
 		void redo();
 
 		//default volume data settings
-		MainSettings& get_settings() { return main_settings_; }
-		VolumeDataDefault& get_vol_def() { return main_settings_.m_vol_def; }
+		MainSettings& get_settings();
+		BrushDefault& get_brush_def();
+		ComponentDefault& get_comp_def();
+		OutAdjDefault& get_outadj_def();
+		ViewDefault& get_view_def();
+		VolumeDataDefault& get_vol_def();
 
 	private:
 		Global();

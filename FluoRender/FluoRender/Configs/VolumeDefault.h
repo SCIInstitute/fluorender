@@ -37,10 +37,10 @@ public:
 	VolumeDataDefault();
 	~VolumeDataDefault();
 
-	void ReadDefault(wxFileConfig& f);
-	void SaveDefault(wxFileConfig& f);
-	void SetDefault(VolumeData* vd);
-	void ApplyDefault(VolumeData* vd);
+	void Read(wxFileConfig& f);
+	void Save(wxFileConfig& f);
+	void Set(VolumeData* vd);
+	void Apply(VolumeData* vd);
 
 public:
 	//default values

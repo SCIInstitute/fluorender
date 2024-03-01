@@ -92,7 +92,7 @@ VolumeDataDefault::~VolumeDataDefault()
 
 }
 
-void VolumeDataDefault::ReadDefault(wxFileConfig& f)
+void VolumeDataDefault::Read(wxFileConfig& f)
 {
 	double dval;
 	int ival;
@@ -190,12 +190,12 @@ void VolumeDataDefault::ReadDefault(wxFileConfig& f)
 		m_label_mode = ival;
 }
 
-void VolumeDataDefault::SaveDefault(wxFileConfig& f)
+void VolumeDataDefault::Save(wxFileConfig& f)
 {
 
 }
 
-void VolumeDataDefault::SetDefault(VolumeData* vd)
+void VolumeDataDefault::Set(VolumeData* vd)
 {
 	if (!vd)
 		return;
@@ -222,7 +222,7 @@ void VolumeDataDefault::SetDefault(VolumeData* vd)
 
 }
 
-void VolumeDataDefault::ApplyDefault(VolumeData* vd)
+void VolumeDataDefault::Apply(VolumeData* vd)
 {
 
 }

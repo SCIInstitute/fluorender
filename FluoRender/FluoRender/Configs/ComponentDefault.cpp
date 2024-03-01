@@ -38,7 +38,7 @@ ComponentDefault::~ComponentDefault()
 
 }
 
-void ComponentDefault::ReadDefault(wxFileConfig& f)
+void ComponentDefault::Read(wxFileConfig& f)
 {
 	double dval;
 	int ival;
@@ -47,9 +47,33 @@ void ComponentDefault::ReadDefault(wxFileConfig& f)
 	if (f.Exists("/comp default"))
 		f.SetPath("/comp default");
 
+	//selected only
+	//if (f.Read("ca_select_only", &bval))
+	//	m_ca_select_only_chk->SetValue(bval);
+	////min voxel
+	//if (f.Read("ca_min", &ival))
+	//{
+	//	str = wxString::Format("%d", ival);
+	//	m_ca_min_text->SetValue(str);
+	//}
+	////max voxel
+	//if (f.Read("ca_max", &ival))
+	//{
+	//	str = wxString::Format("%d", ival);
+	//	m_ca_max_text->SetValue(str);
+	//}
+	////ignore max
+	//if (f.Read("ca_ignore_max", &bval))
+	//{
+	//	m_ca_ignore_max_chk->SetValue(bval);
+	//	if (bval)
+	//		m_ca_max_text->Disable();
+	//	else
+	//		m_ca_max_text->Enable();
+	//}
 }
 
-void ComponentDefault::SaveDefault(wxFileConfig& f)
+void ComponentDefault::Save(wxFileConfig& f)
 {
 
 }

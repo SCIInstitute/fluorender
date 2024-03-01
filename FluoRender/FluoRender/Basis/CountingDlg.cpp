@@ -133,7 +133,7 @@ CountingDlg::~CountingDlg()
 //load default
 void CountingDlg::LoadDefault()
 {
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+/*	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
 	wxString dft = expath + GETSLASH() + "default_brush_settings.dft";
 	wxFileInputStream is(dft);
@@ -169,7 +169,7 @@ void CountingDlg::LoadDefault()
 			m_ca_max_text->Disable();
 		else
 			m_ca_max_text->Enable();
-	}
+	}*/
 }
 
 void CountingDlg::GetSettings(VRenderGLView* view)

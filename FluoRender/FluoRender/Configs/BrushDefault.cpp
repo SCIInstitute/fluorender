@@ -28,11 +28,36 @@ DEALINGS IN THE SOFTWARE.
 
 #include <BrushDefault.h>
 #include <Names.h>
+#include <VolumeSelector.h>
 
 BrushDefault::BrushDefault()
 {
-	m_paint_hist_depth = 0;
+	m_paint_hist_depth = 1;
 
+	m_iter_weak = 10;
+	m_iter_normal = 30;
+	m_iter_strong = 60;
+	m_iter_num = 30;
+
+	m_ini_thresh = 0.0;
+	m_estimate_threshold = false;
+	m_gm_falloff = 1.0;
+	m_scl_falloff = 0.0;
+	m_scl_translate = 0.0;
+
+	m_select_multi = 0;
+	m_edge_detect = false;
+	m_hidden_removal = false;
+	m_ortho = true;
+	m_update_order = true;
+
+	m_w2d = 0.0;
+	m_brush_radius1 = 10;
+	m_use_brush_radius2 = true;
+	m_brush_radius2 = 30;
+
+	m_brush_spacing = 0.1;
+	m_brush_size_data = true;
 }
 
 BrushDefault::~BrushDefault()
@@ -40,7 +65,7 @@ BrushDefault::~BrushDefault()
 
 }
 
-void BrushDefault::ReadDefault(wxFileConfig& f)
+void BrushDefault::Read(wxFileConfig& f)
 {
 	double dval;
 	int ival;
@@ -49,71 +74,61 @@ void BrushDefault::ReadDefault(wxFileConfig& f)
 	if (f.Exists("/brush default"))
 		f.SetPath("/brush default");
 
-	double val;
-	int ival;
-	bool bval;
-
+	//history
+	f.Read("hist depth", &m_paint_hist_depth, 1);
+	//iterations
+	f.Read("iter weak", &m_iter_weak, 10);
+	f.Read("iter normal", &m_iter_weak, 30);
+	f.Read("iter strong", &m_iter_weak, 60);
+	f.Read("iter num", &m_iter_num, 30);
 	//brush properties
-	if (fconfig.Read("brush_ini_thresh", &val))
-		m_ini_thresh = val;
-	if (fconfig.Read("brush_gm_falloff", &val))
-		m_gm_falloff = val;
-	if (fconfig.Read("brush_scl_falloff", &val))
-		m_scl_falloff = val;
-	if (fconfig.Read("brush_scl_translate", &val))
-		m_scl_translate = val;
-	//	m_calculator.SetThreshold(val);
-	//auto thresh
-	if (fconfig.Read("auto_thresh", &bval))
-		m_estimate_threshold = bval;
-	//edge detect
-	if (fconfig.Read("edge_detect", &bval))
-		m_edge_detect = bval;
-	//hidden removal
-	if (fconfig.Read("hidden_removal", &bval))
-		m_hidden_removal = bval;
+	f.Read("ini thresh", &m_ini_thresh, 0.0);
+	f.Read("auto thresh", &m_estimate_threshold, false);
+	f.Read("gm falloff", &m_gm_falloff, 1.0);
+	f.Read("scl falloff", &m_scl_falloff, 0.0);
+	f.Read("scl translate", &m_scl_translate, 0.0);
 	//select group
-	if (fconfig.Read("select_group", &bval))
-		m_select_multi = bval ? 1 : 0;
+	f.Read("select group", &m_select_multi, 0);
+	//edge detect
+	f.Read("edge detect", &m_edge_detect, false);
+	//hidden removal
+	f.Read("hidden removal", &m_hidden_removal, false);
+	f.Read("ortho", &m_ortho, true);
 	//brick accuracy
-	if (fconfig.Read("accurate_bricks", &bval))
-		m_update_order = bval;
+	f.Read("accurate bricks", &m_update_order, true);
+
 	//2d influence
-	if (fconfig.Read("brush_2dinfl", &val))
-		m_w2d = val;
+	f.Read("2d infl", &m_w2d, 0.0);
 	//size 1
-	if (fconfig.Read("brush_size1", &val) && val > 0.0)
-		m_brush_radius1 = val;
+	f.Read("size1", &m_brush_radius1, 10);
 	//size 2 link
-	if (fconfig.Read("use_brush_size2", &bval))
-		m_use_brush_radius2 = bval;
+	f.Read("use_size2", &m_use_brush_radius2, true);
 	//size 2
-	if (fconfig.Read("brush_size2", &val) && val > 0.0)
-		m_brush_radius2 = val;
+	f.Read("size2", &m_brush_radius2, 30);
 	//radius settings for individual brush types
-	if (fconfig.Exists("/radius_settings"))
+	if (f.Exists("/radius_settings"))
 	{
-		fconfig.SetPath("/radius_settings");
-		int brush_num = fconfig.Read("num", 0l);
+		f.SetPath("/radius_settings");
+		int brush_num = f.Read("num", 0l);
 		if (m_brush_radius_sets.size() != brush_num)
 			m_brush_radius_sets.resize(brush_num);
 		wxString str;
 		for (int i = 0; i < brush_num; ++i)
 		{
 			str = wxString::Format("/radius_settings/%d", i);
-			if (!fconfig.Exists(str))
+			if (!f.Exists(str))
 				continue;
-			fconfig.SetPath(str);
+			f.SetPath(str);
 			//type
-			fconfig.Read("type", &(m_brush_radius_sets[i].type));
+			f.Read("type", &(m_brush_radius_sets[i].type));
 			//radius 1
-			fconfig.Read("radius1", &(m_brush_radius_sets[i].radius1));
+			f.Read("radius1", &(m_brush_radius_sets[i].radius1));
 			//radius 2
-			fconfig.Read("radius2", &(m_brush_radius_sets[i].radius2));
+			f.Read("radius2", &(m_brush_radius_sets[i].radius2));
 			//use radius 2
-			fconfig.Read("use_radius2", &(m_brush_radius_sets[i].use_radius2));
+			f.Read("use_radius2", &(m_brush_radius_sets[i].use_radius2));
 		}
-		fconfig.SetPath("/");
+		f.SetPath("..");
 	}
 	if (m_brush_radius_sets.size() == 0)
 	{
@@ -135,75 +150,78 @@ void BrushDefault::ReadDefault(wxFileConfig& f)
 		radius_set.use_radius2 = false;
 		m_brush_radius_sets.push_back(radius_set);
 	}
-	m_brush_sets_index = 0;
-	//iterations
-	if (fconfig.Read("brush_iters", &ival))
-	{
-		switch (ival)
-		{
-		case 1:
-			m_iter_num = BRUSH_TOOL_ITER_WEAK;
-			break;
-		case 2:
-			m_iter_num = BRUSH_TOOL_ITER_NORMAL;
-			break;
-		case 3:
-			m_iter_num = BRUSH_TOOL_ITER_STRONG;
-			break;
-		}
-	}
+	//spacing
+	f.Read("spacing", &m_brush_spacing, 0.1);
 	//brush size relation
-	if (fconfig.Read("brush_size_data", &bval))
-		m_brush_size_data = bval;
+	f.Read("size_data", &m_brush_size_data, true);
 }
 
-void BrushDefault::SaveDefault(wxFileConfig& f)
+void BrushDefault::Save(wxFileConfig& f)
 {
+	wxString str;
 
+	//history
+	f.Write("hist depth", m_paint_hist_depth);
+	//iterations
+	f.Write("iter weak", m_iter_weak);
+	f.Write("iter normal", m_iter_weak);
+	f.Write("iter strong", m_iter_weak);
+	f.Write("iter num", m_iter_num);
 	//brush properties
-	fconfig.Write("brush_ini_thresh", m_ini_thresh);
-	fconfig.Write("brush_gm_falloff", m_gm_falloff);
-	fconfig.Write("brush_scl_falloff", m_scl_falloff);
-	fconfig.Write("brush_scl_translate", m_scl_translate);
-	//auto thresh
-	fconfig.Write("auto_thresh", m_estimate_threshold);
-	//edge detect
-	fconfig.Write("edge_detect", m_edge_detect);
-	//hidden removal
-	fconfig.Write("hidden_removal", m_hidden_removal);
+	f.Write("ini thresh", m_ini_thresh);
+	f.Write("auto thresh", m_estimate_threshold);
+	f.Write("gm falloff", m_gm_falloff);
+	f.Write("scl falloff", m_scl_falloff);
+	f.Write("scl translate", m_scl_translate);
 	//select group
-	fconfig.Write("select_group", m_select_multi == 1);
-	//brick acccuracy
-	fconfig.Write("accurate_bricks", m_update_order);
+	f.Write("select group", m_select_multi);
+	//edge detect
+	f.Write("edge detect", m_edge_detect);
+	//hidden removal
+	f.Write("hidden removal", m_hidden_removal);
+	f.Write("ortho", m_ortho);
+	//brick accuracy
+	f.Write("accurate bricks", m_update_order);
+
 	//2d influence
-	fconfig.Write("brush_2dinfl", m_w2d);
+	f.Write("2d infl", m_w2d);
 	//size 1
-	fconfig.Write("brush_size1", m_brush_radius1);
-	//size2 link
-	fconfig.Write("use_brush_size2", m_use_brush_radius2);
+	f.Write("size1", m_brush_radius1);
+	//size 2 link
+	f.Write("use_size2", m_use_brush_radius2);
 	//size 2
-	fconfig.Write("brush_size2", m_brush_radius2);
+	f.Write("size2", m_brush_radius2);
 	//radius settings for individual brush types
-	fconfig.SetPath("/radius_settings");
+	f.SetPath("/radius_settings");
 	int brush_num = m_brush_radius_sets.size();
-	fconfig.Write("num", brush_num);
+	f.Write("num", brush_num);
 	for (int i = 0; i < brush_num; ++i)
 	{
 		BrushRadiusSet radius_set = m_brush_radius_sets[i];
 		str = wxString::Format("/radius_settings/%d", i);
-		fconfig.SetPath(str);
+		f.SetPath(str);
 		//type
-		fconfig.Write("type", radius_set.type);
+		f.Write("type", radius_set.type);
 		//radius 1
-		fconfig.Write("radius1", radius_set.radius1);
+		f.Write("radius1", radius_set.radius1);
 		//radius 2
-		fconfig.Write("radius2", radius_set.radius2);
+		f.Write("radius2", radius_set.radius2);
 		//use radius 2
-		fconfig.Write("use_radius2", radius_set.use_radius2);
+		f.Write("use_radius2", radius_set.use_radius2);
 	}
-	fconfig.SetPath("/");
-	//iterations
-	fconfig.Write("brush_iters", m_iter_num);
+	f.SetPath("..");
+	//spacing
+	f.Write("spacing", m_brush_spacing);
 	//brush size relation
-	fconfig.Write("brush_size_data", m_brush_size_data);
+	f.Write("size_data", m_brush_size_data);
+}
+
+void BrushDefault::Set(flrd::VolumeSelector* vs)
+{
+
+}
+
+void BrushDefault::Apply(flrd::VolumeSelector* vs)
+{
+
 }

@@ -38,7 +38,7 @@ OutAdjDefault::~OutAdjDefault()
 
 }
 
-void OutAdjDefault::ReadDefault(wxFileConfig& f)
+void OutAdjDefault::Read(wxFileConfig& f)
 {
 	double dval;
 	int ival;
@@ -49,7 +49,7 @@ void OutAdjDefault::ReadDefault(wxFileConfig& f)
 
 }
 
-void OutAdjDefault::SaveDefault(wxFileConfig& f)
+void OutAdjDefault::Save(wxFileConfig& f)
 {
 
 }

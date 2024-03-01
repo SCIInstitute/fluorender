@@ -362,7 +362,8 @@ VRenderGLView::VRenderGLView(VRenderFrame* frame,
 #endif
 #endif
 
-	m_selector.LoadBrushSettings();
+	//m_selector.LoadBrushSettings();
+	glbin_brush_def.Apply(&m_selector);
 
 	m_timer = new Fltimer(10);
 	if (m_frame && m_frame->GetBenchmark())
@@ -529,7 +530,7 @@ VRenderGLView::~VRenderGLView()
 	m_timer->stop();
 	delete m_timer;
 
-	m_selector.SaveBrushSettings();
+	//m_selector.SaveBrushSettings();
 
 #ifdef _WIN3
 	//tablet
