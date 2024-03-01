@@ -28,9 +28,72 @@ DEALINGS IN THE SOFTWARE.
 
 #include <ComponentDefault.h>
 #include <Names.h>
+#include <compatibility.h>
+#include <wx/stdpaths.h>
+#include <wx/wfstream.h>
 
 ComponentDefault::ComponentDefault()
 {
+	//defaults
+	//comp generate page
+	m_use_sel = false;
+	m_use_ml = false;
+	m_iter = 50;
+	m_thresh = 0.5;
+	m_tfactor = 1.0;
+	m_use_dist_field = false;
+	m_dist_strength = 0.5;
+	m_max_dist = 30;
+	m_dist_thresh = 0.25;
+	m_dist_filter_size = 3;
+	m_diff = false;
+	m_falloff = 0.01;
+	m_size = false;
+	m_size_lm = 100;
+	m_density = false;
+	m_density_thresh = 1.0;
+	m_varth = 0.0001;
+	m_density_window_size = 5;
+	m_density_stats_size = 15;
+	m_fixate = false;
+	m_fix_size = 50;
+	m_grow_fixed = 1;
+	m_clean = false;
+	m_clean_iter = 5;
+	m_clean_size_vl = 5;
+
+	//cluster
+	m_cluster_method_kmeans = true;
+	m_cluster_method_exmax = false;
+	m_cluster_method_dbscan = false;
+	m_cluster_clnum = 2;
+	m_cluster_maxiter = 200;
+	m_cluster_tol = 0.9f;
+	m_cluster_size = 60;
+	m_cluster_eps = 2.5;
+
+	//selection
+	m_use_min = false;
+	m_min_num = 0;
+	m_use_max = false;
+	m_max_num = 0;
+	//colocalization
+	m_colocal = false;
+	m_consistent = false;
+
+	//distance
+	m_use_dist_neighbor = false;
+	m_dist_neighbor = 1;
+	m_use_dist_allchan = false;
+
+	//update
+	m_auto_update = false;
+
+	//record
+	m_record_cmd = false;
+
+	//output
+	m_output_type = 1;
 }
 
 ComponentDefault::~ComponentDefault()
@@ -38,43 +101,137 @@ ComponentDefault::~ComponentDefault()
 
 }
 
+void ComponentDefault::Read(const std::string& filename)
+{
+	wxFileInputStream is(filename);
+	if (!is.IsOk())
+		return;
+	wxFileConfig fconfig(is);
+
+	Read(fconfig);
+}
+
+void ComponentDefault::Save(const std::string& filename)
+{
+	wxString app_name = "FluoRender " +
+		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
+	wxString vendor_name = "FluoRender";
+	wxString local_name = "component_settings.dft";
+	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
+		wxCONFIG_USE_LOCAL_FILE);
+
+	Save(fconfig);
+	SaveConfig(fconfig, filename);
+}
+
 void ComponentDefault::Read(wxFileConfig& f)
 {
-	double dval;
-	int ival;
-	bool bval;
-
 	if (f.Exists("/comp default"))
 		f.SetPath("/comp default");
 
-	//selected only
-	//if (f.Read("ca_select_only", &bval))
-	//	m_ca_select_only_chk->SetValue(bval);
-	////min voxel
-	//if (f.Read("ca_min", &ival))
-	//{
-	//	str = wxString::Format("%d", ival);
-	//	m_ca_min_text->SetValue(str);
-	//}
-	////max voxel
-	//if (f.Read("ca_max", &ival))
-	//{
-	//	str = wxString::Format("%d", ival);
-	//	m_ca_max_text->SetValue(str);
-	//}
-	////ignore max
-	//if (f.Read("ca_ignore_max", &bval))
-	//{
-	//	m_ca_ignore_max_chk->SetValue(bval);
-	//	if (bval)
-	//		m_ca_max_text->Disable();
-	//	else
-	//		m_ca_max_text->Enable();
-	//}
+	//basic settings
+	f.Read("use_sel", &m_use_sel);
+	f.Read("use_ml", &m_use_ml);
+	f.Read("iter", &m_iter);
+	f.Read("thresh", &m_thresh);
+	f.Read("use_dist_field", &m_use_dist_field);
+	f.Read("dist_strength", &m_dist_strength);
+	f.Read("dist_filter_size", &m_dist_filter_size);
+	f.Read("max_dist", &m_max_dist);
+	f.Read("dist_thresh", &m_dist_thresh);
+	f.Read("diff", &m_diff);
+	f.Read("falloff", &m_falloff);
+	f.Read("size", &m_size);
+	f.Read("size_lm", &m_size_lm);
+	f.Read("density", &m_density);
+	f.Read("density_thresh", &m_density_thresh);
+	f.Read("varth", &m_varth);
+	f.Read("density_window_size", &m_density_window_size);
+	f.Read("density_stats_size", &m_density_stats_size);
+	f.Read("clean", &m_clean);
+	f.Read("clean_iter", &m_clean_iter);
+	f.Read("clean_size_vl", &m_clean_size_vl);
+	f.Read("grow_fixed", &m_grow_fixed);
+
+	//cluster
+	f.Read("cluster_method_kmeans", &m_cluster_method_kmeans);
+	f.Read("cluster_method_exmax", &m_cluster_method_exmax);
+	f.Read("cluster_method_dbscan", &m_cluster_method_dbscan);
+	//parameters
+	f.Read("cluster_clnum", &m_cluster_clnum);
+	f.Read("cluster_maxiter", &m_cluster_maxiter);
+	f.Read("cluster_tol", &m_cluster_tol);
+	f.Read("cluster_size", &m_cluster_size);
+	f.Read("cluster_eps", &m_cluster_eps);
+
+	//selection
+	f.Read("use_min", &m_use_min);
+	f.Read("min_num", &m_min_num);
+	f.Read("use_max", &m_use_max);
+	f.Read("max_num", &m_max_num);
+	//colocalization
+	f.Read("colocal", &m_colocal);
+	//output
+	f.Read("output_type", &m_output_type);
 }
 
 void ComponentDefault::Save(wxFileConfig& f)
 {
+	if (f.Exists("/comp default"))
+		f.SetPath("/comp default");
+
+	//comp generate settings
+	f.Write("use_sel", m_use_sel);
+	f.Write("use_ml", m_use_ml);
+	f.Write("iter", m_iter);
+	f.Write("thresh", m_thresh);
+	f.Write("use_dist_field", m_use_dist_field);
+	f.Write("dist_strength", m_dist_strength);
+	f.Write("dist_filter_size", m_dist_filter_size);
+	f.Write("max_dist", m_max_dist);
+	f.Write("dist_thresh", m_dist_thresh);
+	f.Write("diff", m_diff);
+	f.Write("falloff", m_falloff);
+	f.Write("size", m_size);
+	f.Write("size_lm", m_size_lm);
+	f.Write("density", m_density);
+	f.Write("density_thresh", m_density_thresh);
+	f.Write("varth", m_varth);
+	f.Write("density_window_size", m_density_window_size);
+	f.Write("density_stats_size", m_density_stats_size);
+	f.Write("clean", m_clean);
+	f.Write("clean_iter", m_clean_iter);
+	f.Write("clean_size_vl", m_clean_size_vl);
+	f.Write("grow_fixed", m_grow_fixed);
+
+	//cluster
+	f.Write("cluster_method_kmeans", m_cluster_method_kmeans);
+	f.Write("cluster_method_exmax", m_cluster_method_exmax);
+	f.Write("cluster_method_dbscan", m_cluster_method_dbscan);
+	//parameters
+	f.Write("cluster_clnum", m_cluster_clnum);
+	f.Write("cluster_maxiter", m_cluster_maxiter);
+	f.Write("cluster_tol", m_cluster_tol);
+	f.Write("cluster_size", m_cluster_size);
+	f.Write("cluster_eps", m_cluster_eps);
+
+	//selection
+	f.Write("use_min", m_use_min);
+	f.Write("min_num", m_min_num);
+	f.Write("use_max", m_use_max);
+	f.Write("max_num", m_max_num);
+	//colocalization
+	f.Write("colocal", m_colocal);
+	//output
+	f.Write("output_type", m_output_type);
+}
+
+void ComponentDefault::Set(flrd::ComponentAnalyzer* ca)
+{
 
 }
 
+void ComponentDefault::Apply(flrd::ComponentAnalyzer* ca)
+{
+
+}

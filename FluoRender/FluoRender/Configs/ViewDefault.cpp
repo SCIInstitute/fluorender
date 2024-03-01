@@ -28,9 +28,32 @@ DEALINGS IN THE SOFTWARE.
 
 #include <ViewDefault.h>
 #include <Names.h>
+#include <VRenderGLView.h>
+#include <wx/string.h>
 
 ViewDefault::ViewDefault()
 {
+	m_vol_method = 1;
+	m_bg_color = fluo::Color(0, 0, 0);
+	m_draw_camctr = false;
+	m_camctr_size = 2.0;
+	m_draw_info = 250;
+	m_draw_legend = false;
+	m_draw_colormap = false;
+	m_mouse_focus = false;
+	m_persp = false;
+	m_aov = 15.0;
+	m_free = false;
+	m_center = fluo::Point(0);
+	m_rot_lock = false;
+	m_pin_rot_center = false;
+	m_scale_mode = 0;
+	m_scale_factor = 1.0;
+	m_use_fog = false;
+	m_fog_intensity = 0.0;
+
+	m_rot = fluo::Vector(0);
+	m_rot_slider = true;
 }
 
 ViewDefault::~ViewDefault()
@@ -40,25 +63,129 @@ ViewDefault::~ViewDefault()
 
 void ViewDefault::Read(wxFileConfig& f)
 {
-	double dval;
-	int ival;
-	bool bval;
-
+	wxString str;
 	if (f.Exists("/view default"))
 		f.SetPath("/view default");
 
+	f.Read("vol method", &m_vol_method, 1);
+	if (f.Read("bg color", &str))
+	{
+		double r, g, b;
+		if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b))
+			m_bg_color = fluo::Color(r, g, b);
+	}
+	f.Read("draw camctr", &m_draw_camctr, false);
+	f.Read("camctr size", &m_camctr_size, 2.0);
+	f.Read("draw info", &m_draw_info, 250);
+	f.Read("draw legend", &m_draw_legend, false);
+	f.Read("draw colormap", &m_draw_colormap, false);
+	f.Read("mouse focus", &m_mouse_focus, false);
+	f.Read("persp", &m_persp, false);
+	f.Read("aov", &m_aov, 15.0);
+	f.Read("free", &m_free, false);
+	if (f.Read("center", &str))
+	{
+		double x, y, z;
+		if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
+			m_center = fluo::Point(x, y, z);
+	}
+	f.Read("rot lock", &m_rot_lock, false);
+	f.Read("pin rot center", &m_pin_rot_center, false);
+	f.Read("scale mode", &m_scale_mode, 0);
+	f.Read("scale factor", &m_scale_factor, 1.0);
+	f.Read("use fog", &m_use_fog, false);
+	f.Read("fog intensity", &m_fog_intensity, 0.0);
+
+	if (f.Read("rot", &str))
+	{
+		double x, y, z;
+		if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
+			m_rot = fluo::Vector(x, y, z);
+	}
+	f.Read("rot slider", &m_rot_slider, true);
 }
 
 void ViewDefault::Save(wxFileConfig& f)
 {
+	wxString str;
+	if (f.Exists("/view default"))
+		f.SetPath("/view default");
 
+	f.Write("vol method", m_vol_method);
+	str = wxString::Format("%f %f %f", m_bg_color.r(), m_bg_color.g(), m_bg_color.b());
+	f.Write("bg color", str);
+	f.Write("draw camctr", m_draw_camctr);
+	f.Write("camctr size", m_camctr_size);
+	f.Write("draw info", m_draw_info);
+	f.Write("draw legend", m_draw_legend);
+	f.Write("draw colormap", m_draw_colormap);
+	f.Write("mouse focus", m_mouse_focus);
+	f.Write("persp", m_persp);
+	f.Write("aov", m_aov);
+	f.Write("free", m_free);
+	str = wxString::Format("%f %f %f", m_center.x(), m_center.y(), m_center.z());
+	f.Write("center", str);
+	f.Write("rot lock", m_rot_lock);
+	f.Write("pin rot center", m_pin_rot_center);
+	f.Write("scale mode", m_scale_mode);
+	f.Write("scale factor", m_scale_factor);
+	f.Write("use fog", m_use_fog);
+	f.Write("fog intensity", m_fog_intensity);
+
+	str = wxString::Format("%f %f %f", m_rot.x(), m_rot.y(), m_rot.z());
+	f.Write("rot", str);
+	f.Write("rot slider", m_rot_slider);
 }
 
-//void ViewDefault::Set(VolumeData* vd)
-//{
-//}
-//
-//void ViewDefault::Apply(VolumeData* vd)
-//{
-//
-//}
+void ViewDefault::Set(VRenderGLView* view)
+{
+	if (!view)
+		return;
+
+	m_vol_method = view->GetVolMethod();
+	m_bg_color = view->GetBackgroundColor();
+	m_draw_camctr = view->m_draw_camctr;
+	m_camctr_size = view->m_camctr_size;
+	m_draw_info = view->m_draw_info;
+	m_draw_legend = view->m_draw_legend;
+	m_draw_colormap = view->m_draw_colormap;
+	m_mouse_focus = view->m_mouse_focus;
+	m_persp = view->GetPersp();
+	m_aov = view->GetAov();
+	m_free = view->GetFree();
+	double x, y, z;
+	view->GetCenters(x, y, z);
+	m_center = fluo::Point(x, y, z);
+	m_rot_lock = view->GetRotLock();
+	m_pin_rot_center = view->m_pin_rot_center;
+	m_scale_mode = view->m_scale_mode;
+	m_scale_factor = view->m_scale_factor;
+	m_use_fog = view->GetFog();
+	m_fog_intensity = view->GetFogIntensity();
+}
+
+void ViewDefault::Apply(VRenderGLView* view)
+{
+	if (!view)
+		return;
+
+	view->SetVolMethod(m_vol_method);
+	view->SetBackgroundColor(m_bg_color);
+	view->m_draw_camctr = m_draw_camctr;
+	view->m_camctr_size = m_camctr_size;
+	view->m_draw_info = m_draw_info;
+	view->m_draw_legend = m_draw_legend;
+	view->m_draw_colormap = m_draw_colormap;
+	view->m_mouse_focus = m_mouse_focus;
+	view->SetPersp(m_persp);
+	view->SetAov(m_aov);
+	view->SetFree(m_free);
+	view->SetCenters(m_center.x(), m_center.y(), m_center.z());
+	view->SetRotLock(m_rot_lock);
+	view->m_pin_rot_center = m_pin_rot_center;
+	view->m_scale_mode = m_scale_mode;
+	view->m_scale_factor = m_scale_factor;
+	view->SetFog(m_use_fog);
+	view->SetFogIntensity(m_fog_intensity);
+}
+

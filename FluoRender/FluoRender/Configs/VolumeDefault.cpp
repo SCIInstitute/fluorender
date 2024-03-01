@@ -64,25 +64,29 @@ VolumeDataDefault::VolumeDataDefault()
 	m_sample_rate_enable = true;
 	m_sample_rate = 2.0;
 
+	m_spcx = 1.0;
+	m_spcy = 1.0;
+	m_spcz = 1.0;
+
 	//colormap mode
-	m_colormap_inv = 1.0;
 	m_colormap_mode = 0;
 	m_colormap_disp = false;
 	m_colormap_low_value = 0.0;
 	m_colormap_hi_value = 1.0;
+	m_colormap_inv = 1.0;
 	m_colormap_type = 0;
 	m_colormap_proj = 0;
 
 	m_noise_rd = false;
 	m_interpolate = true;
 	m_inverted = false;
+	m_mip_enable = false;
+	m_transparent = false;
 
 	//blend mode
 	m_blend_mode = 0;
-
 	//legend
 	m_legend = true;
-
 	//lable
 	m_label_mode = 1;
 }
@@ -94,105 +98,116 @@ VolumeDataDefault::~VolumeDataDefault()
 
 void VolumeDataDefault::Read(wxFileConfig& f)
 {
-	double dval;
-	int ival;
-	bool bval;
-
 	if (f.Exists("/volume default"))
 		f.SetPath("/volume default");
 
-	if (f.Read(gstGammaEnable, &bval))
-		m_gamma_enable = bval;
-	if (f.Read(gstGamma3d, &dval))
-		m_gamma = dval;
+	f.Read(gstGammaEnable, &m_gamma_enable, true);
+	f.Read(gstGamma3d, &m_gamma, 1.0);
 
-	if (f.Read(gstBoundaryEnable, &bval))
-		m_boundary_enable = bval;
-	if (f.Read(gstBoundary, &dval))
-		m_boundary = dval;
+	f.Read(gstBoundaryEnable, &m_boundary_enable, true);
+	f.Read(gstBoundary, &m_boundary, 0.0);
 
-	if (f.Read(gstSaturationEnable, &bval))
-		m_saturation_enable = bval;
-	if (f.Read(gstSaturation, &dval))
-		m_saturation = dval;
+	f.Read(gstSaturationEnable, &m_saturation_enable, true);
+	f.Read(gstSaturation, &m_saturation, 1.0);
 
-	if (f.Read(gstThresholdEnable, &bval))
-		m_thresh_enable = bval;
-	if (f.Read(gstLowThreshold, &dval))
-		m_lo_thresh = dval;
-	if (f.Read(gstHighThreshold, &dval))
-		m_hi_thresh = dval;
+	f.Read(gstThresholdEnable, &m_thresh_enable, true);
+	f.Read(gstLowThreshold, &m_lo_thresh, 0.0);
+	f.Read(gstHighThreshold, &m_hi_thresh, 1.0);
 
-	if (f.Read(gstLuminanceEnable, &bval))
-		m_luminance_enable = bval;
-	if (f.Read(gstLuminance, &dval))
-		m_luminance = dval;
+	f.Read(gstLuminanceEnable, &m_luminance_enable, true);
+	f.Read(gstLuminance, &m_luminance, 1.0);
 
-	if (f.Read(gstAlphaEnable, &bval))
-		m_alpha_enable = bval;
-	if (f.Read(gstAlpha, &dval))
-		m_alpha = dval;
+	f.Read(gstAlphaEnable, &m_alpha_enable, true);
+	f.Read(gstAlpha, &m_alpha, 1.0);
 
-	if (f.Read(gstShadingEnable, &bval))
-		m_shading_enable = bval;
-	if (f.Read(gstLowShading, &dval))
-		m_low_shading = dval;
-	if (f.Read(gstHighShading, &dval))
-		m_high_shading = dval;
+	f.Read(gstShadingEnable, &m_shading_enable, false);
+	f.Read(gstLowShading, &m_low_shading, 1.0);
+	f.Read(gstHighShading, &m_high_shading, 10.0);
 
-	if (f.Read(gstShadowEnable, &bval))
-		m_shadow_enable = bval;
-	if (f.Read(gstShadowInt, &dval))
-		m_shadow_intensity = dval;
+	f.Read(gstShadowEnable, &m_shadow_enable, false);
+	f.Read(gstShadowInt, &m_shadow_intensity, 0.0);
 
-	if (f.Read(gstSampleRateEnable, &bval))
-		m_sample_rate_enable = bval;
-	if (f.Read(gstSampleRate, &dval))
-		m_sample_rate = dval;
+	f.Read(gstSampleRateEnable, &m_sample_rate_enable, true);
+	f.Read(gstSampleRate, &m_sample_rate, 2.0);
 
-	if (f.Read(gstSpcX, &dval))
-		m_spcx = dval;
-	if (f.Read(gstSpcY, &dval))
-		m_spcy = dval;
-	if (f.Read(gstSpcZ, &dval))
-		m_spcz = dval;
+	f.Read(gstSpcX, &m_spcx, 1.0);
+	f.Read(gstSpcY, &m_spcy, 1.0);
+	f.Read(gstSpcZ, &m_spcz, 1.0);
 
-	if (f.Read(gstColormapMode, &ival))
-		m_colormap_mode = ival;
-	if (f.Read(gstColormapDisp, &bval))
-		m_colormap_disp = bval;
-	if (f.Read(gstColormapLow, &dval))
-		m_colormap_low_value = dval;
-	if (f.Read(gstColormapHigh, &dval))
-		m_colormap_hi_value = dval;
-	if (f.Read(gstColormapInv, &bval))
-		m_colormap_inv = bval;
-	if (f.Read(gstColormapType, &ival))
-		m_colormap_type = ival;
-	if (f.Read(gstColormapProj, &ival))
-		m_colormap_proj = ival;
+	f.Read(gstColormapMode, &m_colormap_mode, 0);
+	f.Read(gstColormapDisp, &m_colormap_disp, false);
+	f.Read(gstColormapLow, &m_colormap_low_value, 0.0);
+	f.Read(gstColormapHigh, &m_colormap_hi_value, 1.0);
+	f.Read(gstColormapInv, &m_colormap_inv, 1.0);
+	f.Read(gstColormapType, &m_colormap_type, 0);
+	f.Read(gstColormapProj, &m_colormap_proj, 0);
 
-	if (f.Read(gstNoiseRedct, &bval))
-		m_noise_rd = bval;
-	if (f.Read(gstInterpolate, &bval))
-		m_interpolate = bval;
-	if (f.Read(gstInvert, &bval))
-		m_inverted = bval;
-	if (f.Read(gstMipMode, &bval))
-		m_mip_enable = bval;
-	if (f.Read(gstTransparent, &bval))
-		m_transparent = bval;
-	if (f.Read(gstBlendMode, &ival))
-		m_blend_mode = ival;
-	if (f.Read(gstLegend, &bval))
-		m_legend = ival;
-	if (f.Read(gstLabelMode, &ival))
-		m_label_mode = ival;
+	f.Read(gstNoiseRedct, &m_noise_rd, false);
+	f.Read(gstInterpolate, &m_interpolate, true);
+	f.Read(gstInvert, &m_inverted, false);
+	f.Read(gstMipMode, &m_mip_enable, false);
+	f.Read(gstTransparent, &m_transparent, false);
+
+	f.Read(gstBlendMode, &m_blend_mode, 0);
+	f.Read(gstLegend, &m_legend, true);
+	f.Read(gstLabelMode, &m_label_mode, 1);
 }
 
 void VolumeDataDefault::Save(wxFileConfig& f)
 {
+	if (f.Exists("/volume default"))
+		f.SetPath("/volume default");
 
+	f.Write(gstGammaEnable, m_gamma_enable);
+	f.Write(gstGamma3d, m_gamma);
+
+	f.Write(gstBoundaryEnable, m_boundary_enable);
+	f.Write(gstBoundary, m_boundary);
+
+	f.Write(gstSaturationEnable, m_saturation_enable);
+	f.Write(gstSaturation, m_saturation);
+
+	f.Write(gstThresholdEnable, m_thresh_enable);
+	f.Write(gstLowThreshold, m_lo_thresh);
+	f.Write(gstHighThreshold, m_hi_thresh);
+
+	f.Write(gstLuminanceEnable, m_luminance_enable);
+	f.Write(gstLuminance, m_luminance);
+
+	f.Write(gstAlphaEnable, m_alpha_enable);
+	f.Write(gstAlpha, m_alpha);
+
+	f.Write(gstShadingEnable, m_shading_enable);
+	f.Write(gstLowShading, m_low_shading);
+	f.Write(gstHighShading, m_high_shading);
+
+	f.Write(gstShadowEnable, m_shadow_enable);
+	f.Write(gstShadowInt, m_shadow_intensity);
+
+	f.Write(gstSampleRateEnable, m_sample_rate_enable);
+	f.Write(gstSampleRate, m_sample_rate);
+
+	f.Write(gstSpcX, m_spcx);
+	f.Write(gstSpcY, m_spcy);
+	f.Write(gstSpcZ, m_spcz);
+
+	f.Write(gstColormapMode, m_colormap_mode);
+	f.Write(gstColormapDisp, m_colormap_disp);
+	f.Write(gstColormapLow, m_colormap_low_value);
+	f.Write(gstColormapHigh, m_colormap_hi_value);
+	f.Write(gstColormapInv, m_colormap_inv);
+	f.Write(gstColormapType, m_colormap_type);
+	f.Write(gstColormapProj, m_colormap_proj);
+
+	f.Write(gstNoiseRedct, m_noise_rd);
+	f.Write(gstInterpolate, m_interpolate);
+	f.Write(gstInvert, m_inverted);
+	f.Write(gstMipMode, m_mip_enable);
+	f.Write(gstTransparent, m_transparent);
+
+	f.Write(gstBlendMode, m_blend_mode);
+	f.Write(gstLegend, m_legend);
+	f.Write(gstLabelMode, m_label_mode);
 }
 
 void VolumeDataDefault::Set(VolumeData* vd)
@@ -219,10 +234,93 @@ void VolumeDataDefault::Set(VolumeData* vd)
 	m_alpha_enable = vd->GetAlphaEnable();
 	m_alpha = vd->GetAlpha();
 
+	m_shading_enable = vd->GetShadingEnable();
+	m_low_shading = vd->GetLowShading();
+	m_high_shading = vd->GetHiShading();
 
+	m_shadow_enable = vd->GetShadingEnable();
+	m_shadow_intensity = vd->GetShadowIntensity();
+
+	m_sample_rate_enable = vd->GetSampleRateEnable();
+	m_sample_rate = vd->GetSampleRate();
+
+	vd->GetSpacings(m_spcx, m_spcy, m_spcz);
+
+	m_colormap_mode = vd->GetColormapMode();
+	m_colormap_disp = vd->GetColormapDisp();
+	m_colormap_low_value = vd->GetColormapLow();
+	m_colormap_hi_value = vd->GetColormapHigh();
+	m_colormap_inv = vd->GetColormapInv();
+	m_colormap_type = vd->GetColormap();
+	m_colormap_proj = vd->GetColormapProj();
+
+	m_noise_rd = vd->GetNR();
+	m_interpolate = vd->GetInterpolate();
+	m_inverted = vd->GetInvert();
+	m_mip_enable = vd->GetMode() == 1;
+	m_transparent = vd->GetTransparent();
+
+	m_blend_mode = vd->GetBlendMode();
+	m_legend = vd->GetLegend();
+	m_label_mode = vd->GetLabelMode();
 }
 
 void VolumeDataDefault::Apply(VolumeData* vd)
 {
+	if (!vd)
+		return;
 
+	int resx, resy, resz;
+	vd->GetResolution(resx, resy, resz);
+
+	vd->SetGammaEnable(m_gamma_enable);
+	vd->SetGamma(m_gamma);
+
+	vd->SetBoundaryEnable(m_boundary_enable);
+	vd->SetBoundary(m_boundary);
+
+	vd->SetSaturationEnable(m_saturation_enable);
+	vd->SetSaturation(m_saturation);
+
+	vd->SetThreshEnable(m_thresh_enable);
+	vd->SetLeftThresh(m_lo_thresh);
+	vd->SetRightThresh(m_hi_thresh);
+
+	vd->SetLuminanceEnable(m_luminance_enable);
+	vd->SetLuminance(m_luminance);
+
+	vd->SetAlphaEnable(m_alpha_enable);
+	vd->SetAlpha(m_alpha);
+
+	if (resz > 1)
+		vd->SetShadingEnable(m_shading_enable);
+	vd->SetLowShading(m_low_shading);
+	vd->SetHiShading(m_high_shading);
+
+	if (resz > 1)
+		vd->SetShadowEnable(m_shadow_enable);
+	vd->SetShadowIntensity(m_shadow_intensity);
+
+	vd->SetSampleRateEnable(m_sample_rate_enable);
+	vd->SetSampleRate(m_sample_rate);
+
+	if (!vd->GetSpcFromFile())
+		vd->SetBaseSpacings(m_spcx, m_spcy, m_spcz);
+
+	vd->SetColormapMode(m_colormap_mode);
+	vd->SetColormapDisp(m_colormap_disp);
+	vd->SetColormapValues(m_colormap_low_value, m_colormap_hi_value);
+	vd->SetColormapInv(m_colormap_inv);
+	vd->SetColormap(m_colormap_type);
+	vd->SetColormapProj(m_colormap_proj);
+
+	vd->SetNR(m_noise_rd);
+	vd->SetInterpolate(m_interpolate);
+	vd->SetInvert(m_inverted);
+	vd->SetMode(m_mip_enable?1:0);
+	vd->SetTransparent(m_transparent);
+
+	vd->SetBlendMode(m_blend_mode);
+	vd->SetLegend(m_legend);
+	vd->SetLabelMode(m_label_mode);
 }

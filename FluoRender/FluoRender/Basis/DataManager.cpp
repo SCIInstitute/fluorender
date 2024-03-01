@@ -2166,6 +2166,22 @@ void VolumeData::SetColormapValues(double low, double high)
 		m_colormap_low_value, m_colormap_hi_value);
 }
 
+void VolumeData::SetColormapLow(double val)
+{
+	m_colormap_low_value = val;
+	if (m_vr)
+		m_vr->set_colormap_values(
+			m_colormap_low_value, m_colormap_hi_value);
+}
+
+void VolumeData::SetColormapHigh(double val)
+{
+	m_colormap_hi_value = val;
+	if (m_vr)
+		m_vr->set_colormap_values(
+			m_colormap_low_value, m_colormap_hi_value);
+}
+
 void VolumeData::GetColormapValues(double &low, double &high)
 {
 	low = m_colormap_low_value;

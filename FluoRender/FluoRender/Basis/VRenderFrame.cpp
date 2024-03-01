@@ -952,7 +952,12 @@ VRenderFrame::~VRenderFrame()
 	for (int i=0; i<GetViewNum(); i++)
 	{
 		VRenderGLView* view = GetView(i);
-		if (view) view->ClearAll();
+		if (view)
+		{
+			view->ClearAll();
+			if (i == 0)
+				glbin_brush_def.Set(view->GetVolumeSelector());
+		}
 	}
 	m_aui_mgr.UnInit();
 	flvr::KernelProgram::release();

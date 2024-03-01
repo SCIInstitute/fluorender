@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "CountingDlg.h"
 #include "VRenderFrame.h"
+#include <Global/Global.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 
@@ -133,43 +134,21 @@ CountingDlg::~CountingDlg()
 //load default
 void CountingDlg::LoadDefault()
 {
-/*	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	wxString dft = expath + GETSLASH() + "default_brush_settings.dft";
-	wxFileInputStream is(dft);
-	if (!is.IsOk())
-		return;
-	wxFileConfig fconfig(is);
-
-	wxString str;
-	int ival;
 	bool bval;
-
+	wxString str;
 	//component analyzer
 	//selected only
-	if (fconfig.Read("ca_select_only", &bval))
-		m_ca_select_only_chk->SetValue(bval);
+	m_ca_select_only_chk->SetValue(glbin_comp_def.m_use_sel);
 	//min voxel
-	if (fconfig.Read("ca_min", &ival))
-	{
-		str = wxString::Format("%d", ival);
-		m_ca_min_text->SetValue(str);
-	}
+	str = wxString::Format("%d", glbin_comp_def.m_min_num);
+	m_ca_min_text->SetValue(str);
 	//max voxel
-	if (fconfig.Read("ca_max", &ival))
-	{
-		str = wxString::Format("%d", ival);
-		m_ca_max_text->SetValue(str);
-	}
+	str = wxString::Format("%d", glbin_comp_def.m_max_num);
+	m_ca_max_text->SetValue(str);
 	//ignore max
-	if (fconfig.Read("ca_ignore_max", &bval))
-	{
-		m_ca_ignore_max_chk->SetValue(bval);
-		if (bval)
-			m_ca_max_text->Disable();
-		else
-			m_ca_max_text->Enable();
-	}*/
+	bval = glbin_comp_def.m_use_min && !glbin_comp_def.m_use_max;
+	m_ca_ignore_max_chk->SetValue(bval);
+	m_ca_max_text->Enable(bval);
 }
 
 void CountingDlg::GetSettings(VRenderGLView* view)

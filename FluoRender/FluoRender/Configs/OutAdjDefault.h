@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/fileconf.h>
 
+class VRenderGLView;
+class TreeLayer;
 class OutAdjDefault
 {
 public:
@@ -38,8 +40,25 @@ public:
 
 	void Read(wxFileConfig& f);
 	void Save(wxFileConfig& f);
+	void Set(VRenderGLView* view);
+	void Apply(VRenderGLView* view);
+	void Set(TreeLayer* layer);
+	void Apply(TreeLayer* layer);
 
 public:
 	//default values
+	bool m_sync_r;
+	bool m_sync_g;
+	bool m_sync_b;
+	double m_gamma_r;
+	double m_gamma_g;
+	double m_gamma_b;
+	double m_brightness_r;
+	double m_brightness_g;
+	double m_brightness_b;
+	double m_hdr_r;
+	double m_hdr_g;
+	double m_hdr_b;
+
 };
 #endif

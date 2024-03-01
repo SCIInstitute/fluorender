@@ -581,13 +581,13 @@ void BrushToolDlg::GetSettings(VRenderGLView* view)
 
 	//iteration number
 	ival = m_selector->GetBrushIteration();
-	if (ival<=BRUSH_TOOL_ITER_WEAK)
+	if (ival<=m_selector->GetIterWeak())
 	{
 		m_brush_iterw_rb->SetValue(true);
 		m_brush_iters_rb->SetValue(false);
 		m_brush_iterss_rb->SetValue(false);
 	}
-	else if (ival<=BRUSH_TOOL_ITER_NORMAL)
+	else if (ival<=m_selector->GetIterNormal())
 	{
 		m_brush_iterw_rb->SetValue(false);
 		m_brush_iters_rb->SetValue(true);
@@ -1104,17 +1104,17 @@ void BrushToolDlg::OnBrushIterCheck(wxCommandEvent& event)
 	if (m_brush_iterw_rb->GetValue())
 	{
 		if (m_selector)
-			m_selector->SetBrushIteration(BRUSH_TOOL_ITER_WEAK);
+			m_selector->SetBrushIteration(m_selector->GetIterWeak());
 	}
 	else if (m_brush_iters_rb->GetValue())
 	{
 		if (m_selector)
-			m_selector->SetBrushIteration(BRUSH_TOOL_ITER_NORMAL);
+			m_selector->SetBrushIteration(m_selector->GetIterNormal());
 	}
 	else if (m_brush_iterss_rb->GetValue())
 	{
 		if (m_selector)
-			m_selector->SetBrushIteration(BRUSH_TOOL_ITER_STRONG);
+			m_selector->SetBrushIteration(m_selector->GetIterStrong());
 	}
 }
 

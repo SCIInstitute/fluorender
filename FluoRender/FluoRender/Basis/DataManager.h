@@ -381,6 +381,8 @@ public:
 	void SetColormapDisp(bool disp);
 	bool GetColormapDisp();
 	void SetColormapValues(double low, double high);
+	void SetColormapLow(double val);
+	void SetColormapHigh(double val);
 	void GetColormapValues(double &low, double &high);
 	double GetColormapLow();
 	double GetColormapHigh();

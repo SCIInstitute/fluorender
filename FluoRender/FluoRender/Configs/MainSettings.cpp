@@ -164,10 +164,6 @@ MainSettings::~MainSettings()
 
 void MainSettings::Read()
 {
-	double dval;
-	int ival;
-	bool bval;
-
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
 	wxString dft = expath + GETSLASH() + "fluorender.set";
@@ -557,8 +553,8 @@ void MainSettings::Save()
 
 	//machine learning settings
 	fconfig.SetPath("/ml");
-	fconfig.Write("cg_table", m_cg_table);
-	fconfig.Write("vp_table", m_vp_table);
+	fconfig.Write("cg_table", wxString(m_cg_table));
+	fconfig.Write("vp_table", wxString(m_vp_table));
 	fconfig.Write("auto_start_all", m_ml_auto_start_all);
 	fconfig.Write("cg_auto_start", m_cg_auto_start);
 	fconfig.Write("vp_auto_start", m_vp_auto_start);

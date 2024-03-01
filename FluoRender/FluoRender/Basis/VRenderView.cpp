@@ -2249,12 +2249,6 @@ void VRenderView::OnFullScreen(wxCommandEvent& event)
 
 void VRenderView::SaveDefault(unsigned int mask)
 {
-	wxString app_name = "FluoRender " +
-		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
-	wxString vendor_name = "FluoRender";
-	wxString local_name = "default_view_settings.dft";
-	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
-		wxCONFIG_USE_LOCAL_FILE);
 	wxString str;
 	bool bVal;
 	wxColor cVal;
@@ -2372,10 +2366,6 @@ void VRenderView::SaveDefault(unsigned int mask)
 		bVal = m_glview->m_draw_colormap;
 		fconfig.Write("colormap_chk", bVal);
 	}
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	wxString dft = expath + GETSLASH() + "default_view_settings.dft";
-	SaveConfig(fconfig, dft);
 
 	m_default_saved = true;
 }
@@ -2387,20 +2377,12 @@ void VRenderView::OnSaveDefault(wxCommandEvent &event)
 
 void VRenderView::LoadSettings()
 {
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	wxString dft = expath + GETSLASH() + "default_view_settings.dft";
-
-	wxFileInputStream is(dft);
-
 	if (!is.IsOk()) {
 		wxCommandEvent e;
 		OnRotSliderType(e);
 		UpdateView();
 		return;
 	}
-
-	wxFileConfig fconfig(is);
 
 	bool bVal;
 	double dVal;

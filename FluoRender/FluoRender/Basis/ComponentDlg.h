@@ -205,8 +205,6 @@ public:
 
 	void Update();
 	void GetSettings();
-	void LoadSettings(wxString filename);
-	void SaveSettings(wxString filename);
 	void SetView(VRenderGLView* view);
 	VRenderGLView* GetView() { return m_view; }
 
@@ -256,72 +254,6 @@ private:
 	float m_prog_bit;
 	float m_prog;
 
-	//generate settings
-	bool m_use_sel;
-	bool m_use_ml;
-	int m_iter;
-	double m_thresh;
-	double m_tfactor;
-	//distance field
-	bool m_use_dist_field;
-	double m_dist_strength;
-	int m_dist_filter_size;
-	int m_max_dist;
-	double m_dist_thresh;
-	//diffusion
-	bool m_diff;
-	double m_falloff;
-	bool m_size;
-	int m_size_lm;
-	//density
-	bool m_density;
-	double m_density_thresh;
-	double m_varth;//variance threshold
-	int m_density_window_size;
-	int m_density_stats_size;
-	//fixate
-	bool m_fixate;
-	int m_fix_size;
-	int m_grow_fixed;
-	//clean
-	bool m_clean;
-	int m_clean_iter;
-	int m_clean_size_vl;
-
-	//cluster settings
-	bool m_cluster_method_exmax;
-	bool m_cluster_method_dbscan;
-	bool m_cluster_method_kmeans;
-	//parameters
-	int m_cluster_clnum;
-	int m_cluster_maxiter;
-	float m_cluster_tol;
-	int m_cluster_size;
-	double m_cluster_eps;
-
-	//selection
-	bool m_use_min;
-	int m_min_num;
-	bool m_use_max;
-	int m_max_num;
-	//options
-	bool m_consistent;
-	bool m_colocal;
-
-	//modify
-	unsigned int m_cell_new_id;
-	bool m_cell_new_id_empty;
-
-	//distance
-	bool m_use_dist_neighbor;
-	int m_dist_neighbor;
-	bool m_use_dist_allchan;
-
-	//output
-	int m_output_type;//1-multi; 2-rgb;
-
-	//auto udate
-	bool m_auto_update;
 
 	//record
 	bool m_record_cmd;

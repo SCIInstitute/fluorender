@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace flrd
 {
+	struct BrushRadiusSet;
 	class VolumeSelector;
 }
 class BrushDefault
@@ -62,7 +63,7 @@ public:
 	double m_scl_falloff;
 	double m_scl_translate;
 
-	int m_select_multi;			//0-only current; 1-select group;
+	bool m_select_multi;		//0-only current; 1-select group;
 	bool m_edge_detect;
 	bool m_hidden_removal;
 	bool m_ortho;
@@ -75,14 +76,8 @@ public:
 	double m_brush_radius2;
 	bool m_use_brush_radius2;
 	//radius settings for individual brush types
-	typedef struct
-	{
-		int type;//brush type
-		double radius1;//radius 1
-		double radius2;//radius 2
-		bool use_radius2;//use radius 2
-	} BrushRadiusSet;
-	std::vector<BrushRadiusSet> m_brush_radius_sets;
+	std::vector<flrd::BrushRadiusSet> m_brush_radius_sets;
+
 	//paint stroke spacing
 	double m_brush_spacing;
 	//brush size relation

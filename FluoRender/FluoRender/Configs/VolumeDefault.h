@@ -75,6 +75,9 @@ public:
 	bool m_sample_rate_enable;
 	double m_sample_rate;
 
+	//spacing
+	double m_spcx, m_spcy, m_spcz;
+
 	//color map mode
 	int m_colormap_mode;	//0-normal; 1-rainbow
 	bool m_colormap_disp;	//true/false
@@ -92,16 +95,14 @@ public:
 	bool m_inverted;
 	//mip
 	bool m_mip_enable;
-	//blend mode
-	int m_blend_mode;	//0: ignore; 1: layered; 2: depth; 3: composite
 	//transparent
 	bool m_transparent;
+	//blend mode
+	int m_blend_mode;	//0: ignore; 1: layered; 2: depth; 3: composite
 	//shown in legend
 	bool m_legend;
 	//lable
 	int m_label_mode;
 
-	//spacing
-	double m_spcx, m_spcy, m_spcz;
 };
 #endif

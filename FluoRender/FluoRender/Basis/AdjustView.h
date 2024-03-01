@@ -125,13 +125,6 @@ public:
 	//set volume adjustment to link to group
 	void SetGroupLink(DataGroup *group);
 
-	//load default settings
-	void LoadSettings();
-
-	//get defaults
-	void GetDefaults(fluo::Color &gamma, fluo::Color &brightness, fluo::Color &hdr,
-		bool &snyc_r, bool &sync_g, bool &sync_b);
-
 	//change settings externally
 	void ChangeRGamma(double gamma_r);
 	void ChangeGGamma(double gamma_g);
@@ -166,15 +159,6 @@ private:
 	bool m_sync_r;
 	bool m_sync_g;
 	bool m_sync_b;
-
-	//default values
-	bool m_use_dft_settings;
-	fluo::Color m_dft_gamma;
-	fluo::Color m_dft_brightness;
-	fluo::Color m_dft_hdr;
-	bool m_dft_sync_r;
-	bool m_dft_sync_g;
-	bool m_dft_sync_b;
 
 	//sync red
 	wxToolBar *m_sync_r_chk;

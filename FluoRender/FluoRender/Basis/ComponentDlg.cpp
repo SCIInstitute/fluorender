@@ -1198,222 +1198,19 @@ void ComponentDlg::Update()
 
 void ComponentDlg::GetSettings()
 {
-	//defaults
-	//comp generate page
-	m_use_sel = false;
-	m_use_ml = false;
-	m_iter = 50;
-	m_thresh = 0.5;
-	m_tfactor = 1.0;
-	m_use_dist_field = false;
-	m_dist_strength = 0.5;
-	m_max_dist = 30;
-	m_dist_thresh = 0.25;
-	m_dist_filter_size = 3;
-	m_diff = false;
-	m_falloff = 0.01;
-	m_size = false;
-	m_size_lm = 100;
-	m_density = false;
-	m_density_thresh = 1.0;
-	m_varth = 0.0001;
-	m_density_window_size = 5;
-	m_density_stats_size = 15;
-	m_fixate = false;
-	m_fix_size = 50;
-	m_grow_fixed = 1;
-	m_clean = false;
-	m_clean_iter = 5;
-	m_clean_size_vl = 5;
-
-	//cluster
-	m_cluster_method_kmeans = true;
-	m_cluster_method_exmax = false;
-	m_cluster_method_dbscan = false;
-	m_cluster_clnum = 2;
-	m_cluster_maxiter = 200;
-	m_cluster_tol = 0.9f;
-	m_cluster_size = 60;
-	m_cluster_eps = 2.5;
-
-	//selection
-	m_use_min = false;
-	m_min_num = 0;
-	m_use_max = false;
-	m_max_num = 0;
-	//colocalization
-	m_colocal = false;
-	m_consistent = false;
-
-	//distance
-	m_use_dist_neighbor = false;
-	m_dist_neighbor = 1;
-	m_use_dist_allchan = false;
-
-	//update
-	m_auto_update = false;
-
-	//record
-	m_record_cmd = false;
-
-	//output
-	m_output_type = 1;
 
 	//read values
-	LoadSettings("");
+	//LoadSettings("");
+	glbin_comp_def.Apply(&m_comp_analyzer);
 	Update();
-}
-
-void ComponentDlg::LoadSettings(wxString filename)
-{
-	bool get_basic = false;
-	if (!wxFileExists(filename))
-	{
-		wxString expath = wxStandardPaths::Get().GetExecutablePath();
-		expath = wxPathOnly(expath);
-		filename = expath + GETSLASH() + "default_component_settings.dft";
-		get_basic = true;
-	}
-	wxFileInputStream is(filename);
-	if (!is.IsOk())
-		return;
-	wxFileConfig fconfig(is);
-
-	//basic settings
-	fconfig.Read("use_sel", &m_use_sel);
-	fconfig.Read("use_ml", &m_use_ml);
-	fconfig.Read("iter", &m_iter);
-	fconfig.Read("thresh", &m_thresh);
-	fconfig.Read("use_dist_field", &m_use_dist_field);
-	fconfig.Read("dist_strength", &m_dist_strength);
-	fconfig.Read("dist_filter_size", &m_dist_filter_size);
-	fconfig.Read("max_dist", &m_max_dist);
-	fconfig.Read("dist_thresh", &m_dist_thresh);
-	fconfig.Read("diff", &m_diff);
-	fconfig.Read("falloff", &m_falloff);
-	fconfig.Read("size", &m_size);
-	fconfig.Read("size_lm", &m_size_lm);
-	fconfig.Read("density", &m_density);
-	fconfig.Read("density_thresh", &m_density_thresh);
-	fconfig.Read("varth", &m_varth);
-	fconfig.Read("density_window_size", &m_density_window_size);
-	fconfig.Read("density_stats_size", &m_density_stats_size);
-	fconfig.Read("clean", &m_clean);
-	fconfig.Read("clean_iter", &m_clean_iter);
-	fconfig.Read("clean_size_vl", &m_clean_size_vl);
-	fconfig.Read("grow_fixed", &m_grow_fixed);
-
-	//cluster
-	fconfig.Read("cluster_method_kmeans", &m_cluster_method_kmeans);
-	fconfig.Read("cluster_method_exmax", &m_cluster_method_exmax);
-	fconfig.Read("cluster_method_dbscan", &m_cluster_method_dbscan);
-	//parameters
-	fconfig.Read("cluster_clnum", &m_cluster_clnum);
-	fconfig.Read("cluster_maxiter", &m_cluster_maxiter);
-	fconfig.Read("cluster_tol", &m_cluster_tol);
-	fconfig.Read("cluster_size", &m_cluster_size);
-	fconfig.Read("cluster_eps", &m_cluster_eps);
-
-	//selection
-	fconfig.Read("use_min", &m_use_min);
-	fconfig.Read("min_num", &m_min_num);
-	fconfig.Read("use_max", &m_use_max);
-	fconfig.Read("max_num", &m_max_num);
-	//colocalization
-	fconfig.Read("colocal", &m_colocal);
-	//output
-	fconfig.Read("output_type", &m_output_type);
-
-	//m_load_settings_text->SetValue(filename);
-}
-
-void ComponentDlg::SaveSettings(wxString filename)
-{
-	wxString app_name = "FluoRender " +
-		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
-	wxString vendor_name = "FluoRender";
-	wxString local_name = "default_component_settings.dft";
-	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
-		wxCONFIG_USE_LOCAL_FILE);
-
-	//comp generate settings
-	fconfig.Write("use_sel", m_use_sel);
-	fconfig.Write("use_ml", m_use_ml);
-	fconfig.Write("iter", m_iter);
-	fconfig.Write("thresh", m_thresh);
-	fconfig.Write("use_dist_field", m_use_dist_field);
-	fconfig.Write("dist_strength", m_dist_strength);
-	fconfig.Write("dist_filter_size", m_dist_filter_size);
-	fconfig.Write("max_dist", m_max_dist);
-	fconfig.Write("dist_thresh", m_dist_thresh);
-	fconfig.Write("diff", m_diff);
-	fconfig.Write("falloff", m_falloff);
-	fconfig.Write("size", m_size);
-	fconfig.Write("size_lm", m_size_lm);
-	fconfig.Write("density", m_density);
-	fconfig.Write("density_thresh", m_density_thresh);
-	fconfig.Write("varth", m_varth);
-	fconfig.Write("density_window_size", m_density_window_size);
-	fconfig.Write("density_stats_size", m_density_stats_size);
-	fconfig.Write("clean", m_clean);
-	fconfig.Write("clean_iter", m_clean_iter);
-	fconfig.Write("clean_size_vl", m_clean_size_vl);
-	fconfig.Write("grow_fixed", m_grow_fixed);
-
-	//cluster
-	fconfig.Write("cluster_method_kmeans", m_cluster_method_kmeans);
-	fconfig.Write("cluster_method_exmax", m_cluster_method_exmax);
-	fconfig.Write("cluster_method_dbscan", m_cluster_method_dbscan);
-	//parameters
-	fconfig.Write("cluster_clnum", m_cluster_clnum);
-	fconfig.Write("cluster_maxiter", m_cluster_maxiter);
-	fconfig.Write("cluster_tol", m_cluster_tol);
-	fconfig.Write("cluster_size", m_cluster_size);
-	fconfig.Write("cluster_eps", m_cluster_eps);
-
-	//selection
-	fconfig.Write("use_min", m_use_min);
-	fconfig.Write("min_num", m_min_num);
-	fconfig.Write("use_max", m_use_max);
-	fconfig.Write("max_num", m_max_num);
-	//colocalization
-	fconfig.Write("colocal", m_colocal);
-	//output
-	fconfig.Write("output_type", m_output_type);
-
-	if (filename == "")
-	{
-		wxString expath = wxStandardPaths::Get().GetExecutablePath();
-		expath = wxPathOnly(expath);
-		filename = expath + GETSLASH() + "default_component_settings.dft";
-	}
-
-	SaveConfig(fconfig, filename);
-}
-
-void ComponentDlg::OnLoadSettings(wxCommandEvent& event)
-{
-	wxFileDialog *fopendlg = new wxFileDialog(
-		m_frame, "Choose a FluoRender component generator setting file",
-		"", "", "*.txt;*.dft", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-
-	int rval = fopendlg->ShowModal();
-	if (rval == wxID_OK)
-	{
-		wxString filename = fopendlg->GetPath();
-		LoadSettings(filename);
-		Update();
-	}
-
-	if (fopendlg)
-		delete fopendlg;
 }
 
 void ComponentDlg::OnSaveSettings(wxCommandEvent& event)
 {
+	glbin_comp_def.Set(&m_comp_analyzer);
 	wxString filename = m_load_settings_text->GetValue();
 	if (wxFileExists(filename))
-		SaveSettings(filename);
+		glbin_comp_def.Save(filename.ToStdString());
 	else
 	{
 		wxCommandEvent e;
@@ -1423,6 +1220,7 @@ void ComponentDlg::OnSaveSettings(wxCommandEvent& event)
 
 void ComponentDlg::OnSaveasSettings(wxCommandEvent& event)
 {
+	glbin_comp_def.Set(&m_comp_analyzer);
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Save a FluoRender component generator setting file",
 		"", "", "*.txt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
@@ -1431,7 +1229,7 @@ void ComponentDlg::OnSaveasSettings(wxCommandEvent& event)
 	if (rval == wxID_OK)
 	{
 		wxString filename = fopendlg->GetPath();
-		SaveSettings(filename);
+		glbin_comp_def.Save(filename.ToStdString());
 		m_load_settings_text->SetValue(filename);
 	}
 

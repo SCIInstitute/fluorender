@@ -45,7 +45,7 @@ BrushDefault::BrushDefault()
 	m_scl_falloff = 0.0;
 	m_scl_translate = 0.0;
 
-	m_select_multi = 0;
+	m_select_multi = false;
 	m_edge_detect = false;
 	m_hidden_removal = false;
 	m_ortho = true;
@@ -67,10 +67,7 @@ BrushDefault::~BrushDefault()
 
 void BrushDefault::Read(wxFileConfig& f)
 {
-	double dval;
-	int ival;
-	bool bval;
-
+	wxString str;
 	if (f.Exists("/brush default"))
 		f.SetPath("/brush default");
 
@@ -88,7 +85,7 @@ void BrushDefault::Read(wxFileConfig& f)
 	f.Read("scl falloff", &m_scl_falloff, 0.0);
 	f.Read("scl translate", &m_scl_translate, 0.0);
 	//select group
-	f.Read("select group", &m_select_multi, 0);
+	f.Read("select group", &m_select_multi, false);
 	//edge detect
 	f.Read("edge detect", &m_edge_detect, false);
 	//hidden removal
@@ -112,7 +109,6 @@ void BrushDefault::Read(wxFileConfig& f)
 		int brush_num = f.Read("num", 0l);
 		if (m_brush_radius_sets.size() != brush_num)
 			m_brush_radius_sets.resize(brush_num);
-		wxString str;
 		for (int i = 0; i < brush_num; ++i)
 		{
 			str = wxString::Format("/radius_settings/%d", i);
@@ -128,11 +124,11 @@ void BrushDefault::Read(wxFileConfig& f)
 			//use radius 2
 			f.Read("use_radius2", &(m_brush_radius_sets[i].use_radius2));
 		}
-		f.SetPath("..");
+		f.SetPath("../..");
 	}
 	if (m_brush_radius_sets.size() == 0)
 	{
-		BrushRadiusSet radius_set;
+		flrd::BrushRadiusSet radius_set;
 		//select brush
 		radius_set.type = 2;
 		radius_set.radius1 = 10;
@@ -159,6 +155,8 @@ void BrushDefault::Read(wxFileConfig& f)
 void BrushDefault::Save(wxFileConfig& f)
 {
 	wxString str;
+	if (f.Exists("/brush default"))
+		f.SetPath("/brush default");
 
 	//history
 	f.Write("hist depth", m_paint_hist_depth);
@@ -197,7 +195,7 @@ void BrushDefault::Save(wxFileConfig& f)
 	f.Write("num", brush_num);
 	for (int i = 0; i < brush_num; ++i)
 	{
-		BrushRadiusSet radius_set = m_brush_radius_sets[i];
+		flrd::BrushRadiusSet radius_set = m_brush_radius_sets[i];
 		str = wxString::Format("/radius_settings/%d", i);
 		f.SetPath(str);
 		//type
@@ -209,7 +207,7 @@ void BrushDefault::Save(wxFileConfig& f)
 		//use radius 2
 		f.Write("use_radius2", radius_set.use_radius2);
 	}
-	f.SetPath("..");
+	f.SetPath("../..");
 	//spacing
 	f.Write("spacing", m_brush_spacing);
 	//brush size relation
@@ -218,10 +216,62 @@ void BrushDefault::Save(wxFileConfig& f)
 
 void BrushDefault::Set(flrd::VolumeSelector* vs)
 {
+	if (!vs)
+		return;
 
+	m_iter_weak = vs->GetIterWeak();
+	m_iter_normal = vs->GetIterNormal();
+	m_iter_strong = vs->GetIterStrong();
+	m_iter_num = vs->GetBrushIteration();
+
+	m_ini_thresh = vs->GetBrushIniThresh();
+	m_estimate_threshold = vs->GetEstimateThreshold();
+	m_gm_falloff = vs->GetBrushGmFalloff();
+	m_scl_falloff = vs->GetBrushSclFalloff();
+	m_scl_translate = vs->GetBrushSclTranslate();
+
+	m_select_multi = vs->GetSelectGroup();
+	m_edge_detect = vs->GetEdgeDetect();
+	m_hidden_removal = vs->GetHiddenRemoval();
+	m_ortho = vs->GetOrthographic();
+	m_update_order = vs->GetUpdateOrder();
+
+	m_w2d = vs->GetW2d();
+	m_brush_radius1 = vs->GetBrushSize1();
+	m_brush_radius2 = vs->GetBrushSize2();
+	m_use_brush_radius2 = vs->GetUseBrushSize2();
+	vs->GetBrushRadiusSet(m_brush_radius_sets);
+
+	m_brush_spacing = vs->GetBrushSpacing();
+	m_brush_size_data = vs->GetBrushSizeData();
 }
 
 void BrushDefault::Apply(flrd::VolumeSelector* vs)
 {
+	if (!vs)
+		return;
+
+	vs->SetDefaultIterations(m_iter_weak, m_iter_normal, m_iter_strong);
+	vs->SetBrushIteration(m_iter_num);
+
+	vs->SetBrushIniThresh(m_ini_thresh);
+	vs->SetEstimateThreshold(m_estimate_threshold);
+	vs->SetBrushGmFalloff(m_gm_falloff);
+	vs->SetBrushSclFalloff(m_scl_falloff);
+	vs->SetBrushSclTranslate(m_scl_translate);
+
+	vs->SetSelectGroup(m_select_multi);
+	vs->SetEdgeDetect(m_edge_detect);
+	vs->SetHiddenRemoval(m_hidden_removal);
+	vs->SetOrthographic(m_ortho);
+	vs->SetUpdateOrder(m_update_order);
+
+	vs->SetW2d(m_w2d);
+	vs->SetBrushSize(m_brush_radius1, m_brush_radius2);
+	vs->SetUseBrushSize2(m_use_brush_radius2);
+	vs->SetBrushRadiusSet(m_brush_radius_sets);
+
+	vs->SetBrushSpacing(m_brush_spacing);
+	vs->SetBrushSizeData(m_brush_size_data);
 
 }

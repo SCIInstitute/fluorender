@@ -56,7 +56,7 @@ VolumeSelector::VolumeSelector() :
 	m_gm_falloff(1.0),
 	m_scl_falloff(0.0),
 	m_scl_translate(0.0),
-	m_select_multi(0),
+	m_select_multi(false),
 	m_edge_detect(false),
 	m_hidden_removal(false),
 	m_ortho(true),
@@ -81,6 +81,7 @@ VolumeSelector::VolumeSelector() :
 	m_iter_weak(10),
 	m_iter_normal(30),
 	m_iter_strong(60),
+	m_brush_sets_index(0),
 	m_test_speed(false)
 
 {
@@ -149,7 +150,7 @@ void VolumeSelector::Segment(int mx, int my)
 	}
 
 	double r = m_brush_radius2 - m_brush_radius1;
-	if (m_select_multi == 1)
+	if (m_select_multi)
 	{
 		DataGroup* group = m_view->GetGroup(m_vd);
 		if (group && group->GetVolumeNum() > 1)

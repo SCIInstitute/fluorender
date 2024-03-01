@@ -83,14 +83,7 @@ m_group(0),
 m_link_group(false),
 m_sync_r(false),
 m_sync_g(false),
-m_sync_b(false),
-m_use_dft_settings(false),
-m_dft_gamma(fluo::Color(1.0, 1.0, 1.0)),
-m_dft_brightness(fluo::Color(0.0, 0.0, 0.0)),
-m_dft_hdr(fluo::Color(0.0, 0.0, 0.0)),
-m_dft_sync_r(false),
-m_dft_sync_g(false),
-m_dft_sync_b(false)
+m_sync_b(false)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -343,8 +336,6 @@ m_dft_sync_b(false)
 	Layout();
 
 	DisableAll();
-
-	LoadSettings();
 
 	//add sliders for undo and redo
 	glbin.add_undo_control(m_r_gamma_sldr);
@@ -1345,136 +1336,21 @@ void AdjustView::OnSyncBCheck(wxCommandEvent &event)
 
 void AdjustView::OnSaveDefault(wxCommandEvent &event)
 {
-	wxString app_name = "FluoRender " +
-		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
-	wxString vendor_name = "FluoRender";
-	wxString local_name = "default_2d_adjustment_settings.dft";
-	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
-		wxCONFIG_USE_LOCAL_FILE);
-	wxString str;
-	double dft_r_gamma, dft_g_gamma, dft_b_gamma;
-	double dft_r_brightness, dft_g_brightness, dft_b_brightness;
-	double dft_r_hdr, dft_g_hdr, dft_b_hdr;
-
-	//red
-	fconfig.Write("sync_r_chk", m_sync_r_chk->GetToolState(ID_SyncRChk));
-	str = m_r_gamma_text->GetValue();
-	str.ToDouble(&dft_r_gamma);
-	fconfig.Write("r_gamma_text", dft_r_gamma);
-	str = m_r_brightness_text->GetValue();
-	str.ToDouble(&dft_r_brightness);
-	fconfig.Write("r_brightness_text", dft_r_brightness);
-	str = m_r_hdr_text->GetValue();
-	str.ToDouble(&dft_r_hdr);
-	fconfig.Write("r_hdr_text", dft_r_hdr);
-
-	//green
-	fconfig.Write("sync_g_chk", m_sync_g_chk->GetToolState(ID_SyncGChk));
-	str = m_g_gamma_text->GetValue();
-	str.ToDouble(&dft_g_gamma);
-	fconfig.Write("g_gamma_text", dft_g_gamma);
-	str = m_g_brightness_text->GetValue();
-	str.ToDouble(&dft_g_brightness);
-	fconfig.Write("g_brightness_text", dft_g_brightness);
-	str = m_g_hdr_text->GetValue();
-	str.ToDouble(&dft_g_hdr);
-	fconfig.Write("g_hdr_text", dft_g_hdr);
-
-	//blue
-	fconfig.Write("sync_b_chk", m_sync_b_chk->GetToolState(ID_SyncBChk));
-	str = m_b_gamma_text->GetValue();
-	str.ToDouble(&dft_b_gamma);
-	fconfig.Write("b_gamma_text", dft_b_gamma);
-	str = m_b_brightness_text->GetValue();
-	str.ToDouble(&dft_b_brightness);
-	fconfig.Write("b_brightness_text", dft_b_brightness);
-	str = m_b_hdr_text->GetValue();
-	str.ToDouble(&dft_b_hdr);
-	fconfig.Write("b_hdr_text", dft_b_hdr);
-
-	m_dft_gamma = fluo::Color(dft_r_gamma, dft_g_gamma, dft_b_gamma);
-	m_dft_brightness = fluo::Color(dft_r_brightness, dft_g_brightness, dft_b_brightness);
-	m_dft_hdr = fluo::Color(dft_r_hdr, dft_g_hdr, dft_b_hdr);
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	wxString dft = expath + GETSLASH() + "default_2d_adjustment_settings.dft";
-	SaveConfig(fconfig, dft);
-}
-
-void AdjustView::LoadSettings()
-{
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	wxString dft = expath + GETSLASH() + "default_2d_adjustment_settings.dft";
-
-	wxFileInputStream is(dft);
-	if (!is.IsOk())
-		return;
-	wxFileConfig fconfig(is);
-
-	wxString sVal;
-	bool bVal;
-	double dft_r_gamma = 1.0;
-	double dft_g_gamma = 1.0;
-	double dft_b_gamma = 1.0;
-	double dft_r_brightness = 0.0;
-	double dft_g_brightness = 0.0;
-	double dft_b_brightness = 0.0;
-	double dft_r_hdr = 0.0;
-	double dft_g_hdr = 0.0;
-	double dft_b_hdr = 0.0;
-
-	//red
-	if (fconfig.Read("sync_r_chk", &bVal))
-		m_dft_sync_r = bVal;
-	if (fconfig.Read("r_gamma_text", &sVal))
-		sVal.ToDouble(&dft_r_gamma);
-	if (fconfig.Read("r_brightness_text", &sVal))
-		sVal.ToDouble(&dft_r_brightness);
-	if (fconfig.Read("r_hdr_text", &sVal))
-		sVal.ToDouble(&dft_r_hdr);
-
-	//green
-	if (fconfig.Read("sync_g_chk", &bVal))
-		m_dft_sync_g = bVal;
-	if (fconfig.Read("g_gamma_text", &sVal))
-		sVal.ToDouble(&dft_g_gamma);
-	if (fconfig.Read("g_brightness_text", &sVal))
-		sVal.ToDouble(&dft_g_brightness);
-	if (fconfig.Read("g_hdr_text", &sVal))
-		sVal.ToDouble(&dft_g_hdr);
-
-	//blue
-	if (fconfig.Read("sync_b_chk", &bVal))
-		m_dft_sync_b = bVal;
-	if (fconfig.Read("b_gamma_text", &sVal))
-		sVal.ToDouble(&dft_b_gamma);
-	if (fconfig.Read("b_brightness_text", &sVal))
-		sVal.ToDouble(&dft_b_brightness);
-	if (fconfig.Read("b_hdr_text", &sVal))
-		sVal.ToDouble(&dft_b_hdr);
-
-	m_dft_gamma = fluo::Color(dft_r_gamma, dft_g_gamma, dft_b_gamma);
-	m_dft_brightness = fluo::Color(dft_r_brightness, dft_g_brightness, dft_b_brightness);
-	m_dft_hdr = fluo::Color(dft_r_hdr, dft_g_hdr, dft_b_hdr);
-
-	m_use_dft_settings = true;
-
-}
-
-void AdjustView::GetDefaults(fluo::Color &gamma, fluo::Color &brightness, fluo::Color &hdr,
-							 bool &sync_r, bool &sync_g, bool &sync_b)
-{
-	GammaUI2(m_dft_gamma.r(), gamma[0]);
-	GammaUI2(m_dft_gamma.g(), gamma[1]);
-	GammaUI2(m_dft_gamma.b(), gamma[2]);
-	BrightnessUI2(m_dft_brightness.r(), brightness[0]);
-	BrightnessUI2(m_dft_brightness.g(), brightness[1]);
-	BrightnessUI2(m_dft_brightness.b(), brightness[2]);
-	hdr = m_dft_hdr;
-	sync_r = m_dft_sync_r;
-	sync_g = m_dft_sync_g;
-	sync_b = m_dft_sync_b;
+	switch (m_type)
+	{
+	case 1://view
+		if (m_view)
+			glbin_outadj_def.Set(m_view);
+		break;
+	case 2://volume data
+		if (m_vd)
+			glbin_outadj_def.Set(m_vd);
+		break;
+	case 5://group
+		if (m_group)
+			glbin_outadj_def.Set(m_group);
+		break;
+	}
 }
 
 //change settings externally
@@ -1717,9 +1593,7 @@ void AdjustView::UpdateSync()
 void AdjustView::OnRReset(wxCommandEvent &event)
 {
 	//reset gamma
-	double dft_value = 1.0;
-	if (m_use_dft_settings)
-		dft_value = m_dft_gamma.r();
+	double dft_value = glbin_outadj_def.m_gamma_r;
 
 	m_r_gamma_sldr->SetValue(std::round(dft_value*100.0));
 	wxString str = wxString::Format("%.2f", dft_value);
@@ -1775,9 +1649,7 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 	}
 
 	//reset brightness
-	dft_value = 0;
-	if (m_use_dft_settings)
-		dft_value = m_dft_brightness.r();
+	dft_value = glbin_outadj_def.m_brightness_r;
 
 	m_r_brightness_sldr->SetValue(std::round(dft_value));
 	str = wxString::Format("%d", std::round(dft_value));
@@ -1828,9 +1700,7 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 	}
 
 	//reset hdr
-	dft_value = 0;
-	if (m_use_dft_settings)
-		dft_value = m_dft_hdr.r();
+	dft_value = glbin_outadj_def.m_hdr_r;
 
 	m_r_hdr_sldr->SetValue(std::round(dft_value*100.0));
 	str = wxString::Format("%.2f", dft_value);
@@ -1886,9 +1756,7 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 void AdjustView::OnGReset(wxCommandEvent &event)
 {
 	//reset gamma
-	double dft_value = 1.0;
-	if (m_use_dft_settings)
-		dft_value = m_dft_gamma.g();
+	double dft_value = glbin_outadj_def.m_gamma_g;
 
 	m_g_gamma_sldr->SetValue(std::round(dft_value*100.0));
 	wxString str = wxString::Format("%.2f", dft_value);
@@ -1944,9 +1812,7 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 	}
 
 	//reset brightness
-	dft_value = 0.0;
-	if (m_use_dft_settings)
-		dft_value = m_dft_brightness.g();
+	dft_value = glbin_outadj_def.m_brightness_g;
 
 	m_g_brightness_sldr->SetValue(std::round(dft_value));
 	str = wxString::Format("%d", std::round(dft_value));
@@ -1997,9 +1863,7 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 	}
 
 	//reset hdr
-	dft_value = 0;
-	if (m_use_dft_settings)
-		dft_value = m_dft_hdr.g();
+	dft_value = glbin_outadj_def.m_hdr_g;
 
 	m_g_hdr_sldr->SetValue(std::round(dft_value*100.0));
 	str = wxString::Format("%.2f", dft_value);
@@ -2055,9 +1919,7 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 void AdjustView::OnBReset(wxCommandEvent &event)
 {
 	//reset gamma
-	double dft_value = 1.0;
-	if (m_use_dft_settings)
-		dft_value = m_dft_gamma.b();
+	double dft_value = glbin_outadj_def.m_gamma_b;
 
 	m_b_gamma_sldr->SetValue(std::round(dft_value*100.0));
 	wxString str = wxString::Format("%.2f", dft_value);
@@ -2113,9 +1975,7 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 	}
 
 	//reset brightness
-	dft_value = 1.0;
-	if (m_use_dft_settings)
-		dft_value = m_dft_brightness.b();
+	dft_value = glbin_outadj_def.m_brightness_b;
 
 	m_b_brightness_sldr->SetValue(std::round(dft_value));
 	str = wxString::Format("%d", std::round(dft_value));
@@ -2166,9 +2026,7 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 	}
 
 	//reset hdr
-	dft_value = 0;
-	if (m_use_dft_settings)
-		dft_value = m_dft_hdr.b();
+	dft_value = glbin_outadj_def.m_hdr_b;
 
 	m_b_hdr_sldr->SetValue(std::round(dft_value*100.0));
 	str = wxString::Format("%.2f", dft_value);

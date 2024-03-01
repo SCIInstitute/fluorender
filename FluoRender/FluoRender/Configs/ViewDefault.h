@@ -28,6 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VIEWDEFAULT_H_
 #define _VIEWDEFAULT_H_
 
+#include <Types/Color.h>
+#include <Types/Vector.h>
+#include <Types/Point.h>
 #include <wx/fileconf.h>
 
 class VRenderGLView;
@@ -39,10 +42,30 @@ public:
 
 	void Read(wxFileConfig& f);
 	void Save(wxFileConfig& f);
-	//void Set(VolumeData* vd);
-	//void Apply(VolumeData* vd);
+	void Set(VRenderGLView* view);
+	void Apply(VRenderGLView* view);
 
 public:
 	//default values
+	int m_vol_method;
+	fluo::Color m_bg_color;
+	bool m_draw_camctr;
+	double m_camctr_size;
+	int m_draw_info;
+	bool m_draw_legend;
+	bool m_draw_colormap;
+	bool m_mouse_focus;
+	bool m_persp;
+	double m_aov;
+	bool m_free;
+	fluo::Point m_center;
+	fluo::Vector m_rot;
+	bool m_rot_lock;
+	bool m_rot_slider;
+	bool m_pin_rot_center;
+	int m_scale_mode;
+	double m_scale_factor;
+	bool m_use_fog;
+	double m_fog_intensity;
 };
 #endif

@@ -39,6 +39,14 @@ class VRenderGLView;
 class VolumeData;
 namespace flrd
 {
+	struct BrushRadiusSet
+	{
+		int type;//brush type
+		double radius1;//radius 1
+		double radius2;//radius 2
+		bool use_radius2;//use radius 2
+	};
+
 	class VolumeSelector
 	{
 	public:
@@ -68,6 +76,15 @@ namespace flrd
 		}
 		void SetBrushIteration(int num) { m_iter_num = num; }
 		int GetBrushIteration() { return m_iter_num; }
+		void SetDefaultIterations(int i1, int i2, int i3)
+		{
+			m_iter_weak = i1;
+			m_iter_normal = i2;
+			m_iter_strong = i3;
+		}
+		int GetIterWeak() { return m_iter_weak; }
+		int GetIterNormal() { return m_iter_normal; }
+		int GetIterStrong() { return m_iter_strong; }
 		//set/get brush properties
 		void SetBrushIniThresh(double val) { m_ini_thresh = val; }
 		double GetBrushIniThresh() { return m_ini_thresh; }
@@ -90,8 +107,8 @@ namespace flrd
 		void SetOrthographic(bool val) { m_ortho = val; }
 		bool GetOrthographic() { return m_ortho; }
 		//select group
-		void SetSelectGroup(bool value) { m_select_multi = value ? 1 : 0; }
-		bool GetSelectGroup() { return m_select_multi == 1; }
+		void SetSelectGroup(bool value) { m_select_multi = value; }
+		bool GetSelectGroup() { return m_select_multi; }
 		//iteration number
 		int GetIter() { return m_iter; }
 		//update order
@@ -186,6 +203,14 @@ namespace flrd
 			}
 		}
 		//brush sets
+		void GetBrushRadiusSet(std::vector<BrushRadiusSet>& sets)
+		{
+			sets.assign(m_brush_radius_sets.begin(), m_brush_radius_sets.end());
+		}
+		void SetBrushRadiusSet(const std::vector<BrushRadiusSet>& sets)
+		{
+			m_brush_radius_sets.assign(sets.begin(), sets.end());
+		}
 		void ChangeBrushSetsIndex();
 		//set use 2d rendering results
 		void SetPaintUse2d(bool use2d) { m_use2d = use2d; }
@@ -245,7 +270,7 @@ namespace flrd
 		double m_gm_falloff;
 		double m_scl_falloff;
 		double m_scl_translate;
-		int m_select_multi;	//0-only current; 1-select group;
+		bool m_select_multi;	//0-only current; 1-select group;
 		bool m_edge_detect;
 		bool m_hidden_removal;
 		bool m_ortho;
@@ -265,13 +290,6 @@ namespace flrd
 		double m_brush_radius2;
 		bool m_use_brush_radius2;
 		//radius settings for individual brush types
-		typedef struct
-		{
-			int type;//brush type
-			double radius1;//radius 1
-			double radius2;//radius 2
-			bool use_radius2;//use radius 2
-		} BrushRadiusSet;
 		std::vector<BrushRadiusSet> m_brush_radius_sets;
 		int m_brush_sets_index;
 		//paint stroke spacing
