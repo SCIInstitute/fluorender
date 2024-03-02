@@ -176,13 +176,13 @@ void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
 	if (!vd)
 		return;
 
-	flrd::ComponentGenerator cg(vd);
-	cg.SetUseMask(select);
-	vd->AddEmptyMask(1, !cg.GetUseMask());
-	vd->AddEmptyLabel(0, !cg.GetUseMask());
-	cg.ShuffleID();
+	m_comp_generator.SetVolumeData(vd);
+	m_comp_generator.SetUseMask(select);
+	vd->AddEmptyMask(1, !m_comp_generator.GetUseMask());
+	vd->AddEmptyLabel(0, !m_comp_generator.GetUseMask());
+	m_comp_generator.ShuffleID();
 	double scale = vd->GetScalarScale();
-	cg.Grow(false, -1, thresh, 0.0, scale, 0);
+	m_comp_generator.Grow(false, -1, thresh, 0.0, scale, 0);
 
 	flrd::ComponentAnalyzer ca(vd);
 	ca.Analyze(select, true, false);
