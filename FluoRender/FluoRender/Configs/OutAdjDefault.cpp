@@ -76,8 +76,7 @@ void OutAdjDefault::Read(wxFileConfig& f)
 
 void OutAdjDefault::Save(wxFileConfig& f)
 {
-	if (f.Exists("/outadj default"))
-		f.SetPath("/outadj default");
+	f.SetPath("/outadj default");
 
 	f.Write("sync_r", m_sync_r);
 	f.Write("sync_g", m_sync_g);

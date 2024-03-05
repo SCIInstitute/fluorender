@@ -155,8 +155,7 @@ void VolumeDataDefault::Read(wxFileConfig& f)
 
 void VolumeDataDefault::Save(wxFileConfig& f)
 {
-	if (f.Exists("/volume default"))
-		f.SetPath("/volume default");
+	f.SetPath("/volume default");
 
 	f.Write(gstGammaEnable, m_gamma_enable);
 	f.Write(gstGamma3d, m_gamma);

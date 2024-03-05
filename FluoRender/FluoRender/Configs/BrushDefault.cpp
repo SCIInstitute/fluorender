@@ -103,15 +103,15 @@ void BrushDefault::Read(wxFileConfig& f)
 	//size 2
 	f.Read("size2", &m_brush_radius2, 30);
 	//radius settings for individual brush types
-	if (f.Exists("/radius_settings"))
+	if (f.Exists("radius_settings"))
 	{
-		f.SetPath("/radius_settings");
+		f.SetPath("radius_settings");
 		int brush_num = f.Read("num", 0l);
 		if (m_brush_radius_sets.size() != brush_num)
 			m_brush_radius_sets.resize(brush_num);
 		for (int i = 0; i < brush_num; ++i)
 		{
-			str = wxString::Format("/radius_settings/%d", i);
+			str = wxString::Format("%d", i);
 			if (!f.Exists(str))
 				continue;
 			f.SetPath(str);
@@ -124,7 +124,6 @@ void BrushDefault::Read(wxFileConfig& f)
 			//use radius 2
 			f.Read("use_radius2", &(m_brush_radius_sets[i].use_radius2));
 		}
-		f.SetPath("../..");
 	}
 	if (m_brush_radius_sets.size() == 0)
 	{
@@ -146,6 +145,8 @@ void BrushDefault::Read(wxFileConfig& f)
 		radius_set.use_radius2 = false;
 		m_brush_radius_sets.push_back(radius_set);
 	}
+	if (f.Exists("/brush default"))
+		f.SetPath("/brush default");
 	//spacing
 	f.Read("spacing", &m_brush_spacing, 0.1);
 	//brush size relation
@@ -155,8 +156,7 @@ void BrushDefault::Read(wxFileConfig& f)
 void BrushDefault::Save(wxFileConfig& f)
 {
 	wxString str;
-	if (f.Exists("/brush default"))
-		f.SetPath("/brush default");
+	f.SetPath("/brush default");
 
 	//history
 	f.Write("hist depth", m_paint_hist_depth);
@@ -190,13 +190,13 @@ void BrushDefault::Save(wxFileConfig& f)
 	//size 2
 	f.Write("size2", m_brush_radius2);
 	//radius settings for individual brush types
-	f.SetPath("/radius_settings");
+	f.SetPath("/brush default/radius_settings");
 	int brush_num = m_brush_radius_sets.size();
 	f.Write("num", brush_num);
 	for (int i = 0; i < brush_num; ++i)
 	{
 		flrd::BrushRadiusSet radius_set = m_brush_radius_sets[i];
-		str = wxString::Format("/radius_settings/%d", i);
+		str = wxString::Format("/brush default/radius_settings/%d", i);
 		f.SetPath(str);
 		//type
 		f.Write("type", radius_set.type);
@@ -207,7 +207,7 @@ void BrushDefault::Save(wxFileConfig& f)
 		//use radius 2
 		f.Write("use_radius2", radius_set.use_radius2);
 	}
-	f.SetPath("../..");
+	f.SetPath("/brush default");
 	//spacing
 	f.Write("spacing", m_brush_spacing);
 	//brush size relation

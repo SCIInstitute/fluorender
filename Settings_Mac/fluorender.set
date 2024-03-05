@@ -1,95 +1,66 @@
 ver_major=2
-ver_minor=29.3
-[gm\ calculation]
-mode=2
-[peeling\ layers]
-value=1
-[micro\ blend]
-mode=0
-[save\ project]
-mode=1
-inc=0
-[dpi]
-value=72
-[save\ alpha]
-mode=0
-[save\ float]
-mode=0
-[realtime\ compress]
-mode=0
-[script\ break]
-mode=1
-[skip\ bricks]
-mode=0
-[mouse\ int]
-mode=1
-[dir\ shadow]
-mode=0
-x=0
-y=0
-[pin\ threshold]
-value=10
-[stereo]
-enable_stereo=0
-eye\ dist=20
+ver_minor=30
+[project]
+save\ project=0
+inc\ save=0
+time\ id=_T
+save\ compress=0
+override\ vox=1
+last\ tool=0
+[image]
+slice\ sequence=0
+chann\ sequence=0
+digit\ order=0
+ser\ num=0
+skip\ brick=0
+load\ mask=1
+save\ crop=0
+save\ filter=0
+vrp\ embed=0
+save\ alpha=0
+save\ float=0
+dpi=72
+rt\ compress=0
+[script]
+script\ break=1
+script\ file=
+[ui]
+invert\ slider=0
+mulfunc=0
+time\ span=1
 [test\ mode]
 speed=0
 param=0
 wiref=0
+[rendering]
+peeling\ layers=1
+micro\ blend=0
+grad\ bg=0
+mouse\ int=1
+pin\ thresh=10
+soft\ thresh=0
+line\ width=3
+clip\ plane\ disp=0
+[shadow]
+dir\ enable=0
+dir\ x=0
+dir\ y=0
 [wavelength\ to\ color]
 c1=3
 c2=2
 c3=1
 c4=4
-[time\ id]
-value=_T
-[grad\ bg]
-value=0
-[override\ vox]
-value=1
-[soft\ threshold]
-value=0
-[save\ cmp]
-value=0
-[run\ script]
-value=0
-file=
-[paint\ history]
-value=1
-[pencil\ dist]
-value=30
-[text\ font]
-file=FreeSans.ttf
-value=14
-color=0
-[line\ width]
-value=3
-[full\ screen]
-stay\ top=1
+[display]
+disp\ id=0
+stereo\ enable=0
+sbs\ enable=0
+eye\ dist=20
+stay\ top=0
 show\ cursor=1
-[last\ tool]
-value=1
-[tracking]
-track_iter=3
-component_size=25
-consistent_color=0
-try_merge=0
-try_split=0
-contact_factor=0.6
-similarity=0.5
-[memory\ settings]
-mem\ swap=0
-graphics\ mem=2000
-large\ data\ size=200
-force\ brick\ size=128
-up\ time=200
-detail\ level\ offset=0
-[update\ order]
-value=0
-[invalidate\ tex]
-value=0
-[point\ volume\ mode]
-value=0
+[font]
+font\ file=
+text\ size=12
+text\ color=0
 [ruler]
 use\ transf=0
 relax\ f1=2
@@ -99,43 +70,56 @@ relax\ iter=50
 auto\ relax=0
 relax\ type=1
 size\ thresh=2
-[bg\ int]
-type=0
-kx=15
-ky=15
-varth=0.0001
-gauth=1
+pencil\ dist=30
+point\ volume=0
+[memory]
+mem\ swap=0
+graphics\ mem=1000
+large\ data\ size=1000
+force\ brick\ size=128
+up\ time=100
+update\ order=0
+invalidate\ tex=0
+detail\ level\ offset=0
+[bg\ remove]
+bg\ rmv\ type=0
+bg\ kx=100
+bg\ ky=100
+bg\ varth=0.0001
+bg\ gauth=1
 [pvxml]
 flip_x=0
 flip_y=0
 seq_type=0
-[pixel\ format]
+[gpu]
 api_type=0
 red_bit=8
 green_bit=8
 blue_bit=8
 alpha_bit=8
 depth_bit=24
-samples=4
-[context\ attrib]
+samples=0
 gl_major_ver=4
-gl_minor_ver=1
-gl_profile_mask=1
-[max\ texture\ size]
+gl_minor_ver=6
+gl_profile_mask=2
 use_max_texture_size=0
 max_texture_size=2048
-[no\ tex\ pack]
 no_tex_pack=0
-[cl\ device]
-platform_id=0
-device_id=0
-[Java]
+cl_platform_id=0
+cl_device_id=0
+[tracking]
+track_iter=3
+component_size=25
+consistent_color=0
+try_merge=0
+try_split=0
+contact_factor=0.6
+similarity=0.5
+[java]
 jvm_path=
 ij_path=
 bioformats_path=
 ij_mode=0
-[clipping\ planes]
-mode=0
 [ml]
 cg_table=
 vp_table=
@@ -145,3 +129,158 @@ vp_auto_start=0
 vp_auto_apply=0
 [python]
 version=10
+[brush\ default]
+hist\ depth=1
+iter\ weak=60
+iter\ normal=60
+iter\ strong=60
+iter\ num=30
+ini\ thresh=0
+auto\ thresh=0
+gm\ falloff=1
+scl\ falloff=0
+scl\ translate=0
+select\ group=0
+edge\ detect=0
+hidden\ removal=0
+ortho=1
+accurate\ bricks=1
+2d\ infl=0
+size1=10
+use_size2=1
+size2=30
+spacing=0.1
+size_data=1
+[brush\ default/radius_settings]
+num=4
+[brush\ default/radius_settings/0]
+type=2
+radius1=10
+radius2=30
+use_radius2=1
+[brush\ default/radius_settings/1]
+type=3
+radius1=10
+radius2=30
+use_radius2=1
+[brush\ default/radius_settings/2]
+type=4
+radius1=10
+radius2=30
+use_radius2=1
+[brush\ default/radius_settings/3]
+type=8
+radius1=10
+radius2=30
+use_radius2=0
+[comp\ default]
+use_sel=0
+use_ml=0
+iter=50
+thresh=0.5
+use_dist_field=0
+dist_strength=0.5
+dist_filter_size=3
+max_dist=30
+dist_thresh=0.25
+diff=0
+falloff=0.01
+size=0
+size_lm=100
+density=0
+density_thresh=1
+varth=0.0001
+density_window_size=5
+density_stats_size=15
+clean=0
+clean_iter=5
+clean_size_vl=5
+grow_fixed=1
+fill_border=0.1
+cluster_method_kmeans=1
+cluster_method_exmax=0
+cluster_method_dbscan=0
+cluster_clnum=2
+cluster_maxiter=200
+cluster_tol=0.9
+cluster_size=60
+cluster_eps=2.5
+use_min=0
+min_num=0
+use_max=0
+max_num=0
+colocal=0
+output_type=1
+[outadj\ default]
+sync_r=0
+sync_g=0
+sync_b=0
+gamma_r=1
+gamma_g=1
+gamma_b=1
+brightness_r=1
+brightness_g=1
+brightness_b=1
+hdr_r=0
+hdr_g=0
+hdr_b=0
+[view\ default]
+vol\ method=1
+bg\ color=0.000000 0.000000 0.000000
+draw\ camctr=1
+camctr\ size=2
+draw\ info=250
+draw\ legend=0
+draw\ colormap=0
+mouse\ focus=0
+persp=0
+aov=15
+free=0
+center=0.000000 0.000000 0.000000
+rot\ lock=0
+pin\ rot\ center=0
+scale\ mode=1
+scale\ factor=1.35
+use\ fog=0
+fog\ intensity=0
+rot=0.000000 0.000000 0.000000
+rot\ slider=1
+[volume\ default]
+gamma\ enable=1
+gamma\ 3d=1
+boundary\ enable=1
+boundary=0
+saturation\ enable=1
+saturation=1
+threshold\ enable=1
+low\ threshold=0
+high\ threshold=1
+luminance\ enable=1
+luminance=1
+alpha\ enable=1
+alpha=1
+shading\ enable=0
+low\ shading=1
+high\ shading=10
+shadow\ enable=0
+shadow\ int=0
+sample\ rate\ enable=1
+sample\ rate=2
+spc\ x=1
+spc\ y=1
+spc\ z=3
+colormap\ mode=0
+colormap\ disp=0
+colormap\ low=0
+colormap\ high=1
+colormap\ inv=1
+colormap\ type=0
+colormap\ proj=0
+noise\ redct=0
+interpolate=1
+invert=0
+mip\ mode=0
+transparent=0
+blend\ mode=0
+legend=1
+label\ mode=1

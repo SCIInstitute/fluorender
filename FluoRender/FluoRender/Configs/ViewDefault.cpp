@@ -71,7 +71,7 @@ void ViewDefault::Read(wxFileConfig& f)
 	if (f.Read("bg color", &str))
 	{
 		double r, g, b;
-		if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b))
+		if (SSCANF(str.c_str(), "%lf%lf%lf", &r, &g, &b))
 			m_bg_color = fluo::Color(r, g, b);
 	}
 	f.Read("draw camctr", &m_draw_camctr, false);
@@ -86,7 +86,7 @@ void ViewDefault::Read(wxFileConfig& f)
 	if (f.Read("center", &str))
 	{
 		double x, y, z;
-		if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
+		if (SSCANF(str.c_str(), "%lf%lf%lf", &x, &y, &z))
 			m_center = fluo::Point(x, y, z);
 	}
 	f.Read("rot lock", &m_rot_lock, false);
@@ -99,7 +99,7 @@ void ViewDefault::Read(wxFileConfig& f)
 	if (f.Read("rot", &str))
 	{
 		double x, y, z;
-		if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
+		if (SSCANF(str.c_str(), "%lf%lf%lf", &x, &y, &z))
 			m_rot = fluo::Vector(x, y, z);
 	}
 	f.Read("rot slider", &m_rot_slider, true);
@@ -108,8 +108,7 @@ void ViewDefault::Read(wxFileConfig& f)
 void ViewDefault::Save(wxFileConfig& f)
 {
 	wxString str;
-	if (f.Exists("/view default"))
-		f.SetPath("/view default");
+	f.SetPath("/view default");
 
 	f.Write("vol method", m_vol_method);
 	str = wxString::Format("%f %f %f", m_bg_color.r(), m_bg_color.g(), m_bg_color.b());

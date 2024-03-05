@@ -180,8 +180,7 @@ void ComponentDefault::Read(wxFileConfig& f)
 
 void ComponentDefault::Save(wxFileConfig& f)
 {
-	if (f.Exists("/comp default"))
-		f.SetPath("/comp default");
+	f.SetPath("/comp default");
 
 	//comp generate settings
 	f.Write("use_sel", m_use_sel);
