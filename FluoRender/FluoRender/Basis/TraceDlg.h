@@ -222,15 +222,6 @@ private:
 	//cluster number
 	int m_clnum;
 
-	//settings
-	size_t m_iter_num;
-	double m_size_thresh;
-	bool m_consistent_color;
-	bool m_try_merge;
-	bool m_try_split;
-	double m_similarity;
-	double m_contact_factor;
-
 	wxString m_track_file;
 
 	//ids

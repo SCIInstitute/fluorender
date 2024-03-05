@@ -544,14 +544,13 @@ void VMovieView::GetSettings()
 void VMovieView::GetScriptSettings(bool sel)
 {
 	//script
-	if (!m_view || !m_frame || !m_frame->GetSettingDlg())
+	if (!m_view)
 		return;
 
-	bool run_script = m_frame->GetSettingDlg()->GetRunScript();
+	bool run_script = glbin_settings.m_run_script;
 	m_view->SetRun4DScript(run_script);
 	m_run_script_chk->SetValue(run_script);
-	wxString script_file =
-		m_frame->GetSettingDlg()->GetScriptFile();
+	wxString script_file = glbin_settings.m_script_file;
 	m_script_file_text->SetValue(script_file);
 	m_view->SetScriptFile(script_file);
 	//highlight if builtin
@@ -1068,13 +1067,12 @@ void VMovieView::OnRunScriptChk(wxCommandEvent &event)
 	if (!m_frame || !m_view)
 		return;
 	bool run_script = m_run_script_chk->GetValue();
-	if (m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetRunScript(run_script);
+	glbin_settings.m_run_script = run_script;
 	m_view->SetRun4DScript(run_script);
 	wxString str = m_script_file_text->GetValue();
 	if (!str.IsEmpty())
 	{
-		m_frame->GetSettingDlg()->SetScriptFile(str);
+		glbin_settings.m_script_file = str;
 		m_view->SetScriptFile(str);
 	}
 	if (run_script)
@@ -1092,11 +1090,8 @@ void VMovieView::OnRunScriptChk(wxCommandEvent &event)
 
 void VMovieView::OnScriptFileEdit(wxCommandEvent &event)
 {
-	if (!m_frame || !m_frame->GetSettingDlg())
-		return;
-
 	wxString str = m_script_file_text->GetValue();
-	m_frame->GetSettingDlg()->SetScriptFile(str);
+	glbin_settings.m_script_file = str;
 	m_view->SetScriptFile(str);
 }
 
@@ -1116,8 +1111,7 @@ void VMovieView::OnScriptFileBtn(wxCommandEvent &event)
 	if (rval == wxID_OK)
 	{
 		wxString file = fopendlg->GetPath();
-		if (m_frame && m_frame->GetSettingDlg())
-			m_frame->GetSettingDlg()->SetScriptFile(file);
+		glbin_settings.m_script_file = file;
 		m_view->SetScriptFile(file);
 		m_script_file_text->SetValue(file);
 
@@ -1338,9 +1332,9 @@ void VMovieView::WriteFrameToFile(int total_frames)
 
 	//capture
 	bool bmov = filetype_.IsSameAs(".mov");
-	int chann = VRenderFrame::GetSaveAlpha() ? 4 : 3;
-	bool fp32 = bmov?false:VRenderFrame::GetSaveFloat();
-	float dpi = VRenderFrame::GetDpi();
+	int chann = glbin_settings.m_save_alpha ? 4 : 3;
+	bool fp32 = bmov ? false : glbin_settings.m_save_float;
+	float dpi = glbin_settings.m_dpi;
 	int x, y, w, h;
 	void* image = 0;
 	m_view->ReadPixels(chann, fp32, x, y, w, h, &image);
@@ -1380,7 +1374,7 @@ void VMovieView::WriteFrameToFile(int total_frames)
 		TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
 		TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 		TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-		if (VRenderFrame::GetCompression())
+		if (glbin_settings.m_save_compress)
 			TIFFSetField(out, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
 		//dpi
 		TIFFSetField(out, TIFFTAG_XRESOLUTION, dpi);
@@ -1440,14 +1434,6 @@ void VMovieView::Run()
 	if (!m_frame || !m_view)
 		return;
 
-	if (m_frame->GetSettingDlg())
-	{
-		VRenderFrame::SetSaveProject(m_frame->GetSettingDlg()->GetProjSave());
-		VRenderFrame::SetSaveAlpha(m_frame->GetSettingDlg()->GetSaveAlpha());
-		VRenderFrame::SetSaveFloat(m_frame->GetSettingDlg()->GetSaveFloat());
-		VRenderFrame::SetDpi(m_frame->GetSettingDlg()->GetDpi());
-	}
-
 	Rewind();
 
 	filetype_ = m_filename.SubString(m_filename.Len() - 4,
@@ -1473,24 +1459,17 @@ void VMovieView::Run()
 	}
 	m_filename = m_filename.SubString(0, m_filename.Len() - 5);
 	m_record = true;
-	if (m_frame->GetSettingDlg())
+	if (glbin_settings.m_prj_save)
 	{
-		m_frame->GetSettingDlg()->SetSaveAlpha(VRenderFrame::GetSaveAlpha());
-		m_frame->GetSettingDlg()->SetSaveFloat(VRenderFrame::GetSaveFloat());
-		m_frame->GetSettingDlg()->SetDpi(VRenderFrame::GetDpi());
-		if (m_frame->GetSettingDlg()->GetProjSave())
-		{
-			wxString new_folder;
-			new_folder = m_filename + "_project";
-			MkDirW(new_folder.ToStdWstring());
-			wstring name = m_filename.ToStdWstring();
-			name = GET_NAME(name);
-			wxString prop_file = new_folder + GETSLASH()
-				+ name + "_project.vrp";
-			bool inc = wxFileExists(prop_file) &&
-				m_frame->GetSettingDlg()->GetProjSaveInc();
-			m_frame->SaveProject(prop_file, inc);
-		}
+		wxString new_folder;
+		new_folder = m_filename + "_project";
+		MkDirW(new_folder.ToStdWstring());
+		wstring name = m_filename.ToStdWstring();
+		name = GET_NAME(name);
+		wxString prop_file = new_folder + GETSLASH()
+			+ name + "_project.vrp";
+		bool inc = wxFileExists(prop_file) && glbin_settings.m_prj_save_inc;
+		m_frame->SaveProject(prop_file, inc);
 	}
 
 	Prev();
@@ -1561,19 +1540,19 @@ void VMovieView::OnFpsEdit(wxCommandEvent& event)
 void VMovieView::OnCh1Check(wxCommandEvent &event) {
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
 	if (ch1)
-		VRenderFrame::SetCompression(ch1->GetValue());
+		glbin_settings.m_save_compress = ch1->GetValue();
 }
 //ch2
 void VMovieView::OnCh2Check(wxCommandEvent &event) {
 	wxCheckBox* ch2 = (wxCheckBox*)event.GetEventObject();
 	if (ch2)
-		VRenderFrame::SetSaveAlpha(ch2->GetValue());
+		glbin_settings.m_save_alpha = ch2->GetValue();
 }
 //ch3
 void VMovieView::OnCh3Check(wxCommandEvent &event) {
 	wxCheckBox* ch3 = (wxCheckBox*)event.GetEventObject();
 	if (ch3)
-		VRenderFrame::SetSaveFloat(ch3->GetValue());
+		glbin_settings.m_save_float = ch3->GetValue();
 }
 void VMovieView::OnDpiText(wxCommandEvent& event)
 {
@@ -1581,7 +1560,7 @@ void VMovieView::OnDpiText(wxCommandEvent& event)
 	wxString str = event.GetString();
 	long lval;
 	str.ToLong(&lval);
-	VRenderFrame::SetDpi(float(lval));
+	glbin_settings.m_dpi = lval;
 	if (!tx_dpi)
 		return;
 	wxCheckBox* ch_enlarge = (wxCheckBox*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_CHK);
@@ -1680,10 +1659,11 @@ void VMovieView::OnMovieQuality(wxCommandEvent &event)
 	m_estimated_size_text->SetValue(wxString::Format("%.2f", size));
 }
 //embed project
-void VMovieView::OnChEmbedCheck(wxCommandEvent &event) {
+void VMovieView::OnChEmbedCheck(wxCommandEvent &event)
+{
 	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
 	if (ch_embed)
-		VRenderFrame::SetEmbedProject(ch_embed->GetValue());
+		glbin_settings.m_vrp_embed = ch_embed->GetValue();
 }
 
 wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
@@ -1706,19 +1686,19 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VMovieView::OnCh1Check), NULL, panel);
 	if (ch1)
-		ch1->SetValue(VRenderFrame::GetCompression());
+		ch1->SetValue(glbin_settings.m_save_compress);
 	wxCheckBox *ch2 = new wxCheckBox(panel, ID_SAVE_ALPHA,
 		"Save alpha");
 	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VMovieView::OnCh2Check), NULL, panel);
 	if (ch2)
-		ch2->SetValue(VRenderFrame::GetSaveAlpha());
+		ch2->SetValue(glbin_settings.m_save_alpha);
 	wxCheckBox *ch3 = new wxCheckBox(panel, ID_SAVE_FLOAT,
 		"Save float channel");
 	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VMovieView::OnCh3Check), NULL, panel);
 	if (ch3)
-		ch3->SetValue(VRenderFrame::GetSaveFloat());
+		ch3->SetValue(glbin_settings.m_save_float);
 	line1->Add(tiffopts, 0, wxALIGN_CENTER);
 	line1->Add(ch1, 0, wxALIGN_CENTER);
 	line1->Add(10, 10);
@@ -1734,7 +1714,7 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
 		"", wxDefaultPosition, wxDefaultSize, 0, vald_int);
 	tx_dpi->Connect(tx_dpi->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(VMovieView::OnDpiText), NULL, panel);
-	float dpi = VRenderFrame::GetDpi();
+	float dpi = glbin_settings.m_dpi;
 	tx_dpi->SetValue(wxString::Format("%.0f", dpi));
 	//enlarge
 	wxCheckBox* ch_enlarge = new wxCheckBox(panel, ID_ENLARGE_CHK,
@@ -1802,15 +1782,16 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
 	line3->Add(st2, 0, wxALIGN_CENTER);
 	//copy all files check box
 	wxCheckBox *ch_embed;
-	if (VRenderFrame::GetSaveProject()) {
+	if (glbin_settings.m_prj_save)
+	{
 		ch_embed = new wxCheckBox(panel, ID_EMBED_FILES,
 			"Embed all files in the project folder");
 		ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 			wxCommandEventHandler(VMovieView::OnChEmbedCheck), NULL, panel);
-		ch_embed->SetValue(VRenderFrame::GetEmbedProject());
+		ch_embed->SetValue(glbin_settings.m_vrp_embed);
 	}
 	//group
-	if (VRenderFrame::GetSaveProject() && ch_embed) {
+	if (glbin_settings.m_prj_save && ch_embed) {
 		wxBoxSizer *line3 = new wxBoxSizer(wxHORIZONTAL);
 		line3->Add(ch_embed, 0, wxALIGN_CENTER);
 		group1->Add(line3);

@@ -718,25 +718,25 @@ void ScriptProc::RunMaskTracking()
 	m_fconfig->Read("sim", &sim, 0);
 
 	flrd::pTrackMap track_map = tg->GetTrackMap();
-	flrd::TrackMapProcessor tm_processor(track_map);
+	glbin_trackmap_proc.SetTrackMap(track_map);
 	int resx, resy, resz;
 	cur_vol->GetResolution(resx, resy, resz);
 	double spcx, spcy, spcz;
 	cur_vol->GetSpacings(spcx, spcy, spcz);
-	tm_processor.SetBits(cur_vol->GetBits());
-	tm_processor.SetScale(cur_vol->GetScalarScale());
-	tm_processor.SetSizes(resx, resy, resz);
-	tm_processor.SetSpacings(spcx, spcy, spcz);
-	tm_processor.SetMaxIter(iter);
-	tm_processor.SetEps(eps);
-	tm_processor.SetFilterSize(fsize);
-	tm_processor.SetStencilThresh(fluo::Point(stsize));
+	glbin_trackmap_proc.SetBits(cur_vol->GetBits());
+	glbin_trackmap_proc.SetScale(cur_vol->GetScalarScale());
+	glbin_trackmap_proc.SetSizes(resx, resy, resz);
+	glbin_trackmap_proc.SetSpacings(spcx, spcy, spcz);
+	glbin_trackmap_proc.SetMaxIter(iter);
+	glbin_trackmap_proc.SetEps(eps);
+	glbin_trackmap_proc.SetFilterSize(fsize);
+	glbin_trackmap_proc.SetStencilThresh(fluo::Point(stsize));
 	//register file reading and deleteing functions
 	glbin_reg_cache_queue_func(this,
 		ScriptProc::ReadVolCacheDataLabel,
 		ScriptProc::DelVolCacheDataLabel);
 
-	tm_processor.TrackStencils(
+	glbin_trackmap_proc.TrackStencils(
 		m_view->m_tseq_prv_num,
 		m_view->m_tseq_cur_num,
 		extt, exta,
@@ -1369,21 +1369,19 @@ void ScriptProc::RunRulerProfile()
 	if (!GetVolumes(vlist))
 		return;
 
-	RulerHandler* ruler_handler = m_view->GetRulerHandler();
-	if (!ruler_handler) return;
 	RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list || ruler_list->empty()) return;
 
 	int ival;
 	double dval;
 	m_fconfig->Read("fsize", &ival, 1);
-	ruler_handler->SetFsize(ival);
+	glbin_ruler_handler.SetFsize(ival);
 	m_fconfig->Read("sample_type", &ival, 1);
-	ruler_handler->SetSampleType(ival);
+	glbin_ruler_handler.SetSampleType(ival);
 	m_fconfig->Read("step_len", &dval, 1);
-	ruler_handler->SetStepLength(dval);
-	bool bg_int = ruler_handler->GetBackground();
-	ruler_handler->SetBackground(false);
+	glbin_ruler_handler.SetStepLength(dval);
+	bool bg_int = glbin_ruler_handler.GetBackground();
+	glbin_ruler_handler.SetBackground(false);
 
 	int curf = m_view->m_tseq_cur_num;
 	int chan_num = vlist.size();
@@ -1393,9 +1391,9 @@ void ScriptProc::RunRulerProfile()
 	for (auto itvol = vlist.begin();
 		itvol != vlist.end(); ++itvol, ++ch)
 	{
-		ruler_handler->SetVolumeData(*itvol);
+		glbin_ruler_handler.SetVolumeData(*itvol);
 		for (size_t i = 0; i < ruler_list->size(); ++i)
-			ruler_handler->Profile(i);
+			glbin_ruler_handler.Profile(i);
 
 		//output
 		//time group
@@ -1447,7 +1445,7 @@ void ScriptProc::RunRulerProfile()
 			}
 		}
 	}
-	ruler_handler->SetBackground(bg_int);
+	glbin_ruler_handler.SetBackground(bg_int);
 }
 
 void ScriptProc::RunRoi()
@@ -1458,8 +1456,6 @@ void ScriptProc::RunRoi()
 	if (!GetVolumes(vlist))
 		return;
 
-	RulerHandler* ruler_handler = m_view->GetRulerHandler();
-	if (!ruler_handler) return;
 	RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list || ruler_list->empty()) return;
 
@@ -1471,7 +1467,7 @@ void ScriptProc::RunRoi()
 	for (auto itvol = vlist.begin();
 		itvol != vlist.end(); ++itvol, ++ch)
 	{
-		ruler_handler->SetVolumeData(*itvol);
+		glbin_ruler_handler.SetVolumeData(*itvol);
 
 		//output
 		//time group
@@ -1494,7 +1490,7 @@ void ScriptProc::RunRoi()
 			if (!ruler->GetDisp()) continue;
 			ruler->SetWorkTime(curf);
 
-			if (ruler_handler->Roi(ruler))
+			if (glbin_ruler_handler.Roi(ruler))
 			{
 				fluo::Node* ruler_node = cmdg->getOrAddNode(std::to_string(ruler->Id() + 1));
 				ruler_node->addSetValue("type", std::string("ruler"));
@@ -1544,13 +1540,13 @@ void ScriptProc::RunAddCells()
 	}
 
 	flrd::pTrackMap track_map = tg->GetTrackMap();
-	flrd::TrackMapProcessor tm_processor(track_map);
-	tm_processor.SetBits(cur_vol->GetBits());
-	tm_processor.SetScale(cur_vol->GetScalarScale());
+	glbin_trackmap_proc.SetTrackMap(track_map);
+	glbin_trackmap_proc.SetBits(cur_vol->GetBits());
+	glbin_trackmap_proc.SetScale(cur_vol->GetScalarScale());
 	int resx, resy, resz;
 	cur_vol->GetResolution(resx, resy, resz);
-	tm_processor.SetSizes(resx, resy, resz);
-	tm_processor.AddCells(m_sel_labels,
+	glbin_trackmap_proc.SetSizes(resx, resy, resz);
+	glbin_trackmap_proc.AddCells(m_sel_labels,
 		m_view->m_tseq_cur_num);
 }
 
@@ -1577,13 +1573,13 @@ void ScriptProc::RunUnlinkCells()
 	if (!tg) return;
 
 	flrd::pTrackMap track_map = tg->GetTrackMap();
-	flrd::TrackMapProcessor tm_processor(track_map);
-	tm_processor.SetBits(cur_vol->GetBits());
-	tm_processor.SetScale(cur_vol->GetScalarScale());
+	glbin_trackmap_proc.SetTrackMap(track_map);
+	glbin_trackmap_proc.SetBits(cur_vol->GetBits());
+	glbin_trackmap_proc.SetScale(cur_vol->GetScalarScale());
 	int resx, resy, resz;
 	cur_vol->GetResolution(resx, resy, resz);
-	tm_processor.SetSizes(resx, resy, resz);
-	tm_processor.RemoveCells(m_sel_labels,
+	glbin_trackmap_proc.SetSizes(resx, resy, resz);
+	glbin_trackmap_proc.RemoveCells(m_sel_labels,
 		m_view->m_tseq_cur_num);
 }
 
@@ -1836,7 +1832,6 @@ void ScriptProc::RunCameraPoints()
 	//turn off script
 	if (m_frame)
 	{
-		//m_frame->GetSettingDlg()->SetRunScript(false);
 		glbin_settings.m_run_script = false;
 		m_frame->GetMovieView()->GetScriptSettings(false);
 	}
@@ -2032,9 +2027,6 @@ void ScriptProc::RunGenerateWalk()
 		return;
 	if (!m_view)
 		return;
-	RulerHandler* rhdl = m_view->GetRulerHandler();
-	if (!rhdl)
-		return;
 
 	wxString filename;
 	m_fconfig->Read("cycle", &filename);
@@ -2047,7 +2039,7 @@ void ScriptProc::RunGenerateWalk()
 	flrd::WalkCycle cycle;
 	cycle.ReadData(filename.ToStdString());
 	cycle.Correct(0);
-	rhdl->GenerateWalk(length, dir, cycle);
+	glbin_ruler_handler.GenerateWalk(length, dir, cycle);
 }
 
 void ScriptProc::RunPython()
@@ -2132,15 +2124,12 @@ void ScriptProc::RunDlcGetRulers()
 		return;
 	}
 
-	RulerHandler* rhdl = m_view->GetRulerHandler();
-	if (!rhdl)
-		return;
 	//std::filesystem::path p(fn);
 	//if (p.extension().string() != ".m4v")//dlc may have problem decoding m4v files
 	//	toff = 0;
 
 	int errs = dlc->GetDecodeErrorCount();
-	dlc->AddRulers(rhdl, toff + errs);
+	dlc->AddRulers(&glbin_ruler_handler, toff + errs);
 	dlc->Exit();
 	dlcg->addSetValue(fn, true);
 }
@@ -2157,9 +2146,6 @@ void ScriptProc::RunDlcCreateProj()
 
 	flrd::PyDlc* dlc = glbin.get_add_python<flrd::PyDlc>("dlc");
 	if (!dlc)
-		return;
-	RulerHandler* rhdl = m_view->GetRulerHandler();
-	if (!rhdl)
 		return;
 
 	//resoultion
@@ -2178,7 +2164,7 @@ void ScriptProc::RunDlcCreateProj()
 	dlc->SetVideoFile(str);
 	std::filesystem::path p(str);
 	str = p.stem().string();
-	dlc->CreateConfigFile(str, "FluoRender", rhdl);
+	dlc->CreateConfigFile(str, "FluoRender", &glbin_ruler_handler);
 }
 
 void ScriptProc::RunDlcLabel()
@@ -2186,9 +2172,6 @@ void ScriptProc::RunDlcLabel()
 	if (!m_view)
 		return;
 	if (!TimeCondition())
-		return;
-	RulerHandler* rhdl = m_view->GetRulerHandler();
-	if (!rhdl)
 		return;
 	flrd::PyDlc* dlc = glbin.get_add_python<flrd::PyDlc>("dlc");
 	if (!dlc)
@@ -2206,7 +2189,7 @@ void ScriptProc::RunDlcLabel()
 	}
 	//write frame
 	std::set<size_t> keys;
-	rhdl->GetKeyFrames(keys);
+	glbin_ruler_handler.GetKeyFrames(keys);
 	if (keys.find(size_t(curf)) != keys.end())
 	{
 		int vn = std::min(m_view->GetAllVolumeNum(), 3);
@@ -2281,7 +2264,7 @@ void ScriptProc::RunDlcLabel()
 	{
 		//write hdf
 		dlc->SetFrameNumber(fn);
-		dlc->WriteHDF(rhdl);
+		dlc->WriteHDF(&glbin_ruler_handler);
 		int maxiters = 100;
 		m_fconfig->Read("maxiters", &maxiters, 100);
 
@@ -2488,7 +2471,7 @@ void ScriptProc::ChangeData()
 	if (clear)
 	{
 		//m_frame->GetTree()->DeleteAll();
-		m_view->GetRulerHandler()->DeleteAll(false);
+		glbin_ruler_handler.DeleteAll(false);
 		m_frame->GetDataManager()->ClearAll();
 		m_frame->GetAdjustView()->SetVolumeData(0);
 		m_frame->GetAdjustView()->SetGroup(0);

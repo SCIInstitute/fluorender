@@ -2164,12 +2164,11 @@ void VRenderView::SetFullScreen()
 {
 	if (m_glview->GetParent() != m_full_frame)
 	{
-		VRenderFrame* frame = (VRenderFrame*)m_frame;
 		m_view_sizer->Detach(m_glview);
 		m_glview->Reparent(m_full_frame);
 		//get display id
 		int disp_id = glbin_settings.m_disp_id;
-		if (disp_id >= frame->GetSettingDlg()->GetDisplayNum())
+		if (disp_id >= wxDisplay::GetCount())
 			disp_id = 0;
 		wxDisplay display(disp_id);
 		wxRect rect = display.GetGeometry();

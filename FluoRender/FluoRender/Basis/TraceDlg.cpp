@@ -789,14 +789,6 @@ TraceDlg::TraceDlg(VRenderFrame* frame)
 	//m_mask(0),
 	m_cur_time(-1),
 	m_prv_time(-1),
-	m_clnum(2),
-	m_iter_num(3),
-	m_size_thresh(50.0),
-	m_consistent_color(true),
-	m_try_merge(false),
-	m_try_split(false),
-	m_similarity(0.2),
-	m_contact_factor(0.6),
 	m_cell_new_id(0),
 	m_cell_new_id_empty(true)
 {
@@ -939,31 +931,13 @@ void TraceDlg::GetSettings(VRenderGLView* vrv)
 	}
 
 	//settings for tracking
-	if (m_frame && m_frame->GetSettingDlg())
-	{
-		m_iter_num =
-			m_frame->GetSettingDlg()->GetTrackIter();
-		m_size_thresh =
-			m_frame->GetSettingDlg()->GetComponentSize();
-		m_consistent_color =
-			m_frame->GetSettingDlg()->GetConsistentColor();
-		m_try_merge =
-			m_frame->GetSettingDlg()->GetTryMerge();
-		m_try_split =
-			m_frame->GetSettingDlg()->GetTrySplit();
-		m_similarity =
-			m_frame->GetSettingDlg()->GetSimilarity();
-		m_contact_factor =
-			m_frame->GetSettingDlg()->GetContactFactor();
-		//
-		m_map_iter_spin->SetValue(m_iter_num);
-		m_map_size_spin->SetValue(m_size_thresh);
-		m_map_consistent_btn->SetValue(m_consistent_color);
-		m_map_merge_btn->SetValue(m_try_merge);
-		m_map_split_btn->SetValue(m_try_split);
-		m_map_similar_spin->SetValue(m_similarity);
-		m_map_contact_spin->SetValue(m_contact_factor);
-	}
+	m_map_iter_spin->SetValue(glbin_settings.m_track_iter);
+	m_map_size_spin->SetValue(glbin_settings.m_component_size);
+	m_map_consistent_btn->SetValue(glbin_settings.m_consistent_color);
+	m_map_merge_btn->SetValue(glbin_settings.m_try_merge);
+	m_map_split_btn->SetValue(glbin_settings.m_try_split);
+	m_map_similar_spin->SetValue(glbin_settings.m_similarity);
+	m_map_contact_spin->SetValue(glbin_settings.m_contact_factor);
 }
 
 void TraceDlg::SetCellSize(int size)
@@ -1246,12 +1220,12 @@ void TraceDlg::UncertainFilter(bool input)
 	}
 
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
-	flrd::TrackMapProcessor tm_processor(track_map);
+	glbin_trackmap_proc.SetTrackMap(track_map);
 	wxString str = m_comp_uncertain_low_text->GetValue();
 	long ival;
 	str.ToLong(&ival);
-	tm_processor.SetUncertainLow(ival);
-	tm_processor.GetCellsByUncertainty(list_in, list_out, m_cur_time);
+	glbin_trackmap_proc.SetUncertainLow(ival);
+	glbin_trackmap_proc.GetCellsByUncertainty(list_in, list_out, m_cur_time);
 
 	glbin_comp_selector.SetVolume(m_view->m_cur_vol);
 	glbin_comp_selector.SelectList(list_out);
@@ -1315,92 +1289,57 @@ void TraceDlg::OnRefineAllBtn(wxCommandEvent &event)
 //settings
 void TraceDlg::OnMapIterSpin(wxSpinEvent& event)
 {
-	m_iter_num = m_map_iter_spin->GetValue();
-	//save settings
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetTrackIter(m_iter_num);
+	glbin_settings.m_track_iter = m_map_iter_spin->GetValue();
 }
 
 void TraceDlg::OnMapIterText(wxCommandEvent& event)
 {
-	m_iter_num = m_map_iter_spin->GetValue();
-	//save settings
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetTrackIter(m_iter_num);
+	glbin_settings.m_track_iter = m_map_iter_spin->GetValue();
 }
 
 void TraceDlg::OnMapSizeSpin(wxSpinEvent& event)
 {
-	m_size_thresh = m_map_size_spin->GetValue();
-	//save settings
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetComponentSize(m_size_thresh);
+	glbin_settings.m_component_size = m_map_size_spin->GetValue();
 }
 
 void TraceDlg::OnMapSizeText(wxCommandEvent& event)
 {
-	m_size_thresh = m_map_size_spin->GetValue();
-	//save settings
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetComponentSize(m_size_thresh);
+	glbin_settings.m_component_size = m_map_size_spin->GetValue();
 }
 
 void TraceDlg::OnMapConsistentBtn(wxCommandEvent& event)
 {
-	m_consistent_color = m_map_consistent_btn->GetValue();
-	//save settings
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetConsistentColor(m_consistent_color);
+	glbin_settings.m_consistent_color = m_map_consistent_btn->GetValue();
 }
 
 void TraceDlg::OnMapMergeBtn(wxCommandEvent& event)
 {
-	m_try_merge = m_map_merge_btn->GetValue();
-	//save settings
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetTryMerge(m_try_merge);
+	glbin_settings.m_try_merge = m_map_merge_btn->GetValue();
 }
 
 void TraceDlg::OnMapSplitBtn(wxCommandEvent& event)
 {
-	m_try_split = m_map_split_btn->GetValue();
-	//save settings
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetTrySplit(m_try_split);
+	glbin_settings.m_try_split = m_map_split_btn->GetValue();
 }
 
 void TraceDlg::OnMapSimilarSpin(wxSpinDoubleEvent& event)
 {
-	m_similarity = m_map_similar_spin->GetValue();
-	//save settings
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetSimilarity(m_similarity);
+	glbin_settings.m_similarity = m_map_similar_spin->GetValue();
 }
 
 void TraceDlg::OnMapSimilarText(wxCommandEvent& event)
 {
-	double dval = m_map_similar_spin->GetValue();
-	m_similarity = dval;
-	//save settings
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetSimilarity(m_similarity);
+	glbin_settings.m_similarity = m_map_similar_spin->GetValue();
 }
 
 void TraceDlg::OnMapContactSpin(wxSpinDoubleEvent& event)
 {
-	m_contact_factor = m_map_contact_spin->GetValue();
-	//save settings
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetContactFactor(m_contact_factor);
+	glbin_settings.m_contact_factor = m_map_contact_spin->GetValue();
 }
 
 void TraceDlg::OnMapContactText(wxCommandEvent& event)
 {
-	double dval = m_map_contact_spin->GetValue();
-	m_contact_factor = dval;
-	//save settings
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetContactFactor(m_contact_factor);
+	glbin_settings.m_contact_factor = m_map_contact_spin->GetValue();
 }
 
 //analysis
@@ -1449,28 +1388,28 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 	wxGetApp().Yield();
 
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
-	flrd::TrackMapProcessor tm_processor(track_map);
+	glbin_trackmap_proc.SetTrackMap(track_map);
 	int resx, resy, resz;
 	vd->GetResolution(resx, resy, resz);
 	double spcx, spcy, spcz;
 	vd->GetSpacings(spcx, spcy, spcz);
-	tm_processor.SetBits(vd->GetBits());
-	tm_processor.SetScale(vd->GetScalarScale());
-	tm_processor.SetSizes(resx, resy, resz);
-	tm_processor.SetSpacings(spcx, spcy, spcz);
+	glbin_trackmap_proc.SetBits(vd->GetBits());
+	glbin_trackmap_proc.SetScale(vd->GetScalarScale());
+	glbin_trackmap_proc.SetSizes(resx, resy, resz);
+	glbin_trackmap_proc.SetSpacings(spcx, spcy, spcz);
 	glbin_reg_cache_queue_func(this, TraceDlg::ReadVolCache, TraceDlg::DelVolCache);
 	glbin_cache_queue.set_max_size(2);
 
 	(*m_stat_text) << wxString::Format("Frame %d\n", 0);
 	wxGetApp().Yield();
-	tm_processor.MakeConsistent(0);
+	glbin_trackmap_proc.MakeConsistent(0);
 
 	//remaining frames
 	for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
 	{
 		(*m_stat_text) << wxString::Format("Frame %d\n", int(fi));
 		wxGetApp().Yield();
-		tm_processor.MakeConsistent(fi - 1, fi);
+		glbin_trackmap_proc.MakeConsistent(fi - 1, fi);
 	}
 
 	CellUpdate();
@@ -1560,11 +1499,11 @@ void TraceDlg::OnAnalyzeUncertainHist(wxCommandEvent &event)
 	m_stat_text->SetValue("");
 
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
-	flrd::TrackMapProcessor tm_processor(track_map);
+	glbin_trackmap_proc.SetTrackMap(track_map);
 	if (list_in.empty())
 	{
 		flrd::UncertainHist hist1, hist2;
-		tm_processor.GetUncertainHist(hist1, hist2, m_cur_time);
+		glbin_trackmap_proc.GetUncertainHist(hist1, hist2, m_cur_time);
 		//header
 		(*m_stat_text) << "In\n";
 		(*m_stat_text) << "Level\t" << "Frequency\n";
@@ -1600,7 +1539,7 @@ void TraceDlg::OnAnalyzeUncertainHist(wxCommandEvent &event)
 	}
 	else
 	{
-		tm_processor.GetCellUncertainty(list_in, m_cur_time);
+		glbin_trackmap_proc.GetCellUncertainty(list_in, m_cur_time);
 		//header
 		(*m_stat_text) << "ID\t" << "In\t" << "Out\n";
 		for (auto iter = list_in.begin();
@@ -1653,7 +1592,7 @@ void TraceDlg::OnAnalyzePath(wxCommandEvent &event)
 	m_stat_text->SetValue("");
 
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
-	flrd::TrackMapProcessor tm_processor(track_map);
+	glbin_trackmap_proc.SetTrackMap(track_map);
 	if (list_in.empty())
 		return;
 
@@ -1664,7 +1603,7 @@ void TraceDlg::OnAnalyzePath(wxCommandEvent &event)
 	{
 		(*m_stat_text) << "Paths of T" << m_cur_time << " to T" << m_cur_time - 1 << ":\n";
 		flrd::PathList paths_prv;
-		tm_processor.GetPaths(list_in, paths_prv, m_cur_time, m_cur_time - 1);
+		glbin_trackmap_proc.GetPaths(list_in, paths_prv, m_cur_time, m_cur_time - 1);
 		for (size_t i = 0; i < paths_prv.size(); ++i)
 			os << paths_prv[i];
 	}
@@ -1672,7 +1611,7 @@ void TraceDlg::OnAnalyzePath(wxCommandEvent &event)
 	{
 		(*m_stat_text) << "Paths of T" << m_cur_time << " to T" << m_cur_time + 1 << ":\n";
 		flrd::PathList paths_nxt;
-		tm_processor.GetPaths(list_in, paths_nxt, m_cur_time, m_cur_time + 1);
+		glbin_trackmap_proc.GetPaths(list_in, paths_nxt, m_cur_time, m_cur_time + 1);
 		for (size_t i = 0; i < paths_nxt.size(); ++i)
 			os << paths_nxt[i];
 	}
@@ -2215,13 +2154,13 @@ void TraceDlg::OnCellLinkAll(wxCommandEvent &event)
 		return;
 
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
-	flrd::TrackMapProcessor tm_processor(track_map);
+	glbin_trackmap_proc.SetTrackMap(track_map);
 	//register file reading and deleteing functions
 	glbin_reg_cache_queue_func(this, TraceDlg::ReadVolCache, TraceDlg::DelVolCache);
 	glbin_cache_queue.set_max_size(3);
 	flrd::CelpList in = m_frame->GetComponentDlg()->GetInCells();
 	flrd::CelpList out = m_frame->GetComponentDlg()->GetOutCells();
-	tm_processor.RelinkCells(in, out, m_cur_time);
+	glbin_trackmap_proc.RelinkCells(in, out, m_cur_time);
 
 	CellUpdate();
 }
@@ -2522,14 +2461,14 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 		return;
 
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
-	flrd::TrackMapProcessor tm_processor(track_map);
-	tm_processor.SetBits(vd->GetBits());
-	tm_processor.SetScale(vd->GetScalarScale());
-	tm_processor.SetSizes(resx, resy, resz);
+	glbin_trackmap_proc.SetTrackMap(track_map);
+	glbin_trackmap_proc.SetBits(vd->GetBits());
+	glbin_trackmap_proc.SetScale(vd->GetScalarScale());
+	glbin_trackmap_proc.SetSizes(resx, resy, resz);
 	//register file reading and deleteing functions
 	glbin_reg_cache_queue_func(this, TraceDlg::ReadVolCache, TraceDlg::DelVolCache);
 	glbin_cache_queue.set_max_size(3);
-	tm_processor.SegmentCells(list_cur, m_cur_time, m_clnum);
+	glbin_trackmap_proc.SegmentCells(list_cur, m_cur_time, m_clnum);
 
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_current();
@@ -2554,15 +2493,15 @@ void TraceDlg::LinkAddedCells(flrd::CelpList &list)
 		return;
 
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
-	flrd::TrackMapProcessor tm_processor(track_map);
-	tm_processor.SetBits(vd->GetBits());
-	tm_processor.SetScale(vd->GetScalarScale());
-	tm_processor.SetSizes(resx, resy, resz);
+	glbin_trackmap_proc.SetTrackMap(track_map);
+	glbin_trackmap_proc.SetBits(vd->GetBits());
+	glbin_trackmap_proc.SetScale(vd->GetScalarScale());
+	glbin_trackmap_proc.SetSizes(resx, resy, resz);
 	//register file reading and deleteing functions
 	glbin_reg_cache_queue_func(this, TraceDlg::ReadVolCache, TraceDlg::DelVolCache);
 	glbin_cache_queue.set_max_size(3);
-	tm_processor.LinkAddedCells(list, m_cur_time, m_cur_time - 1);
-	tm_processor.LinkAddedCells(list, m_cur_time, m_cur_time + 1);
+	glbin_trackmap_proc.LinkAddedCells(list, m_cur_time, m_cur_time - 1);
+	glbin_trackmap_proc.LinkAddedCells(list, m_cur_time, m_cur_time + 1);
 	RefineMap(m_cur_time, false);
 }
 
@@ -2708,31 +2647,31 @@ void TraceDlg::GenMap()
 
 	//get and set parameters
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
-	flrd::TrackMapProcessor tm_processor(track_map);
+	glbin_trackmap_proc.SetTrackMap(track_map);
 	int resx, resy, resz;
 	vd->GetResolution(resx, resy, resz);
 	double spcx, spcy, spcz;
 	vd->GetSpacings(spcx, spcy, spcz);
-	tm_processor.SetBits(vd->GetBits());
-	tm_processor.SetScale(vd->GetScalarScale());
-	tm_processor.SetSizes(resx, resy, resz);
-	tm_processor.SetSpacings(spcx, spcy, spcz);
-	tm_processor.SetSizeThresh(m_size_thresh);
-	tm_processor.SetContactThresh(m_contact_factor);
-	tm_processor.SetSimilarThresh(m_similarity);
+	glbin_trackmap_proc.SetBits(vd->GetBits());
+	glbin_trackmap_proc.SetScale(vd->GetScalarScale());
+	glbin_trackmap_proc.SetSizes(resx, resy, resz);
+	glbin_trackmap_proc.SetSpacings(spcx, spcy, spcz);
+	glbin_trackmap_proc.SetSizeThresh(glbin_settings.m_component_size);
+	glbin_trackmap_proc.SetContactThresh(glbin_settings.m_contact_factor);
+	glbin_trackmap_proc.SetSimilarThresh(glbin_settings.m_similarity);
 	//register file reading and deleteing functions
 	glbin_reg_cache_queue_func(this, TraceDlg::ReadVolCache, TraceDlg::DelVolCache);
 	glbin_cache_queue.set_max_size(4);
 	//merge/split
-	tm_processor.SetMerge(m_try_merge);
-	tm_processor.SetSplit(m_try_split);
+	glbin_trackmap_proc.SetMerge(glbin_settings.m_try_merge);
+	glbin_trackmap_proc.SetSplit(glbin_settings.m_try_split);
 
 	//start timing
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	//initialization
 	for (int i = 0; i < frames; ++i)
 	{
-		tm_processor.InitializeFrame(i);
+		glbin_trackmap_proc.InitializeFrame(i);
 		(*m_stat_text) << wxString::Format("Time point %d initialized.\n", i);
 		wxGetApp().Yield();
 
@@ -2740,13 +2679,13 @@ void TraceDlg::GenMap()
 			continue;
 
 		//link maps 1 and 2
-		tm_processor.LinkFrames(i - 1, i);
+		glbin_trackmap_proc.LinkFrames(i - 1, i);
 		(*m_stat_text) << wxString::Format("Time point %d linked.\n", i);
 		wxGetApp().Yield();
 
 		//check contacts and merge cells
-		tm_processor.ResolveGraph(i - 1, i);
-		tm_processor.ResolveGraph(i, i - 1);
+		glbin_trackmap_proc.ResolveGraph(i - 1, i);
+		glbin_trackmap_proc.ResolveGraph(i, i - 1);
 		(*m_stat_text) << wxString::Format("Time point %d merged.\n", i - 1);
 		wxGetApp().Yield();
 
@@ -2754,42 +2693,42 @@ void TraceDlg::GenMap()
 			continue;
 
 		//further process
-		tm_processor.ProcessFrames(i - 2, i - 1);
-		tm_processor.ProcessFrames(i - 1, i - 2);
+		glbin_trackmap_proc.ProcessFrames(i - 2, i - 1);
+		glbin_trackmap_proc.ProcessFrames(i - 1, i - 2);
 		(*m_stat_text) << wxString::Format("Time point %d processed.\n", i - 1);
 		wxGetApp().Yield();
 	}
 	//last frame
-	tm_processor.ProcessFrames(frames - 2, frames - 1);
-	tm_processor.ProcessFrames(frames - 1, frames - 2);
+	glbin_trackmap_proc.ProcessFrames(frames - 2, frames - 1);
+	glbin_trackmap_proc.ProcessFrames(frames - 1, frames - 2);
 	(*m_stat_text) << wxString::Format("Time point %d processed.\n", frames - 1);
 	wxGetApp().Yield();
 
 	//iterations
-	for (size_t iteri = 0; iteri < m_iter_num; ++iteri)
+	for (size_t iteri = 0; iteri < glbin_settings.m_track_iter; ++iteri)
 	{
 		for (int i = 2; i <= frames; ++i)
 		{
 			//further process
-			tm_processor.ProcessFrames(i - 2, i - 1);
-			tm_processor.ProcessFrames(i - 1, i - 2);
+			glbin_trackmap_proc.ProcessFrames(i - 2, i - 1);
+			glbin_trackmap_proc.ProcessFrames(i - 1, i - 2);
 			(*m_stat_text) << wxString::Format("Time point %d processed.\n", i - 1);
 			wxGetApp().Yield();
 		}
 	}
 
 	//consistent colors
-	if (m_consistent_color)
+	if (glbin_settings.m_consistent_color)
 	{
 		(*m_stat_text) << wxString::Format("Set colors for frame 0\n");
 		wxGetApp().Yield();
-		tm_processor.MakeConsistent(0);
+		glbin_trackmap_proc.MakeConsistent(0);
 		//remaining frames
 		for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
 		{
 			(*m_stat_text) << wxString::Format("Set colors for frame %d\n", int(fi));
 			wxGetApp().Yield();
-			tm_processor.MakeConsistent(fi - 1, fi);
+			glbin_trackmap_proc.MakeConsistent(fi - 1, fi);
 		}
 	}
 
@@ -2835,62 +2774,62 @@ void TraceDlg::RefineMap(int t, bool erase_v)
 		start_frame = end_frame = t;
 
 	//get and set parameters
-	flrd::TrackMapProcessor tm_processor(track_map);
+	glbin_trackmap_proc.SetTrackMap(track_map);
 	int resx, resy, resz;
 	vd->GetResolution(resx, resy, resz);
 	double spcx, spcy, spcz;
 	vd->GetSpacings(spcx, spcy, spcz);
-	tm_processor.SetBits(vd->GetBits());
-	tm_processor.SetScale(vd->GetScalarScale());
-	tm_processor.SetSizes(resx, resy, resz);
-	tm_processor.SetSpacings(spcx, spcy, spcz);
-	tm_processor.SetSizeThresh(m_size_thresh);
-	tm_processor.SetContactThresh(m_contact_factor);
-	tm_processor.SetSimilarThresh(m_similarity);
+	glbin_trackmap_proc.SetBits(vd->GetBits());
+	glbin_trackmap_proc.SetScale(vd->GetScalarScale());
+	glbin_trackmap_proc.SetSizes(resx, resy, resz);
+	glbin_trackmap_proc.SetSpacings(spcx, spcy, spcz);
+	glbin_trackmap_proc.SetSizeThresh(glbin_settings.m_component_size);
+	glbin_trackmap_proc.SetContactThresh(glbin_settings.m_contact_factor);
+	glbin_trackmap_proc.SetSimilarThresh(glbin_settings.m_similarity);
 	//register file reading and deleteing functions
 	glbin_reg_cache_queue_func(this, TraceDlg::ReadVolCache, TraceDlg::DelVolCache);
 	glbin_cache_queue.set_max_size(4);
 	//merge/split
-	tm_processor.SetMerge(m_try_merge);
-	tm_processor.SetSplit(m_try_split);
+	glbin_trackmap_proc.SetMerge(glbin_settings.m_try_merge);
+	glbin_trackmap_proc.SetSplit(glbin_settings.m_try_split);
 
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
 	//not sure if counters need to be cleared for all refinement
 	//if (clear_counters)
-	//	tm_processor.ClearCounters();
+	//	glbin_trackmap_proc.ClearCounters();
 	//iterations
-	for (size_t iteri = 0; iteri < m_iter_num; ++iteri)
+	for (size_t iteri = 0; iteri < glbin_settings.m_track_iter; ++iteri)
 	{
 		for (int i = start_frame - 1; i <= end_frame; ++i)
 		{
 			//further process
-			tm_processor.ProcessFrames(i, i + 1, erase_v);
-			tm_processor.ProcessFrames(i + 1, i, erase_v);
+			glbin_trackmap_proc.ProcessFrames(i, i + 1, erase_v);
+			glbin_trackmap_proc.ProcessFrames(i + 1, i, erase_v);
 			(*m_stat_text) << wxString::Format("Time point %d processed.\n", i + 1);
 			wxGetApp().Yield();
 		}
 	}
 
 	//consistent colors
-	if (m_consistent_color)
+	if (glbin_settings.m_consistent_color)
 	{
 		if (t < 0)
 		{
 			(*m_stat_text) << wxString::Format("Set colors for frame 0\n");
 			wxGetApp().Yield();
-			tm_processor.MakeConsistent(0);
+			glbin_trackmap_proc.MakeConsistent(0);
 			//remaining frames
 			for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
 			{
 				(*m_stat_text) << wxString::Format("Set colors for frame %d\n", int(fi));
 				wxGetApp().Yield();
-				tm_processor.MakeConsistent(fi - 1, fi);
+				glbin_trackmap_proc.MakeConsistent(fi - 1, fi);
 			}
 		}
 		else
 		{
-			tm_processor.MakeConsistent(t - 1, t);
+			glbin_trackmap_proc.MakeConsistent(t - 1, t);
 		}
 	}
 

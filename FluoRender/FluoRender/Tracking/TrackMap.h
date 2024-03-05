@@ -57,7 +57,7 @@ namespace flrd
 	class TrackMapProcessor
 	{
 	public:
-		TrackMapProcessor(pTrackMap &track_map) :
+		TrackMapProcessor() :
 		m_contact_thresh(0.6f),
 		m_size_thresh(25.0f),
 		m_similar_thresh(0.2f),
@@ -67,10 +67,10 @@ namespace flrd
 		m_max_iter(25),
 		m_eps(1e-3),
 		m_filter(1),
-		m_stencil_thresh(2),
-		m_map(track_map) {}
+		m_stencil_thresh(2){}
 		~TrackMapProcessor();
 
+		void SetTrackMap(pTrackMap& map);
 		void SetContactThresh(float value);
 		void SetSizeThresh(float value);
 		void SetSimilarThresh(float value);
@@ -167,6 +167,8 @@ namespace flrd
 			int mode, size_t start, int sim);
 
 	private:
+		//the trackmap
+		pTrackMap m_map;
 		float m_contact_thresh;
 		float m_size_thresh;
 		float m_similar_thresh;
@@ -179,8 +181,6 @@ namespace flrd
 		fluo::Point m_stencil_thresh;
 		//uncertainty filter
 		unsigned int m_uncertain_low;
-		//the trackmap
-		pTrackMap m_map;
 		//cur & neighbor frames for orphan searching
 		size_t m_frame1;
 		size_t m_frame2;

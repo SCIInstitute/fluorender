@@ -106,10 +106,10 @@ bool VRenderApp::OnInit()
 	bool run_mov = false;
 	if (m_mov_file != "")
 	{
-		VRenderFrame::SetCompression(m_lzw);
-		VRenderFrame::SetSaveAlpha(m_save_alpha);
-		VRenderFrame::SetSaveFloat(m_save_float);
-		VRenderFrame::SetDpi(m_dpi);
+		glbin_settings.m_save_compress = m_lzw;
+		glbin_settings.m_save_alpha = m_save_alpha;
+		glbin_settings.m_save_float = m_save_float;
+		glbin_settings.m_dpi = m_dpi;
 		if (((VRenderFrame*)frame)->GetMovieView())
 		{
 			((VRenderFrame*)frame)->GetMovieView()->SetBitRate(m_bitrate);
@@ -121,11 +121,7 @@ bool VRenderApp::OnInit()
 		((VRenderFrame*)frame)->StartupLoad(m_files, run_mov, m_imagej);
 
 	// Adding JVm initialization.
-	std::vector<std::string> args;
-	args.push_back(glbin_settings.m_jvm_path.ToStdString());
-	args.push_back(glbin_settings.m_ij_path.ToStdString());
-	args.push_back(glbin_settings.m_bioformats_path.ToStdString());
-	JVMInitializer*	pInstance = JVMInitializer::getInstance(args);
+	JVMInitializer*	pInstance = JVMInitializer::getInstance(glbin_settings.GetJvmArgs());
 	return true;
 }
 

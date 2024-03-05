@@ -228,13 +228,13 @@ void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append, bool tr
 	{
 		//trace_group->AddCell(cell, m_cur_time);
 		pTrackMap track_map = trace_group->GetTrackMap();
-		TrackMapProcessor tm_processor(track_map);
+		glbin_trackmap_proc.SetTrackMap(track_map);
 		//register file reading and deleteing functions
 		glbin_reg_cache_queue_func(this, ComponentEditor::ReadVolCache, ComponentEditor::DelVolCache);
 		glbin_cache_queue.set_max_size(4);
 		//add
 		cell->Calc();
-		tm_processor.AddCellDup(cell, cur_time);
+		glbin_trackmap_proc.AddCellDup(cell, cur_time);
 	}
 }
 

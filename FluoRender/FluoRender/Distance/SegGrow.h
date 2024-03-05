@@ -33,7 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Point.h>
 #include <set>
 
-class VolumeData;
 namespace flrd
 {
 	class RulerHandler;
@@ -49,9 +48,10 @@ namespace flrd
 	class SegGrow
 	{
 	public:
-		SegGrow(VolumeData* vd);
+		SegGrow();
 		~SegGrow();
 
+		void SetVolumeData(VolumeData* vd) { m_vd = vd; }
 		void SetBranches(int val) { m_branches = val; }
 		void SetIter(int val) { m_iter = val; }
 		void SetSizeThresh(int size) { m_sz_thresh = size; }

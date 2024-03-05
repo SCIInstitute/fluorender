@@ -3797,10 +3797,10 @@ void TraceGroup::GetLinkLists(size_t frame,
 	if (out_multi_list.size())
 		out_multi_list.clear();
 
-	flrd::TrackMapProcessor tm_processor(m_track_map);
-	tm_processor.SetSizeThresh(m_cell_size);
-	tm_processor.SetUncertainLow(m_uncertain_low);
-	tm_processor.GetLinkLists(frame,
+	glbin_trackmap_proc.SetTrackMap(m_track_map);
+	glbin_trackmap_proc.SetSizeThresh(m_cell_size);
+	glbin_trackmap_proc.SetUncertainLow(m_uncertain_low);
+	glbin_trackmap_proc.GetLinkLists(frame,
 		in_orphan_list, out_orphan_list,
 		in_multi_list, out_multi_list);
 }
@@ -3840,8 +3840,8 @@ void TraceGroup::UpdateCellList(flrd::CelpList &cur_sel_list)
 
 	//get mapped cells
 	//cur_sel_list -> m_cell_list
-	flrd::TrackMapProcessor tm_processor(m_track_map);
-	tm_processor.GetMappedCells(
+	glbin_trackmap_proc.SetTrackMap(m_track_map);
+	glbin_trackmap_proc.GetMappedCells(
 		cur_sel_list, m_cell_list,
 		(unsigned int)m_prv_time,
 		(unsigned int)m_cur_time);
@@ -3862,48 +3862,48 @@ bool TraceGroup::FindCell(unsigned int id)
 //modifications
 bool TraceGroup::AddCell(flrd::Celp &cell, size_t frame)
 {
-	flrd::TrackMapProcessor tm_processor(m_track_map);
-	return tm_processor.AddCellDup(cell, frame);
+	glbin_trackmap_proc.SetTrackMap(m_track_map);
+	return glbin_trackmap_proc.AddCellDup(cell, frame);
 }
 
 bool TraceGroup::LinkCells(flrd::CelpList &list1, flrd::CelpList &list2,
 	size_t frame1, size_t frame2, bool exclusive)
 {
-	flrd::TrackMapProcessor tm_processor(m_track_map);
-	return tm_processor.LinkCells(list1, list2,
+	glbin_trackmap_proc.SetTrackMap(m_track_map);
+	return glbin_trackmap_proc.LinkCells(list1, list2,
 		frame1, frame2, exclusive);
 }
 
 bool TraceGroup::IsolateCells(flrd::CelpList &list, size_t frame)
 {
-	flrd::TrackMapProcessor tm_processor(m_track_map);
-	return tm_processor.IsolateCells(list, frame);
+	glbin_trackmap_proc.SetTrackMap(m_track_map);
+	return glbin_trackmap_proc.IsolateCells(list, frame);
 }
 
 bool TraceGroup::UnlinkCells(flrd::CelpList &list1, flrd::CelpList &list2,
 	size_t frame1, size_t frame2)
 {
-	flrd::TrackMapProcessor tm_processor(m_track_map);
-	return tm_processor.UnlinkCells(list1, list2, frame1, frame2);
+	glbin_trackmap_proc.SetTrackMap(m_track_map);
+	return glbin_trackmap_proc.UnlinkCells(list1, list2, frame1, frame2);
 }
 
 bool TraceGroup::CombineCells(flrd::Celp &cell, flrd::CelpList &list,
 	size_t frame)
 {
-	flrd::TrackMapProcessor tm_processor(m_track_map);
-	return tm_processor.CombineCells(cell, list, frame);
+	glbin_trackmap_proc.SetTrackMap(m_track_map);
+	return glbin_trackmap_proc.CombineCells(cell, list, frame);
 }
 
 bool TraceGroup::DivideCells(flrd::CelpList &list, size_t frame)
 {
-	flrd::TrackMapProcessor tm_processor(m_track_map);
-	return tm_processor.DivideCells(list, frame);
+	glbin_trackmap_proc.SetTrackMap(m_track_map);
+	return glbin_trackmap_proc.DivideCells(list, frame);
 }
 
 bool TraceGroup::ReplaceCellID(unsigned int old_id, unsigned int new_id, size_t frame)
 {
-	flrd::TrackMapProcessor tm_processor(m_track_map);
-	return tm_processor.ReplaceCellID(old_id, new_id, frame);
+	glbin_trackmap_proc.SetTrackMap(m_track_map);
+	return glbin_trackmap_proc.ReplaceCellID(old_id, new_id, frame);
 }
 
 bool TraceGroup::GetMappedRulers(flrd::RulerList &rulers)
@@ -4161,17 +4161,17 @@ void TraceGroup::Clear()
 bool TraceGroup::Load(wxString &filename)
 {
 	m_data_path = filename;
-	flrd::TrackMapProcessor tm_processor(m_track_map);
+	glbin_trackmap_proc.SetTrackMap(m_track_map);
 	std::string str = ws2s(m_data_path.ToStdWstring());
-	return tm_processor.Import(str);
+	return glbin_trackmap_proc.Import(str);
 }
 
 bool TraceGroup::Save(wxString &filename)
 {
 	m_data_path = filename;
-	flrd::TrackMapProcessor tm_processor(m_track_map);
+	glbin_trackmap_proc.SetTrackMap(m_track_map);
 	std::string str = ws2s(m_data_path.ToStdWstring());
-	return tm_processor.Export(str);
+	return glbin_trackmap_proc.Export(str);
 }
 
 unsigned int TraceGroup::Draw(vector<float> &verts, int shuffle)

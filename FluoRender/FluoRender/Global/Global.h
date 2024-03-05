@@ -46,6 +46,12 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelExecutor.h>
 #include <ScriptProc.h>
 #include <RulerAlign.h>
+#include <TrackMap.h>
+#include <RulerHandler.h>
+#include <RulerRenderer.h>
+#include <VolumePoint.h>
+#include <SegGrow.h>
+#include <DistCalculator.h>
 
 #define glbin fluo::Global::instance()
 #define glbin_cache_queue fluo::Global::instance().get_cache_queue()
@@ -70,6 +76,12 @@ DEALINGS IN THE SOFTWARE.
 #define glbin_kernel_executor fluo::Global::instance().get_kernel_executor()
 #define glbin_script_proc fluo::Global::instance().get_script_proc()
 #define glbin_aligner fluo::Global::instance().get_aligner()
+#define glbin_trackmap_proc fluo::Global::instance().get_trackmap_proc()
+#define glbin_ruler_handler fluo::Global::instance().get_ruler_handler()
+#define glbin_ruler_renderer fluo::Global::instance().get_ruler_renderer()
+#define glbin_volume_point fluo::Global::instance().get_volume_point()
+#define glbin_seg_grow fluo::Global::instance().get_seg_grow()
+#define glbin_dist_calculator fluo::Global::instance().get_dist_calculator()
 
 namespace fluo
 {
@@ -144,6 +156,7 @@ namespace fluo
 		VolumeDataDefault& get_vol_def();
 
 		//data processors
+		void apply_processor_settings();
 		flrd::ComponentGenerator& get_comp_generator() { return m_comp_generator; }
 		flrd::ComponentAnalyzer& get_comp_analyzer() { return m_comp_analyzer; }
 		flrd::ComponentSelector& get_comp_selector() { return m_comp_selector; }
@@ -152,6 +165,12 @@ namespace fluo
 		KernelExecutor& get_kernel_executor() { return m_kernel_executor; }
 		flrd::ScriptProc& get_script_proc() { return m_script_proc; }
 		flrd::RulerAlign& get_aligner() { return m_aligner; }
+		flrd::TrackMapProcessor& get_trackmap_proc() { return m_trackmap_proc; }
+		flrd::RulerHandler& get_ruler_handler() { return m_ruler_handler; }
+		flrd::RulerRenderer& get_ruler_renderer() { return m_ruler_renderer; }
+		flrd::VolumePoint& get_volume_point() { return m_volume_point; }
+		flrd::SegGrow& get_seg_grow() { return m_seg_grow; }
+		flrd::DistCalculator& get_dist_calculator() { return m_dist_calculator; }
 
 	private:
 		Global();
@@ -190,6 +209,12 @@ namespace fluo
 		KernelExecutor m_kernel_executor;
 		flrd::ScriptProc m_script_proc;
 		flrd::RulerAlign m_aligner;
+		flrd::TrackMapProcessor m_trackmap_proc;
+		flrd::RulerHandler m_ruler_handler;
+		flrd::RulerRenderer m_ruler_renderer;
+		flrd::VolumePoint m_volume_point;
+		flrd::SegGrow m_seg_grow;
+		flrd::DistCalculator m_dist_calculator;
 	};
 
 }

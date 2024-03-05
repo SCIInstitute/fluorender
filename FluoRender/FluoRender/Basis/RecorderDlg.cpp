@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "RecorderDlg.h"
 #include "VRenderFrame.h"
+#include <Global.h>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include "key.xpm"
@@ -1043,7 +1044,7 @@ void RecorderDlg::OnCh1Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
 	if (ch1)
-		VRenderFrame::SetCompression(ch1->GetValue());
+		glbin_settings.m_save_compress = ch1->GetValue();
 }
 
 wxWindow* RecorderDlg::CreateExtraCaptureControl(wxWindow* parent)
@@ -1061,7 +1062,7 @@ wxWindow* RecorderDlg::CreateExtraCaptureControl(wxWindow* parent)
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(RecorderDlg::OnCh1Check), NULL, panel);
 	if (ch1)
-		ch1->SetValue(VRenderFrame::GetCompression());
+		ch1->SetValue(glbin_settings.m_save_compress);
 
 	//group
 	group1->Add(10, 10);

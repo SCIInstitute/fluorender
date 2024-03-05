@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ListPanel.h"
+#include <Global.h>
 #include <DataManager.h>
 #include "VRenderFrame.h"
 #include "Formats/png_resource.h"
@@ -438,7 +439,7 @@ void DataListCtrl::OnCropCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
 	if (ch1)
-		VRenderFrame::SetCrop(ch1->GetValue());
+		glbin_settings.m_save_crop = ch1->GetValue();
 }
 
 //compress
@@ -446,7 +447,7 @@ void DataListCtrl::OnCompCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
 	if (ch1)
-		VRenderFrame::SetCompression(ch1->GetValue());
+		glbin_settings.m_save_compress = ch1->GetValue();
 }
 
 void DataListCtrl::OnResizeCheck(wxCommandEvent &event)
@@ -508,7 +509,7 @@ void DataListCtrl::OnFilterChange(wxCommandEvent &event)
 {
 	wxComboBox* combo = (wxComboBox*)event.GetEventObject();
 	if (combo)
-		VRenderFrame::SetFilter(combo->GetSelection());
+		glbin_settings.m_save_filter = combo->GetSelection();
 }
 
 wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
@@ -528,7 +529,7 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 		"Lempel-Ziv-Welch Compression");
 	comp_chk->Connect(comp_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(DataListCtrl::OnCompCheck), NULL, panel);
-	comp_chk->SetValue(VRenderFrame::GetCompression());
+	comp_chk->SetValue(glbin_settings.m_save_compress);
 	sizer1->Add(10, 10);
 	sizer1->Add(comp_chk);
 	//crop
@@ -537,7 +538,7 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 		"Use Clipping Planes to Crop");
 	crop_chk->Connect(crop_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(DataListCtrl::OnCropCheck), NULL, panel);
-	crop_chk->SetValue(VRenderFrame::GetCrop());
+	crop_chk->SetValue(glbin_settings.m_save_crop);
 	sizer2->Add(10, 10);
 	sizer2->Add(crop_chk);
 	//resize
@@ -569,7 +570,7 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 	combo_list.push_back("Box");
 	for (size_t i = 0; i < combo_list.size(); ++i)
 		combo->Append(combo_list[i]);
-	combo->SetSelection(VRenderFrame::GetFilter());
+	combo->SetSelection(glbin_settings.m_save_filter);
 
 	if (m_vd)
 	{
@@ -646,8 +647,8 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 				if (m_vd)
 				{
 					m_vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
-						VRenderFrame::GetCrop(), VRenderFrame::GetFilter(),
-						false, VRenderFrame::GetCompression(),
+						glbin_settings.m_save_crop, glbin_settings.m_save_filter,
+						false, glbin_settings.m_save_compress,
 						fluo::Point(), q, fluo::Point(), false);
 					wxString str = m_vd->GetPath();
 					SetText(item, 2, str);
@@ -743,8 +744,8 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
 				if (vd)
 				{
 					vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
-						VRenderFrame::GetCrop(), VRenderFrame::GetFilter(),
-						true, VRenderFrame::GetCompression(),
+						glbin_settings.m_save_crop, glbin_settings.m_save_filter,
+						true, glbin_settings.m_save_compress,
 						fluo::Point(), q, fluo::Point(), false);
 					wxString str = vd->GetPath();
 					SetText(item, 2, str);

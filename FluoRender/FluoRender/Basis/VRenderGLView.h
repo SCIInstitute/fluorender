@@ -551,8 +551,6 @@ public:
 	void DrawRulers();
 	flrd::RulerList* GetRulerList();
 	flrd::Ruler* GetRuler(unsigned int id);
-	flrd::RulerHandler* GetRulerHandler() { return &m_ruler_handler; }
-	flrd::RulerRenderer* GetRulerRenderer() { return &m_ruler_renderer; }
 
 	//draw highlighted comps
 	void DrawCells();
@@ -1209,9 +1207,6 @@ private:
 #endif
 
 	//handle rulers
-	flrd::RulerHandler m_ruler_handler;
-	flrd::RulerRenderer m_ruler_renderer;
-	flrd::VolumePoint m_vp;
 
 	//focused slider
 	wxBasisSlider* m_focused_slider;

@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ScriptBreakDlg.h"
 #include "VRenderFrame.h"
+#include <Global.h>
 
 BEGIN_EVENT_TABLE(ScriptBreakDlg, wxPanel)
 EVT_CHECKBOX(ID_ShownChk, ScriptBreakDlg::OnShownChk)
@@ -99,9 +100,7 @@ void ScriptBreakDlg::Hold()
 
 void ScriptBreakDlg::OnShownChk(wxCommandEvent& event)
 {
-	bool bval = m_shown_chk->GetValue();
-	if (bval)
-		m_frame->GetSettingDlg()->SetScriptBreak(false);
+	glbin_settings.m_script_break = m_shown_chk->GetValue();
 }
 
 void ScriptBreakDlg::OnStopBtn(wxCommandEvent& event)

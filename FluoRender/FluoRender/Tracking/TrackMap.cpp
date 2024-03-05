@@ -58,6 +58,11 @@ TrackMap::~TrackMap()
 {
 }
 
+void TrackMapProcessor::SetTrackMap(pTrackMap& map)
+{
+	m_map = map;
+}
+
 void TrackMapProcessor::SetSizes(size_t nx, size_t ny, size_t nz)
 {
 	m_map->m_size_x = nx;

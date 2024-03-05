@@ -579,8 +579,8 @@ const char* str_cl_sg_check_borders = \
 "}\n" \
 ;
 
-SegGrow::SegGrow(VolumeData* vd):
-	m_vd(vd),
+SegGrow::SegGrow():
+	m_vd(0),
 	m_branches(10),
 	m_iter(0),
 	m_sz_thresh(10)

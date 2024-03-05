@@ -1205,6 +1205,27 @@ void ComponentDlg::GetSettings()
 	Update();
 }
 
+void ComponentDlg::OnLoadSettings(wxCommandEvent& event)
+{
+	wxFileDialog* fopendlg = new wxFileDialog(
+		m_frame, "Choose a FluoRender component generator setting file",
+		"", "", "*.txt;*.dft", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg->GetPath();
+		if (wxFileExists(filename))
+		{
+			glbin_comp_def.Read(filename.ToStdString());
+			Update();
+		}
+	}
+
+	if (fopendlg)
+		delete fopendlg;
+}
+
 void ComponentDlg::OnSaveSettings(wxCommandEvent& event)
 {
 	//glbin_comp_def.Set(&m_comp_analyzer);

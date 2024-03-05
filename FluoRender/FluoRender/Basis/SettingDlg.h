@@ -139,37 +139,8 @@ public:
 	void UpdateDeviceTree();
 	void UpdateTextureSize();
 
-	////get settings from ui
-	//void SetScriptBreak(bool val);
-	////bool GetTestMode(int type);	//type	1:speed test
-	////							//		2:parameter test
-	////							//		3:wireframe mode
-	//int GetPeelingLyers();
-	//bool GetMicroBlend();
-	//void GetShadowDir(double& x, double &y);
-	//int GetWavelengthColor(int n);
-	//background parameters
-	//void GetBgParams(int &type, int &kx, int &ky, double &varth, double &gauth)
-	//{
-	//	type = m_bg_type;
-	//	kx = m_kx;
-	//	ky = m_ky;
-	//	varth = m_varth;
-	//	gauth = m_gauth;
-	//}
-	
-	//Getting the java paths.
-	//wxString getJVMPath();
-	//wxString getIJPath();
-	//wxString getBioformatsPath();
-	//std::vector<std::string> GetJvmArgs();
-
-	//display settings
-	unsigned int GetDisplayNum();
-
 private:
 	VRenderFrame* m_frame;
-
 
 private:
 	//save project

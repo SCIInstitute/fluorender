@@ -161,6 +161,9 @@ VRenderFrame::VRenderFrame(
 #endif
 	//create this first to read the settings
 	glbin_settings.Read();
+	glbin.apply_processor_settings();
+	glbin_vol_calculator.SetFrame(this);
+	glbin_script_proc.SetFrame(this);
 
 	// tell wxAuiManager to manage this frame
 	m_aui_mgr.SetManagedWindow(this);
@@ -242,7 +245,8 @@ VRenderFrame::VRenderFrame(
 		"Open single or multiple volume data file(s)",
 		"Open single or multiple volume data file(s)");
 
-	if (JVMInitializer::getInstance(m_setting_dlg->GetJvmArgs()) != nullptr) {
+	if (JVMInitializer::getInstance(glbin_settings.GetJvmArgs()) != nullptr)
+	{
 		bitmap = wxGetBitmapFromMemory(icon_import);
 		m_main_tb->AddTool(ID_ImportVolume, "Import Volume",
 			bitmap, wxNullBitmap, wxITEM_NORMAL,
@@ -413,14 +417,13 @@ VRenderFrame::VRenderFrame(
 	m_clip_view = new ClippingView(this,
 		wxDefaultPosition, FromDIP(wxSize(130,700)));
 	m_clip_view->SetDataManager(&m_data_mgr);
-	m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(
-		m_setting_dlg->GetPlaneMode()));
+	m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(glbin_settings.m_plane_mode));
 
 	//adjust view
 	m_adjust_view = new AdjustView(this,
 		wxDefaultPosition, FromDIP(wxSize(75, 700)));
 
-	wxString font_file = m_setting_dlg->GetFontFile();
+	wxString font_file = glbin_settings.m_font_file;
 	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 	exePath = wxPathOnly(exePath);
 	if (font_file != "")
@@ -430,46 +433,45 @@ VRenderFrame::VRenderFrame(
 		font_file = exePath + GETSLASH() + "Fonts" +
 			GETSLASH() + "FreeSans.ttf";
 	flvr::TextRenderer::text_texture_manager_.load_face(font_file.ToStdString());
-	flvr::TextRenderer::text_texture_manager_.SetSize(m_setting_dlg->GetTextSize());
+	flvr::TextRenderer::text_texture_manager_.SetSize(glbin_settings.m_text_size);
 
 	//settings dialog
 	m_setting_dlg = new SettingDlg(this);
 
-	if (m_setting_dlg->GetTestMode(1))
+	if (glbin_settings.m_test_speed)
 		m_vrv_list[0]->m_glview->m_test_speed = true;
-	if (m_setting_dlg->GetTestMode(3))
+	if (glbin_settings.m_test_wiref)
 	{
 		m_vrv_list[0]->m_glview->m_test_wiref = true;
 		m_vrv_list[0]->m_glview->m_draw_bounds = true;
 		m_vrv_list[0]->m_glview->m_draw_grid = true;
 		m_data_mgr.m_vol_test_wiref = true;
 	}
-	int c1 = m_setting_dlg->GetWavelengthColor(1);
-	int c2 = m_setting_dlg->GetWavelengthColor(2);
-	int c3 = m_setting_dlg->GetWavelengthColor(3);
-	int c4 = m_setting_dlg->GetWavelengthColor(4);
+	int c1 = glbin_settings.m_wav_color1;
+	int c2 = glbin_settings.m_wav_color2;
+	int c3 = glbin_settings.m_wav_color3;
+	int c4 = glbin_settings.m_wav_color4;
 	if (c1 && c2 && c3 && c4)
 		m_data_mgr.SetWavelengthColor(c1, c2, c3, c4);
-	m_vrv_list[0]->SetPinThreshold(m_setting_dlg->GetPinThreshold());
-	m_vrv_list[0]->m_glview->SetPeelingLayers(m_setting_dlg->GetPeelingLyers());
-	m_vrv_list[0]->m_glview->SetBlendSlices(m_setting_dlg->GetMicroBlend());
-	m_vrv_list[0]->m_glview->SetAdaptive(m_setting_dlg->GetMouseInt());
-	m_vrv_list[0]->m_glview->SetGradBg(m_setting_dlg->GetGradBg());
-	m_vrv_list[0]->m_glview->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
-	m_vrv_list[0]->m_glview->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
-	m_vrv_list[0]->m_glview->SetStereo(m_setting_dlg->GetStereo());
-	m_vrv_list[0]->m_glview->SetSBS(m_setting_dlg->GetSBS());
-	m_vrv_list[0]->m_glview->SetEyeDist(m_setting_dlg->GetEyeDist());
-	if (m_setting_dlg->GetStereo()) m_vrv_list[0]->InitOpenVR();
-	m_time_id = m_setting_dlg->GetTimeId();
-	m_data_mgr.SetOverrideVox(m_setting_dlg->GetOverrideVox());
-	m_data_mgr.SetPvxmlFlipX(m_setting_dlg->GetPvxmlFlipX());
-	m_data_mgr.SetPvxmlFlipY(m_setting_dlg->GetPvxmlFlipY());
-	m_data_mgr.SetPvxmlSeqType(m_setting_dlg->GetPvxmlSeqType());
-	flvr::VolumeRenderer::set_soft_threshold(m_setting_dlg->GetSoftThreshold());
-	flvr::MultiVolumeRenderer::set_soft_threshold(m_setting_dlg->GetSoftThreshold());
-	TreeLayer::SetSoftThreshsold(m_setting_dlg->GetSoftThreshold());
-	VolumeMeshConv::SetSoftThreshold(m_setting_dlg->GetSoftThreshold());
+	m_vrv_list[0]->SetPinThreshold(glbin_settings.m_pin_threshold);
+	m_vrv_list[0]->m_glview->SetPeelingLayers(glbin_settings.m_peeling_layers);
+	m_vrv_list[0]->m_glview->SetBlendSlices(glbin_settings.m_micro_blend);
+	m_vrv_list[0]->m_glview->SetAdaptive(glbin_settings.m_mouse_int);
+	m_vrv_list[0]->m_glview->SetGradBg(glbin_settings.m_grad_bg);
+	m_vrv_list[0]->m_glview->SetPointVolumeMode(glbin_settings.m_point_volume_mode);
+	m_vrv_list[0]->m_glview->SetRulerUseTransf(glbin_settings.m_ruler_use_transf);
+	m_vrv_list[0]->m_glview->SetStereo(glbin_settings.m_stereo);
+	m_vrv_list[0]->m_glview->SetSBS(glbin_settings.m_sbs);
+	m_vrv_list[0]->m_glview->SetEyeDist(glbin_settings.m_eye_dist);
+	if (glbin_settings.m_stereo) m_vrv_list[0]->InitOpenVR();
+	m_data_mgr.SetOverrideVox(glbin_settings.m_override_vox);
+	m_data_mgr.SetPvxmlFlipX(glbin_settings.m_pvxml_flip_x);
+	m_data_mgr.SetPvxmlFlipY(glbin_settings.m_pvxml_flip_y);
+	m_data_mgr.SetPvxmlSeqType(glbin_settings.m_pvxml_seq_type);
+	flvr::VolumeRenderer::set_soft_threshold(glbin_settings.m_soft_threshold);
+	flvr::MultiVolumeRenderer::set_soft_threshold(glbin_settings.m_soft_threshold);
+	TreeLayer::SetSoftThreshsold(glbin_settings.m_soft_threshold);
+	VolumeMeshConv::SetSoftThreshold(glbin_settings.m_soft_threshold);
 
 	//brush tool dialog
 	m_brush_tool_dlg = new BrushToolDlg(this);
@@ -491,7 +493,7 @@ VRenderFrame::VRenderFrame(
 
 	//trace dialog
 	m_trace_dlg = new TraceDlg(this);
-	m_trace_dlg->SetCellSize(m_setting_dlg->GetComponentSize());
+	m_trace_dlg->SetCellSize(glbin_settings.m_component_size);
 
 	//ocl dialog
 	m_ocl_dlg = new OclDlg(this);
@@ -515,7 +517,7 @@ VRenderFrame::VRenderFrame(
 	//tester
 	//shown for testing parameters
 	m_tester = new TesterDlg(this);
-	if (m_setting_dlg->GetTestMode(2))
+	if (glbin_settings.m_test_param)
 		m_tester->Show(true);
 	else
 		m_tester->Show(false);
@@ -712,7 +714,7 @@ VRenderFrame::VRenderFrame(
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_volume_mini));
 	m_top_file->Append(m);
 
-	if (JVMInitializer::getInstance(m_setting_dlg->GetJvmArgs()) != nullptr) {
+	if (JVMInitializer::getInstance(glbin_settings.GetJvmArgs()) != nullptr) {
 		m = new wxMenuItem(m_top_file, ID_ImportVolume, wxT("Import &Volume"));
 		m->SetBitmap(wxGetBitmapFromMemory(icon_import_mini));
 		m_top_file->Append(m);
@@ -845,7 +847,7 @@ VRenderFrame::VRenderFrame(
 	//set analyze icon
 	if (m_setting_dlg)
 	{
-		switch (m_setting_dlg->GetLastTool())
+		switch (glbin_settings.m_last_tool)
 		{
 		case TOOL_PAINT_BRUSH:
 		default:
@@ -893,10 +895,6 @@ VRenderFrame::VRenderFrame(
 				wxGetBitmapFromMemory(icon_machine_learning));
 			break;
 		}
-		SetSaveProject(m_setting_dlg->GetProjSave());
-		SetSaveAlpha(m_setting_dlg->GetSaveAlpha());
-		SetSaveFloat(m_setting_dlg->GetSaveFloat());
-		SetDpi(m_setting_dlg->GetDpi());
 	}
 
 	if (fullscreen)
@@ -911,15 +909,16 @@ VRenderFrame::VRenderFrame(
 		flvr::TextureRenderer::set_mainmem_buf_size(mainmem_buf_size);
 
 	//python
-	flrd::PyBase::SetHighVer(m_setting_dlg->GetPythonVer());
+	flrd::PyBase::SetHighVer(glbin_settings.m_python_ver);
 
 	//keyboard shortcuts
-	wxAcceleratorEntry entries[4];
+	wxAcceleratorEntry entries[5];
 	entries[0].Set(wxACCEL_CTRL, (int)'N', ID_NewProject);
 	entries[1].Set(wxACCEL_CTRL, (int)'S', ID_SaveProject);
 	entries[2].Set(wxACCEL_CTRL, (int)'Z', ID_Undo);
 	entries[3].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'Z', ID_Redo);
-	wxAcceleratorTable accel(4, entries);
+	entries[4].Set(wxACCEL_CTRL, (int)'O', ID_OpenVolume);
+	wxAcceleratorTable accel(5, entries);
 	SetAcceleratorTable(accel);
 }
 
@@ -957,7 +956,6 @@ void VRenderFrame::OnExit(wxCommandEvent& event)
 
 void VRenderFrame::OnClose(wxCloseEvent &event)
 {
-	m_setting_dlg->SaveSettings();
 	bool vrv_saved = false;
 	for (unsigned int i=0; i<m_vrv_list.size(); ++i)
 	{
@@ -995,19 +993,19 @@ wxString VRenderFrame::CreateView(int row)
 	m_vrv_list.push_back(vrv);
 	if (m_movie_view)
 		m_movie_view->AddView(vrv->GetName());
-	if (m_setting_dlg->GetTestMode(3))
+	if (glbin_settings.m_test_wiref)
 	{
 		view->m_test_wiref = true;
 		view->m_draw_bounds = true;
 		view->m_draw_grid = true;
 	}
-	view->SetPeelingLayers(m_setting_dlg->GetPeelingLyers());
-	view->SetBlendSlices(m_setting_dlg->GetMicroBlend());
-	view->SetAdaptive(m_setting_dlg->GetMouseInt());
-	view->SetGradBg(m_setting_dlg->GetGradBg());
-	view->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
-	view->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
-	vrv->SetPinThreshold(m_setting_dlg->GetPinThreshold());
+	view->SetPeelingLayers(glbin_settings.m_peeling_layers);
+	view->SetBlendSlices(glbin_settings.m_micro_blend);
+	view->SetAdaptive(glbin_settings.m_mouse_int);
+	view->SetGradBg(glbin_settings.m_grad_bg);
+	view->SetPointVolumeMode(glbin_settings.m_point_volume_mode);
+	view->SetRulerUseTransf(glbin_settings.m_ruler_use_transf);
+	vrv->SetPinThreshold(glbin_settings.m_pin_threshold);
 
 	//reset gl
 	for (int i = 0; i < GetViewNum(); ++i)
@@ -1138,28 +1136,28 @@ void VRenderFrame::OnCh11Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch11 = (wxCheckBox*)event.GetEventObject();
 	if (ch11)
-		m_sliceSequence = ch11->GetValue();
+		glbin_settings.m_slice_sequence = ch11->GetValue();
 }
 
 void VRenderFrame::OnCh12Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch12 = (wxCheckBox*)event.GetEventObject();
 	if (ch12)
-		m_channSequence = ch12->GetValue();
+		glbin_settings.m_chann_sequence = ch12->GetValue();
 }
 
 void VRenderFrame::OnCmbChange(wxCommandEvent &event)
 {
 	wxComboBox* combo = (wxComboBox*)event.GetEventObject();
 	if (combo)
-		m_digitOrder = combo->GetSelection();
+		glbin_settings.m_digit_order = combo->GetSelection();
 }
 
 void VRenderFrame::OnTxt1Change(wxCommandEvent &event)
 {
 	wxTextCtrl* txt1 = (wxTextCtrl*)event.GetEventObject();
 	if (txt1)
-		m_time_id = txt1->GetValue();
+		glbin_settings.m_time_id = txt1->GetValue();
 }
 
 void VRenderFrame::OnTxt2Change(wxCommandEvent &event)
@@ -1170,7 +1168,7 @@ void VRenderFrame::OnTxt2Change(wxCommandEvent &event)
 		wxString str = txt2->GetValue();
 		long lval;
 		if (str.ToLong(&lval))
-			m_ser_num = lval;
+			glbin_settings.m_ser_num = lval;
 	}
 }
 
@@ -1178,14 +1176,14 @@ void VRenderFrame::OnCh2Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch2 = (wxCheckBox*)event.GetEventObject();
 	if (ch2)
-		m_compression = ch2->GetValue();
+		glbin_settings.m_realtime_compress = ch2->GetValue();
 }
 
 void VRenderFrame::OnCh3Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch3 = (wxCheckBox*)event.GetEventObject();
 	if (ch3)
-		m_skip_brick = ch3->GetValue();
+		glbin_settings.m_skip_brick = ch3->GetValue();
 }
 
 wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
@@ -1204,14 +1202,14 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 		"Read file# as Z sections");
 	ch11->Connect(ch11->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderFrame::OnCh11Check), NULL, panel);
-	ch11->SetValue(m_sliceSequence);
+	ch11->SetValue(glbin_settings.m_slice_sequence);
 
 	//slice sequence check box
 	wxCheckBox* ch12 = new wxCheckBox(panel, ID_READ_CHANN,
 		"Read file# as channels");
 	ch12->Connect(ch12->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderFrame::OnCh12Check), NULL, panel);
-	ch12->SetValue(m_channSequence);
+	ch12->SetValue(glbin_settings.m_chann_sequence);
 
 	//digit order
 	st1 = new wxStaticText(panel, 0,
@@ -1225,7 +1223,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	combo_list.push_back("Z section first");
 	for (size_t i = 0; i < combo_list.size(); ++i)
 		combo->Append(combo_list[i]);
-	combo->SetSelection(m_digitOrder);
+	combo->SetSelection(glbin_settings.m_digit_order);
 
 	//series number
 	st2 = new wxStaticText(panel, 0,
@@ -1253,20 +1251,20 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 		"Compress data (loading will take longer time and data are compressed in graphics memory)");
 	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderFrame::OnCh2Check), NULL, panel);
-	ch2->SetValue(m_compression);
+	ch2->SetValue(glbin_settings.m_realtime_compress);
 
 	//empty brick skipping
 	wxCheckBox* ch3 = new wxCheckBox(panel, ID_SKIP_BRICKS,
 		"Skip empty bricks during rendering (loading takes longer time)");
 	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderFrame::OnCh3Check), NULL, panel);
-	ch3->SetValue(m_skip_brick);
+	ch3->SetValue(glbin_settings.m_skip_brick);
 
 	//time sequence identifier
 	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	wxTextCtrl* txt1 = new wxTextCtrl(panel, ID_TSEQ_ID,
 		"", wxDefaultPosition, wxDefaultSize);
-	txt1->SetValue(m_time_id);
+	txt1->SetValue(glbin_settings.m_time_id);
 	txt1->Connect(txt1->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(VRenderFrame::OnTxt1Change), NULL, panel);
 	st1 = new wxStaticText(panel, 0,
@@ -1314,14 +1312,14 @@ wxWindow* VRenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 		"Compress data (loading will take longer time and data are compressed in graphics memory)");
 	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderFrame::OnCh2Check), NULL, panel);
-	ch2->SetValue(m_compression);
+	ch2->SetValue(glbin_settings.m_realtime_compress);
 
 	//empty brick skipping
 	wxCheckBox* ch3 = new wxCheckBox(panel, ID_SKIP_BRICKS,
 		"Skip empty bricks during rendering (loading takes longer time)");
 	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderFrame::OnCh3Check), NULL, panel);
-	ch3->SetValue(m_skip_brick);
+	ch3->SetValue(glbin_settings.m_skip_brick);
 
 	//time sequence identifier. TODO: Not supported as of now.
 	/*
@@ -1356,12 +1354,6 @@ wxWindow* VRenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 
 void VRenderFrame::OnOpenVolume(wxCommandEvent& event)
 {
-	if (m_setting_dlg)
-	{
-		m_compression = m_setting_dlg->GetRealtimeCompress();
-		m_skip_brick = m_setting_dlg->GetSkipBricks();
-	}
-
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose the volume data file", "", "",
 		"All Supported|*.tif;*.tiff;*.lif;*.lof;*.nd2;*.oib;*.oif;*.xml;*.lsm;*.czi;*.nrrd;*.vvd;*.mp4;*.m4v;*.mov;*.avi;*.wmv|"\
@@ -1391,8 +1383,6 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& event)
 
 		if (m_setting_dlg)
 		{
-			m_setting_dlg->SetRealtimeCompress(m_compression);
-			m_setting_dlg->SetSkipBricks(m_skip_brick);
 			m_setting_dlg->UpdateUI();
 		}
 	}
@@ -1402,12 +1392,6 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& event)
 
 void VRenderFrame::OnImportVolume(wxCommandEvent& event)
 {
-	if (m_setting_dlg)
-	{
-		m_compression = m_setting_dlg->GetRealtimeCompress();
-		m_skip_brick = m_setting_dlg->GetSkipBricks();
-	}
-
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose the volume data file", "", "", "All Files|*.*",
 		wxFD_OPEN | wxFD_MULTIPLE);
@@ -1424,8 +1408,6 @@ void VRenderFrame::OnImportVolume(wxCommandEvent& event)
 
 		if (m_setting_dlg)
 		{
-			m_setting_dlg->SetRealtimeCompress(m_compression);
-			m_setting_dlg->SetSkipBricks(m_skip_brick);
 			m_setting_dlg->UpdateUI();
 		}
 	}
@@ -1449,11 +1431,11 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 	wxProgressDialog *prg_diag = 0;
 	if (v)
 	{
-		bool streaming = m_setting_dlg->GetMemSwap();
-		double gpu_size = m_setting_dlg->GetGraphicsMem();
-		double data_size = m_setting_dlg->GetLargeDataSize();
-		int brick_size = m_setting_dlg->GetForceBrickSize();
-		int resp_time = m_setting_dlg->GetResponseTime();
+		bool streaming = glbin_settings.m_mem_swap;
+		double gpu_size = glbin_settings.m_graphics_mem;
+		double data_size = glbin_settings.m_large_data_size;
+		int brick_size = glbin_settings.m_force_brick_size;
+		int resp_time = glbin_settings.m_up_time;
 		wxString str_streaming;
 		if (streaming)
 		{
@@ -1471,16 +1453,15 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 			"",
 			100, this, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
-		m_data_mgr.SetSliceSequence(m_sliceSequence);
-		m_data_mgr.SetChannSequence(m_channSequence);
-		m_data_mgr.SetDigitOrder(m_digitOrder);
-		m_data_mgr.SetSerNum(m_ser_num);
-		m_data_mgr.SetCompression(m_compression);
-		m_data_mgr.SetSkipBrick(m_skip_brick);
-		m_data_mgr.SetTimeId(m_time_id);
-		m_data_mgr.SetLoadMask(m_load_mask);
+		m_data_mgr.SetSliceSequence(glbin_settings.m_slice_sequence);
+		m_data_mgr.SetChannSequence(glbin_settings.m_chann_sequence);
+		m_data_mgr.SetDigitOrder(glbin_settings.m_digit_order);
+		m_data_mgr.SetSerNum(glbin_settings.m_ser_num);
+		m_data_mgr.SetCompression(glbin_settings.m_realtime_compress);
+		m_data_mgr.SetSkipBrick(glbin_settings.m_skip_brick);
+		m_data_mgr.SetTimeId(glbin_settings.m_time_id);
+		m_data_mgr.SetLoadMask(glbin_settings.m_load_mask);
 		m_data_mgr.SetReaderFpConvert(false, 0, 1);
-		m_setting_dlg->SetTimeId(m_time_id);
 
 		bool enable_4d = false;
 
@@ -2296,6 +2277,18 @@ void VRenderFrame::OnSelection(int type,
 	MeshData* md,
 	Annotations* ann)
 {
+	if (view)
+	{
+		glbin_ruler_handler.SetView(view);
+		glbin_ruler_handler.SetRulerList(view->GetRulerList());
+		glbin_ruler_renderer.SetView(view);
+		glbin_ruler_renderer.SetRulerList(view->GetRulerList());
+		glbin_volume_point.SetView(view);
+		glbin_vol_selector.SetView(view);
+		glbin_vol_calculator.SetView(view);
+		glbin_script_proc.SetView(view);
+	}
+
 	if (m_adjust_view)
 	{
 		m_adjust_view->SetRenderView(view);
@@ -2928,14 +2921,14 @@ void VRenderFrame::OnChEmbedCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
 	if (ch_embed)
-		m_vrp_embed = ch_embed->GetValue();
+		glbin_settings.m_vrp_embed = ch_embed->GetValue();
 }
 
 void VRenderFrame::OnChSaveCmpCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_cmp = (wxCheckBox*)event.GetEventObject();
 	if (ch_cmp)
-		m_save_compress = ch_cmp->GetValue();
+		glbin_settings.m_save_compress = ch_cmp->GetValue();
 }
 
 wxWindow* VRenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
@@ -2952,7 +2945,7 @@ wxWindow* VRenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
 		"Embed all files in the project folder");
 	ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderFrame::OnChEmbedCheck), NULL, panel);
-	ch_embed->SetValue(m_vrp_embed);
+	ch_embed->SetValue(glbin_settings.m_vrp_embed);
 
 	//compressed
 	wxCheckBox* ch_cmp = new wxCheckBox(panel, ID_LZW_COMP,
@@ -2960,7 +2953,7 @@ wxWindow* VRenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
 	ch_cmp->Connect(ch_cmp->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderFrame::OnChSaveCmpCheck), NULL, panel);
 	if (ch_cmp)
-		ch_cmp->SetValue(m_save_compress);
+		ch_cmp->SetValue(glbin_settings.m_save_compress);
 
 	//group
 	group1->Add(10, 10);
@@ -3024,7 +3017,7 @@ void VRenderFrame::OnSaveProject(wxCommandEvent& event)
 	else
 	{
 		wxString filename = default_path;
-		bool inc = m_setting_dlg->GetProjSaveInc();
+		bool inc = glbin_settings.m_prj_save_inc;
 		SaveProject(filename, inc);
 	}
 }
@@ -3098,12 +3091,12 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 
 	//save streaming mode
 	fconfig.SetPath("/memory settings");
-	fconfig.Write("mem swap", m_setting_dlg->GetMemSwap());
-	fconfig.Write("graphics mem", m_setting_dlg->GetGraphicsMem());
-	fconfig.Write("large data size", m_setting_dlg->GetLargeDataSize());
-	fconfig.Write("force brick size", m_setting_dlg->GetForceBrickSize());
-	fconfig.Write("up time", m_setting_dlg->GetResponseTime());
-	fconfig.Write("update order", m_setting_dlg->GetUpdateOrder());
+	fconfig.Write("mem swap", glbin_settings.m_mem_swap);
+	fconfig.Write("graphics mem", glbin_settings.m_graphics_mem);
+	fconfig.Write("large data size", glbin_settings.m_large_data_size);
+	fconfig.Write("force brick size", glbin_settings.m_force_brick_size);
+	fconfig.Write("up time", glbin_settings.m_up_time);
+	fconfig.Write("update order", glbin_settings.m_update_order);
 
 	//save data list
 	//volume
@@ -3125,20 +3118,20 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 			str = vd->GetName();
 			fconfig.Write("name", str);
 			//compression
-			fconfig.Write("compression", m_compression);
+			fconfig.Write("compression", glbin_settings.m_realtime_compress);
 			//skip brick
 			fconfig.Write("skip_brick", vd->GetSkipBrick());
 			//path
 			str = vd->GetPath();
 			bool new_chan = false;
-			if (str == "" || m_vrp_embed)
+			if (str == "" || glbin_settings.m_vrp_embed)
 			{
 				wxString new_folder;
 				new_folder = filename2 + "_files";
 				MkDirW(new_folder.ToStdWstring());
 				str = new_folder + GETSLASH() + vd->GetName() + ".tif";
 				vd->Save(str, 0, 3, false,
-					false, 0, false, VRenderFrame::GetCompression(),
+					false, 0, false, glbin_settings.m_save_compress,
 					fluo::Point(), fluo::Quaternion(), fluo::Point(), false);
 				fconfig.Write("path", str);
 				new_chan = true;
@@ -3311,7 +3304,7 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 		MeshData* md = m_data_mgr.GetMeshData(i);
 		if (md)
 		{
-			if (md->GetPath() == "" || m_vrp_embed)
+			if (md->GetPath() == "" || glbin_settings.m_vrp_embed)
 			{
 				wxString new_folder;
 				new_folder = filename2 + "_files";
@@ -3578,7 +3571,7 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 
 			//rulers
 			fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
-			view->GetRulerHandler()->Save(fconfig, i);
+			glbin_ruler_handler.Save(fconfig, i);
 		}
 	}
 	//clipping planes
@@ -3610,8 +3603,8 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 	fconfig.Write("cur_frame", m_movie_view->GetCurFrame());
 	fconfig.Write("start_frame", m_movie_view->GetStartFrame());
 	fconfig.Write("end_frame", m_movie_view->GetEndFrame());
-	fconfig.Write("run_script", m_setting_dlg->GetRunScript());
-	fconfig.Write("script_file", m_setting_dlg->GetScriptFile());
+	fconfig.Write("run_script", glbin_settings.m_run_script);
+	fconfig.Write("script_file", glbin_settings.m_script_file);
 	//tracking diag
 	fconfig.SetPath("/track_diag");
 	int ival = m_trace_dlg->GetTrackFileExist(true);
@@ -3816,12 +3809,12 @@ void VRenderFrame::OpenProject(wxString& filename)
 		int update_order = 0;
 		fconfig.Read("update order", &update_order);
 
-		m_setting_dlg->SetMemSwap(mem_swap);
-		m_setting_dlg->SetGraphicsMem(graphics_mem);
-		m_setting_dlg->SetLargeDataSize(large_data_size);
-		m_setting_dlg->SetForceBrickSize(force_brick_size);
-		m_setting_dlg->SetResponseTime(up_time);
-		m_setting_dlg->SetUpdateOrder(update_order);
+		glbin_settings.m_mem_swap = mem_swap;
+		glbin_settings.m_graphics_mem = graphics_mem;
+		glbin_settings.m_large_data_size = large_data_size;
+		glbin_settings.m_force_brick_size = force_brick_size;
+		glbin_settings.m_up_time = up_time;
+		glbin_settings.m_update_order = update_order;
 		m_setting_dlg->UpdateUI();
 
 		SetTextureRendererSettings();
@@ -3923,7 +3916,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 						{
 							int type;
 							float left_x, left_y, width, height, offset1, offset2, gamma;
-							wchar_t token[256];
+							wchar_t token[256] = {};
 							token[255] = '\0';
 							const wchar_t* sstr = str.wc_str();
 							std::wstringstream ss(sstr);
@@ -4350,7 +4343,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 
 			view->ClearAll();
 
-			if (i==0 && m_setting_dlg && m_setting_dlg->GetTestMode(1))
+			if (i==0 && m_setting_dlg && glbin_settings.m_test_speed)
 				view->m_test_speed = true;
 
 			wxString str;
@@ -4777,7 +4770,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 				fconfig.Exists(wxString::Format("/views/%d/rulers", i)))
 			{
 				fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
-				view->GetRulerHandler()->Read(fconfig, i);
+				glbin_ruler_handler.Read(fconfig, i);
 			}
 		}
 	}
@@ -4936,9 +4929,9 @@ void VRenderFrame::OpenProject(wxString& filename)
 			}
 		}
 		if (fconfig.Read("run_script", &bVal))
-			m_setting_dlg->SetRunScript(bVal);
+			glbin_settings.m_run_script = bVal;
 		if (fconfig.Read("script_file", &sVal))
-			m_setting_dlg->SetScriptFile(sVal);
+			glbin_settings.m_script_file = sVal;
 		m_movie_view->GetScriptSettings(false);
 	}
 
@@ -5339,7 +5332,7 @@ void VRenderFrame::OnLastTool(wxCommandEvent& event)
 		return;
 	}
 
-	unsigned int tool = m_setting_dlg->GetLastTool();
+	unsigned int tool = glbin_settings.m_last_tool;
 	switch (tool)
 	{
 	case 0:
@@ -5440,8 +5433,7 @@ void VRenderFrame::ShowPaintTool()
 	m_aui_mgr.GetPane(m_brush_tool_dlg).Show();
 	m_aui_mgr.GetPane(m_brush_tool_dlg).Float();
 	m_aui_mgr.Update();
-	if (m_setting_dlg)
-		m_setting_dlg->SetLastTool(TOOL_PAINT_BRUSH);
+	glbin_settings.m_last_tool = TOOL_PAINT_BRUSH;
 	m_main_tb->SetToolNormalBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_paint_brush));
 }
@@ -5451,8 +5443,7 @@ void VRenderFrame::ShowMeasureDlg()
 	m_aui_mgr.GetPane(m_measure_dlg).Show();
 	m_aui_mgr.GetPane(m_measure_dlg).Float();
 	m_aui_mgr.Update();
-	if (m_setting_dlg)
-		m_setting_dlg->SetLastTool(TOOL_MEASUREMENT);
+	glbin_settings.m_last_tool = TOOL_MEASUREMENT;
 	m_main_tb->SetToolNormalBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_measurement));
 }
@@ -5462,8 +5453,7 @@ void VRenderFrame::ShowTraceDlg()
 	m_aui_mgr.GetPane(m_trace_dlg).Show();
 	m_aui_mgr.GetPane(m_trace_dlg).Float();
 	m_aui_mgr.Update();
-	if (m_setting_dlg)
-		m_setting_dlg->SetLastTool(TOOL_TRACKING);
+	glbin_settings.m_last_tool = TOOL_TRACKING;
 	m_main_tb->SetToolNormalBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_tracking));
 }
@@ -5473,8 +5463,7 @@ void VRenderFrame::ShowNoiseCancellingDlg()
 	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Show();
 	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Float();
 	m_aui_mgr.Update();
-	if (m_setting_dlg)
-		m_setting_dlg->SetLastTool(TOOL_NOISE_REDUCTION);
+	glbin_settings.m_last_tool = TOOL_NOISE_REDUCTION;
 	m_main_tb->SetToolNormalBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_noise_reduc));
 }
@@ -5484,8 +5473,7 @@ void VRenderFrame::ShowCountingDlg()
 	m_aui_mgr.GetPane(m_counting_dlg).Show();
 	m_aui_mgr.GetPane(m_counting_dlg).Float();
 	m_aui_mgr.Update();
-	if (m_setting_dlg)
-		m_setting_dlg->SetLastTool(TOOL_VOLUME_SIZE);
+	glbin_settings.m_last_tool = TOOL_VOLUME_SIZE;
 	m_main_tb->SetToolNormalBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_volume_size));
 }
@@ -5495,8 +5483,7 @@ void VRenderFrame::ShowColocalizationDlg()
 	m_aui_mgr.GetPane(m_colocalization_dlg).Show();
 	m_aui_mgr.GetPane(m_colocalization_dlg).Float();
 	m_aui_mgr.Update();
-	if (m_setting_dlg)
-		m_setting_dlg->SetLastTool(TOOL_COLOCALIZATION);
+	glbin_settings.m_last_tool = TOOL_COLOCALIZATION;
 	m_main_tb->SetToolNormalBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_colocalization));
 }
@@ -5506,8 +5493,7 @@ void VRenderFrame::ShowConvertDlg()
 	m_aui_mgr.GetPane(m_convert_dlg).Show();
 	m_aui_mgr.GetPane(m_convert_dlg).Float();
 	m_aui_mgr.Update();
-	if (m_setting_dlg)
-		m_setting_dlg->SetLastTool(TOOL_CONVERT);
+	glbin_settings.m_last_tool = TOOL_CONVERT;
 	m_main_tb->SetToolNormalBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_convert));
 }
@@ -5517,8 +5503,7 @@ void VRenderFrame::ShowOclDlg()
 	m_aui_mgr.GetPane(m_ocl_dlg).Show();
 	m_aui_mgr.GetPane(m_ocl_dlg).Float();
 	m_aui_mgr.Update();
-	if (m_setting_dlg)
-		m_setting_dlg->SetLastTool(TOOL_OPENCL);
+	glbin_settings.m_last_tool = TOOL_OPENCL;
 	m_main_tb->SetToolNormalBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_opencl));
 }
@@ -5528,8 +5513,7 @@ void VRenderFrame::ShowComponentDlg()
 	m_aui_mgr.GetPane(m_component_dlg).Show();
 	m_aui_mgr.GetPane(m_component_dlg).Float();
 	m_aui_mgr.Update();
-	if (m_setting_dlg)
-		m_setting_dlg->SetLastTool(TOOL_COMPONENT);
+	glbin_settings.m_last_tool = TOOL_COMPONENT;
 	m_main_tb->SetToolNormalBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_components));
 }
@@ -5539,8 +5523,7 @@ void VRenderFrame::ShowCalculationDlg()
 	m_aui_mgr.GetPane(m_calculation_dlg).Show();
 	m_aui_mgr.GetPane(m_calculation_dlg).Float();
 	m_aui_mgr.Update();
-	if (m_setting_dlg)
-		m_setting_dlg->SetLastTool(TOOL_CALCULATIONS);
+	glbin_settings.m_last_tool = TOOL_CALCULATIONS;
 	m_main_tb->SetToolNormalBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_calculations));
 }
@@ -5550,8 +5533,7 @@ void VRenderFrame::ShowMachineLearningDlg()
 	m_aui_mgr.GetPane(m_machine_learning_dlg).Show();
 	m_aui_mgr.GetPane(m_machine_learning_dlg).Float();
 	m_aui_mgr.Update();
-	if (m_setting_dlg)
-		m_setting_dlg->SetLastTool(TOOL_MACHINE_LEARNING);
+	glbin_settings.m_last_tool = TOOL_MACHINE_LEARNING;
 	m_main_tb->SetToolNormalBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_machine_learning));
 }
@@ -5570,7 +5552,7 @@ void VRenderFrame::ShowScriptBreakDlg(bool show)
 void VRenderFrame::SetTextureUndos()
 {
 	if (m_setting_dlg)
-		flvr::Texture::mask_undo_num_ = (size_t)(m_setting_dlg->GetPaintHistDepth());
+		flvr::Texture::mask_undo_num_ = (size_t)(glbin_brush_def.m_paint_hist_depth);
 }
 
 void VRenderFrame::SetTextureRendererSettings()
@@ -5578,7 +5560,7 @@ void VRenderFrame::SetTextureRendererSettings()
 	if (!m_setting_dlg)
 		return;
 
-	flvr::TextureRenderer::set_mem_swap(m_setting_dlg->GetMemSwap());
+	flvr::TextureRenderer::set_mem_swap(glbin_settings.m_mem_swap);
 	bool use_mem_limit = false;
 	GLenum error = glGetError();
 	GLint mem_info[4] = {0, 0, 0, 0};
@@ -5591,18 +5573,18 @@ void VRenderFrame::SetTextureRendererSettings()
 		if (error == GL_INVALID_ENUM)
 			use_mem_limit = true;
 	}
-	if (m_setting_dlg->GetGraphicsMem() > mem_info[0]/1024.0)
+	if (glbin_settings.m_graphics_mem > mem_info[0]/1024.0)
 		use_mem_limit = true;
 	flvr::TextureRenderer::set_use_mem_limit(use_mem_limit);
 	flvr::TextureRenderer::set_mem_limit(use_mem_limit?
-		m_setting_dlg->GetGraphicsMem():mem_info[0]/1024.0);
+		glbin_settings.m_graphics_mem :mem_info[0]/1024.0);
 	flvr::TextureRenderer::set_available_mem(use_mem_limit?
-		m_setting_dlg->GetGraphicsMem():mem_info[0]/1024.0);
-	flvr::TextureRenderer::set_large_data_size(m_setting_dlg->GetLargeDataSize());
-	flvr::TextureRenderer::set_force_brick_size(m_setting_dlg->GetForceBrickSize());
-	flvr::TextureRenderer::set_up_time(m_setting_dlg->GetResponseTime());
-	flvr::TextureRenderer::set_update_order(m_setting_dlg->GetUpdateOrder());
-	flvr::TextureRenderer::set_invalidate_tex(m_setting_dlg->GetInvalidateTex());
+		glbin_settings.m_graphics_mem :mem_info[0]/1024.0);
+	flvr::TextureRenderer::set_large_data_size(glbin_settings.m_large_data_size);
+	flvr::TextureRenderer::set_force_brick_size(glbin_settings.m_force_brick_size);
+	flvr::TextureRenderer::set_up_time(glbin_settings.m_up_time);
+	flvr::TextureRenderer::set_update_order(glbin_settings.m_update_order);
+	flvr::TextureRenderer::set_invalidate_tex(glbin_settings.m_invalidate_tex);
 }
 
 void VRenderFrame::OnFacebook(wxCommandEvent& event)

@@ -362,35 +362,12 @@ VRenderGLView::VRenderGLView(VRenderFrame* frame,
 #endif
 #endif
 
-	//glbin_vol_selector.LoadBrushSettings();
-	glbin_brush_def.Apply(&glbin_vol_selector);
-
 	m_timer = new Fltimer(10);
 	if (m_frame && m_frame->GetBenchmark())
 		m_benchmark = true;
 	else
 		m_benchmark = false;
 
-	m_ruler_handler.SetView(this);
-	m_ruler_handler.SetRulerList(&m_ruler_list);
-	if (m_frame && m_frame->GetSettingDlg())
-	{
-		int type, kx, ky; double varth, gauth;
-		m_frame->GetSettingDlg()->GetBgParams(type, kx, ky, varth, gauth);
-		m_ruler_handler.SetBgParams(type, kx, ky, varth, gauth);
-		bool bval;
-		bval = m_frame->GetSettingDlg()->GetScriptBreak();
-		glbin_script_proc.SetBreak(bval);
-	}
-	m_ruler_renderer.SetView(this);
-	m_ruler_renderer.SetRulerList(&m_ruler_list);
-	m_vp.SetView(this);
-	glbin_vol_selector.SetView(this);
-	glbin_vol_calculator.SetFrame(m_frame);
-	glbin_vol_calculator.SetView(this);
-	glbin_vol_calculator.SetVolumeSelector(&glbin_vol_selector);
-	glbin_script_proc.SetFrame(m_frame);
-	glbin_script_proc.SetView(this);
 }
 
 #ifdef _WIN32
@@ -654,13 +631,8 @@ void VRenderGLView::Init()
 	if (!m_initialized)
 	{
 		flvr::ShaderProgram::init_shaders_supported();
-		if (m_frame && m_frame->GetSettingDlg())
-		{
-			flvr::KernelProgram::set_platform_id(m_frame->
-				GetSettingDlg()->GetCLPlatformID());
-			flvr::KernelProgram::set_device_id(m_frame->
-				GetSettingDlg()->GetCLDeviceID());
-		}
+		flvr::KernelProgram::set_platform_id(glbin_settings.m_cl_platform_id);
+		flvr::KernelProgram::set_device_id(glbin_settings.m_cl_device_id);
 		flvr::KernelProgram::init_kernels_supported();
 #ifdef _DARWIN
 		CGLContextObj ctx = CGLGetCurrentContext();
@@ -1327,7 +1299,7 @@ void VRenderGLView::DrawVolumes(int peel)
 	int nx, ny;
 	GetRenderSize(nx, ny);
 
-	flrd::RulerPoint *p0 = m_ruler_handler.GetPoint();
+	flrd::RulerPoint *p0 = glbin_ruler_handler.GetPoint();
 
 	//draw
 	if (m_load_update ||
@@ -1350,9 +1322,7 @@ void VRenderGLView::DrawVolumes(int peel)
 		m_force_clear = false;
 		m_load_update = false;
 
-		if (m_frame &&
-			m_frame->GetSettingDlg() &&
-			m_frame->GetSettingDlg()->GetUpdateOrder() == 1)
+		if (glbin_settings.m_update_order == 1)
 		{
 			if (m_interactive)
 				ClearFinalBuffer();
@@ -1469,10 +1439,10 @@ void VRenderGLView::DrawVolumes(int peel)
 				if (!vd)
 					if (m_vd_pop_list.size())
 						vd = m_vd_pop_list[0];
-				m_vp.SetVolumeData(vd);
+				glbin_volume_point.SetVolumeData(vd);
 				fluo::Point p;
-				if (m_vp.GetPointVolumeBox(nx / 2, ny / 2, false, p) > 0.0 ||
-					(vd && m_vp.GetPointPlane(nx / 2, ny / 2, 0, false, p) > 0.0))
+				if (glbin_volume_point.GetPointVolumeBox(nx / 2.0, ny / 2.0, false, p) > 0.0 ||
+					(vd && glbin_volume_point.GetPointPlane(nx / 2.0, ny / 2.0, 0, false, p) > 0.0))
 				{
 					int resx, resy, resz;
 					double sclx, scly, sclz;
@@ -3193,10 +3163,9 @@ void VRenderGLView::DrawOLShadowsMesh(double darkness)
 		img_shader->bind();
 	}
 	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, m_persp ? 2e10 : 1e6, 0.0);
-	double dir_x = 0.0, dir_y = 0.0;
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->GetShadowDir(dir_x, dir_y);
-	img_shader->setLocalParam(1, dir_x, dir_y, 0.0, 0.0);
+	img_shader->setLocalParam(1,
+		glbin_settings.m_shadow_dir_x,
+		glbin_settings.m_shadow_dir_y, 0.0, 0.0);
 	//2d adjustment
 
 	DrawViewQuad();
@@ -3426,10 +3395,10 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 			img_shader->bind();
 		}
 		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, m_persp ? 2e10 : 1e6, 0.0);
-		double dir_x = 0.0, dir_y = 0.0;
-		if (m_frame && m_frame->GetSettingDlg())
-			m_frame->GetSettingDlg()->GetShadowDir(dir_x, dir_y);
-		img_shader->setLocalParam(1, dir_x, dir_y, 0.0, 0.0);
+		img_shader->setLocalParam(1,
+			glbin_settings.m_shadow_dir_x,
+			glbin_settings.m_shadow_dir_y, 0.0, 0.0);
+
 		//2d adjustment
 
 		DrawViewQuad();
@@ -3627,7 +3596,7 @@ void VRenderGLView::SetBrush(int mode)
 	m_prev_focus = FindFocus();
 	SetFocus();
 
-	int ruler_type = m_ruler_handler.GetType();
+	int ruler_type = glbin_ruler_handler.GetType();
 
 	if (m_int_mode == 5 ||
 		m_int_mode == 7)
@@ -3824,7 +3793,7 @@ void VRenderGLView::PickMesh()
 	}
 	glDisable(GL_SCISSOR_TEST);
 
-	unsigned int choose = 0;
+	size_t choose = 0;
 	if (pick_buffer)
 		choose = pick_buffer->read_value(mouse_pos.x, ny - mouse_pos.y);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_cur_framebuffer);
@@ -3865,8 +3834,8 @@ void VRenderGLView::PickVolume()
 		if (!vd) continue;
 		int mode = 2;
 		if (vd->GetMode() == 1) mode = 1;
-		m_vp.SetVolumeData(vd);
-		dist = m_vp.GetPointVolume(old_mouse_X, old_mouse_Y,
+		glbin_volume_point.SetVolumeData(vd);
+		dist = glbin_volume_point.GetPointVolume(old_mouse_X, old_mouse_Y,
 			mode, true, 0.5, p, ip);
 		if (dist > 0.0)
 		{
@@ -3989,11 +3958,11 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		int ny = GetGLSize().y;
 		int mode = 2;
 		if (m_cur_vol->GetMode() == 1) mode = 1;
-		m_vp.SetVolumeData(m_cur_vol);
-		double dist = m_vp.GetPointVolume(nx / 2.0, ny / 2.0,
+		glbin_volume_point.SetVolumeData(m_cur_vol);
+		double dist = glbin_volume_point.GetPointVolume(nx / 2.0, ny / 2.0,
 			mode, true, m_pin_pick_thresh, p, ip);
 		if (dist <= 0.0)
-			dist = m_vp.GetPointVolumeBox(
+			dist = glbin_volume_point.GetPointVolumeBox(
 				nx / 2.0, ny / 2.0,
 				true, p);
 		if (dist > 0.0)
@@ -4321,20 +4290,17 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			wxGetMouseState().LeftIsDown() &&
 			m_grow_on)
 		{
-			int sz = 5;
-			if (m_frame && m_frame->GetSettingDlg())
-				sz = m_frame->GetSettingDlg()->GetRulerSizeThresh();
+			int sz = glbin_settings.m_ruler_size_thresh;
 			//event.RequestMore();
 			glbin_vol_selector.SetInitMask(2);
 			Segment();
 			glbin_vol_selector.SetInitMask(3);
 			if (m_int_mode == 12)
 			{
-				flrd::SegGrow sg(m_cur_vol);
-				sg.SetRulerHandler(&m_ruler_handler);
-				sg.SetIter(glbin_vol_selector.GetIter()*3);
-				sg.SetSizeThresh(sz);
-				sg.Compute();
+				glbin_seg_grow.SetVolumeData(m_cur_vol);
+				glbin_seg_grow.SetIter(glbin_vol_selector.GetIter()*3);
+				glbin_seg_grow.SetSizeThresh(sz);
+				glbin_seg_grow.Compute();
 			}
 			refresh = true;
 			start_loop = true;
@@ -4545,8 +4511,7 @@ void VRenderGLView::OnQuitFscreen(wxTimerEvent& event)
 		if (m_frame)
 		{
 #ifdef _WIN32
-			if (m_frame->GetSettingDlg() &&
-				!m_frame->GetSettingDlg()->GetShowCursor())
+			if (glbin_settings.m_show_cursor)
 				ShowCursor(true);
 #endif
 			m_frame->Iconize(false);
@@ -4576,7 +4541,7 @@ void VRenderGLView::Set3DRotCapture(double start_angle,
 	bool rewind,
 	int len)
 {
-	double rv[3];
+	double rv[3] = { 0 };
 	GetRotations(rv[0], rv[1], rv[2]);
 
 	//remove the chance of the x/y/z angles being outside 360.
@@ -4833,7 +4798,7 @@ void VRenderGLView::SetParams(double t)
 		m_frame->GetRecorderDlg()->SetSelection(index);
 		m_frame->GetMeasureDlg()->GetSettings(this);
 		//update ruler intensity values
-		m_ruler_handler.ProfileAll();
+		glbin_ruler_handler.ProfileAll();
 		m_frame->GetMeasureDlg()->UpdateList();
 	}
 	SetVolPopDirty();
@@ -4841,7 +4806,7 @@ void VRenderGLView::SetParams(double t)
 
 void VRenderGLView::ResetMovieAngle()
 {
-	double rv[3];
+	double rv[3] = { 0 };
 	GetRotations(rv[0], rv[1], rv[2]);
 	rv[m_rot_axis] = m_init_angle;
 	SetRotations(rv[0], rv[1], rv[2]);
@@ -5100,7 +5065,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, int start_frame, int end_frame, boo
 	glbin_vol_calculator.SetVolumeA(m_cur_vol);
 
 	//update ruler intensity values
-	m_ruler_handler.ProfileAll();
+	glbin_ruler_handler.ProfileAll();
 	m_frame->GetMeasureDlg()->UpdateList();
 
 	//clear results if rewind
@@ -5193,7 +5158,7 @@ void VRenderGLView::Set3DBatFrame(int frame, int start_frame, int end_frame, boo
 	glbin_vol_calculator.SetVolumeA(m_cur_vol);
 
 	//update ruler intensity values
-	m_ruler_handler.ProfileAll();
+	glbin_ruler_handler.ProfileAll();
 	m_frame->GetMeasureDlg()->UpdateList();
 
 	RefreshGL(18);
@@ -5311,9 +5276,9 @@ void VRenderGLView::PostDraw()
 		//capture
 		wxString outputfilename = m_cap_file;
 
-		int chann = VRenderFrame::GetSaveAlpha() ? 4 : 3;
-		bool fp32 = VRenderFrame::GetSaveFloat();
-		float dpi = VRenderFrame::GetDpi();
+		int chann = glbin_settings.m_save_alpha;
+		bool fp32 = glbin_settings.m_save_float;
+		float dpi = glbin_settings.m_dpi;
 		int x, y, w, h;
 		void* image = 0;
 		ReadPixels(chann, fp32, x, y, w, h, &image);
@@ -5338,14 +5303,14 @@ void VRenderGLView::PostDraw()
 		TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
 		TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 		TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-		if (VRenderFrame::GetCompression())
+		if (glbin_settings.m_save_compress)
 			TIFFSetField(out, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
 		//dpi
 		TIFFSetField(out, TIFFTAG_XRESOLUTION, dpi);
 		TIFFSetField(out, TIFFTAG_YRESOLUTION, dpi);
 		TIFFSetField(out, TIFFTAG_RESOLUTIONUNIT, RESUNIT_INCH);
 
-		tsize_t linebytes = chann * w * (fp32?4:1);
+		tsize_t linebytes = tsize_t(chann) * w * (fp32?4:1);
 		void *buf = NULL;
 		buf = _TIFFmalloc(linebytes);
 		//TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out, 0));
@@ -6370,7 +6335,7 @@ void VRenderGLView::RemoveVolumeDataDup(wxString &name)
 	if (!vd_main)
 		return;
 
-	m_ruler_handler.SetVolumeData(0);
+	glbin_ruler_handler.SetVolumeData(0);
 	
 	for (auto iter = m_layer_list.begin();
 		iter != m_layer_list.end();)
@@ -7431,9 +7396,7 @@ void VRenderGLView::DrawClippingPlanes(int face_winding)
 		link = m_frame->GetClippingView()->GetChannLink();
 		plane_mode = m_frame->GetClippingView()->GetPlaneMode();
 	}
-	double width = 1.0;
-	if (m_frame && m_frame->GetSettingDlg())
-		width = m_frame->GetSettingDlg()->GetLineWidth();
+	double width = glbin_settings.m_line_width;
 
 	if (plane_mode == kNone)
 		return;
@@ -8219,8 +8182,8 @@ void VRenderGLView::DrawName(
 	if (shader && shader->valid())
 		shader->release();
 
-	float px1 = x + font_height - nx / 2;
-	float py1 = ny / 2 - y + 0.25*font_height;
+	float px1 = x + font_height - nx / 2.0;
+	float py1 = ny / 2.0 - y + 0.25 * font_height;
 	wstr = name.ToStdWstring();
 	m_text_renderer.RenderText(
 		wstr, text_color,
@@ -8279,7 +8242,7 @@ void VRenderGLView::DrawGradBg()
 	}
 
 	vector<float> vertex;
-	vertex.reserve(16 * 3);
+	vertex.reserve(48);
 	vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
 	vertex.push_back(m_bg_color.r()); vertex.push_back(m_bg_color.g()); vertex.push_back(m_bg_color.b());
 	vertex.push_back(1.0); vertex.push_back(0.0); vertex.push_back(0.0);
@@ -8540,7 +8503,7 @@ void VRenderGLView::DrawColormap()
 	glm::mat4 proj_mat = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
 
 	vector<float> vertex;
-	vertex.reserve(14 * 7);
+	vertex.reserve(98);
 
 	float px, py;
 	//draw colormap
@@ -8784,8 +8747,8 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 				fps_ >= 0.0&&fps_<300.0 ? fps_ : 0.0);
 	}
 	wstring wstr_temp = str.ToStdWstring();
-	px = gapw - nx / 2;
-	py = ny / 2 - gaph / 2;
+	px = gapw - nx / 2.0;
+	py = ny / 2.0 - gaph / 2.0;
 	m_text_renderer.RenderText(
 		wstr_temp, text_color,
 		px*sx, py*sy, sx, sy);
@@ -8797,15 +8760,15 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	{
 		fluo::Point p;
 		wxPoint mouse_pos = ScreenToClient(wxGetMousePosition());
-		m_vp.SetVolumeData(m_cur_vol);
-		if ((m_vp.GetPointVolumeBox(mouse_pos.x, mouse_pos.y, true, p )>0.0) ||
-			m_vp.GetPointPlane(mouse_pos.x, mouse_pos.y, 0, true, p)>0.0)
+		glbin_volume_point.SetVolumeData(m_cur_vol);
+		if ((glbin_volume_point.GetPointVolumeBox(mouse_pos.x, mouse_pos.y, true, p )>0.0) ||
+			glbin_volume_point.GetPointPlane(mouse_pos.x, mouse_pos.y, 0, true, p)>0.0)
 		{
 			str = wxString::Format("T: %d  X: %.2f  Y: %.2f  Z: %.2f",
 				m_tseq_cur_num, p.x(), p.y(), p.z());
 			wstr_temp = str.ToStdWstring();
-			px = gapw - nx / 2;
-			py = ny / 2 - gaph;
+			px = gapw - nx / 2.0;
+			py = ny / 2.0 - gaph;
 			m_text_renderer.RenderText(
 				wstr_temp, text_color,
 				px*sx, py*sy, sx, sy);
@@ -8850,8 +8813,8 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 		{
 			str = wxString::Format("SLICES: %d", m_mvr->get_slice_num());
 			wstr_temp = str.ToStdWstring();
-			px = gapw - nx / 2;
-			py = ny / 2 - gaph*1.5;
+			px = gapw - nx / 2.0;
+			py = ny / 2.0 - gaph*1.5;
 			m_text_renderer.RenderText(
 				wstr_temp, text_color,
 				px*sx, py*sy, sx, sy);
@@ -8865,8 +8828,8 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 				{
 					str = wxString::Format("SLICES_%d: %d", i + 1, vd->GetVR()->get_slice_num());
 					wstr_temp = str.ToStdWstring();
-					px = gapw - nx / 2;
-					py = ny / 2 - gaph*(3 + i) / 2;
+					px = gapw - nx / 2.0;
+					py = ny / 2.0 - gaph*(3 + i) / 2;
 					m_text_renderer.RenderText(
 						wstr_temp, text_color,
 						px*sx, py*sy, sx, sy);
@@ -9308,7 +9271,7 @@ void VRenderGLView::StartLoopUpdate()
 				bool shadow = vd->GetShadowEnable();
 				for (j = 0; j < bricks->size(); j++)
 				{
-					VolumeLoaderData d;
+					VolumeLoaderData d = {};
 					flvr::TextureBrick* b = (*bricks)[j];
 					if (b->get_disp())
 					{
@@ -9394,7 +9357,7 @@ void VRenderGLView::StartLoopUpdate()
 						bool shadow = vd->GetShadowEnable();
 						for (j = 0; j<bricks->size(); j++)
 						{
-							VolumeLoaderData d;
+							VolumeLoaderData d = {};
 							flvr::TextureBrick* b = (*bricks)[j];
 							if (b->get_disp())
 							{
@@ -9476,7 +9439,7 @@ void VRenderGLView::StartLoopUpdate()
 							bool shadow = vd->GetShadowEnable();
 							for (j = 0; j < bricks->size(); j++)
 							{
-								VolumeLoaderData d;
+								VolumeLoaderData d = {};
 								flvr::TextureBrick* b = (*bricks)[j];
 								if (b->get_disp())
 								{
@@ -9551,7 +9514,7 @@ void VRenderGLView::StartLoopUpdate()
 							bool shadow = vd->GetShadowEnable();
 							for (k = 0; k<bricks->size(); k++)
 							{
-								VolumeLoaderData d;
+								VolumeLoaderData d = {};
 								flvr::TextureBrick* b = (*bricks)[k];
 								if (b->get_disp())
 								{
@@ -9654,11 +9617,9 @@ void VRenderGLView::DrawRulers()
 {
 	if (m_ruler_list.empty())
 		return;
-	double width = 1.0;
-	if (m_frame && m_frame->GetSettingDlg())
-		width = m_frame->GetSettingDlg()->GetLineWidth();
-	m_ruler_renderer.SetLineSize(width);
-	m_ruler_renderer.Draw();
+	double width = glbin_settings.m_line_width;
+	glbin_ruler_renderer.SetLineSize(width);
+	glbin_ruler_renderer.Draw();
 }
 
 flrd::RulerList* VRenderGLView::GetRulerList()
@@ -9685,9 +9646,7 @@ void VRenderGLView::DrawCells()
 {
 	if (m_cell_list.empty())
 		return;
-	double width = 1.0;
-	if (m_frame && m_frame->GetSettingDlg())
-		width = m_frame->GetSettingDlg()->GetLineWidth();
+	double width = glbin_settings.m_line_width;
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -9728,7 +9687,7 @@ void VRenderGLView::DrawCells()
 unsigned int VRenderGLView::DrawCellVerts(vector<float>& verts)
 {
 	float w = flvr::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
-	float px, py;
+	float px = 0, py = 0;
 
 	fluo::Transform mv;
 	fluo::Transform p;
@@ -9736,8 +9695,8 @@ unsigned int VRenderGLView::DrawCellVerts(vector<float>& verts)
 	p.set(glm::value_ptr(m_proj_mat));
 
 	//estimate
-	int vert_num = m_cell_list.size();
-	verts.reserve(vert_num * 8 * 3 * 2);
+	size_t vert_num = m_cell_list.size();
+	verts.reserve(vert_num * 48);
 
 	unsigned int num = 0;
 	fluo::Point p1, p2, p3, p4;
@@ -9854,9 +9813,7 @@ void VRenderGLView::DrawTraces()
 	if (m_cur_vol &&
 		m_trace_group)
 	{
-		double width = 1.0;
-		if (m_frame && m_frame->GetSettingDlg())
-			width = m_frame->GetSettingDlg()->GetLineWidth();
+		double width = glbin_settings.m_line_width;
 
 		//glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_DEPTH_TEST);
@@ -9973,7 +9930,7 @@ WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM
 	{
 		if (message == WT_PACKET)
 		{
-			PACKET pkt;
+			PACKET pkt = {};
 			if (gpWTPacket((HCTX)lParam, wParam, &pkt))
 				glbin_vol_selector.SetPressure(pkt.pkNormalPressure, pkt.pkTangentPressure);
 		}
@@ -10125,7 +10082,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	fluo::Point mp = GetMousePos(event);
 
 	//mouse button down operations
-	m_ruler_handler.SetVolumeData(m_cur_vol);
+	glbin_ruler_handler.SetVolumeData(m_cur_vol);
 	if (event.LeftDown())
 	{
 		m_focused_slider = 0;
@@ -10136,18 +10093,18 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_int_mode == 11 ||
 			m_int_mode == 14)
 		{
-			found_rp = m_ruler_handler.FindEditingRuler(
+			found_rp = glbin_ruler_handler.FindEditingRuler(
 				mp.x(), mp.y());
 		}
 		if (found_rp)
 		{
 			if (m_int_mode == 11)
 			{
-				flrd::RulerPoint *p = m_ruler_handler.GetPoint();
+				flrd::RulerPoint *p = glbin_ruler_handler.GetPoint();
 				if (p) p->ToggleLocked();
 			}
 			if (m_int_mode == 14)
-				m_ruler_handler.DeletePoint();
+				glbin_ruler_handler.DeletePoint();
 			if (m_frame && m_frame->GetMeasureDlg())
 				m_frame->GetMeasureDlg()->GetSettings(this);
 			RefreshGL(41);
@@ -10242,7 +10199,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			!event.AltDown())
 		{
 			//add one point to a ruler
-			m_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
+			glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
 			if (m_frame && m_frame->GetMeasureDlg())
 				m_frame->GetMeasureDlg()->GetSettings(this);
 			RefreshGL(27);
@@ -10251,17 +10208,17 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		else if (m_int_mode == 9 ||
 			m_int_mode == 11)
 		{
-			m_ruler_handler.SetPoint(0);
+			glbin_ruler_handler.SetPoint(0);
 		}
 		else if (m_int_mode == 7)
 		{
 			//segment volume, calculate center, add ruler point
 			m_paint_enable = true;
 			Segment();
-			if (m_ruler_handler.GetType() == 3)
-				m_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
+			if (glbin_ruler_handler.GetType() == 3)
+				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
 			else
-				m_ruler_handler.AddPaintRulerPoint();
+				glbin_ruler_handler.AddPaintRulerPoint();
 			m_int_mode = 8;
 			m_force_clear = true;
 			RefreshGL(27);
@@ -10284,7 +10241,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				{
 					m_frame->GetMeasureDlg()->SetEdit();
 					m_frame->GetMeasureDlg()->Relax(
-						m_ruler_handler.GetRulerIndex());
+						glbin_ruler_handler.GetRulerIndex());
 				}
 				m_frame->GetMeasureDlg()->GetSettings(this);
 			}
@@ -10297,13 +10254,13 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		{
 			if (m_int_mode == 6)
 			{
-				m_ruler_handler.ClearMagStroke();
-				m_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
+				glbin_ruler_handler.ClearMagStroke();
+				glbin_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
 			}
-			else if (m_ruler_handler.MagStrokeEmpty())
-				m_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
-			m_ruler_handler.ApplyMagPoint();
-			m_ruler_handler.ClearMagStroke();
+			else if (glbin_ruler_handler.MagStrokeEmpty())
+				glbin_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
+			glbin_ruler_handler.ApplyMagPoint();
+			glbin_ruler_handler.ClearMagStroke();
 			if (m_frame && m_frame->GetMeasureDlg())
 				m_frame->GetMeasureDlg()->GetSettings(this);
 			RefreshGL(29);
@@ -10326,14 +10283,14 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		if (m_int_mode == 5 &&
 			!event.AltDown())
 		{
-			if (m_ruler_handler.GetRulerFinished())
+			if (glbin_ruler_handler.GetRulerFinished())
 			{
 				SetIntMode(1);
 			}
 			else
 			{
-				m_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
-				m_ruler_handler.FinishRuler();
+				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
+				glbin_ruler_handler.FinishRuler();
 			}
 			if (m_frame && m_frame->GetMeasureDlg())
 			{
@@ -10341,7 +10298,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				{
 					m_frame->GetMeasureDlg()->SetEdit();
 					m_frame->GetMeasureDlg()->Relax(
-						m_ruler_handler.GetRulerIndex());
+						glbin_ruler_handler.GetRulerIndex());
 				}
 				m_frame->GetMeasureDlg()->GetSettings(this);
 			}
@@ -10360,7 +10317,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				double(old_mouse_Y - mp.y())*
 				double(old_mouse_Y - mp.y()))));
 
-		flrd::RulerPoint *p0 = m_ruler_handler.GetPoint();
+		flrd::RulerPoint *p0 = glbin_ruler_handler.GetPoint();
 		bool hold_old = false;
 		if (m_int_mode == 1 ||
 			((m_int_mode == 5  ||
@@ -10512,10 +10469,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		{
 			bool rval = false;
 			if (m_int_mode == 6)
-				rval = m_ruler_handler.EditPoint(
+				rval = glbin_ruler_handler.EditPoint(
 					mp.x(), mp.y(), event.AltDown());
 			else if (m_int_mode == 9)
-				rval = m_ruler_handler.MoveRuler(
+				rval = glbin_ruler_handler.MoveRuler(
 					mp.x(), mp.y());
 			if (rval)
 			{
@@ -10529,13 +10486,11 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		}
 		else if (m_int_mode == 13 && !event.AltDown())
 		{
-			double dist = 30;
-			if (m_frame && m_frame->GetSettingDlg())
-				dist = m_frame->GetSettingDlg()->GetPencilDist();
-			if (m_ruler_handler.GetMouseDist(mp.x(), mp.y(), dist))
+			double dist = glbin_settings.m_pencil_dist;
+			if (glbin_ruler_handler.GetMouseDist(mp.x(), mp.y(), dist))
 			{
 				//add one point to a ruler
-				m_ruler_handler.AddRulerPoint(mp.x(), mp.y(), false);
+				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), false);
 				if (m_frame && m_frame->GetMeasureDlg())
 					m_frame->GetMeasureDlg()->GetSettings(this);
 				RefreshGL(27);
@@ -10543,12 +10498,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		}
 		else if (m_int_mode == 15 && !event.AltDown())
 		{
-			double dist = 30;
-			if (m_frame && m_frame->GetSettingDlg())
-				dist = m_frame->GetSettingDlg()->GetPencilDist();
-			if (m_ruler_handler.GetMouseDist(mp.x(), mp.y(), dist))
-				m_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
-			m_ruler_handler.ApplyMagStroke();
+			double dist = glbin_settings.m_pencil_dist;
+			if (glbin_ruler_handler.GetMouseDist(mp.x(), mp.y(), dist))
+				glbin_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
+			glbin_ruler_handler.ApplyMagStroke();
 			RefreshGL(27);
 		}
 
@@ -10658,9 +10611,7 @@ fluo::Color VRenderGLView::GetBackgroundColor()
 
 fluo::Color VRenderGLView::GetTextColor()
 {
-	if (!m_frame || !m_frame->GetSettingDlg())
-		return m_bg_color_inv;
-	switch (m_frame->GetSettingDlg()->GetTextColor())
+	switch (glbin_settings.m_text_color)
 	{
 	case 0://background inverted
 		return m_bg_color_inv;
@@ -10953,8 +10904,7 @@ void VRenderGLView::switchLevel(VolumeData *vd)
 				}
 			}
 			//apply offset
-			if (m_frame && m_frame->GetSettingDlg())
-				lv += m_frame->GetSettingDlg()->GetDetailLevelOffset();
+			lv += glbin_settings.m_detail_level_offset;
 			if (lv < 0) lv = 0;
 			//if (m_interactive) lv += 1;
 			if (lv >= lvnum) lv = lvnum - 1;

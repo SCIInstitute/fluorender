@@ -32,7 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Global/Global.h>
 #include <wx/valnum.h>
 #include <wx/notebook.h>
-#include <wx/display.h>
 #include <wx/stdpaths.h>
 
 BEGIN_EVENT_TABLE(SettingDlg, wxPanel)
@@ -918,7 +917,7 @@ void SettingDlg::UpdateUI()
 	//mouse interactions
 	m_mouse_int_chk->SetValue(glbin_settings.m_mouse_int);
 	//depth peeling
-	m_peeling_layers_sldr->SetValue(glbin_settings.m_peeling_layers);
+	m_peeling_layers_sldr->ChangeValue(glbin_settings.m_peeling_layers);
 	m_peeling_layers_text->ChangeValue(wxString::Format("%d", glbin_settings.m_peeling_layers));
 	//micro blending
 	m_micro_blend_chk->SetValue(glbin_settings.m_micro_blend);
@@ -938,10 +937,10 @@ void SettingDlg::UpdateUI()
 		glbin_settings.m_shadow_dir_y = 0.0;
 	}
 	double deg = GetShadowDir();
-	m_shadow_dir_sldr->SetValue(std::round(deg));
+	m_shadow_dir_sldr->ChangeValue(std::round(deg));
 	m_shadow_dir_text->ChangeValue(wxString::Format("%.2f", deg));
 	//rot center anchor thresh
-	m_pin_threshold_sldr->SetValue(std::round(glbin_settings.m_pin_threshold*10.0));
+	m_pin_threshold_sldr->ChangeValue(std::round(glbin_settings.m_pin_threshold*10.0));
 	m_pin_threshold_text->ChangeValue(wxString::Format("%.0f", glbin_settings.m_pin_threshold*100.0));
 	//gradient background
 	m_grad_bg_chk->SetValue(glbin_settings.m_grad_bg);
@@ -952,10 +951,10 @@ void SettingDlg::UpdateUI()
 	else
 		m_sbs_chk->Disable();
 	m_sbs_chk->SetValue(glbin_settings.m_sbs);
-	m_eye_dist_sldr->SetValue(std::round(glbin_settings.m_eye_dist*10.0));
+	m_eye_dist_sldr->ChangeValue(std::round(glbin_settings.m_eye_dist*10.0));
 	m_eye_dist_text->ChangeValue(wxString::Format("%.1f", glbin_settings.m_eye_dist));
 	//display id
-	m_disp_id_sldr->SetValue(glbin_settings.m_disp_id);
+	m_disp_id_sldr->ChangeValue(glbin_settings.m_disp_id);
 	m_disp_id_text->ChangeValue(wxString::Format("%d", glbin_settings.m_disp_id));
 	//override vox
 	m_override_vox_chk->SetValue(glbin_settings.m_override_vox);
@@ -991,27 +990,27 @@ void SettingDlg::UpdateUI()
 	m_text_color_cmb->Select(glbin_settings.m_text_color);
 	//line width
 	m_line_width_text->SetValue(wxString::Format("%.0f", glbin_settings.m_line_width));
-	m_line_width_sldr->SetValue(std::round(glbin_settings.m_line_width));
+	m_line_width_sldr->ChangeValue(std::round(glbin_settings.m_line_width));
 	//paint history depth
 	m_paint_hist_depth_text->ChangeValue(wxString::Format("%d", glbin_brush_def.m_paint_hist_depth));
-	m_paint_hist_depth_sldr->SetValue(glbin_brush_def.m_paint_hist_depth);
+	m_paint_hist_depth_sldr->ChangeValue(glbin_brush_def.m_paint_hist_depth);
 	//pencil distance
 	m_pencil_dist_text->ChangeValue(wxString::Format("%.0f", glbin_settings.m_pencil_dist));
-	m_pencil_dist_sldr->SetValue(glbin_settings.m_pencil_dist);
+	m_pencil_dist_sldr->ChangeValue(glbin_settings.m_pencil_dist);
 	//memory settings
 	m_streaming_chk->SetValue(glbin_settings.m_mem_swap);
 	EnableStreaming(glbin_settings.m_mem_swap);
 	m_update_order_rbox->SetSelection(glbin_settings.m_update_order);
 	m_graphics_mem_text->ChangeValue(wxString::Format("%d", (int)glbin_settings.m_graphics_mem));
-	m_graphics_mem_sldr->SetValue(std::round(glbin_settings.m_graphics_mem / 100.0));
+	m_graphics_mem_sldr->ChangeValue(std::round(glbin_settings.m_graphics_mem / 100.0));
 	m_large_data_text->ChangeValue(wxString::Format("%d", (int)glbin_settings.m_large_data_size));
-	m_large_data_sldr->SetValue(std::round(glbin_settings.m_large_data_size / 10.0));
+	m_large_data_sldr->ChangeValue(std::round(glbin_settings.m_large_data_size / 10.0));
 	m_block_size_text->ChangeValue(wxString::Format("%d", glbin_settings.m_force_brick_size));
-	m_block_size_sldr->SetValue(std::round(log(glbin_settings.m_force_brick_size) / log(2.0)));
+	m_block_size_sldr->ChangeValue(std::round(log(glbin_settings.m_force_brick_size) / log(2.0)));
 	m_response_time_text->ChangeValue(wxString::Format("%d", glbin_settings.m_up_time));
-	m_response_time_sldr->SetValue(std::round(glbin_settings.m_up_time / 10.0));
+	m_response_time_sldr->ChangeValue(std::round(glbin_settings.m_up_time / 10.0));
 	m_detail_level_offset_text->ChangeValue(wxString::Format("%d", -glbin_settings.m_detail_level_offset));
-	m_detail_level_offset_sldr->SetValue(-glbin_settings.m_detail_level_offset);
+	m_detail_level_offset_sldr->ChangeValue(-glbin_settings.m_detail_level_offset);
 
 	//java
 	m_java_jvm_text->SetValue(glbin_settings.m_jvm_path);
@@ -1113,36 +1112,27 @@ void SettingDlg::OnProjectSaveIncCheck(wxCommandEvent& event)
 
 void SettingDlg::OnRealtimeCompressCheck(wxCommandEvent &event)
 {
-	if (m_realtime_cmp_chk->GetValue())
-		m_realtime_compress = true;
-	else
-		m_realtime_compress = false;
-
-	VRenderFrame::SetRealtimeCompression(m_realtime_compress);
+	glbin_settings.m_realtime_compress = m_realtime_cmp_chk->GetValue();
 }
 
 void SettingDlg::OnScriptBreakCheck(wxCommandEvent& event)
 {
-	SetScriptBreak(m_script_break_chk->GetValue());
+	glbin_settings.m_script_break = m_script_break_chk->GetValue();
 }
 
 void SettingDlg::OnInverseSliderCheck(wxCommandEvent& event)
 {
-	m_inverse_slider = m_inverse_slider_chk->GetValue();
+	glbin_settings.m_inverse_slider = m_inverse_slider_chk->GetValue();
 }
 
 void SettingDlg::OnMulFuncBtnComb(wxCommandEvent& event)
 {
-	int val = m_mul_func_btn_comb->GetCurrentSelection();
-	glbin.set_mul_func(val);
+	glbin_settings.m_mulfunc = m_mul_func_btn_comb->GetCurrentSelection();
 }
 
 void SettingDlg::OnMouseIntCheck(wxCommandEvent &event)
 {
-	if (m_mouse_int_chk->GetValue())
-		m_mouse_int = true;
-	else
-		m_mouse_int = false;
+	glbin_settings.m_mouse_int = m_mouse_int_chk->GetValue();
 
 	if (m_frame)
 	{
@@ -1151,7 +1141,7 @@ void SettingDlg::OnMouseIntCheck(wxCommandEvent &event)
 			VRenderGLView* view = m_frame->GetView(i);
 			if (view)
 			{
-				view->SetAdaptive(m_mouse_int);
+				view->SetAdaptive(glbin_settings.m_mouse_int);
 				view->RefreshGL(39);
 			}
 		}
@@ -1173,8 +1163,8 @@ void SettingDlg::OnPeelingLayersEdit(wxCommandEvent &event)
 	str.ToLong(&ival);
 	if (ival <= 0)
 		return;
-	m_peeling_layers_sldr->SetValue(ival);
-	m_peeling_layers = ival;
+	m_peeling_layers_sldr->ChangeValue(ival);
+	glbin_settings.m_peeling_layers = ival;
 
 	if (m_frame)
 	{
@@ -1192,10 +1182,7 @@ void SettingDlg::OnPeelingLayersEdit(wxCommandEvent &event)
 
 void SettingDlg::OnMicroBlendCheck(wxCommandEvent &event)
 {
-	if (m_micro_blend_chk->GetValue())
-		m_micro_blend = true;
-	else
-		m_micro_blend = false;
+	glbin_settings.m_micro_blend = m_micro_blend_chk->GetValue();
 
 	if (m_frame)
 	{
@@ -1204,7 +1191,7 @@ void SettingDlg::OnMicroBlendCheck(wxCommandEvent &event)
 			VRenderGLView* view = m_frame->GetView(i);
 			if (view)
 			{
-				view->SetBlendSlices(m_micro_blend);
+				view->SetBlendSlices(glbin_settings.m_micro_blend);
 				view->RefreshGL(39);
 			}
 		}
@@ -1224,15 +1211,15 @@ void SettingDlg::OnShadowDirCheck(wxCommandEvent &event)
 		double deg;
 		str.ToDouble(&deg);
 		SetShadowDir(deg);
-		m_shadow_dir = true;
+		glbin_settings.m_shadow_dir = true;
 	}
 	else
 	{
 		m_shadow_dir_sldr->Disable();
 		m_shadow_dir_text->Disable();
-		m_shadow_dir_x = 0.0;
-		m_shadow_dir_y = 0.0;
-		m_shadow_dir = false;
+		glbin_settings.m_shadow_dir_x = 0.0;
+		glbin_settings.m_shadow_dir_y = 0.0;
+		glbin_settings.m_shadow_dir = false;
 	}
 
 	if (m_frame)
@@ -1259,7 +1246,7 @@ void SettingDlg::OnShadowDirEdit(wxCommandEvent &event)
 	wxString str = m_shadow_dir_text->GetValue();
 	double deg;
 	str.ToDouble(&deg);
-	m_shadow_dir_sldr->SetValue(std::round(deg));
+	m_shadow_dir_sldr->ChangeValue(std::round(deg));
 	SetShadowDir(deg);
 
 	if (m_frame)
@@ -1314,23 +1301,20 @@ void SettingDlg::EnableStreaming(bool enable)
 
 void SettingDlg::SetShadowDir(double deg)
 {
-	m_shadow_dir_x = cos(d2r(deg));
-	m_shadow_dir_y = sin(d2r(deg));
+	glbin_settings.m_shadow_dir_x = cos(d2r(deg));
+	glbin_settings.m_shadow_dir_y = sin(d2r(deg));
 }
 
 double SettingDlg::GetShadowDir()
 {
-	double deg = r2d(atan2(m_shadow_dir_y, m_shadow_dir_x));
+	double deg = r2d(atan2(glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x));
 	return deg;
 }
 
 //gradient background
 void SettingDlg::OnGradBgCheck(wxCommandEvent &event)
 {
-	if (m_grad_bg_chk->GetValue())
-		m_grad_bg = true;
-	else
-		m_grad_bg = false;
+	glbin_settings.m_grad_bg = m_grad_bg_chk->GetValue();
 
 	if (m_frame)
 	{
@@ -1339,42 +1323,11 @@ void SettingDlg::OnGradBgCheck(wxCommandEvent &event)
 			VRenderGLView* view = m_frame->GetView(i);
 			if (view)
 			{
-				view->SetGradBg(m_grad_bg);
+				view->SetGradBg(glbin_settings.m_grad_bg);
 				view->RefreshGL(39);
 			}
 		}
 	}
-}
-
-// Get jvm paths.
-wxString SettingDlg::getJVMPath()
-{
-	return m_java_jvm_text->GetValue(); 
-}
-
-wxString SettingDlg::getIJPath()
-{
-	return m_java_ij_text->GetValue(); 
-}
-
-wxString SettingDlg::getBioformatsPath()
-{
-	return m_java_bioformats_text->GetValue(); 
-}
-
-std::vector<std::string> SettingDlg::GetJvmArgs()
-{
-	std::vector<std::string> args;
-	args.push_back(getJVMPath().ToStdString());
-	args.push_back(getIJPath().ToStdString());
-	args.push_back(getBioformatsPath().ToStdString());
-	return args;
-}
-
-//display settings
-unsigned int SettingDlg::GetDisplayNum()
-{
-	return wxDisplay::GetCount();
 }
 
 //rot center anchor thresh
@@ -1391,8 +1344,8 @@ void SettingDlg::OnPinThresholdEdit(wxCommandEvent &event)
 	wxString str = m_pin_threshold_text->GetValue();
 	double dval;
 	str.ToDouble(&dval);
-	m_pin_threshold_sldr->SetValue(std::round(dval/10.0));
-	m_pin_threshold = dval / 100.0;
+	m_pin_threshold_sldr->ChangeValue(std::round(dval/10.0));
+	glbin_settings.m_pin_threshold = dval / 100.0;
 
 	if (m_frame)
 	{
@@ -1400,7 +1353,7 @@ void SettingDlg::OnPinThresholdEdit(wxCommandEvent &event)
 		{
 			VRenderGLView* view = m_frame->GetView(i);
 			if (view)
-				view->m_vrv->m_pin_scale_thresh = m_pin_threshold;
+				view->m_vrv->m_pin_scale_thresh = glbin_settings.m_pin_threshold;
 		}
 	}
 }
@@ -1423,17 +1376,14 @@ void SettingDlg::OnRotLink(wxCommandEvent& event)
 //stereo
 void SettingDlg::OnStereoCheck(wxCommandEvent &event)
 {
-	m_stereo = m_stereo_chk->GetValue();
-	if (m_stereo)
-		m_sbs_chk->Enable();
-	else
-		m_sbs_chk->Disable();
+	glbin_settings.m_stereo = m_stereo_chk->GetValue();
+	m_sbs_chk->Enable(glbin_settings.m_stereo);
 	if (m_frame && 0 < m_frame->GetViewNum())
 	{
 		VRenderGLView* view = m_frame->GetView(0);
 		if (view)
 		{
-			view->SetStereo(m_stereo);
+			view->SetStereo(glbin_settings.m_stereo);
 			view->RefreshGL(39);
 		}
 	}
@@ -1441,13 +1391,13 @@ void SettingDlg::OnStereoCheck(wxCommandEvent &event)
 
 void SettingDlg::OnSBSCheck(wxCommandEvent& event)
 {
-	m_sbs = m_sbs_chk->GetValue();
+	glbin_settings.m_sbs = m_sbs_chk->GetValue();
 	if (m_frame && 0 < m_frame->GetViewNum())
 	{
 		VRenderGLView* view = m_frame->GetView(0);
 		if (view)
 		{
-			view->SetSBS(m_sbs);
+			view->SetSBS(glbin_settings.m_sbs);
 			view->RefreshGL(39);
 		}
 	}
@@ -1455,8 +1405,8 @@ void SettingDlg::OnSBSCheck(wxCommandEvent& event)
 
 void SettingDlg::OnEyeDistChange(wxScrollEvent &event)
 {
-	m_eye_dist = m_eye_dist_sldr->GetValue() / 10.0;
-	wxString str = wxString::Format("%.1f", m_eye_dist);
+	glbin_settings.m_eye_dist = m_eye_dist_sldr->GetValue() / 10.0;
+	wxString str = wxString::Format("%.1f", glbin_settings.m_eye_dist);
 	if (str != m_eye_dist_text->GetValue())
 		m_eye_dist_text->SetValue(str);
 }
@@ -1466,15 +1416,15 @@ void SettingDlg::OnEyeDistEdit(wxCommandEvent &event)
 	wxString str = m_eye_dist_text->GetValue();
 	double dval;
 	str.ToDouble(&dval);
-	m_eye_dist_sldr->SetValue(std::round(dval * 10.0));
-	m_eye_dist = dval;
+	m_eye_dist_sldr->ChangeValue(std::round(dval * 10.0));
+	glbin_settings.m_eye_dist = dval;
 
 	if (m_frame && 0 < m_frame->GetViewNum())
 	{
 		VRenderGLView* view = m_frame->GetView(0);
 		if (view)
 		{
-			view->SetEyeDist(m_eye_dist);
+			view->SetEyeDist(glbin_settings.m_eye_dist);
 			view->RefreshGL(39);
 		}
 	}
@@ -1483,8 +1433,8 @@ void SettingDlg::OnEyeDistEdit(wxCommandEvent &event)
 //display id
 void SettingDlg::OnDispIdChange(wxScrollEvent& event)
 {
-	m_disp_id = m_disp_id_sldr->GetValue();
-	wxString str = wxString::Format("%d", m_disp_id);
+	glbin_settings.m_disp_id = m_disp_id_sldr->GetValue();
+	wxString str = wxString::Format("%d", glbin_settings.m_disp_id);
 	if (str != m_disp_id_text->GetValue())
 		m_disp_id_text->SetValue(str);
 }
@@ -1494,101 +1444,80 @@ void SettingDlg::OnDispIdEdit(wxCommandEvent& event)
 	wxString str = m_disp_id_text->GetValue();
 	long ival;
 	str.ToLong(&ival);
-	m_disp_id_sldr->SetValue(ival);
-	m_disp_id = ival;
+	m_disp_id_sldr->ChangeValue(ival);
+	glbin_settings.m_disp_id = ival;
 }
 
 //override vox
 void SettingDlg::OnOverrideVoxCheck(wxCommandEvent &event)
 {
-	if (m_override_vox_chk->GetValue())
-		m_override_vox = true;
-	else
-		m_override_vox = false;
+	glbin_settings.m_override_vox = m_override_vox_chk->GetValue();
 
 	if (m_frame)
-		m_frame->GetDataManager()->SetOverrideVox(m_override_vox);
-}
-
-//wavelength to color
-int SettingDlg::GetWavelengthColor(int n)
-{
-	switch (n)
-	{
-	case 1:
-		return m_wav_color1;
-	case 2:
-		return m_wav_color2;
-	case 3:
-		return m_wav_color3;
-	case 4:
-		return m_wav_color4;
-	default:
-		return 0;
-	}
+		m_frame->GetDataManager()->SetOverrideVox(glbin_settings.m_override_vox);
 }
 
 void SettingDlg::OnWavColor1Change(wxCommandEvent &event)
 {
 	if (m_wav_color1_cmb)
-		m_wav_color1 = m_wav_color1_cmb->GetCurrentSelection() + 1;
+		glbin_settings.m_wav_color1 = m_wav_color1_cmb->GetCurrentSelection() + 1;
 
 	if (m_frame && m_frame->GetDataManager())
 		m_frame->GetDataManager()->SetWavelengthColor(
-			m_wav_color1,
-			m_wav_color2,
-			m_wav_color3,
-			m_wav_color4);
+			glbin_settings.m_wav_color1,
+			glbin_settings.m_wav_color2,
+			glbin_settings.m_wav_color3,
+			glbin_settings.m_wav_color4);
 }
 
 void SettingDlg::OnWavColor2Change(wxCommandEvent &event)
 {
 	if (m_wav_color2_cmb)
-		m_wav_color2 = m_wav_color2_cmb->GetCurrentSelection() + 1;
+		glbin_settings.m_wav_color2 = m_wav_color2_cmb->GetCurrentSelection() + 1;
 
 	if (m_frame && m_frame->GetDataManager())
 		m_frame->GetDataManager()->SetWavelengthColor(
-			m_wav_color1,
-			m_wav_color2,
-			m_wav_color3,
-			m_wav_color4);
+			glbin_settings.m_wav_color1,
+			glbin_settings.m_wav_color2,
+			glbin_settings.m_wav_color3,
+			glbin_settings.m_wav_color4);
 }
 
 void SettingDlg::OnWavColor3Change(wxCommandEvent &event)
 {
 	if (m_wav_color3_cmb)
-		m_wav_color3 = m_wav_color3_cmb->GetCurrentSelection() + 1;
+		glbin_settings.m_wav_color3 = m_wav_color3_cmb->GetCurrentSelection() + 1;
 
 	if (m_frame && m_frame->GetDataManager())
 		m_frame->GetDataManager()->SetWavelengthColor(
-			m_wav_color1,
-			m_wav_color2,
-			m_wav_color3,
-			m_wav_color4);
+			glbin_settings.m_wav_color1,
+			glbin_settings.m_wav_color2,
+			glbin_settings.m_wav_color3,
+			glbin_settings.m_wav_color4);
 }
 
 void SettingDlg::OnWavColor4Change(wxCommandEvent &event)
 {
 	if (m_wav_color4_cmb)
-		m_wav_color4 = m_wav_color4_cmb->GetCurrentSelection() + 1;
+		glbin_settings.m_wav_color4 = m_wav_color4_cmb->GetCurrentSelection() + 1;
 
 	if (m_frame && m_frame->GetDataManager())
 		m_frame->GetDataManager()->SetWavelengthColor(
-			m_wav_color1,
-			m_wav_color2,
-			m_wav_color3,
-			m_wav_color4);
+			glbin_settings.m_wav_color1,
+			glbin_settings.m_wav_color2,
+			glbin_settings.m_wav_color3,
+			glbin_settings.m_wav_color4);
 }
 
 //texture size
 void SettingDlg::OnMaxTextureSizeChk(wxCommandEvent &event)
 {
-	m_use_max_texture_size = m_max_texture_size_chk->GetValue();
-	if (m_use_max_texture_size)
+	glbin_settings.m_use_max_texture_size = m_max_texture_size_chk->GetValue();
+	if (glbin_settings.m_use_max_texture_size)
 	{
-		flvr::ShaderProgram::set_max_texture_size(m_max_texture_size);
+		flvr::ShaderProgram::set_max_texture_size(glbin_settings.m_max_texture_size);
 		m_max_texture_size_text->SetValue(
-			wxString::Format("%d", m_max_texture_size));
+			wxString::Format("%d", glbin_settings.m_max_texture_size));
 		m_max_texture_size_text->Enable();
 	}
 	else
@@ -1600,13 +1529,13 @@ void SettingDlg::OnMaxTextureSizeChk(wxCommandEvent &event)
 
 void SettingDlg::OnMaxTextureSizeEdit(wxCommandEvent &event)
 {
-	if (m_use_max_texture_size)
+	if (glbin_settings.m_use_max_texture_size)
 	{
 		wxString str = m_max_texture_size_text->GetValue();
 		long size;
 		if (str.ToLong(&size))
 		{
-			m_max_texture_size = size;
+			glbin_settings.m_max_texture_size = size;
 			flvr::ShaderProgram::set_max_texture_size(size);
 		}
 	}
@@ -1616,15 +1545,15 @@ void SettingDlg::OnMaxTextureSizeEdit(wxCommandEvent &event)
 void SettingDlg::OnStreamingChk(wxCommandEvent &event)
 {
 	if (m_streaming_chk->GetValue())
-		m_mem_swap = true;
+		glbin_settings.m_mem_swap = true;
 	else
-		m_mem_swap = false;
-	EnableStreaming(m_mem_swap);
+		glbin_settings.m_mem_swap = false;
+	EnableStreaming(glbin_settings.m_mem_swap);
 }
 
 void SettingDlg::OnUpdateOrderChange(wxCommandEvent &event)
 {
-	m_update_order = m_update_order_rbox->GetSelection();
+	glbin_settings.m_update_order = m_update_order_rbox->GetSelection();
 }
 
 void SettingDlg::OnGraphicsMemChange(wxScrollEvent &event)
@@ -1642,8 +1571,8 @@ void SettingDlg::OnGraphicsMemEdit(wxCommandEvent &event)
 	str.ToDouble(&val);
 	if (val <= 0.0)
 		return;
-	m_graphics_mem_sldr->SetValue(std::round(val / 100.0));
-	m_graphics_mem = val;
+	m_graphics_mem_sldr->ChangeValue(std::round(val / 100.0));
+	glbin_settings.m_graphics_mem = val;
 }
 
 void SettingDlg::OnLargeDataChange(wxScrollEvent &event)
@@ -1661,8 +1590,8 @@ void SettingDlg::OnLargeDataEdit(wxCommandEvent &event)
 	str.ToDouble(&val);
 	if (val < 0.0)
 		return;
-	m_large_data_sldr->SetValue(std::round(val / 10.0));
-	m_large_data_size = val;
+	m_large_data_sldr->ChangeValue(std::round(val / 10.0));
+	glbin_settings.m_large_data_size = val;
 }
 
 void SettingDlg::OnBlockSizeChange(wxScrollEvent &event)
@@ -1680,8 +1609,8 @@ void SettingDlg::OnBlockSizeEdit(wxCommandEvent &event)
 	str.ToDouble(&val);
 	if (val <= 0.0)
 		return;
-	m_block_size_sldr->SetValue(std::round(log(val) / log(2.0)));
-	m_force_brick_size = val;
+	m_block_size_sldr->ChangeValue(std::round(log(val) / log(2.0)));
+	glbin_settings.m_force_brick_size = val;
 }
 
 void SettingDlg::OnResponseTimeChange(wxScrollEvent &event)
@@ -1699,8 +1628,8 @@ void SettingDlg::OnResponseTimeEdit(wxCommandEvent &event)
 	str.ToDouble(&val);
 	if (val <= 0.0)
 		return;
-	m_response_time_sldr->SetValue(std::round(val / 10.0));
-	m_up_time = val;
+	m_response_time_sldr->ChangeValue(std::round(val / 10.0));
+	glbin_settings.m_up_time = val;
 }
 
 void SettingDlg::OnDetailLevelOffsetChange(wxScrollEvent &event)
@@ -1716,8 +1645,8 @@ void SettingDlg::OnDetailLevelOffsetEdit(wxCommandEvent &event)
 	wxString str = m_detail_level_offset_text->GetValue();
 	long val;
 	str.ToLong(&val);
-	m_detail_level_offset_sldr->SetValue(val);
-	m_detail_level_offset = -val;
+	m_detail_level_offset_sldr->ChangeValue(val);
+	glbin_settings.m_detail_level_offset = -val;
 
 	if (m_frame)
 	{
@@ -1736,7 +1665,7 @@ void SettingDlg::OnFontChange(wxCommandEvent &event)
 	wxString str = m_font_cmb->GetValue();
 	if (str != "")
 	{
-		m_font_file = str + ".ttf";
+		glbin_settings.m_font_file = str + ".ttf";
 		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 		exePath = wxPathOnly(exePath);
 		wxString loc = exePath + GETSLASH() + "Fonts" +
@@ -1745,7 +1674,7 @@ void SettingDlg::OnFontChange(wxCommandEvent &event)
 		if (m_frame)
 		{
 			flvr::TextRenderer::text_texture_manager_.load_face(loc.ToStdString());
-			flvr::TextRenderer::text_texture_manager_.SetSize(m_text_size);
+			flvr::TextRenderer::text_texture_manager_.SetSize(glbin_settings.m_text_size);
 			for (int i = 0; i < m_frame->GetViewNum(); i++)
 			{
 				VRenderGLView* view = m_frame->GetView(i);
@@ -1762,11 +1691,11 @@ void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
 	long size;
 	if (str.ToLong(&size))
 	{
-		m_text_size = size;
+		glbin_settings.m_text_size = size;
 
 		if (m_frame)
 		{
-			flvr::TextRenderer::text_texture_manager_.SetSize(m_text_size);
+			flvr::TextRenderer::text_texture_manager_.SetSize(glbin_settings.m_text_size);
 			for (int i = 0; i < m_frame->GetViewNum(); i++)
 			{
 				VRenderGLView* view = m_frame->GetView(i);
@@ -1779,7 +1708,7 @@ void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
 
 void SettingDlg::OnTextColorChange(wxCommandEvent &event)
 {
-	m_text_color = m_text_color_cmb->GetCurrentSelection();
+	glbin_settings.m_text_color = m_text_color_cmb->GetCurrentSelection();
 	if (m_frame)
 	{
 		for (int i = 0; i < m_frame->GetViewNum(); i++)
@@ -1806,8 +1735,8 @@ void SettingDlg::OnLineWidthText(wxCommandEvent &event)
 	unsigned long ival;
 	if (str.ToULong(&ival))
 	{
-		m_line_width_sldr->SetValue(ival);
-		m_line_width = ival;
+		m_line_width_sldr->ChangeValue(ival);
+		glbin_settings.m_line_width = ival;
 		if (m_frame)
 		{
 			for (int i = 0; i < m_frame->GetViewNum(); i++)
@@ -1834,8 +1763,8 @@ void SettingDlg::OnPaintHistDepthEdit(wxCommandEvent &event)
 	wxString str = m_paint_hist_depth_text->GetValue();
 	unsigned long ival;
 	str.ToULong(&ival);
-	m_paint_hist_depth_sldr->SetValue(ival);
-	m_paint_hist_depth = ival;
+	m_paint_hist_depth_sldr->ChangeValue(ival);
+	glbin_brush_def.m_paint_hist_depth = ival;
 	if (m_frame)
 		m_frame->SetTextureUndos();
 }
@@ -1854,30 +1783,24 @@ void SettingDlg::OnPencilDistEdit(wxCommandEvent& event)
 	wxString str = m_pencil_dist_text->GetValue();
 	unsigned long ival;
 	str.ToULong(&ival);
-	m_pencil_dist_sldr->SetValue(ival);
-	m_pencil_dist = ival;
+	m_pencil_dist_sldr->ChangeValue(ival);
+	glbin_settings.m_pencil_dist = ival;
 }
 
 // Java settings.
 void SettingDlg::OnJavaJvmEdit(wxCommandEvent &event)
 {
-	wxString str = m_java_jvm_text->GetValue();
-	unsigned long ival;
-	str.ToULong(&ival);
+	glbin_settings.m_jvm_path = m_java_jvm_text->GetValue();
 }
 
 void SettingDlg::OnJavaIJEdit(wxCommandEvent &event)
 {
-	wxString str = m_java_ij_text->GetValue();
-	unsigned long ival;
-	str.ToULong(&ival);
+	glbin_settings.m_ij_path = m_java_ij_text->GetValue();
 }
 
 void SettingDlg::OnJavaBioformatsEdit(wxCommandEvent &event)
 {
-	wxString str = m_java_bioformats_text->GetValue();
-	unsigned long ival;
-	str.ToULong(&ival);
+	glbin_settings.m_bioformats_path = m_java_bioformats_text->GetValue();
 }
 
 void SettingDlg::onJavaJvmBrowse(wxCommandEvent &event)
@@ -1887,11 +1810,11 @@ void SettingDlg::onJavaJvmBrowse(wxCommandEvent &event)
 		m_frame, "Choose the jvm dll file",
 		"", "", "*.dll", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 #else
-    wxFileDialog *fopendlg = new wxFileDialog(
-                                              m_frame, "Choose the libjvm.dylib file",
-                                              "", "", "*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	wxFileDialog* fopendlg = new wxFileDialog(
+		m_frame, "Choose the libjvm.dylib file",
+		"", "", "*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 #endif
-    
+
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
@@ -1913,9 +1836,9 @@ void SettingDlg::onJavaIJBrowse(wxCommandEvent &event)
 		m_frame, "Choose the imageJ/fiji directory",
 		"", wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
 #else
-    wxFileDialog *fopendlg = new wxFileDialog(
-                                              m_frame, "Choose the imageJ/fiji app",
-                                              "", "", "*.app", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	wxFileDialog* fopendlg = new wxFileDialog(
+		m_frame, "Choose the imageJ/fiji app",
+		"", "", "*.app", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 #endif
 
 	int rval = fopendlg->ShowModal();
@@ -1923,7 +1846,7 @@ void SettingDlg::onJavaIJBrowse(wxCommandEvent &event)
 	{
 		wxString filename = fopendlg->GetPath();
 #ifdef _DARWIN
-        //filename = filename + "/Contents/Java/ij.jar";
+		//filename = filename + "/Contents/Java/ij.jar";
 #endif
 		m_java_ij_text->SetValue(filename);
 	}
@@ -1954,7 +1877,7 @@ void SettingDlg::onJavaRadioButtonImageJ(wxCommandEvent &event) {
 	m_java_bioformats_text->Enable(true);
 	m_browse_jvm_btn->Enable(true);
 	m_browse_bioformats_btn->Enable(true);
-	m_ij_mode = 0;
+	glbin_settings.m_ij_mode = 0;
 }
 
 void SettingDlg::onJavaRadioButtonFiji(wxCommandEvent &event) {
@@ -1962,7 +1885,7 @@ void SettingDlg::onJavaRadioButtonFiji(wxCommandEvent &event) {
 	m_java_bioformats_text->Enable(false);
 	m_browse_jvm_btn->Enable(false);
 	m_browse_bioformats_btn->Enable(false);
-	m_ij_mode = 1;
+	glbin_settings.m_ij_mode = 1;
 }
 
 //device tree
@@ -1986,8 +1909,8 @@ void SettingDlg::OnSelChanged(wxTreeEvent& event)
 			{
 				if (dvitem == sel)
 				{
-					SetCLPlatformID(i);
-					SetCLDeviceID(j);
+					glbin_settings.m_cl_platform_id = i;
+					glbin_settings.m_cl_device_id = j;
 				}
 				dvitem = m_device_tree->GetNextChild(pfitem, dvck);
 				j++;

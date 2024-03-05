@@ -1074,7 +1074,5 @@ void MLVolPropPanel::SaveTable(const std::string& filename)
 
 void MLVolPropPanel::OnAutoApply(wxCommandEvent& event)
 {
-	if (!m_frame || !m_frame->GetSettingDlg())
-		return;
 	glbin_settings.m_vp_auto_apply = m_auto_apply_chk->GetValue();
 }

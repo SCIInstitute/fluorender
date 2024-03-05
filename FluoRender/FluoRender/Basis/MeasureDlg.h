@@ -42,11 +42,8 @@ class VRenderGLView;
 class MeasureDlg;
 namespace flrd
 {
-	class DistCalculator;
 	class Ruler;
 	class RulerList;
-	class RulerAlign;
-	class RulerHandler;
 }
 class RulerListCtrl : public wxListCtrl
 {
@@ -97,7 +94,6 @@ private:
 	wxTextCtrl *m_center_text;
 	wxColourPickerCtrl *m_color_picker;
 	long m_editing_item;
-	flrd::RulerHandler *m_rhdl;
 
 private:
 	void EndEdit(bool update=true);
@@ -207,7 +203,6 @@ private:
 	VRenderFrame* m_frame;
 	//current view
 	VRenderGLView* m_view;
-	flrd::RulerHandler *m_rhdl;
 
 	//list ctrl
 	wxButton* m_new_group;
@@ -250,8 +245,6 @@ private:
 	wxButton* m_align_yzx;
 	wxButton* m_align_zyx;
 
-	flrd::DistCalculator* m_calculator;
-	flrd::RulerAlign* m_aligner;
 	bool m_edited;
 
 private:

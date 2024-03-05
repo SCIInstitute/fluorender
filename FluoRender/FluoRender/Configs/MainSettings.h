@@ -57,6 +57,14 @@ public:
 	void Read();
 	void Save();
 
+	std::vector<std::string> GetJvmArgs()
+	{
+		std::vector<std::string> args;
+		args.push_back(m_jvm_path.ToStdString());
+		args.push_back(m_ij_path.ToStdString());
+		args.push_back(m_bioformats_path.ToStdString());
+		return args;
+	}
 	BrushDefault m_brush_def;
 	ComponentDefault m_comp_def;
 	OutAdjDefault m_outadj_def;
@@ -151,7 +159,6 @@ public:
 	int m_update_order;		//0:back-to-front; 1:front-to-back
 	bool m_invalidate_tex;	//invalidate texture in every loop
 	int m_detail_level_offset;//an offset value to current level of detail (for multiresolution data only)
-	bool m_skip_bricks;		//skip empty bricks
 
 	int m_bg_type;			//background parameters: 0-mean; 1-minmax; 2-median
 	int m_kx, m_ky;			//windows size
