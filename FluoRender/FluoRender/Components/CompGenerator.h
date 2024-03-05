@@ -53,62 +53,92 @@ namespace flrd
 		{
 			m_vd = vd;
 		}
-		void SetUseMask(bool use_mask)
-		{ m_use_mask = use_mask; }
-		bool GetUseMask()
-		{ return m_use_mask; }
+
+		void SetUseSel(bool val) { m_use_sel = val; }
+		bool GetUseSel() { return m_use_sel; }
+		void SetIter(int val) { m_iter = val; }
+		int GetIter() { return m_iter; }
+		void SetThresh(double val) { m_thresh = val; }
+		double GetThresh() { return m_thresh; }
+		void SetTFactor(double val) { m_tfactor = val; }
+		double GetTFactor() { return m_tfactor; }
+		//distance
+		void SetUseDistField(bool val) { m_use_dist_field = val; }
+		bool GetUseDustField() { return m_use_dist_field; }
+		void SetDistStrength(double val) { m_dist_strength = val; }
+		double GetDistStrength() { return m_dist_strength; }
+		void SetDistFilterSize(int val) { m_dist_filter_size = val; }
+		int GetDistFilterSize() { return m_dist_filter_size; }
+		void SetMaxDist(int val) { m_max_dist = val; }
+		int GetMaxDist() { return m_max_dist; }
+		void SetDistThresh(double val) { m_dist_thresh = val; }
+		double GetDistThresh() { return m_dist_thresh; }
+		//diffusion
+		void SetDiffusion(bool val) { m_diff = val; }
+		bool GetDiffusion() { return m_diff; }
+		void SetFalloff(double val) { m_falloff = val; }
+		double GetFalloff() { return m_falloff; }
+		//size
+		void SetSize(bool val) { m_size = val; }
+		bool GetSize() { return m_size; }
+		void SetSizeLimit(int val) { m_size_lm = val; }
+		int GetSizeLimit() { return m_size_lm; }
+		//density
+		void SetDensity(bool val) { m_density = val; }
+		bool GetDensity() { return m_density; }
+		void SetDensityThresh(double val) { m_density_thresh = val; }
+		double GetDensityThresh() { return m_density_thresh; }
+		void SetVarThresh(double val) { m_varth = val; }
+		double GetVarThresh() { return m_varth; }
+		void SetDensityWinSize(int val) { m_density_window_size = val; }
+		int GetDensityWinSize() { return m_density_window_size; }
+		void SetDensityStatSize(int val) { m_density_stats_size = val; }
+		int GetDensityStatSize() { return m_density_stats_size; }
+		//fixate
+		void SetFixate(bool val) { m_fixate = val; }
+		bool GetFixate() { return m_fixate; }
+		void SetFixSize(int val) { m_fix_size = val; }
+		int GetFixSize() { return m_fix_size; }
+		void SetGrowFixed(int val) { m_grow_fixed = val; }
+		int GetGrowFixed() { return m_grow_fixed; }
+		//clean
+		void SetClean(bool val) { m_clean = val; }
+		bool GetClean() { return m_clean; }
+		void SetCleanIter(int val) { m_clean_iter = val; }
+		int GetCleanIter() { return m_clean_iter; }
+		void SetCleanSize(int val) { m_clean_size_vl = val; }
+		int GetCleanSize() { return m_clean_size_vl; }
+		//fill border
+		void SetFillBorder(double val) { m_fill_border = val; }
+		double GetFillBorder() { return m_fill_border; }
 
 		//segmentation functions
 		void ShuffleID();
 		void SetIDBit(int);
-		void Grow(bool, int, float, float, float, int);
-		void DensityField(int dsize, int wsize,
-			bool diffuse, int iter, float tran, float falloff,
-			float density, float varth, float sscale, int fixed);
-		void DistGrow(bool, int,
-			float, float, int, int, float, float, float, int);
-		void DistDensityField(
-			bool diffuse, int iter, float tran, float falloff,
-			int dsize1, int max_dist, float dist_thresh, float dist_strength,
-			int dsize2, int wsize, float density, float varth, float sscale, int fixed);
-		void Cleanup(int, unsigned int);
+
+		void Grow();
+		void DensityField();
+		void DistGrow();
+		void DistDensityField();
+		void Cleanup();
 		void ClearBorders();
-		void FillBorders(float);
+		void FillBorders();
 
 		//learning functions
-		void AddEntry(
-			int iter,
-			float thresh,
-			bool diff,
-			float falloff,
-			bool grow_fixed,
-			bool density = false,
-			float density_thresh = 1.0f,
-			float varth = 0.0001f,
-			int density_window_size = 5,
-			int density_stats_size = 15,
-			bool use_dist_field = false,
-			float dist_strength = 0.5f,
-			float dist_thresh = 0.25f,
-			int dist_filter_size = 3,
-			int max_dist = 30
-			);
-		void AddCleanEntry(
-			int clean_iter,
-			int clean_size_vl
-		);
+		void AddEntry();
+		void AddCleanEntry();
 		void GenerateDB();
 
 		//unused
-		void OrderID_2D();
-		void OrderID_3D();
-		void ShuffleID_2D();
-		void Grow3DSized(bool, int, float, float,
-			int, float, int);
-		void MatchSlices(bool backwards,
-			unsigned int,
-			float, float, float);
-		void DistField(int iter, float th, int dsize, float sscale);
+		//void OrderID_2D();
+		//void OrderID_3D();
+		//void ShuffleID_2D();
+		//void Grow3DSized(bool, int, float, float,
+		//	int, float, int);
+		//void MatchSlices(bool backwards,
+		//	unsigned int,
+		//	float, float, float);
+		//void DistField(int iter, float th, int dsize, float sscale);
 
 		//update progress
 		CompGenFunc prework;
@@ -116,7 +146,38 @@ namespace flrd
 
 	private:
 		VolumeData *m_vd;
-		bool m_use_mask;//use mask instead of data
+
+		bool m_use_sel;//use mask instead of data
+		int m_iter;//iteration
+		double m_thresh;
+		double m_tfactor;
+		//distance field
+		bool m_use_dist_field;
+		double m_dist_strength;
+		int m_dist_filter_size;
+		int m_max_dist;
+		double m_dist_thresh;
+		//diffusion
+		bool m_diff;
+		double m_falloff;
+		bool m_size;
+		int m_size_lm;
+		//density
+		bool m_density;
+		double m_density_thresh;
+		double m_varth;//variance threshold
+		int m_density_window_size;
+		int m_density_stats_size;
+		//fixate
+		bool m_fixate;
+		int m_fix_size;
+		int m_grow_fixed;
+		//clean
+		bool m_clean;
+		int m_clean_iter;
+		int m_clean_size_vl;
+		//fill borders
+		double m_fill_border;
 
 	private:
 		bool CheckBricks();

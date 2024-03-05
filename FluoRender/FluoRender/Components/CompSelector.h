@@ -42,7 +42,7 @@ namespace flrd
 	class ComponentSelector
 	{
 	public:
-		ComponentSelector(VolumeData* vd);
+		ComponentSelector();
 		~ComponentSelector();
 
 		void SetVolume(VolumeData* vd)

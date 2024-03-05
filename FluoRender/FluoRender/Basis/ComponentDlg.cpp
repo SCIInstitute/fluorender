@@ -27,12 +27,12 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ComponentDlg.h"
 #include "VRenderFrame.h"
+#include <Global.h>
 #include <Components/CompSelector.h>
 #include <Components/CompEditor.h>
 #include <Cluster/dbscan.h>
 #include <Cluster/kmeans.h>
 #include <Cluster/exmax.h>
-#include <Global.h>
 #include <Database/RecordHistParams.h>
 #include <wxSingleSlider.h>
 #include <wx/scrolwin.h>
@@ -305,7 +305,7 @@ ComponentDlg::ComponentDlg(VRenderFrame *frame)
 
 ComponentDlg::~ComponentDlg()
 {
-	SaveSettings("");
+	//SaveSettings("");
 	//SaveTable();
 }
 
@@ -1098,58 +1098,58 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 void ComponentDlg::Update()
 {
 	//update ui
-	m_use_sel_chk->SetValue(m_use_sel);
-	m_use_ml_chk->SetValue(m_use_ml);
+	m_use_sel_chk->SetValue(glbin_comp_def.m_use_sel);
+	m_use_ml_chk->SetValue(glbin_comp_def.m_use_ml);
 	//comp generate page
-	m_iter_text->SetValue(wxString::Format("%d", m_iter));
-	m_thresh_text->SetValue(wxString::Format("%.3f", m_thresh));
+	m_iter_text->SetValue(wxString::Format("%d", glbin_comp_def.m_iter));
+	m_thresh_text->SetValue(wxString::Format("%.3f", glbin_comp_def.m_thresh));
 	//dist
-	m_use_dist_field_check->SetValue(m_use_dist_field);
-	EnableUseDistField(m_use_dist_field);
-	m_dist_strength_text->SetValue(wxString::Format("%.3f", m_dist_strength));
-	m_dist_filter_size_text->SetValue(wxString::Format("%d", m_dist_filter_size));
-	m_max_dist_text->SetValue(wxString::Format("%d", m_max_dist));
-	m_dist_thresh_text->SetValue(wxString::Format("%.3f", m_dist_thresh));
-	m_diff_check->SetValue(m_diff);
-	EnableDiff(m_diff);
-	m_falloff_text->SetValue(wxString::Format("%.3f", m_falloff));
+	m_use_dist_field_check->SetValue(glbin_comp_def.m_use_dist_field);
+	EnableUseDistField(glbin_comp_def.m_use_dist_field);
+	m_dist_strength_text->SetValue(wxString::Format("%.3f", glbin_comp_def.m_dist_strength));
+	m_dist_filter_size_text->SetValue(wxString::Format("%d", glbin_comp_def.m_dist_filter_size));
+	m_max_dist_text->SetValue(wxString::Format("%d", glbin_comp_def.m_max_dist));
+	m_dist_thresh_text->SetValue(wxString::Format("%.3f", glbin_comp_def.m_dist_thresh));
+	m_diff_check->SetValue(glbin_comp_def.m_diff);
+	EnableDiff(glbin_comp_def.m_diff);
+	m_falloff_text->SetValue(wxString::Format("%.3f", glbin_comp_def.m_falloff));
 	//m_size_check->SetValue(m_size);
-	EnableSize(m_size);
+	EnableSize(glbin_comp_def.m_size);
 	//m_size_text->SetValue(wxString::Format("%d", m_size_lm));
-	EnableDensity(m_density);
-	m_density_check->SetValue(m_density);
-	m_density_text->SetValue(wxString::Format("%.3f", m_density_thresh));
-	m_varth_text->SetValue(wxString::Format("%.4f", m_varth));
-	m_density_window_size_text->SetValue(wxString::Format("%d", m_density_window_size));
-	m_density_stats_size_text->SetValue(wxString::Format("%d", m_density_stats_size));
+	EnableDensity(glbin_comp_def.m_density);
+	m_density_check->SetValue(glbin_comp_def.m_density);
+	m_density_text->SetValue(wxString::Format("%.3f", glbin_comp_def.m_density_thresh));
+	m_varth_text->SetValue(wxString::Format("%.4f", glbin_comp_def.m_varth));
+	m_density_window_size_text->SetValue(wxString::Format("%d", glbin_comp_def.m_density_window_size));
+	m_density_stats_size_text->SetValue(wxString::Format("%d", glbin_comp_def.m_density_stats_size));
 	//fixate
-	m_fixate_check->SetValue(m_fixate);
-	EnableFixate(m_fixate);
-	m_grow_fixed_check->SetValue(m_grow_fixed);
-	m_fix_size_text->SetValue(wxString::Format("%d", m_fix_size));
+	m_fixate_check->SetValue(glbin_comp_def.m_fixate);
+	EnableFixate(glbin_comp_def.m_fixate);
+	m_grow_fixed_check->SetValue(glbin_comp_def.m_grow_fixed);
+	m_fix_size_text->SetValue(wxString::Format("%d", glbin_comp_def.m_fix_size));
 	//clean
-	EnableClean(m_clean);
-	m_clean_check->SetValue(m_clean);
-	m_clean_iter_text->SetValue(wxString::Format("%d", m_clean_iter));
-	m_clean_limit_text->SetValue(wxString::Format("%d", m_clean_size_vl));
+	EnableClean(glbin_comp_def.m_clean);
+	m_clean_check->SetValue(glbin_comp_def.m_clean);
+	m_clean_iter_text->SetValue(wxString::Format("%d", glbin_comp_def.m_clean_iter));
+	m_clean_limit_text->SetValue(wxString::Format("%d", glbin_comp_def.m_clean_size_vl));
 	//record
 	int ival = m_command.size();
 	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
 
 	//cluster page
-	m_cluster_method_exmax_rd->SetValue(m_cluster_method_exmax);
-	m_cluster_method_dbscan_rd->SetValue(m_cluster_method_dbscan);
-	m_cluster_method_kmeans_rd->SetValue(m_cluster_method_kmeans);
+	m_cluster_method_exmax_rd->SetValue(glbin_comp_def.m_cluster_method_exmax);
+	m_cluster_method_dbscan_rd->SetValue(glbin_comp_def.m_cluster_method_dbscan);
+	m_cluster_method_kmeans_rd->SetValue(glbin_comp_def.m_cluster_method_kmeans);
 	//parameters
-	m_cluster_clnum_text->SetValue(wxString::Format("%d", m_cluster_clnum));
-	m_cluster_maxiter_text->SetValue(wxString::Format("%d", m_cluster_maxiter));
-	m_cluster_tol_text->SetValue(wxString::Format("%.2f", m_cluster_tol));
-	m_cluster_size_text->SetValue(wxString::Format("%d", m_cluster_size));
-	m_cluster_eps_text->SetValue(wxString::Format("%.1f", m_cluster_eps));
+	m_cluster_clnum_text->SetValue(wxString::Format("%d", glbin_comp_def.m_cluster_clnum));
+	m_cluster_maxiter_text->SetValue(wxString::Format("%d", glbin_comp_def.m_cluster_maxiter));
+	m_cluster_tol_text->SetValue(wxString::Format("%.2f", glbin_comp_def.m_cluster_tol));
+	m_cluster_size_text->SetValue(wxString::Format("%d", glbin_comp_def.m_cluster_size));
+	m_cluster_eps_text->SetValue(wxString::Format("%.1f", glbin_comp_def.m_cluster_eps));
 	UpdateClusterMethod();
 
 	//selection
-	if (m_use_min)
+	if (glbin_comp_def.m_use_min)
 	{
 		m_analysis_min_check->SetValue(true);
 		m_analysis_min_spin->Enable();
@@ -1159,8 +1159,8 @@ void ComponentDlg::Update()
 		m_analysis_min_check->SetValue(false);
 		m_analysis_min_spin->Disable();
 	}
-	m_analysis_min_spin->SetValue(m_min_num);
-	if (m_use_max)
+	m_analysis_min_spin->SetValue(glbin_comp_def.m_min_num);
+	if (glbin_comp_def.m_use_max)
 	{
 		m_analysis_max_check->SetValue(true);
 		m_analysis_max_spin->Enable();
@@ -1170,24 +1170,24 @@ void ComponentDlg::Update()
 		m_analysis_max_check->SetValue(false);
 		m_analysis_max_spin->Disable();
 	}
-	m_analysis_max_spin->SetValue(m_max_num);
+	m_analysis_max_spin->SetValue(glbin_comp_def.m_max_num);
 
 	//options
-	m_consistent_check->SetValue(m_consistent);
-	m_colocal_check->SetValue(m_colocal);
+	m_consistent_check->SetValue(glbin_comp_def.m_consistent);
+	m_colocal_check->SetValue(glbin_comp_def.m_colocal);
 
 	//output type
 	m_output_multi_rb->SetValue(false);
 	m_output_rgb_rb->SetValue(false);
-	if (m_output_type == 1)
+	if (glbin_comp_def.m_output_type == 1)
 		m_output_multi_rb->SetValue(true);
-	else if (m_output_type == 2)
+	else if (glbin_comp_def.m_output_type == 2)
 		m_output_rgb_rb->SetValue(true);
 
-	m_dist_neighbor_check->SetValue(m_use_dist_neighbor);
-	m_dist_neighbor_sldr->Enable(m_use_dist_neighbor);
-	m_dist_neighbor_text->Enable(m_use_dist_neighbor);
-	m_dist_all_chan_check->SetValue(m_use_dist_allchan);
+	m_dist_neighbor_check->SetValue(glbin_comp_def.m_use_dist_neighbor);
+	m_dist_neighbor_sldr->Enable(glbin_comp_def.m_use_dist_neighbor);
+	m_dist_neighbor_text->Enable(glbin_comp_def.m_use_dist_neighbor);
+	m_dist_all_chan_check->SetValue(glbin_comp_def.m_use_dist_allchan);
 
 	//generate
 	EnableGenerate();
@@ -1201,13 +1201,13 @@ void ComponentDlg::GetSettings()
 
 	//read values
 	//LoadSettings("");
-	glbin_comp_def.Apply(&m_comp_analyzer);
+	//glbin_comp_def.Apply(&m_comp_analyzer);
 	Update();
 }
 
 void ComponentDlg::OnSaveSettings(wxCommandEvent& event)
 {
-	glbin_comp_def.Set(&m_comp_analyzer);
+	//glbin_comp_def.Set(&m_comp_analyzer);
 	wxString filename = m_load_settings_text->GetValue();
 	if (wxFileExists(filename))
 		glbin_comp_def.Save(filename.ToStdString());
@@ -1220,7 +1220,7 @@ void ComponentDlg::OnSaveSettings(wxCommandEvent& event)
 
 void ComponentDlg::OnSaveasSettings(wxCommandEvent& event)
 {
-	glbin_comp_def.Set(&m_comp_analyzer);
+	//glbin_comp_def.Set(&m_comp_analyzer);
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Save a FluoRender component generator setting file",
 		"", "", "*.txt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
@@ -1241,7 +1241,7 @@ void ComponentDlg::SetView(VRenderGLView* view)
 {
 	m_view = view;
 	if (m_view)
-		m_aligner.SetView(m_view);
+		glbin_aligner.SetView(m_view);
 }
 
 //comp generate page
@@ -1257,11 +1257,11 @@ void ComponentDlg::OnIterText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_iter_text->GetValue().ToLong(&val);
-	m_iter = val;
-	m_iter_sldr->SetValue(m_iter);
+	glbin_comp_def.m_iter = val;
+	m_iter_sldr->ChangeValue(glbin_comp_def.m_iter);
 
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnThreshSldr(wxScrollEvent &event)
@@ -1276,53 +1276,31 @@ void ComponentDlg::OnThreshText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_thresh_text->GetValue().ToDouble(&val);
-	m_thresh = val;
-	m_thresh_sldr->SetValue(std::round(m_thresh * 1000.0));
+	glbin_comp_def.m_thresh = val;
+	m_thresh_sldr->ChangeValue(std::round(glbin_comp_def.m_thresh * 1000.0));
 
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::EnableUseDistField(bool value)
 {
-	m_use_dist_field = value;
-	if (m_use_dist_field)
-	{
-		m_dist_strength_sldr->Enable();
-		m_dist_strength_text->Enable();
-		m_dist_filter_size_sldr->Enable();
-		m_dist_filter_size_text->Enable();
-		m_max_dist_sldr->Enable();
-		m_max_dist_text->Enable();
-		m_dist_thresh_sldr->Enable();
-		m_dist_thresh_text->Enable();
-	}
-	else
-	{
-		m_dist_strength_sldr->Disable();
-		m_dist_strength_text->Disable();
-		m_dist_filter_size_sldr->Disable();
-		m_dist_filter_size_text->Disable();
-		m_max_dist_sldr->Disable();
-		m_max_dist_text->Disable();
-		m_dist_thresh_sldr->Disable();
-		m_dist_thresh_text->Disable();
-	}
+	glbin_comp_def.m_use_dist_field = value;
+	m_dist_strength_sldr->Enable(value);
+	m_dist_strength_text->Enable(value);
+	m_dist_filter_size_sldr->Enable(value);
+	m_dist_filter_size_text->Enable(value);
+	m_max_dist_sldr->Enable(value);
+	m_max_dist_text->Enable(value);
+	m_dist_thresh_sldr->Enable(value);
+	m_dist_thresh_text->Enable(value);
 }
 
 void ComponentDlg::EnableDiff(bool value)
 {
-	m_diff = value;
-	if (m_diff)
-	{
-		m_falloff_sldr->Enable();
-		m_falloff_text->Enable();
-	}
-	else
-	{
-		m_falloff_sldr->Disable();
-		m_falloff_text->Disable();
-	}
+	glbin_comp_def.m_diff = value;
+	m_falloff_sldr->Enable(value);
+	m_falloff_text->Enable(value);
 }
 
 void ComponentDlg::OnDistStrengthSldr(wxScrollEvent &event)
@@ -1337,19 +1315,19 @@ void ComponentDlg::OnDistStrengthText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_dist_strength_text->GetValue().ToDouble(&val);
-	m_dist_strength = val;
-	m_dist_strength_sldr->SetValue(std::round(m_dist_strength * 1000.0));
+	glbin_comp_def.m_dist_strength = val;
+	m_dist_strength_sldr->ChangeValue(std::round(glbin_comp_def.m_dist_strength * 1000.0));
 
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnUseDistFieldCheck(wxCommandEvent &event)
 {
 	EnableUseDistField(m_use_dist_field_check->GetValue());
 
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnDistFilterSizeSldr(wxScrollEvent &event)
@@ -1364,11 +1342,11 @@ void ComponentDlg::OnDistFitlerSizeText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_dist_filter_size_text->GetValue().ToLong(&val);
-	m_dist_filter_size = val;
-	m_dist_filter_size_sldr->SetValue(m_dist_filter_size);
+	glbin_comp_def.m_dist_filter_size = val;
+	m_dist_filter_size_sldr->ChangeValue(glbin_comp_def.m_dist_filter_size);
 
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnMaxDistSldr(wxScrollEvent &event)
@@ -1385,11 +1363,11 @@ void ComponentDlg::OnMaxDistText(wxCommandEvent &event)
 	m_max_dist_text->GetValue().ToLong(&val);
 	if (val > 255)
 		val = 255;
-	m_max_dist = val;
-	m_max_dist_sldr->SetValue(m_max_dist);
+	glbin_comp_def.m_max_dist = val;
+	m_max_dist_sldr->ChangeValue(glbin_comp_def.m_max_dist);
 
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnDistThreshSldr(wxScrollEvent &event)
@@ -1404,19 +1382,19 @@ void ComponentDlg::OnDistThreshText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_dist_thresh_text->GetValue().ToDouble(&val);
-	m_dist_thresh = val;
-	m_dist_thresh_sldr->SetValue(std::round(m_dist_thresh * 1000.0));
+	glbin_comp_def.m_dist_thresh = val;
+	m_dist_thresh_sldr->ChangeValue(std::round(glbin_comp_def.m_dist_thresh * 1000.0));
 
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnDiffCheck(wxCommandEvent &event)
 {
 	EnableDiff(m_diff_check->GetValue());
 
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnFalloffSldr(wxScrollEvent &event)
@@ -1431,17 +1409,17 @@ void ComponentDlg::OnFalloffText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_falloff_text->GetValue().ToDouble(&val);
-	m_falloff = val;
-	m_falloff_sldr->SetValue(std::round(m_falloff * 1000.0));
+	glbin_comp_def.m_falloff = val;
+	m_falloff_sldr->ChangeValue(std::round(glbin_comp_def.m_falloff * 1000.0));
 
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::EnableSize(bool value)
 {
-	m_size = value;
-	if (m_size)
+	glbin_comp_def.m_size = value;
+	if (glbin_comp_def.m_size)
 	{
 		//m_size_sldr->Enable();
 		//m_size_text->Enable();
@@ -1469,13 +1447,13 @@ void ComponentDlg::OnSizeText(wxCommandEvent &event)
 	//long val = 0;
 	//m_size_text->GetValue().ToLong(&val);
 	//m_size_lm = (int)val;
-	//m_size_sldr->SetValue(m_size_lm);
+	//m_size_sldr->ChangeValue(m_size_lm);
 }
 
 void ComponentDlg::EnableDensity(bool value)
 {
-	m_density = value;
-	if (m_density)
+	glbin_comp_def.m_density = value;
+	if (glbin_comp_def.m_density)
 	{
 		m_density_sldr->Enable();
 		m_density_text->Enable();
@@ -1503,8 +1481,8 @@ void ComponentDlg::OnDensityCheck(wxCommandEvent &event)
 {
 	EnableDensity(m_density_check->GetValue());
 
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnDensitySldr(wxScrollEvent &event)
@@ -1519,11 +1497,11 @@ void ComponentDlg::OnDensityText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_density_text->GetValue().ToDouble(&val);
-	m_density_thresh = val;
-	m_density_sldr->SetValue(std::round(m_density_thresh * 1000.0));
+	glbin_comp_def.m_density_thresh = val;
+	m_density_sldr->ChangeValue(std::round(glbin_comp_def.m_density_thresh * 1000.0));
 
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnVarthSldr(wxScrollEvent &event)
@@ -1538,11 +1516,11 @@ void ComponentDlg::OnVarthText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_varth_text->GetValue().ToDouble(&val);
-	m_varth = val;
-	m_varth_sldr->SetValue(std::round(m_varth * 10000.0));
+	glbin_comp_def.m_varth = val;
+	m_varth_sldr->ChangeValue(std::round(glbin_comp_def.m_varth * 10000.0));
 
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnDensityWindowSizeSldr(wxScrollEvent &event)
@@ -1557,11 +1535,11 @@ void ComponentDlg::OnDensityWindowSizeText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_density_window_size_text->GetValue().ToLong(&val);
-	m_density_window_size = val;
-	m_density_window_size_sldr->SetValue(m_density_window_size);
+	glbin_comp_def.m_density_window_size = val;
+	m_density_window_size_sldr->ChangeValue(glbin_comp_def.m_density_window_size);
 
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnDensityStatsSizeSldr(wxScrollEvent &event)
@@ -1576,11 +1554,11 @@ void ComponentDlg::OnDensityStatsSizeText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_density_stats_size_text->GetValue().ToLong(&val);
-	m_density_stats_size = val;
-	m_density_stats_size_sldr->SetValue(m_density_stats_size);
+	glbin_comp_def.m_density_stats_size = val;
+	m_density_stats_size_sldr->ChangeValue(glbin_comp_def.m_density_stats_size);
 
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::EnableFixate(bool value)
@@ -1603,31 +1581,31 @@ void ComponentDlg::EnableFixate(bool value)
 
 void ComponentDlg::OnFixateCheck(wxCommandEvent &event)
 {
-	m_fixate = m_fixate_check->GetValue();
-	EnableFixate(m_fixate);
+	glbin_comp_def.m_fixate = m_fixate_check->GetValue();
+	EnableFixate(glbin_comp_def.m_fixate);
 
-	if (m_fixate)
+	if (glbin_comp_def.m_fixate)
 		Fixate();
 
-	if (m_auto_update)
+	if (glbin_comp_def.m_auto_update)
 	{
-		bool bval = m_clean;
-		m_clean = false;
-		GenerateComp(m_use_sel, false);
-		m_clean = bval;
+		bool bval = glbin_comp_def.m_clean;
+		glbin_comp_def.m_clean = false;
+		GenerateComp(false);
+		glbin_comp_def.m_clean = bval;
 	}
 }
 
 void ComponentDlg::OnGrowFixedCheck(wxCommandEvent &event)
 {
-	m_grow_fixed = m_grow_fixed_check->GetValue();
+	glbin_comp_def.m_grow_fixed = m_grow_fixed_check->GetValue();
 
-	if (m_auto_update)
+	if (glbin_comp_def.m_auto_update)
 	{
-		bool bval = m_clean;
-		m_clean = false;
-		GenerateComp(m_use_sel, false);
-		m_clean = bval;
+		bool bval = glbin_comp_def.m_clean;
+		glbin_comp_def.m_clean = false;
+		GenerateComp(false);
+		glbin_comp_def.m_clean = bval;
 	}
 }
 
@@ -1635,12 +1613,12 @@ void ComponentDlg::OnFixUpdateBtn(wxCommandEvent &event)
 {
 	Fixate();
 
-	if (m_auto_update)
+	if (glbin_comp_def.m_auto_update)
 	{
-		bool bval = m_clean;
-		m_clean = false;
-		GenerateComp(m_use_sel, false);
-		m_clean = bval;
+		bool bval = glbin_comp_def.m_clean;
+		glbin_comp_def.m_clean = false;
+		GenerateComp(false);
+		glbin_comp_def.m_clean = bval;
 	}
 }
 
@@ -1656,19 +1634,19 @@ void ComponentDlg::OnFixSizeText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_fix_size_text->GetValue().ToLong(&val);
-	m_fix_size = val;
-	m_fix_size_sldr->SetValue(m_fix_size);
+	glbin_comp_def.m_fix_size = val;
+	m_fix_size_sldr->ChangeValue(glbin_comp_def.m_fix_size);
 
-	if (m_auto_update)
-		GenerateComp(m_use_sel, false);
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp(false);
 	if (m_record_cmd)
 		AddCmd("fixate");
 }
 
 void ComponentDlg::EnableClean(bool value)
 {
-	m_clean = value;
-	if (m_clean)
+	glbin_comp_def.m_clean = value;
+	if (glbin_comp_def.m_clean)
 	{
 		m_clean_btn->Enable();
 		m_clean_iter_sldr->Enable();
@@ -1690,8 +1668,8 @@ void ComponentDlg::OnCleanCheck(wxCommandEvent &event)
 {
 	EnableClean(m_clean_check->GetValue());
 
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnCleanIterSldr(wxScrollEvent &event)
@@ -1706,11 +1684,11 @@ void ComponentDlg::OnCleanIterText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_clean_iter_text->GetValue().ToLong(&val);
-	m_clean_iter = (int)val;
-	m_clean_iter_sldr->SetValue(m_clean_iter);
+	glbin_comp_def.m_clean_iter = (int)val;
+	m_clean_iter_sldr->ChangeValue(glbin_comp_def.m_clean_iter);
 
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnCleanLimitSldr(wxScrollEvent &event)
@@ -1725,11 +1703,11 @@ void ComponentDlg::OnCleanLimitText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_clean_limit_text->GetValue().ToLong(&val);
-	m_clean_size_vl = (int)val;
-	m_clean_limit_sldr->SetValue(m_clean_size_vl);
+	glbin_comp_def.m_clean_size_vl = (int)val;
+	m_clean_limit_sldr->ChangeValue(glbin_comp_def.m_clean_size_vl);
 
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp();
 }
 
 //record
@@ -1755,35 +1733,35 @@ void ComponentDlg::AddCmd(const std::string &type)
 	if (type == "generate")
 	{
 		params.push_back("generate");
-		params.push_back("iter"); params.push_back(std::to_string(m_iter));
-		params.push_back("thresh"); params.push_back(std::to_string(m_thresh));
-		params.push_back("use_dist_field"); params.push_back(std::to_string(m_use_dist_field));
-		params.push_back("dist_strength"); params.push_back(std::to_string(m_dist_strength));
-		params.push_back("dist_filter_size"); params.push_back(std::to_string(m_dist_filter_size));
-		params.push_back("max_dist"); params.push_back(std::to_string(m_max_dist));
-		params.push_back("dist_thresh"); params.push_back(std::to_string(m_dist_thresh));
-		params.push_back("diff"); params.push_back(std::to_string(m_diff));
-		params.push_back("falloff"); params.push_back(std::to_string(m_falloff));
-		params.push_back("density"); params.push_back(std::to_string(m_density));
-		params.push_back("density_thresh"); params.push_back(std::to_string(m_density_thresh));
-		params.push_back("varth"); params.push_back(std::to_string(m_varth));
-		params.push_back("density_window_size"); params.push_back(std::to_string(m_density_window_size));
-		params.push_back("density_stats_size"); params.push_back(std::to_string(m_density_stats_size));
-		params.push_back("cleanb"); params.push_back(std::to_string(m_clean));
-		params.push_back("clean_iter"); params.push_back(std::to_string(m_clean_iter));
-		params.push_back("clean_size_vl"); params.push_back(std::to_string(m_clean_size_vl));
-		params.push_back("grow_fixed"); params.push_back(std::to_string(m_grow_fixed));
+		params.push_back("iter"); params.push_back(std::to_string(glbin_comp_def.m_iter));
+		params.push_back("thresh"); params.push_back(std::to_string(glbin_comp_def.m_thresh));
+		params.push_back("use_dist_field"); params.push_back(std::to_string(glbin_comp_def.m_use_dist_field));
+		params.push_back("dist_strength"); params.push_back(std::to_string(glbin_comp_def.m_dist_strength));
+		params.push_back("dist_filter_size"); params.push_back(std::to_string(glbin_comp_def.m_dist_filter_size));
+		params.push_back("max_dist"); params.push_back(std::to_string(glbin_comp_def.m_max_dist));
+		params.push_back("dist_thresh"); params.push_back(std::to_string(glbin_comp_def.m_dist_thresh));
+		params.push_back("diff"); params.push_back(std::to_string(glbin_comp_def.m_diff));
+		params.push_back("falloff"); params.push_back(std::to_string(glbin_comp_def.m_falloff));
+		params.push_back("density"); params.push_back(std::to_string(glbin_comp_def.m_density));
+		params.push_back("density_thresh"); params.push_back(std::to_string(glbin_comp_def.m_density_thresh));
+		params.push_back("varth"); params.push_back(std::to_string(glbin_comp_def.m_varth));
+		params.push_back("density_window_size"); params.push_back(std::to_string(glbin_comp_def.m_density_window_size));
+		params.push_back("density_stats_size"); params.push_back(std::to_string(glbin_comp_def.m_density_stats_size));
+		params.push_back("cleanb"); params.push_back(std::to_string(glbin_comp_def.m_clean));
+		params.push_back("clean_iter"); params.push_back(std::to_string(glbin_comp_def.m_clean_iter));
+		params.push_back("clean_size_vl"); params.push_back(std::to_string(glbin_comp_def.m_clean_size_vl));
+		params.push_back("grow_fixed"); params.push_back(std::to_string(glbin_comp_def.m_grow_fixed));
 	}
 	else if (type == "clean")
 	{
 		params.push_back("clean");
-		params.push_back("clean_iter"); params.push_back(std::to_string(m_clean_iter));
-		params.push_back("clean_size_vl"); params.push_back(std::to_string(m_clean_size_vl));
+		params.push_back("clean_iter"); params.push_back(std::to_string(glbin_comp_def.m_clean_iter));
+		params.push_back("clean_size_vl"); params.push_back(std::to_string(glbin_comp_def.m_clean_size_vl));
 	}
 	else if (type == "fixate")
 	{
 		params.push_back("fixate");
-		params.push_back("fix_size"); params.push_back(std::to_string(m_fix_size));
+		params.push_back("fix_size"); params.push_back(std::to_string(glbin_comp_def.m_fix_size));
 	}
 	m_command.push_back(params);
 
@@ -1802,19 +1780,19 @@ void ComponentDlg::ResetCmd()
 	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
 }
 
-void ComponentDlg::PlayCmd(bool use_sel, double tfactor)
+void ComponentDlg::PlayCmd(double tfactor)
 {
 	//disable first
-	m_fixate = false;
-	m_auto_update = false;
+	glbin_comp_def.m_fixate = false;
+	glbin_comp_def.m_auto_update = false;
 	m_auto_update_btn->SetValue(false);
 
 	if (m_command.empty())
 	{
 		//the threshold factor is used to lower the threshold value for semi auto segmentation
-		m_tfactor = tfactor;
-		GenerateComp(use_sel, false);
-		m_tfactor = 1.0;
+		glbin_comp_def.m_tfactor = tfactor;
+		GenerateComp(false);
+		glbin_comp_def.m_tfactor = 1.0;
 		return;
 	}
 
@@ -1829,67 +1807,67 @@ void ComponentDlg::PlayCmd(bool use_sel, double tfactor)
 				it2 != it->end(); ++it2)
 			{
 				if (*it2 == "iter")
-					m_iter = std::stoi(*(++it2));
+					glbin_comp_def.m_iter = std::stoi(*(++it2));
 				else if (*it2 == "thresh")
-					m_thresh = std::stod(*(++it2));
+					glbin_comp_def.m_thresh = std::stod(*(++it2));
 				else if (*it2 == "use_dist_field")
-					m_use_dist_field = std::stoi(*(++it2));
+					glbin_comp_def.m_use_dist_field = std::stoi(*(++it2));
 				else if (*it2 == "dist_strength")
-					m_dist_strength = std::stod(*(++it2));
+					glbin_comp_def.m_dist_strength = std::stod(*(++it2));
 				else if (*it2 == "dist_filter_size")
-					m_dist_filter_size = std::stod(*(++it2));
+					glbin_comp_def.m_dist_filter_size = std::stod(*(++it2));
 				else if (*it2 == "max_dist")
-					m_max_dist = std::stoi(*(++it2));
+					glbin_comp_def.m_max_dist = std::stoi(*(++it2));
 				else if (*it2 == "dist_thresh")
-					m_dist_thresh = std::stod(*(++it2));
+					glbin_comp_def.m_dist_thresh = std::stod(*(++it2));
 				else if (*it2 == "diff")
-					m_diff = std::stoi(*(++it2));
+					glbin_comp_def.m_diff = std::stoi(*(++it2));
 				else if (*it2 == "falloff")
-					m_falloff = std::stod(*(++it2));
+					glbin_comp_def.m_falloff = std::stod(*(++it2));
 				else if (*it2 == "density")
-					m_density = std::stoi(*(++it2));
+					glbin_comp_def.m_density = std::stoi(*(++it2));
 				else if (*it2 == "density_thresh")
-					m_density_thresh = std::stod(*(++it2));
+					glbin_comp_def.m_density_thresh = std::stod(*(++it2));
 				else if (*it2 == "varth")
-					m_varth = std::stod(*(++it2));
+					glbin_comp_def.m_varth = std::stod(*(++it2));
 				else if (*it2 == "density_window_size")
-					m_density_window_size = std::stoi(*(++it2));
+					glbin_comp_def.m_density_window_size = std::stoi(*(++it2));
 				else if (*it2 == "density_stats_size")
-					m_density_stats_size = std::stoi(*(++it2));
+					glbin_comp_def.m_density_stats_size = std::stoi(*(++it2));
 				else if (*it2 == "cleanb")
-					m_clean = std::stoi(*(++it2));
+					glbin_comp_def.m_clean = std::stoi(*(++it2));
 				else if (*it2 == "clean_iter")
-					m_clean_iter = std::stoi(*(++it2));
+					glbin_comp_def.m_clean_iter = std::stoi(*(++it2));
 				else if (*it2 == "clean_size_vl")
-					m_clean_size_vl = std::stoi(*(++it2));
+					glbin_comp_def.m_clean_size_vl = std::stoi(*(++it2));
 				else if (*it2 == "grow_fixed")
-					m_grow_fixed = std::stoi(*(++it2));
+					glbin_comp_def.m_grow_fixed = std::stoi(*(++it2));
 			}
-			GenerateComp(use_sel, false);
+			GenerateComp(false);
 		}
 		else if ((*it)[0] == "clean")
 		{
-			m_clean = true;
+			glbin_comp_def.m_clean = true;
 			for (auto it2 = it->begin();
 				it2 != it->end(); ++it2)
 			{
 				if (*it2 == "clean_iter")
-					m_clean_iter = std::stoi(*(++it2));
+					glbin_comp_def.m_clean_iter = std::stoi(*(++it2));
 				else if (*it2 == "clean_size_vl")
-					m_clean_size_vl = std::stoi(*(++it2));
+					glbin_comp_def.m_clean_size_vl = std::stoi(*(++it2));
 			}
-			Clean(use_sel, false);
+			Clean(false);
 		}
 		else if ((*it)[0] == "fixate")
 		{
-			m_fixate = true;
+			glbin_comp_def.m_fixate = true;
 			for (auto it2 = it->begin();
 				it2 != it->end(); ++it2)
 			{
 				if (*it2 == "fix_size")
-					m_fix_size = std::stoi(*(++it2));
+					glbin_comp_def.m_fix_size = std::stoi(*(++it2));
 			}
-			//GenerateComp(false);
+			//GenerateComp();
 			Fixate(false);
 			//return;
 		}
@@ -1904,7 +1882,7 @@ void ComponentDlg::OnRecordCmd(wxCommandEvent &event)
 
 void ComponentDlg::OnPlayCmd(wxCommandEvent &event)
 {
-	PlayCmd(m_use_sel, 1.0);
+	PlayCmd(1.0);
 }
 
 void ComponentDlg::OnResetCmd(wxCommandEvent &event)
@@ -1949,8 +1927,8 @@ void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
 //clustering page
 void ComponentDlg::UpdateClusterMethod()
 {
-	if (m_cluster_method_exmax ||
-		m_cluster_method_kmeans)
+	if (glbin_comp_def.m_cluster_method_exmax ||
+		glbin_comp_def.m_cluster_method_kmeans)
 	{
 		m_cluster_clnum_sldr->Enable();
 		m_cluster_clnum_text->Enable();
@@ -1959,7 +1937,7 @@ void ComponentDlg::UpdateClusterMethod()
 		m_cluster_eps_sldr->Disable();
 		m_cluster_eps_text->Disable();
 	}
-	if (m_cluster_method_dbscan)
+	if (glbin_comp_def.m_cluster_method_dbscan)
 	{
 		m_cluster_clnum_sldr->Disable();
 		m_cluster_clnum_text->Disable();
@@ -1972,25 +1950,25 @@ void ComponentDlg::UpdateClusterMethod()
 
 void ComponentDlg::OnClusterMethodExmaxCheck(wxCommandEvent &event)
 {
-	m_cluster_method_exmax = true;
-	m_cluster_method_dbscan = false;
-	m_cluster_method_kmeans = false;
+	glbin_comp_def.m_cluster_method_exmax = true;
+	glbin_comp_def.m_cluster_method_dbscan = false;
+	glbin_comp_def.m_cluster_method_kmeans = false;
 	UpdateClusterMethod();
 }
 
 void ComponentDlg::OnClusterMethodDbscanCheck(wxCommandEvent &event)
 {
-	m_cluster_method_exmax = false;
-	m_cluster_method_dbscan = true;
-	m_cluster_method_kmeans = false;
+	glbin_comp_def.m_cluster_method_exmax = false;
+	glbin_comp_def.m_cluster_method_dbscan = true;
+	glbin_comp_def.m_cluster_method_kmeans = false;
 	UpdateClusterMethod();
 }
 
 void ComponentDlg::OnClusterMethodKmeansCheck(wxCommandEvent &event)
 {
-	m_cluster_method_exmax = false;
-	m_cluster_method_dbscan = false;
-	m_cluster_method_kmeans = true;
+	glbin_comp_def.m_cluster_method_exmax = false;
+	glbin_comp_def.m_cluster_method_dbscan = false;
+	glbin_comp_def.m_cluster_method_kmeans = true;
 	UpdateClusterMethod();
 }
 
@@ -2007,8 +1985,8 @@ void ComponentDlg::OnClusterClnumText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_cluster_clnum_text->GetValue().ToLong(&val);
-	m_cluster_clnum = (int)val;
-	m_cluster_clnum_sldr->SetValue(m_cluster_clnum);
+	glbin_comp_def.m_cluster_clnum = (int)val;
+	m_cluster_clnum_sldr->ChangeValue(glbin_comp_def.m_cluster_clnum);
 }
 
 void ComponentDlg::OnClusterMaxiterSldr(wxScrollEvent &event)
@@ -2023,8 +2001,8 @@ void ComponentDlg::OnClusterMaxiterText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_cluster_maxiter_text->GetValue().ToLong(&val);
-	m_cluster_maxiter = (int)val;
-	m_cluster_maxiter_sldr->SetValue(m_cluster_maxiter);
+	glbin_comp_def.m_cluster_maxiter = (int)val;
+	m_cluster_maxiter_sldr->ChangeValue(glbin_comp_def.m_cluster_maxiter);
 }
 
 void ComponentDlg::OnClusterTolSldr(wxScrollEvent &event)
@@ -2039,8 +2017,8 @@ void ComponentDlg::OnClusterTolText(wxCommandEvent &event)
 {
 	double val = 0.9;
 	m_cluster_tol_text->GetValue().ToDouble(&val);
-	m_cluster_tol = (float)val;
-	m_cluster_tol_sldr->SetValue(std::round(val * 100));
+	glbin_comp_def.m_cluster_tol = (float)val;
+	m_cluster_tol_sldr->ChangeValue(std::round(val * 100));
 }
 
 void ComponentDlg::OnClusterSizeSldr(wxScrollEvent &event)
@@ -2055,8 +2033,8 @@ void ComponentDlg::OnClusterSizeText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_cluster_size_text->GetValue().ToLong(&val);
-	m_cluster_size = (int)val;
-	m_cluster_size_sldr->SetValue(m_cluster_size);
+	glbin_comp_def.m_cluster_size = (int)val;
+	m_cluster_size_sldr->ChangeValue(glbin_comp_def.m_cluster_size);
 }
 
 void ComponentDlg::OnClusterEpsSldr(wxScrollEvent &event)
@@ -2071,8 +2049,8 @@ void ComponentDlg::OnClusterepsText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_cluster_eps_text->GetValue().ToDouble(&val);
-	m_cluster_eps = val;
-	m_cluster_eps_sldr->SetValue(std::round(m_cluster_eps * 10.0));
+	glbin_comp_def.m_cluster_eps = val;
+	m_cluster_eps_sldr->ChangeValue(std::round(glbin_comp_def.m_cluster_eps * 10.0));
 }
 
 //analysis page
@@ -2108,23 +2086,23 @@ void ComponentDlg::OnAnalysisMinCheck(wxCommandEvent &event)
 	if (m_analysis_min_check->GetValue())
 	{
 		m_analysis_min_spin->Enable();
-		m_use_min = true;
+		glbin_comp_def.m_use_min = true;
 	}
 	else
 	{
 		m_analysis_min_spin->Disable();
-		m_use_min = false;
+		glbin_comp_def.m_use_min = false;
 	}
 }
 
 void ComponentDlg::OnAnalysisMinSpin(wxSpinEvent &event)
 {
-	m_min_num = m_analysis_min_spin->GetValue();
+	glbin_comp_def.m_min_num = m_analysis_min_spin->GetValue();
 }
 
 void ComponentDlg::OnAnalysisMinText(wxCommandEvent &event)
 {
-	m_min_num = m_analysis_min_spin->GetValue();
+	glbin_comp_def.m_min_num = m_analysis_min_spin->GetValue();
 }
 
 void ComponentDlg::OnAnalysisMaxCheck(wxCommandEvent &event)
@@ -2132,23 +2110,23 @@ void ComponentDlg::OnAnalysisMaxCheck(wxCommandEvent &event)
 	if (m_analysis_max_check->GetValue())
 	{
 		m_analysis_max_spin->Enable();
-		m_use_max = true;
+		glbin_comp_def.m_use_max = true;
 	}
 	else
 	{
 		m_analysis_max_spin->Disable();
-		m_use_max = false;
+		glbin_comp_def.m_use_max = false;
 	}
 }
 
 void ComponentDlg::OnAnalysisMaxSpin(wxSpinEvent &event)
 {
-	m_max_num = m_analysis_max_spin->GetValue();
+	glbin_comp_def.m_max_num = m_analysis_max_spin->GetValue();
 }
 
 void ComponentDlg::OnAnalysisMaxText(wxCommandEvent &event)
 {
-	m_max_num = m_analysis_max_spin->GetValue();
+	glbin_comp_def.m_max_num = m_analysis_max_spin->GetValue();
 }
 
 void ComponentDlg::OnCompFull(wxCommandEvent &event)
@@ -2172,19 +2150,18 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 	if (GetIds(sstr, id, brick_id))
 	{
 		//get current mask
-		VolumeData* vd = m_view->m_cur_vol;
-		flrd::ComponentSelector comp_selector(vd);
-		comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
+		glbin_comp_selector.SetVolume(m_view->m_cur_vol);
+		glbin_comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
 
 		//cell size filter
 		bool use = m_analysis_min_check->GetValue();
 		unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
-		comp_selector.SetMinNum(use, num);
+		glbin_comp_selector.SetMinNum(use, num);
 		use = m_analysis_max_check->GetValue();
 		num = (unsigned int)(m_analysis_max_spin->GetValue());
-		comp_selector.SetMaxNum(use, num);
-		comp_selector.SetAnalyzer(&m_comp_analyzer);
-		comp_selector.Exclusive();
+		glbin_comp_selector.SetMaxNum(use, num);
+		glbin_comp_selector.SetAnalyzer(&glbin_comp_analyzer);
+		glbin_comp_selector.Exclusive();
 
 		m_view->RefreshGL(39);
 
@@ -2220,19 +2197,18 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	get_all = !get_all;
 
 	//get current mask
-	VolumeData* vd = m_view->m_cur_vol;
-	flrd::ComponentSelector comp_selector(vd);
-	comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
+	glbin_comp_selector.SetVolume(m_view->m_cur_vol);
+	glbin_comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
 
 	//cell size filter
 	bool use = m_analysis_min_check->GetValue();
 	unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
-	comp_selector.SetMinNum(use, num);
+	glbin_comp_selector.SetMinNum(use, num);
 	use = m_analysis_max_check->GetValue();
 	num = (unsigned int)(m_analysis_max_spin->GetValue());
-	comp_selector.SetMaxNum(use, num);
-	comp_selector.SetAnalyzer(&m_comp_analyzer);
-	comp_selector.Select(get_all);
+	glbin_comp_selector.SetMaxNum(use, num);
+	glbin_comp_selector.SetAnalyzer(&glbin_comp_analyzer);
+	glbin_comp_selector.Select(get_all);
 
 	m_view->RefreshGL(39);
 
@@ -2257,9 +2233,8 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	VolumeData* vd = m_view->m_cur_vol;
-	flrd::ComponentSelector comp_selector(vd);
-	comp_selector.All();
+	glbin_comp_selector.SetVolume(m_view->m_cur_vol);
+	glbin_comp_selector.All();
 
 	m_view->RefreshGL(39);
 
@@ -2284,9 +2259,8 @@ void ComponentDlg::OnCompClear(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	VolumeData* vd = m_view->m_cur_vol;
-	flrd::ComponentSelector comp_selector(vd);
-	comp_selector.Clear();
+	glbin_comp_selector.SetVolume(m_view->m_cur_vol);
+	glbin_comp_selector.Clear();
 
 	m_view->RefreshGL(39);
 
@@ -2409,18 +2383,18 @@ void ComponentDlg::OnConSizeText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_con_size_text->GetValue().ToLong(&val);
-	m_con_size_sldr->SetValue(val);
-	m_comp_analyzer.SetSizeLimit(val);
+	m_con_size_sldr->ChangeValue(val);
+	glbin_comp_analyzer.SetSizeLimit(val);
 }
 
 void ComponentDlg::OnConsistentCheck(wxCommandEvent &event)
 {
-	m_consistent = m_consistent_check->GetValue();
+	glbin_comp_def.m_consistent = m_consistent_check->GetValue();
 }
 
 void ComponentDlg::OnColocalCheck(wxCommandEvent &event)
 {
-	m_colocal = m_colocal_check->GetValue();
+	glbin_comp_def.m_colocal = m_colocal_check->GetValue();
 }
 
 void ComponentDlg::EnableGenerate()
@@ -2468,22 +2442,21 @@ void ComponentDlg::OnOutputTypeRadio(wxCommandEvent &event)
 	switch (id)
 	{
 	case ID_OutputMultiRb:
-		m_output_type = 1;
+		glbin_comp_def.m_output_type = 1;
 		break;
 	case ID_OutputRgbRb:
-		m_output_type = 2;
+		glbin_comp_def.m_output_type = 2;
 		break;
 	}
 }
 
 void ComponentDlg::OutputMulti(int color_type)
 {
-	if (!m_view)
+	if (!m_view || !m_view->m_cur_vol)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
-	m_comp_analyzer.SetVolume(vd);
+	glbin_comp_analyzer.SetVolume(m_view->m_cur_vol);
 	list<VolumeData*> channs;
-	if (m_comp_analyzer.GenMultiChannels(channs, color_type, m_consistent))
+	if (glbin_comp_analyzer.GenMultiChannels(channs, color_type, glbin_comp_def.m_consistent))
 	{
 		if (m_frame)
 		{
@@ -2508,15 +2481,15 @@ void ComponentDlg::OutputMulti(int color_type)
 				//group->SetSyncRAll(true);
 				//group->SetSyncGAll(true);
 				//group->SetSyncBAll(true);
-				fluo::Color col = vd->GetGamma();
+				fluo::Color col = m_view->m_cur_vol->GetGammaColor();
 				group->SetGammaAll(col);
-				col = vd->GetBrightness();
+				col = m_view->m_cur_vol->GetBrightness();
 				group->SetBrightnessAll(col);
-				col = vd->GetHdr();
+				col = m_view->m_cur_vol->GetHdr();
 				group->SetHdrAll(col);
 			}
 			m_frame->UpdateList();
-			m_frame->UpdateTree(vd->GetName());
+			m_frame->UpdateTree(m_view->m_cur_vol->GetName());
 			m_view->RefreshGL(39);
 		}
 	}
@@ -2524,12 +2497,11 @@ void ComponentDlg::OutputMulti(int color_type)
 
 void ComponentDlg::OutputRgb(int color_type)
 {
-	if (!m_view)
+	if (!m_view || !m_view->m_cur_vol)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
-	m_comp_analyzer.SetVolume(vd);
+	glbin_comp_analyzer.SetVolume(m_view->m_cur_vol);
 	list<VolumeData*> channs;
-	if (m_comp_analyzer.GenRgbChannels(channs, color_type, m_consistent))
+	if (glbin_comp_analyzer.GenRgbChannels(channs, color_type, glbin_comp_def.m_consistent))
 	{
 		if (m_frame)
 		{
@@ -2554,15 +2526,15 @@ void ComponentDlg::OutputRgb(int color_type)
 				//group->SetSyncRAll(true);
 				//group->SetSyncGAll(true);
 				//group->SetSyncBAll(true);
-				fluo::Color col = vd->GetGamma();
+				fluo::Color col = m_view->m_cur_vol->GetGammaColor();
 				group->SetGammaAll(col);
-				col = vd->GetBrightness();
+				col = m_view->m_cur_vol->GetBrightness();
 				group->SetBrightnessAll(col);
-				col = vd->GetHdr();
+				col = m_view->m_cur_vol->GetHdr();
 				group->SetHdrAll(col);
 			}
 			m_frame->UpdateList();
-			m_frame->UpdateTree(vd->GetName());
+			m_frame->UpdateTree(m_view->m_cur_vol->GetName());
 			m_view->RefreshGL(39);
 		}
 	}
@@ -2577,9 +2549,9 @@ void ComponentDlg::OnOutputChannels(wxCommandEvent &event)
 	else if (id == ID_OutputSizeBtn)
 		color_type = 2;
 
-	if (m_output_type == 1)
+	if (glbin_comp_def.m_output_type == 1)
 		OutputMulti(color_type);
-	else if (m_output_type == 2)
+	else if (glbin_comp_def.m_output_type == 2)
 		OutputRgb(color_type);
 }
 
@@ -2588,15 +2560,14 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 	int type = 0;
 	if (event.GetId() == ID_OutputSnBtn)
 		type = 1;
-	if (!m_view)
+	if (!m_view || !m_view->m_cur_vol)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
-	m_comp_analyzer.SetVolume(vd);
+	glbin_comp_analyzer.SetVolume(m_view->m_cur_vol);
 	Annotations* ann = new Annotations();
-	if (m_comp_analyzer.GenAnnotations(*ann, m_consistent, type))
+	if (glbin_comp_analyzer.GenAnnotations(*ann, glbin_comp_def.m_consistent, type))
 	{
-		ann->SetVolume(vd);
-		ann->SetTransform(vd->GetTexture()->transform());
+		ann->SetVolume(m_view->m_cur_vol);
+		ann->SetTransform(m_view->m_cur_vol->GetTexture()->transform());
 		if (m_frame)
 		{
 			DataManager* mgr = m_frame->GetDataManager();
@@ -2604,7 +2575,7 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 				mgr->AddAnnotations(ann);
 			m_view->AddAnnotations(ann);
 			m_frame->UpdateList();
-			m_frame->UpdateTree(vd->GetName());
+			m_frame->UpdateTree(m_view->m_cur_vol->GetName());
 		}
 		m_view->RefreshGL(39);
 	}
@@ -2613,14 +2584,14 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 //distance
 void ComponentDlg::OnDistNeighborCheck(wxCommandEvent &event)
 {
-	m_use_dist_neighbor = m_dist_neighbor_check->GetValue();
-	m_dist_neighbor_sldr->Enable(m_use_dist_neighbor);
-	m_dist_neighbor_text->Enable(m_use_dist_neighbor);
+	glbin_comp_def.m_use_dist_neighbor = m_dist_neighbor_check->GetValue();
+	m_dist_neighbor_sldr->Enable(glbin_comp_def.m_use_dist_neighbor);
+	m_dist_neighbor_text->Enable(glbin_comp_def.m_use_dist_neighbor);
 }
 
 void ComponentDlg::OnDistAllChanCheck(wxCommandEvent &event)
 {
-	m_use_dist_allchan = m_dist_all_chan_check->GetValue();
+	glbin_comp_def.m_use_dist_allchan = m_dist_all_chan_check->GetValue();
 }
 
 void ComponentDlg::OnDistNeighborSldr(wxScrollEvent &event)
@@ -2635,19 +2606,19 @@ void ComponentDlg::OnDistNeighborText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_dist_neighbor_text->GetValue().ToLong(&val);
-	m_dist_neighbor = (int)val;
-	m_dist_neighbor_sldr->SetValue(m_dist_neighbor);
+	glbin_comp_def.m_dist_neighbor = (int)val;
+	m_dist_neighbor_sldr->ChangeValue(glbin_comp_def.m_dist_neighbor);
 }
 
 int ComponentDlg::GetDistMatSize()
 {
-	int gsize = m_comp_analyzer.GetCompGroupSize();
-	if (m_use_dist_allchan && gsize > 1)
+	int gsize = glbin_comp_analyzer.GetCompGroupSize();
+	if (glbin_comp_def.m_use_dist_allchan && gsize > 1)
 	{
 		int matsize = 0;
 		for (int i = 0; i < gsize; ++i)
 		{
-			flrd::CompGroup* compgroup = m_comp_analyzer.GetCompGroup(i);
+			flrd::CompGroup* compgroup = glbin_comp_analyzer.GetCompGroup(i);
 			if (!compgroup)
 				continue;
 			matsize += compgroup->celps.size();
@@ -2656,7 +2627,7 @@ int ComponentDlg::GetDistMatSize()
 	}
 	else
 	{
-		flrd::CelpList* list = m_comp_analyzer.GetCelpList();
+		flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
 		if (!list)
 			return 0;
 		return list->size();
@@ -2668,8 +2639,8 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 	int num = GetDistMatSize();
 	if (num <= 0)
 		return;
-	int gsize = m_comp_analyzer.GetCompGroupSize();
-	int bn = m_comp_analyzer.GetBrickNum();
+	int gsize = glbin_comp_analyzer.GetCompGroupSize();
+	int bn = glbin_comp_analyzer.GetBrickNum();
 
 	//result
 	std::string str;
@@ -2693,11 +2664,11 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 	std::vector<fluo::Point> pos;
 	pos.reserve(num);
 	int num2 = 0;//actual number
-	if (m_use_dist_allchan && gsize > 1)
+	if (glbin_comp_def.m_use_dist_allchan && gsize > 1)
 	{
 		for (int i = 0; i < gsize; ++i)
 		{
-			flrd::CompGroup* compgroup = m_comp_analyzer.GetCompGroup(i);
+			flrd::CompGroup* compgroup = glbin_comp_analyzer.GetCompGroup(i);
 			if (!compgroup)
 				continue;
 
@@ -2718,7 +2689,7 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 						continue;
 					flrd::CelpList links;
 					graph.GetLinkedComps(it->second, links,
-						m_comp_analyzer.GetSizeLimit());
+						glbin_comp_analyzer.GetSizeLimit());
 				}
 
 				pos.push_back(it->second->GetCenter(sx, sy, sz));
@@ -2733,8 +2704,8 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 	}
 	else
 	{
-		flrd::CellGraph &graph = m_comp_analyzer.GetCompGroup(0)->graph;
-		flrd::CelpList* list = m_comp_analyzer.GetCelpList();
+		flrd::CellGraph &graph = glbin_comp_analyzer.GetCompGroup(0)->graph;
+		flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
 		sx = list->sx;
 		sy = list->sy;
 		sz = list->sz;
@@ -2750,7 +2721,7 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 					continue;
 				flrd::CelpList links;
 				graph.GetLinkedComps(it->second, links,
-					m_comp_analyzer.GetSizeLimit());
+					glbin_comp_analyzer.GetSizeLimit());
 			}
 
 			pos.push_back(it->second->GetCenter(sx, sy, sz));
@@ -2770,9 +2741,9 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 		}
 	}
 
-	bool bdist = m_use_dist_neighbor &&
-		m_dist_neighbor > 0 &&
-		m_dist_neighbor < num2-1;
+	bool bdist = glbin_comp_def.m_use_dist_neighbor &&
+		glbin_comp_def.m_dist_neighbor > 0 &&
+		glbin_comp_def.m_dist_neighbor < num2-1;
 
 	std::vector<double> in_group;//distances with in a group
 	std::vector<double> out_group;//distance between groups
@@ -2804,7 +2775,7 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 			{
 				rm[i][j] = rm2[i][im[i][j]];
 				if (gsize > 1 && j > 0 &&
-					j <= m_dist_neighbor)
+					j <= glbin_comp_def.m_dist_neighbor)
 				{
 					if (gn[i] == gn[im[i][j]])
 						in_group.push_back(rm[i][j]);
@@ -2840,7 +2811,7 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 		std::ofstream outfile;
 		outfile.open(str, std::ofstream::out);
 		//output result matrix
-		size_t dnum = bdist ? (m_dist_neighbor+1) : num2;
+		size_t dnum = bdist ? (glbin_comp_def.m_dist_neighbor+1) : num2;
 		for (size_t i = 0; i < num2; ++i)
 		{
 			outfile << nl[i] << "\t";
@@ -2909,7 +2880,7 @@ void ComponentDlg::AlignCenter(flrd::Ruler* ruler)
 
 void ComponentDlg::OnAlignPca(wxCommandEvent& event)
 {
-	flrd::CelpList* list = m_comp_analyzer.GetCelpList();
+	flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
 	if (!list || list->size() < 3)
 		return;
 
@@ -2951,8 +2922,8 @@ void ComponentDlg::OnAlignPca(wxCommandEvent& event)
 		break;
 	}
 	rulerlist.push_back(&ruler);
-	m_aligner.SetRulerList(&rulerlist);
-	m_aligner.AlignPca(axis_type);
+	glbin_aligner.SetRulerList(&rulerlist);
+	glbin_aligner.AlignPca(axis_type);
 	if (m_align_center->GetValue())
 		AlignCenter(&ruler);
 }
@@ -2970,27 +2941,27 @@ void ComponentDlg::OnNotebook(wxBookCtrlEvent &event)
 
 void ComponentDlg::OnUseSelChk(wxCommandEvent &event)
 {
-	m_use_sel = m_use_sel_chk->GetValue();
+	glbin_comp_def.m_use_sel = m_use_sel_chk->GetValue();
 }
 
 void ComponentDlg::OnUseMlChk(wxCommandEvent &event)
 {
-	m_use_ml = m_use_ml_chk->GetValue();
+	glbin_comp_def.m_use_ml = m_use_ml_chk->GetValue();
 }
 
 void ComponentDlg::OnGenerate(wxCommandEvent &event)
 {
-	if (m_use_ml)
+	if (glbin_comp_def.m_use_ml)
 		ApplyRecord();
 	else
-		GenerateComp(m_use_sel);
+		GenerateComp();
 }
 
 void ComponentDlg::OnAutoUpdate(wxCommandEvent &event)
 {
-	m_auto_update = m_auto_update_btn->GetValue();
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	glbin_comp_def.m_auto_update = m_auto_update_btn->GetValue();
+	if (glbin_comp_def.m_auto_update)
+		GenerateComp();
 }
 
 void ComponentDlg::OnCluster(wxCommandEvent &event)
@@ -3000,7 +2971,7 @@ void ComponentDlg::OnCluster(wxCommandEvent &event)
 
 void ComponentDlg::OnCleanBtn(wxCommandEvent &event)
 {
-	Clean(m_use_sel);
+	Clean();
 }
 
 void ComponentDlg::Cluster()
@@ -3048,26 +3019,26 @@ void ComponentDlg::Cluster()
 
 	flrd::ClusterMethod* method = 0;
 	//switch method
-	if (m_cluster_method_exmax)
+	if (glbin_comp_def.m_cluster_method_exmax)
 	{
 		flrd::ClusterExmax* method_exmax = new flrd::ClusterExmax();
-		method_exmax->SetClnum(m_cluster_clnum);
-		method_exmax->SetMaxiter(m_cluster_maxiter);
-		method_exmax->SetProbTol(m_cluster_tol);
+		method_exmax->SetClnum(glbin_comp_def.m_cluster_clnum);
+		method_exmax->SetMaxiter(glbin_comp_def.m_cluster_maxiter);
+		method_exmax->SetProbTol(glbin_comp_def.m_cluster_tol);
 		method = method_exmax;
 	}
-	else if (m_cluster_method_dbscan)
+	else if (glbin_comp_def.m_cluster_method_dbscan)
 	{
 		flrd::ClusterDbscan* method_dbscan = new flrd::ClusterDbscan();
-		method_dbscan->SetSize(m_cluster_size);
-		method_dbscan->SetEps(m_cluster_eps);
+		method_dbscan->SetSize(glbin_comp_def.m_cluster_size);
+		method_dbscan->SetEps(glbin_comp_def.m_cluster_eps);
 		method = method_dbscan;
 	}
-	else if (m_cluster_method_kmeans)
+	else if (glbin_comp_def.m_cluster_method_kmeans)
 	{
 		flrd::ClusterKmeans* method_kmeans = new flrd::ClusterKmeans();
-		method_kmeans->SetClnum(m_cluster_clnum);
-		method_kmeans->SetMaxiter(m_cluster_maxiter);
+		method_kmeans->SetClnum(glbin_comp_def.m_cluster_clnum);
+		method_kmeans->SetMaxiter(glbin_comp_def.m_cluster_maxiter);
 		method = method_kmeans;
 	}
 
@@ -3095,7 +3066,7 @@ void ComponentDlg::Cluster()
 	};
 	std::unordered_map<unsigned int, CmpCnt> init_clusters;
 	std::set<CmpCnt> ordered_clusters;
-	if (m_cluster_method_exmax)
+	if (glbin_comp_def.m_cluster_method_exmax)
 	{
 		for (index = 0; index < nxyz; ++index)
 		{
@@ -3117,7 +3088,7 @@ void ComponentDlg::Cluster()
 				it->second.size++;
 			}
 		}
-		if (init_clusters.size() >= m_cluster_clnum)
+		if (init_clusters.size() >= glbin_comp_def.m_cluster_clnum)
 		{
 			for (auto it = init_clusters.begin();
 				it != init_clusters.end(); ++it)
@@ -3224,7 +3195,7 @@ bool ComponentDlg::GetIds(std::string &str, unsigned int &id, int &brick_id)
 	return true;
 }
 
-void ComponentDlg::GenerateComp(bool use_sel, bool command)
+void ComponentDlg::GenerateComp(bool command)
 {
 	if (!m_view)
 		return;
@@ -3232,107 +3203,62 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	if (!vd)
 		return;
 
-	int clean_iter = m_clean_iter;
-	int clean_size = m_clean_size_vl;
-	if (!m_clean)
-	{
-		clean_iter = 0;
-		clean_size = 0;
-	}
+	//int clean_iter = m_clean_iter;
+	//int clean_size = m_clean_size_vl;
+	//if (!m_clean)
+	//{
+	//	clean_iter = 0;
+	//	clean_size = 0;
+	//}
 
 	//get brick number
 	int bn = vd->GetAllBrickNum();
 	double scale = vd->GetScalarScale();
 
-	m_comp_generator.SetVolumeData(vd);
-	m_comp_generator.prework = std::bind(
+	glbin_comp_generator.SetVolumeData(vd);
+	glbin_comp_generator.prework = std::bind(
 			&ComponentDlg::StartTimer, this, std::placeholders::_1);
-	m_comp_generator.postwork = std::bind(
+	glbin_comp_generator.postwork = std::bind(
 			&ComponentDlg::StopTimer, this, std::placeholders::_1);
+	glbin_comp_def.Apply(&glbin_comp_generator);
 	m_titles.Clear();
 	m_values.Clear();
 	m_tps.clear();
 	m_tps.push_back(std::chrono::high_resolution_clock::now());
 
-	m_comp_generator.SetUseMask(use_sel);
+	//glbin_comp_generator.SetUseSel(use_sel);
 
-	vd->AddEmptyMask(1, !m_comp_generator.GetUseMask());//select all if no mask, otherwise keep
-	if (m_fixate && vd->GetLabel(false))
+	vd->AddEmptyMask(1, !glbin_comp_def.m_use_sel);//select all if no mask, otherwise keep
+	if (glbin_comp_def.m_fixate && vd->GetLabel(false))
 	{
 		vd->LoadLabel2();
-		m_comp_generator.SetIDBit(m_fix_size);
+		glbin_comp_generator.SetIDBit(glbin_comp_def.m_fix_size);
 	}
 	else
 	{
-		vd->AddEmptyLabel(0, !use_sel);
-		m_comp_generator.ShuffleID();
+		vd->AddEmptyLabel(0, !glbin_comp_def.m_use_sel);
+		glbin_comp_generator.ShuffleID();
 	}
 
-	if (m_use_dist_field)
+	if (glbin_comp_def.m_use_dist_field)
 	{
-		if (m_density)
-		{
-			m_comp_generator.DistDensityField(
-				m_diff, m_iter,
-				m_thresh*m_tfactor,
-				m_falloff,
-				m_dist_filter_size,
-				m_max_dist,
-				m_dist_thresh,
-				m_dist_strength,
-				m_density_window_size,
-				m_density_stats_size,
-				m_density_thresh,
-				m_varth,
-				scale,
-				m_grow_fixed);
-		}
+		if (glbin_comp_def.m_density)
+			glbin_comp_generator.DistDensityField();
 		else
-		{
-			m_comp_generator.DistGrow(
-				m_diff, m_iter,
-				m_thresh*m_tfactor,
-				m_falloff ,
-				m_dist_filter_size,
-				m_max_dist,
-				m_dist_thresh,
-				scale,
-				m_dist_strength,
-				m_grow_fixed);
-		}
+			glbin_comp_generator.DistGrow();
 	}
 	else
 	{
-		if (m_density)
-		{
-			m_comp_generator.DensityField(
-				m_density_window_size,
-				m_density_stats_size,
-				m_diff, m_iter,
-				m_thresh*m_tfactor,
-				m_falloff,
-				m_density_thresh,
-				m_varth,
-				scale,
-				m_grow_fixed);
-		}
+		if (glbin_comp_def.m_density)
+			glbin_comp_generator.DensityField();
 		else
-		{
-			m_comp_generator.Grow(
-				m_diff,
-				m_iter,
-				m_thresh*m_tfactor,
-				m_falloff,
-				scale,
-				m_grow_fixed);
-		}
+			glbin_comp_generator.Grow();
 	}
 
-	if (clean_iter > 0)
-		m_comp_generator.Cleanup(clean_iter, clean_size);
+	glbin_comp_generator.Cleanup();
 
 	if (bn > 1)
-		m_comp_generator.FillBorders(0.1);
+		glbin_comp_generator.FillBorders();
 
 	m_tps.push_back(std::chrono::high_resolution_clock::now());
 	std::chrono::duration<double> time_span =
@@ -3374,7 +3300,7 @@ void ComponentDlg::Fixate(bool command)
 		AddCmd("fixate");
 }
 
-void ComponentDlg::Clean(bool use_sel, bool command)
+void ComponentDlg::Clean(bool command)
 {
 	if (!m_view)
 		return;
@@ -3382,8 +3308,8 @@ void ComponentDlg::Clean(bool use_sel, bool command)
 	if (!vd)
 		return;
 
-	int clean_iter = m_clean_iter;
-	int clean_size = m_clean_size_vl;
+	//int clean_iter = m_clean_iter;
+	//int clean_size = m_clean_size_vl;
 	//if (!m_clean)
 	//{
 	//	clean_iter = 0;
@@ -3393,20 +3319,19 @@ void ComponentDlg::Clean(bool use_sel, bool command)
 	//get brick number
 	int bn = vd->GetAllBrickNum();
 
-	m_comp_generator.SetVolumeData(vd);
+	glbin_comp_generator.SetVolumeData(vd);
+	glbin_comp_def.Apply(&glbin_comp_generator);
+	//glbin_comp_generator.SetUseMask(use_sel);
 
-	m_comp_generator.SetUseMask(use_sel);
-
-	vd->AddEmptyMask(1, !use_sel);
-
-	if (bn > 1)
-		m_comp_generator.ClearBorders();
-
-	if (clean_iter > 0)
-		m_comp_generator.Cleanup(clean_iter, clean_size);
+	vd->AddEmptyMask(1, !glbin_comp_def.m_use_sel);
 
 	if (bn > 1)
-		m_comp_generator.FillBorders(0.1);
+		glbin_comp_generator.ClearBorders();
+
+	glbin_comp_generator.Cleanup();
+
+	if (bn > 1)
+		glbin_comp_generator.FillBorders();
 
 	m_view->RefreshGL(39);
 
@@ -3420,20 +3345,19 @@ void ComponentDlg::SelectFullComp()
 	wxString str = m_comp_id_text->GetValue();
 	if (str.empty())
 	{
-		if (!m_view)
+		if (!m_view || !m_view->m_cur_vol)
 			return;
 		//get current mask
-		VolumeData* vd = m_view->m_cur_vol;
-		flrd::ComponentSelector comp_selector(vd);
+		glbin_comp_selector.SetVolume(m_view->m_cur_vol);
 		//cell size filter
 		bool use = m_analysis_min_check->GetValue();
 		unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
-		comp_selector.SetMinNum(use, num);
+		glbin_comp_selector.SetMinNum(use, num);
 		use = m_analysis_max_check->GetValue();
 		num = (unsigned int)(m_analysis_max_spin->GetValue());
-		comp_selector.SetMaxNum(use, num);
-		comp_selector.SetAnalyzer(&m_comp_analyzer);
-		comp_selector.CompFull();
+		glbin_comp_selector.SetMaxNum(use, num);
+		glbin_comp_selector.SetAnalyzer(&glbin_comp_analyzer);
+		glbin_comp_selector.CompFull();
 	}
 	else
 	{
@@ -3467,22 +3391,22 @@ void ComponentDlg::ApplyRecord()
 	if (!vd)
 		return;
 
-	m_comp_generator.SetVolumeData(vd);
-	m_comp_generator.prework = std::bind(
+	glbin_comp_generator.SetVolumeData(vd);
+	glbin_comp_generator.prework = std::bind(
 		&ComponentDlg::StartTimer, this, std::placeholders::_1);
-	m_comp_generator.postwork = std::bind(
+	glbin_comp_generator.postwork = std::bind(
 		&ComponentDlg::StopTimer, this, std::placeholders::_1);
 	vd->AddEmptyMask(1);
 	if (!vd->GetMlCompGenApplied())
 	{
 		vd->AddEmptyLabel(0);
-		m_comp_generator.ShuffleID();
+		glbin_comp_generator.ShuffleID();
 	}
-	m_comp_generator.GenerateDB();
+	glbin_comp_generator.GenerateDB();
 
 	int bn = vd->GetAllBrickNum();
 	if (bn > 1)
-		m_comp_generator.FillBorders(0.1);
+		glbin_comp_generator.FillBorders();
 
 	//update
 	m_view->RefreshGL(39);
@@ -3509,30 +3433,30 @@ void ComponentDlg::Analyze(bool sel)
 		return;
 
 	int bn = vd->GetAllBrickNum();
-	m_prog_bit = 97.0f / float(bn * 2 + (m_consistent?1:0));
+	m_prog_bit = 97.0f / float(bn * 2 + (glbin_comp_def.m_consistent?1:0));
 	m_prog = 0.0f;
 
-	m_comp_analyzer.SetVolume(vd);
-	if (m_colocal)
+	glbin_comp_analyzer.SetVolume(vd);
+	if (glbin_comp_def.m_colocal)
 	{
-		m_comp_analyzer.ClearCoVolumes();
+		glbin_comp_analyzer.ClearCoVolumes();
 		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
 		{
 			VolumeData* vdi = m_view->GetDispVolumeData(i);
 			if (vdi != vd)
-				m_comp_analyzer.AddCoVolume(vdi);
+				glbin_comp_analyzer.AddCoVolume(vdi);
 		}
 	}
-	m_comp_analyzer.Analyze(sel, m_consistent, m_colocal);
+	glbin_comp_analyzer.Analyze(sel, glbin_comp_def.m_consistent, glbin_comp_def.m_colocal);
 
-	if (m_consistent)
+	if (glbin_comp_def.m_consistent)
 	{
 		//invalidate label mask in gpu
 		vd->GetVR()->clear_tex_label();
 		m_view->RefreshGL(39);
 	}
 
-	if (m_comp_analyzer.GetListSize() > 10000)
+	if (glbin_comp_analyzer.GetListSize() > 10000)
 	{
 		wxFileDialog *fopendlg = new wxFileDialog(
 			this, "Save Analysis Data", "", "",
@@ -3543,7 +3467,7 @@ void ComponentDlg::Analyze(bool sel)
 		{
 			wxString filename = fopendlg->GetPath();
 			string str = filename.ToStdString();
-			m_comp_analyzer.OutputCompListFile(str, 1);
+			glbin_comp_analyzer.OutputCompListFile(str, 1);
 		}
 		if (fopendlg)
 			delete fopendlg;
@@ -3551,8 +3475,8 @@ void ComponentDlg::Analyze(bool sel)
 	else
 	{
 		string titles, values;
-		m_comp_analyzer.OutputFormHeader(titles);
-		m_comp_analyzer.OutputCompListStr(values, 0);
+		glbin_comp_analyzer.OutputFormHeader(titles);
+		glbin_comp_analyzer.OutputCompListStr(values, 0);
 		wxString str1(titles), str2(values);
 		SetOutput(str1, str2);
 	}
@@ -3781,7 +3705,7 @@ void ComponentDlg::PasteData()
 
 bool ComponentDlg::GetCellList(flrd::CelpList &cl, bool links)
 {
-	flrd::CelpList* list = m_comp_analyzer.GetCelpList();
+	flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
 	if (!list || list->empty())
 		return false;
 
@@ -3794,7 +3718,7 @@ bool ComponentDlg::GetCellList(flrd::CelpList &cl, bool links)
 	bool sel_all = false;
 	std::vector<unsigned int> ids;
 	std::vector<unsigned int> bids;
-	int bn = m_comp_analyzer.GetBrickNum();
+	int bn = glbin_comp_analyzer.GetBrickNum();
 
 	//selected cells are retrieved using different functions
 	wxArrayInt seli = m_output_grid->GetSelectedCols();
@@ -3890,11 +3814,11 @@ void ComponentDlg::FindCelps(flrd::CelpList &list,
 
 	if (links)
 	{
-		flrd::CellGraph* graph = m_comp_analyzer.GetCellGraph();
+		flrd::CellGraph* graph = glbin_comp_analyzer.GetCellGraph();
 		graph->ClearVisited();
 		flrd::CelpList links;
 		if (graph->GetLinkedComps(it->second, links,
-			m_comp_analyzer.GetSizeLimit()))
+			glbin_comp_analyzer.GetSizeLimit()))
 		{
 			for (auto it2 = links.begin();
 				it2 != links.end(); ++it2)
@@ -4128,7 +4052,7 @@ void ComponentDlg::SetCompSelection(std::set<unsigned long long>& ids, int mode)
 	if (ids.empty())
 		return;
 
-	int bn = m_comp_analyzer.GetBrickNum();
+	int bn = glbin_comp_analyzer.GetBrickNum();
 
 	wxString str;
 	unsigned long ulv;
@@ -4188,17 +4112,14 @@ void ComponentDlg::SetCompSelection(std::set<unsigned long long>& ids, int mode)
 
 void ComponentDlg::IncludeComps()
 {
-	if (!m_view)
-		return;
-	VolumeData* vd = m_view->m_cur_vol;
-	if (!vd)
+	if (!m_view || !m_view->m_cur_vol)
 		return;
 
 	flrd::CelpList cl;
 	if (GetCellList(cl, true))
 	{
 		//clear complist
-		flrd::CelpList *list = m_comp_analyzer.GetCelpList();
+		flrd::CelpList *list = glbin_comp_analyzer.GetCelpList();
 		for (auto it = list->begin();
 			it != list->end();)
 		{
@@ -4208,12 +4129,12 @@ void ComponentDlg::IncludeComps()
 				++it;
 		}
 		//select cl
-		flrd::ComponentSelector comp_selector(vd);
-		comp_selector.SelectList(cl);
+		glbin_comp_selector.SetVolume(m_view->m_cur_vol);
+		glbin_comp_selector.SelectList(cl);
 		ClearOutputGrid();
 		string titles, values;
-		m_comp_analyzer.OutputFormHeader(titles);
-		m_comp_analyzer.OutputCompListStr(values, 0);
+		glbin_comp_analyzer.OutputFormHeader(titles);
+		glbin_comp_analyzer.OutputCompListStr(values, 0);
 		wxString str1(titles), str2(values);
 		SetOutput(str1, str2);
 
@@ -4240,17 +4161,14 @@ void ComponentDlg::IncludeComps()
 
 void ComponentDlg::ExcludeComps()
 {
-	if (!m_view)
-		return;
-	VolumeData* vd = m_view->m_cur_vol;
-	if (!vd)
+	if (!m_view || !m_view->m_cur_vol)
 		return;
 
 	flrd::CelpList cl;
 	if (GetCellList(cl, true))
 	{
 		//clear complist
-		flrd::CelpList *list = m_comp_analyzer.GetCelpList();
+		flrd::CelpList *list = glbin_comp_analyzer.GetCelpList();
 		for (auto it = list->begin();
 			it != list->end();)
 		{
@@ -4259,16 +4177,16 @@ void ComponentDlg::ExcludeComps()
 			else
 				++it;
 		}
-		flrd::ComponentSelector comp_selector(vd);
+		glbin_comp_selector.SetVolume(m_view->m_cur_vol);
 		std::vector<unsigned long long> ids;
 		for (auto it = list->begin();
 			it != list->end(); ++it)
 			ids.push_back(it->second->GetEId());
-		comp_selector.Delete(ids);
+		glbin_comp_selector.Delete(ids);
 		ClearOutputGrid();
 		string titles, values;
-		m_comp_analyzer.OutputFormHeader(titles);
-		m_comp_analyzer.OutputCompListStr(values, 0);
+		glbin_comp_analyzer.OutputFormHeader(titles);
+		glbin_comp_analyzer.OutputCompListStr(values, 0);
 		wxString str1(titles), str2(values);
 		SetOutput(str1, str2);
 

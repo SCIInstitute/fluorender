@@ -558,8 +558,8 @@ void ScriptProc::RunNoiseReduction()
 		return;
 
 	if (!m_frame) return;
-	VolumeCalculator* calculator = m_view->GetVolumeCalculator();
-	if (!calculator) return;
+	//VolumeCalculator* calculator = m_view->GetVolumeCalculator();
+	//if (!calculator) return;
 
 	double thresh, size;
 	m_fconfig->Read("threshold", &thresh, 0.0);
@@ -569,13 +569,13 @@ void ScriptProc::RunNoiseReduction()
 		i != vlist.end(); ++i)
 	{
 		m_view->m_cur_vol = *i;
-		calculator->SetVolumeA(*i);
+		glbin_vol_calculator.SetVolumeA(*i);
 
 		//selection
 		if (m_frame->GetNoiseCancellingDlg())
 			m_frame->GetNoiseCancellingDlg()->Preview(false, size, thresh);
 		//delete
-		calculator->CalculateGroup(6, "", false);
+		glbin_vol_calculator.CalculateGroup(6, "", false);
 	}
 }
 
@@ -689,8 +689,9 @@ void ScriptProc::RunMaskTracking()
 	if (m_view->m_tseq_cur_num == m_view->m_begin_play_frame)
 	{
 		//rewind
-		flrd::ComponentSelector comp_selector(cur_vol);
-		comp_selector.All();
+		//flrd::ComponentSelector comp_selector(cur_vol);
+		glbin_comp_selector.SetVolume(cur_vol);
+		glbin_comp_selector.All();
 		return;
 	}
 
@@ -754,9 +755,9 @@ void ScriptProc::RunRandomColors()
 	if (!GetVolumes(vlist))
 		return;
 
-	VolumeSelector* selector = m_view->GetVolumeSelector();
-	if (!selector)
-		return;
+	//VolumeSelector* selector = m_view->GetVolumeSelector();
+	//if (!selector)
+	//	return;
 
 	int hmode;
 	m_fconfig->Read("huemode", &hmode, 1);
@@ -765,8 +766,8 @@ void ScriptProc::RunRandomColors()
 		i != vlist.end(); ++i)
 	{
 		//generate RGB volumes
-		selector->SetVolume(*i);
-		selector->CompExportRandomColor(hmode, 0, 0, 0, false, false);
+		glbin_vol_selector.SetVolume(*i);
+		glbin_vol_selector.CompExportRandomColor(hmode, 0, 0, 0, false, false);
 	}
 }
 
@@ -788,23 +789,24 @@ void ScriptProc::RunCompSelect()
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
-		flrd::ComponentSelector comp_selector(*i);
+		//flrd::ComponentSelector comp_selector(*i);
+		glbin_comp_selector.SetVolume(*i);
 
 		switch (mode)
 		{
 		case 0:
-			comp_selector.All();
+			glbin_comp_selector.All();
 			break;
 		case 1:
-			comp_selector.Clear();
+			glbin_comp_selector.Clear();
 			break;
 		case 2:
 		default:
 			if (comp_min)
-				comp_selector.SetMinNum(true, comp_min);
+				glbin_comp_selector.SetMinNum(true, comp_min);
 			if (comp_max)
-				comp_selector.SetMaxNum(true, comp_max);
-			comp_selector.Select(true);
+				glbin_comp_selector.SetMaxNum(true, comp_max);
+			glbin_comp_selector.Select(true);
 		}
 	}
 }
@@ -971,26 +973,26 @@ void ScriptProc::RunSaveVolume()
 	}
 	else if (source == "calculator")
 	{
-		VolumeCalculator* calculator = m_view->GetVolumeCalculator();
-		if (!calculator) return;
+		//VolumeCalculator* calculator = m_view->GetVolumeCalculator();
+		//if (!calculator) return;
 		VolumeData* vd = 0;
-		while (vd = calculator->GetResult(true))
+		while (vd = glbin_vol_calculator.GetResult(true))
 			vlist.push_back(vd);
 	}
 	else if (source == "selector")
 	{
-		VolumeSelector* selector = m_view->GetVolumeSelector();
-		if (!selector) return;
+		//VolumeSelector* selector = m_view->GetVolumeSelector();
+		//if (!selector) return;
 		VolumeData* vd = 0;
-		while (vd = selector->GetResult(true))
+		while (vd = glbin_vol_selector.GetResult(true))
 			vlist.push_back(vd);
 	}
 	else if (source == "executor")
 	{
-		KernelExecutor* executor = m_view->GetKernelExecutor();
-		if (!executor) return;
+		//KernelExecutor* executor = m_view->GetKernelExecutor();
+		//if (!executor) return;
 		VolumeData* vd = 0;
-		while (vd = executor->GetResult(true))
+		while (vd = glbin_kernel_executor.GetResult(true))
 			vlist.push_back(vd);
 	}
 	else if (source == "registrator")
@@ -1053,8 +1055,8 @@ void ScriptProc::RunCalculate()
 	if (!TimeCondition())
 		return;
 
-	VolumeCalculator* calculator = m_view->GetVolumeCalculator();
-	if (!calculator) return;
+	//VolumeCalculator* calculator = m_view->GetVolumeCalculator();
+	//if (!calculator) return;
 
 	int vol_a_index;
 	m_fconfig->Read("vol_a", &vol_a_index, 0);
@@ -1075,18 +1077,18 @@ void ScriptProc::RunCalculate()
 		return;
 
 	//calculate
-	calculator->SetVolumeA(vol_a);
-	calculator->SetVolumeB(vol_b);
+	glbin_vol_calculator.SetVolumeA(vol_a);
+	glbin_vol_calculator.SetVolumeB(vol_b);
 	if (sOper == "subtract")
-		calculator->CalculateGroup(1, "", false);
+		glbin_vol_calculator.CalculateGroup(1, "", false);
 	else if (sOper == "add")
-		calculator->CalculateGroup(2, "", false);
+		glbin_vol_calculator.CalculateGroup(2, "", false);
 	else if (sOper == "divide")
-		calculator->CalculateGroup(3, "", false);
+		glbin_vol_calculator.CalculateGroup(3, "", false);
 	else if (sOper == "colocate")
-		calculator->CalculateGroup(4, "", false);
+		glbin_vol_calculator.CalculateGroup(4, "", false);
 	else if (sOper == "fill")
-		calculator->CalculateGroup(9, "", false);
+		glbin_vol_calculator.CalculateGroup(9, "", false);
 }
 
 void ScriptProc::RunOpenCL()
@@ -1097,8 +1099,8 @@ void ScriptProc::RunOpenCL()
 	if (!GetVolumes(vlist))
 		return;
 
-	KernelExecutor* executor = m_view->GetKernelExecutor();
-	if (!executor) return;
+	//KernelExecutor* executor = m_view->GetKernelExecutor();
+	//if (!executor) return;
 
 	wxString clname;
 	m_fconfig->Read("clpath", &clname, "");
@@ -1110,10 +1112,10 @@ void ScriptProc::RunOpenCL()
 		i != vlist.end(); ++i)
 	{
 		(*i)->GetVR()->clear_tex_current();
-		executor->LoadCode(clname);
-		executor->SetVolume(*i);
-		executor->SetDuplicate(true);
-		executor->Execute();
+		glbin_kernel_executor.LoadCode(clname);
+		glbin_kernel_executor.SetVolume(*i);
+		glbin_kernel_executor.SetDuplicate(true);
+		glbin_kernel_executor.Execute();
 	}
 }
 
@@ -1354,7 +1356,7 @@ void ScriptProc::RunGenerateComp()
 			m_frame->GetComponentDlg()->ApplyRecord();
 		}
 		else
-			m_frame->GetComponentDlg()->PlayCmd(use_sel, tfac);
+			m_frame->GetComponentDlg()->PlayCmd(tfac);
 	}
 }
 
@@ -1834,7 +1836,8 @@ void ScriptProc::RunCameraPoints()
 	//turn off script
 	if (m_frame)
 	{
-		m_frame->GetSettingDlg()->SetRunScript(false);
+		//m_frame->GetSettingDlg()->SetRunScript(false);
+		glbin_settings.m_run_script = false;
 		m_frame->GetMovieView()->GetScriptSettings(false);
 	}
 }
@@ -2517,9 +2520,9 @@ void ScriptProc::ChangeScript()
 	filename = GetInputFile(filename, "Scripts");
 
 	if (!run_script)
-		m_frame->GetSettingDlg()->SetRunScript(run_script);
+		glbin_settings.m_run_script = run_script;
 	if (!filename.IsEmpty())
-		m_frame->GetSettingDlg()->SetScriptFile(filename);
+		glbin_settings.m_script_file = filename;
 	m_frame->GetMovieView()->GetScriptSettings(false);
 	m_fconfig_name = filename;
 }

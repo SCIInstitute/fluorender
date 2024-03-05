@@ -1253,9 +1253,8 @@ void TraceDlg::UncertainFilter(bool input)
 	tm_processor.SetUncertainLow(ival);
 	tm_processor.GetCellsByUncertainty(list_in, list_out, m_cur_time);
 
-	VolumeData* vd = m_view->m_cur_vol;
-	flrd::ComponentSelector comp_selector(vd);
-	comp_selector.SelectList(list_out);
+	glbin_comp_selector.SetVolume(m_view->m_cur_vol);
+	glbin_comp_selector.SelectList(list_out);
 
 	//update view
 	CellUpdate();
@@ -1726,15 +1725,14 @@ void TraceDlg::CompDelete()
 	}
 
 	//get current vd
-	VolumeData* vd = m_view->m_cur_vol;
-	flrd::ComponentSelector comp_selector(vd);
+	glbin_comp_selector.SetVolume(m_view->m_cur_vol);
 	if (ids.size() == 1)
 	{
-		comp_selector.SetId(ids[0]);
-		comp_selector.Delete();
+		glbin_comp_selector.SetId(ids[0]);
+		glbin_comp_selector.Delete();
 	}
 	else
-		comp_selector.Delete(ids);
+		glbin_comp_selector.Delete(ids);
 
 	//update view
 	CellUpdate();
@@ -1750,9 +1748,8 @@ void TraceDlg::CompClear()
 		return;
 
 	//get current vd
-	VolumeData* vd = m_view->m_cur_vol;
-	flrd::ComponentSelector comp_selector(vd);
-	comp_selector.Clear();
+	glbin_comp_selector.SetVolume(m_view->m_cur_vol);
+	glbin_comp_selector.Clear();
 
 	//update view
 	CellUpdate();
@@ -1851,11 +1848,10 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 
 		unsigned int id = (unsigned int)ival;
 		//get current mask
-		VolumeData* vd = m_view->m_cur_vol;
-		flrd::ComponentSelector comp_selector(vd);
-		comp_selector.SetId(id);
-		comp_selector.SetMinNum(true, slimit);
-		comp_selector.Select(get_all);
+		glbin_comp_selector.SetVolume(m_view->m_cur_vol);
+		glbin_comp_selector.SetId(id);
+		glbin_comp_selector.SetMinNum(true, slimit);
+		glbin_comp_selector.Select(get_all);
 	}
 
 	//update view
@@ -1885,11 +1881,10 @@ void TraceDlg::OnCompExclusive(wxCommandEvent &event)
 	{
 		unsigned int id = ival;
 		//get current mask
-		VolumeData* vd = m_view->m_cur_vol;
-		flrd::ComponentSelector comp_selector(vd);
-		comp_selector.SetId(id);
-		comp_selector.SetMinNum(true, slimit);
-		comp_selector.Exclusive();
+		glbin_comp_selector.SetVolume(m_view->m_cur_vol);
+		glbin_comp_selector.SetId(id);
+		glbin_comp_selector.SetMinNum(true, slimit);
+		glbin_comp_selector.Exclusive();
 	}
 
 	//update view
@@ -1931,10 +1926,9 @@ void TraceDlg::CellFull()
 	str.ToLong(&ival);
 	unsigned int slimit = (unsigned int)ival;
 	//get current mask
-	VolumeData* vd = m_view->m_cur_vol;
-	flrd::ComponentSelector comp_selector(vd);
-	comp_selector.SetMinNum(true, slimit);
-	comp_selector.CompFull();
+	glbin_comp_selector.SetVolume(m_view->m_cur_vol);
+	glbin_comp_selector.SetMinNum(true, slimit);
+	glbin_comp_selector.CompFull();
 	//update view
 	CellUpdate();
 

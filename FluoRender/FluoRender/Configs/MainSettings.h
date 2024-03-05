@@ -65,6 +65,7 @@ public:
 
 public:
 	//default values
+
 	bool m_prj_save;		//save project automatically
 	bool m_prj_save_inc;	//save project incrementally
 	wxString m_time_id;		//identfier for time sequence
@@ -72,6 +73,15 @@ public:
 	bool m_override_vox;
 	int m_last_tool;		//last tool
 
+	bool m_slice_sequence;	//if slices are sequence
+	bool m_chann_sequence;	//read channels
+	int m_digit_order;		//digit order
+	int m_ser_num;			//series number
+	bool m_skip_brick;		//brick skipping
+	bool m_load_mask;		//load volume mask
+	bool m_save_crop;		//save crop
+	int m_save_filter;		//filter
+	bool m_vrp_embed;		//embed files in project
 	bool m_save_alpha;		//save alpha channel in captured images
 	bool m_save_float;		//save float values in captured images
 	double m_dpi;			//dpi number of captured image

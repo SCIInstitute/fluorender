@@ -183,6 +183,8 @@ void ViewDefault::Apply(VRenderGLView* view)
 	view->SetCenters(m_center.x(), m_center.y(), m_center.z());
 	view->SetRotLock(m_rot_lock);
 	view->m_pin_rot_center = m_pin_rot_center;
+	if (m_pin_rot_center)
+		view->m_rot_center_dirty = true;
 	view->m_scale_mode = m_scale_mode;
 	view->m_scale_factor = m_scale_factor;
 	view->SetFog(m_use_fog);

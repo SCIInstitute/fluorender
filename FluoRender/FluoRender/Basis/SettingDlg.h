@@ -139,15 +139,15 @@ public:
 	void UpdateDeviceTree();
 	void UpdateTextureSize();
 
-	//get settings from ui
-	void SetScriptBreak(bool val);
-	//bool GetTestMode(int type);	//type	1:speed test
-	//							//		2:parameter test
-	//							//		3:wireframe mode
-	int GetPeelingLyers();
-	bool GetMicroBlend();
-	void GetShadowDir(double& x, double &y);
-	int GetWavelengthColor(int n);
+	////get settings from ui
+	//void SetScriptBreak(bool val);
+	////bool GetTestMode(int type);	//type	1:speed test
+	////							//		2:parameter test
+	////							//		3:wireframe mode
+	//int GetPeelingLyers();
+	//bool GetMicroBlend();
+	//void GetShadowDir(double& x, double &y);
+	//int GetWavelengthColor(int n);
 	//background parameters
 	//void GetBgParams(int &type, int &kx, int &ky, double &varth, double &gauth)
 	//{

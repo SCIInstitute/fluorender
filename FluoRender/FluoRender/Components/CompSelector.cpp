@@ -32,8 +32,8 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-ComponentSelector::ComponentSelector(VolumeData* vd)
-	: m_vd(vd),
+ComponentSelector::ComponentSelector()
+	: m_vd(0),
 	m_analyzer(0),
 	m_sel_all(false),
 	m_id(0),

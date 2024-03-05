@@ -30,10 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 
-namespace flrd
-{
-	class ComponentGenerator;
-}
 class VRenderFrame;
 class VRenderGLView;
 class VolumeData;
@@ -62,8 +58,6 @@ private:
 	VRenderFrame* m_frame;
 	//current view
 	VRenderGLView *m_view;
-
-	flrd::ComponentGenerator m_comp_generator;
 
 	//max volume value
 	double m_max_value;

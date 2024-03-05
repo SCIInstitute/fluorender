@@ -531,12 +531,6 @@ public:
 	void SetIntp(bool mode);
 	bool GetIntp();
 
-	//get volume selector
-	flrd::VolumeSelector* GetVolumeSelector() { return &m_selector; }
-	//get volume calculator
-	flrd::VolumeCalculator* GetVolumeCalculator() { return &m_calculator; }
-	//get kernel executor
-	KernelExecutor* GetKernelExecutor() { return &m_kernel_executor; }
 	//text renderer
 	flvr::TextRenderer* GetTextRenderer() { return &m_text_renderer; }
 
@@ -794,10 +788,10 @@ public:
 
 	void GetRenderSize(int& nx, int& ny);
 
-	void SetScriptBreak(bool val)
-	{
-		m_scriptor.SetBreak(val);
-	}
+	//void SetScriptBreak(bool val)
+	//{
+	//	m_scriptor.SetBreak(val);
+	//}
 
 	void SetFocusedSlider(wxBasisSlider* slider)
 	{
@@ -1098,17 +1092,17 @@ private:
 	fluo::Quaternion m_q_cl_zero;
 	double m_rotx_cl, m_roty_cl, m_rotz_cl;
 
-	//volume selector for segmentation
-	flrd::VolumeSelector m_selector;
+	////volume selector for segmentation
+	//flrd::VolumeSelector m_selector;
 
-	//calculator
-	flrd::VolumeCalculator m_calculator;
+	////calculator
+	//flrd::VolumeCalculator m_calculator;
 
-	//kernel executor
-	KernelExecutor m_kernel_executor;
+	////kernel executor
+	//KernelExecutor m_kernel_executor;
 
-	//scriptor
-	flrd::ScriptProc m_scriptor;
+	////scriptor
+	//flrd::ScriptProc m_scriptor;
 
 	//timer
 	Fltimer *m_timer;

@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace flrd
 {
+	class ComponentGenerator;
 	class ComponentAnalyzer;
 }
 class ComponentDefault
@@ -44,6 +45,8 @@ public:
 	void Save(const std::string& filename);
 	void Read(wxFileConfig& f);
 	void Save(wxFileConfig& f);
+	void Set(flrd::ComponentGenerator* cg);
+	void Apply(flrd::ComponentGenerator* cg);
 	//void Set(flrd::ComponentAnalyzer* ca);
 	//void Apply(flrd::ComponentAnalyzer* ca);
 
@@ -85,6 +88,8 @@ public:
 	bool m_clean;
 	int m_clean_iter;
 	int m_clean_size_vl;
+	//fill borders
+	double m_fill_border;
 
 	//cluster settings
 	bool m_cluster_method_exmax;

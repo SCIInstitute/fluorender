@@ -114,23 +114,6 @@ BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 	EVT_CLOSE(VRenderFrame::OnClose)
 END_EVENT_TABLE()
 
-bool VRenderFrame::m_sliceSequence = false;
-bool VRenderFrame::m_channSequence = false;
-int VRenderFrame::m_digitOrder = 0;
-int VRenderFrame::m_ser_num = 0;
-bool VRenderFrame::m_compression = false;
-bool VRenderFrame::m_skip_brick = false;
-wxString VRenderFrame::m_time_id = "_T";
-bool VRenderFrame::m_load_mask = true;
-bool VRenderFrame::m_save_crop = false;
-int VRenderFrame::m_save_filter = 0;
-bool VRenderFrame::m_save_compress = true;
-bool VRenderFrame::m_vrp_embed = false;
-bool VRenderFrame::m_save_project = false;
-bool VRenderFrame::m_save_alpha = false;
-bool VRenderFrame::m_save_float = false;
-float VRenderFrame::m_dpi = 72.0f;
-
 VRenderFrame::VRenderFrame(
 	wxFrame* frame,
 	const wxString& title,
@@ -958,7 +941,7 @@ VRenderFrame::~VRenderFrame()
 		{
 			view->ClearAll();
 			if (i == 0)
-				glbin_brush_def.Set(view->GetVolumeSelector());
+				glbin_brush_def.Set(&glbin_vol_selector);
 		}
 	}
 	m_aui_mgr.UnInit();
@@ -3585,17 +3568,13 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 			fconfig.Write("rotz_cl", rotz_cl);
 
 			//painting parameters
-			flrd::VolumeSelector* selector = view->GetVolumeSelector();
-			if (selector)
-			{
-				fconfig.Write("brush_use_pres", selector->GetBrushUsePres());
-				fconfig.Write("brush_size_1", selector->GetBrushSize1());
-				fconfig.Write("brush_size_2", selector->GetBrushSize2());
-				fconfig.Write("brush_spacing", selector->GetBrushSpacing());
-				fconfig.Write("brush_iteration", selector->GetBrushIteration());
-				fconfig.Write("brush_translate", selector->GetBrushSclTranslate());
-				fconfig.Write("w2d", selector->GetW2d());
-			}
+			fconfig.Write("brush_use_pres", glbin_vol_selector.GetBrushUsePres());
+			fconfig.Write("brush_size_1", glbin_vol_selector.GetBrushSize1());
+			fconfig.Write("brush_size_2", glbin_vol_selector.GetBrushSize2());
+			fconfig.Write("brush_spacing", glbin_vol_selector.GetBrushSpacing());
+			fconfig.Write("brush_iteration", glbin_vol_selector.GetBrushIteration());
+			fconfig.Write("brush_translate", glbin_vol_selector.GetBrushSclTranslate());
+			fconfig.Write("w2d", glbin_vol_selector.GetW2d());
 
 			//rulers
 			fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
@@ -4774,26 +4753,22 @@ void VRenderFrame::OpenProject(wxString& filename)
 
 				//painting parameters
 				double dVal;
-				flrd::VolumeSelector* selector = view->GetVolumeSelector();
-				if (selector)
-				{
-					if (fconfig.Read("brush_use_pres", &bVal))
-						selector->SetBrushUsePres(bVal);
-					double size1, size2;
-					if (fconfig.Read("brush_size_1", &size1) &&
-						fconfig.Read("brush_size_2", &size2))
-						selector->SetBrushSize(size1, size2);
-					if (fconfig.Read("brush_spacing", &dVal))
-						selector->SetBrushSpacing(dVal);
-					if (fconfig.Read("brush_iteration", &dVal))
-						selector->SetBrushIteration(dVal);
-					if (fconfig.Read("brush_size_data", &bVal))
-						selector->SetBrushSizeData(bVal);
-					if (fconfig.Read("brush_translate", &dVal))
-						selector->SetBrushSclTranslate(dVal);
-					if (fconfig.Read("w2d", &dVal))
-						selector->SetW2d(dVal);
-				}
+				if (fconfig.Read("brush_use_pres", &bVal))
+					glbin_vol_selector.SetBrushUsePres(bVal);
+				double size1, size2;
+				if (fconfig.Read("brush_size_1", &size1) &&
+					fconfig.Read("brush_size_2", &size2))
+					glbin_vol_selector.SetBrushSize(size1, size2);
+				if (fconfig.Read("brush_spacing", &dVal))
+					glbin_vol_selector.SetBrushSpacing(dVal);
+				if (fconfig.Read("brush_iteration", &dVal))
+					glbin_vol_selector.SetBrushIteration(dVal);
+				if (fconfig.Read("brush_size_data", &bVal))
+					glbin_vol_selector.SetBrushSizeData(bVal);
+				if (fconfig.Read("brush_translate", &dVal))
+					glbin_vol_selector.SetBrushSclTranslate(dVal);
+				if (fconfig.Read("w2d", &dVal))
+					glbin_vol_selector.SetW2d(dVal);
 
 			}
 

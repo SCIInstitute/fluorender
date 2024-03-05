@@ -301,56 +301,6 @@ public:
 	void LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLView* view = 0);
 	void LoadMeshes(wxArrayString files, VRenderGLView* view = 0);
 
-	//crop
-	static void SetCrop(bool value)
-	{ m_save_crop = value; }
-	static bool GetCrop()
-	{ return m_save_crop; }
-	static void SetFilter(int value)
-	{ m_save_filter = value; }
-	static int GetFilter()
-	{ return m_save_filter; }
-	//compression
-	static void SetCompression(bool value)
-	{ m_save_compress = value; }
-	static bool GetCompression()
-	{ return m_save_compress; }
-	//realtime compression
-	static void SetRealtimeCompression(bool value)
-	{ m_compression = value; }
-	static bool GetRealtimeCompression()
-	{ return m_compression; }
-	//skip brick
-	static void SetSkipBrick(bool value)
-	{ m_skip_brick = value; }
-	static bool GetSkipBrick()
-	{ return m_skip_brick;}
-	//save project
-	static void SetSaveProject(bool value)
-	{ m_save_project = value; }
-	static bool GetSaveProject()
-	{ return m_save_project; }
-	//embed project
-	static void SetEmbedProject(bool value)
-	{ m_vrp_embed = value; }
-	static bool GetEmbedProject()
-	{ return m_vrp_embed; }
-	//save alpha
-	static void SetSaveAlpha(bool value)
-	{ m_save_alpha = value; }
-	static bool GetSaveAlpha()
-	{ return m_save_alpha; }
-	//save float
-	static void SetSaveFloat(bool value)
-	{ m_save_float = value; }
-	static bool GetSaveFloat()
-	{ return m_save_float; }
-	//dpi
-	static void SetDpi(float fval)
-	{ m_dpi = fval; }
-	static float GetDpi()
-	{ return m_dpi; }
-
 	//show dialogs
 	void ShowPaintTool();
 	void ShowMeasureDlg();
@@ -459,39 +409,6 @@ private:
 	int m_cur_sel_vol;
 	//mesh index
 	int m_cur_sel_mesh;
-
-	//if slices are sequence
-	static bool m_sliceSequence;
-	//read channels
-	static bool m_channSequence;
-	//digit order
-	static int m_digitOrder;
-	//series number
-	static int m_ser_num;
-	//compression
-	static bool m_compression;
-	//brick skipping
-	static bool m_skip_brick;
-	//string for time id
-	static wxString m_time_id;
-	//load volume mask
-	static bool m_load_mask;
-	//save crop
-	static bool m_save_crop;
-	//filter
-	static int m_save_filter;
-	//save compressed
-	static bool m_save_compress;
-	//embed files in project
-	static bool m_vrp_embed;
-	//save project
-	static bool m_save_project;
-	//save alpha
-	static bool m_save_alpha;
-	//save float
-	static bool m_save_float;
-	//dpi
-	static float m_dpi;
 
 	//mac address
 	wxString m_address;

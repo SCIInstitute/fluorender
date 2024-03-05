@@ -181,19 +181,19 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 
 	bool select = m_ca_select_only_chk->GetValue();
 
-	m_comp_generator.SetVolumeData(vd);
-	m_comp_generator.SetUseMask(select);
-	vd->AddEmptyMask(1, !m_comp_generator.GetUseMask());
-	vd->AddEmptyLabel(0, !m_comp_generator.GetUseMask());
-	m_comp_generator.ShuffleID();
+	glbin_comp_generator.SetVolumeData(vd);
+	glbin_comp_generator.SetUseSel(select);
+	vd->AddEmptyMask(1, !glbin_comp_generator.GetUseSel());
+	vd->AddEmptyLabel(0, !glbin_comp_generator.GetUseSel());
+	glbin_comp_generator.ShuffleID();
 	double scale = vd->GetScalarScale();
-	m_comp_generator.Grow(false, -1, 0.0, 0.0, scale, 0);
+	glbin_comp_generator.Grow();
 
-	flrd::ComponentAnalyzer ca(vd);
-	ca.Analyze(select, true, false);
+	glbin_comp_analyzer.SetVolume(vd);
+	glbin_comp_analyzer.Analyze(select, true, false);
 	m_view->RefreshGL(39);
 
-	flrd::CelpList *list = ca.GetCelpList();
+	flrd::CelpList *list = glbin_comp_analyzer.GetCelpList();
 	if (!list || list->empty())
 		return;
 

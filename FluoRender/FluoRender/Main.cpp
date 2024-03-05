@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "Main.h"
+#include <Global.h>
 #include <cstdio>
 #include <iostream>
 #include <wx/cmdline.h>
@@ -120,7 +121,11 @@ bool VRenderApp::OnInit()
 		((VRenderFrame*)frame)->StartupLoad(m_files, run_mov, m_imagej);
 
 	// Adding JVm initialization.
-	JVMInitializer*	pInstance = JVMInitializer::getInstance((((VRenderFrame*)frame)->GetSettingDlg())->GetJvmArgs());
+	std::vector<std::string> args;
+	args.push_back(glbin_settings.m_jvm_path.ToStdString());
+	args.push_back(glbin_settings.m_ij_path.ToStdString());
+	args.push_back(glbin_settings.m_bioformats_path.ToStdString());
+	JVMInitializer*	pInstance = JVMInitializer::getInstance(args);
 	return true;
 }
 

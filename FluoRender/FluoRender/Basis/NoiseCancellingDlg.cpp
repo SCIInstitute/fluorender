@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "NoiseCancellingDlg.h"
 #include "VRenderFrame.h"
-#include "Components/CompSelector.h"
+#include <Global.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 
@@ -176,23 +176,23 @@ void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
 	if (!vd)
 		return;
 
-	m_comp_generator.SetVolumeData(vd);
-	m_comp_generator.SetUseMask(select);
-	vd->AddEmptyMask(1, !m_comp_generator.GetUseMask());
-	vd->AddEmptyLabel(0, !m_comp_generator.GetUseMask());
-	m_comp_generator.ShuffleID();
+	glbin_comp_generator.SetVolumeData(vd);
+	glbin_comp_generator.SetUseSel(select);
+	vd->AddEmptyMask(1, !glbin_comp_generator.GetUseSel());
+	vd->AddEmptyLabel(0, !glbin_comp_generator.GetUseSel());
+	glbin_comp_generator.ShuffleID();
 	double scale = vd->GetScalarScale();
-	m_comp_generator.Grow(false, -1, thresh, 0.0, scale, 0);
+	glbin_comp_generator.Grow();
 
-	flrd::ComponentAnalyzer ca(vd);
-	ca.Analyze(select, true, false);
+	glbin_comp_analyzer.SetVolume(vd);
+	glbin_comp_analyzer.Analyze(select, true, false);
 
-	flrd::ComponentSelector comp_selector(vd);
+	glbin_comp_selector.SetVolume(vd);
 	//cell size filter
-	comp_selector.SetMinNum(false, 0);
-	comp_selector.SetMaxNum(true, size);
-	comp_selector.SetAnalyzer(&ca);
-	comp_selector.CompFull();
+	glbin_comp_selector.SetMinNum(false, 0);
+	glbin_comp_selector.SetMaxNum(true, size);
+	glbin_comp_selector.SetAnalyzer(&glbin_comp_analyzer);
+	glbin_comp_selector.CompFull();
 
 	m_view->RefreshGL(39);
 }

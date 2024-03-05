@@ -43,6 +43,15 @@ MainSettings::MainSettings()
 	m_override_vox = true;
 	m_last_tool = 0;
 
+	m_slice_sequence = false;
+	m_chann_sequence = false;
+	m_digit_order = 0;
+	m_ser_num = 0;
+	m_skip_brick = false;
+	m_load_mask = true;
+	m_save_crop = false;
+	m_save_filter = 0;
+	m_vrp_embed = false;
 	m_save_alpha = false;
 	m_save_float = false;
 	m_dpi = 72.0;
@@ -187,6 +196,15 @@ void MainSettings::Read()
 	if (fconfig.Exists("/image"))
 	{
 		fconfig.SetPath("/image");
+		fconfig.Read("slice sequence", &m_slice_sequence, false);
+		fconfig.Read("chann sequence", &m_chann_sequence, false);
+		fconfig.Read("digit order", &m_digit_order, 0);
+		fconfig.Read("ser num", &m_ser_num, 0);
+		fconfig.Read("skip brick", &m_skip_brick, false);
+		fconfig.Read("load mask", &m_load_mask, true);
+		fconfig.Read("save crop", &m_save_crop, false);
+		fconfig.Read("save filter", &m_save_filter, 0);
+		fconfig.Read("vrp embed", &m_vrp_embed, false);
 		fconfig.Read("save alpha", &m_save_alpha, false);
 		fconfig.Read("save float", &m_save_float, false);
 		fconfig.Read("dpi", &m_dpi, 72.0);
@@ -410,6 +428,15 @@ void MainSettings::Save()
 
 	//image
 	fconfig.SetPath("/image");
+	fconfig.Write("slice sequence", m_slice_sequence);
+	fconfig.Write("chann sequence", m_chann_sequence);
+	fconfig.Write("digit order", m_digit_order);
+	fconfig.Write("ser num", m_ser_num);
+	fconfig.Write("skip brick", m_skip_brick);
+	fconfig.Write("load mask", m_load_mask);
+	fconfig.Write("save crop", m_save_crop);
+	fconfig.Write("save filter", m_save_filter);
+	fconfig.Write("vrp embed", m_vrp_embed);
 	fconfig.Write("save alpha", m_save_alpha);
 	fconfig.Write("save float", m_save_float);
 	fconfig.Write("dpi", m_dpi);

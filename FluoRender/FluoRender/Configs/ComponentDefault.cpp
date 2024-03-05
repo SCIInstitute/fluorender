@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ComponentDefault.h>
 #include <Names.h>
 #include <compatibility.h>
+#include <CompGenerator.h>
 #include <wx/stdpaths.h>
 #include <wx/wfstream.h>
 
@@ -61,6 +62,7 @@ ComponentDefault::ComponentDefault()
 	m_clean = false;
 	m_clean_iter = 5;
 	m_clean_size_vl = 5;
+	m_fill_border = 0.1;
 
 	//cluster
 	m_cluster_method_kmeans = true;
@@ -152,6 +154,7 @@ void ComponentDefault::Read(wxFileConfig& f)
 	f.Read("clean_iter", &m_clean_iter);
 	f.Read("clean_size_vl", &m_clean_size_vl);
 	f.Read("grow_fixed", &m_grow_fixed);
+	f.Read("fill_border", &m_fill_border);
 
 	//cluster
 	f.Read("cluster_method_kmeans", &m_cluster_method_kmeans);
@@ -203,6 +206,7 @@ void ComponentDefault::Save(wxFileConfig& f)
 	f.Write("clean_iter", m_clean_iter);
 	f.Write("clean_size_vl", m_clean_size_vl);
 	f.Write("grow_fixed", m_grow_fixed);
+	f.Write("fill_border", m_fill_border);
 
 	//cluster
 	f.Write("cluster_method_kmeans", m_cluster_method_kmeans);
@@ -226,11 +230,38 @@ void ComponentDefault::Save(wxFileConfig& f)
 	f.Write("output_type", m_output_type);
 }
 
-//void ComponentDefault::Set(flrd::ComponentAnalyzer* ca)
-//{
-//}
-//
-//void ComponentDefault::Apply(flrd::ComponentAnalyzer* ca)
-//{
-//
-//}
+void ComponentDefault::Set(flrd::ComponentGenerator* cg)
+{
+	//
+}
+
+void ComponentDefault::Apply(flrd::ComponentGenerator* cg)
+{
+	if (!cg)
+		return;
+
+	cg->SetUseSel(m_use_sel);
+	cg->SetIter(m_iter);
+	cg->SetThresh(m_thresh);
+	cg->SetTFactor(m_tfactor);
+	cg->SetUseDistField(m_use_dist_field);
+	cg->SetDistStrength(m_dist_strength);
+	cg->SetDistFilterSize(m_dist_filter_size);
+	cg->SetMaxDist(m_max_dist);
+	cg->SetDistThresh(m_dist_thresh);
+	cg->SetDiffusion(m_diff);
+	cg->SetFalloff(m_falloff);
+	cg->SetSize(m_size);
+	cg->SetSizeLimit(m_size_lm);
+	cg->SetDensity(m_density);
+	cg->SetDensityThresh(m_density_thresh);
+	cg->SetVarThresh(m_varth);
+	cg->SetDensityWinSize(m_density_window_size);
+	cg->SetDensityStatSize(m_density_stats_size);
+	cg->SetFixate(m_fixate);
+	cg->SetGrowFixed(m_grow_fixed);
+	cg->SetClean(m_clean);
+	cg->SetCleanIter(m_clean_iter);
+	cg->SetCleanSize(m_clean_size_vl);
+	cg->SetFillBorder(m_fill_border);
+}

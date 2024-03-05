@@ -31,10 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <Types/Color.h>
 
-namespace flrd
-{
-	class ComponentGenerator;
-}
 class VRenderFrame;
 class VRenderGLView;
 class VolumeData;
@@ -69,7 +65,6 @@ private:
 	//current view
 	VRenderGLView *m_view;
 
-	flrd::ComponentGenerator m_comp_generator;
 	//max volume value
 	double m_max_value;
 	//default cs thresh

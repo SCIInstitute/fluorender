@@ -26,7 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "TreePanel.h"
-#include "VRenderFrame.h"
+#include <VRenderFrame.h>
+#include <Global.h>
 #include <compatibility.h>
 //resources
 #include <Formats/png_resource.h>
@@ -1961,12 +1962,8 @@ void DataTreeCtrl::BrushCreate()
 						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 						if (vd)
 						{
-							flrd::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
-							if (calculator)
-							{
-								calculator->SetVolumeA(vd);
-								calculator->CalculateGroup(5, group_name);
-							}
+							glbin_vol_calculator.SetVolumeA(vd);
+							glbin_vol_calculator.CalculateGroup(5, group_name);
 						}
 					}
 				}
@@ -1980,12 +1977,8 @@ void DataTreeCtrl::BrushCreate()
 						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 						if (vd)
 						{
-							flrd::VolumeCalculator* calculator = view->GetVolumeCalculator();
-							if (calculator)
-							{
-								calculator->SetVolumeA(vd);
-								calculator->CalculateGroup(5);
-							}
+							glbin_vol_calculator.SetVolumeA(vd);
+							glbin_vol_calculator.CalculateGroup(5);
 						}
 					}
 				}
@@ -2026,12 +2019,8 @@ void DataTreeCtrl::BrushCreateInv()
 						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 						if (vd)
 						{
-							flrd::VolumeCalculator* calculator = view->GetVolumeCalculator();
-							if (calculator)
-							{
-								calculator->SetVolumeA(vd);
-								calculator->CalculateGroup(cal_type, group_name);
-							}
+							glbin_vol_calculator.SetVolumeA(vd);
+							glbin_vol_calculator.CalculateGroup(cal_type, group_name);
 						}
 					}
 				}
@@ -2045,12 +2034,8 @@ void DataTreeCtrl::BrushCreateInv()
 						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 						if (vd)
 						{
-							flrd::VolumeCalculator* calculator = view->GetVolumeCalculator();
-							if (calculator)
-							{
-								calculator->SetVolumeA(vd);
-								calculator->CalculateGroup(cal_type);
-							}
+							glbin_vol_calculator.SetVolumeA(vd);
+							glbin_vol_calculator.CalculateGroup(cal_type);
 						}
 					}
 				}
@@ -2106,9 +2091,7 @@ void DataTreeCtrl::PasteMask(int op)
 			view = m_frame->GetView(str);
 		}
 	}
-	bool apply_group = false;
-	if (view)
-		apply_group = view->GetVolumeSelector()->GetSelectGroup();
+	bool apply_group = glbin_vol_selector.GetSelectGroup();
 
 	if (vd && m_frame->m_vd_copy)
 	{

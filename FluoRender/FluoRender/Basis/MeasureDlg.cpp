@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "MeasureDlg.h"
 #include "VRenderFrame.h"
+#include <Global.h>
 #include <Distance/RulerHandler.h>
 #include <Distance/DistCalculator.h>
 #include <Distance/RulerAlign.h>
@@ -1367,22 +1368,14 @@ void MeasureDlg::GetSettings(VRenderGLView* vrv)
 		}
 
 		m_use_transfer_chk->SetValue(m_view->m_ruler_use_transf);
-		if (m_frame && m_frame->GetSettingDlg())
-		{
-			//ruler exports df/f
-			bool bval = m_frame->GetSettingDlg()->GetRulerDF_F();
-			m_df_f_chk->SetValue(bval);
-			m_rhdl->SetBackground(bval);
-			//relax
-			m_relax_value_spin->SetValue(
-				m_frame->GetSettingDlg()->GetRulerRelaxF1());
-			m_auto_relax_btn->SetValue(
-				m_frame->GetSettingDlg()->GetRulerAutoRelax());
-			m_view->m_ruler_autorelax =
-				m_frame->GetSettingDlg()->GetRulerAutoRelax();
-			m_relax_data_cmb->Select(
-				m_frame->GetSettingDlg()->GetRulerRelaxType());
-		}
+		//ruler exports df/f
+		m_df_f_chk->SetValue(glbin_settings.m_ruler_df_f);
+		m_rhdl->SetBackground(glbin_settings.m_ruler_df_f);
+		//relax
+		m_relax_value_spin->SetValue(glbin_settings.m_ruler_relax_f1);
+		m_auto_relax_btn->SetValue(glbin_settings.m_ruler_auto_relax);
+		m_view->m_ruler_autorelax = glbin_settings.m_ruler_auto_relax;
+		m_relax_data_cmb->Select(glbin_settings.m_ruler_relax_type);
 	}
 }
 
@@ -1969,11 +1962,7 @@ void MeasureDlg::OnDistance(wxCommandEvent& event)
 	if (!m_view || !m_frame)
 		return;
 
-	flrd::ComponentAnalyzer* analyzer =
-		m_frame->GetComponentDlg()->GetAnalyzer();
-	if (!analyzer)
-		return;
-	m_rhdl->SetCompAnalyzer(analyzer);
+	m_rhdl->SetCompAnalyzer(&glbin_comp_analyzer);
 
 	std::string filename;
 	wxFileDialog *fopendlg = new wxFileDialog(
@@ -2041,12 +2030,8 @@ void MeasureDlg::Project(int idx)
 	if (idx < 0 || idx >= ruler_list->size())
 		return;
 	flrd::Ruler* ruler = ruler_list->at(idx);
-	flrd::ComponentAnalyzer* analyzer =
-		m_frame->GetComponentDlg()->GetAnalyzer();
 	flrd::CelpList* list = 0;
-	if (!analyzer)
-		return;
-	list = analyzer->GetCelpList();
+	list = glbin_comp_analyzer.GetCelpList();
 	if (list->empty())
 		return;
 
@@ -2116,24 +2101,13 @@ void MeasureDlg::Relax(int idx)
 	if (idx < 0 || idx >= ruler_list->size())
 		return;
 	flrd::Ruler* ruler = ruler_list->at(idx);
-	flrd::ComponentAnalyzer* analyzer = 0;
-	if (m_frame && m_frame->GetComponentDlg())
-		analyzer = m_frame->GetComponentDlg()->GetAnalyzer();
-	if (!analyzer)
-		return;
 	flrd::CelpList* list = 0;
-	list = analyzer->GetCelpList();
+	list = glbin_comp_analyzer.GetCelpList();
 	if (list && list->empty())
 		list = 0;
-	double infr = 2.0;
-	int type = 1;
-	int iter = 10;
-	if (m_frame && m_frame->GetSettingDlg())
-	{
-		iter = m_frame->GetSettingDlg()->GetRulerRelaxIter();
-		infr = m_frame->GetSettingDlg()->GetRulerInfr();
-		type = m_frame->GetSettingDlg()->GetRulerRelaxType();
-	}
+	double infr = glbin_settings.m_ruler_infr;
+	int type = glbin_settings.m_ruler_relax_type;
+	int iter = glbin_settings.m_ruler_relax_iter;
 
 	m_calculator->SetF1(m_relax_value_spin->GetValue());
 	m_calculator->SetInfr(infr);
@@ -2250,8 +2224,7 @@ void MeasureDlg::OnIntensityMethodCheck(wxCommandEvent& event)
 		break;
 	}
 	m_view->m_point_volume_mode = mode;
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetPointVolumeMode(mode);
+	glbin_settings.m_point_volume_mode = mode;
 }
 
 void MeasureDlg::OnUseTransferCheck(wxCommandEvent& event)
@@ -2261,8 +2234,7 @@ void MeasureDlg::OnUseTransferCheck(wxCommandEvent& event)
 
 	bool use_transfer = m_use_transfer_chk->GetValue();
 	m_view->m_ruler_use_transf = use_transfer;
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetRulerUseTransf(use_transfer);
+	glbin_settings.m_ruler_use_transf = use_transfer;
 }
 
 void MeasureDlg::OnTransientCheck(wxCommandEvent& event)
@@ -2300,16 +2272,13 @@ void MeasureDlg::OnDF_FCheck(wxCommandEvent& event)
 	if (val)
 		OnProfile(event);
 	m_rulerlist->UpdateRulers(m_view);
-
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetRulerDF_F(val);
+	glbin_settings.m_ruler_df_f = val;
 }
 
 void MeasureDlg::OnAutoRelax(wxCommandEvent& event)
 {
 	bool bval = m_auto_relax_btn->GetValue();
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetRulerAutoRelax(bval);
+	glbin_settings.m_ruler_auto_relax = bval;
 	if (m_view)
 		m_view->m_ruler_autorelax = bval;
 }
@@ -2318,25 +2287,19 @@ void MeasureDlg::OnRelaxValueSpin(wxSpinDoubleEvent& event)
 {
 	double dval = m_relax_value_spin->GetValue();
 	m_calculator->SetF1(dval);
-	//relax
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetRulerRelaxF1(dval);
+	glbin_settings.m_ruler_relax_f1 = dval;
 }
 
 void MeasureDlg::OnRelaxValueText(wxCommandEvent& event)
 {
 	double dval = m_relax_value_spin->GetValue();
 	m_calculator->SetF1(dval);
-	//relax
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetRulerRelaxF1(dval);
+	glbin_settings.m_ruler_relax_f1 = dval;
 }
 
 void MeasureDlg::OnRelaxData(wxCommandEvent& event)
 {
-	int ival = m_relax_data_cmb->GetSelection();
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetRulerRelaxType(ival);
+	glbin_settings.m_ruler_relax_type = m_relax_data_cmb->GetSelection();
 }
 
 //ruler list

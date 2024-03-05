@@ -54,10 +54,7 @@ MachineLearningDlg::MachineLearningDlg(VRenderFrame *frame) :
 	//auto start
 	m_auto_start_all = new wxCheckBox(this, ID_AutoStartAll, "Auto Start Learning",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	if (m_frame && m_frame->GetSettingDlg()->GetMlAutoStartAll())
-		m_auto_start_all->SetValue(true);
-	else
-		m_auto_start_all->SetValue(false);
+	m_auto_start_all->SetValue(glbin_settings.m_ml_auto_start_all);
 	sizer1->AddStretchSpacer(1);
 	sizer1->Add(m_auto_start_all, 0, wxALIGN_CENTER);
 
@@ -92,12 +89,9 @@ void MachineLearningDlg::OnAutoStartAll(wxCommandEvent& event)
 	bool bval = m_auto_start_all->GetValue();
 	m_panel1->SetAutoStart(bval);
 	m_panel2->SetAutoStart(bval);
-	if (m_frame)
-	{
-		m_frame->GetSettingDlg()->SetMlAutoStartAll(bval);
-		m_frame->GetSettingDlg()->SetCgAutoStart(bval);
-		m_frame->GetSettingDlg()->SetVpAutoStart(bval);
-	}
+	glbin_settings.m_ml_auto_start_all = bval;
+	glbin_settings.m_cg_auto_start = bval;
+	glbin_settings.m_vp_auto_start = bval;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -428,10 +422,7 @@ MLCompGenPanel::MLCompGenPanel(
 	table.setUpdateFunc(std::bind(
 		&MLCompGenPanel::UpdateList, this, std::placeholders::_1));
 
-	if (m_frame && m_frame->GetSettingDlg()->GetCgAutoStart())
-		m_auto_start_check->SetValue(true);
-	else
-		m_auto_start_check->SetValue(false);
+	m_auto_start_check->SetValue(glbin_settings.m_cg_auto_start);
 }
 
 MLCompGenPanel::~MLCompGenPanel()
@@ -522,16 +513,13 @@ void MLCompGenPanel::OnAutoLoad(wxCommandEvent& event)
 	if (seli.GetCount() > 0)
 	{
 		std::string name = m_top_grid->GetCellValue(seli[0], 0).ToStdString();
-		if (m_frame)
-			m_frame->GetSettingDlg()->SetCgTable(name);
+		glbin_settings.m_cg_table = name;
 	}
 }
 
 void MLCompGenPanel::OnAutoStartRec(wxCommandEvent& event)
 {
-	bool bval = m_auto_start_check->GetValue();
-	if (m_frame)
-		m_frame->GetSettingDlg()->SetCgAutoStart(bval);
+	glbin_settings.m_cg_auto_start = m_auto_start_check->GetValue();
 }
 
 void MLCompGenPanel::OnStartRec(wxCommandEvent& event)
@@ -698,17 +686,14 @@ void MLCompGenPanel::AutoLoadTable()
 	std::string name, str;
 	int count = m_top_grid->GetNumberRows();
 	bool found = false;
-	if (m_frame)
+	name = glbin_settings.m_cg_table;
+	for (int i = 0; i < count; ++i)
 	{
-		name = m_frame->GetSettingDlg()->GetCgTable();
-		for (int i = 0; i < count; ++i)
+		str = m_top_grid->GetCellValue(i, 0).ToStdString();
+		if (str == name)
 		{
-			str = m_top_grid->GetCellValue(i, 0).ToStdString();
-			if (str == name)
-			{
-				found = true;
-				break;
-			}
+			found = true;
+			break;
 		}
 	}
 	if (!found && count > 0)
@@ -716,7 +701,7 @@ void MLCompGenPanel::AutoLoadTable()
 	LoadTable(name);
 	UpdateBotList();
 
-	if (m_frame && m_frame->GetSettingDlg()->GetCgAutoStart())
+	if (glbin_settings.m_cg_auto_start)
 	{
 		wxCommandEvent e;
 		OnStartRec(e);
@@ -781,16 +766,8 @@ MLVolPropPanel::MLVolPropPanel(
 	table.setUpdateFunc(std::bind(
 		&MLVolPropPanel::UpdateList, this, std::placeholders::_1));
 
-	if (m_frame && m_frame->GetSettingDlg())
-	{
-		m_auto_start_check->SetValue(m_frame->GetSettingDlg()->GetVpAutoStart());
-		m_auto_apply_chk->SetValue(m_frame->GetSettingDlg()->GetVpAutoApply());
-	}
-	else
-	{
-		m_auto_start_check->SetValue(false);
-		m_auto_apply_chk->SetValue(false);
-	}
+	m_auto_start_check->SetValue(glbin_settings.m_vp_auto_start);
+	m_auto_apply_chk->SetValue(glbin_settings.m_vp_auto_apply);
 }
 
 MLVolPropPanel::~MLVolPropPanel()
@@ -879,18 +856,12 @@ void MLVolPropPanel::OnAutoLoad(wxCommandEvent& event)
 {
 	wxArrayInt seli = m_top_grid->GetSelectedRows();
 	if (seli.GetCount() > 0)
-	{
-		std::string name = m_top_grid->GetCellValue(seli[0], 0).ToStdString();
-		if (m_frame)
-			m_frame->GetSettingDlg()->SetVpTable(name);
-	}
+		glbin_settings.m_vp_table = m_top_grid->GetCellValue(seli[0], 0).ToStdString();
 }
 
 void MLVolPropPanel::OnAutoStartRec(wxCommandEvent& event)
 {
-	bool bval = m_auto_start_check->GetValue();
-	if (m_frame)
-		m_frame->GetSettingDlg()->SetVpAutoStart(bval);
+	glbin_settings.m_vp_auto_start = m_auto_start_check->GetValue();
 }
 
 void MLVolPropPanel::OnStartRec(wxCommandEvent& event)
@@ -1056,17 +1027,14 @@ void MLVolPropPanel::AutoLoadTable()
 	std::string name, str;
 	int count = m_top_grid->GetNumberRows();
 	bool found = false;
-	if (m_frame)
+	name = glbin_settings.m_vp_table;
+	for (int i = 0; i < count; ++i)
 	{
-		name = m_frame->GetSettingDlg()->GetVpTable();
-		for (int i = 0; i < count; ++i)
+		str = m_top_grid->GetCellValue(i, 0).ToStdString();
+		if (str == name)
 		{
-			str = m_top_grid->GetCellValue(i, 0).ToStdString();
-			if (str == name)
-			{
-				found = true;
-				break;
-			}
+			found = true;
+			break;
 		}
 	}
 	if (!found && count > 0)
@@ -1074,7 +1042,7 @@ void MLVolPropPanel::AutoLoadTable()
 	LoadTable(name);
 	UpdateBotList();
 
-	if (m_frame && m_frame->GetSettingDlg()->GetVpAutoStart())
+	if (glbin_settings.m_vp_auto_start)
 	{
 		wxCommandEvent e;
 		OnStartRec(e);
@@ -1108,6 +1076,5 @@ void MLVolPropPanel::OnAutoApply(wxCommandEvent& event)
 {
 	if (!m_frame || !m_frame->GetSettingDlg())
 		return;
-	bool bval = m_auto_apply_chk->GetValue();
-	m_frame->GetSettingDlg()->SetVpAutoApply(bval);
+	glbin_settings.m_vp_auto_apply = m_auto_apply_chk->GetValue();
 }

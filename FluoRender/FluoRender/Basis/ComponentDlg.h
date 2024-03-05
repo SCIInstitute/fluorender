@@ -208,25 +208,25 @@ public:
 	void SetView(VRenderGLView* view);
 	VRenderGLView* GetView() { return m_view; }
 
-	void GenerateComp(bool use_sel, bool command=true);
+	void GenerateComp(bool command=true);
 	void Fixate(bool command = true);
-	void Clean(bool use_sel, bool command = true);
+	void Clean(bool command = true);
 	void SelectFullComp();
 
 	//learning functions
 	void ApplyRecord();
 
-	flrd::ComponentAnalyzer* GetAnalyzer()
-	{
-		return &m_comp_analyzer;
-	}
+	//flrd::ComponentAnalyzer* GetAnalyzer()
+	//{
+	//	return &m_comp_analyzer;
+	//}
 
 	//command
 	void LoadCmd(const wxString &filename);
 	void SaveCmd(const wxString &filename);
 	void AddCmd(const std::string &type);
 	void ResetCmd();
-	void PlayCmd(bool use_sel, double tfactor);
+	void PlayCmd(double tfactor);
 
 	//in and out cell lists
 	flrd::CelpList &GetInCells()
@@ -261,10 +261,6 @@ private:
 	//record
 	bool m_record_cmd;
 	flrd::CompCommand m_command;
-
-	flrd::ComponentGenerator m_comp_generator;
-	flrd::ComponentAnalyzer m_comp_analyzer;
-	flrd::RulerAlign m_aligner;
 
 	//in and out cell lists for tracking
 	flrd::CelpList m_in_cells;

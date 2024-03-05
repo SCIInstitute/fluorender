@@ -38,6 +38,14 @@ DEALINGS IN THE SOFTWARE.
 #include <QVideoEncoder.h>
 #include <Python/PyBase.h>
 #include <Python/PyDlc.h>
+#include <CompGenerator.h>
+#include <CompSelector.h>
+#include <VolumeSelector.h>
+#include <CompAnalyzer.h>
+#include <VolumeCalculator.h>
+#include <KernelExecutor.h>
+#include <ScriptProc.h>
+#include <RulerAlign.h>
 
 #define glbin fluo::Global::instance()
 #define glbin_cache_queue fluo::Global::instance().get_cache_queue()
@@ -46,12 +54,22 @@ DEALINGS IN THE SOFTWARE.
 	RegisterCacheQueueFuncs(\
 	std::bind(&read_func, obj, std::placeholders::_1),\
 	std::bind(&del_func, obj, std::placeholders::_1))
+//settings
 #define glbin_settings fluo::Global::instance().get_settings()
 #define glbin_brush_def fluo::Global::instance().get_brush_def()
 #define glbin_comp_def fluo::Global::instance().get_comp_def()
 #define glbin_outadj_def fluo::Global::instance().get_outadj_def()
 #define glbin_view_def fluo::Global::instance().get_view_def()
 #define glbin_vol_def fluo::Global::instance().get_vol_def()
+//processors
+#define glbin_comp_generator fluo::Global::instance().get_comp_generator()
+#define glbin_comp_analyzer fluo::Global::instance().get_comp_analyzer()
+#define glbin_comp_selector fluo::Global::instance().get_comp_selector()
+#define glbin_vol_selector fluo::Global::instance().get_vol_selector()
+#define glbin_vol_calculator fluo::Global::instance().get_vol_calculator()
+#define glbin_kernel_executor fluo::Global::instance().get_kernel_executor()
+#define glbin_script_proc fluo::Global::instance().get_script_proc()
+#define glbin_aligner fluo::Global::instance().get_aligner()
 
 namespace fluo
 {
@@ -125,6 +143,16 @@ namespace fluo
 		ViewDefault& get_view_def();
 		VolumeDataDefault& get_vol_def();
 
+		//data processors
+		flrd::ComponentGenerator& get_comp_generator() { return m_comp_generator; }
+		flrd::ComponentAnalyzer& get_comp_analyzer() { return m_comp_analyzer; }
+		flrd::ComponentSelector& get_comp_selector() { return m_comp_selector; }
+		flrd::VolumeSelector& get_vol_selector() { return m_vol_selector; }
+		flrd::VolumeCalculator& get_vol_calculator() { return m_vol_calculator; }
+		KernelExecutor& get_kernel_executor() { return m_kernel_executor; }
+		flrd::ScriptProc& get_script_proc() { return m_script_proc; }
+		flrd::RulerAlign& get_aligner() { return m_aligner; }
+
 	private:
 		Global();
 		static Global instance_;
@@ -152,6 +180,16 @@ namespace fluo
 
 		//settings
 		MainSettings main_settings_;
+
+		//the data processors
+		flrd::ComponentGenerator m_comp_generator;
+		flrd::ComponentAnalyzer m_comp_analyzer;
+		flrd::ComponentSelector m_comp_selector;
+		flrd::VolumeSelector m_vol_selector;
+		flrd::VolumeCalculator m_vol_calculator;
+		KernelExecutor m_kernel_executor;
+		flrd::ScriptProc m_script_proc;
+		flrd::RulerAlign m_aligner;
 	};
 
 }

@@ -149,7 +149,6 @@ private:
 	VRenderFrame* m_frame;
 	//current view
 	VRenderGLView *m_view;
-	flrd::VolumeSelector *m_selector;
 
 	//max volume value
 	double m_max_value;
@@ -158,8 +157,6 @@ private:
 	double m_dft_scl_translate;
 	//output
 	bool m_hold_history;
-
-	flrd::RulerAlign* m_aligner;
 
 	//paint tools
 	//toolbar

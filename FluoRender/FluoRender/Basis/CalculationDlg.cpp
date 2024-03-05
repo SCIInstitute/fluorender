@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "CalculationDlg.h"
 #include "VRenderFrame.h"
+#include <Global.h>
 #include "Calculate/CombineList.h"
 
 BEGIN_EVENT_TABLE(CalculationDlg, wxPanel)
@@ -211,11 +212,9 @@ void CalculationDlg::OnCalcSub(wxCommandEvent &event)
 	if (!m_vol1 || !m_vol2)
 		return;
 
-	flrd::VolumeCalculator* calculator = m_view->GetVolumeCalculator();
-	if (!calculator) return;
-	calculator->SetVolumeA(m_vol1);
-	calculator->SetVolumeB(m_vol2);
-	calculator->CalculateGroup(1);
+	glbin_vol_calculator.SetVolumeA(m_vol1);
+	glbin_vol_calculator.SetVolumeB(m_vol2);
+	glbin_vol_calculator.CalculateGroup(1);
 }
 
 void CalculationDlg::OnCalcAdd(wxCommandEvent &event)
@@ -225,11 +224,9 @@ void CalculationDlg::OnCalcAdd(wxCommandEvent &event)
 	if (!m_vol1 || !m_vol2)
 		return;
 
-	flrd::VolumeCalculator* calculator = m_view->GetVolumeCalculator();
-	if (!calculator) return;
-	calculator->SetVolumeA(m_vol1);
-	calculator->SetVolumeB(m_vol2);
-	calculator->CalculateGroup(2);
+	glbin_vol_calculator.SetVolumeA(m_vol1);
+	glbin_vol_calculator.SetVolumeB(m_vol2);
+	glbin_vol_calculator.CalculateGroup(2);
 }
 
 void CalculationDlg::OnCalcDiv(wxCommandEvent &event)
@@ -239,11 +236,9 @@ void CalculationDlg::OnCalcDiv(wxCommandEvent &event)
 	if (!m_vol1 || !m_vol2)
 		return;
 
-	flrd::VolumeCalculator* calculator = m_view->GetVolumeCalculator();
-	if (!calculator) return;
-	calculator->SetVolumeA(m_vol1);
-	calculator->SetVolumeB(m_vol2);
-	calculator->CalculateGroup(3);
+	glbin_vol_calculator.SetVolumeA(m_vol1);
+	glbin_vol_calculator.SetVolumeB(m_vol2);
+	glbin_vol_calculator.CalculateGroup(3);
 }
 
 void CalculationDlg::OnCalcIsc(wxCommandEvent &event)
@@ -253,11 +248,9 @@ void CalculationDlg::OnCalcIsc(wxCommandEvent &event)
 	if (!m_vol1 || !m_vol2)
 		return;
 
-	flrd::VolumeCalculator* calculator = m_view->GetVolumeCalculator();
-	if (!calculator) return;
-	calculator->SetVolumeA(m_vol1);
-	calculator->SetVolumeB(m_vol2);
-	calculator->CalculateGroup(4);
+	glbin_vol_calculator.SetVolumeA(m_vol1);
+	glbin_vol_calculator.SetVolumeB(m_vol2);
+	glbin_vol_calculator.CalculateGroup(4);
 }
 
 //one-operators
@@ -268,13 +261,11 @@ void CalculationDlg::OnCalcFill(wxCommandEvent &event)
 	if (!m_vol1)
 		return;
 
-	flrd::VolumeCalculator* calculator = m_view->GetVolumeCalculator();
-	if (!calculator) return;
-	calculator->SetVolumeA(m_vol1);
+	glbin_vol_calculator.SetVolumeA(m_vol1);
 	m_vol2 = 0;
-	calculator->SetVolumeB(0);
+	glbin_vol_calculator.SetVolumeB(0);
 	m_calc_b_text->Clear();
-	calculator->CalculateGroup(9);
+	glbin_vol_calculator.CalculateGroup(9);
 }
 
 void CalculationDlg::OnCalcCombine(wxCommandEvent &event)

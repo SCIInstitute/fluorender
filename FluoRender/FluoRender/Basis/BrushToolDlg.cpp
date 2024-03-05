@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "BrushToolDlg.h"
 #include "VRenderFrame.h"
+#include <Global.h>
 #include <Calculate/Count.h>
 #include <Distance/Cov.h>
 #include <Distance/RulerAlign.h>
@@ -119,13 +120,11 @@ BrushToolDlg::BrushToolDlg(
 	0, "BrushToolDlg"),
 	m_frame(frame),
 	m_view(0),
-	m_selector(0),
 	m_max_value(255.0),
 	m_dft_gm_falloff(0.0),
 	m_dft_scl_translate(0.0),
 	m_hold_history(false)
 {
-	m_aligner = new flrd::RulerAlign();
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);
@@ -484,8 +483,6 @@ BrushToolDlg::BrushToolDlg(
 
 BrushToolDlg::~BrushToolDlg()
 {
-	if (m_aligner)
-		delete m_aligner;
 }
 
 void BrushToolDlg::GetSettings(VRenderGLView* view)
@@ -493,10 +490,10 @@ void BrushToolDlg::GetSettings(VRenderGLView* view)
 	if (!view)
 		return;
 	m_view = view;
-	m_aligner->SetView(m_view);
-	m_selector = m_view->GetVolumeSelector();
-	if (!m_selector)
-		return;
+	//m_aligner->SetView(m_view);
+	//m_selector = m_view->GetVolumeSelector();
+	//if (!m_selector)
+	//	return;
 
 	VolumeData* sel_vol = 0;
 	if (m_frame)
@@ -520,21 +517,21 @@ void BrushToolDlg::GetSettings(VRenderGLView* view)
 		//m_brush_scl_translate_text->SetValue(wxString::Format("%.1f", m_dft_scl_translate*m_max_value));
 	}
 	//selection strength
-	dval = m_selector->GetBrushSclTranslate();
+	dval = glbin_vol_selector.GetBrushSclTranslate();
 	m_dft_scl_translate = dval;
 	m_brush_scl_translate_sldr->SetValue(std::round(dval*m_max_value*10.0));
 	m_brush_scl_translate_text->ChangeValue(wxString::Format("%.1f", m_dft_scl_translate*m_max_value));
 	//gm falloff
-	dval = m_selector->GetBrushGmFalloff();
+	dval = glbin_vol_selector.GetBrushGmFalloff();
 	m_dft_gm_falloff = dval;
 	m_brush_gm_falloff_sldr->SetValue(std::round(GM_2_ESTR(dval)*1000.0));
 	m_brush_gm_falloff_text->ChangeValue(wxString::Format("%.3f", GM_2_ESTR(dval)));
 	//2d influence
-	dval = m_selector->GetW2d();
+	dval = glbin_vol_selector.GetW2d();
 	m_brush_2dinfl_sldr->SetValue(std::round(dval*100.0));
 	m_brush_2dinfl_text->ChangeValue(wxString::Format("%.2f", dval));
 	//edge detect
-	bval = m_selector->GetEdgeDetect();
+	bval = glbin_vol_selector.GetEdgeDetect();
 	m_edge_detect_chk->SetValue(bval);
 	if (bval)
 	{
@@ -547,25 +544,25 @@ void BrushToolDlg::GetSettings(VRenderGLView* view)
 		m_brush_gm_falloff_text->Disable();
 	}
 	//hidden removal
-	bval = m_selector->GetHiddenRemoval();
+	bval = glbin_vol_selector.GetHiddenRemoval();
 	m_hidden_removal_chk->SetValue(bval);
 	//select group
-	bval = m_selector->GetSelectGroup();
+	bval = glbin_vol_selector.GetSelectGroup();
 	m_select_group_chk->SetValue(bval);
 	//estimate threshold
-	bval = m_selector->GetEstimateThreshold();
+	bval = glbin_vol_selector.GetEstimateThreshold();
 	m_estimate_thresh_chk->SetValue(bval);
 	//brick acuracy
-	bval = m_selector->GetUpdateOrder();
+	bval = glbin_vol_selector.GetUpdateOrder();
 	m_accurate_bricks_chk->SetValue(bval);
 
 	//size1
-	dval = m_selector->GetBrushSize1();
+	dval = glbin_vol_selector.GetBrushSize1();
 	m_brush_size1_sldr->SetValue(std::round(dval));
 	m_brush_size1_text->ChangeValue(wxString::Format("%.0f", dval));
 	//size2
-	m_brush_size2_chk->SetValue(m_selector->GetUseBrushSize2());
-	if (m_selector->GetUseBrushSize2())
+	m_brush_size2_chk->SetValue(glbin_vol_selector.GetUseBrushSize2());
+	if (glbin_vol_selector.GetUseBrushSize2())
 	{
 		m_brush_size2_sldr->Enable();
 		m_brush_size2_text->Enable();
@@ -575,19 +572,19 @@ void BrushToolDlg::GetSettings(VRenderGLView* view)
 		m_brush_size2_sldr->Disable();
 		m_brush_size2_text->Disable();
 	}
-	dval = m_selector->GetBrushSize2();
+	dval = glbin_vol_selector.GetBrushSize2();
 	m_brush_size2_sldr->SetValue(std::round(dval));
 	m_brush_size2_text->ChangeValue(wxString::Format("%.0f", dval));
 
 	//iteration number
-	ival = m_selector->GetBrushIteration();
-	if (ival<=m_selector->GetIterWeak())
+	ival = glbin_vol_selector.GetBrushIteration();
+	if (ival<=glbin_vol_selector.GetIterWeak())
 	{
 		m_brush_iterw_rb->SetValue(true);
 		m_brush_iters_rb->SetValue(false);
 		m_brush_iterss_rb->SetValue(false);
 	}
-	else if (ival<=m_selector->GetIterNormal())
+	else if (ival<=glbin_vol_selector.GetIterNormal())
 	{
 		m_brush_iterw_rb->SetValue(false);
 		m_brush_iters_rb->SetValue(true);
@@ -601,7 +598,7 @@ void BrushToolDlg::GetSettings(VRenderGLView* view)
 	}
 
 	//brush size relation
-	bval = m_selector->GetBrushSizeData();
+	bval = glbin_vol_selector.GetBrushSizeData();
 	if (bval)
 	{
 		m_brush_size_data_rb->SetValue(true);
@@ -781,8 +778,7 @@ void BrushToolDlg::OnBrushCreate(wxCommandEvent &event)
 
 void BrushToolDlg::OnBrushUndo(wxCommandEvent &event)
 {
-	if (m_selector)
-		m_selector->UndoMask();
+	glbin_vol_selector.UndoMask();
 	if (m_view)
 		m_view->RefreshGL(39);
 	UpdateUndoRedo();
@@ -790,8 +786,7 @@ void BrushToolDlg::OnBrushUndo(wxCommandEvent &event)
 
 void BrushToolDlg::OnBrushRedo(wxCommandEvent &event)
 {
-	if (m_selector)
-		m_selector->RedoMask();
+	glbin_vol_selector.RedoMask();
 	if (m_view)
 		m_view->RefreshGL(39);
 	UpdateUndoRedo();
@@ -866,15 +861,12 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent &event)
 	m_brush_scl_translate_sldr->SetValue(std::round(val*10.0));
 
 	//set translate
-	if (m_selector)
+	glbin_vol_selector.SetBrushSclTranslate(m_dft_scl_translate);
+	if (m_view && glbin_vol_selector.GetThUpdate())
 	{
-		m_selector->SetBrushSclTranslate(m_dft_scl_translate);
-		if (m_view && m_selector->GetThUpdate())
-		{
-			m_selector->PopMask();
-			m_view->Segment();
-			m_view->RefreshGL(39);
-		}
+		glbin_vol_selector.PopMask();
+		m_view->Segment();
+		m_view->RefreshGL(39);
 	}
 }
 
@@ -897,15 +889,12 @@ void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent &event)
 	m_brush_gm_falloff_sldr->SetValue(std::round(val*1000.0));
 
 	//set gm falloff
-	if (m_selector)
+	glbin_vol_selector.SetBrushGmFalloff(m_dft_gm_falloff);
+	if (m_view && glbin_vol_selector.GetThUpdate())
 	{
-		m_selector->SetBrushGmFalloff(m_dft_gm_falloff);
-		if (m_view && m_selector->GetThUpdate())
-		{
-			m_selector->PopMask();
-			m_view->Segment();
-			m_view->RefreshGL(39);
-		}
+		glbin_vol_selector.PopMask();
+		m_view->Segment();
+		m_view->RefreshGL(39);
 	}
 }
 
@@ -927,15 +916,12 @@ void BrushToolDlg::OnBrush2dinflText(wxCommandEvent &event)
 	m_brush_2dinfl_sldr->SetValue(std::round(val*100.0));
 
 	//set 2d weight
-	if (m_selector)
+	glbin_vol_selector.SetW2d(val);
+	if (m_view && glbin_vol_selector.GetThUpdate())
 	{
-		m_selector->SetW2d(val);
-		if (m_view && m_selector->GetThUpdate())
-		{
-			m_selector->PopMask();
-			m_view->Segment();
-			m_view->RefreshGL(39);
-		}
+		glbin_vol_selector.PopMask();
+		m_view->Segment();
+		m_view->RefreshGL(39);
 	}
 }
 
@@ -956,15 +942,12 @@ void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent &event)
 	}
 
 	//set edge detect
-	if (m_selector)
+	glbin_vol_selector.SetEdgeDetect(edge_detect);
+	if (m_view && glbin_vol_selector.GetThUpdate())
 	{
-		m_selector->SetEdgeDetect(edge_detect);
-		if (m_view && m_selector->GetThUpdate())
-		{
-			m_selector->PopMask();
-			m_view->Segment();
-			m_view->RefreshGL(39);
-		}
+		glbin_vol_selector.PopMask();
+		m_view->Segment();
+		m_view->RefreshGL(39);
 	}
 }
 
@@ -974,8 +957,7 @@ void BrushToolDlg::OnBrushHiddenRemovalChk(wxCommandEvent &event)
 	bool hidden_removal = m_hidden_removal_chk->GetValue();
 
 	//set hidden removal
-	if (m_selector)
-		m_selector->SetHiddenRemoval(hidden_removal);
+	glbin_vol_selector.SetHiddenRemoval(hidden_removal);
 }
 
 //select group
@@ -984,15 +966,12 @@ void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent &event)
 	bool select_group = m_select_group_chk->GetValue();
 
 	//set select group
-	if (m_selector)
+	glbin_vol_selector.SetSelectGroup(select_group);
+	if (m_view && glbin_vol_selector.GetThUpdate())
 	{
-		m_selector->SetSelectGroup(select_group);
-		if (m_view && m_selector->GetThUpdate())
-		{
-			m_selector->PopMask();
-			m_view->Segment();
-			m_view->RefreshGL(39);
-		}
+		glbin_vol_selector.PopMask();
+		m_view->Segment();
+		m_view->RefreshGL(39);
 	}
 }
 
@@ -1001,9 +980,7 @@ void BrushToolDlg::OnEstimateThreshChk(wxCommandEvent &event)
 {
 	bool value = m_estimate_thresh_chk->GetValue();
 
-	//
-	if (m_selector)
-		m_selector->SetEstimateThreshold(value);
+	glbin_vol_selector.SetEstimateThreshold(value);
 }
 
 //brick accuracy
@@ -1011,8 +988,7 @@ void BrushToolDlg::OnAccurateBricksCheck(wxCommandEvent &event)
 {
 	bool value = m_accurate_bricks_chk->GetValue();
 
-	if (m_selector)
-		m_selector->SetUpdateOrder(value);
+	glbin_vol_selector.SetUpdateOrder(value);
 }
 
 //brush size 1
@@ -1032,12 +1008,9 @@ void BrushToolDlg::OnBrushSize1Text(wxCommandEvent &event)
 	m_brush_size1_sldr->SetValue(std::round(val));
 
 	//set size1
-	if (m_view && m_selector)
-	{
-		m_selector->SetBrushSize(val, -1.0);
-		if (m_view->GetIntMode()==2)
-			m_view->RefreshGL(39);
-	}
+	glbin_vol_selector.SetBrushSize(val, -1.0);
+	if (m_view->GetIntMode()==2)
+		m_view->RefreshGL(39);
 }
 
 //brush size 2
@@ -1054,10 +1027,10 @@ void BrushToolDlg::OnBrushSize2Chk(wxCommandEvent &event)
 	{
 		m_brush_size2_sldr->Enable();
 		m_brush_size2_text->Enable();
-		if (m_view && m_selector)
+		if (m_view)
 		{
-			m_selector->SetUseBrushSize2(true);
-			m_selector->SetBrushSize(val1, val2);
+			glbin_vol_selector.SetUseBrushSize2(true);
+			glbin_vol_selector.SetBrushSize(val1, val2);
 			m_view->RefreshGL(39);
 		}
 	}
@@ -1065,10 +1038,10 @@ void BrushToolDlg::OnBrushSize2Chk(wxCommandEvent &event)
 	{
 		m_brush_size2_sldr->Disable();
 		m_brush_size2_text->Disable();
-		if (m_view && m_selector)
+		if (m_view)
 		{
-			m_selector->SetUseBrushSize2(false);
-			m_selector->SetBrushSize(val1, val2);
+			glbin_vol_selector.SetUseBrushSize2(false);
+			glbin_vol_selector.SetBrushSize(val1, val2);
 			m_view->RefreshGL(39);
 		}
 	}
@@ -1090,9 +1063,9 @@ void BrushToolDlg::OnBrushSize2Text(wxCommandEvent &event)
 	m_brush_size2_sldr->SetValue(std::round(val));
 
 	//set size2
-	if (m_view && m_selector)
+	if (m_view)
 	{
-		m_selector->SetBrushSize(-1.0, val);
+		glbin_vol_selector.SetBrushSize(-1.0, val);
 		if (m_view->GetIntMode()==2)
 			m_view->RefreshGL(39);
 	}
@@ -1103,18 +1076,15 @@ void BrushToolDlg::OnBrushIterCheck(wxCommandEvent& event)
 {
 	if (m_brush_iterw_rb->GetValue())
 	{
-		if (m_selector)
-			m_selector->SetBrushIteration(m_selector->GetIterWeak());
+		glbin_vol_selector.SetBrushIteration(glbin_vol_selector.GetIterWeak());
 	}
 	else if (m_brush_iters_rb->GetValue())
 	{
-		if (m_selector)
-			m_selector->SetBrushIteration(m_selector->GetIterNormal());
+		glbin_vol_selector.SetBrushIteration(glbin_vol_selector.GetIterNormal());
 	}
 	else if (m_brush_iterss_rb->GetValue())
 	{
-		if (m_selector)
-			m_selector->SetBrushIteration(m_selector->GetIterStrong());
+		glbin_vol_selector.SetBrushIteration(glbin_vol_selector.GetIterStrong());
 	}
 }
 
@@ -1123,13 +1093,11 @@ void BrushToolDlg::OnBrushSizeRelationCheck(wxCommandEvent& event)
 {
 	if (m_brush_size_data_rb->GetValue())
 	{
-		if (m_selector)
-			m_selector->SetBrushSizeData(true);
+		glbin_vol_selector.SetBrushSizeData(true);
 	}
 	else if (m_brush_size_screen_rb->GetValue())
 	{
-		if (m_selector)
-			m_selector->SetBrushSizeData(false);
+		glbin_vol_selector.SetBrushSizeData(false);
 	}
 }
 
@@ -1161,6 +1129,7 @@ void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 
 	if (m_frame && m_view)
 	{
+		glbin_aligner.SetView(m_view);
 		VolumeData* vd = m_frame->GetCurSelVol();
 		if (vd && vd->GetTexture())
 		{
@@ -1169,8 +1138,8 @@ void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 			{
 				std::vector<double> cov = cover.GetCov();
 				fluo::Point center = cover.GetCenter();
-				m_aligner->SetCovMat(cov);
-				m_aligner->AlignPca(axis_type, false);
+				glbin_aligner.SetCovMat(cov);
+				glbin_aligner.AlignPca(axis_type, false);
 				if (m_align_center->GetValue())
 				{
 					double tx, ty, tz;
@@ -1252,10 +1221,10 @@ void BrushToolDlg::UpdateSize()
 
 void BrushToolDlg::UpdateSpeed()
 {
-	if (!m_selector || !m_selector->m_test_speed)
+	if (!glbin_vol_selector.m_test_speed)
 		return;
 	GridData data;
-	data.size = m_selector->GetSpanSec();
+	data.size = glbin_vol_selector.GetSpanSec();
 	data.wsize = data.size;
 	wxString unit = "Sec.";
 	SetOutput(data, unit);

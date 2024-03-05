@@ -140,30 +140,16 @@ VRenderView::VRenderView(VRenderFrame* frame,
 	SetName(name);
 	// this list takes care of both pixel and context attributes (no custom edits of wx is preferred)
 	//render view/////////////////////////////////////////////////
-	int red_bit = 8;
-	int green_bit = 8;
-	int blue_bit = 8;
-	int alpha_bit = 8;
-	int depth_bit = 24;
-	int samples = 0;
-	int gl_major_ver = 4;
-	int gl_minor_ver = 4;
-	int gl_profile_mask = 1;
-	int api_type = 0;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-	{
-		api_type = vr_frame->GetSettingDlg()->GetApiType();
-		red_bit = vr_frame->GetSettingDlg()->GetRedBit();
-		green_bit = vr_frame->GetSettingDlg()->GetGreenBit();
-		blue_bit = vr_frame->GetSettingDlg()->GetBlueBit();
-		alpha_bit = vr_frame->GetSettingDlg()->GetAlphaBit();
-		depth_bit = vr_frame->GetSettingDlg()->GetDepthBit();
-		samples = vr_frame->GetSettingDlg()->GetSamples();
-		gl_major_ver = vr_frame->GetSettingDlg()->GetGLMajorVer();
-		gl_minor_ver = vr_frame->GetSettingDlg()->GetGLMinorVer();
-		gl_profile_mask = vr_frame->GetSettingDlg()->GetGLProfileMask();
-	}
+	int red_bit = glbin_settings.m_red_bit;
+	int green_bit = glbin_settings.m_green_bit;
+	int blue_bit = glbin_settings.m_blue_bit;
+	int alpha_bit = glbin_settings.m_alpha_bit;
+	int depth_bit = glbin_settings.m_depth_bit;
+	int samples = glbin_settings.m_samples;
+	int gl_major_ver = glbin_settings.m_gl_major_ver;
+	int gl_minor_ver = glbin_settings.m_gl_minor_ver;
+	int gl_profile_mask = glbin_settings.m_gl_profile_mask;
+	int api_type = glbin_settings.m_api_type;
 
 	wxGLAttributes attriblist;
 #ifdef _WIN32
@@ -261,15 +247,11 @@ VRenderView::VRenderView(VRenderFrame* frame,
 				"Graphics card error", wxOK | wxICON_ERROR, this);
 			delete sharedContext;
 			sharedContext = 0;
-			if (vr_frame && vr_frame->GetSettingDlg())
-			{
-				//could be that color bits are incorrectly set
-				vr_frame->GetSettingDlg()->SetRedBit(8);
-				vr_frame->GetSettingDlg()->SetGreenBit(8);
-				vr_frame->GetSettingDlg()->SetBlueBit(8);
-				vr_frame->GetSettingDlg()->SetAlphaBit(8);
-				vr_frame->GetSettingDlg()->SaveSettings();
-			}
+			glbin_settings.m_red_bit = 8;
+			glbin_settings.m_green_bit = 8;
+			glbin_settings.m_blue_bit = 8;
+			glbin_settings.m_alpha_bit = 8;
+			glbin_settings.Save();
 		}
 		if (sharedContext)
 		{
@@ -311,11 +293,8 @@ VRenderView::VRenderView(VRenderFrame* frame,
 	//get actual version
 	glGetIntegerv(GL_MAJOR_VERSION, &gl_major_ver);
 	glGetIntegerv(GL_MINOR_VERSION, &gl_minor_ver);
-	if (vr_frame && vr_frame->GetSettingDlg())
-	{
-		vr_frame->GetSettingDlg()->SetGLMajorVer(gl_major_ver);
-		vr_frame->GetSettingDlg()->SetGLMinorVer(gl_minor_ver);
-	}
+	glbin_settings.m_gl_major_ver = gl_major_ver;
+	glbin_settings.m_gl_minor_ver = gl_minor_ver;
 
 	CreateBar();
 	if (m_glview)
@@ -1098,24 +1077,21 @@ void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
 void VRenderView::OnCh1Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
-	if (ch1)
-		VRenderFrame::SetCompression(ch1->GetValue());
+	glbin_settings.m_save_compress = ch1->GetValue();
 }
 
 //save alpha
 void VRenderView::OnChAlphaCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_alpha = (wxCheckBox*)event.GetEventObject();
-	if (ch_alpha)
-		VRenderFrame::SetSaveAlpha(ch_alpha->GetValue());
+	glbin_settings.m_save_alpha = ch_alpha->GetValue();
 }
 
 //save float
 void VRenderView::OnChFloatCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_float = (wxCheckBox*)event.GetEventObject();
-	if (ch_float)
-		VRenderFrame::SetSaveFloat(ch_float->GetValue());
+	glbin_settings.m_save_float = ch_float->GetValue();
 }
 
 //dpi
@@ -1125,7 +1101,7 @@ void VRenderView::OnDpiText(wxCommandEvent& event)
 	wxString str = event.GetString();
 	long lval;
 	str.ToLong(&lval);
-	VRenderFrame::SetDpi(float(lval));
+	glbin_settings.m_dpi = lval;
 	if (!tx_dpi)
 		return;
 	wxCheckBox* ch_enlarge = (wxCheckBox*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_CHK);
@@ -1152,8 +1128,7 @@ void VRenderView::OnDpiText(wxCommandEvent& event)
 void VRenderView::OnChEmbedCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
-	if (ch_embed)
-		VRenderFrame::SetEmbedProject(ch_embed->GetValue());
+	glbin_settings.m_vrp_embed = ch_embed->GetValue();
 }
 
 //enlarge output image
@@ -1240,7 +1215,7 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderView::OnCh1Check), NULL, panel);
 	if (ch1)
-		ch1->SetValue(VRenderFrame::GetCompression());
+		ch1->SetValue(glbin_settings.m_save_compress);
 
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	//save alpha
@@ -1249,14 +1224,14 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 	ch_alpha->Connect(ch_alpha->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderView::OnChAlphaCheck), NULL, panel);
 	if (ch_alpha)
-		ch_alpha->SetValue(VRenderFrame::GetSaveAlpha());
+		ch_alpha->SetValue(glbin_settings.m_save_alpha);
 	//save float
 	wxCheckBox* ch_float = new wxCheckBox(panel, ID_SAVE_FLOAT,
 		"Save float channel");
 	ch_float->Connect(ch_float->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VRenderView::OnChFloatCheck), NULL, panel);
 	if (ch_float)
-		ch_float->SetValue(VRenderFrame::GetSaveFloat());
+		ch_float->SetValue(glbin_settings.m_save_float);
 	sizer_1->Add(ch_alpha, 0, wxALIGN_CENTER);
 	sizer_1->Add(10, 10);
 	sizer_1->Add(ch_float, 0, wxALIGN_CENTER);
@@ -1269,7 +1244,7 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 		"", wxDefaultPosition, parent->FromDIP(wxSize(60, 23)), 0, vald_int);
 	tx_dpi->Connect(tx_dpi->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(VRenderView::OnDpiText), NULL, panel);
-	float dpi = VRenderFrame::GetDpi();
+	float dpi = glbin_settings.m_dpi;
 	tx_dpi->SetValue(wxString::Format("%.0f", dpi));
 	//enlarge
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
@@ -1304,13 +1279,13 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 
 	//copy all files check box
 	wxCheckBox* ch_embed = 0;
-	if (VRenderFrame::GetSaveProject())
+	if (glbin_settings.m_prj_save)
 	{
 		ch_embed = new wxCheckBox(panel, ID_EMBED_FILES,
 			"Embed all files in the project folder");
 		ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 			wxCommandEventHandler(VRenderView::OnChEmbedCheck), NULL, panel);
-		ch_embed->SetValue(VRenderFrame::GetEmbedProject());
+		ch_embed->SetValue(glbin_settings.m_vrp_embed);
 	}
 
 	//group
@@ -1320,7 +1295,7 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 	group1->Add(sizer_1);
 	group1->Add(10, 10);
 	group1->Add(sizer_2);
-	if (VRenderFrame::GetSaveProject() &&
+	if (glbin_settings.m_prj_save &&
 		ch_embed)
 	{
 		group1->Add(10, 10);
@@ -1342,14 +1317,6 @@ void VRenderView::OnCapture(wxCommandEvent& event)
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
-	if (vr_frame && vr_frame->GetSettingDlg())
-	{
-		VRenderFrame::SetSaveProject(vr_frame->GetSettingDlg()->GetProjSave());
-		VRenderFrame::SetSaveAlpha(vr_frame->GetSettingDlg()->GetSaveAlpha());
-		VRenderFrame::SetSaveFloat(vr_frame->GetSettingDlg()->GetSaveFloat());
-		VRenderFrame::SetDpi(vr_frame->GetSettingDlg()->GetDpi());
-	}
-
 	wxFileDialog file_dlg(m_frame, "Save captured image", "", "", "*.tif", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 	file_dlg.SetExtraControlCreator(CreateExtraCaptureControl);
 	int rval = file_dlg.ShowModal();
@@ -1359,21 +1326,15 @@ void VRenderView::OnCapture(wxCommandEvent& event)
 		m_glview->m_capture = true;
 		RefreshGL();
 
-		if (vr_frame && vr_frame->GetSettingDlg())
+		if (glbin_settings.m_prj_save)
 		{
-			if (vr_frame->GetSettingDlg()->GetProjSave())
-			{
-				wxString new_folder;
-				new_folder = m_glview->m_cap_file + "_project";
-				MkDirW(new_folder.ToStdWstring());
-				wxString prop_file = new_folder + GETSLASH() + file_dlg.GetFilename() + "_project.vrp";
-				bool inc = wxFileExists(prop_file) && 
-					vr_frame->GetSettingDlg()->GetProjSaveInc();
-				vr_frame->SaveProject(prop_file, inc);
-			}
-			vr_frame->GetSettingDlg()->SetSaveAlpha(VRenderFrame::GetSaveAlpha());
-			vr_frame->GetSettingDlg()->SetSaveFloat(VRenderFrame::GetSaveFloat());
-			vr_frame->GetSettingDlg()->SetDpi(VRenderFrame::GetDpi());
+			wxString new_folder;
+			new_folder = m_glview->m_cap_file + "_project";
+			MkDirW(new_folder.ToStdWstring());
+			wxString prop_file = new_folder + GETSLASH() + file_dlg.GetFilename() + "_project.vrp";
+			bool inc = wxFileExists(prop_file) && 
+				glbin_settings.m_prj_save_inc;
+			vr_frame->SaveProject(prop_file, inc);
 		}
 	}
 }
@@ -2207,7 +2168,7 @@ void VRenderView::SetFullScreen()
 		m_view_sizer->Detach(m_glview);
 		m_glview->Reparent(m_full_frame);
 		//get display id
-		int disp_id = frame->GetSettingDlg()->GetDispId();
+		int disp_id = glbin_settings.m_disp_id;
 		if (disp_id >= frame->GetSettingDlg()->GetDisplayNum())
 			disp_id = 0;
 		wxDisplay display(disp_id);
@@ -2217,17 +2178,14 @@ void VRenderView::SetFullScreen()
 		m_full_frame->ShowFullScreen(true);
 		m_glview->SetPosition(wxPoint(0, 0));
 		m_glview->SetSize(m_full_frame->GetSize());
-		if (frame && frame->GetSettingDlg())
-		{
-			if (frame->GetSettingDlg()->GetStayTop())
-				m_full_frame->SetWindowStyle(wxBORDER_NONE|wxSTAY_ON_TOP);
-			else
-				m_full_frame->SetWindowStyle(wxBORDER_NONE);
+		if (glbin_settings.m_stay_top)
+			m_full_frame->SetWindowStyle(wxBORDER_NONE|wxSTAY_ON_TOP);
+		else
+			m_full_frame->SetWindowStyle(wxBORDER_NONE);
 #ifdef _WIN32
-			if (!frame->GetSettingDlg()->GetShowCursor())
-				ShowCursor(false);
+		if (!glbin_settings.m_show_cursor)
+			ShowCursor(false);
 #endif
-		}
 		m_full_frame->Iconize(false);
 		m_full_frame->Raise();
 		m_full_frame->Show();
@@ -2255,116 +2213,66 @@ void VRenderView::SaveDefault(unsigned int mask)
 
 	//render modes
 	if (mask & 0x1)
-	{
-		bVal = m_options_toolbar->GetToolState(ID_VolumeSeqRd);
-		fconfig.Write("volume_seq_rd", bVal);
-		bVal = m_options_toolbar->GetToolState(ID_VolumeMultiRd);
-		fconfig.Write("volume_multi_rd", bVal);
-		bVal = m_options_toolbar->GetToolState(ID_VolumeCompRd);
-		fconfig.Write("volume_comp_rd", bVal);
-	}
+		glbin_view_def.m_vol_method = m_glview->m_vol_method;
 	//background color
 	if (mask & 0x2)
-	{
-		cVal = m_bg_color_picker->GetColour();
-		str = wxString::Format("%d %d %d", cVal.Red(), cVal.Green(), cVal.Blue());
-		fconfig.Write("bg_color_picker", str);
-	}
+		glbin_view_def.m_bg_color = m_glview->m_bg_color;
 	//camera center
 	if (mask & 0x4)
-	{
-		bVal = m_options_toolbar->GetToolState(ID_CamCtrChk);
-		fconfig.Write("cam_ctr_chk", bVal);
-	}
+		glbin_view_def.m_draw_camctr = m_glview->m_draw_camctr;
 	//camctr size
 	if (mask & 0x8)
-	{
-		fconfig.Write("camctr_size", m_glview->m_camctr_size);
-	}
+		glbin_view_def.m_draw_camctr = m_glview->m_camctr_size;
 	//fps
 	if (mask & 0x10)
-	{
-		fconfig.Write("info_chk", m_glview->m_draw_info);
-	}
+		glbin_view_def.m_draw_info = m_glview->m_draw_info;
 	//selection
 	if (mask & 0x20)
-	{
-		bVal = m_glview->m_draw_legend;
-		fconfig.Write("legend_chk", bVal);
-	}
+		glbin_view_def.m_draw_legend = m_glview->m_draw_legend;
 	//mouse focus
 	if (mask & 0x40)
-	{
-		bVal = m_glview->m_mouse_focus;
-		fconfig.Write("mouse_focus", bVal);
-	}
+		glbin_view_def.m_mouse_focus = m_glview->m_mouse_focus;
 	//ortho/persp
 	if (mask & 0x80)
 	{
-		fconfig.Write("persp", m_glview->m_persp);
-		fconfig.Write("aov", m_glview->m_aov);
-		bVal = m_options_toolbar2->GetToolState(ID_FreeChk);
-		fconfig.Write("free_rd", bVal);
+		glbin_view_def.m_persp = m_glview->m_persp;
+		glbin_view_def.m_aov = m_glview->m_aov;
+		glbin_view_def.m_free = m_glview->m_free;
 	}
 	//rotations
 	if (mask & 0x100)
 	{
-		str = m_x_rot_text->GetValue();
-		fconfig.Write("x_rot", str);
-		str = m_y_rot_text->GetValue();
-		fconfig.Write("y_rot", str);
-		str = m_z_rot_text->GetValue();
-		fconfig.Write("z_rot", str);
-		fconfig.Write("rot_lock", m_glview->GetRotLock());
-		fconfig.Write("rot_slider", m_rot_slider);
-	}
-	else
-	{
-		fconfig.Write("x_rot", m_dft_x_rot);
-		fconfig.Write("y_rot", m_dft_y_rot);
-		fconfig.Write("z_rot", m_dft_z_rot);
-		fconfig.Write("rot_lock", m_glview->GetRotLock());
-		fconfig.Write("rot_slider", m_rot_slider);
+		glbin_view_def.m_rot = fluo::Vector(
+			m_glview->m_rotx,
+			m_glview->m_roty,
+			m_glview->m_rotz
+		);
+		glbin_view_def.m_rot_lock = m_glview->GetRotLock();
+		glbin_view_def.m_rot_slider = m_rot_slider;
 	}
 	//depth atten
 	if (mask & 0x200)
 	{
-		bVal = m_left_toolbar->GetToolState(ID_DepthAttenChk);
-		fconfig.Write("depth_atten_chk", bVal);
-		str = m_depth_atten_factor_text->GetValue();
-		fconfig.Write("depth_atten_factor_text", str);
-		str.ToDouble(&m_dft_depth_atten_factor);
+		glbin_view_def.m_use_fog = m_glview->m_use_fog;
+		glbin_view_def.m_fog_intensity = m_glview->m_fog_intensity;
 	}
 	//scale factor
 	if (mask & 0x400)
 	{
-		fconfig.Write("pin_rot_center", m_glview->m_pin_rot_center);
-		//str = m_scale_factor_text->GetValue();
-		//fconfig.Write("scale_factor_text", str);
-		//str.ToDouble(&m_dft_scale_factor);
-		m_dft_scale_factor = m_glview->m_scale_factor;
-		fconfig.Write("scale_factor", m_dft_scale_factor);
-		m_dft_scale_factor_mode = m_glview->m_scale_mode;
-		fconfig.Write("scale_factor_mode", m_dft_scale_factor_mode);
-	}
-	else
-	{
-		fconfig.Write("scale_factor", m_dft_scale_factor);
-		fconfig.Write("scale_factor_mode", m_dft_scale_factor_mode);
+		glbin_view_def.m_pin_rot_center = m_glview->m_pin_rot_center;
+		glbin_view_def.m_scale_factor = m_glview->m_scale_factor;
+		glbin_view_def.m_scale_mode = m_glview->m_scale_mode;
 	}
 	//camera center
 	if (mask & 0x800)
-	{
-		m_glview->GetCenters(x, y, z);
-		str = wxString::Format("%f %f %f", x, y, z);
-		fconfig.Write("center", str);
-	}
+		glbin_view_def.m_center = fluo::Point(
+			m_glview->m_ctrx,
+			m_glview->m_ctry,
+			m_glview->m_ctrz
+		);
 	//colormap
 	if (mask & 0x1000)
-	{
-		bVal = m_glview->m_draw_colormap;
-		fconfig.Write("colormap_chk", bVal);
-	}
+		glbin_view_def.m_draw_colormap = m_glview->m_draw_colormap;
 
 	m_default_saved = true;
 }
@@ -2376,109 +2284,24 @@ void VRenderView::OnSaveDefault(wxCommandEvent &event)
 
 void VRenderView::LoadSettings()
 {
-	if (!is.IsOk()) {
-		wxCommandEvent e;
-		OnRotSliderType(e);
-		UpdateView();
-		return;
-	}
+	glbin_view_def.Apply(m_glview);
 
-	bool bVal;
-	double dVal;
-	int iVal;
-	if (fconfig.Read("volume_seq_rd", &bVal) && bVal)
-		m_glview->SetVolMethod(VOL_METHOD_SEQ);
-	if (fconfig.Read("volume_multi_rd", &bVal) && bVal)
-		m_glview->SetVolMethod(VOL_METHOD_MULTI);
-	if (fconfig.Read("volume_comp_rd", &bVal) && bVal)
-		m_glview->SetVolMethod(VOL_METHOD_COMP);
-
-	wxString str;
-	if (fconfig.Read("bg_color_picker", &str))
-	{
-		int r, g, b;
-		SSCANF(str.c_str(), "%d%d%d", &r, &g, &b);
-		wxColor cVal(r, g, b);
-		m_bg_color_picker->SetColour(cVal);
-		fluo::Color c(r/255.0, g/255.0, b/255.0);
-		m_glview->SetBackgroundColor(c);
-	}
-	if (fconfig.Read("cam_ctr_chk", &bVal))
-	{
-		m_options_toolbar->ToggleTool(ID_CamCtrChk,bVal);
-		m_glview->m_draw_camctr = bVal;
-	}
-	if (fconfig.Read("camctr_size", &dVal))
-	{
-		m_glview->m_camctr_size = dVal;
-	}
-	if (fconfig.Read("info_chk", &iVal))
-	{
-		m_options_toolbar->ToggleTool(ID_FpsChk, iVal&INFO_DISP);
-		m_glview->m_draw_info = iVal;
-	}
-	if (fconfig.Read("legend_chk", &bVal))
-	{
-		m_options_toolbar->ToggleTool(ID_LegendChk,bVal);
-		m_glview->m_draw_legend = bVal;
-	}
-	if (fconfig.Read("colormap_chk", &bVal))
-	{
-		m_options_toolbar->ToggleTool(ID_ColormapChk, bVal);
-		m_glview->m_draw_colormap = bVal;
-	}
-	if (fconfig.Read("mouse_focus", &bVal))
-	{
-		m_glview->m_mouse_focus = bVal;
-	}
-	if (fconfig.Read("persp", &bVal))
-	{
-		if (bVal)
-			m_glview->SetPersp(true);
-		else
-			m_glview->SetPersp(false);
-	}
-	if (fconfig.Read("aov", &dVal))
-	{
-		m_glview->SetAov(dVal);
-	}
-	if (fconfig.Read("free_rd", &bVal))
-	{
-		m_options_toolbar2->ToggleTool(ID_FreeChk,bVal);
-		if (bVal)
-			m_glview->SetFree(true);
-	}
-	if (fconfig.Read("x_rot", &str))
-	{
-		m_x_rot_text->ChangeValue(str);
-		str.ToDouble(&m_dft_x_rot);
-	}
-	if (fconfig.Read("y_rot", &str))
-	{
-		m_y_rot_text->ChangeValue(str);
-		str.ToDouble(&m_dft_y_rot);
-	}
-	if (fconfig.Read("z_rot", &str))
-	{
-		m_z_rot_text->ChangeValue(str);
-		str.ToDouble(&m_dft_z_rot);
-	}
-	if (fconfig.Read("rot_lock", &bVal))
-	{
-		m_rot_lock_btn->ToggleTool(ID_RotLockChk,bVal);
-		if (bVal)
-			m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
-				wxGetBitmap(gear_45, m_dpi_sf2));
-		else
-			m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
-				wxGetBitmap(gear_dark, m_dpi_sf2));
-
-		m_glview->SetRotLock(bVal);
-	}
-	if (fconfig.Read("rot_slider", &m_rot_slider))
-	{
-		m_rot_lock_btn->ToggleTool(ID_RotSliderType, m_rot_slider);
-	}
+	m_options_toolbar->ToggleTool(ID_CamCtrChk,glbin_view_def.m_draw_camctr);
+	m_options_toolbar->ToggleTool(ID_FpsChk, glbin_view_def.m_draw_info & INFO_DISP);
+	m_options_toolbar->ToggleTool(ID_LegendChk, glbin_view_def.m_draw_legend);
+	m_options_toolbar->ToggleTool(ID_ColormapChk, glbin_view_def.m_draw_colormap);
+	m_options_toolbar2->ToggleTool(ID_FreeChk, glbin_view_def.m_free);
+	m_x_rot_text->ChangeValue(wxString::Format("%.0f", glbin_view_def.m_rot.x()));
+	m_y_rot_text->ChangeValue(wxString::Format("%.0f", glbin_view_def.m_rot.y()));
+	m_z_rot_text->ChangeValue(wxString::Format("%.0f", glbin_view_def.m_rot.z()));
+	m_rot_lock_btn->ToggleTool(ID_RotLockChk,glbin_view_def.m_rot_lock);
+	if (glbin_view_def.m_rot_lock)
+		m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
+			wxGetBitmap(gear_45, m_dpi_sf2));
+	else
+		m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
+			wxGetBitmap(gear_dark, m_dpi_sf2));
+	m_rot_lock_btn->ToggleTool(ID_RotSliderType, glbin_view_def.m_rot_slider);
 	wxCommandEvent e;
 	OnRotSliderType(e);
 	UpdateView();  //for rotations
@@ -2492,59 +2315,29 @@ void VRenderView::LoadSettings()
 	//	m_glview->m_scale_factor = dVal/100.0;
 	//	m_dft_scale_factor = dVal;
 	//}
-	if (fconfig.Read("pin_rot_center", &bVal))
+	m_pin_btn->ToggleTool(ID_PinBtn, glbin_view_def.m_pin_rot_center);
+	if (glbin_view_def.m_pin_rot_center)
+		m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
+			wxGetBitmap(pin, m_dpi_sf2));
+	else
+		m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
+			wxGetBitmap(anchor_dark, m_dpi_sf2));
+	SetScaleMode(glbin_view_def.m_scale_mode, false);
+	UpdateScaleFactor(false);
+	m_glview->SetFog(glbin_view_def.m_use_fog);
+	if (glbin_view_def.m_use_fog)
 	{
-		m_glview->m_pin_rot_center = bVal;
-		if (bVal)
-			m_glview->m_rot_center_dirty = true;
-		m_pin_btn->ToggleTool(ID_PinBtn, bVal);
-		if (bVal)
-			m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
-				wxGetBitmap(pin, m_dpi_sf2));
-		else
-			m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
-				wxGetBitmap(anchor_dark, m_dpi_sf2));
+		m_depth_atten_factor_sldr->Enable();
+		m_depth_atten_factor_text->Enable();
 	}
-	if (fconfig.Read("scale_factor_mode", &iVal))
+	else
 	{
-		m_dft_scale_factor_mode = iVal;
-		SetScaleMode(iVal, false);
+		m_depth_atten_factor_sldr->Disable();
+		m_depth_atten_factor_text->Disable();
 	}
-	if (fconfig.Read("scale_factor", &dVal))
-	{
-		m_dft_scale_factor = dVal;
-		m_glview->m_scale_factor = m_dft_scale_factor;
-		UpdateScaleFactor(false);
-	}
-	if (fconfig.Read("depth_atten_chk", &bVal))
-	{
-		//m_left_toolbar->ToggleTool(ID_DepthAttenChk,bVal);
-		m_glview->SetFog(bVal);
-		if (bVal)
-		{
-			m_depth_atten_factor_sldr->Enable();
-			m_depth_atten_factor_text->Enable();
-		}
-		else
-		{
-			m_depth_atten_factor_sldr->Disable();
-			m_depth_atten_factor_text->Disable();
-		}
-	}
-	if (fconfig.Read("depth_atten_factor_text", &str))
-	{
-		m_depth_atten_factor_text->ChangeValue(str);
-		str.ToDouble(&dVal);
-		m_depth_atten_factor_sldr->SetValue(std::round(dVal*100));
-		m_glview->SetFogIntensity(dVal);
-		m_dft_depth_atten_factor = dVal;
-	}
-	if (fconfig.Read("center", &str))
-	{
-		float x, y, z;
-		SSCANF(str.c_str(), "%f%f%f", &x, &y, &z);
-		m_glview->SetCenters(x, y, z);
-	}
+	m_depth_atten_factor_text->ChangeValue(wxString::Format("%.0f", glbin_view_def.m_fog_intensity));
+	m_depth_atten_factor_sldr->ChangeValue(std::round(glbin_view_def.m_fog_intensity*100));
+	m_glview->SetFogIntensity(glbin_view_def.m_fog_intensity);
 
 	m_use_dft_settings = true;
 	RefreshGL();

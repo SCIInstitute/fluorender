@@ -27,7 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "OclDlg.h"
 #include <DataManager.h>
-#include "VRenderFrame.h"
+#include <VRenderFrame.h>
+#include <Global.h>
 #include <wxSingleSlider.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
@@ -328,9 +329,9 @@ void OclDlg::Execute()
 
 	if (!m_view)
 		return;
-	KernelExecutor* executor = m_view->GetKernelExecutor();
-	if (!executor)
-		return;
+	//KernelExecutor* executor = m_view->GetKernelExecutor();
+	//if (!executor)
+	//	return;
 
 	//currently, this is expected to be a convolution/filering kernel
 	//get cl code
@@ -345,10 +346,10 @@ void OclDlg::Execute()
 	if (vd_name.Find("_CL") != wxNOT_FOUND)
 		dup = false;
 
-	executor->SetVolume(vd);
-	executor->SetCode(code);
-	executor->SetDuplicate(dup);
-	executor->Execute();
+	glbin_kernel_executor.SetVolume(vd);
+	glbin_kernel_executor.SetCode(code);
+	glbin_kernel_executor.SetDuplicate(dup);
+	glbin_kernel_executor.Execute();
 
 	/*	Texture* tex = vd->GetTexture();
 	void* result = executor->GetResult()->GetTexture()->get_nrrd(0)->data;
@@ -362,13 +363,13 @@ void OclDlg::Execute()
 	(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";*/
 
 	wxString str;
-	executor->GetMessage(str);
+	glbin_kernel_executor.GetMessage(str);
 	(*m_output_txt) << str;
 
 	//add result for rendering
 	if (dup)
 	{
-		VolumeData* vd_r = executor->GetResult(true);
+		VolumeData* vd_r = glbin_kernel_executor.GetResult(true);
 		if (!vd_r)
 			return;
 		if (m_frame)

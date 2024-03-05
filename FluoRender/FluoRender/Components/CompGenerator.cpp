@@ -42,7 +42,6 @@ using namespace flrd;
 
 ComponentGenerator::ComponentGenerator()
 	: m_vd(0),
-	m_use_mask(false),
 	prework(0),
 	postwork(0)
 {
@@ -73,7 +72,7 @@ void ComponentGenerator::ShuffleID()
 	if (!kernel_prog)
 		return;
 	int kernel_index;
-	if (m_use_mask)
+	if (m_use_sel)
 		kernel_index = kernel_prog->createKernel("kernel_1");
 	else
 		kernel_index = kernel_prog->createKernel("kernel_0");
@@ -102,7 +101,7 @@ void ComponentGenerator::ShuffleID()
 			prework("");
 
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask)
+		if (m_use_sel)
 		{
 			if (!b->is_mask_valid())
 				continue;
@@ -116,7 +115,7 @@ void ComponentGenerator::ShuffleID()
 		int nz = b->nz();
 		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint mid = 0;
-		if (m_use_mask)
+		if (m_use_sel)
 			mid = m_vd->GetVR()->load_brick_mask(b);
 		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
@@ -167,7 +166,7 @@ void ComponentGenerator::ShuffleID()
 		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p+5));
 		kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&scl));
 		kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&trl));
-		if (m_use_mask)
+		if (m_use_sel)
 			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
@@ -203,7 +202,7 @@ void ComponentGenerator::SetIDBit(int psize)
 	//int kernel_index1;
 	int kernel_index2;
 	int kernel_index3;
-	if (m_use_mask)
+	if (m_use_sel)
 	{
 		kernel_index0 = kernel_prog->createKernel("kernel_4");
 		//kernel_index1 = kernel_prog->createKernel("kernel_5");
@@ -226,7 +225,7 @@ void ComponentGenerator::SetIDBit(int psize)
 			prework("");
 
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask)
+		if (m_use_sel)
 		{
 			if (!b->is_mask_valid())
 				continue;
@@ -239,7 +238,7 @@ void ComponentGenerator::SetIDBit(int psize)
 		int ny = b->ny();
 		int nz = b->nz();
 		GLint mid = 0;
-		if (m_use_mask)
+		if (m_use_sel)
 			mid = m_vd->GetVR()->load_brick_mask(b);
 		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
@@ -282,7 +281,7 @@ void ComponentGenerator::SetIDBit(int psize)
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenz));
 		flvr::Argument arg_mask;
-		if (m_use_mask)
+		if (m_use_sel)
 			arg_mask = kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		//kernel 2
 		kernel_prog->setKernelArgBegin(kernel_index2);
@@ -293,7 +292,7 @@ void ComponentGenerator::SetIDBit(int psize)
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenz));
-		if (m_use_mask)
+		if (m_use_sel)
 			kernel_prog->setKernelArgument(arg_mask);
 		//kernel 3
 		kernel_prog->setKernelArgBegin(kernel_index3);
@@ -303,7 +302,7 @@ void ComponentGenerator::SetIDBit(int psize)
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&psize));
-		if (m_use_mask)
+		if (m_use_sel)
 			kernel_prog->setKernelArgument(arg_mask);
 
 		//execute
@@ -323,10 +322,12 @@ void ComponentGenerator::SetIDBit(int psize)
 	}
 }
 
-void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff, float sscale, int fixed)
+void ComponentGenerator::Grow(/*bool diffuse, int iter, float tran, float falloff, float sscale, int fixed*/)
 {
 	if (!CheckBricks())
 		return;
+
+	float scale = m_vd->GetScalarScale();
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
@@ -334,7 +335,7 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 	if (!kernel_prog)
 		return;
 	int kernel_index0;
-	if (m_use_mask)
+	if (m_use_sel)
 		kernel_index0 = kernel_prog->createKernel("kernel_1");
 	else
 		kernel_index0 = kernel_prog->createKernel("kernel_0");
@@ -347,7 +348,7 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 			prework("");
 
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask && !b->is_mask_valid())
+		if (m_use_sel && !b->is_mask_valid())
 			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
@@ -355,12 +356,12 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 		int nz = b->nz();
 		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint mid = 0;
-		if (m_use_mask)
+		if (m_use_sel)
 			mid = m_vd->GetVR()->load_brick_mask(b);
 		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
 		//auto iter
-		int biter = iter;
+		int biter = m_iter;
 		if (biter < 0)
 			biter = std::max(std::max(nx, ny), nz);
 
@@ -368,8 +369,9 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 		unsigned int seed = biter > 10 ? biter : 11;
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
-		float scl_ff = diffuse ? falloff : 0.0f;
-		float grad_ff = diffuse ? falloff : 0.0f;
+		float scl_ff = m_diff ? m_falloff : 0.0f;
+		float grad_ff = m_diff ? m_falloff : 0.0f;
+		float tran = m_thresh * m_tfactor;
 
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
@@ -385,9 +387,9 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&tran));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&scl_ff));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&grad_ff));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&scale));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&fixed));
-		if (m_use_mask)
+		if (m_use_sel)
 			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
 		//execute
@@ -406,12 +408,12 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 	}
 
 	if (glbin.get_cg_table_enable())
-		AddEntry(iter, tran, diffuse, falloff, fixed);
+		AddEntry();
 }
 
-void ComponentGenerator::DensityField(int dsize, int wsize,
+void ComponentGenerator::DensityField(/*int dsize, int wsize,
 	bool diffuse, int iter, float tran, float falloff,
-	float density, float varth, float sscale, int fixed)
+	float density, float varth, float sscale, int fixed*/)
 {
 	//debug
 #ifdef _DEBUG
@@ -421,6 +423,8 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 
 	if (!CheckBricks())
 		return;
+
+	float scale = m_vd->GetScalarScale();
 
 	//create program and kernels
 	//prog density
@@ -438,7 +442,7 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 	if (!kernel_prog_grow)
 		return;
 	int kernel_grow_index0;
-	if (m_use_mask)
+	if (m_use_sel)
 		kernel_grow_index0 = kernel_prog_grow->createKernel("kernel_1");
 	else
 		kernel_grow_index0 = kernel_prog_grow->createKernel("kernel_0");
@@ -452,7 +456,7 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 			prework("");
 
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask && !b->is_mask_valid())
+		if (m_use_sel && !b->is_mask_valid())
 			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
@@ -460,7 +464,7 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		int nz = b->nz();
 		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint mid = 0;
-		if (m_use_mask)
+		if (m_use_sel)
 			mid = m_vd->GetVR()->load_brick_mask(b);
 		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
@@ -469,9 +473,9 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		int ngx, ngy, ngz;//number of groups
 		int dnx, dny, dnz;//adjusted n size
 		int dnxy, ngxy;//precalculate
-		gsx = wsize >= nx ? nx : wsize;
-		gsy = wsize >= ny ? ny : wsize;
-		gsz = wsize >= nz ? nz : wsize;
+		gsx = m_density_stats_size >= nx ? nx : m_density_stats_size;
+		gsy = m_density_stats_size >= ny ? ny : m_density_stats_size;
+		gsz = m_density_stats_size >= nz ? nz : m_density_stats_size;
 		ngx = nx / gsx + (nx % gsx ? 1 : 0);
 		ngy = ny / gsy + (ny % gsy ? 1 : 0);
 		ngz = nz / gsz + (nz % gsz ? 1 : 0);
@@ -495,8 +499,8 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
-		kernel_prog_dens->setKernelArgConst(sizeof(int), (void*)(&dsize));
-		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&sscale));
+		kernel_prog_dens->setKernelArgConst(sizeof(int), (void*)(&m_density_window_size));
+		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&scale));
 		//kernel 1
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index1);
 		kernel_prog_dens->setKernelArgument(arg_densf);
@@ -558,9 +562,13 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 
 		//density grow
 		unsigned int rcnt = 0;
-		unsigned int seed = iter > 10 ? iter : 11;
-		float scl_ff = diffuse ? falloff : 0.0f;
-		float grad_ff = diffuse ? falloff : 0.0f;
+		unsigned int seed = m_iter > 10 ? m_iter : 11;
+		float scl_ff = m_diff ? m_falloff : 0.0f;
+		float grad_ff = m_diff ? m_falloff : 0.0f;
+		float tran = m_thresh * m_tfactor;
+		float density = m_density_thresh;
+		float varth = m_varth;
+		int fixed = m_grow_fixed;
 
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
@@ -583,13 +591,13 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&grad_ff));
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&density));
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&varth));
-		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&sscale));
+		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&scale));
 		kernel_prog_grow->setKernelArgConst(sizeof(int), (void*)(&fixed));
-		if (m_use_mask)
+		if (m_use_sel)
 			kernel_prog_grow->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
 		//execute
-		for (int j = 0; j < iter; ++j)
+		for (int j = 0; j < m_iter; ++j)
 			kernel_prog_grow->executeKernel(kernel_grow_index0, 3, global_size, local_size);
 
 		//read back
@@ -605,13 +613,10 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 	}
 
 	if (glbin.get_cg_table_enable())
-		AddEntry(iter, tran, diffuse, falloff, fixed,
-			true, density, varth, dsize, wsize);
+		AddEntry();
 }
 
-void ComponentGenerator::DistGrow(bool diffuse, int iter,
-	float tran, float falloff, int dsize, int max_dist,
-	float dist_thresh, float sscale, float dist_strength, int fixed)
+void ComponentGenerator::DistGrow()
 {
 	//debug
 #ifdef _DEBUG
@@ -622,6 +627,8 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 	if (!CheckBricks())
 		return;
 
+	float scale = m_vd->GetScalarScale();
+
 	//create program and kernels
 	//prog dist
 	flvr::KernelProgram* kernel_prog_dist = flvr::VolumeRenderer::
@@ -630,7 +637,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		return;
 	int kernel_dist_index0;
 	int kernel_dist_index1;
-	if (m_use_mask)
+	if (m_use_sel)
 	{
 		kernel_dist_index0 = kernel_prog_dist->createKernel("kernel_3");
 		kernel_dist_index1 = kernel_prog_dist->createKernel("kernel_5");
@@ -646,7 +653,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 	if (!kernel_prog)
 		return;
 	int kernel_index0;
-	if (m_use_mask)
+	if (m_use_sel)
 		kernel_index0 = kernel_prog->createKernel("kernel_1");
 	else
 		kernel_index0 = kernel_prog->createKernel("kernel_0");
@@ -659,7 +666,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 			prework("");
 
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask && !b->is_mask_valid())
+		if (m_use_sel && !b->is_mask_valid())
 			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
@@ -667,13 +674,14 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		int nz = b->nz();
 		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint mid = 0;
-		if (m_use_mask)
+		if (m_use_sel)
 			mid = m_vd->GetVR()->load_brick_mask(b);
 		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
+		float dist_thresh = m_dist_thresh;
 		//generate distance field arg_distf
 		unsigned char ini = 1;
 		//set
@@ -686,12 +694,12 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog_dist->setKernelArgConst(sizeof(int), (void*)(&dsize));
+		kernel_prog_dist->setKernelArgConst(sizeof(int), (void*)(&m_dist_filter_size));
 		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&dist_thresh));
-		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&sscale));
+		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&scale));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
 		flvr::Argument arg_mask;
-		if (m_use_mask)
+		if (m_use_sel)
 			arg_mask = kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		//kernel 1
 		kernel_prog_dist->setKernelArgBegin(kernel_dist_index1);
@@ -700,7 +708,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
-		if (m_use_mask)
+		if (m_use_sel)
 		{
 			kernel_prog_dist->setKernelArgBegin(kernel_dist_index1, 7);
 			kernel_prog_dist->setKernelArgument(arg_mask);
@@ -708,7 +716,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		//init
 		kernel_prog_dist->executeKernel(kernel_dist_index0, 3, global_size, local_size);
 		unsigned char nn, re;
-		for (int j = 0; j < max_dist; ++j)
+		for (int j = 0; j < m_max_dist; ++j)
 		{
 			nn = j == 0 ? 0 : j + ini;
 			re = j + ini + 1;
@@ -720,10 +728,13 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 
 		//grow
 		unsigned int rcnt = 0;
-		unsigned int seed = iter > 10 ? iter : 11;
-		float scl_ff = diffuse ? falloff : 0.0f;
-		float grad_ff = diffuse ? falloff : 0.0f;
-		float distscl = 5.0f / max_dist;
+		unsigned int seed = m_iter > 10 ? m_iter : 11;
+		float scl_ff = m_diff ? m_falloff : 0.0f;
+		float grad_ff = m_diff ? m_falloff : 0.0f;
+		float distscl = 5.0f / m_max_dist;
+		float tran = m_thresh * m_tfactor;
+		float dist_strength = m_dist_strength;
+		int fixed = m_grow_fixed;
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgBegin(kernel_index0);
@@ -739,15 +750,15 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&tran));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&scl_ff));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&grad_ff));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&scale));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&distscl));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&dist_strength));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&fixed));
-		if (m_use_mask)
+		if (m_use_sel)
 			kernel_prog->setKernelArgument(arg_mask);
 
 		//execute
-		for (int j = 0; j < iter; ++j)
+		for (int j = 0; j < m_iter; ++j)
 			kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
 
 		//read back
@@ -763,15 +774,13 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 	}
 
 	if (glbin.get_cg_table_enable())
-		AddEntry(iter, tran, diffuse, falloff, fixed,
-			false, 1.0f, 0.0001f, 5, 15,
-			true, dist_strength, dist_thresh, dsize, max_dist);
+		AddEntry();
 }
 
 void ComponentGenerator::DistDensityField(
-	bool diffuse, int iter, float tran, float falloff,
+	/*bool diffuse, int iter, float tran, float falloff,
 	int dsize1, int max_dist, float dist_thresh, float dist_strength,
-	int dsize2, int wsize, float density, float varth, float sscale, int fixed)
+	int dsize2, int wsize, float density, float varth, float sscale, int fixed*/)
 {
 	//debug
 #ifdef _DEBUG
@@ -782,6 +791,8 @@ void ComponentGenerator::DistDensityField(
 	if (!CheckBricks())
 		return;
 
+	float scale = m_vd->GetScalarScale();
+
 	//create program and kernels
 	//prog dist
 	flvr::KernelProgram* kernel_prog_dist = flvr::VolumeRenderer::
@@ -790,7 +801,7 @@ void ComponentGenerator::DistDensityField(
 		return;
 	int kernel_dist_index0;
 	int kernel_dist_index1;
-	if (m_use_mask)
+	if (m_use_sel)
 	{
 		kernel_dist_index0 = kernel_prog_dist->createKernel("kernel_3");
 		kernel_dist_index1 = kernel_prog_dist->createKernel("kernel_5");
@@ -815,7 +826,7 @@ void ComponentGenerator::DistDensityField(
 	if (!kernel_prog_grow)
 		return;
 	int kernel_grow_index0;
-	if (m_use_mask)
+	if (m_use_sel)
 		kernel_grow_index0 = kernel_prog_grow->createKernel("kernel_1");
 	else
 		kernel_grow_index0 = kernel_prog_grow->createKernel("kernel_0");
@@ -829,7 +840,7 @@ void ComponentGenerator::DistDensityField(
 			prework("");
 
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask && !b->is_mask_valid())
+		if (m_use_sel && !b->is_mask_valid())
 			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
@@ -837,7 +848,7 @@ void ComponentGenerator::DistDensityField(
 		int nz = b->nz();
 		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint mid = 0;
-		if (m_use_mask)
+		if (m_use_sel)
 			mid = m_vd->GetVR()->load_brick_mask(b);
 		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
@@ -846,9 +857,9 @@ void ComponentGenerator::DistDensityField(
 		int ngx, ngy, ngz;//number of groups
 		int dnx, dny, dnz;//adjusted n size
 		int nxy, dnxy, ngxy;//precalculate
-		gsx = wsize >= nx ? nx : wsize;
-		gsy = wsize >= ny ? ny : wsize;
-		gsz = wsize >= nz ? nz : wsize;
+		gsx = m_density_stats_size >= nx ? nx : m_density_stats_size;
+		gsy = m_density_stats_size >= ny ? ny : m_density_stats_size;
+		gsz = m_density_stats_size >= nz ? nz : m_density_stats_size;
 		ngx = nx / gsx + (nx % gsx ? 1 : 0);
 		ngy = ny / gsy + (ny % gsy ? 1 : 0);
 		ngz = nz / gsz + (nz % gsz ? 1 : 0);
@@ -865,6 +876,7 @@ void ComponentGenerator::DistDensityField(
 
 		//generate distance field arg_distf
 		unsigned char ini = 1;
+		float dist_thresh = m_dist_thresh;
 		//set
 		//kernel 0
 		kernel_prog_dist->setKernelArgBegin(kernel_dist_index0);
@@ -874,12 +886,12 @@ void ComponentGenerator::DistDensityField(
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog_dist->setKernelArgConst(sizeof(int), (void*)(&dsize1));
+		kernel_prog_dist->setKernelArgConst(sizeof(int), (void*)(&m_dist_filter_size));
 		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&dist_thresh));
-		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&sscale));
+		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&scale));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
 		flvr::Argument arg_mask;
-		if (m_use_mask)
+		if (m_use_sel)
 			arg_mask = kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		//kernel 1
 		kernel_prog_dist->setKernelArgBegin(kernel_dist_index1);
@@ -888,7 +900,7 @@ void ComponentGenerator::DistDensityField(
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
-		if (m_use_mask)
+		if (m_use_sel)
 		{
 			kernel_prog_dist->setKernelArgBegin(kernel_dist_index1, 7);
 			kernel_prog_dist->setKernelArgument(arg_mask);
@@ -896,7 +908,7 @@ void ComponentGenerator::DistDensityField(
 		//init
 		kernel_prog_dist->executeKernel(kernel_dist_index0, 3, global_size, local_size);
 		unsigned char nn, re;
-		for (int j = 0; j < max_dist; ++j)
+		for (int j = 0; j < m_max_dist; ++j)
 		{
 			nn = j == 0 ? 0 : j + ini;
 			re = j + ini + 1;
@@ -914,7 +926,8 @@ void ComponentGenerator::DistDensityField(
 		//generate density field arg_densf
 		//set
 		//kernel 0
-		float distscl = 5.0f / max_dist;
+		float distscl = 5.0f / m_max_dist;
+		float dist_strength = m_dist_strength;
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index0);
 		kernel_prog_dens->setKernelArgument(arg_img);
 		kernel_prog_dens->setKernelArgument(arg_distf);
@@ -926,8 +939,8 @@ void ComponentGenerator::DistDensityField(
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
-		kernel_prog_dens->setKernelArgConst(sizeof(int), (void*)(&dsize2));
-		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&sscale));
+		kernel_prog_dens->setKernelArgConst(sizeof(int), (void*)(&m_density_window_size));
+		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&scale));
 		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&distscl));
 		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&dist_strength));
 		//kernel 1
@@ -986,9 +999,13 @@ void ComponentGenerator::DistDensityField(
 
 		//distance + density grow
 		unsigned int rcnt = 0;
-		unsigned int seed = iter > 10 ? iter : 11;
-		float scl_ff = diffuse ? falloff : 0.0f;
-		float grad_ff = diffuse ? falloff : 0.0f;
+		unsigned int seed = m_iter > 10 ? m_iter : 11;
+		float scl_ff = m_diff ? m_falloff : 0.0f;
+		float grad_ff = m_diff ? m_falloff : 0.0f;
+		float tran = m_thresh * m_tfactor;
+		int fixed = m_grow_fixed;
+		float density = m_density_thresh;
+		float varth = m_varth;
 
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
@@ -1011,13 +1028,13 @@ void ComponentGenerator::DistDensityField(
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&grad_ff));
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&density));
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&varth));
-		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&sscale));
+		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&scale));
 		kernel_prog_grow->setKernelArgConst(sizeof(int), (void*)(&fixed));
-		if (m_use_mask)
+		if (m_use_sel)
 			kernel_prog_grow->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
 		//execute
-		for (int j = 0; j < iter; ++j)
+		for (int j = 0; j < m_iter; ++j)
 			kernel_prog_grow->executeKernel(kernel_grow_index0, 3, global_size, local_size);
 
 		//read back
@@ -1034,13 +1051,13 @@ void ComponentGenerator::DistDensityField(
 	}
 
 	if (glbin.get_cg_table_enable())
-		AddEntry(iter, tran, diffuse, falloff, fixed,
-			true, density, varth, dsize2, wsize,
-			true, dist_strength, dist_thresh, dsize1, max_dist);
+		AddEntry();
 }
 
-void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
+void ComponentGenerator::Cleanup(/*int iter, unsigned int size_lm*/)
 {
+	if (m_clean_iter <= 0)
+		return;
 	if (!CheckBricks())
 		return;
 
@@ -1052,7 +1069,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 	int kernel_index0;
 	int kernel_index1;
 	int kernel_index2;
-	if (m_use_mask)
+	if (m_use_sel)
 	{
 		kernel_index0 = kernel_prog->createKernel("kernel_3");
 		kernel_index1 = kernel_prog->createKernel("kernel_4");
@@ -1073,7 +1090,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 			prework("");
 
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask && !b->is_mask_valid())
+		if (m_use_sel && !b->is_mask_valid())
 			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
@@ -1081,7 +1098,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		int nz = b->nz();
 		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint mid = 0;
-		if (m_use_mask)
+		if (m_use_sel)
 			mid = m_vd->GetVR()->load_brick_mask(b);
 		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
@@ -1124,7 +1141,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenz));
 		flvr::Argument arg_mask;
-		if (m_use_mask)
+		if (m_use_sel)
 			arg_mask = kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		//kernel 1
 		kernel_prog->setKernelArgBegin(kernel_index1);
@@ -1135,9 +1152,10 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenz));
-		if (m_use_mask)
+		if (m_use_sel)
 			kernel_prog->setKernelArgument(arg_mask);
 		//kernel 2
+		unsigned int size_lm = m_clean_size_vl;
 		kernel_prog->setKernelArgBegin(kernel_index2);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
 		kernel_prog->setKernelArgument(arg_szbuf);
@@ -1146,11 +1164,11 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&size_lm));
-		if (m_use_mask)
+		if (m_use_sel)
 			kernel_prog->setKernelArgument(arg_mask);
 
 		//execute
-		for (int j = 0; j < iter; ++j)
+		for (int j = 0; j < m_iter; ++j)
 		{
 			kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
 			kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
@@ -1169,7 +1187,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 	}
 
 	if (glbin.get_cg_table_enable())
-		AddCleanEntry(iter, size_lm);
+		AddCleanEntry();
 }
 
 void ComponentGenerator::ClearBorders()
@@ -1183,7 +1201,7 @@ void ComponentGenerator::ClearBorders()
 	if (!kernel_prog)
 		return;
 	int kernel_index;
-	if (m_use_mask)
+	if (m_use_sel)
 		kernel_index = kernel_prog->createKernel("kernel_1");
 	else
 		kernel_index = kernel_prog->createKernel("kernel_0");
@@ -1196,14 +1214,14 @@ void ComponentGenerator::ClearBorders()
 			prework("");
 
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask && !b->is_mask_valid())
+		if (m_use_sel && !b->is_mask_valid())
 			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
 		GLint mid = 0;
-		if (m_use_mask)
+		if (m_use_sel)
 			mid = m_vd->GetVR()->load_brick_mask(b);
 		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
@@ -1217,7 +1235,7 @@ void ComponentGenerator::ClearBorders()
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		if (m_use_mask)
+		if (m_use_sel)
 			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
 		//execute
@@ -1235,7 +1253,7 @@ void ComponentGenerator::ClearBorders()
 	}
 }
 
-void ComponentGenerator::FillBorders(float tol)
+void ComponentGenerator::FillBorders()
 {
 	if (!CheckBricks())
 		return;
@@ -1246,7 +1264,7 @@ void ComponentGenerator::FillBorders(float tol)
 	if (!kernel_prog)
 		return;
 	int kernel_index;
-	if (m_use_mask)
+	if (m_use_sel)
 		kernel_index = kernel_prog->createKernel("kernel_1");
 	else
 		kernel_index = kernel_prog->createKernel("kernel_0");
@@ -1259,7 +1277,7 @@ void ComponentGenerator::FillBorders(float tol)
 			prework("");
 
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask && !b->is_mask_valid())
+		if (m_use_sel && !b->is_mask_valid())
 			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
@@ -1267,13 +1285,14 @@ void ComponentGenerator::FillBorders(float tol)
 		int nz = b->nz();
 		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint mid = 0;
-		if (m_use_mask)
+		if (m_use_sel)
 			mid = m_vd->GetVR()->load_brick_mask(b);
 		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
+		float tol = m_fill_border;
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgBegin(kernel_index);
@@ -1284,7 +1303,7 @@ void ComponentGenerator::FillBorders(float tol)
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&tol));
-		if (m_use_mask)
+		if (m_use_sel)
 			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
 		//execute
@@ -1302,52 +1321,33 @@ void ComponentGenerator::FillBorders(float tol)
 	}
 }
 
-void ComponentGenerator::AddEntry(
-	int iter,
-	float thresh,
-	bool diff,
-	float falloff,
-	bool grow_fixed,
-	bool density,
-	float density_thresh,
-	float varth,
-	int density_window_size,
-	int density_stats_size,
-	bool use_dist_field,
-	float dist_strength,
-	float dist_thresh,
-	int dist_filter_size,
-	int max_dist
-	)
+void ComponentGenerator::AddEntry()
 {
 	//parameters
 	flrd::EntryParams& ep = glbin.get_cg_entry();
-	ep.setParam("iter", iter);
-	ep.setParam("thresh", thresh);
-	ep.setParam("use_dist_field", use_dist_field);
-	ep.setParam("dist_strength", dist_strength);
-	ep.setParam("dist_filter_size", dist_filter_size);
-	ep.setParam("max_dist", max_dist);
-	ep.setParam("dist_thresh", dist_thresh);
-	ep.setParam("diff", diff);
-	ep.setParam("falloff", falloff);
-	ep.setParam("density", density);
-	ep.setParam("density_thresh", density_thresh);
-	ep.setParam("varth", varth);
-	ep.setParam("density_window_size", density_window_size);
-	ep.setParam("density_stats_size", density_stats_size);
-	ep.setParam("grow_fixed", grow_fixed);
+	ep.setParam("iter", m_iter);
+	ep.setParam("thresh", m_thresh);
+	ep.setParam("use_dist_field", m_use_dist_field);
+	ep.setParam("dist_strength", m_dist_strength);
+	ep.setParam("dist_filter_size", m_dist_filter_size);
+	ep.setParam("max_dist", m_max_dist);
+	ep.setParam("dist_thresh", m_dist_thresh);
+	ep.setParam("diff", m_diff);
+	ep.setParam("falloff", m_falloff);
+	ep.setParam("density", m_density);
+	ep.setParam("density_thresh", m_density_thresh);
+	ep.setParam("varth", m_varth);
+	ep.setParam("density_window_size", m_density_window_size);
+	ep.setParam("density_stats_size", m_density_stats_size);
+	ep.setParam("grow_fixed", m_grow_fixed);
 }
 
-void ComponentGenerator::AddCleanEntry(
-	int clean_iter,
-	int clean_size_vl
-)
+void ComponentGenerator::AddCleanEntry()
 {
 	flrd::EntryParams& ep = glbin.get_cg_entry();
 	ep.setParam("cleanb", 1.0f);
-	ep.setParam("clean_iter", clean_iter);
-	ep.setParam("clean_size_vl", clean_size_vl);
+	ep.setParam("clean_iter", m_clean_iter);
+	ep.setParam("clean_size_vl", m_clean_size_vl);
 }
 
 void ComponentGenerator::GenerateDB()

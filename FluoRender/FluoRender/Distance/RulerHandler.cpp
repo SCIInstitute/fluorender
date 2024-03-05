@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "RulerHandler.h"
 #include "VRenderGLView.h"
+#include <Global.h>
 #include <FLIVR/Texture.h>
 #include <DataManager.h>
 #include <Components/CompAnalyzer.h>
@@ -600,15 +601,12 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 		ruler->AddPoint(p2);
 		m_ruler_list->push_back(ruler);
 		//store brush size in ruler
-		flrd::VolumeSelector* selector = m_view->GetVolumeSelector();
-		if (selector)
-		{
-			if (selector->GetBrushSizeData())
-				ruler->SetBrushSize(selector->GetBrushSize1());
-			else
-				ruler->SetBrushSize(selector->GetBrushSize1()
-					/ m_view->Get121ScaleFactor());
-		}
+		//flrd::VolumeSelector* selector = m_view->GetVolumeSelector();
+		if (glbin_vol_selector.GetBrushSizeData())
+			ruler->SetBrushSize(glbin_vol_selector.GetBrushSize1());
+		else
+			ruler->SetBrushSize(glbin_vol_selector.GetBrushSize1()
+				/ m_view->Get121ScaleFactor());
 	}
 	else
 	{
@@ -684,12 +682,12 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 
 void RulerHandler::AddPaintRulerPoint()
 {
-	if (!m_view)
-		return;
-	flrd::VolumeSelector* selector = m_view->GetVolumeSelector();
-	if (!selector)
-		return;
-	VolumeData* vd = selector->GetVolume();
+	//if (!m_view)
+	//	return;
+	//flrd::VolumeSelector* selector = m_view->GetVolumeSelector();
+	//if (!selector)
+	//	return;
+	VolumeData* vd = glbin_vol_selector.GetVolume();
 	if (!vd)
 		return;
 
