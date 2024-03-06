@@ -26,8 +26,12 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "BrushToolDlg.h"
-#include "VRenderFrame.h"
 #include <Global.h>
+#include <VRenderFrame.h>
+#include <VRenderGLView.h>
+#include <NoiseCancellingDlg.h>
+#include <CountingDlg.h>
+#include <TreePanel.h>
 #include <Calculate/Count.h>
 #include <Distance/Cov.h>
 #include <Distance/RulerAlign.h>

@@ -55,20 +55,14 @@ wxDoubleSlider::wxDoubleSlider(
 	Update();
 }
 
-bool wxDoubleSlider::setLowValue(int val, bool send_msg)
+bool wxDoubleSlider::setLowValue(int val, bool notify)
 {
 	int old = low_val_;
-	if (!link_)
-		low_val_ = val < min_val_ ? min_val_ :
-		(val >= hi_val_ ? hi_val_ - 1 : val);
-	else
-		low_val_ = val < min_val_ ? min_val_ :
-		(val >= max_val_ ? max_val_ - 1 : val);
-	bool changed = old != low_val_;
-	if (!changed)
-		return changed;
 	if (link_)
 	{
+		low_val_ = val < min_val_ ? min_val_ :
+		(val >= max_val_ ? max_val_ - 1 : val);
+
 		hi_val_ = low_val_ + link_dist_;
 		if (hi_val_ > max_val_)
 		{
@@ -76,11 +70,28 @@ bool wxDoubleSlider::setLowValue(int val, bool send_msg)
 			low_val_ = hi_val_ - link_dist_;
 		}
 	}
-	changed = old != low_val_;
+	else
+		low_val_ = val < min_val_ ? min_val_ :
+		(val >= hi_val_ ? hi_val_ - 1 : val);
+
+	bool changed = old != low_val_;
+
+	if (changed || stack_.empty())
+	{
+		double t;
+		if (time_sample(t))
+			push(t);
+		else
+			replace(t);
+	}
+
+	if (!changed)
+		return changed;
+
 	Refresh();
 	Update();
 
-	if (send_msg)
+	if (notify)
 	{
 		wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
 		e.SetEventObject(this);
@@ -95,17 +106,10 @@ bool wxDoubleSlider::setLowValue(int val, bool send_msg)
 bool wxDoubleSlider::setHighValue(int val, bool notify)
 {
 	int old = hi_val_;
-	if (!link_)
-		hi_val_ = val <= low_val_ ? low_val_ + 1 :
-		(val > max_val_ ? max_val_ : val);
-	else
-		hi_val_ = val <= min_val_ ? min_val_ + 1 :
-		(val > max_val_ ? max_val_ : val);
-	bool changed = old != hi_val_;
-	if (!changed)
-		return changed;
 	if (link_)
 	{
+		hi_val_ = val <= min_val_ ? min_val_ + 1 :
+		(val > max_val_ ? max_val_ : val);
 		low_val_ = hi_val_ - link_dist_;
 		if (low_val_ < min_val_)
 		{
@@ -113,9 +117,13 @@ bool wxDoubleSlider::setHighValue(int val, bool notify)
 			hi_val_ = low_val_ + link_dist_;
 		}
 	}
-	changed = old != hi_val_;
+	else
+		hi_val_ = val <= low_val_ ? low_val_ + 1 :
+		(val > max_val_ ? max_val_ : val);
 
-	if (changed)
+	bool changed = old != hi_val_;
+
+	if (changed || stack_.empty())
 	{
 		double t;
 		if (time_sample(t))
@@ -123,6 +131,9 @@ bool wxDoubleSlider::setHighValue(int val, bool notify)
 		else
 			replace(t);
 	}
+
+	if (!changed)
+		return changed;
 
 	Refresh();
 	Update();

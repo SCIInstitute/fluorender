@@ -26,8 +26,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ComponentDlg.h"
-#include "VRenderFrame.h"
 #include <Global.h>
+#include <VRenderFrame.h>
+#include <VRenderGLView.h>
+#include <BrushToolDlg.h>
+#include <ColocalizationDlg.h>
 #include <Components/CompSelector.h>
 #include <Components/CompEditor.h>
 #include <Cluster/dbscan.h>
@@ -2488,7 +2491,7 @@ void ComponentDlg::OutputMulti(int color_type)
 				VolumeData* vd = *i;
 				if (vd)
 				{
-					m_frame->GetDataManager()->AddVolumeData(vd);
+					glbin_data_manager.AddVolumeData(vd);
 					if (i == channs.begin())
 					{
 						group_name = m_view->AddGroup("");
@@ -2533,7 +2536,7 @@ void ComponentDlg::OutputRgb(int color_type)
 				VolumeData* vd = *i;
 				if (vd)
 				{
-					m_frame->GetDataManager()->AddVolumeData(vd);
+					glbin_data_manager.AddVolumeData(vd);
 					if (i == channs.begin())
 					{
 						group_name = m_view->AddGroup("");
@@ -2591,9 +2594,7 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 		ann->SetTransform(m_view->m_cur_vol->GetTexture()->transform());
 		if (m_frame)
 		{
-			DataManager* mgr = m_frame->GetDataManager();
-			if (mgr)
-				mgr->AddAnnotations(ann);
+			glbin_data_manager.AddAnnotations(ann);
 			m_view->AddAnnotations(ann);
 			m_frame->UpdateList();
 			m_frame->UpdateTree(m_view->m_cur_vol->GetName());

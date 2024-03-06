@@ -29,43 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VRENDERFRAME_H_
 #define _VRENDERFRAME_H_
 
-#include <DataManager.h>
-#include "TreePanel.h"
-#include "ListPanel.h"
-#include "VRenderView.h"
-#include "PropPanel.h"
-#include "VolumePropPanel.h"
-#include "MeshPropPanel.h"
-#include "AnnotatPropPanel.h"
-#include "ManipPropPanel.h"
-#include "VMovieView.h"
-#include "ClippingView.h"
-#include "AdjustView.h"
-#include "SettingDlg.h"
-#include "HelpDlg.h"
-#include "BrushToolDlg.h"
-#include "NoiseCancellingDlg.h"
-#include "CountingDlg.h"
-#include "ConvertDlg.h"
-#include "ColocalizationDlg.h"
-#include "RecorderDlg.h"
-#include "MeasureDlg.h"
-#include "TraceDlg.h"
-#include "OclDlg.h"
-#include "ComponentDlg.h"
-#include "CalculationDlg.h"
-#include "MachineLearningDlg.h"
-#include "ScriptBreakDlg.h"
-#include "Tester.h"
-#include <Animator/Interpolator.h>
-#include <compatibility.h>
-#include <JVMInitializer.h>
-
+#include <Value.hpp>
 #include <wx/wx.h>
 #include <wx/menu.h>
 #include <wx/aui/aui.h>
 #include <wx/aui/auibook.h>
-
 #include <vector>
 
 using namespace std;
@@ -108,6 +76,39 @@ using namespace std;
 #define UITEXT_ADJUST		"Output Adjustments"
 #define UITEXT_CLIPPING		"Clipping Planes"
 #define UITEXT_PROPERTIES	"Properties"
+
+class TreePanel;
+class ListPanel;
+class VRenderView;
+class VRenderGLView;
+class DataGroup;
+class VolumeData;
+class MeshData;
+class Annotations;
+class PropPanel;
+class VolumePropPanel;
+class MeshPropPanel;
+class AnnotatPropPanel;
+class ManipPropPanel;
+class AdjustView;
+class VMovieView;
+class SettingDlg;
+class HelpDlg;
+class ClippingView;
+class BrushToolDlg;
+class NoiseCancellingDlg;
+class CountingDlg;
+class ConvertDlg;
+class ColocalizationDlg;
+class RecorderDlg;
+class MeasureDlg;
+class TraceDlg;
+class OclDlg;
+class ComponentDlg;
+class CalculationDlg;
+class ScriptBreakDlg;
+class MachineLearningDlg;
+class TesterDlg;
 
 class VRenderFrame: public wxFrame
 {
@@ -185,9 +186,6 @@ public:
 	void UpdateTreeIcons();
 	void UpdateList();
 
-	//data manager
-	DataManager* GetDataManager();
-	
 	//views
 	int GetViewNum();
 	VRenderGLView* GetView(int index);
@@ -238,62 +236,42 @@ public:
 	//prop view
 	AdjustView* GetAdjustView();
 	//movie view
-	VMovieView* GetMovieView()
-	{ return m_movie_view; }
+	VMovieView* GetMovieView();
 	//system settings
-	SettingDlg* GetSettingDlg()
-	{ return m_setting_dlg; }
+	SettingDlg* GetSettingDlg();
 	//help dialog
-	HelpDlg* GetHelpDlg()
-	{ return m_help_dlg; }
+	HelpDlg* GetHelpDlg();
 	//clipping view
-	ClippingView* GetClippingView()
-	{ return m_clip_view; }
+	ClippingView* GetClippingView();
 	//brush dialog
-	BrushToolDlg* GetBrushToolDlg()
-	{ return m_brush_tool_dlg; }
+	BrushToolDlg* GetBrushToolDlg();
 	//noise cancelling dialog
-	NoiseCancellingDlg* GetNoiseCancellingDlg()
-	{ return m_noise_cancelling_dlg; }
+	NoiseCancellingDlg* GetNoiseCancellingDlg();
 	//counting dialog
-	CountingDlg* GetCountingDlg()
-	{ return m_counting_dlg; }
+	CountingDlg* GetCountingDlg();
 	//convert dialog
-	ConvertDlg* GetConvertDlg()
-	{ return m_convert_dlg; }
-	ColocalizationDlg* GetColocalizationDlg()
-	{ return m_colocalization_dlg; }
+	ConvertDlg* GetConvertDlg();
+	ColocalizationDlg* GetColocalizationDlg();
 	//recorder dialog
-	RecorderDlg* GetRecorderDlg()
-	{ return m_recorder_dlg; }
+	RecorderDlg* GetRecorderDlg();
 	//measure dialog
-	MeasureDlg* GetMeasureDlg()
-	{ return m_measure_dlg; }
+	MeasureDlg* GetMeasureDlg();
 	//trace dialog
-	TraceDlg* GetTraceDlg()
-	{ return m_trace_dlg; }
+	TraceDlg* GetTraceDlg();
 	//ocl dialog
-	OclDlg* GetOclDlg()
-	{ return m_ocl_dlg; }
+	OclDlg* GetOclDlg();
 	//component dialog
-	ComponentDlg* GetComponentDlg()
-	{ return m_component_dlg; }
+	ComponentDlg* GetComponentDlg();
 	//calculation dialog
-	CalculationDlg* GetCalculationDlg()
-	{ return m_calculation_dlg; }
+	CalculationDlg* GetCalculationDlg();
 	//script break dialog
-	ScriptBreakDlg* GetScriptBreakDlg()
-	{ return m_script_break_dlg; }
+	ScriptBreakDlg* GetScriptBreakDlg();
 
 	//selection
-	int GetCurSelType()
-	{ return m_cur_sel_type; }
-	//get current selected volume
-	VolumeData* GetCurSelVol()
-	{ return m_data_mgr.GetVolumeData(m_cur_sel_vol); }
+	int GetCurSelType();
+	VolumeData* GetCurSelVol();
 	//get current selected mesh
-	MeshData* GetCurSelMesh()
-	{ return m_data_mgr.GetMeshData(m_cur_sel_mesh); }
+	MeshData* GetCurSelMesh();
 
 	void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
 	void OpenProject(wxString& filename);
@@ -315,41 +293,21 @@ public:
 	void ShowMachineLearningDlg();
 	void ShowScriptBreakDlg(bool show=true);
 
-	//get interpolator
-	Interpolator* GetInterpolator()
-	{ return &m_interpolator; }
-
 	//tex renderer settings
 	void SetTextureRendererSettings();
 	void SetTextureUndos();
 
 	//quit option
-	void OnQuit(wxCommandEvent& event)
-	{ Close(true); }
+	void OnQuit(wxCommandEvent& event);
 	//show info
 	void OnInfo(wxCommandEvent& event);
 
-	bool GetBenchmark()
-	{ return m_benchmark; }
+	bool GetBenchmark();
 
-	void ClearVrvList()
-	{ m_vrv_list.clear(); }
+	void ClearVrvList();
 
 	wxString ScriptDialog(const wxString& title,
-		const wxString& wildcard, long style)
-	{
-		m_movie_view->HoldRun();
-		wxString result;
-		wxFileDialog *dlg = new wxFileDialog(
-			this, title, "", "",
-			wildcard, style);
-		int rval = dlg->ShowModal();
-		if (rval == wxID_OK)
-			result = dlg->GetPath();
-		delete dlg;
-		m_movie_view->ResumeRun();
-		return result;
-	}
+		const wxString& wildcard, long style);
 
 public: //public so export window can see it and set it. 
 	RecorderDlg* m_recorder_dlg;
@@ -372,8 +330,7 @@ private:
 
 	TreePanel *m_tree_panel;
 	ListPanel *m_list_panel;
-	vector <VRenderView*> m_vrv_list;
-	DataManager m_data_mgr;
+	std::vector<VRenderView*> m_vrv_list;
 	wxAuiNotebook *m_prop_panel;
 	ClippingView *m_clip_view;
 	AdjustView* m_adjust_view;
@@ -397,10 +354,6 @@ private:
 	TesterDlg* m_tester;
 	//flag for show/hide views
 	bool m_ui_state;
-	//interpolator
-	//it stores all keys
-	//and does interpolaions too
-	Interpolator m_interpolator;
 
 	//current selection (allow only one)
 	//selection type
@@ -421,7 +374,7 @@ private:
 private:
 	//views
 	wxString CreateView(int row=1);
-	VRenderGLView* GetLastView() {return m_vrv_list[m_vrv_list.size()-1]->m_glview;}
+	VRenderGLView* GetLastView();
 	static wxWindow* CreateExtraControlVolume(wxWindow* parent);
 	static wxWindow* CreateExtraControlVolumeForImport(wxWindow* parent);
 	static wxWindow* CreateExtraControlProjectSave(wxWindow* parent);

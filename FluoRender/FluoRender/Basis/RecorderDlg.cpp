@@ -26,8 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "RecorderDlg.h"
-#include "VRenderFrame.h"
 #include <Global.h>
+#include <VRenderFrame.h>
+#include <VRenderGLView.h>
+#include <VRenderView.h>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include "key.xpm"
@@ -132,23 +134,13 @@ void KeyListCtrl::DeleteSel()
 	long id;
 	str.ToLong(&id);
 
-	if (!m_frame)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-	interpolator->RemoveKey(id);
+	glbin_interpolator.RemoveKey(id);
 	Update();
 }
 
 void KeyListCtrl::DeleteAll()
 {
-	if (!m_frame)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-	interpolator->Clear();
+	glbin_interpolator.Clear();
 	Update();
 }
 
@@ -160,45 +152,33 @@ void KeyListCtrl::Update()
 	m_description_text->Hide();
 	m_editing_item = -1;
 
-	if (!m_frame)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
 	DeleteAllItems();
-	for (int i=0; i<interpolator->GetKeyNum(); i++)
+	for (int i=0; i<glbin_interpolator.GetKeyNum(); i++)
 	{
-		int id = interpolator->GetKeyID(i);
-		int time = interpolator->GetKeyTime(i);
-		int duration = interpolator->GetKeyDuration(i);
-		int interp = interpolator->GetKeyType(i);
-		string desc = interpolator->GetKeyDesc(i);
+		int id = glbin_interpolator.GetKeyID(i);
+		int time = glbin_interpolator.GetKeyTime(i);
+		int duration = glbin_interpolator.GetKeyDuration(i);
+		int interp = glbin_interpolator.GetKeyType(i);
+		string desc = glbin_interpolator.GetKeyDesc(i);
 		Append(id, time, duration, interp, desc);
 	}
 }
 
 void KeyListCtrl::UpdateText()
 {
-	if (!m_frame)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
 	wxString str;
 
-	for (int i=0; i<interpolator->GetKeyNum(); i++)
+	for (int i=0; i<glbin_interpolator.GetKeyNum(); i++)
 	{
-		int id = interpolator->GetKeyID(i);
-		int time = interpolator->GetKeyTime(i);
-		int duration = interpolator->GetKeyDuration(i);
-		int interp = interpolator->GetKeyType(i);
-		string desc = interpolator->GetKeyDesc(i);
+		int id = glbin_interpolator.GetKeyID(i);
+		int time = glbin_interpolator.GetKeyTime(i);
+		int duration = glbin_interpolator.GetKeyDuration(i);
+		int interp = glbin_interpolator.GetKeyType(i);
+		string desc = glbin_interpolator.GetKeyDesc(i);
 		
-        wxString wx_id = wxString::Format("%d", id);
-        wxString wx_time = wxString::Format("%d", time);
-        wxString wx_duration = wxString::Format("%d", duration);
+		wxString wx_id = wxString::Format("%d", id);
+		wxString wx_time = wxString::Format("%d", time);
+		wxString wx_duration = wxString::Format("%d", duration);
 		SetText(i, 0, wx_id);
 		SetText(i, 1, wx_time);
 		SetText(i, 2, wx_duration);
@@ -220,14 +200,10 @@ void KeyListCtrl::OnAct(wxListEvent &event)
 	long id;
 	str.ToLong(&id);
 
-	if (!m_frame || !m_recdlg)
+	int index = glbin_interpolator.GetKeyIndex(int(id));
+	double time = glbin_interpolator.GetKeyTime(index);
+	if (!m_recdlg)
 		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
-	int index = interpolator->GetKeyIndex(int(id));
-	double time = interpolator->GetKeyTime(index);
 	VRenderGLView* view = m_recdlg->GetView();
 	if (view)
 	{
@@ -330,18 +306,12 @@ void KeyListCtrl::OnFrameText(wxCommandEvent& event)
 	long id;
 	str.ToLong(&id);
 
-	if (!m_frame)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
-	int index = interpolator->GetKeyIndex(int(id));
+	int index = glbin_interpolator.GetKeyIndex(int(id));
 	str = m_frame_text->GetValue();
 	double time;
 	if (str.ToDouble(&time))
 	{
-		interpolator->ChangeTime(index, time);
+		glbin_interpolator.ChangeTime(index, time);
 	}
 }
 
@@ -354,18 +324,12 @@ void KeyListCtrl::OnDurationText(wxCommandEvent& event)
 	long id;
 	str.ToLong(&id);
 
-	if (!m_frame)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
-	int index = interpolator->GetKeyIndex(int(id));
+	int index = glbin_interpolator.GetKeyIndex(int(id));
 	str = m_duration_text->GetValue();
 	double duration;
 	if (str.ToDouble(&duration))
 	{
-		interpolator->ChangeDuration(index, duration);
+		glbin_interpolator.ChangeDuration(index, duration);
 		SetText(m_editing_item, 2, str);
 	}
 }
@@ -379,14 +343,8 @@ void KeyListCtrl::OnInterpoCmb(wxCommandEvent& event)
 	long id;
 	str.ToLong(&id);
 
-	if (!m_frame)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
-	int index = interpolator->GetKeyIndex(int(id));
-	FlKeyGroup* keygroup = interpolator->GetKeyGroup(index);
+	int index = glbin_interpolator.GetKeyIndex(int(id));
+	FlKeyGroup* keygroup = glbin_interpolator.GetKeyGroup(index);
 	if (keygroup)
 	{
 		int sel = m_interpolation_cmb->GetSelection();
@@ -405,14 +363,8 @@ void KeyListCtrl::OnDescritionText(wxCommandEvent& event)
 	long id;
 	str.ToLong(&id);
 
-	if (!m_frame)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
-	int index = interpolator->GetKeyIndex(int(id));
-	FlKeyGroup* keygroup = interpolator->GetKeyGroup(index);
+	int index = glbin_interpolator.GetKeyIndex(int(id));
+	FlKeyGroup* keygroup = glbin_interpolator.GetKeyGroup(index);
 	if (keygroup)
 	{
 		str = m_description_text->GetValue();
@@ -459,19 +411,13 @@ void KeyListCtrl::OnDragging(wxMouseEvent& event)
 	long index = HitTest(pos, flags, NULL); // got to use it at last
 	if (index >=0 && index != m_editing_item && index != m_dragging_to_item)
 	{
-		if (!m_frame)
-			return;
-		Interpolator* interpolator = m_frame->GetInterpolator();
-		if (!interpolator)
-			return;
-
 		m_dragging_to_item = index;
 
 		//change the content in the interpolator
 		if (m_editing_item > m_dragging_to_item)
-			interpolator->MoveKeyBefore(m_editing_item, m_dragging_to_item);
+			glbin_interpolator.MoveKeyBefore(m_editing_item, m_dragging_to_item);
 		else
-			interpolator->MoveKeyAfter(m_editing_item, m_dragging_to_item);
+			glbin_interpolator.MoveKeyAfter(m_editing_item, m_dragging_to_item);
 
 		DeleteItem(m_editing_item);
 		InsertItem(m_dragging_to_item, "", 0);
@@ -666,11 +612,6 @@ void RecorderDlg::OnSetKey(wxCommandEvent &event)
 void RecorderDlg::OnInsKey(wxCommandEvent &event)
 {
 	wxString str;
-	if (!m_frame)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
 	long item = m_keylist->GetNextItem(-1,
 		wxLIST_NEXT_ALL,
 		wxLIST_STATE_SELECTED);
@@ -680,23 +621,19 @@ void RecorderDlg::OnInsKey(wxCommandEvent &event)
 		str = m_keylist->GetItemText(item);
 		long id;
 		str.ToLong(&id);
-		index = interpolator->GetKeyIndex(id);
+		index = glbin_interpolator.GetKeyIndex(id);
 	}
 	//check if 4D
 	bool is_4d = false;
 	VolumeData* vd = 0;
-	DataManager* mgr = m_frame->GetDataManager();
-	if (mgr)
+	for (int i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
 	{
-		for (int i = 0; i < mgr->GetVolumeNum(); i++)
+		vd = glbin_data_manager.GetVolumeData(i);
+		if (vd->GetReader() &&
+			vd->GetReader()->GetTimeNum() > 1)
 		{
-			vd = mgr->GetVolumeData(i);
-			if (vd->GetReader() &&
-				vd->GetReader()->GetTimeNum() > 1)
-			{
-				is_4d = true;
-				break;
-			}
+			is_4d = true;
+			break;
 		}
 	}
 	double duration = 0.0;
@@ -714,8 +651,8 @@ void RecorderDlg::OnInsKey(wxCommandEvent &event)
 		//	keycode.l2 = 0;
 		//	keycode.l2_name = "frame";
 		//	double frame;
-		//	if (interpolator->GetDouble(keycode, 
-		//		interpolator->GetLastIndex(), frame))
+		//	if (glbin_interpolator.GetDouble(keycode, 
+		//		glbin_interpolator.GetLastIndex(), frame))
 		//		duration = fabs(ct - frame);
 		//}
 	}
@@ -740,12 +677,6 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 			return;
 	}
 
-	DataManager* mgr = m_frame->GetDataManager();
-	if (!mgr)
-		return;
-	Interpolator *interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
 	FlKeyCode keycode;
 	FlKeyDouble* flkey = 0;
 	FlKeyQuaternion* flkeyQ = 0;
@@ -753,15 +684,15 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	FlKeyInt* flkeyI = 0;
 	FlKeyColor* flkeyC = 0;
 
-	double t = interpolator->GetLastT();
+	double t = glbin_interpolator.GetLastT();
 	t = t<0.0?0.0:t+duration;
 
-	interpolator->Begin(t, duration);
+	glbin_interpolator.Begin(t, duration);
 
 	//for all volumes
-	for (int i=0; i<mgr->GetVolumeNum() ; i++)
+	for (int i=0; i< glbin_data_manager.GetVolumeNum() ; i++)
 	{
-		VolumeData* vd = mgr->GetVolumeData(i);
+		VolumeData* vd = glbin_data_manager.GetVolumeData(i);
 		keycode.l0 = 1;
 		keycode.l0_name = m_view->m_vrv->GetName();
 		keycode.l1 = 2;
@@ -770,7 +701,7 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 		keycode.l2 = 0;
 		keycode.l2_name = "display";
 		flkeyB = new FlKeyBoolean(keycode, vd->GetDisp());
-		interpolator->AddKey(flkeyB);
+		glbin_interpolator.AddKey(flkeyB);
 		//clipping planes
 		vector<fluo::Plane*> * planes = vd->GetVR()->get_planes();
 		if (!planes)
@@ -785,54 +716,54 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 		keycode.l2 = 0;
 		keycode.l2_name = "x1_val";
 		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
-		interpolator->AddKey(flkey);
+		glbin_interpolator.AddKey(flkey);
 		//x2
 		plane = (*planes)[1];
 		plane->get_copy(abcd);
 		keycode.l2 = 0;
 		keycode.l2_name = "x2_val";
 		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
-		interpolator->AddKey(flkey);
+		glbin_interpolator.AddKey(flkey);
 		//y1
 		plane = (*planes)[2];
 		plane->get_copy(abcd);
 		keycode.l2 = 0;
 		keycode.l2_name = "y1_val";
 		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
-		interpolator->AddKey(flkey);
+		glbin_interpolator.AddKey(flkey);
 		//y2
 		plane = (*planes)[3];
 		plane->get_copy(abcd);
 		keycode.l2 = 0;
 		keycode.l2_name = "y2_val";
 		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
-		interpolator->AddKey(flkey);
+		glbin_interpolator.AddKey(flkey);
 		//z1
 		plane = (*planes)[4];
 		plane->get_copy(abcd);
 		keycode.l2 = 0;
 		keycode.l2_name = "z1_val";
 		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
-		interpolator->AddKey(flkey);
+		glbin_interpolator.AddKey(flkey);
 		//z2
 		plane = (*planes)[5];
 		plane->get_copy(abcd);
 		keycode.l2 = 0;
 		keycode.l2_name = "z2_val";
 		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
-		interpolator->AddKey(flkey);
+		glbin_interpolator.AddKey(flkey);
 		//t
 		int frame = vd->GetCurTime();
 		keycode.l2 = 0;
 		keycode.l2_name = "frame";
 		flkey = new FlKeyDouble(keycode, frame);
-		interpolator->AddKey(flkey);
+		glbin_interpolator.AddKey(flkey);
 		//primary color
 		fluo::Color pc = vd->GetColor();
 		keycode.l2 = 0;
 		keycode.l2_name = "color";
 		flkeyC = new FlKeyColor(keycode, pc);
-		interpolator->AddKey(flkeyC);
+		glbin_interpolator.AddKey(flkeyC);
 	}
 	//for the view
 	keycode.l0 = 1;
@@ -844,60 +775,60 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	keycode.l2_name = "rotation";
 	fluo::Quaternion q = m_view->GetRotations();
 	flkeyQ = new FlKeyQuaternion(keycode, q);
-	interpolator->AddKey(flkeyQ);
+	glbin_interpolator.AddKey(flkeyQ);
 	//translation
 	double tx, ty, tz;
 	m_view->GetTranslations(tx, ty, tz);
 	//x
 	keycode.l2_name = "translation_x";
 	flkey = new FlKeyDouble(keycode, tx);
-	interpolator->AddKey(flkey);
+	glbin_interpolator.AddKey(flkey);
 	//y
 	keycode.l2_name = "translation_y";
 	flkey = new FlKeyDouble(keycode, ty);
-	interpolator->AddKey(flkey);
+	glbin_interpolator.AddKey(flkey);
 	//z
 	keycode.l2_name = "translation_z";
 	flkey = new FlKeyDouble(keycode, tz);
-	interpolator->AddKey(flkey);
+	glbin_interpolator.AddKey(flkey);
 	//centers
 	m_view->GetCenters(tx, ty, tz);
 	//x
 	keycode.l2_name = "center_x";
 	flkey = new FlKeyDouble(keycode, tx);
-	interpolator->AddKey(flkey);
+	glbin_interpolator.AddKey(flkey);
 	//y
 	keycode.l2_name = "center_y";
 	flkey = new FlKeyDouble(keycode, ty);
-	interpolator->AddKey(flkey);
+	glbin_interpolator.AddKey(flkey);
 	//z
 	keycode.l2_name = "center_z";
 	flkey = new FlKeyDouble(keycode, tz);
-	interpolator->AddKey(flkey);
+	glbin_interpolator.AddKey(flkey);
 	//obj traslation
 	m_view->GetObjTrans(tx, ty, tz);
 	//x
 	keycode.l2_name = "obj_trans_x";
 	flkey = new FlKeyDouble(keycode, tx);
-	interpolator->AddKey(flkey);
+	glbin_interpolator.AddKey(flkey);
 	//y
 	keycode.l2_name = "obj_trans_y";
 	flkey = new FlKeyDouble(keycode, ty);
-	interpolator->AddKey(flkey);
+	glbin_interpolator.AddKey(flkey);
 	//z
 	keycode.l2_name = "obj_trans_z";
 	flkey = new FlKeyDouble(keycode, tz);
-	interpolator->AddKey(flkey);
+	glbin_interpolator.AddKey(flkey);
 	//scale
 	double scale = m_view->m_scale_factor;
 	keycode.l2_name = "scale";
 	flkey = new FlKeyDouble(keycode, scale);
-	interpolator->AddKey(flkey);
+	glbin_interpolator.AddKey(flkey);
 	//intermixing mode
 	int ival = m_view->GetVolMethod();
 	keycode.l2_name = "volmethod";
 	flkeyI = new FlKeyInt(keycode, ival);
-	interpolator->AddKey(flkeyI);
+	glbin_interpolator.AddKey(flkeyI);
 	//perspective angle
 	bool persp = m_view->GetPersp();
 	double aov = m_view->GetAov();
@@ -905,11 +836,11 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 		aov = 9.9;
 	keycode.l2_name = "aov";
 	flkey = new FlKeyDouble(keycode, aov);
-	interpolator->AddKey(flkey);
+	glbin_interpolator.AddKey(flkey);
 
-	interpolator->End();
+	glbin_interpolator.End();
 
-	FlKeyGroup* group = interpolator->GetKeyGroup(interpolator->GetLastIndex());
+	FlKeyGroup* group = glbin_interpolator.GetKeyGroup(glbin_interpolator.GetLastIndex());
 	if (group)
 		group->type = interpolation;
 }
@@ -973,13 +904,6 @@ void RecorderDlg::AutoKeyChanComb(int comb)
 			return;
 	}
 
-	DataManager* mgr = m_frame->GetDataManager();
-	if (!mgr)
-		return;
-	Interpolator *interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
 	wxString str = m_duration_text->GetValue();
 	double duration;
 	str.ToDouble(&duration);
@@ -987,7 +911,7 @@ void RecorderDlg::AutoKeyChanComb(int comb)
 	FlKeyCode keycode;
 	FlKeyBoolean* flkeyB = 0;
 
-	double t = interpolator->GetLastT();
+	double t = glbin_interpolator.GetLastT();
 	t = t<0.0?0.0:t;
 	if (t>0.0) t += duration;
 
@@ -1005,7 +929,7 @@ void RecorderDlg::AutoKeyChanComb(int comb)
 
 	do
 	{
-		interpolator->Begin(t, duration);
+		glbin_interpolator.Begin(t, duration);
 
 		//for all volumes
 		for (i=0; i<m_view->GetAllVolumeNum(); i++)
@@ -1019,10 +943,10 @@ void RecorderDlg::AutoKeyChanComb(int comb)
 			keycode.l2 = 0;
 			keycode.l2_name = "display";
 			flkeyB = new FlKeyBoolean(keycode, chan_mask[i]);
-			interpolator->AddKey(flkeyB);
+			glbin_interpolator.AddKey(flkeyB);
 		}
 
-		interpolator->End();
+		glbin_interpolator.End();
 		t += duration;
 	} while (GetMask(chan_mask));
 

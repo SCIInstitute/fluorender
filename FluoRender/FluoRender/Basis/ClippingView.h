@@ -107,7 +107,6 @@ public:
 	void GetSettings(VRenderGLView* view);
 	void SetVolumeData(VolumeData* vd);
 	void SetMeshData(MeshData* md);
-	void SetDataManager(DataManager* mgr);
 	int GetSelType();
 	VolumeData* GetVolumeData();
 	MeshData* GetMeshData();
@@ -142,7 +141,6 @@ private:
 	int m_sel_type;		//curent selection type
 	VolumeData* m_vd;	//current volume data
 	MeshData* m_md;		//current mesh data
-	DataManager* m_mgr;	//manage all if clipping planes are synced
 	bool m_draw_clip;
 	bool m_hold_planes;
 	PLANE_MODES m_plane_mode;

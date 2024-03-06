@@ -26,9 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "VolumeCalculator.h"
-#include <DataManager.h>
+#include <Global.h>
 #include <VRenderFrame.h>
 #include <VRenderGLView.h>
+#include <VolumePropPanel.h>
 #include <Selection/VolumeSelector.h>
 #include <wx/progdlg.h>
 
@@ -139,7 +140,7 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 		{
 				if (add)
 				{
-					m_frame->GetDataManager()->AddVolumeData(vd);
+					glbin_data_manager.AddVolumeData(vd);
 					//vr_frame->GetDataManager()->SetVolumeDefault(vd);
 					m_view->AddVolumeData(vd, prev_group);
 

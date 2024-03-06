@@ -94,6 +94,8 @@ public:
 	bool m_save_float;		//save float values in captured images
 	double m_dpi;			//dpi number of captured image
 	bool m_realtime_compress;//real time compress
+	double m_mov_bitrate;	//bitrate for mov export (Mbits)
+	wxString m_mov_filename;//file name for mov export
 
 	bool m_run_script;		//script
 	bool m_script_break;	//allow script break

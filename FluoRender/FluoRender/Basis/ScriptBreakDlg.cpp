@@ -26,8 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ScriptBreakDlg.h"
-#include "VRenderFrame.h"
 #include <Global.h>
+#include <VRenderFrame.h>
+#include <VMovieView.h>
 
 BEGIN_EVENT_TABLE(ScriptBreakDlg, wxPanel)
 EVT_CHECKBOX(ID_ShownChk, ScriptBreakDlg::OnShownChk)

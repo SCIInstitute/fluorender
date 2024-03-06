@@ -52,6 +52,8 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumePoint.h>
 #include <SegGrow.h>
 #include <DistCalculator.h>
+#include <Animator/Interpolator.h>
+#include <DataManager.h>
 
 #define glbin fluo::Global::instance()
 #define glbin_cache_queue fluo::Global::instance().get_cache_queue()
@@ -82,6 +84,8 @@ DEALINGS IN THE SOFTWARE.
 #define glbin_volume_point fluo::Global::instance().get_volume_point()
 #define glbin_seg_grow fluo::Global::instance().get_seg_grow()
 #define glbin_dist_calculator fluo::Global::instance().get_dist_calculator()
+#define glbin_interpolator fluo::Global::instance().get_interpolator()
+#define glbin_data_manager fluo::Global::instance().get_data_manager()
 
 namespace fluo
 {
@@ -171,6 +175,8 @@ namespace fluo
 		flrd::VolumePoint& get_volume_point() { return m_volume_point; }
 		flrd::SegGrow& get_seg_grow() { return m_seg_grow; }
 		flrd::DistCalculator& get_dist_calculator() { return m_dist_calculator; }
+		Interpolator& get_interpolator() { return m_interpolator; }
+		DataManager& get_data_manager() { return m_data_manager; }
 
 	private:
 		Global();
@@ -215,6 +221,8 @@ namespace fluo
 		flrd::VolumePoint m_volume_point;
 		flrd::SegGrow m_seg_grow;
 		flrd::DistCalculator m_dist_calculator;
+		Interpolator m_interpolator;
+		DataManager m_data_manager;
 	};
 
 }

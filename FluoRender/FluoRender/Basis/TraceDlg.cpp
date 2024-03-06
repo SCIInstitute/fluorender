@@ -27,8 +27,12 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "TraceDlg.h"
 #include <Global.h>
-#include <DataManager.h>
-#include "VRenderFrame.h"
+#include <VRenderFrame.h>
+#include <VRenderGLView.h>
+#include <BrushToolDlg.h>
+#include <MeasureDlg.h>
+#include <ComponentDlg.h>
+#include <VMovieView.h>
 #include <Components/CompSelector.h>
 #include <Components/CompAnalyzer.h>
 #include <Components/CompEditor.h>

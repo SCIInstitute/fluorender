@@ -26,9 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "OclDlg.h"
-#include <DataManager.h>
-#include <VRenderFrame.h>
 #include <Global.h>
+#include <VRenderFrame.h>
+#include <VRenderGLView.h>
 #include <wxSingleSlider.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
@@ -374,7 +374,7 @@ void OclDlg::Execute()
 			return;
 		if (m_frame)
 		{
-			m_frame->GetDataManager()->AddVolumeData(vd_r);
+			glbin_data_manager.AddVolumeData(vd_r);
 			m_view->AddVolumeData(vd_r);
 			vd->SetDisp(false);
 			m_frame->UpdateList();

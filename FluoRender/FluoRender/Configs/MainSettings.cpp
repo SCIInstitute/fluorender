@@ -56,6 +56,8 @@ MainSettings::MainSettings()
 	m_save_float = false;
 	m_dpi = 72.0;
 	m_realtime_compress = false;
+	m_mov_bitrate = 20.0;
+	m_mov_filename = "output.mov";
 
 	m_script_break = true;
 	m_run_script = false;
@@ -208,6 +210,8 @@ void MainSettings::Read()
 		fconfig.Read("save float", &m_save_float, false);
 		fconfig.Read("dpi", &m_dpi, 72.0);
 		fconfig.Read("rt compress", &m_realtime_compress, false);
+		fconfig.Read("mov bitrate", &m_mov_bitrate, 20.0);
+		fconfig.Read("mov filename", &m_mov_filename, "output.mov");
 	}
 	//script
 	if (fconfig.Exists("/script"))
@@ -439,6 +443,8 @@ void MainSettings::Save()
 	fconfig.Write("save float", m_save_float);
 	fconfig.Write("dpi", m_dpi);
 	fconfig.Write("rt compress", m_realtime_compress);
+	fconfig.Write("mov bitrate", m_mov_bitrate);
+	fconfig.Write("mov filename", m_mov_filename);
 
 	//script
 	fconfig.SetPath("/script");

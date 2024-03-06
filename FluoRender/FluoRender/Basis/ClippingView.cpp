@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ClippingView.h"
 #include "VRenderFrame.h"
-#include <DataManager.h>
+#include <VRenderGLView.h>
 #include <Global/Global.h>
 #include <compatibility.h>
 #include <wxDoubleSlider.h>
@@ -538,11 +538,6 @@ void ClippingView::SetMeshData(MeshData* md)
 	m_sel_type = 3;
 }
 
-void ClippingView::SetDataManager(DataManager* mgr)
-{
-	m_mgr = mgr;
-}
-
 void ClippingView::GetSettings(VRenderGLView* view)
 {
 	m_view = view;
@@ -717,9 +712,6 @@ void ClippingView::OnLinkChannelsBtn(wxCommandEvent &event)
 {
 	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
-		if (!m_mgr)
-			return;
-
 		wxString str;
 		//x1
 		str = m_x1_clip_text->GetValue();
@@ -748,9 +740,9 @@ void ClippingView::OnLinkChannelsBtn(wxCommandEvent &event)
 
 		int i;
 
-		for (i=0; i<m_mgr->GetVolumeNum(); i++)
+		for (i=0; i< glbin_data_manager.GetVolumeNum(); i++)
 		{
-			VolumeData* vd = m_mgr->GetVolumeData(i);
+			VolumeData* vd = glbin_data_manager.GetVolumeData(i);
 			if (!vd || vd == m_vd)
 				continue;
 
@@ -873,30 +865,27 @@ void ClippingView::OnClipResetBtn(wxCommandEvent &event)
 	//link
 	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
-		if (m_mgr)
+		int i;
+		for (i=0; i< glbin_data_manager.GetVolumeNum(); i++)
 		{
-			int i;
-			for (i=0; i<m_mgr->GetVolumeNum(); i++)
-			{
-				VolumeData* vd = m_mgr->GetVolumeData(i);
-				if (!vd || vd == m_vd)
-					continue;
+			VolumeData* vd = glbin_data_manager.GetVolumeData(i);
+			if (!vd || vd == m_vd)
+				continue;
 
-				planes = 0;
-				if (m_vd->GetVR())
-					planes = vd->GetVR()->get_planes();
-				if (!planes)
-					continue;
-				if (planes->size() != 6)
-					continue;
+			planes = 0;
+			if (m_vd->GetVR())
+				planes = vd->GetVR()->get_planes();
+			if (!planes)
+				continue;
+			if (planes->size() != 6)
+				continue;
 
-				(*planes)[0]->ChangePlane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(1.0, 0.0, 0.0));
-				(*planes)[1]->ChangePlane(fluo::Point(1.0, 0.0, 0.0), fluo::Vector(-1.0, 0.0, 0.0));
-				(*planes)[2]->ChangePlane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(0.0, 1.0, 0.0));
-				(*planes)[3]->ChangePlane(fluo::Point(0.0, 1.0, 0.0), fluo::Vector(0.0, -1.0, 0.0));
-				(*planes)[4]->ChangePlane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(0.0, 0.0, 1.0));
-				(*planes)[5]->ChangePlane(fluo::Point(0.0, 0.0, 1.0), fluo::Vector(0.0, 0.0, -1.0));
-			}
+			(*planes)[0]->ChangePlane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(1.0, 0.0, 0.0));
+			(*planes)[1]->ChangePlane(fluo::Point(1.0, 0.0, 0.0), fluo::Vector(-1.0, 0.0, 0.0));
+			(*planes)[2]->ChangePlane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(0.0, 1.0, 0.0));
+			(*planes)[3]->ChangePlane(fluo::Point(0.0, 1.0, 0.0), fluo::Vector(0.0, -1.0, 0.0));
+			(*planes)[4]->ChangePlane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(0.0, 0.0, 1.0));
+			(*planes)[5]->ChangePlane(fluo::Point(0.0, 0.0, 1.0), fluo::Vector(0.0, 0.0, -1.0));
 		}
 	}
 
@@ -962,27 +951,24 @@ void ClippingView::OnX1ClipEdit(wxCommandEvent &event)
 
 	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
-		if (m_mgr)
+		int i;
+		for (i=0; i< glbin_data_manager.GetVolumeNum(); i++)
 		{
-			int i;
-			for (i=0; i<m_mgr->GetVolumeNum(); i++)
-			{
-				VolumeData* vd = m_mgr->GetVolumeData(i);
-				if (!vd || vd == m_vd)
-					continue;
+			VolumeData* vd = glbin_data_manager.GetVolumeData(i);
+			if (!vd || vd == m_vd)
+				continue;
 
-				planes = 0;
-				if (m_vd->GetVR())
-					planes = vd->GetVR()->get_planes();
-				if (!planes)
-					continue;
-				if (planes->size() != 6)
-					continue;
+			planes = 0;
+			if (m_vd->GetVR())
+				planes = vd->GetVR()->get_planes();
+			if (!planes)
+				continue;
+			if (planes->size() != 6)
+				continue;
 
-				(*planes)[0]->ChangePlane(fluo::Point(val, 0.0, 0.0), fluo::Vector(1.0, 0.0, 0.0));
-				if (link)
-					(*planes)[1]->ChangePlane(fluo::Point(val2, 0.0, 0.0), fluo::Vector(-1.0, 0.0, 0.0));
-			}
+			(*planes)[0]->ChangePlane(fluo::Point(val, 0.0, 0.0), fluo::Vector(1.0, 0.0, 0.0));
+			if (link)
+				(*planes)[1]->ChangePlane(fluo::Point(val2, 0.0, 0.0), fluo::Vector(-1.0, 0.0, 0.0));
 		}
 	}
 
@@ -1024,26 +1010,23 @@ void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
 
 	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
-		if (m_mgr)
+		int i;
+		for (i=0; i< glbin_data_manager.GetVolumeNum(); i++)
 		{
-			int i;
-			for (i=0; i<m_mgr->GetVolumeNum(); i++)
-			{
-				VolumeData* vd = m_mgr->GetVolumeData(i);
-				if (!vd || vd == m_vd)
-					continue;
+			VolumeData* vd = glbin_data_manager.GetVolumeData(i);
+			if (!vd || vd == m_vd)
+				continue;
 
-				planes = 0;
-				if (m_vd->GetVR())
-					planes = vd->GetVR()->get_planes();
-				if (!planes)
-					continue;
-				if (planes->size() != 6)
-					continue;
-				(*planes)[1]->ChangePlane(fluo::Point(val, 0.0, 0.0), fluo::Vector(-1.0, 0.0, 0.0));
-				if (link)
-					(*planes)[0]->ChangePlane(fluo::Point(val2, 0.0, 0.0), fluo::Vector(1.0, 0.0, 0.0));
-			}
+			planes = 0;
+			if (m_vd->GetVR())
+				planes = vd->GetVR()->get_planes();
+			if (!planes)
+				continue;
+			if (planes->size() != 6)
+				continue;
+			(*planes)[1]->ChangePlane(fluo::Point(val, 0.0, 0.0), fluo::Vector(-1.0, 0.0, 0.0));
+			if (link)
+				(*planes)[0]->ChangePlane(fluo::Point(val2, 0.0, 0.0), fluo::Vector(1.0, 0.0, 0.0));
 		}
 	}
 
@@ -1111,27 +1094,24 @@ void ClippingView::OnY1ClipEdit(wxCommandEvent &event)
 
 	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
-		if (m_mgr)
+		int i;
+		for (i=0; i< glbin_data_manager.GetVolumeNum(); i++)
 		{
-			int i;
-			for (i=0; i<m_mgr->GetVolumeNum(); i++)
-			{
-				VolumeData* vd = m_mgr->GetVolumeData(i);
-				if (!vd || vd == m_vd)
-					continue;
+			VolumeData* vd = glbin_data_manager.GetVolumeData(i);
+			if (!vd || vd == m_vd)
+				continue;
 
-				planes = 0;
-				if (m_vd->GetVR())
-					planes = vd->GetVR()->get_planes();
-				if (!planes)
-					continue;
-				if (planes->size() != 6)
-					continue;
+			planes = 0;
+			if (m_vd->GetVR())
+				planes = vd->GetVR()->get_planes();
+			if (!planes)
+				continue;
+			if (planes->size() != 6)
+				continue;
 
-				(*planes)[2]->ChangePlane(fluo::Point(0.0, val, 0.0), fluo::Vector(0.0, 1.0, 0.0));
-				if (link)
-					(*planes)[3]->ChangePlane(fluo::Point(0.0, val2, 0.0), fluo::Vector(0.0, -1.0, 0.0));
-			}
+			(*planes)[2]->ChangePlane(fluo::Point(0.0, val, 0.0), fluo::Vector(0.0, 1.0, 0.0));
+			if (link)
+				(*planes)[3]->ChangePlane(fluo::Point(0.0, val2, 0.0), fluo::Vector(0.0, -1.0, 0.0));
 		}
 	}
 
@@ -1173,27 +1153,24 @@ void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
 
 	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
-		if (m_mgr)
+		int i;
+		for (i=0; i< glbin_data_manager.GetVolumeNum(); i++)
 		{
-			int i;
-			for (i=0; i<m_mgr->GetVolumeNum(); i++)
-			{
-				VolumeData* vd = m_mgr->GetVolumeData(i);
-				if (!vd || vd == m_vd)
-					continue;
+			VolumeData* vd = glbin_data_manager.GetVolumeData(i);
+			if (!vd || vd == m_vd)
+				continue;
 
-				planes = 0;
-				if (m_vd->GetVR())
-					planes = vd->GetVR()->get_planes();
-				if (!planes)
-					continue;
-				if (planes->size() != 6)
-					continue;
+			planes = 0;
+			if (m_vd->GetVR())
+				planes = vd->GetVR()->get_planes();
+			if (!planes)
+				continue;
+			if (planes->size() != 6)
+				continue;
 
-				(*planes)[3]->ChangePlane(fluo::Point(0.0, val, 0.0), fluo::Vector(0.0, -1.0, 0.0));
-				if (link)
-					(*planes)[2]->ChangePlane(fluo::Point(0.0, val2, 0.0), fluo::Vector(0.0, 1.0, 0.0));
-			}
+			(*planes)[3]->ChangePlane(fluo::Point(0.0, val, 0.0), fluo::Vector(0.0, -1.0, 0.0));
+			if (link)
+				(*planes)[2]->ChangePlane(fluo::Point(0.0, val2, 0.0), fluo::Vector(0.0, 1.0, 0.0));
 		}
 	}
 
@@ -1260,27 +1237,24 @@ void ClippingView::OnZ1ClipEdit(wxCommandEvent &event)
 
 	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
-		if (m_mgr)
+		int i;
+		for (i=0; i< glbin_data_manager.GetVolumeNum(); i++)
 		{
-			int i;
-			for (i=0; i<m_mgr->GetVolumeNum(); i++)
-			{
-				VolumeData* vd = m_mgr->GetVolumeData(i);
-				if (!vd || vd == m_vd)
-					continue;
+			VolumeData* vd = glbin_data_manager.GetVolumeData(i);
+			if (!vd || vd == m_vd)
+				continue;
 
-				planes = 0;
-				if (m_vd->GetVR())
-					planes = vd->GetVR()->get_planes();
-				if (!planes)
-					continue;
-				if (planes->size() != 6)
-					continue;
+			planes = 0;
+			if (m_vd->GetVR())
+				planes = vd->GetVR()->get_planes();
+			if (!planes)
+				continue;
+			if (planes->size() != 6)
+				continue;
 
-				(*planes)[4]->ChangePlane(fluo::Point(0.0, 0.0, val), fluo::Vector(0.0, 0.0, 1.0));
-				if (link)
-					(*planes)[5]->ChangePlane(fluo::Point(0.0, 0.0, val2), fluo::Vector(0.0, 0.0, -1.0));
-			}
+			(*planes)[4]->ChangePlane(fluo::Point(0.0, 0.0, val), fluo::Vector(0.0, 0.0, 1.0));
+			if (link)
+				(*planes)[5]->ChangePlane(fluo::Point(0.0, 0.0, val2), fluo::Vector(0.0, 0.0, -1.0));
 		}
 	}
 
@@ -1322,27 +1296,24 @@ void ClippingView::OnZ2ClipEdit(wxCommandEvent &event)
 
 	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
-		if (m_mgr)
+		int i;
+		for (i=0; i< glbin_data_manager.GetVolumeNum(); i++)
 		{
-			int i;
-			for (i=0; i<m_mgr->GetVolumeNum(); i++)
-			{
-				VolumeData* vd = m_mgr->GetVolumeData(i);
-				if (!vd || vd == m_vd)
-					continue;
+			VolumeData* vd = glbin_data_manager.GetVolumeData(i);
+			if (!vd || vd == m_vd)
+				continue;
 
-				planes = 0;
-				if (vd->GetVR())
-					planes = vd->GetVR()->get_planes();
-				if (!planes)
-					continue;
-				if (planes->size() != 6)
-					continue;
+			planes = 0;
+			if (vd->GetVR())
+				planes = vd->GetVR()->get_planes();
+			if (!planes)
+				continue;
+			if (planes->size() != 6)
+				continue;
 
-				(*planes)[5]->ChangePlane(fluo::Point(0.0, 0.0, val), fluo::Vector(0.0, 0.0, -1.0));
-				if (link)
-					(*planes)[4]->ChangePlane(fluo::Point(0.0, 0.0, val2), fluo::Vector(0.0, 0.0, 1.0));
-			}
+			(*planes)[5]->ChangePlane(fluo::Point(0.0, 0.0, val), fluo::Vector(0.0, 0.0, -1.0));
+			if (link)
+				(*planes)[4]->ChangePlane(fluo::Point(0.0, 0.0, val2), fluo::Vector(0.0, 0.0, 1.0));
 		}
 	}
 
@@ -1666,17 +1637,14 @@ void ClippingView::OnSliderRClick(wxCommandEvent& event)
 		m_vd->SetSampleRate(2.0);
 	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
-		if (m_mgr)
+		int i;
+		for (i=0; i< glbin_data_manager.GetVolumeNum(); i++)
 		{
-			int i;
-			for (i=0; i<m_mgr->GetVolumeNum(); i++)
-			{
-				VolumeData* vd = m_mgr->GetVolumeData(i);
-				if (!vd || vd == m_vd)
-					continue;
-				if (vd->GetSampleRate()<2.0)
-					vd->SetSampleRate(2.0);
-			}
+			VolumeData* vd = glbin_data_manager.GetVolumeData(i);
+			if (!vd || vd == m_vd)
+				continue;
+			if (vd->GetSampleRate()<2.0)
+				vd->SetSampleRate(2.0);
 		}
 	}
 

@@ -205,7 +205,6 @@ public:
 	int GetCropH() { return m_crop_h; }
 	void UpdateCrop();
 
-	void SetBitRate(double value) { m_Mbitrate = value; }
 	void SetFileName(wxString &filename) { m_filename = filename; }
 	void Run();
 	bool GetRunning() { return m_running; }
@@ -296,7 +295,6 @@ private:
 	wxSpinButton* m_height_spin;
 
 	static wxTextCtrl *m_estimated_size_text;
-	static double m_Mbitrate;
 
 private:
 	VRenderFrame* m_frame;

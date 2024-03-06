@@ -27,9 +27,12 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ListPanel.h"
 #include <Global.h>
-#include <DataManager.h>
-#include "VRenderFrame.h"
-#include "Formats/png_resource.h"
+#include <VRenderFrame.h>
+#include <VRenderGLView.h>
+#include <VRenderView.h>
+#include <TreePanel.h>
+#include <AdjustView.h>
+#include <Formats/png_resource.h>
 #include <wx/valnum.h>
 
 //resources
@@ -175,7 +178,7 @@ void DataListCtrl::SaveSelMask()
 		wxString name = GetText(item, 1);
 		if (m_frame)
 		{
-			VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+			VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 			if (vd)
 			{
 				vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
@@ -195,7 +198,7 @@ void DataListCtrl::SaveAllMasks()
 			wxString name = GetText(item, 1);
 			if (m_frame)
 			{
-				VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+				VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 				if (vd)
 				{
 					vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
@@ -249,7 +252,7 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 					if (GetItemText(item) == "Volume")
 					{
 						wxString name = GetText(item, 1);
-						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 						if (vd)
 						{
 							if (vd->GetPath() == "")
@@ -263,7 +266,7 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 					else if (GetItemText(item) == "Mesh")
 					{
 						wxString name = GetText(item, 1);
-						MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+						MeshData* md = glbin_data_manager.GetMeshData(name);
 						if (md)
 						{
 							if (md->GetPath() == "")
@@ -275,7 +278,7 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 					else if (GetItemText(item) == "Annotations")
 					{
 						wxString name = GetText(item, 1);
-						Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name);
+						Annotations* ann = glbin_data_manager.GetAnnotations(name);
 						if (ann)
 						{
 							if (ann->GetPath() == "")
@@ -303,7 +306,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 		if (GetItemText(item) == "Volume")
 		{
 			name = GetText(item, 1);
-			VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+			VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 			if (vd)
 			{
 				if (view)
@@ -315,7 +318,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 						VRenderGLView* v = m_frame->GetView(i);
 						if (v && v->GetVolumeData(name))
 						{
-							vd_add = m_frame->GetDataManager()->DuplicateVolumeData(vd);
+							vd_add = glbin_data_manager.DuplicateVolumeData(vd);
 							break;
 						}
 					}
@@ -350,7 +353,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 		else if (GetItemText(item) == "Mesh")
 		{
 			name = GetText(item, 1);
-			MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+			MeshData* md = glbin_data_manager.GetMeshData(name);
 			if (md)
 			{
 				if (view)
@@ -364,7 +367,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 		else if (GetItemText(item) == "Annotations")
 		{
 			name = GetText(item, 1);
-			Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name);
+			Annotations* ann = glbin_data_manager.GetAnnotations(name);
 			if (ann)
 			{
 				if (view)
@@ -624,7 +627,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 		{
 
 			if (m_frame)
-				m_vd = m_frame->GetDataManager()->GetVolumeData(name);
+				m_vd = glbin_data_manager.GetVolumeData(name);
 			else
 				return;
 			fluo::Quaternion q = m_frame->GetView(0)->GetClipRotation();
@@ -674,7 +677,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 
 				if (m_frame)
 				{
-					MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+					MeshData* md = glbin_data_manager.GetMeshData(name);
 					if (md)
 					{
 						md->Save(filename);
@@ -700,7 +703,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 
 				if (m_frame)
 				{
-					Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name);
+					Annotations* ann = glbin_data_manager.GetAnnotations(name);
 					if (ann)
 					{
 						ann->Save(filename);
@@ -740,7 +743,7 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
 			if (m_frame)
 			{
 				fluo::Quaternion q = m_frame->GetView(0)->GetClipRotation();
-				VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+				VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 				if (vd)
 				{
 					vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
@@ -821,34 +824,33 @@ void DataListCtrl::EndEdit(bool update)
 		long item = GetNextItem(-1,
 			wxLIST_NEXT_ALL,
 			wxLIST_STATE_SELECTED);
-		DataManager* mgr = m_frame ? m_frame->GetDataManager() : 0;
 
-		if (item != -1 && mgr)
+		if (item != -1)
 		{
 			wxString name = GetText(item, 1);
 
 			if (new_name != name)
 			{
 				wxString new_name2 = new_name;
-				for (int i = 1; mgr->CheckNames(new_name2); i++)
+				for (int i = 1; glbin_data_manager.CheckNames(new_name2); i++)
 					new_name2 = new_name + wxString::Format("_%d", i);
 
 
 				if (GetItemText(item) == "Volume")
 				{
-					VolumeData* vd = mgr->GetVolumeData(name);
+					VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 					if (vd)
 						vd->SetName(new_name2);
 				}
 				else if (GetItemText(item) == "Mesh")
 				{
-					MeshData* md = mgr->GetMeshData(name);
+					MeshData* md = glbin_data_manager.GetMeshData(name);
 					if (md)
 						md->SetName(new_name2);
 				}
 				else if (GetItemText(item) == "Annotations")
 				{
-					Annotations* ann = mgr->GetAnnotations(name);
+					Annotations* ann = glbin_data_manager.GetAnnotations(name);
 					if (ann)
 						ann->SetName(new_name2);
 				}
@@ -893,14 +895,10 @@ void DataListCtrl::DeleteSelection()
 					}
 				}
 				//from datamanager
-				DataManager* mgr = m_frame->GetDataManager();
-				if (mgr)
+				int index = glbin_data_manager.GetVolumeIndex(name);
+				if (index != -1)
 				{
-					int index = mgr->GetVolumeIndex(name);
-					if (index != -1)
-					{
-						mgr->RemoveVolumeData(index);
-					}
+					glbin_data_manager.RemoveVolumeData(index);
 				}
 			}
 			else if (GetItemText(item) == "Mesh")
@@ -917,14 +915,10 @@ void DataListCtrl::DeleteSelection()
 					}
 				}
 				//from datamanager
-				DataManager* mgr = m_frame->GetDataManager();
-				if (mgr)
+				int index = glbin_data_manager.GetMeshIndex(name);
+				if (index != -1)
 				{
-					int index = mgr->GetMeshIndex(name);
-					if (index != -1)
-					{
-						mgr->RemoveMeshData(index);
-					}
+					glbin_data_manager.RemoveMeshData(index);
 				}
 			}
 			else if (GetItemText(item) == "Annotations")
@@ -939,13 +933,9 @@ void DataListCtrl::DeleteSelection()
 						view->RemoveAnnotations(name);
 				}
 				//from datamanager
-				DataManager* mgr = m_frame->GetDataManager();
-				if (mgr)
-				{
-					int index = mgr->GetAnnotationIndex(name);
-					if (index != -1)
-						mgr->RemoveAnnotations(index);
-				}
+				int index = glbin_data_manager.GetAnnotationIndex(name);
+				if (index != -1)
+					glbin_data_manager.RemoveAnnotations(index);
 			}
 		}
 		m_frame->UpdateList();
@@ -973,13 +963,9 @@ void DataListCtrl::DeleteAll()
 					view->RemoveVolumeDataDup(name);
 			}
 			//from datamanager
-			DataManager* mgr = m_frame->GetDataManager();
-			if (mgr)
-			{
-				int index = mgr->GetVolumeIndex(name);
-				if (index != -1)
-					mgr->RemoveVolumeData(index);
-			}
+			int index = glbin_data_manager.GetVolumeIndex(name);
+			if (index != -1)
+				glbin_data_manager.RemoveVolumeData(index);
 		}
 		else if (GetItemText(item) == "Mesh")
 		{
@@ -993,13 +979,9 @@ void DataListCtrl::DeleteAll()
 					view->RemoveMeshData(name);
 			}
 			//from datamanager
-			DataManager* mgr = m_frame->GetDataManager();
-			if (mgr)
-			{
-				int index = mgr->GetMeshIndex(name);
-				if (index != -1)
-					mgr->RemoveMeshData(index);
-			}
+			int index = glbin_data_manager.GetMeshIndex(name);
+			if (index != -1)
+				glbin_data_manager.RemoveMeshData(index);
 		}
 		else if (GetItemText(item) == "Annotations")
 		{
@@ -1013,13 +995,9 @@ void DataListCtrl::DeleteAll()
 					view->RemoveAnnotations(name);
 			}
 			//from datamanager
-			DataManager* mgr = m_frame->GetDataManager();
-			if (mgr)
-			{
-				int index = mgr->GetAnnotationIndex(name);
-				if (index != -1)
-					mgr->RemoveAnnotations(index);
-			}
+			int index = glbin_data_manager.GetAnnotationIndex(name);
+			if (index != -1)
+				glbin_data_manager.RemoveAnnotations(index);
 		}
 
 		item = GetNextItem(item);

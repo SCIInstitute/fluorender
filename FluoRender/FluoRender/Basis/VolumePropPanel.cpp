@@ -26,10 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "VolumePropPanel.h"
-#include <DataManager.h>
-#include "VRenderFrame.h"
 #include <Global/Global.h>
 #include <Global/Names.h>
+#include <VRenderFrame.h>
+#include <VRenderGLView.h>
+#include <VRenderView.h>
+#include <AdjustView.h>
+#include <ColocalizationDlg.h>
 #include <Calculate/Histogram.h>
 #include <Database/RecordHistParams.h>
 #include <FLIVR/MultiVolumeRenderer.h>
@@ -1314,9 +1317,9 @@ void VolumePropPanel::EnableShadow(bool bval)
 void VolumePropPanel::EnableSample(bool bval)
 {
 	if (m_sync_group && m_group)
-		m_group->SetShadowEnable(bval);
+		m_group->SetSampleRateEnable(bval);
 	else if (m_vd)
-		m_vd->SetShadowEnable(bval);
+		m_vd->SetSampleRateEnable(bval);
 
 	m_sample_sldr->Enable(bval);
 	m_sample_text->Enable(bval);
@@ -1386,6 +1389,16 @@ void VolumePropPanel::EnableMip(bool bval)
 	//	EnableShading();
 	//else
 	//	DisableShading();
+}
+
+void VolumePropPanel::EnableTransparent(bool bval)
+{
+	if (m_sync_group && m_group)
+		m_group->SetTransparent(bval);
+	else if (m_vd)
+		m_vd->SetTransparent(bval);
+
+	FluoRefresh(false, true, true, { gstTransparent });
 }
 
 //set values
@@ -2278,8 +2291,7 @@ void VolumePropPanel::OnColormapInvBtn(wxCommandEvent &event)
 {
 	bool val = m_colormap_inv_btn->GetValue();
 
-	m_colormap_chk->SetValue(true);
-	OnColormapChk(event);
+	EnableColormap(true);
 
 	if (m_sync_group && m_group)
 		m_group->SetColormapInv(val ? -1.0 : 1.0);
@@ -2298,20 +2310,16 @@ void VolumePropPanel::OnColormapCombo(wxCommandEvent &event)
 {
 	int colormap = m_colormap_combo->GetCurrentSelection();
 
-	m_colormap_chk->SetValue(true);
-	OnColormapChk(event);
-	if (colormap >= 5)
-	{
-		m_options_toolbar->ToggleTool(ID_TranspChk, true);
-		OnTranspChk(event);
-	}
-
 	if (m_sync_group && m_group)
 		m_group->SetColormap(colormap);
 	else if (m_vd)
 		m_vd->SetColormap(colormap);
 
-	FluoRefresh(false, true);
+	EnableColormap(true);
+	if (colormap >= 5)
+		EnableTransparent(true);
+
+	FluoRefresh(false, true, true, { gstColormap });
 
 	//update colocalization
 	if (m_frame && m_frame->GetColocalizationDlg() &&
@@ -2323,15 +2331,14 @@ void VolumePropPanel::OnColormapCombo2(wxCommandEvent &event)
 {
 	int colormap_proj = m_colormap_combo2->GetCurrentSelection();
 
-	m_colormap_chk->SetValue(true);
-	OnColormapChk(event);
-
 	if (m_sync_group && m_group)
 		m_group->SetColormapProj(colormap_proj);
 	else if (m_vd)
 		m_vd->SetColormapProj(colormap_proj);
 
-	FluoRefresh(false, true);
+	EnableColormap(true);
+
+	FluoRefresh(false, true, true, { gstColormap });
 }
 
 //6
@@ -2602,18 +2609,7 @@ void VolumePropPanel::OnMIPCheck(wxCommandEvent &event)
 void VolumePropPanel::OnTranspChk(wxCommandEvent &event)
 {
 	bool bval = m_options_toolbar->GetToolState(ID_TranspChk);
-	if (m_sync_group && m_group)
-		m_group->SetTransparent(bval);
-	else if (m_vd)
-		m_vd->SetTransparent(bval);
-	if (bval)
-		m_options_toolbar->SetToolNormalBitmap(ID_TranspChk,
-			wxGetBitmapFromMemory(transphi));
-	else
-		m_options_toolbar->SetToolNormalBitmap(ID_TranspChk,
-			wxGetBitmapFromMemory(transplo));
-
-	FluoRefresh(false, true);
+	EnableTransparent(bval);
 }
 
 void VolumePropPanel::OnCompChk(wxCommandEvent &event)
@@ -2646,11 +2642,6 @@ void VolumePropPanel::OnUseMlChk(wxCommandEvent& event)
 {
 	ApplyMl();
 	//settings not managed by ml
-	if (!m_frame)
-		return;
-	DataManager* mgr = m_frame->GetDataManager();
-	if (!mgr)
-		return;
 	if (!m_vd)
 		return;
 	//component display
@@ -2693,12 +2684,6 @@ void VolumePropPanel::OnNRCheck(wxCommandEvent &event)
 	}
 
 	FluoRefresh(false, true);
-}
-
-void VolumePropPanel::OnFluoRender(wxCommandEvent &event)
-{
-	if (!m_frame) return;
-	m_frame->OnInfo(event);
 }
 
 //depth mode

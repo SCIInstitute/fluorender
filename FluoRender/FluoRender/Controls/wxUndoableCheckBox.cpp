@@ -46,7 +46,7 @@ wxUndoableCheckBox::wxUndoableCheckBox(
 void wxUndoableCheckBox::SetValue(bool val)
 {
 	bool val_ = GetValue();
-	if (val_ != val)
+	if (val_ != val || stack_.empty())
 	{
 		wxCheckBox::SetValue(val);
 		double t;

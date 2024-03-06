@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ColocalizationDlg.h"
-#include <DataManager.h>
-#include "VRenderFrame.h"
+#include <VRenderFrame.h>
+#include <VRenderGLView.h>
 #include <Calculate/Compare.h>
 
 BEGIN_EVENT_TABLE(ColocalizationDlg, wxPanel)

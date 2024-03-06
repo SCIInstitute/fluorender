@@ -26,9 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ConvertDlg.h"
-#include "VRenderFrame.h"
-#include <DataManager.h>
-#include "Converters/VolumeMeshConv.h"
+#include <Global.h>
+#include <VRenderFrame.h>
+#include <VRenderGLView.h>
+#include <Converters/VolumeMeshConv.h>
 #include <wxSingleSlider.h>
 #include <wx/progdlg.h>
 #include <wx/valnum.h>
@@ -295,9 +296,9 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 		float area;
 		float scale[3] = {1.0f, 1.0f, 1.0f};
 		glmArea(mesh, scale, &area);
-		DataManager* mgr = m_frame->GetDataManager();
-		mgr->LoadMeshData(mesh);
-		MeshData* md = mgr->GetLastMeshData();
+		
+		glbin_data_manager.LoadMeshData(mesh);
+		MeshData* md = glbin_data_manager.GetLastMeshData();
 		if (md && m_frame->GetView(0))
 		{
 			m_frame->GetView(0)->AddMeshData(md);

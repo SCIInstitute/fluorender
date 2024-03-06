@@ -58,10 +58,10 @@ bool wxSingleSlider::setValue(int val, bool notify)
 	int old = val_;
 	val_ = val < min_val_ ? min_val_ :
 		(val > max_val_ ? max_val_ : val);
+
 	bool changed = old != val_;
-	if (!changed)
-		return changed;
-	else
+
+	if (changed || stack_.empty())
 	{
 		double t;
 		if (time_sample(t))
@@ -69,6 +69,9 @@ bool wxSingleSlider::setValue(int val, bool notify)
 		else
 			replace(t);
 	}
+
+	if (!changed)
+		return changed;
 
 	Refresh();
 	Update();

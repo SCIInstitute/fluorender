@@ -26,8 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "SettingDlg.h"
-#include "VRenderFrame.h"
 #include <Global.h>
+#include <VRenderFrame.h>
+#include <VRenderGLView.h>
+#include <VRenderView.h>
 #include <wxSingleSlider.h>
 #include <Global/Global.h>
 #include <wx/valnum.h>
@@ -1452,18 +1454,14 @@ void SettingDlg::OnDispIdEdit(wxCommandEvent& event)
 void SettingDlg::OnOverrideVoxCheck(wxCommandEvent &event)
 {
 	glbin_settings.m_override_vox = m_override_vox_chk->GetValue();
-
-	if (m_frame)
-		m_frame->GetDataManager()->SetOverrideVox(glbin_settings.m_override_vox);
+	glbin_data_manager.SetOverrideVox(glbin_settings.m_override_vox);
 }
 
 void SettingDlg::OnWavColor1Change(wxCommandEvent &event)
 {
 	if (m_wav_color1_cmb)
 		glbin_settings.m_wav_color1 = m_wav_color1_cmb->GetCurrentSelection() + 1;
-
-	if (m_frame && m_frame->GetDataManager())
-		m_frame->GetDataManager()->SetWavelengthColor(
+	glbin_data_manager.SetWavelengthColor(
 			glbin_settings.m_wav_color1,
 			glbin_settings.m_wav_color2,
 			glbin_settings.m_wav_color3,
@@ -1474,9 +1472,7 @@ void SettingDlg::OnWavColor2Change(wxCommandEvent &event)
 {
 	if (m_wav_color2_cmb)
 		glbin_settings.m_wav_color2 = m_wav_color2_cmb->GetCurrentSelection() + 1;
-
-	if (m_frame && m_frame->GetDataManager())
-		m_frame->GetDataManager()->SetWavelengthColor(
+	glbin_data_manager.SetWavelengthColor(
 			glbin_settings.m_wav_color1,
 			glbin_settings.m_wav_color2,
 			glbin_settings.m_wav_color3,
@@ -1487,9 +1483,7 @@ void SettingDlg::OnWavColor3Change(wxCommandEvent &event)
 {
 	if (m_wav_color3_cmb)
 		glbin_settings.m_wav_color3 = m_wav_color3_cmb->GetCurrentSelection() + 1;
-
-	if (m_frame && m_frame->GetDataManager())
-		m_frame->GetDataManager()->SetWavelengthColor(
+	glbin_data_manager.SetWavelengthColor(
 			glbin_settings.m_wav_color1,
 			glbin_settings.m_wav_color2,
 			glbin_settings.m_wav_color3,
@@ -1500,9 +1494,7 @@ void SettingDlg::OnWavColor4Change(wxCommandEvent &event)
 {
 	if (m_wav_color4_cmb)
 		glbin_settings.m_wav_color4 = m_wav_color4_cmb->GetCurrentSelection() + 1;
-
-	if (m_frame && m_frame->GetDataManager())
-		m_frame->GetDataManager()->SetWavelengthColor(
+	glbin_data_manager.SetWavelengthColor(
 			glbin_settings.m_wav_color1,
 			glbin_settings.m_wav_color2,
 			glbin_settings.m_wav_color3,

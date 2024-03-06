@@ -26,8 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "TreePanel.h"
-#include <VRenderFrame.h>
 #include <Global.h>
+#include <VRenderFrame.h>
+#include <VRenderGLView.h>
+#include <AdjustView.h>
+#include <ListPanel.h>
+#include <BrushToolDlg.h>
+#include <ColocalizationDlg.h>
 #include <compatibility.h>
 //resources
 #include <Formats/png_resource.h>
@@ -551,7 +556,7 @@ void DataTreeCtrl::OnManipulateData(wxCommandEvent& event)
 		if (item_data && item_data->type == 3)//mesh data
 		{
 			wxString name = GetItemText(sel_item);
-			MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+			MeshData* md = glbin_data_manager.GetMeshData(name);
 			m_frame->OnSelection(6, 0, 0, 0, md);
 		}
 	}
@@ -929,14 +934,14 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	else if (item_data->type == 2)
 	{
 		//volume
-		VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+		VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 		if (vd)
 			vd->RandomizeColor();
 	}
 	else if (item_data->type == 3)
 	{
 		//mesh
-		MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+		MeshData* md = glbin_data_manager.GetMeshData(name);
 		if (md)
 			md->RandomizeColor();
 	}
@@ -1051,7 +1056,7 @@ void DataTreeCtrl::UpdateSelection()
 								VRenderGLView* view = m_frame->GetView(str);
 								if (view)
 								{
-									VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+									VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 									str = GetItemText(par_item);
 									DataGroup* group = view->GetGroup(str);
 									m_frame->GetAdjustView()->SetGroupLink(group);
@@ -1066,7 +1071,7 @@ void DataTreeCtrl::UpdateSelection()
 								VRenderGLView* view = m_frame->GetView(str);
 								if (view)
 								{
-									VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+									VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 									m_frame->GetAdjustView()->SetGroupLink(0);
 									m_frame->OnSelection(2, view, 0, vd);
 									view->SetVolumeA(vd);
@@ -1089,7 +1094,7 @@ void DataTreeCtrl::UpdateSelection()
 							VRenderGLView* view = m_frame->GetView(str);
 							if (view)
 							{
-								MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+								MeshData* md = glbin_data_manager.GetMeshData(name);
 								m_frame->OnSelection(3, view, 0, 0, md);
 							}
 						}
@@ -1100,7 +1105,7 @@ void DataTreeCtrl::UpdateSelection()
 							VRenderGLView* view = m_frame->GetView(str);
 							if (view)
 							{
-								MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+								MeshData* md = glbin_data_manager.GetMeshData(name);
 								m_frame->OnSelection(3, view, 0, 0, md);
 							}
 						}
@@ -1111,7 +1116,7 @@ void DataTreeCtrl::UpdateSelection()
 				{
 					wxString par_name = GetItemText(GetItemParent(sel_item));
 					VRenderGLView* view = m_frame->GetView(par_name);
-					Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name);
+					Annotations* ann = glbin_data_manager.GetAnnotations(name);
 					m_frame->OnSelection(4, view, 0, 0, 0, ann);
 				}
 				break;
@@ -1283,7 +1288,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 				break;
 			case 2://volume data
 				{
-					VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+					VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 					if (vd)
 					{
 						if (rc)
@@ -1303,7 +1308,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 				break;
 			case 3://mesh data
 				{
-					MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+					MeshData* md = glbin_data_manager.GetMeshData(name);
 					if (md)
 					{
 						if (rc)
@@ -1323,7 +1328,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 				break;
 			case 4://annotations
 				{
-					Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name);
+					Annotations* ann = glbin_data_manager.GetAnnotations(name);
 					if (ann)
 					{
 						ann->ToggleDisp();
@@ -1896,7 +1901,7 @@ void DataTreeCtrl::BrushClear()
 					VRenderGLView* view = m_frame->GetView(str);
 					if (view)
 					{
-						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 						if (vd)
 						{
 							int int_mode = view->GetIntMode();
@@ -1917,7 +1922,7 @@ void DataTreeCtrl::BrushClear()
 					VRenderGLView* view = m_frame->GetView(str);
 					if (view)
 					{
-						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 						if (vd)
 						{
 							int int_mode = view->GetIntMode();
@@ -1959,7 +1964,7 @@ void DataTreeCtrl::BrushCreate()
 					VRenderGLView* vrv = m_frame->GetView(str);
 					if (vrv)
 					{
-						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 						if (vd)
 						{
 							glbin_vol_calculator.SetVolumeA(vd);
@@ -1974,7 +1979,7 @@ void DataTreeCtrl::BrushCreate()
 					VRenderGLView* view = m_frame->GetView(str);
 					if (view)
 					{
-						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 						if (vd)
 						{
 							glbin_vol_calculator.SetVolumeA(vd);
@@ -2016,7 +2021,7 @@ void DataTreeCtrl::BrushCreateInv()
 					VRenderGLView* view = m_frame->GetView(str);
 					if (view)
 					{
-						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 						if (vd)
 						{
 							glbin_vol_calculator.SetVolumeA(vd);
@@ -2031,7 +2036,7 @@ void DataTreeCtrl::BrushCreateInv()
 					VRenderGLView* view = m_frame->GetView(str);
 					if (view)
 					{
-						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 						if (vd)
 						{
 							glbin_vol_calculator.SetVolumeA(vd);
@@ -2052,7 +2057,7 @@ void DataTreeCtrl::CopyMask(bool copy_data)
 	if (!m_frame) return;
 
 	wxString name = GetItemText(sel_item);
-	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+	VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 	if (vd)
 	{
 		m_frame->m_vd_copy = vd;
@@ -2069,7 +2074,7 @@ void DataTreeCtrl::PasteMask(int op)
 	if (!m_frame) return;
 
 	wxString name = GetItemText(sel_item);
-	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+	VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 	VRenderGLView* view = 0;
 	DataGroup* group = 0;
 	wxTreeItemId par_item = GetItemParent(sel_item);

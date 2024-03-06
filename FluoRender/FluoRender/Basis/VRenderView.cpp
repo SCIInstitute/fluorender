@@ -27,9 +27,10 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <FLIVR/ShaderProgram.h>
-#include "VRenderView.h"
-#include "VRenderFrame.h"
+#include <VRenderView.h>
 #include <Global/Global.h>
+#include <VRenderFrame.h>
+#include <ClippingView.h>
 #include <tiffio.h>
 #include <wxSingleSlider.h>
 #include <wx/utils.h>

@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "AdjustView.h"
-#include "VRenderFrame.h"
-#include <DataManager.h>
+#include <VRenderFrame.h>
+#include <VRenderGLView.h>
 #include <Global/Global.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>

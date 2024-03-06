@@ -27,15 +27,15 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "Main.h"
+#include <VRenderFrame.h>
+#include <compatibility.h>
+#include <JVMInitializer.h>
 #include <Global.h>
 #include <cstdio>
 #include <iostream>
 #include <wx/cmdline.h>
 #include <wx/stdpaths.h>
 #include <wx/filefn.h>
-#include "VRenderFrame.h"
-#include <compatibility.h>
-#include "JVMInitializer.h"
 
 IMPLEMENT_APP(VRenderApp)
 
@@ -110,11 +110,8 @@ bool VRenderApp::OnInit()
 		glbin_settings.m_save_alpha = m_save_alpha;
 		glbin_settings.m_save_float = m_save_float;
 		glbin_settings.m_dpi = m_dpi;
-		if (((VRenderFrame*)frame)->GetMovieView())
-		{
-			((VRenderFrame*)frame)->GetMovieView()->SetBitRate(m_bitrate);
-			((VRenderFrame*)frame)->GetMovieView()->SetFileName(m_mov_file);
-		}
+		glbin_settings.m_mov_bitrate = m_bitrate;
+		glbin_settings.m_mov_filename = m_mov_file;
 		run_mov = true;
 	}
 	if (m_file_num > 0)

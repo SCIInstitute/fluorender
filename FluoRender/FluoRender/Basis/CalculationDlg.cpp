@@ -26,9 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "CalculationDlg.h"
-#include "VRenderFrame.h"
 #include <Global.h>
-#include "Calculate/CombineList.h"
+#include <VRenderFrame.h>
+#include <VRenderGLView.h>
+#include <Calculate/CombineList.h>
 
 BEGIN_EVENT_TABLE(CalculationDlg, wxPanel)
 	//calculations
@@ -305,7 +306,7 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 			if (vd)
 			{
 				if (!volume) volume = vd;
-				m_frame->GetDataManager()->AddVolumeData(vd);
+				glbin_data_manager.AddVolumeData(vd);
 				if (i == results.begin())
 				{
 					group_name = m_view->AddGroup("");

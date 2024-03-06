@@ -207,6 +207,7 @@ private:
 	void EnableColormap(bool);
 	//3
 	void EnableMip(bool);
+	void EnableTransparent(bool);
 
 	//set values
 	void SetGamma(double);
@@ -324,7 +325,6 @@ private:
 	void OnNRCheck(wxCommandEvent &event);
 	//depth omde
 	void OnDepthCheck(wxCommandEvent &event);
-	void OnFluoRender(wxCommandEvent &event);
 	//transparency
 	void OnTranspChk(wxCommandEvent &event);
 	//component display

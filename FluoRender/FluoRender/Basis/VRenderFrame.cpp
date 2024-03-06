@@ -29,6 +29,36 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 #include <DragDrop.h>
 #include <Global/Global.h>
+#include <DataManager.h>
+#include "TreePanel.h"
+#include "ListPanel.h"
+#include "VRenderView.h"
+#include "PropPanel.h"
+#include "VolumePropPanel.h"
+#include "MeshPropPanel.h"
+#include "AnnotatPropPanel.h"
+#include "ManipPropPanel.h"
+#include "VMovieView.h"
+#include "ClippingView.h"
+#include "AdjustView.h"
+#include "SettingDlg.h"
+#include "HelpDlg.h"
+#include "BrushToolDlg.h"
+#include "NoiseCancellingDlg.h"
+#include "CountingDlg.h"
+#include "ConvertDlg.h"
+#include "ColocalizationDlg.h"
+#include "RecorderDlg.h"
+#include "MeasureDlg.h"
+#include "TraceDlg.h"
+#include "OclDlg.h"
+#include "ComponentDlg.h"
+#include "CalculationDlg.h"
+#include "MachineLearningDlg.h"
+#include "ScriptBreakDlg.h"
+#include "Tester.h"
+#include <compatibility.h>
+#include <JVMInitializer.h>
 #include <Formats/png_resource.h>
 #include <Formats/msk_writer.h>
 #include <Formats/msk_reader.h>
@@ -168,7 +198,7 @@ VRenderFrame::VRenderFrame(
 	// tell wxAuiManager to manage this frame
 	m_aui_mgr.SetManagedWindow(this);
 
-	m_data_mgr.SetFrame(this);
+	glbin_data_manager.SetFrame(this);
 
 	// set frame icon
 	wxIcon icon;
@@ -416,7 +446,6 @@ VRenderFrame::VRenderFrame(
 	//clipping view
 	m_clip_view = new ClippingView(this,
 		wxDefaultPosition, FromDIP(wxSize(130,700)));
-	m_clip_view->SetDataManager(&m_data_mgr);
 	m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(glbin_settings.m_plane_mode));
 
 	//adjust view
@@ -445,14 +474,14 @@ VRenderFrame::VRenderFrame(
 		m_vrv_list[0]->m_glview->m_test_wiref = true;
 		m_vrv_list[0]->m_glview->m_draw_bounds = true;
 		m_vrv_list[0]->m_glview->m_draw_grid = true;
-		m_data_mgr.m_vol_test_wiref = true;
+		glbin_data_manager.m_vol_test_wiref = true;
 	}
 	int c1 = glbin_settings.m_wav_color1;
 	int c2 = glbin_settings.m_wav_color2;
 	int c3 = glbin_settings.m_wav_color3;
 	int c4 = glbin_settings.m_wav_color4;
 	if (c1 && c2 && c3 && c4)
-		m_data_mgr.SetWavelengthColor(c1, c2, c3, c4);
+		glbin_data_manager.SetWavelengthColor(c1, c2, c3, c4);
 	m_vrv_list[0]->SetPinThreshold(glbin_settings.m_pin_threshold);
 	m_vrv_list[0]->m_glview->SetPeelingLayers(glbin_settings.m_peeling_layers);
 	m_vrv_list[0]->m_glview->SetBlendSlices(glbin_settings.m_micro_blend);
@@ -464,10 +493,10 @@ VRenderFrame::VRenderFrame(
 	m_vrv_list[0]->m_glview->SetSBS(glbin_settings.m_sbs);
 	m_vrv_list[0]->m_glview->SetEyeDist(glbin_settings.m_eye_dist);
 	if (glbin_settings.m_stereo) m_vrv_list[0]->InitOpenVR();
-	m_data_mgr.SetOverrideVox(glbin_settings.m_override_vox);
-	m_data_mgr.SetPvxmlFlipX(glbin_settings.m_pvxml_flip_x);
-	m_data_mgr.SetPvxmlFlipY(glbin_settings.m_pvxml_flip_y);
-	m_data_mgr.SetPvxmlSeqType(glbin_settings.m_pvxml_seq_type);
+	glbin_data_manager.SetOverrideVox(glbin_settings.m_override_vox);
+	glbin_data_manager.SetPvxmlFlipX(glbin_settings.m_pvxml_flip_x);
+	glbin_data_manager.SetPvxmlFlipY(glbin_settings.m_pvxml_flip_y);
+	glbin_data_manager.SetPvxmlSeqType(glbin_settings.m_pvxml_seq_type);
 	flvr::VolumeRenderer::set_soft_threshold(glbin_settings.m_soft_threshold);
 	flvr::MultiVolumeRenderer::set_soft_threshold(glbin_settings.m_soft_threshold);
 	TreeLayer::SetSoftThreshsold(glbin_settings.m_soft_threshold);
@@ -1042,7 +1071,7 @@ wxString VRenderFrame::CreateView(int row)
 				VolumeData* vd = view0->GetDispVolumeData(i);
 				if (vd)
 				{
-					VolumeData* vd_add = m_data_mgr.DuplicateVolumeData(vd);
+					VolumeData* vd_add = glbin_data_manager.DuplicateVolumeData(vd);
 
 					if (vd_add)
 					{
@@ -1071,6 +1100,11 @@ wxString VRenderFrame::CreateView(int row)
 	UpdateTree();
 
 	return vrv->GetName();
+}
+
+VRenderGLView* VRenderFrame::GetLastView()
+{
+	return m_vrv_list[m_vrv_list.size() - 1]->m_glview;
 }
 
 //views
@@ -1453,15 +1487,15 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 			"",
 			100, this, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
-		m_data_mgr.SetSliceSequence(glbin_settings.m_slice_sequence);
-		m_data_mgr.SetChannSequence(glbin_settings.m_chann_sequence);
-		m_data_mgr.SetDigitOrder(glbin_settings.m_digit_order);
-		m_data_mgr.SetSerNum(glbin_settings.m_ser_num);
-		m_data_mgr.SetCompression(glbin_settings.m_realtime_compress);
-		m_data_mgr.SetSkipBrick(glbin_settings.m_skip_brick);
-		m_data_mgr.SetTimeId(glbin_settings.m_time_id);
-		m_data_mgr.SetLoadMask(glbin_settings.m_load_mask);
-		m_data_mgr.SetReaderFpConvert(false, 0, 1);
+		glbin_data_manager.SetSliceSequence(glbin_settings.m_slice_sequence);
+		glbin_data_manager.SetChannSequence(glbin_settings.m_chann_sequence);
+		glbin_data_manager.SetDigitOrder(glbin_settings.m_digit_order);
+		glbin_data_manager.SetSerNum(glbin_settings.m_ser_num);
+		glbin_data_manager.SetCompression(glbin_settings.m_realtime_compress);
+		glbin_data_manager.SetSkipBrick(glbin_settings.m_skip_brick);
+		glbin_data_manager.SetTimeId(glbin_settings.m_time_id);
+		glbin_data_manager.SetLoadMask(glbin_settings.m_load_mask);
+		glbin_data_manager.SetReaderFpConvert(false, 0, 1);
 
 		bool enable_4d = false;
 
@@ -1477,31 +1511,31 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 			wxString suffix = filename.Mid(filename.Find('.', true)).MakeLower();
 
 			if (withImageJ)
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_IMAGEJ, true); //The type of data doesnt matter.
+				ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_IMAGEJ, true); //The type of data doesnt matter.
 			else if (suffix == ".nrrd" || suffix == ".msk" || suffix == ".lbl")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_NRRD, false);
+				ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_NRRD, false);
 			else if (suffix == ".tif" || suffix == ".tiff")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_TIFF, false);
+				ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_TIFF, false);
 			else if (suffix == ".oib")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_OIB, false);
+				ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_OIB, false);
 			else if (suffix == ".oif")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_OIF, false);
+				ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_OIF, false);
 			else if (suffix == ".lsm")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_LSM, false);
+				ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_LSM, false);
 			else if (suffix == ".xml")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_PVXML, false);
+				ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_PVXML, false);
 			else if (suffix == ".vvd")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_BRKXML, false);
+				ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_BRKXML, false);
 			else if (suffix == ".czi")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_CZI, false);
+				ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_CZI, false);
 			else if (suffix == ".nd2")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_ND2, false);
+				ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_ND2, false);
 			else if (suffix == ".lif")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_LIF, false);
+				ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_LIF, false);
 			else if (suffix == ".lof")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_LOF, false);
+				ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_LOF, false);
 			else if (suffix == ".mp4" || suffix == ".m4v" || suffix == ".mov" || suffix == ".avi" || suffix == ".wmv")
-				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_MPG, false);
+				ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_MPG, false);
 
 			if (ch_num > 1)
 			{
@@ -1510,7 +1544,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 				{
 					for (int i=ch_num; i>0; i--)
 					{
-						VolumeData* vd = m_data_mgr.GetVolumeData(m_data_mgr.GetVolumeNum()-i);
+						VolumeData* vd = glbin_data_manager.GetVolumeData(glbin_data_manager.GetVolumeNum()-i);
 						if (vd)
 						{
 							v->AddVolumeData(vd, group->GetName());
@@ -1537,7 +1571,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 			}
 			else if (ch_num == 1)
 			{
-				VolumeData* vd = m_data_mgr.GetVolumeData(m_data_mgr.GetVolumeNum()-1);
+				VolumeData* vd = glbin_data_manager.GetVolumeData(glbin_data_manager.GetVolumeNum()-1);
 				if (vd)
 				{
 					if (!vd->GetWlColor())
@@ -1643,7 +1677,10 @@ void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imag
 	}
 
 	if (run_mov && m_movie_view)
+	{
+		m_movie_view->SetFileName(glbin_settings.m_mov_filename);
 		m_movie_view->Run();
+	}
 }
 
 void VRenderFrame::LoadMeshes(wxArrayString files, VRenderGLView* view)
@@ -1667,9 +1704,9 @@ void VRenderFrame::LoadMeshes(wxArrayString files, VRenderGLView* view)
 		prg_diag->Update(90*(i+1)/(int)files.Count());
 
 		wxString filename = files[i];
-		m_data_mgr.LoadMeshData(filename);
+		glbin_data_manager.LoadMeshData(filename);
 
-		MeshData* md = m_data_mgr.GetLastMeshData();
+		MeshData* md = glbin_data_manager.GetLastMeshData();
 		if (view && md)
 		{
 			if (group)
@@ -1796,6 +1833,32 @@ void VRenderFrame::OnInfo(wxCommandEvent& event)
 	main->Add(right,0,wxEXPAND);
 	d->SetSizer(main);
 	d->ShowModal();
+}
+
+bool VRenderFrame::GetBenchmark()
+{
+	return m_benchmark;
+}
+
+void VRenderFrame::ClearVrvList()
+{
+	m_vrv_list.clear();
+}
+
+wxString VRenderFrame::ScriptDialog(const wxString& title,
+	const wxString& wildcard, long style)
+{
+	m_movie_view->HoldRun();
+	wxString result;
+	wxFileDialog* dlg = new wxFileDialog(
+		this, title, "", "",
+		wildcard, style);
+	int rval = dlg->ShowModal();
+	if (rval == wxID_OK)
+		result = dlg->GetPath();
+	delete dlg;
+	m_movie_view->ResumeRun();
+	return result;
 }
 
 void VRenderFrame::UpdateTreeIcons()
@@ -2220,9 +2283,9 @@ void VRenderFrame::UpdateList()
 {
 	m_list_panel->DeleteAllItems();
 
-	for (int i=0 ; i<m_data_mgr.GetVolumeNum() ; i++)
+	for (int i=0 ; i<glbin_data_manager.GetVolumeNum() ; i++)
 	{
-		VolumeData* vd = m_data_mgr.GetVolumeData(i);
+		VolumeData* vd = glbin_data_manager.GetVolumeData(i);
 		if (vd && !vd->GetDup())
 		{
 			wxString name = vd->GetName();
@@ -2231,9 +2294,9 @@ void VRenderFrame::UpdateList()
 		}
 	}
 
-	for (int i=0 ; i<m_data_mgr.GetMeshNum() ; i++)
+	for (int i=0 ; i<glbin_data_manager.GetMeshNum() ; i++)
 	{
-		MeshData* md = m_data_mgr.GetMeshData(i);
+		MeshData* md = glbin_data_manager.GetMeshData(i);
 		if (md)
 		{
 			wxString name = md->GetName();
@@ -2242,9 +2305,9 @@ void VRenderFrame::UpdateList()
 		}
 	}
 
-	for (int i=0; i<m_data_mgr.GetAnnotationNum(); i++)
+	for (int i=0; i<glbin_data_manager.GetAnnotationNum(); i++)
 	{
-		Annotations* ann = m_data_mgr.GetAnnotations(i);
+		Annotations* ann = glbin_data_manager.GetAnnotations(i);
 		if (ann)
 		{
 			wxString name = ann->GetName();
@@ -2252,11 +2315,6 @@ void VRenderFrame::UpdateList()
 			m_list_panel->Append(DATA_ANNOTATIONS, name, path);
 		}
 	}
-}
-
-DataManager* VRenderFrame::GetDataManager()
-{
-	return &m_data_mgr;
 }
 
 TreePanel *VRenderFrame::GetTree()
@@ -2319,8 +2377,8 @@ void VRenderFrame::OnSelection(int type,
 
 	m_cur_sel_type = type;
 	//clear mesh boundbox
-	if (m_data_mgr.GetMeshData(m_cur_sel_mesh))
-		m_data_mgr.GetMeshData(m_cur_sel_mesh)->SetDrawBounds(false);
+	if (glbin_data_manager.GetMeshData(m_cur_sel_mesh))
+		glbin_data_manager.GetMeshData(m_cur_sel_mesh)->SetDrawBounds(false);
 
 	if (m_brush_tool_dlg)
 		m_brush_tool_dlg->GetSettings(view);
@@ -2356,7 +2414,7 @@ void VRenderFrame::OnSelection(int type,
 		{
 			wxString str = vd->GetName();
 			ShowPropPage(2, view, group, vd, md, ann);
-			m_cur_sel_vol = m_data_mgr.GetVolumeIndex(str);
+			m_cur_sel_vol = glbin_data_manager.GetVolumeIndex(str);
 
 			for (size_t i=0; i< GetViewNum(); ++i)
 			{
@@ -2374,7 +2432,7 @@ void VRenderFrame::OnSelection(int type,
 		{
 			wxString str = md->GetName();
 			ShowPropPage(3, view, group, vd, md, ann);
-			m_cur_sel_mesh = m_data_mgr.GetMeshIndex(str);
+			m_cur_sel_mesh = glbin_data_manager.GetMeshIndex(str);
 			md->SetDrawBounds(true);
 		}
 		if (m_colocalization_dlg)
@@ -2679,6 +2737,125 @@ ManipPropPanel* VRenderFrame::FindMeshManip(MeshData* md)
 	return 0;
 }
 
+//prop view
+AdjustView* VRenderFrame::GetAdjustView()
+{
+	return m_adjust_view;
+}
+
+//movie view
+VMovieView* VRenderFrame::GetMovieView()
+{
+	return m_movie_view;
+}
+
+//system settings
+SettingDlg* VRenderFrame::GetSettingDlg()
+{
+	return m_setting_dlg;
+}
+
+//help dialog
+HelpDlg* VRenderFrame::GetHelpDlg()
+{
+	return m_help_dlg;
+}
+
+//clipping view
+ClippingView* VRenderFrame::GetClippingView()
+{
+	return m_clip_view;
+}
+
+//brush dialog
+BrushToolDlg* VRenderFrame::GetBrushToolDlg()
+{
+	return m_brush_tool_dlg;
+}
+
+//noise cancelling dialog
+NoiseCancellingDlg* VRenderFrame::GetNoiseCancellingDlg()
+{
+	return m_noise_cancelling_dlg;
+}
+
+//counting dialog
+CountingDlg* VRenderFrame::GetCountingDlg()
+{
+	return m_counting_dlg;
+}
+
+//convert dialog
+ConvertDlg* VRenderFrame::GetConvertDlg()
+{
+	return m_convert_dlg;
+}
+
+ColocalizationDlg* VRenderFrame::GetColocalizationDlg()
+{
+	return m_colocalization_dlg;
+}
+
+//recorder dialog
+RecorderDlg* VRenderFrame::GetRecorderDlg()
+{
+	return m_recorder_dlg;
+}
+
+//measure dialog
+MeasureDlg* VRenderFrame::GetMeasureDlg()
+{
+	return m_measure_dlg;
+}
+
+//trace dialog
+TraceDlg* VRenderFrame::GetTraceDlg()
+{
+	return m_trace_dlg;
+}
+
+//ocl dialog
+OclDlg* VRenderFrame::GetOclDlg()
+{
+	return m_ocl_dlg;
+}
+
+//component dialog
+ComponentDlg* VRenderFrame::GetComponentDlg()
+{
+	return m_component_dlg;
+}
+
+//calculation dialog
+CalculationDlg* VRenderFrame::GetCalculationDlg()
+{
+	return m_calculation_dlg;
+}
+
+//script break dialog
+ScriptBreakDlg* VRenderFrame::GetScriptBreakDlg()
+{
+	return m_script_break_dlg;
+}
+
+//selection
+int VRenderFrame::GetCurSelType()
+{
+	return m_cur_sel_type;
+}
+
+//get current selected volume
+VolumeData* VRenderFrame::GetCurSelVol()
+{
+	return glbin_data_manager.GetVolumeData(m_cur_sel_vol);
+}
+
+//get current selected mesh
+MeshData* VRenderFrame::GetCurSelMesh()
+{
+	return glbin_data_manager.GetMeshData(m_cur_sel_mesh);
+}
+
 void VRenderFrame::RefreshVRenderViews(bool tree, bool interactive)
 {
 	for (int i=0 ; i<(int)m_vrv_list.size() ; i++)
@@ -2728,11 +2905,6 @@ void VRenderFrame::DeleteVRenderView(wxString &name)
 			return;
 		}
 	}
-}
-
-AdjustView* VRenderFrame::GetAdjustView()
-{
-	return m_adjust_view;
 }
 
 //organize render views
@@ -2970,10 +3142,10 @@ wxWindow* VRenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
 
 void VRenderFrame::OnNewProject(wxCommandEvent& event)
 {
-	m_data_mgr.SetProjectPath("");
+	glbin_data_manager.SetProjectPath("");
 	SetTitle(m_title);
 	//clear
-	m_data_mgr.ClearAll();
+	glbin_data_manager.ClearAll();
 	DataGroup::ResetID();
 	MeshGroup::ResetID();
 	m_adjust_view->SetVolumeData(0);
@@ -2999,7 +3171,7 @@ void VRenderFrame::OnNewProject(wxCommandEvent& event)
 	m_movie_view->GetScriptSettings(false);
 	m_movie_view->SetCrop(false);
 	m_trace_dlg->GetSettings(GetView(0));
-	m_interpolator.Clear();
+	glbin_interpolator.Clear();
 	m_recorder_dlg->UpdateList();
 	UpdateList();
 	UpdateTree();
@@ -3008,7 +3180,7 @@ void VRenderFrame::OnNewProject(wxCommandEvent& event)
 
 void VRenderFrame::OnSaveProject(wxCommandEvent& event)
 {
-	std::wstring default_path = m_data_mgr.GetProjectFile().ToStdWstring();
+	std::wstring default_path = glbin_data_manager.GetProjectFile().ToStdWstring();
 	if (default_path.empty())
 	{
 		wxCommandEvent e;
@@ -3024,7 +3196,7 @@ void VRenderFrame::OnSaveProject(wxCommandEvent& event)
 
 void VRenderFrame::OnSaveAsProject(wxCommandEvent& event)
 {
-	std::wstring default_path = m_data_mgr.GetProjectFile().ToStdWstring();
+	std::wstring default_path = glbin_data_manager.GetProjectFile().ToStdWstring();
 	std::wstring path;
 	std::wstring filename;
 	bool default_valid = SEP_PATH_NAME(default_path, path, filename);
@@ -3078,7 +3250,7 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 	fconfig.Write("ver_major", VERSION_MAJOR_TAG);
 	fconfig.Write("ver_minor", VERSION_MINOR_TAG);
 
-	int ticks = m_data_mgr.GetVolumeNum() + m_data_mgr.GetMeshNum();
+	int ticks = glbin_data_manager.GetVolumeNum() + glbin_data_manager.GetMeshNum();
 	int tick_cnt = 1;
 	fconfig.Write("ticks", ticks);
 	wxProgressDialog *prg_diag = 0;
@@ -3101,15 +3273,15 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 	//save data list
 	//volume
 	fconfig.SetPath("/data/volume");
-	fconfig.Write("num", m_data_mgr.GetVolumeNum());
-	for (i=0; i<m_data_mgr.GetVolumeNum(); i++)
+	fconfig.Write("num", glbin_data_manager.GetVolumeNum());
+	for (i=0; i<glbin_data_manager.GetVolumeNum(); i++)
 	{
 		if (ticks && prg_diag)
 			prg_diag->Update(90*tick_cnt/ticks,
 			"Saving volume data. Please wait.");
 		tick_cnt++;
 
-		VolumeData* vd = m_data_mgr.GetVolumeData(i);
+		VolumeData* vd = glbin_data_manager.GetVolumeData(i);
 		if (vd)
 		{
 			str = wxString::Format("/data/volume/%d", i);
@@ -3293,15 +3465,15 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 	}
 	//mesh
 	fconfig.SetPath("/data/mesh");
-	fconfig.Write("num", m_data_mgr.GetMeshNum());
-	for (i=0; i<m_data_mgr.GetMeshNum(); i++)
+	fconfig.Write("num", glbin_data_manager.GetMeshNum());
+	for (i=0; i<glbin_data_manager.GetMeshNum(); i++)
 	{
 		if (ticks && prg_diag)
 			prg_diag->Update(90*tick_cnt/ticks,
 			"Saving mesh data. Please wait.");
 		tick_cnt++;
 
-		MeshData* md = m_data_mgr.GetMeshData(i);
+		MeshData* md = glbin_data_manager.GetMeshData(i);
 		if (md)
 		{
 			if (md->GetPath() == "" || glbin_settings.m_vrp_embed)
@@ -3365,10 +3537,10 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 	}
 	//annotations
 	fconfig.SetPath("/data/annotations");
-	fconfig.Write("num", m_data_mgr.GetAnnotationNum());
-	for (i=0; i<m_data_mgr.GetAnnotationNum(); i++)
+	fconfig.Write("num", glbin_data_manager.GetAnnotationNum());
+	for (i=0; i<glbin_data_manager.GetAnnotationNum(); i++)
 	{
-		Annotations* ann = m_data_mgr.GetAnnotations(i);
+		Annotations* ann = glbin_data_manager.GetAnnotations(i);
 		if (ann)
 		{
 			if (ann->GetPath() == "")
@@ -3651,11 +3823,11 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 	//interpolator
 	fconfig.SetPath("/interpolator");
 	fconfig.Write("max_id", Interpolator::m_id);
-	int group_num = m_interpolator.GetKeyNum();
+	int group_num = glbin_interpolator.GetKeyNum();
 	fconfig.Write("num", group_num);
 	for (i=0; i<group_num; i++)
 	{
-		FlKeyGroup* key_group = m_interpolator.GetKeyGroup(i);
+		FlKeyGroup* key_group = glbin_interpolator.GetKeyGroup(i);
 		if (key_group)
 		{
 			str = wxString::Format("/interpolator/%d", i);
@@ -3735,19 +3907,19 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 	UpdateList();
 
 	delete prg_diag;
-	m_data_mgr.SetProjectPath(filename2);
+	glbin_data_manager.SetProjectPath(filename2);
 	SetTitle(m_title + " - " + filename2);
 }
 
 void VRenderFrame::OpenProject(wxString& filename)
 {
-	m_data_mgr.SetProjectPath(filename);
+	glbin_data_manager.SetProjectPath(filename);
 	SetTitle(m_title + " - " + filename);
 
 	int iVal;
 	int i, j, k;
 	//clear
-	m_data_mgr.ClearAll();
+	glbin_data_manager.ClearAll();
 	DataGroup::ResetID();
 	MeshGroup::ResetID();
 	m_adjust_view->SetVolumeData(0);
@@ -3840,10 +4012,10 @@ void VRenderFrame::OpenProject(wxString& filename)
 				fconfig.SetPath(str);
 				bool compression = false;
 				fconfig.Read("compression", &compression);
-				m_data_mgr.SetCompression(compression);
+				glbin_data_manager.SetCompression(compression);
 				bool skip_brick = false;
 				fconfig.Read("skip_brick", &skip_brick);
-				m_data_mgr.SetSkipBrick(skip_brick);
+				glbin_data_manager.SetSkipBrick(skip_brick);
 				//path
 				if (fconfig.Read("path", &str))
 				{
@@ -3858,47 +4030,47 @@ void VRenderFrame::OpenProject(wxString& filename)
 					fconfig.Read("reader_type", &reader_type);
 					bool slice_seq = 0;
 					fconfig.Read("slice_seq", &slice_seq);
-					m_data_mgr.SetSliceSequence(slice_seq);
+					glbin_data_manager.SetSliceSequence(slice_seq);
 					wxString time_id;
 					fconfig.Read("time_id", &time_id);
-					m_data_mgr.SetTimeId(time_id);
+					glbin_data_manager.SetTimeId(time_id);
 					bool fp_convert = false;
 					double minv, maxv;
 					fconfig.Read("fp_convert", &fp_convert, false);
 					fconfig.Read("fp_min", &minv, 0);
 					fconfig.Read("fp_max", &maxv, 1);
-					m_data_mgr.SetReaderFpConvert(fp_convert, minv, maxv);
+					glbin_data_manager.SetReaderFpConvert(fp_convert, minv, maxv);
 					wxString suffix = str.Mid(str.Find('.', true)).MakeLower();
 					if (reader_type == READER_IMAGEJ_TYPE)
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_IMAGEJ, true, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_IMAGEJ, true, cur_chan, cur_time);
 					else if (suffix == ".nrrd" || suffix == ".msk" || suffix == ".lbl")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_NRRD, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_NRRD, false, cur_chan, cur_time);
 					else if (suffix == ".tif" || suffix == ".tiff")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_TIFF, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_TIFF, false, cur_chan, cur_time);
 					else if (suffix == ".oib")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_OIB, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_OIB, false, cur_chan, cur_time);
 					else if (suffix == ".oif")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_OIF, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_OIF, false, cur_chan, cur_time);
 					else if (suffix == ".lsm")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_LSM, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_LSM, false, cur_chan, cur_time);
 					else if (suffix == ".xml")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_PVXML, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_PVXML, false, cur_chan, cur_time);
 					else if (suffix == ".vvd")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_BRKXML, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_BRKXML, false, cur_chan, cur_time);
 					else if (suffix == ".czi")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_CZI, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_CZI, false, cur_chan, cur_time);
 					else if (suffix == ".nd2")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_ND2, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_ND2, false, cur_chan, cur_time);
 					else if (suffix == ".lif")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_LIF, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_LIF, false, cur_chan, cur_time);
 					else if (suffix == ".lof")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_LOF, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_LOF, false, cur_chan, cur_time);
 					else if (suffix == ".mp4" || suffix == ".m4v" || suffix == ".mov" || suffix == ".avi" || suffix == ".wmv")
-						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_MPG, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_MPG, false, cur_chan, cur_time);
 				}
 				VolumeData* vd = 0;
 				if (loaded_num)
-					vd = m_data_mgr.GetLastVolumeData();
+					vd = glbin_data_manager.GetLastVolumeData();
 				if (vd)
 				{
 					if (fconfig.Read("name", &str))
@@ -4207,9 +4379,9 @@ void VRenderFrame::OpenProject(wxString& filename)
 				fconfig.SetPath(str);
 				if (fconfig.Read("path", &str))
 				{
-					m_data_mgr.LoadMeshData(str);
+					glbin_data_manager.LoadMeshData(str);
 				}
-				MeshData* md = m_data_mgr.GetLastMeshData();
+				MeshData* md = glbin_data_manager.GetLastMeshData();
 				if (md)
 				{
 					if (fconfig.Read("name", &str))
@@ -4320,7 +4492,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 				fconfig.SetPath(str);
 				if (fconfig.Read("path", &str))
 				{
-					m_data_mgr.LoadAnnotations(str);
+					glbin_data_manager.LoadAnnotations(str);
 				}
 			}
 		}
@@ -4358,7 +4530,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 				{
 					if (fconfig.Read(wxString::Format("name%d", j), &str))
 					{
-						VolumeData* vd = m_data_mgr.GetVolumeData(str);
+						VolumeData* vd = glbin_data_manager.GetVolumeData(str);
 						if (vd)
 							view->AddVolumeData(vd);
 					}
@@ -4375,7 +4547,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 				{
 					if (fconfig.Read(wxString::Format("name%d", j), &str))
 					{
-						MeshData* md = m_data_mgr.GetMeshData(str);
+						MeshData* md = glbin_data_manager.GetMeshData(str);
 						if (md)
 							view->AddMeshData(md);
 					}
@@ -4404,7 +4576,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 								{
 									if (fconfig.Read("name", &str))
 									{
-										VolumeData* vd = m_data_mgr.GetVolumeData(str);
+										VolumeData* vd = glbin_data_manager.GetVolumeData(str);
 										if (vd)
 											view->AddVolumeData(vd);
 									}
@@ -4414,7 +4586,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 								{
 									if (fconfig.Read("name", &str))
 									{
-										MeshData* md = m_data_mgr.GetMeshData(str);
+										MeshData* md = glbin_data_manager.GetMeshData(str);
 										if (md)
 											view->AddMeshData(md);
 									}
@@ -4424,7 +4596,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 								{
 									if (fconfig.Read("name", &str))
 									{
-										Annotations* ann = m_data_mgr.GetAnnotations(str);
+										Annotations* ann = glbin_data_manager.GetAnnotations(str);
 										if (ann)
 											view->AddAnnotations(ann);
 									}
@@ -4489,7 +4661,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 												{
 													if (fconfig.Read(wxString::Format("vol_%d", k), &str))
 													{
-														VolumeData* vd = m_data_mgr.GetVolumeData(str);
+														VolumeData* vd = glbin_data_manager.GetVolumeData(str);
 														if (vd)
 														{
 															group->InsertVolumeData(k-1, vd);
@@ -4529,7 +4701,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 												{
 													if (fconfig.Read(wxString::Format("mesh_%d", k), &str))
 													{
-														MeshData* md = m_data_mgr.GetMeshData(str);
+														MeshData* md = glbin_data_manager.GetMeshData(str);
 														if (md)
 														{
 															group->InsertMeshData(k-1, md);
@@ -4790,10 +4962,10 @@ void VRenderFrame::OpenProject(wxString& filename)
 			switch (m_cur_sel_type)
 			{
 			case 2:  //volume
-				OnSelection(2, 0, 0, m_data_mgr.GetVolumeData(cur_sel_vol));
+				OnSelection(2, 0, 0, glbin_data_manager.GetVolumeData(cur_sel_vol));
 				break;
 			case 3:  //mesh
-				OnSelection(3, 0, 0, 0, m_data_mgr.GetMeshData(cur_sel_mesh));
+				OnSelection(3, 0, 0, 0, glbin_data_manager.GetMeshData(cur_sel_mesh));
 				break;
 			}
 		}
@@ -4802,7 +4974,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 			m_cur_sel_vol = cur_sel_vol;
 			if (m_cur_sel_vol != -1)
 			{
-				VolumeData* vd = m_data_mgr.GetVolumeData(m_cur_sel_vol);
+				VolumeData* vd = glbin_data_manager.GetVolumeData(m_cur_sel_vol);
 				OnSelection(2, 0, 0, vd);
 			}
 		}
@@ -5140,10 +5312,10 @@ void VRenderFrame::OpenProject(wxString& filename)
 		double dVal;
 
 		fconfig.SetPath("/interpolator");
-		m_interpolator.Clear();
+		glbin_interpolator.Clear();
 		if (fconfig.Read("max_id", &iVal))
 			Interpolator::m_id = iVal;
-		vector<FlKeyGroup*>* key_list = m_interpolator.GetKeyList();
+		vector<FlKeyGroup*>* key_list = glbin_interpolator.GetKeyList();
 		int group_num = fconfig.Read("num", 0l);
 		for (i=0; i<group_num; i++)
 		{
@@ -5272,14 +5444,14 @@ void VRenderFrame::OpenProject(wxString& filename)
 		switch (m_cur_sel_type)
 		{
 		case 2:  //volume
-			if (m_data_mgr.GetVolumeData(m_cur_sel_vol))
-				UpdateTree(m_data_mgr.GetVolumeData(m_cur_sel_vol)->GetName());
+			if (glbin_data_manager.GetVolumeData(m_cur_sel_vol))
+				UpdateTree(glbin_data_manager.GetVolumeData(m_cur_sel_vol)->GetName());
 			else
 				UpdateTree();
 			break;
 		case 3:  //mesh
-			if (m_data_mgr.GetMeshData(m_cur_sel_mesh))
-				UpdateTree(m_data_mgr.GetMeshData(m_cur_sel_mesh)->GetName());
+			if (glbin_data_manager.GetMeshData(m_cur_sel_mesh))
+				UpdateTree(glbin_data_manager.GetMeshData(m_cur_sel_mesh)->GetName());
 			else
 				UpdateTree();
 			break;
@@ -5289,8 +5461,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 	}
 	else if (m_cur_sel_vol != -1)
 	{
-		if (m_data_mgr.GetVolumeData(m_cur_sel_vol))
-			UpdateTree(m_data_mgr.GetVolumeData(m_cur_sel_vol)->GetName());
+		if (glbin_data_manager.GetVolumeData(m_cur_sel_vol))
+			UpdateTree(glbin_data_manager.GetVolumeData(m_cur_sel_vol)->GetName());
 		else
 			UpdateTree();
 	}
@@ -5585,6 +5757,12 @@ void VRenderFrame::SetTextureRendererSettings()
 	flvr::TextureRenderer::set_up_time(glbin_settings.m_up_time);
 	flvr::TextureRenderer::set_update_order(glbin_settings.m_update_order);
 	flvr::TextureRenderer::set_invalidate_tex(glbin_settings.m_invalidate_tex);
+}
+
+//quit option
+void VRenderFrame::OnQuit(wxCommandEvent& event)
+{
+	Close(true);
 }
 
 void VRenderFrame::OnFacebook(wxCommandEvent& event)

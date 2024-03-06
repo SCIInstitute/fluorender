@@ -33,6 +33,12 @@ DEALINGS IN THE SOFTWARE.
 #include <DataManager.h>
 #include <VRenderGLView.h>
 #include <VRenderFrame.h>
+#include <TraceDlg.h>
+#include <NoiseCancellingDlg.h>
+#include <ComponentDlg.h>
+#include <VMovieView.h>
+#include <AdjustView.h>
+#include <ScriptBreakDlg.h>
 #include <Calculate/BackgStat.h>
 #include <Components/CompSelector.h>
 #include <Components/CompEditor.h>
@@ -2472,7 +2478,7 @@ void ScriptProc::ChangeData()
 	{
 		//m_frame->GetTree()->DeleteAll();
 		glbin_ruler_handler.DeleteAll(false);
-		m_frame->GetDataManager()->ClearAll();
+		glbin_data_manager.ClearAll();
 		m_frame->GetAdjustView()->SetVolumeData(0);
 		m_frame->GetAdjustView()->SetGroup(0);
 		m_frame->GetAdjustView()->SetGroupLink(0);

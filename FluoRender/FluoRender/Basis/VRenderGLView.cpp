@@ -27,9 +27,22 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "VRenderGLView.h"
-#include "VRenderView.h"
-#include "VRenderFrame.h"
 #include <Global.h>
+#include <VRenderFrame.h>
+#include <VRenderView.h>
+#include <SettingDlg.h>
+#include <AdjustView.h>
+#include <BrushToolDlg.h>
+#include <ColocalizationDlg.h>
+#include <TreePanel.h>
+#include <ListPanel.h>
+#include <VMovieView.h>
+#include <RecorderDlg.h>
+#include <ComponentDlg.h>
+#include <ClippingView.h>
+#include <TraceDlg.h>
+#include <MeasureDlg.h>
+#include <VolumePropPanel.h>
 #include <Components/CompAnalyzer.h>
 #include <Calculate/Count.h>
 #include <Calculate/Histogram.h>
@@ -4624,9 +4637,6 @@ void VRenderGLView::SetParams(double t)
 	if (!m_frame)
 		return;
 	ClippingView* clip_view = m_frame->GetClippingView();
-	Interpolator *interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
 	m_frame_num_type = 1;
 	m_param_cur_num = std::round(t);
 	FlKeyCode keycode;
@@ -4645,7 +4655,7 @@ void VRenderGLView::SetParams(double t)
 		keycode.l2 = 0;
 		keycode.l2_name = "display";
 		bool bval;
-		if (interpolator->GetBoolean(keycode, t, bval))
+		if (glbin_interpolator.GetBoolean(keycode, t, bval))
 			vd->SetDisp(bval);
 
 		//clipping planes
@@ -4658,55 +4668,55 @@ void VRenderGLView::SetParams(double t)
 		plane = (*planes)[0];
 		keycode.l2 = 0;
 		keycode.l2_name = "x1_val";
-		if (interpolator->GetDouble(keycode, t, val))
+		if (glbin_interpolator.GetDouble(keycode, t, val))
 			plane->ChangePlane(fluo::Point(abs(val), 0.0, 0.0),
 				fluo::Vector(1.0, 0.0, 0.0));
 		//x2
 		plane = (*planes)[1];
 		keycode.l2 = 0;
 		keycode.l2_name = "x2_val";
-		if (interpolator->GetDouble(keycode, t, val))
+		if (glbin_interpolator.GetDouble(keycode, t, val))
 			plane->ChangePlane(fluo::Point(abs(val), 0.0, 0.0),
 				fluo::Vector(-1.0, 0.0, 0.0));
 		//y1
 		plane = (*planes)[2];
 		keycode.l2 = 0;
 		keycode.l2_name = "y1_val";
-		if (interpolator->GetDouble(keycode, t, val))
+		if (glbin_interpolator.GetDouble(keycode, t, val))
 			plane->ChangePlane(fluo::Point(0.0, abs(val), 0.0),
 				fluo::Vector(0.0, 1.0, 0.0));
 		//y2
 		plane = (*planes)[3];
 		keycode.l2 = 0;
 		keycode.l2_name = "y2_val";
-		if (interpolator->GetDouble(keycode, t, val))
+		if (glbin_interpolator.GetDouble(keycode, t, val))
 			plane->ChangePlane(fluo::Point(0.0, abs(val), 0.0),
 				fluo::Vector(0.0, -1.0, 0.0));
 		//z1
 		plane = (*planes)[4];
 		keycode.l2 = 0;
 		keycode.l2_name = "z1_val";
-		if (interpolator->GetDouble(keycode, t, val))
+		if (glbin_interpolator.GetDouble(keycode, t, val))
 			plane->ChangePlane(fluo::Point(0.0, 0.0, abs(val)),
 				fluo::Vector(0.0, 0.0, 1.0));
 		//z2
 		plane = (*planes)[5];
 		keycode.l2 = 0;
 		keycode.l2_name = "z2_val";
-		if (interpolator->GetDouble(keycode, t, val))
+		if (glbin_interpolator.GetDouble(keycode, t, val))
 			plane->ChangePlane(fluo::Point(0.0, 0.0, abs(val)),
 				fluo::Vector(0.0, 0.0, -1.0));
 		//t
 		double frame;
 		keycode.l2 = 0;
 		keycode.l2_name = "frame";
-		if (interpolator->GetDouble(keycode, t, frame))
+		if (glbin_interpolator.GetDouble(keycode, t, frame))
 			UpdateVolumeData(std::round(frame), vd);
 		//primary color
 		fluo::Color pc;
 		keycode.l2 = 0;
 		keycode.l2_name = "color";
-		if (interpolator->GetColor(keycode, t, pc))
+		if (glbin_interpolator.GetColor(keycode, t, pc))
 			vd->SetColor(pc);
 	}
 
@@ -4718,35 +4728,35 @@ void VRenderGLView::SetParams(double t)
 	double tx, ty, tz;
 	keycode.l2 = 0;
 	keycode.l2_name = "translation_x";
-	bx = interpolator->GetDouble(keycode, t, tx);
+	bx = glbin_interpolator.GetDouble(keycode, t, tx);
 	keycode.l2_name = "translation_y";
-	by = interpolator->GetDouble(keycode, t, ty);
+	by = glbin_interpolator.GetDouble(keycode, t, ty);
 	keycode.l2_name = "translation_z";
-	bz = interpolator->GetDouble(keycode, t, tz);
+	bz = glbin_interpolator.GetDouble(keycode, t, tz);
 	if (bx && by && bz)
 		SetTranslations(tx, ty, tz);
 	//centers
 	keycode.l2_name = "center_x";
-	bx = interpolator->GetDouble(keycode, t, tx);
+	bx = glbin_interpolator.GetDouble(keycode, t, tx);
 	keycode.l2_name = "center_y";
-	by = interpolator->GetDouble(keycode, t, ty);
+	by = glbin_interpolator.GetDouble(keycode, t, ty);
 	keycode.l2_name = "center_z";
-	bz = interpolator->GetDouble(keycode, t, tz);
+	bz = glbin_interpolator.GetDouble(keycode, t, tz);
 	if (bx && by && bz)
 		SetCenters(tx, ty, tz);
 	//obj translation
 	keycode.l2_name = "obj_trans_x";
-	bx = interpolator->GetDouble(keycode, t, tx);
+	bx = glbin_interpolator.GetDouble(keycode, t, tx);
 	keycode.l2_name = "obj_trans_y";
-	by = interpolator->GetDouble(keycode, t, ty);
+	by = glbin_interpolator.GetDouble(keycode, t, ty);
 	keycode.l2_name = "obj_trans_z";
-	bz = interpolator->GetDouble(keycode, t, tz);
+	bz = glbin_interpolator.GetDouble(keycode, t, tz);
 	if (bx && by && bz)
 		SetObjTrans(tx, ty, tz);
 	//scale
 	double scale;
 	keycode.l2_name = "scale";
-	if (interpolator->GetDouble(keycode, t, scale))
+	if (glbin_interpolator.GetDouble(keycode, t, scale))
 	{
 		m_scale_factor = scale;
 		m_vrv->UpdateScaleFactor(false);
@@ -4755,7 +4765,7 @@ void VRenderGLView::SetParams(double t)
 	keycode.l2 = 0;
 	keycode.l2_name = "rotation";
 	fluo::Quaternion q;
-	if (interpolator->GetQuaternion(keycode, t, q))
+	if (glbin_interpolator.GetQuaternion(keycode, t, q))
 	{
 		m_q = q;
 		q *= -m_zq;
@@ -4766,12 +4776,12 @@ void VRenderGLView::SetParams(double t)
 	//intermixing mode
 	keycode.l2_name = "volmethod";
 	int ival;
-	if (interpolator->GetInt(keycode, t, ival))
+	if (glbin_interpolator.GetInt(keycode, t, ival))
 		SetVolMethod(ival);
 	//perspective angle
 	keycode.l2_name = "aov";
 	double aov;
-	if (interpolator->GetDouble(keycode, t, aov))
+	if (glbin_interpolator.GetDouble(keycode, t, aov))
 	{
 		if (aov <= 10)
 		{
@@ -4794,7 +4804,7 @@ void VRenderGLView::SetParams(double t)
 	if (m_frame)
 	{
 		m_frame->UpdateTree(m_cur_vol ? m_cur_vol->GetName() : wxString(""));
-		int index = interpolator->GetKeyIndexFromTime(t);
+		int index = glbin_interpolator.GetKeyIndexFromTime(t);
 		m_frame->GetRecorderDlg()->SetSelection(index);
 		m_frame->GetMeasureDlg()->GetSettings(this);
 		//update ruler intensity values
@@ -6179,10 +6189,6 @@ void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)
 	bool found = false;
 	DataGroup* group = 0;
 
-	if (!m_frame) return;
-	DataManager *dm = m_frame->GetDataManager();
-	if (!dm) return;
-
 	for (i = 0; i<(int)m_layer_list.size(); i++)
 	{
 		if (!m_layer_list[i])
@@ -6200,7 +6206,7 @@ void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)
 				m_layer_list[i] = dst;
 				m_vd_pop_dirty = true;
 				found = true;
-				dm->RemoveVolumeData(name);
+				glbin_data_manager.RemoveVolumeData(name);
 				break;
 			}
 		}
@@ -6220,7 +6226,7 @@ void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)
 					m_vd_pop_dirty = true;
 					found = true;
 					group = tmpgroup;
-					dm->RemoveVolumeData(name);
+					glbin_data_manager.RemoveVolumeData(name);
 					break;
 				}
 			}

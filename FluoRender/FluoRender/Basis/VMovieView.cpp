@@ -26,9 +26,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "VMovieView.h"
-#include "VRenderFrame.h"
-#include "RecorderDlg.h"
 #include <Global/Global.h>
+#include <RecorderDlg.h>
+#include <VRenderFrame.h>
+#include <VRenderGLView.h>
+#include <VRenderView.h>
 #include <wxSingleSlider.h>
 #include <tiffio.h>
 #include <wx/aboutdlg.h>
@@ -94,7 +96,6 @@ EVT_TIMER(ID_Timer, VMovieView::OnTimer)
 EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, VMovieView::OnNbPageChange)
 END_EVENT_TABLE()
 
-double VMovieView::m_Mbitrate = 1;
 double VMovieView::m_movie_len = 5;
 wxTextCtrl * VMovieView::m_estimated_size_text = 0;
 
@@ -850,10 +851,9 @@ void VMovieView::Prev()
 		m_starting_rot = 0.;
 	if (m_current_page == 1)
 	{
-		Interpolator *interpolator = m_frame->GetInterpolator();
-		if (interpolator && interpolator->GetLastIndex() > 0)
+		if (glbin_interpolator.GetLastIndex() > 0)
 		{
-			int frames = std::round(interpolator->GetLastT()) + 1;
+			int frames = std::round(glbin_interpolator.GetLastT()) + 1;
 			m_start_frame = 0; m_end_frame = frames;
 			m_movie_len = (double)frames / m_fps;
 			m_movie_len_text->ChangeValue(wxString::Format("%.2f", m_movie_len));
@@ -1183,19 +1183,18 @@ void VMovieView::OnTimeText(wxCommandEvent& event)
 
 void VMovieView::SetRendering(double pcnt, bool rewind)
 {
-	if (!m_frame || !m_view)
+	if (!m_view)
 		return;
 
 	m_view->SetLockCamObject(false);
 	//advanced options
 	if (m_current_page == 1)
 	{
-		Interpolator *interpolator = m_frame->GetInterpolator();
-		if (interpolator && interpolator->GetLastIndex() > 0)
+		if (glbin_interpolator.GetLastIndex() > 0)
 		{
 			if (m_advanced_movie->GetCamLock() && m_timer.IsRunning())
 				m_view->SetLockCamObject(true);
-			int end_frame = std::round(interpolator->GetLastT());
+			int end_frame = std::round(glbin_interpolator.GetLastT());
 			m_view->SetParams(pcnt * end_frame);
 			m_view->SetInteractive(false);
 			m_view->RefreshGL(39);
@@ -1455,7 +1454,7 @@ void VMovieView::Run()
 		}
 
 		glbin.get_video_encoder().open(m_filename.ToStdString(), m_crop_w, m_crop_h, m_fps,
-			m_Mbitrate * 1e6);
+			glbin_settings.m_mov_bitrate * 1e6);
 	}
 	m_filename = m_filename.SubString(0, m_filename.Len() - 5);
 	m_record = true;
@@ -1653,9 +1652,9 @@ void VMovieView::OnTxEnlargeText(wxCommandEvent &event)
 //movie quality
 void VMovieView::OnMovieQuality(wxCommandEvent &event)
 {
-	m_Mbitrate = STOD(((wxTextCtrl*)event.GetEventObject())
+	glbin_settings.m_mov_bitrate = STOD(((wxTextCtrl*)event.GetEventObject())
 		->GetValue().fn_str());
-	double size = m_Mbitrate * m_movie_len / 8.;
+	double size = glbin_settings.m_mov_bitrate * m_movie_len / 8.;
 	m_estimated_size_text->SetValue(wxString::Format("%.2f", size));
 }
 //embed project
@@ -1763,8 +1762,8 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
 	m_estimated_size_text = new wxTextCtrl(panel, ID_BitrateText, "2.5",
 		wxDefaultPosition, wxDefaultSize);
 	m_estimated_size_text->Disable();
-	m_Mbitrate = STOD(bitrate_text->GetValue().fn_str());
-	double size = m_Mbitrate * m_movie_len / 8.;
+	glbin_settings.m_mov_bitrate = STOD(bitrate_text->GetValue().fn_str());
+	double size = glbin_settings.m_mov_bitrate * m_movie_len / 8.;
 	m_estimated_size_text->SetValue(wxString::Format("%.2f", size));
 
 	line3->Add(MOVopts, 0, wxALIGN_CENTER);

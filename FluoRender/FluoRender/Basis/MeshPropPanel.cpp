@@ -26,8 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "MeshPropPanel.h"
-#include <DataManager.h>
+#include <Global.h>
 #include <VRenderFrame.h>
+#include <VRenderGLView.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 
