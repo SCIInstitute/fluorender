@@ -849,6 +849,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		if ((vald_fp = (wxFloatingPointValidator<double>*)m_sample_text->GetValidator()))
 			vald_fp->SetRange(0.0, 100.0);
+		bval = m_vd->GetSampleRateEnable();
 		dval = m_vd->GetSampleRate();
 		str = wxString::Format("%.1f", dval);
 		m_sample_sldr->ChangeValue(dval * 10.0);
