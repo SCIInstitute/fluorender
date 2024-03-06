@@ -210,6 +210,8 @@ VolumeData::VolumeData(VolumeData &copy)
 	else
 		m_dup_data = &copy;
 
+	m_ep = 0;
+
 	m_vr = new flvr::VolumeRenderer(*copy.m_vr);
 	//layer properties
 	type = 2;//volume
@@ -1772,6 +1774,14 @@ double VolumeData::GetGamma()
 	return m_gamma;
 }
 
+double VolumeData::GetMlGamma()
+{
+	if (m_ep)
+		return m_ep->getParam("gamma3d");
+	else
+		return m_gamma;
+}
+
 void VolumeData::SetBoundaryEnable(bool bval)
 {
 	m_boundary_enable = bval;
@@ -1799,6 +1809,14 @@ double VolumeData::GetBoundary()
 	return m_boundary;
 }
 
+double VolumeData::GetMlBoundary()
+{
+	if (m_ep)
+		return m_ep->getParam("extract_boundary");
+	else
+		return m_boundary;
+}
+
 void VolumeData::SetSaturationEnable(bool bval)
 {
 	m_saturation_enable = bval;
@@ -1824,6 +1842,14 @@ void VolumeData::SetSaturation(double val, bool set_this)
 double VolumeData::GetSaturation()
 {
 	return m_saturation;
+}
+
+double VolumeData::GetMlSaturation()
+{
+	if (m_ep)
+		return m_ep->getParam("low_offset");
+	else
+		return m_saturation;
 }
 
 void VolumeData::SetThreshEnable(bool bval)
@@ -1859,6 +1885,14 @@ double VolumeData::GetLeftThresh()
 	return m_lo_thresh;
 }
 
+double VolumeData::GetMlLeftThresh()
+{
+	if (m_ep)
+		return m_ep->getParam("low_threshold");
+	else
+		return m_lo_thresh;
+}
+
 void VolumeData::SetRightThresh(double val, bool set_this)
 {
 	if (set_this)
@@ -1870,6 +1904,14 @@ void VolumeData::SetRightThresh(double val, bool set_this)
 double VolumeData::GetRightThresh()
 {
 	return m_hi_thresh;
+}
+
+double VolumeData::GetMlRightThresh()
+{
+	if (m_ep)
+		return m_ep->getParam("high_threshold");
+	else
+		return m_hi_thresh;
 }
 
 void VolumeData::SetLuminanceEnable(bool bval)
@@ -1902,8 +1944,14 @@ fluo::Color VolumeData::SetLuminance(double val, bool set_this)
 double VolumeData::GetLuminance()
 {
 	return m_luminance;
-	//fluo::HSVColor hsv(m_color);
-	//return hsv.val();
+}
+
+double VolumeData::GetMlLuminance()
+{
+	if (m_ep)
+		return m_ep->getParam("luminance");
+	else
+		return m_luminance;
 }
 
 void VolumeData::SetAlphaEnable(bool bval)
@@ -1935,6 +1983,14 @@ void VolumeData::SetAlpha(double val, bool set_this)
 double VolumeData::GetAlpha()
 {
 	return m_alpha;
+}
+
+double VolumeData::GetMlAlpha()
+{
+	if (m_ep)
+		return m_ep->getParam("alpha");
+	else
+		return m_alpha;
 }
 
 //shading
@@ -1989,11 +2045,27 @@ double VolumeData::GetLowShading()
 	return amb;
 }
 
+double VolumeData::GetMlLowShading()
+{
+	if (m_ep)
+		return m_ep->getParam("low_shading");
+	else
+		return GetLowShading();
+}
+
 double VolumeData::GetHiShading()
 {
 	double amb, diff, spec, shine;
 	GetMaterial(amb, diff, spec, shine);
 	return shine;
+}
+
+double VolumeData::GetMlHiShading()
+{
+	if (m_ep)
+		return m_ep->getParam("high_shading");
+	else
+		return GetHiShading();
 }
 
 //shadow
@@ -2015,6 +2087,14 @@ void VolumeData::SetShadowIntensity(double val)
 double VolumeData::GetShadowIntensity()
 {
 	return m_shadow_intensity;
+}
+
+double VolumeData::GetMlShadowIntensity()
+{
+	if (m_ep)
+		return m_ep->getParam("shadow_intensity");
+	else
+		return m_shadow_intensity;
 }
 
 //sample rate
@@ -2043,6 +2123,14 @@ void VolumeData::SetSampleRate(double val, bool set_this)
 double VolumeData::GetSampleRate()
 {
 	return m_sample_rate;
+}
+
+double VolumeData::GetMlSampleRate()
+{
+	if (m_ep)
+		return m_ep->getParam("sample_rate");
+	else
+		return m_sample_rate;
 }
 
 void VolumeData::SetColor(fluo::Color &color, bool update_hsv)
@@ -2193,9 +2281,25 @@ double VolumeData::GetColormapLow()
 	return m_colormap_low_value;
 }
 
+double VolumeData::GetMlColormapLow()
+{
+	if (m_ep)
+		return m_ep->getParam("colormap_low");
+	else
+		return m_colormap_low_value;
+}
+
 double VolumeData::GetColormapHigh()
 {
 	return m_colormap_hi_value;
+}
+
+double VolumeData::GetMlColormapHigh()
+{
+	if (m_ep)
+		return m_ep->getParam("colormap_hi");
+	else
+		return m_colormap_hi_value;
 }
 
 void VolumeData::SetColormapInv(double val)
@@ -2644,17 +2748,27 @@ void VolumeData::LoadLabel2()
 	}
 }
 
+flrd::EntryParams* VolumeData::GetMlParams()
+{
+	if (!m_ep)
+	{
+		flrd::Histogram histogram(this);
+		histogram.SetUseMask(false);
+		flrd::EntryHist* eh = histogram.GetEntryHist();
+		if (!eh)
+			return 0;
+		//get entry from table
+		flrd::TableHistParams& table = glbin.get_vp_table();
+		m_ep = table.findNearestOutput(eh);
+		delete eh;
+	}
+	return m_ep;
+}
+
 void VolumeData::ApplyMlVolProp()
 {
+	flrd::EntryParams* ep = GetMlParams();
 	//get histogram
-	flrd::Histogram histogram(this);
-	histogram.SetUseMask(false);
-	flrd::EntryHist* eh = histogram.GetEntryHist();
-	if (!eh)
-		return;
-	//get entry from table
-	flrd::TableHistParams& table = glbin.get_vp_table();
-	flrd::EntryParams* ep = table.findNearestOutput(eh);
 	if (ep)
 	{
 		//set parameters
@@ -2742,7 +2856,6 @@ void VolumeData::ApplyMlVolProp()
 		dval = ep->getParam("shadow_intensity");
 		SetShadowIntensity(dval);
 	}
-	delete eh;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////

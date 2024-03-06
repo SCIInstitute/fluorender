@@ -271,8 +271,7 @@ private:
 	//
 	void OnThreshMF(wxCommandEvent& event);
 	void OnThreshChange(wxScrollEvent &event);
-	void OnThreshLowText(wxCommandEvent &event);
-	void OnThreshHiText(wxCommandEvent &event);
+	void OnThreshText(wxCommandEvent &event);
 	void OnThreshLink(wxCommandEvent& event);
 	void OnThreshChk(wxCommandEvent& event);
 	//
@@ -288,8 +287,7 @@ private:
 	//
 	void OnColormapMF(wxCommandEvent& event);
 	void OnColormapChange(wxScrollEvent &event);
-	void OnColormapHiText(wxCommandEvent &event);
-	void OnColormapLowText(wxCommandEvent &event);
+	void OnColormapText(wxCommandEvent &event);
 	void OnColormapLink(wxCommandEvent& event);
 	void OnColormapChk(wxCommandEvent &event);
 

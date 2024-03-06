@@ -83,6 +83,10 @@ using namespace std;
 #define LOAD_TYPE_LOF		11
 #define LOAD_TYPE_MPG		12
 
+namespace flrd
+{
+	class EntryParams;
+}
 class TreeLayer
 {
 public:
@@ -309,33 +313,40 @@ public:
 	bool GetGammaEnable();
 	void SetGamma(double val, bool set_this = true);
 	double GetGamma();
+	double GetMlGamma();
 
 	void SetBoundaryEnable(bool);
 	bool GetBoundaryEnable();
 	void SetBoundary(double val, bool set_this = true);
 	double GetBoundary();
+	double GetMlBoundary();
 
 	void SetSaturationEnable(bool);
 	bool GetSaturationEnable();
 	void SetSaturation(double val, bool set_this = true);
 	double GetSaturation();
+	double GetMlSaturation();
 
 	void SetThreshEnable(bool);
 	bool GetThreshEnable();
 	void SetLeftThresh(double val, bool set_this = true);
 	double GetLeftThresh();
+	double GetMlLeftThresh();
 	void SetRightThresh(double val, bool set_this = true);
 	double GetRightThresh();
+	double GetMlRightThresh();
 
 	void SetLuminanceEnable(bool);
 	bool GetLuminanceEnable();
 	fluo::Color SetLuminance(double val, bool set_this = true);
 	double GetLuminance();
+	double GetMlLuminance();
 
 	void SetAlphaEnable(bool mode);
 	bool GetAlphaEnable();
 	void SetAlpha(double val, bool set_this = true);
 	double GetAlpha();
+	double GetMlAlpha();
 
 	//shading
 	void SetShadingEnable(bool bVal);
@@ -346,18 +357,22 @@ public:
 	void SetHiShading(double val);
 	double GetLowShading();
 	double GetHiShading();
+	double GetMlLowShading();
+	double GetMlHiShading();
 
 	//shadow
 	void SetShadowEnable(bool bVal);
 	bool GetShadowEnable();
 	void SetShadowIntensity(double val);
 	double GetShadowIntensity();
+	double GetMlShadowIntensity();
 
 	//sample rate
 	void SetSampleRateEnable(bool bval);
 	bool GetSampleRateEnable();
 	void SetSampleRate(double val, bool set_this = true);
 	double GetSampleRate();
+	double GetMlSampleRate();
 
 	//colors
 	void SetColor(fluo::Color &color, bool update_hsv=true);
@@ -385,7 +400,9 @@ public:
 	void SetColormapHigh(double val);
 	void GetColormapValues(double &low, double &high);
 	double GetColormapLow();
+	double GetMlColormapLow();
 	double GetColormapHigh();
+	double GetMlColormapHigh();
 	void SetColormapInv(double val);
 	double GetColormapInv();
 	void SetColormap(int value);
@@ -544,6 +561,7 @@ public:
 	void SetMlCompGenApplied(bool bval) { m_ml_comp_gen_applied = bval; }
 
 	//apply volume properties form machine learning
+	flrd::EntryParams* GetMlParams();
 	void ApplyMlVolProp();
 
 private:
@@ -551,6 +569,8 @@ private:
 	bool m_dup;
 	int m_dup_counter;
 	VolumeData* m_dup_data;//duplicated from
+
+	flrd::EntryParams* m_ep;
 
 	wxString m_tex_path;
 	fluo::BBox m_bounds;
