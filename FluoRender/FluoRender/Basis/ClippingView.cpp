@@ -142,7 +142,8 @@ m_plane_mode(kNormal)
 	long ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
 	//x
 	wxBoxSizer* sizer_cx = new wxBoxSizer(wxVERTICAL);
-	m_clip_x_st = new wxButton(this, wxID_ANY, "X");
+	m_clip_x_st = new wxButton(this, wxID_ANY, "X",
+		wxDefaultPosition, FromDIP(wxSize(34, 20)));
 	m_x1_clip_sldr = new wxDoubleSlider(this, ID_X1ClipSldr, 0, 512, 0, 512,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_x1_clip_sldr->SetRangeColor(wxColor(255, 128, 128));
@@ -180,7 +181,8 @@ m_plane_mode(kNormal)
 	//y
 	wxBoxSizer* sizer_cy = new wxBoxSizer(wxVERTICAL);
 	//wxPanel * ypanel = new wxPanel(this);
-	m_clip_y_st = new wxButton(this, wxID_ANY, "Y");
+	m_clip_y_st = new wxButton(this, wxID_ANY, "Y",
+		wxDefaultPosition, FromDIP(wxSize(34, 20)));
 	m_y1_clip_sldr = new wxDoubleSlider(this, ID_Y1ClipSldr, 0, 512, 0, 512,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_y1_clip_sldr->SetRangeColor(wxColor(128, 255, 128));
@@ -217,7 +219,8 @@ m_plane_mode(kNormal)
 	//z
 	wxBoxSizer* sizer_cz = new wxBoxSizer(wxVERTICAL);
 	//wxPanel * zpanel = new wxPanel(this);
-	m_clip_z_st = new wxButton(this, wxID_ANY, "Z");
+	m_clip_z_st = new wxButton(this, wxID_ANY, "Z",
+		wxDefaultPosition, FromDIP(wxSize(34, 20)));
 	m_z1_clip_sldr = new wxDoubleSlider(this, ID_Z1ClipSldr, 0, 512, 0, 512,
 		wxPoint(0,0), wxDefaultSize, ls);
 	m_z1_clip_sldr->SetRangeColor(wxColor(128, 128, 255));
@@ -340,7 +343,8 @@ m_plane_mode(kNormal)
 	//sliders for rotating clipping planes 
 	//x
 	wxBoxSizer* sizer_rx = new wxBoxSizer(wxVERTICAL);
-	m_rot_x_st = new wxButton(this, wxID_ANY, "X");
+	m_rot_x_st = new wxButton(this, wxID_ANY, "X",
+		wxDefaultPosition, FromDIP(wxSize(34, 20)));
 	m_x_rot_sldr = new wxSingleSlider(this, ID_XRotSldr, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_x_rot_sldr->SetRangeStyle(2);
@@ -350,14 +354,15 @@ m_plane_mode(kNormal)
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxSP_VERTICAL);
 	m_x_rot_spin->SetRange(-0x8000, 0x7fff);
 	sizer_rx->Add(5, 5, 0);
-	sizer_rx->Add(m_x_rot_text, 0, wxALIGN_CENTER, 0);
 	sizer_rx->Add(m_rot_x_st, 0, wxALIGN_CENTER, 0);
+	sizer_rx->Add(m_x_rot_text, 0, wxALIGN_CENTER, 0);
 	sizer_rx->Add(5, 5, 0);
 	sizer_rx->Add(m_x_rot_spin, 0, wxALIGN_CENTER, 0);
 	sizer_rx->Add(m_x_rot_sldr, 1, wxEXPAND, 0);
 	//y
 	wxBoxSizer* sizer_ry = new wxBoxSizer(wxVERTICAL);
-	m_rot_y_st = new wxButton(this, wxID_ANY, "Y");
+	m_rot_y_st = new wxButton(this, wxID_ANY, "Y",
+		wxDefaultPosition, FromDIP(wxSize(34, 20)));
 	m_y_rot_sldr = new wxSingleSlider(this, ID_YRotSldr, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_y_rot_sldr->SetRangeStyle(2);
@@ -367,14 +372,15 @@ m_plane_mode(kNormal)
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxSP_VERTICAL);
 	m_y_rot_spin->SetRange(-0x8000, 0x7fff);
 	sizer_ry->Add(5, 5, 0);
-	sizer_ry->Add(m_y_rot_text, 0, wxALIGN_CENTER, 0);
 	sizer_ry->Add(m_rot_y_st, 0, wxALIGN_CENTER, 0);
+	sizer_ry->Add(m_y_rot_text, 0, wxALIGN_CENTER, 0);
 	sizer_ry->Add(5, 5, 0);
 	sizer_ry->Add(m_y_rot_spin, 0, wxALIGN_CENTER, 0);
 	sizer_ry->Add(m_y_rot_sldr, 1, wxEXPAND, 0);
 	//z
 	wxBoxSizer* sizer_rz = new wxBoxSizer(wxVERTICAL);
-	m_rot_z_st = new wxButton(this, wxID_ANY, "Z");
+	m_rot_z_st = new wxButton(this, wxID_ANY, "Z",
+		wxDefaultPosition, FromDIP(wxSize(34, 20)));
 	m_z_rot_sldr = new wxSingleSlider(this, ID_ZRotSldr, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_z_rot_sldr->SetRangeStyle(2);
@@ -384,8 +390,8 @@ m_plane_mode(kNormal)
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxSP_VERTICAL);
 	m_z_rot_spin->SetRange(-0x8000, 0x7fff);
 	sizer_rz->Add(5, 5, 0);
-	sizer_rz->Add(m_z_rot_text, 0, wxALIGN_CENTER, 0);
 	sizer_rz->Add(m_rot_z_st, 0, wxALIGN_CENTER, 0);
+	sizer_rz->Add(m_z_rot_text, 0, wxALIGN_CENTER, 0);
 	sizer_rz->Add(5, 5, 0);
 	sizer_rz->Add(m_z_rot_spin, 0, wxALIGN_CENTER, 0);
 	sizer_rz->Add(m_z_rot_sldr, 1, wxEXPAND, 0);
