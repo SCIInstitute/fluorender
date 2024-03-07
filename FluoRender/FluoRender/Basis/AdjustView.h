@@ -162,45 +162,54 @@ private:
 
 	//sync red
 	wxToolBar *m_sync_r_chk;
+	//buttons
+	wxButton* m_r_gamma_st;
+	wxButton* m_r_brightness_st;
+	wxButton* m_r_hdr_st;
 	//red sliders
 	wxSingleSlider *m_r_gamma_sldr;
 	wxSingleSlider *m_r_brightness_sldr;
 	wxSingleSlider *m_r_hdr_sldr;
-	//red reset buttons
-	wxButton *m_r_reset_btn;
-	//wxButton *m_r_brightness_reset_btn;
 	//red input boxes
 	wxTextCtrl *m_r_gamma_text;
 	wxTextCtrl *m_r_brightness_text;
 	wxTextCtrl *m_r_hdr_text;
+	//red reset buttons
+	wxButton *m_r_reset_btn;
 
 	//sync green
 	wxToolBar *m_sync_g_chk;
+	//buttons
+	wxButton* m_g_gamma_st;
+	wxButton* m_g_brightness_st;
+	wxButton* m_g_hdr_st;
 	//green sliders
 	wxSingleSlider *m_g_gamma_sldr;
 	wxSingleSlider *m_g_brightness_sldr;
 	wxSingleSlider *m_g_hdr_sldr;
-	//green reset buttons
-	wxButton *m_g_reset_btn;
-	//wxButton *m_g_brightness_reset_btn;
 	//green input boxes
 	wxTextCtrl *m_g_gamma_text;
 	wxTextCtrl *m_g_brightness_text;
 	wxTextCtrl *m_g_hdr_text;
+	//green reset buttons
+	wxButton *m_g_reset_btn;
 
 	//sync blue
 	wxToolBar *m_sync_b_chk;
+	//buttons
+	wxButton* m_b_gamma_st;
+	wxButton* m_b_brightness_st;
+	wxButton* m_b_hdr_st;
 	//blue sliders
 	wxSingleSlider *m_b_gamma_sldr;
 	wxSingleSlider *m_b_brightness_sldr;
 	wxSingleSlider *m_b_hdr_sldr;
-	//blue reset buttons
-	wxButton *m_b_reset_btn;
-	//wxButton *m_b_brightness_reset_btn;
 	//blue input boxes
 	wxTextCtrl *m_b_gamma_text;
 	wxTextCtrl *m_b_brightness_text;
 	wxTextCtrl *m_b_hdr_text;
+	//blue reset buttons
+	wxButton *m_b_reset_btn;
 
 	//set default
 	wxButton *m_dft_btn;

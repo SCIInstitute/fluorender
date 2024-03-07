@@ -156,7 +156,35 @@ m_sync_b(false)
 	sizer_h_3->Add(m_r_hdr_sldr, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_3, 1, wxEXPAND);
 
-	//fifth line: reset buttons
+	//5th line: input boxes
+	wxBoxSizer *sizer_h_4 = new wxBoxSizer(wxHORIZONTAL);
+	vald_fp2.SetRange(0.0, 10.0);
+	m_r_gamma_text = new wxTextCtrl(this, ID_RGammaText, "1.00",
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
+	sizer_h_4->Add(m_r_gamma_text, 1, wxEXPAND);
+	m_r_brightness_text = new wxTextCtrl(this, ID_RBrightnessText, "0",
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_int);
+	sizer_h_4->Add(m_r_brightness_text, 1, wxEXPAND);
+	vald_fp2.SetRange(0.0, 1.0);
+	m_r_hdr_text = new wxTextCtrl(this, ID_RHdrText, "0.00",
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
+	sizer_h_4->Add(m_r_hdr_text, 1, wxEXPAND);
+	sizer_v->Add(sizer_h_4, 0, wxEXPAND);
+
+	//6th line: buttons
+	wxBoxSizer* sizer_h_5 = new wxBoxSizer(wxHORIZONTAL);
+	m_r_gamma_st = new wxButton(this, wxID_ANY, "Gam.R.",
+		wxDefaultPosition, FromDIP(wxSize(30, 20)));
+	sizer_h_5->Add(m_r_gamma_st, 1, wxEXPAND);
+	m_r_brightness_st = new wxButton(this, wxID_ANY, "Lum.R.",
+		wxDefaultPosition, FromDIP(wxSize(30, 20)));
+	sizer_h_5->Add(m_r_brightness_st, 1, wxEXPAND);
+	m_r_hdr_st = new wxButton(this, wxID_ANY, "Eql.R.",
+		wxDefaultPosition, FromDIP(wxSize(30, 20)));
+	sizer_h_5->Add(m_r_hdr_st, 1, wxEXPAND);
+	sizer_v->Add(sizer_h_5, 0, wxEXPAND);
+
+	//7th line: reset buttons
 #ifndef _DARWIN
 	m_r_reset_btn = new wxButton(this, ID_RResetBtn, "Reset",
 								 wxDefaultPosition, FromDIP(wxSize(30, 22)));
@@ -167,25 +195,10 @@ m_sync_b(false)
 	m_r_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	sizer_v->Add(m_r_reset_btn, 0, wxEXPAND);
 
-	//6th line: input boxes
-	wxBoxSizer *sizer_h_5 = new wxBoxSizer(wxHORIZONTAL);
-	vald_fp2.SetRange(0.0, 10.0);
-	m_r_gamma_text = new wxTextCtrl(this, ID_RGammaText, "1.00",
-		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
-	sizer_h_5->Add(m_r_gamma_text, 1, wxEXPAND);
-	m_r_brightness_text = new wxTextCtrl(this, ID_RBrightnessText, "0",
-		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_int);
-	sizer_h_5->Add(m_r_brightness_text, 1, wxEXPAND);
-	vald_fp2.SetRange(0.0, 1.0);
-	m_r_hdr_text = new wxTextCtrl(this, ID_RHdrText, "0.00",
-		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
-	sizer_h_5->Add(m_r_hdr_text, 1, wxEXPAND);
-	sizer_v->Add(sizer_h_5, 0, wxEXPAND);
-
 	//space
 	sizer_v->Add(5, 5, 0);
 
-	//7th line: green
+	//8th line: green
 	wxBoxSizer *sizer_h_6 = new wxBoxSizer(wxHORIZONTAL);
 	m_sync_g_chk = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -206,12 +219,12 @@ m_sync_b(false)
 	sizer_v->Add(sizer_h_6, 0, wxEXPAND);
 	sizer_v->Add(3,3,0);
 
-	//8th line: green bar
+	//9th line: green bar
 	st = new wxStaticText(this, 0, "", wxDefaultPosition, FromDIP(wxSize(5, 5)));
 	st->SetBackgroundColour(wxColor(0, 255, 0));
 	sizer_v->Add(st, 0, wxEXPAND);
 
-	//9th line: sliders
+	//10th line: sliders
 	wxBoxSizer *sizer_h_7 = new wxBoxSizer(wxHORIZONTAL);
 	m_g_gamma_sldr = new wxSingleSlider(this, ID_GGammaSldr, 100, 10, 400,
 		wxDefaultPosition, wxDefaultSize, ls);
@@ -225,7 +238,35 @@ m_sync_b(false)
 	sizer_h_7->Add(m_g_hdr_sldr, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_7, 1, wxEXPAND);
 
-	//10th line: reset buttons
+	//11th line: input boxes
+	wxBoxSizer *sizer_h_8 = new wxBoxSizer(wxHORIZONTAL);
+	vald_fp2.SetRange(0.0, 10.0);
+	m_g_gamma_text = new wxTextCtrl(this, ID_GGammaText, "1.00",
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
+	sizer_h_8->Add(m_g_gamma_text, 1, wxEXPAND);
+	m_g_brightness_text = new wxTextCtrl(this, ID_GBrightnessText, "0",
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_int);
+	sizer_h_8->Add(m_g_brightness_text, 1, wxEXPAND);
+	vald_fp2.SetRange(0.0, 1.0);
+	m_g_hdr_text = new wxTextCtrl(this, ID_GHdrText, "0.00",
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
+	sizer_h_8->Add(m_g_hdr_text, 1, wxEXPAND);
+	sizer_v->Add(sizer_h_8, 0, wxEXPAND);
+
+	//12th line: buttons
+	wxBoxSizer* sizer_h_9 = new wxBoxSizer(wxHORIZONTAL);
+	m_g_gamma_st = new wxButton(this, wxID_ANY, "Gam.G.",
+		wxDefaultPosition, FromDIP(wxSize(30, 20)));
+	sizer_h_9->Add(m_g_gamma_st, 1, wxEXPAND);
+	m_g_brightness_st = new wxButton(this, wxID_ANY, "Lum.G.",
+		wxDefaultPosition, FromDIP(wxSize(30, 20)));
+	sizer_h_9->Add(m_g_brightness_st, 1, wxEXPAND);
+	m_g_hdr_st = new wxButton(this, wxID_ANY, "Eql.G.",
+		wxDefaultPosition, FromDIP(wxSize(30, 20)));
+	sizer_h_9->Add(m_g_hdr_st, 1, wxEXPAND);
+	sizer_v->Add(sizer_h_9, 0, wxEXPAND);
+
+	//13th line: reset buttons
 #ifndef _DARWIN
 	m_g_reset_btn = new wxButton(this, ID_GResetBtn, "Reset",
 								 wxDefaultPosition, FromDIP(wxSize(30, 22)));
@@ -236,25 +277,10 @@ m_sync_b(false)
 	m_g_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	sizer_v->Add(m_g_reset_btn, 0, wxEXPAND);
 
-	//11th line: input boxes
-	wxBoxSizer *sizer_h_9 = new wxBoxSizer(wxHORIZONTAL);
-	vald_fp2.SetRange(0.0, 10.0);
-	m_g_gamma_text = new wxTextCtrl(this, ID_GGammaText, "1.00",
-		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
-	sizer_h_9->Add(m_g_gamma_text, 1, wxEXPAND);
-	m_g_brightness_text = new wxTextCtrl(this, ID_GBrightnessText, "0",
-		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_int);
-	sizer_h_9->Add(m_g_brightness_text, 1, wxEXPAND);
-	vald_fp2.SetRange(0.0, 1.0);
-	m_g_hdr_text = new wxTextCtrl(this, ID_GHdrText, "0.00",
-		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
-	sizer_h_9->Add(m_g_hdr_text, 1, wxEXPAND);
-	sizer_v->Add(sizer_h_9, 0, wxEXPAND);
-
 	//space
 	sizer_v->Add(5, 5, 0);
 
-	//12th line: blue
+	//14th line: blue
 	wxBoxSizer *sizer_h_10 = new wxBoxSizer(wxHORIZONTAL);
 	m_sync_b_chk = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -275,12 +301,12 @@ m_sync_b(false)
 	sizer_v->Add(sizer_h_10, 0, wxEXPAND);
 	sizer_v->Add(3,3,0);
 
-	//13th line:blue bar
+	//15th line:blue bar
 	st = new wxStaticText(this, 0, "", wxDefaultPosition, FromDIP(wxSize(5, 5)));
 	st->SetBackgroundColour(wxColor(0, 0, 255));
 	sizer_v->Add(st, 0, wxEXPAND);
 
-	//14th line: sliders
+	//16th line: sliders
 	wxBoxSizer *sizer_h_11 = new wxBoxSizer(wxHORIZONTAL);
 	m_b_gamma_sldr = new wxSingleSlider(this, ID_BGammaSldr, 100, 10, 400,
 		wxDefaultPosition, wxDefaultSize, ls);
@@ -294,7 +320,35 @@ m_sync_b(false)
 	sizer_h_11->Add(m_b_hdr_sldr, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_11, 1, wxEXPAND);
 
-	//15th line: reset buttons
+	//17th line: input boxes
+	wxBoxSizer* sizer_h_12 = new wxBoxSizer(wxHORIZONTAL);
+	vald_fp2.SetRange(0.0, 10.0);
+	m_b_gamma_text = new wxTextCtrl(this, ID_BGammaText, "1.00",
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
+	sizer_h_12->Add(m_b_gamma_text, 1, wxEXPAND);
+	m_b_brightness_text = new wxTextCtrl(this, ID_BBrightnessText, "0",
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_int);
+	sizer_h_12->Add(m_b_brightness_text, 1, wxEXPAND);
+	vald_fp2.SetRange(0.0, 1.0);
+	m_b_hdr_text = new wxTextCtrl(this, ID_BHdrText, "0.00",
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
+	sizer_h_12->Add(m_b_hdr_text, 1, wxEXPAND);
+	sizer_v->Add(sizer_h_12, 0, wxEXPAND);
+
+	//18th line: buttons
+	wxBoxSizer* sizer_h_13 = new wxBoxSizer(wxHORIZONTAL);
+	m_b_gamma_st = new wxButton(this, ID_BGammaText, "Gam.B.",
+		wxDefaultPosition, FromDIP(wxSize(30, 20)));
+	sizer_h_13->Add(m_b_gamma_st, 1, wxEXPAND);
+	m_b_brightness_st = new wxButton(this, ID_BBrightnessText, "Lum.B.",
+		wxDefaultPosition, FromDIP(wxSize(30, 20)));
+	sizer_h_13->Add(m_b_brightness_st, 1, wxEXPAND);
+	m_b_hdr_st = new wxButton(this, ID_BHdrText, "Eql.B.",
+		wxDefaultPosition, FromDIP(wxSize(30, 20)));
+	sizer_h_13->Add(m_b_hdr_st, 1, wxEXPAND);
+	sizer_v->Add(sizer_h_13, 0, wxEXPAND);
+
+	//19th line: reset buttons
 #ifndef _DARWIN
 	m_b_reset_btn = new wxButton(this, ID_BResetBtn, "Reset",
 								 wxDefaultPosition, FromDIP(wxSize(30, 22)));
@@ -305,22 +359,7 @@ m_sync_b(false)
 	m_b_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	sizer_v->Add(m_b_reset_btn, 0, wxEXPAND);
 
-	//16th line: input boxes
-	wxBoxSizer *sizer_h_13 = new wxBoxSizer(wxHORIZONTAL);
-	vald_fp2.SetRange(0.0, 10.0);
-	m_b_gamma_text = new wxTextCtrl(this, ID_BGammaText, "1.00",
-		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
-	sizer_h_13->Add(m_b_gamma_text, 1, wxEXPAND);
-	m_b_brightness_text = new wxTextCtrl(this, ID_BBrightnessText, "0",
-		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_int);
-	sizer_h_13->Add(m_b_brightness_text, 1, wxEXPAND);
-	vald_fp2.SetRange(0.0, 1.0);
-	m_b_hdr_text = new wxTextCtrl(this, ID_BHdrText, "0.00",
-		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
-	sizer_h_13->Add(m_b_hdr_text, 1, wxEXPAND);
-	sizer_v->Add(sizer_h_13, 0, wxEXPAND);
-
-	//17th line: default button
+	//20th line: default button
 #ifndef _DARWIN
 	m_dft_btn = new wxButton(this, ID_DefaultBtn, "Set Default",
 							 wxDefaultPosition, FromDIP(wxSize(95, 22)));

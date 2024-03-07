@@ -159,17 +159,10 @@ private:
 	wxButton *m_set_zero_btn;
 	wxButton *m_rot_reset_btn;
 
-	//sliders for rotating clipping planes
-	wxSingleSlider *m_x_rot_sldr;
-	wxSingleSlider *m_y_rot_sldr;
-	wxSingleSlider *m_z_rot_sldr;
-	wxTextCtrl *m_x_rot_text;
-	wxTextCtrl *m_y_rot_text;
-	wxTextCtrl *m_z_rot_text;
-	wxSpinButton* m_x_rot_spin;
-	wxSpinButton* m_y_rot_spin;
-	wxSpinButton* m_z_rot_spin;
-
+	//buttons
+	wxButton* m_clip_x_st;
+	wxButton* m_clip_y_st;
+	wxButton* m_clip_z_st;
 	//sliders for clipping planes
 	//x1
 	wxDoubleSlider *m_x1_clip_sldr;
@@ -199,6 +192,21 @@ private:
 	wxTextCtrl *m_yz_dist_text;
 	wxTextCtrl *m_xz_dist_text;
 	wxTextCtrl *m_xy_dist_text;
+
+	//buttons
+	wxButton* m_rot_x_st;
+	wxButton* m_rot_y_st;
+	wxButton* m_rot_z_st;
+	//sliders for rotating clipping planes
+	wxSingleSlider *m_x_rot_sldr;
+	wxSingleSlider *m_y_rot_sldr;
+	wxSingleSlider *m_z_rot_sldr;
+	wxTextCtrl *m_x_rot_text;
+	wxTextCtrl *m_y_rot_text;
+	wxTextCtrl *m_z_rot_text;
+	wxSpinButton* m_x_rot_spin;
+	wxSpinButton* m_y_rot_spin;
+	wxSpinButton* m_z_rot_spin;
 
 private:
 	void OnIdle(wxIdleEvent &event);
