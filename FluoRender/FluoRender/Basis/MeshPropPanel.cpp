@@ -32,27 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 
-BEGIN_EVENT_TABLE(MeshPropPanel, wxPanel)
-	//lighting
-	EVT_CHECKBOX(ID_light_chk, MeshPropPanel::OnLightingCheck)
-	EVT_COLOURPICKER_CHANGED(ID_diff_picker, MeshPropPanel::OnDiffChange)
-	EVT_COLOURPICKER_CHANGED(ID_spec_picker, MeshPropPanel::OnSpecChange)
-	EVT_COMMAND_SCROLL(ID_shine_sldr, MeshPropPanel::OnShineChange)
-	EVT_COMMAND_SCROLL(ID_alpha_sldr, MeshPropPanel::OnAlphaChange)
-	EVT_COMMAND_SCROLL(ID_scale_sldr, MeshPropPanel::OnScaleChange)
-	EVT_TEXT(ID_shine_text, MeshPropPanel::OnShineText)
-	EVT_TEXT(ID_alpha_text, MeshPropPanel::OnAlphaText)
-	EVT_TEXT(ID_scale_text, MeshPropPanel::OnScaleText)
-	//shadow
-	EVT_CHECKBOX(ID_shadow_chk, MeshPropPanel::OnShadowCheck)
-	EVT_COMMAND_SCROLL(ID_shadow_sldr, MeshPropPanel::OnShadowChange)
-	EVT_TEXT(ID_shadow_text, MeshPropPanel::OnShadowText)
-	//size limiter
-	EVT_CHECKBOX(ID_size_chk, MeshPropPanel::OnSizeCheck)
-	EVT_COMMAND_SCROLL(ID_size_sldr, MeshPropPanel::OnSizeChange)
-	EVT_TEXT(ID_size_text, MeshPropPanel::OnSizeText)
-END_EVENT_TABLE()
-
 MeshPropPanel::MeshPropPanel(VRenderFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
@@ -84,28 +63,34 @@ MeshPropPanel::MeshPropPanel(VRenderFrame* frame,
 
 	st = new wxStaticText(this, 0, " Transparency: ",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
-	m_alpha_sldr = new wxSingleSlider(this, ID_alpha_sldr, 255, 0, 255, 
+	m_alpha_sldr = new wxSingleSlider(this, wxID_ANY, 255, 0, 255, 
 		wxDefaultPosition, FromDIP(wxSize(200, 20)), wxSL_HORIZONTAL);
-	m_alpha_text = new wxTextCtrl(this, ID_alpha_text, "1.00",
+	m_alpha_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnAlphaChange, this);
+	m_alpha_text = new wxTextCtrl(this, wxID_ANY, "1.00",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp2);
+	m_alpha_text->Bind(wxEVT_TEXT, &MeshPropPanel::OnAlphaText, this);
 	sizer_1->Add(20, 5, 0);
 	sizer_1->Add(st, 0, wxALIGN_CENTER, 0);
 	sizer_1->Add(m_alpha_sldr, 0, wxALIGN_CENTER, 0);
 	sizer_1->Add(m_alpha_text, 0, wxALIGN_CENTER, 0);
 
-	m_shadow_chk = new wxCheckBox(this, ID_shadow_chk, "Shadow: ",
+	m_shadow_chk = new wxCheckBox(this, wxID_ANY, "Shadow: ",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
-	m_shadow_sldr = new wxSingleSlider(this, ID_shadow_sldr, 60, 0, 100,
+	m_shadow_chk->Bind(wxEVT_CHECKBOX, &MeshPropPanel::OnShadowCheck, this);
+	m_shadow_sldr = new wxSingleSlider(this, wxID_ANY, 60, 0, 100,
 		wxDefaultPosition, FromDIP(wxSize(200, 20)), wxSL_HORIZONTAL);
-	m_shadow_text = new wxTextCtrl(this, ID_shadow_text, "0.60",
+	m_shadow_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnShadowChange, this);
+	m_shadow_text = new wxTextCtrl(this, wxID_ANY, "0.60",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp2);
+	m_shadow_text->Bind(wxEVT_TEXT, &MeshPropPanel::OnShadowText, this);
 	sizer_2->Add(20, 5, 0);
 	sizer_2->Add(m_shadow_chk, 0, wxALIGN_CENTER, 0);
 	sizer_2->Add(m_shadow_sldr, 0, wxALIGN_CENTER, 0);
 	sizer_2->Add(m_shadow_text, 0, wxALIGN_CENTER, 0);
 
-	m_light_chk = new wxCheckBox(this, ID_light_chk, "Lighting",
+	m_light_chk = new wxCheckBox(this, wxID_ANY, "Lighting",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	m_light_chk->Bind(wxEVT_CHECKBOX, &MeshPropPanel::OnLightingCheck, this);
 	sizer_3->Add(20, 5, 0);
 	sizer_3->Add(m_light_chk, 0, wxALIGN_CENTER, 0);
 
@@ -115,24 +100,28 @@ MeshPropPanel::MeshPropPanel(VRenderFrame* frame,
 
 	st = new wxStaticText(this, 0, " Diffuse Color: ",
 		wxDefaultPosition, FromDIP(wxSize(110, 20)));
-	m_diff_picker = new wxColourPickerCtrl(this, ID_diff_picker, *wxWHITE, 
+	m_diff_picker = new wxColourPickerCtrl(this, wxID_ANY, *wxWHITE,
 		wxDefaultPosition, FromDIP(wxSize(180, 30)));
+	m_diff_picker->Bind(wxEVT_COLOURPICKER_CHANGED, &MeshPropPanel::OnDiffChange, this);
 	sizer_4->Add(st, 0, wxALIGN_LEFT, 0);
 	sizer_4->Add(m_diff_picker, 0, wxALIGN_CENTER, 0);
 
 	st = new wxStaticText(this, 0, " Specular Color: ",
 		wxDefaultPosition, FromDIP(wxSize(110, 20)));
-	m_spec_picker = new wxColourPickerCtrl(this, ID_spec_picker, *wxWHITE, 
+	m_spec_picker = new wxColourPickerCtrl(this, wxID_ANY, *wxWHITE,
 		wxDefaultPosition, FromDIP(wxSize(180, 30)));
+	m_spec_picker->Bind(wxEVT_COLOURPICKER_CHANGED, &MeshPropPanel::OnSpecChange, this);
 	sizer_5->Add(st, 0, wxALIGN_LEFT, 0);
 	sizer_5->Add(m_spec_picker, 0, wxALIGN_CENTER, 0);
 
 	st = new wxStaticText(this, 0, " Shininess: ",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
-	m_shine_sldr = new wxSingleSlider(this, ID_shine_sldr, 30, 0, 128, 
+	m_shine_sldr = new wxSingleSlider(this, wxID_ANY, 30, 0, 128,
 		wxDefaultPosition, FromDIP(wxSize(200, 20)), wxSL_HORIZONTAL);
-	m_shine_text = new wxTextCtrl(this, ID_shine_text, "30",
+	m_shine_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnShineChange, this);
+	m_shine_text = new wxTextCtrl(this, wxID_ANY, "30",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_int);
+	m_shine_text->Bind(wxEVT_TEXT, &MeshPropPanel::OnShineText, this);
 	sizer_6->Add(st, 0, wxALIGN_CENTER, 0);
 	sizer_6->Add(m_shine_sldr, 0, wxALIGN_CENTER, 0);
 	sizer_6->Add(m_shine_text, 0, wxALIGN_CENTER, 0);
@@ -148,10 +137,12 @@ MeshPropPanel::MeshPropPanel(VRenderFrame* frame,
 	wxBoxSizer* sizer_7 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, " Scaling: ",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
-	m_scale_sldr = new wxSingleSlider(this, ID_scale_sldr, 100, 50, 200, 
+	m_scale_sldr = new wxSingleSlider(this, wxID_ANY, 100, 50, 200,
 		wxDefaultPosition, FromDIP(wxSize(200, 20)), wxSL_HORIZONTAL);
-	m_scale_text = new wxTextCtrl(this, ID_scale_text, "1.00",
+	m_scale_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnScaleChange, this);
+	m_scale_text = new wxTextCtrl(this, wxID_ANY, "1.00",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp2);
+	m_scale_text->Bind(wxEVT_TEXT, &MeshPropPanel::OnScaleText, this);
 	sizer_7->Add(20, 5, 0);
 	sizer_7->Add(st, 0, wxALIGN_CENTER, 0);
 	sizer_7->Add(m_scale_sldr, 0, wxALIGN_CENTER, 0);
@@ -159,12 +150,15 @@ MeshPropPanel::MeshPropPanel(VRenderFrame* frame,
 
 	//size limiter
 	wxBoxSizer* sizer_8 = new wxBoxSizer(wxHORIZONTAL);
-	m_size_chk = new wxCheckBox(this, ID_size_chk, " Size limit: ",
+	m_size_chk = new wxCheckBox(this, wxID_ANY, " Size limit: ",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
-	m_size_sldr = new wxSingleSlider(this, ID_size_sldr, 50, 0, 250,
+	m_size_chk->Bind(wxEVT_CHECKBOX, &MeshPropPanel::OnSizeCheck, this);
+	m_size_sldr = new wxSingleSlider(this, wxID_ANY, 50, 0, 250,
 		wxDefaultPosition, FromDIP(wxSize(200, 20)), wxSL_HORIZONTAL);
-	m_size_text = new wxTextCtrl(this, ID_size_text, "50",
+	m_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnSizeChange, this);
+	m_size_text = new wxTextCtrl(this, wxID_ANY, "50",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_int);
+	m_size_text->Bind(wxEVT_TEXT, &MeshPropPanel::OnSizeText, this);
 	sizer_8->Add(20, 5, 0);
 	sizer_8->Add(m_size_chk, 0, wxALIGN_CENTER);
 	sizer_8->Add(m_size_sldr, 0, wxALIGN_CENTER);

@@ -30,10 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #include <DataManager.h>
 #include <wx/valnum.h>
 
-BEGIN_EVENT_TABLE(AnnotatPropPanel, wxPanel)
-	EVT_BUTTON(ID_MemoUpdateBtn, AnnotatPropPanel::OnMemoUpdateBtn)
-END_EVENT_TABLE()
-
 AnnotatPropPanel::AnnotatPropPanel(VRenderFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
@@ -57,13 +53,14 @@ AnnotatPropPanel::AnnotatPropPanel(VRenderFrame* frame,
 	sizer_1->Add(st);
 
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
-	m_memo_text = new wxTextCtrl(this, ID_MemoText, "",
+	m_memo_text = new wxTextCtrl(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(400, 100)), wxTE_MULTILINE);
 	sizer_2->Add(10, 10);
 	sizer_2->Add(m_memo_text, 1, wxEXPAND);
 
 	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
-	m_memo_update_btn = new wxButton(this, ID_MemoUpdateBtn, "Update");
+	m_memo_update_btn = new wxButton(this, wxID_ANY, "Update");
+	m_memo_update_btn->Bind(wxEVT_BUTTON, &AnnotatPropPanel::OnMemoUpdateBtn, this);
 	sizer_3->Add(330, 10);
 	sizer_3->Add(m_memo_update_btn, 0, wxALIGN_CENTER);
 

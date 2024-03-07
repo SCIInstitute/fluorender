@@ -28,9 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _ADJUSTVIEW_H_
 #define _ADJUSTVIEW_H_
 
+#include <PropPanel.h>
 #include <Types/Color.h>
-#include <wx/wx.h>
-#include <wx/panel.h>
 
 //all convert v1 to v2
 #define GammaUI2(v1, v2) \
@@ -57,42 +56,8 @@ class VRenderGLView;
 class VolumeData;
 class DataGroup;
 class wxSingleSlider;
-class AdjustView: public wxPanel
+class AdjustView: public PropPanel
 {
-	enum
-	{
-		//gamma
-		ID_RGammaSldr = ID_ADJUST_VIEW,
-		ID_RGammaText,
-		ID_GGammaSldr,
-		ID_GGammaText,
-		ID_BGammaSldr,
-		ID_BGammaText,
-		//brightness
-		ID_RBrightnessSldr,
-		ID_RBrightnessText,
-		ID_GBrightnessSldr,
-		ID_GBrightnessText,
-		ID_BBrightnessSldr,
-		ID_BBrightnessText,
-		//hdr
-		ID_RHdrSldr,
-		ID_RHdrText,
-		ID_GHdrSldr,
-		ID_GHdrText,
-		ID_BHdrSldr,
-		ID_BHdrText,
-		//reset
-		ID_RResetBtn,
-		ID_GResetBtn,
-		ID_BResetBtn,
-		//sync
-		ID_SyncRChk,
-		ID_SyncGChk,
-		ID_SyncBChk,
-		ID_DefaultBtn
-	};
-
 public:
 	AdjustView(VRenderFrame* frame,
 		const wxPoint& pos=wxDefaultPosition,
@@ -101,10 +66,8 @@ public:
 		const wxString& name="AdjustView");
 	~AdjustView();
 
-	//refresh
-	void RefreshVRenderViews(bool interactive=false);
-	//get settings
-	void GetSettings();
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+
 	//disable/enable
 	void DisableAll();
 	void EnableAll();
@@ -215,6 +178,16 @@ private:
 	wxButton *m_dft_btn;
 
 private:
+	//multifunc
+	void OnRGammaMF(wxCommandEvent& event);
+	void OnGGammaMF(wxCommandEvent& event);
+	void OnBGammaMF(wxCommandEvent& event);
+	void OnRBrightnessMF(wxCommandEvent& event);
+	void OnGBrightnessMF(wxCommandEvent& event);
+	void OnBBrightnessMF(wxCommandEvent& event);
+	void OnRHdrMF(wxCommandEvent& event);
+	void OnGHdrMF(wxCommandEvent& event);
+	void OnBHdrMF(wxCommandEvent& event);
 	//gamma
 	void OnRGammaChange(wxScrollEvent &event);
 	void OnRGammaText(wxCommandEvent &event);
@@ -246,8 +219,6 @@ private:
 	void OnSyncBCheck(wxCommandEvent &event);
 	//set default
 	void OnSaveDefault(wxCommandEvent &event);
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_ADJUSTVIEW_H_

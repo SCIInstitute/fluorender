@@ -33,8 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clrpicker.h>
 #include <wx/tglbtn.h>
 
-using namespace std;
-
 class VRenderFrame;
 class VRenderGLView;
 class VolumeData;
@@ -47,30 +45,20 @@ class VolumePropPanel: public PropPanel
 {
 	enum
 	{
-		//3
-		ID_ColorText = ID_VPROP_VIEW,
-		ID_Color2Text,
-		ID_ColorBtn,
-		ID_Color2Btn,
-		ID_SpaceXText,
-		ID_SpaceYText,
-		ID_SpaceZText,
-		ID_LegendChk,
-		ID_InterpolateChk,
-		ID_SyncGroupChk,
-		ID_SaveDefault,
-		ID_ResetDefault,
-		ID_ColormapInvBtn,
-		ID_ColormapCombo,
-		ID_ColormapCombo2,
-		ID_InvChk,
-		ID_MipChk,
-		ID_NRChk,
-		ID_DepthChk,
+		//toolbar
+		ID_UseMlChk = 0,
 		ID_TranspChk,
+		ID_MipChk,
+		ID_InvChk,
 		ID_CompChk,
-		ID_UseMlChk
-};
+		ID_InterpolateChk,
+		ID_NRChk,
+		ID_SyncGroupChk,
+		ID_DepthChk,
+		ID_LegendChk,
+		ID_ResetDefault,
+		ID_SaveDefault
+	};
 
 public:
 	VolumePropPanel(VRenderFrame* frame,
@@ -97,6 +85,7 @@ public:
 	VRenderGLView* GetView();
 
 	void ApplyMl();
+	void SaveMl();
 
 	void ClearUndo();
 
@@ -179,7 +168,7 @@ private:
 	wxTextCtrl *m_space_x_text;
 	wxTextCtrl *m_space_y_text;
 	wxTextCtrl *m_space_z_text;
-	wxToggleButton *m_colormap_inv_btn;
+	wxToolBar* m_colormap_inv_btn;
 	wxComboBox *m_colormap_combo;
 	wxComboBox *m_colormap_combo2;
 
@@ -234,6 +223,20 @@ private:
 	void SyncShadowInt(double);
 	void SyncSampleRate(double);
 	void SyncColormapVal(double, double);
+
+	//optioins
+	void SetMachineLearning();
+	void SetTransparent();
+	void SetMIP();
+	void SetInvert();
+	void SetComponentDisplay();
+	void SetInterpolate();
+	void SetNoiseReduction();
+	void SetSyncGroup();
+	void SetBlendDepth();
+	void SetLegend();
+	void SaveDefault();
+	void ResetDefault();
 
 	//1
 	void OnGammaMF(wxCommandEvent& event);
@@ -292,45 +295,22 @@ private:
 	void OnColormapChk(wxCommandEvent &event);
 
 	//others
+	void OnOptions(wxCommandEvent& event);
+	//color / colormap
 	void OnColormapInvBtn(wxCommandEvent &event);
 	void OnColormapCombo(wxCommandEvent &event);
 	void OnColormapCombo2(wxCommandEvent &event);
 	int GetColorString(wxString& str, wxColor& wxc);
 	void OnColorChange(wxColor c);
 	void OnColorTextChange(wxCommandEvent& event);
-	void OnColorTextFocus(wxCommandEvent& event);
+	void OnColorTextFocus(wxMouseEvent& event);
 	void OnColorBtn(wxColourPickerEvent& event);
 	void OnColor2Change(wxColor c);
 	void OnColor2TextChange(wxCommandEvent& event);
-	void OnColor2TextFocus(wxCommandEvent& event);
+	void OnColor2TextFocus(wxMouseEvent& event);
 	void OnColor2Btn(wxColourPickerEvent& event);
 	//spacings
 	void OnSpaceText(wxCommandEvent& event);
-	//legend
-	void OnLegendCheck(wxCommandEvent& event);
-	//interpolate
-	void OnInterpolateCheck(wxCommandEvent& event);
-	//sync within group
-	void OnSyncGroupCheck(wxCommandEvent& event);
-	//save as default
-	void OnSaveDefault(wxCommandEvent& event);
-	void OnResetDefault(wxCommandEvent& event);
-	//inversion
-	void OnInvCheck(wxCommandEvent &event);
-	//MIP
-	void OnMIPCheck(wxCommandEvent &event);
-	//noise reduction
-	void OnNRCheck(wxCommandEvent &event);
-	//depth omde
-	void OnDepthCheck(wxCommandEvent &event);
-	//transparency
-	void OnTranspChk(wxCommandEvent &event);
-	//component display
-	void OnCompChk(wxCommandEvent &event);
-	//ml
-	void OnUseMlChk(wxCommandEvent& event);
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_VOLUMEPROPPANEL_H_

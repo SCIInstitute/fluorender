@@ -37,7 +37,7 @@ class ManipPropPanel: public PropPanel
 {
 	enum
 	{
-		ID_XTransText = ID_MANIPULATOR,
+		ID_XTransText = 0,
 		ID_XTransSpin,
 		ID_YTransText,
 		ID_YTransSpin,
@@ -113,8 +113,6 @@ private:
 	void OnSpinUp(wxSpinEvent& event);
 	void OnSpinDown(wxSpinEvent& event);
 	void OnValueEnter(wxCommandEvent& event);
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_MANIPPROPPANEL_H_

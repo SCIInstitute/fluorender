@@ -36,12 +36,6 @@ using namespace std;
 class Annotations;
 class AnnotatPropPanel : public PropPanel
 {
-	enum
-	{
-		ID_MemoText = ID_APROP_VIEW,
-		ID_MemoUpdateBtn
-	};
-
 public:
 	AnnotatPropPanel(VRenderFrame* frame,
 		wxWindow* parent,
@@ -64,7 +58,6 @@ private:
 
 	//memo
 	void OnMemoUpdateBtn(wxCommandEvent& event);
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_ANNOTATPROPPANEL_H_

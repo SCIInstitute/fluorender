@@ -40,25 +40,6 @@ class MeshData;
 class wxSingleSlider;
 class MeshPropPanel: public PropPanel
 {
-	enum
-	{
-		ID_diff_picker = ID_MPROP_VIEW,
-		ID_spec_picker,
-		ID_shine_sldr,
-		ID_shine_text,
-		ID_light_chk,
-		ID_alpha_sldr,
-		ID_alpha_text,
-		ID_scale_sldr,
-		ID_scale_text,
-		ID_shadow_chk,
-		ID_shadow_sldr,
-		ID_shadow_text,
-		ID_size_chk,
-		ID_size_sldr,
-		ID_size_text
-	};
-
 public:
 	MeshPropPanel(VRenderFrame* frame,
 		wxWindow* parent,
@@ -99,13 +80,13 @@ private:
 
 private:
 	//lighting
+	void OnAlphaChange(wxScrollEvent & event);
+	void OnAlphaText(wxCommandEvent& event);
 	void OnLightingCheck(wxCommandEvent& event);
 	void OnDiffChange(wxColourPickerEvent& event);
 	void OnSpecChange(wxColourPickerEvent& event);
 	void OnShineChange(wxScrollEvent & event);
 	void OnShineText(wxCommandEvent& event);
-	void OnAlphaChange(wxScrollEvent & event);
-	void OnAlphaText(wxCommandEvent& event);
 	void OnScaleChange(wxScrollEvent & event);
 	void OnScaleText(wxCommandEvent& event);
 	//shadow
@@ -116,8 +97,6 @@ private:
 	void OnSizeCheck(wxCommandEvent& event);
 	void OnSizeChange(wxScrollEvent& event);
 	void OnSizeText(wxCommandEvent& event);
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_MESHPROPPANEL_H_
