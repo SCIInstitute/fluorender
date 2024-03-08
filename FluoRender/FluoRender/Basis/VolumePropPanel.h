@@ -74,7 +74,6 @@ public:
 	void SetVolumeData(VolumeData* vd);
 	VolumeData* GetVolumeData();
 	void InitVRenderViews(unsigned int type);
-	void SetFocusVRenderViews(wxBasisSlider* slider);
 
 	//sync group
 	void SetGroup(DataGroup* group);

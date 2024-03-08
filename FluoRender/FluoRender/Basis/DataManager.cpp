@@ -55,7 +55,7 @@ TreeLayer::TreeLayer()
 	m_gamma = fluo::Color(1.0, 1.0, 1.0);
 	m_brightness = fluo::Color(1.0, 1.0, 1.0);
 	m_hdr = fluo::Color(0.0, 0.0, 0.0);
-	m_sync_r = m_sync_g = m_sync_b = false;
+	for (int i : {0, 1, 2}) m_sync[i] = false;
 }
 
 TreeLayer::~TreeLayer()
@@ -221,9 +221,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	SetGammaColor(copy.GetGammaColor());
 	SetBrightness(copy.GetBrightness());
 	SetHdr(copy.GetHdr());
-	SetSyncR(copy.GetSyncR());
-	SetSyncG(copy.GetSyncG());
-	SetSyncB(copy.GetSyncB());
+	for (int i : { 0, 1, 2}) m_sync[i] = copy.m_sync[i];
 
 	//path and bounds
 	m_tex_path = copy.m_tex_path;
@@ -4406,38 +4404,14 @@ void DataGroup::SetHdrAll(const fluo::Color &hdr)
 }
 
 //set sync red to all
-void DataGroup::SetSyncRAll(bool sync_r)
+void DataGroup::SetSyncAll(int i, bool val)
 {
-	SetSyncR(sync_r);
-	for (int i=0; i<(int)m_vd_list.size(); i++)
+	SetSync(i, val);
+	for (int j=0; j<(int)m_vd_list.size(); j++)
 	{
-		VolumeData* vd = m_vd_list[i];
+		VolumeData* vd = m_vd_list[j];
 		if (vd)
-			vd->SetSyncR(sync_r);
-	}
-}
-
-//set sync green to all
-void DataGroup::SetSyncGAll(bool sync_g)
-{
-	SetSyncG(sync_g);
-	for (int i=0; i<(int)m_vd_list.size(); i++)
-	{
-		VolumeData* vd = m_vd_list[i];
-		if (vd)
-			vd->SetSyncG(sync_g);
-	}
-}
-
-//set sync blue to all
-void DataGroup::SetSyncBAll(bool sync_b)
-{
-	SetSyncB(sync_b);
-	for (int i=0; i<(int)m_vd_list.size(); i++)
-	{
-		VolumeData* vd = m_vd_list[i];
-		if (vd)
-			vd->SetSyncB(sync_b);
+			vd->SetSync(i, val);
 	}
 }
 
@@ -4471,9 +4445,9 @@ void DataGroup::ResetSync()
 		}
 	}
 
-	SetSyncRAll(r_v);
-	SetSyncGAll(g_v);
-	SetSyncBAll(b_v);
+	SetSyncAll(0, r_v);
+	SetSyncAll(1, g_v);
+	SetSyncAll(2, b_v);
 }
 
 //volume properties

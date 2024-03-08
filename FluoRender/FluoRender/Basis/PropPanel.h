@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #define FOUND_VALUE(v) vc.find(v) != vc.end()
 
 class VRenderFrame;
+class wxBasisSlider;
 class PropPanel: public wxScrolledWindow
 {
 public:
@@ -48,6 +49,7 @@ public:
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {}) = 0;
 	void FluoRefresh(bool tree = false, bool interactive = false, bool excl_self = true,
 		const fluo::ValueCollection& vc = {});
+	void SetFocusVRenderViews(wxBasisSlider* slider);
 
 protected:
 	VRenderFrame* m_frame;

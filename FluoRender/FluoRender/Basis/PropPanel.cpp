@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "PropPanel.h"
 #include <VRenderFrame.h>
+#include <VRenderGLView.h>
 
 PropPanel::PropPanel(VRenderFrame* frame,
 	wxWindow* parent,
@@ -50,5 +51,20 @@ void PropPanel::FluoRefresh(bool tree, bool interactive, bool excl_self,
 		return;
 	m_frame->RefreshVRenderViews(tree, interactive);
 	m_frame->UpdateProps(vc, excl_self?this:0);//update ui but exclude this
+}
+
+void PropPanel::SetFocusVRenderViews(wxBasisSlider* slider)
+{
+	if (m_frame)
+	{
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
+		{
+			VRenderGLView* view = m_frame->GetView(i);
+			if (view)
+			{
+				view->SetFocusedSlider(slider);
+			}
+		}
+	}
 }
 

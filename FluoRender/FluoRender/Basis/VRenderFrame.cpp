@@ -704,8 +704,8 @@ VRenderFrame::VRenderFrame(
 	}
 
 	//set view default settings
-	if (m_adjust_view && vrv)
-	{
+	//if (m_adjust_view && vrv)
+	//{
 		//Color gamma, brightness, hdr;
 		//bool sync_r, sync_g, sync_b;
 		//m_adjust_view->GetDefaults(gamma, brightness, hdr,
@@ -713,10 +713,11 @@ VRenderFrame::VRenderFrame(
 		//vrv->m_glview->SetGamma(gamma);
 		//vrv->m_glview->SetBrightness(brightness);
 		//vrv->m_glview->SetHdr(hdr);
-		vrv->m_glview->SetSyncR(true);
-		vrv->m_glview->SetSyncG(true);
-		vrv->m_glview->SetSyncB(true);
-	}
+		//for (int i : { 0, 1, 2})
+		//vrv->m_glview->SetSyncR(true);
+		//vrv->m_glview->SetSyncG(true);
+		//vrv->m_glview->SetSyncB(true);
+	//}
 
 	//drop target
 	SetDropTarget(new DnDFile(this));
@@ -1047,18 +1048,18 @@ wxString VRenderFrame::CreateView(int row)
 	OrganizeVRenderViews(1);
 
 	//set view default settings
-	if (m_adjust_view)
-	{
+	//if (m_adjust_view)
+	//{
 		/*Color gamma, brightness, hdr;
 		bool sync_r, sync_g, sync_b;
 		m_adjust_view->GetDefaults(gamma, brightness, hdr, sync_r, sync_g, sync_b);
 		vrv->m_glview->SetGamma(gamma);
 		vrv->m_glview->SetBrightness(brightness);
 		vrv->m_glview->SetHdr(hdr);*/
-		view->SetSyncR(true);
-		view->SetSyncG(true);
-		view->SetSyncB(true);
-	}
+		//view->SetSyncR(true);
+		//view->SetSyncG(true);
+		//view->SetSyncB(true);
+	//}
 
 	//add volumes
 	if (GetViewNum() > 0)
@@ -2647,7 +2648,8 @@ void VRenderFrame::UpdateProps(const fluo::ValueCollection& vc, PropPanel* excl)
 	for (auto i : m_prop_pages)
 		if (i != excl)
 			i->FluoUpdate(vc);
-	m_adjust_view->FluoUpdate(vc);
+	if (excl != m_adjust_view)
+		m_adjust_view->FluoUpdate(vc);
 }
 
 VolumePropPanel* VRenderFrame::FindVolumeProps(const wxString& name)
@@ -3426,9 +3428,9 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 			fconfig.Write("brightness", str);
 			str = wxString::Format("%f %f %f", vd->GetHdr().r(), vd->GetHdr().g(), vd->GetHdr().b());
 			fconfig.Write("hdr", str);
-			fconfig.Write("sync_r", vd->GetSyncR());
-			fconfig.Write("sync_g", vd->GetSyncG());
-			fconfig.Write("sync_b", vd->GetSyncB());
+			fconfig.Write("sync_r", vd->GetSync(0));
+			fconfig.Write("sync_g", vd->GetSync(1));
+			fconfig.Write("sync_b", vd->GetSync(2));
 
 			//colormap settings
 			fconfig.Write("colormap_mode", vd->GetColormapMode());
@@ -3515,9 +3517,9 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 			fconfig.Write("brightness", str);
 			str = wxString::Format("%f %f %f", md->GetHdr().r(), md->GetHdr().g(), md->GetHdr().b());
 			fconfig.Write("hdr", str);
-			fconfig.Write("sync_r", md->GetSyncR());
-			fconfig.Write("sync_g", md->GetSyncG());
-			fconfig.Write("sync_b", md->GetSyncB());
+			fconfig.Write("sync_r", md->GetSync(0));
+			fconfig.Write("sync_g", md->GetSync(1));
+			fconfig.Write("sync_b", md->GetSync(2));
 			//shadow
 			fconfig.Write("shadow", md->GetShadowEnable());
 			fconfig.Write("shadow_darkness", md->GetShadowIntensity());
@@ -3614,9 +3616,9 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 						str = wxString::Format("%f %f %f", group->GetHdr().r(),
 							group->GetHdr().g(), group->GetHdr().b());
 						fconfig.Write("hdr", str);
-						fconfig.Write("sync_r", group->GetSyncR());
-						fconfig.Write("sync_g", group->GetSyncG());
-						fconfig.Write("sync_b", group->GetSyncB());
+						fconfig.Write("sync_r", group->GetSync(0));
+						fconfig.Write("sync_g", group->GetSync(1));
+						fconfig.Write("sync_b", group->GetSync(2));
 						//sync volume properties
 						fconfig.Write("sync_vp", group->GetVolumeSyncProp());
 						//volumes
@@ -3721,9 +3723,9 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 			str = wxString::Format("%f %f %f", view->GetHdr().r(),
 				view->GetHdr().g(), view->GetHdr().b());
 			fconfig.Write("hdr", str);
-			fconfig.Write("sync_r", view->GetSyncR());
-			fconfig.Write("sync_g", view->GetSyncG());
-			fconfig.Write("sync_b", view->GetSyncB());
+			fconfig.Write("sync_r", view->GetSync(0));
+			fconfig.Write("sync_g", view->GetSync(1));
+			fconfig.Write("sync_b", view->GetSync(2));
 
 			//clipping plane rotations
 			fconfig.Write("clip_mode", view->GetClipMode());
@@ -4296,11 +4298,11 @@ void VRenderFrame::OpenProject(wxString& filename)
 						}
 						bool bVal;
 						if (fconfig.Read("sync_r", &bVal))
-							vd->SetSyncR(bVal);
+							vd->SetSync(0, bVal);
 						if (fconfig.Read("sync_g", &bVal))
-							vd->SetSyncG(bVal);
+							vd->SetSync(1, bVal);
 						if (fconfig.Read("sync_b", &bVal))
-							vd->SetSyncB(bVal);
+							vd->SetSync(2, bVal);
 
 						//colormap settings
 						if (fconfig.Read("colormap_mode", &iVal))
@@ -4439,11 +4441,11 @@ void VRenderFrame::OpenProject(wxString& filename)
 						}
 						bool bVal;
 						if (fconfig.Read("sync_r", &bVal))
-							md->SetSyncG(bVal);
+							md->SetSync(0, bVal);
 						if (fconfig.Read("sync_g", &bVal))
-							md->SetSyncG(bVal);
+							md->SetSync(1, bVal);
 						if (fconfig.Read("sync_b", &bVal))
-							md->SetSyncB(bVal);
+							md->SetSync(2, bVal);
 						//shadow
 						if (fconfig.Read("shadow", &bVal))
 							md->SetShadowEnable(bVal);
@@ -4645,11 +4647,11 @@ void VRenderFrame::OpenProject(wxString& filename)
 												}
 											}
 											if (fconfig.Read("sync_r", &bVal))
-												group->SetSyncR(bVal);
+												group->SetSync(0, bVal);
 											if (fconfig.Read("sync_g", &bVal))
-												group->SetSyncG(bVal);
+												group->SetSync(1, bVal);
 											if (fconfig.Read("sync_b", &bVal))
-												group->SetSyncB(bVal);
+												group->SetSync(2, bVal);
 											//sync volume properties
 											if (fconfig.Read("sync_vp", &bVal))
 												group->SetVolumeSyncProp(bVal);
@@ -4898,11 +4900,11 @@ void VRenderFrame::OpenProject(wxString& filename)
 					}
 				}
 				if (fconfig.Read("sync_r", &bVal))
-					view->SetSyncR(bVal);
+					view->SetSync(0, bVal);
 				if (fconfig.Read("sync_g", &bVal))
-					view->SetSyncG(bVal);
+					view->SetSync(1, bVal);
 				if (fconfig.Read("sync_b", &bVal))
-					view->SetSyncB(bVal);
+					view->SetSync(2, bVal);
 
 				//clipping plane rotations
 				int clip_mode;

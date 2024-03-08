@@ -31,26 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <PropPanel.h>
 #include <Types/Color.h>
 
-//all convert v1 to v2
-//#define GammaUI2(v1, v2) \
-//	{v2 = 1.0/v1;}
-//#define Gamma2UI(v1, v2) \
-//	{v2 = 1.0/v1;}
-//#define Gamma2UIP(v) \
-//	int(std::round(v*100.0))
-//#define BrightnessUI2(v1, v2) \
-//	{v2 = v1/256.0 + 1.0;}
-//#define Brightness2UI(v1, v2) \
-//	{v2 = (v1-1.0)*256.0;}
-//#define Brightness2UIP(v) \
-//	int(std::round(v))
-//#define HdrUI2(v1, v2) \
-//	{v2 = v1;}
-//#define Hdr2UI(v1, v2) \
-//	{v2 = v1;}
-//#define Hdr2UIP(v) \
-//	int(std::round(v*100.0))
-
 class VRenderFrame;
 class VRenderGLView;
 class VolumeData;
@@ -103,11 +83,9 @@ private:
 	VolumeData* m_vd;
 	DataGroup* m_group;
 	bool m_link_group;
-
+	bool m_enable_all;
 	//sync flags
-	bool m_sync_r;
-	bool m_sync_g;
-	bool m_sync_b;
+	bool m_sync[3];//for rgb
 
 	//sync red
 	wxToolBar *m_sync_r_chk;
@@ -205,6 +183,14 @@ private:
 	void OnSyncBCheck(wxCommandEvent &event);
 	//set default
 	void OnSaveDefault(wxCommandEvent &event);
+
+	void SyncColor(fluo::Color& c, double val);
+	void SyncGamma(fluo::Color& c, int i, double val, fluo::ValueCollection& vc);
+	void SyncBrightness(fluo::Color& c, int i, double val, fluo::ValueCollection& vc);
+	void SyncHdr(fluo::Color& c, int i, double val, fluo::ValueCollection& vc);
+	void SyncGamma(int i);
+	void SyncBrightness(int i);
+	void SyncHdr(int i);
 };
 
 #endif//_ADJUSTVIEW_H_

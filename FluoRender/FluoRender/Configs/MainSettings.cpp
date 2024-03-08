@@ -176,7 +176,7 @@ void MainSettings::Read()
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
-	wxString dft = expath + GETSLASH() + "fluorender.set";
+	wxString dft = expath + GETSLASH() + "fluorender.ini";
 	wxFileInputStream is(dft);
 	if (!is.IsOk())
 		return;
@@ -412,7 +412,7 @@ void MainSettings::Save()
 	wxString app_name = "FluoRender " +
 		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
 	wxString vendor_name = "FluoRender";
-	wxString local_name = "fluorender.set";
+	wxString local_name = "fluorender.ini";
 	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
 		wxCONFIG_USE_LOCAL_FILE);
 
@@ -602,7 +602,7 @@ void MainSettings::Save()
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
-	wxString dft = expath + GETSLASH() + "fluorender.set";
+	wxString dft = expath + GETSLASH() + "fluorender.ini";
 	SaveConfig(fconfig, dft);
 }
 

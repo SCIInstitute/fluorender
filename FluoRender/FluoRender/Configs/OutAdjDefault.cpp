@@ -100,9 +100,9 @@ void OutAdjDefault::Set(VRenderGLView* view)
 	if (!view)
 		return;
 
-	m_sync_r = view->GetSyncR();
-	m_sync_g = view->GetSyncR();
-	m_sync_b = view->GetSyncB();
+	m_sync_r = view->GetSync(0);
+	m_sync_g = view->GetSync(1);
+	m_sync_b = view->GetSync(2);
 
 	fluo::Color c;
 
@@ -127,9 +127,9 @@ void OutAdjDefault::Apply(VRenderGLView* view)
 	if (!view)
 		return;
 
-	view->SetSyncR(m_sync_r);
-	view->SetSyncG(m_sync_g);
-	view->SetSyncB(m_sync_b);
+	view->SetSync(0, m_sync_r);
+	view->SetSync(1, m_sync_g);
+	view->SetSync(2, m_sync_b);
 
 	view->SetGammaColor(fluo::Color(m_gamma_r, m_gamma_g, m_gamma_b));
 	view->SetBrightness(fluo::Color(m_brightness_r, m_brightness_g, m_brightness_b));
@@ -141,9 +141,9 @@ void OutAdjDefault::Set(TreeLayer* layer)
 	if (!layer)
 		return;
 
-	m_sync_r = layer->GetSyncR();
-	m_sync_g = layer->GetSyncR();
-	m_sync_b = layer->GetSyncB();
+	m_sync_r = layer->GetSync(0);
+	m_sync_g = layer->GetSync(1);
+	m_sync_b = layer->GetSync(2);
 
 	fluo::Color c;
 
@@ -168,9 +168,9 @@ void OutAdjDefault::Apply(TreeLayer* layer)
 	if (!layer)
 		return;
 
-	layer->SetSyncR(m_sync_r);
-	layer->SetSyncG(m_sync_g);
-	layer->SetSyncB(m_sync_b);
+	layer->SetSync(0, m_sync_r);
+	layer->SetSync(1, m_sync_g);
+	layer->SetSync(2, m_sync_b);
 
 	layer->SetGammaColor(fluo::Color(m_gamma_r, m_gamma_g, m_gamma_b));
 	layer->SetBrightness(fluo::Color(m_brightness_r, m_brightness_g, m_brightness_b));

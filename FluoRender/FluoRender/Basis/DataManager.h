@@ -131,18 +131,8 @@ public:
 	void SetHdr(const fluo::Color &hdr)
 	{m_hdr = hdr;}
 	//sync values
-	bool GetSyncR()
-	{return m_sync_r;}
-	void SetSyncR(bool sync_r)
-	{m_sync_r = sync_r;}
-	bool GetSyncG()
-	{return m_sync_g;}
-	void SetSyncG(bool sync_g)
-	{m_sync_g = sync_g;}
-	bool GetSyncB()
-	{return m_sync_b;}
-	void SetSyncB(bool sync_b)
-	{m_sync_b = sync_b;}
+	bool GetSync(int i) { if (i >= 0 && i < 3) return m_sync[i]; else return false; }
+	void SetSync(int i, bool val) { if (i >= 0 && i < 3) m_sync[i] = val; }
 
 	//randomize color
 	virtual void RandomizeColor() {}
@@ -168,9 +158,7 @@ protected:
 	fluo::Color m_gamma;
 	fluo::Color m_brightness;
 	fluo::Color m_hdr;
-	bool m_sync_r;
-	bool m_sync_g;
-	bool m_sync_b;
+	bool m_sync[3];//for rgb
 
 	//soft threshold
 	static double m_sw;
@@ -1148,9 +1136,7 @@ public:
 	//set hdr to all
 	void SetHdrAll(const fluo::Color &hdr);
 	//set sync to all
-	void SetSyncRAll(bool sync_r);
-	void SetSyncGAll(bool sync_g);
-	void SetSyncBAll(bool sync_b);
+	void SetSyncAll(int i, bool val);
 	//reset sync
 	void ResetSync();
 

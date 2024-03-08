@@ -121,9 +121,8 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 		vd->SetBrightness(col);
 		col = vd_a->GetHdr();
 		vd->SetHdr(col);
-		vd->SetSyncR(vd_a->GetSyncR());
-		vd->SetSyncG(vd_a->GetSyncG());
-		vd->SetSyncB(vd_a->GetSyncB());
+		for (int i : { 0, 1, 2})
+			vd->SetSync(i, vd_a->GetSync(i));
 		//max
 		vd->SetScalarScale(vd_a->GetScalarScale());
 		vd->SetGMScale(vd_a->GetGMScale());

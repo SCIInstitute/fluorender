@@ -230,9 +230,8 @@ bool KernelExecutor::Execute()
 			vd->SetBrightness(col);
 			col = m_vd->GetHdr();
 			vd->SetHdr(col);
-			vd->SetSyncR(m_vd->GetSyncR());
-			vd->SetSyncG(m_vd->GetSyncG());
-			vd->SetSyncB(m_vd->GetSyncB());
+			for (int i : { 0, 1, 2})
+				vd->SetSync(i, m_vd->GetSync(i));
 			//max and scale
 			vd->SetMaxValue(m_vd->GetMaxValue());
 			vd->SetScalarScale(m_vd->GetScalarScale());

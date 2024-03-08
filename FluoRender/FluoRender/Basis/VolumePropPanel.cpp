@@ -637,7 +637,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 	bool update_all = vc.empty();
 
-	DBGPRINT(L"update vol props, update_all=%d, vc_size=%d\n", update_all, vc.size());
+	//DBGPRINT(L"update vol props, update_all=%d, vc_size=%d\n", update_all, vc.size());
 	//volume properties
 	//transfer function
 	//gamma
@@ -651,9 +651,12 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_gamma_sldr->ChangeValue(std::round(dval * 100.0));
 		m_gamma_text->ChangeValue(str);
 		m_gamma_chk->SetValue(bval);
-		m_gamma_sldr->Enable(bval);
-		m_gamma_text->Enable(bval);
-		m_gamma_st->Enable(bval);
+		if (m_gamma_sldr->IsEnabled() != bval)
+		{
+			m_gamma_sldr->Enable(bval);
+			m_gamma_text->Enable(bval);
+			m_gamma_st->Enable(bval);
+		}
 	}
 	//boundary
 	if (update_all || FOUND_VALUE(gstBoundary))
@@ -666,9 +669,12 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_boundary_sldr->ChangeValue(std::round(dval * 2000.0));
 		m_boundary_text->ChangeValue(str);
 		m_boundary_chk->SetValue(bval);
-		m_boundary_sldr->Enable(bval);
-		m_boundary_text->Enable(bval);
-		m_boundary_st->Enable(bval);
+		if (m_boundary_sldr->IsEnabled() != bval)
+		{
+			m_boundary_sldr->Enable(bval);
+			m_boundary_text->Enable(bval);
+			m_boundary_st->Enable(bval);
+		}
 	}
 	//saturation
 	if (update_all || FOUND_VALUE(gstSaturation))
@@ -683,9 +689,12 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_saturation_sldr->ChangeValue(ival);
 		m_saturation_text->ChangeValue(str);
 		m_saturation_chk->SetValue(bval);
-		m_saturation_sldr->Enable(bval);
-		m_saturation_text->Enable(bval);
-		m_saturation_st->Enable(bval);
+		if (m_saturation_sldr->IsEnabled() != bval)
+		{
+			m_saturation_sldr->Enable(bval);
+			m_saturation_text->Enable(bval);
+			m_saturation_st->Enable(bval);
+		}
 	}
 	//threshold
 	if (update_all || FOUND_VALUE(gstThreshold))
@@ -719,11 +728,14 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		}
 		bval = m_vd->GetThreshEnable();
 		m_thresh_chk->SetValue(bval);
-		m_thresh_sldr->Enable(bval);
-		m_left_thresh_text->Enable(bval);
-		m_right_thresh_text->Enable(bval);
-		m_thresh_link_tb->Enable(bval);
-		m_thresh_st->Enable(bval);
+		if (m_thresh_sldr->IsEnabled() != bval)
+		{
+			m_thresh_sldr->Enable(bval);
+			m_left_thresh_text->Enable(bval);
+			m_right_thresh_text->Enable(bval);
+			m_thresh_link_tb->Enable(bval);
+			m_thresh_st->Enable(bval);
+		}
 	}
 	//luminance
 	if (update_all || FOUND_VALUE(gstColor))
@@ -738,9 +750,12 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_luminance_sldr->ChangeValue(ival);
 		m_luminance_text->ChangeValue(str);
 		m_luminance_chk->SetValue(bval);
-		m_luminance_sldr->Enable(bval);
-		m_luminance_text->Enable(bval);
-		m_luminance_st->Enable(bval);
+		if (m_luminance_sldr->IsEnabled() != bval)
+		{
+			m_luminance_sldr->Enable(bval);
+			m_luminance_text->Enable(bval);
+			m_luminance_st->Enable(bval);
+		}
 	}
 	//alpha
 	if (update_all || FOUND_VALUE(gstAlpha))
@@ -755,9 +770,12 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_alpha_text->ChangeValue(str);
 		bval = m_vd->GetAlphaEnable();
 		m_alpha_chk->SetValue(bval);
-		m_alpha_sldr->Enable(bval);
-		m_alpha_text->Enable(bval);
-		m_alpha_st->Enable(bval);
+		if (m_luminance_sldr->IsEnabled() != bval)
+		{
+			m_luminance_sldr->Enable(bval);
+			m_alpha_text->Enable(bval);
+			m_alpha_st->Enable(bval);
+		}
 	}
 
 	//shadings
@@ -777,11 +795,14 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_hi_shading_text->ChangeValue(str);
 		bval = m_vd->GetShadingEnable();
 		m_shade_chk->SetValue(bval);
-		m_low_shading_sldr->Enable(bval);
-		m_low_shading_text->Enable(bval);
-		m_hi_shading_text->Enable(bval);
-		m_hi_shading_text->Enable(bval);
-		m_shade_st->Enable(bval);
+		if (m_low_shading_sldr->IsEnabled() != bval)
+		{
+			m_low_shading_sldr->Enable(bval);
+			m_low_shading_text->Enable(bval);
+			m_hi_shading_text->Enable(bval);
+			m_hi_shading_text->Enable(bval);
+			m_shade_st->Enable(bval);
+		}
 	}
 
 	//shadow
@@ -795,9 +816,12 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_shadow_sldr->ChangeValue(std::round(dval * 100.0));
 		m_shadow_text->ChangeValue(str);
 		m_shadow_chk->SetValue(bval);
-		m_shadow_sldr->Enable(bval);
-		m_shadow_text->Enable(bval);
-		m_shadow_st->Enable(bval);
+		if (m_shadow_sldr->IsEnabled() != bval)
+		{
+			m_shadow_sldr->Enable(bval);
+			m_shadow_text->Enable(bval);
+			m_shadow_st->Enable(bval);
+		}
 	}
 
 	//smaple rate
@@ -811,9 +835,12 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_sample_sldr->ChangeValue(dval * 10.0);
 		m_sample_text->ChangeValue(str);
 		m_sample_chk->SetValue(bval);
-		m_sample_sldr->Enable(bval);
-		m_sample_text->Enable(bval);
-		m_sample_st->Enable(bval);
+		if (m_sample_sldr->IsEnabled() != bval)
+		{
+			m_sample_sldr->Enable(bval);
+			m_sample_text->Enable(bval);
+			m_sample_st->Enable(bval);
+		}
 	}
 
 	//spacings
@@ -894,11 +921,14 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		//mode
 		bval = m_vd->GetColormapMode() == 1;
 		m_colormap_chk->SetValue(bval);
-		m_colormap_sldr->Enable(bval);
-		m_colormap_low_text->Enable(bval);
-		m_colormap_hi_text->Enable(bval);
-		m_colormap_link_tb->Enable(bval);
-		m_colormap_st->Enable(bval);
+		if (m_colormap_sldr->IsEnabled() != bval)
+		{
+			m_colormap_sldr->Enable(bval);
+			m_colormap_low_text->Enable(bval);
+			m_colormap_hi_text->Enable(bval);
+			m_colormap_link_tb->Enable(bval);
+			m_colormap_st->Enable(bval);
+		}
 		//colormap
 		bval = m_vd->GetColormapInv() > 0.0 ? false : true;
 		if (bval != m_colormap_inv_btn->GetToolState(0))
@@ -1034,7 +1064,6 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//	std::chrono::high_resolution_clock::now() - t);
 	//DBGPRINT(L"update settings, time: %f\n", ts);
 	//return;
-
 }
 
 void VolumePropPanel::SetVolumeData(VolumeData* vd)
@@ -1062,21 +1091,6 @@ void VolumePropPanel::InitVRenderViews(unsigned int type)
 			{
 				view->InitView(type);
 				view->m_vrv->UpdateView();
-			}
-		}
-	}
-}
-
-void VolumePropPanel::SetFocusVRenderViews(wxBasisSlider* slider)
-{
-	if (m_frame)
-	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			VRenderGLView* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetFocusedSlider(slider);
 			}
 		}
 	}

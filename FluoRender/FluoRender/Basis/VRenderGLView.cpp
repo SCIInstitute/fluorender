@@ -268,9 +268,7 @@ VRenderGLView::VRenderGLView(VRenderFrame* frame,
 	m_gamma(fluo::Color(1.0, 1.0, 1.0)),
 	m_brightness(fluo::Color(1.135, 1.135, 1.135)),
 	m_hdr(0.0, 0.0, 0.0),
-	m_sync_r(false),
-	m_sync_g(false),
-	m_sync_b(false),
+	m_sync(),
 	//volume color map
 	m_color_1(fluo::Color(0.0, 0.0, 1.0)),
 	m_value_2(0.0),
@@ -6131,12 +6129,8 @@ DataGroup* VRenderGLView::AddVolumeData(VolumeData* vd, wxString group_name)
 		vd->SetBrightness(brightness);
 		fluo::Color hdr = group->GetHdr();
 		vd->SetHdr(hdr);
-		bool sync_r = group->GetSyncR();
-		vd->SetSyncR(sync_r);
-		bool sync_g = group->GetSyncG();
-		vd->SetSyncG(sync_g);
-		bool sync_b = group->GetSyncB();
-		vd->SetSyncB(sync_b);
+		for (int i : { 0, 1, 2})
+			vd->SetSync(i, group->GetSync(i));
 
 		if (m_frame)
 		{
@@ -6873,12 +6867,8 @@ void VRenderGLView::MoveLayertoGroup(wxString &group_name, wxString &src_name, w
 	src_vd->SetBrightness(brightness);
 	fluo::Color hdr = group->GetHdr();
 	src_vd->SetHdr(hdr);
-	bool sync_r = group->GetSyncR();
-	src_vd->SetSyncR(sync_r);
-	bool sync_g = group->GetSyncG();
-	src_vd->SetSyncG(sync_g);
-	bool sync_b = group->GetSyncB();
-	src_vd->SetSyncB(sync_b);
+	for (int i : { 0, 1, 2})
+		src_vd->SetSync(i, group->GetSync(i));
 
 	m_vd_pop_dirty = true;
 	m_md_pop_dirty = true;
@@ -6933,12 +6923,8 @@ void VRenderGLView::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst
 	src_vd->SetBrightness(brightness);
 	fluo::Color hdr = dst_group->GetHdr();
 	src_vd->SetHdr(hdr);
-	bool sync_r = dst_group->GetSyncR();
-	src_vd->SetSyncR(sync_r);
-	bool sync_g = dst_group->GetSyncG();
-	src_vd->SetSyncG(sync_g);
-	bool sync_b = dst_group->GetSyncB();
-	src_vd->SetSyncB(sync_b);
+	for (int i : { 0, 1, 2})
+		src_vd->SetSync(i, dst_group->GetSync(i));
 
 	m_vd_pop_dirty = true;
 	m_md_pop_dirty = true;
@@ -7179,9 +7165,9 @@ wxString VRenderGLView::AddGroup(wxString str, wxString prev_group)
 				fluo::Color(glbin_outadj_def.m_brightness_r, glbin_outadj_def.m_brightness_g, glbin_outadj_def.m_brightness_b));
 			group->SetHdr(
 				fluo::Color(glbin_outadj_def.m_hdr_r, glbin_outadj_def.m_hdr_g, glbin_outadj_def.m_hdr_b));
-			group->SetSyncR(glbin_outadj_def.m_sync_r);
-			group->SetSyncG(glbin_outadj_def.m_sync_g);
-			group->SetSyncB(glbin_outadj_def.m_sync_b);
+			group->SetSync(0, glbin_outadj_def.m_sync_r);
+			group->SetSync(1, glbin_outadj_def.m_sync_g);
+			group->SetSync(2, glbin_outadj_def.m_sync_b);
 		}
 	}
 
@@ -7224,9 +7210,9 @@ DataGroup* VRenderGLView::AddOrGetGroup()
 				fluo::Color(glbin_outadj_def.m_brightness_r, glbin_outadj_def.m_brightness_g, glbin_outadj_def.m_brightness_b));
 			group->SetHdr(
 				fluo::Color(glbin_outadj_def.m_hdr_r, glbin_outadj_def.m_hdr_g, glbin_outadj_def.m_hdr_b));
-			group->SetSyncR(glbin_outadj_def.m_sync_r);
-			group->SetSyncG(glbin_outadj_def.m_sync_g);
-			group->SetSyncB(glbin_outadj_def.m_sync_b);
+			group->SetSync(0, glbin_outadj_def.m_sync_r);
+			group->SetSync(1, glbin_outadj_def.m_sync_g);
+			group->SetSync(2, glbin_outadj_def.m_sync_b);
 		}
 	}
 	m_layer_list.push_back(group);
