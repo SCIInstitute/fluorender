@@ -317,7 +317,7 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 		}
 		if (group && volume)
 		{
-			fluo::Color col = volume->GetGamma();
+			fluo::Color col = volume->GetGammaColor();
 			group->SetGammaAll(col);
 			col = volume->GetBrightness();
 			group->SetBrightnessAll(col);

@@ -32,24 +32,24 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Color.h>
 
 //all convert v1 to v2
-#define GammaUI2(v1, v2) \
-	{v2 = 1.0/v1;}
-#define Gamma2UI(v1, v2) \
-	{v2 = 1.0/v1;}
-#define Gamma2UIP(v) \
-	int(v*100.0+0.5)
-#define BrightnessUI2(v1, v2) \
-	{v2 = v1/256.0 + 1.0;}
-#define Brightness2UI(v1, v2) \
-	{v2 = (v1-1.0)*256.0;}
-#define Brightness2UIP(v) \
-	int(v+0.5)
-#define HdrUI2(v1, v2) \
-	{v2 = v1;}
-#define Hdr2UI(v1, v2) \
-	{v2 = v1;}
-#define Hdr2UIP(v) \
-	int(v*100.0+0.5)
+//#define GammaUI2(v1, v2) \
+//	{v2 = 1.0/v1;}
+//#define Gamma2UI(v1, v2) \
+//	{v2 = 1.0/v1;}
+//#define Gamma2UIP(v) \
+//	int(std::round(v*100.0))
+//#define BrightnessUI2(v1, v2) \
+//	{v2 = v1/256.0 + 1.0;}
+//#define Brightness2UI(v1, v2) \
+//	{v2 = (v1-1.0)*256.0;}
+//#define Brightness2UIP(v) \
+//	int(std::round(v))
+//#define HdrUI2(v1, v2) \
+//	{v2 = v1;}
+//#define Hdr2UI(v1, v2) \
+//	{v2 = v1;}
+//#define Hdr2UIP(v) \
+//	int(std::round(v*100.0))
 
 class VRenderFrame;
 class VRenderGLView;
@@ -69,8 +69,7 @@ public:
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 	//disable/enable
-	void DisableAll();
-	void EnableAll();
+	void EnableAll(bool val);
 	//get type
 	int GetType()
 	{
@@ -88,23 +87,10 @@ public:
 	//set volume adjustment to link to group
 	void SetGroupLink(DataGroup *group);
 
-	//change settings externally
-	void ChangeRGamma(double gamma_r);
-	void ChangeGGamma(double gamma_g);
-	void ChangeBGamma(double gamma_b);
-	void ChangeRBrightness(double brightness_r);
-	void ChangeGBrightness(double brightness_g);
-	void ChangeBBrightness(double brightness_b);
-	void ChangeRHdr(double hdr_r);
-	void ChangeGHdr(double hdr_g);
-	void ChangeBHdr(double hdr_b);
-	void ChangeRSync(bool sync_r);
-	void ChangeGSync(bool sync_g);
-	void ChangeBSync(bool sync_b);
-
-	bool GetRSync() {return m_sync_r;}
-	bool GetGSync() {return m_sync_g;}
-	bool GetBSync() {return m_sync_b;}
+	void SetSync(int i, bool val, bool update = true);
+	void SetGamma(int i, double val, bool update = true);
+	void SetBrightness(int i, double val, bool update = true);
+	void SetHdr(int i, double val, bool update = true);
 
 	void UpdateSync();
 

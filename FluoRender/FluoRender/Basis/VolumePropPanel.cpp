@@ -609,6 +609,8 @@ VolumePropPanel::~VolumePropPanel()
 	glbin.del_undo_control(m_shadow_chk);
 	glbin.del_undo_control(m_sample_chk);
 	glbin.del_undo_control(m_colormap_chk);
+
+	SetFocusVRenderViews(0);
 }
 
 void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)

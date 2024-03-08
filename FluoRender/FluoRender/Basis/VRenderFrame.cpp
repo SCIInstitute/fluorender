@@ -2647,6 +2647,7 @@ void VRenderFrame::UpdateProps(const fluo::ValueCollection& vc, PropPanel* excl)
 	for (auto i : m_prop_pages)
 		if (i != excl)
 			i->FluoUpdate(vc);
+	m_adjust_view->FluoUpdate(vc);
 }
 
 VolumePropPanel* VRenderFrame::FindVolumeProps(const wxString& name)

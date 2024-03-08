@@ -26,48 +26,14 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "AdjustView.h"
+#include <Global/Global.h>
 #include <VRenderFrame.h>
 #include <VRenderGLView.h>
-#include <Global/Global.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include "png_resource.h"
 #include "img/icons.h"
-
-//BEGIN_EVENT_TABLE(AdjustView, wxPanel)
-//	//set gamma
-//	EVT_COMMAND_SCROLL(ID_RGammaSldr, AdjustView::OnRGammaChange)
-//	EVT_TEXT(ID_RGammaText, AdjustView::OnRGammaText)
-//	EVT_COMMAND_SCROLL(ID_GGammaSldr, AdjustView::OnGGammaChange)
-//	EVT_TEXT(ID_GGammaText, AdjustView::OnGGammaText)
-//	EVT_COMMAND_SCROLL(ID_BGammaSldr, AdjustView::OnBGammaChange)
-//	EVT_TEXT(ID_BGammaText, AdjustView::OnBGammaText)
-//	//set brightness
-//	EVT_COMMAND_SCROLL(ID_RBrightnessSldr, AdjustView::OnRBrightnessChange)
-//	EVT_TEXT(ID_RBrightnessText, AdjustView::OnRBrightnessText)
-//	EVT_COMMAND_SCROLL(ID_GBrightnessSldr, AdjustView::OnGBrightnessChange)
-//	EVT_TEXT(ID_GBrightnessText, AdjustView::OnGBrightnessText)
-//	EVT_COMMAND_SCROLL(ID_BBrightnessSldr, AdjustView::OnBBrightnessChange)
-//	EVT_TEXT(ID_BBrightnessText, AdjustView::OnBBrightnessText)
-//	//set hdr
-//	EVT_COMMAND_SCROLL(ID_RHdrSldr, AdjustView::OnRHdrChange)
-//	EVT_TEXT(ID_RHdrText, AdjustView::OnRHdrText)
-//	EVT_COMMAND_SCROLL(ID_GHdrSldr, AdjustView::OnGHdrChange)
-//	EVT_TEXT(ID_GHdrText, AdjustView::OnGHdrText)
-//	EVT_COMMAND_SCROLL(ID_BHdrSldr, AdjustView::OnBHdrChange)
-//	EVT_TEXT(ID_BHdrText, AdjustView::OnBHdrText)
-//	//reset
-//	EVT_BUTTON(ID_RResetBtn, AdjustView::OnRReset)
-//	EVT_BUTTON(ID_GResetBtn, AdjustView::OnGReset)
-//	EVT_BUTTON(ID_BResetBtn, AdjustView::OnBReset)
-//	//set sync
-//	EVT_TOOL(ID_SyncRChk, AdjustView::OnSyncRCheck)
-//	EVT_TOOL(ID_SyncGChk, AdjustView::OnSyncGCheck)
-//	EVT_TOOL(ID_SyncBChk, AdjustView::OnSyncBCheck)
-//	//set default
-//	EVT_BUTTON(ID_DefaultBtn, AdjustView::OnSaveDefault)
-//END_EVENT_TABLE()
 
 AdjustView::AdjustView(VRenderFrame* frame,
 					   const wxPoint& pos,
@@ -412,7 +378,7 @@ m_sync_b(false)
 	SetAutoLayout(true);
 	SetScrollRate(10, 10);
 
-	DisableAll();
+	EnableAll(false);
 
 	//add sliders for undo and redo
 	glbin.add_undo_control(m_r_gamma_sldr);
@@ -444,48 +410,48 @@ AdjustView::~AdjustView()
 
 void AdjustView::FluoUpdate(const fluo::ValueCollection& vc)
 {
-	//red
-	bool sync_r = false;
-	double r_gamma = 1.0;
-	double r_brightness = 0.0;
-	double r_hdr = 0.0;
-	//green
-	bool sync_g = false;
-	double g_gamma = 1.0;
-	double g_brightness = 0.0;
-	double g_hdr = 0.0;
-	//blue
-	bool sync_b = false;
-	double b_gamma = 1.0;
-	double b_brightness = 0.0;
-	double b_hdr = 0.0;
+	if (m_type != 1 && m_type != 2 && m_type != 5)
+	{
+		EnableAll(false);
+		return;
+	}
+	if (FOUND_VALUE(gstNull))
+		return;
+	bool update_all = vc.empty();
+	if (!(update_all ||
+		FOUND_VALUE(gstSyncR) ||
+		FOUND_VALUE(gstSyncG) ||
+		FOUND_VALUE(gstSyncB) ||
+		FOUND_VALUE(gstGammaR) ||
+		FOUND_VALUE(gstGammaG) ||
+		FOUND_VALUE(gstGammaB) ||
+		FOUND_VALUE(gstBrightnessR) ||
+		FOUND_VALUE(gstBrightnessG) ||
+		FOUND_VALUE(gstBrightnessB) ||
+		FOUND_VALUE(gstEqualizeR) ||
+		FOUND_VALUE(gstEqualizeG) ||
+		FOUND_VALUE(gstEqualizeB)))
+		return;
+
+	fluo::Color gamma;
+	fluo::Color brightness;
+	fluo::Color hdr;
 
 	switch (m_type)
 	{
 	case 1://view
 		if (m_view)
 		{
-			//red
-			sync_r = m_view->GetSyncR();
-			Gamma2UI(m_view->GetGammaColor().r(), r_gamma);
-			Brightness2UI(m_view->GetBrightness().r(), r_brightness);
-			Hdr2UI(m_view->GetHdr().r(), r_hdr);
-			//green
-			sync_g = m_view->GetSyncG();
-			Gamma2UI(m_view->GetGammaColor().g(), g_gamma);
-			Brightness2UI(m_view->GetBrightness().g(), g_brightness);
-			Hdr2UI(m_view->GetHdr().g(), g_hdr);
-			//blue
-			sync_b = m_view->GetSyncB();
-			Gamma2UI(m_view->GetGammaColor().b(), b_gamma);
-			Brightness2UI(m_view->GetBrightness().b(), b_brightness);
-			Hdr2UI(m_view->GetHdr().b(), b_hdr);
+			m_sync_r = m_view->GetSyncR();
+			gamma = m_view->GetGammaColor();
+			brightness = m_view->GetBrightness();
+			hdr = m_view->GetHdr();
 		}
 		break;
 	case 2://volume data
 	case 5://group
 		{
-			TreeLayer *layer = 0;
+			TreeLayer* layer = 0;
 			if (m_type == 2 && m_vd)
 				layer = (TreeLayer*)m_vd;
 			else if (m_type == 5 && m_group)
@@ -493,133 +459,126 @@ void AdjustView::FluoUpdate(const fluo::ValueCollection& vc)
 
 			if (layer)
 			{
-				//red
-				sync_r = layer->GetSyncR();
-				Gamma2UI(layer->GetGammaColor().r(), r_gamma);
-				Brightness2UI(layer->GetBrightness().r(), r_brightness);
-				Hdr2UI(layer->GetHdr().r(), r_hdr);
-				//green
-				sync_g = layer->GetSyncG();
-				Gamma2UI(layer->GetGammaColor().g(), g_gamma);
-				Brightness2UI(layer->GetBrightness().g(), g_brightness);
-				Hdr2UI(layer->GetHdr().g(), g_hdr);
-				//blue
-				sync_b = layer->GetSyncB();
-				Gamma2UI(layer->GetGammaColor().b(), b_gamma);
-				Brightness2UI(layer->GetBrightness().b(), b_brightness);
-				Hdr2UI(layer->GetHdr().b(), b_hdr);
+				m_sync_r = layer->GetSyncR();
+				gamma = layer->GetGammaColor();
+				brightness = layer->GetBrightness();
+				hdr = layer->GetHdr();
 			}
 		}
-		break;
+	break;
 	}
 
-	if (m_type == 1 || m_type == 2 || m_type == 5)
+	//red
+	if (update_all || FOUND_VALUE(gstSyncR))
 	{
-		//red
-		m_sync_r_chk->ToggleTool(0,sync_r);
+		m_sync_r_chk->ToggleTool(0, m_sync_r);
 		m_sync_r_chk->SetToolNormalBitmap(0,
-			sync_r?wxGetBitmapFromMemory(link):wxGetBitmapFromMemory(unlink));
-		m_sync_r = sync_r;
-		m_r_gamma_sldr->SetValue(Gamma2UIP(r_gamma));
-		m_r_brightness_sldr->SetValue(Brightness2UIP(r_brightness));
-		m_r_hdr_sldr->SetValue(Hdr2UIP(r_hdr));
-		m_r_gamma_text->ChangeValue(wxString::Format("%.2f", r_gamma));
-		m_r_brightness_text->ChangeValue(wxString::Format("%d", Brightness2UIP(r_brightness)));
-		m_r_hdr_text->ChangeValue(wxString::Format("%.2f", r_hdr));
-		//green
-		m_sync_g_chk->ToggleTool(0,sync_g);
-		m_sync_g_chk->SetToolNormalBitmap(0,
-			sync_g?wxGetBitmapFromMemory(link):wxGetBitmapFromMemory(unlink));
-		m_sync_g = sync_g;
-		m_g_gamma_sldr->SetValue(Gamma2UIP(g_gamma));
-		m_g_brightness_sldr->SetValue(Brightness2UIP(g_brightness));
-		m_g_hdr_sldr->SetValue(Hdr2UIP(g_hdr));
-		m_g_gamma_text->ChangeValue(wxString::Format("%.2f", g_gamma));
-		m_g_brightness_text->ChangeValue(wxString::Format("%d", Brightness2UIP(g_brightness)));
-		m_g_hdr_text->ChangeValue(wxString::Format("%.2f", g_hdr));
-		//blue
-		m_sync_b_chk->ToggleTool(0,sync_b);
-		m_sync_b_chk->SetToolNormalBitmap(0,
-			sync_b?wxGetBitmapFromMemory(link):wxGetBitmapFromMemory(unlink));
-		m_sync_b = sync_b;
-		m_b_gamma_sldr->SetValue(Gamma2UIP(b_gamma));
-		m_b_brightness_sldr->SetValue(Brightness2UIP(b_brightness));
-		m_b_hdr_sldr->SetValue(Hdr2UIP(b_hdr));
-		m_b_gamma_text->ChangeValue(wxString::Format("%.2f", b_gamma));
-		m_b_brightness_text->ChangeValue(wxString::Format("%d", Brightness2UIP(b_brightness)));
-		m_b_hdr_text->ChangeValue(wxString::Format("%.2f", b_hdr));
-		EnableAll();
+			m_sync_r ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
 	}
-	else
-		DisableAll();
+	if (update_all || FOUND_VALUE(gstGammaR))
+	{
+		m_r_gamma_sldr->ChangeValue(std::round((1.0 / gamma.r()) * 100.0));
+		m_r_gamma_text->ChangeValue(wxString::Format("%.2f", 1.0 / gamma.r()));
+	}
+	if (update_all || FOUND_VALUE(gstBrightnessR))
+	{
+		m_r_brightness_sldr->ChangeValue(std::round((brightness.r() - 1.0) * 256.0));
+		m_r_brightness_text->ChangeValue(wxString::Format("%d", int(std::round((brightness.r()-1.0)*256.0))));
+	}
+	if (update_all || FOUND_VALUE(gstEqualizeR))
+	{
+		m_r_hdr_sldr->ChangeValue(std::round(hdr.r() * 100.0));
+		m_r_hdr_text->ChangeValue(wxString::Format("%.2f", hdr.r()));
+	}
+	//green
+	if (update_all || FOUND_VALUE(gstSyncG))
+	{
+		m_sync_g_chk->ToggleTool(0, m_sync_g);
+		m_sync_g_chk->SetToolNormalBitmap(0,
+			m_sync_g ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+	}
+	if (update_all || FOUND_VALUE(gstGammaG))
+	{
+		m_g_gamma_sldr->ChangeValue(std::round((1.0 / gamma.g()) * 100.0));
+		m_g_gamma_text->ChangeValue(wxString::Format("%.2f", 1.0 / gamma.g()));
+	}
+	if (update_all || FOUND_VALUE(gstBrightnessG))
+	{
+		m_g_brightness_sldr->ChangeValue(std::round((brightness.g() - 1.0) * 256.0));
+		m_g_brightness_text->ChangeValue(wxString::Format("%d", int(std::round((brightness.g() - 1.0) * 256.0))));
+	}
+	if (update_all || FOUND_VALUE(gstEqualizeG))
+	{
+		m_g_hdr_sldr->ChangeValue(std::round(hdr.g() * 100.0));
+		m_g_hdr_text->ChangeValue(wxString::Format("%.2f", hdr.g()));
+	}
+	//blue
+	if (update_all || FOUND_VALUE(gstSyncB))
+	{
+		m_sync_b_chk->ToggleTool(0, m_sync_b);
+		m_sync_b_chk->SetToolNormalBitmap(0,
+			m_sync_b ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+	}
+	if (update_all || FOUND_VALUE(gstGammaB))
+	{
+		m_b_gamma_sldr->ChangeValue(std::round((1.0 / gamma.b()) * 100.0));
+		m_b_gamma_text->ChangeValue(wxString::Format("%.2f", 1.0 / gamma.b()));
+	}
+	if (update_all || FOUND_VALUE(gstBrightnessB))
+	{
+		m_b_brightness_sldr->ChangeValue(std::round((brightness.g() - 1.0) * 256.0));
+		m_b_brightness_text->ChangeValue(wxString::Format("%d", int(std::round((brightness.g() - 1.0) * 256.0))));
+	}
+	if (update_all || FOUND_VALUE(gstEqualizeB))
+	{
+		m_b_hdr_sldr->ChangeValue(std::round(hdr.g() * 100.0));
+		m_b_hdr_text->ChangeValue(wxString::Format("%.2f", hdr.b()));
+	}
+
+	EnableAll(true);
 }
 
-void AdjustView::DisableAll()
+void AdjustView::EnableAll(bool val)
 {
 	//red
-	m_sync_r_chk->Disable();
-	m_r_gamma_sldr->Disable();
-	m_r_brightness_sldr->Disable();
-	m_r_hdr_sldr->Disable();
-	m_r_gamma_text->Disable();
-	m_r_brightness_text->Disable();
-	m_r_hdr_text->Disable();
+	m_sync_r_chk->Enable(val);
+	m_r_gamma_sldr->Enable(val);
+	m_r_brightness_sldr->Enable(val);
+	m_r_hdr_sldr->Enable(val);
+	m_r_gamma_text->Enable(val);
+	m_r_brightness_text->Enable(val);
+	m_r_hdr_text->Enable(val);
+	m_r_gamma_st->Enable(val);
+	m_r_brightness_st->Enable(val);
+	m_r_hdr_st->Enable(val);
 	//green
-	m_sync_g_chk->Disable();
-	m_g_gamma_sldr->Disable();
-	m_g_brightness_sldr->Disable();
-	m_g_hdr_sldr->Disable();
-	m_g_gamma_text->Disable();
-	m_g_brightness_text->Disable();
-	m_g_hdr_text->Disable();
+	m_sync_g_chk->Enable(val);
+	m_g_gamma_sldr->Enable(val);
+	m_g_brightness_sldr->Enable(val);
+	m_g_hdr_sldr->Enable(val);
+	m_g_gamma_text->Enable(val);
+	m_g_brightness_text->Enable(val);
+	m_g_hdr_text->Enable(val);
+	m_g_gamma_st->Enable(val);
+	m_g_brightness_st->Enable(val);
+	m_g_hdr_st->Enable(val);
 	//blue
-	m_sync_b_chk->Disable();
-	m_b_gamma_sldr->Disable();
-	m_b_brightness_sldr->Disable();
-	m_b_hdr_sldr->Disable();
-	m_b_gamma_text->Disable();
-	m_b_brightness_text->Disable();
-	m_b_hdr_text->Disable();
+	m_sync_b_chk->Enable(val);
+	m_b_gamma_sldr->Enable(val);
+	m_b_brightness_sldr->Enable(val);
+	m_b_hdr_sldr->Enable(val);
+	m_b_gamma_text->Enable(val);
+	m_b_brightness_text->Enable(val);
+	m_b_hdr_text->Enable(val);
+	m_b_gamma_st->Enable(val);
+	m_b_brightness_st->Enable(val);
+	m_b_hdr_st->Enable(val);
 	//reset
-	m_r_reset_btn->Disable();
-	m_g_reset_btn->Disable();
-	m_b_reset_btn->Disable();
+	m_r_reset_btn->Enable(val);
+	m_g_reset_btn->Enable(val);
+	m_b_reset_btn->Enable(val);
 	//save as default
-	m_dft_btn->Disable();
-}
-
-void AdjustView::EnableAll()
-{
-	//red
-	m_sync_r_chk->Enable();
-	m_r_gamma_sldr->Enable();
-	m_r_brightness_sldr->Enable();
-	m_r_hdr_sldr->Enable();
-	m_r_gamma_text->Enable();
-	m_r_brightness_text->Enable();
-	m_r_hdr_text->Enable();
-	//green
-	m_sync_g_chk->Enable();
-	m_g_gamma_sldr->Enable();
-	m_g_brightness_sldr->Enable();
-	m_g_hdr_sldr->Enable();
-	m_g_gamma_text->Enable();
-	m_g_brightness_text->Enable();
-	m_g_hdr_text->Enable();
-	//blue
-	m_sync_b_chk->Enable();
-	m_b_gamma_sldr->Enable();
-	m_b_brightness_sldr->Enable();
-	m_b_hdr_sldr->Enable();
-	m_b_gamma_text->Enable();
-	m_b_brightness_text->Enable();
-	m_b_hdr_text->Enable();
-	//reset
-	m_r_reset_btn->Enable();
-	m_g_reset_btn->Enable();
-	m_b_reset_btn->Enable();
-	//save as default
-	m_dft_btn->Enable();
+	m_dft_btn->Enable(val);
 }
 
 //set view
@@ -629,13 +588,12 @@ void AdjustView::SetRenderView(VRenderGLView *view)
 	{
 		m_view = view;
 		m_type = 1;
-		FluoUpdate();
 	}
 	else
 	{
 		m_type = -1;
-		DisableAll();
 	}
+	FluoUpdate();
 }
 
 VRenderGLView* AdjustView::GetRenderView()
@@ -653,13 +611,12 @@ void AdjustView::SetVolumeData(VolumeData* vd)
 	{
 		m_vd = vd;
 		m_type = 2;
-		FluoUpdate();
 	}
 	else
 	{
 		m_type = -1;
-		DisableAll();
 	}
+	FluoUpdate();
 }
 
 VolumeData* AdjustView::GetVolumeData()
@@ -674,13 +631,12 @@ void AdjustView::SetGroup(DataGroup *group)
 	{
 		m_group = group;
 		m_type = 5;
-		FluoUpdate();
 	}
 	else
 	{
 		m_type = -1;
-		DisableAll();
 	}
+	FluoUpdate();
 }
 
 DataGroup* AdjustView::GetGroup()
@@ -780,9 +736,7 @@ void AdjustView::OnBHdrMF(wxCommandEvent& event)
 void AdjustView::OnRGammaChange(wxScrollEvent & event)
 {
 	double val = m_r_gamma_sldr->GetValue() / 100.0;
-	wxString str = wxString::Format("%.2f", val);
-	if (str != m_r_gamma_text->GetValue())
-		m_r_gamma_text->SetValue(str);
+	SetGamma(0, 1.0 / val);
 }
 
 void AdjustView::OnRGammaText(wxCommandEvent& event)
@@ -790,67 +744,13 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 	wxString str = m_r_gamma_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_r_gamma_sldr->SetValue(std::round(val*100));
-
-	if (m_sync_r)
-	{
-		if (m_sync_g)
-		{
-			m_g_gamma_sldr->SetValue(std::round(val*100));
-			m_g_gamma_text->ChangeValue(str);
-		}
-		if (m_sync_b)
-		{
-			m_b_gamma_sldr->SetValue(std::round(val*100));
-			m_b_gamma_text->ChangeValue(str);
-		}
-	}
-
-	if (m_view && m_type==1)
-	{
-		fluo::Color gamma = m_view->GetGammaColor();
-		GammaUI2(val, gamma[0]);
-		if (m_sync_r)
-		{
-			if (m_sync_g)
-				GammaUI2(val, gamma[1]);
-			if (m_sync_b)
-				GammaUI2(val, gamma[2]);
-		}
-		m_view->SetGammaColor(gamma);
-	}
-
-	TreeLayer *layer = 0;
-	if (m_type == 2 && m_vd)
-		layer = (TreeLayer*)m_vd;
-	else if (m_type == 5 && m_group)
-		layer = (TreeLayer*)m_group;
-	if (layer)
-	{
-		fluo::Color gamma = layer->GetGammaColor();
-		GammaUI2(val, gamma[0]);
-		if (m_sync_r)
-		{
-			if (m_sync_g)
-				GammaUI2(val, gamma[1]);
-			if (m_sync_b)
-				GammaUI2(val, gamma[2]);
-		}
-		layer->SetGammaColor(gamma);
-
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
-
-	}
-	FluoRefresh(false, true);
+	SetGamma(0, 1.0 / val);
 }
 
 void AdjustView::OnGGammaChange(wxScrollEvent & event)
 {
 	double val = m_g_gamma_sldr->GetValue() / 100.0;
-	wxString str = wxString::Format("%.2f", val);
-	if (str != m_g_gamma_text->GetValue())
-		m_g_gamma_text->SetValue(str);
+	SetGamma(1, 1.0 / val);
 }
 
 void AdjustView::OnGGammaText(wxCommandEvent& event)
@@ -858,67 +758,13 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 	wxString str = m_g_gamma_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_g_gamma_sldr->SetValue(std::round(val*100));
-
-	if (m_sync_g)
-	{
-		if (m_sync_r)
-		{
-			m_r_gamma_sldr->SetValue(std::round(val*100));
-			m_r_gamma_text->ChangeValue(str);
-		}
-		if (m_sync_b)
-		{
-			m_b_gamma_sldr->SetValue(std::round(val*100));
-			m_b_gamma_text->ChangeValue(str);
-		}
-	}
-
-	if (m_view && m_type==1)
-	{
-		fluo::Color gamma = m_view->GetGammaColor();
-		GammaUI2(val, gamma[1]);
-		if (m_sync_g)
-		{
-			if (m_sync_r)
-				GammaUI2(val, gamma[0]);
-			if (m_sync_b)
-				GammaUI2(val, gamma[2]);
-		}
-		m_view->SetGammaColor(gamma);
-	}
-
-	TreeLayer *layer = 0;
-	if (m_type == 2 && m_vd)
-		layer = (TreeLayer*)m_vd;
-	else if (m_type == 5 && m_group)
-		layer = (TreeLayer*)m_group;
-	if (layer)
-	{
-		fluo::Color gamma = layer->GetGammaColor();
-		GammaUI2(val, gamma[1]);
-		if (m_sync_g)
-		{
-			if (m_sync_r)
-				GammaUI2(val, gamma[0]);
-			if (m_sync_b)
-				GammaUI2(val, gamma[2]);
-		}
-		layer->SetGammaColor(gamma);
-
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
-
-	}
-	FluoRefresh(false, true);
+	SetGamma(1, 1.0 / val);
 }
 
 void AdjustView::OnBGammaChange(wxScrollEvent & event)
 {
 	double val = m_b_gamma_sldr->GetValue() / 100.0;
-	wxString str = wxString::Format("%.2f", val);
-	if (str != m_b_gamma_text->GetValue())
-		m_b_gamma_text->SetValue(str);
+	SetGamma(2, 1.0 / val);
 }
 
 void AdjustView::OnBGammaText(wxCommandEvent& event)
@@ -926,68 +772,14 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 	wxString str = m_b_gamma_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_b_gamma_sldr->SetValue(std::round(val*100));
-
-	if (m_sync_b)
-	{
-		if (m_sync_r)
-		{
-			m_r_gamma_sldr->SetValue(std::round(val*100));
-			m_r_gamma_text->ChangeValue(str);
-		}
-		if (m_sync_g)
-		{
-			m_g_gamma_sldr->SetValue(std::round(val*100));
-			m_g_gamma_text->ChangeValue(str);
-		}
-	}
-
-	if (m_view && m_type==1)
-	{
-		fluo::Color gamma = m_view->GetGammaColor();
-		GammaUI2(val, gamma[2]);
-		if (m_sync_b)
-		{
-			if (m_sync_r)
-				GammaUI2(val, gamma[0]);
-			if (m_sync_g)
-				GammaUI2(val, gamma[1]);
-		}
-		m_view->SetGammaColor(gamma);
-	}
-
-	TreeLayer *layer = 0;
-	if (m_type == 2 && m_vd)
-		layer = (TreeLayer*)m_vd;
-	else if (m_type == 5 && m_group)
-		layer = (TreeLayer*)m_group;
-	if (layer)
-	{
-		fluo::Color gamma = layer->GetGammaColor();
-		GammaUI2(val, gamma[2]);
-		if (m_sync_b)
-		{
-			if (m_sync_r)
-				GammaUI2(val, gamma[0]);
-			if (m_sync_g)
-				GammaUI2(val, gamma[1]);
-		}
-		layer->SetGammaColor(gamma);
-
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
-
-	}
-	FluoRefresh(false, true);
+	SetGamma(2, 1.0 / val);
 }
 
 //brightness
 void AdjustView::OnRBrightnessChange(wxScrollEvent & event)
 {
-	int val = m_r_brightness_sldr->GetValue();
-	wxString str = wxString::Format("%d", val);
-	if (str != m_r_brightness_text->GetValue())
-		m_r_brightness_text->SetValue(str);
+	int val = m_r_brightness_sldr->GetValue() / 256.0 + 1.0;
+	SetBrightness(0, val);
 }
 
 void AdjustView::OnRBrightnessText(wxCommandEvent& event)
@@ -995,67 +787,13 @@ void AdjustView::OnRBrightnessText(wxCommandEvent& event)
 	wxString str = m_r_brightness_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_r_brightness_sldr->SetValue(std::round(val));
-
-	if (m_sync_r)
-	{
-		if (m_sync_g)
-		{
-			m_g_brightness_sldr->SetValue(std::round(val));
-			m_g_brightness_text->ChangeValue(str);
-		}
-		if (m_sync_b)
-		{
-			m_b_brightness_sldr->SetValue(std::round(val));
-			m_b_brightness_text->ChangeValue(str);
-		}
-	}
-
-	if (m_view && m_type==1)
-	{
-		fluo::Color brightness = m_view->GetBrightness();
-		BrightnessUI2(val, brightness[0]);
-		if (m_sync_r)
-		{
-			if (m_sync_g)
-				BrightnessUI2(val, brightness[1]);
-			if (m_sync_b)
-				BrightnessUI2(val, brightness[2]);
-		}
-		m_view->SetBrightness(brightness);
-	}
-
-	TreeLayer *layer = 0;
-	if (m_type == 2 && m_vd)
-		layer = (TreeLayer*)m_vd;
-	else if (m_type == 5 && m_group)
-		layer = (TreeLayer*)m_group;
-	if (layer)
-	{
-		fluo::Color brightness = layer->GetBrightness();
-		BrightnessUI2(val, brightness[0]);
-		if (m_sync_r)
-		{
-			if (m_sync_g)
-				BrightnessUI2(val, brightness[1]);
-			if (m_sync_b)
-				BrightnessUI2(val, brightness[2]);
-		}
-		layer->SetBrightness(brightness);
-
-		if (m_link_group && m_group)
-			m_group->SetBrightnessAll(brightness);
-
-	}
-	FluoRefresh(false, true);
+	SetBrightness(0, val);
 }
 
 void AdjustView::OnGBrightnessChange(wxScrollEvent & event)
 {
-	int val = m_g_brightness_sldr->GetValue();
-	wxString str = wxString::Format("%d", val);
-	if (str != m_g_brightness_text->GetValue())
-		m_g_brightness_text->SetValue(str);
+	int val = m_g_brightness_sldr->GetValue() / 256.0 + 1.0;
+	SetBrightness(1, val);
 }
 
 void AdjustView::OnGBrightnessText(wxCommandEvent& event)
@@ -1063,67 +801,13 @@ void AdjustView::OnGBrightnessText(wxCommandEvent& event)
 	wxString str = m_g_brightness_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_g_brightness_sldr->SetValue(std::round(val));
-
-	if (m_sync_g)
-	{
-		if (m_sync_r)
-		{
-			m_r_brightness_sldr->SetValue(std::round(val));
-			m_r_brightness_text->ChangeValue(str);
-		}
-		if (m_sync_b)
-		{
-			m_b_brightness_sldr->SetValue(std::round(val));
-			m_b_brightness_text->ChangeValue(str);
-		}
-	}
-
-	if (m_view && m_type==1)
-	{
-		fluo::Color brightness = m_view->GetBrightness();
-		BrightnessUI2(val, brightness[1]);
-		if (m_sync_g)
-		{
-			if (m_sync_r)
-				BrightnessUI2(val, brightness[0]);
-			if (m_sync_b)
-				BrightnessUI2(val, brightness[2]);
-		}
-		m_view->SetBrightness(brightness);
-	}
-
-	TreeLayer *layer = 0;
-	if (m_type == 2 && m_vd)
-		layer = (TreeLayer*)m_vd;
-	else if (m_type == 5 && m_group)
-		layer = (TreeLayer*)m_group;
-	if (layer)
-	{
-		fluo::Color brightness = layer->GetBrightness();
-		BrightnessUI2(val, brightness[1]);
-		if (m_sync_g)
-		{
-			if (m_sync_r)
-				BrightnessUI2(val, brightness[0]);
-			if (m_sync_b)
-				BrightnessUI2(val, brightness[2]);
-		}
-		layer->SetBrightness(brightness);
-
-		if (m_link_group && m_group)
-			m_group->SetBrightnessAll(brightness);
-
-	}
-	FluoRefresh(false, true);
+	SetBrightness(1, val);
 }
 
 void AdjustView::OnBBrightnessChange(wxScrollEvent & event)
 {
-	int val = m_b_brightness_sldr->GetValue();
-	wxString str = wxString::Format("%d", val);
-	if (str != m_b_brightness_text->GetValue())
-		m_b_brightness_text->SetValue(str);
+	int val = m_b_brightness_sldr->GetValue() / 256.0 + 1.0;
+	SetBrightness(2, val);
 }
 
 void AdjustView::OnBBrightnessText(wxCommandEvent& event)
@@ -1131,67 +815,13 @@ void AdjustView::OnBBrightnessText(wxCommandEvent& event)
 	wxString str = m_b_brightness_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_b_brightness_sldr->SetValue(std::round(val));
-
-	if (m_sync_b)
-	{
-		if (m_sync_r)
-		{
-			m_r_brightness_sldr->SetValue(std::round(val));
-			m_r_brightness_text->ChangeValue(str);
-		}
-		if (m_sync_g)
-		{
-			m_g_brightness_sldr->SetValue(std::round(val));
-			m_g_brightness_text->ChangeValue(str);
-		}
-	}
-
-	if (m_view && m_type==1)
-	{
-		fluo::Color brightness = m_view->GetBrightness();
-		BrightnessUI2(val, brightness[2]);
-		if (m_sync_b)
-		{
-			if (m_sync_r)
-				BrightnessUI2(val, brightness[0]);
-			if (m_sync_g)
-				BrightnessUI2(val, brightness[1]);
-		}
-		m_view->SetBrightness(brightness);
-	}
-
-	TreeLayer *layer = 0;
-	if (m_type == 2 && m_vd)
-		layer = (TreeLayer*)m_vd;
-	else if (m_type == 5 && m_group)
-		layer = (TreeLayer*)m_group;
-	if (layer)
-	{
-		fluo::Color brightness = layer->GetBrightness();
-		BrightnessUI2(val, brightness[2]);
-		if (m_sync_b)
-		{
-			if (m_sync_r)
-				BrightnessUI2(val, brightness[0]);
-			if (m_sync_g)
-				BrightnessUI2(val, brightness[1]);
-		}
-		layer->SetBrightness(brightness);
-
-		if (m_link_group && m_group)
-			m_group->SetBrightnessAll(brightness);
-
-	}
-	FluoRefresh(false, true);
+	SetBrightness(2, val);
 }
 
 void AdjustView::OnRHdrChange(wxScrollEvent &event)
 {
 	double val = m_r_hdr_sldr->GetValue() / 100.0;
-	wxString str = wxString::Format("%.2f", val);
-	if (str != m_r_hdr_text->GetValue())
-		m_r_hdr_text->SetValue(str);
+	SetHdr(0, val);
 }
 
 void AdjustView::OnRHdrText(wxCommandEvent &event)
@@ -1199,67 +829,13 @@ void AdjustView::OnRHdrText(wxCommandEvent &event)
 	wxString str = m_r_hdr_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_r_hdr_sldr->SetValue(std::round(val*100));
-
-	if (m_sync_r)
-	{
-		if (m_sync_g)
-		{
-			m_g_hdr_sldr->SetValue(std::round(val*100));
-			m_g_hdr_text->ChangeValue(str);
-		}
-		if (m_sync_b)
-		{
-			m_b_hdr_sldr->SetValue(std::round(val*100));
-			m_b_hdr_text->ChangeValue(str);
-		}
-	}
-
-	if (m_view && m_type==1)
-	{
-		fluo::Color hdr = m_view->GetHdr();
-		HdrUI2(val, hdr[0]);
-		if (m_sync_r)
-		{
-			if (m_sync_g)
-				HdrUI2(val, hdr[1]);
-			if (m_sync_b)
-				HdrUI2(val, hdr[2]);
-		}
-		m_view->SetHdr(hdr);
-	}
-
-	TreeLayer *layer = 0;
-	if (m_type == 2 && m_vd)
-		layer = (TreeLayer*)m_vd;
-	else if (m_type == 5 && m_group)
-		layer = (TreeLayer*)m_group;
-	if (layer)
-	{
-		fluo::Color hdr = layer->GetHdr();
-		HdrUI2(val, hdr[0]);
-		if (m_sync_r)
-		{
-			if (m_sync_g)
-				HdrUI2(val, hdr[1]);
-			if (m_sync_b)
-				HdrUI2(val, hdr[2]);
-		}
-		layer->SetHdr(hdr);
-
-		if (m_link_group && m_group)
-			m_group->SetHdrAll(hdr);
-
-	}
-	FluoRefresh(false, true);
+	SetHdr(0, val);
 }
 
 void AdjustView::OnGHdrChange(wxScrollEvent &event)
 {
 	double val = m_g_hdr_sldr->GetValue() / 100.0;
-	wxString str = wxString::Format("%.2f", val);
-	if (str != m_g_hdr_text->GetValue())
-		m_g_hdr_text->SetValue(str);
+	SetHdr(1, val);
 }
 
 void AdjustView::OnGHdrText(wxCommandEvent &event)
@@ -1267,67 +843,13 @@ void AdjustView::OnGHdrText(wxCommandEvent &event)
 	wxString str = m_g_hdr_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_g_hdr_sldr->SetValue(std::round(val*100));
-
-	if (m_sync_g)
-	{
-		if (m_sync_r)
-		{
-			m_r_hdr_sldr->SetValue(std::round(val*100));
-			m_r_hdr_text->ChangeValue(str);
-		}
-		if (m_sync_b)
-		{
-			m_b_hdr_sldr->SetValue(std::round(val*100));
-			m_b_hdr_text->ChangeValue(str);
-		}
-	}
-
-	if (m_view && m_type==1)
-	{
-		fluo::Color hdr = m_view->GetHdr();
-		HdrUI2(val, hdr[1]);
-		if (m_sync_g)
-		{
-			if (m_sync_r)
-				HdrUI2(val, hdr[0]);
-			if (m_sync_b)
-				HdrUI2(val, hdr[2]);
-		}
-		m_view->SetHdr(hdr);
-	}
-
-	TreeLayer *layer = 0;
-	if (m_type == 2 && m_vd)
-		layer = (TreeLayer*)m_vd;
-	else if (m_type == 5 && m_group)
-		layer = (TreeLayer*)m_group;
-	if (layer)
-	{
-		fluo::Color hdr = layer->GetHdr();
-		HdrUI2(val, hdr[1]);
-		if (m_sync_g)
-		{
-			if (m_sync_r)
-				HdrUI2(val, hdr[0]);
-			if (m_sync_b)
-				HdrUI2(val, hdr[2]);
-		}
-		layer->SetHdr(hdr);
-
-		if (m_link_group && m_group)
-			m_group->SetHdrAll(hdr);
-
-	}
-	FluoRefresh(false, true);
+	SetHdr(1, val);
 }
 
 void AdjustView::OnBHdrChange(wxScrollEvent &event)
 {
 	double val = m_b_hdr_sldr->GetValue() / 100.0;
-	wxString str = wxString::Format("%.2f", val);
-	if (str != m_b_hdr_text->GetValue())
-		m_b_hdr_text->SetValue(str);
+	SetHdr(2, val);
 }
 
 void AdjustView::OnBHdrText(wxCommandEvent &event)
@@ -1335,137 +857,22 @@ void AdjustView::OnBHdrText(wxCommandEvent &event)
 	wxString str = m_b_hdr_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_b_hdr_sldr->SetValue(std::round(val*100));
-
-	if (m_sync_b)
-	{
-		if (m_sync_r)
-		{
-			m_r_hdr_sldr->SetValue(std::round(val*100));
-			m_r_hdr_text->ChangeValue(str);
-		}
-		if (m_sync_g)
-		{
-			m_g_hdr_sldr->SetValue(std::round(val*100));
-			m_g_hdr_text->ChangeValue(str);
-		}
-	}
-
-	if (m_view && m_type==1)
-	{
-		fluo::Color hdr = m_view->GetHdr();
-		HdrUI2(val, hdr[2]);
-		if (m_sync_b)
-		{
-			if (m_sync_r)
-				HdrUI2(val, hdr[0]);
-			if (m_sync_g)
-				HdrUI2(val, hdr[1]);
-		}
-		m_view->SetHdr(hdr);
-	}
-
-	TreeLayer *layer = 0;
-	if (m_type == 2 && m_vd)
-		layer = (TreeLayer*)m_vd;
-	else if (m_type == 5 && m_group)
-		layer = (TreeLayer*)m_group;
-	if (layer)
-	{
-		fluo::Color hdr = layer->GetHdr();
-		HdrUI2(val, hdr[2]);
-		if (m_sync_b)
-		{
-			if (m_sync_r)
-				HdrUI2(val, hdr[0]);
-			if (m_sync_g)
-				HdrUI2(val, hdr[1]);
-		}
-		layer->SetHdr(hdr);
-
-		if (m_link_group && m_group)
-			m_group->SetHdrAll(hdr);
-
-	}
-	FluoRefresh(false, true);
+	SetHdr(2, val);
 }
 
 void AdjustView::OnSyncRCheck(wxCommandEvent &event)
 {
-	m_sync_r = m_sync_r_chk->GetToolState(0);
-	m_sync_r_chk->SetToolNormalBitmap(0,
-			m_sync_r?wxGetBitmapFromMemory(link):wxGetBitmapFromMemory(unlink));
-	switch (m_type)
-	{
-	case 1://view
-		if (m_view)
-			m_view->SetSyncR(m_sync_r);
-		break;
-	case 2://volume data
-		if (m_vd)
-			m_vd->SetSyncR(m_sync_r);
-		break;
-	case 5://group
-		if (m_group)
-			m_group->SetSyncR(m_sync_r);
-		break;
-	}
-
-	if ((m_type == 2 || m_type == 5) && 
-		m_link_group && m_group)
-		m_group->SetSyncRAll(m_sync_r);
+	SetSync(0, m_sync_r_chk->GetToolState(0));
 }
 
 void AdjustView::OnSyncGCheck(wxCommandEvent &event)
 {
-	m_sync_g = m_sync_g_chk->GetToolState(0);
-	m_sync_g_chk->SetToolNormalBitmap(0,
-			m_sync_g?wxGetBitmapFromMemory(link):wxGetBitmapFromMemory(unlink));
-	switch (m_type)
-	{
-	case 1://view
-		if (m_view)
-			m_view->SetSyncG(m_sync_g);
-		break;
-	case 2://volume data
-		if (m_vd)
-			m_vd->SetSyncG(m_sync_g);
-		break;
-	case 5://group
-		if (m_group)
-			m_group->SetSyncG(m_sync_g);
-		break;
-	}
-
-	if ((m_type == 2 || m_type == 5) && 
-		m_link_group && m_group)
-		m_group->SetSyncGAll(m_sync_g);
+	SetSync(1, m_sync_g_chk->GetToolState(0));
 }
 
 void AdjustView::OnSyncBCheck(wxCommandEvent &event)
 {
-	m_sync_b = m_sync_b_chk->GetToolState(0);
-	m_sync_b_chk->SetToolNormalBitmap(0,
-			m_sync_b?wxGetBitmapFromMemory(link):wxGetBitmapFromMemory(unlink));
-	switch (m_type)
-	{
-	case 1://view
-		if (m_view)
-			m_view->SetSyncB(m_sync_b);
-		break;
-	case 2://volume data
-		if (m_vd)
-			m_vd->SetSyncB(m_sync_b);
-		break;
-	case 5://group
-		if (m_group)
-			m_group->SetSyncB(m_sync_b);
-		break;
-	}
-
-	if ((m_type == 2 || m_type == 5) && 
-		m_link_group && m_group)
-		m_group->SetSyncBAll(m_sync_b);
+	SetSync(2, m_sync_b_chk->GetToolState(0));
 }
 
 void AdjustView::OnSaveDefault(wxCommandEvent &event)
@@ -1487,80 +894,257 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 	}
 }
 
-//change settings externally
-void AdjustView::ChangeRGamma(double gamma_r)
+void AdjustView::SetSync(int i, bool val, bool update)
 {
-	Gamma2UI(gamma_r, gamma_r);
-	m_r_gamma_text->SetValue(wxString::Format("%.2f", gamma_r));
+	switch (m_type)
+	{
+	case 1://view
+		if (m_view)
+			if (i == 0)
+			{
+				m_sync_r = val;
+				m_view->SetSyncR(val);
+			}
+			else if (i == 1)
+			{
+				m_sync_g = val;
+				m_view->SetSyncG(val);
+			}
+			else if (i == 2)
+			{
+				m_sync_b = val;
+				m_view->SetSyncB(val);
+			}
+		break;
+	case 2://volume data
+		if (m_vd)
+		{
+			if (i == 0)
+			{
+				m_sync_r = val;
+				m_vd->SetSyncR(val);
+			}
+			else if (i == 1)
+			{
+				m_sync_g = val;
+				m_vd->SetSyncG(val);
+			}
+			else if (i == 2)
+			{
+				m_sync_b = val;
+				m_vd->SetSyncB(val);
+			}
+			if (m_link_group && m_group)
+				m_group->SetSyncRAll(val);
+		}
+		break;
+	case 5://group
+		if (m_group)
+		{
+			if (i == 0)
+			{
+				m_sync_r = val;
+				m_group->SetSyncR(val);
+			}
+			else if (i == 1)
+			{
+				m_sync_g = val;
+				m_group->SetSyncG(val);
+			}
+			else if (i == 2)
+			{
+				m_sync_b = val;
+				m_group->SetSyncB(val);
+			}
+			if (m_link_group)
+				m_group->SetSyncRAll(val);
+		}
+		break;
+	}
+
+	if (update)
+	{
+		fluo::ValueCollection vc;
+		if (i == 0)
+			vc.insert(gstSyncR);
+		else if (i == 1)
+			vc.insert(gstSyncG);
+		else if (i == 2)
+			vc.insert(gstSyncB);
+
+		FluoRefresh(false, true, false, vc);
+	}
 }
 
-void AdjustView::ChangeGGamma(double gamma_g)
+void AdjustView::SetGamma(int i, double val, bool update)
 {
-	Gamma2UI(gamma_g, gamma_g);
-	m_g_gamma_text->SetValue(wxString::Format("%.2f", gamma_g));
+	fluo::Color gamma;
+	switch (m_type)
+	{
+	case 1://view
+		if (m_view)
+			gamma = m_view->GetGammaColor();
+		break;
+	case 2://volume
+		if (m_vd)
+			gamma = m_vd->GetGammaColor();
+		break;
+	case 5://group
+		if (m_group)
+			gamma = m_group->GetGammaColor();
+		break;
+	}
+	fluo::ValueCollection vc;
+	if (m_sync_r || i == 0)
+	{
+		gamma[0] = val;
+		vc.insert(gstGammaR);
+	}
+	if (m_sync_g || i == 1)
+	{
+		gamma[1] = val;
+		vc.insert(gstGammaG);
+	}
+	if (m_sync_b || i == 2)
+	{
+		gamma[2] = val;
+		vc.insert(gstGammaB);
+	}
+	switch (m_type)
+	{
+	case 1:
+		if (m_view)
+			m_view->SetGammaColor(gamma);
+		break;
+	case 2:
+		if (m_vd)
+			m_vd->SetGammaColor(gamma);
+		if (m_link_group && m_group)
+			m_group->SetGammaAll(gamma);
+		break;
+	case 3:
+		if (m_group)
+			m_group->SetGammaColor(gamma);
+		if (m_link_group && m_group)
+			m_group->SetGammaAll(gamma);
+	}
+
+	if (update)
+		FluoRefresh(false, true, false, vc);
 }
 
-void AdjustView::ChangeBGamma(double gamma_b)
+void AdjustView::SetBrightness(int i, double val, bool update)
 {
-	Gamma2UI(gamma_b, gamma_b);
-	m_b_gamma_text->SetValue(wxString::Format("%.2f", gamma_b));
+	fluo::Color brightness;
+	switch (m_type)
+	{
+	case 1://view
+		if (m_view)
+			brightness = m_view->GetBrightness();
+		break;
+	case 2://volume
+		if (m_vd)
+			brightness = m_vd->GetBrightness();
+		break;
+	case 5://group
+		if (m_group)
+			brightness = m_group->GetBrightness();
+		break;
+	}
+	fluo::ValueCollection vc;
+	if (m_sync_r || i == 0)
+	{
+		brightness[0] = val;
+		vc.insert(gstBrightnessR);
+	}
+	if (m_sync_g || i == 1)
+	{
+		brightness[1] = val;
+		vc.insert(gstBrightnessG);
+	}
+	if (m_sync_b || i == 2)
+	{
+		brightness[2] = val;
+		vc.insert(gstBrightnessB);
+	}
+	switch (m_type)
+	{
+	case 1:
+		if (m_view)
+			m_view->SetBrightness(brightness);
+		break;
+	case 2:
+		if (m_vd)
+			m_vd->SetBrightness(brightness);
+		if (m_link_group && m_group)
+			m_group->SetBrightnessAll(brightness);
+		break;
+	case 3:
+		if (m_group)
+			m_group->SetBrightness(brightness);
+		if (m_link_group && m_group)
+			m_group->SetBrightnessAll(brightness);
+	}
+
+	if (update)
+		FluoRefresh(false, true, false, vc);
 }
 
-void AdjustView::ChangeRBrightness(double brightness_r)
+void AdjustView::SetHdr(int i, double val, bool update)
 {
-	Brightness2UI(brightness_r, brightness_r);
-	m_r_brightness_text->SetValue(wxString::Format("%.0f", brightness_r));
-}
+	fluo::Color hdr;
+	switch (m_type)
+	{
+	case 1://view
+		if (m_view)
+			hdr = m_view->GetHdr();
+		break;
+	case 2://volume
+		if (m_vd)
+			hdr = m_vd->GetHdr();
+		break;
+	case 5://group
+		if (m_group)
+			hdr = m_group->GetHdr();
+		break;
+	}
+	fluo::ValueCollection vc;
+	if (m_sync_r || i == 0)
+	{
+		hdr[0] = val;
+		vc.insert(gstEqualizeR);
+	}
+	if (m_sync_g || i == 1)
+	{
+		hdr[1] = val;
+		vc.insert(gstEqualizeG);
+	}
+	if (m_sync_b || i == 2)
+	{
+		hdr[2] = val;
+		vc.insert(gstEqualizeB);
+	}
+	switch (m_type)
+	{
+	case 1:
+		if (m_view)
+			m_view->SetHdr(hdr);
+		break;
+	case 2:
+		if (m_vd)
+			m_vd->SetHdr(hdr);
+		if (m_link_group && m_group)
+			m_group->SetHdrAll(hdr);
+		break;
+	case 3:
+		if (m_group)
+			m_group->SetHdr(hdr);
+		if (m_link_group && m_group)
+			m_group->SetHdrAll(hdr);
+	}
 
-void AdjustView::ChangeGBrightness(double brightness_g)
-{
-	Brightness2UI(brightness_g, brightness_g);
-	m_g_brightness_text->SetValue(wxString::Format("%.0f", brightness_g));
-}
-
-void AdjustView::ChangeBBrightness(double brightness_b)
-{
-	Brightness2UI(brightness_b, brightness_b);
-	m_b_brightness_text->SetValue(wxString::Format("%.0f", brightness_b));
-}
-
-void AdjustView::ChangeRHdr(double hdr_r)
-{
-	Hdr2UI(hdr_r, hdr_r);
-	m_r_hdr_text->SetValue(wxString::Format("%.2f", hdr_r));
-}
-
-void AdjustView::ChangeGHdr(double hdr_g)
-{
-	Hdr2UI(hdr_g, hdr_g);
-	m_g_hdr_text->SetValue(wxString::Format("%.2f", hdr_g));
-}
-
-void AdjustView::ChangeBHdr(double hdr_b)
-{
-	Hdr2UI(hdr_b, hdr_b);
-	m_b_hdr_text->SetValue(wxString::Format("%.2f", hdr_b));
-}
-
-void AdjustView::ChangeRSync(bool sync_r)
-{
-	m_sync_r_chk->ToggleTool(0,sync_r);
-	wxCommandEvent event;
-	OnSyncRCheck(event);
-}
-
-void AdjustView::ChangeGSync(bool sync_g)
-{
-	m_sync_g_chk->ToggleTool(0,sync_g);
-	wxCommandEvent event;
-	OnSyncGCheck(event);
-}
-
-void AdjustView::ChangeBSync(bool sync_b)
-{
-	m_sync_b_chk->ToggleTool(0,sync_b);
-	wxCommandEvent event;
-	OnSyncBCheck(event);
+	if (update)
+		FluoRefresh(false, true, false, vc);
 }
 
 void AdjustView::UpdateSync()
@@ -1603,14 +1187,14 @@ void AdjustView::UpdateSync()
 				}
 			}
 		}
-		ChangeRSync(r_v);
-		ChangeGSync(g_v);
-		ChangeBSync(b_v);
-
 		cnt = 0;
 		if (r_v) cnt++;
 		if (g_v) cnt++;
 		if (b_v) cnt++;
+
+		SetSync(0, r_v, false);
+		SetSync(1, g_v, false);
+		SetSync(2, b_v, cnt > 1 ? false : true);
 
 		if (cnt > 1)
 		{
@@ -1630,15 +1214,15 @@ void AdjustView::UpdateSync()
 
 			if (g_v)
 			{
-				ChangeGGamma(gamma);
-				ChangeGBrightness(brightness);
-				ChangeGHdr(hdr);
+				SetGamma(1, gamma, false);
+				SetBrightness(1, brightness, false);
+				SetHdr(1, hdr, b_v ? false : true);
 			}
 			if (b_v)
 			{
-				ChangeBGamma(gamma);
-				ChangeBBrightness(brightness);
-				ChangeBHdr(hdr);
+				SetGamma(2, gamma, false);
+				SetBrightness(2, brightness, false);
+				SetHdr(2, hdr, true);
 			}
 		}
 	}
@@ -1681,15 +1265,15 @@ void AdjustView::UpdateSync()
 			}
 		}
 
-		ChangeRSync(r_v);
-		ChangeGSync(g_v);
-		ChangeBSync(b_v);
-
 		cnt = 0;
 
 		if (r_v) cnt++;
 		if (g_v) cnt++;
 		if (b_v) cnt++;
+
+		SetSync(0, r_v, false);
+		SetSync(1, g_v, false);
+		SetSync(2, b_v, cnt > 1 ? false : true);
 
 		if (cnt > 1)
 		{
@@ -1709,15 +1293,15 @@ void AdjustView::UpdateSync()
 
 			if (g_v)
 			{
-				ChangeGGamma(gamma);
-				ChangeGBrightness(brightness);
-				ChangeGHdr(hdr);
+				SetGamma(1, gamma, false);
+				SetBrightness(1, brightness, false);
+				SetHdr(1, hdr, b_v ? false : true);
 			}
 			if (b_v)
 			{
-				ChangeBGamma(gamma);
-				ChangeBBrightness(brightness);
-				ChangeBHdr(hdr);
+				SetGamma(2, gamma, false);
+				SetBrightness(2, brightness, false);
+				SetHdr(2, hdr, true);
 			}
 		}
 	}
@@ -1726,490 +1310,22 @@ void AdjustView::UpdateSync()
 
 void AdjustView::OnRReset(wxCommandEvent &event)
 {
-	//reset gamma
-	double dft_value = glbin_outadj_def.m_gamma_r;
-
-	m_r_gamma_sldr->SetValue(std::round(dft_value*100.0));
-	wxString str = wxString::Format("%.2f", dft_value);
-	m_r_gamma_text->ChangeValue(str);
-	if (m_sync_r)
-	{
-		if (m_sync_g)
-		{
-			m_g_gamma_sldr->SetValue(std::round(dft_value*100.0));
-			m_g_gamma_text->ChangeValue(str);
-		}
-		if (m_sync_b)
-		{
-			m_b_gamma_sldr->SetValue(std::round(dft_value*100.0));
-			m_b_gamma_text->ChangeValue(str);
-		}
-	}
-
-	if (m_view)
-	{
-		fluo::Color gamma = m_view->GetGammaColor();
-		GammaUI2(dft_value, gamma[0]);
-		if (m_sync_r)
-		{
-			if (m_sync_g)
-				GammaUI2(dft_value, gamma[1]);
-			if (m_sync_b)
-				GammaUI2(dft_value, gamma[2]);
-		}
-		m_view->SetGammaColor(gamma);
-	}
-
-	TreeLayer *layer = 0;
-	if (m_type == 2 && m_vd)
-		layer = (TreeLayer*)m_vd;
-	else if (m_type == 5 && m_group)
-		layer = (TreeLayer*)m_group;
-	if (layer)
-	{
-		fluo::Color gamma = layer->GetGammaColor();
-		GammaUI2(dft_value, gamma[0]);
-		if (m_sync_r)
-		{
-			if (m_sync_g)
-				GammaUI2(dft_value, gamma[1]);
-			if (m_sync_b)
-				GammaUI2(dft_value, gamma[2]);
-		}
-		layer->SetGammaColor(gamma);
-
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
-	}
-
-	//reset brightness
-	dft_value = glbin_outadj_def.m_brightness_r;
-
-	m_r_brightness_sldr->SetValue(std::round(dft_value));
-	str = wxString::Format("%d", std::round(dft_value));
-	m_r_brightness_text->ChangeValue(str);
-	if (m_sync_r)
-	{
-		if (m_sync_g)
-		{
-			m_g_brightness_sldr->SetValue(std::round(dft_value));
-			m_g_brightness_text->ChangeValue(str);
-		}
-		if (m_sync_b)
-		{
-			m_b_brightness_sldr->SetValue(std::round(dft_value));
-			m_b_brightness_text->ChangeValue(str);
-		}
-	}
-
-	if (m_view)
-	{
-		fluo::Color brightness = m_view->GetBrightness();
-		BrightnessUI2(dft_value, brightness[0]);
-		if (m_sync_r)
-		{
-			if (m_sync_g)
-				BrightnessUI2(dft_value, brightness[1]);
-			if (m_sync_b)
-				BrightnessUI2(dft_value, brightness[2]);
-		}
-		m_view->SetBrightness(brightness);
-	}
-
-	if (layer)
-	{
-		fluo::Color brightness = layer->GetBrightness();
-		BrightnessUI2(dft_value, brightness[0]);
-		if (m_sync_r)
-		{
-			if (m_sync_g)
-				BrightnessUI2(dft_value, brightness[1]);
-			if (m_sync_b)
-				BrightnessUI2(dft_value, brightness[2]);
-		}
-		layer->SetBrightness(brightness);
-
-		if (m_link_group && m_group)
-			m_group->SetBrightnessAll(brightness);
-	}
-
-	//reset hdr
-	dft_value = glbin_outadj_def.m_hdr_r;
-
-	m_r_hdr_sldr->SetValue(std::round(dft_value*100.0));
-	str = wxString::Format("%.2f", dft_value);
-	m_r_hdr_text->ChangeValue(str);
-	if (m_sync_r)
-	{
-		if (m_sync_g)
-		{
-			m_g_hdr_sldr->SetValue(std::round(dft_value*100.0));
-			m_g_hdr_text->ChangeValue(str);
-		}
-		if (m_sync_b)
-		{
-			m_b_hdr_sldr->SetValue(std::round(dft_value*100.0));
-			m_b_hdr_text->ChangeValue(str);
-		}
-	}
-
-	if (m_view)
-	{
-		fluo::Color hdr = m_view->GetHdr();
-		hdr[0] = dft_value;
-		if (m_sync_r)
-		{
-			if (m_sync_g)
-				hdr[1] = dft_value;
-			if (m_sync_b)
-				hdr[2] = dft_value;
-		}
-		m_view->SetHdr(hdr);
-	}
-
-	if (layer)
-	{
-		fluo::Color hdr = layer->GetHdr();
-		hdr[0] = dft_value;
-		if (m_sync_r)
-		{
-			if (m_sync_g)
-				hdr[1] = dft_value;
-			if (m_sync_b)
-				hdr[2] = dft_value;
-		}
-		layer->SetHdr(hdr);
-
-		if (m_link_group && m_group)
-			m_group->SetHdrAll(hdr);
-	}
-
-	FluoRefresh(false, true);
+	SetGamma(0, glbin_outadj_def.m_gamma_r, false);
+	SetBrightness(0, glbin_outadj_def.m_brightness_r, false);
+	SetHdr(0, glbin_outadj_def.m_hdr_r);
 }
 
 void AdjustView::OnGReset(wxCommandEvent &event)
 {
-	//reset gamma
-	double dft_value = glbin_outadj_def.m_gamma_g;
-
-	m_g_gamma_sldr->SetValue(std::round(dft_value*100.0));
-	wxString str = wxString::Format("%.2f", dft_value);
-	m_g_gamma_text->ChangeValue(str);
-	if (m_sync_g)
-	{
-		if (m_sync_r)
-		{
-			m_r_gamma_sldr->SetValue(std::round(dft_value*100.0));
-			m_r_gamma_text->ChangeValue(str);
-		}
-		if (m_sync_b)
-		{
-			m_b_gamma_sldr->SetValue(std::round(dft_value*100.0));
-			m_b_gamma_text->ChangeValue(str);
-		}
-	}
-
-	if (m_view)
-	{
-		fluo::Color gamma = m_view->GetGammaColor();
-		GammaUI2(dft_value, gamma[1]);
-		if (m_sync_g)
-		{
-			if (m_sync_r)
-				GammaUI2(dft_value, gamma[0]);
-			if (m_sync_b)
-				GammaUI2(dft_value, gamma[2]);
-		}
-		m_view->SetGammaColor(gamma);
-	}
-
-	TreeLayer *layer = 0;
-	if (m_type == 2 && m_vd)
-		layer = (TreeLayer*)m_vd;
-	else if (m_type == 5 && m_group)
-		layer = (TreeLayer*)m_group;
-	if (layer)
-	{
-		fluo::Color gamma = layer->GetGammaColor();
-		GammaUI2(dft_value, gamma[1]);
-		if (m_sync_g)
-		{
-			if (m_sync_r)
-				GammaUI2(dft_value, gamma[0]);
-			if (m_sync_b)
-				GammaUI2(dft_value, gamma[2]);
-		}
-		layer->SetGammaColor(gamma);
-
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
-	}
-
-	//reset brightness
-	dft_value = glbin_outadj_def.m_brightness_g;
-
-	m_g_brightness_sldr->SetValue(std::round(dft_value));
-	str = wxString::Format("%d", std::round(dft_value));
-	m_g_brightness_text->ChangeValue(str);
-	if (m_sync_g)
-	{
-		if (m_sync_r)
-		{
-			m_r_brightness_sldr->SetValue(std::round(dft_value));
-			m_r_brightness_text->ChangeValue(str);
-		}
-		if (m_sync_b)
-		{
-			m_b_brightness_sldr->SetValue(std::round(dft_value));
-			m_b_brightness_text->ChangeValue(str);
-		}
-	}
-
-	if (m_view)
-	{
-		fluo::Color brightness = m_view->GetBrightness();
-		BrightnessUI2(dft_value, brightness[1]);
-		if (m_sync_g)
-		{
-			if (m_sync_r)
-				BrightnessUI2(dft_value, brightness[0]);
-			if (m_sync_b)
-				BrightnessUI2(dft_value, brightness[2]);
-		}
-		m_view->SetBrightness(brightness);
-	}
-
-	if (layer)
-	{
-		fluo::Color brightness = layer->GetBrightness();
-		BrightnessUI2(dft_value, brightness[1]);
-		if (m_sync_g)
-		{
-			if (m_sync_r)
-				BrightnessUI2(dft_value, brightness[0]);
-			if (m_sync_b)
-				BrightnessUI2(dft_value, brightness[2]);
-		}
-		layer->SetBrightness(brightness);
-
-		if (m_link_group && m_group)
-			m_group->SetBrightnessAll(brightness);
-	}
-
-	//reset hdr
-	dft_value = glbin_outadj_def.m_hdr_g;
-
-	m_g_hdr_sldr->SetValue(std::round(dft_value*100.0));
-	str = wxString::Format("%.2f", dft_value);
-	m_g_hdr_text->ChangeValue(str);
-	if (m_sync_g)
-	{
-		if (m_sync_r)
-		{
-			m_r_hdr_sldr->SetValue(std::round(dft_value*100.0));
-			m_r_hdr_text->ChangeValue(str);
-		}
-		if (m_sync_b)
-		{
-			m_b_hdr_sldr->SetValue(std::round(dft_value*100.0));
-			m_b_hdr_text->ChangeValue(str);
-		}
-	}
-
-	if (m_view)
-	{
-		fluo::Color hdr = m_view->GetHdr();
-		hdr[1] = dft_value;
-		if (m_sync_g)
-		{
-			if (m_sync_r)
-				hdr[0] = dft_value;
-			if (m_sync_b)
-				hdr[2] = dft_value;
-		}
-		m_view->SetHdr(hdr);
-	}
-
-	if (layer)
-	{
-		fluo::Color hdr = layer->GetHdr();
-		hdr[1] = dft_value;
-		if (m_sync_g)
-		{
-			if (m_sync_r)
-				hdr[0] = dft_value;
-			if (m_sync_b)
-				hdr[2] = dft_value;
-		}
-		layer->SetHdr(hdr);
-
-		if (m_link_group && m_group)
-			m_group->SetHdrAll(hdr);
-	}
-
-	FluoRefresh(false, true);
+	SetGamma(1, glbin_outadj_def.m_gamma_g, false);
+	SetBrightness(1, glbin_outadj_def.m_brightness_g, false);
+	SetHdr(1, glbin_outadj_def.m_hdr_g);
 }
 
 void AdjustView::OnBReset(wxCommandEvent &event)
 {
-	//reset gamma
-	double dft_value = glbin_outadj_def.m_gamma_b;
-
-	m_b_gamma_sldr->SetValue(std::round(dft_value*100.0));
-	wxString str = wxString::Format("%.2f", dft_value);
-	m_b_gamma_text->ChangeValue(str);
-	if (m_sync_b)
-	{
-		if (m_sync_r)
-		{
-			m_r_gamma_sldr->SetValue(std::round(dft_value*100.0));
-			m_r_gamma_text->ChangeValue(str);
-		}
-		if (m_sync_g)
-		{
-			m_g_gamma_sldr->SetValue(std::round(dft_value*100.0));
-			m_g_gamma_text->ChangeValue(str);
-		}
-	}
-
-	if (m_view)
-	{
-		fluo::Color gamma = m_view->GetGammaColor();
-		GammaUI2(dft_value, gamma[2]);
-		if (m_sync_b)
-		{
-			if (m_sync_r)
-				GammaUI2(dft_value, gamma[0]);
-			if (m_sync_g)
-				GammaUI2(dft_value, gamma[1]);
-		}
-		m_view->SetGammaColor(gamma);
-	}
-
-	TreeLayer *layer = 0;
-	if (m_type == 2 && m_vd)
-		layer = (TreeLayer*)m_vd;
-	else if (m_type == 5 && m_group)
-		layer = (TreeLayer*)m_group;
-	if (layer)
-	{
-		fluo::Color gamma = layer->GetGammaColor();
-		GammaUI2(dft_value, gamma[2]);
-		if (m_sync_b)
-		{
-			if (m_sync_r)
-				GammaUI2(dft_value, gamma[0]);
-			if (m_sync_g)
-				GammaUI2(dft_value, gamma[1]);
-		}
-		layer->SetGammaColor(gamma);
-
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
-	}
-
-	//reset brightness
-	dft_value = glbin_outadj_def.m_brightness_b;
-
-	m_b_brightness_sldr->SetValue(std::round(dft_value));
-	str = wxString::Format("%d", std::round(dft_value));
-	m_b_brightness_text->ChangeValue(str);
-	if (m_sync_b)
-	{
-		if (m_sync_r)
-		{
-			m_r_brightness_sldr->SetValue(std::round(dft_value));
-			m_r_brightness_text->ChangeValue(str);
-		}
-		if (m_sync_g)
-		{
-			m_g_brightness_sldr->SetValue(std::round(dft_value));
-			m_g_brightness_text->ChangeValue(str);
-		}
-	}
-
-	if (m_view)
-	{
-		fluo::Color brightness = m_view->GetBrightness();
-		BrightnessUI2(dft_value, brightness[2]);
-		if (m_sync_b)
-		{
-			if (m_sync_r)
-				BrightnessUI2(dft_value, brightness[0]);
-			if (m_sync_g)
-				BrightnessUI2(dft_value, brightness[1]);
-		}
-		m_view->SetBrightness(brightness);
-	}
-
-	if (layer)
-	{
-		fluo::Color brightness = layer->GetBrightness();
-		BrightnessUI2(dft_value, brightness[2]);
-		if (m_sync_b)
-		{
-			if (m_sync_r)
-				BrightnessUI2(dft_value, brightness[0]);
-			if (m_sync_g)
-				BrightnessUI2(dft_value, brightness[1]);
-		}
-		layer->SetBrightness(brightness);
-
-		if (m_link_group && m_group)
-			m_group->SetBrightnessAll(brightness);
-	}
-
-	//reset hdr
-	dft_value = glbin_outadj_def.m_hdr_b;
-
-	m_b_hdr_sldr->SetValue(std::round(dft_value*100.0));
-	str = wxString::Format("%.2f", dft_value);
-	m_b_hdr_text->ChangeValue(str);
-	if (m_sync_b)
-	{
-		if (m_sync_r)
-		{
-			m_r_hdr_sldr->SetValue(std::round(dft_value*100.0));
-			m_r_hdr_text->ChangeValue(str);
-		}
-		if (m_sync_g)
-		{
-			m_g_hdr_sldr->SetValue(std::round(dft_value*100.0));
-			m_g_hdr_text->ChangeValue(str);
-		}
-	}
-
-	if (m_view)
-	{
-		fluo::Color hdr = m_view->GetHdr();
-		hdr[2] = dft_value;
-		if (m_sync_b)
-		{
-			if (m_sync_r)
-				hdr[0] = dft_value;
-			if (m_sync_g)
-				hdr[1] = dft_value;
-		}
-		m_view->SetHdr(hdr);
-	}
-
-	if (layer)
-	{
-		fluo::Color hdr = layer->GetHdr();
-		hdr[2] = dft_value;
-		if (m_sync_b)
-		{
-			if (m_sync_r)
-				hdr[0] = dft_value;
-			if (m_sync_g)
-				hdr[1] = dft_value;
-		}
-		layer->SetHdr(hdr);
-
-		if (m_link_group && m_group)
-			m_group->SetHdrAll(hdr);
-	}
-
-	FluoRefresh(false, true);
+	SetGamma(2, glbin_outadj_def.m_gamma_b, false);
+	SetBrightness(2, glbin_outadj_def.m_brightness_b, false);
+	SetHdr(2, glbin_outadj_def.m_hdr_b);
 }
 

@@ -2703,7 +2703,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 			img_shader->create();
 		img_shader->bind();
 	}
-	fluo::Color gamma = vd->GetGamma();
+	fluo::Color gamma = vd->GetGammaColor();
 	fluo::Color brightness = vd->GetBrightness();
 	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
 	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
@@ -2999,7 +2999,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 			img_shader->create();
 		img_shader->bind();
 	}
-	fluo::Color gamma = vd->GetGamma();
+	fluo::Color gamma = vd->GetGammaColor();
 	fluo::Color brightness = vd->GetBrightness();
 	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
 	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
@@ -3590,7 +3590,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	}
 	fluo::Color gamma, brightness, hdr;
 	VolumeData* vd = list[0];
-	gamma = vd->GetGamma();
+	gamma = vd->GetGammaColor();
 	brightness = vd->GetBrightness();
 	hdr = vd->GetHdr();
 	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);

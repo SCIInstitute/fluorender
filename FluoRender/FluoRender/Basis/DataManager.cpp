@@ -216,7 +216,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	//layer properties
 	type = 2;//volume
 	SetName(copy.GetName()+wxString::Format("_%d", m_dup_counter));
-	SetGamma(copy.GetGamma());
+	SetGammaColor(copy.GetGammaColor());
 	SetBrightness(copy.GetBrightness());
 	SetHdr(copy.GetHdr());
 	SetSyncR(copy.GetSyncR());
