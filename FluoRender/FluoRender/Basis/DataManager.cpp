@@ -71,6 +71,8 @@ VolumeData::VolumeData()
 	m_dup_counter = 0;
 	m_dup_data = 0;
 
+	m_ep = 0;
+
 	type = 2;//volume
 
 	//volume renderer and texture
