@@ -778,7 +778,7 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 //brightness
 void AdjustView::OnRBrightnessChange(wxScrollEvent & event)
 {
-	int val = m_r_brightness_sldr->GetValue() / 256.0 + 1.0;
+	double val = m_r_brightness_sldr->GetValue() / 256.0 + 1.0;
 	SetBrightness(0, val);
 }
 
@@ -787,12 +787,13 @@ void AdjustView::OnRBrightnessText(wxCommandEvent& event)
 	wxString str = m_r_brightness_text->GetValue();
 	double val;
 	str.ToDouble(&val);
+	val = val / 256.0 + 1.0;
 	SetBrightness(0, val);
 }
 
 void AdjustView::OnGBrightnessChange(wxScrollEvent & event)
 {
-	int val = m_g_brightness_sldr->GetValue() / 256.0 + 1.0;
+	double val = m_g_brightness_sldr->GetValue() / 256.0 + 1.0;
 	SetBrightness(1, val);
 }
 
@@ -801,12 +802,13 @@ void AdjustView::OnGBrightnessText(wxCommandEvent& event)
 	wxString str = m_g_brightness_text->GetValue();
 	double val;
 	str.ToDouble(&val);
+	val = val / 256.0 + 1.0;
 	SetBrightness(1, val);
 }
 
 void AdjustView::OnBBrightnessChange(wxScrollEvent & event)
 {
-	int val = m_b_brightness_sldr->GetValue() / 256.0 + 1.0;
+	double val = m_b_brightness_sldr->GetValue() / 256.0 + 1.0;
 	SetBrightness(2, val);
 }
 
@@ -815,6 +817,7 @@ void AdjustView::OnBBrightnessText(wxCommandEvent& event)
 	wxString str = m_b_brightness_text->GetValue();
 	double val;
 	str.ToDouble(&val);
+	val = val / 256.0 + 1.0;
 	SetBrightness(2, val);
 }
 
