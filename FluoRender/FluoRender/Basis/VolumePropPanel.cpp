@@ -799,7 +799,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		{
 			m_low_shading_sldr->Enable(bval);
 			m_low_shading_text->Enable(bval);
-			m_hi_shading_text->Enable(bval);
+			m_hi_shading_sldr->Enable(bval);
 			m_hi_shading_text->Enable(bval);
 			m_shade_st->Enable(bval);
 		}
@@ -921,7 +921,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		//mode
 		bval = m_vd->GetColormapMode() == 1;
 		m_colormap_chk->SetValue(bval);
-		if (m_colormap_sldr->IsEnabled() != bval)
+		if (update_all || m_colormap_sldr->IsEnabled() != bval)
 		{
 			m_colormap_sldr->Enable(bval);
 			m_colormap_low_text->Enable(bval);
@@ -1200,11 +1200,6 @@ void VolumePropPanel::EnableGamma(bool bval)
 	else if (m_vd)
 		m_vd->SetGammaEnable(bval);
 
-	m_gamma_sldr->Enable(bval);
-	m_gamma_text->Enable(bval);
-	m_gamma_st->Enable(bval);
-	m_gamma_chk->SetValue(bval);
-
 	FluoRefresh(false, true, false, { gstGamma3d });
 }
 
@@ -1222,11 +1217,6 @@ void VolumePropPanel::EnableSaturation(bool bval)
 	else if (m_vd)
 		m_vd->SetSaturationEnable(bval);
 
-	m_saturation_sldr->Enable(bval);
-	m_saturation_text->Enable(bval);
-	m_saturation_st->Enable(bval);
-	m_saturation_chk->SetValue(bval);
-
 	FluoRefresh(false, true, false, { gstSaturation });
 }
 
@@ -1236,11 +1226,6 @@ void VolumePropPanel::EnableLuminance(bool bval)
 		m_group->SetLuminanceEnable(bval);
 	else if (m_vd)
 		m_vd->SetLuminanceEnable(bval);
-
-	m_luminance_sldr->Enable(bval);
-	m_luminance_text->Enable(bval);
-	m_luminance_st->Enable(bval);
-	m_luminance_chk->SetValue(bval);
 
 	FluoRefresh(false, true, false, { gstColor });
 }
@@ -1253,11 +1238,6 @@ void VolumePropPanel::EnableAlpha(bool bval)
 	else if (m_vd)
 		m_vd->SetAlphaEnable(bval);
 
-	m_alpha_sldr->Enable(bval);
-	m_alpha_text->Enable(bval);
-	m_alpha_st->Enable(bval);
-	m_alpha_chk->SetValue(bval);
-
 	FluoRefresh(false, true, false, { gstAlpha });
 }
 
@@ -1267,13 +1247,6 @@ void VolumePropPanel::EnableShading(bool bval)
 		m_group->SetShadingEnable(bval);
 	else if (m_vd)
 		m_vd->SetShadingEnable(bval);
-
-	m_low_shading_sldr->Enable(bval);
-	m_low_shading_text->Enable(bval);
-	m_hi_shading_sldr->Enable(bval);
-	m_hi_shading_text->Enable(bval);
-	m_shade_st->Enable(bval);
-	m_shade_chk->SetValue(bval);
 
 	//if (m_vd->GetMode() == 1)
 	//m_thresh_sldr->Enable();
@@ -1289,11 +1262,6 @@ void VolumePropPanel::EnableBoundary(bool bval)
 	else if (m_vd)
 		m_vd->SetBoundaryEnable(bval);
 
-	m_boundary_sldr->Enable(bval);
-	m_boundary_text->Enable(bval);
-	m_boundary_st->Enable(bval);
-	m_boundary_chk->SetValue(bval);
-
 	FluoRefresh(false, true, false, { gstBoundary });
 }
 
@@ -1303,13 +1271,6 @@ void VolumePropPanel::EnableThresh(bool bval)
 		m_group->SetThreshEnable(bval);
 	else if (m_vd)
 		m_vd->SetThreshEnable(bval);
-
-	m_thresh_sldr->Enable(bval);
-	m_left_thresh_text->Enable(bval);
-	m_right_thresh_text->Enable(bval);
-	m_thresh_st->Enable(bval);
-	m_thresh_link_tb->Enable(bval);
-	m_thresh_chk->SetValue(bval);
 
 	FluoRefresh(false, true, false, { gstThreshold });
 }
@@ -1323,10 +1284,6 @@ void VolumePropPanel::EnableShadow(bool bval)
 	else if (m_vd)
 		m_vd->SetShadowEnable(bval);
 
-	m_shadow_sldr->Enable(bval);
-	m_shadow_text->Enable(bval);
-	m_shadow_st->Enable(bval);
-	m_shadow_chk->SetValue(bval);
 	//if (m_vd->GetMode() == 1)
 	//{
 	//	m_thresh_sldr->Enable();
@@ -1342,11 +1299,6 @@ void VolumePropPanel::EnableSample(bool bval)
 		m_group->SetSampleRateEnable(bval);
 	else if (m_vd)
 		m_vd->SetSampleRateEnable(bval);
-
-	m_sample_sldr->Enable(bval);
-	m_sample_text->Enable(bval);
-	m_sample_st->Enable(bval);
-	m_sample_chk->SetValue(bval);
 
 	FluoRefresh(false, true, false, { gstSampleRate });
 }
@@ -1370,13 +1322,6 @@ void VolumePropPanel::EnableColormap(bool bval)
 		if (adjust_view)
 			adjust_view->UpdateSync();
 	}
-
-	m_colormap_sldr->Enable(bval);
-	m_colormap_low_text->Enable(bval);
-	m_colormap_hi_text->Enable(bval);
-	m_colormap_link_tb->Enable(bval);
-	m_colormap_st->Enable(bval);
-	m_colormap_chk->SetValue(bval);
 
 	FluoRefresh(false, true, false, { gstColormap });
 }
