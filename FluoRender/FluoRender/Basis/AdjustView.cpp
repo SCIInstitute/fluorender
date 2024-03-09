@@ -419,19 +419,23 @@ void AdjustView::FluoUpdate(const fluo::ValueCollection& vc)
 	if (FOUND_VALUE(gstNull))
 		return;
 	bool update_all = vc.empty();
+	bool bSyncR = FOUND_VALUE(gstSyncR);
+	bool bSyncG = FOUND_VALUE(gstSyncG);
+	bool bSyncB = FOUND_VALUE(gstSyncB);
+	bool bGammaR = FOUND_VALUE(gstGammaR);
+	bool bGammaG = FOUND_VALUE(gstGammaG);
+	bool bGammaB = FOUND_VALUE(gstGammaB);
+	bool bBrightnessR = FOUND_VALUE(gstBrightnessR);
+	bool bBrightnessG = FOUND_VALUE(gstBrightnessG);
+	bool bBrightnessB = FOUND_VALUE(gstBrightnessB);
+	bool bHdrR = FOUND_VALUE(gstEqualizeR);
+	bool bHdrG = FOUND_VALUE(gstEqualizeG);
+	bool bHdrB = FOUND_VALUE(gstEqualizeB);
 	if (!(update_all ||
-		FOUND_VALUE(gstSyncR) ||
-		FOUND_VALUE(gstSyncG) ||
-		FOUND_VALUE(gstSyncB) ||
-		FOUND_VALUE(gstGammaR) ||
-		FOUND_VALUE(gstGammaG) ||
-		FOUND_VALUE(gstGammaB) ||
-		FOUND_VALUE(gstBrightnessR) ||
-		FOUND_VALUE(gstBrightnessG) ||
-		FOUND_VALUE(gstBrightnessB) ||
-		FOUND_VALUE(gstEqualizeR) ||
-		FOUND_VALUE(gstEqualizeG) ||
-		FOUND_VALUE(gstEqualizeB)))
+		bSyncR || bSyncG || bSyncB ||
+		bGammaR || bGammaG || bGammaB ||
+		bBrightnessR || bBrightnessG || bBrightnessB ||
+		bHdrR || bHdrG || bHdrB))
 		return;
 
 	fluo::Color gamma;
@@ -472,67 +476,67 @@ void AdjustView::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	//red
-	if (update_all || FOUND_VALUE(gstSyncR))
+	if (update_all || bSyncR)
 	{
 		m_sync_r_chk->ToggleTool(0, m_sync[0]);
 		m_sync_r_chk->SetToolNormalBitmap(0,
 			m_sync[0] ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
 	}
-	if (update_all || FOUND_VALUE(gstGammaR) || FOUND_VALUE(gstSyncR))
+	if (update_all || bGammaR || bSyncR)
 	{
 		m_r_gamma_sldr->ChangeValue(std::round((1.0 / gamma.r()) * 100.0));
 		m_r_gamma_text->ChangeValue(wxString::Format("%.2f", 1.0 / gamma.r()));
 	}
-	if (update_all || FOUND_VALUE(gstBrightnessR) || FOUND_VALUE(gstSyncR))
+	if (update_all || bBrightnessR || bSyncR)
 	{
 		m_r_brightness_sldr->ChangeValue(std::round((brightness.r() - 1.0) * 256.0));
 		m_r_brightness_text->ChangeValue(wxString::Format("%d", int(std::round((brightness.r()-1.0)*256.0))));
 	}
-	if (update_all || FOUND_VALUE(gstEqualizeR) || FOUND_VALUE(gstSyncR))
+	if (update_all || bHdrR || bSyncR)
 	{
 		m_r_hdr_sldr->ChangeValue(std::round(hdr.r() * 100.0));
 		m_r_hdr_text->ChangeValue(wxString::Format("%.2f", hdr.r()));
 	}
 	//green
-	if (update_all || FOUND_VALUE(gstSyncG))
+	if (update_all || bSyncG)
 	{
 		m_sync_g_chk->ToggleTool(0, m_sync[1]);
 		m_sync_g_chk->SetToolNormalBitmap(0,
 			m_sync[1] ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
 	}
-	if (update_all || FOUND_VALUE(gstGammaG) || FOUND_VALUE(gstSyncG))
+	if (update_all || bGammaG || bSyncG)
 	{
 		m_g_gamma_sldr->ChangeValue(std::round((1.0 / gamma.g()) * 100.0));
 		m_g_gamma_text->ChangeValue(wxString::Format("%.2f", 1.0 / gamma.g()));
 	}
-	if (update_all || FOUND_VALUE(gstBrightnessG) || FOUND_VALUE(gstSyncG))
+	if (update_all || bBrightnessG || bSyncG)
 	{
 		m_g_brightness_sldr->ChangeValue(std::round((brightness.g() - 1.0) * 256.0));
 		m_g_brightness_text->ChangeValue(wxString::Format("%d", int(std::round((brightness.g() - 1.0) * 256.0))));
 	}
-	if (update_all || FOUND_VALUE(gstEqualizeG) || FOUND_VALUE(gstSyncG))
+	if (update_all || bHdrG || bSyncG)
 	{
 		m_g_hdr_sldr->ChangeValue(std::round(hdr.g() * 100.0));
 		m_g_hdr_text->ChangeValue(wxString::Format("%.2f", hdr.g()));
 	}
 	//blue
-	if (update_all || FOUND_VALUE(gstSyncB))
+	if (update_all || bSyncB)
 	{
 		m_sync_b_chk->ToggleTool(0, m_sync[2]);
 		m_sync_b_chk->SetToolNormalBitmap(0,
 			m_sync[2] ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
 	}
-	if (update_all || FOUND_VALUE(gstGammaB) || FOUND_VALUE(gstSyncB))
+	if (update_all || bGammaB || bSyncB)
 	{
 		m_b_gamma_sldr->ChangeValue(std::round((1.0 / gamma.b()) * 100.0));
 		m_b_gamma_text->ChangeValue(wxString::Format("%.2f", 1.0 / gamma.b()));
 	}
-	if (update_all || FOUND_VALUE(gstBrightnessB) || FOUND_VALUE(gstSyncB))
+	if (update_all || bBrightnessB || bSyncB)
 	{
 		m_b_brightness_sldr->ChangeValue(std::round((brightness.b() - 1.0) * 256.0));
 		m_b_brightness_text->ChangeValue(wxString::Format("%d", int(std::round((brightness.b() - 1.0) * 256.0))));
 	}
-	if (update_all || FOUND_VALUE(gstEqualizeB) || FOUND_VALUE(gstSyncB))
+	if (update_all || bHdrB || bSyncB)
 	{
 		m_b_hdr_sldr->ChangeValue(std::round(hdr.b() * 100.0));
 		m_b_hdr_text->ChangeValue(wxString::Format("%.2f", hdr.b()));

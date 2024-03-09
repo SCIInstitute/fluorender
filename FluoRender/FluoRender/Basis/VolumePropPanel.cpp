@@ -651,7 +651,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_gamma_sldr->ChangeValue(std::round(dval * 100.0));
 		m_gamma_text->ChangeValue(str);
 		m_gamma_chk->SetValue(bval);
-		if (m_gamma_sldr->IsEnabled() != bval)
+		if (update_all || m_gamma_sldr->IsEnabled() != bval)
 		{
 			m_gamma_sldr->Enable(bval);
 			m_gamma_text->Enable(bval);
@@ -669,7 +669,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_boundary_sldr->ChangeValue(std::round(dval * 2000.0));
 		m_boundary_text->ChangeValue(str);
 		m_boundary_chk->SetValue(bval);
-		if (m_boundary_sldr->IsEnabled() != bval)
+		if (update_all || m_boundary_sldr->IsEnabled() != bval)
 		{
 			m_boundary_sldr->Enable(bval);
 			m_boundary_text->Enable(bval);
@@ -689,7 +689,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_saturation_sldr->ChangeValue(ival);
 		m_saturation_text->ChangeValue(str);
 		m_saturation_chk->SetValue(bval);
-		if (m_saturation_sldr->IsEnabled() != bval)
+		if (update_all || m_saturation_sldr->IsEnabled() != bval)
 		{
 			m_saturation_sldr->Enable(bval);
 			m_saturation_text->Enable(bval);
@@ -728,7 +728,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		}
 		bval = m_vd->GetThreshEnable();
 		m_thresh_chk->SetValue(bval);
-		if (m_thresh_sldr->IsEnabled() != bval)
+		if (update_all || m_thresh_sldr->IsEnabled() != bval)
 		{
 			m_thresh_sldr->Enable(bval);
 			m_left_thresh_text->Enable(bval);
@@ -750,7 +750,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_luminance_sldr->ChangeValue(ival);
 		m_luminance_text->ChangeValue(str);
 		m_luminance_chk->SetValue(bval);
-		if (m_luminance_sldr->IsEnabled() != bval)
+		if (update_all || m_luminance_sldr->IsEnabled() != bval)
 		{
 			m_luminance_sldr->Enable(bval);
 			m_luminance_text->Enable(bval);
@@ -770,7 +770,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_alpha_text->ChangeValue(str);
 		bval = m_vd->GetAlphaEnable();
 		m_alpha_chk->SetValue(bval);
-		if (m_luminance_sldr->IsEnabled() != bval)
+		if (update_all || m_luminance_sldr->IsEnabled() != bval)
 		{
 			m_luminance_sldr->Enable(bval);
 			m_alpha_text->Enable(bval);
@@ -795,7 +795,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_hi_shading_text->ChangeValue(str);
 		bval = m_vd->GetShadingEnable();
 		m_shade_chk->SetValue(bval);
-		if (m_low_shading_sldr->IsEnabled() != bval)
+		if (update_all || m_low_shading_sldr->IsEnabled() != bval)
 		{
 			m_low_shading_sldr->Enable(bval);
 			m_low_shading_text->Enable(bval);
@@ -816,7 +816,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_shadow_sldr->ChangeValue(std::round(dval * 100.0));
 		m_shadow_text->ChangeValue(str);
 		m_shadow_chk->SetValue(bval);
-		if (m_shadow_sldr->IsEnabled() != bval)
+		if (update_all || m_shadow_sldr->IsEnabled() != bval)
 		{
 			m_shadow_sldr->Enable(bval);
 			m_shadow_text->Enable(bval);
@@ -835,7 +835,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_sample_sldr->ChangeValue(dval * 10.0);
 		m_sample_text->ChangeValue(str);
 		m_sample_chk->SetValue(bval);
-		if (m_sample_sldr->IsEnabled() != bval)
+		if (update_all || m_sample_sldr->IsEnabled() != bval)
 		{
 			m_sample_sldr->Enable(bval);
 			m_sample_text->Enable(bval);

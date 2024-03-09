@@ -494,9 +494,7 @@ public:
 	//clip size
 	void GetClipValues(int &ox, int &oy, int &oz,
 		int &nx, int &ny, int &nz);
-	//clip distance
-	void SetClipDistance(int distx, int disty, int distz);
-	void GetClipDistance(int &distx, int &disty, int &distz);
+	void SetClipValue(int i, int val);
 
 	//randomize color
 	void RandomizeColor();
@@ -673,11 +671,6 @@ private:
 	//reader
 	BaseReader *m_reader;
 
-	//clip distance
-	int m_clip_dist_x;
-	int m_clip_dist_y;
-	int m_clip_dist_z;
-
 	//compression
 	bool m_compression;
 	//resize
@@ -763,6 +756,7 @@ public:
 	void SetMaterial(fluo::Color& amb, fluo::Color& diff, fluo::Color& spec,
 		double shine = 30.0, double alpha = 1.0);
 	void SetColor(fluo::Color &color, int type);
+	fluo::Color GetColor();
 	void SetFloat(double &value, int type);
 	void GetMaterial(fluo::Color& amb, fluo::Color& diff, fluo::Color& spec,
 		double& shine, double& alpha);

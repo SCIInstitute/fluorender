@@ -28,8 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _CLIPPINGVIEW_H_
 #define _CLIPPINGVIEW_H_
 
-#include <wx/wx.h>
-#include <wx/panel.h>
+#include <PropPanel.h>
 #include <wx/spinbutt.h>
 
 //plane modes
@@ -51,7 +50,7 @@ class MeshData;
 class DataManager;
 class wxDoubleSlider;
 class wxSingleSlider;
-class ClippingView: public wxPanel
+class ClippingView: public PropPanel
 {
 	enum
 	{
@@ -104,7 +103,10 @@ public:
 		const wxString& name="ClippingView");
 	~ClippingView();
 
-	void GetSettings(VRenderGLView* view);
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+
+	//set view
+	void SetRenderView(VRenderGLView* view);
 	void SetVolumeData(VolumeData* vd);
 	void SetMeshData(MeshData* md);
 	int GetSelType();
@@ -112,7 +114,7 @@ public:
 	MeshData* GetMeshData();
 
 	bool GetChannLink()
-	{ return m_toolbar->GetToolState(ID_LinkChannelsBtn); }
+	{ return m_chann_link; }
 	void SetChannLink(bool chann);
 	bool GetHoldPlanes()
 	{ return m_hold_planes; }
@@ -128,6 +130,8 @@ public:
 	void SetYLink(bool val);
 	void SetZLink(bool val);
 
+	void SetClipValue(int i, int val, bool link = false);
+
 	void SetClippingPlaneRotations(double rotx, double roty, double rotz);
 
 	//move linked clipping planes
@@ -136,21 +140,15 @@ public:
 	void ClearUndo();
 
 private:
-	VRenderFrame* m_frame;
 	VRenderGLView* m_view;
 	int m_sel_type;		//curent selection type
 	VolumeData* m_vd;	//current volume data
 	MeshData* m_md;		//current mesh data
+	bool m_chann_link;
 	bool m_draw_clip;
 	bool m_hold_planes;
 	PLANE_MODES m_plane_mode;
-
-	//int m_x_sldr_dist;
-	//int m_y_sldr_dist;
-	//int m_z_sldr_dist;
-	//bool m_link_x;
-	//bool m_link_y;
-	//bool m_link_z;
+	bool m_enable_all;
 
 	//1st line
 	wxToolBar *m_toolbar;
@@ -216,15 +214,11 @@ private:
 	void OnPlaneModesBtn(wxCommandEvent &event);
 	void OnClipResetBtn(wxCommandEvent &event);
 
-	void EnableAll();
-	void DisableAll();
+	void EnableAll(bool val);
 
 	void OnX1ClipChange(wxScrollEvent &event);
-	//void OnX2ClipChange(wxScrollEvent &event);
 	void OnY1ClipChange(wxScrollEvent &event);
-	//void OnY2ClipChange(wxScrollEvent &event);
 	void OnZ1ClipChange(wxScrollEvent &event);
-	//void OnZ2ClipChange(wxScrollEvent &event);
 	void OnX1ClipEdit(wxCommandEvent &event);
 	void OnX2ClipEdit(wxCommandEvent &event);
 	void OnY1ClipEdit(wxCommandEvent &event);

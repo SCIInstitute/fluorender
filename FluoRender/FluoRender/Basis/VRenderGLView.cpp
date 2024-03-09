@@ -4797,7 +4797,7 @@ void VRenderGLView::SetParams(double t)
 	if (m_frame && clip_view)
 	{
 		clip_view->SetVolumeData(m_frame->GetCurSelVol());
-		clip_view->GetSettings(this);
+		clip_view->SetRenderView(this);
 	}
 	if (m_frame)
 	{
@@ -9128,6 +9128,17 @@ void VRenderGLView::GetClippingPlaneRotations(double &rotx, double &roty, double
 	rotx = m_rotx_cl == 0.0 ? m_rotx_cl : -m_rotx_cl;
 	roty = m_roty_cl;
 	rotz = m_rotz_cl;
+}
+
+void VRenderGLView::SetClipValue(int i, int val)
+{
+	for (int i = 0; i < GetAllVolumeNum(); ++i)
+	{
+		VolumeData* vd = GetAllVolumeData(i);
+		if (!vd)
+			continue;
+		vd->SetClipValue(i, val);
+	}
 }
 
 //interpolation

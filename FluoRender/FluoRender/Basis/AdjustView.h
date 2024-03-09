@@ -77,7 +77,6 @@ public:
 	void ClearUndo();
 
 private:
-	VRenderFrame* m_frame;
 	int m_type;
 	VRenderGLView *m_view;
 	VolumeData* m_vd;

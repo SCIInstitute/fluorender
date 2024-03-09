@@ -169,11 +169,6 @@ VolumeData::VolumeData()
 	m_2d_weight2 = 0;
 	m_2d_dmap = 0;
 
-	//clip distance
-	m_clip_dist_x = 0;
-	m_clip_dist_y = 0;
-	m_clip_dist_z = 0;
-
 	//compression
 	m_compression = false;
 	//resize
@@ -301,11 +296,6 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_2d_weight1 = 0;
 	m_2d_weight2 = 0;
 	m_2d_dmap = 0;
-
-	//clip distance
-	m_clip_dist_x = 0;
-	m_clip_dist_y = 0;
-	m_clip_dist_z = 0;
 
 	//compression
 	m_compression = false;
@@ -2638,19 +2628,55 @@ void VolumeData::GetClipValues(int &ox, int &oy, int &oz,
 	nz = std::round(resz*pz2->d()) - oz;
 }
 
-//clip distance
-void VolumeData::SetClipDistance(int distx, int disty, int distz)
+void VolumeData::SetClipValue(int i, int val)
 {
-	m_clip_dist_x = distx;
-	m_clip_dist_y = disty;
-	m_clip_dist_z = distz;
-}
+	if (i < 0 || i > 5)
+		return;
+	vector<fluo::Plane*>* planes = 0;
+	if (GetVR())
+		planes = GetVR()->get_planes();
+	if (!planes)
+		return;
+	if (planes->size() != 6)
+		return;
 
-void VolumeData::GetClipDistance(int &distx, int &disty, int &distz)
-{
-	distx = m_clip_dist_x;
-	disty = m_clip_dist_y;
-	distz = m_clip_dist_z;
+	double clip = 0;
+	fluo::Point p;
+	fluo::Vector v;
+	switch (i)
+	{
+	case 0://x1
+		clip = (double)val / m_res_x;
+		p = fluo::Point(clip, 0, 0);
+		v = fluo::Vector(1, 0, 0);
+		break;
+	case 1://x2
+		clip = (double)val / m_res_x;
+		p = fluo::Point(clip, 0, 0);
+		v = fluo::Vector(-1, 0, 0);
+		break;
+	case 2://y1
+		clip = (double)val / m_res_y;
+		p = fluo::Point(0, clip, 0);
+		v = fluo::Vector(0, 1, 0);
+		break;
+	case 3://y2
+		clip = (double)val / m_res_y;
+		p = fluo::Point(0, clip, 0);
+		v = fluo::Vector(0, -1, 0);
+		break;
+	case 4://z1
+		clip = (double)val / m_res_z;
+		p = fluo::Point(0, 0, clip);
+		v = fluo::Vector(0, 0, 1);
+		break;
+	case 5://z2
+		clip = (double)val / m_res_z;
+		p = fluo::Point(0, 0, clip);
+		v = fluo::Vector(0, 0, -1);
+		break;
+	}
+	(*planes)[i]->ChangePlane(p, v);
 }
 
 //randomize color
@@ -3229,6 +3255,11 @@ void MeshData::SetColor(fluo::Color &color, int type)
 		}
 		break;
 	}
+}
+
+fluo::Color MeshData::GetColor()
+{
+	return m_mat_amb;
 }
 
 void MeshData::SetFloat(double &value, int type)

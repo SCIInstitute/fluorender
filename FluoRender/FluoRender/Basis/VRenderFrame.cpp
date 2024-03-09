@@ -2373,7 +2373,7 @@ void VRenderFrame::OnSelection(int type,
 			}
 			break;
 		}
-		m_clip_view->GetSettings(view);
+		m_clip_view->SetRenderView(view);
 	}
 
 	m_cur_sel_type = type;
@@ -2650,6 +2650,8 @@ void VRenderFrame::UpdateProps(const fluo::ValueCollection& vc, PropPanel* excl)
 			i->FluoUpdate(vc);
 	if (excl != m_adjust_view)
 		m_adjust_view->FluoUpdate(vc);
+	if (excl != m_clip_view)
+		m_clip_view->FluoUpdate(vc);
 }
 
 VolumePropPanel* VRenderFrame::FindVolumeProps(const wxString& name)
