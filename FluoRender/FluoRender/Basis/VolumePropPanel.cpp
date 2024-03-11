@@ -1128,7 +1128,7 @@ void VolumePropPanel::ApplyMl()
 	else if (m_vd)
 		m_vd->ApplyMlVolProp();
 	//GetSettings();
-	FluoRefresh(false, true);
+	FluoRefresh(false, true, 0);
 }
 
 void VolumePropPanel::SaveMl()
@@ -1200,7 +1200,7 @@ void VolumePropPanel::EnableGamma(bool bval)
 	else if (m_vd)
 		m_vd->SetGammaEnable(bval);
 
-	FluoRefresh(false, true, false, { gstGamma3d });
+	FluoRefresh(false, true, 0, { gstGamma3d });
 }
 
 void VolumePropPanel::EnableSaturation(bool bval)
@@ -1217,7 +1217,7 @@ void VolumePropPanel::EnableSaturation(bool bval)
 	else if (m_vd)
 		m_vd->SetSaturationEnable(bval);
 
-	FluoRefresh(false, true, false, { gstSaturation });
+	FluoRefresh(false, true, 0, { gstSaturation });
 }
 
 void VolumePropPanel::EnableLuminance(bool bval)
@@ -1227,7 +1227,7 @@ void VolumePropPanel::EnableLuminance(bool bval)
 	else if (m_vd)
 		m_vd->SetLuminanceEnable(bval);
 
-	FluoRefresh(false, true, false, { gstColor });
+	FluoRefresh(false, true, 0, { gstColor });
 }
 
 void VolumePropPanel::EnableAlpha(bool bval)
@@ -1238,7 +1238,7 @@ void VolumePropPanel::EnableAlpha(bool bval)
 	else if (m_vd)
 		m_vd->SetAlphaEnable(bval);
 
-	FluoRefresh(false, true, false, { gstAlpha });
+	FluoRefresh(false, true, 0, { gstAlpha });
 }
 
 void VolumePropPanel::EnableShading(bool bval)
@@ -1252,7 +1252,7 @@ void VolumePropPanel::EnableShading(bool bval)
 	//m_thresh_sldr->Enable();
 	//m_left_thresh_text->Enable();
 	//m_right_thresh_text->Enable();
-	FluoRefresh(false, true, false, { gstShading });
+	FluoRefresh(false, true, 0, { gstShading });
 }
 
 void VolumePropPanel::EnableBoundary(bool bval)
@@ -1262,7 +1262,7 @@ void VolumePropPanel::EnableBoundary(bool bval)
 	else if (m_vd)
 		m_vd->SetBoundaryEnable(bval);
 
-	FluoRefresh(false, true, false, { gstBoundary });
+	FluoRefresh(false, true, 0, { gstBoundary });
 }
 
 void VolumePropPanel::EnableThresh(bool bval)
@@ -1272,7 +1272,7 @@ void VolumePropPanel::EnableThresh(bool bval)
 	else if (m_vd)
 		m_vd->SetThreshEnable(bval);
 
-	FluoRefresh(false, true, false, { gstThreshold });
+	FluoRefresh(false, true, 0, { gstThreshold });
 }
 
 void VolumePropPanel::EnableShadow(bool bval)
@@ -1290,7 +1290,7 @@ void VolumePropPanel::EnableShadow(bool bval)
 	//	m_left_thresh_text->Enable();
 	//	m_right_thresh_text->Enable();
 	//}
-	FluoRefresh(false, true, false, { gstShadow });
+	FluoRefresh(false, true, 0, { gstShadow });
 }
 
 void VolumePropPanel::EnableSample(bool bval)
@@ -1300,7 +1300,7 @@ void VolumePropPanel::EnableSample(bool bval)
 	else if (m_vd)
 		m_vd->SetSampleRateEnable(bval);
 
-	FluoRefresh(false, true, false, { gstSampleRate });
+	FluoRefresh(false, true, 0, { gstSampleRate });
 }
 
 void VolumePropPanel::EnableColormap(bool bval)
@@ -1323,7 +1323,7 @@ void VolumePropPanel::EnableColormap(bool bval)
 			adjust_view->UpdateSync();
 	}
 
-	FluoRefresh(false, true, false, { gstColormap });
+	FluoRefresh(false, true, 0, { gstColormap });
 }
 
 void VolumePropPanel::EnableMip(bool bval)
@@ -1345,7 +1345,7 @@ void VolumePropPanel::EnableMip(bool bval)
 	}
 	//Layout();
 
-	FluoRefresh(false, true, false, { gstMipMode });
+	FluoRefresh(false, true, 0, { gstMipMode });
 	//DisableAlpha();
 	//m_boundary_sldr->Disable();
 	//m_boundary_text->Disable();
@@ -1365,7 +1365,7 @@ void VolumePropPanel::EnableTransparent(bool bval)
 	else if (m_vd)
 		m_vd->SetTransparent(bval);
 
-	FluoRefresh(false, true, true, { gstTransparent });
+	FluoRefresh(false, true, 0, { gstTransparent });
 }
 
 //set values
@@ -1375,7 +1375,7 @@ void VolumePropPanel::SetGamma(double val)
 		return;
 
 	m_vd->SetGamma(val);
-	FluoRefresh(false, true, true, { gstNull });
+	FluoRefresh(false, true, 1, { gstNull });
 }
 
 void VolumePropPanel::SetSaturation(double val)
@@ -1384,7 +1384,7 @@ void VolumePropPanel::SetSaturation(double val)
 		return;
 
 	m_vd->SetSaturation(val);
-	FluoRefresh(false, true, true, { gstNull });
+	FluoRefresh(false, true, 1, { gstNull });
 }
 
 void VolumePropPanel::SetLuminance(double val)
@@ -1409,7 +1409,7 @@ void VolumePropPanel::SetLuminance(double val)
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 	m_color2_btn->SetColour(wxc);
 
-	FluoRefresh(false, true, true, { gstNull });
+	FluoRefresh(false, true, 1, { gstNull });
 }
 
 void VolumePropPanel::SetAlpha(double val)
@@ -1418,7 +1418,7 @@ void VolumePropPanel::SetAlpha(double val)
 		return;
 
 	m_vd->SetAlpha(val);
-	FluoRefresh(false, true, true, { gstNull });
+	FluoRefresh(false, true, 1, { gstNull });
 }
 
 void VolumePropPanel::SetLowShading(double val)
@@ -1427,7 +1427,7 @@ void VolumePropPanel::SetLowShading(double val)
 		return;
 
 	m_vd->SetLowShading(val);
-	FluoRefresh(false, true, true, { gstNull });
+	FluoRefresh(false, true, 1, { gstNull });
 }
 
 void VolumePropPanel::SetHiShading(double val)
@@ -1436,7 +1436,7 @@ void VolumePropPanel::SetHiShading(double val)
 		return;
 
 	m_vd->SetHiShading(val);
-	FluoRefresh(false, true, true, { gstNull });
+	FluoRefresh(false, true, 1, { gstNull });
 }
 
 void VolumePropPanel::SetBoundary(double val)
@@ -1445,7 +1445,7 @@ void VolumePropPanel::SetBoundary(double val)
 		return;
 
 	m_vd->SetBoundary(val);
-	FluoRefresh(false, true, true, { gstNull });
+	FluoRefresh(false, true, 1, { gstNull });
 }
 
 void VolumePropPanel::SetThresh(double val1, double val2)
@@ -1455,7 +1455,7 @@ void VolumePropPanel::SetThresh(double val1, double val2)
 
 	m_vd->SetLeftThresh(val1);
 	m_vd->SetRightThresh(val2);
-	FluoRefresh(false, true, true, { gstNull });
+	FluoRefresh(false, true, 1, { gstNull });
 }
 
 void VolumePropPanel::SetShadowInt(double val)
@@ -1464,7 +1464,7 @@ void VolumePropPanel::SetShadowInt(double val)
 		return;
 
 	m_vd->SetShadowIntensity(val);
-	FluoRefresh(false, true, true, { gstNull });
+	FluoRefresh(false, true, 1, { gstNull });
 }
 
 void VolumePropPanel::SetSampleRate(double val)
@@ -1473,7 +1473,7 @@ void VolumePropPanel::SetSampleRate(double val)
 		return;
 
 	m_vd->SetSampleRate(val);
-	FluoRefresh(false, true, true, { gstNull });
+	FluoRefresh(false, true, 1, { gstNull });
 }
 
 void VolumePropPanel::SetColormapVal(double val1, double val2)
@@ -1482,7 +1482,7 @@ void VolumePropPanel::SetColormapVal(double val1, double val2)
 		return;
 
 	m_vd->SetColormapValues(val1, val2);
-	FluoRefresh(false, true, true, { gstNull });
+	FluoRefresh(false, true, 1, { gstNull });
 }
 
 
@@ -1493,7 +1493,7 @@ void VolumePropPanel::SyncGamma(double val)
 		return;
 
 	m_group->SetGamma(val);
-	FluoRefresh(false, true, true, { gstGamma3d });
+	FluoRefresh(false, true, 1, { gstGamma3d });
 }
 
 void VolumePropPanel::SyncSaturation(double val)
@@ -1502,7 +1502,7 @@ void VolumePropPanel::SyncSaturation(double val)
 		return;
 
 	m_group->SetSaturation(val);
-	FluoRefresh(false, true, true, { gstSaturation });
+	FluoRefresh(false, true, 1, { gstSaturation });
 }
 
 void VolumePropPanel::SyncLuminance(double val)
@@ -1511,7 +1511,7 @@ void VolumePropPanel::SyncLuminance(double val)
 		return;
 
 	m_group->SetLuminance(val);
-	FluoRefresh(false, true, true, { gstColor });
+	FluoRefresh(false, true, 1, { gstColor });
 }
 
 void VolumePropPanel::SyncAlpha(double val)
@@ -1520,7 +1520,7 @@ void VolumePropPanel::SyncAlpha(double val)
 		return;
 
 	m_group->SetAlpha(val);
-	FluoRefresh(false, true, true, { gstAlpha });
+	FluoRefresh(false, true, 1, { gstAlpha });
 }
 
 void VolumePropPanel::SyncLowShading(double val)
@@ -1529,7 +1529,7 @@ void VolumePropPanel::SyncLowShading(double val)
 		return;
 
 	m_group->SetLowShading(val);
-	FluoRefresh(false, true, true, { gstShading });
+	FluoRefresh(false, true, 1, { gstShading });
 }
 
 void VolumePropPanel::SyncHiShading(double val)
@@ -1538,7 +1538,7 @@ void VolumePropPanel::SyncHiShading(double val)
 		return;
 
 	m_group->SetHiShading(val);
-	FluoRefresh(false, true, true, { gstShading });
+	FluoRefresh(false, true, 1, { gstShading });
 }
 
 void VolumePropPanel::SyncBoundary(double val)
@@ -1547,7 +1547,7 @@ void VolumePropPanel::SyncBoundary(double val)
 		return;
 
 	m_group->SetBoundary(val);
-	FluoRefresh(false, true, true, { gstBoundary });
+	FluoRefresh(false, true, 1, { gstBoundary });
 }
 
 void VolumePropPanel::SyncThresh(double val1, double val2)
@@ -1557,7 +1557,7 @@ void VolumePropPanel::SyncThresh(double val1, double val2)
 
 	m_group->SetLeftThresh(val1);
 	m_group->SetRightThresh(val2);
-	FluoRefresh(false, true, true, { gstThreshold });
+	FluoRefresh(false, true, 1, { gstThreshold });
 }
 
 void VolumePropPanel::SyncShadowInt(double val)
@@ -1566,7 +1566,7 @@ void VolumePropPanel::SyncShadowInt(double val)
 		return;
 
 	m_group->SetShadowIntensity(val);
-	FluoRefresh(false, true, true, { gstShadow });
+	FluoRefresh(false, true, 1, { gstShadow });
 }
 
 void VolumePropPanel::SyncSampleRate(double val)
@@ -1583,7 +1583,7 @@ void VolumePropPanel::SyncSampleRate(double val)
 		}
 	else
 		m_group->SetSampleRate(val);
-	FluoRefresh(false, true, true, { gstSampleRate });
+	FluoRefresh(false, true, 1, { gstSampleRate });
 }
 
 void VolumePropPanel::SyncColormapVal(double val1, double val2)
@@ -1592,7 +1592,7 @@ void VolumePropPanel::SyncColormapVal(double val1, double val2)
 		return;
 
 	m_group->SetColormapValues(val1, val2);
-	FluoRefresh(false, true, true, { gstColormap });
+	FluoRefresh(false, true, 1, { gstColormap });
 }
 
 
@@ -2349,7 +2349,7 @@ void VolumePropPanel::OnColormapInvBtn(wxCommandEvent &event)
 
 	EnableColormap(true);
 
-	FluoRefresh(false, true, true, { gstColormap });
+	FluoRefresh(false, true, 1, { gstColormap });
 
 	//update colocalization
 	if (m_frame && m_frame->GetColocalizationDlg() &&
@@ -2373,7 +2373,7 @@ void VolumePropPanel::OnColormapCombo(wxCommandEvent &event)
 		EnableTransparent(true);
 	}
 
-	FluoRefresh(false, true, true, { gstColormap });
+	FluoRefresh(false, true, 1, { gstColormap });
 
 	//update colocalization
 	if (m_frame && m_frame->GetColocalizationDlg() &&
@@ -2392,7 +2392,7 @@ void VolumePropPanel::OnColormapCombo2(wxCommandEvent &event)
 
 	EnableColormap(true);
 
-	FluoRefresh(false, true, true, { gstColormap });
+	FluoRefresh(false, true, 1, { gstColormap });
 }
 
 //6
@@ -2433,7 +2433,7 @@ void VolumePropPanel::OnColorChange(wxColor c)
 				adjust_view->UpdateSync();
 		}
 
-		FluoRefresh(true, true);
+		FluoRefresh(true, true, 1);
 	}
 }
 
@@ -2443,7 +2443,7 @@ void VolumePropPanel::OnColor2Change(wxColor c)
 	if (m_vd)
 	{
 		m_vd->SetMaskColor(color);
-		FluoRefresh(true, true);
+		FluoRefresh(true, true, 1);
 	}
 }
 
@@ -2716,7 +2716,7 @@ void VolumePropPanel::SetInvert()
 	else if (m_vd)
 		m_vd->SetInvert(inv);
 
-	FluoRefresh(false, true);
+	FluoRefresh(false, true, 1);
 }
 
 void VolumePropPanel::SetComponentDisplay()
@@ -2728,7 +2728,7 @@ void VolumePropPanel::SetComponentDisplay()
 	else if (m_vd)
 		m_vd->SetLabelMode(mode);
 
-	FluoRefresh(false, true);
+	FluoRefresh(false, true, 1);
 }
 
 //interpolation
@@ -2743,7 +2743,7 @@ void VolumePropPanel::SetInterpolate()
 	if (m_view)
 		m_view->SetIntp(inv);
 
-	FluoRefresh(false, true);
+	FluoRefresh(false, true, 1);
 }
 
 //noise reduction
@@ -2770,7 +2770,7 @@ void VolumePropPanel::SetNoiseReduction()
 			m_vd->SetNR(val);
 	}
 
-	FluoRefresh(false, true);
+	FluoRefresh(false, true, 1);
 }
 
 //sync within group
@@ -2833,7 +2833,7 @@ void VolumePropPanel::SetSyncGroup()
 		m_group->SetColormapProj(m_vd->GetColormapProj());
 	}
 
-	FluoRefresh(false, true);
+	FluoRefresh(false, true, 1);
 }
 
 //depth mode
@@ -2861,7 +2861,7 @@ void VolumePropPanel::SetBlendDepth()
 			m_group->SetBlendMode(0);
 	}
 
-	FluoRefresh(false, true);
+	FluoRefresh(false, true, 1);
 }
 
 //legend
@@ -2871,7 +2871,7 @@ void VolumePropPanel::SetLegend()
 	if (m_vd)
 		m_vd->SetLegend(leg);
 
-	FluoRefresh(false, true);
+	FluoRefresh(false, true, 1);
 }
 
 void VolumePropPanel::SaveDefault()
@@ -2889,7 +2889,7 @@ void VolumePropPanel::ResetDefault()
 		return;
 	glbin_vol_def.Apply(m_vd);
 
-	FluoRefresh(false, true);
+	FluoRefresh(false, true, 1);
 }
 
 bool VolumePropPanel::SetSpacings()

@@ -95,7 +95,7 @@ bool wxDoubleSlider::setLowValue(int val, bool notify)
 	{
 		wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
 		e.SetEventObject(this);
-		e.SetString("update");
+		e.SetString("update low");
 		ProcessWindowEvent(e);
 		wxPostEvent(parent_, e);
 	}
@@ -142,7 +142,7 @@ bool wxDoubleSlider::setHighValue(int val, bool notify)
 	{
 		wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
 		e.SetEventObject(this);
-		e.SetString("update");
+		e.SetString("update high");
 		ProcessWindowEvent(e);
 		wxPostEvent(parent_, e);
 	}
@@ -712,7 +712,10 @@ void wxDoubleSlider::OnMotion(wxMouseEvent& event)
 
 		wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
 		e.SetEventObject(this);
-		e.SetString("update");
+		if (sel_ == 1)
+			e.SetString("update low");
+		else if (sel_ == 2)
+			e.SetString("update high");
 		ProcessWindowEvent(e);
 		wxPostEvent(parent_, e);
 	}
@@ -734,7 +737,7 @@ void wxDoubleSlider::OnMotion(wxMouseEvent& event)
 			sel_val_ = val;
 			wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
 			e.SetEventObject(this);
-			e.SetString("update");
+			e.SetString("update both");
 			ProcessWindowEvent(e);
 			wxPostEvent(parent_, e);
 		}
@@ -770,7 +773,7 @@ void wxDoubleSlider::Scroll(int val)
 		SetLowValue(low_val_ + val);
 	else
 		SetHighValue(hi_val_ + val);
-	wxBasisSlider::Scroll(val);
+	//wxBasisSlider::Scroll(val);
 }
 
 void wxDoubleSlider::replace(double t)
@@ -818,7 +821,7 @@ void wxDoubleSlider::update()
 
 	wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
 	e.SetEventObject(this);
-	e.SetString("update");
+	e.SetString("undo/redo");
 	ProcessWindowEvent(e);
 	wxPostEvent(parent_, e);
 }

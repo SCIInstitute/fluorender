@@ -54,45 +54,9 @@ class ClippingView: public PropPanel
 {
 	enum
 	{
-		ID_LinkChannelsBtn = ID_CLIP_VIEW,
+		ID_LinkChannelsBtn = 0,
 		ID_HoldPlanesBtn,
-		ID_PlaneModesBtn,
-		ID_RotatePlanesChk,
-		ID_ClipResetBtn,
-		ID_SetZeroBtn,
-		ID_RotResetBtn,
-		//rotation sliders
-		ID_XRotSldr,
-		ID_YRotSldr,
-		ID_ZRotSldr,
-		ID_XRotText,
-		ID_YRotText,
-		ID_ZRotText,
-		ID_XRotSpin,
-		ID_YRotSpin,
-		ID_ZRotSpin,
-		//clipping sliders
-		ID_X1ClipSldr,
-		ID_X2ClipSldr,
-		ID_Y1ClipSldr,
-		ID_Y2ClipSldr,
-		ID_Z1ClipSldr,
-		ID_Z2ClipSldr,
-		ID_X1ClipText,
-		ID_X2ClipText,
-		ID_Y1ClipText,
-		ID_Y2ClipText,
-		ID_Z1ClipText,
-		ID_Z2ClipText,
-		ID_LinkXChk,
-		ID_LinkYChk,
-		ID_LinkZChk,
-		ID_YZClipBtn,
-		ID_XZClipBtn,
-		ID_XYClipBtn,
-		ID_YZDistText,
-		ID_XZDistText,
-		ID_XYDistText
+		ID_PlaneModesBtn
 	};
 
 public:
@@ -130,9 +94,15 @@ public:
 	void SetYLink(bool val);
 	void SetZLink(bool val);
 
-	void SetClipValue(int i, int val, bool link = false);
+	void SetClipValue(int i, int val, bool link = false);//index: 0~5 = X1~Z2
+	void SetClipValues(int i, int val1, int val2);//index: clip mask
+	void SetClipValues(const int val[6]);
+	void ResetClipValues();
+	void ResetClipValuesX();
+	void ResetClipValuesY();
+	void ResetClipValuesZ();
 
-	void SetClippingPlaneRotations(double rotx, double roty, double rotz);
+	void SyncClipValue(int i);//index: 0~2 = X~Z
 
 	//move linked clipping planes
 	void MoveLinkedClippingPlanes(int dir);
@@ -162,20 +132,17 @@ private:
 	wxButton* m_clip_y_st;
 	wxButton* m_clip_z_st;
 	//sliders for clipping planes
-	//x1
-	wxDoubleSlider *m_x1_clip_sldr;
+	//x
+	wxDoubleSlider *m_clipx_sldr;
 	wxTextCtrl *m_x1_clip_text;
-	//x2
 	wxTextCtrl *m_x2_clip_text;
-	//y1
-	wxDoubleSlider *m_y1_clip_sldr;
+	//y
+	wxDoubleSlider *m_clipy_sldr;
 	wxTextCtrl *m_y1_clip_text;
-	//y2
 	wxTextCtrl *m_y2_clip_text;
-	//z1
-	wxDoubleSlider *m_z1_clip_sldr;
+	//z
+	wxDoubleSlider *m_clipz_sldr;
 	wxTextCtrl *m_z1_clip_text;
-	//z2
 	wxTextCtrl *m_z2_clip_text;
 
 	wxToolBar *m_linkx_tb;
@@ -207,18 +174,23 @@ private:
 	wxSpinButton* m_z_rot_spin;
 
 private:
-	void OnIdle(wxIdleEvent &event);
-
-	void OnLinkChannelsBtn(wxCommandEvent &event);
-	void OnHoldPlanesBtn(wxCommandEvent &event);
-	void OnPlaneModesBtn(wxCommandEvent &event);
-	void OnClipResetBtn(wxCommandEvent &event);
-
 	void EnableAll(bool val);
 
-	void OnX1ClipChange(wxScrollEvent &event);
-	void OnY1ClipChange(wxScrollEvent &event);
-	void OnZ1ClipChange(wxScrollEvent &event);
+	void OnIdle(wxIdleEvent &event);
+
+	void OnToolbar(wxCommandEvent& event);
+	void LinkChannels();
+	void HoldPlanes();
+	void SetPlaneMode();
+
+	void OnClipXMF(wxCommandEvent& event);
+	void OnClipYMF(wxCommandEvent& event);
+	void OnClipZMF(wxCommandEvent& event);
+
+	void OnClipXChange(wxScrollEvent &event);
+	void OnClipYChange(wxScrollEvent &event);
+	void OnClipZChange(wxScrollEvent &event);
+
 	void OnX1ClipEdit(wxCommandEvent &event);
 	void OnX2ClipEdit(wxCommandEvent &event);
 	void OnY1ClipEdit(wxCommandEvent &event);
@@ -230,8 +202,29 @@ private:
 	void OnLinkYCheck(wxCommandEvent &event);
 	void OnLinkZCheck(wxCommandEvent &event);
 
+	//mouse
+	void UpdateSampleRate();
+	void OnClipXRClick(wxMouseEvent& event);
+	void OnClipYRClick(wxMouseEvent& event);
+	void OnClipZRClick(wxMouseEvent& event);
+
+	//clip buttons
+	void OnYZClipBtn(wxCommandEvent& event);
+	void OnXZClipBtn(wxCommandEvent& event);
+	void OnXYClipBtn(wxCommandEvent& event);
+
+	void OnClipDistXEdit(wxCommandEvent& event);
+	void OnClipDistYEdit(wxCommandEvent& event);
+	void OnClipDistZEdit(wxCommandEvent& event);
+
+	void OnClipResetBtn(wxCommandEvent &event);
+
 	void OnSetZeroBtn(wxCommandEvent &event);
 	void OnRotResetBtn(wxCommandEvent &event);
+
+	void OnRotXMF(wxCommandEvent& event);
+	void OnRotYMF(wxCommandEvent& event);
+	void OnRotZMF(wxCommandEvent& event);
 
 	void OnXRotChange(wxScrollEvent &event);
 	void OnYRotChange(wxScrollEvent &event);
@@ -247,17 +240,6 @@ private:
 	void OnYRotSpinDown(wxSpinEvent& event);
 	void OnZRotSpinUp(wxSpinEvent& event);
 	void OnZRotSpinDown(wxSpinEvent& event);
-
-	//mouse
-	void OnSliderRClick(wxCommandEvent& event);
-
-	//clip buttons
-	void OnYZClipBtn(wxCommandEvent& event);
-	void OnXZClipBtn(wxCommandEvent& event);
-	void OnXYClipBtn(wxCommandEvent& event);
-
-	DECLARE_EVENT_TABLE()
-
 };
 
 #endif//_CLIPPINGVIEW_H_

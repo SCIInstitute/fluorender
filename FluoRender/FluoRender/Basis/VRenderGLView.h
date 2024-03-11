@@ -519,11 +519,21 @@ public:
 	//restore clipping planes
 	void RestorePlanes();
 	//clipping plane rotations
+	void ClipRotate();
 	void SetClippingPlaneRotations(double rotx, double roty, double rotz);
 	void GetClippingPlaneRotations(double &rotx, double &roty, double &rotz);
+	void SetClipRotX(double val);
+	void SetClipRotY(double val);
+	void SetClipRotZ(double val);
 	fluo::Quaternion GetClipRotation() { return m_q_cl; }
 	//set clip values
 	void SetClipValue(int i, int val);
+	void SetClipValues(int i, int val1, int val2);
+	void SetClipValues(const int val[6]);
+	void ResetClipValues();
+	void ResetClipValuesX();
+	void ResetClipValuesY();
+	void ResetClipValuesZ();
 
 	//interpolation
 	void SetIntp(bool mode);

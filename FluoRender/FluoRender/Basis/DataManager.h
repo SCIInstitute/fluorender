@@ -495,6 +495,20 @@ public:
 	void GetClipValues(int &ox, int &oy, int &oz,
 		int &nx, int &ny, int &nz);
 	void SetClipValue(int i, int val);
+	void SetClipValues(int i, int val1, int val2);
+	void SetClipValues(const int val[6]);
+	void ResetClipValues();
+	void ResetClipValuesX();
+	void ResetClipValuesY();
+	void ResetClipValuesZ();
+
+	//clip distance
+	void SetClipDistX(int val) { m_clip_dist[0] = std::min(m_res_x, std::max(0, val)); }
+	void SetClipDistY(int val) { m_clip_dist[1] = std::min(m_res_y, std::max(0, val)); }
+	void SetClipDistZ(int val) { m_clip_dist[2] = std::min(m_res_z, std::max(0, val)); }
+	int GetClipDistX() { return m_clip_dist[0]; }
+	int GetClipDistY() { return m_clip_dist[1]; }
+	int GetClipDistZ() { return m_clip_dist[2]; }
 
 	//randomize color
 	void RandomizeColor();
@@ -700,6 +714,9 @@ private:
 	//background intensity
 	bool m_bg_valid;
 	double m_bg_int;
+
+	//clip distance
+	int m_clip_dist[3];
 
 private:
 	//label functions

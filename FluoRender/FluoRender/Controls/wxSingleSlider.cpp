@@ -488,7 +488,7 @@ void wxSingleSlider::SetThumbColor(const wxColor& c)
 void wxSingleSlider::Scroll(int val)
 {
 	SetValue(val_ + val);
-	wxBasisSlider::Scroll(val);
+	//wxBasisSlider::Scroll(val);
 }
 
 void wxSingleSlider::replace(double t)

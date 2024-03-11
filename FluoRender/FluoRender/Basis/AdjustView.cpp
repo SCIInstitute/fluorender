@@ -1207,7 +1207,7 @@ void AdjustView::SyncGamma(int i)
 		vc.insert(gstGammaG);
 	if (i != 2)
 		vc.insert(gstGammaB);
-	FluoRefresh(false, true, false, vc);
+	FluoRefresh(false, true, 2, vc);
 }
 
 void AdjustView::SyncBrightness(int i)
@@ -1256,7 +1256,7 @@ void AdjustView::SyncBrightness(int i)
 		vc.insert(gstBrightnessG);
 	if (i != 2)
 		vc.insert(gstBrightnessB);
-	FluoRefresh(false, true, false, vc);
+	FluoRefresh(false, true, 2, vc);
 }
 
 void AdjustView::SyncHdr(int i)
@@ -1305,7 +1305,7 @@ void AdjustView::SyncHdr(int i)
 		vc.insert(gstEqualizeG);
 	if (i != 2)
 		vc.insert(gstEqualizeB);
-	FluoRefresh(false, true, false, vc);
+	FluoRefresh(false, true, 2, vc);
 }
 
 void AdjustView::SetSync(int i, bool val, bool update)
@@ -1398,7 +1398,7 @@ void AdjustView::SetSync(int i, bool val, bool update)
 		if (m_sync[2])
 			vc.insert(gstSyncB);
 
-		FluoRefresh(false, true, false, vc);
+		FluoRefresh(false, true, 2, vc);
 	}
 }
 
@@ -1442,7 +1442,7 @@ void AdjustView::SetGamma(int i, double val, bool update)
 	}
 
 	if (update)
-		FluoRefresh(false, true, false, vc);
+		FluoRefresh(false, true, 2, vc);
 }
 
 void AdjustView::SetBrightness(int i, double val, bool update)
@@ -1485,7 +1485,7 @@ void AdjustView::SetBrightness(int i, double val, bool update)
 	}
 
 	if (update)
-		FluoRefresh(false, true, false, vc);
+		FluoRefresh(false, true, 2, vc);
 }
 
 void AdjustView::SetHdr(int i, double val, bool update)
@@ -1528,7 +1528,7 @@ void AdjustView::SetHdr(int i, double val, bool update)
 	}
 
 	if (update)
-		FluoRefresh(false, true, false, vc);
+		FluoRefresh(false, true, 2, vc);
 }
 
 void AdjustView::UpdateSync()

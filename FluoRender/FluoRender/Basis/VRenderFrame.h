@@ -223,7 +223,7 @@ public:
 		MeshData* md = 0,
 		Annotations* ann = 0,
 		bool show = true);
-	void UpdateProps(const fluo::ValueCollection &vc, PropPanel* excl = 0);
+	void UpdateProps(const fluo::ValueCollection &vc, int excl_self = 1, PropPanel* panel = 0);
 	VolumePropPanel* FindVolumeProps(VolumeData* vd);
 	MeshPropPanel* FindMeshProps(MeshData* md);
 	AnnotatPropPanel* FindAnnotationProps(Annotations* ad);
@@ -443,6 +443,8 @@ private:
 
 	void OnDraw(wxPaintEvent& event);
 	void OnKeyDown(wxKeyEvent& event);
+
+	bool update_props(int excl_self, PropPanel* p1, PropPanel* p2);
 
 	DECLARE_EVENT_TABLE()
 };

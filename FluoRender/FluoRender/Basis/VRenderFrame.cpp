@@ -2643,14 +2643,29 @@ void VRenderFrame::ShowPropPage(int type,
 
 }
 
-void VRenderFrame::UpdateProps(const fluo::ValueCollection& vc, PropPanel* excl)
+bool VRenderFrame::update_props(int excl_self, PropPanel* p1, PropPanel* p2)
+{
+	switch (excl_self)
+	{
+	case 0:
+		return true;
+	case 1:
+		return p1 != p2;
+	case 2:
+		return p1 == p2;
+	case 3:
+		return false;
+	}
+}
+
+void VRenderFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, PropPanel* panel)
 {
 	for (auto i : m_prop_pages)
-		if (i != excl)
+		if (update_props(excl_self, i, panel))
 			i->FluoUpdate(vc);
-	if (excl != m_adjust_view)
+	if (update_props(excl_self, m_adjust_view, panel))
 		m_adjust_view->FluoUpdate(vc);
-	if (excl != m_clip_view)
+	if (update_props(excl_self, m_clip_view, panel))
 		m_clip_view->FluoUpdate(vc);
 }
 
@@ -4918,7 +4933,6 @@ void VRenderFrame::OpenProject(wxString& filename)
 					fconfig.Read("rotz_cl", &rotz_cl))
 				{
 					view->SetClippingPlaneRotations(rotx_cl, roty_cl, rotz_cl);
-					m_clip_view->SetClippingPlaneRotations(rotx_cl, roty_cl, rotz_cl);
 				}
 
 				//painting parameters

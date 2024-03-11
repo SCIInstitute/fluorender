@@ -35,52 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 #include "png_resource.h"
 #include "img/icons.h"
-
-BEGIN_EVENT_TABLE(ClippingView, wxPanel)
-	EVT_TOOL(ID_LinkChannelsBtn, ClippingView::OnLinkChannelsBtn)
-	EVT_TOOL(ID_HoldPlanesBtn, ClippingView::OnHoldPlanesBtn)
-	EVT_TOOL(ID_PlaneModesBtn, ClippingView::OnPlaneModesBtn)
-	EVT_BUTTON(ID_SetZeroBtn, ClippingView::OnSetZeroBtn)
-	EVT_BUTTON(ID_RotResetBtn, ClippingView::OnRotResetBtn)
-	EVT_BUTTON(ID_ClipResetBtn, ClippingView::OnClipResetBtn)
-
-	EVT_COMMAND_SCROLL(ID_X1ClipSldr, ClippingView::OnX1ClipChange)
-	EVT_COMMAND_SCROLL(ID_Y1ClipSldr, ClippingView::OnY1ClipChange)
-	EVT_COMMAND_SCROLL(ID_Z1ClipSldr, ClippingView::OnZ1ClipChange)
-
-	EVT_TEXT(ID_X1ClipText, ClippingView::OnX1ClipEdit)
-	EVT_TEXT(ID_X2ClipText, ClippingView::OnX2ClipEdit)
-	EVT_TEXT(ID_Y1ClipText, ClippingView::OnY1ClipEdit)
-	EVT_TEXT(ID_Y2ClipText, ClippingView::OnY2ClipEdit)
-	EVT_TEXT(ID_Z1ClipText, ClippingView::OnZ1ClipEdit)
-	EVT_TEXT(ID_Z2ClipText, ClippingView::OnZ2ClipEdit)
-
-	EVT_IDLE(ClippingView::OnIdle)
-
-	EVT_TOOL(ID_LinkXChk, ClippingView::OnLinkXCheck)
-	EVT_TOOL(ID_LinkYChk, ClippingView::OnLinkYCheck)
-	EVT_TOOL(ID_LinkZChk, ClippingView::OnLinkZCheck)
-
-	EVT_COMMAND_SCROLL(ID_XRotSldr, ClippingView::OnXRotChange)
-	EVT_COMMAND_SCROLL(ID_YRotSldr, ClippingView::OnYRotChange)
-	EVT_COMMAND_SCROLL(ID_ZRotSldr, ClippingView::OnZRotChange)
-	EVT_TEXT(ID_XRotText, ClippingView::OnXRotEdit)
-	EVT_TEXT(ID_YRotText, ClippingView::OnYRotEdit)
-	EVT_TEXT(ID_ZRotText, ClippingView::OnZRotEdit)
-
-	//spin buttons
-	EVT_SPIN_UP(ID_XRotSpin, ClippingView::OnXRotSpinUp)
-	EVT_SPIN_DOWN(ID_XRotSpin, ClippingView::OnXRotSpinDown)
-	EVT_SPIN_UP(ID_YRotSpin, ClippingView::OnYRotSpinUp)
-	EVT_SPIN_DOWN(ID_YRotSpin, ClippingView::OnYRotSpinDown)
-	EVT_SPIN_UP(ID_ZRotSpin, ClippingView::OnZRotSpinUp)
-	EVT_SPIN_DOWN(ID_ZRotSpin, ClippingView::OnZRotSpinDown)
-
-	//clip buttons
-	EVT_BUTTON(ID_YZClipBtn, ClippingView::OnYZClipBtn)
-	EVT_BUTTON(ID_XZClipBtn, ClippingView::OnXZClipBtn)
-	EVT_BUTTON(ID_XYClipBtn, ClippingView::OnXYClipBtn)
-END_EVENT_TABLE()
+#include <Debug.h>
 
 ClippingView::ClippingView(
 	VRenderFrame* frame,
@@ -135,6 +90,7 @@ m_enable_all(true)
 	bitmap = wxGetBitmapFromMemory(clip_normal);
 	m_toolbar->AddTool(ID_PlaneModesBtn, "Display Modes",
 		bitmap, "Toggle clipping plane display modes");
+	m_toolbar->Bind(wxEVT_TOOL, &ClippingView::OnToolbar, this);
 	m_toolbar->Realize();
 	sizer_1->Add(5, 5, 0);
 	sizer_1->Add(m_toolbar, 0, wxALIGN_CENTER, 0);
@@ -146,19 +102,24 @@ m_enable_all(true)
 	wxBoxSizer* sizer_cx = new wxBoxSizer(wxVERTICAL);
 	m_clip_x_st = new wxButton(this, wxID_ANY, "X",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
-	m_x1_clip_sldr = new wxDoubleSlider(this, ID_X1ClipSldr, 0, 512, 0, 512,
+	m_clipx_sldr = new wxDoubleSlider(this, wxID_ANY, 0, 512, 0, 512,
 		wxDefaultPosition, wxDefaultSize, ls);
-	m_x1_clip_sldr->SetRangeColor(wxColor(255, 128, 128));
-	m_x1_clip_sldr->SetThumbColor(wxColor(255, 128, 128), wxColor(255, 128, 255));
-	m_x1_clip_text = new wxTextCtrl(this, ID_X1ClipText, "0",
+	m_clipx_sldr->SetRangeColor(wxColor(255, 128, 128));
+	m_clipx_sldr->SetThumbColor(wxColor(255, 128, 128), wxColor(255, 128, 255));
+	m_x1_clip_text = new wxTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
-	m_x2_clip_text = new wxTextCtrl(this, ID_X2ClipText, "512",
+	m_x2_clip_text = new wxTextCtrl(this, wxID_ANY, "512",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
 	m_linkx_tb = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(unlink);
-	m_linkx_tb->AddCheckTool(ID_LinkXChk, "Lock X Planes",
+	m_linkx_tb->AddCheckTool(0, "Lock X Planes",
 		bitmap, wxNullBitmap, "Lock X Planes");
+	m_clip_x_st->Bind(wxEVT_BUTTON, &ClippingView::OnClipXMF, this);
+	m_clipx_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClippingView::OnClipXChange, this);
+	m_x1_clip_text->Bind(wxEVT_TEXT, &ClippingView::OnX1ClipEdit, this);
+	m_x2_clip_text->Bind(wxEVT_TEXT, &ClippingView::OnX2ClipEdit, this);
+	m_linkx_tb->Bind(wxEVT_TOOL, &ClippingView::OnLinkXCheck, this);
 	//add the items
 	sizer_cx->Add(5, 5, 0);
 	sizer_cx->Add(m_clip_x_st, 0, wxALIGN_CENTER, 0);
@@ -166,14 +127,14 @@ m_enable_all(true)
 	{
 		sizer_cx->Add(m_x1_clip_text, 0, wxALIGN_CENTER, 0);
 		sizer_cx->Add(5, 5, 0);
-		sizer_cx->Add(m_x1_clip_sldr, 1, wxEXPAND, 0);
+		sizer_cx->Add(m_clipx_sldr, 1, wxEXPAND, 0);
 		sizer_cx->Add(m_x2_clip_text, 0, wxALIGN_CENTER, 0);
 	}
 	else
 	{
 		sizer_cx->Add(m_x2_clip_text, 0, wxALIGN_CENTER, 0);
 		sizer_cx->Add(5, 5, 0);
-		sizer_cx->Add(m_x1_clip_sldr, 1, wxEXPAND, 0);
+		sizer_cx->Add(m_clipx_sldr, 1, wxEXPAND, 0);
 		sizer_cx->Add(m_x1_clip_text, 0, wxALIGN_CENTER, 0);
 	}
 	sizer_cx->Add(5, 5, 0);
@@ -185,18 +146,23 @@ m_enable_all(true)
 	//wxPanel * ypanel = new wxPanel(this);
 	m_clip_y_st = new wxButton(this, wxID_ANY, "Y",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
-	m_y1_clip_sldr = new wxDoubleSlider(this, ID_Y1ClipSldr, 0, 512, 0, 512,
+	m_clipy_sldr = new wxDoubleSlider(this, wxID_ANY, 0, 512, 0, 512,
 		wxDefaultPosition, wxDefaultSize, ls);
-	m_y1_clip_sldr->SetRangeColor(wxColor(128, 255, 128));
-	m_y1_clip_sldr->SetThumbColor(wxColor(128, 255, 128), wxColor(255, 255, 128));
-	m_y1_clip_text = new wxTextCtrl(this, ID_Y1ClipText, "0",
+	m_clipy_sldr->SetRangeColor(wxColor(128, 255, 128));
+	m_clipy_sldr->SetThumbColor(wxColor(128, 255, 128), wxColor(255, 255, 128));
+	m_y1_clip_text = new wxTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
-	m_y2_clip_text = new wxTextCtrl(this, ID_Y2ClipText, "512",
+	m_y2_clip_text = new wxTextCtrl(this, wxID_ANY, "512",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
 	m_linky_tb = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_linky_tb->AddCheckTool(ID_LinkYChk, "Lock Y Planes",
+	m_linky_tb->AddCheckTool(0, "Lock Y Planes",
 		bitmap, wxNullBitmap, "Lock Y Planes");
+	m_clip_y_st->Bind(wxEVT_BUTTON, &ClippingView::OnClipYMF, this);
+	m_clipy_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClippingView::OnClipYChange, this);
+	m_y1_clip_text->Bind(wxEVT_TEXT, &ClippingView::OnY1ClipEdit, this);
+	m_y2_clip_text->Bind(wxEVT_TEXT, &ClippingView::OnY2ClipEdit, this);
+	m_linky_tb->Bind(wxEVT_TOOL, &ClippingView::OnLinkYCheck, this);
 	//add the items
 	sizer_cy->Add(5, 5, 0);
 	sizer_cy->Add(m_clip_y_st, 0, wxALIGN_CENTER, 0);
@@ -204,14 +170,14 @@ m_enable_all(true)
 	{
 		sizer_cy->Add(m_y1_clip_text, 0, wxALIGN_CENTER, 0);
 		sizer_cy->Add(5, 5, 0);
-		sizer_cy->Add(m_y1_clip_sldr, 1, wxEXPAND, 0);
+		sizer_cy->Add(m_clipy_sldr, 1, wxEXPAND, 0);
 		sizer_cy->Add(m_y2_clip_text, 0, wxALIGN_CENTER, 0);
 	}
 	else
 	{
 		sizer_cy->Add(m_y2_clip_text, 0, wxALIGN_CENTER, 0);
 		sizer_cy->Add(5, 5, 0);
-		sizer_cy->Add(m_y1_clip_sldr, 1, wxEXPAND, 0);
+		sizer_cy->Add(m_clipy_sldr, 1, wxEXPAND, 0);
 		sizer_cy->Add(m_y1_clip_text, 0, wxALIGN_CENTER, 0);
 	}
 	sizer_cy->Add(5, 5, 0);
@@ -223,18 +189,23 @@ m_enable_all(true)
 	//wxPanel * zpanel = new wxPanel(this);
 	m_clip_z_st = new wxButton(this, wxID_ANY, "Z",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
-	m_z1_clip_sldr = new wxDoubleSlider(this, ID_Z1ClipSldr, 0, 512, 0, 512,
+	m_clipz_sldr = new wxDoubleSlider(this, wxID_ANY, 0, 512, 0, 512,
 		wxPoint(0,0), wxDefaultSize, ls);
-	m_z1_clip_sldr->SetRangeColor(wxColor(128, 128, 255));
-	m_z1_clip_sldr->SetThumbColor(wxColor(128, 128, 255), wxColor(128, 255, 255));
-	m_z1_clip_text = new wxTextCtrl(this, ID_Z1ClipText, "0",
+	m_clipz_sldr->SetRangeColor(wxColor(128, 128, 255));
+	m_clipz_sldr->SetThumbColor(wxColor(128, 128, 255), wxColor(128, 255, 255));
+	m_z1_clip_text = new wxTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
-	m_z2_clip_text = new wxTextCtrl(this, ID_Z2ClipText, "512",
+	m_z2_clip_text = new wxTextCtrl(this, wxID_ANY, "512",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
 	m_linkz_tb = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_linkz_tb->AddCheckTool(ID_LinkZChk, "Lock Z Planes",
+	m_linkz_tb->AddCheckTool(0, "Lock Z Planes",
 		bitmap, wxNullBitmap, "Lock Z Planes");
+	m_clip_z_st->Bind(wxEVT_BUTTON, &ClippingView::OnClipZMF, this);
+	m_clipz_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClippingView::OnClipZChange, this);
+	m_z1_clip_text->Bind(wxEVT_TEXT, &ClippingView::OnZ1ClipEdit, this);
+	m_z2_clip_text->Bind(wxEVT_TEXT, &ClippingView::OnZ2ClipEdit, this);
+	m_linkz_tb->Bind(wxEVT_TOOL, &ClippingView::OnLinkZCheck, this);
 	//add the items
 	sizer_cz->Add(5, 5, 0);
 	sizer_cz->Add(m_clip_z_st, 0, wxALIGN_CENTER, 0);
@@ -242,14 +213,14 @@ m_enable_all(true)
 	{
 		sizer_cz->Add(m_z1_clip_text, 0, wxALIGN_CENTER, 0);
 		sizer_cz->Add(5, 5, 0);
-		sizer_cz->Add(m_z1_clip_sldr, 1, wxEXPAND, 0);
+		sizer_cz->Add(m_clipz_sldr, 1, wxEXPAND, 0);
 		sizer_cz->Add(m_z2_clip_text, 0, wxALIGN_CENTER, 0);
 	}
 	else
 	{
 		sizer_cz->Add(m_z2_clip_text, 0, wxALIGN_CENTER, 0);
 		sizer_cz->Add(5, 5, 0);
-		sizer_cz->Add(m_z1_clip_sldr, 1, wxEXPAND, 0);
+		sizer_cz->Add(m_clipz_sldr, 1, wxEXPAND, 0);
 		sizer_cz->Add(m_z1_clip_text, 0, wxALIGN_CENTER, 0);
 	}
 	sizer_cz->Add(5, 5, 0);
@@ -257,15 +228,9 @@ m_enable_all(true)
 	m_linkz_tb->Realize();
 
 	//link sliders
-	m_x1_clip_sldr->Connect(ID_X1ClipSldr, wxEVT_RIGHT_DOWN,
-		wxCommandEventHandler(ClippingView::OnSliderRClick),
-		NULL, this);
-	m_y1_clip_sldr->Connect(ID_Y1ClipSldr, wxEVT_RIGHT_DOWN,
-		wxCommandEventHandler(ClippingView::OnSliderRClick),
-		NULL, this);
-	m_z1_clip_sldr->Connect(ID_Z1ClipSldr, wxEVT_RIGHT_DOWN,
-		wxCommandEventHandler(ClippingView::OnSliderRClick),
-		NULL, this);
+	m_clipx_sldr->Bind(wxEVT_RIGHT_DOWN, &ClippingView::OnClipXRClick, this);
+	m_clipy_sldr->Bind(wxEVT_RIGHT_DOWN, &ClippingView::OnClipYRClick, this);
+	m_clipz_sldr->Bind(wxEVT_RIGHT_DOWN, &ClippingView::OnClipZRClick, this);
 
 	//2
 	wxBoxSizer *sizer_2 = new wxBoxSizer(wxHORIZONTAL);
@@ -275,12 +240,15 @@ m_enable_all(true)
 
 	//clip buttons 4
 	wxBoxSizer* sizer_4 = new wxBoxSizer(wxHORIZONTAL);
-	m_yz_clip_btn = new wxButton(this, ID_YZClipBtn, "YZ",
+	m_yz_clip_btn = new wxButton(this, wxID_ANY, "YZ",
 		wxDefaultPosition, FromDIP(wxSize(34, 22)));
-	m_xz_clip_btn = new wxButton(this, ID_XZClipBtn, "XZ",
+	m_xz_clip_btn = new wxButton(this, wxID_ANY, "XZ",
 		wxDefaultPosition, FromDIP(wxSize(34, 22)));
-	m_xy_clip_btn = new wxButton(this, ID_XYClipBtn, "XY",
+	m_xy_clip_btn = new wxButton(this, wxID_ANY, "XY",
 		wxDefaultPosition, FromDIP(wxSize(34, 22)));
+	m_yz_clip_btn->Bind(wxEVT_BUTTON, &ClippingView::OnYZClipBtn, this);
+	m_xz_clip_btn->Bind(wxEVT_BUTTON, &ClippingView::OnXZClipBtn, this);
+	m_xy_clip_btn->Bind(wxEVT_BUTTON, &ClippingView::OnXYClipBtn, this);
 	sizer_4->Add(m_yz_clip_btn, 1, wxEXPAND);
 	sizer_4->AddSpacer(5);
 	sizer_4->Add(m_xz_clip_btn, 1, wxEXPAND);
@@ -289,12 +257,15 @@ m_enable_all(true)
 
 	//clip distance 5
 	wxBoxSizer* sizer_5 = new wxBoxSizer(wxHORIZONTAL);
-	m_yz_dist_text = new wxTextCtrl(this, ID_YZDistText, "1",
+	m_yz_dist_text = new wxTextCtrl(this, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(34, 22)), 0, vald_int);
-	m_xz_dist_text = new wxTextCtrl(this, ID_XZDistText, "1",
+	m_xz_dist_text = new wxTextCtrl(this, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(34, 22)), 0, vald_int);
-	m_xy_dist_text = new wxTextCtrl(this, ID_XYDistText, "1",
+	m_xy_dist_text = new wxTextCtrl(this, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(34, 22)), 0, vald_int);
+	m_yz_dist_text->Bind(wxEVT_TEXT, &ClippingView::OnClipDistXEdit, this);
+	m_xz_dist_text->Bind(wxEVT_TEXT, &ClippingView::OnClipDistYEdit, this);
+	m_xy_dist_text->Bind(wxEVT_TEXT, &ClippingView::OnClipDistZEdit, this);
 	sizer_5->Add(m_yz_dist_text, 1, wxEXPAND);
 	sizer_5->AddSpacer(5);
 	sizer_5->Add(m_xz_dist_text, 1, wxEXPAND);
@@ -304,13 +275,14 @@ m_enable_all(true)
 	//reset clipping 6
 	wxBoxSizer* sizer_6 = new wxBoxSizer(wxHORIZONTAL);
 #ifndef _DARWIN
-	m_clip_reset_btn = new wxButton(this, ID_ClipResetBtn, "Reset Clips",
+	m_clip_reset_btn = new wxButton(this, wxID_ANY, "Reset Clips",
 									wxDefaultPosition, FromDIP(wxSize(120, 22)));
 #else
-	m_clip_reset_btn = new wxButton(this, ID_ClipResetBtn, "Reset Clips",
+	m_clip_reset_btn = new wxButton(this, wxID_ANY, "Reset Clips",
 									wxDefaultPosition, FromDIP(wxSize(125, 30)));
 #endif
 	m_clip_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
+	m_clip_reset_btn->Bind(wxEVT_BUTTON, &ClippingView::OnClipResetBtn, this);
 	sizer_6->Add(5, 5, 0);
 	sizer_6->Add(m_clip_reset_btn, 0, wxALIGN_CENTER);
 
@@ -318,26 +290,28 @@ m_enable_all(true)
 	//set sero rotation for clipping planes 7
 	wxBoxSizer* sizer_7 = new wxBoxSizer(wxHORIZONTAL);
 #ifndef _DARWIN
-	m_set_zero_btn = new wxButton(this, ID_SetZeroBtn, "Align to View",
+	m_set_zero_btn = new wxButton(this, wxID_ANY, "Align to View",
 								  wxDefaultPosition, FromDIP(wxSize(120, 22)));
 #else
-	m_set_zero_btn = new wxButton(this, ID_SetZeroBtn, "Align to View",
+	m_set_zero_btn = new wxButton(this, wxID_ANY, "Align to View",
 								  wxDefaultPosition, FromDIP(wxSize(125, 30)));
 #endif
 	m_set_zero_btn->SetBitmap(wxGetBitmapFromMemory(align));
+	m_set_zero_btn->Bind(wxEVT_BUTTON, &ClippingView::OnSetZeroBtn, this);
 	sizer_7->Add(5, 5, 0);
 	sizer_7->Add(m_set_zero_btn, 0, wxALIGN_CENTER);
 
 	//reset rotations 8
 	wxBoxSizer* sizer_8 = new wxBoxSizer(wxHORIZONTAL);
 #ifndef _DARWIN
-	m_rot_reset_btn = new wxButton(this, ID_RotResetBtn, "Reset to 0",
+	m_rot_reset_btn = new wxButton(this, wxID_ANY, "Reset to 0",
 								   wxDefaultPosition, FromDIP(wxSize(120, 22)));
 #else
-	m_rot_reset_btn = new wxButton(this, ID_RotResetBtn, "Reset to 0",
+	m_rot_reset_btn = new wxButton(this, wxID_ANY, "Reset to 0",
 								   wxDefaultPosition, FromDIP(wxSize(125, 30)));
 #endif
 	m_rot_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
+	m_rot_reset_btn->Bind(wxEVT_BUTTON, &ClippingView::OnRotResetBtn, this);
 	sizer_8->Add(5, 5, 0);
 	sizer_8->Add(m_rot_reset_btn, 0, wxALIGN_CENTER);
 
@@ -347,14 +321,19 @@ m_enable_all(true)
 	wxBoxSizer* sizer_rx = new wxBoxSizer(wxVERTICAL);
 	m_rot_x_st = new wxButton(this, wxID_ANY, "X",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
-	m_x_rot_sldr = new wxSingleSlider(this, ID_XRotSldr, 0, -180, 180,
+	m_x_rot_sldr = new wxSingleSlider(this, wxID_ANY, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_x_rot_sldr->SetRangeStyle(2);
-	m_x_rot_text = new wxTextCtrl(this, ID_XRotText, "0.0",
+	m_x_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_fp1);
-	m_x_rot_spin = new wxSpinButton(this, ID_XRotSpin,
+	m_x_rot_spin = new wxSpinButton(this, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxSP_VERTICAL);
 	m_x_rot_spin->SetRange(-0x8000, 0x7fff);
+	m_rot_x_st->Bind(wxEVT_BUTTON, &ClippingView::OnRotXMF, this);
+	m_x_rot_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClippingView::OnXRotChange, this);
+	m_x_rot_text->Bind(wxEVT_TEXT, &ClippingView::OnXRotEdit, this);
+	m_x_rot_spin->Bind(wxEVT_SPIN_UP, &ClippingView::OnXRotSpinUp, this);
+	m_x_rot_spin->Bind(wxEVT_SPIN_DOWN, &ClippingView::OnXRotSpinDown, this);
 	sizer_rx->Add(5, 5, 0);
 	sizer_rx->Add(m_rot_x_st, 0, wxALIGN_CENTER, 0);
 	sizer_rx->Add(m_x_rot_text, 0, wxALIGN_CENTER, 0);
@@ -365,14 +344,19 @@ m_enable_all(true)
 	wxBoxSizer* sizer_ry = new wxBoxSizer(wxVERTICAL);
 	m_rot_y_st = new wxButton(this, wxID_ANY, "Y",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
-	m_y_rot_sldr = new wxSingleSlider(this, ID_YRotSldr, 0, -180, 180,
+	m_y_rot_sldr = new wxSingleSlider(this, wxID_ANY, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_y_rot_sldr->SetRangeStyle(2);
-	m_y_rot_text = new wxTextCtrl(this, ID_YRotText, "0.0",
+	m_y_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_fp1);
-	m_y_rot_spin = new wxSpinButton(this, ID_YRotSpin,
+	m_y_rot_spin = new wxSpinButton(this, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxSP_VERTICAL);
 	m_y_rot_spin->SetRange(-0x8000, 0x7fff);
+	m_rot_y_st->Bind(wxEVT_BUTTON, &ClippingView::OnRotXMF, this);
+	m_y_rot_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClippingView::OnYRotChange, this);
+	m_y_rot_text->Bind(wxEVT_TEXT, &ClippingView::OnYRotEdit, this);
+	m_y_rot_spin->Bind(wxEVT_SPIN_UP, &ClippingView::OnYRotSpinUp, this);
+	m_y_rot_spin->Bind(wxEVT_SPIN_DOWN, &ClippingView::OnYRotSpinDown, this);
 	sizer_ry->Add(5, 5, 0);
 	sizer_ry->Add(m_rot_y_st, 0, wxALIGN_CENTER, 0);
 	sizer_ry->Add(m_y_rot_text, 0, wxALIGN_CENTER, 0);
@@ -383,14 +367,19 @@ m_enable_all(true)
 	wxBoxSizer* sizer_rz = new wxBoxSizer(wxVERTICAL);
 	m_rot_z_st = new wxButton(this, wxID_ANY, "Z",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
-	m_z_rot_sldr = new wxSingleSlider(this, ID_ZRotSldr, 0, -180, 180,
+	m_z_rot_sldr = new wxSingleSlider(this, wxID_ANY, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_z_rot_sldr->SetRangeStyle(2);
-	m_z_rot_text = new wxTextCtrl(this, ID_ZRotText, "0.0",
+	m_z_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_fp1);
-	m_z_rot_spin = new wxSpinButton(this, ID_ZRotSpin,
+	m_z_rot_spin = new wxSpinButton(this, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxSP_VERTICAL);
 	m_z_rot_spin->SetRange(-0x8000, 0x7fff);
+	m_rot_z_st->Bind(wxEVT_BUTTON, &ClippingView::OnRotZMF, this);
+	m_z_rot_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClippingView::OnZRotChange, this);
+	m_z_rot_text->Bind(wxEVT_TEXT, &ClippingView::OnZRotEdit, this);
+	m_z_rot_spin->Bind(wxEVT_SPIN_UP, &ClippingView::OnZRotSpinUp, this);
+	m_z_rot_spin->Bind(wxEVT_SPIN_DOWN, &ClippingView::OnZRotSpinDown, this);
 	sizer_rz->Add(5, 5, 0);
 	sizer_rz->Add(m_rot_z_st, 0, wxALIGN_CENTER, 0);
 	sizer_rz->Add(m_z_rot_text, 0, wxALIGN_CENTER, 0);
@@ -439,12 +428,14 @@ m_enable_all(true)
 	SetAutoLayout(true);
 	SetScrollRate(10, 10);
 
+	Bind(wxEVT_IDLE, &ClippingView::OnIdle, this);
+
 	EnableAll(false);
 
 	//add controls
-	glbin.add_undo_control(m_x1_clip_sldr);
-	glbin.add_undo_control(m_y1_clip_sldr);
-	glbin.add_undo_control(m_z1_clip_sldr);
+	glbin.add_undo_control(m_clipx_sldr);
+	glbin.add_undo_control(m_clipy_sldr);
+	glbin.add_undo_control(m_clipz_sldr);
 	glbin.add_undo_control(m_x_rot_sldr);
 	glbin.add_undo_control(m_y_rot_sldr);
 	glbin.add_undo_control(m_z_rot_sldr);
@@ -455,9 +446,9 @@ m_enable_all(true)
 ClippingView::~ClippingView()
 {
 	//delete controls
-	glbin.del_undo_control(m_x1_clip_sldr);
-	glbin.del_undo_control(m_y1_clip_sldr);
-	glbin.del_undo_control(m_z1_clip_sldr);
+	glbin.del_undo_control(m_clipx_sldr);
+	glbin.del_undo_control(m_clipy_sldr);
+	glbin.del_undo_control(m_clipz_sldr);
 	glbin.del_undo_control(m_x_rot_sldr);
 	glbin.del_undo_control(m_y_rot_sldr);
 	glbin.del_undo_control(m_z_rot_sldr);
@@ -473,38 +464,45 @@ void ClippingView::FluoUpdate(const fluo::ValueCollection& vc)
 		EnableAll(false);
 		return;
 	}
+	if (FOUND_VALUE(gstNull))
+		return;
+
+	bool update_all = vc.empty();
 
 	//modes
-	switch (m_plane_mode)
+	if (update_all || FOUND_VALUE(gstPlaneMode))
 	{
-	case kNormal:
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_normal));
-		break;
-	case kFrame6:
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_frame6));
-		break;
-	case kFrame3:
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_frame3));
-		break;
-	case kLowTrans:
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_low));
-		break;
-	case kLowTransBack:
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_low_back));
-		break;
-	case kNormalBack:
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_normal_back));
-		break;
-	case kNone:
-		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_none));
-		break;
+		switch (m_plane_mode)
+		{
+		case kNormal:
+			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+				wxGetBitmapFromMemory(clip_normal));
+			break;
+		case kFrame6:
+			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+				wxGetBitmapFromMemory(clip_frame6));
+			break;
+		case kFrame3:
+			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+				wxGetBitmapFromMemory(clip_frame3));
+			break;
+		case kLowTrans:
+			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+				wxGetBitmapFromMemory(clip_low));
+			break;
+		case kLowTransBack:
+			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+				wxGetBitmapFromMemory(clip_low_back));
+			break;
+		case kNormalBack:
+			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+				wxGetBitmapFromMemory(clip_normal_back));
+			break;
+		case kNone:
+			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+				wxGetBitmapFromMemory(clip_none));
+			break;
+		}
 	}
 
 	int resx, resy, resz;
@@ -524,50 +522,51 @@ void ClippingView::FluoUpdate(const fluo::ValueCollection& vc)
 		break;
 	}
 	wxColor c(fc.r() * 255, fc.g() * 255, fc.b() * 255);
-	//slider range
-	m_x1_clip_sldr->SetRange(resx_n, resx);
-	m_x1_clip_sldr->SetRangeColor(c);
-	m_y1_clip_sldr->SetRange(resy_n, resy);
-	m_y1_clip_sldr->SetRangeColor(c);
-	m_z1_clip_sldr->SetRange(resz_n, resz);
-	m_z1_clip_sldr->SetRangeColor(c);
-	//text range
+
 	wxIntegerValidator<int>* vald_i;
-	if ((vald_i = (wxIntegerValidator<int>*)m_x1_clip_text->GetValidator()))
-		vald_i->SetRange(0, resx);
-	if ((vald_i = (wxIntegerValidator<int>*)m_x2_clip_text->GetValidator()))
-		vald_i->SetRange(0, resx);
-	if ((vald_i = (wxIntegerValidator<int>*)m_y1_clip_text->GetValidator()))
-		vald_i->SetRange(0, resy);
-	if ((vald_i = (wxIntegerValidator<int>*)m_y2_clip_text->GetValidator()))
-		vald_i->SetRange(0, resy);
-	if ((vald_i = (wxIntegerValidator<int>*)m_z1_clip_text->GetValidator()))
-		vald_i->SetRange(0, resz);
-	if ((vald_i = (wxIntegerValidator<int>*)m_z2_clip_text->GetValidator()))
-		vald_i->SetRange(0, resz);
+
+	if (update_all || FOUND_VALUE(gstClipRange))
+	{
+		//slider range
+		m_clipx_sldr->SetRange(resx_n, resx);
+		m_clipx_sldr->SetRangeColor(c);
+		m_clipy_sldr->SetRange(resy_n, resy);
+		m_clipy_sldr->SetRangeColor(c);
+		m_clipz_sldr->SetRange(resz_n, resz);
+		m_clipz_sldr->SetRangeColor(c);
+		//text range
+		if ((vald_i = (wxIntegerValidator<int>*)m_x1_clip_text->GetValidator()))
+			vald_i->SetRange(0, resx);
+		if ((vald_i = (wxIntegerValidator<int>*)m_x2_clip_text->GetValidator()))
+			vald_i->SetRange(0, resx);
+		if ((vald_i = (wxIntegerValidator<int>*)m_y1_clip_text->GetValidator()))
+			vald_i->SetRange(0, resy);
+		if ((vald_i = (wxIntegerValidator<int>*)m_y2_clip_text->GetValidator()))
+			vald_i->SetRange(0, resy);
+		if ((vald_i = (wxIntegerValidator<int>*)m_z1_clip_text->GetValidator()))
+			vald_i->SetRange(0, resz);
+		if ((vald_i = (wxIntegerValidator<int>*)m_z2_clip_text->GetValidator()))
+			vald_i->SetRange(0, resz);
+	}
 
 	//clip distance
-	switch (m_sel_type)
+	if (update_all || FOUND_VALUE(gstClipDistance))
 	{
-	case 2:	//volume
-	{
-		int distx, disty, distz;
-		distx = resx / 20;
-		distx = distx == 0 ? 1 : distx;
-		disty = resy / 20;
-		disty = disty == 0 ? 1 : disty;
-		distz = resz / 20;
-		distz = distz == 0 ? 1 : distz;
-		m_yz_dist_text->ChangeValue(
-			wxString::Format("%d", distx));
-		m_xz_dist_text->ChangeValue(
-			wxString::Format("%d", disty));
-		m_xy_dist_text->ChangeValue(
-			wxString::Format("%d", distz));
-	}
-	break;
-	case 3:	//mesh
+		switch (m_sel_type)
+		{
+		case 2:	//volume
+		{
+			m_yz_dist_text->ChangeValue(
+				wxString::Format("%d", m_vd->GetClipDistX()));
+			m_xz_dist_text->ChangeValue(
+				wxString::Format("%d", m_vd->GetClipDistY()));
+			m_xy_dist_text->ChangeValue(
+				wxString::Format("%d", m_vd->GetClipDistZ()));
+		}
 		break;
+		case 3:	//mesh
+			break;
+		}
 	}
 
 	vector<fluo::Plane*>* planes = 0;
@@ -587,66 +586,138 @@ void ClippingView::FluoUpdate(const fluo::ValueCollection& vc)
 	if (planes->size() != 6)	//it has to be 6
 		return;
 
+	bool bval;
 	wxString str;
 	fluo::Plane* plane = 0;
 	int val = 0;
 	double abcd[4];
 
 	//x1
-	plane = (*planes)[0];
-	plane->get_copy(abcd);
-	val = fabs(abcd[3] * resx) + 0.499;
-	m_x1_clip_sldr->ChangeLowValue(val);
-	str = wxString::Format("%d", val);
-	m_x1_clip_text->ChangeValue(str);
+	if (update_all || FOUND_VALUE(gstClipX1))
+	{
+		plane = (*planes)[0];
+		plane->get_copy(abcd);
+		val = std::round(fabs(abcd[3] * resx));
+		m_clipx_sldr->ChangeLowValue(val);
+		str = wxString::Format("%d", val);
+		m_x1_clip_text->ChangeValue(str);
+	}
 	//x2
-	plane = (*planes)[1];
-	plane->get_copy(abcd);
-	val = fabs(abcd[3] * resx) + 0.499;
-	m_x1_clip_sldr->ChangeHighValue(val);
-	str = wxString::Format("%d", val);
-	m_x2_clip_text->ChangeValue(str);
+	if (update_all || FOUND_VALUE(gstClipX2))
+	{
+		plane = (*planes)[1];
+		plane->get_copy(abcd);
+		val = std::round(fabs(abcd[3] * resx));
+		m_clipx_sldr->ChangeHighValue(val);
+		str = wxString::Format("%d", val);
+		m_x2_clip_text->ChangeValue(str);
+	}
 	//y1
-	plane = (*planes)[2];
-	plane->get_copy(abcd);
-	val = fabs(abcd[3] * resy) + 0.499;
-	m_y1_clip_sldr->ChangeLowValue(val);
-	str = wxString::Format("%d", val);
-	m_y1_clip_text->ChangeValue(str);
+	if (update_all || FOUND_VALUE(gstClipY1))
+	{
+		plane = (*planes)[2];
+		plane->get_copy(abcd);
+		val = std::round(fabs(abcd[3] * resy));
+		m_clipy_sldr->ChangeLowValue(val);
+		str = wxString::Format("%d", val);
+		m_y1_clip_text->ChangeValue(str);
+	}
 	//y2
-	plane = (*planes)[3];
-	plane->get_copy(abcd);
-	val = fabs(abcd[3] * resy) + 0.499;
-	m_y1_clip_sldr->ChangeHighValue(val);
-	str = wxString::Format("%d", val);
-	m_y2_clip_text->ChangeValue(str);
+	if (update_all || FOUND_VALUE(gstClipY2))
+	{
+		plane = (*planes)[3];
+		plane->get_copy(abcd);
+		val = std::round(fabs(abcd[3] * resy));
+		m_clipy_sldr->ChangeHighValue(val);
+		str = wxString::Format("%d", val);
+		m_y2_clip_text->ChangeValue(str);
+	}
 	//z1
-	plane = (*planes)[4];
-	plane->get_copy(abcd);
-	val = fabs(abcd[3] * resz) + 0.499;
-	m_z1_clip_sldr->ChangeLowValue(val);
-	str = wxString::Format("%d", val);
-	m_z1_clip_text->ChangeValue(str);
+	if (update_all || FOUND_VALUE(gstClipZ1))
+	{
+		plane = (*planes)[4];
+		plane->get_copy(abcd);
+		val = std::round(fabs(abcd[3] * resz));
+		m_clipz_sldr->ChangeLowValue(val);
+		str = wxString::Format("%d", val);
+		m_z1_clip_text->ChangeValue(str);
+	}
 	//z2
-	plane = (*planes)[5];
-	plane->get_copy(abcd);
-	val = fabs(abcd[3] * resz) + 0.499;
-	m_z1_clip_sldr->ChangeHighValue(val);
-	str = wxString::Format("%d", val);
-	m_z2_clip_text->ChangeValue(str);
+	if (update_all || FOUND_VALUE(gstClipZ2))
+	{
+		plane = (*planes)[5];
+		plane->get_copy(abcd);
+		val = std::round(fabs(abcd[3] * resz));
+		m_clipz_sldr->ChangeHighValue(val);
+		str = wxString::Format("%d", val);
+		m_z2_clip_text->ChangeValue(str);
+	}
+
+	//link
+	if (update_all || FOUND_VALUE(gstClipLinkX))
+	{
+		bval = m_clipx_sldr->GetLink();
+		if (bval != m_linkx_tb->GetToolState(0))
+		{
+			m_linkx_tb->ToggleTool(0, bval);
+			if (bval)
+				m_linkx_tb->SetToolNormalBitmap(0,
+					wxGetBitmapFromMemory(link));
+			else
+				m_linkx_tb->SetToolNormalBitmap(0,
+					wxGetBitmapFromMemory(unlink));
+		}
+	}
+	if (update_all || FOUND_VALUE(gstClipLinkY))
+	{
+		bval = m_clipy_sldr->GetLink();
+		if (bval != m_linky_tb->GetToolState(0))
+		{
+			m_linky_tb->ToggleTool(0, bval);
+			if (bval)
+				m_linky_tb->SetToolNormalBitmap(0,
+					wxGetBitmapFromMemory(link));
+			else
+				m_linky_tb->SetToolNormalBitmap(0,
+					wxGetBitmapFromMemory(unlink));
+		}
+	}
+	if (update_all || FOUND_VALUE(gstClipLinkZ))
+	{
+		bval = m_clipz_sldr->GetLink();
+		if (bval != m_linkz_tb->GetToolState(0))
+		{
+			m_linkz_tb->ToggleTool(0, bval);
+			if (bval)
+				m_linkz_tb->SetToolNormalBitmap(0,
+					wxGetBitmapFromMemory(link));
+			else
+				m_linkz_tb->SetToolNormalBitmap(0,
+					wxGetBitmapFromMemory(unlink));
+		}
+	}
 
 	//rotations
 	double rotx, roty, rotz;
 	m_view->GetClippingPlaneRotations(rotx, roty, rotz);
 	//x
-	m_x_rot_text->ChangeValue(wxString::Format("%.1f", double(rotx)));
-	m_x_rot_sldr->ChangeValue(std::round(rotx));
+	if (update_all || FOUND_VALUE(gstClipRotX))
+	{
+		m_x_rot_text->ChangeValue(wxString::Format("%.1f", double(rotx)));
+		m_x_rot_sldr->ChangeValue(std::round(rotx));
+	}
 	//y
-	m_y_rot_text->ChangeValue(wxString::Format("%.1f", double(roty)));
-	m_y_rot_sldr->ChangeValue(std::round(roty));
+	if (update_all || FOUND_VALUE(gstClipRotY))
+	{
+		m_y_rot_text->ChangeValue(wxString::Format("%.1f", double(roty)));
+		m_y_rot_sldr->ChangeValue(std::round(roty));
+	}
 	//z
-	m_z_rot_text->ChangeValue(wxString::Format("%.1f", double(rotz)));
-	m_z_rot_sldr->ChangeValue(std::round(rotz));
+	if (update_all || FOUND_VALUE(gstClipRotZ))
+	{
+		m_z_rot_text->ChangeValue(wxString::Format("%.1f", double(rotz)));
+		m_z_rot_sldr->ChangeValue(std::round(rotz));
+	}
 
 	EnableAll(true);
 
@@ -674,7 +745,7 @@ void ClippingView::SetHoldPlanes(bool hold)
 void ClippingView::SetPlaneMode(PLANE_MODES mode)
 {
 	m_plane_mode = mode;
-	FluoRefresh(false, true, false);
+	FluoRefresh(false, true, 2);
 }
 
 int ClippingView::GetSelType()
@@ -717,7 +788,24 @@ void ClippingView::SetMeshData(MeshData* md)
 	m_sel_type = 3;
 }
 
-void ClippingView::OnLinkChannelsBtn(wxCommandEvent &event)
+void ClippingView::OnToolbar(wxCommandEvent& event)
+{
+	int id = event.GetId();
+	switch (id)
+	{
+	case ID_LinkChannelsBtn:
+		LinkChannels();
+		break;
+	case ID_HoldPlanesBtn:
+		HoldPlanes();
+		break;
+	case ID_PlaneModesBtn:
+		SetPlaneMode();
+		break;
+	}
+}
+
+void ClippingView::LinkChannels()
 {
 	m_chann_link = m_toolbar->GetToolState(ID_LinkChannelsBtn);
 	if (m_chann_link)
@@ -748,43 +836,17 @@ void ClippingView::OnLinkChannelsBtn(wxCommandEvent &event)
 		long z2_val = 0;
 		str.ToLong(&z2_val);
 
-		int i;
-
-		for (i=0; i< glbin_data_manager.GetVolumeNum(); i++)
-		{
-			VolumeData* vd = glbin_data_manager.GetVolumeData(i);
-			if (!vd || vd == m_vd)
-				continue;
-
-			vector<fluo::Plane*> *planes = 0;
-			if (vd->GetVR())
-				planes = vd->GetVR()->get_planes();
-			if (!planes)
-				continue;
-			if (planes->size() != 6)
-				continue;
-
-			int resx, resy, resz;
-			vd->GetResolution(resx, resy, resz);
-
-			(*planes)[0]->ChangePlane(fluo::Point(double(x1_val)/double(resx), 0.0, 0.0), fluo::Vector(1.0, 0.0, 0.0));
-			(*planes)[1]->ChangePlane(fluo::Point(double(x2_val)/double(resx), 0.0, 0.0), fluo::Vector(-1.0, 0.0, 0.0));
-			(*planes)[2]->ChangePlane(fluo::Point(0.0, double(y1_val)/double(resy), 0.0), fluo::Vector(0.0, 1.0, 0.0));
-			(*planes)[3]->ChangePlane(fluo::Point(0.0, double(y2_val)/double(resy), 0.0), fluo::Vector(0.0, -1.0, 0.0));
-			(*planes)[4]->ChangePlane(fluo::Point(0.0, 0.0, double(z1_val)/double(resz)), fluo::Vector(0.0, 0.0, 1.0));
-			(*planes)[5]->ChangePlane(fluo::Point(0.0, 0.0, double(z2_val)/double(resz)), fluo::Vector(0.0, 0.0, -1.0));
-		}
-
-		FluoRefresh(false, true, false);
+		int val[6] = { x1_val, x2_val, y1_val, y2_val, z1_val, z2_val };
+		SetClipValues(val);
 	}
 }
 
-void ClippingView::OnHoldPlanesBtn(wxCommandEvent &event)
+void ClippingView::HoldPlanes()
 {
 	m_hold_planes = m_toolbar->GetToolState(ID_HoldPlanesBtn);
 }
 
-void ClippingView::OnPlaneModesBtn(wxCommandEvent &event)
+void ClippingView::SetPlaneMode()
 {
 	switch (m_plane_mode)
 	{
@@ -815,102 +877,114 @@ void ClippingView::OnPlaneModesBtn(wxCommandEvent &event)
 
 void ClippingView::OnClipResetBtn(wxCommandEvent &event)
 {
-	if (!m_vd)
-		return;
-	int resx, resy, resz;
-	m_vd->GetResolution(resx, resy, resz);
-
-	vector<fluo::Plane*> *planes = 0;
-	if (m_vd->GetVR())
-		planes = m_vd->GetVR()->get_planes();
-	if(!planes)
-		return;
-	if (planes->size()!=6)
-		return;
-
-	fluo::Plane* plane = (*planes)[0];
-	plane->ChangePlane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(1.0, 0.0, 0.0));
-	plane = (*planes)[1];
-	plane->ChangePlane(fluo::Point(1.0, 0.0, 0.0), fluo::Vector(-1.0, 0.0, 0.0));
-	plane = (*planes)[2];
-	plane->ChangePlane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(0.0, 1.0, 0.0));
-	plane = (*planes)[3];
-	plane->ChangePlane(fluo::Point(0.0, 1.0, 0.0), fluo::Vector(0.0, -1.0, 0.0));
-	plane = (*planes)[4];
-	plane->ChangePlane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(0.0, 0.0, 1.0));
-	plane = (*planes)[5];
-	plane->ChangePlane(fluo::Point(0.0, 0.0, 1.0), fluo::Vector(0.0, 0.0, -1.0));
-
-	//links
-	SetXLink(false);
-	SetYLink(false);
-	SetZLink(false);
-
-	//controls
-	//texts
-	//m_x1_clip_text->SetValue("0");
-	//m_x2_clip_text->SetValue(wxString::Format("%d", resx));
-	//m_y1_clip_text->SetValue("0");
-	//m_y2_clip_text->SetValue(wxString::Format("%d", resy));
-	//m_z1_clip_text->SetValue("0");
-	//m_z2_clip_text->SetValue(wxString::Format("%d", resz));
-
-	//link
-	if (m_chann_link)
-	{
-		int i;
-		for (i=0; i< glbin_data_manager.GetVolumeNum(); i++)
-		{
-			VolumeData* vd = glbin_data_manager.GetVolumeData(i);
-			if (!vd || vd == m_vd)
-				continue;
-
-			planes = 0;
-			if (m_vd->GetVR())
-				planes = vd->GetVR()->get_planes();
-			if (!planes)
-				continue;
-			if (planes->size() != 6)
-				continue;
-
-			(*planes)[0]->ChangePlane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(1.0, 0.0, 0.0));
-			(*planes)[1]->ChangePlane(fluo::Point(1.0, 0.0, 0.0), fluo::Vector(-1.0, 0.0, 0.0));
-			(*planes)[2]->ChangePlane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(0.0, 1.0, 0.0));
-			(*planes)[3]->ChangePlane(fluo::Point(0.0, 1.0, 0.0), fluo::Vector(0.0, -1.0, 0.0));
-			(*planes)[4]->ChangePlane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(0.0, 0.0, 1.0));
-			(*planes)[5]->ChangePlane(fluo::Point(0.0, 0.0, 1.0), fluo::Vector(0.0, 0.0, -1.0));
-		}
-	}
-
-	//views
-	m_view->m_clip_mask = -1;
-	m_view->UpdateClips();
-	FluoRefresh(false, true, false);
+	ResetClipValues();
 }
 
-void ClippingView::OnX1ClipChange(wxScrollEvent &event)
+void ClippingView::SyncClipValue(int i)
 {
-	bool bval = m_x1_clip_sldr->GetLink();
-	if (bval != m_linkx_tb->GetToolState(ID_LinkXChk))
+	int val1, val2;
+	switch (i)
 	{
-		m_linkx_tb->ToggleTool(ID_LinkXChk, bval);
-		if (bval)
-			m_linkx_tb->SetToolNormalBitmap(ID_LinkXChk,
-				wxGetBitmapFromMemory(link));
-		else
-			m_linkx_tb->SetToolNormalBitmap(ID_LinkXChk,
-				wxGetBitmapFromMemory(unlink));
+	case 0:
+		val1 = m_clipx_sldr->GetLowValue();
+		val2 = m_clipx_sldr->GetHighValue();
+		SetClipValues(3, val1, val2);
+		break;
+	case 1:
+		val1 = m_clipy_sldr->GetLowValue();
+		val2 = m_clipy_sldr->GetHighValue();
+		SetClipValues(12, val1, val2);
+		break;
+	case 2:
+		val1 = m_clipz_sldr->GetLowValue();
+		val2 = m_clipz_sldr->GetHighValue();
+		SetClipValues(48, val1, val2);
+		break;
 	}
+}
 
-	int ival = m_x1_clip_sldr->GetLowValue();
-	wxString str = wxString::Format("%d", ival);
-	if (str != m_x1_clip_text->GetValue())
-		m_x1_clip_text->SetValue(str);
+void ClippingView::OnClipXMF(wxCommandEvent& event)
+{
+	switch (glbin_settings.m_mulfunc)
+	{
+	case 0:
+		SyncClipValue(0);
+		break;
+	case 1:
+		SetFocusVRenderViews(m_clipx_sldr);
+		break;
+	case 2:
+		ResetClipValuesX();
+		break;
+	case 3:
+		break;
+	case 4:
+		m_clipx_sldr->Undo();
+		break;
+	case 5:
+		break;
+	}
+}
 
-	ival = m_x1_clip_sldr->GetHighValue();
-	str = wxString::Format("%d", ival);
-	if (str != m_x2_clip_text->GetValue())
-		m_x2_clip_text->SetValue(str);
+void ClippingView::OnClipYMF(wxCommandEvent& event)
+{
+	switch (glbin_settings.m_mulfunc)
+	{
+	case 0:
+		SyncClipValue(1);
+		break;
+	case 1:
+		SetFocusVRenderViews(m_clipy_sldr);
+		break;
+	case 2:
+		ResetClipValuesY();
+		break;
+	case 3:
+		break;
+	case 4:
+		m_clipy_sldr->Undo();
+		break;
+	case 5:
+		break;
+	}
+}
+
+void ClippingView::OnClipZMF(wxCommandEvent& event)
+{
+	switch (glbin_settings.m_mulfunc)
+	{
+	case 0:
+		SyncClipValue(2);
+		break;
+	case 1:
+		SetFocusVRenderViews(m_clipz_sldr);
+		break;
+	case 2:
+		ResetClipValuesZ();
+		break;
+	case 3:
+		break;
+	case 4:
+		m_clipz_sldr->Undo();
+		break;
+	case 5:
+		break;
+	}
+}
+
+void ClippingView::OnClipXChange(wxScrollEvent &event)
+{
+	int ival1 = m_clipx_sldr->GetLowValue();
+	int ival2 = m_clipx_sldr->GetHighValue();
+	wxString str = event.GetString();
+	int i = 0;
+	if (str.Find("low") != wxNOT_FOUND)
+		i = 1;
+	else if (str.Find("high") != wxNOT_FOUND)
+		i = 2;
+	else
+		i = 3;
+	SetClipValues(i, ival1, ival2);
 }
 
 void ClippingView::OnX1ClipEdit(wxCommandEvent &event)
@@ -918,7 +992,7 @@ void ClippingView::OnX1ClipEdit(wxCommandEvent &event)
 	wxString str = m_x1_clip_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
-	bool link = m_x1_clip_sldr->GetLink();
+	bool link = m_clipx_sldr->GetLink();
 	SetClipValue(0, ival, link);
 }
 
@@ -927,33 +1001,23 @@ void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
 	wxString str = m_x2_clip_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
-	bool link = m_x1_clip_sldr->GetLink();
+	bool link = m_clipx_sldr->GetLink();
 	SetClipValue(1, ival, link);
 }
 
-void ClippingView::OnY1ClipChange(wxScrollEvent &event)
+void ClippingView::OnClipYChange(wxScrollEvent &event)
 {
-	bool bval = m_y1_clip_sldr->GetLink();
-	if (bval != m_linky_tb->GetToolState(ID_LinkYChk))
-	{
-		m_linky_tb->ToggleTool(ID_LinkYChk, bval);
-		if (bval)
-			m_linky_tb->SetToolNormalBitmap(ID_LinkYChk,
-				wxGetBitmapFromMemory(link));
-		else
-			m_linky_tb->SetToolNormalBitmap(ID_LinkYChk,
-				wxGetBitmapFromMemory(unlink));
-	}
-
-	int ival = m_y1_clip_sldr->GetLowValue();
-	wxString str = wxString::Format("%d", ival);
-	if (str != m_y1_clip_text->GetValue())
-		m_y1_clip_text->SetValue(str);
-
-	ival = m_y1_clip_sldr->GetHighValue();
-	str = wxString::Format("%d", ival);
-	if (str != m_y2_clip_text->GetValue())
-		m_y2_clip_text->SetValue(str);
+	int ival1 = m_clipy_sldr->GetLowValue();
+	int ival2 = m_clipy_sldr->GetHighValue();
+	wxString str = event.GetString();
+	int i = 0;
+	if (str.Find("low") != wxNOT_FOUND)
+		i = 4;
+	else if (str.Find("high") != wxNOT_FOUND)
+		i = 8;
+	else
+		i = 12;
+	SetClipValues(i, ival1, ival2);
 }
 
 void ClippingView::OnY1ClipEdit(wxCommandEvent &event)
@@ -961,7 +1025,7 @@ void ClippingView::OnY1ClipEdit(wxCommandEvent &event)
 	wxString str = m_y1_clip_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
-	bool link = m_y1_clip_sldr->GetLink();
+	bool link = m_clipy_sldr->GetLink();
 	SetClipValue(2, ival, link);
 }
 
@@ -970,33 +1034,23 @@ void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
 	wxString str = m_y2_clip_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
-	bool link = m_y1_clip_sldr->GetLink();
+	bool link = m_clipy_sldr->GetLink();
 	SetClipValue(3, ival, link);
 }
 
-void ClippingView::OnZ1ClipChange(wxScrollEvent &event)
+void ClippingView::OnClipZChange(wxScrollEvent &event)
 {
-	bool bval = m_z1_clip_sldr->GetLink();
-	if (bval != m_linkz_tb->GetToolState(ID_LinkZChk))
-	{
-		m_linkz_tb->ToggleTool(ID_LinkZChk, bval);
-		if (bval)
-			m_linkz_tb->SetToolNormalBitmap(ID_LinkZChk,
-				wxGetBitmapFromMemory(link));
-		else
-			m_linkz_tb->SetToolNormalBitmap(ID_LinkZChk,
-				wxGetBitmapFromMemory(unlink));
-	}
-
-	int ival = m_z1_clip_sldr->GetLowValue();
-	wxString str = wxString::Format("%d", ival);
-	if (str != m_z1_clip_text->GetValue())
-		m_z1_clip_text->SetValue(str);
-
-	ival = m_z1_clip_sldr->GetHighValue();
-	str = wxString::Format("%d", ival);
-	if (str != m_z2_clip_text->GetValue())
-		m_z2_clip_text->SetValue(str);
+	int ival1 = m_clipz_sldr->GetLowValue();
+	int ival2 = m_clipz_sldr->GetHighValue();
+	wxString str = event.GetString();
+	int i = 0;
+	if (str.Find("low") != wxNOT_FOUND)
+		i = 16;
+	else if (str.Find("high") != wxNOT_FOUND)
+		i = 32;
+	else
+		i = 48;
+	SetClipValues(i, ival1, ival2);
 }
 
 void ClippingView::OnZ1ClipEdit(wxCommandEvent &event)
@@ -1004,7 +1058,7 @@ void ClippingView::OnZ1ClipEdit(wxCommandEvent &event)
 	wxString str = m_z1_clip_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
-	bool link = m_z1_clip_sldr->GetLink();
+	bool link = m_clipz_sldr->GetLink();
 	SetClipValue(4, ival, link);
 }
 
@@ -1013,7 +1067,7 @@ void ClippingView::OnZ2ClipEdit(wxCommandEvent &event)
 	wxString str = m_z2_clip_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
-	bool link = m_z1_clip_sldr->GetLink();
+	bool link = m_clipz_sldr->GetLink();
 	SetClipValue(5, ival, link);
 }
 
@@ -1060,50 +1114,50 @@ void ClippingView::OnIdle(wxIdleEvent &event)
 
 bool ClippingView::GetXLink()
 {
-	return m_x1_clip_sldr->GetLink();
+	return m_clipx_sldr->GetLink();
 }
 bool ClippingView::GetYLink()
 {
-	return m_y1_clip_sldr->GetLink();
+	return m_clipy_sldr->GetLink();
 }
 bool ClippingView::GetZLink()
 {
-	return m_z1_clip_sldr->GetLink();
+	return m_clipz_sldr->GetLink();
 }
 
 void ClippingView::SetXLink(bool val)
 {
-	m_x1_clip_sldr->SetLink(val);
-	m_linkx_tb->ToggleTool(ID_LinkXChk, val);
+	m_clipx_sldr->SetLink(val);
+	m_linkx_tb->ToggleTool(0, val);
 	if (val)
-		m_linkx_tb->SetToolNormalBitmap(ID_LinkXChk,
+		m_linkx_tb->SetToolNormalBitmap(0,
 			wxGetBitmapFromMemory(link));
 	else
-		m_linkx_tb->SetToolNormalBitmap(ID_LinkXChk,
+		m_linkx_tb->SetToolNormalBitmap(0,
 			wxGetBitmapFromMemory(unlink));
 }
 
 void ClippingView::SetYLink(bool val)
 {
-	m_y1_clip_sldr->SetLink(val);
-	m_linky_tb->ToggleTool(ID_LinkYChk, val);
+	m_clipy_sldr->SetLink(val);
+	m_linky_tb->ToggleTool(0, val);
 	if (val)
-		m_linky_tb->SetToolNormalBitmap(ID_LinkYChk,
+		m_linky_tb->SetToolNormalBitmap(0,
 			wxGetBitmapFromMemory(link));
 	else
-		m_linky_tb->SetToolNormalBitmap(ID_LinkYChk,
+		m_linky_tb->SetToolNormalBitmap(0,
 			wxGetBitmapFromMemory(unlink));
 }
 
 void ClippingView::SetZLink(bool val)
 {
-	m_z1_clip_sldr->SetLink(val);
-	m_linkz_tb->ToggleTool(ID_LinkZChk, val);
+	m_clipz_sldr->SetLink(val);
+	m_linkz_tb->ToggleTool(0, val);
 	if (val)
-		m_linkz_tb->SetToolNormalBitmap(ID_LinkZChk,
+		m_linkz_tb->SetToolNormalBitmap(0,
 			wxGetBitmapFromMemory(link));
 	else
-		m_linkz_tb->SetToolNormalBitmap(ID_LinkZChk,
+		m_linkz_tb->SetToolNormalBitmap(0,
 			wxGetBitmapFromMemory(unlink));
 }
 
@@ -1116,41 +1170,180 @@ void ClippingView::SetClipValue(int i, int val, bool link)
 	else
 		m_vd->SetClipValue(i, val);
 
-	if (link)
-		m_view->m_clip_mask = 3;
-	else
-		m_view->m_clip_mask = 1;
+	switch (i)
+	{
+	case 0:
+		m_view->m_clip_mask = link ? 3 : 1;
+		break;
+	case 1:
+		m_view->m_clip_mask = link ? 3 : 2;
+		break;
+	case 2:
+		m_view->m_clip_mask = link ? 12 : 4;
+		break;
+	case 3:
+		m_view->m_clip_mask = link ? 12 : 8;
+		break;
+	case 4:
+		m_view->m_clip_mask = link ? 48 : 16;
+		break;
+	case 5:
+		m_view->m_clip_mask = link ? 48 : 32;
+		break;
+	}
 	m_view->UpdateClips();
 
-	FluoRefresh(false, true, false);
+	FluoRefresh(false, true, 2);
 }
 
-void ClippingView::SetClippingPlaneRotations(double rotx, double roty, double rotz)
+void ClippingView::SetClipValues(int i, int val1, int val2)
 {
-	m_x_rot_sldr->SetValue(std::round(rotx));
-	m_y_rot_sldr->SetValue(std::round(roty));
-	m_z_rot_sldr->SetValue(std::round(rotz));
-	m_x_rot_text->SetValue(wxString::Format("%.1f", rotx));
-	m_y_rot_text->SetValue(wxString::Format("%.1f", roty));
-	m_z_rot_text->SetValue(wxString::Format("%.1f", rotz));
+	if (!m_vd || !m_view)
+		return;
+	if (m_chann_link)
+		m_view->SetClipValues(i, val1, val2);
+	else
+		m_vd->SetClipValues(i, val1, val2);
+
+	m_view->m_clip_mask = i;
+	m_view->UpdateClips();
+
+	FluoRefresh(false, true, 2);
+}
+
+void ClippingView::SetClipValues(const int val[6])
+{
+	if (!m_vd || !m_view)
+		return;
+	if (m_chann_link)
+		m_view->SetClipValues(val);
+	else
+		m_vd->SetClipValues(val);
+	m_view->m_clip_mask = 63;
+	m_view->UpdateClips();
+
+	FluoRefresh(false, true, 2);
+}
+
+void ClippingView::ResetClipValues()
+{
+	if (!m_vd || !m_view)
+		return;
+	if (m_chann_link)
+		m_view->ResetClipValues();
+	else
+		m_vd->ResetClipValues();
+	m_view->m_clip_mask = -1;
+	m_view->UpdateClips();
+
+	//links
+	SetXLink(false);
+	SetYLink(false);
+	SetZLink(false);
+
+	FluoRefresh(false, true, 2);
+}
+
+void ClippingView::ResetClipValuesX()
+{
+	if (!m_vd || !m_view)
+		return;
+	if (m_chann_link)
+		m_view->ResetClipValuesX();
+	else
+		m_vd->ResetClipValuesX();
+	m_view->m_clip_mask = -1;
+	m_view->UpdateClips();
+
+	//links
+	SetXLink(false);
+
+	FluoRefresh(false, true, 2);
+}
+
+void ClippingView::ResetClipValuesY()
+{
+	if (!m_vd || !m_view)
+		return;
+	if (m_chann_link)
+		m_view->ResetClipValuesY();
+	else
+		m_vd->ResetClipValuesY();
+	m_view->m_clip_mask = -1;
+	m_view->UpdateClips();
+
+	//links
+	SetYLink(false);
+
+	FluoRefresh(false, true, 2);
+}
+
+void ClippingView::ResetClipValuesZ()
+{
+	if (!m_vd || !m_view)
+		return;
+	if (m_chann_link)
+		m_view->ResetClipValuesZ();
+	else
+		m_vd->ResetClipValuesZ();
+	m_view->m_clip_mask = -1;
+	m_view->UpdateClips();
+
+	//links
+	SetZLink(false);
+
+	FluoRefresh(false, true, 2);
 }
 
 void ClippingView::OnLinkXCheck(wxCommandEvent &event)
 {
-	bool link = m_linkx_tb->GetToolState(ID_LinkXChk);
+	bool link = m_linkx_tb->GetToolState(0);
 	SetXLink(link);
 }
 
 void ClippingView::OnLinkYCheck(wxCommandEvent &event)
 {
-	bool link = m_linky_tb->GetToolState(ID_LinkYChk);
+	bool link = m_linky_tb->GetToolState(0);
 	SetYLink(link);
 }
 
 void ClippingView::OnLinkZCheck(wxCommandEvent &event)
 {
-	bool link = m_linkz_tb->GetToolState(ID_LinkZChk);
+	bool link = m_linkz_tb->GetToolState(0);
 	SetZLink(link);
+}
+
+void ClippingView::OnClipDistXEdit(wxCommandEvent& event)
+{
+	if (!m_vd)
+		return;
+
+	wxString str = m_yz_dist_text->GetValue();
+	long val;
+	if (str.ToLong(&val))
+		m_vd->SetClipDistX(val);
+}
+
+void ClippingView::OnClipDistYEdit(wxCommandEvent& event)
+{
+	if (!m_vd)
+		return;
+
+	wxString str = m_xz_dist_text->GetValue();
+	long val;
+	if (str.ToLong(&val))
+		m_vd->SetClipDistY(val);
+}
+
+void ClippingView::OnClipDistZEdit(wxCommandEvent& event)
+{
+	if (!m_vd)
+		return;
+
+	wxString str = m_xy_dist_text->GetValue();
+	long val;
+	if (str.ToLong(&val))
+		m_vd->SetClipDistZ(val);
 }
 
 void ClippingView::OnSetZeroBtn(wxCommandEvent &event)
@@ -1159,15 +1352,7 @@ void ClippingView::OnSetZeroBtn(wxCommandEvent &event)
 		return;
 
 	m_view->SetClipMode(2);
-	m_view->RefreshGL(51);
-	double rotx, roty, rotz;
-	m_view->GetClippingPlaneRotations(rotx, roty, rotz);
-	m_x_rot_sldr->SetValue(std::round(rotx));
-	m_y_rot_sldr->SetValue(std::round(roty));
-	m_z_rot_sldr->SetValue(std::round(rotz));
-	m_x_rot_text->ChangeValue(wxString::Format("%.1f", rotx));
-	m_y_rot_text->ChangeValue(wxString::Format("%.1f", roty));
-	m_z_rot_text->ChangeValue(wxString::Format("%.1f", rotz));
+	FluoRefresh(false, true, 2);
 }
 
 void ClippingView::OnRotResetBtn(wxCommandEvent &event)
@@ -1177,23 +1362,86 @@ void ClippingView::OnRotResetBtn(wxCommandEvent &event)
 
 	//reset rotations
 	m_view->SetClippingPlaneRotations(0.0, 0.0, 0.0);
-	m_view->RefreshGL(51);
+	FluoRefresh(false, true, 2);
+}
 
-	wxString str = "0.0";
-	m_x_rot_sldr->SetValue(0);
-	m_x_rot_text->ChangeValue(str);
-	m_y_rot_sldr->SetValue(0);
-	m_y_rot_text->ChangeValue(str);
-	m_z_rot_sldr->SetValue(0);
-	m_z_rot_text->ChangeValue(str);
+void ClippingView::OnRotXMF(wxCommandEvent& event)
+{
+	switch (glbin_settings.m_mulfunc)
+	{
+	case 0:
+		break;
+	case 1:
+		SetFocusVRenderViews(m_x_rot_sldr);
+		break;
+	case 2:
+		if (m_view) m_view->SetClipRotX(0.0);
+		FluoRefresh(false, true, 2);
+		break;
+	case 3:
+		break;
+	case 4:
+		m_x_rot_sldr->Undo();
+		break;
+	case 5:
+		break;
+	}
+}
+
+void ClippingView::OnRotYMF(wxCommandEvent& event)
+{
+	switch (glbin_settings.m_mulfunc)
+	{
+	case 0:
+		break;
+	case 1:
+		SetFocusVRenderViews(m_y_rot_sldr);
+		break;
+	case 2:
+		if (m_view) m_view->SetClipRotY(0.0);
+		FluoRefresh(false, true, 2);
+		break;
+	case 3:
+		break;
+	case 4:
+		m_y_rot_sldr->Undo();
+		break;
+	case 5:
+		break;
+	}
+}
+
+void ClippingView::OnRotZMF(wxCommandEvent& event)
+{
+	switch (glbin_settings.m_mulfunc)
+	{
+	case 0:
+		break;
+	case 1:
+		SetFocusVRenderViews(m_z_rot_sldr);
+		break;
+	case 2:
+		if (m_view) m_view->SetClipRotZ(0.0);
+		FluoRefresh(false, true, 2);
+		break;
+	case 3:
+		break;
+	case 4:
+		m_z_rot_sldr->Undo();
+		break;
+	case 5:
+		break;
+	}
 }
 
 void ClippingView::OnXRotChange(wxScrollEvent &event)
 {
+	if (!m_view)
+		return;
+
 	int val = m_x_rot_sldr->GetValue();
-	wxString str = wxString::Format("%.1f", double(val));
-	if (str != m_x_rot_text->GetValue())
-		m_x_rot_text->SetValue(str);
+	m_view->SetClipRotX(val);
+	FluoRefresh(false, true, 2);
 }
 
 void ClippingView::OnXRotEdit(wxCommandEvent &event)
@@ -1204,20 +1452,18 @@ void ClippingView::OnXRotEdit(wxCommandEvent &event)
 	wxString str = m_x_rot_text->GetValue();
 	double val = 0.0;
 	str.ToDouble(&val);
-	m_x_rot_sldr->SetValue(std::round(val));
-
-	double rotx, roty, rotz;
-	m_view->GetClippingPlaneRotations(rotx, roty, rotz);
-	m_view->SetClippingPlaneRotations(val, roty, rotz);
-	m_view->RefreshGL(51);
+	m_view->SetClipRotX(val);
+	FluoRefresh(false, true, 2);
 }
 
 void ClippingView::OnYRotChange(wxScrollEvent &event)
 {
+	if (!m_view)
+		return;
+
 	int val = m_y_rot_sldr->GetValue();
-	wxString str = wxString::Format("%.1f", double(val));
-	if (str != m_y_rot_text->GetValue())
-		m_y_rot_text->SetValue(str);
+	m_view->SetClipRotY(val);
+	FluoRefresh(false, true, 2);
 }
 
 void ClippingView::OnYRotEdit(wxCommandEvent &event)
@@ -1228,35 +1474,30 @@ void ClippingView::OnYRotEdit(wxCommandEvent &event)
 	wxString str = m_y_rot_text->GetValue();
 	double val = 0.0;
 	str.ToDouble(&val);
-	m_y_rot_sldr->SetValue(std::round(val));
-
-	double rotx, roty, rotz;
-	m_view->GetClippingPlaneRotations(rotx, roty, rotz);
-	m_view->SetClippingPlaneRotations(rotx, val, rotz);
-	m_view->RefreshGL(51);
+	m_view->SetClipRotY(val);
+	FluoRefresh(false, true, 2);
 }
 
 void ClippingView::OnZRotChange(wxScrollEvent &event)
 {
+	if (!m_view)
+		return;
+
 	int val = m_z_rot_sldr->GetValue();
-	wxString str = wxString::Format("%.1f", double(val));
-	if (str != m_z_rot_text->GetValue())
-		m_z_rot_text->SetValue(str);
+	m_view->SetClipRotZ(val);
+	FluoRefresh(false, true, 2);
 }
 
 void ClippingView::OnZRotEdit(wxCommandEvent &event)
 {
 	if (!m_view)
 		return;
+
 	wxString str = m_z_rot_text->GetValue();
 	double val = 0.0;
 	str.ToDouble(&val);
-	m_z_rot_sldr->SetValue(std::round(val));
-
-	double rotx, roty, rotz;
-	m_view->GetClippingPlaneRotations(rotx, roty, rotz);
-	m_view->SetClippingPlaneRotations(rotx, roty, val);
-	m_view->RefreshGL(51);
+	m_view->SetClipRotZ(val);
+	FluoRefresh(false, true, 2);
 }
 
 void ClippingView::OnXRotSpinUp(wxSpinEvent& event)
@@ -1267,8 +1508,8 @@ void ClippingView::OnXRotSpinUp(wxSpinEvent& event)
 	val += glbin_settings.m_inverse_slider ? -1 : 1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
-	wxString str = wxString::Format("%.1f", val);
-	m_x_rot_text->SetValue(str);
+	m_view->SetClipRotX(val);
+	FluoRefresh(false, true, 2);
 }
 
 void ClippingView::OnXRotSpinDown(wxSpinEvent& event)
@@ -1279,8 +1520,8 @@ void ClippingView::OnXRotSpinDown(wxSpinEvent& event)
 	val += glbin_settings.m_inverse_slider ? 1 : -1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
-	wxString str = wxString::Format("%.1f", val);
-	m_x_rot_text->SetValue(str);
+	m_view->SetClipRotX(val);
+	FluoRefresh(false, true, 2);
 }
 
 void ClippingView::OnYRotSpinUp(wxSpinEvent& event)
@@ -1291,8 +1532,8 @@ void ClippingView::OnYRotSpinUp(wxSpinEvent& event)
 	val += glbin_settings.m_inverse_slider ? -1 : 1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
-	wxString str = wxString::Format("%.1f", val);
-	m_y_rot_text->SetValue(str);
+	m_view->SetClipRotY(val);
+	FluoRefresh(false, true, 2);
 }
 
 void ClippingView::OnYRotSpinDown(wxSpinEvent& event)
@@ -1303,8 +1544,8 @@ void ClippingView::OnYRotSpinDown(wxSpinEvent& event)
 	val += glbin_settings.m_inverse_slider ? 1 : -1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
-	wxString str = wxString::Format("%.1f", val);
-	m_y_rot_text->SetValue(str);
+	m_view->SetClipRotY(val);
+	FluoRefresh(false, true, 2);
 }
 
 void ClippingView::OnZRotSpinUp(wxSpinEvent& event)
@@ -1315,8 +1556,8 @@ void ClippingView::OnZRotSpinUp(wxSpinEvent& event)
 	val += glbin_settings.m_inverse_slider ? -1 : 1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
-	wxString str = wxString::Format("%.1f", val);
-	m_z_rot_text->SetValue(str);
+	m_view->SetClipRotZ(val);
+	FluoRefresh(false, true, 2);
 }
 
 void ClippingView::OnZRotSpinDown(wxSpinEvent& event)
@@ -1327,157 +1568,99 @@ void ClippingView::OnZRotSpinDown(wxSpinEvent& event)
 	val += glbin_settings.m_inverse_slider ? 1 : -1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
-	wxString str = wxString::Format("%.1f", val);
-	m_z_rot_text->SetValue(str);
+	m_view->SetClipRotZ(val);
+	FluoRefresh(false, true, 2);
 }
 
-void ClippingView::OnSliderRClick(wxCommandEvent& event)
+void ClippingView::UpdateSampleRate()
 {
-	if (m_sel_type!=2 || !m_vd)
+	if (m_sel_type != 2 || !m_vd)
 		return;
 
-	int id = event.GetId();
-
-	wxString str;
-	double val;
-
 	//good rate
-	if (m_vd->GetSampleRate()<2.0)
+	if (m_vd->GetSampleRate() < 2.0)
 		m_vd->SetSampleRate(2.0);
 	if (m_chann_link)
 	{
 		int i;
-		for (i=0; i< glbin_data_manager.GetVolumeNum(); i++)
+		for (i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
 		{
 			VolumeData* vd = glbin_data_manager.GetVolumeData(i);
 			if (!vd || vd == m_vd)
 				continue;
-			if (vd->GetSampleRate()<2.0)
+			if (vd->GetSampleRate() < 2.0)
 				vd->SetSampleRate(2.0);
 		}
 	}
+}
+
+void ClippingView::OnClipXRClick(wxMouseEvent& event)
+{
+	if (m_sel_type != 2 || !m_vd)
+		return;
 
 	int resx, resy, resz;
 	m_vd->GetResolution(resx, resy, resz);
 
-	if (id == ID_X1ClipSldr)
-	{
-		str = m_x1_clip_text->GetValue();
-		str.ToDouble(&val);
-		if (val < resx)
-		{
-			SetXLink(false);
-			m_x2_clip_text->SetValue(
-				wxString::Format("%d", (int)(val+1.0)));
-			SetXLink(true);
-		}
-	}
-	else if (id == ID_X2ClipSldr)
-	{
-		str = m_x2_clip_text->GetValue();
-		str.ToDouble(&val);
-		if (val > 0)
-		{
-			SetXLink(false);
-			m_x1_clip_text->SetValue(
-				wxString::Format("%d", (int)(val-1.0)));
-			SetXLink(true);
-		}
-	}
-	else if (id == ID_Y1ClipSldr)
-	{
-		str = m_y1_clip_text->GetValue();
-		str.ToDouble(&val);
-		if (val < resy)
-		{
-			SetYLink(false);
-			m_y2_clip_text->SetValue(
-				wxString::Format("%d", (int)(val+1.0)));
-			SetYLink(true);
-		}
-	}
-	else if (id == ID_Y2ClipSldr)
-	{
-		str = m_y2_clip_text->GetValue();
-		str.ToDouble(&val);
-		if (val > 0)
-		{
-			SetYLink(false);
-			m_y1_clip_text->SetValue(
-				wxString::Format("%d", (int)(val-1.0)));
-			SetYLink(true);
-		}
-	}
-	else if (id == ID_Z1ClipSldr)
-	{
-		str = m_z1_clip_text->GetValue();
-		str.ToDouble(&val);
-		if (val < resz)
-		{
-			SetZLink(false);
-			m_z2_clip_text->SetValue(
-				wxString::Format("%d", (int)(val+1.0)));
-			SetZLink(true);
-		}
-	}
-	else if (id == ID_Z2ClipSldr)
-	{
-		str = m_z2_clip_text->GetValue();
-		str.ToDouble(&val);
-		if (val > 0)
-		{
-			SetZLink(false);
-			m_z1_clip_text->SetValue(
-				wxString::Format("%d", (int)(val-1.0)));
-			SetZLink(true);
-		}
-	}
+	SetXLink(true);
+	SetYLink(false);
+	SetZLink(false);
 
-	//reset others
-	vector<fluo::Plane*> *planes = 0;
-	if (m_vd->GetVR())
-		planes = m_vd->GetVR()->get_planes();
-	if(!planes)
-		return;
-	if (planes->size()!=6)
+	int clip = m_clipx_sldr->GetLowValue();
+	int val[6] =
+	{
+		clip,
+		clip + 1,
+		0, resy,
+		0, resz
+	};
+	SetClipValues(val);
+}
+
+void ClippingView::OnClipYRClick(wxMouseEvent& event)
+{
+	if (m_sel_type != 2 || !m_vd)
 		return;
 
-	if (id == ID_X1ClipSldr ||
-		id == ID_X2ClipSldr)
+	int resx, resy, resz;
+	m_vd->GetResolution(resx, resy, resz);
+
+	SetXLink(false);
+	SetYLink(true);
+	SetZLink(false);
+
+	int clip = m_clipy_sldr->GetLowValue();
+	int val[6] =
 	{
-		SetYLink(false);
-		SetZLink(false);
-		m_y1_clip_text->SetValue("0");
-		m_y2_clip_text->SetValue(
-			wxString::Format("%d", resy));
-		m_z1_clip_text->SetValue("0");
-		m_z2_clip_text->SetValue(
-			wxString::Format("%d", resz));
-	}
-	else if (id == ID_Y1ClipSldr ||
-		id == ID_Y2ClipSldr)
+		0, resx,
+		clip,
+		clip + 1,
+		0, resz
+	};
+	SetClipValues(val);
+}
+
+void ClippingView::OnClipZRClick(wxMouseEvent& event)
+{
+	if (m_sel_type != 2 || !m_vd)
+		return;
+
+	int resx, resy, resz;
+	m_vd->GetResolution(resx, resy, resz);
+
+	SetXLink(false);
+	SetYLink(false);
+	SetZLink(true);
+
+	int clip = m_clipz_sldr->GetLowValue();
+	int val[6] =
 	{
-		SetXLink(false);
-		SetZLink(false);
-		m_x1_clip_text->SetValue("0");
-		m_x2_clip_text->SetValue(
-			wxString::Format("%d", resx));
-		m_z1_clip_text->SetValue("0");
-		m_z2_clip_text->SetValue(
-			wxString::Format("%d", resz));
-	}
-	else if (id == ID_Z1ClipSldr ||
-		id == ID_Z2ClipSldr)
-	{
-		SetXLink(false);
-		SetYLink(false);
-		m_x1_clip_text->SetValue("0");
-		m_x2_clip_text->SetValue(
-			wxString::Format("%d", resx));
-		m_y1_clip_text->SetValue("0");
-		m_y2_clip_text->SetValue(
-			wxString::Format("%d", resy));
-	}
+		0, resx,
+		0, resy,
+		clip,
+		clip + 1
+	};
+	SetClipValues(val);
 }
 
 void ClippingView::OnYZClipBtn(wxCommandEvent& event)
@@ -1488,40 +1671,19 @@ void ClippingView::OnYZClipBtn(wxCommandEvent& event)
 	int resx, resy, resz;
 	m_vd->GetResolution(resx, resy, resz);
 
-	wxString str = m_yz_dist_text->GetValue();
-	long dist;
-	str.ToLong(&dist);
-
 	//reset yz
 	SetYLink(false);
 	SetZLink(false);
-	m_y1_clip_text->SetValue("0");
-	m_y2_clip_text->SetValue(
-		wxString::Format("%d", resy));
-	m_z1_clip_text->SetValue("0");
-	m_z2_clip_text->SetValue(
-		wxString::Format("%d", resz));
-
 	//set x
-	SetXLink(false);
-	if (dist < resx)
-	{
-		int x1 = resx/2-dist/2;
-		int x2 = x1 + dist;
-		m_x1_clip_text->SetValue(
-			wxString::Format("%d", x1));
-		m_x2_clip_text->SetValue(
-			wxString::Format("%d", x2));
-		SetXLink(true);
-	}
-	else
-	{
-		m_x1_clip_text->SetValue("0");
-		m_x2_clip_text->SetValue(
-			wxString::Format("%d", resx));
-	}
+	SetXLink(true);
 
-	m_x1_clip_sldr->SetFocus();
+	int val[6] = 
+	{
+		(resx - m_vd->GetClipDistX()) / 2,
+		(resx + m_vd->GetClipDistX()) / 2,
+		0, resy, 0, resz
+	};
+	SetClipValues(val);
 }
 
 void ClippingView::OnXZClipBtn(wxCommandEvent& event)
@@ -1532,40 +1694,20 @@ void ClippingView::OnXZClipBtn(wxCommandEvent& event)
 	int resx, resy, resz;
 	m_vd->GetResolution(resx, resy, resz);
 
-	wxString str = m_xz_dist_text->GetValue();
-	long dist;
-	str.ToLong(&dist);
-
 	//reset xz
 	SetXLink(false);
 	SetZLink(false);
-	m_x1_clip_text->SetValue("0");
-	m_x2_clip_text->SetValue(
-		wxString::Format("%d", resx));
-	m_z1_clip_text->SetValue("0");
-	m_z2_clip_text->SetValue(
-		wxString::Format("%d", resz));
-
 	//set y
-	SetYLink(false);
-	if (dist < resy)
-	{
-		int y1 = resy/2-dist/2;
-		int y2 = y1 + dist;
-		m_y1_clip_text->SetValue(
-			wxString::Format("%d", y1));
-		m_y2_clip_text->SetValue(
-			wxString::Format("%d", y2));
-		SetYLink(true);
-	}
-	else
-	{
-		m_y1_clip_text->SetValue("0");
-		m_y2_clip_text->SetValue(
-			wxString::Format("%d", resy));
-	}
+	SetYLink(true);
 
-	m_y1_clip_sldr->SetFocus();
+	int val[6] =
+	{
+		0, resx,
+		(resy - m_vd->GetClipDistY()) / 2,
+		(resy + m_vd->GetClipDistY()) / 2,
+		0, resz
+	};
+	SetClipValues(val);
 }
 
 void ClippingView::OnXYClipBtn(wxCommandEvent& event)
@@ -1576,40 +1718,20 @@ void ClippingView::OnXYClipBtn(wxCommandEvent& event)
 	int resx, resy, resz;
 	m_vd->GetResolution(resx, resy, resz);
 
-	wxString str = m_xy_dist_text->GetValue();
-	long dist;
-	str.ToLong(&dist);
-
 	//reset xy
 	SetXLink(false);
 	SetYLink(false);
-	m_x1_clip_text->SetValue("0");
-	m_x2_clip_text->SetValue(
-		wxString::Format("%d", resx));
-	m_y1_clip_text->SetValue("0");
-	m_y2_clip_text->SetValue(
-		wxString::Format("%d", resy));
-
 	//set z
-	SetZLink(false);
-	if (dist < resz)
-	{
-		int z1 = resz/2-dist/2;
-		int z2 = z1 + dist;
-		m_z1_clip_text->SetValue(
-			wxString::Format("%d", z1));
-		m_z2_clip_text->SetValue(
-			wxString::Format("%d", z2));
-		SetZLink(true);
-	}
-	else
-	{
-		m_z1_clip_text->SetValue("0");
-		m_z2_clip_text->SetValue(
-			wxString::Format("%d", resz));
-	}
+	SetZLink(true);
 
-	m_z1_clip_sldr->SetFocus();
+	int val[6] =
+	{
+		0, resx,
+		0, resy,
+		(resz - m_vd->GetClipDistZ()) / 2,
+		(resz + m_vd->GetClipDistZ()) / 2
+	};
+	SetClipValues(val);
 }
 
 //move linked clipping planes
@@ -1622,34 +1744,34 @@ void ClippingView::MoveLinkedClippingPlanes(int dir)
 	long dist;
 
 	//moving lower
-	if (m_x1_clip_sldr->GetLink())
+	if (m_clipx_sldr->GetLink())
 	{
 		str = m_yz_dist_text->GetValue();
 		str.ToLong(&dist);
 		dist = dist < 2 ? dist + 1 : dist;
-		m_x1_clip_sldr->Scroll(dir * dist);
+		m_clipx_sldr->Scroll(dir * dist);
 	}
-	if (m_y1_clip_sldr->GetLink())
+	if (m_clipy_sldr->GetLink())
 	{
 		str = m_xz_dist_text->GetValue();
 		str.ToLong(&dist);
 		dist = dist < 2 ? dist + 1 : dist;
-		m_y1_clip_sldr->Scroll(dir * dist);
+		m_clipy_sldr->Scroll(dir * dist);
 	}
-	if (m_z1_clip_sldr->GetLink())
+	if (m_clipz_sldr->GetLink())
 	{
 		str = m_xy_dist_text->GetValue();
 		str.ToLong(&dist);
 		dist = dist < 2 ? dist + 1 : dist;
-		m_z1_clip_sldr->Scroll(dir * dist);
+		m_clipz_sldr->Scroll(dir * dist);
 	}
 }
 
 void ClippingView::ClearUndo()
 {
-	m_x1_clip_sldr->Clear();
-	m_y1_clip_sldr->Clear();
-	m_z1_clip_sldr->Clear();
+	m_clipx_sldr->Clear();
+	m_clipy_sldr->Clear();
+	m_clipz_sldr->Clear();
 	m_x_rot_sldr->Clear();
 	m_y_rot_sldr->Clear();
 	m_z_rot_sldr->Clear();
@@ -1673,13 +1795,13 @@ void ClippingView::EnableAll(bool val)
 	m_x_rot_spin->Enable(val);
 	m_y_rot_spin->Enable(val);
 	m_z_rot_spin->Enable(val);
-	m_x1_clip_sldr->Enable(val);
+	m_clipx_sldr->Enable(val);
 	m_x1_clip_text->Enable(val);
 	m_x2_clip_text->Enable(val);
-	m_y1_clip_sldr->Enable(val);
+	m_clipy_sldr->Enable(val);
 	m_y1_clip_text->Enable(val);
 	m_y2_clip_text->Enable(val);
-	m_z1_clip_sldr->Enable(val);
+	m_clipz_sldr->Enable(val);
 	m_z1_clip_text->Enable(val);
 	m_z2_clip_text->Enable(val);
 	m_linkx_tb->Enable(val);

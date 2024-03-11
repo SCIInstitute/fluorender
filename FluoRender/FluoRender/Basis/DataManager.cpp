@@ -193,6 +193,10 @@ VolumeData::VolumeData()
 
 	//machine learning applied
 	m_ml_comp_gen_applied = false;
+
+	//m_clip
+	for (int i : { 0, 1, 2 })
+		m_clip_dist[i] = 1;
 }
 
 VolumeData::VolumeData(VolumeData &copy)
@@ -329,6 +333,11 @@ VolumeData::VolumeData(VolumeData &copy)
 
 	//transparent
 	m_transparent = false;
+
+	//m_clip
+	for (int i : { 0, 1, 2 })
+		m_clip_dist[i] = copy.m_clip_dist[i];
+
 }
 
 VolumeData::~VolumeData()
@@ -495,6 +504,12 @@ int VolumeData::Load(Nrrd* data, wxString &name, wxString &path)
 	}
 
 	m_bg_valid = false;
+
+	//clip distance
+	m_clip_dist[0] = std::max(1, m_res_x / 20);
+	m_clip_dist[1] = std::max(1, m_res_y / 20);
+	m_clip_dist[2] = std::max(1, m_res_z / 20);
+
 	return 1;
 }
 
@@ -528,6 +543,12 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 		delete tex;
 
 	m_bg_valid = false;
+
+	//clip distance
+	m_clip_dist[0] = std::max(1, m_res_x / 20);
+	m_clip_dist[1] = std::max(1, m_res_y / 20);
+	m_clip_dist[2] = std::max(1, m_res_z / 20);
+
 	return 1;
 }
 
@@ -654,6 +675,12 @@ void VolumeData::AddEmptyData(int bits,
 
 	SetMode(m_mode);
 	m_bg_valid = false;
+
+	//clip distance
+	m_clip_dist[0] = std::max(1, m_res_x / 20);
+	m_clip_dist[1] = std::max(1, m_res_y / 20);
+	m_clip_dist[2] = std::max(1, m_res_z / 20);
+
 }
 
 //volume mask
@@ -2677,6 +2704,217 @@ void VolumeData::SetClipValue(int i, int val)
 		break;
 	}
 	(*planes)[i]->ChangePlane(p, v);
+}
+
+void VolumeData::SetClipValues(int i, int val1, int val2)
+{
+	vector<fluo::Plane*>* planes = 0;
+	if (GetVR())
+		planes = GetVR()->get_planes();
+	if (!planes)
+		return;
+	if (planes->size() != 6)
+		return;
+
+	double clip1 = 0, clip2 = 0;
+	fluo::Point p1, p2;
+	fluo::Vector v1, v2;
+	switch (i)
+	{
+	case 1://x
+	case 2:
+	case 3:
+		clip1 = (double)val1 / m_res_x;
+		clip2 = (double)val2 / m_res_x;
+		p1 = fluo::Point(clip1, 0, 0);
+		v1 = fluo::Vector(1, 0, 0);
+		p2 = fluo::Point(clip2, 0, 0);
+		v2 = fluo::Vector(-1, 0, 0);
+		(*planes)[0]->ChangePlane(p1, v1);
+		(*planes)[1]->ChangePlane(p2, v2);
+		break;
+	case 4://y1
+	case 8:
+	case 12:
+		clip1 = (double)val1 / m_res_y;
+		clip2 = (double)val2 / m_res_y;
+		p1 = fluo::Point(0, clip1, 0);
+		v1 = fluo::Vector(0, 1, 0);
+		p2 = fluo::Point(0, clip2, 0);
+		v2 = fluo::Vector(0, -1, 0);
+		(*planes)[2]->ChangePlane(p1, v1);
+		(*planes)[3]->ChangePlane(p2, v2);
+		break;
+	case 16://z1
+	case 32:
+	case 48:
+		clip1 = (double)val1 / m_res_z;
+		clip2 = (double)val2 / m_res_z;
+		p1 = fluo::Point(0, 0, clip1);
+		v1 = fluo::Vector(0, 0, 1);
+		p2 = fluo::Point(0, 0, clip2);
+		v2 = fluo::Vector(0, 0, -1);
+		(*planes)[4]->ChangePlane(p1, v1);
+		(*planes)[5]->ChangePlane(p2, v2);
+		break;
+	}
+}
+
+void VolumeData::SetClipValues(const int val[6])
+{
+	vector<fluo::Plane*>* planes = 0;
+	if (GetVR())
+		planes = GetVR()->get_planes();
+	if (!planes)
+		return;
+	if (planes->size() != 6)
+		return;
+
+	double clip;
+	fluo::Point p;
+	fluo::Vector v;
+	for (int i : { 0, 1, 2, 3, 4, 5 })
+	{
+		switch (i)
+		{
+		case 0:
+			clip = (double)val[i] / m_res_x;
+			p = fluo::Point(clip, 0, 0);
+			v = fluo::Vector(1, 0, 0);
+			break;
+		case 1:
+			clip = (double)val[i] / m_res_x;
+			p = fluo::Point(clip, 0, 0);
+			v = fluo::Vector(-1, 0, 0);
+			break;
+		case 2:
+			clip = (double)val[i] / m_res_y;
+			p = fluo::Point(0, clip, 0);
+			v = fluo::Vector(0, 1, 0);
+			break;
+		case 3:
+			clip = (double)val[i] / m_res_y;
+			p = fluo::Point(0, clip, 0);
+			v = fluo::Vector(0, -1, 0);
+			break;
+		case 4:
+			clip = (double)val[i] / m_res_z;
+			p = fluo::Point(0, 0, clip);
+			v = fluo::Vector(0, 0, 1);
+			break;
+		case 5:
+			clip = (double)val[i] / m_res_z;
+			p = fluo::Point(0, 0, clip);
+			v = fluo::Vector(0, 0, -1);
+			break;
+		}
+		(*planes)[i]->ChangePlane(p, v);
+	}
+}
+
+void VolumeData::ResetClipValues()
+{
+	vector<fluo::Plane*>* planes = 0;
+	if (GetVR())
+		planes = GetVR()->get_planes();
+	if (!planes)
+		return;
+	if (planes->size() != 6)
+		return;
+
+	fluo::Point p;
+	fluo::Vector v;
+	for (int i : { 0, 1, 2, 3, 4, 5 })
+	{
+		switch (i)
+		{
+		case 0:
+			p = fluo::Point(0, 0, 0);
+			v = fluo::Vector(1, 0, 0);
+			break;
+		case 1:
+			p = fluo::Point(1, 0, 0);
+			v = fluo::Vector(-1, 0, 0);
+			break;
+		case 2:
+			p = fluo::Point(0, 0, 0);
+			v = fluo::Vector(0, 1, 0);
+			break;
+		case 3:
+			p = fluo::Point(0, 1, 0);
+			v = fluo::Vector(0, -1, 0);
+			break;
+		case 4:
+			p = fluo::Point(0, 0, 0);
+			v = fluo::Vector(0, 0, 1);
+			break;
+		case 5:
+			p = fluo::Point(0, 0, 1);
+			v = fluo::Vector(0, 0, -1);
+			break;
+		}
+		(*planes)[i]->ChangePlane(p, v);
+	}
+}
+
+void VolumeData::ResetClipValuesX()
+{
+	vector<fluo::Plane*>* planes = 0;
+	if (GetVR())
+		planes = GetVR()->get_planes();
+	if (!planes)
+		return;
+	if (planes->size() != 6)
+		return;
+
+	fluo::Point p;
+	fluo::Vector v;
+	p = fluo::Point(0, 0, 0);
+	v = fluo::Vector(1, 0, 0);
+	(*planes)[0]->ChangePlane(p, v);
+	p = fluo::Point(1, 0, 0);
+	v = fluo::Vector(-1, 0, 0);
+	(*planes)[1]->ChangePlane(p, v);
+}
+
+void VolumeData::ResetClipValuesY()
+{
+	vector<fluo::Plane*>* planes = 0;
+	if (GetVR())
+		planes = GetVR()->get_planes();
+	if (!planes)
+		return;
+	if (planes->size() != 6)
+		return;
+
+	fluo::Point p;
+	fluo::Vector v;
+	p = fluo::Point(0, 0, 0);
+	v = fluo::Vector(0, 1, 0);
+	(*planes)[2]->ChangePlane(p, v);
+	p = fluo::Point(0, 1, 0);
+	v = fluo::Vector(0, -1, 0);
+	(*planes)[3]->ChangePlane(p, v);
+}
+
+void VolumeData::ResetClipValuesZ()
+{
+	vector<fluo::Plane*>* planes = 0;
+	if (GetVR())
+		planes = GetVR()->get_planes();
+	if (!planes)
+		return;
+	if (planes->size() != 6)
+		return;
+
+	fluo::Point p;
+	fluo::Vector v;
+	p = fluo::Point(0, 0, 0);
+	v = fluo::Vector(0, 0, 1);
+	(*planes)[4]->ChangePlane(p, v);
+	p = fluo::Point(0, 0, 1);
+	v = fluo::Vector(0, 0, -1);
+	(*planes)[5]->ChangePlane(p, v);
 }
 
 //randomize color

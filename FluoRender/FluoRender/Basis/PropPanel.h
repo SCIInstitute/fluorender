@@ -47,7 +47,8 @@ public:
 	~PropPanel();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {}) = 0;
-	void FluoRefresh(bool tree = false, bool interactive = false, bool excl_self = true,
+	//excl_self: 0 - update all; 1 - exclude this; 2 - only this; 3 - update none
+	void FluoRefresh(bool tree = false, bool interactive = false, int excl_self = 1,
 		const fluo::ValueCollection& vc = {});
 	void SetFocusVRenderViews(wxBasisSlider* slider);
 

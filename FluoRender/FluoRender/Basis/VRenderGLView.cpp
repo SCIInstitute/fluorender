@@ -9111,16 +9111,21 @@ void VRenderGLView::RestorePlanes()
 	}
 }
 
+void VRenderGLView::ClipRotate()
+{
+	m_q_cl.FromEuler(m_rotx_cl, m_roty_cl, m_rotz_cl);
+	m_q_cl.Normalize();
+
+	SetRotations(m_rotx, m_roty, m_rotz);
+
+}
+
 void VRenderGLView::SetClippingPlaneRotations(double rotx, double roty, double rotz)
 {
 	m_rotx_cl = -rotx;
 	m_roty_cl = roty;
 	m_rotz_cl = rotz;
-
-	m_q_cl.FromEuler(m_rotx_cl, m_roty_cl, m_rotz_cl);
-	m_q_cl.Normalize();
-
-	SetRotations(m_rotx, m_roty, m_rotz);
+	ClipRotate();
 }
 
 void VRenderGLView::GetClippingPlaneRotations(double &rotx, double &roty, double &rotz)
@@ -9128,6 +9133,24 @@ void VRenderGLView::GetClippingPlaneRotations(double &rotx, double &roty, double
 	rotx = m_rotx_cl == 0.0 ? m_rotx_cl : -m_rotx_cl;
 	roty = m_roty_cl;
 	rotz = m_rotz_cl;
+}
+
+void VRenderGLView::SetClipRotX(double val)
+{
+	m_rotx_cl = -val;
+	ClipRotate();
+}
+
+void VRenderGLView::SetClipRotY(double val)
+{
+	m_roty_cl = val;
+	ClipRotate();
+}
+
+void VRenderGLView::SetClipRotZ(double val)
+{
+	m_rotz_cl = val;
+	ClipRotate();
 }
 
 void VRenderGLView::SetClipValue(int i, int val)
@@ -9138,6 +9161,72 @@ void VRenderGLView::SetClipValue(int i, int val)
 		if (!vd)
 			continue;
 		vd->SetClipValue(i, val);
+	}
+}
+
+void VRenderGLView::SetClipValues(int i, int val1, int val2)
+{
+	for (int i = 0; i < GetAllVolumeNum(); ++i)
+	{
+		VolumeData* vd = GetAllVolumeData(i);
+		if (!vd)
+			continue;
+		vd->SetClipValues(i, val1, val2);
+	}
+}
+
+void VRenderGLView::SetClipValues(const int val[6])
+{
+	for (int i = 0; i < GetAllVolumeNum(); ++i)
+	{
+		VolumeData* vd = GetAllVolumeData(i);
+		if (!vd)
+			continue;
+		vd->SetClipValues(val);
+	}
+}
+
+void VRenderGLView::ResetClipValues()
+{
+	for (int i = 0; i < GetAllVolumeNum(); ++i)
+	{
+		VolumeData* vd = GetAllVolumeData(i);
+		if (!vd)
+			continue;
+		vd->ResetClipValues();
+	}
+}
+
+void VRenderGLView::ResetClipValuesX()
+{
+	for (int i = 0; i < GetAllVolumeNum(); ++i)
+	{
+		VolumeData* vd = GetAllVolumeData(i);
+		if (!vd)
+			continue;
+		vd->ResetClipValuesX();
+	}
+}
+
+void VRenderGLView::ResetClipValuesY()
+{
+	for (int i = 0; i < GetAllVolumeNum(); ++i)
+	{
+		VolumeData* vd = GetAllVolumeData(i);
+		if (!vd)
+			continue;
+		vd->ResetClipValuesY();
+	}
+}
+
+void VRenderGLView::ResetClipValuesZ()
+{
+	for (int i = 0; i < GetAllVolumeNum(); ++i)
+	{
+		VolumeData* vd = GetAllVolumeData(i);
+		if (!vd)
+			continue;
+		vd->ResetClipValuesZ();
 	}
 }
 
@@ -10535,7 +10624,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	{
 		if (m_focused_slider)
 		{
-			int value = -wheel / event.GetWheelDelta();
+			int value = wheel / event.GetWheelDelta();
 			m_focused_slider->Scroll(value);
 		}
 		else
