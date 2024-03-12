@@ -137,6 +137,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstClipY2 "clip y2"
 #define gstClipZ1 "clip z1"
 #define gstClipZ2 "clip z2"
+#define gstClipDist "clip dist"
 #define gstClipDistX "clip dist x"
 #define gstClipDistY "clip dist y"
 #define gstClipDistZ "clip dist z"
@@ -325,6 +326,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstUseDefault "use default"
 #define gstClipLinkChan "clip link chan"
 #define gstClipPlaneMode "clip plane mode"
+#define gstClipPlaneRanges "clip plane ranges"
 #define gstInitialized "initialized"
 #define gstInitView "init view"
 #define gstSetGl "set gl"//set gl context

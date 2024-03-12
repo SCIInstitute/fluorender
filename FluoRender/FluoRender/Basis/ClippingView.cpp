@@ -470,7 +470,7 @@ void ClippingView::FluoUpdate(const fluo::ValueCollection& vc)
 	bool update_all = vc.empty();
 
 	//modes
-	if (update_all || FOUND_VALUE(gstPlaneMode))
+	if (update_all || FOUND_VALUE(gstClipPlaneMode))
 	{
 		switch (m_plane_mode)
 		{
@@ -525,7 +525,7 @@ void ClippingView::FluoUpdate(const fluo::ValueCollection& vc)
 
 	wxIntegerValidator<int>* vald_i;
 
-	if (update_all || FOUND_VALUE(gstClipRange))
+	if (update_all || FOUND_VALUE(gstClipPlaneRanges))
 	{
 		//slider range
 		m_clipx_sldr->SetRange(resx_n, resx);
@@ -550,7 +550,7 @@ void ClippingView::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	//clip distance
-	if (update_all || FOUND_VALUE(gstClipDistance))
+	if (update_all || FOUND_VALUE(gstClipDistX))
 	{
 		switch (m_sel_type)
 		{
@@ -745,7 +745,7 @@ void ClippingView::SetHoldPlanes(bool hold)
 void ClippingView::SetPlaneMode(PLANE_MODES mode)
 {
 	m_plane_mode = mode;
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipPlaneMode });
 }
 
 int ClippingView::GetSelType()
@@ -1170,30 +1170,50 @@ void ClippingView::SetClipValue(int i, int val, bool link)
 	else
 		m_vd->SetClipValue(i, val);
 
+	fluo::ValueCollection vc;
+
 	switch (i)
 	{
 	case 0:
 		m_view->m_clip_mask = link ? 3 : 1;
+		vc.insert(gstClipX1);
+		if (link)
+			vc.insert(gstClipX2);
 		break;
 	case 1:
 		m_view->m_clip_mask = link ? 3 : 2;
+		vc.insert(gstClipX2);
+		if (link)
+			vc.insert(gstClipX1);
 		break;
 	case 2:
 		m_view->m_clip_mask = link ? 12 : 4;
+		vc.insert(gstClipY1);
+		if (link)
+			vc.insert(gstClipY2);
 		break;
 	case 3:
 		m_view->m_clip_mask = link ? 12 : 8;
+		vc.insert(gstClipY2);
+		if (link)
+			vc.insert(gstClipY1);
 		break;
 	case 4:
 		m_view->m_clip_mask = link ? 48 : 16;
+		vc.insert(gstClipZ1);
+		if (link)
+			vc.insert(gstClipZ2);
 		break;
 	case 5:
 		m_view->m_clip_mask = link ? 48 : 32;
+		vc.insert(gstClipZ2);
+		if (link)
+			vc.insert(gstClipZ1);
 		break;
 	}
 	m_view->UpdateClips();
 
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, vc);
 }
 
 void ClippingView::SetClipValues(int i, int val1, int val2)
@@ -1208,7 +1228,21 @@ void ClippingView::SetClipValues(int i, int val1, int val2)
 	m_view->m_clip_mask = i;
 	m_view->UpdateClips();
 
-	FluoRefresh(false, true, 2);
+	fluo::ValueCollection vc;
+	if (i & 1)
+		vc.insert(gstClipX1);
+	if (i & 2)
+		vc.insert(gstClipX2);
+	if (i & 4)
+		vc.insert(gstClipY1);
+	if (i & 8)
+		vc.insert(gstClipY2);
+	if (i & 16)
+		vc.insert(gstClipZ1);
+	if (i & 32)
+		vc.insert(gstClipZ2);
+
+	FluoRefresh(false, true, 2, vc);
 }
 
 void ClippingView::SetClipValues(const int val[6])
@@ -1222,7 +1256,7 @@ void ClippingView::SetClipValues(const int val[6])
 	m_view->m_clip_mask = 63;
 	m_view->UpdateClips();
 
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
 }
 
 void ClippingView::ResetClipValues()
@@ -1241,7 +1275,7 @@ void ClippingView::ResetClipValues()
 	SetYLink(false);
 	SetZLink(false);
 
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
 }
 
 void ClippingView::ResetClipValuesX()

@@ -2656,6 +2656,7 @@ bool VRenderFrame::update_props(int excl_self, PropPanel* p1, PropPanel* p2)
 	case 3:
 		return false;
 	}
+	return false;
 }
 
 void VRenderFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, PropPanel* panel)
