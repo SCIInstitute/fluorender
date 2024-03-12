@@ -592,6 +592,12 @@ void ClippingView::FluoUpdate(const fluo::ValueCollection& vc)
 	int val = 0;
 	double abcd[4];
 
+	bool linkx = m_clipx_sldr->GetLink();
+	bool linky = m_clipy_sldr->GetLink();
+	bool linkz = m_clipz_sldr->GetLink();
+	m_clipx_sldr->SetLink(false);
+	m_clipy_sldr->SetLink(false);
+	m_clipz_sldr->SetLink(false);
 	//x1
 	if (update_all || FOUND_VALUE(gstClipX1))
 	{
@@ -652,6 +658,9 @@ void ClippingView::FluoUpdate(const fluo::ValueCollection& vc)
 		str = wxString::Format("%d", val);
 		m_z2_clip_text->ChangeValue(str);
 	}
+	m_clipx_sldr->SetLink(linkx);
+	m_clipy_sldr->SetLink(linky);
+	m_clipz_sldr->SetLink(linkz);
 
 	//link
 	if (update_all || FOUND_VALUE(gstClipLinkX))
@@ -1292,7 +1301,7 @@ void ClippingView::ResetClipValuesX()
 	//links
 	SetXLink(false);
 
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipX1, gstClipX2 });
 }
 
 void ClippingView::ResetClipValuesY()
@@ -1309,7 +1318,7 @@ void ClippingView::ResetClipValuesY()
 	//links
 	SetYLink(false);
 
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipY1, gstClipY2 });
 }
 
 void ClippingView::ResetClipValuesZ()
@@ -1326,7 +1335,7 @@ void ClippingView::ResetClipValuesZ()
 	//links
 	SetZLink(false);
 
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipZ1, gstClipZ2 });
 }
 
 void ClippingView::OnLinkXCheck(wxCommandEvent &event)
@@ -1386,7 +1395,7 @@ void ClippingView::OnSetZeroBtn(wxCommandEvent &event)
 		return;
 
 	m_view->SetClipMode(2);
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipRotX, gstClipRotY, gstClipRotZ });
 }
 
 void ClippingView::OnRotResetBtn(wxCommandEvent &event)
@@ -1396,7 +1405,7 @@ void ClippingView::OnRotResetBtn(wxCommandEvent &event)
 
 	//reset rotations
 	m_view->SetClippingPlaneRotations(0.0, 0.0, 0.0);
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipRotX, gstClipRotY, gstClipRotZ });
 }
 
 void ClippingView::OnRotXMF(wxCommandEvent& event)
@@ -1410,7 +1419,7 @@ void ClippingView::OnRotXMF(wxCommandEvent& event)
 		break;
 	case 2:
 		if (m_view) m_view->SetClipRotX(0.0);
-		FluoRefresh(false, true, 2);
+		FluoRefresh(false, true, 2, { gstClipRotX });
 		break;
 	case 3:
 		break;
@@ -1433,7 +1442,7 @@ void ClippingView::OnRotYMF(wxCommandEvent& event)
 		break;
 	case 2:
 		if (m_view) m_view->SetClipRotY(0.0);
-		FluoRefresh(false, true, 2);
+		FluoRefresh(false, true, 2, { gstClipRotY });
 		break;
 	case 3:
 		break;
@@ -1456,7 +1465,7 @@ void ClippingView::OnRotZMF(wxCommandEvent& event)
 		break;
 	case 2:
 		if (m_view) m_view->SetClipRotZ(0.0);
-		FluoRefresh(false, true, 2);
+		FluoRefresh(false, true, 2, { gstClipRotZ });
 		break;
 	case 3:
 		break;
@@ -1475,7 +1484,7 @@ void ClippingView::OnXRotChange(wxScrollEvent &event)
 
 	int val = m_x_rot_sldr->GetValue();
 	m_view->SetClipRotX(val);
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipRotX });
 }
 
 void ClippingView::OnXRotEdit(wxCommandEvent &event)
@@ -1487,7 +1496,7 @@ void ClippingView::OnXRotEdit(wxCommandEvent &event)
 	double val = 0.0;
 	str.ToDouble(&val);
 	m_view->SetClipRotX(val);
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipRotX });
 }
 
 void ClippingView::OnYRotChange(wxScrollEvent &event)
@@ -1497,7 +1506,7 @@ void ClippingView::OnYRotChange(wxScrollEvent &event)
 
 	int val = m_y_rot_sldr->GetValue();
 	m_view->SetClipRotY(val);
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipRotY });
 }
 
 void ClippingView::OnYRotEdit(wxCommandEvent &event)
@@ -1509,7 +1518,7 @@ void ClippingView::OnYRotEdit(wxCommandEvent &event)
 	double val = 0.0;
 	str.ToDouble(&val);
 	m_view->SetClipRotY(val);
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipRotY });
 }
 
 void ClippingView::OnZRotChange(wxScrollEvent &event)
@@ -1519,7 +1528,7 @@ void ClippingView::OnZRotChange(wxScrollEvent &event)
 
 	int val = m_z_rot_sldr->GetValue();
 	m_view->SetClipRotZ(val);
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipRotZ });
 }
 
 void ClippingView::OnZRotEdit(wxCommandEvent &event)
@@ -1531,7 +1540,7 @@ void ClippingView::OnZRotEdit(wxCommandEvent &event)
 	double val = 0.0;
 	str.ToDouble(&val);
 	m_view->SetClipRotZ(val);
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipRotZ });
 }
 
 void ClippingView::OnXRotSpinUp(wxSpinEvent& event)
@@ -1543,7 +1552,7 @@ void ClippingView::OnXRotSpinUp(wxSpinEvent& event)
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	m_view->SetClipRotX(val);
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipRotX });
 }
 
 void ClippingView::OnXRotSpinDown(wxSpinEvent& event)
@@ -1555,7 +1564,7 @@ void ClippingView::OnXRotSpinDown(wxSpinEvent& event)
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	m_view->SetClipRotX(val);
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipRotX });
 }
 
 void ClippingView::OnYRotSpinUp(wxSpinEvent& event)
@@ -1567,7 +1576,7 @@ void ClippingView::OnYRotSpinUp(wxSpinEvent& event)
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	m_view->SetClipRotY(val);
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipRotY });
 }
 
 void ClippingView::OnYRotSpinDown(wxSpinEvent& event)
@@ -1579,7 +1588,7 @@ void ClippingView::OnYRotSpinDown(wxSpinEvent& event)
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	m_view->SetClipRotY(val);
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipRotY });
 }
 
 void ClippingView::OnZRotSpinUp(wxSpinEvent& event)
@@ -1591,7 +1600,7 @@ void ClippingView::OnZRotSpinUp(wxSpinEvent& event)
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	m_view->SetClipRotZ(val);
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipRotZ });
 }
 
 void ClippingView::OnZRotSpinDown(wxSpinEvent& event)
@@ -1603,7 +1612,7 @@ void ClippingView::OnZRotSpinDown(wxSpinEvent& event)
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	m_view->SetClipRotZ(val);
-	FluoRefresh(false, true, 2);
+	FluoRefresh(false, true, 2, { gstClipRotZ });
 }
 
 void ClippingView::UpdateSampleRate()

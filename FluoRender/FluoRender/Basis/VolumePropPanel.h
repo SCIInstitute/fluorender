@@ -30,8 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 #include <wx/scrolwin.h>
-#include <wx/clrpicker.h>
-#include <wx/tglbtn.h>
 
 class VRenderFrame;
 class VRenderGLView;
@@ -41,6 +39,11 @@ class wxBasisSlider;
 class wxDoubleSlider;
 class wxSingleSlider;
 class wxUndoableCheckBox;
+class wxUndoableToolbar;
+class wxUndoableComboBox;
+class wxUndoableColorPicker;
+class wxColourPickerEvent;
+class wxUndoableTextCtrl;
 class VolumePropPanel: public PropPanel
 {
 	enum
@@ -160,19 +163,19 @@ private:
 	//3
 	//color
 	wxTextCtrl *m_color_text;
-	wxColourPickerCtrl *m_color_btn;
+	wxUndoableColorPicker* m_color_btn;
 	wxTextCtrl *m_color2_text;
-	wxColourPickerCtrl *m_color2_btn;
+	wxUndoableColorPicker* m_color2_btn;
 	//space
-	wxTextCtrl *m_space_x_text;
-	wxTextCtrl *m_space_y_text;
-	wxTextCtrl *m_space_z_text;
-	wxToolBar* m_colormap_inv_btn;
-	wxComboBox *m_colormap_combo;
-	wxComboBox *m_colormap_combo2;
+	wxUndoableTextCtrl* m_space_x_text;
+	wxUndoableTextCtrl* m_space_y_text;
+	wxUndoableTextCtrl* m_space_z_text;
+	wxUndoableToolbar* m_colormap_inv_btn;
+	wxUndoableComboBox* m_colormap_combo;
+	wxUndoableComboBox* m_colormap_combo2;
 
 	//buttons
-	wxToolBar *m_options_toolbar;
+	wxUndoableToolbar* m_options_toolbar;
 
 private:
 	bool SetSpacings();

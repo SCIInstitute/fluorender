@@ -2222,7 +2222,7 @@ void VRenderView::SaveDefault(unsigned int mask)
 		glbin_view_def.m_draw_camctr = m_glview->m_draw_camctr;
 	//camctr size
 	if (mask & 0x8)
-		glbin_view_def.m_draw_camctr = m_glview->m_camctr_size;
+		glbin_view_def.m_camctr_size = m_glview->m_camctr_size;
 	//fps
 	if (mask & 0x10)
 		glbin_view_def.m_draw_info = m_glview->m_draw_info;

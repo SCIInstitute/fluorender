@@ -44,6 +44,10 @@ DEALINGS IN THE SOFTWARE.
 #include <wxDoubleSlider.h>
 #include <wxSingleSlider.h>
 #include <wxUndoableCheckBox.h>
+#include <wxUndoableColorPicker.h>
+#include <wxUndoableComboBox.h>
+#include <wxUndoableToolbar.h>
+#include <wxUndoableTextCtrl.h>
 #include "png_resource.h"
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
@@ -342,7 +346,7 @@ VolumePropPanel::VolumePropPanel(VRenderFrame* frame,
 	m_colormap_link_tb->Realize();
 
 	//right ///////////////////////////////////////////////////
-	m_options_toolbar = new wxToolBar(this,wxID_ANY,
+	m_options_toolbar = new wxUndoableToolbar(this,wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	double dpi_sf = GetDPIScaleFactor();
 	double dpi_sf2 = std::round(dpi_sf - 0.1);
@@ -433,7 +437,7 @@ VolumePropPanel::VolumePropPanel(VRenderFrame* frame,
 	//x
 	st = new wxStaticText(this, 0, "Voxel Size: ",
 		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxALIGN_RIGHT);
-	m_space_x_text = new wxTextCtrl(this, wxID_ANY, "1.000",
+	m_space_x_text = new wxUndoableTextCtrl(this, wxID_ANY, "1.000",
 		wxDefaultPosition, FromDIP(wxSize(50, -1)), 0, vald_fp3);
 	m_space_x_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnSpaceText, this);
 	sizer_r2->Add(st, 0, wxALIGN_CENTER);
@@ -443,7 +447,7 @@ VolumePropPanel::VolumePropPanel(VRenderFrame* frame,
 	sizer_r2->Add(m_space_x_text, 1, wxALIGN_CENTER);
 	//y
 	st = new wxStaticText(this, 0, "Y ");
-	m_space_y_text = new wxTextCtrl(this, wxID_ANY, "1.000",
+	m_space_y_text = new wxUndoableTextCtrl(this, wxID_ANY, "1.000",
 		wxDefaultPosition, FromDIP(wxSize(50, -1)), 0, vald_fp3);
 	m_space_y_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnSpaceText, this);
 	sizer_r2->Add(3, 5, 0);
@@ -451,7 +455,7 @@ VolumePropPanel::VolumePropPanel(VRenderFrame* frame,
 	sizer_r2->Add(m_space_y_text, 1, wxALIGN_CENTER);
 	//z
 	st = new wxStaticText(this, 0, "Z ");
-	m_space_z_text = new wxTextCtrl(this, wxID_ANY, "1.000",
+	m_space_z_text = new wxUndoableTextCtrl(this, wxID_ANY, "1.000",
 		wxDefaultPosition, FromDIP(wxSize(50, -1)), 0, vald_fp3);
 	m_space_z_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnSpaceText, this);
 	sizer_r2->Add(3, 5, 0);
@@ -464,7 +468,7 @@ VolumePropPanel::VolumePropPanel(VRenderFrame* frame,
 		wxDefaultPosition, FromDIP(wxSize(50, 20)));
 	m_color_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnColorTextChange, this);
 	m_color_text->Bind(wxEVT_LEFT_DCLICK, &VolumePropPanel::OnColorTextFocus, this);
-	m_color_btn = new wxColourPickerCtrl(this, wxID_ANY, *wxRED,
+	m_color_btn = new wxUndoableColorPicker(this, wxID_ANY, *wxRED,
 		wxDefaultPosition, FromDIP(wxSize(50, 25)));
 	m_color_btn->Bind(wxEVT_COLOURPICKER_CHANGED, &VolumePropPanel::OnColorBtn, this);
 	sizer_r3->Add(st, 0, wxALIGN_CENTER, 0); 
@@ -478,7 +482,7 @@ VolumePropPanel::VolumePropPanel(VRenderFrame* frame,
 		wxDefaultPosition, FromDIP(wxSize(50, 20)));
 	m_color2_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnColor2TextChange, this);
 	m_color2_text->Bind(wxEVT_LEFT_DCLICK, &VolumePropPanel::OnColor2TextFocus, this);
-	m_color2_btn = new wxColourPickerCtrl(this, wxID_ANY, *wxRED,
+	m_color2_btn = new wxUndoableColorPicker(this, wxID_ANY, *wxRED,
 		wxDefaultPosition, FromDIP(wxSize(50, 25)));
 	m_color2_btn->Bind(wxEVT_COLOURPICKER_CHANGED, &VolumePropPanel::OnColor2Btn, this);
 	sizer_r4->Add(st, 0, wxALIGN_CENTER, 0);
@@ -488,7 +492,7 @@ VolumePropPanel::VolumePropPanel(VRenderFrame* frame,
 	// colormap chooser
 	st = new wxStaticText(this, 0, "Effects: ",
 		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxALIGN_RIGHT);
-	m_colormap_inv_btn = new wxToolBar(this, wxID_ANY,
+	m_colormap_inv_btn = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(invert_off);
 	m_colormap_inv_btn->AddCheckTool(0, "Invert",
@@ -498,12 +502,12 @@ VolumePropPanel::VolumePropPanel(VRenderFrame* frame,
 	m_colormap_inv_btn->ToggleTool(0, false);
 	m_colormap_inv_btn->Bind(wxEVT_TOOL, &VolumePropPanel::OnColormapInvBtn, this);
 	m_colormap_inv_btn->Realize();
-	m_colormap_combo = new wxComboBox(this, wxID_ANY, "",
+	m_colormap_combo = new wxUndoableComboBox(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(85, 25)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> colormap_list = { "Rainbow", "Hot", "Cool", "Diverging", "Monochrome", "High-key", "Low-key", "Hi Transparency" };
 	m_colormap_combo->Append(colormap_list);
 	m_colormap_combo->Bind(wxEVT_COMBOBOX, &VolumePropPanel::OnColormapCombo, this);
-	m_colormap_combo2 = new wxComboBox(this, wxID_ANY, "",
+	m_colormap_combo2 = new wxUndoableComboBox(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(85, 25)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> colormap_list2 = { "Intensity", "Z Value", "Y Value", "X Value", "Gradient", "Differential" };
 	m_colormap_combo2->Append(colormap_list2);
@@ -1400,14 +1404,14 @@ void VolumePropPanel::SetLuminance(double val)
 		(unsigned char)(c.b() * 255 + 0.5));
 	m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
 		wxc.Red(), wxc.Green(), wxc.Blue()));
-	m_color_btn->SetColour(wxc);
+	m_color_btn->SetValue(wxc);
 	c = m_vd->GetMaskColor();
 	wxc = wxColor((unsigned char)(c.r() * 255 + 0.5),
 		(unsigned char)(c.g() * 255 + 0.5),
 		(unsigned char)(c.b() * 255 + 0.5));
 	m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
 		wxc.Red(), wxc.Green(), wxc.Blue()));
-	m_color2_btn->SetColour(wxc);
+	m_color2_btn->SetValue(wxc);
 
 	FluoRefresh(false, true, 1, { gstNull });
 }
@@ -2423,7 +2427,7 @@ void VolumePropPanel::OnColorChange(wxColor c)
 				(unsigned char)(color.b()*255));
 			m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
 				wxc.Red(), wxc.Green(), wxc.Blue()));
-			m_color2_btn->SetColour(wxc);
+			m_color2_btn->SetValue(wxc);
 		}
 
 		if (m_frame)
@@ -2584,7 +2588,7 @@ void VolumePropPanel::OnColorTextChange(wxCommandEvent& event)
 			wxc.Red(), wxc.Green(), wxc.Blue());
 		if (str != new_str)
 			m_color_text->ChangeValue(new_str);
-		m_color_btn->SetColour(wxc);
+		m_color_btn->SetValue(wxc);
 
 		OnColorChange(wxc);
 	}
@@ -2600,7 +2604,7 @@ void VolumePropPanel::OnColor2TextChange(wxCommandEvent& event)
 			wxc.Red(), wxc.Green(), wxc.Blue());
 		if (str != new_str)
 			m_color2_text->ChangeValue(new_str);
-		m_color2_btn->SetColour(wxc);
+		m_color2_btn->SetValue(wxc);
 
 		OnColor2Change(wxc);
 	}
