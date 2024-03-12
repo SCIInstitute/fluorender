@@ -59,7 +59,6 @@ void wxUndoableCheckBox::SetValue(bool val)
 
 void wxUndoableCheckBox::OnChange(wxCommandEvent& event)
 {
-	bool val = event.IsChecked();
 	double t;
 	if (time_sample(t))
 		push(t);

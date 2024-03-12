@@ -584,6 +584,16 @@ VolumePropPanel::VolumePropPanel(VRenderFrame* frame,
 	glbin.add_undo_control(m_shadow_chk);
 	glbin.add_undo_control(m_sample_chk);
 	glbin.add_undo_control(m_colormap_chk);
+	//add others
+	glbin.add_undo_control(m_color_btn);
+	glbin.add_undo_control(m_color2_btn);
+	glbin.add_undo_control(m_space_x_text);
+	glbin.add_undo_control(m_space_y_text);
+	glbin.add_undo_control(m_space_z_text);
+	glbin.add_undo_control(m_colormap_inv_btn);
+	glbin.add_undo_control(m_colormap_combo);
+	glbin.add_undo_control(m_colormap_combo2);
+	glbin.add_undo_control(m_options_toolbar);
 
 	Thaw();
 }
@@ -613,6 +623,16 @@ VolumePropPanel::~VolumePropPanel()
 	glbin.del_undo_control(m_shadow_chk);
 	glbin.del_undo_control(m_sample_chk);
 	glbin.del_undo_control(m_colormap_chk);
+	//delete others
+	glbin.del_undo_control(m_color_btn);
+	glbin.del_undo_control(m_color2_btn);
+	glbin.del_undo_control(m_space_x_text);
+	glbin.del_undo_control(m_space_y_text);
+	glbin.del_undo_control(m_space_z_text);
+	glbin.del_undo_control(m_colormap_inv_btn);
+	glbin.del_undo_control(m_colormap_combo);
+	glbin.del_undo_control(m_colormap_combo2);
+	glbin.del_undo_control(m_options_toolbar);
 
 	SetFocusVRenderViews(0);
 }
@@ -958,14 +978,14 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			(unsigned char)(c.b() * 255 + 0.5));
 		m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
 			wxc.Red(), wxc.Green(), wxc.Blue()));
-		m_color_btn->SetColour(wxc);
+		m_color_btn->SetValue(wxc);
 		c = m_vd->GetMaskColor();
 		wxc = wxColor((unsigned char)(c.r() * 255 + 0.5),
 			(unsigned char)(c.g() * 255 + 0.5),
 			(unsigned char)(c.b() * 255 + 0.5));
 		m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
 			wxc.Red(), wxc.Green(), wxc.Blue()));
-		m_color2_btn->SetColour(wxc);
+		m_color2_btn->SetValue(wxc);
 	}
 
 	//inversion
