@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "wxUndoableTextCtrl.h"
-#include <Debug.h>
 
 wxUndoableTextCtrl::wxUndoableTextCtrl(
 	wxWindow *parent,
@@ -73,11 +72,14 @@ void wxUndoableTextCtrl::ChangeValue(const wxString& val)
 
 void wxUndoableTextCtrl::OnChange(wxCommandEvent& event)
 {
-	double t;
-	if (time_sample(t))
-		push(t);
-	else
-		replace(t);
+	if (event.GetString() != "update")
+	{
+		double t;
+		if (time_sample(t))
+			push(t);
+		else
+			replace(t);
+	}
 	event.Skip();
 }
 
@@ -104,9 +106,6 @@ void wxUndoableTextCtrl::push(double t)
 		else
 			stack_.insert(stack_.begin() + stack_pointer_, std::pair<double, wxString>(t, val_));
 		stack_pointer_++;
-		//DBGPRINT(L"\tsize:%d,pointer:%d,last:(%f, %d)\n",
-		//	stack_.size(), stack_pointer_, stack_.back().first,
-		//	std::any_cast<bool>(stack_.back().second));
 	}
 }
 
@@ -118,6 +117,6 @@ void wxUndoableTextCtrl::update()
 	wxCommandEvent e(wxEVT_TEXT, GetId());
 	e.SetEventObject(this);
 	e.SetString("update");
-	//ProcessWindowEvent(e);
+	ProcessWindowEvent(e);
 	wxPostEvent(GetParent(), e);
 }

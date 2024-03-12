@@ -364,42 +364,42 @@ VolumePropPanel::VolumePropPanel(VRenderFrame* frame,
 		bitmap, wxNullBitmap,
 		"Enable High Tarnsparency mode",
 		"Enable High Tarnsparency mode");
-	m_options_toolbar->ToggleTool(ID_TranspChk, false);
+	m_options_toolbar->ToggleTool(ID_TranspChk, glbin_vol_def.m_transparent);
 	//MIP
 	bitmap = wxGetBitmap(mip, dpi_sf);
 	m_options_toolbar->AddCheckTool(ID_MipChk, "MIP",
 		bitmap, wxNullBitmap,
 		"Enable Maximum Intensity Projection (MIP)",
 		"Enable Maximum Intensity Projection (MIP)");
-	m_options_toolbar->ToggleTool(ID_MipChk,false);
+	m_options_toolbar->ToggleTool(ID_MipChk, glbin_vol_def.m_mip_enable);
 	//inversion
 	bitmap = wxGetBitmap(invert_off, dpi_sf);
 	m_options_toolbar->AddCheckTool(ID_InvChk, "Inversion",
 		bitmap, wxNullBitmap,
 		"Invert data intensity values",
 		"Invert data intensity values");
-	m_options_toolbar->ToggleTool(ID_InvChk,false);
+	m_options_toolbar->ToggleTool(ID_InvChk, glbin_vol_def.m_inverted);
 	//component display
 	bitmap = wxGetBitmap(comp_off, dpi_sf);
 	m_options_toolbar->AddCheckTool(ID_CompChk, "Components",
 		bitmap, wxNullBitmap,
 		"Show components",
 		"Show components");
-	m_options_toolbar->ToggleTool(ID_CompChk, false);
+	m_options_toolbar->ToggleTool(ID_CompChk, glbin_vol_def.m_label_mode);
 	//interpolation
 	bitmap = wxGetBitmap(interpolate, dpi_sf);
 	m_options_toolbar->AddCheckTool(ID_InterpolateChk, "Interpolate",
 		bitmap, wxNullBitmap,
 		"Enable spatial interpolation of voxel intensity values",
 		"Enable spatial interpolation of voxel intensity values");
-	m_options_toolbar->ToggleTool(ID_InterpolateChk,true);
+	m_options_toolbar->ToggleTool(ID_InterpolateChk, glbin_vol_def.m_interpolate);
 	//noise reduction
 	bitmap = wxGetBitmap(smooth_off, dpi_sf);
 	m_options_toolbar->AddCheckTool(ID_NRChk, "Smoothing",
 		bitmap, wxNullBitmap,
 		"Enable rendering result smoothing",
 		"Enable rendering result smoothing");
-	m_options_toolbar->ToggleTool(ID_NRChk,false);
+	m_options_toolbar->ToggleTool(ID_NRChk, glbin_vol_def.m_noise_rd);
 	//sync group
 	bitmap = wxGetBitmap(sync_chan, dpi_sf);
 	m_options_toolbar->AddCheckTool(ID_SyncGroupChk,"Group Sync",
@@ -413,14 +413,14 @@ VolumePropPanel::VolumePropPanel(VRenderFrame* frame,
 		bitmap, wxNullBitmap,
 		"Enable Depth Mode within the group",
 		"Enable Depth Mode within the group");
-	m_options_toolbar->ToggleTool(ID_DepthChk,false);
+	m_options_toolbar->ToggleTool(ID_DepthChk, glbin_vol_def.m_blend_mode == 2);
 	//legend
 	bitmap = wxGetBitmap(legend, dpi_sf);
 	m_options_toolbar->AddCheckTool(ID_LegendChk, "Legend",
 		bitmap, wxNullBitmap,
 		"Enable name legend display for current channel",
 		"Enable name legend display for current channel");
-	m_options_toolbar->ToggleTool(ID_LegendChk,true);
+	m_options_toolbar->ToggleTool(ID_LegendChk, glbin_vol_def.m_legend);
 	//buttons
 	bitmap = wxGetBitmap(reset, dpi_sf);
 	m_options_toolbar->AddTool(ID_ResetDefault,"Reset",
@@ -1681,6 +1681,7 @@ void VolumePropPanel::OnGammaChk(wxCommandEvent& event)
 {
 	bool val = m_gamma_chk->GetValue();
 	EnableGamma(val);
+	event.Skip();
 }
 
 void VolumePropPanel::OnSaturationMF(wxCommandEvent& event)
@@ -1748,6 +1749,7 @@ void VolumePropPanel::OnSaturationChk(wxCommandEvent& event)
 {
 	bool val = m_saturation_chk->GetValue();
 	EnableSaturation(val);
+	event.Skip();
 }
 
 void VolumePropPanel::OnLuminanceMF(wxCommandEvent& event)
@@ -1818,6 +1820,7 @@ void VolumePropPanel::OnLuminanceChk(wxCommandEvent& event)
 {
 	bool val = m_luminance_chk->GetValue();
 	EnableLuminance(val);
+	event.Skip();
 }
 
 void VolumePropPanel::OnAlphaMF(wxCommandEvent& event)
@@ -1852,6 +1855,7 @@ void VolumePropPanel::OnAlphaCheck(wxCommandEvent& event)
 {
 	bool val = m_alpha_chk->GetValue();
 	EnableAlpha(val);
+	event.Skip();
 }
 
 void VolumePropPanel::OnAlphaChange(wxScrollEvent& event)
@@ -1982,6 +1986,7 @@ void VolumePropPanel::OnShadingChk(wxCommandEvent& event)
 {
 	bool val = m_shade_chk->GetValue();
 	EnableShading(val);
+	event.Skip();
 }
 
 void VolumePropPanel::OnBoundaryMF(wxCommandEvent& event)
@@ -2044,6 +2049,7 @@ void VolumePropPanel::OnBoundaryChk(wxCommandEvent& event)
 {
 	bool val = m_boundary_chk->GetValue();
 	EnableBoundary(val);
+	event.Skip();
 }
 
 void VolumePropPanel::OnThreshMF(wxCommandEvent& event)
@@ -2139,6 +2145,7 @@ void VolumePropPanel::OnThreshChk(wxCommandEvent& event)
 {
 	bool val = m_thresh_chk->GetValue();
 	EnableThresh(val);
+	event.Skip();
 }
 
 //shadow
@@ -2174,6 +2181,7 @@ void VolumePropPanel::OnShadowChk(wxCommandEvent &event)
 {
 	bool val = m_shadow_chk->GetValue();
 	EnableShadow(val);
+	event.Skip();
 }
 
 void VolumePropPanel::OnShadowChange(wxScrollEvent &event)
@@ -2264,6 +2272,7 @@ void VolumePropPanel::OnSampleChk(wxCommandEvent& event)
 {
 	bool val = m_sample_chk->GetValue();
 	EnableSample(val);
+	event.Skip();
 }
 
 //colormap controls
@@ -2303,6 +2312,7 @@ void VolumePropPanel::OnColormapChk(wxCommandEvent &event)
 {
 	bool val = m_colormap_chk->GetValue();
 	EnableColormap(val);
+	event.Skip();
 }
 
 void VolumePropPanel::OnColormapChange(wxScrollEvent &event)
@@ -2379,6 +2389,7 @@ void VolumePropPanel::OnColormapInvBtn(wxCommandEvent &event)
 	if (m_frame && m_frame->GetColocalizationDlg() &&
 		m_frame->GetColocalizationDlg()->GetColormapUpdate())
 		m_frame->GetColocalizationDlg()->Colocalize();
+	event.Skip();
 }
 
 void VolumePropPanel::OnColormapCombo(wxCommandEvent &event)
@@ -2403,6 +2414,7 @@ void VolumePropPanel::OnColormapCombo(wxCommandEvent &event)
 	if (m_frame && m_frame->GetColocalizationDlg() &&
 		m_frame->GetColocalizationDlg()->GetColormapUpdate())
 		m_frame->GetColocalizationDlg()->Colocalize();
+	event.Skip();
 }
 
 void VolumePropPanel::OnColormapCombo2(wxCommandEvent &event)
@@ -2457,7 +2469,7 @@ void VolumePropPanel::OnColorChange(wxColor c)
 				adjust_view->UpdateSync();
 		}
 
-		FluoRefresh(true, true, 1);
+		FluoRefresh(true, true, 1, { gstColor, gstLuminance, gstSecColor });
 	}
 }
 
@@ -2467,7 +2479,7 @@ void VolumePropPanel::OnColor2Change(wxColor c)
 	if (m_vd)
 	{
 		m_vd->SetMaskColor(color);
-		FluoRefresh(true, true, 1);
+		FluoRefresh(true, true, 1, { gstSecColor });
 	}
 }
 
@@ -2638,6 +2650,7 @@ void VolumePropPanel::OnColorBtn(wxColourPickerEvent& event)
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 
 	OnColorChange(wxc);
+	event.Skip();
 }
 
 void VolumePropPanel::OnColor2Btn(wxColourPickerEvent& event)
@@ -2648,6 +2661,7 @@ void VolumePropPanel::OnColor2Btn(wxColourPickerEvent& event)
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 
 	OnColor2Change(wxc);
+	event.Skip();
 }
 
 void VolumePropPanel::OnColorTextFocus(wxMouseEvent& event)
@@ -2703,6 +2717,7 @@ void VolumePropPanel::OnOptions(wxCommandEvent& event)
 		ResetDefault();
 		break;
 	}
+	event.Skip();
 }
 
 //ml
@@ -2740,7 +2755,7 @@ void VolumePropPanel::SetInvert()
 	else if (m_vd)
 		m_vd->SetInvert(inv);
 
-	FluoRefresh(false, true, 1);
+	FluoRefresh(false, true, 1, { gstInvert });
 }
 
 void VolumePropPanel::SetComponentDisplay()
@@ -2752,7 +2767,7 @@ void VolumePropPanel::SetComponentDisplay()
 	else if (m_vd)
 		m_vd->SetLabelMode(mode);
 
-	FluoRefresh(false, true, 1);
+	FluoRefresh(false, true, 1, { gstLabelMode });
 }
 
 //interpolation
@@ -2767,7 +2782,7 @@ void VolumePropPanel::SetInterpolate()
 	if (m_view)
 		m_view->SetIntp(inv);
 
-	FluoRefresh(false, true, 1);
+	FluoRefresh(false, true, 1, { gstInterpolate });
 }
 
 //noise reduction
@@ -2794,7 +2809,7 @@ void VolumePropPanel::SetNoiseReduction()
 			m_vd->SetNR(val);
 	}
 
-	FluoRefresh(false, true, 1);
+	FluoRefresh(false, true, 1, { gstNoiseRedct });
 }
 
 //sync within group
@@ -2885,7 +2900,7 @@ void VolumePropPanel::SetBlendDepth()
 			m_group->SetBlendMode(0);
 	}
 
-	FluoRefresh(false, true, 1);
+	FluoRefresh(false, true, 1, { gstBlendMode });
 }
 
 //legend
@@ -2895,7 +2910,7 @@ void VolumePropPanel::SetLegend()
 	if (m_vd)
 		m_vd->SetLegend(leg);
 
-	FluoRefresh(false, true, 1);
+	FluoRefresh(false, true, 1, { gstLegend });
 }
 
 void VolumePropPanel::SaveDefault()
@@ -2989,5 +3004,6 @@ void VolumePropPanel::OnSpaceText(wxCommandEvent& event)
 {
 	if (SetSpacings())
 		InitVRenderViews(INIT_BOUNDS|INIT_CENTER);
+	event.Skip();
 }
 

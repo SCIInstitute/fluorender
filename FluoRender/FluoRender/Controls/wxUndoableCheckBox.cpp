@@ -59,11 +59,14 @@ void wxUndoableCheckBox::SetValue(bool val)
 
 void wxUndoableCheckBox::OnChange(wxCommandEvent& event)
 {
-	double t;
-	if (time_sample(t))
-		push(t);
-	else
-		replace(t);
+	if (event.GetString() != "update")
+	{
+		double t;
+		if (time_sample(t))
+			push(t);
+		else
+			replace(t);
+	}
 	event.Skip();
 }
 
@@ -102,6 +105,6 @@ void wxUndoableCheckBox::update()
 	wxCommandEvent e(wxEVT_CHECKBOX, GetId());
 	e.SetEventObject(this);
 	e.SetString("update");
-	//ProcessWindowEvent(e);
+	ProcessWindowEvent(e);
 	wxPostEvent(GetParent(), e);
 }

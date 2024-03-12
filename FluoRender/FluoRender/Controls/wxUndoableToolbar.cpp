@@ -59,11 +59,14 @@ void wxUndoableToolbar::ToggleTool(int id, bool val)
 
 void wxUndoableToolbar::OnChange(wxCommandEvent& event)
 {
-	double t;
-	if (time_sample(t))
-		push(t);
-	else
-		replace(t);
+	if (event.GetString() != "update")
+	{
+		double t;
+		if (time_sample(t))
+			push(t);
+		else
+			replace(t);
+	}
 	event.Skip();
 }
 
@@ -71,26 +74,25 @@ void wxUndoableToolbar::replace(double t)
 {
 	if (stack_.empty())
 		return;
-	bool val_ = GetToolState(id_);
-	stack_[stack_pointer_] = std::pair<double, std::pair<int, bool>>(t,
-		std::pair<int, bool>(id_, val_));
+	UTBData val_ = get_data();
+	stack_[stack_pointer_] = std::pair<double, UTBData>(t, val_);
 }
 
 void wxUndoableToolbar::push(double t)
 {
 	size_t size = stack_.size();
-	bool val_ = GetToolState(id_);
-	std::pair<int, bool> val = size ? std::any_cast<std::pair<int, bool>>(stack_[stack_pointer_].second) : std::pair<int, bool>(-1, false);
-	if (!size || id_ != val.first || val_ != val.second )
+	UTBData val_ = get_data();
+	UTBData val;
+	if (size)
+		val = std::any_cast<UTBData>(stack_[stack_pointer_].second);
+	if (!size || val_ != val)
 	{
 		if (!size ||
 			stack_pointer_ == size - 1)
-			stack_.push_back(std::pair<double, std::pair<int, bool>>(t,
-				std::pair<int, bool>(id_, val_)));
+			stack_.push_back(std::pair<double, UTBData>(t, val_));
 		else
 			stack_.insert(stack_.begin() + stack_pointer_,
-				std::pair<double, std::pair<int, bool>>(t,
-					std::pair<int, bool>(id_, val_)));
+				std::pair<double, UTBData>(t, val_));
 		stack_pointer_++;
 		//DBGPRINT(L"\tsize:%d,pointer:%d,last:(%f, %d)\n",
 		//	stack_.size(), stack_pointer_, stack_.back().first,
@@ -100,12 +102,27 @@ void wxUndoableToolbar::push(double t)
 
 void wxUndoableToolbar::update()
 {
-	std::pair<int, bool> val = std::any_cast<std::pair<int, bool>>(stack_[stack_pointer_].second);
-	wxToolBar::ToggleTool(val.first, val.second);
+	UTBData val = std::any_cast<UTBData>(stack_[stack_pointer_].second);
+	for (size_t i = 0; i < val.size(); ++i)
+	{
+		if (val[i] != GetToolState(i))
+		{
+			wxToolBar::ToggleTool(i, val[i]);
+			id_ = i;
+		}
+	}
 
-	wxCommandEvent e(wxEVT_TOOL, GetId());
+	wxCommandEvent e(wxEVT_TOOL, id_);
 	e.SetEventObject(this);
 	e.SetString("update");
-	//ProcessWindowEvent(e);
+	ProcessWindowEvent(e);
 	wxPostEvent(GetParent(), e);
+}
+
+UTBData wxUndoableToolbar::get_data()
+{
+	UTBData data;
+	for (size_t i = 0; i < GetToolsCount(); ++i)
+		data.push_back(GetToolState(i));
+	return data;
 }

@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Undoable.h>
 #include <wx/toolbar.h>
 
+typedef std::vector<bool> UTBData;
 class wxUndoableToolbar : public wxToolBar, public Undoable
 {
 public:
@@ -54,6 +55,7 @@ private:
 	virtual void replace(double t);
 	virtual void push(double t);
 	virtual void update();
+	UTBData get_data();
 };
 
 #endif//_WXUNDOABLETOOLBAR_H_

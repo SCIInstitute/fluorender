@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "wxUndoableColorPicker.h"
-#include <Debug.h>
 
 wxUndoableColorPicker::wxUndoableColorPicker(
 	wxWindow *parent,
@@ -59,11 +58,14 @@ void wxUndoableColorPicker::SetValue(const wxColor& color)
 
 void wxUndoableColorPicker::OnChange(wxColourPickerEvent& event)
 {
-	double t;
-	if (time_sample(t))
-		push(t);
-	else
-		replace(t);
+	if (event.GetString() != "update")
+	{
+		double t;
+		if (time_sample(t))
+			push(t);
+		else
+			replace(t);
+	}
 	event.Skip();
 }
 
@@ -88,9 +90,6 @@ void wxUndoableColorPicker::push(double t)
 		else
 			stack_.insert(stack_.begin() + stack_pointer_, std::pair<double, wxColor>(t, color_));
 		stack_pointer_++;
-		//DBGPRINT(L"\tsize:%d,pointer:%d,last:(%f, %d)\n",
-		//	stack_.size(), stack_pointer_, stack_.back().first,
-		//	std::any_cast<bool>(stack_.back().second));
 	}
 }
 
@@ -100,8 +99,7 @@ void wxUndoableColorPicker::update()
 	SetColour(color);
 
 	wxColourPickerEvent e(this, GetId(), color);
-	//e.SetEventObject(this);
 	e.SetString("update");
-	//ProcessWindowEvent(e);
+	ProcessWindowEvent(e);
 	wxPostEvent(GetParent(), e);
 }
