@@ -9153,25 +9153,25 @@ void VRenderGLView::SetClipRotZ(double val)
 	ClipRotate();
 }
 
-void VRenderGLView::SetClipValue(int i, int val)
+void VRenderGLView::SetClipValue(int mask, int val)
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
 		VolumeData* vd = GetAllVolumeData(i);
 		if (!vd)
 			continue;
-		vd->SetClipValue(i, val);
+		vd->SetClipValue(mask, val);
 	}
 }
 
-void VRenderGLView::SetClipValues(int i, int val1, int val2)
+void VRenderGLView::SetClipValues(int mask, int val1, int val2)
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
 		VolumeData* vd = GetAllVolumeData(i);
 		if (!vd)
 			continue;
-		vd->SetClipValues(i, val1, val2);
+		vd->SetClipValues(mask, val1, val2);
 	}
 }
 
