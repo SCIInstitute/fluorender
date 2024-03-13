@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define _RENDERVIEWPANEL_H_
 
 #include <PropPanel.h>
+#include <wx/clrpicker.h>
 
 class MainFrame;
 class wxSingleSlider;
@@ -77,16 +78,39 @@ public:
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
-	//update
-	void UpdateView(bool ui_update = true);
-	void UpdateScaleFactor(bool update_text = true);
-	void SetScaleFactor(double s, bool update);
-	void SetScaleMode(int mode, bool update);
-	//rot center anchor thresh
-	void SetPinThreshold(double value);
-
 	//reset counter
 	static void ResetID();
+
+	//update
+	void SetVolumeMethod(int val);
+	void Capture();
+	void SetInfo(bool val);
+	void SetDrawCamCtr(bool val);
+	void SetLegend(bool val);
+	void SetDrawColormap(bool val);
+	void SetDrawScalebar(int val);
+	void SetScaleText(double val);
+	void SetScaleUnit(int val);
+	void SetBgColor(fluo::Color val);
+	void SetBgColorInvert();
+	void SetDrawClipPlanes(bool val);
+	void SetAov(double val);
+	void SetFree(bool val);
+	void SetFullScreen();
+
+	void SetDepthAttenEnable(bool val);
+	void SetDepthAtten(double val);
+
+	void SetPinRotCenter(bool val);
+	void SetCenter();
+	void SetScale121();
+	void SetScaleFactor(double val);
+	void SetScaleMode(int val);
+
+	void UpdateView(bool ui_update = true);
+	void UpdateScaleFactor(bool update_text = true);
+	//rot center anchor thresh
+	void SetPinThreshold(double value);
 
 	//get rendering context
 	wxGLContext* GetContext();
@@ -97,22 +121,17 @@ public:
 	//bit mask for items to save
 	bool m_default_saved;
 	void SaveDefault(unsigned int mask = 0xffffffff);
+	void LoadSettings();
 
-	//set full screen
-	void SetFullScreen();
 
 	//stereo/vr
-	void InitOpenVR()
-	{
-#ifdef _WIN32
-		if (m_glview) m_glview->InitOpenVR();
-#endif
-	}
+	void InitOpenVR();
 
 public:
 	wxWindow* m_frame;
 	static int m_max_id;
 	int m_id;
+	int m_draw_scalebar;
 
 	//render view///////////////////////////////////////////////
 	RenderCanvas *m_glview;
@@ -162,17 +181,6 @@ public:
 	//slider timer
 	wxTimer m_timer;
 
-	//draw clip
-	bool m_draw_clip;
-
-	//draw scalebar
-	enum SCALEBAR_STATE {
-		kOn,
-		kOff,
-		kText
-	};
-	SCALEBAR_STATE m_draw_scalebar;
-
 	double m_pin_scale_thresh;//scale factor theshold value for auto update
 	//rot slider style
 	bool m_rot_slider;
@@ -190,40 +198,25 @@ public:
 private:
 	//called when updated from bars
 	void CreateBar();
-	//load default settings from file
-	void LoadSettings();
 
 	//bar top
-	void OnVolumeMethodCheck(wxCommandEvent& event);
-	void OnCh1Check(wxCommandEvent &event);
-	void OnChAlphaCheck(wxCommandEvent &event);
-	void OnChFloatCheck(wxCommandEvent &event);
-	void OnDpiText(wxCommandEvent& event);
-	void OnChEmbedCheck(wxCommandEvent &event);
-	void OnChEnlargeCheck(wxCommandEvent &event);
-	void OnSlEnlargeScroll(wxScrollEvent &event);
-	void OnTxEnlargeText(wxCommandEvent &event);
-	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
-	void OnCapture(wxCommandEvent& event);
+	void OnToolBar(wxCommandEvent& event);
+	void OnScaleText(wxCommandEvent& event);
+	void OnScaleUnit(wxCommandEvent& event);
 	void OnBgColorChange(wxColourPickerEvent& event);
 	void OnBgInvBtn(wxCommandEvent& event);
-	void OnCamCtrCheck(wxCommandEvent& event);
-	void OnFpsCheck(wxCommandEvent& event);
-	void OnLegendCheck(wxCommandEvent& event);
-	void OnColormapCheck(wxCommandEvent& event);
-	void OnScaleBar(wxCommandEvent& event);
-	void OnScaleTextEditing(wxCommandEvent& event);
-	void OnScaleUnitSelected(wxCommandEvent& event);
 	void OnAovSldrIdle(wxIdleEvent& event);
 	void OnAovChange(wxScrollEvent& event);
 	void OnAovText(wxCommandEvent &event);
-	void OnFreeChk(wxCommandEvent& event);
+	void OnToolBar2(wxCommandEvent& event);
 	void OnFullScreen(wxCommandEvent& event);
+
 	//bar left
 	void OnDepthAttenCheck(wxCommandEvent& event);
-	void OnDepthAttenFactorChange(wxScrollEvent& event);
-	void OnDepthAttenFactorEdit(wxCommandEvent& event);
+	void OnDepthAttenChange(wxScrollEvent& event);
+	void OnDepthAttenEdit(wxCommandEvent& event);
 	void OnDepthAttenReset(wxCommandEvent &event);
+
 	//bar right
 	void OnPin(wxCommandEvent &event);
 	void OnCenter(wxCommandEvent &event);
@@ -234,6 +227,7 @@ private:
 	void OnScaleReset(wxCommandEvent &event);
 	void OnScaleFactorSpinUp(wxSpinEvent& event);
 	void OnScaleFactorSpinDown(wxSpinEvent& event);
+
 	//bar bottom
 	void OnZeroRot(wxCommandEvent& event);
 	void OnRotReset(wxCommandEvent &event);
@@ -245,14 +239,20 @@ private:
 	void OnRotSliderType(wxCommandEvent& event);
 	void OnOrthoViewSelected(wxCommandEvent& event);
 
-	void OnSaveDefault(wxCommandEvent &event);
 
-	void OnKeyDown(wxKeyEvent& event);
 	//idle
 	void OnTimer(wxTimerEvent& event);
 
-	DECLARE_EVENT_TABLE()
-
+	//capture options
+	void OnCh1Check(wxCommandEvent& event);
+	void OnChAlphaCheck(wxCommandEvent& event);
+	void OnChFloatCheck(wxCommandEvent& event);
+	void OnDpiText(wxCommandEvent& event);
+	void OnChEmbedCheck(wxCommandEvent& event);
+	void OnChEnlargeCheck(wxCommandEvent& event);
+	void OnSlEnlargeScroll(wxScrollEvent& event);
+	void OnTxEnlargeText(wxCommandEvent& event);
+	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
 };
 
 #endif//_RENDERVIEWPANEL_H_

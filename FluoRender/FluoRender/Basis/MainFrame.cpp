@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include "TreePanel.h"
 #include "ListPanel.h"
 #include <RenderViewPanel.h>
+#include <RenderCanvas.h>
 #include "PropPanel.h"
 #include "VolumePropPanel.h"
 #include "MeshPropPanel.h"
@@ -2877,12 +2878,15 @@ MeshData* MainFrame::GetCurSelMesh()
 	return glbin_data_manager.GetMeshData(m_cur_sel_mesh);
 }
 
-void MainFrame::RefreshVRenderViews(bool tree, bool interactive)
+void MainFrame::RefreshVRenderViews(bool tree, bool interactive, int excl_self, PropPanel* panel)
 {
 	for (int i=0 ; i<(int)m_vrv_list.size() ; i++)
 	{
 		if (m_vrv_list[i])
-			m_vrv_list[i]->RefreshGL(interactive);
+		{
+			if (update_props(excl_self, m_vrv_list[i], panel))
+				m_vrv_list[i]->RefreshGL(interactive);
+		}
 	}
 
 	//incase volume color changes

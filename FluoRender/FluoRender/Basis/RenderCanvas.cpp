@@ -5697,8 +5697,6 @@ void RenderCanvas::SetPersp(bool persp)
 void RenderCanvas::SetFree(bool free)
 {
 	m_free = free;
-	if (m_vrv->m_options_toolbar2->GetToolState(RenderViewPanel::ID_FreeChk) != m_free)
-		m_vrv->m_options_toolbar2->ToggleTool(RenderViewPanel::ID_FreeChk, m_free);
 	if (free)
 	{
 		m_persp = true;
@@ -5728,8 +5726,6 @@ void RenderCanvas::SetFree(bool free)
 		m_obj_transz_saved = m_obj_transz;
 		//save scale factor
 		m_scale_factor_saved = m_scale_factor;
-		m_vrv->m_aov_text->ChangeValue(wxString::Format("%d", int(std::round(m_aov))));
-		m_vrv->m_aov_sldr->SetValue(m_aov);
 	}
 	else
 	{
@@ -5752,7 +5748,6 @@ void RenderCanvas::SetFree(bool free)
 		m_obj_transz = m_obj_transz_saved;
 		//restore scale factor
 		m_scale_factor = m_scale_factor_saved;
-		m_vrv->UpdateScaleFactor(false);
 		//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
 		//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
 		//m_vrv->m_scale_factor_text->ChangeValue(str);
@@ -5781,41 +5776,6 @@ void RenderCanvas::SetVolMethod(int method)
 	PopVolumeList();
 
 	m_vol_method = method;
-
-	//ui
-	m_vrv->m_options_toolbar->ToggleTool(RenderViewPanel::ID_VolumeSeqRd, false);
-	m_vrv->m_options_toolbar->ToggleTool(RenderViewPanel::ID_VolumeMultiRd, false);
-	m_vrv->m_options_toolbar->ToggleTool(RenderViewPanel::ID_VolumeCompRd, false);
-	switch (m_vol_method)
-	{
-	case VOL_METHOD_SEQ:
-		m_vrv->m_options_toolbar->ToggleTool(RenderViewPanel::ID_VolumeSeqRd, true);
-		m_vrv->m_options_toolbar->SetToolNormalBitmap(
-			RenderViewPanel::ID_VolumeSeqRd, wxGetBitmapFromMemory(layers));
-		m_vrv->m_options_toolbar->SetToolNormalBitmap(
-			RenderViewPanel::ID_VolumeMultiRd, wxGetBitmapFromMemory(depth_off));
-		m_vrv->m_options_toolbar->SetToolNormalBitmap(
-			RenderViewPanel::ID_VolumeCompRd, wxGetBitmapFromMemory(composite_off));
-		break;
-	case VOL_METHOD_MULTI:
-		m_vrv->m_options_toolbar->ToggleTool(RenderViewPanel::ID_VolumeMultiRd, true);
-		m_vrv->m_options_toolbar->SetToolNormalBitmap(
-			RenderViewPanel::ID_VolumeSeqRd, wxGetBitmapFromMemory(layers_off));
-		m_vrv->m_options_toolbar->SetToolNormalBitmap(
-			RenderViewPanel::ID_VolumeMultiRd, wxGetBitmapFromMemory(depth));
-		m_vrv->m_options_toolbar->SetToolNormalBitmap(
-			RenderViewPanel::ID_VolumeCompRd, wxGetBitmapFromMemory(composite_off));
-		break;
-	case VOL_METHOD_COMP:
-		m_vrv->m_options_toolbar->ToggleTool(RenderViewPanel::ID_VolumeCompRd, true);
-		m_vrv->m_options_toolbar->SetToolNormalBitmap(
-			RenderViewPanel::ID_VolumeSeqRd, wxGetBitmapFromMemory(layers_off));
-		m_vrv->m_options_toolbar->SetToolNormalBitmap(
-			RenderViewPanel::ID_VolumeMultiRd, wxGetBitmapFromMemory(depth_off));
-		m_vrv->m_options_toolbar->SetToolNormalBitmap(
-			RenderViewPanel::ID_VolumeCompRd, wxGetBitmapFromMemory(composite));
-		break;
-	}
 }
 
 VolumeData* RenderCanvas::GetAllVolumeData(int index)

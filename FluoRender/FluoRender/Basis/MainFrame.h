@@ -190,7 +190,7 @@ public:
 	int GetViewNum();
 	RenderCanvas* GetView(int index);
 	RenderCanvas* GetView(wxString& name);
-	void RefreshVRenderViews(bool tree=false, bool interactive=false);
+	void RefreshVRenderViews(bool tree=false, bool interactive=false, int excl_self=0, PropPanel* panel=0);
 	void DeleteVRenderView(int i);
 	void DeleteVRenderView(wxString &name);
 

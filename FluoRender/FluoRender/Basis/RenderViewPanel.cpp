@@ -49,41 +49,6 @@ int RenderViewPanel::m_max_id = 1;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BEGIN_EVENT_TABLE(RenderViewPanel, wxPanel)
-	//bar top
-	EVT_TOOL(ID_VolumeSeqRd, RenderViewPanel::OnVolumeMethodCheck)
-	EVT_TOOL(ID_VolumeMultiRd, RenderViewPanel::OnVolumeMethodCheck)
-	EVT_TOOL(ID_VolumeCompRd, RenderViewPanel::OnVolumeMethodCheck)
-	EVT_BUTTON(ID_CaptureBtn, RenderViewPanel::OnCapture)
-	EVT_COLOURPICKER_CHANGED(ID_BgColorPicker, RenderViewPanel::OnBgColorChange)
-	EVT_BUTTON(ID_BgInvBtn, RenderViewPanel::OnBgInvBtn)
-	EVT_TOOL(ID_CamCtrChk, RenderViewPanel::OnCamCtrCheck)
-	EVT_TOOL(ID_FpsChk, RenderViewPanel::OnFpsCheck)
-	EVT_TOOL(ID_LegendChk, RenderViewPanel::OnLegendCheck)
-	EVT_TOOL(ID_ColormapChk, RenderViewPanel::OnColormapCheck)
-	//scale bar
-	EVT_TOOL(ID_ScaleBar, RenderViewPanel::OnScaleBar)
-	EVT_TEXT(ID_ScaleText, RenderViewPanel::OnScaleTextEditing)
-	EVT_COMBOBOX(ID_ScaleCmb, RenderViewPanel::OnScaleTextEditing)
-	//other tools
-	EVT_COMMAND_SCROLL(ID_AovSldr, RenderViewPanel::OnAovChange)
-	EVT_TEXT(ID_AovText, RenderViewPanel::OnAovText)
-	EVT_TOOL(ID_FreeChk, RenderViewPanel::OnFreeChk)
-	EVT_TOOL(ID_FullScreenBtn, RenderViewPanel::OnFullScreen)
-	//bar left
-	EVT_TOOL(ID_DepthAttenChk, RenderViewPanel::OnDepthAttenCheck)
-	EVT_COMMAND_SCROLL(ID_DepthAttenFactorSldr, RenderViewPanel::OnDepthAttenFactorChange)
-	EVT_TEXT(ID_DepthAttenFactorText, RenderViewPanel::OnDepthAttenFactorEdit)
-	EVT_TOOL(ID_DepthAttenResetBtn, RenderViewPanel::OnDepthAttenReset)
-	//bar right
-	EVT_TOOL(ID_PinBtn, RenderViewPanel::OnPin)
-	EVT_TOOL(ID_CenterBtn, RenderViewPanel::OnCenter)
-	EVT_TOOL(ID_Scale121Btn, RenderViewPanel::OnScale121)
-	EVT_COMMAND_SCROLL(ID_ScaleFactorSldr, RenderViewPanel::OnScaleFactorChange)
-	EVT_TEXT(ID_ScaleFactorText, RenderViewPanel::OnScaleFactorEdit)
-	EVT_TOOL(ID_ScaleModeBtn, RenderViewPanel::OnScaleMode)
-	EVT_TOOL(ID_ScaleResetBtn, RenderViewPanel::OnScaleReset)
-	EVT_SPIN_UP(ID_ScaleFactorSpin, RenderViewPanel::OnScaleFactorSpinDown)
-	EVT_SPIN_DOWN(ID_ScaleFactorSpin, RenderViewPanel::OnScaleFactorSpinUp)
 	//bar bottom
 	EVT_TOOL(ID_ZeroRotBtn, RenderViewPanel::OnZeroRot)
 	EVT_TOOL(ID_RotResetBtn, RenderViewPanel::OnRotReset)
@@ -96,12 +61,6 @@ BEGIN_EVENT_TABLE(RenderViewPanel, wxPanel)
 	EVT_TOOL(ID_RotLockChk, RenderViewPanel::OnRotLockCheck)
 	EVT_TOOL(ID_RotSliderType, RenderViewPanel::OnRotSliderType)
 	EVT_COMBOBOX(ID_OrthoViewCmb, RenderViewPanel::OnOrthoViewSelected)
-	//timer
-	EVT_TIMER(ID_RotateTimer, RenderViewPanel::OnTimer)
-	//save default
-	EVT_TOOL(ID_DefaultBtn, RenderViewPanel::OnSaveDefault)
-
-	EVT_KEY_DOWN(RenderViewPanel::OnKeyDown)
 END_EVENT_TABLE()
 
 RenderViewPanel::RenderViewPanel(MainFrame* frame,
@@ -115,8 +74,7 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 	m_default_saved(false),
 	m_frame(frame),
 	m_timer(this),
-	m_draw_clip(false),
-	m_draw_scalebar(kOff),
+	m_draw_scalebar(0),
 	m_pin_scale_thresh(10.0),
 	m_rot_slider(true),
 	m_use_dft_settings(false),
@@ -421,14 +379,17 @@ void RenderViewPanel::CreateBar()
 
 	sizer_h_1->Add(40, 40);
 	sizer_h_1->Add(m_options_toolbar, 1, wxALIGN_CENTER);
+	m_options_toolbar->Bind(wxEVT_TOOL, &RenderViewPanel::OnToolBar, this);
 	m_options_toolbar->Realize();
 
-	m_scale_text = new wxTextCtrl(this, ID_ScaleText, "50",
+	m_scale_text = new wxTextCtrl(this, wxID_ANY, "50",
 		wxDefaultPosition, FromDIP(wxSize(35, 20)), 0, vald_int);
-	m_scale_cmb = new wxComboBox(this, ID_ScaleCmb, "",
+	m_scale_cmb = new wxComboBox(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(50, 30)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> scale_list = { "nm", L"\u03BCm", "mm" };
 	m_scale_cmb->Append(scale_list);
+	m_scale_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnScaleText, this);
+	m_scale_cmb->Bind(wxEVT_TEXT, &RenderViewPanel::OnScaleUnit, this);
 	sizer_h_1->Add(m_scale_text, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_scale_cmb, 0, wxALIGN_CENTER);
 
@@ -436,7 +397,7 @@ void RenderViewPanel::CreateBar()
 
 	//background
 	m_bg_color_picker = new wxColourPickerCtrl(this,
-		ID_BgColorPicker, wxColor(), wxDefaultPosition, FromDIP(wxSize(100, 20)));
+		wxID_ANY, wxColor(), wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	wxSize bs = m_bg_color_picker->GetSize();
 	m_bg_inv_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -448,18 +409,21 @@ void RenderViewPanel::CreateBar()
 		bitmap, wxNullBitmap,
 		"Inver background color",
 		"Inver background color");
+	m_bg_inv_btn->Realize();
+	m_bg_color_picker->Bind(wxEVT_COLOURPICKER_CHANGED, &RenderViewPanel::OnBgColorChange, this);
+	m_bg_inv_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnBgInvBtn, this);
 	sizer_h_1->Add(m_bg_color_picker, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_bg_inv_btn, 0, wxALIGN_CENTER);
 
 	//angle of view
 	st2 = new wxStaticText(this, wxID_ANY, "Projection:");
-	m_aov_sldr = new wxSingleSlider(this, ID_AovSldr, 45, 10, 100,
+	m_aov_sldr = new wxSingleSlider(this, wxID_ANY, 45, 10, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_aov_sldr->Connect(wxID_ANY, wxEVT_IDLE,
-		wxIdleEventHandler(RenderViewPanel::OnAovSldrIdle),
-		NULL, this);
-	m_aov_text = new wxTextCtrl(this, ID_AovText, "",
+	m_aov_text = new wxTextCtrl(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), 0, vald_int);
+	m_aov_sldr->Bind(wxEVT_IDLE, &RenderViewPanel::OnAovSldrIdle, this);
+	m_aov_sldr->Bind(wxEVT_SCROLL_CHANGED, &RenderViewPanel::OnAovChange, this);
+	m_aov_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnAovText, this);
 	sizer_h_1->Add(st2, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_aov_sldr, 1, wxEXPAND);
 	sizer_h_1->Add(m_aov_text, 0, wxALIGN_CENTER);
@@ -481,8 +445,9 @@ void RenderViewPanel::CreateBar()
 	m_options_toolbar2->AddTool(
 		ID_DefaultBtn, "Save", bitmap,
 		"Set Default Render View Settings");
-	sizer_h_1->Add(m_options_toolbar2, 0, wxALIGN_CENTER);
+	m_options_toolbar2->Bind(wxEVT_TOOL, &RenderViewPanel::OnToolBar2, this);
 	m_options_toolbar2->Realize();
+	sizer_h_1->Add(m_options_toolbar2, 0, wxALIGN_CENTER);
 
 	//full screen
 	m_full_screen_btn = new wxToolBar(this, wxID_ANY,
@@ -493,6 +458,7 @@ void RenderViewPanel::CreateBar()
 	m_full_screen_btn->AddTool(
 		0, "Full Screen",
 		bitmap, "Show full screen");
+	m_full_screen_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnFullScreen, this);
 	m_full_screen_btn->Realize();
 	sizer_h_1->Add(m_full_screen_btn, 0, wxALIGN_CENTER);
 
@@ -508,11 +474,17 @@ void RenderViewPanel::CreateBar()
 		bitmap, wxNullBitmap,
 		"Enable adjustment of the Depth Attenuation Interval",
 		"Enable adjustment of the Depth Attenuation Interval");
+	m_depth_atten_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnDepthAttenCheck, this);
 	m_depth_atten_btn->Realize();
 	//slider
 	long ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
-	m_depth_atten_factor_sldr = new wxSingleSlider(this, ID_DepthAttenFactorSldr, 0, 0, 100,
+	m_depth_atten_factor_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, ls);
+	//text
+	m_depth_atten_factor_text = new wxTextCtrl(this, wxID_ANY, "0.0",
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_fp2);
+	m_depth_atten_factor_sldr->Bind(wxEVT_SCROLL_CHANGED, &RenderViewPanel::OnDepthAttenChange, this);
+	m_depth_atten_factor_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnDepthAttenEdit, this);
 	//reset
 	m_depth_atten_reset_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -522,10 +494,8 @@ void RenderViewPanel::CreateBar()
 	m_depth_atten_reset_btn->AddTool(
 		0, "Reset",
 		bitmap, "Reset Depth Attenuation Interval");
+	m_depth_atten_reset_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnDepthAttenReset, this);
 	m_depth_atten_reset_btn->Realize();
-	//text
-	m_depth_atten_factor_text = new wxTextCtrl(this, ID_DepthAttenFactorText, "0.0",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_fp2);
 	sizer_v_3->AddSpacer(50);
 	sizer_v_3->Add(m_depth_atten_btn, 0, wxALIGN_CENTER);
 	sizer_v_3->Add(m_depth_atten_factor_sldr, 1, wxEXPAND);
@@ -545,6 +515,7 @@ void RenderViewPanel::CreateBar()
 		bitmap, wxNullBitmap,
 		"Anchor the rotation center on data",
 		"Anchor the rotation center on data");
+	m_pin_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnPin, this);
 	m_pin_btn->Realize();
 
 	//centerize
@@ -555,6 +526,7 @@ void RenderViewPanel::CreateBar()
 	bitmap = wxGetBitmap(center, m_dpi_sf2);
 	m_center_btn->AddTool(0, "Center",
 		bitmap, "Center the Data on the Render View");
+	m_center_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnCenter, this);
 	m_center_btn->Realize();
 
 	//one to one scale
@@ -565,17 +537,22 @@ void RenderViewPanel::CreateBar()
 	bitmap = wxGetBitmap(ratio, m_dpi_sf2);
 	m_scale_121_btn->AddTool(0, "1 to 1",
 		bitmap, "Auto-size the data to a 1:1 ratio");
+	m_scale_121_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnScale121, this);
 	m_scale_121_btn->Realize();
 
 	//scale slider
 	ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
-	m_scale_factor_sldr = new wxSingleSlider(this, ID_ScaleFactorSldr, 100, 50, 999,
+	m_scale_factor_sldr = new wxSingleSlider(this, wxID_ANY, 100, 50, 999,
 		wxDefaultPosition, wxDefaultSize, ls, wxDefaultValidator, "test");
-	m_scale_factor_text = new wxTextCtrl(this, ID_ScaleFactorText, "100",
+	m_scale_factor_text = new wxTextCtrl(this, wxID_ANY, "100",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
-	m_scale_factor_spin = new wxSpinButton(this, ID_ScaleFactorSpin,
+	m_scale_factor_spin = new wxSpinButton(this, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(40, 20)));
 	m_scale_factor_spin->SetRange(-0x8000, 0x7fff);
+	m_scale_factor_sldr->Bind(wxEVT_SCROLL_CHANGED, &RenderViewPanel::OnScaleFactorChange, this);
+	m_scale_factor_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnScaleFactorEdit, this);
+	m_scale_factor_spin->Bind(wxEVT_SPIN_UP, &RenderViewPanel::OnScaleFactorSpinDown, this);
+	m_scale_factor_spin->Bind(wxEVT_SPIN_DOWN, &RenderViewPanel::OnScaleFactorSpinUp, this);
 	m_scale_reset_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_scale_reset_btn->SetToolBitmapSize(toolsize);
@@ -583,6 +560,7 @@ void RenderViewPanel::CreateBar()
 	bitmap = wxGetBitmap(reset, m_dpi_sf2);
 	m_scale_reset_btn->AddTool(0, "Reset",
 		bitmap, "Reset the Zoom");
+	m_scale_reset_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnScaleReset, this);
 	m_scale_reset_btn->Realize();
 	m_scale_mode_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -592,6 +570,7 @@ void RenderViewPanel::CreateBar()
 	m_scale_mode_btn->AddTool(
 		0, "Switch zoom ratio mode",
 		bitmap, "View-based zoom ratio");
+	m_scale_mode_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnScaleMode, this);
 	m_scale_mode_btn->Realize();
 	sizer_v_4->AddSpacer(50);
 	sizer_v_4->Add(m_pin_btn, 0, wxALIGN_CENTER);
@@ -688,6 +667,7 @@ void RenderViewPanel::CreateBar()
 	SetSizer(sizer_v);
 	Layout();
 
+	m_timer.Bind(wxEVT_TIMER, &RenderViewPanel::OnTimer, this);
 }
 
 void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
@@ -723,19 +703,19 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//scale bar
 	switch (m_draw_scalebar)
 	{
-	case kOff:
+	case 0:
 		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
 			wxGetBitmap(scale_text_off, m_dpi_sf2));
 		m_scale_text->Enable();
 		m_scale_cmb->Disable();
 		break;
-	case kOn:
+	case 1:
 		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
 			wxGetBitmap(scale_text, m_dpi_sf2));
 		m_scale_text->Enable();
 		m_scale_cmb->Enable();
 		break;
-	case kText:
+	case 2:
 		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
 			wxGetBitmap(scalebar, m_dpi_sf2));
 		m_scale_text->Disable();
@@ -850,6 +830,578 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//m_ortho_view_cmb->Select(6);
 }
 
+void RenderViewPanel::SetVolumeMethod(int val)
+{
+	m_glview->SetVolMethod(val);
+
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::Capture()
+{
+	//reset enlargement
+	RenderCanvas::SetEnlarge(false);
+	RenderCanvas::SetEnlargeScale(1.0);
+
+	MainFrame* vr_frame = (MainFrame*)m_frame;
+
+	wxFileDialog file_dlg(m_frame, "Save captured image", "", "", "*.tif", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	file_dlg.SetExtraControlCreator(CreateExtraCaptureControl);
+	int rval = file_dlg.ShowModal();
+	if (rval == wxID_OK)
+	{
+		m_glview->m_cap_file = file_dlg.GetDirectory() + GETSLASH() + file_dlg.GetFilename();
+		m_glview->m_capture = true;
+		RefreshGL();
+
+		if (glbin_settings.m_prj_save)
+		{
+			wxString new_folder;
+			new_folder = m_glview->m_cap_file + "_project";
+			MkDirW(new_folder.ToStdWstring());
+			wxString prop_file = new_folder + GETSLASH() + file_dlg.GetFilename() + "_project.vrp";
+			bool inc = wxFileExists(prop_file) &&
+				glbin_settings.m_prj_save_inc;
+			vr_frame->SaveProject(prop_file, inc);
+		}
+	}
+}
+
+void RenderViewPanel::SetInfo(bool val)
+{
+	if (val)
+		m_glview->m_draw_info |= 1;
+	else
+		m_glview->m_draw_info &= ~1;
+
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::SetDrawCamCtr(bool val)
+{
+	m_glview->m_draw_camctr = val;
+
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::SetLegend(bool val)
+{
+	m_glview->m_draw_legend = val;
+
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::SetDrawColormap(bool val)
+{
+	m_glview->m_draw_colormap = val;
+
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::SetDrawScalebar(int val)
+{
+	switch (val)
+	{
+	case 0:
+		m_glview->m_disp_scale_bar = true;
+		m_glview->m_disp_scale_bar_text = false;
+		break;
+	case 1:
+		m_glview->m_disp_scale_bar = true;
+		m_glview->m_disp_scale_bar_text = true;
+		break;
+	case 2:
+		m_glview->m_disp_scale_bar = false;
+		m_glview->m_disp_scale_bar_text = false;
+		break;
+	}
+
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::SetScaleText(double val)
+{
+	wxString str, num_text, unit_text;
+	num_text = wxString::Format("%d", (int)val);
+	switch (m_glview->m_sb_unit)
+	{
+	case 0:
+		unit_text = "nm";
+		break;
+	case 1:
+	default:
+		unit_text = L"\u03BCm";
+		break;
+	case 2:
+		unit_text = "mm";
+		break;
+	}
+	str = num_text + " " + unit_text;
+	m_glview->SetSBText(str);
+	m_glview->SetScaleBarLen(val);
+	m_glview->m_sb_num = num_text;
+
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::SetScaleUnit(int val)
+{
+	m_glview->m_sb_unit = val;
+
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::SetBgColor(fluo::Color val)
+{
+	m_glview->SetBackgroundColor(val);
+
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::SetBgColorInvert()
+{
+	fluo::Color c = m_glview->GetBackgroundColor();
+	c = fluo::Color(1.0, 1.0, 1.0) - c;
+	m_glview->SetBackgroundColor(c);
+
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::SetDrawClipPlanes(bool val)
+{
+	bool draw_clip = m_glview->m_draw_clip;
+	if (val && !draw_clip)
+	{
+		m_glview->m_draw_clip = true;
+		m_glview->m_clip_mask = -1;
+		FluoRefresh(false, true, 2);
+	}
+	else if (!val && draw_clip)
+	{
+		m_glview->m_draw_clip = false;
+		FluoRefresh(false, true, 2);
+	}
+}
+
+void RenderViewPanel::SetAov(double val)
+{
+	if (val < 11)
+	{
+		m_glview->SetPersp(false);
+		m_glview->SetAov(10);
+	}
+	else if (val > 100)
+	{
+		m_glview->SetPersp(true);
+		m_glview->SetAov(100);
+	}
+	else
+	{
+		m_glview->SetPersp(true);
+		m_glview->SetAov(val);
+	}
+
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::SetFree(bool val)
+{
+	m_glview->SetFree(val);
+	if (!val)
+	{
+		if (m_glview->m_aov > 10)
+			m_glview->SetPersp(true);
+		else
+			m_glview->SetPersp(false);
+	}
+
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::SetFullScreen()
+{
+	if (m_glview->GetParent() != m_full_frame)
+	{
+		m_view_sizer->Detach(m_glview);
+		m_glview->Reparent(m_full_frame);
+		//get display id
+		int disp_id = glbin_settings.m_disp_id;
+		if (disp_id >= wxDisplay::GetCount())
+			disp_id = 0;
+		wxDisplay display(disp_id);
+		wxRect rect = display.GetGeometry();
+		m_full_frame->SetSize(rect.GetSize());
+		m_full_frame->SetPosition(rect.GetPosition());
+		m_full_frame->ShowFullScreen(true);
+		m_glview->SetPosition(wxPoint(0, 0));
+		m_glview->SetSize(m_full_frame->GetSize());
+		if (glbin_settings.m_stay_top)
+			m_full_frame->SetWindowStyle(wxBORDER_NONE | wxSTAY_ON_TOP);
+		else
+			m_full_frame->SetWindowStyle(wxBORDER_NONE);
+#ifdef _WIN32
+		if (!glbin_settings.m_show_cursor)
+			ShowCursor(false);
+#endif
+		m_full_frame->Iconize(false);
+		m_full_frame->Raise();
+		m_full_frame->Show();
+		m_glview->m_full_screen = true;
+		m_glview->SetFocus();
+		RefreshGL();
+	}
+	else
+	{
+		m_glview->Close();
+	}
+}
+
+void RenderViewPanel::SetDepthAttenEnable(bool val)
+{
+	m_glview->SetFog(true);
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::SetDepthAtten(double val)
+{
+	m_glview->SetFogIntensity(val);
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::SetPinRotCenter(bool val)
+{
+	m_glview->SetPinRotCenter(val);
+	double scale = m_glview->m_scale_factor;
+	switch (m_glview->m_scale_mode)
+	{
+		case 0:
+			break;
+		case 1:
+			scale /= m_glview->Get121ScaleFactor();
+			break;
+		case 2:
+		{
+			VolumeData* vd = 0;
+			if (m_glview->m_cur_vol)
+				vd = m_glview->m_cur_vol;
+			else if (m_glview->m_vd_pop_list.size())
+				vd = m_glview->m_vd_pop_list[0];
+			double spcx, spcy, spcz;
+			if (vd)
+				vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
+			if (spcx > 0.0)
+				scale /= m_glview->Get121ScaleFactor() * spcx;
+		}
+		break;
+	}
+
+	if (val)
+	{
+		if (scale > m_pin_scale_thresh)
+			m_glview->m_auto_update_rot_center = true;
+		else
+			m_glview->m_auto_update_rot_center = false;
+	}
+	else
+	{
+		if (scale > m_pin_scale_thresh)
+			m_glview->m_auto_update_rot_center = false;
+		else
+			m_glview->m_auto_update_rot_center = true;
+	}
+}
+
+void RenderViewPanel::SetCenter()
+{
+	m_glview->SetCenter();
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::SetScale121()
+{
+	m_glview->SetScale121();
+	if (m_glview->m_mouse_focus)
+		m_glview->SetFocus();
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::SetScaleFactor(double val)
+{
+	switch (m_glview->m_scale_mode)
+	{
+		case 0:
+			m_glview->m_scale_factor = val;
+			break;
+		case 1:
+			m_glview->m_scale_factor = val * m_glview->Get121ScaleFactor();
+			break;
+		case 2:
+		{
+			VolumeData* vd = 0;
+			if (m_glview->m_cur_vol)
+				vd = m_glview->m_cur_vol;
+			else if (m_glview->m_vd_pop_list.size())
+				vd = m_glview->m_vd_pop_list[0];
+			double spcx, spcy, spcz;
+			if (vd)
+				vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
+			if (spcx > 0.0)
+				m_glview->m_scale_factor = val * m_glview->Get121ScaleFactor() * spcx;
+		}
+		break;
+	}
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::SetScaleMode(int val)
+{
+	m_glview->m_scale_mode = val;
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::OnToolBar(wxCommandEvent& event)
+{
+	int id = event.GetId();
+
+	switch (id)
+	{
+	case ID_VolumeSeqRd:
+		SetVolumeMethod(VOL_METHOD_SEQ);
+		break;
+	case ID_VolumeMultiRd:
+		SetVolumeMethod(VOL_METHOD_MULTI);
+		break;
+	case ID_VolumeCompRd:
+		SetVolumeMethod(VOL_METHOD_COMP);
+		break;
+	case ID_CaptureBtn:
+		Capture();
+		break;
+	case ID_InfoChk:
+		SetInfo(m_options_toolbar->GetToolState(ID_InfoChk));
+		break;
+	case ID_CamCtrChk:
+		SetDrawCamCtr(m_options_toolbar->GetToolState(ID_CamCtrChk));
+		break;
+	case ID_LegendChk:
+		SetLegend(m_options_toolbar->GetToolState(ID_LegendChk));
+		break;
+	case ID_ColormapChk:
+		SetDrawColormap(m_options_toolbar->GetToolState(ID_ColormapChk));
+		break;
+	case ID_ScaleBar:
+		m_draw_scalebar += 1;
+		m_draw_scalebar = m_draw_scalebar > 2 ? 0 : m_draw_scalebar;
+		SetDrawScalebar(m_draw_scalebar);
+		break;
+	}
+
+	event.Skip();
+}
+
+void RenderViewPanel::OnScaleText(wxCommandEvent& event)
+{
+	wxString str = m_scale_text->GetValue();
+	double len;
+	str.ToDouble(&len);
+	SetScaleText(len);
+	event.Skip();
+}
+
+void RenderViewPanel::OnScaleUnit(wxCommandEvent& event)
+{
+	SetScaleUnit(m_scale_cmb->GetSelection());
+	event.Skip();
+}
+
+void RenderViewPanel::OnBgColorChange(wxColourPickerEvent& event)
+{
+	wxColor c = m_bg_color_picker->GetColour();
+	fluo::Color color(c.Red() / 255.0, c.Green() / 255.0, c.Blue() / 255.0);
+	SetBgColor(color);
+	event.Skip();
+}
+
+void RenderViewPanel::OnBgInvBtn(wxCommandEvent& event)
+{
+	SetBgColorInvert();
+	event.Skip();
+}
+
+void RenderViewPanel::OnAovSldrIdle(wxIdleEvent& event)
+{
+	MainFrame* vr_frame = (MainFrame*)m_frame;
+	if (vr_frame && vr_frame->GetClippingView())
+	{
+		if (vr_frame->GetClippingView()->GetHoldPlanes())
+			return;
+	}
+	if (m_glview->m_capture)
+		return;
+
+	wxPoint pos = wxGetMousePosition();
+	wxRect reg = m_aov_sldr->GetScreenRect();
+	wxWindow* window = wxWindow::FindFocus();
+	if (window && reg.Contains(pos))
+		SetDrawClipPlanes(true);
+	else
+		SetDrawClipPlanes(false);
+	event.Skip();
+}
+
+void RenderViewPanel::OnAovChange(wxScrollEvent& event)
+{
+	int val = m_aov_sldr->GetValue();
+	SetAov(val);
+	event.Skip();
+}
+
+void RenderViewPanel::OnAovText(wxCommandEvent& event)
+{
+	wxString str = m_aov_text->GetValue();
+	if (str == "Ortho")
+		SetAov(10);
+	else
+	{
+		long val;
+		if (!str.ToLong(&val))
+			return;
+		SetAov(val);
+	}
+	event.Skip();
+}
+
+void RenderViewPanel::OnToolBar2(wxCommandEvent& event)
+{
+	int id = event.GetId();
+
+	switch (id)
+	{
+	case ID_FreeChk:
+		SetFree(m_options_toolbar2->GetToolState(ID_FreeChk));
+		break;
+	case ID_DefaultBtn:
+		SaveDefault();
+		break;
+	}
+	event.Skip();
+}
+
+void RenderViewPanel::OnFullScreen(wxCommandEvent& event)
+{
+	SetFullScreen();
+	event.Skip();
+}
+
+void RenderViewPanel::OnDepthAttenCheck(wxCommandEvent& event)
+{
+	SetDepthAttenEnable(m_depth_atten_btn->GetToolState(0));
+	event.Skip();
+}
+
+//bar left
+void RenderViewPanel::OnDepthAttenChange(wxScrollEvent& event)
+{
+	double val = m_depth_atten_factor_sldr->GetValue() / 100.0;
+	SetDepthAtten(val);
+	event.Skip();
+}
+
+void RenderViewPanel::OnDepthAttenEdit(wxCommandEvent& event)
+{
+	wxString str = m_depth_atten_factor_text->GetValue();
+	double val;
+	str.ToDouble(&val);
+	SetDepthAtten(val);
+	event.Skip();
+}
+
+void RenderViewPanel::OnDepthAttenReset(wxCommandEvent& event)
+{
+	SetDepthAttenEnable(glbin_view_def.m_use_fog);
+	SetDepthAtten(glbin_view_def.m_fog_intensity);
+	event.Skip();
+}
+
+void RenderViewPanel::OnPin(wxCommandEvent& event)
+{
+	bool val = m_pin_btn->GetToolState(0);
+	SetPinRotCenter(val);
+	event.Skip();
+}
+
+void RenderViewPanel::OnCenter(wxCommandEvent& event)
+{
+	SetCenter();
+	event.Skip();
+}
+
+void RenderViewPanel::OnScale121(wxCommandEvent& event)
+{
+	SetScale121();
+	event.Skip();
+}
+
+void RenderViewPanel::OnScaleFactorChange(wxScrollEvent& event)
+{
+	int val = m_scale_factor_sldr->GetValue();
+	SetScaleFactor(val / 100.0);
+	event.Skip();
+}
+
+void RenderViewPanel::OnScaleFactorEdit(wxCommandEvent& event)
+{
+	wxString str = m_scale_factor_text->GetValue();
+	long val;
+	str.ToLong(&val);
+	if (val > 0)
+		SetScaleFactor(val / 100.0);
+	event.Skip();
+}
+
+void RenderViewPanel::OnScaleFactorSpinUp(wxSpinEvent& event)
+{
+	wxString str_val = m_scale_factor_text->GetValue();
+	long val;
+	str_val.ToLong(&val);
+	if (glbin_settings.m_inverse_slider)
+		val++;
+	else
+		val--;
+	if (val > 0)
+		SetScaleFactor(val / 100.0);
+	event.Skip();
+}
+
+void RenderViewPanel::OnScaleFactorSpinDown(wxSpinEvent& event)
+{
+	wxString str_val = m_scale_factor_text->GetValue();
+	long val;
+	str_val.ToLong(&val);
+	if (glbin_settings.m_inverse_slider)
+		val--;
+	else
+		val++;
+	if (val > 0)
+		SetScaleFactor(val / 100.0);
+	event.Skip();
+}
+
+void RenderViewPanel::OnScaleReset(wxCommandEvent& event)
+{
+	SetScaleFactor(glbin_view_def.m_scale_factor);
+	event.Skip();
+}
+
+void RenderViewPanel::OnScaleMode(wxCommandEvent& event)
+{
+	int mode = m_glview->m_scale_mode;
+	mode += 1;
+	mode = mode > 2 ? 0 : mode;
+	SetScaleMode(mode);
+	event.Skip();
+}
+
 void RenderViewPanel::UpdateView(bool ui_update)
 {
 	double rotx, roty, rotz;
@@ -865,70 +1417,6 @@ void RenderViewPanel::UpdateView(bool ui_update)
 
 void RenderViewPanel::UpdateScaleFactor(bool update_text)
 {
-}
-
-void RenderViewPanel::SetScaleFactor(double s, bool update)
-{
-	switch (m_glview->m_scale_mode)
-	{
-	case 0:
-		m_glview->m_scale_factor = s;
-		break;
-	case 1:
-		m_glview->m_scale_factor = s * m_glview->Get121ScaleFactor();
-		break;
-	case 2:
-		{
-		VolumeData *vd = 0;
-		if (m_glview->m_cur_vol)
-			vd = m_glview->m_cur_vol;
-		else if (m_glview->m_vd_pop_list.size())
-			vd = m_glview->m_vd_pop_list[0];
-		double spcx, spcy, spcz;
-		if (vd)
-			vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
-		if (spcx > 0.0)
-			m_glview->m_scale_factor = s * m_glview->Get121ScaleFactor() * spcx;
-		}
-		break;
-	}
-
-	if (update)
-		UpdateScaleFactor();
-}
-
-void RenderViewPanel::SetScaleMode(int mode, bool update)
-{
-	switch (mode)
-	{
-	case 0:
-		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
-			wxGetBitmap(zoom_view, m_dpi_sf2));
-		m_scale_mode_btn->SetToolShortHelp(ID_ScaleModeBtn,
-			"View-based zoom ratio");
-		m_scale_mode_btn->SetToolLongHelp(ID_ScaleModeBtn,
-			"View-based zoom ratio (View entire data set at 100%)");
-		break;
-	case 1:
-		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
-			wxGetBitmap(zoom_pixel, m_dpi_sf2));
-		m_scale_mode_btn->SetToolShortHelp(ID_ScaleModeBtn,
-			"Pixel-based zoom ratio");
-		m_scale_mode_btn->SetToolLongHelp(ID_ScaleModeBtn,
-			"Pixel-based zoom ratio (View 1 data pixel to 1 screen pixel at 100%)");
-		break;
-	case 2:
-		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
-			wxGetBitmap(zoom_data, m_dpi_sf2));
-		m_scale_mode_btn->SetToolShortHelp(ID_ScaleModeBtn,
-			"Data-based zoom ratio");
-		m_scale_mode_btn->SetToolLongHelp(ID_ScaleModeBtn,
-			"Data-based zoom ratio (View with consistent scale bar sizes)");
-		break;
-	}
-	m_glview->m_scale_mode = mode;
-	if (update)
-		UpdateScaleFactor();
 }
 
 //rot center anchor thresh
@@ -963,160 +1451,6 @@ void RenderViewPanel::RefreshGL(bool interactive, bool start_loop)
 }
 
 //bar top
-void RenderViewPanel::OnVolumeMethodCheck(wxCommandEvent& event)
-{
-	//mode switch type
-	//0 - didn't change
-	//1 - to depth mode
-	//2 - from depth mode
-	//int mode_switch_type = 0;
-	//int old_mode = GetVolMethod();
-
-	int sender_id = event.GetId();
-	switch (sender_id)
-	{
-	case ID_VolumeSeqRd:
-		m_glview->SetVolMethod(VOL_METHOD_SEQ);
-		break;
-	case ID_VolumeMultiRd:
-		m_glview->SetVolMethod(VOL_METHOD_MULTI);
-		break;
-	case ID_VolumeCompRd:
-		m_glview->SetVolMethod(VOL_METHOD_COMP);
-		break;
-	}
-
-	/*   int new_mode = GetVolMethod();
-
-	if (new_mode == VOL_METHOD_MULTI &&
-	(old_mode == VOL_METHOD_SEQ || old_mode == VOL_METHOD_COMP))
-	mode_switch_type = 1;
-	else if ((new_mode == VOL_METHOD_SEQ || new_mode == VOL_METHOD_COMP) &&
-	old_mode == VOL_METHOD_MULTI)
-	mode_switch_type = 2;
-
-	MainFrame* vr_frame = (MainFrame*)m_frame;
-	if (vr_frame)
-	{
-	if (mode_switch_type == 1)
-	{
-	int cnt = 0;
-	bool r = false;
-	bool g = false;
-	bool b = false;
-	Color gamma = m_glview->GetGamma();
-	Color brightness = m_glview->GetBrightness();
-	Color hdr = m_glview->GetHdr();
-	for (int i=0; i<GetLayerNum(); i++)
-	{
-	TreeLayer* layer = GetLayer(i);
-	if (layer && layer->IsA() == 5)
-	{
-	DataGroup* group = (DataGroup*)layer;
-
-	if (group->GetVolumeNum() == 0)
-	continue;
-
-	r = r||group->GetSyncR();
-	g = g||group->GetSyncG();
-	b = b||group->GetSyncB();
-
-	if (cnt == 0)
-	{
-	gamma = group->GetGamma();
-	brightness = group->GetBrightness();
-	hdr = group->GetHdr();
-	}
-	}
-	cnt++;
-	}
-
-	if (r && g && b)
-	{
-	gamma[1] = gamma[2] = gamma[0];
-	brightness[1] = brightness[2] = brightness[0];
-	hdr[1] = hdr[2] = hdr[0];
-	}
-	else
-	{
-	if (r && g)
-	{
-	gamma[1] = gamma[0];
-	brightness[1] = brightness[0];
-	hdr[1] = hdr[0];
-	}
-	else if (r & b)
-	{
-	gamma[2] = gamma[0];
-	brightness[2] = brightness[0];
-	hdr[2] = hdr[0];
-	}
-	else if (g & b)
-	{
-	gamma[2] = gamma[1];
-	brightness[2] = brightness[1];
-	hdr[2] = hdr[1];
-	}
-	}
-	m_glview->SetGamma(gamma);
-	m_glview->SetBrightness(brightness);
-	m_glview->SetHdr(hdr);
-	m_glview->SetSyncR(r);
-	m_glview->SetSyncG(g);
-	m_glview->SetSyncB(b);
-
-	//sync properties of the selcted volume
-	VolumeData* svd = vr_frame->GetCurSelVol();
-	if (!svd)
-	svd = GetAllVolumeData(0);
-	if (svd)
-	{
-	for (int i=0; i<GetAllVolumeNum(); i++)
-	{
-	VolumeData* vd = GetAllVolumeData(i);
-	if (vd)
-	{
-	vd->SetNR(svd->GetNR());
-	vd->SetSampleRate(svd->GetSampleRate());
-	vd->SetShadow(svd->GetShadow());
-	double sp;
-	svd->GetShadowParams(sp);
-	vd->SetShadowParams(sp);
-	}
-	}
-	}
-	}
-	else if (mode_switch_type == 2)
-	{
-	if (GetGroupNum() == 1)
-	{
-	for (int i=0; i<GetLayerNum(); i++)
-	{
-	TreeLayer* layer = GetLayer(i);
-	if (layer && layer->IsA() == 5)
-	{
-	DataGroup* group = (DataGroup*)layer;
-	flvr::Color col = m_glview->GetGamma();
-	group->SetGammaAll(col);
-	col = m_glview->GetBrightness();
-	group->SetBrightnessAll(col);
-	col = m_glview->GetHdr();
-	group->SetHdrAll(col);
-	group->SetSyncRAll(m_glview->GetSyncR());
-	group->SetSyncGAll(m_glview->GetSyncG());
-	group->SetSyncBAll(m_glview->GetSyncB());
-	break;
-	}
-	}
-	}
-	}
-
-	vr_frame->GetTree()->UpdateSelection();
-	}*/
-
-	RefreshGL();
-}
-
 //ch1
 void RenderViewPanel::OnCh1Check(wxCommandEvent &event)
 {
@@ -1353,256 +1687,8 @@ wxWindow* RenderViewPanel::CreateExtraCaptureControl(wxWindow* parent)
 	return panel;
 }
 
-void RenderViewPanel::OnCapture(wxCommandEvent& event)
-{
-	//reset enlargement
-	RenderCanvas::SetEnlarge(false);
-	RenderCanvas::SetEnlargeScale(1.0);
-
-	MainFrame* vr_frame = (MainFrame*)m_frame;
-
-	wxFileDialog file_dlg(m_frame, "Save captured image", "", "", "*.tif", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
-	file_dlg.SetExtraControlCreator(CreateExtraCaptureControl);
-	int rval = file_dlg.ShowModal();
-	if (rval == wxID_OK)
-	{
-		m_glview->m_cap_file = file_dlg.GetDirectory() + GETSLASH() + file_dlg.GetFilename();
-		m_glview->m_capture = true;
-		RefreshGL();
-
-		if (glbin_settings.m_prj_save)
-		{
-			wxString new_folder;
-			new_folder = m_glview->m_cap_file + "_project";
-			MkDirW(new_folder.ToStdWstring());
-			wxString prop_file = new_folder + GETSLASH() + file_dlg.GetFilename() + "_project.vrp";
-			bool inc = wxFileExists(prop_file) && 
-				glbin_settings.m_prj_save_inc;
-			vr_frame->SaveProject(prop_file, inc);
-		}
-	}
-}
-
-
-//bar left
-void RenderViewPanel::OnDepthAttenCheck(wxCommandEvent& event)
-{
-	if (m_depth_atten_btn->GetToolState(ID_DepthAttenChk))
-	{
-		m_glview->SetFog(true);
-		m_depth_atten_factor_sldr->Enable();
-		m_depth_atten_factor_text->Enable();
-		m_depth_atten_btn->SetToolNormalBitmap (ID_DepthAttenChk,
-			wxGetBitmap(depth_atten, m_dpi_sf2));
-	}
-	else
-	{
-		m_glview->SetFog(false);
-		m_depth_atten_factor_sldr->Disable();
-		m_depth_atten_factor_text->Disable();
-		m_depth_atten_btn->SetToolNormalBitmap (ID_DepthAttenChk,
-			wxGetBitmap(no_depth_atten, m_dpi_sf2));
-	}
-
-	RefreshGL();
-}
-
-void RenderViewPanel::OnDepthAttenFactorChange(wxScrollEvent& event)
-{
-	double atten_factor = m_depth_atten_factor_sldr->GetValue()/100.0;
-	wxString str = wxString::Format("%.2f", atten_factor);
-	if (str != m_depth_atten_factor_text->GetValue())
-		m_depth_atten_factor_text->SetValue(str);
-}
-
-void RenderViewPanel::OnDepthAttenFactorEdit(wxCommandEvent& event)
-{
-	wxString str = m_depth_atten_factor_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_glview->SetFogIntensity(val);
-	m_depth_atten_factor_sldr->SetValue(std::round(val*100.0));
-	RefreshGL(true);
-}
-
-void RenderViewPanel::OnDepthAttenReset(wxCommandEvent &event)
-{
-	if (m_use_dft_settings)
-	{
-		wxString str = wxString::Format("%.2f", m_dft_depth_atten_factor);
-		m_depth_atten_factor_text->SetValue(str);
-	}
-	else
-	{
-		wxString str = wxString::Format("%.2f", 0.0);
-		m_depth_atten_factor_text->SetValue(str);
-	}
-}
 
 //bar right
-void RenderViewPanel::OnPin(wxCommandEvent &event)
-{
-	bool pin = m_pin_btn->GetToolState(ID_PinBtn);
-	m_glview->SetPinRotCenter(pin);
-	double scale = m_glview->m_scale_factor;
-	switch (m_glview->m_scale_mode)
-	{
-	case 0:
-		break;
-	case 1:
-		scale /= m_glview->Get121ScaleFactor();
-		break;
-	case 2:
-		{
-		VolumeData *vd = 0;
-		if (m_glview->m_cur_vol)
-			vd = m_glview->m_cur_vol;
-		else if (m_glview->m_vd_pop_list.size())
-			vd = m_glview->m_vd_pop_list[0];
-		double spcx, spcy, spcz;
-		if (vd)
-			vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
-		if (spcx > 0.0)
-			scale /= m_glview->Get121ScaleFactor() * spcx;
-		}
-		break;
-	}
-	if (pin)
-	{
-		m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
-			wxGetBitmap(pin, m_dpi_sf2));
-		if (scale > m_pin_scale_thresh)
-			m_glview->m_auto_update_rot_center = true;
-		else
-			m_glview->m_auto_update_rot_center = false;
-	}
-	else
-	{
-		m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
-			wxGetBitmap(anchor_dark, m_dpi_sf2));
-		if (scale > m_pin_scale_thresh)
-			m_glview->m_auto_update_rot_center = false;
-		else
-			m_glview->m_auto_update_rot_center = true;
-	}
-}
-
-void RenderViewPanel::OnCenter(wxCommandEvent &event)
-{
-	if (m_glview)
-	{
-		m_glview->SetCenter();
-		RefreshGL();
-	}
-}
-
-void RenderViewPanel::OnScale121(wxCommandEvent &event)
-{
-	if (m_glview)
-	{
-		m_glview->SetScale121();
-		RefreshGL();
-		if (m_glview->m_mouse_focus)
-			m_glview->SetFocus();
-	}
-}
-
-void RenderViewPanel::OnScaleFactorChange(wxScrollEvent& event)
-{
-	int scale_factor = m_scale_factor_sldr->GetValue();
-	//m_glview->m_scale_factor = scale_factor/100.0;
-	wxString str = wxString::Format("%d", scale_factor);
-	if (str != m_scale_factor_text->GetValue())
-		m_scale_factor_text->SetValue(str);
-}
-
-void RenderViewPanel::OnScaleFactorEdit(wxCommandEvent& event)
-{
-	wxString str = m_scale_factor_text->GetValue();
-	long val;
-	str.ToLong(&val);
-	if (val>0)
-	{
-		m_scale_factor_sldr->SetValue(val);
-		SetScaleFactor(val/100.0, false);
-		//m_glview->SetSortBricks();
-		RefreshGL(true);
-	}
-}
-
-void RenderViewPanel::OnScaleMode(wxCommandEvent& event)
-{
-	int mode = m_glview->m_scale_mode;
-	mode += 1;
-	mode = mode > 2 ? 0 : mode;
-	switch (mode)
-	{
-	case 0:
-		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
-			wxGetBitmap(zoom_view, m_dpi_sf2));
-		m_scale_mode_btn->SetToolShortHelp(ID_ScaleModeBtn,
-			"View-based zoom ratio");
-		m_scale_mode_btn->SetToolLongHelp(ID_ScaleModeBtn,
-			"View-based zoom ratio (View entire data set at 100%)");
-		break;
-	case 1:
-		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
-			wxGetBitmap(zoom_pixel, m_dpi_sf2));
-		m_scale_mode_btn->SetToolShortHelp(ID_ScaleModeBtn,
-			"Pixel-based zoom ratio");
-		m_scale_mode_btn->SetToolLongHelp(ID_ScaleModeBtn,
-			"Pixel-based zoom ratio (View 1 data pixel to 1 screen pixel at 100%)");
-		break;
-	case 2:
-		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
-			wxGetBitmap(zoom_data, m_dpi_sf2));
-		m_scale_mode_btn->SetToolShortHelp(ID_ScaleModeBtn,
-			"Data-based zoom ratio");
-		m_scale_mode_btn->SetToolLongHelp(ID_ScaleModeBtn,
-			"Data-based zoom ratio (View with consistent scale bar sizes)");
-		break;
-	}
-	m_glview->m_scale_mode = mode;
-	UpdateScaleFactor(false);
-}
-
-void RenderViewPanel::OnScaleFactorSpinUp(wxSpinEvent& event)
-{
-	wxString str_val = m_scale_factor_text->GetValue();
-	long val;
-	str_val.ToLong(&val);
-	if (glbin_settings.m_inverse_slider)
-		val++;
-	else
-		val--;
-	str_val = wxString::Format("%d", val);
-	m_scale_factor_text->SetValue(str_val);
-}
-
-void RenderViewPanel::OnScaleFactorSpinDown(wxSpinEvent& event)
-{
-	wxString str_val = m_scale_factor_text->GetValue();
-	long val;
-	str_val.ToLong(&val);
-	if (glbin_settings.m_inverse_slider)
-		val--;
-	else
-		val++;
-	str_val = wxString::Format("%d", val);
-	m_scale_factor_text->SetValue(str_val);
-}
-
-void RenderViewPanel::OnScaleReset(wxCommandEvent &event)
-{
-	if (m_use_dft_settings)
-		m_glview->m_scale_factor = m_dft_scale_factor;
-	else
-		m_glview->m_scale_factor = 1.0;
-	UpdateScaleFactor();
-	if (m_glview && m_glview->m_mouse_focus)
-		m_glview->SetFocus();
-}
-
 //bar bottom
 void RenderViewPanel::OnValueEdit(wxCommandEvent& event)
 {
@@ -1984,267 +2070,11 @@ void RenderViewPanel::OnOrthoViewSelected(wxCommandEvent& event)
 	RefreshGL();
 }
 
-//top
-void RenderViewPanel::OnBgColorChange(wxColourPickerEvent& event)
+void RenderViewPanel::InitOpenVR()
 {
-	wxColor c = event.GetColour();
-	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	m_glview->SetBackgroundColor(color);
-	RefreshGL();
-}
-
-void RenderViewPanel::OnBgInvBtn(wxCommandEvent& event)
-{
-	fluo::Color c = m_glview->GetBackgroundColor();
-	c = fluo::Color(1.0, 1.0, 1.0) - c;
-	m_glview->SetBackgroundColor(c);
-	RefreshGL();
-}
-
-void RenderViewPanel::OnCamCtrCheck(wxCommandEvent& event)
-{
-	m_glview->m_draw_camctr = 
-		m_options_toolbar->GetToolState(ID_CamCtrChk);
-	RefreshGL();
-}
-
-void RenderViewPanel::OnFpsCheck(wxCommandEvent& event)
-{
-	if (m_options_toolbar->GetToolState(ID_FpsChk))
-		m_glview->m_draw_info |= 1;
-	else
-		m_glview->m_draw_info &= ~1;
-	RefreshGL();
-}
-
-void RenderViewPanel::OnLegendCheck(wxCommandEvent& event)
-{
-	m_glview->m_draw_legend = 
-		m_options_toolbar->GetToolState(ID_LegendChk);
-	RefreshGL();
-}
-
-void RenderViewPanel::OnColormapCheck(wxCommandEvent& event)
-{
-	m_glview->m_draw_colormap =
-		m_options_toolbar->GetToolState(ID_ColormapChk);
-	RefreshGL();
-}
-
-void RenderViewPanel::OnScaleTextEditing(wxCommandEvent& event)
-{
-	wxString str, num_text, unit_text;
-	num_text = m_scale_text->GetValue();
-	double len;
-	num_text.ToDouble(&len);
-	str = num_text + " ";
-	switch (m_scale_cmb->GetSelection())
-	{
-	case 0:
-		unit_text = "nm";
-		break;
-	case 1:
-	default:
-		unit_text = L"\u03BCm";
-		break;
-	case 2:
-		unit_text = "mm";
-		break;
-	}
-	str += unit_text;
-	if (m_glview)
-	{
-		m_glview->SetSBText(str);
-		m_glview->SetScaleBarLen(len);
-		m_glview->m_sb_num = num_text;
-		m_glview->m_sb_unit = m_scale_cmb->GetSelection();
-	}
-	RefreshGL();
-}
-
-void RenderViewPanel::OnScaleUnitSelected(wxCommandEvent& event) {
-}
-
-void RenderViewPanel::OnScaleBar(wxCommandEvent& event)
-{
-	if (!m_glview)
-		return;
-
-	switch (m_draw_scalebar)
-	{
-	case kOff:
-		m_draw_scalebar = kOn;
-		m_glview->m_disp_scale_bar = true;
-		m_glview->m_disp_scale_bar_text = false;
-		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
-			wxGetBitmap(scale_text_off, m_dpi_sf2));
-		m_scale_text->Enable();
-		m_scale_cmb->Disable();
-		break;
-	case kOn:
-		m_draw_scalebar = kText;
-		m_glview->m_disp_scale_bar = true;
-		m_glview->m_disp_scale_bar_text = true;
-		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
-			wxGetBitmap(scale_text, m_dpi_sf2));
-		m_scale_text->Enable();
-		m_scale_cmb->Enable();
-		break;
-	case kText:
-		m_draw_scalebar = kOff;
-		m_glview->m_disp_scale_bar = false;
-		m_glview->m_disp_scale_bar_text = false;
-		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
-			wxGetBitmap(scalebar, m_dpi_sf2));
-		m_scale_text->Disable();
-		m_scale_cmb->Disable();
-		break;
-	default:
-		break;
-	}
-	OnScaleTextEditing(event);
-	RefreshGL();
-}
-
-void RenderViewPanel::OnAovSldrIdle(wxIdleEvent& event)
-{
-	MainFrame* vr_frame = (MainFrame*)m_frame;
-	if (vr_frame && vr_frame->GetClippingView())
-	{
-		if (vr_frame->GetClippingView()->GetHoldPlanes())
-			return;
-	}
-	if (m_glview->m_capture)
-		return;
-
-	wxPoint pos = wxGetMousePosition();
-	wxRect reg = m_aov_sldr->GetScreenRect();
-	wxWindow *window = wxWindow::FindFocus();
-	if (window && reg.Contains(pos))
-	{
-		if (!m_draw_clip)
-		{
-			m_glview->m_draw_clip = true;
-			m_glview->m_clip_mask = -1;
-			RefreshGL(true);
-			m_draw_clip = true;
-		}
-	}
-	else
-	{
-		if (m_draw_clip)
-		{
-			m_glview->m_draw_clip = false;
-			RefreshGL(true);
-			m_draw_clip = false;
-		}
-	}
-	event.Skip();
-}
-
-void RenderViewPanel::OnAovChange(wxScrollEvent& event)
-{
-	int val = m_aov_sldr->GetValue();
-	wxString str = wxString::Format("%d", val);
-	if (str != m_aov_text->GetValue())
-		m_aov_text->SetValue(str);
-}
-
-void RenderViewPanel::OnAovText(wxCommandEvent& event)
-{
-	wxString str = m_aov_text->GetValue();
-	if (str == "Ortho")
-	{
-		m_glview->SetPersp(false);
-		m_aov_sldr->SetValue(10);
-		RefreshGL(true);
-		return;
-	}
-	long val;
-	if (!str.ToLong(&val))
-		return;
-	if (val ==0 || val == 10)
-	{
-		m_glview->SetPersp(false);
-		m_aov_text->ChangeValue("Ortho");
-		m_aov_sldr->SetValue(10);
-	}
-	else if (val < 10)
-	{
-		return;
-	}
-	else
-	{
-		if (val > 100)
-		{
-			val = 100;
-			m_aov_text->ChangeValue("100");
-			m_aov_sldr->SetValue(100);
-		}
-		m_glview->SetPersp(true);
-		m_glview->SetAov(val);
-		m_aov_sldr->SetValue(val);
-	}
-	RefreshGL(true);
-}
-
-void RenderViewPanel::OnFreeChk(wxCommandEvent& event)
-{
-	if (m_options_toolbar2->GetToolState(ID_FreeChk))
-		m_glview->SetFree(true);
-	else
-	{
-		m_glview->SetFree(false);
-		int val = m_aov_sldr->GetValue();
-		if (val == 10)
-			m_glview->SetPersp(false);
-		else
-			m_glview->SetPersp(true);
-	}
-	RefreshGL();
-}
-
-void RenderViewPanel::SetFullScreen()
-{
-	if (m_glview->GetParent() != m_full_frame)
-	{
-		m_view_sizer->Detach(m_glview);
-		m_glview->Reparent(m_full_frame);
-		//get display id
-		int disp_id = glbin_settings.m_disp_id;
-		if (disp_id >= wxDisplay::GetCount())
-			disp_id = 0;
-		wxDisplay display(disp_id);
-		wxRect rect = display.GetGeometry();
-		m_full_frame->SetSize(rect.GetSize());
-		m_full_frame->SetPosition(rect.GetPosition());
-		m_full_frame->ShowFullScreen(true);
-		m_glview->SetPosition(wxPoint(0, 0));
-		m_glview->SetSize(m_full_frame->GetSize());
-		if (glbin_settings.m_stay_top)
-			m_full_frame->SetWindowStyle(wxBORDER_NONE|wxSTAY_ON_TOP);
-		else
-			m_full_frame->SetWindowStyle(wxBORDER_NONE);
 #ifdef _WIN32
-		if (!glbin_settings.m_show_cursor)
-			ShowCursor(false);
+	if (m_glview) m_glview->InitOpenVR();
 #endif
-		m_full_frame->Iconize(false);
-		m_full_frame->Raise();
-		m_full_frame->Show();
-		m_glview->m_full_screen = true;
-		m_glview->SetFocus();
-		RefreshGL();
-	}
-	else
-	{
-		m_glview->Close();
-	}
-}
-
-void RenderViewPanel::OnFullScreen(wxCommandEvent& event)
-{
-	SetFullScreen();
 }
 
 void RenderViewPanel::SaveDefault(unsigned int mask)
@@ -2320,11 +2150,6 @@ void RenderViewPanel::SaveDefault(unsigned int mask)
 	m_default_saved = true;
 }
 
-void RenderViewPanel::OnSaveDefault(wxCommandEvent &event)
-{
-	SaveDefault();
-}
-
 void RenderViewPanel::LoadSettings()
 {
 	glbin_view_def.Apply(m_glview);
@@ -2384,10 +2209,5 @@ void RenderViewPanel::LoadSettings()
 
 	m_use_dft_settings = true;
 	RefreshGL();
-}
-
-void RenderViewPanel::OnKeyDown(wxKeyEvent& event)
-{
-	event.Skip();
 }
 

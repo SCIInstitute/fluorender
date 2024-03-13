@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "PropPanel.h"
 #include <MainFrame.h>
 #include <RenderCanvas.h>
+#include <RenderViewPanel.h>
 
 PropPanel::PropPanel(MainFrame* frame,
 	wxWindow* parent,
@@ -49,7 +50,10 @@ void PropPanel::FluoRefresh(bool tree, bool interactive, int excl_self,
 {
 	if (!m_frame)
 		return;
-	m_frame->RefreshVRenderViews(tree, interactive);
+	int view_excl = 0;
+	if (dynamic_cast<RenderViewPanel*>(this))
+		view_excl = excl_self;
+	m_frame->RefreshVRenderViews(tree, interactive, view_excl, this);
 	m_frame->UpdateProps(vc, excl_self, this);//update ui but exclude this
 }
 
