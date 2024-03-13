@@ -1004,19 +1004,8 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//MIP
 	if (update_all || FOUND_VALUE(gstMipMode))
 	{
-		int mode = m_vd->GetMode();
-		if (mode == 1)
-		{
-			m_options_toolbar->ToggleTool(ID_MipChk, true);
-			if (m_thresh_st)
-				m_thresh_st->SetLabel("Shade Thresh. :");
-		}
-		else
-		{
-			m_options_toolbar->ToggleTool(ID_MipChk, false);
-			if (m_thresh_st)
-				m_thresh_st->SetLabel("Threshold :");
-		}
+		bool mip = m_vd->GetMode() == 1;
+		m_options_toolbar->ToggleTool(ID_MipChk, mip);
 	}
 
 	//transparency
@@ -1357,29 +1346,7 @@ void VolumePropPanel::EnableMip(bool bval)
 	else if (m_vd)
 		m_vd->SetMode(bval ? 1 : 0);
 
-	if (bval)
-	{
-		if (m_thresh_st)
-			m_thresh_st->SetLabel("Shade Thresh. :");
-	}
-	else
-	{
-		if (m_thresh_st)
-			m_thresh_st->SetLabel("Threshold :");
-	}
-	//Layout();
-
 	FluoRefresh(false, true, 0, { gstMipMode });
-	//DisableAlpha();
-	//m_boundary_sldr->Disable();
-	//m_boundary_text->Disable();
-	//m_luminance_sldr->Disable();
-	//m_luminance_text->Disable();
-	//if (m_vd->GetShading() ||
-	//	m_vd->GetShadowEnable())
-	//	EnableShading();
-	//else
-	//	DisableShading();
 }
 
 void VolumePropPanel::EnableTransparent(bool bval)
