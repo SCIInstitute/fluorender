@@ -30,8 +30,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 
-class VRenderFrame;
-class VRenderGLView;
+class MainFrame;
+class RenderCanvas;
 class VolumeData;
 class DataGroup;
 class CalculationDlg : public wxPanel
@@ -56,15 +56,15 @@ public:
 		ID_CalcCombineBtn
 	};
 
-	CalculationDlg(VRenderFrame* frame);
+	CalculationDlg(MainFrame* frame);
 	~CalculationDlg();
 
 	void SetGroup(DataGroup* group);
 
 private:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 	//current view
-	VRenderGLView *m_view;
+	RenderCanvas *m_view;
 	//current volume
 	VolumeData *m_vol1;
 	VolumeData *m_vol2;

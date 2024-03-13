@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <wx/dialog.h>
 
-class VRenderFrame;
+class MainFrame;
 class FpRangeDlg : public wxDialog
 {
 	enum
@@ -41,7 +41,7 @@ class FpRangeDlg : public wxDialog
 	};
 
 public:
-	FpRangeDlg(VRenderFrame* frame);
+	FpRangeDlg(MainFrame* frame);
 	~FpRangeDlg();
 
 	void SetRange(double min_val, double max_val);
@@ -49,7 +49,7 @@ public:
 	double GetMaxValue() { return m_max_val; }
 
 private:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 
 	//values
 	double m_min_val;

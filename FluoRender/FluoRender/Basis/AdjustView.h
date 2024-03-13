@@ -31,15 +31,15 @@ DEALINGS IN THE SOFTWARE.
 #include <PropPanel.h>
 #include <Types/Color.h>
 
-class VRenderFrame;
-class VRenderGLView;
+class MainFrame;
+class RenderCanvas;
 class VolumeData;
 class DataGroup;
 class wxSingleSlider;
 class AdjustView: public PropPanel
 {
 public:
-	AdjustView(VRenderFrame* frame,
+	AdjustView(MainFrame* frame,
 		const wxPoint& pos=wxDefaultPosition,
 		const wxSize& size=wxDefaultSize,
 		long style=0,
@@ -56,8 +56,8 @@ public:
 		return m_type;
 	}
 	//set view
-	void SetRenderView(VRenderGLView *view);
-	VRenderGLView* GetRenderView();
+	void SetRenderView(RenderCanvas *view);
+	RenderCanvas* GetRenderView();
 	//set volume data
 	void SetVolumeData(VolumeData* vd);
 	VolumeData* GetVolumeData();
@@ -78,7 +78,7 @@ public:
 
 private:
 	int m_type;
-	VRenderGLView *m_view;
+	RenderCanvas *m_view;
 	VolumeData* m_vd;
 	DataGroup* m_group;
 	bool m_link_group;

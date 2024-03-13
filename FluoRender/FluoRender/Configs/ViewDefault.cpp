@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <ViewDefault.h>
 #include <Names.h>
-#include <VRenderGLView.h>
+#include <RenderCanvas.h>
 #include <wx/string.h>
 
 ViewDefault::ViewDefault()
@@ -136,7 +136,7 @@ void ViewDefault::Save(wxFileConfig& f)
 	f.Write("rot slider", m_rot_slider);
 }
 
-void ViewDefault::Set(VRenderGLView* view)
+void ViewDefault::Set(RenderCanvas* view)
 {
 	if (!view)
 		return;
@@ -163,7 +163,7 @@ void ViewDefault::Set(VRenderGLView* view)
 	m_fog_intensity = view->GetFogIntensity();
 }
 
-void ViewDefault::Apply(VRenderGLView* view)
+void ViewDefault::Apply(RenderCanvas* view)
 {
 	if (!view)
 		return;

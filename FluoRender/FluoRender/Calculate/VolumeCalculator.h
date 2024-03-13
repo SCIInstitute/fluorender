@@ -32,8 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/string.h>
 
 class VolumeData;
-class VRenderFrame;
-class VRenderGLView;
+class MainFrame;
+class RenderCanvas;
 namespace flrd
 {
 	class VolumeSelector;
@@ -43,8 +43,8 @@ namespace flrd
 		VolumeCalculator();
 		~VolumeCalculator();
 
-		void SetFrame(VRenderFrame* frame) { m_frame = frame; }
-		void SetView(VRenderGLView* view) { m_view = view; }
+		void SetFrame(MainFrame* frame) { m_frame = frame; }
+		void SetView(RenderCanvas* view) { m_view = view; }
 		void SetVolumeSelector(VolumeSelector* selector) { m_selector = selector; }
 
 		void SetVolumeA(VolumeData *vd);
@@ -63,8 +63,8 @@ namespace flrd
 		void Calculate(int type);
 
 	private:
-		VRenderFrame* m_frame;
-		VRenderGLView* m_view;
+		MainFrame* m_frame;
+		RenderCanvas* m_view;
 		VolumeSelector* m_selector;
 		std::vector<VolumeData*> m_vd_r;//result volume data (stack)
 

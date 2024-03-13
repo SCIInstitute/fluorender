@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <wx/dialog.h>
 
-class VRenderFrame;
+class MainFrame;
 class wxSingleSlider;
 class TesterDlg : public wxDialog
 {
@@ -56,7 +56,7 @@ class TesterDlg : public wxDialog
 	};
 
 public:
-	TesterDlg(VRenderFrame* frame);
+	TesterDlg(MainFrame* frame);
 	~TesterDlg();
 
 	//values
@@ -90,7 +90,7 @@ public:
 	wxButton *m_b1_btn;
 
 private:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 
 	//sliders
 	void OnP1Change(wxScrollEvent &event);

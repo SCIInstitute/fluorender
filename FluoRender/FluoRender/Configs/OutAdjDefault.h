@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/fileconf.h>
 
-class VRenderGLView;
+class RenderCanvas;
 class TreeLayer;
 class OutAdjDefault
 {
@@ -40,8 +40,8 @@ public:
 
 	void Read(wxFileConfig& f);
 	void Save(wxFileConfig& f);
-	void Set(VRenderGLView* view);
-	void Apply(VRenderGLView* view);
+	void Set(RenderCanvas* view);
+	void Apply(RenderCanvas* view);
 	void Set(TreeLayer* layer);
 	void Apply(TreeLayer* layer);
 

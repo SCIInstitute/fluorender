@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 
-class VRenderFrame;
+class MainFrame;
 class VolumeData;
 class DataListCtrl : public wxListCtrl
 {
@@ -49,7 +49,7 @@ class DataListCtrl : public wxListCtrl
 	};
 
 public:
-	DataListCtrl(VRenderFrame *frame,
+	DataListCtrl(MainFrame *frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -66,7 +66,7 @@ public:
 	friend class ListPanel;
 
 private:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 	static VolumeData* m_vd;
 
 	wxTextCtrl *m_rename_text;
@@ -125,7 +125,7 @@ class ListPanel : public wxPanel
 		ID_DeleteAll
 	};
 public:
-	ListPanel(VRenderFrame* frame,
+	ListPanel(MainFrame* frame,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,

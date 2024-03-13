@@ -27,8 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "MeasureDlg.h"
 #include <Global.h>
-#include <VRenderFrame.h>
-#include <VRenderGLView.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
 #include <Distance/RulerHandler.h>
 #include <Distance/DistCalculator.h>
 #include <Distance/RulerAlign.h>
@@ -66,7 +66,7 @@ END_EVENT_TABLE()
 #define PointCol 10
 
 RulerListCtrl::RulerListCtrl(
-	VRenderFrame* frame,
+	MainFrame* frame,
 	MeasureDlg* parent,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -197,7 +197,7 @@ void RulerListCtrl::AdjustSize()
 	SetColumnWidth(col, wxLIST_AUTOSIZE_USEHEADER); col++;
 }
 
-void RulerListCtrl::UpdateRulers(VRenderGLView* vrv)
+void RulerListCtrl::UpdateRulers(RenderCanvas* vrv)
 {
 	m_name_text->Hide();
 	m_center_text->Hide();
@@ -931,7 +931,7 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_BUTTON(ID_AlignZYX, MeasureDlg::OnAlignPca)
 END_EVENT_TABLE()
 
-MeasureDlg::MeasureDlg(VRenderFrame* frame)
+MeasureDlg::MeasureDlg(MainFrame* frame)
 	: wxPanel(frame, wxID_ANY,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(500, 600)),
@@ -1270,7 +1270,7 @@ MeasureDlg::~MeasureDlg()
 {
 }
 
-void MeasureDlg::GetSettings(VRenderGLView* vrv)
+void MeasureDlg::GetSettings(RenderCanvas* vrv)
 {
 	m_view = vrv;
 	if (!m_view)
@@ -1386,7 +1386,7 @@ void MeasureDlg::UpdateRulerProps()
 	m_interp_cmb->Select(interp);
 }
 
-VRenderGLView* MeasureDlg::GetView()
+RenderCanvas* MeasureDlg::GetView()
 {
 	return m_view;
 }

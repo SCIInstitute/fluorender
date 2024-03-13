@@ -54,6 +54,11 @@ private:
 	virtual void replace(double t);
 	virtual void push(double t);
 	virtual void update();
+
+	virtual double get_time_span()
+	{
+		return 3;//allow more time for text input
+	}
 };
 
 #endif//_WXUNDOABLETEXTCTRL_H_

@@ -31,8 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <Types/Color.h>
 
-class VRenderFrame;
-class VRenderGLView;
+class MainFrame;
+class RenderCanvas;
 class VolumeData;
 class DataGroup;
 class wxSingleSlider;
@@ -51,19 +51,19 @@ public:
 		ID_EnhanceSelChk
 	};
 
-	NoiseCancellingDlg(VRenderFrame* frame);
+	NoiseCancellingDlg(MainFrame* frame);
 	~NoiseCancellingDlg();
 
-	void GetSettings(VRenderGLView* view);
+	void GetSettings(RenderCanvas* view);
 	void SetDftThresh(double thresh) {m_dft_thresh = thresh;}
 	void SetDftSize(double size) {m_dft_size = size;}
 
 	void Preview(bool select, double size, double thresh);
 
 private:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 	//current view
-	VRenderGLView *m_view;
+	RenderCanvas *m_view;
 
 	//max volume value
 	double m_max_value;

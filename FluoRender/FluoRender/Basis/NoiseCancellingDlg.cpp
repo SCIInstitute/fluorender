@@ -27,8 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "NoiseCancellingDlg.h"
 #include <Global.h>
-#include <VRenderFrame.h>
-#include <VRenderGLView.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
 #include <TreePanel.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
@@ -43,7 +43,7 @@ BEGIN_EVENT_TABLE(NoiseCancellingDlg, wxPanel)
 	EVT_CHECKBOX(ID_EnhanceSelChk, NoiseCancellingDlg::OnEnhanceSelChk)
 END_EVENT_TABLE()
 
-NoiseCancellingDlg::NoiseCancellingDlg(VRenderFrame *frame)
+NoiseCancellingDlg::NoiseCancellingDlg(MainFrame *frame)
 : wxPanel(frame, wxID_ANY,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(450, 200)),
@@ -139,7 +139,7 @@ NoiseCancellingDlg::~NoiseCancellingDlg()
 {
 }
 
-void NoiseCancellingDlg::GetSettings(VRenderGLView* view)
+void NoiseCancellingDlg::GetSettings(RenderCanvas* view)
 {
 	if (!view)
 		return;

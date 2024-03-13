@@ -56,6 +56,7 @@ protected:
 	virtual void pop();
 	virtual void update() = 0;
 
+	virtual double get_time_span();
 	virtual bool time_sample(double& t);
 };
 

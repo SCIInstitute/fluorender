@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "RulerRenderer.h"
-#include "VRenderGLView.h"
+#include "RenderCanvas.h"
 #include <Types/Vector.h>
 #include <Types/Quaternion.h>
 #include <FLIVR/TextRenderer.h>

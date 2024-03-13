@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _VRENDERGLVIEW_H_
-#define _VRENDERGLVIEW_H_
+#ifndef _RENDERCANVAS_H_
+#define _RENDERCANVAS_H_
 
 #include <DataManager.h>
 #include <VolumeLoader.h>
@@ -119,19 +119,19 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-class VRenderFrame;
-class VRenderView;
-class VRenderGLView : public wxGLCanvas
+class MainFrame;
+class RenderViewPanel;
+class RenderCanvas : public wxGLCanvas
 {
 public:
-	VRenderGLView(VRenderFrame* frame,
-		VRenderView* parent,
+	RenderCanvas(MainFrame* frame,
+		RenderViewPanel* parent,
 		const wxGLAttributes& attriblist,
 		wxGLContext* sharedContext = 0,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0);
-	~VRenderGLView();
+	~RenderCanvas();
 
 	//for degugging, this allows inspection of the pixel format actually given.
 #ifdef _WIN32
@@ -805,7 +805,7 @@ public:
 	}
 
 public:
-	VRenderView* m_vrv;
+	RenderViewPanel* m_vrv;
 	//set gl context
 	bool m_set_gl;
 	//script run
@@ -890,7 +890,7 @@ public:
 	bool m_ruler_use_transf;
 	//linked rotation
 	static bool m_linked_rot;
-	static VRenderGLView* m_master_linked_view;
+	static RenderCanvas* m_master_linked_view;
 	//count after paint
 	bool m_paint_count;
 	//colocalize after paint
@@ -905,7 +905,7 @@ private:
 	wxString m_GLversion;
 	wxGLContext* m_glRC;
 	bool m_sharedRC;
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 	//populated lists of data
 	bool m_vd_pop_dirty;
 	vector <VolumeData*> m_vd_pop_list;
@@ -1333,10 +1333,10 @@ private:
 
 	DECLARE_EVENT_TABLE()
 
-	friend class VRenderView;
+	friend class RenderViewPanel;
 };
 
-inline wxSize VRenderGLView::GetGLSize()
+inline wxSize RenderCanvas::GetGLSize()
 {
 	double dval = 1;
 #ifdef _DARWIN
@@ -1349,7 +1349,7 @@ inline wxSize VRenderGLView::GetGLSize()
 	return size;
 }
 
-inline fluo::Point VRenderGLView::GetMousePos(wxMouseEvent& e)
+inline fluo::Point RenderCanvas::GetMousePos(wxMouseEvent& e)
 {
 	double dval = 1;
 #ifdef _DARWIN
@@ -1362,7 +1362,7 @@ inline fluo::Point VRenderGLView::GetMousePos(wxMouseEvent& e)
 	return pnt;
 }
 
-inline bool VRenderGLView::GetMouseIn(wxPoint& p)
+inline bool RenderCanvas::GetMouseIn(wxPoint& p)
 {
 	double dval = 1;
 #ifdef _DARWIN
@@ -1372,4 +1372,4 @@ inline bool VRenderGLView::GetMouseIn(wxPoint& p)
 	rect.SetSize(rect.GetSize() * dval);
 	return rect.Contains(p);
 }
-#endif//_VRENDERGLVIEW_H_
+#endif//_RENDERCANVAS_H_

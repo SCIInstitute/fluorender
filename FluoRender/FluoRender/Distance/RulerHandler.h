@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <algorithm>
 
-class VRenderGLView;
+class RenderCanvas;
 class wxFileConfig;
 class VolumeData;
 
@@ -68,7 +68,7 @@ namespace flrd
 			m_group = group;
 		}
 
-		void SetView(VRenderGLView* view)
+		void SetView(RenderCanvas* view)
 		{
 			m_view = view;
 			m_vp.SetView(view);
@@ -242,7 +242,7 @@ namespace flrd
 
 	private:
 		unsigned int m_group;
-		VRenderGLView *m_view;
+		RenderCanvas *m_view;
 		VolumeData * m_vd;
 		ComponentAnalyzer* m_ca;
 		VolumePoint m_vp;

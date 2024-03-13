@@ -27,8 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ClippingView.h"
 #include <Global/Global.h>
-#include <VRenderFrame.h>
-#include <VRenderGLView.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
 #include <compatibility.h>
 #include <wxDoubleSlider.h>
 #include <wxSingleSlider.h>
@@ -38,7 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Debug.h>
 
 ClippingView::ClippingView(
-	VRenderFrame* frame,
+	MainFrame* frame,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
@@ -773,7 +773,7 @@ MeshData* ClippingView::GetMeshData()
 }
 
 //set view
-void ClippingView::SetRenderView(VRenderGLView* view)
+void ClippingView::SetRenderView(RenderCanvas* view)
 {
 	m_view = view;
 	FluoUpdate();

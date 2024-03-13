@@ -1304,14 +1304,14 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class VRenderFrame;
+class MainFrame;
 class DataManager
 {
 public:
 	DataManager();
 	~DataManager();
 
-	void SetFrame(VRenderFrame* frame);
+	void SetFrame(MainFrame* frame);
 
 	void ClearAll();
 
@@ -1420,7 +1420,7 @@ public:
 	fluo::Color m_vol_wav[4];
 
 private:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 	vector <VolumeData*> m_vd_list;
 	vector <MeshData*> m_md_list;
 	vector <BaseReader*> m_reader_list;

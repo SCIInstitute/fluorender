@@ -35,8 +35,8 @@ DEALINGS IN THE SOFTWARE.
 #include <limits>
 #include <chrono>
 
-class VRenderFrame;
-class VRenderGLView;
+class MainFrame;
+class RenderCanvas;
 class DataGroup;
 class ColocalizationDlg : public wxPanel
 {
@@ -62,10 +62,10 @@ public:
 		ID_OutputGrid
 	};
 
-	ColocalizationDlg(VRenderFrame* frame);
+	ColocalizationDlg(MainFrame* frame);
 	~ColocalizationDlg();
 
-	void SetView(VRenderGLView* view)
+	void SetView(RenderCanvas* view)
 	{
 		m_view = view;
 	}
@@ -95,9 +95,9 @@ public:
 	}
 
 private:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 	//current view
-	VRenderGLView* m_view;
+	RenderCanvas* m_view;
 	DataGroup *m_group;
 
 	wxString m_output_file;

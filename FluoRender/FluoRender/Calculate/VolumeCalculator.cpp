@@ -27,8 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "VolumeCalculator.h"
 #include <Global.h>
-#include <VRenderFrame.h>
-#include <VRenderGLView.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
 #include <VolumePropPanel.h>
 #include <Selection/VolumeSelector.h>
 #include <wx/progdlg.h>

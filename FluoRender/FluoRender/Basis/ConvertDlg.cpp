@@ -27,8 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ConvertDlg.h"
 #include <Global.h>
-#include <VRenderFrame.h>
-#include <VRenderGLView.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
 #include <Converters/VolumeMeshConv.h>
 #include <wxSingleSlider.h>
 #include <wx/progdlg.h>
@@ -45,7 +45,7 @@ BEGIN_EVENT_TABLE(ConvertDlg, wxPanel)
 	EVT_BUTTON(ID_CnvVolMeshConvertBtn, ConvertDlg::OnCnvVolMeshConvert)
 END_EVENT_TABLE()
 
-ConvertDlg::ConvertDlg(VRenderFrame *frame) :
+ConvertDlg::ConvertDlg(MainFrame *frame) :
 wxPanel(frame, wxID_ANY,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(400, 300)),

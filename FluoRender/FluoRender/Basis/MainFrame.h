@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _VRENDERFRAME_H_
-#define _VRENDERFRAME_H_
+#ifndef _MAINFRAME_H_
+#define _MAINFRAME_H_
 
 #include <Value.hpp>
 #include <wx/wx.h>
@@ -79,8 +79,8 @@ using namespace std;
 
 class TreePanel;
 class ListPanel;
-class VRenderView;
-class VRenderGLView;
+class RenderViewPanel;
+class RenderCanvas;
 class DataGroup;
 class VolumeData;
 class MeshData;
@@ -91,7 +91,7 @@ class MeshPropPanel;
 class AnnotatPropPanel;
 class ManipPropPanel;
 class AdjustView;
-class VMovieView;
+class MoviePanel;
 class SettingDlg;
 class HelpDlg;
 class ClippingView;
@@ -110,7 +110,7 @@ class ScriptBreakDlg;
 class MachineLearningDlg;
 class TesterDlg;
 
-class VRenderFrame: public wxFrame
+class MainFrame: public wxFrame
 {
 	enum
 	{
@@ -169,7 +169,7 @@ class VRenderFrame: public wxFrame
 	};
 
 public:
-	VRenderFrame(wxFrame* frame,
+	MainFrame(wxFrame* frame,
 		const wxString& title,
 		int x, int y,
 		int w, int h,
@@ -177,7 +177,7 @@ public:
 		bool fullscreen,
 		bool windowed,
 		bool hidepanels);
-	~VRenderFrame();
+	~MainFrame();
 
 	TreePanel *GetTree();
 	ListPanel *GetList();
@@ -188,8 +188,8 @@ public:
 
 	//views
 	int GetViewNum();
-	VRenderGLView* GetView(int index);
-	VRenderGLView* GetView(wxString& name);
+	RenderCanvas* GetView(int index);
+	RenderCanvas* GetView(wxString& name);
 	void RefreshVRenderViews(bool tree=false, bool interactive=false);
 	void DeleteVRenderView(int i);
 	void DeleteVRenderView(wxString &name);
@@ -203,21 +203,21 @@ public:
 
 	//on selections
 	void OnSelection(int type,	//0: nothing; 1:view; 2: volume; 3:mesh; 4:annotations; 5:group; 6:mesh manip
-		VRenderGLView* view=0,
+		RenderCanvas* view=0,
 		DataGroup* group=0,
 		VolumeData* vd=0,
 		MeshData* md=0,
 		Annotations* ann=0);
 
 	wxWindow* AddProps(int type,//follow above
-		VRenderGLView* view = 0,
+		RenderCanvas* view = 0,
 		DataGroup* group = 0,
 		VolumeData* vd = 0,
 		MeshData* md = 0,
 		Annotations* ann = 0);
 	void DeleteProps(int type, const wxString& name);
 	void ShowPropPage(int type,
-		VRenderGLView* view = 0,
+		RenderCanvas* view = 0,
 		DataGroup* group = 0,
 		VolumeData* vd = 0,
 		MeshData* md = 0,
@@ -236,7 +236,7 @@ public:
 	//prop view
 	AdjustView* GetAdjustView();
 	//movie view
-	VMovieView* GetMovieView();
+	MoviePanel* GetMovieView();
 	//system settings
 	SettingDlg* GetSettingDlg();
 	//help dialog
@@ -276,8 +276,8 @@ public:
 	void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
 	void OpenProject(wxString& filename);
 	void SaveProject(wxString& filename, bool inc);//inc: save incrementally
-	void LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLView* view = 0);
-	void LoadMeshes(wxArrayString files, VRenderGLView* view = 0);
+	void LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* view = 0);
+	void LoadMeshes(wxArrayString files, RenderCanvas* view = 0);
 
 	//show dialogs
 	void ShowPaintTool();
@@ -311,7 +311,7 @@ public:
 
 public: //public so export window can see it and set it. 
 	RecorderDlg* m_recorder_dlg;
-	VMovieView* m_movie_view;
+	MoviePanel* m_movie_view;
 	VolumeData* m_vd_copy;//for copying mask source
 	bool m_copy_data;//copy data or mask
 
@@ -330,7 +330,7 @@ private:
 
 	TreePanel *m_tree_panel;
 	ListPanel *m_list_panel;
-	std::vector<VRenderView*> m_vrv_list;
+	std::vector<RenderViewPanel*> m_vrv_list;
 	wxAuiNotebook *m_prop_panel;
 	ClippingView *m_clip_view;
 	AdjustView* m_adjust_view;
@@ -374,7 +374,7 @@ private:
 private:
 	//views
 	wxString CreateView(int row=1);
-	VRenderGLView* GetLastView();
+	RenderCanvas* GetLastView();
 	static wxWindow* CreateExtraControlVolume(wxWindow* parent);
 	static wxWindow* CreateExtraControlVolumeForImport(wxWindow* parent);
 	static wxWindow* CreateExtraControlProjectSave(wxWindow* parent);
@@ -449,4 +449,4 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 
-#endif//_VRENDERFRAME_H_
+#endif//_MAINFRAME_H_

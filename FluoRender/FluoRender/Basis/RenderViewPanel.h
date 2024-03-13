@@ -26,69 +26,56 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _VRENDERVIEW_H_
-#define _VRENDERVIEW_H_
+#ifndef _RENDERVIEWPANEL_H_
+#define _RENDERVIEWPANEL_H_
 
-#include "VRenderGLView.h"
+#include <PropPanel.h>
 
-class VRenderFrame;
+class MainFrame;
 class wxSingleSlider;
-class VRenderView: public wxPanel
+class RenderCanvas;
+class wxGLContext;
+class RenderViewPanel: public PropPanel
 {
 public:
 	enum
 	{
-		ID_VolumeSeqRd = ID_VRENDER_VIEW2,
+		ID_VolumeSeqRd = 0,
 		ID_VolumeMultiRd,
 		ID_VolumeCompRd,
 		ID_CaptureBtn,
-		ID_BgColorPicker,
-		ID_BgInvBtn,
-		ID_RotLinkChk,
-		ID_ZeroRotBtn,
-		ID_RotResetBtn,
-		ID_XRotText,
-		ID_YRotText,
-		ID_ZRotText,
-		ID_XRotSldr,
-		ID_YRotSldr,
-		ID_ZRotSldr,
-		ID_RotateTimer,
-		ID_RotLockChk,
-		ID_RotSliderType,
-		ID_OrthoViewCmb,
-		ID_DepthAttenChk,
-		ID_DepthAttenFactorSldr,
-		ID_DepthAttenResetBtn,
-		ID_DepthAttenFactorText,
-		ID_FullScreenBtn,
-		ID_PinBtn,
-		ID_CenterBtn,
-		ID_Scale121Btn,
-		ID_ScaleFactorSldr,
-		ID_ScaleFactorText,
-		ID_ScaleFactorSpin,
-		ID_ScaleModeBtn,
-		ID_ScaleResetBtn,
+		ID_InfoChk,
 		ID_CamCtrChk,
-		ID_FpsChk,
 		ID_LegendChk,
 		ID_ColormapChk,
-		ID_ScaleBar,
-		ID_ScaleText,
-		ID_ScaleCmb,
+		ID_ScaleBar
+	};
+	enum
+	{
+		ID_FreeChk = 0,
 		ID_DefaultBtn,
-		ID_AovSldr,
-		ID_AovText,
-		ID_FreeChk
+	};
+	enum
+	{
+		ID_RotLockChk = 0,
+		ID_RotSliderType
+	};
+	enum
+	{
+		ID_ZeroRotBtn = 0,
+		ID_RotResetBtn
 	};
 
-	VRenderView(VRenderFrame* frame,
+	RenderViewPanel(MainFrame* frame,
 		wxGLContext* sharedContext=0,
+		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
-		long style = 0);
-	~VRenderView();
+		long style = 0,
+		const wxString& name = "RenderView");
+	~RenderViewPanel();
+
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 	//update
 	void UpdateView(bool ui_update = true);
@@ -128,56 +115,52 @@ public:
 	int m_id;
 
 	//render view///////////////////////////////////////////////
-	VRenderGLView *m_glview;
+	RenderCanvas *m_glview;
 	wxFrame* m_full_frame;
 	wxBoxSizer* m_view_sizer;
 
 	//top bar///////////////////////////////////////////////////
-	wxPanel* m_panel_1;
-	wxColourPickerCtrl *m_bg_color_picker;
-	wxButton* m_bg_inv_btn;
-	wxSingleSlider* m_aov_sldr;
-	wxTextCtrl* m_aov_text;
 	wxToolBar * m_options_toolbar;
-	wxToolBar * m_options_toolbar2;
-	wxToolBar * m_left_toolbar;
-	wxToolBar * m_right_toolbar2;
-	wxToolBar * m_lower_toolbar;
-	//scale bar
 	wxTextCtrl *m_scale_text;
 	wxComboBox *m_scale_cmb;
+	wxColourPickerCtrl *m_bg_color_picker;
+	wxToolBar* m_bg_inv_btn;
+	wxSingleSlider* m_aov_sldr;
+	wxTextCtrl* m_aov_text;
+	wxToolBar* m_options_toolbar2;
+	wxToolBar *m_full_screen_btn;
+
+	//left bar///////////////////////////////////////////////////
+	wxToolBar* m_depth_atten_btn;
+	wxSingleSlider *m_depth_atten_factor_sldr;
+	wxToolBar *m_depth_atten_reset_btn;
+	wxTextCtrl *m_depth_atten_factor_text;
+
+	//right bar///////////////////////////////////////////////////
+	wxToolBar *m_pin_btn;
+	wxToolBar *m_center_btn;
+	wxToolBar *m_scale_121_btn;
+	wxSingleSlider *m_scale_factor_sldr;
+	wxTextCtrl *m_scale_factor_text;
+	wxSpinButton* m_scale_factor_spin;
+	wxToolBar *m_scale_mode_btn;
+	wxToolBar *m_scale_reset_btn;
 
 	//bottom bar///////////////////////////////////////////////////
-	wxPanel* m_panel_2;
 	wxScrollBar *m_x_rot_sldr;
 	wxTextCtrl *m_x_rot_text;
 	wxScrollBar *m_y_rot_sldr;
 	wxTextCtrl *m_y_rot_text;
 	wxScrollBar *m_z_rot_sldr;
 	wxTextCtrl *m_z_rot_text;
-	wxTimer m_timer;
 	bool m_x_rotating, m_y_rotating, m_z_rotating;
 	bool m_skip_thumb;
 	wxToolBar *m_rot_lock_btn;
 	wxComboBox *m_ortho_view_cmb;
+	wxToolBar* m_lower_toolbar;
 
-	//left bar///////////////////////////////////////////////////
-	wxPanel* m_panel_3;
-	wxSingleSlider *m_depth_atten_factor_sldr;
-	wxToolBar *m_depth_atten_reset_btn;
-	wxTextCtrl *m_depth_atten_factor_text;
-
-	//right bar///////////////////////////////////////////////////
-	wxPanel* m_panel_4;
-	wxToolBar *m_full_screen_btn;
-	wxToolBar *m_pin_btn;
-	wxToolBar *m_center_btn;
-	wxToolBar *m_scale_121_btn;
-	wxSingleSlider *m_scale_factor_sldr;
-	wxTextCtrl *m_scale_factor_text;
-	wxToolBar *m_scale_mode_btn;
-	wxToolBar *m_scale_reset_btn;
-	wxSpinButton* m_scale_factor_spin;
+	//slider timer
+	wxTimer m_timer;
 
 	//draw clip
 	bool m_draw_clip;
@@ -272,4 +255,4 @@ private:
 
 };
 
-#endif//_VRENDERVIEW_H_
+#endif//_RENDERVIEWPANEL_H_

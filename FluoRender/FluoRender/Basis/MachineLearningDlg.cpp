@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "MachineLearningDlg.h"
 #include <Global.h>
-#include <VRenderFrame.h>
+#include <MainFrame.h>
 #include <ComponentDlg.h>
 #include <EntryHist.h>
 #include <EntryParams.h>
@@ -40,7 +40,7 @@ BEGIN_EVENT_TABLE(MachineLearningDlg, wxPanel)
 	EVT_CHECKBOX(ID_AutoStartAll, MachineLearningDlg::OnAutoStartAll)
 END_EVENT_TABLE()
 
-MachineLearningDlg::MachineLearningDlg(VRenderFrame *frame) :
+MachineLearningDlg::MachineLearningDlg(MainFrame *frame) :
 	wxPanel(frame, wxID_ANY,
 		wxDefaultPosition,
 		frame->FromDIP(wxSize(450, 750)),
@@ -97,7 +97,7 @@ void MachineLearningDlg::OnAutoStartAll(wxCommandEvent& event)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 MachineLearningPanel::MachineLearningPanel(
-	VRenderFrame* frame, wxWindow* parent) :
+	MainFrame* frame, wxWindow* parent) :
 	wxPanel(parent, wxID_ANY,
 		wxDefaultPosition,
 		frame->FromDIP(wxSize(450, 750)),
@@ -398,7 +398,7 @@ void MachineLearningPanel::OnBotGridCellChanged(wxGridEvent& event)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 MLCompGenPanel::MLCompGenPanel(
-	VRenderFrame* frame, wxWindow* parent) :
+	MainFrame* frame, wxWindow* parent) :
 	MachineLearningPanel(frame, parent)
 {
 	m_dir = "Database";
@@ -734,7 +734,7 @@ void MLCompGenPanel::SaveTable(const std::string& filename)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 MLVolPropPanel::MLVolPropPanel(
-	VRenderFrame* frame, wxWindow* parent) :
+	MainFrame* frame, wxWindow* parent) :
 	MachineLearningPanel(frame, parent)
 {
 	m_dir = "Database";

@@ -43,8 +43,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/splitter.h>
 #include <chrono>
 
-class VRenderFrame;
-class VRenderGLView;
+class MainFrame;
+class RenderCanvas;
 class VolumeData;
 class wxSingleSlider;
 
@@ -200,13 +200,13 @@ public:
 		ID_OutputGrid
 	};
 
-	ComponentDlg(VRenderFrame* frame);
+	ComponentDlg(MainFrame* frame);
 	~ComponentDlg();
 
 	void Update();
 	void GetSettings();
-	void SetView(VRenderGLView* view);
-	VRenderGLView* GetView() { return m_view; }
+	void SetView(RenderCanvas* view);
+	RenderCanvas* GetView() { return m_view; }
 
 	void GenerateComp(bool command=true);
 	void Fixate(bool command = true);
@@ -247,8 +247,8 @@ public:
 	void ExcludeComps();
 
 private:
-	VRenderFrame* m_frame;
-	VRenderGLView* m_view;
+	MainFrame* m_frame;
+	RenderCanvas* m_view;
 
 	//progress
 	float m_prog_bit;

@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "CompEditor.h"
 #include <Global.h>
-#include <VRenderGLView.h>
+#include <RenderCanvas.h>
 #include <DataManager.h>
 
 using namespace flrd;

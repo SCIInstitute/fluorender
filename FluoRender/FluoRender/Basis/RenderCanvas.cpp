@@ -26,17 +26,17 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "VRenderGLView.h"
+#include "RenderCanvas.h"
 #include <Global.h>
-#include <VRenderFrame.h>
-#include <VRenderView.h>
+#include <MainFrame.h>
+#include <RenderViewPanel.h>
 #include <SettingDlg.h>
 #include <AdjustView.h>
 #include <BrushToolDlg.h>
 #include <ColocalizationDlg.h>
 #include <TreePanel.h>
 #include <ListPanel.h>
-#include <VMovieView.h>
+#include <MoviePanel.h>
 #include <RecorderDlg.h>
 #include <ComponentDlg.h>
 #include <ClippingView.h>
@@ -62,28 +62,28 @@ DEALINGS IN THE SOFTWARE.
 #include "img/icons.h"
 #include <array>
 
-bool VRenderGLView::m_linked_rot = false;
-VRenderGLView* VRenderGLView::m_master_linked_view = 0;
-bool VRenderGLView::m_keep_enlarge = false;
-bool VRenderGLView::m_enlarge = false;
-double VRenderGLView::m_enlarge_scale = 1.0;
+bool RenderCanvas::m_linked_rot = false;
+RenderCanvas* RenderCanvas::m_master_linked_view = 0;
+bool RenderCanvas::m_keep_enlarge = false;
+bool RenderCanvas::m_enlarge = false;
+double RenderCanvas::m_enlarge_scale = 1.0;
 #ifdef _WIN32
-HCTX VRenderGLView::m_hTab = 0;
-LOGCONTEXTA VRenderGLView::m_lc;
+HCTX RenderCanvas::m_hTab = 0;
+LOGCONTEXTA RenderCanvas::m_lc;
 #endif
 
-BEGIN_EVENT_TABLE(VRenderGLView, wxGLCanvas)
-EVT_PAINT(VRenderGLView::OnDraw)
-EVT_SIZE(VRenderGLView::OnResize)
-EVT_MOUSE_EVENTS(VRenderGLView::OnMouse)
-EVT_IDLE(VRenderGLView::OnIdle)
-EVT_KEY_DOWN(VRenderGLView::OnKeyDown)
-EVT_TIMER(ID_ftrigger, VRenderGLView::OnQuitFscreen)
-EVT_CLOSE(VRenderGLView::OnClose)
+BEGIN_EVENT_TABLE(RenderCanvas, wxGLCanvas)
+EVT_PAINT(RenderCanvas::OnDraw)
+EVT_SIZE(RenderCanvas::OnResize)
+EVT_MOUSE_EVENTS(RenderCanvas::OnMouse)
+EVT_IDLE(RenderCanvas::OnIdle)
+EVT_KEY_DOWN(RenderCanvas::OnKeyDown)
+EVT_TIMER(ID_ftrigger, RenderCanvas::OnQuitFscreen)
+EVT_CLOSE(RenderCanvas::OnClose)
 END_EVENT_TABLE()
 
-VRenderGLView::VRenderGLView(VRenderFrame* frame,
-	VRenderView* parent,
+RenderCanvas::RenderCanvas(MainFrame* frame,
+	RenderViewPanel* parent,
 	const wxGLAttributes& attriblist,
 	wxGLContext* sharedContext,
 	const wxPoint& pos,
@@ -383,7 +383,7 @@ VRenderGLView::VRenderGLView(VRenderFrame* frame,
 
 #ifdef _WIN32
 //tablet init
-HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
+HCTX RenderCanvas::TabletInit(HWND hWnd, HINSTANCE hInst)
 {
 	HCTX hctx = NULL;
 	UINT wDevice = 0;
@@ -477,7 +477,7 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 	return hctx;
 }
 
-void VRenderGLView::InitOpenVR()
+void RenderCanvas::InitOpenVR()
 {
 	//openvr initilization
 	vr::EVRInitError vr_error;
@@ -499,7 +499,7 @@ void VRenderGLView::InitOpenVR()
 }
 #endif
 
-VRenderGLView::~VRenderGLView()
+RenderCanvas::~RenderCanvas()
 {
 	if (m_benchmark)
 	{
@@ -624,7 +624,7 @@ VRenderGLView::~VRenderGLView()
 		delete m_glRC;
 }
 
-void VRenderGLView::OnResize(wxSizeEvent& event)
+void RenderCanvas::OnResize(wxSizeEvent& event)
 {
 	wxSize size = GetGLSize();
 	if (m_size == size)
@@ -637,7 +637,7 @@ void VRenderGLView::OnResize(wxSizeEvent& event)
 	RefreshGL(1);
 }
 
-void VRenderGLView::Init()
+void RenderCanvas::Init()
 {
 	if (!m_initialized)
 	{
@@ -665,7 +665,7 @@ void VRenderGLView::Init()
 	}
 }
 
-void VRenderGLView::ClearAll()
+void RenderCanvas::ClearAll()
 {
 	Clear();
 	ClearVolList();
@@ -681,7 +681,7 @@ void VRenderGLView::ClearAll()
 	SetClippingPlaneRotations(0, 0, 0);
 }
 
-void VRenderGLView::Clear()
+void RenderCanvas::Clear()
 {
 	m_loader.RemoveAllLoadedBrick();
 	flvr::TextureRenderer::clear_tex_pool();
@@ -707,7 +707,7 @@ void VRenderGLView::Clear()
 	m_cur_vol = 0;
 }
 
-void VRenderGLView::HandleProjection(int nx, int ny, bool vr)
+void RenderCanvas::HandleProjection(int nx, int ny, bool vr)
 {
 	if (!m_free)
 		m_distance = m_radius / tan(d2r(m_aov / 2.0)) / m_scale_factor;
@@ -760,7 +760,7 @@ void VRenderGLView::HandleProjection(int nx, int ny, bool vr)
 	}
 }
 
-void VRenderGLView::HandleCamera(bool vr)
+void RenderCanvas::HandleCamera(bool vr)
 {
 	fluo::Vector pos(m_transx, m_transy, m_transz);
 	pos.normalize();
@@ -821,7 +821,7 @@ void VRenderGLView::HandleCamera(bool vr)
 }
 
 //depth buffer calculation
-double VRenderGLView::CalcZ(double z)
+double RenderCanvas::CalcZ(double z)
 {
 	double result = 0.0;
 	if (m_persp)
@@ -837,7 +837,7 @@ double VRenderGLView::CalcZ(double z)
 	return result;
 }
 
-void VRenderGLView::CalcFogRange()
+void RenderCanvas::CalcFogRange()
 {
 	fluo::BBox bbox;
 	bool use_box = false;
@@ -905,7 +905,7 @@ void VRenderGLView::CalcFogRange()
 }
 
 //draw the volume data only
-void VRenderGLView::Draw()
+void RenderCanvas::Draw()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -974,7 +974,7 @@ void VRenderGLView::Draw()
 }
 
 //draw with depth peeling
-void VRenderGLView::DrawDP()
+void RenderCanvas::DrawDP()
 {
 	int i;
 	int nx, ny;
@@ -1252,7 +1252,7 @@ void VRenderGLView::DrawDP()
 
 //draw meshes
 //peel==true -- depth peeling
-void VRenderGLView::DrawMeshes(int peel)
+void RenderCanvas::DrawMeshes(int peel)
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -1296,7 +1296,7 @@ void VRenderGLView::DrawMeshes(int peel)
 
 //draw volumes
 //peel==true -- depth peeling
-void VRenderGLView::DrawVolumes(int peel)
+void RenderCanvas::DrawVolumes(int peel)
 {
 	int finished_bricks = 0;
 	if (flvr::TextureRenderer::get_mem_swap())
@@ -1602,7 +1602,7 @@ void VRenderGLView::DrawVolumes(int peel)
 	//}
 }
 
-void VRenderGLView::DrawAnnotations()
+void RenderCanvas::DrawAnnotations()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -1662,7 +1662,7 @@ void VRenderGLView::DrawAnnotations()
 
 //get populated mesh list
 //stored in m_md_pop_list
-void VRenderGLView::PopMeshList()
+void RenderCanvas::PopMeshList()
 {
 	if (!m_md_pop_dirty)
 		return;
@@ -1703,7 +1703,7 @@ void VRenderGLView::PopMeshList()
 
 //get populated volume list
 //stored in m_vd_pop_list
-void VRenderGLView::PopVolumeList()
+void RenderCanvas::PopVolumeList()
 {
 	if (!m_vd_pop_dirty)
 		return;
@@ -1744,7 +1744,7 @@ void VRenderGLView::PopVolumeList()
 //organize layers in view
 //put all volume data under view into last group of the view
 //if no group in view
-void VRenderGLView::OrganizeLayers()
+void RenderCanvas::OrganizeLayers()
 {
 	DataGroup* le_group = 0;
 	int i;
@@ -1802,7 +1802,7 @@ void VRenderGLView::OrganizeLayers()
 	}
 }
 
-void VRenderGLView::RandomizeColor()
+void RenderCanvas::RandomizeColor()
 {
 	for (int i = 0; i<(int)m_layer_list.size(); i++)
 	{
@@ -1811,25 +1811,25 @@ void VRenderGLView::RandomizeColor()
 	}
 }
 
-void VRenderGLView::ClearVolList()
+void RenderCanvas::ClearVolList()
 {
 	m_loader.RemoveAllLoadedBrick();
 	flvr::TextureRenderer::clear_tex_pool();
 	m_vd_pop_list.clear();
 }
 
-void VRenderGLView::ClearMeshList()
+void RenderCanvas::ClearMeshList()
 {
 	m_md_pop_list.clear();
 }
 
 //interactive modes
-int VRenderGLView::GetIntMode()
+int RenderCanvas::GetIntMode()
 {
 	return m_int_mode;
 }
 
-void VRenderGLView::SetIntMode(int mode)
+void RenderCanvas::SetIntMode(int mode)
 {
 	m_int_mode = mode;
 	if (m_int_mode == 1)
@@ -1843,30 +1843,30 @@ void VRenderGLView::SetIntMode(int mode)
 }
 
 //set use 2d rendering results
-void VRenderGLView::SetPaintUse2d(bool use2d)
+void RenderCanvas::SetPaintUse2d(bool use2d)
 {
 	glbin_vol_selector.SetPaintUse2d(use2d);
 }
 
-bool VRenderGLView::GetPaintUse2d()
+bool RenderCanvas::GetPaintUse2d()
 {
 	return glbin_vol_selector.GetPaintUse2d();
 }
 
 //segmentation mdoe selection
-void VRenderGLView::SetPaintMode(int mode)
+void RenderCanvas::SetPaintMode(int mode)
 {
 	glbin_vol_selector.SetMode(mode);
 	m_brush_state = mode;
 	glbin_vol_selector.ChangeBrushSetsIndex();
 }
 
-int VRenderGLView::GetPaintMode()
+int RenderCanvas::GetPaintMode()
 {
 	return glbin_vol_selector.GetMode();
 }
 
-void VRenderGLView::DrawCircles(double cx, double cy,
+void RenderCanvas::DrawCircles(double cx, double cy,
 	double r1, double r2, fluo::Color &color, glm::mat4 &matrix)
 {
 	flvr::ShaderProgram* shader =
@@ -1902,7 +1902,7 @@ void VRenderGLView::DrawCircles(double cx, double cy,
 }
 
 //draw the brush shape
-void VRenderGLView::DrawBrush()
+void RenderCanvas::DrawBrush()
 {
 	double pressure = glbin_vol_selector.GetNormPress();
 
@@ -1984,7 +1984,7 @@ void VRenderGLView::DrawBrush()
 }
 
 //paint strokes on the paint fbo
-void VRenderGLView::PaintStroke()
+void RenderCanvas::PaintStroke()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -2097,7 +2097,7 @@ void VRenderGLView::PaintStroke()
 }
 
 //show the stroke buffer
-void VRenderGLView::DisplayStroke()
+void RenderCanvas::DisplayStroke()
 {
 	//painting texture
 	flvr::Framebuffer* paint_buffer =
@@ -2129,7 +2129,7 @@ void VRenderGLView::DisplayStroke()
 }
 
 //segment volumes in current view
-void VRenderGLView::Segment()
+void RenderCanvas::Segment()
 {
 	int mode = glbin_vol_selector.GetMode();
 
@@ -2193,7 +2193,7 @@ void VRenderGLView::Segment()
 }
 
 //change brush display
-void VRenderGLView::ChangeBrushSize(int value)
+void RenderCanvas::ChangeBrushSize(int value)
 {
 	glbin_vol_selector.ChangeBrushSize(value, wxGetKeyState(WXK_CONTROL));
 	if (m_frame && m_frame->GetBrushToolDlg())
@@ -2201,19 +2201,19 @@ void VRenderGLView::ChangeBrushSize(int value)
 }
 
 //calculations
-void VRenderGLView::SetVolumeA(VolumeData* vd)
+void RenderCanvas::SetVolumeA(VolumeData* vd)
 {
 	glbin_vol_calculator.SetVolumeA(vd);
 	glbin_vol_selector.SetVolume(vd);
 }
 
-void VRenderGLView::SetVolumeB(VolumeData* vd)
+void RenderCanvas::SetVolumeB(VolumeData* vd)
 {
 	glbin_vol_calculator.SetVolumeB(vd);
 }
 
 //draw out the framebuffer after composition
-void VRenderGLView::PrepFinalBuffer()
+void RenderCanvas::PrepFinalBuffer()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -2229,7 +2229,7 @@ void VRenderGLView::PrepFinalBuffer()
 		final_buffer->protect();
 }
 
-void VRenderGLView::ClearFinalBuffer()
+void RenderCanvas::ClearFinalBuffer()
 {
 	flvr::Framebuffer* final_buffer =
 		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
@@ -2241,7 +2241,7 @@ void VRenderGLView::ClearFinalBuffer()
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void VRenderGLView::DrawFinalBuffer()
+void RenderCanvas::DrawFinalBuffer()
 {
 	if (m_enlarge)
 		return;
@@ -2295,7 +2295,7 @@ void VRenderGLView::DrawFinalBuffer()
 }
 
 //vr buffers
-void VRenderGLView::GetRenderSize(int &nx, int &ny)
+void RenderCanvas::GetRenderSize(int &nx, int &ny)
 {
 	if (m_use_openvr)
 	{
@@ -2314,7 +2314,7 @@ void VRenderGLView::GetRenderSize(int &nx, int &ny)
 	}
 }
 
-void VRenderGLView::PrepVRBuffer()
+void RenderCanvas::PrepVRBuffer()
 {
 	if (m_use_openvr)
 	{
@@ -2344,7 +2344,7 @@ void VRenderGLView::PrepVRBuffer()
 		vr_buffer->protect();
 }
 
-void VRenderGLView::BindRenderBuffer()
+void RenderCanvas::BindRenderBuffer()
 {
 	if (m_enable_vr)
 	{
@@ -2363,7 +2363,7 @@ void VRenderGLView::BindRenderBuffer()
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void VRenderGLView::ClearVRBuffer()
+void RenderCanvas::ClearVRBuffer()
 {
 	BindRenderBuffer();
 	//clear color buffer to black for compositing
@@ -2372,7 +2372,7 @@ void VRenderGLView::ClearVRBuffer()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void VRenderGLView::DrawVRBuffer()
+void RenderCanvas::DrawVRBuffer()
 {
 	int vr_x, vr_y, gl_x, gl_y;
 	GetRenderSize(vr_x, vr_y);
@@ -2449,7 +2449,7 @@ void VRenderGLView::DrawVRBuffer()
 
 //Draw the volmues with compositing
 //peel==true -- depth peeling
-void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int peel)
+void RenderCanvas::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int peel)
 {
 	if (list.size() <= 0)
 		return;
@@ -2527,7 +2527,7 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 	}
 }
 
-void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
+void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -2725,7 +2725,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 	}
 }
 
-void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
+void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -3024,7 +3024,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 	}
 }
 
-void VRenderGLView::DrawOLShading(VolumeData* vd)
+void RenderCanvas::DrawOLShading(VolumeData* vd)
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -3100,7 +3100,7 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 }
 
 //get mesh shadow
-bool VRenderGLView::GetMeshShadow(double &val)
+bool RenderCanvas::GetMeshShadow(double &val)
 {
 	for (int i = 0; i<(int)m_layer_list.size(); i++)
 	{
@@ -3136,7 +3136,7 @@ bool VRenderGLView::GetMeshShadow(double &val)
 	return false;
 }
 
-void VRenderGLView::DrawOLShadowsMesh(double darkness)
+void RenderCanvas::DrawOLShadowsMesh(double darkness)
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -3234,7 +3234,7 @@ void VRenderGLView::DrawOLShadowsMesh(double darkness)
 	glEnable(GL_DEPTH_TEST);
 }
 
-void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
+void RenderCanvas::DrawOLShadows(vector<VolumeData*> &vlist)
 {
 	if (vlist.empty())
 		return;
@@ -3463,7 +3463,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 
 //draw multi volumes with depth consideration
 //peel==true -- depth peeling
-void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
+void RenderCanvas::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 {
 	if (list.empty())
 		return;
@@ -3602,7 +3602,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 		img_shader->release();
 }
 
-void VRenderGLView::SetBrush(int mode)
+void RenderCanvas::SetBrush(int mode)
 {
 	m_prev_focus = FindFocus();
 	SetFocus();
@@ -3639,7 +3639,7 @@ void VRenderGLView::SetBrush(int mode)
 	glbin_vol_selector.ChangeBrushSetsIndex();
 }
 
-void VRenderGLView::UpdateBrushState()
+void RenderCanvas::UpdateBrushState()
 {
 	TreePanel* tree_panel = 0;
 	BrushToolDlg* brush_dlg = 0;
@@ -3747,7 +3747,7 @@ void VRenderGLView::UpdateBrushState()
 }
 
 //selection
-void VRenderGLView::Pick()
+void RenderCanvas::Pick()
 {
 	if (m_draw_all)
 	{
@@ -3756,7 +3756,7 @@ void VRenderGLView::Pick()
 	}
 }
 
-void VRenderGLView::PickMesh()
+void RenderCanvas::PickMesh()
 {
 	int i;
 	int nx = GetGLSize().x;
@@ -3831,7 +3831,7 @@ void VRenderGLView::PickMesh()
 	m_mv_mat = mv_temp;
 }
 
-void VRenderGLView::PickVolume()
+void RenderCanvas::PickVolume()
 {
 	int kmode = wxGetKeyState(WXK_CONTROL) ? 1 : 0;
 	double dist = 0.0;
@@ -3895,7 +3895,7 @@ void VRenderGLView::PickVolume()
 	}
 }
 
-void VRenderGLView::SetCompSelection(fluo::Point& p, int mode)
+void RenderCanvas::SetCompSelection(fluo::Point& p, int mode)
 {
 	//update selection
 	if (m_frame && m_frame->GetComponentDlg())
@@ -3906,7 +3906,7 @@ void VRenderGLView::SetCompSelection(fluo::Point& p, int mode)
 	}
 }
 
-void VRenderGLView::OnIdle(wxIdleEvent& event)
+void RenderCanvas::OnIdle(wxIdleEvent& event)
 {
 	bool refresh = false;
 	bool ref_stat = false;
@@ -4494,12 +4494,12 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	}
 }
 
-void VRenderGLView::OnKeyDown(wxKeyEvent& event)
+void RenderCanvas::OnKeyDown(wxKeyEvent& event)
 {
 	event.Skip();
 }
 
-void VRenderGLView::OnQuitFscreen(wxTimerEvent& event)
+void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
 {
 	m_fullscreen_trigger.Stop();
 	if (!m_frame || !m_vrv)
@@ -4534,7 +4534,7 @@ void VRenderGLView::OnQuitFscreen(wxTimerEvent& event)
 	}
 }
 
-void VRenderGLView::OnClose(wxCloseEvent &event)
+void RenderCanvas::OnClose(wxCloseEvent &event)
 {
 	if (m_full_screen)
 	{
@@ -4543,7 +4543,7 @@ void VRenderGLView::OnClose(wxCloseEvent &event)
 	}
 }
 
-void VRenderGLView::Set3DRotCapture(double start_angle,
+void RenderCanvas::Set3DRotCapture(double start_angle,
 	double end_angle,
 	double step,
 	int frames,
@@ -4587,7 +4587,7 @@ void VRenderGLView::Set3DRotCapture(double start_angle,
 	m_stages = 0;
 }
 
-void VRenderGLView::Set3DBatCapture(wxString &cap_file, int begin_frame, int end_frame)
+void RenderCanvas::Set3DBatCapture(wxString &cap_file, int begin_frame, int end_frame)
 {
 	m_cap_file = cap_file;
 	m_begin_frame = begin_frame;
@@ -4603,7 +4603,7 @@ void VRenderGLView::Set3DBatCapture(wxString &cap_file, int begin_frame, int end
 	}
 }
 
-void VRenderGLView::Set4DSeqCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
+void RenderCanvas::Set4DSeqCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
 {
 	m_cap_file = cap_file;
 	m_tseq_cur_num = begin_frame;
@@ -4616,7 +4616,7 @@ void VRenderGLView::Set4DSeqCapture(wxString &cap_file, int begin_frame, int end
 	m_4d_rewind = rewind;
 }
 
-void VRenderGLView::SetParamCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
+void RenderCanvas::SetParamCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
 {
 	m_cap_file = cap_file;
 	m_param_cur_num = begin_frame;
@@ -4628,7 +4628,7 @@ void VRenderGLView::SetParamCapture(wxString &cap_file, int begin_frame, int end
 	m_4d_rewind = rewind;
 }
 
-void VRenderGLView::SetParams(double t)
+void RenderCanvas::SetParams(double t)
 {
 	if (!m_vrv)
 		return;
@@ -4812,7 +4812,7 @@ void VRenderGLView::SetParams(double t)
 	SetVolPopDirty();
 }
 
-void VRenderGLView::ResetMovieAngle()
+void RenderCanvas::ResetMovieAngle()
 {
 	double rv[3] = { 0 };
 	GetRotations(rv[0], rv[1], rv[2]);
@@ -4825,7 +4825,7 @@ void VRenderGLView::ResetMovieAngle()
 	RefreshGL(16);
 }
 
-void VRenderGLView::StopMovie()
+void RenderCanvas::StopMovie()
 {
 	m_capture = false;
 	m_capture_rotat = false;
@@ -4833,7 +4833,7 @@ void VRenderGLView::StopMovie()
 	m_capture_param = false;
 }
 
-void VRenderGLView::Get4DSeqRange(int &start_frame, int &end_frame)
+void RenderCanvas::Get4DSeqRange(int &start_frame, int &end_frame)
 {
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
@@ -4863,7 +4863,7 @@ void VRenderGLView::Get4DSeqRange(int &start_frame, int &end_frame)
 	m_end_all_frame = end_frame;
 }
 
-void VRenderGLView::UpdateVolumeData(int frame, VolumeData* vd)
+void RenderCanvas::UpdateVolumeData(int frame, VolumeData* vd)
 {
 	if (vd && vd->GetReader())
 	{
@@ -4915,7 +4915,7 @@ void VRenderGLView::UpdateVolumeData(int frame, VolumeData* vd)
 	}
 }
 
-void VRenderGLView::ReloadVolumeData(int frame)
+void RenderCanvas::ReloadVolumeData(int frame)
 {
 	int i, j;
 	vector<BaseReader*> reader_list;
@@ -5030,7 +5030,7 @@ void VRenderGLView::ReloadVolumeData(int frame)
 	}
 }
 
-void VRenderGLView::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind)
+void RenderCanvas::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind)
 {
 	m_frame_num_type = 0;
 
@@ -5083,7 +5083,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, int start_frame, int end_frame, boo
 	RefreshGL(17);
 }
 
-void VRenderGLView::Get3DBatRange(int &start_frame, int &end_frame)
+void RenderCanvas::Get3DBatRange(int &start_frame, int &end_frame)
 {
 	m_bat_folder = "";
 
@@ -5124,7 +5124,7 @@ void VRenderGLView::Get3DBatRange(int &start_frame, int &end_frame)
 	m_end_all_frame = end_frame;
 }
 
-void VRenderGLView::Set3DBatFrame(int frame, int start_frame, int end_frame, bool rewind)
+void RenderCanvas::Set3DBatFrame(int frame, int start_frame, int end_frame, bool rewind)
 {
 	m_frame_num_type = 0;
 
@@ -5173,7 +5173,7 @@ void VRenderGLView::Set3DBatFrame(int frame, int start_frame, int end_frame, boo
 }
 
 //pre-draw processings
-void VRenderGLView::PreDraw()
+void RenderCanvas::PreDraw()
 {
 	//skip if not done with loop
 	if (flvr::TextureRenderer::get_mem_swap())
@@ -5186,7 +5186,7 @@ void VRenderGLView::PreDraw()
 }
 
 //read pixels
-void VRenderGLView::ReadPixels(
+void RenderCanvas::ReadPixels(
 	int chann, bool fp32,
 	int &x, int &y, int &w, int &h,
 	void** image)
@@ -5270,7 +5270,7 @@ void VRenderGLView::ReadPixels(
 		BindRenderBuffer();
 }
 
-void VRenderGLView::PostDraw()
+void RenderCanvas::PostDraw()
 {
 	//skip if not done with loop
 	if (flvr::TextureRenderer::get_mem_swap() &&
@@ -5347,7 +5347,7 @@ void VRenderGLView::PostDraw()
 	}
 }
 
-void VRenderGLView::ResetEnlarge()
+void RenderCanvas::ResetEnlarge()
 {
 	//skip if not done with loop
 	if (flvr::TextureRenderer::get_mem_swap() &&
@@ -5362,7 +5362,7 @@ void VRenderGLView::ResetEnlarge()
 }
 
 //draw
-void VRenderGLView::OnDraw(wxPaintEvent& event)
+void RenderCanvas::OnDraw(wxPaintEvent& event)
 {
 	if (!m_refresh)
 		m_retain_finalbuffer = true;
@@ -5371,7 +5371,7 @@ void VRenderGLView::OnDraw(wxPaintEvent& event)
 	ForceDraw();
 }
 
-void VRenderGLView::ForceDraw()
+void RenderCanvas::ForceDraw()
 {
 #ifdef _WIN32
 	if (!m_set_gl)
@@ -5382,7 +5382,7 @@ void VRenderGLView::ForceDraw()
 		{
 			for (int i = 0; i< m_frame->GetViewNum(); i++)
 			{
-				VRenderGLView* view = m_frame->GetView(i);
+				RenderCanvas* view = m_frame->GetView(i);
 				if (view && view != this)
 				{
 					view->m_set_gl = false;
@@ -5532,7 +5532,7 @@ void VRenderGLView::ForceDraw()
 		{
 			for (int i = 0; i< m_frame->GetViewNum(); i++)
 			{
-				VRenderGLView* view = m_frame->GetView(i);
+				RenderCanvas* view = m_frame->GetView(i);
 				if (view && view != this)
 				{
 					view->SetRotations(m_rotx, m_roty, m_rotz, true);
@@ -5545,12 +5545,12 @@ void VRenderGLView::ForceDraw()
 	}
 }
 
-void VRenderGLView::SetRadius(double r)
+void RenderCanvas::SetRadius(double r)
 {
 	m_radius = r;
 }
 
-void VRenderGLView::SetCenter()
+void RenderCanvas::SetCenter()
 {
 	InitView(INIT_BOUNDS | INIT_CENTER | INIT_OBJ_TRANSL);
 
@@ -5592,7 +5592,7 @@ void VRenderGLView::SetCenter()
 	}
 }
 
-double VRenderGLView::Get121ScaleFactor()
+double RenderCanvas::Get121ScaleFactor()
 {
 	double result = 1.0;
 
@@ -5616,7 +5616,7 @@ double VRenderGLView::Get121ScaleFactor()
 	return result;
 }
 
-void VRenderGLView::SetScale121()
+void RenderCanvas::SetScale121()
 {
 	m_scale_factor = Get121ScaleFactor();
 	double value = 1.0;
@@ -5652,14 +5652,14 @@ void VRenderGLView::SetScale121()
 	RefreshGL(21);
 }
 
-void VRenderGLView::SetPinRotCenter(bool pin)
+void RenderCanvas::SetPinRotCenter(bool pin)
 {
 	m_pin_rot_center = pin;
 	if (pin)
 		m_rot_center_dirty = true;
 }
 
-void VRenderGLView::SetPersp(bool persp)
+void RenderCanvas::SetPersp(bool persp)
 {
 	m_persp = persp;
 	if (m_free && !m_persp)
@@ -5687,18 +5687,18 @@ void VRenderGLView::SetPersp(bool persp)
 		//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
 		//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
 		//m_vrv->m_scale_factor_text->ChangeValue(str);
-		m_vrv->m_options_toolbar2->ToggleTool(VRenderView::ID_FreeChk, false);
+		m_vrv->m_options_toolbar2->ToggleTool(RenderViewPanel::ID_FreeChk, false);
 
 		SetRotations(m_rotx, m_roty, m_rotz);
 	}
 	//SetSortBricks();
 }
 
-void VRenderGLView::SetFree(bool free)
+void RenderCanvas::SetFree(bool free)
 {
 	m_free = free;
-	if (m_vrv->m_options_toolbar2->GetToolState(VRenderView::ID_FreeChk) != m_free)
-		m_vrv->m_options_toolbar2->ToggleTool(VRenderView::ID_FreeChk, m_free);
+	if (m_vrv->m_options_toolbar2->GetToolState(RenderViewPanel::ID_FreeChk) != m_free)
+		m_vrv->m_options_toolbar2->ToggleTool(RenderViewPanel::ID_FreeChk, m_free);
 	if (free)
 	{
 		m_persp = true;
@@ -5762,7 +5762,7 @@ void VRenderGLView::SetFree(bool free)
 	//SetSortBricks();
 }
 
-void VRenderGLView::SetAov(double aov)
+void RenderCanvas::SetAov(double aov)
 {
 	//view has been changed, sort bricks
 	//SetSortBricks();
@@ -5775,7 +5775,7 @@ void VRenderGLView::SetAov(double aov)
 	}
 }
 
-void VRenderGLView::SetVolMethod(int method)
+void RenderCanvas::SetVolMethod(int method)
 {
 	//get the volume list m_vd_pop_list
 	PopVolumeList();
@@ -5783,42 +5783,42 @@ void VRenderGLView::SetVolMethod(int method)
 	m_vol_method = method;
 
 	//ui
-	m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_VolumeSeqRd, false);
-	m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_VolumeMultiRd, false);
-	m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_VolumeCompRd, false);
+	m_vrv->m_options_toolbar->ToggleTool(RenderViewPanel::ID_VolumeSeqRd, false);
+	m_vrv->m_options_toolbar->ToggleTool(RenderViewPanel::ID_VolumeMultiRd, false);
+	m_vrv->m_options_toolbar->ToggleTool(RenderViewPanel::ID_VolumeCompRd, false);
 	switch (m_vol_method)
 	{
 	case VOL_METHOD_SEQ:
-		m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_VolumeSeqRd, true);
+		m_vrv->m_options_toolbar->ToggleTool(RenderViewPanel::ID_VolumeSeqRd, true);
 		m_vrv->m_options_toolbar->SetToolNormalBitmap(
-			VRenderView::ID_VolumeSeqRd, wxGetBitmapFromMemory(layers));
+			RenderViewPanel::ID_VolumeSeqRd, wxGetBitmapFromMemory(layers));
 		m_vrv->m_options_toolbar->SetToolNormalBitmap(
-			VRenderView::ID_VolumeMultiRd, wxGetBitmapFromMemory(depth_off));
+			RenderViewPanel::ID_VolumeMultiRd, wxGetBitmapFromMemory(depth_off));
 		m_vrv->m_options_toolbar->SetToolNormalBitmap(
-			VRenderView::ID_VolumeCompRd, wxGetBitmapFromMemory(composite_off));
+			RenderViewPanel::ID_VolumeCompRd, wxGetBitmapFromMemory(composite_off));
 		break;
 	case VOL_METHOD_MULTI:
-		m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_VolumeMultiRd, true);
+		m_vrv->m_options_toolbar->ToggleTool(RenderViewPanel::ID_VolumeMultiRd, true);
 		m_vrv->m_options_toolbar->SetToolNormalBitmap(
-			VRenderView::ID_VolumeSeqRd, wxGetBitmapFromMemory(layers_off));
+			RenderViewPanel::ID_VolumeSeqRd, wxGetBitmapFromMemory(layers_off));
 		m_vrv->m_options_toolbar->SetToolNormalBitmap(
-			VRenderView::ID_VolumeMultiRd, wxGetBitmapFromMemory(depth));
+			RenderViewPanel::ID_VolumeMultiRd, wxGetBitmapFromMemory(depth));
 		m_vrv->m_options_toolbar->SetToolNormalBitmap(
-			VRenderView::ID_VolumeCompRd, wxGetBitmapFromMemory(composite_off));
+			RenderViewPanel::ID_VolumeCompRd, wxGetBitmapFromMemory(composite_off));
 		break;
 	case VOL_METHOD_COMP:
-		m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_VolumeCompRd, true);
+		m_vrv->m_options_toolbar->ToggleTool(RenderViewPanel::ID_VolumeCompRd, true);
 		m_vrv->m_options_toolbar->SetToolNormalBitmap(
-			VRenderView::ID_VolumeSeqRd, wxGetBitmapFromMemory(layers_off));
+			RenderViewPanel::ID_VolumeSeqRd, wxGetBitmapFromMemory(layers_off));
 		m_vrv->m_options_toolbar->SetToolNormalBitmap(
-			VRenderView::ID_VolumeMultiRd, wxGetBitmapFromMemory(depth_off));
+			RenderViewPanel::ID_VolumeMultiRd, wxGetBitmapFromMemory(depth_off));
 		m_vrv->m_options_toolbar->SetToolNormalBitmap(
-			VRenderView::ID_VolumeCompRd, wxGetBitmapFromMemory(composite));
+			RenderViewPanel::ID_VolumeCompRd, wxGetBitmapFromMemory(composite));
 		break;
 	}
 }
 
-VolumeData* VRenderGLView::GetAllVolumeData(int index)
+VolumeData* RenderCanvas::GetAllVolumeData(int index)
 {
 	int cnt = 0;
 	int i, j;
@@ -5851,7 +5851,7 @@ VolumeData* VRenderGLView::GetAllVolumeData(int index)
 	return 0;
 }
 
-VolumeData* VRenderGLView::GetDispVolumeData(int index)
+VolumeData* RenderCanvas::GetDispVolumeData(int index)
 {
 	if (GetDispVolumeNum() <= 0)
 		return 0;
@@ -5865,7 +5865,7 @@ VolumeData* VRenderGLView::GetDispVolumeData(int index)
 		return 0;
 }
 
-MeshData* VRenderGLView::GetMeshData(int index)
+MeshData* RenderCanvas::GetMeshData(int index)
 {
 	if (GetMeshNum() <= 0)
 		return 0;
@@ -5878,7 +5878,7 @@ MeshData* VRenderGLView::GetMeshData(int index)
 		return 0;
 }
 
-VolumeData* VRenderGLView::GetVolumeData(wxString &name)
+VolumeData* RenderCanvas::GetVolumeData(wxString &name)
 {
 	int i, j;
 
@@ -5914,7 +5914,7 @@ VolumeData* VRenderGLView::GetVolumeData(wxString &name)
 	return 0;
 }
 
-MeshData* VRenderGLView::GetMeshData(wxString &name)
+MeshData* RenderCanvas::GetMeshData(wxString &name)
 {
 	int i, j;
 
@@ -5948,7 +5948,7 @@ MeshData* VRenderGLView::GetMeshData(wxString &name)
 	return 0;
 }
 
-Annotations* VRenderGLView::GetAnnotations(wxString &name)
+Annotations* RenderCanvas::GetAnnotations(wxString &name)
 {
 	int i;
 
@@ -5969,7 +5969,7 @@ Annotations* VRenderGLView::GetAnnotations(wxString &name)
 	return 0;
 }
 
-DataGroup* VRenderGLView::GetGroup(wxString &name)
+DataGroup* RenderCanvas::GetGroup(wxString &name)
 {
 	int i;
 
@@ -5990,7 +5990,7 @@ DataGroup* VRenderGLView::GetGroup(wxString &name)
 	return 0;
 }
 
-DataGroup* VRenderGLView::GetGroup(int index)
+DataGroup* RenderCanvas::GetGroup(int index)
 {
 	int i;
 	int count = 0;
@@ -6012,7 +6012,7 @@ DataGroup* VRenderGLView::GetGroup(int index)
 	return 0;
 }
 
-DataGroup* VRenderGLView::GetGroup(VolumeData* vd)
+DataGroup* RenderCanvas::GetGroup(VolumeData* vd)
 {
 	for (int i = 0; i < GetLayerNum(); i++)
 	{
@@ -6031,14 +6031,14 @@ DataGroup* VRenderGLView::GetGroup(VolumeData* vd)
 	return 0;
 }
 
-int VRenderGLView::GetAny()
+int RenderCanvas::GetAny()
 {
 	PopVolumeList();
 	PopMeshList();
 	return m_vd_pop_list.size() + m_md_pop_list.size();
 }
 
-int VRenderGLView::GetDispVolumeNum()
+int RenderCanvas::GetDispVolumeNum()
 {
 	//get the volume list m_vd_pop_list
 	PopVolumeList();
@@ -6046,7 +6046,7 @@ int VRenderGLView::GetDispVolumeNum()
 	return m_vd_pop_list.size();
 }
 
-int VRenderGLView::GetAllVolumeNum()
+int RenderCanvas::GetAllVolumeNum()
 {
 	int num = 0;
 	for (int i = 0; i<(int)m_layer_list.size(); i++)
@@ -6069,13 +6069,13 @@ int VRenderGLView::GetAllVolumeNum()
 	return num;
 }
 
-int VRenderGLView::GetMeshNum()
+int RenderCanvas::GetMeshNum()
 {
 	PopMeshList();
 	return m_md_pop_list.size();
 }
 
-DataGroup* VRenderGLView::AddVolumeData(VolumeData* vd, wxString group_name)
+DataGroup* RenderCanvas::AddVolumeData(VolumeData* vd, wxString group_name)
 {
 	//m_layer_list.push_back(vd);
 	int i;
@@ -6159,7 +6159,7 @@ DataGroup* VRenderGLView::AddVolumeData(VolumeData* vd, wxString group_name)
 	return group;
 }
 
-void VRenderGLView::AddMeshData(MeshData* md)
+void RenderCanvas::AddMeshData(MeshData* md)
 {
 	m_layer_list.push_back(md);
 	m_md_pop_dirty = true;
@@ -6169,14 +6169,14 @@ void VRenderGLView::AddMeshData(MeshData* md)
 	//m_frame->AddProps(6, this, 0, 0, md);
 }
 
-void VRenderGLView::AddAnnotations(Annotations* ann)
+void RenderCanvas::AddAnnotations(Annotations* ann)
 {
 	m_layer_list.push_back(ann);
 	//add ui
 	//m_frame->AddProps(4, this, 0, 0, 0, ann);
 }
 
-void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)
+void RenderCanvas::ReplaceVolumeData(wxString &name, VolumeData *dst)
 {
 	int i, j;
 
@@ -6247,7 +6247,7 @@ void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)
 	}
 }
 
-void VRenderGLView::RemoveVolumeData(wxString &name)
+void RenderCanvas::RemoveVolumeData(wxString &name)
 {
 	wxString str = GetName() + ":";
 	m_frame->DeleteProps(2, name);
@@ -6292,7 +6292,7 @@ void VRenderGLView::RemoveVolumeData(wxString &name)
 	}
 }
 
-void VRenderGLView::RemoveVolumeDataDup(wxString &name)
+void RenderCanvas::RemoveVolumeDataDup(wxString &name)
 {
 	wxString str = GetName() + ":";
 	m_frame->DeleteProps(2, name);
@@ -6408,7 +6408,7 @@ void VRenderGLView::RemoveVolumeDataDup(wxString &name)
 	}
 }
 
-void VRenderGLView::RemoveMeshData(wxString &name)
+void RenderCanvas::RemoveMeshData(wxString &name)
 {
 	wxString str = GetName() + ":";
 	m_frame->DeleteProps(3, name);
@@ -6452,7 +6452,7 @@ void VRenderGLView::RemoveMeshData(wxString &name)
 	}
 }
 
-void VRenderGLView::RemoveAnnotations(wxString &name)
+void RenderCanvas::RemoveAnnotations(wxString &name)
 {
 	wxString str = GetName() + ":";
 	m_frame->DeleteProps(4, name);
@@ -6471,7 +6471,7 @@ void VRenderGLView::RemoveAnnotations(wxString &name)
 	}
 }
 
-void VRenderGLView::RemoveGroup(wxString &name)
+void RenderCanvas::RemoveGroup(wxString &name)
 {
 	wxString str = GetName() + ":";
 	int i, j;
@@ -6527,7 +6527,7 @@ void VRenderGLView::RemoveGroup(wxString &name)
 }
 
 //isolate
-void VRenderGLView::Isolate(int type, wxString name)
+void RenderCanvas::Isolate(int type, wxString name)
 {
 	for (int i = 0; i<(int)m_layer_list.size(); i++)
 	{
@@ -6646,7 +6646,7 @@ void VRenderGLView::Isolate(int type, wxString name)
 
 //move layer of the same level within this view
 //source is after the destination
-void VRenderGLView::MoveLayerinView(wxString &src_name, wxString &dst_name)
+void RenderCanvas::MoveLayerinView(wxString &src_name, wxString &dst_name)
 {
 	int i, src_index;
 	TreeLayer* src = 0;
@@ -6677,7 +6677,7 @@ void VRenderGLView::MoveLayerinView(wxString &src_name, wxString &dst_name)
 	m_md_pop_dirty = true;
 }
 
-void VRenderGLView::ShowAll()
+void RenderCanvas::ShowAll()
 {
 	for (unsigned int i = 0; i<m_layer_list.size(); ++i)
 	{
@@ -6744,7 +6744,7 @@ void VRenderGLView::ShowAll()
 
 //move layer (volume) of the same level within the given group
 //source is after the destination
-void VRenderGLView::MoveLayerinGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
+void RenderCanvas::MoveLayerinGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
 	DataGroup* group = GetGroup(group_name);
 	if (!group)
@@ -6783,7 +6783,7 @@ void VRenderGLView::MoveLayerinGroup(wxString &group_name, wxString &src_name, w
 
 //move layer (volume) from the given group up one level to this view
 //source is after the destination
-void VRenderGLView::MoveLayertoView(wxString &group_name, wxString &src_name, wxString &dst_name)
+void RenderCanvas::MoveLayertoView(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
 	DataGroup* group = GetGroup(group_name);
 	if (!group)
@@ -6825,7 +6825,7 @@ void VRenderGLView::MoveLayertoView(wxString &group_name, wxString &src_name, wx
 
 //move layer (volume) one level down to the given group
 //source is after the destination
-void VRenderGLView::MoveLayertoGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
+void RenderCanvas::MoveLayertoGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
 	VolumeData* src_vd = 0;
 	int i;
@@ -6876,7 +6876,7 @@ void VRenderGLView::MoveLayertoGroup(wxString &group_name, wxString &src_name, w
 
 //move layer (volume from one group to another different group
 //sourece is after the destination
-void VRenderGLView::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst_group_name, wxString &src_name, wxString &dst_name)
+void RenderCanvas::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst_group_name, wxString &src_name, wxString &dst_name)
 {
 	DataGroup* src_group = GetGroup(src_group_name);
 	if (!src_group)
@@ -6942,7 +6942,7 @@ void VRenderGLView::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst
 }
 
 //move mesh within a group
-void VRenderGLView::MoveMeshinGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
+void RenderCanvas::MoveMeshinGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
 	MeshGroup* group = GetMGroup(group_name);
 	if (!group)
@@ -6981,7 +6981,7 @@ void VRenderGLView::MoveMeshinGroup(wxString &group_name, wxString &src_name, wx
 }
 
 //move mesh out of a group
-void VRenderGLView::MoveMeshtoView(wxString &group_name, wxString &src_name, wxString &dst_name)
+void RenderCanvas::MoveMeshtoView(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
 	MeshGroup* group = GetMGroup(group_name);
 	if (!group)
@@ -7020,7 +7020,7 @@ void VRenderGLView::MoveMeshtoView(wxString &group_name, wxString &src_name, wxS
 }
 
 //move mesh into a group
-void VRenderGLView::MoveMeshtoGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
+void RenderCanvas::MoveMeshtoGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
 	MeshData* src_md = 0;
 	int i;
@@ -7057,7 +7057,7 @@ void VRenderGLView::MoveMeshtoGroup(wxString &group_name, wxString &src_name, wx
 }
 
 //move mesh out of then into a group
-void VRenderGLView::MoveMeshfromtoGroup(wxString &src_group_name, wxString &dst_group_name, wxString &src_name, wxString &dst_name)
+void RenderCanvas::MoveMeshfromtoGroup(wxString &src_group_name, wxString &dst_group_name, wxString &src_name, wxString &dst_name)
 {
 	MeshGroup* src_group = GetMGroup(src_group_name);
 	if (!src_group)
@@ -7096,7 +7096,7 @@ void VRenderGLView::MoveMeshfromtoGroup(wxString &src_group_name, wxString &dst_
 }
 
 //layer control
-int VRenderGLView::GetGroupNum()
+int RenderCanvas::GetGroupNum()
 {
 	int group_num = 0;
 
@@ -7109,12 +7109,12 @@ int VRenderGLView::GetGroupNum()
 	return group_num;
 }
 
-int VRenderGLView::GetLayerNum()
+int RenderCanvas::GetLayerNum()
 {
 	return m_layer_list.size();
 }
 
-TreeLayer* VRenderGLView::GetLayer(int index)
+TreeLayer* RenderCanvas::GetLayer(int index)
 {
 	if (index >= 0 && index<(int)m_layer_list.size())
 		return m_layer_list[index];
@@ -7122,7 +7122,7 @@ TreeLayer* VRenderGLView::GetLayer(int index)
 		return 0;
 }
 
-wxString VRenderGLView::AddGroup(wxString str, wxString prev_group)
+wxString RenderCanvas::AddGroup(wxString str, wxString prev_group)
 {
 	DataGroup* group = new DataGroup();
 	if (group && str != "")
@@ -7177,7 +7177,7 @@ wxString VRenderGLView::AddGroup(wxString str, wxString prev_group)
 		return "";
 }
 
-DataGroup* VRenderGLView::AddOrGetGroup()
+DataGroup* RenderCanvas::AddOrGetGroup()
 {
 	for (int i = 0; i < (int)m_layer_list.size(); i++)
 	{
@@ -7219,7 +7219,7 @@ DataGroup* VRenderGLView::AddOrGetGroup()
 	return group;
 }
 
-wxString VRenderGLView::AddMGroup(wxString str)
+wxString RenderCanvas::AddMGroup(wxString str)
 {
 	MeshGroup* group = new MeshGroup();
 	if (group && str != "")
@@ -7232,7 +7232,7 @@ wxString VRenderGLView::AddMGroup(wxString str)
 		return "";
 }
 
-MeshGroup* VRenderGLView::AddOrGetMGroup()
+MeshGroup* RenderCanvas::AddOrGetMGroup()
 {
 	for (int i = 0; i < (int)m_layer_list.size(); i++)
 	{
@@ -7257,7 +7257,7 @@ MeshGroup* VRenderGLView::AddOrGetMGroup()
 	return group;
 }
 
-MeshGroup* VRenderGLView::GetMGroup(wxString str)
+MeshGroup* RenderCanvas::GetMGroup(wxString str)
 {
 	int i;
 
@@ -7279,7 +7279,7 @@ MeshGroup* VRenderGLView::GetMGroup(wxString str)
 }
 
 //init
-void VRenderGLView::InitView(unsigned int type)
+void RenderCanvas::InitView(unsigned int type)
 {
 	int i;
 
@@ -7346,7 +7346,7 @@ void VRenderGLView::InitView(unsigned int type)
 
 }
 
-void VRenderGLView::DrawBounds()
+void RenderCanvas::DrawBounds()
 {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
@@ -7378,7 +7378,7 @@ void VRenderGLView::DrawBounds()
 	glEnable(GL_BLEND);
 }
 
-void VRenderGLView::DrawClippingPlanes(int face_winding)
+void RenderCanvas::DrawClippingPlanes(int face_winding)
 {
 	int i;
 	bool link = false;
@@ -7774,7 +7774,7 @@ void VRenderGLView::DrawClippingPlanes(int face_winding)
 	glCullFace(GL_BACK);
 }
 
-void VRenderGLView::DrawGrid()
+void RenderCanvas::DrawGrid()
 {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
@@ -7811,7 +7811,7 @@ void VRenderGLView::DrawGrid()
 	glEnable(GL_BLEND);
 }
 
-void VRenderGLView::DrawCamCtr()
+void RenderCanvas::DrawCamCtr()
 {
 	flvr::VertexArray* va_jack =
 		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Cam_Jack);
@@ -7855,7 +7855,7 @@ void VRenderGLView::DrawCamCtr()
 	glEnable(GL_BLEND);
 }
 
-void VRenderGLView::DrawFrame()
+void RenderCanvas::DrawFrame()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -7892,7 +7892,7 @@ void VRenderGLView::DrawFrame()
 	glEnable(GL_DEPTH_TEST);
 }
 
-void VRenderGLView::DrawScaleBar()
+void RenderCanvas::DrawScaleBar()
 {
 	flvr::VertexArray* va_scale_bar =
 		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Scale_Bar);
@@ -7992,7 +7992,7 @@ void VRenderGLView::DrawScaleBar()
 	glEnable(GL_BLEND);
 }
 
-void VRenderGLView::DrawLegend()
+void RenderCanvas::DrawLegend()
 {
 	if (!m_frame)
 		return;
@@ -8127,7 +8127,7 @@ void VRenderGLView::DrawLegend()
 	m_sb_height = (lines + 1)*font_height;
 }
 
-void VRenderGLView::DrawName(
+void RenderCanvas::DrawName(
 	double x, double y, int nx, int ny,
 	wxString name, fluo::Color color,
 	double font_height,
@@ -8193,7 +8193,7 @@ void VRenderGLView::DrawName(
 	glEnable(GL_BLEND);
 }
 
-void VRenderGLView::DrawGradBg()
+void RenderCanvas::DrawGradBg()
 {
 	glm::mat4 proj_mat = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
 
@@ -8276,7 +8276,7 @@ void VRenderGLView::DrawGradBg()
 	glEnable(GL_BLEND);
 }
 
-void VRenderGLView::SetColormapColors(int colormap, fluo::Color &c, double inv)
+void RenderCanvas::SetColormapColors(int colormap, fluo::Color &c, double inv)
 {
 	switch (colormap)
 	{
@@ -8459,7 +8459,7 @@ void VRenderGLView::SetColormapColors(int colormap, fluo::Color &c, double inv)
 	}
 }
 
-void VRenderGLView::DrawColormap()
+void RenderCanvas::DrawColormap()
 {
 	double max_val = 255.0;
 	bool enable_alpha = false;
@@ -8684,7 +8684,7 @@ void VRenderGLView::DrawColormap()
 	glEnable(GL_DEPTH_TEST);
 }
 
-void VRenderGLView::DrawInfo(int nx, int ny)
+void RenderCanvas::DrawInfo(int nx, int ny)
 {
 	float sx, sy;
 	sx = 2.0 / nx;
@@ -8831,7 +8831,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	}
 }
 
-fluo::Quaternion VRenderGLView::Trackball(double dx, double dy)
+fluo::Quaternion RenderCanvas::Trackball(double dx, double dy)
 {
 	fluo::Quaternion q;
 	fluo::Vector a; /* Axis of rotation */
@@ -8891,7 +8891,7 @@ fluo::Quaternion VRenderGLView::Trackball(double dx, double dy)
 	return q;
 }
 
-fluo::Quaternion VRenderGLView::TrackballClip(int p1x, int p1y, int p2x, int p2y)
+fluo::Quaternion RenderCanvas::TrackballClip(int p1x, int p1y, int p2x, int p2y)
 {
 	fluo::Quaternion q;
 	fluo::Vector a; /* Axis of rotation */
@@ -8921,7 +8921,7 @@ fluo::Quaternion VRenderGLView::TrackballClip(int p1x, int p1y, int p2x, int p2y
 	return q;
 }
 
-void VRenderGLView::UpdateClips()
+void RenderCanvas::UpdateClips()
 {
 	if (m_clip_mode == 1)
 		m_q_cl.FromEuler(m_rotx, -m_roty, -m_rotz);
@@ -9007,7 +9007,7 @@ void VRenderGLView::UpdateClips()
 	}
 }
 
-void VRenderGLView::Q2A()
+void RenderCanvas::Q2A()
 {
 	//view changed, re-sort bricks
 	//SetSortBricks();
@@ -9031,7 +9031,7 @@ void VRenderGLView::Q2A()
 		UpdateClips();
 }
 
-void VRenderGLView::A2Q()
+void RenderCanvas::A2Q()
 {
 	//view changed, re-sort bricks
 	//SetSortBricks();
@@ -9044,7 +9044,7 @@ void VRenderGLView::A2Q()
 }
 
 //sort bricks after view changes
-void VRenderGLView::SetSortBricks()
+void RenderCanvas::SetSortBricks()
 {
 	PopVolumeList();
 
@@ -9056,7 +9056,7 @@ void VRenderGLView::SetSortBricks()
 	}
 }
 
-void VRenderGLView::SetClipMode(int mode)
+void RenderCanvas::SetClipMode(int mode)
 {
 	switch (mode)
 	{
@@ -9088,7 +9088,7 @@ void VRenderGLView::SetClipMode(int mode)
 	}
 }
 
-void VRenderGLView::RestorePlanes()
+void RenderCanvas::RestorePlanes()
 {
 	vector<fluo::Plane*> *planes = 0;
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
@@ -9111,7 +9111,7 @@ void VRenderGLView::RestorePlanes()
 	}
 }
 
-void VRenderGLView::ClipRotate()
+void RenderCanvas::ClipRotate()
 {
 	m_q_cl.FromEuler(m_rotx_cl, m_roty_cl, m_rotz_cl);
 	m_q_cl.Normalize();
@@ -9120,7 +9120,7 @@ void VRenderGLView::ClipRotate()
 
 }
 
-void VRenderGLView::SetClippingPlaneRotations(double rotx, double roty, double rotz)
+void RenderCanvas::SetClippingPlaneRotations(double rotx, double roty, double rotz)
 {
 	m_rotx_cl = -rotx;
 	m_roty_cl = roty;
@@ -9128,32 +9128,32 @@ void VRenderGLView::SetClippingPlaneRotations(double rotx, double roty, double r
 	ClipRotate();
 }
 
-void VRenderGLView::GetClippingPlaneRotations(double &rotx, double &roty, double &rotz)
+void RenderCanvas::GetClippingPlaneRotations(double &rotx, double &roty, double &rotz)
 {
 	rotx = m_rotx_cl == 0.0 ? m_rotx_cl : -m_rotx_cl;
 	roty = m_roty_cl;
 	rotz = m_rotz_cl;
 }
 
-void VRenderGLView::SetClipRotX(double val)
+void RenderCanvas::SetClipRotX(double val)
 {
 	m_rotx_cl = -val;
 	ClipRotate();
 }
 
-void VRenderGLView::SetClipRotY(double val)
+void RenderCanvas::SetClipRotY(double val)
 {
 	m_roty_cl = val;
 	ClipRotate();
 }
 
-void VRenderGLView::SetClipRotZ(double val)
+void RenderCanvas::SetClipRotZ(double val)
 {
 	m_rotz_cl = val;
 	ClipRotate();
 }
 
-void VRenderGLView::SetClipValue(int mask, int val)
+void RenderCanvas::SetClipValue(int mask, int val)
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -9164,7 +9164,7 @@ void VRenderGLView::SetClipValue(int mask, int val)
 	}
 }
 
-void VRenderGLView::SetClipValues(int mask, int val1, int val2)
+void RenderCanvas::SetClipValues(int mask, int val1, int val2)
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -9175,7 +9175,7 @@ void VRenderGLView::SetClipValues(int mask, int val1, int val2)
 	}
 }
 
-void VRenderGLView::SetClipValues(const int val[6])
+void RenderCanvas::SetClipValues(const int val[6])
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -9186,7 +9186,7 @@ void VRenderGLView::SetClipValues(const int val[6])
 	}
 }
 
-void VRenderGLView::ResetClipValues()
+void RenderCanvas::ResetClipValues()
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -9197,7 +9197,7 @@ void VRenderGLView::ResetClipValues()
 	}
 }
 
-void VRenderGLView::ResetClipValuesX()
+void RenderCanvas::ResetClipValuesX()
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -9208,7 +9208,7 @@ void VRenderGLView::ResetClipValuesX()
 	}
 }
 
-void VRenderGLView::ResetClipValuesY()
+void RenderCanvas::ResetClipValuesY()
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -9219,7 +9219,7 @@ void VRenderGLView::ResetClipValuesY()
 	}
 }
 
-void VRenderGLView::ResetClipValuesZ()
+void RenderCanvas::ResetClipValuesZ()
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -9231,18 +9231,18 @@ void VRenderGLView::ResetClipValuesZ()
 }
 
 //interpolation
-void VRenderGLView::SetIntp(bool mode)
+void RenderCanvas::SetIntp(bool mode)
 {
 	m_intp = mode;
 }
 
-bool VRenderGLView::GetIntp()
+bool RenderCanvas::GetIntp()
 {
 	return m_intp;
 }
 
 //start loop update
-void VRenderGLView::StartLoopUpdate()
+void RenderCanvas::StartLoopUpdate()
 {
 	////this is for debug_ds, comment when done
 	//if (TextureRenderer::get_mem_swap() &&
@@ -9676,7 +9676,7 @@ void VRenderGLView::StartLoopUpdate()
 }
 
 //halt loop update
-void VRenderGLView::HaltLoopUpdate()
+void RenderCanvas::HaltLoopUpdate()
 {
 	if (flvr::TextureRenderer::get_mem_swap())
 	{
@@ -9685,7 +9685,7 @@ void VRenderGLView::HaltLoopUpdate()
 }
 
 //new function to refresh
-void VRenderGLView::RefreshGL(int debug_code,
+void RenderCanvas::RefreshGL(int debug_code,
 	bool erase,
 	bool start_loop)
 {
@@ -9705,7 +9705,7 @@ void VRenderGLView::RefreshGL(int debug_code,
 	Refresh(erase);
 }
 
-void VRenderGLView::DrawRulers()
+void RenderCanvas::DrawRulers()
 {
 	if (m_ruler_list.empty())
 		return;
@@ -9714,12 +9714,12 @@ void VRenderGLView::DrawRulers()
 	glbin_ruler_renderer.Draw();
 }
 
-flrd::RulerList* VRenderGLView::GetRulerList()
+flrd::RulerList* RenderCanvas::GetRulerList()
 {
 	return &m_ruler_list;
 }
 
-flrd::Ruler* VRenderGLView::GetRuler(unsigned int id)
+flrd::Ruler* RenderCanvas::GetRuler(unsigned int id)
 {
 	m_cur_ruler = 0;
 	for (size_t i = 0; i < m_ruler_list.size(); ++i)
@@ -9734,7 +9734,7 @@ flrd::Ruler* VRenderGLView::GetRuler(unsigned int id)
 }
 
 //draw highlighted comps
-void VRenderGLView::DrawCells()
+void RenderCanvas::DrawCells()
 {
 	if (m_cell_list.empty())
 		return;
@@ -9776,7 +9776,7 @@ void VRenderGLView::DrawCells()
 		shader->release();
 }
 
-unsigned int VRenderGLView::DrawCellVerts(vector<float>& verts)
+unsigned int RenderCanvas::DrawCellVerts(vector<float>& verts)
 {
 	float w = flvr::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
 	float px = 0, py = 0;
@@ -9825,7 +9825,7 @@ unsigned int VRenderGLView::DrawCellVerts(vector<float>& verts)
 	return num;
 }
 
-void VRenderGLView::GetCellPoints(fluo::BBox& box,
+void RenderCanvas::GetCellPoints(fluo::BBox& box,
 	fluo::Point& p1, fluo::Point& p2, fluo::Point& p3, fluo::Point& p4,
 	fluo::Transform& mv, fluo::Transform& p)
 {
@@ -9864,12 +9864,12 @@ void VRenderGLView::GetCellPoints(fluo::BBox& box,
 }
 
 //traces
-TraceGroup* VRenderGLView::GetTraceGroup()
+TraceGroup* RenderCanvas::GetTraceGroup()
 {
 	return m_trace_group;
 }
 
-void VRenderGLView::CreateTraceGroup()
+void RenderCanvas::CreateTraceGroup()
 {
 	if (m_trace_group)
 		delete m_trace_group;
@@ -9877,7 +9877,7 @@ void VRenderGLView::CreateTraceGroup()
 	m_trace_group = new TraceGroup;
 }
 
-int VRenderGLView::LoadTraceGroup(wxString filename)
+int RenderCanvas::LoadTraceGroup(wxString filename)
 {
 	if (m_trace_group)
 		delete m_trace_group;
@@ -9886,7 +9886,7 @@ int VRenderGLView::LoadTraceGroup(wxString filename)
 	return m_trace_group->Load(filename);
 }
 
-int VRenderGLView::SaveTraceGroup(wxString filename)
+int RenderCanvas::SaveTraceGroup(wxString filename)
 {
 	if (m_trace_group)
 		return m_trace_group->Save(filename);
@@ -9894,13 +9894,13 @@ int VRenderGLView::SaveTraceGroup(wxString filename)
 		return 0;
 }
 
-void VRenderGLView::ExportTrace(wxString filename, unsigned int id)
+void RenderCanvas::ExportTrace(wxString filename, unsigned int id)
 {
 	if (!m_trace_group)
 		return;
 }
 
-void VRenderGLView::DrawTraces()
+void RenderCanvas::DrawTraces()
 {
 	if (m_cur_vol &&
 		m_trace_group)
@@ -9956,7 +9956,7 @@ void VRenderGLView::DrawTraces()
 	}
 }
 
-void VRenderGLView::GetTraces(bool update)
+void RenderCanvas::GetTraces(bool update)
 {
 	if (!m_trace_group)
 		return;
@@ -10016,7 +10016,7 @@ void VRenderGLView::GetTraces(bool update)
 }
 
 #ifdef _WIN32
-WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
+WXLRESULT RenderCanvas::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
 	if (glbin_vol_selector.GetBrushUsePres())
 	{
@@ -10135,7 +10135,7 @@ WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM
 }
 #endif
 
-void VRenderGLView::OnMouse(wxMouseEvent& event)
+void RenderCanvas::OnMouse(wxMouseEvent& event)
 {
 	if (m_interactive && !m_rot_lock)
 		return;
@@ -10681,27 +10681,27 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	}
 }
 
-void VRenderGLView::SetDraw(bool draw)
+void RenderCanvas::SetDraw(bool draw)
 {
 	m_draw_all = draw;
 }
 
-void VRenderGLView::ToggleDraw()
+void RenderCanvas::ToggleDraw()
 {
 	m_draw_all = !m_draw_all;
 }
 
-bool VRenderGLView::GetDraw()
+bool RenderCanvas::GetDraw()
 {
 	return m_draw_all;
 }
 
-fluo::Color VRenderGLView::GetBackgroundColor()
+fluo::Color RenderCanvas::GetBackgroundColor()
 {
 	return m_bg_color;
 }
 
-fluo::Color VRenderGLView::GetTextColor()
+fluo::Color RenderCanvas::GetTextColor()
 {
 	switch (glbin_settings.m_text_color)
 	{
@@ -10718,7 +10718,7 @@ fluo::Color VRenderGLView::GetTextColor()
 	return m_bg_color_inv;
 }
 
-void VRenderGLView::SetBackgroundColor(fluo::Color &color)
+void RenderCanvas::SetBackgroundColor(fluo::Color &color)
 {
 	m_bg_color = color;
 	fluo::HSVColor bg_color(m_bg_color);
@@ -10745,14 +10745,14 @@ void VRenderGLView::SetBackgroundColor(fluo::Color &color)
 	}
 }
 
-void VRenderGLView::SetFog(bool b)
+void RenderCanvas::SetFog(bool b)
 {
 	m_use_fog = b;
 	if (m_vrv)
-		m_vrv->m_left_toolbar->ToggleTool(VRenderView::ID_DepthAttenChk, b);
+		m_vrv->m_left_toolbar->ToggleTool(RenderViewPanel::ID_DepthAttenChk, b);
 }
 
-void VRenderGLView::SetRotations(double rotx, double roty, double rotz, bool ui_update)
+void RenderCanvas::SetRotations(double rotx, double roty, double rotz, bool ui_update)
 {
 	m_rotx = rotx;
 	m_roty = roty;
@@ -10812,12 +10812,12 @@ void VRenderGLView::SetRotations(double rotx, double roty, double rotz, bool ui_
 	}
 }
 
-void VRenderGLView::SetZeroRotations()
+void RenderCanvas::SetZeroRotations()
 {
 	m_zq = m_q;
 }
 
-void VRenderGLView::ResetZeroRotations(double &rotx, double &roty, double &rotz)
+void RenderCanvas::ResetZeroRotations(double &rotx, double &roty, double &rotz)
 {
 	m_zq = fluo::Quaternion();
 	m_q.ToEuler(rotx, roty, rotz);
@@ -10835,7 +10835,7 @@ void VRenderGLView::ResetZeroRotations(double &rotx, double &roty, double &rotz)
 		rotz += 360.0;
 }
 
-void VRenderGLView::GetFrame(int &x, int &y, int &w, int &h)
+void RenderCanvas::GetFrame(int &x, int &y, int &w, int &h)
 {
 	x = m_frame_x;
 	y = m_frame_y;
@@ -10843,7 +10843,7 @@ void VRenderGLView::GetFrame(int &x, int &y, int &w, int &h)
 	h = m_frame_h;
 }
 
-void VRenderGLView::CalcFrame()
+void RenderCanvas::CalcFrame()
 {
 	int w, h;
 	w = GetGLSize().x;
@@ -10919,7 +10919,7 @@ void VRenderGLView::CalcFrame()
 	}
 }
 
-void VRenderGLView::DrawViewQuad()
+void RenderCanvas::DrawViewQuad()
 {
 	flvr::VertexArray* quad_va =
 		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Norm_Square);
@@ -10927,7 +10927,7 @@ void VRenderGLView::DrawViewQuad()
 		quad_va->draw();
 }
 
-void VRenderGLView::switchLevel(VolumeData *vd)
+void RenderCanvas::switchLevel(VolumeData *vd)
 {
 	if (!vd) return;
 
@@ -11017,7 +11017,7 @@ void VRenderGLView::switchLevel(VolumeData *vd)
 }
 
 #ifdef _WIN32
-int VRenderGLView::GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd) {
+int RenderCanvas::GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd) {
 	int pixelFormat = ::GetPixelFormat(m_hDC);
 	if (pixelFormat == 0) return GetLastError();
 	pixelFormat = DescribePixelFormat(m_hDC, pixelFormat, sizeof(PIXELFORMATDESCRIPTOR), pfd);
@@ -11026,11 +11026,11 @@ int VRenderGLView::GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd) {
 }
 #endif
 
-wxString VRenderGLView::GetOGLVersion() {
+wxString RenderCanvas::GetOGLVersion() {
 	return m_GLversion;
 }
 
-void VRenderGLView::SetLockCenter(int type)
+void RenderCanvas::SetLockCenter(int type)
 {
 	switch (type)
 	{
@@ -11050,7 +11050,7 @@ void VRenderGLView::SetLockCenter(int type)
 	}
 }
 
-void VRenderGLView::SetLockCenterVol()
+void RenderCanvas::SetLockCenterVol()
 {
 	if (!m_cur_vol)
 		return;
@@ -11058,14 +11058,14 @@ void VRenderGLView::SetLockCenterVol()
 	m_lock_center = box.center();
 }
 
-void VRenderGLView::SetLockCenterRuler()
+void RenderCanvas::SetLockCenterRuler()
 {
 	if (!m_cur_ruler)
 		return;
 	m_lock_center = m_cur_ruler->GetCenter();
 }
 
-void VRenderGLView::SetLockCenterSel()
+void RenderCanvas::SetLockCenterSel()
 {
 	if (!m_cur_vol)
 		return;

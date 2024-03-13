@@ -26,11 +26,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "AnnotatPropPanel.h"
-#include "VRenderFrame.h"
+#include <MainFrame.h>
 #include <DataManager.h>
 #include <wx/valnum.h>
 
-AnnotatPropPanel::AnnotatPropPanel(VRenderFrame* frame,
+AnnotatPropPanel::AnnotatPropPanel(MainFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,

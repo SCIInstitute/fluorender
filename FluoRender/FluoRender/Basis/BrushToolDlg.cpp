@@ -27,8 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "BrushToolDlg.h"
 #include <Global.h>
-#include <VRenderFrame.h>
-#include <VRenderGLView.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
 #include <NoiseCancellingDlg.h>
 #include <CountingDlg.h>
 #include <TreePanel.h>
@@ -117,7 +117,7 @@ BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 END_EVENT_TABLE()
 
 BrushToolDlg::BrushToolDlg(
-	VRenderFrame *frame)
+	MainFrame *frame)
 	: wxPanel(frame, wxID_ANY,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(500, 620)),
@@ -489,7 +489,7 @@ BrushToolDlg::~BrushToolDlg()
 {
 }
 
-void BrushToolDlg::GetSettings(VRenderGLView* view)
+void BrushToolDlg::GetSettings(RenderCanvas* view)
 {
 	if (!view)
 		return;

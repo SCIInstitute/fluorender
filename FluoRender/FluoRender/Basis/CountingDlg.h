@@ -30,8 +30,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 
-class VRenderFrame;
-class VRenderGLView;
+class MainFrame;
+class RenderCanvas;
 class VolumeData;
 class DataGroup;
 class CountingDlg : public wxPanel
@@ -49,15 +49,15 @@ public:
 		ID_CAVolUnitText
 	};
 
-	CountingDlg(VRenderFrame* frame);
+	CountingDlg(MainFrame* frame);
 	~CountingDlg();
 
-	void GetSettings(VRenderGLView* view);
+	void GetSettings(RenderCanvas* view);
 
 private:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 	//current view
-	VRenderGLView *m_view;
+	RenderCanvas *m_view;
 
 	//max volume value
 	double m_max_value;

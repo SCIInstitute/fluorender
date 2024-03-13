@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "Main.h"
-#include <VRenderFrame.h>
+#include <MainFrame.h>
 #include <compatibility.h>
 #include <JVMInitializer.h>
 #include <Global.h>
@@ -94,7 +94,7 @@ bool VRenderApp::OnInit()
 	std::string title = std::string(FLUORENDER_TITLE) + std::string(" ") +
 		std::string(VERSION_MAJOR_TAG) + std::string(".") +
 		std::string(VERSION_MINOR_TAG);
-	wxFrame* frame = new VRenderFrame(
+	wxFrame* frame = new MainFrame(
 		(wxFrame*)NULL,
 		wxString(title),
 		-1, -1,
@@ -115,7 +115,7 @@ bool VRenderApp::OnInit()
 		run_mov = true;
 	}
 	if (m_file_num > 0)
-		((VRenderFrame*)frame)->StartupLoad(m_files, run_mov, m_imagej);
+		((MainFrame*)frame)->StartupLoad(m_files, run_mov, m_imagej);
 
 	// Adding JVm initialization.
 	JVMInitializer*	pInstance = JVMInitializer::getInstance(glbin_settings.GetJvmArgs());

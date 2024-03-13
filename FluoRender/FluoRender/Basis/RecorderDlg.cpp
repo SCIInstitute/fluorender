@@ -27,9 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "RecorderDlg.h"
 #include <Global.h>
-#include <VRenderFrame.h>
-#include <VRenderGLView.h>
-#include <VRenderView.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
+#include <RenderViewPanel.h>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include "key.xpm"
@@ -50,7 +50,7 @@ BEGIN_EVENT_TABLE(KeyListCtrl, wxListCtrl)
 END_EVENT_TABLE()
 
 KeyListCtrl::KeyListCtrl(
-	VRenderFrame* frame,
+	MainFrame* frame,
 	RecorderDlg* parent,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -204,7 +204,7 @@ void KeyListCtrl::OnAct(wxListEvent &event)
 	double time = glbin_interpolator.GetKeyTime(index);
 	if (!m_recdlg)
 		return;
-	VRenderGLView* view = m_recdlg->GetView();
+	RenderCanvas* view = m_recdlg->GetView();
 	if (view)
 	{
 		view->SetParams(time);
@@ -462,7 +462,7 @@ BEGIN_EVENT_TABLE(RecorderDlg, wxPanel)
 	EVT_BUTTON(ID_CamLockBtn, RecorderDlg::OnCamLockBtn)
 END_EVENT_TABLE()
 
-RecorderDlg::RecorderDlg(VRenderFrame* frame, wxWindow* parent)
+RecorderDlg::RecorderDlg(MainFrame* frame, wxWindow* parent)
 : wxPanel(parent, wxID_ANY,
 wxDefaultPosition,
 frame->FromDIP(wxSize(450, 650)),
@@ -559,7 +559,7 @@ RecorderDlg::~RecorderDlg()
 {
 }
 
-void RecorderDlg::GetSettings(VRenderGLView* view)
+void RecorderDlg::GetSettings(RenderCanvas* view)
 {
 	m_view = view;
 }

@@ -33,8 +33,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/listctrl.h>
 #include <string>
 
-class VRenderFrame;
-class VRenderGLView;
+class MainFrame;
+class RenderCanvas;
 class wxSingleSlider;
 class OclDlg : public wxPanel
 {
@@ -54,15 +54,15 @@ public:
 		ID_OutputTxt
 	};
 
-	OclDlg(VRenderFrame* frame);
+	OclDlg(MainFrame* frame);
 	~OclDlg();
 
-	void GetSettings(VRenderGLView* view);
-	VRenderGLView* GetView();
+	void GetSettings(RenderCanvas* view);
+	RenderCanvas* GetView();
 
 private:
-	VRenderFrame* m_frame;
-	VRenderGLView* m_view;
+	MainFrame* m_frame;
+	RenderCanvas* m_view;
 
 	//ui
 	wxTextCtrl* m_kernel_file_txt;

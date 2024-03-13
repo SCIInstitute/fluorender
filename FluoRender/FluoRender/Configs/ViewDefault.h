@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Point.h>
 #include <wx/fileconf.h>
 
-class VRenderGLView;
+class RenderCanvas;
 class ViewDefault
 {
 public:
@@ -42,8 +42,8 @@ public:
 
 	void Read(wxFileConfig& f);
 	void Save(wxFileConfig& f);
-	void Set(VRenderGLView* view);
-	void Apply(VRenderGLView* view);
+	void Set(RenderCanvas* view);
+	void Apply(RenderCanvas* view);
 
 public:
 	//default values

@@ -37,8 +37,8 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-class VRenderFrame;
-class VRenderGLView;
+class MainFrame;
+class RenderCanvas;
 class MeasureDlg;
 namespace flrd
 {
@@ -56,7 +56,7 @@ class RulerListCtrl : public wxListCtrl
 	};
 
 public:
-	RulerListCtrl(VRenderFrame *frame,
+	RulerListCtrl(MainFrame *frame,
 		MeasureDlg* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -70,7 +70,7 @@ public:
 		double angle, wxString &center, bool time_dep,
 		int time, wxString &extra, wxString &points);
 	void AdjustSize();
-	void UpdateRulers(VRenderGLView* vrv=0);
+	void UpdateRulers(RenderCanvas* vrv=0);
 
 	bool GetCurrSelection(std::vector<int> &sel);
 	void ClearSelection();
@@ -87,7 +87,7 @@ public:
 
 private:
 	wxWindow* m_frame;
-	VRenderGLView *m_view;
+	RenderCanvas *m_view;
 	MeasureDlg* m_measure_dlg;
 	wxImageList *m_images;
 	wxTextCtrl *m_name_text;
@@ -183,12 +183,12 @@ public:
 		ID_AlignZYX,
 	};
 
-	MeasureDlg(VRenderFrame* frame);
+	MeasureDlg(MainFrame* frame);
 	~MeasureDlg();
 
-	void GetSettings(VRenderGLView* vrv);
+	void GetSettings(RenderCanvas* vrv);
 	void UpdateRulerProps();
-	VRenderGLView* GetView();
+	RenderCanvas* GetView();
 	void UpdateList();
 
 	//processing
@@ -200,9 +200,9 @@ public:
 	void Prune(int idx, int len);
 
 private:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 	//current view
-	VRenderGLView* m_view;
+	RenderCanvas* m_view;
 
 	//list ctrl
 	wxButton* m_new_group;

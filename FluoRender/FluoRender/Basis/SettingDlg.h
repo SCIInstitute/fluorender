@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 
 //enum BitmapFontType;
-class VRenderFrame;
+class MainFrame;
 class wxSingleSlider;
 class SettingDlg : public wxPanel
 {
@@ -132,7 +132,7 @@ class SettingDlg : public wxPanel
 	};
 
 public:
-	SettingDlg(VRenderFrame* frame);
+	SettingDlg(MainFrame* frame);
 	~SettingDlg();
 
 	void UpdateUI();
@@ -140,7 +140,7 @@ public:
 	void UpdateTextureSize();
 
 private:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 
 private:
 	//save project

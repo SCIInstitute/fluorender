@@ -43,8 +43,8 @@ enum PLANE_MODES
 	kNone
 };
 
-class VRenderFrame;
-class VRenderGLView;
+class MainFrame;
+class RenderCanvas;
 class VolumeData;
 class MeshData;
 class DataManager;
@@ -60,7 +60,7 @@ class ClippingView: public PropPanel
 	};
 
 public:
-	ClippingView(VRenderFrame* frame,
+	ClippingView(MainFrame* frame,
 		const wxPoint& pos=wxDefaultPosition,
 		const wxSize& size=wxDefaultSize,
 		long style=0,
@@ -70,7 +70,7 @@ public:
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 	//set view
-	void SetRenderView(VRenderGLView* view);
+	void SetRenderView(RenderCanvas* view);
 	void SetVolumeData(VolumeData* vd);
 	void SetMeshData(MeshData* md);
 	int GetSelType();
@@ -110,7 +110,7 @@ public:
 	void ClearUndo();
 
 private:
-	VRenderGLView* m_view;
+	RenderCanvas* m_view;
 	int m_sel_type;		//curent selection type
 	VolumeData* m_vd;	//current volume data
 	MeshData* m_md;		//current mesh data

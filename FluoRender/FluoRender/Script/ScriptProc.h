@@ -35,8 +35,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/fileconf.h>
 #include <vector>
 
-class VRenderFrame;
-class VRenderGLView;
+class MainFrame;
+class RenderCanvas;
 class VolumeData;
 namespace flrd
 {
@@ -66,8 +66,8 @@ namespace flrd
 		ScriptProc();
 		~ScriptProc();
 
-		void SetFrame(VRenderFrame* frame) { m_frame = frame; }
-		void SetView(VRenderGLView* view) { m_view = view; }
+		void SetFrame(MainFrame* frame) { m_frame = frame; }
+		void SetView(RenderCanvas* view) { m_view = view; }
 		void SetBreak(bool bval) { m_break = bval; }
 		bool GetBreak() { return m_break; }
 		void SetBreakCount(int val = 0) { m_break_count = val; }
@@ -79,8 +79,8 @@ namespace flrd
 		void ClearResults() { m_output->removeAllChildren(); }
 
 	private:
-		VRenderFrame* m_frame;
-		VRenderGLView *m_view;
+		MainFrame* m_frame;
+		RenderCanvas *m_view;
 
 		wxString m_type;
 		TimeMask m_time_mask;

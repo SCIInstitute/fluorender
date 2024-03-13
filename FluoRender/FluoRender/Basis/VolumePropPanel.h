@@ -29,10 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUMEPROPPANEL_H_
 
 #include <PropPanel.h>
-#include <wx/scrolwin.h>
 
-class VRenderFrame;
-class VRenderGLView;
+class MainFrame;
+class RenderCanvas;
 class VolumeData;
 class DataGroup;
 class wxBasisSlider;
@@ -64,7 +63,7 @@ class VolumePropPanel: public PropPanel
 	};
 
 public:
-	VolumePropPanel(VRenderFrame* frame,
+	VolumePropPanel(MainFrame* frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -83,8 +82,8 @@ public:
 	DataGroup* GetGroup();
 
 	//sync view in depth mode
-	void SetView(VRenderGLView* view);
-	VRenderGLView* GetView();
+	void SetView(RenderCanvas* view);
+	RenderCanvas* GetView();
 
 	void ApplyMl();
 	void SaveMl();
@@ -97,7 +96,7 @@ private:
 	bool m_lumi_change;
 	bool m_sync_group;
 	DataGroup* m_group;
-	VRenderGLView* m_view;
+	RenderCanvas* m_view;
 	double m_max_val;
 
 	//1

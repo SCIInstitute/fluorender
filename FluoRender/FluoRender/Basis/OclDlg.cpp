@@ -27,8 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "OclDlg.h"
 #include <Global.h>
-#include <VRenderFrame.h>
-#include <VRenderGLView.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
 #include <wxSingleSlider.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
@@ -49,7 +49,7 @@ BEGIN_EVENT_TABLE(OclDlg, wxPanel)
 	EVT_LIST_ITEM_SELECTED(ID_KernelList, OclDlg::OnKernelListSelected)
 END_EVENT_TABLE()
 
-OclDlg::OclDlg(VRenderFrame* frame) :
+OclDlg::OclDlg(MainFrame* frame) :
 wxPanel(frame, wxID_ANY,
 wxDefaultPosition,
 frame->FromDIP(wxSize(550, 600)),
@@ -196,7 +196,7 @@ OclDlg::~OclDlg()
 {
 }
 
-void OclDlg::GetSettings(VRenderGLView* view)
+void OclDlg::GetSettings(RenderCanvas* view)
 {
 	if (!view) return;
 	m_view = view;
@@ -204,7 +204,7 @@ void OclDlg::GetSettings(VRenderGLView* view)
 	AddKernelsToList();
 }
 
-VRenderGLView* OclDlg::GetView()
+RenderCanvas* OclDlg::GetView()
 {
 	return m_view;
 }

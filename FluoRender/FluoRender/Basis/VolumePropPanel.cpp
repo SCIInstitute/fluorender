@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #include "VolumePropPanel.h"
 #include <Global/Global.h>
 #include <Global/Names.h>
-#include <VRenderFrame.h>
-#include <VRenderGLView.h>
-#include <VRenderView.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
+#include <RenderViewPanel.h>
 #include <AdjustView.h>
 #include <ColocalizationDlg.h>
 #include <Calculate/Histogram.h>
@@ -60,7 +60,7 @@ DEALINGS IN THE SOFTWARE.
 #include <limits>
 #include <Debug.h>
 
-VolumePropPanel::VolumePropPanel(VRenderFrame* frame,
+VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -1099,7 +1099,7 @@ void VolumePropPanel::InitVRenderViews(unsigned int type)
 	{
 		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			VRenderGLView* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetView(i);
 			if (view)
 			{
 				view->InitView(type);
@@ -1124,12 +1124,12 @@ DataGroup* VolumePropPanel::GetGroup()
 	return m_group;
 }
 
-void VolumePropPanel::SetView(VRenderGLView *view)
+void VolumePropPanel::SetView(RenderCanvas *view)
 {
 	m_view = view;
 }
 
-VRenderGLView* VolumePropPanel::GetView()
+RenderCanvas* VolumePropPanel::GetView()
 {
 	return m_view;
 }

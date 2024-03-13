@@ -33,12 +33,12 @@ DEALINGS IN THE SOFTWARE.
 
 #define FOUND_VALUE(v) vc.find(v) != vc.end()
 
-class VRenderFrame;
+class MainFrame;
 class wxBasisSlider;
 class PropPanel: public wxScrolledWindow
 {
 public:
-	PropPanel(VRenderFrame* frame,
+	PropPanel(MainFrame* frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -48,12 +48,12 @@ public:
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {}) = 0;
 	//excl_self: 0 - update all; 1 - exclude this; 2 - only this; 3 - update none
-	void FluoRefresh(bool tree = false, bool interactive = false, int excl_self = 1,
+	virtual void FluoRefresh(bool tree = false, bool interactive = false, int excl_self = 1,
 		const fluo::ValueCollection& vc = {});
 	void SetFocusVRenderViews(wxBasisSlider* slider);
 
 protected:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 
 };
 

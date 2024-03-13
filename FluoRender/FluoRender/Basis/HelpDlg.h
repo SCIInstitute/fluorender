@@ -31,11 +31,11 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <wx/html/htmlwin.h>
 
-class VRenderFrame;
+class MainFrame;
 class HelpDlg : public wxPanel
 {
 public:
-	HelpDlg(VRenderFrame* frame);
+	HelpDlg(MainFrame* frame);
 	~HelpDlg();
 
 	void LoadPage(wxString name);

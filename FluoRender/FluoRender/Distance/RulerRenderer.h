@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Transform.h>
 #include <vector>
 
-class VRenderGLView;
+class RenderCanvas;
 
 namespace flrd
 {
@@ -45,7 +45,7 @@ namespace flrd
 		RulerRenderer();
 		~RulerRenderer();
 
-		void SetView(VRenderGLView* view)
+		void SetView(RenderCanvas* view)
 		{
 			m_view = view;
 		}
@@ -73,7 +73,7 @@ namespace flrd
 		void Draw();
 
 	private:
-		VRenderGLView *m_view;
+		RenderCanvas *m_view;
 		RulerList *m_ruler_list;
 		double m_line_size;
 		bool m_draw_text;

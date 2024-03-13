@@ -27,8 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ScriptBreakDlg.h"
 #include <Global.h>
-#include <VRenderFrame.h>
-#include <VMovieView.h>
+#include <MainFrame.h>
+#include <MoviePanel.h>
 
 BEGIN_EVENT_TABLE(ScriptBreakDlg, wxPanel)
 EVT_CHECKBOX(ID_ShownChk, ScriptBreakDlg::OnShownChk)
@@ -36,7 +36,7 @@ EVT_BUTTON(ID_StopBtn, ScriptBreakDlg::OnStopBtn)
 EVT_BUTTON(ID_ContinueBtn, ScriptBreakDlg::OnContinueBtn)
 END_EVENT_TABLE()
 
-ScriptBreakDlg::ScriptBreakDlg(VRenderFrame* frame) :
+ScriptBreakDlg::ScriptBreakDlg(MainFrame* frame) :
 	wxPanel(frame, wxID_ANY,
 		wxDefaultPosition,
 		frame->FromDIP(wxSize(400, 300)),

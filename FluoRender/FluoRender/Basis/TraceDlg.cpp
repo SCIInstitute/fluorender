@@ -27,12 +27,12 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "TraceDlg.h"
 #include <Global.h>
-#include <VRenderFrame.h>
-#include <VRenderGLView.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
 #include <BrushToolDlg.h>
 #include <MeasureDlg.h>
 #include <ComponentDlg.h>
-#include <VMovieView.h>
+#include <MoviePanel.h>
 #include <Components/CompSelector.h>
 #include <Components/CompAnalyzer.h>
 #include <Components/CompEditor.h>
@@ -58,7 +58,7 @@ EVT_MENU(Menu_Delete, TraceListCtrl::OnDeleteSelection)
 END_EVENT_TABLE()
 
 TraceListCtrl::TraceListCtrl(
-	VRenderFrame* frame,
+	MainFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -119,7 +119,7 @@ void TraceListCtrl::Append(wxString &gtype, unsigned int id, wxColor color,
 	SetItemBackgroundColour(tmp, color);
 }
 
-void TraceListCtrl::UpdateTraces(VRenderGLView* vrv)
+void TraceListCtrl::UpdateTraces(RenderCanvas* vrv)
 {
 	m_view = vrv;
 	if (!m_view)
@@ -783,7 +783,7 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 	return page;
 }
 
-TraceDlg::TraceDlg(VRenderFrame* frame)
+TraceDlg::TraceDlg(MainFrame* frame)
 	: wxPanel(frame, wxID_ANY,
 		wxDefaultPosition,
 		frame->FromDIP(wxSize(550, 650)),
@@ -897,7 +897,7 @@ TraceDlg::~TraceDlg()
 	//}
 }
 
-void TraceDlg::GetSettings(VRenderGLView* vrv)
+void TraceDlg::GetSettings(RenderCanvas* vrv)
 {
 	m_view = vrv;
 	if (!m_view)
@@ -951,7 +951,7 @@ void TraceDlg::SetCellSize(int size)
 
 }
 
-VRenderGLView* TraceDlg::GetView()
+RenderCanvas* TraceDlg::GetView()
 {
 	return m_view;
 }

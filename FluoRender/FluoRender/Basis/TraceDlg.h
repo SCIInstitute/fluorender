@@ -40,8 +40,8 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-class VRenderFrame;
-class VRenderGLView;
+class MainFrame;
+class RenderCanvas;
 class wxSingleSlider;
 class TraceListCtrl : public wxListCtrl
 {
@@ -52,7 +52,7 @@ class TraceListCtrl : public wxListCtrl
 	};
 
 public:
-	TraceListCtrl(VRenderFrame *frame,
+	TraceListCtrl(MainFrame *frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxSize(100, 100),
@@ -61,14 +61,14 @@ public:
 
 	void Append(wxString &gtype, unsigned int id, wxColor color,
 		int size, double cx, double cy, double cz);
-	void UpdateTraces(VRenderGLView* vrv=0);
+	void UpdateTraces(RenderCanvas* vrv=0);
 	void DeleteSelection();
 	wxString GetText(long item, int col);
 
 	friend class TraceDlg;
 
 private:
-	VRenderGLView *m_view;
+	RenderCanvas *m_view;
 	int m_type;//0-current; 1-previous
 
 private:
@@ -164,11 +164,11 @@ public:
 		ID_StatText
 	};
 
-	TraceDlg(VRenderFrame* frame);
+	TraceDlg(MainFrame* frame);
 	~TraceDlg();
 
-	void GetSettings(VRenderGLView* vrv);
-	VRenderGLView* GetView();
+	void GetSettings(RenderCanvas* vrv);
+	RenderCanvas* GetView();
 	void UpdateList();
 	void SetCellSize(int size);
 
@@ -209,9 +209,9 @@ private:
 		int contact_num;
 	} comp_info;
 
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 	//current view
-	VRenderGLView* m_view;
+	RenderCanvas* m_view;
 	//tab control
 	wxNotebook *m_notebook;
 

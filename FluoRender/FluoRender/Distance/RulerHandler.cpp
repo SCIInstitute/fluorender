@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "RulerHandler.h"
-#include "VRenderGLView.h"
+#include "RenderCanvas.h"
 #include <Global.h>
 #include <FLIVR/Texture.h>
 #include <DataManager.h>

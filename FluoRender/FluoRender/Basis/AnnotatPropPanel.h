@@ -37,7 +37,7 @@ class Annotations;
 class AnnotatPropPanel : public PropPanel
 {
 public:
-	AnnotatPropPanel(VRenderFrame* frame,
+	AnnotatPropPanel(MainFrame* frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,

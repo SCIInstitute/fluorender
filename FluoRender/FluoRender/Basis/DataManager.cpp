@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Calculate/VolumeSampler.h>
 #include <Calculate/VolumeBaker.h>
 #include <Calculate/Histogram.h>
-#include <VRenderFrame.h>
+#include <MainFrame.h>
 #include <FpRangeDlg.h>
 #include "teem/Nrrd/nrrd.h"
 #include <wx/msgdlg.h>
@@ -5176,7 +5176,7 @@ DataManager::~DataManager()
 			delete m_annotation_list[i];
 }
 
-void DataManager::SetFrame(VRenderFrame* frame)
+void DataManager::SetFrame(MainFrame* frame)
 {
 	m_frame = frame;
 }

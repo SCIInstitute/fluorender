@@ -33,8 +33,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/tglbtn.h>
 #include <wx/clipbrd.h>
 
-class VRenderFrame;
-class VRenderGLView;
+class MainFrame;
+class RenderCanvas;
 class VolumeData;
 class wxSingleSlider;
 namespace flrd
@@ -126,10 +126,10 @@ public:
 		ID_OutputGrid
 	};
 
-	BrushToolDlg(VRenderFrame* frame);
+	BrushToolDlg(MainFrame* frame);
 	~BrushToolDlg();
 
-	void GetSettings(VRenderGLView* view);
+	void GetSettings(RenderCanvas* view);
 
 	//set the brush icon down
 	void SelectBrush(int id);
@@ -146,9 +146,9 @@ public:
 	void PasteData();
 
 private:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 	//current view
-	VRenderGLView *m_view;
+	RenderCanvas *m_view;
 
 	//max volume value
 	double m_max_value;

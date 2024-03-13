@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Types/Point.h>
 
-class VRenderGLView;
+class RenderCanvas;
 class VolumeData;
 
 namespace flrd
@@ -42,7 +42,7 @@ namespace flrd
 		VolumePoint() : m_view(0), m_vd(0) {}
 		~VolumePoint() {}
 
-		void SetView(VRenderGLView* view)
+		void SetView(RenderCanvas* view)
 		{
 			m_view = view;
 		}
@@ -70,7 +70,7 @@ namespace flrd
 			fluo::Point &mp);
 
 	private:
-		VRenderGLView* m_view;
+		RenderCanvas* m_view;
 		VolumeData* m_vd;
 	};
 }

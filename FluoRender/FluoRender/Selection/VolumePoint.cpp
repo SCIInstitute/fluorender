@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Selection/VolumePoint.h>
 #include <DataManager.h>
-#include <VRenderGLView.h>
+#include <RenderCanvas.h>
 #include <FLIVR/Texture.h>
 #include <glm/gtc/type_ptr.hpp>
 

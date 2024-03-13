@@ -44,7 +44,7 @@ public:
 				//5-group; 6-mesh group
 };
 
-class VRenderFrame;
+class MainFrame;
 class VolumeData;
 
 class DataTreeCtrl: public wxTreeCtrl
@@ -81,7 +81,7 @@ class DataTreeCtrl: public wxTreeCtrl
 	};
 
 public:
-	DataTreeCtrl(VRenderFrame* frame,
+	DataTreeCtrl(MainFrame* frame,
 		wxWindow* parent,
 		const wxPoint& pos=wxDefaultPosition,
 		const wxSize& size=wxDefaultSize,
@@ -144,7 +144,7 @@ public:
 	friend class TreePanel;
 
 private:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 
 	//drag
 	wxTreeItemId m_drag_item;
@@ -218,7 +218,7 @@ public:
 		ID_BrushCreate
 	};
 
-	TreePanel(VRenderFrame* frame,
+	TreePanel(MainFrame* frame,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
@@ -273,7 +273,7 @@ public:
 	void BrushGrow(bool state);
 
 private:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 	DataTreeCtrl* m_datatree;
 	wxToolBar *m_toolbar;
 

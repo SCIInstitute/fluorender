@@ -26,10 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "PropPanel.h"
-#include <VRenderFrame.h>
-#include <VRenderGLView.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
 
-PropPanel::PropPanel(VRenderFrame* frame,
+PropPanel::PropPanel(MainFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -59,7 +59,7 @@ void PropPanel::SetFocusVRenderViews(wxBasisSlider* slider)
 	{
 		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			VRenderGLView* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetView(i);
 			if (view)
 			{
 				view->SetFocusedSlider(slider);

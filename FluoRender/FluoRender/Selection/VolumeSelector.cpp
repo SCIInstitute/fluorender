@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include "VolumeSelector.h"
 #include <DataManager.h>
-#include "VRenderGLView.h"
-#include "VRenderFrame.h"
+#include "RenderCanvas.h"
+#include <MainFrame.h>
 #include <utility.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/TextureRenderer.h>

@@ -25,12 +25,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "VMovieView.h"
+#include "MoviePanel.h"
 #include <Global/Global.h>
 #include <RecorderDlg.h>
-#include <VRenderFrame.h>
-#include <VRenderGLView.h>
-#include <VRenderView.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
+#include <RenderViewPanel.h>
 #include <wxSingleSlider.h>
 #include <tiffio.h>
 #include <wx/aboutdlg.h>
@@ -39,67 +39,67 @@ DEALINGS IN THE SOFTWARE.
 #include "png_resource.h"
 #include "img/icons.h"
 
-BEGIN_EVENT_TABLE(VMovieView, wxPanel)
+BEGIN_EVENT_TABLE(MoviePanel, wxPanel)
 //time sequence
-EVT_CHECKBOX(ID_SeqChk, VMovieView::OnSequenceChecked)
-EVT_CHECKBOX(ID_BatChk, VMovieView::OnBatchChecked)
-EVT_BUTTON(ID_IncTimeBtn, VMovieView::OnUpFrame)
-EVT_BUTTON(ID_DecTimeBtn, VMovieView::OnDownFrame)
-EVT_TEXT(ID_CurFrameText, VMovieView::OnCurFrameText)
-EVT_TEXT(ID_StartFrameText, VMovieView::OnStartFrameText)
-EVT_TEXT(ID_EndFrameText, VMovieView::OnEndFrameText)
-EVT_TEXT(ID_MovieLenText, VMovieView::OnMovieLenText)
+EVT_CHECKBOX(ID_SeqChk, MoviePanel::OnSequenceChecked)
+EVT_CHECKBOX(ID_BatChk, MoviePanel::OnBatchChecked)
+EVT_BUTTON(ID_IncTimeBtn, MoviePanel::OnUpFrame)
+EVT_BUTTON(ID_DecTimeBtn, MoviePanel::OnDownFrame)
+EVT_TEXT(ID_CurFrameText, MoviePanel::OnCurFrameText)
+EVT_TEXT(ID_StartFrameText, MoviePanel::OnStartFrameText)
+EVT_TEXT(ID_EndFrameText, MoviePanel::OnEndFrameText)
+EVT_TEXT(ID_MovieLenText, MoviePanel::OnMovieLenText)
 //rotations
-EVT_CHECKBOX(ID_RotChk, VMovieView::OnRotateChecked)
-EVT_RADIOBUTTON(ID_XRd, VMovieView::OnRotAxis)
-EVT_RADIOBUTTON(ID_YRd, VMovieView::OnRotAxis)
-EVT_RADIOBUTTON(ID_ZRd, VMovieView::OnRotAxis)
-EVT_TEXT(ID_DegreeText, VMovieView::OnDegreeText)
-EVT_COMBOBOX(ID_RotIntCmb, VMovieView::OnRotIntCmb)
+EVT_CHECKBOX(ID_RotChk, MoviePanel::OnRotateChecked)
+EVT_RADIOBUTTON(ID_XRd, MoviePanel::OnRotAxis)
+EVT_RADIOBUTTON(ID_YRd, MoviePanel::OnRotAxis)
+EVT_RADIOBUTTON(ID_ZRd, MoviePanel::OnRotAxis)
+EVT_TEXT(ID_DegreeText, MoviePanel::OnDegreeText)
+EVT_COMBOBOX(ID_RotIntCmb, MoviePanel::OnRotIntCmb)
 //fps, view combo, help
-EVT_TEXT(ID_FPS_Text, VMovieView::OnFpsEdit)
-EVT_COMBOBOX(ID_ViewsCombo, VMovieView::OnViewSelected)
+EVT_TEXT(ID_FPS_Text, MoviePanel::OnFpsEdit)
+EVT_COMBOBOX(ID_ViewsCombo, MoviePanel::OnViewSelected)
 //main controls
-EVT_BUTTON(ID_PlayPause, VMovieView::OnPrev)
-EVT_BUTTON(ID_Rewind, VMovieView::OnRewind)
-EVT_COMMAND_SCROLL(ID_ProgressSldr, VMovieView::OnTimeChange)
-EVT_TEXT(ID_ProgressText, VMovieView::OnTimeText)
-EVT_BUTTON(ID_SaveMovie, VMovieView::OnRun)
+EVT_BUTTON(ID_PlayPause, MoviePanel::OnPrev)
+EVT_BUTTON(ID_Rewind, MoviePanel::OnRewind)
+EVT_COMMAND_SCROLL(ID_ProgressSldr, MoviePanel::OnTimeChange)
+EVT_TEXT(ID_ProgressText, MoviePanel::OnTimeText)
+EVT_BUTTON(ID_SaveMovie, MoviePanel::OnRun)
 //script
-EVT_CHECKBOX(ID_RunScriptChk, VMovieView::OnRunScriptChk)
-EVT_TEXT(ID_ScriptFileText, VMovieView::OnScriptFileEdit)
-EVT_BUTTON(ID_ScriptClearBtn, VMovieView::OnScriptClearBtn)
-EVT_BUTTON(ID_ScriptFileBtn, VMovieView::OnScriptFileBtn)
-EVT_LIST_ITEM_SELECTED(ID_ScriptList, VMovieView::OnScriptListSelected)
-EVT_LIST_ITEM_ACTIVATED(ID_ScriptList, VMovieView::OnScriptListSelected)
+EVT_CHECKBOX(ID_RunScriptChk, MoviePanel::OnRunScriptChk)
+EVT_TEXT(ID_ScriptFileText, MoviePanel::OnScriptFileEdit)
+EVT_BUTTON(ID_ScriptClearBtn, MoviePanel::OnScriptClearBtn)
+EVT_BUTTON(ID_ScriptFileBtn, MoviePanel::OnScriptFileBtn)
+EVT_LIST_ITEM_SELECTED(ID_ScriptList, MoviePanel::OnScriptListSelected)
+EVT_LIST_ITEM_ACTIVATED(ID_ScriptList, MoviePanel::OnScriptListSelected)
 //auto key
-EVT_BUTTON(ID_GenKeyBtn, VMovieView::OnGenKey)
-EVT_LIST_ITEM_ACTIVATED(ID_AutoKeyList, VMovieView::OnListItemAct)
+EVT_BUTTON(ID_GenKeyBtn, MoviePanel::OnGenKey)
+EVT_LIST_ITEM_ACTIVATED(ID_AutoKeyList, MoviePanel::OnListItemAct)
 //cropping
-EVT_CHECKBOX(ID_CropChk, VMovieView::OnCropCheck)
-EVT_BUTTON(ID_ResetBtn, VMovieView::OnResetCrop)
-EVT_TEXT(ID_CenterXText, VMovieView::OnEditCrop)
-EVT_TEXT(ID_CenterYText, VMovieView::OnEditCrop)
-EVT_TEXT(ID_WidthText, VMovieView::OnEditCrop)
-EVT_TEXT(ID_HeightText, VMovieView::OnEditCrop)
-EVT_SPIN_UP(ID_CenterXSpin, VMovieView::OnCropSpinUp)
-EVT_SPIN_UP(ID_CenterYSpin, VMovieView::OnCropSpinUp)
-EVT_SPIN_UP(ID_WidthSpin, VMovieView::OnCropSpinUp)
-EVT_SPIN_UP(ID_HeightSpin, VMovieView::OnCropSpinUp)
-EVT_SPIN_DOWN(ID_CenterXSpin, VMovieView::OnCropSpinDown)
-EVT_SPIN_DOWN(ID_CenterYSpin, VMovieView::OnCropSpinDown)
-EVT_SPIN_DOWN(ID_WidthSpin, VMovieView::OnCropSpinDown)
-EVT_SPIN_DOWN(ID_HeightSpin, VMovieView::OnCropSpinDown)
+EVT_CHECKBOX(ID_CropChk, MoviePanel::OnCropCheck)
+EVT_BUTTON(ID_ResetBtn, MoviePanel::OnResetCrop)
+EVT_TEXT(ID_CenterXText, MoviePanel::OnEditCrop)
+EVT_TEXT(ID_CenterYText, MoviePanel::OnEditCrop)
+EVT_TEXT(ID_WidthText, MoviePanel::OnEditCrop)
+EVT_TEXT(ID_HeightText, MoviePanel::OnEditCrop)
+EVT_SPIN_UP(ID_CenterXSpin, MoviePanel::OnCropSpinUp)
+EVT_SPIN_UP(ID_CenterYSpin, MoviePanel::OnCropSpinUp)
+EVT_SPIN_UP(ID_WidthSpin, MoviePanel::OnCropSpinUp)
+EVT_SPIN_UP(ID_HeightSpin, MoviePanel::OnCropSpinUp)
+EVT_SPIN_DOWN(ID_CenterXSpin, MoviePanel::OnCropSpinDown)
+EVT_SPIN_DOWN(ID_CenterYSpin, MoviePanel::OnCropSpinDown)
+EVT_SPIN_DOWN(ID_WidthSpin, MoviePanel::OnCropSpinDown)
+EVT_SPIN_DOWN(ID_HeightSpin, MoviePanel::OnCropSpinDown)
 //timer
-EVT_TIMER(ID_Timer, VMovieView::OnTimer)
+EVT_TIMER(ID_Timer, MoviePanel::OnTimer)
 //notebook
-EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, VMovieView::OnNbPageChange)
+EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, MoviePanel::OnNbPageChange)
 END_EVENT_TABLE()
 
-double VMovieView::m_movie_len = 5;
-wxTextCtrl * VMovieView::m_estimated_size_text = 0;
+double MoviePanel::m_movie_len = 5;
+wxTextCtrl * MoviePanel::m_estimated_size_text = 0;
 
-wxWindow* VMovieView::CreateSimplePage(wxWindow *parent)
+wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
 
@@ -133,14 +133,14 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent)
 	//sizer 2
 	m_start_frame_st = new wxStaticText(page, ID_StartFrameSync, "Start Frame: ");
 	m_start_frame_st->Connect(ID_StartFrameSync, wxEVT_LEFT_DCLICK,
-		wxMouseEventHandler(VMovieView::OnStartFrameSync), NULL, this);
+		wxMouseEventHandler(MoviePanel::OnStartFrameSync), NULL, this);
 	m_start_frame_st->Connect(ID_StartFrameSync, wxEVT_RIGHT_DCLICK,
-		wxMouseEventHandler(VMovieView::OnStartFrameSync), NULL, this);
+		wxMouseEventHandler(MoviePanel::OnStartFrameSync), NULL, this);
 	m_end_frame_st = new wxStaticText(page, ID_EndFrameSync, "End Frame: ");
 	m_end_frame_st->Connect(ID_EndFrameSync, wxEVT_LEFT_DCLICK,
-		wxMouseEventHandler(VMovieView::OnEndFrameSync), NULL, this);
+		wxMouseEventHandler(MoviePanel::OnEndFrameSync), NULL, this);
 	m_end_frame_st->Connect(ID_EndFrameSync, wxEVT_RIGHT_DCLICK,
-		wxMouseEventHandler(VMovieView::OnEndFrameSync), NULL, this);
+		wxMouseEventHandler(MoviePanel::OnEndFrameSync), NULL, this);
 	sizer_2->Add(5, 5, 0);
 	sizer_2->Add(m_start_frame_st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_start_frame_text, 0, wxALIGN_CENTER);
@@ -236,7 +236,7 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent)
 	return page;
 }
 
-wxWindow* VMovieView::CreateAdvancedPage(wxWindow *parent)
+wxWindow* MoviePanel::CreateAdvancedPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
 	//vertical sizer
@@ -248,7 +248,7 @@ wxWindow* VMovieView::CreateAdvancedPage(wxWindow *parent)
 	return page;
 }
 
-wxWindow* VMovieView::CreateAutoKeyPage(wxWindow *parent) {
+wxWindow* MoviePanel::CreateAutoKeyPage(wxWindow *parent) {
 	wxPanel *page = new wxPanel(parent);
 
 	wxStaticText * st = new wxStaticText(page, 0, "Choose an auto key type");
@@ -289,7 +289,7 @@ wxWindow* VMovieView::CreateAutoKeyPage(wxWindow *parent) {
 
 }
 
-wxWindow* VMovieView::CreateCroppingPage(wxWindow *parent) {
+wxWindow* MoviePanel::CreateCroppingPage(wxWindow *parent) {
 	wxPanel *page = new wxPanel(parent);
 
 	//validator: integer
@@ -372,7 +372,7 @@ wxWindow* VMovieView::CreateCroppingPage(wxWindow *parent) {
 
 }
 
-wxWindow* VMovieView::CreateScriptPage(wxWindow *parent)
+wxWindow* MoviePanel::CreateScriptPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
 	//script
@@ -424,7 +424,7 @@ wxWindow* VMovieView::CreateScriptPage(wxWindow *parent)
 	return page;
 }
 
-VMovieView::VMovieView(VRenderFrame* frame,
+MoviePanel::MoviePanel(MainFrame* frame,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
@@ -516,9 +516,9 @@ VMovieView::VMovieView(VRenderFrame* frame,
 	Init();
 }
 
-VMovieView::~VMovieView() {}
+MoviePanel::~MoviePanel() {}
 
-void VMovieView::OnViewSelected(wxCommandEvent& event)
+void MoviePanel::OnViewSelected(wxCommandEvent& event)
 {
 	m_view_idx = m_views_cmb->GetCurrentSelection();
 	if (!m_frame) return;
@@ -526,7 +526,7 @@ void VMovieView::OnViewSelected(wxCommandEvent& event)
 	GetSettings();
 }
 
-void VMovieView::GetSettings()
+void MoviePanel::GetSettings()
 {
 	if (!m_view) return;
 
@@ -542,7 +542,7 @@ void VMovieView::GetSettings()
 		m_advanced_movie->GetSettings(m_view);
 }
 
-void VMovieView::GetScriptSettings(bool sel)
+void MoviePanel::GetScriptSettings(bool sel)
 {
 	//script
 	if (!m_view)
@@ -595,13 +595,13 @@ void VMovieView::GetScriptSettings(bool sel)
 	}
 }
 
-void VMovieView::SetCurrentPage(int page)
+void MoviePanel::SetCurrentPage(int page)
 {
 	if (m_notebook)
 		m_notebook->SetSelection(page);
 }
 
-int VMovieView::GetScriptFiles(wxArrayString& list)
+int MoviePanel::GetScriptFiles(wxArrayString& list)
 {
 	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 	exePath = wxPathOnly(exePath);
@@ -618,7 +618,7 @@ int VMovieView::GetScriptFiles(wxArrayString& list)
 	return list.GetCount();
 }
 
-void VMovieView::AddScriptToList()
+void MoviePanel::AddScriptToList()
 {
 	m_script_list->DeleteAllItems();
 	wxArrayString list;
@@ -635,14 +635,14 @@ void VMovieView::AddScriptToList()
 	}
 }
 
-void VMovieView::Init()
+void MoviePanel::Init()
 {
 	if (!m_frame) return;
 	int i = 0;
 	m_views_cmb->Clear();
 	for (i = 0; i < m_frame->GetViewNum(); i++)
 	{
-		VRenderGLView* view = m_frame->GetView(i);
+		RenderCanvas* view = m_frame->GetView(i);
 		if (view && m_views_cmb)
 			m_views_cmb->Append(view->m_vrv->GetName());
 	}
@@ -651,7 +651,7 @@ void VMovieView::Init()
 	GetSettings();
 }
 
-void VMovieView::GenKey()
+void MoviePanel::GenKey()
 {
 	long item = m_auto_key_list->GetNextItem(-1,
 		wxLIST_NEXT_ALL,
@@ -670,13 +670,13 @@ void VMovieView::GenKey()
 	}
 }
 
-void VMovieView::AddView(wxString view)
+void MoviePanel::AddView(wxString view)
 {
 	if (m_views_cmb)
 		m_views_cmb->Append(view);
 }
 
-void VMovieView::DeleteView(wxString view)
+void MoviePanel::DeleteView(wxString view)
 {
 	if (!m_views_cmb)
 		return;
@@ -688,13 +688,13 @@ void VMovieView::DeleteView(wxString view)
 		m_views_cmb->Select(0);
 }
 
-void VMovieView::SetView(int index)
+void MoviePanel::SetView(int index)
 {
 	if (m_views_cmb)
 		m_views_cmb->SetSelection(index);
 }
 
-void VMovieView::SetTimeSeq(bool value)
+void MoviePanel::SetTimeSeq(bool value)
 {
 	m_time_seq = value;
 	if (m_time_seq)
@@ -730,7 +730,7 @@ void VMovieView::SetTimeSeq(bool value)
 	m_movie_len_text->ChangeValue(wxString::Format("%.2f", m_movie_len));
 }
 
-void VMovieView::SetCrop(bool value)
+void MoviePanel::SetCrop(bool value)
 {
 	m_crop = value;
 	m_crop_chk->SetValue(m_crop);
@@ -755,7 +755,7 @@ void VMovieView::SetCrop(bool value)
 	m_view->RefreshGL(39);
 }
 
-void VMovieView::UpdateCrop()
+void MoviePanel::UpdateCrop()
 {
 	if (!m_view)
 		return;
@@ -766,7 +766,7 @@ void VMovieView::UpdateCrop()
 		m_view->RefreshGL(39);
 }
 
-void VMovieView::OnTimer(wxTimerEvent& event)
+void MoviePanel::OnTimer(wxTimerEvent& event)
 {
 	//get all of the progress info
 	if (m_delayed_stop)
@@ -775,7 +775,7 @@ void VMovieView::OnTimer(wxTimerEvent& event)
 			WriteFrameToFile(std::round(m_fps*m_movie_len));
 		m_delayed_stop = false;
 		Stop();
-		VRenderGLView::SetKeepEnlarge(false);
+		RenderCanvas::SetKeepEnlarge(false);
 		return;
 	}
 
@@ -810,7 +810,7 @@ void VMovieView::OnTimer(wxTimerEvent& event)
 		m_delayed_stop = true;
 }
 
-void VMovieView::OnNbPageChange(wxBookCtrlEvent& event)
+void MoviePanel::OnNbPageChange(wxBookCtrlEvent& event)
 {
 	int sel = event.GetSelection();
 	int old_sel = event.GetOldSelection();
@@ -818,7 +818,7 @@ void VMovieView::OnNbPageChange(wxBookCtrlEvent& event)
 		m_current_page = sel;
 }
 
-void VMovieView::Prev()
+void MoviePanel::Prev()
 {
 	if (m_running)
 	{
@@ -865,12 +865,12 @@ void VMovieView::Prev()
 	TimerRun();
 }
 
-void VMovieView::OnPrev(wxCommandEvent& event)
+void MoviePanel::OnPrev(wxCommandEvent& event)
 {
 	Prev();
 }
 
-void VMovieView::OnRun(wxCommandEvent& event)
+void MoviePanel::OnRun(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Save Movie Sequence",
@@ -882,13 +882,13 @@ void VMovieView::OnRun(wxCommandEvent& event)
 	if (rval == wxID_OK)
 	{
 		m_filename = fopendlg->GetPath();
-		VRenderGLView::SetKeepEnlarge(true);
+		RenderCanvas::SetKeepEnlarge(true);
 		Run();
 	}
 	delete fopendlg;
 }
 
-void VMovieView::Stop()
+void MoviePanel::Stop()
 {
 	bool run_script = m_run_script_chk->GetValue();
 	if (run_script)
@@ -903,12 +903,12 @@ void VMovieView::Stop()
 	flvr::TextureRenderer::maximize_uptime_ = false;
 }
 
-void VMovieView::OnStop(wxCommandEvent& event)
+void MoviePanel::OnStop(wxCommandEvent& event)
 {
 	Stop();
 }
 
-void VMovieView::Rewind()
+void MoviePanel::Rewind()
 {
 	if (!m_view)
 		return;
@@ -920,7 +920,7 @@ void VMovieView::Rewind()
 	SetRendering(0., true);
 }
 
-void VMovieView::Reset()
+void MoviePanel::Reset()
 {
 	if (!m_view)
 		return;
@@ -935,22 +935,22 @@ void VMovieView::Reset()
 	SetRendering(0., false);
 }
 
-void VMovieView::OnRewind(wxCommandEvent& event)
+void MoviePanel::OnRewind(wxCommandEvent& event)
 {
 	Rewind();
 }
 
-void VMovieView::OnCropCheck(wxCommandEvent& event)
+void MoviePanel::OnCropCheck(wxCommandEvent& event)
 {
 	SetCrop(m_crop_chk->GetValue());
 }
 
-void VMovieView::OnResetCrop(wxCommandEvent& event)
+void MoviePanel::OnResetCrop(wxCommandEvent& event)
 {
 	SetCrop(true);
 }
 
-void VMovieView::OnEditCrop(wxCommandEvent& event)
+void MoviePanel::OnEditCrop(wxCommandEvent& event)
 {
 	wxString temp;
 	temp = m_center_x_text->GetValue();
@@ -965,7 +965,7 @@ void VMovieView::OnEditCrop(wxCommandEvent& event)
 	UpdateCrop();
 }
 
-void VMovieView::OnCropSpinUp(wxSpinEvent& event)
+void MoviePanel::OnCropSpinUp(wxSpinEvent& event)
 {
 	int sender_id = event.GetId();
 	wxTextCtrl* text_ctrl = 0;
@@ -994,7 +994,7 @@ void VMovieView::OnCropSpinUp(wxSpinEvent& event)
 	}
 }
 
-void VMovieView::OnCropSpinDown(wxSpinEvent& event)
+void MoviePanel::OnCropSpinDown(wxSpinEvent& event)
 {
 	int sender_id = event.GetId();
 	wxTextCtrl* text_ctrl = 0;
@@ -1023,7 +1023,7 @@ void VMovieView::OnCropSpinDown(wxSpinEvent& event)
 	}
 }
 
-void VMovieView::UpFrame()
+void MoviePanel::UpFrame()
 {
 	if (m_running) return;
 	if (m_cur_frame < m_start_frame)
@@ -1042,7 +1042,7 @@ void VMovieView::UpFrame()
 	SetRendering(pcnt, rewind);
 }
 
-void VMovieView::DownFrame()
+void MoviePanel::DownFrame()
 {
 	if (m_running) return;
 	if (m_cur_frame > m_end_frame)
@@ -1056,13 +1056,13 @@ void VMovieView::DownFrame()
 	SetRendering(pcnt);
 }
 
-void VMovieView::OnListItemAct(wxListEvent &event)
+void MoviePanel::OnListItemAct(wxListEvent &event)
 {
 	GenKey();
 }
 
 //script
-void VMovieView::OnRunScriptChk(wxCommandEvent &event)
+void MoviePanel::OnRunScriptChk(wxCommandEvent &event)
 {
 	if (!m_frame || !m_view)
 		return;
@@ -1088,19 +1088,19 @@ void VMovieView::OnRunScriptChk(wxCommandEvent &event)
 	m_view->RefreshGL(39);
 }
 
-void VMovieView::OnScriptFileEdit(wxCommandEvent &event)
+void MoviePanel::OnScriptFileEdit(wxCommandEvent &event)
 {
 	wxString str = m_script_file_text->GetValue();
 	glbin_settings.m_script_file = str;
 	m_view->SetScriptFile(str);
 }
 
-void VMovieView::OnScriptClearBtn(wxCommandEvent &event)
+void MoviePanel::OnScriptClearBtn(wxCommandEvent &event)
 {
 	m_script_file_text->Clear();
 }
 
-void VMovieView::OnScriptFileBtn(wxCommandEvent &event)
+void MoviePanel::OnScriptFileBtn(wxCommandEvent &event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Choose a 4D script file", "", "",
@@ -1126,7 +1126,7 @@ void VMovieView::OnScriptFileBtn(wxCommandEvent &event)
 	delete fopendlg;
 }
 
-void VMovieView::OnScriptListSelected(wxListEvent &event)
+void MoviePanel::OnScriptListSelected(wxListEvent &event)
 {
 	long item = m_script_list->GetNextItem(-1,
 		wxLIST_NEXT_ALL,
@@ -1151,11 +1151,11 @@ void VMovieView::OnScriptListSelected(wxListEvent &event)
 }
 
 //auto key
-void VMovieView::OnGenKey(wxCommandEvent& event) {
+void MoviePanel::OnGenKey(wxCommandEvent& event) {
 	GenKey();
 }
 
-void VMovieView::OnTimeChange(wxScrollEvent &event)
+void MoviePanel::OnTimeChange(wxScrollEvent &event)
 {
 	if (m_running) return;
 	int prg = m_progress_sldr->GetValue();
@@ -1166,7 +1166,7 @@ void VMovieView::OnTimeChange(wxScrollEvent &event)
 		m_progress_text->SetValue(str);
 }
 
-void VMovieView::OnTimeText(wxCommandEvent& event)
+void MoviePanel::OnTimeText(wxCommandEvent& event)
 {
 	if (m_running) return;
 	wxString str = m_progress_text->GetValue();
@@ -1181,7 +1181,7 @@ void VMovieView::OnTimeText(wxCommandEvent& event)
 	SetRendering(pcnt);
 }
 
-void VMovieView::SetRendering(double pcnt, bool rewind)
+void MoviePanel::SetRendering(double pcnt, bool rewind)
 {
 	if (!m_view)
 		return;
@@ -1234,7 +1234,7 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 	m_view->RefreshGL(39);
 }
 
-void VMovieView::OnRotateChecked(wxCommandEvent& event)
+void MoviePanel::OnRotateChecked(wxCommandEvent& event)
 {
 	m_rotate = m_rot_chk->GetValue();
 	if (m_rotate)
@@ -1258,7 +1258,7 @@ void VMovieView::OnRotateChecked(wxCommandEvent& event)
 	}
 }
 
-void VMovieView::OnRotAxis(wxCommandEvent& event)
+void MoviePanel::OnRotAxis(wxCommandEvent& event)
 {
 	if (m_x_rd->GetValue())
 		m_rot_axis = 0;
@@ -1268,7 +1268,7 @@ void VMovieView::OnRotAxis(wxCommandEvent& event)
 		m_rot_axis = 2;
 }
 
-void VMovieView::OnDegreeText(wxCommandEvent &event)
+void MoviePanel::OnDegreeText(wxCommandEvent &event)
 {
 	wxString str = m_degree_text->GetValue();
 	long ival = 0;
@@ -1276,12 +1276,12 @@ void VMovieView::OnDegreeText(wxCommandEvent &event)
 	m_rot_deg = ival;
 }
 
-void VMovieView::OnRotIntCmb(wxCommandEvent& event)
+void MoviePanel::OnRotIntCmb(wxCommandEvent& event)
 {
 	m_rot_int_type = m_rot_int_cmb->GetCurrentSelection();
 }
 
-void VMovieView::OnSequenceChecked(wxCommandEvent& event)
+void MoviePanel::OnSequenceChecked(wxCommandEvent& event)
 {
 	if (m_seq_chk->GetValue())
 	{
@@ -1295,7 +1295,7 @@ void VMovieView::OnSequenceChecked(wxCommandEvent& event)
 	}
 }
 
-void VMovieView::OnBatchChecked(wxCommandEvent& event)
+void MoviePanel::OnBatchChecked(wxCommandEvent& event)
 {
 	if (m_bat_chk->GetValue())
 	{
@@ -1309,7 +1309,7 @@ void VMovieView::OnBatchChecked(wxCommandEvent& event)
 	}
 }
 
-void VMovieView::SetProgress(double pcnt)
+void MoviePanel::SetProgress(double pcnt)
 {
 	pcnt = std::abs(pcnt);
 	m_progress_sldr->SetValue(pcnt * PROG_SLDR_MAX);
@@ -1318,7 +1318,7 @@ void VMovieView::SetProgress(double pcnt)
 	m_progress_text->ChangeValue(st);
 }
 
-void VMovieView::WriteFrameToFile(int total_frames)
+void MoviePanel::WriteFrameToFile(int total_frames)
 {
 	if (!m_view)
 		return;
@@ -1407,17 +1407,17 @@ void VMovieView::WriteFrameToFile(int total_frames)
 	}
 }
 
-void VMovieView::OnUpFrame(wxCommandEvent& event)
+void MoviePanel::OnUpFrame(wxCommandEvent& event)
 {
 	UpFrame();
 }
 
-void VMovieView::OnDownFrame(wxCommandEvent& event)
+void MoviePanel::OnDownFrame(wxCommandEvent& event)
 {
 	DownFrame();
 }
 
-void VMovieView::SetCurrentTime(size_t t)
+void MoviePanel::SetCurrentTime(size_t t)
 {
 	m_cur_frame = t;
 	m_cur_frame_text->ChangeValue(wxString::Format("%d", m_cur_frame));
@@ -1428,7 +1428,7 @@ void VMovieView::SetCurrentTime(size_t t)
 	SetProgress(pcnt);
 }
 
-void VMovieView::Run()
+void MoviePanel::Run()
 {
 	if (!m_frame || !m_view)
 		return;
@@ -1446,9 +1446,9 @@ void VMovieView::Run()
 			m_crop_w = m_view->GetGLSize().x;
 			m_crop_h = m_view->GetGLSize().y;
 		}
-		else if (VRenderGLView::GetEnlarge())
+		else if (RenderCanvas::GetEnlarge())
 		{
-			double scale = VRenderGLView::GetEnlargeScale();
+			double scale = RenderCanvas::GetEnlargeScale();
 			m_crop_w *= scale;
 			m_crop_h *= scale;
 		}
@@ -1474,7 +1474,7 @@ void VMovieView::Run()
 	Prev();
 }
 
-void VMovieView::OnCurFrameText(wxCommandEvent& event)
+void MoviePanel::OnCurFrameText(wxCommandEvent& event)
 {
 	if (m_running) return;
 	m_cur_frame = STOI(m_cur_frame_text->GetValue().fn_str());
@@ -1486,13 +1486,13 @@ void VMovieView::OnCurFrameText(wxCommandEvent& event)
 	SetRendering(pcnt);
 }
 
-void VMovieView::OnStartFrameSync(wxMouseEvent& event)
+void MoviePanel::OnStartFrameSync(wxMouseEvent& event)
 {
 	wxString str = m_cur_frame_text->GetValue();
 	m_start_frame_text->SetValue(str);
 }
 
-void VMovieView::OnStartFrameText(wxCommandEvent& event)
+void MoviePanel::OnStartFrameText(wxCommandEvent& event)
 {
 	wxString str = m_start_frame_text->GetValue();
 	long lval;
@@ -1501,13 +1501,13 @@ void VMovieView::OnStartFrameText(wxCommandEvent& event)
 	OnFpsEdit(event);
 }
 
-void VMovieView::OnEndFrameSync(wxMouseEvent& event)
+void MoviePanel::OnEndFrameSync(wxMouseEvent& event)
 {
 	wxString str = m_cur_frame_text->GetValue();
 	m_end_frame_text->SetValue(str);
 }
 
-void VMovieView::OnEndFrameText(wxCommandEvent& event)
+void MoviePanel::OnEndFrameText(wxCommandEvent& event)
 {
 	wxString str = m_end_frame_text->GetValue();
 	long lval;
@@ -1516,7 +1516,7 @@ void VMovieView::OnEndFrameText(wxCommandEvent& event)
 	OnFpsEdit(event);
 }
 
-void VMovieView::OnMovieLenText(wxCommandEvent& event)
+void MoviePanel::OnMovieLenText(wxCommandEvent& event)
 {
 	wxString str = m_movie_len_text->GetValue();
 	str.ToDouble(&m_movie_len);
@@ -1526,7 +1526,7 @@ void VMovieView::OnMovieLenText(wxCommandEvent& event)
 	m_fps_text->ChangeValue(wxString::Format("%.0f", m_fps));
 }
 
-void VMovieView::OnFpsEdit(wxCommandEvent& event)
+void MoviePanel::OnFpsEdit(wxCommandEvent& event)
 {
 	m_fps_text->GetValue().ToDouble(&m_fps);
 
@@ -1536,24 +1536,24 @@ void VMovieView::OnFpsEdit(wxCommandEvent& event)
 }
 
 //ch1
-void VMovieView::OnCh1Check(wxCommandEvent &event) {
+void MoviePanel::OnCh1Check(wxCommandEvent &event) {
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
 	if (ch1)
 		glbin_settings.m_save_compress = ch1->GetValue();
 }
 //ch2
-void VMovieView::OnCh2Check(wxCommandEvent &event) {
+void MoviePanel::OnCh2Check(wxCommandEvent &event) {
 	wxCheckBox* ch2 = (wxCheckBox*)event.GetEventObject();
 	if (ch2)
 		glbin_settings.m_save_alpha = ch2->GetValue();
 }
 //ch3
-void VMovieView::OnCh3Check(wxCommandEvent &event) {
+void MoviePanel::OnCh3Check(wxCommandEvent &event) {
 	wxCheckBox* ch3 = (wxCheckBox*)event.GetEventObject();
 	if (ch3)
 		glbin_settings.m_save_float = ch3->GetValue();
 }
-void VMovieView::OnDpiText(wxCommandEvent& event)
+void MoviePanel::OnDpiText(wxCommandEvent& event)
 {
 	wxTextCtrl* tx_dpi = (wxTextCtrl*)event.GetEventObject();
 	wxString str = event.GetString();
@@ -1566,7 +1566,7 @@ void VMovieView::OnDpiText(wxCommandEvent& event)
 	wxSlider* sl_enlarge = (wxSlider*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_SLDR);
 	wxTextCtrl* tx_enlarge = (wxTextCtrl*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_TEXT);
 	bool enlarge = lval > 72;
-	VRenderGLView::SetEnlarge(enlarge);
+	RenderCanvas::SetEnlarge(enlarge);
 	if (ch_enlarge)
 		ch_enlarge->SetValue(enlarge);
 	double enlarge_scale = (double)lval / 72.0;
@@ -1582,13 +1582,13 @@ void VMovieView::OnDpiText(wxCommandEvent& event)
 	}
 }
 //enlarge output image
-void VMovieView::OnChEnlargeCheck(wxCommandEvent &event)
+void MoviePanel::OnChEnlargeCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_enlarge = (wxCheckBox*)event.GetEventObject();
 	if (ch_enlarge)
 	{
 		bool enlarge = ch_enlarge->GetValue();
-		VRenderGLView::SetEnlarge(enlarge);
+		RenderCanvas::SetEnlarge(enlarge);
 		if (ch_enlarge->GetParent())
 		{
 			wxSlider* sl_enlarge = (wxSlider*)
@@ -1614,7 +1614,7 @@ void VMovieView::OnChEnlargeCheck(wxCommandEvent &event)
 	}
 }
 
-void VMovieView::OnSlEnlargeScroll(wxScrollEvent &event)
+void MoviePanel::OnSlEnlargeScroll(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxSlider* sl_enlarge = (wxSlider*)event.GetEventObject();
@@ -1631,12 +1631,12 @@ void VMovieView::OnSlEnlargeScroll(wxScrollEvent &event)
 	}
 }
 
-void VMovieView::OnTxEnlargeText(wxCommandEvent &event)
+void MoviePanel::OnTxEnlargeText(wxCommandEvent &event)
 {
 	wxString str = event.GetString();
 	double dval;
 	str.ToDouble(&dval);
-	VRenderGLView::SetEnlargeScale(dval);
+	RenderCanvas::SetEnlargeScale(dval);
 	int ival = std::round(dval * 10);
 	wxTextCtrl* tx_enlarge = (wxTextCtrl*)event.GetEventObject();
 	if (tx_enlarge && tx_enlarge->GetParent())
@@ -1650,7 +1650,7 @@ void VMovieView::OnTxEnlargeText(wxCommandEvent &event)
 }
 
 //movie quality
-void VMovieView::OnMovieQuality(wxCommandEvent &event)
+void MoviePanel::OnMovieQuality(wxCommandEvent &event)
 {
 	glbin_settings.m_mov_bitrate = STOD(((wxTextCtrl*)event.GetEventObject())
 		->GetValue().fn_str());
@@ -1658,14 +1658,14 @@ void VMovieView::OnMovieQuality(wxCommandEvent &event)
 	m_estimated_size_text->SetValue(wxString::Format("%.2f", size));
 }
 //embed project
-void VMovieView::OnChEmbedCheck(wxCommandEvent &event)
+void MoviePanel::OnChEmbedCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
 	if (ch_embed)
 		glbin_settings.m_vrp_embed = ch_embed->GetValue();
 }
 
-wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
+wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
@@ -1683,19 +1683,19 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
 	wxCheckBox *ch1 = new wxCheckBox(panel, ID_LZW_COMP,
 		"Lempel-Ziv-Welch Compression");
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VMovieView::OnCh1Check), NULL, panel);
+		wxCommandEventHandler(MoviePanel::OnCh1Check), NULL, panel);
 	if (ch1)
 		ch1->SetValue(glbin_settings.m_save_compress);
 	wxCheckBox *ch2 = new wxCheckBox(panel, ID_SAVE_ALPHA,
 		"Save alpha");
 	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VMovieView::OnCh2Check), NULL, panel);
+		wxCommandEventHandler(MoviePanel::OnCh2Check), NULL, panel);
 	if (ch2)
 		ch2->SetValue(glbin_settings.m_save_alpha);
 	wxCheckBox *ch3 = new wxCheckBox(panel, ID_SAVE_FLOAT,
 		"Save float channel");
 	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VMovieView::OnCh3Check), NULL, panel);
+		wxCommandEventHandler(MoviePanel::OnCh3Check), NULL, panel);
 	if (ch3)
 		ch3->SetValue(glbin_settings.m_save_float);
 	line1->Add(tiffopts, 0, wxALIGN_CENTER);
@@ -1712,28 +1712,28 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
 	wxTextCtrl* tx_dpi = new wxTextCtrl(panel, ID_DPI,
 		"", wxDefaultPosition, wxDefaultSize, 0, vald_int);
 	tx_dpi->Connect(tx_dpi->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
-		wxCommandEventHandler(VMovieView::OnDpiText), NULL, panel);
+		wxCommandEventHandler(MoviePanel::OnDpiText), NULL, panel);
 	float dpi = glbin_settings.m_dpi;
 	tx_dpi->SetValue(wxString::Format("%.0f", dpi));
 	//enlarge
 	wxCheckBox* ch_enlarge = new wxCheckBox(panel, ID_ENLARGE_CHK,
 		"Enlarge output image");
 	ch_enlarge->Connect(ch_enlarge->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VMovieView::OnChEnlargeCheck), NULL, panel);
+		wxCommandEventHandler(MoviePanel::OnChEnlargeCheck), NULL, panel);
 	bool enlarge = dpi > 72;
 	double enlarge_scale = dpi / 72.0;
 	ch_enlarge->SetValue(enlarge);
 	wxSlider* sl_enlarge = new wxSlider(panel, ID_ENLARGE_SLDR,
 		10, 10, 100);
 	sl_enlarge->Connect(sl_enlarge->GetId(), wxEVT_COMMAND_SLIDER_UPDATED,
-		wxScrollEventHandler(VMovieView::OnSlEnlargeScroll), NULL, panel);
+		wxScrollEventHandler(MoviePanel::OnSlEnlargeScroll), NULL, panel);
 	sl_enlarge->Enable(enlarge);
 	sl_enlarge->SetValue(std::round(enlarge_scale * 10));
 	wxFloatingPointValidator<double> vald_fp(1);
 	wxTextCtrl* tx_enlarge = new wxTextCtrl(panel, ID_ENLARGE_TEXT,
 		"1.0", wxDefaultPosition, wxDefaultSize, 0, vald_fp);
 	tx_enlarge->Connect(tx_enlarge->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
-		wxCommandEventHandler(VMovieView::OnTxEnlargeText), NULL, panel);
+		wxCommandEventHandler(MoviePanel::OnTxEnlargeText), NULL, panel);
 	tx_enlarge->Enable(enlarge);
 	tx_enlarge->SetValue(wxString::Format("%.1f", enlarge_scale));
 	line2->Add(st, 0, wxALIGN_CENTER);
@@ -1752,7 +1752,7 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
 	wxTextCtrl *bitrate_text = new wxTextCtrl(panel, wxID_ANY, "20.0",
 		wxDefaultPosition, wxDefaultSize);
 	bitrate_text->Connect(bitrate_text->GetId(), wxEVT_TEXT,
-		wxCommandEventHandler(VMovieView::OnMovieQuality), NULL, panel);
+		wxCommandEventHandler(MoviePanel::OnMovieQuality), NULL, panel);
 	st = new wxStaticText(panel, wxID_ANY, "Bitrate:",
 		wxDefaultPosition, wxDefaultSize);
 	wxStaticText *st2 = new wxStaticText(panel, wxID_ANY, "Mbps",
@@ -1786,7 +1786,7 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
 		ch_embed = new wxCheckBox(panel, ID_EMBED_FILES,
 			"Embed all files in the project folder");
 		ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-			wxCommandEventHandler(VMovieView::OnChEmbedCheck), NULL, panel);
+			wxCommandEventHandler(MoviePanel::OnChEmbedCheck), NULL, panel);
 		ch_embed->SetValue(glbin_settings.m_vrp_embed);
 	}
 	//group

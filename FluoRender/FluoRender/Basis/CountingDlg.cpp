@@ -27,8 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "CountingDlg.h"
 #include <Global/Global.h>
-#include <VRenderFrame.h>
-#include <VRenderGLView.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 
@@ -38,7 +38,7 @@ BEGIN_EVENT_TABLE(CountingDlg, wxPanel)
 	EVT_BUTTON(ID_CAAnalyzeBtn, CountingDlg::OnCAAnalyzeBtn)
 END_EVENT_TABLE()
 
-CountingDlg::CountingDlg(VRenderFrame *frame)
+CountingDlg::CountingDlg(MainFrame *frame)
 : wxPanel(frame, wxID_ANY,
 wxDefaultPosition,
 frame->FromDIP(wxSize(400, 150)),
@@ -152,7 +152,7 @@ void CountingDlg::LoadDefault()
 	m_ca_max_text->Enable(bval);
 }
 
-void CountingDlg::GetSettings(VRenderGLView* view)
+void CountingDlg::GetSettings(RenderCanvas* view)
 {
 	if (!view)
 		return;

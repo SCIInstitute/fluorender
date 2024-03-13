@@ -27,15 +27,15 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "AdjustView.h"
 #include <Global/Global.h>
-#include <VRenderFrame.h>
-#include <VRenderGLView.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include "png_resource.h"
 #include "img/icons.h"
 
-AdjustView::AdjustView(VRenderFrame* frame,
+AdjustView::AdjustView(MainFrame* frame,
 					   const wxPoint& pos,
 					   const wxSize& size,
 					   long style,
@@ -593,7 +593,7 @@ void AdjustView::EnableAll(bool val)
 }
 
 //set view
-void AdjustView::SetRenderView(VRenderGLView *view)
+void AdjustView::SetRenderView(RenderCanvas *view)
 {
 	if (view)
 	{
@@ -607,7 +607,7 @@ void AdjustView::SetRenderView(VRenderGLView *view)
 	FluoUpdate();
 }
 
-VRenderGLView* AdjustView::GetRenderView()
+RenderCanvas* AdjustView::GetRenderView()
 {
 	return m_view;
 }

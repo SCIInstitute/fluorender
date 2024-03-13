@@ -27,9 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ListPanel.h"
 #include <Global.h>
-#include <VRenderFrame.h>
-#include <VRenderGLView.h>
-#include <VRenderView.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
+#include <RenderViewPanel.h>
 #include <TreePanel.h>
 #include <AdjustView.h>
 #include <Formats/png_resource.h>
@@ -59,7 +59,7 @@ END_EVENT_TABLE()
 VolumeData* DataListCtrl::m_vd = 0;
 
 DataListCtrl::DataListCtrl(
-	VRenderFrame* frame,
+	MainFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -233,7 +233,7 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 			wxMenu *add_to_menu = new wxMenu;
 			for (int i = 0; i < m_frame->GetViewNum(); ++i)
 			{
-				VRenderGLView* view = m_frame->GetView(i);
+				RenderCanvas* view = m_frame->GetView(i);
 				add_to_menu->Append(Menu_View_start + i,
 					view->m_vrv->GetName());
 			}
@@ -302,7 +302,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 
 	if (m_frame)
 	{
-		VRenderGLView* view = m_frame->GetView(menu_index);
+		RenderCanvas* view = m_frame->GetView(menu_index);
 		if (GetItemText(item) == "Volume")
 		{
 			name = GetText(item, 1);
@@ -315,7 +315,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 
 					for (int i = 0; i < m_frame->GetViewNum(); ++i)
 					{
-						VRenderGLView* v = m_frame->GetView(i);
+						RenderCanvas* v = m_frame->GetView(i);
 						if (v && v->GetVolumeData(name))
 						{
 							vd_add = glbin_data_manager.DuplicateVolumeData(vd);
@@ -888,7 +888,7 @@ void DataListCtrl::DeleteSelection()
 				//from view
 				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
-					VRenderGLView* view = m_frame->GetView(i);
+					RenderCanvas* view = m_frame->GetView(i);
 					if (view)
 					{
 						view->RemoveVolumeDataDup(name);
@@ -908,7 +908,7 @@ void DataListCtrl::DeleteSelection()
 				//from view
 				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
-					VRenderGLView* view = m_frame->GetView(i);
+					RenderCanvas* view = m_frame->GetView(i);
 					if (view)
 					{
 						view->RemoveMeshData(name);
@@ -928,7 +928,7 @@ void DataListCtrl::DeleteSelection()
 				//from view
 				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
-					VRenderGLView* view = m_frame->GetView(i);
+					RenderCanvas* view = m_frame->GetView(i);
 					if (view)
 						view->RemoveAnnotations(name);
 				}
@@ -958,7 +958,7 @@ void DataListCtrl::DeleteAll()
 			//from view
 			for (int i = 0; i < m_frame->GetViewNum(); i++)
 			{
-				VRenderGLView* view = m_frame->GetView(i);
+				RenderCanvas* view = m_frame->GetView(i);
 				if (view)
 					view->RemoveVolumeDataDup(name);
 			}
@@ -974,7 +974,7 @@ void DataListCtrl::DeleteAll()
 			//from view
 			for (int i = 0; i < m_frame->GetViewNum(); i++)
 			{
-				VRenderGLView* view = m_frame->GetView(i);
+				RenderCanvas* view = m_frame->GetView(i);
 				if (view)
 					view->RemoveMeshData(name);
 			}
@@ -990,7 +990,7 @@ void DataListCtrl::DeleteAll()
 			//from view
 			for (int i = 0; i < m_frame->GetViewNum(); i++)
 			{
-				VRenderGLView* view = m_frame->GetView(i);
+				RenderCanvas* view = m_frame->GetView(i);
 				if (view)
 					view->RemoveAnnotations(name);
 			}
@@ -1035,7 +1035,7 @@ EVT_TOOL(ID_Delete, ListPanel::OnDelete)
 EVT_TOOL(ID_DeleteAll, ListPanel::OnDeleteAll)
 END_EVENT_TABLE()
 
-ListPanel::ListPanel(VRenderFrame *frame,
+ListPanel::ListPanel(MainFrame *frame,
 	const wxPoint &pos,
 	const wxSize &size,
 	long style,

@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/tglbtn.h>
 #include <string>
 
-class VRenderFrame;
+class MainFrame;
 class MLCompGenPanel;
 class MLVolPropPanel;
 class MachineLearningDlg : public wxPanel
@@ -45,11 +45,11 @@ public:
 	{
 		ID_AutoStartAll = ID_LEARNING
 	};
-	MachineLearningDlg(VRenderFrame* frame);
+	MachineLearningDlg(MainFrame* frame);
 	~MachineLearningDlg();
 
 private:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 	//
 	wxCheckBox* m_auto_start_all;
 	MLCompGenPanel* m_panel1;
@@ -65,7 +65,7 @@ private:
 class MachineLearningPanel : public wxPanel
 {
 public:
-	MachineLearningPanel(VRenderFrame* frame,
+	MachineLearningPanel(MainFrame* frame,
 		wxWindow* parent);
 	~MachineLearningPanel();
 
@@ -80,7 +80,7 @@ public:
 	virtual void SetAutoStart(bool bval) { m_auto_start_check->SetValue(bval); }
 
 protected:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 	wxSplitterWindow* m_splitter;
 	//
 	wxPanel* m_panel_top;
@@ -160,7 +160,7 @@ public:
 		ID_DelRecBtn,
 		ID_ApplyRecBtn
 	};
-	MLCompGenPanel(VRenderFrame* frame,
+	MLCompGenPanel(MainFrame* frame,
 		wxWindow* parent);
 	~MLCompGenPanel();
 
@@ -207,7 +207,7 @@ public:
 		ID_ApplyRecBtn,
 		ID_AutoApplyChk
 	};
-	MLVolPropPanel(VRenderFrame* frame,
+	MLVolPropPanel(MainFrame* frame,
 		wxWindow* parent);
 	~MLVolPropPanel();
 

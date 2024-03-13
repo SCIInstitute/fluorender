@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "DragDrop.h"
-#include "VRenderFrame.h"
+#include <MainFrame.h>
 
 DnDFile::DnDFile(wxWindow *frame, wxWindow *view)
 : m_frame(frame),
@@ -47,7 +47,7 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 {
 	if (filenames.Count())
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		MainFrame* vr_frame = (MainFrame*)m_frame;
 		if (vr_frame)
 		{
 			wxString filename = filenames[0];

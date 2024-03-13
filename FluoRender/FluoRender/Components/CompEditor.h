@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Cell.h>
 #include <wx/string.h>
 
-class VRenderGLView;
+class RenderCanvas;
 class VolumeData;
 namespace flrd
 {
@@ -44,11 +44,11 @@ namespace flrd
 		ComponentEditor();
 		~ComponentEditor();
 
-		void SetView(VRenderGLView* view)
+		void SetView(RenderCanvas* view)
 		{
 			m_view = view;
 		}
-		VRenderGLView* GetView()
+		RenderCanvas* GetView()
 		{
 			return m_view;
 		}
@@ -71,7 +71,7 @@ namespace flrd
 
 	private:
 		VolumeData* m_vd;
-		VRenderGLView* m_view;
+		RenderCanvas* m_view;
 		wxString m_output;
 
 	private:

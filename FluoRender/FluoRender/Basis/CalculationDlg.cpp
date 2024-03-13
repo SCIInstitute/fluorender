@@ -27,8 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "CalculationDlg.h"
 #include <Global.h>
-#include <VRenderFrame.h>
-#include <VRenderGLView.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
 #include <Calculate/CombineList.h>
 
 BEGIN_EVENT_TABLE(CalculationDlg, wxPanel)
@@ -46,7 +46,7 @@ BEGIN_EVENT_TABLE(CalculationDlg, wxPanel)
 	EVT_BUTTON(ID_CalcCombineBtn, CalculationDlg::OnCalcCombine)
 END_EVENT_TABLE()
 
-CalculationDlg::CalculationDlg(VRenderFrame *frame)
+CalculationDlg::CalculationDlg(MainFrame *frame)
 	: wxPanel(frame, wxID_ANY,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(500, 350)),
@@ -154,7 +154,7 @@ void CalculationDlg::OnLoadA(wxCommandEvent &event)
 				m_calc_a_text->SetValue(str);
 				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
-					VRenderGLView* view = m_frame->GetView(i);
+					RenderCanvas* view = m_frame->GetView(i);
 					if (view && view->GetVolumeData(str))
 					{
 						m_view = view;
@@ -171,7 +171,7 @@ void CalculationDlg::OnLoadA(wxCommandEvent &event)
 				m_calc_a_text->SetValue(str);
 				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
-					VRenderGLView* view = m_frame->GetView(i);
+					RenderCanvas* view = m_frame->GetView(i);
 					if (view && view->GetGroup(str))
 					{
 						m_view = view;

@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <chrono>
 #include <cstring>
 
-class VRenderGLView;
+class RenderCanvas;
 class VolumeData;
 namespace flrd
 {
@@ -53,7 +53,7 @@ namespace flrd
 		VolumeSelector();
 		~VolumeSelector();
 
-		void SetView(VRenderGLView* view) { m_view = view; }
+		void SetView(RenderCanvas* view) { m_view = view; }
 		void SetVolume(VolumeData *vd) { m_vd = vd; }
 		VolumeData* GetVolume() { return m_vd; }
 		//modes
@@ -243,7 +243,7 @@ namespace flrd
 		double GetSpanSec() { return m_span_sec; }
 
 	private:
-		VRenderGLView *m_view;
+		RenderCanvas *m_view;
 		VolumeData *m_vd;	//volume data for segmentation
 		unsigned int m_2d_mask;	//2d mask from painting
 		unsigned int m_2d_weight1;//2d weight map (after tone mapping)

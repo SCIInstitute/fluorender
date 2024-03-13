@@ -34,8 +34,8 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-class VRenderFrame;
-class VRenderGLView;
+class MainFrame;
+class RenderCanvas;
 class RecorderDlg;
 class KeyListCtrl : public wxListCtrl
 {
@@ -48,7 +48,7 @@ class KeyListCtrl : public wxListCtrl
 	};
 
 public:
-	KeyListCtrl(VRenderFrame *frame,
+	KeyListCtrl(MainFrame *frame,
 		RecorderDlg* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -66,7 +66,7 @@ public:
 	friend class RecorderDlg;
 
 private:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 	RecorderDlg* m_recdlg;
 	wxImageList *m_images;
 
@@ -124,12 +124,12 @@ public:
 		ID_CamLockBtn
 	};
 
-	RecorderDlg(VRenderFrame* frame,
+	RecorderDlg(MainFrame* frame,
 		wxWindow* parent);
 	~RecorderDlg();
 
-	void GetSettings(VRenderGLView* view);
-	VRenderGLView* GetView()
+	void GetSettings(RenderCanvas* view);
+	RenderCanvas* GetView()
 	{
 		return m_view;
 	}
@@ -148,9 +148,9 @@ private:
 	int m_cam_lock_type;//0-not used;1-image center;2-click view;3-ruler;4-selection
 
 private:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 	//current view
-	VRenderGLView* m_view;
+	RenderCanvas* m_view;
 
 	//automatic keys
 	wxComboBox *m_auto_key_cmb;

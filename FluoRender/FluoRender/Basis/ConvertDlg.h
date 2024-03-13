@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 
-class VRenderFrame;
+class MainFrame;
 class wxSingleSlider;
 class ConvertDlg : public wxPanel
 {
@@ -51,11 +51,11 @@ public:
 		ID_StatText
 	};
 
-	ConvertDlg(VRenderFrame* frame);
+	ConvertDlg(MainFrame* frame);
 	~ConvertDlg();
 
 private:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 
 	//convert from volume to polygon mesh
 	wxSingleSlider* m_cnv_vol_mesh_thresh_sldr;

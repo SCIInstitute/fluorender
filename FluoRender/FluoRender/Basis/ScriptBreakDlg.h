@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 
-class VRenderFrame;
+class MainFrame;
 class ScriptBreakDlg : public wxPanel
 {
 public:
@@ -40,7 +40,7 @@ public:
 		ID_StopBtn,
 		ID_ContinueBtn
 	};
-	ScriptBreakDlg(VRenderFrame* frame);
+	ScriptBreakDlg(MainFrame* frame);
 	~ScriptBreakDlg();
 
 	void SetScriptName(const wxString& str);
@@ -48,7 +48,7 @@ public:
 	void Hold();
 
 private:
-	VRenderFrame* m_frame;
+	MainFrame* m_frame;
 	wxTextCtrl* m_info_text;
 	wxCheckBox* m_shown_chk;
 	wxButton* m_stop_btn;

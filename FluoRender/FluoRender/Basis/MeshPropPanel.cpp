@@ -27,12 +27,12 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "MeshPropPanel.h"
 #include <Global.h>
-#include <VRenderFrame.h>
-#include <VRenderGLView.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 
-MeshPropPanel::MeshPropPanel(VRenderFrame* frame,
+MeshPropPanel::MeshPropPanel(MainFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -230,7 +230,7 @@ void MeshPropPanel::FluoUpdate(const fluo::ValueCollection& values)
 	m_size_text->SetValue(wxString::Format("%d", limit));
 }
 
-void MeshPropPanel::SetView(VRenderGLView* view)
+void MeshPropPanel::SetView(RenderCanvas* view)
 {
 	m_view = view;
 }

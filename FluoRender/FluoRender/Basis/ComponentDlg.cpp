@@ -27,8 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ComponentDlg.h"
 #include <Global.h>
-#include <VRenderFrame.h>
-#include <VRenderGLView.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
 #include <BrushToolDlg.h>
 #include <ColocalizationDlg.h>
 #include <Components/CompSelector.h>
@@ -193,7 +193,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_SPLITTER_DCLICK(wxID_ANY, ComponentDlg::OnSplitterDclick)
 END_EVENT_TABLE()
 
-ComponentDlg::ComponentDlg(VRenderFrame *frame)
+ComponentDlg::ComponentDlg(MainFrame *frame)
 	: wxPanel(frame, wxID_ANY,
 		wxDefaultPosition,
 		frame->FromDIP(wxSize(600, 800)),
@@ -1261,7 +1261,7 @@ void ComponentDlg::OnSaveasSettings(wxCommandEvent& event)
 		delete fopendlg;
 }
 
-void ComponentDlg::SetView(VRenderGLView* view)
+void ComponentDlg::SetView(RenderCanvas* view)
 {
 	m_view = view;
 	if (m_view)

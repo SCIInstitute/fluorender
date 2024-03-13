@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/RulerAlign.h>
 #include <Types/Quaternion.h>
 #include <Types/Utils.h>
-#include <VRenderGLView.h>
+#include <RenderCanvas.h>
 #include <Distance/Pca.h>
 
 using namespace flrd;

@@ -31,12 +31,12 @@ DEALINGS IN THE SOFTWARE.
 #include <ScriptVisitors.h>
 #include <Global.h>
 #include <DataManager.h>
-#include <VRenderGLView.h>
-#include <VRenderFrame.h>
+#include <RenderCanvas.h>
+#include <MainFrame.h>
 #include <TraceDlg.h>
 #include <NoiseCancellingDlg.h>
 #include <ComponentDlg.h>
-#include <VMovieView.h>
+#include <MoviePanel.h>
 #include <AdjustView.h>
 #include <ScriptBreakDlg.h>
 #include <Calculate/BackgStat.h>

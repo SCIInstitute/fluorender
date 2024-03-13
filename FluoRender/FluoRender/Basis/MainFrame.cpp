@@ -25,20 +25,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "VRenderFrame.h"
+#include <MainFrame.h>
 #include <compatibility.h>
 #include <DragDrop.h>
 #include <Global/Global.h>
 #include <DataManager.h>
 #include "TreePanel.h"
 #include "ListPanel.h"
-#include "VRenderView.h"
+#include <RenderViewPanel.h>
 #include "PropPanel.h"
 #include "VolumePropPanel.h"
 #include "MeshPropPanel.h"
 #include "AnnotatPropPanel.h"
 #include "ManipPropPanel.h"
-#include "VMovieView.h"
+#include "MoviePanel.h"
 #include "ClippingView.h"
 #include "AdjustView.h"
 #include "SettingDlg.h"
@@ -86,65 +86,65 @@ DEALINGS IN THE SOFTWARE.
 //resources
 #include "img/icons.h"
 
-BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
-	EVT_MENU(wxID_EXIT, VRenderFrame::OnExit)
-	EVT_MENU(ID_ViewNew, VRenderFrame::OnNewView)
-	EVT_MENU(ID_Layout, VRenderFrame::OnLayout)
-	EVT_MENU(ID_FullScreen, VRenderFrame::OnFullScreen)
-	EVT_MENU(ID_OpenVolume, VRenderFrame::OnOpenVolume)
-	EVT_MENU(ID_OpenMesh, VRenderFrame::OnOpenMesh)
-	EVT_MENU(ID_ViewOrganize, VRenderFrame::OnOrganize)
-	EVT_MENU(ID_CheckUpdates, VRenderFrame::OnCheckUpdates)
-	EVT_MENU(ID_Info, VRenderFrame::OnInfo)
-	EVT_MENU(ID_NewProject, VRenderFrame::OnNewProject)
-	EVT_MENU(ID_SaveProject, VRenderFrame::OnSaveProject)
-	EVT_MENU(ID_SaveAsProject, VRenderFrame::OnSaveAsProject)
-	EVT_MENU(ID_OpenProject, VRenderFrame::OnOpenProject)
-	EVT_MENU(ID_Settings, VRenderFrame::OnSettings)
-	EVT_MENU(ID_ImportVolume, VRenderFrame::OnImportVolume)
-	EVT_MENU(ID_Undo, VRenderFrame::OnUndo)
-	EVT_MENU(ID_Redo, VRenderFrame::OnRedo)
+BEGIN_EVENT_TABLE(MainFrame, wxFrame)
+	EVT_MENU(wxID_EXIT, MainFrame::OnExit)
+	EVT_MENU(ID_ViewNew, MainFrame::OnNewView)
+	EVT_MENU(ID_Layout, MainFrame::OnLayout)
+	EVT_MENU(ID_FullScreen, MainFrame::OnFullScreen)
+	EVT_MENU(ID_OpenVolume, MainFrame::OnOpenVolume)
+	EVT_MENU(ID_OpenMesh, MainFrame::OnOpenMesh)
+	EVT_MENU(ID_ViewOrganize, MainFrame::OnOrganize)
+	EVT_MENU(ID_CheckUpdates, MainFrame::OnCheckUpdates)
+	EVT_MENU(ID_Info, MainFrame::OnInfo)
+	EVT_MENU(ID_NewProject, MainFrame::OnNewProject)
+	EVT_MENU(ID_SaveProject, MainFrame::OnSaveProject)
+	EVT_MENU(ID_SaveAsProject, MainFrame::OnSaveAsProject)
+	EVT_MENU(ID_OpenProject, MainFrame::OnOpenProject)
+	EVT_MENU(ID_Settings, MainFrame::OnSettings)
+	EVT_MENU(ID_ImportVolume, MainFrame::OnImportVolume)
+	EVT_MENU(ID_Undo, MainFrame::OnUndo)
+	EVT_MENU(ID_Redo, MainFrame::OnRedo)
 	//tools
-	EVT_MENU(ID_LastTool, VRenderFrame::OnLastTool)
-	EVT_MENU(ID_PaintTool, VRenderFrame::OnPaintTool)
-	EVT_MENU(ID_Measure, VRenderFrame::OnMeasure)
-	EVT_MENU(ID_Trace, VRenderFrame::OnTrace)
-	EVT_MENU(ID_NoiseCancelling, VRenderFrame::OnNoiseCancelling)
-	EVT_MENU(ID_Counting, VRenderFrame::OnCounting)
-	EVT_MENU(ID_Colocalization, VRenderFrame::OnColocalization)
-	EVT_MENU(ID_Convert, VRenderFrame::OnConvert)
-	EVT_MENU(ID_Ocl, VRenderFrame::OnOcl)
-	EVT_MENU(ID_Component, VRenderFrame::OnComponent)
-	EVT_MENU(ID_Calculations, VRenderFrame::OnCalculations)
-	EVT_MENU(ID_MachineLearning, VRenderFrame::OnMachineLearning)
+	EVT_MENU(ID_LastTool, MainFrame::OnLastTool)
+	EVT_MENU(ID_PaintTool, MainFrame::OnPaintTool)
+	EVT_MENU(ID_Measure, MainFrame::OnMeasure)
+	EVT_MENU(ID_Trace, MainFrame::OnTrace)
+	EVT_MENU(ID_NoiseCancelling, MainFrame::OnNoiseCancelling)
+	EVT_MENU(ID_Counting, MainFrame::OnCounting)
+	EVT_MENU(ID_Colocalization, MainFrame::OnColocalization)
+	EVT_MENU(ID_Convert, MainFrame::OnConvert)
+	EVT_MENU(ID_Ocl, MainFrame::OnOcl)
+	EVT_MENU(ID_Component, MainFrame::OnComponent)
+	EVT_MENU(ID_Calculations, MainFrame::OnCalculations)
+	EVT_MENU(ID_MachineLearning, MainFrame::OnMachineLearning)
 	//
-	EVT_MENU(ID_Youtube, VRenderFrame::OnYoutube)
-	EVT_MENU(ID_Twitter, VRenderFrame::OnTwitter)
-	EVT_MENU(ID_Facebook, VRenderFrame::OnFacebook)
-	EVT_MENU(ID_Manual, VRenderFrame::OnManual)
-	EVT_MENU(ID_Tutorial, VRenderFrame::OnTutorial)
-	EVT_MENU(ID_ShowHideUI, VRenderFrame::OnShowHideUI)
-	EVT_MENU(ID_ShowHideToolbar, VRenderFrame::OnShowHideToolbar)
+	EVT_MENU(ID_Youtube, MainFrame::OnYoutube)
+	EVT_MENU(ID_Twitter, MainFrame::OnTwitter)
+	EVT_MENU(ID_Facebook, MainFrame::OnFacebook)
+	EVT_MENU(ID_Manual, MainFrame::OnManual)
+	EVT_MENU(ID_Tutorial, MainFrame::OnTutorial)
+	EVT_MENU(ID_ShowHideUI, MainFrame::OnShowHideUI)
+	EVT_MENU(ID_ShowHideToolbar, MainFrame::OnShowHideToolbar)
 	//ui menu events
-	EVT_MENU(ID_UIListView, VRenderFrame::OnShowHideView)
-	EVT_MENU(ID_UITreeView, VRenderFrame::OnShowHideView)
-	EVT_MENU(ID_UIMovieView, VRenderFrame::OnShowHideView)
-	EVT_MENU(ID_UIAdjView, VRenderFrame::OnShowHideView)
-	EVT_MENU(ID_UIClipView, VRenderFrame::OnShowHideView)
-	EVT_MENU(ID_UIPropView, VRenderFrame::OnShowHideView)
+	EVT_MENU(ID_UIListView, MainFrame::OnShowHideView)
+	EVT_MENU(ID_UITreeView, MainFrame::OnShowHideView)
+	EVT_MENU(ID_UIMovieView, MainFrame::OnShowHideView)
+	EVT_MENU(ID_UIAdjView, MainFrame::OnShowHideView)
+	EVT_MENU(ID_UIClipView, MainFrame::OnShowHideView)
+	EVT_MENU(ID_UIPropView, MainFrame::OnShowHideView)
 	//panes
-	EVT_AUI_PANE_CLOSE(VRenderFrame::OnPaneClose)
+	EVT_AUI_PANE_CLOSE(MainFrame::OnPaneClose)
 	//prop panel
-	EVT_AUINOTEBOOK_PAGE_CLOSE(wxID_ANY, VRenderFrame::OnPropPageClose)
+	EVT_AUINOTEBOOK_PAGE_CLOSE(wxID_ANY, MainFrame::OnPropPageClose)
 	//draw background
-	EVT_PAINT(VRenderFrame::OnDraw)
+	EVT_PAINT(MainFrame::OnDraw)
 	//process key event
-	EVT_KEY_DOWN(VRenderFrame::OnKeyDown)
+	EVT_KEY_DOWN(MainFrame::OnKeyDown)
 	//close
-	EVT_CLOSE(VRenderFrame::OnClose)
+	EVT_CLOSE(MainFrame::OnClose)
 END_EVENT_TABLE()
 
-VRenderFrame::VRenderFrame(
+MainFrame::MainFrame(
 	wxFrame* frame,
 	const wxString& title,
 	int x, int y,
@@ -406,7 +406,7 @@ VRenderFrame::VRenderFrame(
 	m_main_tb->Realize();
 
 	//create render view
-	VRenderView *vrv = new VRenderView(this);
+	RenderViewPanel *vrv = new RenderViewPanel(this);
 	vrv->m_glview->InitView();
 	vrv->UpdateView();
 	m_vrv_list.push_back(vrv);
@@ -421,7 +421,7 @@ VRenderFrame::VRenderFrame(
 		wxDefaultPosition, panel_size);
 
 	//create movie view (sets the m_recorder_dlg)
-	m_movie_view = new VMovieView(this,
+	m_movie_view = new MoviePanel(this,
 		wxDefaultPosition, panel_size);
 
 	//create prop panel
@@ -952,7 +952,7 @@ VRenderFrame::VRenderFrame(
 	SetAcceleratorTable(accel);
 }
 
-VRenderFrame::~VRenderFrame()
+MainFrame::~MainFrame()
 {
 	//release?
 	flvr::TextureRenderer::vol_kernel_factory_.clear();
@@ -965,7 +965,7 @@ VRenderFrame::~VRenderFrame()
 	flvr::TextRenderer::text_texture_manager_.clear();
 	for (int i=0; i<GetViewNum(); i++)
 	{
-		VRenderGLView* view = GetView(i);
+		RenderCanvas* view = GetView(i);
 		if (view)
 		{
 			view->ClearAll();
@@ -979,12 +979,12 @@ VRenderFrame::~VRenderFrame()
 	glbin_settings.Save();
 }
 
-void VRenderFrame::OnExit(wxCommandEvent& event)
+void MainFrame::OnExit(wxCommandEvent& event)
 {
 	Close(true);
 }
 
-void VRenderFrame::OnClose(wxCloseEvent &event)
+void MainFrame::OnClose(wxCloseEvent &event)
 {
 	bool vrv_saved = false;
 	for (unsigned int i=0; i<m_vrv_list.size(); ++i)
@@ -1001,22 +1001,22 @@ void VRenderFrame::OnClose(wxCloseEvent &event)
 	event.Skip();
 }
 
-wxString VRenderFrame::CreateView(int row)
+wxString MainFrame::CreateView(int row)
 {
-	VRenderView* vrv = 0;
+	RenderViewPanel* vrv = 0;
 	if (m_vrv_list.size()>0)
 	{
 		wxGLContext* sharedContext = m_vrv_list[0]->GetContext();
-		vrv = new VRenderView(this, sharedContext);
+		vrv = new RenderViewPanel(this, sharedContext);
 	}
 	else
 	{
-		vrv = new VRenderView(this);
+		vrv = new RenderViewPanel(this);
 	}
 
 	if (!vrv)
 		return "NO_NAME";
-	VRenderGLView* view = vrv->m_glview;
+	RenderCanvas* view = vrv->m_glview;
 	if (!view)
 		return "NO_NAME";
 
@@ -1064,7 +1064,7 @@ wxString VRenderFrame::CreateView(int row)
 	//add volumes
 	if (GetViewNum() > 0)
 	{
-		VRenderGLView* view0 = GetView(0);
+		RenderCanvas* view0 = GetView(0);
 		if (view0)
 		{
 			for (int i = 0; i < view0->GetDispVolumeNum(); ++i)
@@ -1103,50 +1103,50 @@ wxString VRenderFrame::CreateView(int row)
 	return vrv->GetName();
 }
 
-VRenderGLView* VRenderFrame::GetLastView()
+RenderCanvas* MainFrame::GetLastView()
 {
 	return m_vrv_list[m_vrv_list.size() - 1]->m_glview;
 }
 
 //views
-int VRenderFrame::GetViewNum()
+int MainFrame::GetViewNum()
 {
 	return m_vrv_list.size();
 }
 
-VRenderGLView* VRenderFrame::GetView(int index)
+RenderCanvas* MainFrame::GetView(int index)
 {
 	if (index >= 0 && index < (int)m_vrv_list.size())
 	{
-		VRenderView* v = m_vrv_list[index];
+		RenderViewPanel* v = m_vrv_list[index];
 		if (v)
 			return v->m_glview;
 	}
 	return 0;
 }
 
-VRenderGLView* VRenderFrame::GetView(wxString& name)
+RenderCanvas* MainFrame::GetView(wxString& name)
 {
 	for (size_t i=0; i < m_vrv_list.size(); ++i)
 	{
-		VRenderView* v = m_vrv_list[i];
+		RenderViewPanel* v = m_vrv_list[i];
 		if (v && v->GetName() == name)
 			return v->m_glview;
 	}
 	return 0;
 }
 
-void VRenderFrame::OnNewView(wxCommandEvent& event)
+void MainFrame::OnNewView(wxCommandEvent& event)
 {
 	wxString str = CreateView();
 }
 
-void VRenderFrame::OnLayout(wxCommandEvent& event)
+void MainFrame::OnLayout(wxCommandEvent& event)
 {
 	OrganizeVRenderViews(1);
 }
 
-void VRenderFrame::OnFullScreen(wxCommandEvent& event)
+void MainFrame::OnFullScreen(wxCommandEvent& event)
 {
 	if (IsFullScreen())
 	{
@@ -1167,35 +1167,35 @@ void VRenderFrame::OnFullScreen(wxCommandEvent& event)
 }
 
 //open dialog options
-void VRenderFrame::OnCh11Check(wxCommandEvent &event)
+void MainFrame::OnCh11Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch11 = (wxCheckBox*)event.GetEventObject();
 	if (ch11)
 		glbin_settings.m_slice_sequence = ch11->GetValue();
 }
 
-void VRenderFrame::OnCh12Check(wxCommandEvent &event)
+void MainFrame::OnCh12Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch12 = (wxCheckBox*)event.GetEventObject();
 	if (ch12)
 		glbin_settings.m_chann_sequence = ch12->GetValue();
 }
 
-void VRenderFrame::OnCmbChange(wxCommandEvent &event)
+void MainFrame::OnCmbChange(wxCommandEvent &event)
 {
 	wxComboBox* combo = (wxComboBox*)event.GetEventObject();
 	if (combo)
 		glbin_settings.m_digit_order = combo->GetSelection();
 }
 
-void VRenderFrame::OnTxt1Change(wxCommandEvent &event)
+void MainFrame::OnTxt1Change(wxCommandEvent &event)
 {
 	wxTextCtrl* txt1 = (wxTextCtrl*)event.GetEventObject();
 	if (txt1)
 		glbin_settings.m_time_id = txt1->GetValue();
 }
 
-void VRenderFrame::OnTxt2Change(wxCommandEvent &event)
+void MainFrame::OnTxt2Change(wxCommandEvent &event)
 {
 	wxTextCtrl* txt2 = (wxTextCtrl*)event.GetEventObject();
 	if (txt2)
@@ -1207,21 +1207,21 @@ void VRenderFrame::OnTxt2Change(wxCommandEvent &event)
 	}
 }
 
-void VRenderFrame::OnCh2Check(wxCommandEvent &event)
+void MainFrame::OnCh2Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch2 = (wxCheckBox*)event.GetEventObject();
 	if (ch2)
 		glbin_settings.m_realtime_compress = ch2->GetValue();
 }
 
-void VRenderFrame::OnCh3Check(wxCommandEvent &event)
+void MainFrame::OnCh3Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch3 = (wxCheckBox*)event.GetEventObject();
 	if (ch3)
 		glbin_settings.m_skip_brick = ch3->GetValue();
 }
 
-wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
+wxWindow* MainFrame::CreateExtraControlVolume(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
@@ -1236,14 +1236,14 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	wxCheckBox* ch11 = new wxCheckBox(panel, ID_READ_ZSLICE,
 		"Read file# as Z sections");
 	ch11->Connect(ch11->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnCh11Check), NULL, panel);
+		wxCommandEventHandler(MainFrame::OnCh11Check), NULL, panel);
 	ch11->SetValue(glbin_settings.m_slice_sequence);
 
 	//slice sequence check box
 	wxCheckBox* ch12 = new wxCheckBox(panel, ID_READ_CHANN,
 		"Read file# as channels");
 	ch12->Connect(ch12->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnCh12Check), NULL, panel);
+		wxCommandEventHandler(MainFrame::OnCh12Check), NULL, panel);
 	ch12->SetValue(glbin_settings.m_chann_sequence);
 
 	//digit order
@@ -1252,7 +1252,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	wxComboBox* combo = new wxComboBox(panel, ID_DIGI_ORDER,
 		"Order", wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	combo->Connect(combo->GetId(), wxEVT_COMMAND_COMBOBOX_SELECTED,
-		wxCommandEventHandler(VRenderFrame::OnCmbChange), NULL, panel);
+		wxCommandEventHandler(MainFrame::OnCmbChange), NULL, panel);
 	std::vector<std::string> combo_list;
 	combo_list.push_back("Channel first");
 	combo_list.push_back("Z section first");
@@ -1266,7 +1266,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	wxTextCtrl* txt2 = new wxTextCtrl(panel, ID_SER_NUM,
 		"", wxDefaultPosition, wxDefaultSize);
 	txt2->Connect(txt2->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
-		wxCommandEventHandler(VRenderFrame::OnTxt2Change), NULL, panel);
+		wxCommandEventHandler(MainFrame::OnTxt2Change), NULL, panel);
 
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	sizer1->Add(ch11);
@@ -1285,14 +1285,14 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	wxCheckBox* ch2 = new wxCheckBox(panel, ID_COMPRESS,
 		"Compress data (loading will take longer time and data are compressed in graphics memory)");
 	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnCh2Check), NULL, panel);
+		wxCommandEventHandler(MainFrame::OnCh2Check), NULL, panel);
 	ch2->SetValue(glbin_settings.m_realtime_compress);
 
 	//empty brick skipping
 	wxCheckBox* ch3 = new wxCheckBox(panel, ID_SKIP_BRICKS,
 		"Skip empty bricks during rendering (loading takes longer time)");
 	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnCh3Check), NULL, panel);
+		wxCommandEventHandler(MainFrame::OnCh3Check), NULL, panel);
 	ch3->SetValue(glbin_settings.m_skip_brick);
 
 	//time sequence identifier
@@ -1301,7 +1301,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 		"", wxDefaultPosition, wxDefaultSize);
 	txt1->SetValue(glbin_settings.m_time_id);
 	txt1->Connect(txt1->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
-		wxCommandEventHandler(VRenderFrame::OnTxt1Change), NULL, panel);
+		wxCommandEventHandler(MainFrame::OnTxt1Change), NULL, panel);
 	st1 = new wxStaticText(panel, 0,
 		"Time sequence identifier (digits after the identifier in filenames are used as time index)\n");
 	sizer2->Add(txt1);
@@ -1324,7 +1324,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	return panel;
 }
 
-wxWindow* VRenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
+wxWindow* MainFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
@@ -1338,7 +1338,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 	wxCheckBox* ch1 = new wxCheckBox(panel, ID_READ_ZSLICES,
 		"Read a sequence as Z slices (the last digits in filenames are used to identify the sequence)");
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnCh1Check), NULL, panel);
+		wxCommandEventHandler(MainFrame::OnCh1Check), NULL, panel);
 	ch1->SetValue(m_sliceSequence);
 	*/
 
@@ -1346,14 +1346,14 @@ wxWindow* VRenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 	wxCheckBox* ch2 = new wxCheckBox(panel, ID_COMPRESS,
 		"Compress data (loading will take longer time and data are compressed in graphics memory)");
 	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnCh2Check), NULL, panel);
+		wxCommandEventHandler(MainFrame::OnCh2Check), NULL, panel);
 	ch2->SetValue(glbin_settings.m_realtime_compress);
 
 	//empty brick skipping
 	wxCheckBox* ch3 = new wxCheckBox(panel, ID_SKIP_BRICKS,
 		"Skip empty bricks during rendering (loading takes longer time)");
 	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnCh3Check), NULL, panel);
+		wxCommandEventHandler(MainFrame::OnCh3Check), NULL, panel);
 	ch3->SetValue(glbin_settings.m_skip_brick);
 
 	//time sequence identifier. TODO: Not supported as of now.
@@ -1363,7 +1363,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 		"", wxDefaultPosition, wxSize(80, 20));
 	txt1->SetValue(m_time_id);
 	txt1->Connect(txt1->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
-		wxCommandEventHandler(VRenderFrame::OnTxt1Change), NULL, panel);
+		wxCommandEventHandler(MainFrame::OnTxt1Change), NULL, panel);
 	wxStaticText* st = new wxStaticText(panel, 0,
 		"Time sequence identifier (digits after the identifier in filenames are used as time index)");
 	sizer1->Add(txt1);
@@ -1387,7 +1387,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 	return panel;
 }
 
-void VRenderFrame::OnOpenVolume(wxCommandEvent& event)
+void MainFrame::OnOpenVolume(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose the volume data file", "", "",
@@ -1410,7 +1410,7 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& event)
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		VRenderGLView* view = GetView(0);
+		RenderCanvas* view = GetView(0);
 
 		wxArrayString paths;
 		fopendlg->GetPaths(paths);
@@ -1425,7 +1425,7 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& event)
 	delete fopendlg;
 }
 
-void VRenderFrame::OnImportVolume(wxCommandEvent& event)
+void MainFrame::OnImportVolume(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose the volume data file", "", "", "All Files|*.*",
@@ -1435,7 +1435,7 @@ void VRenderFrame::OnImportVolume(wxCommandEvent& event)
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		VRenderGLView* view = GetView(0);
+		RenderCanvas* view = GetView(0);
 
 		wxArrayString paths;
 		fopendlg->GetPaths(paths);
@@ -1450,13 +1450,13 @@ void VRenderFrame::OnImportVolume(wxCommandEvent& event)
 	delete fopendlg;
 }
 
-void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLView* view)
+void MainFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* view)
 {
 	int j;
 
 	VolumeData* vd_sel = 0;
 	DataGroup* group_sel = 0;
-	VRenderGLView* v = 0;
+	RenderCanvas* v = 0;
 
 	if (view)
 		v = view;
@@ -1629,7 +1629,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 	v->RefreshGL(39);//added by Takashi
 }
 
-void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imagej)
+void MainFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imagej)
 {
 	if (m_vrv_list[0])
 		m_vrv_list[0]->m_glview->Init();
@@ -1684,7 +1684,7 @@ void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imag
 	}
 }
 
-void VRenderFrame::LoadMeshes(wxArrayString files, VRenderGLView* view)
+void MainFrame::LoadMeshes(wxArrayString files, RenderCanvas* view)
 {
 	if (!view)
 		view = GetView(0);
@@ -1735,7 +1735,7 @@ void VRenderFrame::LoadMeshes(wxArrayString files, VRenderGLView* view)
 	delete prg_diag;
 }
 
-void VRenderFrame::OnOpenMesh(wxCommandEvent& event)
+void MainFrame::OnOpenMesh(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose the mesh data file",
@@ -1744,7 +1744,7 @@ void VRenderFrame::OnOpenMesh(wxCommandEvent& event)
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		VRenderGLView* view = GetView(0);
+		RenderCanvas* view = GetView(0);
 		wxArrayString files;
 		fopendlg->GetPaths(files);
 
@@ -1755,7 +1755,7 @@ void VRenderFrame::OnOpenMesh(wxCommandEvent& event)
 		delete fopendlg;
 }
 
-void VRenderFrame::OnOrganize(wxCommandEvent& event)
+void MainFrame::OnOrganize(wxCommandEvent& event)
 {
 	int w, h;
 	GetClientSize(&w, &h);
@@ -1770,12 +1770,12 @@ void VRenderFrame::OnOrganize(wxCommandEvent& event)
 	}
 }
 
-void VRenderFrame::OnCheckUpdates(wxCommandEvent &)
+void MainFrame::OnCheckUpdates(wxCommandEvent &)
 {
 	::wxLaunchDefaultBrowser(VERSION_UPDATES);
 }
 
-void VRenderFrame::OnInfo(wxCommandEvent& event)
+void MainFrame::OnInfo(wxCommandEvent& event)
 {
 
 	wxString time = wxNow();
@@ -1836,17 +1836,17 @@ void VRenderFrame::OnInfo(wxCommandEvent& event)
 	d->ShowModal();
 }
 
-bool VRenderFrame::GetBenchmark()
+bool MainFrame::GetBenchmark()
 {
 	return m_benchmark;
 }
 
-void VRenderFrame::ClearVrvList()
+void MainFrame::ClearVrvList()
 {
 	m_vrv_list.clear();
 }
 
-wxString VRenderFrame::ScriptDialog(const wxString& title,
+wxString MainFrame::ScriptDialog(const wxString& title,
 	const wxString& wildcard, long style)
 {
 	m_movie_view->HoldRun();
@@ -1862,7 +1862,7 @@ wxString VRenderFrame::ScriptDialog(const wxString& title,
 	return result;
 }
 
-void VRenderFrame::UpdateTreeIcons()
+void MainFrame::UpdateTreeIcons()
 {
 	int i, j, k;
 	if (!m_tree_panel || !m_tree_panel->GetTreeCtrl())
@@ -1874,7 +1874,7 @@ void VRenderFrame::UpdateTreeIcons()
 	int counter = 0;
 	for (i=0; i<GetViewNum(); i++)
 	{
-		VRenderGLView *view = GetView(i);
+		RenderCanvas *view = GetView(i);
 		wxTreeItemId vrv_item;
 		if (i==0)
 			vrv_item = treectrl->GetFirstChild(root, ck_view);
@@ -1982,13 +1982,13 @@ void VRenderFrame::UpdateTreeIcons()
 	m_tree_panel->Refresh(false);
 }
 
-void VRenderFrame::UpdateTreeColors()
+void MainFrame::UpdateTreeColors()
 {
 	int i, j, k;
 	int counter = 0;
 	for (i=0 ; i<GetViewNum() ; i++)
 	{
-		VRenderGLView *view = GetView(i);
+		RenderCanvas *view = GetView(i);
 
 		for (j=0; j< view->GetLayerNum(); j++)
 		{
@@ -2087,7 +2087,7 @@ void VRenderFrame::UpdateTreeColors()
 	m_tree_panel->Refresh(false);
 }
 
-void VRenderFrame::UpdateTree(const wxString& name)
+void MainFrame::UpdateTree(const wxString& name)
 {
 	if (!m_tree_panel)
 		return;
@@ -2108,7 +2108,7 @@ void VRenderFrame::UpdateTree(const wxString& name)
 
 	for (int i = 0; i < GetViewNum(); i++)
 	{
-		VRenderGLView* view = GetView(i);
+		RenderCanvas* view = GetView(i);
 		if (!view)
 			continue;
 		int j, k;
@@ -2280,7 +2280,7 @@ void VRenderFrame::UpdateTree(const wxString& name)
 	m_tree_panel->ExpandAll();
 }
 
-void VRenderFrame::UpdateList()
+void MainFrame::UpdateList()
 {
 	m_list_panel->DeleteAllItems();
 
@@ -2318,19 +2318,19 @@ void VRenderFrame::UpdateList()
 	}
 }
 
-TreePanel *VRenderFrame::GetTree()
+TreePanel *MainFrame::GetTree()
 {
 	return m_tree_panel;
 }
 
-ListPanel *VRenderFrame::GetList()
+ListPanel *MainFrame::GetList()
 {
 	return m_list_panel;
 }
 
 //on selections
-void VRenderFrame::OnSelection(int type,
-	VRenderGLView* view,
+void MainFrame::OnSelection(int type,
+	RenderCanvas* view,
 	DataGroup* group,
 	VolumeData* vd,
 	MeshData* md,
@@ -2419,7 +2419,7 @@ void VRenderFrame::OnSelection(int type,
 
 			for (size_t i=0; i< GetViewNum(); ++i)
 			{
-				VRenderGLView* v = GetView(i);
+				RenderCanvas* v = GetView(i);
 				if (!v)
 					continue;
 				v->m_cur_vol = vd;
@@ -2475,8 +2475,8 @@ void VRenderFrame::OnSelection(int type,
 	}
 }
 
-wxWindow* VRenderFrame::AddProps(int type,
-	VRenderGLView* view,
+wxWindow* MainFrame::AddProps(int type,
+	RenderCanvas* view,
 	DataGroup* group,
 	VolumeData* vd,
 	MeshData* md,
@@ -2544,7 +2544,7 @@ wxWindow* VRenderFrame::AddProps(int type,
 	return result;
 }
 
-void VRenderFrame::DeleteProps(int type, const wxString& name)
+void MainFrame::DeleteProps(int type, const wxString& name)
 {
 	//find page
 	wxWindow* page = 0;
@@ -2577,8 +2577,8 @@ void VRenderFrame::DeleteProps(int type, const wxString& name)
 	}
 }
 
-void VRenderFrame::ShowPropPage(int type,
-	VRenderGLView* view,
+void MainFrame::ShowPropPage(int type,
+	RenderCanvas* view,
 	DataGroup* group,
 	VolumeData* vd,
 	MeshData* md,
@@ -2643,7 +2643,7 @@ void VRenderFrame::ShowPropPage(int type,
 
 }
 
-bool VRenderFrame::update_props(int excl_self, PropPanel* p1, PropPanel* p2)
+bool MainFrame::update_props(int excl_self, PropPanel* p1, PropPanel* p2)
 {
 	switch (excl_self)
 	{
@@ -2659,7 +2659,7 @@ bool VRenderFrame::update_props(int excl_self, PropPanel* p1, PropPanel* p2)
 	return false;
 }
 
-void VRenderFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, PropPanel* panel)
+void MainFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, PropPanel* panel)
 {
 	for (auto i : m_prop_pages)
 		if (update_props(excl_self, i, panel))
@@ -2670,7 +2670,7 @@ void VRenderFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, P
 		m_clip_view->FluoUpdate(vc);
 }
 
-VolumePropPanel* VRenderFrame::FindVolumeProps(const wxString& name)
+VolumePropPanel* MainFrame::FindVolumeProps(const wxString& name)
 {
 	VolumePropPanel* result = 0;
 	for (auto i : m_prop_pages)
@@ -2685,14 +2685,14 @@ VolumePropPanel* VRenderFrame::FindVolumeProps(const wxString& name)
 	return 0;
 }
 
-VolumePropPanel* VRenderFrame::FindVolumeProps(VolumeData* vd)
+VolumePropPanel* MainFrame::FindVolumeProps(VolumeData* vd)
 {
 	if (vd)
 		return FindVolumeProps(vd->GetName());
 	return 0;
 }
 
-MeshPropPanel* VRenderFrame::FindMeshProps(const wxString& name)
+MeshPropPanel* MainFrame::FindMeshProps(const wxString& name)
 {
 	MeshPropPanel* result = 0;
 	for (auto i : m_prop_pages)
@@ -2707,14 +2707,14 @@ MeshPropPanel* VRenderFrame::FindMeshProps(const wxString& name)
 	return 0;
 }
 
-MeshPropPanel* VRenderFrame::FindMeshProps(MeshData* md)
+MeshPropPanel* MainFrame::FindMeshProps(MeshData* md)
 {
 	if (md)
 		return FindMeshProps(md->GetName());
 	return 0;
 }
 
-AnnotatPropPanel* VRenderFrame::FindAnnotationProps(const wxString& name)
+AnnotatPropPanel* MainFrame::FindAnnotationProps(const wxString& name)
 {
 	AnnotatPropPanel* result = 0;
 	for (auto i : m_prop_pages)
@@ -2729,14 +2729,14 @@ AnnotatPropPanel* VRenderFrame::FindAnnotationProps(const wxString& name)
 	return 0;
 }
 
-AnnotatPropPanel* VRenderFrame::FindAnnotationProps(Annotations* ad)
+AnnotatPropPanel* MainFrame::FindAnnotationProps(Annotations* ad)
 {
 	if (ad)
 		return FindAnnotationProps(ad->GetName());
 	return 0;
 }
 
-ManipPropPanel* VRenderFrame::FindMeshManip(const wxString& name)
+ManipPropPanel* MainFrame::FindMeshManip(const wxString& name)
 {
 	ManipPropPanel* result = 0;
 	for (auto i : m_prop_pages)
@@ -2751,7 +2751,7 @@ ManipPropPanel* VRenderFrame::FindMeshManip(const wxString& name)
 	return 0;
 }
 
-ManipPropPanel* VRenderFrame::FindMeshManip(MeshData* md)
+ManipPropPanel* MainFrame::FindMeshManip(MeshData* md)
 {
 	if (md)
 		return FindMeshManip(md->GetName());
@@ -2759,125 +2759,125 @@ ManipPropPanel* VRenderFrame::FindMeshManip(MeshData* md)
 }
 
 //prop view
-AdjustView* VRenderFrame::GetAdjustView()
+AdjustView* MainFrame::GetAdjustView()
 {
 	return m_adjust_view;
 }
 
 //movie view
-VMovieView* VRenderFrame::GetMovieView()
+MoviePanel* MainFrame::GetMovieView()
 {
 	return m_movie_view;
 }
 
 //system settings
-SettingDlg* VRenderFrame::GetSettingDlg()
+SettingDlg* MainFrame::GetSettingDlg()
 {
 	return m_setting_dlg;
 }
 
 //help dialog
-HelpDlg* VRenderFrame::GetHelpDlg()
+HelpDlg* MainFrame::GetHelpDlg()
 {
 	return m_help_dlg;
 }
 
 //clipping view
-ClippingView* VRenderFrame::GetClippingView()
+ClippingView* MainFrame::GetClippingView()
 {
 	return m_clip_view;
 }
 
 //brush dialog
-BrushToolDlg* VRenderFrame::GetBrushToolDlg()
+BrushToolDlg* MainFrame::GetBrushToolDlg()
 {
 	return m_brush_tool_dlg;
 }
 
 //noise cancelling dialog
-NoiseCancellingDlg* VRenderFrame::GetNoiseCancellingDlg()
+NoiseCancellingDlg* MainFrame::GetNoiseCancellingDlg()
 {
 	return m_noise_cancelling_dlg;
 }
 
 //counting dialog
-CountingDlg* VRenderFrame::GetCountingDlg()
+CountingDlg* MainFrame::GetCountingDlg()
 {
 	return m_counting_dlg;
 }
 
 //convert dialog
-ConvertDlg* VRenderFrame::GetConvertDlg()
+ConvertDlg* MainFrame::GetConvertDlg()
 {
 	return m_convert_dlg;
 }
 
-ColocalizationDlg* VRenderFrame::GetColocalizationDlg()
+ColocalizationDlg* MainFrame::GetColocalizationDlg()
 {
 	return m_colocalization_dlg;
 }
 
 //recorder dialog
-RecorderDlg* VRenderFrame::GetRecorderDlg()
+RecorderDlg* MainFrame::GetRecorderDlg()
 {
 	return m_recorder_dlg;
 }
 
 //measure dialog
-MeasureDlg* VRenderFrame::GetMeasureDlg()
+MeasureDlg* MainFrame::GetMeasureDlg()
 {
 	return m_measure_dlg;
 }
 
 //trace dialog
-TraceDlg* VRenderFrame::GetTraceDlg()
+TraceDlg* MainFrame::GetTraceDlg()
 {
 	return m_trace_dlg;
 }
 
 //ocl dialog
-OclDlg* VRenderFrame::GetOclDlg()
+OclDlg* MainFrame::GetOclDlg()
 {
 	return m_ocl_dlg;
 }
 
 //component dialog
-ComponentDlg* VRenderFrame::GetComponentDlg()
+ComponentDlg* MainFrame::GetComponentDlg()
 {
 	return m_component_dlg;
 }
 
 //calculation dialog
-CalculationDlg* VRenderFrame::GetCalculationDlg()
+CalculationDlg* MainFrame::GetCalculationDlg()
 {
 	return m_calculation_dlg;
 }
 
 //script break dialog
-ScriptBreakDlg* VRenderFrame::GetScriptBreakDlg()
+ScriptBreakDlg* MainFrame::GetScriptBreakDlg()
 {
 	return m_script_break_dlg;
 }
 
 //selection
-int VRenderFrame::GetCurSelType()
+int MainFrame::GetCurSelType()
 {
 	return m_cur_sel_type;
 }
 
 //get current selected volume
-VolumeData* VRenderFrame::GetCurSelVol()
+VolumeData* MainFrame::GetCurSelVol()
 {
 	return glbin_data_manager.GetVolumeData(m_cur_sel_vol);
 }
 
 //get current selected mesh
-MeshData* VRenderFrame::GetCurSelMesh()
+MeshData* MainFrame::GetCurSelMesh()
 {
 	return glbin_data_manager.GetMeshData(m_cur_sel_mesh);
 }
 
-void VRenderFrame::RefreshVRenderViews(bool tree, bool interactive)
+void MainFrame::RefreshVRenderViews(bool tree, bool interactive)
 {
 	for (int i=0 ; i<(int)m_vrv_list.size() ; i++)
 	{
@@ -2891,7 +2891,7 @@ void VRenderFrame::RefreshVRenderViews(bool tree, bool interactive)
 		UpdateTreeColors();
 }
 
-void VRenderFrame::DeleteVRenderView(int i)
+void MainFrame::DeleteVRenderView(int i)
 {
 	if (m_vrv_list[i])
 	{
@@ -2902,7 +2902,7 @@ void VRenderFrame::DeleteVRenderView(int i)
 			GetView(i)->GetAllVolumeData(j)->SetDisp(true);
 		for (j=0 ; j< GetView(i)->GetMeshNum() ; j++)
 			GetView(i)->GetMeshData(j)->SetDisp(true);
-		VRenderView* vrv = m_vrv_list[i];
+		RenderViewPanel* vrv = m_vrv_list[i];
 		m_vrv_list.erase(m_vrv_list.begin()+i);
 		m_aui_mgr.DetachPane(vrv);
 		vrv->Close();
@@ -2915,11 +2915,11 @@ void VRenderFrame::DeleteVRenderView(int i)
 	}
 }
 
-void VRenderFrame::DeleteVRenderView(wxString &name)
+void MainFrame::DeleteVRenderView(wxString &name)
 {
 	for (int i=0; i<GetViewNum(); i++)
 	{
-		VRenderGLView* view = GetView(i);
+		RenderCanvas* view = GetView(i);
 		if (view && name == view->m_vrv->GetName() && view->m_vrv->m_id > 1)
 		{
 			DeleteVRenderView(i);
@@ -2929,7 +2929,7 @@ void VRenderFrame::DeleteVRenderView(wxString &name)
 }
 
 //organize render views
-void VRenderFrame::OrganizeVRenderViews(int mode)
+void MainFrame::OrganizeVRenderViews(int mode)
 {
 	int width = 800;
 	int height = 600;
@@ -2942,7 +2942,7 @@ void VRenderFrame::OrganizeVRenderViews(int mode)
 	//get total area
 	for (i = 0; i < paneNum; i++)
 	{
-		VRenderView* vrv = m_vrv_list[i];
+		RenderViewPanel* vrv = m_vrv_list[i];
 		if (vrv && m_aui_mgr.GetPane(vrv).IsOk())
 		{
 			wxPoint pos = vrv->GetPosition();
@@ -2975,14 +2975,14 @@ void VRenderFrame::OrganizeVRenderViews(int mode)
 	//detach all panes
 	for (i = 0; i < paneNum; ++i)
 	{
-		VRenderView* vrv = m_vrv_list[i];
+		RenderViewPanel* vrv = m_vrv_list[i];
 		if (vrv)
 			m_aui_mgr.DetachPane(vrv);
 	}
 	//add back
 	for (i=0; i<paneNum; i++)
 	{
-		VRenderView* vrv = m_vrv_list[i];
+		RenderViewPanel* vrv = m_vrv_list[i];
 		if (vrv)
 		{
 			switch (mode)
@@ -3026,7 +3026,7 @@ void VRenderFrame::OrganizeVRenderViews(int mode)
 }
 
 //hide/show tools
-void VRenderFrame::ToggleAllTools(bool cur_state)
+void MainFrame::ToggleAllTools(bool cur_state)
 {
 	if (cur_state)
 	{
@@ -3098,7 +3098,7 @@ void VRenderFrame::ToggleAllTools(bool cur_state)
 	m_aui_mgr.Update();
 }
 
-void VRenderFrame::ShowPane(wxPanel* pane, bool show)
+void MainFrame::ShowPane(wxPanel* pane, bool show)
 {
 	if (m_aui_mgr.GetPane(pane).IsOk())
 	{
@@ -3110,21 +3110,21 @@ void VRenderFrame::ShowPane(wxPanel* pane, bool show)
 	}
 }
 
-void VRenderFrame::OnChEmbedCheck(wxCommandEvent &event)
+void MainFrame::OnChEmbedCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
 	if (ch_embed)
 		glbin_settings.m_vrp_embed = ch_embed->GetValue();
 }
 
-void VRenderFrame::OnChSaveCmpCheck(wxCommandEvent &event)
+void MainFrame::OnChSaveCmpCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_cmp = (wxCheckBox*)event.GetEventObject();
 	if (ch_cmp)
 		glbin_settings.m_save_compress = ch_cmp->GetValue();
 }
 
-wxWindow* VRenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
+wxWindow* MainFrame::CreateExtraControlProjectSave(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
@@ -3137,14 +3137,14 @@ wxWindow* VRenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
 	wxCheckBox* ch_embed = new wxCheckBox(panel, ID_EMBED_FILES,
 		"Embed all files in the project folder");
 	ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnChEmbedCheck), NULL, panel);
+		wxCommandEventHandler(MainFrame::OnChEmbedCheck), NULL, panel);
 	ch_embed->SetValue(glbin_settings.m_vrp_embed);
 
 	//compressed
 	wxCheckBox* ch_cmp = new wxCheckBox(panel, ID_LZW_COMP,
 		"Lempel-Ziv-Welch Compression");
 	ch_cmp->Connect(ch_cmp->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnChSaveCmpCheck), NULL, panel);
+		wxCommandEventHandler(MainFrame::OnChSaveCmpCheck), NULL, panel);
 	if (ch_cmp)
 		ch_cmp->SetValue(glbin_settings.m_save_compress);
 
@@ -3161,7 +3161,7 @@ wxWindow* VRenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
 	return panel;
 }
 
-void VRenderFrame::OnNewProject(wxCommandEvent& event)
+void MainFrame::OnNewProject(wxCommandEvent& event)
 {
 	glbin_data_manager.SetProjectPath("");
 	SetTitle(m_title);
@@ -3175,7 +3175,7 @@ void VRenderFrame::OnNewProject(wxCommandEvent& event)
 	GetView(0)->ClearAll();
 	for (int i = m_vrv_list.size() - 1; i > 0; i--)
 		DeleteVRenderView(i);
-	VRenderView::ResetID();
+	RenderViewPanel::ResetID();
 	DataGroup::ResetID();
 	MeshGroup::ResetID();
 	m_cur_sel_type = 0;
@@ -3199,7 +3199,7 @@ void VRenderFrame::OnNewProject(wxCommandEvent& event)
 	RefreshVRenderViews(true, true);
 }
 
-void VRenderFrame::OnSaveProject(wxCommandEvent& event)
+void MainFrame::OnSaveProject(wxCommandEvent& event)
 {
 	std::wstring default_path = glbin_data_manager.GetProjectFile().ToStdWstring();
 	if (default_path.empty())
@@ -3215,7 +3215,7 @@ void VRenderFrame::OnSaveProject(wxCommandEvent& event)
 	}
 }
 
-void VRenderFrame::OnSaveAsProject(wxCommandEvent& event)
+void MainFrame::OnSaveAsProject(wxCommandEvent& event)
 {
 	std::wstring default_path = glbin_data_manager.GetProjectFile().ToStdWstring();
 	std::wstring path;
@@ -3238,7 +3238,7 @@ void VRenderFrame::OnSaveAsProject(wxCommandEvent& event)
 	delete fopendlg;
 }
 
-void VRenderFrame::OnOpenProject(wxCommandEvent& event)
+void MainFrame::OnOpenProject(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose Project File",
@@ -3254,7 +3254,7 @@ void VRenderFrame::OnOpenProject(wxCommandEvent& event)
 	delete fopendlg;
 }
 
-void VRenderFrame::SaveProject(wxString& filename, bool inc)
+void MainFrame::SaveProject(wxString& filename, bool inc)
 {
 	wxString filename2 = filename;
 	if (inc)
@@ -3585,7 +3585,7 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 	fconfig.Write("num", GetViewNum());
 	for (i=0; i<GetViewNum(); i++)
 	{
-		VRenderGLView* view = GetView(i);
+		RenderCanvas* view = GetView(i);
 		if (view)
 		{
 			str = wxString::Format("/views/%d", i);
@@ -3932,7 +3932,7 @@ void VRenderFrame::SaveProject(wxString& filename, bool inc)
 	SetTitle(m_title + " - " + filename2);
 }
 
-void VRenderFrame::OpenProject(wxString& filename)
+void MainFrame::OpenProject(wxString& filename)
 {
 	glbin_data_manager.SetProjectPath(filename);
 	SetTitle(m_title + " - " + filename);
@@ -3949,7 +3949,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 	GetView(0)->ClearAll();
 	for (i = m_vrv_list.size() - 1; i > 0; i--)
 		DeleteVRenderView(i);
-	//VRenderView::ResetID();
+	//RenderViewPanel::ResetID();
 	DataGroup::ResetID();
 	MeshGroup::ResetID();
 
@@ -4530,7 +4530,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 		{
 			if (i>0)
 				CreateView();
-			VRenderGLView* view = GetLastView();
+			RenderCanvas* view = GetLastView();
 			if (!view)
 				continue;
 
@@ -4794,17 +4794,17 @@ void VRenderFrame::OpenProject(wxString& filename)
 				if (fconfig.Read("draw_camctr", &bVal))
 				{
 					view->m_draw_camctr = bVal;
-					view->m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_CamCtrChk,bVal);
+					view->m_vrv->m_options_toolbar->ToggleTool(RenderViewPanel::ID_CamCtrChk,bVal);
 				}
 				if (fconfig.Read("draw_info", &iVal))
 				{
 					view->m_draw_info = iVal;
-					view->m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FpsChk, iVal & INFO_DISP);
+					view->m_vrv->m_options_toolbar->ToggleTool(RenderViewPanel::ID_FpsChk, iVal & INFO_DISP);
 				}
 				if (fconfig.Read("draw_legend", &bVal))
 				{
 					view->m_draw_legend = bVal;
-					view->m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_LegendChk,bVal);
+					view->m_vrv->m_options_toolbar->ToggleTool(RenderViewPanel::ID_LegendChk,bVal);
 				}
 
 				//camera
@@ -5024,7 +5024,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 		double dVal;
 
 		//set settings for frame
-		VRenderGLView* view = 0;
+		RenderCanvas* view = 0;
 		if (fconfig.Read("cur_page", &iVal))
 		{
 			m_movie_view->SetCurrentPage(iVal);
@@ -5113,7 +5113,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 			if (curf && curf >= startf && curf <= endf)
 			{
 				m_movie_view->SetCurrentTime(curf);
-				VRenderGLView* view = GetLastView();
+				RenderCanvas* view = GetLastView();
 				if (view)
 				{
 					view->Set4DSeqFrame(curf, startf, endf, false);
@@ -5496,7 +5496,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 	RefreshVRenderViews(true, true);
 }
 
-void VRenderFrame::OnSettings(wxCommandEvent& event)
+void MainFrame::OnSettings(wxCommandEvent& event)
 {
 	m_setting_dlg->UpdateDeviceTree();
 	m_aui_mgr.GetPane(m_setting_dlg).Show();
@@ -5505,18 +5505,18 @@ void VRenderFrame::OnSettings(wxCommandEvent& event)
 }
 
 //undo redo
-void VRenderFrame::OnUndo(wxCommandEvent& event)
+void MainFrame::OnUndo(wxCommandEvent& event)
 {
 	glbin.undo();
 }
 
-void VRenderFrame::OnRedo(wxCommandEvent& event)
+void MainFrame::OnRedo(wxCommandEvent& event)
 {
 	glbin.redo();
 }
 
 //tools
-void VRenderFrame::OnLastTool(wxCommandEvent& event)
+void MainFrame::OnLastTool(wxCommandEvent& event)
 {
 	if (!m_setting_dlg)
 	{
@@ -5565,62 +5565,62 @@ void VRenderFrame::OnLastTool(wxCommandEvent& event)
 	}
 }
 
-void VRenderFrame::OnPaintTool(wxCommandEvent& event)
+void MainFrame::OnPaintTool(wxCommandEvent& event)
 {
 	ShowPaintTool();
 }
 
-void VRenderFrame::OnMeasure(wxCommandEvent& event)
+void MainFrame::OnMeasure(wxCommandEvent& event)
 {
 	ShowMeasureDlg();
 }
 
-void VRenderFrame::OnNoiseCancelling(wxCommandEvent& event)
+void MainFrame::OnNoiseCancelling(wxCommandEvent& event)
 {
 	ShowNoiseCancellingDlg();
 }
 
-void VRenderFrame::OnCounting(wxCommandEvent& event)
+void MainFrame::OnCounting(wxCommandEvent& event)
 {
 	ShowCountingDlg();
 }
 
-void VRenderFrame::OnColocalization(wxCommandEvent& event)
+void MainFrame::OnColocalization(wxCommandEvent& event)
 {
 	ShowColocalizationDlg();
 }
 
-void VRenderFrame::OnConvert(wxCommandEvent& event)
+void MainFrame::OnConvert(wxCommandEvent& event)
 {
 	ShowConvertDlg();
 }
 
-void VRenderFrame::OnTrace(wxCommandEvent& event)
+void MainFrame::OnTrace(wxCommandEvent& event)
 {
 	ShowTraceDlg();
 }
 
-void VRenderFrame::OnOcl(wxCommandEvent& event)
+void MainFrame::OnOcl(wxCommandEvent& event)
 {
 	ShowOclDlg();
 }
 
-void VRenderFrame::OnComponent(wxCommandEvent& event)
+void MainFrame::OnComponent(wxCommandEvent& event)
 {
 	ShowComponentDlg();
 }
 
-void VRenderFrame::OnCalculations(wxCommandEvent& event)
+void MainFrame::OnCalculations(wxCommandEvent& event)
 {
 	ShowCalculationDlg();
 }
 
-void VRenderFrame::OnMachineLearning(wxCommandEvent& event)
+void MainFrame::OnMachineLearning(wxCommandEvent& event)
 {
 	ShowMachineLearningDlg();
 }
 
-void VRenderFrame::ShowPaintTool()
+void MainFrame::ShowPaintTool()
 {
 	m_aui_mgr.GetPane(m_brush_tool_dlg).Show();
 	m_aui_mgr.GetPane(m_brush_tool_dlg).Float();
@@ -5630,7 +5630,7 @@ void VRenderFrame::ShowPaintTool()
 		wxGetBitmapFromMemory(icon_paint_brush));
 }
 
-void VRenderFrame::ShowMeasureDlg()
+void MainFrame::ShowMeasureDlg()
 {
 	m_aui_mgr.GetPane(m_measure_dlg).Show();
 	m_aui_mgr.GetPane(m_measure_dlg).Float();
@@ -5640,7 +5640,7 @@ void VRenderFrame::ShowMeasureDlg()
 		wxGetBitmapFromMemory(icon_measurement));
 }
 
-void VRenderFrame::ShowTraceDlg()
+void MainFrame::ShowTraceDlg()
 {
 	m_aui_mgr.GetPane(m_trace_dlg).Show();
 	m_aui_mgr.GetPane(m_trace_dlg).Float();
@@ -5650,7 +5650,7 @@ void VRenderFrame::ShowTraceDlg()
 		wxGetBitmapFromMemory(icon_tracking));
 }
 
-void VRenderFrame::ShowNoiseCancellingDlg()
+void MainFrame::ShowNoiseCancellingDlg()
 {
 	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Show();
 	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Float();
@@ -5660,7 +5660,7 @@ void VRenderFrame::ShowNoiseCancellingDlg()
 		wxGetBitmapFromMemory(icon_noise_reduc));
 }
 
-void VRenderFrame::ShowCountingDlg()
+void MainFrame::ShowCountingDlg()
 {
 	m_aui_mgr.GetPane(m_counting_dlg).Show();
 	m_aui_mgr.GetPane(m_counting_dlg).Float();
@@ -5670,7 +5670,7 @@ void VRenderFrame::ShowCountingDlg()
 		wxGetBitmapFromMemory(icon_volume_size));
 }
 
-void VRenderFrame::ShowColocalizationDlg()
+void MainFrame::ShowColocalizationDlg()
 {
 	m_aui_mgr.GetPane(m_colocalization_dlg).Show();
 	m_aui_mgr.GetPane(m_colocalization_dlg).Float();
@@ -5680,7 +5680,7 @@ void VRenderFrame::ShowColocalizationDlg()
 		wxGetBitmapFromMemory(icon_colocalization));
 }
 
-void VRenderFrame::ShowConvertDlg()
+void MainFrame::ShowConvertDlg()
 {
 	m_aui_mgr.GetPane(m_convert_dlg).Show();
 	m_aui_mgr.GetPane(m_convert_dlg).Float();
@@ -5690,7 +5690,7 @@ void VRenderFrame::ShowConvertDlg()
 		wxGetBitmapFromMemory(icon_convert));
 }
 
-void VRenderFrame::ShowOclDlg()
+void MainFrame::ShowOclDlg()
 {
 	m_aui_mgr.GetPane(m_ocl_dlg).Show();
 	m_aui_mgr.GetPane(m_ocl_dlg).Float();
@@ -5700,7 +5700,7 @@ void VRenderFrame::ShowOclDlg()
 		wxGetBitmapFromMemory(icon_opencl));
 }
 
-void VRenderFrame::ShowComponentDlg()
+void MainFrame::ShowComponentDlg()
 {
 	m_aui_mgr.GetPane(m_component_dlg).Show();
 	m_aui_mgr.GetPane(m_component_dlg).Float();
@@ -5710,7 +5710,7 @@ void VRenderFrame::ShowComponentDlg()
 		wxGetBitmapFromMemory(icon_components));
 }
 
-void VRenderFrame::ShowCalculationDlg()
+void MainFrame::ShowCalculationDlg()
 {
 	m_aui_mgr.GetPane(m_calculation_dlg).Show();
 	m_aui_mgr.GetPane(m_calculation_dlg).Float();
@@ -5720,7 +5720,7 @@ void VRenderFrame::ShowCalculationDlg()
 		wxGetBitmapFromMemory(icon_calculations));
 }
 
-void VRenderFrame::ShowMachineLearningDlg()
+void MainFrame::ShowMachineLearningDlg()
 {
 	m_aui_mgr.GetPane(m_machine_learning_dlg).Show();
 	m_aui_mgr.GetPane(m_machine_learning_dlg).Float();
@@ -5730,7 +5730,7 @@ void VRenderFrame::ShowMachineLearningDlg()
 		wxGetBitmapFromMemory(icon_machine_learning));
 }
 
-void VRenderFrame::ShowScriptBreakDlg(bool show)
+void MainFrame::ShowScriptBreakDlg(bool show)
 {
 	if (show)
 		m_aui_mgr.GetPane(m_script_break_dlg).
@@ -5741,13 +5741,13 @@ void VRenderFrame::ShowScriptBreakDlg(bool show)
 	m_aui_mgr.Update();
 }
 
-void VRenderFrame::SetTextureUndos()
+void MainFrame::SetTextureUndos()
 {
 	if (m_setting_dlg)
 		flvr::Texture::mask_undo_num_ = (size_t)(glbin_brush_def.m_paint_hist_depth);
 }
 
-void VRenderFrame::SetTextureRendererSettings()
+void MainFrame::SetTextureRendererSettings()
 {
 	if (!m_setting_dlg)
 		return;
@@ -5780,43 +5780,43 @@ void VRenderFrame::SetTextureRendererSettings()
 }
 
 //quit option
-void VRenderFrame::OnQuit(wxCommandEvent& event)
+void MainFrame::OnQuit(wxCommandEvent& event)
 {
 	Close(true);
 }
 
-void VRenderFrame::OnFacebook(wxCommandEvent& event)
+void MainFrame::OnFacebook(wxCommandEvent& event)
 {
 	::wxLaunchDefaultBrowser(FACEBOOK_URL);
 }
 
-void VRenderFrame::OnManual(wxCommandEvent& event)
+void MainFrame::OnManual(wxCommandEvent& event)
 {
 	::wxLaunchDefaultBrowser(HELP_MANUAL);
 }
 
 
-void VRenderFrame::OnTutorial(wxCommandEvent& event)
+void MainFrame::OnTutorial(wxCommandEvent& event)
 {
 	::wxLaunchDefaultBrowser(HELP_TUTORIAL);
 }
 
-void VRenderFrame::OnTwitter(wxCommandEvent& event)
+void MainFrame::OnTwitter(wxCommandEvent& event)
 {
 	::wxLaunchDefaultBrowser(TWITTER_URL);
 }
 
-void VRenderFrame::OnYoutube(wxCommandEvent& event)
+void MainFrame::OnYoutube(wxCommandEvent& event)
 {
 	::wxLaunchDefaultBrowser(YOUTUBE_URL);
 }
 
-void VRenderFrame::OnShowHideUI(wxCommandEvent& event)
+void MainFrame::OnShowHideUI(wxCommandEvent& event)
 {
 	ToggleAllTools(true);
 }
 
-void VRenderFrame::OnShowHideToolbar(wxCommandEvent& event)
+void MainFrame::OnShowHideToolbar(wxCommandEvent& event)
 {
 	if (m_aui_mgr.GetPane(m_main_tb).IsShown()) {
 		m_aui_mgr.GetPane(m_main_tb).Hide();
@@ -5828,7 +5828,7 @@ void VRenderFrame::OnShowHideToolbar(wxCommandEvent& event)
 	m_aui_mgr.Update();
 }
 
-void VRenderFrame::OnShowHideView(wxCommandEvent &event)
+void MainFrame::OnShowHideView(wxCommandEvent &event)
 {
 	int id = event.GetId();
 
@@ -5918,7 +5918,7 @@ void VRenderFrame::OnShowHideView(wxCommandEvent &event)
 }
 
 //panes
-void VRenderFrame::OnPaneClose(wxAuiManagerEvent& event)
+void MainFrame::OnPaneClose(wxAuiManagerEvent& event)
 {
 	wxWindow* wnd = event.pane->window;
 	wxString name = wnd->GetName();
@@ -5927,7 +5927,7 @@ void VRenderFrame::OnPaneClose(wxAuiManagerEvent& event)
 		m_tb_menu_ui->Check(ID_UIListView, false);
 	else if (name == "TreePanel")
 		m_tb_menu_ui->Check(ID_UITreeView, false);
-	else if (name == "VMovieView")
+	else if (name == "MoviePanel")
 		m_tb_menu_ui->Check(ID_UIMovieView, false);
 	else if (name == "PropPanel")
 		m_tb_menu_ui->Check(ID_UIPropView, false);
@@ -5938,7 +5938,7 @@ void VRenderFrame::OnPaneClose(wxAuiManagerEvent& event)
 }
 
 //prop pages
-void VRenderFrame::OnPropPageClose(wxAuiNotebookEvent& event)
+void MainFrame::OnPropPageClose(wxAuiNotebookEvent& event)
 {
 	wxAuiNotebook* panel = (wxAuiNotebook*)event.GetEventObject();
 	wxWindow* page = panel->GetPage(event.GetSelection());
@@ -5952,7 +5952,7 @@ void VRenderFrame::OnPropPageClose(wxAuiNotebookEvent& event)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-void VRenderFrame::OnDraw(wxPaintEvent& event)
+void MainFrame::OnDraw(wxPaintEvent& event)
 {
 	//wxPaintDC dc(this);
 
@@ -5961,7 +5961,7 @@ void VRenderFrame::OnDraw(wxPaintEvent& event)
 	//dc.DrawRectangle(windowRect);
 }
 
-void VRenderFrame::OnKeyDown(wxKeyEvent& event)
+void MainFrame::OnKeyDown(wxKeyEvent& event)
 {
 	event.Skip();
 }

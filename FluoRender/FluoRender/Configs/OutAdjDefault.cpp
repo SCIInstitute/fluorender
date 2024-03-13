@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <OutAdjDefault.h>
 #include <Names.h>
-#include <VRenderGLView.h>
+#include <RenderCanvas.h>
 #include <DataManager.h>
 
 OutAdjDefault::OutAdjDefault()
@@ -95,7 +95,7 @@ void OutAdjDefault::Save(wxFileConfig& f)
 	f.Write("hdr_b", m_hdr_b);
 }
 
-void OutAdjDefault::Set(VRenderGLView* view)
+void OutAdjDefault::Set(RenderCanvas* view)
 {
 	if (!view)
 		return;
@@ -122,7 +122,7 @@ void OutAdjDefault::Set(VRenderGLView* view)
 	m_hdr_b = c.b();
 }
 
-void OutAdjDefault::Apply(VRenderGLView* view)
+void OutAdjDefault::Apply(RenderCanvas* view)
 {
 	if (!view)
 		return;

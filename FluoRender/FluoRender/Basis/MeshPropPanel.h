@@ -35,13 +35,13 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-class VRenderGLView;
+class RenderCanvas;
 class MeshData;
 class wxSingleSlider;
 class MeshPropPanel: public PropPanel
 {
 public:
-	MeshPropPanel(VRenderFrame* frame,
+	MeshPropPanel(MainFrame* frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -49,14 +49,14 @@ public:
 		const wxString& name = "MeshPropPanel");
 	~MeshPropPanel();
 
-	void SetView(VRenderGLView* view);
+	void SetView(RenderCanvas* view);
 	void SetMeshData(MeshData* md);
 	MeshData* GetMeshData();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 private:
-	VRenderGLView* m_view;
+	RenderCanvas* m_view;
 	MeshData* m_md;
 
 	wxCheckBox *m_light_chk;

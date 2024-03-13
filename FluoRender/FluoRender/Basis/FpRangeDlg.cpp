@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "FpRangeDlg.h"
-#include "VRenderFrame.h"
+#include <MainFrame.h>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(FpRangeDlg, wxDialog)
@@ -35,7 +35,7 @@ BEGIN_EVENT_TABLE(FpRangeDlg, wxDialog)
 	EVT_TEXT(ID_MaxValText, FpRangeDlg::OnMaxText)
 END_EVENT_TABLE()
 
-FpRangeDlg::FpRangeDlg(VRenderFrame *frame)
+FpRangeDlg::FpRangeDlg(MainFrame *frame)
 : wxDialog(frame, wxID_ANY, wxString("Data Conversion"),
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(400, 200)),

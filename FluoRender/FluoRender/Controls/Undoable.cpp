@@ -105,6 +105,11 @@ void Undoable::pop()
 	}
 }
 
+double Undoable::get_time_span()
+{
+	return time_span_;
+}
+
 bool Undoable::time_sample(double& t)
 {
 	std::chrono::duration<double> time_span =
@@ -113,5 +118,5 @@ bool Undoable::time_sample(double& t)
 	if (stack_.empty())
 		return true;
 	double d = std::fabs(t - stack_[stack_pointer_].first);
-	return d > time_span_;
+	return d > get_time_span();
 }

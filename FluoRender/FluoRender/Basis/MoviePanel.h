@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _VMovieView_H_
-#define _VMovieView_H_
+#ifndef _MOVIEPANEL_H_
+#define _MOVIEPANEL_H_
 
 #include <compatibility.h>
 #include <wx/wx.h>
@@ -38,11 +38,11 @@ DEALINGS IN THE SOFTWARE.
 
 #define PROG_SLDR_MAX	361
 
-class VRenderFrame;
-class VRenderGLView;
+class MainFrame;
+class RenderCanvas;
 class RecorderDlg;
 class wxSingleSlider;
-class VMovieView : public wxPanel
+class MoviePanel : public wxPanel
 {
 	enum
 	{
@@ -110,12 +110,12 @@ class VMovieView : public wxPanel
 	};
 
 public:
-	VMovieView(VRenderFrame* frame,
+	MoviePanel(MainFrame* frame,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
-		const wxString& name = "VMovieView");
-	~VMovieView();
+		const wxString& name = "MoviePanel");
+	~MoviePanel();
 
 	void AddView(wxString view);
 	void DeleteView(wxString view);
@@ -297,8 +297,8 @@ private:
 	static wxTextCtrl *m_estimated_size_text;
 
 private:
-	VRenderFrame* m_frame;
-	VRenderGLView* m_view;
+	MainFrame* m_frame;
+	RenderCanvas* m_view;
 	RecorderDlg* m_advanced_movie;
 	int m_view_idx;//index to current renderview
 
@@ -430,4 +430,4 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 
-#endif//_VMovieView_H_
+#endif//_MOVIEPANEL_H_
