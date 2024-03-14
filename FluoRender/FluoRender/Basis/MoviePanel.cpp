@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "MoviePanel.h"
+#include <MoviePanel.h>
 #include <Global/Global.h>
 #include <RecorderDlg.h>
 #include <MainFrame.h>
@@ -36,8 +36,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
-#include "png_resource.h"
-#include "img/icons.h"
+#include <png_resource.h>
+#include <img/icons.h>
 
 BEGIN_EVENT_TABLE(MoviePanel, wxPanel)
 //time sequence

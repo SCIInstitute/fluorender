@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "BrushToolDlg.h"
+#include <BrushToolDlg.h>
 #include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
@@ -41,7 +41,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stdpaths.h>
 //resources
 #include "Formats/png_resource.h"
-#include "img/icons.h"
+#include <img/icons.h>
 
 #define GM_2_ESTR(x) (1.0 - sqrt(1.0 - (x - 1.0) * (x - 1.0)))
 

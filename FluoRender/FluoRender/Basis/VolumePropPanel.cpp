@@ -25,13 +25,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "VolumePropPanel.h"
+#include <VolumePropPanel.h>
 #include <Global/Global.h>
 #include <Global/Names.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <RenderViewPanel.h>
-#include <AdjustView.h>
+#include <OutputAdjPanel.h>
 #include <ColocalizationDlg.h>
 #include <Calculate/Histogram.h>
 #include <Database/RecordHistParams.h>
@@ -48,7 +48,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wxUndoableComboBox.h>
 #include <wxUndoableToolbar.h>
 #include <wxUndoableTextCtrl.h>
-#include "png_resource.h"
+#include <png_resource.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
 #include <wx/aboutdlg.h>
@@ -56,7 +56,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 #include <wx/hyperlink.h>
 #include <wx/stdpaths.h>
-#include "img/icons.h"
+#include <img/icons.h>
 #include <limits>
 #include <Debug.h>
 
@@ -1103,7 +1103,7 @@ void VolumePropPanel::InitVRenderViews(unsigned int type)
 			if (view)
 			{
 				view->InitView(type);
-				view->m_vrv->UpdateView();
+				view->m_vrv->FluoUpdate();
 			}
 		}
 	}
@@ -1331,7 +1331,7 @@ void VolumePropPanel::EnableColormap(bool bval)
 
 	if (m_frame)
 	{
-		AdjustView* adjust_view = m_frame->GetAdjustView();
+		OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
 		if (adjust_view)
 			adjust_view->UpdateSync();
 	}
@@ -2431,7 +2431,7 @@ void VolumePropPanel::OnColorChange(wxColor c)
 
 		if (m_frame)
 		{
-			AdjustView *adjust_view = m_frame->GetAdjustView();
+			OutputAdjPanel *adjust_view = m_frame->GetAdjustView();
 			if (adjust_view)
 				adjust_view->UpdateSync();
 		}

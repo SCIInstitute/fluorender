@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "MeasureDlg.h"
+#include <MeasureDlg.h>
 #include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
@@ -44,7 +44,7 @@ DEALINGS IN THE SOFTWARE.
 //resources
 #include "Formats/png_resource.h"
 #include "ruler.xpm"
-#include "img/icons.h"
+#include <img/icons.h>
 
 BEGIN_EVENT_TABLE(RulerListCtrl, wxListCtrl)
 	EVT_KEY_DOWN(RulerListCtrl::OnKeyDown)

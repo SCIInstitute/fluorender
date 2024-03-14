@@ -34,9 +34,10 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/spinbutt.h>
 
 class MainFrame;
-class wxSingleSlider;
 class RenderCanvas;
 class wxGLContext;
+class wxSingleSlider;
+class wxUndoableScrollBar;
 class RenderViewPanel: public PropPanel
 {
 public:
@@ -64,19 +65,18 @@ public:
 	};
 	enum
 	{
-		ID_ZeroRotBtn = 0,
-		ID_RotResetBtn
-	};
-	enum
-	{
 		ID_RotXScroll = 0,
 		ID_RotYScroll,
 		ID_RotZScroll
 	};
+	enum
+	{
+		ID_ZeroRotBtn = 0,
+		ID_RotResetBtn
+	};
 
 	RenderViewPanel(MainFrame* frame,
 		wxGLContext* sharedContext=0,
-		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
@@ -117,11 +117,7 @@ public:
 	void SetRotLock(bool val);
 	void SetSliderType(bool val);
 	void SetRotations(double rotx, double roty, double rotz);
-
-	//void UpdateView(bool ui_update = true);
-	void UpdateScaleFactor(bool update_text = true);
-	//rot center anchor thresh
-	void SetPinThreshold(double value);
+	void SetZeroRotations();
 
 	//get rendering context
 	wxGLContext* GetContext();
@@ -134,7 +130,6 @@ public:
 	void SaveDefault(unsigned int mask = 0xffffffff);
 	void LoadSettings();
 
-
 	//stereo/vr
 	void InitOpenVR();
 
@@ -143,6 +138,9 @@ public:
 	static int m_max_id;
 	int m_id;
 	int m_draw_scalebar;
+	//rot slider style
+	bool m_rot_slider;
+	double m_dpi_sf, m_dpi_sf2;
 
 	//render view///////////////////////////////////////////////
 	RenderCanvas *m_glview;
@@ -177,34 +175,15 @@ public:
 	wxToolBar *m_scale_reset_btn;
 
 	//bottom bar///////////////////////////////////////////////////
-	wxScrollBar *m_x_rot_sldr;
-	wxTextCtrl *m_x_rot_text;
-	wxScrollBar *m_y_rot_sldr;
-	wxTextCtrl *m_y_rot_text;
-	wxScrollBar *m_z_rot_sldr;
-	wxTextCtrl *m_z_rot_text;
-	bool m_x_rotating, m_y_rotating, m_z_rotating;
-	bool m_skip_thumb;
 	wxToolBar *m_rot_lock_btn;
+	wxTextCtrl *m_x_rot_text;
+	wxTextCtrl *m_y_rot_text;
+	wxTextCtrl *m_z_rot_text;
+	wxUndoableScrollBar* m_x_rot_sldr;
+	wxUndoableScrollBar* m_y_rot_sldr;
+	wxUndoableScrollBar* m_z_rot_sldr;
 	wxComboBox *m_ortho_view_cmb;
-	wxToolBar* m_lower_toolbar;
-
-	//slider timer
-	wxTimer m_timer;
-
-	double m_pin_scale_thresh;//scale factor theshold value for auto update
-	//rot slider style
-	bool m_rot_slider;
-
-	bool m_use_dft_settings;
-	double m_dft_x_rot;
-	double m_dft_y_rot;
-	double m_dft_z_rot;
-	double m_dft_depth_atten_factor;
-	double m_dft_scale_factor;
-	int m_dft_scale_factor_mode;//0:view; 1:pixel; 2:data(pixel * xy spc)
-
-	double m_dpi_sf, m_dpi_sf2;
+	wxToolBar* m_reset_btn;
 
 private:
 	//called when updated from bars
@@ -242,17 +221,10 @@ private:
 	//bar bottom
 	void OnRotLockCheck(wxCommandEvent& event);
 	void OnRotEdit(wxCommandEvent& event);
-	void OnTimer(wxTimerEvent& event);
-	void OnRotTrack(wxScrollEvent& event);
-	void OnRotRelease(wxScrollEvent& event);
-	void OnRotLineDown(wxScrollEvent& event);
-	void OnRotLineUp(wxScrollEvent& event);
+	void OnRotScroll(wxScrollEvent& event);
 
-	void OnZeroRot(wxCommandEvent& event);
 	void OnRotReset(wxCommandEvent &event);
 	void OnOrthoViewSelected(wxCommandEvent& event);
-
-
 
 	//capture options
 	void OnCh1Check(wxCommandEvent& event);

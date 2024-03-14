@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "TraceDlg.h"
+#include <TraceDlg.h>
 #include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
@@ -42,8 +42,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/dirdlg.h>
-#include "png_resource.h"
-#include "img/icons.h"
+#include <png_resource.h>
+#include <img/icons.h>
 #include <boost/chrono.hpp>
 #include <set>
 #include <limits>

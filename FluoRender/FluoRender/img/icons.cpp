@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "img/icons.h"
+#include <img/icons.h>
 #include "img/icons_main_toolbar_menu.h"
 #include "img/icons_render_view.h"
 #include "img/icons_clipping_view.h"

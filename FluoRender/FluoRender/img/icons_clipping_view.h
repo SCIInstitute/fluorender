@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "img/icons.h"
+#include <img/icons.h>
 
 /* align.png - 1470 bytes */
 const unsigned char icons::align_png[1470] = {

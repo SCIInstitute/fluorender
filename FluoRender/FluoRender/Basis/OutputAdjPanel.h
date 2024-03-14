@@ -36,15 +36,15 @@ class RenderCanvas;
 class VolumeData;
 class DataGroup;
 class wxSingleSlider;
-class AdjustView: public PropPanel
+class OutputAdjPanel: public PropPanel
 {
 public:
-	AdjustView(MainFrame* frame,
+	OutputAdjPanel(MainFrame* frame,
 		const wxPoint& pos=wxDefaultPosition,
 		const wxSize& size=wxDefaultSize,
 		long style=0,
-		const wxString& name="AdjustView");
-	~AdjustView();
+		const wxString& name="OutputAdjPanel");
+	~OutputAdjPanel();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 

@@ -50,7 +50,7 @@ class MeshData;
 class DataManager;
 class wxDoubleSlider;
 class wxSingleSlider;
-class ClippingView: public PropPanel
+class ClipPlanePanel: public PropPanel
 {
 	enum
 	{
@@ -60,12 +60,12 @@ class ClippingView: public PropPanel
 	};
 
 public:
-	ClippingView(MainFrame* frame,
+	ClipPlanePanel(MainFrame* frame,
 		const wxPoint& pos=wxDefaultPosition,
 		const wxSize& size=wxDefaultSize,
 		long style=0,
-		const wxString& name="ClippingView");
-	~ClippingView();
+		const wxString& name="ClipPlanePanel");
+	~ClipPlanePanel();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 

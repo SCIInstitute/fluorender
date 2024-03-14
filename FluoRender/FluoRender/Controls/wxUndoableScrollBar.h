@@ -25,50 +25,46 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <PropPanel.h>
-#include <MainFrame.h>
-#include <RenderCanvas.h>
-#include <RenderViewPanel.h>
+#ifndef _WXUNDOABLESCROLLBAR_H_
+#define _WXUNDOABLESCROLLBAR_H_
 
-PropPanel::PropPanel(MainFrame* frame,
-	wxWindow* parent,
-	const wxPoint& pos,
-	const wxSize& size,
-	long style,
-	const wxString& name) :
-	wxScrolledWindow(parent, wxID_ANY, pos, size,style, name),
-	m_frame(frame)
+#include <Undoable.h>
+#include <wx/scrolbar.h>
+#include <wx/timer.h>
+
+class wxUndoableScrollBar : public wxScrollBar, public Undoable
 {
-}
+public:
+	wxUndoableScrollBar(
+		wxWindow *parent,
+		wxWindowID id,
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = wxSB_HORIZONTAL,
+		const wxValidator& val = wxDefaultValidator,
+		const wxString& name = "wxUndoableScrollBar");
 
-PropPanel::~PropPanel()
-{
-}
+	virtual void SetMode(int val);
+	virtual void SetValue(int val);
+	virtual void ChangeValue(int val);
+	virtual int GetValue();
 
-void PropPanel::FluoRefresh(bool tree, bool interactive, int excl_self,
-	const fluo::ValueCollection& vc)
-{
-	if (!m_frame)
-		return;
-	int view_excl = 0;
-	if (dynamic_cast<RenderViewPanel*>(this))
-		view_excl = excl_self;
-	m_frame->RefreshVRenderViews(tree, interactive, view_excl, this);
-	m_frame->UpdateProps(vc, excl_self, this);//update ui but exclude this
-}
+private:
+	int value_;
+	int mode_;//0: normal slider; 1: jog
+	wxTimer timer_;
 
-void PropPanel::SetFocusVRenderViews(wxBasisSlider* slider)
-{
-	if (m_frame)
-	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetFocusedSlider(slider);
-			}
-		}
-	}
-}
+private:
+	void OnTimer(wxTimerEvent& event);
+	void OnTrack(wxScrollEvent& event);
+	void OnRelease(wxScrollEvent& event);
+	void OnLineDown(wxScrollEvent& event);
+	void OnLineUp(wxScrollEvent& event);
 
+private:
+	virtual void replace(double t);
+	virtual void push(double t);
+	virtual void update();
+};
+
+#endif//_WXUNDOABLESCROLLBAR_H_

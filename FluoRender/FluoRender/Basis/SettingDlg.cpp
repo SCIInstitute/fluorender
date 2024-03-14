@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "SettingDlg.h"
+#include <SettingDlg.h>
 #include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
@@ -1348,16 +1348,6 @@ void SettingDlg::OnPinThresholdEdit(wxCommandEvent &event)
 	str.ToDouble(&dval);
 	m_pin_threshold_sldr->ChangeValue(std::round(dval/10.0));
 	glbin_settings.m_pin_threshold = dval / 100.0;
-
-	if (m_frame)
-	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-				view->m_vrv->m_pin_scale_thresh = glbin_settings.m_pin_threshold;
-		}
-	}
 }
 
 //link rotations

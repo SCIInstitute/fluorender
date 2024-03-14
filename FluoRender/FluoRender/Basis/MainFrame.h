@@ -70,6 +70,7 @@ using namespace std;
 #define BATCH_INFO HELP_MANUAL
 #define HELP_PAINT HELP_MANUAL
 
+#define UITEXT_PROJECT		"Project"
 #define UITEXT_DATAVIEW		"Datasets"
 #define UITEXT_TREEVIEW		"Workspace"
 #define UITEXT_MAKEMOVIE	"Record/Export"
@@ -90,11 +91,11 @@ class VolumePropPanel;
 class MeshPropPanel;
 class AnnotatPropPanel;
 class ManipPropPanel;
-class AdjustView;
+class OutputAdjPanel;
 class MoviePanel;
 class SettingDlg;
 class HelpDlg;
-class ClippingView;
+class ClipPlanePanel;
 class BrushToolDlg;
 class NoiseCancellingDlg;
 class CountingDlg;
@@ -150,8 +151,7 @@ class MainFrame: public wxFrame
 		//
 		ID_Settings,
 		//UI menu
-		ID_UIListView,
-		ID_UITreeView,
+		ID_UIProjView,
 		ID_UIMovieView,
 		ID_UIAdjView,
 		ID_UIClipView,
@@ -234,7 +234,7 @@ public:
 	ManipPropPanel* FindMeshManip(const wxString& str);
 
 	//prop view
-	AdjustView* GetAdjustView();
+	OutputAdjPanel* GetAdjustView();
 	//movie view
 	MoviePanel* GetMovieView();
 	//system settings
@@ -242,7 +242,7 @@ public:
 	//help dialog
 	HelpDlg* GetHelpDlg();
 	//clipping view
-	ClippingView* GetClippingView();
+	ClipPlanePanel* GetClippingView();
 	//brush dialog
 	BrushToolDlg* GetBrushToolDlg();
 	//noise cancelling dialog
@@ -328,12 +328,13 @@ private:
 	wxMenu* m_top_window;
 	wxMenu* m_top_help;
 
+	wxAuiNotebook* m_proj_panel;
 	TreePanel *m_tree_panel;
 	ListPanel *m_list_panel;
 	std::vector<RenderViewPanel*> m_vrv_list;
 	wxAuiNotebook *m_prop_panel;
-	ClippingView *m_clip_view;
-	AdjustView* m_adjust_view;
+	ClipPlanePanel *m_clip_view;
+	OutputAdjPanel* m_adjust_view;
 	SettingDlg* m_setting_dlg;
 	HelpDlg* m_help_dlg;
 	BrushToolDlg* m_brush_tool_dlg;

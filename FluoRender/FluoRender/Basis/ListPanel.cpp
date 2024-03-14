@@ -25,18 +25,18 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "ListPanel.h"
+#include <ListPanel.h>
 #include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <RenderViewPanel.h>
 #include <TreePanel.h>
-#include <AdjustView.h>
+#include <OutputAdjPanel.h>
 #include <Formats/png_resource.h>
 #include <wx/valnum.h>
 
 //resources
-#include "img/icons.h"
+#include <img/icons.h>
 
 BEGIN_EVENT_TABLE(DataListCtrl, wxListCtrl)
 EVT_LIST_ITEM_ACTIVATED(wxID_ANY, DataListCtrl::OnAct)
@@ -340,7 +340,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 					m_frame->OnSelection(2, view, group, vd_add, 0);
 					if (view->GetVolMethod() == VOL_METHOD_MULTI)
 					{
-						AdjustView* adjust_view = m_frame->GetAdjustView();
+						OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
 						if (adjust_view)
 						{
 							adjust_view->SetRenderView(view);

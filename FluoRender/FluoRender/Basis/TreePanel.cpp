@@ -25,11 +25,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "TreePanel.h"
+#include <TreePanel.h>
 #include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
-#include <AdjustView.h>
+#include <OutputAdjPanel.h>
 #include <ListPanel.h>
 #include <BrushToolDlg.h>
 #include <ColocalizationDlg.h>
@@ -38,7 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Formats/png_resource.h>
 #include "tick.xpm"
 #include "cross.xpm"
-#include "img/icons.h"
+#include <img/icons.h>
 
 BEGIN_EVENT_TABLE(DataTreeCtrl, wxTreeCtrl)
 	EVT_CONTEXT_MENU(DataTreeCtrl::OnContextMenu)
@@ -182,7 +182,7 @@ void DataTreeCtrl::DeleteSelection()
 								view->RemoveVolumeData(name_data);
 								if (view->GetVolMethod() == VOL_METHOD_MULTI)
 								{
-									AdjustView* adjust_view = m_frame->GetAdjustView();
+									OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
 									if (adjust_view)
 									{
 										adjust_view->SetRenderView(view);
@@ -239,7 +239,7 @@ void DataTreeCtrl::DeleteSelection()
 
 					if (view->GetVolMethod() == VOL_METHOD_MULTI)
 					{
-						AdjustView* adjust_view = m_frame->GetAdjustView();
+						OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
 						if (adjust_view)
 						{
 							adjust_view->SetRenderView(view);

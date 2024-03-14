@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <NoiseCancellingDlg.h>
 #include <ComponentDlg.h>
 #include <MoviePanel.h>
-#include <AdjustView.h>
+#include <OutputAdjPanel.h>
 #include <ScriptBreakDlg.h>
 #include <Calculate/BackgStat.h>
 #include <Components/CompSelector.h>

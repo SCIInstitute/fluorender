@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <RenderViewPanel.h>
 #include <SettingDlg.h>
-#include <AdjustView.h>
+#include <OutputAdjPanel.h>
 #include <BrushToolDlg.h>
 #include <ColocalizationDlg.h>
 #include <TreePanel.h>
@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MoviePanel.h>
 #include <RecorderDlg.h>
 #include <ComponentDlg.h>
-#include <ClippingView.h>
+#include <ClipPlanePanel.h>
 #include <TraceDlg.h>
 #include <MeasureDlg.h>
 #include <VolumePropPanel.h>
@@ -58,8 +58,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stdpaths.h>
 #include <Debug.h>
 #include <Timer.h>
-#include "png_resource.h"
-#include "img/icons.h"
+#include <png_resource.h>
+#include <img/icons.h>
 #include <array>
 
 bool RenderCanvas::m_linked_rot = false;
@@ -631,8 +631,6 @@ void RenderCanvas::OnResize(wxSizeEvent& event)
 		return;
 	else
 		m_size = size;
-
-	m_vrv->UpdateScaleFactor(false);
 
 	RefreshGL(1);
 }
@@ -1791,7 +1789,7 @@ void RenderCanvas::OrganizeLayers()
 
 			if (m_frame)
 			{
-				AdjustView* adjust_view = m_frame->GetAdjustView();
+				OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
 				if (adjust_view)
 				{
 					adjust_view->SetGroupLink(le_group);
@@ -4346,23 +4344,23 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 
 #ifdef _WIN32
 	//update ortho rotation
-	if (!m_vrv->m_ortho_view_cmb->HasFocus())
-	{
-		if (m_q.AlmostEqual(fluo::Quaternion(0, sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
-			m_vrv->m_ortho_view_cmb->Select(0);
-		else if (m_q.AlmostEqual(fluo::Quaternion(0, -sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
-			m_vrv->m_ortho_view_cmb->Select(1);
-		else if (m_q.AlmostEqual(fluo::Quaternion(sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
-			m_vrv->m_ortho_view_cmb->Select(2);
-		else if (m_q.AlmostEqual(fluo::Quaternion(-sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
-			m_vrv->m_ortho_view_cmb->Select(3);
-		else if (m_q.AlmostEqual(fluo::Quaternion(0, 0, 0, 1)))
-			m_vrv->m_ortho_view_cmb->Select(4);
-		else if (m_q.AlmostEqual(fluo::Quaternion(0, -1, 0, 0)))
-			m_vrv->m_ortho_view_cmb->Select(5);
-		else
-			m_vrv->m_ortho_view_cmb->Select(6);
-	}
+	//if (!m_vrv->m_ortho_view_cmb->HasFocus())
+	//{
+	//	if (m_q.AlmostEqual(fluo::Quaternion(0, sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
+	//		m_vrv->m_ortho_view_cmb->Select(0);
+	//	else if (m_q.AlmostEqual(fluo::Quaternion(0, -sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
+	//		m_vrv->m_ortho_view_cmb->Select(1);
+	//	else if (m_q.AlmostEqual(fluo::Quaternion(sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
+	//		m_vrv->m_ortho_view_cmb->Select(2);
+	//	else if (m_q.AlmostEqual(fluo::Quaternion(-sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
+	//		m_vrv->m_ortho_view_cmb->Select(3);
+	//	else if (m_q.AlmostEqual(fluo::Quaternion(0, 0, 0, 1)))
+	//		m_vrv->m_ortho_view_cmb->Select(4);
+	//	else if (m_q.AlmostEqual(fluo::Quaternion(0, -1, 0, 0)))
+	//		m_vrv->m_ortho_view_cmb->Select(5);
+	//	else
+	//		m_vrv->m_ortho_view_cmb->Select(6);
+	//}
 #endif
 
 #if defined(_WIN32) && defined(USE_XINPUT)
@@ -4409,7 +4407,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		{
 			double delta = lefty * sclr / (double)ny;
 			m_scale_factor += m_scale_factor * delta;
-			m_vrv->UpdateScaleFactor(false);
+			//m_vrv->UpdateScaleFactor(false);
 			if (m_free)
 			{
 				fluo::Vector pos(m_transx, m_transy, m_transz);
@@ -4450,18 +4448,18 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				m_rotz -= 360.0;
 			if (m_rotz < 0.0)
 				m_rotz += 360.0;
-			wxString str = wxString::Format("%.1f", m_rotx);
-			m_vrv->m_x_rot_text->ChangeValue(str);
-			str = wxString::Format("%.1f", m_roty);
-			m_vrv->m_y_rot_text->ChangeValue(str);
-			str = wxString::Format("%.1f", m_rotz);
-			m_vrv->m_z_rot_text->ChangeValue(str);
-			if (!m_vrv->m_rot_slider)
-			{
-				m_vrv->m_x_rot_sldr->SetThumbPosition(std::round(m_rotx));
-				m_vrv->m_y_rot_sldr->SetThumbPosition(std::round(m_roty));
-				m_vrv->m_z_rot_sldr->SetThumbPosition(std::round(m_rotz));
-			}
+			//wxString str = wxString::Format("%.1f", m_rotx);
+			//m_vrv->m_x_rot_text->ChangeValue(str);
+			//str = wxString::Format("%.1f", m_roty);
+			//m_vrv->m_y_rot_text->ChangeValue(str);
+			//str = wxString::Format("%.1f", m_rotz);
+			//m_vrv->m_z_rot_text->ChangeValue(str);
+			//if (!m_vrv->m_rot_slider)
+			//{
+			//	m_vrv->m_x_rot_sldr->SetThumbPosition(std::round(m_rotx));
+			//	m_vrv->m_y_rot_sldr->SetThumbPosition(std::round(m_roty));
+			//	m_vrv->m_z_rot_sldr->SetThumbPosition(std::round(m_rotz));
+			//}
 			m_interactive = true;
 			refresh = true;
 		}
@@ -4634,7 +4632,7 @@ void RenderCanvas::SetParams(double t)
 		return;
 	if (!m_frame)
 		return;
-	ClippingView* clip_view = m_frame->GetClippingView();
+	ClipPlanePanel* clip_view = m_frame->GetClippingView();
 	m_frame_num_type = 1;
 	m_param_cur_num = std::round(t);
 	FlKeyCode keycode;
@@ -4757,7 +4755,7 @@ void RenderCanvas::SetParams(double t)
 	if (glbin_interpolator.GetDouble(keycode, t, scale))
 	{
 		m_scale_factor = scale;
-		m_vrv->UpdateScaleFactor(false);
+		//m_vrv->UpdateScaleFactor(false);
 	}
 	//rotation
 	keycode.l2 = 0;
@@ -4769,7 +4767,7 @@ void RenderCanvas::SetParams(double t)
 		q *= -m_zq;
 		double rotx, roty, rotz;
 		q.ToEuler(rotx, roty, rotz);
-		SetRotations(rotx, roty, rotz, true);
+		SetRotations(rotx, roty, rotz);
 	}
 	//intermixing mode
 	keycode.l2_name = "volmethod";
@@ -4784,8 +4782,8 @@ void RenderCanvas::SetParams(double t)
 		if (aov <= 10)
 		{
 			SetPersp(false);
-			m_vrv->m_aov_text->ChangeValue("Ortho");
-			m_vrv->m_aov_sldr->SetValue(10);
+			//m_vrv->m_aov_text->ChangeValue("Ortho");
+			//m_vrv->m_aov_sldr->SetValue(10);
 		}
 		else
 		{
@@ -5535,7 +5533,7 @@ void RenderCanvas::ForceDraw()
 				RenderCanvas* view = m_frame->GetView(i);
 				if (view && view != this)
 				{
-					view->SetRotations(m_rotx, m_roty, m_rotz, true);
+					view->SetRotations(m_rotx, m_roty, m_rotz);
 					view->RefreshGL(39);
 				}
 			}
@@ -5643,9 +5641,9 @@ void RenderCanvas::SetScale121()
 		break;
 	}
 
-	wxString str = wxString::Format("%.0f", value*100.0);
-	m_vrv->m_scale_factor_sldr->SetValue(value * 100);
-	m_vrv->m_scale_factor_text->ChangeValue(str);
+	//wxString str = wxString::Format("%.0f", value*100.0);
+	//m_vrv->m_scale_factor_sldr->SetValue(value * 100);
+	//m_vrv->m_scale_factor_text->ChangeValue(str);
 
 	//SetSortBricks();
 
@@ -5683,11 +5681,11 @@ void RenderCanvas::SetPersp(bool persp)
 		m_obj_transz = m_obj_transz_saved;
 		//restore scale factor
 		m_scale_factor = m_scale_factor_saved;
-		m_vrv->UpdateScaleFactor(false);
+		//m_vrv->UpdateScaleFactor(false);
 		//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
 		//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
 		//m_vrv->m_scale_factor_text->ChangeValue(str);
-		m_vrv->m_options_toolbar2->ToggleTool(RenderViewPanel::ID_FreeChk, false);
+		//m_vrv->m_options_toolbar2->ToggleTool(RenderViewPanel::ID_FreeChk, false);
 
 		SetRotations(m_rotx, m_roty, m_rotz);
 	}
@@ -6106,7 +6104,7 @@ DataGroup* RenderCanvas::AddVolumeData(VolumeData* vd, wxString group_name)
 		//add ui
 		//m_frame->AddProps(2, this, group, vd);
 		//
-		AdjustView* adjust_view = m_frame->GetAdjustView();
+		OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
 		if (adjust_view)
 		{
 			adjust_view->SetGroupLink(group);
@@ -6193,7 +6191,7 @@ void RenderCanvas::ReplaceVolumeData(wxString &name, VolumeData *dst)
 	{
 		if (m_frame)
 		{
-			AdjustView* adjust_view = m_frame->GetAdjustView();
+			OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
 			if (adjust_view)
 			{
 				adjust_view->SetVolumeData(dst);
@@ -6891,7 +6889,7 @@ void RenderCanvas::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst_
 
 	if (m_frame)
 	{
-		AdjustView* adjust_view = m_frame->GetAdjustView();
+		OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
 		if (adjust_view)
 		{
 			adjust_view->SetVolumeData(src_vd);
@@ -7113,7 +7111,7 @@ wxString RenderCanvas::AddGroup(wxString str, wxString prev_group)
 	//set default settings
 	if (m_frame)
 	{
-		AdjustView* adjust_view = m_frame->GetAdjustView();
+		OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
 		if (adjust_view && group)
 		{
 			//fluo::Color gamma, brightness, hdr;
@@ -7161,7 +7159,7 @@ DataGroup* RenderCanvas::AddOrGetGroup()
 	//set default settings
 	if (m_frame)
 	{
-		AdjustView* adjust_view = m_frame->GetAdjustView();
+		OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
 		if (adjust_view)
 		{
 			group->SetGammaColor(
@@ -7282,8 +7280,8 @@ void RenderCanvas::InitView(unsigned int type)
 		m_transx = 0.0;
 		m_transy = 0.0;
 		m_transz = m_distance;
-		if (!m_vrv->m_use_dft_settings)
-			m_scale_factor = 1.0;
+		//if (!m_vrv->m_use_dft_settings)
+		//	m_scale_factor = 1.0;
 	}
 
 	if (type&INIT_OBJ_TRANSL)
@@ -7295,11 +7293,8 @@ void RenderCanvas::InitView(unsigned int type)
 
 	if (type&INIT_ROTATE || !m_init_view)
 	{
-		if (!m_vrv->m_use_dft_settings)
-		{
-			m_q = fluo::Quaternion(0, 0, 0, 1);
-			m_q.ToEuler(m_rotx, m_roty, m_rotz);
-		}
+		m_q = fluo::Quaternion(0, 0, 0, 1);
+		m_q.ToEuler(m_rotx, m_roty, m_rotz);
 	}
 
 	m_init_view = true;
@@ -10420,18 +10415,18 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 
 					Q2A();
 
-					wxString str = wxString::Format("%.1f", m_rotx);
-					m_vrv->m_x_rot_text->ChangeValue(str);
-					str = wxString::Format("%.1f", m_roty);
-					m_vrv->m_y_rot_text->ChangeValue(str);
-					str = wxString::Format("%.1f", m_rotz);
-					m_vrv->m_z_rot_text->ChangeValue(str);
-					if (!m_vrv->m_rot_slider)
-					{
-						m_vrv->m_x_rot_sldr->SetThumbPosition(std::round(m_rotx));
-						m_vrv->m_y_rot_sldr->SetThumbPosition(std::round(m_roty));
-						m_vrv->m_z_rot_sldr->SetThumbPosition(std::round(m_rotz));
-					}
+					//wxString str = wxString::Format("%.1f", m_rotx);
+					//m_vrv->m_x_rot_text->ChangeValue(str);
+					//str = wxString::Format("%.1f", m_roty);
+					//m_vrv->m_y_rot_text->ChangeValue(str);
+					//str = wxString::Format("%.1f", m_rotz);
+					//m_vrv->m_z_rot_text->ChangeValue(str);
+					//if (!m_vrv->m_rot_slider)
+					//{
+					//	m_vrv->m_x_rot_sldr->SetThumbPosition(std::round(m_rotx));
+					//	m_vrv->m_y_rot_sldr->SetThumbPosition(std::round(m_roty));
+					//	m_vrv->m_z_rot_sldr->SetThumbPosition(std::round(m_rotz));
+					//}
 
 					m_interactive = true;
 
@@ -10472,7 +10467,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 						(double)dx / (double)nx :
 						(double)-dy / (double)ny;
 					m_scale_factor += m_scale_factor*delta;
-					m_vrv->UpdateScaleFactor(false);
+					//m_vrv->UpdateScaleFactor(false);
 					//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
 					//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
 					//m_vrv->m_scale_factor_text->ChangeValue(str);
@@ -10602,7 +10597,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 					m_scale_factor += value;
 				//if (m_scale_factor < 0.01)
 				//	m_scale_factor = 0.01;
-				m_vrv->UpdateScaleFactor(false);
+				//m_vrv->UpdateScaleFactor(false);
 				//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
 				//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
 				//m_vrv->m_scale_factor_text->ChangeValue(str);
@@ -10698,18 +10693,18 @@ void RenderCanvas::SetBackgroundColor(fluo::Color &color)
 	{
 		m_bg_color_inv = fluo::Color(1.0, 1.0, 1.0);
 	}
-	if (m_vrv)
-	{
-		wxColor c(std::round(color.r()*255.0), std::round(color.g()*255.0), std::round(color.b()*255.0));
-		m_vrv->m_bg_color_picker->SetColour(c);
-	}
+	//if (m_vrv)
+	//{
+	//	wxColor c(std::round(color.r()*255.0), std::round(color.g()*255.0), std::round(color.b()*255.0));
+	//	m_vrv->m_bg_color_picker->SetColour(c);
+	//}
 }
 
 void RenderCanvas::SetFog(bool b)
 {
 	m_use_fog = b;
-	if (m_vrv)
-		m_vrv->m_left_toolbar->ToggleTool(RenderViewPanel::ID_DepthAttenChk, b);
+	//if (m_vrv)
+	//	m_vrv->m_left_toolbar->ToggleTool(RenderViewPanel::ID_DepthAttenChk, b);
 }
 
 void RenderCanvas::SetRotations(double rotx, double roty, double rotz)

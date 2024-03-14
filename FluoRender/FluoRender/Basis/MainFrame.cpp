@@ -30,34 +30,34 @@ DEALINGS IN THE SOFTWARE.
 #include <DragDrop.h>
 #include <Global/Global.h>
 #include <DataManager.h>
-#include "TreePanel.h"
-#include "ListPanel.h"
+#include <TreePanel.h>
+#include <ListPanel.h>
 #include <RenderViewPanel.h>
 #include <RenderCanvas.h>
-#include "PropPanel.h"
-#include "VolumePropPanel.h"
-#include "MeshPropPanel.h"
-#include "AnnotatPropPanel.h"
-#include "ManipPropPanel.h"
-#include "MoviePanel.h"
-#include "ClippingView.h"
-#include "AdjustView.h"
-#include "SettingDlg.h"
-#include "HelpDlg.h"
-#include "BrushToolDlg.h"
-#include "NoiseCancellingDlg.h"
-#include "CountingDlg.h"
-#include "ConvertDlg.h"
-#include "ColocalizationDlg.h"
-#include "RecorderDlg.h"
-#include "MeasureDlg.h"
-#include "TraceDlg.h"
-#include "OclDlg.h"
-#include "ComponentDlg.h"
-#include "CalculationDlg.h"
-#include "MachineLearningDlg.h"
-#include "ScriptBreakDlg.h"
-#include "Tester.h"
+#include <PropPanel.h>
+#include <VolumePropPanel.h>
+#include <MeshPropPanel.h>
+#include <AnnotatPropPanel.h>
+#include <ManipPropPanel.h>
+#include <MoviePanel.h>
+#include <ClipPlanePanel.h>
+#include <OutputAdjPanel.h>
+#include <SettingDlg.h>
+#include <HelpDlg.h>
+#include <BrushToolDlg.h>
+#include <NoiseCancellingDlg.h>
+#include <CountingDlg.h>
+#include <ConvertDlg.h>
+#include <ColocalizationDlg.h>
+#include <RecorderDlg.h>
+#include <MeasureDlg.h>
+#include <TraceDlg.h>
+#include <OclDlg.h>
+#include <ComponentDlg.h>
+#include <CalculationDlg.h>
+#include <MachineLearningDlg.h>
+#include <ScriptBreakDlg.h>
+#include <Tester.h>
 #include <compatibility.h>
 #include <JVMInitializer.h>
 #include <Formats/png_resource.h>
@@ -85,7 +85,7 @@ DEALINGS IN THE SOFTWARE.
 #include <cctype>
 
 //resources
-#include "img/icons.h"
+#include <img/icons.h>
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(wxID_EXIT, MainFrame::OnExit)
@@ -127,8 +127,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(ID_ShowHideUI, MainFrame::OnShowHideUI)
 	EVT_MENU(ID_ShowHideToolbar, MainFrame::OnShowHideToolbar)
 	//ui menu events
-	EVT_MENU(ID_UIListView, MainFrame::OnShowHideView)
-	EVT_MENU(ID_UITreeView, MainFrame::OnShowHideView)
+	EVT_MENU(ID_UIProjView, MainFrame::OnShowHideView)
 	EVT_MENU(ID_UIMovieView, MainFrame::OnShowHideView)
 	EVT_MENU(ID_UIAdjView, MainFrame::OnShowHideView)
 	EVT_MENU(ID_UIClipView, MainFrame::OnShowHideView)
@@ -211,10 +210,8 @@ MainFrame::MainFrame(
 		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER);
 	//create the menu for UI management
 	m_tb_menu_ui = new wxMenu;
-	m_tb_menu_ui->Append(ID_UIListView, UITEXT_DATAVIEW,
-		"Show/hide the data list panel", wxITEM_CHECK);
-	m_tb_menu_ui->Append(ID_UITreeView, UITEXT_TREEVIEW,
-		"Show/hide the workspace panel", wxITEM_CHECK);
+	m_tb_menu_ui->Append(ID_UIProjView, UITEXT_PROJECT,
+		"Show/hide the project panel", wxITEM_CHECK);
 	m_tb_menu_ui->Append(ID_UIMovieView, UITEXT_MAKEMOVIE,
 		"Show/hide the movie export panel", wxITEM_CHECK);
 	m_tb_menu_ui->Append(ID_UIAdjView, UITEXT_ADJUST,
@@ -224,8 +221,7 @@ MainFrame::MainFrame(
 	m_tb_menu_ui->Append(ID_UIPropView, UITEXT_PROPERTIES,
 		"Show/hide the property panel", wxITEM_CHECK);
 	//check all the items
-	m_tb_menu_ui->Check(ID_UIListView, true);
-	m_tb_menu_ui->Check(ID_UITreeView, true);
+	m_tb_menu_ui->Check(ID_UIProjView, true);
 	m_tb_menu_ui->Check(ID_UIMovieView, true);
 	m_tb_menu_ui->Check(ID_UIAdjView, true);
 	m_tb_menu_ui->Check(ID_UIClipView, true);
@@ -409,17 +405,24 @@ MainFrame::MainFrame(
 	//create render view
 	RenderViewPanel *vrv = new RenderViewPanel(this);
 	vrv->m_glview->InitView();
-	vrv->UpdateView();
 	m_vrv_list.push_back(vrv);
 
-	wxSize panel_size(FromDIP(wxSize(350, 300)));
+	wxSize panel_size(FromDIP(wxSize(350, 450)));
+	//use the project panel for both tree and list
+	m_proj_panel = new wxAuiNotebook(this, wxID_ANY,
+		wxDefaultPosition, panel_size,
+		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE | 
+		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE |
+		wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
+	m_proj_panel->SetName("ProjectPanel");
 	//create list view
 	m_list_panel = new ListPanel(this,
 		wxDefaultPosition, panel_size);
-
 	//create tree view
 	m_tree_panel = new TreePanel(this,
 		wxDefaultPosition, panel_size);
+	m_proj_panel->AddPage(m_list_panel, UITEXT_DATAVIEW, false);
+	m_proj_panel->AddPage(m_tree_panel, UITEXT_TREEVIEW, true);
 
 	//create movie view (sets the m_recorder_dlg)
 	m_movie_view = new MoviePanel(this,
@@ -428,29 +431,17 @@ MainFrame::MainFrame(
 	//create prop panel
 	m_prop_panel = new wxAuiNotebook(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize,
-		wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
-	//prop panel chidren
-	//m_volume_prop = new VolumePropPanel(this, m_prop_panel);
-	//m_mesh_prop = new MeshPropPanel(this, m_prop_panel);
-	//m_mesh_manip = new ManipPropPanel(this, m_prop_panel);
-	//m_annotation_prop = new AnnotatPropPanel(this, m_prop_panel);
-	//m_prop_panel->SetSizer(m_prop_sizer);
-	//m_prop_sizer->Add(m_volume_prop, 1, wxEXPAND, 0);
-	//m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
-	//m_prop_sizer->Add(m_mesh_manip, 1, wxEXPAND, 0);
-	//m_prop_sizer->Add(m_annotation_prop, 1, wxEXPAND, 0);
-	//m_volume_prop->Show(false);
-	//m_mesh_prop->Show(false);
-	//m_mesh_manip->Show(false);
-	//m_annotation_prop->Show(false);
+		wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_TAB_EXTERNAL_MOVE |
+		wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
+	m_prop_panel->SetName("PropPanel");
 
 	//clipping view
-	m_clip_view = new ClippingView(this,
+	m_clip_view = new ClipPlanePanel(this,
 		wxDefaultPosition, FromDIP(wxSize(130,700)));
 	m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(glbin_settings.m_plane_mode));
 
 	//adjust view
-	m_adjust_view = new AdjustView(this,
+	m_adjust_view = new OutputAdjPanel(this,
 		wxDefaultPosition, FromDIP(wxSize(130, 700)));
 
 	wxString font_file = glbin_settings.m_font_file;
@@ -468,31 +459,13 @@ MainFrame::MainFrame(
 	//settings dialog
 	m_setting_dlg = new SettingDlg(this);
 
-	if (glbin_settings.m_test_speed)
-		m_vrv_list[0]->m_glview->m_test_speed = true;
-	if (glbin_settings.m_test_wiref)
-	{
-		m_vrv_list[0]->m_glview->m_test_wiref = true;
-		m_vrv_list[0]->m_glview->m_draw_bounds = true;
-		m_vrv_list[0]->m_glview->m_draw_grid = true;
-		glbin_data_manager.m_vol_test_wiref = true;
-	}
+	glbin_data_manager.m_vol_test_wiref = glbin_settings.m_test_wiref;
 	int c1 = glbin_settings.m_wav_color1;
 	int c2 = glbin_settings.m_wav_color2;
 	int c3 = glbin_settings.m_wav_color3;
 	int c4 = glbin_settings.m_wav_color4;
 	if (c1 && c2 && c3 && c4)
 		glbin_data_manager.SetWavelengthColor(c1, c2, c3, c4);
-	m_vrv_list[0]->SetPinThreshold(glbin_settings.m_pin_threshold);
-	m_vrv_list[0]->m_glview->SetPeelingLayers(glbin_settings.m_peeling_layers);
-	m_vrv_list[0]->m_glview->SetBlendSlices(glbin_settings.m_micro_blend);
-	m_vrv_list[0]->m_glview->SetAdaptive(glbin_settings.m_mouse_int);
-	m_vrv_list[0]->m_glview->SetGradBg(glbin_settings.m_grad_bg);
-	m_vrv_list[0]->m_glview->SetPointVolumeMode(glbin_settings.m_point_volume_mode);
-	m_vrv_list[0]->m_glview->SetRulerUseTransf(glbin_settings.m_ruler_use_transf);
-	m_vrv_list[0]->m_glview->SetStereo(glbin_settings.m_stereo);
-	m_vrv_list[0]->m_glview->SetSBS(glbin_settings.m_sbs);
-	m_vrv_list[0]->m_glview->SetEyeDist(glbin_settings.m_eye_dist);
 	if (glbin_settings.m_stereo) m_vrv_list[0]->InitOpenVR();
 	glbin_data_manager.SetOverrideVox(glbin_settings.m_override_vox);
 	glbin_data_manager.SetPvxmlFlipX(glbin_settings.m_pvxml_flip_x);
@@ -559,12 +532,8 @@ MainFrame::MainFrame(
 		Name("m_main_tb").Caption("Toolbar").CaptionVisible(false).
 		BestSize(tb_size).
 		Top().CloseButton(false).Layer(4));
-	m_aui_mgr.AddPane(m_list_panel, wxAuiPaneInfo().
-		Name("m_list_panel").Caption(UITEXT_DATAVIEW).
-		Left().CloseButton(true).BestSize(panel_size).
-		FloatingSize(FromDIP(wxSize(400, 600))).Layer(3));
-	m_aui_mgr.AddPane(m_tree_panel, wxAuiPaneInfo().
-		Name("m_tree_panel").Caption(UITEXT_TREEVIEW).
+	m_aui_mgr.AddPane(m_proj_panel, wxAuiPaneInfo().
+		Name("m_proj_panel").Caption(UITEXT_PROJECT).
 		Left().CloseButton(true).BestSize(panel_size).
 		FloatingSize(FromDIP(wxSize(400, 600))).Layer(3));
 	m_aui_mgr.AddPane(m_movie_view, wxAuiPaneInfo().
@@ -817,12 +786,9 @@ MainFrame::MainFrame(
 	m = new wxMenuItem(m_top_window,ID_ShowHideUI, wxT("Show/Hide &UI"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_show_hide_ui_mini));
 	m_top_window->Append(m);
-	m = new wxMenuItem(m_top_window,ID_UIListView, wxT("&Datasets"), wxEmptyString, wxITEM_CHECK);
+	m = new wxMenuItem(m_top_window, ID_UIProjView, wxT("&Project"), wxEmptyString, wxITEM_CHECK);
 	m_top_window->Append(m);
-	m_top_window->Check(ID_UIListView, true);
-	m = new wxMenuItem(m_top_window,ID_UITreeView, wxT("&Workspace"), wxEmptyString, wxITEM_CHECK);
-	m_top_window->Append(m);
-	m_top_window->Check(ID_UITreeView, true);
+	m_top_window->Check(ID_UIProjView, true);
 	m = new wxMenuItem(m_top_window,ID_UIMovieView, wxT("&Export"), wxEmptyString, wxITEM_CHECK);
 	m_top_window->Append(m);
 	m_top_window->Check(ID_UIMovieView, true);
@@ -1024,19 +990,6 @@ wxString MainFrame::CreateView(int row)
 	m_vrv_list.push_back(vrv);
 	if (m_movie_view)
 		m_movie_view->AddView(vrv->GetName());
-	if (glbin_settings.m_test_wiref)
-	{
-		view->m_test_wiref = true;
-		view->m_draw_bounds = true;
-		view->m_draw_grid = true;
-	}
-	view->SetPeelingLayers(glbin_settings.m_peeling_layers);
-	view->SetBlendSlices(glbin_settings.m_micro_blend);
-	view->SetAdaptive(glbin_settings.m_mouse_int);
-	view->SetGradBg(glbin_settings.m_grad_bg);
-	view->SetPointVolumeMode(glbin_settings.m_point_volume_mode);
-	view->SetRulerUseTransf(glbin_settings.m_ruler_use_transf);
-	vrv->SetPinThreshold(glbin_settings.m_pin_threshold);
 
 	//reset gl
 	for (int i = 0; i < GetViewNum(); ++i)
@@ -1096,7 +1049,7 @@ wxString MainFrame::CreateView(int row)
 		}
 		//update
 		view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
-		vrv->UpdateView();
+		vrv->FluoRefresh(false, false, 2);
 	}
 
 	UpdateTree();
@@ -1615,7 +1568,7 @@ void MainFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* 
 		v->RefreshGL(39);
 
 		v->InitView(INIT_BOUNDS|INIT_CENTER);
-		v->m_vrv->UpdateScaleFactor(false);
+		v->m_vrv->FluoUpdate();
 
 		if (enable_4d)
 		{
@@ -2669,6 +2622,9 @@ void MainFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, Prop
 		m_adjust_view->FluoUpdate(vc);
 	if (update_props(excl_self, m_clip_view, panel))
 		m_clip_view->FluoUpdate(vc);
+	for (auto i : m_vrv_list)
+		if (update_props(excl_self, i, panel))
+			i->FluoUpdate(vc);
 }
 
 VolumePropPanel* MainFrame::FindVolumeProps(const wxString& name)
@@ -2760,7 +2716,7 @@ ManipPropPanel* MainFrame::FindMeshManip(MeshData* md)
 }
 
 //prop view
-AdjustView* MainFrame::GetAdjustView()
+OutputAdjPanel* MainFrame::GetAdjustView()
 {
 	return m_adjust_view;
 }
@@ -2784,7 +2740,7 @@ HelpDlg* MainFrame::GetHelpDlg()
 }
 
 //clipping view
-ClippingView* MainFrame::GetClippingView()
+ClipPlanePanel* MainFrame::GetClippingView()
 {
 	return m_clip_view;
 }
@@ -3034,15 +2990,13 @@ void MainFrame::ToggleAllTools(bool cur_state)
 {
 	if (cur_state)
 	{
-		if (m_aui_mgr.GetPane(m_list_panel).IsShown() &&
-			m_aui_mgr.GetPane(m_tree_panel).IsShown() &&
+		if (m_aui_mgr.GetPane(m_proj_panel).IsShown() &&
 			m_aui_mgr.GetPane(m_movie_view).IsShown() &&
 			m_aui_mgr.GetPane(m_prop_panel).IsShown() &&
 			m_aui_mgr.GetPane(m_adjust_view).IsShown() &&
 			m_aui_mgr.GetPane(m_clip_view).IsShown())
 			m_ui_state = true;
-		else if (!m_aui_mgr.GetPane(m_list_panel).IsShown() &&
-			!m_aui_mgr.GetPane(m_tree_panel).IsShown() &&
+		else if (!m_aui_mgr.GetPane(m_proj_panel).IsShown() &&
 			!m_aui_mgr.GetPane(m_movie_view).IsShown() &&
 			!m_aui_mgr.GetPane(m_prop_panel).IsShown() &&
 			!m_aui_mgr.GetPane(m_adjust_view).IsShown() &&
@@ -3054,11 +3008,8 @@ void MainFrame::ToggleAllTools(bool cur_state)
 	{
 		//hide all
 		//data view
-		m_aui_mgr.GetPane(m_list_panel).Hide();
-		m_tb_menu_ui->Check(ID_UIListView, false);
-		//scene view
-		m_aui_mgr.GetPane(m_tree_panel).Hide();
-		m_tb_menu_ui->Check(ID_UITreeView, false);
+		m_aui_mgr.GetPane(m_proj_panel).Hide();
+		m_tb_menu_ui->Check(ID_UIProjView, false);
 		//movie view (float only)
 		m_aui_mgr.GetPane(m_movie_view).Hide();
 		m_tb_menu_ui->Check(ID_UIMovieView, false);
@@ -3078,11 +3029,8 @@ void MainFrame::ToggleAllTools(bool cur_state)
 	{
 		//show all
 		//data view
-		m_aui_mgr.GetPane(m_list_panel).Show();
-		m_tb_menu_ui->Check(ID_UIListView, true);
-		//scene view
-		m_aui_mgr.GetPane(m_tree_panel).Show();
-		m_tb_menu_ui->Check(ID_UITreeView, true);
+		m_aui_mgr.GetPane(m_proj_panel).Show();
+		m_tb_menu_ui->Check(ID_UIProjView, true);
 		//movie view (float only)
 		m_aui_mgr.GetPane(m_movie_view).Show();
 		m_tb_menu_ui->Check(ID_UIMovieView, true);
@@ -3825,18 +3773,15 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 	//ui layout
 	fconfig.SetPath("/ui_layout");
 	fconfig.Write("ui_main_tb", m_main_tb->IsShown());
-	fconfig.Write("ui_list_view", m_list_panel->IsShown());
-	fconfig.Write("ui_tree_view", m_tree_panel->IsShown());
+	fconfig.Write("ui_proj_view", m_proj_panel->IsShown());
 	fconfig.Write("ui_movie_view", m_movie_view->IsShown());
 	fconfig.Write("ui_adjust_view", m_adjust_view->IsShown());
 	fconfig.Write("ui_clip_view", m_clip_view->IsShown());
 	fconfig.Write("ui_prop_view", m_prop_panel->IsShown());
 	fconfig.Write("ui_main_tb_float", m_aui_mgr.GetPane(m_main_tb).IsOk()?
 		m_aui_mgr.GetPane(m_main_tb).IsFloating():false);
-	fconfig.Write("ui_list_view_float", m_aui_mgr.GetPane(m_list_panel).IsOk()?
-		m_aui_mgr.GetPane(m_list_panel).IsFloating():false);
-	fconfig.Write("ui_tree_view_float", m_aui_mgr.GetPane(m_tree_panel).IsOk()?
-		m_aui_mgr.GetPane(m_tree_panel).IsFloating():false);
+	fconfig.Write("ui_proj_view_float", m_aui_mgr.GetPane(m_proj_panel).IsOk()?
+		m_aui_mgr.GetPane(m_proj_panel).IsFloating():false);
 	fconfig.Write("ui_movie_view_float", m_aui_mgr.GetPane(m_movie_view).IsOk()?
 		m_aui_mgr.GetPane(m_movie_view).IsFloating():false);
 	fconfig.Write("ui_adjust_view_float", m_aui_mgr.GetPane(m_adjust_view).IsOk()?
@@ -4794,21 +4739,18 @@ void MainFrame::OpenProject(wxString& filename)
 					view->SetFog(fog);
 				double fogintensity;
 				if (fconfig.Read("fogintensity", &fogintensity))
-					view->m_vrv->m_depth_atten_factor_text->SetValue(wxString::Format("%.2f",fogintensity));
+					view->SetFogIntensity(fogintensity);
 				if (fconfig.Read("draw_camctr", &bVal))
 				{
 					view->m_draw_camctr = bVal;
-					view->m_vrv->m_options_toolbar->ToggleTool(RenderViewPanel::ID_CamCtrChk,bVal);
 				}
 				if (fconfig.Read("draw_info", &iVal))
 				{
 					view->m_draw_info = iVal;
-					view->m_vrv->m_options_toolbar->ToggleTool(RenderViewPanel::ID_FpsChk, iVal & INFO_DISP);
 				}
 				if (fconfig.Read("draw_legend", &bVal))
 				{
 					view->m_draw_legend = bVal;
-					view->m_vrv->m_options_toolbar->ToggleTool(RenderViewPanel::ID_LegendChk,bVal);
 				}
 
 				//camera
@@ -4845,12 +4787,11 @@ void MainFrame::OpenProject(wxString& filename)
 					view->SetInitDist(radius/tan(d2r(view->GetAov()/2.0)));
 				int scale_mode;
 				if (fconfig.Read("scale_mode", &scale_mode))
-					view->m_vrv->SetScaleMode(scale_mode, false);
+					view->m_scale_mode = scale_mode;
 				double scale;
 				if (!fconfig.Read("scale", &scale))
 					scale = radius / tan(d2r(view->GetAov() / 2.0)) / dist;
 				view->m_scale_factor = scale;
-				view->m_vrv->UpdateScaleFactor(false);
 				bool pin_rot_center;
 				if (fconfig.Read("pin_rot_center", &pin_rot_center))
 				{
@@ -5192,48 +5133,26 @@ void MainFrame::OpenProject(wxString& filename)
 					m_aui_mgr.GetPane(m_main_tb).Hide();
 			}
 		}
-		if (fconfig.Read("ui_list_view", &bVal))
+		if (fconfig.Read("ui_proj_view", &bVal))
 		{
 			if (bVal)
 			{
-				m_aui_mgr.GetPane(m_list_panel).Show();
-				m_tb_menu_ui->Check(ID_UIListView, true);
+				m_aui_mgr.GetPane(m_proj_panel).Show();
+				m_tb_menu_ui->Check(ID_UIProjView, true);
 				bool fl;
 				if (fconfig.Read("ui_list_view_float", &fl))
 				{
 					if (fl)
-						m_aui_mgr.GetPane(m_list_panel).Float();
+						m_aui_mgr.GetPane(m_proj_panel).Float();
 					else
-						m_aui_mgr.GetPane(m_list_panel).Dock();
+						m_aui_mgr.GetPane(m_proj_panel).Dock();
 				}
 			}
 			else
 			{
-				if (m_aui_mgr.GetPane(m_list_panel).IsOk())
-					m_aui_mgr.GetPane(m_list_panel).Hide();
-				m_tb_menu_ui->Check(ID_UIListView, false);
-			}
-		}
-		if (fconfig.Read("ui_tree_view", &bVal))
-		{
-			if (bVal)
-			{
-				m_aui_mgr.GetPane(m_tree_panel).Show();
-				m_tb_menu_ui->Check(ID_UITreeView, true);
-				bool fl;
-				if (fconfig.Read("ui_tree_view_float", &fl))
-				{
-					if (fl)
-						m_aui_mgr.GetPane(m_tree_panel).Float();
-					else
-						m_aui_mgr.GetPane(m_tree_panel).Dock();
-				}
-			}
-			else
-			{
-				if (m_aui_mgr.GetPane(m_tree_panel).IsOk())
-					m_aui_mgr.GetPane(m_tree_panel).Hide();
-				m_tb_menu_ui->Check(ID_UITreeView, false);
+				if (m_aui_mgr.GetPane(m_proj_panel).IsOk())
+					m_aui_mgr.GetPane(m_proj_panel).Hide();
+				m_tb_menu_ui->Check(ID_UIProjView, false);
 			}
 		}
 		if (fconfig.Read("ui_movie_view", &bVal))
@@ -5838,30 +5757,17 @@ void MainFrame::OnShowHideView(wxCommandEvent &event)
 
 	switch (id)
 	{
-	case ID_UIListView:
+	case ID_UIProjView:
 		//data view
-		if (m_aui_mgr.GetPane(m_list_panel).IsShown())
+		if (m_aui_mgr.GetPane(m_proj_panel).IsShown())
 		{
-			m_aui_mgr.GetPane(m_list_panel).Hide();
-			m_tb_menu_ui->Check(ID_UIListView, false);
+			m_aui_mgr.GetPane(m_proj_panel).Hide();
+			m_tb_menu_ui->Check(ID_UIProjView, false);
 		}
 		else
 		{
 			m_aui_mgr.GetPane(m_list_panel).Show();
-			m_tb_menu_ui->Check(ID_UIListView, true);
-		}
-		break;
-	case ID_UITreeView:
-		//scene view
-		if (m_aui_mgr.GetPane(m_tree_panel).IsShown())
-		{
-			m_aui_mgr.GetPane(m_tree_panel).Hide();
-			m_tb_menu_ui->Check(ID_UITreeView, false);
-		}
-		else
-		{
-			m_aui_mgr.GetPane(m_tree_panel).Show();
-			m_tb_menu_ui->Check(ID_UITreeView, true);
+			m_tb_menu_ui->Check(ID_UIProjView, true);
 		}
 		break;
 	case ID_UIMovieView:
@@ -5927,17 +5833,15 @@ void MainFrame::OnPaneClose(wxAuiManagerEvent& event)
 	wxWindow* wnd = event.pane->window;
 	wxString name = wnd->GetName();
 
-	if (name == "ListPanel")
-		m_tb_menu_ui->Check(ID_UIListView, false);
-	else if (name == "TreePanel")
-		m_tb_menu_ui->Check(ID_UITreeView, false);
+	if (name == "ProjectPanel")
+		m_tb_menu_ui->Check(ID_UIProjView, false);
 	else if (name == "MoviePanel")
 		m_tb_menu_ui->Check(ID_UIMovieView, false);
 	else if (name == "PropPanel")
 		m_tb_menu_ui->Check(ID_UIPropView, false);
-	else if (name == "AdjustView")
+	else if (name == "OutputAdjPanel")
 		m_tb_menu_ui->Check(ID_UIAdjView, false);
-	else if (name == "ClippingView")
+	else if (name == "ClipPlanePanel")
 		m_tb_menu_ui->Check(ID_UIClipView, false);
 }
 

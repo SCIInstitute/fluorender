@@ -25,17 +25,17 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "AdjustView.h"
+#include <OutputAdjPanel.h>
 #include <Global/Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
-#include "png_resource.h"
-#include "img/icons.h"
+#include <png_resource.h>
+#include <img/icons.h>
 
-AdjustView::AdjustView(MainFrame* frame,
+OutputAdjPanel::OutputAdjPanel(MainFrame* frame,
 					   const wxPoint& pos,
 					   const wxSize& size,
 					   long style,
@@ -95,7 +95,7 @@ m_sync()
 		bitmap, wxNullBitmap,
 		"Link Red Properties with Linked Green or Blue",
 		"Link Red Properties with Linked Green or Blue");
-	m_sync_r_chk->Bind(wxEVT_TOOL, &AdjustView::OnSyncRCheck, this);
+	m_sync_r_chk->Bind(wxEVT_TOOL, &OutputAdjPanel::OnSyncRCheck, this);
 	m_sync_r_chk->Realize();
 	sizer_h_2->Add(3, 3, 0);
 	sizer_h_2->Add(st, 0, wxALIGN_CENTER);
@@ -113,16 +113,16 @@ m_sync()
 	wxBoxSizer *sizer_h_3 = new wxBoxSizer(wxHORIZONTAL);
 	m_r_gamma_sldr = new wxSingleSlider(this, wxID_ANY, 100, 10, 400,
 		wxDefaultPosition, wxDefaultSize, ls);
-	m_r_gamma_sldr->Bind(wxEVT_SCROLL_CHANGED, &AdjustView::OnRGammaChange, this);
+	m_r_gamma_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnRGammaChange, this);
 	sizer_h_3->Add(m_r_gamma_sldr, 1, wxEXPAND);
 	m_r_brightness_sldr = new wxSingleSlider(this, wxID_ANY, 0, -256, 256,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_r_brightness_sldr->SetRangeStyle(2);
-	m_r_brightness_sldr->Bind(wxEVT_SCROLL_CHANGED, &AdjustView::OnRBrightnessChange, this);
+	m_r_brightness_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnRBrightnessChange, this);
 	sizer_h_3->Add(m_r_brightness_sldr, 1, wxEXPAND);
 	m_r_hdr_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, ls);
-	m_r_hdr_sldr->Bind(wxEVT_SCROLL_CHANGED, &AdjustView::OnRHdrChange, this);
+	m_r_hdr_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnRHdrChange, this);
 	sizer_h_3->Add(m_r_hdr_sldr, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_3, 1, wxEXPAND);
 
@@ -131,16 +131,16 @@ m_sync()
 	vald_fp2.SetRange(0.0, 10.0);
 	m_r_gamma_text = new wxTextCtrl(this, wxID_ANY, "1.00",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
-	m_r_gamma_text->Bind(wxEVT_TEXT, &AdjustView::OnRGammaText, this);
+	m_r_gamma_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnRGammaText, this);
 	sizer_h_4->Add(m_r_gamma_text, 1, wxEXPAND);
 	m_r_brightness_text = new wxTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_int);
-	m_r_brightness_text->Bind(wxEVT_TEXT, &AdjustView::OnRBrightnessText, this);
+	m_r_brightness_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnRBrightnessText, this);
 	sizer_h_4->Add(m_r_brightness_text, 1, wxEXPAND);
 	vald_fp2.SetRange(0.0, 1.0);
 	m_r_hdr_text = new wxTextCtrl(this, wxID_ANY, "0.00",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
-	m_r_hdr_text->Bind(wxEVT_TEXT, &AdjustView::OnRHdrText, this);
+	m_r_hdr_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnRHdrText, this);
 	sizer_h_4->Add(m_r_hdr_text, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_4, 0, wxEXPAND);
 
@@ -148,15 +148,15 @@ m_sync()
 	wxBoxSizer* sizer_h_5 = new wxBoxSizer(wxHORIZONTAL);
 	m_r_gamma_st = new wxButton(this, wxID_ANY, "Gam.R.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
-	m_r_gamma_st->Bind(wxEVT_BUTTON, &AdjustView::OnRGammaMF, this);
+	m_r_gamma_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnRGammaMF, this);
 	sizer_h_5->Add(m_r_gamma_st, 1, wxEXPAND);
 	m_r_brightness_st = new wxButton(this, wxID_ANY, "Lum.R.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
-	m_r_brightness_st->Bind(wxEVT_BUTTON, &AdjustView::OnRBrightnessMF, this);
+	m_r_brightness_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnRBrightnessMF, this);
 	sizer_h_5->Add(m_r_brightness_st, 1, wxEXPAND);
 	m_r_hdr_st = new wxButton(this, wxID_ANY, "Eql.R.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
-	m_r_hdr_st->Bind(wxEVT_BUTTON, &AdjustView::OnRHdrMF, this);
+	m_r_hdr_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnRHdrMF, this);
 	sizer_h_5->Add(m_r_hdr_st, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_5, 0, wxEXPAND);
 
@@ -169,7 +169,7 @@ m_sync()
 								 wxDefaultPosition, FromDIP(wxSize(30, 30)));
 #endif
 	m_r_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
-	m_r_reset_btn->Bind(wxEVT_BUTTON, &AdjustView::OnRReset, this);
+	m_r_reset_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnRReset, this);
 	sizer_v->Add(m_r_reset_btn, 0, wxEXPAND);
 
 	//space
@@ -189,7 +189,7 @@ m_sync()
 		bitmap, wxNullBitmap,
 		"Link Green Properties with Linked Red or Blue",
 		"Link Green Properties with Linked Red or Blue");
-	m_sync_g_chk->Bind(wxEVT_TOOL, &AdjustView::OnSyncGCheck, this);
+	m_sync_g_chk->Bind(wxEVT_TOOL, &OutputAdjPanel::OnSyncGCheck, this);
 	m_sync_g_chk->Realize();
 	sizer_h_6->Add(3, 3, 0);
 	sizer_h_6->Add(st, 0, wxALIGN_CENTER);
@@ -207,16 +207,16 @@ m_sync()
 	wxBoxSizer *sizer_h_7 = new wxBoxSizer(wxHORIZONTAL);
 	m_g_gamma_sldr = new wxSingleSlider(this, wxID_ANY, 100, 10, 400,
 		wxDefaultPosition, wxDefaultSize, ls);
-	m_g_gamma_sldr->Bind(wxEVT_SCROLL_CHANGED, &AdjustView::OnGGammaChange, this);
+	m_g_gamma_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnGGammaChange, this);
 	sizer_h_7->Add(m_g_gamma_sldr, 1, wxEXPAND);
 	m_g_brightness_sldr = new wxSingleSlider(this, wxID_ANY, 0, -256, 256,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_g_brightness_sldr->SetRangeStyle(2);
-	m_g_brightness_sldr->Bind(wxEVT_SCROLL_CHANGED, &AdjustView::OnGBrightnessChange, this);
+	m_g_brightness_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnGBrightnessChange, this);
 	sizer_h_7->Add(m_g_brightness_sldr, 1, wxEXPAND);
 	m_g_hdr_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, ls);
-	m_g_hdr_sldr->Bind(wxEVT_SCROLL_CHANGED, &AdjustView::OnGHdrChange, this);
+	m_g_hdr_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnGHdrChange, this);
 	sizer_h_7->Add(m_g_hdr_sldr, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_7, 1, wxEXPAND);
 
@@ -225,16 +225,16 @@ m_sync()
 	vald_fp2.SetRange(0.0, 10.0);
 	m_g_gamma_text = new wxTextCtrl(this, wxID_ANY, "1.00",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
-	m_g_gamma_text->Bind(wxEVT_TEXT, &AdjustView::OnGGammaText, this);
+	m_g_gamma_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnGGammaText, this);
 	sizer_h_8->Add(m_g_gamma_text, 1, wxEXPAND);
 	m_g_brightness_text = new wxTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_int);
-	m_g_brightness_text->Bind(wxEVT_TEXT, &AdjustView::OnGBrightnessText, this);
+	m_g_brightness_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnGBrightnessText, this);
 	sizer_h_8->Add(m_g_brightness_text, 1, wxEXPAND);
 	vald_fp2.SetRange(0.0, 1.0);
 	m_g_hdr_text = new wxTextCtrl(this, wxID_ANY, "0.00",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
-	m_g_hdr_text->Bind(wxEVT_TEXT, &AdjustView::OnGHdrText, this);
+	m_g_hdr_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnGHdrText, this);
 	sizer_h_8->Add(m_g_hdr_text, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_8, 0, wxEXPAND);
 
@@ -242,15 +242,15 @@ m_sync()
 	wxBoxSizer* sizer_h_9 = new wxBoxSizer(wxHORIZONTAL);
 	m_g_gamma_st = new wxButton(this, wxID_ANY, "Gam.G.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
-	m_g_gamma_st->Bind(wxEVT_BUTTON, &AdjustView::OnGGammaMF, this);
+	m_g_gamma_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnGGammaMF, this);
 	sizer_h_9->Add(m_g_gamma_st, 1, wxEXPAND);
 	m_g_brightness_st = new wxButton(this, wxID_ANY, "Lum.G.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
-	m_g_brightness_st->Bind(wxEVT_BUTTON, &AdjustView::OnGBrightnessMF, this);
+	m_g_brightness_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnGBrightnessMF, this);
 	sizer_h_9->Add(m_g_brightness_st, 1, wxEXPAND);
 	m_g_hdr_st = new wxButton(this, wxID_ANY, "Eql.G.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
-	m_g_hdr_st->Bind(wxEVT_BUTTON, &AdjustView::OnGHdrMF, this);
+	m_g_hdr_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnGHdrMF, this);
 	sizer_h_9->Add(m_g_hdr_st, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_9, 0, wxEXPAND);
 
@@ -263,7 +263,7 @@ m_sync()
 								 wxDefaultPosition, FromDIP(wxSize(30, 30)));
 #endif
 	m_g_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
-	m_g_reset_btn->Bind(wxEVT_BUTTON, &AdjustView::OnGReset, this);
+	m_g_reset_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnGReset, this);
 	sizer_v->Add(m_g_reset_btn, 0, wxEXPAND);
 
 	//space
@@ -283,7 +283,7 @@ m_sync()
 		bitmap, wxNullBitmap,
 		"Link Blue Properties with Linked Red or Green",
 		"Link Blue Properties with Linked Red or Green");
-	m_sync_b_chk->Bind(wxEVT_TOOL, &AdjustView::OnSyncBCheck, this);
+	m_sync_b_chk->Bind(wxEVT_TOOL, &OutputAdjPanel::OnSyncBCheck, this);
 	m_sync_b_chk->Realize();
 	sizer_h_10->Add(3, 3, 0);
 	sizer_h_10->Add(st, 0, wxALIGN_CENTER);
@@ -301,16 +301,16 @@ m_sync()
 	wxBoxSizer *sizer_h_11 = new wxBoxSizer(wxHORIZONTAL);
 	m_b_gamma_sldr = new wxSingleSlider(this, wxID_ANY, 100, 10, 400,
 		wxDefaultPosition, wxDefaultSize, ls);
-	m_b_gamma_sldr->Bind(wxEVT_SCROLL_CHANGED, &AdjustView::OnBGammaChange, this);
+	m_b_gamma_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnBGammaChange, this);
 	sizer_h_11->Add(m_b_gamma_sldr, 1, wxEXPAND);
 	m_b_brightness_sldr = new wxSingleSlider(this, wxID_ANY, 0, -256, 256,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_b_brightness_sldr->SetRangeStyle(2);
-	m_b_brightness_sldr->Bind(wxEVT_SCROLL_CHANGED, &AdjustView::OnBBrightnessChange, this);
+	m_b_brightness_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnBBrightnessChange, this);
 	sizer_h_11->Add(m_b_brightness_sldr, 1, wxEXPAND);
 	m_b_hdr_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, ls);
-	m_b_hdr_sldr->Bind(wxEVT_SCROLL_CHANGED, &AdjustView::OnBHdrChange, this);
+	m_b_hdr_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnBHdrChange, this);
 	sizer_h_11->Add(m_b_hdr_sldr, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_11, 1, wxEXPAND);
 
@@ -319,16 +319,16 @@ m_sync()
 	vald_fp2.SetRange(0.0, 10.0);
 	m_b_gamma_text = new wxTextCtrl(this, wxID_ANY, "1.00",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
-	m_b_gamma_text->Bind(wxEVT_TEXT, &AdjustView::OnBGammaText, this);
+	m_b_gamma_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnBGammaText, this);
 	sizer_h_12->Add(m_b_gamma_text, 1, wxEXPAND);
 	m_b_brightness_text = new wxTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_int);
-	m_b_brightness_text->Bind(wxEVT_TEXT, &AdjustView::OnBBrightnessText, this);
+	m_b_brightness_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnBBrightnessText, this);
 	sizer_h_12->Add(m_b_brightness_text, 1, wxEXPAND);
 	vald_fp2.SetRange(0.0, 1.0);
 	m_b_hdr_text = new wxTextCtrl(this, wxID_ANY, "0.00",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
-	m_b_hdr_text->Bind(wxEVT_TEXT, &AdjustView::OnBHdrText, this);
+	m_b_hdr_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnBHdrText, this);
 	sizer_h_12->Add(m_b_hdr_text, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_12, 0, wxEXPAND);
 
@@ -336,15 +336,15 @@ m_sync()
 	wxBoxSizer* sizer_h_13 = new wxBoxSizer(wxHORIZONTAL);
 	m_b_gamma_st = new wxButton(this, wxID_ANY, "Gam.B.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
-	m_b_gamma_st->Bind(wxEVT_BUTTON, &AdjustView::OnBGammaMF, this);
+	m_b_gamma_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnBGammaMF, this);
 	sizer_h_13->Add(m_b_gamma_st, 1, wxEXPAND);
 	m_b_brightness_st = new wxButton(this, wxID_ANY, "Lum.B.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
-	m_b_brightness_st->Bind(wxEVT_BUTTON, &AdjustView::OnBBrightnessMF, this);
+	m_b_brightness_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnBBrightnessMF, this);
 	sizer_h_13->Add(m_b_brightness_st, 1, wxEXPAND);
 	m_b_hdr_st = new wxButton(this, wxID_ANY, "Eql.B.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
-	m_b_hdr_st->Bind(wxEVT_BUTTON, &AdjustView::OnBHdrMF, this);
+	m_b_hdr_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnBHdrMF, this);
 	sizer_h_13->Add(m_b_hdr_st, 1, wxEXPAND);
 	sizer_v->Add(sizer_h_13, 0, wxEXPAND);
 
@@ -357,7 +357,7 @@ m_sync()
 								 wxDefaultPosition, FromDIP(wxSize(30, 30)));
 #endif
 	m_b_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
-	m_b_reset_btn->Bind(wxEVT_BUTTON, &AdjustView::OnBReset, this);
+	m_b_reset_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnBReset, this);
 	sizer_v->Add(m_b_reset_btn, 0, wxEXPAND);
 
 	//20th line: default button
@@ -369,7 +369,7 @@ m_sync()
 							 wxDefaultPosition, FromDIP(wxSize(95, 30)));
 #endif
 	m_dft_btn->SetBitmap(wxGetBitmapFromMemory(save_settings));
-	m_dft_btn->Bind(wxEVT_BUTTON, &AdjustView::OnSaveDefault, this);
+	m_dft_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnSaveDefault, this);
 	sizer_v->Add(m_dft_btn, 0, wxEXPAND);
 
 	SetSizer(sizer_v);
@@ -393,7 +393,7 @@ m_sync()
 	Thaw();
 }
 
-AdjustView::~AdjustView()
+OutputAdjPanel::~OutputAdjPanel()
 {
 	//delete sliders for undo and redo
 	glbin.del_undo_control(m_r_gamma_sldr);
@@ -409,7 +409,7 @@ AdjustView::~AdjustView()
 	SetFocusVRenderViews(0);
 }
 
-void AdjustView::FluoUpdate(const fluo::ValueCollection& vc)
+void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)
 {
 	if (m_type != 1 && m_type != 2 && m_type != 5)
 	{
@@ -545,7 +545,7 @@ void AdjustView::FluoUpdate(const fluo::ValueCollection& vc)
 	EnableAll(true);
 }
 
-void AdjustView::EnableAll(bool val)
+void OutputAdjPanel::EnableAll(bool val)
 {
 	if (m_enable_all == val)
 		return;
@@ -593,7 +593,7 @@ void AdjustView::EnableAll(bool val)
 }
 
 //set view
-void AdjustView::SetRenderView(RenderCanvas *view)
+void OutputAdjPanel::SetRenderView(RenderCanvas *view)
 {
 	if (view)
 	{
@@ -607,13 +607,13 @@ void AdjustView::SetRenderView(RenderCanvas *view)
 	FluoUpdate();
 }
 
-RenderCanvas* AdjustView::GetRenderView()
+RenderCanvas* OutputAdjPanel::GetRenderView()
 {
 	return m_view;
 }
 
 //set volume data
-void AdjustView::SetVolumeData(VolumeData* vd)
+void OutputAdjPanel::SetVolumeData(VolumeData* vd)
 {
 	if (m_vd != vd)
 		ClearUndo();
@@ -630,13 +630,13 @@ void AdjustView::SetVolumeData(VolumeData* vd)
 	FluoUpdate();
 }
 
-VolumeData* AdjustView::GetVolumeData()
+VolumeData* OutputAdjPanel::GetVolumeData()
 {
 	return m_vd;
 }
 
 //set group
-void AdjustView::SetGroup(DataGroup *group)
+void OutputAdjPanel::SetGroup(DataGroup *group)
 {
 	if (group)
 	{
@@ -650,13 +650,13 @@ void AdjustView::SetGroup(DataGroup *group)
 	FluoUpdate();
 }
 
-DataGroup* AdjustView::GetGroup()
+DataGroup* OutputAdjPanel::GetGroup()
 {
 	return m_group;
 }
 
 //set volume adjustment to link to group
-void AdjustView::SetGroupLink(DataGroup *group)
+void OutputAdjPanel::SetGroupLink(DataGroup *group)
 {
 	if (group)
 	{
@@ -670,7 +670,7 @@ void AdjustView::SetGroupLink(DataGroup *group)
 	}
 }
 
-void AdjustView::ClearUndo()
+void OutputAdjPanel::ClearUndo()
 {
 	m_r_gamma_sldr->Clear();
 	m_r_brightness_sldr->Clear();
@@ -684,7 +684,7 @@ void AdjustView::ClearUndo()
 }
 
 //multifunc
-void AdjustView::OnRGammaMF(wxCommandEvent& event)
+void OutputAdjPanel::OnRGammaMF(wxCommandEvent& event)
 {
 	switch (glbin_settings.m_mulfunc)
 	{
@@ -707,7 +707,7 @@ void AdjustView::OnRGammaMF(wxCommandEvent& event)
 	}
 }
 
-void AdjustView::OnGGammaMF(wxCommandEvent& event)
+void OutputAdjPanel::OnGGammaMF(wxCommandEvent& event)
 {
 	switch (glbin_settings.m_mulfunc)
 	{
@@ -730,7 +730,7 @@ void AdjustView::OnGGammaMF(wxCommandEvent& event)
 	}
 }
 
-void AdjustView::OnBGammaMF(wxCommandEvent& event)
+void OutputAdjPanel::OnBGammaMF(wxCommandEvent& event)
 {
 	switch (glbin_settings.m_mulfunc)
 	{
@@ -753,7 +753,7 @@ void AdjustView::OnBGammaMF(wxCommandEvent& event)
 	}
 }
 
-void AdjustView::OnRBrightnessMF(wxCommandEvent& event)
+void OutputAdjPanel::OnRBrightnessMF(wxCommandEvent& event)
 {
 	switch (glbin_settings.m_mulfunc)
 	{
@@ -776,7 +776,7 @@ void AdjustView::OnRBrightnessMF(wxCommandEvent& event)
 	}
 }
 
-void AdjustView::OnGBrightnessMF(wxCommandEvent& event)
+void OutputAdjPanel::OnGBrightnessMF(wxCommandEvent& event)
 {
 	switch (glbin_settings.m_mulfunc)
 	{
@@ -799,7 +799,7 @@ void AdjustView::OnGBrightnessMF(wxCommandEvent& event)
 	}
 }
 
-void AdjustView::OnBBrightnessMF(wxCommandEvent& event)
+void OutputAdjPanel::OnBBrightnessMF(wxCommandEvent& event)
 {
 	switch (glbin_settings.m_mulfunc)
 	{
@@ -822,7 +822,7 @@ void AdjustView::OnBBrightnessMF(wxCommandEvent& event)
 	}
 }
 
-void AdjustView::OnRHdrMF(wxCommandEvent& event)
+void OutputAdjPanel::OnRHdrMF(wxCommandEvent& event)
 {
 	switch (glbin_settings.m_mulfunc)
 	{
@@ -845,7 +845,7 @@ void AdjustView::OnRHdrMF(wxCommandEvent& event)
 	}
 }
 
-void AdjustView::OnGHdrMF(wxCommandEvent& event)
+void OutputAdjPanel::OnGHdrMF(wxCommandEvent& event)
 {
 	switch (glbin_settings.m_mulfunc)
 	{
@@ -868,7 +868,7 @@ void AdjustView::OnGHdrMF(wxCommandEvent& event)
 	}
 }
 
-void AdjustView::OnBHdrMF(wxCommandEvent& event)
+void OutputAdjPanel::OnBHdrMF(wxCommandEvent& event)
 {
 	switch (glbin_settings.m_mulfunc)
 	{
@@ -891,13 +891,13 @@ void AdjustView::OnBHdrMF(wxCommandEvent& event)
 	}
 }
 
-void AdjustView::OnRGammaChange(wxScrollEvent & event)
+void OutputAdjPanel::OnRGammaChange(wxScrollEvent & event)
 {
 	double val = m_r_gamma_sldr->GetValue() / 100.0;
 	SetGamma(0, 1.0 / val);
 }
 
-void AdjustView::OnRGammaText(wxCommandEvent& event)
+void OutputAdjPanel::OnRGammaText(wxCommandEvent& event)
 {
 	wxString str = m_r_gamma_text->GetValue();
 	double val;
@@ -905,13 +905,13 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 	SetGamma(0, 1.0 / val);
 }
 
-void AdjustView::OnGGammaChange(wxScrollEvent & event)
+void OutputAdjPanel::OnGGammaChange(wxScrollEvent & event)
 {
 	double val = m_g_gamma_sldr->GetValue() / 100.0;
 	SetGamma(1, 1.0 / val);
 }
 
-void AdjustView::OnGGammaText(wxCommandEvent& event)
+void OutputAdjPanel::OnGGammaText(wxCommandEvent& event)
 {
 	wxString str = m_g_gamma_text->GetValue();
 	double val;
@@ -919,13 +919,13 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 	SetGamma(1, 1.0 / val);
 }
 
-void AdjustView::OnBGammaChange(wxScrollEvent & event)
+void OutputAdjPanel::OnBGammaChange(wxScrollEvent & event)
 {
 	double val = m_b_gamma_sldr->GetValue() / 100.0;
 	SetGamma(2, 1.0 / val);
 }
 
-void AdjustView::OnBGammaText(wxCommandEvent& event)
+void OutputAdjPanel::OnBGammaText(wxCommandEvent& event)
 {
 	wxString str = m_b_gamma_text->GetValue();
 	double val;
@@ -934,13 +934,13 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 }
 
 //brightness
-void AdjustView::OnRBrightnessChange(wxScrollEvent & event)
+void OutputAdjPanel::OnRBrightnessChange(wxScrollEvent & event)
 {
 	double val = m_r_brightness_sldr->GetValue() / 256.0 + 1.0;
 	SetBrightness(0, val);
 }
 
-void AdjustView::OnRBrightnessText(wxCommandEvent& event)
+void OutputAdjPanel::OnRBrightnessText(wxCommandEvent& event)
 {
 	wxString str = m_r_brightness_text->GetValue();
 	double val;
@@ -949,13 +949,13 @@ void AdjustView::OnRBrightnessText(wxCommandEvent& event)
 	SetBrightness(0, val);
 }
 
-void AdjustView::OnGBrightnessChange(wxScrollEvent & event)
+void OutputAdjPanel::OnGBrightnessChange(wxScrollEvent & event)
 {
 	double val = m_g_brightness_sldr->GetValue() / 256.0 + 1.0;
 	SetBrightness(1, val);
 }
 
-void AdjustView::OnGBrightnessText(wxCommandEvent& event)
+void OutputAdjPanel::OnGBrightnessText(wxCommandEvent& event)
 {
 	wxString str = m_g_brightness_text->GetValue();
 	double val;
@@ -964,13 +964,13 @@ void AdjustView::OnGBrightnessText(wxCommandEvent& event)
 	SetBrightness(1, val);
 }
 
-void AdjustView::OnBBrightnessChange(wxScrollEvent & event)
+void OutputAdjPanel::OnBBrightnessChange(wxScrollEvent & event)
 {
 	double val = m_b_brightness_sldr->GetValue() / 256.0 + 1.0;
 	SetBrightness(2, val);
 }
 
-void AdjustView::OnBBrightnessText(wxCommandEvent& event)
+void OutputAdjPanel::OnBBrightnessText(wxCommandEvent& event)
 {
 	wxString str = m_b_brightness_text->GetValue();
 	double val;
@@ -979,13 +979,13 @@ void AdjustView::OnBBrightnessText(wxCommandEvent& event)
 	SetBrightness(2, val);
 }
 
-void AdjustView::OnRHdrChange(wxScrollEvent &event)
+void OutputAdjPanel::OnRHdrChange(wxScrollEvent &event)
 {
 	double val = m_r_hdr_sldr->GetValue() / 100.0;
 	SetHdr(0, val);
 }
 
-void AdjustView::OnRHdrText(wxCommandEvent &event)
+void OutputAdjPanel::OnRHdrText(wxCommandEvent &event)
 {
 	wxString str = m_r_hdr_text->GetValue();
 	double val;
@@ -993,13 +993,13 @@ void AdjustView::OnRHdrText(wxCommandEvent &event)
 	SetHdr(0, val);
 }
 
-void AdjustView::OnGHdrChange(wxScrollEvent &event)
+void OutputAdjPanel::OnGHdrChange(wxScrollEvent &event)
 {
 	double val = m_g_hdr_sldr->GetValue() / 100.0;
 	SetHdr(1, val);
 }
 
-void AdjustView::OnGHdrText(wxCommandEvent &event)
+void OutputAdjPanel::OnGHdrText(wxCommandEvent &event)
 {
 	wxString str = m_g_hdr_text->GetValue();
 	double val;
@@ -1007,13 +1007,13 @@ void AdjustView::OnGHdrText(wxCommandEvent &event)
 	SetHdr(1, val);
 }
 
-void AdjustView::OnBHdrChange(wxScrollEvent &event)
+void OutputAdjPanel::OnBHdrChange(wxScrollEvent &event)
 {
 	double val = m_b_hdr_sldr->GetValue() / 100.0;
 	SetHdr(2, val);
 }
 
-void AdjustView::OnBHdrText(wxCommandEvent &event)
+void OutputAdjPanel::OnBHdrText(wxCommandEvent &event)
 {
 	wxString str = m_b_hdr_text->GetValue();
 	double val;
@@ -1021,22 +1021,22 @@ void AdjustView::OnBHdrText(wxCommandEvent &event)
 	SetHdr(2, val);
 }
 
-void AdjustView::OnSyncRCheck(wxCommandEvent &event)
+void OutputAdjPanel::OnSyncRCheck(wxCommandEvent &event)
 {
 	SetSync(0, m_sync_r_chk->GetToolState(0));
 }
 
-void AdjustView::OnSyncGCheck(wxCommandEvent &event)
+void OutputAdjPanel::OnSyncGCheck(wxCommandEvent &event)
 {
 	SetSync(1, m_sync_g_chk->GetToolState(0));
 }
 
-void AdjustView::OnSyncBCheck(wxCommandEvent &event)
+void OutputAdjPanel::OnSyncBCheck(wxCommandEvent &event)
 {
 	SetSync(2, m_sync_b_chk->GetToolState(0));
 }
 
-void AdjustView::OnSaveDefault(wxCommandEvent &event)
+void OutputAdjPanel::OnSaveDefault(wxCommandEvent &event)
 {
 	switch (m_type)
 	{
@@ -1055,14 +1055,14 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 	}
 }
 
-void AdjustView::SyncColor(fluo::Color& c, double val)
+void OutputAdjPanel::SyncColor(fluo::Color& c, double val)
 {
 	for (int i : {0, 1, 2})
 		if (m_sync[i])
 			c[i] = val;
 }
 
-void AdjustView::SyncGamma(fluo::Color& c, int i, double val, fluo::ValueCollection& vc)
+void OutputAdjPanel::SyncGamma(fluo::Color& c, int i, double val, fluo::ValueCollection& vc)
 {
 	for (int j : {0, 1, 2})
 	{
@@ -1095,7 +1095,7 @@ void AdjustView::SyncGamma(fluo::Color& c, int i, double val, fluo::ValueCollect
 	}
 }
 
-void AdjustView::SyncBrightness(fluo::Color& c, int i, double val, fluo::ValueCollection& vc)
+void OutputAdjPanel::SyncBrightness(fluo::Color& c, int i, double val, fluo::ValueCollection& vc)
 {
 	for (int j : {0, 1, 2})
 	{
@@ -1128,7 +1128,7 @@ void AdjustView::SyncBrightness(fluo::Color& c, int i, double val, fluo::ValueCo
 	}
 }
 
-void AdjustView::SyncHdr(fluo::Color& c, int i, double val, fluo::ValueCollection& vc)
+void OutputAdjPanel::SyncHdr(fluo::Color& c, int i, double val, fluo::ValueCollection& vc)
 {
 	for (int j : {0, 1, 2})
 	{
@@ -1161,7 +1161,7 @@ void AdjustView::SyncHdr(fluo::Color& c, int i, double val, fluo::ValueCollectio
 	}
 }
 
-void AdjustView::SyncGamma(int i)
+void OutputAdjPanel::SyncGamma(int i)
 {
 	fluo::Color gamma;
 	switch (m_type)
@@ -1210,7 +1210,7 @@ void AdjustView::SyncGamma(int i)
 	FluoRefresh(false, true, 2, vc);
 }
 
-void AdjustView::SyncBrightness(int i)
+void OutputAdjPanel::SyncBrightness(int i)
 {
 	fluo::Color brightness;
 	switch (m_type)
@@ -1259,7 +1259,7 @@ void AdjustView::SyncBrightness(int i)
 	FluoRefresh(false, true, 2, vc);
 }
 
-void AdjustView::SyncHdr(int i)
+void OutputAdjPanel::SyncHdr(int i)
 {
 	fluo::Color hdr;
 	switch (m_type)
@@ -1308,7 +1308,7 @@ void AdjustView::SyncHdr(int i)
 	FluoRefresh(false, true, 2, vc);
 }
 
-void AdjustView::SetSync(int i, bool val, bool update)
+void OutputAdjPanel::SetSync(int i, bool val, bool update)
 {
 	m_sync[i] = val;
 	fluo::Color gamma, brightness, hdr;
@@ -1402,7 +1402,7 @@ void AdjustView::SetSync(int i, bool val, bool update)
 	}
 }
 
-void AdjustView::SetGamma(int i, double val, bool update)
+void OutputAdjPanel::SetGamma(int i, double val, bool update)
 {
 	fluo::Color gamma;
 	switch (m_type)
@@ -1445,7 +1445,7 @@ void AdjustView::SetGamma(int i, double val, bool update)
 		FluoRefresh(false, true, 2, vc);
 }
 
-void AdjustView::SetBrightness(int i, double val, bool update)
+void OutputAdjPanel::SetBrightness(int i, double val, bool update)
 {
 	fluo::Color brightness;
 	switch (m_type)
@@ -1488,7 +1488,7 @@ void AdjustView::SetBrightness(int i, double val, bool update)
 		FluoRefresh(false, true, 2, vc);
 }
 
-void AdjustView::SetHdr(int i, double val, bool update)
+void OutputAdjPanel::SetHdr(int i, double val, bool update)
 {
 	fluo::Color hdr;
 	switch (m_type)
@@ -1531,7 +1531,7 @@ void AdjustView::SetHdr(int i, double val, bool update)
 		FluoRefresh(false, true, 2, vc);
 }
 
-void AdjustView::UpdateSync()
+void OutputAdjPanel::UpdateSync()
 {
 	int i;
 	int cnt;
@@ -1692,21 +1692,21 @@ void AdjustView::UpdateSync()
 
 }
 
-void AdjustView::OnRReset(wxCommandEvent &event)
+void OutputAdjPanel::OnRReset(wxCommandEvent &event)
 {
 	SetGamma(0, glbin_outadj_def.m_gamma_r, false);
 	SetBrightness(0, glbin_outadj_def.m_brightness_r, false);
 	SetHdr(0, glbin_outadj_def.m_hdr_r);
 }
 
-void AdjustView::OnGReset(wxCommandEvent &event)
+void OutputAdjPanel::OnGReset(wxCommandEvent &event)
 {
 	SetGamma(1, glbin_outadj_def.m_gamma_g, false);
 	SetBrightness(1, glbin_outadj_def.m_brightness_g, false);
 	SetHdr(1, glbin_outadj_def.m_hdr_g);
 }
 
-void AdjustView::OnBReset(wxCommandEvent &event)
+void OutputAdjPanel::OnBReset(wxCommandEvent &event)
 {
 	SetGamma(2, glbin_outadj_def.m_gamma_b, false);
 	SetBrightness(2, glbin_outadj_def.m_brightness_b, false);
