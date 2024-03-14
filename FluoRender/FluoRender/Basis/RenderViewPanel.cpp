@@ -590,22 +590,6 @@ void RenderViewPanel::CreateBar()
 
 	//bar bottom///////////////////////////////////////////////////
 	wxBoxSizer* sizer_h_2 = new wxBoxSizer(wxHORIZONTAL);
-	st1 = new wxStaticText(this, 0, "X:");
-	m_x_rot_sldr = new wxScrollBar(this, ID_XRotSldr);
-	m_x_rot_sldr->SetScrollbar(180,60,420,15);
-	m_x_rot_text = new wxTextCtrl(this, ID_XRotText, "0.0",
-		wxDefaultPosition, FromDIP(wxSize(45,20)), 0, vald_fp1);
-	st2 = new wxStaticText(this, 0, "Y:");
-	m_y_rot_sldr = new wxScrollBar(this, ID_YRotSldr);
-	m_y_rot_sldr->SetScrollbar(180,60,420,15);
-	m_y_rot_text = new wxTextCtrl(this, ID_YRotText, "0.0",
-		wxDefaultPosition, FromDIP(wxSize(45,20)), 0, vald_fp1);
-	st3 = new wxStaticText(this, 0, "Z:");
-	m_z_rot_sldr = new wxScrollBar(this, ID_ZRotSldr);
-	m_z_rot_sldr->SetScrollbar(180,60,420,15);
-	m_z_rot_text = new wxTextCtrl(this, ID_ZRotText, "0.0",
-		wxDefaultPosition, FromDIP(wxSize(45,20)), 0, vald_fp1);
-
 	//45 lock
 	m_rot_lock_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -621,7 +605,30 @@ void RenderViewPanel::CreateBar()
 		bitmap, wxNullBitmap,
 		"Choose slider style",
 		"Choose slider style");
+	m_rot_lock_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnRotLockCheck, this);
 	m_rot_lock_btn->Realize();
+
+	st1 = new wxStaticText(this, 0, "X:");
+	m_x_rot_sldr = new wxScrollBar(this, ID_RotXScroll);
+	m_x_rot_sldr->SetScrollbar(180,60,420,15);
+	m_x_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
+		wxDefaultPosition, FromDIP(wxSize(45,20)), 0, vald_fp1);
+	st2 = new wxStaticText(this, 0, "Y:");
+	m_y_rot_sldr = new wxScrollBar(this, ID_RotYScroll);
+	m_y_rot_sldr->SetScrollbar(180,60,420,15);
+	m_y_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
+		wxDefaultPosition, FromDIP(wxSize(45,20)), 0, vald_fp1);
+	st3 = new wxStaticText(this, 0, "Z:");
+	m_z_rot_sldr = new wxScrollBar(this, ID_RotZScroll);
+	m_z_rot_sldr->SetScrollbar(180,60,420,15);
+	m_z_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
+		wxDefaultPosition, FromDIP(wxSize(45,20)), 0, vald_fp1);
+	m_x_rot_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnRotEdit, this);
+	m_y_rot_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnRotEdit, this);
+	m_z_rot_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnRotEdit, this);
+	m_x_rot_sldr->Bind(wxEVT_SCROLL_THUMBTRACK, &RenderViewPanel::OnRotTrack, this);
+	m_y_rot_sldr->Bind(wxEVT_SCROLL_THUMBTRACK, &RenderViewPanel::OnRotTrack, this);
+	m_z_rot_sldr->Bind(wxEVT_SCROLL_THUMBTRACK, &RenderViewPanel::OnRotTrack, this);
 
 	//ortho view selector
 	m_ortho_view_cmb = new wxComboBox(this, ID_OrthoViewCmb, "",
@@ -667,7 +674,7 @@ void RenderViewPanel::CreateBar()
 	SetSizer(sizer_v);
 	Layout();
 
-	m_timer.Bind(wxEVT_TIMER, &RenderViewPanel::OnTimer, this);
+	//m_timer.Bind(wxEVT_TIMER, &RenderViewPanel::OnTimer, this);
 }
 
 void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
@@ -815,16 +822,39 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		break;
 	}
 
-	//roatation
-	double rotx, roty, rotz;
-	m_glview->GetRotations(rotx, roty, rotz);
-	m_x_rot_sldr->SetThumbPosition(std::round(rotx));
-	m_y_rot_sldr->SetThumbPosition(std::round(roty));
-	m_z_rot_sldr->SetThumbPosition(std::round(rotz));
-
 	//lock rot
 	m_rot_lock_btn->ToggleTool(ID_RotLockChk, m_glview->m_rot_lock);
+	if (m_glview->m_rot_lock)
+		m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
+			wxGetBitmap(gear_45, m_dpi_sf2));
+	else
+		m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
+			wxGetBitmap(gear_dark, m_dpi_sf2));
+
+	//slider type
 	m_rot_lock_btn->ToggleTool(ID_RotSliderType, m_rot_slider);
+	if (m_rot_slider)
+		m_rot_lock_btn->SetToolNormalBitmap(ID_RotSliderType,
+			wxGetBitmap(slider_type_rot, m_dpi_sf2));
+	else
+		m_rot_lock_btn->SetToolNormalBitmap(ID_RotSliderType,
+			wxGetBitmap(slider_type_pos, m_dpi_sf2));
+
+	//roatation
+	if (m_rot_slider)
+	{
+		m_x_rot_sldr->SetThumbPosition(180);
+		m_y_rot_sldr->SetThumbPosition(180);
+		m_z_rot_sldr->SetThumbPosition(180);
+	}
+	else
+	{
+		double rotx, roty, rotz;
+		m_glview->GetRotations(rotx, roty, rotz);
+		m_x_rot_sldr->SetThumbPosition(std::round(rotx));
+		m_y_rot_sldr->SetThumbPosition(std::round(roty));
+		m_z_rot_sldr->SetThumbPosition(std::round(rotz));
+	}
 
 	//ortho view
 	//m_ortho_view_cmb->Select(6);
@@ -1159,6 +1189,63 @@ void RenderViewPanel::SetScaleMode(int val)
 	FluoRefresh(false, true, 2);
 }
 
+void RenderViewPanel::SetRotLock(bool val)
+{
+	m_glview->SetRotLock(val);
+	if (val)
+	{
+		double rotx, roty, rotz;
+		m_glview->GetRotations(rotx, roty, rotz);
+		rotx = (((int)(rotx / 45)) * 45);
+		roty = (((int)(roty / 45)) * 45);
+		rotz = (((int)(rotz / 45)) * 45);
+		SetRotations(rotx, roty, rotz);
+	}
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::SetSliderType(bool val)
+{
+	m_rot_slider = val;
+	if (val)
+	{
+		//m_timer.Start(50);
+		m_x_rot_sldr->Bind(wxEVT_SCROLL_THUMBRELEASE, &RenderViewPanel::OnRotRelease, this);
+		m_y_rot_sldr->Bind(wxEVT_SCROLL_THUMBRELEASE, &RenderViewPanel::OnRotRelease, this);
+		m_z_rot_sldr->Bind(wxEVT_SCROLL_THUMBRELEASE, &RenderViewPanel::OnRotRelease, this);
+
+		m_x_rot_sldr->Bind(wxEVT_SCROLL_LINEDOWN, &RenderViewPanel::OnRotLineDown, this);
+		m_y_rot_sldr->Bind(wxEVT_SCROLL_LINEDOWN, &RenderViewPanel::OnRotLineDown, this);
+		m_z_rot_sldr->Bind(wxEVT_SCROLL_LINEDOWN, &RenderViewPanel::OnRotLineDown, this);
+
+		m_x_rot_sldr->Bind(wxEVT_SCROLL_LINEUP, &RenderViewPanel::OnRotLineUp, this);
+		m_y_rot_sldr->Bind(wxEVT_SCROLL_LINEUP, &RenderViewPanel::OnRotLineUp, this);
+		m_z_rot_sldr->Bind(wxEVT_SCROLL_LINEUP, &RenderViewPanel::OnRotLineUp, this);
+	}
+	else
+	{
+		//m_timer.Stop();
+		m_x_rot_sldr->Unbind(wxEVT_SCROLL_THUMBRELEASE, &RenderViewPanel::OnRotRelease, this);
+		m_y_rot_sldr->Unbind(wxEVT_SCROLL_THUMBRELEASE, &RenderViewPanel::OnRotRelease, this);
+		m_z_rot_sldr->Unbind(wxEVT_SCROLL_THUMBRELEASE, &RenderViewPanel::OnRotRelease, this);
+
+		m_x_rot_sldr->Unbind(wxEVT_SCROLL_LINEDOWN, &RenderViewPanel::OnRotLineDown, this);
+		m_y_rot_sldr->Unbind(wxEVT_SCROLL_LINEDOWN, &RenderViewPanel::OnRotLineDown, this);
+		m_z_rot_sldr->Unbind(wxEVT_SCROLL_LINEDOWN, &RenderViewPanel::OnRotLineDown, this);
+
+		m_x_rot_sldr->Unbind(wxEVT_SCROLL_LINEUP, &RenderViewPanel::OnRotLineUp, this);
+		m_y_rot_sldr->Unbind(wxEVT_SCROLL_LINEUP, &RenderViewPanel::OnRotLineUp, this);
+		m_z_rot_sldr->Unbind(wxEVT_SCROLL_LINEUP, &RenderViewPanel::OnRotLineUp, this);
+	}
+	FluoRefresh(false, true, 2);
+}
+
+void RenderViewPanel::SetRotations(double rotx, double roty, double rotz)
+{
+	m_glview->SetRotations(rotx, roty, rotz);
+	FluoRefresh(false, true, 2);
+}
+
 void RenderViewPanel::OnToolBar(wxCommandEvent& event)
 {
 	int id = event.GetId();
@@ -1402,18 +1489,266 @@ void RenderViewPanel::OnScaleMode(wxCommandEvent& event)
 	event.Skip();
 }
 
-void RenderViewPanel::UpdateView(bool ui_update)
+void RenderViewPanel::OnRotLockCheck(wxCommandEvent& event)
 {
-	double rotx, roty, rotz;
-	wxString str_val = m_x_rot_text->GetValue();
-	rotx = STOD(str_val.fn_str());
-	str_val = m_y_rot_text->GetValue();
-	roty = STOD(str_val.fn_str());
-	str_val = m_z_rot_text->GetValue();
-	rotz = STOD(str_val.fn_str());
-	m_glview->SetRotations(rotx, roty, rotz, ui_update);
-	RefreshGL(true);
+	int id = event.GetId();
+
+	switch (id)
+	{
+	case ID_RotLockChk:
+		SetRotLock(m_rot_lock_btn->GetToolState(ID_RotLockChk));
+		break;
+	case ID_RotSliderType:
+		SetSliderType(m_rot_lock_btn->GetToolState(ID_RotSliderType));
+		break;
+	}
+	event.Skip();
 }
+
+void RenderViewPanel::OnRotEdit(wxCommandEvent& event)
+{
+	wxString str;
+	double rotx, roty, rotz;
+	str = m_x_rot_text->GetValue();
+	str.ToDouble(&rotx);
+	str = m_y_rot_text->GetValue();
+	str.ToDouble(&roty);
+	str = m_z_rot_text->GetValue();
+	str.ToDouble(&rotz);
+	SetRotations(rotx, roty, rotz);
+	event.Skip();
+}
+
+//timer used for rotation scrollbars
+void RenderViewPanel::OnTimer(wxTimerEvent& event)
+{
+	wxString str;
+	bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
+	double rotx, roty, rotz;
+	m_glview->GetRotations(rotx, roty, rotz);
+	//the X bar positions
+	int pos = m_x_rot_sldr->GetThumbPosition();
+	int mid = 180;
+	double dist = pos - mid;
+	rotx = lock ? (((int)((rotx + dist) / 45)) * 45) :
+		(rotx + dist * dist * dist / 324000.);
+	if (rotx < 0.) rotx += 360.;
+	if (rotx > 360.) rotx -= 360.;
+	str = wxString::Format("%.1f", rotx);
+	if (std::abs(dist) > 1) {
+		if (!m_x_rotating)
+			m_x_rot_sldr->SetThumbPosition((mid + pos) / 2. + 0.5);
+		if (std::abs(dist) > 10)
+			m_x_rot_text->SetValue(str);
+	}
+	//the Y bar positions
+	pos = m_y_rot_sldr->GetThumbPosition();
+	dist = pos - mid;
+	roty = lock ? (((int)((roty + dist) / 45)) * 45) :
+		(roty + dist * dist * dist / 324000.);
+	if (roty < 0.) roty += 360.;
+	if (roty > 360.) roty -= 360.;
+	str = wxString::Format("%.1f", roty);
+	if (std::abs(dist) > 1) {
+		if (!m_y_rotating)
+			m_y_rot_sldr->SetThumbPosition((mid + pos) / 2. + 0.5);
+		if (std::abs(dist) > 10)
+			m_y_rot_text->SetValue(str);
+	}
+	//the Z bar positions
+	pos = m_z_rot_sldr->GetThumbPosition();
+	dist = pos - mid;
+	rotz = lock ? (((int)((rotz + dist) / 45)) * 45) :
+		(rotz + dist * dist * dist / 324000.);
+	if (rotz < 0.) rotz += 360.;
+	if (rotz > 360.) rotz -= 360.;
+	str = wxString::Format("%.1f", rotz);
+	if (std::abs(dist) > 1) {
+		if (!m_z_rotating)
+			m_z_rot_sldr->SetThumbPosition((mid + pos) / 2. + 0.5);
+		if (std::abs(dist) > 10)
+			m_z_rot_text->SetValue(str);
+	}
+}
+
+void RenderViewPanel::OnRotTrack(wxScrollEvent& event)
+{
+	if (m_skip_thumb)
+	{
+		m_skip_thumb = false;
+		m_x_rot_sldr->SetThumbPosition(180);
+	}
+	else
+	{
+		bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
+		wxString str;
+		if (m_rot_slider)
+		{
+			double rotx, roty, rotz, deg;
+			m_glview->GetRotations(rotx, roty, rotz);
+			if (event.GetEventType() == wxEVT_SCROLL_THUMBTRACK)
+				m_x_rotating = true;
+			else if (event.GetEventType() == wxEVT_SCROLL_THUMBRELEASE)
+				m_x_rotating = false;
+			else if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN)
+			{
+				deg = lock ? (rotx + 45) : (rotx + 1);
+				deg = deg > 360.0 ? deg - 360.0 : deg;
+				str = wxString::Format("%.1f", deg);
+				if (str != m_x_rot_text->GetValue())
+				{
+					m_x_rot_text->SetValue(str);
+					m_skip_thumb = true;
+				}
+			}
+			else if (event.GetEventType() == wxEVT_SCROLL_LINEUP)
+			{
+				deg = lock ? (rotx - 45) : (rotx - 1);
+				deg = deg < 0.0 ? deg + 360.0 : deg;
+				str = wxString::Format("%.1f", deg);
+				if (str != m_x_rot_text->GetValue())
+				{
+					m_x_rot_text->SetValue(str);
+					m_skip_thumb = true;
+				}
+			}
+		}
+		else
+		{
+			int pos = m_x_rot_sldr->GetThumbPosition();
+			if (lock)
+				pos = std::round(double(pos) / 45.0) * 45;
+			str = wxString::Format("%.1f", double(pos));
+			if (str != m_x_rot_text->GetValue())
+				m_x_rot_text->SetValue(str);
+		}
+	}
+	event.Skip();
+}
+
+void RenderViewPanel::OnYRotScroll(wxScrollEvent& event)
+{
+	if (m_skip_thumb)
+	{
+		m_skip_thumb = false;
+		m_y_rot_sldr->SetThumbPosition(180);
+		event.Skip();
+		return;
+	}
+
+	bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
+	wxString str;
+	if (m_rot_slider)
+	{
+		double rotx, roty, rotz, deg;
+		m_glview->GetRotations(rotx, roty, rotz);
+		if (event.GetEventType() == wxEVT_SCROLL_THUMBTRACK)
+			m_y_rotating = true;
+		else if (event.GetEventType() == wxEVT_SCROLL_THUMBRELEASE)
+			m_y_rotating = false;
+		else if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN)
+		{
+			deg = lock ? (roty + 45) : (roty + 1);
+			deg = deg > 360.0 ? deg - 360.0 : deg;
+			str = wxString::Format("%.1f", deg);
+			if (str != m_y_rot_text->GetValue())
+			{
+				m_y_rot_text->SetValue(str);
+				m_skip_thumb = true;
+			}
+		}
+		else if (event.GetEventType() == wxEVT_SCROLL_LINEUP)
+		{
+			deg = lock ? (roty - 45) : (roty - 1);
+			deg = deg < 0.0 ? deg + 360.0 : deg;
+			str = wxString::Format("%.1f", deg);
+			if (str != m_y_rot_text->GetValue())
+			{
+				m_y_rot_text->SetValue(str);
+				m_skip_thumb = true;
+			}
+		}
+	}
+	else
+	{
+		int pos = m_y_rot_sldr->GetThumbPosition();
+		if (lock)
+			pos = std::round(double(pos) / 45.0) * 45;
+		str = wxString::Format("%.1f", double(pos));
+		if (str != m_y_rot_text->GetValue())
+			m_y_rot_text->SetValue(str);
+	}
+}
+
+void RenderViewPanel::OnZRotScroll(wxScrollEvent& event)
+{
+	if (m_skip_thumb)
+	{
+		m_skip_thumb = false;
+		m_z_rot_sldr->SetThumbPosition(180);
+		event.Skip();
+		return;
+	}
+
+	bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
+	wxString str;
+	if (m_rot_slider)
+	{
+		double rotx, roty, rotz, deg;
+		m_glview->GetRotations(rotx, roty, rotz);
+		if (event.GetEventType() == wxEVT_SCROLL_THUMBTRACK)
+			m_z_rotating = true;
+		else if (event.GetEventType() == wxEVT_SCROLL_THUMBRELEASE)
+			m_z_rotating = false;
+		else if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN)
+		{
+			deg = lock ? (rotz + 45) : (rotz + 1);
+			deg = deg > 360.0 ? deg - 360.0 : deg;
+			str = wxString::Format("%.1f", deg);
+			if (str != m_z_rot_text->GetValue())
+			{
+				m_z_rot_text->SetValue(str);
+				m_skip_thumb = true;
+			}
+		}
+		else if (event.GetEventType() == wxEVT_SCROLL_LINEUP)
+		{
+			deg = lock ? (rotz - 45) : (rotz - 1);
+			deg = deg < 0.0 ? deg + 360.0 : deg;
+			str = wxString::Format("%.1f", deg);
+			if (str != m_z_rot_text->GetValue())
+			{
+				m_z_rot_text->SetValue(str);
+				m_skip_thumb = true;
+			}
+		}
+	}
+	else
+	{
+		int pos = m_z_rot_sldr->GetThumbPosition();
+		if (lock)
+			pos = std::round(double(pos) / 45.0) * 45;
+		str = wxString::Format("%.1f", double(pos));
+		if (str != m_z_rot_text->GetValue())
+			m_z_rot_text->SetValue(str);
+	}
+}
+
+
+
+
+//void RenderViewPanel::UpdateView(bool ui_update)
+//{
+//	double rotx, roty, rotz;
+//	wxString str_val = m_x_rot_text->GetValue();
+//	rotx = STOD(str_val.fn_str());
+//	str_val = m_y_rot_text->GetValue();
+//	roty = STOD(str_val.fn_str());
+//	str_val = m_z_rot_text->GetValue();
+//	rotz = STOD(str_val.fn_str());
+//	m_glview->SetRotations(rotx, roty, rotz, ui_update);
+//	RefreshGL(true);
+//}
 
 void RenderViewPanel::UpdateScaleFactor(bool update_text)
 {
@@ -1690,19 +2025,6 @@ wxWindow* RenderViewPanel::CreateExtraCaptureControl(wxWindow* parent)
 
 //bar right
 //bar bottom
-void RenderViewPanel::OnValueEdit(wxCommandEvent& event)
-{
-	UpdateView(false);
-	if (!m_rot_slider)
-	{
-		double rotx, roty, rotz;
-		m_glview->GetRotations(rotx, roty, rotz);
-		m_x_rot_sldr->SetThumbPosition(std::round(rotx));
-		m_y_rot_sldr->SetThumbPosition(std::round(roty));
-		m_z_rot_sldr->SetThumbPosition(std::round(rotz));
-	}
-}
-
 /*void RenderViewPanel::OnRotLink(bool b)
 {
 	m_glview->m_linked_rot = true;
@@ -1761,270 +2083,6 @@ void RenderViewPanel::OnRotReset(wxCommandEvent &event)
 	RefreshGL(true);
 	if (m_glview->m_mouse_focus)
 		m_glview->SetFocus();
-}
-
-//timer used for rotation scrollbars
-void RenderViewPanel::OnTimer(wxTimerEvent& event) {
-	wxString str;
-	bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
-	double rotx, roty, rotz;
-	m_glview->GetRotations(rotx, roty, rotz);
-	//the X bar positions
-	int pos = m_x_rot_sldr->GetThumbPosition();
-	int mid = 180;
-	double dist = pos - mid;
-	rotx = lock?(((int)((rotx + dist)/45))*45):
-		(rotx + dist * dist * dist / 324000.);
-	if (rotx < 0.) rotx +=360.;
-	if (rotx > 360.) rotx -=360.;
-	str = wxString::Format("%.1f", rotx);
-	if (std::abs(dist) > 1) {
-		if (!m_x_rotating)
-			m_x_rot_sldr->SetThumbPosition((mid + pos) / 2. + 0.5);
-		if (std::abs(dist) > 10)
-			m_x_rot_text->SetValue(str);
-	}
-	//the Y bar positions
-	pos = m_y_rot_sldr->GetThumbPosition();
-	dist = pos - mid;
-	roty = lock?(((int)((roty + dist)/45))*45):
-		(roty + dist * dist * dist / 324000.);
-	if (roty < 0.) roty +=360.;
-	if (roty > 360.) roty -=360.;
-	str = wxString::Format("%.1f", roty);
-	if (std::abs(dist) > 1) {
-		if (!m_y_rotating)
-			m_y_rot_sldr->SetThumbPosition((mid + pos) / 2. + 0.5);
-		if (std::abs(dist) > 10)
-			m_y_rot_text->SetValue(str);
-	}
-	//the Z bar positions
-	pos = m_z_rot_sldr->GetThumbPosition();
-	dist = pos - mid;
-	rotz = lock?(((int)((rotz + dist)/45))*45):
-		(rotz + dist * dist * dist / 324000.);
-	if (rotz < 0.) rotz +=360.;
-	if (rotz > 360.) rotz -=360.;
-	str = wxString::Format("%.1f", rotz);
-	if (std::abs(dist) > 1) {
-		if (!m_z_rotating)
-			m_z_rot_sldr->SetThumbPosition((mid + pos) / 2. + 0.5);
-		if (std::abs(dist) > 10)
-			m_z_rot_text->SetValue(str);
-	}
-}
-
-void RenderViewPanel::OnXRotScroll(wxScrollEvent& event)
-{
-	if (m_skip_thumb)
-	{
-		m_skip_thumb = false;
-		m_x_rot_sldr->SetThumbPosition(180);
-		event.Skip();
-		return;
-	}
-
-	bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
-	wxString str;
-	if (m_rot_slider)
-	{
-		double rotx, roty, rotz, deg;
-		m_glview->GetRotations(rotx, roty, rotz);
-		if (event.GetEventType() == wxEVT_SCROLL_THUMBTRACK )
-			m_x_rotating = true;
-		else if (event.GetEventType() == wxEVT_SCROLL_THUMBRELEASE  )
-			m_x_rotating = false;
-		else if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN)
-		{
-			deg = lock ? (rotx + 45) : (rotx + 1);
-			deg = deg > 360.0 ? deg - 360.0 : deg;
-			str = wxString::Format("%.1f", deg);
-			if (str != m_x_rot_text->GetValue())
-			{
-				m_x_rot_text->SetValue(str);
-				m_skip_thumb = true;
-			}
-		} else if (event.GetEventType() == wxEVT_SCROLL_LINEUP)
-		{
-			deg = lock ? (rotx - 45) : (rotx - 1);
-			deg = deg < 0.0 ? deg + 360.0 : deg;
-			str = wxString::Format("%.1f", deg);
-			if (str != m_x_rot_text->GetValue())
-			{
-				m_x_rot_text->SetValue(str);
-				m_skip_thumb = true;
-			}
-		}
-	}
-	else
-	{
-		int pos = m_x_rot_sldr->GetThumbPosition();
-		if (lock)
-			pos = std::round(double(pos) / 45.0) * 45;
-		str = wxString::Format("%.1f", double(pos));
-		if (str != m_x_rot_text->GetValue())
-			m_x_rot_text->SetValue(str);
-	}
-}
-
-void RenderViewPanel::OnYRotScroll(wxScrollEvent& event)
-{
-	if (m_skip_thumb)
-	{
-		m_skip_thumb = false;
-		m_y_rot_sldr->SetThumbPosition(180);
-		event.Skip();
-		return;
-	}
-
-	bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
-	wxString str;
-	if (m_rot_slider)
-	{
-		double rotx, roty, rotz, deg;
-		m_glview->GetRotations(rotx, roty, rotz);
-		if (event.GetEventType() == wxEVT_SCROLL_THUMBTRACK)
-			m_y_rotating = true;
-		else if (event.GetEventType() == wxEVT_SCROLL_THUMBRELEASE)
-			m_y_rotating = false;
-		else if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN)
-		{
-			deg = lock ? (roty + 45) : (roty + 1);
-			deg = deg > 360.0 ? deg - 360.0 : deg;
-			str = wxString::Format("%.1f", deg);
-			if (str != m_y_rot_text->GetValue())
-			{
-				m_y_rot_text->SetValue(str);
-				m_skip_thumb = true;
-			}
-		}
-		else if (event.GetEventType() == wxEVT_SCROLL_LINEUP)
-		{
-			deg = lock ? (roty - 45) : (roty - 1);
-			deg = deg < 0.0 ? deg + 360.0 : deg;
-			str = wxString::Format("%.1f", deg);
-			if (str != m_y_rot_text->GetValue())
-			{
-				m_y_rot_text->SetValue(str);
-				m_skip_thumb = true;
-			}
-		}
-	}
-	else
-	{
-		int pos = m_y_rot_sldr->GetThumbPosition();
-		if (lock)
-			pos = std::round(double(pos) / 45.0) * 45;
-		str = wxString::Format("%.1f", double(pos));
-		if (str != m_y_rot_text->GetValue())
-			m_y_rot_text->SetValue(str);
-	}
-}
-
-void RenderViewPanel::OnZRotScroll(wxScrollEvent& event)
-{
-	if (m_skip_thumb)
-	{
-		m_skip_thumb = false;
-		m_z_rot_sldr->SetThumbPosition(180);
-		event.Skip();
-		return;
-	}
-
-	bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
-	wxString str;
-	if (m_rot_slider)
-	{
-		double rotx, roty, rotz, deg;
-		m_glview->GetRotations(rotx, roty, rotz);
-		if (event.GetEventType() == wxEVT_SCROLL_THUMBTRACK)
-			m_z_rotating = true;
-		else if (event.GetEventType() == wxEVT_SCROLL_THUMBRELEASE)
-			m_z_rotating = false;
-		else if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN)
-		{
-			deg = lock ? (rotz + 45) : (rotz + 1);
-			deg = deg > 360.0 ? deg - 360.0 : deg;
-			str = wxString::Format("%.1f", deg);
-			if (str != m_z_rot_text->GetValue())
-			{
-				m_z_rot_text->SetValue(str);
-				m_skip_thumb = true;
-			}
-		}
-		else if (event.GetEventType() == wxEVT_SCROLL_LINEUP)
-		{
-			deg = lock ? (rotz - 45) : (rotz - 1);
-			deg = deg < 0.0 ? deg + 360.0 : deg;
-			str = wxString::Format("%.1f", deg);
-			if (str != m_z_rot_text->GetValue())
-			{
-				m_z_rot_text->SetValue(str);
-				m_skip_thumb = true;
-			}
-		}
-	}
-	else
-	{
-		int pos = m_z_rot_sldr->GetThumbPosition();
-		if (lock)
-			pos = std::round(double(pos) / 45.0) * 45;
-		str = wxString::Format("%.1f", double(pos));
-		if (str != m_z_rot_text->GetValue())
-			m_z_rot_text->SetValue(str);
-	}
-}
-
-void RenderViewPanel::OnRotLockCheck(wxCommandEvent& event)
-{
-	bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
-	double rotx, roty, rotz;
-	m_glview->GetRotations(rotx, roty, rotz);
-	if (lock)
-	{
-		m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
-			wxGetBitmap(gear_45, m_dpi_sf2));
-		rotx = (((int)(rotx/45))*45);
-		roty = (((int)(roty/45))*45);
-		rotz = (((int)(rotz/45))*45);
-	}
-	else
-	{
-		m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
-			wxGetBitmap(gear_dark, m_dpi_sf2));
-	}
-	m_glview->SetRotLock(lock);
-	wxString str = wxString::Format("%.1f", rotx);
-	m_x_rot_text->SetValue(str);
-	str = wxString::Format("%.1f", roty);
-	m_y_rot_text->SetValue(str);
-	str = wxString::Format("%.1f", rotz);
-	m_z_rot_text->SetValue(str);
-}
-
-void RenderViewPanel::OnRotSliderType(wxCommandEvent& event)
-{
-	m_rot_slider = m_rot_lock_btn->GetToolState(ID_RotSliderType);
-	if (m_rot_slider)
-	{
-		m_timer.Start(50);
-		m_rot_lock_btn->SetToolNormalBitmap(ID_RotSliderType,
-			wxGetBitmap(slider_type_rot, m_dpi_sf2));
-		m_x_rot_sldr->SetThumbPosition(180);
-		m_y_rot_sldr->SetThumbPosition(180);
-		m_z_rot_sldr->SetThumbPosition(180);
-	}
-	else
-	{
-		m_timer.Stop();
-		m_rot_lock_btn->SetToolNormalBitmap(ID_RotSliderType,
-			wxGetBitmap(slider_type_pos, m_dpi_sf2));
-		double rotx, roty, rotz;
-		m_glview->GetRotations(rotx, roty, rotz);
-		m_x_rot_sldr->SetThumbPosition(std::round(rotx));
-		m_y_rot_sldr->SetThumbPosition(std::round(roty));
-		m_z_rot_sldr->SetThumbPosition(std::round(rotz));
-	}
 }
 
 void RenderViewPanel::OnOrthoViewSelected(wxCommandEvent& event)

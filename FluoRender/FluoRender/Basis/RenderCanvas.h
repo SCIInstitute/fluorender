@@ -241,7 +241,7 @@ public:
 		roty = m_roty;
 		rotz = m_rotz;
 	}
-	void SetRotations(double rotx, double roty, double rotz, bool ui_update = true);
+	void SetRotations(double rotx, double roty, double rotz);
 	void SetZeroRotations();
 	void ResetZeroRotations(double &rotx, double &roty, double &rotz);
 	void GetCenters(double &ctrx, double &ctry, double &ctrz)

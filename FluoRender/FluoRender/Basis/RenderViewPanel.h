@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 #include <wx/clrpicker.h>
+#include <wx/spinbutt.h>
 
 class MainFrame;
 class wxSingleSlider;
@@ -65,6 +66,12 @@ public:
 	{
 		ID_ZeroRotBtn = 0,
 		ID_RotResetBtn
+	};
+	enum
+	{
+		ID_RotXScroll = 0,
+		ID_RotYScroll,
+		ID_RotZScroll
 	};
 
 	RenderViewPanel(MainFrame* frame,
@@ -107,7 +114,11 @@ public:
 	void SetScaleFactor(double val);
 	void SetScaleMode(int val);
 
-	void UpdateView(bool ui_update = true);
+	void SetRotLock(bool val);
+	void SetSliderType(bool val);
+	void SetRotations(double rotx, double roty, double rotz);
+
+	//void UpdateView(bool ui_update = true);
 	void UpdateScaleFactor(bool update_text = true);
 	//rot center anchor thresh
 	void SetPinThreshold(double value);
@@ -229,19 +240,19 @@ private:
 	void OnScaleFactorSpinDown(wxSpinEvent& event);
 
 	//bar bottom
+	void OnRotLockCheck(wxCommandEvent& event);
+	void OnRotEdit(wxCommandEvent& event);
+	void OnTimer(wxTimerEvent& event);
+	void OnRotTrack(wxScrollEvent& event);
+	void OnRotRelease(wxScrollEvent& event);
+	void OnRotLineDown(wxScrollEvent& event);
+	void OnRotLineUp(wxScrollEvent& event);
+
 	void OnZeroRot(wxCommandEvent& event);
 	void OnRotReset(wxCommandEvent &event);
-	void OnValueEdit(wxCommandEvent& event);
-	void OnXRotScroll(wxScrollEvent &event);
-	void OnYRotScroll(wxScrollEvent &event);
-	void OnZRotScroll(wxScrollEvent &event);
-	void OnRotLockCheck(wxCommandEvent& event);
-	void OnRotSliderType(wxCommandEvent& event);
 	void OnOrthoViewSelected(wxCommandEvent& event);
 
 
-	//idle
-	void OnTimer(wxTimerEvent& event);
 
 	//capture options
 	void OnCh1Check(wxCommandEvent& event);

@@ -10712,7 +10712,7 @@ void RenderCanvas::SetFog(bool b)
 		m_vrv->m_left_toolbar->ToggleTool(RenderViewPanel::ID_DepthAttenChk, b);
 }
 
-void RenderCanvas::SetRotations(double rotx, double roty, double rotz, bool ui_update)
+void RenderCanvas::SetRotations(double rotx, double roty, double rotz)
 {
 	m_rotx = rotx;
 	m_roty = roty;
@@ -10743,27 +10743,27 @@ void RenderCanvas::SetRotations(double rotx, double roty, double rotz, bool ui_u
 	fluo::Quaternion up2 = (-m_q) * up * m_q;
 	m_up = fluo::Vector(up2.x, up2.y, up2.z);
 
-	if (ui_update)
-	{
-		wxString str = wxString::Format("%.1f", m_rotx);
-		m_vrv->m_x_rot_text->ChangeValue(str);
-		str = wxString::Format("%.1f", m_roty);
-		m_vrv->m_y_rot_text->ChangeValue(str);
-		str = wxString::Format("%.1f", m_rotz);
-		m_vrv->m_z_rot_text->ChangeValue(str);
-		if (m_vrv->m_rot_slider)
-		{
-			m_vrv->m_x_rot_sldr->SetThumbPosition(180);
-			m_vrv->m_y_rot_sldr->SetThumbPosition(180);
-			m_vrv->m_z_rot_sldr->SetThumbPosition(180);
-		}
-		else
-		{
-			m_vrv->m_x_rot_sldr->SetThumbPosition(std::round(m_rotx));
-			m_vrv->m_y_rot_sldr->SetThumbPosition(std::round(m_roty));
-			m_vrv->m_z_rot_sldr->SetThumbPosition(std::round(m_rotz));
-		}
-	}
+	//if (ui_update)
+	//{
+	//	wxString str = wxString::Format("%.1f", m_rotx);
+	//	m_vrv->m_x_rot_text->ChangeValue(str);
+	//	str = wxString::Format("%.1f", m_roty);
+	//	m_vrv->m_y_rot_text->ChangeValue(str);
+	//	str = wxString::Format("%.1f", m_rotz);
+	//	m_vrv->m_z_rot_text->ChangeValue(str);
+	//	if (m_vrv->m_rot_slider)
+	//	{
+	//		m_vrv->m_x_rot_sldr->SetThumbPosition(180);
+	//		m_vrv->m_y_rot_sldr->SetThumbPosition(180);
+	//		m_vrv->m_z_rot_sldr->SetThumbPosition(180);
+	//	}
+	//	else
+	//	{
+	//		m_vrv->m_x_rot_sldr->SetThumbPosition(std::round(m_rotx));
+	//		m_vrv->m_y_rot_sldr->SetThumbPosition(std::round(m_roty));
+	//		m_vrv->m_z_rot_sldr->SetThumbPosition(std::round(m_rotz));
+	//	}
+	//}
 
 	if (m_linked_rot)
 	{
