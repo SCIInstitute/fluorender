@@ -200,17 +200,17 @@ private:
 	void EnableTransparent(bool);
 
 	//set values
-	void SetGamma(double);
-	void SetSaturation(double);
-	void SetLuminance(double);
-	void SetAlpha(double);
-	void SetLowShading(double);
-	void SetHiShading(double);
-	void SetBoundary(double);
-	void SetThresh(double, double);
-	void SetShadowInt(double);
-	void SetSampleRate(double);
-	void SetColormapVal(double, double);
+	void SetGamma(double, bool);
+	void SetSaturation(double, bool);
+	void SetLuminance(double, bool);
+	void SetAlpha(double, bool);
+	void SetLowShading(double, bool);
+	void SetHiShading(double, bool);
+	void SetBoundary(double, bool);
+	void SetThresh(double, double, bool);
+	void SetShadowInt(double, bool);
+	void SetSampleRate(double, bool);
+	void SetColormapVal(double, double, bool);
 
 	//sync values
 	void SyncGamma(double);

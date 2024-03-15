@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 #include <wx/spinbutt.h>
+#include <wx/aui/auibook.h>
 
 //plane modes
 enum PLANE_MODES
@@ -111,6 +112,7 @@ public:
 
 private:
 	RenderCanvas* m_view;
+	wxAuiNotebook* m_notebook;
 	int m_sel_type;		//curent selection type
 	VolumeData* m_vd;	//current volume data
 	MeshData* m_md;		//current mesh data
@@ -174,6 +176,9 @@ private:
 	wxSpinButton* m_z_rot_spin;
 
 private:
+	wxWindow* CreateTranslatePage(wxWindow* parent);
+	wxWindow* CreateRotatePage(wxWindow* parent);
+
 	void EnableAll(bool val);
 
 	void OnIdle(wxIdleEvent &event);

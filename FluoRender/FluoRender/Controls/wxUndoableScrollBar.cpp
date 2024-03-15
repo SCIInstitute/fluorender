@@ -159,6 +159,8 @@ void wxUndoableScrollBar::OnTrack(wxScrollEvent& event)
 void wxUndoableScrollBar::OnRelease(wxScrollEvent& event)
 {
 	timer_.Stop();
+	SetThumbPosition(
+		(GetRange() - GetThumbSize()) / 2);
 	event.Skip();
 }
 

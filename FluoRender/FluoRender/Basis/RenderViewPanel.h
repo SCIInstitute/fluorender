@@ -99,24 +99,24 @@ public:
 	void SetScaleText(double val);
 	void SetScaleUnit(int val);
 	void SetBgColor(fluo::Color val);
-	void SetBgColorInvert();
+	void SetBgColorInvert(bool val);
 	void SetDrawClipPlanes(bool val);
-	void SetAov(double val);
+	void SetAov(double val, bool notify);
 	void SetFree(bool val);
 	void SetFullScreen();
 
 	void SetDepthAttenEnable(bool val);
-	void SetDepthAtten(double val);
+	void SetDepthAtten(double val, bool notify);
 
 	void SetPinRotCenter(bool val);
 	void SetCenter();
 	void SetScale121();
-	void SetScaleFactor(double val);
+	void SetScaleFactor(double val, bool notify);
 	void SetScaleMode(int val);
 
 	void SetRotLock(bool val);
 	void SetSliderType(bool val);
-	void SetRotations(double rotx, double roty, double rotz);
+	void SetRotations(double rotx, double roty, double rotz, bool notify);
 	void SetZeroRotations();
 
 	//get rendering context
@@ -138,6 +138,8 @@ public:
 	static int m_max_id;
 	int m_id;
 	int m_draw_scalebar;
+	bool m_bg_color_inv;
+	bool m_draw_clip;
 	//rot slider style
 	bool m_rot_slider;
 	double m_dpi_sf, m_dpi_sf2;

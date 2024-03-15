@@ -396,6 +396,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstRotCtrDirty "rot ctr dirty"//request rot ctr update
 #define gstPinThresh "pin thresh"//ray casting threshold value
 #define gstRotCtrPin "rot ctr pin"//rotation center point from pin
+#define gstRotSliderMode "rot slider mode"//slider mode for rot view
 #define gstPointVolumeMode "point volume mode"//0: use view plane; 1: use max value; 2: use accumulated value
 #define gstRulerUseTransf "ruler use transf"//ruler use volume transfer function
 #define gstRulerTransient "ruler transient"//ruler is time dependent
@@ -463,6 +464,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstCamTransSavedX "cam trans saved x"
 #define gstCamTransSavedY "cam trans saved y"
 #define gstCamTransSavedZ "cam trans saved z"
+#define gstCamRotation "cam rot"
 #define gstCamRotX "cam rot x"//camera rotation
 #define gstCamRotY "cam rot y"
 #define gstCamRotZ "cam rot z"

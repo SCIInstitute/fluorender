@@ -59,14 +59,6 @@ m_enable_all(true)
 	Freeze();
 	SetDoubleBuffered(true);
 
-	//validator: floating point 1
-	wxFloatingPointValidator<double> vald_fp1(1);
-	vald_fp1.SetRange(-180.0, 180.0);
-	//validator: integer
-	wxIntegerValidator<unsigned int> vald_int;
-
-	wxStaticText *st = 0;
-
 	//sync channels 1
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_toolbar = new wxToolBar(this, wxID_ANY,
@@ -95,22 +87,75 @@ m_enable_all(true)
 	sizer_1->Add(5, 5, 0);
 	sizer_1->Add(m_toolbar, 0, wxALIGN_CENTER, 0);
 
+	//notebook
+	m_notebook = new wxAuiNotebook(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize,
+		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
+		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE |
+		wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
+	m_notebook->AddPage(CreateTranslatePage(m_notebook), "Translate", true);
+	m_notebook->AddPage(CreateRotatePage(m_notebook), "Rotate");
+
+	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+	sizer->Add(sizer_1, 0, wxALIGN_CENTER);
+	sizer->Add(m_notebook, 1, wxEXPAND);
+	SetSizer(sizer);
+	Layout();
+	SetAutoLayout(true);
+	SetScrollRate(10, 10);
+
+	Bind(wxEVT_IDLE, &ClipPlanePanel::OnIdle, this);
+
+	EnableAll(false);
+
+	//add controls
+	glbin.add_undo_control(m_clipx_sldr);
+	glbin.add_undo_control(m_clipy_sldr);
+	glbin.add_undo_control(m_clipz_sldr);
+	glbin.add_undo_control(m_x_rot_sldr);
+	glbin.add_undo_control(m_y_rot_sldr);
+	glbin.add_undo_control(m_z_rot_sldr);
+
+	Thaw();
+}
+
+ClipPlanePanel::~ClipPlanePanel()
+{
+	//delete controls
+	glbin.del_undo_control(m_clipx_sldr);
+	glbin.del_undo_control(m_clipy_sldr);
+	glbin.del_undo_control(m_clipz_sldr);
+	glbin.del_undo_control(m_x_rot_sldr);
+	glbin.del_undo_control(m_y_rot_sldr);
+	glbin.del_undo_control(m_z_rot_sldr);
+
+	SetFocusVRenderViews(0);
+}
+
+wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
+{
+	wxScrolledWindow* page = new wxScrolledWindow(parent);
+
+	//validator: integer
+	wxIntegerValidator<unsigned int> vald_int;
+	wxBitmap bitmap;
+
 	//sliders for clipping planes
 	bool inverse_slider = glbin_settings.m_inverse_slider;
 	long ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
 	//x
 	wxBoxSizer* sizer_cx = new wxBoxSizer(wxVERTICAL);
-	m_clip_x_st = new wxButton(this, wxID_ANY, "X",
+	m_clip_x_st = new wxButton(page, wxID_ANY, "X",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
-	m_clipx_sldr = new wxDoubleSlider(this, wxID_ANY, 0, 512, 0, 512,
+	m_clipx_sldr = new wxDoubleSlider(page, wxID_ANY, 0, 512, 0, 512,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_clipx_sldr->SetRangeColor(wxColor(255, 128, 128));
 	m_clipx_sldr->SetThumbColor(wxColor(255, 128, 128), wxColor(255, 128, 255));
-	m_x1_clip_text = new wxTextCtrl(this, wxID_ANY, "0",
+	m_x1_clip_text = new wxTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
-	m_x2_clip_text = new wxTextCtrl(this, wxID_ANY, "512",
+	m_x2_clip_text = new wxTextCtrl(page, wxID_ANY, "512",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
-	m_linkx_tb = new wxToolBar(this, wxID_ANY,
+	m_linkx_tb = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(unlink);
 	m_linkx_tb->AddCheckTool(0, "Lock X Planes",
@@ -143,18 +188,18 @@ m_enable_all(true)
 
 	//y
 	wxBoxSizer* sizer_cy = new wxBoxSizer(wxVERTICAL);
-	//wxPanel * ypanel = new wxPanel(this);
-	m_clip_y_st = new wxButton(this, wxID_ANY, "Y",
+	//wxPanel * ypanel = new wxPanel(page);
+	m_clip_y_st = new wxButton(page, wxID_ANY, "Y",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
-	m_clipy_sldr = new wxDoubleSlider(this, wxID_ANY, 0, 512, 0, 512,
+	m_clipy_sldr = new wxDoubleSlider(page, wxID_ANY, 0, 512, 0, 512,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_clipy_sldr->SetRangeColor(wxColor(128, 255, 128));
 	m_clipy_sldr->SetThumbColor(wxColor(128, 255, 128), wxColor(255, 255, 128));
-	m_y1_clip_text = new wxTextCtrl(this, wxID_ANY, "0",
+	m_y1_clip_text = new wxTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
-	m_y2_clip_text = new wxTextCtrl(this, wxID_ANY, "512",
+	m_y2_clip_text = new wxTextCtrl(page, wxID_ANY, "512",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
-	m_linky_tb = new wxToolBar(this, wxID_ANY,
+	m_linky_tb = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_linky_tb->AddCheckTool(0, "Lock Y Planes",
 		bitmap, wxNullBitmap, "Lock Y Planes");
@@ -186,18 +231,18 @@ m_enable_all(true)
 
 	//z
 	wxBoxSizer* sizer_cz = new wxBoxSizer(wxVERTICAL);
-	//wxPanel * zpanel = new wxPanel(this);
-	m_clip_z_st = new wxButton(this, wxID_ANY, "Z",
+	//wxPanel * zpanel = new wxPanel(page);
+	m_clip_z_st = new wxButton(page, wxID_ANY, "Z",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
-	m_clipz_sldr = new wxDoubleSlider(this, wxID_ANY, 0, 512, 0, 512,
-		wxPoint(0,0), wxDefaultSize, ls);
+	m_clipz_sldr = new wxDoubleSlider(page, wxID_ANY, 0, 512, 0, 512,
+		wxPoint(0, 0), wxDefaultSize, ls);
 	m_clipz_sldr->SetRangeColor(wxColor(128, 128, 255));
 	m_clipz_sldr->SetThumbColor(wxColor(128, 128, 255), wxColor(128, 255, 255));
-	m_z1_clip_text = new wxTextCtrl(this, wxID_ANY, "0",
+	m_z1_clip_text = new wxTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
-	m_z2_clip_text = new wxTextCtrl(this, wxID_ANY, "512",
+	m_z2_clip_text = new wxTextCtrl(page, wxID_ANY, "512",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
-	m_linkz_tb = new wxToolBar(this, wxID_ANY,
+	m_linkz_tb = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_linkz_tb->AddCheckTool(0, "Lock Z Planes",
 		bitmap, wxNullBitmap, "Lock Z Planes");
@@ -233,100 +278,102 @@ m_enable_all(true)
 	m_clipz_sldr->Bind(wxEVT_RIGHT_DOWN, &ClipPlanePanel::OnClipZRClick, this);
 
 	//2
-	wxBoxSizer *sizer_2 = new wxBoxSizer(wxHORIZONTAL);
-	sizer_2->Add(sizer_cx, 1, wxEXPAND);
-	sizer_2->Add(sizer_cy, 1, wxEXPAND);
-	sizer_2->Add(sizer_cz, 1, wxEXPAND);
+	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
+	sizer_1->Add(sizer_cx, 1, wxEXPAND);
+	sizer_1->Add(sizer_cy, 1, wxEXPAND);
+	sizer_1->Add(sizer_cz, 1, wxEXPAND);
 
 	//clip buttons 4
-	wxBoxSizer* sizer_4 = new wxBoxSizer(wxHORIZONTAL);
-	m_yz_clip_btn = new wxButton(this, wxID_ANY, "YZ",
+	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
+	m_yz_clip_btn = new wxButton(page, wxID_ANY, "YZ",
 		wxDefaultPosition, FromDIP(wxSize(34, 22)));
-	m_xz_clip_btn = new wxButton(this, wxID_ANY, "XZ",
+	m_xz_clip_btn = new wxButton(page, wxID_ANY, "XZ",
 		wxDefaultPosition, FromDIP(wxSize(34, 22)));
-	m_xy_clip_btn = new wxButton(this, wxID_ANY, "XY",
+	m_xy_clip_btn = new wxButton(page, wxID_ANY, "XY",
 		wxDefaultPosition, FromDIP(wxSize(34, 22)));
 	m_yz_clip_btn->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnYZClipBtn, this);
 	m_xz_clip_btn->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnXZClipBtn, this);
 	m_xy_clip_btn->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnXYClipBtn, this);
-	sizer_4->Add(m_yz_clip_btn, 1, wxEXPAND);
-	sizer_4->AddSpacer(5);
-	sizer_4->Add(m_xz_clip_btn, 1, wxEXPAND);
-	sizer_4->AddSpacer(5);
-	sizer_4->Add(m_xy_clip_btn, 1, wxEXPAND);
+	sizer_2->Add(m_yz_clip_btn, 1, wxEXPAND);
+	sizer_2->AddSpacer(5);
+	sizer_2->Add(m_xz_clip_btn, 1, wxEXPAND);
+	sizer_2->AddSpacer(5);
+	sizer_2->Add(m_xy_clip_btn, 1, wxEXPAND);
 
 	//clip distance 5
-	wxBoxSizer* sizer_5 = new wxBoxSizer(wxHORIZONTAL);
-	m_yz_dist_text = new wxTextCtrl(this, wxID_ANY, "1",
+	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
+	m_yz_dist_text = new wxTextCtrl(page, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(34, 22)), 0, vald_int);
-	m_xz_dist_text = new wxTextCtrl(this, wxID_ANY, "1",
+	m_xz_dist_text = new wxTextCtrl(page, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(34, 22)), 0, vald_int);
-	m_xy_dist_text = new wxTextCtrl(this, wxID_ANY, "1",
+	m_xy_dist_text = new wxTextCtrl(page, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(34, 22)), 0, vald_int);
 	m_yz_dist_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnClipDistXEdit, this);
 	m_xz_dist_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnClipDistYEdit, this);
 	m_xy_dist_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnClipDistZEdit, this);
-	sizer_5->Add(m_yz_dist_text, 1, wxEXPAND);
-	sizer_5->AddSpacer(5);
-	sizer_5->Add(m_xz_dist_text, 1, wxEXPAND);
-	sizer_5->AddSpacer(5);
-	sizer_5->Add(m_xy_dist_text, 1, wxEXPAND);
-	
+	sizer_3->Add(m_yz_dist_text, 1, wxEXPAND);
+	sizer_3->AddSpacer(5);
+	sizer_3->Add(m_xz_dist_text, 1, wxEXPAND);
+	sizer_3->AddSpacer(5);
+	sizer_3->Add(m_xy_dist_text, 1, wxEXPAND);
+
 	//reset clipping 6
-	wxBoxSizer* sizer_6 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer_4 = new wxBoxSizer(wxHORIZONTAL);
 #ifndef _DARWIN
-	m_clip_reset_btn = new wxButton(this, wxID_ANY, "Reset Clips",
-									wxDefaultPosition, FromDIP(wxSize(120, 22)));
+	m_clip_reset_btn = new wxButton(page, wxID_ANY, "Reset Clips",
+		wxDefaultPosition, FromDIP(wxSize(120, 22)));
 #else
-	m_clip_reset_btn = new wxButton(this, wxID_ANY, "Reset Clips",
-									wxDefaultPosition, FromDIP(wxSize(125, 30)));
+	m_clip_reset_btn = new wxButton(page, wxID_ANY, "Reset Clips",
+		wxDefaultPosition, FromDIP(wxSize(125, 30)));
 #endif
 	m_clip_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	m_clip_reset_btn->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnClipResetBtn, this);
-	sizer_6->Add(5, 5, 0);
-	sizer_6->Add(m_clip_reset_btn, 0, wxALIGN_CENTER);
+	sizer_4->Add(5, 5, 0);
+	sizer_4->Add(m_clip_reset_btn, 0, wxALIGN_CENTER);
+
+	//v
+	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
+	sizer_v->Add(5, 5, 0);
+	sizer_v->Add(sizer_1, 1, wxEXPAND);
+	sizer_v->AddSpacer(5);
+	sizer_v->Add(new wxStaticText(page, 0,
+		"Set Clip Slab Width"), 0, wxALIGN_CENTER);
+	sizer_v->Add(5, 5, 0);
+	sizer_v->Add(sizer_2, 0, wxALIGN_CENTER);
+	sizer_v->Add(5, 5, 0);
+	sizer_v->Add(sizer_3, 0, wxALIGN_CENTER);
+	sizer_v->Add(5, 5, 0);
+	sizer_v->Add(sizer_4, 0, wxALIGN_CENTER);
+	sizer_v->Add(5, 5, 0);
+
+	page->SetSizer(sizer_v);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
+	return page;
+}
+
+wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
+{
+	wxScrolledWindow* page = new wxScrolledWindow(parent);
+
+	//validator: floating point 1
+	wxFloatingPointValidator<double> vald_fp1(1);
+	vald_fp1.SetRange(-180.0, 180.0);
 
 	//rotations
-	//set sero rotation for clipping planes 7
-	wxBoxSizer* sizer_7 = new wxBoxSizer(wxHORIZONTAL);
-#ifndef _DARWIN
-	m_set_zero_btn = new wxButton(this, wxID_ANY, "Align to View",
-								  wxDefaultPosition, FromDIP(wxSize(120, 22)));
-#else
-	m_set_zero_btn = new wxButton(this, wxID_ANY, "Align to View",
-								  wxDefaultPosition, FromDIP(wxSize(125, 30)));
-#endif
-	m_set_zero_btn->SetBitmap(wxGetBitmapFromMemory(align));
-	m_set_zero_btn->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnSetZeroBtn, this);
-	sizer_7->Add(5, 5, 0);
-	sizer_7->Add(m_set_zero_btn, 0, wxALIGN_CENTER);
-
-	//reset rotations 8
-	wxBoxSizer* sizer_8 = new wxBoxSizer(wxHORIZONTAL);
-#ifndef _DARWIN
-	m_rot_reset_btn = new wxButton(this, wxID_ANY, "Reset to 0",
-								   wxDefaultPosition, FromDIP(wxSize(120, 22)));
-#else
-	m_rot_reset_btn = new wxButton(this, wxID_ANY, "Reset to 0",
-								   wxDefaultPosition, FromDIP(wxSize(125, 30)));
-#endif
-	m_rot_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
-	m_rot_reset_btn->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnRotResetBtn, this);
-	sizer_8->Add(5, 5, 0);
-	sizer_8->Add(m_rot_reset_btn, 0, wxALIGN_CENTER);
-
-	ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
+	bool inverse_slider = glbin_settings.m_inverse_slider;
+	long ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
 	//sliders for rotating clipping planes 
 	//x
 	wxBoxSizer* sizer_rx = new wxBoxSizer(wxVERTICAL);
-	m_rot_x_st = new wxButton(this, wxID_ANY, "X",
+	m_rot_x_st = new wxButton(page, wxID_ANY, "X",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
-	m_x_rot_sldr = new wxSingleSlider(this, wxID_ANY, 0, -180, 180,
+	m_x_rot_sldr = new wxSingleSlider(page, wxID_ANY, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_x_rot_sldr->SetRangeStyle(2);
-	m_x_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
+	m_x_rot_text = new wxTextCtrl(page, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_fp1);
-	m_x_rot_spin = new wxSpinButton(this, wxID_ANY,
+	m_x_rot_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxSP_VERTICAL);
 	m_x_rot_spin->SetRange(-0x8000, 0x7fff);
 	m_rot_x_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnRotXMF, this);
@@ -342,14 +389,14 @@ m_enable_all(true)
 	sizer_rx->Add(m_x_rot_sldr, 1, wxEXPAND, 0);
 	//y
 	wxBoxSizer* sizer_ry = new wxBoxSizer(wxVERTICAL);
-	m_rot_y_st = new wxButton(this, wxID_ANY, "Y",
+	m_rot_y_st = new wxButton(page, wxID_ANY, "Y",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
-	m_y_rot_sldr = new wxSingleSlider(this, wxID_ANY, 0, -180, 180,
+	m_y_rot_sldr = new wxSingleSlider(page, wxID_ANY, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_y_rot_sldr->SetRangeStyle(2);
-	m_y_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
+	m_y_rot_text = new wxTextCtrl(page, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_fp1);
-	m_y_rot_spin = new wxSpinButton(this, wxID_ANY,
+	m_y_rot_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxSP_VERTICAL);
 	m_y_rot_spin->SetRange(-0x8000, 0x7fff);
 	m_rot_y_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnRotXMF, this);
@@ -365,14 +412,14 @@ m_enable_all(true)
 	sizer_ry->Add(m_y_rot_sldr, 1, wxEXPAND, 0);
 	//z
 	wxBoxSizer* sizer_rz = new wxBoxSizer(wxVERTICAL);
-	m_rot_z_st = new wxButton(this, wxID_ANY, "Z",
+	m_rot_z_st = new wxButton(page, wxID_ANY, "Z",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
-	m_z_rot_sldr = new wxSingleSlider(this, wxID_ANY, 0, -180, 180,
+	m_z_rot_sldr = new wxSingleSlider(page, wxID_ANY, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_z_rot_sldr->SetRangeStyle(2);
-	m_z_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
+	m_z_rot_text = new wxTextCtrl(page, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_fp1);
-	m_z_rot_spin = new wxSpinButton(this, wxID_ANY,
+	m_z_rot_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxSP_VERTICAL);
 	m_z_rot_spin->SetRange(-0x8000, 0x7fff);
 	m_rot_z_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnRotZMF, this);
@@ -386,74 +433,52 @@ m_enable_all(true)
 	sizer_rz->Add(5, 5, 0);
 	sizer_rz->Add(m_z_rot_spin, 0, wxALIGN_CENTER, 0);
 	sizer_rz->Add(m_z_rot_sldr, 1, wxEXPAND, 0);
-	
-	//sizer 9
-	wxBoxSizer *sizer_9 = new wxBoxSizer(wxHORIZONTAL);
-	sizer_9->Add(sizer_rx, 1, wxEXPAND);
-	sizer_9->Add(sizer_ry, 1, wxEXPAND);
-	sizer_9->Add(sizer_rz, 1, wxEXPAND);
+	//sizer 1
+	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
+	sizer_1->Add(sizer_rx, 1, wxEXPAND);
+	sizer_1->Add(sizer_ry, 1, wxEXPAND);
+	sizer_1->Add(sizer_rz, 1, wxEXPAND);
+
+	//set sero rotation for clipping planes 7
+	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
+#ifndef _DARWIN
+	m_set_zero_btn = new wxButton(page, wxID_ANY, "Align to View",
+		wxDefaultPosition, FromDIP(wxSize(120, 22)));
+#else
+	m_set_zero_btn = new wxButton(page, wxID_ANY, "Align to View",
+		wxDefaultPosition, FromDIP(wxSize(125, 30)));
+#endif
+	m_set_zero_btn->SetBitmap(wxGetBitmapFromMemory(align));
+	m_set_zero_btn->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnSetZeroBtn, this);
+	sizer_2->Add(5, 5, 0);
+	sizer_2->Add(m_set_zero_btn, 0, wxALIGN_CENTER);
+
+	//reset rotation
+	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
+#ifndef _DARWIN
+	m_rot_reset_btn = new wxButton(page, wxID_ANY, "Reset to 0",
+		wxDefaultPosition, FromDIP(wxSize(120, 22)));
+#else
+	m_rot_reset_btn = new wxButton(page, wxID_ANY, "Reset to 0",
+		wxDefaultPosition, FromDIP(wxSize(125, 30)));
+#endif
+	m_rot_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
+	m_rot_reset_btn->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnRotResetBtn, this);
+	sizer_3->Add(5, 5, 0);
+	sizer_3->Add(m_rot_reset_btn, 0, wxALIGN_CENTER);
 
 	//v
-	wxBoxSizer *sizer_v = new wxBoxSizer(wxVERTICAL);
-	sizer_v->Add(sizer_1, 0, wxALIGN_CENTER);
-	sizer_v->Add(5, 5, 0);
-	sizer_v->Add(sizer_2, 1, wxEXPAND);
-	sizer_v->AddSpacer(5);
-	sizer_v->Add(new wxStaticText(this,0,
-		"Set Clip Slab Width"), 0, wxALIGN_CENTER);
-	sizer_v->Add(5, 5, 0);
-	sizer_v->Add(sizer_4, 0, wxALIGN_CENTER);
-	sizer_v->Add(5, 5, 0);
-	sizer_v->Add(sizer_5, 0, wxALIGN_CENTER);
-	sizer_v->Add(5, 5, 0);
-	sizer_v->Add(sizer_6, 0, wxALIGN_CENTER);
-	sizer_v->Add(5, 5, 0);
-
-	st = new wxStaticText(this, 0, "", wxDefaultPosition, FromDIP(wxSize(5, 5)));
-	st->SetBackgroundColour(wxColor(100, 100, 100));
+	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	sizer_v->Add(10, 10, 0);
-	sizer_v->Add(st, 0, wxEXPAND);
-
-	st = new wxStaticText(this, 0, "Rotations:");
+	sizer_v->Add(sizer_1, 1, wxEXPAND);
 	sizer_v->Add(10, 10, 0);
-	sizer_v->Add(st, 0, wxALIGN_CENTER);
-	sizer_v->Add(10, 10, 0);
-	sizer_v->Add(sizer_7, 0, wxALIGN_CENTER);
-	sizer_v->Add(sizer_8, 0, wxALIGN_CENTER);
-	sizer_v->Add(10, 10, 0);
-	sizer_v->Add(sizer_9, 1, wxEXPAND);
+	sizer_v->Add(sizer_2, 0, wxALIGN_CENTER);
+	sizer_v->Add(sizer_3, 0, wxALIGN_CENTER);
 
-	SetSizer(sizer_v);
-	Layout();
-	SetAutoLayout(true);
-	SetScrollRate(10, 10);
-
-	Bind(wxEVT_IDLE, &ClipPlanePanel::OnIdle, this);
-
-	EnableAll(false);
-
-	//add controls
-	glbin.add_undo_control(m_clipx_sldr);
-	glbin.add_undo_control(m_clipy_sldr);
-	glbin.add_undo_control(m_clipz_sldr);
-	glbin.add_undo_control(m_x_rot_sldr);
-	glbin.add_undo_control(m_y_rot_sldr);
-	glbin.add_undo_control(m_z_rot_sldr);
-
-	Thaw();
-}
-
-ClipPlanePanel::~ClipPlanePanel()
-{
-	//delete controls
-	glbin.del_undo_control(m_clipx_sldr);
-	glbin.del_undo_control(m_clipy_sldr);
-	glbin.del_undo_control(m_clipz_sldr);
-	glbin.del_undo_control(m_x_rot_sldr);
-	glbin.del_undo_control(m_y_rot_sldr);
-	glbin.del_undo_control(m_z_rot_sldr);
-
-	SetFocusVRenderViews(0);
+	page->SetSizer(sizer_v);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
+	return page;
 }
 
 void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
@@ -1829,6 +1854,12 @@ void ClipPlanePanel::EnableAll(bool val)
 	m_toolbar->Enable(val);
 	m_set_zero_btn->Enable(val);
 	m_rot_reset_btn->Enable(val);
+	m_clip_x_st->Enable(val);
+	m_clip_y_st->Enable(val);
+	m_clip_z_st->Enable(val);
+	m_rot_x_st->Enable(val);
+	m_rot_y_st->Enable(val);
+	m_rot_z_st->Enable(val);
 	m_x_rot_sldr->Enable(val);
 	m_y_rot_sldr->Enable(val);
 	m_z_rot_sldr->Enable(val);

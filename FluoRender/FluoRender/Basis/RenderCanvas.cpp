@@ -5764,7 +5764,7 @@ void RenderCanvas::SetAov(double aov)
 	if (m_persp)
 	{
 		m_vrv->m_aov_text->ChangeValue(wxString::Format("%d", int(std::round(m_aov))));
-		m_vrv->m_aov_sldr->SetValue(std::round(m_aov));
+		m_vrv->m_aov_sldr->ChangeValue(std::round(m_aov));
 	}
 }
 
@@ -9658,6 +9658,7 @@ void RenderCanvas::RefreshGL(int debug_code,
 	SetSortBricks();
 	m_refresh = true;
 	Refresh(erase);
+	//Update();
 }
 
 void RenderCanvas::DrawRulers()
@@ -10760,11 +10761,11 @@ void RenderCanvas::SetRotations(double rotx, double roty, double rotz)
 	//	}
 	//}
 
-	if (m_linked_rot)
-	{
-		if (!m_master_linked_view)
-			m_master_linked_view = this;
-	}
+	//if (m_linked_rot)
+	//{
+	//	if (!m_master_linked_view)
+	//		m_master_linked_view = this;
+	//}
 }
 
 void RenderCanvas::SetZeroRotations()

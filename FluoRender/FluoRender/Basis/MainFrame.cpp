@@ -437,12 +437,12 @@ MainFrame::MainFrame(
 
 	//clipping view
 	m_clip_view = new ClipPlanePanel(this,
-		wxDefaultPosition, FromDIP(wxSize(130,700)));
+		wxDefaultPosition, FromDIP(wxSize(140,700)));
 	m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(glbin_settings.m_plane_mode));
 
 	//adjust view
 	m_adjust_view = new OutputAdjPanel(this,
-		wxDefaultPosition, FromDIP(wxSize(130, 700)));
+		wxDefaultPosition, FromDIP(wxSize(140, 700)));
 
 	wxString font_file = glbin_settings.m_font_file;
 	wxString exePath = wxStandardPaths::Get().GetExecutablePath();

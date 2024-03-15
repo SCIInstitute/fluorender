@@ -45,6 +45,7 @@ public:
 		const wxString& name = "wxUndoableScrollBar");
 
 	virtual void SetMode(int val);
+	virtual int GetMode() { return mode_; }
 	virtual void SetValue(int val);
 	virtual void ChangeValue(int val);
 	virtual int GetValue();

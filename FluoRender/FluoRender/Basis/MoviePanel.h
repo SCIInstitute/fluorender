@@ -249,6 +249,10 @@ private:
 	wxSingleSlider *m_progress_sldr;
 	wxTextCtrl *m_progress_text;
 	wxButton *m_save_btn;
+	wxButton* m_start_frame_st;
+	wxTextCtrl *m_start_frame_text;
+	wxButton* m_end_frame_st;
+	wxTextCtrl *m_end_frame_text;
 
 	//basic movie controls
 	wxCheckBox *m_seq_chk;
@@ -256,10 +260,6 @@ private:
 	wxButton *m_inc_time_btn;
 	wxButton *m_dec_time_btn;
 	wxTextCtrl *m_cur_frame_text;
-	wxStaticText* m_start_frame_st;
-	wxTextCtrl *m_start_frame_text;
-	wxStaticText* m_end_frame_st;
-	wxTextCtrl *m_end_frame_text;
 	wxTextCtrl *m_movie_len_text;
 
 	wxCheckBox *m_rot_chk;
@@ -410,9 +410,9 @@ private:
 	void OnUpFrame(wxCommandEvent& event);
 	void OnDownFrame(wxCommandEvent& event);
 	void OnCurFrameText(wxCommandEvent& event);
-	void OnStartFrameSync(wxMouseEvent& event);
+	void OnStartFrameSync(wxCommandEvent& event);
 	void OnStartFrameText(wxCommandEvent& event);
-	void OnEndFrameSync(wxMouseEvent& event);
+	void OnEndFrameSync(wxCommandEvent& event);
 	void OnEndFrameText(wxCommandEvent& event);
 	void OnMovieLenText(wxCommandEvent& event);
 	void OnFpsEdit(wxCommandEvent& event);

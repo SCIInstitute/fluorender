@@ -1360,25 +1360,31 @@ void VolumePropPanel::EnableTransparent(bool bval)
 }
 
 //set values
-void VolumePropPanel::SetGamma(double val)
+void VolumePropPanel::SetGamma(double val, bool notify)
 {
 	if (!m_vd)
 		return;
 
 	m_vd->SetGamma(val);
-	FluoRefresh(false, true, 1, { gstNull });
+	if (notify)
+		FluoRefresh(false, true, 1, { gstGamma3d });
+	else
+		FluoRefresh(false, true, 1, { gstNull });
 }
 
-void VolumePropPanel::SetSaturation(double val)
+void VolumePropPanel::SetSaturation(double val, bool notify)
 {
 	if (!m_vd)
 		return;
 
 	m_vd->SetSaturation(val);
-	FluoRefresh(false, true, 1, { gstNull });
+	if (notify)
+		FluoRefresh(false, true, 1, { gstSaturation });
+	else
+		FluoRefresh(false, true, 1, { gstNull });
 }
 
-void VolumePropPanel::SetLuminance(double val)
+void VolumePropPanel::SetLuminance(double val, bool notify)
 {
 	if (!m_vd)
 		return;
@@ -1400,80 +1406,107 @@ void VolumePropPanel::SetLuminance(double val)
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 	m_color2_btn->SetValue(wxc);
 
-	FluoRefresh(false, true, 1, { gstNull });
+	if (notify)
+		FluoRefresh(false, true, 1, { gstColor });
+	else
+		FluoRefresh(false, true, 1, { gstNull });
 }
 
-void VolumePropPanel::SetAlpha(double val)
+void VolumePropPanel::SetAlpha(double val, bool notify)
 {
 	if (!m_vd)
 		return;
 
 	m_vd->SetAlpha(val);
-	FluoRefresh(false, true, 1, { gstNull });
+	if (notify)
+		FluoRefresh(false, true, 1, { gstAlpha });
+	else
+		FluoRefresh(false, true, 1, { gstNull });
 }
 
-void VolumePropPanel::SetLowShading(double val)
+void VolumePropPanel::SetLowShading(double val, bool notify)
 {
 	if (!m_vd)
 		return;
 
 	m_vd->SetLowShading(val);
-	FluoRefresh(false, true, 1, { gstNull });
+	if (notify)
+		FluoRefresh(false, true, 1, { gstShading });
+	else
+		FluoRefresh(false, true, 1, { gstNull });
 }
 
-void VolumePropPanel::SetHiShading(double val)
+void VolumePropPanel::SetHiShading(double val, bool notify)
 {
 	if (!m_vd)
 		return;
 
 	m_vd->SetHiShading(val);
-	FluoRefresh(false, true, 1, { gstNull });
+	if (notify)
+		FluoRefresh(false, true, 1, { gstShading });
+	else
+		FluoRefresh(false, true, 1, { gstNull });
 }
 
-void VolumePropPanel::SetBoundary(double val)
+void VolumePropPanel::SetBoundary(double val, bool notify)
 {
 	if (!m_vd)
 		return;
 
 	m_vd->SetBoundary(val);
-	FluoRefresh(false, true, 1, { gstNull });
+	if (notify)
+		FluoRefresh(false, true, 1, { gstBoundary });
+	else
+		FluoRefresh(false, true, 1, { gstNull });
 }
 
-void VolumePropPanel::SetThresh(double val1, double val2)
+void VolumePropPanel::SetThresh(double val1, double val2, bool notify)
 {
 	if (!m_vd)
 		return;
 
 	m_vd->SetLeftThresh(val1);
 	m_vd->SetRightThresh(val2);
-	FluoRefresh(false, true, 1, { gstNull });
+	if (notify)
+		FluoRefresh(false, true, 1, { gstThreshold });
+	else
+		FluoRefresh(false, true, 1, { gstNull });
 }
 
-void VolumePropPanel::SetShadowInt(double val)
+void VolumePropPanel::SetShadowInt(double val, bool notify)
 {
 	if (!m_vd)
 		return;
 
 	m_vd->SetShadowIntensity(val);
-	FluoRefresh(false, true, 1, { gstNull });
+	if (notify)
+		FluoRefresh(false, true, 1, { gstShadow });
+	else
+		FluoRefresh(false, true, 1, { gstNull });
 }
 
-void VolumePropPanel::SetSampleRate(double val)
+void VolumePropPanel::SetSampleRate(double val, bool notify)
 {
 	if (!m_vd)
 		return;
 
 	m_vd->SetSampleRate(val);
-	FluoRefresh(false, true, 1, { gstNull });
+	if (notify)
+		FluoRefresh(false, true, 1, { gstSampleRate });
+	else
+		FluoRefresh(false, true, 1, { gstNull });
 }
 
-void VolumePropPanel::SetColormapVal(double val1, double val2)
+void VolumePropPanel::SetColormapVal(double val1, double val2, bool notify)
 {
 	if (!m_vd)
 		return;
 
 	m_vd->SetColormapValues(val1, val2);
-	FluoRefresh(false, true, 1, { gstNull });
+	if (notify)
+		FluoRefresh(false, true, 1, { gstColormap });
+	else
+		FluoRefresh(false, true, 1, { gstNull });
 }
 
 
@@ -1602,10 +1635,10 @@ void VolumePropPanel::OnGammaMF(wxCommandEvent& event)
 		SetFocusVRenderViews(m_gamma_sldr);
 		break;
 	case 2:
-		SetGamma(glbin_vol_def.m_gamma);
+		SetGamma(glbin_vol_def.m_gamma, true);
 		break;
 	case 3:
-		SetGamma(m_vd->GetMlGamma());
+		SetGamma(m_vd->GetMlGamma(), true);
 		break;
 	case 4:
 		m_gamma_sldr->Undo();
@@ -1627,7 +1660,7 @@ void VolumePropPanel::OnGammaChange(wxScrollEvent & event)
 	if (m_sync_group)
 		SyncGamma(val);
 	else
-		SetGamma(val);
+		SetGamma(val, false);
 }
 
 void VolumePropPanel::OnGammaText(wxCommandEvent& event)
@@ -1641,7 +1674,7 @@ void VolumePropPanel::OnGammaText(wxCommandEvent& event)
 	if (m_sync_group)
 		SyncGamma(val);
 	else
-		SetGamma(val);
+		SetGamma(val, false);
 }
 
 void VolumePropPanel::OnGammaChk(wxCommandEvent& event)
@@ -1665,10 +1698,10 @@ void VolumePropPanel::OnSaturationMF(wxCommandEvent& event)
 		SetFocusVRenderViews(m_saturation_sldr);
 		break;
 	case 2:
-		SetSaturation(glbin_vol_def.m_saturation);
+		SetSaturation(glbin_vol_def.m_saturation, true);
 		break;
 	case 3:
-		SetSaturation(m_vd->GetMlSaturation());
+		SetSaturation(m_vd->GetMlSaturation(), true);
 		break;
 	case 4:
 		m_saturation_sldr->Undo();
@@ -1691,7 +1724,7 @@ void VolumePropPanel::OnSaturationChange(wxScrollEvent & event)
 	if (m_sync_group)
 		SyncSaturation(val);
 	else
-		SetSaturation(val);
+		SetSaturation(val, false);
 }
 
 void VolumePropPanel::OnSaturationText(wxCommandEvent& event)
@@ -1708,7 +1741,7 @@ void VolumePropPanel::OnSaturationText(wxCommandEvent& event)
 	if (m_sync_group)
 		SyncSaturation(val);
 	else
-		SetSaturation(val);
+		SetSaturation(val, false);
 
 }
 
@@ -1733,10 +1766,10 @@ void VolumePropPanel::OnLuminanceMF(wxCommandEvent& event)
 		SetFocusVRenderViews(m_luminance_sldr);
 		break;
 	case 2:
-		SetLuminance(glbin_vol_def.m_luminance);
+		SetLuminance(glbin_vol_def.m_luminance, true);
 		break;
 	case 3:
-		SetLuminance(m_vd->GetMlLuminance());
+		SetLuminance(m_vd->GetMlLuminance(), true);
 		break;
 	case 4:
 		m_luminance_sldr->Undo();
@@ -1759,7 +1792,7 @@ void VolumePropPanel::OnLuminanceChange(wxScrollEvent& event)
 	if (m_sync_group)
 		SyncLuminance(val);
 	else
-		SetLuminance(val);
+		SetLuminance(val, false);
 
 	m_lumi_change = true;
 }
@@ -1778,7 +1811,7 @@ void VolumePropPanel::OnLuminanceText(wxCommandEvent& event)
 	if (m_sync_group)
 		SyncLuminance(val);
 	else
-		SetLuminance(val);
+		SetLuminance(val, false);
 
 	m_lumi_change = true;
 }
@@ -1804,10 +1837,10 @@ void VolumePropPanel::OnAlphaMF(wxCommandEvent& event)
 		SetFocusVRenderViews(m_alpha_sldr);
 		break;
 	case 2:
-		SetAlpha(glbin_vol_def.m_alpha);
+		SetAlpha(glbin_vol_def.m_alpha, true);
 		break;
 	case 3:
-		SetAlpha(m_vd->GetMlAlpha());
+		SetAlpha(m_vd->GetMlAlpha(), true);
 		break;
 	case 4:
 		m_alpha_sldr->Undo();
@@ -1837,7 +1870,7 @@ void VolumePropPanel::OnAlphaChange(wxScrollEvent& event)
 	if (m_sync_group)
 		SyncAlpha(val);
 	else
-		SetAlpha(val);
+		SetAlpha(val, false);
 }
 
 void VolumePropPanel::OnAlphaText(wxCommandEvent& event)
@@ -1854,7 +1887,7 @@ void VolumePropPanel::OnAlphaText(wxCommandEvent& event)
 	if (m_sync_group)
 		SyncAlpha(val);
 	else
-		SetAlpha(val);
+		SetAlpha(val, false);
 }
 
 void VolumePropPanel::OnShadingMF(wxCommandEvent& event)
@@ -1876,12 +1909,12 @@ void VolumePropPanel::OnShadingMF(wxCommandEvent& event)
 		SetFocusVRenderViews(m_low_shading_sldr);
 		break;
 	case 2:
-		SetLowShading(glbin_vol_def.m_low_shading);
-		SetHiShading(glbin_vol_def.m_high_shading);
+		SetLowShading(glbin_vol_def.m_low_shading, true);
+		SetHiShading(glbin_vol_def.m_high_shading, true);
 		break;
 	case 3:
-		SetLowShading(m_vd->GetMlLowShading());
-		SetHiShading(m_vd->GetMlHiShading());
+		SetLowShading(m_vd->GetMlLowShading(), true);
+		SetHiShading(m_vd->GetMlHiShading(), true);
 		break;
 	case 4:
 		m_low_shading_sldr->Undo();
@@ -1904,7 +1937,7 @@ void VolumePropPanel::OnHiShadingChange(wxScrollEvent& event)
 	if (m_sync_group)
 		SyncHiShading(val);
 	else
-		SetHiShading(val);
+		SetHiShading(val, false);
 }
 
 void VolumePropPanel::OnHiShadingText(wxCommandEvent& event)
@@ -1918,7 +1951,7 @@ void VolumePropPanel::OnHiShadingText(wxCommandEvent& event)
 	if (m_sync_group)
 		SyncHiShading(val);
 	else
-		SetHiShading(val);
+		SetHiShading(val, false);
 }
 
 void VolumePropPanel::OnLowShadingChange(wxScrollEvent& event)
@@ -1932,7 +1965,7 @@ void VolumePropPanel::OnLowShadingChange(wxScrollEvent& event)
 	if (m_sync_group)
 		SyncLowShading(val);
 	else
-		SetLowShading(val);
+		SetLowShading(val, false);
 }
 
 void VolumePropPanel::OnLowShadingText(wxCommandEvent& event)
@@ -1946,7 +1979,7 @@ void VolumePropPanel::OnLowShadingText(wxCommandEvent& event)
 	if (m_sync_group)
 		SyncLowShading(val);
 	else
-		SetLowShading(val);
+		SetLowShading(val, false);
 }
 
 void VolumePropPanel::OnShadingChk(wxCommandEvent& event)
@@ -1970,10 +2003,10 @@ void VolumePropPanel::OnBoundaryMF(wxCommandEvent& event)
 		SetFocusVRenderViews(m_boundary_sldr);
 		break;
 	case 2:
-		SetBoundary(glbin_vol_def.m_boundary);
+		SetBoundary(glbin_vol_def.m_boundary, true);
 		break;
 	case 3:
-		SetBoundary(m_vd->GetMlBoundary());
+		SetBoundary(m_vd->GetMlBoundary(), true);
 		break;
 	case 4:
 		m_boundary_sldr->Undo();
@@ -1995,7 +2028,7 @@ void VolumePropPanel::OnBoundaryChange(wxScrollEvent& event)
 	if (m_sync_group)
 		SyncBoundary(val);
 	else
-		SetBoundary(val);
+		SetBoundary(val, false);
 }
 
 void VolumePropPanel::OnBoundaryText(wxCommandEvent& event)
@@ -2009,7 +2042,7 @@ void VolumePropPanel::OnBoundaryText(wxCommandEvent& event)
 	if (m_sync_group)
 		SyncBoundary(val);
 	else
-		SetBoundary(val);
+		SetBoundary(val, false);
 }
 
 void VolumePropPanel::OnBoundaryChk(wxCommandEvent& event)
@@ -2033,10 +2066,10 @@ void VolumePropPanel::OnThreshMF(wxCommandEvent& event)
 		SetFocusVRenderViews(m_thresh_sldr);
 		break;
 	case 2:
-		SetThresh(glbin_vol_def.m_lo_thresh, glbin_vol_def.m_hi_thresh);
+		SetThresh(glbin_vol_def.m_lo_thresh, glbin_vol_def.m_hi_thresh, true);
 		break;
 	case 3:
-		SetThresh(m_vd->GetMlLeftThresh(), m_vd->GetMlRightThresh());
+		SetThresh(m_vd->GetMlLeftThresh(), m_vd->GetMlRightThresh(), true);
 		break;
 	case 4:
 		m_thresh_sldr->Undo();
@@ -2060,7 +2093,7 @@ void VolumePropPanel::OnThreshChange(wxScrollEvent &event)
 	if (m_sync_group)
 		SyncThresh(val1, val2);
 	else
-		SetThresh(val1, val2);
+		SetThresh(val1, val2, false);
 
 	//update colocalization
 	if (m_frame && m_frame->GetColocalizationDlg() &&
@@ -2086,7 +2119,7 @@ void VolumePropPanel::OnThreshText(wxCommandEvent &event)
 	if (m_sync_group)
 		SyncThresh(val1, val2);
 	else
-		SetThresh(val1, val2);
+		SetThresh(val1, val2, false);
 
 	//update colocalization
 	if (m_frame && m_frame->GetColocalizationDlg() &&
@@ -2130,10 +2163,10 @@ void VolumePropPanel::OnShadowMF(wxCommandEvent& event)
 		SetFocusVRenderViews(m_shadow_sldr);
 		break;
 	case 2:
-		SetShadowInt(glbin_vol_def.m_shadow_intensity);
+		SetShadowInt(glbin_vol_def.m_shadow_intensity, true);
 		break;
 	case 3:
-		SetShadowInt(m_vd->GetMlShadowIntensity());
+		SetShadowInt(m_vd->GetMlShadowIntensity(), true);
 		break;
 	case 4:
 		m_shadow_sldr->Undo();
@@ -2162,7 +2195,7 @@ void VolumePropPanel::OnShadowChange(wxScrollEvent &event)
 	if (m_sync_group)
 		SyncShadowInt(val);
 	else
-		SetShadowInt(val);
+		SetShadowInt(val, false);
 }
 
 void VolumePropPanel::OnShadowText(wxCommandEvent &event)
@@ -2176,7 +2209,7 @@ void VolumePropPanel::OnShadowText(wxCommandEvent &event)
 	if (m_sync_group)
 		SyncShadowInt(val);
 	else
-		SetShadowInt(val);
+		SetShadowInt(val, false);
 }
 
 void VolumePropPanel::OnSampleMF(wxCommandEvent& event)
@@ -2193,10 +2226,10 @@ void VolumePropPanel::OnSampleMF(wxCommandEvent& event)
 		SetFocusVRenderViews(m_sample_sldr);
 		break;
 	case 2:
-		SetSampleRate(glbin_vol_def.m_sample_rate);
+		SetSampleRate(glbin_vol_def.m_sample_rate, true);
 		break;
 	case 3:
-		SetSampleRate(m_vd->GetMlSampleRate());
+		SetSampleRate(m_vd->GetMlSampleRate(), true);
 		break;
 	case 4:
 		m_sample_sldr->Undo();
@@ -2218,7 +2251,7 @@ void VolumePropPanel::OnSampleChange(wxScrollEvent & event)
 	if (m_sync_group)
 		SyncSampleRate(val);
 	else
-		SetSampleRate(val);
+		SetSampleRate(val, false);
 }
 
 void VolumePropPanel::OnSampleText(wxCommandEvent& event)
@@ -2232,7 +2265,7 @@ void VolumePropPanel::OnSampleText(wxCommandEvent& event)
 	if (m_sync_group)
 		SyncSampleRate(val);
 	else
-		SetSampleRate(val);
+		SetSampleRate(val, false);
 }
 
 void VolumePropPanel::OnSampleChk(wxCommandEvent& event)
@@ -2261,10 +2294,10 @@ void VolumePropPanel::OnColormapMF(wxCommandEvent& event)
 		SetFocusVRenderViews(m_colormap_sldr);
 		break;
 	case 2:
-		SetColormapVal(glbin_vol_def.m_colormap_low_value, glbin_vol_def.m_colormap_hi_value);
+		SetColormapVal(glbin_vol_def.m_colormap_low_value, glbin_vol_def.m_colormap_hi_value, true);
 		break;
 	case 3:
-		SetColormapVal(m_vd->GetMlColormapLow(), m_vd->GetMlColormapHigh());
+		SetColormapVal(m_vd->GetMlColormapLow(), m_vd->GetMlColormapHigh(), true);
 		break;
 	case 4:
 		m_colormap_sldr->Undo();
@@ -2295,7 +2328,7 @@ void VolumePropPanel::OnColormapChange(wxScrollEvent &event)
 	if (m_sync_group)
 		SyncColormapVal(val1, val2);
 	else
-		SetColormapVal(val1, val2);
+		SetColormapVal(val1, val2, false);
 }
 
 void VolumePropPanel::OnColormapText(wxCommandEvent &event)
@@ -2316,7 +2349,7 @@ void VolumePropPanel::OnColormapText(wxCommandEvent &event)
 	if (m_sync_group)
 		SyncColormapVal(val1, val2);
 	else
-		SetColormapVal(val1, val2);
+		SetColormapVal(val1, val2, false);
 }
 
 void VolumePropPanel::OnColormapLink(wxCommandEvent& event)

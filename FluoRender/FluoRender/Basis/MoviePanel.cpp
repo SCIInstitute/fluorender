@@ -108,63 +108,15 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 
 	wxStaticText *st = 0, *st2 = 0;
 	//sizers
-	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer* sizer_4 = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer* sizer_5 = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer* sizer_6 = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer* sizer_7 = new wxBoxSizer(wxHORIZONTAL);
-	//vertical sizer
-	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
-	m_seq_chk = new wxCheckBox(page, ID_SeqChk, "Time Sequence");
-	m_bat_chk = new wxCheckBox(page, ID_BatChk, "Batch Process");
-	m_start_frame_text = new wxTextCtrl(page, ID_StartFrameText, "1",
-		wxDefaultPosition, FromDIP(wxSize(40, -1)));
-	m_end_frame_text = new wxTextCtrl(page, ID_EndFrameText, "10",
-		wxDefaultPosition, FromDIP(wxSize(40, -1)));
-	//sizer 1
-	sizer_1->Add(m_seq_chk, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_bat_chk, 0, wxALIGN_CENTER);
-	sizer_1->AddStretchSpacer();
-	st = new wxStaticText(page, wxID_ANY, "Current Frame");
-	sizer_1->Add(st, 0, wxALIGN_CENTER);
-	sizer_1->Add(20, 5, 0);
-	//sizer 2
-	m_start_frame_st = new wxStaticText(page, ID_StartFrameSync, "Start Frame: ");
-	m_start_frame_st->Connect(ID_StartFrameSync, wxEVT_LEFT_DCLICK,
-		wxMouseEventHandler(MoviePanel::OnStartFrameSync), NULL, this);
-	m_start_frame_st->Connect(ID_StartFrameSync, wxEVT_RIGHT_DCLICK,
-		wxMouseEventHandler(MoviePanel::OnStartFrameSync), NULL, this);
-	m_end_frame_st = new wxStaticText(page, ID_EndFrameSync, "End Frame: ");
-	m_end_frame_st->Connect(ID_EndFrameSync, wxEVT_LEFT_DCLICK,
-		wxMouseEventHandler(MoviePanel::OnEndFrameSync), NULL, this);
-	m_end_frame_st->Connect(ID_EndFrameSync, wxEVT_RIGHT_DCLICK,
-		wxMouseEventHandler(MoviePanel::OnEndFrameSync), NULL, this);
-	sizer_2->Add(5, 5, 0);
-	sizer_2->Add(m_start_frame_st, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_start_frame_text, 0, wxALIGN_CENTER);
-	sizer_2->Add(5, 5, 0);
-	sizer_2->Add(m_end_frame_st, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_end_frame_text, 0, wxALIGN_CENTER);
-	m_inc_time_btn = new wxButton(page, ID_IncTimeBtn, "",
-		wxDefaultPosition, FromDIP(wxSize(30, 30)));
-	m_dec_time_btn = new wxButton(page, ID_DecTimeBtn, "",
-		wxDefaultPosition, FromDIP(wxSize(30, 30)));
-	m_cur_frame_text = new wxTextCtrl(page, ID_CurFrameText, "0",
-		wxDefaultPosition, FromDIP(wxSize(40, -1)));
-	m_inc_time_btn->SetBitmap(wxGetBitmapFromMemory(plus));
-	m_dec_time_btn->SetBitmap(wxGetBitmapFromMemory(minus));
-	sizer_2->AddStretchSpacer();
-	sizer_2->Add(m_dec_time_btn, 0, wxALIGN_CENTER);
-	sizer_2->Add(5, 15, 0);
-	sizer_2->Add(m_cur_frame_text, 0, wxALIGN_CENTER);
-	sizer_2->Add(5, 15, 0);
-	sizer_2->Add(m_inc_time_btn, 0, wxALIGN_CENTER);
-	sizer_2->Add(5, 15, 0);
+
 	//rotations
+	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	m_rot_chk = new wxCheckBox(page, ID_RotChk, "Rotation");
+	sizer1->Add(10, 10);
+	sizer1->Add(m_rot_chk, 0, wxALIGN_CENTER);
+
 	//axis
+	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	m_x_rd = new wxRadioButton(page, ID_XRd, "X",
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
 	m_y_rd = new wxRadioButton(page, ID_YRd, "Y",
@@ -172,65 +124,64 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 	m_z_rd = new wxRadioButton(page, ID_ZRd, "Z",
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
 	m_y_rd->SetValue(true);
+	sizer2->Add(20, 5);
+	sizer2->Add(m_x_rd, 0, wxALIGN_CENTER);
+	sizer2->Add(20, 5);
+	sizer2->Add(m_y_rd, 0, wxALIGN_CENTER);
+	sizer2->Add(20, 5);
+	sizer2->Add(m_z_rd, 0, wxALIGN_CENTER);
+
 	//degrees
+	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, wxID_ANY, "Rotation Angles:");
 	m_degree_text = new wxTextCtrl(page, ID_DegreeText, "360",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)));
 	st2 = new wxStaticText(page, wxID_ANY, "Deg.");
-	//sizer3
-	sizer_3->Add(m_rot_chk, 0, wxALIGN_CENTER);
-	//sizer 4
-	sizer_4->Add(20, 5, 0);
-	sizer_4->Add(m_x_rd, 0, wxALIGN_CENTER);
-	//sizer 5
-	sizer_5->Add(20, 5, 0);
-	sizer_5->Add(m_y_rd, 0, wxALIGN_CENTER);
-	sizer_5->Add(20, 5, 0);
-	sizer_5->Add(m_degree_text, 0, wxALIGN_CENTER);
-	sizer_5->Add(5, 5, 0);
-	sizer_5->Add(st2, 0, wxALIGN_CENTER);
+	sizer3->Add(20, 5, 0);
+	sizer3->Add(st, 0, wxALIGN_CENTER);
+	sizer3->Add(20, 5, 0);
+	sizer3->Add(m_degree_text, 0, wxALIGN_CENTER);
+	sizer3->Add(20, 5, 0);
+	sizer3->Add(st2, 0, wxALIGN_CENTER);
+
 	//rotation interpolation
-	st2 = new wxStaticText(page, wxID_ANY, "Interpolation");
+	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, wxID_ANY, "Interpolation Method:");
 	m_rot_int_cmb = new wxComboBox(page, ID_RotIntCmb, "",
 		wxDefaultPosition, FromDIP(wxSize(65, -1)), 0, NULL, wxCB_READONLY);
-	m_rot_int_cmb->Append("Linear");
-	m_rot_int_cmb->Append("Smooth");
+	std::vector<wxString> list = { "Linear", "Smooth" };
+	m_rot_int_cmb->Append(list);
 	m_rot_int_cmb->Select(0);
-	sizer_5->AddStretchSpacer();
-	sizer_5->Add(m_rot_int_cmb, 0, wxALIGN_CENTER);
-	sizer_5->Add(5, 5);
-	sizer_5->Add(st2, 0, wxALIGN_CENTER);
-	sizer_5->Add(5, 5);
-	//sizer 6
-	sizer_6->Add(20, 5, 0);
-	sizer_6->Add(m_z_rd, 0, wxALIGN_CENTER);
-	//movie length
-	st = new wxStaticText(page, wxID_ANY, "Movie Time: ");
-	st2 = new wxStaticText(page, wxID_ANY, "Sec.");
-	m_movie_len_text = new wxTextCtrl(page, ID_MovieLenText, "5.00",
-		wxDefaultPosition, FromDIP(wxSize(50, -1)));
-	//sizer 7
-	sizer_7->AddStretchSpacer();
-	sizer_7->Add(st, 0, wxALIGN_CENTER);
-	sizer_7->Add(m_movie_len_text, 0, wxALIGN_CENTER);
-	sizer_7->Add(5, 5, 0);
-	sizer_7->Add(st2, 0, wxALIGN_CENTER);
-	sizer_7->Add(5, 5, 0);
-	//all sizers
+	sizer4->Add(20, 5, 0);
+	sizer4->Add(st, 0, wxALIGN_CENTER);
+	sizer4->Add(20, 5, 0);
+	sizer4->Add(m_rot_int_cmb, 0, wxALIGN_CENTER);
+
+	//type
+	wxBoxSizer* sizer5 = new wxBoxSizer(wxHORIZONTAL);
+	m_seq_chk = new wxCheckBox(page, ID_SeqChk, "Time Sequence");
+	sizer5->Add(10, 10, 0);
+	sizer5->Add(m_seq_chk, 0, wxALIGN_CENTER);
+
+	wxBoxSizer* sizer6 = new wxBoxSizer(wxHORIZONTAL);
+	m_bat_chk = new wxCheckBox(page, ID_BatChk, "Batch Process");
+	sizer6->Add(10, 10, 0);
+	sizer6->Add(m_bat_chk, 0, wxALIGN_CENTER);
+
+	//vertical sizer
+	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	sizer_v->Add(5, 5, 0);
-	sizer_v->Add(sizer_3, 0, wxEXPAND);
+	sizer_v->Add(sizer1, 0, wxEXPAND);
 	sizer_v->Add(5, 5, 0);
-	sizer_v->Add(sizer_4, 0, wxEXPAND);
+	sizer_v->Add(sizer2, 0, wxEXPAND);
 	sizer_v->Add(5, 5, 0);
-	sizer_v->Add(sizer_5, 0, wxEXPAND);
+	sizer_v->Add(sizer3, 0, wxEXPAND);
 	sizer_v->Add(5, 5, 0);
-	sizer_v->Add(sizer_6, 0, wxEXPAND);
-	sizer_v->Add(5, 10, 0);
-	sizer_v->Add(sizer_1, 0, wxEXPAND);
-	sizer_v->Add(5, 5, 0);
-	sizer_v->Add(sizer_2, 0, wxEXPAND);
-	sizer_v->Add(5, 10, 0);
-	sizer_v->Add(sizer_7, 0, wxEXPAND);
-	sizer_v->AddStretchSpacer();
+	sizer_v->Add(sizer4, 0, wxEXPAND);
+	sizer_v->Add(5, 20, 0);
+	sizer_v->Add(sizer5, 0, wxEXPAND);
+	sizer_v->Add(5, 20, 0);
+	sizer_v->Add(sizer6, 0, wxEXPAND);
 	//set the page
 	page->SetSizer(sizer_v);
 	page->SetAutoLayout(true);
@@ -473,54 +424,113 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	m_notebook->AddPage(CreateAutoKeyPage(m_notebook), "Auto Key");
 	m_notebook->AddPage(CreateCroppingPage(m_notebook), "Cropping");
 	m_notebook->AddPage(CreateScriptPage(m_notebook), "Script");
-	//renderview selector
-	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	//FPS
-	m_fps_text = new wxTextCtrl(this, ID_FPS_Text, "30",
-		wxDefaultPosition, FromDIP(wxSize(50, -1)));
-	//other
-	m_views_cmb = new wxComboBox(this, ID_ViewsCombo, "",
-		wxDefaultPosition, FromDIP(wxSize(120, -1)), 0, NULL, wxCB_READONLY);
-	//sizer 1
-	sizer_1->Add(5, 5, 0);
-	wxStaticText * st = new wxStaticText(this, wxID_ANY, "FPS: ");
-	wxStaticText * st2 = new wxStaticText(this, wxID_ANY, "Capture: ");
-	sizer_1->Add(st, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_fps_text, 0, wxALIGN_CENTER);
-	sizer_1->AddStretchSpacer();
-	sizer_1->Add(st2, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_views_cmb, 0, wxALIGN_CENTER);
 
-	//the play/rewind/slider/save
-	wxBoxSizer *sizerH = new wxBoxSizer(wxHORIZONTAL);
+	wxStaticText* st = 0, *st2 = 0;
+	//common settings
+	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	//FPS
+	st = new wxStaticText(this, wxID_ANY, "FPS: ");
+	m_fps_text = new wxTextCtrl(this, ID_FPS_Text, "30",
+		wxDefaultPosition, FromDIP(wxSize(30, -1)));
+	sizer1->Add(5, 5);
+	sizer1->Add(st, 0, wxALIGN_CENTER);
+	sizer1->Add(m_fps_text, 0, wxALIGN_CENTER);
+	//movie length
+	st = new wxStaticText(this, wxID_ANY, "Length: ");
+	st2 = new wxStaticText(this, wxID_ANY, "Sec.");
+	m_movie_len_text = new wxTextCtrl(this, ID_MovieLenText, "5.00",
+		wxDefaultPosition, FromDIP(wxSize(50, -1)));
+	sizer1->Add(5, 5);
+	sizer1->Add(st, 0, wxALIGN_CENTER);
+	sizer1->Add(5, 5);
+	sizer1->Add(m_movie_len_text, 0, wxALIGN_CENTER);
+	sizer1->Add(st2, 0, wxALIGN_CENTER);
+	//view
+	st = new wxStaticText(this, wxID_ANY, "Capture: ");
+	m_views_cmb = new wxComboBox(this, ID_ViewsCombo, "",
+		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
+	sizer1->AddStretchSpacer();
+	sizer1->Add(st, 0, wxALIGN_CENTER);
+	sizer1->Add(m_views_cmb, 0, wxALIGN_CENTER);
+	sizer1->Add(5, 5);
+
+	//slider
+	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	m_progress_sldr = new wxSingleSlider(this, ID_ProgressSldr, 0, 0, PROG_SLDR_MAX);
+	sizer2->Add(5, 5);
+	sizer2->Add(m_progress_sldr, 1, wxEXPAND);
+	sizer2->Add(5, 5);
+
+	//controls
+	wxFont f;
+	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
+	m_start_frame_text = new wxTextCtrl(this, ID_StartFrameText, "1",
+		wxDefaultPosition, FromDIP(wxSize(40, -1)));
+	f = m_start_frame_text->GetFont();
+	f.MakeLarger();
+	m_start_frame_text->SetFont(f);
+	m_end_frame_text = new wxTextCtrl(this, ID_EndFrameText, "10",
+		wxDefaultPosition, FromDIP(wxSize(40, -1)));
+	m_end_frame_text->SetFont(f);
+	m_progress_text = new wxTextCtrl(this, ID_ProgressText, "0.00",
+		wxDefaultPosition, FromDIP(wxSize(50, -1)));
+	m_progress_text->SetFont(f);
+	st = new wxStaticText(this, 0, "Sec.");
+	wxSize bs = FromDIP(wxSize(30, 30));
+	sizer3->Add(5, 5);
+	sizer3->Add(bs.x * 2, bs.y);
+	sizer3->Add(m_start_frame_text, 0, wxALIGN_CENTER);
+	sizer3->Add(m_end_frame_text, 0, wxALIGN_CENTER);
+	sizer3->Add(bs.x, bs.y);
+	sizer3->Add(m_progress_text, 0, wxALIGN_CENTER);
+	sizer3->Add(st, 0, wxALIGN_CENTER);
+	sizer3->Add(5, 5);
+
+	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
 	m_play_btn = new wxButton(this, ID_PlayPause, "",
 		wxDefaultPosition, FromDIP(wxSize(30, 30)));
-	//m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
-	sizerH->Add(m_play_btn, 0, wxEXPAND);
+	m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
 	m_rewind_btn = new wxButton(this, ID_Rewind, "",
 		wxDefaultPosition, FromDIP(wxSize(30, 30)));
 	m_rewind_btn->SetBitmap(wxGetBitmapFromMemory(rewind));
-	sizerH->Add(m_rewind_btn, 0, wxEXPAND);
-	m_progress_sldr = new wxSingleSlider(this, ID_ProgressSldr, 0, 0, PROG_SLDR_MAX);
-	sizerH->Add(m_progress_sldr, 1, wxEXPAND);
-	m_progress_text = new wxTextCtrl(this, ID_ProgressText, "0.00",
-		wxDefaultPosition, FromDIP(wxSize(50, -1)));
-	sizerH->Add(m_progress_text, 0, wxEXPAND);
-	wxStaticText * st3 = new wxStaticText(this, 0, "Sec.");
-	sizerH->Add(5, 5, 0);
-	sizerH->Add(st3, 0, wxALIGN_CENTER);
-	sizerH->Add(5, 5);
+	m_start_frame_st = new wxButton(this, ID_StartFrameSync, "Start:",
+		wxDefaultPosition, FromDIP(wxSize(40, 30)));
+	m_end_frame_st = new wxButton(this, ID_EndFrameSync, "End:",
+		wxDefaultPosition, FromDIP(wxSize(40, 30)));
+	m_start_frame_st->Bind(wxEVT_BUTTON, &MoviePanel::OnStartFrameSync, this);
+	m_end_frame_st->Bind(wxEVT_BUTTON, &MoviePanel::OnEndFrameSync, this);
+	m_inc_time_btn = new wxButton(this, ID_IncTimeBtn, "",
+		wxDefaultPosition, FromDIP(wxSize(30, 30)));
+	m_inc_time_btn->SetBitmap(wxGetBitmapFromMemory(plus));
+	m_cur_frame_text = new wxTextCtrl(this, ID_CurFrameText, "0",
+		wxDefaultPosition, FromDIP(wxSize(50, 30)));
+	m_cur_frame_text->SetFont(f);
+	m_dec_time_btn = new wxButton(this, ID_DecTimeBtn, "",
+		wxDefaultPosition, FromDIP(wxSize(30, 30)));
+	m_dec_time_btn->SetBitmap(wxGetBitmapFromMemory(minus));
 	m_save_btn = new wxButton(this, ID_SaveMovie, "",
 		wxDefaultPosition, FromDIP(wxSize(30, 30)));
 	m_save_btn->SetBitmap(wxGetBitmapFromMemory(save));
-	sizerH->Add(m_save_btn, 0, wxEXPAND);
-	//interface
-	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
-	sizerV->Add(m_notebook, 1, wxEXPAND);
-	sizerV->AddStretchSpacer();
-	sizerV->Add(sizer_1, 0, wxEXPAND);
-	sizerV->Add(sizerH, 0, wxEXPAND);
-	SetSizerAndFit(sizerV);
+	sizer4->Add(5, 5);
+	sizer4->Add(m_play_btn, 0, wxALIGN_CENTER);
+	sizer4->Add(m_rewind_btn, 0, wxALIGN_CENTER);
+	sizer4->Add(m_start_frame_st, 0, wxALIGN_CENTER);
+	sizer4->Add(m_end_frame_st, 0, wxALIGN_CENTER);
+	sizer4->Add(m_dec_time_btn, 0, wxALIGN_CENTER);
+	sizer4->Add(m_cur_frame_text, 0, wxALIGN_CENTER);
+	sizer4->Add(m_inc_time_btn, 0, wxALIGN_CENTER);
+	sizer4->AddStretchSpacer();
+	sizer4->Add(m_save_btn, 0, wxALIGN_CENTER);
+	sizer4->Add(5, 5);
+
+	//sizer
+	wxBoxSizer *sizerv = new wxBoxSizer(wxVERTICAL);
+	sizerv->Add(m_notebook, 1, wxEXPAND);
+	sizerv->Add(sizer1, 0, wxEXPAND);
+	sizerv->Add(sizer2, 0, wxEXPAND);
+	sizerv->Add(sizer3, 0, wxEXPAND);
+	sizerv->Add(sizer4, 0, wxEXPAND);
+	SetSizerAndFit(sizerv);
 	Layout();
 	Init();
 }
@@ -1495,7 +1505,7 @@ void MoviePanel::OnCurFrameText(wxCommandEvent& event)
 	SetRendering(pcnt);
 }
 
-void MoviePanel::OnStartFrameSync(wxMouseEvent& event)
+void MoviePanel::OnStartFrameSync(wxCommandEvent& event)
 {
 	wxString str = m_cur_frame_text->GetValue();
 	m_start_frame_text->SetValue(str);
@@ -1510,7 +1520,7 @@ void MoviePanel::OnStartFrameText(wxCommandEvent& event)
 	OnFpsEdit(event);
 }
 
-void MoviePanel::OnEndFrameSync(wxMouseEvent& event)
+void MoviePanel::OnEndFrameSync(wxCommandEvent& event)
 {
 	wxString str = m_cur_frame_text->GetValue();
 	m_end_frame_text->SetValue(str);
