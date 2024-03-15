@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/panel.h>
 #include <wx/spinbutt.h>
 #include <wx/clrpicker.h>
-#include <wx/notebook.h>
+#include <wx/aui/auibook.h>
 #include <wx/listctrl.h>
 
 #define PROG_SLDR_MAX	361
@@ -302,7 +302,7 @@ private:
 	RecorderDlg* m_advanced_movie;
 	int m_view_idx;//index to current renderview
 
-	wxNotebook* m_notebook;
+	wxAuiNotebook* m_notebook;
 	int m_current_page;
 	wxTimer m_timer;
 

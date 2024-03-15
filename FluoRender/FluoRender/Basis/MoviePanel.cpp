@@ -101,7 +101,7 @@ wxTextCtrl * MoviePanel::m_estimated_size_text = 0;
 
 wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 {
-	wxPanel *page = new wxPanel(parent);
+	wxScrolledWindow *page = new wxScrolledWindow(parent);
 
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
@@ -233,23 +233,21 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 	sizer_v->AddStretchSpacer();
 	//set the page
 	page->SetSizer(sizer_v);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
 	return page;
 }
 
 wxWindow* MoviePanel::CreateAdvancedPage(wxWindow *parent)
 {
-	wxPanel *page = new wxPanel(parent);
-	//vertical sizer
-	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
-	m_advanced_movie = new RecorderDlg(m_frame, page);
+	m_advanced_movie = new RecorderDlg(m_frame, this);
 	m_frame->m_recorder_dlg = m_advanced_movie;
-	sizer_v->Add(m_advanced_movie, 0, wxEXPAND);
-	page->SetSizer(sizer_v);
-	return page;
+	return m_advanced_movie;
 }
 
-wxWindow* MoviePanel::CreateAutoKeyPage(wxWindow *parent) {
-	wxPanel *page = new wxPanel(parent);
+wxWindow* MoviePanel::CreateAutoKeyPage(wxWindow *parent)
+{
+	wxScrolledWindow* page = new wxScrolledWindow(parent);
 
 	wxStaticText * st = new wxStaticText(page, 0, "Choose an auto key type");
 
@@ -285,12 +283,15 @@ wxWindow* MoviePanel::CreateAutoKeyPage(wxWindow *parent) {
 	sizer_v->Add(10, 10, 0);
 
 	page->SetSizer(sizer_v);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
 	return page;
 
 }
 
-wxWindow* MoviePanel::CreateCroppingPage(wxWindow *parent) {
-	wxPanel *page = new wxPanel(parent);
+wxWindow* MoviePanel::CreateCroppingPage(wxWindow *parent)
+{
+	wxScrolledWindow* page = new wxScrolledWindow(parent);
 
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
@@ -368,13 +369,15 @@ wxWindow* MoviePanel::CreateCroppingPage(wxWindow *parent) {
 	sizer_v->AddStretchSpacer();
 
 	page->SetSizer(sizer_v);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
 	return page;
 
 }
 
 wxWindow* MoviePanel::CreateScriptPage(wxWindow *parent)
 {
-	wxPanel *page = new wxPanel(parent);
+	wxScrolledWindow* page = new wxScrolledWindow(parent);
 	//script
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -421,6 +424,8 @@ wxWindow* MoviePanel::CreateScriptPage(wxWindow *parent)
 
 	//set the page
 	page->SetSizer(sizer_v);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
 	return page;
 }
 
@@ -458,8 +463,12 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		m_view = m_frame->GetView(m_view_idx);
 
 	//notebook
-	m_notebook = new wxNotebook(this, ID_Notebook);
-	m_notebook->AddPage(CreateSimplePage(m_notebook), "Basic");
+	m_notebook = new wxAuiNotebook(this, ID_Notebook,
+		wxDefaultPosition, wxDefaultSize,
+		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
+		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE |
+		wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
+	m_notebook->AddPage(CreateSimplePage(m_notebook), "Basic", true);
 	m_notebook->AddPage(CreateAdvancedPage(m_notebook), "Advanced");
 	m_notebook->AddPage(CreateAutoKeyPage(m_notebook), "Auto Key");
 	m_notebook->AddPage(CreateCroppingPage(m_notebook), "Cropping");

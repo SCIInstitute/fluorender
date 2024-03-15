@@ -451,7 +451,7 @@ void KeyListCtrl::OnScroll(wxMouseEvent& event)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-BEGIN_EVENT_TABLE(RecorderDlg, wxPanel)
+BEGIN_EVENT_TABLE(RecorderDlg, wxScrolledWindow)
 	EVT_BUTTON(ID_AutoKeyBtn, RecorderDlg::OnAutoKey)
 	EVT_BUTTON(ID_SetKeyBtn, RecorderDlg::OnInsKey)
 	EVT_BUTTON(ID_InsKeyBtn, RecorderDlg::OnInsKey)
@@ -463,7 +463,7 @@ BEGIN_EVENT_TABLE(RecorderDlg, wxPanel)
 END_EVENT_TABLE()
 
 RecorderDlg::RecorderDlg(MainFrame* frame, wxWindow* parent)
-: wxPanel(parent, wxID_ANY,
+: wxScrolledWindow(parent, wxID_ANY,
 wxDefaultPosition,
 frame->FromDIP(wxSize(450, 650)),
 0, "RecorderDlg"),
@@ -553,6 +553,8 @@ m_cam_lock_type(0)
 
 	SetSizer(sizerV);
 	Layout();
+	SetAutoLayout(true);
+	SetScrollRate(10, 10);
 }
 
 RecorderDlg::~RecorderDlg()
