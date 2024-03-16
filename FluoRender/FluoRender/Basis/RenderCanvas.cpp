@@ -5535,6 +5535,7 @@ void RenderCanvas::ForceDraw()
 				{
 					view->SetRotations(m_rotx, m_roty, m_rotz);
 					view->RefreshGL(39);
+					view->Update();
 				}
 			}
 		}
