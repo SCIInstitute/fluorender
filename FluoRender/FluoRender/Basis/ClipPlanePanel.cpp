@@ -383,10 +383,10 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	m_x_rot_spin->Bind(wxEVT_SPIN_DOWN, &ClipPlanePanel::OnXRotSpinDown, this);
 	sizer_rx->Add(5, 5, 0);
 	sizer_rx->Add(m_rot_x_st, 0, wxALIGN_CENTER, 0);
-	sizer_rx->Add(m_x_rot_text, 0, wxALIGN_CENTER, 0);
-	sizer_rx->Add(5, 5, 0);
-	sizer_rx->Add(m_x_rot_spin, 0, wxALIGN_CENTER, 0);
 	sizer_rx->Add(m_x_rot_sldr, 1, wxEXPAND, 0);
+	sizer_rx->Add(m_x_rot_spin, 0, wxALIGN_CENTER, 0);
+	sizer_rx->Add(5, 5, 0);
+	sizer_rx->Add(m_x_rot_text, 0, wxALIGN_CENTER, 0);
 	//y
 	wxBoxSizer* sizer_ry = new wxBoxSizer(wxVERTICAL);
 	m_rot_y_st = new wxButton(page, wxID_ANY, "Y",
@@ -406,10 +406,10 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	m_y_rot_spin->Bind(wxEVT_SPIN_DOWN, &ClipPlanePanel::OnYRotSpinDown, this);
 	sizer_ry->Add(5, 5, 0);
 	sizer_ry->Add(m_rot_y_st, 0, wxALIGN_CENTER, 0);
-	sizer_ry->Add(m_y_rot_text, 0, wxALIGN_CENTER, 0);
-	sizer_ry->Add(5, 5, 0);
-	sizer_ry->Add(m_y_rot_spin, 0, wxALIGN_CENTER, 0);
 	sizer_ry->Add(m_y_rot_sldr, 1, wxEXPAND, 0);
+	sizer_ry->Add(m_y_rot_spin, 0, wxALIGN_CENTER, 0);
+	sizer_ry->Add(5, 5, 0);
+	sizer_ry->Add(m_y_rot_text, 0, wxALIGN_CENTER, 0);
 	//z
 	wxBoxSizer* sizer_rz = new wxBoxSizer(wxVERTICAL);
 	m_rot_z_st = new wxButton(page, wxID_ANY, "Z",
@@ -429,10 +429,10 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	m_z_rot_spin->Bind(wxEVT_SPIN_DOWN, &ClipPlanePanel::OnZRotSpinDown, this);
 	sizer_rz->Add(5, 5, 0);
 	sizer_rz->Add(m_rot_z_st, 0, wxALIGN_CENTER, 0);
-	sizer_rz->Add(m_z_rot_text, 0, wxALIGN_CENTER, 0);
-	sizer_rz->Add(5, 5, 0);
-	sizer_rz->Add(m_z_rot_spin, 0, wxALIGN_CENTER, 0);
 	sizer_rz->Add(m_z_rot_sldr, 1, wxEXPAND, 0);
+	sizer_rz->Add(m_z_rot_spin, 0, wxALIGN_CENTER, 0);
+	sizer_rz->Add(5, 5, 0);
+	sizer_rz->Add(m_z_rot_text, 0, wxALIGN_CENTER, 0);
 	//sizer 1
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	sizer_1->Add(sizer_rx, 1, wxEXPAND);

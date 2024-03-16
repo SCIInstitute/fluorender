@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 #include <Types/Color.h>
+#include <wx/aui/auibook.h>
 
 class MainFrame;
 class RenderCanvas;
@@ -81,6 +82,7 @@ private:
 	RenderCanvas *m_view;
 	VolumeData* m_vd;
 	DataGroup* m_group;
+	wxAuiNotebook* m_notebook;
 	bool m_link_group;
 	bool m_enable_all;
 	//sync flags
@@ -141,6 +143,10 @@ private:
 	wxButton *m_dft_btn;
 
 private:
+	wxWindow* CreateRedPage(wxWindow* parent);
+	wxWindow* CreateGreenPage(wxWindow* parent);
+	wxWindow* CreateBluePage(wxWindow* parent);
+
 	//multifunc
 	void OnRGammaMF(wxCommandEvent& event);
 	void OnGGammaMF(wxCommandEvent& event);

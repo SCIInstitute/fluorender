@@ -270,7 +270,7 @@ void RenderViewPanel::CreateBar()
 	wxBoxSizer* sizer_h_1 = new wxBoxSizer(wxHORIZONTAL);
 	//toolbar 1
 	m_options_toolbar = new wxToolBar(this, wxID_ANY,
-		wxDefaultPosition, wxDefaultSize, wxTB_TEXT | wxTB_HORZ_TEXT | wxTB_NODIVIDER);
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_options_toolbar->SetDoubleBuffered(true);
 	wxSize tbs = m_options_toolbar->GetSize();
 	wxSize toolsize = FromDIP(wxSize(tbs.y, tbs.y));
@@ -645,8 +645,8 @@ void RenderViewPanel::CreateBar()
 
 	SetSizer(sizer_v);
 	Layout();
-
-	//m_timer.Bind(wxEVT_TIMER, &RenderViewPanel::OnTimer, this);
+	SetAutoLayout(true);
+	SetScrollRate(10, 10);
 }
 
 void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
