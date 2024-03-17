@@ -555,7 +555,6 @@ MainFrame::MainFrame(
 	m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
 		Name(vrv->GetName()).Caption(vrv->GetName()).
 		Dockable(true).CloseButton(false).
-		FloatingSize(FromDIP(wxSize(600, 400))).MinSize(FromDIP(wxSize(300, 200))).
 		Layer(0).Centre());
 
 	//dialogs
@@ -2891,12 +2890,12 @@ void MainFrame::DeleteVRenderView(wxString &name)
 //organize render views
 void MainFrame::OrganizeVRenderViews(int mode)
 {
-	int width = 800;
-	int height = 600;
-	int minx = 0;
-	int miny = 0;
-	int maxx = 0;
-	int maxy = 0;
+	int width = 0;
+	int height = 0;
+	//int minx = 0;
+	//int miny = 0;
+	//int maxx = 0;
+	//int maxy = 0;
 	int paneNum = (int)m_vrv_list.size();
 	int i;
 	//get total area
@@ -2905,33 +2904,35 @@ void MainFrame::OrganizeVRenderViews(int mode)
 		RenderViewPanel* vrv = m_vrv_list[i];
 		if (vrv && m_aui_mgr.GetPane(vrv).IsOk())
 		{
-			wxPoint pos = vrv->GetPosition();
+			//wxPoint pos = vrv->GetPosition();
 			wxSize size = vrv->GetSize();
-			int x1 = pos.x;
-			int y1 = pos.y;
-			int x2 = x1 + size.x;
-			int y2 = y1 + size.y;
-			if (i == 0)
-			{
-				minx = x1;
-				miny = y1;
-				maxx = x2;
-				maxy = y2;
-			}
-			else
-			{
-				minx = x1 < minx ? x1 : minx;
-				miny = y1 < miny ? y1 : miny;
-				maxx = x2 > maxx ? x2 : maxx;
-				maxy = y2 > maxy ? y2 : maxy;
-			}
+			width += size.x;
+			height += size.y;
+			//int x1 = pos.x;
+			//int y1 = pos.y;
+			//int x2 = x1 + size.x;
+			//int y2 = y1 + size.y;
+			//if (i == 0)
+			//{
+			//	minx = x1;
+			//	miny = y1;
+			//	maxx = x2;
+			//	maxy = y2;
+			//}
+			//else
+			//{
+			//	minx = x1 < minx ? x1 : minx;
+			//	miny = y1 < miny ? y1 : miny;
+			//	maxx = x2 > maxx ? x2 : maxx;
+			//	maxy = y2 > maxy ? y2 : maxy;
+			//}
 		}
 	}
-	if (maxx - minx > 0 && maxy - miny > 0)
-	{
-		width = maxx - minx;
-		height = maxy - miny;
-	}
+	//if (maxx - minx > 0 && maxy - miny > 0)
+	//{
+	//	width = maxx - minx;
+	//	height = maxy - miny;
+	//}
 	//detach all panes
 	for (i = 0; i < paneNum; ++i)
 	{
@@ -2953,8 +2954,6 @@ void MainFrame::OrganizeVRenderViews(int mode)
 					Name(vrv->GetName()).Caption(vrv->GetName()).
 					Dockable(true).CloseButton(false).Resizable().
 					FloatingSize(width, height / paneNum).
-					//MinSize(width, height / paneNum).
-					//MaxSize(width, height / paneNum).
 					BestSize(width, height / paneNum).
 					Layer(0).Centre());
 				break;
@@ -2965,19 +2964,32 @@ void MainFrame::OrganizeVRenderViews(int mode)
 						Name(vrv->GetName()).Caption(vrv->GetName()).
 						Dockable(true).CloseButton(false).Resizable().
 						FloatingSize(width / paneNum, height).
-						//MinSize(width / paneNum, height).
-						//MaxSize(width / paneNum, height).
 						BestSize(width / paneNum, height).
 						Layer(0).Centre());
 				else
-				m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
-					Name(vrv->GetName()).Caption(vrv->GetName()).
-					Dockable(true).CloseButton(false).Resizable().
-					FloatingSize(width / paneNum, height).
-					//MinSize(width / paneNum, height).
-					//MaxSize(width / paneNum, height).
-					BestSize(width / paneNum, height).
-					Layer(0).Centre().Right());
+					m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
+						Name(vrv->GetName()).Caption(vrv->GetName()).
+						Dockable(true).CloseButton(false).Resizable().
+						FloatingSize(width / paneNum, height).
+						BestSize(width / paneNum, height).
+						Layer(0).Centre().Right());
+				break;
+			}
+		}
+	}
+	m_aui_mgr.Update();
+	for (i = 0; i < paneNum; ++i)
+	{
+		RenderViewPanel* vrv = m_vrv_list[i];
+		if (vrv)
+		{
+			switch (mode)
+			{
+			case 0://top-bottom
+				m_aui_mgr.GetPane(vrv).BestSize(width, height / paneNum);
+				break;
+			case 1://left-right
+				m_aui_mgr.GetPane(vrv).BestSize(width / paneNum, height);
 				break;
 			}
 		}

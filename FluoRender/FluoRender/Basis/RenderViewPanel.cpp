@@ -367,7 +367,7 @@ void RenderViewPanel::CreateBar()
 
 	//background
 	m_bg_color_picker = new wxColourPickerCtrl(this,
-		wxID_ANY, wxColor(), wxDefaultPosition, FromDIP(wxSize(100, 20)));
+		wxID_ANY, wxColor(), wxDefaultPosition, FromDIP(wxSize(40, 20)));
 	wxSize bs = m_bg_color_picker->GetSize();
 	m_bg_inv_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -386,16 +386,16 @@ void RenderViewPanel::CreateBar()
 	sizer_h_1->Add(m_bg_inv_btn, 0, wxALIGN_CENTER);
 
 	//angle of view
-	st2 = new wxStaticText(this, wxID_ANY, "Projection:");
+	st2 = new wxStaticText(this, wxID_ANY, "AOV:");
 	m_aov_sldr = new wxSingleSlider(this, wxID_ANY, 45, 10, 100,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+		wxDefaultPosition, FromDIP(wxSize(100, 20)), wxSL_HORIZONTAL);
 	m_aov_text = new wxTextCtrl(this, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
 	m_aov_sldr->Bind(wxEVT_IDLE, &RenderViewPanel::OnAovSldrIdle, this);
 	m_aov_sldr->Bind(wxEVT_SCROLL_CHANGED, &RenderViewPanel::OnAovChange, this);
 	m_aov_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnAovText, this);
 	sizer_h_1->Add(st2, 0, wxALIGN_CENTER);
-	sizer_h_1->Add(m_aov_sldr, 1, wxEXPAND);
+	sizer_h_1->Add(m_aov_sldr, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_aov_text, 0, wxALIGN_CENTER);
 
 	//free fly
