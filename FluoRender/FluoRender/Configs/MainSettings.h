@@ -73,6 +73,7 @@ public:
 
 public:
 	//default values
+	wxString m_layout;
 
 	bool m_prj_save;		//save project automatically
 	bool m_prj_save_inc;	//save project incrementally

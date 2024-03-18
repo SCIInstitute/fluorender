@@ -143,9 +143,9 @@ private:
 	wxButton *m_dft_btn;
 
 private:
-	wxWindow* CreateRedPage(wxWindow* parent);
-	wxWindow* CreateGreenPage(wxWindow* parent);
-	wxWindow* CreateBluePage(wxWindow* parent);
+	wxWindow* CreateRedPage(wxWindow* parent, wxSize& size);
+	wxWindow* CreateGreenPage(wxWindow* parent, wxSize& size);
+	wxWindow* CreateBluePage(wxWindow* parent, wxSize& size);
 
 	//multifunc
 	void OnRGammaMF(wxCommandEvent& event);

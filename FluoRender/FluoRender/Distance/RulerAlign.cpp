@@ -90,7 +90,7 @@ void RulerAlign::AlignRuler(int axis_type)
 	double qx, qy, qz;
 	m_view->ResetZeroRotations(qx, qy, qz);
 	q.ToEuler(qx, qy, qz);
-	m_view->SetRotations(qx, -qy, -qz);
+	m_view->SetRotations(qx, -qy, -qz, true);
 	m_view->RefreshGL(50);
 }
 
@@ -170,6 +170,6 @@ void RulerAlign::AlignPca(int axis_type, bool cov)
 	double qx, qy, qz;
 	m_view->ResetZeroRotations(qx, qy, qz);
 	q2.ToEuler(qx, qy, qz);
-	m_view->SetRotations(qx, -qy, -qz);
+	m_view->SetRotations(qx, -qy, -qz, true);
 	m_view->RefreshGL(50);
 }

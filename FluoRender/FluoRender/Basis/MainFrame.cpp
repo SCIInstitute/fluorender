@@ -657,6 +657,8 @@ MainFrame::MainFrame(
 	m_aui_mgr.GetPane(m_script_break_dlg).Float();
 	m_aui_mgr.GetPane(m_script_break_dlg).Hide();
 
+	for (auto it : m_vrv_list)
+		it->LoadSettings();
 	UpdateTree();
 
 	SetMinSize(FromDIP(wxSize(800,600)));
@@ -916,6 +918,8 @@ MainFrame::MainFrame(
 	entries[4].Set(wxACCEL_CTRL, (int)'O', ID_OpenVolume);
 	wxAcceleratorTable accel(5, entries);
 	SetAcceleratorTable(accel);
+
+	m_aui_mgr.LoadPerspective(glbin_settings.m_layout);
 }
 
 MainFrame::~MainFrame()
@@ -942,6 +946,7 @@ MainFrame::~MainFrame()
 	m_aui_mgr.UnInit();
 	flvr::KernelProgram::release();
 
+	glbin_settings.m_layout = m_aui_mgr.SavePerspective();
 	glbin_settings.Save();
 }
 
@@ -1051,6 +1056,7 @@ wxString MainFrame::CreateView(int row)
 		vrv->FluoRefresh(false, false, 2);
 	}
 
+	vrv->LoadSettings();
 	UpdateTree();
 
 	return vrv->GetName();
@@ -2892,10 +2898,10 @@ void MainFrame::OrganizeVRenderViews(int mode)
 {
 	int width = 0;
 	int height = 0;
-	//int minx = 0;
-	//int miny = 0;
-	//int maxx = 0;
-	//int maxy = 0;
+	int minx = 0;
+	int miny = 0;
+	int maxx = 0;
+	int maxy = 0;
 	int paneNum = (int)m_vrv_list.size();
 	int i;
 	//get total area
@@ -2904,35 +2910,35 @@ void MainFrame::OrganizeVRenderViews(int mode)
 		RenderViewPanel* vrv = m_vrv_list[i];
 		if (vrv && m_aui_mgr.GetPane(vrv).IsOk())
 		{
-			//wxPoint pos = vrv->GetPosition();
+			wxPoint pos = vrv->GetPosition();
 			wxSize size = vrv->GetSize();
-			width += size.x;
-			height += size.y;
-			//int x1 = pos.x;
-			//int y1 = pos.y;
-			//int x2 = x1 + size.x;
-			//int y2 = y1 + size.y;
-			//if (i == 0)
-			//{
-			//	minx = x1;
-			//	miny = y1;
-			//	maxx = x2;
-			//	maxy = y2;
-			//}
-			//else
-			//{
-			//	minx = x1 < minx ? x1 : minx;
-			//	miny = y1 < miny ? y1 : miny;
-			//	maxx = x2 > maxx ? x2 : maxx;
-			//	maxy = y2 > maxy ? y2 : maxy;
-			//}
+			//width += size.x;
+			//height += size.y;
+			int x1 = pos.x;
+			int y1 = pos.y;
+			int x2 = x1 + size.x;
+			int y2 = y1 + size.y;
+			if (i == 0)
+			{
+				minx = x1;
+				miny = y1;
+				maxx = x2;
+				maxy = y2;
+			}
+			else
+			{
+				minx = x1 < minx ? x1 : minx;
+				miny = y1 < miny ? y1 : miny;
+				maxx = x2 > maxx ? x2 : maxx;
+				maxy = y2 > maxy ? y2 : maxy;
+			}
 		}
 	}
-	//if (maxx - minx > 0 && maxy - miny > 0)
-	//{
-	//	width = maxx - minx;
-	//	height = maxy - miny;
-	//}
+	if (maxx - minx > 0 && maxy - miny > 0)
+	{
+		width = maxx - minx;
+		height = maxy - miny;
+	}
 	//detach all panes
 	for (i = 0; i < paneNum; ++i)
 	{
@@ -2954,7 +2960,8 @@ void MainFrame::OrganizeVRenderViews(int mode)
 					Name(vrv->GetName()).Caption(vrv->GetName()).
 					Dockable(true).CloseButton(false).Resizable().
 					FloatingSize(width, height / paneNum).
-					BestSize(width, height / paneNum).
+					MinSize(width, height / paneNum).
+					MaxSize(width, height / paneNum).
 					Layer(0).Centre());
 				break;
 			case 1://left-right
@@ -2964,14 +2971,16 @@ void MainFrame::OrganizeVRenderViews(int mode)
 						Name(vrv->GetName()).Caption(vrv->GetName()).
 						Dockable(true).CloseButton(false).Resizable().
 						FloatingSize(width / paneNum, height).
-						BestSize(width / paneNum, height).
+						MinSize(width / paneNum, height).
+						MaxSize(width / paneNum, height).
 						Layer(0).Centre());
 				else
 					m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
 						Name(vrv->GetName()).Caption(vrv->GetName()).
 						Dockable(true).CloseButton(false).Resizable().
 						FloatingSize(width / paneNum, height).
-						BestSize(width / paneNum, height).
+						MinSize(width / paneNum, height).
+						MaxSize(width / paneNum, height).
 						Layer(0).Centre().Right());
 				break;
 			}
@@ -2986,10 +2995,14 @@ void MainFrame::OrganizeVRenderViews(int mode)
 			switch (mode)
 			{
 			case 0://top-bottom
-				m_aui_mgr.GetPane(vrv).BestSize(width, height / paneNum);
+				m_aui_mgr.GetPane(vrv).
+					MinSize(-1, -1).MaxSize(-1, -1).
+					BestSize(width, height / paneNum);
 				break;
 			case 1://left-right
-				m_aui_mgr.GetPane(vrv).BestSize(width / paneNum, height);
+				m_aui_mgr.GetPane(vrv).
+					MinSize(-1, -1).MaxSize(-1, -1).
+					BestSize(width / paneNum, height);
 				break;
 			}
 		}
@@ -4774,7 +4787,7 @@ void MainFrame::OpenProject(wxString& filename)
 				if (fconfig.Read("rotation", &str))
 				{
 					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						view->SetRotations(x, y, z);
+						view->SetRotations(x, y, z, false);
 				}
 				if (fconfig.Read("zero_quat", &str))
 				{
@@ -5429,6 +5442,7 @@ void MainFrame::OpenProject(wxString& filename)
 	delete prg_diag;
 
 	RefreshVRenderViews(true, true);
+	UpdateProps({}, 0, 0);
 }
 
 void MainFrame::OnSettings(wxCommandEvent& event)

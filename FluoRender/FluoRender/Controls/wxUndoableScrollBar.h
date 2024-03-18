@@ -58,6 +58,8 @@ private:
 private:
 	void OnTimer(wxTimerEvent& event);
 	void OnTrack(wxScrollEvent& event);
+	void OnLeftDown(wxMouseEvent& event);
+	void OnLeftUp(wxMouseEvent& event);
 	void OnRelease(wxScrollEvent& event);
 	void OnLineDown(wxScrollEvent& event);
 	void OnLineUp(wxScrollEvent& event);

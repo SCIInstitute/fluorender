@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <RenderViewPanel.h>
-#include <wxSingleSlider.h>
+#include <wxUndoableScrollBar.h>
 #include <tiffio.h>
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
@@ -393,6 +393,8 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	m_rot_axis(1),
 	m_rot_deg(360),
 	m_start_frame(0),
+	m_end_frame(360),
+	m_frame_num(361),
 	m_cur_frame(0),
 	m_starting_rot(0.),
 	m_cur_time(0.0),
@@ -405,7 +407,8 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	m_fps(30),
 	m_timer(this, ID_Timer),
 	m_crop(false),
-	m_timer_hold(false)
+	m_timer_hold(false),
+	m_slider_style(false)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -456,7 +459,19 @@ MoviePanel::MoviePanel(MainFrame* frame,
 
 	//slider
 	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
-	m_progress_sldr = new wxSingleSlider(this, ID_ProgressSldr, 0, 0, PROG_SLDR_MAX);
+	m_slider_btn = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	m_slider_btn->SetDoubleBuffered(true);
+	m_slider_btn->AddCheckTool(0, "Slider style",
+		wxGetBitmapFromMemory(slider_type_pos), wxNullBitmap,
+		"Choose slider style between jog and normal",
+		"Choose slider style between jog and normal");
+	m_slider_btn->Bind(wxEVT_TOOL, &MoviePanel::OnSliderStyle, this);
+	m_slider_btn->Realize();
+	m_progress_sldr = new wxUndoableScrollBar(this, ID_ProgressSldr);
+	m_progress_sldr->SetScrollbar(m_cur_frame, 40, m_frame_num + 40, 1);
+	sizer2->Add(5, 5);
+	sizer2->Add(m_slider_btn, 0, wxALIGN_CENTER);
 	sizer2->Add(5, 5);
 	sizer2->Add(m_progress_sldr, 1, wxEXPAND);
 	sizer2->Add(5, 5);
@@ -527,7 +542,9 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	wxBoxSizer *sizerv = new wxBoxSizer(wxVERTICAL);
 	sizerv->Add(m_notebook, 1, wxEXPAND);
 	sizerv->Add(sizer1, 0, wxEXPAND);
+	sizerv->Add(5, 5);
 	sizerv->Add(sizer2, 0, wxEXPAND);
+	sizerv->Add(5, 5);
 	sizerv->Add(sizer3, 0, wxEXPAND);
 	sizerv->Add(sizer4, 0, wxEXPAND);
 	SetSizerAndFit(sizerv);
@@ -747,6 +764,8 @@ void MoviePanel::SetTimeSeq(bool value)
 	m_start_frame_text->ChangeValue(wxString::Format("%d", m_start_frame));
 	m_end_frame_text->ChangeValue(wxString::Format("%d", m_end_frame));
 	m_movie_len_text->ChangeValue(wxString::Format("%.2f", m_movie_len));
+	m_frame_num = m_end_frame - m_start_frame + 1;
+	m_progress_sldr->SetScrollbar(m_cur_frame, 40, m_frame_num + 40, 1);
 }
 
 void MoviePanel::SetCrop(bool value)
@@ -850,7 +869,7 @@ void MoviePanel::Prev()
 	flvr::TextureRenderer::maximize_uptime_ = true;
 	m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
 	int slider_pos = m_progress_sldr->GetValue();
-	if (slider_pos < PROG_SLDR_MAX && slider_pos > 0 &&
+	if (slider_pos < m_frame_num && slider_pos > 0 &&
 		!(m_movie_len - m_cur_time < 0.1 / m_fps ||
 			m_cur_time > m_movie_len))
 	{
@@ -876,6 +895,8 @@ void MoviePanel::Prev()
 			m_start_frame = 0; m_end_frame = frames;
 			m_movie_len = (double)frames / m_fps;
 			m_movie_len_text->ChangeValue(wxString::Format("%.2f", m_movie_len));
+			m_frame_num = m_end_frame - m_start_frame + 1;
+			m_progress_sldr->SetScrollbar(m_cur_frame, 40, m_frame_num + 40, 1);
 		}
 	}
 	SetProgress(0.);
@@ -1174,15 +1195,25 @@ void MoviePanel::OnGenKey(wxCommandEvent& event) {
 	GenKey();
 }
 
+void MoviePanel::OnSliderStyle(wxCommandEvent& event)
+{
+	m_slider_style = m_slider_btn->GetToolState(0);
+	m_progress_sldr->SetMode(m_slider_style ? 1 : 0);
+	if (m_slider_style)
+		m_slider_btn->SetToolNormalBitmap(0, wxGetBitmapFromMemory(slider_type_rot));
+	else
+		m_slider_btn->SetToolNormalBitmap(0, wxGetBitmapFromMemory(slider_type_pos));
+}
+
 void MoviePanel::OnTimeChange(wxScrollEvent &event)
 {
 	if (m_running) return;
 	int prg = m_progress_sldr->GetValue();
-	double pcnt = (double)prg / PROG_SLDR_MAX;
+	double pcnt = (double)prg / m_frame_num;
 	m_cur_time = pcnt * m_movie_len;
 	wxString str = wxString::Format("%.2f", m_cur_time);
 	if (str != m_progress_text->GetValue())
-		m_progress_text->SetValue(str);
+		m_progress_text->ChangeValue(str);
 }
 
 void MoviePanel::OnTimeText(wxCommandEvent& event)
@@ -1192,7 +1223,7 @@ void MoviePanel::OnTimeText(wxCommandEvent& event)
 	if (!str.ToDouble(&m_cur_time))
 		m_cur_time = 0;
 	double pcnt = (m_cur_time / m_movie_len);
-	m_progress_sldr->SetValue(PROG_SLDR_MAX * pcnt);
+	m_progress_sldr->ChangeValue(std::round(m_frame_num * pcnt));
 	int time = m_end_frame - m_start_frame + 1;
 	m_cur_frame = std::round(m_start_frame + time * pcnt);
 	m_cur_frame_text->ChangeValue(wxString::Format("%d", m_cur_frame));
@@ -1246,7 +1277,7 @@ void MoviePanel::SetRendering(double pcnt, bool rewind)
 			val = m_starting_rot +
 			(-2.0*pcnt*pcnt*pcnt + 3.0*pcnt*pcnt) * m_rot_deg;
 		rval[m_rot_axis] = val;
-		m_view->SetRotations(rval[0], rval[1], rval[2]);
+		m_view->SetRotations(rval[0], rval[1], rval[2], true);
 	}
 
 	m_view->SetInteractive(false);
@@ -1331,7 +1362,7 @@ void MoviePanel::OnBatchChecked(wxCommandEvent& event)
 void MoviePanel::SetProgress(double pcnt)
 {
 	pcnt = std::abs(pcnt);
-	m_progress_sldr->SetValue(pcnt * PROG_SLDR_MAX);
+	m_progress_sldr->ChangeValue(std::round(pcnt * m_frame_num));
 	m_cur_time = pcnt*m_movie_len;
 	wxString st = wxString::Format("%.2f", m_cur_time);
 	m_progress_text->ChangeValue(st);
@@ -1491,6 +1522,22 @@ void MoviePanel::Run()
 	}
 
 	Prev();
+}
+
+void MoviePanel::SetStartFrame(int value)
+{
+	m_start_frame = value;
+	m_start_frame_text->SetValue(wxString::Format("%d", m_start_frame));
+	m_frame_num = m_end_frame - m_start_frame + 1;
+	m_progress_sldr->SetScrollbar(m_cur_frame, 40, m_frame_num + 40, 1);
+}
+
+void MoviePanel::SetEndFrame(int value)
+{
+	m_end_frame = value;
+	m_end_frame_text->SetValue(wxString::Format("%d", m_end_frame));
+	m_frame_num = m_end_frame - m_start_frame + 1;
+	m_progress_sldr->SetScrollbar(m_cur_frame, 40, m_frame_num + 40, 1);
 }
 
 void MoviePanel::OnCurFrameText(wxCommandEvent& event)

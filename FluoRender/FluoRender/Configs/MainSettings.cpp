@@ -399,6 +399,11 @@ void MainSettings::Read()
 		fconfig.Read("version", &m_python_ver, 10);
 	}
 
+	if (fconfig.Exists("/ui"))
+	{
+		fconfig.Read("layout", &m_layout);
+	}
+
 	//EnableStreaming(m_mem_swap);
 	m_brush_def.Read(fconfig);
 	m_comp_def.Read(fconfig);
@@ -593,6 +598,9 @@ void MainSettings::Save()
 	//python settings
 	fconfig.SetPath("/python");
 	fconfig.Write("version", m_python_ver);
+
+	fconfig.SetPath("/ui");
+	fconfig.Write("layout", m_layout);
 
 	m_brush_def.Save(fconfig);
 	m_comp_def.Save(fconfig);

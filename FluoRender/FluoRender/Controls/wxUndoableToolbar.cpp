@@ -122,7 +122,8 @@ void wxUndoableToolbar::update()
 UTBData wxUndoableToolbar::get_data()
 {
 	UTBData data;
-	for (size_t i = 0; i < GetToolsCount(); ++i)
+	int n = GetToolsCount();
+	for (size_t i = 0; i < n; ++i)
 		data.push_back(GetToolState(i));
 	return data;
 }

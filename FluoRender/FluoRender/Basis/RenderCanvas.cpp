@@ -3906,6 +3906,8 @@ void RenderCanvas::SetCompSelection(fluo::Point& p, int mode)
 
 void RenderCanvas::OnIdle(wxIdleEvent& event)
 {
+	fluo::ValueCollection vc;
+
 	bool refresh = false;
 	bool ref_stat = false;
 	bool start_loop = true;
@@ -4342,27 +4344,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		}
 	}
 
-#ifdef _WIN32
-	//update ortho rotation
-	//if (!m_vrv->m_ortho_view_cmb->HasFocus())
-	//{
-	//	if (m_q.AlmostEqual(fluo::Quaternion(0, sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
-	//		m_vrv->m_ortho_view_cmb->Select(0);
-	//	else if (m_q.AlmostEqual(fluo::Quaternion(0, -sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
-	//		m_vrv->m_ortho_view_cmb->Select(1);
-	//	else if (m_q.AlmostEqual(fluo::Quaternion(sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
-	//		m_vrv->m_ortho_view_cmb->Select(2);
-	//	else if (m_q.AlmostEqual(fluo::Quaternion(-sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
-	//		m_vrv->m_ortho_view_cmb->Select(3);
-	//	else if (m_q.AlmostEqual(fluo::Quaternion(0, 0, 0, 1)))
-	//		m_vrv->m_ortho_view_cmb->Select(4);
-	//	else if (m_q.AlmostEqual(fluo::Quaternion(0, -1, 0, 0)))
-	//		m_vrv->m_ortho_view_cmb->Select(5);
-	//	else
-	//		m_vrv->m_ortho_view_cmb->Select(6);
-	//}
-#endif
-
 #if defined(_WIN32) && defined(USE_XINPUT)
 	//xinput controller
 	if (m_controller->IsConnected())
@@ -4420,6 +4401,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			}
 			m_interactive = true;
 			refresh = true;
+			vc.insert(gstScaleFactor);
 		}
 		//rotate
 		if (rghtx != 0.0 || rghty != 0.0)
@@ -4462,6 +4444,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			//}
 			m_interactive = true;
 			refresh = true;
+			vc.insert(gstCamRotation);
 		}
 		//pan
 		if (px != 0 || py != 0)
@@ -4489,6 +4472,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		m_clear_buffer = true;
 		m_updating = true;
 		RefreshGL(15, ref_stat, start_loop);
+		m_vrv->FluoUpdate(vc);
 	}
 }
 
@@ -4628,6 +4612,7 @@ void RenderCanvas::SetParamCapture(wxString &cap_file, int begin_frame, int end_
 
 void RenderCanvas::SetParams(double t)
 {
+	fluo::ValueCollection vc;
 	if (!m_vrv)
 		return;
 	if (!m_frame)
@@ -4755,7 +4740,7 @@ void RenderCanvas::SetParams(double t)
 	if (glbin_interpolator.GetDouble(keycode, t, scale))
 	{
 		m_scale_factor = scale;
-		//m_vrv->UpdateScaleFactor(false);
+		vc.insert(gstScaleFactor);
 	}
 	//rotation
 	keycode.l2 = 0;
@@ -4767,7 +4752,7 @@ void RenderCanvas::SetParams(double t)
 		q *= -m_zq;
 		double rotx, roty, rotz;
 		q.ToEuler(rotx, roty, rotz);
-		SetRotations(rotx, roty, rotz);
+		SetRotations(rotx, roty, rotz, true);
 	}
 	//intermixing mode
 	keycode.l2_name = "volmethod";
@@ -4782,14 +4767,13 @@ void RenderCanvas::SetParams(double t)
 		if (aov <= 10)
 		{
 			SetPersp(false);
-			//m_vrv->m_aov_text->ChangeValue("Ortho");
-			//m_vrv->m_aov_sldr->SetValue(10);
 		}
 		else
 		{
 			SetPersp(true);
 			SetAov(aov);
 		}
+		vc.insert(gstAov);
 	}
 
 	if (m_frame && clip_view)
@@ -4808,6 +4792,8 @@ void RenderCanvas::SetParams(double t)
 		m_frame->GetMeasureDlg()->UpdateList();
 	}
 	SetVolPopDirty();
+
+	m_vrv->FluoUpdate(vc);
 }
 
 void RenderCanvas::ResetMovieAngle()
@@ -4815,7 +4801,7 @@ void RenderCanvas::ResetMovieAngle()
 	double rv[3] = { 0 };
 	GetRotations(rv[0], rv[1], rv[2]);
 	rv[m_rot_axis] = m_init_angle;
-	SetRotations(rv[0], rv[1], rv[2]);
+	SetRotations(rv[0], rv[1], rv[2], true);
 
 	m_capture = false;
 	m_capture_rotat = false;
@@ -5533,7 +5519,7 @@ void RenderCanvas::ForceDraw()
 				RenderCanvas* view = m_frame->GetView(i);
 				if (view && view != this)
 				{
-					view->SetRotations(m_rotx, m_roty, m_rotz);
+					view->SetRotations(m_rotx, m_roty, m_rotz, true);
 					view->RefreshGL(39);
 					view->Update();
 				}
@@ -5642,13 +5628,11 @@ void RenderCanvas::SetScale121()
 		break;
 	}
 
-	//wxString str = wxString::Format("%.0f", value*100.0);
-	//m_vrv->m_scale_factor_sldr->SetValue(value * 100);
-	//m_vrv->m_scale_factor_text->ChangeValue(str);
-
 	//SetSortBricks();
 
 	RefreshGL(21);
+
+	m_vrv->FluoUpdate({ gstScaleFactor });
 }
 
 void RenderCanvas::SetPinRotCenter(bool pin)
@@ -5682,14 +5666,11 @@ void RenderCanvas::SetPersp(bool persp)
 		m_obj_transz = m_obj_transz_saved;
 		//restore scale factor
 		m_scale_factor = m_scale_factor_saved;
-		//m_vrv->UpdateScaleFactor(false);
-		//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
-		//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
-		//m_vrv->m_scale_factor_text->ChangeValue(str);
-		//m_vrv->m_options_toolbar2->ToggleTool(RenderViewPanel::ID_FreeChk, false);
 
-		SetRotations(m_rotx, m_roty, m_rotz);
+		m_vrv->FluoUpdate({ gstScaleFactor, gstFree });
+		SetRotations(m_rotx, m_roty, m_rotz, true);
 	}
+
 	//SetSortBricks();
 }
 
@@ -5750,8 +5731,9 @@ void RenderCanvas::SetFree(bool free)
 		//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
 		//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
 		//m_vrv->m_scale_factor_text->ChangeValue(str);
+		m_vrv->FluoUpdate({ gstScaleFactor });
 
-		SetRotations(m_rotx, m_roty, m_rotz);
+		SetRotations(m_rotx, m_roty, m_rotz, true);
 	}
 	//SetSortBricks();
 }
@@ -5762,11 +5744,11 @@ void RenderCanvas::SetAov(double aov)
 	//SetSortBricks();
 
 	m_aov = aov;
-	if (m_persp)
-	{
-		m_vrv->m_aov_text->ChangeValue(wxString::Format("%d", int(std::round(m_aov))));
-		m_vrv->m_aov_sldr->ChangeValue(std::round(m_aov));
-	}
+	//if (m_persp)
+	//{
+	//	m_vrv->m_aov_text->ChangeValue(wxString::Format("%d", int(std::round(m_aov))));
+	//	m_vrv->m_aov_sldr->ChangeValue(std::round(m_aov));
+	//}
 }
 
 void RenderCanvas::SetVolMethod(int method)
@@ -7281,8 +7263,6 @@ void RenderCanvas::InitView(unsigned int type)
 		m_transx = 0.0;
 		m_transy = 0.0;
 		m_transz = m_distance;
-		//if (!m_vrv->m_use_dft_settings)
-		//	m_scale_factor = 1.0;
 	}
 
 	if (type&INIT_OBJ_TRANSL)
@@ -9025,7 +9005,7 @@ void RenderCanvas::SetClipMode(int mode)
 		break;
 	case 1:
 		m_clip_mode = 1;
-		SetRotations(m_rotx, m_roty, m_rotz);
+		SetRotations(m_rotx, m_roty, m_rotz, true);
 		break;
 	case 2:
 		m_clip_mode = 2;
@@ -9039,7 +9019,7 @@ void RenderCanvas::SetClipMode(int mode)
 		if (m_rotx_cl > 180.0) m_rotx_cl -= 360.0;
 		if (m_roty_cl > 180.0) m_roty_cl -= 360.0;
 		if (m_rotz_cl > 180.0) m_rotz_cl -= 360.0;
-		SetRotations(m_rotx, m_roty, m_rotz);
+		SetRotations(m_rotx, m_roty, m_rotz, true);
 		break;
 	}
 }
@@ -9072,7 +9052,7 @@ void RenderCanvas::ClipRotate()
 	m_q_cl.FromEuler(m_rotx_cl, m_roty_cl, m_rotz_cl);
 	m_q_cl.Normalize();
 
-	SetRotations(m_rotx, m_roty, m_rotz);
+	SetRotations(m_rotx, m_roty, m_rotz, true);
 
 }
 
@@ -10417,19 +10397,6 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 
 					Q2A();
 
-					//wxString str = wxString::Format("%.1f", m_rotx);
-					//m_vrv->m_x_rot_text->ChangeValue(str);
-					//str = wxString::Format("%.1f", m_roty);
-					//m_vrv->m_y_rot_text->ChangeValue(str);
-					//str = wxString::Format("%.1f", m_rotz);
-					//m_vrv->m_z_rot_text->ChangeValue(str);
-					//if (!m_vrv->m_rot_slider)
-					//{
-					//	m_vrv->m_x_rot_sldr->SetThumbPosition(std::round(m_rotx));
-					//	m_vrv->m_y_rot_sldr->SetThumbPosition(std::round(m_roty));
-					//	m_vrv->m_z_rot_sldr->SetThumbPosition(std::round(m_rotz));
-					//}
-
 					m_interactive = true;
 
 					if (m_linked_rot)
@@ -10437,6 +10404,8 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 
 					if (!hold_old)
 						RefreshGL(30);
+
+					m_vrv->FluoUpdate({ gstCamRotation });
 				}
 				if (event.MiddleIsDown() || (event.ControlDown() && event.LeftIsDown()))
 				{
@@ -10469,10 +10438,6 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 						(double)dx / (double)nx :
 						(double)-dy / (double)ny;
 					m_scale_factor += m_scale_factor*delta;
-					//m_vrv->UpdateScaleFactor(false);
-					//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
-					//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
-					//m_vrv->m_scale_factor_text->ChangeValue(str);
 
 					if (m_free)
 					{
@@ -10489,6 +10454,8 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 
 					//SetSortBricks();
 					RefreshGL(32);
+
+					m_vrv->FluoUpdate({ gstScaleFactor });
 				}
 			}
 		}
@@ -10509,7 +10476,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 					fluo::Quaternion q_delta = TrackballClip(old_mouse_X, mp.y(), mp.x(), old_mouse_Y);
 					m_q_cl = q_delta * m_q_cl;
 					m_q_cl.Normalize();
-					SetRotations(m_rotx, m_roty, m_rotz);
+					SetRotations(m_rotx, m_roty, m_rotz, true);
 					RefreshGL(34);
 				}
 			}
@@ -10572,6 +10539,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			prv_mouse_X = old_mouse_X;
 			prv_mouse_Y = old_mouse_Y;
 		}
+
 		return;
 	}
 
@@ -10597,12 +10565,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 				double value = wheel * m_scale_factor / 1000.0;
 				if (m_scale_factor + value > 0.01)
 					m_scale_factor += value;
-				//if (m_scale_factor < 0.01)
-				//	m_scale_factor = 0.01;
-				//m_vrv->UpdateScaleFactor(false);
-				//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
-				//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
-				//m_vrv->m_scale_factor_text->ChangeValue(str);
+				m_vrv->FluoUpdate({ gstScaleFactor });
 			}
 		}
 
@@ -10709,7 +10672,7 @@ void RenderCanvas::SetFog(bool b)
 	//	m_vrv->m_left_toolbar->ToggleTool(RenderViewPanel::ID_DepthAttenChk, b);
 }
 
-void RenderCanvas::SetRotations(double rotx, double roty, double rotz)
+void RenderCanvas::SetRotations(double rotx, double roty, double rotz, bool notify)
 {
 	m_rotx = rotx;
 	m_roty = roty;
@@ -10740,6 +10703,9 @@ void RenderCanvas::SetRotations(double rotx, double roty, double rotz)
 	fluo::Quaternion up2 = (-m_q) * up * m_q;
 	m_up = fluo::Vector(up2.x, up2.y, up2.z);
 
+	if (notify)
+		m_vrv->FluoUpdate({ gstCamRotation });
+
 	//if (ui_update)
 	//{
 	//	wxString str = wxString::Format("%.1f", m_rotx);
@@ -10767,6 +10733,25 @@ void RenderCanvas::SetRotations(double rotx, double roty, double rotz)
 	//	if (!m_master_linked_view)
 	//		m_master_linked_view = this;
 	//}
+}
+
+int RenderCanvas::GetOrientation()
+{
+	//update ortho rotation
+	if (m_q.AlmostEqual(fluo::Quaternion(0, sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
+		return 0;
+	else if (m_q.AlmostEqual(fluo::Quaternion(0, -sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
+		return 1;
+	else if (m_q.AlmostEqual(fluo::Quaternion(sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
+		return 2;
+	else if (m_q.AlmostEqual(fluo::Quaternion(-sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
+		return 3;
+	else if (m_q.AlmostEqual(fluo::Quaternion(0, 0, 0, 1)))
+		return 4;
+	else if (m_q.AlmostEqual(fluo::Quaternion(0, -1, 0, 0)))
+		return 5;
+	else
+		return 6;
 }
 
 void RenderCanvas::SetZeroRotations()

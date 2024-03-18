@@ -241,7 +241,8 @@ public:
 		roty = m_roty;
 		rotz = m_rotz;
 	}
-	void SetRotations(double rotx, double roty, double rotz);
+	void SetRotations(double rotx, double roty, double rotz, bool notify);
+	int GetOrientation();//same as the indices in the view panel
 	void SetZeroRotations();
 	void ResetZeroRotations(double &rotx, double &roty, double &rotz);
 	void GetCenters(double &ctrx, double &ctry, double &ctrz)

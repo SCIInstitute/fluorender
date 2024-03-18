@@ -36,12 +36,10 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/aui/auibook.h>
 #include <wx/listctrl.h>
 
-#define PROG_SLDR_MAX	361
-
 class MainFrame;
 class RenderCanvas;
 class RecorderDlg;
-class wxSingleSlider;
+class wxUndoableScrollBar;
 class MoviePanel : public wxPanel
 {
 	enum
@@ -179,17 +177,9 @@ public:
 	}
 	double GetFps() { return m_fps; }
 	//frames
-	void SetStartFrame(int value)
-	{
-		m_start_frame = value;
-		m_start_frame_text->SetValue(wxString::Format("%d", m_start_frame));
-	}
+	void SetStartFrame(int value);
 	int GetStartFrame() { return m_start_frame; }
-	void SetEndFrame(int value)
-	{
-		m_end_frame = value;
-		m_end_frame_text->SetValue(wxString::Format("%d", m_end_frame));
-	}
+	void SetEndFrame(int value);
 	int GetEndFrame() { return m_end_frame; }
 	int GetCurFrame() { return m_cur_frame; }
 	//cropping
@@ -246,7 +236,8 @@ private:
 
 	wxButton *m_play_btn;
 	wxButton *m_rewind_btn;
-	wxSingleSlider *m_progress_sldr;
+	wxToolBar* m_slider_btn;
+	wxUndoableScrollBar* m_progress_sldr;
 	wxTextCtrl *m_progress_text;
 	wxButton *m_save_btn;
 	wxButton* m_start_frame_st;
@@ -301,6 +292,7 @@ private:
 	RenderCanvas* m_view;
 	RecorderDlg* m_advanced_movie;
 	int m_view_idx;//index to current renderview
+	bool m_slider_style;//0:normal, 1:jog
 
 	wxAuiNotebook* m_notebook;
 	int m_current_page;
@@ -316,6 +308,7 @@ private:
 	static double m_movie_len;//length in sec
 	double m_cur_time;//time in sec
 	double m_fps;
+	int m_frame_num;
 	int m_start_frame;
 	int m_end_frame;
 	int m_cur_frame;
@@ -405,6 +398,7 @@ private:
 	void OnGenKey(wxCommandEvent& event);
 
 	//time slider
+	void OnSliderStyle(wxCommandEvent& event);
 	void OnTimeChange(wxScrollEvent &event);
 	void OnTimeText(wxCommandEvent& event);
 	void OnUpFrame(wxCommandEvent& event);

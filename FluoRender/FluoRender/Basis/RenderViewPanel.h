@@ -38,6 +38,8 @@ class RenderCanvas;
 class wxGLContext;
 class wxSingleSlider;
 class wxUndoableScrollBar;
+class wxUndoableToolbar;
+class wxUndoableColorPicker;
 class RenderViewPanel: public PropPanel
 {
 public:
@@ -150,18 +152,18 @@ public:
 	wxBoxSizer* m_view_sizer;
 
 	//top bar///////////////////////////////////////////////////
-	wxToolBar * m_options_toolbar;
+	wxUndoableToolbar* m_options_toolbar;
 	wxTextCtrl *m_scale_text;
 	wxComboBox *m_scale_cmb;
-	wxColourPickerCtrl *m_bg_color_picker;
+	wxUndoableColorPicker* m_bg_color_picker;
 	wxToolBar* m_bg_inv_btn;
 	wxSingleSlider* m_aov_sldr;
 	wxTextCtrl* m_aov_text;
-	wxToolBar* m_options_toolbar2;
+	wxUndoableToolbar* m_options_toolbar2;
 	wxToolBar *m_full_screen_btn;
 
 	//left bar///////////////////////////////////////////////////
-	wxToolBar* m_depth_atten_btn;
+	wxUndoableToolbar* m_depth_atten_btn;
 	wxSingleSlider *m_depth_atten_factor_sldr;
 	wxToolBar *m_depth_atten_reset_btn;
 	wxTextCtrl *m_depth_atten_factor_text;
@@ -177,7 +179,7 @@ public:
 	wxToolBar *m_scale_reset_btn;
 
 	//bottom bar///////////////////////////////////////////////////
-	wxToolBar *m_rot_lock_btn;
+	wxUndoableToolbar* m_rot_lock_btn;
 	wxTextCtrl *m_x_rot_text;
 	wxTextCtrl *m_y_rot_text;
 	wxTextCtrl *m_z_rot_text;

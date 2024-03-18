@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _OUTADJDEFAULT_H_
 
 #include <wx/fileconf.h>
+#include <wx/string.h>
 
 class RenderCanvas;
 class TreeLayer;
@@ -59,6 +60,5 @@ public:
 	double m_hdr_r;
 	double m_hdr_g;
 	double m_hdr_b;
-
 };
 #endif

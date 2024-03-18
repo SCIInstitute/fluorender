@@ -40,6 +40,8 @@ wxUndoableScrollBar::wxUndoableScrollBar(
 	Undoable(),
 	timer_(this)
 {
+	Bind(wxEVT_LEFT_DOWN, &wxUndoableScrollBar::OnLeftDown, this);
+	Bind(wxEVT_LEFT_UP, &wxUndoableScrollBar::OnLeftUp, this);
 	Bind(wxEVT_SCROLL_THUMBTRACK, &wxUndoableScrollBar::OnTrack, this);
 	Bind(wxEVT_SCROLL_LINEDOWN, &wxUndoableScrollBar::OnLineDown, this);
 	Bind(wxEVT_SCROLL_LINEUP, &wxUndoableScrollBar::OnLineUp, this);
@@ -143,6 +145,21 @@ void wxUndoableScrollBar::OnTimer(wxTimerEvent& event)
 
 		SetValue(std::round(val));
 	}
+	event.Skip();
+}
+
+void wxUndoableScrollBar::OnLeftDown(wxMouseEvent& event)
+{
+	//SetFocus();
+	//if (!HasCapture())
+	//	CaptureMouse();
+	event.Skip();
+}
+
+void wxUndoableScrollBar::OnLeftUp(wxMouseEvent& event)
+{
+	//if (HasCapture())
+	//	ReleaseMouse();
 	event.Skip();
 }
 

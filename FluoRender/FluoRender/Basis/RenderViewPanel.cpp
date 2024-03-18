@@ -34,6 +34,8 @@ DEALINGS IN THE SOFTWARE.
 #include <ClipPlanePanel.h>
 #include <wxSingleSlider.h>
 #include <wxUndoableScrollBar.h>
+#include <wxUndoableToolbar.h>
+#include <wxUndoableColorPicker.h>
 #include <wx/utils.h>
 #include <wx/valnum.h>
 #include <tiffio.h>
@@ -236,7 +238,19 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 
 	CreateBar();
 
-	LoadSettings();
+	//add controls
+	glbin.add_undo_control(m_options_toolbar);
+	glbin.add_undo_control(m_bg_color_picker);
+	glbin.add_undo_control(m_aov_sldr);
+	glbin.add_undo_control(m_options_toolbar2);
+	glbin.add_undo_control(m_depth_atten_btn);
+	glbin.add_undo_control(m_depth_atten_factor_sldr);
+	glbin.add_undo_control(m_scale_factor_sldr);
+	glbin.add_undo_control(m_rot_lock_btn);
+	glbin.add_undo_control(m_x_rot_sldr);
+	glbin.add_undo_control(m_y_rot_sldr);
+	glbin.add_undo_control(m_z_rot_sldr);
+
 }
 
 RenderViewPanel::~RenderViewPanel()
@@ -245,6 +259,19 @@ RenderViewPanel::~RenderViewPanel()
 		delete m_glview;
 	if (m_full_frame)
 		delete m_full_frame;
+
+	//delete controls
+	glbin.del_undo_control(m_options_toolbar);
+	glbin.del_undo_control(m_bg_color_picker);
+	glbin.del_undo_control(m_aov_sldr);
+	glbin.del_undo_control(m_options_toolbar2);
+	glbin.del_undo_control(m_depth_atten_btn);
+	glbin.del_undo_control(m_depth_atten_factor_sldr);
+	glbin.del_undo_control(m_scale_factor_sldr);
+	glbin.del_undo_control(m_rot_lock_btn);
+	glbin.del_undo_control(m_x_rot_sldr);
+	glbin.del_undo_control(m_y_rot_sldr);
+	glbin.del_undo_control(m_z_rot_sldr);
 }
 
 void RenderViewPanel::CreateBar()
@@ -269,7 +296,7 @@ void RenderViewPanel::CreateBar()
 	//bar top///////////////////////////////////////////////////
 	wxBoxSizer* sizer_h_1 = new wxBoxSizer(wxHORIZONTAL);
 	//toolbar 1
-	m_options_toolbar = new wxToolBar(this, wxID_ANY,
+	m_options_toolbar = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_options_toolbar->SetDoubleBuffered(true);
 	wxSize tbs = m_options_toolbar->GetSize();
@@ -278,25 +305,23 @@ void RenderViewPanel::CreateBar()
 
 	//blend mode
 	bitmap = wxGetBitmap(layers, m_dpi_sf2);
-	m_options_toolbar->AddRadioTool(
+	m_options_toolbar->AddCheckTool(
 		ID_VolumeSeqRd, "Layer",
 		bitmap, wxNullBitmap,
 		"Render View as Layers",
 		"Render View as Layers");
 	bitmap = wxGetBitmap(depth, m_dpi_sf2);
-	m_options_toolbar->AddRadioTool(
+	m_options_toolbar->AddCheckTool(
 		ID_VolumeMultiRd, "Depth",
 		bitmap, wxNullBitmap,
 		"Render View by Depth",
 		"Render View by Depth");
 	bitmap = wxGetBitmap(composite, m_dpi_sf2);
-	m_options_toolbar->AddRadioTool(
+	m_options_toolbar->AddCheckTool(
 		ID_VolumeCompRd, "Compo",
 		bitmap, wxNullBitmap,
 		"Render View as a Composite of Colors",
 		"Render View as a Composite of Colors");
-
-	m_options_toolbar->AddSeparator();
 
 	//capture
 	bitmap = wxGetBitmap(camera, m_dpi_sf2);
@@ -304,8 +329,6 @@ void RenderViewPanel::CreateBar()
 		ID_CaptureBtn, "Snap",
 		bitmap,
 		"Capture Render View as an image");
-
-	m_options_toolbar->AddSeparator();
 
 	//info
 	bitmap = wxGetBitmap(info, m_dpi_sf2);
@@ -339,8 +362,6 @@ void RenderViewPanel::CreateBar()
 		"Toggle View of the Colormap Sample",
 		"Toggle View of the Colormap Sample");
 
-	m_options_toolbar->AddSeparator();
-
 	//scale bar
 	bitmap = wxGetBitmap(scalebar, m_dpi_sf2);
 	m_options_toolbar->AddTool(
@@ -366,7 +387,7 @@ void RenderViewPanel::CreateBar()
 	sizer_h_1->AddStretchSpacer(1);
 
 	//background
-	m_bg_color_picker = new wxColourPickerCtrl(this,
+	m_bg_color_picker = new wxUndoableColorPicker(this,
 		wxID_ANY, wxColor(), wxDefaultPosition, FromDIP(wxSize(40, 20)));
 	wxSize bs = m_bg_color_picker->GetSize();
 	m_bg_inv_btn = new wxToolBar(this, wxID_ANY,
@@ -399,7 +420,7 @@ void RenderViewPanel::CreateBar()
 	sizer_h_1->Add(m_aov_text, 0, wxALIGN_CENTER);
 
 	//free fly
-	m_options_toolbar2 = new wxToolBar(this, wxID_ANY,
+	m_options_toolbar2 = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_options_toolbar2->SetToolBitmapSize(toolsize);
 	m_options_toolbar2->SetDoubleBuffered(true);
@@ -435,7 +456,7 @@ void RenderViewPanel::CreateBar()
 	//bar left///////////////////////////////////////////////////
 	wxBoxSizer* sizer_v_3 = new wxBoxSizer(wxVERTICAL);
 	//depth attenuation
-	m_depth_atten_btn = new wxToolBar(this, wxID_ANY,
+	m_depth_atten_btn = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_depth_atten_btn->SetToolBitmapSize(toolsize);
 	m_depth_atten_btn->SetDoubleBuffered(true);
@@ -561,7 +582,7 @@ void RenderViewPanel::CreateBar()
 	//bar bottom///////////////////////////////////////////////////
 	wxBoxSizer* sizer_h_2 = new wxBoxSizer(wxHORIZONTAL);
 	//45 lock
-	m_rot_lock_btn = new wxToolBar(this, wxID_ANY,
+	m_rot_lock_btn = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_rot_lock_btn->SetToolBitmapSize(toolsize);
 	m_rot_lock_btn->SetDoubleBuffered(true);
@@ -573,8 +594,8 @@ void RenderViewPanel::CreateBar()
 	bitmap = wxGetBitmap(slider_type_rot, m_dpi_sf2);
 	m_rot_lock_btn->AddCheckTool(ID_RotSliderType, "Slider Style",
 		bitmap, wxNullBitmap,
-		"Choose slider style",
-		"Choose slider style");
+		"Choose slider style between jog and normal",
+		"Choose slider style between jog and normal");
 	m_rot_lock_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnRotLockCheck, this);
 	m_rot_lock_btn->Realize();
 
@@ -604,7 +625,7 @@ void RenderViewPanel::CreateBar()
 	m_ortho_view_cmb = new wxComboBox(this, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	std::vector<wxString> ov_list = { "+X", "-X", "+Y", "-Y", "+Z", "-Z", "NA" };
-	m_ortho_view_cmb->Append(scale_list);
+	m_ortho_view_cmb->Append(ov_list);
 	m_ortho_view_cmb->Bind(wxEVT_COMBOBOX, &RenderViewPanel::OnOrthoViewSelected, this);
 
 	//set reset
@@ -666,6 +687,7 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstMixMethod))
 	{
 		ival = m_glview->GetVolMethod();
+		int test = m_options_toolbar->GetToolsCount();
 		m_options_toolbar->ToggleTool(ID_VolumeSeqRd, ival == VOL_METHOD_SEQ);
 		m_options_toolbar->SetToolNormalBitmap(ID_VolumeSeqRd,
 			ival == VOL_METHOD_SEQ ?
@@ -898,11 +920,8 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_x_rot_text->ChangeValue(wxString::Format("%.1f", rotx));
 		m_y_rot_text->ChangeValue(wxString::Format("%.1f", roty));
 		m_z_rot_text->ChangeValue(wxString::Format("%.1f", rotz));
+		m_ortho_view_cmb->Select(m_glview->GetOrientation());
 	}
-
-
-	//ortho view
-	//m_ortho_view_cmb->Select(6);
 }
 
 void RenderViewPanel::SetVolumeMethod(int val)
@@ -1292,7 +1311,7 @@ void RenderViewPanel::SetSliderType(bool val)
 
 void RenderViewPanel::SetRotations(double rotx, double roty, double rotz, bool notify)
 {
-	m_glview->SetRotations(rotx, roty, rotz);
+	m_glview->SetRotations(rotx, roty, rotz, false);
 	if (notify)
 		FluoRefresh(false, true, 2, { gstCamRotation });
 	else
@@ -1309,12 +1328,12 @@ void RenderViewPanel::SetZeroRotations()
 	{
 		//reset
 		m_glview->ResetZeroRotations(rotx, roty, rotz);
-		m_glview->SetRotations(rotx, roty, rotz);
+		m_glview->SetRotations(rotx, roty, rotz, false);
 	}
 	else
 	{
 		m_glview->SetZeroRotations();
-		m_glview->SetRotations(0.0, 0.0, 0.0);
+		m_glview->SetRotations(0.0, 0.0, 0.0, false);
 	}
 	FluoRefresh(false, true, 2, { gstCamRotation });
 }
@@ -1637,22 +1656,22 @@ void RenderViewPanel::OnOrthoViewSelected(wxCommandEvent& event)
 	switch (sel)
 	{
 	case 0://+X
-		m_glview->SetRotations(0.0, 90.0, 0.0);
+		m_glview->SetRotations(0.0, 90.0, 0.0, false);
 		break;
 	case 1://-X
-		m_glview->SetRotations(0.0, 270.0, 0.0);
+		m_glview->SetRotations(0.0, 270.0, 0.0, false);
 		break;
 	case 2://+Y
-		m_glview->SetRotations(90.0, 0.0, 0.0);
+		m_glview->SetRotations(90.0, 0.0, 0.0, false);
 		break;
 	case 3://-Y
-		m_glview->SetRotations(270.0, 0.0, 0.0);
+		m_glview->SetRotations(270.0, 0.0, 0.0, false);
 		break;
 	case 4://+Z
-		m_glview->SetRotations(0.0, 0.0, 0.0);
+		m_glview->SetRotations(0.0, 0.0, 0.0, false);
 		break;
 	case 5:
-		m_glview->SetRotations(0.0, 180.0, 0.0);
+		m_glview->SetRotations(0.0, 180.0, 0.0, false);
 		break;
 	}
 	if (sel < 6)
