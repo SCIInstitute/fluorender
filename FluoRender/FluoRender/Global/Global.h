@@ -53,6 +53,7 @@ DEALINGS IN THE SOFTWARE.
 #include <SegGrow.h>
 #include <DistCalculator.h>
 #include <Animator/Interpolator.h>
+#include <Animator/MovieMaker.h>
 #include <DataManager.h>
 
 #define glbin fluo::Global::instance()
@@ -69,6 +70,7 @@ DEALINGS IN THE SOFTWARE.
 #define glbin_outadj_def fluo::Global::instance().get_outadj_def()
 #define glbin_view_def fluo::Global::instance().get_view_def()
 #define glbin_vol_def fluo::Global::instance().get_vol_def()
+#define glbin_mov_def fluo::Global::instance().get_movie_def()
 //processors
 #define glbin_comp_generator fluo::Global::instance().get_comp_generator()
 #define glbin_comp_analyzer fluo::Global::instance().get_comp_analyzer()
@@ -85,6 +87,7 @@ DEALINGS IN THE SOFTWARE.
 #define glbin_seg_grow fluo::Global::instance().get_seg_grow()
 #define glbin_dist_calculator fluo::Global::instance().get_dist_calculator()
 #define glbin_interpolator fluo::Global::instance().get_interpolator()
+#define glbin_moviemaker fluo::Global::instance().get_movie_maker()
 #define glbin_data_manager fluo::Global::instance().get_data_manager()
 
 namespace fluo
@@ -158,6 +161,7 @@ namespace fluo
 		OutAdjDefault& get_outadj_def();
 		ViewDefault& get_view_def();
 		VolumeDataDefault& get_vol_def();
+		MovieDefault& get_movie_def();
 
 		//data processors
 		void apply_processor_settings();
@@ -176,6 +180,7 @@ namespace fluo
 		flrd::SegGrow& get_seg_grow() { return m_seg_grow; }
 		flrd::DistCalculator& get_dist_calculator() { return m_dist_calculator; }
 		Interpolator& get_interpolator() { return m_interpolator; }
+		MovieMaker& get_movie_maker() { return m_movie_maker; }
 		DataManager& get_data_manager() { return m_data_manager; }
 
 	private:
@@ -222,6 +227,7 @@ namespace fluo
 		flrd::SegGrow m_seg_grow;
 		flrd::DistCalculator m_dist_calculator;
 		Interpolator m_interpolator;
+		MovieMaker m_movie_maker;
 		DataManager m_data_manager;
 	};
 

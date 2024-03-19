@@ -48,7 +48,6 @@ EVT_BUTTON(ID_DecTimeBtn, MoviePanel::OnDownFrame)
 EVT_TEXT(ID_CurFrameText, MoviePanel::OnCurFrameText)
 EVT_TEXT(ID_StartFrameText, MoviePanel::OnStartFrameText)
 EVT_TEXT(ID_EndFrameText, MoviePanel::OnEndFrameText)
-EVT_TEXT(ID_MovieLenText, MoviePanel::OnMovieLenText)
 //rotations
 EVT_CHECKBOX(ID_RotChk, MoviePanel::OnRotateChecked)
 EVT_RADIOBUTTON(ID_XRd, MoviePanel::OnRotAxis)
@@ -56,9 +55,6 @@ EVT_RADIOBUTTON(ID_YRd, MoviePanel::OnRotAxis)
 EVT_RADIOBUTTON(ID_ZRd, MoviePanel::OnRotAxis)
 EVT_TEXT(ID_DegreeText, MoviePanel::OnDegreeText)
 EVT_COMBOBOX(ID_RotIntCmb, MoviePanel::OnRotIntCmb)
-//fps, view combo, help
-EVT_TEXT(ID_FPS_Text, MoviePanel::OnFpsEdit)
-EVT_COMBOBOX(ID_ViewsCombo, MoviePanel::OnViewSelected)
 //main controls
 EVT_BUTTON(ID_PlayPause, MoviePanel::OnPrev)
 EVT_BUTTON(ID_Rewind, MoviePanel::OnRewind)
@@ -96,7 +92,6 @@ EVT_TIMER(ID_Timer, MoviePanel::OnTimer)
 EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, MoviePanel::OnNbPageChange)
 END_EVENT_TABLE()
 
-double MoviePanel::m_movie_len = 5;
 wxTextCtrl * MoviePanel::m_estimated_size_text = 0;
 
 wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
@@ -111,19 +106,22 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 
 	//rotations
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	m_rot_chk = new wxCheckBox(page, ID_RotChk, "Rotation");
+	m_rot_chk = new wxCheckBox(page, wxID_ANY, "Rotation");
+	m_rot_chk->Bind(wxEVT_CHECKBOX, &MoviePanel::OnRotateChecked, this);
 	sizer1->Add(10, 10);
 	sizer1->Add(m_rot_chk, 0, wxALIGN_CENTER);
 
 	//axis
 	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
-	m_x_rd = new wxRadioButton(page, ID_XRd, "X",
+	m_x_rd = new wxRadioButton(page, wxID_ANY, "X",
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
-	m_y_rd = new wxRadioButton(page, ID_YRd, "Y",
+	m_y_rd = new wxRadioButton(page, wxID_ANY, "Y",
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
-	m_z_rd = new wxRadioButton(page, ID_ZRd, "Z",
+	m_z_rd = new wxRadioButton(page, wxID_ANY, "Z",
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
-	m_y_rd->SetValue(true);
+	m_x_rd->Bind(wxEVT_RADIOBUTTON, &MoviePanel::OnRotAxis, this);
+	m_y_rd->Bind(wxEVT_RADIOBUTTON, &MoviePanel::OnRotAxis, this);
+	m_z_rd->Bind(wxEVT_RADIOBUTTON, &MoviePanel::OnRotAxis, this);
 	sizer2->Add(20, 5);
 	sizer2->Add(m_x_rd, 0, wxALIGN_CENTER);
 	sizer2->Add(20, 5);
@@ -191,9 +189,23 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 
 wxWindow* MoviePanel::CreateAdvancedPage(wxWindow *parent)
 {
+	wxScrolledWindow* page = new wxScrolledWindow(parent);
+
+	m_keyframe_chk = new wxCheckBox(page, wxID_ANY, "Enable keyframe movie");
+	m_keyframe_chk->Bind(wxEVT_CHECKBOX, &MoviePanel::OnKeyframeChk, this);
 	m_advanced_movie = new RecorderDlg(m_frame, this);
 	m_frame->m_recorder_dlg = m_advanced_movie;
-	return m_advanced_movie;
+
+	//vertical sizer
+	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
+	sizerv->Add(5, 5, 0);
+	sizerv->Add(m_keyframe_chk, 0, wxALIGN_CENTER);
+	sizerv->Add(m_advanced_movie, 1, wxEXPAND);
+	//set the page
+	page->SetSizer(sizerv);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
+	return page;
 }
 
 wxWindow* MoviePanel::CreateAutoKeyPage(wxWindow *parent)
@@ -385,39 +397,18 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	wxPanel(frame, wxID_ANY, pos, size, style, name),
-	m_frame(frame),
-	m_view_idx(0),
-	m_rotate(true),
-	m_time_seq(false),
-	m_rot_axis(1),
-	m_rot_deg(360),
-	m_start_frame(0),
-	m_end_frame(360),
-	m_frame_num(361),
-	m_cur_frame(0),
-	m_starting_rot(0.),
-	m_cur_time(0.0),
-	m_running(false),
-	m_record(false),
-	m_current_page(0),
-	m_rot_int_type(0),
-	m_delayed_stop(false),
-	m_seq_mode(0),
-	m_fps(30),
-	m_timer(this, ID_Timer),
-	m_crop(false),
-	m_timer_hold(false),
-	m_slider_style(false)
+	PropPanel(frame, frame, pos, size, style, name)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	Freeze();
+	SetDoubleBuffered(true);
 
 	if (m_frame)
-		m_view = m_frame->GetView(m_view_idx);
+		m_view = m_frame->GetView(glbin_mov_def.m_view_idx);
 
 	//notebook
-	m_notebook = new wxAuiNotebook(this, ID_Notebook,
+	m_notebook = new wxAuiNotebook(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize,
 		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
 		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE |
@@ -427,22 +418,25 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	m_notebook->AddPage(CreateAutoKeyPage(m_notebook), "Auto Key");
 	m_notebook->AddPage(CreateCroppingPage(m_notebook), "Cropping");
 	m_notebook->AddPage(CreateScriptPage(m_notebook), "Script");
+	m_notebook->Bind(wxEVT_AUINOTEBOOK_PAGE_CHANGED, &MoviePanel::OnNotebookPage, this);
 
 	wxStaticText* st = 0, *st2 = 0;
 	//common settings
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	//FPS
 	st = new wxStaticText(this, wxID_ANY, "FPS: ");
-	m_fps_text = new wxTextCtrl(this, ID_FPS_Text, "30",
+	m_fps_text = new wxTextCtrl(this, wxID_ANY, "30",
 		wxDefaultPosition, FromDIP(wxSize(30, -1)));
+	m_fps_text->Bind(wxEVT_TEXT, &MoviePanel::OnFpsEdit, this);
 	sizer1->Add(5, 5);
 	sizer1->Add(st, 0, wxALIGN_CENTER);
 	sizer1->Add(m_fps_text, 0, wxALIGN_CENTER);
 	//movie length
 	st = new wxStaticText(this, wxID_ANY, "Length: ");
 	st2 = new wxStaticText(this, wxID_ANY, "Sec.");
-	m_movie_len_text = new wxTextCtrl(this, ID_MovieLenText, "5.00",
+	m_movie_len_text = new wxTextCtrl(this, wxID_ANY, "5.00",
 		wxDefaultPosition, FromDIP(wxSize(50, -1)));
+	m_movie_len_text->Bind(wxEVT_TEXT, &MoviePanel::OnMovieLenText, this);
 	sizer1->Add(5, 5);
 	sizer1->Add(st, 0, wxALIGN_CENTER);
 	sizer1->Add(5, 5);
@@ -450,8 +444,9 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	sizer1->Add(st2, 0, wxALIGN_CENTER);
 	//view
 	st = new wxStaticText(this, wxID_ANY, "Capture: ");
-	m_views_cmb = new wxComboBox(this, ID_ViewsCombo, "",
+	m_views_cmb = new wxComboBox(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
+	m_views_cmb->Bind(wxEVT_COMBOBOX, &MoviePanel::OnViewSelected, this);
 	sizer1->AddStretchSpacer();
 	sizer1->Add(st, 0, wxALIGN_CENTER);
 	sizer1->Add(m_views_cmb, 0, wxALIGN_CENTER);
@@ -468,9 +463,10 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		"Choose slider style between jog and normal");
 	m_slider_btn->Bind(wxEVT_TOOL, &MoviePanel::OnSliderStyle, this);
 	m_slider_btn->Realize();
-	m_progress_sldr = new wxUndoableScrollBar(this, ID_ProgressSldr,
+	m_progress_sldr = new wxUndoableScrollBar(this, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(-1, 20)));
-	m_progress_sldr->SetScrollbar(m_cur_frame, 40, m_frame_num + 40, 1);
+	m_progress_sldr->SetScrollbar(glbin_mov_def.m_cur_frame, 40, glbin_mov_def.m_frame_num + 40, 1);
+	m_progress_sldr->Bind(wxEVT_SCROLL_CHANGED, &MoviePanel::OnProgressScroll, this);
 	sizer2->Add(5, 5);
 	sizer2->Add(m_slider_btn, 0, wxALIGN_CENTER);
 	sizer2->Add(5, 5);
@@ -550,17 +546,179 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	sizerv->Add(sizer4, 0, wxEXPAND);
 	SetSizerAndFit(sizerv);
 	Layout();
-	Init();
+	SetAutoLayout(true);
+	SetScrollRate(10, 10);
+
+	Thaw();
 }
 
-MoviePanel::~MoviePanel() {}
+MoviePanel::~MoviePanel()
+{
+}
+
+void MoviePanel::LoadPerspective()
+{
+
+}
+
+void MoviePanel::SavePerspective()
+{
+
+}
+
+void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
+{
+	if (FOUND_VALUE(gstNull))
+		return;
+
+	bool update_all = vc.empty();
+	bool bval;
+
+	//modes
+	if (update_all || FOUND_VALUE(gstMovFps))
+		m_fps_text->ChangeValue(wxString::Format("%.0f", glbin_mov_def.m_fps));
+
+	if (update_all || FOUND_VALUE(gstMovLength))
+		m_movie_len_text->ChangeValue(wxString::Format("%.2f", (int)(glbin_mov_def.m_movie_len)));
+
+	if (update_all || FOUND_VALUE(gstMovViewList))
+	{
+		int i = 0;
+		m_views_cmb->Clear();
+		for (i = 0; i < m_frame->GetViewNum(); i++)
+		{
+			RenderCanvas* view = m_frame->GetView(i);
+			if (view && m_views_cmb)
+				m_views_cmb->Append(view->m_vrv->GetName());
+		}
+	}
+	if (update_all || FOUND_VALUE(gstMovViewIndex))
+		m_views_cmb->Select(glbin_mov_def.m_view_idx);
+
+	if (update_all || FOUND_VALUE(gstMovSliderStyle))
+	{
+		bval = glbin_mov_def.m_slider_style;
+		m_progress_sldr->SetMode(bval ? 1 : 0);
+		if (bval)
+			m_slider_btn->SetToolNormalBitmap(0, wxGetBitmapFromMemory(slider_type_rot));
+		else
+			m_slider_btn->SetToolNormalBitmap(0, wxGetBitmapFromMemory(slider_type_pos));
+	}
+
+	if (update_all || FOUND_VALUE(gstMovProgSlider))
+	{
+		m_progress_sldr->SetScrollbar(glbin_mov_def.m_cur_frame, 40, glbin_mov_def.m_frame_num + 40, 1);
+		m_progress_sldr->ChangeValue(glbin_mov_def.m_cur_frame);
+	}
+
+	if (update_all || FOUND_VALUE(gstCaptureParam))
+		m_keyframe_chk->SetValue(glbin_mov_def.m_keyframe_enable);
+}
+
+void MoviePanel::SetFps(double val)
+{
+	glbin_mov_def.m_fps = val;
+	glbin_mov_def.m_movie_len = glbin_mov_def.m_frame_num / val;
+	
+	FluoUpdate({ gstMovFps, gstMovLength });
+}
+
+void MoviePanel::SetMovieLength(double val)
+{
+	glbin_mov_def.m_movie_len = val;
+	glbin_mov_def.m_fps = glbin_mov_def.m_frame_num / val;
+
+	FluoUpdate({ gstMovFps, gstMovLength });
+}
+
+void MoviePanel::SetView(int index)
+{
+	glbin_mov_def.m_view_idx = index;
+
+	FluoUpdate({ gstMovViewIndex });
+}
+
+void MoviePanel::SetSliderStyle(bool val)
+{
+	glbin_mov_def.m_slider_style = val;
+
+	FluoUpdate({ gstMovSliderStyle });
+}
+
+void MoviePanel::SetProgress(int val, bool notify)
+{
+	if (glbin_moviemaker.IsRunning())
+		return;
+	double pcnt = (double)val / glbin_mov_def.m_frame_num;
+	glbin_mov_def.m_cur_time = pcnt * glbin_mov_def.m_movie_len;
+	glbin_mov_def.m_cur_frame = std::round(
+		glbin_mov_def.m_start_frame +
+		glbin_mov_def.m_frame_num *
+		glbin_mov_def.m_cur_time /
+		glbin_mov_def.m_movie_len);
+
+	fluo::ValueCollection vc = { gstMovCurTime, gstCurrentFrame };
+	if (notify)
+		vc.insert(gstMovProgSlider);
+	FluoRefresh(false, true, 2, vc);
+}
+
+void MoviePanel::SetKeyframeMovie(bool val)
+{
+	glbin_mov_def.m_keyframe_enable = val;
+
+	FluoUpdate({ gstCaptureParam });
+}
+
+void MoviePanel::OnNotebookPage(wxAuiNotebookEvent& event)
+{
+	int sel = event.GetSelection();
+	if (sel == 0)
+		glbin_mov_def.m_keyframe_enable = false;
+	else if (sel == 1)
+		glbin_mov_def.m_keyframe_enable = true;
+
+	FluoUpdate({ gstCaptureParam });
+}
+
+void MoviePanel::OnFpsEdit(wxCommandEvent& event)
+{
+	wxString str = m_fps_text->GetValue();
+	double val;
+	if (str.ToDouble(&val))
+		SetFps(val);
+}
+
+void MoviePanel::OnMovieLenText(wxCommandEvent& event)
+{
+	wxString str = m_movie_len_text->GetValue();
+	double val;
+	if (str.ToDouble(&val))
+		SetMovieLength(val);
+}
 
 void MoviePanel::OnViewSelected(wxCommandEvent& event)
 {
-	m_view_idx = m_views_cmb->GetCurrentSelection();
-	if (!m_frame) return;
-	m_view = m_frame->GetView(m_view_idx);
-	GetSettings();
+	int val = m_views_cmb->GetCurrentSelection();
+	SetView(val);
+}
+
+void MoviePanel::OnSliderStyle(wxCommandEvent& event)
+{
+	bool val = m_slider_btn->GetToolState(0);
+	SetSliderStyle(val);
+}
+
+void MoviePanel::OnProgressScroll(wxScrollEvent& event)
+{
+	int val = m_progress_sldr->GetValue();
+	SetProgress(val, false);
+}
+
+void MoviePanel::OnKeyframeChk(wxCommandEvent& event)
+{
+	bool val = m_keyframe_chk->GetValue();
+	SetKeyframeMovie(val);
 }
 
 void MoviePanel::GetSettings()
@@ -672,22 +830,6 @@ void MoviePanel::AddScriptToList()
 	}
 }
 
-void MoviePanel::Init()
-{
-	if (!m_frame) return;
-	int i = 0;
-	m_views_cmb->Clear();
-	for (i = 0; i < m_frame->GetViewNum(); i++)
-	{
-		RenderCanvas* view = m_frame->GetView(i);
-		if (view && m_views_cmb)
-			m_views_cmb->Append(view->m_vrv->GetName());
-	}
-	if (i)
-		m_views_cmb->Select(0);
-	GetSettings();
-}
-
 void MoviePanel::GenKey()
 {
 	long item = m_auto_key_list->GetNextItem(-1,
@@ -705,30 +847,6 @@ void MoviePanel::GenKey()
 
 		m_notebook->SetSelection(1);
 	}
-}
-
-void MoviePanel::AddView(wxString view)
-{
-	if (m_views_cmb)
-		m_views_cmb->Append(view);
-}
-
-void MoviePanel::DeleteView(wxString view)
-{
-	if (!m_views_cmb)
-		return;
-	int cur_sel = m_views_cmb->GetCurrentSelection();
-	int del = m_views_cmb->FindString(view, true);
-	if (del != wxNOT_FOUND)
-		m_views_cmb->Delete(del);
-	if (cur_sel == del)
-		m_views_cmb->Select(0);
-}
-
-void MoviePanel::SetView(int index)
-{
-	if (m_views_cmb)
-		m_views_cmb->SetSelection(index);
 }
 
 void MoviePanel::SetTimeSeq(bool value)
@@ -847,14 +965,6 @@ void MoviePanel::OnTimer(wxTimerEvent& event)
 	if (m_movie_len - m_cur_time < 0.1 / m_fps ||
 		m_cur_time > m_movie_len)
 		m_delayed_stop = true;
-}
-
-void MoviePanel::OnNbPageChange(wxBookCtrlEvent& event)
-{
-	int sel = event.GetSelection();
-	int old_sel = event.GetOldSelection();
-	if (sel <=1)
-		m_current_page = sel;
 }
 
 void MoviePanel::Prev()
@@ -1196,27 +1306,6 @@ void MoviePanel::OnGenKey(wxCommandEvent& event) {
 	GenKey();
 }
 
-void MoviePanel::OnSliderStyle(wxCommandEvent& event)
-{
-	m_slider_style = m_slider_btn->GetToolState(0);
-	m_progress_sldr->SetMode(m_slider_style ? 1 : 0);
-	if (m_slider_style)
-		m_slider_btn->SetToolNormalBitmap(0, wxGetBitmapFromMemory(slider_type_rot));
-	else
-		m_slider_btn->SetToolNormalBitmap(0, wxGetBitmapFromMemory(slider_type_pos));
-}
-
-void MoviePanel::OnTimeChange(wxScrollEvent &event)
-{
-	if (m_running) return;
-	int prg = m_progress_sldr->GetValue();
-	double pcnt = (double)prg / m_frame_num;
-	m_cur_time = pcnt * m_movie_len;
-	wxString str = wxString::Format("%.2f", m_cur_time);
-	if (str != m_progress_text->GetValue())
-		m_progress_text->ChangeValue(str);
-}
-
 void MoviePanel::OnTimeText(wxCommandEvent& event)
 {
 	if (m_running) return;
@@ -1358,15 +1447,6 @@ void MoviePanel::OnBatchChecked(wxCommandEvent& event)
 		m_seq_mode = 0;
 		SetTimeSeq(false);
 	}
-}
-
-void MoviePanel::SetProgress(double pcnt)
-{
-	pcnt = std::abs(pcnt);
-	m_progress_sldr->ChangeValue(std::round(pcnt * m_frame_num));
-	m_cur_time = pcnt*m_movie_len;
-	wxString st = wxString::Format("%.2f", m_cur_time);
-	m_progress_text->ChangeValue(st);
 }
 
 void MoviePanel::WriteFrameToFile(int total_frames)
@@ -1581,25 +1661,6 @@ void MoviePanel::OnEndFrameText(wxCommandEvent& event)
 	if (str.ToLong(&lval))
 		m_end_frame = lval;
 	OnFpsEdit(event);
-}
-
-void MoviePanel::OnMovieLenText(wxCommandEvent& event)
-{
-	wxString str = m_movie_len_text->GetValue();
-	str.ToDouble(&m_movie_len);
-
-	//update fps
-	m_fps = double(m_end_frame - m_start_frame + 1) / m_movie_len;
-	m_fps_text->ChangeValue(wxString::Format("%.0f", m_fps));
-}
-
-void MoviePanel::OnFpsEdit(wxCommandEvent& event)
-{
-	m_fps_text->GetValue().ToDouble(&m_fps);
-
-	//update length
-	m_movie_len = double(m_end_frame - m_start_frame + 1) / m_fps;
-	m_movie_len_text->ChangeValue(wxString::Format("%.2f", m_movie_len));
 }
 
 //ch1

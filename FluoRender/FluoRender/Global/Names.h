@@ -643,6 +643,10 @@ DEALINGS IN THE SOFTWARE.
 #define gstRulerRelaxType "ruler relax type"
 #define gstRulerDfoverf "ruler dfoverf"
 //movie agent
+#define gstMovViewList "mov view list"
+#define gstMovViewIndex "mov view index"
+#define gstMovSliderStyle "mov slider style"
+#define gstMovProgSlider "mov prog slider"
 #define gstMovTimerName "mov timer name"
 #define gstMovRotEnable "mov rot enable"
 #define gstMovTimeSeqEnable "mov time seq enable"

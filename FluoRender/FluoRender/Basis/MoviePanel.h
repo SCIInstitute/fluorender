@@ -28,21 +28,18 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MOVIEPANEL_H_
 #define _MOVIEPANEL_H_
 
-#include <compatibility.h>
-#include <wx/wx.h>
-#include <wx/panel.h>
-#include <wx/spinbutt.h>
-#include <wx/clrpicker.h>
+#include <PropPanel.h>
 #include <wx/aui/auibook.h>
 #include <wx/listctrl.h>
+#include <wx/spinbutt.h>
 
 class MainFrame;
 class RenderCanvas;
 class RecorderDlg;
 class wxUndoableScrollBar;
-class MoviePanel : public wxPanel
+class MoviePanel : public PropPanel
 {
-	enum
+/*	enum
 	{
 		//time sequence
 		ID_SeqChk = ID_MOVIEW_VIEW,
@@ -106,7 +103,7 @@ class MoviePanel : public wxPanel
 		//notebook
 		ID_Notebook
 	};
-
+*/
 public:
 	MoviePanel(MainFrame* frame,
 		const wxPoint& pos = wxDefaultPosition,
@@ -115,10 +112,20 @@ public:
 		const wxString& name = "MoviePanel");
 	~MoviePanel();
 
-	void AddView(wxString view);
-	void DeleteView(wxString view);
+	virtual void LoadPerspective();
+	virtual void SavePerspective();
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+
+	//common
+	void SetFps(double value);
+	void SetMovieLength(double value);
 	void SetView(int index);
-	int GetView() { return m_view_idx; }
+	void SetSliderStyle(bool val);
+	void SetProgress(int val, bool notify);//slider position
+	//void SetProgressF(double val);//percentage of all movie length
+
+	//keyframe movie
+	void SetKeyframeMovie(bool val);
 
 	void UpFrame();
 	void DownFrame();
@@ -164,18 +171,6 @@ public:
 		m_degree_text->SetValue(wxString::Format("%d", m_rot_deg));
 	}
 	int GetRotDeg() { return m_rot_deg; }
-	void SetMovieLen(double value)
-	{
-		m_movie_len = value;
-		m_movie_len_text->SetValue(wxString::Format("%.2f", m_movie_len));
-	}
-	double GetMovieLen() { return m_movie_len; }
-	void SetFps(double value)
-	{
-		m_fps = value;
-		m_fps_text->SetValue(wxString::Format("%.0f", m_fps));
-	}
-	double GetFps() { return m_fps; }
 	//frames
 	void SetStartFrame(int value);
 	int GetStartFrame() { return m_start_frame; }
@@ -207,31 +202,25 @@ public:
 	void Stop();
 	void Rewind();
 	void Reset();
-	//timer
-	void TimerRun()
-	{
-		m_timer.Start(int(1000.0 / m_fps + 0.5));
-	}
-	void ResumeRun()
-	{
-		if (m_timer_hold)
-		{
-			TimerRun();
-			m_timer_hold = false;
-		}
-	}
-	void HoldRun()
-	{
-		if (!m_timer_hold && m_timer.IsRunning())
-		{
-			m_timer_hold = true;
-			m_timer.Stop();
-		}
-	}
+
+	void GetSettings();
+	int GetScriptFiles(wxArrayString& list);
+	void AddScriptToList();
+
+	//set the renderview and progress bars/text
+	void SetRendering(double pcnt, bool rewind = false);
+
+	//write frames to file
+	void WriteFrameToFile(int total_frames);
 
 private:
-	//controls
+	RenderCanvas* m_view;
+	wxAuiNotebook* m_notebook;
+	RecorderDlg* m_advanced_movie;
+
+	//common controls
 	wxTextCtrl *m_fps_text;
+	wxTextCtrl *m_movie_len_text;
 	wxComboBox *m_views_cmb;
 
 	wxButton *m_play_btn;
@@ -245,20 +234,25 @@ private:
 	wxButton* m_end_frame_st;
 	wxTextCtrl *m_end_frame_text;
 
-	//basic movie controls
-	wxCheckBox *m_seq_chk;
-	wxCheckBox *m_bat_chk;
-	wxButton *m_inc_time_btn;
-	wxButton *m_dec_time_btn;
-	wxTextCtrl *m_cur_frame_text;
-	wxTextCtrl *m_movie_len_text;
-
+	//controls
 	wxCheckBox *m_rot_chk;
 	wxRadioButton *m_x_rd;
 	wxRadioButton *m_y_rd;
 	wxRadioButton *m_z_rd;
 	wxTextCtrl *m_degree_text;
 	wxComboBox *m_rot_int_cmb;
+
+
+
+	//basic movie controls
+	wxCheckBox *m_seq_chk;
+	wxCheckBox *m_bat_chk;
+	wxButton *m_inc_time_btn;
+	wxButton *m_dec_time_btn;
+	wxTextCtrl *m_cur_frame_text;
+
+	//key frame
+	wxCheckBox* m_keyframe_chk;
 
 	//script
 	wxCheckBox *m_run_script_chk;
@@ -288,68 +282,24 @@ private:
 	static wxTextCtrl *m_estimated_size_text;
 
 private:
-	MainFrame* m_frame;
-	RenderCanvas* m_view;
-	RecorderDlg* m_advanced_movie;
-	int m_view_idx;//index to current renderview
-	bool m_slider_style;//0:normal, 1:jog
-
-	wxAuiNotebook* m_notebook;
-	int m_current_page;
-	wxTimer m_timer;
-
-	//basic
-	bool m_rotate;
-	bool m_time_seq;
-	int m_seq_mode;//0:none; 1:4d; 2:bat
-	int m_rot_axis;	//0-x;1-y;2-z
-	int m_rot_deg;
-	int m_rot_int_type;//0-linear; 1-smooth
-	static double m_movie_len;//length in sec
-	double m_cur_time;//time in sec
-	double m_fps;
-	int m_frame_num;
-	int m_start_frame;
-	int m_end_frame;
-	int m_cur_frame;
-
-	//cropping
-	bool m_crop;//enable cropping
-	int m_crop_x;
-	int m_crop_y;
-	int m_crop_w;
-	int m_crop_h;
-
-	//save controls
-	int m_last_frame;//last frame nunmber to save
-	double m_starting_rot;//starting degree of rotation
-	bool m_running, m_record;
-	bool m_delayed_stop;
-	bool m_timer_hold;//for temporary hold
-	//save
-	wxString m_filename;
-	wxString filetype_;
 
 private:
-	void GetSettings();
-	int GetScriptFiles(wxArrayString& list);
-	void AddScriptToList();
-
-	//set the renderview and progress bars/text
-	void SetRendering(double pcnt, bool rewind=false);
-	void SetProgress(double pcnt);
-
-	//write frames to file
-	void WriteFrameToFile(int total_frames);
-
-private:
+	void GenKey();
 	wxWindow* CreateSimplePage(wxWindow *parent);
 	wxWindow* CreateAdvancedPage(wxWindow *parent);
 	wxWindow* CreateAutoKeyPage(wxWindow *parent);
 	wxWindow* CreateCroppingPage(wxWindow *parent);
 	wxWindow* CreateScriptPage(wxWindow *parent);
-	void Init();
-	void GenKey();
+
+	//notebook page change
+	void OnNotebookPage(wxAuiNotebookEvent& event);
+
+	//common controls
+	void OnFpsEdit(wxCommandEvent& event);
+	void OnMovieLenText(wxCommandEvent& event);
+	void OnViewSelected(wxCommandEvent& event);
+	void OnSliderStyle(wxCommandEvent& event);
+	void OnProgressScroll(wxScrollEvent& event);
 
 	//basic rotation
 	void OnRotateChecked(wxCommandEvent& event);
@@ -364,7 +314,9 @@ private:
 	void OnStop(wxCommandEvent& event);
 	void OnRewind(wxCommandEvent& event);
 
-	void OnViewSelected(wxCommandEvent& event);
+
+	//keyframe movie
+	void OnKeyframeChk(wxCommandEvent& event);
 
 	//right column
 	void OnCropCheck(wxCommandEvent& event);
@@ -398,8 +350,6 @@ private:
 	void OnGenKey(wxCommandEvent& event);
 
 	//time slider
-	void OnSliderStyle(wxCommandEvent& event);
-	void OnTimeChange(wxScrollEvent &event);
 	void OnTimeText(wxCommandEvent& event);
 	void OnUpFrame(wxCommandEvent& event);
 	void OnDownFrame(wxCommandEvent& event);
@@ -408,8 +358,6 @@ private:
 	void OnStartFrameText(wxCommandEvent& event);
 	void OnEndFrameSync(wxCommandEvent& event);
 	void OnEndFrameText(wxCommandEvent& event);
-	void OnMovieLenText(wxCommandEvent& event);
-	void OnFpsEdit(wxCommandEvent& event);
 
 	//checkboxes
 	void OnSequenceChecked(wxCommandEvent& event);
@@ -418,8 +366,6 @@ private:
 	//timer for playback.
 	void OnTimer(wxTimerEvent& event);
 
-	//notebook page change
-	void OnNbPageChange(wxBookCtrlEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };

@@ -411,6 +411,7 @@ void MainSettings::Read()
 	m_outadj_def.Read(fconfig);
 	m_view_def.Read(fconfig);
 	m_vol_def.Read(fconfig);
+	m_movie_def.Read(fconfig);
 }
 
 void MainSettings::Save()
@@ -608,6 +609,7 @@ void MainSettings::Save()
 	m_outadj_def.Save(fconfig);
 	m_view_def.Save(fconfig);
 	m_vol_def.Save(fconfig);
+	m_movie_def.Save(fconfig);
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);

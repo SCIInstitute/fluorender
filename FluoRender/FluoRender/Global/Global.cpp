@@ -345,3 +345,8 @@ VolumeDataDefault& Global::get_vol_def()
 {
 	return main_settings_.m_vol_def;
 }
+
+MovieDefault& Global::get_movie_def()
+{
+	return main_settings_.m_movie_def;
+}

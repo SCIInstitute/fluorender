@@ -45,6 +45,7 @@ DEALINGS IN THE SOFTWARE.
 #include <OutAdjDefault.h>
 #include <ViewDefault.h>
 #include <VolumeDefault.h>
+#include <MovieDefault.h>
 #include <wx/string.h>
 #include <string>
 
@@ -70,6 +71,7 @@ public:
 	OutAdjDefault m_outadj_def;
 	ViewDefault m_view_def;
 	VolumeDataDefault m_vol_def;
+	MovieDefault m_movie_def;
 
 public:
 	//default values

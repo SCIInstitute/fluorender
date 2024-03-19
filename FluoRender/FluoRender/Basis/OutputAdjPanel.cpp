@@ -60,7 +60,7 @@ m_enable_all(true)
 	m_notebook = new wxAuiNotebook(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize,
 		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
-		wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
+		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
 	wxSize s = wxSize(size.x, size.y / 3);
 	m_notebook->AddPage(CreateRedPage(m_notebook, s), "Red", true);
 	m_notebook->AddPage(CreateGreenPage(m_notebook, s), "Green");

@@ -91,8 +91,7 @@ m_enable_all(true)
 	m_notebook = new wxAuiNotebook(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize,
 		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
-		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE |
-		wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
+		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
 	m_notebook->AddPage(CreateTranslatePage(m_notebook), "Translate", true);
 	m_notebook->AddPage(CreateRotatePage(m_notebook), "Rotate");
 

@@ -1067,6 +1067,8 @@ wxString MainFrame::CreateView(int row)
 	vrv->LoadSettings();
 	UpdateTree();
 
+	m_movie_view->FluoUpdate({ gstMovViewList, gstMovViewIndex });
+
 	return vrv->GetName();
 }
 
@@ -2883,8 +2885,7 @@ void MainFrame::DeleteVRenderView(int i)
 		m_aui_mgr.Update();
 		UpdateTree();
 
-		if (m_movie_view)
-			m_movie_view->DeleteView(str);
+		m_movie_view->FluoUpdate({ gstMovViewList, gstMovViewIndex });
 	}
 }
 
