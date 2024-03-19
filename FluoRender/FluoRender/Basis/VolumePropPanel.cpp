@@ -254,7 +254,6 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_thresh_link_tb->AddCheckTool(0, "Lock Threshold Range",
 		wxGetBitmapFromMemory(unlink), wxNullBitmap, "Lock Threshold Range");
-	m_thresh_link_tb->SetToolBitmapSize(wxSize(20, 20));
 	m_thresh_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	//bind events
 	m_thresh_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnThreshMF, this);
@@ -326,7 +325,6 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_colormap_link_tb->AddCheckTool(0, "Lock Colormap Range",
 		wxGetBitmapFromMemory(unlink), wxNullBitmap, "Lock Colormap Range");
-	m_colormap_link_tb->SetToolBitmapSize(wxSize(20, 20));
 	m_colormap_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	//bind events
 	m_colormap_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnColormapMF, this);

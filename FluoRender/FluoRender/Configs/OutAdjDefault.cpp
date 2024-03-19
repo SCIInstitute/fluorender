@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 
 OutAdjDefault::OutAdjDefault()
 {
+	m_split = true;
 	m_sync_r = false;
 	m_sync_g = false;
 	m_sync_b = false;
@@ -57,6 +58,8 @@ void OutAdjDefault::Read(wxFileConfig& f)
 	if (f.Exists("/outadj default"))
 		f.SetPath("/outadj default");
 
+	f.Read("split", &m_split, true);
+
 	f.Read("sync_r", &m_sync_r, false);
 	f.Read("sync_g", &m_sync_g, false);
 	f.Read("sync_b", &m_sync_b, false);
@@ -79,6 +82,8 @@ void OutAdjDefault::Read(wxFileConfig& f)
 void OutAdjDefault::Save(wxFileConfig& f)
 {
 	f.SetPath("/outadj default");
+
+	f.Write("split", m_split);
 
 	f.Write("sync_r", m_sync_r);
 	f.Write("sync_g", m_sync_g);

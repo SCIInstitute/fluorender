@@ -68,6 +68,8 @@ public:
 		const wxString& name="ClipPlanePanel");
 	~ClipPlanePanel();
 
+	virtual void LoadPerspective();
+	virtual void SavePerspective();
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 	//set view

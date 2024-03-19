@@ -60,7 +60,7 @@ m_enable_all(true)
 	m_notebook = new wxAuiNotebook(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize,
 		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
-		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
+		wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
 	wxSize s = wxSize(size.x, size.y / 3);
 	m_notebook->AddPage(CreateRedPage(m_notebook, s), "Red", true);
 	m_notebook->AddPage(CreateGreenPage(m_notebook, s), "Green");
@@ -84,15 +84,6 @@ m_enable_all(true)
 	Layout();
 	SetAutoLayout(true);
 	SetScrollRate(10, 10);
-
-	m_notebook->Split(0, wxBOTTOM);
-	m_notebook->Split(1, wxBOTTOM);
-	m_notebook->Split(2, wxBOTTOM);
-	//wxAuiPaneInfoArray list = const_cast<wxAuiManager&>(m_notebook->GetAuiManager()).GetAllPanes();
-	//for (size_t i = 0; i < list.size(); ++i)
-	//	list[i].MinSize(s).MaxSize(s);
-	//const_cast<wxAuiManager&>(m_notebook->GetAuiManager()).Update();
-	//const_cast<wxAuiManager&>(m_notebook->GetAuiManager()).LoadPerspective(glbin_outadj_def.m_layout);
 
 	EnableAll(false);
 
@@ -124,10 +115,6 @@ OutputAdjPanel::~OutputAdjPanel()
 	glbin.del_undo_control(m_b_hdr_sldr);
 
 	SetFocusVRenderViews(0);
-
-	//glbin_outadj_def.m_layout =
-	//	const_cast<wxAuiManager&>(m_notebook->GetAuiManager()).SavePerspective();
-
 }
 
 wxWindow* OutputAdjPanel::CreateRedPage(wxWindow* parent, wxSize& size)
@@ -443,6 +430,20 @@ wxWindow* OutputAdjPanel::CreateBluePage(wxWindow* parent, wxSize& size)
 	page->SetAutoLayout(true);
 	page->SetScrollRate(10, 10);
 	return page;
+}
+
+void OutputAdjPanel::LoadPerspective()
+{
+	if (glbin_outadj_def.m_split)
+	{
+		m_notebook->Split(1, wxBOTTOM);
+		m_notebook->Split(2, wxBOTTOM);
+	}
+}
+
+void OutputAdjPanel::SavePerspective()
+{
+	glbin_outadj_def.m_split = m_notebook->IsSplit();
 }
 
 void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)

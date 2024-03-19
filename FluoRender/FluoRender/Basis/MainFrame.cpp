@@ -920,6 +920,10 @@ MainFrame::MainFrame(
 	SetAcceleratorTable(accel);
 
 	m_aui_mgr.LoadPerspective(glbin_settings.m_layout);
+	if (glbin_settings.m_prj_panel_split)
+		m_proj_panel->Split(1, wxBOTTOM);
+	m_adjust_view->LoadPerspective();
+	m_clip_view->LoadPerspective();
 }
 
 MainFrame::~MainFrame()
@@ -943,11 +947,15 @@ MainFrame::~MainFrame()
 				glbin_brush_def.Set(&glbin_vol_selector);
 		}
 	}
-	m_aui_mgr.UnInit();
 	flvr::KernelProgram::release();
 
 	glbin_settings.m_layout = m_aui_mgr.SavePerspective();
+	glbin_settings.m_prj_panel_split = m_proj_panel->IsSplit();
+	m_adjust_view->SavePerspective();
+	m_clip_view->SavePerspective();
 	glbin_settings.Save();
+
+	m_aui_mgr.UnInit();
 }
 
 void MainFrame::OnExit(wxCommandEvent& event)

@@ -48,6 +48,7 @@ public:
 
 public:
 	//default values
+	bool m_split;//if panels for RGB are split
 	bool m_sync_r;
 	bool m_sync_g;
 	bool m_sync_b;

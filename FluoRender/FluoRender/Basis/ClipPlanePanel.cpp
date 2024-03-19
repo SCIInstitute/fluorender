@@ -481,6 +481,17 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	return page;
 }
 
+void ClipPlanePanel::LoadPerspective()
+{
+	if (glbin_settings.m_clip_panel_split)
+		m_notebook->Split(1, wxBOTTOM);
+}
+
+void ClipPlanePanel::SavePerspective()
+{
+	glbin_settings.m_clip_panel_split = m_notebook->IsSplit();
+}
+
 void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 {
 	if (!m_view ||

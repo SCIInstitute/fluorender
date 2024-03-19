@@ -45,6 +45,16 @@ PropPanel::~PropPanel()
 {
 }
 
+void PropPanel::LoadPerspective()
+{
+
+}
+
+void PropPanel::SavePerspective()
+{
+
+}
+
 void PropPanel::FluoRefresh(bool tree, bool interactive, int excl_self,
 	const fluo::ValueCollection& vc)
 {

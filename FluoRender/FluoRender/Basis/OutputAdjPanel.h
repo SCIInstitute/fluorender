@@ -47,6 +47,8 @@ public:
 		const wxString& name="OutputAdjPanel");
 	~OutputAdjPanel();
 
+	virtual void LoadPerspective();
+	virtual void SavePerspective();
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 	//disable/enable

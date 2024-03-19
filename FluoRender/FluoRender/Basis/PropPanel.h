@@ -46,6 +46,8 @@ public:
 		const wxString& name = "PropPanel");
 	~PropPanel();
 
+	virtual void LoadPerspective();
+	virtual void SavePerspective();
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {}) = 0;
 	//excl_self: 0 - update all; 1 - exclude this; 2 - only this; 3 - update none
 	virtual void FluoRefresh(bool tree = false, bool interactive = false, int excl_self = 1,

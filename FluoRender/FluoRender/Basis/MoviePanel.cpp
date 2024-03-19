@@ -468,12 +468,13 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		"Choose slider style between jog and normal");
 	m_slider_btn->Bind(wxEVT_TOOL, &MoviePanel::OnSliderStyle, this);
 	m_slider_btn->Realize();
-	m_progress_sldr = new wxUndoableScrollBar(this, ID_ProgressSldr);
+	m_progress_sldr = new wxUndoableScrollBar(this, ID_ProgressSldr,
+		wxDefaultPosition, FromDIP(wxSize(-1, 20)));
 	m_progress_sldr->SetScrollbar(m_cur_frame, 40, m_frame_num + 40, 1);
 	sizer2->Add(5, 5);
 	sizer2->Add(m_slider_btn, 0, wxALIGN_CENTER);
 	sizer2->Add(5, 5);
-	sizer2->Add(m_progress_sldr, 1, wxEXPAND);
+	sizer2->Add(m_progress_sldr, 1, wxALIGN_CENTER);
 	sizer2->Add(5, 5);
 
 	//controls

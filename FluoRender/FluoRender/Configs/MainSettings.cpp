@@ -36,6 +36,9 @@ DEALINGS IN THE SOFTWARE.
 
 MainSettings::MainSettings()
 {
+	m_prj_panel_split = false;
+	m_clip_panel_split = false;
+
 	m_prj_save = false;
 	m_prj_save_inc = false;
 	m_time_id = "_T";
@@ -224,6 +227,9 @@ void MainSettings::Read()
 	if (fconfig.Exists("/ui"))
 	{
 		fconfig.SetPath("/ui");
+		fconfig.Read("layout", &m_layout);
+		fconfig.Read("prj panel split", &m_prj_panel_split, false);
+		fconfig.Read("clip panel split", &m_clip_panel_split, false);
 		fconfig.Read("invert slider", &m_inverse_slider, false);
 		fconfig.Read("mulfunc", &m_mulfunc, 0);
 		fconfig.Read("time span", &m_time_span, 1);
@@ -399,11 +405,6 @@ void MainSettings::Read()
 		fconfig.Read("version", &m_python_ver, 10);
 	}
 
-	if (fconfig.Exists("/ui"))
-	{
-		fconfig.Read("layout", &m_layout);
-	}
-
 	//EnableStreaming(m_mem_swap);
 	m_brush_def.Read(fconfig);
 	m_comp_def.Read(fconfig);
@@ -458,6 +459,9 @@ void MainSettings::Save()
 
 	//ui
 	fconfig.SetPath("/ui");
+	fconfig.Write("layout", m_layout);
+	fconfig.Write("prj panel split", m_prj_panel_split);
+	fconfig.Write("clip panel split", m_clip_panel_split);
 	fconfig.Write("invert slider", m_inverse_slider);
 	fconfig.Write("mulfunc", m_mulfunc);
 	fconfig.Write("time span", m_time_span);
@@ -598,9 +602,6 @@ void MainSettings::Save()
 	//python settings
 	fconfig.SetPath("/python");
 	fconfig.Write("version", m_python_ver);
-
-	fconfig.SetPath("/ui");
-	fconfig.Write("layout", m_layout);
 
 	m_brush_def.Save(fconfig);
 	m_comp_def.Save(fconfig);
