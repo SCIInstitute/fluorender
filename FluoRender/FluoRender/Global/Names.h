@@ -643,6 +643,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstRulerRelaxType "ruler relax type"
 #define gstRulerDfoverf "ruler dfoverf"
 //movie agent
+#define gstMovPlay "mov play"
 #define gstMovViewList "mov view list"
 #define gstMovViewIndex "mov view index"
 #define gstMovSliderStyle "mov slider style"

@@ -39,71 +39,14 @@ class RecorderDlg;
 class wxUndoableScrollBar;
 class MoviePanel : public PropPanel
 {
-/*	enum
+	enum
 	{
-		//time sequence
-		ID_SeqChk = ID_MOVIEW_VIEW,
-		ID_BatChk,//batch mutual exclusive with seq(4d)
-		ID_IncTimeBtn,
-		ID_DecTimeBtn,
-		ID_StartFrameSync,
-		ID_StartFrameText,
-		ID_EndFrameSync,
-		ID_EndFrameText,
-		ID_CurFrameText,
-		//movie len
-		ID_MovieLenText,
-
-		//rotations
-		ID_RotChk,
-		ID_XRd,
-		ID_YRd,
-		ID_ZRd,
-		ID_DegreeText,
-		ID_RotIntCmb,
-
-		//bit rate
-		ID_BitrateText,
-
-		//fps, view combo, help
-		ID_FPS_Text,
-		ID_ViewsCombo,
-
-		//main controls
-		ID_PlayPause,
-		ID_Rewind,
-		ID_ProgressSldr,
-		ID_ProgressText,
-		ID_SaveMovie,
-
-		//4d script
-		ID_RunScriptChk,
-		ID_ScriptFileText,
-		ID_ScriptClearBtn,
-		ID_ScriptFileBtn,
-		ID_ScriptList,
-
-		//auto key
-		ID_AutoKeyList,
-		ID_GenKeyBtn,
-
-		//cropping
-		ID_CropChk,
-		ID_ResetBtn,
-		ID_CenterXText,
-		ID_CenterYText,
-		ID_CenterXSpin,
-		ID_CenterYSpin,
-		ID_WidthText,
-		ID_HeightText,
-		ID_WidthSpin,
-		ID_HeightSpin,
-		ID_Timer,
-
-		//notebook
-		ID_Notebook
+		ID_ENLARGE_CHK = 0,
+		ID_ENLARGE_SLDR,
+		ID_ENLARGE_TEXT,
+		ID_MOV_ESTIMATE_TEXT
 	};
-*/
+
 public:
 	MoviePanel(MainFrame* frame,
 		const wxPoint& pos = wxDefaultPosition,
@@ -127,12 +70,19 @@ public:
 	void SetScrollFrame(int val, bool notify);
 	void SetCurrentFrame(int val, bool notify);
 	void SetCurrentTime(double val, bool notify);
+	void Play();
+	void Rewind();
+	void IncFrame();
+	void DecFrame();
+	void Save(const wxString& filename);
+
+	//simple animation
+	
 
 	//keyframe movie
 	void SetKeyframeMovie(bool val);
 
-	void UpFrame();
-	void DownFrame();
+
 
 	void SetRotate(bool value)
 	{
@@ -174,41 +124,15 @@ public:
 		m_degree_text->SetValue(wxString::Format("%d", m_rot_deg));
 	}
 	int GetRotDeg() { return m_rot_deg; }
-	//cropping
-	void SetCrop(bool value);
-	bool GetCrop() { return m_crop; }
-	void SetCropX(int value) { m_crop_x = value; }
-	int GetCropX() { return m_crop_x; }
-	void SetCropY(int value) { m_crop_y = value; }
-	int GetCropY() { return m_crop_y; }
-	void SetCropW(int value) { m_crop_w = value; }
-	int GetCropW() { return m_crop_w; }
-	void SetCropH(int value) { m_crop_h = value; }
-	int GetCropH() { return m_crop_h; }
 	void UpdateCrop();
 
-	void SetFileName(wxString &filename) { m_filename = filename; }
-	void Run();
-	bool GetRunning() { return m_running; }
 	void GetScriptSettings(bool sel);
-	int GetCurrentPage() { return m_current_page; }
-	void SetCurrentPage(int page);
-
-	//play
-	void Prev();
-	void Stop();
-	void Rewind();
-	void Reset();
 
 	void GetSettings();
 	int GetScriptFiles(wxArrayString& list);
 	void AddScriptToList();
 
-	//set the renderview and progress bars/text
-	void SetRendering(double pcnt, bool rewind = false);
 
-	//write frames to file
-	void WriteFrameToFile(int total_frames);
 
 private:
 	RenderCanvas* m_view;
@@ -276,8 +200,6 @@ private:
 	wxTextCtrl *m_height_text;
 	wxSpinButton* m_height_spin;
 
-	static wxTextCtrl *m_estimated_size_text;
-
 private:
 
 private:
@@ -301,6 +223,13 @@ private:
 	void OnEndFrameText(wxCommandEvent& event);
 	void OnCurFrameText(wxCommandEvent& event);
 	void OnCurTimeText(wxCommandEvent& event);
+	void OnPlay(wxCommandEvent& event);
+	void OnRewind(wxCommandEvent& event);
+	void OnStartFrameBtn(wxCommandEvent& event);
+	void OnEndFrameBtn(wxCommandEvent& event);
+	void OnIncFrame(wxCommandEvent& event);
+	void OnDecFrame(wxCommandEvent& event);
+	void OnSave(wxCommandEvent& event);
 
 	//basic rotation
 	void OnRotateChecked(wxCommandEvent& event);
@@ -308,13 +237,9 @@ private:
 	void OnDegreeText(wxCommandEvent &event);
 	//rotation interpolation
 	void OnRotIntCmb(wxCommandEvent& event);
-
-	//left column
-	void OnRun(wxCommandEvent& event);
-	void OnPrev(wxCommandEvent& event);
-	void OnStop(wxCommandEvent& event);
-	void OnRewind(wxCommandEvent& event);
-
+	//sequence
+	void OnSequenceChecked(wxCommandEvent& event);
+	void OnBatchChecked(wxCommandEvent& event);
 
 	//keyframe movie
 	void OnKeyframeChk(wxCommandEvent& event);
@@ -351,14 +276,8 @@ private:
 	void OnGenKey(wxCommandEvent& event);
 
 	//time slider
-	void OnUpFrame(wxCommandEvent& event);
-	void OnDownFrame(wxCommandEvent& event);
-	void OnStartFrameSync(wxCommandEvent& event);
-	void OnEndFrameSync(wxCommandEvent& event);
 
 	//checkboxes
-	void OnSequenceChecked(wxCommandEvent& event);
-	void OnBatchChecked(wxCommandEvent& event);
 
 
 

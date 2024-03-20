@@ -141,11 +141,7 @@ public:
 
 	void AutoKeyChanComb(int comb);
 
-	bool GetCamLock() { return m_cam_lock; }
-
 private:
-	bool m_cam_lock;
-	int m_cam_lock_type;//0-not used;1-image center;2-click view;3-ruler;4-selection
 
 private:
 	MainFrame* m_frame;

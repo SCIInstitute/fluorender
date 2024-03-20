@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/timer.h>
 
+class MainFrame;
 class RenderCanvas;
 class MovieMaker : public wxEvtHandler
 {
@@ -37,20 +38,38 @@ public:
 	MovieMaker();
 	~MovieMaker();
 
-	//timer
+	//play
 	bool IsRunning()
 	{
 		return m_running;
 	}
-	void TimerRun();
-	void ResumeRun();
-	void HoldRun();
+	void Play();
+	void Start();
+	void Stop();
+	void Resume();
+	void Hold();
+	void Rewind();
+	void Reset();
+	void PlaySave();
+
+	//set the renderview and progress bars/text
+	void SetRendering(bool rewind);
+	//write frames to file
+	void WriteFrameToFile();
 
 	//settings
+	void SetMainFrame(MainFrame* frame);
 	void SetView(RenderCanvas* view);
+	void SetFileName(const wxString& filename) { m_filename = filename; }
+
 	void SetKeyframeEnable(bool val) { m_keyframe_enable = val; }
 	bool GetKeyframeEnable() { return m_keyframe_enable; }
-	void SetRotateEnable(bool val) { m_rotate = val; }
+	void SetRotateEnable(bool val)
+	{
+		m_rotate = val;
+		if (!m_rotate && m_seq_mode == 0)
+			SetTimeSeqEnable(true);
+	}
 	bool GetRotateEnable() { return m_rotate; }
 	void SetRotateAxis(int val)
 	{
@@ -66,7 +85,7 @@ public:
 			m_rot_int_type = val;
 	}
 	int GetRotIntType() { return m_rot_int_type; }
-	void SetTimeSeqEnable(bool val) { m_time_seq = val; }
+	void SetTimeSeqEnable(bool val);
 	bool GetTimeSeqEnable() { return m_time_seq; }
 	void SetSeqMode(int val)
 	{
@@ -141,8 +160,29 @@ public:
 		SetCurrentFrame(frame);
 	}
 	double GetCurrentTime() { return m_cur_time; }
+	void SetCropEnable(bool val) { m_crop = val; }
+	bool GetCropEnable() { return m_crop; }
+	void SetCropX(int val) { m_crop_x = val; }
+	int GetCropX() { return m_crop_x; }
+	void SetCropY(int val) { m_crop_y = val; }
+	int GetCropY() { return m_crop_y; }
+	void SetCropW(int val) { m_crop_w = val; }
+	int GetCropW() { return m_crop_w; }
+	void SetCropH(int val) { m_crop_h = val; }
+	int GetCropH() { return m_crop_h; }
+	void SetCamLock(bool val) { m_cam_lock = val; }
+	bool GetCamLock() { return m_cam_lock; }
+	void SetCamLockType(int val)
+	{
+		if (val > 0 && val < 5)
+			m_cam_lock_type = val;
+		else
+			m_cam_lock_type = 0;
+	}
+	int GetCamLockType() { return m_cam_lock_type; }
 
 private:
+	MainFrame* m_frame;
 	RenderCanvas* m_view;
 	wxTimer m_timer;
 	int m_last_frame;//last frame nunmber to save
@@ -172,6 +212,17 @@ private:
 	int m_end_frame;
 	int m_cur_frame;
 	double m_cur_time;//time in sec
+
+	//cropping
+	bool m_crop;//enable cropping
+	int m_crop_x;
+	int m_crop_y;
+	int m_crop_w;
+	int m_crop_h;
+
+	//cam lock
+	bool m_cam_lock;
+	int m_cam_lock_type;//0-not used;1-image center;2-click view;3-ruler;4-selection
 
 private:
 	//timer for playback.

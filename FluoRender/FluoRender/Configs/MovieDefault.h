@@ -46,6 +46,7 @@ public:
 
 public:
 	//default values
+	int m_selected_page;
 	int m_view_idx;//index to current renderview
 	bool m_slider_style;//0:normal, 1:jog
 
@@ -73,6 +74,8 @@ public:
 	int m_crop_w;
 	int m_crop_h;
 
-
+	//cam lock
+	bool m_cam_lock;
+	int m_cam_lock_type;//0-not used;1-image center;2-click view;3-ruler;4-selection
 };
 #endif

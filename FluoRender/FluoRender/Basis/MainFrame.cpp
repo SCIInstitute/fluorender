@@ -843,56 +843,53 @@ MainFrame::MainFrame(
 	SetMenuBar(m_top_menu);
 
 	//set analyze icon
-	if (m_setting_dlg)
+	switch (glbin_settings.m_last_tool)
 	{
-		switch (glbin_settings.m_last_tool)
-		{
-		case TOOL_PAINT_BRUSH:
-		default:
-			m_main_tb->SetToolNormalBitmap(ID_LastTool,
-				wxGetBitmapFromMemory(icon_paint_brush));
-			break;
-		case TOOL_MEASUREMENT:
-			m_main_tb->SetToolNormalBitmap(ID_LastTool,
-				wxGetBitmapFromMemory(icon_measurement));
-			break;
-		case TOOL_TRACKING:
-			m_main_tb->SetToolNormalBitmap(ID_LastTool,
-				wxGetBitmapFromMemory(icon_tracking));
-			break;
-		case TOOL_NOISE_REDUCTION:
-			m_main_tb->SetToolNormalBitmap(ID_LastTool,
-				wxGetBitmapFromMemory(icon_noise_reduc));
-			break;
-		case TOOL_VOLUME_SIZE:
-			m_main_tb->SetToolNormalBitmap(ID_LastTool,
-				wxGetBitmapFromMemory(icon_volume_size));
-			break;
-		case TOOL_COLOCALIZATION:
-			m_main_tb->SetToolNormalBitmap(ID_LastTool,
-				wxGetBitmapFromMemory(icon_colocalization));
-			break;
-		case TOOL_CONVERT:
-			m_main_tb->SetToolNormalBitmap(ID_LastTool,
-				wxGetBitmapFromMemory(icon_convert));
-			break;
-		case TOOL_OPENCL:
-			m_main_tb->SetToolNormalBitmap(ID_LastTool,
-				wxGetBitmapFromMemory(icon_opencl));
-			break;
-		case TOOL_COMPONENT:
-			m_main_tb->SetToolNormalBitmap(ID_LastTool,
-				wxGetBitmapFromMemory(icon_components));
-			break;
-		case TOOL_CALCULATIONS:
-			m_main_tb->SetToolNormalBitmap(ID_LastTool,
-				wxGetBitmapFromMemory(icon_calculations));
-			break;
-		case TOOL_MACHINE_LEARNING:
-			m_main_tb->SetToolNormalBitmap(ID_LastTool,
-				wxGetBitmapFromMemory(icon_machine_learning));
-			break;
-		}
+	case TOOL_PAINT_BRUSH:
+	default:
+		m_main_tb->SetToolNormalBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_paint_brush));
+		break;
+	case TOOL_MEASUREMENT:
+		m_main_tb->SetToolNormalBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_measurement));
+		break;
+	case TOOL_TRACKING:
+		m_main_tb->SetToolNormalBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_tracking));
+		break;
+	case TOOL_NOISE_REDUCTION:
+		m_main_tb->SetToolNormalBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_noise_reduc));
+		break;
+	case TOOL_VOLUME_SIZE:
+		m_main_tb->SetToolNormalBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_volume_size));
+		break;
+	case TOOL_COLOCALIZATION:
+		m_main_tb->SetToolNormalBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_colocalization));
+		break;
+	case TOOL_CONVERT:
+		m_main_tb->SetToolNormalBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_convert));
+		break;
+	case TOOL_OPENCL:
+		m_main_tb->SetToolNormalBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_opencl));
+		break;
+	case TOOL_COMPONENT:
+		m_main_tb->SetToolNormalBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_components));
+		break;
+	case TOOL_CALCULATIONS:
+		m_main_tb->SetToolNormalBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_calculations));
+		break;
+	case TOOL_MACHINE_LEARNING:
+		m_main_tb->SetToolNormalBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_machine_learning));
+		break;
 	}
 
 	if (fullscreen)
@@ -924,6 +921,7 @@ MainFrame::MainFrame(
 		m_proj_panel->Split(1, wxBOTTOM);
 	m_adjust_view->LoadPerspective();
 	m_clip_view->LoadPerspective();
+	glbin_moviemaker->SetMainFrame(this);
 }
 
 MainFrame::~MainFrame()

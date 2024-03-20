@@ -56,6 +56,9 @@ MovieDefault::MovieDefault()
 	m_crop_y = 0;
 	m_crop_w = 0;
 	m_crop_h = 0;
+
+	m_cam_lock = false;
+	m_cam_lock_type = 0;
 }
 
 MovieDefault::~MovieDefault()
@@ -93,6 +96,9 @@ void MovieDefault::Read(wxFileConfig& f)
 	f.Read("crop y", &m_crop_y, 0);
 	f.Read("crop w", &m_crop_w, 0);
 	f.Read("crop h", &m_crop_h, 0);
+
+	f.Read("cam lock", &m_cam_lock, false);
+	f.Read("cam lock type", &m_cam_lock_type, 0);
 }
 
 void MovieDefault::Save(wxFileConfig& f)
@@ -124,6 +130,9 @@ void MovieDefault::Save(wxFileConfig& f)
 	f.Write("crop y", m_crop_y);
 	f.Write("crop w", m_crop_w);
 	f.Write("crop h", m_crop_h);
+
+	f.Write("cam lock", m_cam_lock);
+	f.Write("cam lock type", m_cam_lock_type);
 }
 
 void MovieDefault::Set(MovieMaker* mm)
@@ -146,6 +155,15 @@ void MovieDefault::Set(MovieMaker* mm)
 	m_end_frame = mm->GetEndFrame();
 	m_cur_frame = mm->GetCurrentFrame();
 	m_cur_time = mm->GetCurrentTime();
+
+	m_crop = mm->GetCropEnable();
+	m_crop_x = mm->GetCropX();
+	m_crop_y = mm->GetCropY();
+	m_crop_w = mm->GetCropW();
+	m_crop_h = mm->GetCropH();
+
+	m_cam_lock = mm->GetCamLock();
+	m_cam_lock_type = mm->GetCamLockType();
 }
 
 void MovieDefault::Apply(MovieMaker* mm)
@@ -168,5 +186,14 @@ void MovieDefault::Apply(MovieMaker* mm)
 	mm->SetEndFrame(m_end_frame);
 	mm->SetCurrentFrame(m_cur_frame);
 	mm->SetCurrentTime(m_cur_time);
+
+	mm->SetCropEnable(m_crop);
+	mm->SetCropX(m_crop_x);
+	mm->SetCropY(m_crop_y);
+	mm->SetCropW(m_crop_w);
+	mm->SetCropH(m_crop_h);
+
+	mm->SetCamLock(m_cam_lock);
+	mm->SetCamLockType(m_cam_lock_type);
 }
 
