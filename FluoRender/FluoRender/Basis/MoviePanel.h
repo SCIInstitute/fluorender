@@ -117,19 +117,22 @@ public:
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 	//common
-	void SetFps(double value);
-	void SetMovieLength(double value);
-	void SetView(int index);
+	void SetFps(double val);
+	void SetMovieLength(double val);
+	void SetView(int val);
 	void SetSliderStyle(bool val);
-	void SetProgress(int val, bool notify);//slider position
-	//void SetProgressF(double val);//percentage of all movie length
+	//frames
+	void SetStartFrame(int val);
+	void SetEndFrame(int val);
+	void SetScrollFrame(int val, bool notify);
+	void SetCurrentFrame(int val, bool notify);
+	void SetCurrentTime(double val, bool notify);
 
 	//keyframe movie
 	void SetKeyframeMovie(bool val);
 
 	void UpFrame();
 	void DownFrame();
-	void SetCurrentTime(size_t t);
 
 	void SetRotate(bool value)
 	{
@@ -171,12 +174,6 @@ public:
 		m_degree_text->SetValue(wxString::Format("%d", m_rot_deg));
 	}
 	int GetRotDeg() { return m_rot_deg; }
-	//frames
-	void SetStartFrame(int value);
-	int GetStartFrame() { return m_start_frame; }
-	void SetEndFrame(int value);
-	int GetEndFrame() { return m_end_frame; }
-	int GetCurFrame() { return m_cur_frame; }
 	//cropping
 	void SetCrop(bool value);
 	bool GetCrop() { return m_crop; }
@@ -300,6 +297,10 @@ private:
 	void OnViewSelected(wxCommandEvent& event);
 	void OnSliderStyle(wxCommandEvent& event);
 	void OnProgressScroll(wxScrollEvent& event);
+	void OnStartFrameText(wxCommandEvent& event);
+	void OnEndFrameText(wxCommandEvent& event);
+	void OnCurFrameText(wxCommandEvent& event);
+	void OnCurTimeText(wxCommandEvent& event);
 
 	//basic rotation
 	void OnRotateChecked(wxCommandEvent& event);
@@ -350,21 +351,15 @@ private:
 	void OnGenKey(wxCommandEvent& event);
 
 	//time slider
-	void OnTimeText(wxCommandEvent& event);
 	void OnUpFrame(wxCommandEvent& event);
 	void OnDownFrame(wxCommandEvent& event);
-	void OnCurFrameText(wxCommandEvent& event);
 	void OnStartFrameSync(wxCommandEvent& event);
-	void OnStartFrameText(wxCommandEvent& event);
 	void OnEndFrameSync(wxCommandEvent& event);
-	void OnEndFrameText(wxCommandEvent& event);
 
 	//checkboxes
 	void OnSequenceChecked(wxCommandEvent& event);
 	void OnBatchChecked(wxCommandEvent& event);
 
-	//timer for playback.
-	void OnTimer(wxTimerEvent& event);
 
 
 	DECLARE_EVENT_TABLE()

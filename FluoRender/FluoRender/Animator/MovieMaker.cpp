@@ -27,9 +27,13 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "MovieMaker.h"
 #include <Global.h>
+#include <RenderCanvas.h>
 
-MovieMaker::MovieMaker()
+MovieMaker::MovieMaker() :
+	m_timer(this),
+	m_view(0)
 {
+	glbin_mov_def.Apply(this);
 }
 
 MovieMaker::~MovieMaker()
@@ -56,4 +60,9 @@ void MovieMaker::HoldRun()
 		m_timer_hold = true;
 		m_timer.Stop();
 	}
+}
+
+void MovieMaker::SetView(RenderCanvas* view)
+{
+	m_view = view;
 }

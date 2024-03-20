@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/fileconf.h>
 #include <wx/string.h>
 
-class RenderCanvas;
+class MovieMaker;
 class MovieDefault
 {
 public:
@@ -41,8 +41,8 @@ public:
 
 	void Read(wxFileConfig& f);
 	void Save(wxFileConfig& f);
-	void Set(RenderCanvas* view);
-	void Apply(RenderCanvas* view);
+	void Set(MovieMaker* mm);
+	void Apply(MovieMaker* mm);
 
 public:
 	//default values

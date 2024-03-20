@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <MovieDefault.h>
 #include <Names.h>
-#include <RenderCanvas.h>
+#include <Animator/MovieMaker.h>
 
 MovieDefault::MovieDefault()
 {
@@ -126,15 +126,47 @@ void MovieDefault::Save(wxFileConfig& f)
 	f.Write("crop h", m_crop_h);
 }
 
-void MovieDefault::Set(RenderCanvas* view)
+void MovieDefault::Set(MovieMaker* mm)
 {
-	if (!view)
+	if (!mm)
 		return;
+
+	m_keyframe_enable = mm->GetKeyframeEnable();
+	m_rotate = mm->GetRotateEnable();
+	m_rot_axis = mm->GetRotateAxis();
+	m_rot_deg = mm->GetRotateDeg();
+	m_rot_int_type = mm->GetRotIntType();
+	m_time_seq = mm->GetTimeSeqEnable();
+	m_seq_mode = mm->GetSeqMode();
+
+	m_frame_num = mm->GetFrameNum();
+	m_movie_len = mm->GetMovieLength();
+	m_fps = mm->GetFps();
+	m_start_frame = mm->GetStartFrame();
+	m_end_frame = mm->GetEndFrame();
+	m_cur_frame = mm->GetCurrentFrame();
+	m_cur_time = mm->GetCurrentTime();
 }
 
-void MovieDefault::Apply(RenderCanvas* view)
+void MovieDefault::Apply(MovieMaker* mm)
 {
-	if (!view)
+	if (!mm)
 		return;
+
+	mm->SetKeyframeEnable(m_keyframe_enable);
+	mm->SetRotateEnable(m_rotate);
+	mm->SetRotateAxis(m_rot_axis);
+	mm->SetRotateDeg(m_rot_deg);
+	mm->SetRotIntType(m_rot_int_type);
+	mm->SetTimeSeqEnable(m_time_seq);
+	mm->SetSeqMode(m_seq_mode);
+
+	mm->SetFrameNum(m_frame_num);
+	mm->SetMovieLength(m_movie_len);
+	mm->SetFps(m_fps);
+	mm->SetStartFrame(m_start_frame);
+	mm->SetEndFrame(m_end_frame);
+	mm->SetCurrentFrame(m_cur_frame);
+	mm->SetCurrentTime(m_cur_time);
 }
 

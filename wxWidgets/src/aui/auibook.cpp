@@ -1889,6 +1889,7 @@ wxSize wxAuiNotebook::CalculateNewSplitSize()
 {
     // count number of tab controls
     int tab_ctrl_count = GetPageCount();
+    tab_ctrl_count = tab_ctrl_count > 4 ? 4 : tab_ctrl_count;
 
     wxSize new_split_size;
 
@@ -2511,6 +2512,21 @@ void wxAuiNotebook::Split(size_t page, int direction)
     UpdateHintWindowSize();
 }
 
+bool wxAuiNotebook::IsSplit()
+{
+    // count number of tab controls
+    int tab_ctrl_count = 0;
+    wxAuiPaneInfoArray& all_panes = m_mgr.GetAllPanes();
+    size_t i, pane_count = all_panes.GetCount();
+    for (i = 0; i < pane_count; ++i)
+    {
+        wxAuiPaneInfo& pane = all_panes.Item(i);
+        if (pane.name == wxT("dummy"))
+            continue;
+        tab_ctrl_count++;
+    }
+    return tab_ctrl_count > 1;
+}
 
 void wxAuiNotebook::OnSize(wxSizeEvent& evt)
 {

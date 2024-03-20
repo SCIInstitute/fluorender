@@ -30,22 +30,120 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/timer.h>
 
-class MovieMaker
+class RenderCanvas;
+class MovieMaker : public wxEvtHandler
 {
 public:
 	MovieMaker();
 	~MovieMaker();
 
+	//timer
 	bool IsRunning()
 	{
 		return m_running;
 	}
-	//timer
 	void TimerRun();
 	void ResumeRun();
 	void HoldRun();
 
+	//settings
+	void SetView(RenderCanvas* view);
+	void SetKeyframeEnable(bool val) { m_keyframe_enable = val; }
+	bool GetKeyframeEnable() { return m_keyframe_enable; }
+	void SetRotateEnable(bool val) { m_rotate = val; }
+	bool GetRotateEnable() { return m_rotate; }
+	void SetRotateAxis(int val)
+	{
+		if (val > -1 && val < 3)
+			m_rot_axis = val;
+	}
+	int GetRotateAxis() { return m_rot_axis; }
+	void SetRotateDeg(int val) { m_rot_deg = val; }
+	int GetRotateDeg() { return m_rot_deg; }
+	void SetRotIntType(int val)
+	{
+		if (val > -1 && val < 2)
+			m_rot_int_type = val;
+	}
+	int GetRotIntType() { return m_rot_int_type; }
+	void SetTimeSeqEnable(bool val) { m_time_seq = val; }
+	bool GetTimeSeqEnable() { return m_time_seq; }
+	void SetSeqMode(int val)
+	{
+		if (val > -1 && val < 3)
+			m_seq_mode = val;
+	}
+	int GetSeqMode() { return m_seq_mode; }
+	void SetFrameNum(int val)
+	{
+		m_frame_num = val;
+		if (m_end_frame - m_start_frame + 1 != val)
+			m_end_frame = m_start_frame + m_frame_num - 1;
+	}
+	int GetFrameNum() { return m_frame_num; }
+	void SetMovieLength(double val)
+	{
+		m_movie_len = val;
+		if (val > 0)
+			m_fps = m_frame_num / m_movie_len;
+	}
+	double GetMovieLength() { return m_movie_len; }
+	void SetFps(double val)
+	{
+		m_fps = val;
+		if (val > 0)
+			m_movie_len = m_frame_num * m_fps;
+	}
+	double GetFps() { return m_fps; }
+	void SetStartFrame(int val)
+	{
+		m_start_frame = val;
+		if (m_start_frame >= m_end_frame)
+			m_start_frame = m_end_frame - 1;
+		m_frame_num = m_end_frame - m_start_frame + 1;
+		if (m_fps > 0)
+			m_movie_len = m_frame_num * m_fps;
+	}
+	int GetStartFrame() { return m_start_frame; }
+	void SetEndFrame(int val)
+	{
+		m_end_frame = val;
+		if (m_start_frame >= m_end_frame)
+			m_end_frame = m_start_frame + 1;
+		m_frame_num = m_end_frame - m_start_frame + 1;
+		if (m_fps > 0)
+			m_movie_len = m_frame_num * m_fps;
+	}
+	int GetEndFrame() { return m_end_frame; }
+	void SetCurrentFrame(int val)
+	{
+		m_cur_frame = val;
+		if (m_cur_frame < m_start_frame)
+		{
+			int len = m_frame_num - 1;
+			int mul = (m_start_frame - m_cur_frame) / len + 1;
+			int inc = mul * len;
+			m_cur_frame += inc;
+		}
+		if (m_cur_frame > m_end_frame)
+		{
+			int len = m_frame_num - 1;
+			int mul = (m_cur_frame - m_end_frame) / len + 1;
+			int inc = mul * len;
+			m_cur_frame -= inc;
+		}
+		m_cur_time = (m_cur_frame - m_start_frame) / m_fps;
+	}
+	int GetCurrentFrame() { return m_cur_frame; }
+	void SetCurrentTime(double val)
+	{
+		int frame = m_start_frame + std::round(val * m_fps);
+		SetCurrentFrame(frame);
+	}
+	double GetCurrentTime() { return m_cur_time; }
+
 private:
+	RenderCanvas* m_view;
 	wxTimer m_timer;
 	int m_last_frame;//last frame nunmber to save
 	double m_starting_rot;//starting degree of rotation
@@ -57,6 +155,27 @@ private:
 	wxString m_filename;
 	wxString filetype_;
 
+	//settings
+	bool m_keyframe_enable;//enable keyframe animation
+	bool m_rotate;//enable roatation animation
+	int m_rot_axis;	//0-x;1-y;2-z
+	int m_rot_deg;
+	int m_rot_int_type;//0-linear; 1-smooth
+	bool m_time_seq;
+	int m_seq_mode;//0:none; 1:4d; 2:bat
+
+	//movie properties
+	int m_frame_num;
+	double m_movie_len;//length in sec
+	double m_fps;
+	int m_start_frame;
+	int m_end_frame;
+	int m_cur_frame;
+	double m_cur_time;//time in sec
+
+private:
+	//timer for playback.
+	void OnTimer(wxTimerEvent& event);
 
 };
 
