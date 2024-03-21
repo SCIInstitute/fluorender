@@ -39,7 +39,9 @@ MovieMaker::MovieMaker() :
 	m_running(false),
 	m_record(false),
 	m_delayed_stop(false),
-	m_timer_hold(false)
+	m_timer_hold(false),
+	m_reverse(false),
+	m_loop(false)
 {
 	glbin_mov_def.Apply(this);
 	m_timer.Bind(wxEVT_TIMER, &MovieMaker::OnTimer, this);
@@ -49,7 +51,7 @@ MovieMaker::~MovieMaker()
 {
 }
 
-void MovieMaker::Play()
+void MovieMaker::Play(bool back)
 {
 	if (m_running)
 	{
@@ -57,6 +59,7 @@ void MovieMaker::Play()
 	}
 	else
 	{
+		m_reverse = back;
 		Start();
 	}
 }
@@ -90,6 +93,7 @@ void MovieMaker::Stop()
 	glbin.get_video_encoder().close();
 	m_record = false;
 	flvr::TextureRenderer::maximize_uptime_ = false;
+	m_reverse = false;
 	m_running = false;
 }
 
@@ -102,6 +106,7 @@ void MovieMaker::Resume()
 		m_running = true;
 	}
 }
+
 void MovieMaker::Hold()
 {
 	if (!m_timer_hold && m_running)
@@ -180,7 +185,7 @@ void MovieMaker::PlaySave()
 	}
 
 	RenderCanvas::SetKeepEnlarge(true);
-	Play();
+	Play(false);
 }
 
 void MovieMaker::SetRendering(bool rewind)
@@ -188,7 +193,7 @@ void MovieMaker::SetRendering(bool rewind)
 	if (!m_view)
 		return;
 
-	double t = (double)m_cur_time / m_frame_num;
+	double t = GetCurProg();
 	//advanced options
 	if (m_keyframe_enable)
 	{
@@ -355,6 +360,67 @@ void MovieMaker::SetTimeSeqEnable(bool val)
 	}
 }
 
+void MovieMaker::SetCropEnable(bool val)
+{
+	m_crop = val;
+	if (m_view)
+	{
+		if (val)
+		{
+			m_view->CalcFrame();
+			m_view->GetFrame(m_crop_x, m_crop_y, m_crop_w, m_crop_h);
+			m_crop_x = std::round(m_crop_x + m_crop_w / 2.0);
+			m_crop_y = std::round(m_crop_y + m_crop_h / 2.0);
+			m_view->EnableFrame();
+		}
+		else
+			m_view->DisableFrame();
+	}
+}
+
+void MovieMaker::SetCropValues(int x, int y, int w, int h)
+{
+	m_crop_x = x;
+	m_crop_y = y;
+	m_crop_w = w;
+	m_crop_h = h;
+	if (m_view)
+		m_view->SetFrame(std::round(m_crop_x - m_crop_w / 2.0),
+			std::round(m_crop_y - m_crop_h / 2.0), m_crop_w, m_crop_h);
+}
+
+void MovieMaker::SetCropX(int val)
+{
+	m_crop_x = val;
+	if (m_view)
+		m_view->SetFrame(std::round(m_crop_x - m_crop_w / 2.0),
+			std::round(m_crop_y - m_crop_h / 2.0), m_crop_w, m_crop_h);
+}
+
+void MovieMaker::SetCropY(int val)
+{
+	m_crop_y = val;
+	if (m_view)
+		m_view->SetFrame(std::round(m_crop_x - m_crop_w / 2.0),
+			std::round(m_crop_y - m_crop_h / 2.0), m_crop_w, m_crop_h);
+}
+
+void MovieMaker::SetCropW(int val)
+{
+	m_crop_w = val;
+	if (m_view)
+		m_view->SetFrame(std::round(m_crop_x - m_crop_w / 2.0),
+			std::round(m_crop_y - m_crop_h / 2.0), m_crop_w, m_crop_h);
+}
+
+void MovieMaker::SetCropH(int val)
+{
+	m_crop_h = val;
+	if (m_view)
+		m_view->SetFrame(std::round(m_crop_x - m_crop_w / 2.0),
+			std::round(m_crop_y - m_crop_h / 2.0), m_crop_w, m_crop_h);
+}
+
 void MovieMaker::OnTimer(wxTimerEvent& event)
 {
 	//get all of the progress info
@@ -378,7 +444,12 @@ void MovieMaker::OnTimer(wxTimerEvent& event)
 		return;
 	}
 
-	SetCurrentFrame(m_cur_frame + 1);
+	//move time
+	if (m_reverse)
+		SetCurrentFrame(m_cur_frame - 1);
+	else
+		SetCurrentFrame(m_cur_frame + 1);
+
 	//update the rendering frame since we have advanced.
 	if (m_last_frame != m_cur_frame)
 	{
@@ -387,7 +458,20 @@ void MovieMaker::OnTimer(wxTimerEvent& event)
 		m_last_frame = m_cur_frame;
 		SetRendering(false);
 	}
-	if (m_cur_frame == m_end_frame)
-		m_delayed_stop = true;
+
+	//check stop
+	if (!m_loop)
+	{
+		if (m_reverse)
+		{
+			if (m_cur_frame == m_start_frame)
+				m_delayed_stop = true;
+		}
+		else
+		{
+			if (m_cur_frame == m_end_frame)
+				m_delayed_stop = true;
+		}
+	}
 }
 

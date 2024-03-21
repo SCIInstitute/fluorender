@@ -39,54 +39,6 @@ DEALINGS IN THE SOFTWARE.
 #include <png_resource.h>
 #include <img/icons.h>
 
-BEGIN_EVENT_TABLE(MoviePanel, wxPanel)
-//time sequence
-EVT_CHECKBOX(ID_SeqChk, MoviePanel::OnSequenceChecked)
-EVT_CHECKBOX(ID_BatChk, MoviePanel::OnBatchChecked)
-EVT_BUTTON(ID_IncTimeBtn, MoviePanel::OnUpFrame)
-EVT_BUTTON(ID_DecTimeBtn, MoviePanel::OnDownFrame)
-//rotations
-EVT_CHECKBOX(ID_RotChk, MoviePanel::OnRotateChecked)
-EVT_RADIOBUTTON(ID_XRd, MoviePanel::OnRotAxis)
-EVT_RADIOBUTTON(ID_YRd, MoviePanel::OnRotAxis)
-EVT_RADIOBUTTON(ID_ZRd, MoviePanel::OnRotAxis)
-EVT_TEXT(ID_DegreeText, MoviePanel::OnDegreeText)
-EVT_COMBOBOX(ID_RotIntCmb, MoviePanel::OnRotIntCmb)
-//main controls
-EVT_BUTTON(ID_PlayPause, MoviePanel::OnPrev)
-EVT_BUTTON(ID_Rewind, MoviePanel::OnRewind)
-EVT_COMMAND_SCROLL(ID_ProgressSldr, MoviePanel::OnTimeChange)
-EVT_TEXT(ID_ProgressText, MoviePanel::OnTimeText)
-EVT_BUTTON(ID_SaveMovie, MoviePanel::OnRun)
-//script
-EVT_CHECKBOX(ID_RunScriptChk, MoviePanel::OnRunScriptChk)
-EVT_TEXT(ID_ScriptFileText, MoviePanel::OnScriptFileEdit)
-EVT_BUTTON(ID_ScriptClearBtn, MoviePanel::OnScriptClearBtn)
-EVT_BUTTON(ID_ScriptFileBtn, MoviePanel::OnScriptFileBtn)
-EVT_LIST_ITEM_SELECTED(ID_ScriptList, MoviePanel::OnScriptListSelected)
-EVT_LIST_ITEM_ACTIVATED(ID_ScriptList, MoviePanel::OnScriptListSelected)
-//auto key
-EVT_BUTTON(ID_GenKeyBtn, MoviePanel::OnGenKey)
-EVT_LIST_ITEM_ACTIVATED(ID_AutoKeyList, MoviePanel::OnListItemAct)
-//cropping
-EVT_CHECKBOX(ID_CropChk, MoviePanel::OnCropCheck)
-EVT_BUTTON(ID_ResetBtn, MoviePanel::OnResetCrop)
-EVT_TEXT(ID_CenterXText, MoviePanel::OnEditCrop)
-EVT_TEXT(ID_CenterYText, MoviePanel::OnEditCrop)
-EVT_TEXT(ID_WidthText, MoviePanel::OnEditCrop)
-EVT_TEXT(ID_HeightText, MoviePanel::OnEditCrop)
-EVT_SPIN_UP(ID_CenterXSpin, MoviePanel::OnCropSpinUp)
-EVT_SPIN_UP(ID_CenterYSpin, MoviePanel::OnCropSpinUp)
-EVT_SPIN_UP(ID_WidthSpin, MoviePanel::OnCropSpinUp)
-EVT_SPIN_UP(ID_HeightSpin, MoviePanel::OnCropSpinUp)
-EVT_SPIN_DOWN(ID_CenterXSpin, MoviePanel::OnCropSpinDown)
-EVT_SPIN_DOWN(ID_CenterYSpin, MoviePanel::OnCropSpinDown)
-EVT_SPIN_DOWN(ID_WidthSpin, MoviePanel::OnCropSpinDown)
-EVT_SPIN_DOWN(ID_HeightSpin, MoviePanel::OnCropSpinDown)
-//notebook
-EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, MoviePanel::OnNbPageChange)
-END_EVENT_TABLE()
-
 wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 {
 	wxScrolledWindow *page = new wxScrolledWindow(parent);
@@ -212,7 +164,7 @@ wxWindow* MoviePanel::CreateAutoKeyPage(wxWindow *parent)
 	wxStaticText * st = new wxStaticText(page, 0, "Choose an auto key type");
 
 	//list of options
-	m_auto_key_list = new wxListCtrl(page, ID_AutoKeyList,
+	m_auto_key_list = new wxListCtrl(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL);
 	wxListItem itemCol;
 	itemCol.SetText("ID");
@@ -228,9 +180,11 @@ wxWindow* MoviePanel::CreateAutoKeyPage(wxWindow *parent)
 	tmp = m_auto_key_list->InsertItem(2, "3", 0);
 	m_auto_key_list->SetItem(tmp, 1, "Channel combination nC3");
 	m_auto_key_list->SetColumnWidth(1, -1);
+	m_auto_key_list->Bind(wxEVT_LIST_ITEM_ACTIVATED, &MoviePanel::OnGenKey, this);
 
 	//button
-	m_gen_keys_btn = new wxButton(page, ID_GenKeyBtn, "Generate");
+	m_gen_keys_btn = new wxButton(page, wxID_ANY, "Generate");
+	m_gen_keys_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnGenKey, this);
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -266,9 +220,11 @@ wxWindow* MoviePanel::CreateCroppingPage(wxWindow *parent)
 	//8th line
 	st = new wxStaticText(page, 0, "Enable cropping:",
 		wxDefaultPosition, FromDIP(wxSize(110, 20)));
-	m_crop_chk = new wxCheckBox(page, ID_CropChk, "");
-	m_reset_btn = new wxButton(page, ID_ResetBtn, "Reset",
+	m_crop_chk = new wxCheckBox(page, wxID_ANY, "");
+	m_crop_chk->Bind(wxEVT_CHECKBOX, &MoviePanel::OnCropCheck, this);
+	m_reset_btn = new wxButton(page, wxID_ANY, "Reset",
 		wxDefaultPosition, FromDIP(wxSize(110, 30)));
+	m_reset_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnResetCrop, this);
 	m_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	sizer_8->Add(5, 5, 0);
 	sizer_8->Add(st, 0, wxALIGN_CENTER);
@@ -278,44 +234,56 @@ wxWindow* MoviePanel::CreateCroppingPage(wxWindow *parent)
 	//9th line
 	st = new wxStaticText(page, 0, "Center:  X:",
 		wxDefaultPosition, FromDIP(wxSize(85, 20)));
-	m_center_x_text = new wxTextCtrl(page, ID_CenterXText, "",
+	m_center_x_text = new wxTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), 0, vald_int);
-	m_center_x_spin = new wxSpinButton(page, ID_CenterXSpin,
+	m_center_x_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
+	m_center_x_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(20, 20)));
 	m_center_x_spin->SetRange(-0x8000, 0x7fff);
+	m_center_x_spin->Bind(wxEVT_SPIN_UP, &MoviePanel::OnCropSpinUp, this);
+	m_center_x_spin->Bind(wxEVT_SPIN_DOWN, &MoviePanel::OnCropSpinDown, this);
 	sizer_9->Add(5, 5, 0);
 	sizer_9->Add(st, 0, wxALIGN_CENTER);
 	sizer_9->Add(m_center_x_text, 0, wxALIGN_CENTER);
 	sizer_9->Add(m_center_x_spin, 0, wxALIGN_CENTER);
 	st = new wxStaticText(page, 0, "       Y:",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)));
-	m_center_y_text = new wxTextCtrl(page, ID_CenterYText, "",
+	m_center_y_text = new wxTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), 0, vald_int);
-	m_center_y_spin = new wxSpinButton(page, ID_CenterYSpin,
+	m_center_y_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
+	m_center_y_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(20, 20)));
 	m_center_y_spin->SetRange(-0x8000, 0x7fff);
+	m_center_y_spin->Bind(wxEVT_SPIN_UP, &MoviePanel::OnCropSpinUp, this);
+	m_center_y_spin->Bind(wxEVT_SPIN_DOWN, &MoviePanel::OnCropSpinDown, this);
 	sizer_9->Add(st, 0, wxALIGN_CENTER);
 	sizer_9->Add(m_center_y_text, 0, wxALIGN_CENTER);
 	sizer_9->Add(m_center_y_spin, 0, wxALIGN_CENTER);
 	//10th line
 	st = new wxStaticText(page, 0, "Size:    Width:",
 		wxDefaultPosition, FromDIP(wxSize(85, 20)));
-	m_width_text = new wxTextCtrl(page, ID_WidthText, "",
+	m_width_text = new wxTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), 0, vald_int);
-	m_width_spin = new wxSpinButton(page, ID_WidthSpin,
+	m_width_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
+	m_width_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(20, 20)));
 	m_width_spin->SetRange(-0x8000, 0x7fff);
+	m_width_spin->Bind(wxEVT_SPIN_UP, &MoviePanel::OnCropSpinUp, this);
+	m_width_spin->Bind(wxEVT_SPIN_DOWN, &MoviePanel::OnCropSpinDown, this);
 	sizer_10->Add(5, 5, 0);
 	sizer_10->Add(st, 0, wxALIGN_CENTER);
 	sizer_10->Add(m_width_text, 0, wxALIGN_CENTER);
 	sizer_10->Add(m_width_spin, 0, wxALIGN_CENTER);
 	st = new wxStaticText(page, 0, "   Height:",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)));
-	m_height_text = new wxTextCtrl(page, ID_HeightText, "",
+	m_height_text = new wxTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), 0, vald_int);
-	m_height_spin = new wxSpinButton(page, ID_HeightSpin,
+	m_height_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
+	m_height_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(20, 20)));
 	m_height_spin->SetRange(-0x8000, 0x7fff);
+	m_height_spin->Bind(wxEVT_SPIN_UP, &MoviePanel::OnCropSpinUp, this);
+	m_height_spin->Bind(wxEVT_SPIN_DOWN, &MoviePanel::OnCropSpinDown, this);
 	sizer_10->Add(st, 0, wxALIGN_CENTER);
 	sizer_10->Add(m_height_text, 0, wxALIGN_CENTER);
 	sizer_10->Add(m_height_spin, 0, wxALIGN_CENTER);
@@ -341,8 +309,9 @@ wxWindow* MoviePanel::CreateScriptPage(wxWindow *parent)
 	//script
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
-	m_run_script_chk = new wxCheckBox(page, ID_RunScriptChk,
+	m_run_script_chk = new wxCheckBox(page, wxID_ANY,
 		"Enable execution of a script during playback.");
+	m_run_script_chk->Bind(wxEVT_CHECKBOX, &MoviePanel::OnRunScriptChk, this);
 	wxStaticText* st;
 	sizer_v->Add(10, 10);
 	sizer_v->Add(m_run_script_chk);
@@ -352,28 +321,33 @@ wxWindow* MoviePanel::CreateScriptPage(wxWindow *parent)
 	wxBoxSizer *sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Script File:",
 		wxDefaultPosition, FromDIP(wxSize(80, -1)));
-	m_script_file_btn = new wxButton(page, ID_ScriptFileBtn, "Browse...",
+	m_script_file_btn = new wxButton(page, wxID_ANY, "Browse...",
 		wxDefaultPosition, FromDIP(wxSize(80, -1)));
+	m_script_file_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnScriptFileBtn, this);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->AddStretchSpacer(1);
 	sizer_1->Add(m_script_file_btn, 0, wxALIGN_CENTER);
 
 	//file name
 	wxBoxSizer *sizer_2 = new wxBoxSizer(wxHORIZONTAL);
-	m_script_file_text = new wxTextCtrl(page, ID_ScriptFileText, "",
+	m_script_file_text = new wxTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize);
-	m_script_clear_btn = new wxButton(page, ID_ScriptClearBtn, "X",
+	m_script_clear_btn = new wxButton(page, wxID_ANY, "X",
 		wxDefaultPosition, FromDIP(wxSize(25, -1)));
+	m_script_file_text->Bind(wxEVT_TEXT, &MoviePanel::OnScriptFileEdit, this);
+	m_script_clear_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnScriptClearBtn, this);
 	sizer_2->Add(m_script_file_text, 1, wxEXPAND);
 	sizer_2->Add(m_script_clear_btn, 0, wxALIGN_CENTER);
 
 	//script list
-	m_script_list = new wxListCtrl(page, ID_ScriptList,
+	m_script_list = new wxListCtrl(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL);
 	wxListItem itemCol;
 	itemCol.SetText("Built-in Scripte Files");
 	m_script_list->InsertColumn(0, itemCol);
 	m_script_list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
+	m_script_list->Bind(wxEVT_LIST_ITEM_SELECTED, &MoviePanel::OnScriptListSelected, this);
+	m_script_list->Bind(wxEVT_LIST_ITEM_ACTIVATED, &MoviePanel::OnScriptListSelected, this);
 
 	sizer_v->Add(5, 5);
 	sizer_v->Add(sizer_1, 0, wxEXPAND);
@@ -581,6 +555,7 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 	bool update_all = vc.empty();
 	bool bval;
+	int ival;
 
 	//modes
 	if (update_all || FOUND_VALUE(gstMovFps))
@@ -650,8 +625,116 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 			m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
 	}
 
+	if (update_all || FOUND_VALUE(gstMovRotEnable))
+	{
+		bval = glbin_moviemaker.GetRotateEnable();
+		m_rot_chk->SetValue(bval);
+		m_x_rd->Enable(bval);
+		m_y_rd->Enable(bval);
+		m_z_rd->Enable(bval);
+	}
+	
+	if (update_all || FOUND_VALUE(gstMovRotAxis))
+	{
+		ival = glbin_moviemaker.GetRotateAxis();
+		if (ival == 0)
+			m_x_rd->SetValue(true);
+		else if (ival == 1)
+			m_y_rd->SetValue(true);
+		else if (ival == 2)
+			m_z_rd->SetValue(true);
+	}
+
+	if (update_all || FOUND_VALUE(gstMovRotAng))
+		m_degree_text->SetValue(wxString::Format("%d", glbin_moviemaker.GetRotateDeg()));
+
+	if (update_all || FOUND_VALUE(gstMovIntrpMode))
+		m_rot_int_cmb->SetSelection(glbin_moviemaker.GetRotIntType());
+
+	if (update_all || FOUND_VALUE(gstMovSeqMode))
+	{
+		bval = glbin_moviemaker.GetTimeSeqEnable();
+		if (bval)
+		{
+			ival = glbin_moviemaker.GetSeqMode();
+			if (ival == 1)
+			{
+				m_seq_chk->SetValue(true);
+				m_bat_chk->SetValue(false);
+			}
+			else if (ival == 2)
+			{
+				m_seq_chk->SetValue(false);
+				m_bat_chk->SetValue(true);
+			}
+		}
+		else
+		{
+			m_seq_chk->SetValue(false);
+			m_bat_chk->SetValue(false);
+		}
+	}
+
 	if (update_all || FOUND_VALUE(gstCaptureParam))
 		m_keyframe_chk->SetValue(glbin_moviemaker.GetKeyframeEnable());
+
+	if (update_all || FOUND_VALUE(gstCropEnable))
+	{
+		bval = glbin_moviemaker.GetCropEnable();
+		m_crop_chk->SetValue(bval);
+		m_center_x_text->Enable(bval);
+		m_center_y_text->Enable(bval);
+		m_width_text->Enable(bval);
+		m_height_text->Enable(bval);
+	}
+
+	if (update_all || FOUND_VALUE(gstCropValues))
+	{
+		m_center_x_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropX()));
+		m_center_y_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropY()));
+		m_width_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropW()));
+		m_height_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropH()));
+	}
+
+	if (update_all || FOUND_VALUE(gstRunScript))
+	{
+		bval = glbin_settings.m_run_script;
+		m_run_script_chk->SetValue(bval);
+		if (bval)
+			m_notebook->SetPageText(4, "Script (Enabled)");
+		else
+			m_notebook->SetPageText(4, "Script");
+	}
+
+	if (update_all || FOUND_VALUE(gstScriptFile))
+	{
+		m_script_file_text->SetValue(glbin_settings.m_script_file);
+	}
+
+	if (update_all || FOUND_VALUE(gstScriptList))
+	{
+		wxArrayString list;
+		if (GetScriptFiles(list))
+		{
+			int idx = -1;
+			for (size_t i = 0; i < list.GetCount(); ++i)
+			{
+				if (glbin_settings.m_script_file == list[i])
+				{
+					idx = i;
+					break;
+				}
+			}
+			if (idx >= 0)
+			{
+				m_script_list->SetItemState(idx,
+					wxLIST_STATE_SELECTED,
+					wxLIST_STATE_SELECTED);
+				//wxSize ss = m_script_list->GetItemSpacing();
+				//m_script_list->ScrollList(0, ss.y*idx);
+			}
+		}
+	}
 }
 
 void MoviePanel::SetFps(double val)
@@ -739,7 +822,7 @@ void MoviePanel::SetCurrentTime(double val, bool notify)
 
 void MoviePanel::Play()
 {
-	glbin_moviemaker.Play();
+	glbin_moviemaker.Play(false);
 
 	fluo::ValueCollection vc = { gstMovPlay };
 	FluoRefresh(false, true, 2, vc);
@@ -789,6 +872,37 @@ void MoviePanel::SetKeyframeMovie(bool val)
 	glbin_moviemaker.SetKeyframeEnable(val);
 
 	FluoUpdate({ gstCaptureParam });
+}
+
+void MoviePanel::GenKey()
+{
+	long item = m_auto_key_list->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+
+	if (item != -1)
+	{
+		if (item == 0)
+			m_advanced_movie->AutoKeyChanComb(1);
+		else if (item == 1)
+			m_advanced_movie->AutoKeyChanComb(2);
+		else if (item == 2)
+			m_advanced_movie->AutoKeyChanComb(3);
+
+		m_notebook->SetSelection(1);
+	}
+}
+
+void MoviePanel::SetCropEnable(bool val)
+{
+	glbin_moviemaker.SetCropEnable(val);
+	FluoRefresh(false, false, 2, { gstCropEnable, gstCropValues });
+}
+
+void MoviePanel::SetCropValues(int x, int y, int w, int h)
+{
+	glbin_moviemaker.SetCropValues(x, y, w, h);
+	FluoRefresh(false, false, 2, { gstCropValues });
 }
 
 void MoviePanel::OnNotebookPage(wxAuiNotebookEvent& event)
@@ -925,12 +1039,15 @@ void MoviePanel::OnRotateChecked(wxCommandEvent& event)
 
 void MoviePanel::OnRotAxis(wxCommandEvent& event)
 {
+	int val = 0;
 	if (m_x_rd->GetValue())
-		m_rot_axis = 0;
+		val = 0;
 	else if (m_y_rd->GetValue())
-		m_rot_axis = 1;
+		val = 1;
 	else if (m_z_rd->GetValue())
-		m_rot_axis = 2;
+		val = 2;
+	glbin_moviemaker.SetRotateAxis(val);
+	//FluoUpdate({ gstMovRotAxis });
 }
 
 void MoviePanel::OnDegreeText(wxCommandEvent& event)
@@ -938,43 +1055,32 @@ void MoviePanel::OnDegreeText(wxCommandEvent& event)
 	wxString str = m_degree_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
-	m_rot_deg = ival;
+	glbin_moviemaker.SetRotateDeg(ival);
 }
 
 void MoviePanel::OnRotIntCmb(wxCommandEvent& event)
 {
-	m_rot_int_type = m_rot_int_cmb->GetCurrentSelection();
+	int val = m_rot_int_cmb->GetCurrentSelection();
+	glbin_moviemaker.SetRotIntType(val);
 }
 
 void MoviePanel::OnSequenceChecked(wxCommandEvent& event)
 {
-	if (m_seq_chk->GetValue())
-	{
-		m_seq_mode = 1;
-		SetTimeSeq(true);
-	}
-	else
-	{
-		m_seq_mode = 0;
-		SetTimeSeq(false);
-	}
+	bool val = m_seq_chk->GetValue();
+	if (val)
+		glbin_moviemaker.SetSeqMode(1);
+	glbin_moviemaker.SetTimeSeqEnable(val);
+	FluoUpdate({});
 }
 
 void MoviePanel::OnBatchChecked(wxCommandEvent& event)
 {
-	if (m_bat_chk->GetValue())
-	{
-		m_seq_mode = 2;
-		SetTimeSeq(true);
-	}
-	else
-	{
-		m_seq_mode = 0;
-		SetTimeSeq(false);
-	}
+	int val = m_bat_chk->GetValue();
+	if (val)
+		glbin_moviemaker.SetSeqMode(2);
+	glbin_moviemaker.SetTimeSeqEnable(val);
+	FluoUpdate({});
 }
-
-
 
 void MoviePanel::OnKeyframeChk(wxCommandEvent& event)
 {
@@ -982,214 +1088,51 @@ void MoviePanel::OnKeyframeChk(wxCommandEvent& event)
 	SetKeyframeMovie(val);
 }
 
-void MoviePanel::GetSettings()
+//auto key
+void MoviePanel::OnGenKey(wxCommandEvent& event)
 {
-	if (!m_view) return;
-
-	SetTimeSeq(m_time_seq);
-	SetRotate(m_rotate);
-	SetRotAxis(m_rot_axis);
-	SetRotDeg(m_rot_deg);
-	SetCurrentTime(m_start_frame);
-	SetCrop(m_view->m_draw_frame);
-	AddScriptToList();
-	GetScriptSettings(true);
-	if (m_advanced_movie)
-		m_advanced_movie->GetSettings(m_view);
-}
-
-void MoviePanel::GetScriptSettings(bool sel)
-{
-	//script
-	if (!m_view)
-		return;
-
-	bool run_script = glbin_settings.m_run_script;
-	m_view->SetRun4DScript(run_script);
-	m_run_script_chk->SetValue(run_script);
-	wxString script_file = glbin_settings.m_script_file;
-	m_script_file_text->SetValue(script_file);
-	m_view->SetScriptFile(script_file);
-	//highlight if builtin
-	wxArrayString list;
-	if (GetScriptFiles(list))
-	{
-		int idx = -1;
-		for (size_t i = 0; i < list.GetCount(); ++i)
-		{
-			if (script_file == list[i])
-			{
-				idx = i;
-				break;
-			}
-		}
-		if (idx >= 0 && sel)
-		{
-			m_script_list->SetItemState(idx,
-				wxLIST_STATE_SELECTED,
-				wxLIST_STATE_SELECTED);
-			//wxSize ss = m_script_list->GetItemSpacing();
-			//m_script_list->ScrollList(0, ss.y*idx);
-		}
-	}
-	//change icon
-	if (run_script)
-	{
-		if (m_running)
-			m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
-		else
-			m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
-		m_notebook->SetPageText(4, "Script (Enabled)");
-	}
-	else
-	{
-		if (m_running)
-			m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
-		else
-			m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
-		m_notebook->SetPageText(4, "Script");
-	}
-}
-
-void MoviePanel::SetCurrentPage(int page)
-{
-	if (m_notebook)
-		m_notebook->SetSelection(page);
-}
-
-int MoviePanel::GetScriptFiles(wxArrayString& list)
-{
-	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-	exePath = wxPathOnly(exePath);
-	wxString loc = exePath + GETSLASH() + "Scripts" +
-		GETSLASH() + "*.txt";
-	wxLogNull logNo;
-	wxString file = wxFindFirstFile(loc);
-	while (!file.empty())
-	{
-		list.Add(file);
-		file = wxFindNextFile();
-	}
-	list.Sort();
-	return list.GetCount();
-}
-
-void MoviePanel::AddScriptToList()
-{
-	m_script_list->DeleteAllItems();
-	wxArrayString list;
-	wxString filename;
-	if (GetScriptFiles(list))
-	{
-		for (size_t i = 0; i < list.GetCount(); ++i)
-		{
-			filename = wxFileNameFromPath(list[i]);
-			filename = filename.BeforeLast('.');
-			m_script_list->InsertItem(
-				m_script_list->GetItemCount(), filename);
-		}
-	}
-}
-
-void MoviePanel::GenKey()
-{
-	long item = m_auto_key_list->GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-
-	if (item != -1)
-	{
-		if (item == 0)
-			m_advanced_movie->AutoKeyChanComb(1);
-		else if (item == 1)
-			m_advanced_movie->AutoKeyChanComb(2);
-		else if (item == 2)
-			m_advanced_movie->AutoKeyChanComb(3);
-
-		m_notebook->SetSelection(1);
-	}
-}
-
-void MoviePanel::SetCrop(bool value)
-{
-	m_crop = value;
-	m_crop_chk->SetValue(m_crop);
-
-	if (!m_view)
-		return;
-	if (m_crop)
-	{
-		m_view->CalcFrame();
-		m_view->GetFrame(m_crop_x, m_crop_y, m_crop_w, m_crop_h);
-		m_crop_x = std::round(m_crop_x + m_crop_w / 2.0);
-		m_crop_y = std::round(m_crop_y + m_crop_h / 2.0);
-		m_center_x_text->ChangeValue(wxString::Format("%d", m_crop_x));
-		m_center_y_text->ChangeValue(wxString::Format("%d", m_crop_y));
-		m_width_text->ChangeValue(wxString::Format("%d", m_crop_w));
-		m_height_text->ChangeValue(wxString::Format("%d", m_crop_h));
-		m_view->EnableFrame();
-	}
-	else
-		m_view->DisableFrame();
-
-	m_view->RefreshGL(39);
-}
-
-void MoviePanel::UpdateCrop()
-{
-	if (!m_view)
-		return;
-
-	m_view->SetFrame(std::round(m_crop_x - m_crop_w / 2.0),
-		std::round(m_crop_y - m_crop_h / 2.0), m_crop_w, m_crop_h);
-	if (m_crop)
-		m_view->RefreshGL(39);
+	GenKey();
 }
 
 void MoviePanel::OnCropCheck(wxCommandEvent& event)
 {
-	SetCrop(m_crop_chk->GetValue());
+	SetCropEnable(m_crop_chk->GetValue());
 }
 
 void MoviePanel::OnResetCrop(wxCommandEvent& event)
 {
-	SetCrop(true);
+	SetCropEnable(true);
 }
 
 void MoviePanel::OnEditCrop(wxCommandEvent& event)
 {
 	wxString temp;
+	long x, y, w, h;
 	temp = m_center_x_text->GetValue();
-	m_crop_x = STOI(temp.fn_str());
+	temp.ToLong(&x);
 	temp = m_center_y_text->GetValue();
-	m_crop_y = STOI(temp.fn_str());
+	temp.ToLong(&y);
 	temp = m_width_text->GetValue();
-	m_crop_w = STOI(temp.fn_str());
+	temp.ToLong(&w);
 	temp = m_height_text->GetValue();
-	m_crop_h = STOI(temp.fn_str());
+	temp.ToLong(&h);
 
-	UpdateCrop();
+	SetCropValues(x, y, w, h);
 }
 
 void MoviePanel::OnCropSpinUp(wxSpinEvent& event)
 {
-	int sender_id = event.GetId();
+	wxObject* obj = event.GetEventObject();
 	wxTextCtrl* text_ctrl = 0;
-	switch (sender_id)
-	{
-	case ID_CenterXSpin:
+	if (obj == m_center_x_spin)
 		text_ctrl = m_center_x_text;
-		break;
-	case ID_CenterYSpin:
+	if (obj == m_center_y_spin)
 		text_ctrl = m_center_y_text;
-		break;
-	case ID_WidthSpin:
+	if (obj == m_width_spin)
 		text_ctrl = m_width_text;
-		break;
-	case ID_HeightSpin:
+	if (obj == m_height_spin)
 		text_ctrl = m_height_text;
-		break;
-	}
+
 	if (text_ctrl)
 	{
 		wxString str = text_ctrl->GetValue();
@@ -1202,23 +1145,17 @@ void MoviePanel::OnCropSpinUp(wxSpinEvent& event)
 
 void MoviePanel::OnCropSpinDown(wxSpinEvent& event)
 {
-	int sender_id = event.GetId();
+	wxObject* obj = event.GetEventObject();
 	wxTextCtrl* text_ctrl = 0;
-	switch (sender_id)
-	{
-	case ID_CenterXSpin:
+	if (obj == m_center_x_spin)
 		text_ctrl = m_center_x_text;
-		break;
-	case ID_CenterYSpin:
+	if (obj == m_center_y_spin)
 		text_ctrl = m_center_y_text;
-		break;
-	case ID_WidthSpin:
+	if (obj == m_width_spin)
 		text_ctrl = m_width_text;
-		break;
-	case ID_HeightSpin:
+	if (obj == m_height_spin)
 		text_ctrl = m_height_text;
-		break;
-	}
+
 	if (text_ctrl)
 	{
 		wxString str = text_ctrl->GetValue();
@@ -1229,13 +1166,8 @@ void MoviePanel::OnCropSpinDown(wxSpinEvent& event)
 	}
 }
 
-void MoviePanel::OnListItemAct(wxListEvent &event)
-{
-	GenKey();
-}
-
 //script
-void MoviePanel::OnRunScriptChk(wxCommandEvent &event)
+void MoviePanel::OnRunScriptChk(wxCommandEvent& event)
 {
 	if (!m_frame || !m_view)
 		return;
@@ -1261,21 +1193,21 @@ void MoviePanel::OnRunScriptChk(wxCommandEvent &event)
 	m_view->RefreshGL(39);
 }
 
-void MoviePanel::OnScriptFileEdit(wxCommandEvent &event)
+void MoviePanel::OnScriptFileEdit(wxCommandEvent& event)
 {
 	wxString str = m_script_file_text->GetValue();
 	glbin_settings.m_script_file = str;
 	m_view->SetScriptFile(str);
 }
 
-void MoviePanel::OnScriptClearBtn(wxCommandEvent &event)
+void MoviePanel::OnScriptClearBtn(wxCommandEvent& event)
 {
 	m_script_file_text->Clear();
 }
 
-void MoviePanel::OnScriptFileBtn(wxCommandEvent &event)
+void MoviePanel::OnScriptFileBtn(wxCommandEvent& event)
 {
-	wxFileDialog *fopendlg = new wxFileDialog(
+	wxFileDialog* fopendlg = new wxFileDialog(
 		m_frame, "Choose a 4D script file", "", "",
 		"4D script file (*.txt)|*.txt",
 		wxFD_OPEN);
@@ -1299,7 +1231,7 @@ void MoviePanel::OnScriptFileBtn(wxCommandEvent &event)
 	delete fopendlg;
 }
 
-void MoviePanel::OnScriptListSelected(wxListEvent &event)
+void MoviePanel::OnScriptListSelected(wxListEvent& event)
 {
 	long item = m_script_list->GetNextItem(-1,
 		wxLIST_NEXT_ALL,
@@ -1323,9 +1255,21 @@ void MoviePanel::OnScriptListSelected(wxListEvent &event)
 	}
 }
 
-//auto key
-void MoviePanel::OnGenKey(wxCommandEvent& event) {
-	GenKey();
+int MoviePanel::GetScriptFiles(wxArrayString& list)
+{
+	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+	exePath = wxPathOnly(exePath);
+	wxString loc = exePath + GETSLASH() + "Scripts" +
+		GETSLASH() + "*.txt";
+	wxLogNull logNo;
+	wxString file = wxFindFirstFile(loc);
+	while (!file.empty())
+	{
+		list.Add(file);
+		file = wxFindNextFile();
+	}
+	list.Sort();
+	return list.GetCount();
 }
 
 //ch1
@@ -1533,7 +1477,7 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	ch_enlarge->SetValue(enlarge);
 	wxSlider* sl_enlarge = new wxSlider(panel, ID_ENLARGE_SLDR,
 		10, 10, 100);
-	sl_enlarge->Bind(wxEVT_COMMAND_SLIDER_UPDATED, &MoviePanel::OnSlEnlargeScroll, panel);
+	sl_enlarge->Bind(wxEVT_SCROLL_CHANGED, &MoviePanel::OnSlEnlargeScroll, panel);
 	sl_enlarge->Enable(enlarge);
 	sl_enlarge->SetValue(std::round(enlarge_scale * 10));
 	wxFloatingPointValidator<double> vald_fp(1);

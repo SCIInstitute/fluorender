@@ -921,7 +921,7 @@ MainFrame::MainFrame(
 		m_proj_panel->Split(1, wxBOTTOM);
 	m_adjust_view->LoadPerspective();
 	m_clip_view->LoadPerspective();
-	glbin_moviemaker->SetMainFrame(this);
+	glbin_moviemaker.SetMainFrame(this);
 }
 
 MainFrame::~MainFrame()
@@ -1001,7 +1001,7 @@ wxString MainFrame::CreateView(int row)
 
 	m_vrv_list.push_back(vrv);
 	if (m_movie_view)
-		m_movie_view->AddView(vrv->GetName());
+		m_movie_view->FluoUpdate({ gstMovViewList });
 
 	//reset gl
 	for (int i = 0; i < GetViewNum(); ++i)

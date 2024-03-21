@@ -76,63 +76,16 @@ public:
 	void DecFrame();
 	void Save(const wxString& filename);
 
-	//simple animation
-	
-
 	//keyframe movie
 	void SetKeyframeMovie(bool val);
+	void GenKey();
 
+	//crop
+	void SetCropEnable(bool val);
+	void SetCropValues(int, int, int, int);
 
-
-	void SetRotate(bool value)
-	{
-		m_rotate = value;
-		if (m_rotate)
-		{
-			m_x_rd->Enable();
-			m_y_rd->Enable();
-			m_z_rd->Enable();
-			m_degree_text->Enable();
-			m_rot_chk->SetValue(true);
-		}
-		else
-		{
-			m_x_rd->Disable();
-			m_y_rd->Disable();
-			m_z_rd->Disable();
-			m_degree_text->Disable();
-			m_rot_chk->SetValue(false);
-		}
-	}
-	bool GetRotate() { return m_rotate; }
-	void SetTimeSeq(bool value);
-	bool GetTimeSeq() { return m_time_seq; }
-	void SetRotAxis(int value)
-	{
-		m_rot_axis = value;
-		if (m_rot_axis == 0)
-			m_x_rd->SetValue(true);
-		else if (m_rot_axis == 1)
-			m_y_rd->SetValue(true);
-		else if (m_rot_axis == 2)
-			m_z_rd->SetValue(true);
-	}
-	int GetRotAxis() { return m_rot_axis; }
-	void SetRotDeg(int value)
-	{
-		m_rot_deg = value;
-		m_degree_text->SetValue(wxString::Format("%d", m_rot_deg));
-	}
-	int GetRotDeg() { return m_rot_deg; }
-	void UpdateCrop();
-
-	void GetScriptSettings(bool sel);
-
-	void GetSettings();
+	//script
 	int GetScriptFiles(wxArrayString& list);
-	void AddScriptToList();
-
-
 
 private:
 	RenderCanvas* m_view;
@@ -154,8 +107,11 @@ private:
 	wxTextCtrl *m_start_frame_text;
 	wxButton* m_end_frame_st;
 	wxTextCtrl *m_end_frame_text;
+	wxButton *m_inc_time_btn;
+	wxButton *m_dec_time_btn;
+	wxTextCtrl *m_cur_frame_text;
 
-	//controls
+	//basic movie controls
 	wxCheckBox *m_rot_chk;
 	wxRadioButton *m_x_rd;
 	wxRadioButton *m_y_rd;
@@ -163,14 +119,8 @@ private:
 	wxTextCtrl *m_degree_text;
 	wxComboBox *m_rot_int_cmb;
 
-
-
-	//basic movie controls
 	wxCheckBox *m_seq_chk;
 	wxCheckBox *m_bat_chk;
-	wxButton *m_inc_time_btn;
-	wxButton *m_dec_time_btn;
-	wxTextCtrl *m_cur_frame_text;
 
 	//key frame
 	wxCheckBox* m_keyframe_chk;
@@ -201,9 +151,6 @@ private:
 	wxSpinButton* m_height_spin;
 
 private:
-
-private:
-	void GenKey();
 	wxWindow* CreateSimplePage(wxWindow *parent);
 	wxWindow* CreateAdvancedPage(wxWindow *parent);
 	wxWindow* CreateAutoKeyPage(wxWindow *parent);
@@ -244,13 +191,23 @@ private:
 	//keyframe movie
 	void OnKeyframeChk(wxCommandEvent& event);
 
-	//right column
+	//auto key
+	void OnGenKey(wxCommandEvent& event);
+
+	//crop
 	void OnCropCheck(wxCommandEvent& event);
 	void OnResetCrop(wxCommandEvent& event);
 	void OnEditCrop(wxCommandEvent& event);
 
 	void OnCropSpinUp(wxSpinEvent& event);
 	void OnCropSpinDown(wxSpinEvent& event);
+
+	//script
+	void OnRunScriptChk(wxCommandEvent &event);
+	void OnScriptFileEdit(wxCommandEvent &event);
+	void OnScriptClearBtn(wxCommandEvent &event);
+	void OnScriptFileBtn(wxCommandEvent &event);
+	void OnScriptListSelected(wxListEvent &event);
 
 	//help
 	void OnChEnlargeCheck(wxCommandEvent &event);
@@ -263,25 +220,6 @@ private:
 	void OnDpiText(wxCommandEvent& event);
 	void OnChEmbedCheck(wxCommandEvent &event);
 	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
-
-	//script
-	void OnRunScriptChk(wxCommandEvent &event);
-	void OnScriptFileEdit(wxCommandEvent &event);
-	void OnScriptClearBtn(wxCommandEvent &event);
-	void OnScriptFileBtn(wxCommandEvent &event);
-	void OnScriptListSelected(wxListEvent &event);
-
-	//auto key
-	void OnListItemAct(wxListEvent &event);
-	void OnGenKey(wxCommandEvent& event);
-
-	//time slider
-
-	//checkboxes
-
-
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_MOVIEPANEL_H_

@@ -332,6 +332,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstSetGl "set gl"//set gl context
 #define gstRunScript "run script"//script run
 #define gstScriptFile "script file"
+#define gstScriptList "script list"
 #define gstCapture "capture"//capture modes
 #define gstCaptureRot "capture rot"
 #define gstCaptureRotOver "capture rot over"
@@ -518,6 +519,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstMovStage "mov stage"//0-moving to start angle; 1-moving to end; 2-rewind
 #define gstMovRewind4d "mov rewind 4d"
 #define gstMovRunning "mov running"//movie is currently running
+#define gstCropEnable "crop enable"
+#define gstCropValues "crop values"
 #define gstCropX "crop x"//movie frame properties
 #define gstCropY "crop y"
 #define gstCropW "crop w"

@@ -43,7 +43,7 @@ public:
 	{
 		return m_running;
 	}
-	void Play();
+	void Play(bool back);
 	void Start();
 	void Stop();
 	void Resume();
@@ -61,6 +61,8 @@ public:
 	void SetMainFrame(MainFrame* frame);
 	void SetView(RenderCanvas* view);
 	void SetFileName(const wxString& filename) { m_filename = filename; }
+	void SetLoop(bool val) { m_loop = val; }
+	bool GetLoop() { return m_loop; }
 
 	void SetKeyframeEnable(bool val) { m_keyframe_enable = val; }
 	bool GetKeyframeEnable() { return m_keyframe_enable; }
@@ -104,14 +106,14 @@ public:
 	{
 		m_movie_len = val;
 		if (val > 0)
-			m_fps = m_frame_num / m_movie_len;
+			m_fps = (m_frame_num - 1) / m_movie_len;
 	}
 	double GetMovieLength() { return m_movie_len; }
 	void SetFps(double val)
 	{
 		m_fps = val;
 		if (val > 0)
-			m_movie_len = m_frame_num * m_fps;
+			m_movie_len = (m_frame_num - 1) * m_fps;
 	}
 	double GetFps() { return m_fps; }
 	void SetStartFrame(int val)
@@ -121,7 +123,7 @@ public:
 			m_start_frame = m_end_frame - 1;
 		m_frame_num = m_end_frame - m_start_frame + 1;
 		if (m_fps > 0)
-			m_movie_len = m_frame_num * m_fps;
+			m_movie_len = (m_frame_num - 1) * m_fps;
 	}
 	int GetStartFrame() { return m_start_frame; }
 	void SetEndFrame(int val)
@@ -131,7 +133,7 @@ public:
 			m_end_frame = m_start_frame + 1;
 		m_frame_num = m_end_frame - m_start_frame + 1;
 		if (m_fps > 0)
-			m_movie_len = m_frame_num * m_fps;
+			m_movie_len = (m_frame_num - 1) * m_fps;
 	}
 	int GetEndFrame() { return m_end_frame; }
 	void SetCurrentFrame(int val)
@@ -159,16 +161,18 @@ public:
 		int frame = m_start_frame + std::round(val * m_fps);
 		SetCurrentFrame(frame);
 	}
+	double GetCurProg() { return m_cur_frame / (m_frame_num - 1); }
 	double GetCurrentTime() { return m_cur_time; }
-	void SetCropEnable(bool val) { m_crop = val; }
+	void SetCropEnable(bool val);
 	bool GetCropEnable() { return m_crop; }
-	void SetCropX(int val) { m_crop_x = val; }
+	void SetCropValues(int, int, int, int);
+	void SetCropX(int val);
 	int GetCropX() { return m_crop_x; }
-	void SetCropY(int val) { m_crop_y = val; }
+	void SetCropY(int val);
 	int GetCropY() { return m_crop_y; }
-	void SetCropW(int val) { m_crop_w = val; }
+	void SetCropW(int val);
 	int GetCropW() { return m_crop_w; }
-	void SetCropH(int val) { m_crop_h = val; }
+	void SetCropH(int val);
 	int GetCropH() { return m_crop_h; }
 	void SetCamLock(bool val) { m_cam_lock = val; }
 	bool GetCamLock() { return m_cam_lock; }
@@ -191,6 +195,8 @@ private:
 	bool m_record;
 	bool m_delayed_stop;
 	bool m_timer_hold;//for temporary hold
+	bool m_reverse;//play backward
+	bool m_loop;//rewind after finish and restart play
 	//save
 	wxString m_filename;
 	wxString filetype_;
@@ -212,6 +218,7 @@ private:
 	int m_end_frame;
 	int m_cur_frame;
 	double m_cur_time;//time in sec
+	double m_cur_prog;//normalized time between 0 and 1
 
 	//cropping
 	bool m_crop;//enable cropping
