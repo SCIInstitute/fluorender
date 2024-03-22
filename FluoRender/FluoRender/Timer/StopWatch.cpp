@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2021 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -25,14 +25,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "Timer.h"
+#include <StopWatch.hpp>
 #include <chrono>
-#include <assert.h>
 
+using namespace fluo;
 using namespace std::chrono;
 // Default constructor
 //
-Fltimer::Fltimer(unsigned int nBoxFilterSize) :
+StopWatch::StopWatch(unsigned int nBoxFilterSize) :
 	_nStartCount(0),
 	_nStopCount(0),
 	_nFrequency(0),
@@ -54,10 +54,32 @@ Fltimer::Fltimer(unsigned int nBoxFilterSize) :
 		_aIntervals[iInterval] = 0.0;
 }
 
+StopWatch::StopWatch(const StopWatch& data, const CopyOp& copyop, bool copy_values) :
+	_nStartCount(data._nStartCount),
+	_nStopCount(data._nStopCount),
+	_nFrequency(data._nFrequency),
+	_nLastPeriod(data._nLastPeriod),
+	_nSum(data._nSum),
+	_nTotal(data._nTotal),
+	_nCount(data._nCount),
+	_nBoxFilterSize(data._nBoxFilterSize),
+	_iFilterPosition(data._iFilterPosition),
+	_aIntervals(data._aIntervals),
+	_bClockRuns(data._bClockRuns)
+{
+	// create array to store timing results
+	_aIntervals = new double[_nBoxFilterSize];
+
+	// initialize inverals with 0
+	for (unsigned int iInterval = 0; iInterval < _nBoxFilterSize; ++iInterval)
+		_aIntervals[iInterval] = 0.0;
+}
+
 // Destructor
 //
-Fltimer::~Fltimer()
+StopWatch::~StopWatch()
 {
+	stop();
 	delete[] _aIntervals;
 }
 
@@ -68,7 +90,7 @@ Fltimer::~Fltimer()
 // start
 //
 void
-Fltimer::start()
+StopWatch::start()
 {
 	if (_bClockRuns) return;
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -79,7 +101,7 @@ Fltimer::start()
 // stop
 //
 void
-Fltimer::stop()
+StopWatch::stop()
 {
 	if (!_bClockRuns) return;
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -97,7 +119,7 @@ Fltimer::stop()
 // sample
 //
 void
-Fltimer::sample()
+StopWatch::sample()
 {
 	if (!_bClockRuns) return;
 	unsigned long long nCurrentCount;
@@ -125,7 +147,7 @@ Fltimer::sample()
 //      Time interval in ms
 //
 double
-Fltimer::time()
+StopWatch::time()
 const
 {
 	return _nLastPeriod;
@@ -140,14 +162,14 @@ const
 //      the result is undetermined.
 //
 double
-Fltimer::average()
+StopWatch::average()
 const
 {
 	return _nSum / _nBoxFilterSize;
 }
 
 unsigned long long
-Fltimer::count() const
+StopWatch::count() const
 {
 	if (_nCount >= _nBoxFilterSize)
 		return _nCount - _nBoxFilterSize;
@@ -156,16 +178,26 @@ Fltimer::count() const
 }
 
 double
-Fltimer::total_time() const
+StopWatch::total_time() const
 {
 	return _nTotal;
 }
 
 double
-Fltimer::total_fps() const
+StopWatch::total_fps() const
 {
 	if (_nCount >= _nBoxFilterSize)
 		return static_cast<double>(_nCount) / _nTotal;
 	else
 		return 0;
+}
+
+unsigned long long StopWatch::sys_time()
+{
+	return time_point_cast<seconds>(system_clock::now()).time_since_epoch().count();
+}
+
+unsigned long long StopWatch::get_ticks()
+{
+	return time_point_cast<milliseconds>(steady_clock::now()).time_since_epoch().count();
 }

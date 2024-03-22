@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
+#include <AsyncTimer.hpp>
+#include <AsyncTimerFactory.hpp>
 
 MovieMaker::MovieMaker() :
 	m_frame(0),
@@ -40,8 +42,7 @@ MovieMaker::MovieMaker() :
 	m_delayed_stop(false),
 	m_timer_hold(false),
 	m_reverse(false),
-	m_loop(false),
-	m_timer(0)
+	m_loop(false)
 {
 	m_keyframe_enable = false;
 	m_rotate = true;
@@ -67,12 +68,11 @@ MovieMaker::MovieMaker() :
 
 	m_cam_lock = false;
 	m_cam_lock_type = 0;
+
 }
 
 MovieMaker::~MovieMaker()
 {
-	if (m_timer)
-		delete m_timer;
 }
 
 void MovieMaker::Play(bool back)
@@ -113,7 +113,9 @@ void MovieMaker::Start()
 
 void MovieMaker::Stop()
 {
-	m_timer->Stop();
+	fluo::AsyncTimer* timer = glbin_atmf->findFirst(m_timer);
+	if (timer)
+		timer->stop();
 	glbin.get_video_encoder().close();
 	m_record = false;
 	flvr::TextureRenderer::maximize_uptime_ = false;
@@ -135,7 +137,9 @@ void MovieMaker::Hold()
 {
 	if (!m_timer_hold && m_running)
 	{
-		m_timer->Stop();
+		fluo::AsyncTimer* timer = glbin_atmf->findFirst(m_timer);
+		if (timer)
+			timer->stop();
 		m_timer_hold = true;
 		m_running = false;
 	}
@@ -587,8 +591,11 @@ void MovieMaker::SetCropH(int val)
 			std::round(m_crop_y - m_crop_h / 2.0), m_crop_w, m_crop_h);
 }
 
-void MovieMaker::OnTimer(wxTimerEvent& event)
+void MovieMaker::OnTimer()
 {
+	if (!m_running)
+		return;
+
 	//get all of the progress info
 	if (m_delayed_stop)
 	{
@@ -643,10 +650,20 @@ void MovieMaker::OnTimer(wxTimerEvent& event)
 
 void MovieMaker::start_timer()
 {
-	if (!m_timer)
+	fluo::AsyncTimer* timer = 0;
+	if (m_timer.empty())
 	{
-		m_timer = new wxTimer(this);
-		m_timer->Bind(wxEVT_TIMER, &MovieMaker::OnTimer, this);
+		timer = glbin_atmf->build();
+		if (timer)
+		{
+			m_timer = timer->getName();
+			timer->setFunc(std::bind(&MovieMaker::OnTimer, this));
+		}
 	}
-	m_timer->Start(std::round(1000.0 / m_fps));
+	else
+		timer = glbin_atmf->findFirst(m_timer);
+	if (!timer)
+		return;
+	long lval = long(std::round(1000.0 / m_fps));
+	timer->restart(lval);
 }

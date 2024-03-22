@@ -27,6 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Global.h>
+#include <AsyncTimerFactory.hpp>
+#include <StopWatchFactory.hpp>
+#include <SearchVisitor.hpp>
 
 using namespace fluo;
 
@@ -41,6 +44,10 @@ Global::Global() :
 	comp_gen_table_.setParams(get_params("comp_gen"));
 	//vol prop
 	vol_prop_table_.setParams(get_params("vol_prop"));
+
+	origin_ = ref_ptr<Group>(new Group());
+	origin_->setName(gstOrigin);
+	BuildFactories();
 }
 
 void Global::gen_params_list()
@@ -349,4 +356,56 @@ VolumeDataDefault& Global::get_vol_def()
 MovieDefault& Global::get_movie_def()
 {
 	return main_settings_.m_movie_def;
+}
+
+AsyncTimer* Global::getAsyncTimer(const std::string& name)
+{
+	return glbin_atmf->findFirst(name);
+}
+
+StopWatch* Global::getStopWatch(const std::string& name)
+{
+	return glbin_swhf->findFirst(name);
+}
+
+Object* Global::get(const std::string& name, Group* start)
+{
+	SearchVisitor visitor;
+	visitor.matchName(name);
+	if (start)
+		start->accept(visitor);
+	else
+		origin_->accept(visitor);
+	ObjectList* list = visitor.getResult();
+	if (list->empty())
+		return 0;
+	else
+		return (*list)[0];
+}
+
+AsyncTimerFactory* Global::getAsyncTimerFactory()
+{
+	Object* obj = get(gstAsyncTimerFactory);
+	if (!obj)
+		return 0;
+	return dynamic_cast<AsyncTimerFactory*>(obj);
+}
+
+StopWatchFactory* Global::getStopWatchFactory()
+{
+	Object* obj = get(gstStopWatchFactory);
+	if (!obj)
+		return 0;
+	return dynamic_cast<StopWatchFactory*>(obj);
+}
+
+void Global::BuildFactories()
+{
+	AsyncTimerFactory* f1 = new AsyncTimerFactory();
+	f1->createDefault();
+	origin_->addChild(f1);
+	StopWatchFactory* f2 = new StopWatchFactory();
+	f2->createDefault();
+	origin_->addChild(f2);
+
 }

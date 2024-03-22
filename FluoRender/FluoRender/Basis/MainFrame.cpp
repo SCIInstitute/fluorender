@@ -57,6 +57,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CalculationDlg.h>
 #include <MachineLearningDlg.h>
 #include <ScriptBreakDlg.h>
+#include <AsyncTimerFactory.hpp>
 #include <Tester.h>
 #include <compatibility.h>
 #include <JVMInitializer.h>
@@ -922,6 +923,7 @@ MainFrame::MainFrame(
 	m_adjust_view->LoadPerspective();
 	m_clip_view->LoadPerspective();
 	glbin_moviemaker.SetMainFrame(this);
+	glbin_moviemaker.SetView(vrv->m_glview);
 	glbin_mov_def.Apply(&glbin_moviemaker);
 	m_movie_view->FluoUpdate();
 }
@@ -967,6 +969,8 @@ void MainFrame::OnExit(wxCommandEvent& event)
 
 void MainFrame::OnClose(wxCloseEvent &event)
 {
+	glbin_moviemaker.Stop();
+
 	bool vrv_saved = false;
 	for (unsigned int i=0; i<m_vrv_list.size(); ++i)
 	{

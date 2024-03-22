@@ -28,13 +28,13 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MOVIEMAKER_H_
 #define _MOVIEMAKER_H_
 
-#include <wx/timer.h>
+#include <wx/string.h>
 #include <vector>
 #include <string>
 
 class MainFrame;
 class RenderCanvas;
-class MovieMaker : public wxEvtHandler
+class MovieMaker
 {
 public:
 	MovieMaker();
@@ -116,7 +116,7 @@ public:
 	{
 		m_fps = val;
 		if (val > 0)
-			m_movie_len = (m_frame_num - 1) * m_fps;
+			m_movie_len = (m_frame_num - 1) / m_fps;
 	}
 	double GetFps() { return m_fps; }
 	void SetStartFrame(int val)
@@ -126,7 +126,7 @@ public:
 			m_start_frame = m_end_frame - 1;
 		m_frame_num = m_end_frame - m_start_frame + 1;
 		if (m_fps > 0)
-			m_movie_len = (m_frame_num - 1) * m_fps;
+			m_movie_len = (m_frame_num - 1) / m_fps;
 	}
 	int GetStartFrame() { return m_start_frame; }
 	void SetEndFrame(int val)
@@ -136,7 +136,7 @@ public:
 			m_end_frame = m_start_frame + 1;
 		m_frame_num = m_end_frame - m_start_frame + 1;
 		if (m_fps > 0)
-			m_movie_len = (m_frame_num - 1) * m_fps;
+			m_movie_len = (m_frame_num - 1) / m_fps;
 	}
 	int GetEndFrame() { return m_end_frame; }
 	void SetCurrentFrame(int val)
@@ -164,7 +164,7 @@ public:
 		int frame = m_start_frame + std::round(val * m_fps);
 		SetCurrentFrame(frame);
 	}
-	double GetCurProg() { return m_cur_frame / (m_frame_num - 1); }
+	double GetCurProg() { return double(m_cur_frame) / (m_frame_num - 1); }
 	double GetCurrentTime() { return m_cur_time; }
 	void SetCropEnable(bool val);
 	bool GetCropEnable() { return m_crop; }
@@ -198,7 +198,6 @@ public:
 private:
 	MainFrame* m_frame;
 	RenderCanvas* m_view;
-	wxTimer* m_timer;
 	int m_last_frame;//last frame nunmber to save
 	double m_starting_rot;//starting degree of rotation
 	bool m_running;
@@ -241,9 +240,12 @@ private:
 	bool m_cam_lock;
 	int m_cam_lock_type;//0-not used;1-image center;2-click view;3-ruler;4-selection
 
+	//time
+	std::string m_timer;
+
 private:
 	//timer for playback.
-	void OnTimer(wxTimerEvent& event);
+	void OnTimer();
 	void start_timer();
 };
 

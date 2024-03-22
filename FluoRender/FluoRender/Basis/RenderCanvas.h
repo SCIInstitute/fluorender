@@ -50,7 +50,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/BBox.h>
 #include <Types/Quaternion.h>
 #include <compatibility.h>
-#include <Timer.h>
 #include <wxBasisSlider.h>
 
 #include <wx/wx.h>
@@ -1096,21 +1095,6 @@ private:
 	fluo::Quaternion m_q_cl;
 	fluo::Quaternion m_q_cl_zero;
 	double m_rotx_cl, m_roty_cl, m_rotz_cl;
-
-	////volume selector for segmentation
-	//flrd::VolumeSelector m_selector;
-
-	////calculator
-	//flrd::VolumeCalculator m_calculator;
-
-	////kernel executor
-	//KernelExecutor m_kernel_executor;
-
-	////scriptor
-	//flrd::ScriptProc m_scriptor;
-
-	//timer
-	Fltimer *m_timer;
 
 	//timer for full screen
 	wxTimer m_fullscreen_trigger;

@@ -143,6 +143,11 @@ namespace fluo
 
 		inline virtual const Object* get(size_t i) const { return objects_[i].get(); }
 
+		inline virtual Object* getLast()
+		{
+			return objects_.front().get();
+		}
+
 		inline bool contains(const Object* object) const
 		{
 			for (auto it = objects_.begin();

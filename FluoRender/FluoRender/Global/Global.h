@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define GLOBAL_H
 
 #include <Names.h>
+#include <Group.hpp>
 #include <MainSettings.h>
 #include <Tracking/VolCache.h>
 #include <Database/Params.h>
@@ -90,8 +91,16 @@ DEALINGS IN THE SOFTWARE.
 #define glbin_moviemaker fluo::Global::instance().get_movie_maker()
 #define glbin_data_manager fluo::Global::instance().get_data_manager()
 
+//time
+#define glbin_atmf fluo::Global::instance().getAsyncTimerFactory()
+#define glbin_swhf fluo::Global::instance().getStopWatchFactory()
+
 namespace fluo
 {
+	class AsyncTimer;
+	class StopWatch;
+	class AsyncTimerFactory;
+	class StopWatchFactory;
 	class Global
 	{
 	public:
@@ -183,8 +192,14 @@ namespace fluo
 		MovieMaker& get_movie_maker() { return m_movie_maker; }
 		DataManager& get_data_manager() { return m_data_manager; }
 
+		//time
+		Object* get(const std::string& name, Group* start = nullptr);
+		AsyncTimer* getAsyncTimer(const std::string& name);
+		StopWatch* getStopWatch(const std::string& name);
+		AsyncTimerFactory* getAsyncTimerFactory();
+		StopWatchFactory* getStopWatchFactory();
+
 	private:
-		Global();
 		static Global instance_;
 
 		flrd::CacheQueue cache_queue_;
@@ -229,6 +244,13 @@ namespace fluo
 		Interpolator m_interpolator;
 		MovieMaker m_movie_maker;
 		DataManager m_data_manager;
+
+		//time
+		ref_ptr<Group> origin_;//the root of everything else
+
+	private:
+		Global();
+		void BuildFactories();
 	};
 
 }

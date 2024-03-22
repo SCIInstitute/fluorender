@@ -57,7 +57,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wxSingleSlider.h>
 #include <wx/stdpaths.h>
 #include <Debug.h>
-#include <Timer.h>
+#include <StopWatch.hpp>
 #include <png_resource.h>
 #include <img/icons.h>
 #include <array>
@@ -373,7 +373,6 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 #endif
 #endif
 
-	m_timer = new Fltimer(10);
 	if (m_frame && m_frame->GetBenchmark())
 		m_benchmark = true;
 	else
@@ -503,21 +502,21 @@ RenderCanvas::~RenderCanvas()
 {
 	if (m_benchmark)
 	{
-		int msec = std::round(m_timer->total_time() * 1000.0);
-		double fps = m_timer->total_fps();
+		unsigned long long msec =
+			(unsigned long long)(glbin.getStopWatch(gstStopWatch)->total_time() * 1000.0);
+		unsigned long long count =
+			glbin.getStopWatch(gstStopWatch)->count();
+		double fps = glbin.getStopWatch(gstStopWatch)->total_fps();
 		wxString string = wxString("FluoRender has finished benchmarking.\n") +
 			wxString("Results:\n") +
 			wxString("Render size: ") + wxString::Format("%d X %d\n", m_size.GetWidth(), m_size.GetHeight()) +
-			wxString("Time: ") + wxString::Format("%d msec\n", msec) +
-			wxString("Frames: ") + wxString::Format("%llu\n", m_timer->count()) +
+			wxString("Time: ") + wxString::Format("%llu msec\n", msec) +
+			wxString("Frames: ") + wxString::Format("%llu\n", count) +
 			wxString("FPS: ") + wxString::Format("%.2f", fps);
 		wxMessageDialog *diag = new wxMessageDialog(this, string, "Benchmark Results",
 			wxOK | wxICON_INFORMATION);
 		diag->ShowModal();
 	}
-	m_timer->stop();
-	delete m_timer;
-
 	//glbin_vol_selector.SaveBrushSettings();
 
 #ifdef _WIN3
@@ -659,7 +658,7 @@ void RenderCanvas::Init()
 
 		m_initialized = true;
 
-		m_timer->start();
+		glbin.getStopWatch(gstStopWatch)->start();
 	}
 }
 
@@ -3946,7 +3945,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 
 	if (m_frame && m_frame->GetBenchmark())
 	{
-		double fps = 1.0 / m_timer->average();
+		double fps = 1.0 / glbin.getStopWatch(gstStopWatch)->average();
 		wxString title = wxString(FLUORENDER_TITLE) +
 			" " + wxString(VERSION_MAJOR_TAG) +
 			"." + wxString(VERSION_MINOR_TAG) +
@@ -5495,7 +5494,7 @@ void RenderCanvas::ForceDraw()
 	else
 		SwapBuffers();
 
-	m_timer->sample();
+	glbin.getStopWatch(gstStopWatch)->sample();
 	m_drawing = false;
 
 	//DBGPRINT(L"buffer swapped\t%d\n", m_interactive);
@@ -8629,7 +8628,7 @@ void RenderCanvas::DrawInfo(int nx, int ny)
 	float gapw = flvr::TextRenderer::text_texture_manager_.GetSize();
 	float gaph = gapw * 2;
 
-	double fps_ = 1.0 / m_timer->average();
+	double fps = 1.0 / glbin.getStopWatch(gstStopWatch)->average();
 	wxString str;
 	fluo::Color text_color = GetTextColor();
 	if (flvr::TextureRenderer::get_mem_swap())
@@ -8638,7 +8637,7 @@ void RenderCanvas::DrawInfo(int nx, int ny)
 			str = wxString::Format(
 				"Int: %s, FPS: %.2f, Bricks: %d, Quota: %d, Time: %lu, Pressure: %.2f",
 				m_interactive ? "Yes" : "No",
-				fps_ >= 0.0&&fps_<300.0 ? fps_ : 0.0,
+				fps >= 0.0&&fps<300.0 ? fps : 0.0,
 				flvr::TextureRenderer::get_finished_bricks(),
 				flvr::TextureRenderer::get_quota_bricks(),
 				flvr::TextureRenderer::get_cor_up_time(),
@@ -8647,7 +8646,7 @@ void RenderCanvas::DrawInfo(int nx, int ny)
 			str = wxString::Format(
 				"Int: %s, FPS: %.2f, Bricks: %d, Quota: %d, Time: %lu",
 				m_interactive ? "Yes" : "No",
-				fps_ >= 0.0&&fps_<300.0 ? fps_ : 0.0,
+				fps >= 0.0&&fps<300.0 ? fps : 0.0,
 				flvr::TextureRenderer::get_finished_bricks(),
 				flvr::TextureRenderer::get_quota_bricks(),
 				flvr::TextureRenderer::get_cor_up_time());
@@ -8669,10 +8668,10 @@ void RenderCanvas::DrawInfo(int nx, int ny)
 	{
 		if (glbin_vol_selector.GetBrushUsePres())
 			str = wxString::Format("FPS: %.2f, Pressure: %.2f",
-				fps_ >= 0.0&&fps_<300.0 ? fps_ : 0.0, glbin_vol_selector.GetPressure());
+				fps >= 0.0&&fps<300.0 ? fps : 0.0, glbin_vol_selector.GetPressure());
 		else
 			str = wxString::Format("FPS: %.2f",
-				fps_ >= 0.0&&fps_<300.0 ? fps_ : 0.0);
+				fps >= 0.0&&fps<300.0 ? fps : 0.0);
 	}
 	wstring wstr_temp = str.ToStdWstring();
 	px = gapw - nx / 2.0;

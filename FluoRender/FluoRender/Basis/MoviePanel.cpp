@@ -486,7 +486,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	m_rewind_btn = new wxButton(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(30, 30)));
 	m_rewind_btn->SetBitmap(wxGetBitmapFromMemory(rewind));
-	m_play_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnRewind, this);
+	m_rewind_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnRewind, this);
 	m_start_frame_st = new wxButton(this, wxID_ANY, "Start:",
 		wxDefaultPosition, FromDIP(wxSize(40, 30)));
 	m_start_frame_st->Bind(wxEVT_BUTTON, &MoviePanel::OnStartFrameBtn, this);
@@ -530,11 +530,10 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	sizerv->Add(5, 5);
 	sizerv->Add(sizer3, 0, wxEXPAND);
 	sizerv->Add(sizer4, 0, wxEXPAND);
-	SetSizerAndFit(sizerv);
+	SetSizer(sizerv);
 	Layout();
 	SetAutoLayout(true);
 	SetScrollRate(10, 10);
-
 	Thaw();
 }
 
@@ -619,14 +618,14 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstMovPlay))
 	{
 		if (glbin_moviemaker.IsRunning())
+			m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
+		else
 		{
 			if (glbin_settings.m_run_script)
 				m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
 			else
 				m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
 		}
-		else
-			m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
 	}
 
 	if (update_all || FOUND_VALUE(gstMovRotEnable))
@@ -912,6 +911,7 @@ void MoviePanel::OnNotebookPage(wxAuiNotebookEvent& event)
 		glbin_moviemaker.SetKeyframeEnable(true);
 
 	FluoUpdate({ gstCaptureParam });
+	event.Skip();
 }
 
 void MoviePanel::OnFpsEdit(wxCommandEvent& event)
@@ -920,6 +920,7 @@ void MoviePanel::OnFpsEdit(wxCommandEvent& event)
 	double val;
 	if (str.ToDouble(&val))
 		SetFps(val);
+	event.Skip();
 }
 
 void MoviePanel::OnMovieLenText(wxCommandEvent& event)
@@ -928,24 +929,28 @@ void MoviePanel::OnMovieLenText(wxCommandEvent& event)
 	double val;
 	if (str.ToDouble(&val))
 		SetMovieLength(val);
+	event.Skip();
 }
 
 void MoviePanel::OnViewSelected(wxCommandEvent& event)
 {
 	int val = m_views_cmb->GetCurrentSelection();
 	SetView(val);
+	event.Skip();
 }
 
 void MoviePanel::OnSliderStyle(wxCommandEvent& event)
 {
 	bool val = m_slider_btn->GetToolState(0);
 	SetSliderStyle(val);
+	event.Skip();
 }
 
 void MoviePanel::OnProgressScroll(wxScrollEvent& event)
 {
 	int val = m_progress_sldr->GetValue();
 	SetScrollFrame(val, false);
+	event.Skip();
 }
 
 void MoviePanel::OnStartFrameText(wxCommandEvent& event)
@@ -954,6 +959,7 @@ void MoviePanel::OnStartFrameText(wxCommandEvent& event)
 	long lval;
 	if (str.ToLong(&lval))
 		SetStartFrame(lval);
+	event.Skip();
 }
 
 void MoviePanel::OnEndFrameText(wxCommandEvent& event)
@@ -962,6 +968,7 @@ void MoviePanel::OnEndFrameText(wxCommandEvent& event)
 	long lval;
 	if (str.ToLong(&lval))
 		SetEndFrame(lval);
+	event.Skip();
 }
 
 void MoviePanel::OnCurFrameText(wxCommandEvent& event)
@@ -970,6 +977,7 @@ void MoviePanel::OnCurFrameText(wxCommandEvent& event)
 	long lval;
 	if (str.ToLong(&lval))
 		SetCurrentFrame(lval, false);
+	event.Skip();
 }
 
 void MoviePanel::OnCurTimeText(wxCommandEvent& event)
@@ -978,38 +986,45 @@ void MoviePanel::OnCurTimeText(wxCommandEvent& event)
 	double val;
 	if (str.ToDouble(&val))
 		SetCurrentTime(val, false);
+	event.Skip();
 }
 
 void MoviePanel::OnPlay(wxCommandEvent& event)
 {
 	Play();
+	event.Skip();
 }
 
 void MoviePanel::OnRewind(wxCommandEvent& event)
 {
 	Rewind();
+	event.Skip();
 }
 
 void MoviePanel::OnStartFrameBtn(wxCommandEvent& event)
 {
 	int frame = glbin_moviemaker.GetCurrentFrame();
 	SetStartFrame(frame);
+	event.Skip();
 }
 
 void MoviePanel::OnEndFrameBtn(wxCommandEvent& event)
 {
 	int frame = glbin_moviemaker.GetCurrentFrame();
 	SetEndFrame(frame);
+	event.Skip();
 }
 
 void MoviePanel::OnIncFrame(wxCommandEvent& event)
 {
 	IncFrame();
+	event.Skip();
 }
 
 void MoviePanel::OnDecFrame(wxCommandEvent& event)
 {
 	DecFrame();
+	event.Skip();
 }
 
 void MoviePanel::OnSave(wxCommandEvent& event)
@@ -1026,6 +1041,7 @@ void MoviePanel::OnSave(wxCommandEvent& event)
 		Save(fopendlg->GetPath());
 	}
 	delete fopendlg;
+	event.Skip();
 }
 
 void MoviePanel::OnRotateChecked(wxCommandEvent& event)
@@ -1033,6 +1049,7 @@ void MoviePanel::OnRotateChecked(wxCommandEvent& event)
 	bool val = m_rot_chk->GetValue();
 	glbin_moviemaker.SetRotateEnable(val);
 	FluoUpdate({ gstMovRotEnable });
+	event.Skip();
 }
 
 void MoviePanel::OnRotAxis(wxCommandEvent& event)
@@ -1046,6 +1063,7 @@ void MoviePanel::OnRotAxis(wxCommandEvent& event)
 		val = 2;
 	glbin_moviemaker.SetRotateAxis(val);
 	//FluoUpdate({ gstMovRotAxis });
+	event.Skip();
 }
 
 void MoviePanel::OnDegreeText(wxCommandEvent& event)
@@ -1054,12 +1072,14 @@ void MoviePanel::OnDegreeText(wxCommandEvent& event)
 	long ival = 0;
 	str.ToLong(&ival);
 	glbin_moviemaker.SetRotateDeg(ival);
+	event.Skip();
 }
 
 void MoviePanel::OnRotIntCmb(wxCommandEvent& event)
 {
 	int val = m_rot_int_cmb->GetCurrentSelection();
 	glbin_moviemaker.SetRotIntType(val);
+	event.Skip();
 }
 
 void MoviePanel::OnSequenceChecked(wxCommandEvent& event)
@@ -1069,6 +1089,7 @@ void MoviePanel::OnSequenceChecked(wxCommandEvent& event)
 		glbin_moviemaker.SetSeqMode(1);
 	glbin_moviemaker.SetTimeSeqEnable(val);
 	FluoUpdate({});
+	event.Skip();
 }
 
 void MoviePanel::OnBatchChecked(wxCommandEvent& event)
@@ -1078,28 +1099,33 @@ void MoviePanel::OnBatchChecked(wxCommandEvent& event)
 		glbin_moviemaker.SetSeqMode(2);
 	glbin_moviemaker.SetTimeSeqEnable(val);
 	FluoUpdate({});
+	event.Skip();
 }
 
 void MoviePanel::OnKeyframeChk(wxCommandEvent& event)
 {
 	bool val = m_keyframe_chk->GetValue();
 	SetKeyframeMovie(val);
+	event.Skip();
 }
 
 //auto key
 void MoviePanel::OnGenKey(wxCommandEvent& event)
 {
 	GenKey();
+	event.Skip();
 }
 
 void MoviePanel::OnCropCheck(wxCommandEvent& event)
 {
 	SetCropEnable(m_crop_chk->GetValue());
+	event.Skip();
 }
 
 void MoviePanel::OnResetCrop(wxCommandEvent& event)
 {
 	SetCropEnable(true);
+	event.Skip();
 }
 
 void MoviePanel::OnEditCrop(wxCommandEvent& event)
@@ -1116,6 +1142,7 @@ void MoviePanel::OnEditCrop(wxCommandEvent& event)
 	temp.ToLong(&h);
 
 	SetCropValues(x, y, w, h);
+	event.Skip();
 }
 
 void MoviePanel::OnCropSpinUp(wxSpinEvent& event)
@@ -1139,6 +1166,7 @@ void MoviePanel::OnCropSpinUp(wxSpinEvent& event)
 			text_ctrl->SetValue(wxString::Format(
 				"%d", ival + 1));
 	}
+	event.Skip();
 }
 
 void MoviePanel::OnCropSpinDown(wxSpinEvent& event)
@@ -1162,6 +1190,7 @@ void MoviePanel::OnCropSpinDown(wxSpinEvent& event)
 			text_ctrl->SetValue(wxString::Format(
 				"%d", ival - 1));
 	}
+	event.Skip();
 }
 
 //script
@@ -1189,6 +1218,7 @@ void MoviePanel::OnRunScriptChk(wxCommandEvent& event)
 		m_notebook->SetPageText(4, "Script");
 	}
 	m_view->RefreshGL(39);
+	event.Skip();
 }
 
 void MoviePanel::OnScriptFileEdit(wxCommandEvent& event)
@@ -1196,11 +1226,13 @@ void MoviePanel::OnScriptFileEdit(wxCommandEvent& event)
 	wxString str = m_script_file_text->GetValue();
 	glbin_settings.m_script_file = str;
 	m_view->SetScriptFile(str);
+	event.Skip();
 }
 
 void MoviePanel::OnScriptClearBtn(wxCommandEvent& event)
 {
 	m_script_file_text->Clear();
+	event.Skip();
 }
 
 void MoviePanel::OnScriptFileBtn(wxCommandEvent& event)
@@ -1227,6 +1259,7 @@ void MoviePanel::OnScriptFileBtn(wxCommandEvent& event)
 	}
 
 	delete fopendlg;
+	event.Skip();
 }
 
 void MoviePanel::OnScriptListSelected(wxListEvent& event)
@@ -1251,6 +1284,7 @@ void MoviePanel::OnScriptListSelected(wxListEvent& event)
 			OnRunScriptChk(event);
 		}
 	}
+	event.Skip();
 }
 
 int MoviePanel::GetScriptFiles(wxArrayString& list)

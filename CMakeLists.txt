@@ -442,7 +442,7 @@ add_library(TYPES_OBJ OBJECT
 # Timer
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Timer)
 file(GLOB timer_src FluoRender/FluoRender/Timer/*.cpp)
-file(GLOB timer_hdr FluoRender/FluoRender/Timer/*.h)
+file(GLOB timer_hdr FluoRender/FluoRender/Timer/*.hpp)
 add_library(TIMER_OBJ OBJECT
   ${timer_src} ${timer_hdr})
 
@@ -888,14 +888,14 @@ endif()
 
 #copy wxwidgets patch to its source dir
 #need to rebuild wxWidgets after this
-add_custom_command(TARGET FluoRender POST_BUILD
-  COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
-  "${FluoRender_SOURCE_DIR}/wxWidgets/include/wx/aui"
-  "${wxWidgets_ROOT_DIR}/include/wx/aui")
-add_custom_command(TARGET FluoRender POST_BUILD
-  COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
-  "${FluoRender_SOURCE_DIR}/wxWidgets/src/aui"
-  "${wxWidgets_ROOT_DIR}/src/aui")
+#add_custom_command(TARGET FluoRender POST_BUILD
+#  COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
+#  "${FluoRender_SOURCE_DIR}/wxWidgets/include/wx/aui"
+#  "${wxWidgets_ROOT_DIR}/include/wx/aui")
+#add_custom_command(TARGET FluoRender POST_BUILD
+#  COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
+#  "${FluoRender_SOURCE_DIR}/wxWidgets/src/aui"
+#  "${wxWidgets_ROOT_DIR}/src/aui")
 
 # copy Java code dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
