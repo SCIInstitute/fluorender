@@ -43,7 +43,30 @@ MovieMaker::MovieMaker() :
 	m_loop(false),
 	m_timer(0)
 {
-	glbin_mov_def.Apply(this);
+	m_keyframe_enable = false;
+	m_rotate = true;
+	m_rot_axis = 1;
+	m_rot_deg = 360;
+	m_rot_int_type = 0;
+	m_time_seq = false;
+	m_seq_mode = 0;
+
+	m_frame_num = 361;
+	m_movie_len = 12;
+	m_fps = 30;
+	m_start_frame = 0;
+	m_end_frame = 360;
+	m_cur_frame = 0;
+	m_cur_time = 0;
+
+	m_crop = false;
+	m_crop_x = 0;
+	m_crop_y = 0;
+	m_crop_w = 0;
+	m_crop_h = 0;
+
+	m_cam_lock = false;
+	m_cam_lock_type = 0;
 }
 
 MovieMaker::~MovieMaker()

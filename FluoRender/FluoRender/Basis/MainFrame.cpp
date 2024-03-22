@@ -922,6 +922,7 @@ MainFrame::MainFrame(
 	m_adjust_view->LoadPerspective();
 	m_clip_view->LoadPerspective();
 	glbin_moviemaker.SetMainFrame(this);
+	glbin_mov_def.Apply(&glbin_moviemaker);
 	m_movie_view->FluoUpdate();
 }
 
