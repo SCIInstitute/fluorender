@@ -1477,7 +1477,8 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	ch_enlarge->SetValue(enlarge);
 	wxSlider* sl_enlarge = new wxSlider(panel, ID_ENLARGE_SLDR,
 		10, 10, 100);
-	sl_enlarge->Bind(wxEVT_SCROLL_CHANGED, &MoviePanel::OnSlEnlargeScroll, panel);
+	sl_enlarge->Connect(sl_enlarge->GetId(), wxEVT_COMMAND_SLIDER_UPDATED,
+		wxScrollEventHandler(VMovieView::OnSlEnlargeScroll), NULL, panel);
 	sl_enlarge->Enable(enlarge);
 	sl_enlarge->SetValue(std::round(enlarge_scale * 10));
 	wxFloatingPointValidator<double> vald_fp(1);
