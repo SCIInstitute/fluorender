@@ -899,7 +899,7 @@ endif()
 add_custom_command(TARGET FluoRender PRE_BUILD
   COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
   "${FluoRender_SOURCE_DIR}/wxWidgets/include/wx/aui"
-  "${wxWidgets_INCLUDE_DIRS}/wx/aui")
+  "${wxWidgets_ROOT_DIR}/include/wx/aui")
 add_custom_command(TARGET FluoRender PRE_BUILD
   COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
   "${FluoRender_SOURCE_DIR}/wxWidgets/src/aui"
