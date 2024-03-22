@@ -2616,13 +2616,13 @@ void TraceDlg::DelVolCache(flrd::VolCache& vol_cache)
 void TraceDlg::OnCellPrev(wxCommandEvent &event)
 {
 	if (m_frame && m_frame->GetMovieView())
-		m_frame->GetMovieView()->DownFrame();
+		m_frame->GetMovieView()->DecFrame();
 }
 
 void TraceDlg::OnCellNext(wxCommandEvent &event)
 {
 	if (m_frame && m_frame->GetMovieView())
-		m_frame->GetMovieView()->UpFrame();
+		m_frame->GetMovieView()->IncFrame();
 }
 
 //auto tracking

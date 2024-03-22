@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define _MOVIEMAKER_H_
 
 #include <wx/timer.h>
+#include <vector>
+#include <string>
 
 class MainFrame;
 class RenderCanvas;
@@ -60,6 +62,7 @@ public:
 	//settings
 	void SetMainFrame(MainFrame* frame);
 	void SetView(RenderCanvas* view);
+	int GetViewIndex();
 	void SetFileName(const wxString& filename) { m_filename = filename; }
 	void SetLoop(bool val) { m_loop = val; }
 	bool GetLoop() { return m_loop; }
@@ -185,10 +188,17 @@ public:
 	}
 	int GetCamLockType() { return m_cam_lock_type; }
 
+	//autokey functions
+	void MakeKeys(int type);
+	std::vector<std::string> GetAutoKeyTypes();
+	void AutoKeyChanComb(int comb);
+	bool MoveOne(std::vector<bool>& chan_mask, int lv);
+	bool GetMask(std::vector<bool>& chan_mask);
+
 private:
 	MainFrame* m_frame;
 	RenderCanvas* m_view;
-	wxTimer m_timer;
+	wxTimer* m_timer;
 	int m_last_frame;//last frame nunmber to save
 	double m_starting_rot;//starting degree of rotation
 	bool m_running;
@@ -234,7 +244,7 @@ private:
 private:
 	//timer for playback.
 	void OnTimer(wxTimerEvent& event);
-
+	void start_timer();
 };
 
 #endif//_MOVIEMAKER_H_

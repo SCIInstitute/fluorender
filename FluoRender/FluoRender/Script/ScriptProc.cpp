@@ -1839,7 +1839,7 @@ void ScriptProc::RunCameraPoints()
 	if (m_frame)
 	{
 		glbin_settings.m_run_script = false;
-		m_frame->GetMovieView()->GetScriptSettings(false);
+		m_frame->GetMovieView()->FluoUpdate({ gstRunScript });
 	}
 }
 
@@ -2126,7 +2126,7 @@ void ScriptProc::RunDlcGetRulers()
 	{
 		//busy
 		if (m_view->m_tseq_cur_num == m_view->m_end_frame)
-			m_frame->GetMovieView()->Reset();//rewind and restart video
+			glbin_moviemaker.Reset();//rewind and restart video
 		return;
 	}
 
@@ -2280,9 +2280,9 @@ void ScriptProc::RunDlcLabel()
 		dlc->Train(maxiters);
 #else
 		std::string cmd = dlc->GetTrainCmd(maxiters);
-		m_frame->GetMovieView()->HoldRun();
+		glbin_moviemaker.Hold();
 		wxExecute(cmd);
-		m_frame->GetMovieView()->ResumeRun();
+		glbin_moviemaker.Resume();
 #endif
 	}
 }
@@ -2320,9 +2320,9 @@ void ScriptProc::ExportInfo()
 	if (filetype)
 	{
 		wxString command = filetype->GetOpenCommand(outputfile);
-		m_frame->GetMovieView()->HoldRun();
+		glbin_moviemaker.Hold();
 		wxExecute(command);
-		m_frame->GetMovieView()->ResumeRun();
+		glbin_moviemaker.Resume();
 	}
 }
 
@@ -2414,9 +2414,9 @@ void ScriptProc::ExportTemplate()
 	outputfile.Replace(" ", "%20");
 	outputfile = "file://" + outputfile;
 #endif
-	m_frame->GetMovieView()->HoldRun();
+	glbin_moviemaker.Hold();
 	::wxLaunchDefaultBrowser(outputfile);
-	m_frame->GetMovieView()->ResumeRun();
+	glbin_moviemaker.Resume();
 }
 
 void ScriptProc::ExportSpreadsheet()
@@ -2452,9 +2452,9 @@ void ScriptProc::ExportSpreadsheet()
 	if (filetype)
 	{
 		wxString command = filetype->GetOpenCommand(outputfile);
-		m_frame->GetMovieView()->HoldRun();
+		glbin_moviemaker.Hold();
 		wxExecute(command);
-		m_frame->GetMovieView()->ResumeRun();
+		glbin_moviemaker.Resume();
 	}
 }
 
@@ -2512,7 +2512,7 @@ void ScriptProc::ChangeScript()
 		glbin_settings.m_run_script = run_script;
 	if (!filename.IsEmpty())
 		glbin_settings.m_script_file = filename;
-	m_frame->GetMovieView()->GetScriptSettings(false);
+	m_frame->GetMovieView()->FluoUpdate({ gstScriptList });
 	m_fconfig_name = filename;
 }
 

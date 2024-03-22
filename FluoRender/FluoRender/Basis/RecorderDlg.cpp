@@ -468,9 +468,7 @@ wxDefaultPosition,
 frame->FromDIP(wxSize(450, 650)),
 0, "RecorderDlg"),
 m_frame(frame),
-m_view(0),
-m_cam_lock(false),
-m_cam_lock_type(0)
+m_view(0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -579,25 +577,16 @@ void RecorderDlg::SetSelection(int index)
 	}
 }
 
+void RecorderDlg::GenKey(int type)
+{
+	glbin_moviemaker.MakeKeys(type);
+	m_keylist->Update();
+}
+
 void RecorderDlg::OnAutoKey(wxCommandEvent &event)
 {
 	int sel = m_auto_key_cmb->GetSelection();
-
-	switch (sel)
-	{
-	case 0://isolations
-		AutoKeyChanComb(1);
-		break;
-	case 1://combination of two
-		AutoKeyChanComb(2);
-		break;
-	case 2://combination of three
-		AutoKeyChanComb(3);
-		break;
-	case 3://combination of all
-		break;
-	}
-
+	GenKey(sel);
 }
 
 void RecorderDlg::OnSetKey(wxCommandEvent &event)
@@ -847,114 +836,6 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 		group->type = interpolation;
 }
 
-bool RecorderDlg::MoveOne(vector<bool>& chan_mask, int lv)
-{
-	int i;
-	int cur_lv = 0;
-	int lv_pos = -1;
-	for (i=(int)chan_mask.size()-1; i>=0; i--)
-	{
-		if (chan_mask[i])
-		{
-			cur_lv++;
-			if (cur_lv == lv)
-			{
-				lv_pos = i;
-				break;
-			}
-		}
-	}
-	if (lv_pos >= 0)
-	{
-		if (lv_pos == (int)chan_mask.size()-lv)
-			return MoveOne(chan_mask, ++lv);
-		else
-		{
-			if (!chan_mask[lv_pos+1])
-			{
-				for (i=lv_pos; i<(int)chan_mask.size(); i++)
-				{
-					if (i==lv_pos)
-						chan_mask[i] = false;
-					else if (i<=lv_pos+lv)
-						chan_mask[i] = true;
-					else
-						chan_mask[i] = false;
-				}
-				return true;
-			}
-			else return false;//no space anymore
-		}
-	}
-	else return false;
-}
-
-bool RecorderDlg::GetMask(vector<bool>& chan_mask)
-{
-	return MoveOne(chan_mask, 1);
-}
-
-void RecorderDlg::AutoKeyChanComb(int comb)
-{
-	if (!m_frame)
-		return;
-	if (!m_view)
-	{
-		if (m_frame->GetView(0))
-			m_view = m_frame->GetView(0);
-		else
-			return;
-	}
-
-	wxString str = m_duration_text->GetValue();
-	double duration;
-	str.ToDouble(&duration);
-
-	FlKeyCode keycode;
-	FlKeyBoolean* flkeyB = 0;
-
-	double t = glbin_interpolator.GetLastT();
-	t = t<0.0?0.0:t;
-	if (t>0.0) t += duration;
-
-	int i;
-	int numChan = m_view->GetAllVolumeNum();
-	vector<bool> chan_mask;
-	//initiate mask
-	for (i=0; i<numChan; i++)
-	{
-		if (i < comb)
-			chan_mask.push_back(true);
-		else
-			chan_mask.push_back(false);
-	}
-
-	do
-	{
-		glbin_interpolator.Begin(t, duration);
-
-		//for all volumes
-		for (i=0; i<m_view->GetAllVolumeNum(); i++)
-		{
-			VolumeData* vd = m_view->GetAllVolumeData(i);
-			keycode.l0 = 1;
-			keycode.l0_name = m_view->m_vrv->GetName();
-			keycode.l1 = 2;
-			keycode.l1_name = vd->GetName();
-			//display only
-			keycode.l2 = 0;
-			keycode.l2_name = "display";
-			flkeyB = new FlKeyBoolean(keycode, chan_mask[i]);
-			glbin_interpolator.AddKey(flkeyB);
-		}
-
-		glbin_interpolator.End();
-		t += duration;
-	} while (GetMask(chan_mask));
-
-	m_keylist->Update();
-}
-
 void RecorderDlg::OnDelKey(wxCommandEvent &event)
 {
 	m_keylist->DeleteSel();
@@ -1003,15 +884,15 @@ wxWindow* RecorderDlg::CreateExtraCaptureControl(wxWindow* parent)
 
 void RecorderDlg::OnCamLockChk(wxCommandEvent &event)
 {
-	m_cam_lock = m_cam_lock_chk->GetValue();
+	glbin_moviemaker.SetCamLock(m_cam_lock_chk->GetValue());
 }
 
 void RecorderDlg::OnCamLockCmb(wxCommandEvent &event)
 {
-	m_cam_lock_type = m_cam_lock_cmb->GetSelection() + 1;
+	glbin_moviemaker.SetCamLockType(m_cam_lock_cmb->GetSelection() + 1);
 }
 
 void RecorderDlg::OnCamLockBtn(wxCommandEvent &event)
 {
-	m_view->SetLockCenter(m_cam_lock_type);
+	m_view->SetLockCenter(glbin_moviemaker.GetCamLockType());
 }

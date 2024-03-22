@@ -139,9 +139,7 @@ public:
 	}
 	void SetSelection(int index);
 
-	void AutoKeyChanComb(int comb);
-
-private:
+	void GenKey(int type);
 
 private:
 	MainFrame* m_frame;
@@ -176,8 +174,6 @@ private:
 private:
 	//insert/append key
 	void InsertKey(int index, double duration, int interpolation);
-	bool MoveOne(vector<bool>& chan_mask, int lv);
-	bool GetMask(vector<bool>& chan_mask);
 
 	void OnCh1Check(wxCommandEvent &event);
 	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);

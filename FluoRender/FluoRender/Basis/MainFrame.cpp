@@ -922,6 +922,7 @@ MainFrame::MainFrame(
 	m_adjust_view->LoadPerspective();
 	m_clip_view->LoadPerspective();
 	glbin_moviemaker.SetMainFrame(this);
+	m_movie_view->FluoUpdate();
 }
 
 MainFrame::~MainFrame()
@@ -1587,9 +1588,10 @@ void MainFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* 
 
 		if (enable_4d)
 		{
-			m_movie_view->SetTimeSeq(true);
-			m_movie_view->SetRotate(false);
-			m_movie_view->SetCurrentTime(v->m_tseq_cur_num);
+			glbin_moviemaker.SetTimeSeqEnable(true);
+			glbin_moviemaker.SetRotateEnable(false);
+			glbin_moviemaker.SetCurrentFrame(v->m_tseq_cur_num);
+			m_movie_view->FluoUpdate({ gstMovSeqMode, gstMovRotEnable, gstCurrentFrame });
 		}
 
 		delete prg_diag;
@@ -1646,10 +1648,10 @@ void MainFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imagej)
 		}
 	}
 
-	if (run_mov && m_movie_view)
+	if (run_mov)
 	{
-		m_movie_view->SetFileName(glbin_settings.m_mov_filename);
-		m_movie_view->Run();
+		glbin_moviemaker.SetFileName(glbin_settings.m_mov_filename);
+		glbin_moviemaker.PlaySave();
 	}
 }
 
@@ -1818,7 +1820,7 @@ void MainFrame::ClearVrvList()
 wxString MainFrame::ScriptDialog(const wxString& title,
 	const wxString& wildcard, long style)
 {
-	m_movie_view->HoldRun();
+	glbin_moviemaker.Hold();
 	wxString result;
 	wxFileDialog* dlg = new wxFileDialog(
 		this, title, "", "",
@@ -1827,7 +1829,7 @@ wxString MainFrame::ScriptDialog(const wxString& title,
 	if (rval == wxID_OK)
 		result = dlg->GetPath();
 	delete dlg;
-	m_movie_view->ResumeRun();
+	glbin_moviemaker.Resume();
 	return result;
 }
 
@@ -3167,16 +3169,9 @@ void MainFrame::OnNewProject(wxCommandEvent& event)
 	m_cur_sel_type = 0;
 	m_cur_sel_vol = 0;
 	m_cur_sel_mesh = 0;
-	m_movie_view->Stop();
-	m_movie_view->SetView(0);
-	m_movie_view->SetRotate(true);
-	m_movie_view->SetRotAxis(1);
-	m_movie_view->SetTimeSeq(false);
-	m_movie_view->SetStartFrame(0);
-	m_movie_view->SetEndFrame(360);
-	m_movie_view->SetCurrentTime(0);
-	m_movie_view->GetScriptSettings(false);
-	m_movie_view->SetCrop(false);
+	glbin_moviemaker.Stop();
+	glbin_moviemaker.SetView(GetView(0));
+	glbin_mov_def.Apply(&glbin_moviemaker);
 	m_trace_dlg->GetSettings(GetView(0));
 	glbin_interpolator.Clear();
 	m_recorder_dlg->UpdateList();
@@ -3766,22 +3761,22 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 	fconfig.Write("z_link", m_clip_view->GetZLink());
 	//movie view
 	fconfig.SetPath("/movie_panel");
-	fconfig.Write("cur_page", m_movie_view->GetCurrentPage());
-	fconfig.Write("views_cmb", m_movie_view->GetView());
-	fconfig.Write("rot_check", m_movie_view->GetRotate());
-	fconfig.Write("seq_check", m_movie_view->GetTimeSeq());
-	fconfig.Write("rot_axis", m_movie_view->GetRotAxis());
-	fconfig.Write("rot_deg", m_movie_view->GetRotDeg());
-	fconfig.Write("movie_len", m_movie_view->GetMovieLen());
-	fconfig.Write("fps", m_movie_view->GetFps());
-	fconfig.Write("crop", m_movie_view->GetCrop());
-	fconfig.Write("crop_x", m_movie_view->GetCropX());
-	fconfig.Write("crop_y", m_movie_view->GetCropY());
-	fconfig.Write("crop_w", m_movie_view->GetCropW());
-	fconfig.Write("crop_h", m_movie_view->GetCropH());
-	fconfig.Write("cur_frame", m_movie_view->GetCurFrame());
-	fconfig.Write("start_frame", m_movie_view->GetStartFrame());
-	fconfig.Write("end_frame", m_movie_view->GetEndFrame());
+	fconfig.Write("key frame enable", glbin_moviemaker.GetKeyframeEnable());
+	fconfig.Write("views_cmb", glbin_moviemaker.GetViewIndex());
+	fconfig.Write("rot_check", glbin_moviemaker.GetRotateEnable());
+	fconfig.Write("seq_check", glbin_moviemaker.GetTimeSeqEnable());
+	fconfig.Write("rot_axis", glbin_moviemaker.GetRotateAxis());
+	fconfig.Write("rot_deg", glbin_moviemaker.GetRotateDeg());
+	fconfig.Write("movie_len", glbin_moviemaker.GetMovieLength());
+	fconfig.Write("fps", glbin_moviemaker.GetFps());
+	fconfig.Write("crop", glbin_moviemaker.GetCropEnable());
+	fconfig.Write("crop_x", glbin_moviemaker.GetCropX());
+	fconfig.Write("crop_y", glbin_moviemaker.GetCropY());
+	fconfig.Write("crop_w", glbin_moviemaker.GetCropW());
+	fconfig.Write("crop_h", glbin_moviemaker.GetCropH());
+	fconfig.Write("cur_frame", glbin_moviemaker.GetCurrentFrame());
+	fconfig.Write("start_frame", glbin_moviemaker.GetStartFrame());
+	fconfig.Write("end_frame", glbin_moviemaker.GetEndFrame());
 	fconfig.Write("run_script", glbin_settings.m_run_script);
 	fconfig.Write("script_file", glbin_settings.m_script_file);
 	//tracking diag
@@ -5004,94 +4999,84 @@ void MainFrame::OpenProject(wxString& filename)
 
 		//set settings for frame
 		RenderCanvas* view = 0;
-		if (fconfig.Read("cur_page", &iVal))
+		if (fconfig.Read("key frame enable", &bVal))
 		{
-			m_movie_view->SetCurrentPage(iVal);
+			glbin_moviemaker.SetKeyframeEnable(bVal);
 		}
 		if (fconfig.Read("views_cmb", &iVal))
 		{
-			m_movie_view->SetView(iVal);
 			view = GetView(iVal);
+			glbin_moviemaker.SetView(view);
 		}
 		if (fconfig.Read("rot_check", &bVal))
 		{
-			m_movie_view->SetRotate(bVal);
+			glbin_moviemaker.SetRotateEnable(bVal);
 		}
 		if (fconfig.Read("seq_check", &bVal))
 		{
-			m_movie_view->SetTimeSeq(bVal);
+			glbin_moviemaker.SetTimeSeqEnable(bVal);
 		}
 		if (fconfig.Read("x_rd", &bVal))
 		{
 			if (bVal)
-				m_movie_view->SetRotAxis(0);
+				glbin_moviemaker.SetRotateAxis(0);
 		}
 		if (fconfig.Read("y_rd", &bVal))
 		{
 			if (bVal)
-				m_movie_view->SetRotAxis(1);
+				glbin_moviemaker.SetRotateAxis(1);
 		}
 		if (fconfig.Read("z_rd", &bVal))
 		{
 			if (bVal)
-				m_movie_view->SetRotAxis(2);
+				glbin_moviemaker.SetRotateAxis(2);
 		}
 		if (fconfig.Read("rot_axis", &iVal))
 		{
-			m_movie_view->SetRotAxis(iVal);
+			glbin_moviemaker.SetRotateAxis(iVal);
 		}
 		if (fconfig.Read("rot_deg", &iVal))
 		{
-			m_movie_view->SetRotDeg(iVal);
+			glbin_moviemaker.SetRotateDeg(iVal);
 		}
 		if (fconfig.Read("movie_len", &dVal))
 		{
-			m_movie_view->SetMovieLen(dVal);
+			glbin_moviemaker.SetMovieLength(dVal);
 		}
 		if (fconfig.Read("fps", &dVal))
 		{
-			m_movie_view->SetFps(dVal);
+			glbin_moviemaker.SetFps(dVal);
 		}
 		if (fconfig.Read("crop", &bVal))
 		{
-			m_movie_view->SetCrop(bVal);
+			glbin_moviemaker.SetCropEnable(bVal);
 		}
-		bool b_x, b_y, b_w, b_h;
-		b_x = b_y = b_w = b_h = false;
 		if (fconfig.Read("crop_x", &iVal))
 		{
-			m_movie_view->SetCropX(iVal);
-			b_x = true;
+			glbin_moviemaker.SetCropX(iVal);
 		}
 		if (fconfig.Read("crop_y", &iVal))
 		{
-			m_movie_view->SetCropY(iVal);
-			b_y = true;
+			glbin_moviemaker.SetCropY(iVal);
 		}
 		if (fconfig.Read("crop_w", &iVal))
 		{
-			m_movie_view->SetCropW(iVal);
-			b_w = true;
+			glbin_moviemaker.SetCropW(iVal);
 		}
 		if (fconfig.Read("crop_h", &iVal))
 		{
-			m_movie_view->SetCropH(iVal);
-			b_h = true;
-		}
-		if (b_x && b_y && b_w && b_h)
-		{
-			m_movie_view->UpdateCrop();
+			glbin_moviemaker.SetCropH(iVal);
 		}
 		int startf = 0, endf = 0, curf = 0;
 		if (fconfig.Read("start_frame", &startf))
-			m_movie_view->SetStartFrame(startf);
+			glbin_moviemaker.SetStartFrame(startf);
 		if (fconfig.Read("end_frame", &endf))
-			m_movie_view->SetEndFrame(endf);
+			glbin_moviemaker.SetEndFrame(endf);
 		if (fconfig.Read("cur_frame", &curf))
 		{
 			if (curf && curf >= startf && curf <= endf)
 			{
-				m_movie_view->SetCurrentTime(curf);
+				glbin_moviemaker.SetCurrentTime(curf);
 				RenderCanvas* view = GetLastView();
 				if (view)
 				{
@@ -5103,7 +5088,7 @@ void MainFrame::OpenProject(wxString& filename)
 			glbin_settings.m_run_script = bVal;
 		if (fconfig.Read("script_file", &sVal))
 			glbin_settings.m_script_file = sVal;
-		m_movie_view->GetScriptSettings(false);
+		m_movie_view->FluoUpdate();
 	}
 
 	//tracking diag

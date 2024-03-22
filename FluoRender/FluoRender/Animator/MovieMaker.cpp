@@ -33,7 +33,6 @@ DEALINGS IN THE SOFTWARE.
 MovieMaker::MovieMaker() :
 	m_frame(0),
 	m_view(0),
-	m_timer(this),
 	m_last_frame(-1),
 	m_starting_rot(0),
 	m_running(false),
@@ -41,14 +40,16 @@ MovieMaker::MovieMaker() :
 	m_delayed_stop(false),
 	m_timer_hold(false),
 	m_reverse(false),
-	m_loop(false)
+	m_loop(false),
+	m_timer(0)
 {
 	glbin_mov_def.Apply(this);
-	m_timer.Bind(wxEVT_TIMER, &MovieMaker::OnTimer, this);
 }
 
 MovieMaker::~MovieMaker()
 {
+	if (m_timer)
+		delete m_timer;
 }
 
 void MovieMaker::Play(bool back)
@@ -83,13 +84,13 @@ void MovieMaker::Start()
 			m_starting_rot = 0.;
 	}
 
-	m_timer.Start(std::round(1000.0 / m_fps));
+	start_timer();
 	m_running = true;
 }
 
 void MovieMaker::Stop()
 {
-	m_timer.Stop();
+	m_timer->Stop();
 	glbin.get_video_encoder().close();
 	m_record = false;
 	flvr::TextureRenderer::maximize_uptime_ = false;
@@ -101,7 +102,7 @@ void MovieMaker::Resume()
 {
 	if (m_timer_hold)
 	{
-		m_timer.Start(std::round(1000.0 / m_fps));
+		start_timer();
 		m_timer_hold = false;
 		m_running = true;
 	}
@@ -111,7 +112,7 @@ void MovieMaker::Hold()
 {
 	if (!m_timer_hold && m_running)
 	{
-		m_timer.Stop();
+		m_timer->Stop();
 		m_timer_hold = true;
 		m_running = false;
 	}
@@ -324,6 +325,134 @@ void MovieMaker::WriteFrameToFile()
 	}
 }
 
+void MovieMaker::MakeKeys(int type)
+{
+	switch (type)
+	{
+	case 0:
+		AutoKeyChanComb(1);
+		break;
+	case 1:
+		AutoKeyChanComb(2);
+		break;
+	case 2:
+		AutoKeyChanComb(3);
+		break;
+	}
+}
+
+std::vector<std::string> MovieMaker::GetAutoKeyTypes()
+{
+	std::vector<std::string> result;
+	result.push_back("Channel combination nC1");
+	result.push_back("Channel combination nC2");
+	result.push_back("Channel combination nC3");
+	return result;
+}
+
+void MovieMaker::AutoKeyChanComb(int comb)
+{
+	if (!m_frame)
+		return;
+	if (!m_view)
+	{
+		if (m_frame->GetView(0))
+			m_view = m_frame->GetView(0);
+		else
+			return;
+	}
+
+	FlKeyCode keycode;
+	FlKeyBoolean* flkeyB = 0;
+
+	double t = glbin_interpolator.GetLastT();
+	t = t < 0.0 ? 0.0 : t;
+	if (t > 0.0) t += m_movie_len;
+
+	int i;
+	int numChan = m_view->GetAllVolumeNum();
+	vector<bool> chan_mask;
+	//initiate mask
+	for (i = 0; i < numChan; i++)
+	{
+		if (i < comb)
+			chan_mask.push_back(true);
+		else
+			chan_mask.push_back(false);
+	}
+
+	do
+	{
+		glbin_interpolator.Begin(t, m_movie_len);
+
+		//for all volumes
+		for (i = 0; i < m_view->GetAllVolumeNum(); i++)
+		{
+			VolumeData* vd = m_view->GetAllVolumeData(i);
+			keycode.l0 = 1;
+			keycode.l0_name = m_view->GetName();
+			keycode.l1 = 2;
+			keycode.l1_name = vd->GetName();
+			//display only
+			keycode.l2 = 0;
+			keycode.l2_name = "display";
+			flkeyB = new FlKeyBoolean(keycode, chan_mask[i]);
+			glbin_interpolator.AddKey(flkeyB);
+		}
+
+		glbin_interpolator.End();
+		t += m_movie_len;
+	} while (GetMask(chan_mask));
+
+}
+
+bool MovieMaker::MoveOne(std::vector<bool>& chan_mask, int lv)
+{
+	int i;
+	int cur_lv = 0;
+	int lv_pos = -1;
+	for (i = (int)chan_mask.size() - 1; i >= 0; i--)
+	{
+		if (chan_mask[i])
+		{
+			cur_lv++;
+			if (cur_lv == lv)
+			{
+				lv_pos = i;
+				break;
+			}
+		}
+	}
+	if (lv_pos >= 0)
+	{
+		if (lv_pos == (int)chan_mask.size() - lv)
+			return MoveOne(chan_mask, ++lv);
+		else
+		{
+			if (!chan_mask[lv_pos + 1])
+			{
+				for (i = lv_pos; i < (int)chan_mask.size(); i++)
+				{
+					if (i == lv_pos)
+						chan_mask[i] = false;
+					else if (i <= lv_pos + lv)
+						chan_mask[i] = true;
+					else
+						chan_mask[i] = false;
+				}
+				return true;
+			}
+			else return false;//no space anymore
+		}
+	}
+	else return false;
+}
+
+bool MovieMaker::GetMask(std::vector<bool>& chan_mask)
+{
+	return MoveOne(chan_mask, 1);
+}
+
 void MovieMaker::SetMainFrame(MainFrame* frame)
 {
 	m_frame = frame;
@@ -332,6 +461,20 @@ void MovieMaker::SetMainFrame(MainFrame* frame)
 void MovieMaker::SetView(RenderCanvas* view)
 {
 	m_view = view;
+}
+
+int MovieMaker::GetViewIndex()
+{
+	if (!m_view || !m_frame)
+		return -1;
+
+	for (int i = 0; i < m_frame->GetViewNum(); ++i)
+	{
+		if (m_view == m_frame->GetView(i))
+			return i;
+	}
+
+	return -1;
 }
 
 void MovieMaker::SetTimeSeqEnable(bool val)
@@ -475,3 +618,12 @@ void MovieMaker::OnTimer(wxTimerEvent& event)
 	}
 }
 
+void MovieMaker::start_timer()
+{
+	if (!m_timer)
+	{
+		m_timer = new wxTimer(this);
+		m_timer->Bind(wxEVT_TIMER, &MovieMaker::OnTimer, this);
+	}
+	m_timer->Start(std::round(1000.0 / m_fps));
+}

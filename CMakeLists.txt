@@ -108,12 +108,9 @@ endif()
 
 #UI IDs
 add_definitions(-DID_START=5999)
-add_definitions(-DID_ADJUST_VIEW=ID_START+1)
-add_definitions(-DID_APROP_VIEW=ID_ADJUST_VIEW+31)
-add_definitions(-DID_BRUSH_TOOL=ID_APROP_VIEW+11)
+add_definitions(-DID_BRUSH_TOOL=ID_START+1)
 add_definitions(-DID_CALCULATION=ID_BRUSH_TOOL+51)
-add_definitions(-DID_CLIP_VIEW=ID_CALCULATION+21)
-add_definitions(-DID_COLOCALIZE=ID_CLIP_VIEW+41)
+add_definitions(-DID_COLOCALIZE=ID_CALCULATION+41)
 add_definitions(-DID_COMPONENT=ID_COLOCALIZE+11)
 add_definitions(-DID_CONVERT=ID_COMPONENT+171)
 add_definitions(-DID_COUNTING=ID_CONVERT+21)
@@ -121,9 +118,7 @@ add_definitions(-DID_LIST_PANEL1=ID_COUNTING+21)
 add_definitions(-DID_LIST_PANEL2=ID_LIST_PANEL1+11)
 add_definitions(-DID_MEASURE1=ID_LIST_PANEL2+11)
 add_definitions(-DID_MEASURE2=ID_MEASURE1+11)
-add_definitions(-DID_MANIPULATOR=ID_MEASURE2+21)
-add_definitions(-DID_MPROP_VIEW=ID_MANIPULATOR+21)
-add_definitions(-DID_NOISE_CANCEL=ID_MPROP_VIEW+21)
+add_definitions(-DID_NOISE_CANCEL=ID_MEASURE2+21)
 add_definitions(-DID_OCL=ID_NOISE_CANCEL+11)
 add_definitions(-DID_RECORD1=ID_OCL+11)
 add_definitions(-DID_RECORD2=ID_RECORD1+11)
@@ -134,12 +129,9 @@ add_definitions(-DID_TRACE1=ID_FP_RANGE+21)
 add_definitions(-DID_TRACE2=ID_TRACE1+11)
 add_definitions(-DID_TREE_PANEL1=ID_TRACE2+81)
 add_definitions(-DID_TREE_PANEL2=ID_TREE_PANEL1+31)
-add_definitions(-DID_MOVIEW_VIEW=ID_TREE_PANEL2+11)
-add_definitions(-DID_VPROP_VIEW=ID_MOVIEW_VIEW+61)
-add_definitions(-DID_VRENDER_FRAME=ID_VPROP_VIEW+71)
+add_definitions(-DID_VRENDER_FRAME=ID_TREE_PANEL2+71)
 add_definitions(-DID_VRENDER_VIEW1=ID_VRENDER_FRAME+51)
-add_definitions(-DID_VRENDER_VIEW2=ID_VRENDER_VIEW1+21)
-add_definitions(-DID_LEARNING=ID_VRENDER_VIEW2+51)
+add_definitions(-DID_LEARNING=ID_VRENDER_VIEW1+51)
 add_definitions(-DID_LEARNING_COMP_GEN=ID_LEARNING+11)
 add_definitions(-DID_LEARNING_VOL_PROP=ID_LEARNING_COMP_GEN+11)
 add_definitions(-DID_SCRIPT_BREAK=ID_LEARNING_VOL_PROP+11)
@@ -896,11 +888,11 @@ endif()
 
 #copy wxwidgets patch to its source dir
 #need to rebuild wxWidgets after this
-add_custom_command(TARGET FluoRender PRE_BUILD
+add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
   "${FluoRender_SOURCE_DIR}/wxWidgets/include/wx/aui"
   "${wxWidgets_ROOT_DIR}/include/wx/aui")
-add_custom_command(TARGET FluoRender PRE_BUILD
+add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
   "${FluoRender_SOURCE_DIR}/wxWidgets/src/aui"
   "${wxWidgets_ROOT_DIR}/src/aui")

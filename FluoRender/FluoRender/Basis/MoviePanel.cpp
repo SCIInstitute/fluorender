@@ -142,7 +142,7 @@ wxWindow* MoviePanel::CreateAdvancedPage(wxWindow *parent)
 
 	m_keyframe_chk = new wxCheckBox(page, wxID_ANY, "Enable keyframe movie");
 	m_keyframe_chk->Bind(wxEVT_CHECKBOX, &MoviePanel::OnKeyframeChk, this);
-	m_advanced_movie = new RecorderDlg(m_frame, this);
+	m_advanced_movie = new RecorderDlg(m_frame, page);
 	m_frame->m_recorder_dlg = m_advanced_movie;
 
 	//vertical sizer
@@ -173,12 +173,16 @@ wxWindow* MoviePanel::CreateAutoKeyPage(wxWindow *parent)
 	m_auto_key_list->InsertColumn(1, itemCol);
 	//options
 	//channel comb 1
-	long tmp = m_auto_key_list->InsertItem(0, "1", 0);
-	m_auto_key_list->SetItem(tmp, 1, "Channel combination nC1");
-	tmp = m_auto_key_list->InsertItem(1, "2", 0);
-	m_auto_key_list->SetItem(tmp, 1, "Channel combination nC2");
-	tmp = m_auto_key_list->InsertItem(2, "3", 0);
-	m_auto_key_list->SetItem(tmp, 1, "Channel combination nC3");
+	long tmp;
+	std::vector<std::string> str_list = glbin_moviemaker.GetAutoKeyTypes();
+	int i = 0;
+	wxString str;
+	for (auto& it : str_list)
+	{
+		str = wxString::Format("%d", i + 1);
+		tmp = m_auto_key_list->InsertItem(i, str, 0);
+		m_auto_key_list->SetItem(tmp, 1, it);
+	}
 	m_auto_key_list->SetColumnWidth(1, -1);
 	m_auto_key_list->Bind(wxEVT_LIST_ITEM_ACTIVATED, &MoviePanel::OnGenKey, this);
 
@@ -562,7 +566,7 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_fps_text->ChangeValue(wxString::Format("%.0f", glbin_moviemaker.GetFps()));
 
 	if (update_all || FOUND_VALUE(gstMovLength))
-		m_movie_len_text->ChangeValue(wxString::Format("%.2f", (int)(glbin_moviemaker.GetMovieLength())));
+		m_movie_len_text->ChangeValue(wxString::Format("%.2f", glbin_moviemaker.GetMovieLength()));
 
 	if (update_all || FOUND_VALUE(gstMovViewList))
 	{
@@ -882,13 +886,7 @@ void MoviePanel::GenKey()
 
 	if (item != -1)
 	{
-		if (item == 0)
-			m_advanced_movie->AutoKeyChanComb(1);
-		else if (item == 1)
-			m_advanced_movie->AutoKeyChanComb(2);
-		else if (item == 2)
-			m_advanced_movie->AutoKeyChanComb(3);
-
+		m_advanced_movie->GenKey(item);
 		m_notebook->SetSelection(1);
 	}
 }

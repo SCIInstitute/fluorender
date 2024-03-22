@@ -4122,7 +4122,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		{
 			m_tseq_forward = true;
 			if (m_frame && m_frame->GetMovieView())
-				m_frame->GetMovieView()->UpFrame();
+				m_frame->GetMovieView()->IncFrame();
 			refresh = true;
 			set_focus = true;
 		}
@@ -4135,7 +4135,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		{
 			m_tseq_backward = true;
 			if (m_frame && m_frame->GetMovieView())
-				m_frame->GetMovieView()->DownFrame();
+				m_frame->GetMovieView()->DecFrame();
 			refresh = true;
 			set_focus = true;
 		}
@@ -5034,7 +5034,7 @@ void RenderCanvas::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool
 		int r = glbin_script_proc.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, m_script_file, rewind);
 		if (r == 2)
 		{
-			m_frame->GetMovieView()->Reset();
+			glbin_moviemaker.Reset();
 			return;
 		}
 	}
@@ -5128,7 +5128,7 @@ void RenderCanvas::Set3DBatFrame(int frame, int start_frame, int end_frame, bool
 		int r = glbin_script_proc.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, m_script_file, rewind);
 		if (r == 2)
 		{
-			m_frame->GetMovieView()->Reset();
+			glbin_moviemaker.Reset();
 			return;
 		}
 	}
@@ -10585,8 +10585,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 
 	if (m_draw_info & INFO_DISP)
 	{
-		if (m_frame && m_frame->GetMovieView() &&
-			m_frame->GetMovieView()->GetRunning())
+		if (glbin_moviemaker.IsRunning())
 			return;
 		if (m_enable_vr)
 			return;

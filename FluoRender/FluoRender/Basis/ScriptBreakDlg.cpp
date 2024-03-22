@@ -95,7 +95,7 @@ void ScriptBreakDlg::Hold()
 {
 	if (!m_frame)
 		return;
-	m_frame->GetMovieView()->HoldRun();
+	glbin_moviemaker.Hold();
 	m_frame->ShowScriptBreakDlg();
 }
 
@@ -108,8 +108,8 @@ void ScriptBreakDlg::OnStopBtn(wxCommandEvent& event)
 {
 	if (!m_frame)
 		return;
-	m_frame->GetMovieView()->Stop();
-	m_frame->GetMovieView()->Rewind();
+	glbin_moviemaker.Stop();
+	glbin_moviemaker.Rewind();
 	m_frame->ShowScriptBreakDlg(false);
 }
 
@@ -117,6 +117,6 @@ void ScriptBreakDlg::OnContinueBtn(wxCommandEvent& event)
 {
 	if (!m_frame)
 		return;
-	m_frame->GetMovieView()->ResumeRun();
+	glbin_moviemaker.Resume();
 	m_frame->ShowScriptBreakDlg(false);
 }
