@@ -76,6 +76,17 @@ public:
 		ID_ZeroRotBtn = 0,
 		ID_RotResetBtn
 	};
+	enum
+	{
+		ID_LZW_COMP,
+		ID_SAVE_ALPHA,
+		ID_SAVE_FLOAT,
+		ID_DPI,
+		ID_ENLARGE_CHK,
+		ID_ENLARGE_SLDR,
+		ID_ENLARGE_TEXT,
+		ID_EMBED_FILES
+	};
 
 	RenderViewPanel(MainFrame* frame,
 		wxGLContext* sharedContext=0,

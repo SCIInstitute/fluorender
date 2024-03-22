@@ -983,7 +983,7 @@ wxWindow* RecorderDlg::CreateExtraCaptureControl(wxWindow* parent)
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
 
 	//compressed
-	wxCheckBox* ch1 = new wxCheckBox(panel, ID_LZW_COMP,
+	wxCheckBox* ch1 = new wxCheckBox(panel, wxID_ANY,
 		"Lempel-Ziv-Welch Compression");
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(RecorderDlg::OnCh1Check), NULL, panel);

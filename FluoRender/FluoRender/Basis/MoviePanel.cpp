@@ -1439,17 +1439,20 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 		wxDefaultPosition, wxDefaultSize);
 	wxCheckBox *ch1 = new wxCheckBox(panel, wxID_ANY,
 		"Lempel-Ziv-Welch Compression");
-	ch1->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED, &MoviePanel::OnCh1Check, panel);
+	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(MoviePanel::OnCh1Check), NULL, panel);
 	if (ch1)
 		ch1->SetValue(glbin_settings.m_save_compress);
 	wxCheckBox *ch2 = new wxCheckBox(panel, wxID_ANY,
 		"Save alpha");
-	ch2->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED, &MoviePanel::OnCh2Check, panel);
+	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(MoviePanel::OnCh2Check), NULL, panel);
 	if (ch2)
 		ch2->SetValue(glbin_settings.m_save_alpha);
 	wxCheckBox *ch3 = new wxCheckBox(panel, wxID_ANY,
 		"Save float channel");
-	ch3->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED, &MoviePanel::OnCh3Check, panel);
+	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(MoviePanel::OnCh3Check), NULL, panel);
 	if (ch3)
 		ch3->SetValue(glbin_settings.m_save_float);
 	line1->Add(tiffopts, 0, wxALIGN_CENTER);
@@ -1465,26 +1468,29 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	wxIntegerValidator<unsigned int> vald_int;
 	wxTextCtrl* tx_dpi = new wxTextCtrl(panel, wxID_ANY,
 		"", wxDefaultPosition, wxDefaultSize, 0, vald_int);
-	tx_dpi->Bind(wxEVT_COMMAND_TEXT_UPDATED, &MoviePanel::OnDpiText, panel);
+	tx_dpi->Connect(tx_dpi->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
+		wxCommandEventHandler(MoviePanel::OnDpiText), NULL, panel);
 	float dpi = glbin_settings.m_dpi;
 	tx_dpi->SetValue(wxString::Format("%.0f", dpi));
 	//enlarge
 	wxCheckBox* ch_enlarge = new wxCheckBox(panel, ID_ENLARGE_CHK,
 		"Enlarge output image");
-	ch_enlarge->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED, &MoviePanel::OnChEnlargeCheck, panel);
+	ch_enlarge->Connect(ch_enlarge->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(MoviePanel::OnChEnlargeCheck), NULL, panel);
 	bool enlarge = dpi > 72;
 	double enlarge_scale = dpi / 72.0;
 	ch_enlarge->SetValue(enlarge);
 	wxSlider* sl_enlarge = new wxSlider(panel, ID_ENLARGE_SLDR,
 		10, 10, 100);
 	sl_enlarge->Connect(sl_enlarge->GetId(), wxEVT_COMMAND_SLIDER_UPDATED,
-		wxScrollEventHandler(VMovieView::OnSlEnlargeScroll), NULL, panel);
+		wxScrollEventHandler(MoviePanel::OnSlEnlargeScroll), NULL, panel);
 	sl_enlarge->Enable(enlarge);
 	sl_enlarge->SetValue(std::round(enlarge_scale * 10));
 	wxFloatingPointValidator<double> vald_fp(1);
 	wxTextCtrl* tx_enlarge = new wxTextCtrl(panel, ID_ENLARGE_TEXT,
 		"1.0", wxDefaultPosition, wxDefaultSize, 0, vald_fp);
-	tx_enlarge->Bind(wxEVT_COMMAND_TEXT_UPDATED, &MoviePanel::OnTxEnlargeText, panel);
+	tx_enlarge->Connect(tx_enlarge->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
+		wxCommandEventHandler(MoviePanel::OnTxEnlargeText), NULL, panel);
 	tx_enlarge->Enable(enlarge);
 	tx_enlarge->SetValue(wxString::Format("%.1f", enlarge_scale));
 	line2->Add(st, 0, wxALIGN_CENTER);
@@ -1502,7 +1508,8 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 		wxDefaultPosition, wxDefaultSize);
 	wxTextCtrl *bitrate_text = new wxTextCtrl(panel, wxID_ANY, "20.0",
 		wxDefaultPosition, wxDefaultSize);
-	bitrate_text->Bind(wxEVT_TEXT, &MoviePanel::OnMovieQuality, panel);
+	bitrate_text->Connect(bitrate_text->GetId(), wxEVT_TEXT,
+		wxCommandEventHandler(MoviePanel::OnMovieQuality), NULL, panel);
 	st = new wxStaticText(panel, wxID_ANY, "Bitrate:",
 		wxDefaultPosition, wxDefaultSize);
 	wxStaticText *st2 = new wxStaticText(panel, wxID_ANY, "Mbps",
@@ -1531,12 +1538,13 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	line3->Add(5, 5, wxALIGN_CENTER);
 	line3->Add(st2, 0, wxALIGN_CENTER);
 	//copy all files check box
-	wxCheckBox *ch_embed;
+	wxCheckBox *ch_embed = 0;
 	if (glbin_settings.m_prj_save)
 	{
 		ch_embed = new wxCheckBox(panel, wxID_ANY,
 			"Embed all files in the project folder");
-		ch_embed->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED, &MoviePanel::OnChEmbedCheck, panel);
+		ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+			wxCommandEventHandler(MoviePanel::OnChEmbedCheck), NULL, panel);
 		ch_embed->SetValue(glbin_settings.m_vrp_embed);
 	}
 	//group

@@ -48,6 +48,17 @@ class DataListCtrl : public wxListCtrl
 		Menu_View_start
 	};
 
+	enum
+	{
+		ID_LZW_COMP,
+		ID_CROP,
+		ID_RESIZE_CHK,
+		ID_RESIZE_X_TXT,
+		ID_RESIZE_Y_TXT,
+		ID_RESIZE_Z_TXT,
+		ID_FILTER
+	};
+
 public:
 	DataListCtrl(MainFrame *frame,
 		wxWindow* parent,

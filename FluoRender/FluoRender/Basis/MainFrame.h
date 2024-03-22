@@ -168,6 +168,19 @@ class MainFrame: public wxFrame
 		ID_ShowHideToolbar
 	};
 
+	enum
+	{
+		ID_READ_ZSLICE,
+		ID_READ_CHANN,
+		ID_DIGI_ORDER,
+		ID_SER_NUM,
+		ID_COMPRESS,
+		ID_SKIP_BRICKS,
+		ID_TSEQ_ID,
+		ID_EMBED_FILES,
+		ID_LZW_COMP
+	};
+
 public:
 	MainFrame(wxFrame* frame,
 		const wxString& title,
