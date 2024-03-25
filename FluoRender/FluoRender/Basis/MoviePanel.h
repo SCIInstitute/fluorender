@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/aui/auibook.h>
 #include <wx/listctrl.h>
 #include <wx/spinbutt.h>
+#include <wx/tglbtn.h>
 
 class MainFrame;
 class RenderCanvas;
@@ -71,7 +72,10 @@ public:
 	void SetCurrentFrame(int val, bool notify);
 	void SetCurrentTime(double val, bool notify);
 	void Play();
+	void PlayInv();
 	void Rewind();
+	void Forward();
+	void Loop(bool val);
 	void IncFrame();
 	void DecFrame();
 	void Save(const wxString& filename);
@@ -97,19 +101,25 @@ private:
 	wxTextCtrl *m_movie_len_text;
 	wxComboBox *m_views_cmb;
 
-	wxButton *m_play_btn;
-	wxButton *m_rewind_btn;
 	wxToolBar* m_slider_btn;
 	wxUndoableScrollBar* m_progress_sldr;
-	wxTextCtrl *m_progress_text;
-	wxButton *m_save_btn;
-	wxButton* m_start_frame_st;
+
+	wxButton* m_start_btn;
 	wxTextCtrl *m_start_frame_text;
-	wxButton* m_end_frame_st;
 	wxTextCtrl *m_end_frame_text;
-	wxButton *m_inc_time_btn;
+	wxButton* m_end_btn;
+
 	wxButton *m_dec_time_btn;
 	wxTextCtrl *m_cur_frame_text;
+	wxButton *m_inc_time_btn;
+
+	wxButton *m_rewind_btn;
+	wxButton* m_play_inv_btn;
+	wxButton *m_play_btn;
+	wxButton* m_forward_btn;
+	wxToggleButton* m_loop_btn;
+	wxTextCtrl *m_progress_text;
+	wxButton *m_save_btn;
 
 	//basic movie controls
 	wxCheckBox *m_rot_chk;
@@ -171,7 +181,10 @@ private:
 	void OnCurFrameText(wxCommandEvent& event);
 	void OnCurTimeText(wxCommandEvent& event);
 	void OnPlay(wxCommandEvent& event);
+	void OnPlayInv(wxCommandEvent& event);
 	void OnRewind(wxCommandEvent& event);
+	void OnForward(wxCommandEvent& event);
+	void OnLoop(wxCommandEvent& event);
 	void OnStartFrameBtn(wxCommandEvent& event);
 	void OnEndFrameBtn(wxCommandEvent& event);
 	void OnIncFrame(wxCommandEvent& event);

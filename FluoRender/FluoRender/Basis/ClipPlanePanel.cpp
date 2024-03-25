@@ -57,7 +57,7 @@ m_enable_all(true)
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
-	SetDoubleBuffered(true);
+	//SetDoubleBuffered(true);
 
 	//sync channels 1
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);

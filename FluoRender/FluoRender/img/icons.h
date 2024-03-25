@@ -323,18 +323,30 @@ public:
 	const static unsigned char magnet_png[917];
 
 	//movie play export icons
-	/* minus.png - 426 bytes */
-	const static unsigned char minus_png[426];
-	/* pause.png - 773 bytes */
-	const static unsigned char pause_png[773];
-	/* play.png - 935 bytes */
-	const static unsigned char play_png[935];
-	/* plus.png - 721 bytes */
-	const static unsigned char plus_png[721];
-	/* rewind.png - 1065 bytes */
-	const static unsigned char rewind_png[1065];
-	/* playscript.png - 892 bytes */
-	const static unsigned char playscript_png[892];
+	/* end.png - 658 bytes */
+	const static unsigned char end_png[658];
+	/* forward.png - 929 bytes */
+	const static unsigned char forward_png[929];
+	/* loop.png - 850 bytes */
+	const static unsigned char loop_png[959];
+	/* minus.png - 360 bytes */
+	const static unsigned char minus_png[360];
+	/* pause.png - 627 bytes */
+	const static unsigned char pause_png[671];
+	/* play.png - 948 bytes */
+	const static unsigned char play_png[948];
+	/* play_inv.png - 931 bytes */
+	const static unsigned char play_inv_png[931];
+	/* play_inv_script.png - 1110 bytes */
+	const static unsigned char play_inv_script_png[1110];
+	/* play_script.png - 1113 bytes */
+	const static unsigned char play_script_png[1113];
+	/* plus.png - 649 bytes */
+	const static unsigned char plus_png[649];
+	/* rewind.png - 1009 bytes */
+	const static unsigned char rewind_png[1009];
+	/* start.png - 642 bytes */
+	const static unsigned char start_png[642];
 
 	//volume property icons
 	/* mip.png - 436 bytes */

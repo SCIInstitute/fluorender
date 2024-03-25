@@ -5073,10 +5073,9 @@ void MainFrame::OpenProject(wxString& filename)
 			glbin_moviemaker.SetCropH(iVal);
 		}
 		int startf = 0, endf = 0, curf = 0;
-		if (fconfig.Read("start_frame", &startf))
-			glbin_moviemaker.SetStartFrame(startf);
-		if (fconfig.Read("end_frame", &endf))
-			glbin_moviemaker.SetEndFrame(endf);
+		if (fconfig.Read("start_frame", &startf) &&
+			fconfig.Read("end_frame", &endf))
+			glbin_moviemaker.SetStartEndFrames(startf, endf);
 		if (fconfig.Read("cur_frame", &curf))
 		{
 			if (curf && curf >= startf && curf <= endf)

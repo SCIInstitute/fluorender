@@ -156,6 +156,15 @@ void MovieMaker::Rewind()
 	SetRendering(true);
 }
 
+void MovieMaker::Forward()
+{
+	if (!m_view)
+		return;
+	Stop();
+	SetCurrentFrame(m_end_frame);
+	SetRendering(false);
+}
+
 void MovieMaker::Reset()
 {
 	if (!m_view)
@@ -528,8 +537,7 @@ void MovieMaker::SetTimeSeqEnable(bool val)
 	}
 	else
 	{
-		SetStartFrame(0);
-		SetEndFrame(m_rot_deg);
+		SetStartEndFrames(0, m_rot_deg);
 	}
 }
 
@@ -638,7 +646,7 @@ bool MovieMaker::OnTimer()
 	}
 
 	//check stop
-	if (!m_loop)
+	if (!m_loop || m_record)
 	{
 		if (m_reverse)
 		{

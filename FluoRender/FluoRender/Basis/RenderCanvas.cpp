@@ -3931,7 +3931,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		{
 			refresh = glbin_moviemaker.OnTimer();
 			event.RequestMore(glbin_moviemaker.IsRunning());
-			vc.insert(gstCamRotation);
+			if (refresh)
+				vc.insert(gstCamRotation);
 		}
 		//fluo::StopWatch* sw = glbin_swhf->findFirst(gstMovStopWatch);
 		//if (sw)

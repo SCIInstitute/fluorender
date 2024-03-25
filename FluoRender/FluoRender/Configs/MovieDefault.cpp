@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 
 MovieDefault::MovieDefault()
 {
+	m_selected_page = 0;
 	m_view_idx = 0;
 	m_slider_style = false;
 
@@ -182,8 +183,7 @@ void MovieDefault::Apply(MovieMaker* mm)
 	mm->SetFrameNum(m_frame_num);
 	mm->SetMovieLength(m_movie_len);
 	mm->SetFps(m_fps);
-	mm->SetStartFrame(m_start_frame);
-	mm->SetEndFrame(m_end_frame);
+	mm->SetStartEndFrames(m_start_frame, m_end_frame);
 	mm->SetCurrentFrame(m_cur_frame);
 	mm->SetCurrentTime(m_cur_time);
 

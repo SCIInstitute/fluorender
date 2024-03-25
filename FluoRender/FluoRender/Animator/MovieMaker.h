@@ -57,6 +57,7 @@ public:
 	void Resume();
 	void Hold();
 	void Rewind();
+	void Forward();
 	void Reset();
 	void PlaySave();
 
@@ -126,6 +127,16 @@ public:
 			m_movie_len = (m_frame_num - 1) / m_fps;
 	}
 	double GetFps() { return m_fps; }
+	void SetStartEndFrames(int val1, int val2)
+	{
+		m_start_frame = val1;
+		m_end_frame = val2;
+		if (m_start_frame >= m_end_frame)
+			m_end_frame = m_start_frame + 1;
+		m_frame_num = m_end_frame - m_start_frame + 1;
+		if (m_fps > 0)
+			m_movie_len = (m_frame_num - 1) / m_fps;
+	}
 	void SetStartFrame(int val)
 	{
 		m_start_frame = val;

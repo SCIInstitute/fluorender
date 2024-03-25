@@ -377,7 +377,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
-	SetDoubleBuffered(true);
+	//SetDoubleBuffered(true);
 
 	if (m_frame)
 		m_view = m_frame->GetView(glbin_mov_def.m_view_idx);
@@ -451,73 +451,94 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	sizer2->Add(5, 5);
 
 	//controls
+	wxSize bs = FromDIP(wxSize(26, 26));
 	wxFont f;
 	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
+	m_start_btn = new wxButton(this, wxID_ANY, "",
+		wxDefaultPosition, bs);
+	m_start_btn->SetBitmap(wxGetBitmapFromMemory(start));
+	m_start_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnStartFrameBtn, this);
 	m_start_frame_text = new wxTextCtrl(this, wxID_ANY, "1",
-		wxDefaultPosition, FromDIP(wxSize(40, -1)));
+		wxDefaultPosition, FromDIP(wxSize(39, -1)), wxTE_RIGHT);
 	f = m_start_frame_text->GetFont();
 	f.MakeLarger();
 	m_start_frame_text->SetFont(f);
 	m_start_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnStartFrameText, this);
 	m_end_frame_text = new wxTextCtrl(this, wxID_ANY, "10",
-		wxDefaultPosition, FromDIP(wxSize(40, -1)));
+		wxDefaultPosition, FromDIP(wxSize(39, -1)), wxTE_RIGHT);
 	m_end_frame_text->SetFont(f);
 	m_end_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnEndFrameText, this);
-	m_progress_text = new wxTextCtrl(this, wxID_ANY, "0.00",
-		wxDefaultPosition, FromDIP(wxSize(50, -1)));
-	m_progress_text->SetFont(f);
-	m_progress_text->Bind(wxEVT_TEXT, &MoviePanel::OnCurTimeText, this);
-	st = new wxStaticText(this, 0, "Sec.");
-	wxSize bs = FromDIP(wxSize(30, 30));
-	sizer3->Add(5, 5);
-	sizer3->Add(bs.x * 2, bs.y);
+	m_end_btn = new wxButton(this, wxID_ANY, "",
+		wxDefaultPosition, bs);
+	m_end_btn->SetBitmap(wxGetBitmapFromMemory(end));
+	m_end_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnEndFrameBtn, this);
+	m_dec_time_btn = new wxButton(this, wxID_ANY, "",
+		wxDefaultPosition, bs);
+	m_dec_time_btn->SetBitmap(wxGetBitmapFromMemory(minus));
+	m_dec_time_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnDecFrame, this);
+	m_cur_frame_text = new wxTextCtrl(this, wxID_ANY, "0",
+		wxDefaultPosition, FromDIP(wxSize(50, -1)), wxTE_RIGHT);
+	m_cur_frame_text->SetFont(f);
+	m_cur_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnCurFrameText, this);
+	m_inc_time_btn = new wxButton(this, wxID_ANY, "",
+		wxDefaultPosition, bs);
+	m_inc_time_btn->SetBitmap(wxGetBitmapFromMemory(plus));
+	m_inc_time_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnIncFrame, this);
+	sizer3->AddStretchSpacer(2);
+	sizer3->Add(m_start_btn, 0, wxALIGN_CENTER);
 	sizer3->Add(m_start_frame_text, 0, wxALIGN_CENTER);
 	sizer3->Add(m_end_frame_text, 0, wxALIGN_CENTER);
+	sizer3->Add(m_end_btn, 0, wxALIGN_CENTER);
+	sizer3->AddStretchSpacer(1);
+	sizer3->Add(m_dec_time_btn, 0, wxALIGN_CENTER);
+	sizer3->Add(m_cur_frame_text, 0, wxALIGN_CENTER);
+	sizer3->Add(m_inc_time_btn, 0, wxALIGN_CENTER);
+	sizer3->AddStretchSpacer(2);
 	sizer3->Add(bs.x, bs.y);
-	sizer3->Add(m_progress_text, 0, wxALIGN_CENTER);
-	sizer3->Add(st, 0, wxALIGN_CENTER);
 	sizer3->Add(5, 5);
 
 	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
-	m_play_btn = new wxButton(this, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(30, 30)));
-	m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
-	m_play_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnPlay, this);
 	m_rewind_btn = new wxButton(this, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(30, 30)));
+		wxDefaultPosition, bs);
 	m_rewind_btn->SetBitmap(wxGetBitmapFromMemory(rewind));
 	m_rewind_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnRewind, this);
-	m_start_frame_st = new wxButton(this, wxID_ANY, "Start:",
-		wxDefaultPosition, FromDIP(wxSize(40, 30)));
-	m_start_frame_st->Bind(wxEVT_BUTTON, &MoviePanel::OnStartFrameBtn, this);
-	m_end_frame_st = new wxButton(this, wxID_ANY, "End:",
-		wxDefaultPosition, FromDIP(wxSize(40, 30)));
-	m_end_frame_st->Bind(wxEVT_BUTTON, &MoviePanel::OnEndFrameBtn, this);
-	m_inc_time_btn = new wxButton(this, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(30, 30)));
-	m_inc_time_btn->SetBitmap(wxGetBitmapFromMemory(plus));
-	m_inc_time_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnIncFrame, this);
-	m_cur_frame_text = new wxTextCtrl(this, wxID_ANY, "0",
-		wxDefaultPosition, FromDIP(wxSize(50, 30)));
-	m_cur_frame_text->SetFont(f);
-	m_cur_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnCurFrameText, this);
-	m_dec_time_btn = new wxButton(this, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(30, 30)));
-	m_dec_time_btn->SetBitmap(wxGetBitmapFromMemory(minus));
-	m_dec_time_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnDecFrame, this);
+	m_play_inv_btn = new wxButton(this, wxID_ANY, "",
+		wxDefaultPosition, bs);
+	m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv));
+	m_play_inv_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnPlayInv, this);
+	m_play_btn = new wxButton(this, wxID_ANY, "",
+		wxDefaultPosition, bs);
+	m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+	m_play_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnPlay, this);
+	m_forward_btn = new wxButton(this, wxID_ANY, "",
+		wxDefaultPosition, bs);
+	m_forward_btn->SetBitmap(wxGetBitmapFromMemory(forward));
+	m_forward_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnForward, this);
+	m_loop_btn = new wxToggleButton(this, wxID_ANY, "",
+		wxDefaultPosition, bs);
+	m_loop_btn->SetBitmap(wxGetBitmapFromMemory(loop));
+	m_loop_btn->Bind(wxEVT_TOGGLEBUTTON, &MoviePanel::OnLoop, this);
+	m_progress_text = new wxTextCtrl(this, wxID_ANY, "0.00",
+		wxDefaultPosition, FromDIP(wxSize(50, -1)), wxTE_RIGHT);
+	m_progress_text->SetFont(f);
+	m_progress_text->Bind(wxEVT_TEXT, &MoviePanel::OnCurTimeText, this);
+	st = new wxStaticText(this, wxID_ANY, "Sec.",
+		wxDefaultPosition, FromDIP(wxSize(26, -1)));
 	m_save_btn = new wxButton(this, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(30, 30)));
+		wxDefaultPosition, bs);
 	m_save_btn->SetBitmap(wxGetBitmapFromMemory(save));
 	m_save_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnSave, this);
-	sizer4->Add(5, 5);
-	sizer4->Add(m_play_btn, 0, wxALIGN_CENTER);
+	sizer4->AddStretchSpacer(2);
 	sizer4->Add(m_rewind_btn, 0, wxALIGN_CENTER);
-	sizer4->Add(m_start_frame_st, 0, wxALIGN_CENTER);
-	sizer4->Add(m_end_frame_st, 0, wxALIGN_CENTER);
-	sizer4->Add(m_dec_time_btn, 0, wxALIGN_CENTER);
-	sizer4->Add(m_cur_frame_text, 0, wxALIGN_CENTER);
-	sizer4->Add(m_inc_time_btn, 0, wxALIGN_CENTER);
-	sizer4->AddStretchSpacer();
+	sizer4->Add(m_play_inv_btn, 0, wxALIGN_CENTER);
+	sizer4->Add(m_play_btn, 0, wxALIGN_CENTER);
+	sizer4->Add(m_forward_btn, 0, wxALIGN_CENTER);
+	sizer4->Add(m_loop_btn, 0, wxALIGN_CENTER);
+	sizer4->AddStretchSpacer(1);
+	sizer4->Add(bs.x, bs.y);
+	sizer4->Add(m_progress_text, 0, wxALIGN_CENTER);
+	sizer4->Add(st, 0, wxALIGN_CENTER);
+	sizer4->AddStretchSpacer(2);
 	sizer4->Add(m_save_btn, 0, wxALIGN_CENTER);
 	sizer4->Add(5, 5);
 
@@ -622,7 +643,7 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		else
 		{
 			if (glbin_settings.m_run_script)
-				m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
+				m_play_btn->SetBitmap(wxGetBitmapFromMemory(play_script));
 			else
 				m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
 		}
@@ -831,9 +852,27 @@ void MoviePanel::Play()
 	FluoRefresh(false, true, 2, vc);
 }
 
+void MoviePanel::PlayInv()
+{
+	glbin_moviemaker.Play(true);
+
+	fluo::ValueCollection vc = { gstMovPlay };
+	FluoRefresh(false, true, 2, vc);
+}
+
 void MoviePanel::Rewind()
 {
 	glbin_moviemaker.Rewind();
+}
+
+void MoviePanel::Forward()
+{
+	glbin_moviemaker.Forward();
+}
+
+void MoviePanel::Loop(bool val)
+{
+	glbin_moviemaker.SetLoop(val);
 }
 
 void MoviePanel::IncFrame()
@@ -995,9 +1034,27 @@ void MoviePanel::OnPlay(wxCommandEvent& event)
 	event.Skip();
 }
 
+void MoviePanel::OnPlayInv(wxCommandEvent& event)
+{
+	PlayInv();
+	event.Skip();
+}
+
 void MoviePanel::OnRewind(wxCommandEvent& event)
 {
 	Rewind();
+	event.Skip();
+}
+
+void MoviePanel::OnForward(wxCommandEvent& event)
+{
+	Forward();
+	event.Skip();
+}
+
+void MoviePanel::OnLoop(wxCommandEvent& event)
+{
+	Loop(m_loop_btn->GetValue());
 	event.Skip();
 }
 
@@ -1209,7 +1266,7 @@ void MoviePanel::OnRunScriptChk(wxCommandEvent& event)
 	}
 	if (run_script)
 	{
-		m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
+		m_play_btn->SetBitmap(wxGetBitmapFromMemory(play_script));
 		m_notebook->SetPageText(4, "Script (Enabled)");
 	}
 	else
