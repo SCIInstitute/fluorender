@@ -153,7 +153,7 @@ double
 StopWatch::time()
 const
 {
-	return _nLastPeriod;
+	return _fLastTime;
 }
 
 bool StopWatch::check()
@@ -162,14 +162,18 @@ bool StopWatch::check()
 	unsigned long long nCurrentCount;
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	nCurrentCount = time_point_cast<milliseconds>(t1).time_since_epoch().count();
-	double cur_time = static_cast<double>(nCurrentCount - _nStartCount)
-		/ static_cast<double>(_nFrequency);
+	double cur_time = static_cast<double>(nCurrentCount - _nStartCount);
 	if (cur_time - _fLastTime >= _fInterval)
 	{
 		_fLastTime = cur_time;
 		return true;
 	}
 	return false;
+}
+
+void StopWatch::interval(double val)
+{
+	_fInterval = val;
 }
 
 // average

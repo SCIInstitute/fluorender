@@ -86,6 +86,7 @@ namespace fluo
 		double time() const;
 
 		bool check();
+		void interval(double);
 
 		// average
 		//

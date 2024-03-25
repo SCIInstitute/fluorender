@@ -58,6 +58,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stdpaths.h>
 #include <Debug.h>
 #include <StopWatch.hpp>
+#include <StopWatchFactory.hpp>
 #include <png_resource.h>
 #include <img/icons.h>
 #include <array>
@@ -3927,7 +3928,14 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	else
 	{
 		if (glbin_moviemaker.GetView() == this)
+		{
 			refresh = glbin_moviemaker.OnTimer();
+			event.RequestMore(glbin_moviemaker.IsRunning());
+			vc.insert(gstCamRotation);
+		}
+		//fluo::StopWatch* sw = glbin_swhf->findFirst(gstMovStopWatch);
+		//if (sw)
+		//	DBGPRINT(L"refresh: %d, time: %f\n", refresh, sw->time());
 	}
 
 	if (m_capture_rotat ||
@@ -3943,7 +3951,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 
 	if (m_use_openvr)
 	{
-		event.RequestMore();
+		event.RequestMore(true);
 		refresh = true;
 		//m_retain_finalbuffer = true;
 	}

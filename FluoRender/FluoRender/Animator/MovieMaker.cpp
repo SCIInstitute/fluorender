@@ -107,6 +107,7 @@ void MovieMaker::Start()
 			m_starting_rot = 0.;
 	}
 
+	get_stopwatch()->interval(1000.0 / m_fps);
 	get_stopwatch()->start();
 	m_running = true;
 }
@@ -125,6 +126,7 @@ void MovieMaker::Resume()
 {
 	if (m_timer_hold)
 	{
+		get_stopwatch()->interval(1000.0 / m_fps);
 		get_stopwatch()->start();
 		m_timer_hold = false;
 		m_running = true;
@@ -660,6 +662,7 @@ fluo::StopWatch* MovieMaker::get_stopwatch()
 	{
 		result = glbin_swhf->build();
 		result->setName(gstMovStopWatch);
+		result->interval(1000.0 / m_fps);
 	}
 	return result;
 }
