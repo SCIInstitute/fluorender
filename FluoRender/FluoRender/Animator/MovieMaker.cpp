@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
-#include <AsyncTimer.hpp>
-#include <AsyncTimerFactory.hpp>
+#include <StopWatch.hpp>
+#include <StopWatchFactory.hpp>
 
 MovieMaker::MovieMaker() :
 	m_frame(0),
@@ -107,15 +107,13 @@ void MovieMaker::Start()
 			m_starting_rot = 0.;
 	}
 
-	start_timer();
+	get_stopwatch()->start();
 	m_running = true;
 }
 
 void MovieMaker::Stop()
 {
-	fluo::AsyncTimer* timer = glbin_atmf->findFirst(m_timer);
-	if (timer)
-		timer->stop();
+	get_stopwatch()->stop();
 	glbin.get_video_encoder().close();
 	m_record = false;
 	flvr::TextureRenderer::maximize_uptime_ = false;
@@ -127,7 +125,7 @@ void MovieMaker::Resume()
 {
 	if (m_timer_hold)
 	{
-		start_timer();
+		get_stopwatch()->start();
 		m_timer_hold = false;
 		m_running = true;
 	}
@@ -137,9 +135,7 @@ void MovieMaker::Hold()
 {
 	if (!m_timer_hold && m_running)
 	{
-		fluo::AsyncTimer* timer = glbin_atmf->findFirst(m_timer);
-		if (timer)
-			timer->stop();
+		get_stopwatch()->stop();
 		m_timer_hold = true;
 		m_running = false;
 	}
@@ -260,7 +256,7 @@ void MovieMaker::SetRendering(bool rewind)
 		}
 	}
 	m_view->SetInteractive(false);
-	m_view->RefreshGL(39);
+	//m_view->RefreshGL(39);
 }
 
 void MovieMaker::WriteFrameToFile()
@@ -490,6 +486,11 @@ void MovieMaker::SetView(RenderCanvas* view)
 	m_view = view;
 }
 
+RenderCanvas* MovieMaker::GetView()
+{
+	return m_view;
+}
+
 int MovieMaker::GetViewIndex()
 {
 	if (!m_view || !m_frame)
@@ -591,10 +592,12 @@ void MovieMaker::SetCropH(int val)
 			std::round(m_crop_y - m_crop_h / 2.0), m_crop_w, m_crop_h);
 }
 
-void MovieMaker::OnTimer()
+bool MovieMaker::OnTimer()
 {
 	if (!m_running)
-		return;
+		return false;
+	if (!get_stopwatch()->check())
+		return false;
 
 	//get all of the progress info
 	if (m_delayed_stop)
@@ -604,18 +607,18 @@ void MovieMaker::OnTimer()
 		m_delayed_stop = false;
 		Stop();
 		RenderCanvas::SetKeepEnlarge(false);
-		return;
+		return true;
 	}
 
-	if (flvr::TextureRenderer::get_mem_swap() &&
-		flvr::TextureRenderer::get_start_update_loop() &&
-		!flvr::TextureRenderer::get_done_update_loop())
-	{
-		if (!m_view) return;
-		m_view->SetInteractive(false);
-		m_view->RefreshGL(39, false, false);
-		return;
-	}
+	//if (flvr::TextureRenderer::get_mem_swap() &&
+	//	flvr::TextureRenderer::get_start_update_loop() &&
+	//	!flvr::TextureRenderer::get_done_update_loop())
+	//{
+	//	if (!m_view) return;
+	//	m_view->SetInteractive(false);
+	//	m_view->RefreshGL(39, false, false);
+	//	return;
+	//}
 
 	//move time
 	if (m_reverse)
@@ -646,24 +649,18 @@ void MovieMaker::OnTimer()
 				m_delayed_stop = true;
 		}
 	}
+
+	return true;
 }
 
-void MovieMaker::start_timer()
+fluo::StopWatch* MovieMaker::get_stopwatch()
 {
-	fluo::AsyncTimer* timer = 0;
-	if (m_timer.empty())
+	fluo::StopWatch* result = glbin_swhf->findFirst(gstMovStopWatch);
+	if (!result)
 	{
-		timer = glbin_atmf->build();
-		if (timer)
-		{
-			m_timer = timer->getName();
-			timer->setFunc(std::bind(&MovieMaker::OnTimer, this));
-		}
+		result = glbin_swhf->build();
+		result->setName(gstMovStopWatch);
 	}
-	else
-		timer = glbin_atmf->findFirst(m_timer);
-	if (!timer)
-		return;
-	long lval = long(std::round(1000.0 / m_fps));
-	timer->restart(lval);
+	return result;
 }
+

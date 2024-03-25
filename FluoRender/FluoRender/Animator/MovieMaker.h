@@ -32,6 +32,10 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <string>
 
+namespace fluo
+{
+	class StopWatch;
+}
 class MainFrame;
 class RenderCanvas;
 class MovieMaker
@@ -40,6 +44,8 @@ public:
 	MovieMaker();
 	~MovieMaker();
 
+	//timer for playback.
+	bool OnTimer();
 	//play
 	bool IsRunning()
 	{
@@ -62,6 +68,7 @@ public:
 	//settings
 	void SetMainFrame(MainFrame* frame);
 	void SetView(RenderCanvas* view);
+	RenderCanvas* GetView();
 	int GetViewIndex();
 	void SetFileName(const wxString& filename) { m_filename = filename; }
 	void SetLoop(bool val) { m_loop = val; }
@@ -240,13 +247,8 @@ private:
 	bool m_cam_lock;
 	int m_cam_lock_type;//0-not used;1-image center;2-click view;3-ruler;4-selection
 
-	//time
-	std::string m_timer;
-
 private:
-	//timer for playback.
-	void OnTimer();
-	void start_timer();
+	fluo::StopWatch* get_stopwatch();
 };
 
 #endif//_MOVIEMAKER_H_

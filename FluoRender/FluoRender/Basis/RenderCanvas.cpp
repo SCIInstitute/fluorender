@@ -3924,6 +3924,11 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			start_loop = false;
 		}
 	}
+	else
+	{
+		if (glbin_moviemaker.GetView() == this)
+			refresh = glbin_moviemaker.OnTimer();
+	}
 
 	if (m_capture_rotat ||
 		m_capture_tsequ ||
@@ -5063,7 +5068,7 @@ void RenderCanvas::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool
 	if (rewind)
 		glbin_script_proc.ClearResults();
 
-	RefreshGL(17);
+	//RefreshGL(17);
 }
 
 void RenderCanvas::Get3DBatRange(int &start_frame, int &end_frame)
@@ -5152,7 +5157,7 @@ void RenderCanvas::Set3DBatFrame(int frame, int start_frame, int end_frame, bool
 	glbin_ruler_handler.ProfileAll();
 	m_frame->GetMeasureDlg()->UpdateList();
 
-	RefreshGL(18);
+	//RefreshGL(18);
 }
 
 //pre-draw processings

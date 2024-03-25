@@ -43,6 +43,7 @@ StopWatch::StopWatch(unsigned int nBoxFilterSize) :
 	_nBoxFilterSize(nBoxFilterSize),
 	_iFilterPosition(0),
 	_aIntervals(0),
+	_fInterval(100),//100ms, 10fps
 	_bClockRuns(false)
 {
 	_nFrequency = 1000;
@@ -65,6 +66,7 @@ StopWatch::StopWatch(const StopWatch& data, const CopyOp& copyop, bool copy_valu
 	_nBoxFilterSize(data._nBoxFilterSize),
 	_iFilterPosition(data._iFilterPosition),
 	_aIntervals(data._aIntervals),
+	_fInterval(data._fInterval),
 	_bClockRuns(data._bClockRuns)
 {
 	// create array to store timing results
@@ -96,6 +98,7 @@ StopWatch::start()
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	_nStartCount = time_point_cast<milliseconds>(t1).time_since_epoch().count();
 	_bClockRuns = true;
+	_fLastTime = 0;
 }
 
 // stop
@@ -151,6 +154,22 @@ StopWatch::time()
 const
 {
 	return _nLastPeriod;
+}
+
+bool StopWatch::check()
+{
+	if (!_bClockRuns) return false;
+	unsigned long long nCurrentCount;
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	nCurrentCount = time_point_cast<milliseconds>(t1).time_since_epoch().count();
+	double cur_time = static_cast<double>(nCurrentCount - _nStartCount)
+		/ static_cast<double>(_nFrequency);
+	if (cur_time - _fLastTime >= _fInterval)
+	{
+		_fLastTime = cur_time;
+		return true;
+	}
+	return false;
 }
 
 // average

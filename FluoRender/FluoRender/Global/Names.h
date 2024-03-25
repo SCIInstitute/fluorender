@@ -508,6 +508,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstCamLockCtr "cam lock ctr"
 #define gstCamLockPick "cam lock pick"//camera locking center by picking
 #define gstRadius "radius"//scene size in terms of radius of a sphere
+#define gstMovStopWatch "mov stop watch"//time keeper for running movies
 #define gstMovInitAng "mov init ang"//movie properties
 #define gstMovStartAng "mov start ang"
 #define gstMovEndAng "mov end ang"

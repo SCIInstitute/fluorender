@@ -44,6 +44,7 @@ namespace fluo
 		// Default constructor
 		//
 		StopWatch(unsigned int nBoxFilterSize = 1);
+		StopWatch(double interval);
 		StopWatch(const StopWatch& data, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
 
 		virtual Object* clone(const CopyOp& copyop) const
@@ -67,27 +68,24 @@ namespace fluo
 
 		// start
 		//
-		void
-			start();
+		void start();
 
 		// stop
 		//
-		void
-			stop();
+		void stop();
 
 		// sample
 		//
-		void
-			sample();
+		void sample();
 
 		// time
 		//
 		// Description:
 		//      Time interval in ms
 		//
-		double
-			time()
-			const;
+		double time() const;
+
+		bool check();
 
 		// average
 		//
@@ -136,6 +134,8 @@ namespace fluo
 		unsigned int _nBoxFilterSize;
 		unsigned int _iFilterPosition;
 		double *     _aIntervals;
+		double _fInterval;//target interval
+		double _fLastTime;
 
 		bool _bClockRuns;
 	};
