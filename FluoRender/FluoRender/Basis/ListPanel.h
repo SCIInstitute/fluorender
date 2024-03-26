@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _LISTPANEL_H_
 #define _LISTPANEL_H_
 
+#include <PropPanel.h>
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 
@@ -123,7 +124,7 @@ protected: //Possible TODO
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ListPanel : public wxPanel
+class ListPanel : public PropPanel
 {
 	enum
 	{
@@ -142,6 +143,12 @@ public:
 		long style = 0,
 		const wxString& name = "ListPanel");
 	~ListPanel();
+
+	virtual void LoadPerspective();
+	virtual void SavePerspective();
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+
+	void UpdateList();
 
 	void Append(int type, wxString name, wxString path);
 	wxString GetText(long item, int col);

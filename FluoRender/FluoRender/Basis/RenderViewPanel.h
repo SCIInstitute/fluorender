@@ -147,7 +147,6 @@ public:
 	void InitOpenVR();
 
 public:
-	wxWindow* m_frame;
 	static int m_max_id;
 	int m_id;
 	int m_draw_scalebar;

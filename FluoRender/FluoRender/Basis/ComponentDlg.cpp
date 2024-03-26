@@ -2478,6 +2478,8 @@ void ComponentDlg::OutputMulti(int color_type)
 {
 	if (!m_view || !m_view->m_cur_vol)
 		return;
+	bool refresh = false;
+
 	glbin_comp_analyzer.SetVolume(m_view->m_cur_vol);
 	list<VolumeData*> channs;
 	if (glbin_comp_analyzer.GenMultiChannels(channs, color_type, glbin_comp_def.m_consistent))
@@ -2512,10 +2514,15 @@ void ComponentDlg::OutputMulti(int color_type)
 				col = m_view->m_cur_vol->GetHdr();
 				group->SetHdrAll(col);
 			}
-			m_frame->UpdateList();
-			m_frame->UpdateTree(m_view->m_cur_vol->GetName());
-			m_view->RefreshGL(39);
+			glbin.set_tree_selection(m_view->m_cur_vol->GetName().ToStdString());
+			refresh = true;
 		}
+	}
+
+	if (refresh)
+	{
+		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
+		m_frame->RefreshCanvases(false, { m_frame->GetView(m_view) });
 	}
 }
 
@@ -2523,6 +2530,8 @@ void ComponentDlg::OutputRgb(int color_type)
 {
 	if (!m_view || !m_view->m_cur_vol)
 		return;
+	bool refresh = false;
+
 	glbin_comp_analyzer.SetVolume(m_view->m_cur_vol);
 	list<VolumeData*> channs;
 	if (glbin_comp_analyzer.GenRgbChannels(channs, color_type, glbin_comp_def.m_consistent))
@@ -2557,10 +2566,15 @@ void ComponentDlg::OutputRgb(int color_type)
 				col = m_view->m_cur_vol->GetHdr();
 				group->SetHdrAll(col);
 			}
-			m_frame->UpdateList();
-			m_frame->UpdateTree(m_view->m_cur_vol->GetName());
-			m_view->RefreshGL(39);
+			glbin.set_tree_selection(m_view->m_cur_vol->GetName().ToStdString());
+			refresh = true;
 		}
+	}
+
+	if (refresh)
+	{
+		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
+		m_frame->RefreshCanvases(false, { m_frame->GetView(m_view) });
 	}
 }
 
@@ -2586,20 +2600,24 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 		type = 1;
 	if (!m_view || !m_view->m_cur_vol)
 		return;
+	bool refresh = false;
+
 	glbin_comp_analyzer.SetVolume(m_view->m_cur_vol);
 	Annotations* ann = new Annotations();
 	if (glbin_comp_analyzer.GenAnnotations(*ann, glbin_comp_def.m_consistent, type))
 	{
 		ann->SetVolume(m_view->m_cur_vol);
 		ann->SetTransform(m_view->m_cur_vol->GetTexture()->transform());
-		if (m_frame)
-		{
-			glbin_data_manager.AddAnnotations(ann);
-			m_view->AddAnnotations(ann);
-			m_frame->UpdateList();
-			m_frame->UpdateTree(m_view->m_cur_vol->GetName());
-		}
-		m_view->RefreshGL(39);
+		glbin_data_manager.AddAnnotations(ann);
+		m_view->AddAnnotations(ann);
+		glbin.set_tree_selection(m_view->m_cur_vol->GetName().ToStdString());
+		refresh = true;;
+	}
+
+	if (refresh && m_frame)
+	{
+		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
+		m_frame->RefreshCanvases(false, { m_frame->GetView(m_view) });
 	}
 }
 

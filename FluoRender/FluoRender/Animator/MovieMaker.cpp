@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
+#include <MoviePanel.h>
 #include <StopWatch.hpp>
 #include <StopWatchFactory.hpp>
 
@@ -267,7 +268,12 @@ void MovieMaker::SetRendering(bool rewind)
 		}
 	}
 	m_view->SetInteractive(false);
-	//m_view->RefreshGL(39);
+	m_frame->UpdateProps({
+		gstMovProgSlider,
+		gstCurrentFrame,
+		gstMovCurTime,
+		gstMovPlay},
+		2, m_frame->GetMovieView());
 }
 
 void MovieMaker::WriteFrameToFile()

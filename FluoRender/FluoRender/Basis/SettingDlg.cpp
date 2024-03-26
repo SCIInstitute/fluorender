@@ -1297,7 +1297,7 @@ void SettingDlg::EnableStreaming(bool enable)
 	if (m_frame)
 	{
 		m_frame->SetTextureRendererSettings();
-		m_frame->RefreshVRenderViews();
+		m_frame->RefreshCanvases();
 	}
 }
 

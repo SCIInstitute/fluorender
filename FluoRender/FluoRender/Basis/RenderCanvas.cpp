@@ -4796,7 +4796,7 @@ void RenderCanvas::SetParams(double t)
 	}
 	if (m_frame)
 	{
-		m_frame->UpdateTree(m_cur_vol ? m_cur_vol->GetName() : wxString(""));
+		//m_frame->UpdateTree(m_cur_vol ? m_cur_vol->GetName() : wxString(""));
 		int index = glbin_interpolator.GetKeyIndexFromTime(t);
 		m_frame->GetRecorderDlg()->SetSelection(index);
 		m_frame->GetMeasureDlg()->GetSettings(this);
@@ -4806,6 +4806,11 @@ void RenderCanvas::SetParams(double t)
 	}
 	SetVolPopDirty();
 
+	vc.insert(gstTreeCtrl);
+	if (m_cur_vol)
+		glbin.set_tree_selection(m_cur_vol->GetName().ToStdString());
+	else
+		glbin.set_tree_selection("");
 	m_vrv->FluoUpdate(vc);
 }
 
@@ -5019,11 +5024,12 @@ void RenderCanvas::ReloadVolumeData(int frame)
 
 	if (m_frame)
 	{
-		m_frame->UpdateList();
-		m_frame->UpdateTree(
-			m_frame->GetCurSelVol() ?
-			m_frame->GetCurSelVol()->GetName() :
-			wxString(""));
+		VolumeData* vd = m_frame->GetCurSelVol();
+		if (vd)
+			glbin.set_tree_selection(vd->GetName().ToStdString());
+		else
+			glbin.set_tree_selection("");
+		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
 	}
 }
 

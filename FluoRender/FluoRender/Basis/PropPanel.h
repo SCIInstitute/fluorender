@@ -50,8 +50,9 @@ public:
 	virtual void SavePerspective();
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {}) = 0;
 	//excl_self: 0 - update all; 1 - exclude this; 2 - only this; 3 - update none
-	virtual void FluoRefresh(bool tree = false, bool interactive = false, int excl_self = 1,
-		const fluo::ValueCollection& vc = {});
+	virtual void FluoRefresh(bool interactive = false, int excl_self = 1,
+		const fluo::ValueCollection& vc = {},
+		const std::set<int>& views = {});
 	void SetFocusVRenderViews(wxBasisSlider* slider);
 
 protected:

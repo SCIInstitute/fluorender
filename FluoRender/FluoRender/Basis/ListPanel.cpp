@@ -297,98 +297,105 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 
 void DataListCtrl::AddToView(int menu_index, long item)
 {
+	if (!m_frame)
+		return;
+
 	bool view_empty = true;
 	wxString name = "";
 
-	if (m_frame)
+	RenderCanvas* view = m_frame->GetView(menu_index);
+	if (GetItemText(item) == "Volume")
 	{
-		RenderCanvas* view = m_frame->GetView(menu_index);
-		if (GetItemText(item) == "Volume")
+		name = GetText(item, 1);
+		VolumeData* vd = glbin_data_manager.GetVolumeData(name);
+		if (vd)
 		{
-			name = GetText(item, 1);
-			VolumeData* vd = glbin_data_manager.GetVolumeData(name);
-			if (vd)
+			if (view)
 			{
-				if (view)
+				VolumeData* vd_add = vd;
+
+				for (int i = 0; i < m_frame->GetViewNum(); ++i)
 				{
-					VolumeData* vd_add = vd;
-
-					for (int i = 0; i < m_frame->GetViewNum(); ++i)
+					RenderCanvas* v = m_frame->GetView(i);
+					if (v && v->GetVolumeData(name))
 					{
-						RenderCanvas* v = m_frame->GetView(i);
-						if (v && v->GetVolumeData(name))
-						{
-							vd_add = glbin_data_manager.DuplicateVolumeData(vd);
-							break;
-						}
+						vd_add = glbin_data_manager.DuplicateVolumeData(vd);
+						break;
 					}
+				}
 
-					int chan_num = view->GetAny();
-					view_empty = chan_num > 0 ? false : view_empty;
-					fluo::Color color(1.0, 1.0, 1.0);
-					if (chan_num == 0)
-						color = fluo::Color(1.0, 0.0, 0.0);
-					else if (chan_num == 1)
-						color = fluo::Color(0.0, 1.0, 0.0);
-					else if (chan_num == 2)
-						color = fluo::Color(0.0, 0.0, 1.0);
+				int chan_num = view->GetAny();
+				view_empty = chan_num > 0 ? false : view_empty;
+				fluo::Color color(1.0, 1.0, 1.0);
+				if (chan_num == 0)
+					color = fluo::Color(1.0, 0.0, 0.0);
+				else if (chan_num == 1)
+					color = fluo::Color(0.0, 1.0, 0.0);
+				else if (chan_num == 2)
+					color = fluo::Color(0.0, 0.0, 1.0);
 
-					if (chan_num >= 0 && chan_num < 3)
-						vd_add->SetColor(color);
+				if (chan_num >= 0 && chan_num < 3)
+					vd_add->SetColor(color);
 
-					DataGroup *group = view->AddVolumeData(vd_add);
-					m_frame->OnSelection(2, view, group, vd_add, 0);
-					if (view->GetVolMethod() == VOL_METHOD_MULTI)
+				DataGroup *group = view->AddVolumeData(vd_add);
+				m_frame->OnSelection(2, view, group, vd_add, 0);
+				if (view->GetVolMethod() == VOL_METHOD_MULTI)
+				{
+					OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
+					if (adjust_view)
 					{
-						OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
-						if (adjust_view)
-						{
-							adjust_view->SetRenderView(view);
-							adjust_view->UpdateSync();
-						}
+						adjust_view->SetRenderView(view);
+						adjust_view->UpdateSync();
 					}
 				}
 			}
 		}
-		else if (GetItemText(item) == "Mesh")
+	}
+	else if (GetItemText(item) == "Mesh")
+	{
+		name = GetText(item, 1);
+		MeshData* md = glbin_data_manager.GetMeshData(name);
+		if (md)
 		{
-			name = GetText(item, 1);
-			MeshData* md = glbin_data_manager.GetMeshData(name);
-			if (md)
+			if (view)
 			{
-				if (view)
-				{
-					int chan_num = view->GetAny();
-					view_empty = chan_num > 0 ? false : view_empty;
-					view->AddMeshData(md);
-				}
+				int chan_num = view->GetAny();
+				view_empty = chan_num > 0 ? false : view_empty;
+				view->AddMeshData(md);
 			}
 		}
-		else if (GetItemText(item) == "Annotations")
+	}
+	else if (GetItemText(item) == "Annotations")
+	{
+		name = GetText(item, 1);
+		Annotations* ann = glbin_data_manager.GetAnnotations(name);
+		if (ann)
 		{
-			name = GetText(item, 1);
-			Annotations* ann = glbin_data_manager.GetAnnotations(name);
-			if (ann)
+			if (view)
 			{
-				if (view)
-				{
-					int chan_num = view->GetAny();
-					view_empty = chan_num > 0 ? false : view_empty;
-					view->AddAnnotations(ann);
-				}
+				int chan_num = view->GetAny();
+				view_empty = chan_num > 0 ? false : view_empty;
+				view->AddAnnotations(ann);
 			}
 		}
+	}
 
-		//update
-		if (view)
-		{
-			if (view_empty)
-				view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
-			else
-				view->InitView(INIT_BOUNDS | INIT_CENTER);
-			view->RefreshGL(39);
-		}
-		m_frame->UpdateTree(name);
+	bool refresh = false;
+	//update
+	if (view)
+	{
+		if (view_empty)
+			view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
+		else
+			view->InitView(INIT_BOUNDS | INIT_CENTER);
+		refresh = true;
+		//view->RefreshGL(39);
+	}
+	//m_frame->UpdateTree(name);
+	if (refresh)
+	{
+		glbin.set_tree_selection(name.ToStdString());
+		m_frame->GetTree()->FluoRefresh(false, 2, { gstTreeCtrl }, { m_frame->GetView(view) });
 	}
 }
 
@@ -857,7 +864,6 @@ void DataListCtrl::EndEdit(bool update)
 
 				//update ui
 				SetText(item, 1, new_name2);
-				m_frame->UpdateTree();
 			}
 		}
 	}
@@ -873,6 +879,7 @@ void DataListCtrl::OnEndEditName(wxCommandEvent& event)
 void DataListCtrl::DeleteSelection()
 {
 	wxString name = "";
+	bool refresh = false;
 
 	if (m_frame && GetSelectedItemCount() > 0)
 	{
@@ -938,10 +945,12 @@ void DataListCtrl::DeleteSelection()
 					glbin_data_manager.RemoveAnnotations(index);
 			}
 		}
-		m_frame->UpdateList();
-		m_frame->UpdateTree(name);
-		m_frame->RefreshVRenderViews();
+		refresh = true;
+		glbin.set_tree_selection(name.ToStdString());
 	}
+
+	if (refresh)
+		m_frame->GetTree()->FluoRefresh(false, 2, { gstTreeCtrl });
 }
 
 void DataListCtrl::DeleteAll()
@@ -1005,10 +1014,7 @@ void DataListCtrl::DeleteAll()
 
 	DeleteAllItems();
 	if (m_frame)
-	{
-		m_frame->UpdateTree();
-		m_frame->RefreshVRenderViews();
-	}
+		m_frame->GetTree()->FluoRefresh(false, 2, { gstTreeCtrl });
 }
 
 void DataListCtrl::OnScroll(wxScrollWinEvent& event)
@@ -1040,7 +1046,7 @@ ListPanel::ListPanel(MainFrame *frame,
 	const wxSize &size,
 	long style,
 	const wxString& name) :
-	wxPanel(frame, wxID_ANY, pos, size, style, name)
+	PropPanel(frame, frame, pos, size, style, name)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -1089,6 +1095,65 @@ ListPanel::ListPanel(MainFrame *frame,
 
 ListPanel::~ListPanel()
 {
+}
+
+void ListPanel::LoadPerspective()
+{
+
+}
+
+void ListPanel::SavePerspective()
+{
+
+}
+
+void ListPanel::FluoUpdate(const fluo::ValueCollection& vc)
+{
+	if (FOUND_VALUE(gstNull))
+		return;
+
+	bool update_all = vc.empty();
+
+	if (update_all || FOUND_VALUE(gstListCtrl))
+		UpdateList();
+}
+
+void ListPanel::UpdateList()
+{
+	DeleteAllItems();
+
+	for (int i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
+	{
+		VolumeData* vd = glbin_data_manager.GetVolumeData(i);
+		if (vd && !vd->GetDup())
+		{
+			wxString name = vd->GetName();
+			wxString path = vd->GetPath();
+			Append(DATA_VOLUME, name, path);
+		}
+	}
+
+	for (int i = 0; i < glbin_data_manager.GetMeshNum(); i++)
+	{
+		MeshData* md = glbin_data_manager.GetMeshData(i);
+		if (md)
+		{
+			wxString name = md->GetName();
+			wxString path = md->GetPath();
+			Append(DATA_MESH, name, path);
+		}
+	}
+
+	for (int i = 0; i < glbin_data_manager.GetAnnotationNum(); i++)
+	{
+		Annotations* ann = glbin_data_manager.GetAnnotations(i);
+		if (ann)
+		{
+			wxString name = ann->GetName();
+			wxString path = ann->GetPath();
+			Append(DATA_ANNOTATIONS, name, path);
+		}
+	}
 }
 
 void ListPanel::Append(int type, wxString name, wxString path)

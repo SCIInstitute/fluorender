@@ -222,7 +222,7 @@ void NoiseCancellingDlg::OnThresholdText(wxCommandEvent &event)
 		sel_vol = m_frame->GetCurSelVol();
 	if (sel_vol)
 		sel_vol->SetMaskThreshold(m_dft_thresh);
-	m_frame->RefreshVRenderViews();
+	m_frame->RefreshCanvases();
 }
 
 //voxel size
@@ -288,5 +288,5 @@ void NoiseCancellingDlg::OnEnhanceSelChk(wxCommandEvent &event)
 		sel_vol->SetHdr(m_hdr);
 	}
 	if (m_frame)
-		m_frame->RefreshVRenderViews();
+		m_frame->RefreshCanvases();
 }

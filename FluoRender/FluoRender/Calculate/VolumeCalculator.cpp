@@ -85,6 +85,8 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 {
 	if (!m_view || !m_frame)
 		return;
+	bool update = false;
+	bool refresh = false;
 
 	Calculate(type);
 	VolumeData* vd = GetResult(add);
@@ -159,8 +161,10 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 						if (vd_b)
 							vd_b->SetDisp(false);
 					}
-					m_frame->UpdateList();
-					m_frame->UpdateTree(vd->GetName());
+					//m_frame->UpdateList();
+					//m_frame->UpdateTree(vd->GetName());
+					glbin.set_tree_selection(vd->GetName().ToStdString());
+					update = true;
 				}
 		}
 		else if (type == 7)
@@ -171,7 +175,14 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 			//m_frame->GetPropView()->SetVolumeData(vd_a);
 			page->SetVolumeData(vd_a);
 		}
-		m_view->RefreshGL(5);
+		//m_view->RefreshGL(5);
+		refresh = true;
+	}
+	if (refresh)
+	{
+		if (update)
+			m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
+		m_frame->RefreshCanvases(false, { m_frame->GetView(m_view) });
 	}
 }
 

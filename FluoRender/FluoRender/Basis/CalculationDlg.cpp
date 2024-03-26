@@ -278,6 +278,7 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 	if (!m_group)
 		return;
 
+	bool refresh = false;
 	flrd::CombineList Op;
 	wxString name = m_group->GetName() + "_combined";
 	Op.SetName(name);
@@ -324,9 +325,16 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 			col = volume->GetHdr();
 			group->SetHdrAll(col);
 		}
-		m_frame->UpdateList();
-		m_frame->UpdateTree(m_group->GetName());
-		m_view->RefreshGL(39);
+		//m_frame->UpdateList();
+		//m_frame->UpdateTree(m_group->GetName());
+		//m_view->RefreshGL(39);
+		glbin.set_tree_selection(m_group->GetName().ToStdString());
+		refresh = true;
 	}
 
+	if (refresh)
+	{
+		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
+		m_frame->RefreshCanvases(false, { m_frame->GetView(m_view) });
+	}
 }

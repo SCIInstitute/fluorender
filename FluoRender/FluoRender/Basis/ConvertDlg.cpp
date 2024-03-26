@@ -289,6 +289,8 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 	progress = 90;
 	prog_diag->Update(progress);
 
+	bool refresh = false;
+
 	if (mesh)
 	{
 		if (m_cnv_vol_mesh_weld_chk->GetValue())
@@ -304,14 +306,19 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 			m_frame->GetView(0)->AddMeshData(md);
 			m_frame->GetView(0)->RefreshGL(39);
 		}
-		m_frame->UpdateList();
-		m_frame->UpdateTree();
 		(*m_stat_text) <<
 			"The surface area of mesh object " <<
 			md->GetName() << " is " <<
 			wxString::Format("%f", area) << "\n";
+		refresh = true;
+		glbin.set_tree_selection("");
 	}
 
 	delete prog_diag;
 
+	if (refresh)
+	{
+		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
+		m_frame->RefreshCanvases(false);
+	}
 }

@@ -660,7 +660,6 @@ MainFrame::MainFrame(
 
 	for (auto it : m_vrv_list)
 		it->LoadSettings();
-	UpdateTree();
 
 	SetMinSize(FromDIP(wxSize(800,600)));
 
@@ -925,7 +924,7 @@ MainFrame::MainFrame(
 	glbin_moviemaker.SetMainFrame(this);
 	glbin_moviemaker.SetView(vrv->m_glview);
 	glbin_mov_def.Apply(&glbin_moviemaker);
-	m_movie_view->FluoUpdate();
+	UpdateProps({});
 }
 
 MainFrame::~MainFrame()
@@ -1067,13 +1066,11 @@ wxString MainFrame::CreateView(int row)
 		}
 		//update
 		view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
-		vrv->FluoRefresh(false, false, 2);
 	}
 
 	vrv->LoadSettings();
-	UpdateTree();
 
-	m_movie_view->FluoUpdate({ gstMovViewList, gstMovViewIndex });
+	UpdateProps({ gstMovViewList, gstMovViewIndex, gstTreeCtrl });
 
 	return vrv->GetName();
 }
@@ -1108,6 +1105,23 @@ RenderCanvas* MainFrame::GetView(wxString& name)
 		if (v && v->GetName() == name)
 			return v->m_glview;
 	}
+	return 0;
+}
+
+int MainFrame::GetView(RenderCanvas* view)
+{
+	if (!view)
+		return 0;
+	if (m_vrv_list.size() == 1)
+		return 0;
+
+	for (size_t i = 0; i < m_vrv_list.size(); ++i)
+	{
+		RenderViewPanel* v = m_vrv_list[i];
+		if (v && v->m_glview == view)
+			return i;
+	}
+
 	return 0;
 }
 
@@ -1438,6 +1452,7 @@ void MainFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* 
 	else
 		v = GetView(0);
 
+	bool refresh = false;
 	wxProgressDialog *prg_diag = 0;
 	if (v)
 	{
@@ -1581,28 +1596,34 @@ void MainFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* 
 			}
 		}
 
-		UpdateList();
+		//UpdateList();
 		if (vd_sel)
-			UpdateTree(vd_sel->GetName());
+			glbin.set_tree_selection(vd_sel->GetName().ToStdString());
 		else
-			UpdateTree();
-		v->RefreshGL(39);
-
+			glbin.set_tree_selection("");
 		v->InitView(INIT_BOUNDS|INIT_CENTER);
-		v->m_vrv->FluoUpdate();
+		refresh = true;
+		//v->RefreshGL(39);
+
+		//v->m_vrv->FluoUpdate();
 
 		if (enable_4d)
 		{
 			glbin_moviemaker.SetTimeSeqEnable(true);
 			glbin_moviemaker.SetRotateEnable(false);
 			glbin_moviemaker.SetCurrentFrame(v->m_tseq_cur_num);
-			m_movie_view->FluoUpdate({ gstMovSeqMode, gstMovRotEnable, gstCurrentFrame });
+			//m_movie_view->FluoUpdate({ gstMovSeqMode, gstMovRotEnable, gstCurrentFrame });
 		}
 
 		delete prg_diag;
 	}
 
-	v->RefreshGL(39);//added by Takashi
+	//v->RefreshGL(39);//added by Takashi
+	if (refresh)
+	{
+		RefreshCanvases(false, { GetView(v) });
+		UpdateProps({ gstListCtrl, gstTreeCtrl, gstScaleFactor, gstMovSeqMode, gstMovRotEnable, gstCurrentFrame });
+	}
 }
 
 void MainFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imagej)
@@ -1699,14 +1720,16 @@ void MainFrame::LoadMeshes(wxArrayString files, RenderCanvas* view)
 		}
 	}
 
-	UpdateList();
+	//UpdateList();
 	if (md_sel)
-		UpdateTree(md_sel->GetName());
+		glbin.set_tree_selection(md_sel->GetName().ToStdString());
 	else
-		UpdateTree();
+		glbin.set_tree_selection("");
 
 	if (view)
 		view->InitView(INIT_BOUNDS|INIT_CENTER);
+
+	UpdateProps({ gstListCtrl, gstTreeCtrl });
 
 	delete prg_diag;
 }
@@ -1836,462 +1859,6 @@ wxString MainFrame::ScriptDialog(const wxString& title,
 	delete dlg;
 	glbin_moviemaker.Resume();
 	return result;
-}
-
-void MainFrame::UpdateTreeIcons()
-{
-	int i, j, k;
-	if (!m_tree_panel || !m_tree_panel->GetTreeCtrl())
-		return;
-
-	DataTreeCtrl* treectrl = m_tree_panel->GetTreeCtrl();
-	wxTreeItemId root = treectrl->GetRootItem();
-	wxTreeItemIdValue ck_view;
-	int counter = 0;
-	for (i=0; i<GetViewNum(); i++)
-	{
-		RenderCanvas *view = GetView(i);
-		wxTreeItemId vrv_item;
-		if (i==0)
-			vrv_item = treectrl->GetFirstChild(root, ck_view);
-		else
-			vrv_item = treectrl->GetNextChild(root, ck_view);
-
-		if (!vrv_item.IsOk())
-			continue;
-
-		m_tree_panel->SetViewItemImage(vrv_item, view->GetDraw());
-
-		wxTreeItemIdValue ck_layer;
-		for (j=0; j< view->GetLayerNum(); j++)
-		{
-			TreeLayer* layer = view->GetLayer(j);
-			wxTreeItemId layer_item;
-			if (j==0)
-				layer_item = treectrl->GetFirstChild(vrv_item, ck_layer);
-			else
-				layer_item = treectrl->GetNextChild(vrv_item, ck_layer);
-
-			if (!layer_item.IsOk())
-				continue;
-
-			switch (layer->IsA())
-			{
-			case 2://volume
-				{
-					VolumeData* vd = (VolumeData*)layer;
-					if (!vd)
-						break;
-					counter++;
-					m_tree_panel->SetVolItemImage(layer_item, vd->GetDisp()?2*counter+1:2*counter);
-				}
-				break;
-			case 3://mesh
-				{
-					MeshData* md = (MeshData*)layer;
-					if (!md)
-						break;
-					counter++;
-					m_tree_panel->SetMeshItemImage(layer_item, md->GetDisp()?2*counter+1:2*counter);
-				}
-				break;
-			case 4://annotations
-				{
-					Annotations* ann = (Annotations*)layer;
-					if (!ann)
-						break;
-					counter++;
-					m_tree_panel->SetAnnotationItemImage(layer_item, ann->GetDisp()?2*counter+1:2*counter);
-				}
-				break;
-			case 5://volume group
-				{
-					DataGroup* group = (DataGroup*)layer;
-					if (!group)
-						break;
-					m_tree_panel->SetGroupItemImage(layer_item, int(group->GetDisp()));
-					wxTreeItemIdValue ck_volume;
-					for (k=0; k<group->GetVolumeNum(); k++)
-					{
-						VolumeData* vd = group->GetVolumeData(k);
-						if (!vd)
-							continue;
-						wxTreeItemId volume_item;
-						if (k==0)
-							volume_item = treectrl->GetFirstChild(layer_item, ck_volume);
-						else
-							volume_item = treectrl->GetNextChild(layer_item, ck_volume);
-						if (!volume_item.IsOk())
-							continue;
-						counter++;
-						m_tree_panel->SetVolItemImage(volume_item, vd->GetDisp()?2*counter+1:2*counter);
-					}
-				}
-				break;
-			case 6://mesh group
-				{
-					MeshGroup* group = (MeshGroup*)layer;
-					if (!group)
-						break;
-					m_tree_panel->SetMGroupItemImage(layer_item, int(group->GetDisp()));
-					wxTreeItemIdValue ck_mesh;
-					for (k=0; k<group->GetMeshNum(); k++)
-					{
-						MeshData* md = group->GetMeshData(k);
-						if (!md)
-							continue;
-						wxTreeItemId mesh_item;
-						if (k==0)
-							mesh_item = treectrl->GetFirstChild(layer_item, ck_mesh);
-						else
-							mesh_item = treectrl->GetNextChild(layer_item, ck_mesh);
-						if (!mesh_item.IsOk())
-							continue;
-						counter++;
-						m_tree_panel->SetMeshItemImage(mesh_item, md->GetDisp()?2*counter+1:2*counter);
-					}
-				}
-				break;
-			}
-		}
-	}
-	m_tree_panel->Refresh(false);
-}
-
-void MainFrame::UpdateTreeColors()
-{
-	int i, j, k;
-	int counter = 0;
-	for (i=0 ; i<GetViewNum() ; i++)
-	{
-		RenderCanvas *view = GetView(i);
-
-		for (j=0; j< view->GetLayerNum(); j++)
-		{
-			TreeLayer* layer = view->GetLayer(j);
-			switch (layer->IsA())
-			{
-			case 0://root
-				break;
-			case 1://view
-				break;
-			case 2://volume
-				{
-					VolumeData* vd = (VolumeData*)layer;
-					if (!vd)
-						break;
-					fluo::Color c = vd->GetColor();
-					wxColor wxc(
-						(unsigned char)(c.r()*255),
-						(unsigned char)(c.g()*255),
-						(unsigned char)(c.b()*255));
-					m_tree_panel->ChangeIconColor(counter+1, wxc);
-					counter++;
-				}
-				break;
-			case 3://mesh
-				{
-					MeshData* md = (MeshData*)layer;
-					if (!md)
-						break;
-					fluo::Color amb, diff, spec;
-					double shine, alpha;
-					md->GetMaterial(amb, diff, spec, shine, alpha);
-					wxColor wxc(
-						(unsigned char)(diff.r()*255),
-						(unsigned char)(diff.g()*255),
-						(unsigned char)(diff.b()*255));
-					m_tree_panel->ChangeIconColor(counter+1, wxc);
-					counter++;
-				}
-				break;
-			case 4://annotations
-				{
-					Annotations* ann = (Annotations*)layer;
-					if (!ann)
-						break;
-					wxColor wxc(255, 255, 255);
-					m_tree_panel->ChangeIconColor(counter+1, wxc);
-					counter++;
-				}
-				break;
-			case 5://group
-				{
-					DataGroup* group = (DataGroup*)layer;
-					if (!group)
-						break;
-					for (k=0; k<group->GetVolumeNum(); k++)
-					{
-						VolumeData* vd = group->GetVolumeData(k);
-						if (!vd)
-							break;
-						fluo::Color c = vd->GetColor();
-						wxColor wxc(
-							(unsigned char)(c.r()*255),
-							(unsigned char)(c.g()*255),
-							(unsigned char)(c.b()*255));
-						m_tree_panel->ChangeIconColor(counter+1, wxc);
-						counter++;
-					}
-				}
-				break;
-			case 6://mesh group
-				{
-					MeshGroup* group = (MeshGroup*)layer;
-					if (!group)
-						break;
-					for (k=0; k<group->GetMeshNum(); k++)
-					{
-						MeshData* md = group->GetMeshData(k);
-						if (!md)
-							break;
-						fluo::Color amb, diff, spec;
-						double shine, alpha;
-						md->GetMaterial(amb, diff, spec, shine, alpha);
-						wxColor wxc(
-							(unsigned char)(diff.r()*255),
-							(unsigned char)(diff.g()*255),
-							(unsigned char)(diff.b()*255));
-						m_tree_panel->ChangeIconColor(counter+1, wxc);
-						counter++;
-					}
-				}
-				break;
-			}
-		}
-	}
-	m_tree_panel->Refresh(false);
-}
-
-void MainFrame::UpdateTree(const wxString& name)
-{
-	if (!m_tree_panel)
-		return;
-
-	m_tree_panel->DeleteAll();
-	m_tree_panel->ClearIcons();
-
-	wxString root_str = "Active Datasets";
-	wxTreeItemId root_item = m_tree_panel->AddRootItem(root_str);
-	if (name == root_str)
-		m_tree_panel->SelectItem(root_item);
-	//append non-color icons for views
-	m_tree_panel->AppendIcon();
-	m_tree_panel->Expand(root_item);
-	m_tree_panel->ChangeIconColor(0, wxColor(255, 255, 255));
-
-	wxTreeItemId sel_item;
-
-	for (int i = 0; i < GetViewNum(); i++)
-	{
-		RenderCanvas* view = GetView(i);
-		if (!view)
-			continue;
-		int j, k;
-
-		wxString view_name = view->m_vrv->GetName();
-		view->OrganizeLayers();
-		wxTreeItemId vrv_item = m_tree_panel->AddViewItem(view_name);
-		m_tree_panel->SetViewItemImage(vrv_item, view->GetDraw());
-		if (name == view_name)
-			m_tree_panel->SelectItem(vrv_item);
-
-		for (j=0; j< view->GetLayerNum(); j++)
-		{
-			TreeLayer* layer = view->GetLayer(j);
-			switch (layer->IsA())
-			{
-			case 0://root
-				break;
-			case 1://view
-				break;
-			case 2://volume data
-				{
-					VolumeData* vd = (VolumeData*)layer;
-					if (!vd)
-						break;
-					//append icon for volume
-					m_tree_panel->AppendIcon();
-					fluo::Color c = vd->GetColor();
-					wxColor wxc(
-						(unsigned char)(c.r()*255),
-						(unsigned char)(c.g()*255),
-						(unsigned char)(c.b()*255));
-					int ii = m_tree_panel->GetIconNum()-1;
-					m_tree_panel->ChangeIconColor(ii, wxc);
-					wxTreeItemId item = m_tree_panel->AddVolItem(vrv_item, vd->GetName());
-					m_tree_panel->SetVolItemImage(item, vd->GetDisp()?2*ii+1:2*ii);
-					if (name == vd->GetName())
-					{
-						sel_item = item;
-						view->SetVolumeA(vd);
-						GetBrushToolDlg()->GetSettings(view);
-						GetMeasureDlg()->GetSettings(view);
-						GetTraceDlg()->GetSettings(view);
-						GetOclDlg()->GetSettings(view);
-						GetComponentDlg()->SetView(view);
-						GetColocalizationDlg()->SetView(view);
-					}
-				}
-				break;
-			case 3://mesh data
-				{
-					MeshData* md = (MeshData*)layer;
-					if (!md)
-						break;
-					//append icon for mesh
-					m_tree_panel->AppendIcon();
-					fluo::Color amb, diff, spec;
-					double shine, alpha;
-					md->GetMaterial(amb, diff, spec, shine, alpha);
-					wxColor wxc(
-						(unsigned char)(diff.r()*255),
-						(unsigned char)(diff.g()*255),
-						(unsigned char)(diff.b()*255));
-					int ii = m_tree_panel->GetIconNum()-1;
-					m_tree_panel->ChangeIconColor(ii, wxc);
-					wxTreeItemId item = m_tree_panel->AddMeshItem(vrv_item, md->GetName());
-					m_tree_panel->SetMeshItemImage(item, md->GetDisp()?2*ii+1:2*ii);
-					if (name == md->GetName())
-						sel_item = item;
-				}
-				break;
-			case 4://annotations
-				{
-					Annotations* ann = (Annotations*)layer;
-					if (!ann)
-						break;
-					//append icon for annotations
-					m_tree_panel->AppendIcon();
-					wxColor wxc(255, 255, 255);
-					int ii = m_tree_panel->GetIconNum()-1;
-					m_tree_panel->ChangeIconColor(ii, wxc);
-					wxTreeItemId item = m_tree_panel->AddAnnotationItem(vrv_item, ann->GetName());
-					m_tree_panel->SetAnnotationItemImage(item, ann->GetDisp()?2*ii+1:2*ii);
-					if (name == ann->GetName())
-						sel_item = item;
-				}
-				break;
-			case 5://group
-				{
-					DataGroup* group = (DataGroup*)layer;
-					if (!group)
-						break;
-					//append group item to tree
-					wxTreeItemId group_item = m_tree_panel->AddGroupItem(vrv_item, group->GetName());
-					m_tree_panel->SetGroupItemImage(group_item, int(group->GetDisp()));
-					//append volume data to group
-					for (k=0; k<group->GetVolumeNum(); k++)
-					{
-						VolumeData* vd = group->GetVolumeData(k);
-						if (!vd)
-							continue;
-						//add icon
-						m_tree_panel->AppendIcon();
-						fluo::Color c = vd->GetColor();
-						wxColor wxc(
-							(unsigned char)(c.r()*255),
-							(unsigned char)(c.g()*255),
-							(unsigned char)(c.b()*255));
-						int ii = m_tree_panel->GetIconNum()-1;
-						m_tree_panel->ChangeIconColor(ii, wxc);
-						wxTreeItemId item = m_tree_panel->AddVolItem(group_item, vd->GetName());
-						m_tree_panel->SetVolItemImage(item, vd->GetDisp()?2*ii+1:2*ii);
-						if (name == vd->GetName())
-						{
-							sel_item = item;
-							view->SetVolumeA(vd);
-							GetBrushToolDlg()->GetSettings(view);
-							GetMeasureDlg()->GetSettings(view);
-							GetTraceDlg()->GetSettings(view);
-							GetOclDlg()->GetSettings(view);
-							GetComponentDlg()->SetView(view);
-							GetColocalizationDlg()->SetView(view);
-						}
-					}
-					if (name == group->GetName())
-						sel_item = group_item;
-				}
-				break;
-			case 6://mesh group
-				{
-					MeshGroup* group = (MeshGroup*)layer;
-					if (!group)
-						break;
-					//append group item to tree
-					wxTreeItemId group_item = m_tree_panel->AddMGroupItem(vrv_item, group->GetName());
-					m_tree_panel->SetMGroupItemImage(group_item, int(group->GetDisp()));
-					//append mesh data to group
-					for (k=0; k<group->GetMeshNum(); k++)
-					{
-						MeshData* md = group->GetMeshData(k);
-						if (!md)
-							continue;
-						//add icon
-						m_tree_panel->AppendIcon();
-						fluo::Color amb, diff, spec;
-						double shine, alpha;
-						md->GetMaterial(amb, diff, spec, shine, alpha);
-						wxColor wxc(
-							(unsigned char)(diff.r()*255),
-							(unsigned char)(diff.g()*255),
-							(unsigned char)(diff.b()*255));
-						int ii = m_tree_panel->GetIconNum()-1;
-						m_tree_panel->ChangeIconColor(ii, wxc);
-						wxTreeItemId item = m_tree_panel->AddMeshItem(group_item, md->GetName());
-						m_tree_panel->SetMeshItemImage(item, md->GetDisp()?2*ii+1:2*ii);
-						if (name == md->GetName())
-							sel_item = item;
-					}
-					if (name == group->GetName())
-						sel_item = group_item;
-				}
-				break;
-			}
-		}
-	}
-
-	if (sel_item.IsOk())
-		m_tree_panel->SelectItem(sel_item);
-	m_tree_panel->ExpandAll();
-}
-
-void MainFrame::UpdateList()
-{
-	m_list_panel->DeleteAllItems();
-
-	for (int i=0 ; i<glbin_data_manager.GetVolumeNum() ; i++)
-	{
-		VolumeData* vd = glbin_data_manager.GetVolumeData(i);
-		if (vd && !vd->GetDup())
-		{
-			wxString name = vd->GetName();
-			wxString path = vd->GetPath();
-			m_list_panel->Append(DATA_VOLUME, name, path);
-		}
-	}
-
-	for (int i=0 ; i<glbin_data_manager.GetMeshNum() ; i++)
-	{
-		MeshData* md = glbin_data_manager.GetMeshData(i);
-		if (md)
-		{
-			wxString name = md->GetName();
-			wxString path = md->GetPath();
-			m_list_panel->Append(DATA_MESH, name, path);
-		}
-	}
-
-	for (int i=0; i<glbin_data_manager.GetAnnotationNum(); i++)
-	{
-		Annotations* ann = glbin_data_manager.GetAnnotations(i);
-		if (ann)
-		{
-			wxString name = ann->GetName();
-			wxString path = ann->GetPath();
-			m_list_panel->Append(DATA_ANNOTATIONS, name, path);
-		}
-	}
 }
 
 TreePanel *MainFrame::GetTree()
@@ -2637,14 +2204,18 @@ bool MainFrame::update_props(int excl_self, PropPanel* p1, PropPanel* p2)
 
 void MainFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, PropPanel* panel)
 {
-	for (auto i : m_prop_pages)
-		if (update_props(excl_self, i, panel))
-			i->FluoUpdate(vc);
+	if (update_props(excl_self, m_list_panel, panel))
+		m_list_panel->FluoUpdate(vc);
+	if (update_props(excl_self, m_tree_panel, panel))
+		m_tree_panel->FluoUpdate(vc);
 	if (update_props(excl_self, m_adjust_view, panel))
 		m_adjust_view->FluoUpdate(vc);
 	if (update_props(excl_self, m_clip_view, panel))
 		m_clip_view->FluoUpdate(vc);
 	for (auto i : m_vrv_list)
+		if (update_props(excl_self, i, panel))
+			i->FluoUpdate(vc);
+	for (auto i : m_prop_pages)
 		if (update_props(excl_self, i, panel))
 			i->FluoUpdate(vc);
 }
@@ -2856,21 +2427,23 @@ MeshData* MainFrame::GetCurSelMesh()
 	return glbin_data_manager.GetMeshData(m_cur_sel_mesh);
 }
 
-void MainFrame::RefreshVRenderViews(bool tree, bool interactive, int excl_self, PropPanel* panel)
+void MainFrame::RefreshCanvases(bool interactive, const std::set<int>& views)
 {
+	bool update_all = views.empty();
+
 	for (int i=0 ; i<(int)m_vrv_list.size() ; i++)
 	{
-		if (m_vrv_list[i])
-		{
-			if (update_props(excl_self, m_vrv_list[i], panel))
-				m_vrv_list[i]->RefreshGL(interactive);
-		}
+		if (!m_vrv_list[i])
+			continue;
+
+		if (update_all || views.find(i) != views.end())
+			m_vrv_list[i]->RefreshGL(interactive);
 	}
 
 	//incase volume color changes
 	//change icon color of the tree panel
-	if (tree)
-		UpdateTreeColors();
+	//if (tree)
+	//	UpdateTreeColors();
 }
 
 void MainFrame::DeleteVRenderView(int i)
@@ -2890,9 +2463,11 @@ void MainFrame::DeleteVRenderView(int i)
 		vrv->Close();
 		delete vrv;
 		m_aui_mgr.Update();
-		UpdateTree();
+		//UpdateTree();
 
-		m_movie_view->FluoUpdate({ gstMovViewList, gstMovViewIndex });
+		if (glbin_mov_def.m_view_idx >= i)
+			glbin_mov_def.m_view_idx--;
+		UpdateProps({ gstTreeCtrl, gstMovViewList, gstMovViewIndex });
 	}
 }
 
@@ -3180,9 +2755,11 @@ void MainFrame::OnNewProject(wxCommandEvent& event)
 	m_trace_dlg->GetSettings(GetView(0));
 	glbin_interpolator.Clear();
 	m_recorder_dlg->UpdateList();
-	UpdateList();
-	UpdateTree();
-	RefreshVRenderViews(true, true);
+	//UpdateList();
+	//UpdateTree();
+	RefreshCanvases(false);
+	UpdateProps({ gstListCtrl, gstTreeCtrl });
+
 }
 
 void MainFrame::OnSaveProject(wxCommandEvent& event)
@@ -3908,11 +3485,13 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 	}
 
 	SaveConfig(fconfig, filename2);
-	UpdateList();
+	//UpdateList();
 
 	delete prg_diag;
 	glbin_data_manager.SetProjectPath(filename2);
 	SetTitle(m_title + " - " + filename2);
+
+	UpdateProps({ gstListCtrl });
 }
 
 void MainFrame::OpenProject(wxString& filename)
@@ -5404,42 +4983,41 @@ void MainFrame::OpenProject(wxString& filename)
 		m_recorder_dlg->UpdateList();
 	}
 
-	UpdateList();
 	if (m_cur_sel_type != -1)
 	{
 		switch (m_cur_sel_type)
 		{
 		case 2:  //volume
 			if (glbin_data_manager.GetVolumeData(m_cur_sel_vol))
-				UpdateTree(glbin_data_manager.GetVolumeData(m_cur_sel_vol)->GetName());
+				glbin.set_tree_selection(glbin_data_manager.GetVolumeData(m_cur_sel_vol)->GetName().ToStdString());
 			else
-				UpdateTree();
+				glbin.set_tree_selection("");
 			break;
 		case 3:  //mesh
 			if (glbin_data_manager.GetMeshData(m_cur_sel_mesh))
-				UpdateTree(glbin_data_manager.GetMeshData(m_cur_sel_mesh)->GetName());
+				glbin.set_tree_selection(glbin_data_manager.GetMeshData(m_cur_sel_mesh)->GetName().ToStdString());
 			else
-				UpdateTree();
+				glbin.set_tree_selection("");
 			break;
 		default:
-			UpdateTree();
+			glbin.set_tree_selection("");
 		}
 	}
 	else if (m_cur_sel_vol != -1)
 	{
 		if (glbin_data_manager.GetVolumeData(m_cur_sel_vol))
-			UpdateTree(glbin_data_manager.GetVolumeData(m_cur_sel_vol)->GetName());
+			glbin.set_tree_selection(glbin_data_manager.GetVolumeData(m_cur_sel_vol)->GetName().ToStdString());
 		else
-			UpdateTree();
+			glbin.set_tree_selection("");
 	}
 	else
-		UpdateTree();
+		glbin.set_tree_selection("");
 
 	if (m_movie_view)
 		m_movie_view->SetView(0);
 	delete prg_diag;
 
-	RefreshVRenderViews(true, true);
+	RefreshCanvases(false);
 	UpdateProps({}, 0, 0);
 }
 

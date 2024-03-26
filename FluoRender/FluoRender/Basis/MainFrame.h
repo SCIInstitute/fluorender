@@ -194,16 +194,13 @@ public:
 
 	TreePanel *GetTree();
 	ListPanel *GetList();
-	void UpdateTree(const wxString& name = "");
-	void UpdateTreeColors();
-	void UpdateTreeIcons();
-	void UpdateList();
 
 	//views
+	void RefreshCanvases(bool interactive = false, const std::set<int>& views = {});//view indices to update
 	int GetViewNum();
 	RenderCanvas* GetView(int index);
 	RenderCanvas* GetView(wxString& name);
-	void RefreshVRenderViews(bool tree=false, bool interactive=false, int excl_self=0, PropPanel* panel=0);
+	int GetView(RenderCanvas* view);
 	void DeleteVRenderView(int i);
 	void DeleteVRenderView(wxString &name);
 

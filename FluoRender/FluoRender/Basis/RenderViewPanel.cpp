@@ -58,7 +58,6 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 	const wxString& name) :
 	PropPanel(frame, frame, pos, size, style, name),
 	m_default_saved(false),
-	m_frame(frame),
 	m_draw_scalebar(0),
 	m_bg_color_inv(false),
 	m_draw_clip(false),
@@ -928,7 +927,7 @@ void RenderViewPanel::SetVolumeMethod(int val)
 {
 	m_glview->SetVolMethod(val);
 
-	FluoRefresh(false, true, 2, { gstMixMethod });
+	FluoRefresh(true, 2, { gstMixMethod }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::Capture()
@@ -936,8 +935,6 @@ void RenderViewPanel::Capture()
 	//reset enlargement
 	RenderCanvas::SetEnlarge(false);
 	RenderCanvas::SetEnlargeScale(1.0);
-
-	MainFrame* vr_frame = (MainFrame*)m_frame;
 
 	wxFileDialog file_dlg(m_frame, "Save captured image", "", "", "*.tif", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 	file_dlg.SetExtraControlCreator(CreateExtraCaptureControl);
@@ -956,7 +953,7 @@ void RenderViewPanel::Capture()
 			wxString prop_file = new_folder + GETSLASH() + file_dlg.GetFilename() + "_project.vrp";
 			bool inc = wxFileExists(prop_file) &&
 				glbin_settings.m_prj_save_inc;
-			vr_frame->SaveProject(prop_file, inc);
+			m_frame->SaveProject(prop_file, inc);
 		}
 	}
 }
@@ -968,28 +965,28 @@ void RenderViewPanel::SetInfo(bool val)
 	else
 		m_glview->m_draw_info &= ~1;
 
-	FluoRefresh(false, true, 2, { gstDrawInfo });
+	FluoRefresh(true, 2, { gstDrawInfo }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetDrawCamCtr(bool val)
 {
 	m_glview->m_draw_camctr = val;
 
-	FluoRefresh(false, true, 2, { gstDrawCamCtr });
+	FluoRefresh(true, 2, { gstDrawCamCtr }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetLegend(bool val)
 {
 	m_glview->m_draw_legend = val;
 
-	FluoRefresh(false, true, 2, { gstDrawLegend });
+	FluoRefresh(true, 2, { gstDrawLegend }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetDrawColormap(bool val)
 {
 	m_glview->m_draw_colormap = val;
 
-	FluoRefresh(false, true, 2, { gstDrawColormap });
+	FluoRefresh(true, 2, { gstDrawColormap }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetDrawScalebar(int val)
@@ -1010,7 +1007,7 @@ void RenderViewPanel::SetDrawScalebar(int val)
 		break;
 	}
 
-	FluoRefresh(false, true, 2, { gstDrawScaleBar });
+	FluoRefresh(true, 2, { gstDrawScaleBar }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetScaleText(double val)
@@ -1035,7 +1032,7 @@ void RenderViewPanel::SetScaleText(double val)
 	m_glview->SetScaleBarLen(val);
 	m_glview->m_sb_num = num_text;
 
-	FluoRefresh(false, true, 2, {gstNull});
+	FluoRefresh(true, 2, {gstNull}, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetScaleUnit(int val)
@@ -1062,14 +1059,14 @@ void RenderViewPanel::SetScaleUnit(int val)
 	m_glview->SetScaleBarLen(dval);
 	m_glview->m_sb_num = num_text;
 
-	FluoRefresh(false, true, 2, { gstNull });
+	FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetBgColor(fluo::Color val)
 {
 	m_glview->SetBackgroundColor(val);
 
-	FluoRefresh(false, true, 2, { gstBgColor });
+	FluoRefresh(true, 2, { gstBgColor }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetBgColorInvert(bool val)
@@ -1079,7 +1076,7 @@ void RenderViewPanel::SetBgColorInvert(bool val)
 	c = fluo::Color(1.0, 1.0, 1.0) - c;
 	m_glview->SetBackgroundColor(c);
 
-	FluoRefresh(false, true, 2, { gstBgColor, gstBgColorInv });
+	FluoRefresh(true, 2, { gstBgColor, gstBgColorInv }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetDrawClipPlanes(bool val)
@@ -1089,12 +1086,12 @@ void RenderViewPanel::SetDrawClipPlanes(bool val)
 	{
 		m_glview->m_draw_clip = true;
 		m_glview->m_clip_mask = -1;
-		FluoRefresh(false, true, 2, {gstNull});
+		FluoRefresh(true, 2, {gstNull}, { m_frame->GetView(m_glview) });
 	}
 	else if (!val && draw_clip)
 	{
 		m_glview->m_draw_clip = false;
-		FluoRefresh(false, true, 2, {gstNull});
+		FluoRefresh(true, 2, {gstNull}, { m_frame->GetView(m_glview) });
 	}
 }
 
@@ -1117,9 +1114,9 @@ void RenderViewPanel::SetAov(double val, bool notify)
 	}
 
 	if (notify)
-		FluoRefresh(false, true, 2, { gstAov });
+		FluoRefresh(true, 2, { gstAov }, { m_frame->GetView(m_glview) });
 	else
-		FluoRefresh(false, true, 2, { gstNull });
+		FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetFree(bool val)
@@ -1133,7 +1130,7 @@ void RenderViewPanel::SetFree(bool val)
 			m_glview->SetPersp(false);
 	}
 
-	FluoRefresh(false, true, 2, { gstFree });
+	FluoRefresh(true, 2, { gstFree }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetFullScreen()
@@ -1177,16 +1174,16 @@ void RenderViewPanel::SetFullScreen()
 void RenderViewPanel::SetDepthAttenEnable(bool val)
 {
 	m_glview->SetFog(true);
-	FluoRefresh(false, true, 2, { gstDepthAtten });
+	FluoRefresh(true, 2, { gstDepthAtten }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetDepthAtten(double val, bool notify)
 {
 	m_glview->SetFogIntensity(val);
 	if (notify)
-		FluoRefresh(false, true, 2, { gstDaInt });
+		FluoRefresh(true, 2, { gstDaInt }, { m_frame->GetView(m_glview) });
 	else
-		FluoRefresh(false, true, 2, { gstNull });
+		FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetPinRotCenter(bool val)
@@ -1232,13 +1229,13 @@ void RenderViewPanel::SetPinRotCenter(bool val)
 		else
 			m_glview->m_auto_update_rot_center = true;
 	}
-	FluoRefresh(false, true, 2, { gstPinRotCtr });
+	FluoRefresh(true, 2, { gstPinRotCtr }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetCenter()
 {
 	m_glview->SetCenter();
-	FluoRefresh(false, true, 2, { gstNull });
+	FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetScale121()
@@ -1246,7 +1243,7 @@ void RenderViewPanel::SetScale121()
 	m_glview->SetScale121();
 	if (m_glview->m_mouse_focus)
 		m_glview->SetFocus();
-	FluoRefresh(false, true, 2, { gstNull });
+	FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetScaleFactor(double val, bool notify)
@@ -1277,15 +1274,15 @@ void RenderViewPanel::SetScaleFactor(double val, bool notify)
 		break;
 	}
 	if (notify)
-		FluoRefresh(false, true, 2, { gstScaleFactor });
+		FluoRefresh(true, 2, { gstScaleFactor }, { m_frame->GetView(m_glview) });
 	else
-		FluoRefresh(false, true, 2, { gstNull });
+		FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetScaleMode(int val)
 {
 	m_glview->m_scale_mode = val;
-	FluoRefresh(false, true, 2, { gstScaleMode });
+	FluoRefresh(true, 2, { gstScaleMode }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetRotLock(bool val)
@@ -1300,22 +1297,22 @@ void RenderViewPanel::SetRotLock(bool val)
 		rotz = (((int)(rotz / 45)) * 45);
 		SetRotations(rotx, roty, rotz, true);
 	}
-	FluoRefresh(false, true, 2, { gstGearedEnable });
+	FluoRefresh(true, 2, { gstGearedEnable }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetSliderType(bool val)
 {
 	m_rot_slider = val;
-	FluoRefresh(false, true, 2, { gstRotSliderMode });
+	FluoRefresh(true, 2, { gstRotSliderMode }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetRotations(double rotx, double roty, double rotz, bool notify)
 {
 	m_glview->SetRotations(rotx, roty, rotz, false);
 	if (notify)
-		FluoRefresh(false, true, 2, { gstCamRotation });
+		FluoRefresh(true, 2, { gstCamRotation }, { m_frame->GetView(m_glview) });
 	else
-		FluoRefresh(false, true, 2, { gstNull });
+		FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::SetZeroRotations()
@@ -1335,7 +1332,7 @@ void RenderViewPanel::SetZeroRotations()
 		m_glview->SetZeroRotations();
 		m_glview->SetRotations(0.0, 0.0, 0.0, false);
 	}
-	FluoRefresh(false, true, 2, { gstCamRotation });
+	FluoRefresh(true, 2, { gstCamRotation }, { m_frame->GetView(m_glview) });
 }
 
 void RenderViewPanel::OnToolBar(wxCommandEvent& event)
@@ -1409,12 +1406,8 @@ void RenderViewPanel::OnBgInvBtn(wxCommandEvent& event)
 
 void RenderViewPanel::OnAovSldrIdle(wxIdleEvent& event)
 {
-	MainFrame* vr_frame = (MainFrame*)m_frame;
-	if (vr_frame && vr_frame->GetClippingView())
-	{
-		if (vr_frame->GetClippingView()->GetHoldPlanes())
-			return;
-	}
+	if (m_frame->GetClippingView()->GetHoldPlanes())
+		return;
 	if (m_glview->m_capture)
 		return;
 
@@ -2055,6 +2048,6 @@ void RenderViewPanel::LoadSettings()
 	m_glview->SetSBS(glbin_settings.m_sbs);
 	m_glview->SetEyeDist(glbin_settings.m_eye_dist);
 
-	FluoRefresh(false, true, 2);
+	FluoRefresh(true, 2, {}, { m_frame->GetView(m_glview) });
 }
 

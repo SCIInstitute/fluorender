@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TREEPANEL_H_
 #define _TREEPANEL_H_
 
+#include <PropPanel.h>
 #include <wx/wx.h>
 #include <wx/treectrl.h>
 
@@ -201,7 +202,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class TreePanel : public wxPanel
+class TreePanel : public PropPanel
 {
 public:
 	enum
@@ -226,6 +227,15 @@ public:
 	~TreePanel();
 
 	DataTreeCtrl* GetTreeCtrl();
+
+	virtual void LoadPerspective();
+	virtual void SavePerspective();
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+
+	//update
+	void UpdateTree();
+	void UpdateTreeColors();
+	void UpdateTreeIcons();
 
 	//icon operations
 	void ChangeIconColor(int i, wxColor c);
@@ -273,7 +283,6 @@ public:
 	void BrushGrow(bool state);
 
 private:
-	MainFrame* m_frame;
 	DataTreeCtrl* m_datatree;
 	wxToolBar *m_toolbar;
 

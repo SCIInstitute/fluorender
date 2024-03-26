@@ -113,6 +113,13 @@ DEALINGS IN THE SOFTWARE.
 #define gstActivated "activated"
 
 //properties
+//list panel
+#define gstListCtrl "list ctrl"
+//tree panel
+#define gstTreeIcons "tree icons"
+#define gstTreeColors "tree colors"
+#define gstTreeCtrl "tree ctrl"
+#define gstTreeSelection "tree selection"
 //output adjustments
 #define gstGammaR "gamma r"
 #define gstGammaG "gamma g"

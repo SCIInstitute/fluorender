@@ -816,7 +816,7 @@ void MoviePanel::SetScrollFrame(int val, bool notify)
 	fluo::ValueCollection vc = { gstMovCurTime, gstCurrentFrame };
 	if (notify)
 		vc.insert(gstMovProgSlider);
-	FluoRefresh(false, true, 2, vc);
+	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::SetCurrentFrame(int val, bool notify)
@@ -828,7 +828,7 @@ void MoviePanel::SetCurrentFrame(int val, bool notify)
 	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider };
 	if (notify)
 		vc.insert(gstCurrentFrame);
-	FluoRefresh(false, true, 2, vc);
+	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::SetCurrentTime(double val, bool notify)
@@ -841,7 +841,7 @@ void MoviePanel::SetCurrentTime(double val, bool notify)
 	fluo::ValueCollection vc = { gstCurrentFrame, gstMovProgSlider };
 	if (notify)
 		vc.insert(gstMovCurTime);
-	FluoRefresh(false, true, 2, vc);
+	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::Play()
@@ -849,7 +849,7 @@ void MoviePanel::Play()
 	glbin_moviemaker.Play(false);
 
 	fluo::ValueCollection vc = { gstMovPlay };
-	FluoRefresh(false, true, 2, vc);
+	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::PlayInv()
@@ -857,7 +857,7 @@ void MoviePanel::PlayInv()
 	glbin_moviemaker.Play(true);
 
 	fluo::ValueCollection vc = { gstMovPlay };
-	FluoRefresh(false, true, 2, vc);
+	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::Rewind()
@@ -883,7 +883,7 @@ void MoviePanel::IncFrame()
 	frame++;
 	glbin_moviemaker.SetCurrentFrame(frame);
 	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstCurrentFrame };
-	FluoRefresh(false, true, 2, vc);
+	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::DecFrame()
@@ -894,7 +894,7 @@ void MoviePanel::DecFrame()
 	frame--;
 	glbin_moviemaker.SetCurrentFrame(frame);
 	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstCurrentFrame };
-	FluoRefresh(false, true, 2, vc);
+	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::Save(const wxString& filename)
@@ -906,7 +906,7 @@ void MoviePanel::Save(const wxString& filename)
 	glbin_moviemaker.PlaySave();
 
 	fluo::ValueCollection vc = { gstMovPlay };
-	FluoRefresh(false, true, 2, vc);
+	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::SetKeyframeMovie(bool val)
@@ -932,13 +932,13 @@ void MoviePanel::GenKey()
 void MoviePanel::SetCropEnable(bool val)
 {
 	glbin_moviemaker.SetCropEnable(val);
-	FluoRefresh(false, false, 2, { gstCropEnable, gstCropValues });
+	FluoRefresh(false, 2, { gstCropEnable, gstCropValues }, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::SetCropValues(int x, int y, int w, int h)
 {
 	glbin_moviemaker.SetCropValues(x, y, w, h);
-	FluoRefresh(false, false, 2, { gstCropValues });
+	FluoRefresh(false, 2, { gstCropValues }, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::OnNotebookPage(wxAuiNotebookEvent& event)

@@ -327,6 +327,8 @@ void OclDlg::Execute()
 {
 	m_output_txt->SetValue("");
 
+	bool refresh = false;
+
 	if (!m_view)
 		return;
 	//KernelExecutor* executor = m_view->GetKernelExecutor();
@@ -377,12 +379,16 @@ void OclDlg::Execute()
 			glbin_data_manager.AddVolumeData(vd_r);
 			m_view->AddVolumeData(vd_r);
 			vd->SetDisp(false);
-			m_frame->UpdateList();
-			m_frame->UpdateTree(vd_r->GetName());
+			glbin.set_tree_selection(vd_r->GetName().ToStdString());
+			refresh = true;
 		}
 	}
 
-	m_view->RefreshGL(39);
+	if (refresh)
+	{
+		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
+		m_frame->RefreshCanvases(false, { m_frame->GetView(m_view) });
+	}
 }
 
 void OclDlg::OnKernelListSelected(wxListEvent& event)

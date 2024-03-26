@@ -55,15 +55,15 @@ void PropPanel::SavePerspective()
 
 }
 
-void PropPanel::FluoRefresh(bool tree, bool interactive, int excl_self,
-	const fluo::ValueCollection& vc)
+void PropPanel::FluoRefresh(bool interactive, int excl_self,
+	const fluo::ValueCollection& vc, const std::set<int>& views)
 {
 	if (!m_frame)
 		return;
 	int view_excl = 0;
 	if (dynamic_cast<RenderViewPanel*>(this))
 		view_excl = excl_self;
-	m_frame->RefreshVRenderViews(tree, interactive, view_excl, this);
+	m_frame->RefreshCanvases(interactive, views);
 	m_frame->UpdateProps(vc, excl_self, this);//update ui but exclude this
 }
 
