@@ -20,7 +20,7 @@ VOID _DBGPRINT(LPCWSTR kwszFunction, INT iLineNumber, LPCWSTR kwszDebugFormatStr
 	wszDebugString = (PWCHAR)_malloca(cbFormatString);
 
 	/* Populate the buffer with the contents of the format string. */
-	StringCbPrintfW(wszDebugString, cbFormatString, L"[%s:%d] ", kwszFunction, iLineNumber);
+	StringCbPrintfW(wszDebugString, cbFormatString, L"%02d [%s:%d] ", rand() / 100, kwszFunction, iLineNumber);
 	StringCbLengthW(wszDebugString, cbFormatString, &st_Offset);
 	StringCbVPrintfW(&wszDebugString[st_Offset / sizeof(WCHAR)], cbFormatString - st_Offset, kwszDebugFormatString, args);
 

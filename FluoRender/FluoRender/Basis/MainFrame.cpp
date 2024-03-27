@@ -156,7 +156,7 @@ MainFrame::MainFrame(
 	bool hidepanels)
 	: wxFrame(frame, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE),
 	m_title(title),
-	m_movie_view(0),
+	m_movie_panel(0),
 	m_tree_panel(0),
 	m_list_panel(0),
 	m_prop_panel(0),
@@ -426,7 +426,7 @@ MainFrame::MainFrame(
 	m_proj_panel->AddPage(m_tree_panel, UITEXT_TREEVIEW, true);
 
 	//create movie view (sets the m_recorder_dlg)
-	m_movie_view = new MoviePanel(this,
+	m_movie_panel = new MoviePanel(this,
 		wxDefaultPosition, panel_size);
 
 	//create prop panel
@@ -537,8 +537,8 @@ MainFrame::MainFrame(
 		Name("m_proj_panel").Caption(UITEXT_PROJECT).
 		Left().CloseButton(true).BestSize(panel_size).
 		FloatingSize(FromDIP(wxSize(400, 600))).Layer(3));
-	m_aui_mgr.AddPane(m_movie_view, wxAuiPaneInfo().
-		Name("m_movie_view").Caption(UITEXT_MAKEMOVIE).
+	m_aui_mgr.AddPane(m_movie_panel, wxAuiPaneInfo().
+		Name("m_movie_panel").Caption(UITEXT_MAKEMOVIE).
 		Left().CloseButton(true).BestSize(panel_size).
 		FloatingSize(FromDIP(wxSize(400, 600))).Layer(3));
 	m_aui_mgr.AddPane(m_prop_panel, wxAuiPaneInfo().
@@ -1005,8 +1005,8 @@ wxString MainFrame::CreateView(int row)
 		return "NO_NAME";
 
 	m_vrv_list.push_back(vrv);
-	if (m_movie_view)
-		m_movie_view->FluoUpdate({ gstMovViewList });
+	if (m_movie_panel)
+		m_movie_panel->FluoUpdate({ gstMovViewList });
 
 	//reset gl
 	for (int i = 0; i < GetViewNum(); ++i)
@@ -1612,7 +1612,7 @@ void MainFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* 
 			glbin_moviemaker.SetTimeSeqEnable(true);
 			glbin_moviemaker.SetRotateEnable(false);
 			glbin_moviemaker.SetCurrentFrame(v->m_tseq_cur_num);
-			//m_movie_view->FluoUpdate({ gstMovSeqMode, gstMovRotEnable, gstCurrentFrame });
+			//m_movie_panel->FluoUpdate({ gstMovSeqMode, gstMovRotEnable, gstCurrentFrame });
 		}
 
 		delete prg_diag;
@@ -2208,6 +2208,8 @@ void MainFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, Prop
 		m_list_panel->FluoUpdate(vc);
 	if (update_props(excl_self, m_tree_panel, panel))
 		m_tree_panel->FluoUpdate(vc);
+	if (update_props(excl_self, m_movie_panel, panel))
+		m_movie_panel->FluoUpdate(vc);
 	if (update_props(excl_self, m_adjust_view, panel))
 		m_adjust_view->FluoUpdate(vc);
 	if (update_props(excl_self, m_clip_view, panel))
@@ -2317,7 +2319,7 @@ OutputAdjPanel* MainFrame::GetAdjustView()
 //movie view
 MoviePanel* MainFrame::GetMovieView()
 {
-	return m_movie_view;
+	return m_movie_panel;
 }
 
 //system settings
@@ -2368,6 +2370,11 @@ ColocalizationDlg* MainFrame::GetColocalizationDlg()
 }
 
 //recorder dialog
+void MainFrame::SetRecorderDlg(RecorderDlg* dlg)
+{
+	m_recorder_dlg = dlg;
+}
+
 RecorderDlg* MainFrame::GetRecorderDlg()
 {
 	return m_recorder_dlg;
@@ -2607,13 +2614,13 @@ void MainFrame::ToggleAllTools(bool cur_state)
 	if (cur_state)
 	{
 		if (m_aui_mgr.GetPane(m_proj_panel).IsShown() &&
-			m_aui_mgr.GetPane(m_movie_view).IsShown() &&
+			m_aui_mgr.GetPane(m_movie_panel).IsShown() &&
 			m_aui_mgr.GetPane(m_prop_panel).IsShown() &&
 			m_aui_mgr.GetPane(m_adjust_view).IsShown() &&
 			m_aui_mgr.GetPane(m_clip_view).IsShown())
 			m_ui_state = true;
 		else if (!m_aui_mgr.GetPane(m_proj_panel).IsShown() &&
-			!m_aui_mgr.GetPane(m_movie_view).IsShown() &&
+			!m_aui_mgr.GetPane(m_movie_panel).IsShown() &&
 			!m_aui_mgr.GetPane(m_prop_panel).IsShown() &&
 			!m_aui_mgr.GetPane(m_adjust_view).IsShown() &&
 			!m_aui_mgr.GetPane(m_clip_view).IsShown())
@@ -2627,7 +2634,7 @@ void MainFrame::ToggleAllTools(bool cur_state)
 		m_aui_mgr.GetPane(m_proj_panel).Hide();
 		m_tb_menu_ui->Check(ID_UIProjView, false);
 		//movie view (float only)
-		m_aui_mgr.GetPane(m_movie_view).Hide();
+		m_aui_mgr.GetPane(m_movie_panel).Hide();
 		m_tb_menu_ui->Check(ID_UIMovieView, false);
 		//properties
 		m_aui_mgr.GetPane(m_prop_panel).Hide();
@@ -2648,7 +2655,7 @@ void MainFrame::ToggleAllTools(bool cur_state)
 		m_aui_mgr.GetPane(m_proj_panel).Show();
 		m_tb_menu_ui->Check(ID_UIProjView, true);
 		//movie view (float only)
-		m_aui_mgr.GetPane(m_movie_view).Show();
+		m_aui_mgr.GetPane(m_movie_panel).Show();
 		m_tb_menu_ui->Check(ID_UIMovieView, true);
 		//properties
 		m_aui_mgr.GetPane(m_prop_panel).Show();
@@ -3385,7 +3392,7 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 	fconfig.SetPath("/ui_layout");
 	fconfig.Write("ui_main_tb", m_main_tb->IsShown());
 	fconfig.Write("ui_proj_view", m_proj_panel->IsShown());
-	fconfig.Write("ui_movie_view", m_movie_view->IsShown());
+	fconfig.Write("ui_movie_view", m_movie_panel->IsShown());
 	fconfig.Write("ui_adjust_view", m_adjust_view->IsShown());
 	fconfig.Write("ui_clip_view", m_clip_view->IsShown());
 	fconfig.Write("ui_prop_view", m_prop_panel->IsShown());
@@ -3393,8 +3400,8 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 		m_aui_mgr.GetPane(m_main_tb).IsFloating():false);
 	fconfig.Write("ui_proj_view_float", m_aui_mgr.GetPane(m_proj_panel).IsOk()?
 		m_aui_mgr.GetPane(m_proj_panel).IsFloating():false);
-	fconfig.Write("ui_movie_view_float", m_aui_mgr.GetPane(m_movie_view).IsOk()?
-		m_aui_mgr.GetPane(m_movie_view).IsFloating():false);
+	fconfig.Write("ui_movie_view_float", m_aui_mgr.GetPane(m_movie_panel).IsOk()?
+		m_aui_mgr.GetPane(m_movie_panel).IsFloating():false);
 	fconfig.Write("ui_adjust_view_float", m_aui_mgr.GetPane(m_adjust_view).IsOk()?
 		m_aui_mgr.GetPane(m_adjust_view).IsFloating():false);
 	fconfig.Write("ui_clip_view_float", m_aui_mgr.GetPane(m_clip_view).IsOk()?
@@ -4671,7 +4678,7 @@ void MainFrame::OpenProject(wxString& filename)
 			glbin_settings.m_run_script = bVal;
 		if (fconfig.Read("script_file", &sVal))
 			glbin_settings.m_script_file = sVal;
-		m_movie_view->FluoUpdate();
+		m_movie_panel->FluoUpdate();
 	}
 
 	//tracking diag
@@ -4761,21 +4768,21 @@ void MainFrame::OpenProject(wxString& filename)
 		{
 			if (bVal)
 			{
-				m_aui_mgr.GetPane(m_movie_view).Show();
+				m_aui_mgr.GetPane(m_movie_panel).Show();
 				m_tb_menu_ui->Check(ID_UIMovieView, true);
 				bool fl;
 				if (fconfig.Read("ui_movie_view_float", &fl))
 				{
 					if (fl)
-						m_aui_mgr.GetPane(m_movie_view).Float();
+						m_aui_mgr.GetPane(m_movie_panel).Float();
 					else
-						m_aui_mgr.GetPane(m_movie_view).Dock();
+						m_aui_mgr.GetPane(m_movie_panel).Dock();
 				}
 			}
 			else
 			{
-				if (m_aui_mgr.GetPane(m_movie_view).IsOk())
-					m_aui_mgr.GetPane(m_movie_view).Hide();
+				if (m_aui_mgr.GetPane(m_movie_panel).IsOk())
+					m_aui_mgr.GetPane(m_movie_panel).Hide();
 				m_tb_menu_ui->Check(ID_UIMovieView, false);
 			}
 		}
@@ -5013,8 +5020,8 @@ void MainFrame::OpenProject(wxString& filename)
 	else
 		glbin.set_tree_selection("");
 
-	if (m_movie_view)
-		m_movie_view->SetView(0);
+	if (m_movie_panel)
+		m_movie_panel->SetView(0);
 	delete prg_diag;
 
 	RefreshCanvases(false);
@@ -5374,14 +5381,14 @@ void MainFrame::OnShowHideView(wxCommandEvent &event)
 		break;
 	case ID_UIMovieView:
 		//movie view
-		if (m_aui_mgr.GetPane(m_movie_view).IsShown())
+		if (m_aui_mgr.GetPane(m_movie_panel).IsShown())
 		{
-			m_aui_mgr.GetPane(m_movie_view).Hide();
+			m_aui_mgr.GetPane(m_movie_panel).Hide();
 			m_tb_menu_ui->Check(ID_UIMovieView, false);
 		}
 		else
 		{
-			m_aui_mgr.GetPane(m_movie_view).Show();
+			m_aui_mgr.GetPane(m_movie_panel).Show();
 			m_tb_menu_ui->Check(ID_UIMovieView, true);
 		}
 		break;

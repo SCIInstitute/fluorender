@@ -45,6 +45,7 @@ DEALINGS IN THE SOFTWARE.
 #include <img/icons.h>
 #include <wx/stdpaths.h>
 #include <wx/display.h>
+#include <Debug.h>
 
 int RenderViewPanel::m_max_id = 1;
 
@@ -402,8 +403,8 @@ void RenderViewPanel::CreateBar()
 	m_bg_inv_btn->Realize();
 	m_bg_color_picker->Bind(wxEVT_COLOURPICKER_CHANGED, &RenderViewPanel::OnBgColorChange, this);
 	m_bg_inv_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnBgInvBtn, this);
-	sizer_h_1->Add(m_bg_color_picker, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_bg_inv_btn, 0, wxALIGN_CENTER);
+	sizer_h_1->Add(m_bg_color_picker, 0, wxALIGN_CENTER);
 
 	//angle of view
 	st2 = new wxStaticText(this, wxID_ANY, "AOV:");
@@ -414,6 +415,7 @@ void RenderViewPanel::CreateBar()
 	m_aov_sldr->Bind(wxEVT_IDLE, &RenderViewPanel::OnAovSldrIdle, this);
 	m_aov_sldr->Bind(wxEVT_SCROLL_CHANGED, &RenderViewPanel::OnAovChange, this);
 	m_aov_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnAovText, this);
+	sizer_h_1->Add(5, 5);
 	sizer_h_1->Add(st2, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_aov_sldr, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_aov_text, 0, wxALIGN_CENTER);
@@ -1438,6 +1440,7 @@ void RenderViewPanel::OnAovChange(wxScrollEvent& event)
 	int val = m_aov_sldr->GetValue();
 	bool bval = m_glview->m_persp;
 	m_aov_text->ChangeValue(bval ? wxString::Format("%d", val) : wxString("Ortho"));
+	m_aov_text->Update();
 
 	SetAov(val, false);
 
@@ -1489,6 +1492,7 @@ void RenderViewPanel::OnDepthAttenChange(wxScrollEvent& event)
 {
 	double val = m_depth_atten_factor_sldr->GetValue() / 100.0;
 	m_depth_atten_factor_text->ChangeValue(wxString::Format("%.2f", val));
+	m_depth_atten_factor_text->Update();
 	SetDepthAtten(val, false);
 	event.Skip();
 }
@@ -1534,6 +1538,7 @@ void RenderViewPanel::OnScaleFactorChange(wxScrollEvent& event)
 	int ival = m_scale_factor_sldr->GetValue();
 	double dval = ival / 100.0;
 	m_scale_factor_text->ChangeValue(wxString::Format("%d", ival));
+	m_scale_factor_text->Update();
 	SetScaleFactor(dval, false);
 	event.Skip();
 }
@@ -1637,6 +1642,10 @@ void RenderViewPanel::OnRotScroll(wxScrollEvent& event)
 	m_x_rot_text->ChangeValue(wxString::Format("%.1f", rotx));
 	m_y_rot_text->ChangeValue(wxString::Format("%.1f", roty));
 	m_z_rot_text->ChangeValue(wxString::Format("%.1f", rotz));
+	m_x_rot_text->Update();
+	m_y_rot_text->Update();
+	m_z_rot_text->Update();
+	//DBGPRINT(L"rot text update %d:\n", rand() % 10);
 	SetRotations(rotx, roty, rotz, false);
 	event.Skip();
 }

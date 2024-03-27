@@ -3929,14 +3929,11 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	{
 		if (glbin_moviemaker.GetView() == this)
 		{
-			refresh = glbin_moviemaker.OnTimer();
+			refresh = glbin_moviemaker.Action();
 			event.RequestMore(glbin_moviemaker.IsRunning());
 			if (refresh)
 				vc.insert(gstCamRotation);
 		}
-		//fluo::StopWatch* sw = glbin_swhf->findFirst(gstMovStopWatch);
-		//if (sw)
-		//	DBGPRINT(L"refresh: %d, time: %f\n", refresh, sw->time());
 	}
 
 	if (m_capture_rotat ||

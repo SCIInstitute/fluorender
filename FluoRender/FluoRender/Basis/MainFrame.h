@@ -263,6 +263,7 @@ public:
 	ConvertDlg* GetConvertDlg();
 	ColocalizationDlg* GetColocalizationDlg();
 	//recorder dialog
+	void SetRecorderDlg(RecorderDlg* dlg);
 	RecorderDlg* GetRecorderDlg();
 	//measure dialog
 	MeasureDlg* GetMeasureDlg();
@@ -320,8 +321,6 @@ public:
 		const wxString& wildcard, long style);
 
 public: //public so export window can see it and set it. 
-	RecorderDlg* m_recorder_dlg;
-	MoviePanel* m_movie_view;
 	VolumeData* m_vd_copy;//for copying mask source
 	bool m_copy_data;//copy data or mask
 
@@ -359,6 +358,8 @@ private:
 	CalculationDlg* m_calculation_dlg;
 	MachineLearningDlg* m_machine_learning_dlg;
 	ScriptBreakDlg* m_script_break_dlg;
+	RecorderDlg* m_recorder_dlg;
+	MoviePanel* m_movie_panel;
 	//prop panel children
 	std::vector<PropPanel*> m_prop_pages;
 	//tester

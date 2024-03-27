@@ -45,7 +45,7 @@ public:
 	~MovieMaker();
 
 	//timer for playback.
-	bool OnTimer();
+	bool Action();
 	//play
 	bool IsRunning()
 	{
@@ -157,25 +157,7 @@ public:
 			m_movie_len = (m_frame_num - 1) / m_fps;
 	}
 	int GetEndFrame() { return m_end_frame; }
-	void SetCurrentFrame(int val)
-	{
-		m_cur_frame = val;
-		if (m_cur_frame < m_start_frame)
-		{
-			int len = m_frame_num - 1;
-			int mul = (m_start_frame - m_cur_frame) / len + 1;
-			int inc = mul * len;
-			m_cur_frame += inc;
-		}
-		if (m_cur_frame > m_end_frame)
-		{
-			int len = m_frame_num - 1;
-			int mul = (m_cur_frame - m_end_frame) / len + 1;
-			int inc = mul * len;
-			m_cur_frame -= inc;
-		}
-		m_cur_time = (m_cur_frame - m_start_frame) / m_fps;
-	}
+	void SetCurrentFrame(int val);
 	int GetCurrentFrame() { return m_cur_frame; }
 	void SetCurrentTime(double val)
 	{
@@ -216,9 +198,9 @@ public:
 private:
 	MainFrame* m_frame;
 	RenderCanvas* m_view;
+	bool m_running;
 	int m_last_frame;//last frame nunmber to save
 	double m_starting_rot;//starting degree of rotation
-	bool m_running;
 	bool m_record;
 	bool m_delayed_stop;
 	bool m_timer_hold;//for temporary hold

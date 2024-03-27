@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stdpaths.h>
 #include <png_resource.h>
 #include <img/icons.h>
+#include <Debug.h>
 
 wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 {
@@ -143,7 +144,7 @@ wxWindow* MoviePanel::CreateAdvancedPage(wxWindow *parent)
 	m_keyframe_chk = new wxCheckBox(page, wxID_ANY, "Enable keyframe movie");
 	m_keyframe_chk->Bind(wxEVT_CHECKBOX, &MoviePanel::OnKeyframeChk, this);
 	m_advanced_movie = new RecorderDlg(m_frame, page);
-	m_frame->m_recorder_dlg = m_advanced_movie;
+	m_frame->SetRecorderDlg(m_advanced_movie);
 
 	//vertical sizer
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
@@ -629,12 +630,18 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 			glbin_moviemaker.GetEndFrame()));
 
 	if (update_all || FOUND_VALUE(gstCurrentFrame))
+	{
 		m_cur_frame_text->ChangeValue(wxString::Format("%d",
 			glbin_moviemaker.GetCurrentFrame()));
+		m_cur_frame_text->Update();
+	}
 
 	if (update_all || FOUND_VALUE(gstMovCurTime))
+	{
 		m_progress_text->ChangeValue(wxString::Format("%.2f",
 			glbin_moviemaker.GetCurrentTime()));
+		m_progress_text->Update();
+	}
 
 	if (update_all || FOUND_VALUE(gstMovPlay))
 	{
@@ -809,8 +816,8 @@ void MoviePanel::SetEndFrame(int val)
 
 void MoviePanel::SetScrollFrame(int val, bool notify)
 {
-	if (glbin_moviemaker.IsRunning())
-		return;
+	//if (glbin_moviemaker.IsRunning())
+	//	return;
 	glbin_moviemaker.SetCurrentFrame(val);
 
 	fluo::ValueCollection vc = { gstMovCurTime, gstCurrentFrame };
@@ -821,8 +828,8 @@ void MoviePanel::SetScrollFrame(int val, bool notify)
 
 void MoviePanel::SetCurrentFrame(int val, bool notify)
 {
-	if (glbin_moviemaker.IsRunning())
-		return;
+	//if (glbin_moviemaker.IsRunning())
+	//	return;
 	glbin_moviemaker.SetCurrentFrame(val);
 
 	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider };
@@ -863,11 +870,17 @@ void MoviePanel::PlayInv()
 void MoviePanel::Rewind()
 {
 	glbin_moviemaker.Rewind();
+
+	fluo::ValueCollection vc = { gstCurrentFrame, gstMovCurTime, gstMovProgSlider };
+	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::Forward()
 {
 	glbin_moviemaker.Forward();
+
+	fluo::ValueCollection vc = { gstCurrentFrame, gstMovCurTime, gstMovProgSlider };
+	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::Loop(bool val)

@@ -267,13 +267,16 @@ void MovieMaker::SetRendering(bool rewind)
 			m_view->SetRotations(rval[0], rval[1], rval[2], true);
 		}
 	}
-	m_view->SetInteractive(false);
-	m_frame->UpdateProps({
-		gstMovProgSlider,
-		gstCurrentFrame,
-		gstMovCurTime,
-		gstMovPlay},
-		2, m_frame->GetMovieView());
+	if (m_running)
+	{
+		m_view->SetInteractive(false);
+		m_frame->UpdateProps({
+			gstMovProgSlider,
+			gstCurrentFrame,
+			gstMovCurTime,
+			gstMovPlay },
+			2, m_frame->GetMovieView());
+	}
 }
 
 void MovieMaker::WriteFrameToFile()
@@ -547,6 +550,27 @@ void MovieMaker::SetTimeSeqEnable(bool val)
 	}
 }
 
+void MovieMaker::SetCurrentFrame(int val)
+{
+	m_cur_frame = val;
+	if (m_cur_frame < m_start_frame)
+	{
+		int len = m_frame_num - 1;
+		int mul = (m_start_frame - m_cur_frame) / len + 1;
+		int inc = mul * len;
+		m_cur_frame += inc;
+	}
+	if (m_cur_frame > m_end_frame)
+	{
+		int len = m_frame_num - 1;
+		int mul = (m_cur_frame - m_end_frame) / len + 1;
+		int inc = mul * len;
+		m_cur_frame -= inc;
+	}
+	m_cur_time = (m_cur_frame - m_start_frame) / m_fps;
+	SetRendering(false);
+}
+
 void MovieMaker::SetCropEnable(bool val)
 {
 	m_crop = val;
@@ -608,7 +632,7 @@ void MovieMaker::SetCropH(int val)
 			std::round(m_crop_y - m_crop_h / 2.0), m_crop_w, m_crop_h);
 }
 
-bool MovieMaker::OnTimer()
+bool MovieMaker::Action()
 {
 	if (!m_running)
 		return false;

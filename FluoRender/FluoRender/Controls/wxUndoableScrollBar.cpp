@@ -183,13 +183,13 @@ void wxUndoableScrollBar::OnRelease(wxScrollEvent& event)
 
 void wxUndoableScrollBar::OnLineDown(wxScrollEvent& event)
 {
-	SetValue(value_ - 1);
+	SetValue(value_ + 1);
 	event.Skip();
 }
 
 void wxUndoableScrollBar::OnLineUp(wxScrollEvent& event)
 {
-	SetValue(value_ + 1);
+	SetValue(value_ - 1);
 	event.Skip();
 }
 
