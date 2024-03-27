@@ -136,7 +136,7 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 	wxScrolledWindow* page = new wxScrolledWindow(parent);
 
 	//validator: integer
-	wxIntegerValidator<unsigned int> vald_int;
+	wxIntegerValidator<int> vald_int;
 	wxBitmap bitmap;
 
 	//sliders for clipping planes
@@ -570,18 +570,18 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_clipz_sldr->SetRange(resz_n, resz);
 		m_clipz_sldr->SetRangeColor(c);
 		//text range
-		if ((vald_i = (wxIntegerValidator<int>*)m_x1_clip_text->GetValidator()))
-			vald_i->SetRange(0, resx);
-		if ((vald_i = (wxIntegerValidator<int>*)m_x2_clip_text->GetValidator()))
-			vald_i->SetRange(0, resx);
-		if ((vald_i = (wxIntegerValidator<int>*)m_y1_clip_text->GetValidator()))
-			vald_i->SetRange(0, resy);
-		if ((vald_i = (wxIntegerValidator<int>*)m_y2_clip_text->GetValidator()))
-			vald_i->SetRange(0, resy);
-		if ((vald_i = (wxIntegerValidator<int>*)m_z1_clip_text->GetValidator()))
-			vald_i->SetRange(0, resz);
-		if ((vald_i = (wxIntegerValidator<int>*)m_z2_clip_text->GetValidator()))
-			vald_i->SetRange(0, resz);
+		//if ((vald_i = (wxIntegerValidator<int>*)m_x1_clip_text->GetValidator()))
+		//	vald_i->SetRange(0, resx);
+		//if ((vald_i = (wxIntegerValidator<int>*)m_x2_clip_text->GetValidator()))
+		//	vald_i->SetRange(0, resx);
+		//if ((vald_i = (wxIntegerValidator<int>*)m_y1_clip_text->GetValidator()))
+		//	vald_i->SetRange(0, resy);
+		//if ((vald_i = (wxIntegerValidator<int>*)m_y2_clip_text->GetValidator()))
+		//	vald_i->SetRange(0, resy);
+		//if ((vald_i = (wxIntegerValidator<int>*)m_z1_clip_text->GetValidator()))
+		//	vald_i->SetRange(0, resz);
+		//if ((vald_i = (wxIntegerValidator<int>*)m_z2_clip_text->GetValidator()))
+		//	vald_i->SetRange(0, resz);
 	}
 
 	//clip distance
@@ -638,60 +638,66 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		plane = (*planes)[0];
 		plane->get_copy(abcd);
-		val = std::round(fabs(abcd[3] * resx));
+		val = std::round(-abcd[3] * resx);
 		m_clipx_sldr->ChangeLowValue(val);
 		str = wxString::Format("%d", val);
 		m_x1_clip_text->ChangeValue(str);
+		m_x1_clip_text->Update();
 	}
 	//x2
 	if (update_all || FOUND_VALUE(gstClipX2))
 	{
 		plane = (*planes)[1];
 		plane->get_copy(abcd);
-		val = std::round(fabs(abcd[3] * resx));
+		val = std::round(abcd[3] * resx);
 		m_clipx_sldr->ChangeHighValue(val);
 		str = wxString::Format("%d", val);
 		m_x2_clip_text->ChangeValue(str);
+		m_x2_clip_text->Update();
 	}
 	//y1
 	if (update_all || FOUND_VALUE(gstClipY1))
 	{
 		plane = (*planes)[2];
 		plane->get_copy(abcd);
-		val = std::round(fabs(abcd[3] * resy));
+		val = std::round(-abcd[3] * resy);
 		m_clipy_sldr->ChangeLowValue(val);
 		str = wxString::Format("%d", val);
 		m_y1_clip_text->ChangeValue(str);
+		m_y1_clip_text->Update();
 	}
 	//y2
 	if (update_all || FOUND_VALUE(gstClipY2))
 	{
 		plane = (*planes)[3];
 		plane->get_copy(abcd);
-		val = std::round(fabs(abcd[3] * resy));
+		val = std::round(abcd[3] * resy);
 		m_clipy_sldr->ChangeHighValue(val);
 		str = wxString::Format("%d", val);
 		m_y2_clip_text->ChangeValue(str);
+		m_y2_clip_text->Update();
 	}
 	//z1
 	if (update_all || FOUND_VALUE(gstClipZ1))
 	{
 		plane = (*planes)[4];
 		plane->get_copy(abcd);
-		val = std::round(fabs(abcd[3] * resz));
+		val = std::round(-abcd[3] * resz);
 		m_clipz_sldr->ChangeLowValue(val);
 		str = wxString::Format("%d", val);
 		m_z1_clip_text->ChangeValue(str);
+		m_z1_clip_text->Update();
 	}
 	//z2
 	if (update_all || FOUND_VALUE(gstClipZ2))
 	{
 		plane = (*planes)[5];
 		plane->get_copy(abcd);
-		val = std::round(fabs(abcd[3] * resz));
+		val = std::round(abcd[3] * resz);
 		m_clipz_sldr->ChangeHighValue(val);
 		str = wxString::Format("%d", val);
 		m_z2_clip_text->ChangeValue(str);
+		m_z2_clip_text->Update();
 	}
 	m_clipx_sldr->SetLink(linkx);
 	m_clipy_sldr->SetLink(linky);
@@ -747,20 +753,23 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//x
 	if (update_all || FOUND_VALUE(gstClipRotX))
 	{
-		m_x_rot_text->ChangeValue(wxString::Format("%.1f", double(rotx)));
 		m_x_rot_sldr->ChangeValue(std::round(rotx));
+		m_x_rot_text->ChangeValue(wxString::Format("%.1f", double(rotx)));
+		m_x_rot_text->Update();
 	}
 	//y
 	if (update_all || FOUND_VALUE(gstClipRotY))
 	{
-		m_y_rot_text->ChangeValue(wxString::Format("%.1f", double(roty)));
 		m_y_rot_sldr->ChangeValue(std::round(roty));
+		m_y_rot_text->ChangeValue(wxString::Format("%.1f", double(roty)));
+		m_y_rot_text->Update();
 	}
 	//z
 	if (update_all || FOUND_VALUE(gstClipRotZ))
 	{
-		m_z_rot_text->ChangeValue(wxString::Format("%.1f", double(rotz)));
 		m_z_rot_sldr->ChangeValue(std::round(rotz));
+		m_z_rot_text->ChangeValue(wxString::Format("%.1f", double(rotz)));
+		m_z_rot_text->Update();
 	}
 
 	EnableAll(true);

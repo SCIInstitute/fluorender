@@ -931,7 +931,9 @@ void OutputAdjPanel::OnBHdrMF(wxCommandEvent& event)
 void OutputAdjPanel::OnRGammaChange(wxScrollEvent & event)
 {
 	double val = m_r_gamma_sldr->GetValue() / 100.0;
-	SetGamma(0, 1.0 / val);
+	wxString str = wxString::Format("%.2f", val);
+	m_r_gamma_text->ChangeValue(str);
+	SetGamma(0, 1.0 / val, false);
 }
 
 void OutputAdjPanel::OnRGammaText(wxCommandEvent& event)
@@ -939,13 +941,16 @@ void OutputAdjPanel::OnRGammaText(wxCommandEvent& event)
 	wxString str = m_r_gamma_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	SetGamma(0, 1.0 / val);
+	m_r_gamma_sldr->ChangeValue(std::round(val * 100));
+	SetGamma(0, 1.0 / val, false);
 }
 
 void OutputAdjPanel::OnGGammaChange(wxScrollEvent & event)
 {
 	double val = m_g_gamma_sldr->GetValue() / 100.0;
-	SetGamma(1, 1.0 / val);
+	wxString str = wxString::Format("%.2f", val);
+	m_g_gamma_text->ChangeValue(str);
+	SetGamma(1, 1.0 / val, false);
 }
 
 void OutputAdjPanel::OnGGammaText(wxCommandEvent& event)
@@ -953,13 +958,16 @@ void OutputAdjPanel::OnGGammaText(wxCommandEvent& event)
 	wxString str = m_g_gamma_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	SetGamma(1, 1.0 / val);
+	m_g_gamma_sldr->ChangeValue(std::round(val * 100));
+	SetGamma(1, 1.0 / val, false);
 }
 
 void OutputAdjPanel::OnBGammaChange(wxScrollEvent & event)
 {
 	double val = m_b_gamma_sldr->GetValue() / 100.0;
-	SetGamma(2, 1.0 / val);
+	wxString str = wxString::Format("%.2f", val);
+	m_b_gamma_text->ChangeValue(str);
+	SetGamma(2, 1.0 / val, false);
 }
 
 void OutputAdjPanel::OnBGammaText(wxCommandEvent& event)
@@ -967,14 +975,18 @@ void OutputAdjPanel::OnBGammaText(wxCommandEvent& event)
 	wxString str = m_b_gamma_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	SetGamma(2, 1.0 / val);
+	m_b_gamma_sldr->ChangeValue(std::round(val * 100));
+	SetGamma(2, 1.0 / val, false);
 }
 
 //brightness
 void OutputAdjPanel::OnRBrightnessChange(wxScrollEvent & event)
 {
-	double val = m_r_brightness_sldr->GetValue() / 256.0 + 1.0;
-	SetBrightness(0, val);
+	int ival = m_r_brightness_sldr->GetValue();
+	double dval = ival / 256.0 + 1.0;
+	wxString str = wxString::Format("%d", ival);
+	m_r_brightness_text->ChangeValue(str);
+	SetBrightness(0, dval, false);
 }
 
 void OutputAdjPanel::OnRBrightnessText(wxCommandEvent& event)
@@ -982,14 +994,18 @@ void OutputAdjPanel::OnRBrightnessText(wxCommandEvent& event)
 	wxString str = m_r_brightness_text->GetValue();
 	double val;
 	str.ToDouble(&val);
+	m_r_brightness_sldr->ChangeValue(std::round(val));
 	val = val / 256.0 + 1.0;
-	SetBrightness(0, val);
+	SetBrightness(0, val, false);
 }
 
 void OutputAdjPanel::OnGBrightnessChange(wxScrollEvent & event)
 {
-	double val = m_g_brightness_sldr->GetValue() / 256.0 + 1.0;
-	SetBrightness(1, val);
+	int ival = m_g_brightness_sldr->GetValue();
+	double dval = ival / 256.0 + 1.0;
+	wxString str = wxString::Format("%d", ival);
+	m_g_brightness_text->ChangeValue(str);
+	SetBrightness(1, dval, false);
 }
 
 void OutputAdjPanel::OnGBrightnessText(wxCommandEvent& event)
@@ -997,14 +1013,18 @@ void OutputAdjPanel::OnGBrightnessText(wxCommandEvent& event)
 	wxString str = m_g_brightness_text->GetValue();
 	double val;
 	str.ToDouble(&val);
+	m_g_brightness_sldr->ChangeValue(std::round(val));
 	val = val / 256.0 + 1.0;
-	SetBrightness(1, val);
+	SetBrightness(1, val, false);
 }
 
 void OutputAdjPanel::OnBBrightnessChange(wxScrollEvent & event)
 {
-	double val = m_b_brightness_sldr->GetValue() / 256.0 + 1.0;
-	SetBrightness(2, val);
+	int ival = m_b_brightness_sldr->GetValue();
+	double dval = ival / 256.0 + 1.0;
+	wxString str = wxString::Format("%d", ival);
+	m_b_brightness_text->ChangeValue(str);
+	SetBrightness(2, dval, false);
 }
 
 void OutputAdjPanel::OnBBrightnessText(wxCommandEvent& event)
@@ -1012,14 +1032,17 @@ void OutputAdjPanel::OnBBrightnessText(wxCommandEvent& event)
 	wxString str = m_b_brightness_text->GetValue();
 	double val;
 	str.ToDouble(&val);
+	m_b_brightness_sldr->ChangeValue(std::round(val));
 	val = val / 256.0 + 1.0;
-	SetBrightness(2, val);
+	SetBrightness(2, val, false);
 }
 
 void OutputAdjPanel::OnRHdrChange(wxScrollEvent &event)
 {
 	double val = m_r_hdr_sldr->GetValue() / 100.0;
-	SetHdr(0, val);
+	wxString str = wxString::Format("%.2f", val);
+	m_r_hdr_text->ChangeValue(str);
+	SetHdr(0, val, false);
 }
 
 void OutputAdjPanel::OnRHdrText(wxCommandEvent &event)
@@ -1027,13 +1050,16 @@ void OutputAdjPanel::OnRHdrText(wxCommandEvent &event)
 	wxString str = m_r_hdr_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	SetHdr(0, val);
+	m_r_hdr_sldr->ChangeValue(std::round(val * 100));
+	SetHdr(0, val, false);
 }
 
 void OutputAdjPanel::OnGHdrChange(wxScrollEvent &event)
 {
 	double val = m_g_hdr_sldr->GetValue() / 100.0;
-	SetHdr(1, val);
+	wxString str = wxString::Format("%.2f", val);
+	m_g_hdr_text->ChangeValue(str);
+	SetHdr(1, val, false);
 }
 
 void OutputAdjPanel::OnGHdrText(wxCommandEvent &event)
@@ -1041,13 +1067,16 @@ void OutputAdjPanel::OnGHdrText(wxCommandEvent &event)
 	wxString str = m_g_hdr_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	SetHdr(1, val);
+	m_g_hdr_sldr->ChangeValue(std::round(val * 100));
+	SetHdr(1, val, false);
 }
 
 void OutputAdjPanel::OnBHdrChange(wxScrollEvent &event)
 {
 	double val = m_b_hdr_sldr->GetValue() / 100.0;
-	SetHdr(2, val);
+	wxString str = wxString::Format("%.2f", val);
+	m_b_hdr_text->ChangeValue(str);
+	SetHdr(2, val, false);
 }
 
 void OutputAdjPanel::OnBHdrText(wxCommandEvent &event)
@@ -1055,7 +1084,8 @@ void OutputAdjPanel::OnBHdrText(wxCommandEvent &event)
 	wxString str = m_b_hdr_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	SetHdr(2, val);
+	m_b_hdr_sldr->ChangeValue(std::round(val * 100));
+	SetHdr(2, val, false);
 }
 
 void OutputAdjPanel::OnSyncRCheck(wxCommandEvent &event)
@@ -1099,7 +1129,7 @@ void OutputAdjPanel::SyncColor(fluo::Color& c, double val)
 			c[i] = val;
 }
 
-void OutputAdjPanel::SyncGamma(fluo::Color& c, int i, double val, fluo::ValueCollection& vc)
+void OutputAdjPanel::SyncGamma(fluo::Color& c, int i, double val, fluo::ValueCollection& vc, bool notify)
 {
 	for (int j : {0, 1, 2})
 	{
@@ -1116,23 +1146,28 @@ void OutputAdjPanel::SyncGamma(fluo::Color& c, int i, double val, fluo::ValueCol
 		}
 		if (changed)
 		{
-			switch (j)
+			if (notify == (i == j))
 			{
-			case 0:
-				vc.insert(gstGammaR);
-				break;
-			case 1:
-				vc.insert(gstGammaG);
-				break;
-			case 2:
-				vc.insert(gstGammaB);
-				break;
+				switch (j)
+				{
+				case 0:
+					vc.insert(gstGammaR);
+					break;
+				case 1:
+					vc.insert(gstGammaG);
+					break;
+				case 2:
+					vc.insert(gstGammaB);
+					break;
+				}
 			}
 		}
 	}
+	if (vc.empty())
+		vc.insert(gstNull);
 }
 
-void OutputAdjPanel::SyncBrightness(fluo::Color& c, int i, double val, fluo::ValueCollection& vc)
+void OutputAdjPanel::SyncBrightness(fluo::Color& c, int i, double val, fluo::ValueCollection& vc, bool notify)
 {
 	for (int j : {0, 1, 2})
 	{
@@ -1149,23 +1184,28 @@ void OutputAdjPanel::SyncBrightness(fluo::Color& c, int i, double val, fluo::Val
 		}
 		if (changed)
 		{
-			switch (j)
+			if (notify == (i == j))
 			{
-			case 0:
-				vc.insert(gstBrightnessR);
-				break;
-			case 1:
-				vc.insert(gstBrightnessG);
-				break;
-			case 2:
-				vc.insert(gstBrightnessB);
-				break;
+				switch (j)
+				{
+				case 0:
+					vc.insert(gstBrightnessR);
+					break;
+				case 1:
+					vc.insert(gstBrightnessG);
+					break;
+				case 2:
+					vc.insert(gstBrightnessB);
+					break;
+				}
 			}
 		}
 	}
+	if (vc.empty())
+		vc.insert(gstNull);
 }
 
-void OutputAdjPanel::SyncHdr(fluo::Color& c, int i, double val, fluo::ValueCollection& vc)
+void OutputAdjPanel::SyncHdr(fluo::Color& c, int i, double val, fluo::ValueCollection& vc, bool notify)
 {
 	for (int j : {0, 1, 2})
 	{
@@ -1182,20 +1222,25 @@ void OutputAdjPanel::SyncHdr(fluo::Color& c, int i, double val, fluo::ValueColle
 		}
 		if (changed)
 		{
-			switch (j)
+			if (notify == (i == j))
 			{
-			case 0:
-				vc.insert(gstEqualizeR);
-				break;
-			case 1:
-				vc.insert(gstEqualizeG);
-				break;
-			case 2:
-				vc.insert(gstEqualizeB);
-				break;
+				switch (j)
+				{
+				case 0:
+					vc.insert(gstEqualizeR);
+					break;
+				case 1:
+					vc.insert(gstEqualizeG);
+					break;
+				case 2:
+					vc.insert(gstEqualizeB);
+					break;
+				}
 			}
 		}
 	}
+	if (vc.empty())
+		vc.insert(gstNull);
 }
 
 void OutputAdjPanel::SyncGamma(int i)
@@ -1428,18 +1473,18 @@ void OutputAdjPanel::SetSync(int i, bool val, bool update)
 	if (update)
 	{
 		fluo::ValueCollection vc;
-		if (m_sync[0])
+		if (i == 0)
 			vc.insert(gstSyncR);
-		if (m_sync[1])
+		if (i == 1)
 			vc.insert(gstSyncG);
-		if (m_sync[2])
+		if (i == 2)
 			vc.insert(gstSyncB);
 
 		FluoRefresh(true, 2, vc, { m_frame->GetView(m_view) });
 	}
 }
 
-void OutputAdjPanel::SetGamma(int i, double val, bool update)
+void OutputAdjPanel::SetGamma(int i, double val, bool notify)
 {
 	fluo::Color gamma;
 	switch (m_type)
@@ -1458,7 +1503,7 @@ void OutputAdjPanel::SetGamma(int i, double val, bool update)
 		break;
 	}
 	fluo::ValueCollection vc;
-	SyncGamma(gamma, i, val, vc);
+	SyncGamma(gamma, i, val, vc, notify);
 	switch (m_type)
 	{
 	case 1:
@@ -1478,11 +1523,10 @@ void OutputAdjPanel::SetGamma(int i, double val, bool update)
 			m_group->SetGammaAll(gamma);
 	}
 
-	if (update)
-		FluoRefresh(true, 2, vc, { m_frame->GetView(m_view) });
+	FluoRefresh(true, 2, vc, { m_frame->GetView(m_view) });
 }
 
-void OutputAdjPanel::SetBrightness(int i, double val, bool update)
+void OutputAdjPanel::SetBrightness(int i, double val, bool notify)
 {
 	fluo::Color brightness;
 	switch (m_type)
@@ -1501,7 +1545,7 @@ void OutputAdjPanel::SetBrightness(int i, double val, bool update)
 		break;
 	}
 	fluo::ValueCollection vc;
-	SyncBrightness(brightness, i, val, vc);
+	SyncBrightness(brightness, i, val, vc, notify);
 	switch (m_type)
 	{
 	case 1:
@@ -1521,11 +1565,10 @@ void OutputAdjPanel::SetBrightness(int i, double val, bool update)
 			m_group->SetBrightnessAll(brightness);
 	}
 
-	if (update)
-		FluoRefresh(true, 2, vc, { m_frame->GetView(m_view) });
+	FluoRefresh(true, 2, vc, { m_frame->GetView(m_view) });
 }
 
-void OutputAdjPanel::SetHdr(int i, double val, bool update)
+void OutputAdjPanel::SetHdr(int i, double val, bool notify)
 {
 	fluo::Color hdr;
 	switch (m_type)
@@ -1544,7 +1587,7 @@ void OutputAdjPanel::SetHdr(int i, double val, bool update)
 		break;
 	}
 	fluo::ValueCollection vc;
-	SyncHdr(hdr, i, val, vc);
+	SyncHdr(hdr, i, val, vc, notify);
 	switch (m_type)
 	{
 	case 1:
@@ -1564,8 +1607,7 @@ void OutputAdjPanel::SetHdr(int i, double val, bool update)
 			m_group->SetHdrAll(hdr);
 	}
 
-	if (update)
-		FluoRefresh(true, 2, vc, { m_frame->GetView(m_view) });
+	FluoRefresh(true, 2, vc, { m_frame->GetView(m_view) });
 }
 
 void OutputAdjPanel::UpdateSync()
@@ -1613,9 +1655,9 @@ void OutputAdjPanel::UpdateSync()
 		if (g_v) cnt++;
 		if (b_v) cnt++;
 
-		SetSync(0, r_v, false);
-		SetSync(1, g_v, false);
-		SetSync(2, b_v, cnt > 1 ? false : true);
+		SetSync(0, r_v, true);
+		SetSync(1, g_v, true);
+		SetSync(2, b_v, true);
 
 		if (cnt > 1)
 		{
@@ -1635,14 +1677,14 @@ void OutputAdjPanel::UpdateSync()
 
 			if (g_v)
 			{
-				SetGamma(1, gamma, false);
-				SetBrightness(1, brightness, false);
+				SetGamma(1, gamma, b_v ? false : true);
+				SetBrightness(1, brightness, b_v ? false : true);
 				SetHdr(1, hdr, b_v ? false : true);
 			}
 			if (b_v)
 			{
-				SetGamma(2, gamma, false);
-				SetBrightness(2, brightness, false);
+				SetGamma(2, gamma, true);
+				SetBrightness(2, brightness, true);
 				SetHdr(2, hdr, true);
 			}
 		}
@@ -1692,9 +1734,9 @@ void OutputAdjPanel::UpdateSync()
 		if (g_v) cnt++;
 		if (b_v) cnt++;
 
-		SetSync(0, r_v, false);
-		SetSync(1, g_v, false);
-		SetSync(2, b_v, cnt > 1 ? false : true);
+		SetSync(0, r_v, true);
+		SetSync(1, g_v, true);
+		SetSync(2, b_v, true);
 
 		if (cnt > 1)
 		{
@@ -1714,14 +1756,14 @@ void OutputAdjPanel::UpdateSync()
 
 			if (g_v)
 			{
-				SetGamma(1, gamma, false);
-				SetBrightness(1, brightness, false);
+				SetGamma(1, gamma, b_v ? false : true);
+				SetBrightness(1, brightness, b_v ? false : true);
 				SetHdr(1, hdr, b_v ? false : true);
 			}
 			if (b_v)
 			{
-				SetGamma(2, gamma, false);
-				SetBrightness(2, brightness, false);
+				SetGamma(2, gamma, true);
+				SetBrightness(2, brightness, true);
 				SetHdr(2, hdr, true);
 			}
 		}

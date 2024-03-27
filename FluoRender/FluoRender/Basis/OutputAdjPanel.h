@@ -192,9 +192,9 @@ private:
 	void OnSaveDefault(wxCommandEvent &event);
 
 	void SyncColor(fluo::Color& c, double val);
-	void SyncGamma(fluo::Color& c, int i, double val, fluo::ValueCollection& vc);
-	void SyncBrightness(fluo::Color& c, int i, double val, fluo::ValueCollection& vc);
-	void SyncHdr(fluo::Color& c, int i, double val, fluo::ValueCollection& vc);
+	void SyncGamma(fluo::Color& c, int i, double val, fluo::ValueCollection& vc, bool notify);
+	void SyncBrightness(fluo::Color& c, int i, double val, fluo::ValueCollection& vc, bool notify);
+	void SyncHdr(fluo::Color& c, int i, double val, fluo::ValueCollection& vc, bool notify);
 	void SyncGamma(int i);
 	void SyncBrightness(int i);
 	void SyncHdr(int i);
