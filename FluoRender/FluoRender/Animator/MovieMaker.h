@@ -61,8 +61,8 @@ public:
 	}
 	bool IsPaused()
 	{
-		return m_cur_frame != m_start_frame &&
-			m_cur_frame != m_end_frame;
+		return m_cur_frame != m_clip_start_frame &&
+			m_cur_frame != m_clip_end_frame;
 	}
 	void Play(bool back);
 	void Start();
@@ -103,7 +103,7 @@ public:
 			m_rot_axis = val;
 	}
 	int GetRotateAxis() { return m_rot_axis; }
-	void SetRotateDeg(int val) { m_rot_deg = val; }
+	void SetRotateDeg(int val);
 	int GetRotateDeg() { return m_rot_deg; }
 	void SetRotIntType(int val)
 	{
@@ -119,69 +119,38 @@ public:
 			m_seq_mode = val;
 	}
 	int GetSeqMode() { return m_seq_mode; }
-	void SetFrameNum(int val)
+	void SetFullFrameNum(int val);
+	int GetFullFrameNum()
 	{
-		m_frame_num = val;
-		if (m_end_frame - m_start_frame + 1 != val)
-			m_end_frame = m_start_frame + m_frame_num - 1;
+		return m_full_frame_num;
 	}
-	int GetFrameNum() { return m_frame_num; }
 	void SetMovieLength(double val)
 	{
 		m_movie_len = val;
 		if (val > 0)
-			m_fps = (m_frame_num - 1) / m_movie_len;
+			m_fps = (m_clip_frame_num - 1) / m_movie_len;
 	}
 	double GetMovieLength() { return m_movie_len; }
 	void SetFps(double val)
 	{
 		m_fps = val;
 		if (val > 0)
-			m_movie_len = (m_frame_num - 1) / m_fps;
+			m_movie_len = (m_clip_frame_num - 1) / m_fps;
 	}
 	double GetFps() { return m_fps; }
-	void SetStartEndFrames(int val1, int val2)
-	{
-		m_start_frame = val1;
-		m_end_frame = val2;
-		if (m_start_frame >= m_end_frame)
-			m_end_frame = m_start_frame + 1;
-		m_frame_num = m_end_frame - m_start_frame + 1;
-		if (m_fps > 0)
-			m_movie_len = (m_frame_num - 1) / m_fps;
-	}
-	void SetStartFrame(int val)
-	{
-		m_start_frame = val;
-		if (m_start_frame >= m_end_frame)
-			m_start_frame = m_end_frame - 1;
-		m_frame_num = m_end_frame - m_start_frame + 1;
-		if (m_fps > 0)
-			m_movie_len = (m_frame_num - 1) / m_fps;
-	}
-	int GetStartFrame() { return m_start_frame; }
-	void SetEndFrame(int val)
-	{
-		m_end_frame = val;
-		if (m_start_frame >= m_end_frame)
-			m_end_frame = m_start_frame + 1;
-		m_frame_num = m_end_frame - m_start_frame + 1;
-		if (m_fps > 0)
-			m_movie_len = (m_frame_num - 1) / m_fps;
-	}
-	int GetEndFrame() { return m_end_frame; }
+	void SetClipStartEndFrames(int val1, int val2);
+	void SetClipStartFrame(int val);
+	int GetClipStartFrame() { return m_clip_start_frame; }
+	void SetClipEndFrame(int val);
+	int GetClipEndFrame() { return m_clip_end_frame; }
 	void SetCurrentFrame(int val);
 	int GetCurrentFrame() { return m_cur_frame; }
-	void SetCurrentTime(double val)
-	{
-		int frame = m_start_frame + std::round(val * m_fps);
-		SetCurrentFrame(frame);
-	}
-	double GetCurProg() { return double(m_cur_frame) / (m_frame_num - 1); }
+	void SetCurrentTime(double val);
+	double GetCurProg() { return double(m_cur_frame) / (m_full_frame_num - 1); }
 	double GetCurrentTime() { return m_cur_time; }
 	int GetScrollThumbSize() { return m_scroll_thumb_size; }
 
-	//
+	//crop
 	void SetCropEnable(bool val);
 	bool GetCropEnable() { return m_crop; }
 	void SetCropValues(int, int, int, int);
@@ -237,11 +206,12 @@ private:
 	int m_seq_mode;//0:none; 1:4d; 2:bat
 
 	//movie properties
-	int m_frame_num;
+	int m_full_frame_num;//the full length movie always starts from 0 and ends at f-1
+	int m_clip_frame_num;
 	double m_movie_len;//length in sec
 	double m_fps;
-	int m_start_frame;
-	int m_end_frame;
+	int m_clip_start_frame;
+	int m_clip_end_frame;
 	int m_cur_frame;
 	double m_cur_time;//time in sec
 	double m_cur_prog;//normalized time between 0 and 1

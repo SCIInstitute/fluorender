@@ -44,11 +44,11 @@ MovieDefault::MovieDefault()
 	m_time_seq = false;
 	m_seq_mode = 0;
 
-	m_frame_num = 361;
+	m_full_frame_num = 361;
 	m_movie_len = 12;
 	m_fps = 30;
-	m_start_frame = 0;
-	m_end_frame = 360;
+	m_clip_start_frame = 0;
+	m_clip_end_frame = 360;
 	m_cur_frame = 0;
 	m_cur_time = 0;
 
@@ -84,11 +84,11 @@ void MovieDefault::Read(wxFileConfig& f)
 	f.Read("time seq", &m_time_seq, false);
 	f.Read("seq mode", &m_seq_mode, 0);
 
-	f.Read("frame num", &m_frame_num, 361);
+	f.Read("full frame num", &m_full_frame_num, 361);
 	f.Read("movie len", &m_movie_len, 12);
 	f.Read("fps", &m_fps, 30);
-	f.Read("start frame", &m_start_frame, 0);
-	f.Read("end frame", &m_end_frame, 360);
+	f.Read("clip start frame", &m_clip_start_frame, 0);
+	f.Read("clip end frame", &m_clip_end_frame, 360);
 	f.Read("cur frame", &m_cur_frame, 0);
 	f.Read("cur time", &m_cur_time, 0);
 
@@ -118,11 +118,11 @@ void MovieDefault::Save(wxFileConfig& f)
 	f.Write("time seq", m_time_seq);
 	f.Write("seq mode", m_seq_mode);
 
-	f.Write("frame num", m_frame_num);
+	f.Write("full frame num", m_full_frame_num);
 	f.Write("movie len", m_movie_len);
 	f.Write("fps", m_fps);
-	f.Write("start frame", m_start_frame);
-	f.Write("end frame", m_end_frame);
+	f.Write("clip start frame", m_clip_start_frame);
+	f.Write("clip end frame", m_clip_end_frame);
 	f.Write("cur frame", m_cur_frame);
 	f.Write("cur time", m_cur_time);
 
@@ -149,11 +149,11 @@ void MovieDefault::Set(MovieMaker* mm)
 	m_time_seq = mm->GetTimeSeqEnable();
 	m_seq_mode = mm->GetSeqMode();
 
-	m_frame_num = mm->GetFrameNum();
+	m_full_frame_num = mm->GetFullFrameNum();
 	m_movie_len = mm->GetMovieLength();
 	m_fps = mm->GetFps();
-	m_start_frame = mm->GetStartFrame();
-	m_end_frame = mm->GetEndFrame();
+	m_clip_start_frame = mm->GetClipStartFrame();
+	m_clip_end_frame = mm->GetClipEndFrame();
 	m_cur_frame = mm->GetCurrentFrame();
 	m_cur_time = mm->GetCurrentTime();
 
@@ -180,10 +180,10 @@ void MovieDefault::Apply(MovieMaker* mm)
 	mm->SetTimeSeqEnable(m_time_seq);
 	mm->SetSeqMode(m_seq_mode);
 
-	mm->SetFrameNum(m_frame_num);
+	mm->SetFullFrameNum(m_full_frame_num);
 	mm->SetMovieLength(m_movie_len);
 	mm->SetFps(m_fps);
-	mm->SetStartEndFrames(m_start_frame, m_end_frame);
+	mm->SetClipStartEndFrames(m_clip_start_frame, m_clip_end_frame);
 	mm->SetCurrentFrame(m_cur_frame);
 	mm->SetCurrentTime(m_cur_time);
 

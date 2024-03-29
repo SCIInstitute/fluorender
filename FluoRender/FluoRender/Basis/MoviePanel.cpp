@@ -444,8 +444,8 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	m_progress_sldr->SetScrollbar2(
 		glbin_moviemaker.GetCurrentFrame(),
 		glbin_moviemaker.GetScrollThumbSize(),
-		glbin_moviemaker.GetStartFrame(),
-		glbin_moviemaker.GetEndFrame(), 1);
+		glbin_moviemaker.GetClipStartFrame(),
+		glbin_moviemaker.GetClipEndFrame(), 1);
 	m_progress_sldr->Bind(wxEVT_SCROLL_CHANGED, &MoviePanel::OnProgressScroll, this);
 	sizer2->Add(5, 5);
 	sizer2->Add(m_slider_btn, 0, wxALIGN_CENTER);
@@ -621,18 +621,18 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_progress_sldr->SetScrollbar2(
 			glbin_moviemaker.GetCurrentFrame(),
 			glbin_moviemaker.GetScrollThumbSize(),
-			glbin_moviemaker.GetStartFrame(),
-			glbin_moviemaker.GetEndFrame(), 1);
+			glbin_moviemaker.GetClipStartFrame(),
+			glbin_moviemaker.GetClipEndFrame(), 1);
 		m_progress_sldr->ChangeValue(glbin_moviemaker.GetCurrentFrame());
 	}
 
 	if (update_all || FOUND_VALUE(gstBeginFrame))
 		m_start_frame_text->ChangeValue(wxString::Format("%d",
-			glbin_moviemaker.GetStartFrame()));
+			glbin_moviemaker.GetClipStartFrame()));
 
 	if (update_all || FOUND_VALUE(gstEndFrame))
 		m_end_frame_text->ChangeValue(wxString::Format("%d",
-			glbin_moviemaker.GetEndFrame()));
+			glbin_moviemaker.GetClipEndFrame()));
 
 	if (update_all || FOUND_VALUE(gstCurrentFrame))
 	{
@@ -825,18 +825,18 @@ void MoviePanel::SetStartFrame(int val)
 {
 	if (glbin_moviemaker.IsRunning())
 		return;
-	glbin_moviemaker.SetStartFrame(val);
+	glbin_moviemaker.SetClipStartFrame(val);
 
-	FluoUpdate({ gstBeginFrame, gstMovFps, gstMovLength, gstMovProgSlider });
+	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovFps, gstMovLength, gstMovProgSlider });
 }
 
 void MoviePanel::SetEndFrame(int val)
 {
 	if (glbin_moviemaker.IsRunning())
 		return;
-	glbin_moviemaker.SetEndFrame(val);
+	glbin_moviemaker.SetClipEndFrame(val);
 
-	FluoUpdate({ gstEndFrame, gstMovFps, gstMovLength, gstMovProgSlider });
+	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovFps, gstMovLength, gstMovProgSlider });
 }
 
 void MoviePanel::SetScrollFrame(int val, bool notify)
@@ -1167,6 +1167,7 @@ void MoviePanel::OnDegreeText(wxCommandEvent& event)
 	long ival = 0;
 	str.ToLong(&ival);
 	glbin_moviemaker.SetRotateDeg(ival);
+	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider });
 	event.Skip();
 }
 

@@ -59,11 +59,12 @@ public:
 	int m_seq_mode;//0:none; 1:4d; 2:bat
 
 	//movie properties
-	int m_frame_num;
+	int m_full_frame_num;
+	int m_clip_frame_num;
 	double m_movie_len;//length in sec
 	double m_fps;
-	int m_start_frame;
-	int m_end_frame;
+	int m_clip_start_frame;
+	int m_clip_end_frame;
 	int m_cur_frame;
 	double m_cur_time;//time in sec
 

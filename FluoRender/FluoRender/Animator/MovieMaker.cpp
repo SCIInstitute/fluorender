@@ -54,11 +54,12 @@ MovieMaker::MovieMaker() :
 	m_time_seq = false;
 	m_seq_mode = 0;
 
-	m_frame_num = 361;
+	m_full_frame_num = 361;
+	m_clip_frame_num = 361;
 	m_movie_len = 12;
 	m_fps = 30;
-	m_start_frame = 0;
-	m_end_frame = 360;
+	m_clip_start_frame = 0;
+	m_clip_end_frame = 360;
 	m_cur_frame = 0;
 	m_cur_time = 0;
 	m_cur_prog = 0;
@@ -149,7 +150,7 @@ void MovieMaker::Rewind()
 	if (!m_view)
 		return;
 	Stop();
-	SetCurrentFrame(m_start_frame);
+	SetCurrentFrame(m_clip_start_frame);
 
 	//m_view->SetParams(0.);
 	//m_cur_frame_text->ChangeValue(wxString::Format("%d", m_cur_frame));
@@ -162,7 +163,7 @@ void MovieMaker::Forward()
 	if (!m_view)
 		return;
 	Stop();
-	SetCurrentFrame(m_end_frame);
+	SetCurrentFrame(m_clip_end_frame);
 	SetRendering(false);
 }
 
@@ -172,7 +173,7 @@ void MovieMaker::Reset()
 		return;
 	m_view->m_tseq_cur_num =
 		m_view->m_tseq_prv_num = 0;
-	SetCurrentFrame(m_start_frame);
+	SetCurrentFrame(m_clip_start_frame);
 	m_last_frame = -1;
 	SetRendering(false);
 }
@@ -244,11 +245,11 @@ void MovieMaker::SetRendering(bool rewind)
 		//basic options
 		if (m_seq_mode == 1)
 		{
-			m_view->Set4DSeqFrame(m_cur_frame, m_start_frame, m_end_frame, rewind);
+			m_view->Set4DSeqFrame(m_cur_frame, m_clip_start_frame, m_clip_end_frame, rewind);
 		}
 		else if (m_seq_mode == 2)
 		{
-			m_view->Set3DBatFrame(m_cur_frame, m_start_frame, m_end_frame, rewind);
+			m_view->Set3DBatFrame(m_cur_frame, m_clip_start_frame, m_clip_end_frame, rewind);
 		}
 
 		//rotate animation
@@ -284,7 +285,7 @@ void MovieMaker::WriteFrameToFile()
 	if (!m_view)
 		return;
 
-	wxString s_length = wxString::Format("%d", m_frame_num);
+	wxString s_length = wxString::Format("%d", m_clip_frame_num);
 	int length = s_length.Length();
 	wxString format = wxString::Format("_%%0%dd", length);
 	wxString outputfilename = wxString::Format("%s" + format + "%s", m_filename,
@@ -525,6 +526,15 @@ int MovieMaker::GetViewIndex()
 	return -1;
 }
 
+void MovieMaker::SetRotateDeg(int val)
+{
+	m_rot_deg = val;
+	if (m_rotate)
+	{
+		SetFullFrameNum(val + 1);
+	}
+}
+
 void MovieMaker::SetTimeSeqEnable(bool val)
 {
 	m_time_seq = val;
@@ -536,39 +546,90 @@ void MovieMaker::SetTimeSeqEnable(bool val)
 		if (m_seq_mode == 1)
 		{
 			if (m_view)
-				m_view->Get4DSeqRange(m_start_frame, m_end_frame);
+				m_view->Get4DSeqRange(m_clip_start_frame, m_clip_end_frame);
 		}
 		else if (m_seq_mode == 2)
 		{
 			if (m_view)
-				m_view->Get3DBatRange(m_start_frame, m_end_frame);
+				m_view->Get3DBatRange(m_clip_start_frame, m_clip_end_frame);
 		}
 	}
 	else
 	{
-		SetStartEndFrames(0, m_rot_deg);
+		SetClipStartEndFrames(0, m_rot_deg);
 	}
+}
+
+void MovieMaker::SetFullFrameNum(int val)
+{
+	//it resets the whole movie length
+	m_full_frame_num = val;
+	SetClipStartEndFrames(0, val - 1);
+}
+
+void MovieMaker::SetClipStartEndFrames(int val1, int val2)
+{
+	m_clip_start_frame = val1;
+	m_clip_end_frame = val2;
+	if (m_clip_start_frame >= m_clip_end_frame)
+		m_clip_end_frame = m_clip_start_frame + 1;
+	m_clip_frame_num = m_clip_end_frame - m_clip_start_frame + 1;
+	if (m_clip_end_frame > m_full_frame_num - 1)
+		m_full_frame_num = val2 + 1;
+	if (m_fps > 0)
+		m_movie_len = (m_clip_frame_num - 1) / m_fps;
+	SetCurrentFrame(m_cur_frame);
+}
+
+void MovieMaker::SetClipStartFrame(int val)
+{
+	m_clip_start_frame = val;
+	if (m_clip_start_frame >= m_clip_end_frame)
+		m_clip_start_frame = m_clip_end_frame - 1;
+	m_clip_frame_num = m_clip_end_frame - m_clip_start_frame + 1;
+	if (m_fps > 0)
+		m_movie_len = (m_clip_frame_num - 1) / m_fps;
+	SetCurrentFrame(m_cur_frame);
+}
+
+void MovieMaker::SetClipEndFrame(int val)
+{
+	m_clip_end_frame = val;
+	if (m_clip_start_frame >= m_clip_end_frame)
+		m_clip_end_frame = m_clip_start_frame + 1;
+	m_clip_frame_num = m_clip_end_frame - m_clip_start_frame + 1;
+	if (m_clip_end_frame > m_full_frame_num - 1)
+		m_full_frame_num = val + 1;
+	if (m_fps > 0)
+		m_movie_len = (m_clip_frame_num - 1) / m_fps;
+	SetCurrentFrame(m_cur_frame);
 }
 
 void MovieMaker::SetCurrentFrame(int val)
 {
-	m_cur_frame = val;
-	if (m_cur_frame < m_start_frame)
-	{
-		int len = m_frame_num - 1;
-		int mul = (m_start_frame - m_cur_frame) / len + 1;
-		int inc = mul * len;
-		m_cur_frame += inc;
-	}
-	if (m_cur_frame > m_end_frame)
-	{
-		int len = m_frame_num - 1;
-		int mul = (m_cur_frame - m_end_frame) / len + 1;
-		int inc = mul * len;
-		m_cur_frame -= inc;
-	}
-	m_cur_time = (m_cur_frame - m_start_frame) / m_fps;
+	m_cur_frame = fluo::RotateClamp2(val, m_clip_start_frame, m_clip_end_frame);
+	//if (m_cur_frame < m_clip_start_frame)
+	//{
+	//	int len = m_clip_frame_num - 1;
+	//	int mul = (m_clip_start_frame - m_cur_frame) / len + 1;
+	//	int inc = mul * len;
+	//	m_cur_frame += inc;
+	//}
+	//if (m_cur_frame > m_clip_end_frame)
+	//{
+	//	int len = m_clip_frame_num - 1;
+	//	int mul = (m_cur_frame - m_clip_end_frame) / len + 1;
+	//	int inc = mul * len;
+	//	m_cur_frame -= inc;
+	//}
+	m_cur_time = (m_cur_frame - m_clip_start_frame) / m_fps;
 	SetRendering(false);
+}
+
+void MovieMaker::SetCurrentTime(double val)
+{
+	int frame = m_clip_start_frame + std::round(val * m_fps);
+	SetCurrentFrame(frame);
 }
 
 void MovieMaker::SetCropEnable(bool val)
@@ -642,9 +703,10 @@ bool MovieMaker::Action()
 	//get all of the progress info
 	if (m_delayed_stop)
 	{
+		m_delayed_stop = false;
 		if (m_record)
 			WriteFrameToFile();
-		m_delayed_stop = false;
+		SetCurrentFrame(m_cur_frame);
 		Stop();
 		RenderCanvas::SetKeepEnlarge(false);
 		return true;
@@ -680,12 +742,12 @@ bool MovieMaker::Action()
 	{
 		if (m_reverse)
 		{
-			if (m_cur_frame == m_start_frame)
+			if (m_cur_frame == m_clip_start_frame)
 				m_delayed_stop = true;
 		}
 		else
 		{
-			if (m_cur_frame == m_end_frame)
+			if (m_cur_frame == m_clip_end_frame)
 				m_delayed_stop = true;
 		}
 	}

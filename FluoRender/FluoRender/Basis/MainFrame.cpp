@@ -3366,8 +3366,9 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 	fconfig.Write("crop_w", glbin_moviemaker.GetCropW());
 	fconfig.Write("crop_h", glbin_moviemaker.GetCropH());
 	fconfig.Write("cur_frame", glbin_moviemaker.GetCurrentFrame());
-	fconfig.Write("start_frame", glbin_moviemaker.GetStartFrame());
-	fconfig.Write("end_frame", glbin_moviemaker.GetEndFrame());
+	fconfig.Write("full frame num", glbin_moviemaker.GetFullFrameNum());
+	fconfig.Write("start_frame", glbin_moviemaker.GetClipStartFrame());
+	fconfig.Write("end_frame", glbin_moviemaker.GetClipEndFrame());
 	fconfig.Write("run_script", glbin_settings.m_run_script);
 	fconfig.Write("script_file", glbin_settings.m_script_file);
 	//tracking diag
@@ -4593,22 +4594,16 @@ void MainFrame::OpenProject(wxString& filename)
 		//set settings for frame
 		RenderCanvas* view = 0;
 		if (fconfig.Read("key frame enable", &bVal))
-		{
 			glbin_moviemaker.SetKeyframeEnable(bVal);
-		}
 		if (fconfig.Read("views_cmb", &iVal))
 		{
 			view = GetView(iVal);
 			glbin_moviemaker.SetView(view);
 		}
 		if (fconfig.Read("rot_check", &bVal))
-		{
 			glbin_moviemaker.SetRotateEnable(bVal);
-		}
 		if (fconfig.Read("seq_check", &bVal))
-		{
 			glbin_moviemaker.SetTimeSeqEnable(bVal);
-		}
 		if (fconfig.Read("x_rd", &bVal))
 		{
 			if (bVal)
@@ -4625,45 +4620,29 @@ void MainFrame::OpenProject(wxString& filename)
 				glbin_moviemaker.SetRotateAxis(2);
 		}
 		if (fconfig.Read("rot_axis", &iVal))
-		{
 			glbin_moviemaker.SetRotateAxis(iVal);
-		}
 		if (fconfig.Read("rot_deg", &iVal))
-		{
 			glbin_moviemaker.SetRotateDeg(iVal);
-		}
 		if (fconfig.Read("movie_len", &dVal))
-		{
 			glbin_moviemaker.SetMovieLength(dVal);
-		}
 		if (fconfig.Read("fps", &dVal))
-		{
 			glbin_moviemaker.SetFps(dVal);
-		}
 		if (fconfig.Read("crop", &bVal))
-		{
 			glbin_moviemaker.SetCropEnable(bVal);
-		}
 		if (fconfig.Read("crop_x", &iVal))
-		{
 			glbin_moviemaker.SetCropX(iVal);
-		}
 		if (fconfig.Read("crop_y", &iVal))
-		{
 			glbin_moviemaker.SetCropY(iVal);
-		}
 		if (fconfig.Read("crop_w", &iVal))
-		{
 			glbin_moviemaker.SetCropW(iVal);
-		}
 		if (fconfig.Read("crop_h", &iVal))
-		{
 			glbin_moviemaker.SetCropH(iVal);
-		}
+		if (fconfig.Read("full frame num", &iVal))
+			glbin_moviemaker.SetFullFrameNum(iVal);
 		int startf = 0, endf = 0, curf = 0;
 		if (fconfig.Read("start_frame", &startf) &&
 			fconfig.Read("end_frame", &endf))
-			glbin_moviemaker.SetStartEndFrames(startf, endf);
+			glbin_moviemaker.SetClipStartEndFrames(startf, endf);
 		if (fconfig.Read("cur_frame", &curf))
 		{
 			if (curf && curf >= startf && curf <= endf)
