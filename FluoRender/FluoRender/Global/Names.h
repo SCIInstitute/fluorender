@@ -655,6 +655,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstRulerDfoverf "ruler dfoverf"
 //movie agent
 #define gstMovPlay "mov play"
+#define gstMovLoop "mov loop"
 #define gstMovViewList "mov view list"
 #define gstMovViewIndex "mov view index"
 #define gstMovSliderStyle "mov slider style"

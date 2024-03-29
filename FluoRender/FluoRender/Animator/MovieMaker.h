@@ -51,6 +51,19 @@ public:
 	{
 		return m_running;
 	}
+	bool IsReverse()
+	{
+		return m_reverse;
+	}
+	bool IsLoop()
+	{
+		return m_loop;
+	}
+	bool IsPaused()
+	{
+		return m_cur_frame != m_start_frame &&
+			m_cur_frame != m_end_frame;
+	}
 	void Play(bool back);
 	void Start();
 	void Stop();
@@ -166,6 +179,11 @@ public:
 	}
 	double GetCurProg() { return double(m_cur_frame) / (m_frame_num - 1); }
 	double GetCurrentTime() { return m_cur_time; }
+	int GetScrollPos() { return m_cur_frame; }
+	int GetScrollThumbSize() { return m_scroll_thumb_size; }
+	int GetScrollRange() { return m_frame_num + m_scroll_thumb_size - 1; }
+
+	//
 	void SetCropEnable(bool val);
 	bool GetCropEnable() { return m_crop; }
 	void SetCropValues(int, int, int, int);
@@ -209,6 +227,7 @@ private:
 	//save
 	wxString m_filename;
 	wxString filetype_;
+	int m_scroll_thumb_size;
 
 	//settings
 	bool m_keyframe_enable;//enable keyframe animation

@@ -43,7 +43,8 @@ MovieMaker::MovieMaker() :
 	m_delayed_stop(false),
 	m_timer_hold(false),
 	m_reverse(false),
-	m_loop(false)
+	m_loop(false),
+	m_scroll_thumb_size(20)
 {
 	m_keyframe_enable = false;
 	m_rotate = true;
@@ -97,15 +98,13 @@ void MovieMaker::Start()
 	m_view->m_begin_play_frame = m_cur_frame;
 	flvr::TextureRenderer::maximize_uptime_ = true;
 	m_last_frame = 0;
-	if (!m_keyframe_enable)
+	if (!m_keyframe_enable
+		&& !IsPaused())
 	{
 		double rval[3];
 		m_view->GetRotations(rval[0], rval[1], rval[2]);
-		m_starting_rot = rval[m_rot_axis];
-		while (m_starting_rot > 360.) m_starting_rot -= 360.;
-		while (m_starting_rot < -360.) m_starting_rot += 360.;
-		if (360. - std::abs(m_starting_rot) < 0.001)
-			m_starting_rot = 0.;
+		double r = rval[m_rot_axis];
+		m_starting_rot = fluo::RotateClamp(r, 0, 360);
 	}
 
 	get_stopwatch()->interval(1000.0 / m_fps);

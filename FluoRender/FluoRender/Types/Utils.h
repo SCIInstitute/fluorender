@@ -276,6 +276,26 @@ inline void sinCos(double *returnSin, double *returnCos, double theta)
     *returnCos = std::cos(theta);
 }
 
+inline int RotateClamp(int v, int low, int high)
+{
+	int r = high - low;
+	if (v < low)
+		v += r * (-(v-low) / r + 1);
+	if (v >= high)
+		v -= r * ((v-low) / r);
+	return v;
+}
+
+inline double RotateClamp(double v, int low, int high)
+{
+	int r = high - low;
+	if (v < low)
+		v += r * (-(int)(v - low) / r + 1);
+	if (v >= high)
+		v -= r * ((int)(v - low) / r);
+	return v;
+}
+
 } // namespace fluo
 
 #endif//_FLTYPEUTILS_H_

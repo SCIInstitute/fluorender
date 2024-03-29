@@ -442,8 +442,9 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	m_progress_sldr = new wxUndoableScrollBar(this, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(-1, 20)));
 	m_progress_sldr->SetScrollbar(
-		glbin_moviemaker.GetCurrentFrame(), 40,
-		glbin_moviemaker.GetFrameNum() + 40, 1);
+		glbin_moviemaker.GetScrollPos(),
+		glbin_moviemaker.GetScrollThumbSize(),
+		glbin_moviemaker.GetScrollRange(), 1);
 	m_progress_sldr->Bind(wxEVT_SCROLL_CHANGED, &MoviePanel::OnProgressScroll, this);
 	sizer2->Add(5, 5);
 	sizer2->Add(m_slider_btn, 0, wxALIGN_CENTER);
@@ -616,8 +617,9 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstMovProgSlider))
 	{
 		m_progress_sldr->SetScrollbar(
-			glbin_moviemaker.GetCurrentFrame(), 40,
-			glbin_moviemaker.GetFrameNum() + 40, 1);
+			glbin_moviemaker.GetScrollPos(),
+			glbin_moviemaker.GetScrollThumbSize(),
+			glbin_moviemaker.GetScrollRange(), 1);
 		m_progress_sldr->ChangeValue(glbin_moviemaker.GetCurrentFrame());
 	}
 
@@ -646,15 +648,35 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstMovPlay))
 	{
 		if (glbin_moviemaker.IsRunning())
-			m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
+		{
+			if (glbin_moviemaker.IsReverse())
+			{
+				m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+				m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(pause));
+			}
+			else
+			{
+				m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
+				m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv));
+			}
+		}
 		else
 		{
 			if (glbin_settings.m_run_script)
+			{
 				m_play_btn->SetBitmap(wxGetBitmapFromMemory(play_script));
+				m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv_script));
+			}
 			else
+			{
 				m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+				m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv));
+			}
 		}
 	}
+
+	if (update_all || FOUND_VALUE(gstMovLoop))
+		m_loop_btn->SetValue(glbin_moviemaker.IsLoop());
 
 	if (update_all || FOUND_VALUE(gstMovRotEnable))
 	{
@@ -802,7 +824,7 @@ void MoviePanel::SetStartFrame(int val)
 		return;
 	glbin_moviemaker.SetStartFrame(val);
 
-	FluoUpdate({ gstBeginFrame, gstMovFps, gstMovLength });
+	FluoUpdate({ gstBeginFrame, gstMovFps, gstMovLength, gstMovProgSlider });
 }
 
 void MoviePanel::SetEndFrame(int val)
@@ -811,7 +833,7 @@ void MoviePanel::SetEndFrame(int val)
 		return;
 	glbin_moviemaker.SetEndFrame(val);
 
-	FluoUpdate({ gstEndFrame, gstMovFps, gstMovLength });
+	FluoUpdate({ gstEndFrame, gstMovFps, gstMovLength, gstMovProgSlider });
 }
 
 void MoviePanel::SetScrollFrame(int val, bool notify)

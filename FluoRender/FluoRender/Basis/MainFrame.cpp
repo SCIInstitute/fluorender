@@ -2436,6 +2436,8 @@ MeshData* MainFrame::GetCurSelMesh()
 
 void MainFrame::RefreshCanvases(bool interactive, const std::set<int>& views)
 {
+	if (views.find(-1) != views.end())
+		return;
 	bool update_all = views.empty();
 
 	for (int i=0 ; i<(int)m_vrv_list.size() ; i++)

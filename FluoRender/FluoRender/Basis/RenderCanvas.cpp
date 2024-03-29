@@ -3932,7 +3932,11 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			refresh = glbin_moviemaker.Action();
 			event.RequestMore(glbin_moviemaker.IsRunning());
 			if (refresh)
+			{
 				vc.insert(gstCamRotation);
+				if (!glbin_moviemaker.IsRunning())
+					vc.insert(gstMovPlay);
+			}
 		}
 	}
 
@@ -4482,7 +4486,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		m_clear_buffer = true;
 		m_updating = true;
 		RefreshGL(15, ref_stat, start_loop);
-		m_vrv->FluoUpdate(vc);
+		m_vrv->FluoRefresh(false, 0, vc, {-1});
 	}
 }
 
