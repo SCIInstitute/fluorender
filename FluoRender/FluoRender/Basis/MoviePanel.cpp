@@ -441,10 +441,11 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	m_slider_btn->Realize();
 	m_progress_sldr = new wxUndoableScrollBar(this, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(-1, 20)));
-	m_progress_sldr->SetScrollbar(
-		glbin_moviemaker.GetScrollPos(),
+	m_progress_sldr->SetScrollbar2(
+		glbin_moviemaker.GetCurrentFrame(),
 		glbin_moviemaker.GetScrollThumbSize(),
-		glbin_moviemaker.GetScrollRange(), 1);
+		glbin_moviemaker.GetStartFrame(),
+		glbin_moviemaker.GetEndFrame(), 1);
 	m_progress_sldr->Bind(wxEVT_SCROLL_CHANGED, &MoviePanel::OnProgressScroll, this);
 	sizer2->Add(5, 5);
 	sizer2->Add(m_slider_btn, 0, wxALIGN_CENTER);
@@ -608,6 +609,7 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		bval = glbin_mov_def.m_slider_style;
 		m_progress_sldr->SetMode(bval ? 1 : 0);
+		m_slider_btn->ToggleTool(0, bval);
 		if (bval)
 			m_slider_btn->SetToolNormalBitmap(0, wxGetBitmapFromMemory(slider_type_rot));
 		else
@@ -616,10 +618,11 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstMovProgSlider))
 	{
-		m_progress_sldr->SetScrollbar(
-			glbin_moviemaker.GetScrollPos(),
+		m_progress_sldr->SetScrollbar2(
+			glbin_moviemaker.GetCurrentFrame(),
 			glbin_moviemaker.GetScrollThumbSize(),
-			glbin_moviemaker.GetScrollRange(), 1);
+			glbin_moviemaker.GetStartFrame(),
+			glbin_moviemaker.GetEndFrame(), 1);
 		m_progress_sldr->ChangeValue(glbin_moviemaker.GetCurrentFrame());
 	}
 

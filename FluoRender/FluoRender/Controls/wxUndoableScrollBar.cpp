@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "wxUndoableScrollBar.h"
+#include <Utils.h>
 #include <Debug.h>
 
 wxUndoableScrollBar::wxUndoableScrollBar(
@@ -55,33 +56,52 @@ void wxUndoableScrollBar::SetMode(int val)
 	case 0://normal
 		if (timer_.IsRunning())
 			timer_.Stop();
-		SetThumbPosition(value_);
+		SetThumbPosition2(value_);
 		Unbind(wxEVT_TIMER, &wxUndoableScrollBar::OnTimer, this);
 		Unbind(wxEVT_SCROLL_THUMBRELEASE, &wxUndoableScrollBar::OnRelease, this);
 		break;
 	case 1://jog
-		SetThumbPosition(
-			(GetRange() - GetThumbSize()) / 2);
+		SetThumbPosition2(value_);
 		Bind(wxEVT_TIMER, &wxUndoableScrollBar::OnTimer, this);
 		Bind(wxEVT_SCROLL_THUMBRELEASE, &wxUndoableScrollBar::OnRelease, this);
 		break;
 	}
 }
 
+void wxUndoableScrollBar::SetScrollbar2(int position, int thumbSize, int low, int high, int pageSize)
+{
+	value_ = position;
+	low_ = low;
+	high_ = high > low ? high : low + 1;
+	int p;
+	if (mode_ == 0)
+		p = position - low;
+	else
+		p = (high - low) / 2;
+	SetScrollbar(p, thumbSize, high - low + thumbSize, pageSize);
+}
+
+void wxUndoableScrollBar::SetThumbPosition2(int val)
+{
+	if (mode_ == 0)
+	{
+		SetThumbPosition(val - low_);
+	}
+	else if (mode_ == 1)
+	{
+		SetThumbPosition(
+			(GetRange() - GetThumbSize()) / 2);
+	}
+}
+
 void wxUndoableScrollBar::SetValue(int val)
 {
 	int old = value_;
-	int range = GetRange() - GetThumbSize();
-	value_ = val;
-	if (value_ < 0)
-		value_ += range * (-value_ / range  + 1);
-	if (value_ > range)
-		value_ -= range * (value_ / range);
-
+	value_ = fluo::RotateClamp2(val, low_, high_);
 	bool changed = old != value_;
 
 	if (changed && mode_ == 0)
-		SetThumbPosition(value_);
+		SetThumbPosition2(value_);
 
 	if (changed || stack_.empty())
 	{
@@ -105,17 +125,11 @@ void wxUndoableScrollBar::SetValue(int val)
 void wxUndoableScrollBar::ChangeValue(int val)
 {
 	int old = value_;
-	int range = GetRange() - GetThumbSize();
-	value_ = val;
-	if (value_ < 0)
-		value_ += range * (-value_ / range + 1);
-	if (value_ > range)
-		value_ -= range * (value_ / range);
-
+	value_ = fluo::RotateClamp2(val, low_, high_);
 	bool changed = old != value_;
 
 	if (changed && mode_ == 0)
-		SetThumbPosition(value_);
+		SetThumbPosition2(value_);
 
 	if (changed || stack_.empty())
 	{
@@ -141,7 +155,8 @@ void wxUndoableScrollBar::OnTimer(wxTimerEvent& event)
 		int mid = range / 2;
 		int dist = pos - mid;
 		double val = value_;
-		val += (double)dist * dist * dist / 324000.;
+		double f = double(dist) / (mid / 3);
+		val += f * f * f;
 
 		SetValue(std::round(val));
 	}
@@ -166,7 +181,7 @@ void wxUndoableScrollBar::OnLeftUp(wxMouseEvent& event)
 void wxUndoableScrollBar::OnTrack(wxScrollEvent& event)
 {
 	if (mode_ == 0)
-		SetValue(GetThumbPosition());
+		SetValue(GetThumbPosition() + low_);
 	else if (mode_ == 1)
 		if (!timer_.IsRunning())
 			timer_.Start(50);
@@ -176,8 +191,7 @@ void wxUndoableScrollBar::OnTrack(wxScrollEvent& event)
 void wxUndoableScrollBar::OnRelease(wxScrollEvent& event)
 {
 	timer_.Stop();
-	SetThumbPosition(
-		(GetRange() - GetThumbSize()) / 2);
+	SetThumbPosition2(value_);
 	event.Skip();
 }
 

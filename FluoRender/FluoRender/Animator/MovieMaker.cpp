@@ -61,6 +61,7 @@ MovieMaker::MovieMaker() :
 	m_end_frame = 360;
 	m_cur_frame = 0;
 	m_cur_time = 0;
+	m_cur_prog = 0;
 
 	m_crop = false;
 	m_crop_x = 0;

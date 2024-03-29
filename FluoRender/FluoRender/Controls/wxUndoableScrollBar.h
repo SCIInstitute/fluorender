@@ -46,12 +46,16 @@ public:
 
 	virtual void SetMode(int val);
 	virtual int GetMode() { return mode_; }
+	virtual void SetScrollbar2(int position, int thumbSize, int low, int high, int pageSize);
+	virtual void SetThumbPosition2(int val);
 	virtual void SetValue(int val);
 	virtual void ChangeValue(int val);
 	virtual int GetValue();
 
 private:
 	int value_;
+	int low_;
+	int high_;
 	int mode_;//0: normal slider; 1: jog
 	wxTimer timer_;
 

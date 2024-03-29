@@ -602,17 +602,17 @@ void RenderViewPanel::CreateBar()
 
 	st1 = new wxStaticText(this, 0, "X:");
 	m_x_rot_sldr = new wxUndoableScrollBar(this, ID_RotXScroll);
-	m_x_rot_sldr->SetScrollbar(180,60,420,15);
+	m_x_rot_sldr->SetScrollbar2(180, 60, 0, 360, 15);
 	m_x_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(45,20)), 0, vald_fp1);
 	st2 = new wxStaticText(this, 0, "Y:");
 	m_y_rot_sldr = new wxUndoableScrollBar(this, ID_RotYScroll);
-	m_y_rot_sldr->SetScrollbar(180,60,420,15);
+	m_y_rot_sldr->SetScrollbar2(180, 60, 0, 360, 15);
 	m_y_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(45,20)), 0, vald_fp1);
 	st3 = new wxStaticText(this, 0, "Z:");
 	m_z_rot_sldr = new wxUndoableScrollBar(this, ID_RotZScroll);
-	m_z_rot_sldr->SetScrollbar(180,60,420,15);
+	m_z_rot_sldr->SetScrollbar2(180, 60, 0, 360, 15);
 	m_z_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(45,20)), 0, vald_fp1);
 	m_x_rot_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnRotEdit, this);

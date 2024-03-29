@@ -4444,18 +4444,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				m_rotz -= 360.0;
 			if (m_rotz < 0.0)
 				m_rotz += 360.0;
-			//wxString str = wxString::Format("%.1f", m_rotx);
-			//m_vrv->m_x_rot_text->ChangeValue(str);
-			//str = wxString::Format("%.1f", m_roty);
-			//m_vrv->m_y_rot_text->ChangeValue(str);
-			//str = wxString::Format("%.1f", m_rotz);
-			//m_vrv->m_z_rot_text->ChangeValue(str);
-			//if (!m_vrv->m_rot_slider)
-			//{
-			//	m_vrv->m_x_rot_sldr->SetThumbPosition(std::round(m_rotx));
-			//	m_vrv->m_y_rot_sldr->SetThumbPosition(std::round(m_roty));
-			//	m_vrv->m_z_rot_sldr->SetThumbPosition(std::round(m_rotz));
-			//}
 			m_interactive = true;
 			refresh = true;
 			vc.insert(gstCamRotation);
@@ -10724,34 +10712,6 @@ void RenderCanvas::SetRotations(double rotx, double roty, double rotz, bool noti
 
 	if (notify)
 		m_vrv->FluoUpdate({ gstCamRotation });
-
-	//if (ui_update)
-	//{
-	//	wxString str = wxString::Format("%.1f", m_rotx);
-	//	m_vrv->m_x_rot_text->ChangeValue(str);
-	//	str = wxString::Format("%.1f", m_roty);
-	//	m_vrv->m_y_rot_text->ChangeValue(str);
-	//	str = wxString::Format("%.1f", m_rotz);
-	//	m_vrv->m_z_rot_text->ChangeValue(str);
-	//	if (m_vrv->m_rot_slider)
-	//	{
-	//		m_vrv->m_x_rot_sldr->SetThumbPosition(180);
-	//		m_vrv->m_y_rot_sldr->SetThumbPosition(180);
-	//		m_vrv->m_z_rot_sldr->SetThumbPosition(180);
-	//	}
-	//	else
-	//	{
-	//		m_vrv->m_x_rot_sldr->SetThumbPosition(std::round(m_rotx));
-	//		m_vrv->m_y_rot_sldr->SetThumbPosition(std::round(m_roty));
-	//		m_vrv->m_z_rot_sldr->SetThumbPosition(std::round(m_rotz));
-	//	}
-	//}
-
-	//if (m_linked_rot)
-	//{
-	//	if (!m_master_linked_view)
-	//		m_master_linked_view = this;
-	//}
 }
 
 int RenderCanvas::GetOrientation()

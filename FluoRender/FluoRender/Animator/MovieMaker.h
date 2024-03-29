@@ -179,9 +179,7 @@ public:
 	}
 	double GetCurProg() { return double(m_cur_frame) / (m_frame_num - 1); }
 	double GetCurrentTime() { return m_cur_time; }
-	int GetScrollPos() { return m_cur_frame; }
 	int GetScrollThumbSize() { return m_scroll_thumb_size; }
-	int GetScrollRange() { return m_frame_num + m_scroll_thumb_size - 1; }
 
 	//
 	void SetCropEnable(bool val);

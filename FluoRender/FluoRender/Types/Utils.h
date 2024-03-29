@@ -286,6 +286,16 @@ inline int RotateClamp(int v, int low, int high)
 	return v;
 }
 
+inline int RotateClamp2(int v, int low, int high)//inclusive
+{
+	int r = high - low;
+	if (v < low)
+		v += r * (-(v - low) / r + 1);
+	if (v > high)
+		v -= r * ((v - low) / r);
+	return v;
+}
+
 inline double RotateClamp(double v, int low, int high)
 {
 	int r = high - low;
