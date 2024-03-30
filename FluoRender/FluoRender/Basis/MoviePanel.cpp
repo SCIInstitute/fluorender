@@ -375,6 +375,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	const wxString& name) :
 	PropPanel(frame, frame, pos, size, style, name)
 {
+	m_running = true;
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
@@ -419,7 +420,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	sizer1->Add(m_movie_len_text, 0, wxALIGN_CENTER);
 	sizer1->Add(st2, 0, wxALIGN_CENTER);
 	//view
-	st = new wxStaticText(this, wxID_ANY, "Capture: ");
+	st = new wxStaticText(this, wxID_ANY, "For: ");
 	m_views_cmb = new wxComboBox(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
 	m_views_cmb->Bind(wxEVT_COMBOBOX, &MoviePanel::OnViewSelected, this);
@@ -652,28 +653,36 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		if (glbin_moviemaker.IsRunning())
 		{
-			if (glbin_moviemaker.IsReverse())
+			if (!m_running)
 			{
-				m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
-				m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(pause));
-			}
-			else
-			{
-				m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
-				m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv));
+				if (glbin_moviemaker.IsReverse())
+				{
+					m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+					m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(pause));
+				}
+				else
+				{
+					m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
+					m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv));
+				}
+				m_running = true;
 			}
 		}
 		else
 		{
-			if (glbin_settings.m_run_script)
+			if (m_running)
 			{
-				m_play_btn->SetBitmap(wxGetBitmapFromMemory(play_script));
-				m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv_script));
-			}
-			else
-			{
-				m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
-				m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv));
+				if (glbin_settings.m_run_script)
+				{
+					m_play_btn->SetBitmap(wxGetBitmapFromMemory(play_script));
+					m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv_script));
+				}
+				else
+				{
+					m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+					m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv));
+				}
+				m_running = false;
 			}
 		}
 	}
@@ -688,6 +697,8 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_x_rd->Enable(bval);
 		m_y_rd->Enable(bval);
 		m_z_rd->Enable(bval);
+		m_degree_text->Enable(bval);
+		m_rot_int_cmb->Enable(bval);
 	}
 	
 	if (update_all || FOUND_VALUE(gstMovRotAxis))

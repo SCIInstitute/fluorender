@@ -100,14 +100,6 @@ void MovieMaker::Start()
 	m_view->m_begin_play_frame = m_cur_frame;
 	flvr::TextureRenderer::maximize_uptime_ = true;
 	m_last_frame = 0;
-	if (!m_keyframe_enable
-		&& !IsPaused())
-	{
-		double rval[3];
-		m_view->GetRotations(rval[0], rval[1], rval[2]);
-		double r = rval[m_rot_axis];
-		m_starting_rot = fluo::RotateClamp(r, 0, 360);
-	}
 
 	get_stopwatch()->interval(1000.0 / m_fps);
 	get_stopwatch()->start();
@@ -607,21 +599,14 @@ void MovieMaker::SetClipEndFrame(int val)
 
 void MovieMaker::SetCurrentFrame(int val)
 {
+	if (m_rotate && !IsPaused())
+	{
+		double rval[3];
+		m_view->GetRotations(rval[0], rval[1], rval[2]);
+		double r = rval[m_rot_axis];
+		m_starting_rot = fluo::RotateClamp(r, 0, 360);
+	}
 	m_cur_frame = fluo::RotateClamp2(val, m_clip_start_frame, m_clip_end_frame);
-	//if (m_cur_frame < m_clip_start_frame)
-	//{
-	//	int len = m_clip_frame_num - 1;
-	//	int mul = (m_clip_start_frame - m_cur_frame) / len + 1;
-	//	int inc = mul * len;
-	//	m_cur_frame += inc;
-	//}
-	//if (m_cur_frame > m_clip_end_frame)
-	//{
-	//	int len = m_clip_frame_num - 1;
-	//	int mul = (m_cur_frame - m_clip_end_frame) / len + 1;
-	//	int inc = mul * len;
-	//	m_cur_frame -= inc;
-	//}
 	m_cur_time = (m_cur_frame - m_clip_start_frame) / m_fps;
 	SetRendering(false);
 }

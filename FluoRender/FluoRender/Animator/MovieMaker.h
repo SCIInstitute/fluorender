@@ -61,8 +61,7 @@ public:
 	}
 	bool IsPaused()
 	{
-		return m_cur_frame != m_clip_start_frame &&
-			m_cur_frame != m_clip_end_frame;
+		return m_cur_frame != 0;
 	}
 	void Play(bool back);
 	void Start();

@@ -92,6 +92,7 @@ public:
 	int GetScriptFiles(wxArrayString& list);
 
 private:
+	bool m_running;
 	RenderCanvas* m_view;
 	wxAuiNotebook* m_notebook;
 	RecorderDlg* m_advanced_movie;
