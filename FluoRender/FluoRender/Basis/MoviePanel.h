@@ -115,8 +115,8 @@ private:
 	wxButton *m_inc_time_btn;
 
 	wxButton *m_rewind_btn;
-	wxButton* m_play_inv_btn;
-	wxButton *m_play_btn;
+	wxToggleButton* m_play_inv_btn;
+	wxToggleButton *m_play_btn;
 	wxButton* m_forward_btn;
 	wxToggleButton* m_loop_btn;
 	wxTextCtrl *m_progress_text;

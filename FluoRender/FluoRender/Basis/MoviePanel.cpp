@@ -506,14 +506,14 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		wxDefaultPosition, bs);
 	m_rewind_btn->SetBitmap(wxGetBitmapFromMemory(rewind));
 	m_rewind_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnRewind, this);
-	m_play_inv_btn = new wxButton(this, wxID_ANY, "",
+	m_play_inv_btn = new wxToggleButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
 	m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv));
-	m_play_inv_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnPlayInv, this);
-	m_play_btn = new wxButton(this, wxID_ANY, "",
+	m_play_inv_btn->Bind(wxEVT_TOGGLEBUTTON, &MoviePanel::OnPlayInv, this);
+	m_play_btn = new wxToggleButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
 	m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
-	m_play_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnPlay, this);
+	m_play_btn->Bind(wxEVT_TOGGLEBUTTON, &MoviePanel::OnPlay, this);
 	m_forward_btn = new wxButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
 	m_forward_btn->SetBitmap(wxGetBitmapFromMemory(forward));
@@ -658,12 +658,16 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 				if (glbin_moviemaker.IsReverse())
 				{
 					m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+					m_play_btn->SetValue(false);
 					m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(pause));
+					m_play_inv_btn->SetValue(true);
 				}
 				else
 				{
 					m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
+					m_play_btn->SetValue(true);
 					m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv));
+					m_play_inv_btn->SetValue(false);
 				}
 				m_running = true;
 			}
@@ -675,12 +679,16 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 				if (glbin_settings.m_run_script)
 				{
 					m_play_btn->SetBitmap(wxGetBitmapFromMemory(play_script));
+					m_play_btn->SetValue(false);
 					m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv_script));
+					m_play_inv_btn->SetValue(false);
 				}
 				else
 				{
 					m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+					m_play_btn->SetValue(false);
 					m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv));
+					m_play_inv_btn->SetValue(false);
 				}
 				m_running = false;
 			}
