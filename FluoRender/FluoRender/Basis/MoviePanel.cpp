@@ -915,7 +915,7 @@ void MoviePanel::Rewind()
 {
 	glbin_moviemaker.Rewind();
 
-	fluo::ValueCollection vc = { gstCurrentFrame, gstMovCurTime, gstMovProgSlider };
+	fluo::ValueCollection vc = { gstCurrentFrame, gstMovCurTime, gstMovProgSlider, gstMovPlay };
 	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
 }
 
@@ -923,7 +923,7 @@ void MoviePanel::Forward()
 {
 	glbin_moviemaker.Forward();
 
-	fluo::ValueCollection vc = { gstCurrentFrame, gstMovCurTime, gstMovProgSlider };
+	fluo::ValueCollection vc = { gstCurrentFrame, gstMovCurTime, gstMovProgSlider, gstMovPlay };
 	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
 }
 
