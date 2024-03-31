@@ -93,7 +93,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstMeasureAgent "MeasureDlg"
 #define gstMeshPropAgent "MeshPropPanel"
 #define gstMeshTransAgent "MeshTransPanel"
-#define gstMovieAgent "MovieDlg"
+#define gstMovieAgent "MoviePanel"
 #define gstNoiseReduceAgent "NoiseReduceDlg"
 #define gstOutAdjustAgent "OutAdjustPanel"
 #define gstRecorderAgent "RecorderDlg"

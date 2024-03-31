@@ -1453,6 +1453,7 @@ void MainFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* 
 		v = GetView(0);
 
 	bool refresh = false;
+	fluo::ValueCollection vc;
 	wxProgressDialog *prg_diag = 0;
 	if (v)
 	{
@@ -1597,6 +1598,8 @@ void MainFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* 
 		}
 
 		//UpdateList();
+		vc.insert(gstListCtrl);
+		vc.insert(gstTreeCtrl);
 		if (vd_sel)
 			glbin.set_tree_selection(vd_sel->GetName().ToStdString());
 		else
@@ -1606,12 +1609,14 @@ void MainFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* 
 		//v->RefreshGL(39);
 
 		//v->m_vrv->FluoUpdate();
+		vc.insert(gstScaleFactor);
 
 		if (enable_4d)
 		{
 			glbin_moviemaker.SetTimeSeqEnable(true);
 			glbin_moviemaker.SetRotateEnable(false);
 			glbin_moviemaker.SetCurrentFrame(v->m_tseq_cur_num);
+			vc.insert(gstMovieAgent);
 			//m_movie_panel->FluoUpdate({ gstMovSeqMode, gstMovRotEnable, gstCurrentFrame });
 		}
 
@@ -1622,7 +1627,7 @@ void MainFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* 
 	if (refresh)
 	{
 		RefreshCanvases(false, { GetView(v) });
-		UpdateProps({ gstListCtrl, gstTreeCtrl, gstScaleFactor, gstMovSeqMode, gstMovRotEnable, gstCurrentFrame });
+		UpdateProps(vc);
 	}
 }
 

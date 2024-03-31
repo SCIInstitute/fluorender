@@ -582,7 +582,7 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (FOUND_VALUE(gstNull))
 		return;
 
-	bool update_all = vc.empty();
+	bool update_all = vc.empty() || FOUND_VALUE(gstMovieAgent);
 	bool bval;
 	int ival;
 

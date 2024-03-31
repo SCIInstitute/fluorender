@@ -5571,6 +5571,8 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 					vd->SetColor(white);
 			}
 		}
+		if (type == LOAD_TYPE_MPG)
+			vd->SetAlphaEnable(false);
 
 	}
 
