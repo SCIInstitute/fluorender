@@ -380,6 +380,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	wxEventBlocker blocker(this);
 	Freeze();
 	//SetDoubleBuffered(true);
+	wxIntegerValidator<unsigned int> vald_int;
 
 	if (m_frame)
 		m_view = m_frame->GetView(glbin_mov_def.m_view_idx);
@@ -463,13 +464,13 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	m_start_btn->SetBitmap(wxGetBitmapFromMemory(start));
 	m_start_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnStartFrameBtn, this);
 	m_start_frame_text = new wxTextCtrl(this, wxID_ANY, "1",
-		wxDefaultPosition, FromDIP(wxSize(39, -1)), wxTE_RIGHT);
+		wxDefaultPosition, FromDIP(wxSize(39, -1)), wxTE_RIGHT, vald_int);
 	f = m_start_frame_text->GetFont();
 	f.MakeLarger();
 	m_start_frame_text->SetFont(f);
 	m_start_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnStartFrameText, this);
 	m_end_frame_text = new wxTextCtrl(this, wxID_ANY, "10",
-		wxDefaultPosition, FromDIP(wxSize(39, -1)), wxTE_RIGHT);
+		wxDefaultPosition, FromDIP(wxSize(39, -1)), wxTE_RIGHT, vald_int);
 	m_end_frame_text->SetFont(f);
 	m_end_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnEndFrameText, this);
 	m_end_btn = new wxButton(this, wxID_ANY, "",
@@ -481,7 +482,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	m_dec_time_btn->SetBitmap(wxGetBitmapFromMemory(minus));
 	m_dec_time_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnDecFrame, this);
 	m_cur_frame_text = new wxTextCtrl(this, wxID_ANY, "0",
-		wxDefaultPosition, FromDIP(wxSize(50, -1)), wxTE_RIGHT);
+		wxDefaultPosition, FromDIP(wxSize(50, -1)), wxTE_RIGHT, vald_int);
 	m_cur_frame_text->SetFont(f);
 	m_cur_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnCurFrameText, this);
 	m_inc_time_btn = new wxButton(this, wxID_ANY, "",

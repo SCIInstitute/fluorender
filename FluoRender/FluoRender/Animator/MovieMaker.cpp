@@ -561,7 +561,7 @@ void MovieMaker::SetFullFrameNum(int val)
 
 void MovieMaker::SetClipStartEndFrames(int val1, int val2)
 {
-	m_clip_start_frame = val1;
+	m_clip_start_frame = val1 >= 0 ? val1 : 0;
 	m_clip_end_frame = val2;
 	if (m_clip_start_frame >= m_clip_end_frame)
 		m_clip_end_frame = m_clip_start_frame + 1;
@@ -575,7 +575,7 @@ void MovieMaker::SetClipStartEndFrames(int val1, int val2)
 
 void MovieMaker::SetClipStartFrame(int val)
 {
-	m_clip_start_frame = val;
+	m_clip_start_frame = val >= 0 ? val : 0;
 	if (m_clip_start_frame >= m_clip_end_frame)
 		m_clip_start_frame = m_clip_end_frame - 1;
 	m_clip_frame_num = m_clip_end_frame - m_clip_start_frame + 1;
