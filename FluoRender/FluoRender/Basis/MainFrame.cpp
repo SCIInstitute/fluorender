@@ -1586,7 +1586,8 @@ void MainFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* 
 					v->AddVolumeData(vd);
 					vd_sel = vd;
 
-					if (vd->GetReader() && vd->GetReader()->GetTimeNum()>1){
+					if (vd->GetReader() && vd->GetReader()->GetTimeNum()>1)
+					{
 						v->m_tseq_cur_num = vd->GetReader()->GetCurTime();
 						enable_4d = true;
 					}
@@ -1606,24 +1607,17 @@ void MainFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* 
 			glbin.set_tree_selection("");
 		v->InitView(INIT_BOUNDS|INIT_CENTER);
 		refresh = true;
-		//v->RefreshGL(39);
-
-		//v->m_vrv->FluoUpdate();
 		vc.insert(gstScaleFactor);
 
 		if (enable_4d)
 		{
 			glbin_moviemaker.SetSeqMode(1);
-			glbin_moviemaker.SetRotateEnable(false);
-			glbin_moviemaker.SetCurrentFrame(v->m_tseq_cur_num);
 			vc.insert(gstMovieAgent);
-			//m_movie_panel->FluoUpdate({ gstMovSeqMode, gstMovRotEnable, gstCurrentFrame });
 		}
 
 		delete prg_diag;
 	}
 
-	//v->RefreshGL(39);//added by Takashi
 	if (refresh)
 	{
 		RefreshCanvases(false, { GetView(v) });

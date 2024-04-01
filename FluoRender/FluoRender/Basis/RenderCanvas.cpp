@@ -5078,6 +5078,7 @@ void RenderCanvas::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool
 void RenderCanvas::Get3DBatRange(int &start_frame, int &end_frame)
 {
 	m_bat_folder = "";
+	int cur_t = -1;
 
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
@@ -5090,6 +5091,8 @@ void RenderCanvas::Get3DBatRange(int &start_frame, int &end_frame)
 			int vd_cur_frame = reader->GetCurBatch();
 			int vd_start_frame = -vd_cur_frame;
 			int vd_end_frame = reader->GetBatchNum() - 1 - vd_cur_frame;
+			if (cur_t < 0)
+				cur_t = vd_cur_frame;
 
 			if (i > 0)
 				m_bat_folder += "_";
@@ -5114,6 +5117,8 @@ void RenderCanvas::Get3DBatRange(int &start_frame, int &end_frame)
 	end_frame -= start_frame;
 	start_frame = 0;
 	m_end_all_frame = end_frame;
+	if (cur_t > -1)
+		m_tseq_cur_num = cur_t;
 }
 
 void RenderCanvas::Set3DBatFrame(int frame, int start_frame, int end_frame, bool rewind)

@@ -561,16 +561,36 @@ void MovieMaker::SetSeqMode(int val)
 		if (m_view)
 		{
 			m_view->Get4DSeqRange(sf, ef);
-			SetFullFrameNum(ef + 1);
-			SetClipStartEndFrames(0, ef);
+			if (ef > 0)
+			{
+				m_rotate = false;
+				SetCurrentFrame(m_view->m_tseq_cur_num);
+				SetFullFrameNum(ef + 1);
+				SetClipStartEndFrames(0, ef);
+			}
+			else
+			{
+				m_seq_mode = 0;
+				SetRotateEnable(true);
+			}
 		}
 		break;
 	case 2:
 		if (m_view)
 		{
 			m_view->Get3DBatRange(sf, ef);
-			SetFullFrameNum(ef + 1);
-			SetClipStartEndFrames(0, ef);
+			if (ef > 0)
+			{
+				m_rotate = false;
+				SetCurrentFrame(m_view->m_tseq_cur_num);
+				SetFullFrameNum(ef + 1);
+				SetClipStartEndFrames(0, ef);
+			}
+			else
+			{
+				m_seq_mode = 0;
+				SetRotateEnable(true);
+			}
 		}
 		break;
 	}

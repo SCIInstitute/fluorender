@@ -1201,7 +1201,7 @@ void MoviePanel::OnSequenceChecked(wxCommandEvent& event)
 		glbin_moviemaker.SetSeqMode(1);
 	else
 		glbin_moviemaker.SetSeqMode(0);
-	FluoUpdate({});
+	FluoUpdate({ gstMovRotEnable, gstMovSeqMode, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider });
 	event.Skip();
 }
 
@@ -1212,7 +1212,7 @@ void MoviePanel::OnBatchChecked(wxCommandEvent& event)
 		glbin_moviemaker.SetSeqMode(2);
 	else
 		glbin_moviemaker.SetSeqMode(0);
-	FluoUpdate({});
+	FluoUpdate({ gstMovRotEnable, gstMovSeqMode, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider });
 	event.Skip();
 }
 

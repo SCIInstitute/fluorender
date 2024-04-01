@@ -323,7 +323,7 @@ inline void FIND_FILES(std::wstring m_path_name,
 	std::wstring search_path = m_path_name.substr(0,
 		m_path_name.find_last_of(L'\\')) + L'\\';
 	if (std::string::npos == search_mask.find(m_path_name))
-		search_mask = m_path_name + search_mask;
+		search_mask = search_path + search_mask;
 	WIN32_FIND_DATAW FindFileData;
 	HANDLE hFind;
 	hFind = FindFirstFileW(search_mask.c_str(), &FindFileData);
