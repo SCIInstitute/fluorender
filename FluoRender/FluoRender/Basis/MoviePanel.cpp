@@ -722,32 +722,28 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	if (update_all || FOUND_VALUE(gstMovRotAng))
-		m_degree_text->SetValue(wxString::Format("%d", glbin_moviemaker.GetRotateDeg()));
+		m_degree_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetRotateDeg()));
 
 	if (update_all || FOUND_VALUE(gstMovIntrpMode))
 		m_rot_int_cmb->SetSelection(glbin_moviemaker.GetRotIntType());
 
 	if (update_all || FOUND_VALUE(gstMovSeqMode))
 	{
-		bval = glbin_moviemaker.GetTimeSeqEnable();
-		if (bval)
+		ival = glbin_moviemaker.GetSeqMode();
+		switch (ival)
 		{
-			ival = glbin_moviemaker.GetSeqMode();
-			if (ival == 1)
-			{
-				m_seq_chk->SetValue(true);
-				m_bat_chk->SetValue(false);
-			}
-			else if (ival == 2)
-			{
-				m_seq_chk->SetValue(false);
-				m_bat_chk->SetValue(true);
-			}
-		}
-		else
-		{
+		case 0:
 			m_seq_chk->SetValue(false);
 			m_bat_chk->SetValue(false);
+			break;
+		case 1:
+			m_seq_chk->SetValue(true);
+			m_bat_chk->SetValue(false);
+			break;
+		case 2:
+			m_seq_chk->SetValue(false);
+			m_bat_chk->SetValue(true);
+			break;
 		}
 	}
 
@@ -1203,7 +1199,8 @@ void MoviePanel::OnSequenceChecked(wxCommandEvent& event)
 	bool val = m_seq_chk->GetValue();
 	if (val)
 		glbin_moviemaker.SetSeqMode(1);
-	glbin_moviemaker.SetTimeSeqEnable(val);
+	else
+		glbin_moviemaker.SetSeqMode(0);
 	FluoUpdate({});
 	event.Skip();
 }
@@ -1213,7 +1210,8 @@ void MoviePanel::OnBatchChecked(wxCommandEvent& event)
 	int val = m_bat_chk->GetValue();
 	if (val)
 		glbin_moviemaker.SetSeqMode(2);
-	glbin_moviemaker.SetTimeSeqEnable(val);
+	else
+		glbin_moviemaker.SetSeqMode(0);
 	FluoUpdate({});
 	event.Skip();
 }

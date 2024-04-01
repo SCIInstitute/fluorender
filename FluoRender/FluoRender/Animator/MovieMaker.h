@@ -89,18 +89,9 @@ public:
 
 	void SetKeyframeEnable(bool val) { m_keyframe_enable = val; }
 	bool GetKeyframeEnable() { return m_keyframe_enable; }
-	void SetRotateEnable(bool val)
-	{
-		m_rotate = val;
-		if (!m_rotate && m_seq_mode == 0)
-			SetTimeSeqEnable(true);
-	}
+	void SetRotateEnable(bool val);
 	bool GetRotateEnable() { return m_rotate; }
-	void SetRotateAxis(int val)
-	{
-		if (val > -1 && val < 3)
-			m_rot_axis = val;
-	}
+	void SetRotateAxis(int val);
 	int GetRotateAxis() { return m_rot_axis; }
 	void SetRotateDeg(int val);
 	int GetRotateDeg() { return m_rot_deg; }
@@ -110,13 +101,7 @@ public:
 			m_rot_int_type = val;
 	}
 	int GetRotIntType() { return m_rot_int_type; }
-	void SetTimeSeqEnable(bool val);
-	bool GetTimeSeqEnable() { return m_time_seq; }
-	void SetSeqMode(int val)
-	{
-		if (val > -1 && val < 3)
-			m_seq_mode = val;
-	}
+	void SetSeqMode(int val);
 	int GetSeqMode() { return m_seq_mode; }
 	void SetFullFrameNum(int val);
 	int GetFullFrameNum()
@@ -201,7 +186,6 @@ private:
 	int m_rot_axis;	//0-x;1-y;2-z
 	int m_rot_deg;
 	int m_rot_int_type;//0-linear; 1-smooth
-	bool m_time_seq;
 	int m_seq_mode;//0:none; 1:4d; 2:bat
 
 	//movie properties

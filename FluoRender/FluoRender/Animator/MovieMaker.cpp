@@ -51,7 +51,6 @@ MovieMaker::MovieMaker() :
 	m_rot_axis = 1;
 	m_rot_deg = 360;
 	m_rot_int_type = 0;
-	m_time_seq = false;
 	m_seq_mode = 0;
 
 	m_full_frame_num = 361;
@@ -518,37 +517,62 @@ int MovieMaker::GetViewIndex()
 	return -1;
 }
 
+void MovieMaker::SetRotateEnable(bool val)
+{
+	if (val)
+	{
+		m_rotate = true;
+		SetRotateDeg(m_rot_deg);
+	}
+	else
+	{
+		if (m_seq_mode != 0)
+			m_rotate = false;
+	}
+}
+
+void MovieMaker::SetRotateAxis(int val)
+{
+	if (val > -1 && val < 3)
+		m_rot_axis = val;
+}
+
 void MovieMaker::SetRotateDeg(int val)
 {
 	m_rot_deg = val;
-	if (m_rotate)
+	if (m_rotate && m_seq_mode == 0)
 	{
 		SetFullFrameNum(val + 1);
 	}
 }
 
-void MovieMaker::SetTimeSeqEnable(bool val)
+void MovieMaker::SetSeqMode(int val)
 {
-	m_time_seq = val;
-	if (m_time_seq)
-	{
-		if (!m_seq_mode)
-			m_seq_mode = 1;
+	if (val > -1 && val < 3)
+		m_seq_mode = val;
 
-		if (m_seq_mode == 1)
-		{
-			if (m_view)
-				m_view->Get4DSeqRange(m_clip_start_frame, m_clip_end_frame);
-		}
-		else if (m_seq_mode == 2)
-		{
-			if (m_view)
-				m_view->Get3DBatRange(m_clip_start_frame, m_clip_end_frame);
-		}
-	}
-	else
+	int sf, ef;
+	switch (m_seq_mode)
 	{
-		SetClipStartEndFrames(0, m_rot_deg);
+	case 0:
+		SetRotateEnable(true);
+		break;
+	case 1:
+		if (m_view)
+		{
+			m_view->Get4DSeqRange(sf, ef);
+			SetFullFrameNum(ef + 1);
+			SetClipStartEndFrames(0, ef);
+		}
+		break;
+	case 2:
+		if (m_view)
+		{
+			m_view->Get3DBatRange(sf, ef);
+			SetFullFrameNum(ef + 1);
+			SetClipStartEndFrames(0, ef);
+		}
+		break;
 	}
 }
 

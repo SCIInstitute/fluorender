@@ -293,11 +293,15 @@ void VolumeDataDefault::Apply(VolumeData* vd)
 
 	if (resz > 1)
 		vd->SetShadingEnable(m_shading_enable);
+	else
+		vd->SetShadingEnable(false);
 	vd->SetLowShading(m_low_shading);
 	vd->SetHiShading(m_high_shading);
 
 	if (resz > 1)
 		vd->SetShadowEnable(m_shadow_enable);
+	else
+		vd->SetShadingEnable(false);
 	vd->SetShadowIntensity(m_shadow_intensity);
 
 	vd->SetSampleRateEnable(m_sample_rate_enable);

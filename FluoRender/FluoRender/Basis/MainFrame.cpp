@@ -1613,7 +1613,7 @@ void MainFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* 
 
 		if (enable_4d)
 		{
-			glbin_moviemaker.SetTimeSeqEnable(true);
+			glbin_moviemaker.SetSeqMode(1);
 			glbin_moviemaker.SetRotateEnable(false);
 			glbin_moviemaker.SetCurrentFrame(v->m_tseq_cur_num);
 			vc.insert(gstMovieAgent);
@@ -3360,7 +3360,7 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 	fconfig.Write("key frame enable", glbin_moviemaker.GetKeyframeEnable());
 	fconfig.Write("views_cmb", glbin_moviemaker.GetViewIndex());
 	fconfig.Write("rot_check", glbin_moviemaker.GetRotateEnable());
-	fconfig.Write("seq_check", glbin_moviemaker.GetTimeSeqEnable());
+	fconfig.Write("seq_mode", glbin_moviemaker.GetSeqMode());
 	fconfig.Write("rot_axis", glbin_moviemaker.GetRotateAxis());
 	fconfig.Write("rot_deg", glbin_moviemaker.GetRotateDeg());
 	fconfig.Write("movie_len", glbin_moviemaker.GetMovieLength());
@@ -4607,8 +4607,8 @@ void MainFrame::OpenProject(wxString& filename)
 		}
 		if (fconfig.Read("rot_check", &bVal))
 			glbin_moviemaker.SetRotateEnable(bVal);
-		if (fconfig.Read("seq_check", &bVal))
-			glbin_moviemaker.SetTimeSeqEnable(bVal);
+		if (fconfig.Read("seq_mode", &iVal))
+			glbin_moviemaker.SetSeqMode(iVal);
 		if (fconfig.Read("x_rd", &bVal))
 		{
 			if (bVal)

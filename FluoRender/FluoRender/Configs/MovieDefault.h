@@ -55,7 +55,6 @@ public:
 	int m_rot_axis;	//0-x;1-y;2-z
 	int m_rot_deg;
 	int m_rot_int_type;//0-linear; 1-smooth
-	bool m_time_seq;
 	int m_seq_mode;//0:none; 1:4d; 2:bat
 
 	//movie properties

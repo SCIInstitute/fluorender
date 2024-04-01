@@ -41,7 +41,6 @@ MovieDefault::MovieDefault()
 	m_rot_axis = 1;
 	m_rot_deg = 360;
 	m_rot_int_type = 0;
-	m_time_seq = false;
 	m_seq_mode = 0;
 
 	m_full_frame_num = 361;
@@ -81,7 +80,6 @@ void MovieDefault::Read(wxFileConfig& f)
 	f.Read("rot axis", &m_rot_axis, 1);
 	f.Read("rot deg", &m_rot_deg, 360);
 	f.Read("rot int type", &m_rot_int_type, 0);
-	f.Read("time seq", &m_time_seq, false);
 	f.Read("seq mode", &m_seq_mode, 0);
 
 	f.Read("full frame num", &m_full_frame_num, 361);
@@ -115,7 +113,6 @@ void MovieDefault::Save(wxFileConfig& f)
 	f.Write("rot axis", m_rot_axis);
 	f.Write("rot deg", m_rot_deg);
 	f.Write("rot int type", m_rot_int_type);
-	f.Write("time seq", m_time_seq);
 	f.Write("seq mode", m_seq_mode);
 
 	f.Write("full frame num", m_full_frame_num);
@@ -146,7 +143,6 @@ void MovieDefault::Set(MovieMaker* mm)
 	m_rot_axis = mm->GetRotateAxis();
 	m_rot_deg = mm->GetRotateDeg();
 	m_rot_int_type = mm->GetRotIntType();
-	m_time_seq = mm->GetTimeSeqEnable();
 	m_seq_mode = mm->GetSeqMode();
 
 	m_full_frame_num = mm->GetFullFrameNum();
@@ -177,15 +173,14 @@ void MovieDefault::Apply(MovieMaker* mm)
 	mm->SetRotateAxis(m_rot_axis);
 	mm->SetRotateDeg(m_rot_deg);
 	mm->SetRotIntType(m_rot_int_type);
-	mm->SetTimeSeqEnable(m_time_seq);
-	mm->SetSeqMode(m_seq_mode);
+	//mm->SetSeqMode(m_seq_mode);
 
-	mm->SetFullFrameNum(m_full_frame_num);
-	mm->SetMovieLength(m_movie_len);
+	//mm->SetFullFrameNum(m_full_frame_num);
+	//mm->SetMovieLength(m_movie_len);
 	mm->SetFps(m_fps);
-	mm->SetClipStartEndFrames(m_clip_start_frame, m_clip_end_frame);
-	mm->SetCurrentFrame(m_cur_frame);
-	mm->SetCurrentTime(m_cur_time);
+	//mm->SetClipStartEndFrames(m_clip_start_frame, m_clip_end_frame);
+	//mm->SetCurrentFrame(m_cur_frame);
+	//mm->SetCurrentTime(m_cur_time);
 
 	mm->SetCropEnable(m_crop);
 	mm->SetCropX(m_crop_x);
