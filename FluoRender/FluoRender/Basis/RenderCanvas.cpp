@@ -4915,6 +4915,8 @@ void RenderCanvas::ReloadVolumeData(int frame)
 	for (i = 0; i < (int)m_vd_pop_list.size(); i++)
 	{
 		VolumeData* vd = m_vd_pop_list[i];
+		if (vd)
+			m_frame->DeleteProps(2, vd->GetName());
 		if (vd && vd->GetReader())
 		{
 			flvr::Texture *tex = vd->GetTexture();
@@ -5017,9 +5019,9 @@ void RenderCanvas::ReloadVolumeData(int frame)
 		if (vd)
 			glbin.set_tree_selection(vd->GetName().ToStdString());
 		else
-			glbin.set_tree_selection("");
-		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
-	}
+	glbin.set_tree_selection("");
+	m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
+}
 }
 
 void RenderCanvas::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind)

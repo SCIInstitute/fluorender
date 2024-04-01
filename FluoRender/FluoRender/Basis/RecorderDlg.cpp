@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <RenderViewPanel.h>
+#include <MoviePanel.h>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include "key.xpm"
@@ -452,7 +453,6 @@ void KeyListCtrl::OnScroll(wxMouseEvent& event)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BEGIN_EVENT_TABLE(RecorderDlg, wxScrolledWindow)
-	EVT_BUTTON(ID_AutoKeyBtn, RecorderDlg::OnAutoKey)
 	EVT_BUTTON(ID_SetKeyBtn, RecorderDlg::OnInsKey)
 	EVT_BUTTON(ID_InsKeyBtn, RecorderDlg::OnInsKey)
 	EVT_BUTTON(ID_DelKeyBtn, RecorderDlg::OnDelKey)
@@ -465,7 +465,7 @@ END_EVENT_TABLE()
 RecorderDlg::RecorderDlg(MainFrame* frame, wxWindow* parent)
 : wxScrolledWindow(parent, wxID_ANY,
 wxDefaultPosition,
-frame->FromDIP(wxSize(450, 650)),
+wxDefaultSize,
 0, "RecorderDlg"),
 m_frame(frame),
 m_view(0)
@@ -583,12 +583,6 @@ void RecorderDlg::GenKey(int type)
 	m_keylist->Update();
 }
 
-void RecorderDlg::OnAutoKey(wxCommandEvent &event)
-{
-	int sel = m_auto_key_cmb->GetSelection();
-	GenKey(sel);
-}
-
 void RecorderDlg::OnSetKey(wxCommandEvent &event)
 {
 	wxString str = m_duration_text->GetValue();
@@ -598,6 +592,9 @@ void RecorderDlg::OnSetKey(wxCommandEvent &event)
 	InsertKey(-1, duration, interpolation);
 
 	m_keylist->Update();
+
+	glbin_moviemaker.SetFullFrameNum(glbin_interpolator.GetFrameNum());
+	m_movie_panel->FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame });
 }
 
 void RecorderDlg::OnInsKey(wxCommandEvent &event)
@@ -834,16 +831,23 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	FlKeyGroup* group = glbin_interpolator.GetKeyGroup(glbin_interpolator.GetLastIndex());
 	if (group)
 		group->type = interpolation;
+
+	glbin_moviemaker.SetFullFrameNum(glbin_interpolator.GetFrameNum());
+	m_movie_panel->FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame });
 }
 
 void RecorderDlg::OnDelKey(wxCommandEvent &event)
 {
 	m_keylist->DeleteSel();
+	glbin_moviemaker.SetFullFrameNum(glbin_interpolator.GetFrameNum());
+	m_movie_panel->FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame });
 }
 
 void RecorderDlg::OnDelAll(wxCommandEvent &event)
 {
 	m_keylist->DeleteAll();
+	glbin_moviemaker.SetFullFrameNum(glbin_interpolator.GetFrameNum());
+	m_movie_panel->FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame });
 }
 
 //ch1

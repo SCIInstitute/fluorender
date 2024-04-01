@@ -37,6 +37,7 @@ using namespace std;
 class MainFrame;
 class RenderCanvas;
 class RecorderDlg;
+class MoviePanel;
 class KeyListCtrl : public wxListCtrl
 {
 	enum
@@ -118,7 +119,6 @@ public:
 		ID_InsKeyBtn,
 		ID_DelAllBtn,
 		ID_AutoKeyCmb,
-		ID_AutoKeyBtn,
 		ID_CamLockChk,
 		ID_CamLockCmb,
 		ID_CamLockBtn
@@ -133,6 +133,10 @@ public:
 	{
 		return m_view;
 	}
+	void SetMoviePanel(MoviePanel* mp)
+	{
+		m_movie_panel = mp;
+	}
 	void UpdateList()
 	{
 		m_keylist->Update();
@@ -143,6 +147,7 @@ public:
 
 private:
 	MainFrame* m_frame;
+	MoviePanel* m_movie_panel;
 	//current view
 	RenderCanvas* m_view;
 
@@ -177,7 +182,6 @@ private:
 
 	void OnCh1Check(wxCommandEvent &event);
 	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
-	void OnAutoKey(wxCommandEvent &event);
 	void OnSetKey(wxCommandEvent &event);
 	void OnInsKey(wxCommandEvent &event);
 	void OnDelKey(wxCommandEvent &event);

@@ -194,6 +194,14 @@ elseif(UNIX OR MINGW)
   string(REGEX REPLACE "wx_gtk3u_scintilla" "wxscintilla"
     wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
 endif()
+#copy wxwidgets patch to its source dir
+#need to rebuild wxWidgets after this
+file(COPY ${FluoRender_SOURCE_DIR}/wxWidgets/include/wx/aui/auibook.h
+  DESTINATION ${wxWidgets_ROOT_DIR}/include/wx/aui)
+file(COPY ${FluoRender_SOURCE_DIR}/wxWidgets/src/aui/auibook.cpp
+  DESTINATION ${wxWidgets_ROOT_DIR}/src/aui)
+
+
 
 # OpenGL
 set(OpenGL_GL_PREFERENCE GLVND)
@@ -885,17 +893,6 @@ else()
     ${OpenCV_LIBS}
   )
 endif()
-
-#copy wxwidgets patch to its source dir
-#need to rebuild wxWidgets after this
-#add_custom_command(TARGET FluoRender POST_BUILD
-#  COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
-#  "${FluoRender_SOURCE_DIR}/wxWidgets/include/wx/aui"
-#  "${wxWidgets_ROOT_DIR}/include/wx/aui")
-#add_custom_command(TARGET FluoRender POST_BUILD
-#  COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
-#  "${FluoRender_SOURCE_DIR}/wxWidgets/src/aui"
-#  "${wxWidgets_ROOT_DIR}/src/aui")
 
 # copy Java code dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD

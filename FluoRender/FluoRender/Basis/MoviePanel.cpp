@@ -111,7 +111,7 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 	sizer5->Add(m_seq_chk, 0, wxALIGN_CENTER);
 
 	wxBoxSizer* sizer6 = new wxBoxSizer(wxHORIZONTAL);
-	m_bat_chk = new wxCheckBox(page, wxID_ANY, "Batch Process");
+	m_bat_chk = new wxCheckBox(page, wxID_ANY, "Batch (Files in the same folder)");
 	m_bat_chk->Bind(wxEVT_CHECKBOX, &MoviePanel::OnBatchChecked, this);
 	sizer6->Add(10, 10, 0);
 	sizer6->Add(m_bat_chk, 0, wxALIGN_CENTER);
@@ -141,15 +141,22 @@ wxWindow* MoviePanel::CreateAdvancedPage(wxWindow *parent)
 {
 	wxScrolledWindow* page = new wxScrolledWindow(parent);
 
+	//check
+	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	m_keyframe_chk = new wxCheckBox(page, wxID_ANY, "Enable keyframe movie");
 	m_keyframe_chk->Bind(wxEVT_CHECKBOX, &MoviePanel::OnKeyframeChk, this);
+	sizer1->Add(5, 5);
+	sizer1->Add(m_keyframe_chk, 0, wxALIGN_CENTER);
+
+	//key list
 	m_advanced_movie = new RecorderDlg(m_frame, page);
 	m_frame->SetRecorderDlg(m_advanced_movie);
+	m_advanced_movie->SetMoviePanel(this);
 
 	//vertical sizer
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
 	sizerv->Add(5, 5, 0);
-	sizerv->Add(m_keyframe_chk, 0, wxALIGN_CENTER);
+	sizerv->Add(sizer1, 0, wxEXPAND);
 	sizerv->Add(m_advanced_movie, 1, wxEXPAND);
 	//set the page
 	page->SetSizer(sizerv);
@@ -675,24 +682,21 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		}
 		else
 		{
-			if (m_running)
+			if (glbin_settings.m_run_script)
 			{
-				if (glbin_settings.m_run_script)
-				{
-					m_play_btn->SetBitmap(wxGetBitmapFromMemory(play_script));
-					m_play_btn->SetValue(false);
-					m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv_script));
-					m_play_inv_btn->SetValue(false);
-				}
-				else
-				{
-					m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
-					m_play_btn->SetValue(false);
-					m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv));
-					m_play_inv_btn->SetValue(false);
-				}
-				m_running = false;
+				m_play_btn->SetBitmap(wxGetBitmapFromMemory(play_script));
+				m_play_btn->SetValue(false);
+				m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv_script));
+				m_play_inv_btn->SetValue(false);
 			}
+			else
+			{
+				m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+				m_play_btn->SetValue(false);
+				m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv));
+				m_play_inv_btn->SetValue(false);
+			}
+			m_running = false;
 		}
 	}
 
@@ -967,7 +971,7 @@ void MoviePanel::SetKeyframeMovie(bool val)
 {
 	glbin_moviemaker.SetKeyframeEnable(val);
 
-	FluoUpdate({ gstCaptureParam });
+	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovCurTime });
 }
 
 void MoviePanel::GenKey()
@@ -1003,7 +1007,7 @@ void MoviePanel::OnNotebookPage(wxAuiNotebookEvent& event)
 	else if (sel == 1)
 		glbin_moviemaker.SetKeyframeEnable(true);
 
-	FluoUpdate({ gstCaptureParam });
+	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovCurTime });
 	event.Skip();
 }
 
@@ -1321,17 +1325,7 @@ void MoviePanel::OnRunScriptChk(wxCommandEvent& event)
 		glbin_settings.m_script_file = str;
 		m_view->SetScriptFile(str);
 	}
-	if (run_script)
-	{
-		m_play_btn->SetBitmap(wxGetBitmapFromMemory(play_script));
-		m_notebook->SetPageText(4, "Script (Enabled)");
-	}
-	else
-	{
-		m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
-		m_notebook->SetPageText(4, "Script");
-	}
-	m_view->RefreshGL(39);
+	FluoRefresh(false, 2, { gstMovPlay }, { glbin_mov_def.m_view_idx });
 	event.Skip();
 }
 

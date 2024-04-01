@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <MoviePanel.h>
+#include <Animator/Interpolator.h>
 #include <StopWatch.hpp>
 #include <StopWatchFactory.hpp>
 
@@ -515,6 +516,34 @@ int MovieMaker::GetViewIndex()
 	}
 
 	return -1;
+}
+
+void MovieMaker::SetKeyframeEnable(bool val)
+{
+	m_keyframe_enable = val;
+	if (m_keyframe_enable)
+	{
+		//get settings from interpolator
+		int n = glbin_interpolator.GetFrameNum();
+		SetFullFrameNum(n + 1);
+	}
+	else
+	{
+		//get settings from basic
+		switch (m_seq_mode)
+		{
+		case 0:
+			SetRotateEnable(true);
+			break;
+		case 1:
+			SetSeqMode(1);
+			break;
+		case 2:
+			SetSeqMode(2);
+			break;
+		}
+	}
+	SetCurrentFrame(m_clip_start_frame);
 }
 
 void MovieMaker::SetRotateEnable(bool val)

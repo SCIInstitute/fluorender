@@ -87,7 +87,7 @@ public:
 	void SetLoop(bool val) { m_loop = val; }
 	bool GetLoop() { return m_loop; }
 
-	void SetKeyframeEnable(bool val) { m_keyframe_enable = val; }
+	void SetKeyframeEnable(bool val);
 	bool GetKeyframeEnable() { return m_keyframe_enable; }
 	void SetRotateEnable(bool val);
 	bool GetRotateEnable() { return m_rotate; }
@@ -130,7 +130,13 @@ public:
 	void SetCurrentFrame(int val);
 	int GetCurrentFrame() { return m_cur_frame; }
 	void SetCurrentTime(double val);
-	double GetCurProg() { return double(m_cur_frame) / (m_full_frame_num - 1); }
+	double GetCurProg()
+	{
+		if (m_keyframe_enable)
+			return m_cur_frame;
+		else
+			return double(m_cur_frame) / (m_full_frame_num - 1);
+	}
 	double GetCurrentTime() { return m_cur_time; }
 	int GetScrollThumbSize() { return m_scroll_thumb_size; }
 

@@ -2530,8 +2530,32 @@ bool wxAuiNotebook::IsSplit()
 
 void wxAuiNotebook::OnSize(wxSizeEvent& evt)
 {
-    UpdateHintWindowSize();
+    if (IsSplit())
+    {
+        // choose a split size
+        wxSize split_size = CalculateNewSplitSize();
 
+        wxAuiPaneInfoArray& all_panes = m_mgr.GetAllPanes();
+        size_t i, pane_count = all_panes.GetCount();
+        for (i = 0; i < pane_count; ++i)
+        {
+            wxAuiPaneInfo& pane = all_panes.Item(i);
+            if (pane.name == wxT("dummy"))
+                continue;
+            pane.MinSize(split_size).MaxSize(split_size);
+            pane.Fixed();
+        }
+        m_mgr.Update();
+        for (i = 0; i < pane_count; ++i)
+        {
+            wxAuiPaneInfo& pane = all_panes.Item(i);
+            if (pane.name == wxT("dummy"))
+                continue;
+            pane.Resizable();
+        }
+        m_mgr.Update();
+    }
+    UpdateHintWindowSize();
     evt.Skip();
 }
 
