@@ -400,8 +400,8 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
 	m_notebook->AddPage(CreateSimplePage(m_notebook), "Basic", true);
 	m_notebook->AddPage(CreateAdvancedPage(m_notebook), "Advanced");
-	m_notebook->AddPage(CreateAutoKeyPage(m_notebook), "Auto Key");
-	m_notebook->AddPage(CreateCroppingPage(m_notebook), "Cropping");
+	m_notebook->AddPage(CreateAutoKeyPage(m_notebook), "AutoGen");
+	m_notebook->AddPage(CreateCroppingPage(m_notebook), "Crop");
 	m_notebook->AddPage(CreateScriptPage(m_notebook), "Script");
 	m_notebook->Bind(wxEVT_AUINOTEBOOK_PAGE_CHANGED, &MoviePanel::OnNotebookPage, this);
 
