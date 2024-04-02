@@ -33,11 +33,69 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/listctrl.h>
 #include <wx/spinbutt.h>
 #include <wx/tglbtn.h>
+#include <vector>
+#include <string>
 
 class MainFrame;
 class RenderCanvas;
-class RecorderDlg;
 class wxUndoableScrollBar;
+
+class KeyListCtrl : public wxListCtrl
+{
+public:
+	KeyListCtrl(wxWindow* parent, MainFrame* frame,
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = wxLC_REPORT | wxLC_SINGLE_SEL);
+	~KeyListCtrl();
+
+	void Append(int id, int time, int duration, int interp, std::string& description);
+	void DeleteSel();
+	void DeleteAll();
+	wxString GetText(long item, int col);
+	void SetText(long item, int col, wxString& str);
+	void Update();
+	void UpdateText();
+
+private:
+	MainFrame* m_frame;
+	wxImageList* m_images;
+
+	wxTextCtrl* m_frame_text;
+	wxTextCtrl* m_duration_text;
+	wxComboBox* m_interpolation_cmb;
+	wxTextCtrl* m_description_text;
+
+	long m_editing_item;
+	long m_dragging_to_item;
+
+private:
+	void EndEdit(bool update = true);
+
+private:
+	void OnAct(wxListEvent& event);
+	void OnSelection(wxListEvent& event);
+	void OnEndSelection(wxListEvent& event);
+	void OnFrameText(wxCommandEvent& event);
+	void OnDurationText(wxCommandEvent& event);
+	void OnInterpoCmb(wxCommandEvent& event);
+	void OnDescritionText(wxCommandEvent& event);
+	void OnBeginDrag(wxListEvent& event);
+	void OnDragging(wxMouseEvent& event);
+	void OnEndDrag(wxMouseEvent& event);
+
+	void OnKeyDown(wxKeyEvent& event);
+	void OnKeyUp(wxKeyEvent& event);
+	void OnScroll(wxScrollWinEvent& event);
+	void OnMouseScroll(wxMouseEvent& event);
+
+protected: //Possible TODO
+	wxSize GetSizeAvailableForScrollTarget(const wxSize& size)
+	{
+		return size - GetEffectiveMinSize();
+	}
+};
+
 class MoviePanel : public PropPanel
 {
 	enum
@@ -82,7 +140,8 @@ public:
 
 	//keyframe movie
 	void SetKeyframeMovie(bool val);
-	void GenKey();
+	void GenKey(int val);
+	void InsertKey(int index, double duration, int interpolation);
 
 	//crop
 	void SetCropEnable(bool val);
@@ -95,7 +154,6 @@ private:
 	bool m_running;
 	RenderCanvas* m_view;
 	wxAuiNotebook* m_notebook;
-	RecorderDlg* m_advanced_movie;
 
 	//common controls
 	wxTextCtrl *m_fps_text;
@@ -140,6 +198,25 @@ private:
 
 	//key frame
 	wxCheckBox* m_keyframe_chk;
+	//recorder controls
+	//list ctrl
+	KeyListCtrl* m_keylist;
+	//default duration
+	wxTextCtrl* m_duration_text;
+	//default interpolation
+	wxComboBox* m_interpolation_cmb;
+	//set key
+	wxButton* m_set_key_btn;
+	//insert key
+	//wxButton *m_insert_key_btn;
+	//delete key
+	wxButton* m_del_key_btn;
+	//delete all keys
+	wxButton* m_del_all_btn;
+	//lock cam center object
+	wxCheckBox* m_cam_lock_chk;
+	wxComboBox* m_cam_lock_cmb;
+	wxButton* m_cam_lock_btn;
 
 	//script
 	wxCheckBox *m_run_script_chk;
@@ -213,6 +290,14 @@ private:
 
 	//keyframe movie
 	void OnKeyframeChk(wxCommandEvent& event);
+	void OnDurationText(wxCommandEvent& event);
+	void OnInterpolation(wxCommandEvent& event);
+	void OnInsKey(wxCommandEvent& event);
+	void OnDelKey(wxCommandEvent& event);
+	void OnDelAll(wxCommandEvent& event);
+	void OnCamLockChk(wxCommandEvent& event);
+	void OnCamLockCmb(wxCommandEvent& event);
+	void OnCamLockBtn(wxCommandEvent& event);
 
 	//auto key
 	void OnGenKey(wxCommandEvent& event);

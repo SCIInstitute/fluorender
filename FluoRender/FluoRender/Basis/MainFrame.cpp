@@ -49,7 +49,6 @@ DEALINGS IN THE SOFTWARE.
 #include <CountingDlg.h>
 #include <ConvertDlg.h>
 #include <ColocalizationDlg.h>
-#include <RecorderDlg.h>
 #include <MeasureDlg.h>
 #include <TraceDlg.h>
 #include <OclDlg.h>
@@ -1937,8 +1936,6 @@ void MainFrame::OnSelection(int type,
 		m_noise_cancelling_dlg->GetSettings(view);
 	if (m_ocl_dlg)
 		m_ocl_dlg->GetSettings(view);
-	if (m_recorder_dlg)
-		m_recorder_dlg->GetSettings(view);
 	if (m_trace_dlg)
 		m_trace_dlg->GetSettings(view);
 
@@ -2368,17 +2365,6 @@ ColocalizationDlg* MainFrame::GetColocalizationDlg()
 	return m_colocalization_dlg;
 }
 
-//recorder dialog
-void MainFrame::SetRecorderDlg(RecorderDlg* dlg)
-{
-	m_recorder_dlg = dlg;
-}
-
-RecorderDlg* MainFrame::GetRecorderDlg()
-{
-	return m_recorder_dlg;
-}
-
 //measure dialog
 MeasureDlg* MainFrame::GetMeasureDlg()
 {
@@ -2762,11 +2748,8 @@ void MainFrame::OnNewProject(wxCommandEvent& event)
 	glbin_mov_def.Apply(&glbin_moviemaker);
 	m_trace_dlg->GetSettings(GetView(0));
 	glbin_interpolator.Clear();
-	m_recorder_dlg->UpdateList();
-	//UpdateList();
-	//UpdateTree();
 	RefreshCanvases(false);
-	UpdateProps({ gstListCtrl, gstTreeCtrl });
+	UpdateProps({ gstListCtrl, gstTreeCtrl, gstParamList });
 
 }
 
@@ -4967,7 +4950,7 @@ void MainFrame::OpenProject(wxString& filename)
 				key_list->push_back(key_group);
 			}
 		}
-		m_recorder_dlg->UpdateList();
+		//m_recorder_dlg->UpdateList();
 	}
 
 	if (m_cur_sel_type != -1)

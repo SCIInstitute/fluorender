@@ -37,7 +37,6 @@ DEALINGS IN THE SOFTWARE.
 #include <TreePanel.h>
 #include <ListPanel.h>
 #include <MoviePanel.h>
-#include <RecorderDlg.h>
 #include <ComponentDlg.h>
 #include <ClipPlanePanel.h>
 #include <TraceDlg.h>
@@ -4783,11 +4782,12 @@ void RenderCanvas::SetParams(double t)
 		clip_view->SetVolumeData(m_frame->GetCurSelVol());
 		clip_view->SetRenderView(this);
 	}
+	vc.insert(gstParamListSelect);
 	if (m_frame)
 	{
 		//m_frame->UpdateTree(m_cur_vol ? m_cur_vol->GetName() : wxString(""));
-		int index = glbin_interpolator.GetKeyIndexFromTime(t);
-		m_frame->GetRecorderDlg()->SetSelection(index);
+		//int index = glbin_interpolator.GetKeyIndexFromTime(t);
+		//m_frame->GetRecorderDlg()->SetSelection(index);
 		m_frame->GetMeasureDlg()->GetSettings(this);
 		//update ruler intensity values
 		glbin_ruler_handler.ProfileAll();
@@ -10958,8 +10958,9 @@ wxString RenderCanvas::GetOGLVersion() {
 	return m_GLversion;
 }
 
-void RenderCanvas::SetLockCenter(int type)
+void RenderCanvas::SetLockCenter()
 {
+	int type = glbin_moviemaker.GetCamLockType();
 	switch (type)
 	{
 	case 1:

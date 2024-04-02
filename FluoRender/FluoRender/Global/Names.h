@@ -96,7 +96,6 @@ DEALINGS IN THE SOFTWARE.
 #define gstMovieAgent "MoviePanel"
 #define gstNoiseReduceAgent "NoiseReduceDlg"
 #define gstOutAdjustAgent "OutAdjustPanel"
-#define gstRecorderAgent "RecorderDlg"
 #define gstRenderCanvasAgent "Render View:"//plus a serial number
 #define gstRenderFrameAgent "RenderFrame"
 #define gstRenderviewAgent "RenderviewPanel"//plus a serial number
@@ -679,6 +678,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstMovSliderRange "mov slider range"
 #define gstMovCurrentPage "mov current page"
 #define gstAutoKeyIndex "auto key index"
+#define gstParamList "param list"
+#define gstParamListSelect "param list sel"
 //noise reduct agent
 #define gstEnhance "enhance"
 #define gstEqualizeSavedR "equalize saved r"

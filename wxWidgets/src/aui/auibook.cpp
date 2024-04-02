@@ -2555,6 +2555,7 @@ void wxAuiNotebook::OnSize(wxSizeEvent& evt)
         }
         m_mgr.Update();
     }
+    DoSizing();
     UpdateHintWindowSize();
     evt.Skip();
 }

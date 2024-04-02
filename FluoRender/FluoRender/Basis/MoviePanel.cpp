@@ -27,7 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <MoviePanel.h>
 #include <Global/Global.h>
-#include <RecorderDlg.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <RenderViewPanel.h>
@@ -38,8 +37,422 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stdpaths.h>
 #include <png_resource.h>
 #include <img/icons.h>
+#include <key.xpm>
 #include <Debug.h>
 
+KeyListCtrl::KeyListCtrl(
+	wxWindow* parent,
+	MainFrame* frame,
+	const wxPoint& pos,
+	const wxSize& size,
+	long style) :
+	wxListCtrl(parent, wxID_ANY, pos, size, style),
+	m_frame(frame),
+	m_editing_item(-1),
+	m_dragging_to_item(-1)
+{
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+	//SetDoubleBuffered(true);
+
+	//validator: integer
+	wxIntegerValidator<unsigned int> vald_int;
+
+	wxListItem itemCol;
+	itemCol.SetText("ID");
+	this->InsertColumn(0, itemCol);
+	SetColumnWidth(0, 40);
+	itemCol.SetText("Frame");
+	this->InsertColumn(1, itemCol);
+	SetColumnWidth(1, 60);
+	itemCol.SetText("Duration");
+	this->InsertColumn(2, itemCol);
+	SetColumnWidth(2, 80);
+	itemCol.SetText("Interpolation");
+	this->InsertColumn(3, itemCol);
+	SetColumnWidth(3, 80);
+	itemCol.SetText("Description");
+	this->InsertColumn(4, itemCol);
+	SetColumnWidth(4, 80);
+
+	m_images = new wxImageList(16, 16, true);
+	wxIcon icon = wxIcon(key_xpm);
+	m_images->Add(icon);
+	AssignImageList(m_images, wxIMAGE_LIST_SMALL);
+
+	//frame edit
+	m_frame_text = new wxTextCtrl(this, wxID_ANY, "",
+		wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, vald_int);
+	m_frame_text->Hide();
+	m_frame_text->Bind(wxEVT_TEXT, &KeyListCtrl::OnFrameText, this);
+	//duration edit
+	m_duration_text = new wxTextCtrl(this, wxID_ANY, "",
+		wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, vald_int);
+	m_duration_text->Hide();
+	m_duration_text->Bind(wxEVT_TEXT, &KeyListCtrl::OnDurationText, this);
+	//interpolation combo box
+	m_interpolation_cmb = new wxComboBox(this, wxID_ANY, "",
+		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+	std::vector<wxString> list = { "Linear", "Smooth" };
+	m_interpolation_cmb->Append(list);
+	m_interpolation_cmb->Hide();
+	m_interpolation_cmb->Bind(wxEVT_COMBOBOX, &KeyListCtrl::OnInterpoCmb, this);
+	//description edit
+	m_description_text = new wxTextCtrl(this, wxID_ANY, "",
+		wxDefaultPosition, wxDefaultSize);
+	m_description_text->Hide();
+	m_description_text->Bind(wxEVT_TEXT, &KeyListCtrl::OnDescritionText, this);
+
+	//event handling
+	Bind(wxEVT_LIST_ITEM_ACTIVATED, &KeyListCtrl::OnAct, this);
+	Bind(wxEVT_LIST_ITEM_SELECTED, &KeyListCtrl::OnSelection, this);
+	Bind(wxEVT_LIST_ITEM_DESELECTED, &KeyListCtrl::OnEndSelection, this);
+	Bind(wxEVT_KEY_DOWN, &KeyListCtrl::OnKeyDown, this);
+	Bind(wxEVT_KEY_UP, &KeyListCtrl::OnKeyUp, this);
+	Bind(wxEVT_LIST_BEGIN_DRAG, &KeyListCtrl::OnBeginDrag, this);
+	Bind(wxEVT_SCROLLWIN_THUMBTRACK, &KeyListCtrl::OnScroll, this);
+	Bind(wxEVT_MOUSEWHEEL, &KeyListCtrl::OnMouseScroll, this);
+}
+
+KeyListCtrl::~KeyListCtrl()
+{
+}
+
+void KeyListCtrl::Append(int id, int time, int duration, int interp, string& description)
+{
+	long tmp = InsertItem(GetItemCount(), wxString::Format("%d", id), 0);
+	SetItem(tmp, 1, wxString::Format("%d", time));
+	SetItem(tmp, 2, wxString::Format("%d", duration));
+	SetItem(tmp, 3, interp == 0 ? "Linear" : "Smooth");
+	SetItem(tmp, 4, description);
+}
+
+void KeyListCtrl::DeleteSel()
+{
+	long item = GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+	if (item == -1)
+		return;
+	wxString str = GetItemText(item);
+	long id;
+	str.ToLong(&id);
+
+	glbin_interpolator.RemoveKey(id);
+	Update();
+}
+
+void KeyListCtrl::DeleteAll()
+{
+	glbin_interpolator.Clear();
+	Update();
+}
+
+void KeyListCtrl::Update()
+{
+	m_frame_text->Hide();
+	m_duration_text->Hide();
+	m_interpolation_cmb->Hide();
+	m_description_text->Hide();
+	m_editing_item = -1;
+
+	DeleteAllItems();
+	for (int i = 0; i < glbin_interpolator.GetKeyNum(); i++)
+	{
+		int id = glbin_interpolator.GetKeyID(i);
+		int time = glbin_interpolator.GetKeyTime(i);
+		int duration = glbin_interpolator.GetKeyDuration(i);
+		int interp = glbin_interpolator.GetKeyType(i);
+		string desc = glbin_interpolator.GetKeyDesc(i);
+		Append(id, time, duration, interp, desc);
+	}
+}
+
+void KeyListCtrl::UpdateText()
+{
+	wxString str;
+
+	for (int i = 0; i < glbin_interpolator.GetKeyNum(); i++)
+	{
+		int id = glbin_interpolator.GetKeyID(i);
+		int time = glbin_interpolator.GetKeyTime(i);
+		int duration = glbin_interpolator.GetKeyDuration(i);
+		int interp = glbin_interpolator.GetKeyType(i);
+		string desc = glbin_interpolator.GetKeyDesc(i);
+
+		wxString wx_id = wxString::Format("%d", id);
+		wxString wx_time = wxString::Format("%d", time);
+		wxString wx_duration = wxString::Format("%d", duration);
+		SetText(i, 0, wx_id);
+		SetText(i, 1, wx_time);
+		SetText(i, 2, wx_duration);
+		str = interp == 0 ? "Linear" : "Smooth";
+		SetText(i, 3, str);
+		str = desc;
+		SetText(i, 4, str);
+	}
+}
+
+void KeyListCtrl::OnAct(wxListEvent& event)
+{
+	long item = GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+	if (item == -1)
+		return;
+	wxString str = GetItemText(item);
+	long id;
+	str.ToLong(&id);
+
+	int index = glbin_interpolator.GetKeyIndex(int(id));
+	double time = glbin_interpolator.GetKeyTime(index);
+
+	RenderCanvas* view = glbin_moviemaker.GetView();
+	if (view)
+	{
+		view->SetParams(time);
+		m_frame->RefreshCanvases(false, {glbin_moviemaker.GetViewIndex()});
+	}
+}
+
+wxString KeyListCtrl::GetText(long item, int col)
+{
+	wxListItem info;
+	info.SetId(item);
+	info.SetColumn(col);
+	info.SetMask(wxLIST_MASK_TEXT);
+	GetItem(info);
+	return info.GetText();
+}
+
+void KeyListCtrl::SetText(long item, int col, wxString& str)
+{
+	wxListItem info;
+	info.SetId(item);
+	info.SetColumn(col);
+	info.SetMask(wxLIST_MASK_TEXT);
+	GetItem(info);
+	info.SetText(str);
+	SetItem(info);
+}
+
+void KeyListCtrl::OnSelection(wxListEvent& event)
+{
+	long item = GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+	m_editing_item = item;
+	if (item != -1 && m_dragging_to_item == -1)
+	{
+		wxRect rect;
+		wxString str;
+		//add frame text
+		GetSubItemRect(item, 1, rect);
+		str = GetText(item, 1);
+		m_frame_text->SetPosition(rect.GetTopLeft());
+		m_frame_text->SetSize(rect.GetSize());
+		m_frame_text->SetValue(str);
+		//m_frame_text->Show();
+		//add duration text
+		GetSubItemRect(item, 2, rect);
+		str = GetText(item, 2);
+		m_duration_text->SetPosition(rect.GetTopLeft());
+		m_duration_text->SetSize(rect.GetSize());
+		m_duration_text->SetValue(str);
+		m_duration_text->Show();
+		//add interpolation combo
+		GetSubItemRect(item, 3, rect);
+		str = GetText(item, 3);
+		m_interpolation_cmb->SetPosition(rect.GetTopLeft() - FromDIP(wxSize(0, 5)));
+		m_interpolation_cmb->SetSize(FromDIP(wxSize(rect.GetSize().GetWidth(), -1)));
+		int sel = 0;
+		if (str == "Linear")
+			sel = 0;
+		else if (str == "Smooth")
+			sel = 1;
+		m_interpolation_cmb->Select(sel);
+		m_interpolation_cmb->Show();
+		//add description text
+		GetSubItemRect(item, 4, rect);
+		str = GetText(item, 4);
+		m_description_text->SetPosition(rect.GetTopLeft());
+		m_description_text->SetSize(rect.GetSize());
+		m_description_text->SetValue(str);
+		m_description_text->Show();
+	}
+}
+
+void KeyListCtrl::EndEdit(bool update)
+{
+	if (m_duration_text->IsShown())
+	{
+		m_frame_text->Hide();
+		m_duration_text->Hide();
+		m_interpolation_cmb->Hide();
+		m_description_text->Hide();
+		m_editing_item = -1;
+		if (update) UpdateText();
+	}
+}
+
+void KeyListCtrl::OnEndSelection(wxListEvent& event)
+{
+	EndEdit();
+}
+
+void KeyListCtrl::OnFrameText(wxCommandEvent& event)
+{
+	if (m_editing_item == -1)
+		return;
+
+	wxString str = GetItemText(m_editing_item);
+	long id;
+	str.ToLong(&id);
+
+	int index = glbin_interpolator.GetKeyIndex(int(id));
+	str = m_frame_text->GetValue();
+	double time;
+	if (str.ToDouble(&time))
+	{
+		glbin_interpolator.ChangeTime(index, time);
+	}
+}
+
+void KeyListCtrl::OnDurationText(wxCommandEvent& event)
+{
+	if (m_editing_item == -1)
+		return;
+
+	wxString str = GetItemText(m_editing_item);
+	long id;
+	str.ToLong(&id);
+
+	int index = glbin_interpolator.GetKeyIndex(int(id));
+	str = m_duration_text->GetValue();
+	double duration;
+	if (str.ToDouble(&duration))
+	{
+		glbin_interpolator.ChangeDuration(index, duration);
+		SetText(m_editing_item, 2, str);
+	}
+}
+
+void KeyListCtrl::OnInterpoCmb(wxCommandEvent& event)
+{
+	if (m_editing_item == -1)
+		return;
+
+	wxString str = GetItemText(m_editing_item);
+	long id;
+	str.ToLong(&id);
+
+	int index = glbin_interpolator.GetKeyIndex(int(id));
+	FlKeyGroup* keygroup = glbin_interpolator.GetKeyGroup(index);
+	if (keygroup)
+	{
+		int sel = m_interpolation_cmb->GetSelection();
+		keygroup->type = sel;
+		str = sel == 0 ? "Linear" : "Smooth";
+		SetText(m_editing_item, 3, str);
+	}
+}
+
+void KeyListCtrl::OnDescritionText(wxCommandEvent& event)
+{
+	if (m_editing_item == -1)
+		return;
+
+	wxString str = GetItemText(m_editing_item);
+	long id;
+	str.ToLong(&id);
+
+	int index = glbin_interpolator.GetKeyIndex(int(id));
+	FlKeyGroup* keygroup = glbin_interpolator.GetKeyGroup(index);
+	if (keygroup)
+	{
+		str = m_description_text->GetValue();
+		keygroup->desc = str.ToStdString();
+		SetText(m_editing_item, 4, str);
+	}
+}
+
+void KeyListCtrl::OnKeyDown(wxKeyEvent& event)
+{
+	if (event.GetKeyCode() == WXK_DELETE ||
+		event.GetKeyCode() == WXK_BACK)
+		DeleteSel();
+	event.Skip();
+}
+
+void KeyListCtrl::OnKeyUp(wxKeyEvent& event)
+{
+	event.Skip();
+}
+
+void KeyListCtrl::OnBeginDrag(wxListEvent& event)
+{
+	if (m_editing_item == -1)
+		return;
+
+	m_dragging_to_item = -1;
+	// trigger when user releases left button (drop)
+	Connect(wxEVT_MOTION, wxMouseEventHandler(KeyListCtrl::OnDragging), NULL, this);
+	Connect(wxEVT_LEFT_UP, wxMouseEventHandler(KeyListCtrl::OnEndDrag), NULL, this);
+	Connect(wxEVT_LEAVE_WINDOW, wxMouseEventHandler(KeyListCtrl::OnEndDrag), NULL, this);
+	SetCursor(wxCursor(wxCURSOR_WATCH));
+
+	m_frame_text->Hide();
+	m_duration_text->Hide();
+	m_interpolation_cmb->Hide();
+	m_description_text->Hide();
+}
+
+void KeyListCtrl::OnDragging(wxMouseEvent& event)
+{
+	wxPoint pos = event.GetPosition();
+	int flags = wxLIST_HITTEST_ONITEM;
+	long index = HitTest(pos, flags, NULL); // got to use it at last
+	if (index >= 0 && index != m_editing_item && index != m_dragging_to_item)
+	{
+		m_dragging_to_item = index;
+
+		//change the content in the interpolator
+		if (m_editing_item > m_dragging_to_item)
+			glbin_interpolator.MoveKeyBefore(m_editing_item, m_dragging_to_item);
+		else
+			glbin_interpolator.MoveKeyAfter(m_editing_item, m_dragging_to_item);
+
+		DeleteItem(m_editing_item);
+		InsertItem(m_dragging_to_item, "", 0);
+		UpdateText();
+
+		m_editing_item = m_dragging_to_item;
+		SetItemState(m_editing_item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	}
+}
+
+void KeyListCtrl::OnEndDrag(wxMouseEvent& event)
+{
+	SetCursor(wxCursor(*wxSTANDARD_CURSOR));
+	Disconnect(wxEVT_MOTION, wxMouseEventHandler(KeyListCtrl::OnDragging));
+	Disconnect(wxEVT_LEFT_UP, wxMouseEventHandler(KeyListCtrl::OnEndDrag));
+	Disconnect(wxEVT_LEAVE_WINDOW, wxMouseEventHandler(KeyListCtrl::OnEndDrag));
+	m_dragging_to_item = -1;
+}
+
+void KeyListCtrl::OnScroll(wxScrollWinEvent& event)
+{
+	EndEdit(false);
+	event.Skip(true);
+}
+
+void KeyListCtrl::OnMouseScroll(wxMouseEvent& event)
+{
+	EndEdit(false);
+	event.Skip(true);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 {
 	wxScrolledWindow *page = new wxScrolledWindow(parent);
@@ -173,6 +586,9 @@ wxWindow* MoviePanel::CreateAdvancedPage(wxWindow *parent)
 {
 	wxScrolledWindow* page = new wxScrolledWindow(parent);
 
+	wxIntegerValidator<unsigned int> vald_int;
+	wxStaticText* st = 0;
+
 	//check
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	m_keyframe_chk = new wxCheckBox(page, wxID_ANY, "Enable keyframe movie");
@@ -180,18 +596,91 @@ wxWindow* MoviePanel::CreateAdvancedPage(wxWindow *parent)
 	sizer1->Add(5, 5);
 	sizer1->Add(m_keyframe_chk, 0, wxALIGN_CENTER);
 
-	//key list
-	m_advanced_movie = new RecorderDlg(m_frame, page);
-	m_frame->SetRecorderDlg(m_advanced_movie);
-	m_advanced_movie->SetMoviePanel(this);
+	//default duration
+	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, wxID_ANY, "Duration:");
+	m_duration_text = new wxTextCtrl(page, wxID_ANY, "30",
+		wxDefaultPosition, FromDIP(wxSize(30, 23)), wxTE_RIGHT, vald_int);
+	m_duration_text->Bind(wxEVT_TEXT, &MoviePanel::OnDurationText, this);
+	m_duration_text->SetToolTip("Set the default duration between two keyframes");
+	sizer2->Add(5, 5);
+	sizer2->Add(st, 0, wxALIGN_CENTER);
+	sizer2->Add(5, 5);
+	sizer2->Add(m_duration_text, 0, wxALIGN_CENTER);
+	sizer2->Add(5, 5);
+	st = new wxStaticText(page, wxID_ANY, "Interpolation:");
+	m_interpolation_cmb = new wxComboBox(page, wxID_ANY, "",
+		wxDefaultPosition, FromDIP(wxSize(65, -1)), 0, NULL, wxCB_READONLY);
+	m_interpolation_cmb->Bind(wxEVT_COMBOBOX, &MoviePanel::OnInterpolation, this);
+	std::vector<wxString> list = { "Linear", "Smooth" };
+	m_interpolation_cmb->Append(list);
+	sizer2->Add(st, 0, wxALIGN_CENTER);
+	sizer2->Add(5, 5);
+	sizer2->Add(m_interpolation_cmb, 0, wxALIGN_CENTER);
+
+	//list
+	m_keylist = new KeyListCtrl(page, m_frame);
+
+	//key buttons
+	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
+	m_set_key_btn = new wxButton(page, wxID_ANY, "Add",
+		wxDefaultPosition, FromDIP(wxSize(50, 23)));
+	m_set_key_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnInsKey, this);
+	m_set_key_btn->SetToolTip("Add or insert a keyframe");
+	m_del_key_btn = new wxButton(page, wxID_ANY, "Delete",
+		wxDefaultPosition, FromDIP(wxSize(55, 23)));
+	m_del_key_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnDelKey, this);
+	m_del_key_btn->SetToolTip("Delete the selected keyframe");
+	m_del_all_btn = new wxButton(page, wxID_ANY, "Del. All",
+		wxDefaultPosition, FromDIP(wxSize(60, 23)));
+	m_del_all_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnDelAll, this);
+	m_del_all_btn->SetToolTip("Delete all keyframes");
+	sizer3->AddStretchSpacer(1);
+	sizer3->Add(m_set_key_btn, 0, wxALIGN_CENTER);
+	sizer3->Add(5, 5);
+	sizer3->Add(m_del_key_btn, 0, wxALIGN_CENTER);
+	sizer3->Add(5, 5);
+	sizer3->Add(m_del_all_btn, 0, wxALIGN_CENTER);
+	sizer3->Add(5, 5);
+
+	//lock cam center object
+	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
+	m_cam_lock_chk = new wxCheckBox(page, wxID_ANY,
+		"Lock View Target:");
+	m_cam_lock_chk->Bind(wxEVT_CHECKBOX, &MoviePanel::OnCamLockChk, this);
+	m_cam_lock_cmb = new wxComboBox(page, wxID_ANY, "",
+		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+	std::vector<wxString> list2 = { "Image center", "Click view", "Ruler", "Selection" };
+	m_cam_lock_cmb->Append(list2);
+	m_cam_lock_cmb->Bind(wxEVT_COMBOBOX, &MoviePanel::OnCamLockCmb, this);
+	m_cam_lock_btn = new wxButton(page, wxID_ANY, "Apply");
+	m_cam_lock_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnCamLockBtn, this);
+	m_cam_lock_btn->SetToolTip("Apply camera viewing direction lock to the target");
+	sizer4->Add(5, 5);
+	sizer4->Add(m_cam_lock_chk, 0, wxALIGN_CENTER);
+	sizer4->AddStretchSpacer(1);
+	sizer4->Add(m_cam_lock_cmb, 0, wxALIGN_CENTER);
+	sizer4->Add(5, 5);
+	sizer4->Add(m_cam_lock_btn, 0, wxALIGN_CENTER);
+	sizer4->Add(5, 5);
+
 
 	//vertical sizer
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
 	sizerv->Add(5, 5, 0);
 	sizerv->Add(sizer1, 0, wxEXPAND);
-	sizerv->Add(m_advanced_movie, 1, wxEXPAND);
+	sizerv->Add(10, 5);
+	sizerv->Add(sizer2, 0, wxEXPAND);
+	sizerv->Add(10, 5);
+	sizerv->Add(m_keylist, 1, wxEXPAND);
+	sizerv->Add(10, 5);
+	sizerv->Add(sizer3, 0, wxEXPAND);
+	sizerv->Add(5, 5);
+	sizerv->Add(sizer4, 0, wxEXPAND);
+	sizerv->Add(5, 5);
 	//set the page
 	page->SetSizer(sizerv);
+	Layout();
 	page->SetAutoLayout(true);
 	page->SetScrollRate(10, 10);
 	return page;
@@ -431,10 +920,10 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE |
 		wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
 	m_notebook->AddPage(CreateSimplePage(m_notebook), "Basic", true);
-	m_notebook->AddPage(CreateAdvancedPage(m_notebook), "Advanced");
-	m_notebook->AddPage(CreateAutoKeyPage(m_notebook), "AutoGen");
+	m_notebook->AddPage(CreateAdvancedPage(m_notebook), "Keyframes");
+	m_notebook->AddPage(CreateAutoKeyPage(m_notebook), "Templates");
 	m_notebook->AddPage(CreateCroppingPage(m_notebook), "Crop");
-	m_notebook->AddPage(CreateScriptPage(m_notebook), "Script");
+	m_notebook->AddPage(CreateScriptPage(m_notebook), "Scripts");
 	m_notebook->Bind(wxEVT_AUINOTEBOOK_PAGE_CHANGED, &MoviePanel::OnNotebookPage, this);
 
 	wxStaticText* st = 0, *st2 = 0;
@@ -803,6 +1292,21 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstCaptureParam))
 		m_keyframe_chk->SetValue(glbin_moviemaker.GetKeyframeEnable());
 
+	if (update_all || FOUND_VALUE(gstParamList))
+		m_keylist->Update();
+
+	if (update_all || FOUND_VALUE(gstParamListSelect))
+	{
+		double t = glbin_moviemaker.GetCurProg();
+		int index = glbin_interpolator.GetKeyIndexFromTime(t);
+		long item = m_keylist->GetNextItem(-1,
+			wxLIST_NEXT_ALL,
+			wxLIST_STATE_SELECTED);
+		if (index != item && item != -1)
+			m_keylist->SetItemState(index,
+				wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	}
+
 	if (update_all || FOUND_VALUE(gstCropEnable))
 	{
 		bval = glbin_moviemaker.GetCropEnable();
@@ -825,10 +1329,20 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		bval = glbin_settings.m_run_script;
 		m_run_script_chk->SetValue(bval);
+		size_t idx = 4;
+		for (size_t i = 0; i < m_notebook->GetPageCount(); ++i)
+		{
+			wxString str = m_notebook->GetPageText(i);
+			if (str.Contains("Script"))
+			{
+				idx = i;
+				break;
+			}
+		}
 		if (bval)
-			m_notebook->SetPageText(4, "Script (Enabled)");
+			m_notebook->SetPageText(idx, "Scripts (Enabled)");
 		else
-			m_notebook->SetPageText(4, "Script");
+			m_notebook->SetPageText(idx, "Scripts");
 	}
 
 	if (update_all || FOUND_VALUE(gstScriptFile))
@@ -1023,17 +1537,8 @@ void MoviePanel::SetKeyframeMovie(bool val)
 	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovCurTime });
 }
 
-void MoviePanel::GenKey()
+void MoviePanel::GenKey(int val)
 {
-	long item = m_auto_key_list->GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-
-	if (item != -1)
-	{
-		m_advanced_movie->GenKey(item);
-		m_notebook->SetSelection(1);
-	}
 }
 
 void MoviePanel::SetCropEnable(bool val)
@@ -1295,10 +1800,298 @@ void MoviePanel::OnKeyframeChk(wxCommandEvent& event)
 	event.Skip();
 }
 
+void MoviePanel::OnDurationText(wxCommandEvent& event)
+{
+
+}
+
+void MoviePanel::OnInterpolation(wxCommandEvent& event)
+{
+
+}
+
+void MoviePanel::OnInsKey(wxCommandEvent& event)
+{
+	wxString str;
+	long item = m_keylist->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+	int index = -1;
+	if (item != -1)
+	{
+		str = m_keylist->GetItemText(item);
+		long id;
+		str.ToLong(&id);
+		index = glbin_interpolator.GetKeyIndex(id);
+	}
+	//check if 4D
+	bool is_4d = false;
+	VolumeData* vd = 0;
+	for (int i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
+	{
+		vd = glbin_data_manager.GetVolumeData(i);
+		if (vd->GetReader() &&
+			vd->GetReader()->GetTimeNum() > 1)
+		{
+			is_4d = true;
+			break;
+		}
+	}
+	double duration = 0.0;
+	if (is_4d)
+	{
+		//Interpolator *interpolator = m_frame->GetInterpolator();
+		//if (interpolator && m_view)
+		//{
+		//	double ct = vd->GetCurTime();
+		//	FlKeyCode keycode;
+		//	keycode.l0 = 1;
+		//	keycode.l0_name = m_view->m_vrv->GetName();
+		//	keycode.l1 = 2;
+		//	keycode.l1_name = vd->GetName();
+		//	keycode.l2 = 0;
+		//	keycode.l2_name = "frame";
+		//	double frame;
+		//	if (glbin_interpolator.GetDouble(keycode, 
+		//		glbin_interpolator.GetLastIndex(), frame))
+		//		duration = fabs(ct - frame);
+		//}
+	}
+	str = m_duration_text->GetValue();
+	str.ToDouble(&duration);
+	int interpolation = m_interpolation_cmb->GetSelection();
+	InsertKey(index, duration, interpolation);
+
+	m_keylist->Update();
+	m_keylist->SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+}
+
+void MoviePanel::InsertKey(int index, double duration, int interpolation)
+{
+	if (!m_frame)
+		return;
+	if (!m_view)
+	{
+		if (m_frame->GetView(0))
+			m_view = m_frame->GetView(0);
+		else
+			return;
+	}
+
+	FlKeyCode keycode;
+	FlKeyDouble* flkey = 0;
+	FlKeyQuaternion* flkeyQ = 0;
+	FlKeyBoolean* flkeyB = 0;
+	FlKeyInt* flkeyI = 0;
+	FlKeyColor* flkeyC = 0;
+
+	double t = glbin_interpolator.GetLastT();
+	t = t < 0.0 ? 0.0 : t + duration;
+
+	glbin_interpolator.Begin(t, duration);
+
+	//for all volumes
+	for (int i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
+	{
+		VolumeData* vd = glbin_data_manager.GetVolumeData(i);
+		keycode.l0 = 1;
+		keycode.l0_name = m_view->m_vrv->GetName();
+		keycode.l1 = 2;
+		keycode.l1_name = vd->GetName();
+		//display
+		keycode.l2 = 0;
+		keycode.l2_name = "display";
+		flkeyB = new FlKeyBoolean(keycode, vd->GetDisp());
+		glbin_interpolator.AddKey(flkeyB);
+		//clipping planes
+		vector<fluo::Plane*>* planes = vd->GetVR()->get_planes();
+		if (!planes)
+			continue;
+		if (planes->size() != 6)
+			continue;
+		fluo::Plane* plane = 0;
+		double abcd[4];
+		//x1
+		plane = (*planes)[0];
+		plane->get_copy(abcd);
+		keycode.l2 = 0;
+		keycode.l2_name = "x1_val";
+		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
+		glbin_interpolator.AddKey(flkey);
+		//x2
+		plane = (*planes)[1];
+		plane->get_copy(abcd);
+		keycode.l2 = 0;
+		keycode.l2_name = "x2_val";
+		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
+		glbin_interpolator.AddKey(flkey);
+		//y1
+		plane = (*planes)[2];
+		plane->get_copy(abcd);
+		keycode.l2 = 0;
+		keycode.l2_name = "y1_val";
+		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
+		glbin_interpolator.AddKey(flkey);
+		//y2
+		plane = (*planes)[3];
+		plane->get_copy(abcd);
+		keycode.l2 = 0;
+		keycode.l2_name = "y2_val";
+		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
+		glbin_interpolator.AddKey(flkey);
+		//z1
+		plane = (*planes)[4];
+		plane->get_copy(abcd);
+		keycode.l2 = 0;
+		keycode.l2_name = "z1_val";
+		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
+		glbin_interpolator.AddKey(flkey);
+		//z2
+		plane = (*planes)[5];
+		plane->get_copy(abcd);
+		keycode.l2 = 0;
+		keycode.l2_name = "z2_val";
+		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
+		glbin_interpolator.AddKey(flkey);
+		//t
+		int frame = vd->GetCurTime();
+		keycode.l2 = 0;
+		keycode.l2_name = "frame";
+		flkey = new FlKeyDouble(keycode, frame);
+		glbin_interpolator.AddKey(flkey);
+		//primary color
+		fluo::Color pc = vd->GetColor();
+		keycode.l2 = 0;
+		keycode.l2_name = "color";
+		flkeyC = new FlKeyColor(keycode, pc);
+		glbin_interpolator.AddKey(flkeyC);
+	}
+	//for the view
+	keycode.l0 = 1;
+	keycode.l0_name = m_view->m_vrv->GetName();
+	keycode.l1 = 1;
+	keycode.l1_name = m_view->m_vrv->GetName();
+	//rotation
+	keycode.l2 = 0;
+	keycode.l2_name = "rotation";
+	fluo::Quaternion q = m_view->GetRotations();
+	flkeyQ = new FlKeyQuaternion(keycode, q);
+	glbin_interpolator.AddKey(flkeyQ);
+	//translation
+	double tx, ty, tz;
+	m_view->GetTranslations(tx, ty, tz);
+	//x
+	keycode.l2_name = "translation_x";
+	flkey = new FlKeyDouble(keycode, tx);
+	glbin_interpolator.AddKey(flkey);
+	//y
+	keycode.l2_name = "translation_y";
+	flkey = new FlKeyDouble(keycode, ty);
+	glbin_interpolator.AddKey(flkey);
+	//z
+	keycode.l2_name = "translation_z";
+	flkey = new FlKeyDouble(keycode, tz);
+	glbin_interpolator.AddKey(flkey);
+	//centers
+	m_view->GetCenters(tx, ty, tz);
+	//x
+	keycode.l2_name = "center_x";
+	flkey = new FlKeyDouble(keycode, tx);
+	glbin_interpolator.AddKey(flkey);
+	//y
+	keycode.l2_name = "center_y";
+	flkey = new FlKeyDouble(keycode, ty);
+	glbin_interpolator.AddKey(flkey);
+	//z
+	keycode.l2_name = "center_z";
+	flkey = new FlKeyDouble(keycode, tz);
+	glbin_interpolator.AddKey(flkey);
+	//obj traslation
+	m_view->GetObjTrans(tx, ty, tz);
+	//x
+	keycode.l2_name = "obj_trans_x";
+	flkey = new FlKeyDouble(keycode, tx);
+	glbin_interpolator.AddKey(flkey);
+	//y
+	keycode.l2_name = "obj_trans_y";
+	flkey = new FlKeyDouble(keycode, ty);
+	glbin_interpolator.AddKey(flkey);
+	//z
+	keycode.l2_name = "obj_trans_z";
+	flkey = new FlKeyDouble(keycode, tz);
+	glbin_interpolator.AddKey(flkey);
+	//scale
+	double scale = m_view->m_scale_factor;
+	keycode.l2_name = "scale";
+	flkey = new FlKeyDouble(keycode, scale);
+	glbin_interpolator.AddKey(flkey);
+	//intermixing mode
+	int ival = m_view->GetVolMethod();
+	keycode.l2_name = "volmethod";
+	flkeyI = new FlKeyInt(keycode, ival);
+	glbin_interpolator.AddKey(flkeyI);
+	//perspective angle
+	bool persp = m_view->GetPersp();
+	double aov = m_view->GetAov();
+	if (!persp)
+		aov = 9.9;
+	keycode.l2_name = "aov";
+	flkey = new FlKeyDouble(keycode, aov);
+	glbin_interpolator.AddKey(flkey);
+
+	glbin_interpolator.End();
+
+	FlKeyGroup* group = glbin_interpolator.GetKeyGroup(glbin_interpolator.GetLastIndex());
+	if (group)
+		group->type = interpolation;
+
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + 1);
+	glbin_moviemaker.SetCurrentFrame(glbin_moviemaker.GetClipEndFrame());
+	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame });
+}
+
+void MoviePanel::OnDelKey(wxCommandEvent& event)
+{
+	m_keylist->DeleteSel();
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + 1);
+	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame });
+}
+
+void MoviePanel::OnDelAll(wxCommandEvent& event)
+{
+	m_keylist->DeleteAll();
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + 1);
+	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame });
+}
+
+void MoviePanel::OnCamLockChk(wxCommandEvent& event)
+{
+	glbin_moviemaker.SetCamLock(m_cam_lock_chk->GetValue());
+	event.Skip();
+}
+
+void MoviePanel::OnCamLockCmb(wxCommandEvent& event)
+{
+	glbin_moviemaker.SetCamLockType(m_cam_lock_cmb->GetSelection() + 1);
+}
+
+void MoviePanel::OnCamLockBtn(wxCommandEvent& event)
+{
+	m_view->SetLockCenter();
+}
+
 //auto key
 void MoviePanel::OnGenKey(wxCommandEvent& event)
 {
-	GenKey();
+	long item = m_auto_key_list->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+
+	if (item != -1)
+	{
+		GenKey(item);
+		m_notebook->SetSelection(1);
+	}
 	event.Skip();
 }
 
@@ -1393,7 +2186,7 @@ void MoviePanel::OnRunScriptChk(wxCommandEvent& event)
 		glbin_settings.m_script_file = str;
 		m_view->SetScriptFile(str);
 	}
-	FluoRefresh(false, 2, { gstMovPlay }, { glbin_mov_def.m_view_idx });
+	FluoRefresh(false, 2, { gstMovPlay, gstRunScript }, { glbin_mov_def.m_view_idx });
 	event.Skip();
 }
 

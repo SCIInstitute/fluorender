@@ -73,7 +73,7 @@ using namespace std;
 #define UITEXT_PROJECT		"Project"
 #define UITEXT_DATAVIEW		"Datasets"
 #define UITEXT_TREEVIEW		"Workspace"
-#define UITEXT_MAKEMOVIE	"Record/Export"
+#define UITEXT_MAKEMOVIE	"Movie Making & Scripts"
 #define UITEXT_ADJUST		"Output Adjustments"
 #define UITEXT_CLIPPING		"Clipping Planes"
 #define UITEXT_PROPERTIES	"Properties"
@@ -101,7 +101,6 @@ class NoiseCancellingDlg;
 class CountingDlg;
 class ConvertDlg;
 class ColocalizationDlg;
-class RecorderDlg;
 class MeasureDlg;
 class TraceDlg;
 class OclDlg;
@@ -262,9 +261,6 @@ public:
 	//convert dialog
 	ConvertDlg* GetConvertDlg();
 	ColocalizationDlg* GetColocalizationDlg();
-	//recorder dialog
-	void SetRecorderDlg(RecorderDlg* dlg);
-	RecorderDlg* GetRecorderDlg();
 	//measure dialog
 	MeasureDlg* GetMeasureDlg();
 	//trace dialog
@@ -358,7 +354,6 @@ private:
 	CalculationDlg* m_calculation_dlg;
 	MachineLearningDlg* m_machine_learning_dlg;
 	ScriptBreakDlg* m_script_break_dlg;
-	RecorderDlg* m_recorder_dlg;
 	MoviePanel* m_movie_panel;
 	//prop panel children
 	std::vector<PropPanel*> m_prop_pages;

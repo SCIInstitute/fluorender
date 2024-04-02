@@ -378,7 +378,7 @@ public:
 	//lock cam center
 	void SetLockCamObject(bool bval) { m_lock_cam_object = bval; }
 	bool GetLockCamObject() { return m_lock_cam_object; }
-	void SetLockCenter(int type);
+	void SetLockCenter();
 	void SetLockCenterVol();
 	void SetLockCenterRuler();
 	void SetLockCenterSel();
