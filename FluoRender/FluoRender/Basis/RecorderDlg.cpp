@@ -76,7 +76,7 @@ m_dragging_to_item(-1)
 	itemCol.SetText("Frame");
 	this->InsertColumn(1, itemCol);
     SetColumnWidth(1, 60);
-	itemCol.SetText("Inbetweens");
+	itemCol.SetText("Duration");
 	this->InsertColumn(2, itemCol);
     SetColumnWidth(2, 80);
 	itemCol.SetText("Interpolation");
@@ -478,44 +478,43 @@ m_view(0)
 	wxStaticText* st = 0;
 
 	//list
-	wxBoxSizer *group2 = new wxBoxSizer(wxVERTICAL);
-	st = new wxStaticText(this, wxID_ANY, "Key Frames:");
 	m_keylist = new KeyListCtrl(frame, this);
-	group2->Add(st, 0, wxEXPAND);
-	group2->Add(5, 5);
-	group2->Add(m_keylist, 1, wxEXPAND);
 
 	//default duration
-	wxBoxSizer *group3 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, wxID_ANY, "Default:",wxDefaultPosition,FromDIP(wxSize(50,-1)));
+	wxBoxSizer *group2 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, wxID_ANY, "Duration:");
 	m_duration_text = new wxTextCtrl(this, ID_DurationText, "30",
 		wxDefaultPosition, FromDIP(wxSize(30, 23)), 0, vald_int);
+	group2->Add(5, 5);
+	group2->Add(st, 0, wxALIGN_CENTER);
+	group2->Add(5, 5);
+	group2->Add(m_duration_text, 0, wxALIGN_CENTER);
+	group2->Add(5, 5);
+	st = new wxStaticText(this, wxID_ANY, "Interpolation:");
 	m_interpolation_cmb = new wxComboBox(this, ID_InterpolationCmb, "",
 		wxDefaultPosition, FromDIP(wxSize(65,-1)), 0, NULL, wxCB_READONLY);
 	m_interpolation_cmb->Append("Linear");
 	m_interpolation_cmb->Append("Smooth");
 	m_interpolation_cmb->Select(0);
+	group2->Add(st, 0, wxALIGN_CENTER);
+	group2->Add(5, 5);
+	group2->Add(m_interpolation_cmb, 0, wxALIGN_CENTER);
 
 	//key buttons
-	//wxBoxSizer *group4 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *group3 = new wxBoxSizer(wxHORIZONTAL);
 	m_set_key_btn = new wxButton(this, ID_SetKeyBtn, "Add",
 		wxDefaultPosition, FromDIP(wxSize(50, 23)));
 	m_del_key_btn = new wxButton(this, ID_DelKeyBtn, "Delete",
 		wxDefaultPosition, FromDIP(wxSize(55, 23)));
 	m_del_all_btn = new wxButton(this, ID_DelAllBtn, "Del. All",
 		wxDefaultPosition, FromDIP(wxSize(60, 23)));
-
-	group3->Add(st, 0, wxALIGN_CENTER);
-	group3->Add(5, 5);
-	group3->Add(m_duration_text, 0, wxALIGN_CENTER);
-	group3->Add(5, 5);
-	group3->Add(m_interpolation_cmb, 0, wxALIGN_CENTER);
 	group3->AddStretchSpacer(1);
 	group3->Add(m_set_key_btn, 0, wxALIGN_CENTER);
 	group3->Add(5, 5);
 	group3->Add(m_del_key_btn, 0, wxALIGN_CENTER);
 	group3->Add(5, 5);
 	group3->Add(m_del_all_btn, 0, wxALIGN_CENTER);
+	group3->Add(5, 5);
 
 	//lock cam center object
 	wxBoxSizer *group4 = new wxBoxSizer(wxHORIZONTAL);
@@ -539,10 +538,10 @@ m_view(0)
 
 	//all controls
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
-	//sizerV->Add(10, 5);
-	//sizerV->Add(group1, 0, wxEXPAND);
 	sizerV->Add(10, 5);
-	sizerV->Add(group2, 1, wxEXPAND);
+	sizerV->Add(m_keylist, 1, wxEXPAND);
+	sizerV->Add(10, 5);
+	sizerV->Add(group2, 0, wxEXPAND);
 	sizerV->Add(10, 5);
 	sizerV->Add(group3, 0, wxEXPAND);
 	sizerV->Add(5, 5);
@@ -593,7 +592,7 @@ void RecorderDlg::OnSetKey(wxCommandEvent &event)
 
 	m_keylist->Update();
 
-	glbin_moviemaker.SetFullFrameNum(glbin_interpolator.GetFrameNum());
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + 1);
 	m_movie_panel->FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame });
 }
 
@@ -832,21 +831,22 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	if (group)
 		group->type = interpolation;
 
-	glbin_moviemaker.SetFullFrameNum(glbin_interpolator.GetFrameNum());
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + 1);
+	glbin_moviemaker.SetCurrentFrame(glbin_moviemaker.GetClipEndFrame());
 	m_movie_panel->FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame });
 }
 
 void RecorderDlg::OnDelKey(wxCommandEvent &event)
 {
 	m_keylist->DeleteSel();
-	glbin_moviemaker.SetFullFrameNum(glbin_interpolator.GetFrameNum());
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + 1);
 	m_movie_panel->FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame });
 }
 
 void RecorderDlg::OnDelAll(wxCommandEvent &event)
 {
 	m_keylist->DeleteAll();
-	glbin_moviemaker.SetFullFrameNum(glbin_interpolator.GetFrameNum());
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + 1);
 	m_movie_panel->FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame });
 }
 

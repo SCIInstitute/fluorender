@@ -79,18 +79,6 @@ public:
 	{ return (int)m_key_list.size() - 1;}
 	vector<FlKeyGroup*>* GetKeyList()
 	{ return &m_key_list; }
-	int GetFrameNum()
-	{
-		//frame num == time
-		double t = 0;
-		for (auto it : m_key_list)
-		{
-			if (!it)
-				continue;
-			t += it->dt;
-		}
-		return std::round(t);
-	}
 
 	//modify
 	void Clear();
