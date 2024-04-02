@@ -124,6 +124,7 @@ public:
 	void SetView(int val);
 	void SetSliderStyle(bool val);
 	//frames
+	void SetFullFrame(int val);
 	void SetStartFrame(int val);
 	void SetEndFrame(int val);
 	void SetScrollFrame(int val, bool notify);

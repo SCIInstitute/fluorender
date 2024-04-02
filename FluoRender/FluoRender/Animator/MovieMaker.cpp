@@ -64,6 +64,12 @@ MovieMaker::MovieMaker() :
 	m_cur_time = 0;
 	m_cur_prog = 0;
 
+	//seq numbers can be different from output frame numders
+	m_seq_cur_num = 0;
+	m_seq_all_num = 0;
+	m_seq_clip_start_num = 0;
+	m_seq_clip_end_num = 0;
+
 	m_crop = false;
 	m_crop_x = 0;
 	m_crop_y = 0;
@@ -237,11 +243,11 @@ void MovieMaker::SetRendering(bool rewind)
 		//basic options
 		if (m_seq_mode == 1)
 		{
-			m_view->Set4DSeqFrame(m_cur_frame, m_clip_start_frame, m_clip_end_frame, rewind);
+			m_view->Set4DSeqFrame(m_seq_cur_num, m_seq_clip_start_num, m_seq_clip_end_num, rewind);
 		}
 		else if (m_seq_mode == 2)
 		{
-			m_view->Set3DBatFrame(m_cur_frame, m_clip_start_frame, m_clip_end_frame, rewind);
+			m_view->Set3DBatFrame(m_seq_cur_num, m_seq_clip_start_num, m_seq_clip_end_num, rewind);
 		}
 
 		//rotate animation
@@ -593,9 +599,10 @@ void MovieMaker::SetSeqMode(int val)
 			if (ef > 0)
 			{
 				m_rotate = false;
-				SetCurrentFrame(m_view->m_tseq_cur_num);
+				m_seq_all_num = ef - sf + 1;
 				SetFullFrameNum(ef + 1);
-				SetClipStartEndFrames(0, ef);
+				SetSeqCurNum(m_view->m_tseq_cur_num);
+				//SetClipStartEndFrames(0, ef);
 			}
 			else
 			{
@@ -611,18 +618,30 @@ void MovieMaker::SetSeqMode(int val)
 			if (ef > 0)
 			{
 				m_rotate = false;
-				SetCurrentFrame(m_view->m_tseq_cur_num);
+				m_seq_all_num = ef - sf + 1;
 				SetFullFrameNum(ef + 1);
-				SetClipStartEndFrames(0, ef);
+				SetSeqCurNum(m_view->m_tseq_cur_num);
+				//SetClipStartEndFrames(0, ef);
 			}
 			else
 			{
 				m_seq_mode = 0;
+				m_seq_all_num = 0;
+				m_seq_cur_num = 0;
 				SetRotateEnable(true);
 			}
 		}
 		break;
 	}
+}
+
+void MovieMaker::SetSeqCurNum(int val)
+{
+	if (m_seq_all_num <= 1)
+		return;
+	m_seq_cur_num = fluo::RotateClamp2(val, 0, m_seq_all_num-1);
+	m_cur_frame = std::round((double)m_seq_cur_num * m_full_frame_num / (m_seq_all_num - 1));
+	SetCurrentFrame(m_cur_frame);
 }
 
 void MovieMaker::SetFullFrameNum(int val)
@@ -643,6 +662,11 @@ void MovieMaker::SetClipStartEndFrames(int val1, int val2)
 		m_full_frame_num = val2 + 1;
 	if (m_fps > 0)
 		m_movie_len = (m_clip_frame_num - 1) / m_fps;
+	if (m_seq_mode > 0)
+	{
+		m_seq_clip_start_num = std::round((double)m_clip_start_frame * (m_seq_all_num - 1) / m_full_frame_num);
+		m_seq_clip_end_num = std::round((double)m_clip_end_frame * (m_seq_all_num - 1) / m_full_frame_num);
+	}
 	SetCurrentFrame(m_cur_frame);
 }
 
@@ -654,6 +678,11 @@ void MovieMaker::SetClipStartFrame(int val)
 	m_clip_frame_num = m_clip_end_frame - m_clip_start_frame + 1;
 	if (m_fps > 0)
 		m_movie_len = (m_clip_frame_num - 1) / m_fps;
+	if (m_seq_mode > 0)
+	{
+		m_seq_clip_start_num = std::round((double)m_clip_start_frame * (m_seq_all_num - 1) / m_full_frame_num);
+		m_seq_clip_end_num = std::round((double)m_clip_end_frame * (m_seq_all_num - 1) / m_full_frame_num);
+	}
 	SetCurrentFrame(m_cur_frame);
 }
 
@@ -667,6 +696,11 @@ void MovieMaker::SetClipEndFrame(int val)
 		m_full_frame_num = val + 1;
 	if (m_fps > 0)
 		m_movie_len = (m_clip_frame_num - 1) / m_fps;
+	if (m_seq_mode > 0)
+	{
+		m_seq_clip_start_num = std::round((double)m_clip_start_frame * (m_seq_all_num - 1) / m_full_frame_num);
+		m_seq_clip_end_num = std::round((double)m_clip_end_frame * (m_seq_all_num - 1) / m_full_frame_num);
+	}
 	SetCurrentFrame(m_cur_frame);
 }
 
@@ -681,6 +715,11 @@ void MovieMaker::SetCurrentFrame(int val)
 	}
 	m_cur_frame = fluo::RotateClamp2(val, m_clip_start_frame, m_clip_end_frame);
 	m_cur_time = (m_cur_frame - m_clip_start_frame) / m_fps;
+	if (m_seq_mode > 0)
+	{
+		m_seq_cur_num = std::round((double)m_cur_frame * (m_seq_all_num - 1) / m_full_frame_num);
+	}
+
 	SetRendering(false);
 }
 

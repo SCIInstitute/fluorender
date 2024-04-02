@@ -103,6 +103,9 @@ public:
 	int GetRotIntType() { return m_rot_int_type; }
 	void SetSeqMode(int val);
 	int GetSeqMode() { return m_seq_mode; }
+	void SetSeqCurNum(int val);
+	int GetSeqCurNum() { return m_seq_cur_num; }
+	int GetSeqAllNum() { return m_seq_all_num; }
 	void SetFullFrameNum(int val);
 	int GetFullFrameNum()
 	{
@@ -193,6 +196,10 @@ private:
 	int m_rot_deg;
 	int m_rot_int_type;//0-linear; 1-smooth
 	int m_seq_mode;//0:none; 1:4d; 2:bat
+	int m_seq_cur_num;//current time point of a sequence
+	int m_seq_all_num;//total number of time points
+	int m_seq_clip_start_num;
+	int m_seq_clip_end_num;
 
 	//movie properties
 	int m_full_frame_num;//the full length movie always starts from 0 and ends at f-1

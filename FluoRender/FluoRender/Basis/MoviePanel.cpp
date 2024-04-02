@@ -876,7 +876,7 @@ wxWindow* MoviePanel::CreateScriptPage(wxWindow *parent)
 	m_script_list = new wxListCtrl(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL);
 	wxListItem itemCol;
-	itemCol.SetText("Built-in Scripte Files");
+	itemCol.SetText("Built-in Script Files");
 	m_script_list->InsertColumn(0, itemCol);
 	m_script_list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
 	m_script_list->Bind(wxEVT_LIST_ITEM_SELECTED, &MoviePanel::OnScriptListSelected, this);
@@ -1287,6 +1287,16 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 			m_bat_chk->SetValue(true);
 			break;
 		}
+		bval = ival > 0;
+		m_seq_dec_btn->Enable(bval);
+		m_seq_inc_btn->Enable(bval);
+		m_seq_num_text->Enable(bval);
+	}
+
+	if (update_all || FOUND_VALUE(gstMovSeqNum))
+	{
+		m_seq_num_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetSeqCurNum()));
+		m_seq_total_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetSeqAllNum()));
 	}
 
 	if (update_all || FOUND_VALUE(gstCaptureParam))
@@ -1402,6 +1412,13 @@ void MoviePanel::SetSliderStyle(bool val)
 	glbin_mov_def.m_slider_style = val;
 
 	FluoUpdate({ gstMovSliderStyle });
+}
+
+void MoviePanel::SetFullFrame(int val)
+{
+	glbin_moviemaker.SetFullFrameNum(val);
+
+	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovFps, gstMovLength, gstMovProgSlider });
 }
 
 void MoviePanel::SetStartFrame(int val)
@@ -1698,6 +1715,11 @@ void MoviePanel::OnDecFrame(wxCommandEvent& event)
 
 void MoviePanel::OnFullFrameText(wxCommandEvent& event)
 {
+	wxString str = m_full_frame_text->GetValue();
+	long val;
+	if (str.ToLong(&val))
+		SetFullFrame(val);
+	event.Skip();
 }
 
 void MoviePanel::OnSave(wxCommandEvent& event)
@@ -1780,17 +1802,34 @@ void MoviePanel::OnBatchChecked(wxCommandEvent& event)
 
 void MoviePanel::OnSeqDecBtn(wxCommandEvent& event)
 {
-
+	int val = glbin_moviemaker.GetSeqCurNum();
+	glbin_moviemaker.SetSeqCurNum(val - 1);
+	FluoRefresh(true, 2,
+		{ gstCurrentFrame, gstMovProgSlider, gstMovSeqNum },
+		{ glbin_mov_def.m_view_idx });
+	event.Skip();
 }
 
 void MoviePanel::OnSeqNumText(wxCommandEvent& event)
 {
-
+	wxString str = m_seq_num_text->GetValue();
+	long val;
+	if (str.ToLong(&val))
+		glbin_moviemaker.SetSeqCurNum(val);
+	FluoRefresh(true, 2,
+		{ gstCurrentFrame, gstMovProgSlider, gstMovSeqNum },
+		{ glbin_mov_def.m_view_idx });
+	event.Skip();
 }
 
 void MoviePanel::OnSeqIncBtn(wxCommandEvent& event)
 {
-
+	int val = glbin_moviemaker.GetSeqCurNum();
+	glbin_moviemaker.SetSeqCurNum(val + 1);
+	FluoRefresh(true, 2,
+		{ gstCurrentFrame, gstMovProgSlider, gstMovSeqNum },
+		{ glbin_mov_def.m_view_idx });
+	event.Skip();
 }
 
 void MoviePanel::OnKeyframeChk(wxCommandEvent& event)
