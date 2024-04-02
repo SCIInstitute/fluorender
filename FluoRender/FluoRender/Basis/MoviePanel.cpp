@@ -486,7 +486,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	m_end_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnEndFrameBtn, this);
 	m_dec_time_btn = new wxButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
-	m_dec_time_btn->SetBitmap(wxGetBitmapFromMemory(minus));
+	m_dec_time_btn->SetBitmap(wxGetBitmapFromMemory(step_back));
 	m_dec_time_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnDecFrame, this);
 	m_cur_frame_text = new wxTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(50, -1)), wxTE_RIGHT, vald_int);
@@ -494,7 +494,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	m_cur_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnCurFrameText, this);
 	m_inc_time_btn = new wxButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
-	m_inc_time_btn->SetBitmap(wxGetBitmapFromMemory(plus));
+	m_inc_time_btn->SetBitmap(wxGetBitmapFromMemory(step_forward));
 	m_inc_time_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnIncFrame, this);
 	sizer3->AddStretchSpacer(2);
 	sizer3->Add(m_start_btn, 0, wxALIGN_CENTER);
