@@ -93,11 +93,11 @@ m_dragging_to_item(-1)
 
 	//frame edit
 	m_frame_text = new wxTextCtrl(this, ID_FrameText, "",
-		wxDefaultPosition, wxDefaultSize, 0, vald_int);
+		wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, vald_int);
 	m_frame_text->Hide();
 	//duration edit
 	m_duration_text = new wxTextCtrl(this, ID_DurationText, "",
-		wxDefaultPosition, wxDefaultSize, 0, vald_int);
+		wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, vald_int);
 	m_duration_text->Hide();
 	//interpolation combo box
 	m_interpolation_cmb = new wxComboBox(this, ID_InterpoCmb, "",
@@ -484,7 +484,7 @@ m_view(0)
 	wxBoxSizer *group2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, wxID_ANY, "Duration:");
 	m_duration_text = new wxTextCtrl(this, ID_DurationText, "30",
-		wxDefaultPosition, FromDIP(wxSize(30, 23)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(30, 23)), wxTE_RIGHT, vald_int);
 	group2->Add(5, 5);
 	group2->Add(st, 0, wxALIGN_CENTER);
 	group2->Add(5, 5);

@@ -151,9 +151,9 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 	m_clipx_sldr->SetRangeColor(wxColor(255, 128, 128));
 	m_clipx_sldr->SetThumbColor(wxColor(255, 128, 128), wxColor(255, 128, 255));
 	m_x1_clip_text = new wxTextCtrl(page, wxID_ANY, "0",
-		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_int);
 	m_x2_clip_text = new wxTextCtrl(page, wxID_ANY, "512",
-		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_int);
 	m_linkx_tb = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(unlink);
@@ -195,9 +195,9 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 	m_clipy_sldr->SetRangeColor(wxColor(128, 255, 128));
 	m_clipy_sldr->SetThumbColor(wxColor(128, 255, 128), wxColor(255, 255, 128));
 	m_y1_clip_text = new wxTextCtrl(page, wxID_ANY, "0",
-		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_int);
 	m_y2_clip_text = new wxTextCtrl(page, wxID_ANY, "512",
-		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_int);
 	m_linky_tb = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_linky_tb->AddCheckTool(0, "Lock Y Planes",
@@ -238,9 +238,9 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 	m_clipz_sldr->SetRangeColor(wxColor(128, 128, 255));
 	m_clipz_sldr->SetThumbColor(wxColor(128, 128, 255), wxColor(128, 255, 255));
 	m_z1_clip_text = new wxTextCtrl(page, wxID_ANY, "0",
-		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_int);
 	m_z2_clip_text = new wxTextCtrl(page, wxID_ANY, "512",
-		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_int);
 	m_linkz_tb = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_linkz_tb->AddCheckTool(0, "Lock Z Planes",
@@ -302,11 +302,11 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 	//clip distance 5
 	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
 	m_yz_dist_text = new wxTextCtrl(page, wxID_ANY, "1",
-		wxDefaultPosition, FromDIP(wxSize(34, 22)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(34, 22)), wxTE_CENTRE, vald_int);
 	m_xz_dist_text = new wxTextCtrl(page, wxID_ANY, "1",
-		wxDefaultPosition, FromDIP(wxSize(34, 22)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(34, 22)), wxTE_CENTRE, vald_int);
 	m_xy_dist_text = new wxTextCtrl(page, wxID_ANY, "1",
-		wxDefaultPosition, FromDIP(wxSize(34, 22)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(34, 22)), wxTE_CENTRE, vald_int);
 	m_yz_dist_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnClipDistXEdit, this);
 	m_xz_dist_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnClipDistYEdit, this);
 	m_xy_dist_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnClipDistZEdit, this);
@@ -371,7 +371,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_x_rot_sldr->SetRangeStyle(2);
 	m_x_rot_text = new wxTextCtrl(page, wxID_ANY, "0.0",
-		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_fp1);
+		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_fp1);
 	m_x_rot_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxSP_VERTICAL);
 	m_x_rot_spin->SetRange(-0x8000, 0x7fff);
@@ -394,7 +394,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_y_rot_sldr->SetRangeStyle(2);
 	m_y_rot_text = new wxTextCtrl(page, wxID_ANY, "0.0",
-		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_fp1);
+		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_fp1);
 	m_y_rot_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxSP_VERTICAL);
 	m_y_rot_spin->SetRange(-0x8000, 0x7fff);
@@ -417,7 +417,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_z_rot_sldr->SetRangeStyle(2);
 	m_z_rot_text = new wxTextCtrl(page, wxID_ANY, "0.0",
-		wxDefaultPosition, FromDIP(wxSize(34, 20)), 0, vald_fp1);
+		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_fp1);
 	m_z_rot_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxSP_VERTICAL);
 	m_z_rot_spin->SetRange(-0x8000, 0x7fff);

@@ -1142,7 +1142,7 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	st = new wxStaticText(this, 0, "Group ID:",
 		wxDefaultPosition, FromDIP(wxSize(65, -1)));
 	m_group_text = new wxTextCtrl(this, ID_GroupText, "0",
-		wxDefaultPosition, FromDIP(wxSize(40, 22)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 22)), wxTE_RIGHT, vald_int);
 	m_chg_group = new wxButton(this, ID_ChgGroup, "Change",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_sel_group = new wxButton(this, ID_SelGroup, "Select",

@@ -236,7 +236,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	m_line_width_sldr = new wxSingleSlider(page, ID_LineWidthSldr, 3, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_line_width_text = new wxTextCtrl(page, ID_LineWidthText, "3",
-		wxDefaultPosition, FromDIP(wxSize(40, -1)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	sizer3_1->Add(m_line_width_sldr, 1, wxEXPAND);
 	sizer3_1->Add(m_line_width_text, 0, wxALIGN_CENTER);
 	group3->Add(10, 5);
@@ -250,7 +250,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	m_paint_hist_depth_sldr = new wxSingleSlider(page, ID_PaintHistDepthSldr, 0, 0, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_paint_hist_depth_text = new wxTextCtrl(page, ID_PaintHistDepthText, "0",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	st = new wxStaticText(page, 0,
 		"The number of undo steps for paint brush selection.\n" \
 		"Set the value to 0 to disable history.\n" \
@@ -270,7 +270,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	m_pencil_dist_sldr = new wxSingleSlider(page, ID_PencilDistSldr, 30, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_pencil_dist_text = new wxTextCtrl(page, ID_PencilDistText, "30",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	st = new wxStaticText(page, 0,
 		"The pixel distance between two ruler points for pencil and magnet.\n");
 	sizer5_1->Add(m_pencil_dist_sldr, 1, wxEXPAND);
@@ -333,7 +333,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	m_peeling_layers_sldr = new wxSingleSlider(page, ID_PeelingLayersSldr, 1, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_peeling_layers_text = new wxTextCtrl(page, ID_PeelingLayersText, "1",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	st = new wxStaticText(page, 0,
 		"The number of depth peeling layers for rendering transparent mesh objects.\n"\
 		"Set higher numbers only for complex geometries.\n"\
@@ -356,7 +356,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shadow_dir_sldr->SetRangeStyle(2);
 	m_shadow_dir_text = new wxTextCtrl(page, ID_ShadowDirText, "-45",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_fp2);
 	st = new wxStaticText(page, 0,
 		"The direction of the shadows, when shadow is enabled for volume data.");
 	sizer3_1->Add(m_shadow_dir_chk, 0, wxALIGN_CENTER);
@@ -376,7 +376,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	m_pin_threshold_sldr = new wxSingleSlider(page, ID_PinThreshSldr, 100, 10, 500,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_pin_threshold_text = new wxTextCtrl(page, ID_PinThreshText, "1000",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	sizer4_1->Add(st, 0, wxALIGN_CENTER);
 	sizer4_1->Add(m_pin_threshold_sldr, 1, wxEXPAND);
 	sizer4_1->Add(m_pin_threshold_text, 0, wxALIGN_CENTER);
@@ -453,7 +453,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	m_graphics_mem_sldr = new wxSingleSlider(page, ID_GraphicsMemSldr, 10, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_graphics_mem_text = new wxTextCtrl(page, ID_GraphicsMemText, "1000",
-		wxDefaultPosition, FromDIP(wxSize(40, -1)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	st = new wxStaticText(page, 0, "MB",
 		wxDefaultPosition, FromDIP(wxSize(20, -1)));
 	sizer2_1->Add(m_graphics_mem_sldr, 1, wxEXPAND);
@@ -466,7 +466,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	m_large_data_sldr = new wxSingleSlider(page, ID_LargeDataSldr, 20, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_large_data_text = new wxTextCtrl(page, ID_LargeDataText, "200",
-		wxDefaultPosition, FromDIP(wxSize(40, -1)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	st = new wxStaticText(page, 0, "MB",
 		wxDefaultPosition, FromDIP(wxSize(20, -1)));
 	sizer2_2->Add(m_large_data_sldr, 1, wxEXPAND);
@@ -479,7 +479,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	m_block_size_sldr = new wxSingleSlider(page, ID_BlockSizeSldr, 7, 6, 12,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_block_size_text = new wxTextCtrl(page, ID_BlockSizeText, "128",
-		wxDefaultPosition, FromDIP(wxSize(40, -1)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	st = new wxStaticText(page, 0, "vx",
 		wxDefaultPosition, FromDIP(wxSize(20, -1)));
 	sizer2_3->Add(m_block_size_sldr, 1, wxEXPAND);
@@ -492,7 +492,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	m_response_time_sldr = new wxSingleSlider(page, ID_ResponseTimeSldr, 10, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_response_time_text = new wxTextCtrl(page, ID_ResponseTimeText, "100",
-		wxDefaultPosition, FromDIP(wxSize(40, -1)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	st = new wxStaticText(page, 0, "ms",
 		wxDefaultPosition, FromDIP(wxSize(20, -1)));
 	sizer2_4->Add(m_response_time_sldr, 1, wxEXPAND);
@@ -505,7 +505,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	m_detail_level_offset_sldr = new wxSingleSlider(page, ID_DetailLevelOffsetSldr, 0, -5, 5,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_detail_level_offset_text = new wxTextCtrl(page, ID_DetailLevelOffsetText, "0",
-		wxDefaultPosition, FromDIP(wxSize(40, -1)), 0, vald_int2);
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int2);
 	sizer2_5->Add(m_detail_level_offset_sldr, 1, wxEXPAND);
 	sizer2_5->Add(m_detail_level_offset_text, 0, wxALIGN_CENTER);
 	sizer2_5->Add(20, 5);
@@ -568,7 +568,7 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	m_eye_dist_sldr = new wxSingleSlider(page, ID_EyeDistSldr, 200, 0, 2000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_eye_dist_text = new wxTextCtrl(page, ID_EyeDistText, "20.0",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_fp1);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_fp1);
 	sizer1_3->Add(st, 0, wxALIGN_CENTER);
 	sizer1_3->Add(m_eye_dist_sldr, 1, wxEXPAND);
 	sizer1_3->Add(m_eye_dist_text, 0, wxALIGN_CENTER);
@@ -588,7 +588,7 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	m_disp_id_sldr = new wxSingleSlider(page, ID_DispIdSldr, 0, 0, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_disp_id_text = new wxTextCtrl(page, ID_DispIdText, "0",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	sizer2_1->Add(st, 0, wxALIGN_CENTER);
 	sizer2_1->Add(m_disp_id_sldr, 1, wxEXPAND);
 	sizer2_1->Add(m_disp_id_text, 0, wxALIGN_CENTER);
@@ -728,7 +728,7 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	m_max_texture_size_chk = new wxCheckBox(page, ID_MaxTextureSizeChk,
 		"Set max texture size");
 	m_max_texture_size_text = new wxTextCtrl(page, ID_MaxTextureSizeText, "2048",
-		wxDefaultPosition, FromDIP(wxSize(40, -1)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	sizer3_1->Add(m_max_texture_size_chk, 0, wxALIGN_CENTER);
 	sizer3_1->Add(10, 10);
 	sizer3_1->Add(m_max_texture_size_text, 0, wxALIGN_CENTER);

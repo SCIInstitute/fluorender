@@ -113,6 +113,7 @@ private:
 	wxButton *m_dec_time_btn;
 	wxTextCtrl *m_cur_frame_text;
 	wxButton *m_inc_time_btn;
+	wxTextCtrl* m_full_frame_text;
 
 	wxButton *m_rewind_btn;
 	wxToggleButton* m_play_inv_btn;
@@ -129,9 +130,13 @@ private:
 	wxRadioButton *m_z_rd;
 	wxTextCtrl *m_degree_text;
 	wxComboBox *m_rot_int_cmb;
-
+	//sequence
 	wxCheckBox *m_seq_chk;
 	wxCheckBox *m_bat_chk;
+	wxButton* m_seq_dec_btn;
+	wxButton* m_seq_inc_btn;
+	wxTextCtrl* m_seq_num_text;
+	wxTextCtrl* m_seq_total_text;
 
 	//key frame
 	wxCheckBox* m_keyframe_chk;
@@ -190,6 +195,7 @@ private:
 	void OnEndFrameBtn(wxCommandEvent& event);
 	void OnIncFrame(wxCommandEvent& event);
 	void OnDecFrame(wxCommandEvent& event);
+	void OnFullFrameText(wxCommandEvent& event);
 	void OnSave(wxCommandEvent& event);
 
 	//basic rotation
@@ -201,6 +207,9 @@ private:
 	//sequence
 	void OnSequenceChecked(wxCommandEvent& event);
 	void OnBatchChecked(wxCommandEvent& event);
+	void OnSeqDecBtn(wxCommandEvent& event);
+	void OnSeqNumText(wxCommandEvent& event);
+	void OnSeqIncBtn(wxCommandEvent& event);
 
 	//keyframe movie
 	void OnKeyframeChk(wxCommandEvent& event);

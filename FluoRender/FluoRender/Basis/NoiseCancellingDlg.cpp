@@ -73,7 +73,7 @@ NoiseCancellingDlg::NoiseCancellingDlg(MainFrame *frame)
 	m_threshold_sldr = new wxSingleSlider(this, ID_ThresholdSldr, 0, 0, 2550,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_threshold_text = new wxTextCtrl(this, ID_ThresholdText, "0.0",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_fp1);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_fp1);
 	m_preview_btn = new wxButton(this, ID_PreviewBtn, "Preview",
 		wxDefaultPosition, FromDIP(wxSize(70, 23)));
 	sizer1->Add(st, 0, wxALIGN_CENTER);
@@ -89,7 +89,7 @@ NoiseCancellingDlg::NoiseCancellingDlg(MainFrame *frame)
 	m_voxel_sldr = new wxSingleSlider(this, ID_VoxelSldr, 1, 1, 500,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_voxel_text = new wxTextCtrl(this, ID_VoxelText, "1",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_erase_btn = new wxButton(this, ID_EraseBtn, "Erase",
 		wxDefaultPosition, FromDIP(wxSize(70, 23)));
 	sizer2->Add(st, 0, wxALIGN_CENTER);

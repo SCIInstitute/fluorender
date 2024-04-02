@@ -558,15 +558,15 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 	resize_chk->Connect(resize_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(DataListCtrl::OnResizeCheck), NULL, panel);
 	wxTextCtrl* size_x_txt = new wxTextCtrl(panel, ID_RESIZE_X_TXT, "",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+		wxDefaultPosition, wxSize(40, 20), wxTE_RIGHT, vald_int);
 	size_x_txt->Connect(size_x_txt->GetId(), wxEVT_TEXT,
 		wxCommandEventHandler(DataListCtrl::OnSizeXText), NULL, panel);
 	wxTextCtrl* size_y_txt = new wxTextCtrl(panel, ID_RESIZE_Y_TXT, "",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+		wxDefaultPosition, wxSize(40, 20), wxTE_RIGHT, vald_int);
 	size_y_txt->Connect(size_y_txt->GetId(), wxEVT_TEXT,
 		wxCommandEventHandler(DataListCtrl::OnSizeYText), NULL, panel);
 	wxTextCtrl* size_z_txt = new wxTextCtrl(panel, ID_RESIZE_Z_TXT, "",
-		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
+		wxDefaultPosition, wxSize(40, 20), wxTE_RIGHT, vald_int);
 	size_z_txt->Connect(size_z_txt->GetId(), wxEVT_TEXT,
 		wxCommandEventHandler(DataListCtrl::OnSizeZText), NULL, panel);
 	wxComboBox* combo = new wxComboBox(panel, ID_FILTER,

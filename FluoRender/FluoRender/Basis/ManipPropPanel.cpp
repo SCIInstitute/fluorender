@@ -52,7 +52,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 
 	m_x_trans_st = new wxStaticText(this, 0, "X:");
 	m_x_trans_text = new wxTextCtrl(this, ID_XTransText, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
 	m_x_trans_text->Bind(wxEVT_TEXT, &ManipPropPanel::OnValueEnter, this);
 	m_x_trans_spin = new wxSpinButton(this, ID_XTransSpin);
 	m_x_trans_spin->SetRange(-0x8000, 0x7fff);
@@ -60,7 +60,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 	m_x_trans_spin->Bind(wxEVT_SPIN_DOWN, &ManipPropPanel::OnSpinDown, this);
 	m_y_trans_st = new wxStaticText(this, 0, "Y:");
 	m_y_trans_text = new wxTextCtrl(this, ID_YTransText, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
 	m_y_trans_text->Bind(wxEVT_TEXT, &ManipPropPanel::OnValueEnter, this);
 	m_y_trans_spin = new wxSpinButton(this, ID_YTransSpin);
 	m_y_trans_spin->SetRange(-0x8000, 0x7fff);
@@ -68,7 +68,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 	m_y_trans_spin->Bind(wxEVT_SPIN_DOWN, &ManipPropPanel::OnSpinDown, this);
 	m_z_trans_st = new wxStaticText(this, 0, "Z:");
 	m_z_trans_text = new wxTextCtrl(this, ID_ZTransText, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
 	m_z_trans_text->Bind(wxEVT_TEXT, &ManipPropPanel::OnValueEnter, this);
 	m_z_trans_spin = new wxSpinButton(this, ID_ZTransSpin);
 	m_z_trans_spin->SetRange(-0x8000, 0x7fff);
@@ -88,7 +88,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 
 	m_x_rot_st = new wxStaticText(this, 0, "X:");
 	m_x_rot_text = new wxTextCtrl(this, ID_XRotText, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
 	m_x_rot_text->Bind(wxEVT_TEXT, &ManipPropPanel::OnValueEnter, this);
 	m_x_rot_spin = new wxSpinButton(this, ID_XRotSpin);
 	m_x_rot_spin->SetRange(-0x8000, 0x7fff);
@@ -96,7 +96,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 	m_x_rot_spin->Bind(wxEVT_SPIN_DOWN, &ManipPropPanel::OnSpinDown, this);
 	m_y_rot_st = new wxStaticText(this, 0, "Y:");
 	m_y_rot_text = new wxTextCtrl(this, ID_YRotText, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
 	m_y_rot_text->Bind(wxEVT_TEXT, &ManipPropPanel::OnValueEnter, this);
 	m_y_rot_spin = new wxSpinButton(this, ID_YRotSpin);
 	m_y_rot_spin->SetRange(-0x8000, 0x7fff);
@@ -104,7 +104,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 	m_y_rot_spin->Bind(wxEVT_SPIN_DOWN, &ManipPropPanel::OnSpinDown, this);
 	m_z_rot_st = new wxStaticText(this, 0, "Z:");
 	m_z_rot_text = new wxTextCtrl(this, ID_ZRotText, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
 	m_z_rot_text->Bind(wxEVT_TEXT, &ManipPropPanel::OnValueEnter, this);
 	m_z_rot_spin = new wxSpinButton(this, ID_ZRotSpin);
 	m_z_rot_spin->SetRange(-0x8000, 0x7fff);
@@ -124,7 +124,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 
 	m_x_scl_st = new wxStaticText(this, 0, "X:");
 	m_x_scl_text = new wxTextCtrl(this, ID_XScalText, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
 	m_x_scl_text->Bind(wxEVT_TEXT, &ManipPropPanel::OnValueEnter, this);
 	m_x_scl_spin = new wxSpinButton(this, ID_XScalSpin);
 	m_x_scl_spin->SetRange(-0x8000, 0x7fff);
@@ -132,7 +132,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 	m_x_scl_spin->Bind(wxEVT_SPIN_DOWN, &ManipPropPanel::OnSpinDown, this);
 	m_y_scl_st = new wxStaticText(this, 0, "Y:");
 	m_y_scl_text = new wxTextCtrl(this, ID_YScalText, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
 	m_y_scl_text->Bind(wxEVT_TEXT, &ManipPropPanel::OnValueEnter, this);
 	m_y_scl_spin = new wxSpinButton(this, ID_YScalSpin);
 	m_y_scl_spin->SetRange(-0x8000, 0x7fff);
@@ -140,7 +140,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 	m_y_scl_spin->Bind(wxEVT_SPIN_DOWN, &ManipPropPanel::OnSpinDown, this);
 	m_z_scl_st = new wxStaticText(this, 0, "Z:");
 	m_z_scl_text = new wxTextCtrl(this, ID_ZScalText, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
 	m_z_scl_text->Bind(wxEVT_TEXT, &ManipPropPanel::OnValueEnter, this);
 	m_z_scl_spin = new wxSpinButton(this, ID_ZScalSpin);
 	m_z_scl_spin->SetRange(-0x8000, 0x7fff);

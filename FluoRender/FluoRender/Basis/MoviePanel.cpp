@@ -79,7 +79,7 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, wxID_ANY, "Rotation Angles:");
 	m_degree_text = new wxTextCtrl(page, wxID_ANY, "360",
-		wxDefaultPosition, FromDIP(wxSize(40, -1)));
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT);
 	m_degree_text->Bind(wxEVT_TEXT, &MoviePanel::OnDegreeText, this);
 	st2 = new wxStaticText(page, wxID_ANY, "Deg.");
 	sizer3->Add(20, 5, 0);
@@ -116,6 +116,36 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 	sizer6->Add(10, 10, 0);
 	sizer6->Add(m_bat_chk, 0, wxALIGN_CENTER);
 
+	//sequence number
+	wxSize bs = FromDIP(wxSize(26, 26));
+	wxBoxSizer* sizer7 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, wxID_ANY, "T: ");
+	m_seq_dec_btn = new wxButton(page, wxID_ANY, "",
+		wxDefaultPosition, bs);
+	m_seq_dec_btn->SetBitmap(wxGetBitmapFromMemory(minus));
+	m_seq_dec_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnSeqDecBtn, this);
+	m_seq_dec_btn->SetToolTip("Decrease the time point number by 1");
+	m_seq_num_text = new wxTextCtrl(page, wxID_ANY, "0",
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
+	m_seq_num_text->Bind(wxEVT_TEXT, &MoviePanel::OnSeqNumText, this);
+	m_seq_inc_btn = new wxButton(page, wxID_ANY, "",
+		wxDefaultPosition, bs);
+	m_seq_inc_btn->SetBitmap(wxGetBitmapFromMemory(plus));
+	m_seq_inc_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnSeqIncBtn, this);
+	m_seq_inc_btn->SetToolTip("Increase the time point number by 1");
+	st2 = new wxStaticText(page, wxID_ANY, "Total Time Points: ");
+	m_seq_total_text = new wxTextCtrl(page, wxID_ANY, "0",
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT|wxTE_READONLY);
+	sizer7->Add(20, 20);
+	sizer7->Add(st, 0, wxALIGN_CENTER);
+	sizer7->Add(10, 10);
+	sizer7->Add(m_seq_dec_btn, 0, wxALIGN_CENTER);
+	sizer7->Add(m_seq_num_text, 0, wxALIGN_CENTER);
+	sizer7->Add(m_seq_inc_btn, 0, wxALIGN_CENTER);
+	sizer7->Add(20, 20);
+	sizer7->Add(st2, 0, wxALIGN_CENTER);
+	sizer7->Add(m_seq_total_text, 0, wxALIGN_CENTER);
+
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	sizer_v->Add(5, 5, 0);
@@ -130,6 +160,8 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 	sizer_v->Add(sizer5, 0, wxEXPAND);
 	sizer_v->Add(5, 20, 0);
 	sizer_v->Add(sizer6, 0, wxEXPAND);
+	sizer_v->Add(5, 20, 0);
+	sizer_v->Add(sizer7, 0, wxEXPAND);
 	//set the page
 	page->SetSizer(sizer_v);
 	page->SetAutoLayout(true);
@@ -247,7 +279,7 @@ wxWindow* MoviePanel::CreateCroppingPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Center:  X:",
 		wxDefaultPosition, FromDIP(wxSize(85, 20)));
 	m_center_x_text = new wxTextCtrl(page, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_center_x_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
 	m_center_x_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(20, 20)));
@@ -261,7 +293,7 @@ wxWindow* MoviePanel::CreateCroppingPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "       Y:",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)));
 	m_center_y_text = new wxTextCtrl(page, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_center_y_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
 	m_center_y_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(20, 20)));
@@ -275,7 +307,7 @@ wxWindow* MoviePanel::CreateCroppingPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Size:    Width:",
 		wxDefaultPosition, FromDIP(wxSize(85, 20)));
 	m_width_text = new wxTextCtrl(page, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_width_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
 	m_width_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(20, 20)));
@@ -289,7 +321,7 @@ wxWindow* MoviePanel::CreateCroppingPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "   Height:",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)));
 	m_height_text = new wxTextCtrl(page, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_height_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
 	m_height_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(20, 20)));
@@ -411,7 +443,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	//FPS
 	st = new wxStaticText(this, wxID_ANY, "FPS: ");
 	m_fps_text = new wxTextCtrl(this, wxID_ANY, "30",
-		wxDefaultPosition, FromDIP(wxSize(30, -1)));
+		wxDefaultPosition, FromDIP(wxSize(30, -1)), wxTE_RIGHT);
 	m_fps_text->Bind(wxEVT_TEXT, &MoviePanel::OnFpsEdit, this);
 	sizer1->Add(5, 5);
 	sizer1->Add(st, 0, wxALIGN_CENTER);
@@ -419,8 +451,8 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	//movie length
 	st = new wxStaticText(this, wxID_ANY, "Length: ");
 	st2 = new wxStaticText(this, wxID_ANY, "Sec.");
-	m_movie_len_text = new wxTextCtrl(this, wxID_ANY, "5.00",
-		wxDefaultPosition, FromDIP(wxSize(50, -1)));
+	m_movie_len_text = new wxTextCtrl(this, wxID_ANY, "0",
+		wxDefaultPosition, FromDIP(wxSize(50, -1)), wxTE_RIGHT);
 	m_movie_len_text->Bind(wxEVT_TEXT, &MoviePanel::OnMovieLenText, this);
 	sizer1->Add(5, 5);
 	sizer1->Add(st, 0, wxALIGN_CENTER);
@@ -464,12 +496,14 @@ MoviePanel::MoviePanel(MainFrame* frame,
 
 	//controls
 	wxSize bs = FromDIP(wxSize(26, 26));
+	wxSize ts = FromDIP(wxSize(50, -1));
 	wxFont f;
 	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
 	m_start_btn = new wxButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
 	m_start_btn->SetBitmap(wxGetBitmapFromMemory(start));
 	m_start_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnStartFrameBtn, this);
+	m_start_btn->SetToolTip("Set the start frame of a clip");
 	m_start_frame_text = new wxTextCtrl(this, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(39, -1)), wxTE_RIGHT, vald_int);
 	f = m_start_frame_text->GetFont();
@@ -484,18 +518,26 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		wxDefaultPosition, bs);
 	m_end_btn->SetBitmap(wxGetBitmapFromMemory(end));
 	m_end_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnEndFrameBtn, this);
+	m_end_btn->SetToolTip("Set the end frame of a clip");
 	m_dec_time_btn = new wxButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
 	m_dec_time_btn->SetBitmap(wxGetBitmapFromMemory(step_back));
 	m_dec_time_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnDecFrame, this);
+	m_dec_time_btn->SetToolTip("Step back one frame");
 	m_cur_frame_text = new wxTextCtrl(this, wxID_ANY, "0",
-		wxDefaultPosition, FromDIP(wxSize(50, -1)), wxTE_RIGHT, vald_int);
+		wxDefaultPosition, ts, wxTE_RIGHT, vald_int);
 	m_cur_frame_text->SetFont(f);
 	m_cur_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnCurFrameText, this);
 	m_inc_time_btn = new wxButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
 	m_inc_time_btn->SetBitmap(wxGetBitmapFromMemory(step_forward));
 	m_inc_time_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnIncFrame, this);
+	m_inc_time_btn->SetToolTip("Step forward one frame");
+	m_full_frame_text = new wxTextCtrl(this, wxID_ANY, "0",
+		wxDefaultPosition, ts, wxTE_RIGHT, vald_int);
+	m_full_frame_text->SetFont(f);
+	m_full_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnFullFrameText, this);
+	m_full_frame_text->SetToolTip("Set the total number of frames");
 	sizer3->AddStretchSpacer(2);
 	sizer3->Add(m_start_btn, 0, wxALIGN_CENTER);
 	sizer3->Add(m_start_frame_text, 0, wxALIGN_CENTER);
@@ -506,7 +548,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	sizer3->Add(m_cur_frame_text, 0, wxALIGN_CENTER);
 	sizer3->Add(m_inc_time_btn, 0, wxALIGN_CENTER);
 	sizer3->AddStretchSpacer(2);
-	sizer3->Add(bs.x, bs.y);
+	sizer3->Add(m_full_frame_text, 0, wxALIGN_CENTER);
 	sizer3->Add(5, 5);
 
 	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
@@ -514,24 +556,29 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		wxDefaultPosition, bs);
 	m_rewind_btn->SetBitmap(wxGetBitmapFromMemory(rewind));
 	m_rewind_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnRewind, this);
+	m_rewind_btn->SetToolTip("Rewind to the start frame of a clip");
 	m_play_inv_btn = new wxToggleButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
 	m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv));
 	m_play_inv_btn->Bind(wxEVT_TOGGLEBUTTON, &MoviePanel::OnPlayInv, this);
+	m_play_inv_btn->SetToolTip("Play a clip backward");
 	m_play_btn = new wxToggleButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
 	m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
 	m_play_btn->Bind(wxEVT_TOGGLEBUTTON, &MoviePanel::OnPlay, this);
+	m_play_btn->SetToolTip("Play a clip");
 	m_forward_btn = new wxButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
 	m_forward_btn->SetBitmap(wxGetBitmapFromMemory(forward));
 	m_forward_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnForward, this);
+	m_forward_btn->SetToolTip("Wind forward to the end of a clip");
 	m_loop_btn = new wxToggleButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
 	m_loop_btn->SetBitmap(wxGetBitmapFromMemory(loop));
 	m_loop_btn->Bind(wxEVT_TOGGLEBUTTON, &MoviePanel::OnLoop, this);
+	m_loop_btn->SetToolTip("Enable playback in a loop");
 	m_progress_text = new wxTextCtrl(this, wxID_ANY, "0.00",
-		wxDefaultPosition, FromDIP(wxSize(50, -1)), wxTE_RIGHT);
+		wxDefaultPosition, ts, wxTE_RIGHT);
 	m_progress_text->SetFont(f);
 	m_progress_text->Bind(wxEVT_TEXT, &MoviePanel::OnCurTimeText, this);
 	st = new wxStaticText(this, wxID_ANY, "Sec.",
@@ -540,6 +587,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		wxDefaultPosition, bs);
 	m_save_btn->SetBitmap(wxGetBitmapFromMemory(save));
 	m_save_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnSave, this);
+	m_save_btn->SetToolTip("Export a movie clip");
 	sizer4->AddStretchSpacer(2);
 	sizer4->Add(m_rewind_btn, 0, wxALIGN_CENTER);
 	sizer4->Add(m_play_inv_btn, 0, wxALIGN_CENTER);
@@ -551,6 +599,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	sizer4->Add(m_progress_text, 0, wxALIGN_CENTER);
 	sizer4->Add(st, 0, wxALIGN_CENTER);
 	sizer4->AddStretchSpacer(2);
+	sizer4->Add(ts.x - bs.x, ts.y);
 	sizer4->Add(m_save_btn, 0, wxALIGN_CENTER);
 	sizer4->Add(5, 5);
 
@@ -1142,6 +1191,10 @@ void MoviePanel::OnDecFrame(wxCommandEvent& event)
 	event.Skip();
 }
 
+void MoviePanel::OnFullFrameText(wxCommandEvent& event)
+{
+}
+
 void MoviePanel::OnSave(wxCommandEvent& event)
 {
 	wxFileDialog* fopendlg = new wxFileDialog(
@@ -1218,6 +1271,21 @@ void MoviePanel::OnBatchChecked(wxCommandEvent& event)
 		glbin_moviemaker.SetSeqMode(0);
 	FluoUpdate({ gstMovRotEnable, gstMovSeqMode, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider });
 	event.Skip();
+}
+
+void MoviePanel::OnSeqDecBtn(wxCommandEvent& event)
+{
+
+}
+
+void MoviePanel::OnSeqNumText(wxCommandEvent& event)
+{
+
+}
+
+void MoviePanel::OnSeqIncBtn(wxCommandEvent& event)
+{
+
 }
 
 void MoviePanel::OnKeyframeChk(wxCommandEvent& event)
@@ -1607,7 +1675,7 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 		wxDefaultPosition, wxDefaultSize);
 	wxIntegerValidator<unsigned int> vald_int;
 	wxTextCtrl* tx_dpi = new wxTextCtrl(panel, wxID_ANY,
-		"", wxDefaultPosition, wxDefaultSize, 0, vald_int);
+		"", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, vald_int);
 	tx_dpi->Connect(tx_dpi->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(MoviePanel::OnDpiText), NULL, panel);
 	float dpi = glbin_settings.m_dpi;
@@ -1628,7 +1696,7 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	sl_enlarge->SetValue(std::round(enlarge_scale * 10));
 	wxFloatingPointValidator<double> vald_fp(1);
 	wxTextCtrl* tx_enlarge = new wxTextCtrl(panel, ID_ENLARGE_TEXT,
-		"1.0", wxDefaultPosition, wxDefaultSize, 0, vald_fp);
+		"1.0", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, vald_fp);
 	tx_enlarge->Connect(tx_enlarge->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(MoviePanel::OnTxEnlargeText), NULL, panel);
 	tx_enlarge->Enable(enlarge);
@@ -1647,7 +1715,7 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	wxStaticText *MOVopts = new wxStaticText(panel, wxID_ANY, "MOV Options:",
 		wxDefaultPosition, wxDefaultSize);
 	wxTextCtrl *bitrate_text = new wxTextCtrl(panel, wxID_ANY, "20.0",
-		wxDefaultPosition, wxDefaultSize);
+		wxDefaultPosition, wxDefaultSize, wxTE_RIGHT);
 	bitrate_text->Connect(bitrate_text->GetId(), wxEVT_TEXT,
 		wxCommandEventHandler(MoviePanel::OnMovieQuality), NULL, panel);
 	st = new wxStaticText(panel, wxID_ANY, "Bitrate:",
@@ -1657,7 +1725,7 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	wxStaticText *st3 = new wxStaticText(panel, wxID_ANY, "Estimated size:",
 		wxDefaultPosition, wxDefaultSize);
 	wxTextCtrl* tx_estimate = new wxTextCtrl(panel, ID_MOV_ESTIMATE_TEXT, "2.5",
-		wxDefaultPosition, wxDefaultSize);
+		wxDefaultPosition, wxDefaultSize, wxTE_RIGHT);
 	tx_estimate->Disable();
 	glbin_settings.m_mov_bitrate = STOD(bitrate_text->GetValue().fn_str());
 	double size = glbin_settings.m_mov_bitrate *

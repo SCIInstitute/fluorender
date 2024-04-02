@@ -95,7 +95,7 @@ m_view(0)
 	m_iterations_sldr = new wxSingleSlider(this, ID_IterationsSldr, 1, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_iterations_txt = new wxTextCtrl(this, ID_IterationsTxt, "1",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	sizer_2->Add(5, 5);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_execute_btn, 0, wxALIGN_CENTER);

@@ -170,16 +170,16 @@ wxWindow* OutputAdjPanel::CreateRedPage(wxWindow* parent, wxSize& size)
 	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
 	vald_fp2.SetRange(0.0, 10.0);
 	m_r_gamma_text = new wxTextCtrl(page, wxID_ANY, "1.00",
-		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_fp2);
 	m_r_gamma_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnRGammaText, this);
 	sizer3->Add(m_r_gamma_text, 1, wxEXPAND);
 	m_r_brightness_text = new wxTextCtrl(page, wxID_ANY, "0",
-		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_int);
 	m_r_brightness_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnRBrightnessText, this);
 	sizer3->Add(m_r_brightness_text, 1, wxEXPAND);
 	vald_fp2.SetRange(0.0, 1.0);
 	m_r_hdr_text = new wxTextCtrl(page, wxID_ANY, "0.00",
-		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_fp2);
 	m_r_hdr_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnRHdrText, this);
 	sizer3->Add(m_r_hdr_text, 1, wxEXPAND);
 
@@ -274,16 +274,16 @@ wxWindow* OutputAdjPanel::CreateGreenPage(wxWindow* parent, wxSize& size)
 	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
 	vald_fp2.SetRange(0.0, 10.0);
 	m_g_gamma_text = new wxTextCtrl(page, wxID_ANY, "1.00",
-		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_fp2);
 	m_g_gamma_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnGGammaText, this);
 	sizer3->Add(m_g_gamma_text, 1, wxEXPAND);
 	m_g_brightness_text = new wxTextCtrl(page, wxID_ANY, "0",
-		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_int);
 	m_g_brightness_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnGBrightnessText, this);
 	sizer3->Add(m_g_brightness_text, 1, wxEXPAND);
 	vald_fp2.SetRange(0.0, 1.0);
 	m_g_hdr_text = new wxTextCtrl(page, wxID_ANY, "0.00",
-		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_fp2);
 	m_g_hdr_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnGHdrText, this);
 	sizer3->Add(m_g_hdr_text, 1, wxEXPAND);
 
@@ -381,16 +381,16 @@ wxWindow* OutputAdjPanel::CreateBluePage(wxWindow* parent, wxSize& size)
 	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
 	vald_fp2.SetRange(0.0, 10.0);
 	m_b_gamma_text = new wxTextCtrl(page, wxID_ANY, "1.00",
-		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_fp2);
 	m_b_gamma_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnBGammaText, this);
 	sizer3->Add(m_b_gamma_text, 1, wxEXPAND);
 	m_b_brightness_text = new wxTextCtrl(page, wxID_ANY, "0",
-		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_int);
 	m_b_brightness_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnBBrightnessText, this);
 	sizer3->Add(m_b_brightness_text, 1, wxEXPAND);
 	vald_fp2.SetRange(0.0, 1.0);
 	m_b_hdr_text = new wxTextCtrl(page, wxID_ANY, "0.00",
-		wxDefaultPosition, FromDIP(wxSize(30, 20)), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_fp2);
 	m_b_hdr_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnBHdrText, this);
 	sizer3->Add(m_b_hdr_text, 1, wxEXPAND);
 

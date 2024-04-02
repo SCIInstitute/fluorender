@@ -67,7 +67,7 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 		wxDefaultPosition, FromDIP(wxSize(200, 20)), wxSL_HORIZONTAL);
 	m_alpha_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnAlphaChange, this);
 	m_alpha_text = new wxTextCtrl(this, wxID_ANY, "1.00",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_fp2);
 	m_alpha_text->Bind(wxEVT_TEXT, &MeshPropPanel::OnAlphaText, this);
 	sizer_1->Add(20, 5, 0);
 	sizer_1->Add(st, 0, wxALIGN_CENTER, 0);
@@ -81,7 +81,7 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 		wxDefaultPosition, FromDIP(wxSize(200, 20)), wxSL_HORIZONTAL);
 	m_shadow_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnShadowChange, this);
 	m_shadow_text = new wxTextCtrl(this, wxID_ANY, "0.60",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_fp2);
 	m_shadow_text->Bind(wxEVT_TEXT, &MeshPropPanel::OnShadowText, this);
 	sizer_2->Add(20, 5, 0);
 	sizer_2->Add(m_shadow_chk, 0, wxALIGN_CENTER, 0);
@@ -120,7 +120,7 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 		wxDefaultPosition, FromDIP(wxSize(200, 20)), wxSL_HORIZONTAL);
 	m_shine_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnShineChange, this);
 	m_shine_text = new wxTextCtrl(this, wxID_ANY, "30",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_int);
 	m_shine_text->Bind(wxEVT_TEXT, &MeshPropPanel::OnShineText, this);
 	sizer_6->Add(st, 0, wxALIGN_CENTER, 0);
 	sizer_6->Add(m_shine_sldr, 0, wxALIGN_CENTER, 0);
@@ -141,7 +141,7 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 		wxDefaultPosition, FromDIP(wxSize(200, 20)), wxSL_HORIZONTAL);
 	m_scale_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnScaleChange, this);
 	m_scale_text = new wxTextCtrl(this, wxID_ANY, "1.00",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_fp2);
 	m_scale_text->Bind(wxEVT_TEXT, &MeshPropPanel::OnScaleText, this);
 	sizer_7->Add(20, 5, 0);
 	sizer_7->Add(st, 0, wxALIGN_CENTER, 0);
@@ -157,7 +157,7 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 		wxDefaultPosition, FromDIP(wxSize(200, 20)), wxSL_HORIZONTAL);
 	m_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnSizeChange, this);
 	m_size_text = new wxTextCtrl(this, wxID_ANY, "50",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_int);
 	m_size_text->Bind(wxEVT_TEXT, &MeshPropPanel::OnSizeText, this);
 	sizer_8->Add(20, 5, 0);
 	sizer_8->Add(m_size_chk, 0, wxALIGN_CENTER);

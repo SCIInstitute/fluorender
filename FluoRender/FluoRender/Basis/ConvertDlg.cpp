@@ -75,7 +75,7 @@ wxPanel(frame, wxID_ANY,
 	m_cnv_vol_mesh_thresh_sldr = new wxSingleSlider(this, ID_CnvVolMeshThreshSldr, 30, 1, 99,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_cnv_vol_mesh_thresh_text = new wxTextCtrl(this, ID_CnvVolMeshThreshText, "0.30",
-		wxDefaultPosition, FromDIP(wxSize(40, 23)), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(40, 23)), wxTE_RIGHT, vald_fp2);
 	sizer11->Add(st, 0, wxALIGN_CENTER);
 	sizer11->Add(10, 10);
 	sizer11->Add(m_cnv_vol_mesh_thresh_sldr, 1, wxEXPAND);
@@ -88,7 +88,7 @@ wxPanel(frame, wxID_ANY,
 	m_cnv_vol_mesh_downsample_sldr = new wxSingleSlider(this, ID_CnvVolMeshDownsampleSldr, 2, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_cnv_vol_mesh_downsample_text = new wxTextCtrl(this, ID_CnvVolMeshDownsampleText, "2",
-		wxDefaultPosition, FromDIP(wxSize(40, 23)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 23)), wxTE_RIGHT, vald_int);
 	sizer12->Add(st, 0, wxALIGN_CENTER);
 	sizer12->Add(10, 10);
 	sizer12->Add(m_cnv_vol_mesh_downsample_sldr, 1, wxEXPAND);
@@ -101,7 +101,7 @@ wxPanel(frame, wxID_ANY,
 	m_cnv_vol_mesh_downsample_z_sldr = new wxSingleSlider(this, ID_CnvVolMeshDownsampleZSldr, 1, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_cnv_vol_mesh_downsample_z_text = new wxTextCtrl(this, ID_CnvVolMeshDownsampleZText, "1",
-		wxDefaultPosition, FromDIP(wxSize(40, 23)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 23)), wxTE_RIGHT, vald_int);
 	sizer13->Add(st, 0, wxALIGN_CENTER);
 	sizer13->Add(10, 10);
 	sizer13->Add(m_cnv_vol_mesh_downsample_z_sldr, 1, wxEXPAND);

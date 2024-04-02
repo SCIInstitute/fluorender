@@ -258,7 +258,7 @@ BrushToolDlg::BrushToolDlg(
 	m_brush_scl_translate_sldr = new wxSingleSlider(this, ID_BrushSclTranslateSldr, 0, 0, 2550,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_scl_translate_text = new wxTextCtrl(this, ID_BrushSclTranslateText, "0.0",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp1);
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_fp1);
 	sizer1_2->Add(5, 5);
 	sizer1_2->Add(st, 0, wxALIGN_CENTER);
 	sizer1_2->Add(m_brush_scl_translate_sldr, 1, wxEXPAND);
@@ -271,7 +271,7 @@ BrushToolDlg::BrushToolDlg(
 	m_brush_gm_falloff_sldr = new wxSingleSlider(this, ID_BrushGmFalloffSldr, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_gm_falloff_text = new wxTextCtrl(this, ID_BrushGmFalloffText, "0.000",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_fp3);
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_fp3);
 	sizer1_3->Add(5, 5);
 	sizer1_3->Add(st, 0, wxALIGN_CENTER);
 	sizer1_3->Add(m_brush_gm_falloff_sldr, 1, wxEXPAND);
@@ -284,7 +284,7 @@ BrushToolDlg::BrushToolDlg(
 	m_brush_2dinfl_sldr = new wxSingleSlider(this, ID_Brush2dinflSldr, 100, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_INVERSE);
 	m_brush_2dinfl_text = new wxTextCtrl(this, ID_Brush2dinflText, "1.00",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_fp2);
 	sizer1_4->Add(5, 5);
 	sizer1_4->Add(st, 0, wxALIGN_CENTER);
 	sizer1_4->Add(m_brush_2dinfl_sldr, 1, wxEXPAND);
@@ -315,7 +315,7 @@ BrushToolDlg::BrushToolDlg(
 	m_brush_size1_sldr = new wxSingleSlider(this, ID_BrushSize1Sldr, 10, 1, 300,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_size1_text = new wxTextCtrl(this, ID_BrushSize1Text, "10",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_int);
 	sizer2_2->Add(5, 5);
 	sizer2_2->Add(st, 0, wxALIGN_CENTER);
 	sizer2_2->Add(m_brush_size1_sldr, 1, wxEXPAND);
@@ -330,7 +330,7 @@ BrushToolDlg::BrushToolDlg(
 	m_brush_size2_sldr = new wxSingleSlider(this, ID_BrushSize2Sldr, 30, 1, 300,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_size2_text = new wxTextCtrl(this, ID_BrushSize2Text, "30",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_int);
 	m_brush_size2_chk->SetValue(true);
 	m_brush_size2_sldr->Enable();
 	m_brush_size2_text->Enable();

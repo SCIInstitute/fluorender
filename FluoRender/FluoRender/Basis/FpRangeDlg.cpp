@@ -63,7 +63,7 @@ m_frame(frame)
 	st = new wxStaticText(this, 0, "Minimum:",
 		wxDefaultPosition, wxDefaultSize);
 	m_min_text = new wxTextCtrl(this, ID_MinValText, "0.0",
-		wxDefaultPosition, wxDefaultSize , 0, vald_fp);
+		wxDefaultPosition, wxDefaultSize , wxTE_RIGHT, vald_fp);
 	sizer2->Add(10, 10);
 	sizer2->Add(st, 0, wxALIGN_CENTER);
 	sizer2->Add(10, 10);
@@ -71,7 +71,7 @@ m_frame(frame)
 	st = new wxStaticText(this, 0, "Maximum:",
 		wxDefaultPosition, wxDefaultSize);
 	m_max_text = new wxTextCtrl(this, ID_MaxValText, "1.0",
-		wxDefaultPosition, wxDefaultSize, 0, vald_fp);
+		wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, vald_fp);
 	sizer2->Add(10, 10);
 	sizer2->Add(st, 0, wxALIGN_CENTER);
 	sizer2->Add(10, 10);

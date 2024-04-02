@@ -513,7 +513,7 @@ wxWindow* TraceDlg::CreateSelectPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Selection tools:",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	m_comp_id_text = new wxTextCtrl(page, ID_CompIDText, "",
-		wxDefaultPosition, FromDIP(wxSize(77, 23)), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(77, 23)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
 	m_comp_id_x_btn = new wxButton(page, ID_CompIDXBtn, "X",
 		wxDefaultPosition, FromDIP(wxSize(23, 23)));
 	m_comp_full_btn = new wxButton(page, ID_CompFullBtn, "FullCompt",
@@ -543,7 +543,7 @@ wxWindow* TraceDlg::CreateSelectPage(wxWindow *parent)
 	m_cell_size_sldr = new wxSingleSlider(page, ID_CellSizeSldr, 20, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_cell_size_text = new wxTextCtrl(page, ID_CellSizeText, "20",
-		wxDefaultPosition, FromDIP(wxSize(60, 23)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(60, 23)), wxTE_RIGHT, vald_int);
 	sizer_2->Add(5, 5);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_cell_size_sldr, 1, wxEXPAND);
@@ -555,7 +555,7 @@ wxWindow* TraceDlg::CreateSelectPage(wxWindow *parent)
 	m_comp_uncertain_low_sldr = new wxSingleSlider(page, ID_CompUncertainLowSldr, 0, 0, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_comp_uncertain_low_text = new wxTextCtrl(page, ID_CompUncertainLowText, "0",
-		wxDefaultPosition, FromDIP(wxSize(60, 23)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(60, 23)), wxTE_RIGHT, vald_int);
 	sizer_3->Add(5, 5);
 	sizer_3->Add(m_comp_uncertain_btn, 0, wxALIGN_CENTER);
 	sizer_3->Add(30, 23);
@@ -589,7 +589,7 @@ wxWindow* TraceDlg::CreateLinkPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Selection tools:",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	m_comp_id_text2 = new wxTextCtrl(page, ID_CompIDText2, "",
-		wxDefaultPosition, FromDIP(wxSize(77, 23)), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(77, 23)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
 	m_comp_id_x_btn = new wxButton(page, ID_CompIDXBtn, "X",
 		wxDefaultPosition, FromDIP(wxSize(23, 23)));
 	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Append",
@@ -657,7 +657,7 @@ wxWindow* TraceDlg::CreateModifyPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "New ID/Selection:",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	m_cell_new_id_text = new wxTextCtrl(page, ID_CellNewIDText, "",
-		wxDefaultPosition, FromDIP(wxSize(77, 23)), wxTE_PROCESS_ENTER);
+		wxDefaultPosition, FromDIP(wxSize(77, 23)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
 	m_cell_new_id_x_btn = new wxButton(page, ID_CellNewIDXBtn, "X",
 		wxDefaultPosition, FromDIP(wxSize(23, 23)));
 	m_comp_append2_btn = new wxButton(page, ID_CompAppend2Btn, "Append",
@@ -821,7 +821,7 @@ TraceDlg::TraceDlg(MainFrame* frame)
 	m_ghost_num_sldr = new wxSingleSlider(this, ID_GhostNumSldr, 10, 0, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_ghost_num_text = new wxTextCtrl(this, ID_GhostNumText, "10",
-		wxDefaultPosition, FromDIP(wxSize(60, 23)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(60, 23)), wxTE_RIGHT, vald_int);
 	m_ghost_show_lead_chk = new wxCheckBox(this, ID_GhostShowLeadChk, "Lead",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	sizer_1->Add(5, 5);

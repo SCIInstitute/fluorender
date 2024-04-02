@@ -1253,7 +1253,7 @@ wxWindow* MainFrame::CreateExtraControlVolume(wxWindow* parent)
 	st2 = new wxStaticText(panel, 0,
 		"Serial:");
 	wxTextCtrl* txt2 = new wxTextCtrl(panel, ID_SER_NUM,
-		"", wxDefaultPosition, wxDefaultSize);
+		"", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT);
 	txt2->Connect(txt2->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(MainFrame::OnTxt2Change), NULL, panel);
 

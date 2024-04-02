@@ -374,7 +374,7 @@ void RenderViewPanel::CreateBar()
 	sizer_h_1->Add(m_options_toolbar, 0, wxALIGN_CENTER);
 
 	m_scale_text = new wxTextCtrl(this, wxID_ANY, "50",
-		wxDefaultPosition, FromDIP(wxSize(35, tbs.y-3)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(35, tbs.y-3)), wxTE_RIGHT, vald_int);
 	m_scale_cmb = new wxComboBox(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(50, tbs.y)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> scale_list = { "nm", L"\u03BCm", "mm" };
@@ -411,7 +411,7 @@ void RenderViewPanel::CreateBar()
 	m_aov_sldr = new wxSingleSlider(this, wxID_ANY, 45, 10, 100,
 		wxDefaultPosition, FromDIP(wxSize(100, 20)), wxSL_HORIZONTAL);
 	m_aov_text = new wxTextCtrl(this, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_aov_sldr->Bind(wxEVT_IDLE, &RenderViewPanel::OnAovSldrIdle, this);
 	m_aov_sldr->Bind(wxEVT_SCROLL_CHANGED, &RenderViewPanel::OnAovChange, this);
 	m_aov_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnAovText, this);
@@ -474,7 +474,7 @@ void RenderViewPanel::CreateBar()
 		wxDefaultPosition, wxDefaultSize, ls);
 	//text
 	m_depth_atten_factor_text = new wxTextCtrl(this, wxID_ANY, "0.00",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_CENTER, vald_fp2);
 	m_depth_atten_factor_sldr->Bind(wxEVT_SCROLL_CHANGED, &RenderViewPanel::OnDepthAttenChange, this);
 	m_depth_atten_factor_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnDepthAttenEdit, this);
 	//reset
@@ -537,7 +537,7 @@ void RenderViewPanel::CreateBar()
 	m_scale_factor_sldr = new wxSingleSlider(this, wxID_ANY, 100, 50, 999,
 		wxDefaultPosition, wxDefaultSize, ls, wxDefaultValidator, "test");
 	m_scale_factor_text = new wxTextCtrl(this, wxID_ANY, "100",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_CENTER, vald_int);
 	m_scale_factor_spin = new wxSpinButton(this, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(40, 20)));
 	m_scale_factor_spin->SetRange(-0x8000, 0x7fff);
@@ -604,17 +604,17 @@ void RenderViewPanel::CreateBar()
 	m_x_rot_sldr = new wxUndoableScrollBar(this, ID_RotXScroll);
 	m_x_rot_sldr->SetScrollbar2(180, 60, 0, 360, 15);
 	m_x_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
-		wxDefaultPosition, FromDIP(wxSize(45,20)), 0, vald_fp1);
+		wxDefaultPosition, FromDIP(wxSize(45,20)), wxTE_RIGHT, vald_fp1);
 	st2 = new wxStaticText(this, 0, "Y:");
 	m_y_rot_sldr = new wxUndoableScrollBar(this, ID_RotYScroll);
 	m_y_rot_sldr->SetScrollbar2(180, 60, 0, 360, 15);
 	m_y_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
-		wxDefaultPosition, FromDIP(wxSize(45,20)), 0, vald_fp1);
+		wxDefaultPosition, FromDIP(wxSize(45,20)), wxTE_RIGHT, vald_fp1);
 	st3 = new wxStaticText(this, 0, "Z:");
 	m_z_rot_sldr = new wxUndoableScrollBar(this, ID_RotZScroll);
 	m_z_rot_sldr->SetScrollbar2(180, 60, 0, 360, 15);
 	m_z_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
-		wxDefaultPosition, FromDIP(wxSize(45,20)), 0, vald_fp1);
+		wxDefaultPosition, FromDIP(wxSize(45,20)), wxTE_RIGHT, vald_fp1);
 	m_x_rot_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnRotEdit, this);
 	m_y_rot_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnRotEdit, this);
 	m_z_rot_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnRotEdit, this);
@@ -1893,7 +1893,7 @@ wxWindow* RenderViewPanel::CreateExtraCaptureControl(wxWindow* parent)
 		wxDefaultPosition, wxDefaultSize);
 	wxIntegerValidator<unsigned int> vald_int;
 	wxTextCtrl* tx_dpi = new wxTextCtrl(panel, ID_DPI,
-		"", wxDefaultPosition, parent->FromDIP(wxSize(60, 23)), 0, vald_int);
+		"", wxDefaultPosition, parent->FromDIP(wxSize(60, 23)), wxTE_RIGHT, vald_int);
 	tx_dpi->Connect(tx_dpi->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(RenderViewPanel::OnDpiText), NULL, panel);
 	float dpi = glbin_settings.m_dpi;
@@ -1915,7 +1915,7 @@ wxWindow* RenderViewPanel::CreateExtraCaptureControl(wxWindow* parent)
 	sl_enlarge->SetValue(std::round(enlarge_scale * 10));
 	wxFloatingPointValidator<double> vald_fp(1);
 	wxTextCtrl* tx_enlarge = new wxTextCtrl(panel, ID_ENLARGE_TEXT,
-		"1.0", wxDefaultPosition, parent->FromDIP(wxSize(60, 23)), 0, vald_fp);
+		"1.0", wxDefaultPosition, parent->FromDIP(wxSize(60, 23)), wxTE_RIGHT, vald_fp);
 	tx_enlarge->Connect(tx_enlarge->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(RenderViewPanel::OnTxEnlargeText), NULL, panel);
 	tx_enlarge->Enable(enlarge);
