@@ -13,14 +13,15 @@ VOID _DBGPRINT(LPCWSTR kwszFunction, INT iLineNumber, LPCWSTR kwszDebugFormatStr
 
 	va_start(args, kwszDebugFormatString);
 
-	cbFormatString = _scwprintf(L"[%s:%d] ", kwszFunction, iLineNumber) * sizeof(WCHAR);
+	int r = rand() / 100;
+	cbFormatString = _scwprintf(L"%02d [%s:%d] ", r, kwszFunction, iLineNumber) * sizeof(WCHAR);
 	cbFormatString += _vscwprintf(kwszDebugFormatString, args) * sizeof(WCHAR) + 2;
 
 	/* Depending on the size of the format string, allocate space on the stack or the heap. */
 	wszDebugString = (PWCHAR)_malloca(cbFormatString);
 
 	/* Populate the buffer with the contents of the format string. */
-	StringCbPrintfW(wszDebugString, cbFormatString, L"%02d [%s:%d] ", rand() / 100, kwszFunction, iLineNumber);
+	StringCbPrintfW(wszDebugString, cbFormatString, L"%02d [%s:%d] ", r, kwszFunction, iLineNumber);
 	StringCbLengthW(wszDebugString, cbFormatString, &st_Offset);
 	StringCbVPrintfW(&wszDebugString[st_Offset / sizeof(WCHAR)], cbFormatString - st_Offset, kwszDebugFormatString, args);
 

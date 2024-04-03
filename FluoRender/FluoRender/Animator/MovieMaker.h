@@ -203,8 +203,6 @@ private:
 	int m_seq_mode;//0:none; 1:4d; 2:bat
 	int m_seq_cur_num;//current time point of a sequence
 	int m_seq_all_num;//the number of the last time point; a sequence always starts from 0; this = total time points - 1
-	int m_seq_clip_start_num;//used by canvas only
-	int m_seq_clip_end_num;//used by canvas
 
 	//movie properties
 	int m_full_frame_num;//full movie starts from 0, this is the last frame number = actual total - 1

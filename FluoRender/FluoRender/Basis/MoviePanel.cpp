@@ -919,11 +919,11 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
 		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE |
 		wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
-	m_notebook->AddPage(CreateSimplePage(m_notebook), "Basic", true);
-	m_notebook->AddPage(CreateAdvancedPage(m_notebook), "Keyframes");
-	m_notebook->AddPage(CreateAutoKeyPage(m_notebook), "Templates");
-	m_notebook->AddPage(CreateCroppingPage(m_notebook), "Crop");
-	m_notebook->AddPage(CreateScriptPage(m_notebook), "Scripts");
+	m_notebook->AddPage(CreateSimplePage(m_notebook), UITEXT_NBPG0, true);
+	m_notebook->AddPage(CreateAdvancedPage(m_notebook), UITEXT_NBPG1);
+	m_notebook->AddPage(CreateAutoKeyPage(m_notebook), UITEXT_NBPG2);
+	m_notebook->AddPage(CreateCroppingPage(m_notebook), UITEXT_NBPG3);
+	m_notebook->AddPage(CreateScriptPage(m_notebook), UITEXT_NBPG4_0);
 	m_notebook->Bind(wxEVT_AUINOTEBOOK_PAGE_CHANGED, &MoviePanel::OnNotebookPage, this);
 
 	wxStaticText* st = 0, *st2 = 0;
@@ -1363,16 +1363,16 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		for (size_t i = 0; i < m_notebook->GetPageCount(); ++i)
 		{
 			wxString str = m_notebook->GetPageText(i);
-			if (str.Contains("Script"))
+			if (str.Contains(UITEXT_NBPG4_0))
 			{
 				idx = i;
 				break;
 			}
 		}
 		if (bval)
-			m_notebook->SetPageText(idx, "Scripts (Enabled)");
+			m_notebook->SetPageText(idx, UITEXT_NBPG4_1);
 		else
-			m_notebook->SetPageText(idx, "Scripts");
+			m_notebook->SetPageText(idx, UITEXT_NBPG4_0);
 	}
 
 	if (update_all || FOUND_VALUE(gstScriptFile))
@@ -1589,12 +1589,14 @@ void MoviePanel::SetCropValues(int x, int y, int w, int h)
 void MoviePanel::OnNotebookPage(wxAuiNotebookEvent& event)
 {
 	int sel = event.GetSelection();
-	if (sel == 0)
-		glbin_moviemaker.SetKeyframeEnable(false);
-	else if (sel == 1)
+	wxString str = m_notebook->GetPageText(sel);
+	if (str == UITEXT_NBPG1)
+	{
 		glbin_moviemaker.SetKeyframeEnable(true);
+		//DBGPRINT(L"SetKeyframeEnable: true\n");
+	}
 
-	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovCurTime, gstMovSeqNum });
+	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstMovCurTime, gstMovSeqNum });
 	event.Skip();
 }
 
@@ -1759,7 +1761,7 @@ void MoviePanel::OnRotateChecked(wxCommandEvent& event)
 {
 	bool val = m_rot_chk->GetValue();
 	glbin_moviemaker.SetRotateEnable(val);
-	FluoUpdate({ gstMovRotEnable });
+	FluoUpdate({ gstCaptureParam, gstMovRotEnable, gstMovSeqMode, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider, gstMovSeqNum });
 	event.Skip();
 }
 
@@ -1802,7 +1804,7 @@ void MoviePanel::OnSequenceChecked(wxCommandEvent& event)
 		glbin_moviemaker.SetSeqMode(1);
 	else
 		glbin_moviemaker.SetSeqMode(0);
-	FluoUpdate({ gstMovRotEnable, gstMovSeqMode, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider, gstMovSeqNum });
+	FluoUpdate({ gstCaptureParam, gstMovRotEnable, gstMovSeqMode, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider, gstMovSeqNum });
 	event.Skip();
 }
 
@@ -1813,7 +1815,7 @@ void MoviePanel::OnBatchChecked(wxCommandEvent& event)
 		glbin_moviemaker.SetSeqMode(2);
 	else
 		glbin_moviemaker.SetSeqMode(0);
-	FluoUpdate({ gstMovRotEnable, gstMovSeqMode, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider, gstMovSeqNum });
+	FluoUpdate({ gstCaptureParam, gstMovRotEnable, gstMovSeqMode, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider, gstMovSeqNum });
 	event.Skip();
 }
 
@@ -1853,6 +1855,7 @@ void MoviePanel::OnKeyframeChk(wxCommandEvent& event)
 {
 	bool val = m_keyframe_chk->GetValue();
 	SetKeyframeMovie(val);
+	//DBGPRINT(L"SetKeyframeEnable: %d\n", val);
 	event.Skip();
 }
 
@@ -1889,7 +1892,7 @@ void MoviePanel::OnInsKey(wxCommandEvent& event)
 	}
 	glbin_moviemaker.InsertKey(index);
 
-	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstTotalFrames, gstParamList, gstParamListSelect });
+	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstParamList, gstParamListSelect });
 	m_keylist->Update();
 	m_keylist->SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
@@ -1898,14 +1901,14 @@ void MoviePanel::OnDelKey(wxCommandEvent& event)
 {
 	m_keylist->DeleteSel();
 	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
-	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstTotalFrames, gstParamList, gstParamListSelect });
+	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstParamList, gstParamListSelect });
 }
 
 void MoviePanel::OnDelAll(wxCommandEvent& event)
 {
 	m_keylist->DeleteAll();
 	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
-	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstTotalFrames, gstParamList, gstParamListSelect });
+	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstParamList, gstParamListSelect });
 }
 
 void MoviePanel::OnCamLockChk(wxCommandEvent& event)

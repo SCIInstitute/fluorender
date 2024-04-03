@@ -4693,7 +4693,10 @@ void RenderCanvas::SetParams(double t)
 		keycode.l2 = 0;
 		keycode.l2_name = "frame";
 		if (glbin_interpolator.GetDouble(keycode, t, frame))
+		{
 			UpdateVolumeData(std::round(frame), vd);
+			glbin_moviemaker.SetSeqCurNum(frame);
+		}
 		//primary color
 		fluo::Color pc;
 		keycode.l2 = 0;

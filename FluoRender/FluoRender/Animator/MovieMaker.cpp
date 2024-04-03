@@ -68,8 +68,6 @@ MovieMaker::MovieMaker() :
 	//seq numbers can be different from output frame numders
 	m_seq_cur_num = 0;
 	m_seq_all_num = 0;
-	m_seq_clip_start_num = 0;
-	m_seq_clip_end_num = 0;
 
 	m_crop = false;
 	m_crop_x = 0;
@@ -244,11 +242,11 @@ void MovieMaker::SetRendering(bool rewind)
 		//basic options
 		if (m_seq_mode == 1)
 		{
-			m_view->Set4DSeqFrame(m_seq_cur_num, m_seq_clip_start_num, m_seq_clip_end_num, rewind);
+			m_view->Set4DSeqFrame(m_seq_cur_num, m_clip_start_frame, m_clip_end_frame, rewind);
 		}
 		else if (m_seq_mode == 2)
 		{
-			m_view->Set3DBatFrame(m_seq_cur_num, m_seq_clip_start_num, m_seq_clip_end_num, rewind);
+			m_view->Set3DBatFrame(m_seq_cur_num, m_clip_start_frame, m_clip_end_frame, rewind);
 		}
 
 		//rotate animation
@@ -410,7 +408,6 @@ void MovieMaker::AutoKeyChanComb(int comb)
 	FlKeyBoolean* flkeyB = 0;
 
 	double t = glbin_interpolator.GetLastT();
-	t = t < 0.0 ? 0.0 : t;
 	if (t > 0.0) t += m_movie_len;
 
 	int i;
@@ -528,6 +525,8 @@ int MovieMaker::GetViewIndex()
 
 void MovieMaker::SetKeyframeEnable(bool val)
 {
+	if (val == m_keyframe_enable)
+		return;
 	m_keyframe_enable = val;
 	if (m_keyframe_enable)
 	{
@@ -556,6 +555,7 @@ void MovieMaker::SetKeyframeEnable(bool val)
 
 void MovieMaker::SetRotateEnable(bool val)
 {
+	m_keyframe_enable = false;
 	if (val)
 	{
 		m_rotate = true;
@@ -577,7 +577,7 @@ void MovieMaker::SetRotateAxis(int val)
 void MovieMaker::SetRotateDeg(int val)
 {
 	m_rot_deg = val;
-	if (m_rotate && m_seq_mode == 0)
+	if (!m_keyframe_enable && m_rotate && m_seq_mode == 0)
 	{
 		SetFullFrameNum(val);
 	}
@@ -587,6 +587,7 @@ void MovieMaker::SetSeqMode(int val)
 {
 	if (val > -1 && val < 3)
 		m_seq_mode = val;
+	m_keyframe_enable = false;
 
 	int sf, ef;
 	switch (m_seq_mode)
@@ -642,8 +643,22 @@ void MovieMaker::SetSeqCurNum(int val)
 	if (m_seq_all_num == 0)
 		return;
 	m_seq_cur_num = fluo::RotateClamp2(val, 0, m_seq_all_num);
-	m_cur_frame = std::round((double)m_seq_cur_num * m_full_frame_num / m_seq_all_num);
-	SetCurrentFrame(m_cur_frame);
+	if (m_keyframe_enable)
+	{
+		if (m_seq_mode == 1)
+		{
+			m_view->Set4DSeqFrame(m_seq_cur_num, m_clip_start_frame, m_clip_end_frame, false);
+		}
+		else if (m_seq_mode == 2)
+		{
+			m_view->Set3DBatFrame(m_seq_cur_num, m_clip_start_frame, m_clip_end_frame, false);
+		}
+	}
+	else if (m_seq_mode > 0)
+	{
+		m_cur_frame = std::round((double)m_seq_cur_num * m_full_frame_num / m_seq_all_num);
+		SetCurrentFrame(m_cur_frame);
+	}
 }
 
 void MovieMaker::SetFullFrameNum(int val)
@@ -664,11 +679,6 @@ void MovieMaker::SetClipStartEndFrames(int val1, int val2)
 		m_full_frame_num = val2;
 	if (m_fps > 0)
 		m_movie_len = m_clip_frame_num / m_fps;
-	if (m_seq_mode > 0)
-	{
-		m_seq_clip_start_num = std::round((double)m_clip_start_frame * m_seq_all_num / m_full_frame_num);
-		m_seq_clip_end_num = std::round((double)m_clip_end_frame * m_seq_all_num / m_full_frame_num);
-	}
 	SetCurrentFrame(m_cur_frame);
 }
 
@@ -680,11 +690,6 @@ void MovieMaker::SetClipStartFrame(int val)
 	m_clip_frame_num = m_clip_end_frame - m_clip_start_frame;
 	if (m_fps > 0)
 		m_movie_len = m_clip_frame_num / m_fps;
-	if (m_seq_mode > 0)
-	{
-		m_seq_clip_start_num = std::round((double)m_clip_start_frame * m_seq_all_num / m_full_frame_num);
-		m_seq_clip_end_num = std::round((double)m_clip_end_frame * m_seq_all_num / m_full_frame_num);
-	}
 	SetCurrentFrame(m_cur_frame);
 }
 
@@ -698,11 +703,6 @@ void MovieMaker::SetClipEndFrame(int val)
 		m_full_frame_num = val;
 	if (m_fps > 0)
 		m_movie_len = m_clip_frame_num / m_fps;
-	if (m_seq_mode > 0)
-	{
-		m_seq_clip_start_num = std::round((double)m_clip_start_frame * m_seq_all_num / m_full_frame_num);
-		m_seq_clip_end_num = std::round((double)m_clip_end_frame * m_seq_all_num / m_full_frame_num);
-	}
 	SetCurrentFrame(m_cur_frame);
 }
 
@@ -717,7 +717,7 @@ void MovieMaker::SetCurrentFrame(int val)
 	}
 	m_cur_frame = fluo::RotateClamp2(val, m_clip_start_frame, m_clip_end_frame);
 	m_cur_time = (m_cur_frame - m_clip_start_frame) / m_fps;
-	if (m_seq_mode > 0)
+	if (!m_keyframe_enable && m_seq_mode > 0)
 	{
 		m_seq_cur_num = std::round((double)m_cur_frame * m_seq_all_num / m_full_frame_num);
 	}
@@ -812,7 +812,8 @@ void MovieMaker::InsertKey(int index)
 	FlKeyColor* flkeyC = 0;
 
 	double t = glbin_interpolator.GetLastT();
-	t = t < 0.0 ? 0.0 : t + m_key_duration;
+	int kn = glbin_interpolator.GetKeyNum();
+	t = kn == 0 ? t : t + m_key_duration;
 
 	glbin_interpolator.Begin(t, m_key_duration);
 

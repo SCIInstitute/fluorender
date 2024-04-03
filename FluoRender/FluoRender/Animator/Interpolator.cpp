@@ -108,14 +108,14 @@ double Interpolator::GetFirstT()
 {
 	if (m_key_list.size()>0 && m_key_list[0])
 		return m_key_list[0]->t;
-	else return -1.0;
+	else return 0;
 }
 
 double Interpolator::GetLastT()
 {
 	if (m_key_list.size() > 0 && m_key_list[m_key_list.size()-1])
 		return m_key_list[m_key_list.size()-1]->t;
-	else return -1.0;
+	else return 0;
 }
 
 FlKeyGroup* Interpolator::GetKeyGroup(int index)
@@ -134,7 +134,7 @@ int Interpolator::GetKeyIndex(int id)
 		if (group && group->id==id)
 			return i;
 	}
-	return -1;
+	return 0;
 }
 
 int Interpolator::GetKeyIndexFromTime(double t)
