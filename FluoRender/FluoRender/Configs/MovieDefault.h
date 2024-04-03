@@ -59,7 +59,6 @@ public:
 
 	//movie properties
 	int m_full_frame_num;
-	int m_clip_frame_num;
 	double m_movie_len;//length in sec
 	double m_fps;
 	int m_clip_start_frame;

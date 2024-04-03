@@ -490,21 +490,22 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 
 	//degrees
 	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, wxID_ANY, "Rotation Angles:");
+	st = new wxStaticText(page, wxID_ANY, "Rotation Angles:",
+		wxDefaultPosition, FromDIP(wxSize(200, -1)));
 	m_degree_text = new wxTextCtrl(page, wxID_ANY, "360",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT);
 	m_degree_text->Bind(wxEVT_TEXT, &MoviePanel::OnDegreeText, this);
 	st2 = new wxStaticText(page, wxID_ANY, "Deg.");
 	sizer3->Add(20, 5, 0);
 	sizer3->Add(st, 0, wxALIGN_CENTER);
-	sizer3->Add(20, 5, 0);
 	sizer3->Add(m_degree_text, 0, wxALIGN_CENTER);
 	sizer3->Add(20, 5, 0);
 	sizer3->Add(st2, 0, wxALIGN_CENTER);
 
 	//rotation interpolation
 	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, wxID_ANY, "Interpolation Method:");
+	st = new wxStaticText(page, wxID_ANY, "Interpolation Method:",
+		wxDefaultPosition, FromDIP(wxSize(200, -1)));
 	m_rot_int_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(65, -1)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> list = { "Linear", "Smooth" };
@@ -513,7 +514,6 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 	m_rot_int_cmb->Bind(wxEVT_COMBOBOX, &MoviePanel::OnRotIntCmb, this);
 	sizer4->Add(20, 5, 0);
 	sizer4->Add(st, 0, wxALIGN_CENTER);
-	sizer4->Add(20, 5, 0);
 	sizer4->Add(m_rot_int_cmb, 0, wxALIGN_CENTER);
 
 	//type
@@ -546,7 +546,7 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 	m_seq_inc_btn->SetBitmap(wxGetBitmapFromMemory(plus));
 	m_seq_inc_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnSeqIncBtn, this);
 	m_seq_inc_btn->SetToolTip("Increase the time point number by 1");
-	st2 = new wxStaticText(page, wxID_ANY, "Total Time Points: ");
+	st2 = new wxStaticText(page, wxID_ANY, "Time Points: ");
 	m_seq_total_text = new wxTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT|wxTE_READONLY);
 	sizer7->Add(20, 20);
@@ -1026,7 +1026,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		wxDefaultPosition, ts, wxTE_RIGHT, vald_int);
 	m_full_frame_text->SetFont(f);
 	m_full_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnFullFrameText, this);
-	m_full_frame_text->SetToolTip("Set the total number of frames");
+	m_full_frame_text->SetToolTip("Set the number of frames");
 	sizer3->AddStretchSpacer(2);
 	sizer3->Add(m_start_btn, 0, wxALIGN_CENTER);
 	sizer3->Add(m_start_frame_text, 0, wxALIGN_CENTER);
@@ -1187,6 +1187,10 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 			glbin_moviemaker.GetCurrentFrame()));
 		m_cur_frame_text->Update();
 	}
+
+	if (update_all || FOUND_VALUE(gstTotalFrames))
+		m_full_frame_text->ChangeValue(wxString::Format("%d",
+			glbin_moviemaker.GetFullFrameNum()));
 
 	if (update_all || FOUND_VALUE(gstMovCurTime))
 	{
@@ -2084,7 +2088,7 @@ void MoviePanel::InsertKey(int index, double duration, int interpolation)
 	if (group)
 		group->type = interpolation;
 
-	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + 1);
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
 	glbin_moviemaker.SetCurrentFrame(glbin_moviemaker.GetClipEndFrame());
 	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame });
 }
@@ -2092,14 +2096,14 @@ void MoviePanel::InsertKey(int index, double duration, int interpolation)
 void MoviePanel::OnDelKey(wxCommandEvent& event)
 {
 	m_keylist->DeleteSel();
-	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + 1);
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
 	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame });
 }
 
 void MoviePanel::OnDelAll(wxCommandEvent& event)
 {
 	m_keylist->DeleteAll();
-	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + 1);
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
 	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame });
 }
 

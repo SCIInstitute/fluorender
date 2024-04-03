@@ -115,14 +115,14 @@ public:
 	{
 		m_movie_len = val;
 		if (val > 0)
-			m_fps = (m_clip_frame_num - 1) / m_movie_len;
+			m_fps = m_clip_frame_num / m_movie_len;
 	}
 	double GetMovieLength() { return m_movie_len; }
 	void SetFps(double val)
 	{
 		m_fps = val;
 		if (val > 0)
-			m_movie_len = (m_clip_frame_num - 1) / m_fps;
+			m_movie_len = m_clip_frame_num / m_fps;
 	}
 	double GetFps() { return m_fps; }
 	void SetClipStartEndFrames(int val1, int val2);
@@ -138,7 +138,7 @@ public:
 		if (m_keyframe_enable)
 			return m_cur_frame;
 		else
-			return double(m_cur_frame) / (m_full_frame_num - 1);
+			return double(m_cur_frame) / m_full_frame_num;
 	}
 	double GetCurrentTime() { return m_cur_time; }
 	int GetScrollThumbSize() { return m_scroll_thumb_size; }
@@ -197,13 +197,13 @@ private:
 	int m_rot_int_type;//0-linear; 1-smooth
 	int m_seq_mode;//0:none; 1:4d; 2:bat
 	int m_seq_cur_num;//current time point of a sequence
-	int m_seq_all_num;//total number of time points
-	int m_seq_clip_start_num;
-	int m_seq_clip_end_num;
+	int m_seq_all_num;//the number of the last time point; a sequence always starts from 0; this = total time points - 1
+	int m_seq_clip_start_num;//used by canvas only
+	int m_seq_clip_end_num;//used by canvas
 
 	//movie properties
-	int m_full_frame_num;//the full length movie always starts from 0 and ends at f-1
-	int m_clip_frame_num;
+	int m_full_frame_num;//full movie starts from 0, this is the last frame number = actual total - 1
+	int m_clip_frame_num;//a clip can start from any frame; for convenience, this = actual clip total - 1
 	double m_movie_len;//length in sec
 	double m_fps;
 	int m_clip_start_frame;

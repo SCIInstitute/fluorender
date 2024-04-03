@@ -43,7 +43,7 @@ MovieDefault::MovieDefault()
 	m_rot_int_type = 0;
 	m_seq_mode = 0;
 
-	m_full_frame_num = 361;
+	m_full_frame_num = 360;
 	m_movie_len = 12;
 	m_fps = 30;
 	m_clip_start_frame = 0;
@@ -82,7 +82,7 @@ void MovieDefault::Read(wxFileConfig& f)
 	f.Read("rot int type", &m_rot_int_type, 0);
 	f.Read("seq mode", &m_seq_mode, 0);
 
-	f.Read("full frame num", &m_full_frame_num, 361);
+	f.Read("full frame num", &m_full_frame_num, 360);
 	f.Read("movie len", &m_movie_len, 12);
 	f.Read("fps", &m_fps, 30);
 	f.Read("clip start frame", &m_clip_start_frame, 0);
