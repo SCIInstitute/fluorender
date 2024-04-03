@@ -274,7 +274,8 @@ void MovieMaker::SetRendering(bool rewind)
 			gstMovProgSlider,
 			gstCurrentFrame,
 			gstMovCurTime,
-			gstMovPlay },
+			gstMovPlay,
+			gstMovSeqNum },
 			2, m_frame->GetMovieView());
 	}
 }

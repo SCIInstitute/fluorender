@@ -1438,7 +1438,7 @@ void MoviePanel::SetFullFrame(int val)
 {
 	glbin_moviemaker.SetFullFrameNum(val);
 
-	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovFps, gstMovLength, gstMovProgSlider });
+	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovFps, gstMovLength, gstMovProgSlider, gstMovSeqNum });
 }
 
 void MoviePanel::SetStartFrame(int val)
@@ -1447,7 +1447,7 @@ void MoviePanel::SetStartFrame(int val)
 		return;
 	glbin_moviemaker.SetClipStartFrame(val);
 
-	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovFps, gstMovLength, gstMovProgSlider });
+	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovFps, gstMovLength, gstMovProgSlider, gstMovSeqNum });
 }
 
 void MoviePanel::SetEndFrame(int val)
@@ -1456,7 +1456,7 @@ void MoviePanel::SetEndFrame(int val)
 		return;
 	glbin_moviemaker.SetClipEndFrame(val);
 
-	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovFps, gstMovLength, gstMovProgSlider });
+	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovFps, gstMovLength, gstMovProgSlider, gstMovSeqNum });
 }
 
 void MoviePanel::SetScrollFrame(int val, bool notify)
@@ -1465,7 +1465,7 @@ void MoviePanel::SetScrollFrame(int val, bool notify)
 	//	return;
 	glbin_moviemaker.SetCurrentFrame(val);
 
-	fluo::ValueCollection vc = { gstMovCurTime, gstCurrentFrame };
+	fluo::ValueCollection vc = { gstMovCurTime, gstCurrentFrame, gstMovSeqNum };
 	if (notify)
 		vc.insert(gstMovProgSlider);
 	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
@@ -1477,7 +1477,7 @@ void MoviePanel::SetCurrentFrame(int val, bool notify)
 	//	return;
 	glbin_moviemaker.SetCurrentFrame(val);
 
-	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider };
+	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstMovSeqNum };
 	if (notify)
 		vc.insert(gstCurrentFrame);
 	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
@@ -1490,7 +1490,7 @@ void MoviePanel::SetCurrentTime(double val, bool notify)
 
 	glbin_moviemaker.SetCurrentTime(val);
 
-	fluo::ValueCollection vc = { gstCurrentFrame, gstMovProgSlider };
+	fluo::ValueCollection vc = { gstCurrentFrame, gstMovProgSlider, gstMovSeqNum };
 	if (notify)
 		vc.insert(gstMovCurTime);
 	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
@@ -1516,7 +1516,7 @@ void MoviePanel::Rewind()
 {
 	glbin_moviemaker.Rewind();
 
-	fluo::ValueCollection vc = { gstCurrentFrame, gstMovCurTime, gstMovProgSlider, gstMovPlay };
+	fluo::ValueCollection vc = { gstCurrentFrame, gstMovCurTime, gstMovProgSlider, gstMovPlay, gstMovSeqNum };
 	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
 }
 
@@ -1524,7 +1524,7 @@ void MoviePanel::Forward()
 {
 	glbin_moviemaker.Forward();
 
-	fluo::ValueCollection vc = { gstCurrentFrame, gstMovCurTime, gstMovProgSlider, gstMovPlay };
+	fluo::ValueCollection vc = { gstCurrentFrame, gstMovCurTime, gstMovProgSlider, gstMovPlay, gstMovSeqNum };
 	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
 }
 
@@ -1540,7 +1540,7 @@ void MoviePanel::IncFrame()
 	int frame = glbin_moviemaker.GetCurrentFrame();
 	frame++;
 	glbin_moviemaker.SetCurrentFrame(frame);
-	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstCurrentFrame };
+	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstCurrentFrame, gstMovSeqNum };
 	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
 }
 
@@ -1551,7 +1551,7 @@ void MoviePanel::DecFrame()
 	int frame = glbin_moviemaker.GetCurrentFrame();
 	frame--;
 	glbin_moviemaker.SetCurrentFrame(frame);
-	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstCurrentFrame };
+	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstCurrentFrame, gstMovSeqNum };
 	FluoRefresh(true, 2, vc, { glbin_mov_def.m_view_idx });
 }
 
@@ -1571,7 +1571,7 @@ void MoviePanel::SetKeyframeMovie(bool val)
 {
 	glbin_moviemaker.SetKeyframeEnable(val);
 
-	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovCurTime });
+	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovCurTime, gstMovSeqNum });
 }
 
 void MoviePanel::SetCropEnable(bool val)
@@ -1594,7 +1594,7 @@ void MoviePanel::OnNotebookPage(wxAuiNotebookEvent& event)
 	else if (sel == 1)
 		glbin_moviemaker.SetKeyframeEnable(true);
 
-	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovCurTime });
+	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovCurTime, gstMovSeqNum });
 	event.Skip();
 }
 
@@ -1783,7 +1783,7 @@ void MoviePanel::OnDegreeText(wxCommandEvent& event)
 	long ival = 0;
 	str.ToLong(&ival);
 	glbin_moviemaker.SetRotateDeg(ival);
-	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider });
+	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider, gstMovSeqNum });
 	event.Skip();
 }
 
@@ -1802,7 +1802,7 @@ void MoviePanel::OnSequenceChecked(wxCommandEvent& event)
 		glbin_moviemaker.SetSeqMode(1);
 	else
 		glbin_moviemaker.SetSeqMode(0);
-	FluoUpdate({ gstMovRotEnable, gstMovSeqMode, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider });
+	FluoUpdate({ gstMovRotEnable, gstMovSeqMode, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider, gstMovSeqNum });
 	event.Skip();
 }
 
@@ -1813,7 +1813,7 @@ void MoviePanel::OnBatchChecked(wxCommandEvent& event)
 		glbin_moviemaker.SetSeqMode(2);
 	else
 		glbin_moviemaker.SetSeqMode(0);
-	FluoUpdate({ gstMovRotEnable, gstMovSeqMode, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider });
+	FluoUpdate({ gstMovRotEnable, gstMovSeqMode, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider, gstMovSeqNum });
 	event.Skip();
 }
 
