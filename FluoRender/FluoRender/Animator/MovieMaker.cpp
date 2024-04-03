@@ -408,7 +408,9 @@ void MovieMaker::AutoKeyChanComb(int comb)
 	FlKeyBoolean* flkeyB = 0;
 
 	double t = glbin_interpolator.GetLastT();
-	if (t > 0.0) t += m_movie_len;
+	if (t > 0.0) t += m_key_duration;
+
+	Interpolator* intp = &glbin_interpolator;
 
 	int i;
 	int numChan = m_view->GetAllVolumeNum();
@@ -424,14 +426,14 @@ void MovieMaker::AutoKeyChanComb(int comb)
 
 	do
 	{
-		glbin_interpolator.Begin(t, m_movie_len);
+		glbin_interpolator.Begin(t, m_key_duration);
 
 		//for all volumes
 		for (i = 0; i < m_view->GetAllVolumeNum(); i++)
 		{
 			VolumeData* vd = m_view->GetAllVolumeData(i);
 			keycode.l0 = 1;
-			keycode.l0_name = m_view->GetName();
+			keycode.l0_name = m_view->m_vrv->GetName();
 			keycode.l1 = 2;
 			keycode.l1_name = vd->GetName();
 			//display only
@@ -442,9 +444,8 @@ void MovieMaker::AutoKeyChanComb(int comb)
 		}
 
 		glbin_interpolator.End();
-		t += m_movie_len;
+		t += m_key_duration;
 	} while (GetMask(chan_mask));
-
 }
 
 bool MovieMaker::MoveOne(std::vector<bool>& chan_mask, int lv)
@@ -972,7 +973,7 @@ void MovieMaker::InsertKey(int index)
 	if (group)
 		group->type = m_interpolation;
 
-	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + m_key_duration);
 	glbin_moviemaker.SetCurrentFrame(glbin_moviemaker.GetClipEndFrame());
 }
 

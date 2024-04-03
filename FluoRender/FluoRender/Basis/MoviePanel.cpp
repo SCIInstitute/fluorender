@@ -60,19 +60,24 @@ KeyListCtrl::KeyListCtrl(
 
 	wxListItem itemCol;
 	itemCol.SetText("ID");
-	this->InsertColumn(0, itemCol);
+	itemCol.SetAlign(wxLIST_FORMAT_CENTER);
+	InsertColumn(0, itemCol);
 	SetColumnWidth(0, 40);
 	itemCol.SetText("Frame");
-	this->InsertColumn(1, itemCol);
+	itemCol.SetAlign(wxLIST_FORMAT_RIGHT);
+	InsertColumn(1, itemCol);
 	SetColumnWidth(1, 60);
 	itemCol.SetText("Duration");
-	this->InsertColumn(2, itemCol);
+	itemCol.SetAlign(wxLIST_FORMAT_RIGHT);
+	InsertColumn(2, itemCol);
 	SetColumnWidth(2, 80);
 	itemCol.SetText("Interpolation");
-	this->InsertColumn(3, itemCol);
+	itemCol.SetAlign(wxLIST_FORMAT_LEFT);
+	InsertColumn(3, itemCol);
 	SetColumnWidth(3, 80);
 	itemCol.SetText("Description");
-	this->InsertColumn(4, itemCol);
+	itemCol.SetAlign(wxLIST_FORMAT_LEFT);
+	InsertColumn(4, itemCol);
 	SetColumnWidth(4, 80);
 
 	m_images = new wxImageList(16, 16, true);
@@ -708,8 +713,9 @@ wxWindow* MoviePanel::CreateAutoKeyPage(wxWindow *parent)
 	wxString str;
 	for (auto& it : str_list)
 	{
-		str = wxString::Format("%d", i + 1);
-		tmp = m_auto_key_list->InsertItem(i, str, 0);
+		i++;
+		str = wxString::Format("%d", i);
+		tmp = m_auto_key_list->InsertItem(i-1, str, 0);
 		m_auto_key_list->SetItem(tmp, 1, it);
 	}
 	m_auto_key_list->SetColumnWidth(1, -1);
@@ -1938,6 +1944,7 @@ void MoviePanel::OnGenKey(wxCommandEvent& event)
 	{
 		glbin_moviemaker.MakeKeys(item);
 		m_notebook->SetSelection(1);
+		FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstParamList, gstParamListSelect });
 	}
 	event.Skip();
 }
