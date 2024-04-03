@@ -532,7 +532,7 @@ void MovieMaker::SetKeyframeEnable(bool val)
 	if (m_keyframe_enable)
 	{
 		//get settings from interpolator
-		int n = std::round(glbin_interpolator.GetLastT());
+		int n = std::round(glbin_interpolator.GetLastT() + m_key_duration);
 		SetFullFrameNum(n);
 	}
 	else
