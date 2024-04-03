@@ -546,7 +546,7 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 	m_seq_inc_btn->SetBitmap(wxGetBitmapFromMemory(plus));
 	m_seq_inc_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnSeqIncBtn, this);
 	m_seq_inc_btn->SetToolTip("Increase the time point number by 1");
-	st2 = new wxStaticText(page, wxID_ANY, "Time Points: ");
+	st2 = new wxStaticText(page, wxID_ANY, "of: ");
 	m_seq_total_text = new wxTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT|wxTE_READONLY);
 	sizer7->Add(20, 20);
@@ -992,22 +992,24 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		wxDefaultPosition, bs);
 	m_start_btn->SetBitmap(wxGetBitmapFromMemory(start));
 	m_start_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnStartFrameBtn, this);
-	m_start_btn->SetToolTip("Set the start frame of a clip");
+	m_start_btn->SetToolTip("Set the start frame number of a clip to current frame");
 	m_start_frame_text = new wxTextCtrl(this, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(39, -1)), wxTE_RIGHT, vald_int);
 	f = m_start_frame_text->GetFont();
 	f.MakeLarger();
 	m_start_frame_text->SetFont(f);
 	m_start_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnStartFrameText, this);
+	m_start_frame_text->SetToolTip("Set the start frame number of a clip");
 	m_end_frame_text = new wxTextCtrl(this, wxID_ANY, "10",
 		wxDefaultPosition, FromDIP(wxSize(39, -1)), wxTE_RIGHT, vald_int);
 	m_end_frame_text->SetFont(f);
 	m_end_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnEndFrameText, this);
+	m_end_frame_text->SetToolTip("Set the end frame number of a clip");
 	m_end_btn = new wxButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
 	m_end_btn->SetBitmap(wxGetBitmapFromMemory(end));
 	m_end_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnEndFrameBtn, this);
-	m_end_btn->SetToolTip("Set the end frame of a clip");
+	m_end_btn->SetToolTip("Set the end frame number of a clip to current frame");
 	m_dec_time_btn = new wxButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
 	m_dec_time_btn->SetBitmap(wxGetBitmapFromMemory(step_back));
@@ -1017,6 +1019,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		wxDefaultPosition, ts, wxTE_RIGHT, vald_int);
 	m_cur_frame_text->SetFont(f);
 	m_cur_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnCurFrameText, this);
+	m_cur_frame_text->SetToolTip("Set current frame number");
 	m_inc_time_btn = new wxButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
 	m_inc_time_btn->SetBitmap(wxGetBitmapFromMemory(step_forward));
@@ -1026,7 +1029,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		wxDefaultPosition, ts, wxTE_RIGHT, vald_int);
 	m_full_frame_text->SetFont(f);
 	m_full_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnFullFrameText, this);
-	m_full_frame_text->SetToolTip("Set the number of frames");
+	m_full_frame_text->SetToolTip("Set the end frame number of the entire movie");
 	sizer3->AddStretchSpacer(2);
 	sizer3->Add(m_start_btn, 0, wxALIGN_CENTER);
 	sizer3->Add(m_start_frame_text, 0, wxALIGN_CENTER);
@@ -1060,16 +1063,17 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		wxDefaultPosition, bs);
 	m_forward_btn->SetBitmap(wxGetBitmapFromMemory(forward));
 	m_forward_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnForward, this);
-	m_forward_btn->SetToolTip("Wind forward to the end of a clip");
+	m_forward_btn->SetToolTip("Proceed forward to the end of a clip");
 	m_loop_btn = new wxToggleButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
 	m_loop_btn->SetBitmap(wxGetBitmapFromMemory(loop));
 	m_loop_btn->Bind(wxEVT_TOGGLEBUTTON, &MoviePanel::OnLoop, this);
-	m_loop_btn->SetToolTip("Enable playback in a loop");
+	m_loop_btn->SetToolTip("Enable clip playback in a loop");
 	m_progress_text = new wxTextCtrl(this, wxID_ANY, "0.00",
 		wxDefaultPosition, ts, wxTE_RIGHT);
 	m_progress_text->SetFont(f);
 	m_progress_text->Bind(wxEVT_TEXT, &MoviePanel::OnCurTimeText, this);
+	m_progress_text->SetToolTip("Set current time (in seconds) within a clip");
 	st = new wxStaticText(this, wxID_ANY, "Sec.",
 		wxDefaultPosition, FromDIP(wxSize(26, -1)));
 	m_save_btn = new wxButton(this, wxID_ANY, "",
@@ -1271,7 +1275,10 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_degree_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetRotateDeg()));
 
 	if (update_all || FOUND_VALUE(gstMovIntrpMode))
-		m_rot_int_cmb->SetSelection(glbin_moviemaker.GetRotIntType());
+	{
+		m_rot_int_cmb->SetSelection(glbin_moviemaker.GetInterpolation());
+		m_interpolation_cmb->SetSelection(glbin_moviemaker.GetInterpolation());
+	}
 
 	if (update_all || FOUND_VALUE(gstMovSeqMode))
 	{
@@ -1306,6 +1313,9 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstCaptureParam))
 		m_keyframe_chk->SetValue(glbin_moviemaker.GetKeyframeEnable());
 
+	if (update_all || FOUND_VALUE(gstParamKeyDuration))
+		m_duration_text->ChangeValue(wxString::Format("%.0f", glbin_moviemaker.GetKeyDuration()));
+
 	if (update_all || FOUND_VALUE(gstParamList))
 		m_keylist->Update();
 
@@ -1320,6 +1330,12 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 			m_keylist->SetItemState(index,
 				wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	}
+
+	if (update_all || FOUND_VALUE(gstCamLockObjEnable))
+		m_cam_lock_chk->SetValue(glbin_moviemaker.GetCamLock());
+
+	if (update_all || FOUND_VALUE(gstCamLockType))
+		m_cam_lock_cmb->SetSelection(glbin_moviemaker.GetCamLockType() - 1);
 
 	if (update_all || FOUND_VALUE(gstCropEnable))
 	{
@@ -1558,10 +1574,6 @@ void MoviePanel::SetKeyframeMovie(bool val)
 	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovCurTime });
 }
 
-void MoviePanel::GenKey(int val)
-{
-}
-
 void MoviePanel::SetCropEnable(bool val)
 {
 	glbin_moviemaker.SetCropEnable(val);
@@ -1778,7 +1790,8 @@ void MoviePanel::OnDegreeText(wxCommandEvent& event)
 void MoviePanel::OnRotIntCmb(wxCommandEvent& event)
 {
 	int val = m_rot_int_cmb->GetCurrentSelection();
-	glbin_moviemaker.SetRotIntType(val);
+	glbin_moviemaker.SetInterpolation(val);
+	FluoUpdate({ gstMovIntrpMode });
 	event.Skip();
 }
 
@@ -1845,12 +1858,19 @@ void MoviePanel::OnKeyframeChk(wxCommandEvent& event)
 
 void MoviePanel::OnDurationText(wxCommandEvent& event)
 {
-
+	wxString str = m_duration_text->GetValue();
+	double val;
+	str.ToDouble(&val);
+	glbin_moviemaker.SetKeyDuration(val);
+	event.Skip();
 }
 
 void MoviePanel::OnInterpolation(wxCommandEvent& event)
 {
-
+	int val = m_interpolation_cmb->GetSelection();
+	glbin_moviemaker.SetInterpolation(val);
+	FluoUpdate({ gstMovIntrpMode });
+	event.Skip();
 }
 
 void MoviePanel::OnInsKey(wxCommandEvent& event)
@@ -1867,244 +1887,25 @@ void MoviePanel::OnInsKey(wxCommandEvent& event)
 		str.ToLong(&id);
 		index = glbin_interpolator.GetKeyIndex(id);
 	}
-	//check if 4D
-	bool is_4d = false;
-	VolumeData* vd = 0;
-	for (int i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
-	{
-		vd = glbin_data_manager.GetVolumeData(i);
-		if (vd->GetReader() &&
-			vd->GetReader()->GetTimeNum() > 1)
-		{
-			is_4d = true;
-			break;
-		}
-	}
-	double duration = 0.0;
-	if (is_4d)
-	{
-		//Interpolator *interpolator = m_frame->GetInterpolator();
-		//if (interpolator && m_view)
-		//{
-		//	double ct = vd->GetCurTime();
-		//	FlKeyCode keycode;
-		//	keycode.l0 = 1;
-		//	keycode.l0_name = m_view->m_vrv->GetName();
-		//	keycode.l1 = 2;
-		//	keycode.l1_name = vd->GetName();
-		//	keycode.l2 = 0;
-		//	keycode.l2_name = "frame";
-		//	double frame;
-		//	if (glbin_interpolator.GetDouble(keycode, 
-		//		glbin_interpolator.GetLastIndex(), frame))
-		//		duration = fabs(ct - frame);
-		//}
-	}
-	str = m_duration_text->GetValue();
-	str.ToDouble(&duration);
-	int interpolation = m_interpolation_cmb->GetSelection();
-	InsertKey(index, duration, interpolation);
+	glbin_moviemaker.InsertKey(index);
 
+	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstTotalFrames, gstParamList, gstParamListSelect });
 	m_keylist->Update();
 	m_keylist->SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-}
-
-void MoviePanel::InsertKey(int index, double duration, int interpolation)
-{
-	if (!m_frame)
-		return;
-	if (!m_view)
-	{
-		if (m_frame->GetView(0))
-			m_view = m_frame->GetView(0);
-		else
-			return;
-	}
-
-	FlKeyCode keycode;
-	FlKeyDouble* flkey = 0;
-	FlKeyQuaternion* flkeyQ = 0;
-	FlKeyBoolean* flkeyB = 0;
-	FlKeyInt* flkeyI = 0;
-	FlKeyColor* flkeyC = 0;
-
-	double t = glbin_interpolator.GetLastT();
-	t = t < 0.0 ? 0.0 : t + duration;
-
-	glbin_interpolator.Begin(t, duration);
-
-	//for all volumes
-	for (int i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
-	{
-		VolumeData* vd = glbin_data_manager.GetVolumeData(i);
-		keycode.l0 = 1;
-		keycode.l0_name = m_view->m_vrv->GetName();
-		keycode.l1 = 2;
-		keycode.l1_name = vd->GetName();
-		//display
-		keycode.l2 = 0;
-		keycode.l2_name = "display";
-		flkeyB = new FlKeyBoolean(keycode, vd->GetDisp());
-		glbin_interpolator.AddKey(flkeyB);
-		//clipping planes
-		vector<fluo::Plane*>* planes = vd->GetVR()->get_planes();
-		if (!planes)
-			continue;
-		if (planes->size() != 6)
-			continue;
-		fluo::Plane* plane = 0;
-		double abcd[4];
-		//x1
-		plane = (*planes)[0];
-		plane->get_copy(abcd);
-		keycode.l2 = 0;
-		keycode.l2_name = "x1_val";
-		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
-		glbin_interpolator.AddKey(flkey);
-		//x2
-		plane = (*planes)[1];
-		plane->get_copy(abcd);
-		keycode.l2 = 0;
-		keycode.l2_name = "x2_val";
-		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
-		glbin_interpolator.AddKey(flkey);
-		//y1
-		plane = (*planes)[2];
-		plane->get_copy(abcd);
-		keycode.l2 = 0;
-		keycode.l2_name = "y1_val";
-		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
-		glbin_interpolator.AddKey(flkey);
-		//y2
-		plane = (*planes)[3];
-		plane->get_copy(abcd);
-		keycode.l2 = 0;
-		keycode.l2_name = "y2_val";
-		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
-		glbin_interpolator.AddKey(flkey);
-		//z1
-		plane = (*planes)[4];
-		plane->get_copy(abcd);
-		keycode.l2 = 0;
-		keycode.l2_name = "z1_val";
-		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
-		glbin_interpolator.AddKey(flkey);
-		//z2
-		plane = (*planes)[5];
-		plane->get_copy(abcd);
-		keycode.l2 = 0;
-		keycode.l2_name = "z2_val";
-		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
-		glbin_interpolator.AddKey(flkey);
-		//t
-		int frame = vd->GetCurTime();
-		keycode.l2 = 0;
-		keycode.l2_name = "frame";
-		flkey = new FlKeyDouble(keycode, frame);
-		glbin_interpolator.AddKey(flkey);
-		//primary color
-		fluo::Color pc = vd->GetColor();
-		keycode.l2 = 0;
-		keycode.l2_name = "color";
-		flkeyC = new FlKeyColor(keycode, pc);
-		glbin_interpolator.AddKey(flkeyC);
-	}
-	//for the view
-	keycode.l0 = 1;
-	keycode.l0_name = m_view->m_vrv->GetName();
-	keycode.l1 = 1;
-	keycode.l1_name = m_view->m_vrv->GetName();
-	//rotation
-	keycode.l2 = 0;
-	keycode.l2_name = "rotation";
-	fluo::Quaternion q = m_view->GetRotations();
-	flkeyQ = new FlKeyQuaternion(keycode, q);
-	glbin_interpolator.AddKey(flkeyQ);
-	//translation
-	double tx, ty, tz;
-	m_view->GetTranslations(tx, ty, tz);
-	//x
-	keycode.l2_name = "translation_x";
-	flkey = new FlKeyDouble(keycode, tx);
-	glbin_interpolator.AddKey(flkey);
-	//y
-	keycode.l2_name = "translation_y";
-	flkey = new FlKeyDouble(keycode, ty);
-	glbin_interpolator.AddKey(flkey);
-	//z
-	keycode.l2_name = "translation_z";
-	flkey = new FlKeyDouble(keycode, tz);
-	glbin_interpolator.AddKey(flkey);
-	//centers
-	m_view->GetCenters(tx, ty, tz);
-	//x
-	keycode.l2_name = "center_x";
-	flkey = new FlKeyDouble(keycode, tx);
-	glbin_interpolator.AddKey(flkey);
-	//y
-	keycode.l2_name = "center_y";
-	flkey = new FlKeyDouble(keycode, ty);
-	glbin_interpolator.AddKey(flkey);
-	//z
-	keycode.l2_name = "center_z";
-	flkey = new FlKeyDouble(keycode, tz);
-	glbin_interpolator.AddKey(flkey);
-	//obj traslation
-	m_view->GetObjTrans(tx, ty, tz);
-	//x
-	keycode.l2_name = "obj_trans_x";
-	flkey = new FlKeyDouble(keycode, tx);
-	glbin_interpolator.AddKey(flkey);
-	//y
-	keycode.l2_name = "obj_trans_y";
-	flkey = new FlKeyDouble(keycode, ty);
-	glbin_interpolator.AddKey(flkey);
-	//z
-	keycode.l2_name = "obj_trans_z";
-	flkey = new FlKeyDouble(keycode, tz);
-	glbin_interpolator.AddKey(flkey);
-	//scale
-	double scale = m_view->m_scale_factor;
-	keycode.l2_name = "scale";
-	flkey = new FlKeyDouble(keycode, scale);
-	glbin_interpolator.AddKey(flkey);
-	//intermixing mode
-	int ival = m_view->GetVolMethod();
-	keycode.l2_name = "volmethod";
-	flkeyI = new FlKeyInt(keycode, ival);
-	glbin_interpolator.AddKey(flkeyI);
-	//perspective angle
-	bool persp = m_view->GetPersp();
-	double aov = m_view->GetAov();
-	if (!persp)
-		aov = 9.9;
-	keycode.l2_name = "aov";
-	flkey = new FlKeyDouble(keycode, aov);
-	glbin_interpolator.AddKey(flkey);
-
-	glbin_interpolator.End();
-
-	FlKeyGroup* group = glbin_interpolator.GetKeyGroup(glbin_interpolator.GetLastIndex());
-	if (group)
-		group->type = interpolation;
-
-	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
-	glbin_moviemaker.SetCurrentFrame(glbin_moviemaker.GetClipEndFrame());
-	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame });
 }
 
 void MoviePanel::OnDelKey(wxCommandEvent& event)
 {
 	m_keylist->DeleteSel();
 	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
-	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame });
+	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstTotalFrames, gstParamList, gstParamListSelect });
 }
 
 void MoviePanel::OnDelAll(wxCommandEvent& event)
 {
 	m_keylist->DeleteAll();
 	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
-	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame });
+	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstTotalFrames, gstParamList, gstParamListSelect });
 }
 
 void MoviePanel::OnCamLockChk(wxCommandEvent& event)
@@ -2132,7 +1933,7 @@ void MoviePanel::OnGenKey(wxCommandEvent& event)
 
 	if (item != -1)
 	{
-		GenKey(item);
+		glbin_moviemaker.MakeKeys(item);
 		m_notebook->SetSelection(1);
 	}
 	event.Skip();

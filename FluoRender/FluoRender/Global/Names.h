@@ -680,6 +680,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstAutoKeyIndex "auto key index"
 #define gstParamList "param list"
 #define gstParamListSelect "param list sel"
+#define gstParamKeyDuration "param key duration"
 //noise reduct agent
 #define gstEnhance "enhance"
 #define gstEqualizeSavedR "equalize saved r"

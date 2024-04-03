@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <MoviePanel.h>
+#include <RenderViewPanel.h>
 #include <Animator/Interpolator.h>
 #include <StopWatch.hpp>
 #include <StopWatchFactory.hpp>
@@ -51,7 +52,7 @@ MovieMaker::MovieMaker() :
 	m_rotate = true;
 	m_rot_axis = 1;
 	m_rot_deg = 360;
-	m_rot_int_type = 0;
+	m_interpolation = 0;
 	m_seq_mode = 0;
 
 	m_full_frame_num = 360;
@@ -77,7 +78,7 @@ MovieMaker::MovieMaker() :
 	m_crop_h = 0;
 
 	m_cam_lock = false;
-	m_cam_lock_type = 0;
+	m_cam_lock_type = 1;
 
 }
 
@@ -257,9 +258,9 @@ void MovieMaker::SetRendering(bool rewind)
 			double val;
 			m_view->GetRotations(rval[0], rval[1], rval[2]);
 			val = rval[m_rot_axis];
-			if (m_rot_int_type == 0)
+			if (m_interpolation == 0)
 				val = m_starting_rot + t * m_rot_deg;
-			else if (m_rot_int_type == 1)
+			else if (m_interpolation == 1)
 				val = m_starting_rot +
 				(-2.0 * t * t * t + 3.0 * t * t) * m_rot_deg;
 			rval[m_rot_axis] = val;
@@ -788,6 +789,189 @@ void MovieMaker::SetCropH(int val)
 	if (m_view)
 		m_view->SetFrame(std::round(m_crop_x - m_crop_w / 2.0),
 			std::round(m_crop_y - m_crop_h / 2.0), m_crop_w, m_crop_h);
+}
+
+void MovieMaker::InsertKey(int index)
+{
+	if (!m_frame)
+		return;
+	if (!m_view)
+	{
+		if (m_frame->GetView(0))
+			m_view = m_frame->GetView(0);
+		else
+			return;
+	}
+
+	FlKeyCode keycode;
+	FlKeyDouble* flkey = 0;
+	FlKeyQuaternion* flkeyQ = 0;
+	FlKeyBoolean* flkeyB = 0;
+	FlKeyInt* flkeyI = 0;
+	FlKeyColor* flkeyC = 0;
+
+	double t = glbin_interpolator.GetLastT();
+	t = t < 0.0 ? 0.0 : t + m_key_duration;
+
+	glbin_interpolator.Begin(t, m_key_duration);
+
+	//for all volumes
+	for (int i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
+	{
+		VolumeData* vd = glbin_data_manager.GetVolumeData(i);
+		keycode.l0 = 1;
+		keycode.l0_name = m_view->m_vrv->GetName();
+		keycode.l1 = 2;
+		keycode.l1_name = vd->GetName();
+		//display
+		keycode.l2 = 0;
+		keycode.l2_name = "display";
+		flkeyB = new FlKeyBoolean(keycode, vd->GetDisp());
+		glbin_interpolator.AddKey(flkeyB);
+		//clipping planes
+		vector<fluo::Plane*>* planes = vd->GetVR()->get_planes();
+		if (!planes)
+			continue;
+		if (planes->size() != 6)
+			continue;
+		fluo::Plane* plane = 0;
+		double abcd[4];
+		//x1
+		plane = (*planes)[0];
+		plane->get_copy(abcd);
+		keycode.l2 = 0;
+		keycode.l2_name = "x1_val";
+		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
+		glbin_interpolator.AddKey(flkey);
+		//x2
+		plane = (*planes)[1];
+		plane->get_copy(abcd);
+		keycode.l2 = 0;
+		keycode.l2_name = "x2_val";
+		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
+		glbin_interpolator.AddKey(flkey);
+		//y1
+		plane = (*planes)[2];
+		plane->get_copy(abcd);
+		keycode.l2 = 0;
+		keycode.l2_name = "y1_val";
+		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
+		glbin_interpolator.AddKey(flkey);
+		//y2
+		plane = (*planes)[3];
+		plane->get_copy(abcd);
+		keycode.l2 = 0;
+		keycode.l2_name = "y2_val";
+		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
+		glbin_interpolator.AddKey(flkey);
+		//z1
+		plane = (*planes)[4];
+		plane->get_copy(abcd);
+		keycode.l2 = 0;
+		keycode.l2_name = "z1_val";
+		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
+		glbin_interpolator.AddKey(flkey);
+		//z2
+		plane = (*planes)[5];
+		plane->get_copy(abcd);
+		keycode.l2 = 0;
+		keycode.l2_name = "z2_val";
+		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
+		glbin_interpolator.AddKey(flkey);
+		//t
+		int frame = vd->GetCurTime();
+		keycode.l2 = 0;
+		keycode.l2_name = "frame";
+		flkey = new FlKeyDouble(keycode, frame);
+		glbin_interpolator.AddKey(flkey);
+		//primary color
+		fluo::Color pc = vd->GetColor();
+		keycode.l2 = 0;
+		keycode.l2_name = "color";
+		flkeyC = new FlKeyColor(keycode, pc);
+		glbin_interpolator.AddKey(flkeyC);
+	}
+	//for the view
+	keycode.l0 = 1;
+	keycode.l0_name = m_view->m_vrv->GetName();
+	keycode.l1 = 1;
+	keycode.l1_name = m_view->m_vrv->GetName();
+	//rotation
+	keycode.l2 = 0;
+	keycode.l2_name = "rotation";
+	fluo::Quaternion q = m_view->GetRotations();
+	flkeyQ = new FlKeyQuaternion(keycode, q);
+	glbin_interpolator.AddKey(flkeyQ);
+	//translation
+	double tx, ty, tz;
+	m_view->GetTranslations(tx, ty, tz);
+	//x
+	keycode.l2_name = "translation_x";
+	flkey = new FlKeyDouble(keycode, tx);
+	glbin_interpolator.AddKey(flkey);
+	//y
+	keycode.l2_name = "translation_y";
+	flkey = new FlKeyDouble(keycode, ty);
+	glbin_interpolator.AddKey(flkey);
+	//z
+	keycode.l2_name = "translation_z";
+	flkey = new FlKeyDouble(keycode, tz);
+	glbin_interpolator.AddKey(flkey);
+	//centers
+	m_view->GetCenters(tx, ty, tz);
+	//x
+	keycode.l2_name = "center_x";
+	flkey = new FlKeyDouble(keycode, tx);
+	glbin_interpolator.AddKey(flkey);
+	//y
+	keycode.l2_name = "center_y";
+	flkey = new FlKeyDouble(keycode, ty);
+	glbin_interpolator.AddKey(flkey);
+	//z
+	keycode.l2_name = "center_z";
+	flkey = new FlKeyDouble(keycode, tz);
+	glbin_interpolator.AddKey(flkey);
+	//obj traslation
+	m_view->GetObjTrans(tx, ty, tz);
+	//x
+	keycode.l2_name = "obj_trans_x";
+	flkey = new FlKeyDouble(keycode, tx);
+	glbin_interpolator.AddKey(flkey);
+	//y
+	keycode.l2_name = "obj_trans_y";
+	flkey = new FlKeyDouble(keycode, ty);
+	glbin_interpolator.AddKey(flkey);
+	//z
+	keycode.l2_name = "obj_trans_z";
+	flkey = new FlKeyDouble(keycode, tz);
+	glbin_interpolator.AddKey(flkey);
+	//scale
+	double scale = m_view->m_scale_factor;
+	keycode.l2_name = "scale";
+	flkey = new FlKeyDouble(keycode, scale);
+	glbin_interpolator.AddKey(flkey);
+	//intermixing mode
+	int ival = m_view->GetVolMethod();
+	keycode.l2_name = "volmethod";
+	flkeyI = new FlKeyInt(keycode, ival);
+	glbin_interpolator.AddKey(flkeyI);
+	//perspective angle
+	bool persp = m_view->GetPersp();
+	double aov = m_view->GetAov();
+	if (!persp)
+		aov = 9.9;
+	keycode.l2_name = "aov";
+	flkey = new FlKeyDouble(keycode, aov);
+	glbin_interpolator.AddKey(flkey);
+
+	glbin_interpolator.End();
+
+	FlKeyGroup* group = glbin_interpolator.GetKeyGroup(glbin_interpolator.GetLastIndex());
+	if (group)
+		group->type = m_interpolation;
+
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
+	glbin_moviemaker.SetCurrentFrame(glbin_moviemaker.GetClipEndFrame());
 }
 
 bool MovieMaker::Action()

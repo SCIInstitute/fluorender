@@ -95,12 +95,12 @@ public:
 	int GetRotateAxis() { return m_rot_axis; }
 	void SetRotateDeg(int val);
 	int GetRotateDeg() { return m_rot_deg; }
-	void SetRotIntType(int val)
+	void SetInterpolation(int val)
 	{
 		if (val > -1 && val < 2)
-			m_rot_int_type = val;
+			m_interpolation = val;
 	}
-	int GetRotIntType() { return m_rot_int_type; }
+	int GetInterpolation() { return m_interpolation; }
 	void SetSeqMode(int val);
 	int GetSeqMode() { return m_seq_mode; }
 	void SetSeqCurNum(int val);
@@ -155,6 +155,11 @@ public:
 	int GetCropW() { return m_crop_w; }
 	void SetCropH(int val);
 	int GetCropH() { return m_crop_h; }
+
+	//keys
+	void InsertKey(int index);
+	void SetKeyDuration(double val) { m_key_duration = val; }
+	double GetKeyDuration() { return m_key_duration; }
 	void SetCamLock(bool val) { m_cam_lock = val; }
 	bool GetCamLock() { return m_cam_lock; }
 	void SetCamLockType(int val)
@@ -194,7 +199,7 @@ private:
 	bool m_rotate;//enable roatation animation
 	int m_rot_axis;	//0-x;1-y;2-z
 	int m_rot_deg;
-	int m_rot_int_type;//0-linear; 1-smooth
+	int m_interpolation;//0-linear; 1-smooth
 	int m_seq_mode;//0:none; 1:4d; 2:bat
 	int m_seq_cur_num;//current time point of a sequence
 	int m_seq_all_num;//the number of the last time point; a sequence always starts from 0; this = total time points - 1
@@ -219,6 +224,8 @@ private:
 	int m_crop_w;
 	int m_crop_h;
 
+	//keys
+	double m_key_duration;
 	//cam lock
 	bool m_cam_lock;
 	int m_cam_lock_type;//0-not used;1-image center;2-click view;3-ruler;4-selection

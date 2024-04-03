@@ -54,7 +54,7 @@ public:
 	bool m_rotate;//enable roatation animation
 	int m_rot_axis;	//0-x;1-y;2-z
 	int m_rot_deg;
-	int m_rot_int_type;//0-linear; 1-smooth
+	int m_interpolation;//0-linear; 1-smooth
 	int m_seq_mode;//0:none; 1:4d; 2:bat
 
 	//movie properties
@@ -73,6 +73,8 @@ public:
 	int m_crop_w;
 	int m_crop_h;
 
+	//keys
+	double m_key_duration;
 	//cam lock
 	bool m_cam_lock;
 	int m_cam_lock_type;//0-not used;1-image center;2-click view;3-ruler;4-selection

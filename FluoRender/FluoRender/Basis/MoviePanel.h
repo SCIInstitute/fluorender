@@ -141,8 +141,6 @@ public:
 
 	//keyframe movie
 	void SetKeyframeMovie(bool val);
-	void GenKey(int val);
-	void InsertKey(int index, double duration, int interpolation);
 
 	//crop
 	void SetCropEnable(bool val);
