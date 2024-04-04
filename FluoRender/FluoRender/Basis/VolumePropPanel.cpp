@@ -660,6 +660,86 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	bool update_all = vc.empty();
 
 	//DBGPRINT(L"update vol props, update_all=%d, vc_size=%d\n", update_all, vc.size());
+		//mf button tips
+	if (update_all || FOUND_VALUE(gstMultiFuncTips))
+	{
+		switch (glbin_settings.m_mulfunc)
+		{
+		case 0:
+			m_gamma_st->SetToolTip("Synchronize the gamma values of all channels in the group");
+			m_saturation_st->SetToolTip("Synchronize the saturation values of all channels in the group");
+			m_luminance_st->SetToolTip("Synchronize the luminance values of all channels in the group");
+			m_alpha_st->SetToolTip("Synchronize the alpha values of all channels in the group");
+			m_shade_st->SetToolTip("Synchronize the shading values of all channels in the group");
+			m_boundary_st->SetToolTip("Synchronize the boundary values of all channels in the group");
+			m_thresh_st->SetToolTip("Synchronize the threshold values of all channels in the group");
+			m_shadow_st->SetToolTip("Synchronize the shadow values of all channels in the group");
+			m_sample_st->SetToolTip("Synchronize the sampling rate values of all channels in the group");
+			m_colormap_st->SetToolTip("Synchronize the colormap values of all channels in the group");
+			break;
+		case 1:
+			m_gamma_st->SetToolTip("Move the mouse cursor in render view and change the gamma value using the mouse wheel");
+			m_saturation_st->SetToolTip("Move the mouse cursor in render view and change the saturation value using the mouse wheel");
+			m_luminance_st->SetToolTip("Move the mouse cursor in render view and change the luminance value using the mouse wheel");
+			m_alpha_st->SetToolTip("Move the mouse cursor in render view and change the alpha value using the mouse wheel");
+			m_shade_st->SetToolTip("Move the mouse cursor in render view and change the shading value using the mouse wheel");
+			m_boundary_st->SetToolTip("Move the mouse cursor in render view and change the boundary value using the mouse wheel");
+			m_thresh_st->SetToolTip("Move the mouse cursor in render view and change the threshold value using the mouse wheel");
+			m_shadow_st->SetToolTip("Move the mouse cursor in render view and change the shadow value using the mouse wheel");
+			m_sample_st->SetToolTip("Move the mouse cursor in render view and change the sampling rate value using the mouse wheel");
+			m_colormap_st->SetToolTip("Move the mouse cursor in render view and change the colormap value using the mouse wheel");
+			break;
+		case 2:
+			m_gamma_st->SetToolTip("Reset the gamma value");
+			m_saturation_st->SetToolTip("Reset the saturation value");
+			m_luminance_st->SetToolTip("Reset the luminance value");
+			m_alpha_st->SetToolTip("Reset the alpha value");
+			m_shade_st->SetToolTip("Reset the shading value");
+			m_boundary_st->SetToolTip("Reset the boundary value");
+			m_thresh_st->SetToolTip("Reset the threshold value");
+			m_shadow_st->SetToolTip("Reset the shadow value");
+			m_sample_st->SetToolTip("Reset the sampling rate value");
+			m_colormap_st->SetToolTip("Reset the colormap value");
+			break;
+		case 3:
+			m_gamma_st->SetToolTip("Set the gamma value from machine learning");
+			m_saturation_st->SetToolTip("Set the saturation value from machine learning");
+			m_luminance_st->SetToolTip("Set the luminance value from machine learning");
+			m_alpha_st->SetToolTip("Set the alpha value from machine learning");
+			m_shade_st->SetToolTip("Set the shading value from machine learning");
+			m_boundary_st->SetToolTip("Set the boundary value from machine learning");
+			m_thresh_st->SetToolTip("Set the threshold value from machine learning");
+			m_shadow_st->SetToolTip("Set the shadow value from machine learning");
+			m_sample_st->SetToolTip("Set the sampling rate value from machine learning");
+			m_colormap_st->SetToolTip("Set the colormap value from machine learning");
+			break;
+		case 4:
+			m_gamma_st->SetToolTip("Undo the gamma value changes");
+			m_saturation_st->SetToolTip("Undo the saturation value changes");
+			m_luminance_st->SetToolTip("Undo the luminance value changes");
+			m_alpha_st->SetToolTip("Undo the alpha value changes");
+			m_shade_st->SetToolTip("Undo the shading value changes");
+			m_boundary_st->SetToolTip("Undo the boundary value changes");
+			m_thresh_st->SetToolTip("Undo the thresh value changes");
+			m_shadow_st->SetToolTip("Undo the shadow value changes");
+			m_sample_st->SetToolTip("Undo the sampling rate value changes");
+			m_colormap_st->SetToolTip("Undo the colormap value changes");
+			break;
+		case 5:
+			m_gamma_st->SetToolTip("Enable/Disable the gamma value");
+			m_saturation_st->SetToolTip("Enable/Disable the saturation value");
+			m_luminance_st->SetToolTip("Enable/Disable the luminance value");
+			m_alpha_st->SetToolTip("Enable/Disable the alpha value");
+			m_shade_st->SetToolTip("Enable/Disable the shading value");
+			m_boundary_st->SetToolTip("Enable/Disable the boundary value");
+			m_thresh_st->SetToolTip("Enable/Disable the thresh value");
+			m_shadow_st->SetToolTip("Enable/Disable the shadow value");
+			m_sample_st->SetToolTip("Enable/Disable the sampling rate value");
+			m_colormap_st->SetToolTip("Enable/Disable the colormap value");
+			break;
+		}
+	}
+
 	//volume properties
 	//transfer function
 	//gamma

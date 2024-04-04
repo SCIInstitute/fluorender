@@ -1130,6 +1130,7 @@ void SettingDlg::OnInverseSliderCheck(wxCommandEvent& event)
 void SettingDlg::OnMulFuncBtnComb(wxCommandEvent& event)
 {
 	glbin_settings.m_mulfunc = m_mul_func_btn_comb->GetCurrentSelection();
+	m_frame->UpdateProps({ gstMultiFuncTips });
 }
 
 void SettingDlg::OnMouseIntCheck(wxCommandEvent &event)

@@ -174,7 +174,12 @@ public:
 	//autokey functions
 	void MakeKeys(int type);
 	std::vector<std::string> GetAutoKeyTypes();
-	void AutoKeyChanComb(int comb);
+	void MakeKeysCameraTumble();
+	void MakeKeysCameraZoom();
+	void MakeKeysTimeSequence();
+	void MakeKeysTimeColormap();
+	void MakeKeysClipZ(int type);//type: 0-one-sided; 1-single slice
+	void MakeKeysChannComb(int comb);
 	bool MoveOne(std::vector<bool>& chan_mask, int lv);
 	bool GetMask(std::vector<bool>& chan_mask);
 	void KeyChannComb();

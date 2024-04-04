@@ -504,6 +504,55 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 	bool update_all = vc.empty();
 
+	//mf button tips
+	if (update_all || FOUND_VALUE(gstMultiFuncTips))
+	{
+		switch (glbin_settings.m_mulfunc)
+		{
+		case 0:
+			m_clip_x_st->SetToolTip("Synchronize the X clipping values for channels in render view");
+			m_clip_y_st->SetToolTip("Synchronize the Y clipping values for channels in render view");
+			m_clip_z_st->SetToolTip("Synchronize the Z clipping values for channels in render view");
+			m_rot_x_st->SetToolTip("Synchronize the X rotation values for channels in render view");
+			m_rot_y_st->SetToolTip("Synchronize the Y rotation values for channels in render view");
+			m_rot_z_st->SetToolTip("Synchronize the Z rotation values for channels in render view");
+			break;
+		case 1:
+			m_clip_x_st->SetToolTip("Move mouse cursor in render view and change X clipping using the mouse wheel");
+			m_clip_y_st->SetToolTip("Move mouse cursor in render view and change Y clipping using the mouse wheel");
+			m_clip_z_st->SetToolTip("Move mouse cursor in render view and change Z clipping using the mouse wheel");
+			m_rot_x_st->SetToolTip("Move mouse cursor in render view and change X rotation using the mouse wheel");
+			m_rot_y_st->SetToolTip("Move mouse cursor in render view and change Y rotation using the mouse wheel");
+			m_rot_z_st->SetToolTip("Move mouse cursor in render view and change Z rotation using the mouse wheel");
+			break;
+		case 2:
+			m_clip_x_st->SetToolTip("Reset X clipping values");
+			m_clip_y_st->SetToolTip("Reset Y clipping values");
+			m_clip_z_st->SetToolTip("Reset Z clipping values");
+			m_rot_x_st->SetToolTip("Reset X rotation values");
+			m_rot_y_st->SetToolTip("Reset Y rotation values");
+			m_rot_z_st->SetToolTip("Reset Z rotation values");
+			break;
+		case 4:
+			m_clip_x_st->SetToolTip("Undo X clipping value changes");
+			m_clip_y_st->SetToolTip("Undo Y clipping value changes");
+			m_clip_z_st->SetToolTip("Undo Z clipping value changes");
+			m_rot_x_st->SetToolTip("Undo X rotation value changes");
+			m_rot_y_st->SetToolTip("Undo Y rotation value changes");
+			m_rot_z_st->SetToolTip("Undo Z rotation value changes");
+			break;
+		case 3:
+		case 5:
+			m_clip_x_st->SetToolTip("No function assigned");
+			m_clip_y_st->SetToolTip("No function assigned");
+			m_clip_z_st->SetToolTip("No function assigned");
+			m_rot_x_st->SetToolTip("No function assigned");
+			m_rot_y_st->SetToolTip("No function assigned");
+			m_rot_z_st->SetToolTip("No function assigned");
+			break;
+		}
+	}
+
 	//modes
 	if (update_all || FOUND_VALUE(gstClipPlaneMode))
 	{

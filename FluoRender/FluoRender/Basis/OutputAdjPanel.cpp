@@ -456,6 +456,71 @@ void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (FOUND_VALUE(gstNull))
 		return;
 	bool update_all = vc.empty();
+
+	//mf button tips
+	if (update_all || FOUND_VALUE(gstMultiFuncTips))
+	{
+		switch (glbin_settings.m_mulfunc)
+		{
+		case 0:
+			m_r_gamma_st->SetToolTip("Synchronize the gamma values of RGB channels");
+			m_g_gamma_st->SetToolTip("Synchronize the gamma values of RGB channels");
+			m_b_gamma_st->SetToolTip("Synchronize the gamma values of RGB channels");
+			m_r_brightness_st->SetToolTip("Synchronize the brightness values of RGB channels");
+			m_g_brightness_st->SetToolTip("Synchronize the brightness values of RGB channels");
+			m_b_brightness_st->SetToolTip("Synchronize the brightness values of RGB channels");
+			m_r_hdr_st->SetToolTip("Synchronize the equalization values of RGB channels");
+			m_g_hdr_st->SetToolTip("Synchronize the equalization values of RGB channels");
+			m_b_hdr_st->SetToolTip("Synchronize the equalization values of RGB channels");
+			break;
+		case 1:
+			m_r_gamma_st->SetToolTip("Move the mouse cursor in render view and change the gamma value using the mouse wheel");
+			m_g_gamma_st->SetToolTip("Move the mouse cursor in render view and change the gamma value using the mouse wheel");
+			m_b_gamma_st->SetToolTip("Move the mouse cursor in render view and change the gamma value using the mouse wheel");
+			m_r_brightness_st->SetToolTip("Move the mouse cursor in render view and change the brightness value using the mouse wheel");
+			m_g_brightness_st->SetToolTip("Move the mouse cursor in render view and change the brightness value using the mouse wheel");
+			m_b_brightness_st->SetToolTip("Move the mouse cursor in render view and change the brightness value using the mouse wheel");
+			m_r_hdr_st->SetToolTip("Move the mouse cursor in render view and change the equalization value using the mouse wheel");
+			m_g_hdr_st->SetToolTip("Move the mouse cursor in render view and change the equalization value using the mouse wheel");
+			m_b_hdr_st->SetToolTip("Move the mouse cursor in render view and change the equalization value using the mouse wheel");
+			break;
+		case 2:
+			m_r_gamma_st->SetToolTip("Reset the gamma value");
+			m_g_gamma_st->SetToolTip("Reset the gamma value");
+			m_b_gamma_st->SetToolTip("Reset the gamma value");
+			m_r_brightness_st->SetToolTip("Reset the brightness value");
+			m_g_brightness_st->SetToolTip("Reset the brightness value");
+			m_b_brightness_st->SetToolTip("Reset the brightness value");
+			m_r_hdr_st->SetToolTip("Reset the eqaualization value");
+			m_g_hdr_st->SetToolTip("Reset the eqaualization value");
+			m_b_hdr_st->SetToolTip("Reset the eqaualization value");
+			break;
+		case 4:
+			m_r_gamma_st->SetToolTip("Undo the gamma value changes");
+			m_g_gamma_st->SetToolTip("Undo the gamma value changes");
+			m_b_gamma_st->SetToolTip("Undo the gamma value changes");
+			m_r_brightness_st->SetToolTip("Undo the brightness value changes");
+			m_g_brightness_st->SetToolTip("Undo the brightness value changes");
+			m_b_brightness_st->SetToolTip("Undo the brightness value changes");
+			m_r_hdr_st->SetToolTip("Undo the equalization value changes");
+			m_g_hdr_st->SetToolTip("Undo the equalization value changes");
+			m_b_hdr_st->SetToolTip("Undo the equalization value changes");
+			break;
+		case 3:
+		case 5:
+			m_r_gamma_st->SetToolTip("No function assigned");
+			m_g_gamma_st->SetToolTip("No function assigned");
+			m_b_gamma_st->SetToolTip("No function assigned");
+			m_r_brightness_st->SetToolTip("No function assigned");
+			m_g_brightness_st->SetToolTip("No function assigned");
+			m_b_brightness_st->SetToolTip("No function assigned");
+			m_r_hdr_st->SetToolTip("No function assigned");
+			m_g_hdr_st->SetToolTip("No function assigned");
+			m_b_hdr_st->SetToolTip("No function assigned");
+			break;
+		}
+	}
+
 	bool bSyncR = FOUND_VALUE(gstSyncR);
 	bool bSyncG = FOUND_VALUE(gstSyncG);
 	bool bSyncB = FOUND_VALUE(gstSyncB);

@@ -112,6 +112,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstActivated "activated"
 
 //properties
+#define gstMultiFuncTips "multi func tips"
 //list panel
 #define gstListCtrl "list ctrl"
 //tree panel

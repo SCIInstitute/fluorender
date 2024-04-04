@@ -372,16 +372,34 @@ void MovieMaker::MakeKeys(int type)
 	switch (type)
 	{
 	case 0:
-		KeyChannComb();
+		MakeKeysCameraTumble();
 		break;
 	case 1:
-		AutoKeyChanComb(1);
+		MakeKeysCameraZoom();
 		break;
 	case 2:
-		AutoKeyChanComb(2);
+		MakeKeysTimeSequence();
 		break;
 	case 3:
-		AutoKeyChanComb(3);
+		MakeKeysTimeColormap();
+		break;
+	case 4:
+		MakeKeysClipZ(0);
+		break;
+	case 5:
+		MakeKeysClipZ(1);
+		break;
+	case 6:
+		KeyChannComb();
+		break;
+	case 7:
+		MakeKeysChannComb(1);
+		break;
+	case 8:
+		MakeKeysChannComb(2);
+		break;
+	case 9:
+		MakeKeysChannComb(3);
 		break;
 	}
 }
@@ -390,17 +408,54 @@ std::vector<std::string> MovieMaker::GetAutoKeyTypes()
 {
 	std::vector<std::string> result;
 	//0
-	result.push_back("Channel combinations");
+	result.push_back("Camera tumble left and rignt");
 	//1
-	result.push_back("Channel combination nC1");
+	result.push_back("Camera zoom in and out");
 	//2
-	result.push_back("Channel combination nC2");
+	result.push_back("Time sequence playback and reverse");
 	//3
+	result.push_back("Time sequence change colors");
+	//4
+	result.push_back("Slice down the Z direction and back");
+	//5
+	result.push_back("Single Z section move down and back");
+	//6
+	result.push_back("Channel combinations");
+	//7
+	result.push_back("Channel combination nC1");
+	//8
+	result.push_back("Channel combination nC2");
+	//9
 	result.push_back("Channel combination nC3");
 	return result;
 }
 
-void MovieMaker::AutoKeyChanComb(int comb)
+void MovieMaker::MakeKeysCameraTumble()
+{
+
+}
+
+void MovieMaker::MakeKeysCameraZoom()
+{
+
+}
+
+void MovieMaker::MakeKeysTimeSequence()
+{
+
+}
+
+void MovieMaker::MakeKeysTimeColormap()
+{
+
+}
+
+void MovieMaker::MakeKeysClipZ(int type)
+{
+
+}
+
+void MovieMaker::MakeKeysChannComb(int comb)
 {
 	if (!m_frame)
 		return;
@@ -508,9 +563,9 @@ bool MovieMaker::GetMask(std::vector<bool>& chan_mask)
 
 void MovieMaker::KeyChannComb()
 {
-	AutoKeyChanComb(1);
-	AutoKeyChanComb(2);
-	AutoKeyChanComb(3);
+	MakeKeysChannComb(1);
+	MakeKeysChannComb(2);
+	MakeKeysChannComb(3);
 }
 
 void MovieMaker::SetMainFrame(MainFrame* frame)
