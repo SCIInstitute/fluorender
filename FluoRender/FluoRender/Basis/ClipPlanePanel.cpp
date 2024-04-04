@@ -157,8 +157,8 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 	m_linkx_tb = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(unlink);
-	m_linkx_tb->AddCheckTool(0, "Lock X Planes",
-		bitmap, wxNullBitmap, "Lock X Planes");
+	m_linkx_tb->AddCheckTool(0, "",
+		bitmap, wxNullBitmap, "Link two X clipping planes");
 	m_clip_x_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnClipXMF, this);
 	m_clipx_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClipPlanePanel::OnClipXChange, this);
 	m_x1_clip_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnX1ClipEdit, this);
@@ -200,8 +200,8 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_int);
 	m_linky_tb = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_linky_tb->AddCheckTool(0, "Lock Y Planes",
-		bitmap, wxNullBitmap, "Lock Y Planes");
+	m_linky_tb->AddCheckTool(0, "",
+		bitmap, wxNullBitmap, "Link two Y clipping planes");
 	m_clip_y_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnClipYMF, this);
 	m_clipy_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClipPlanePanel::OnClipYChange, this);
 	m_y1_clip_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnY1ClipEdit, this);
@@ -243,8 +243,8 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_int);
 	m_linkz_tb = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_linkz_tb->AddCheckTool(0, "Lock Z Planes",
-		bitmap, wxNullBitmap, "Lock Z Planes");
+	m_linkz_tb->AddCheckTool(0, "",
+		bitmap, wxNullBitmap, "Link two Z clipping planes");
 	m_clip_z_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnClipZMF, this);
 	m_clipz_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClipPlanePanel::OnClipZChange, this);
 	m_z1_clip_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnZ1ClipEdit, this);

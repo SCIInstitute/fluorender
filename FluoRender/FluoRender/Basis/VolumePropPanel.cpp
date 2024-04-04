@@ -252,8 +252,8 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_thresh_link_tb = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_thresh_link_tb->AddCheckTool(0, "Lock Threshold Range",
-		wxGetBitmapFromMemory(unlink), wxNullBitmap, "Lock Threshold Range");
+	m_thresh_link_tb->AddCheckTool(0, "",
+		wxGetBitmapFromMemory(unlink), wxNullBitmap, "Link low and high threshold values");
 	m_thresh_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	//bind events
 	m_thresh_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnThreshMF, this);
@@ -323,8 +323,8 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_colormap_link_tb = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_colormap_link_tb->AddCheckTool(0, "Lock Colormap Range",
-		wxGetBitmapFromMemory(unlink), wxNullBitmap, "Lock Colormap Range");
+	m_colormap_link_tb->AddCheckTool(0, "",
+		wxGetBitmapFromMemory(unlink), wxNullBitmap, "Link low and high colormap values");
 	m_colormap_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	//bind events
 	m_colormap_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnColormapMF, this);
@@ -360,19 +360,19 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	bitmap = wxGetBitmap(transplo, dpi_sf);
 	m_options_toolbar->AddCheckTool(ID_TranspChk, "Increase Transpancy",
 		bitmap, wxNullBitmap,
-		"Enable High Tarnsparency mode",
-		"Enable High Tarnsparency mode");
+		"Enable High-Tarnsparency mode",
+		"Enable High-Tarnsparency mode");
 	m_options_toolbar->ToggleTool(ID_TranspChk, glbin_vol_def.m_transparent);
 	//MIP
 	bitmap = wxGetBitmap(mip, dpi_sf);
 	m_options_toolbar->AddCheckTool(ID_MipChk, "MIP",
 		bitmap, wxNullBitmap,
-		"Enable Maximum Intensity Projection (MIP)",
-		"Enable Maximum Intensity Projection (MIP)");
+		"Enable Maximum Intensity Projection (MIP) mode",
+		"Enable Maximum Intensity Projection (MIP) mode");
 	m_options_toolbar->ToggleTool(ID_MipChk, glbin_vol_def.m_mip_enable);
 	//inversion
 	bitmap = wxGetBitmap(invert_off, dpi_sf);
-	m_options_toolbar->AddCheckTool(ID_InvChk, "Inversion",
+	m_options_toolbar->AddCheckTool(ID_InvChk, "Invert",
 		bitmap, wxNullBitmap,
 		"Invert data intensity values",
 		"Invert data intensity values");

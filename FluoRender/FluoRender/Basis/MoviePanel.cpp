@@ -62,23 +62,18 @@ KeyListCtrl::KeyListCtrl(
 	itemCol.SetText("ID");
 	itemCol.SetAlign(wxLIST_FORMAT_CENTER);
 	InsertColumn(0, itemCol);
-	SetColumnWidth(0, 40);
 	itemCol.SetText("Frame");
 	itemCol.SetAlign(wxLIST_FORMAT_RIGHT);
 	InsertColumn(1, itemCol);
-	SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
 	itemCol.SetText("Duration");
 	itemCol.SetAlign(wxLIST_FORMAT_RIGHT);
 	InsertColumn(2, itemCol);
-	SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
 	itemCol.SetText("Interpolation");
 	itemCol.SetAlign(wxLIST_FORMAT_LEFT);
 	InsertColumn(3, itemCol);
-	SetColumnWidth(3, wxLIST_AUTOSIZE_USEHEADER);
 	itemCol.SetText("Description");
 	itemCol.SetAlign(wxLIST_FORMAT_LEFT);
 	InsertColumn(4, itemCol);
-	SetColumnWidth(4, wxLIST_AUTOSIZE_USEHEADER);
 
 	m_images = new wxImageList(16, 16, true);
 	wxIcon icon = wxIcon(key_xpm);
@@ -171,6 +166,9 @@ void KeyListCtrl::Update()
 		string desc = glbin_interpolator.GetKeyDesc(i);
 		Append(id, time, duration, interp, desc);
 	}
+
+	for (int i = 0; i < 5; ++i)
+		SetColumnWidth(i, wxLIST_AUTOSIZE_USEHEADER);
 }
 
 void KeyListCtrl::UpdateText()
@@ -701,7 +699,7 @@ wxWindow* MoviePanel::CreateAutoKeyPage(wxWindow *parent)
 	m_auto_key_list = new wxListCtrl(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL);
 	wxListItem itemCol;
-	itemCol.SetText("ID");
+	itemCol.SetText("No.");
 	m_auto_key_list->InsertColumn(0, itemCol);
 	itemCol.SetText("Template");
 	m_auto_key_list->InsertColumn(1, itemCol);
@@ -718,11 +716,12 @@ wxWindow* MoviePanel::CreateAutoKeyPage(wxWindow *parent)
 		tmp = m_auto_key_list->InsertItem(i-1, str, 0);
 		m_auto_key_list->SetItem(tmp, 1, it);
 	}
-	m_auto_key_list->SetColumnWidth(1, -1);
+	for (int i : { 0, 1 })
+		m_auto_key_list->SetColumnWidth(i, wxLIST_AUTOSIZE);
 	m_auto_key_list->Bind(wxEVT_LIST_ITEM_ACTIVATED, &MoviePanel::OnGenKey, this);
 
 	//button
-	m_gen_keys_btn = new wxButton(page, wxID_ANY, "Generate");
+	m_gen_keys_btn = new wxButton(page, wxID_ANY, "Generate keyframes");
 	m_gen_keys_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnGenKey, this);
 
 	//vertical sizer
