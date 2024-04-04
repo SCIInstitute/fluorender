@@ -1043,7 +1043,6 @@ void MovieMaker::MakeKeysCameraTumble()
 	flkey = new FlKeyQuaternion(keycode, q);
 	glbin_interpolator.AddKey(flkey);
 	glbin_interpolator.End();
-	t += m_key_duration;
 
 	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
 }
@@ -1086,7 +1085,6 @@ void MovieMaker::MakeKeysCameraZoom()
 	flkey = new FlKeyDouble(keycode, val);
 	glbin_interpolator.AddKey(flkey);
 	glbin_interpolator.End();
-	t += m_key_duration;
 
 	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
 }
@@ -1115,6 +1113,8 @@ void MovieMaker::MakeKeysTimeSequence()
 	for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
 	{
 		VolumeData* vd = m_view->GetAllVolumeData(i);
+		if (!vd)
+			continue;
 		keycode.l1 = 2;
 		keycode.l1_name = vd->GetName();
 		flkey = new FlKeyDouble(keycode, 0);
@@ -1127,6 +1127,8 @@ void MovieMaker::MakeKeysTimeSequence()
 	for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
 	{
 		VolumeData* vd = m_view->GetAllVolumeData(i);
+		if (!vd)
+			continue;
 		keycode.l1 = 2;
 		keycode.l1_name = vd->GetName();
 		flkey = new FlKeyDouble(keycode, m_seq_all_num);
@@ -1139,13 +1141,14 @@ void MovieMaker::MakeKeysTimeSequence()
 	for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
 	{
 		VolumeData* vd = m_view->GetAllVolumeData(i);
+		if (!vd)
+			continue;
 		keycode.l1 = 2;
 		keycode.l1_name = vd->GetName();
 		flkey = new FlKeyDouble(keycode, 0);
 		glbin_interpolator.AddKey(flkey);
 	}
 	glbin_interpolator.End();
-	t += m_seq_all_num;
 
 	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
 }
@@ -1157,6 +1160,8 @@ void MovieMaker::MakeKeysTimeColormap()
 
 	fluo::Color c[7];
 	double v[7];
+	int tt[7];
+	int dt[7];
 	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		vd = m_view->GetAllVolumeData(0);
@@ -1172,14 +1177,19 @@ void MovieMaker::MakeKeysTimeColormap()
 	v[5] = high;
 	v[6] = 1;
 	for (int i = 0; i < 7; ++i)
+	{
 		c[i] = vd->GetColorFromColormap(v[i]);
+		tt[i] = std::round(m_seq_all_num * v[i]);
+	}
+	dt[0] = 0;
+	for (int i = 1; i < 7; ++i)
+		dt[i] = tt[i] - tt[i - 1];
 
 	FlKeyCode keycode;
 	FlKeyColor* flkey = 0;
 
 	double t = glbin_interpolator.GetLastT();
 	if (t > 0.0) t += m_key_duration;
-	double dt = 0;
 
 	//for the view
 	keycode.l0 = 1;
@@ -1190,14 +1200,16 @@ void MovieMaker::MakeKeysTimeColormap()
 
 	for (int i = 0; i < 7; ++i)
 	{
-		if (i == 0 && v[i] == v[i + 1])
+		if (i == 0 && tt[i] == tt[i + 1])
 			continue;
-		if (i == 6 && v[i] == v[i - 1])
+		if (i == 6 && tt[i] == tt[i - 1])
 			continue;
-		glbin_interpolator.Begin(t, m_seq_all_num);
+		glbin_interpolator.Begin(t, dt[i]);
 		for (int j = 0; j < m_view->GetAllVolumeNum(); ++j)
 		{
 			VolumeData* vd = m_view->GetAllVolumeData(j);
+			if (!vd)
+				continue;
 			keycode.l1 = 2;
 			keycode.l1_name = vd->GetName();
 			flkey = new FlKeyColor(keycode, c[i]);
@@ -1205,12 +1217,7 @@ void MovieMaker::MakeKeysTimeColormap()
 		}
 		glbin_interpolator.End();
 		if (i < 6)
-			dt = m_seq_all_num * (v[i + 1] - v[i]);
-		else
-			dt = m_key_duration;
-		if (dt < 1)
-			dt = 1;
-		t += dt;
+			t += dt[i + 1];
 	}
 
 	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
@@ -1218,7 +1225,100 @@ void MovieMaker::MakeKeysTimeColormap()
 
 void MovieMaker::MakeKeysClipZ(int type)
 {
+	int n = m_view->GetAllVolumeNum();
+	if (n <= 0)
+		return;
 
+	int nz = 0;
+	int x, y, z;
+	for (int i = 0; i < n; ++i)
+	{
+		VolumeData* vd = m_view->GetAllVolumeData(i);
+		if (!vd)
+			continue;
+		vd->GetResolution(x, y, z);
+		nz = std::max(z, nz);
+	}
+	if (nz <= 1)
+		return;
+	nz -= 1;
+
+	FlKeyCode keycode1, keycode2;
+	FlKeyDouble* flkey = 0;
+
+	double t = glbin_interpolator.GetLastT();
+	if (t > 0.0) t += nz;
+
+	//for the view
+	keycode1.l0 = 1;
+	keycode1.l0_name = m_view->m_vrv->GetName();
+	keycode2.l0 = 1;
+	keycode2.l0_name = m_view->m_vrv->GetName();
+	//time point
+	keycode1.l2 = 0;
+	keycode1.l2_name = "z1_val";
+	keycode2.l2 = 0;
+	keycode2.l2_name = "z2_val";
+
+	//initial
+	glbin_interpolator.Begin(t, nz);
+	for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
+	{
+		VolumeData* vd = m_view->GetAllVolumeData(i);
+		if (!vd)
+			continue;
+		keycode1.l1 = 2;
+		keycode1.l1_name = vd->GetName();
+		flkey = new FlKeyDouble(keycode1, 0);
+		glbin_interpolator.AddKey(flkey);
+		keycode2.l1 = 2;
+		keycode2.l1_name = vd->GetName();
+		flkey = new FlKeyDouble(keycode2,
+			type ? 1.0 / z : 1);
+		glbin_interpolator.AddKey(flkey);
+	}
+	glbin_interpolator.End();
+	t += nz;
+	//move down
+	glbin_interpolator.Begin(t, nz);
+	for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
+	{
+		VolumeData* vd = m_view->GetAllVolumeData(i);
+		if (!vd)
+			continue;
+		keycode1.l1 = 2;
+		keycode1.l1_name = vd->GetName();
+		int x, y, z;
+		vd->GetResolution(x, y, z);
+		flkey = new FlKeyDouble(keycode1, 1 - 1.0 / z);
+		glbin_interpolator.AddKey(flkey);
+		keycode2.l1 = 2;
+		keycode2.l1_name = vd->GetName();
+		flkey = new FlKeyDouble(keycode2, 1);
+		glbin_interpolator.AddKey(flkey);
+	}
+	glbin_interpolator.End();
+	t += nz;
+	//restore
+	glbin_interpolator.Begin(t, nz);
+	for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
+	{
+		VolumeData* vd = m_view->GetAllVolumeData(i);
+		if (!vd)
+			continue;
+		keycode1.l1 = 2;
+		keycode1.l1_name = vd->GetName();
+		flkey = new FlKeyDouble(keycode1, 0);
+		glbin_interpolator.AddKey(flkey);
+		keycode2.l1 = 2;
+		keycode2.l1_name = vd->GetName();
+		flkey = new FlKeyDouble(keycode2,
+			type ? 1.0 / z : 1);
+		glbin_interpolator.AddKey(flkey);
+	}
+	glbin_interpolator.End();
+
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
 }
 
 void MovieMaker::MakeKeysChannComb(int comb)
