@@ -66,19 +66,19 @@ KeyListCtrl::KeyListCtrl(
 	itemCol.SetText("Frame");
 	itemCol.SetAlign(wxLIST_FORMAT_RIGHT);
 	InsertColumn(1, itemCol);
-	SetColumnWidth(1, 60);
+	SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
 	itemCol.SetText("Duration");
 	itemCol.SetAlign(wxLIST_FORMAT_RIGHT);
 	InsertColumn(2, itemCol);
-	SetColumnWidth(2, 80);
+	SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
 	itemCol.SetText("Interpolation");
 	itemCol.SetAlign(wxLIST_FORMAT_LEFT);
 	InsertColumn(3, itemCol);
-	SetColumnWidth(3, 80);
+	SetColumnWidth(3, wxLIST_AUTOSIZE_USEHEADER);
 	itemCol.SetText("Description");
 	itemCol.SetAlign(wxLIST_FORMAT_LEFT);
 	InsertColumn(4, itemCol);
-	SetColumnWidth(4, 80);
+	SetColumnWidth(4, wxLIST_AUTOSIZE_USEHEADER);
 
 	m_images = new wxImageList(16, 16, true);
 	wxIcon icon = wxIcon(key_xpm);
@@ -695,7 +695,7 @@ wxWindow* MoviePanel::CreateAutoKeyPage(wxWindow *parent)
 {
 	wxScrolledWindow* page = new wxScrolledWindow(parent);
 
-	wxStaticText * st = new wxStaticText(page, 0, "Choose an auto key type");
+	wxStaticText * st = new wxStaticText(page, 0, "Double-click a template to generate keyframes");
 
 	//list of options
 	m_auto_key_list = new wxListCtrl(page, wxID_ANY,
@@ -703,7 +703,7 @@ wxWindow* MoviePanel::CreateAutoKeyPage(wxWindow *parent)
 	wxListItem itemCol;
 	itemCol.SetText("ID");
 	m_auto_key_list->InsertColumn(0, itemCol);
-	itemCol.SetText("Auto Key Type");
+	itemCol.SetText("Template");
 	m_auto_key_list->InsertColumn(1, itemCol);
 	//options
 	//channel comb 1

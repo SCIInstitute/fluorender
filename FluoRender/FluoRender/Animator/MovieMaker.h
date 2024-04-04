@@ -130,7 +130,7 @@ public:
 	int GetClipStartFrame() { return m_clip_start_frame; }
 	void SetClipEndFrame(int val);
 	int GetClipEndFrame() { return m_clip_end_frame; }
-	void SetCurrentFrame(int val);
+	void SetCurrentFrame(int val, bool upd_seq = true);
 	int GetCurrentFrame() { return m_cur_frame; }
 	void SetCurrentTime(double val);
 	double GetCurProg()
@@ -177,6 +177,7 @@ public:
 	void AutoKeyChanComb(int comb);
 	bool MoveOne(std::vector<bool>& chan_mask, int lv);
 	bool GetMask(std::vector<bool>& chan_mask);
+	void KeyChannComb();
 
 private:
 	MainFrame* m_frame;

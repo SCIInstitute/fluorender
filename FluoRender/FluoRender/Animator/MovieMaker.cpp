@@ -372,12 +372,15 @@ void MovieMaker::MakeKeys(int type)
 	switch (type)
 	{
 	case 0:
-		AutoKeyChanComb(1);
+		KeyChannComb();
 		break;
 	case 1:
-		AutoKeyChanComb(2);
+		AutoKeyChanComb(1);
 		break;
 	case 2:
+		AutoKeyChanComb(2);
+		break;
+	case 3:
 		AutoKeyChanComb(3);
 		break;
 	}
@@ -386,8 +389,13 @@ void MovieMaker::MakeKeys(int type)
 std::vector<std::string> MovieMaker::GetAutoKeyTypes()
 {
 	std::vector<std::string> result;
+	//0
+	result.push_back("Channel combinations");
+	//1
 	result.push_back("Channel combination nC1");
+	//2
 	result.push_back("Channel combination nC2");
+	//3
 	result.push_back("Channel combination nC3");
 	return result;
 }
@@ -446,6 +454,9 @@ void MovieMaker::AutoKeyChanComb(int comb)
 		glbin_interpolator.End();
 		t += m_key_duration;
 	} while (GetMask(chan_mask));
+
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + m_key_duration);
+
 }
 
 bool MovieMaker::MoveOne(std::vector<bool>& chan_mask, int lv)
@@ -495,6 +506,13 @@ bool MovieMaker::GetMask(std::vector<bool>& chan_mask)
 	return MoveOne(chan_mask, 1);
 }
 
+void MovieMaker::KeyChannComb()
+{
+	AutoKeyChanComb(1);
+	AutoKeyChanComb(2);
+	AutoKeyChanComb(3);
+}
+
 void MovieMaker::SetMainFrame(MainFrame* frame)
 {
 	m_frame = frame;
@@ -532,7 +550,7 @@ void MovieMaker::SetKeyframeEnable(bool val)
 	if (m_keyframe_enable)
 	{
 		//get settings from interpolator
-		int n = std::round(glbin_interpolator.GetLastT() + m_key_duration);
+		int n = std::round(glbin_interpolator.GetLastT());
 		SetFullFrameNum(n);
 	}
 	else
@@ -658,7 +676,7 @@ void MovieMaker::SetSeqCurNum(int val)
 	else if (m_seq_mode > 0)
 	{
 		m_cur_frame = std::round((double)m_seq_cur_num * m_full_frame_num / m_seq_all_num);
-		SetCurrentFrame(m_cur_frame);
+		SetCurrentFrame(m_cur_frame, false);
 	}
 }
 
@@ -707,7 +725,7 @@ void MovieMaker::SetClipEndFrame(int val)
 	SetCurrentFrame(m_cur_frame);
 }
 
-void MovieMaker::SetCurrentFrame(int val)
+void MovieMaker::SetCurrentFrame(int val, bool upd_seq)
 {
 	if (m_rotate && !IsPaused())
 	{
@@ -718,7 +736,7 @@ void MovieMaker::SetCurrentFrame(int val)
 	}
 	m_cur_frame = fluo::RotateClamp2(val, m_clip_start_frame, m_clip_end_frame);
 	m_cur_time = (m_cur_frame - m_clip_start_frame) / m_fps;
-	if (!m_keyframe_enable && m_seq_mode > 0)
+	if (upd_seq && !m_keyframe_enable && m_seq_mode > 0)
 	{
 		m_seq_cur_num = std::round((double)m_cur_frame * m_seq_all_num / m_full_frame_num);
 	}
@@ -973,7 +991,7 @@ void MovieMaker::InsertKey(int index)
 	if (group)
 		group->type = m_interpolation;
 
-	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + m_key_duration);
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
 	glbin_moviemaker.SetCurrentFrame(glbin_moviemaker.GetClipEndFrame());
 }
 
