@@ -180,6 +180,7 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_prev_focus(0),
 	//interactive modes
 	m_int_mode(1),
+	m_crop_type(0),
 	m_force_clear(false),
 	m_interactive(false),
 	m_clear_buffer(false),
@@ -259,11 +260,6 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_rewind(false),
 	m_stages(0),
 	m_4d_rewind(false),
-	//movie frame properties
-	m_frame_x(-1),
-	m_frame_y(-1),
-	m_frame_w(-1),
-	m_frame_h(-1),
 	//post image processing
 	m_gamma(fluo::Color(1.0, 1.0, 1.0)),
 	m_brightness(fluo::Color(1.135, 1.135, 1.135)),
@@ -5197,17 +5193,17 @@ void RenderCanvas::ReadPixels(
 	{
 		if (m_enlarge)
 		{
-			x = m_frame_x * m_enlarge_scale;
-			y = m_frame_y * m_enlarge_scale;
-			w = m_frame_w * m_enlarge_scale;
-			h = m_frame_h * m_enlarge_scale;
+			x = glbin_moviemaker.GetCropX() * m_enlarge_scale;
+			y = glbin_moviemaker.GetCropY() * m_enlarge_scale;
+			w = glbin_moviemaker.GetCropW() * m_enlarge_scale;
+			h = glbin_moviemaker.GetCropH() * m_enlarge_scale;
 		}
 		else
 		{
-			x = m_frame_x;
-			y = m_frame_y;
-			w = m_frame_w;
-			h = m_frame_h;
+			x = glbin_moviemaker.GetCropX();
+			y = glbin_moviemaker.GetCropY();
+			w = glbin_moviemaker.GetCropW();
+			h = glbin_moviemaker.GetCropH();
 		}
 	}
 	else
@@ -7834,10 +7830,10 @@ void RenderCanvas::DrawFrame()
 
 	//draw frame
 	vector<std::pair<unsigned int, double>> params;
-	params.push_back(std::pair<unsigned int, double>(0, m_frame_x));
-	params.push_back(std::pair<unsigned int, double>(1, m_frame_y));
-	params.push_back(std::pair<unsigned int, double>(2, m_frame_w));
-	params.push_back(std::pair<unsigned int, double>(3, m_frame_h));
+	params.push_back(std::pair<unsigned int, double>(0, glbin_moviemaker.GetCropX()));
+	params.push_back(std::pair<unsigned int, double>(1, glbin_moviemaker.GetCropY()));
+	params.push_back(std::pair<unsigned int, double>(2, glbin_moviemaker.GetCropW()));
+	params.push_back(std::pair<unsigned int, double>(3, glbin_moviemaker.GetCropH()));
 	va_frame->set_param(params);
 	va_frame->draw();
 
@@ -7873,10 +7869,10 @@ void RenderCanvas::DrawScaleBar()
 	std::vector<std::pair<unsigned int, double>> params;
 	if (m_draw_frame)
 	{
-		int framew = m_frame_w;
-		int frameh = m_frame_h;
-		int framex = m_frame_x;
-		int framey = m_frame_y;
+		int framew = glbin_moviemaker.GetCropX();
+		int frameh = glbin_moviemaker.GetCropY();
+		int framex = glbin_moviemaker.GetCropW();
+		int framey = glbin_moviemaker.GetCropH();
 		if (m_enlarge)
 		{
 			framew *= m_enlarge_scale;
@@ -7961,8 +7957,8 @@ void RenderCanvas::DrawLegend()
 	double yoffset = 10.0;
 	if (m_draw_frame)
 	{
-		xoffset = 10.0 + m_frame_x;
-		yoffset = ny - m_frame_h - m_frame_y + 10.0;
+		xoffset = 10.0 + glbin_moviemaker.GetCropX();
+		yoffset = ny - glbin_moviemaker.GetCropH() - glbin_moviemaker.GetCropY() + 10.0;
 	}
 
 	wxString wxstr;
@@ -7972,6 +7968,7 @@ void RenderCanvas::DrawLegend()
 	double gap_width = font_height*1.5;
 	int lines = 0;
 	int i;
+	double w = glbin_moviemaker.GetCropW();
 	//first pass
 	for (i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
@@ -7981,7 +7978,7 @@ void RenderCanvas::DrawLegend()
 			wstr = wxstr.ToStdWstring();
 			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
-			if (length < double(m_draw_frame ? m_frame_w : nx) - gap_width)
+			if (length < double(m_draw_frame ? w : nx) - gap_width)
 			{
 				length += gap_width;
 			}
@@ -8000,7 +7997,7 @@ void RenderCanvas::DrawLegend()
 			wstr = wxstr.ToStdWstring();
 			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
-			if (length < double(m_draw_frame ? m_frame_w : nx) - gap_width)
+			if (length < double(m_draw_frame ? w : nx) - gap_width)
 			{
 				length += gap_width;
 			}
@@ -8025,7 +8022,7 @@ void RenderCanvas::DrawLegend()
 			wstr = wxstr.ToStdWstring();
 			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
-			if (length < double(m_draw_frame ? m_frame_w : nx) - gap_width)
+			if (length < double(m_draw_frame ? w : nx) - gap_width)
 			{
 				length += gap_width;
 			}
@@ -8054,7 +8051,7 @@ void RenderCanvas::DrawLegend()
 			wstr = wxstr.ToStdWstring();
 			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
-			if (length < double(m_draw_frame ? m_frame_w : nx) - gap_width)
+			if (length < double(m_draw_frame ? w : nx) - gap_width)
 			{
 				length += gap_width;
 			}
@@ -8452,38 +8449,44 @@ void RenderCanvas::DrawColormap()
 	vertex.reserve(98);
 
 	float px, py;
+	float x, y, w, h;
+	x = glbin_moviemaker.GetCropX();
+	y = glbin_moviemaker.GetCropY();
+	w = glbin_moviemaker.GetCropW();
+	h = glbin_moviemaker.GetCropH();
+
 	//draw colormap
 	if (m_draw_frame)
 	{
-		px = (0.01*m_frame_w + m_frame_x) / nx;
-		py = (0.05*m_frame_w + m_frame_x) / nx;
-		vertex.push_back(px); vertex.push_back((0.1*m_frame_h + m_frame_y + offset) / ny); vertex.push_back(0.0);
+		px = (0.01*w + x) / nx;
+		py = (0.05*w + x) / nx;
+		vertex.push_back(px); vertex.push_back((0.1*h + y + offset) / ny); vertex.push_back(0.0);
 		vertex.push_back(m_color_1.r()); vertex.push_back(m_color_1.g()); vertex.push_back(m_color_1.b()); vertex.push_back(enable_alpha ? 0.0 : 1.0);
-		vertex.push_back(py); vertex.push_back((0.1*m_frame_h + m_frame_y + offset) / ny); vertex.push_back(0.0);
+		vertex.push_back(py); vertex.push_back((0.1*h + y + offset) / ny); vertex.push_back(0.0);
 		vertex.push_back(m_color_1.r()); vertex.push_back(m_color_1.g()); vertex.push_back(m_color_1.b()); vertex.push_back(enable_alpha ? 0.0 : 1.0);
-		vertex.push_back(px); vertex.push_back(((0.1 + 0.4*m_value_2)*m_frame_h + m_frame_y + offset) / ny); vertex.push_back(0.0);
+		vertex.push_back(px); vertex.push_back(((0.1 + 0.4*m_value_2)*h + y + offset) / ny); vertex.push_back(0.0);
 		vertex.push_back(m_color_2.r()); vertex.push_back(m_color_2.g()); vertex.push_back(m_color_2.b()); vertex.push_back(enable_alpha ? m_value_2 : 1.0);
-		vertex.push_back(py); vertex.push_back(((0.1 + 0.4*m_value_2)*m_frame_h + m_frame_y + offset) / ny); vertex.push_back(0.0);
+		vertex.push_back(py); vertex.push_back(((0.1 + 0.4*m_value_2)*h + y + offset) / ny); vertex.push_back(0.0);
 		vertex.push_back(m_color_2.r()); vertex.push_back(m_color_2.g()); vertex.push_back(m_color_2.b()); vertex.push_back(enable_alpha ? m_value_2 : 1.0);
-		vertex.push_back(px); vertex.push_back(((0.1 + 0.4*m_value_3)*m_frame_h + m_frame_y + offset) / ny); vertex.push_back(0.0);
+		vertex.push_back(px); vertex.push_back(((0.1 + 0.4*m_value_3)*h + y + offset) / ny); vertex.push_back(0.0);
 		vertex.push_back(m_color_3.r()); vertex.push_back(m_color_3.g()); vertex.push_back(m_color_3.b()); vertex.push_back(enable_alpha ? m_value_3 : 1.0);
-		vertex.push_back(py); vertex.push_back(((0.1 + 0.4*m_value_3)*m_frame_h + m_frame_y + offset) / ny); vertex.push_back(0.0);
+		vertex.push_back(py); vertex.push_back(((0.1 + 0.4*m_value_3)*h + y + offset) / ny); vertex.push_back(0.0);
 		vertex.push_back(m_color_3.r()); vertex.push_back(m_color_3.g()); vertex.push_back(m_color_3.b()); vertex.push_back(enable_alpha ? m_value_3 : 1.0);
-		vertex.push_back(px); vertex.push_back(((0.1 + 0.4*m_value_4)*m_frame_h + m_frame_y + offset) / ny); vertex.push_back(0.0);
+		vertex.push_back(px); vertex.push_back(((0.1 + 0.4*m_value_4)*h + y + offset) / ny); vertex.push_back(0.0);
 		vertex.push_back(m_color_4.r()); vertex.push_back(m_color_4.g()); vertex.push_back(m_color_4.b()); vertex.push_back(enable_alpha ? m_value_4 : 1.0);
-		vertex.push_back(py); vertex.push_back(((0.1 + 0.4*m_value_4)*m_frame_h + m_frame_y + offset) / ny); vertex.push_back(0.0);
+		vertex.push_back(py); vertex.push_back(((0.1 + 0.4*m_value_4)*h + y + offset) / ny); vertex.push_back(0.0);
 		vertex.push_back(m_color_4.r()); vertex.push_back(m_color_4.g()); vertex.push_back(m_color_4.b()); vertex.push_back(enable_alpha ? m_value_4 : 1.0);
-		vertex.push_back(px); vertex.push_back(((0.1 + 0.4*m_value_5)*m_frame_h + m_frame_y + offset) / ny); vertex.push_back(0.0);
+		vertex.push_back(px); vertex.push_back(((0.1 + 0.4*m_value_5)*h + y + offset) / ny); vertex.push_back(0.0);
 		vertex.push_back(m_color_5.r()); vertex.push_back(m_color_5.g()); vertex.push_back(m_color_5.b()); vertex.push_back(enable_alpha ? m_value_5 : 1.0);
-		vertex.push_back(py); vertex.push_back(((0.1 + 0.4*m_value_5)*m_frame_h + m_frame_y + offset) / ny); vertex.push_back(0.0);
+		vertex.push_back(py); vertex.push_back(((0.1 + 0.4*m_value_5)*h + y + offset) / ny); vertex.push_back(0.0);
 		vertex.push_back(m_color_5.r()); vertex.push_back(m_color_5.g()); vertex.push_back(m_color_5.b()); vertex.push_back(enable_alpha ? m_value_5 : 1.0);
-		vertex.push_back(px); vertex.push_back(((0.1 + 0.4*m_value_6)*m_frame_h + m_frame_y + offset) / ny); vertex.push_back(0.0);
+		vertex.push_back(px); vertex.push_back(((0.1 + 0.4*m_value_6)*h + y + offset) / ny); vertex.push_back(0.0);
 		vertex.push_back(m_color_6.r()); vertex.push_back(m_color_6.g()); vertex.push_back(m_color_6.b()); vertex.push_back(enable_alpha ? m_value_6 : 1.0);
-		vertex.push_back(py); vertex.push_back(((0.1 + 0.4*m_value_6)*m_frame_h + m_frame_y + offset) / ny); vertex.push_back(0.0);
+		vertex.push_back(py); vertex.push_back(((0.1 + 0.4*m_value_6)*h + y + offset) / ny); vertex.push_back(0.0);
 		vertex.push_back(m_color_6.r()); vertex.push_back(m_color_6.g()); vertex.push_back(m_color_6.b()); vertex.push_back(enable_alpha ? m_value_6 : 1.0);
-		vertex.push_back(px); vertex.push_back((0.5*m_frame_h + m_frame_y + offset) / ny); vertex.push_back(0.0);
+		vertex.push_back(px); vertex.push_back((0.5*h + y + offset) / ny); vertex.push_back(0.0);
 		vertex.push_back(m_color_7.r()); vertex.push_back(m_color_7.g()); vertex.push_back(m_color_7.b()); vertex.push_back(1.0);
-		vertex.push_back(py); vertex.push_back((0.5*m_frame_h + m_frame_y + offset) / ny); vertex.push_back(0.0);
+		vertex.push_back(py); vertex.push_back((0.5*h + y + offset) / ny); vertex.push_back(0.0);
 		vertex.push_back(m_color_7.r()); vertex.push_back(m_color_7.g()); vertex.push_back(m_color_7.b()); vertex.push_back(1.0);
 
 		wxString str;
@@ -8492,40 +8495,40 @@ void RenderCanvas::DrawColormap()
 		fluo::Color text_color = GetTextColor();
 
 		//value 1
-		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
-		py = 0.1*m_frame_h + m_frame_y + offset - ny / 2.0;
+		px = 0.052*w + x - nx / 2.0;
+		py = 0.1*h + y + offset - ny / 2.0;
 		str = wxString::Format("%d", 0);
 		wstr = str.ToStdWstring();
 		m_text_renderer.RenderText(
 			wstr, text_color,
 			px*sx, py*sy, sx, sy);
 		//value 2
-		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
-		py = (0.1 + 0.4*m_value_2)*m_frame_h + m_frame_y + offset - ny / 2.0;
+		px = 0.052*w + x - nx / 2.0;
+		py = (0.1 + 0.4*m_value_2)*h + y + offset - ny / 2.0;
 		str = wxString::Format("%d", int(std::round(m_value_2*max_val)));
 		wstr = str.ToStdWstring();
 		m_text_renderer.RenderText(
 			wstr, text_color,
 			px*sx, py*sy, sx, sy);
 		//value 4
-		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
-		py = (0.1 + 0.4*m_value_4)*m_frame_h + m_frame_y + offset - ny / 2.0;
+		px = 0.052*w + x - nx / 2.0;
+		py = (0.1 + 0.4*m_value_4)*h + y + offset - ny / 2.0;
 		str = wxString::Format("%d", int(std::round(m_value_4*max_val)));
 		wstr = str.ToStdWstring();
 		m_text_renderer.RenderText(
 			wstr, text_color,
 			px*sx, py*sy, sx, sy);
 		//value 6
-		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
-		py = (0.1 + 0.4*m_value_6)*m_frame_h + m_frame_y + offset - ny / 2.0;
+		px = 0.052*w + x - nx / 2.0;
+		py = (0.1 + 0.4*m_value_6)*h + y + offset - ny / 2.0;
 		str = wxString::Format("%d", int(std::round(m_value_6*max_val)));
 		wstr = str.ToStdWstring();
 		m_text_renderer.RenderText(
 			wstr, text_color,
 			px*sx, py*sy, sx, sy);
 		//value 7
-		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
-		py = 0.5*m_frame_h + m_frame_y + offset - ny / 2.0;
+		px = 0.052*w + x - nx / 2.0;
+		py = 0.5*h + y + offset - ny / 2.0;
 		str = wxString::Format("%d", int(std::round(max_val)));
 		wstr = str.ToStdWstring();
 		m_text_renderer.RenderText(
@@ -8739,8 +8742,8 @@ void RenderCanvas::DrawInfo(int nx, int ny)
 			wstr_temp = str.ToStdWstring();
 			if (m_draw_frame)
 			{
-				px = 0.01*m_frame_w + m_frame_x - nx / 2.0;
-				py = 0.04*m_frame_h + m_frame_y - ny / 2.0;
+				px = 0.01*glbin_moviemaker.GetCropW() + glbin_moviemaker.GetCropX() - nx / 2.0;
+				py = 0.04*glbin_moviemaker.GetCropH() + glbin_moviemaker.GetCropY() - ny / 2.0;
 			}
 			else
 			{
@@ -10132,6 +10135,16 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 	glbin_ruler_handler.SetVolumeData(m_cur_vol);
 	if (event.LeftDown())
 	{
+		if (m_draw_frame)
+		{
+			m_crop_type = HitCropFrame(mp);
+			if (m_crop_type)
+			{
+				m_int_mode = 16;
+				return;
+			}
+		}
+
 		m_focused_slider = 0;
 
 		bool found_rp = false;
@@ -10313,6 +10326,11 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			RefreshGL(29);
 			return;
 		}
+		else if (m_int_mode == 16)
+		{
+			m_int_mode = 1;
+			m_crop_type = 0;
+		}
 	}
 	if (event.MiddleUp())
 	{
@@ -10358,6 +10376,15 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 	//mouse dragging
 	if (event.Dragging())
 	{
+		//crop
+		if (m_int_mode == 16)
+		{
+			ChangeCropFrame(mp);
+			RefreshGL(29);
+			m_frame->UpdateProps({ gstCropValues });
+			return;
+		}
+
 		flvr::TextureRenderer::set_cor_up_time(
 			std::round(sqrt(double(old_mouse_X - mp.x())*
 				double(old_mouse_X - mp.x()) +
@@ -10766,14 +10793,6 @@ void RenderCanvas::ResetZeroRotations(double &rotx, double &roty, double &rotz)
 		rotz += 360.0;
 }
 
-void RenderCanvas::GetFrame(int &x, int &y, int &w, int &h)
-{
-	x = m_frame_x;
-	y = m_frame_y;
-	w = m_frame_w;
-	h = m_frame_h;
-}
-
 void RenderCanvas::CalcFrame()
 {
 	int w, h;
@@ -10825,10 +10844,10 @@ void RenderCanvas::CalcFrame()
 		miny = fluo::Clamp(miny, -1.0, 1.0);
 		maxy = fluo::Clamp(maxy, -1.0, 1.0);
 
-		m_frame_x = std::round((minx + 1.0)*w / 2.0 + 1.0);
-		m_frame_y = std::round((miny + 1.0)*h / 2.0 + 1.0);
-		m_frame_w = std::round((maxx - minx)*w / 2.0 - 1.5);
-		m_frame_h = std::round((maxy - miny)*h / 2.0 - 1.5);
+		glbin_moviemaker.SetCropX(std::round((minx + 1.0)*w / 2.0 + 1.0));
+		glbin_moviemaker.SetCropY(std::round((miny + 1.0)*h / 2.0 + 1.0));
+		glbin_moviemaker.SetCropW(std::round((maxx - minx)*w / 2.0 - 1.5));
+		glbin_moviemaker.SetCropH(std::round((maxy - miny)*h / 2.0 - 1.5));
 
 	}
 	else
@@ -10837,16 +10856,17 @@ void RenderCanvas::CalcFrame()
 		if (w > h)
 		{
 			size = h;
-			m_frame_x = std::round((w - h) / 2.0);
-			m_frame_y = 0;
+			glbin_moviemaker.SetCropX(std::round((w - h) / 2.0));
+			glbin_moviemaker.SetCropY(0);
 		}
 		else
 		{
 			size = w;
-			m_frame_x = 0;
-			m_frame_y = std::round((h - w) / 2.0);
+			glbin_moviemaker.SetCropX(0);
+			glbin_moviemaker.SetCropY(std::round((h - w) / 2.0));
 		}
-		m_frame_w = m_frame_h = size;
+		glbin_moviemaker.SetCropW(size);
+		glbin_moviemaker.SetCropH(size);
 	}
 }
 
@@ -10856,6 +10876,160 @@ void RenderCanvas::DrawViewQuad()
 		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Norm_Square);
 	if (quad_va)
 		quad_va->draw();
+}
+
+//find crop frame
+int RenderCanvas::HitCropFrame(fluo::Point& mp)
+{
+	int ny = GetGLSize().y;
+	fluo::Point p(mp);
+	p.y(ny - p.y());
+
+	double x, y, w, h;
+	x = glbin_moviemaker.GetCropX();
+	y = glbin_moviemaker.GetCropY();
+	w = glbin_moviemaker.GetCropW();
+	h = glbin_moviemaker.GetCropH();
+	double tol = 10;
+	fluo::BBox box;
+	fluo::Point p1, p2;
+	//check corners
+	//bottom left
+	p1 = fluo::Point(x, y, 0);
+	p1 = p1 - fluo::Vector(tol, tol, 1);
+	p2 = p1 + 2 * fluo::Vector(tol, tol, 1);
+	box = fluo::BBox(p1, p2);
+	if (box.inside(p))
+		return 1;
+	//bottom right
+	p1 = fluo::Point(x + w, y, 0);
+	p1 = p1 - fluo::Vector(tol, tol, 1);
+	p2 = p1 + 2 * fluo::Vector(tol, tol, 1);
+	box = fluo::BBox(p1, p2);
+	if (box.inside(p))
+		return 2;
+	//top left
+	p1 = fluo::Point(x, y + h, 0);
+	p1 = p1 - fluo::Vector(tol, tol, 1);
+	p2 = p1 + 2 * fluo::Vector(tol, tol, 1);
+	box = fluo::BBox(p1, p2);
+	if (box.inside(p))
+		return 3;
+	//top right
+	p1 = fluo::Point(x + w, y + h, 0);
+	p1 = p1 - fluo::Vector(tol, tol, 1);
+	p2 = p1 + 2 * fluo::Vector(tol, tol, 1);
+	box = fluo::BBox(p1, p2);
+	if (box.inside(p))
+		return 4;
+	//bottom
+	p1 = fluo::Point(x + w / 2, y, 0);
+	p1 = p1 - fluo::Vector(w / 2, tol, 1);
+	p2 = p1 + 2 * fluo::Vector(w / 2, tol, 1);
+	box = fluo::BBox(p1, p2);
+	if (box.inside(p))
+		return 5;
+	//left
+	p1 = fluo::Point(x, y + h / 2, 0);
+	p1 = p1 - fluo::Vector(tol, h / 2, 1);
+	p2 = p1 + 2 * fluo::Vector(tol, h / 2, 1);
+	box = fluo::BBox(p1, p2);
+	if (box.inside(p))
+		return 6;
+	//right
+	p1 = fluo::Point(x + w, y + h / 2, 0);
+	p1 = p1 - fluo::Vector(tol, h / 2, 1);
+	p2 = p1 + 2 * fluo::Vector(tol, h / 2, 1);
+	box = fluo::BBox(p1, p2);
+	if (box.inside(p))
+		return 7;
+	//top
+	p1 = fluo::Point(x + w / 2, y + h, 0);
+	p1 = p1 - fluo::Vector(w / 2, tol, 1);
+	p2 = p1 + 2 * fluo::Vector(w / 2, tol, 1);
+	box = fluo::BBox(p1, p2);
+	if (box.inside(p))
+		return 8;
+
+	return 0;
+}
+
+void RenderCanvas::ChangeCropFrame(fluo::Point& mp)
+{
+	if (!m_crop_type)
+		return;
+
+	int ny = GetGLSize().y;
+	fluo::Point p(mp);
+	p.y(ny - p.y());
+
+	double x, y, w, h;
+	x = glbin_moviemaker.GetCropX();
+	y = glbin_moviemaker.GetCropY();
+	w = glbin_moviemaker.GetCropW();
+	h = glbin_moviemaker.GetCropH();
+	fluo::Point p1(x, y, 0);
+	fluo::Point p2(x + w, y, 0);
+	fluo::Point p3(x, y + h, 0);
+	fluo::Point p4(x + w, y + h, 0);
+
+	switch (m_crop_type)
+	{
+	case 1:
+		//bottom left
+		p1 = p;
+		p2.y(p.y());
+		p3.x(p.x());
+		break;
+	case 2:
+		//bottom right
+		p1.y(p.y());
+		p2 = p;
+		p4.x(p.x());
+		break;
+	case 3:
+		//top left
+		p1.x(p.x());
+		p3 = p;
+		p4.y(p.y());
+		break;
+	case 4:
+		//top right
+		p2.x(p.x());
+		p3.y(p.y());
+		p4 = p;
+		break;
+	case 5:
+		//bottom
+		p1.y(p.y());
+		p2.y(p.y());
+		break;
+	case 6:
+		//left
+		p1.x(p.x());
+		p3.x(p.x());
+		break;
+	case 7:
+		//right
+		p2.x(p.x());
+		p4.x(p.x());
+		break;
+	case 8:
+		//top
+		p3.y(p.y());
+		p4.y(p.y());
+		break;
+	}
+
+	x = p1.x();
+	y = p1.y();
+	w = (p2 - p1).x();
+	h = (p3 - p1).y();
+
+	glbin_moviemaker.SetCropX(std::round(x));
+	glbin_moviemaker.SetCropY(std::round(y));
+	glbin_moviemaker.SetCropW(std::round(w));
+	glbin_moviemaker.SetCropH(std::round(h));
 }
 
 void RenderCanvas::switchLevel(VolumeData *vd)

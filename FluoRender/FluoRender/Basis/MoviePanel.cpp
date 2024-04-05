@@ -585,7 +585,7 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 	return page;
 }
 
-wxWindow* MoviePanel::CreateAdvancedPage(wxWindow *parent)
+wxWindow* MoviePanel::CreateKeyframePage(wxWindow *parent)
 {
 	wxScrolledWindow* page = new wxScrolledWindow(parent);
 
@@ -689,7 +689,7 @@ wxWindow* MoviePanel::CreateAdvancedPage(wxWindow *parent)
 	return page;
 }
 
-wxWindow* MoviePanel::CreateAutoKeyPage(wxWindow *parent)
+wxWindow* MoviePanel::CreateTemplatePage(wxWindow *parent)
 {
 	wxScrolledWindow* page = new wxScrolledWindow(parent);
 
@@ -741,98 +741,111 @@ wxWindow* MoviePanel::CreateAutoKeyPage(wxWindow *parent)
 
 }
 
-wxWindow* MoviePanel::CreateCroppingPage(wxWindow *parent)
+wxWindow* MoviePanel::CreateCropPage(wxWindow *parent)
 {
 	wxScrolledWindow* page = new wxScrolledWindow(parent);
 
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
-
 	wxStaticText *st = 0;
-	//sizers
-	wxBoxSizer* sizer_8 = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer* sizer_9 = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer* sizer_10 = new wxBoxSizer(wxHORIZONTAL);
-	//vertical sizer
-	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
-	//8th line
+
+	//check
+	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Enable cropping:",
-		wxDefaultPosition, FromDIP(wxSize(110, 20)));
+		wxDefaultPosition, wxDefaultSize);
 	m_crop_chk = new wxCheckBox(page, wxID_ANY, "");
 	m_crop_chk->Bind(wxEVT_CHECKBOX, &MoviePanel::OnCropCheck, this);
+	sizer1->Add(5, 5, 0);
+	sizer1->Add(st, 0, wxALIGN_CENTER);
+	sizer1->Add(10, 10, 0);
+	sizer1->Add(m_crop_chk, 0, wxALIGN_CENTER);
+	//corner coords
+	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "X:",
+		wxDefaultPosition, FromDIP(wxSize(20, 20)));
+	m_crop_x_text = new wxTextCtrl(page, wxID_ANY, "",
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_crop_x_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
+	m_crop_x_text->SetToolTip("Also drag the yellow frame in render view");
+	m_crop_x_spin = new wxSpinButton(page, wxID_ANY,
+		wxDefaultPosition, FromDIP(wxSize(20, 20)));
+	m_crop_x_spin->SetRange(-0x8000, 0x7fff);
+	m_crop_x_spin->Bind(wxEVT_SPIN_UP, &MoviePanel::OnCropSpinUp, this);
+	m_crop_x_spin->Bind(wxEVT_SPIN_DOWN, &MoviePanel::OnCropSpinDown, this);
+	sizer2->Add(20, 20, 0);
+	sizer2->Add(st, 0, wxALIGN_CENTER);
+	sizer2->Add(m_crop_x_text, 0, wxALIGN_CENTER);
+	sizer2->Add(m_crop_x_spin, 0, wxALIGN_CENTER);
+	st = new wxStaticText(page, 0, "Y:",
+		wxDefaultPosition, FromDIP(wxSize(20, 20)));
+	m_crop_y_text = new wxTextCtrl(page, wxID_ANY, "",
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_crop_y_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
+	m_crop_y_text->SetToolTip("Also drag the yellow frame in render view");
+	m_crop_y_spin = new wxSpinButton(page, wxID_ANY,
+		wxDefaultPosition, FromDIP(wxSize(20, 20)));
+	m_crop_y_spin->SetRange(-0x8000, 0x7fff);
+	m_crop_y_spin->Bind(wxEVT_SPIN_UP, &MoviePanel::OnCropSpinUp, this);
+	m_crop_y_spin->Bind(wxEVT_SPIN_DOWN, &MoviePanel::OnCropSpinDown, this);
+	sizer2->Add(20, 20, 0);
+	sizer2->Add(st, 0, wxALIGN_CENTER);
+	sizer2->Add(m_crop_y_text, 0, wxALIGN_CENTER);
+	sizer2->Add(m_crop_y_spin, 0, wxALIGN_CENTER);
+	sizer2->Add(20, 20, 0);
+	//size
+	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "W:",
+		wxDefaultPosition, FromDIP(wxSize(20, 20)));
+	m_crop_w_text = new wxTextCtrl(page, wxID_ANY, "",
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_crop_w_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
+	m_crop_w_text->SetToolTip("Also drag the yellow frame in render view");
+	m_crop_w_spin = new wxSpinButton(page, wxID_ANY,
+		wxDefaultPosition, FromDIP(wxSize(20, 20)));
+	m_crop_w_spin->SetRange(-0x8000, 0x7fff);
+	m_crop_w_spin->Bind(wxEVT_SPIN_UP, &MoviePanel::OnCropSpinUp, this);
+	m_crop_w_spin->Bind(wxEVT_SPIN_DOWN, &MoviePanel::OnCropSpinDown, this);
+	sizer3->Add(20, 20, 0);
+	sizer3->Add(st, 0, wxALIGN_CENTER);
+	sizer3->Add(m_crop_w_text, 0, wxALIGN_CENTER);
+	sizer3->Add(m_crop_w_spin, 0, wxALIGN_CENTER);
+	st = new wxStaticText(page, 0, "H:",
+		wxDefaultPosition, FromDIP(wxSize(20, 20)));
+	m_crop_h_text = new wxTextCtrl(page, wxID_ANY, "",
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_crop_h_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
+	m_crop_h_text->SetToolTip("Also drag the yellow frame in render view");
+	m_crop_h_spin = new wxSpinButton(page, wxID_ANY,
+		wxDefaultPosition, FromDIP(wxSize(20, 20)));
+	m_crop_h_spin->SetRange(-0x8000, 0x7fff);
+	m_crop_h_spin->Bind(wxEVT_SPIN_UP, &MoviePanel::OnCropSpinUp, this);
+	m_crop_h_spin->Bind(wxEVT_SPIN_DOWN, &MoviePanel::OnCropSpinDown, this);
+	sizer3->Add(20, 20, 0);
+	sizer3->Add(st, 0, wxALIGN_CENTER);
+	sizer3->Add(m_crop_h_text, 0, wxALIGN_CENTER);
+	sizer3->Add(m_crop_h_spin, 0, wxALIGN_CENTER);
+	sizer3->Add(20, 20, 0);
+	//reset
+	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
 	m_reset_btn = new wxButton(page, wxID_ANY, "Reset",
-		wxDefaultPosition, FromDIP(wxSize(110, 30)));
+		wxDefaultPosition, wxDefaultSize);
 	m_reset_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnResetCrop, this);
 	m_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
-	sizer_8->Add(5, 5, 0);
-	sizer_8->Add(st, 0, wxALIGN_CENTER);
-	sizer_8->Add(m_crop_chk, 0, wxALIGN_CENTER);
-	sizer_8->Add(100, 5, 0);
-	sizer_8->Add(m_reset_btn, 0, wxALIGN_CENTER);
-	//9th line
-	st = new wxStaticText(page, 0, "Center:  X:",
-		wxDefaultPosition, FromDIP(wxSize(85, 20)));
-	m_center_x_text = new wxTextCtrl(page, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
-	m_center_x_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
-	m_center_x_spin = new wxSpinButton(page, wxID_ANY,
-		wxDefaultPosition, FromDIP(wxSize(20, 20)));
-	m_center_x_spin->SetRange(-0x8000, 0x7fff);
-	m_center_x_spin->Bind(wxEVT_SPIN_UP, &MoviePanel::OnCropSpinUp, this);
-	m_center_x_spin->Bind(wxEVT_SPIN_DOWN, &MoviePanel::OnCropSpinDown, this);
-	sizer_9->Add(5, 5, 0);
-	sizer_9->Add(st, 0, wxALIGN_CENTER);
-	sizer_9->Add(m_center_x_text, 0, wxALIGN_CENTER);
-	sizer_9->Add(m_center_x_spin, 0, wxALIGN_CENTER);
-	st = new wxStaticText(page, 0, "       Y:",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)));
-	m_center_y_text = new wxTextCtrl(page, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
-	m_center_y_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
-	m_center_y_spin = new wxSpinButton(page, wxID_ANY,
-		wxDefaultPosition, FromDIP(wxSize(20, 20)));
-	m_center_y_spin->SetRange(-0x8000, 0x7fff);
-	m_center_y_spin->Bind(wxEVT_SPIN_UP, &MoviePanel::OnCropSpinUp, this);
-	m_center_y_spin->Bind(wxEVT_SPIN_DOWN, &MoviePanel::OnCropSpinDown, this);
-	sizer_9->Add(st, 0, wxALIGN_CENTER);
-	sizer_9->Add(m_center_y_text, 0, wxALIGN_CENTER);
-	sizer_9->Add(m_center_y_spin, 0, wxALIGN_CENTER);
-	//10th line
-	st = new wxStaticText(page, 0, "Size:    Width:",
-		wxDefaultPosition, FromDIP(wxSize(85, 20)));
-	m_width_text = new wxTextCtrl(page, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
-	m_width_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
-	m_width_spin = new wxSpinButton(page, wxID_ANY,
-		wxDefaultPosition, FromDIP(wxSize(20, 20)));
-	m_width_spin->SetRange(-0x8000, 0x7fff);
-	m_width_spin->Bind(wxEVT_SPIN_UP, &MoviePanel::OnCropSpinUp, this);
-	m_width_spin->Bind(wxEVT_SPIN_DOWN, &MoviePanel::OnCropSpinDown, this);
-	sizer_10->Add(5, 5, 0);
-	sizer_10->Add(st, 0, wxALIGN_CENTER);
-	sizer_10->Add(m_width_text, 0, wxALIGN_CENTER);
-	sizer_10->Add(m_width_spin, 0, wxALIGN_CENTER);
-	st = new wxStaticText(page, 0, "   Height:",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)));
-	m_height_text = new wxTextCtrl(page, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
-	m_height_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
-	m_height_spin = new wxSpinButton(page, wxID_ANY,
-		wxDefaultPosition, FromDIP(wxSize(20, 20)));
-	m_height_spin->SetRange(-0x8000, 0x7fff);
-	m_height_spin->Bind(wxEVT_SPIN_UP, &MoviePanel::OnCropSpinUp, this);
-	m_height_spin->Bind(wxEVT_SPIN_DOWN, &MoviePanel::OnCropSpinDown, this);
-	sizer_10->Add(st, 0, wxALIGN_CENTER);
-	sizer_10->Add(m_height_text, 0, wxALIGN_CENTER);
-	sizer_10->Add(m_height_spin, 0, wxALIGN_CENTER);
-	// add vertical lines
+	m_reset_btn->SetToolTip("Also drag the yellow frame in render view");
+	sizer4->AddStretchSpacer();
+	sizer4->Add(m_reset_btn, 0, wxALIGN_CENTER);
+	sizer4->Add(20, 20, 0);
+
+	//vertical sizer
+	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	sizer_v->Add(10, 10, 0);
-	sizer_v->Add(sizer_8, 0, wxEXPAND);
+	sizer_v->Add(sizer1, 0, wxEXPAND);
 	sizer_v->Add(10, 10, 0);
-	sizer_v->Add(sizer_9, 0, wxEXPAND);
+	sizer_v->Add(sizer2, 0, wxEXPAND);
 	sizer_v->Add(10, 10, 0);
-	sizer_v->Add(sizer_10, 0, wxEXPAND);
-	sizer_v->AddStretchSpacer();
+	sizer_v->Add(sizer3, 0, wxEXPAND);
+	sizer_v->Add(10, 10, 0);
+	sizer_v->Add(sizer4, 0, wxEXPAND);
 
 	page->SetSizer(sizer_v);
 	page->SetAutoLayout(true);
@@ -925,9 +938,9 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE |
 		wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
 	m_notebook->AddPage(CreateSimplePage(m_notebook), UITEXT_NBPG0, true);
-	m_notebook->AddPage(CreateAdvancedPage(m_notebook), UITEXT_NBPG1);
-	m_notebook->AddPage(CreateAutoKeyPage(m_notebook), UITEXT_NBPG2);
-	m_notebook->AddPage(CreateCroppingPage(m_notebook), UITEXT_NBPG3);
+	m_notebook->AddPage(CreateKeyframePage(m_notebook), UITEXT_NBPG1);
+	m_notebook->AddPage(CreateTemplatePage(m_notebook), UITEXT_NBPG2);
+	m_notebook->AddPage(CreateCropPage(m_notebook), UITEXT_NBPG3);
 	m_notebook->AddPage(CreateScriptPage(m_notebook), UITEXT_NBPG4_0);
 	m_notebook->Bind(wxEVT_AUINOTEBOOK_PAGE_CHANGED, &MoviePanel::OnNotebookPage, this);
 
@@ -1346,18 +1359,18 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		bval = glbin_moviemaker.GetCropEnable();
 		m_crop_chk->SetValue(bval);
-		m_center_x_text->Enable(bval);
-		m_center_y_text->Enable(bval);
-		m_width_text->Enable(bval);
-		m_height_text->Enable(bval);
+		m_crop_x_text->Enable(bval);
+		m_crop_y_text->Enable(bval);
+		m_crop_w_text->Enable(bval);
+		m_crop_h_text->Enable(bval);
 	}
 
 	if (update_all || FOUND_VALUE(gstCropValues))
 	{
-		m_center_x_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropX()));
-		m_center_y_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropY()));
-		m_width_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropW()));
-		m_height_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropH()));
+		m_crop_x_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropX()));
+		m_crop_y_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropY()));
+		m_crop_w_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropW()));
+		m_crop_h_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropH()));
 	}
 
 	if (update_all || FOUND_VALUE(gstRunScript))
@@ -1386,6 +1399,23 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	if (update_all || FOUND_VALUE(gstScriptList))
+	{
+		m_script_list->DeleteAllItems();
+		wxArrayString list;
+		wxString filename;
+		if (GetScriptFiles(list))
+		{
+			for (size_t i = 0; i < list.GetCount(); ++i)
+			{
+				filename = wxFileNameFromPath(list[i]);
+				filename = filename.BeforeLast('.');
+				m_script_list->InsertItem(
+					m_script_list->GetItemCount(), filename);
+			}
+		}
+	}
+
+	if (update_all || FOUND_VALUE(gstScriptSelect))
 	{
 		wxArrayString list;
 		if (GetScriptFiles(list))
@@ -1964,13 +1994,13 @@ void MoviePanel::OnEditCrop(wxCommandEvent& event)
 {
 	wxString temp;
 	long x, y, w, h;
-	temp = m_center_x_text->GetValue();
+	temp = m_crop_x_text->GetValue();
 	temp.ToLong(&x);
-	temp = m_center_y_text->GetValue();
+	temp = m_crop_y_text->GetValue();
 	temp.ToLong(&y);
-	temp = m_width_text->GetValue();
+	temp = m_crop_w_text->GetValue();
 	temp.ToLong(&w);
-	temp = m_height_text->GetValue();
+	temp = m_crop_h_text->GetValue();
 	temp.ToLong(&h);
 
 	SetCropValues(x, y, w, h);
@@ -1981,14 +2011,14 @@ void MoviePanel::OnCropSpinUp(wxSpinEvent& event)
 {
 	wxObject* obj = event.GetEventObject();
 	wxTextCtrl* text_ctrl = 0;
-	if (obj == m_center_x_spin)
-		text_ctrl = m_center_x_text;
-	if (obj == m_center_y_spin)
-		text_ctrl = m_center_y_text;
-	if (obj == m_width_spin)
-		text_ctrl = m_width_text;
-	if (obj == m_height_spin)
-		text_ctrl = m_height_text;
+	if (obj == m_crop_x_spin)
+		text_ctrl = m_crop_x_text;
+	if (obj == m_crop_y_spin)
+		text_ctrl = m_crop_y_text;
+	if (obj == m_crop_w_spin)
+		text_ctrl = m_crop_w_text;
+	if (obj == m_crop_h_spin)
+		text_ctrl = m_crop_h_text;
 
 	if (text_ctrl)
 	{
@@ -2005,14 +2035,14 @@ void MoviePanel::OnCropSpinDown(wxSpinEvent& event)
 {
 	wxObject* obj = event.GetEventObject();
 	wxTextCtrl* text_ctrl = 0;
-	if (obj == m_center_x_spin)
-		text_ctrl = m_center_x_text;
-	if (obj == m_center_y_spin)
-		text_ctrl = m_center_y_text;
-	if (obj == m_width_spin)
-		text_ctrl = m_width_text;
-	if (obj == m_height_spin)
-		text_ctrl = m_height_text;
+	if (obj == m_crop_x_spin)
+		text_ctrl = m_crop_x_text;
+	if (obj == m_crop_y_spin)
+		text_ctrl = m_crop_y_text;
+	if (obj == m_crop_w_spin)
+		text_ctrl = m_crop_w_text;
+	if (obj == m_crop_h_spin)
+		text_ctrl = m_crop_h_text;
 
 	if (text_ctrl)
 	{

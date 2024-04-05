@@ -612,9 +612,6 @@ void MovieMaker::SetCropEnable(bool val)
 		if (val)
 		{
 			m_view->CalcFrame();
-			m_view->GetFrame(m_crop_x, m_crop_y, m_crop_w, m_crop_h);
-			m_crop_x = std::round(m_crop_x + m_crop_w / 2.0);
-			m_crop_y = std::round(m_crop_y + m_crop_h / 2.0);
 			m_view->EnableFrame();
 		}
 		else
@@ -628,41 +625,26 @@ void MovieMaker::SetCropValues(int x, int y, int w, int h)
 	m_crop_y = y;
 	m_crop_w = w;
 	m_crop_h = h;
-	if (m_view)
-		m_view->SetFrame(std::round(m_crop_x - m_crop_w / 2.0),
-			std::round(m_crop_y - m_crop_h / 2.0), m_crop_w, m_crop_h);
 }
 
 void MovieMaker::SetCropX(int val)
 {
 	m_crop_x = val;
-	if (m_view)
-		m_view->SetFrame(std::round(m_crop_x - m_crop_w / 2.0),
-			std::round(m_crop_y - m_crop_h / 2.0), m_crop_w, m_crop_h);
 }
 
 void MovieMaker::SetCropY(int val)
 {
 	m_crop_y = val;
-	if (m_view)
-		m_view->SetFrame(std::round(m_crop_x - m_crop_w / 2.0),
-			std::round(m_crop_y - m_crop_h / 2.0), m_crop_w, m_crop_h);
 }
 
 void MovieMaker::SetCropW(int val)
 {
 	m_crop_w = val;
-	if (m_view)
-		m_view->SetFrame(std::round(m_crop_x - m_crop_w / 2.0),
-			std::round(m_crop_y - m_crop_h / 2.0), m_crop_w, m_crop_h);
 }
 
 void MovieMaker::SetCropH(int val)
 {
 	m_crop_h = val;
-	if (m_view)
-		m_view->SetFrame(std::round(m_crop_x - m_crop_w / 2.0),
-			std::round(m_crop_y - m_crop_h / 2.0), m_crop_w, m_crop_h);
 }
 
 void MovieMaker::InsertKey(int index)

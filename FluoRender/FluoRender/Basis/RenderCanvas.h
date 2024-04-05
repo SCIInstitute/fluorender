@@ -454,11 +454,6 @@ public:
 	//frame for capturing
 	void EnableFrame() { m_draw_frame = true; }
 	void DisableFrame() { m_draw_frame = false; };
-	void SetFrame(int x, int y, int w, int h) {
-		m_frame_x = x;
-		m_frame_y = y; m_frame_w = w; m_frame_h = h;
-	}
-	void GetFrame(int &x, int &y, int &w, int &h);
 	void CalcFrame();
 
 	//scale bar
@@ -964,6 +959,8 @@ private:
 					 //13-pencil with multipoint ruler
 					 //14-delete ruler point
 					 //15-edit ruler by magnet
+					 //16-edit crop frame
+	int m_crop_type;
 	bool m_force_clear;
 	bool m_interactive;
 	bool m_clear_buffer;
@@ -1069,12 +1066,6 @@ private:
 	bool m_rewind;
 	int m_stages; //0-moving to start angle; 1-moving to end; 2-rewind
 	bool m_4d_rewind;
-
-	//movie frame properties
-	int m_frame_x;
-	int m_frame_y;
-	int m_frame_w;
-	int m_frame_h;
 
 	//post image processing
 	fluo::Color m_gamma;
@@ -1320,6 +1311,10 @@ private:
 
 	//draw quad
 	void DrawViewQuad();
+
+	//find crop frame
+	int HitCropFrame(fluo::Point& mp);
+	void ChangeCropFrame(fluo::Point& mp);
 
 	void switchLevel(VolumeData *vd);
 

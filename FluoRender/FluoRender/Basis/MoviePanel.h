@@ -239,21 +239,21 @@ private:
 	wxCheckBox *m_crop_chk;
 	wxButton *m_reset_btn;
 
-	wxTextCtrl *m_center_x_text;
-	wxSpinButton* m_center_x_spin;
-	wxTextCtrl *m_center_y_text;
-	wxSpinButton* m_center_y_spin;
+	wxTextCtrl *m_crop_x_text;
+	wxSpinButton* m_crop_x_spin;
+	wxTextCtrl *m_crop_y_text;
+	wxSpinButton* m_crop_y_spin;
 
-	wxTextCtrl *m_width_text;
-	wxSpinButton* m_width_spin;
-	wxTextCtrl *m_height_text;
-	wxSpinButton* m_height_spin;
+	wxTextCtrl *m_crop_w_text;
+	wxSpinButton* m_crop_w_spin;
+	wxTextCtrl *m_crop_h_text;
+	wxSpinButton* m_crop_h_spin;
 
 private:
 	wxWindow* CreateSimplePage(wxWindow *parent);
-	wxWindow* CreateAdvancedPage(wxWindow *parent);
-	wxWindow* CreateAutoKeyPage(wxWindow *parent);
-	wxWindow* CreateCroppingPage(wxWindow *parent);
+	wxWindow* CreateKeyframePage(wxWindow *parent);
+	wxWindow* CreateTemplatePage(wxWindow *parent);
+	wxWindow* CreateCropPage(wxWindow *parent);
 	wxWindow* CreateScriptPage(wxWindow *parent);
 
 	//notebook page change

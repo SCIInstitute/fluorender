@@ -340,6 +340,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstRunScript "run script"//script run
 #define gstScriptFile "script file"
 #define gstScriptList "script list"
+#define gstScriptSelect "script select"
 #define gstCapture "capture"//capture modes
 #define gstCaptureRot "capture rot"
 #define gstCaptureRotOver "capture rot over"
