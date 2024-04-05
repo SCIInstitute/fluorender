@@ -946,15 +946,18 @@ void MovieMaker::MakeKeys(int type)
 		MakeKeysClipZ(1);
 		break;
 	case 6:
-		KeyChannComb();
+		AddChannToView();
 		break;
 	case 7:
-		MakeKeysChannComb(1);
+		KeyChannComb();
 		break;
 	case 8:
-		MakeKeysChannComb(2);
+		MakeKeysChannComb(1);
 		break;
 	case 9:
+		MakeKeysChannComb(2);
+		break;
+	case 10:
 		MakeKeysChannComb(3);
 		break;
 	}
@@ -976,12 +979,14 @@ std::vector<std::string> MovieMaker::GetAutoKeyTypes()
 	//5
 	result.push_back("Single Z section move down and back");
 	//6
-	result.push_back("Channel combinations");
+	result.push_back("Add channels one by one to view");
 	//7
-	result.push_back("Channel combination nC1");
+	result.push_back("Channel combinations");
 	//8
-	result.push_back("Channel combination nC2");
+	result.push_back("Channel combination nC1");
 	//9
+	result.push_back("Channel combination nC2");
+	//10
 	result.push_back("Channel combination nC3");
 	return result;
 }
@@ -1321,6 +1326,56 @@ void MovieMaker::MakeKeysClipZ(int type)
 	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
 }
 
+void MovieMaker::AddChannToView()
+{
+	FlKeyCode keycode;
+	FlKeyBoolean* flkeyB = 0;
+
+	double t = glbin_interpolator.GetLastT();
+	if (t > 0.0) t += m_key_duration;
+
+	int numChan = m_view->GetAllVolumeNum();
+
+	//for view
+	keycode.l0 = 1;
+	keycode.l0_name = m_view->m_vrv->GetName();
+	//display only
+	keycode.l2 = 0;
+	keycode.l2_name = "display";
+
+	//initial
+	glbin_interpolator.Begin(t, m_key_duration);
+	//for all volumes
+	for (int i = 0; i < numChan; i++)
+	{
+		VolumeData* vd = m_view->GetAllVolumeData(i);
+		keycode.l1 = 2;
+		keycode.l1_name = vd->GetName();
+		flkeyB = new FlKeyBoolean(keycode, false);
+		glbin_interpolator.AddKey(flkeyB);
+	}
+	glbin_interpolator.End();
+	t += m_key_duration;
+	//one by one
+	for (int i = 0; i < numChan; i++)
+	{
+		glbin_interpolator.Begin(t, m_key_duration);
+		//for all volumes
+		for (int j = 0; j < numChan; j++)
+		{
+			VolumeData* vd = m_view->GetAllVolumeData(j);
+			keycode.l1 = 2;
+			keycode.l1_name = vd->GetName();
+			flkeyB = new FlKeyBoolean(keycode, j <= i);
+			glbin_interpolator.AddKey(flkeyB);
+		}
+		glbin_interpolator.End();
+		t += m_key_duration;
+	}
+
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + m_key_duration);
+}
+
 void MovieMaker::MakeKeysChannComb(int comb)
 {
 	if (!m_frame)
@@ -1375,7 +1430,6 @@ void MovieMaker::MakeKeysChannComb(int comb)
 	} while (GetMask(chan_mask));
 
 	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + m_key_duration);
-
 }
 
 bool MovieMaker::MoveOne(std::vector<bool>& chan_mask, int lv)

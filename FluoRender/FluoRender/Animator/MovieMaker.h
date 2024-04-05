@@ -179,10 +179,11 @@ public:
 	void MakeKeysTimeSequence();
 	void MakeKeysTimeColormap();
 	void MakeKeysClipZ(int type);//type: 0-one-sided; 1-single slice
+	void AddChannToView();
+	void KeyChannComb();
 	void MakeKeysChannComb(int comb);
 	bool MoveOne(std::vector<bool>& chan_mask, int lv);
 	bool GetMask(std::vector<bool>& chan_mask);
-	void KeyChannComb();
 
 private:
 	MainFrame* m_frame;
