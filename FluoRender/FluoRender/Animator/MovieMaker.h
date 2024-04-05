@@ -184,6 +184,7 @@ public:
 	void MakeKeysChannComb(int comb);
 	bool MoveOne(std::vector<bool>& chan_mask, int lv);
 	bool GetMask(std::vector<bool>& chan_mask);
+	void MakeKeysLookingGlass(int val);
 
 private:
 	MainFrame* m_frame;

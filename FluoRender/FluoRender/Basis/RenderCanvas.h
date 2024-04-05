@@ -789,6 +789,13 @@ public:
 	{
 		return m_offset_tf;
 	}
+	fluo::Vector GetSide()
+	{
+		m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+		m_head.normalize();
+		fluo::Vector side = Cross(m_up, m_head);
+		return side;
+	}
 
 	void UpdateClips();
 

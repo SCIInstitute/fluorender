@@ -960,6 +960,8 @@ void MovieMaker::MakeKeys(int type)
 	case 10:
 		MakeKeysChannComb(3);
 		break;
+	case 11:
+		MakeKeysLookingGlass(44);
 	}
 }
 
@@ -988,6 +990,8 @@ std::vector<std::string> MovieMaker::GetAutoKeyTypes()
 	result.push_back("Channel combination nC2");
 	//10
 	result.push_back("Channel combination nC3");
+	//11
+	result.push_back("Looking Glass light field");
 	return result;
 }
 
@@ -1486,3 +1490,59 @@ void MovieMaker::KeyChannComb()
 	MakeKeysChannComb(3);
 }
 
+void MovieMaker::MakeKeysLookingGlass(int frames)
+{
+	FlKeyCode keycode;
+	FlKeyDouble* flkey = 0;
+
+	double t = glbin_interpolator.GetLastT();
+	if (t > 0.0) t += frames;
+
+	fluo::Vector side = m_view->GetSide();
+	fluo::Vector trans = side * (m_view->m_ortho_right - m_view->m_ortho_left);
+	trans /= 4;
+	double x, y, z;
+	m_view->GetObjTrans(x, y, z);
+
+	//for the view
+	keycode.l0 = 1;
+	keycode.l0_name = m_view->m_vrv->GetName();
+	keycode.l1 = 1;
+	keycode.l1_name = m_view->m_vrv->GetName();
+	//scale
+	keycode.l2 = 0;
+
+	//left
+	glbin_interpolator.Begin(t, frames);
+	keycode.l2_name = "obj_trans_x";
+	flkey = new FlKeyDouble(keycode, -trans.x());
+	glbin_interpolator.AddKey(flkey);
+	keycode.l2_name = "obj_trans_y";
+	flkey = new FlKeyDouble(keycode, y);
+	glbin_interpolator.AddKey(flkey);
+	keycode.l2_name = "obj_trans_z";
+	flkey = new FlKeyDouble(keycode, z);
+	glbin_interpolator.AddKey(flkey);
+	keycode.l2_name = "aov";
+	flkey = new FlKeyDouble(keycode, 42);
+	glbin_interpolator.AddKey(flkey);
+	glbin_interpolator.End();
+	t += frames;
+	//right
+	glbin_interpolator.Begin(t, frames);
+	keycode.l2_name = "obj_trans_x";
+	flkey = new FlKeyDouble(keycode, trans.x());
+	glbin_interpolator.AddKey(flkey);
+	keycode.l2_name = "obj_trans_y";
+	flkey = new FlKeyDouble(keycode, y);
+	glbin_interpolator.AddKey(flkey);
+	keycode.l2_name = "obj_trans_z";
+	flkey = new FlKeyDouble(keycode, z);
+	glbin_interpolator.AddKey(flkey);
+	keycode.l2_name = "aov";
+	flkey = new FlKeyDouble(keycode, 42);
+	glbin_interpolator.AddKey(flkey);
+	glbin_interpolator.End();
+
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
+}
