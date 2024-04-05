@@ -716,8 +716,8 @@ wxWindow* MoviePanel::CreateAutoKeyPage(wxWindow *parent)
 		tmp = m_auto_key_list->InsertItem(i-1, str, 0);
 		m_auto_key_list->SetItem(tmp, 1, it);
 	}
-	for (int i : { 0, 1 })
-		m_auto_key_list->SetColumnWidth(i, wxLIST_AUTOSIZE);
+	m_auto_key_list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
+	m_auto_key_list->SetColumnWidth(1, wxLIST_AUTOSIZE);
 	m_auto_key_list->Bind(wxEVT_LIST_ITEM_ACTIVATED, &MoviePanel::OnGenKey, this);
 
 	//button

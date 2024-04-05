@@ -1515,7 +1515,7 @@ void MovieMaker::MakeKeysLookingGlass(int frames)
 	//left
 	glbin_interpolator.Begin(t, frames);
 	keycode.l2_name = "obj_trans_x";
-	flkey = new FlKeyDouble(keycode, -trans.x());
+	flkey = new FlKeyDouble(keycode, trans.x());
 	glbin_interpolator.AddKey(flkey);
 	keycode.l2_name = "obj_trans_y";
 	flkey = new FlKeyDouble(keycode, y);
@@ -1531,7 +1531,7 @@ void MovieMaker::MakeKeysLookingGlass(int frames)
 	//right
 	glbin_interpolator.Begin(t, frames);
 	keycode.l2_name = "obj_trans_x";
-	flkey = new FlKeyDouble(keycode, trans.x());
+	flkey = new FlKeyDouble(keycode, -trans.x());
 	glbin_interpolator.AddKey(flkey);
 	keycode.l2_name = "obj_trans_y";
 	flkey = new FlKeyDouble(keycode, y);
