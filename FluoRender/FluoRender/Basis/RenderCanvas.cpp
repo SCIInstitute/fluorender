@@ -5282,7 +5282,7 @@ void RenderCanvas::PostDraw()
 		//capture
 		wxString outputfilename = m_cap_file;
 
-		int chann = glbin_settings.m_save_alpha;
+		int chann = glbin_settings.m_save_alpha ? 4 : 3;
 		bool fp32 = glbin_settings.m_save_float;
 		float dpi = glbin_settings.m_dpi;
 		int x, y, w, h;
