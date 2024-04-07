@@ -126,6 +126,12 @@ FlKeyGroup* Interpolator::GetKeyGroup(int index)
 		return 0;
 }
 
+FlKeyGroup* Interpolator::GetKeyGroupFromTime(double t)
+{
+	int index = GetKeyIndexFromTime(t);
+	return GetKeyGroup(index);
+}
+
 int Interpolator::GetKeyIndex(int id)
 {
 	for (size_t i=0; i<m_key_list.size(); i++)

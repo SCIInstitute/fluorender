@@ -68,6 +68,7 @@ public:
 	double GetFirstT();
 	double GetLastT();
 	FlKeyGroup* GetKeyGroup(int index);
+	FlKeyGroup* GetKeyGroupFromTime(double t);
 	int GetKeyIndex(int id);
 	int GetKeyIndexFromTime(double t);
 	int GetKeyID(int index);
