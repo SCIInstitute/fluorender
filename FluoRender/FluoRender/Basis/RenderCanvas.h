@@ -1290,7 +1290,7 @@ private:
 
 	//brush states update
 	void SetBrush(int mode);
-	void UpdateBrushState();
+	void UpdateBrushState(bool focus);
 
 	//selection
 	void Pick();

@@ -3632,7 +3632,7 @@ void RenderCanvas::SetBrush(int mode)
 	glbin_vol_selector.ChangeBrushSetsIndex();
 }
 
-void RenderCanvas::UpdateBrushState()
+void RenderCanvas::UpdateBrushState(bool focus)
 {
 	TreePanel* tree_panel = 0;
 	BrushToolDlg* brush_dlg = 0;
@@ -3644,7 +3644,7 @@ void RenderCanvas::UpdateBrushState()
 
 	if (m_int_mode != 2 && m_int_mode != 7)
 	{
-		if (wxGetKeyState(WXK_SHIFT))
+		if (wxGetKeyState(WXK_SHIFT) && focus)
 		{
 			SetBrush(2);
 			if (tree_panel)
@@ -3653,7 +3653,7 @@ void RenderCanvas::UpdateBrushState()
 				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
 			RefreshGL(6);
 		}
-		else if (wxGetKeyState(wxKeyCode('Z')))
+		else if (wxGetKeyState(wxKeyCode('Z')) && focus)
 		{
 			SetBrush(4);
 			if (tree_panel)
@@ -3662,7 +3662,7 @@ void RenderCanvas::UpdateBrushState()
 				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
 			RefreshGL(7);
 		}
-		else if (wxGetKeyState(wxKeyCode('X')))
+		else if (wxGetKeyState(wxKeyCode('X')) && focus)
 		{
 			SetBrush(3);
 			if (tree_panel)
@@ -3686,7 +3686,7 @@ void RenderCanvas::UpdateBrushState()
 					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
 				RefreshGL(9);
 			}
-			else if (wxGetKeyState(wxKeyCode('Z')))
+			else if (wxGetKeyState(wxKeyCode('Z')) && focus)
 			{
 				m_brush_state = 0;
 				SetBrush(4);
@@ -3696,7 +3696,7 @@ void RenderCanvas::UpdateBrushState()
 					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
 				RefreshGL(10);
 			}
-			else if (wxGetKeyState(wxKeyCode('X')))
+			else if (wxGetKeyState(wxKeyCode('X')) && focus)
 			{
 				m_brush_state = 0;
 				SetBrush(3);
@@ -4019,343 +4019,348 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 
 	wxPoint mouse_pos = wxGetMousePosition();
 	wxRect view_reg = GetScreenRect();
-
-	wxWindow *window = wxWindow::FindFocus();
-	if (window == this && view_reg.Contains(mouse_pos))
+	bool mouse_in = view_reg.Contains(mouse_pos);
+	bool focus = wxWindow::FindFocus() == this;
+	
+	if (mouse_in)
 	{
-		UpdateBrushState();
+		UpdateBrushState(focus);
 
-		//draw_mask
-		if (wxGetKeyState(wxKeyCode('V')) &&
-			m_draw_mask)
+		if (focus)
 		{
-			m_draw_mask = false;
-			refresh = true;
-			set_focus = true;
-		}
-		if (!wxGetKeyState(wxKeyCode('V')) &&
-			!m_draw_mask)
-		{
-			m_draw_mask = true;
-			refresh = true;
-		}
 
-		//move view
-		//left
-		if (!m_move_left &&
-			wxGetKeyState(WXK_CONTROL) &&
-			wxGetKeyState(WXK_LEFT))
-		{
-			m_move_left = true;
-
-			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-			m_head.normalize();
-			fluo::Vector side = fluo::Cross(m_up, m_head);
-			fluo::Vector trans = -(side*(std::round(0.8*(m_ortho_right - m_ortho_left))));
-			m_obj_transx += trans.x();
-			m_obj_transy += trans.y();
-			m_obj_transz += trans.z();
-			//if (m_persp) SetSortBricks();
-			refresh = true;
-			set_focus = true;
-		}
-		if (m_move_left &&
-			(!wxGetKeyState(WXK_CONTROL) ||
-				!wxGetKeyState(WXK_LEFT)))
-			m_move_left = false;
-		//right
-		if (!m_move_right &&
-			wxGetKeyState(WXK_CONTROL) &&
-			wxGetKeyState(WXK_RIGHT))
-		{
-			m_move_right = true;
-
-			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-			m_head.normalize();
-			fluo::Vector side = fluo::Cross(m_up, m_head);
-			fluo::Vector trans = side*(std::round(0.8*(m_ortho_right - m_ortho_left)));
-			m_obj_transx += trans.x();
-			m_obj_transy += trans.y();
-			m_obj_transz += trans.z();
-			//if (m_persp) SetSortBricks();
-			refresh = true;
-			set_focus = true;
-		}
-		if (m_move_right &&
-			(!wxGetKeyState(WXK_CONTROL) ||
-				!wxGetKeyState(WXK_RIGHT)))
-			m_move_right = false;
-		//up
-		if (!m_move_up &&
-			wxGetKeyState(WXK_CONTROL) &&
-			wxGetKeyState(WXK_UP))
-		{
-			m_move_up = true;
-
-			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-			m_head.normalize();
-			fluo::Vector trans = -m_up*(std::round(0.8*(m_ortho_top - m_ortho_bottom)));
-			m_obj_transx += trans.x();
-			m_obj_transy += trans.y();
-			m_obj_transz += trans.z();
-			//if (m_persp) SetSortBricks();
-			refresh = true;
-			set_focus = true;
-		}
-		if (m_move_up &&
-			(!wxGetKeyState(WXK_CONTROL) ||
-				!wxGetKeyState(WXK_UP)))
-			m_move_up = false;
-		//down
-		if (!m_move_down &&
-			wxGetKeyState(WXK_CONTROL) &&
-			wxGetKeyState(WXK_DOWN))
-		{
-			m_move_down = true;
-
-			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-			m_head.normalize();
-			fluo::Vector trans = m_up*(std::round(0.8*(m_ortho_top - m_ortho_bottom)));
-			m_obj_transx += trans.x();
-			m_obj_transy += trans.y();
-			m_obj_transz += trans.z();
-			//if (m_persp) SetSortBricks();
-			refresh = true;
-			set_focus = true;
-		}
-		if (m_move_down &&
-			(!wxGetKeyState(WXK_CONTROL) ||
-				!wxGetKeyState(WXK_DOWN)))
-			m_move_down = false;
-
-		//move time sequence
-		//forward
-		if ((!m_tseq_forward &&
-			wxGetKeyState(wxKeyCode('d'))) ||
-			wxGetKeyState(WXK_SPACE))
-		{
-			m_tseq_forward = true;
-			if (m_frame && m_frame->GetMovieView())
-				m_frame->GetMovieView()->IncFrame();
-			refresh = true;
-			set_focus = true;
-		}
-		if (m_tseq_forward &&
-			!wxGetKeyState(wxKeyCode('d')))
-			m_tseq_forward = false;
-		//backforward
-		if (!m_tseq_backward &&
-			wxGetKeyState(wxKeyCode('a')))
-		{
-			m_tseq_backward = true;
-			if (m_frame && m_frame->GetMovieView())
-				m_frame->GetMovieView()->DecFrame();
-			refresh = true;
-			set_focus = true;
-		}
-		if (m_tseq_backward &&
-			!wxGetKeyState(wxKeyCode('a')))
-			m_tseq_backward = false;
-
-		//move clip
-		//up
-		if (!m_clip_up &&
-			wxGetKeyState(wxKeyCode('s')))
-		{
-			m_clip_up = true;
-			if (m_frame && m_frame->GetClippingView())
-				m_frame->GetClippingView()->MoveLinkedClippingPlanes(-1);
-			refresh = true;
-			set_focus = true;
-		}
-		if (m_clip_up &&
-			!wxGetKeyState(wxKeyCode('s')))
-			m_clip_up = false;
-		//down
-		if (!m_clip_down &&
-			wxGetKeyState(wxKeyCode('w')))
-		{
-			m_clip_down = true;
-			if (m_frame && m_frame->GetClippingView())
-				m_frame->GetClippingView()->MoveLinkedClippingPlanes(1);
-			refresh = true;
-			set_focus = true;
-		}
-		if (m_clip_down &&
-			!wxGetKeyState(wxKeyCode('w')))
-			m_clip_down = false;
-
-		//cell full
-		if (!m_cell_full &&
-			wxGetKeyState(wxKeyCode('f')))
-		{
-			m_cell_full = true;
-			if (m_frame && m_frame->GetComponentDlg())
-				m_frame->GetComponentDlg()->SelectFullComp();
-			if (m_frame && m_frame->GetTraceDlg())
-				m_frame->GetTraceDlg()->CellUpdate();
-			refresh = true;
-			set_focus = true;
-		}
-		if (m_cell_full &&
-			!wxGetKeyState(wxKeyCode('f')))
-			m_cell_full = false;
-		//cell link
-		if (!m_cell_link &&
-			wxGetKeyState(wxKeyCode('l')))
-		{
-			m_cell_link = true;
-			if (m_frame && m_frame->GetTraceDlg())
-				m_frame->GetTraceDlg()->CellLink(false);
-			refresh = true;
-			set_focus = true;
-		}
-		if (m_cell_link &&
-			!wxGetKeyState(wxKeyCode('l')))
-			m_cell_link = false;
-		//new cell id
-		if (!m_cell_new_id &&
-			wxGetKeyState(wxKeyCode('n')))
-		{
-			m_cell_new_id = true;
-			if (m_frame && m_frame->GetTraceDlg())
-				m_frame->GetTraceDlg()->CellNewID(false);
-			refresh = true;
-			set_focus = true;
-		}
-		if (m_cell_new_id &&
-			!wxGetKeyState(wxKeyCode('n')))
-			m_cell_new_id = false;
-		//clear
-		if (wxGetKeyState(wxKeyCode('c')) &&
-			!m_clear_mask)
-		{
-			if (m_frame && m_frame->GetTree())
-				m_frame->GetTree()->BrushClear();
-			if (m_frame && m_frame->GetTraceDlg())
-				m_frame->GetTraceDlg()->CompClear();
-			m_clear_mask = true;
-			refresh = true;
-			set_focus = true;
-		}
-		if (!wxGetKeyState(wxKeyCode('c')) &&
-			m_clear_mask)
-			m_clear_mask = false;
-		//save all masks
-		if (wxGetKeyState(wxKeyCode('m')) &&
-			!m_save_mask)
-		{
-			if (m_frame && m_frame->GetList())
-				m_frame->GetList()->SaveAllMasks();
-			m_save_mask = true;
-			set_focus = true;
-		}
-		if (!wxGetKeyState(wxKeyCode('m')) &&
-			m_save_mask)
-			m_save_mask = false;
-		//full screen
-		if (wxGetKeyState(WXK_ESCAPE))
-		{
-			m_fullscreen_trigger.Start(10);
-		}
-		//brush size
-		if (wxGetKeyState(wxKeyCode('[')))
-		{
-			ChangeBrushSize(-10);
-			set_focus = true;
-		}
-		if (wxGetKeyState(wxKeyCode(']')))
-		{
-			ChangeBrushSize(10);
-			set_focus = true;
-		}
-		//comp include
-		if (wxGetKeyState(WXK_RETURN) &&
-			!m_comp_include)
-		{
-			if (m_frame && m_frame->GetComponentDlg())
-				m_frame->GetComponentDlg()->IncludeComps();
-			m_comp_include = true;
-			refresh = true;
-			set_focus = true;
-		}
-		if (!wxGetKeyState(WXK_RETURN) &&
-			m_comp_include)
-			m_comp_include = false;
-		//comp exclude
-		if (wxGetKeyState(wxKeyCode('\\')) &&
-			!m_comp_exclude)
-		{
-			if (m_frame && m_frame->GetComponentDlg())
-				m_frame->GetComponentDlg()->ExcludeComps();
-			m_comp_exclude = true;
-			refresh = true;
-			set_focus = true;
-		}
-		if (!wxGetKeyState(wxKeyCode('\\')) &&
-			m_comp_exclude)
-			m_comp_exclude = false;
-		//ruler relax
-		if (wxGetKeyState(wxKeyCode('r')) &&
-			!m_ruler_relax)
-		{
-			if (m_frame && m_frame->GetMeasureDlg())
-				m_frame->GetMeasureDlg()->Relax();
-			m_ruler_relax = true;
-			refresh = true;
-			set_focus = true;
-		}
-		if (!wxGetKeyState(wxKeyCode('r')) &&
-			m_ruler_relax)
-			m_ruler_relax = false;
-
-		//grow
-		if ((m_int_mode == 10 ||
-			m_int_mode == 12) &&
-			wxGetMouseState().LeftIsDown() &&
-			m_grow_on)
-		{
-			int sz = glbin_settings.m_ruler_size_thresh;
-			//event.RequestMore();
-			glbin_vol_selector.SetInitMask(2);
-			Segment();
-			glbin_vol_selector.SetInitMask(3);
-			if (m_int_mode == 12)
+			//draw_mask
+			if (wxGetKeyState(wxKeyCode('V')) &&
+				m_draw_mask)
 			{
-				glbin_seg_grow.SetVolumeData(m_cur_vol);
-				glbin_seg_grow.SetIter(glbin_vol_selector.GetIter()*3);
-				glbin_seg_grow.SetSizeThresh(sz);
-				glbin_seg_grow.Compute();
+				m_draw_mask = false;
+				refresh = true;
+				set_focus = true;
 			}
-			refresh = true;
-			start_loop = true;
-			//update
-			if (m_frame)
+			if (!wxGetKeyState(wxKeyCode('V')) &&
+				!m_draw_mask)
 			{
-				if (m_paint_count && m_frame->GetBrushToolDlg())
-					m_frame->GetBrushToolDlg()->Update(0);
-				if (m_paint_colocalize && m_frame->GetColocalizationDlg())
-					m_frame->GetColocalizationDlg()->Colocalize();
-				if (m_int_mode == 12 && m_frame->GetMeasureDlg())
-					m_frame->GetMeasureDlg()->GetSettings(this);
+				m_draw_mask = true;
+				refresh = true;
 			}
-			vc.insert(gstNull);
-		}
 
-		//forced refresh
-		if (wxGetKeyState(WXK_F5))
-		{
-			SetFocus();
-			m_clear_buffer = true;
-			m_updating = true;
-			if (m_frame && m_frame->GetStatusBar())
-				m_frame->GetStatusBar()->PushStatusText("Forced Refresh");
-			wxSizeEvent e;
-			OnResize(e);
-			RefreshGL(14);
-			if (m_frame && m_frame->GetStatusBar())
-				m_frame->GetStatusBar()->PopStatusText();
-			return;
+			//move view
+			//left
+			if (!m_move_left &&
+				wxGetKeyState(WXK_CONTROL) &&
+				wxGetKeyState(WXK_LEFT))
+			{
+				m_move_left = true;
+
+				m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+				m_head.normalize();
+				fluo::Vector side = fluo::Cross(m_up, m_head);
+				fluo::Vector trans = -(side * (std::round(0.8 * (m_ortho_right - m_ortho_left))));
+				m_obj_transx += trans.x();
+				m_obj_transy += trans.y();
+				m_obj_transz += trans.z();
+				//if (m_persp) SetSortBricks();
+				refresh = true;
+				set_focus = true;
+			}
+			if (m_move_left &&
+				(!wxGetKeyState(WXK_CONTROL) ||
+					!wxGetKeyState(WXK_LEFT)))
+				m_move_left = false;
+			//right
+			if (!m_move_right &&
+				wxGetKeyState(WXK_CONTROL) &&
+				wxGetKeyState(WXK_RIGHT))
+			{
+				m_move_right = true;
+
+				m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+				m_head.normalize();
+				fluo::Vector side = fluo::Cross(m_up, m_head);
+				fluo::Vector trans = side * (std::round(0.8 * (m_ortho_right - m_ortho_left)));
+				m_obj_transx += trans.x();
+				m_obj_transy += trans.y();
+				m_obj_transz += trans.z();
+				//if (m_persp) SetSortBricks();
+				refresh = true;
+				set_focus = true;
+			}
+			if (m_move_right &&
+				(!wxGetKeyState(WXK_CONTROL) ||
+					!wxGetKeyState(WXK_RIGHT)))
+				m_move_right = false;
+			//up
+			if (!m_move_up &&
+				wxGetKeyState(WXK_CONTROL) &&
+				wxGetKeyState(WXK_UP))
+			{
+				m_move_up = true;
+
+				m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+				m_head.normalize();
+				fluo::Vector trans = -m_up * (std::round(0.8 * (m_ortho_top - m_ortho_bottom)));
+				m_obj_transx += trans.x();
+				m_obj_transy += trans.y();
+				m_obj_transz += trans.z();
+				//if (m_persp) SetSortBricks();
+				refresh = true;
+				set_focus = true;
+			}
+			if (m_move_up &&
+				(!wxGetKeyState(WXK_CONTROL) ||
+					!wxGetKeyState(WXK_UP)))
+				m_move_up = false;
+			//down
+			if (!m_move_down &&
+				wxGetKeyState(WXK_CONTROL) &&
+				wxGetKeyState(WXK_DOWN))
+			{
+				m_move_down = true;
+
+				m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+				m_head.normalize();
+				fluo::Vector trans = m_up * (std::round(0.8 * (m_ortho_top - m_ortho_bottom)));
+				m_obj_transx += trans.x();
+				m_obj_transy += trans.y();
+				m_obj_transz += trans.z();
+				//if (m_persp) SetSortBricks();
+				refresh = true;
+				set_focus = true;
+			}
+			if (m_move_down &&
+				(!wxGetKeyState(WXK_CONTROL) ||
+					!wxGetKeyState(WXK_DOWN)))
+				m_move_down = false;
+
+			//move time sequence
+			//forward
+			if ((!m_tseq_forward &&
+				wxGetKeyState(wxKeyCode('d'))) ||
+				wxGetKeyState(WXK_SPACE))
+			{
+				m_tseq_forward = true;
+				if (m_frame && m_frame->GetMovieView())
+					m_frame->GetMovieView()->IncFrame();
+				refresh = true;
+				set_focus = true;
+			}
+			if (m_tseq_forward &&
+				!wxGetKeyState(wxKeyCode('d')))
+				m_tseq_forward = false;
+			//backforward
+			if (!m_tseq_backward &&
+				wxGetKeyState(wxKeyCode('a')))
+			{
+				m_tseq_backward = true;
+				if (m_frame && m_frame->GetMovieView())
+					m_frame->GetMovieView()->DecFrame();
+				refresh = true;
+				set_focus = true;
+			}
+			if (m_tseq_backward &&
+				!wxGetKeyState(wxKeyCode('a')))
+				m_tseq_backward = false;
+
+			//move clip
+			//up
+			if (!m_clip_up &&
+				wxGetKeyState(wxKeyCode('s')))
+			{
+				m_clip_up = true;
+				if (m_frame && m_frame->GetClippingView())
+					m_frame->GetClippingView()->MoveLinkedClippingPlanes(-1);
+				refresh = true;
+				set_focus = true;
+			}
+			if (m_clip_up &&
+				!wxGetKeyState(wxKeyCode('s')))
+				m_clip_up = false;
+			//down
+			if (!m_clip_down &&
+				wxGetKeyState(wxKeyCode('w')))
+			{
+				m_clip_down = true;
+				if (m_frame && m_frame->GetClippingView())
+					m_frame->GetClippingView()->MoveLinkedClippingPlanes(1);
+				refresh = true;
+				set_focus = true;
+			}
+			if (m_clip_down &&
+				!wxGetKeyState(wxKeyCode('w')))
+				m_clip_down = false;
+
+			//cell full
+			if (!m_cell_full &&
+				wxGetKeyState(wxKeyCode('f')))
+			{
+				m_cell_full = true;
+				if (m_frame && m_frame->GetComponentDlg())
+					m_frame->GetComponentDlg()->SelectFullComp();
+				if (m_frame && m_frame->GetTraceDlg())
+					m_frame->GetTraceDlg()->CellUpdate();
+				refresh = true;
+				set_focus = true;
+			}
+			if (m_cell_full &&
+				!wxGetKeyState(wxKeyCode('f')))
+				m_cell_full = false;
+			//cell link
+			if (!m_cell_link &&
+				wxGetKeyState(wxKeyCode('l')))
+			{
+				m_cell_link = true;
+				if (m_frame && m_frame->GetTraceDlg())
+					m_frame->GetTraceDlg()->CellLink(false);
+				refresh = true;
+				set_focus = true;
+			}
+			if (m_cell_link &&
+				!wxGetKeyState(wxKeyCode('l')))
+				m_cell_link = false;
+			//new cell id
+			if (!m_cell_new_id &&
+				wxGetKeyState(wxKeyCode('n')))
+			{
+				m_cell_new_id = true;
+				if (m_frame && m_frame->GetTraceDlg())
+					m_frame->GetTraceDlg()->CellNewID(false);
+				refresh = true;
+				set_focus = true;
+			}
+			if (m_cell_new_id &&
+				!wxGetKeyState(wxKeyCode('n')))
+				m_cell_new_id = false;
+			//clear
+			if (wxGetKeyState(wxKeyCode('c')) &&
+				!m_clear_mask)
+			{
+				if (m_frame && m_frame->GetTree())
+					m_frame->GetTree()->BrushClear();
+				if (m_frame && m_frame->GetTraceDlg())
+					m_frame->GetTraceDlg()->CompClear();
+				m_clear_mask = true;
+				refresh = true;
+				set_focus = true;
+			}
+			if (!wxGetKeyState(wxKeyCode('c')) &&
+				m_clear_mask)
+				m_clear_mask = false;
+			//save all masks
+			if (wxGetKeyState(wxKeyCode('m')) &&
+				!m_save_mask)
+			{
+				if (m_frame && m_frame->GetList())
+					m_frame->GetList()->SaveAllMasks();
+				m_save_mask = true;
+				set_focus = true;
+			}
+			if (!wxGetKeyState(wxKeyCode('m')) &&
+				m_save_mask)
+				m_save_mask = false;
+			//full screen
+			if (wxGetKeyState(WXK_ESCAPE))
+			{
+				m_fullscreen_trigger.Start(10);
+			}
+			//brush size
+			if (wxGetKeyState(wxKeyCode('[')))
+			{
+				ChangeBrushSize(-10);
+				set_focus = true;
+			}
+			if (wxGetKeyState(wxKeyCode(']')))
+			{
+				ChangeBrushSize(10);
+				set_focus = true;
+			}
+			//comp include
+			if (wxGetKeyState(WXK_RETURN) &&
+				!m_comp_include)
+			{
+				if (m_frame && m_frame->GetComponentDlg())
+					m_frame->GetComponentDlg()->IncludeComps();
+				m_comp_include = true;
+				refresh = true;
+				set_focus = true;
+			}
+			if (!wxGetKeyState(WXK_RETURN) &&
+				m_comp_include)
+				m_comp_include = false;
+			//comp exclude
+			if (wxGetKeyState(wxKeyCode('\\')) &&
+				!m_comp_exclude)
+			{
+				if (m_frame && m_frame->GetComponentDlg())
+					m_frame->GetComponentDlg()->ExcludeComps();
+				m_comp_exclude = true;
+				refresh = true;
+				set_focus = true;
+			}
+			if (!wxGetKeyState(wxKeyCode('\\')) &&
+				m_comp_exclude)
+				m_comp_exclude = false;
+			//ruler relax
+			if (wxGetKeyState(wxKeyCode('r')) &&
+				!m_ruler_relax)
+			{
+				if (m_frame && m_frame->GetMeasureDlg())
+					m_frame->GetMeasureDlg()->Relax();
+				m_ruler_relax = true;
+				refresh = true;
+				set_focus = true;
+			}
+			if (!wxGetKeyState(wxKeyCode('r')) &&
+				m_ruler_relax)
+				m_ruler_relax = false;
+
+			//grow
+			if ((m_int_mode == 10 ||
+				m_int_mode == 12) &&
+				wxGetMouseState().LeftIsDown() &&
+				m_grow_on)
+			{
+				int sz = glbin_settings.m_ruler_size_thresh;
+				//event.RequestMore();
+				glbin_vol_selector.SetInitMask(2);
+				Segment();
+				glbin_vol_selector.SetInitMask(3);
+				if (m_int_mode == 12)
+				{
+					glbin_seg_grow.SetVolumeData(m_cur_vol);
+					glbin_seg_grow.SetIter(glbin_vol_selector.GetIter() * 3);
+					glbin_seg_grow.SetSizeThresh(sz);
+					glbin_seg_grow.Compute();
+				}
+				refresh = true;
+				start_loop = true;
+				//update
+				if (m_frame)
+				{
+					if (m_paint_count && m_frame->GetBrushToolDlg())
+						m_frame->GetBrushToolDlg()->Update(0);
+					if (m_paint_colocalize && m_frame->GetColocalizationDlg())
+						m_frame->GetColocalizationDlg()->Colocalize();
+					if (m_int_mode == 12 && m_frame->GetMeasureDlg())
+						m_frame->GetMeasureDlg()->GetSettings(this);
+				}
+				vc.insert(gstNull);
+			}
+
+			//forced refresh
+			if (wxGetKeyState(WXK_F5))
+			{
+				SetFocus();
+				m_clear_buffer = true;
+				m_updating = true;
+				if (m_frame && m_frame->GetStatusBar())
+					m_frame->GetStatusBar()->PushStatusText("Forced Refresh");
+				wxSizeEvent e;
+				OnResize(e);
+				RefreshGL(14);
+				if (m_frame && m_frame->GetStatusBar())
+					m_frame->GetStatusBar()->PopStatusText();
+				return;
+			}
 		}
 	}
 
