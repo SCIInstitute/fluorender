@@ -123,7 +123,7 @@ void  wxBasisSlider::DrawThumb(wxDC& dc, wxCoord x, wxCoord y, const wxColor& c)
 		//dc.DrawCircle(xx, yy, 7 * scale_);
 		//dc.SetPen(c);
 		dc.SetBrush(wxBrush(c, wxBRUSHSTYLE_SOLID));
-		dc.DrawCircle(xx, yy, 6 * scale_);
+		dc.DrawCircle(xx, yy, 10 * scale_);
 	}
 }
 

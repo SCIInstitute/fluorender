@@ -266,7 +266,7 @@ MainFrame::MainFrame(
 	wxBitmap bitmap;
 
 	bitmap = wxGetBitmapFromMemory(icon_open_volume);
-	//m_main_tb->SetToolBitmapSize(FromDIP(wxSize(100, 42)));
+	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
 	m_main_tb->AddTool(ID_OpenVolume, "Open Volume",
 		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Open single or multiple volume data file(s)",
@@ -275,6 +275,7 @@ MainFrame::MainFrame(
 	if (JVMInitializer::getInstance(glbin_settings.GetJvmArgs()) != nullptr)
 	{
 		bitmap = wxGetBitmapFromMemory(icon_import);
+		m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
 		m_main_tb->AddTool(ID_ImportVolume, "Import Volume",
 			bitmap, wxNullBitmap, wxITEM_NORMAL,
 			"Import single or multiple volume data file(s) using ImageJ",
@@ -283,22 +284,26 @@ MainFrame::MainFrame(
 	}
 
 	bitmap = wxGetBitmapFromMemory(icon_open_project);
+	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
 	m_main_tb->AddTool(ID_OpenProject, "Open Project",
 		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Open a saved project",
 		"Open a saved project");
 	bitmap = wxGetBitmapFromMemory(icon_save_project);
+	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
 	m_main_tb->AddTool(ID_SaveProject, "Save Project",
 		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Save current work as a project",
 		"Save current work as a project");
 	m_main_tb->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(icon_new_view);
+	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
 	m_main_tb->AddTool(ID_ViewNew, "New View",
 		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Create a new render viewport",
 		"Create a new render viewport");
 	bitmap = wxGetBitmapFromMemory(icon_show_hide_ui);
+	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
 	m_main_tb->AddTool(ID_ShowHideUI, "Show/Hide UI",
 		bitmap, wxNullBitmap, wxITEM_DROPDOWN,
 		"Show or hide all control panels",
@@ -306,11 +311,13 @@ MainFrame::MainFrame(
 	m_main_tb->SetDropdownMenu(ID_ShowHideUI, m_tb_menu_ui);
 	m_main_tb->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(icon_open_mesh);
+	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
 	m_main_tb->AddTool(ID_OpenMesh, "Open Mesh",
 		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Open single or multiple mesh file(s)",
 		"Open single or multiple mesh file(s)");
 	bitmap = wxGetBitmapFromMemory(icon_paint_brush);
+	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
 	m_main_tb->AddTool(ID_LastTool, "Analyze",
 		bitmap, wxNullBitmap,
 		wxITEM_DROPDOWN,
@@ -319,17 +326,20 @@ MainFrame::MainFrame(
 	m_main_tb->SetDropdownMenu(ID_LastTool, m_tb_menu_edit);
 	m_main_tb->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(icon_settings);
+	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
 	m_main_tb->AddTool(ID_Settings, "Settings",
 		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Settings of FluoRender",
 		"Settings of FluoRender");
 	m_main_tb->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(icon_undo);
+	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
 	m_main_tb->AddTool(ID_Undo, "Undo",
 		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Undo",
 		"Undo");
 	bitmap = wxGetBitmapFromMemory(icon_redo);
+	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
 	m_main_tb->AddTool(ID_Redo, "Redo",
 		bitmap, wxNullBitmap, wxITEM_NORMAL,
 		"Redo",
@@ -395,6 +405,7 @@ MainFrame::MainFrame(
 		item_id = ID_Info;
 		break;
 	}
+	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
 	m_main_tb->AddTool(item_id, str1,
 		bitmap, wxNullBitmap, wxITEM_DROPDOWN,
 		str2, str3);
