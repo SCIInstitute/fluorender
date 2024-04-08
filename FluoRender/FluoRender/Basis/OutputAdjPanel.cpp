@@ -68,13 +68,8 @@ m_enable_all(true)
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
-#ifndef _DARWIN
 	m_dft_btn = new wxButton(this, wxID_ANY, "Set Default",
 							 wxDefaultPosition, FromDIP(wxSize(95, 22)));
-#else
-	m_dft_btn = new wxButton(this, ID_DefaultBtn, "Set Default",
-							 wxDefaultPosition, FromDIP(wxSize(95, 30)));
-#endif
 	m_dft_btn->SetBitmap(wxGetBitmapFromMemory(save_settings));
 	m_dft_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnSaveDefault, this);
 
@@ -185,13 +180,8 @@ wxWindow* OutputAdjPanel::CreateRedPage(wxWindow* parent, wxSize& size)
 
 	//reset buttons
 	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
-#ifndef _DARWIN
 	m_r_reset_btn = new wxButton(page, wxID_ANY, "Reset",
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
-#else
-	m_r_reset_btn = new wxButton(page, ID_RResetBtn, "Reset",
-		wxDefaultPosition, FromDIP(wxSize(30, 30)));
-#endif
 	m_r_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	m_r_reset_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnRReset, this);
 	m_sync_r_chk = new wxToolBar(page, wxID_ANY,
@@ -289,13 +279,8 @@ wxWindow* OutputAdjPanel::CreateGreenPage(wxWindow* parent, wxSize& size)
 
 	//reset buttons
 	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
-#ifndef _DARWIN
 	m_g_reset_btn = new wxButton(page, wxID_ANY, "Reset",
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
-#else
-	m_g_reset_btn = new wxButton(page, ID_GResetBtn, "Reset",
-		wxDefaultPosition, FromDIP(wxSize(30, 30)));
-#endif
 	m_g_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	m_g_reset_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnGReset, this);
 	wxBoxSizer* sizer_h_6 = new wxBoxSizer(wxHORIZONTAL);
@@ -396,13 +381,8 @@ wxWindow* OutputAdjPanel::CreateBluePage(wxWindow* parent, wxSize& size)
 
 	//reset buttons
 	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
-#ifndef _DARWIN
 	m_b_reset_btn = new wxButton(page, wxID_ANY, "Reset",
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
-#else
-	m_b_reset_btn = new wxButton(page, ID_BResetBtn, "Reset",
-		wxDefaultPosition, FromDIP(wxSize(30, 30)));
-#endif
 	m_b_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	m_b_reset_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnBReset, this);
 	m_sync_b_chk = new wxToolBar(page, wxID_ANY,
