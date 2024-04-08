@@ -194,11 +194,12 @@ elseif(UNIX OR MINGW)
 endif()
 #copy wxwidgets patch to its source dir
 #need to rebuild wxWidgets after this
+if (WIN32)
 file(COPY ${FluoRender_SOURCE_DIR}/wxWidgets/include/wx/aui/auibook.h
   DESTINATION ${wxWidgets_ROOT_DIR}/include/wx/aui)
 file(COPY ${FluoRender_SOURCE_DIR}/wxWidgets/src/aui/auibook.cpp
   DESTINATION ${wxWidgets_ROOT_DIR}/src/aui)
-
+endif()
 
 
 # OpenGL
