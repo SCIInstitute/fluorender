@@ -938,7 +938,7 @@ void ClipPlanePanel::LinkChannels()
 		long z2_val = 0;
 		str.ToLong(&z2_val);
 
-		int val[6] = { x1_val, x2_val, y1_val, y2_val, z1_val, z2_val };
+		int val[6] = { (int)x1_val, (int)x2_val, (int)y1_val, (int)y2_val, (int)z1_val, (int)z2_val };
 		SetClipValues(val);
 	}
 }
