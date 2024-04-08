@@ -617,7 +617,8 @@ namespace flvr
 
 		//--------------------------------------------------------------------------
 
-		bool use_fog = m_use_fog && colormap_mode_!=2;
+		int cm_mode = mode == 4 ? 0 : colormap_mode_;
+		bool use_fog = m_use_fog && cm_mode !=2;
 
 		// set up blending
 		glEnable(GL_BLEND);
@@ -692,14 +693,14 @@ namespace flvr
 		ShaderProgram* shader = 0;
 		//create/bind
 		bool grad = gm_thresh_ > 0.0 ||
-			(colormap_mode_ &&
+			(cm_mode &&
 			colormap_proj_>3);
 		shader = vol_shader_factory_.shader(
 			false, tex_->nc(),
 			shading_, use_fog,
 			depth_peel_, true,
 			grad, ml_mode_, mode_ == TextureRenderer::MODE_MIP,
-			colormap_mode_, colormap_, colormap_proj_,
+			cm_mode, colormap_, colormap_proj_,
 			solid_, 1);
 		if (shader)
 		{
@@ -736,7 +737,7 @@ namespace flvr
 				colormap_hi_value_ - colormap_low_value_, colormap_inv_);
 		else
 		{
-			switch (colormap_mode_)
+			switch (cm_mode)
 			{
 			case 0://normal
 				if (mask_ && !label_)
@@ -757,7 +758,7 @@ namespace flvr
 		shader->setLocalParam(9, color_.r(), color_.g(), color_.b(), alpha_power_);
 
 		//setup depth peeling
-		if (depth_peel_ || colormap_mode_ == 2)
+		if (depth_peel_ || cm_mode == 2)
 			shader->setLocalParam(7, 1.0/double(w2), 1.0/double(h2), 0.0, 0.0);
 
 		//fog
@@ -839,7 +840,7 @@ namespace flvr
 				continue;
 			}
 
-			if ((colormap_mode_==1 ||
+			if ((cm_mode ==1 ||
 				mode_==TextureRenderer::MODE_MIP) &&
 				colormap_proj_)
 			{
@@ -947,7 +948,7 @@ namespace flvr
 		}
 
 		//release depth texture for rendering shadows
-		if (colormap_mode_ == 2)
+		if (cm_mode == 2)
 			release_texture(4, GL_TEXTURE_2D);
 
 		// Release shader.
@@ -976,7 +977,7 @@ namespace flvr
 			ShaderProgram* img_shader = 0;
 
 			Framebuffer* filter_buffer = 0;
-			if (noise_red_ && colormap_mode_!=2)
+			if (noise_red_ && cm_mode !=2)
 			{
 				//FILTERING/////////////////////////////////////////////////////////////////
 				filter_buffer = framebuffer_manager_.framebuffer(
@@ -1010,12 +1011,12 @@ namespace flvr
 
 			glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 
-			if (noise_red_ && colormap_mode_ != 2)
+			if (noise_red_ && cm_mode != 2)
 				filter_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 			else
 				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 
-			if (noise_red_ && colormap_mode_!=2)
+			if (noise_red_ && cm_mode !=2)
 				img_shader = 
 					img_shader_factory_.shader(IMG_SHDR_FILTER_SHARPEN);
 			else
@@ -1029,7 +1030,7 @@ namespace flvr
 				img_shader->bind();
 			}
 
-			if (noise_red_ && colormap_mode_!=2)
+			if (noise_red_ && cm_mode !=2)
 			{
 				filter_size_shp_ = CalcFilterSize(3, w, h, tex_->nx(), tex_->ny(), sfactor_);
 				img_shader->setLocalParam(0, filter_size_shp_/w, filter_size_shp_/h, 0.0, 0.0);
