@@ -3918,6 +3918,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		{
 			refresh = true;
 			start_loop = false;
+			vc.insert(gstNull);
 		}
 	}
 	else
@@ -3944,12 +3945,14 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		if (flvr::TextureRenderer::get_mem_swap() &&
 			flvr::TextureRenderer::get_done_update_loop())
 			m_pre_draw = true;
+		vc.insert(gstNull);
 	}
 
 	if (m_use_openvr)
 	{
 		event.RequestMore(true);
 		refresh = true;
+		vc.insert(gstNull);
 		//m_retain_finalbuffer = true;
 	}
 
@@ -3964,6 +3967,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		m_frame->SetTitle(title);
 
 		refresh = true;
+		vc.insert(gstNull);
 		if (flvr::TextureRenderer::get_mem_swap() &&
 			flvr::TextureRenderer::get_done_update_loop())
 			m_pre_draw = true;
@@ -4010,6 +4014,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		}
 		m_rot_center_dirty = false;
 		refresh = true;
+		vc.insert(gstNull);
 	}
 
 	wxPoint mouse_pos = wxGetMousePosition();
@@ -4334,6 +4339,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				if (m_int_mode == 12 && m_frame->GetMeasureDlg())
 					m_frame->GetMeasureDlg()->GetSettings(this);
 			}
+			vc.insert(gstNull);
 		}
 
 		//forced refresh
@@ -4391,6 +4397,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			m_interactive = true;
 			m_rot_center_dirty = true;
 			refresh = true;
+			vc.insert(gstNull);
 		}
 		//zoom/dolly
 		if (lefty != 0.0)
@@ -4458,6 +4465,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			m_interactive = true;
 			m_rot_center_dirty = true;
 			refresh = true;
+			vc.insert(gstNull);
 		}
 	}
 #endif
