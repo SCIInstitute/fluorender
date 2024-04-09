@@ -51,10 +51,17 @@ wxBasisSlider::wxBasisSlider(
 	horizontal_(!(style & wxSL_VERTICAL)),
 	inverse_(style & wxSL_INVERSE),
 	range_style_(0),
+#ifdef _WIN32
 	wxControl(parent, id, pos,
 		wxSize(std::max(size.GetWidth(), int(std::round(24 * parent->GetDPIScaleFactor()))),
 			std::max(size.GetHeight(), int(std::round(24 * parent->GetDPIScaleFactor())))),
 		wxBORDER_NONE, val, name),
+#else
+	wxControl(parent, id, pos,
+		wxSize(std::max(size.GetWidth(), 24,
+			std::max(size.GetHeight(), 24,
+		wxBORDER_NONE, val, name),
+#endif
 	Undoable()
 {
 	scale_ = thumb_style_ ? 1 : parent->GetDPIScaleFactor();
