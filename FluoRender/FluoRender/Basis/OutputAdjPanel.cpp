@@ -283,9 +283,6 @@ wxWindow* OutputAdjPanel::CreateGreenPage(wxWindow* parent, wxSize& size)
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
 	m_g_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	m_g_reset_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnGReset, this);
-	wxBoxSizer* sizer_h_6 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Green:",
-		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	m_sync_g_chk = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(unlink);
