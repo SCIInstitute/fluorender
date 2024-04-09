@@ -58,8 +58,8 @@ wxBasisSlider::wxBasisSlider(
 		wxBORDER_NONE, val, name),
 #else
 	wxControl(parent, id, pos,
-		wxSize(std::max(size.GetWidth(), 24,
-			std::max(size.GetHeight(), 24,
+		wxSize(std::max(size.GetWidth(), 24),
+			std::max(size.GetHeight(), 24)),
 		wxBORDER_NONE, val, name),
 #endif
 	Undoable()
@@ -130,7 +130,7 @@ void  wxBasisSlider::DrawThumb(wxDC& dc, wxCoord x, wxCoord y, const wxColor& c)
 		//dc.DrawCircle(xx, yy, 7 * scale_);
 		//dc.SetPen(c);
 		dc.SetBrush(wxBrush(c, wxBRUSHSTYLE_SOLID));
-		dc.DrawCircle(xx, yy, 10 * scale_);
+		dc.DrawCircle(xx, yy, 9 * scale_);
 	}
 }
 
