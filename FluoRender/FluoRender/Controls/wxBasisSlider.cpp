@@ -57,7 +57,7 @@ wxBasisSlider::wxBasisSlider(
 		wxBORDER_NONE, val, name),
 	Undoable()
 {
-	scale_ = parent->GetDPIScaleFactor();
+	scale_ = thumb_style_ ? 1 : parent->GetDPIScaleFactor();
 	margin_ = std::round(12 * scale_);
 	SetBackgroundColour(parent->GetBackgroundColour());
 	SetDoubleBuffered(true);
