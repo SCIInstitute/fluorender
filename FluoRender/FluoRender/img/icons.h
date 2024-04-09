@@ -31,112 +31,120 @@ DEALINGS IN THE SOFTWARE.
 class icons {
 public:
 	//main frame toolbar icons
-	/* icon_open_volume.png - 3527 bytes */
-	const static unsigned char icon_open_volume_png[3527];
+	/* icon_open_volume.png - 4571 bytes */
+	const static unsigned char icon_open_volume_png[4571];
 	/* icon_open_volume_mini.png - 859 bytes */
 	const static unsigned char icon_open_volume_mini_png[859];
-	/* importvolume.png - 4255 bytes */
-	const static unsigned char icon_import_png[4255];
+	/* importvolume.png - 4117 bytes */
+	const static unsigned char icon_import_png[4117];
 	/* icon_import_mini.png - 613 bytes */
 	const static unsigned char icon_import_mini_png[613];
-	/* icon_open_project.png - 4213 bytes */
-	const static unsigned char icon_open_project_png[4213];
+	/* icon_open_project.png - 5259 bytes */
+	const static unsigned char icon_open_project_png[5259];
 	/* icon_open_project_mini.png - 902 bytes */
 	const static unsigned char icon_open_project_mini_png[902];
-	/* icon_save_project.png - 2809 bytes */
-	const static unsigned char icon_save_project_png[2809];
+	/* icon_save_project.png - 3713 bytes */
+	const static unsigned char icon_save_project_png[3713];
 	/* icon_save_project_mini.png - 777 bytes */
 	const static unsigned char icon_save_project_mini_png[777];
-	/* icon_new_view.png - 4029 bytes */
-	const static unsigned char icon_new_view_png[4029];
+	/* icon_new_view.png - 4255 bytes */
+	const static unsigned char icon_new_view_png[4255];
 	/* icon_new_view_mini.png - 840 bytes */
 	const static unsigned char icon_new_view_mini_png[840];
-	/* icon_show_hide_ui.png - 2673 bytes */
-	const static unsigned char icon_show_hide_ui_png[2673];
+	/* icon_show_hide_ui.png - 2803 bytes */
+	const static unsigned char icon_show_hide_ui_png[2803];
 	/* icon_show_hide_ui_mini.png - 759 bytes */
 	const static unsigned char icon_show_hide_ui_mini_png[759];
-	/* icon_open_mesh.png - 6116 bytes */
-	const static unsigned char icon_open_mesh_png[6116];
+	/* icon_open_mesh.png - 6671 bytes */
+	const static unsigned char icon_open_mesh_png[6671];
 	/* icon_open_mesh_mini.png - 1109 bytes */
 	const static unsigned char icon_open_mesh_mini_png[1109];
-	/* icon_settings.png - 4147 bytes */
-	const static unsigned char icon_settings_png[4147];
+	/* icon_settings.png - 4556 bytes */
+	const static unsigned char icon_settings_png[4556];
 	/* icon_settings_mini.png - 856 bytes */
 	const static unsigned char icon_settings_mini_png[856];
-	/* icon_check_updates.png - 4044 bytes */
-	const static unsigned char icon_check_updates_png[4044];
+	/* icon_check_updates.png - 4033 bytes */
+	const static unsigned char icon_check_updates_png[4033];
 	/* icon_check_updates_mini.png - 817 bytes */
 	const static unsigned char icon_check_updates_mini_png[817];
-	/* icon_facebook.png - 3435 bytes */
-	const static unsigned char icon_facebook_png[3435];
-	/* icon_facebook_mini.png - 760 bytes */
-	const static unsigned char icon_facebook_mini_png[760];
-	/* icon_twitter.png - 3703 bytes */
-	const static unsigned char icon_twitter_png[3703];
+	/* icon_twitter.png - 3855 bytes */
+	const static unsigned char icon_twitter_png[3855];
 	/* icon_twitter_mini.png - 896 bytes */
 	const static unsigned char icon_twitter_mini_png[896];
-	/* icon_about.png - 2655 bytes */
-	const static unsigned char icon_about_png[2655];
+	/* icon_facebook_mini.png - 760 bytes */
+	const static unsigned char icon_facebook_mini_png[760];
+	/* icon_about.png - 2739 bytes */
+	const static unsigned char icon_about_png[2739];
 	/* icon_about_mini.png - 731 bytes */
 	const static unsigned char icon_about_mini_png[731];
 	/* web_pdf_mini.png - 779 bytes */
 	const static unsigned char web_pdf_mini_png[779];
-	/* icon_youtube.png - 2142 bytes */
-	const static unsigned char icon_youtube_png[2142];
+	/* icon_youtube.png - 2435 bytes */
+	const static unsigned char icon_youtube_png[2435];
 	/* icon_youtube_mini.png - 591 bytes */
 	const static unsigned char icon_youtube_mini_png[591];
 	//tools
-	/* icon_paint_brush.png - 3330 bytes */
-	const static unsigned char icon_paint_brush_png[3330];
+	/* icon_paint_brush.png - 3838 bytes */
+	const static unsigned char icon_paint_brush_png[3838];
 	/* icon_paint_brush_mini.png - 665 bytes */
 	const static unsigned char icon_paint_brush_mini_png[665];
-	/* icon_measurement.png - 4160 bytes */
-	const static unsigned char icon_measurement_png[4160];
+	/* icon_measurement.png - 4103 bytes */
+	const static unsigned char icon_measurement_png[4103];
 	/* icon_measurement_mini.png - 788 bytes */
 	const static unsigned char icon_measurement_mini_png[788];
-	/* icon_tracking.png - 3046 bytes */
-	const static unsigned char icon_tracking_png[3046];
+	/* icon_tracking.png - 3302 bytes */
+	const static unsigned char icon_tracking_png[3302];
 	/* icon_tracking_mini.png - 674 bytes */
 	const static unsigned char icon_tracking_mini_png[674];
-	/* icon_noise_reduc.png - 4047 bytes */
-	const static unsigned char icon_noise_reduc_png[4047];
+	/* icon_noise_reduc.png - 4056 bytes */
+	const static unsigned char icon_noise_reduc_png[4056];
 	/* icon_noise_reduc_mini.png - 750 bytes */
 	const static unsigned char icon_noise_reduc_mini_png[750];
-	/* icon_volume_size.png - 3784 bytes */
-	const static unsigned char icon_volume_size_png[3784];
+	/* icon_volume_size.png - 3503 bytes */
+	const static unsigned char icon_volume_size_png[3503];
 	/* icon_volume_size_mini.png - 746 bytes */
 	const static unsigned char icon_volume_size_mini_png[746];
-	/* icon_colocalization.png - 4019 bytes */
-	const static unsigned char icon_colocalization_png[4019];
+	/* icon_colocalization.png - 3704 bytes */
+	const static unsigned char icon_colocalization_png[3704];
 	/* icon_colocalization_mini.png - 772 bytes */
 	const static unsigned char icon_colocalization_mini_png[772];
-	/* icon_convert.png - 3615 bytes */
-	const static unsigned char icon_convert_png[3615];
+	/* icon_convert.png - 3509 bytes */
+	const static unsigned char icon_convert_png[3509];
 	/* icon_convert_mini.png - 738 bytes */
 	const static unsigned char icon_convert_mini_png[738];
-	/* icon_opencl.png - 3873 bytes */
-	const static unsigned char icon_opencl_png[3873];
+	/* icon_opencl.png - 4312 bytes */
+	const static unsigned char icon_opencl_png[4312];
 	/* icon_opencl_mini.png - 715 bytes */
 	const static unsigned char icon_opencl_mini_png[715];
-	/* icon_components.png - 4353 bytes */
-	const static unsigned char icon_components_png[4353];
+	/* icon_components.png - 4122 bytes */
+	const static unsigned char icon_components_png[4122];
 	/* icon_components_mini.png - 839 bytes */
 	const static unsigned char icon_components_mini_png[839];
-	/* icon_calculations.png - 4744 bytes */
-	const static unsigned char icon_calculations_png[4744];
+	/* icon_calculations.png - 4758 bytes */
+	const static unsigned char icon_calculations_png[4758];
 	/* icon_calculations_mini.png - 819 bytes */
 	const static unsigned char icon_calculations_mini_png[819];
-	/* icon_machine_learning.png - 4767 bytes */
-	const static unsigned char icon_machine_learning_png[4767];
+	/* icon_machine_learning.png - 4828 bytes */
+	const static unsigned char icon_machine_learning_png[4828];
 	/* icon_machine_learning_mini.png - 844 bytes */
 	const static unsigned char icon_machine_learning_mini_png[844];
 	/* icon_new_project_mini.png - 818 bytes */
 	const static unsigned char icon_new_project_mini_png[818];
 	//undo
-	/* icon_undo.png - 2343 bytes */
-	const static unsigned char icon_undo_png[2343];
-	/* icon_redo.png - 2412 bytes */
-	const static unsigned char icon_redo_png[2412];
+	/* icon_undo.png - 2692 bytes */
+	const static unsigned char icon_undo_png[2692];
+	/* icon_redo.png - 2356 bytes */
+	const static unsigned char icon_redo_png[2356];
+	/* disp_adjust.png - 560 bytes */
+	const static unsigned char disp_adjust_png[560];
+	/* disp_clipping.png - 572 bytes */
+	const static unsigned char disp_clipping_png[572];
+	/* disp_makemovie.png - 599 bytes */
+	const static unsigned char disp_makemovie_png[599];
+	/* disp_project.png - 534 bytes */
+	const static unsigned char disp_project_png[534];
+	/* disp_properties.png - 543 bytes */
+	const static unsigned char disp_properties_png[543];
 
 
 	//render view icons

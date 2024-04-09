@@ -132,6 +132,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(ID_UIAdjView, MainFrame::OnShowHideView)
 	EVT_MENU(ID_UIClipView, MainFrame::OnShowHideView)
 	EVT_MENU(ID_UIPropView, MainFrame::OnShowHideView)
+	//toolbar menus
+	EVT_AUITOOLBAR_TOOL_DROPDOWN(wxID_ANY, MainFrame::OnToolbarMenu)
 	//panes
 	EVT_AUI_PANE_CLOSE(MainFrame::OnPaneClose)
 	//prop panel
@@ -204,166 +206,110 @@ MainFrame::MainFrame(
 	wxIcon icon;
 	icon.CopyFromBitmap(wxGetBitmapFromMemory(icon_32));
 	SetIcon(icon);
-
-	// create the main toolbar
-	m_main_tb = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER);
-	//create the menu for UI management
-	m_tb_menu_ui = new wxMenu;
-	m_tb_menu_ui->Append(ID_UIProjView, UITEXT_PROJECT,
-		"Show/hide the project panel", wxITEM_CHECK);
-	m_tb_menu_ui->Append(ID_UIMovieView, UITEXT_MAKEMOVIE,
-		"Show/hide the movie export panel", wxITEM_CHECK);
-	m_tb_menu_ui->Append(ID_UIAdjView, UITEXT_ADJUST,
-		"Show/hide the output adjustment panel", wxITEM_CHECK);
-	m_tb_menu_ui->Append(ID_UIClipView, UITEXT_CLIPPING,
-		"Show/hide the clipping plane control panel", wxITEM_CHECK);
-	m_tb_menu_ui->Append(ID_UIPropView, UITEXT_PROPERTIES,
-		"Show/hide the property panel", wxITEM_CHECK);
-	//check all the items
-	m_tb_menu_ui->Check(ID_UIProjView, true);
-	m_tb_menu_ui->Check(ID_UIMovieView, true);
-	m_tb_menu_ui->Check(ID_UIAdjView, true);
-	m_tb_menu_ui->Check(ID_UIClipView, true);
-	m_tb_menu_ui->Check(ID_UIPropView, true);
-	//create the menu for edit/convert
-	m_tb_menu_edit = new wxMenu;
-	wxMenuItem *m = new wxMenuItem(m_tb_menu_edit, ID_PaintTool, wxT("Paint Brush..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_paint_brush_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_Measure, wxT("Measurement..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_measurement_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_Component, wxT("Component Analyzer..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_components_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_Trace, wxT("Tracking..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_tracking_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_Calculations, wxT("Calculations..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_calculations_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_NoiseCancelling, wxT("Noise Reduction..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_noise_reduc_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_Counting, wxT("Volume Size..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_volume_size_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_Colocalization, wxT("Colocalization..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_colocalization_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_Convert, wxT("Convert..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_convert_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_Ocl, wxT("OpenCL Kernel Editor..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_MachineLearning, wxT("Machine Learning Manager..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_machine_learning_mini));
-	m_tb_menu_edit->Append(m);
-	//build the main toolbar
-	//add tools
 	wxBitmap bitmap;
 
+	// create the main toolbar
+	wxMenuItem* m;
+	wxAuiToolBarItemArray prepend_items;
+	wxAuiToolBarItemArray append_items;
+	m_main_tb = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+		wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW | wxAUI_TB_HORIZONTAL);
+	//add tools
 	bitmap = wxGetBitmapFromMemory(icon_open_volume);
-	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
-	m_main_tb->AddTool(ID_OpenVolume, "Open Volume",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"Open single or multiple volume data file(s)",
+	m_main_tb->AddTool(ID_OpenVolume, "Open Volume", bitmap,
 		"Open single or multiple volume data file(s)");
-
 	if (JVMInitializer::getInstance(glbin_settings.GetJvmArgs()) != nullptr)
 	{
 		bitmap = wxGetBitmapFromMemory(icon_import);
-		m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
-		m_main_tb->AddTool(ID_ImportVolume, "Import Volume",
-			bitmap, wxNullBitmap, wxITEM_NORMAL,
-			"Import single or multiple volume data file(s) using ImageJ",
+		m_main_tb->AddTool(ID_ImportVolume, "Import Volume", bitmap,
 			"Import single or multiple volume data file(s) using ImageJ");
 		m_main_tb->AddSeparator();
 	}
-
 	bitmap = wxGetBitmapFromMemory(icon_open_project);
-	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
-	m_main_tb->AddTool(ID_OpenProject, "Open Project",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"Open a saved project",
+	m_main_tb->AddTool(ID_OpenProject, "Open Project", bitmap,
 		"Open a saved project");
 	bitmap = wxGetBitmapFromMemory(icon_save_project);
-	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
-	m_main_tb->AddTool(ID_SaveProject, "Save Project",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"Save current work as a project",
+	m_main_tb->AddTool(ID_SaveProject, "Save Project", bitmap,
 		"Save current work as a project");
 	m_main_tb->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(icon_new_view);
-	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
-	m_main_tb->AddTool(ID_ViewNew, "New View",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"Create a new render viewport",
+	m_main_tb->AddTool(ID_ViewNew, "New View", bitmap,
 		"Create a new render viewport");
 	bitmap = wxGetBitmapFromMemory(icon_show_hide_ui);
-	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
-	m_main_tb->AddTool(ID_ShowHideUI, "Show/Hide UI",
-		bitmap, wxNullBitmap, wxITEM_DROPDOWN,
-		"Show or hide all control panels",
+	m_main_tb->AddTool(ID_ShowHideUI, "Show/Hide UI", bitmap,
 		"Show or hide all control panels");
-	m_main_tb->SetDropdownMenu(ID_ShowHideUI, m_tb_menu_ui);
+	m_main_tb->SetToolDropDown(ID_ShowHideUI, true);
 	m_main_tb->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(icon_open_mesh);
-	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
-	m_main_tb->AddTool(ID_OpenMesh, "Open Mesh",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"Open single or multiple mesh file(s)",
+	m_main_tb->AddTool(ID_OpenMesh, "Open Mesh", bitmap,
 		"Open single or multiple mesh file(s)");
 	bitmap = wxGetBitmapFromMemory(icon_paint_brush);
-	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
-	m_main_tb->AddTool(ID_LastTool, "Analyze",
-		bitmap, wxNullBitmap,
-		wxITEM_DROPDOWN,
-		"Tools for analyzing selected channel",
+	m_main_tb->AddTool(ID_LastTool, "Analyze", bitmap,
 		"Tools for analyzing selected channel");
-	m_main_tb->SetDropdownMenu(ID_LastTool, m_tb_menu_edit);
-	m_main_tb->AddSeparator();
-	bitmap = wxGetBitmapFromMemory(icon_settings);
-	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
-	m_main_tb->AddTool(ID_Settings, "Settings",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"Settings of FluoRender",
-		"Settings of FluoRender");
+	m_main_tb->SetToolDropDown(ID_LastTool, true);
+	//set analyze icon
+	switch (glbin_settings.m_last_tool)
+	{
+	case TOOL_PAINT_BRUSH:
+	default:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_paint_brush));
+		break;
+	case TOOL_MEASUREMENT:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_measurement));
+		break;
+	case TOOL_TRACKING:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_tracking));
+		break;
+	case TOOL_NOISE_REDUCTION:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_noise_reduc));
+		break;
+	case TOOL_VOLUME_SIZE:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_volume_size));
+		break;
+	case TOOL_COLOCALIZATION:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_colocalization));
+		break;
+	case TOOL_CONVERT:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_convert));
+		break;
+	case TOOL_OPENCL:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_opencl));
+		break;
+	case TOOL_COMPONENT:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_components));
+		break;
+	case TOOL_CALCULATIONS:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_calculations));
+		break;
+	case TOOL_MACHINE_LEARNING:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmapFromMemory(icon_machine_learning));
+		break;
+	}
 	m_main_tb->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(icon_undo);
-	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
-	m_main_tb->AddTool(ID_Undo, "Undo",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"Undo",
+	m_main_tb->AddTool(ID_Undo, "Undo", bitmap,
 		"Undo");
 	bitmap = wxGetBitmapFromMemory(icon_redo);
-	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
-	m_main_tb->AddTool(ID_Redo, "Redo",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"Redo",
+	m_main_tb->AddTool(ID_Redo, "Redo", bitmap,
 		"Redo");
-
-	m_main_tb->AddStretchableSpace();
-	m_tb_menu_update = new wxMenu;
-	m = new wxMenuItem(m_tb_menu_update, ID_CheckUpdates, wxT("Check Updates..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_check_updates_mini));
-	m_tb_menu_update->Append(m);
-	m = new wxMenuItem(m_tb_menu_update, ID_Youtube, wxT("Video Tutorials..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_youtube_mini));
-	m_tb_menu_update->Append(m);
-	m = new wxMenuItem(m_tb_menu_update, ID_Facebook, wxT("Facebook..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_facebook_mini));
-	m_tb_menu_update->Append(m);
-	m = new wxMenuItem(m_tb_menu_update, ID_Twitter, wxT("Twitter..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_twitter_mini));
-	m_tb_menu_update->Append(m);
-	m = new wxMenuItem(m_tb_menu_update, ID_Info, wxT("About..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_about_mini));
-	m_tb_menu_update->Append(m);
-	//last item
-	int num = rand() % 5;
+	//right-side items
+	m_main_tb->AddStretchSpacer();
+	bitmap = wxGetBitmapFromMemory(icon_settings);
+	m_main_tb->AddTool(ID_Settings, "Settings", bitmap,
+		"Settings of FluoRender");
+	m_main_tb->AddSeparator();
+	int num = rand() % 4;
 	wxString str1, str2, str3;
 	int item_id;
 	switch (num)
@@ -383,20 +329,13 @@ MainFrame::MainFrame(
 		item_id = ID_Youtube;
 		break;
 	case 2:
-		bitmap = wxGetBitmapFromMemory(icon_facebook);
-		str1 = "Facebook";
-		str2 = "FluoRender's facebook page";
-		str3 = "FluoRender's facebook page (requires Internet connection)";
-		item_id = ID_Facebook;
-		break;
-	case 3:
 		bitmap = wxGetBitmapFromMemory(icon_twitter);
 		str1 = "Twitter";
 		str2 = "Follow FluoRender on Twitter";
 		str3 = "Follow FluoRender on Twitter (requires Internet connection)";
 		item_id = ID_Twitter;
 		break;
-	case 4:
+	case 3:
 	default:
 		bitmap = wxGetBitmapFromMemory(icon_about);
 		str1 = "About";
@@ -405,13 +344,83 @@ MainFrame::MainFrame(
 		item_id = ID_Info;
 		break;
 	}
-	m_main_tb->SetToolBitmapSize(FromDIP(bitmap.GetSize()));
-	m_main_tb->AddTool(item_id, str1,
-		bitmap, wxNullBitmap, wxITEM_DROPDOWN,
-		str2, str3);
-	m_main_tb->SetDropdownMenu(item_id, m_tb_menu_update);
-
+	m_main_tb->AddTool(item_id, str1, bitmap, str3);
+	m_main_tb->SetToolDropDown(item_id, true);
+	m_main_tb->SetCustomOverflowItems(prepend_items, append_items);
 	m_main_tb->Realize();
+
+	//create the menu for UI management
+	m_tb_menu_ui = new wxMenu;
+	m = m_tb_menu_ui->Append(ID_UIProjView, UITEXT_PROJECT,
+		"Show/hide the project panel", wxITEM_CHECK);
+	m->SetBitmap(wxGetBitmapFromMemory(disp_project));
+	m = m_tb_menu_ui->Append(ID_UIMovieView, UITEXT_MAKEMOVIE,
+		"Show/hide the movie making panel", wxITEM_CHECK);
+	m->SetBitmap(wxGetBitmapFromMemory(disp_makemovie));
+	m = m_tb_menu_ui->Append(ID_UIAdjView, UITEXT_ADJUST,
+		"Show/hide the output adjustment panel", wxITEM_CHECK);
+	m->SetBitmap(wxGetBitmapFromMemory(disp_adjust));
+	m = m_tb_menu_ui->Append(ID_UIClipView, UITEXT_CLIPPING,
+		"Show/hide the clipping plane control panel", wxITEM_CHECK);
+	m->SetBitmap(wxGetBitmapFromMemory(disp_clipping));
+	m = m_tb_menu_ui->Append(ID_UIPropView, UITEXT_PROPERTIES,
+		"Show/hide the property panel", wxITEM_CHECK);
+	m->SetBitmap(wxGetBitmapFromMemory(disp_properties));
+	//check all the items
+	m_tb_menu_ui->Check(ID_UIProjView, true);
+	m_tb_menu_ui->Check(ID_UIMovieView, true);
+	m_tb_menu_ui->Check(ID_UIAdjView, true);
+	m_tb_menu_ui->Check(ID_UIClipView, true);
+	m_tb_menu_ui->Check(ID_UIPropView, true);
+	//create the menu for edit/convert
+	m_tb_menu_edit = new wxMenu;
+	m = m_tb_menu_edit->Append(ID_PaintTool, "Paint Brush...",
+		"Use the paint brush to select regions of interest in 3D");
+	m->SetBitmap(wxGetBitmapFromMemory(icon_paint_brush_mini));
+	m = m_tb_menu_edit->Append(ID_Measure, "Measurement...",
+		"Make measurements with the ruler tools");
+	m->SetBitmap(wxGetBitmapFromMemory(icon_measurement_mini));
+	m = m_tb_menu_edit->Append(ID_Component, "Component Analyzer...",
+		"Segment structures into components and perform analysis");
+	m->SetBitmap(wxGetBitmapFromMemory(icon_components_mini));
+	m = m_tb_menu_edit->Append(ID_Trace, "Tracking...",
+		"Track the movements of structures");
+	m->SetBitmap(wxGetBitmapFromMemory(icon_tracking_mini));
+	m = m_tb_menu_edit->Append(ID_Calculations, "Calculations...",
+		"Calculate a new volume channels from existing channels");
+	m->SetBitmap(wxGetBitmapFromMemory(icon_calculations_mini));
+	m = m_tb_menu_edit->Append(ID_NoiseCancelling, "Noise Reduction...",
+		"Remove noise signals from a volume channel");
+	m->SetBitmap(wxGetBitmapFromMemory(icon_noise_reduc_mini));
+	m = m_tb_menu_edit->Append(ID_Counting, "Volume Size...",
+		"Calculate the size of a volume channel");
+	m->SetBitmap(wxGetBitmapFromMemory(icon_volume_size_mini));
+	m = m_tb_menu_edit->Append(ID_Colocalization, "Colocalization...",
+		"Analyze the colocalized areas among channels");
+	m->SetBitmap(wxGetBitmapFromMemory(icon_colocalization_mini));
+	m = m_tb_menu_edit->Append(ID_Convert, "Convert...",
+		"Conver a volume channel to a mesh object");
+	m->SetBitmap(wxGetBitmapFromMemory(icon_convert_mini));
+	m = m_tb_menu_edit->Append(ID_Ocl, "OpenCL Kernel Editor...",
+		"Edit and apply kernel filters using OpenCL");
+	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
+	m = m_tb_menu_edit->Append(ID_MachineLearning, "Machine Learning Manager...",
+		"Manage machine-learning libraries for various functions");
+	m->SetBitmap(wxGetBitmapFromMemory(icon_machine_learning_mini));
+	//right-side items
+	m_tb_menu_update = new wxMenu;
+	m = m_tb_menu_update->Append(ID_CheckUpdates, "Check Updates...",
+		"Check if a new version of FluoRender is available");
+	m->SetBitmap(wxGetBitmapFromMemory(icon_check_updates_mini));
+	m = m_tb_menu_update->Append(ID_Youtube, "Video Tutorials...",
+		"Watch FluoRender tutorial videos on YouTube");
+	m->SetBitmap(wxGetBitmapFromMemory(icon_youtube_mini));
+	m = m_tb_menu_update->Append(ID_Twitter, "Twitter...",
+		"Follow FluoRender on Twitter");
+	m->SetBitmap(wxGetBitmapFromMemory(icon_twitter_mini));
+	m = m_tb_menu_update->Append(ID_Info, "About...",
+		"Information about FluoRender");
+	m->SetBitmap(wxGetBitmapFromMemory(icon_about_mini));
 
 	//create render view
 	RenderViewPanel *vrv = new RenderViewPanel(this);
@@ -540,29 +549,22 @@ MainFrame::MainFrame(
 	wxSize tb_size(w * std::round(dpi_sf), 46 * std::round(dpi_sf));
 	//Add to the manager
 	m_aui_mgr.AddPane(m_main_tb, wxAuiPaneInfo().
-		Name("m_main_tb").Caption("Toolbar").CaptionVisible(false).
-		BestSize(tb_size).
-		Top().CloseButton(false).Layer(4));
+		Name("m_main_tb").Caption("Toolbar").ToolbarPane().Top().Row(1).Resizable());
 	m_aui_mgr.AddPane(m_proj_panel, wxAuiPaneInfo().
 		Name("m_proj_panel").Caption(UITEXT_PROJECT).
-		Left().CloseButton(true).BestSize(panel_size).
-		FloatingSize(FromDIP(wxSize(400, 600))).Layer(3));
+		Left().CloseButton(true).Layer(3));
 	m_aui_mgr.AddPane(m_movie_panel, wxAuiPaneInfo().
 		Name("m_movie_panel").Caption(UITEXT_MAKEMOVIE).
-		Left().CloseButton(true).BestSize(panel_size).
-		FloatingSize(FromDIP(wxSize(400, 600))).Layer(3));
+		Left().CloseButton(true).Layer(3));
 	m_aui_mgr.AddPane(m_prop_panel, wxAuiPaneInfo().
 		Name("m_prop_panel").Caption(UITEXT_PROPERTIES).
-		Bottom().CloseButton(true).MinSize(FromDIP(wxSize(500, 160))).
-		FloatingSize(FromDIP(wxSize(1100, 160))).Layer(2));
+		Bottom().CloseButton(true).Layer(2));
 	m_aui_mgr.AddPane(m_adjust_view, wxAuiPaneInfo().
 		Name("m_adjust_view").Caption(UITEXT_ADJUST).
-		Left().CloseButton(true).MinSize(FromDIP(wxSize(110, 700))).
-		FloatingSize(FromDIP(wxSize(110, 700))).Layer(1));
+		Left().CloseButton(true).Layer(1));
 	m_aui_mgr.AddPane(m_clip_view, wxAuiPaneInfo().
 		Name("m_clip_view").Caption(UITEXT_CLIPPING).
-		Right().CloseButton(true).MinSize(FromDIP(wxSize(130, 700))).
-		FloatingSize(FromDIP(wxSize(130, 700))).Layer(1));
+		Right().CloseButton(true).Layer(1));
 	m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
 		Name(vrv->GetName()).Caption(vrv->GetName()).
 		Dockable(true).CloseButton(false).
@@ -673,8 +675,6 @@ MainFrame::MainFrame(
 
 	SetMinSize(FromDIP(wxSize(800,600)));
 
-	m_aui_mgr.Update();
-	
 	if (!windowed)
 		Maximize();
 
@@ -684,30 +684,12 @@ MainFrame::MainFrame(
 		ToggleAllTools(false);
 	}
 
-	//set view default settings
-	//if (m_adjust_view && vrv)
-	//{
-		//Color gamma, brightness, hdr;
-		//bool sync_r, sync_g, sync_b;
-		//m_adjust_view->GetDefaults(gamma, brightness, hdr,
-		//	sync_r, sync_g, sync_b);
-		//vrv->m_glview->SetGamma(gamma);
-		//vrv->m_glview->SetBrightness(brightness);
-		//vrv->m_glview->SetHdr(hdr);
-		//for (int i : { 0, 1, 2})
-		//vrv->m_glview->SetSyncR(true);
-		//vrv->m_glview->SetSyncG(true);
-		//vrv->m_glview->SetSyncB(true);
-	//}
-
 	//drop target
 	SetDropTarget(new DnDFile(this));
 
-#if wxUSE_STATUSBAR
 	CreateStatusBar(2);
 	GetStatusBar()->SetStatusText(wxString(FLUORENDER_TITLE)+
 		wxString(" started normally."));
-#endif // wxUSE_STATUSBAR
 
 	//main top menu
 	m_top_menu = new wxMenuBar;
@@ -798,18 +780,23 @@ MainFrame::MainFrame(
 	m->SetBitmap(wxGetBitmapFromMemory(icon_show_hide_ui_mini));
 	m_top_window->Append(m);
 	m = new wxMenuItem(m_top_window, ID_UIProjView, wxT("&Project"), wxEmptyString, wxITEM_CHECK);
+	m->SetBitmap(wxGetBitmapFromMemory(disp_project));
 	m_top_window->Append(m);
 	m_top_window->Check(ID_UIProjView, true);
-	m = new wxMenuItem(m_top_window,ID_UIMovieView, wxT("&Export"), wxEmptyString, wxITEM_CHECK);
+	m = new wxMenuItem(m_top_window,ID_UIMovieView, wxT("&Movie Making"), wxEmptyString, wxITEM_CHECK);
+	m->SetBitmap(wxGetBitmapFromMemory(disp_makemovie));
 	m_top_window->Append(m);
 	m_top_window->Check(ID_UIMovieView, true);
 	m = new wxMenuItem(m_top_window,ID_UIAdjView, wxT("&Output Adjustments"), wxEmptyString, wxITEM_CHECK);
+	m->SetBitmap(wxGetBitmapFromMemory(disp_adjust));
 	m_top_window->Append(m);
 	m_top_window->Check(ID_UIAdjView, true);
 	m = new wxMenuItem(m_top_window,ID_UIClipView, wxT("&Clipping Planes"), wxEmptyString, wxITEM_CHECK);
+	m->SetBitmap(wxGetBitmapFromMemory(disp_clipping));
 	m_top_window->Append(m);
 	m_top_window->Check(ID_UIClipView, true);
-	m = new wxMenuItem(m_top_window,ID_UIPropView, wxT("&Properties"), wxEmptyString, wxITEM_CHECK);
+	m = new wxMenuItem(m_top_window,ID_UIPropView, wxT("P&roperties"), wxEmptyString, wxITEM_CHECK);
+	m->SetBitmap(wxGetBitmapFromMemory(disp_properties));
 	m_top_window->Append(m);
 	m_top_window->Check(ID_UIPropView, true);
 	m_top_window->Append(wxID_SEPARATOR);
@@ -852,56 +839,6 @@ MainFrame::MainFrame(
 	m_top_menu->Append(m_top_help,wxT("&Help"));
 	SetMenuBar(m_top_menu);
 
-	//set analyze icon
-	switch (glbin_settings.m_last_tool)
-	{
-	case TOOL_PAINT_BRUSH:
-	default:
-		m_main_tb->SetToolNormalBitmap(ID_LastTool,
-			wxGetBitmapFromMemory(icon_paint_brush));
-		break;
-	case TOOL_MEASUREMENT:
-		m_main_tb->SetToolNormalBitmap(ID_LastTool,
-			wxGetBitmapFromMemory(icon_measurement));
-		break;
-	case TOOL_TRACKING:
-		m_main_tb->SetToolNormalBitmap(ID_LastTool,
-			wxGetBitmapFromMemory(icon_tracking));
-		break;
-	case TOOL_NOISE_REDUCTION:
-		m_main_tb->SetToolNormalBitmap(ID_LastTool,
-			wxGetBitmapFromMemory(icon_noise_reduc));
-		break;
-	case TOOL_VOLUME_SIZE:
-		m_main_tb->SetToolNormalBitmap(ID_LastTool,
-			wxGetBitmapFromMemory(icon_volume_size));
-		break;
-	case TOOL_COLOCALIZATION:
-		m_main_tb->SetToolNormalBitmap(ID_LastTool,
-			wxGetBitmapFromMemory(icon_colocalization));
-		break;
-	case TOOL_CONVERT:
-		m_main_tb->SetToolNormalBitmap(ID_LastTool,
-			wxGetBitmapFromMemory(icon_convert));
-		break;
-	case TOOL_OPENCL:
-		m_main_tb->SetToolNormalBitmap(ID_LastTool,
-			wxGetBitmapFromMemory(icon_opencl));
-		break;
-	case TOOL_COMPONENT:
-		m_main_tb->SetToolNormalBitmap(ID_LastTool,
-			wxGetBitmapFromMemory(icon_components));
-		break;
-	case TOOL_CALCULATIONS:
-		m_main_tb->SetToolNormalBitmap(ID_LastTool,
-			wxGetBitmapFromMemory(icon_calculations));
-		break;
-	case TOOL_MACHINE_LEARNING:
-		m_main_tb->SetToolNormalBitmap(ID_LastTool,
-			wxGetBitmapFromMemory(icon_machine_learning));
-		break;
-	}
-
 	if (fullscreen)
 	{
 		vrv->SetFullScreen();
@@ -935,6 +872,8 @@ MainFrame::MainFrame(
 	glbin_moviemaker.SetView(vrv->m_glview);
 	glbin_mov_def.Apply(&glbin_moviemaker);
 	UpdateProps({});
+
+	m_aui_mgr.Update();
 }
 
 MainFrame::~MainFrame()
@@ -2190,7 +2129,6 @@ void MainFrame::ShowPropPage(int type,
 		page->Hide();
 		m_prop_panel->RemovePage(page_no);
 	}
-
 }
 
 bool MainFrame::update_props(int excl_self, PropPanel* p1, PropPanel* p2)
@@ -3383,7 +3321,7 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 	fconfig.Write("ca_max", m_brush_tool_dlg->GetDftCAMax());
 	fconfig.Write("ca_thresh", m_brush_tool_dlg->GetDftCAThresh());
 	fconfig.Write("nr_thresh", m_brush_tool_dlg->GetDftNRThresh());
-	fconfig.Write("nr_size", m_brush_tool_dlg->GetDftNRSize());*/
+	fconfig.Write("nr_size", m_brush_tool_dlg->GetDftNRSize());
 	//ui layout
 	fconfig.SetPath("/ui_layout");
 	fconfig.Write("ui_main_tb", m_main_tb->IsShown());
@@ -3403,7 +3341,7 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 	fconfig.Write("ui_clip_view_float", m_aui_mgr.GetPane(m_clip_view).IsOk()?
 		m_aui_mgr.GetPane(m_clip_view).IsFloating():false);
 	fconfig.Write("ui_prop_view_float", m_aui_mgr.GetPane(m_prop_panel).IsOk()?
-		m_aui_mgr.GetPane(m_prop_panel).IsFloating():false);
+		m_aui_mgr.GetPane(m_prop_panel).IsFloating():false);*/
 	//interpolator
 	fconfig.SetPath("/interpolator");
 	fconfig.Write("max_id", Interpolator::m_id);
@@ -4688,7 +4626,7 @@ void MainFrame::OpenProject(wxString& filename)
 			m_brush_tool_dlg->SetDftNRSize(dval);
 			m_noise_cancelling_dlg->SetDftSize(dval);
 		}
-	}*/
+	}
 
 	//ui layout
 	if (fconfig.Exists("/ui_layout"))
@@ -4828,7 +4766,7 @@ void MainFrame::OpenProject(wxString& filename)
 		}
 
 		m_aui_mgr.Update();
-	}
+	}*/
 
 	//interpolator
 	if (fconfig.Exists("/interpolator"))
@@ -5024,12 +4962,6 @@ void MainFrame::OnRedo(wxCommandEvent& event)
 //tools
 void MainFrame::OnLastTool(wxCommandEvent& event)
 {
-	if (!m_setting_dlg)
-	{
-		ShowPaintTool();
-		return;
-	}
-
 	unsigned int tool = glbin_settings.m_last_tool;
 	switch (tool)
 	{
@@ -5132,7 +5064,7 @@ void MainFrame::ShowPaintTool()
 	m_aui_mgr.GetPane(m_brush_tool_dlg).Float();
 	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_PAINT_BRUSH;
-	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_paint_brush));
 }
 
@@ -5142,7 +5074,7 @@ void MainFrame::ShowMeasureDlg()
 	m_aui_mgr.GetPane(m_measure_dlg).Float();
 	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_MEASUREMENT;
-	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_measurement));
 }
 
@@ -5152,7 +5084,7 @@ void MainFrame::ShowTraceDlg()
 	m_aui_mgr.GetPane(m_trace_dlg).Float();
 	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_TRACKING;
-	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_tracking));
 }
 
@@ -5162,7 +5094,7 @@ void MainFrame::ShowNoiseCancellingDlg()
 	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Float();
 	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_NOISE_REDUCTION;
-	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_noise_reduc));
 }
 
@@ -5172,7 +5104,7 @@ void MainFrame::ShowCountingDlg()
 	m_aui_mgr.GetPane(m_counting_dlg).Float();
 	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_VOLUME_SIZE;
-	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_volume_size));
 }
 
@@ -5182,7 +5114,7 @@ void MainFrame::ShowColocalizationDlg()
 	m_aui_mgr.GetPane(m_colocalization_dlg).Float();
 	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_COLOCALIZATION;
-	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_colocalization));
 }
 
@@ -5192,7 +5124,7 @@ void MainFrame::ShowConvertDlg()
 	m_aui_mgr.GetPane(m_convert_dlg).Float();
 	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_CONVERT;
-	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_convert));
 }
 
@@ -5202,7 +5134,7 @@ void MainFrame::ShowOclDlg()
 	m_aui_mgr.GetPane(m_ocl_dlg).Float();
 	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_OPENCL;
-	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_opencl));
 }
 
@@ -5212,7 +5144,7 @@ void MainFrame::ShowComponentDlg()
 	m_aui_mgr.GetPane(m_component_dlg).Float();
 	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_COMPONENT;
-	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_components));
 }
 
@@ -5222,7 +5154,7 @@ void MainFrame::ShowCalculationDlg()
 	m_aui_mgr.GetPane(m_calculation_dlg).Float();
 	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_CALCULATIONS;
-	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_calculations));
 }
 
@@ -5232,7 +5164,7 @@ void MainFrame::ShowMachineLearningDlg()
 	m_aui_mgr.GetPane(m_machine_learning_dlg).Float();
 	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_MACHINE_LEARNING;
-	m_main_tb->SetToolNormalBitmap(ID_LastTool,
+	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_machine_learning));
 }
 
@@ -5349,7 +5281,7 @@ void MainFrame::OnShowHideView(wxCommandEvent &event)
 		}
 		else
 		{
-			m_aui_mgr.GetPane(m_list_panel).Show();
+			m_aui_mgr.GetPane(m_proj_panel).Show();
 			m_tb_menu_ui->Check(ID_UIProjView, true);
 		}
 		break;
@@ -5408,6 +5340,46 @@ void MainFrame::OnShowHideView(wxCommandEvent &event)
 	}
 
 	m_aui_mgr.Update();
+}
+
+//toolbar menus
+void MainFrame::OnToolbarMenu(wxAuiToolBarEvent& event)
+{
+	if (event.IsDropDownClicked())
+	{
+		wxAuiToolBar* tb = static_cast<wxAuiToolBar*>(event.GetEventObject());
+
+		tb->SetToolSticky(event.GetId(), true);
+
+		// line up our menu with the button
+		wxRect rect = tb->GetToolRect(event.GetId());
+		wxPoint pt = tb->ClientToScreen(rect.GetBottomLeft());
+		pt = ScreenToClient(pt);
+
+		int id = event.GetId();
+		wxMenu* menu = 0;
+		switch (id)
+		{
+		case ID_ShowHideUI:
+			menu = m_tb_menu_ui;
+			break;
+		case ID_LastTool:
+			menu = m_tb_menu_edit;
+			break;
+		case ID_CheckUpdates:
+		case ID_Youtube:
+		case ID_Twitter:
+		case ID_Info:
+			menu = m_tb_menu_update;
+			break;
+		}
+		if (menu)
+			PopupMenu(menu, pt);
+
+		// make sure the button is "un-stuck"
+		tb->SetToolSticky(event.GetId(), false);
+	}
+	event.Skip();
 }
 
 //panes

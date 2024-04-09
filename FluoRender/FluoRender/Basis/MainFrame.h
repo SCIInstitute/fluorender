@@ -34,13 +34,14 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/menu.h>
 #include <wx/aui/aui.h>
 #include <wx/aui/auibook.h>
+#include <wx/aui/auibar.h>
 #include <vector>
 
 using namespace std;
 
 #define VERSION_CONTACT "http://www.sci.utah.edu/software/fluorender.html"
 #define VERSION_AUTHORS "YONG WAN\t\tHIDEO OTSUNA\nCHUCK HANSEN\tCHI-BIN CHIEN\n"\
-						"BRIG BAGLEY\t\tTAKASHI KAWASE\nKEI ITO\t\tREMALDEEP SINGH"
+						"BRIG BAGLEY\tTAKASHI KAWASE\nKEI ITO\t\tREMALDEEP SINGH"
 #define VERSION_UPDATES "http://www.sci.utah.edu/releases/fluorender_v" \
 				   VERSION_MAJOR_TAG \
 				   "." \
@@ -73,7 +74,7 @@ using namespace std;
 #define UITEXT_PROJECT		"Project"
 #define UITEXT_DATAVIEW		"Datasets"
 #define UITEXT_TREEVIEW		"Workspace"
-#define UITEXT_MAKEMOVIE	"Movie Making & Scripts"
+#define UITEXT_MAKEMOVIE	"Movie Making"
 #define UITEXT_ADJUST		"Output Adjustments"
 #define UITEXT_CLIPPING		"Clipping Planes"
 #define UITEXT_PROPERTIES	"Properties"
@@ -157,6 +158,7 @@ class MainFrame: public wxFrame
 		ID_UIPropView,
 		ID_ViewOrganize,
 		//right aligned items
+		ID_RightTool,
 		ID_CheckUpdates,
 		ID_Youtube,
 		ID_Facebook,
@@ -325,7 +327,7 @@ private:
 	wxMenu* m_tb_menu_ui;
 	wxMenu* m_tb_menu_edit;
 	wxMenu* m_tb_menu_update;
-	wxToolBar* m_main_tb;
+	wxAuiToolBar* m_main_tb;
 	//main top menu
 	wxMenuBar* m_top_menu;
 	wxMenu* m_top_file;
@@ -415,6 +417,8 @@ private:
 	void OnShowHideUI(wxCommandEvent& event);
 	void OnShowHideToolbar(wxCommandEvent& event);
 	void OnShowHideView(wxCommandEvent &event);
+	//toolbar menus
+	void OnToolbarMenu(wxAuiToolBarEvent& event);
 
 	//panes
 	void OnPaneClose(wxAuiManagerEvent& event);
