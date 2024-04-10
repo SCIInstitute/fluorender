@@ -75,8 +75,6 @@ void OutAdjDefault::Read(wxFileConfig& f)
 	f.Read("hdr_r", &m_hdr_r, 0.0);
 	f.Read("hdr_g", &m_hdr_g, 0.0);
 	f.Read("hdr_b", &m_hdr_b, 0.0);
-
-	//f.Read("layout", &m_layout);
 }
 
 void OutAdjDefault::Save(wxFileConfig& f)
@@ -100,8 +98,6 @@ void OutAdjDefault::Save(wxFileConfig& f)
 	f.Write("hdr_r", m_hdr_r);
 	f.Write("hdr_g", m_hdr_g);
 	f.Write("hdr_b", m_hdr_b);
-
-	//f.Write("layout", m_layout);
 }
 
 void OutAdjDefault::Set(RenderCanvas* view)

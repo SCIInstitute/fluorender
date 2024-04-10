@@ -74,8 +74,9 @@ class SettingDlg : public wxPanel
 		ID_EyeDistSldr,
 		ID_EyeDistText,
 		//display id
-		ID_DispIdSldr,
-		ID_DispIdText,
+		ID_DispIdCombo,
+		//color depth
+		ID_ColorDepthCombo,
 		//override vox
 		ID_OverrideVoxChk,
 		//component size
@@ -178,8 +179,9 @@ private:
 	wxSingleSlider *m_eye_dist_sldr;
 	wxTextCtrl *m_eye_dist_text;
 	//display
-	wxSingleSlider* m_disp_id_sldr;
-	wxTextCtrl* m_disp_id_text;
+	wxComboBox* m_disp_id_comb;
+	//color depth
+	wxComboBox* m_color_depth_comb;
 	//override vox
 	wxCheckBox *m_override_vox_chk;
 	//wavelength to color
@@ -286,8 +288,9 @@ private:
 	void OnEyeDistChange(wxScrollEvent &event);
 	void OnEyeDistEdit(wxCommandEvent &event);
 	//display id
-	void OnDispIdChange(wxScrollEvent& event);
-	void OnDispIdEdit(wxCommandEvent& event);
+	void OnDispIdComb(wxCommandEvent& event);
+	//color depth
+	void OnColorDepthComb(wxCommandEvent& event);
 	//override vox
 	void OnOverrideVoxCheck(wxCommandEvent &event);
 	//wavelength color

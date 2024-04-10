@@ -75,6 +75,7 @@ public:
 
 public:
 	//default values
+	double m_dpi_scale_factor;//dpi scale factor
 	wxString m_layout;
 	bool m_prj_panel_split;	//split the project panel
 	bool m_clip_panel_split;//split the clip plane panel
@@ -138,6 +139,7 @@ public:
 	double m_eye_dist;
 	bool m_stay_top;		//full screen
 	bool m_show_cursor;
+	int m_color_depth;		//for hdr and 10-bit displays
 
 	wxString m_font_file;	//font lib file in the Fonts folder
 	int m_text_size;		//text size in viewport

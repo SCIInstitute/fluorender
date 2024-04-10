@@ -214,6 +214,7 @@ MainFrame::MainFrame(
 	wxAuiToolBarItemArray append_items;
 	m_main_tb = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW | wxAUI_TB_HORIZONTAL);
+	m_main_tb->SetName("Toolbar");
 	//add tools
 	bitmap = wxGetBitmapFromMemory(icon_open_volume);
 	m_main_tb->AddTool(ID_OpenVolume, "Open Volume", bitmap,
@@ -545,8 +546,6 @@ MainFrame::MainFrame(
 	else
 		m_tester->Show(false);
 
-	double dpi_sf = GetDPIScaleFactor() - 0.1;
-	wxSize tb_size(w * std::round(dpi_sf), 46 * std::round(dpi_sf));
 	//Add to the manager
 	m_aui_mgr.AddPane(m_main_tb, wxAuiPaneInfo().
 		Name("m_main_tb").Caption("Toolbar").ToolbarPane().Top().Row(1).Resizable());
@@ -699,144 +698,138 @@ MainFrame::MainFrame(
 	m_top_help = new wxMenu;
 
 	//file options
-	m = new wxMenuItem(m_top_file, ID_NewProject, wxT("&New Project"));
+	m = m_top_file->Append(ID_NewProject, "&New Project",
+		"Clean the workspace by creating a new project");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_new_project_mini));
-	m_top_file->Append(m);
-
-	m = new wxMenuItem(m_top_file,ID_OpenVolume, wxT("Open &Volume"));
+	m = m_top_file->Append(ID_OpenVolume, "Open &Volume",
+		"Open a volume data set and add it to the render view");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_volume_mini));
-	m_top_file->Append(m);
-
-	if (JVMInitializer::getInstance(glbin_settings.GetJvmArgs()) != nullptr) {
-		m = new wxMenuItem(m_top_file, ID_ImportVolume, wxT("Import &Volume"));
+	if (JVMInitializer::getInstance(glbin_settings.GetJvmArgs()) != nullptr)
+	{
+		m = m_top_file->Append(ID_ImportVolume, "&Import Volume",
+			"Import a volume data set using ImageJ");
 		m->SetBitmap(wxGetBitmapFromMemory(icon_import_mini));
-		m_top_file->Append(m);
 	}	
-
-	m = new wxMenuItem(m_top_file,ID_OpenMesh, wxT("Open &Mesh"));
+	m = m_top_file->Append(ID_OpenMesh, "Open &Mesh",
+		"Open a mesh data set and add it the render view");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_mesh_mini));
-	m_top_file->Append(m);
-
-	m = new wxMenuItem(m_top_file,ID_OpenProject, wxT("Open &Project"));
+	m = m_top_file->Append(ID_OpenProject, "Open &Project",
+		"Open a previously saved project");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_project_mini));
-	m_top_file->Append(m);
-
-	m = new wxMenuItem(m_top_file,ID_SaveProject, wxT("&Save Project"));
+	m = m_top_file->Append(ID_SaveProject, "&Save Project",
+		"Save the workspace to current project file");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_save_project_mini));
-	m_top_file->Append(m);
-
-	m = new wxMenuItem(m_top_file, ID_SaveAsProject, wxT("Save &As Project"));
+	m = m_top_file->Append(ID_SaveAsProject, "Save &As Project",
+		"Save the workspace in a new project file");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_save_project_mini));
-	m_top_file->Append(m);
-
-	m_top_file->Append(wxID_SEPARATOR);
-	wxMenuItem *quit = new wxMenuItem(m_top_file, wxID_EXIT);
-	quit->SetBitmap(wxArtProvider::GetBitmap(wxART_QUIT));
-	m_top_file->Append(quit);
+	m_top_file->AppendSeparator();
+	m = m_top_file->Append(wxID_EXIT, "E&xit",
+		"Shut down FluoRender");
+	m->SetBitmap(wxGetBitmapFromMemory(exit));
 	//tool options
-	m = new wxMenuItem(m_top_tools,ID_PaintTool, wxT("&Paint Brush..."));
+	m = m_top_tools->Append(ID_PaintTool, "&Paint Brush...",
+		"Use the paint brush to select structures of interest in 3D");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_paint_brush_mini));
-	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_Measure, wxT("&Measurement..."));
+	m = m_top_tools->Append(ID_Measure, "&Measurement...",
+		"Use the ruler tools to make measurements and analysis in 3D");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_measurement_mini));
-	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools, ID_Component, wxT("Component &Analyzer..."));
+	m = m_top_tools->Append(ID_Component, "Component &Analyzer...",
+		"Segment structures into components and make analysis");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_components_mini));
-	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_Trace, wxT("&Tracking..."));
+	m = m_top_tools->Append(ID_Trace, "&Tracking...",
+		"Track the movements of segmented structures");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_tracking_mini));
-	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools, ID_Calculations, wxT("Ca&lculations..."));
+	m = m_top_tools->Append( ID_Calculations, "Ca&lculations...",
+		"Compute a new volume channel from existing channels");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_calculations_mini));
-	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_NoiseCancelling, wxT("Noise &Reduction..."));
+	m = m_top_tools->Append(ID_NoiseCancelling, "Noise &Reduction...",
+		"Remove noisy signals");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_noise_reduc_mini));
-	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_Counting, wxT("&Volume Size..."));
+	m = m_top_tools->Append(ID_Counting, "&Volume Size...",
+		"Compute the size of a volume channel");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_volume_size_mini));
-	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_Colocalization, wxT("&Colocalization..."));
+	m = m_top_tools->Append(ID_Colocalization, "&Colocalization...",
+		"Make analysis on the overlapped regions among channels");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_colocalization_mini));
-	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_Convert, wxT("Co&nvert..."));
+	m = m_top_tools->Append(ID_Convert, "Co&nvert...",
+		"Conver a volume channel to a mesh object");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_convert_mini));
-	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools, ID_Ocl, wxT("&OpenCL Kernel Editor..."));
+	m = m_top_tools->Append(ID_Ocl, "&OpenCL Kernel Editor...",
+		"Edit and apply filtering with OpenCL kernels");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
-	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools, ID_MachineLearning, wxT("M&achine Learning Manager..."));
+	m = m_top_tools->Append(ID_MachineLearning, "M&achine Learning Manager...",
+		"Manage machine-learning models and training");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_machine_learning_mini));
-	m_top_tools->Append(m);
 	m_top_tools->Append(wxID_SEPARATOR);
-	m = new wxMenuItem(m_top_tools,ID_Settings, wxT("&Settings..."));
+	m = m_top_tools->Append(ID_Settings, "Con&figurations...",
+		"Manage settings of FluoRender");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_settings_mini));
-	m_top_tools->Append(m);
 	//window option
-	m = new wxMenuItem(m_top_window,ID_ShowHideToolbar, wxT("Show/Hide &Toolbar"), wxEmptyString, wxITEM_CHECK);
-	m_top_window->Append(m);
+	m = m_top_window->Append(ID_ShowHideToolbar, "Show/Hide &Toolbar",
+		"The commonly used main menu functions can be accessed from the toolbar", wxITEM_CHECK);
+	m->SetBitmap(wxGetBitmapFromMemory(disp_toolbar));
 	m_top_window->Check(ID_ShowHideToolbar, true);
 	m_top_window->Append(wxID_SEPARATOR);
-	m = new wxMenuItem(m_top_window,ID_ShowHideUI, wxT("Show/Hide &UI"));
+	m = m_top_window->Append(ID_ShowHideUI, "Show/Hide &UI",
+		"Show or hide all panels around the render view");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_show_hide_ui_mini));
-	m_top_window->Append(m);
-	m = new wxMenuItem(m_top_window, ID_UIProjView, wxT("&Project"), wxEmptyString, wxITEM_CHECK);
+	m = m_top_window->Append(ID_UIProjView, "&Project",
+		"Shoe or hide the project panel", wxITEM_CHECK);
 	m->SetBitmap(wxGetBitmapFromMemory(disp_project));
-	m_top_window->Append(m);
 	m_top_window->Check(ID_UIProjView, true);
-	m = new wxMenuItem(m_top_window,ID_UIMovieView, wxT("&Movie Making"), wxEmptyString, wxITEM_CHECK);
+	m = m_top_window->Append(ID_UIMovieView, "&Movie Making",
+		"Show or hide the movie making panel", wxITEM_CHECK);
 	m->SetBitmap(wxGetBitmapFromMemory(disp_makemovie));
-	m_top_window->Append(m);
 	m_top_window->Check(ID_UIMovieView, true);
-	m = new wxMenuItem(m_top_window,ID_UIAdjView, wxT("&Output Adjustments"), wxEmptyString, wxITEM_CHECK);
+	m = m_top_window->Append(ID_UIAdjView, "&Output Adjustments",
+		"Show or hide the output adjustment panel", wxITEM_CHECK);
 	m->SetBitmap(wxGetBitmapFromMemory(disp_adjust));
-	m_top_window->Append(m);
 	m_top_window->Check(ID_UIAdjView, true);
-	m = new wxMenuItem(m_top_window,ID_UIClipView, wxT("&Clipping Planes"), wxEmptyString, wxITEM_CHECK);
+	m = m_top_window->Append(ID_UIClipView, "&Clipping Planes",
+		"Show or hide the clipping plane panel", wxITEM_CHECK);
 	m->SetBitmap(wxGetBitmapFromMemory(disp_clipping));
-	m_top_window->Append(m);
 	m_top_window->Check(ID_UIClipView, true);
-	m = new wxMenuItem(m_top_window,ID_UIPropView, wxT("P&roperties"), wxEmptyString, wxITEM_CHECK);
+	m = m_top_window->Append(ID_UIPropView,"P&roperties",
+		"Show or hide the property panel", wxITEM_CHECK);
 	m->SetBitmap(wxGetBitmapFromMemory(disp_properties));
-	m_top_window->Append(m);
 	m_top_window->Check(ID_UIPropView, true);
 	m_top_window->Append(wxID_SEPARATOR);
-	m = new wxMenuItem(m_top_window, ID_Layout, wxT("Layout"));
-	m_top_window->Append(m);
-	m = new wxMenuItem(m_top_window, ID_ViewNew, wxT("&New View"));
+	m = m_top_window->Append(ID_Layout, "&Layout",
+		"Resize the render view panels");
+	m->SetBitmap(wxGetBitmapFromMemory(layout));
+	m = m_top_window->Append(ID_ViewNew, "&New View",
+		"Create a new render view panel");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_new_view_mini));
-	m_top_window->Append(m);
-#ifndef _DARWIN
-	m = new wxMenuItem(m_top_window, ID_FullScreen, wxT("&Full Screen"));
+	m = m_top_window->Append(ID_FullScreen, "&Full Screen",
+		"Enlarge the window to fill the screen");
 	m->SetBitmap(wxGetBitmapFromMemory(full_screen_menu));
-	m_top_window->Append(m);
-#endif
 	//help menu
-	m = new wxMenuItem(m_top_help,ID_CheckUpdates, wxT("&Check for Updates"));
+	m = m_top_help->Append(ID_CheckUpdates, "&Check for Updates",
+		"Check if there is a later version of FluoRender available for download");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_check_updates_mini));
-	m_top_help->Append(m);
-	m = new wxMenuItem(m_top_help, ID_Youtube, wxT("&Video Tutorials"));
+	m = m_top_help->Append( ID_Youtube, "&Video Tutorials",
+		"Watch FluoRender tutorials on YouTube");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_youtube_mini));
-	m_top_help->Append(m);
-	m = new wxMenuItem(m_top_help,ID_Twitter, wxT("&Twitter"));
+	m = m_top_help->Append(ID_Twitter, "&Twitter",
+		"Check information on Twitter");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_twitter_mini));
-	m_top_help->Append(m);
-	m = new wxMenuItem(m_top_help,ID_Facebook, wxT("&Facebook"));
+	m = m_top_help->Append(ID_Facebook, "&Facebook",
+		"Check information on facebook");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_facebook_mini));
-	m_top_help->Append(m);
-	m = new wxMenuItem(m_top_help,ID_Manual, wxT("&Online Manual"));
+	m = m_top_help->Append(ID_Manual, "&Manual PDF",
+		"Download the PDF of FluoRender operation manual");
 	m->SetBitmap(wxGetBitmapFromMemory(web_pdf_mini));
-	m_top_help->Append(m);
-	m = new wxMenuItem(m_top_help,ID_Tutorial, wxT("Online T&utorials"));
+	m = m_top_help->Append(ID_Tutorial, "T&utorials PDF",
+		"Download the PDF of FluoRender tutorials");
 	m->SetBitmap(wxGetBitmapFromMemory(web_pdf_mini));
-	m_top_help->Append(m);
-	m = new wxMenuItem(m_top_help,ID_Info, wxT("&About FluoRender..."));
+	m = m_top_help->Append(ID_Info, "&About FluoRender...",
+		"Developer team information of FluoRender");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_about_mini));
-	m_top_help->Append(m);
 	//add the menus
-	m_top_menu->Append(m_top_file,wxT("&File"));
-	m_top_menu->Append(m_top_tools,wxT("&Tools"));
-	m_top_menu->Append(m_top_window,wxT("&Windows"));
-	m_top_menu->Append(m_top_help,wxT("&Help"));
+	m_top_menu->Append(m_top_file,"&File");
+	m_top_menu->Append(m_top_tools,"&Tools");
+	m_top_menu->Append(m_top_window,"&Windows");
+	m_top_menu->Append(m_top_help,"&Help");
 	SetMenuBar(m_top_menu);
 
 	if (fullscreen)
@@ -863,7 +856,9 @@ MainFrame::MainFrame(
 	wxAcceleratorTable accel(5, entries);
 	SetAcceleratorTable(accel);
 
-	m_aui_mgr.LoadPerspective(glbin_settings.m_layout);
+	if (glbin_settings.m_dpi_scale_factor ==
+		GetDPIScaleFactor())
+		m_aui_mgr.LoadPerspective(glbin_settings.m_layout);
 	if (glbin_settings.m_prj_panel_split)
 		m_proj_panel->Split(1, wxBOTTOM);
 	m_adjust_view->LoadPerspective();
@@ -901,6 +896,7 @@ MainFrame::~MainFrame()
 
 	glbin_comp_def.Set(&glbin_comp_generator);
 	glbin_mov_def.Set(&glbin_moviemaker);
+	glbin_settings.m_dpi_scale_factor = GetDPIScaleFactor();
 	glbin_settings.m_layout = m_aui_mgr.SavePerspective();
 	glbin_settings.m_prj_panel_split = m_proj_panel->IsSplit();
 	m_adjust_view->SavePerspective();
@@ -5388,16 +5384,33 @@ void MainFrame::OnPaneClose(wxAuiManagerEvent& event)
 	wxWindow* wnd = event.pane->window;
 	wxString name = wnd->GetName();
 
-	if (name == "ProjectPanel")
+	if (name == "Toolbar")
+		m_top_window->Check(ID_ShowHideToolbar, false);
+	else if (name == "ProjectPanel")
+	{
 		m_tb_menu_ui->Check(ID_UIProjView, false);
+		m_top_window->Check(ID_UIProjView, false);
+	}
 	else if (name == "MoviePanel")
+	{
 		m_tb_menu_ui->Check(ID_UIMovieView, false);
+		m_top_window->Check(ID_UIMovieView, false);
+	}
 	else if (name == "PropPanel")
+	{
 		m_tb_menu_ui->Check(ID_UIPropView, false);
+		m_top_window->Check(ID_UIPropView, false);
+	}
 	else if (name == "OutputAdjPanel")
+	{
 		m_tb_menu_ui->Check(ID_UIAdjView, false);
+		m_top_window->Check(ID_UIAdjView, false);
+	}
 	else if (name == "ClipPlanePanel")
+	{
 		m_tb_menu_ui->Check(ID_UIClipView, false);
+		m_top_window->Check(ID_UIClipView, false);
+	}
 }
 
 //prop pages

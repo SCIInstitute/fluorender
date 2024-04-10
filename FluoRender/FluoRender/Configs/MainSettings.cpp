@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 
 MainSettings::MainSettings()
 {
+	m_dpi_scale_factor = 0.0;
 	m_prj_panel_split = false;
 	m_clip_panel_split = false;
 
@@ -98,6 +99,7 @@ MainSettings::MainSettings()
 	m_eye_dist = 20.0;
 	m_stay_top = false;
 	m_show_cursor = true;
+	m_color_depth = 0;
 
 	m_font_file = "";
 	m_text_size = 12;
@@ -227,6 +229,7 @@ void MainSettings::Read()
 	if (fconfig.Exists("/ui"))
 	{
 		fconfig.SetPath("/ui");
+		fconfig.Read("dpi scale factor", &m_dpi_scale_factor, 0.0);
 		fconfig.Read("layout", &m_layout);
 		fconfig.Read("prj panel split", &m_prj_panel_split, false);
 		fconfig.Read("clip panel split", &m_clip_panel_split, false);
@@ -282,6 +285,7 @@ void MainSettings::Read()
 		fconfig.Read("eye dist", &m_eye_dist, 20.0);
 		fconfig.Read("stay top", &m_stay_top, false);
 		fconfig.Read("show cursor", &m_show_cursor, true);
+		fconfig.Read("color depth", &m_color_depth, 0);
 	}
 	//font
 	if (fconfig.Exists("/font"))
@@ -460,6 +464,7 @@ void MainSettings::Save()
 
 	//ui
 	fconfig.SetPath("/ui");
+	fconfig.Write("dpi scale factor", m_dpi_scale_factor);
 	fconfig.Write("layout", m_layout);
 	fconfig.Write("prj panel split", m_prj_panel_split);
 	fconfig.Write("clip panel split", m_clip_panel_split);
@@ -505,6 +510,7 @@ void MainSettings::Save()
 	fconfig.Write("eye dist", m_eye_dist);
 	fconfig.Write("stay top", m_stay_top);
 	fconfig.Write("show cursor", m_show_cursor);
+	fconfig.Write("color depth", m_color_depth);
 
 	//font
 	fconfig.SetPath("/font");

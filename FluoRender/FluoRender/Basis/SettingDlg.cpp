@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 #include <wx/notebook.h>
 #include <wx/stdpaths.h>
+#include <wx/display.h>
 
 BEGIN_EVENT_TABLE(SettingDlg, wxPanel)
 EVT_BUTTON(ID_SaveBtn, SettingDlg::OnSave)
@@ -74,8 +75,9 @@ EVT_CHECKBOX(ID_SBSChk, SettingDlg::OnSBSCheck)
 EVT_COMMAND_SCROLL(ID_EyeDistSldr, SettingDlg::OnEyeDistChange)
 EVT_TEXT(ID_EyeDistText, SettingDlg::OnEyeDistEdit)
 //display id
-EVT_COMMAND_SCROLL(ID_DispIdSldr, SettingDlg::OnDispIdChange)
-EVT_TEXT(ID_DispIdText, SettingDlg::OnDispIdEdit)
+EVT_COMBOBOX(ID_DispIdCombo, SettingDlg::OnDispIdComb)
+//color depth
+EVT_COMBOBOX(ID_ColorDepthCombo, SettingDlg::OnColorDepthComb)
 //override vox
 EVT_CHECKBOX(ID_OverrideVoxChk, SettingDlg::OnOverrideVoxCheck)
 //wavelength to color
@@ -584,24 +586,46 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	wxBoxSizer* group2 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Fullscreen on Display"), wxVERTICAL);
 	wxBoxSizer* sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Display ID");
-	m_disp_id_sldr = new wxSingleSlider(page, ID_DispIdSldr, 0, 0, 10,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_disp_id_text = new wxTextCtrl(page, ID_DispIdText, "0",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
+	st = new wxStaticText(page, 0, "Display ID:",
+		wxDefaultPosition, FromDIP(wxSize(50, -1)));
+	m_disp_id_comb = new wxComboBox(page, ID_DispIdCombo, "",
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, NULL, wxCB_READONLY);
+	int dn = wxDisplay::GetCount();
+	std::vector<wxString> list1;
+	for (int i = 0; i < dn; ++i)
+		list1.push_back(wxString::Format("%d", i));
+	m_disp_id_comb->Append(list1);
 	sizer2_1->Add(st, 0, wxALIGN_CENTER);
-	sizer2_1->Add(m_disp_id_sldr, 1, wxEXPAND);
-	sizer2_1->Add(m_disp_id_text, 0, wxALIGN_CENTER);
+	sizer2_1->Add(5, 5);
+	sizer2_1->Add(m_disp_id_comb, 0, wxALIGN_CENTER);
 	group2->Add(10, 5);
 	group2->Add(sizer2_1, 0, wxEXPAND);
 	group2->Add(10, 5);
 
-	wxBoxSizer* sizerV = new wxBoxSizer(wxVERTICAL);
+	//color depth
+	wxBoxSizer* group3 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Color Depth of Render View"), wxVERTICAL);
+	wxBoxSizer* sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Color Depth:",
+		wxDefaultPosition, FromDIP(wxSize(50, -1)));
+	m_color_depth_comb = new wxComboBox(page, ID_ColorDepthCombo, "",
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, NULL, wxCB_READONLY);
+	std::vector<wxString> list2 = { "8", "10", "16" };
+	m_color_depth_comb->Append(list2);
+	sizer3_1->Add(st, 0, wxALIGN_CENTER);
+	sizer3_1->Add(5, 5);
+	sizer3_1->Add(m_color_depth_comb, 0, wxALIGN_CENTER);
+	group3->Add(10, 5);
+	group3->Add(sizer3_1, 0, wxEXPAND);
+	group3->Add(10, 5);
 
+	wxBoxSizer* sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
 	sizerV->Add(group1, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(group2, 0, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(group3, 0, wxEXPAND);
 
 	page->SetSizer(sizerV);
 	return page;
@@ -956,8 +980,9 @@ void SettingDlg::UpdateUI()
 	m_eye_dist_sldr->ChangeValue(std::round(glbin_settings.m_eye_dist*10.0));
 	m_eye_dist_text->ChangeValue(wxString::Format("%.1f", glbin_settings.m_eye_dist));
 	//display id
-	m_disp_id_sldr->ChangeValue(glbin_settings.m_disp_id);
-	m_disp_id_text->ChangeValue(wxString::Format("%d", glbin_settings.m_disp_id));
+	m_disp_id_comb->Select(glbin_settings.m_disp_id);
+	//color depth
+	m_color_depth_comb->Select(glbin_settings.m_color_depth);
 	//override vox
 	m_override_vox_chk->SetValue(glbin_settings.m_override_vox);
 	//wavelength to color
@@ -1424,21 +1449,39 @@ void SettingDlg::OnEyeDistEdit(wxCommandEvent &event)
 }
 
 //display id
-void SettingDlg::OnDispIdChange(wxScrollEvent& event)
+void SettingDlg::OnDispIdComb(wxCommandEvent& event)
 {
-	glbin_settings.m_disp_id = m_disp_id_sldr->GetValue();
-	wxString str = wxString::Format("%d", glbin_settings.m_disp_id);
-	if (str != m_disp_id_text->GetValue())
-		m_disp_id_text->SetValue(str);
+	glbin_settings.m_disp_id = m_disp_id_comb->GetCurrentSelection();
 }
 
-void SettingDlg::OnDispIdEdit(wxCommandEvent& event)
+//color depth
+void SettingDlg::OnColorDepthComb(wxCommandEvent& event)
 {
-	wxString str = m_disp_id_text->GetValue();
-	long ival;
-	str.ToLong(&ival);
-	m_disp_id_sldr->ChangeValue(ival);
-	glbin_settings.m_disp_id = ival;
+	int val = m_color_depth_comb->GetCurrentSelection();
+	switch (val)
+	{
+	case 0://8
+		glbin_settings.m_color_depth = val;
+		glbin_settings.m_red_bit = 8;
+		glbin_settings.m_green_bit = 8;
+		glbin_settings.m_blue_bit = 8;
+		glbin_settings.m_alpha_bit = 8;
+		break;
+	case 1://10
+		glbin_settings.m_color_depth = val;
+		glbin_settings.m_red_bit = 10;
+		glbin_settings.m_green_bit = 10;
+		glbin_settings.m_blue_bit = 10;
+		glbin_settings.m_alpha_bit = 2;
+		break;
+	case 2://16
+		glbin_settings.m_color_depth = val;
+		glbin_settings.m_red_bit = 16;
+		glbin_settings.m_green_bit = 16;
+		glbin_settings.m_blue_bit = 16;
+		glbin_settings.m_alpha_bit = 16;
+		break;
+	}
 }
 
 //override vox

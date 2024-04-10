@@ -130,7 +130,6 @@ public:
 	const static unsigned char icon_machine_learning_mini_png[844];
 	/* icon_new_project_mini.png - 818 bytes */
 	const static unsigned char icon_new_project_mini_png[818];
-	//undo
 	/* icon_undo.png - 2692 bytes */
 	const static unsigned char icon_undo_png[2692];
 	/* icon_redo.png - 2356 bytes */
@@ -145,6 +144,12 @@ public:
 	const static unsigned char disp_project_png[534];
 	/* disp_properties.png - 543 bytes */
 	const static unsigned char disp_properties_png[543];
+	/* layout.png - 559 bytes */
+	const static unsigned char layout_png[559];
+	/* exit.png - 805 bytes */
+	const static unsigned char exit_png[805];
+	/* disp_toolbar.png - 727 bytes */
+	const static unsigned char disp_toolbar_png[727];
 
 
 	//render view icons
