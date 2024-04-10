@@ -388,7 +388,7 @@ void RenderViewPanel::CreateBar()
 
 	//background
 	m_bg_color_picker = new wxUndoableColorPicker(this,
-		wxID_ANY, wxColor(), wxDefaultPosition, FromDIP(wxSize(40, 20)));
+		wxID_ANY, *wxBLACK, wxDefaultPosition, FromDIP(wxSize(40, 20)));
 	wxSize bs = m_bg_color_picker->GetSize();
 	m_bg_inv_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);

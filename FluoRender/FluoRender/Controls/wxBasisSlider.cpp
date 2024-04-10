@@ -66,7 +66,9 @@ wxBasisSlider::wxBasisSlider(
 {
 	scale_ = thumb_style_ ? 1 : parent->GetDPIScaleFactor();
 	margin_ = std::round(12 * scale_);
+#ifdef _WIN32
 	SetBackgroundColour(parent->GetBackgroundColour());
+#endif
 	SetDoubleBuffered(true);
 }
 
