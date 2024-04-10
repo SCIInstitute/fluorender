@@ -114,15 +114,18 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	wxIntegerValidator<unsigned int> vald_int;
 
 	wxBitmap bitmap;
+	wxSize bts(FromDIP(wxSize(80, 23)));
+	wxSize tts1(FromDIP(wxSize(40, 23)));
+	wxSize tts2(FromDIP(wxSize(50, 23)));
 	//left///////////////////////////////////////////////////
 	//gamma
 	m_gamma_st = new wxButton(this, wxID_ANY, ": Gamma",
-		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_LEFT);
+		wxDefaultPosition, bts, wxBU_LEFT);
 	m_gamma_sldr = new wxSingleSlider(this, wxID_ANY, 100, 10, 400,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_INVERSE);
 	m_gamma_sldr->SetRangeStyle(1);
 	m_gamma_text = new wxTextCtrl(this, wxID_ANY, "1.00",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_fp2);
+		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
 	m_gamma_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	//bind events
 	m_gamma_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnGammaMF, this);
@@ -137,11 +140,11 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_l1->Add(m_gamma_st, 0, wxALIGN_CENTER);
 	//saturation point
 	m_saturation_st = new wxButton(this, wxID_ANY, ": Saturation",
-		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_LEFT);
+		wxDefaultPosition, bts, wxBU_LEFT);
 	m_saturation_sldr = new wxSingleSlider(this, wxID_ANY, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_saturation_text = new wxTextCtrl(this, wxID_ANY, "50",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT/*, vald_int*/);
+		wxDefaultPosition, tts1, wxTE_RIGHT/*, vald_int*/);
 	m_saturation_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	//bind events
 	m_saturation_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnSaturationMF, this);
@@ -156,11 +159,11 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_l2->Add(m_saturation_st, 0, wxALIGN_CENTER);
 	//luminance
 	m_luminance_st = new wxButton(this, wxID_ANY, ": Luminance",
-		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_LEFT);
+		wxDefaultPosition, bts, wxBU_LEFT);
 	m_luminance_sldr = new wxSingleSlider(this, wxID_ANY, 128, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_luminance_text = new wxTextCtrl(this, wxID_ANY, "128",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT/*, vald_int*/);
+		wxDefaultPosition, tts1, wxTE_RIGHT/*, vald_int*/);
 	m_luminance_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	//bind events
 	m_luminance_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnLuminanceMF, this);
@@ -175,11 +178,11 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_l3->Add(m_luminance_st, 0, wxALIGN_CENTER, 0);
 	//alpha
 	m_alpha_st = new wxButton(this, wxID_ANY, ": Alpha",
-		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_LEFT);
+		wxDefaultPosition, bts, wxBU_LEFT);
 	m_alpha_sldr = new wxSingleSlider(this, wxID_ANY, 127, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_alpha_text = new wxTextCtrl(this, wxID_ANY, "127",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
+		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
 	m_alpha_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	//bind events
 	m_alpha_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnAlphaMF, this);
@@ -194,16 +197,16 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_l4->Add(m_alpha_st, 0, wxALIGN_CENTER);
 	//highlight
 	m_shade_st = new wxButton(this, wxID_ANY, ": Shading",
-		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_LEFT);
+		wxDefaultPosition, bts, wxBU_LEFT);
 	m_hi_shading_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_hi_shading_text = new wxTextCtrl(this, wxID_ANY, "0.00",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_fp2);
+		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
 	//shading
 	m_low_shading_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_low_shading_text = new wxTextCtrl(this, wxID_ANY, "0.00",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_fp2);
+		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
 	m_shade_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	//bind events
 	m_shade_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnShadingMF, this);
@@ -224,11 +227,11 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	//middle///////////////////////////////////////////////////
 	//extract boundary
 	m_boundary_st = new wxButton(this, wxID_ANY, "Boundary :",
-		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_RIGHT);
+		wxDefaultPosition, bts, wxBU_RIGHT);
 	m_boundary_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_boundary_text = new wxTextCtrl(this, wxID_ANY, "0.0000",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_fp4);
+		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp4);
 	m_boundary_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	//bind events
 	m_boundary_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnBoundaryMF, this);
@@ -243,13 +246,13 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_m1->Add(m_boundary_sldr, 1, wxEXPAND);
 	//thresholds
 	m_thresh_st = new wxButton(this, wxID_ANY, "Threshold :",
-		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_RIGHT);
+		wxDefaultPosition, bts, wxBU_RIGHT);
 	m_thresh_sldr = new wxDoubleSlider(this, wxID_ANY, 0, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_left_thresh_text = new wxTextCtrl(this, wxID_ANY, "0",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_int);
+		wxDefaultPosition, tts2, wxTE_RIGHT, vald_int);
 	m_right_thresh_text = new wxTextCtrl(this, wxID_ANY, "255",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
+		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
 	m_thresh_link_tb = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_thresh_link_tb->AddCheckTool(0, "",
@@ -273,11 +276,11 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_thresh_link_tb->Realize();
 	//shadow
 	m_shadow_st = new wxButton(this, wxID_ANY, "Shadow :",
-		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_RIGHT);
+		wxDefaultPosition, bts, wxBU_RIGHT);
 	m_shadow_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shadow_text = new wxTextCtrl(this, wxID_ANY, "0.00",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_fp2);
+		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp2);
 	m_shadow_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	//bind events
 	m_shadow_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnShadowMF, this);
@@ -292,11 +295,11 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_m3->Add(m_shadow_sldr, 1, wxEXPAND);
 	//sample rate
 	m_sample_st = new wxButton(this, wxID_ANY, "Samp. Rate :",
-		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_RIGHT);
+		wxDefaultPosition, bts, wxBU_RIGHT);
 	m_sample_sldr = new wxSingleSlider(this, wxID_ANY, 10, 1, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_sample_text = new wxTextCtrl(this, wxID_ANY, "1.0",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_fp2);
+		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp2);
 	m_sample_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	//bind events
 	m_sample_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnSampleMF, this);
@@ -311,16 +314,16 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_m4->Add(m_sample_sldr, 1, wxEXPAND);
 	//colormap
 	m_colormap_st = new wxButton(this, wxID_ANY, "Colormap :",
-		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxBU_RIGHT);
+		wxDefaultPosition, bts, wxBU_RIGHT);
 	m_colormap_sldr = new wxDoubleSlider(this,
 		wxID_ANY, 0, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_colormap_low_text = new wxTextCtrl(this,
 		wxID_ANY, "0",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_int);
+		wxDefaultPosition, tts2, wxTE_RIGHT, vald_int);
 	m_colormap_hi_text = new wxTextCtrl(this,
 		wxID_ANY, "255",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
+		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
 	m_colormap_link_tb = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_colormap_link_tb->AddCheckTool(0, "",
@@ -434,7 +437,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	//spacings
 	//x
 	st = new wxStaticText(this, 0, "Voxel Size: ",
-		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxALIGN_RIGHT);
+		wxDefaultPosition, bts, wxALIGN_RIGHT);
 	m_space_x_text = new wxUndoableTextCtrl(this, wxID_ANY, "1.000",
 		wxDefaultPosition, FromDIP(wxSize(50, -1)), wxTE_RIGHT, vald_fp3);
 	m_space_x_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnSpaceText, this);
@@ -461,9 +464,9 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_r2->Add(m_space_z_text, 1, wxALIGN_CENTER);
 	//color 1
 	st = new wxStaticText(this, 0, "Prime Color: ",
-		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxALIGN_RIGHT);
+		wxDefaultPosition, bts, wxALIGN_RIGHT);
 	m_color_text = new wxTextCtrl(this, wxID_ANY, "255 , 255 , 255",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_CENTER);
+		wxDefaultPosition, tts2, wxTE_CENTER);
 	m_color_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnColorTextChange, this);
 	m_color_text->Bind(wxEVT_LEFT_DCLICK, &VolumePropPanel::OnColorTextFocus, this);
 	m_color_btn = new wxUndoableColorPicker(this, wxID_ANY, *wxRED,
@@ -475,9 +478,9 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_r3->Add(m_color_btn, 1, wxALIGN_CENTER, 0);
 	//color 2
 	st = new wxStaticText(this, 0, "Secnd Color: ",
-		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxALIGN_RIGHT);
+		wxDefaultPosition, bts, wxALIGN_RIGHT);
 	m_color2_text = new wxTextCtrl(this, wxID_ANY, "255 , 255 , 255",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_CENTER);
+		wxDefaultPosition, tts2, wxTE_CENTER);
 	m_color2_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnColor2TextChange, this);
 	m_color2_text->Bind(wxEVT_LEFT_DCLICK, &VolumePropPanel::OnColor2TextFocus, this);
 	m_color2_btn = new wxUndoableColorPicker(this, wxID_ANY, *wxRED,
@@ -489,7 +492,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_r4->Add(m_color2_btn, 1, wxALIGN_CENTER, 0);
 	// colormap chooser
 	st = new wxStaticText(this, 0, "Effects: ",
-		wxDefaultPosition, FromDIP(wxSize(70, -1)), wxALIGN_RIGHT);
+		wxDefaultPosition, bts, wxALIGN_RIGHT);
 	m_colormap_inv_btn = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(invert_off);
