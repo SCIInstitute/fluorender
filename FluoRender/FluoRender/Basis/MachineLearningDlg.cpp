@@ -264,7 +264,7 @@ void MachineLearningPanel::PopTopList()
 		m_top_grid->DeleteRows(0, row, true);
 
 	std::string path = m_exepath;
-	path += GETSLASH() + m_dir;
+	path += GETSLASHA() + m_dir;
 	std::string name, ext, filename;
 	int i = 0;
 	for (const auto& entry : std::filesystem::directory_iterator(path))
@@ -339,7 +339,7 @@ bool MachineLearningPanel::MatchTableName(std::string& name)
 {
 	bool modified = false;
 	std::string path = m_exepath;
-	path += GETSLASH() + m_dir;
+	path += GETSLASHA() + m_dir;
 	std::string stem, ext;
 	while (true)
 	{
@@ -434,7 +434,7 @@ MLCompGenPanel::~MLCompGenPanel()
 	{
 		std::string name = table.getName();
 		std::string filename = m_exepath;
-		filename += GETSLASH() + m_dir + GETSLASH() + name + m_ext;
+		filename += GETSLASHA() + m_dir + GETSLASHA() + name + m_ext;
 		table.save(filename);
 	}
 }
@@ -446,7 +446,7 @@ void MLCompGenPanel::OnNewTable(wxCommandEvent& event)
 	//MatchTableName(name);
 	//table.setName(name);
 	//std::string filename = m_exepath;
-	//filename += GETSLASH() + m_dir + GETSLASH() + name + m_ext;
+	//filename += GETSLASHA() + m_dir + GETSLASHA() + name + m_ext;
 	//table.save(filename);
 	//PopTopList();
 	m_top_grid->InsertRows(0);
@@ -473,7 +473,7 @@ void MLCompGenPanel::OnDelTable(wxCommandEvent& event)
 	flrd::TableHistParams& table = glbin.get_cg_table();
 	std::string name;
 	std::string filename = m_exepath;
-	filename += GETSLASH() + m_dir + GETSLASH();
+	filename += GETSLASHA() + m_dir + GETSLASHA();
 	for (size_t i = 0; i < count; ++i)
 	{
 		name = m_top_grid->GetCellValue(seli[i], 0).ToStdString();
@@ -503,7 +503,7 @@ void MLCompGenPanel::OnDupTable(wxCommandEvent& event)
 		new_table.setName(name);
 	//save it
 	std::string str = m_exepath;
-	str += GETSLASH() + m_dir + GETSLASH() + name + m_ext;
+	str += GETSLASHA() + m_dir + GETSLASHA() + name + m_ext;
 	new_table.save(str);
 	PopTopList();
 }
@@ -586,7 +586,7 @@ void MLCompGenPanel::OnTopGridCellChanged(wxGridEvent& event)
 			table.setName(str1);
 		flrd::TableHistParams temptbl;
 		std::string filename = m_exepath;
-		filename += GETSLASH() + m_dir + GETSLASH();
+		filename += GETSLASHA() + m_dir + GETSLASHA();
 		temptbl.open(filename + str0 + m_ext);
 		temptbl.setName(str1);
 		temptbl.save(filename + str1 + m_ext);
@@ -606,7 +606,7 @@ void MLCompGenPanel::OnTopGridCellChanged(wxGridEvent& event)
 		{
 			flrd::TableHistParams temptbl;
 			std::string filename = m_exepath;
-			filename += GETSLASH() + m_dir + GETSLASH() + str0 + m_ext;
+			filename += GETSLASHA() + m_dir + GETSLASHA() + str0 + m_ext;
 			temptbl.open(filename);
 			temptbl.setNotes(str1);
 			temptbl.save(filename);
@@ -712,7 +712,7 @@ void MLCompGenPanel::AutoLoadTable()
 void MLCompGenPanel::LoadTable(const std::string& filename)
 {
 	std::string str = m_exepath;
-	str += GETSLASH() + m_dir + GETSLASH();
+	str += GETSLASHA() + m_dir + GETSLASHA();
 	flrd::TableHistParams& table = glbin.get_cg_table();
 	//save existing table if modified
 	if (table.getModified())
@@ -728,7 +728,7 @@ void MLCompGenPanel::LoadTable(const std::string& filename)
 void MLCompGenPanel::SaveTable(const std::string& filename)
 {
 	std::string str = m_exepath;
-	str += GETSLASH() + m_dir + GETSLASH() + filename + m_ext;
+	str += GETSLASHA() + m_dir + GETSLASHA() + filename + m_ext;
 	glbin.get_cg_table().save(str);
 }
 
@@ -779,7 +779,7 @@ MLVolPropPanel::~MLVolPropPanel()
 	{
 		std::string name = table.getName();
 		std::string filename = m_exepath;
-		filename += GETSLASH() + m_dir + GETSLASH() + name + m_ext;
+		filename += GETSLASHA() + m_dir + GETSLASHA() + name + m_ext;
 		table.save(filename);
 	}
 }
@@ -791,7 +791,7 @@ void MLVolPropPanel::OnNewTable(wxCommandEvent& event)
 	//MatchTableName(name);
 	//table.setName(name);
 	//std::string filename = m_exepath;
-	//filename += GETSLASH() + m_dir + GETSLASH() + name + m_ext;
+	//filename += GETSLASHA() + m_dir + GETSLASHA() + name + m_ext;
 	//table.save(filename);
 	//PopTopList();
 	m_top_grid->InsertRows(0);
@@ -818,7 +818,7 @@ void MLVolPropPanel::OnDelTable(wxCommandEvent& event)
 	flrd::TableHistParams& table = glbin.get_vp_table();
 	std::string name;
 	std::string filename = m_exepath;
-	filename += GETSLASH() + m_dir + GETSLASH();
+	filename += GETSLASHA() + m_dir + GETSLASHA();
 	for (size_t i = 0; i < count; ++i)
 	{
 		name = m_top_grid->GetCellValue(seli[i], 0).ToStdString();
@@ -848,7 +848,7 @@ void MLVolPropPanel::OnDupTable(wxCommandEvent& event)
 		new_table.setName(name);
 	//save it
 	std::string str = m_exepath;
-	str += GETSLASH() + m_dir + GETSLASH() + name + m_ext;
+	str += GETSLASHA() + m_dir + GETSLASHA() + name + m_ext;
 	new_table.save(str);
 	PopTopList();
 }
@@ -927,7 +927,7 @@ void MLVolPropPanel::OnTopGridCellChanged(wxGridEvent& event)
 			table.setName(str1);
 		flrd::TableHistParams temptbl;
 		std::string filename = m_exepath;
-		filename += GETSLASH() + m_dir + GETSLASH();
+		filename += GETSLASHA() + m_dir + GETSLASHA();
 		temptbl.open(filename + str0 + m_ext);
 		temptbl.setName(str1);
 		temptbl.save(filename + str1 + m_ext);
@@ -947,7 +947,7 @@ void MLVolPropPanel::OnTopGridCellChanged(wxGridEvent& event)
 		{
 			flrd::TableHistParams temptbl;
 			std::string filename = m_exepath;
-			filename += GETSLASH() + m_dir + GETSLASH() + str0 + m_ext;
+			filename += GETSLASHA() + m_dir + GETSLASHA() + str0 + m_ext;
 			temptbl.open(filename);
 			temptbl.setNotes(str1);
 			temptbl.save(filename);
@@ -1053,7 +1053,7 @@ void MLVolPropPanel::AutoLoadTable()
 void MLVolPropPanel::LoadTable(const std::string& filename)
 {
 	std::string str = m_exepath;
-	str += GETSLASH() + m_dir + GETSLASH();
+	str += GETSLASHA() + m_dir + GETSLASHA();
 	flrd::TableHistParams& table = glbin.get_vp_table();
 	//save existing table if modified
 	if (table.getModified())
@@ -1069,7 +1069,7 @@ void MLVolPropPanel::LoadTable(const std::string& filename)
 void MLVolPropPanel::SaveTable(const std::string& filename)
 {
 	std::string str = m_exepath;
-	str += GETSLASH() + m_dir + GETSLASH() + filename + m_ext;
+	str += GETSLASHA() + m_dir + GETSLASHA() + filename + m_ext;
 	glbin.get_vp_table().save(str);
 }
 

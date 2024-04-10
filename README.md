@@ -55,7 +55,7 @@ Building FluoRender
 
    * <code>cd mybuild</code>
 
-   * <code>../configure --disable-shared --enable-cxx11 --with-cxx=11 --enable-stl --enable-std_containers --enable-std_iostreams --enable-std_string_conv_in_wxstring --with-libpng=builtin --with-libtiff=builtin --with-libjpeg=builtin --with-zlib=builtin --with-opengl</code>
+   * <code>../configure --disable-shared --enable-cxx11 --with-cxx=11 --enable-stl --enable-std_containers --enable-std_iostreams --with-libpng=builtin --with-libtiff=builtin --with-libjpeg=builtin --with-zlib=builtin --with-opengl</code>
 
    * <code>make</code>
 
@@ -76,7 +76,7 @@ Building FluoRender
    
    * <code>cd mybuild</code>
    
-   * <code>../configure --disable-shared --enable-macosx_arch=x86_64 --with-cocoa --with-macosx-version-min=10.15 --enable-cxx11 --with-cxx=11 --enable-stl --enable-std_containers --enable-std_iostreams --enable-std_string --enable-std_string_conv_in_wxstring --with-libpng=builtin --with-libtiff=builtin --with-libjpeg=builtin --with-zlib=builtin</code>
+   * <code>../configure --disable-shared --enable-macosx_arch=x86_64 --with-cocoa --with-macosx-version-min=10.15 --enable-cxx11 --with-cxx=11 --enable-stl --enable-std_containers --enable-std_iostreams --with-libpng=builtin --with-libtiff=builtin --with-libjpeg=builtin --with-zlib=builtin</code>
    
    * <code>make</code>
 

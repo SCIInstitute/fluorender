@@ -603,7 +603,7 @@ void LIFReader::ReadData(wxXmlNode* node, std::wstring &name)
 		}
 		child = child->GetNext();
 	}
-	if (imgi && sbsize && sbname != "")
+	if (imgi && sbsize && sbname != L"")
 	{
 		imgi->mbid = sbname;
 	}
