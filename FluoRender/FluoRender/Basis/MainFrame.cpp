@@ -557,6 +557,7 @@ MainFrame::MainFrame(
 		Left().CloseButton(true).Layer(3));
 	m_aui_mgr.AddPane(m_prop_panel, wxAuiPaneInfo().
 		Name("m_prop_panel").Caption(UITEXT_PROPERTIES).
+        BestSize(FromDIP(wxSize(-1, 180))).
 		Bottom().CloseButton(true).Layer(2));
 	m_aui_mgr.AddPane(m_adjust_view, wxAuiPaneInfo().
 		Name("m_adjust_view").Caption(UITEXT_ADJUST).

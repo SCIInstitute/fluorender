@@ -114,9 +114,15 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	wxIntegerValidator<unsigned int> vald_int;
 
 	wxBitmap bitmap;
+#ifdef _WIN32
 	wxSize bts(FromDIP(wxSize(80, 23)));
 	wxSize tts1(FromDIP(wxSize(40, 23)));
 	wxSize tts2(FromDIP(wxSize(50, 23)));
+#else
+    wxSize bts(FromDIP(wxSize(80, 26)));
+    wxSize tts1(FromDIP(wxSize(40, 26)));
+    wxSize tts2(FromDIP(wxSize(50, 26)));
+#endif
 	//left///////////////////////////////////////////////////
 	//gamma
 	m_gamma_st = new wxButton(this, wxID_ANY, ": Gamma",

@@ -1138,7 +1138,7 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	//group
 	wxBoxSizer* sizer21 = new wxBoxSizer(wxHORIZONTAL);
 	m_new_group = new wxButton(this, ID_NewGroup, "New Group",
-		wxDefaultPosition, FromDIP(wxSize(65, 22)));
+		wxDefaultPosition, wxDefaultSize);
 	st = new wxStaticText(this, 0, "Group ID:",
 		wxDefaultPosition, FromDIP(wxSize(65, -1)));
 	m_group_text = new wxTextCtrl(this, ID_GroupText, "0",

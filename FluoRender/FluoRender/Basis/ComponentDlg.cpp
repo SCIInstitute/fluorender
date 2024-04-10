@@ -241,9 +241,9 @@ ComponentDlg::ComponentDlg(MainFrame *frame)
 	m_cluster_btn = new wxButton(panel_bot, ID_ClusterBtn, "Cluster",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)));
 	m_analyze_btn = new wxButton(panel_bot, ID_AnalyzeBtn, "Analyze",
-		wxDefaultPosition, FromDIP(wxSize(75, -1)));
+		wxDefaultPosition, wxDefaultSize);
 	m_analyze_sel_btn = new wxButton(panel_bot, ID_AnalyzeSelBtn, "Analyze Paint",
-		wxDefaultPosition, FromDIP(wxSize(75, -1)));
+		wxDefaultPosition, wxDefaultSize);
 	sizer1->Add(m_shuffle_btn, 0, wxALIGN_CENTER);
 	sizer1->AddStretchSpacer();
 	sizer1->Add(m_use_ml_chk, 0, wxALIGN_CENTER);
@@ -261,13 +261,13 @@ ComponentDlg::ComponentDlg(MainFrame *frame)
 		wxVERTICAL);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_include_btn = new wxButton(panel_bot, ID_IncludeBtn,
-		"Include", wxDefaultPosition, FromDIP(wxSize(75, -1)));
+		"Include", wxDefaultPosition, wxDefaultSize);
 	m_exclude_btn = new wxButton(panel_bot, ID_ExcludeBtn,
-		"Exclude", wxDefaultPosition, FromDIP(wxSize(75, -1)));
+		"Exclude", wxDefaultPosition, wxDefaultSize);
 	m_history_chk = new wxCheckBox(panel_bot, ID_HistoryChk,
-		"Hold History", wxDefaultPosition, FromDIP(wxSize(85, 20)), wxALIGN_LEFT);
+		"Hold History", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_clear_hist_btn = new wxButton(panel_bot, ID_ClearHistBtn,
-		"Clear History", wxDefaultPosition, FromDIP(wxSize(75, -1)));
+		"Clear History", wxDefaultPosition, wxDefaultSize);
 	sizer2_1->Add(m_include_btn, 0, wxALIGN_CENTER);
 	sizer2_1->Add(m_exclude_btn, 0, wxALIGN_CENTER);
 	sizer2_1->AddStretchSpacer(1);

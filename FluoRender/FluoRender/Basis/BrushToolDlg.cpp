@@ -437,13 +437,13 @@ BrushToolDlg::BrushToolDlg(
 		wxVERTICAL);
 	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_update_btn = new wxButton(this, ID_UpdateBtn, "Paint Size",
-		wxDefaultPosition, FromDIP(wxSize(75, -1)));
+		wxDefaultPosition, wxDefaultSize);
 	m_auto_update_btn = new wxToggleButton(this, ID_AutoUpdateBtn,
-		"Auto Update", wxDefaultPosition, FromDIP(wxSize(75, -1)));
+		"Auto Update", wxDefaultPosition, wxDefaultSize);
 	m_history_chk = new wxCheckBox(this, ID_HistoryChk,
-		"Hold History", wxDefaultPosition, FromDIP(wxSize(85, 20)), wxALIGN_LEFT);
+		"Hold History", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_clear_hist_btn = new wxButton(this, ID_ClearHistBtn,
-		"Clear History", wxDefaultPosition, FromDIP(wxSize(75, -1)));
+		"Clear History", wxDefaultPosition, wxDefaultSize);
 	sizer4_1->Add(m_update_btn, 0, wxALIGN_CENTER);
 	sizer4_1->Add(m_auto_update_btn, 0, wxALIGN_CENTER);
 	sizer4_1->AddStretchSpacer(1);
