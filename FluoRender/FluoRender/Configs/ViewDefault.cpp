@@ -154,69 +154,67 @@ void ViewDefault::Save(wxFileConfig& f)
 	f.Write("rot slider", m_rot_slider);
 }
 
-void ViewDefault::Set(RenderCanvas* view)
+void ViewDefault::Set(RenderCanvas* canvas)
 {
-	if (!view)
+	if (!canvas)
 		return;
 
-	m_vol_method = view->GetVolMethod();
-	m_bg_color = view->GetBackgroundColor();
-	m_draw_camctr = view->m_draw_camctr;
-	m_camctr_size = view->m_camctr_size;
-	m_draw_info = view->m_draw_info;
-	m_draw_legend = view->m_draw_legend;
-	m_draw_colormap = view->m_draw_colormap;
-	m_mouse_focus = view->m_mouse_focus;
-	m_draw_scalebar = view->m_disp_scale_bar;
-	m_draw_scalebar_text = view->m_disp_scale_bar_text;
-	m_scalebar_len = view->m_sb_length;
-	m_scalebar_text = view->m_sb_text;
-	m_scalebar_num = view->m_sb_num;
-	m_scalebar_unit = view->m_sb_unit;
-	m_persp = view->GetPersp();
-	m_aov = view->GetAov();
-	m_free = view->GetFree();
+	m_vol_method = canvas->GetVolMethod();
+	m_bg_color = canvas->GetBackgroundColor();
+	m_draw_camctr = canvas->m_draw_camctr;
+	m_camctr_size = canvas->m_camctr_size;
+	m_draw_info = canvas->m_draw_info;
+	m_draw_legend = canvas->m_draw_legend;
+	m_draw_colormap = canvas->m_draw_colormap;
+	m_mouse_focus = canvas->m_mouse_focus;
+	m_draw_scalebar = canvas->m_disp_scale_bar;
+	m_draw_scalebar_text = canvas->m_disp_scale_bar_text;
+	m_scalebar_len = canvas->m_sb_length;
+	m_scalebar_text = canvas->m_sb_text;
+	m_scalebar_num = canvas->m_sb_num;
+	m_scalebar_unit = canvas->m_sb_unit;
+	m_persp = canvas->GetPersp();
+	m_aov = canvas->GetAov();
+	m_free = canvas->GetFree();
 	double x, y, z;
-	view->GetCenters(x, y, z);
+	canvas->GetCenters(x, y, z);
 	m_center = fluo::Point(x, y, z);
-	m_rot_lock = view->GetRotLock();
-	m_pin_rot_center = view->m_pin_rot_center;
-	m_scale_mode = view->m_scale_mode;
-	m_scale_factor = view->m_scale_factor;
-	m_use_fog = view->GetFog();
-	m_fog_intensity = view->GetFogIntensity();
+	m_rot_lock = canvas->GetRotLock();
+	m_pin_rot_center = canvas->m_pin_rot_ctr;
+	m_scale_mode = canvas->m_scale_mode;
+	m_scale_factor = canvas->m_scale_factor;
+	m_use_fog = canvas->GetFog();
+	m_fog_intensity = canvas->GetFogIntensity();
 }
 
-void ViewDefault::Apply(RenderCanvas* view)
+void ViewDefault::Apply(RenderCanvas* canvas)
 {
-	if (!view)
+	if (!canvas)
 		return;
 
-	view->SetVolMethod(m_vol_method);
-	view->SetBackgroundColor(m_bg_color);
-	view->m_draw_camctr = m_draw_camctr;
-	view->m_camctr_size = m_camctr_size;
-	view->m_draw_info = m_draw_info;
-	view->m_draw_legend = m_draw_legend;
-	view->m_draw_colormap = m_draw_colormap;
-	view->m_disp_scale_bar = m_draw_scalebar;
-	view->m_disp_scale_bar_text = m_draw_scalebar_text;
-	view->m_sb_length = m_scalebar_len;
-	view->m_sb_text = m_scalebar_text;
-	view->m_sb_num = m_scalebar_num;
-	view->m_sb_unit = m_scalebar_unit;
-	view->m_mouse_focus = m_mouse_focus;
-	view->SetPersp(m_persp);
-	view->SetAov(m_aov);
-	view->SetFree(m_free);
-	view->SetCenters(m_center.x(), m_center.y(), m_center.z());
-	view->SetRotLock(m_rot_lock);
-	view->m_pin_rot_center = m_pin_rot_center;
-	if (m_pin_rot_center)
-		view->m_rot_center_dirty = true;
-	view->m_scale_mode = m_scale_mode;
-	view->m_scale_factor = m_scale_factor;
-	view->SetFog(m_use_fog);
-	view->SetFogIntensity(m_fog_intensity);
+	canvas->SetVolMethod(m_vol_method);
+	canvas->SetBackgroundColor(m_bg_color);
+	canvas->m_draw_camctr = m_draw_camctr;
+	canvas->m_camctr_size = m_camctr_size;
+	canvas->m_draw_info = m_draw_info;
+	canvas->m_draw_legend = m_draw_legend;
+	canvas->m_draw_colormap = m_draw_colormap;
+	canvas->m_disp_scale_bar = m_draw_scalebar;
+	canvas->m_disp_scale_bar_text = m_draw_scalebar_text;
+	canvas->m_sb_length = m_scalebar_len;
+	canvas->m_sb_text = m_scalebar_text;
+	canvas->m_sb_num = m_scalebar_num;
+	canvas->m_sb_unit = m_scalebar_unit;
+	canvas->m_mouse_focus = m_mouse_focus;
+	canvas->SetPersp(m_persp);
+	canvas->SetAov(m_aov);
+	canvas->SetFree(m_free);
+	canvas->SetCenters(m_center.x(), m_center.y(), m_center.z());
+	canvas->SetRotLock(m_rot_lock);
+	canvas->SetPinRotCenter(m_pin_rot_center);
+	canvas->m_scale_mode = m_scale_mode;
+	canvas->m_scale_factor = m_scale_factor;
+	canvas->SetFog(m_use_fog);
+	canvas->SetFogIntensity(m_fog_intensity);
 }
 

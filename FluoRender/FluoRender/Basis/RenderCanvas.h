@@ -881,11 +881,10 @@ public:
 	//scale mode
 	int m_scale_mode;//zoom ratio meaning: 0-view; 1-pixel; 2-data(pixel*xy spc)
 	//pin rotation center
-	bool m_auto_update_rot_center;
-	bool m_pin_rot_center;
-	bool m_rot_center_dirty;
+	bool m_pin_rot_ctr;//enable auto compute of rot center based on data
+	bool m_update_rot_ctr;//rot center needs update
 	double m_pin_pick_thresh;//ray casting threshold value
-	fluo::Point m_pin_ctr;
+	fluo::Point m_pin_ctr;//the center point for view rotation
 	//mode in determining depth of volume
 	int m_point_volume_mode;  //0: use view plane; 1: use max value; 2: use accumulated value
 							  //ruler use volume transfer function

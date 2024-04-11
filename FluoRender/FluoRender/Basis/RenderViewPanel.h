@@ -121,7 +121,6 @@ public:
 	void SetDepthAttenEnable(bool val);
 	void SetDepthAtten(double val, bool notify);
 
-	void SetPinRotCenter(bool val);
 	void SetCenter();
 	void SetScale121();
 	void SetScaleFactor(double val, bool notify);
@@ -155,9 +154,11 @@ public:
 	//rot slider style
 	bool m_rot_slider;
 	double m_dpi_sf, m_dpi_sf2;
+	int m_pin_by_user;//override pin by scale: 0:by scale; 1:always pin; 2:always not pin
+	bool m_pin_by_scale;
 
 	//render view///////////////////////////////////////////////
-	RenderCanvas *m_glview;
+	RenderCanvas *m_canvas;
 	wxFrame* m_full_frame;
 	wxBoxSizer* m_view_sizer;
 

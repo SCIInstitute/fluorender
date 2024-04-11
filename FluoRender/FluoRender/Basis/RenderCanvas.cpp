@@ -311,9 +311,8 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	//nodraw count
 	m_nodraw_count(0),
 	//pin rotation center
-	m_auto_update_rot_center(true),
-	m_pin_rot_center(false),
-	m_rot_center_dirty(false),
+	m_pin_rot_ctr(false),
+	m_update_rot_ctr(false),
 	m_pin_pick_thresh(0.6),
 	m_res_mode(1),
 	m_enable_touch(false),
@@ -603,7 +602,7 @@ RenderCanvas::~RenderCanvas()
 	if (m_full_screen)
 	{
 		m_full_screen = false;
-		m_vrv->m_glview = 0;
+		m_vrv->m_canvas = 0;
 		m_vrv->m_full_frame = 0;
 		if (m_frame)
 		{
@@ -628,6 +627,7 @@ void RenderCanvas::OnResize(wxSizeEvent& event)
 		m_size = size;
 
 	RefreshGL(1);
+	m_vrv->FluoUpdate({ gstScaleFactor });
 }
 
 void RenderCanvas::Init()
@@ -882,7 +882,7 @@ void RenderCanvas::CalcFogRange()
 		maxz = fabs(maxz);
 		m_fog_start = minz<maxz ? minz : maxz;
 		m_fog_end = maxz>minz ? maxz : minz;
-		if (m_pin_rot_center)
+		if (m_pin_rot_ctr)
 		{
 			p = -mv.transform(m_pin_ctr);
 			if (p.z() > m_fog_start && p.z() < m_fog_end)
@@ -2274,10 +2274,8 @@ void RenderCanvas::DrawFinalBuffer()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	//get pixel value
-	if (m_pin_rot_center &&
-		m_rot_center_dirty &&
-		!m_free)
+	//compute the threshold value for picking volume
+	if (m_update_rot_ctr && !m_free)
 	{
 		unsigned char pixel[4];
 		int nx, ny;
@@ -3973,9 +3971,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			m_pre_draw = true;
 	}
 
-	//pin rotation center
-	if (m_pin_rot_center && m_rot_center_dirty &&
-		m_cur_vol && !m_free)
+	//update pin rotation center
+	if (m_update_rot_ctr && m_cur_vol && !m_free)
 	{
 		fluo::Point p, ip;
 		int nx = GetGLSize().x;
@@ -4012,7 +4009,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				m_obj_transz = obj_transz;
 			}
 		}
-		m_rot_center_dirty = false;
+		m_update_rot_ctr = false;
 		refresh = true;
 		vc.insert(gstNull);
 	}
@@ -4400,7 +4397,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			m_obj_transy += trans.y();
 			m_obj_transz += trans.z();
 			m_interactive = true;
-			m_rot_center_dirty = true;
+			m_update_rot_ctr = true;
 			refresh = true;
 			vc.insert(gstNull);
 		}
@@ -4468,7 +4465,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			m_obj_transy += trans.y();
 			m_obj_transz += trans.z();
 			m_interactive = true;
-			m_rot_center_dirty = true;
+			m_update_rot_ctr = true;
 			refresh = true;
 			vc.insert(gstNull);
 		}
@@ -5646,9 +5643,10 @@ void RenderCanvas::SetScale121()
 			vd = m_cur_vol;
 		else if (m_vd_pop_list.size())
 			vd = m_vd_pop_list[0];
+		if (!vd)
+			break;
 		double spcx = 0, spcy = 0, spcz = 0;
-		if (vd)
-			vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
+		vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
 		if (spcx > 0.0)
 			value /= spcx;
 		}
@@ -5664,9 +5662,9 @@ void RenderCanvas::SetScale121()
 
 void RenderCanvas::SetPinRotCenter(bool pin)
 {
-	m_pin_rot_center = pin;
+	m_pin_rot_ctr = pin;
 	if (pin)
-		m_rot_center_dirty = true;
+		m_update_rot_ctr = true;
 }
 
 void RenderCanvas::SetPersp(bool persp)
@@ -7785,8 +7783,8 @@ void RenderCanvas::DrawCamCtr()
 		len = m_distance*tan(d2r(m_aov / 2.0))*m_camctr_size / 10.0;
 	else
 		len = fabs(m_camctr_size);
-	if (m_pin_rot_center)
-		len /= 10.0;
+	if (m_pin_rot_ctr)
+		len /= 5.0;
 	va_jack->set_param(0, len);
 
 	glDisable(GL_DEPTH_TEST);
@@ -9982,7 +9980,7 @@ void RenderCanvas::GetTraces(bool update)
 	if (update)
 	{
 		if (m_vrv && m_frame && m_frame->GetTraceDlg())
-			m_frame->GetTraceDlg()->GetSettings(m_vrv->m_glview);
+			m_frame->GetTraceDlg()->GetSettings(m_vrv->m_canvas);
 	}
 }
 
@@ -10482,7 +10480,8 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 
 					m_interactive = true;
 
-					m_rot_center_dirty = true;
+					if (m_pin_rot_ctr)
+						m_update_rot_ctr = true;
 
 					//SetSortBricks();
 					RefreshGL(31);
@@ -10619,7 +10618,8 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			else
 			{
 				m_interactive = true;
-				m_rot_center_dirty = true;
+				if (m_pin_rot_ctr)
+					m_update_rot_ctr = true;
 				double value = wheel * m_scale_factor / 1000.0;
 				if (m_scale_factor + value > 0.01)
 					m_scale_factor += value;

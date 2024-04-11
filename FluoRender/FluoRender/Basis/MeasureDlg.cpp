@@ -1657,14 +1657,14 @@ void MeasureDlg::OnPencil(wxCommandEvent& event)
 	{
 		m_view->SetIntMode(13);
 		glbin_ruler_handler.SetType(1);
-		//if (m_view->m_glview->GetRulerRenderer())
-		//	m_view->m_glview->GetRulerRenderer()->SetDrawText(false);
+		//if (m_view->m_canvas->GetRulerRenderer())
+		//	m_view->m_canvas->GetRulerRenderer()->SetDrawText(false);
 	}
 	else
 	{
 		m_view->SetIntMode(1);
-		//if (m_view->m_glview->GetRulerRenderer())
-		//	m_view->m_glview->GetRulerRenderer()->SetDrawText(true);
+		//if (m_view->m_canvas->GetRulerRenderer())
+		//	m_view->m_canvas->GetRulerRenderer()->SetDrawText(true);
 	}
 }
 

@@ -62,7 +62,9 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 	m_draw_scalebar(0),
 	m_bg_color_inv(false),
 	m_draw_clip(false),
-	m_rot_slider(true)
+	m_rot_slider(true),
+	m_pin_by_user(0),
+	m_pin_by_scale(false)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -154,7 +156,7 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 #endif
 	attriblist.DoubleBuffer();
 	attriblist.EndList();
-	m_glview = new RenderCanvas(frame, this, attriblist, sharedContext);
+	m_canvas = new RenderCanvas(frame, this, attriblist, sharedContext);
 	if (!sharedContext)
 	{
 		wxGLContextAttrs contextAttrs;
@@ -173,12 +175,12 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 			Robust().
 			ResetIsolation().
 			EndList();
-		sharedContext = new wxGLContext(m_glview, NULL, &contextAttrs);
+		sharedContext = new wxGLContext(m_canvas, NULL, &contextAttrs);
 		if (!sharedContext->IsOK())
 		{
 			contextAttrs.Reset();
 			contextAttrs.PlatformDefaults().EndList();
-			sharedContext = new wxGLContext(m_glview, NULL, &contextAttrs);
+			sharedContext = new wxGLContext(m_canvas, NULL, &contextAttrs);
 		}
 		if (!sharedContext->IsOK())
 		{
@@ -195,14 +197,14 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 		}
 		if (sharedContext)
 		{
-			//sharedContext->SetCurrent(*m_glview);
-			m_glview->SetCurrent(*sharedContext);
-			m_glview->m_glRC = sharedContext;
-			m_glview->m_set_gl = true;
+			//sharedContext->SetCurrent(*m_canvas);
+			m_canvas->SetCurrent(*sharedContext);
+			m_canvas->m_glRC = sharedContext;
+			m_canvas->m_set_gl = true;
 		}
 	}
-	m_glview->SetCanFocus(false);
-	m_view_sizer->Add(m_glview, 1, wxEXPAND);
+	m_canvas->SetCanFocus(false);
+	m_view_sizer->Add(m_canvas, 1, wxEXPAND);
 #ifdef _DEBUG
 	//example Pixel format descriptor detailing each part
 	//PIXELFORMATDESCRIPTOR pfd = { 
@@ -227,7 +229,7 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 	// }; 
 	PIXELFORMATDESCRIPTOR  pfd;
 	//check ret. this is an error code when the pixel format is invalid.
-	int ret = m_glview->GetPixelFormat(&pfd);
+	int ret = m_canvas->GetPixelFormat(&pfd);
 #endif
 	
 	//get actual version
@@ -255,8 +257,8 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 
 RenderViewPanel::~RenderViewPanel()
 {
-	if (m_glview)
-		delete m_glview;
+	if (m_canvas)
+		delete m_canvas;
 	if (m_full_frame)
 		delete m_full_frame;
 
@@ -675,7 +677,7 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 {
 	if (FOUND_VALUE(gstNull))
 		return;
-	if (!m_glview)
+	if (!m_canvas)
 		return;
 
 	int ival;
@@ -683,11 +685,12 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	double dval;
 
 	bool update_all = vc.empty();
+	bool update_pin_rot_ctr = FOUND_VALUE(gstPinRotCtr);
 
 	//blend mode
 	if (update_all || FOUND_VALUE(gstMixMethod))
 	{
-		ival = m_glview->GetVolMethod();
+		ival = m_canvas->GetVolMethod();
 		int test = m_options_toolbar->GetToolsCount();
 		m_options_toolbar->ToggleTool(ID_VolumeSeqRd, ival == VOL_METHOD_SEQ);
 		m_options_toolbar->SetToolNormalBitmap(ID_VolumeSeqRd,
@@ -709,28 +712,28 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//info
 	if (update_all || FOUND_VALUE(gstDrawInfo))
 	{
-		bval = m_glview->m_draw_info & 1;
+		bval = m_canvas->m_draw_info & 1;
 		m_options_toolbar->ToggleTool(ID_InfoChk, bval);
 	}
 
 	//cam center
 	if (update_all || FOUND_VALUE(gstDrawCamCtr))
 	{
-		bval = m_glview->m_draw_camctr;
+		bval = m_canvas->m_draw_camctr;
 		m_options_toolbar->ToggleTool(ID_CamCtrChk, bval);
 	}
 
 	//legend
 	if (update_all || FOUND_VALUE(gstDrawLegend))
 	{
-		bval = m_glview->m_draw_legend;
+		bval = m_canvas->m_draw_legend;
 		m_options_toolbar->ToggleTool(ID_LegendChk, bval);
 	}
 
 	//colormap
 	if (update_all || FOUND_VALUE(gstDrawColormap))
 	{
-		bval = m_glview->m_draw_colormap;
+		bval = m_canvas->m_draw_colormap;
 		m_options_toolbar->ToggleTool(ID_ColormapChk, bval);
 	}
 
@@ -741,31 +744,31 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		{
 		case 0:
 			m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
-				wxGetBitmap(scale_text_off, m_dpi_sf2));
+				wxGetBitmap(scalebar, m_dpi_sf2));
 			m_scale_text->Enable();
 			m_scale_cmb->Disable();
 			break;
 		case 1:
 			m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
-				wxGetBitmap(scale_text, m_dpi_sf2));
+				wxGetBitmap(scale_text_off, m_dpi_sf2));
 			m_scale_text->Enable();
 			m_scale_cmb->Enable();
 			break;
 		case 2:
 			m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
-				wxGetBitmap(scalebar, m_dpi_sf2));
+				wxGetBitmap(scale_text, m_dpi_sf2));
 			m_scale_text->Disable();
 			m_scale_cmb->Disable();
 			break;
 		}
 	}
 	if (update_all || FOUND_VALUE(gstScaleBarUnit))
-		m_scale_cmb->Select(m_glview->m_sb_unit);
+		m_scale_cmb->Select(m_canvas->m_sb_unit);
 
 	//background
 	if (update_all || FOUND_VALUE(gstBgColor))
 	{
-		fluo::Color c = m_glview->GetBackgroundColor();
+		fluo::Color c = m_canvas->GetBackgroundColor();
 		wxColor wxc((unsigned char)(c.r() * 255 + 0.5),
 			(unsigned char)(c.g() * 255 + 0.5),
 			(unsigned char)(c.b() * 255 + 0.5));
@@ -785,8 +788,8 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//angle of view
 	if (update_all || FOUND_VALUE(gstAov))
 	{
-		dval = m_glview->GetAov();
-		bval = m_glview->GetPersp();
+		dval = m_canvas->GetAov();
+		bval = m_canvas->GetPersp();
 		m_aov_sldr->ChangeValue(bval ? std::round(dval) : 10);
 		m_aov_text->ChangeValue(bval ? wxString::Format("%d",
 			(int)(std::round(dval))) : wxString("Ortho"));
@@ -794,12 +797,12 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 	//free fly
 	if (update_all || FOUND_VALUE(gstFree))
-		m_options_toolbar2->ToggleTool(ID_FreeChk, m_glview->GetFree());
+		m_options_toolbar2->ToggleTool(ID_FreeChk, m_canvas->GetFree());
 
 	//depthe attenuation
 	if (update_all || FOUND_VALUE(gstDepthAtten))
 	{
-		bval = m_glview->m_use_fog;
+		bval = m_canvas->m_use_fog;
 		m_depth_atten_btn->ToggleTool(0, bval);
 		if (bval)
 			m_depth_atten_btn->SetToolNormalBitmap(0,
@@ -812,36 +815,57 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (update_all || FOUND_VALUE(gstDaInt))
 	{
-		dval = m_glview->GetFogIntensity();
+		dval = m_canvas->GetFogIntensity();
 		m_depth_atten_factor_sldr->ChangeValue(std::round(dval * 100));
 		m_depth_atten_factor_text->ChangeValue(wxString::Format("%.2f", dval));
-	}
-
-	//pin rotation center
-	if (update_all || FOUND_VALUE(gstPinRotCtr))
-	{
-		bval = m_glview->m_pin_rot_center;
-		m_pin_btn->ToggleTool(0, bval);
-		if (bval)
-			m_pin_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(pin, m_dpi_sf2));
-		else
-			m_pin_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(anchor_dark, m_dpi_sf2));
 	}
 
 	//scale factor
 	if (update_all || FOUND_VALUE(gstScaleFactor))
 	{
-		double scale = m_glview->m_scale_factor;
+		double scale = m_canvas->m_scale_factor;
+		switch (m_canvas->m_scale_mode)
+		{
+		case 0:
+			break;
+		case 1:
+			scale /= m_canvas->Get121ScaleFactor();
+			break;
+		case 2:
+		{
+			VolumeData* vd = 0;
+			if (m_canvas->m_cur_vol)
+				vd = m_canvas->m_cur_vol;
+			else if (m_canvas->m_vd_pop_list.size())
+				vd = m_canvas->m_vd_pop_list[0];
+			if (!vd)
+				break;
+			double spcx, spcy, spcz;
+			vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
+			if (spcx > 0.0)
+				scale /= m_canvas->Get121ScaleFactor() * spcx;
+		}
+		break;
+		}
+
 		ival = std::round(scale * 100);
 		m_scale_factor_sldr->ChangeValue(ival);
 		m_scale_factor_text->ChangeValue(wxString::Format("%d", ival));
+		m_scale_factor_text->Update();
+
+		//check if need update pin rot center
+		m_pin_by_scale = scale > glbin_settings.m_pin_threshold;
+		if (m_pin_by_user == 0)
+		{
+			bool pin_by_canvas = m_canvas->m_pin_rot_ctr;
+			m_canvas->SetPinRotCenter(m_pin_by_scale);
+			update_pin_rot_ctr = m_pin_by_scale != pin_by_canvas;
+		}
 	}
 	//scale mode
 	if (update_all || FOUND_VALUE(gstScaleMode))
 	{
-		switch (m_glview->m_scale_mode)
+		switch (m_canvas->m_scale_mode)
 		{
 		case 0:
 			m_scale_mode_btn->SetToolNormalBitmap(0,
@@ -869,12 +893,24 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			break;
 		}
 	}
+	//pin rotation center
+	if (update_all || update_pin_rot_ctr)
+	{
+		bval = m_canvas->m_pin_rot_ctr;
+		m_pin_btn->ToggleTool(0, bval);
+		if (bval)
+			m_pin_btn->SetToolNormalBitmap(0,
+				wxGetBitmap(pin, m_dpi_sf2));
+		else
+			m_pin_btn->SetToolNormalBitmap(0,
+				wxGetBitmap(anchor_dark, m_dpi_sf2));
+	}
 
 	//lock rot
 	if (update_all || FOUND_VALUE(gstGearedEnable))
 	{
-		m_rot_lock_btn->ToggleTool(ID_RotLockChk, m_glview->m_rot_lock);
-		if (m_glview->m_rot_lock)
+		m_rot_lock_btn->ToggleTool(ID_RotLockChk, m_canvas->m_rot_lock);
+		if (m_canvas->m_rot_lock)
 			m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
 				wxGetBitmap(gear_45, m_dpi_sf2));
 		else
@@ -914,22 +950,25 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstCamRotation))
 	{
 		double rotx, roty, rotz;
-		m_glview->GetRotations(rotx, roty, rotz);
+		m_canvas->GetRotations(rotx, roty, rotz);
 		m_x_rot_sldr->ChangeValue(std::round(rotx));
 		m_y_rot_sldr->ChangeValue(std::round(roty));
 		m_z_rot_sldr->ChangeValue(std::round(rotz));
 		m_x_rot_text->ChangeValue(wxString::Format("%.1f", rotx));
 		m_y_rot_text->ChangeValue(wxString::Format("%.1f", roty));
 		m_z_rot_text->ChangeValue(wxString::Format("%.1f", rotz));
-		m_ortho_view_cmb->Select(m_glview->GetOrientation());
+		m_x_rot_text->Update();
+		m_y_rot_text->Update();
+		m_z_rot_text->Update();
+		m_ortho_view_cmb->Select(m_canvas->GetOrientation());
 	}
 }
 
 void RenderViewPanel::SetVolumeMethod(int val)
 {
-	m_glview->SetVolMethod(val);
+	m_canvas->SetVolMethod(val);
 
-	FluoRefresh(true, 2, { gstMixMethod }, { m_frame->GetView(m_glview) });
+	FluoRefresh(true, 2, { gstMixMethod }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::Capture()
@@ -943,14 +982,14 @@ void RenderViewPanel::Capture()
 	int rval = file_dlg.ShowModal();
 	if (rval == wxID_OK)
 	{
-		m_glview->m_cap_file = file_dlg.GetDirectory() + GETSLASH() + file_dlg.GetFilename();
-		m_glview->m_capture = true;
+		m_canvas->m_cap_file = file_dlg.GetDirectory() + GETSLASH() + file_dlg.GetFilename();
+		m_canvas->m_capture = true;
 		RefreshGL();
 
 		if (glbin_settings.m_prj_save)
 		{
 			wxString new_folder;
-			new_folder = m_glview->m_cap_file + "_project";
+			new_folder = m_canvas->m_cap_file + "_project";
 			MkDirW(new_folder.ToStdWstring());
 			wxString prop_file = new_folder + GETSLASH() + file_dlg.GetFilename() + "_project.vrp";
 			bool inc = wxFileExists(prop_file) &&
@@ -963,32 +1002,32 @@ void RenderViewPanel::Capture()
 void RenderViewPanel::SetInfo(bool val)
 {
 	if (val)
-		m_glview->m_draw_info |= 1;
+		m_canvas->m_draw_info |= 1;
 	else
-		m_glview->m_draw_info &= ~1;
+		m_canvas->m_draw_info &= ~1;
 
-	FluoRefresh(true, 2, { gstDrawInfo }, { m_frame->GetView(m_glview) });
+	FluoRefresh(true, 2, { gstDrawInfo }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetDrawCamCtr(bool val)
 {
-	m_glview->m_draw_camctr = val;
+	m_canvas->m_draw_camctr = val;
 
-	FluoRefresh(true, 2, { gstDrawCamCtr }, { m_frame->GetView(m_glview) });
+	FluoRefresh(true, 2, { gstDrawCamCtr }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetLegend(bool val)
 {
-	m_glview->m_draw_legend = val;
+	m_canvas->m_draw_legend = val;
 
-	FluoRefresh(true, 2, { gstDrawLegend }, { m_frame->GetView(m_glview) });
+	FluoRefresh(true, 2, { gstDrawLegend }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetDrawColormap(bool val)
 {
-	m_glview->m_draw_colormap = val;
+	m_canvas->m_draw_colormap = val;
 
-	FluoRefresh(true, 2, { gstDrawColormap }, { m_frame->GetView(m_glview) });
+	FluoRefresh(true, 2, { gstDrawColormap }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetDrawScalebar(int val)
@@ -996,27 +1035,27 @@ void RenderViewPanel::SetDrawScalebar(int val)
 	switch (val)
 	{
 	case 0:
-		m_glview->m_disp_scale_bar = true;
-		m_glview->m_disp_scale_bar_text = false;
+		m_canvas->m_disp_scale_bar = false;
+		m_canvas->m_disp_scale_bar_text = false;
 		break;
 	case 1:
-		m_glview->m_disp_scale_bar = true;
-		m_glview->m_disp_scale_bar_text = true;
+		m_canvas->m_disp_scale_bar = true;
+		m_canvas->m_disp_scale_bar_text = false;
 		break;
 	case 2:
-		m_glview->m_disp_scale_bar = false;
-		m_glview->m_disp_scale_bar_text = false;
+		m_canvas->m_disp_scale_bar = true;
+		m_canvas->m_disp_scale_bar_text = true;
 		break;
 	}
 
-	FluoRefresh(true, 2, { gstDrawScaleBar }, { m_frame->GetView(m_glview) });
+	FluoRefresh(true, 2, { gstDrawScaleBar }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetScaleText(double val)
 {
 	wxString str, num_text, unit_text;
 	num_text = wxString::Format("%d", (int)val);
-	switch (m_glview->m_sb_unit)
+	switch (m_canvas->m_sb_unit)
 	{
 	case 0:
 		unit_text = "nm";
@@ -1030,17 +1069,17 @@ void RenderViewPanel::SetScaleText(double val)
 		break;
 	}
 	str = num_text + " " + unit_text;
-	m_glview->SetSBText(str);
-	m_glview->SetScaleBarLen(val);
-	m_glview->m_sb_num = num_text;
+	m_canvas->SetSBText(str);
+	m_canvas->SetScaleBarLen(val);
+	m_canvas->m_sb_num = num_text;
 
-	FluoRefresh(true, 2, {gstNull}, { m_frame->GetView(m_glview) });
+	FluoRefresh(true, 2, {gstNull}, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetScaleUnit(int val)
 {
-	m_glview->m_sb_unit = val;
-	double dval = m_glview->m_sb_length;
+	m_canvas->m_sb_unit = val;
+	double dval = m_canvas->m_sb_length;
 	wxString str, num_text, unit_text;
 	num_text = wxString::Format("%d", (int)dval);
 	switch (val)
@@ -1057,43 +1096,43 @@ void RenderViewPanel::SetScaleUnit(int val)
 		break;
 	}
 	str = num_text + " " + unit_text;
-	m_glview->SetSBText(str);
-	m_glview->SetScaleBarLen(dval);
-	m_glview->m_sb_num = num_text;
+	m_canvas->SetSBText(str);
+	m_canvas->SetScaleBarLen(dval);
+	m_canvas->m_sb_num = num_text;
 
-	FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_glview) });
+	FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetBgColor(fluo::Color val)
 {
-	m_glview->SetBackgroundColor(val);
+	m_canvas->SetBackgroundColor(val);
 
-	FluoRefresh(true, 2, { gstBgColor }, { m_frame->GetView(m_glview) });
+	FluoRefresh(true, 2, { gstBgColor }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetBgColorInvert(bool val)
 {
 	m_bg_color_inv = val;
-	fluo::Color c = m_glview->GetBackgroundColor();
+	fluo::Color c = m_canvas->GetBackgroundColor();
 	c = fluo::Color(1.0, 1.0, 1.0) - c;
-	m_glview->SetBackgroundColor(c);
+	m_canvas->SetBackgroundColor(c);
 
-	FluoRefresh(true, 2, { gstBgColor, gstBgColorInv }, { m_frame->GetView(m_glview) });
+	FluoRefresh(true, 2, { gstBgColor, gstBgColorInv }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetDrawClipPlanes(bool val)
 {
-	bool draw_clip = m_glview->m_draw_clip;
+	bool draw_clip = m_canvas->m_draw_clip;
 	if (val && !draw_clip)
 	{
-		m_glview->m_draw_clip = true;
-		m_glview->m_clip_mask = -1;
-		FluoRefresh(true, 2, {gstNull}, { m_frame->GetView(m_glview) });
+		m_canvas->m_draw_clip = true;
+		m_canvas->m_clip_mask = -1;
+		FluoRefresh(true, 2, {gstNull}, { m_frame->GetView(m_canvas) });
 	}
 	else if (!val && draw_clip)
 	{
-		m_glview->m_draw_clip = false;
-		FluoRefresh(true, 2, {gstNull}, { m_frame->GetView(m_glview) });
+		m_canvas->m_draw_clip = false;
+		FluoRefresh(true, 2, {gstNull}, { m_frame->GetView(m_canvas) });
 	}
 }
 
@@ -1101,46 +1140,46 @@ void RenderViewPanel::SetAov(double val, bool notify)
 {
 	if (val < 11)
 	{
-		m_glview->SetPersp(false);
-		m_glview->SetAov(10);
+		m_canvas->SetPersp(false);
+		m_canvas->SetAov(10);
 	}
 	else if (val > 100)
 	{
-		m_glview->SetPersp(true);
-		m_glview->SetAov(100);
+		m_canvas->SetPersp(true);
+		m_canvas->SetAov(100);
 	}
 	else
 	{
-		m_glview->SetPersp(true);
-		m_glview->SetAov(val);
+		m_canvas->SetPersp(true);
+		m_canvas->SetAov(val);
 	}
 
 	if (notify)
-		FluoRefresh(true, 2, { gstAov }, { m_frame->GetView(m_glview) });
+		FluoRefresh(true, 2, { gstAov }, { m_frame->GetView(m_canvas) });
 	else
-		FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_glview) });
+		FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetFree(bool val)
 {
-	m_glview->SetFree(val);
+	m_canvas->SetFree(val);
 	if (!val)
 	{
-		if (m_glview->m_aov > 10)
-			m_glview->SetPersp(true);
+		if (m_canvas->m_aov > 10)
+			m_canvas->SetPersp(true);
 		else
-			m_glview->SetPersp(false);
+			m_canvas->SetPersp(false);
 	}
 
-	FluoRefresh(true, 2, { gstFree }, { m_frame->GetView(m_glview) });
+	FluoRefresh(true, 2, { gstFree }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetFullScreen()
 {
-	if (m_glview->GetParent() != m_full_frame)
+	if (m_canvas->GetParent() != m_full_frame)
 	{
-		m_view_sizer->Detach(m_glview);
-		m_glview->Reparent(m_full_frame);
+		m_view_sizer->Detach(m_canvas);
+		m_canvas->Reparent(m_full_frame);
 		//get display id
 		int disp_id = glbin_settings.m_disp_id;
 		if (disp_id >= wxDisplay::GetCount())
@@ -1150,8 +1189,8 @@ void RenderViewPanel::SetFullScreen()
 		m_full_frame->SetSize(rect.GetSize());
 		m_full_frame->SetPosition(rect.GetPosition());
 		m_full_frame->ShowFullScreen(true);
-		m_glview->SetPosition(wxPoint(0, 0));
-		m_glview->SetSize(m_full_frame->GetSize());
+		m_canvas->SetPosition(wxPoint(0, 0));
+		m_canvas->SetSize(m_full_frame->GetSize());
 		if (glbin_settings.m_stay_top)
 			m_full_frame->SetWindowStyle(wxBORDER_NONE | wxSTAY_ON_TOP);
 		else
@@ -1163,178 +1202,132 @@ void RenderViewPanel::SetFullScreen()
 		m_full_frame->Iconize(false);
 		m_full_frame->Raise();
 		m_full_frame->Show();
-		m_glview->m_full_screen = true;
-		m_glview->SetFocus();
+		m_canvas->m_full_screen = true;
+		m_canvas->SetFocus();
 		RefreshGL();
 	}
 	else
 	{
-		m_glview->Close();
+		m_canvas->Close();
 	}
 }
 
 void RenderViewPanel::SetDepthAttenEnable(bool val)
 {
-	m_glview->SetFog(true);
-	FluoRefresh(true, 2, { gstDepthAtten }, { m_frame->GetView(m_glview) });
+	m_canvas->SetFog(true);
+	FluoRefresh(true, 2, { gstDepthAtten }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetDepthAtten(double val, bool notify)
 {
-	m_glview->SetFogIntensity(val);
+	m_canvas->SetFogIntensity(val);
 	if (notify)
-		FluoRefresh(true, 2, { gstDaInt }, { m_frame->GetView(m_glview) });
+		FluoRefresh(true, 2, { gstDaInt }, { m_frame->GetView(m_canvas) });
 	else
-		FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_glview) });
-}
-
-void RenderViewPanel::SetPinRotCenter(bool val)
-{
-	m_glview->SetPinRotCenter(val);
-	double scale = m_glview->m_scale_factor;
-	switch (m_glview->m_scale_mode)
-	{
-		case 0:
-			break;
-		case 1:
-			scale /= m_glview->Get121ScaleFactor();
-			break;
-		case 2:
-		{
-			VolumeData* vd = 0;
-			if (m_glview->m_cur_vol)
-				vd = m_glview->m_cur_vol;
-			else if (m_glview->m_vd_pop_list.size())
-				vd = m_glview->m_vd_pop_list[0];
-			double spcx, spcy, spcz;
-			if (vd)
-			{
-				vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
-				if (spcx > 0.0)
-					scale /= m_glview->Get121ScaleFactor() * spcx;
-			}
-		}
-		break;
-	}
-
-	if (val)
-	{
-		if (scale > glbin_settings.m_pin_threshold)
-			m_glview->m_auto_update_rot_center = true;
-		else
-			m_glview->m_auto_update_rot_center = false;
-	}
-	else
-	{
-		if (scale > glbin_settings.m_pin_threshold)
-			m_glview->m_auto_update_rot_center = false;
-		else
-			m_glview->m_auto_update_rot_center = true;
-	}
-	FluoRefresh(true, 2, { gstPinRotCtr }, { m_frame->GetView(m_glview) });
+		FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetCenter()
 {
-	m_glview->SetCenter();
-	FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_glview) });
+	m_canvas->SetCenter();
+	FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetScale121()
 {
-	m_glview->SetScale121();
-	if (m_glview->m_mouse_focus)
-		m_glview->SetFocus();
-	FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_glview) });
+	m_canvas->SetScale121();
+	if (m_canvas->m_mouse_focus)
+		m_canvas->SetFocus();
+	FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetScaleFactor(double val, bool notify)
 {
-	switch (m_glview->m_scale_mode)
+	switch (m_canvas->m_scale_mode)
 	{
 		case 0:
-			m_glview->m_scale_factor = val;
+			m_canvas->m_scale_factor = val;
 			break;
 		case 1:
-			m_glview->m_scale_factor = val * m_glview->Get121ScaleFactor();
+			m_canvas->m_scale_factor = val * m_canvas->Get121ScaleFactor();
 			break;
 		case 2:
 		{
 			VolumeData* vd = 0;
-			if (m_glview->m_cur_vol)
-				vd = m_glview->m_cur_vol;
-			else if (m_glview->m_vd_pop_list.size())
-				vd = m_glview->m_vd_pop_list[0];
+			if (m_canvas->m_cur_vol)
+				vd = m_canvas->m_cur_vol;
+			else if (m_canvas->m_vd_pop_list.size())
+				vd = m_canvas->m_vd_pop_list[0];
 			double spcx, spcy, spcz;
 			if (vd)
 			{
 				vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
 				if (spcx > 0.0)
-					m_glview->m_scale_factor = val * m_glview->Get121ScaleFactor() * spcx;
+					m_canvas->m_scale_factor = val * m_canvas->Get121ScaleFactor() * spcx;
 			}
 		}
 		break;
 	}
 	if (notify)
-		FluoRefresh(true, 2, { gstScaleFactor }, { m_frame->GetView(m_glview) });
+		FluoRefresh(true, 2, { gstScaleFactor }, { m_frame->GetView(m_canvas) });
 	else
-		FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_glview) });
+		FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetScaleMode(int val)
 {
-	m_glview->m_scale_mode = val;
-	FluoRefresh(true, 2, { gstScaleMode }, { m_frame->GetView(m_glview) });
+	m_canvas->m_scale_mode = val;
+	FluoRefresh(true, 2, { gstScaleMode }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetRotLock(bool val)
 {
-	m_glview->SetRotLock(val);
+	m_canvas->SetRotLock(val);
 	if (val)
 	{
 		double rotx, roty, rotz;
-		m_glview->GetRotations(rotx, roty, rotz);
+		m_canvas->GetRotations(rotx, roty, rotz);
 		rotx = (((int)(rotx / 45)) * 45);
 		roty = (((int)(roty / 45)) * 45);
 		rotz = (((int)(rotz / 45)) * 45);
 		SetRotations(rotx, roty, rotz, true);
 	}
-	FluoRefresh(true, 2, { gstGearedEnable }, { m_frame->GetView(m_glview) });
+	FluoRefresh(true, 2, { gstGearedEnable }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetSliderType(bool val)
 {
 	m_rot_slider = val;
-	FluoRefresh(true, 2, { gstRotSliderMode }, { m_frame->GetView(m_glview) });
+	FluoRefresh(true, 2, { gstRotSliderMode }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetRotations(double rotx, double roty, double rotz, bool notify)
 {
-	m_glview->SetRotations(rotx, roty, rotz, false);
+	m_canvas->SetRotations(rotx, roty, rotz, false);
 	if (notify)
-		FluoRefresh(true, 2, { gstCamRotation }, { m_frame->GetView(m_glview) });
+		FluoRefresh(true, 2, { gstCamRotation }, { m_frame->GetView(m_canvas) });
 	else
-		FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_glview) });
+		FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetZeroRotations()
 {
 	double rotx, roty, rotz;
-	m_glview->GetRotations(rotx, roty, rotz);
+	m_canvas->GetRotations(rotx, roty, rotz);
 	if (rotx == 0.0 &&
 		roty == 0.0 &&
 		rotz == 0.0)
 	{
 		//reset
-		m_glview->ResetZeroRotations(rotx, roty, rotz);
-		m_glview->SetRotations(rotx, roty, rotz, false);
+		m_canvas->ResetZeroRotations(rotx, roty, rotz);
+		m_canvas->SetRotations(rotx, roty, rotz, false);
 	}
 	else
 	{
-		m_glview->SetZeroRotations();
-		m_glview->SetRotations(0.0, 0.0, 0.0, false);
+		m_canvas->SetZeroRotations();
+		m_canvas->SetRotations(0.0, 0.0, 0.0, false);
 	}
-	FluoRefresh(true, 2, { gstCamRotation }, { m_frame->GetView(m_glview) });
+	FluoRefresh(true, 2, { gstCamRotation }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::OnToolBar(wxCommandEvent& event)
@@ -1410,7 +1403,7 @@ void RenderViewPanel::OnAovSldrIdle(wxIdleEvent& event)
 {
 	if (m_frame->GetClippingView()->GetHoldPlanes())
 		return;
-	if (m_glview->m_capture)
+	if (m_canvas->m_capture)
 		return;
 
 	wxPoint pos = wxGetMousePosition();
@@ -1438,7 +1431,7 @@ void RenderViewPanel::OnAovSldrIdle(wxIdleEvent& event)
 void RenderViewPanel::OnAovChange(wxScrollEvent& event)
 {
 	int val = m_aov_sldr->GetValue();
-	bool bval = m_glview->m_persp;
+	bool bval = m_canvas->m_persp;
 	m_aov_text->ChangeValue(bval ? wxString::Format("%d", val) : wxString("Ortho"));
 	m_aov_text->Update();
 
@@ -1517,7 +1510,12 @@ void RenderViewPanel::OnDepthAttenReset(wxCommandEvent& event)
 void RenderViewPanel::OnPin(wxCommandEvent& event)
 {
 	bool val = m_pin_btn->GetToolState(0);
-	SetPinRotCenter(val);
+	if (m_pin_by_scale == val)
+		m_pin_by_user = 0;
+	else
+		m_pin_by_user = val ? 2 : 1;
+	m_canvas->SetPinRotCenter(val);
+	FluoRefresh(true, 2, { gstPinRotCtr }, { m_frame->GetView(m_canvas) });
 	event.Skip();
 }
 
@@ -1593,7 +1591,7 @@ void RenderViewPanel::OnScaleReset(wxCommandEvent& event)
 
 void RenderViewPanel::OnScaleMode(wxCommandEvent& event)
 {
-	int mode = m_glview->m_scale_mode;
+	int mode = m_canvas->m_scale_mode;
 	mode += 1;
 	mode = mode > 2 ? 0 : mode;
 	SetScaleMode(mode);
@@ -1658,22 +1656,22 @@ void RenderViewPanel::OnOrthoViewSelected(wxCommandEvent& event)
 	switch (sel)
 	{
 	case 0://+X
-		m_glview->SetRotations(0.0, 90.0, 0.0, false);
+		m_canvas->SetRotations(0.0, 90.0, 0.0, false);
 		break;
 	case 1://-X
-		m_glview->SetRotations(0.0, 270.0, 0.0, false);
+		m_canvas->SetRotations(0.0, 270.0, 0.0, false);
 		break;
 	case 2://+Y
-		m_glview->SetRotations(90.0, 0.0, 0.0, false);
+		m_canvas->SetRotations(90.0, 0.0, 0.0, false);
 		break;
 	case 3://-Y
-		m_glview->SetRotations(270.0, 0.0, 0.0, false);
+		m_canvas->SetRotations(270.0, 0.0, 0.0, false);
 		break;
 	case 4://+Z
-		m_glview->SetRotations(0.0, 0.0, 0.0, false);
+		m_canvas->SetRotations(0.0, 0.0, 0.0, false);
 		break;
 	case 5:
-		m_glview->SetRotations(0.0, 180.0, 0.0, false);
+		m_canvas->SetRotations(0.0, 180.0, 0.0, false);
 		break;
 	}
 	if (sel < 6)
@@ -1708,19 +1706,19 @@ void RenderViewPanel::ResetID()
 //get rendering context
 wxGLContext* RenderViewPanel::GetContext()
 {
-	if (m_glview)
-		return m_glview->m_glRC/*GetContext()*/;
+	if (m_canvas)
+		return m_canvas->m_glRC/*GetContext()*/;
 	else
 		return 0;
 }
 
 void RenderViewPanel::RefreshGL(bool interactive, bool start_loop)
 {
-	if (m_glview)
+	if (m_canvas)
 	{
-		m_glview->m_force_clear = true;
-		m_glview->m_interactive = interactive;
-		m_glview->RefreshGL(39, false, start_loop);
+		m_canvas->m_force_clear = true;
+		m_canvas->m_interactive = interactive;
+		m_canvas->RefreshGL(39, false, start_loop);
 	}
 }
 
@@ -1964,7 +1962,7 @@ wxWindow* RenderViewPanel::CreateExtraCaptureControl(wxWindow* parent)
 void RenderViewPanel::InitOpenVR()
 {
 #ifdef _WIN32
-	if (m_glview) m_glview->InitOpenVR();
+	if (m_canvas) m_canvas->InitOpenVR();
 #endif
 }
 
@@ -1977,86 +1975,86 @@ void RenderViewPanel::SaveDefault(unsigned int mask)
 
 	//render modes
 	if (mask & 0x1)
-		glbin_view_def.m_vol_method = m_glview->m_vol_method;
+		glbin_view_def.m_vol_method = m_canvas->m_vol_method;
 	//background color
 	if (mask & 0x2)
-		glbin_view_def.m_bg_color = m_glview->m_bg_color;
+		glbin_view_def.m_bg_color = m_canvas->m_bg_color;
 	//camera center
 	if (mask & 0x4)
-		glbin_view_def.m_draw_camctr = m_glview->m_draw_camctr;
+		glbin_view_def.m_draw_camctr = m_canvas->m_draw_camctr;
 	//camctr size
 	if (mask & 0x8)
-		glbin_view_def.m_camctr_size = m_glview->m_camctr_size;
+		glbin_view_def.m_camctr_size = m_canvas->m_camctr_size;
 	//fps
 	if (mask & 0x10)
-		glbin_view_def.m_draw_info = m_glview->m_draw_info;
+		glbin_view_def.m_draw_info = m_canvas->m_draw_info;
 	//selection
 	if (mask & 0x20)
-		glbin_view_def.m_draw_legend = m_glview->m_draw_legend;
+		glbin_view_def.m_draw_legend = m_canvas->m_draw_legend;
 	//mouse focus
 	if (mask & 0x40)
-		glbin_view_def.m_mouse_focus = m_glview->m_mouse_focus;
+		glbin_view_def.m_mouse_focus = m_canvas->m_mouse_focus;
 	//ortho/persp
 	if (mask & 0x80)
 	{
-		glbin_view_def.m_persp = m_glview->m_persp;
-		glbin_view_def.m_aov = m_glview->m_aov;
-		glbin_view_def.m_free = m_glview->m_free;
+		glbin_view_def.m_persp = m_canvas->m_persp;
+		glbin_view_def.m_aov = m_canvas->m_aov;
+		glbin_view_def.m_free = m_canvas->m_free;
 	}
 	//rotations
 	if (mask & 0x100)
 	{
 		glbin_view_def.m_rot = fluo::Vector(
-			m_glview->m_rotx,
-			m_glview->m_roty,
-			m_glview->m_rotz
+			m_canvas->m_rotx,
+			m_canvas->m_roty,
+			m_canvas->m_rotz
 		);
-		glbin_view_def.m_rot_lock = m_glview->m_rot_lock;
+		glbin_view_def.m_rot_lock = m_canvas->m_rot_lock;
 		glbin_view_def.m_rot_slider = m_rot_slider;
 	}
 	//depth atten
 	if (mask & 0x200)
 	{
-		glbin_view_def.m_use_fog = m_glview->m_use_fog;
-		glbin_view_def.m_fog_intensity = m_glview->m_fog_intensity;
+		glbin_view_def.m_use_fog = m_canvas->m_use_fog;
+		glbin_view_def.m_fog_intensity = m_canvas->m_fog_intensity;
 	}
 	//scale factor
 	if (mask & 0x400)
 	{
-		glbin_view_def.m_pin_rot_center = m_glview->m_pin_rot_center;
-		glbin_view_def.m_scale_factor = m_glview->m_scale_factor;
-		glbin_view_def.m_scale_mode = m_glview->m_scale_mode;
+		glbin_view_def.m_pin_rot_center = m_canvas->m_pin_rot_ctr;
+		glbin_view_def.m_scale_factor = m_canvas->m_scale_factor;
+		glbin_view_def.m_scale_mode = m_canvas->m_scale_mode;
 	}
 	//camera center
 	if (mask & 0x800)
 		glbin_view_def.m_center = fluo::Point(
-			m_glview->m_ctrx,
-			m_glview->m_ctry,
-			m_glview->m_ctrz
+			m_canvas->m_ctrx,
+			m_canvas->m_ctry,
+			m_canvas->m_ctrz
 		);
 	//colormap
 	if (mask & 0x1000)
-		glbin_view_def.m_draw_colormap = m_glview->m_draw_colormap;
+		glbin_view_def.m_draw_colormap = m_canvas->m_draw_colormap;
 }
 
 void RenderViewPanel::LoadSettings()
 {
-	glbin_view_def.Apply(m_glview);
+	glbin_view_def.Apply(m_canvas);
 	m_rot_slider = glbin_view_def.m_rot_slider;
-	m_glview->m_test_speed = glbin_settings.m_test_speed;
-	m_glview->m_test_wiref = glbin_settings.m_test_wiref;
-	m_glview->m_draw_bounds = glbin_settings.m_test_wiref;
-	m_glview->m_draw_grid = glbin_settings.m_test_wiref;
-	m_glview->SetPeelingLayers(glbin_settings.m_peeling_layers);
-	m_glview->SetBlendSlices(glbin_settings.m_micro_blend);
-	m_glview->SetAdaptive(glbin_settings.m_mouse_int);
-	m_glview->SetGradBg(glbin_settings.m_grad_bg);
-	m_glview->SetPointVolumeMode(glbin_settings.m_point_volume_mode);
-	m_glview->SetRulerUseTransf(glbin_settings.m_ruler_use_transf);
-	m_glview->SetStereo(glbin_settings.m_stereo);
-	m_glview->SetSBS(glbin_settings.m_sbs);
-	m_glview->SetEyeDist(glbin_settings.m_eye_dist);
+	m_canvas->m_test_speed = glbin_settings.m_test_speed;
+	m_canvas->m_test_wiref = glbin_settings.m_test_wiref;
+	m_canvas->m_draw_bounds = glbin_settings.m_test_wiref;
+	m_canvas->m_draw_grid = glbin_settings.m_test_wiref;
+	m_canvas->SetPeelingLayers(glbin_settings.m_peeling_layers);
+	m_canvas->SetBlendSlices(glbin_settings.m_micro_blend);
+	m_canvas->SetAdaptive(glbin_settings.m_mouse_int);
+	m_canvas->SetGradBg(glbin_settings.m_grad_bg);
+	m_canvas->SetPointVolumeMode(glbin_settings.m_point_volume_mode);
+	m_canvas->SetRulerUseTransf(glbin_settings.m_ruler_use_transf);
+	m_canvas->SetStereo(glbin_settings.m_stereo);
+	m_canvas->SetSBS(glbin_settings.m_sbs);
+	m_canvas->SetEyeDist(glbin_settings.m_eye_dist);
 
-	FluoRefresh(true, 2, {}, { m_frame->GetView(m_glview) });
+	FluoRefresh(true, 2, {}, { m_frame->GetView(m_canvas) });
 }
 
