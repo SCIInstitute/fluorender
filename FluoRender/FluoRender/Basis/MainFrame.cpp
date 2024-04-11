@@ -307,7 +307,7 @@ MainFrame::MainFrame(
 	//right-side items
 	m_main_tb->AddStretchSpacer();
 	bitmap = wxGetBitmapFromMemory(icon_settings);
-	m_main_tb->AddTool(ID_Settings, "Settings", bitmap,
+	m_main_tb->AddTool(ID_Settings, "Configurations", bitmap,
 		"Settings of FluoRender");
 	m_main_tb->AddSeparator();
 	int num = rand() % 4;
@@ -650,7 +650,7 @@ MainFrame::MainFrame(
 	m_aui_mgr.GetPane(m_machine_learning_dlg).Hide();
 	//settings
 	m_aui_mgr.AddPane(m_setting_dlg, wxAuiPaneInfo().
-		Name("m_setting_dlg").Caption("Settings").
+		Name("m_setting_dlg").Caption("Configurations").
 		Dockable(false).CloseButton(true).
 		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_setting_dlg).Float();
