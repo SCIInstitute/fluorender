@@ -857,8 +857,8 @@ MainFrame::MainFrame(
 	wxAcceleratorTable accel(5, entries);
 	SetAcceleratorTable(accel);
 
-	if (glbin_settings.m_dpi_scale_factor ==
-		GetDPIScaleFactor())
+	if (fluo::InEpsilon(glbin_settings.m_dpi_scale_factor,
+		GetDPIScaleFactor()))
 		m_aui_mgr.LoadPerspective(glbin_settings.m_layout);
 	if (glbin_settings.m_prj_panel_split)
 		m_proj_panel->Split(1, wxBOTTOM);
@@ -1836,13 +1836,6 @@ void MainFrame::OnSelection(int type,
 		glbin_script_proc.SetView(canvas);
 	}
 
-	if (m_adjust_view)
-	{
-		m_adjust_view->SetRenderView(canvas);
-		if (!canvas || vd)
-			m_adjust_view->SetVolumeData(vd);
-	}
-
 	if (m_clip_view)
 	{
 		switch (type)
@@ -1893,6 +1886,8 @@ void MainFrame::OnSelection(int type,
 	case 1:  //view
 		if (m_colocalization_dlg)
 			m_colocalization_dlg->SetGroup(group);
+		if (m_adjust_view)
+			m_adjust_view->SetRenderView(canvas);
 		//m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
 		//m_aui_mgr.Update();
 		break;
@@ -1911,6 +1906,8 @@ void MainFrame::OnSelection(int type,
 				v->m_cur_vol = vd;
 			}
 		}
+		if (m_adjust_view)
+			m_adjust_view->SetVolumeData(vd);
 		if (m_colocalization_dlg)
 			m_colocalization_dlg->SetGroup(group);
 		break;
@@ -3318,27 +3315,11 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 	fconfig.Write("ca_max", m_brush_tool_dlg->GetDftCAMax());
 	fconfig.Write("ca_thresh", m_brush_tool_dlg->GetDftCAThresh());
 	fconfig.Write("nr_thresh", m_brush_tool_dlg->GetDftNRThresh());
-	fconfig.Write("nr_size", m_brush_tool_dlg->GetDftNRSize());
+	fconfig.Write("nr_size", m_brush_tool_dlg->GetDftNRSize());*/
 	//ui layout
 	fconfig.SetPath("/ui_layout");
-	fconfig.Write("ui_main_tb", m_main_tb->IsShown());
-	fconfig.Write("ui_proj_view", m_proj_panel->IsShown());
-	fconfig.Write("ui_movie_view", m_movie_panel->IsShown());
-	fconfig.Write("ui_adjust_view", m_adjust_view->IsShown());
-	fconfig.Write("ui_clip_view", m_clip_view->IsShown());
-	fconfig.Write("ui_prop_view", m_prop_panel->IsShown());
-	fconfig.Write("ui_main_tb_float", m_aui_mgr.GetPane(m_main_tb).IsOk()?
-		m_aui_mgr.GetPane(m_main_tb).IsFloating():false);
-	fconfig.Write("ui_proj_view_float", m_aui_mgr.GetPane(m_proj_panel).IsOk()?
-		m_aui_mgr.GetPane(m_proj_panel).IsFloating():false);
-	fconfig.Write("ui_movie_view_float", m_aui_mgr.GetPane(m_movie_panel).IsOk()?
-		m_aui_mgr.GetPane(m_movie_panel).IsFloating():false);
-	fconfig.Write("ui_adjust_view_float", m_aui_mgr.GetPane(m_adjust_view).IsOk()?
-		m_aui_mgr.GetPane(m_adjust_view).IsFloating():false);
-	fconfig.Write("ui_clip_view_float", m_aui_mgr.GetPane(m_clip_view).IsOk()?
-		m_aui_mgr.GetPane(m_clip_view).IsFloating():false);
-	fconfig.Write("ui_prop_view_float", m_aui_mgr.GetPane(m_prop_panel).IsOk()?
-		m_aui_mgr.GetPane(m_prop_panel).IsFloating():false);*/
+	fconfig.Write("dpi scale factor", GetDPIScaleFactor());
+	fconfig.Write("layout", m_aui_mgr.SavePerspective());
 	//interpolator
 	fconfig.SetPath("/interpolator");
 	fconfig.Write("max_id", Interpolator::m_id);
@@ -4619,147 +4600,23 @@ void MainFrame::OpenProject(wxString& filename)
 			m_brush_tool_dlg->SetDftNRSize(dval);
 			m_noise_cancelling_dlg->SetDftSize(dval);
 		}
-	}
+	}*/
 
 	//ui layout
 	if (fconfig.Exists("/ui_layout"))
 	{
 		fconfig.SetPath("/ui_layout");
-		bool bVal;
-
-		if (fconfig.Read("ui_main_tb", &bVal))
+		wxString str;
+		double dval;
+		bool update = false;
+		if (fconfig.Read("dpi scale factor", &dval))
+			update = fluo::InEpsilon(dval, GetDPIScaleFactor());
+		if (update && fconfig.Read("layout", &str))
 		{
-			if (bVal)
-			{
-				m_aui_mgr.GetPane(m_main_tb).Show();
-				bool fl;
-				if (fconfig.Read("ui_main_tb_float", &fl))
-				{
-					if (fl)
-						m_aui_mgr.GetPane(m_main_tb).Float();
-					else
-						m_aui_mgr.GetPane(m_main_tb).Dock();
-				}
-			}
-			else
-			{
-				if (m_aui_mgr.GetPane(m_main_tb).IsOk())
-					m_aui_mgr.GetPane(m_main_tb).Hide();
-			}
+			m_aui_mgr.LoadPerspective(str);
+			m_aui_mgr.Update();
 		}
-		if (fconfig.Read("ui_proj_view", &bVal))
-		{
-			if (bVal)
-			{
-				m_aui_mgr.GetPane(m_proj_panel).Show();
-				m_tb_menu_ui->Check(ID_UIProjView, true);
-				bool fl;
-				if (fconfig.Read("ui_list_view_float", &fl))
-				{
-					if (fl)
-						m_aui_mgr.GetPane(m_proj_panel).Float();
-					else
-						m_aui_mgr.GetPane(m_proj_panel).Dock();
-				}
-			}
-			else
-			{
-				if (m_aui_mgr.GetPane(m_proj_panel).IsOk())
-					m_aui_mgr.GetPane(m_proj_panel).Hide();
-				m_tb_menu_ui->Check(ID_UIProjView, false);
-			}
-		}
-		if (fconfig.Read("ui_movie_view", &bVal))
-		{
-			if (bVal)
-			{
-				m_aui_mgr.GetPane(m_movie_panel).Show();
-				m_tb_menu_ui->Check(ID_UIMovieView, true);
-				bool fl;
-				if (fconfig.Read("ui_movie_view_float", &fl))
-				{
-					if (fl)
-						m_aui_mgr.GetPane(m_movie_panel).Float();
-					else
-						m_aui_mgr.GetPane(m_movie_panel).Dock();
-				}
-			}
-			else
-			{
-				if (m_aui_mgr.GetPane(m_movie_panel).IsOk())
-					m_aui_mgr.GetPane(m_movie_panel).Hide();
-				m_tb_menu_ui->Check(ID_UIMovieView, false);
-			}
-		}
-		if (fconfig.Read("ui_adjust_view", &bVal))
-		{
-			if (bVal)
-			{
-				m_aui_mgr.GetPane(m_adjust_view).Show();
-				m_tb_menu_ui->Check(ID_UIAdjView, true);
-				bool fl;
-				if (fconfig.Read("ui_adjust_view_float", &fl))
-				{
-					if (fl)
-						m_aui_mgr.GetPane(m_adjust_view).Float();
-					else
-						m_aui_mgr.GetPane(m_adjust_view).Dock();
-				}
-			}
-			else
-			{
-				if (m_aui_mgr.GetPane(m_adjust_view).IsOk())
-					m_aui_mgr.GetPane(m_adjust_view).Hide();
-				m_tb_menu_ui->Check(ID_UIAdjView, false);
-			}
-		}
-		if (fconfig.Read("ui_clip_view", &bVal))
-		{
-			if (bVal)
-			{
-				m_aui_mgr.GetPane(m_clip_view).Show();
-				m_tb_menu_ui->Check(ID_UIClipView, true);
-				bool fl;
-				if (fconfig.Read("ui_clip_view_float", &fl))
-				{
-					if (fl)
-						m_aui_mgr.GetPane(m_clip_view).Float();
-					else
-						m_aui_mgr.GetPane(m_clip_view).Dock();
-				}
-			}
-			else
-			{
-				if (m_aui_mgr.GetPane(m_clip_view).IsOk())
-					m_aui_mgr.GetPane(m_clip_view).Hide();
-				m_tb_menu_ui->Check(ID_UIClipView, false);
-			}
-		}
-		if (fconfig.Read("ui_prop_view", &bVal))
-		{
-			if (bVal)
-			{
-				m_aui_mgr.GetPane(m_prop_panel).Show();
-				m_tb_menu_ui->Check(ID_UIPropView, true);
-				bool fl;
-				if (fconfig.Read("ui_prop_view_float", &fl))
-				{
-					if (fl)
-						m_aui_mgr.GetPane(m_prop_panel).Float();
-					else
-						m_aui_mgr.GetPane(m_prop_panel).Dock();
-				}
-			}
-			else
-			{
-				if (m_aui_mgr.GetPane(m_prop_panel).IsOk())
-					m_aui_mgr.GetPane(m_prop_panel).Hide();
-				m_tb_menu_ui->Check(ID_UIPropView, false);
-			}
-		}
-
-		m_aui_mgr.Update();
-	}*/
+	}
 
 	//interpolator
 	if (fconfig.Exists("/interpolator"))

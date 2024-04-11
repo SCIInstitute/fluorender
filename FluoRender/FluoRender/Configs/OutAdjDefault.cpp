@@ -132,13 +132,13 @@ void OutAdjDefault::Apply(RenderCanvas* view)
 	if (!view)
 		return;
 
-	view->SetSync(0, m_sync_r);
-	view->SetSync(1, m_sync_g);
-	view->SetSync(2, m_sync_b);
+	view->SetSync(0, true);
+	view->SetSync(1, true);
+	view->SetSync(2, true);
 
-	view->SetGammaColor(fluo::Color(m_gamma_r, m_gamma_g, m_gamma_b));
-	view->SetBrightness(fluo::Color(m_brightness_r, m_brightness_g, m_brightness_b));
-	view->SetHdr(fluo::Color(m_hdr_r, m_hdr_g, m_hdr_b));
+	view->SetGammaColor(fluo::Color(1, 1, 1));
+	view->SetBrightness(fluo::Color(1, 1, 1));
+	view->SetHdr(fluo::Color(0, 0, 0));
 }
 
 void OutAdjDefault::Set(TreeLayer* layer)

@@ -257,6 +257,11 @@ inline double Epsilon(int p=6)
     return std::pow(10.0, double(-p));
 }
 
+inline bool InEpsilon(double v1, double v2, int p = 6)
+{
+	return std::abs(v1 - v2) < Epsilon(p);
+}
+
 inline double d2r(double d)
 {
 	return d*0.017453292519943295769236907684886;
