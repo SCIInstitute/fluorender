@@ -2836,6 +2836,12 @@ void VolumePropPanel::SetMIP()
 void VolumePropPanel::SetInvert()
 {
 	bool inv = m_options_toolbar->GetToolState(ID_InvChk);
+	if (inv)
+		m_options_toolbar->SetToolNormalBitmap(ID_InvChk,
+			wxGetBitmapFromMemory(invert));
+	else
+		m_options_toolbar->SetToolNormalBitmap(ID_InvChk,
+			wxGetBitmapFromMemory(invert_off));
 
 	if (m_sync_group && m_group)
 		m_group->SetInvert(inv);

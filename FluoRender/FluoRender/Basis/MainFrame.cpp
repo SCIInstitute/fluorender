@@ -557,7 +557,7 @@ MainFrame::MainFrame(
 		Left().CloseButton(true).Layer(3));
 	m_aui_mgr.AddPane(m_prop_panel, wxAuiPaneInfo().
 		Name("m_prop_panel").Caption(UITEXT_PROPERTIES).
-        BestSize(FromDIP(wxSize(-1, 180))).
+		BestSize(FromDIP(wxSize(-1, 180))).
 		Bottom().CloseButton(true).Layer(2));
 	m_aui_mgr.AddPane(m_adjust_view, wxAuiPaneInfo().
 		Name("m_adjust_view").Caption(UITEXT_ADJUST).
@@ -734,7 +734,7 @@ MainFrame::MainFrame(
 	m = m_top_tools->Append(ID_Measure, "&Measurement...",
 		"Use the ruler tools to make measurements and analysis in 3D");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_measurement_mini));
-	m = m_top_tools->Append(ID_Component, "Component &Analyzer...",
+	m = m_top_tools->Append(ID_Component, "Component Anal&yzer...",
 		"Segment structures into components and make analysis");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_components_mini));
 	m = m_top_tools->Append(ID_Trace, "&Tracking...",
