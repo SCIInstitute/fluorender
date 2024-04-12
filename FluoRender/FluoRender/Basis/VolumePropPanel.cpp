@@ -539,8 +539,9 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_right->Add(sizer_r5, 1, wxEXPAND);
 	//ADD ALL TOGETHER
 	sizer_all->AddGrowableCol(0);
-	sizer_all->Add(sizer_left, 1, wxEXPAND);
 	sizer_all->AddGrowableCol(1);
+	sizer_all->AddGrowableRow(0);
+	sizer_all->Add(sizer_left, 1, wxEXPAND);
 	sizer_all->Add(sizer_middle, 1, wxEXPAND);
 	sizer_all->Add(sizer_right, 0, wxSHRINK);
 	SetSizer(sizer_all);

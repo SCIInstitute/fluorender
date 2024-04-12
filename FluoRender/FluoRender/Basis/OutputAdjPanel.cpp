@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
+#include <wx/gbsizer.h>
 #include <png_resource.h>
 #include <img/icons.h>
 
@@ -118,8 +119,6 @@ wxWindow* OutputAdjPanel::CreateRedPage(wxWindow* parent, wxSize& size)
 	SetSize(size);
 
 	long ls = glbin_settings.m_inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
-	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
-	wxStaticText* st;
 	//validator: floating point 2
 	wxFloatingPointValidator<double> vald_fp2(2);
 	//validator: integer
@@ -127,59 +126,56 @@ wxWindow* OutputAdjPanel::CreateRedPage(wxWindow* parent, wxSize& size)
 	vald_int.SetRange(-256, 256);
 	wxBitmap bitmap;
 
+	wxGridBagSizer* sizer_v = new wxGridBagSizer(5, 0);
 	//multifunc buttons
-	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	m_r_gamma_st = new wxButton(page, wxID_ANY, "Gam.R.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_r_gamma_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnRGammaMF, this);
-	sizer1->Add(m_r_gamma_st, 1, wxEXPAND);
 	m_r_brightness_st = new wxButton(page, wxID_ANY, "Lum.R.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_r_brightness_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnRBrightnessMF, this);
-	sizer1->Add(m_r_brightness_st, 1, wxEXPAND);
 	m_r_hdr_st = new wxButton(page, wxID_ANY, "Eql.R.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_r_hdr_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnRHdrMF, this);
-	sizer1->Add(m_r_hdr_st, 1, wxEXPAND);
+	sizer_v->Add(m_r_gamma_st, wxGBPosition(0, 0), wxGBSpan(1, 1), wxEXPAND);
+	sizer_v->Add(m_r_brightness_st, wxGBPosition(0, 1), wxGBSpan(1, 1), wxEXPAND);
+	sizer_v->Add(m_r_hdr_st, wxGBPosition(0, 2), wxGBSpan(1, 1), wxEXPAND);
 
 	//sliders
-	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	m_r_gamma_sldr = new wxSingleSlider(page, wxID_ANY, 100, 10, 400,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_r_gamma_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnRGammaChange, this);
 	m_r_gamma_sldr->SetRangeColor(*wxRED);
-	sizer2->Add(m_r_gamma_sldr, 1, wxEXPAND);
 	m_r_brightness_sldr = new wxSingleSlider(page, wxID_ANY, 0, -256, 256,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_r_brightness_sldr->SetRangeStyle(2);
 	m_r_brightness_sldr->SetRangeColor(*wxRED);
 	m_r_brightness_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnRBrightnessChange, this);
-	sizer2->Add(m_r_brightness_sldr, 1, wxEXPAND);
 	m_r_hdr_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_r_hdr_sldr->SetRangeColor(*wxRED);
 	m_r_hdr_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnRHdrChange, this);
-	sizer2->Add(m_r_hdr_sldr, 1, wxEXPAND);
+	sizer_v->Add(m_r_gamma_sldr, wxGBPosition(1, 0), wxGBSpan(1, 1), wxEXPAND);
+	sizer_v->Add(m_r_brightness_sldr, wxGBPosition(1, 1), wxGBSpan(1, 1), wxEXPAND);
+	sizer_v->Add(m_r_hdr_sldr, wxGBPosition(1, 2), wxGBSpan(1, 1), wxEXPAND);
 
 	//input boxes
-	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
 	vald_fp2.SetRange(0.0, 10.0);
 	m_r_gamma_text = new wxTextCtrl(page, wxID_ANY, "1.00",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_fp2);
 	m_r_gamma_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnRGammaText, this);
-	sizer3->Add(m_r_gamma_text, 1, wxEXPAND);
 	m_r_brightness_text = new wxTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_int);
 	m_r_brightness_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnRBrightnessText, this);
-	sizer3->Add(m_r_brightness_text, 1, wxEXPAND);
 	vald_fp2.SetRange(0.0, 1.0);
 	m_r_hdr_text = new wxTextCtrl(page, wxID_ANY, "0.00",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_fp2);
 	m_r_hdr_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnRHdrText, this);
-	sizer3->Add(m_r_hdr_text, 1, wxEXPAND);
+	sizer_v->Add(m_r_gamma_text, wxGBPosition(2, 0), wxGBSpan(1, 1), wxEXPAND);
+	sizer_v->Add(m_r_brightness_text, wxGBPosition(2, 1), wxGBSpan(1, 1), wxEXPAND);
+	sizer_v->Add(m_r_hdr_text, wxGBPosition(2, 2), wxGBSpan(1, 1), wxEXPAND);
 
 	//reset buttons
-	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
 	m_r_reset_btn = new wxButton(page, wxID_ANY, "Reset",
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
 	m_r_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
@@ -187,24 +183,19 @@ wxWindow* OutputAdjPanel::CreateRedPage(wxWindow* parent, wxSize& size)
 	m_sync_r_chk = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(unlink);
-#ifdef _DARWIN
-	m_sync_r_chk->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_sync_r_chk->AddCheckTool(0, "Link",
 		bitmap, wxNullBitmap,
 		"Link Red Properties with Linked Green or Blue",
 		"Link Red Properties with Linked Green or Blue");
 	m_sync_r_chk->Bind(wxEVT_TOOL, &OutputAdjPanel::OnSyncRCheck, this);
 	m_sync_r_chk->Realize();
-	sizer4->Add(m_r_reset_btn, 1, wxEXPAND);
-	sizer4->Add(5, 5);
-	sizer4->Add(m_sync_r_chk, 0, wxALIGN_CENTER);
+	sizer_v->Add(m_r_reset_btn, wxGBPosition(3, 0), wxGBSpan(1, 2), wxEXPAND);
+	sizer_v->Add(m_sync_r_chk, wxGBPosition(3, 2), wxGBSpan(1, 1), wxEXPAND|wxALIGN_RIGHT);
 
-	sizer_v->Add(sizer1, 0, wxEXPAND);
-	sizer_v->Add(sizer2, 1, wxEXPAND);
-	sizer_v->Add(sizer3, 0, wxEXPAND);
-	sizer_v->Add(sizer4, 0, wxEXPAND);
-
+	sizer_v->AddGrowableCol(0);
+	sizer_v->AddGrowableCol(1);
+	sizer_v->AddGrowableCol(2);
+	sizer_v->AddGrowableRow(1);
 	page->SetSizer(sizer_v);
 	page->SetAutoLayout(true);
 	page->SetScrollRate(10, 10);
@@ -218,7 +209,6 @@ wxWindow* OutputAdjPanel::CreateGreenPage(wxWindow* parent, wxSize& size)
 
 	long ls = glbin_settings.m_inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
-	wxStaticText* st;
 	//validator: floating point 2
 	wxFloatingPointValidator<double> vald_fp2(2);
 	//validator: integer
@@ -317,7 +307,6 @@ wxWindow* OutputAdjPanel::CreateBluePage(wxWindow* parent, wxSize& size)
 
 	long ls = glbin_settings.m_inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
-	wxStaticText* st;
 	//validator: floating point 2
 	wxFloatingPointValidator<double> vald_fp2(2);
 	//validator: integer
