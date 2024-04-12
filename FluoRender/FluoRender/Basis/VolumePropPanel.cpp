@@ -114,15 +114,9 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	wxIntegerValidator<unsigned int> vald_int;
 
 	wxBitmap bitmap;
-#ifdef _WIN32
-	wxSize bts(FromDIP(wxSize(80, 23)));
-	wxSize tts1(FromDIP(wxSize(40, 23)));
-	wxSize tts2(FromDIP(wxSize(50, 23)));
-#else
-    wxSize bts(FromDIP(wxSize(80, 26)));
-    wxSize tts1(FromDIP(wxSize(40, 26)));
-    wxSize tts2(FromDIP(wxSize(50, 26)));
-#endif
+	wxSize bts(FromDIP(wxSize(80, 26)));
+	wxSize tts1(FromDIP(wxSize(40, 26)));
+	wxSize tts2(FromDIP(wxSize(50, 26)));
 	//left///////////////////////////////////////////////////
 	//gamma
 	m_gamma_st = new wxButton(this, wxID_ANY, ": Gamma",
@@ -667,6 +661,17 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	wxIntegerValidator<unsigned int>* vald_i;
 
 	bool update_all = vc.empty();
+	bool update_tips = FOUND_VALUE(gstMultiFuncTips);
+	bool update_gamma = update_all || update_tips || FOUND_VALUE(gstGamma3d);
+	bool update_boundary = FOUND_VALUE(gstBoundary);
+	bool update_saturation = FOUND_VALUE(gstSaturation);
+	bool update_threshold = FOUND_VALUE(gstThreshold);
+	bool update_color = FOUND_VALUE(gstColor);
+	bool update_alpha = FOUND_VALUE(gstAlpha);
+	bool update_shading = FOUND_VALUE(gstShading);
+	bool update_shadow = FOUND_VALUE(gstShadow);
+	bool update_sample = FOUND_VALUE(gstSampleRate);
+	bool update_colormap = FOUND_VALUE(gstColormap);
 
 	//DBGPRINT(L"update vol props, update_all=%d, vc_size=%d\n", update_all, vc.size());
 		//mf button tips
@@ -749,25 +754,29 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		}
 	}
 
+	bool mf_enable = glbin_settings.m_mulfunc == 5;
 	//volume properties
 	//transfer function
 	//gamma
-	if (update_all || FOUND_VALUE(gstGamma3d))
+	if (update_gamma)
 	{
-		if ((vald_fp = (wxFloatingPointValidator<double>*)m_gamma_text->GetValidator()))
-			vald_fp->SetRange(0.0, 10.0);
-		dval = m_vd->GetGamma();
-		bval = m_vd->GetGammaEnable();
-		str = wxString::Format("%.2f", dval);
-		m_gamma_sldr->ChangeValue(std::round(dval * 100.0));
-		m_gamma_text->ChangeValue(str);
-		m_gamma_chk->SetValue(bval);
-		if (update_all || m_gamma_sldr->IsEnabled() != bval)
+		if (!update_tips)
 		{
-			m_gamma_sldr->Enable(bval);
-			m_gamma_text->Enable(bval);
-			m_gamma_st->Enable(bval);
+			if ((vald_fp = (wxFloatingPointValidator<double>*)m_gamma_text->GetValidator()))
+				vald_fp->SetRange(0.0, 10.0);
+			dval = m_vd->GetGamma();
+			bval = m_vd->GetGammaEnable();
+			str = wxString::Format("%.2f", dval);
+			m_gamma_sldr->ChangeValue(std::round(dval * 100.0));
+			m_gamma_text->ChangeValue(str);
+			m_gamma_chk->SetValue(bval);
+			if (update_all || m_gamma_sldr->IsEnabled() != bval)
+			{
+				m_gamma_sldr->Enable(bval);
+				m_gamma_text->Enable(bval);
+			}
 		}
+		m_gamma_st->Enable(bval || mf_enable);
 	}
 	//boundary
 	if (update_all || FOUND_VALUE(gstBoundary))
@@ -881,9 +890,9 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_alpha_text->ChangeValue(str);
 		bval = m_vd->GetAlphaEnable();
 		m_alpha_chk->SetValue(bval);
-		if (update_all || m_luminance_sldr->IsEnabled() != bval)
+		if (update_all || m_alpha_sldr->IsEnabled() != bval)
 		{
-			m_luminance_sldr->Enable(bval);
+			m_alpha_sldr->Enable(bval);
 			m_alpha_text->Enable(bval);
 			m_alpha_st->Enable(bval);
 		}
