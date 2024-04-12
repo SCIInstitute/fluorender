@@ -254,14 +254,14 @@ void KeyListCtrl::OnSelection(wxListEvent& event)
 		str = GetText(item, 1);
 		m_frame_text->SetPosition(rect.GetTopLeft());
 		m_frame_text->SetSize(rect.GetSize());
-		m_frame_text->SetValue(str);
+		m_frame_text->ChangeValue(str);
 		//m_frame_text->Show();
 		//add duration text
 		GetSubItemRect(item, 2, rect);
 		str = GetText(item, 2);
 		m_duration_text->SetPosition(rect.GetTopLeft());
 		m_duration_text->SetSize(rect.GetSize());
-		m_duration_text->SetValue(str);
+		m_duration_text->ChangeValue(str);
 		m_duration_text->Show();
 		//add interpolation combo
 		GetSubItemRect(item, 3, rect);
@@ -280,7 +280,7 @@ void KeyListCtrl::OnSelection(wxListEvent& event)
 		str = GetText(item, 4);
 		m_description_text->SetPosition(rect.GetTopLeft());
 		m_description_text->SetSize(rect.GetSize());
-		m_description_text->SetValue(str);
+		m_description_text->ChangeValue(str);
 		m_description_text->Show();
 	}
 }
@@ -1395,7 +1395,7 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstScriptFile))
 	{
-		m_script_file_text->SetValue(glbin_settings.m_script_file);
+		m_script_file_text->ChangeValue(glbin_settings.m_script_file);
 	}
 
 	if (update_all || FOUND_VALUE(gstScriptList))
@@ -2100,7 +2100,7 @@ void MoviePanel::OnScriptFileBtn(wxCommandEvent& event)
 		wxString file = fopendlg->GetPath();
 		glbin_settings.m_script_file = file;
 		m_view->SetScriptFile(file);
-		m_script_file_text->SetValue(file);
+		m_script_file_text->ChangeValue(file);
 
 		//enable script if not
 		if (!m_run_script_chk->GetValue())
@@ -2127,7 +2127,7 @@ void MoviePanel::OnScriptListSelected(wxListEvent& event)
 		exePath = wxPathOnly(exePath);
 		file = exePath + GETSLASH() + "Scripts" +
 			GETSLASH() + file + ".txt";
-		m_script_file_text->SetValue(file);
+		m_script_file_text->ChangeValue(file);
 
 		//enable script if not
 		if (!m_run_script_chk->GetValue())
@@ -2293,7 +2293,7 @@ void MoviePanel::OnMovieQuality(wxCommandEvent &event)
 		{
 			double size = glbin_settings.m_mov_bitrate *
 				glbin_moviemaker.GetMovieLength() / 8.;
-			tx_estimate->SetValue(wxString::Format("%.2f", size));
+			tx_estimate->ChangeValue(wxString::Format("%.2f", size));
 		}
 	}
 
@@ -2355,7 +2355,7 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	tx_dpi->Connect(tx_dpi->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(MoviePanel::OnDpiText), NULL, panel);
 	float dpi = glbin_settings.m_dpi;
-	tx_dpi->SetValue(wxString::Format("%.0f", dpi));
+	tx_dpi->ChangeValue(wxString::Format("%.0f", dpi));
 	//enlarge
 	wxCheckBox* ch_enlarge = new wxCheckBox(panel, ID_ENLARGE_CHK,
 		"Enlarge output image");
@@ -2376,7 +2376,7 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	tx_enlarge->Connect(tx_enlarge->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(MoviePanel::OnTxEnlargeText), NULL, panel);
 	tx_enlarge->Enable(enlarge);
-	tx_enlarge->SetValue(wxString::Format("%.1f", enlarge_scale));
+	tx_enlarge->ChangeValue(wxString::Format("%.1f", enlarge_scale));
 	line2->Add(st, 0, wxALIGN_CENTER);
 	line2->Add(tx_dpi, 0, wxALIGN_CENTER);
 	line2->Add(10, 10);
@@ -2406,7 +2406,7 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	glbin_settings.m_mov_bitrate = STOD(bitrate_text->GetValue().fn_str());
 	double size = glbin_settings.m_mov_bitrate *
 		glbin_moviemaker.GetMovieLength() / 8.;
-	tx_estimate->SetValue(wxString::Format("%.2f", size));
+	tx_estimate->ChangeValue(wxString::Format("%.2f", size));
 
 	line3->Add(MOVopts, 0, wxALIGN_CENTER);
 	line3->Add(st, 0, wxALIGN_CENTER);

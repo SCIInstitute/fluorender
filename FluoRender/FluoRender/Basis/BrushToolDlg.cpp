@@ -518,21 +518,20 @@ void BrushToolDlg::GetSettings(RenderCanvas* view)
 		m_max_value = sel_vol->GetMaxValue();
 		//falloff
 		m_brush_scl_translate_sldr->SetRange(0, std::round(m_max_value*10.0));
-		//m_brush_scl_translate_text->SetValue(wxString::Format("%.1f", m_dft_scl_translate*m_max_value));
 	}
 	//selection strength
 	dval = glbin_vol_selector.GetBrushSclTranslate();
 	m_dft_scl_translate = dval;
-	m_brush_scl_translate_sldr->SetValue(std::round(dval*m_max_value*10.0));
+	m_brush_scl_translate_sldr->ChangeValue(std::round(dval*m_max_value*10.0));
 	m_brush_scl_translate_text->ChangeValue(wxString::Format("%.1f", m_dft_scl_translate*m_max_value));
 	//gm falloff
 	dval = glbin_vol_selector.GetBrushGmFalloff();
 	m_dft_gm_falloff = dval;
-	m_brush_gm_falloff_sldr->SetValue(std::round(GM_2_ESTR(dval)*1000.0));
+	m_brush_gm_falloff_sldr->ChangeValue(std::round(GM_2_ESTR(dval)*1000.0));
 	m_brush_gm_falloff_text->ChangeValue(wxString::Format("%.3f", GM_2_ESTR(dval)));
 	//2d influence
 	dval = glbin_vol_selector.GetW2d();
-	m_brush_2dinfl_sldr->SetValue(std::round(dval*100.0));
+	m_brush_2dinfl_sldr->ChangeValue(std::round(dval*100.0));
 	m_brush_2dinfl_text->ChangeValue(wxString::Format("%.2f", dval));
 	//edge detect
 	bval = glbin_vol_selector.GetEdgeDetect();
@@ -562,7 +561,7 @@ void BrushToolDlg::GetSettings(RenderCanvas* view)
 
 	//size1
 	dval = glbin_vol_selector.GetBrushSize1();
-	m_brush_size1_sldr->SetValue(std::round(dval));
+	m_brush_size1_sldr->ChangeValue(std::round(dval));
 	m_brush_size1_text->ChangeValue(wxString::Format("%.0f", dval));
 	//size2
 	m_brush_size2_chk->SetValue(glbin_vol_selector.GetUseBrushSize2());
@@ -577,7 +576,7 @@ void BrushToolDlg::GetSettings(RenderCanvas* view)
 		m_brush_size2_text->Disable();
 	}
 	dval = glbin_vol_selector.GetBrushSize2();
-	m_brush_size2_sldr->SetValue(std::round(dval));
+	m_brush_size2_sldr->ChangeValue(std::round(dval));
 	m_brush_size2_text->ChangeValue(wxString::Format("%.0f", dval));
 
 	//iteration number
@@ -862,7 +861,7 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent &event)
 	double val;
 	str.ToDouble(&val);
 	m_dft_scl_translate = val/m_max_value;
-	m_brush_scl_translate_sldr->SetValue(std::round(val*10.0));
+	m_brush_scl_translate_sldr->ChangeValue(std::round(val*10.0));
 
 	//set translate
 	glbin_vol_selector.SetBrushSclTranslate(m_dft_scl_translate);
@@ -890,7 +889,7 @@ void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent &event)
 	double val;
 	str.ToDouble(&val);
 	m_dft_gm_falloff = GM_2_ESTR(val);
-	m_brush_gm_falloff_sldr->SetValue(std::round(val*1000.0));
+	m_brush_gm_falloff_sldr->ChangeValue(std::round(val*1000.0));
 
 	//set gm falloff
 	glbin_vol_selector.SetBrushGmFalloff(m_dft_gm_falloff);
@@ -917,7 +916,7 @@ void BrushToolDlg::OnBrush2dinflText(wxCommandEvent &event)
 	wxString str = m_brush_2dinfl_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_brush_2dinfl_sldr->SetValue(std::round(val*100.0));
+	m_brush_2dinfl_sldr->ChangeValue(std::round(val*100.0));
 
 	//set 2d weight
 	glbin_vol_selector.SetW2d(val);
@@ -1009,7 +1008,7 @@ void BrushToolDlg::OnBrushSize1Text(wxCommandEvent &event)
 	wxString str = m_brush_size1_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_brush_size1_sldr->SetValue(std::round(val));
+	m_brush_size1_sldr->ChangeValue(std::round(val));
 
 	//set size1
 	glbin_vol_selector.SetBrushSize(val, -1.0);
@@ -1064,7 +1063,7 @@ void BrushToolDlg::OnBrushSize2Text(wxCommandEvent &event)
 	wxString str = m_brush_size2_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_brush_size2_sldr->SetValue(std::round(val));
+	m_brush_size2_sldr->ChangeValue(std::round(val));
 
 	//set size2
 	if (m_view)

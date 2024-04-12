@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <DataManager.h>
 #include <compatibility.h>
+#include <Names.h>
 
 ManipPropPanel::ManipPropPanel(MainFrame* frame,
 	wxWindow* parent,
@@ -52,7 +53,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 
 	m_x_trans_st = new wxStaticText(this, 0, "X:");
 	m_x_trans_text = new wxTextCtrl(this, ID_XTransText, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT);
 	m_x_trans_text->Bind(wxEVT_TEXT, &ManipPropPanel::OnValueEnter, this);
 	m_x_trans_spin = new wxSpinButton(this, ID_XTransSpin);
 	m_x_trans_spin->SetRange(-0x8000, 0x7fff);
@@ -60,7 +61,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 	m_x_trans_spin->Bind(wxEVT_SPIN_DOWN, &ManipPropPanel::OnSpinDown, this);
 	m_y_trans_st = new wxStaticText(this, 0, "Y:");
 	m_y_trans_text = new wxTextCtrl(this, ID_YTransText, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT);
 	m_y_trans_text->Bind(wxEVT_TEXT, &ManipPropPanel::OnValueEnter, this);
 	m_y_trans_spin = new wxSpinButton(this, ID_YTransSpin);
 	m_y_trans_spin->SetRange(-0x8000, 0x7fff);
@@ -68,7 +69,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 	m_y_trans_spin->Bind(wxEVT_SPIN_DOWN, &ManipPropPanel::OnSpinDown, this);
 	m_z_trans_st = new wxStaticText(this, 0, "Z:");
 	m_z_trans_text = new wxTextCtrl(this, ID_ZTransText, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT);
 	m_z_trans_text->Bind(wxEVT_TEXT, &ManipPropPanel::OnValueEnter, this);
 	m_z_trans_spin = new wxSpinButton(this, ID_ZTransSpin);
 	m_z_trans_spin->SetRange(-0x8000, 0x7fff);
@@ -88,7 +89,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 
 	m_x_rot_st = new wxStaticText(this, 0, "X:");
 	m_x_rot_text = new wxTextCtrl(this, ID_XRotText, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT);
 	m_x_rot_text->Bind(wxEVT_TEXT, &ManipPropPanel::OnValueEnter, this);
 	m_x_rot_spin = new wxSpinButton(this, ID_XRotSpin);
 	m_x_rot_spin->SetRange(-0x8000, 0x7fff);
@@ -96,7 +97,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 	m_x_rot_spin->Bind(wxEVT_SPIN_DOWN, &ManipPropPanel::OnSpinDown, this);
 	m_y_rot_st = new wxStaticText(this, 0, "Y:");
 	m_y_rot_text = new wxTextCtrl(this, ID_YRotText, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT);
 	m_y_rot_text->Bind(wxEVT_TEXT, &ManipPropPanel::OnValueEnter, this);
 	m_y_rot_spin = new wxSpinButton(this, ID_YRotSpin);
 	m_y_rot_spin->SetRange(-0x8000, 0x7fff);
@@ -104,7 +105,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 	m_y_rot_spin->Bind(wxEVT_SPIN_DOWN, &ManipPropPanel::OnSpinDown, this);
 	m_z_rot_st = new wxStaticText(this, 0, "Z:");
 	m_z_rot_text = new wxTextCtrl(this, ID_ZRotText, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT);
 	m_z_rot_text->Bind(wxEVT_TEXT, &ManipPropPanel::OnValueEnter, this);
 	m_z_rot_spin = new wxSpinButton(this, ID_ZRotSpin);
 	m_z_rot_spin->SetRange(-0x8000, 0x7fff);
@@ -124,7 +125,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 
 	m_x_scl_st = new wxStaticText(this, 0, "X:");
 	m_x_scl_text = new wxTextCtrl(this, ID_XScalText, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT);
 	m_x_scl_text->Bind(wxEVT_TEXT, &ManipPropPanel::OnValueEnter, this);
 	m_x_scl_spin = new wxSpinButton(this, ID_XScalSpin);
 	m_x_scl_spin->SetRange(-0x8000, 0x7fff);
@@ -132,7 +133,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 	m_x_scl_spin->Bind(wxEVT_SPIN_DOWN, &ManipPropPanel::OnSpinDown, this);
 	m_y_scl_st = new wxStaticText(this, 0, "Y:");
 	m_y_scl_text = new wxTextCtrl(this, ID_YScalText, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT);
 	m_y_scl_text->Bind(wxEVT_TEXT, &ManipPropPanel::OnValueEnter, this);
 	m_y_scl_spin = new wxSpinButton(this, ID_YScalSpin);
 	m_y_scl_spin->SetRange(-0x8000, 0x7fff);
@@ -140,7 +141,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 	m_y_scl_spin->Bind(wxEVT_SPIN_DOWN, &ManipPropPanel::OnSpinDown, this);
 	m_z_scl_st = new wxStaticText(this, 0, "Z:");
 	m_z_scl_text = new wxTextCtrl(this, ID_ZScalText, "",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT);
 	m_z_scl_text->Bind(wxEVT_TEXT, &ManipPropPanel::OnValueEnter, this);
 	m_z_scl_spin = new wxSpinButton(this, ID_ZScalSpin);
 	m_z_scl_spin->SetRange(-0x8000, 0x7fff);
@@ -198,35 +199,26 @@ void ManipPropPanel::GetData()
 	double x, y, z;
 	wxString str;
 	m_md->GetTranslation(x, y, z);
-	//sprintf(str, "%.2f", x);
 	str = wxString::Format("%.2f", x);
-	m_x_trans_text->SetValue(str);
-	//sprintf(str, "%.2f", y);
+	m_x_trans_text->ChangeValue(str);
 	str = wxString::Format("%.2f", y);
-	m_y_trans_text->SetValue(str);
-	//sprintf(str, "%.2f", z);
+	m_y_trans_text->ChangeValue(str);
 	str = wxString::Format("%.2f", z);
-	m_z_trans_text->SetValue(str);
+	m_z_trans_text->ChangeValue(str);
 	m_md->GetRotation(x, y, z);
-	//sprintf(str, "%.2f", x);
 	str = wxString::Format("%.2f", x);
-	m_x_rot_text->SetValue(str);
-	//sprintf(str, "%.2f", y);
+	m_x_rot_text->ChangeValue(str);
 	str = wxString::Format("%.2f", y);
-	m_y_rot_text->SetValue(str);
-	//sprintf(str, "%.2f", z);
+	m_y_rot_text->ChangeValue(str);
 	str = wxString::Format("%.2f", z);
-	m_z_rot_text->SetValue(str);
+	m_z_rot_text->ChangeValue(str);
 	m_md->GetScaling(x, y, z);
-	//sprintf(str, "%.2f", x);
 	str = wxString::Format("%.2f", x);
-	m_x_scl_text->SetValue(str);
-	//sprintf(str, "%.2f", y);
+	m_x_scl_text->ChangeValue(str);
 	str = wxString::Format("%.2f", y);
-	m_y_scl_text->SetValue(str);
-	//sprintf(str, "%.2f", z);
+	m_y_scl_text->ChangeValue(str);
 	str = wxString::Format("%.2f", z);
-	m_z_scl_text->SetValue(str);
+	m_z_scl_text->ChangeValue(str);
 }
 
 void ManipPropPanel::OnSpinUp(wxSpinEvent& event)
@@ -266,8 +258,8 @@ void ManipPropPanel::OnSpinUp(wxSpinEvent& event)
 	if (text_ctrl)
 	{
 		wxString str_val = text_ctrl->GetValue();
-		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str())+0.01);
-		text_ctrl->SetValue(str);
+		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str())+1);
+		text_ctrl->ChangeValue(str);
 		UpdateData();
 	}
 }
@@ -309,8 +301,8 @@ void ManipPropPanel::OnSpinDown(wxSpinEvent& event)
 	if (text_ctrl)
 	{
 		wxString str_val = text_ctrl->GetValue();
-		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str())-0.01);
-		text_ctrl->SetValue(str);
+		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str())-1);
+		text_ctrl->ChangeValue(str);
 		UpdateData();
 	}
 }
@@ -345,50 +337,11 @@ void ManipPropPanel::UpdateData()
 	z = STOD(str.fn_str());
 	m_md->SetScaling(x, y, z);
 
-	FluoRefresh();
+	FluoRefresh(true, 1, { gstNull });
 }
 
 void ManipPropPanel::OnValueEnter(wxCommandEvent& event)
 {
-	int sender_id = event.GetId();
-	wxTextCtrl* text_ctrl = 0;
-	switch (sender_id)
-	{
-	case ID_XTransText:
-		text_ctrl = m_x_trans_text;
-		break;
-	case ID_YTransText:
-		text_ctrl = m_y_trans_text;
-		break;
-	case ID_ZTransText:
-		text_ctrl = m_z_trans_text;
-		break;
-	case ID_XRotText:
-		text_ctrl = m_x_rot_text;
-		break;
-	case ID_YRotText:
-		text_ctrl = m_y_rot_text;
-		break;
-	case ID_ZRotText:
-		text_ctrl = m_z_rot_text;
-		break;
-	case ID_XScalText:
-		text_ctrl = m_x_scl_text;
-		break;
-	case ID_YScalText:
-		text_ctrl = m_y_scl_text;
-		break;
-	case ID_ZScalText:
-		text_ctrl = m_z_scl_text;
-		break;
-	}
-
-	if (text_ctrl)
-	{
-		wxString str_val = text_ctrl->GetValue();
-		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str()));
-		text_ctrl->SetValue(str);
-		UpdateData();
-	}
+	UpdateData();
 }
 

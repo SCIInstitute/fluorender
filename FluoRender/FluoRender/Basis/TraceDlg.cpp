@@ -905,33 +905,30 @@ void TraceDlg::GetSettings(RenderCanvas* vrv)
 
 	m_cur_time = m_view->m_tseq_cur_num;
 	m_prv_time = m_view->m_tseq_prv_num;
+	m_cell_size_text->ChangeValue(wxString::Format("%d", glbin_settings.m_component_size));
 
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (trace_group)
 	{
 		wxString str;
-		//cell size filter
-		str = m_cell_size_text->GetValue();
-		unsigned long ival;
-		str.ToULong(&ival);
-		trace_group->SetCellSize(ival);
+		trace_group->SetCellSize(glbin_settings.m_component_size);
 
 		str = trace_group->GetPath();
 		if (str != "")
-			m_load_trace_text->SetValue(str);
+			m_load_trace_text->ChangeValue(str);
 		else
-			m_load_trace_text->SetValue("Track map created but not saved");
+			m_load_trace_text->ChangeValue("Track map created but not saved");
 		UpdateList();
 
 		int ghost_num = trace_group->GetGhostNum();
 		m_ghost_num_text->ChangeValue(wxString::Format("%d", ghost_num));
-		m_ghost_num_sldr->SetValue(ghost_num);
+		m_ghost_num_sldr->ChangeValue(ghost_num);
 		m_ghost_show_tail_chk->SetValue(trace_group->GetDrawTail());
 		m_ghost_show_lead_chk->SetValue(trace_group->GetDrawLead());
 	}
 	else
 	{
-		m_load_trace_text->SetValue("No Track map");
+		m_load_trace_text->ChangeValue("No Track map");
 	}
 
 	//settings for tracking
@@ -942,13 +939,6 @@ void TraceDlg::GetSettings(RenderCanvas* vrv)
 	m_map_split_btn->SetValue(glbin_settings.m_try_split);
 	m_map_similar_spin->SetValue(glbin_settings.m_similarity);
 	m_map_contact_spin->SetValue(glbin_settings.m_contact_factor);
-}
-
-void TraceDlg::SetCellSize(int size)
-{
-	if (m_cell_size_text)
-		m_cell_size_text->SetValue(wxString::Format("%d", size));
-
 }
 
 RenderCanvas* TraceDlg::GetView()
@@ -1036,7 +1026,7 @@ void TraceDlg::OnClearTrace(wxCommandEvent& event)
 	if (trace_group)
 	{
 		trace_group->Clear();
-		m_load_trace_text->SetValue("No Track map");
+		m_load_trace_text->ChangeValue("No Track map");
 	}
 }
 
@@ -1111,7 +1101,7 @@ void TraceDlg::OnGhostNumText(wxCommandEvent &event)
 	wxString str = m_ghost_num_text->GetValue();
 	long ival;
 	str.ToLong(&ival);
-	m_ghost_num_sldr->SetValue(ival);
+	m_ghost_num_sldr->ChangeValue(ival);
 
 	if (m_view)
 	{
@@ -1168,7 +1158,7 @@ void TraceDlg::OnCellSizeText(wxCommandEvent &event)
 	wxString str = m_cell_size_text->GetValue();
 	long ival;
 	str.ToLong(&ival);
-	m_cell_size_sldr->SetValue(ival);
+	m_cell_size_sldr->ChangeValue(ival);
 
 	if (m_view)
 	{
@@ -1260,7 +1250,7 @@ void TraceDlg::OnCompUncertainLowText(wxCommandEvent &event)
 	wxString str = m_comp_uncertain_low_text->GetValue();
 	long ival;
 	str.ToLong(&ival);
-	m_comp_uncertain_low_sldr->SetValue(ival);
+	m_comp_uncertain_low_sldr->ChangeValue(ival);
 
 	if (m_view)
 	{
@@ -1388,7 +1378,7 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 	if (!trace_group)
 		return;
 
-	m_stat_text->SetValue("Generating consistent IDs in");
+	m_stat_text->ChangeValue("Generating consistent IDs in");
 	wxGetApp().Yield();
 
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
@@ -1428,7 +1418,7 @@ void TraceDlg::OnAnalyzeComp(wxCommandEvent &event)
 	comp_analyzer.Analyze(true, true);
 	string str;
 	comp_analyzer.OutputCompListStr(str, 1);
-	m_stat_text->SetValue(str);
+	m_stat_text->ChangeValue(str);
 }
 
 void TraceDlg::OnAnalyzeLink(wxCommandEvent &event)
@@ -1441,9 +1431,9 @@ void TraceDlg::OnAnalyzeLink(wxCommandEvent &event)
 		return;
 	size_t frames = trace_group->GetTrackMap()->GetFrameNum();
 	if (frames == 0)
-		m_stat_text->SetValue("ERROR! Generate a track map first.\n");
+		m_stat_text->ChangeValue("ERROR! Generate a track map first.\n");
 	else
-		m_stat_text->SetValue(
+		m_stat_text->ChangeValue(
 			wxString::Format("Time point number: %d\n", int(frames)));
 
 	(*m_stat_text) << "Time\tIn Orphan\tOut Orphan\tIn Multi\tOut Multi\n";
@@ -1500,7 +1490,7 @@ void TraceDlg::OnAnalyzeUncertainHist(wxCommandEvent &event)
 		}
 	}
 
-	m_stat_text->SetValue("");
+	m_stat_text->ChangeValue("");
 
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
 	glbin_trackmap_proc.SetTrackMap(track_map);
@@ -1593,14 +1583,14 @@ void TraceDlg::OnAnalyzePath(wxCommandEvent &event)
 		}
 	}
 
-	m_stat_text->SetValue("");
+	m_stat_text->ChangeValue("");
 
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
 	glbin_trackmap_proc.SetTrackMap(track_map);
 	if (list_in.empty())
 		return;
 
-	m_stat_text->SetValue("");
+	m_stat_text->ChangeValue("");
 	std::ostream os(m_stat_text);
 
 	if (m_cur_time > 0)
@@ -2645,7 +2635,7 @@ void TraceDlg::GenMap()
 		return;
 
 	//start progress
-	m_stat_text->SetValue("Generating track map.\n");
+	m_stat_text->ChangeValue("Generating track map.\n");
 	wxGetApp().Yield();
 	int frames = reader->GetTimeNum();
 
@@ -2758,9 +2748,9 @@ void TraceDlg::RefineMap(int t, bool erase_v)
 	if (!trace_group)
 		return;
 	if (t < 0)
-		m_stat_text->SetValue("Refining track map for all time points.\n");
+		m_stat_text->ChangeValue("Refining track map for all time points.\n");
 	else
-		m_stat_text->SetValue(wxString::Format(
+		m_stat_text->ChangeValue(wxString::Format(
 			"Refining track map at time point %d.\n", t));
 	wxGetApp().Yield();
 
@@ -2879,7 +2869,7 @@ void TraceDlg::LoadTrackFile(wxString &file)
 	int rval = m_view->LoadTraceGroup(file);
 	if (rval)
 	{
-		m_load_trace_text->SetValue(file);
+		m_load_trace_text->ChangeValue(file);
 		m_track_file = file;
 	}
 }
@@ -2890,7 +2880,7 @@ void TraceDlg::SaveTrackFile(wxString &file)
 	int rval = m_view->SaveTraceGroup(file);
 	if (rval)
 	{
-		m_load_trace_text->SetValue(file);
+		m_load_trace_text->ChangeValue(file);
 		m_track_file = file;
 	}
 }

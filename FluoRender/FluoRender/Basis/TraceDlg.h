@@ -170,7 +170,6 @@ public:
 	void GetSettings(RenderCanvas* vrv);
 	RenderCanvas* GetView();
 	void UpdateList();
-	void SetCellSize(int size);
 
 	//cell operations
 	void CellUpdate();

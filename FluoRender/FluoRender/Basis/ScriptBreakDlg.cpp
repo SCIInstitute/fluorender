@@ -88,7 +88,7 @@ void ScriptBreakDlg::SetScriptName(const wxString& str)
 
 void ScriptBreakDlg::SetInfo(const wxString& str)
 {
-	m_info_text->SetValue(str);
+	m_info_text->ChangeValue(str);
 }
 
 void ScriptBreakDlg::Hold()

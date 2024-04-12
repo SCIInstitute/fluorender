@@ -437,7 +437,7 @@ void DataListCtrl::OnRename(wxCommandEvent& event)
 		wxString str = GetText(item, 1);
 		m_rename_text->SetPosition(rect.GetTopLeft());
 		m_rename_text->SetSize(rect.GetSize());
-		m_rename_text->SetValue(str);
+		m_rename_text->ChangeValue(str);
 		m_rename_text->SetFocus();
 		m_rename_text->SetSelection(-1, -1);
 		m_rename_text->Show();
@@ -479,15 +479,15 @@ void DataListCtrl::OnResizeCheck(wxCommandEvent &event)
 		{
 			int nx, ny, nz;
 			m_vd->GetResolution(nx, ny, nz);
-			size_x_txt->SetValue(wxString::Format("%d", nx));
-			size_y_txt->SetValue(wxString::Format("%d", ny));
-			size_z_txt->SetValue(wxString::Format("%d", nz));
+			size_x_txt->ChangeValue(wxString::Format("%d", nx));
+			size_y_txt->ChangeValue(wxString::Format("%d", ny));
+			size_z_txt->ChangeValue(wxString::Format("%d", nz));
 		}
 		else
 		{
-			size_x_txt->SetValue("");
-			size_y_txt->SetValue("");
-			size_z_txt->SetValue("");
+			size_x_txt->ChangeValue("");
+			size_y_txt->ChangeValue("");
+			size_z_txt->ChangeValue("");
 		}
 	}
 	if (m_vd)
@@ -590,9 +590,9 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 		resize_chk->SetValue(resize);
 		if (resize)
 		{
-			size_x_txt->SetValue(std::to_string(nx));
-			size_y_txt->SetValue(std::to_string(ny));
-			size_z_txt->SetValue(std::to_string(nz));
+			size_x_txt->ChangeValue(std::to_string(nx));
+			size_y_txt->ChangeValue(std::to_string(ny));
+			size_z_txt->ChangeValue(std::to_string(nz));
 		}
 	}
 	sizer3->Add(10, 10);
@@ -1062,13 +1062,13 @@ ListPanel::ListPanel(MainFrame *frame,
 	m_toolbar->SetToolBitmapSize(bitmap.GetSize());
 #endif
 	m_toolbar->AddTool(ID_AddToView, "Add to View",
-		bitmap, "Add: Add the selected dataset to render view");
+		bitmap, "Add: Add selected data set to render view");
 	bitmap = wxGetBitmapFromMemory(rename);
 	m_toolbar->AddTool(ID_Rename, "Rename",
-		bitmap, "Rename: Rename the selected dataset");
+		bitmap, "Rename: Rename selected data set");
 	bitmap = wxGetBitmapFromMemory(save);
 	m_toolbar->AddTool(ID_Save, "Save As",
-		bitmap, "Save: Save the selected volume dataset");
+		bitmap, "Save: Save selected volume data set");
 	bitmap = wxGetBitmapFromMemory(bake);
 	m_toolbar->AddTool(ID_Bake, "Bake",
 		bitmap, "Bake: Apply the volume properties and save");
@@ -1077,10 +1077,10 @@ ListPanel::ListPanel(MainFrame *frame,
 		bitmap, "Save Mask: Save its mask to a file");
 	bitmap = wxGetBitmapFromMemory(delet);
 	m_toolbar->AddTool(ID_Delete, "Delete",
-		bitmap, "Delete: Delete the selected dataset");
+		bitmap, "Delete: Delete selected data set");
 	bitmap = wxGetBitmapFromMemory(del_all);
 	m_toolbar->AddTool(ID_DeleteAll, "Delete All",
-		bitmap, "Delete All: Delete all datasets");
+		bitmap, "Delete All: Delete all data sets");
 	m_toolbar->Realize();
 
 	//organize positions

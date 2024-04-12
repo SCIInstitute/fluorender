@@ -2528,7 +2528,7 @@ void TreePanel::UpdateTree()
 	DeleteAll();
 	ClearIcons();
 
-	wxString root_str = "Active Datasets";
+	wxString root_str = "Scene Graph";
 	wxTreeItemId root_item = AddRootItem(root_str);
 	if (glbin_tree_sel == root_str.ToStdString())
 		SelectItem(root_item);

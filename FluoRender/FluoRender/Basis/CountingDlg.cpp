@@ -142,10 +142,10 @@ void CountingDlg::LoadDefault()
 	m_ca_select_only_chk->SetValue(glbin_comp_def.m_use_sel);
 	//min voxel
 	str = wxString::Format("%d", glbin_comp_def.m_min_num);
-	m_ca_min_text->SetValue(str);
+	m_ca_min_text->ChangeValue(str);
 	//max voxel
 	str = wxString::Format("%d", glbin_comp_def.m_max_num);
-	m_ca_max_text->SetValue(str);
+	m_ca_max_text->ChangeValue(str);
 	//ignore max
 	bval = glbin_comp_def.m_use_min && !glbin_comp_def.m_use_max;
 	m_ca_ignore_max_chk->SetValue(bval);
@@ -165,10 +165,8 @@ void CountingDlg::GetSettings(RenderCanvas* view)
 
 void CountingDlg::OnCAIgnoreMaxChk(wxCommandEvent &event)
 {
-	if (m_ca_ignore_max_chk->GetValue())
-		m_ca_max_text->Disable();
-	else
-		m_ca_max_text->Enable();
+	bool val = m_ca_ignore_max_chk->GetValue();
+	m_ca_max_text->Enable(val);
 }
 
 //component analyze
@@ -222,8 +220,8 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 
 	if (count > 0)
 	{
-		m_ca_comps_text->SetValue(wxString::Format("%d", count));
-		m_ca_volume_text->SetValue(wxString::Format("%d", vox));
+		m_ca_comps_text->ChangeValue(wxString::Format("%d", count));
+		m_ca_volume_text->ChangeValue(wxString::Format("%d", vox));
 
 		double spcx, spcy, spcz;
 		vd->GetSpacings(spcx, spcy, spcz);
@@ -245,7 +243,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 			break;
 		}
 
-		m_ca_vol_unit_text->SetValue(vol_unit_text);
+		m_ca_vol_unit_text->ChangeValue(vol_unit_text);
 	}
 }
 

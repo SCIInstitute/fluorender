@@ -151,7 +151,7 @@ void CalculationDlg::OnLoadA(wxCommandEvent &event)
 			if (m_vol1)
 			{
 				wxString str = m_vol1->GetName();
-				m_calc_a_text->SetValue(str);
+				m_calc_a_text->ChangeValue(str);
 				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
 					RenderCanvas* view = m_frame->GetView(i);
@@ -168,7 +168,7 @@ void CalculationDlg::OnLoadA(wxCommandEvent &event)
 			if (m_group)
 			{
 				wxString str = m_group->GetName();
-				m_calc_a_text->SetValue(str);
+				m_calc_a_text->ChangeValue(str);
 				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
 					RenderCanvas* view = m_frame->GetView(i);
@@ -195,11 +195,11 @@ void CalculationDlg::OnLoadB(wxCommandEvent &event)
 		case 2://volume
 			m_vol2 = m_frame->GetCurSelVol();
 			if (m_vol2)
-				m_calc_b_text->SetValue(m_vol2->GetName());
+				m_calc_b_text->ChangeValue(m_vol2->GetName());
 			break;
 		case 5://volume group
 			if (m_group)
-				m_calc_b_text->SetValue(m_group->GetName());
+				m_calc_b_text->ChangeValue(m_group->GetName());
 			break;
 		}
 	}

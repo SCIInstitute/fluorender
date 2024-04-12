@@ -1104,50 +1104,67 @@ void ComponentDlg::Update()
 	m_use_sel_chk->SetValue(glbin_comp_def.m_use_sel);
 	m_use_ml_chk->SetValue(glbin_comp_def.m_use_ml);
 	//comp generate page
-	m_iter_text->SetValue(wxString::Format("%d", glbin_comp_def.m_iter));
-	m_thresh_text->SetValue(wxString::Format("%.3f", glbin_comp_def.m_thresh));
+	m_iter_sldr->ChangeValue(glbin_comp_def.m_iter);
+	m_iter_text->ChangeValue(wxString::Format("%d", glbin_comp_def.m_iter));
+	m_thresh_sldr->ChangeValue(std::round(glbin_comp_def.m_thresh * 1000.0));
+	m_thresh_text->ChangeValue(wxString::Format("%.3f", glbin_comp_def.m_thresh));
 	//dist
 	m_use_dist_field_check->SetValue(glbin_comp_def.m_use_dist_field);
 	EnableUseDistField(glbin_comp_def.m_use_dist_field);
-	m_dist_strength_text->SetValue(wxString::Format("%.3f", glbin_comp_def.m_dist_strength));
-	m_dist_filter_size_text->SetValue(wxString::Format("%d", glbin_comp_def.m_dist_filter_size));
-	m_max_dist_text->SetValue(wxString::Format("%d", glbin_comp_def.m_max_dist));
-	m_dist_thresh_text->SetValue(wxString::Format("%.3f", glbin_comp_def.m_dist_thresh));
+	m_dist_strength_sldr->ChangeValue(std::round(glbin_comp_def.m_dist_strength * 1000.0));
+	m_dist_strength_text->ChangeValue(wxString::Format("%.3f", glbin_comp_def.m_dist_strength));
+	m_dist_filter_size_sldr->ChangeValue(glbin_comp_def.m_dist_filter_size);
+	m_dist_filter_size_text->ChangeValue(wxString::Format("%d", glbin_comp_def.m_dist_filter_size));
+	m_max_dist_sldr->ChangeValue(glbin_comp_def.m_max_dist);
+	m_max_dist_text->ChangeValue(wxString::Format("%d", glbin_comp_def.m_max_dist));
+	m_dist_thresh_sldr->ChangeValue(std::round(glbin_comp_def.m_dist_thresh * 1000.0));
+	m_dist_thresh_text->ChangeValue(wxString::Format("%.3f", glbin_comp_def.m_dist_thresh));
 	m_diff_check->SetValue(glbin_comp_def.m_diff);
 	EnableDiff(glbin_comp_def.m_diff);
-	m_falloff_text->SetValue(wxString::Format("%.3f", glbin_comp_def.m_falloff));
-	//m_size_check->SetValue(m_size);
+	m_falloff_sldr->ChangeValue(std::round(glbin_comp_def.m_falloff * 1000.0));
+	m_falloff_text->ChangeValue(wxString::Format("%.3f", glbin_comp_def.m_falloff));
 	EnableSize(glbin_comp_def.m_size);
-	//m_size_text->SetValue(wxString::Format("%d", m_size_lm));
 	EnableDensity(glbin_comp_def.m_density);
 	m_density_check->SetValue(glbin_comp_def.m_density);
-	m_density_text->SetValue(wxString::Format("%.3f", glbin_comp_def.m_density_thresh));
-	m_varth_text->SetValue(wxString::Format("%.4f", glbin_comp_def.m_varth));
-	m_density_window_size_text->SetValue(wxString::Format("%d", glbin_comp_def.m_density_window_size));
-	m_density_stats_size_text->SetValue(wxString::Format("%d", glbin_comp_def.m_density_stats_size));
+	m_density_sldr->ChangeValue(std::round(glbin_comp_def.m_density_thresh * 1000.0));
+	m_density_text->ChangeValue(wxString::Format("%.3f", glbin_comp_def.m_density_thresh));
+	m_varth_sldr->ChangeValue(std::round(glbin_comp_def.m_varth * 10000.0));
+	m_varth_text->ChangeValue(wxString::Format("%.4f", glbin_comp_def.m_varth));
+	m_density_window_size_sldr->ChangeValue(glbin_comp_def.m_density_window_size);
+	m_density_window_size_text->ChangeValue(wxString::Format("%d", glbin_comp_def.m_density_window_size));
+	m_density_stats_size_sldr->ChangeValue(glbin_comp_def.m_density_stats_size);
+	m_density_stats_size_text->ChangeValue(wxString::Format("%d", glbin_comp_def.m_density_stats_size));
 	//fixate
 	m_fixate_check->SetValue(glbin_comp_def.m_fixate);
 	EnableFixate(glbin_comp_def.m_fixate);
 	m_grow_fixed_check->SetValue(glbin_comp_def.m_grow_fixed);
-	m_fix_size_text->SetValue(wxString::Format("%d", glbin_comp_def.m_fix_size));
+	m_fix_size_sldr->ChangeValue(glbin_comp_def.m_fix_size);
+	m_fix_size_text->ChangeValue(wxString::Format("%d", glbin_comp_def.m_fix_size));
 	//clean
 	EnableClean(glbin_comp_def.m_clean);
 	m_clean_check->SetValue(glbin_comp_def.m_clean);
-	m_clean_iter_text->SetValue(wxString::Format("%d", glbin_comp_def.m_clean_iter));
-	m_clean_limit_text->SetValue(wxString::Format("%d", glbin_comp_def.m_clean_size_vl));
+	m_clean_iter_sldr->ChangeValue(glbin_comp_def.m_clean_iter);
+	m_clean_iter_text->ChangeValue(wxString::Format("%d", glbin_comp_def.m_clean_iter));
+	m_clean_limit_sldr->ChangeValue(glbin_comp_def.m_clean_size_vl);
+	m_clean_limit_text->ChangeValue(wxString::Format("%d", glbin_comp_def.m_clean_size_vl));
 	//record
 	int ival = m_command.size();
-	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
+	m_cmd_count_text->ChangeValue(wxString::Format("%d", ival));
 
 	//cluster page
 	m_cluster_method_exmax_rd->SetValue(glbin_comp_def.m_cluster_method_exmax);
 	m_cluster_method_dbscan_rd->SetValue(glbin_comp_def.m_cluster_method_dbscan);
 	m_cluster_method_kmeans_rd->SetValue(glbin_comp_def.m_cluster_method_kmeans);
 	//parameters
-	m_cluster_clnum_text->SetValue(wxString::Format("%d", glbin_comp_def.m_cluster_clnum));
-	m_cluster_maxiter_text->SetValue(wxString::Format("%d", glbin_comp_def.m_cluster_maxiter));
-	m_cluster_tol_text->SetValue(wxString::Format("%.2f", glbin_comp_def.m_cluster_tol));
-	m_cluster_size_text->SetValue(wxString::Format("%d", glbin_comp_def.m_cluster_size));
+	m_cluster_clnum_sldr->ChangeValue(glbin_comp_def.m_cluster_clnum);
+	m_cluster_clnum_text->ChangeValue(wxString::Format("%d", glbin_comp_def.m_cluster_clnum));
+	m_cluster_maxiter_sldr->ChangeValue(glbin_comp_def.m_cluster_maxiter);
+	m_cluster_maxiter_text->ChangeValue(wxString::Format("%d", glbin_comp_def.m_cluster_maxiter));
+	m_cluster_tol_sldr->ChangeValue(std::round(glbin_comp_def.m_cluster_tol * 100));
+	m_cluster_tol_text->ChangeValue(wxString::Format("%.2f", glbin_comp_def.m_cluster_tol));
+	m_cluster_size_sldr->ChangeValue(glbin_comp_def.m_cluster_size);
+	m_cluster_size_text->ChangeValue(wxString::Format("%d", glbin_comp_def.m_cluster_size));
+	m_cluster_eps_sldr->ChangeValue(std::round(glbin_comp_def.m_cluster_eps * 10.0));
 	m_cluster_eps_text->SetValue(wxString::Format("%.1f", glbin_comp_def.m_cluster_eps));
 	UpdateClusterMethod();
 
@@ -1254,7 +1271,7 @@ void ComponentDlg::OnSaveasSettings(wxCommandEvent& event)
 	{
 		wxString filename = fopendlg->GetPath();
 		glbin_comp_def.Save(filename.ToStdString());
-		m_load_settings_text->SetValue(filename);
+		m_load_settings_text->ChangeValue(filename);
 	}
 
 	if (fopendlg)
@@ -1791,7 +1808,7 @@ void ComponentDlg::AddCmd(const std::string &type)
 
 	//record
 	int ival = m_command.size();
-	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
+	m_cmd_count_text->ChangeValue(wxString::Format("%d", ival));
 }
 
 void ComponentDlg::ResetCmd()
@@ -1801,7 +1818,7 @@ void ComponentDlg::ResetCmd()
 	m_record_cmd = false;
 	//record
 	int ival = m_command.size();
-	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
+	m_cmd_count_text->ChangeValue(wxString::Format("%d", ival));
 }
 
 void ComponentDlg::PlayCmd(double tfactor)
@@ -3877,7 +3894,7 @@ void ComponentDlg::LoadCmd(const wxString &filename)
 	if (!is.IsOk())
 		return;
 	wxFileConfig fconfig(is);
-	m_cmd_file_text->SetValue(filename);
+	m_cmd_file_text->ChangeValue(filename);
 
 	m_command.clear();
 	int cmd_count = 0;
@@ -3979,7 +3996,7 @@ void ComponentDlg::LoadCmd(const wxString &filename)
 	}
 	//record
 	int ival = m_command.size();
-	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
+	m_cmd_count_text->ChangeValue(wxString::Format("%d", ival));
 }
 
 void ComponentDlg::SaveCmd(const wxString &filename)
@@ -4048,7 +4065,7 @@ void ComponentDlg::SaveCmd(const wxString &filename)
 	}
 
 	SaveConfig(fconfig, filename);
-	m_cmd_file_text->SetValue(filename);
+	m_cmd_file_text->ChangeValue(filename);
 }
 
 void ComponentDlg::StartTimer(const std::string& str)

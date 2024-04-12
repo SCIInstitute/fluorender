@@ -1216,7 +1216,7 @@ void RenderViewPanel::SetFullScreen()
 
 void RenderViewPanel::SetDepthAttenEnable(bool val)
 {
-	m_canvas->SetFog(true);
+	m_canvas->SetFog(val);
 	FluoRefresh(true, 2, { gstDepthAtten }, { m_frame->GetView(m_canvas) });
 }
 
@@ -1772,7 +1772,7 @@ void RenderViewPanel::OnDpiText(wxCommandEvent& event)
 	if (tx_enlarge)
 	{
 		tx_enlarge->Enable(enlarge);
-		tx_enlarge->SetValue(wxString::Format("%.1f", enlarge_scale));
+		tx_enlarge->ChangeValue(wxString::Format("%.1f", enlarge_scale));
 	}
 }
 
@@ -1897,7 +1897,7 @@ wxWindow* RenderViewPanel::CreateExtraCaptureControl(wxWindow* parent)
 	tx_dpi->Connect(tx_dpi->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(RenderViewPanel::OnDpiText), NULL, panel);
 	float dpi = glbin_settings.m_dpi;
-	tx_dpi->SetValue(wxString::Format("%.0f", dpi));
+	tx_dpi->ChangeValue(wxString::Format("%.0f", dpi));
 	//enlarge
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	wxCheckBox* ch_enlarge = new wxCheckBox(panel, ID_ENLARGE_CHK,
@@ -1919,7 +1919,7 @@ wxWindow* RenderViewPanel::CreateExtraCaptureControl(wxWindow* parent)
 	tx_enlarge->Connect(tx_enlarge->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(RenderViewPanel::OnTxEnlargeText), NULL, panel);
 	tx_enlarge->Enable(enlarge);
-	tx_enlarge->SetValue(wxString::Format("%.1f", enlarge_scale));
+	tx_enlarge->ChangeValue(wxString::Format("%.1f", enlarge_scale));
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(tx_dpi, 0, wxALIGN_CENTER);
 	sizer_2->Add(10, 10);

@@ -106,7 +106,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstNonObjectValues "non object values"//values not from the managed object
 
 //root
-#define gstRoot "Active Datasets"
+#define gstRoot "Scene Graph"
 #define gstSortValue "sort value"
 #define gstSortMethod "sort method"
 #define gstActivated "activated"
@@ -172,6 +172,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstInvert "invert"
 #define gstTransparent "transparent"
 //trasnfer function
+#define gstVolumeProps "volume props"
 #define gstIntScale "int scale"
 #define gstGmScale "gm scale"
 #define gstMaxInt "max int"
@@ -334,6 +335,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstClipLinkChan "clip link chan"
 #define gstClipPlaneMode "clip plane mode"
 #define gstClipPlaneRanges "clip plane ranges"
+#define gstClipPlaneRangeColor "clip plane range color"
 #define gstInitialized "initialized"
 #define gstInitView "init view"
 #define gstSetGl "set gl"//set gl context

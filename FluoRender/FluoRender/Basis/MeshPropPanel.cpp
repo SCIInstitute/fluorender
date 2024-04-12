@@ -203,31 +203,31 @@ void MeshPropPanel::FluoUpdate(const fluo::ValueCollection& values)
 	//lighting
 	m_light_chk->SetValue(m_md->GetLighting());
 	//shine
-	m_shine_sldr->SetValue(std::round(shine));
+	m_shine_sldr->ChangeValue(std::round(shine));
 	str = wxString::Format("%.0f", shine);
 	m_shine_text->ChangeValue(str);
 	//alpha
-	m_alpha_sldr->SetValue(std::round(alpha*255));
+	m_alpha_sldr->ChangeValue(std::round(alpha*255));
 	str = wxString::Format("%.2f", alpha);
 	m_alpha_text->ChangeValue(str);
 	//scaling
 	double sx, sy, sz;
 	m_md->GetScaling(sx, sy, sz);
-	m_scale_sldr->SetValue(std::round(sx*100.0));
+	m_scale_sldr->ChangeValue(std::round(sx*100.0));
 	str = wxString::Format("%.2f", sx);
 	m_scale_text->ChangeValue(str);
 	//shadow
 	double darkness;
 	m_shadow_chk->SetValue(m_md->GetShadowEnable());
 	darkness = m_md->GetShadowIntensity();
-	m_shadow_sldr->SetValue(std::round(darkness*100.0));
+	m_shadow_sldr->ChangeValue(std::round(darkness*100.0));
 	str = wxString::Format("%.2f", darkness);
 	m_shadow_text->ChangeValue(str);
 	//size limiter
 	m_size_chk->SetValue(m_md->GetLimit());
 	int limit = m_md->GetLimitNumber();
-	m_size_sldr->SetValue(limit);
-	m_size_text->SetValue(wxString::Format("%d", limit));
+	m_size_sldr->ChangeValue(limit);
+	m_size_text->ChangeValue(wxString::Format("%d", limit));
 }
 
 void MeshPropPanel::SetView(RenderCanvas* view)
@@ -259,7 +259,7 @@ void MeshPropPanel::OnLightingCheck(wxCommandEvent& event)
 			if (md)
 				md->SetLighting(val);
 		}
-		FluoRefresh();
+		FluoRefresh(false, 3, {gstNull});
 	}
 }
 
@@ -272,7 +272,7 @@ void MeshPropPanel::OnDiffChange(wxColourPickerEvent& event)
 		m_md->SetColor(color, MESH_COLOR_DIFF);
 		fluo::Color amb = color * 0.3;
 		m_md->SetColor(amb, MESH_COLOR_AMB);
-		FluoRefresh(true);
+		FluoRefresh(false, 1, { gstTreeColors });
 	}
 }
 
@@ -283,7 +283,7 @@ void MeshPropPanel::OnSpecChange(wxColourPickerEvent& event)
 	if (m_md)
 	{
 		m_md->SetColor(color, MESH_COLOR_SPEC);
-		FluoRefresh();
+		FluoRefresh(false, 3, { gstNull });
 	}
 }
 
@@ -300,12 +300,12 @@ void MeshPropPanel::OnShineText(wxCommandEvent& event)
 	wxString str = m_shine_text->GetValue();
 	double shine;
 	str.ToDouble(&shine);
-	m_shine_sldr->SetValue(std::round(shine));
+	m_shine_sldr->ChangeValue(std::round(shine));
 
 	if (m_md)
 	{
 		m_md->SetFloat(shine, MESH_FLOAT_SHN);
-		FluoRefresh();
+		FluoRefresh(false, 3, { gstNull });
 	}
 }
 
@@ -322,12 +322,12 @@ void MeshPropPanel::OnAlphaText(wxCommandEvent& event)
 	wxString str = m_alpha_text->GetValue();
 	double alpha;
 	str.ToDouble(&alpha);
-	m_alpha_sldr->SetValue(std::round(alpha*255.0));
+	m_alpha_sldr->ChangeValue(std::round(alpha*255.0));
 
 	if (m_md)
 	{
 		m_md->SetFloat(alpha, MESH_FLOAT_ALPHA);
-		FluoRefresh();
+		FluoRefresh(false, 3, { gstNull });
 	}
 }
 
@@ -344,12 +344,12 @@ void MeshPropPanel::OnScaleText(wxCommandEvent& event)
 	wxString str = m_scale_text->GetValue();
 	double dval;
 	str.ToDouble(&dval);
-	m_scale_sldr->SetValue(std::round(dval*100.0));
+	m_scale_sldr->ChangeValue(std::round(dval*100.0));
 
 	if (m_md)
 	{
 		m_md->SetScaling(dval, dval, dval);
-		FluoRefresh();
+		FluoRefresh(false, 3, { gstNull });
 	}
 }
 
@@ -366,7 +366,7 @@ void MeshPropPanel::OnShadowCheck(wxCommandEvent& event)
 			if (md)
 				md->SetShadowEnable(val);
 		}
-		FluoRefresh();
+		FluoRefresh(false, 3, { gstNull });
 	}
 }
 
@@ -383,7 +383,7 @@ void MeshPropPanel::OnShadowText(wxCommandEvent& event)
 	wxString str = m_shadow_text->GetValue();
 	double dval;
 	str.ToDouble(&dval);
-	m_shadow_sldr->SetValue(std::round(dval*100.0));
+	m_shadow_sldr->ChangeValue(std::round(dval*100.0));
 
 	if (m_md && m_view)
 	{
@@ -394,7 +394,7 @@ void MeshPropPanel::OnShadowText(wxCommandEvent& event)
 			if (md)
 				md->SetShadowIntensity(dval);
 		}
-		FluoRefresh();
+		FluoRefresh(false, 3, { gstNull });
 	}
 }
 
@@ -405,7 +405,7 @@ void MeshPropPanel::OnSizeCheck(wxCommandEvent& event)
 	if (m_md)
 	{
 		m_md->SetLimit(bval);
-		FluoRefresh();
+		FluoRefresh(false, 3, { gstNull });
 	}
 }
 
@@ -422,12 +422,12 @@ void MeshPropPanel::OnSizeText(wxCommandEvent& event)
 	wxString str = m_size_text->GetValue();
 	long val;
 	str.ToLong(&val);
-	m_size_sldr->SetValue(val);
+	m_size_sldr->ChangeValue(val);
 
 	if (m_md)
 	{
 		m_md->SetLimitNumer(val);
 		if (m_md->GetLimit())
-			FluoRefresh();
+			FluoRefresh(false, 3, { gstNull });
 	}
 }

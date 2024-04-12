@@ -5753,9 +5753,6 @@ void RenderCanvas::SetFree(bool free)
 		m_obj_transz = m_obj_transz_saved;
 		//restore scale factor
 		m_scale_factor = m_scale_factor_saved;
-		//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
-		//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
-		//m_vrv->m_scale_factor_text->ChangeValue(str);
 		m_vrv->FluoUpdate({ gstScaleFactor });
 
 		SetRotations(m_rotx, m_roty, m_rotz, true);
@@ -5769,11 +5766,6 @@ void RenderCanvas::SetAov(double aov)
 	//SetSortBricks();
 
 	m_aov = aov;
-	//if (m_persp)
-	//{
-	//	m_vrv->m_aov_text->ChangeValue(wxString::Format("%d", int(std::round(m_aov))));
-	//	m_vrv->m_aov_sldr->ChangeValue(std::round(m_aov));
-	//}
 }
 
 void RenderCanvas::SetVolMethod(int method)
@@ -6109,9 +6101,6 @@ DataGroup* RenderCanvas::AddVolumeData(VolumeData* vd, wxString group_name)
 
 	if (m_frame)
 	{
-		//add ui
-		//m_frame->AddProps(2, this, group, vd);
-		//
 		OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
 		if (adjust_view)
 		{
@@ -6129,17 +6118,11 @@ void RenderCanvas::AddMeshData(MeshData* md)
 {
 	m_layer_list.push_back(md);
 	m_md_pop_dirty = true;
-
-	//add ui
-	//m_frame->AddProps(3, this, 0, 0, md);
-	//m_frame->AddProps(6, this, 0, 0, md);
 }
 
 void RenderCanvas::AddAnnotations(Annotations* ann)
 {
 	m_layer_list.push_back(ann);
-	//add ui
-	//m_frame->AddProps(4, this, 0, 0, 0, ann);
 }
 
 void RenderCanvas::ReplaceVolumeData(wxString &name, VolumeData *dst)

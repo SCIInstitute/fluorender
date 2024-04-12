@@ -544,24 +544,18 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		//slider range
 		m_clipx_sldr->SetRange(resx_n, resx);
-		m_clipx_sldr->SetRangeColor(c);
 		m_clipy_sldr->SetRange(resy_n, resy);
-		m_clipy_sldr->SetRangeColor(c);
 		m_clipz_sldr->SetRange(resz_n, resz);
+	}
+
+	if (update_all || FOUND_VALUE(gstClipPlaneRangeColor))
+	{
+		m_clipx_sldr->SetRangeColor(c);
+		m_clipy_sldr->SetRangeColor(c);
 		m_clipz_sldr->SetRangeColor(c);
-		//text range
-		//if ((vald_i = (wxIntegerValidator<int>*)m_x1_clip_text->GetValidator()))
-		//	vald_i->SetRange(0, resx);
-		//if ((vald_i = (wxIntegerValidator<int>*)m_x2_clip_text->GetValidator()))
-		//	vald_i->SetRange(0, resx);
-		//if ((vald_i = (wxIntegerValidator<int>*)m_y1_clip_text->GetValidator()))
-		//	vald_i->SetRange(0, resy);
-		//if ((vald_i = (wxIntegerValidator<int>*)m_y2_clip_text->GetValidator()))
-		//	vald_i->SetRange(0, resy);
-		//if ((vald_i = (wxIntegerValidator<int>*)m_z1_clip_text->GetValidator()))
-		//	vald_i->SetRange(0, resz);
-		//if ((vald_i = (wxIntegerValidator<int>*)m_z2_clip_text->GetValidator()))
-		//	vald_i->SetRange(0, resz);
+		m_clipx_sldr->Refresh();
+		m_clipy_sldr->Refresh();
+		m_clipz_sldr->Refresh();
 	}
 
 	//clip distance

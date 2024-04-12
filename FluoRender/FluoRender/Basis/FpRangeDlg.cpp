@@ -113,9 +113,9 @@ void FpRangeDlg::SetRange(double min_val, double max_val)
 	m_min_val = min_val;
 	m_max_val = max_val;
 	wxString str = wxString::Format("%f", m_min_val);
-	m_min_text->SetValue(str);
+	m_min_text->ChangeValue(str);
 	str = wxString::Format("%f", m_max_val);
-	m_max_text->SetValue(str);
+	m_max_text->ChangeValue(str);
 }
 
 void FpRangeDlg::OnMinText(wxCommandEvent& event)

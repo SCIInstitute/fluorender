@@ -518,7 +518,6 @@ MainFrame::MainFrame(
 
 	//trace dialog
 	m_trace_dlg = new TraceDlg(this);
-	m_trace_dlg->SetCellSize(glbin_settings.m_component_size);
 
 	//ocl dialog
 	m_ocl_dlg = new OclDlg(this);
@@ -1252,7 +1251,7 @@ wxWindow* MainFrame::CreateExtraControlVolume(wxWindow* parent)
 	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	wxTextCtrl* txt1 = new wxTextCtrl(panel, ID_TSEQ_ID,
 		"", wxDefaultPosition, wxDefaultSize);
-	txt1->SetValue(glbin_settings.m_time_id);
+	txt1->ChangeValue(glbin_settings.m_time_id);
 	txt1->Connect(txt1->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(MainFrame::OnTxt1Change), NULL, panel);
 	st1 = new wxStaticText(panel, 0,
@@ -1314,7 +1313,7 @@ wxWindow* MainFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	wxTextCtrl* txt1 = new wxTextCtrl(panel, ID_TSEQ_ID,
 		"", wxDefaultPosition, wxSize(80, 20));
-	txt1->SetValue(m_time_id);
+	txt1->ChangeValue(m_time_id);
 	txt1->Connect(txt1->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(MainFrame::OnTxt1Change), NULL, panel);
 	wxStaticText* st = new wxStaticText(panel, 0,
@@ -1692,6 +1691,7 @@ void MainFrame::LoadMeshes(wxArrayString files, RenderCanvas* canvas)
 	if (canvas)
 		canvas->InitView(INIT_BOUNDS|INIT_CENTER);
 
+	RefreshCanvases(false, { GetView(canvas) });
 	UpdateProps({ gstListCtrl, gstTreeCtrl });
 
 	delete prg_diag;
@@ -2032,7 +2032,7 @@ wxWindow* MainFrame::AddProps(int type,
 			ManipPropPanel* pane = new ManipPropPanel(this, m_prop_panel);
 			pane->SetMeshData(md);
 			pane->GetData();
-			pane->SetName(md->GetName());
+			pane->SetName(md->GetName() + " M");
 			pane->Hide();
 			m_prop_pages.push_back(pane);
 			result = pane;
@@ -2061,7 +2061,7 @@ void MainFrame::DeleteProps(int type, const wxString& name)
 			page = FindAnnotationProps(name);
 			break;
 		case 6://mesh manip
-			page = FindMeshManip(name);
+			page = FindMeshManip(name + " M");
 			break;
 	}
 	if (!page)
@@ -2116,7 +2116,7 @@ void MainFrame::ShowPropPage(int type,
 		if (md)
 		{
 			name = md->GetName();
-			page = FindMeshManip(name);
+			page = FindMeshManip(name + " M");
 		}
 		break;
 	}

@@ -443,7 +443,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	wxBoxSizer *group2 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Large Data Streaming"), wxVERTICAL);
 	m_streaming_chk = new wxCheckBox(page, ID_StreamingChk,
-		"Enable streaming for large datasets.");
+		"Enable streaming for large data.");
 	wxString choices[2] = {"Back to front", "Front to back"};
 	m_update_order_rbox = new wxRadioBox(page, ID_UpdateOrderRbox,
 		"Update order", wxDefaultPosition, wxDefaultSize,
@@ -528,8 +528,8 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	group2->Add(10, 5);
 	st = new wxStaticText(page, 0,
 		"Note: Configure these settings before loading data.\n"\
-		"Data streaming allows rendering and processing datasets of larger size than\n"\
-		"available graphics memory. Datasets are divided into bricks. The bricks are\n"\
+		"Data streaming allows rendering and processing data of larger size than\n"\
+		"available graphics memory. Data are divided into bricks. The bricks are\n"\
 		"sequentially loaded into graphics memory for rendering and processing.\n"\
 		"Different computer hardware may need different settings. You may need to\n"\
 		"experiment in order to find the best settings for your computer.");
@@ -646,7 +646,7 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 		new wxStaticBox(page, wxID_ANY, "Override Voxel Size"), wxVERTICAL);
 	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_override_vox_chk = new wxCheckBox(page, ID_OverrideVoxChk,
-		"Get voxel size info from the first opened dataset.");
+		"Get voxel size info from the first opened data set.");
 	sizer1_1->Add(m_override_vox_chk, 0, wxALIGN_CENTER);
 	group1->Add(10, 5);
 	group1->Add(sizer1_1, 0, wxEXPAND);
@@ -995,13 +995,13 @@ void SettingDlg::UpdateUI()
 	if (glbin_settings.m_use_max_texture_size)
 	{
 		flvr::ShaderProgram::set_max_texture_size(glbin_settings.m_max_texture_size);
-		m_max_texture_size_text->SetValue(
+		m_max_texture_size_text->ChangeValue(
 			wxString::Format("%d", glbin_settings.m_max_texture_size));
 		m_max_texture_size_text->Enable();
 	}
 	else
 	{
-		m_max_texture_size_text->SetValue(
+		m_max_texture_size_text->ChangeValue(
 			wxString::Format("%d", flvr::ShaderProgram::
 				max_texture_size()));
 		m_max_texture_size_text->Disable();
@@ -1013,10 +1013,10 @@ void SettingDlg::UpdateUI()
 	int font_sel = m_font_cmb->FindString(str);
 	if (font_sel != wxNOT_FOUND)
 		m_font_cmb->Select(font_sel);
-	m_font_size_cmb->SetValue(wxString::Format("%d", glbin_settings.m_text_size));
+	m_font_size_cmb->ChangeValue(wxString::Format("%d", glbin_settings.m_text_size));
 	m_text_color_cmb->Select(glbin_settings.m_text_color);
 	//line width
-	m_line_width_text->SetValue(wxString::Format("%.0f", glbin_settings.m_line_width));
+	m_line_width_text->ChangeValue(wxString::Format("%.0f", glbin_settings.m_line_width));
 	m_line_width_sldr->ChangeValue(std::round(glbin_settings.m_line_width));
 	//paint history depth
 	m_paint_hist_depth_text->ChangeValue(wxString::Format("%d", glbin_brush_def.m_paint_hist_depth));
@@ -1040,9 +1040,9 @@ void SettingDlg::UpdateUI()
 	m_detail_level_offset_sldr->ChangeValue(-glbin_settings.m_detail_level_offset);
 
 	//java
-	m_java_jvm_text->SetValue(glbin_settings.m_jvm_path);
-	m_java_ij_text->SetValue(glbin_settings.m_ij_path);
-	m_java_bioformats_text->SetValue(glbin_settings.m_bioformats_path);
+	m_java_jvm_text->ChangeValue(glbin_settings.m_jvm_path);
+	m_java_ij_text->ChangeValue(glbin_settings.m_ij_path);
+	m_java_bioformats_text->ChangeValue(glbin_settings.m_bioformats_path);
 	switch (glbin_settings.m_ij_mode)
 	{
 	case 0:
@@ -1100,7 +1100,7 @@ void SettingDlg::UpdateTextureSize()
 {
 	if (!glbin_settings.m_use_max_texture_size)
 	{
-		m_max_texture_size_text->SetValue(
+		m_max_texture_size_text->ChangeValue(
 			wxString::Format("%d", flvr::ShaderProgram::
 				max_texture_size()));
 	}
@@ -1542,7 +1542,7 @@ void SettingDlg::OnMaxTextureSizeChk(wxCommandEvent &event)
 	if (glbin_settings.m_use_max_texture_size)
 	{
 		flvr::ShaderProgram::set_max_texture_size(glbin_settings.m_max_texture_size);
-		m_max_texture_size_text->SetValue(
+		m_max_texture_size_text->ChangeValue(
 			wxString::Format("%d", glbin_settings.m_max_texture_size));
 		m_max_texture_size_text->Enable();
 	}
@@ -1845,7 +1845,7 @@ void SettingDlg::onJavaJvmBrowse(wxCommandEvent &event)
 	if (rval == wxID_OK)
 	{
 		wxString filename = fopendlg->GetPath();
-		m_java_jvm_text->SetValue(filename);
+		m_java_jvm_text->ChangeValue(filename);
 	}
 
 	if (fopendlg)
@@ -1874,7 +1874,7 @@ void SettingDlg::onJavaIJBrowse(wxCommandEvent &event)
 #ifdef _DARWIN
 		//filename = filename + "/Contents/Java/ij.jar";
 #endif
-		m_java_ij_text->SetValue(filename);
+		m_java_ij_text->ChangeValue(filename);
 	}
 
 	if (fopendlg)
@@ -1891,7 +1891,7 @@ void SettingDlg::onJavaBioformatsBrowse(wxCommandEvent &event)
 	if (rval == wxID_OK)
 	{
 		wxString filename = fopendlg->GetPath();
-		m_java_bioformats_text->SetValue(filename);
+		m_java_bioformats_text->ChangeValue(filename);
 	}
 
 	if (fopendlg)

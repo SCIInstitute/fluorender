@@ -83,7 +83,7 @@ void AnnotatPropPanel::FluoUpdate(const fluo::ValueCollection& values)
 		return;
 
 	wxString memo = m_ann->GetMemo();
-	m_memo_text->SetValue(memo);
+	m_memo_text->ChangeValue(memo);
 	if (m_ann->GetMemoRO())
 	{
 		m_memo_text->SetEditable(false);

@@ -540,7 +540,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_all->AddGrowableRow(0);
 	sizer_all->Add(sizer_left, 1, wxEXPAND);
 	sizer_all->Add(sizer_middle, 1, wxEXPAND);
-	sizer_all->Add(sizer_right, 0, wxSHRINK);
+	sizer_all->Add(sizer_right, 1, wxEXPAND);
 	SetSizer(sizer_all);
 	Layout();
 	SetAutoLayout(true);
@@ -644,7 +644,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	wxFloatingPointValidator<double>* vald_fp;
 	wxIntegerValidator<unsigned int>* vald_i;
 
-	bool update_all = vc.empty();
+	bool update_all = vc.empty() || FOUND_VALUE(gstVolumeProps);
 	bool update_tips = update_all || FOUND_VALUE(gstMultiFuncTips);
 	bool update_gamma = update_all || FOUND_VALUE(gstGamma3d);
 	bool update_boundary = update_all || FOUND_VALUE(gstBoundary);
@@ -1009,6 +1009,19 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//legend
 	if (update_all || FOUND_VALUE(gstLegend))
 		m_options_toolbar->ToggleTool(ID_LegendChk,m_vd->GetLegend());
+
+	//component
+	if (update_all || FOUND_VALUE(gstLabelMode))
+	{
+		bval = m_vd->GetLabelMode() > 0;
+		m_options_toolbar->ToggleTool(ID_CompChk, bval);
+		if (bval)
+			m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
+				wxGetBitmapFromMemory(comp));
+		else
+			m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
+				wxGetBitmapFromMemory(comp_off));
+	}
 
 	//interpolate
 	if (update_all || FOUND_VALUE(gstInterpolate))
@@ -1533,9 +1546,9 @@ void VolumePropPanel::SetLuminance(double val, bool notify)
 	m_color2_btn->SetValue(wxc);
 
 	if (notify)
-		FluoRefresh(true, 1, { gstColor, gstTreeColors }, { m_frame->GetView(m_view) });
+		FluoRefresh(true, 1, { gstColor, gstTreeColors, gstClipPlaneRangeColor }, { m_frame->GetView(m_view) });
 	else
-		FluoRefresh(true, 1, { gstTreeColors }, { m_frame->GetView(m_view) });
+		FluoRefresh(true, 1, { gstTreeColors, gstClipPlaneRangeColor }, { m_frame->GetView(m_view) });
 }
 
 void VolumePropPanel::SetAlpha(double val, bool notify)
@@ -1661,7 +1674,7 @@ void VolumePropPanel::SyncLuminance(double val)
 		return;
 
 	m_group->SetLuminance(val);
-	FluoRefresh(true, 1, { gstColor }, { m_frame->GetView(m_view) });
+	FluoRefresh(true, 1, { gstColor, gstTreeColors, gstClipPlaneRangeColor }, { m_frame->GetView(m_view) });
 }
 
 void VolumePropPanel::SyncAlpha(double val)
@@ -2597,7 +2610,7 @@ void VolumePropPanel::OnColorChange(wxColor c)
 				adjust_view->UpdateSync();
 		}
 
-		FluoRefresh(true, 1, { gstColor, gstLuminance, gstSecColor, gstTreeColors }, { m_frame->GetView(m_view) });
+		FluoRefresh(true, 1, { gstColor, gstLuminance, gstSecColor, gstTreeColors, gstClipPlaneRangeColor }, { m_frame->GetView(m_view) });
 	}
 }
 
@@ -2839,10 +2852,10 @@ void VolumePropPanel::OnOptions(wxCommandEvent& event)
 		SetLegend();
 		break;
 	case ID_ResetDefault:
-		SaveDefault();
+		ResetDefault();
 		break;
 	case ID_SaveDefault:
-		ResetDefault();
+		SaveDefault();
 		break;
 	}
 	event.Skip();
@@ -2877,19 +2890,13 @@ void VolumePropPanel::SetMIP()
 void VolumePropPanel::SetInvert()
 {
 	bool inv = m_options_toolbar->GetToolState(ID_InvChk);
-	if (inv)
-		m_options_toolbar->SetToolNormalBitmap(ID_InvChk,
-			wxGetBitmapFromMemory(invert));
-	else
-		m_options_toolbar->SetToolNormalBitmap(ID_InvChk,
-			wxGetBitmapFromMemory(invert_off));
 
 	if (m_sync_group && m_group)
 		m_group->SetInvert(inv);
 	else if (m_vd)
 		m_vd->SetInvert(inv);
 
-	FluoRefresh(true, 1, { gstInvert }, { m_frame->GetView(m_view) });
+	FluoRefresh(true, 0, { gstInvert }, { m_frame->GetView(m_view) });
 }
 
 void VolumePropPanel::SetComponentDisplay()
@@ -2901,7 +2908,7 @@ void VolumePropPanel::SetComponentDisplay()
 	else if (m_vd)
 		m_vd->SetLabelMode(mode);
 
-	FluoRefresh(true, 1, { gstLabelMode }, { m_frame->GetView(m_view) });
+	FluoRefresh(true, 0, { gstLabelMode }, { m_frame->GetView(m_view) });
 }
 
 //interpolation
@@ -2916,19 +2923,13 @@ void VolumePropPanel::SetInterpolate()
 	if (m_view)
 		m_view->SetIntp(inv);
 
-	FluoRefresh(true, 1, { gstInterpolate }, { m_frame->GetView(m_view) });
+	FluoRefresh(true, 0, { gstInterpolate }, { m_frame->GetView(m_view) });
 }
 
 //noise reduction
 void VolumePropPanel::SetNoiseReduction()
 {
 	bool val = m_options_toolbar->GetToolState(ID_NRChk);
-	if (val)
-		m_options_toolbar->SetToolNormalBitmap(ID_NRChk,
-			wxGetBitmapFromMemory(smooth));
-	else
-		m_options_toolbar->SetToolNormalBitmap(ID_NRChk,
-			wxGetBitmapFromMemory(smooth_off));
 
 	if (m_view && m_view->GetVolMethod()==VOL_METHOD_MULTI)
 	{
@@ -2949,7 +2950,7 @@ void VolumePropPanel::SetNoiseReduction()
 			m_vd->SetNR(val);
 	}
 
-	FluoRefresh(true, 1, { gstNoiseRedct }, { m_frame->GetView(m_view) });
+	FluoRefresh(true, 0, { gstNoiseRedct }, { m_frame->GetView(m_view) });
 }
 
 //sync within group
@@ -3012,7 +3013,7 @@ void VolumePropPanel::SetSyncGroup()
 		m_group->SetColormapProj(m_vd->GetColormapProj());
 	}
 
-	FluoRefresh(true, 1, {}, { m_frame->GetView(m_view) });
+	FluoRefresh(true, 1, { gstVolumeProps }, { m_frame->GetView(m_view) });
 }
 
 //depth mode
@@ -3040,7 +3041,7 @@ void VolumePropPanel::SetBlendDepth()
 			m_group->SetBlendMode(0);
 	}
 
-	FluoRefresh(true, 1, { gstBlendMode }, { m_frame->GetView(m_view) });
+	FluoRefresh(true, 0, { gstBlendMode }, { m_frame->GetView(m_view) });
 }
 
 //legend
@@ -3068,7 +3069,7 @@ void VolumePropPanel::ResetDefault()
 		return;
 	glbin_vol_def.Apply(m_vd);
 
-	FluoRefresh(true, 1, {}, { m_frame->GetView(m_view) });
+	FluoRefresh(true, 0, { gstVolumeProps }, { m_frame->GetView(m_view) });
 }
 
 bool VolumePropPanel::SetSpacings()

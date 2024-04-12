@@ -72,7 +72,7 @@ using namespace std;
 #define HELP_PAINT HELP_MANUAL
 
 #define UITEXT_PROJECT		"Project"
-#define UITEXT_DATAVIEW		"Datasets"
+#define UITEXT_DATAVIEW		"Data Sets"
 #define UITEXT_TREEVIEW		"Workspace"
 #define UITEXT_MAKEMOVIE	"Movie Making"
 #define UITEXT_ADJUST		"Output Adjustments"

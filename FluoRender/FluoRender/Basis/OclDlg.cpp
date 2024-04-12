@@ -221,7 +221,7 @@ void OclDlg::OnBrowseBtn(wxCommandEvent& event)
 		wxString filename = fopendlg->GetPath();
 		m_kernel_edit_stc->LoadFile(filename);
 		m_kernel_edit_stc->EmptyUndoBuffer();
-		m_kernel_file_txt->SetValue(filename);
+		m_kernel_file_txt->ChangeValue(filename);
 	}
 
 	if (fopendlg)
@@ -252,7 +252,7 @@ void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 		wxString filename = fopendlg->GetPath();
 		rval = m_kernel_edit_stc->SaveFile(filename);
 		if (rval) {
-			m_kernel_file_txt->SetValue(filename);
+			m_kernel_file_txt->ChangeValue(filename);
 			filename = wxFileNameFromPath(filename);
 			wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 			exePath = wxPathOnly(exePath);
@@ -296,7 +296,7 @@ void OclDlg::OnIterationsEdit(wxCommandEvent &event)
 	wxString str = m_iterations_txt->GetValue();
 	unsigned long ival;
 	str.ToULong(&ival);
-	m_iterations_sldr->SetValue(ival);
+	m_iterations_sldr->ChangeValue(ival);
 }
 
 void OclDlg::AddKernelsToList()
@@ -325,7 +325,7 @@ void OclDlg::AddKernelsToList()
 
 void OclDlg::Execute()
 {
-	m_output_txt->SetValue("");
+	m_output_txt->ChangeValue("");
 
 	bool refresh = false;
 
@@ -406,7 +406,7 @@ void OclDlg::OnKernelListSelected(wxListEvent& event)
 			GETSLASH() + file + ".cl";
 		m_kernel_edit_stc->LoadFile(file);
 		m_kernel_edit_stc->EmptyUndoBuffer();
-		m_kernel_file_txt->SetValue(file);
+		m_kernel_file_txt->ChangeValue(file);
 	}
 }
 

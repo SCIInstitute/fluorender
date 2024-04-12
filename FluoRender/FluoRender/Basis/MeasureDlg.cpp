@@ -635,7 +635,7 @@ void RulerListCtrl::OnSelection(wxListEvent &event)
 	str = GetText(item, 0);
 	m_name_text->SetPosition(rect.GetTopLeft());
 	m_name_text->SetSize(rect.GetSize());
-	m_name_text->SetValue(str);
+	m_name_text->ChangeValue(str);
 	m_name_text->Show();
 	//add color picker
 	GetSubItemRect(item, ColorCol, rect);
@@ -648,7 +648,7 @@ void RulerListCtrl::OnSelection(wxListEvent &event)
 		str = GetText(item, CenterCol);
 		m_center_text->SetPosition(rect.GetTopLeft());
 		m_center_text->SetSize(rect.GetSize());
-		m_center_text->SetValue(str);
+		m_center_text->ChangeValue(str);
 		m_center_text->Show();
 	}
 	if (ruler->GetUseColor())
