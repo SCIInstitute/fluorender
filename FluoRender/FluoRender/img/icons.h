@@ -426,6 +426,8 @@ public:
 	const static unsigned char save_settings_png[1314];
 	/* reset.png - 885 bytes */
 	const static unsigned char reset_png[885];
+	/* reset_mini.png - 695 bytes */
+	const static unsigned char reset_mini_png[695];
 	/* sync_chan.png - 1081 bytes */
 	const static unsigned char sync_chan_png[1081];
 	/* full_screen_back_menu.png - 921 bytes */

@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <wxSingleSlider.h>
+#include <wxUndoableToolbar.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include <wx/gbsizer.h>
@@ -84,12 +85,15 @@ m_enable_all(true)
 	EnableAll(false);
 
 	//add sliders for undo and redo
+	glbin.add_undo_control(m_sync_r_chk);
 	glbin.add_undo_control(m_r_gamma_sldr);
 	glbin.add_undo_control(m_r_brightness_sldr);
 	glbin.add_undo_control(m_r_hdr_sldr);
+	glbin.add_undo_control(m_sync_g_chk);
 	glbin.add_undo_control(m_g_gamma_sldr);
 	glbin.add_undo_control(m_g_brightness_sldr);
 	glbin.add_undo_control(m_g_hdr_sldr);
+	glbin.add_undo_control(m_sync_b_chk);
 	glbin.add_undo_control(m_b_gamma_sldr);
 	glbin.add_undo_control(m_b_brightness_sldr);
 	glbin.add_undo_control(m_b_hdr_sldr);
@@ -100,12 +104,15 @@ m_enable_all(true)
 OutputAdjPanel::~OutputAdjPanel()
 {
 	//delete sliders for undo and redo
+	glbin.del_undo_control(m_sync_r_chk);
 	glbin.del_undo_control(m_r_gamma_sldr);
 	glbin.del_undo_control(m_r_brightness_sldr);
 	glbin.del_undo_control(m_r_hdr_sldr);
+	glbin.del_undo_control(m_sync_g_chk);
 	glbin.del_undo_control(m_g_gamma_sldr);
 	glbin.del_undo_control(m_g_brightness_sldr);
 	glbin.del_undo_control(m_g_hdr_sldr);
+	glbin.del_undo_control(m_sync_b_chk);
 	glbin.del_undo_control(m_b_gamma_sldr);
 	glbin.del_undo_control(m_b_brightness_sldr);
 	glbin.del_undo_control(m_b_hdr_sldr);
@@ -180,7 +187,7 @@ wxWindow* OutputAdjPanel::CreateRedPage(wxWindow* parent, wxSize& size)
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
 	m_r_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	m_r_reset_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnRReset, this);
-	m_sync_r_chk = new wxToolBar(page, wxID_ANY,
+	m_sync_r_chk = new wxUndoableToolbar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(unlink);
 	m_sync_r_chk->AddCheckTool(0, "Link",
@@ -208,7 +215,6 @@ wxWindow* OutputAdjPanel::CreateGreenPage(wxWindow* parent, wxSize& size)
 	SetSize(size);
 
 	long ls = glbin_settings.m_inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
-	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	//validator: floating point 2
 	wxFloatingPointValidator<double> vald_fp2(2);
 	//validator: integer
@@ -216,84 +222,76 @@ wxWindow* OutputAdjPanel::CreateGreenPage(wxWindow* parent, wxSize& size)
 	vald_int.SetRange(-256, 256);
 	wxBitmap bitmap;
 
+	wxGridBagSizer* sizer_v = new wxGridBagSizer(5, 0);
 	//buttons
-	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	m_g_gamma_st = new wxButton(page, wxID_ANY, "Gam.G.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_g_gamma_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnGGammaMF, this);
-	sizer1->Add(m_g_gamma_st, 1, wxEXPAND);
 	m_g_brightness_st = new wxButton(page, wxID_ANY, "Lum.G.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_g_brightness_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnGBrightnessMF, this);
-	sizer1->Add(m_g_brightness_st, 1, wxEXPAND);
 	m_g_hdr_st = new wxButton(page, wxID_ANY, "Eql.G.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_g_hdr_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnGHdrMF, this);
-	sizer1->Add(m_g_hdr_st, 1, wxEXPAND);
+	sizer_v->Add(m_g_gamma_st, wxGBPosition(0, 0), wxGBSpan(1, 1), wxEXPAND);
+	sizer_v->Add(m_g_brightness_st, wxGBPosition(0, 1), wxGBSpan(1, 1), wxEXPAND);
+	sizer_v->Add(m_g_hdr_st, wxGBPosition(0, 2), wxGBSpan(1, 1), wxEXPAND);
 
 	//sliders
-	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	m_g_gamma_sldr = new wxSingleSlider(page, wxID_ANY, 100, 10, 400,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_g_gamma_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnGGammaChange, this);
 	m_g_gamma_sldr->SetRangeColor(*wxGREEN);
-	sizer2->Add(m_g_gamma_sldr, 1, wxEXPAND);
 	m_g_brightness_sldr = new wxSingleSlider(page, wxID_ANY, 0, -256, 256,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_g_brightness_sldr->SetRangeStyle(2);
 	m_g_brightness_sldr->SetRangeColor(*wxGREEN);
 	m_g_brightness_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnGBrightnessChange, this);
-	sizer2->Add(m_g_brightness_sldr, 1, wxEXPAND);
 	m_g_hdr_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_g_hdr_sldr->SetRangeColor(*wxGREEN);
 	m_g_hdr_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnGHdrChange, this);
-	sizer2->Add(m_g_hdr_sldr, 1, wxEXPAND);
+	sizer_v->Add(m_g_gamma_sldr, wxGBPosition(1, 0), wxGBSpan(1, 1), wxEXPAND);
+	sizer_v->Add(m_g_brightness_sldr, wxGBPosition(1, 1), wxGBSpan(1, 1), wxEXPAND);
+	sizer_v->Add(m_g_hdr_sldr, wxGBPosition(1, 2), wxGBSpan(1, 1), wxEXPAND);
 
 	//input boxes
-	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
 	vald_fp2.SetRange(0.0, 10.0);
 	m_g_gamma_text = new wxTextCtrl(page, wxID_ANY, "1.00",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_fp2);
 	m_g_gamma_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnGGammaText, this);
-	sizer3->Add(m_g_gamma_text, 1, wxEXPAND);
 	m_g_brightness_text = new wxTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_int);
 	m_g_brightness_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnGBrightnessText, this);
-	sizer3->Add(m_g_brightness_text, 1, wxEXPAND);
 	vald_fp2.SetRange(0.0, 1.0);
 	m_g_hdr_text = new wxTextCtrl(page, wxID_ANY, "0.00",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_fp2);
 	m_g_hdr_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnGHdrText, this);
-	sizer3->Add(m_g_hdr_text, 1, wxEXPAND);
+	sizer_v->Add(m_g_gamma_text, wxGBPosition(2, 0), wxGBSpan(1, 1), wxEXPAND);
+	sizer_v->Add(m_g_brightness_text, wxGBPosition(2, 1), wxGBSpan(1, 1), wxEXPAND);
+	sizer_v->Add(m_g_hdr_text, wxGBPosition(2, 2), wxGBSpan(1, 1), wxEXPAND);
 
 	//reset buttons
-	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
 	m_g_reset_btn = new wxButton(page, wxID_ANY, "Reset",
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
 	m_g_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	m_g_reset_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnGReset, this);
-	m_sync_g_chk = new wxToolBar(page, wxID_ANY,
+	m_sync_g_chk = new wxUndoableToolbar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(unlink);
-#ifdef _DARWIN
-	m_sync_g_chk->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_sync_g_chk->AddCheckTool(0, "Link",
 		bitmap, wxNullBitmap,
 		"Link Green Properties with Linked Red or Blue",
 		"Link Green Properties with Linked Red or Blue");
 	m_sync_g_chk->Bind(wxEVT_TOOL, &OutputAdjPanel::OnSyncGCheck, this);
 	m_sync_g_chk->Realize();
-	sizer4->Add(m_g_reset_btn, 1, wxEXPAND);
-	sizer4->Add(5, 5);
-	sizer4->Add(m_sync_g_chk, 0, wxALIGN_CENTER);
+	sizer_v->Add(m_g_reset_btn, wxGBPosition(3, 0), wxGBSpan(1, 2), wxEXPAND);
+	sizer_v->Add(m_sync_g_chk, wxGBPosition(3, 2), wxGBSpan(1, 1), wxEXPAND | wxALIGN_RIGHT);
 
-	sizer_v->Add(sizer1, 0, wxEXPAND);
-	sizer_v->Add(sizer2, 1, wxEXPAND);
-	sizer_v->Add(sizer3, 0, wxEXPAND);
-	sizer_v->Add(sizer4, 0, wxEXPAND);
-
+	sizer_v->AddGrowableCol(0);
+	sizer_v->AddGrowableCol(1);
+	sizer_v->AddGrowableCol(2);
+	sizer_v->AddGrowableRow(1);
 	page->SetSizer(sizer_v);
 	page->SetAutoLayout(true);
 	page->SetScrollRate(10, 10);
@@ -306,7 +304,6 @@ wxWindow* OutputAdjPanel::CreateBluePage(wxWindow* parent, wxSize& size)
 	SetSize(size);
 
 	long ls = glbin_settings.m_inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
-	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	//validator: floating point 2
 	wxFloatingPointValidator<double> vald_fp2(2);
 	//validator: integer
@@ -314,84 +311,76 @@ wxWindow* OutputAdjPanel::CreateBluePage(wxWindow* parent, wxSize& size)
 	vald_int.SetRange(-256, 256);
 	wxBitmap bitmap;
 
+	wxGridBagSizer* sizer_v = new wxGridBagSizer(5, 0);
 	//multifunc buttons
-	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	m_b_gamma_st = new wxButton(page, wxID_ANY, "Gam.B.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_b_gamma_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnBGammaMF, this);
-	sizer1->Add(m_b_gamma_st, 1, wxEXPAND);
 	m_b_brightness_st = new wxButton(page, wxID_ANY, "Lum.B.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_b_brightness_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnBBrightnessMF, this);
-	sizer1->Add(m_b_brightness_st, 1, wxEXPAND);
 	m_b_hdr_st = new wxButton(page, wxID_ANY, "Eql.B.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_b_hdr_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnBHdrMF, this);
-	sizer1->Add(m_b_hdr_st, 1, wxEXPAND);
+	sizer_v->Add(m_b_gamma_st, wxGBPosition(0, 0), wxGBSpan(1, 1), wxEXPAND);
+	sizer_v->Add(m_b_brightness_st, wxGBPosition(0, 1), wxGBSpan(1, 1), wxEXPAND);
+	sizer_v->Add(m_b_hdr_st, wxGBPosition(0, 2), wxGBSpan(1, 1), wxEXPAND);
 
 	//sliders
-	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	m_b_gamma_sldr = new wxSingleSlider(page, wxID_ANY, 100, 10, 400,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_b_gamma_sldr->SetRangeColor(*wxBLUE);
 	m_b_gamma_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnBGammaChange, this);
-	sizer2->Add(m_b_gamma_sldr, 1, wxEXPAND);
 	m_b_brightness_sldr = new wxSingleSlider(page, wxID_ANY, 0, -256, 256,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_b_brightness_sldr->SetRangeStyle(2);
 	m_b_brightness_sldr->SetRangeColor(*wxBLUE);
 	m_b_brightness_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnBBrightnessChange, this);
-	sizer2->Add(m_b_brightness_sldr, 1, wxEXPAND);
 	m_b_hdr_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_b_hdr_sldr->SetRangeColor(*wxBLUE);
 	m_b_hdr_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnBHdrChange, this);
-	sizer2->Add(m_b_hdr_sldr, 1, wxEXPAND);
+	sizer_v->Add(m_b_gamma_sldr, wxGBPosition(1, 0), wxGBSpan(1, 1), wxEXPAND);
+	sizer_v->Add(m_b_brightness_sldr, wxGBPosition(1, 1), wxGBSpan(1, 1), wxEXPAND);
+	sizer_v->Add(m_b_hdr_sldr, wxGBPosition(1, 2), wxGBSpan(1, 1), wxEXPAND);
 
 	//input boxes
-	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
 	vald_fp2.SetRange(0.0, 10.0);
 	m_b_gamma_text = new wxTextCtrl(page, wxID_ANY, "1.00",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_fp2);
 	m_b_gamma_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnBGammaText, this);
-	sizer3->Add(m_b_gamma_text, 1, wxEXPAND);
 	m_b_brightness_text = new wxTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_int);
 	m_b_brightness_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnBBrightnessText, this);
-	sizer3->Add(m_b_brightness_text, 1, wxEXPAND);
 	vald_fp2.SetRange(0.0, 1.0);
 	m_b_hdr_text = new wxTextCtrl(page, wxID_ANY, "0.00",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_fp2);
 	m_b_hdr_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnBHdrText, this);
-	sizer3->Add(m_b_hdr_text, 1, wxEXPAND);
+	sizer_v->Add(m_b_gamma_text, wxGBPosition(2, 0), wxGBSpan(1, 1), wxEXPAND);
+	sizer_v->Add(m_b_brightness_text, wxGBPosition(2, 1), wxGBSpan(1, 1), wxEXPAND);
+	sizer_v->Add(m_b_hdr_text, wxGBPosition(2, 2), wxGBSpan(1, 1), wxEXPAND);
 
 	//reset buttons
-	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
 	m_b_reset_btn = new wxButton(page, wxID_ANY, "Reset",
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
 	m_b_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	m_b_reset_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnBReset, this);
-	m_sync_b_chk = new wxToolBar(page, wxID_ANY,
+	m_sync_b_chk = new wxUndoableToolbar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(unlink);
-#ifdef _DARWIN
-	m_sync_b_chk->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_sync_b_chk->AddCheckTool(0, "Link",
 		bitmap, wxNullBitmap,
 		"Link Blue Properties with Linked Red or Green",
 		"Link Blue Properties with Linked Red or Green");
 	m_sync_b_chk->Bind(wxEVT_TOOL, &OutputAdjPanel::OnSyncBCheck, this);
 	m_sync_b_chk->Realize();
-	sizer4->Add(m_b_reset_btn, 1, wxEXPAND);
-	sizer4->Add(5, 5);
-	sizer4->Add(m_sync_b_chk, 0, wxALIGN_CENTER);
+	sizer_v->Add(m_b_reset_btn, wxGBPosition(3, 0), wxGBSpan(1, 2), wxEXPAND);
+	sizer_v->Add(m_sync_b_chk, wxGBPosition(3, 2), wxGBSpan(1, 1), wxEXPAND | wxALIGN_RIGHT);
 
-	sizer_v->Add(sizer1, 0, wxEXPAND);
-	sizer_v->Add(sizer2, 1, wxEXPAND);
-	sizer_v->Add(sizer3, 0, wxEXPAND);
-	sizer_v->Add(sizer4, 0, wxEXPAND);
-
+	sizer_v->AddGrowableCol(0);
+	sizer_v->AddGrowableCol(1);
+	sizer_v->AddGrowableCol(2);
+	sizer_v->AddGrowableRow(1);
 	page->SetSizer(sizer_v);
 	page->SetAutoLayout(true);
 	page->SetScrollRate(10, 10);

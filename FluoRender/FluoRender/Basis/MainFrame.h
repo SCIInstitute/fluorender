@@ -134,6 +134,7 @@ class MainFrame: public wxFrame
 		ID_FullScreen,
 		ID_ViewNew,
 		ID_Layout,
+		ID_Reset,
 		ID_ShowHideUI,
 		//tools
 		ID_LastTool,
@@ -211,6 +212,8 @@ public:
 	void ToggleAllTools(bool cur_state);
 	//show/hide panes
 	void ShowPane(wxPanel* pane, bool show=true);
+	//reset layout
+	void ResetLayout();
 
 	//on selections
 	void OnSelection(int type,	//0: nothing; 1:view; 2: volume; 3:mesh; 4:annotations; 5:group; 6:mesh manip
@@ -403,6 +406,7 @@ private:
 	void OnExit(wxCommandEvent& event);
 	void OnNewView(wxCommandEvent& event);
 	void OnLayout(wxCommandEvent& event);
+	void OnReset(wxCommandEvent& event);
 	void OnFullScreen(wxCommandEvent& event);
 	void OnOpenVolume(wxCommandEvent& event);
 	void OnImportVolume(wxCommandEvent& event);

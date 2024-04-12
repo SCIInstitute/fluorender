@@ -91,6 +91,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(wxID_EXIT, MainFrame::OnExit)
 	EVT_MENU(ID_ViewNew, MainFrame::OnNewView)
 	EVT_MENU(ID_Layout, MainFrame::OnLayout)
+	EVT_MENU(ID_Reset, MainFrame::OnReset)
 	EVT_MENU(ID_FullScreen, MainFrame::OnFullScreen)
 	EVT_MENU(ID_OpenVolume, MainFrame::OnOpenVolume)
 	EVT_MENU(ID_OpenMesh, MainFrame::OnOpenMesh)
@@ -551,19 +552,28 @@ MainFrame::MainFrame(
 		Name("m_main_tb").Caption("Toolbar").ToolbarPane().Top().Row(1).Resizable());
 	m_aui_mgr.AddPane(m_proj_panel, wxAuiPaneInfo().
 		Name("m_proj_panel").Caption(UITEXT_PROJECT).
+		BestSize(FromDIP(wxSize(320, 500))).
+		FloatingSize(FromDIP(wxSize(320, 500))).
 		Left().CloseButton(true).Layer(3));
 	m_aui_mgr.AddPane(m_movie_panel, wxAuiPaneInfo().
 		Name("m_movie_panel").Caption(UITEXT_MAKEMOVIE).
+		BestSize(FromDIP(wxSize(320, 500))).
+		FloatingSize(FromDIP(wxSize(320, 500))).
 		Left().CloseButton(true).Layer(3));
 	m_aui_mgr.AddPane(m_prop_panel, wxAuiPaneInfo().
 		Name("m_prop_panel").Caption(UITEXT_PROPERTIES).
-		BestSize(FromDIP(wxSize(-1, 180))).
+		BestSize(FromDIP(wxSize(1100, 160))).
+		FloatingSize(FromDIP(wxSize(1100, 160))).
 		Bottom().CloseButton(true).Layer(2));
 	m_aui_mgr.AddPane(m_adjust_view, wxAuiPaneInfo().
 		Name("m_adjust_view").Caption(UITEXT_ADJUST).
+		BestSize(FromDIP(wxSize(150, 800))).
+		FloatingSize(FromDIP(wxSize(150, 800))).
 		Left().CloseButton(true).Layer(1));
 	m_aui_mgr.AddPane(m_clip_view, wxAuiPaneInfo().
 		Name("m_clip_view").Caption(UITEXT_CLIPPING).
+		BestSize(FromDIP(wxSize(150, 800))).
+		FloatingSize(FromDIP(wxSize(150, 800))).
 		Right().CloseButton(true).Layer(1));
 	m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
 		Name(vrv->GetName()).Caption(vrv->GetName()).
@@ -798,6 +808,9 @@ MainFrame::MainFrame(
 	m = m_top_window->Append(ID_Layout, "&Layout",
 		"Resize the render view panels");
 	m->SetBitmap(wxGetBitmapFromMemory(layout));
+	m = m_top_window->Append(ID_Reset, "R&eset",
+		"Reset the user interface layout");
+	m->SetBitmap(wxGetBitmapFromMemory(reset_mini));
 	m = m_top_window->Append(ID_ViewNew, "&New View",
 		"Create a new render view panel");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_new_view_mini));
@@ -1079,6 +1092,11 @@ void MainFrame::OnNewView(wxCommandEvent& event)
 void MainFrame::OnLayout(wxCommandEvent& event)
 {
 	OrganizeVRenderViews(1);
+}
+
+void MainFrame::OnReset(wxCommandEvent& event)
+{
+	ResetLayout();
 }
 
 void MainFrame::OnFullScreen(wxCommandEvent& event)
@@ -2613,6 +2631,41 @@ void MainFrame::ShowPane(wxPanel* pane, bool show)
 			m_aui_mgr.GetPane(pane).Hide();
 		m_aui_mgr.Update();
 	}
+}
+
+//reset layout
+void MainFrame::ResetLayout()
+{
+	m_aui_mgr.GetPane(m_main_tb).Show().Dock().
+		Top().Row(1).Resizable();
+	m_aui_mgr.GetPane(m_proj_panel).Show().Dock().
+		BestSize(FromDIP(wxSize(320, 500))).
+		FloatingSize(FromDIP(wxSize(320, 500))).
+		Left().Layer(3);
+	m_aui_mgr.GetPane(m_movie_panel).Show().Dock().
+		BestSize(FromDIP(wxSize(320, 500))).
+		FloatingSize(FromDIP(wxSize(320, 500))).
+		Left().Layer(3);
+	m_aui_mgr.GetPane(m_prop_panel).Show().Dock().
+		BestSize(FromDIP(wxSize(1100, 160))).
+		FloatingSize(FromDIP(wxSize(1100, 160))).
+		Bottom().Layer(2);
+	m_aui_mgr.GetPane(m_adjust_view).Show().Dock().
+		BestSize(FromDIP(wxSize(150, 800))).
+		FloatingSize(FromDIP(wxSize(150, 800))).
+		Left().Layer(1);
+	m_aui_mgr.GetPane(m_clip_view).Show().Dock().
+		BestSize(FromDIP(wxSize(150, 800))).
+		FloatingSize(FromDIP(wxSize(150, 800))).
+		Right().Show().Dock().Layer(1);
+	m_top_window->Check(ID_ShowHideToolbar, true);
+	m_top_window->Check(ID_UIProjView, true);
+	m_top_window->Check(ID_UIMovieView, true);
+	m_top_window->Check(ID_UIAdjView, true);
+	m_top_window->Check(ID_UIClipView, true);
+	m_top_window->Check(ID_UIPropView, true);
+	OrganizeVRenderViews(1);
+	glbin_settings.m_layout.Clear();
 }
 
 void MainFrame::OnChEmbedCheck(wxCommandEvent &event)

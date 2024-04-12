@@ -68,6 +68,7 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	Freeze();
 
 	wxLogNull logNo;
 	//full frame
@@ -253,6 +254,7 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 	glbin.add_undo_control(m_y_rot_sldr);
 	glbin.add_undo_control(m_z_rot_sldr);
 
+	Thaw();
 }
 
 RenderViewPanel::~RenderViewPanel()

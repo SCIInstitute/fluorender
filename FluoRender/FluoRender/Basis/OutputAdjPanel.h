@@ -37,6 +37,7 @@ class RenderCanvas;
 class VolumeData;
 class DataGroup;
 class wxSingleSlider;
+class wxUndoableToolbar;
 class OutputAdjPanel: public PropPanel
 {
 public:
@@ -91,7 +92,7 @@ private:
 	bool m_sync[3];//for rgb
 
 	//sync red
-	wxToolBar *m_sync_r_chk;
+	wxUndoableToolbar* m_sync_r_chk;
 	//buttons
 	wxButton* m_r_gamma_st;
 	wxButton* m_r_brightness_st;
@@ -108,7 +109,7 @@ private:
 	wxButton *m_r_reset_btn;
 
 	//sync green
-	wxToolBar *m_sync_g_chk;
+	wxUndoableToolbar* m_sync_g_chk;
 	//buttons
 	wxButton* m_g_gamma_st;
 	wxButton* m_g_brightness_st;
@@ -125,7 +126,7 @@ private:
 	wxButton *m_g_reset_btn;
 
 	//sync blue
-	wxToolBar *m_sync_b_chk;
+	wxUndoableToolbar* m_sync_b_chk;
 	//buttons
 	wxButton* m_b_gamma_st;
 	wxButton* m_b_brightness_st;
