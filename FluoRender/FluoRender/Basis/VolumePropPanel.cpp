@@ -349,9 +349,6 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	//ml
 	bitmap = wxGetBitmap(starknot, dpi_sf);
-#ifdef _DARWIN
-	m_options_toolbar->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_options_toolbar->AddTool(ID_UseMlChk, "Use Machine Learning",
 		bitmap, "Generate properties using machine learning");
 	//transparency
@@ -2926,6 +2923,12 @@ void VolumePropPanel::SetInterpolate()
 void VolumePropPanel::SetNoiseReduction()
 {
 	bool val = m_options_toolbar->GetToolState(ID_NRChk);
+	if (val)
+		m_options_toolbar->SetToolNormalBitmap(ID_NRChk,
+			wxGetBitmapFromMemory(smooth));
+	else
+		m_options_toolbar->SetToolNormalBitmap(ID_NRChk,
+			wxGetBitmapFromMemory(smooth_off));
 
 	if (m_view && m_view->GetVolMethod()==VOL_METHOD_MULTI)
 	{

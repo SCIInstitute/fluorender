@@ -1173,7 +1173,7 @@ void RenderViewPanel::SetFree(bool val)
 			m_canvas->SetPersp(false);
 	}
 
-	FluoRefresh(true, 2, { gstFree }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(true, 2, { gstFree, gstAov }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetFullScreen()
