@@ -661,8 +661,8 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	wxIntegerValidator<unsigned int>* vald_i;
 
 	bool update_all = vc.empty();
-	bool update_tips = FOUND_VALUE(gstMultiFuncTips);
-	bool update_gamma = update_all || update_tips || FOUND_VALUE(gstGamma3d);
+	bool update_tips = update_all || FOUND_VALUE(gstMultiFuncTips);
+	bool update_gamma = update_all || FOUND_VALUE(gstGamma3d);
 	bool update_boundary = FOUND_VALUE(gstBoundary);
 	bool update_saturation = FOUND_VALUE(gstSaturation);
 	bool update_threshold = FOUND_VALUE(gstThreshold);
@@ -672,10 +672,11 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	bool update_shadow = FOUND_VALUE(gstShadow);
 	bool update_sample = FOUND_VALUE(gstSampleRate);
 	bool update_colormap = FOUND_VALUE(gstColormap);
+	bool mf_enable = glbin_settings.m_mulfunc == 5;
 
 	//DBGPRINT(L"update vol props, update_all=%d, vc_size=%d\n", update_all, vc.size());
-		//mf button tips
-	if (update_all || FOUND_VALUE(gstMultiFuncTips))
+	//mf button tips
+	if (update_tips)
 	{
 		switch (glbin_settings.m_mulfunc)
 		{
@@ -754,28 +755,28 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		}
 	}
 
-	bool mf_enable = glbin_settings.m_mulfunc == 5;
 	//volume properties
 	//transfer function
 	//gamma
 	if (update_gamma)
 	{
-		if (!update_tips)
+		if ((vald_fp = (wxFloatingPointValidator<double>*)m_gamma_text->GetValidator()))
+			vald_fp->SetRange(0.0, 10.0);
+		dval = m_vd->GetGamma();
+		bval = m_vd->GetGammaEnable();
+		str = wxString::Format("%.2f", dval);
+		m_gamma_sldr->ChangeValue(std::round(dval * 100.0));
+		m_gamma_text->ChangeValue(str);
+		m_gamma_chk->SetValue(bval);
+		if (update_all || m_gamma_sldr->IsEnabled() != bval)
 		{
-			if ((vald_fp = (wxFloatingPointValidator<double>*)m_gamma_text->GetValidator()))
-				vald_fp->SetRange(0.0, 10.0);
-			dval = m_vd->GetGamma();
-			bval = m_vd->GetGammaEnable();
-			str = wxString::Format("%.2f", dval);
-			m_gamma_sldr->ChangeValue(std::round(dval * 100.0));
-			m_gamma_text->ChangeValue(str);
-			m_gamma_chk->SetValue(bval);
-			if (update_all || m_gamma_sldr->IsEnabled() != bval)
-			{
-				m_gamma_sldr->Enable(bval);
-				m_gamma_text->Enable(bval);
-			}
+			m_gamma_sldr->Enable(bval);
+			m_gamma_text->Enable(bval);
 		}
+	}
+	if (update_gamma || update_tips)
+	{
+		bval = m_vd->GetGammaEnable();
 		m_gamma_st->Enable(bval || mf_enable);
 	}
 	//boundary
