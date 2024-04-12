@@ -48,7 +48,7 @@ ViewDefault::ViewDefault()
 	m_scalebar_unit = 1;
 	m_mouse_focus = false;
 	m_persp = false;
-	m_aov = 15.0;
+	m_aov = 10.0;
 	m_free = false;
 	m_center = fluo::Point(0);
 	m_rot_lock = false;

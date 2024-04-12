@@ -82,3 +82,9 @@ void PropPanel::SetFocusVRenderViews(wxBasisSlider* slider)
 	}
 }
 
+double PropPanel::getDpiScaleFactor()
+{
+	double dpi_sf = GetDPIScaleFactor();
+	double dpi_sf2 = std::round(dpi_sf - 0.1);
+	return dpi_sf2 < dpi_sf ? dpi_sf : 1;
+}

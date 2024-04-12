@@ -1277,7 +1277,7 @@ void RenderViewPanel::SetScaleFactor(double val, bool notify)
 void RenderViewPanel::SetScaleMode(int val)
 {
 	m_canvas->m_scale_mode = val;
-	FluoRefresh(true, 2, { gstScaleMode }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(true, 2, { gstScaleMode, gstScaleFactor }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetRotLock(bool val)

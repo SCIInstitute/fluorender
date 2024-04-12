@@ -58,6 +58,7 @@ public:
 protected:
 	MainFrame* m_frame;
 
+	double getDpiScaleFactor();
 };
 
 #endif//_PROPPANEL_H_
