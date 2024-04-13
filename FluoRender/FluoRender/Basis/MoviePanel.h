@@ -249,6 +249,16 @@ private:
 	wxTextCtrl *m_crop_h_text;
 	wxSpinButton* m_crop_h_spin;
 
+	wxRadioButton* m_sb_tl_rb;
+	wxRadioButton* m_sb_tr_rb;
+	wxRadioButton* m_sb_bl_rb;
+	wxRadioButton* m_sb_br_rb;
+
+	wxTextCtrl* m_sb_dx_text;
+	wxSpinButton* m_sb_dx_spin;
+	wxTextCtrl* m_sb_dy_text;
+	wxSpinButton* m_sb_dy_spin;
+
 private:
 	wxWindow* CreateSimplePage(wxWindow *parent);
 	wxWindow* CreateKeyframePage(wxWindow *parent);
@@ -315,6 +325,11 @@ private:
 
 	void OnCropSpinUp(wxSpinEvent& event);
 	void OnCropSpinDown(wxSpinEvent& event);
+
+	void OnSbRadio(wxCommandEvent& event);
+	void OnSbEdit(wxCommandEvent& event);
+	void OnSbSpinUp(wxSpinEvent& event);
+	void OnSbSpinDown(wxSpinEvent& event);
 
 	//script
 	void OnRunScriptChk(wxCommandEvent &event);

@@ -747,20 +747,20 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		case 0:
 			m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
 				wxGetBitmap(scalebar, m_dpi_sf2));
-			m_scale_text->Enable();
+			m_scale_text->Disable();
 			m_scale_cmb->Disable();
 			break;
 		case 1:
 			m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
 				wxGetBitmap(scale_text_off, m_dpi_sf2));
 			m_scale_text->Enable();
-			m_scale_cmb->Enable();
+			m_scale_cmb->Disable();
 			break;
 		case 2:
 			m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
 				wxGetBitmap(scale_text, m_dpi_sf2));
-			m_scale_text->Disable();
-			m_scale_cmb->Disable();
+			m_scale_text->Enable();
+			m_scale_cmb->Enable();
 			break;
 		}
 	}

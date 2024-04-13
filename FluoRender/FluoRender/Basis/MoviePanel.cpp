@@ -751,7 +751,7 @@ wxWindow* MoviePanel::CreateCropPage(wxWindow *parent)
 
 	//check
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Enable cropping:",
+	st = new wxStaticText(page, 0, "Enable CCropping:",
 		wxDefaultPosition, wxDefaultSize);
 	m_crop_chk = new wxCheckBox(page, wxID_ANY, "");
 	m_crop_chk->Bind(wxEVT_CHECKBOX, &MoviePanel::OnCropCheck, this);
@@ -825,16 +825,75 @@ wxWindow* MoviePanel::CreateCropPage(wxWindow *parent)
 	sizer3->Add(m_crop_h_text, 0, wxALIGN_CENTER);
 	sizer3->Add(m_crop_h_spin, 0, wxALIGN_CENTER);
 	sizer3->Add(20, 20, 0);
-	//reset
+	//scalebar
 	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Scalebar Positon",
+		wxDefaultPosition, wxDefaultSize);
+	sizer4->Add(5, 5, 0);
+	sizer4->Add(st, 0, wxALIGN_CENTER);
+	//radiobuttons
+	wxBoxSizer* sizer5 = new wxBoxSizer(wxHORIZONTAL);
+	m_sb_tl_rb = new wxRadioButton(page, wxID_ANY, "Top-Left",
+		wxDefaultPosition, FromDIP(wxSize(100, 20)), wxRB_GROUP);
+	m_sb_tr_rb = new wxRadioButton(page, wxID_ANY, "Top-Right",
+		wxDefaultPosition, FromDIP(wxSize(100, 20)));
+	m_sb_tl_rb->Bind(wxEVT_RADIOBUTTON, &MoviePanel::OnSbRadio, this);
+	m_sb_tr_rb->Bind(wxEVT_RADIOBUTTON, &MoviePanel::OnSbRadio, this);
+	sizer5->Add(20, 20, 0);
+	sizer5->Add(m_sb_tl_rb, 0, wxALIGN_CENTER);
+	sizer5->Add(20, 20, 0);
+	sizer5->Add(m_sb_tr_rb, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer6 = new wxBoxSizer(wxHORIZONTAL);
+	m_sb_bl_rb = new wxRadioButton(page, wxID_ANY, "Bottom-Left",
+		wxDefaultPosition, FromDIP(wxSize(100, 20)));
+	m_sb_br_rb = new wxRadioButton(page, wxID_ANY, "Bottom-Right",
+		wxDefaultPosition, FromDIP(wxSize(100, 20)));
+	m_sb_bl_rb->Bind(wxEVT_RADIOBUTTON, &MoviePanel::OnSbRadio, this);
+	m_sb_br_rb->Bind(wxEVT_RADIOBUTTON, &MoviePanel::OnSbRadio, this);
+	sizer6->Add(20, 20, 0);
+	sizer6->Add(m_sb_bl_rb, 0, wxALIGN_CENTER);
+	sizer6->Add(20, 20, 0);
+	sizer6->Add(m_sb_br_rb, 0, wxALIGN_CENTER);
+	//space
+	wxBoxSizer* sizer7 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "X:",
+		wxDefaultPosition, FromDIP(wxSize(20, 20)));
+	m_sb_dx_text = new wxTextCtrl(page, wxID_ANY, "",
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_sb_dx_text->Bind(wxEVT_TEXT, &MoviePanel::OnSbEdit, this);
+	m_sb_dx_spin = new wxSpinButton(page, wxID_ANY,
+		wxDefaultPosition, FromDIP(wxSize(20, 20)));
+	m_sb_dx_spin->SetRange(-0x8000, 0x7fff);
+	m_sb_dx_spin->Bind(wxEVT_SPIN_UP, &MoviePanel::OnSbSpinUp, this);
+	m_sb_dx_spin->Bind(wxEVT_SPIN_DOWN, &MoviePanel::OnSbSpinDown, this);
+	sizer7->Add(20, 20, 0);
+	sizer7->Add(st, 0, wxALIGN_CENTER);
+	sizer7->Add(m_sb_dx_text, 0, wxALIGN_CENTER);
+	sizer7->Add(m_sb_dx_spin, 0, wxALIGN_CENTER);
+	st = new wxStaticText(page, 0, "Y:",
+		wxDefaultPosition, FromDIP(wxSize(20, 20)));
+	m_sb_dy_text = new wxTextCtrl(page, wxID_ANY, "",
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_sb_dy_text->Bind(wxEVT_TEXT, &MoviePanel::OnSbEdit, this);
+	m_sb_dy_spin = new wxSpinButton(page, wxID_ANY,
+		wxDefaultPosition, FromDIP(wxSize(20, 20)));
+	m_sb_dy_spin->SetRange(-0x8000, 0x7fff);
+	m_sb_dy_spin->Bind(wxEVT_SPIN_UP, &MoviePanel::OnSbSpinUp, this);
+	m_sb_dy_spin->Bind(wxEVT_SPIN_DOWN, &MoviePanel::OnSbSpinDown, this);
+	sizer7->Add(20, 20, 0);
+	sizer7->Add(st, 0, wxALIGN_CENTER);
+	sizer7->Add(m_sb_dy_text, 0, wxALIGN_CENTER);
+	sizer7->Add(m_sb_dy_spin, 0, wxALIGN_CENTER);
+	sizer7->Add(20, 20, 0);
+	//reset
+	wxBoxSizer* sizer8 = new wxBoxSizer(wxHORIZONTAL);
 	m_reset_btn = new wxButton(page, wxID_ANY, "Reset",
 		wxDefaultPosition, wxDefaultSize);
 	m_reset_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnResetCrop, this);
 	m_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	m_reset_btn->SetToolTip("Also drag the yellow frame in render view");
-	sizer4->AddStretchSpacer();
-	sizer4->Add(m_reset_btn, 0, wxALIGN_CENTER);
-	sizer4->Add(20, 20, 0);
+	sizer8->Add(20, 20, 0);
+	sizer8->Add(m_reset_btn, 0, wxALIGN_CENTER);
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -846,6 +905,14 @@ wxWindow* MoviePanel::CreateCropPage(wxWindow *parent)
 	sizer_v->Add(sizer3, 0, wxEXPAND);
 	sizer_v->Add(10, 10, 0);
 	sizer_v->Add(sizer4, 0, wxEXPAND);
+	sizer_v->Add(10, 10, 0);
+	sizer_v->Add(sizer5, 0, wxEXPAND);
+	sizer_v->Add(10, 10, 0);
+	sizer_v->Add(sizer6, 0, wxEXPAND);
+	sizer_v->Add(10, 10, 0);
+	sizer_v->Add(sizer7, 0, wxEXPAND);
+	sizer_v->Add(10, 10, 0);
+	sizer_v->Add(sizer8, 0, wxEXPAND);
 
 	page->SetSizer(sizer_v);
 	page->SetAutoLayout(true);
@@ -894,9 +961,12 @@ wxWindow* MoviePanel::CreateScriptPage(wxWindow *parent)
 	m_script_list = new wxListCtrl(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL);
 	wxListItem itemCol;
-	itemCol.SetText("Built-in Script Files");
+	itemCol.SetText("No.");
 	m_script_list->InsertColumn(0, itemCol);
+	itemCol.SetText("Built-in Script Files");
+	m_script_list->InsertColumn(1, itemCol);
 	m_script_list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
+	m_script_list->SetColumnWidth(1, wxLIST_AUTOSIZE);
 	m_script_list->Bind(wxEVT_LIST_ITEM_SELECTED, &MoviePanel::OnScriptListSelected, this);
 	m_script_list->Bind(wxEVT_LIST_ITEM_ACTIVATED, &MoviePanel::OnScriptListSelected, this);
 
@@ -1403,15 +1473,18 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_script_list->DeleteAllItems();
 		wxArrayString list;
 		wxString filename;
+		long tmp;
 		if (GetScriptFiles(list))
 		{
 			for (size_t i = 0; i < list.GetCount(); ++i)
 			{
 				filename = wxFileNameFromPath(list[i]);
 				filename = filename.BeforeLast('.');
-				m_script_list->InsertItem(
-					m_script_list->GetItemCount(), filename);
+				tmp = m_script_list->InsertItem(i, std::to_string(i + 1), 0);
+				m_script_list->SetItem(tmp, 1, filename);
 			}
+			m_script_list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
+			m_script_list->SetColumnWidth(1, wxLIST_AUTOSIZE);
 		}
 	}
 
@@ -2055,6 +2128,26 @@ void MoviePanel::OnCropSpinDown(wxSpinEvent& event)
 	event.Skip();
 }
 
+void MoviePanel::OnSbRadio(wxCommandEvent& event)
+{
+
+}
+
+void MoviePanel::OnSbEdit(wxCommandEvent& event)
+{
+
+}
+
+void MoviePanel::OnSbSpinUp(wxSpinEvent& event)
+{
+
+}
+
+void MoviePanel::OnSbSpinDown(wxSpinEvent& event)
+{
+
+}
+
 //script
 void MoviePanel::OnRunScriptChk(wxCommandEvent& event)
 {
@@ -2122,7 +2215,7 @@ void MoviePanel::OnScriptListSelected(wxListEvent& event)
 
 	if (item != -1)
 	{
-		wxString file = m_script_list->GetItemText(item);
+		wxString file = m_script_list->GetItemText(item, 1);
 		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 		exePath = wxPathOnly(exePath);
 		file = exePath + GETSLASH() + "Scripts" +

@@ -7876,7 +7876,7 @@ void RenderCanvas::DrawScaleBar()
 		}
 		px = (framex + framew - font_height + m_sb_x) / nx;
 		py = (1.1 * font_height + framey + m_sb_y) / ny;
-		ph = 5.0 / ny;
+		ph = glbin_settings.m_line_width * 3 / ny;
 		if (m_enlarge)
 			ph *= m_enlarge_scale;
 		params.push_back(std::pair<unsigned int, double>(0, px));
@@ -7897,7 +7897,7 @@ void RenderCanvas::DrawScaleBar()
 	{
 		px = (nx - font_height + m_sb_x) / nx;
 		py = (1.1 * font_height + m_sb_y) / ny;
-		ph = 5.0 / ny;
+		ph = glbin_settings.m_line_width * 3 / ny;
 		if (m_enlarge)
 			ph *= m_enlarge_scale;
 		params.push_back(std::pair<unsigned int, double>(0, px));
