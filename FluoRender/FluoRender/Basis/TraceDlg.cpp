@@ -905,7 +905,7 @@ void TraceDlg::GetSettings(RenderCanvas* vrv)
 
 	m_cur_time = m_view->m_tseq_cur_num;
 	m_prv_time = m_view->m_tseq_prv_num;
-	m_cell_size_text->ChangeValue(wxString::Format("%d", glbin_settings.m_component_size));
+	m_cell_size_text->ChangeValue(wxString::Format("%.0f", glbin_settings.m_component_size));
 
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (trace_group)
