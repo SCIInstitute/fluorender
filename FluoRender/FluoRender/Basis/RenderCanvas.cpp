@@ -7863,10 +7863,10 @@ void RenderCanvas::DrawScaleBar()
 	std::vector<std::pair<unsigned int, double>> params;
 	if (m_draw_frame)
 	{
-		int framew = glbin_moviemaker.GetCropX();
-		int frameh = glbin_moviemaker.GetCropY();
-		int framex = glbin_moviemaker.GetCropW();
-		int framey = glbin_moviemaker.GetCropH();
+		int framex = glbin_moviemaker.GetCropX();
+		int framey = glbin_moviemaker.GetCropY();
+		int framew = glbin_moviemaker.GetCropW();
+		int frameh = glbin_moviemaker.GetCropH();
 		if (m_enlarge)
 		{
 			framew *= m_enlarge_scale;
@@ -7952,7 +7952,7 @@ void RenderCanvas::DrawLegend()
 	if (m_draw_frame)
 	{
 		xoffset = 10.0 + glbin_moviemaker.GetCropX();
-		yoffset = ny - glbin_moviemaker.GetCropH() - glbin_moviemaker.GetCropY() + 10.0;
+		yoffset = glbin_moviemaker.GetCropY() + 10.0;
 	}
 
 	wxString wxstr;

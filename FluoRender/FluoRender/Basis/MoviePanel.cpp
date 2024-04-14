@@ -751,7 +751,7 @@ wxWindow* MoviePanel::CreateCropPage(wxWindow *parent)
 
 	//check
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Enable CCropping:",
+	st = new wxStaticText(page, 0, "Enable Cropping:",
 		wxDefaultPosition, wxDefaultSize);
 	m_crop_chk = new wxCheckBox(page, wxID_ANY, "");
 	m_crop_chk->Bind(wxEVT_CHECKBOX, &MoviePanel::OnCropCheck, this);
