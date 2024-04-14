@@ -152,6 +152,8 @@ public:
 	//crop
 	void SetCropEnable(bool val);
 	void SetCropValues(int, int, int, int);
+	void SetScalebarPos(int pos);
+	void SetScalebarValues(int x, int y);
 
 	//script
 	int GetScriptFiles(wxArrayString& list);

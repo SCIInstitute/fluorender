@@ -536,6 +536,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstCropY "crop y"
 #define gstCropW "crop w"
 #define gstCropH "crop h"
+#define gstScalebarPos "scalebar pos"
 #define gstColor1 "color1"//colormap settings
 #define gstColor2 "color2"
 #define gstColor3 "color3"

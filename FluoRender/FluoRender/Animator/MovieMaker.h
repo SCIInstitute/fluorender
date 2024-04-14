@@ -155,6 +155,14 @@ public:
 	int GetCropW() { return m_crop_w; }
 	void SetCropH(int val);
 	int GetCropH() { return m_crop_h; }
+	//scalebar
+	void SetScalebarPos(int val) { m_sb_pos = val; }
+	int GetScalebarPos() { return m_sb_pos; }
+	void SetScalebarDist(int x, int y) { m_sb_x = x; m_sb_y = y; }
+	void SetScalebarX(int x) { m_sb_x = x; }
+	void SetScalebarY(int y) { m_sb_y = y; }
+	int GetScalebarX() { return m_sb_x; }
+	int GetScalebarY() { return m_sb_y; }
 
 	//keys
 	void InsertKey(int index);
@@ -229,6 +237,10 @@ private:
 	int m_crop_y;
 	int m_crop_w;
 	int m_crop_h;
+	//scale bar
+	int m_sb_pos;
+	int m_sb_x;
+	int m_sb_y;
 
 	//keys
 	double m_key_duration;

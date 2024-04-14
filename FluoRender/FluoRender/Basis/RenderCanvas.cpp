@@ -135,8 +135,6 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_disp_scale_bar(false),
 	m_disp_scale_bar_text(false),
 	m_sb_length(50),
-	m_sb_x(0),
-	m_sb_y(0),
 	m_sb_unit(1),
 	m_sb_height(0.0),
 	//ortho size
@@ -7843,21 +7841,21 @@ void RenderCanvas::DrawScaleBar()
 	if (!va_scale_bar)
 		return;
 
-	//if (m_draw_legend)
-	//	offset = m_sb_height;
 	int nx, ny;
 	GetRenderSize(nx, ny);
+	float sb_x, sb_y, sb_w, sb_h;
 	float sx, sy;
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
 	float px, py, ph;
 	glm::mat4 proj_mat = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
-	double len = m_sb_length / (m_ortho_right - m_ortho_left);
+	float len = m_sb_length / (m_ortho_right - m_ortho_left);
+	sb_w = len * nx;
 	wstring wsb_text = m_sb_text.ToStdWstring();
-	double textlen =
+	float textlen =
 		m_text_renderer.RenderTextLen(wsb_text);
 	fluo::Color text_color = GetTextColor();
-	double font_height =
+	float font_height =
 		flvr::TextRenderer::text_texture_manager_.GetSize() + 3.0;
 
 	std::vector<std::pair<unsigned int, double>> params;
@@ -7874,9 +7872,30 @@ void RenderCanvas::DrawScaleBar()
 			framex *= m_enlarge_scale;
 			framey *= m_enlarge_scale;
 		}
-		px = (framex + framew - font_height + m_sb_x) / nx;
-		py = (1.1 * font_height + framey + m_sb_y) / ny;
-		ph = glbin_settings.m_line_width * 3 / ny;
+		sb_h = glbin_settings.m_line_width * 3;
+		switch (glbin_moviemaker.GetScalebarPos())
+		{
+		case 0:
+			sb_x = framex + glbin_moviemaker.GetScalebarX();
+			sb_y = framey + frameh - glbin_moviemaker.GetScalebarY() - 1.1 * font_height;
+			break;
+		case 1:
+			sb_x = framex + framew - glbin_moviemaker.GetScalebarX() - sb_w;
+			sb_y = framey + frameh - glbin_moviemaker.GetScalebarY() - 1.1 * font_height;
+			break;
+		case 2:
+			sb_x = framex + glbin_moviemaker.GetScalebarX();
+			sb_y = framey + glbin_moviemaker.GetScalebarY();
+			break;
+		case 3:
+		default:
+			sb_x = framex + framew - glbin_moviemaker.GetScalebarX() - sb_w;
+			sb_y = framey + glbin_moviemaker.GetScalebarY();
+			break;
+		}
+		px = sb_x / nx;
+		py = sb_y / ny;
+		ph = sb_h / ny;
 		if (m_enlarge)
 			ph *= m_enlarge_scale;
 		params.push_back(std::pair<unsigned int, double>(0, px));
@@ -7886,8 +7905,8 @@ void RenderCanvas::DrawScaleBar()
 
 		if (m_disp_scale_bar_text)
 		{
-			px = px * nx - 0.5 * (len * nx + textlen + nx) + m_sb_x;
-			py = py * ny + 0.5 * font_height - ny / 2.0 + m_sb_y;
+			px = px * nx - 0.5 * (len * nx + textlen + nx);
+			py = py * ny + 0.5 * font_height - ny / 2.0;
 			m_text_renderer.RenderText(
 				wsb_text, text_color,
 				px*sx, py*sy, sx, sy);
@@ -7895,8 +7914,8 @@ void RenderCanvas::DrawScaleBar()
 	}
 	else
 	{
-		px = (nx - font_height + m_sb_x) / nx;
-		py = (1.1 * font_height + m_sb_y) / ny;
+		px = (nx - font_height) / nx;
+		py = (1.1 * font_height) / ny;
 		ph = glbin_settings.m_line_width * 3 / ny;
 		if (m_enlarge)
 			ph *= m_enlarge_scale;
@@ -7907,8 +7926,8 @@ void RenderCanvas::DrawScaleBar()
 
 		if (m_disp_scale_bar_text)
 		{
-			px = px * nx - 0.5 * (len * nx + textlen + nx) + m_sb_x;
-			py = (py - 0.5) * ny + 0.5 * font_height + m_sb_y;
+			px = px * nx - 0.5 * (len * nx + textlen + nx);
+			py = (py - 0.5) * ny + 0.5 * font_height;
 			m_text_renderer.RenderText(
 				wsb_text, text_color,
 				px*sx, py*sy, sx, sy);

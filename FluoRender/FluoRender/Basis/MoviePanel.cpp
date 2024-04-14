@@ -1433,6 +1433,16 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_crop_y_text->Enable(bval);
 		m_crop_w_text->Enable(bval);
 		m_crop_h_text->Enable(bval);
+
+		m_sb_tl_rb->Enable(bval);
+		m_sb_tr_rb->Enable(bval);
+		m_sb_bl_rb->Enable(bval);
+		m_sb_br_rb->Enable(bval);
+
+		m_sb_dx_text->Enable(bval);
+		m_sb_dx_spin->Enable(bval);
+		m_sb_dy_text->Enable(bval);
+		m_sb_dy_spin->Enable(bval);
 	}
 
 	if (update_all || FOUND_VALUE(gstCropValues))
@@ -1443,6 +1453,29 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_crop_h_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropH()));
 	}
 
+	if (update_all || FOUND_VALUE(gstScalebarPos))
+	{
+		ival = glbin_moviemaker.GetScalebarPos();
+		switch (ival)
+		{
+		case 0:
+			m_sb_tl_rb->SetValue(true);
+			break;
+		case 1:
+			m_sb_tr_rb->SetValue(true);
+			break;
+		case 2:
+			m_sb_bl_rb->SetValue(true);
+			break;
+		case 3:
+		default:
+			m_sb_br_rb->SetValue(true);
+			break;
+		}
+		m_sb_dx_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetScalebarX()));
+		m_sb_dy_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetScalebarY()));
+	}
+	
 	if (update_all || FOUND_VALUE(gstRunScript))
 	{
 		bval = glbin_settings.m_run_script;
@@ -1692,6 +1725,18 @@ void MoviePanel::SetCropValues(int x, int y, int w, int h)
 {
 	glbin_moviemaker.SetCropValues(x, y, w, h);
 	FluoRefresh(false, 2, { gstCropValues }, { glbin_mov_def.m_view_idx });
+}
+
+void MoviePanel::SetScalebarPos(int pos)
+{
+	glbin_moviemaker.SetScalebarPos(pos);
+	FluoRefresh(false, 2, { gstNull }, { glbin_mov_def.m_view_idx });
+}
+
+void MoviePanel::SetScalebarValues(int x, int y)
+{
+	glbin_moviemaker.SetScalebarDist(x, y);
+	FluoRefresh(false, 2, { gstScalebarPos }, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::OnNotebookPage(wxAuiNotebookEvent& event)
@@ -2130,22 +2175,69 @@ void MoviePanel::OnCropSpinDown(wxSpinEvent& event)
 
 void MoviePanel::OnSbRadio(wxCommandEvent& event)
 {
-
+	int pos = 3;
+	if (m_sb_tl_rb->GetValue())
+		pos = 0;
+	else if (m_sb_tr_rb->GetValue())
+		pos = 1;
+	else if (m_sb_bl_rb->GetValue())
+		pos = 2;
+	else if (m_sb_br_rb->GetValue())
+		pos = 3;
+	SetScalebarPos(pos);
+	event.Skip();
 }
 
 void MoviePanel::OnSbEdit(wxCommandEvent& event)
 {
-
+	wxString temp;
+	long x, y;
+	temp = m_sb_dx_text->GetValue();
+	temp.ToLong(&x);
+	temp = m_sb_dy_text->GetValue();
+	temp.ToLong(&y);
+	SetScalebarValues(x, y);
+	event.Skip();
 }
 
 void MoviePanel::OnSbSpinUp(wxSpinEvent& event)
 {
+	wxObject* obj = event.GetEventObject();
+	wxTextCtrl* text_ctrl = 0;
+	if (obj == m_sb_dx_spin)
+		text_ctrl = m_sb_dx_text;
+	if (obj == m_sb_dy_spin)
+		text_ctrl = m_sb_dy_text;
 
+	if (text_ctrl)
+	{
+		wxString str = text_ctrl->GetValue();
+		long ival;
+		if (str.ToLong(&ival))
+			text_ctrl->SetValue(wxString::Format(
+				"%d", ival + 1));
+	}
+	event.Skip();
 }
 
 void MoviePanel::OnSbSpinDown(wxSpinEvent& event)
 {
+	wxObject* obj = event.GetEventObject();
+	wxTextCtrl* text_ctrl = 0;
+	if (obj == m_sb_dx_spin)
+		text_ctrl = m_sb_dx_text;
+	if (obj == m_sb_dy_spin)
+		text_ctrl = m_sb_dy_text;
 
+	if (text_ctrl)
+	{
+		wxString str = text_ctrl->GetValue();
+		long ival;
+		if (str.ToLong(&ival))
+			text_ctrl->SetValue(wxString::Format(
+				"%d", ival - 1));
+	}
+	event.Skip();
 }
 
 //script

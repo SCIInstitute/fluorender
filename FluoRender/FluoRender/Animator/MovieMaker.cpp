@@ -75,6 +75,10 @@ MovieMaker::MovieMaker() :
 	m_crop_w = 0;
 	m_crop_h = 0;
 
+	m_sb_pos = 3;
+	m_sb_x = 5;
+	m_sb_y = 5;
+
 	m_cam_lock = false;
 	m_cam_lock_type = 1;
 
