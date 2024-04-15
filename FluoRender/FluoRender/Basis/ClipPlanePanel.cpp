@@ -559,7 +559,7 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	//clip distance
-	if (update_all || FOUND_VALUE(gstClipDistX))
+	if (update_all || FOUND_VALUE(gstClipDist))
 	{
 		switch (m_sel_type)
 		{

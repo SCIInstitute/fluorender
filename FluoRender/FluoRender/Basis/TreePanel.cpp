@@ -2284,11 +2284,13 @@ void TreePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//update icons only
 	if (update_all || FOUND_VALUE(gstTreeCtrl))
 		UpdateTree();
-	else if (update_all || FOUND_VALUE(gstTreeIcons))
-		UpdateTreeIcons();
-	else if (update_all || FOUND_VALUE(gstTreeColors))
-		UpdateTreeColors();
-
+	else
+	{
+		if (update_all || FOUND_VALUE(gstTreeIcons))
+			UpdateTreeIcons();
+		if (update_all || FOUND_VALUE(gstTreeColors))
+			UpdateTreeColors();
+	}
 
 	if (update_all || FOUND_VALUE(gstTreeSelection))
 		UpdateSelection();

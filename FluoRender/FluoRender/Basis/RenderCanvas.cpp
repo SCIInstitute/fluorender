@@ -4666,6 +4666,7 @@ void RenderCanvas::SetParams(double t)
 		if (glbin_interpolator.GetDouble(keycode, t, val))
 			plane->ChangePlane(fluo::Point(abs(val), 0.0, 0.0),
 				fluo::Vector(1.0, 0.0, 0.0));
+		vc.insert(gstClipX1);
 		//x2
 		plane = (*planes)[1];
 		keycode.l2 = 0;
@@ -4673,6 +4674,7 @@ void RenderCanvas::SetParams(double t)
 		if (glbin_interpolator.GetDouble(keycode, t, val))
 			plane->ChangePlane(fluo::Point(abs(val), 0.0, 0.0),
 				fluo::Vector(-1.0, 0.0, 0.0));
+		vc.insert(gstClipX2);
 		//y1
 		plane = (*planes)[2];
 		keycode.l2 = 0;
@@ -4680,6 +4682,7 @@ void RenderCanvas::SetParams(double t)
 		if (glbin_interpolator.GetDouble(keycode, t, val))
 			plane->ChangePlane(fluo::Point(0.0, abs(val), 0.0),
 				fluo::Vector(0.0, 1.0, 0.0));
+		vc.insert(gstClipY1);
 		//y2
 		plane = (*planes)[3];
 		keycode.l2 = 0;
@@ -4687,6 +4690,7 @@ void RenderCanvas::SetParams(double t)
 		if (glbin_interpolator.GetDouble(keycode, t, val))
 			plane->ChangePlane(fluo::Point(0.0, abs(val), 0.0),
 				fluo::Vector(0.0, -1.0, 0.0));
+		vc.insert(gstClipY2);
 		//z1
 		plane = (*planes)[4];
 		keycode.l2 = 0;
@@ -4694,6 +4698,7 @@ void RenderCanvas::SetParams(double t)
 		if (glbin_interpolator.GetDouble(keycode, t, val))
 			plane->ChangePlane(fluo::Point(0.0, 0.0, abs(val)),
 				fluo::Vector(0.0, 0.0, 1.0));
+		vc.insert(gstClipZ1);
 		//z2
 		plane = (*planes)[5];
 		keycode.l2 = 0;
@@ -4701,6 +4706,7 @@ void RenderCanvas::SetParams(double t)
 		if (glbin_interpolator.GetDouble(keycode, t, val))
 			plane->ChangePlane(fluo::Point(0.0, 0.0, abs(val)),
 				fluo::Vector(0.0, 0.0, -1.0));
+		vc.insert(gstClipZ2);
 		//t
 		double frame;
 		keycode.l2 = 0;
@@ -4716,6 +4722,7 @@ void RenderCanvas::SetParams(double t)
 		keycode.l2_name = "color";
 		if (glbin_interpolator.GetColor(keycode, t, pc))
 			vd->SetColor(pc);
+		vc.insert(gstColor);
 	}
 
 	bool bx, by, bz;
@@ -4770,6 +4777,7 @@ void RenderCanvas::SetParams(double t)
 		double rotx, roty, rotz;
 		q.ToEuler(rotx, roty, rotz);
 		SetRotations(rotx, roty, rotz, true);
+		vc.insert(gstCamRotation);
 	}
 	//intermixing mode
 	keycode.l2_name = "volmethod";
@@ -4793,30 +4801,20 @@ void RenderCanvas::SetParams(double t)
 		vc.insert(gstAov);
 	}
 
-	if (m_frame && clip_view)
-	{
-		clip_view->SetVolumeData(m_frame->GetCurSelVol());
-		clip_view->SetRenderView(this);
-	}
-	vc.insert(gstParamListSelect);
-	if (m_frame)
-	{
-		//m_frame->UpdateTree(m_cur_vol ? m_cur_vol->GetName() : wxString(""));
-		//int index = glbin_interpolator.GetKeyIndexFromTime(t);
-		//m_frame->GetRecorderDlg()->SetSelection(index);
-		m_frame->GetMeasureDlg()->GetSettings(this);
-		//update ruler intensity values
-		glbin_ruler_handler.ProfileAll();
-		m_frame->GetMeasureDlg()->UpdateList();
-	}
+	m_frame->GetMeasureDlg()->GetSettings(this);
+	//update ruler intensity values
+	glbin_ruler_handler.ProfileAll();
+	m_frame->GetMeasureDlg()->UpdateList();
 	SetVolPopDirty();
 
-	vc.insert(gstTreeCtrl);
+	vc.insert(gstParamListSelect);
+	vc.insert(gstTreeIcons);
+	vc.insert(gstTreeColors);
 	if (m_cur_vol)
 		glbin.set_tree_selection(m_cur_vol->GetName().ToStdString());
 	else
 		glbin.set_tree_selection("");
-	m_vrv->FluoUpdate(vc);
+	m_frame->UpdateProps(vc);
 }
 
 void RenderCanvas::ResetMovieAngle()
