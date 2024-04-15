@@ -57,6 +57,10 @@ MovieDefault::MovieDefault()
 	m_crop_w = 0;
 	m_crop_h = 0;
 
+	m_sb_pos = 3;
+	m_sb_x = 5;
+	m_sb_y = 5;
+
 	m_key_duration = 30;
 
 	m_cam_lock = false;
@@ -97,6 +101,9 @@ void MovieDefault::Read(wxFileConfig& f)
 	f.Read("crop y", &m_crop_y, 0);
 	f.Read("crop w", &m_crop_w, 0);
 	f.Read("crop h", &m_crop_h, 0);
+	f.Read("scalebar pos", &m_sb_pos, 3);
+	f.Read("scalebar x", &m_sb_x, 5);
+	f.Read("scalebar y", &m_sb_y, 5);
 
 	f.Read("key duration", &m_key_duration, 30);
 	f.Read("cam lock", &m_cam_lock, false);
@@ -131,6 +138,9 @@ void MovieDefault::Save(wxFileConfig& f)
 	f.Write("crop y", m_crop_y);
 	f.Write("crop w", m_crop_w);
 	f.Write("crop h", m_crop_h);
+	f.Write("scalebar pos", m_sb_pos);
+	f.Write("scalebar x", m_sb_x);
+	f.Write("scalebar y", m_sb_y);
 
 	f.Write("key duration", m_key_duration);
 	f.Write("cam lock", m_cam_lock);
@@ -162,6 +172,9 @@ void MovieDefault::Set(MovieMaker* mm)
 	m_crop_y = mm->GetCropY();
 	m_crop_w = mm->GetCropW();
 	m_crop_h = mm->GetCropH();
+	m_sb_pos = mm->GetScalebarPos();
+	m_sb_x = mm->GetScalebarX();
+	m_sb_y = mm->GetScalebarY();
 
 	m_key_duration = mm->GetKeyDuration();
 	m_cam_lock = mm->GetCamLock();
@@ -192,6 +205,8 @@ void MovieDefault::Apply(MovieMaker* mm)
 	mm->SetCropY(m_crop_y);
 	mm->SetCropW(m_crop_w);
 	mm->SetCropH(m_crop_h);
+	mm->SetScalebarPos(m_sb_pos);
+	mm->SetScalebarDist(m_sb_x, m_sb_y);
 
 	mm->SetKeyDuration(m_key_duration);
 	mm->SetCamLock(m_cam_lock);

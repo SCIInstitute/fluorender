@@ -72,6 +72,10 @@ public:
 	int m_crop_y;
 	int m_crop_w;
 	int m_crop_h;
+	//scale bar
+	int m_sb_pos;
+	int m_sb_x;
+	int m_sb_y;
 
 	//keys
 	double m_key_duration;
