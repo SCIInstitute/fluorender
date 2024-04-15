@@ -7876,21 +7876,21 @@ void RenderCanvas::DrawScaleBar()
 		switch (glbin_moviemaker.GetScalebarPos())
 		{
 		case 0:
-			sb_x = framex + glbin_moviemaker.GetScalebarX();
+			sb_x = framex + glbin_moviemaker.GetScalebarX() + sb_w;
 			sb_y = framey + frameh - glbin_moviemaker.GetScalebarY() - 1.1 * font_height;
 			break;
 		case 1:
-			sb_x = framex + framew - glbin_moviemaker.GetScalebarX() - sb_w;
+			sb_x = framex + framew - glbin_moviemaker.GetScalebarX();
 			sb_y = framey + frameh - glbin_moviemaker.GetScalebarY() - 1.1 * font_height;
 			break;
 		case 2:
-			sb_x = framex + glbin_moviemaker.GetScalebarX();
-			sb_y = framey + glbin_moviemaker.GetScalebarY();
+			sb_x = framex + glbin_moviemaker.GetScalebarX() + sb_w;
+			sb_y = framey + glbin_moviemaker.GetScalebarY() + sb_h;
 			break;
 		case 3:
 		default:
-			sb_x = framex + framew - glbin_moviemaker.GetScalebarX() - sb_w;
-			sb_y = framey + glbin_moviemaker.GetScalebarY();
+			sb_x = framex + framew - glbin_moviemaker.GetScalebarX();
+			sb_y = framey + glbin_moviemaker.GetScalebarY() + sb_h;
 			break;
 		}
 		px = sb_x / nx;
