@@ -262,6 +262,9 @@ namespace flvr
 		case VA_Cam_Jack:
 			update_cam_jack();
 			break;
+		case VA_Cam_Center:
+			update_cam_center();
+			break;
 		case VA_Crop_Frame:
 			update_crop_frame();
 			break;
@@ -280,16 +283,16 @@ namespace flvr
 
 	void VertexArray::update_buffer_norm_square_d()
 	{
-		double d = 0.0;
+		float d = 0.0;
 		auto param = param_list_.find(0);
 		if (param != param_list_.end())
 			d = param->second;
 
 		float points[] = {
-			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, float(d),
-			1.0f, -1.0f, 0.0f, 1.0f, 0.0f, float(d),
-			-1.0f, 1.0f, 0.0f, 0.0f, 1.0f, float(d),
-			1.0f, 1.0f, 0.0f, 1.0f, 1.0f, float(d) };
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, d,
+			1.0f, -1.0f, 0.0f, 1.0f, 0.0f, d,
+			-1.0f, 1.0f, 0.0f, 0.0f, 1.0f, d,
+			1.0f, 1.0f, 0.0f, 1.0f, 1.0f, d };
 		buffer_data(VABuf_Coord,
 			sizeof(float) * 24, points, GL_STREAM_DRAW);
 	}
@@ -297,8 +300,8 @@ namespace flvr
 	void VertexArray::update_buffer_circles()
 	{
 		//get parameters
-		double r1 = -1.0;
-		double r2 = -1.0;
+		float r1 = -1.0;
+		float r2 = -1.0;
 		int secs = 0;
 		auto param = param_list_.find(0);
 		if (param != param_list_.end())
@@ -320,7 +323,7 @@ namespace flvr
 		else
 			vertex.reserve(secs * 6);//two circles
 
-		double deg = 0.0;
+		float deg = 0.0;
 		//first circle
 		if (r1 >= 0.0)
 		{
@@ -428,7 +431,7 @@ namespace flvr
 	{
 		//get parameters
 		int grid_num = 0;
-		double distance = 1.0;
+		float distance = 1.0;
 		auto param = param_list_.find(0);
 		if (param != param_list_.end())
 			grid_num = int(param->second+0.5);
@@ -439,7 +442,7 @@ namespace flvr
 		std::vector<float> vertex;
 		vertex.reserve(line_num * 4 * 3);
 
-		double gap = distance / grid_num;
+		float gap = distance / grid_num;
 		int i;
 		for (i = 0; i<line_num; ++i)
 		{
@@ -466,7 +469,7 @@ namespace flvr
 
 	void VertexArray::update_cam_jack()
 	{
-		double len = 1.0;
+		float len = 1.0;
 		auto param = param_list_.find(0);
 		if (param != param_list_.end())
 			len = param->second;
@@ -485,12 +488,36 @@ namespace flvr
 			&vertex[0], GL_STATIC_DRAW);
 	}
 
+	void VertexArray::update_cam_center()
+	{
+		float len = 10;
+		auto param = param_list_.find(0);
+		if (param != param_list_.end())
+			len = param->second;
+		float gap = 5;
+
+		std::vector<float> vertex;
+		vertex.reserve(24);
+
+		vertex.push_back(-len - gap); vertex.push_back(0); vertex.push_back(0);
+		vertex.push_back(-gap); vertex.push_back(0); vertex.push_back(0);
+		vertex.push_back(len + gap); vertex.push_back(0); vertex.push_back(0);
+		vertex.push_back(gap); vertex.push_back(0); vertex.push_back(0);
+		vertex.push_back(0); vertex.push_back(-len - gap); vertex.push_back(0);
+		vertex.push_back(0); vertex.push_back(-gap); vertex.push_back(0);
+		vertex.push_back(0); vertex.push_back(len + gap); vertex.push_back(0);
+		vertex.push_back(0); vertex.push_back(gap); vertex.push_back(0);
+		buffer_data(VABuf_Coord,
+			sizeof(float) * vertex.size(),
+			&vertex[0], GL_STATIC_DRAW);
+	}
+
 	void VertexArray::update_crop_frame()
 	{
-		double x = 0.0;
-		double y = 0.0;
-		double w = 1.0;
-		double h = 1.0;
+		float x = 0.0;
+		float y = 0.0;
+		float w = 1.0;
+		float h = 1.0;
 		auto param = param_list_.find(0);
 		if (param != param_list_.end())
 			x = param->second;
@@ -518,10 +545,10 @@ namespace flvr
 
 	void VertexArray::update_scale_bar()
 	{
-		double x = 0.0;
-		double y = 0.0;
-		double w = 1.0;
-		double h = 1.0;
+		float x = 0.0;
+		float y = 0.0;
+		float w = 1.0;
+		float h = 1.0;
 		auto param = param_list_.find(0);
 		if (param != param_list_.end())
 			x = param->second;
@@ -549,10 +576,10 @@ namespace flvr
 
 	void VertexArray::update_legend_squares()
 	{
-		double px1 = 0.0;
-		double py1 = 0.0;
-		double px2 = 1.0;
-		double py2 = 1.0;
+		float px1 = 0.0;
+		float py1 = 0.0;
+		float px2 = 1.0;
+		float py2 = 1.0;
 		auto param = param_list_.find(0);
 		if (param != param_list_.end())
 			px1 = param->second;
@@ -730,6 +757,13 @@ namespace flvr
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
 		}
 		else if (type == VA_Cam_Jack)
+		{
+			//set param
+			va->set_param(0, 1.0);
+			//set attrib
+			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
+		}
+		else if (type == VA_Cam_Center)
 		{
 			//set param
 			va->set_param(0, 1.0);

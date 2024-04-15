@@ -7764,17 +7764,26 @@ void RenderCanvas::DrawGrid()
 
 void RenderCanvas::DrawCamCtr()
 {
-	flvr::VertexArray* va_jack =
-		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Cam_Jack);
+	flvr::VertexArray* va_jack = 0;
+	if (m_pin_rot_ctr)
+		va_jack = flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Cam_Center);
+	else
+		va_jack = flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Cam_Jack);
+
 	if (!va_jack)
 		return;
-	double len;
-	if (m_camctr_size > 0.0)
-		len = m_distance*tan(d2r(m_aov / 2.0))*m_camctr_size / 10.0;
-	else
-		len = fabs(m_camctr_size);
+	float len;
 	if (m_pin_rot_ctr)
-		len /= 5.0;
+	{
+		len = m_scale_factor * 5;
+	}
+	else
+	{
+		if (m_camctr_size > 0.0)
+			len = m_distance * tan(d2r(m_aov / 2.0)) * m_camctr_size / 10.0;
+		else
+			len = fabs(m_camctr_size);
+	}
 	va_jack->set_param(0, len);
 
 	glDisable(GL_DEPTH_TEST);
@@ -7787,16 +7796,30 @@ void RenderCanvas::DrawCamCtr()
 			shader->create();
 		shader->bind();
 	}
-	glm::mat4 matrix = m_proj_mat * m_mv_mat;
-	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
+	glm::mat4 matrix;
 	va_jack->draw_begin();
-	shader->setLocalParam(0, 1.0, 0.0, 0.0, 1.0);
-	va_jack->draw_cam_jack(0);
-	shader->setLocalParam(0, 0.0, 1.0, 0.0, 1.0);
-	va_jack->draw_cam_jack(1);
-	shader->setLocalParam(0, 0.0, 0.0, 1.0, 1.0);
-	va_jack->draw_cam_jack(2);
+	if (m_pin_rot_ctr)
+	{
+		int nx, ny;
+		GetRenderSize(nx, ny);
+		matrix = glm::ortho(-nx / 2.0f, nx / 2.0f, -ny / 2.0f, ny / 2.0f);
+		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+		fluo::Color text_color = GetTextColor();
+		shader->setLocalParam(0, text_color.r(), text_color.g(), text_color.b(), 1.0);
+		va_jack->draw_cam_center();
+	}
+	else
+	{
+		matrix = m_proj_mat * m_mv_mat;
+		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+		shader->setLocalParam(0, 1.0, 0.0, 0.0, 1.0);
+		va_jack->draw_cam_jack(0);
+		shader->setLocalParam(0, 0.0, 1.0, 0.0, 1.0);
+		va_jack->draw_cam_jack(1);
+		shader->setLocalParam(0, 0.0, 0.0, 1.0, 1.0);
+		va_jack->draw_cam_jack(2);
+	}
 	va_jack->draw_end();
 
 	if (shader && shader->valid())

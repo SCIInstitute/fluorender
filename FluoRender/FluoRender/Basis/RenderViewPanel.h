@@ -123,7 +123,7 @@ public:
 
 	void SetCenter();
 	void SetScale121();
-	void SetScaleFactor(double val, bool notify);
+	void SetScaleFactor(double val);
 	void SetScaleMode(int val);
 
 	void SetRotLock(bool val);

@@ -77,6 +77,7 @@ namespace flvr
 		VA_Clip_Planes,
 		VA_Grid,
 		VA_Cam_Jack,
+		VA_Cam_Center,
 		VA_Crop_Frame,
 		VA_Scale_Bar,
 		VA_Legend_Squares,
@@ -134,6 +135,7 @@ namespace flvr
 		//clipping planes are drawn differently
 		inline void draw_clip_plane(int plane, bool border);
 		inline void draw_cam_jack(int axis);//0-x; 1-y; 2-z
+		inline void draw_cam_center();
 		inline void draw_legend_square(int index);//0-outside; 1-inside
 
 		inline bool match(VAType);
@@ -152,6 +154,8 @@ namespace flvr
 		void update_grid();
 		//parameters: 0-length
 		void update_cam_jack();
+		//parameters: 0-length
+		void update_cam_center();
 		//parameters: x, y, w, h
 		void update_crop_frame();
 		//parameters: x, y, w, h
@@ -447,6 +451,14 @@ namespace flvr
 			glDrawArrays(GL_LINES, 4, 2);
 			break;
 		}
+	}
+
+	inline void VertexArray::draw_cam_center()
+	{
+		glDrawArrays(GL_LINES, 0, 2);
+		glDrawArrays(GL_LINES, 2, 2);
+		glDrawArrays(GL_LINES, 4, 2);
+		glDrawArrays(GL_LINES, 6, 2);
 	}
 
 	inline void VertexArray::draw_crop_frame()

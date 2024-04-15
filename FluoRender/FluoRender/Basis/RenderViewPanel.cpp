@@ -1243,7 +1243,7 @@ void RenderViewPanel::SetScale121()
 	FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_canvas) });
 }
 
-void RenderViewPanel::SetScaleFactor(double val, bool notify)
+void RenderViewPanel::SetScaleFactor(double val)
 {
 	switch (m_canvas->m_scale_mode)
 	{
@@ -1270,10 +1270,7 @@ void RenderViewPanel::SetScaleFactor(double val, bool notify)
 		}
 		break;
 	}
-	if (notify)
-		FluoRefresh(true, 2, { gstScaleFactor }, { m_frame->GetView(m_canvas) });
-	else
-		FluoRefresh(true, 2, { gstNull }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(true, 2, { gstScaleFactor, gstPinRotCtr }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetScaleMode(int val)
@@ -1537,9 +1534,7 @@ void RenderViewPanel::OnScaleFactorChange(wxScrollEvent& event)
 {
 	int ival = m_scale_factor_sldr->GetValue();
 	double dval = ival / 100.0;
-	m_scale_factor_text->ChangeValue(wxString::Format("%d", ival));
-	m_scale_factor_text->Update();
-	SetScaleFactor(dval, false);
+	SetScaleFactor(dval);
 	event.Skip();
 }
 
@@ -1551,8 +1546,7 @@ void RenderViewPanel::OnScaleFactorEdit(wxCommandEvent& event)
 	if (val > 0)
 	{
 		double dval = val / 100.0;
-		m_scale_factor_sldr->ChangeValue(val);
-		SetScaleFactor(dval, false);
+		SetScaleFactor(dval);
 	}
 	event.Skip();
 }
@@ -1567,7 +1561,7 @@ void RenderViewPanel::OnScaleFactorSpinUp(wxSpinEvent& event)
 	else
 		val--;
 	if (val > 0)
-		SetScaleFactor(val / 100.0, true);
+		SetScaleFactor(val / 100.0);
 	event.Skip();
 }
 
@@ -1581,13 +1575,13 @@ void RenderViewPanel::OnScaleFactorSpinDown(wxSpinEvent& event)
 	else
 		val++;
 	if (val > 0)
-		SetScaleFactor(val / 100.0, true);
+		SetScaleFactor(val / 100.0);
 	event.Skip();
 }
 
 void RenderViewPanel::OnScaleReset(wxCommandEvent& event)
 {
-	SetScaleFactor(glbin_view_def.m_scale_factor, true);
+	SetScaleFactor(glbin_view_def.m_scale_factor);
 	event.Skip();
 }
 
