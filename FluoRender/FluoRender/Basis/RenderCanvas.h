@@ -1189,6 +1189,7 @@ private:
 	vr::IVRSystem *m_vr_system;
 #ifdef USE_XINPUT
 	XboxController* m_controller;
+	bool m_control_connected;
 #endif
 #endif
 

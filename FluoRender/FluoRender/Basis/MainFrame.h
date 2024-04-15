@@ -383,6 +383,8 @@ private:
 
 	wxString m_title;
 
+	wxTimer* m_waker;
+
 private:
 	//views
 	wxString CreateView(int row=1);

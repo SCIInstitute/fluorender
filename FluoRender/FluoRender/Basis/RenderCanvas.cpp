@@ -363,6 +363,10 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	//xbox controller
 #ifdef USE_XINPUT
 	m_controller = new XboxController(1);
+	if (m_controller)
+	{
+		m_control_connected = m_controller->IsConnected();
+	}
 #endif
 #endif
 
@@ -4361,8 +4365,9 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 
 #if defined(_WIN32) && defined(USE_XINPUT)
 	//xinput controller
-	if (m_controller->IsConnected())
+	if (m_control_connected)
 	{
+		DBGPRINT(L"Idle controller\n");
 		XINPUT_STATE xstate = m_controller->GetState();
 		double dzone = 0.2;
 		double sclr = 15.0;

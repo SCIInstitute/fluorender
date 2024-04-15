@@ -187,7 +187,8 @@ MainFrame::MainFrame(
 	m_cur_sel_mesh(-1),
 	m_benchmark(benchmark),
 	m_vd_copy(0),
-	m_copy_data(false)
+	m_copy_data(false),
+	m_waker(0)
 {
 #ifdef _DARWIN
 	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
@@ -882,6 +883,10 @@ MainFrame::MainFrame(
 	UpdateProps({});
 
 	m_aui_mgr.Update();
+
+	m_waker = new wxTimer(this);
+	m_waker->Bind(wxEVT_TIMER, [](wxTimerEvent& event) { wxWakeUpIdle(); });
+	m_waker->Start(100);
 }
 
 MainFrame::~MainFrame()
@@ -917,6 +922,9 @@ MainFrame::~MainFrame()
 	glbin_settings.Save();
 
 	m_aui_mgr.UnInit();
+
+	if (m_waker)
+		delete m_waker;
 }
 
 void MainFrame::OnExit(wxCommandEvent& event)
