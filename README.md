@@ -138,9 +138,11 @@ Building FluoRender
    
    * In 4 places, you will need to add above each line with a "29" a new line that is exactly the same, but with a "31" instead, assuming your version of wxWidgets is 3.1.*). <br/>
 
-5) Download FluoRender using Git <code>git clone git@github.com:SCIInstitute/fluorender.git</code>
+5) Other dependencies: OpenCV, JDK, Python, HDF5.
 
-6) Use the <code>C:\Program Files(x86)\CMake2.8\bin\cmake-gui.exe</code> program to configure build properties and generate your Visual Studio Solution file. (Remember to keep your MSVC version consistent)
+6) Download FluoRender using Git <code>git clone git@github.com:SCIInstitute/fluorender.git</code>
+
+7) Use the <code>C:\Program Files(x86)\CMake2.8\bin\cmake-gui.exe</code> program to configure build properties and generate your Visual Studio Solution file. (Remember to keep your MSVC version consistent)
    
    * Select your FluoRender source and build directories (create a new folder for building), and add the locations of boost and wxWidgets. <br/>
    	- Choose the FluoRender main folder for source and create a new folder for the build. <br/>
