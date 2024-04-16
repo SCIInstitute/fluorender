@@ -243,8 +243,12 @@ void ColocalizationDlg::SetOutput(wxString &titles, wxString &values)
 		m_output_grid->SetDefaultColSize(100, true);
 	else
 		m_output_grid->SetDefaultColSize(70, true);
-	m_output_grid->ForceRefresh();
+
+	m_output_grid->Fit();
+	m_output_grid->Layout();
 	m_output_grid->ClearSelection();
+	m_output_grid->AdjustScrollbars();
+	m_output_grid->ForceRefresh();
 }
 
 void ColocalizationDlg::CopyData()
