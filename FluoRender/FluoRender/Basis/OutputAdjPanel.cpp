@@ -187,7 +187,7 @@ wxWindow* OutputAdjPanel::CreateRedPage(wxWindow* parent, wxSize& size)
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
 	m_r_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	m_r_reset_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnRReset, this);
-	m_sync_r_chk = new wxUndoableToolbar(page, wxID_ANY,
+	m_sync_r_chk = new wxUndoableToolbar(page, 0,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(unlink);
 	m_sync_r_chk->AddCheckTool(0, "Link",
@@ -276,7 +276,7 @@ wxWindow* OutputAdjPanel::CreateGreenPage(wxWindow* parent, wxSize& size)
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
 	m_g_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	m_g_reset_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnGReset, this);
-	m_sync_g_chk = new wxUndoableToolbar(page, wxID_ANY,
+	m_sync_g_chk = new wxUndoableToolbar(page, 0,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(unlink);
 	m_sync_g_chk->AddCheckTool(0, "Link",
@@ -365,7 +365,7 @@ wxWindow* OutputAdjPanel::CreateBluePage(wxWindow* parent, wxSize& size)
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
 	m_b_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	m_b_reset_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnBReset, this);
-	m_sync_b_chk = new wxUndoableToolbar(page, wxID_ANY,
+	m_sync_b_chk = new wxUndoableToolbar(page, 0,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(unlink);
 	m_sync_b_chk->AddCheckTool(0, "Link",
@@ -1111,16 +1111,19 @@ void OutputAdjPanel::OnBHdrText(wxCommandEvent &event)
 void OutputAdjPanel::OnSyncRCheck(wxCommandEvent &event)
 {
 	SetSync(0, m_sync_r_chk->GetToolState(0));
+	event.Skip();
 }
 
 void OutputAdjPanel::OnSyncGCheck(wxCommandEvent &event)
 {
 	SetSync(1, m_sync_g_chk->GetToolState(0));
+	event.Skip();
 }
 
 void OutputAdjPanel::OnSyncBCheck(wxCommandEvent &event)
 {
 	SetSync(2, m_sync_b_chk->GetToolState(0));
+	event.Skip();
 }
 
 void OutputAdjPanel::OnSaveDefault(wxCommandEvent &event)
