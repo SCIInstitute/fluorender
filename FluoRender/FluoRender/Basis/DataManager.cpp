@@ -1546,51 +1546,20 @@ void VolumeData::SetMode(int mode)
 	case 0://normal
 		m_vr->set_mode(flvr::TextureRenderer::MODE_OVER);
 		m_vr->set_color(m_color);
-		//m_vr->set_alpha(m_alpha);
-		//m_vr->set_lo_thresh(m_lo_thresh);
-		//m_vr->set_hi_thresh(m_hi_thresh);
-		//m_vr->set_gm_thresh(m_boundary);
-		//m_vr->set_gamma3d(m_gamma);
-		//m_vr->set_offset(m_saturation);
 		break;
 	case 1://MIP
 		m_vr->set_mode(flvr::TextureRenderer::MODE_MIP);
 		m_vr->set_color(m_color);
-		//{
-		//	double h, s, v;
-		//	GetHSV(h, s, v);
-		//	fluo::HSVColor hsv(h, s, 1.0);
-		//	fluo::Color rgb = fluo::Color(hsv);
-		//	m_vr->set_color(rgb);
-		//}
-		//m_vr->set_alpha(1.0);
-		//m_vr->set_lo_thresh(0.0);
-		//m_vr->set_hi_thresh(1.0);
-		//m_vr->set_gm_thresh(0.0);
-		//m_vr->set_gamma3d(m_gamma);
-		//m_vr->set_offset(m_saturation);
 		break;
 	case 2://white shading
 		m_vr->set_mode(flvr::TextureRenderer::MODE_OVER);
 		m_vr->set_colormap_mode(0);
 		m_vr->set_color(fluo::Color(1.0, 1.0, 1.0));
-		//m_vr->set_alpha(1.0);
-		//m_vr->set_lo_thresh(m_lo_thresh);
-		//m_vr->set_hi_thresh(m_hi_thresh);
-		//m_vr->set_gm_thresh(m_boundary);
-		//m_vr->set_gamma3d(m_gamma);
-		//m_vr->set_offset(m_saturation);
 		break;
 	case 3://white mip
 		m_vr->set_mode(flvr::TextureRenderer::MODE_MIP);
 		m_vr->set_colormap_mode(0);
 		m_vr->set_color(fluo::Color(1.0, 1.0, 1.0));
-		//m_vr->set_alpha(1.0);
-		//m_vr->set_lo_thresh(0.0);
-		//m_vr->set_hi_thresh(1.0);
-		//m_vr->set_gm_thresh(0.0);
-		//m_vr->set_gamma3d(1.0);
-		//m_vr->set_offset(1.0);
 		break;
 	}
 }

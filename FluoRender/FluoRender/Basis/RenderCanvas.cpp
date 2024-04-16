@@ -4810,6 +4810,7 @@ void RenderCanvas::SetParams(double t)
 	vc.insert(gstParamListSelect);
 	vc.insert(gstTreeIcons);
 	vc.insert(gstTreeColors);
+	vc.insert(gstClipPlaneRangeColor);
 	if (m_cur_vol)
 		glbin.set_tree_selection(m_cur_vol->GetName().ToStdString());
 	else
