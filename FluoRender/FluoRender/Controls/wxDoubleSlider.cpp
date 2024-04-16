@@ -170,6 +170,39 @@ bool wxDoubleSlider::ChangeHighValue(int val)
 	return setHighValue(val, false);
 }
 
+bool wxDoubleSlider::ChangeValues(int &low, int &hi)
+{
+	int olow = low_val_;
+	int ohi = hi_val_;
+
+	low_val_ = low < min_val_ ? min_val_ :
+		(low >= hi ? hi - 1 : low);
+	hi_val_ = hi <= low_val_ ? low_val_ + 1 :
+		(hi > max_val_ ? max_val_ : hi);
+	link_dist_ = hi_val_ - low_val_;
+
+	bool changed = low_val_ != olow || hi_val_ != ohi;
+	low = low_val_;
+	hi = hi_val_;
+
+	if (changed || stack_.empty())
+	{
+		double t;
+		if (time_sample(t))
+			push(t);
+		else
+			replace(t);
+	}
+
+	if (!changed)
+		return changed;
+
+	Refresh();
+	Update();
+
+	return changed;
+}
+
 void wxDoubleSlider::SetLink(bool val)
 {
 	link_ = val;

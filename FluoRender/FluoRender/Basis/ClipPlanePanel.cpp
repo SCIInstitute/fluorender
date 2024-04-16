@@ -1004,13 +1004,14 @@ void ClipPlanePanel::OnClipXChange(wxScrollEvent &event)
 	int ival1 = m_clipx_sldr->GetLowValue();
 	int ival2 = m_clipx_sldr->GetHighValue();
 	wxString str = event.GetString();
-	int i = 0;
-	if (str.Find("low") != wxNOT_FOUND)
-		i = 1;
-	else if (str.Find("high") != wxNOT_FOUND)
-		i = 2;
-	else
-		i = 3;
+	int i = 3;
+	if (!m_clipx_sldr->GetLink())
+	{
+		if (str.Find("low") != wxNOT_FOUND)
+			i = 1;
+		else if (str.Find("high") != wxNOT_FOUND)
+			i = 2;
+	}
 	SetClipValues(i, ival1, ival2);
 }
 
@@ -1037,13 +1038,14 @@ void ClipPlanePanel::OnClipYChange(wxScrollEvent &event)
 	int ival1 = m_clipy_sldr->GetLowValue();
 	int ival2 = m_clipy_sldr->GetHighValue();
 	wxString str = event.GetString();
-	int i = 0;
-	if (str.Find("low") != wxNOT_FOUND)
-		i = 4;
-	else if (str.Find("high") != wxNOT_FOUND)
-		i = 8;
-	else
-		i = 12;
+	int i = 12;
+	if (!m_clipy_sldr->GetLink())
+	{
+		if (str.Find("low") != wxNOT_FOUND)
+			i = 4;
+		else if (str.Find("high") != wxNOT_FOUND)
+			i = 8;
+	}
 	SetClipValues(i, ival1, ival2);
 }
 
@@ -1070,13 +1072,14 @@ void ClipPlanePanel::OnClipZChange(wxScrollEvent &event)
 	int ival1 = m_clipz_sldr->GetLowValue();
 	int ival2 = m_clipz_sldr->GetHighValue();
 	wxString str = event.GetString();
-	int i = 0;
-	if (str.Find("low") != wxNOT_FOUND)
-		i = 16;
-	else if (str.Find("high") != wxNOT_FOUND)
-		i = 32;
-	else
-		i = 48;
+	int i = 48;
+	if (!m_clipz_sldr->GetLink())
+	{
+		if (str.Find("low") != wxNOT_FOUND)
+			i = 16;
+		else if (str.Find("high") != wxNOT_FOUND)
+			i = 32;
+	}
 	SetClipValues(i, ival1, ival2);
 }
 

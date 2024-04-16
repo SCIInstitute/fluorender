@@ -54,6 +54,7 @@ public:
 	bool SetHighValue(int val);
 	bool ChangeLowValue(int val);
 	bool ChangeHighValue(int val);
+	bool ChangeValues(int &low, int &hi);
 
 	virtual void OnLeftDown(wxMouseEvent& event);
 	virtual void OnMotion(wxMouseEvent& event);

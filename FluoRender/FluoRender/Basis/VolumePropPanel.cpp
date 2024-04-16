@@ -2242,17 +2242,23 @@ void VolumePropPanel::OnThreshChange(wxScrollEvent &event)
 
 void VolumePropPanel::OnThreshText(wxCommandEvent &event)
 {
+	wxObject* t = event.GetEventObject();
 	long ival1 = 0, ival2 = 0;
 	wxString str = m_left_thresh_text->GetValue();
 	str.ToLong(&ival1);
 	str = m_right_thresh_text->GetValue();
 	str.ToLong(&ival2);
-	if (double(ival2) > m_max_val)
-		UpdateMaxVal(ival2);
-	m_thresh_sldr->ChangeLowValue(ival1);
-	m_thresh_sldr->ChangeLowValue(ival2);
-	double val1 = double(ival1) / m_max_val;
-	double val2 = double(ival2) / m_max_val;
+	int low = ival1;
+	int hi = ival2;
+	m_thresh_sldr->ChangeValues(low, hi);
+	if (low != ival1 && t != m_left_thresh_text)
+		m_left_thresh_text->ChangeValue(std::to_string(low));
+	if (hi != ival2 && t != m_right_thresh_text)
+		m_right_thresh_text->ChangeValue(std::to_string(hi));
+	if (double(hi) > m_max_val)
+		UpdateMaxVal(hi);
+	double val1 = double(low) / m_max_val;
+	double val2 = double(hi) / m_max_val;
 
 	//set left threshold value
 	if (m_sync_group)
@@ -2473,17 +2479,23 @@ void VolumePropPanel::OnColormapChange(wxScrollEvent &event)
 
 void VolumePropPanel::OnColormapText(wxCommandEvent &event)
 {
+	wxObject* t = event.GetEventObject();
 	wxString str = m_colormap_low_text->GetValue();
 	long ival1 = 0, ival2 = 0;
 	str.ToLong(&ival1);
 	str = m_colormap_hi_text->GetValue();
 	str.ToLong(&ival2);
-	m_colormap_sldr->SetLowValue(ival1);
-	m_colormap_sldr->SetHighValue(ival2);
-	if (double(ival2) > m_max_val)
-		UpdateMaxVal(ival2);
-	double val1 = double(ival1) / m_max_val;
-	double val2 = double(ival2) / m_max_val;
+	int low = ival1;
+	int hi = ival2;
+	m_colormap_sldr->ChangeValues(low, hi);
+	if (low != ival1 && t != m_colormap_low_text)
+		m_colormap_low_text->ChangeValue(std::to_string(low));
+	if (hi != ival2 && t != m_colormap_hi_text)
+		m_colormap_hi_text->ChangeValue(std::to_string(hi));
+	if (double(hi) > m_max_val)
+		UpdateMaxVal(hi);
+	double val1 = double(low) / m_max_val;
+	double val2 = double(hi) / m_max_val;
 
 	//set left threshold value
 	if (m_sync_group)
