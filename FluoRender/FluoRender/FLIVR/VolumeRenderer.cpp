@@ -41,6 +41,7 @@
 #include <fstream>
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
+#include <Debug.h>
 
 namespace flvr
 {
@@ -800,10 +801,11 @@ namespace flvr
 
 		num_slices_ = 0;
 		bool multibricks = bricks->size() > 1;
+		bool drawn_once = false;
 		for (unsigned int i=0; i < bricks->size(); i++)
 		{
 			//comment off when debug_ds
-			if (mem_swap_)
+			if (mem_swap_ && drawn_once)
 			{
 				unsigned long long rn_time = GET_TICK_COUNT();
 				if (rn_time - st_time_ > get_up_time())
@@ -929,16 +931,17 @@ namespace flvr
 
 			if (mem_swap_)
 				finished_bricks_++;
+			drawn_once = true;
 		}
 
 		if (mem_swap_ &&
-			cur_brick_num_ == total_brick_num_)
+			cur_brick_num_ >= total_brick_num_)
 		{
 			done_update_loop_ = true;
 			active_view_ = -1;
 		}
 		if (mem_swap_ &&
-			(size_t)cur_chan_brick_num_ == (*bricks).size())
+			(size_t)cur_chan_brick_num_ >= (*bricks).size())
 		{
 			done_current_chan_ = true;
 			clear_chan_buffer_ = true;
@@ -946,6 +949,9 @@ namespace flvr
 			cur_chan_brick_num_ = 0;
 			done_loop_[mode] = true;
 		}
+
+		//DBGPRINT(L"done_current_chan_:%d\tclear_chan_buffer_:%d\tsave_final_buffer_:%d\tdone_loop_[%d]:%d\tcur_chan_brick_num_:%d\tcur_brick_num_:%d\tfinished_bricks_:%d\tbrick_size:%d\ttotal_brick_num_:%d\n",
+		//	done_current_chan_, clear_chan_buffer_, save_final_buffer_, mode, done_loop_[mode], cur_chan_brick_num_, cur_brick_num_, finished_bricks_, (*bricks).size(), total_brick_num_);
 
 		//release depth texture for rendering shadows
 		if (cm_mode == 2)

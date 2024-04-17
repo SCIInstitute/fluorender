@@ -292,9 +292,10 @@ namespace flvr
 		if (bs)
 		{
 			bool multibricks = bs->size() > 1;
+			bool drawn_once = false;
 			for (unsigned int i=0; i < bs->size(); i++)
 			{
-				if (TextureRenderer::mem_swap_)
+				if (TextureRenderer::mem_swap_ && drawn_once)
 				{
 					unsigned long long rn_time = GET_TICK_COUNT();
 					if (rn_time - TextureRenderer::st_time_ > TextureRenderer::get_up_time())
@@ -342,11 +343,12 @@ namespace flvr
 
 				draw_polygons_vol(b, rate, vertex, index, size, view_ray,
 					i, orthographic_p, w2, h2, intp, quota_bricks_chan, blend_buffer);
+				drawn_once = true;
 			}
 		}
 
 		if (TextureRenderer::mem_swap_ &&
-			TextureRenderer::cur_brick_num_ == TextureRenderer::total_brick_num_)
+			TextureRenderer::cur_brick_num_ >= TextureRenderer::total_brick_num_)
 		{
 			TextureRenderer::done_update_loop_ = true;
 			TextureRenderer::active_view_ = -1;
@@ -356,7 +358,7 @@ namespace flvr
 			int num = 0;
 			for (size_t i=0; i<vr_list_.size(); ++i)
 				num += vr_list_[i]->tex_->get_bricks()->size();
-			if (TextureRenderer::cur_chan_brick_num_ == num)
+			if (TextureRenderer::cur_chan_brick_num_ >= num)
 			{
 				TextureRenderer::done_current_chan_ = true;
 				TextureRenderer::clear_chan_buffer_ = true;

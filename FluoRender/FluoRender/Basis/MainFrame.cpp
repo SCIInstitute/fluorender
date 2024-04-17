@@ -924,7 +924,10 @@ MainFrame::~MainFrame()
 	m_aui_mgr.UnInit();
 
 	if (m_waker)
+	{
+		m_waker->Stop();
 		delete m_waker;
+	}
 }
 
 void MainFrame::OnExit(wxCommandEvent& event)

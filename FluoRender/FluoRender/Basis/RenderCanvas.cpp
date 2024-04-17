@@ -1379,17 +1379,6 @@ void RenderCanvas::DrawVolumes(int peel)
 				quota_bricks = std::min(total_bricks, quota_bricks);
 				flvr::TextureRenderer::set_quota_bricks(quota_bricks);
 				flvr::TextureRenderer::push_quota_brick(quota_bricks);
-				////test
-				//std::ofstream ofs("quota.txt", std::ios::out | std::ios::app);
-				//std::string str;
-				//str += std::to_string(quota_bricks) + "\t";
-				//str += std::to_string(total_bricks) + "\t";
-				//str += std::to_string(fin_bricks) + "\t";
-				//str += std::to_string(adj_bricks) + "\t";
-				//str += std::to_string(TextureRenderer::get_up_time()) + "\t";
-				//str += std::to_string(up_time) + "\t";
-				//str += std::to_string(consumed_time) + "\n";
-				//ofs.write(str.c_str(), str.size());
 
 				int quota_bricks_chan = 0;
 				if (m_vd_pop_list.size() > 1)
