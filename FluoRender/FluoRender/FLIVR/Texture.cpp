@@ -26,6 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
+#include <Global.h>
 #include <FLIVR/ShaderProgram.h>
 #include <FLIVR/Texture.h>
 #include <FLIVR/TextureRenderer.h>
@@ -167,9 +168,9 @@ namespace flvr
 				}
 				(*bricks_)[i]->set_d(d);
 			}
-			if (TextureRenderer::get_update_order() == 0)
+			if (glbin_settings.m_update_order == 0)
 				std::sort((*bricks_).begin(), (*bricks_).end(), TextureBrick::sort_asc);
-			else if (TextureRenderer::get_update_order() == 1)
+			else if (glbin_settings.m_update_order == 1)
 				std::sort((*bricks_).begin(), (*bricks_).end(), TextureBrick::sort_dsc);
 
 			sort_bricks_ = false;
@@ -247,9 +248,9 @@ namespace flvr
 				}
 				quota_bricks_[i]->set_d(d);
 			}
-			if (TextureRenderer::get_update_order() == 0)
+			if (glbin_settings.m_update_order == 0)
 				std::sort(quota_bricks_.begin(), quota_bricks_.end(), TextureBrick::sort_asc);
-			else if (TextureRenderer::get_update_order() == 1)
+			else if (glbin_settings.m_update_order == 1)
 				std::sort(quota_bricks_.begin(), quota_bricks_.end(), TextureBrick::sort_dsc);
 
 			sort_bricks_ = false;
@@ -463,12 +464,12 @@ namespace flvr
 				max_texture_size = ShaderProgram::max_texture_size();
 
 			//further determine the max texture size
-			if (TextureRenderer::get_mem_swap())
+			if (glbin_settings.m_mem_swap)
 			{
 				double data_size = double(sz_x)*double(sz_y)*double(sz_z)/1.04e6;
-				if (data_size > TextureRenderer::get_mem_limit() ||
-					data_size > TextureRenderer::get_large_data_size())
-					max_texture_size = TextureRenderer::get_force_brick_size();
+				if (data_size > glbin_settings.m_mem_limit ||
+					data_size > glbin_settings.m_large_data_size)
+					max_texture_size = glbin_settings.m_force_brick_size;
 			}
 		}
 

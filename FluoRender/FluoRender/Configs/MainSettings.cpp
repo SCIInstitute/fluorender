@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stdpaths.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
-
+#include <glew.h>
 
 MainSettings::MainSettings()
 {
@@ -118,6 +118,9 @@ MainSettings::MainSettings()
 
 	m_mem_swap = false;
 	m_graphics_mem = 1000.0;
+	m_use_mem_limit = false;
+	m_mem_limit = 1000.0;
+	m_available_mem = 1000.0;
 	m_large_data_size = 1000.0;
 	m_force_brick_size = 128;
 	m_up_time = 100;
@@ -623,3 +626,19 @@ void MainSettings::Save()
 	SaveConfig(fconfig, dft);
 }
 
+void MainSettings::GetMemorySettings()
+{
+	//from gl
+	GLenum error = glGetError();
+	GLint mem_info[4] = { 0, 0, 0, 0 };
+	glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, mem_info);
+	error = glGetError();
+	if (error == GL_INVALID_ENUM)
+	{
+		glGetIntegerv(GL_TEXTURE_FREE_MEMORY_ATI, mem_info);
+		error = glGetError();
+		if (error == GL_INVALID_ENUM)
+			m_use_mem_limit = true;
+	}
+	m_mem_limit = m_available_mem = m_use_mem_limit ? m_graphics_mem : mem_info[0] / 1024.0;
+}

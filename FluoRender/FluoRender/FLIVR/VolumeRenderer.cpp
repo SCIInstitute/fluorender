@@ -26,6 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
+#include <Global.h>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/VolShader.h>
 #include <FLIVR/SegShader.h>
@@ -578,7 +579,7 @@ namespace flvr
 
 		vector<TextureBrick*> *bricks = 0;
 		tex_->set_matrices(m_mv_mat2, m_proj_mat);
-		if (mem_swap_ && interactive_)
+		if (glbin_settings.m_mem_swap && interactive_)
 			bricks = tex_->get_closest_bricks(
 			quota_center_, quota_bricks_chan_, true,
 			view_ray, orthographic_p);
@@ -627,9 +628,9 @@ namespace flvr
 		{
 		case MODE_OVER:
 			glBlendEquation(GL_FUNC_ADD);
-			if (update_order_ == 0)
+			if (glbin_settings.m_update_order == 0)
 				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-			else if (update_order_ == 1)
+			else if (glbin_settings.m_update_order == 1)
 				glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 			break;
 		case MODE_MIP:
@@ -805,7 +806,7 @@ namespace flvr
 		for (unsigned int i=0; i < bricks->size(); i++)
 		{
 			//comment off when debug_ds
-			if (mem_swap_ && drawn_once)
+			if (glbin_settings.m_mem_swap && drawn_once)
 			{
 				unsigned long long rn_time = GET_TICK_COUNT();
 				if (rn_time - st_time_ > get_up_time())
@@ -821,17 +822,17 @@ namespace flvr
 				continue;
 			}
 
-			if (mem_swap_ && start_update_loop_ && !done_update_loop_)
+			if (glbin_settings.m_mem_swap && start_update_loop_ && !done_update_loop_)
 			{
 				if (b->drawn(mode))
 					continue;
 			}
 
-			if (((!mem_swap_ || !interactive_) &&
+			if (((!glbin_settings.m_mem_swap || !interactive_) &&
 				!test_against_view(b->bbox(), !orthographic_p)) || // Clip against view
 				b->get_priority()>0) //nothing to draw
 			{
-				if (mem_swap_ && start_update_loop_ && !done_update_loop_)
+				if (glbin_settings.m_mem_swap && start_update_loop_ && !done_update_loop_)
 				{
 					if (!b->drawn(mode))
 					{
@@ -876,7 +877,7 @@ namespace flvr
 
 			if (vertex.size() == 0)
 			{
-				if (mem_swap_ &&
+				if (glbin_settings.m_mem_swap &&
 					start_update_loop_ &&
 					!done_update_loop_)
 				{
@@ -929,18 +930,18 @@ namespace flvr
 				draw_polygons(vertex, index);
 			}
 
-			if (mem_swap_)
+			if (glbin_settings.m_mem_swap)
 				finished_bricks_++;
 			drawn_once = true;
 		}
 
-		if (mem_swap_ &&
+		if (glbin_settings.m_mem_swap &&
 			cur_brick_num_ >= total_brick_num_)
 		{
 			done_update_loop_ = true;
 			active_view_ = -1;
 		}
-		if (mem_swap_ &&
+		if (glbin_settings.m_mem_swap &&
 			(size_t)cur_chan_brick_num_ >= (*bricks).size())
 		{
 			done_current_chan_ = true;

@@ -29,6 +29,7 @@
 #include "MultiVolumeRenderer.h"
 #include "VolShader.h"
 #include "ShaderProgram.h"
+#include <Global.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
 #include <compatibility.h>
@@ -209,9 +210,9 @@ namespace flvr
 		{
 		case TextureRenderer::MODE_OVER:
 			glBlendEquation(GL_FUNC_ADD);
-			if (TextureRenderer::get_update_order() == 0)
+			if (glbin_settings.m_update_order == 0)
 				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-			else if (TextureRenderer::get_update_order() == 1)
+			else if (glbin_settings.m_update_order == 1)
 				glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 			break;
 		case TextureRenderer::MODE_MIP:
@@ -277,7 +278,7 @@ namespace flvr
 		int quota_bricks_chan = vr_list_[0]->get_quota_bricks_chan();
 		vector<TextureBrick*> *bs = 0;
 		fluo::Point pt = TextureRenderer::quota_center_;
-		if (TextureRenderer::mem_swap_ &&
+		if (glbin_settings.m_mem_swap &&
 			TextureRenderer::interactive_)
 			//bs = vr_list_[0]->tex_->get_closest_bricks(
 			//TextureRenderer::quota_center_,
@@ -295,7 +296,7 @@ namespace flvr
 			bool drawn_once = false;
 			for (unsigned int i=0; i < bs->size(); i++)
 			{
-				if (TextureRenderer::mem_swap_ && drawn_once)
+				if (glbin_settings.m_mem_swap && drawn_once)
 				{
 					unsigned long long rn_time = GET_TICK_COUNT();
 					if (rn_time - TextureRenderer::st_time_ > TextureRenderer::get_up_time())
@@ -303,7 +304,7 @@ namespace flvr
 				}
 
 				TextureBrick* b = (*bs)[i];
-				if (TextureRenderer::mem_swap_ &&
+				if (glbin_settings.m_mem_swap &&
 					TextureRenderer::start_update_loop_ &&
 					!TextureRenderer::done_update_loop_)
 				{
@@ -313,7 +314,7 @@ namespace flvr
 
 				if (!vr_list_[0]->test_against_view(b->bbox(), !orthographic_p))// Clip against view
 				{
-					if (TextureRenderer::mem_swap_ &&
+					if (glbin_settings.m_mem_swap &&
 						TextureRenderer::start_update_loop_ &&
 						!TextureRenderer::done_update_loop_)
 					{
@@ -347,13 +348,13 @@ namespace flvr
 			}
 		}
 
-		if (TextureRenderer::mem_swap_ &&
+		if (glbin_settings.m_mem_swap &&
 			TextureRenderer::cur_brick_num_ >= TextureRenderer::total_brick_num_)
 		{
 			TextureRenderer::done_update_loop_ = true;
 			TextureRenderer::active_view_ = -1;
 		}
-		if (TextureRenderer::mem_swap_)
+		if (glbin_settings.m_mem_swap)
 		{
 			int num = 0;
 			for (size_t i=0; i<vr_list_.size(); ++i)
@@ -376,9 +377,9 @@ namespace flvr
 
 		//reset blending
 		glBlendEquation(GL_FUNC_ADD);
-		if (TextureRenderer::get_update_order() == 0)
+		if (glbin_settings.m_update_order == 0)
 			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-		else if (TextureRenderer::get_update_order() == 1)
+		else if (glbin_settings.m_update_order == 1)
 			glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 		glDisable(GL_BLEND);
 
@@ -435,9 +436,9 @@ namespace flvr
 				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 
 			glEnable(GL_BLEND);
-			if (TextureRenderer::get_update_order() == 0)
+			if (glbin_settings.m_update_order == 0)
 				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-			else if (TextureRenderer::get_update_order() == 1)
+			else if (glbin_settings.m_update_order == 1)
 				glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 
 			if (noise_red_ /*&& colormap_mode_!=2*/)
@@ -680,7 +681,7 @@ namespace flvr
 					blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 
 				vector<TextureBrick*> *bs = 0;
-				if (TextureRenderer::mem_swap_ &&
+				if (glbin_settings.m_mem_swap &&
 					TextureRenderer::interactive_)
 					//bs = vr_list_[tn]->tex_->get_closest_bricks(
 					//TextureRenderer::quota_center_,
@@ -696,7 +697,7 @@ namespace flvr
 				TextureBrick* b = (*bs)[bi];
 				if (b->get_priority()>0)
 				{
-					if (TextureRenderer::mem_swap_ &&
+					if (glbin_settings.m_mem_swap &&
 						TextureRenderer::start_update_loop_ &&
 						!TextureRenderer::done_update_loop_)
 					{
@@ -728,7 +729,7 @@ namespace flvr
 				if (vr_list_[tn]->colormap_mode_ == 2)
 					vr_list_[tn]->release_texture(4, GL_TEXTURE_2D);
 
-				if (TextureRenderer::mem_swap_ && i==0)
+				if (glbin_settings.m_mem_swap && i==0)
 					TextureRenderer::finished_bricks_++;
 
 				//release
@@ -753,9 +754,9 @@ namespace flvr
 				micro_blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 				//blend
 				glBlendEquation(GL_FUNC_ADD);
-				if (TextureRenderer::get_update_order() == 0)
+				if (glbin_settings.m_update_order == 0)
 					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-				else if (TextureRenderer::get_update_order() == 1)
+				else if (glbin_settings.m_update_order == 1)
 					glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 				//draw
 				ShaderProgram* img_shader = vr_list_[0]->
@@ -886,9 +887,9 @@ namespace flvr
 			}
 			(*result)[i]->set_d(d);
 		}
-		if (TextureRenderer::get_update_order() == 0)
+		if (glbin_settings.m_update_order == 0)
 			std::sort((*result).begin(), (*result).end(), TextureBrick::sort_asc);
-		else if (TextureRenderer::get_update_order() == 1)
+		else if (glbin_settings.m_update_order == 1)
 			std::sort((*result).begin(), (*result).end(), TextureBrick::sort_dsc);
 		vr_list_[0]->tex_->reset_sort_bricks();
 

@@ -645,9 +645,9 @@ void RenderCanvas::Init()
 		if (ctx != flvr::TextureRenderer::gl_context_)
 			flvr::TextureRenderer::gl_context_ = ctx;
 #endif
+		glbin_settings.GetMemorySettings();
 		if (m_frame)
 		{
-			m_frame->SetTextureRendererSettings();
 			m_frame->SetTextureUndos();
 			m_frame->GetSettingDlg()->UpdateTextureSize();
 		}
@@ -1294,7 +1294,7 @@ void RenderCanvas::DrawMeshes(int peel)
 void RenderCanvas::DrawVolumes(int peel)
 {
 	int finished_bricks = 0;
-	if (flvr::TextureRenderer::get_mem_swap())
+	if (glbin_settings.m_mem_swap)
 	{
 		finished_bricks = flvr::TextureRenderer::get_finished_bricks();
 		flvr::TextureRenderer::reset_finished_bricks();
@@ -1347,7 +1347,7 @@ void RenderCanvas::DrawVolumes(int peel)
 		PopVolumeList();
 
 		vector<VolumeData*> quota_vd_list;
-		if (flvr::TextureRenderer::get_mem_swap())
+		if (glbin_settings.m_mem_swap)
 		{
 			//set start time for the texture renderer
 			flvr::TextureRenderer::set_st_time(GET_TICK_COUNT());
@@ -1458,7 +1458,7 @@ void RenderCanvas::DrawVolumes(int peel)
 		//handle intermixing modes
 		if (m_vol_method == VOL_METHOD_MULTI)
 		{
-			if (flvr::TextureRenderer::get_mem_swap() &&
+			if (glbin_settings.m_mem_swap &&
 				flvr::TextureRenderer::get_interactive() &&
 				quota_vd_list.size() > 0)
 				DrawVolumesMulti(quota_vd_list, peel);
@@ -1483,7 +1483,7 @@ void RenderCanvas::DrawVolumes(int peel)
 					VolumeData* vd = (VolumeData*)m_layer_list[i];
 					if (vd && vd->GetDisp())
 					{
-						if (flvr::TextureRenderer::get_mem_swap() &&
+						if (glbin_settings.m_mem_swap &&
 							flvr::TextureRenderer::get_interactive() &&
 							quota_vd_list.size() > 0)
 						{
@@ -1515,7 +1515,7 @@ void RenderCanvas::DrawVolumes(int peel)
 						VolumeData* vd = group->GetVolumeData(j);
 						if (vd && vd->GetDisp())
 						{
-							if (flvr::TextureRenderer::get_mem_swap() &&
+							if (glbin_settings.m_mem_swap &&
 								flvr::TextureRenderer::get_interactive() &&
 								quota_vd_list.size() > 0)
 							{
@@ -1551,7 +1551,7 @@ void RenderCanvas::DrawVolumes(int peel)
 	//final composition
 	DrawFinalBuffer();
 
-	if (flvr::TextureRenderer::get_mem_swap())
+	if (glbin_settings.m_mem_swap)
 	{
 		flvr::TextureRenderer::set_consumed_time(GET_TICK_COUNT() - flvr::TextureRenderer::get_st_time());
 		if (flvr::TextureRenderer::get_start_update_loop() &&
@@ -2519,7 +2519,7 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 	flvr::ShaderProgram* img_shader = 0;
 
 	bool do_over = true;
-	if (flvr::TextureRenderer::get_mem_swap() &&
+	if (glbin_settings.m_mem_swap &&
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
@@ -2544,7 +2544,7 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 	if (do_over)
 	{
 		//before rendering this channel, save final buffer to temp buffer
-		if (flvr::TextureRenderer::get_mem_swap() &&
+		if (glbin_settings.m_mem_swap &&
 			flvr::TextureRenderer::get_start_update_loop() &&
 			flvr::TextureRenderer::get_save_final_buffer())
 		{
@@ -2590,8 +2590,8 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 			m_cur_framebuffer = chann_buffer->id();
 		}
 
-		if (!flvr::TextureRenderer::get_mem_swap() ||
-			(flvr::TextureRenderer::get_mem_swap() &&
+		if (!glbin_settings.m_mem_swap ||
+			(glbin_settings.m_mem_swap &&
 			flvr::TextureRenderer::get_clear_chan_buffer()))
 		{
 			glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -2627,7 +2627,7 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 	if (final_buffer)
 		final_buffer->bind();
 
-	if (flvr::TextureRenderer::get_mem_swap())
+	if (glbin_settings.m_mem_swap)
 	{
 		//restore temp buffer to final buffer
 		glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -2697,7 +2697,7 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 		img_shader->release();
 
 	//if vd is duplicated
-	if (flvr::TextureRenderer::get_mem_swap() &&
+	if (glbin_settings.m_mem_swap &&
 		flvr::TextureRenderer::get_done_current_chan())
 	{
 		vector<flvr::TextureBrick*> *bricks =
@@ -2715,7 +2715,7 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
 	bool do_mip = true;
-	if (flvr::TextureRenderer::get_mem_swap() &&
+	if (glbin_settings.m_mem_swap &&
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
@@ -2739,7 +2739,7 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 	if (do_mip)
 	{
 		//before rendering this channel, save final buffer to temp buffer
-		if (flvr::TextureRenderer::get_mem_swap() &&
+		if (glbin_settings.m_mem_swap &&
 			flvr::TextureRenderer::get_start_update_loop() &&
 			flvr::TextureRenderer::get_save_final_buffer())
 		{
@@ -2790,8 +2790,8 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 			m_cur_framebuffer = overlay_buffer->id();
 		}
 
-		if (!flvr::TextureRenderer::get_mem_swap() ||
-			(flvr::TextureRenderer::get_mem_swap() &&
+		if (!glbin_settings.m_mem_swap ||
+			(glbin_settings.m_mem_swap &&
 			flvr::TextureRenderer::get_clear_chan_buffer()))
 		{
 			glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -2923,7 +2923,7 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 	if (final_buffer)
 		final_buffer->bind();
 
-	if (flvr::TextureRenderer::get_mem_swap())
+	if (glbin_settings.m_mem_swap)
 	{
 		//restore temp buffer to final buffer
 		glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -2996,7 +2996,7 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 	vd->SetColormapMode(color_mode);
 
 	//if vd is duplicated
-	if (flvr::TextureRenderer::get_mem_swap() &&
+	if (glbin_settings.m_mem_swap &&
 		flvr::TextureRenderer::get_done_current_chan())
 	{
 		vector<flvr::TextureBrick*> *bricks =
@@ -3011,7 +3011,7 @@ void RenderCanvas::DrawOLShading(VolumeData* vd)
 	int nx, ny;
 	GetRenderSize(nx, ny);
 
-	if (flvr::TextureRenderer::get_mem_swap() &&
+	if (glbin_settings.m_mem_swap &&
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
@@ -3247,7 +3247,7 @@ void RenderCanvas::DrawOLShadows(vector<VolumeData*> &vlist)
 	if (!has_shadow)
 		return;
 
-	if (flvr::TextureRenderer::get_mem_swap() &&
+	if (glbin_settings.m_mem_swap &&
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
@@ -3270,8 +3270,8 @@ void RenderCanvas::DrawOLShadows(vector<VolumeData*> &vlist)
 		m_cur_framebuffer = overlay_buffer->id();
 	}
 
-	if (!flvr::TextureRenderer::get_mem_swap() ||
-		(flvr::TextureRenderer::get_mem_swap() &&
+	if (!glbin_settings.m_mem_swap ||
+		(glbin_settings.m_mem_swap &&
 		flvr::TextureRenderer::get_clear_chan_buffer()))
 	{
 		glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -3352,8 +3352,8 @@ void RenderCanvas::DrawOLShadows(vector<VolumeData*> &vlist)
 	}
 
 	//
-	if (!flvr::TextureRenderer::get_mem_swap() ||
-		(flvr::TextureRenderer::get_mem_swap() &&
+	if (!glbin_settings.m_mem_swap ||
+		(glbin_settings.m_mem_swap &&
 		flvr::TextureRenderer::get_clear_chan_buffer()))
 	{
 		//shadow pass
@@ -3519,8 +3519,8 @@ void RenderCanvas::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 		chann_buffer->bind();
 		m_cur_framebuffer = chann_buffer->id();
 	}
-	if (!flvr::TextureRenderer::get_mem_swap() ||
-		(flvr::TextureRenderer::get_mem_swap() &&
+	if (!glbin_settings.m_mem_swap ||
+		(glbin_settings.m_mem_swap &&
 			flvr::TextureRenderer::get_clear_chan_buffer()))
 	{
 		glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -3899,7 +3899,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	m_retain_finalbuffer = false;
 
 	//check memory swap status
-	if (flvr::TextureRenderer::get_mem_swap() &&
+	if (glbin_settings.m_mem_swap &&
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
@@ -3931,7 +3931,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		m_test_speed)
 	{
 		refresh = true;
-		if (flvr::TextureRenderer::get_mem_swap() &&
+		if (glbin_settings.m_mem_swap &&
 			flvr::TextureRenderer::get_done_update_loop())
 			m_pre_draw = true;
 		vc.insert(gstNull);
@@ -3957,7 +3957,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 
 		refresh = true;
 		vc.insert(gstNull);
-		if (flvr::TextureRenderer::get_mem_swap() &&
+		if (glbin_settings.m_mem_swap &&
 			flvr::TextureRenderer::get_done_update_loop())
 			m_pre_draw = true;
 	}
@@ -5179,7 +5179,7 @@ void RenderCanvas::Set3DBatFrame(int frame, int start_frame, int end_frame, bool
 void RenderCanvas::PreDraw()
 {
 	//skip if not done with loop
-	if (flvr::TextureRenderer::get_mem_swap())
+	if (glbin_settings.m_mem_swap)
 	{
 		if (m_pre_draw)
 			m_pre_draw = false;
@@ -5276,7 +5276,7 @@ void RenderCanvas::ReadPixels(
 void RenderCanvas::PostDraw()
 {
 	//skip if not done with loop
-	if (flvr::TextureRenderer::get_mem_swap() &&
+	if (glbin_settings.m_mem_swap &&
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 		return;
@@ -5353,7 +5353,7 @@ void RenderCanvas::PostDraw()
 void RenderCanvas::ResetEnlarge()
 {
 	//skip if not done with loop
-	if (flvr::TextureRenderer::get_mem_swap() &&
+	if (glbin_settings.m_mem_swap &&
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 		return;
@@ -5479,7 +5479,7 @@ void RenderCanvas::ForceDraw()
 		m_int_mode = 7;
 
 
-	if (flvr::TextureRenderer::get_invalidate_tex())
+	if (glbin_settings.m_invalidate_tex)
 	{
 //#ifdef _WIN32
 //		for (int i = 0; i < m_dp_tex_list.size(); ++i)
@@ -8644,7 +8644,7 @@ void RenderCanvas::DrawInfo(int nx, int ny)
 	double fps = 1.0 / glbin.getStopWatch(gstStopWatch)->average();
 	wxString str;
 	fluo::Color text_color = GetTextColor();
-	if (flvr::TextureRenderer::get_mem_swap())
+	if (glbin_settings.m_mem_swap)
 	{
 		if (glbin_vol_selector.GetBrushUsePres())
 			str = wxString::Format(
@@ -9198,7 +9198,7 @@ void RenderCanvas::StartLoopUpdate()
 	//  !TextureRenderer::get_done_update_loop())
 	//  return;
 
-	if (flvr::TextureRenderer::get_mem_swap())
+	if (glbin_settings.m_mem_swap)
 	{
 		if (flvr::TextureRenderer::active_view_ > 0 &&
 			flvr::TextureRenderer::active_view_ != m_vrv->m_id)
@@ -9336,25 +9336,25 @@ void RenderCanvas::StartLoopUpdate()
 					}
 				}
 			}
-			if (flvr::TextureRenderer::get_update_order() == 1)
+			if (glbin_settings.m_update_order == 1)
 				std::sort(queues.begin(), queues.end(), VolumeLoader::sort_data_dsc);
-			else if (flvr::TextureRenderer::get_update_order() == 0)
+			else if (glbin_settings.m_update_order == 0)
 				std::sort(queues.begin(), queues.end(), VolumeLoader::sort_data_asc);
 
 			if (!tmp_shade.empty())
 			{
-				if (flvr::TextureRenderer::get_update_order() == 1)
+				if (glbin_settings.m_update_order == 1)
 					std::sort(tmp_shade.begin(), tmp_shade.end(), VolumeLoader::sort_data_dsc);
-				else if (flvr::TextureRenderer::get_update_order() == 0)
+				else if (glbin_settings.m_update_order == 0)
 					std::sort(tmp_shade.begin(), tmp_shade.end(), VolumeLoader::sort_data_asc);
 				queues.insert(queues.end(), tmp_shade.begin(), tmp_shade.end());
 			}
 			if (!tmp_shadow.empty())
 			{
-				if (flvr::TextureRenderer::get_update_order() == 1)
+				if (glbin_settings.m_update_order == 1)
 				{
-					int order = flvr::TextureRenderer::get_update_order();
-					flvr::TextureRenderer::set_update_order(0);
+					int order = glbin_settings.m_update_order;
+					glbin_settings.m_update_order = 0;
 					for (i = 0; i < list.size(); i++)
 					{
 						fluo::Ray view_ray = list[i]->GetVR()->compute_view();
@@ -9362,10 +9362,10 @@ void RenderCanvas::StartLoopUpdate()
 						list[i]->GetTexture()->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 						list[i]->GetTexture()->set_sort_bricks();
 					}
-					flvr::TextureRenderer::set_update_order(order);
+					glbin_settings.m_update_order = order;
 					std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
 				}
-				else if (flvr::TextureRenderer::get_update_order() == 0)
+				else if (glbin_settings.m_update_order == 0)
 					std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
 				queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
 			}
@@ -9424,15 +9424,15 @@ void RenderCanvas::StartLoopUpdate()
 						if (!tmp_shade.empty()) queues.insert(queues.end(), tmp_shade.begin(), tmp_shade.end());
 						if (!tmp_shadow.empty())
 						{
-							if (flvr::TextureRenderer::get_update_order() == 1)
+							if (glbin_settings.m_update_order == 1)
 							{
-								int order = flvr::TextureRenderer::get_update_order();
-								flvr::TextureRenderer::set_update_order(0);
+								int order = glbin_settings.m_update_order;
+								glbin_settings.m_update_order = 0;
 								fluo::Ray view_ray = vd->GetVR()->compute_view();
 								tex->set_sort_bricks();
 								tex->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 								tex->set_sort_bricks();
-								flvr::TextureRenderer::set_update_order(order);
+								glbin_settings.m_update_order = order;
 								std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
 							}
 							queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
@@ -9506,26 +9506,26 @@ void RenderCanvas::StartLoopUpdate()
 						}
 						if (!tmp_q.empty())
 						{
-							if (flvr::TextureRenderer::get_update_order() == 1)
+							if (glbin_settings.m_update_order == 1)
 								std::sort(tmp_q.begin(), tmp_q.end(), VolumeLoader::sort_data_dsc);
-							else if (flvr::TextureRenderer::get_update_order() == 0)
+							else if (glbin_settings.m_update_order == 0)
 								std::sort(tmp_q.begin(), tmp_q.end(), VolumeLoader::sort_data_asc);
 							queues.insert(queues.end(), tmp_q.begin(), tmp_q.end());
 						}
 						if (!tmp_shade.empty())
 						{
-							if (flvr::TextureRenderer::get_update_order() == 1)
+							if (glbin_settings.m_update_order == 1)
 								std::sort(tmp_shade.begin(), tmp_shade.end(), VolumeLoader::sort_data_dsc);
-							else if (flvr::TextureRenderer::get_update_order() == 0)
+							else if (glbin_settings.m_update_order == 0)
 								std::sort(tmp_shade.begin(), tmp_shade.end(), VolumeLoader::sort_data_asc);
 							queues.insert(queues.end(), tmp_shade.begin(), tmp_shade.end());
 						}
 						if (!tmp_shadow.empty())
 						{
-							if (flvr::TextureRenderer::get_update_order() == 1)
+							if (glbin_settings.m_update_order == 1)
 							{
-								int order = flvr::TextureRenderer::get_update_order();
-								flvr::TextureRenderer::set_update_order(0);
+								int order = glbin_settings.m_update_order;
+								glbin_settings.m_update_order = 0;
 								for (k = 0; k < list.size(); k++)
 								{
 									fluo::Ray view_ray = list[k]->GetVR()->compute_view();
@@ -9533,10 +9533,10 @@ void RenderCanvas::StartLoopUpdate()
 									list[i]->GetTexture()->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 									list[i]->GetTexture()->set_sort_bricks();
 								}
-								flvr::TextureRenderer::set_update_order(order);
+								glbin_settings.m_update_order = order;
 								std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
 							}
-							else if (flvr::TextureRenderer::get_update_order() == 0)
+							else if (glbin_settings.m_update_order == 0)
 								std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
 							queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
 						}
@@ -9581,15 +9581,15 @@ void RenderCanvas::StartLoopUpdate()
 							if (!tmp_shade.empty()) queues.insert(queues.end(), tmp_shade.begin(), tmp_shade.end());
 							if (!tmp_shadow.empty())
 							{
-								if (flvr::TextureRenderer::get_update_order() == 1)
+								if (glbin_settings.m_update_order == 1)
 								{
-									int order = flvr::TextureRenderer::get_update_order();
-									flvr::TextureRenderer::set_update_order(0);
+									int order = glbin_settings.m_update_order;
+									glbin_settings.m_update_order = 0;
 									fluo::Ray view_ray = vd->GetVR()->compute_view();
 									tex->set_sort_bricks();
 									tex->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 									tex->set_sort_bricks();
-									flvr::TextureRenderer::set_update_order(order);
+									glbin_settings.m_update_order = order;
 									std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
 								}
 								queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
@@ -9626,7 +9626,7 @@ void RenderCanvas::StartLoopUpdate()
 //halt loop update
 void RenderCanvas::HaltLoopUpdate()
 {
-	if (flvr::TextureRenderer::get_mem_swap())
+	if (glbin_settings.m_mem_swap)
 	{
 		flvr::TextureRenderer::reset_update_loop();
 	}

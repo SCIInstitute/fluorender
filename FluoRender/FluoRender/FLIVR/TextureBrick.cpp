@@ -26,6 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
+#include <Global.h>
 #include <compatibility.h>
 #include "Texture.h"
 #include <math.h>
@@ -280,7 +281,7 @@ namespace flvr
 		}
 		up.normalize();
 		right = Cross(vdir, up);
-		bool order = TextureRenderer::get_update_order();
+		bool order = glbin_settings.m_update_order;
 		size_t vert_count = 0;
 		for (double t = order ? tmin : tmax;
 		order ? (t < tmax) : (t > tmin);

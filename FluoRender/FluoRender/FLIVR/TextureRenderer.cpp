@@ -27,6 +27,7 @@
 //  
 
 #include <GL/glew.h>
+#include <Global.h>
 #include <FLIVR/TextureBrick.h>
 #include <FLIVR/TextureRenderer.h>
 #include <FLIVR/ShaderProgram.h>
@@ -46,15 +47,9 @@ using namespace std;
 
 namespace flvr
 {
-	bool TextureRenderer::mem_swap_ = false;
 	int TextureRenderer::active_view_ = -1;
-	bool TextureRenderer::use_mem_limit_ = false;
-	double TextureRenderer::mem_limit_ = 0.0;
-	double TextureRenderer::available_mem_ = 0.0;
 	double TextureRenderer::mainmem_buf_size_ = 4000.0;
 	double TextureRenderer::available_mainmem_buf_size_ = 0.0;
-	double TextureRenderer::large_data_size_ = 0.0;
-	int TextureRenderer::force_brick_size_ = 0;
 	vector<TexParam> TextureRenderer::tex_pool_;
 	bool TextureRenderer::start_update_loop_ = false;
 	bool TextureRenderer::done_update_loop_ = true;
@@ -70,7 +65,6 @@ namespace flvr
 	bool TextureRenderer::maximize_uptime_ = false;//change to max time
 #endif
 	unsigned long TextureRenderer::st_time_ = 0;
-	unsigned long TextureRenderer::up_time_ = 100;
 	unsigned long TextureRenderer::cor_up_time_ = 100;
 	unsigned long TextureRenderer::consumed_time_ = 0;
 	bool TextureRenderer::interactive_ = false;
@@ -78,11 +72,9 @@ namespace flvr
 	BrickQueue TextureRenderer::brick_queue_(5);
 	int TextureRenderer::quota_bricks_ = 0;
 	fluo::Point TextureRenderer::quota_center_;
-	int TextureRenderer::update_order_ = 0;
 	bool TextureRenderer::load_on_main_thread_ = false;
 	vector<TextureRenderer::LoadedBrick> TextureRenderer::loadedbrks;
 	int TextureRenderer::del_id = 0;
-	bool TextureRenderer::invalidate_tex_ = false;
 #ifdef _DARWIN
 	CGLContextObj TextureRenderer::gl_context_ = 0;
 #endif
@@ -185,7 +177,7 @@ namespace flvr
 			}
 		}
 		tex_pool_.clear();
-		available_mem_ = mem_limit_;
+		glbin_settings.m_available_mem = glbin_settings.m_mem_limit;
 	}
 
 	void TextureRenderer::clear_tex_current()
@@ -204,7 +196,7 @@ namespace flvr
 					tex_pool_[i].comp == brick->nmask() ||
 					tex_pool_[i].comp == brick->nlabel())*/)
 				{
-					available_mem_ +=
+					glbin_settings.m_available_mem +=
 						tex_pool_[i].nx *
 						tex_pool_[i].ny *
 						tex_pool_[i].nz *
@@ -238,7 +230,7 @@ namespace flvr
 				if (brick == locbk &&
 					tex_pool_[i].comp == brick->nmask())
 				{
-					available_mem_ +=
+					glbin_settings.m_available_mem +=
 						tex_pool_[i].nx *
 						tex_pool_[i].ny *
 						tex_pool_[i].nz *
@@ -272,7 +264,7 @@ namespace flvr
 				if (brick == locbk &&
 					tex_pool_[i].comp == brick->nlabel())
 				{
-					available_mem_ +=
+					glbin_settings.m_available_mem +=
 						tex_pool_[i].nx *
 						tex_pool_[i].ny *
 						tex_pool_[i].nz *
@@ -314,7 +306,7 @@ namespace flvr
 			if (interactive_)
 				return cor_up_time_;
 			else
-				return up_time_;
+				return glbin_settings.m_up_time;
 		}
 	}
 
@@ -324,7 +316,7 @@ namespace flvr
 		//cor_up_time_ = speed;
 		if (speed < 5) speed = 5;
 		if (speed > 20) speed = 20;
-		cor_up_time_ = (unsigned long)(log10(100.0 / speed)*up_time_);
+		cor_up_time_ = (unsigned long)(log10(100.0 / speed)* glbin_settings.m_up_time);
 	}
 
 	//number of bricks rendered before time is up
@@ -694,7 +686,7 @@ namespace flvr
 		else //idx == -1
 		{
 			//see if it needs to free some memory
-			if (mem_swap_)
+			if (glbin_settings.m_mem_swap)
 				check_swap_memory(brick, c);
 
 			// allocate new object
@@ -872,9 +864,9 @@ namespace flvr
 								do {
 									rn_time = GET_TICK_COUNT();
 									elapsed = rn_time - st_time_;
-									t = up_time_ - elapsed;
+									t = glbin_settings.m_up_time - elapsed;
 									if (t > 0) wxMilliSleep(t);
-								} while (elapsed <= up_time_);
+								} while (elapsed <= glbin_settings.m_up_time);
 
 								if (brick->isLoaded())
 								{
@@ -916,10 +908,10 @@ namespace flvr
 						LOAD_TEXTURE
 					}
 
-					if (mem_swap_)
+					if (glbin_settings.m_mem_swap)
 					{
 						double new_mem = brick->nx()*brick->ny()*brick->nz()*brick->nb(c) / 1.04e6;
-						available_mem_ -= new_mem;
+						glbin_settings.m_available_mem -= new_mem;
 					}
 				}
 			}
@@ -933,7 +925,7 @@ namespace flvr
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 		}
 
-		if (mem_swap_ &&
+		if (glbin_settings.m_mem_swap &&
 			start_update_loop_ &&
 			!done_update_loop_)
 		{
@@ -1177,9 +1169,9 @@ namespace flvr
 		unsigned int i;
 		double new_mem = brick->nx()*brick->ny()*brick->nz()*brick->nb(c) / 1.04e6;
 
-		if (use_mem_limit_)
+		if (glbin_settings.m_use_mem_limit)
 		{
-			if (available_mem_ >= new_mem)
+			if (glbin_settings.m_available_mem >= new_mem)
 				return;
 		}
 		else
@@ -1197,8 +1189,8 @@ namespace flvr
 			}
 
 			//available memory size in MB
-			available_mem_ = mem_info[0] / 1024.0;
-			if (available_mem_ >= new_mem)
+			glbin_settings.m_available_mem = mem_info[0] / 1024.0;
+			if (glbin_settings.m_available_mem >= new_mem)
 				return;
 		}
 
@@ -1215,7 +1207,7 @@ namespace flvr
 		}
 
 		//release bricks far away
-		double est_avlb_mem = available_mem_;
+		double est_avlb_mem = glbin_settings.m_available_mem;
 		if (bd_list.size() > 0)
 		{
 			//sort from farthest to closest
@@ -1243,8 +1235,8 @@ namespace flvr
 				}
 			}
 
-			if (use_mem_limit_)
-				available_mem_ = est_avlb_mem;
+			if (glbin_settings.m_use_mem_limit)
+				glbin_settings.m_available_mem = est_avlb_mem;
 		}
 	}
 

@@ -66,6 +66,8 @@ public:
 		args.push_back(m_bioformats_path.ToStdString());
 		return args;
 	}
+	void GetMemorySettings();
+
 	BrushDefault m_brush_def;
 	ComponentDefault m_comp_def;
 	OutAdjDefault m_outadj_def;
@@ -160,6 +162,9 @@ public:
 	double m_graphics_mem;	//in MB
 							//it's the user setting
 							//final value is determined by both reading from the card and this value
+	bool m_use_mem_limit;	//limit graphics mem use
+	double m_mem_limit;		//limit
+	double m_available_mem; //available memory
 	double m_large_data_size;//data size considered as large and needs forced bricking
 	int m_force_brick_size;	//in pixels
 							//it's the user setting

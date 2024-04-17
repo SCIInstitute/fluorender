@@ -181,27 +181,9 @@ namespace flvr
 		// Returns true if it is visible.
 		bool test_against_view(const fluo::BBox &bbox, bool persp=false);
 
-		//memory swap
-		static void set_mem_swap(bool val) {mem_swap_ = val;}
-		static bool get_mem_swap() {return mem_swap_;}
-		//use memory limit (otherwise get available memory from graphics card)
-		static void set_use_mem_limit(bool val) {use_mem_limit_ = val;}
-		static bool get_use_mem_limit() {return use_mem_limit_;}
-		//memory limit
-		static void set_mem_limit(double val) {mem_limit_ = val;}
-		static double get_mem_limit() {return mem_limit_;}
-		//available memory
-		static void set_available_mem(double val) {available_mem_ = val;}
-		static double get_available_mem() {return available_mem_;}
 		//main(cpu) memory limit
 		static void set_mainmem_buf_size(double val) { mainmem_buf_size_ = val; }
 		static double get_mainmem_buf_size() { return mainmem_buf_size_; }
-		//large data size
-		static void set_large_data_size(double val) {large_data_size_ = val;}
-		static double get_large_data_size() {return large_data_size_;}
-		//force brick size
-		static void set_force_brick_size(int val) {force_brick_size_ = val;}
-		static int get_force_brick_size() {return force_brick_size_;}
 		//callback checks if the swapping is done
 		static void set_update_loop() {start_update_loop_ = true;
 		done_update_loop_ = false;}
@@ -224,7 +206,6 @@ namespace flvr
 		//set start time
 		static void set_st_time(unsigned long time) {st_time_ = time;}
 		static unsigned long get_st_time() {return st_time_;}
-		static void set_up_time(unsigned long time) {up_time_ = time;}
 		static unsigned long get_up_time();
 		static void set_consumed_time(unsigned long time) {consumed_time_ = time;}
 		static unsigned long get_consumed_time() {return consumed_time_;}
@@ -249,12 +230,6 @@ namespace flvr
 		//quota center
 		static void set_qutoa_center(fluo::Point &point) {quota_center_ = point;}
 		static fluo::Point& get_quota_center() { return quota_center_; }
-		//update order
-		static void set_update_order(int val) {update_order_ = val;}
-		static int get_update_order() {return update_order_;}
-		//invalidate tex
-		static void set_invalidate_tex(bool val) { invalidate_tex_ = val; }
-		static bool get_invalidate_tex() { return invalidate_tex_; }
 		//load on main thread
 		static void set_load_on_main_thread(bool val) { load_on_main_thread_ = val; }
 		static bool get_load_on_main_thread() { return load_on_main_thread_; }
@@ -305,15 +280,9 @@ namespace flvr
 		static CGLContextObj gl_context_;
 #endif
 		//memory management
-		static bool mem_swap_;
 		static int active_view_;
-		static bool use_mem_limit_;
-		static double mem_limit_;
-		static double available_mem_;
 		static double mainmem_buf_size_;
 		static double available_mainmem_buf_size_;
-		static double large_data_size_;
-		static int force_brick_size_;
 		static vector<TexParam> tex_pool_;
 		static bool start_update_loop_;
 		static bool done_update_loop_;
@@ -323,11 +292,9 @@ namespace flvr
 		static int cur_chan_brick_num_;
 		static bool clear_chan_buffer_;
 		static bool save_final_buffer_;
-		static bool invalidate_tex_;
 		//timer for rendering
 		static bool maximize_uptime_;
 		static unsigned long st_time_;
-		static unsigned long up_time_;
 		static unsigned long cor_up_time_;//mouse movement corrected up time
 		static unsigned long consumed_time_;
 		//interactive mode
@@ -340,8 +307,6 @@ namespace flvr
 		int quota_bricks_chan_;//for current channel
 		//center point of the quota
 		static fluo::Point quota_center_;
-		//update order
-		static int update_order_;
 		//threading
 		static bool load_on_main_thread_;
 		struct LoadedBrick {

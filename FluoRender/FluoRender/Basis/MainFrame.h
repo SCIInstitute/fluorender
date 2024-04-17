@@ -306,7 +306,6 @@ public:
 	void ShowScriptBreakDlg(bool show=true);
 
 	//tex renderer settings
-	void SetTextureRendererSettings();
 	void SetTextureUndos();
 
 	//quit option

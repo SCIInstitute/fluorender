@@ -1320,11 +1320,7 @@ void SettingDlg::EnableStreaming(bool enable)
 		m_detail_level_offset_sldr->Disable();
 		m_detail_level_offset_text->Disable();
 	}
-	if (m_frame)
-	{
-		m_frame->SetTextureRendererSettings();
-		m_frame->RefreshCanvases();
-	}
+	m_frame->RefreshCanvases();
 }
 
 void SettingDlg::SetShadowDir(double deg)

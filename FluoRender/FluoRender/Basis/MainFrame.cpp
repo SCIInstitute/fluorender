@@ -3553,9 +3553,8 @@ void MainFrame::OpenProject(wxString& filename)
 		glbin_settings.m_force_brick_size = force_brick_size;
 		glbin_settings.m_up_time = up_time;
 		glbin_settings.m_update_order = update_order;
+		glbin_settings.GetMemorySettings();
 		m_setting_dlg->UpdateUI();
-
-		SetTextureRendererSettings();
 	}
 
 	//read data list
@@ -5097,38 +5096,6 @@ void MainFrame::SetTextureUndos()
 {
 	if (m_setting_dlg)
 		flvr::Texture::mask_undo_num_ = (size_t)(glbin_brush_def.m_paint_hist_depth);
-}
-
-void MainFrame::SetTextureRendererSettings()
-{
-	if (!m_setting_dlg)
-		return;
-
-	flvr::TextureRenderer::set_mem_swap(glbin_settings.m_mem_swap);
-	bool use_mem_limit = false;
-	GLenum error = glGetError();
-	GLint mem_info[4] = {0, 0, 0, 0};
-	glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, mem_info);
-	error = glGetError();
-	if (error == GL_INVALID_ENUM)
-	{
-		glGetIntegerv(GL_TEXTURE_FREE_MEMORY_ATI, mem_info);
-		error = glGetError();
-		if (error == GL_INVALID_ENUM)
-			use_mem_limit = true;
-	}
-	if (glbin_settings.m_graphics_mem > mem_info[0]/1024.0)
-		use_mem_limit = true;
-	flvr::TextureRenderer::set_use_mem_limit(use_mem_limit);
-	flvr::TextureRenderer::set_mem_limit(use_mem_limit?
-		glbin_settings.m_graphics_mem :mem_info[0]/1024.0);
-	flvr::TextureRenderer::set_available_mem(use_mem_limit?
-		glbin_settings.m_graphics_mem :mem_info[0]/1024.0);
-	flvr::TextureRenderer::set_large_data_size(glbin_settings.m_large_data_size);
-	flvr::TextureRenderer::set_force_brick_size(glbin_settings.m_force_brick_size);
-	flvr::TextureRenderer::set_up_time(glbin_settings.m_up_time);
-	flvr::TextureRenderer::set_update_order(glbin_settings.m_update_order);
-	flvr::TextureRenderer::set_invalidate_tex(glbin_settings.m_invalidate_tex);
 }
 
 //quit option
