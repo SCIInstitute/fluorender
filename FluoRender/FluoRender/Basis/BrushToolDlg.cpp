@@ -868,7 +868,7 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent &event)
 	if (m_view && glbin_vol_selector.GetThUpdate())
 	{
 		glbin_vol_selector.PopMask();
-		m_view->Segment();
+		m_view->Segment(true);
 		m_view->RefreshGL(39);
 	}
 }
@@ -896,7 +896,7 @@ void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent &event)
 	if (m_view && glbin_vol_selector.GetThUpdate())
 	{
 		glbin_vol_selector.PopMask();
-		m_view->Segment();
+		m_view->Segment(true);
 		m_view->RefreshGL(39);
 	}
 }
@@ -923,7 +923,7 @@ void BrushToolDlg::OnBrush2dinflText(wxCommandEvent &event)
 	if (m_view && glbin_vol_selector.GetThUpdate())
 	{
 		glbin_vol_selector.PopMask();
-		m_view->Segment();
+		m_view->Segment(true);
 		m_view->RefreshGL(39);
 	}
 }
@@ -949,7 +949,7 @@ void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent &event)
 	if (m_view && glbin_vol_selector.GetThUpdate())
 	{
 		glbin_vol_selector.PopMask();
-		m_view->Segment();
+		m_view->Segment(true);
 		m_view->RefreshGL(39);
 	}
 }
@@ -973,7 +973,7 @@ void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent &event)
 	if (m_view && glbin_vol_selector.GetThUpdate())
 	{
 		glbin_vol_selector.PopMask();
-		m_view->Segment();
+		m_view->Segment(true);
 		m_view->RefreshGL(39);
 	}
 }

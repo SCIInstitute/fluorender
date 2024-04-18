@@ -2113,7 +2113,7 @@ void RenderCanvas::DisplayStroke()
 }
 
 //segment volumes in current view
-void RenderCanvas::Segment()
+void RenderCanvas::Segment(bool push_mask)
 {
 	int mode = glbin_vol_selector.GetMode();
 
@@ -2144,10 +2144,10 @@ void RenderCanvas::Segment()
 	if (mode == 9)
 	{
 		wxPoint mouse_pos = ScreenToClient(wxGetMousePosition());
-		glbin_vol_selector.Segment(mouse_pos.x, mouse_pos.y);
+		glbin_vol_selector.Segment(push_mask, mouse_pos.x, mouse_pos.y);
 	}
 	else
-		glbin_vol_selector.Segment();
+		glbin_vol_selector.Segment(push_mask);
 
 	bool count = false;
 	bool colocal = false;
@@ -3706,7 +3706,7 @@ void RenderCanvas::UpdateBrushState(bool focus)
 			!wxGetKeyState(wxKeyCode('X')))
 		{
 			if (wxGetMouseState().LeftIsDown())
-				Segment();
+				Segment(true);
 			if (m_int_mode == 7)
 				m_int_mode = 5;
 			else
@@ -4310,7 +4310,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				int sz = glbin_settings.m_ruler_size_thresh;
 				//event.RequestMore();
 				glbin_vol_selector.SetInitMask(2);
-				Segment();
+				Segment(false);
 				glbin_vol_selector.SetInitMask(3);
 				if (m_int_mode == 12)
 				{
@@ -10193,7 +10193,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		{
 			glbin_vol_selector.ResetMousePos();
 			glbin_vol_selector.SetInitMask(1);
-			Segment();
+			Segment(true);
 			glbin_vol_selector.SetInitMask(3);
 			if (m_int_mode == 12)
 				m_cur_vol->AddEmptyLabel(0, false);
@@ -10240,7 +10240,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		{
 			//segment volumes
 			m_paint_enable = true;
-			Segment();
+			Segment(true);
 			m_int_mode = 4;
 			m_force_clear = true;
 			RefreshGL(27);
@@ -10265,7 +10265,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		{
 			//segment volume, calculate center, add ruler point
 			m_paint_enable = true;
-			Segment();
+			Segment(true);
 			if (glbin_ruler_handler.GetType() == 3)
 				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
 			else
@@ -10280,6 +10280,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		else if (m_int_mode == 10 ||
 			m_int_mode == 12)
 		{
+			//glbin_vol_selector.PushMask();
 			m_grow_on = false;
 			return;
 		}

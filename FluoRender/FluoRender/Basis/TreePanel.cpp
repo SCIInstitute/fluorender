@@ -1936,7 +1936,7 @@ void DataTreeCtrl::BrushClear()
 							int paint_mode = view->GetPaintMode();
 							view->SetVolumeA(vd);
 							view->SetPaintMode(6);
-							view->Segment();
+							view->Segment(true);
 							view->RefreshGL(39);
 							view->SetPaintMode(paint_mode);
 							view->SetIntMode(int_mode);
@@ -1957,7 +1957,7 @@ void DataTreeCtrl::BrushClear()
 							int paint_mode = view->GetPaintMode();
 							view->SetVolumeA(vd);
 							view->SetPaintMode(6);
-							view->Segment();
+							view->Segment(true);
 							view->RefreshGL(39);
 							view->SetPaintMode(paint_mode);
 							view->SetIntMode(int_mode);

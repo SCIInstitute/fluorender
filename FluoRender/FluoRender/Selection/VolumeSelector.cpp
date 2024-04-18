@@ -91,7 +91,7 @@ VolumeSelector::~VolumeSelector()
 {
 }
 
-void VolumeSelector::Segment(int mx, int my)
+void VolumeSelector::Segment(bool push_mask, int mx, int my)
 {
 	if (!m_view || !m_vd)
 		return;
@@ -162,16 +162,16 @@ void VolumeSelector::Segment(int mx, int my)
 				if (vd && vd->GetDisp())
 				{
 					m_vd = vd;
-					Select(r);
+					Select(push_mask, r);
 				}
 			}
 			m_vd = save;
 		}
 		else
-			Select(r);
+			Select(push_mask, r);
 	}
 	else
-		Select(r);
+		Select(push_mask, r);
 
 	//restore
 	if (press)
@@ -190,7 +190,7 @@ void VolumeSelector::Segment(int mx, int my)
 	}
 }
 
-void VolumeSelector::Select(double radius)
+void VolumeSelector::Select(bool push_mask, double radius)
 {
 	if (!m_vd)
 		return;
@@ -203,9 +203,8 @@ void VolumeSelector::Select(double radius)
 	else
 		m_vd->Set2DWeight(0, 0);
 
-	if (flvr::Texture::mask_undo_num_>0 &&
-		m_vd->GetTexture())
-		m_vd->GetTexture()->push_mask();
+	if (push_mask)
+		PushMask();
 
 	//segment the volume with 2d mask
 	//result in 3d mask
@@ -616,6 +615,13 @@ bool VolumeSelector::GetThUpdate()
 		return true;
 	else
 		return false;
+}
+
+void VolumeSelector::PushMask()
+{
+	if (flvr::Texture::mask_undo_num_ > 0 &&
+		m_vd->GetTexture())
+		m_vd->GetTexture()->push_mask();
 }
 
 void VolumeSelector::PopMask()

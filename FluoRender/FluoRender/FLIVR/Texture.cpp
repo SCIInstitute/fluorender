@@ -34,6 +34,7 @@
 #include <algorithm>
 #include <inttypes.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <Debug.h>
 
 using namespace std;
 
@@ -892,6 +893,14 @@ namespace flvr
 			trim_mask_undos_head();
 		}
 
+//#ifdef _DEBUG
+//		DBMIUINT8 img;
+//		img.nx = nx_; img.ny = ny_; img.nc = 1; img.nt = img.nx;
+//		img.data = (unsigned char*)(mask_undos_[0]);
+//		DBMIUINT8 img2;
+//		img2.nx = nx_; img2.ny = ny_; img2.nc = 1; img2.nt = img2.nx;
+//		img2.data = (unsigned char*)(mask_undos_[1]);
+//#endif
 		//update mask data
 		nrrdWrap_va(data_[nmask_],
 			mask_undos_[mask_undo_pointer_],

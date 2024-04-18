@@ -221,12 +221,13 @@ namespace flrd
 		//th udpate
 		bool GetThUpdate();
 
-		void Segment(int mx = 0, int my = 0);
-		void Select(double radius);
+		void Segment(bool push_mask, int mx = 0, int my = 0);
+		void Select(bool push_mask, double radius);
 		void CompExportRandomColor(int hmode, VolumeData* vd_r, VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide);
 		VolumeData* GetResult(bool pop);
 
 		//mask
+		void PushMask();
 		void PopMask();
 		void UndoMask();
 		void RedoMask();

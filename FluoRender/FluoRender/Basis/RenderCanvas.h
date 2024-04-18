@@ -502,7 +502,7 @@ public:
 	void SetVolumeB(VolumeData* vd);
 
 	//segment volumes in current view
-	void Segment();
+	void Segment(bool push_mask);
 
 	//brush properties
 	//change display
