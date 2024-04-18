@@ -4024,12 +4024,14 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				m_draw_mask = false;
 				refresh = true;
 				set_focus = true;
+				vc.insert(gstNull);
 			}
 			if (!wxGetKeyState(wxKeyCode('V')) &&
 				!m_draw_mask)
 			{
 				m_draw_mask = true;
 				refresh = true;
+				vc.insert(gstNull);
 			}
 
 			//move view
@@ -4050,6 +4052,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				//if (m_persp) SetSortBricks();
 				refresh = true;
 				set_focus = true;
+				vc.insert(gstNull);
 			}
 			if (m_move_left &&
 				(!wxGetKeyState(WXK_CONTROL) ||
@@ -4072,6 +4075,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				//if (m_persp) SetSortBricks();
 				refresh = true;
 				set_focus = true;
+				vc.insert(gstNull);
 			}
 			if (m_move_right &&
 				(!wxGetKeyState(WXK_CONTROL) ||
@@ -4093,6 +4097,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				//if (m_persp) SetSortBricks();
 				refresh = true;
 				set_focus = true;
+				vc.insert(gstNull);
 			}
 			if (m_move_up &&
 				(!wxGetKeyState(WXK_CONTROL) ||
@@ -4114,6 +4119,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				//if (m_persp) SetSortBricks();
 				refresh = true;
 				set_focus = true;
+				vc.insert(gstNull);
 			}
 			if (m_move_down &&
 				(!wxGetKeyState(WXK_CONTROL) ||
@@ -4124,26 +4130,31 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			//forward
 			if ((!m_tseq_forward &&
 				wxGetKeyState(wxKeyCode('d'))) ||
-				wxGetKeyState(WXK_SPACE))
+				(!wxGetKeyState(WXK_CONTROL) &&
+				wxGetKeyState(WXK_SPACE)))
 			{
 				m_tseq_forward = true;
 				if (m_frame && m_frame->GetMovieView())
 					m_frame->GetMovieView()->IncFrame();
 				refresh = true;
 				set_focus = true;
+				vc.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum });
 			}
 			if (m_tseq_forward &&
 				!wxGetKeyState(wxKeyCode('d')))
 				m_tseq_forward = false;
 			//backforward
-			if (!m_tseq_backward &&
-				wxGetKeyState(wxKeyCode('a')))
+			if ((!m_tseq_backward &&
+				wxGetKeyState(wxKeyCode('a'))) ||
+				(wxGetKeyState(WXK_SPACE) &&
+				wxGetKeyState(WXK_CONTROL)))
 			{
 				m_tseq_backward = true;
 				if (m_frame && m_frame->GetMovieView())
 					m_frame->GetMovieView()->DecFrame();
 				refresh = true;
 				set_focus = true;
+				vc.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum });
 			}
 			if (m_tseq_backward &&
 				!wxGetKeyState(wxKeyCode('a')))
@@ -4159,6 +4170,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 					m_frame->GetClippingView()->MoveLinkedClippingPlanes(-1);
 				refresh = true;
 				set_focus = true;
+				vc.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
 			}
 			if (m_clip_up &&
 				!wxGetKeyState(wxKeyCode('s')))
@@ -4172,6 +4184,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 					m_frame->GetClippingView()->MoveLinkedClippingPlanes(1);
 				refresh = true;
 				set_focus = true;
+				vc.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
 			}
 			if (m_clip_down &&
 				!wxGetKeyState(wxKeyCode('w')))
@@ -4188,6 +4201,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 					m_frame->GetTraceDlg()->CellUpdate();
 				refresh = true;
 				set_focus = true;
+				vc.insert(gstNull);
 			}
 			if (m_cell_full &&
 				!wxGetKeyState(wxKeyCode('f')))
@@ -4201,6 +4215,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 					m_frame->GetTraceDlg()->CellLink(false);
 				refresh = true;
 				set_focus = true;
+				vc.insert(gstNull);
 			}
 			if (m_cell_link &&
 				!wxGetKeyState(wxKeyCode('l')))
@@ -4214,6 +4229,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 					m_frame->GetTraceDlg()->CellNewID(false);
 				refresh = true;
 				set_focus = true;
+				vc.insert(gstNull);
 			}
 			if (m_cell_new_id &&
 				!wxGetKeyState(wxKeyCode('n')))
@@ -4229,6 +4245,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				m_clear_mask = true;
 				refresh = true;
 				set_focus = true;
+				vc.insert(gstNull);
 			}
 			if (!wxGetKeyState(wxKeyCode('c')) &&
 				m_clear_mask)
@@ -4255,11 +4272,13 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			{
 				ChangeBrushSize(-10);
 				set_focus = true;
+				vc.insert(gstNull);
 			}
 			if (wxGetKeyState(wxKeyCode(']')))
 			{
 				ChangeBrushSize(10);
 				set_focus = true;
+				vc.insert(gstNull);
 			}
 			//comp include
 			if (wxGetKeyState(WXK_RETURN) &&
@@ -4270,6 +4289,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				m_comp_include = true;
 				refresh = true;
 				set_focus = true;
+				vc.insert(gstNull);
 			}
 			if (!wxGetKeyState(WXK_RETURN) &&
 				m_comp_include)
@@ -4283,6 +4303,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				m_comp_exclude = true;
 				refresh = true;
 				set_focus = true;
+				vc.insert(gstNull);
 			}
 			if (!wxGetKeyState(wxKeyCode('\\')) &&
 				m_comp_exclude)
@@ -4296,6 +4317,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				m_ruler_relax = true;
 				refresh = true;
 				set_focus = true;
+				vc.insert(gstNull);
 			}
 			if (!wxGetKeyState(wxKeyCode('r')) &&
 				m_ruler_relax)
@@ -4320,6 +4342,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 					glbin_seg_grow.Compute();
 				}
 				refresh = true;
+				vc.insert(gstNull);
 				start_loop = true;
 				//update
 				if (m_frame)
@@ -4331,7 +4354,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 					if (m_int_mode == 12 && m_frame->GetMeasureDlg())
 						m_frame->GetMeasureDlg()->GetSettings(this);
 				}
-				vc.insert(gstNull);
 			}
 
 			//forced refresh
@@ -4468,8 +4490,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	}
 #endif
 
-	if (set_focus)
-		SetFocus();
 	if (refresh)
 	{
 		m_clear_buffer = true;
@@ -4477,6 +4497,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		RefreshGL(15, ref_stat, start_loop);
 		m_vrv->FluoRefresh(false, 0, vc, {-1});
 	}
+	if (set_focus)
+		SetFocus();
 }
 
 void RenderCanvas::OnKeyDown(wxKeyEvent& event)
