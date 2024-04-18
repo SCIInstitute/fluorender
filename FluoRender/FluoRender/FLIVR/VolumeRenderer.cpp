@@ -875,21 +875,7 @@ namespace flvr
 
 			num_slices_ += vertex.size()/12;
 
-			if (vertex.size() == 0)
-			{
-				if (glbin_settings.m_mem_swap &&
-					start_update_loop_ &&
-					!done_update_loop_)
-				{
-					if (!(*bricks)[i]->drawn(mode))
-					{
-						(*bricks)[i]->set_drawn(mode, true);
-						cur_brick_num_++;
-						cur_chan_brick_num_++;
-					}
-				}
-			}
-			else
+			if (!vertex.empty())
 			{
 				GLint filter;
 				if (interpolate_)
@@ -928,12 +914,22 @@ namespace flvr
 				shader->setLocalParamMatrix(2, matrix);
 
 				draw_polygons(vertex, index);
+
+				if (glbin_settings.m_mem_swap && !b->drawn(mode))
+				{
+					b->set_drawn(mode, true);
+					cur_brick_num_++;
+					cur_chan_brick_num_++;
+				}
 			}
 
 			if (glbin_settings.m_mem_swap)
 				finished_bricks_++;
 			drawn_once = true;
 		}
+
+		//DBGPRINT(L"done_current_chan_:%d\tclear_chan_buffer_:%d\tsave_final_buffer_:%d\tdone_loop_[%d]:%d\tcur_chan_brick_num_:%d\tcur_brick_num_:%d\tfinished_bricks_:%d\tbrick_size:%d\ttotal_brick_num_:%d\n",
+		//	done_current_chan_, clear_chan_buffer_, save_final_buffer_, mode, done_loop_[mode], cur_chan_brick_num_, cur_brick_num_, finished_bricks_, (*bricks).size(), total_brick_num_);
 
 		if (glbin_settings.m_mem_swap &&
 			cur_brick_num_ >= total_brick_num_)
@@ -950,9 +946,6 @@ namespace flvr
 			cur_chan_brick_num_ = 0;
 			done_loop_[mode] = true;
 		}
-
-		//DBGPRINT(L"done_current_chan_:%d\tclear_chan_buffer_:%d\tsave_final_buffer_:%d\tdone_loop_[%d]:%d\tcur_chan_brick_num_:%d\tcur_brick_num_:%d\tfinished_bricks_:%d\tbrick_size:%d\ttotal_brick_num_:%d\n",
-		//	done_current_chan_, clear_chan_buffer_, save_final_buffer_, mode, done_loop_[mode], cur_chan_brick_num_, cur_brick_num_, finished_bricks_, (*bricks).size(), total_brick_num_);
 
 		//release depth texture for rendering shadows
 		if (cm_mode == 2)

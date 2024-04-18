@@ -925,17 +925,17 @@ namespace flvr
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 		}
 
-		if (glbin_settings.m_mem_swap &&
-			start_update_loop_ &&
-			!done_update_loop_)
-		{
-			if (!brick->drawn(mode))
-			{
-				brick->set_drawn(mode, true);
-				cur_brick_num_++;
-				cur_chan_brick_num_++;
-			}
-		}
+		//if (glbin_settings.m_mem_swap &&
+		//	start_update_loop_ &&
+		//	!done_update_loop_)
+		//{
+		//	if (!brick->drawn(mode))
+		//	{
+		//		brick->set_drawn(mode, true);
+		//		cur_brick_num_++;
+		//		cur_chan_brick_num_++;
+		//	}
+		//}
 
 		glActiveTexture(GL_TEXTURE0);
 

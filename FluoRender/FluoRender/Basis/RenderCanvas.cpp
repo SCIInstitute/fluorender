@@ -2697,14 +2697,14 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 		img_shader->release();
 
 	//if vd is duplicated
-	if (glbin_settings.m_mem_swap &&
-		flvr::TextureRenderer::get_done_current_chan())
-	{
-		vector<flvr::TextureBrick*> *bricks =
-			vd->GetTexture()->get_bricks();
-		for (int i = 0; i < bricks->size(); i++)
-			(*bricks)[i]->set_drawn(false);
-	}
+	//if (glbin_settings.m_mem_swap &&
+	//	flvr::TextureRenderer::get_done_current_chan())
+	//{
+	//	vector<flvr::TextureBrick*> *bricks =
+	//		vd->GetTexture()->get_bricks();
+	//	for (int i = 0; i < bricks->size(); i++)
+	//		(*bricks)[i]->set_drawn(false);
+	//}
 }
 
 void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
@@ -2996,14 +2996,14 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 	vd->SetColormapMode(color_mode);
 
 	//if vd is duplicated
-	if (glbin_settings.m_mem_swap &&
-		flvr::TextureRenderer::get_done_current_chan())
-	{
-		vector<flvr::TextureBrick*> *bricks =
-			vd->GetTexture()->get_bricks();
-		for (int i = 0; i < bricks->size(); i++)
-			(*bricks)[i]->set_drawn(false);
-	}
+	//if (glbin_settings.m_mem_swap &&
+	//	flvr::TextureRenderer::get_done_current_chan())
+	//{
+	//	vector<flvr::TextureBrick*> *bricks =
+	//		vd->GetTexture()->get_bricks();
+	//	for (int i = 0; i < bricks->size(); i++)
+	//		(*bricks)[i]->set_drawn(false);
+	//}
 }
 
 void RenderCanvas::DrawOLShading(VolumeData* vd)

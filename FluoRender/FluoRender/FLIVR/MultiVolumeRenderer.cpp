@@ -695,17 +695,10 @@ namespace flvr
 				if (bi>=(int)bs->size()) break;
 
 				TextureBrick* b = (*bs)[bi];
+				if (glbin_settings.m_mem_swap && !b->drawn(0))
+					b->set_drawn(0, true);
 				if (b->get_priority()>0)
-				{
-					if (glbin_settings.m_mem_swap &&
-						TextureRenderer::start_update_loop_ &&
-						!TextureRenderer::done_update_loop_)
-					{
-						if (!b->drawn(0))
-							b->set_drawn(0, true);
-					}
 					continue;
-				}
 
 				GLint filter;
 				if (intp)
