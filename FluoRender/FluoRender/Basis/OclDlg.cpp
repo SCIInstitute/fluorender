@@ -387,7 +387,7 @@ void OclDlg::Execute()
 	if (refresh)
 	{
 		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
-		m_frame->RefreshCanvases(false, { m_frame->GetView(m_view) });
+		m_frame->RefreshCanvases({ m_frame->GetView(m_view) });
 	}
 }
 

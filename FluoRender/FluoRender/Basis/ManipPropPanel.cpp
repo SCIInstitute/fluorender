@@ -337,7 +337,7 @@ void ManipPropPanel::UpdateData()
 	z = STOD(str.fn_str());
 	m_md->SetScaling(x, y, z);
 
-	FluoRefresh(false, 1, { gstNull });
+	FluoRefresh(1, { gstNull });
 }
 
 void ManipPropPanel::OnValueEnter(wxCommandEvent& event)

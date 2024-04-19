@@ -259,7 +259,7 @@ void MeshPropPanel::OnLightingCheck(wxCommandEvent& event)
 			if (md)
 				md->SetLighting(val);
 		}
-		FluoRefresh(false, 3, {gstNull});
+		FluoRefresh(3, {gstNull});
 	}
 }
 
@@ -272,7 +272,7 @@ void MeshPropPanel::OnDiffChange(wxColourPickerEvent& event)
 		m_md->SetColor(color, MESH_COLOR_DIFF);
 		fluo::Color amb = color * 0.3;
 		m_md->SetColor(amb, MESH_COLOR_AMB);
-		FluoRefresh(false, 1, { gstTreeColors });
+		FluoRefresh(1, { gstTreeColors });
 	}
 }
 
@@ -283,7 +283,7 @@ void MeshPropPanel::OnSpecChange(wxColourPickerEvent& event)
 	if (m_md)
 	{
 		m_md->SetColor(color, MESH_COLOR_SPEC);
-		FluoRefresh(false, 3, { gstNull });
+		FluoRefresh(3, { gstNull });
 	}
 }
 
@@ -305,7 +305,7 @@ void MeshPropPanel::OnShineText(wxCommandEvent& event)
 	if (m_md)
 	{
 		m_md->SetFloat(shine, MESH_FLOAT_SHN);
-		FluoRefresh(false, 3, { gstNull });
+		FluoRefresh(3, { gstNull });
 	}
 }
 
@@ -327,7 +327,7 @@ void MeshPropPanel::OnAlphaText(wxCommandEvent& event)
 	if (m_md)
 	{
 		m_md->SetFloat(alpha, MESH_FLOAT_ALPHA);
-		FluoRefresh(false, 3, { gstNull });
+		FluoRefresh(3, { gstNull });
 	}
 }
 
@@ -349,7 +349,7 @@ void MeshPropPanel::OnScaleText(wxCommandEvent& event)
 	if (m_md)
 	{
 		m_md->SetScaling(dval, dval, dval);
-		FluoRefresh(false, 3, { gstNull });
+		FluoRefresh(3, { gstNull });
 	}
 }
 
@@ -366,7 +366,7 @@ void MeshPropPanel::OnShadowCheck(wxCommandEvent& event)
 			if (md)
 				md->SetShadowEnable(val);
 		}
-		FluoRefresh(false, 3, { gstNull });
+		FluoRefresh(3, { gstNull });
 	}
 }
 
@@ -394,7 +394,7 @@ void MeshPropPanel::OnShadowText(wxCommandEvent& event)
 			if (md)
 				md->SetShadowIntensity(dval);
 		}
-		FluoRefresh(false, 3, { gstNull });
+		FluoRefresh(3, { gstNull });
 	}
 }
 
@@ -405,7 +405,7 @@ void MeshPropPanel::OnSizeCheck(wxCommandEvent& event)
 	if (m_md)
 	{
 		m_md->SetLimit(bval);
-		FluoRefresh(false, 3, { gstNull });
+		FluoRefresh(3, { gstNull });
 	}
 }
 
@@ -428,6 +428,6 @@ void MeshPropPanel::OnSizeText(wxCommandEvent& event)
 	{
 		m_md->SetLimitNumer(val);
 		if (m_md->GetLimit())
-			FluoRefresh(false, 3, { gstNull });
+			FluoRefresh(3, { gstNull });
 	}
 }

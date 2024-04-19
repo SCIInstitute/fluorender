@@ -970,7 +970,7 @@ void RenderViewPanel::SetVolumeMethod(int val)
 {
 	m_canvas->SetVolMethod(val);
 
-	FluoRefresh(false, 2, { gstMixMethod }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstMixMethod }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::Capture()
@@ -1008,28 +1008,28 @@ void RenderViewPanel::SetInfo(bool val)
 	else
 		m_canvas->m_draw_info &= ~1;
 
-	FluoRefresh(false, 2, { gstDrawInfo }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstDrawInfo }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetDrawCamCtr(bool val)
 {
 	m_canvas->m_draw_camctr = val;
 
-	FluoRefresh(false, 2, { gstDrawCamCtr }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstDrawCamCtr }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetLegend(bool val)
 {
 	m_canvas->m_draw_legend = val;
 
-	FluoRefresh(false, 2, { gstDrawLegend }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstDrawLegend }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetDrawColormap(bool val)
 {
 	m_canvas->m_draw_colormap = val;
 
-	FluoRefresh(false, 2, { gstDrawColormap }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstDrawColormap }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetDrawScalebar(int val)
@@ -1050,7 +1050,7 @@ void RenderViewPanel::SetDrawScalebar(int val)
 		break;
 	}
 
-	FluoRefresh(false, 2, { gstDrawScaleBar }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstDrawScaleBar }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetScaleText(double val)
@@ -1075,7 +1075,7 @@ void RenderViewPanel::SetScaleText(double val)
 	m_canvas->SetScaleBarLen(val);
 	m_canvas->m_sb_num = num_text;
 
-	FluoRefresh(false, 2, {gstNull}, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, {gstNull}, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetScaleUnit(int val)
@@ -1102,14 +1102,14 @@ void RenderViewPanel::SetScaleUnit(int val)
 	m_canvas->SetScaleBarLen(dval);
 	m_canvas->m_sb_num = num_text;
 
-	FluoRefresh(false, 2, { gstNull }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstNull }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetBgColor(fluo::Color val)
 {
 	m_canvas->SetBackgroundColor(val);
 
-	FluoRefresh(false, 2, { gstBgColor }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstBgColor }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetBgColorInvert(bool val)
@@ -1119,7 +1119,7 @@ void RenderViewPanel::SetBgColorInvert(bool val)
 	c = fluo::Color(1.0, 1.0, 1.0) - c;
 	m_canvas->SetBackgroundColor(c);
 
-	FluoRefresh(false, 2, { gstBgColor, gstBgColorInv }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstBgColor, gstBgColorInv }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetDrawClipPlanes(bool val)
@@ -1129,12 +1129,12 @@ void RenderViewPanel::SetDrawClipPlanes(bool val)
 	{
 		m_canvas->m_draw_clip = true;
 		m_canvas->m_clip_mask = -1;
-		FluoRefresh(false, 2, {gstNull}, { m_frame->GetView(m_canvas) });
+		FluoRefresh(2, {gstNull}, { m_frame->GetView(m_canvas) });
 	}
 	else if (!val && draw_clip)
 	{
 		m_canvas->m_draw_clip = false;
-		FluoRefresh(false, 2, {gstNull}, { m_frame->GetView(m_canvas) });
+		FluoRefresh(2, {gstNull}, { m_frame->GetView(m_canvas) });
 	}
 }
 
@@ -1157,9 +1157,9 @@ void RenderViewPanel::SetAov(double val, bool notify)
 	}
 
 	if (notify)
-		FluoRefresh(false, 2, { gstAov }, { m_frame->GetView(m_canvas) });
+		FluoRefresh(2, { gstAov }, { m_frame->GetView(m_canvas) });
 	else
-		FluoRefresh(false, 2, { gstNull }, { m_frame->GetView(m_canvas) });
+		FluoRefresh(2, { gstNull }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetFree(bool val)
@@ -1173,7 +1173,7 @@ void RenderViewPanel::SetFree(bool val)
 			m_canvas->SetPersp(false);
 	}
 
-	FluoRefresh(false, 2, { gstFree, gstAov }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstFree, gstAov }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetFullScreen()
@@ -1217,22 +1217,22 @@ void RenderViewPanel::SetFullScreen()
 void RenderViewPanel::SetDepthAttenEnable(bool val)
 {
 	m_canvas->SetFog(val);
-	FluoRefresh(false, 2, { gstDepthAtten }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstDepthAtten }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetDepthAtten(double val, bool notify)
 {
 	m_canvas->SetFogIntensity(val);
 	if (notify)
-		FluoRefresh(false, 2, { gstDaInt }, { m_frame->GetView(m_canvas) });
+		FluoRefresh(2, { gstDaInt }, { m_frame->GetView(m_canvas) });
 	else
-		FluoRefresh(false, 2, { gstNull }, { m_frame->GetView(m_canvas) });
+		FluoRefresh(2, { gstNull }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetCenter()
 {
 	m_canvas->SetCenter();
-	FluoRefresh(false, 2, { gstNull }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstNull }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetScale121()
@@ -1240,7 +1240,7 @@ void RenderViewPanel::SetScale121()
 	m_canvas->SetScale121();
 	if (m_canvas->m_mouse_focus)
 		m_canvas->SetFocus();
-	FluoRefresh(false, 2, { gstNull }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstNull }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetScaleFactor(double val)
@@ -1270,13 +1270,13 @@ void RenderViewPanel::SetScaleFactor(double val)
 		}
 		break;
 	}
-	FluoRefresh(false, 2, { gstScaleFactor, gstPinRotCtr }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstScaleFactor, gstPinRotCtr }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetScaleMode(int val)
 {
 	m_canvas->m_scale_mode = val;
-	FluoRefresh(false, 2, { gstScaleMode, gstScaleFactor }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstScaleMode, gstScaleFactor }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetRotLock(bool val)
@@ -1291,22 +1291,22 @@ void RenderViewPanel::SetRotLock(bool val)
 		rotz = (((int)(rotz / 45)) * 45);
 		SetRotations(rotx, roty, rotz, true);
 	}
-	FluoRefresh(false, 2, { gstGearedEnable }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstGearedEnable }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetSliderType(bool val)
 {
 	m_rot_slider = val;
-	FluoRefresh(false, 2, { gstRotSliderMode }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstRotSliderMode }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetRotations(double rotx, double roty, double rotz, bool notify)
 {
 	m_canvas->SetRotations(rotx, roty, rotz, false);
 	if (notify)
-		FluoRefresh(false, 2, { gstCamRotation }, { m_frame->GetView(m_canvas) });
+		FluoRefresh(2, { gstCamRotation }, { m_frame->GetView(m_canvas) });
 	else
-		FluoRefresh(false, 2, { gstNull }, { m_frame->GetView(m_canvas) });
+		FluoRefresh(2, { gstNull }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::SetZeroRotations()
@@ -1326,7 +1326,7 @@ void RenderViewPanel::SetZeroRotations()
 		m_canvas->SetZeroRotations();
 		m_canvas->SetRotations(0.0, 0.0, 0.0, false);
 	}
-	FluoRefresh(false, 2, { gstCamRotation }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstCamRotation }, { m_frame->GetView(m_canvas) });
 }
 
 void RenderViewPanel::OnToolBar(wxCommandEvent& event)
@@ -1514,7 +1514,7 @@ void RenderViewPanel::OnPin(wxCommandEvent& event)
 	else
 		m_pin_by_user = val ? 2 : 1;
 	m_canvas->SetPinRotCenter(val);
-	FluoRefresh(false, 2, { gstPinRotCtr }, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, { gstPinRotCtr }, { m_frame->GetView(m_canvas) });
 	event.Skip();
 }
 
@@ -2051,6 +2051,6 @@ void RenderViewPanel::LoadSettings()
 	m_canvas->SetSBS(glbin_settings.m_sbs);
 	m_canvas->SetEyeDist(glbin_settings.m_eye_dist);
 
-	FluoRefresh(false, 2, {}, { m_frame->GetView(m_canvas) });
+	FluoRefresh(2, {}, { m_frame->GetView(m_canvas) });
 }
 

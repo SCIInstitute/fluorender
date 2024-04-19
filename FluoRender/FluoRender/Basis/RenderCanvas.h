@@ -1218,7 +1218,7 @@ private:
 	void SetColormapColors(int colormap, fluo::Color &c, double inv);
 	void DrawColormap();
 	void DrawGradBg();
-	void DrawInfo(int nx, int ny);
+	void DrawInfo(int nx, int ny, bool intactive);
 
 	//depth
 	double CalcZ(double z);

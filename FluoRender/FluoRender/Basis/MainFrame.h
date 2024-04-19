@@ -198,7 +198,7 @@ public:
 	ListPanel *GetList();
 
 	//views
-	void RefreshCanvases(bool interactive = false, const std::set<int>& views = {});//view indices to update
+	void RefreshCanvases(const std::set<int>& views = {});//view indices to update
 	int GetViewNum();
 	RenderCanvas* GetView(int index);
 	RenderCanvas* GetView(wxString& name);

@@ -4495,7 +4495,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		m_clear_buffer = true;
 		m_updating = true;
 		RefreshGL(15, ref_stat, start_loop);
-		m_vrv->FluoRefresh(false, 0, vc, {-1});
+		m_vrv->FluoRefresh(0, vc, {-1});
 	}
 	if (set_focus)
 		SetFocus();
@@ -5425,6 +5425,7 @@ void RenderCanvas::ForceDraw()
 	if (m_resize)
 		m_retain_finalbuffer = false;
 
+	bool intactive = m_interactive;
 	int nx, ny;
 	GetRenderSize(nx, ny);
 
@@ -5473,7 +5474,7 @@ void RenderCanvas::ForceDraw()
 
 	//draw info
 	if (m_draw_info & INFO_DISP)
-		DrawInfo(nx, ny);
+		DrawInfo(nx, ny, intactive);
 
 	if (m_int_mode == 2 ||
 		m_int_mode == 7)  //painting mode
@@ -8654,7 +8655,7 @@ void RenderCanvas::DrawColormap()
 	glEnable(GL_DEPTH_TEST);
 }
 
-void RenderCanvas::DrawInfo(int nx, int ny)
+void RenderCanvas::DrawInfo(int nx, int ny, bool intactive)
 {
 	float sx, sy;
 	sx = 2.0 / nx;
@@ -8664,24 +8665,25 @@ void RenderCanvas::DrawInfo(int nx, int ny)
 	float gaph = gapw * 2;
 
 	double fps = 1.0 / glbin.getStopWatch(gstStopWatch)->average();
+	fps = std::max(fps, 0.0);
 	wxString str;
 	fluo::Color text_color = GetTextColor();
 	if (glbin_settings.m_mem_swap)
 	{
 		if (glbin_vol_selector.GetBrushUsePres())
 			str = wxString::Format(
-				"Int: %s, FPS: %.2f, Bricks: %d, Quota: %d, Time: %lu, Pressure: %.2f",
-				m_interactive ? "Yes" : "No",
-				fps >= 0.0&&fps<300.0 ? fps : 0.0,
+				"FPS: %.2f, Act: %s, Bricks: %d, Quota: %d, Time: %lu, Pressure: %.2f",
+				fps,
+				intactive ? "Yes" : "No",
 				flvr::TextureRenderer::get_finished_bricks(),
 				flvr::TextureRenderer::get_quota_bricks(),
 				flvr::TextureRenderer::get_cor_up_time(),
 				glbin_vol_selector.GetPressure());
 		else
 			str = wxString::Format(
-				"Int: %s, FPS: %.2f, Bricks: %d, Quota: %d, Time: %lu",
-				m_interactive ? "Yes" : "No",
-				fps >= 0.0&&fps<300.0 ? fps : 0.0,
+				"FPS: %.2f, Act: %s, Bricks: %d, Quota: %d, Time: %lu",
+				fps,
+				intactive ? "Yes" : "No",
 				flvr::TextureRenderer::get_finished_bricks(),
 				flvr::TextureRenderer::get_quota_bricks(),
 				flvr::TextureRenderer::get_cor_up_time());
@@ -8703,10 +8705,9 @@ void RenderCanvas::DrawInfo(int nx, int ny)
 	{
 		if (glbin_vol_selector.GetBrushUsePres())
 			str = wxString::Format("FPS: %.2f, Pressure: %.2f",
-				fps >= 0.0&&fps<300.0 ? fps : 0.0, glbin_vol_selector.GetPressure());
+				fps, glbin_vol_selector.GetPressure());
 		else
-			str = wxString::Format("FPS: %.2f",
-				fps >= 0.0&&fps<300.0 ? fps : 0.0);
+			str = wxString::Format("FPS: %.2f", fps);
 	}
 	wstring wstr_temp = str.ToStdWstring();
 	px = gapw - nx / 2.0;

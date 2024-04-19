@@ -270,7 +270,7 @@ void DataTreeCtrl::DeleteSelection()
 	if (refresh)
 	{
 		glbin.set_tree_selection("");
-		m_frame->GetTree()->FluoRefresh(false, 2, {gstTreeCtrl});
+		m_frame->GetTree()->FluoRefresh(2, {gstTreeCtrl});
 		m_frame->OnSelection(1);
 	}
 }
@@ -469,7 +469,7 @@ void DataTreeCtrl::OnIsolate(wxCommandEvent& event)
 
 	if (refresh)
 	{
-		m_frame->GetTree()->FluoRefresh(false, 2, { gstTreeIcons });
+		m_frame->GetTree()->FluoRefresh(2, { gstTreeIcons });
 	}
 }
 
@@ -533,7 +533,7 @@ void DataTreeCtrl::OnShowAll(wxCommandEvent& event)
 
 	if (refresh)
 	{
-		m_frame->GetTree()->FluoRefresh(false, 2, { gstTreeIcons });
+		m_frame->GetTree()->FluoRefresh(2, { gstTreeIcons });
 	}
 }
 
@@ -991,7 +991,7 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	SetScrollPos(wxVERTICAL, m_scroll_pos);
 	UpdateSelection();
 	glbin.set_tree_selection(name.ToStdString());
-	m_frame->GetTree()->FluoRefresh(false, 2, {gstTreeCtrl});
+	m_frame->GetTree()->FluoRefresh(2, {gstTreeCtrl});
 }
 
 void DataTreeCtrl::OnCopyMask(wxCommandEvent& event)
@@ -1410,7 +1410,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 		UpdateSelection();
 	}
 	if (refresh)
-		m_frame->GetTree()->FluoRefresh(false, 2, vc);
+		m_frame->GetTree()->FluoRefresh(2, vc);
 }
 
 void DataTreeCtrl::OnBeginDrag(wxTreeEvent& event)
@@ -1680,7 +1680,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 	}
 
 	if (refresh)
-		m_frame->GetTree()->FluoRefresh(false, 2, { gstTreeCtrl });
+		m_frame->GetTree()->FluoRefresh(2, { gstTreeCtrl });
 
 	SetScrollPos(wxVERTICAL, m_scroll_pos);
 }

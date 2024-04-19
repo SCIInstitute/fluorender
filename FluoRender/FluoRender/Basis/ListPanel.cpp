@@ -395,7 +395,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 	if (refresh)
 	{
 		glbin.set_tree_selection(name.ToStdString());
-		m_frame->GetTree()->FluoRefresh(false, 2, { gstTreeCtrl }, { m_frame->GetView(view) });
+		m_frame->GetTree()->FluoRefresh(2, { gstTreeCtrl }, { m_frame->GetView(view) });
 	}
 }
 
@@ -950,7 +950,7 @@ void DataListCtrl::DeleteSelection()
 	}
 
 	if (refresh)
-		m_frame->GetTree()->FluoRefresh(false, 2, { gstTreeCtrl });
+		m_frame->GetTree()->FluoRefresh(2, { gstTreeCtrl });
 }
 
 void DataListCtrl::DeleteAll()
@@ -1014,7 +1014,7 @@ void DataListCtrl::DeleteAll()
 
 	DeleteAllItems();
 	if (m_frame)
-		m_frame->GetTree()->FluoRefresh(false, 2, { gstTreeCtrl });
+		m_frame->GetTree()->FluoRefresh(2, { gstTreeCtrl });
 }
 
 void DataListCtrl::OnScroll(wxScrollWinEvent& event)

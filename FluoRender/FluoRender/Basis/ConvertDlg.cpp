@@ -319,6 +319,6 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 	if (refresh)
 	{
 		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
-		m_frame->RefreshCanvases(false);
+		m_frame->RefreshCanvases();
 	}
 }

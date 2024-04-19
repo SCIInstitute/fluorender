@@ -214,7 +214,7 @@ void KeyListCtrl::OnAct(wxListEvent& event)
 	if (view)
 	{
 		view->SetParams(time);
-		m_frame->RefreshCanvases(false, {glbin_moviemaker.GetViewIndex()});
+		m_frame->RefreshCanvases({glbin_moviemaker.GetViewIndex()});
 	}
 }
 
@@ -1609,7 +1609,7 @@ void MoviePanel::SetScrollFrame(int val, bool notify)
 	fluo::ValueCollection vc = { gstMovCurTime, gstCurrentFrame, gstMovSeqNum };
 	if (notify)
 		vc.insert(gstMovProgSlider);
-	FluoRefresh(false, 2, vc, { glbin_mov_def.m_view_idx });
+	FluoRefresh(2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::SetCurrentFrame(int val, bool notify)
@@ -1621,7 +1621,7 @@ void MoviePanel::SetCurrentFrame(int val, bool notify)
 	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstMovSeqNum };
 	if (notify)
 		vc.insert(gstCurrentFrame);
-	FluoRefresh(false, 2, vc, { glbin_mov_def.m_view_idx });
+	FluoRefresh(2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::SetCurrentTime(double val, bool notify)
@@ -1634,7 +1634,7 @@ void MoviePanel::SetCurrentTime(double val, bool notify)
 	fluo::ValueCollection vc = { gstCurrentFrame, gstMovProgSlider, gstMovSeqNum };
 	if (notify)
 		vc.insert(gstMovCurTime);
-	FluoRefresh(false, 2, vc, { glbin_mov_def.m_view_idx });
+	FluoRefresh(2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::Play()
@@ -1642,7 +1642,7 @@ void MoviePanel::Play()
 	glbin_moviemaker.Play(false);
 
 	fluo::ValueCollection vc = { gstMovPlay };
-	FluoRefresh(false, 2, vc, { glbin_mov_def.m_view_idx });
+	FluoRefresh(2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::PlayInv()
@@ -1650,7 +1650,7 @@ void MoviePanel::PlayInv()
 	glbin_moviemaker.Play(true);
 
 	fluo::ValueCollection vc = { gstMovPlay };
-	FluoRefresh(false, 2, vc, { glbin_mov_def.m_view_idx });
+	FluoRefresh(2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::Rewind()
@@ -1658,7 +1658,7 @@ void MoviePanel::Rewind()
 	glbin_moviemaker.Rewind();
 
 	fluo::ValueCollection vc = { gstCurrentFrame, gstMovCurTime, gstMovProgSlider, gstMovPlay, gstMovSeqNum };
-	FluoRefresh(false, 2, vc, { glbin_mov_def.m_view_idx });
+	FluoRefresh(2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::Forward()
@@ -1666,7 +1666,7 @@ void MoviePanel::Forward()
 	glbin_moviemaker.Forward();
 
 	fluo::ValueCollection vc = { gstCurrentFrame, gstMovCurTime, gstMovProgSlider, gstMovPlay, gstMovSeqNum };
-	FluoRefresh(false, 2, vc, { glbin_mov_def.m_view_idx });
+	FluoRefresh(2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::Loop(bool val)
@@ -1682,7 +1682,7 @@ void MoviePanel::IncFrame()
 	frame++;
 	glbin_moviemaker.SetCurrentFrame(frame);
 	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstCurrentFrame, gstMovSeqNum };
-	FluoRefresh(false, 2, vc, { glbin_mov_def.m_view_idx });
+	FluoRefresh(2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::DecFrame()
@@ -1693,7 +1693,7 @@ void MoviePanel::DecFrame()
 	frame--;
 	glbin_moviemaker.SetCurrentFrame(frame);
 	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstCurrentFrame, gstMovSeqNum };
-	FluoRefresh(false, 2, vc, { glbin_mov_def.m_view_idx });
+	FluoRefresh(2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::Save(const wxString& filename)
@@ -1705,7 +1705,7 @@ void MoviePanel::Save(const wxString& filename)
 	glbin_moviemaker.PlaySave();
 
 	fluo::ValueCollection vc = { gstMovPlay };
-	FluoRefresh(false, 2, vc, { glbin_mov_def.m_view_idx });
+	FluoRefresh(2, vc, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::SetKeyframeMovie(bool val)
@@ -1718,25 +1718,25 @@ void MoviePanel::SetKeyframeMovie(bool val)
 void MoviePanel::SetCropEnable(bool val)
 {
 	glbin_moviemaker.SetCropEnable(val);
-	FluoRefresh(false, 2, { gstCropEnable, gstCropValues }, { glbin_mov_def.m_view_idx });
+	FluoRefresh(2, { gstCropEnable, gstCropValues }, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::SetCropValues(int x, int y, int w, int h)
 {
 	glbin_moviemaker.SetCropValues(x, y, w, h);
-	FluoRefresh(false, 2, { gstCropValues }, { glbin_mov_def.m_view_idx });
+	FluoRefresh(2, { gstCropValues }, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::SetScalebarPos(int pos)
 {
 	glbin_moviemaker.SetScalebarPos(pos);
-	FluoRefresh(false, 2, { gstNull }, { glbin_mov_def.m_view_idx });
+	FluoRefresh(2, { gstNull }, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::SetScalebarValues(int x, int y)
 {
 	glbin_moviemaker.SetScalebarDist(x, y);
-	FluoRefresh(false, 2, { gstScalebarPos }, { glbin_mov_def.m_view_idx });
+	FluoRefresh(2, { gstScalebarPos }, { glbin_mov_def.m_view_idx });
 }
 
 void MoviePanel::OnNotebookPage(wxAuiNotebookEvent& event)
@@ -1976,7 +1976,7 @@ void MoviePanel::OnSeqDecBtn(wxCommandEvent& event)
 {
 	int val = glbin_moviemaker.GetSeqCurNum();
 	glbin_moviemaker.SetSeqCurNum(val - 1);
-	FluoRefresh(false, 2,
+	FluoRefresh(2,
 		{ gstCurrentFrame, gstMovProgSlider, gstMovSeqNum },
 		{ glbin_mov_def.m_view_idx });
 	event.Skip();
@@ -1988,7 +1988,7 @@ void MoviePanel::OnSeqNumText(wxCommandEvent& event)
 	long val;
 	if (str.ToLong(&val))
 		glbin_moviemaker.SetSeqCurNum(val);
-	FluoRefresh(false, 2,
+	FluoRefresh(2,
 		{ gstCurrentFrame, gstMovProgSlider, gstMovSeqNum },
 		{ glbin_mov_def.m_view_idx });
 	event.Skip();
@@ -1998,7 +1998,7 @@ void MoviePanel::OnSeqIncBtn(wxCommandEvent& event)
 {
 	int val = glbin_moviemaker.GetSeqCurNum();
 	glbin_moviemaker.SetSeqCurNum(val + 1);
-	FluoRefresh(false, 2,
+	FluoRefresh(2,
 		{ gstCurrentFrame, gstMovProgSlider, gstMovSeqNum },
 		{ glbin_mov_def.m_view_idx });
 	event.Skip();
@@ -2254,7 +2254,7 @@ void MoviePanel::OnRunScriptChk(wxCommandEvent& event)
 		glbin_settings.m_script_file = str;
 		m_view->SetScriptFile(str);
 	}
-	FluoRefresh(false, 2, { gstMovPlay, gstRunScript }, { glbin_mov_def.m_view_idx });
+	FluoRefresh(2, { gstMovPlay, gstRunScript }, { glbin_mov_def.m_view_idx });
 	event.Skip();
 }
 

@@ -1594,7 +1594,7 @@ void MainFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* 
 
 	if (refresh)
 	{
-		RefreshCanvases(false, { GetView(v) });
+		RefreshCanvases({ GetView(v) });
 		UpdateProps(vc);
 	}
 }
@@ -1702,7 +1702,7 @@ void MainFrame::LoadMeshes(wxArrayString files, RenderCanvas* canvas)
 	if (canvas)
 		canvas->InitView(INIT_BOUNDS|INIT_CENTER);
 
-	RefreshCanvases(false, { GetView(canvas) });
+	RefreshCanvases({ GetView(canvas) });
 	UpdateProps({ gstListCtrl, gstTreeCtrl });
 
 	delete prg_diag;
@@ -2391,7 +2391,7 @@ MeshData* MainFrame::GetCurSelMesh()
 	return glbin_data_manager.GetMeshData(m_cur_sel_mesh);
 }
 
-void MainFrame::RefreshCanvases(bool interactive, const std::set<int>& views)
+void MainFrame::RefreshCanvases(const std::set<int>& views)
 {
 	if (views.find(-1) != views.end())
 		return;
@@ -2403,7 +2403,7 @@ void MainFrame::RefreshCanvases(bool interactive, const std::set<int>& views)
 			continue;
 
 		if (update_all || views.find(i) != views.end())
-			m_vrv_list[i]->RefreshGL(interactive);
+			m_vrv_list[i]->RefreshGL(false);
 	}
 
 	//incase volume color changes
@@ -2755,7 +2755,7 @@ void MainFrame::OnNewProject(wxCommandEvent& event)
 	glbin_mov_def.Apply(&glbin_moviemaker);
 	m_trace_dlg->GetSettings(GetView(0));
 	glbin_interpolator.Clear();
-	RefreshCanvases(false);
+	RefreshCanvases();
 	UpdateProps({ gstListCtrl, gstTreeCtrl, gstParamList });
 
 }
@@ -4849,7 +4849,7 @@ void MainFrame::OpenProject(wxString& filename)
 		m_movie_panel->SetView(0);
 	delete prg_diag;
 
-	RefreshCanvases(false);
+	RefreshCanvases();
 	UpdateProps({}, 0, 0);
 }
 
