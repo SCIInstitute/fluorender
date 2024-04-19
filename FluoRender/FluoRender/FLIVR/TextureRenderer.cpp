@@ -317,6 +317,7 @@ namespace flvr
 		if (speed < 5) speed = 5;
 		if (speed > 20) speed = 20;
 		cor_up_time_ = (unsigned long)(log10(100.0 / speed)* glbin_settings.m_up_time);
+		cor_up_time_ = std::max(1, (int)cor_up_time_);
 	}
 
 	//number of bricks rendered before time is up

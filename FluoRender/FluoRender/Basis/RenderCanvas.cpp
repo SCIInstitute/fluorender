@@ -3011,17 +3011,17 @@ void RenderCanvas::DrawOLShading(VolumeData* vd)
 	int nx, ny;
 	GetRenderSize(nx, ny);
 
-	if (glbin_settings.m_mem_swap &&
-		flvr::TextureRenderer::get_start_update_loop() &&
-		!flvr::TextureRenderer::get_done_update_loop())
-	{
-		unsigned int rn_time = GET_TICK_COUNT();
-		if (rn_time - flvr::TextureRenderer::get_st_time() >
-			flvr::TextureRenderer::get_up_time())
-			return;
-		if (vd->GetVR()->get_done_loop(2))
-			return;
-	}
+	//if (glbin_settings.m_mem_swap &&
+	//	flvr::TextureRenderer::get_start_update_loop() &&
+	//	!flvr::TextureRenderer::get_done_update_loop())
+	//{
+	//	unsigned int rn_time = GET_TICK_COUNT();
+	//	if (rn_time - flvr::TextureRenderer::get_st_time() >
+	//		flvr::TextureRenderer::get_up_time())
+	//		return;
+	//	if (vd->GetVR()->get_done_loop(2))
+	//		return;
+	//}
 
 	//shading pass
 	flvr::Framebuffer* overlay_buffer =
@@ -3247,18 +3247,18 @@ void RenderCanvas::DrawOLShadows(vector<VolumeData*> &vlist)
 	if (!has_shadow)
 		return;
 
-	if (glbin_settings.m_mem_swap &&
-		flvr::TextureRenderer::get_start_update_loop() &&
-		!flvr::TextureRenderer::get_done_update_loop())
-	{
-		unsigned int rn_time = GET_TICK_COUNT();
-		if (rn_time - flvr::TextureRenderer::get_st_time() >
-			flvr::TextureRenderer::get_up_time())
-			return;
-		if (list.size() == 1 && list[0]->GetShadowEnable())
-			if (list[0]->GetVR()->get_done_loop(3))
-				return;
-	}
+	//if (glbin_settings.m_mem_swap &&
+	//	flvr::TextureRenderer::get_start_update_loop() &&
+	//	!flvr::TextureRenderer::get_done_update_loop())
+	//{
+	//	unsigned int rn_time = GET_TICK_COUNT();
+	//	if (rn_time - flvr::TextureRenderer::get_st_time() >
+	//		flvr::TextureRenderer::get_up_time())
+	//		return;
+	//	if (list.size() == 1 && list[0]->GetShadowEnable())
+	//		if (list[0]->GetVR()->get_done_loop(3))
+	//			return;
+	//}
 
 	flvr::Framebuffer* overlay_buffer =
 		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
