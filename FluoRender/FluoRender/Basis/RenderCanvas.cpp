@@ -10463,7 +10463,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 
 					if (!hold_old)
 						RefreshGL(30);
-
+					//DBGPRINT(L"refresh requested\n");
 					m_vrv->FluoUpdate({ gstCamRotation });
 				}
 				if (event.MiddleIsDown() || (event.ControlDown() && event.LeftIsDown()))
