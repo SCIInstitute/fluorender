@@ -331,7 +331,10 @@ namespace flvr
 								bs_tmp = vr_list_[j]->tex_->get_sorted_bricks(
 								view_ray, orthographic_p);
 							if (!(*bs_tmp)[i]->drawn(0))
+							{
 								(*bs_tmp)[i]->set_drawn(0, true);
+								TextureRenderer::cur_chan_brick_num_++;
+							}
 						}
 					}
 					continue;
@@ -344,6 +347,16 @@ namespace flvr
 
 				draw_polygons_vol(b, rate, vertex, index, size, view_ray,
 					i, orthographic_p, w2, h2, intp, quota_bricks_chan, blend_buffer);
+
+				int vrn = (int)(vr_list_.size());
+				if (glbin_settings.m_mem_swap && !b->drawn(0))
+				{
+					b->set_drawn(0, true);
+					TextureRenderer::cur_brick_num_ += vrn;
+					TextureRenderer::cur_chan_brick_num_ += vrn;
+				}
+				if (glbin_settings.m_mem_swap)
+					TextureRenderer::finished_bricks_ += vrn;
 				drawn_once = true;
 			}
 		}
@@ -695,8 +708,8 @@ namespace flvr
 				if (bi>=(int)bs->size()) break;
 
 				TextureBrick* b = (*bs)[bi];
-				if (glbin_settings.m_mem_swap && !b->drawn(0))
-					b->set_drawn(0, true);
+				//if (glbin_settings.m_mem_swap && !b->drawn(0))
+				//	b->set_drawn(0, true);
 				if (b->get_priority()>0)
 					continue;
 
