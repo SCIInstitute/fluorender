@@ -161,6 +161,7 @@ namespace flvr {
 		{ if (mode>=0 && mode<TEXTURE_RENDER_MODES) drawn_[mode] = val; }
 		inline void set_drawn(bool val)
 		{ for (int i=0; i<TEXTURE_RENDER_MODES; i++) drawn_[i] = val; }
+		//mode: 0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
 		inline bool drawn(int mode)
 		{ if (mode>=0 && mode<TEXTURE_RENDER_MODES) return drawn_[mode]; else return false;}
 
@@ -272,6 +273,7 @@ namespace flvr {
 		//priority level
 		int priority_;//now, 0:highest
 		//if it's been drawn in a full update loop
+		//mode: 0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
 		bool drawn_[TEXTURE_RENDER_MODES];
 		//current index in the queue, for reverse searching
 		size_t ind_;

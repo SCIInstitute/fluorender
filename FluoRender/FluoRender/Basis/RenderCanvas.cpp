@@ -2597,6 +2597,7 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 			flvr::TextureRenderer::reset_clear_chan_buffer();
+			DBGPRINT(L"chan buffer cleared\n");
 		}
 
 		if (vd->GetVR())
@@ -2790,13 +2791,15 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 			m_cur_framebuffer = overlay_buffer->id();
 		}
 
-		if (!glbin_settings.m_mem_swap ||
-			(glbin_settings.m_mem_swap &&
-			flvr::TextureRenderer::get_clear_chan_buffer()))
+
+		bool clear = !glbin_settings.m_mem_swap ||
+			(glbin_settings.m_mem_swap && flvr::TextureRenderer::get_clear_chan_buffer());
+		//if (clear)
 		{
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
-			flvr::TextureRenderer::reset_clear_chan_buffer();
+			//flvr::TextureRenderer::reset_clear_chan_buffer();
+			DBGPRINT(L"overlay cleared\n");
 		}
 
 		if (vd->GetVR())
@@ -2839,8 +2842,15 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 		//bind channel fbo for final composition
 		if (chann_buffer)
 			chann_buffer->bind();
-		glClearColor(0.0, 0.0, 0.0, 0.0);
-		glClear(GL_COLOR_BUFFER_BIT);
+		//clear = !glbin_settings.m_mem_swap ||
+		//	(glbin_settings.m_mem_swap && flvr::TextureRenderer::get_clear_chan_buffer());
+		if (clear)
+		{
+			glClearColor(0.0, 0.0, 0.0, 0.0);
+			glClear(GL_COLOR_BUFFER_BIT);
+			flvr::TextureRenderer::reset_clear_chan_buffer();
+			DBGPRINT(L"chan buffer cleared\n");
+		}
 		glActiveTexture(GL_TEXTURE0);
 		if (overlay_buffer)
 		{
@@ -3008,9 +3018,12 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 
 void RenderCanvas::DrawOLShading(VolumeData* vd)
 {
+	if (glbin_settings.m_mem_swap &&
+		!flvr::TextureRenderer::get_done_current_chan())
+		return;
+
 	int nx, ny;
 	GetRenderSize(nx, ny);
-
 	//if (glbin_settings.m_mem_swap &&
 	//	flvr::TextureRenderer::get_start_update_loop() &&
 	//	!flvr::TextureRenderer::get_done_update_loop())
@@ -3219,6 +3232,9 @@ void RenderCanvas::DrawOLShadowsMesh(double darkness)
 void RenderCanvas::DrawOLShadows(vector<VolumeData*> &vlist)
 {
 	if (vlist.empty())
+		return;
+	if (glbin_settings.m_mem_swap &&
+		!flvr::TextureRenderer::get_done_current_chan())
 		return;
 
 	int nx, ny;

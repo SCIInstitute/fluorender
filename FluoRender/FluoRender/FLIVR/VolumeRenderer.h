@@ -162,12 +162,14 @@ namespace flvr
 
 		//draw
 		void eval_ml_mode();
+		//mode: 0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
 		virtual void draw(bool draw_wireframe_p,
 			bool adaptive,
 			bool interactive_mode_p,
 			bool orthographic_p = false,
 			int mode = 0);
 		void draw_wireframe(bool orthographic_p = false);
+		//mode: 0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
 		void draw_volume(bool adaptive,
 			bool interactive_mode_p,
 			bool orthographic_p = false,
