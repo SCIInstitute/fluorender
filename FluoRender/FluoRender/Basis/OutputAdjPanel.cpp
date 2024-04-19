@@ -1312,7 +1312,7 @@ void OutputAdjPanel::SyncGamma(int i)
 		vc.insert(gstGammaG);
 	if (i != 2)
 		vc.insert(gstGammaB);
-	FluoRefresh(true, 2, vc, {m_frame->GetView(m_view)});
+	FluoRefresh(false, 2, vc, {m_frame->GetView(m_view)});
 }
 
 void OutputAdjPanel::SyncBrightness(int i)
@@ -1361,7 +1361,7 @@ void OutputAdjPanel::SyncBrightness(int i)
 		vc.insert(gstBrightnessG);
 	if (i != 2)
 		vc.insert(gstBrightnessB);
-	FluoRefresh(true, 2, vc, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, vc, { m_frame->GetView(m_view) });
 }
 
 void OutputAdjPanel::SyncHdr(int i)
@@ -1410,7 +1410,7 @@ void OutputAdjPanel::SyncHdr(int i)
 		vc.insert(gstEqualizeG);
 	if (i != 2)
 		vc.insert(gstEqualizeB);
-	FluoRefresh(true, 2, vc, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, vc, { m_frame->GetView(m_view) });
 }
 
 void OutputAdjPanel::SetSync(int i, bool val, bool update)
@@ -1503,7 +1503,7 @@ void OutputAdjPanel::SetSync(int i, bool val, bool update)
 		if (i == 2)
 			vc.insert(gstSyncB);
 
-		FluoRefresh(true, 2, vc, { m_frame->GetView(m_view) });
+		FluoRefresh(false, 2, vc, { m_frame->GetView(m_view) });
 	}
 }
 
@@ -1546,7 +1546,7 @@ void OutputAdjPanel::SetGamma(int i, double val, bool notify)
 			m_group->SetGammaAll(gamma);
 	}
 
-	FluoRefresh(true, 2, vc, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, vc, { m_frame->GetView(m_view) });
 }
 
 void OutputAdjPanel::SetBrightness(int i, double val, bool notify)
@@ -1588,7 +1588,7 @@ void OutputAdjPanel::SetBrightness(int i, double val, bool notify)
 			m_group->SetBrightnessAll(brightness);
 	}
 
-	FluoRefresh(true, 2, vc, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, vc, { m_frame->GetView(m_view) });
 }
 
 void OutputAdjPanel::SetHdr(int i, double val, bool notify)
@@ -1630,7 +1630,7 @@ void OutputAdjPanel::SetHdr(int i, double val, bool notify)
 			m_group->SetHdrAll(hdr);
 	}
 
-	FluoRefresh(true, 2, vc, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, vc, { m_frame->GetView(m_view) });
 }
 
 void OutputAdjPanel::UpdateSync()

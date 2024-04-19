@@ -1243,7 +1243,7 @@ void ClipPlanePanel::SetClipValue(int i, int val, bool link)
 	}
 	m_view->UpdateClips();
 
-	FluoRefresh(true, 2, vc, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, vc, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::SetClipValues(int i, int val1, int val2)
@@ -1272,7 +1272,7 @@ void ClipPlanePanel::SetClipValues(int i, int val1, int val2)
 	if (i & 32)
 		vc.insert(gstClipZ2);
 
-	FluoRefresh(true, 2, vc, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, vc, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::SetClipValues(const int val[6])
@@ -1286,7 +1286,7 @@ void ClipPlanePanel::SetClipValues(const int val[6])
 	m_view->m_clip_mask = 63;
 	m_view->UpdateClips();
 
-	FluoRefresh(true, 2,
+	FluoRefresh(false, 2,
 		{ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 },
 		{ m_frame->GetView(m_view) });
 }
@@ -1307,7 +1307,7 @@ void ClipPlanePanel::ResetClipValues()
 	SetYLink(false);
 	SetZLink(false);
 
-	FluoRefresh(true, 2, { gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 },
+	FluoRefresh(false, 2, { gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 },
 		{ m_frame->GetView(m_view) });
 }
 
@@ -1325,7 +1325,7 @@ void ClipPlanePanel::ResetClipValuesX()
 	//links
 	SetXLink(false);
 
-	FluoRefresh(true, 2, { gstClipX1, gstClipX2 }, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, { gstClipX1, gstClipX2 }, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::ResetClipValuesY()
@@ -1342,7 +1342,7 @@ void ClipPlanePanel::ResetClipValuesY()
 	//links
 	SetYLink(false);
 
-	FluoRefresh(true, 2, { gstClipY1, gstClipY2 }, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, { gstClipY1, gstClipY2 }, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::ResetClipValuesZ()
@@ -1359,7 +1359,7 @@ void ClipPlanePanel::ResetClipValuesZ()
 	//links
 	SetZLink(false);
 
-	FluoRefresh(true, 2, { gstClipZ1, gstClipZ2 }, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, { gstClipZ1, gstClipZ2 }, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::OnLinkXCheck(wxCommandEvent &event)
@@ -1419,7 +1419,7 @@ void ClipPlanePanel::OnSetZeroBtn(wxCommandEvent &event)
 		return;
 
 	m_view->SetClipMode(2);
-	FluoRefresh(true, 2, { gstClipRotX, gstClipRotY, gstClipRotZ },
+	FluoRefresh(false, 2, { gstClipRotX, gstClipRotY, gstClipRotZ },
 		{ m_frame->GetView(m_view) });
 }
 
@@ -1430,7 +1430,7 @@ void ClipPlanePanel::OnRotResetBtn(wxCommandEvent &event)
 
 	//reset rotations
 	m_view->SetClippingPlaneRotations(0.0, 0.0, 0.0);
-	FluoRefresh(true, 2, { gstClipRotX, gstClipRotY, gstClipRotZ },
+	FluoRefresh(false, 2, { gstClipRotX, gstClipRotY, gstClipRotZ },
 		{ m_frame->GetView(m_view) });
 }
 
@@ -1445,7 +1445,7 @@ void ClipPlanePanel::OnRotXMF(wxCommandEvent& event)
 		break;
 	case 2:
 		if (m_view) m_view->SetClipRotX(0.0);
-		FluoRefresh(true, 2, { gstClipRotX }, { m_frame->GetView(m_view) });
+		FluoRefresh(false, 2, { gstClipRotX }, { m_frame->GetView(m_view) });
 		break;
 	case 3:
 		break;
@@ -1468,7 +1468,7 @@ void ClipPlanePanel::OnRotYMF(wxCommandEvent& event)
 		break;
 	case 2:
 		if (m_view) m_view->SetClipRotY(0.0);
-		FluoRefresh(true, 2, { gstClipRotY }, { m_frame->GetView(m_view) });
+		FluoRefresh(false, 2, { gstClipRotY }, { m_frame->GetView(m_view) });
 		break;
 	case 3:
 		break;
@@ -1491,7 +1491,7 @@ void ClipPlanePanel::OnRotZMF(wxCommandEvent& event)
 		break;
 	case 2:
 		if (m_view) m_view->SetClipRotZ(0.0);
-		FluoRefresh(true, 2, { gstClipRotZ }, { m_frame->GetView(m_view) });
+		FluoRefresh(false, 2, { gstClipRotZ }, { m_frame->GetView(m_view) });
 		break;
 	case 3:
 		break;
@@ -1510,7 +1510,7 @@ void ClipPlanePanel::OnXRotChange(wxScrollEvent &event)
 
 	int val = m_x_rot_sldr->GetValue();
 	m_view->SetClipRotX(val);
-	FluoRefresh(true, 2, { gstClipRotX }, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, { gstClipRotX }, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::OnXRotEdit(wxCommandEvent &event)
@@ -1522,7 +1522,7 @@ void ClipPlanePanel::OnXRotEdit(wxCommandEvent &event)
 	double val = 0.0;
 	str.ToDouble(&val);
 	m_view->SetClipRotX(val);
-	FluoRefresh(true, 2, { gstClipRotX }, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, { gstClipRotX }, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::OnYRotChange(wxScrollEvent &event)
@@ -1532,7 +1532,7 @@ void ClipPlanePanel::OnYRotChange(wxScrollEvent &event)
 
 	int val = m_y_rot_sldr->GetValue();
 	m_view->SetClipRotY(val);
-	FluoRefresh(true, 2, { gstClipRotY }, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, { gstClipRotY }, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::OnYRotEdit(wxCommandEvent &event)
@@ -1544,7 +1544,7 @@ void ClipPlanePanel::OnYRotEdit(wxCommandEvent &event)
 	double val = 0.0;
 	str.ToDouble(&val);
 	m_view->SetClipRotY(val);
-	FluoRefresh(true, 2, { gstClipRotY }, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, { gstClipRotY }, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::OnZRotChange(wxScrollEvent &event)
@@ -1554,7 +1554,7 @@ void ClipPlanePanel::OnZRotChange(wxScrollEvent &event)
 
 	int val = m_z_rot_sldr->GetValue();
 	m_view->SetClipRotZ(val);
-	FluoRefresh(true, 2, { gstClipRotZ }, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, { gstClipRotZ }, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::OnZRotEdit(wxCommandEvent &event)
@@ -1566,7 +1566,7 @@ void ClipPlanePanel::OnZRotEdit(wxCommandEvent &event)
 	double val = 0.0;
 	str.ToDouble(&val);
 	m_view->SetClipRotZ(val);
-	FluoRefresh(true, 2, { gstClipRotZ }, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, { gstClipRotZ }, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::OnXRotSpinUp(wxSpinEvent& event)
@@ -1578,7 +1578,7 @@ void ClipPlanePanel::OnXRotSpinUp(wxSpinEvent& event)
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	m_view->SetClipRotX(val);
-	FluoRefresh(true, 2, { gstClipRotX }, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, { gstClipRotX }, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::OnXRotSpinDown(wxSpinEvent& event)
@@ -1590,7 +1590,7 @@ void ClipPlanePanel::OnXRotSpinDown(wxSpinEvent& event)
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	m_view->SetClipRotX(val);
-	FluoRefresh(true, 2, { gstClipRotX }, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, { gstClipRotX }, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::OnYRotSpinUp(wxSpinEvent& event)
@@ -1602,7 +1602,7 @@ void ClipPlanePanel::OnYRotSpinUp(wxSpinEvent& event)
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	m_view->SetClipRotY(val);
-	FluoRefresh(true, 2, { gstClipRotY }, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, { gstClipRotY }, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::OnYRotSpinDown(wxSpinEvent& event)
@@ -1614,7 +1614,7 @@ void ClipPlanePanel::OnYRotSpinDown(wxSpinEvent& event)
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	m_view->SetClipRotY(val);
-	FluoRefresh(true, 2, { gstClipRotY }, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, { gstClipRotY }, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::OnZRotSpinUp(wxSpinEvent& event)
@@ -1626,7 +1626,7 @@ void ClipPlanePanel::OnZRotSpinUp(wxSpinEvent& event)
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	m_view->SetClipRotZ(val);
-	FluoRefresh(true, 2, { gstClipRotZ }, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, { gstClipRotZ }, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::OnZRotSpinDown(wxSpinEvent& event)
@@ -1638,7 +1638,7 @@ void ClipPlanePanel::OnZRotSpinDown(wxSpinEvent& event)
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
 	m_view->SetClipRotZ(val);
-	FluoRefresh(true, 2, { gstClipRotZ }, { m_frame->GetView(m_view) });
+	FluoRefresh(false, 2, { gstClipRotZ }, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::UpdateSampleRate()
