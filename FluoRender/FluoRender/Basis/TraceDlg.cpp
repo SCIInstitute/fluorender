@@ -163,6 +163,7 @@ void TraceListCtrl::UpdateTraces(RenderCanvas* vrv)
 	fluo::Point center;
 	bool prev, next;
 
+	Freeze();
 	for (size_t i = 0; i < cells.size(); ++i)
 	{
 		id = cells[i]->Id();
@@ -203,6 +204,7 @@ void TraceListCtrl::UpdateTraces(RenderCanvas* vrv)
 		Append(gtype, id, color, size,
 			center.x(), center.y(), center.z());
 	}
+	Thaw();
 }
 
 void TraceListCtrl::DeleteSelection()
@@ -972,6 +974,7 @@ void TraceDlg::UpdateList()
 		//copy current to previous
 		if (cur_time != prv_time)
 		{
+			m_trace_list_prev->Freeze();
 			m_trace_list_prev->DeleteAllItems();
 			long item = -1;
 			for (;;)
@@ -998,6 +1001,7 @@ void TraceDlg::UpdateList()
 				}
 				else break;
 			}
+			m_trace_list_prev->Thaw();
 
 			if (cur_time >= 0) m_cur_time = cur_time;
 			if (prv_time >= 0) m_prv_time = prv_time;
