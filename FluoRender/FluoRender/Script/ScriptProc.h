@@ -74,7 +74,7 @@ namespace flrd
 
 		//run 4d script
 		//return 0:failure; 1:normal; 2:break
-		int Run4DScript(TimeMask tm, wxString &scriptname, bool rewind);
+		int Run4DScript(TimeMask tm, bool rewind);
 
 		void ClearResults() { m_output->removeAllChildren(); }
 

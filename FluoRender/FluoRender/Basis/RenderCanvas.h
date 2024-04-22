@@ -540,11 +540,6 @@ public:
 	//force draw
 	void ForceDraw();
 
-	//run 4d script
-	void SetRun4DScript(bool runscript) { m_run_script = runscript; }
-	bool GetRun4DScript() { return m_run_script; }
-	void SetScriptFile(wxString &str) { m_script_file = str; }
-
 	//start loop update
 	void StartLoopUpdate();
 	void HaltLoopUpdate();
@@ -810,9 +805,6 @@ public:
 	RenderViewPanel* m_vrv;
 	//set gl context
 	bool m_set_gl;
-	//script run
-	bool m_run_script;
-	wxString m_script_file;
 	//capture modes
 	bool m_capture;
 	bool m_capture_rotat;

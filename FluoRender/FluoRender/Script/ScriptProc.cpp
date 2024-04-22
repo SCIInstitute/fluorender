@@ -73,11 +73,11 @@ ScriptProc::~ScriptProc()
 
 //run 4d script
 //return 0:failure; 1:normal; 2:break
-int ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
+int ScriptProc::Run4DScript(TimeMask tm, bool rewind)
 {
 	m_fconfig = 0;
 	m_fconfig_name = "";
-	wxString scriptfile = GetInputFile(scriptname, "Scripts");
+	wxString scriptfile = glbin_settings.m_script_file;
 	if (scriptfile.IsEmpty())
 		return 0;
 	m_fconfig_name = scriptfile;

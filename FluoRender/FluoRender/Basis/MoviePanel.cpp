@@ -2247,13 +2247,8 @@ void MoviePanel::OnRunScriptChk(wxCommandEvent& event)
 		return;
 	bool run_script = m_run_script_chk->GetValue();
 	glbin_settings.m_run_script = run_script;
-	m_view->SetRun4DScript(run_script);
 	wxString str = m_script_file_text->GetValue();
-	if (!str.IsEmpty())
-	{
-		glbin_settings.m_script_file = str;
-		m_view->SetScriptFile(str);
-	}
+	glbin_settings.m_script_file = str;
 	FluoRefresh(2, { gstMovPlay, gstRunScript }, { glbin_mov_def.m_view_idx });
 	event.Skip();
 }
@@ -2262,7 +2257,6 @@ void MoviePanel::OnScriptFileEdit(wxCommandEvent& event)
 {
 	wxString str = m_script_file_text->GetValue();
 	glbin_settings.m_script_file = str;
-	m_view->SetScriptFile(str);
 	event.Skip();
 }
 
@@ -2284,7 +2278,6 @@ void MoviePanel::OnScriptFileBtn(wxCommandEvent& event)
 	{
 		wxString file = fopendlg->GetPath();
 		glbin_settings.m_script_file = file;
-		m_view->SetScriptFile(file);
 		m_script_file_text->ChangeValue(file);
 
 		//enable script if not

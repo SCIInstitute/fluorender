@@ -5081,9 +5081,9 @@ void RenderCanvas::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool
 	m_cur_vol_save = m_cur_vol;
 
 	//run pre-change script
-	if (update && m_run_script)
+	if (update && glbin_settings.m_run_script)
 	{
-		int r = glbin_script_proc.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, m_script_file, rewind);
+		int r = glbin_script_proc.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, rewind);
 		if (r == 2)
 		{
 			glbin_moviemaker.Reset();
@@ -5100,8 +5100,8 @@ void RenderCanvas::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool
 		UpdateVolumeData(frame, i);
 
 	//run post-change script
-	if (update && m_run_script)
-		glbin_script_proc.Run4DScript(flrd::ScriptProc::TM_ALL_POST_REWIND, m_script_file, rewind);
+	if (update && glbin_settings.m_run_script)
+		glbin_script_proc.Run4DScript(flrd::ScriptProc::TM_ALL_POST_REWIND, rewind);
 
 	//restore currently selected volume
 	m_cur_vol = m_cur_vol_save;
@@ -5180,9 +5180,9 @@ void RenderCanvas::Set3DBatFrame(int frame, int start_frame, int end_frame, bool
 	VolumeData* cur_vd_save = m_cur_vol;
 
 	//run pre-change script
-	if (update && m_run_script)
+	if (update && glbin_settings.m_run_script)
 	{
-		int r = glbin_script_proc.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, m_script_file, rewind);
+		int r = glbin_script_proc.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, rewind);
 		if (r == 2)
 		{
 			glbin_moviemaker.Reset();
@@ -5198,8 +5198,8 @@ void RenderCanvas::Set3DBatFrame(int frame, int start_frame, int end_frame, bool
 		ReloadVolumeData(frame);
 
 	//run post-change script
-	if (update && m_run_script)
-		glbin_script_proc.Run4DScript(flrd::ScriptProc::TM_ALL_POST, m_script_file, rewind);
+	if (update && glbin_settings.m_run_script)
+		glbin_script_proc.Run4DScript(flrd::ScriptProc::TM_ALL_POST, rewind);
 
 	//restore currently selected volume
 	m_cur_vol = cur_vd_save;
