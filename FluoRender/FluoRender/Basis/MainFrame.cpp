@@ -3749,7 +3749,9 @@ void MainFrame::OpenProject(wxString& filename)
 							{
 								double resx, resy, resz;
 								if (SSCANF(str.c_str(), "%lf%lf%lf", &resx, &resy, &resz))
-									vd->SetSpacings(resx, resy, resz);
+								{
+									vd->SetBaseSpacings(resx, resy, resz);
+								}
 							}
 						}
 						else
