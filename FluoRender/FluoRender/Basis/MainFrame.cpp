@@ -4859,6 +4859,7 @@ void MainFrame::OnSettings(wxCommandEvent& event)
 	m_aui_mgr.GetPane(m_setting_dlg).Show();
 	m_aui_mgr.GetPane(m_setting_dlg).Float();
 	m_aui_mgr.Update();
+	m_setting_dlg->SetFocus();
 }
 
 //undo redo
@@ -4979,6 +4980,7 @@ void MainFrame::ShowPaintTool()
 	glbin_settings.m_last_tool = TOOL_PAINT_BRUSH;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_paint_brush));
+	m_brush_tool_dlg->SetFocus();
 }
 
 void MainFrame::ShowMeasureDlg()
@@ -4989,6 +4991,7 @@ void MainFrame::ShowMeasureDlg()
 	glbin_settings.m_last_tool = TOOL_MEASUREMENT;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_measurement));
+	m_measure_dlg->SetFocus();
 }
 
 void MainFrame::ShowTraceDlg()
@@ -4999,6 +5002,7 @@ void MainFrame::ShowTraceDlg()
 	glbin_settings.m_last_tool = TOOL_TRACKING;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_tracking));
+	m_trace_dlg->SetFocus();
 }
 
 void MainFrame::ShowNoiseCancellingDlg()
@@ -5009,6 +5013,7 @@ void MainFrame::ShowNoiseCancellingDlg()
 	glbin_settings.m_last_tool = TOOL_NOISE_REDUCTION;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_noise_reduc));
+	m_noise_cancelling_dlg->SetFocus();
 }
 
 void MainFrame::ShowCountingDlg()
@@ -5019,6 +5024,7 @@ void MainFrame::ShowCountingDlg()
 	glbin_settings.m_last_tool = TOOL_VOLUME_SIZE;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_volume_size));
+	m_counting_dlg->SetFocus();
 }
 
 void MainFrame::ShowColocalizationDlg()
@@ -5029,6 +5035,7 @@ void MainFrame::ShowColocalizationDlg()
 	glbin_settings.m_last_tool = TOOL_COLOCALIZATION;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_colocalization));
+	m_colocalization_dlg->SetFocus();
 }
 
 void MainFrame::ShowConvertDlg()
@@ -5039,6 +5046,7 @@ void MainFrame::ShowConvertDlg()
 	glbin_settings.m_last_tool = TOOL_CONVERT;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_convert));
+	m_convert_dlg->SetFocus();
 }
 
 void MainFrame::ShowOclDlg()
@@ -5049,6 +5057,7 @@ void MainFrame::ShowOclDlg()
 	glbin_settings.m_last_tool = TOOL_OPENCL;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_opencl));
+	m_ocl_dlg->SetFocus();
 }
 
 void MainFrame::ShowComponentDlg()
@@ -5059,6 +5068,7 @@ void MainFrame::ShowComponentDlg()
 	glbin_settings.m_last_tool = TOOL_COMPONENT;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_components));
+	m_component_dlg->SetFocus();
 }
 
 void MainFrame::ShowCalculationDlg()
@@ -5069,6 +5079,7 @@ void MainFrame::ShowCalculationDlg()
 	glbin_settings.m_last_tool = TOOL_CALCULATIONS;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_calculations));
+	m_calculation_dlg->SetFocus();
 }
 
 void MainFrame::ShowMachineLearningDlg()
@@ -5079,6 +5090,7 @@ void MainFrame::ShowMachineLearningDlg()
 	glbin_settings.m_last_tool = TOOL_MACHINE_LEARNING;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_machine_learning));
+	m_machine_learning_dlg->SetFocus();
 }
 
 void MainFrame::ShowScriptBreakDlg(bool show)
@@ -5090,6 +5102,8 @@ void MainFrame::ShowScriptBreakDlg(bool show)
 	else
 		m_aui_mgr.GetPane(m_script_break_dlg).Hide();
 	m_aui_mgr.Update();
+	if (show)
+		m_script_break_dlg->SetFocus();
 }
 
 void MainFrame::SetTextureUndos()
