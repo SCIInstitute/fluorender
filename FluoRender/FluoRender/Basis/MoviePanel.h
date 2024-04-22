@@ -157,6 +157,7 @@ public:
 
 	//script
 	int GetScriptFiles(wxArrayString& list);
+	void EnableScript(bool val, const wxString& filename = "");
 
 private:
 	bool m_running;

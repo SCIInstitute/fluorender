@@ -2243,13 +2243,9 @@ void MoviePanel::OnSbSpinDown(wxSpinEvent& event)
 //script
 void MoviePanel::OnRunScriptChk(wxCommandEvent& event)
 {
-	if (!m_frame || !m_view)
-		return;
-	bool run_script = m_run_script_chk->GetValue();
-	glbin_settings.m_run_script = run_script;
+	bool val = m_run_script_chk->GetValue();
 	wxString str = m_script_file_text->GetValue();
-	glbin_settings.m_script_file = str;
-	FluoRefresh(2, { gstMovPlay, gstRunScript }, { glbin_mov_def.m_view_idx });
+	EnableScript(val, str);
 	event.Skip();
 }
 
@@ -2263,6 +2259,7 @@ void MoviePanel::OnScriptFileEdit(wxCommandEvent& event)
 void MoviePanel::OnScriptClearBtn(wxCommandEvent& event)
 {
 	m_script_file_text->Clear();
+	EnableScript(false);
 	event.Skip();
 }
 
@@ -2280,12 +2277,7 @@ void MoviePanel::OnScriptFileBtn(wxCommandEvent& event)
 		glbin_settings.m_script_file = file;
 		m_script_file_text->ChangeValue(file);
 
-		//enable script if not
-		if (!m_run_script_chk->GetValue())
-		{
-			m_run_script_chk->SetValue(true);
-			OnRunScriptChk(event);
-		}
+		EnableScript(true, file);
 	}
 
 	delete fopendlg;
@@ -2307,12 +2299,7 @@ void MoviePanel::OnScriptListSelected(wxListEvent& event)
 			GETSLASH() + file + ".txt";
 		m_script_file_text->ChangeValue(file);
 
-		//enable script if not
-		if (!m_run_script_chk->GetValue())
-		{
-			m_run_script_chk->SetValue(true);
-			OnRunScriptChk(event);
-		}
+		EnableScript(true, file);
 	}
 	event.Skip();
 }
@@ -2332,6 +2319,13 @@ int MoviePanel::GetScriptFiles(wxArrayString& list)
 	}
 	list.Sort();
 	return list.GetCount();
+}
+
+void MoviePanel::EnableScript(bool val, const wxString& filename)
+{
+	glbin_settings.m_run_script = val;
+	glbin_settings.m_script_file = filename;
+	FluoRefresh(2, { gstMovPlay, gstRunScript }, { glbin_mov_def.m_view_idx });
 }
 
 //ch1
