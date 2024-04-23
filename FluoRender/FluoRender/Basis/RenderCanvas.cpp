@@ -4399,7 +4399,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		DBGPRINT(L"Idle controller\n");
 		XINPUT_STATE xstate = m_controller->GetState();
 		double dzone = 0.2;
-		double sclr = 15.0;
+		double sclr = 20;
 		double leftx = double(xstate.Gamepad.sThumbLX) / 32767.0;
 		if (leftx > -dzone && leftx < dzone) leftx = 0.0;
 		double lefty = double(xstate.Gamepad.sThumbLY) / 32767.0;
@@ -4439,7 +4439,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		{
 			event.RequestMore(true);
 			double delta = lefty * sclr / (double)ny;
-			m_scale_factor += m_scale_factor * m_scale_factor * delta;
+			if (m_scale_factor < 1e3)
+				m_scale_factor += m_scale_factor * delta;
 			if (m_free)
 			{
 				fluo::Vector pos(m_transx, m_transy, m_transz);
