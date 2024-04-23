@@ -75,8 +75,8 @@ void BrushDefault::Read(wxFileConfig& f)
 	f.Read("hist depth", &m_paint_hist_depth, 1);
 	//iterations
 	f.Read("iter weak", &m_iter_weak, 10);
-	f.Read("iter normal", &m_iter_weak, 30);
-	f.Read("iter strong", &m_iter_weak, 60);
+	f.Read("iter normal", &m_iter_normal, 30);
+	f.Read("iter strong", &m_iter_strong, 60);
 	f.Read("iter num", &m_iter_num, 30);
 	//brush properties
 	f.Read("ini thresh", &m_ini_thresh, 0.0);
@@ -162,8 +162,8 @@ void BrushDefault::Save(wxFileConfig& f)
 	f.Write("hist depth", m_paint_hist_depth);
 	//iterations
 	f.Write("iter weak", m_iter_weak);
-	f.Write("iter normal", m_iter_weak);
-	f.Write("iter strong", m_iter_weak);
+	f.Write("iter normal", m_iter_normal);
+	f.Write("iter strong", m_iter_strong);
 	f.Write("iter num", m_iter_num);
 	//brush properties
 	f.Write("ini thresh", m_ini_thresh);
