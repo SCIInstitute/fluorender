@@ -173,6 +173,7 @@ public:
 	int m_update_order;		//0:back-to-front; 1:front-to-back
 	bool m_invalidate_tex;	//invalidate texture in every loop
 	int m_detail_level_offset;//an offset value to current level of detail (for multiresolution data only)
+	bool m_inf_loop;		//keep the render loop going
 
 	int m_bg_type;			//background parameters: 0-mean; 1-minmax; 2-median
 	int m_kx, m_ky;			//windows size

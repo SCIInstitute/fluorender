@@ -4508,12 +4508,19 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	}
 #endif
 
+
 	if (refresh)
 	{
 		m_clear_buffer = true;
 		m_updating = true;
 		RefreshGL(15, ref_stat, start_loop);
 		m_vrv->FluoRefresh(0, vc, {-1});
+	}
+	else if (glbin_settings.m_inf_loop)
+	{
+		RefreshGL(0, false, true);
+		event.RequestMore(true);
+		return;
 	}
 	if (set_focus)
 		SetFocus();

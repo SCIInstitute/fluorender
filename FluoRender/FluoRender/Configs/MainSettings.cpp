@@ -127,6 +127,7 @@ MainSettings::MainSettings()
 	m_update_order = 0;
 	m_invalidate_tex = false;
 	m_detail_level_offset = 0;
+	m_inf_loop = false;
 
 	m_bg_type = 0;
 	m_kx = 100;
@@ -331,6 +332,7 @@ void MainSettings::Read()
 		fconfig.Read("invalidate tex", &m_invalidate_tex, false);
 		//detail level offset
 		fconfig.Read("detail level offset", &m_detail_level_offset, 0);
+		fconfig.Read("inf loop", &m_inf_loop, false);
 	}
 	//background removal paramters
 	if (fconfig.Exists("/bg remove"))
@@ -550,6 +552,7 @@ void MainSettings::Save()
 	fconfig.Write("invalidate tex", m_invalidate_tex);
 	//detail level offset
 	fconfig.Write("detail level offset", m_detail_level_offset);
+	fconfig.Write("inf loop", m_inf_loop);
 
 	//background removal paramters
 	fconfig.SetPath("/bg remove");
