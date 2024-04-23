@@ -2642,7 +2642,7 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 			//temp buffer becomes unused after texture is bound
 			//ok to unprotect
 			temp_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-			temp_buffer->unprotect();
+			//temp_buffer->unprotect();
 		}
 		glDisable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
@@ -2859,8 +2859,10 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 			overlay_buffer->unprotect();
 		}
 		glEnable(GL_BLEND);
-		glBlendEquation(GL_FUNC_ADD);
-		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		glBlendEquation(GL_MAX);
+		glBlendFunc(GL_ONE, GL_ONE);
+		//glBlendEquation(GL_FUNC_ADD);
+		//glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 		if (color_mode == 1)
 		{
@@ -2947,7 +2949,7 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 			//bind tex from temp buffer
 			//it becomes unprotected afterwards
 			temp_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-			temp_buffer->unprotect();
+			//temp_buffer->unprotect();
 		}
 		glDisable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
@@ -3376,7 +3378,7 @@ void RenderCanvas::DrawOLShadows(vector<VolumeData*> &vlist)
 		//bind the fbo
 		flvr::Framebuffer* temp_buffer =
 			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-				flvr::FB_Render_RGBA, nx, ny);
+				flvr::FB_Render_RGBA, nx, ny, "temp");
 		if (temp_buffer)
 		{
 			temp_buffer->bind();
