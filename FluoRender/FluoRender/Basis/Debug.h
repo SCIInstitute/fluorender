@@ -1,8 +1,11 @@
 #ifndef _DEBUG_H_
 #define _DEBUG_H_
 
+#include <glew.h>
 #include <cstdlib>
 #include <stdio.h>
+
+#define GLHINT glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE)
 
 #ifdef _WIN32
 
