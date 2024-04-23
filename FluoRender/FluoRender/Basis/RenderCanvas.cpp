@@ -4497,9 +4497,9 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			fluo::Vector trans =
 				side * (double(px)*(m_ortho_right - m_ortho_left) / double(nx)) +
 				m_up * (double(py)*(m_ortho_top - m_ortho_bottom) / double(ny));
-			m_obj_transx += trans.x();
-			m_obj_transy += trans.y();
-			m_obj_transz += trans.z();
+			m_obj_transx += trans.x() * m_scale_factor;
+			m_obj_transy += trans.y() * m_scale_factor;
+			m_obj_transz += trans.z() * m_scale_factor;
 			m_interactive = true;
 			m_update_rot_ctr = true;
 			refresh = true;
