@@ -2851,6 +2851,7 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 	fconfig.Write("force brick size", glbin_settings.m_force_brick_size);
 	fconfig.Write("up time", glbin_settings.m_up_time);
 	fconfig.Write("update order", glbin_settings.m_update_order);
+	fconfig.Write("inf loop", glbin_settings.m_inf_loop);
 
 	//save data list
 	//volume
@@ -3546,6 +3547,8 @@ void MainFrame::OpenProject(wxString& filename)
 		fconfig.Read("up time", &up_time);
 		int update_order = 0;
 		fconfig.Read("update order", &update_order);
+		bool inf_loop = false;
+		fconfig.Read("inf loop", &inf_loop);
 
 		glbin_settings.m_mem_swap = mem_swap;
 		glbin_settings.m_graphics_mem = graphics_mem;
@@ -3553,6 +3556,7 @@ void MainFrame::OpenProject(wxString& filename)
 		glbin_settings.m_force_brick_size = force_brick_size;
 		glbin_settings.m_up_time = up_time;
 		glbin_settings.m_update_order = update_order;
+		glbin_settings.m_inf_loop = inf_loop;
 		glbin_settings.GetMemorySettings();
 		m_setting_dlg->UpdateUI();
 	}
