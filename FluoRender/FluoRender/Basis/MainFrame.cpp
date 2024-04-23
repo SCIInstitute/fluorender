@@ -2845,6 +2845,7 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 
 	//save streaming mode
 	fconfig.SetPath("/memory settings");
+	fconfig.Write("mouse int", glbin_settings.m_mouse_int);
 	fconfig.Write("mem swap", glbin_settings.m_mem_swap);
 	fconfig.Write("graphics mem", glbin_settings.m_graphics_mem);
 	fconfig.Write("large data size", glbin_settings.m_large_data_size);
@@ -3535,6 +3536,8 @@ void MainFrame::OpenProject(wxString& filename)
 	if (fconfig.Exists("/memory settings"))
 	{
 		fconfig.SetPath("/memory settings");
+		bool mouse_int = true;
+		fconfig.Read("mouse int", &mouse_int);
 		bool mem_swap = false;
 		fconfig.Read("mem swap", &mem_swap);
 		double graphics_mem = 1000.0;
@@ -3550,6 +3553,7 @@ void MainFrame::OpenProject(wxString& filename)
 		bool inf_loop = false;
 		fconfig.Read("inf loop", &inf_loop);
 
+		glbin_settings.m_mouse_int = mouse_int;
 		glbin_settings.m_mem_swap = mem_swap;
 		glbin_settings.m_graphics_mem = graphics_mem;
 		glbin_settings.m_large_data_size = large_data_size;
