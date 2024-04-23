@@ -4439,8 +4439,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		{
 			event.RequestMore(true);
 			double delta = lefty * sclr / (double)ny;
-			m_scale_factor += m_scale_factor * delta;
-			//m_vrv->UpdateScaleFactor(false);
+			m_scale_factor += m_scale_factor * m_scale_factor * delta;
 			if (m_free)
 			{
 				fluo::Vector pos(m_transx, m_transy, m_transz);
