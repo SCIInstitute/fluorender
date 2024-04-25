@@ -799,7 +799,7 @@ wxWindow* MoviePanel::CreateCropPage(wxWindow *parent)
 	m_crop_w_text = new wxTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_crop_w_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
-	m_crop_w_text->SetToolTip("Also drag the yellow frame in render view");
+	m_crop_w_text->SetToolTip("Also drag the cropping frame in render view");
 	m_crop_w_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(20, 20)));
 	m_crop_w_spin->SetRange(-0x8000, 0x7fff);
@@ -814,7 +814,7 @@ wxWindow* MoviePanel::CreateCropPage(wxWindow *parent)
 	m_crop_h_text = new wxTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_crop_h_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
-	m_crop_h_text->SetToolTip("Also drag the yellow frame in render view");
+	m_crop_h_text->SetToolTip("Also drag the cropping frame in render view");
 	m_crop_h_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(20, 20)));
 	m_crop_h_spin->SetRange(-0x8000, 0x7fff);
@@ -827,7 +827,7 @@ wxWindow* MoviePanel::CreateCropPage(wxWindow *parent)
 	sizer3->Add(20, 20, 0);
 	//scalebar
 	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Scalebar Positon",
+	st = new wxStaticText(page, 0, "Scalebar Position",
 		wxDefaultPosition, wxDefaultSize);
 	sizer4->Add(5, 5, 0);
 	sizer4->Add(st, 0, wxALIGN_CENTER);
