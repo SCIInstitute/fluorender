@@ -2597,7 +2597,7 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 			flvr::TextureRenderer::reset_clear_chan_buffer();
-			DBGPRINT(L"chan buffer cleared\n");
+			//DBGPRINT(L"chan buffer cleared\n");
 		}
 
 		if (vd->GetVR())
@@ -2794,13 +2794,10 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 
 		bool clear = !glbin_settings.m_mem_swap ||
 			(glbin_settings.m_mem_swap && flvr::TextureRenderer::get_clear_chan_buffer());
-		//if (clear)
-		{
-			glClearColor(0.0, 0.0, 0.0, 0.0);
-			glClear(GL_COLOR_BUFFER_BIT);
-			//flvr::TextureRenderer::reset_clear_chan_buffer();
-			DBGPRINT(L"overlay cleared\n");
-		}
+		glClearColor(0.0, 0.0, 0.0, 0.0);
+		glClear(GL_COLOR_BUFFER_BIT);
+		//flvr::TextureRenderer::reset_clear_chan_buffer();
+		//DBGPRINT(L"overlay cleared\n");
 
 		if (vd->GetVR())
 			vd->GetVR()->set_depth_peel(peel);
@@ -2849,7 +2846,7 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 			flvr::TextureRenderer::reset_clear_chan_buffer();
-			DBGPRINT(L"chan buffer cleared\n");
+			//DBGPRINT(L"chan buffer cleared\n");
 		}
 		glActiveTexture(GL_TEXTURE0);
 		if (overlay_buffer)
@@ -4396,7 +4393,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	//xinput controller
 	if (m_control_connected)
 	{
-		DBGPRINT(L"Idle controller\n");
+		//DBGPRINT(L"Idle controller\n");
 		XINPUT_STATE xstate = m_controller->GetState();
 		double dzone = 0.2;
 		double sclr = 20;

@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Undoable.h"
+#include <cmath>
 #include "Debug.h"
 
 double Undoable::time_span_ = 1;
