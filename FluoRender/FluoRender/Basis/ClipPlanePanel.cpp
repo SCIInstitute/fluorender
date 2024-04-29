@@ -1520,9 +1520,10 @@ void ClipPlanePanel::OnXRotEdit(wxCommandEvent &event)
 
 	wxString str = m_x_rot_text->GetValue();
 	double val = 0.0;
-	str.ToDouble(&val);
+	if (str.ToDouble(&val))
+		m_x_rot_sldr->ChangeValue(std::round(val));
 	m_view->SetClipRotX(val);
-	FluoRefresh(2, { gstClipRotX }, { m_frame->GetView(m_view) });
+	FluoRefresh(2, { gstNull }, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::OnYRotChange(wxScrollEvent &event)
@@ -1542,9 +1543,10 @@ void ClipPlanePanel::OnYRotEdit(wxCommandEvent &event)
 
 	wxString str = m_y_rot_text->GetValue();
 	double val = 0.0;
-	str.ToDouble(&val);
+	if (str.ToDouble(&val))
+		m_y_rot_sldr->ChangeValue(std::round(val));
 	m_view->SetClipRotY(val);
-	FluoRefresh(2, { gstClipRotY }, { m_frame->GetView(m_view) });
+	FluoRefresh(2, { gstNull }, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::OnZRotChange(wxScrollEvent &event)
@@ -1564,9 +1566,10 @@ void ClipPlanePanel::OnZRotEdit(wxCommandEvent &event)
 
 	wxString str = m_z_rot_text->GetValue();
 	double val = 0.0;
-	str.ToDouble(&val);
+	if (str.ToDouble(&val))
+		m_z_rot_sldr->ChangeValue(std::round(val));
 	m_view->SetClipRotZ(val);
-	FluoRefresh(2, { gstClipRotZ }, { m_frame->GetView(m_view) });
+	FluoRefresh(2, { gstNull }, { m_frame->GetView(m_view) });
 }
 
 void ClipPlanePanel::OnXRotSpinUp(wxSpinEvent& event)
