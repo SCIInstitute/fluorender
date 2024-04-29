@@ -1213,7 +1213,7 @@ wxWindow* MainFrame::CreateExtraControlVolume(wxWindow* parent)
 	st1 = new wxStaticText(panel, 0,
 		"Digit order:");
 	wxComboBox* combo = new wxComboBox(panel, ID_DIGI_ORDER,
-		"Order", wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+		"Order", wxDefaultPosition, parent->FromDIP(wxSize(100, 20)), 0, NULL, wxCB_READONLY);
 	combo->Connect(combo->GetId(), wxEVT_COMMAND_COMBOBOX_SELECTED,
 		wxCommandEventHandler(MainFrame::OnCmbChange), NULL, panel);
 	std::vector<std::string> combo_list;
@@ -1227,7 +1227,7 @@ wxWindow* MainFrame::CreateExtraControlVolume(wxWindow* parent)
 	st2 = new wxStaticText(panel, 0,
 		"Serial:");
 	wxTextCtrl* txt2 = new wxTextCtrl(panel, ID_SER_NUM,
-		"", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT);
+		"", wxDefaultPosition, parent->FromDIP(wxSize(40, 20)), wxTE_RIGHT);
 	txt2->Connect(txt2->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(MainFrame::OnTxt2Change), NULL, panel);
 
@@ -1261,7 +1261,7 @@ wxWindow* MainFrame::CreateExtraControlVolume(wxWindow* parent)
 	//time sequence identifier
 	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	wxTextCtrl* txt1 = new wxTextCtrl(panel, ID_TSEQ_ID,
-		"", wxDefaultPosition, wxDefaultSize);
+		"", wxDefaultPosition, parent->FromDIP(wxSize(40, 20)));
 	txt1->ChangeValue(glbin_settings.m_time_id);
 	txt1->Connect(txt1->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(MainFrame::OnTxt1Change), NULL, panel);

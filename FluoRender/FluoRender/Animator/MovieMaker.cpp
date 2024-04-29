@@ -204,8 +204,8 @@ void MovieMaker::PlaySave()
 			m_crop_h *= scale;
 		}
 
-		glbin.get_video_encoder().open(m_filename.ToStdString(), m_crop_w, m_crop_h, m_fps,
-			glbin_settings.m_mov_bitrate * 1e6);
+		glbin.get_video_encoder().open(m_filename.ToStdString(), m_crop_w, m_crop_h,
+			m_clip_frame_num + 1, m_fps, glbin_settings.m_mov_bitrate * 1e6);
 	}
 	m_filename = m_filename.SubString(0, m_filename.Len() - 5);
 	m_record = true;
