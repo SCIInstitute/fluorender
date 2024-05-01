@@ -587,7 +587,7 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 		new wxStaticBox(page, wxID_ANY, "Fullscreen on Display"), wxVERTICAL);
 	wxBoxSizer* sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Display ID:",
-		wxDefaultPosition, FromDIP(wxSize(50, -1)));
+		wxDefaultPosition, FromDIP(wxSize(100, -1)));
 	m_disp_id_comb = new wxComboBox(page, ID_DispIdCombo, "",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, NULL, wxCB_READONLY);
 	int dn = wxDisplay::GetCount();
@@ -607,7 +607,7 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 		new wxStaticBox(page, wxID_ANY, "Color Depth of Render View"), wxVERTICAL);
 	wxBoxSizer* sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Color Depth:",
-		wxDefaultPosition, FromDIP(wxSize(50, -1)));
+		wxDefaultPosition, FromDIP(wxSize(100, -1)));
 	m_color_depth_comb = new wxComboBox(page, ID_ColorDepthCombo, "",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> list2 = { "8", "10", "16" };
