@@ -484,14 +484,7 @@ void RenderCanvas::InitOpenVR()
 		m_use_openvr = true;
 		//get render size
 		m_vr_system->GetRecommendedRenderTargetSize(&m_vr_size[0], &m_vr_size[1]);
-		//get eye offset
-		//vr::HmdMatrix34_t eye_mat;
-		//eye_mat = m_vr_system->GetEyeToHeadTransform(vr::Eye_Left);
-		//double eye_x = eye_mat.m[0][3];
-		//double eye_y = eye_mat.m[1][3];
-		//double eye_z = eye_mat.m[2][3];
-		//m_vr_eye_offset = std::sqrt(eye_x*eye_x+eye_y*eye_y+eye_z*eye_z)*100.0;
-	}//otherwise use default settings
+	}
 }
 #endif
 
@@ -723,22 +716,6 @@ void RenderCanvas::HandleProjection(int nx, int ny, bool vr)
 		for (int i = 0; i < 16; ++i)
 			glm::value_ptr(m_proj_mat)[i] =
 			((float*)(proj_mat.m))[ti[i]];
-
-		/*{//not used
-			double aspect;
-			aspect = (double)nx / (double)ny;
-			double frustum_shift = (m_vr_eye_offset / 2.0) * m_near_clip / m_distance;
-			m_ortho_top = std::tan(m_aov / 2.0) * m_near_clip;
-			m_ortho_right = aspect * m_ortho_top + frustum_shift *
-				(m_vr_eye_idx ? 1.0 : -1.0);
-			m_ortho_left = -aspect * m_ortho_top + frustum_shift *
-				(m_vr_eye_idx ? -1.0 : 1.0);
-			m_ortho_bottom = -m_ortho_top;
-			m_proj_mat = glm::frustum(
-				m_ortho_left, m_ortho_right,
-				m_ortho_bottom, m_ortho_top,
-				m_near_clip, m_far_clip);
-		}*/
 #endif
 	}
 	else
@@ -779,7 +756,9 @@ void RenderCanvas::HandleCamera(bool vr)
 
 	if (vr && m_enable_vr)
 	{
-		glm::vec3 offset((m_vr_eye_idx ? 1.0 : -1.0) * m_vr_eye_offset / 2.0, 0.0, 0.0);
+		fluo::Vector side = GetSide();
+		side *= (m_vr_eye_idx ? 1.0 : -1.0) * m_vr_eye_offset / 2.0;
+		glm::vec3 offset(side.x(), side.y(), side.z());
 		m_mv_mat = glm::lookAt(
 			eye + offset,
 			center + offset,
