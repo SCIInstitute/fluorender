@@ -799,7 +799,7 @@ wxWindow* MoviePanel::CreateCropPage(wxWindow *parent)
 	m_crop_w_text = new wxTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_crop_w_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
-	m_crop_w_text->SetToolTip("Also drag the yellow frame in render view");
+	m_crop_w_text->SetToolTip("Also drag the cropping frame in render view");
 	m_crop_w_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(20, 20)));
 	m_crop_w_spin->SetRange(-0x8000, 0x7fff);
@@ -814,7 +814,7 @@ wxWindow* MoviePanel::CreateCropPage(wxWindow *parent)
 	m_crop_h_text = new wxTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_crop_h_text->Bind(wxEVT_TEXT, &MoviePanel::OnEditCrop, this);
-	m_crop_h_text->SetToolTip("Also drag the yellow frame in render view");
+	m_crop_h_text->SetToolTip("Also drag the cropping frame in render view");
 	m_crop_h_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(20, 20)));
 	m_crop_h_spin->SetRange(-0x8000, 0x7fff);
@@ -827,7 +827,7 @@ wxWindow* MoviePanel::CreateCropPage(wxWindow *parent)
 	sizer3->Add(20, 20, 0);
 	//scalebar
 	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Scalebar Positon",
+	st = new wxStaticText(page, 0, "Scalebar Position",
 		wxDefaultPosition, wxDefaultSize);
 	sizer4->Add(5, 5, 0);
 	sizer4->Add(st, 0, wxALIGN_CENTER);
@@ -2486,44 +2486,32 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 #endif
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
-	wxBoxSizer *line1 = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer *line2 = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer *line3 = new wxBoxSizer(wxHORIZONTAL);
 
-	//compressed TIFF
-	wxStaticText *tiffopts = new wxStaticText(panel, wxID_ANY, "TIFF Options:",
-		wxDefaultPosition, wxDefaultSize);
-	wxCheckBox *ch1 = new wxCheckBox(panel, wxID_ANY,
-		"Lempel-Ziv-Welch Compression");
-	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(MoviePanel::OnCh1Check), NULL, panel);
-	if (ch1)
-		ch1->SetValue(glbin_settings.m_save_compress);
-	wxCheckBox *ch2 = new wxCheckBox(panel, wxID_ANY,
-		"Save alpha");
-	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(MoviePanel::OnCh2Check), NULL, panel);
-	if (ch2)
-		ch2->SetValue(glbin_settings.m_save_alpha);
-	wxCheckBox *ch3 = new wxCheckBox(panel, wxID_ANY,
-		"Save float channel");
-	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(MoviePanel::OnCh3Check), NULL, panel);
-	if (ch3)
-		ch3->SetValue(glbin_settings.m_save_float);
-	line1->Add(tiffopts, 0, wxALIGN_CENTER);
-	line1->Add(ch1, 0, wxALIGN_CENTER);
-	line1->Add(10, 10);
-	line1->Add(ch2, 0, wxALIGN_CENTER);
-	line1->Add(10, 10);
-	line1->Add(ch3, 0, wxALIGN_CENTER);
+	wxStaticText* mov_note = new wxStaticText(panel, wxID_ANY,
+		"TIFF sequence is preferrable for very short movies.\n",
+		wxDefaultPosition, parent->FromDIP(wxSize(-1, 20)));
+
+	//copy all files check box
+	wxBoxSizer* line0 = 0;
+	if (glbin_settings.m_prj_save)
+	{
+		line0 = new wxBoxSizer(wxHORIZONTAL);
+		wxCheckBox* ch_embed = 0;
+		ch_embed = new wxCheckBox(panel, wxID_ANY,
+			"Embed all files in the project folder");
+		ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+			wxCommandEventHandler(MoviePanel::OnChEmbedCheck), NULL, panel);
+		ch_embed->SetValue(glbin_settings.m_vrp_embed);
+		line0->Add(ch_embed, 0, wxALIGN_CENTER);
+	}
 
 	//dpi
+	wxBoxSizer *line1 = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText* st = new wxStaticText(panel, wxID_ANY, "DPI: ",
 		wxDefaultPosition, wxDefaultSize);
 	wxIntegerValidator<unsigned int> vald_int;
 	wxTextCtrl* tx_dpi = new wxTextCtrl(panel, wxID_ANY,
-		"", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, vald_int);
+		"", wxDefaultPosition, parent->FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	tx_dpi->Connect(tx_dpi->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(MoviePanel::OnDpiText), NULL, panel);
 	float dpi = glbin_settings.m_dpi;
@@ -2544,26 +2532,57 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	sl_enlarge->SetValue(std::round(enlarge_scale * 10));
 	wxFloatingPointValidator<double> vald_fp(1);
 	wxTextCtrl* tx_enlarge = new wxTextCtrl(panel, ID_ENLARGE_TEXT,
-		"1.0", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, vald_fp);
+		"1.0", wxDefaultPosition, parent->FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp);
 	tx_enlarge->Connect(tx_enlarge->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(MoviePanel::OnTxEnlargeText), NULL, panel);
 	tx_enlarge->Enable(enlarge);
 	tx_enlarge->ChangeValue(wxString::Format("%.1f", enlarge_scale));
-	line2->Add(st, 0, wxALIGN_CENTER);
-	line2->Add(tx_dpi, 0, wxALIGN_CENTER);
-	line2->Add(10, 10);
-	line2->Add(ch_enlarge, 0, wxALIGN_CENTER);
-	line2->Add(10, 10);
-	line2->Add(sl_enlarge, 1, wxEXPAND);
-	line2->Add(10, 10);
-	line2->Add(tx_enlarge, 0, wxALIGN_CENTER);
+	line1->Add(st, 0, wxALIGN_CENTER);
+	line1->Add(tx_dpi, 0, wxALIGN_CENTER);
+	line1->Add(5, 5);
+	line1->Add(ch_enlarge, 0, wxALIGN_CENTER);
+	line1->Add(5, 5);
+	line1->Add(sl_enlarge, 1, wxEXPAND);
+	line1->Add(5, 5);
+	line1->Add(tx_enlarge, 0, wxALIGN_CENTER);
+
+	//compressed TIFF
+	wxBoxSizer* line2 = new wxBoxSizer(wxHORIZONTAL);
+	wxStaticText *tiffopts = new wxStaticText(panel, wxID_ANY, "TIFF Options:",
+		wxDefaultPosition, wxDefaultSize);
+	wxCheckBox *ch1 = new wxCheckBox(panel, wxID_ANY,
+		"Lempel-Ziv-Welch Compression");
+	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(MoviePanel::OnCh1Check), NULL, panel);
+	if (ch1)
+		ch1->SetValue(glbin_settings.m_save_compress);
+	wxCheckBox *ch2 = new wxCheckBox(panel, wxID_ANY,
+		"Save alpha");
+	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(MoviePanel::OnCh2Check), NULL, panel);
+	if (ch2)
+		ch2->SetValue(glbin_settings.m_save_alpha);
+	wxCheckBox *ch3 = new wxCheckBox(panel, wxID_ANY,
+		"Save float channel");
+	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(MoviePanel::OnCh3Check), NULL, panel);
+	if (ch3)
+		ch3->SetValue(glbin_settings.m_save_float);
+	line2->Add(tiffopts, 0, wxALIGN_CENTER);
+	line2->Add(5, 5);
+	line2->Add(ch1, 0, wxALIGN_CENTER);
+	line2->Add(5, 5);
+	line2->Add(ch2, 0, wxALIGN_CENTER);
+	line2->Add(5, 5);
+	line2->Add(ch3, 0, wxALIGN_CENTER);
 
 	// movie quality
+	wxBoxSizer* line3 = new wxBoxSizer(wxHORIZONTAL);
 	//bitrate
 	wxStaticText *MOVopts = new wxStaticText(panel, wxID_ANY, "MOV Options:",
 		wxDefaultPosition, wxDefaultSize);
 	wxTextCtrl *bitrate_text = new wxTextCtrl(panel, wxID_ANY, "20.0",
-		wxDefaultPosition, wxDefaultSize, wxTE_RIGHT);
+		wxDefaultPosition, parent->FromDIP(wxSize(60, 20)), wxTE_RIGHT);
 	bitrate_text->Connect(bitrate_text->GetId(), wxEVT_TEXT,
 		wxCommandEventHandler(MoviePanel::OnMovieQuality), NULL, panel);
 	st = new wxStaticText(panel, wxID_ANY, "Bitrate:",
@@ -2573,7 +2592,7 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	wxStaticText *st3 = new wxStaticText(panel, wxID_ANY, "Estimated size:",
 		wxDefaultPosition, wxDefaultSize);
 	wxTextCtrl* tx_estimate = new wxTextCtrl(panel, ID_MOV_ESTIMATE_TEXT, "2.5",
-		wxDefaultPosition, wxDefaultSize, wxTE_RIGHT);
+		wxDefaultPosition, parent->FromDIP(wxSize(60, 20)), wxTE_RIGHT);
 	tx_estimate->Disable();
 	glbin_settings.m_mov_bitrate = STOD(bitrate_text->GetValue().fn_str());
 	double size = glbin_settings.m_mov_bitrate *
@@ -2582,44 +2601,32 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 
 	line3->Add(MOVopts, 0, wxALIGN_CENTER);
 	line3->Add(st, 0, wxALIGN_CENTER);
-	line3->Add(5, 5, wxALIGN_CENTER);
+	line3->Add(5, 5);
 	line3->Add(bitrate_text, 0, wxALIGN_CENTER);
-	line3->Add(5, 5, wxALIGN_CENTER);
+	line3->Add(5, 5);
 	line3->Add(st2, 0, wxALIGN_CENTER);
-	line3->AddStretchSpacer();
+	line3->Add(5, 5);
 	line3->Add(st3, 0, wxALIGN_CENTER);
 	line3->Add(tx_estimate, 0, wxALIGN_CENTER);
 	st2 = new wxStaticText(panel, wxID_ANY, "MB",
 		wxDefaultPosition, wxDefaultSize);
-	line3->Add(5, 5, wxALIGN_CENTER);
+	line3->Add(5, 5);
 	line3->Add(st2, 0, wxALIGN_CENTER);
-	//copy all files check box
-	wxCheckBox *ch_embed = 0;
+	//group
+	group1->Add(5, 5);
+	group1->Add(mov_note);
+	group1->Add(5, 5);
 	if (glbin_settings.m_prj_save)
 	{
-		ch_embed = new wxCheckBox(panel, wxID_ANY,
-			"Embed all files in the project folder");
-		ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-			wxCommandEventHandler(MoviePanel::OnChEmbedCheck), NULL, panel);
-		ch_embed->SetValue(glbin_settings.m_vrp_embed);
-	}
-	//group
-	if (glbin_settings.m_prj_save && ch_embed) {
-		wxBoxSizer *line3 = new wxBoxSizer(wxHORIZONTAL);
-		line3->Add(ch_embed, 0, wxALIGN_CENTER);
-		group1->Add(line3);
-		group1->Add(5, 5, wxALIGN_CENTER);
+		group1->Add(line0);
+		group1->Add(5, 5);
 	}
 	group1->Add(line1);
-	group1->Add(10, 10, wxALIGN_CENTER);
+	group1->Add(5, 5);
 	group1->Add(line2);
-	group1->Add(10, 10, wxALIGN_CENTER);
+	group1->Add(5, 5);
 	group1->Add(line3);
-	wxStaticText *mov_note = new wxStaticText(panel, wxID_ANY,
-		"NOTE: Please make sure that the movie length is greater than 36 frames for correct compression!\n",
-		wxDefaultPosition, wxDefaultSize);
-	group1->Add(mov_note);
-	group1->Add(10, 10, wxALIGN_CENTER);
+	group1->Add(5, 5);
 	panel->SetSizerAndFit(group1);
 	panel->Layout();
 

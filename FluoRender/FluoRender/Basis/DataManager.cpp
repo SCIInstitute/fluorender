@@ -1349,8 +1349,10 @@ void VolumeData::Save(const wxString &filename, int mode,
 		sampler.SetClipRotation(q);
 		sampler.SetTranslate(t);
 		sampler.SetNegMask(neg_mask);
-		sampler.Resize(flrd::SDT_All, temp);
-		temp = sampler.GetResult();
+		bool replace = temp ? true : false;
+		sampler.Resize(flrd::SDT_All, replace);
+		if (!replace)
+			temp = sampler.GetResult();
 	}
 
 	BaseWriter *writer = 0;

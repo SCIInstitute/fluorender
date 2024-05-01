@@ -587,7 +587,7 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 		new wxStaticBox(page, wxID_ANY, "Fullscreen on Display"), wxVERTICAL);
 	wxBoxSizer* sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Display ID:",
-		wxDefaultPosition, FromDIP(wxSize(50, -1)));
+		wxDefaultPosition, FromDIP(wxSize(100, -1)));
 	m_disp_id_comb = new wxComboBox(page, ID_DispIdCombo, "",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, NULL, wxCB_READONLY);
 	int dn = wxDisplay::GetCount();
@@ -607,7 +607,7 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 		new wxStaticBox(page, wxID_ANY, "Color Depth of Render View"), wxVERTICAL);
 	wxBoxSizer* sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Color Depth:",
-		wxDefaultPosition, FromDIP(wxSize(50, -1)));
+		wxDefaultPosition, FromDIP(wxSize(100, -1)));
 	m_color_depth_comb = new wxComboBox(page, ID_ColorDepthCombo, "",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> list2 = { "8", "10", "16" };
@@ -1842,6 +1842,7 @@ void SettingDlg::onJavaJvmBrowse(wxCommandEvent &event)
 	{
 		wxString filename = fopendlg->GetPath();
 		m_java_jvm_text->ChangeValue(filename);
+		glbin_settings.m_jvm_path = filename;
 	}
 
 	if (fopendlg)
@@ -1871,6 +1872,7 @@ void SettingDlg::onJavaIJBrowse(wxCommandEvent &event)
 		//filename = filename + "/Contents/Java/ij.jar";
 #endif
 		m_java_ij_text->ChangeValue(filename);
+		glbin_settings.m_ij_path = filename;
 	}
 
 	if (fopendlg)
@@ -1888,13 +1890,15 @@ void SettingDlg::onJavaBioformatsBrowse(wxCommandEvent &event)
 	{
 		wxString filename = fopendlg->GetPath();
 		m_java_bioformats_text->ChangeValue(filename);
+		glbin_settings.m_bioformats_path = filename;
 	}
 
 	if (fopendlg)
 		delete fopendlg;
 }
 
-void SettingDlg::onJavaRadioButtonImageJ(wxCommandEvent &event) {
+void SettingDlg::onJavaRadioButtonImageJ(wxCommandEvent &event)
+{
 	m_java_jvm_text->Enable(true);
 	m_java_bioformats_text->Enable(true);
 	m_browse_jvm_btn->Enable(true);
@@ -1902,7 +1906,8 @@ void SettingDlg::onJavaRadioButtonImageJ(wxCommandEvent &event) {
 	glbin_settings.m_ij_mode = 0;
 }
 
-void SettingDlg::onJavaRadioButtonFiji(wxCommandEvent &event) {
+void SettingDlg::onJavaRadioButtonFiji(wxCommandEvent &event)
+{
 	m_java_jvm_text->Enable(false);	
 	m_java_bioformats_text->Enable(false);
 	m_browse_jvm_btn->Enable(false);

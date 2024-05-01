@@ -62,8 +62,11 @@ QVideoEncoder::QVideoEncoder() {
 	valid_ = false;
 }
 
-bool QVideoEncoder::open(std::string f, size_t w, size_t h,
-	size_t fps, size_t bitrate) {
+bool QVideoEncoder::open(
+	const std::string& f,
+	size_t w, size_t h, size_t len,
+	size_t fps, size_t bitrate)
+{
 	output_stream_.frame = 0;
 	output_stream_.next_pts = 0;
 	output_stream_.samples_count = 0;
@@ -82,9 +85,18 @@ bool QVideoEncoder::open(std::string f, size_t w, size_t h,
 	height_ = ((size_t)(h / 16)) * 16;
 	fps_ = fps;
 	bitrate_ = bitrate;
-	gop_ = 12;
-	ffmpeg::avformat_alloc_output_context2(
-		&format_context_, NULL, NULL, filename_.c_str());
+	if (len <= fps * 3)
+	{
+		gop_ = 0;
+		ffmpeg::avformat_alloc_output_context2(
+			&format_context_, NULL, "mpeg", filename_.c_str());
+	}
+	else
+	{
+		gop_ = fps > 30 ? 30 : fps;
+		ffmpeg::avformat_alloc_output_context2(
+			&format_context_, NULL, NULL, filename_.c_str());
+	}
 	if (!format_context_) {
 		std::cerr << "Could not deduce output" <<
 			"format from file extension: using MPEG.\n";
@@ -220,22 +232,26 @@ ffmpeg::AVFrame * QVideoEncoder::alloc_picture() {
 	return picture;
 }
 
-void QVideoEncoder::close() {
+void QVideoEncoder::close()
+{
 	if (!valid_) return;
 	//flush the remaining (delayed) frames.
 	ffmpeg::AVCodecContext *c;
 	c = output_stream_.st->codec;
 	int last_dts = 0;
-	while (true) {
+	while (true)
+	{
 		int got_packet = 0, ret;
 		ffmpeg::AVFrame * frame = output_stream_.frame;
 		ffmpeg::AVPacket pkt = { 0 };
 		ffmpeg::av_init_packet(&pkt);
 		/* encode the image */
 		ret = ffmpeg::avcodec_encode_video2(c, &pkt, frame, &got_packet);
-		if (last_dts == pkt.pts) break;
+		if (last_dts == pkt.pts)
+			break;
 		last_dts = pkt.dts;
-		if (ret < 0) {
+		if (ret < 0)
+		{
 			fprintf(stderr, "Error encoding video frame: %d\n", ret);
 			break;
 		}

@@ -1,0 +1,18 @@
+In fluorender_install, create:
+fluorender
+	usr/local/bin
+	DEBIAN
+Copy fluorender/build/bin to usr/local/bin
+Add control file to DEBIAN
+Build with:
+dpkg-deb --build fluorender
+Install with:
+sudo dpkg -i fluorender.deb
+
+control
+
+Package: fluorender
+Version: 2.30
+Maintainer: Yong Wan
+Architecture: amd64
+Description: fluorender

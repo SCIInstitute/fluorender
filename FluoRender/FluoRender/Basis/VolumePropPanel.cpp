@@ -1242,7 +1242,6 @@ void VolumePropPanel::InitVRenderViews(unsigned int type)
 			if (view)
 			{
 				view->InitView(type);
-				view->m_vrv->FluoUpdate();
 			}
 		}
 	}
@@ -3159,7 +3158,10 @@ void VolumePropPanel::UpdateMaxVal(double value)
 void VolumePropPanel::OnSpaceText(wxCommandEvent& event)
 {
 	if (SetSpacings())
+	{
 		InitVRenderViews(INIT_BOUNDS|INIT_CENTER);
+		FluoRefresh(3, { gstNull });
+	}
 	event.Skip();
 }
 

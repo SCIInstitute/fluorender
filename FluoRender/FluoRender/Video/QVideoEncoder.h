@@ -80,9 +80,9 @@ protected:
 	int write_frame(const ffmpeg::AVRational *time_base, ffmpeg::AVPacket *pkt);
 	void log_packet(const ffmpeg::AVFormatContext *fmt_ctx, const ffmpeg::AVPacket *pkt);
 public:
-    QVideoEncoder();
-    virtual ~QVideoEncoder();
-	bool open(std::string, size_t w, size_t h, size_t fps, size_t bitrate);
+	QVideoEncoder();
+	virtual ~QVideoEncoder();
+	bool open(const std::string& f, size_t w, size_t h, size_t len, size_t fps, size_t bitrate);
 	void close();
 	void fill_yuv_image(int64_t frame_index);
 	bool write_video_frame(size_t frame_num);
