@@ -2835,10 +2835,16 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 			overlay_buffer->unprotect();
 		}
 		glEnable(GL_BLEND);
-		glBlendEquation(GL_MAX);
-		glBlendFunc(GL_ONE, GL_ONE);
-		//glBlendEquation(GL_FUNC_ADD);
-		//glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		if (glbin_settings.m_mem_swap && !vd->GetVR()->get_done_loop(0))
+		{
+			glBlendEquation(GL_MAX);
+			glBlendFunc(GL_ONE, GL_ONE);
+		}
+		else
+		{
+			glBlendEquation(GL_FUNC_ADD);
+			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		}
 
 		if (color_mode == 1)
 		{
@@ -2952,6 +2958,7 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glEnable(GL_BLEND);
+	glBlendEquation(GL_FUNC_ADD);
 	if (m_vol_method == VOL_METHOD_COMP)
 		glBlendFunc(GL_ONE, GL_ONE);
 	else
