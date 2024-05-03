@@ -1496,11 +1496,11 @@ void OutputAdjPanel::SetSync(int i, bool val, bool update)
 	if (update)
 	{
 		fluo::ValueCollection vc;
-		if (i == 0)
+		if (i != 0 && m_sync[0])
 			vc.insert(gstSyncR);
-		if (i == 1)
+		if (i != 1 && m_sync[1])
 			vc.insert(gstSyncG);
-		if (i == 2)
+		if (i != 2 && m_sync[2])
 			vc.insert(gstSyncB);
 
 		FluoRefresh(2, vc, { m_frame->GetView(m_view) });
@@ -1796,22 +1796,52 @@ void OutputAdjPanel::UpdateSync()
 
 void OutputAdjPanel::OnRReset(wxCommandEvent &event)
 {
+	double dval;
+	dval = 1.0 / glbin_outadj_def.m_gamma_r;
+	m_r_gamma_sldr->ChangeValue(std::round(dval * 100.0));
+	m_r_gamma_text->ChangeValue(wxString::Format("%.2f", dval));
 	SetGamma(0, glbin_outadj_def.m_gamma_r, false);
+	dval = (glbin_outadj_def.m_brightness_r - 1.0) * 256.0;
+	m_r_brightness_sldr->ChangeValue(std::round(dval));
+	m_r_brightness_text->ChangeValue(wxString::Format("%d", int(std::round(dval))));
 	SetBrightness(0, glbin_outadj_def.m_brightness_r, false);
-	SetHdr(0, glbin_outadj_def.m_hdr_r);
+	dval = glbin_outadj_def.m_hdr_r;
+	m_r_hdr_sldr->ChangeValue(std::round(dval * 100.0));
+	m_r_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
+	SetHdr(0, glbin_outadj_def.m_hdr_r, false);
 }
 
 void OutputAdjPanel::OnGReset(wxCommandEvent &event)
 {
+	double dval;
+	dval = 1.0 / glbin_outadj_def.m_gamma_g;
+	m_g_gamma_sldr->ChangeValue(std::round(dval * 100.0));
+	m_g_gamma_text->ChangeValue(wxString::Format("%.2f", dval));
 	SetGamma(1, glbin_outadj_def.m_gamma_g, false);
+	dval = (glbin_outadj_def.m_brightness_g - 1.0) * 256.0;
+	m_g_brightness_sldr->ChangeValue(std::round(dval));
+	m_g_brightness_text->ChangeValue(wxString::Format("%d", int(std::round(dval))));
 	SetBrightness(1, glbin_outadj_def.m_brightness_g, false);
-	SetHdr(1, glbin_outadj_def.m_hdr_g);
+	dval = glbin_outadj_def.m_hdr_g;
+	m_g_hdr_sldr->ChangeValue(std::round(dval * 100.0));
+	m_g_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
+	SetHdr(1, glbin_outadj_def.m_hdr_g, false);
 }
 
 void OutputAdjPanel::OnBReset(wxCommandEvent &event)
 {
+	double dval;
+	dval = 1.0 / glbin_outadj_def.m_gamma_b;
+	m_b_gamma_sldr->ChangeValue(std::round(dval * 100.0));
+	m_b_gamma_text->ChangeValue(wxString::Format("%.2f", dval));
 	SetGamma(2, glbin_outadj_def.m_gamma_b, false);
+	dval = (glbin_outadj_def.m_brightness_b - 1.0) * 256.0;
+	m_b_brightness_sldr->ChangeValue(std::round(dval));
+	m_b_brightness_text->ChangeValue(wxString::Format("%d", int(std::round(dval))));
 	SetBrightness(2, glbin_outadj_def.m_brightness_b, false);
-	SetHdr(2, glbin_outadj_def.m_hdr_b);
+	dval = glbin_outadj_def.m_hdr_b;
+	m_b_hdr_sldr->ChangeValue(std::round(dval * 100.0));
+	m_b_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
+	SetHdr(2, glbin_outadj_def.m_hdr_b, false);
 }
 
