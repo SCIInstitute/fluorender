@@ -3,7 +3,7 @@
 //  
 //  The MIT License
 //  
-//  Copyright (c) 2004 Scientific Computing and Imaging Institute,
+//  Copyright (c) 2024 Scientific Computing and Imaging Institute,
 //  University of Utah.
 //  
 //  
@@ -26,59 +26,28 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#ifndef ImgShader_h
-#define ImgShader_h
+#ifndef LightFieldShader_h
+#define LightFieldShader_h
 
 #include <string>
 #include <vector>
 
 namespace flvr
 {
-#define IMG_SHADER_TEXTURE_LOOKUP			0
-#define IMG_SHDR_BRIGHTNESS_CONTRAST		1
-#define IMG_SHDR_BRIGHTNESS_CONTRAST_HDR	2
-#define IMG_SHDR_GRADIENT_MAP				3
-#define IMG_SHDR_FILTER_BLUR				4
-#define IMG_SHDR_FILTER_MAX					5
-#define IMG_SHDR_FILTER_SHARPEN				6
-#define IMG_SHDR_DEPTH_TO_OUTLINES			7
-#define IMG_SHDR_DEPTH_TO_GRADIENT			8
-#define IMG_SHDR_GRADIENT_TO_SHADOW			9
-#define IMG_SHDR_GRADIENT_TO_SHADOW_MESH	10
-#define IMG_SHDR_BLEND_BRIGHT_BACKGROUND	11
-#define IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR	12
-#define IMG_SHDR_PAINT						13
-#define	IMG_SHDR_DRAW_GEOMETRY				14
-#define	IMG_SHDR_DRAW_GEOMETRY_COLOR3		15
-#define	IMG_SHDR_DRAW_GEOMETRY_COLOR4		16
-#define	IMG_SHDR_GRADIENT_PROJ_MAP			17
-#define IMG_SHDR_DRAW_TEXT					18
-#define IMG_SHDR_DRAW_THICK_LINES			19
-#define IMG_SHDR_DRAW_THICK_LINES_COLOR		20
-
 	class ShaderProgram;
 
-	class ImgShader
+	class LightFieldShader
 	{
 	public:
-		ImgShader(int type, int colormap);
-		~ImgShader();
+		LightFieldShader(int type);
+		~LightFieldShader();
 
 		bool create();
 
-		inline int type() {return type_;}
-		inline int colormap() {return colormap_;}
-
-		inline bool match(int type, int colormap)
+		inline bool match(int type)
 		{
 			if (type_ == type)
-			{
-				if (type_ == IMG_SHDR_GRADIENT_MAP ||
-					type_ == IMG_SHDR_GRADIENT_PROJ_MAP)
-					return (colormap_==colormap);
-				else
-					return true;
-			}
+				return true;
 			else
 				return false;
 		}
@@ -88,30 +57,26 @@ namespace flvr
 	protected:
 		bool emit_v(std::string& s);
 		bool emit_f(std::string& s);
-		bool emit_g(std::string& s);
-		std::string get_colormap_code();
 
 		int type_;
-		int colormap_;
-		bool use_geom_shader_;
 
 		ShaderProgram* program_;
 	};
 
-	class ImgShaderFactory
+	class LightFieldShaderFactory
 	{
 	public:
-		ImgShaderFactory();
-		~ImgShaderFactory();
+		LightFieldShaderFactory();
+		~LightFieldShaderFactory();
 		void clear();
 
-		ShaderProgram* shader(int type, int colormap_=0);
+		ShaderProgram* shader(int type);
 
 	protected:
-		std::vector<ImgShader*> shader_;
+		std::vector<LightFieldShader*> shader_;
 		int prev_shader_;
 	};
 
 } // end namespace flvr
 
-#endif // ImgShader_h
+#endif // LightFieldShader_h

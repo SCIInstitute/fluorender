@@ -3,7 +3,7 @@
 //  
 //  The MIT License
 //  
-//  Copyright (c) 2004 Scientific Computing and Imaging Institute,
+//  Copyright (c) 2024 Scientific Computing and Imaging Institute,
 //  University of Utah.
 //  
 //  
@@ -26,8 +26,9 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-namespace flvr
-{
+#ifndef VolShaderCode_h
+#define VolShaderCode_h
+
 #define DEFAULT_FRAGMENT_CODE \
 	"void main() {\n" \
 	"    FragColor = vec4(1,1,1,1);\n" \
@@ -829,4 +830,5 @@ namespace flvr
 	"	}\n" \
 	"\n"
 #endif
-}//namespace flvr
+
+#endif//VolShaderCode_h

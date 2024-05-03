@@ -3,7 +3,7 @@
 //  
 //  The MIT License
 //  
-//  Copyright (c) 2004 Scientific Computing and Imaging Institute,
+//  Copyright (c) 2024 Scientific Computing and Imaging Institute,
 //  University of Utah.
 //  
 //  
@@ -26,8 +26,9 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-namespace flvr
-{
+#ifndef ImgShaderCode_h
+#define ImgShaderCode_h
+
 #define IMG_SHDR_CODE_DRAW_THICK_LINES \
 	"uniform vec4 loc0; //(vp0, vp1, thickness, 0.0)\n" \
 	"layout(lines) in;\n" \
@@ -81,5 +82,4 @@ namespace flvr
 	"	FragColor = vec4(OutColor2, 1.0);\n" \
 	"}\n"
 
-
-}//namespace flvr
+#endif//ImgShaderCode_h
