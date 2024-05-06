@@ -1695,8 +1695,8 @@ void SettingDlg::OnFontChange(wxCommandEvent &event)
 
 		if (m_frame)
 		{
-			flvr::TextRenderer::text_texture_manager_.load_face(loc.ToStdString());
-			flvr::TextRenderer::text_texture_manager_.SetSize(glbin_settings.m_text_size);
+			glbin_text_tex_manager.load_face(loc.ToStdString());
+			glbin_text_tex_manager.SetSize(glbin_settings.m_text_size);
 			for (int i = 0; i < m_frame->GetViewNum(); i++)
 			{
 				RenderCanvas* view = m_frame->GetView(i);
@@ -1717,7 +1717,7 @@ void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
 
 		if (m_frame)
 		{
-			flvr::TextRenderer::text_texture_manager_.SetSize(glbin_settings.m_text_size);
+			glbin_text_tex_manager.SetSize(glbin_settings.m_text_size);
 			for (int i = 0; i < m_frame->GetViewNum(); i++)
 			{
 				RenderCanvas* view = m_frame->GetView(i);

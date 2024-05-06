@@ -30,8 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Utils.h>
 #include <compatibility.h>
 
-double VolumeMeshConv::m_sw = 0.0;
-
 VolumeMeshConv::VolumeMeshConv() :
 	m_volume(0),
 	m_mask(0),
@@ -106,11 +104,12 @@ void VolumeMeshConv::SetVolumeUseTrans(bool use)
 }
 
 void VolumeMeshConv::SetVolumeTransfer(double gamma, double lo_thresh,
-	double hi_thresh, double offset, double gm_thresh)
+	double hi_thresh, double sw, double offset, double gm_thresh)
 {
 	m_gamma = gamma;
 	m_lo_thresh = lo_thresh;
 	m_hi_thresh = hi_thresh;
+	m_sw = sw;
 	m_saturation = offset;
 	m_boundary = gm_thresh;
 }

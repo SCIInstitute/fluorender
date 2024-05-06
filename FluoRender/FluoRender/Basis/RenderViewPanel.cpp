@@ -976,8 +976,8 @@ void RenderViewPanel::SetVolumeMethod(int val)
 void RenderViewPanel::Capture()
 {
 	//reset enlargement
-	RenderCanvas::SetEnlarge(false);
-	RenderCanvas::SetEnlargeScale(1.0);
+	m_canvas->SetEnlarge(false);
+	m_canvas->SetEnlargeScale(1.0);
 
 	wxFileDialog file_dlg(m_frame, "Save captured image", "", "", "*.tif", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 	file_dlg.SetExtraControlCreator(CreateExtraCaptureControl);
@@ -1754,7 +1754,7 @@ void RenderViewPanel::OnDpiText(wxCommandEvent& event)
 	wxSlider* sl_enlarge = (wxSlider*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_SLDR);
 	wxTextCtrl* tx_enlarge = (wxTextCtrl*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_TEXT);
 	bool enlarge = lval > 72;
-	RenderCanvas::SetEnlarge(enlarge);
+	m_canvas->SetEnlarge(enlarge);
 	if (ch_enlarge)
 		ch_enlarge->SetValue(enlarge);
 	double enlarge_scale = (double)lval / 72.0;
@@ -1784,7 +1784,7 @@ void RenderViewPanel::OnChEnlargeCheck(wxCommandEvent &event)
 	if (ch_enlarge)
 	{
 		bool enlarge = ch_enlarge->GetValue();
-		RenderCanvas::SetEnlarge(enlarge);
+		m_canvas->SetEnlarge(enlarge);
 		if (ch_enlarge->GetParent())
 		{
 			wxSlider* sl_enlarge = (wxSlider*)
@@ -1832,7 +1832,7 @@ void RenderViewPanel::OnTxEnlargeText(wxCommandEvent &event)
 	wxString str = event.GetString();
 	double dval;
 	str.ToDouble(&dval);
-	RenderCanvas::SetEnlargeScale(dval);
+	m_canvas->SetEnlargeScale(dval);
 	int ival = std::round(dval * 10);
 	wxTextCtrl* tx_enlarge = (wxTextCtrl*)event.GetEventObject();
 	if (tx_enlarge && tx_enlarge->GetParent())

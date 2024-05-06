@@ -518,6 +518,20 @@ if(WIN32)
 	endif()
 endif()
 
+# HoloPlay
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/include)
+if(WIN32)
+	if(${ARCHITECTURE} MATCHES 32)
+		file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/Win32/*.lib)
+    elseif(${ARCHITECTURE} MATCHES 64)
+		file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/Win64/*.lib)
+    endif()
+elseif(APPLE)
+	file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/macos/HoloPlayCore.bundle)
+else()
+	file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/linux/*.so)
+endif()
+
 #XInput
 if(WIN32 AND USE_XINPUT)
 	include_directories(${FluoRender_SOURCE_DIR}/FluoRender/XInput)
@@ -845,6 +859,7 @@ if(WIN32)
     ${ND2_LIBRARIES}
     ${HDF5_LIBRARIES}
     ${OpenCV_LIBS}
+    ${HoloPlay_LIBRARIES}
   )
   target_link_libraries(Tester
     secur32.lib
@@ -860,6 +875,7 @@ if(WIN32)
     ${OpenVR_LIBRARIES}
     ${HDF5_LIBRARIES}
     ${OpenCV_LIBS}
+    ${HoloPlay_LIBRARIES}
   )
 elseif(APPLE)
   target_link_libraries(FluoRender
@@ -875,6 +891,7 @@ elseif(APPLE)
     ${ND2_LIBRARIES}
     ${HDF5_LIBRARIES}
     ${OpenCV_LIBS}
+    ${HoloPlay_LIBRARIES}
   )
 else()
   target_link_libraries(FluoRender
@@ -890,6 +907,7 @@ else()
     ${ZLIB_LIBRARIES}
     ${ND2_LIBRARIES}
     ${OpenCV_LIBS}
+    ${HoloPlay_LIBRARIES}
   )
 endif()
 
@@ -964,5 +982,9 @@ if(WIN32)
 add_custom_command(TARGET FluoRender POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy
 	"${FluoRender_SOURCE_DIR}/FluoRender/OpenVR/lib/win64/openvr_api.dll"
+	"$<TARGET_FILE_DIR:FluoRender>")
+add_custom_command(TARGET FluoRender POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+	"${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/Win64/HoloPlayCore.dll"
 	"$<TARGET_FILE_DIR:FluoRender>")
 endif()

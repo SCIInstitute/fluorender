@@ -26,13 +26,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Diffusion.h"
+#include <Global.h>
 #include <DataManager.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
 #include <vector>
-#ifdef _DEBUG
-#include <fstream>
-#endif
 
 using namespace flrd;
 
@@ -267,12 +265,6 @@ void Diffusion::ReleaseMask(void* val, size_t brick_num, flvr::TextureBrick* b)
 
 void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 {
-	//debug
-#ifdef _DEBUG
-	unsigned int* val = 0;
-	std::ofstream ofs;
-#endif
-
 	if (!CheckBricks())
 		return;
 
@@ -284,8 +276,7 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 		m_vd->GetTexture()->push_mask();
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_diffusion);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_diffusion);
 	if (!kernel_prog)
 		return;
 	int kernel_index = kernel_prog->createKernel("kernel_0");
@@ -357,10 +348,6 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
 		kernel_prog->readBuffer(sizeof(unsigned char)*nx*ny*nz, val, val);
-		////debug
-		//ofs.open("E:/DATA/Test/colocal/test.bin", std::ios::out | std::ios::binary);
-		//ofs.write((char*)val, nx*ny*nz*sizeof(unsigned char));
-		//ofs.close();
 
 		//release buffer
 		kernel_prog->releaseAll();
@@ -370,18 +357,11 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 
 void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate)
 {
-	//debug
-#ifdef _DEBUG
-	unsigned int* val = 0;
-	std::ofstream ofs;
-#endif
-
 	if (!CheckBricks())
 		return;
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_diffusion);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_diffusion);
 	if (!kernel_prog)
 		return;
 	int kernel_index = kernel_prog->createKernel("kernel_1");
@@ -468,10 +448,6 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 			kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
 		kernel_prog->readBuffer(sizeof(unsigned char)*nx*ny*nz, val, val);
-		////debug
-		//ofs.open("E:/DATA/Test/colocal/test.bin", std::ios::out | std::ios::binary);
-		//ofs.write((char*)val, nx*ny*nz*sizeof(unsigned char));
-		//ofs.close();
 
 		//release buffer
 		kernel_prog->releaseAll();

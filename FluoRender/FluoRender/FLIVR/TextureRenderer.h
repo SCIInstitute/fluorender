@@ -106,6 +106,7 @@ namespace flvr
 	class ImgShaderFactory;
 	class VertexArray;
 	class VertexArrayManager;
+	class LightFieldShaderFactory;
 
 	struct TexParam
 	{
@@ -247,21 +248,6 @@ namespace flvr
 		int num_slices_;
 		double irate_;
 		bool imode_;
-
-		//kernel for calculation
-		static VolKernelFactory vol_kernel_factory_;
-		//framebuffers for everything
-		static FramebufferManager framebuffer_manager_;
-		//vertex arrays
-		static VertexArrayManager vertex_array_manager_;
-		//sahder for volume rendering
-		static VolShaderFactory vol_shader_factory_;
-		//shader for segmentation
-		static SegShaderFactory seg_shader_factory_;
-		//shader for calculation
-		static VolCalShaderFactory cal_shader_factory_;
-		//smooth filter
-		static ImgShaderFactory img_shader_factory_;
 
 		//saved framebuffer
 		GLuint cur_framebuffer_;

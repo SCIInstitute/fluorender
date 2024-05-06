@@ -262,13 +262,14 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 	//get use transfer function
 	if (m_cnv_vol_mesh_usetransf_chk->GetValue())
 	{
-		double gamma, lo_thresh, hi_thresh, offset, gm_thresh;
+		double gamma, lo_thresh, hi_thresh, sw, offset, gm_thresh;
 		gamma = sel_vol->GetGamma();
 		lo_thresh = sel_vol->GetLeftThresh();
 		hi_thresh = sel_vol->GetRightThresh();
 		offset = sel_vol->GetSaturation();
 		gm_thresh = sel_vol->GetBoundary();
-		converter.SetVolumeTransfer(gamma, lo_thresh, hi_thresh, offset, gm_thresh);
+		sw = sel_vol->GetSoftThreshold();
+		converter.SetVolumeTransfer(gamma, lo_thresh, hi_thresh, sw, offset, gm_thresh);
 		converter.SetVolumeUseTrans(true);
 	}
 	else

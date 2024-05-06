@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "VolumeSelector.h"
+#include <Global.h>
 #include <DataManager.h>
 #include "RenderCanvas.h"
 #include <MainFrame.h>
@@ -119,14 +120,14 @@ void VolumeSelector::Segment(bool push_mask, int mx, int my)
 	m_vd->GetVR()->set_mouse_vec(mvec);
 
 	flvr::Framebuffer* paint_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
+		glbin_framebuffer_manager.framebuffer("paint brush");
 	if (paint_buffer)
 		Set2DMask(paint_buffer->tex_id(GL_COLOR_ATTACHMENT0));
 	flvr::Framebuffer* final_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		glbin_framebuffer_manager.framebuffer(
 			"final");
 	flvr::Framebuffer* chann_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		glbin_framebuffer_manager.framebuffer(
 			"channel");
 	if (final_buffer && chann_buffer)
 		Set2DWeight(

@@ -48,7 +48,7 @@ public:
 	void SetVolumeSpacings(double x, double y, double z);
 	void SetVolumeUseTrans(bool use);
 	void SetVolumeTransfer(double gamma, double lo_thresh,
-		double hi_thresh, double offset, double gm_thresh);
+		double hi_thresh, double sw, double offset, double gm_thresh);
 	void SetVolumeUseMask(bool use);
 	void SetVolumeMask(Nrrd* mask);
 
@@ -57,10 +57,6 @@ public:
 	void SetDownsample(int downsample);
 	void SetDownsampleZ(int downsample);
 	void Convert();
-
-	//soft threshold
-	static void SetSoftThreshold(double val)
-	{ m_sw = val; }
 
 private:
 	typedef struct
@@ -84,11 +80,8 @@ private:
 	double m_spcx, m_spcy, m_spcz;
 	//volume info
 	bool m_use_transfer;
-	double m_gamma, m_lo_thresh, m_hi_thresh, m_saturation, m_boundary;
+	double m_gamma, m_lo_thresh, m_hi_thresh, m_sw, m_saturation, m_boundary;
 	bool m_use_mask;
-
-	//soft threshold
-	static double m_sw;
 
 private:
 	double GetValue(int x, int y, int z);

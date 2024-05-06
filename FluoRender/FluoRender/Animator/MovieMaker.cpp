@@ -197,9 +197,9 @@ void MovieMaker::PlaySave()
 			m_crop_w = m_view->GetGLSize().x;
 			m_crop_h = m_view->GetGLSize().y;
 		}
-		else if (RenderCanvas::GetEnlarge())
+		else if (m_view->GetEnlarge())
 		{
-			double scale = RenderCanvas::GetEnlargeScale();
+			double scale = m_view->GetEnlargeScale();
 			m_crop_w *= scale;
 			m_crop_h *= scale;
 		}
@@ -222,7 +222,7 @@ void MovieMaker::PlaySave()
 		m_frame->SaveProject(prop_file, inc);
 	}
 
-	RenderCanvas::SetKeepEnlarge(true);
+	m_view->SetKeepEnlarge(true);
 	Play(false);
 }
 
@@ -850,7 +850,7 @@ bool MovieMaker::Action()
 			WriteFrameToFile();
 		SetCurrentFrame(m_cur_frame);
 		Stop();
-		RenderCanvas::SetKeepEnlarge(false);
+		m_view->SetKeepEnlarge(false);
 		return true;
 	}
 

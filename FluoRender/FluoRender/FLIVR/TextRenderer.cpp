@@ -27,10 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "TextRenderer.h"
+#include <Global.h>
 #include <FLIVR/ShaderProgram.h>
-#include <FLIVR/ImgShader.h>
-#include <FLIVR/VertexArray.h>
-#include <FLIVR/TextureRenderer.h>
 
 namespace flvr
 {
@@ -175,7 +173,6 @@ namespace flvr
 		return result;
 	}
 
-	TextTextureManager TextRenderer::text_texture_manager_;
 	TextRenderer::TextRenderer()
 	{
 	}
@@ -192,8 +189,7 @@ namespace flvr
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		ShaderProgram* shader =
-			TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_TEXT);
+		ShaderProgram* shader = glbin_img_shader_factory.shader(IMG_SHDR_DRAW_TEXT);
 		if (shader)
 		{
 			if (!shader->valid())
@@ -202,8 +198,7 @@ namespace flvr
 			shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0f);
 		}
 
-		VertexArray* va_text =
-			TextureRenderer::vertex_array_manager_.vertex_array(VA_Text);
+		VertexArray* va_text = glbin_vertex_array_manager.vertex_array(VA_Text);
 		if (va_text && shader)
 		{
 			va_text->draw_begin();
@@ -211,7 +206,7 @@ namespace flvr
 			for (p = text.c_str(); *p; p++)
 			{
 				TextTexture* tex_p =
-					text_texture_manager_.text_texture(*p);
+					glbin_text_tex_manager.text_texture(*p);
 				if (tex_p)
 				{
 					tex_p->bind();
@@ -252,7 +247,7 @@ namespace flvr
 		for (p = text.c_str(); *p; p++)
 		{
 			TextTexture* tex_p =
-				text_texture_manager_.text_texture(*p);
+				glbin_text_tex_manager.text_texture(*p);
 			if (tex_p)
 				len += (tex_p->ax_ >> 6);
 		}

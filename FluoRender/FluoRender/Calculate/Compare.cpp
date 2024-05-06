@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Compare.h"
+#include <Global.h>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
@@ -635,8 +636,7 @@ void ChannelCompare::Product()
 		return;
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_chann_dotprod);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_chann_dotprod);
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;
@@ -744,8 +744,7 @@ void ChannelCompare::MinValue()
 		return;
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_chann_minvalue);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_chann_minvalue);
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;
@@ -853,8 +852,7 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		return;
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_chann_threshold);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_chann_threshold);
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;
@@ -968,8 +966,7 @@ void ChannelCompare::Average(float weight, flvr::Argument& avg)
 		return;
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_chann_sum);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_chann_sum);
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;

@@ -570,27 +570,17 @@ public:
 	void GetTraces(bool update = false);
 
 	//enlarge output image
-	static void SetKeepEnlarge(bool value)
+	void SetKeepEnlarge(bool value)
 	{
 		m_keep_enlarge = value;
 	}
-	static void SetEnlarge(bool value)
-	{
-		if (m_enlarge && !value)
-			flvr::TextRenderer::text_texture_manager_.SetEnlargeScale(1);
-		m_enlarge = value;
-	}
-	static void SetEnlargeScale(double value)
-	{
-		m_enlarge_scale = value;
-		if (m_enlarge)
-			flvr::TextRenderer::text_texture_manager_.SetEnlargeScale(m_enlarge_scale);
-	}
-	static bool GetEnlarge()
+	void SetEnlarge(bool value);
+	void SetEnlargeScale(double value);
+	bool GetEnlarge()
 	{
 		return m_enlarge;
 	}
-	static double GetEnlargeScale()
+	double GetEnlargeScale()
 	{
 		return m_enlarge_scale;
 	}
@@ -1136,9 +1126,9 @@ private:
 	flvr::TextRenderer m_text_renderer;
 
 	//enlargement
-	static bool m_keep_enlarge;
-	static bool m_enlarge;
-	static double m_enlarge_scale;
+	bool m_keep_enlarge;
+	bool m_enlarge;
+	double m_enlarge_scale;
 
 	//for benchmark
 	bool m_benchmark;

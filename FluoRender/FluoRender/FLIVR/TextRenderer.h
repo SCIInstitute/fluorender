@@ -133,9 +133,6 @@ namespace flvr
 		void RenderText(const std::wstring& text, fluo::Color &color,
 			float x, float y, float sx, float sy);
 		float RenderTextLen(std::wstring& text);
-
-	public:
-		static TextTextureManager text_texture_manager_;
 	};
 
 }

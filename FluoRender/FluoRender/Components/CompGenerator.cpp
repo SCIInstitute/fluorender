@@ -67,8 +67,7 @@ void ComponentGenerator::ShuffleID()
 		return;
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_shuffle_id_3d);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_shuffle_id_3d);
 	if (!kernel_prog)
 		return;
 	int kernel_index;
@@ -194,8 +193,7 @@ void ComponentGenerator::SetIDBit(int psize)
 		return;
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_set_bit_3d);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_set_bit_3d);
 	if (!kernel_prog)
 		return;
 	int kernel_index0;
@@ -330,8 +328,7 @@ void ComponentGenerator::Grow(/*bool diffuse, int iter, float tran, float fallof
 	float scale = m_vd->GetScalarScale();
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_brainbow_3d);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_brainbow_3d);
 	if (!kernel_prog)
 		return;
 	int kernel_index0;
@@ -428,8 +425,7 @@ void ComponentGenerator::DensityField(/*int dsize, int wsize,
 
 	//create program and kernels
 	//prog density
-	flvr::KernelProgram* kernel_prog_dens = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_density_field_3d);
+	flvr::KernelProgram* kernel_prog_dens = glbin_vol_kernel_factory.kernel(str_cl_density_field_3d);
 	if (!kernel_prog_dens)
 		return;
 	int kernel_dens_index0 = kernel_prog_dens->createKernel("kernel_0");
@@ -437,8 +433,7 @@ void ComponentGenerator::DensityField(/*int dsize, int wsize,
 	int kernel_dens_index2 = kernel_prog_dens->createKernel("kernel_2");
 
 	//prog grow
-	flvr::KernelProgram* kernel_prog_grow = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_density_grow_3d);
+	flvr::KernelProgram* kernel_prog_grow = glbin_vol_kernel_factory.kernel(str_cl_density_grow_3d);
 	if (!kernel_prog_grow)
 		return;
 	int kernel_grow_index0;
@@ -631,8 +626,7 @@ void ComponentGenerator::DistGrow()
 
 	//create program and kernels
 	//prog dist
-	flvr::KernelProgram* kernel_prog_dist = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_dist_field_2d);
+	flvr::KernelProgram* kernel_prog_dist = glbin_vol_kernel_factory.kernel(str_cl_dist_field_2d);
 	if (!kernel_prog_dist)
 		return;
 	int kernel_dist_index0;
@@ -648,8 +642,7 @@ void ComponentGenerator::DistGrow()
 		kernel_dist_index1 = kernel_prog_dist->createKernel("kernel_2");
 	}
 
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_dist_grow_3d);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_dist_grow_3d);
 	if (!kernel_prog)
 		return;
 	int kernel_index0;
@@ -795,8 +788,7 @@ void ComponentGenerator::DistDensityField(
 
 	//create program and kernels
 	//prog dist
-	flvr::KernelProgram* kernel_prog_dist = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_dist_field_2d);
+	flvr::KernelProgram* kernel_prog_dist = glbin_vol_kernel_factory.kernel(str_cl_dist_field_2d);
 	if (!kernel_prog_dist)
 		return;
 	int kernel_dist_index0;
@@ -812,8 +804,7 @@ void ComponentGenerator::DistDensityField(
 		kernel_dist_index1 = kernel_prog_dist->createKernel("kernel_2");
 	}
 	//prog density
-	flvr::KernelProgram* kernel_prog_dens = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_distdens_field_3d);
+	flvr::KernelProgram* kernel_prog_dens = glbin_vol_kernel_factory.kernel(str_cl_distdens_field_3d);
 	if (!kernel_prog_dens)
 		return;
 	int kernel_dens_index0 = kernel_prog_dens->createKernel("kernel_0");
@@ -821,8 +812,7 @@ void ComponentGenerator::DistDensityField(
 	int kernel_dens_index2 = kernel_prog_dens->createKernel("kernel_2");
 
 	//prog grow
-	flvr::KernelProgram* kernel_prog_grow = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_density_grow_3d);
+	flvr::KernelProgram* kernel_prog_grow = glbin_vol_kernel_factory.kernel(str_cl_density_grow_3d);
 	if (!kernel_prog_grow)
 		return;
 	int kernel_grow_index0;
@@ -1062,8 +1052,7 @@ void ComponentGenerator::Cleanup(/*int iter, unsigned int size_lm*/)
 		return;
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_cleanup_3d);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_cleanup_3d);
 	if (!kernel_prog)
 		return;
 	int kernel_index0;
@@ -1196,8 +1185,7 @@ void ComponentGenerator::ClearBorders()
 		return;
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_clear_borders_3d);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_clear_borders_3d);
 	if (!kernel_prog)
 		return;
 	int kernel_index;
@@ -1259,8 +1247,7 @@ void ComponentGenerator::FillBorders()
 		return;
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_fill_borders_3d);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_fill_borders_3d);
 	if (!kernel_prog)
 		return;
 	int kernel_index;
@@ -1392,8 +1379,7 @@ void ComponentGenerator::GenerateDB()
 	float sscale = float(m_vd->GetScalarScale());
 
 	//prog
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_comp_gen_db);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_comp_gen_db);
 	if (!kernel_prog)
 		return;
 	int kernel_index0 = kernel_prog->createKernel("kernel_0");//generate lut

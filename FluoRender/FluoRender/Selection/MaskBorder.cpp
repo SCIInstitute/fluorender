@@ -25,8 +25,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <DataManager.h>
 #include "MaskBorder.h"
+#include <Global.h>
+#include <DataManager.h>
 
 using namespace flrd;
 
@@ -118,8 +119,7 @@ void MaskBorder::Compute(int order)
 	bn = bricks.size();
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_check_box_borders);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_check_box_borders);
 	if (!kernel_prog)
 		return;
 	int kernel_index0 = kernel_prog->createKernel("kernel_0");

@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#include <Global.h>
 #include <StencilCompare.h>
-#include <FLIVR/VolumeRenderer.h>
 #ifdef _DEBUG
 #include <Debug.h>
 #endif
@@ -785,8 +785,7 @@ m_method(method),
 m_use_mask(use_mask)
 {
 	//create program
-	m_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(
+	m_prog = glbin_vol_kernel_factory.kernel(
 		m_use_mask ? str_cl_stencil_mask : str_cl_stencil);
 }
 

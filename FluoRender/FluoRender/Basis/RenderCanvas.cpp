@@ -64,9 +64,6 @@ DEALINGS IN THE SOFTWARE.
 
 bool RenderCanvas::m_linked_rot = false;
 RenderCanvas* RenderCanvas::m_master_linked_view = 0;
-bool RenderCanvas::m_keep_enlarge = false;
-bool RenderCanvas::m_enlarge = false;
-double RenderCanvas::m_enlarge_scale = 1.0;
 #ifdef _WIN32
 HCTX RenderCanvas::m_hTab = 0;
 LOGCONTEXTA RenderCanvas::m_lc;
@@ -323,6 +320,9 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_paint_colocalize(false),
 	m_ruler_autorelax(false),
 	m_focused_slider(0),
+	m_keep_enlarge(false),
+	m_enlarge(false),
+	m_enlarge_scale(1.0),
 	//vr settings
 	m_enable_vr(false),
 	m_enable_sbs(false),
@@ -998,7 +998,7 @@ void RenderCanvas::DrawDP()
 		{
 			name = "peel buffer" + std::to_string(i);
 			peel_buffer =
-				flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+				glbin_framebuffer_manager.framebuffer(
 					flvr::FB_Depth_Float, nx, ny, name);
 			if (peel_buffer)
 			{
@@ -1018,7 +1018,7 @@ void RenderCanvas::DrawDP()
 				glActiveTexture(GL_TEXTURE15);
 				name = "peel buffer" + std::to_string(i-1);
 				peel_buffer =
-					flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+					glbin_framebuffer_manager.framebuffer(name);
 				if (peel_buffer)
 					peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 				glActiveTexture(GL_TEXTURE0);
@@ -1044,7 +1044,7 @@ void RenderCanvas::DrawDP()
 				glActiveTexture(GL_TEXTURE15);
 				name = "peel buffer" + std::to_string(0);
 				peel_buffer =
-					flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+					glbin_framebuffer_manager.framebuffer(name);
 				if (peel_buffer)
 					peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 				glActiveTexture(GL_TEXTURE0);
@@ -1061,7 +1061,7 @@ void RenderCanvas::DrawDP()
 					glActiveTexture(GL_TEXTURE15);
 					name = "peel buffer" + std::to_string(0);
 					peel_buffer =
-						flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+						glbin_framebuffer_manager.framebuffer(name);
 					if (peel_buffer)
 						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 					glActiveTexture(GL_TEXTURE0);
@@ -1071,13 +1071,13 @@ void RenderCanvas::DrawDP()
 					glActiveTexture(GL_TEXTURE14);
 					name = "peel buffer" + std::to_string(0);
 					peel_buffer =
-						flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+						glbin_framebuffer_manager.framebuffer(name);
 					if (peel_buffer)
 						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 					glActiveTexture(GL_TEXTURE15);
 					name = "peel buffer" + std::to_string(1);
 					peel_buffer =
-						flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+						glbin_framebuffer_manager.framebuffer(name);
 					if (peel_buffer)
 						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 					glActiveTexture(GL_TEXTURE0);
@@ -1089,13 +1089,13 @@ void RenderCanvas::DrawDP()
 						glActiveTexture(GL_TEXTURE14);
 						name = "peel buffer" + std::to_string(i-2);
 						peel_buffer =
-							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+							glbin_framebuffer_manager.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE15);
 						name = "peel buffer" + std::to_string(i-1);
 						peel_buffer =
-							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+							glbin_framebuffer_manager.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE0);
@@ -1105,13 +1105,13 @@ void RenderCanvas::DrawDP()
 						glActiveTexture(GL_TEXTURE14);
 						name = "peel buffer" + std::to_string(0);
 						peel_buffer =
-							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+							glbin_framebuffer_manager.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE15);
 						name = "peel buffer" + std::to_string(1);
 						peel_buffer =
-							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+							glbin_framebuffer_manager.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE0);
@@ -1121,19 +1121,19 @@ void RenderCanvas::DrawDP()
 						glActiveTexture(GL_TEXTURE13);
 						name = "peel buffer" + std::to_string(i-2);
 						peel_buffer =
-							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+							glbin_framebuffer_manager.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE14);
 						name = "peel buffer" + std::to_string(i-1);
 						peel_buffer =
-							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+							glbin_framebuffer_manager.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE15);
 						name = "peel buffer" + std::to_string(i);
 						peel_buffer =
-							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+							glbin_framebuffer_manager.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE0);
@@ -1833,7 +1833,7 @@ void RenderCanvas::DrawCircles(double cx, double cy,
 	double r1, double r2, fluo::Color &color, glm::mat4 &matrix)
 {
 	flvr::ShaderProgram* shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -1848,7 +1848,7 @@ void RenderCanvas::DrawCircles(double cx, double cy,
 	shader->setLocalParamMatrix(0, glm::value_ptr(mat0));
 
 	flvr::VertexArray* va_circles =
-		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Brush_Circles);
+		glbin_vertex_array_manager.vertex_array(flvr::VA_Brush_Circles);
 	if (va_circles)
 	{
 		//set parameters
@@ -1957,7 +1957,7 @@ void RenderCanvas::PaintStroke()
 	//generate texture and buffer objects
 	//painting fbo
 	flvr::Framebuffer* paint_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		glbin_framebuffer_manager.framebuffer(
 			flvr::FB_Render_RGBA, nx, ny, "paint brush");
 	if (!paint_buffer)
 		return;
@@ -1974,7 +1974,7 @@ void RenderCanvas::PaintStroke()
 	{
 		//paint shader
 		flvr::ShaderProgram* paint_shader =
-			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_PAINT);
+			glbin_img_shader_factory.shader(IMG_SHDR_PAINT);
 		if (paint_shader)
 		{
 			if (!paint_shader->valid())
@@ -2064,7 +2064,7 @@ void RenderCanvas::DisplayStroke()
 {
 	//painting texture
 	flvr::Framebuffer* paint_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
+		glbin_framebuffer_manager.framebuffer("paint brush");
 	if (!paint_buffer)
 		return;
 
@@ -2076,7 +2076,7 @@ void RenderCanvas::DisplayStroke()
 	glDisable(GL_DEPTH_TEST);
 
 	flvr::ShaderProgram* img_shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+		glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -2186,7 +2186,7 @@ void RenderCanvas::PrepFinalBuffer()
 	//glEnable(GL_TEXTURE_2D);
 	//frame buffer for final
 	flvr::Framebuffer* final_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		glbin_framebuffer_manager.framebuffer(
 			flvr::FB_Render_RGBA, nx, ny, "final");
 	if (final_buffer)
 		final_buffer->protect();
@@ -2195,7 +2195,7 @@ void RenderCanvas::PrepFinalBuffer()
 void RenderCanvas::ClearFinalBuffer()
 {
 	flvr::Framebuffer* final_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		glbin_framebuffer_manager.framebuffer(
 		"final");
 	if (final_buffer)
 		final_buffer->bind();
@@ -2215,7 +2215,7 @@ void RenderCanvas::DrawFinalBuffer()
 	//draw the final buffer to the windows buffer
 	glActiveTexture(GL_TEXTURE0);
 	flvr::Framebuffer* final_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
+		glbin_framebuffer_manager.framebuffer("final");
 	if (final_buffer)
 		final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	glEnable(GL_BLEND);
@@ -2225,7 +2225,7 @@ void RenderCanvas::DrawFinalBuffer()
 
 	//2d adjustment
 	flvr::ShaderProgram* img_shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
+		glbin_img_shader_factory.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -2299,7 +2299,7 @@ void RenderCanvas::PrepVRBuffer()
 		vr_buf_name = "vr left";
 
 	flvr::Framebuffer* vr_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		glbin_framebuffer_manager.framebuffer(
 			flvr::FB_UChar_RGBA, nx, ny, vr_buf_name);
 	if (vr_buffer)
 		vr_buffer->protect();
@@ -2315,7 +2315,7 @@ void RenderCanvas::BindRenderBuffer()
 		else
 			vr_buf_name = "vr left";
 		flvr::Framebuffer* vr_buffer =
-			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			glbin_framebuffer_manager.framebuffer(
 				vr_buf_name);
 		if (vr_buffer)
 			vr_buffer->bind();
@@ -2348,7 +2348,7 @@ void RenderCanvas::DrawVRBuffer()
 	glDisable(GL_DEPTH_TEST);
 
 	flvr::ShaderProgram* img_shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+		glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -2357,12 +2357,12 @@ void RenderCanvas::DrawVRBuffer()
 	}
 	//left eye
 	flvr::Framebuffer* buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		glbin_framebuffer_manager.framebuffer(
 			"vr left");
 	if (buffer)
 		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	flvr::VertexArray* quad_va =
-		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Left_Square);
+		glbin_vertex_array_manager.vertex_array(flvr::VA_Left_Square);
 	if (quad_va)
 		quad_va->draw();
 	//openvr left eye
@@ -2379,12 +2379,12 @@ void RenderCanvas::DrawVRBuffer()
 	}
 	//right eye
 	buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		glbin_framebuffer_manager.framebuffer(
 			"vr right");
 	if (buffer)
 		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	quad_va =
-		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Right_Square);
+		glbin_vertex_array_manager.vertex_array(flvr::VA_Right_Square);
 	if (quad_va)
 		quad_va->draw();
 	//openvr left eye
@@ -2437,7 +2437,7 @@ void RenderCanvas::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pee
 	//generate textures & buffer objects
 	//frame buffer for each volume
 	flvr::Framebuffer* chann_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		glbin_framebuffer_manager.framebuffer(
 		flvr::FB_Render_RGBA, nx, ny, "channel");
 	if (chann_buffer)
 		chann_buffer->protect();
@@ -2519,7 +2519,7 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 	}
 
 	flvr::Framebuffer* chann_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
+		glbin_framebuffer_manager.framebuffer("channel");
 	if (do_over)
 	{
 		//before rendering this channel, save final buffer to temp buffer
@@ -2531,7 +2531,7 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 
 			//bind temporary framebuffer for comp in stream mode
 			flvr::Framebuffer* temp_buffer =
-				flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+				glbin_framebuffer_manager.framebuffer(
 					flvr::FB_Render_RGBA, nx, ny, "temporary");
 			if (temp_buffer)
 			{
@@ -2542,14 +2542,14 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 			glClear(GL_COLOR_BUFFER_BIT);
 			glActiveTexture(GL_TEXTURE0);
 			flvr::Framebuffer* final_buffer =
-				flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
+				glbin_framebuffer_manager.framebuffer("final");
 			if (final_buffer)
 				final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 			glDisable(GL_BLEND);
 			glDisable(GL_DEPTH_TEST);
 
 			img_shader =
-				flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 			if (img_shader)
 			{
 				if (!img_shader->valid())
@@ -2602,7 +2602,7 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 
 	//bind fbo for final composition
 	flvr::Framebuffer* final_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		glbin_framebuffer_manager.framebuffer(
 		"final");
 	if (final_buffer)
 		final_buffer->bind();
@@ -2614,7 +2614,7 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
 		flvr::Framebuffer* temp_buffer =
-			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			glbin_framebuffer_manager.framebuffer(
 			"temporary");
 		if (temp_buffer)
 		{
@@ -2627,7 +2627,7 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 		glDisable(GL_DEPTH_TEST);
 
 		img_shader =
-			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+			glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -2656,7 +2656,7 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 
 	//2d adjustment
 	img_shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+		glbin_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -2714,7 +2714,7 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 	flvr::ShaderProgram* img_shader = 0;
 
 	flvr::Framebuffer* chann_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
+		glbin_framebuffer_manager.framebuffer("channel");
 	flvr::Framebuffer* overlay_buffer = 0;
 	if (do_mip)
 	{
@@ -2727,7 +2727,7 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 
 			//bind temporary framebuffer for comp in stream mode
 			flvr::Framebuffer* temp_buffer =
-				flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+				glbin_framebuffer_manager.framebuffer(
 				flvr::FB_Render_RGBA, nx, ny, "temporary");
 			if (temp_buffer)
 			{
@@ -2738,14 +2738,14 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 			glClear(GL_COLOR_BUFFER_BIT);
 			glActiveTexture(GL_TEXTURE0);
 			flvr::Framebuffer* final_buffer =
-				flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
+				glbin_framebuffer_manager.framebuffer("final");
 			if (final_buffer)
 				final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 			glDisable(GL_BLEND);
 			glDisable(GL_DEPTH_TEST);
 
 			img_shader =
-				flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 			if (img_shader)
 			{
 				if (!img_shader->valid())
@@ -2761,7 +2761,7 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 
 		//bind the fbo
 		overlay_buffer =
-			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			glbin_framebuffer_manager.framebuffer(
 				flvr::FB_Render_RGBA, nx, ny);
 		if (overlay_buffer)
 		{
@@ -2850,10 +2850,10 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 		{
 			//2d adjustment
 			if (vd->GetColormapProj())
-				img_shader = flvr::TextureRenderer::img_shader_factory_.shader(
+				img_shader = glbin_img_shader_factory.shader(
 					IMG_SHDR_GRADIENT_PROJ_MAP, vd->GetColormap());
 			else
-				img_shader = flvr::TextureRenderer::img_shader_factory_.shader(
+				img_shader = glbin_img_shader_factory.shader(
 					IMG_SHDR_GRADIENT_MAP, vd->GetColormap());
 			if (img_shader)
 			{
@@ -2877,7 +2877,7 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 		else
 		{
 			img_shader =
-				flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 		}
 
 		if (img_shader)
@@ -2912,7 +2912,7 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 
 	//bind fbo for final composition
 	flvr::Framebuffer* final_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		glbin_framebuffer_manager.framebuffer(
 		"final");
 	if (final_buffer)
 		final_buffer->bind();
@@ -2924,7 +2924,7 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
 		flvr::Framebuffer* temp_buffer =
-			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			glbin_framebuffer_manager.framebuffer(
 				"temporary");
 		if (temp_buffer)
 		{
@@ -2937,7 +2937,7 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 		glDisable(GL_DEPTH_TEST);
 
 		img_shader =
-			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+			glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -2967,7 +2967,7 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 
 	//2d adjustment
 	img_shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+		glbin_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3023,7 +3023,7 @@ void RenderCanvas::DrawOLShading(VolumeData* vd)
 
 	//shading pass
 	flvr::Framebuffer* overlay_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		glbin_framebuffer_manager.framebuffer(
 		flvr::FB_Render_RGBA, nx, ny);
 	if (overlay_buffer)
 	{
@@ -3048,7 +3048,7 @@ void RenderCanvas::DrawOLShading(VolumeData* vd)
 
 	//bind fbo for final composition
 	flvr::Framebuffer* chann_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
+		glbin_framebuffer_manager.framebuffer("channel");
 	if (chann_buffer)
 		chann_buffer->bind();
 	glActiveTexture(GL_TEXTURE0);
@@ -3064,7 +3064,7 @@ void RenderCanvas::DrawOLShading(VolumeData* vd)
 	glDisable(GL_DEPTH_TEST);
 
 	flvr::ShaderProgram* img_shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+		glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3124,7 +3124,7 @@ void RenderCanvas::DrawOLShadowsMesh(double darkness)
 	//shadow pass
 	//bind the fbo
 	flvr::Framebuffer* overlay_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		glbin_framebuffer_manager.framebuffer(
 		flvr::FB_Render_RGBA, nx, ny);
 	if (overlay_buffer)
 	{
@@ -3136,7 +3136,7 @@ void RenderCanvas::DrawOLShadowsMesh(double darkness)
 	glActiveTexture(GL_TEXTURE0);
 	string name = "peel buffer" + std::to_string(0);
 	flvr::Framebuffer* peel_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+		glbin_framebuffer_manager.framebuffer(name);
 	if (peel_buffer)
 		peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 	glDisable(GL_BLEND);
@@ -3144,7 +3144,7 @@ void RenderCanvas::DrawOLShadowsMesh(double darkness)
 
 	//2d adjustment
 	flvr::ShaderProgram* img_shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
+		glbin_img_shader_factory.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3179,7 +3179,7 @@ void RenderCanvas::DrawOLShadowsMesh(double darkness)
 
 	//2d adjustment
 	img_shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_GRADIENT_TO_SHADOW_MESH);
+		glbin_img_shader_factory.shader(IMG_SHDR_GRADIENT_TO_SHADOW_MESH);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3193,7 +3193,7 @@ void RenderCanvas::DrawOLShadowsMesh(double darkness)
 		peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 	glActiveTexture(GL_TEXTURE2);
 	flvr::Framebuffer* final_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
+		glbin_framebuffer_manager.framebuffer("final");
 	if (final_buffer)
 		final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	//2d adjustment
@@ -3262,7 +3262,7 @@ void RenderCanvas::DrawOLShadows(vector<VolumeData*> &vlist)
 	//}
 
 	flvr::Framebuffer* overlay_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		glbin_framebuffer_manager.framebuffer(
 			flvr::FB_Render_RGBA, nx, ny);
 	if (overlay_buffer)
 	{
@@ -3360,7 +3360,7 @@ void RenderCanvas::DrawOLShadows(vector<VolumeData*> &vlist)
 		//shadow pass
 		//bind the fbo
 		flvr::Framebuffer* temp_buffer =
-			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			glbin_framebuffer_manager.framebuffer(
 				flvr::FB_Render_RGBA, nx, ny, "temp");
 		if (temp_buffer)
 		{
@@ -3381,7 +3381,7 @@ void RenderCanvas::DrawOLShadows(vector<VolumeData*> &vlist)
 
 		//2d adjustment
 		flvr::ShaderProgram* img_shader =
-			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
+			glbin_img_shader_factory.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -3402,7 +3402,7 @@ void RenderCanvas::DrawOLShadows(vector<VolumeData*> &vlist)
 
 		//bind fbo for final composition
 		flvr::Framebuffer* chann_buffer =
-			flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
+			glbin_framebuffer_manager.framebuffer("channel");
 		if (chann_buffer)
 			chann_buffer->bind();
 		glActiveTexture(GL_TEXTURE0);
@@ -3417,7 +3417,7 @@ void RenderCanvas::DrawOLShadows(vector<VolumeData*> &vlist)
 
 		//2d adjustment
 		img_shader =
-			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_GRADIENT_TO_SHADOW);
+			glbin_img_shader_factory.shader(IMG_SHDR_GRADIENT_TO_SHADOW);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -3511,7 +3511,7 @@ void RenderCanvas::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	//generate textures & buffer objects
 	//frame buffer for each volume
 	flvr::Framebuffer* chann_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		glbin_framebuffer_manager.framebuffer(
 			flvr::FB_Render_RGBA, nx, ny, "channel");
 	//bind the fbo
 	if (chann_buffer)
@@ -3541,7 +3541,7 @@ void RenderCanvas::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 
 	//bind fbo for final composition
 	flvr::Framebuffer* final_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		glbin_framebuffer_manager.framebuffer(
 		"final");
 	if (final_buffer)
 		final_buffer->bind();
@@ -3560,7 +3560,7 @@ void RenderCanvas::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 
 	//2d adjustment
 	flvr::ShaderProgram* img_shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+		glbin_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3763,7 +3763,7 @@ void RenderCanvas::PickMesh()
 	m_cur_framebuffer = 0;
 	//bind
 	flvr::Framebuffer* pick_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		glbin_framebuffer_manager.framebuffer(
 			flvr::FB_Pick_Int32_Float, nx, ny);
 	if (pick_buffer)
 		pick_buffer->bind();
@@ -5253,7 +5253,7 @@ void RenderCanvas::ReadPixels(
 	{
 		glActiveTexture(GL_TEXTURE0);
 		flvr::Framebuffer* final_buffer =
-			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			glbin_framebuffer_manager.framebuffer(
 				"final");
 		if (final_buffer)
 		{
@@ -5267,7 +5267,7 @@ void RenderCanvas::ReadPixels(
 
 		//2d adjustment
 		flvr::ShaderProgram* img_shader =
-			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
+			glbin_img_shader_factory.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -5390,7 +5390,7 @@ void RenderCanvas::ResetEnlarge()
 	if (m_keep_enlarge)
 		return;
 	m_enlarge = false;
-	flvr::TextRenderer::text_texture_manager_.SetEnlargeScale(1);
+	glbin_text_tex_manager.SetEnlargeScale(1);
 	RefreshGL(19);
 }
 
@@ -7322,7 +7322,7 @@ void RenderCanvas::DrawBounds()
 	glDisable(GL_BLEND);
 
 	flvr::ShaderProgram* shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -7334,7 +7334,7 @@ void RenderCanvas::DrawBounds()
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
 	flvr::VertexArray* va_cube =
-		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Bound_Cube);
+		glbin_vertex_array_manager.vertex_array(flvr::VA_Bound_Cube);
 	if (va_cube)
 	{
 		va_cube->set_param(m_bounds);
@@ -7401,7 +7401,7 @@ void RenderCanvas::DrawClippingPlanes(int face_winding)
 		glDisable(GL_CULL_FACE);
 
 	flvr::ShaderProgram* shader1 =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader1)
 	{
 		if (!shader1->valid())
@@ -7409,7 +7409,7 @@ void RenderCanvas::DrawClippingPlanes(int face_winding)
 		shader1->bind();
 	}
 	flvr::ShaderProgram* shader2 =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_THICK_LINES_COLOR);
+		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_THICK_LINES_COLOR);
 	if (shader2)
 	{
 		if (!shader2->valid())
@@ -7589,7 +7589,7 @@ void RenderCanvas::DrawClippingPlanes(int face_winding)
 		}
 
 		flvr::VertexArray* va_clipp =
-			flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Clip_Planes);
+			glbin_vertex_array_manager.vertex_array(flvr::VA_Clip_Planes);
 		if (!va_clipp)
 			return;
 		std::vector<fluo::Point> clip_points(pp, pp+8);
@@ -7750,7 +7750,7 @@ void RenderCanvas::DrawGrid()
 	glDisable(GL_BLEND);
 
 	flvr::ShaderProgram* shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -7763,7 +7763,7 @@ void RenderCanvas::DrawGrid()
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
 	flvr::VertexArray* va_grid =
-		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Grid);
+		glbin_vertex_array_manager.vertex_array(flvr::VA_Grid);
 	if (va_grid)
 	{
 		//set parameters
@@ -7785,9 +7785,9 @@ void RenderCanvas::DrawCamCtr()
 {
 	flvr::VertexArray* va_jack = 0;
 	if (m_pin_rot_ctr)
-		va_jack = flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Cam_Center);
+		va_jack = glbin_vertex_array_manager.vertex_array(flvr::VA_Cam_Center);
 	else
-		va_jack = flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Cam_Jack);
+		va_jack = glbin_vertex_array_manager.vertex_array(flvr::VA_Cam_Jack);
 
 	if (!va_jack)
 		return;
@@ -7808,7 +7808,7 @@ void RenderCanvas::DrawCamCtr()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 	flvr::ShaderProgram* shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -7855,13 +7855,13 @@ void RenderCanvas::DrawFrame()
 	glm::mat4 proj_mat = glm::ortho(float(0), float(nx), float(0), float(ny));
 
 	flvr::VertexArray* va_frame =
-		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Crop_Frame);
+		glbin_vertex_array_manager.vertex_array(flvr::VA_Crop_Frame);
 	if (!va_frame)
 		return;
 
 	glDisable(GL_DEPTH_TEST);
 	flvr::ShaderProgram* shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -7888,7 +7888,7 @@ void RenderCanvas::DrawFrame()
 void RenderCanvas::DrawScaleBar()
 {
 	flvr::VertexArray* va_scale_bar =
-		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Scale_Bar);
+		glbin_vertex_array_manager.vertex_array(flvr::VA_Scale_Bar);
 	if (!va_scale_bar)
 		return;
 
@@ -7909,7 +7909,7 @@ void RenderCanvas::DrawScaleBar()
 	fluo::Color text_color = GetTextColor();
 	float font_height = 0;
 	if (m_disp_scale_bar_text)
-		font_height = flvr::TextRenderer::text_texture_manager_.GetSize() + 3.0;
+		font_height = glbin_text_tex_manager.GetSize() + 3.0;
 
 	std::vector<std::pair<unsigned int, double>> params;
 	if (m_draw_frame)
@@ -7973,7 +7973,7 @@ void RenderCanvas::DrawScaleBar()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 	flvr::ShaderProgram* shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -7997,7 +7997,7 @@ void RenderCanvas::DrawLegend()
 		return;
 
 	float font_height =
-		flvr::TextRenderer::text_texture_manager_.GetSize() + 3.0;
+		glbin_text_tex_manager.GetSize() + 3.0;
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -8143,7 +8143,7 @@ void RenderCanvas::DrawName(
 	bool highlighted)
 {
 	flvr::VertexArray* va_legend_squares =
-		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Legend_Squares);
+		glbin_vertex_array_manager.vertex_array(flvr::VA_Legend_Squares);
 	if (!va_legend_squares)
 		return;
 
@@ -8157,7 +8157,7 @@ void RenderCanvas::DrawName(
 	glDisable(GL_BLEND);
 	glDisable(GL_CULL_FACE);
 	flvr::ShaderProgram* shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -8262,7 +8262,7 @@ void RenderCanvas::DrawGradBg()
 	vertex.push_back(m_bg_color.r()); vertex.push_back(m_bg_color.g()); vertex.push_back(m_bg_color.b());
 
 	flvr::ShaderProgram* shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
+		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -8272,7 +8272,7 @@ void RenderCanvas::DrawGradBg()
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
 	flvr::VertexArray* va_bkg =
-		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Grad_Bkg);
+		glbin_vertex_array_manager.vertex_array(flvr::VA_Grad_Bkg);
 	if (va_bkg)
 	{
 		va_bkg->set_param(vertex);
@@ -8493,7 +8493,7 @@ void RenderCanvas::DrawColormap()
 
 	float offset = 0;
 	if (m_draw_legend)
-		offset = flvr::TextRenderer::text_texture_manager_.GetSize() + 3.0;
+		offset = glbin_text_tex_manager.GetSize() + 3.0;
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -8639,7 +8639,7 @@ void RenderCanvas::DrawColormap()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	flvr::ShaderProgram* shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR4);
+		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR4);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -8650,7 +8650,7 @@ void RenderCanvas::DrawColormap()
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
 	flvr::VertexArray* va_colormap =
-		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Color_Map);
+		glbin_vertex_array_manager.vertex_array(flvr::VA_Color_Map);
 	if (va_colormap)
 	{
 		va_colormap->set_param(vertex);
@@ -8669,7 +8669,7 @@ void RenderCanvas::DrawInfo(int nx, int ny, bool intactive)
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
 	float px, py;
-	float gapw = flvr::TextRenderer::text_texture_manager_.GetSize();
+	float gapw = glbin_text_tex_manager.GetSize();
 	float gaph = gapw * 2;
 
 	double fps = 1.0 / glbin.getStopWatch(gstStopWatch)->average();
@@ -9724,7 +9724,7 @@ void RenderCanvas::DrawCells()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	flvr::ShaderProgram* shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_THICK_LINES);
+		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_THICK_LINES);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -9737,7 +9737,7 @@ void RenderCanvas::DrawCells()
 	shader->setLocalParam(0, GetSize().x, GetSize().y, width, 0.0);
 
 	flvr::VertexArray* va_rulers =
-		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Rulers);
+		glbin_vertex_array_manager.vertex_array(flvr::VA_Rulers);
 	if (va_rulers)
 	{
 		vector<float> verts;
@@ -9758,7 +9758,7 @@ void RenderCanvas::DrawCells()
 
 unsigned int RenderCanvas::DrawCellVerts(vector<float>& verts)
 {
-	float w = flvr::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
+	float w = glbin_text_tex_manager.GetSize() / 4.0f;
 	float px = 0, py = 0;
 
 	fluo::Transform mv;
@@ -9899,7 +9899,7 @@ void RenderCanvas::DrawTraces()
 		matrix = m_proj_mat*matrix;
 
 		flvr::ShaderProgram* shader =
-			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_THICK_LINES);
+			glbin_img_shader_factory.shader(IMG_SHDR_DRAW_THICK_LINES);
 		if (shader)
 		{
 			if (!shader->valid())
@@ -9910,7 +9910,7 @@ void RenderCanvas::DrawTraces()
 		shader->setLocalParam(0, GetSize().x, GetSize().y, width, 0.0);
 
 		flvr::VertexArray* va_traces =
-			flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Traces);
+			glbin_vertex_array_manager.vertex_array(flvr::VA_Traces);
 		if (va_traces)
 		{
 			if (va_traces->get_dirty())
@@ -9993,6 +9993,20 @@ void RenderCanvas::GetTraces(bool update)
 		if (m_vrv && m_frame && m_frame->GetTraceDlg())
 			m_frame->GetTraceDlg()->GetSettings(m_vrv->m_canvas);
 	}
+}
+
+void RenderCanvas::SetEnlarge(bool value)
+{
+	if (m_enlarge && !value)
+		glbin_text_tex_manager.SetEnlargeScale(1);
+	m_enlarge = value;
+}
+
+void RenderCanvas::SetEnlargeScale(double value)
+{
+	m_enlarge_scale = value;
+	if (m_enlarge)
+		glbin_text_tex_manager.SetEnlargeScale(m_enlarge_scale);
 }
 
 #ifdef _WIN32
@@ -10898,7 +10912,7 @@ void RenderCanvas::CalcFrame()
 void RenderCanvas::DrawViewQuad()
 {
 	flvr::VertexArray* quad_va =
-		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Norm_Square);
+		glbin_vertex_array_manager.vertex_array(flvr::VA_Norm_Square);
 	if (quad_va)
 		quad_va->draw();
 }

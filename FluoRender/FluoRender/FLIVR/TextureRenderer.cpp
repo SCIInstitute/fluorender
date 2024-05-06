@@ -31,11 +31,6 @@
 #include <FLIVR/TextureBrick.h>
 #include <FLIVR/TextureRenderer.h>
 #include <FLIVR/ShaderProgram.h>
-#include <FLIVR/VolShader.h>
-#include <FLIVR/SegShader.h>
-#include <FLIVR/VolCalShader.h>
-#include <FLIVR/Framebuffer.h>
-#include <FLIVR/VertexArray.h>
 #include <Types/Color.h>
 #include <Types/Utils.h>
 #include <algorithm>
@@ -78,8 +73,6 @@ namespace flvr
 #ifdef _DARWIN
 	CGLContextObj TextureRenderer::gl_context_ = 0;
 #endif
-	FramebufferManager TextureRenderer::framebuffer_manager_;
-	VertexArrayManager TextureRenderer::vertex_array_manager_;
 
 	TextureRenderer::TextureRenderer(Texture* tex)
 		:
@@ -1246,15 +1239,13 @@ namespace flvr
 		VertexArray* quad_va = 0;
 		if (d == 0.0)
 		{
-			quad_va =
-				vertex_array_manager_.vertex_array(VA_Norm_Square);
+			quad_va = glbin_vertex_array_manager.vertex_array(VA_Norm_Square);
 			if (quad_va)
 				quad_va->draw();
 		}
 		else
 		{
-			quad_va =
-				vertex_array_manager_.vertex_array(VA_Norm_Square_d);
+			quad_va = glbin_vertex_array_manager.vertex_array(VA_Norm_Square_d);
 			if (quad_va)
 			{
 				quad_va->set_param(0, d);
@@ -1272,7 +1263,7 @@ namespace flvr
 		bool set_pointers = false;
 		if (!va_slices_ || !va_slices_->valid())
 		{
-			va_slices_ = vertex_array_manager_.vertex_array(true, true);
+			va_slices_ = glbin_vertex_array_manager.vertex_array(true, true);
 			set_pointers = true;
 		}
 		if (va_slices_)
@@ -1313,7 +1304,7 @@ namespace flvr
 		bool set_pointers = false;
 		if (!va_wirefm_ || !va_wirefm_->valid())
 		{
-			va_wirefm_ = vertex_array_manager_.vertex_array(true, true);
+			va_wirefm_ = glbin_vertex_array_manager.vertex_array(true, true);
 			set_pointers = true;
 		}
 		if (va_wirefm_)

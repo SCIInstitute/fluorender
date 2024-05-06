@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef StencilCompare_h
 #define StencilCompare_h
 
-#include <Stencil.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
+#include <Stencil.h>
 
 namespace flrd
 {

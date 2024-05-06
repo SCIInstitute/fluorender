@@ -46,13 +46,6 @@
 
 namespace flvr
 {
-	VolShaderFactory TextureRenderer::vol_shader_factory_;
-	SegShaderFactory TextureRenderer::seg_shader_factory_;
-	VolCalShaderFactory TextureRenderer::cal_shader_factory_;
-	ImgShaderFactory TextureRenderer::img_shader_factory_;
-	VolKernelFactory TextureRenderer::vol_kernel_factory_;
-	double VolumeRenderer::sw_ = 0.0;
-
 	VolumeRenderer::VolumeRenderer(Texture* tex,
 		const vector<fluo::Plane*> &planes)
 		:TextureRenderer(tex),
@@ -268,6 +261,16 @@ namespace flvr
 	double VolumeRenderer::get_hi_thresh()
 	{
 		return hi_thresh_;
+	}
+
+	void VolumeRenderer::set_soft_thresh(double val)
+	{
+		sw_ = val;
+	}
+
+	double VolumeRenderer::get_soft_thresh()
+	{
+		return sw_;
 	}
 
 	void VolumeRenderer::set_color(fluo::Color color)
@@ -574,6 +577,7 @@ namespace flvr
 		if (!tex_)
 			return;
 
+		double sw = glbin_settings.m_soft_threshold;
 		fluo::Ray view_ray = compute_view();
 		fluo::Ray snapview = compute_snapview(0.4);
 
@@ -672,7 +676,7 @@ namespace flvr
 		Framebuffer* blend_buffer = 0;
 		if(blend_num_bits_ > 8)
 		{
-			blend_buffer = framebuffer_manager_.framebuffer(
+			blend_buffer = glbin_framebuffer_manager.framebuffer(
 				FB_Render_RGBA, w2, h2, bbufname);
 			if (!blend_buffer)
 				return;
@@ -697,7 +701,7 @@ namespace flvr
 		bool grad = gm_thresh_ > 0.0 ||
 			(cm_mode &&
 			colormap_proj_>3);
-		shader = vol_shader_factory_.shader(
+		shader = glbin_vol_shader_factory.shader(
 			false, tex_->nc(),
 			shading_, use_fog,
 			depth_peel_, true,
@@ -732,7 +736,7 @@ namespace flvr
 
 		//transfer function
 		shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
-		shader->setLocalParam(3, 1.0/gamma3d_, gm_thresh_, offset_, sw_);
+		shader->setLocalParam(3, 1.0/gamma3d_, gm_thresh_, offset_, sw);
 		if (mode_==TextureRenderer::MODE_MIP &&
 			colormap_proj_)
 			shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
@@ -985,7 +989,7 @@ namespace flvr
 			if (noise_red_ && cm_mode !=2)
 			{
 				//FILTERING/////////////////////////////////////////////////////////////////
-				filter_buffer = framebuffer_manager_.framebuffer(
+				filter_buffer = glbin_framebuffer_manager.framebuffer(
 					FB_Render_RGBA, w2, h2);
 				filter_buffer->bind();
 
@@ -993,7 +997,7 @@ namespace flvr
 
 				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 				img_shader = 
-					img_shader_factory_.shader(IMG_SHDR_FILTER_BLUR);
+					glbin_img_shader_factory.shader(IMG_SHDR_FILTER_BLUR);
 				if (img_shader)
 				{
 					if (!img_shader->valid())
@@ -1023,10 +1027,10 @@ namespace flvr
 
 			if (noise_red_ && cm_mode !=2)
 				img_shader = 
-					img_shader_factory_.shader(IMG_SHDR_FILTER_SHARPEN);
+					glbin_img_shader_factory.shader(IMG_SHDR_FILTER_SHARPEN);
 			else
 				img_shader = 
-				img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 
 			if (img_shader)
 			{
@@ -1097,7 +1101,7 @@ namespace flvr
 		// Set up shaders
 		ShaderProgram* shader = 0;
 		//create/bind
-		shader = vol_shader_factory_.shader(
+		shader = glbin_vol_shader_factory.shader(
 			true, 0,
 			false, false,
 			0, false,
@@ -1171,7 +1175,7 @@ namespace flvr
 
 		//mask frame buffer object
 		Framebuffer* fbo_mask =
-			framebuffer_manager_.framebuffer(FB_3D_Int, 0, 0);
+			glbin_framebuffer_manager.framebuffer(FB_3D_Int, 0, 0);
 		if (fbo_mask)
 			fbo_mask->bind();
 
@@ -1184,13 +1188,13 @@ namespace flvr
 		switch (type)
 		{
 		case 0://initialize
-			seg_shader = seg_shader_factory_.shader(
+			seg_shader = glbin_seg_shader_factory.shader(
 				SEG_SHDR_INITIALIZE, paint_mode, hr_mode,
 				use_2d, true, depth_peel_,
 				true, false);
 			break;
 		case 1://diffusion-based growing
-			seg_shader = seg_shader_factory_.shader(
+			seg_shader = glbin_seg_shader_factory.shader(
 				SEG_SHDR_DB_GROW, paint_mode, hr_mode,
 				use_2d, true, depth_peel_,
 				true, mvec_len>0.5);
@@ -1514,7 +1518,7 @@ namespace flvr
 	{
 		double result = 0.0;
 		int kernel_index = -1;
-		KernelProgram* kernel = vol_kernel_factory_.kernel(KERNEL_HIST_3D);
+		KernelProgram* kernel = glbin_vol_kernel_factory.kernel(KERNEL_HIST_3D);
 		if (kernel)
 		{
 			kernel_index = kernel->createKernel("hist_3d");
@@ -1585,14 +1589,14 @@ namespace flvr
 		glActiveTexture(GL_TEXTURE0);
 		//mask frame buffer object
 		Framebuffer* fbo_calc =
-			framebuffer_manager_.framebuffer(FB_3D_Int, 0, 0);
+			glbin_framebuffer_manager.framebuffer(FB_3D_Int, 0, 0);
 		if (fbo_calc)
 			fbo_calc->bind();
 
 		//--------------------------------------------------------------------------
 		// Set up shaders
 		//calculate shader
-		ShaderProgram* cal_shader = cal_shader_factory_.shader(type);
+		ShaderProgram* cal_shader = glbin_vol_cal_shader_factory.shader(type);
 
 		if (cal_shader)
 		{

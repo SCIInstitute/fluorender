@@ -68,6 +68,7 @@ bool LightFieldShader::emit_v(string& s)
 	switch (type_)
 	{
 	default:
+		z << LIGHT_FIELD_SHADER_VERTEX;
 		break;
 	}
 
@@ -84,6 +85,7 @@ bool LightFieldShader::emit_f(string& s)
 	switch (type_)
 	{
 	default:
+		z << LIGHT_FIELD_SHADER_FRAG;
 		break;
 	}
 

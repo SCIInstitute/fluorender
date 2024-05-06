@@ -27,7 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "RulerRenderer.h"
-#include "RenderCanvas.h"
+#include <Global.h>
+#include <RenderCanvas.h>
 #include <Types/Vector.h>
 #include <Types/Quaternion.h>
 #include <FLIVR/TextRenderer.h>
@@ -66,8 +67,7 @@ void RulerRenderer::Draw()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	flvr::ShaderProgram* shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_THICK_LINES);
+	flvr::ShaderProgram* shader = glbin_img_shader_factory.shader(IMG_SHDR_DRAW_THICK_LINES);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -79,7 +79,7 @@ void RulerRenderer::Draw()
 	shader->setLocalParam(0, nx, ny, m_line_size, 0.0);
 
 	flvr::VertexArray* va_rulers =
-		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Rulers);
+		glbin_vertex_array_manager.vertex_array(flvr::VA_Rulers);
 	if (va_rulers)
 	{
 		std::vector<float> verts;
@@ -115,7 +115,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 	bool persp = m_view->GetPersp();
 	int nx = m_view->GetGLSize().x;
 	int ny = m_view->GetGLSize().y;
-	float w = flvr::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
+	float w = glbin_text_tex_manager.GetSize() / 4.0f;
 	float px, py;
 
 	fluo::Transform mv, p;
@@ -507,7 +507,7 @@ void RulerRenderer::DrawText(int nx, int ny)
 		tseq_cur_num = m_view->m_param_cur_num;
 	else
 		tseq_cur_num = m_view->m_tseq_cur_num;
-	float w = flvr::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
+	float w = glbin_text_tex_manager.GetSize() / 4.0f;
 	float sx, sy;
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;

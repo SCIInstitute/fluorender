@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Histogram.h"
+#include <Global.h>
 #include <DataManager.h>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
@@ -132,8 +133,7 @@ EntryHist* Histogram::GetEntryHist()
 	if (bits > 8) maxv = float(1.0 / m_vd->GetScalarScale());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_histogram, bits);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_histogram, bits);
 	if (!kernel_prog)
 		return hist;
 	int kernel_index;

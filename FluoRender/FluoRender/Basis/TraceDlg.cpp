@@ -1367,7 +1367,7 @@ void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
 	m_view->RefreshGL(39);
 	if (m_frame && m_frame->GetMeasureDlg())
 		m_frame->GetMeasureDlg()->GetSettings(m_view);
-	flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Rulers);
+	glbin_vertex_array_manager.set_dirty(flvr::VA_Rulers);
 }
 
 void TraceDlg::OnConvertConsistent(wxCommandEvent &event)

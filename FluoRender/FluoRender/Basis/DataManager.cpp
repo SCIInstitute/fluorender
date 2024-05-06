@@ -47,8 +47,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Quaternion.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-double TreeLayer::m_sw = 0.0;
-
 TreeLayer::TreeLayer()
 {
 	type = -1;
@@ -111,6 +109,7 @@ VolumeData::VolumeData()
 	m_thresh_enable = true;
 	m_lo_thresh = 0.0;
 	m_hi_thresh = 1.0;
+	m_sw = glbin_settings.m_soft_threshold;
 
 	m_luminance_enable = true;
 	m_luminance = 1.0;
@@ -254,6 +253,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_saturation = copy.m_saturation;
 	m_lo_thresh = copy.m_lo_thresh;
 	m_hi_thresh = copy.m_hi_thresh;
+	m_sw = copy.m_sw;
 	m_color = copy.m_color;
 	m_wl_color = copy.m_wl_color;
 	SetHSV();
@@ -1890,6 +1890,18 @@ void VolumeData::SetRightThresh(double val, bool set_this)
 double VolumeData::GetRightThresh()
 {
 	return m_hi_thresh;
+}
+
+void VolumeData::SetSoftThreshsold(double val)
+{
+	m_sw = val;
+	if (m_vr)
+		m_vr->set_soft_thresh(val);
+}
+
+double VolumeData::GetSoftThreshold()
+{
+	return m_sw;
 }
 
 double VolumeData::GetMlRightThresh()
@@ -4115,7 +4127,7 @@ TraceGroup::~TraceGroup()
 void TraceGroup::SetCurTime(int time)
 {
 	m_cur_time = time;
-	flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);
+	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
 }
 
 int TraceGroup::GetCurTime()
@@ -4130,6 +4142,24 @@ void TraceGroup::SetPrvTime(int time)
 int TraceGroup::GetPrvTime()
 {
 	return m_prv_time;
+}
+
+void TraceGroup::SetGhostNum(int num)
+{
+	m_ghost_num = num;
+	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
+}
+
+void TraceGroup::SetDrawTail(bool draw)
+{
+	m_draw_tail = draw;
+	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
+}
+
+void TraceGroup::SetDrawLead(bool draw)
+{
+	m_draw_lead = draw;
+	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
 }
 
 //get information
@@ -4159,7 +4189,7 @@ void TraceGroup::GetLinkLists(size_t frame,
 void TraceGroup::ClearCellList()
 {
 	m_cell_list.clear();
-	flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);
+	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
 }
 
 //cur_sel_list: ids from previous time point
@@ -4197,7 +4227,7 @@ void TraceGroup::UpdateCellList(flrd::CelpList &cur_sel_list)
 		(unsigned int)m_prv_time,
 		(unsigned int)m_cur_time);
 
-	flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);
+	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
 }
 
 flrd::CelpList &TraceGroup::GetCellList()

@@ -27,6 +27,7 @@
 //  
 
 #include "MeshRenderer.h"
+#include <Global.h>
 #include <VertexArray.h>
 #include <TextureRenderer.h>
 #include <iostream>
@@ -133,8 +134,7 @@ namespace flvr
 		}
 
 		if (!va_model_ || !va_model_->valid())
-			va_model_ =
-				TextureRenderer::vertex_array_manager_.vertex_array(true, false);
+			va_model_ = glbin_vertex_array_manager.vertex_array(true, false);
 		if (!va_model_)
 			return;
 		va_model_->buffer_data(

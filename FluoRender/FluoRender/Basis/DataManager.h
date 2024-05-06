@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _DATAMANAGER_H_
 #define _DATAMANAGER_H_
 
-#include <GL/glew.h>
 #include <compatibility.h>
 #include <vector>
 #include <tiffio.h>
@@ -137,12 +136,6 @@ public:
 	//randomize color
 	virtual void RandomizeColor() {}
 
-	//soft threshold
-	static void SetSoftThreshsold(double val)
-	{m_sw = val;}
-	double GetSoftThreshold()
-	{ return m_sw; }
-
 	//associated layer
 	TreeLayer* GetAssociated()
 	{return m_associated;}
@@ -159,9 +152,6 @@ protected:
 	fluo::Color m_brightness;
 	fluo::Color m_hdr;
 	bool m_sync[3];//for rgb
-
-	//soft threshold
-	static double m_sw;
 
 	//associated layer
 	TreeLayer* m_associated;
@@ -323,6 +313,9 @@ public:
 	void SetRightThresh(double val, bool set_this = true);
 	double GetRightThresh();
 	double GetMlRightThresh();
+	//soft threshold
+	void SetSoftThreshsold(double val);
+	double GetSoftThreshold();
 
 	void SetLuminanceEnable(bool);
 	bool GetLuminanceEnable();
@@ -614,6 +607,8 @@ private:
 	bool m_thresh_enable;
 	double m_lo_thresh;
 	double m_hi_thresh;
+	//soft threshold
+	double m_sw;
 
 	bool m_luminance_enable;
 	double m_luminance;
@@ -978,11 +973,11 @@ public:
 	void SetPrvTime(int time);
 	int GetPrvTime();
 	//ghost num
-	void SetGhostNum(int num) {m_ghost_num = num; flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);}
+	void SetGhostNum(int num);
 	int GetGhostNum() {return m_ghost_num;}
-	void SetDrawTail(bool draw) {m_draw_tail = draw; flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);}
+	void SetDrawTail(bool draw);
 	bool GetDrawTail() {return m_draw_tail;}
-	void SetDrawLead(bool draw) {m_draw_lead = draw; flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);}
+	void SetDrawLead(bool draw);
 	bool GetDrawLead() {return m_draw_lead;}
 	//cells size filter
 	void SetCellSize(int size) {m_cell_size = size;}

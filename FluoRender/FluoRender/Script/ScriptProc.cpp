@@ -27,10 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "ScriptProc.h"
+#include <Global.h>
 #include <Distance/Camera2Ruler.h>
 #include <ScriptVisitors.h>
-#include <Global.h>
-#include <DataManager.h>
 #include <RenderCanvas.h>
 #include <MainFrame.h>
 #include <TraceDlg.h>
@@ -638,7 +637,7 @@ void ScriptProc::RunPostTracking()
 		tg->SetCurTime(m_view->m_tseq_cur_num);
 		tg->SetPrvTime(m_view->m_tseq_prv_num);
 		tg->UpdateCellList(m_sel_labels);
-		flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);
+		glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
 	}
 
 	Nrrd* mask_nrrd = cur_vol->GetMask(false);

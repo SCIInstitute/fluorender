@@ -56,6 +56,15 @@ DEALINGS IN THE SOFTWARE.
 #include <Animator/Interpolator.h>
 #include <Animator/MovieMaker.h>
 #include <DataManager.h>
+#include <VolKernel.h>
+#include <Framebuffer.h>
+#include <VertexArray.h>
+#include <VolShader.h>
+#include <SegShader.h>
+#include <VolCalShader.h>
+#include <ImgShader.h>
+#include <LightFieldShader.h>
+#include <TextRenderer.h>
 
 #define glbin fluo::Global::instance()
 #define glbin_cache_queue fluo::Global::instance().get_cache_queue()
@@ -90,6 +99,16 @@ DEALINGS IN THE SOFTWARE.
 #define glbin_interpolator fluo::Global::instance().get_interpolator()
 #define glbin_moviemaker fluo::Global::instance().get_movie_maker()
 #define glbin_data_manager fluo::Global::instance().get_data_manager()
+//graphics resources
+#define glbin_vol_kernel_factory fluo::Global::instance().get_vol_kernel_factory()
+#define glbin_framebuffer_manager fluo::Global::instance().get_framebuffer_manager()
+#define glbin_vertex_array_manager fluo::Global::instance().get_vertex_array_manager()
+#define glbin_vol_shader_factory fluo::Global::instance().get_vol_shader_factory()
+#define glbin_seg_shader_factory fluo::Global::instance().get_seg_shader_factory()
+#define glbin_vol_cal_shader_factory fluo::Global::instance().get_vol_cal_shader_factory()
+#define glbin_img_shader_factory fluo::Global::instance().get_img_shader_factory()
+#define glbin_light_field_shader_factory fluo::Global::instance().get_light_field_shader_factory()
+#define glbin_text_tex_manager fluo::Global::instance().get_text_tex_manager()
 
 //time
 #define glbin_atmf fluo::Global::instance().getAsyncTimerFactory()
@@ -196,6 +215,17 @@ namespace fluo
 		MovieMaker& get_movie_maker() { return m_movie_maker; }
 		DataManager& get_data_manager() { return m_data_manager; }
 
+		//graphics resources
+		flvr::VolKernelFactory& get_vol_kernel_factory() { return vol_kernel_factory_; }
+		flvr::FramebufferManager& get_framebuffer_manager() { return framebuffer_manager_; }
+		flvr::VertexArrayManager& get_vertex_array_manager() { return vertex_array_manager_; }
+		flvr::VolShaderFactory& get_vol_shader_factory() { return vol_shader_factory_; }
+		flvr::SegShaderFactory& get_seg_shader_factory() { return seg_shader_factory_; }
+		flvr::VolCalShaderFactory& get_vol_cal_shader_factory() { return cal_shader_factory_; }
+		flvr::ImgShaderFactory& get_img_shader_factory() { return img_shader_factory_; }
+		flvr::LightFieldShaderFactory& get_light_field_shader_factory() { return ligh_field_shader_factory_; }
+		flvr::TextTextureManager& get_text_tex_manager() { return text_texture_manager_; }
+
 		//time
 		Object* get(const std::string& name, Group* start = nullptr);
 		AsyncTimer* getAsyncTimer(const std::string& name);
@@ -254,6 +284,26 @@ namespace fluo
 		Interpolator m_interpolator;
 		MovieMaker m_movie_maker;
 		DataManager m_data_manager;
+
+		//graphics resources
+		//kernel for calculation
+		flvr::VolKernelFactory vol_kernel_factory_;
+		//framebuffers for everything
+		flvr::FramebufferManager framebuffer_manager_;
+		//vertex arrays
+		flvr::VertexArrayManager vertex_array_manager_;
+		//sahder for volume rendering
+		flvr::VolShaderFactory vol_shader_factory_;
+		//shader for segmentation
+		flvr::SegShaderFactory seg_shader_factory_;
+		//shader for calculation
+		flvr::VolCalShaderFactory cal_shader_factory_;
+		//smooth filter
+		flvr::ImgShaderFactory img_shader_factory_;
+		//for looking glass
+		flvr::LightFieldShaderFactory ligh_field_shader_factory_;
+		//text texture
+		flvr::TextTextureManager text_texture_manager_;
 
 		//time
 		ref_ptr<Group> origin_;//the root of everything else

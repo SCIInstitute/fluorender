@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "BackgStat.h"
+#include <Global.h>
 #include <DataManager.h>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
@@ -287,8 +288,7 @@ void BackgStat::Run()
 	int chars = bits / 8;
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_backg_stat, bits);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_backg_stat, bits);
 	if (!kernel_prog)
 		return;
 	int kernel_index0;

@@ -34,6 +34,7 @@
 #include "Texture.h"
 #include "TextureRenderer.h"
 #include "ImgShader.h"
+#include <LightFieldShader.h>
 
 namespace flvr
 {
@@ -93,6 +94,8 @@ namespace flvr
 		double get_lo_thresh();
 		void set_hi_thresh(double thresh);
 		double get_hi_thresh();
+		void set_soft_thresh(double val);
+		double get_soft_thresh();
 		void set_color(fluo::Color color);
 		fluo::Color get_color();
 		void set_mask_color(fluo::Color color, bool set=true);
@@ -203,9 +206,6 @@ namespace flvr
 		void SetNoiseRed(bool nd) {noise_red_ = nd;}
 		bool GetNoiseRed() {return noise_red_;}
 
-		//soft threshold
-		static void set_soft_threshold(double val) {sw_ = val;}
-
 		//inversion
 		void set_inversion(bool mode) {inv_ = mode;}
 		bool get_inversion() {return inv_;}
@@ -255,6 +255,7 @@ namespace flvr
 		double offset_;
 		double lo_thresh_;
 		double hi_thresh_;
+		double sw_;//soft threshold
 		fluo::Color color_;
 		fluo::Color mask_color_;
 		double alpha_power_;
@@ -295,9 +296,6 @@ namespace flvr
 		double filter_size_min_;
 		double filter_size_max_;
 		double filter_size_shp_;
-
-		//soft threshold
-		static double sw_;
 
 		//inversion
 		bool inv_;

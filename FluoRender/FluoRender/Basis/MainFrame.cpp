@@ -476,8 +476,8 @@ MainFrame::MainFrame(
 	else
 		font_file = exePath + GETSLASH() + "Fonts" +
 			GETSLASH() + "FreeSans.ttf";
-	flvr::TextRenderer::text_texture_manager_.load_face(font_file.ToStdString());
-	flvr::TextRenderer::text_texture_manager_.SetSize(glbin_settings.m_text_size);
+	glbin_text_tex_manager.load_face(font_file.ToStdString());
+	glbin_text_tex_manager.SetSize(glbin_settings.m_text_size);
 
 	//settings dialog
 	m_setting_dlg = new SettingDlg(this);
@@ -494,10 +494,6 @@ MainFrame::MainFrame(
 	glbin_data_manager.SetPvxmlFlipX(glbin_settings.m_pvxml_flip_x);
 	glbin_data_manager.SetPvxmlFlipY(glbin_settings.m_pvxml_flip_y);
 	glbin_data_manager.SetPvxmlSeqType(glbin_settings.m_pvxml_seq_type);
-	flvr::VolumeRenderer::set_soft_threshold(glbin_settings.m_soft_threshold);
-	flvr::MultiVolumeRenderer::set_soft_threshold(glbin_settings.m_soft_threshold);
-	TreeLayer::SetSoftThreshsold(glbin_settings.m_soft_threshold);
-	VolumeMeshConv::SetSoftThreshold(glbin_settings.m_soft_threshold);
 
 	//brush tool dialog
 	m_brush_tool_dlg = new BrushToolDlg(this);
@@ -892,14 +888,16 @@ MainFrame::MainFrame(
 MainFrame::~MainFrame()
 {
 	//release?
-	flvr::TextureRenderer::vol_kernel_factory_.clear();
-	flvr::TextureRenderer::framebuffer_manager_.clear();
-	flvr::TextureRenderer::vertex_array_manager_.clear();
-	flvr::TextureRenderer::vol_shader_factory_.clear();
-	flvr::TextureRenderer::seg_shader_factory_.clear();
-	flvr::TextureRenderer::cal_shader_factory_.clear();
-	flvr::TextureRenderer::img_shader_factory_.clear();
-	flvr::TextRenderer::text_texture_manager_.clear();
+	glbin_vol_kernel_factory.clear();
+	glbin_framebuffer_manager.clear();
+	glbin_vertex_array_manager.clear();
+	glbin_vol_shader_factory.clear();
+	glbin_seg_shader_factory.clear();
+	glbin_vol_cal_shader_factory.clear();
+	glbin_img_shader_factory.clear();
+	glbin_light_field_shader_factory.clear();
+	glbin_text_tex_manager.clear();
+
 	for (int i=0; i<GetViewNum(); i++)
 	{
 		RenderCanvas* canvas = GetView(i);

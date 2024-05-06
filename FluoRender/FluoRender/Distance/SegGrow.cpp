@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "SegGrow.h"
+#include <Global.h>
 #include <Distance/RulerHandler.h>
 #include <FLIVR/VolKernel.h>
 #include <algorithm>
@@ -625,8 +626,7 @@ void SegGrow::Compute()
 	m_vd->SetMaskClear(false);
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_segrow);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_segrow);
 	if (!kernel_prog)
 		return;
 	int kernel_0 = kernel_prog->createKernel(
@@ -951,8 +951,7 @@ void SegGrow::Compute()
 		flvr::Texture* tex = m_vd->GetTexture();
 		if (!tex)
 			break;
-		kernel_prog = flvr::VolumeRenderer::
-			vol_kernel_factory_.kernel(str_cl_sg_check_borders);
+		kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_sg_check_borders);
 		if (!kernel_prog)
 			break;
 		kernel_0 = kernel_prog->createKernel("kernel_0");//x
@@ -1061,8 +1060,7 @@ void SegGrow::Compute()
 	}
 
 	//finalize bricks
-	kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_segrow);
+	kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_segrow);
 	if (!kernel_prog)
 		return;
 	int kernel_7 = kernel_prog->createKernel("kernel_8");//finalize

@@ -26,13 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#include <glew.h>
 #include <MainSettings.h>
 #include <Names.h>
 #include <compatibility.h>
 #include <wx/stdpaths.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
-#include <glew.h>
 
 MainSettings::MainSettings()
 {

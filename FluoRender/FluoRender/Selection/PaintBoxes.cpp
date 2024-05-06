@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Selection/PaintBoxes.h>
-#include <FLIVR/VolumeRenderer.h>
+#include <PaintBoxes.h>
+#include <Global.h>
 #include <Types/Point.h>
 
 using namespace flrd;
@@ -116,8 +116,7 @@ void PaintBoxes::Compute()
 	}
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_paint_boxes);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_paint_boxes);
 	if (!kernel_prog)
 		return;
 	int kernel_index = kernel_prog->createKernel("kernel_0");

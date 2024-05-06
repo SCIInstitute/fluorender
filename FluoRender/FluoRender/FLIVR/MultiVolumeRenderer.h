@@ -102,9 +102,6 @@ namespace flvr
 		void SetNoiseRed(bool nd) {noise_red_ = nd;}
 		bool GetNoiseRed() {return noise_red_;}
 
-		//soft threshold
-		static void set_soft_threshold(double val) {sw_ = val;}
-
 		//set matrices
 		void set_matrices(glm::mat4 &mv_mat2, glm::mat4 &proj_mat, glm::mat4 &tex_mat);
 
@@ -152,9 +149,6 @@ namespace flvr
 
 		//light position
 		fluo::Vector light_pos_;
-
-		//soft threshold
-		static double sw_;
 
 		//vertex array for rendering slices
 		VertexArray* va_slices_;
