@@ -508,9 +508,8 @@ RenderCanvas::~RenderCanvas()
 			wxOK | wxICON_INFORMATION);
 		diag->ShowModal();
 	}
-	//glbin_vol_selector.SaveBrushSettings();
 
-#ifdef _WIN3
+#ifdef _WIN32
 	//tablet
 	if (m_hTab)
 	{
@@ -518,9 +517,7 @@ RenderCanvas::~RenderCanvas()
 		m_hTab = 0;
 		UnloadWintab();
 	}
-#endif
 
-#ifdef _WIN32
 	if (m_hologram_mode)
 	{
 		if (m_hologram_mode == 1 && m_use_openvr)
@@ -540,7 +537,6 @@ RenderCanvas::~RenderCanvas()
 		delete m_controller;
 #endif
 #endif
-
 
 	m_loader.StopAll();
 
