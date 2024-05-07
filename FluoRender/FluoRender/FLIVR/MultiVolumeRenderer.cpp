@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
-#include "MultiVolumeRenderer.h"
+#include <MultiVolumeRenderer.h>
 #include <Global.h>
 #include <ShaderProgram.h>
 #include <compatibility.h>

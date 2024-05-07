@@ -25,19 +25,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "BackgStat.h"
+#include <BackgStat.h>
 #include <Global.h>
-#include <DataManager.h>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
 #include <FLIVR/TextureBrick.h>
 #include <FLIVR/Texture.h>
 #include <algorithm>
-#ifdef _DEBUG
-#include <fstream>
-#endif
-
 using namespace flrd;
 
 //8-bit data
@@ -277,11 +271,6 @@ bool BackgStat::GetInfo(
 
 void BackgStat::Run()
 {
-	//debug
-#ifdef _DEBUG
-	unsigned char* val = 0;
-	std::ofstream ofs;
-#endif
 	if (!CheckBricks())
 		return;
 	long bits = m_vd->GetBits();
@@ -366,14 +355,6 @@ void BackgStat::Run()
 
 		//execute
 		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
-
-		//debug
-		//val = new unsigned char[nx*ny*nz*chars];
-		//kernel_prog->readBuffer(arg_bkg, val);
-		//ofs.open("E:/DATA/Test/bkg/avg.bin", std::ios::out | std::ios::binary);
-		//ofs.write((char*)val, nx*ny*nz*chars);
-		//ofs.close();
-		//delete[] val;
 
 		//brick min and max
 		unsigned int bminv = std::numeric_limits<unsigned int>::max();
@@ -469,11 +450,6 @@ void BackgStat::Run()
 			kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
 			//read back
 			kernel_prog->readBuffer(sizeof(unsigned int)*(bin), hist, hist);
-
-			//debug
-			//ofs.open("E:/DATA/Test/bkg/hist.bin", std::ios::out | std::ios::binary);
-			//ofs.write((char*)hist, bin*sizeof(unsigned int));
-			//ofs.close();
 
 			//collect
 			for (int ii = 0; ii < bin; ++ii)

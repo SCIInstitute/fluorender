@@ -41,8 +41,8 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 //resources
 #include <Formats/png_resource.h>
-#include "tick.xpm"
-#include "cross.xpm"
+#include <tick.xpm>
+#include <cross.xpm>
 #include <img/icons.h>
 
 BEGIN_EVENT_TABLE(DataTreeCtrl, wxTreeCtrl)

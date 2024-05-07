@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "ScriptProc.h"
 #include <Global.h>
 #include <Distance/Camera2Ruler.h>
 #include <ScriptVisitors.h>
@@ -39,7 +38,6 @@ DEALINGS IN THE SOFTWARE.
 #include <OutputAdjPanel.h>
 #include <ScriptBreakDlg.h>
 #include <Calculate/BackgStat.h>
-#include <Components/CompSelector.h>
 #include <Components/CompEditor.h>
 #include <Distance/WalkCycle.h>
 #include <Tracking/Registrator.h>

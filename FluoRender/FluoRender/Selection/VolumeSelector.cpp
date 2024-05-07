@@ -26,13 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "VolumeSelector.h"
 #include <Global.h>
-#include <DataManager.h>
-#include "RenderCanvas.h"
+#include <RenderCanvas.h>
 #include <MainFrame.h>
 #include <utility.h>
-#include <FLIVR/Framebuffer.h>
 #include <FLIVR/TextureRenderer.h>
 #include <Selection/PaintBoxes.h>
 #include <Selection/MaskBorder.h>

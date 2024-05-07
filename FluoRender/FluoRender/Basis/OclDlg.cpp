@@ -35,8 +35,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stdpaths.h>
 #include <wx/valnum.h>
 #include <compatibility.h>
-//#include <boost/chrono.hpp>
-//using namespace boost::chrono;
 
 BEGIN_EVENT_TABLE(OclDlg, wxPanel)
 	EVT_BUTTON(ID_BrowseBtn, OclDlg::OnBrowseBtn)

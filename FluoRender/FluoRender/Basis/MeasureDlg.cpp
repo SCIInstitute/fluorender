@@ -29,9 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
-#include <Distance/RulerHandler.h>
-#include <Distance/DistCalculator.h>
-#include <Distance/RulerAlign.h>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include <wx/wfstream.h>
@@ -42,8 +39,8 @@ DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include <iterator>
 //resources
-#include "Formats/png_resource.h"
-#include "ruler.xpm"
+#include <Formats/png_resource.h>
+#include <ruler.xpm>
 #include <img/icons.h>
 
 BEGIN_EVENT_TABLE(RulerListCtrl, wxListCtrl)

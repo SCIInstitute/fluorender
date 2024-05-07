@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "Main.h"
+#include <Main.h>
 #include <MainFrame.h>
 #include <compatibility.h>
 #include <JVMInitializer.h>

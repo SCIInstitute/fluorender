@@ -26,11 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "Registrator.h"
+#include <Registrator.h>
 #include <Global.h>
-#include <DataManager.h>
-#include "Stencil.h"
-#include "StencilCompare.h"
+#include <Stencil.h>
+#include <StencilCompare.h>
 #ifdef _DEBUG
 #include <Debug.h>
 #endif

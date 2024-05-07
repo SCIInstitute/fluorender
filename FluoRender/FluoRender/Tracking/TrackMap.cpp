@@ -26,12 +26,12 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "TrackMap.h"
+#include <TrackMap.h>
 #include <Global.h>
-#include "Stencil.h"
-#include "Cluster/dbscan.h"
-#include "Cluster/kmeans.h"
-#include "Cluster/exmax.h"
+#include <Stencil.h>
+#include <Cluster/dbscan.h>
+#include <Cluster/kmeans.h>
+#include <Cluster/exmax.h>
 #include <StencilCompare.h>
 #include <functional>
 #include <algorithm>

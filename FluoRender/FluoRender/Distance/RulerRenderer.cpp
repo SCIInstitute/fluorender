@@ -26,14 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "RulerRenderer.h"
+#include <RulerRenderer.h>
 #include <Global.h>
 #include <RenderCanvas.h>
 #include <Types/Vector.h>
 #include <Types/Quaternion.h>
 #include <FLIVR/TextRenderer.h>
 #include <FLIVR/ShaderProgram.h>
-#include <FLIVR/VertexArray.h>
 #include <FLIVR/TextureRenderer.h>
 #include <glm/gtc/type_ptr.hpp>
 

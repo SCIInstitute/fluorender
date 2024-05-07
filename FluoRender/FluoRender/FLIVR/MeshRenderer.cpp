@@ -26,9 +26,8 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include "MeshRenderer.h"
+#include <MeshRenderer.h>
 #include <Global.h>
-#include <VertexArray.h>
 #include <TextureRenderer.h>
 #include <iostream>
 #include <vector>

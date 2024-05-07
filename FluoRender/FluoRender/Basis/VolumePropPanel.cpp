@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <VolumePropPanel.h>
-#include <Global/Global.h>
-#include <Global/Names.h>
+#include <Global.h>
+#include <Names.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <RenderViewPanel.h>
@@ -37,7 +37,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Database/RecordHistParams.h>
 #include <FLIVR/MultiVolumeRenderer.h>
 #include <FLIVR/VolumeRenderer.h>
-#include <FLIVR/VolShaderCode.h>
 #include <Types/Color.h>
 #include <Types/BBox.h>
 #include <Types/Point.h>

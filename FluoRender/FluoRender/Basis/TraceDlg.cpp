@@ -33,8 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <MeasureDlg.h>
 #include <ComponentDlg.h>
 #include <MoviePanel.h>
-#include <Components/CompSelector.h>
-#include <Components/CompAnalyzer.h>
 #include <Components/CompEditor.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
@@ -44,11 +42,9 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/dirdlg.h>
 #include <png_resource.h>
 #include <img/icons.h>
-#include <boost/chrono.hpp>
 #include <set>
 #include <limits>
-
-using namespace boost::chrono;
+#include <chrono>
 
 BEGIN_EVENT_TABLE(TraceListCtrl, wxListCtrl)
 EVT_KEY_DOWN(TraceListCtrl::OnKeyDown)
@@ -2665,7 +2661,7 @@ void TraceDlg::GenMap()
 	glbin_trackmap_proc.SetSplit(glbin_settings.m_try_split);
 
 	//start timing
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 	//initialization
 	for (int i = 0; i < frames; ++i)
 	{
@@ -2730,8 +2726,8 @@ void TraceDlg::GenMap()
 		}
 	}
 
-	high_resolution_clock::time_point t2 = high_resolution_clock::now();
-	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> time_span = duration_cast<std::chrono::duration<double>>(t2 - t1);
 	(*m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
 
 	GetSettings(m_view);
@@ -2791,7 +2787,7 @@ void TraceDlg::RefineMap(int t, bool erase_v)
 	glbin_trackmap_proc.SetMerge(glbin_settings.m_try_merge);
 	glbin_trackmap_proc.SetSplit(glbin_settings.m_try_split);
 
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
 	//not sure if counters need to be cleared for all refinement
 	//if (clear_counters)
@@ -2831,8 +2827,8 @@ void TraceDlg::RefineMap(int t, bool erase_v)
 		}
 	}
 
-	high_resolution_clock::time_point t2 = high_resolution_clock::now();
-	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> time_span = duration_cast<std::chrono::duration<double>>(t2 - t1);
 	(*m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
 
 	CellUpdate();

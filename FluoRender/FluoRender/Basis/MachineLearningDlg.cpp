@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <ComponentDlg.h>
 #include <EntryHist.h>
-#include <EntryParams.h>
 #include <wx/stdpaths.h>
 #include <format>
 #include <filesystem>

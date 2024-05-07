@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "RenderCanvas.h"
+#include <RenderCanvas.h>
 #include <Global.h>
 #include <MainFrame.h>
 #include <RenderViewPanel.h>
@@ -42,14 +42,10 @@ DEALINGS IN THE SOFTWARE.
 #include <TraceDlg.h>
 #include <MeasureDlg.h>
 #include <VolumePropPanel.h>
-#include <Components/CompAnalyzer.h>
 #include <Calculate/Count.h>
 #include <Calculate/Histogram.h>
 #include <Database/RecordHistParams.h>
-#include <Distance/SegGrow.h>
 #include <Distance/Cov.h>
-#include <FLIVR/Framebuffer.h>
-#include <FLIVR/VertexArray.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/string_cast.hpp>

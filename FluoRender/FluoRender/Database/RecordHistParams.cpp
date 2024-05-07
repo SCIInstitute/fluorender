@@ -25,11 +25,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "RecordHistParams.h"
+#include <RecordHistParams.h>
+#include <Global.h>
 #include <Table.h>
 #include <FileIO/File.h>
 #include <cstring>
-#include <Global.h>
 
 using namespace flrd;
 

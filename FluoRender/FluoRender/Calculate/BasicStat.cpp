@@ -25,11 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "BasicStat.h"
+#include <BasicStat.h>
 #include <Global.h>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
 #include <FLIVR/TextureBrick.h>
 #include <FLIVR/Texture.h>
 #include <algorithm>

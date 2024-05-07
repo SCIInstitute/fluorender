@@ -34,8 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <TreePanel.h>
 #include <Calculate/Count.h>
 #include <Distance/Cov.h>
-#include <Distance/RulerAlign.h>
-#include <Selection/VolumeSelector.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>

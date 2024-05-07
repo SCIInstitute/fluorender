@@ -27,16 +27,10 @@
 //
 
 #include <Global.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <FLIVR/VolShader.h>
-#include <FLIVR/SegShader.h>
-#include <FLIVR/VolCalShader.h>
-#include <FLIVR/ShaderProgram.h>
-#include <FLIVR/TextureBrick.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
-#include <FLIVR/Framebuffer.h>
-#include <FLIVR/VertexArray.h>
+#include <VolumeRenderer.h>
+#include <ShaderProgram.h>
+#include <TextureBrick.h>
+#include <KernelProgram.h>
 #include <utility.h>
 #include <compatibility.h>
 #include <fstream>

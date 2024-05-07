@@ -26,10 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <MainFrame.h>
+#include <Global.h>
 #include <compatibility.h>
 #include <DragDrop.h>
-#include <Global/Global.h>
-#include <DataManager.h>
 #include <TreePanel.h>
 #include <ListPanel.h>
 #include <RenderViewPanel.h>
@@ -58,19 +57,11 @@ DEALINGS IN THE SOFTWARE.
 #include <ScriptBreakDlg.h>
 #include <AsyncTimerFactory.hpp>
 #include <Tester.h>
-#include <compatibility.h>
 #include <JVMInitializer.h>
 #include <Formats/png_resource.h>
 #include <Formats/msk_writer.h>
 #include <Formats/msk_reader.h>
 #include <Converters/VolumeMeshConv.h>
-#include <Selection/VolumeSelector.h>
-#include <FLIVR/TextRenderer.h>
-#include <FLIVR/VertexArray.h>
-#include <FLIVR/Framebuffer.h>
-#include <FLIVR/VolShader.h>
-#include <FLIVR/SegShader.h>
-#include <FLIVR/VolCalShader.h>
 #include <wx/artprov.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>

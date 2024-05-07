@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderCanvas.h>
 #include <RenderViewPanel.h>
 #include <wxSingleSlider.h>
-#include <Global/Global.h>
 #include <wx/valnum.h>
 #include <wx/notebook.h>
 #include <wx/stdpaths.h>

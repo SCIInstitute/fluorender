@@ -27,9 +27,9 @@
 //  
 
 #include <Global.h>
-#include <FLIVR/ShaderProgram.h>
-#include <FLIVR/Texture.h>
-#include <FLIVR/TextureRenderer.h>
+#include <ShaderProgram.h>
+#include <Texture.h>
+#include <TextureRenderer.h>
 #include <Types/Utils.h>
 #include <algorithm>
 #include <inttypes.h>

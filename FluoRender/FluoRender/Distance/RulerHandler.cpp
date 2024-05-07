@@ -26,14 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "RulerHandler.h"
-#include "RenderCanvas.h"
+#include <RulerHandler.h>
+#include <RenderCanvas.h>
 #include <Global.h>
 #include <FLIVR/Texture.h>
-#include <DataManager.h>
-#include <Components/CompAnalyzer.h>
-#include <Selection/VolumePoint.h>
-#include <Selection/VolumeSelector.h>
 #include <Distance/Cov.h>
 #include <Distance/WalkCycle.h>
 #include <Calculate/Count.h>

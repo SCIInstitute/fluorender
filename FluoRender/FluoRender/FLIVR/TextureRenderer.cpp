@@ -28,9 +28,9 @@
 
 #include <GL/glew.h>
 #include <Global.h>
-#include <FLIVR/TextureBrick.h>
-#include <FLIVR/TextureRenderer.h>
-#include <FLIVR/ShaderProgram.h>
+#include <TextureBrick.h>
+#include <TextureRenderer.h>
+#include <ShaderProgram.h>
 #include <Types/Color.h>
 #include <Types/Utils.h>
 #include <algorithm>

@@ -26,10 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <FLIVR/ShaderProgram.h>
-#include <Global/Global.h>
-#include <MainFrame.h>
+//#include <FLIVR/ShaderProgram.h>
 #include <RenderViewPanel.h>
+#include <Global.h>
+#include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <ClipPlanePanel.h>
 #include <wxSingleSlider.h>

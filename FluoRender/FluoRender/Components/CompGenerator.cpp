@@ -25,16 +25,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <DataManager.h>
-#include "CompGenerator.h"
-#include "cl_code.h"
-#include "cl_code_db.h"
+#include <CompGenerator.h>
 #include <Global.h>
+#include <cl_code.h>
+#include <cl_code_db.h>
 #include <Database/EntryHist.h>
 #include <Database/EntryParams.h>
 #include <algorithm>
 #ifdef _DEBUG
-#include <fstream>
 #include <Debug.h>
 #endif
 
@@ -183,12 +181,6 @@ void ComponentGenerator::ShuffleID()
 
 void ComponentGenerator::SetIDBit(int psize)
 {
-	//debug
-#ifdef _DEBUG
-	unsigned int* val = 0;
-	std::ofstream ofs;
-#endif
-
 	if (!CheckBricks())
 		return;
 
@@ -320,7 +312,7 @@ void ComponentGenerator::SetIDBit(int psize)
 	}
 }
 
-void ComponentGenerator::Grow(/*bool diffuse, int iter, float tran, float falloff, float sscale, int fixed*/)
+void ComponentGenerator::Grow()
 {
 	if (!CheckBricks())
 		return;
@@ -408,16 +400,8 @@ void ComponentGenerator::Grow(/*bool diffuse, int iter, float tran, float fallof
 		AddEntry();
 }
 
-void ComponentGenerator::DensityField(/*int dsize, int wsize,
-	bool diffuse, int iter, float tran, float falloff,
-	float density, float varth, float sscale, int fixed*/)
+void ComponentGenerator::DensityField()
 {
-	//debug
-#ifdef _DEBUG
-	unsigned char* val = 0;
-	std::ofstream ofs;
-#endif
-
 	if (!CheckBricks())
 		return;
 
@@ -613,12 +597,6 @@ void ComponentGenerator::DensityField(/*int dsize, int wsize,
 
 void ComponentGenerator::DistGrow()
 {
-	//debug
-#ifdef _DEBUG
-	unsigned char* val = 0;
-	std::ofstream ofs;
-#endif
-
 	if (!CheckBricks())
 		return;
 
@@ -770,17 +748,8 @@ void ComponentGenerator::DistGrow()
 		AddEntry();
 }
 
-void ComponentGenerator::DistDensityField(
-	/*bool diffuse, int iter, float tran, float falloff,
-	int dsize1, int max_dist, float dist_thresh, float dist_strength,
-	int dsize2, int wsize, float density, float varth, float sscale, int fixed*/)
+void ComponentGenerator::DistDensityField()
 {
-	//debug
-#ifdef _DEBUG
-	unsigned char* val = 0;
-	std::ofstream ofs;
-#endif
-
 	if (!CheckBricks())
 		return;
 
@@ -1044,7 +1013,7 @@ void ComponentGenerator::DistDensityField(
 		AddEntry();
 }
 
-void ComponentGenerator::Cleanup(/*int iter, unsigned int size_lm*/)
+void ComponentGenerator::Cleanup()
 {
 	if (m_clean_iter <= 0)
 		return;

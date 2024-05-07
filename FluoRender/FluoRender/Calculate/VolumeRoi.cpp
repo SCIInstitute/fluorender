@@ -25,11 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "VolumeRoi.h"
+#include <VolumeRoi.h>
 #include <Global.h>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
 #include <FLIVR/TextureBrick.h>
 #include <FLIVR/Texture.h>
 #ifdef _DEBUG
@@ -256,11 +255,11 @@ void VolumeRoi::Run()
 		kernel_prog->readBuffer(sizeof(float) * (gsize.gsxyz), wsum, wsum);
 
 		//debug
-#ifdef _DEBUG
-		DBMIFLOAT32 mi;
-		mi.nx = gsize.gsx; mi.ny = gsize.gsy; mi.nc = 1; mi.nt = mi.nx * mi.nc * 4;
-		mi.data = wsum;
-#endif
+//#ifdef _DEBUG
+//		DBMIFLOAT32 mi;
+//		mi.nx = gsize.gsx; mi.ny = gsize.gsy; mi.nc = 1; mi.nt = mi.nx * mi.nc * 4;
+//		mi.data = wsum;
+//#endif
 		//sum
 		for (int ii = 0; ii < gsize.gsxyz; ++ii)
 		{

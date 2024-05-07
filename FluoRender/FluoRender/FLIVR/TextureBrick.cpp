@@ -28,10 +28,10 @@
 
 #include <Global.h>
 #include <compatibility.h>
-#include "Texture.h"
+#include <Texture.h>
 #include <math.h>
-#include <FLIVR/TextureBrick.h>
-#include <FLIVR/TextureRenderer.h>
+#include <TextureBrick.h>
+#include <TextureRenderer.h>
 #include <Types/Utils.h>
 #include <utility>
 #include <iostream>

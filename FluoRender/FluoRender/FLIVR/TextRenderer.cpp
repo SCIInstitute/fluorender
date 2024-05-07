@@ -26,9 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "TextRenderer.h"
+#include <TextRenderer.h>
 #include <Global.h>
-#include <FLIVR/ShaderProgram.h>
+#include <ShaderProgram.h>
 
 namespace flvr
 {

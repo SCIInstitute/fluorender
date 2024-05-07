@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderCanvas.h>
 #include <BrushToolDlg.h>
 #include <ColocalizationDlg.h>
-#include <Components/CompSelector.h>
 #include <Components/CompEditor.h>
 #include <Cluster/dbscan.h>
 #include <Cluster/kmeans.h>
