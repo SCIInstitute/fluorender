@@ -94,7 +94,7 @@ MainSettings::MainSettings()
 	m_wav_color4 = 5;
 
 	m_disp_id = 0;
-	m_stereo = false;
+	m_hologram_mode = 0;
 	m_sbs = false;
 	m_eye_dist = 20.0;
 	m_stay_top = false;
@@ -284,7 +284,7 @@ void MainSettings::Read()
 	{
 		fconfig.SetPath("/display");
 		fconfig.Read("disp id", &m_disp_id, 0);
-		fconfig.Read("stereo enable", &m_stereo, false);
+		fconfig.Read("hologram mode", &m_hologram_mode, 0);
 		fconfig.Read("sbs enable", &m_sbs, false);
 		fconfig.Read("eye dist", &m_eye_dist, 20.0);
 		fconfig.Read("stay top", &m_stay_top, false);
@@ -510,7 +510,7 @@ void MainSettings::Save()
 	//display
 	fconfig.SetPath("/display");
 	fconfig.Write("disp id", m_disp_id);
-	fconfig.Write("stereo enable", m_stereo);
+	fconfig.Write("hologram mode", m_hologram_mode);
 	fconfig.Write("sbs enable", m_sbs);
 	fconfig.Write("eye dist", m_eye_dist);
 	fconfig.Write("stay top", m_stay_top);

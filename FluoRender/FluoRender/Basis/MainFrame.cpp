@@ -458,33 +458,8 @@ MainFrame::MainFrame(
 	m_adjust_view = new OutputAdjPanel(this,
 		wxDefaultPosition, FromDIP(wxSize(140, 700)));
 
-	wxString font_file = glbin_settings.m_font_file;
-	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-	exePath = wxPathOnly(exePath);
-	if (font_file != "")
-		font_file = exePath + GETSLASH() + "Fonts" +
-			GETSLASH() + font_file;
-	else
-		font_file = exePath + GETSLASH() + "Fonts" +
-			GETSLASH() + "FreeSans.ttf";
-	glbin_text_tex_manager.load_face(font_file.ToStdString());
-	glbin_text_tex_manager.SetSize(glbin_settings.m_text_size);
-
 	//settings dialog
 	m_setting_dlg = new SettingDlg(this);
-
-	glbin_data_manager.m_vol_test_wiref = glbin_settings.m_test_wiref;
-	int c1 = glbin_settings.m_wav_color1;
-	int c2 = glbin_settings.m_wav_color2;
-	int c3 = glbin_settings.m_wav_color3;
-	int c4 = glbin_settings.m_wav_color4;
-	if (c1 && c2 && c3 && c4)
-		glbin_data_manager.SetWavelengthColor(c1, c2, c3, c4);
-	if (glbin_settings.m_stereo) m_vrv_list[0]->InitOpenVR();
-	glbin_data_manager.SetOverrideVox(glbin_settings.m_override_vox);
-	glbin_data_manager.SetPvxmlFlipX(glbin_settings.m_pvxml_flip_x);
-	glbin_data_manager.SetPvxmlFlipY(glbin_settings.m_pvxml_flip_y);
-	glbin_data_manager.SetPvxmlSeqType(glbin_settings.m_pvxml_seq_type);
 
 	//brush tool dialog
 	m_brush_tool_dlg = new BrushToolDlg(this);
@@ -846,6 +821,35 @@ MainFrame::MainFrame(
 
 	//python
 	flrd::PyBase::SetHighVer(glbin_settings.m_python_ver);
+	//font
+	wxString font_file = glbin_settings.m_font_file;
+	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+	exePath = wxPathOnly(exePath);
+	if (font_file != "")
+		font_file = exePath + GETSLASH() + "Fonts" +
+		GETSLASH() + font_file;
+	else
+		font_file = exePath + GETSLASH() + "Fonts" +
+		GETSLASH() + "FreeSans.ttf";
+	glbin_text_tex_manager.load_face(font_file.ToStdString());
+	glbin_text_tex_manager.SetSize(glbin_settings.m_text_size);
+	//volume
+	glbin_data_manager.m_vol_test_wiref = glbin_settings.m_test_wiref;
+	int c1 = glbin_settings.m_wav_color1;
+	int c2 = glbin_settings.m_wav_color2;
+	int c3 = glbin_settings.m_wav_color3;
+	int c4 = glbin_settings.m_wav_color4;
+	if (c1 && c2 && c3 && c4)
+		glbin_data_manager.SetWavelengthColor(c1, c2, c3, c4);
+	glbin_data_manager.SetOverrideVox(glbin_settings.m_override_vox);
+	glbin_data_manager.SetPvxmlFlipX(glbin_settings.m_pvxml_flip_x);
+	glbin_data_manager.SetPvxmlFlipY(glbin_settings.m_pvxml_flip_y);
+	glbin_data_manager.SetPvxmlSeqType(glbin_settings.m_pvxml_seq_type);
+	//hologram
+	if (glbin_settings.m_hologram_mode == 1)
+		m_vrv_list[0]->m_canvas->InitOpenVR();
+	else if (glbin_settings.m_hologram_mode == 2)
+		m_vrv_list[0]->m_canvas->InitLookingGlass();
 
 	//keyboard shortcuts
 	wxAcceleratorEntry entries[5];

@@ -142,9 +142,6 @@ public:
 	void SaveDefault(unsigned int mask = 0xffffffff);
 	void LoadSettings();
 
-	//stereo/vr
-	void InitOpenVR();
-
 public:
 	static int m_max_id;
 	int m_id;

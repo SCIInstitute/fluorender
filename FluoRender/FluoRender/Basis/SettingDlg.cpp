@@ -73,6 +73,7 @@ EVT_CHECKBOX(ID_StereoChk, SettingDlg::OnStereoCheck)
 EVT_CHECKBOX(ID_SBSChk, SettingDlg::OnSBSCheck)
 EVT_COMMAND_SCROLL(ID_EyeDistSldr, SettingDlg::OnEyeDistChange)
 EVT_TEXT(ID_EyeDistText, SettingDlg::OnEyeDistEdit)
+EVT_CHECKBOX(ID_LookingGlassChk, SettingDlg::OnLookingGlassCheck)
 //display id
 EVT_COMBOBOX(ID_DispIdCombo, SettingDlg::OnDispIdComb)
 //color depth
@@ -555,30 +556,46 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 
 	//stereo
 	wxBoxSizer* group1 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Stereo && SteamVR"), wxVERTICAL);
+		new wxStaticBox(page, wxID_ANY, "Stereography / Virtual Reality / Holography"), wxVERTICAL);
 	wxBoxSizer* sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_stereo_chk = new wxCheckBox(page, ID_StereoChk,
-		"Enable stereo (Install SteamVR and restart. Otherwise side-by-side only.)");
+		"Enable stereography");
+	sizer1_1->Add(5, 5);
 	sizer1_1->Add(m_stereo_chk, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Install SteamVR and restart. Otherwise side-by-side only.");
+	sizer1_2->Add(20, 5);
+	sizer1_2->Add(st, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
 	m_sbs_chk = new wxCheckBox(page, ID_SBSChk,
 		"Aspect Ratio for 3D TV");
-	sizer1_2->Add(m_sbs_chk, 0, wxALIGN_CENTER);
-	wxBoxSizer* sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
+	sizer1_3->Add(20, 5);
+	sizer1_3->Add(m_sbs_chk, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer1_4 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Eye distance");
 	m_eye_dist_sldr = new wxSingleSlider(page, ID_EyeDistSldr, 200, 0, 2000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_eye_dist_text = new wxTextCtrl(page, ID_EyeDistText, "20.0",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_fp1);
-	sizer1_3->Add(st, 0, wxALIGN_CENTER);
-	sizer1_3->Add(m_eye_dist_sldr, 1, wxEXPAND);
-	sizer1_3->Add(m_eye_dist_text, 0, wxALIGN_CENTER);
+	sizer1_4->Add(20, 5);
+	sizer1_4->Add(st, 0, wxALIGN_CENTER);
+	sizer1_4->Add(m_eye_dist_sldr, 1, wxEXPAND);
+	sizer1_4->Add(m_eye_dist_text, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer1_5 = new wxBoxSizer(wxHORIZONTAL);
+	m_looking_glass_chk = new wxCheckBox(page, ID_LookingGlassChk,
+		"Enable Holography");
+	sizer1_5->Add(5, 5);
+	sizer1_5->Add(m_looking_glass_chk, 0, wxALIGN_CENTER);
 	group1->Add(10, 5);
 	group1->Add(sizer1_1, 0, wxEXPAND);
 	group1->Add(10, 5);
 	group1->Add(sizer1_2, 0, wxEXPAND);
 	group1->Add(10, 5);
 	group1->Add(sizer1_3, 0, wxEXPAND);
+	group1->Add(10, 5);
+	group1->Add(sizer1_4, 0, wxEXPAND);
+	group1->Add(10, 5);
+	group1->Add(sizer1_5, 0, wxEXPAND);
 	group1->Add(10, 5);
 
 	//full screen display
@@ -970,13 +987,32 @@ void SettingDlg::UpdateUI()
 	//gradient background
 	m_grad_bg_chk->SetValue(glbin_settings.m_grad_bg);
 	//stereo
-	m_stereo_chk->SetValue(glbin_settings.m_stereo);
-	if (glbin_settings.m_stereo)
-		m_sbs_chk->Enable();
-	else
+	if (glbin_settings.m_hologram_mode == 0)
+	{
+		m_stereo_chk->SetValue(false);
 		m_sbs_chk->Disable();
+		m_eye_dist_sldr->Disable();
+		m_eye_dist_text->Disable();
+		m_looking_glass_chk->SetValue(false);
+	}
+	else if (glbin_settings.m_hologram_mode == 1)
+	{
+		m_stereo_chk->SetValue(true);
+		m_sbs_chk->Enable();
+		m_eye_dist_sldr->Enable();
+		m_eye_dist_text->Enable();
+		m_looking_glass_chk->SetValue(false);
+	}
+	else if (glbin_settings.m_hologram_mode == 2)
+	{
+		m_stereo_chk->SetValue(false);
+		m_sbs_chk->Disable();
+		m_eye_dist_sldr->Disable();
+		m_eye_dist_text->Disable();
+		m_looking_glass_chk->SetValue(true);
+	}
 	m_sbs_chk->SetValue(glbin_settings.m_sbs);
-	m_eye_dist_sldr->ChangeValue(std::round(glbin_settings.m_eye_dist*10.0));
+	m_eye_dist_sldr->ChangeValue(std::round(glbin_settings.m_eye_dist * 10.0));
 	m_eye_dist_text->ChangeValue(wxString::Format("%.1f", glbin_settings.m_eye_dist));
 	//display id
 	m_disp_id_comb->Select(glbin_settings.m_disp_id);
@@ -1389,14 +1425,36 @@ void SettingDlg::OnRotLink(wxCommandEvent& event)
 //stereo
 void SettingDlg::OnStereoCheck(wxCommandEvent &event)
 {
-	glbin_settings.m_stereo = m_stereo_chk->GetValue();
-	m_sbs_chk->Enable(glbin_settings.m_stereo);
+	bool bval = m_stereo_chk->GetValue();
+	if (bval)
+	{
+		m_looking_glass_chk->SetValue(false);
+		glbin_settings.m_hologram_mode = 1;
+	}
+	else
+		glbin_settings.m_hologram_mode = 0;
+	if (glbin_settings.m_hologram_mode == 0)
+	{
+		m_stereo_chk->SetValue(false);
+		m_sbs_chk->Disable();
+		m_eye_dist_sldr->Disable();
+		m_eye_dist_text->Disable();
+		m_looking_glass_chk->SetValue(false);
+	}
+	else if (glbin_settings.m_hologram_mode == 1)
+	{
+		m_stereo_chk->SetValue(true);
+		m_sbs_chk->Enable();
+		m_eye_dist_sldr->Enable();
+		m_eye_dist_text->Enable();
+		m_looking_glass_chk->SetValue(false);
+	}
 	if (m_frame && 0 < m_frame->GetViewNum())
 	{
 		RenderCanvas* view = m_frame->GetView(0);
 		if (view)
 		{
-			view->SetStereo(glbin_settings.m_stereo);
+			view->SetHologramMode(glbin_settings.m_hologram_mode);
 			view->RefreshGL(39);
 		}
 	}
@@ -1438,6 +1496,43 @@ void SettingDlg::OnEyeDistEdit(wxCommandEvent &event)
 		if (view)
 		{
 			view->SetEyeDist(glbin_settings.m_eye_dist);
+			view->RefreshGL(39);
+		}
+	}
+}
+
+void SettingDlg::OnLookingGlassCheck(wxCommandEvent& event)
+{
+	bool bval = m_looking_glass_chk->GetValue();
+	if (bval)
+	{
+		m_stereo_chk->SetValue(false);
+		glbin_settings.m_hologram_mode = 2;
+	}
+	else
+		glbin_settings.m_hologram_mode = 0;
+	if (glbin_settings.m_hologram_mode == 0)
+	{
+		m_stereo_chk->SetValue(false);
+		m_sbs_chk->Disable();
+		m_eye_dist_sldr->Disable();
+		m_eye_dist_text->Disable();
+		m_looking_glass_chk->SetValue(false);
+	}
+	else if (glbin_settings.m_hologram_mode == 2)
+	{
+		m_stereo_chk->SetValue(false);
+		m_sbs_chk->Disable();
+		m_eye_dist_sldr->Disable();
+		m_eye_dist_text->Disable();
+		m_looking_glass_chk->SetValue(true);
+	}
+	if (m_frame && 0 < m_frame->GetViewNum())
+	{
+		RenderCanvas* view = m_frame->GetView(0);
+		if (view)
+		{
+			view->SetHologramMode(glbin_settings.m_hologram_mode);
 			view->RefreshGL(39);
 		}
 	}

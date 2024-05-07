@@ -65,6 +65,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ImgShader.h>
 #include <LightFieldShader.h>
 #include <TextRenderer.h>
+#include <LookingGlassRenderer.h>
 
 #define glbin fluo::Global::instance()
 #define glbin_cache_queue fluo::Global::instance().get_cache_queue()
@@ -99,6 +100,7 @@ DEALINGS IN THE SOFTWARE.
 #define glbin_interpolator fluo::Global::instance().get_interpolator()
 #define glbin_moviemaker fluo::Global::instance().get_movie_maker()
 #define glbin_data_manager fluo::Global::instance().get_data_manager()
+#define glbin_lg_renderer fluo::Global::instance().get_looking_glass_renderer()
 //graphics resources
 #define glbin_vol_kernel_factory fluo::Global::instance().get_vol_kernel_factory()
 #define glbin_framebuffer_manager fluo::Global::instance().get_framebuffer_manager()
@@ -214,6 +216,7 @@ namespace fluo
 		Interpolator& get_interpolator() { return m_interpolator; }
 		MovieMaker& get_movie_maker() { return m_movie_maker; }
 		DataManager& get_data_manager() { return m_data_manager; }
+		LookingGlassRenderer& get_looking_glass_renderer() { return m_lg_renderer; }
 
 		//graphics resources
 		flvr::VolKernelFactory& get_vol_kernel_factory() { return vol_kernel_factory_; }
@@ -284,6 +287,7 @@ namespace fluo
 		Interpolator m_interpolator;
 		MovieMaker m_movie_maker;
 		DataManager m_data_manager;
+		LookingGlassRenderer m_lg_renderer;
 
 		//graphics resources
 		//kernel for calculation

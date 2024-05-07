@@ -73,6 +73,7 @@ class SettingDlg : public wxPanel
 		ID_SBSChk,
 		ID_EyeDistSldr,
 		ID_EyeDistText,
+		ID_LookingGlassChk,
 		//display id
 		ID_DispIdCombo,
 		//color depth
@@ -178,6 +179,7 @@ private:
 	wxCheckBox* m_sbs_chk;
 	wxSingleSlider *m_eye_dist_sldr;
 	wxTextCtrl *m_eye_dist_text;
+	wxCheckBox* m_looking_glass_chk;
 	//display
 	wxComboBox* m_disp_id_comb;
 	//color depth
@@ -287,6 +289,7 @@ private:
 	void OnSBSCheck(wxCommandEvent& event);
 	void OnEyeDistChange(wxScrollEvent &event);
 	void OnEyeDistEdit(wxCommandEvent &event);
+	void OnLookingGlassCheck(wxCommandEvent& event);
 	//display id
 	void OnDispIdComb(wxCommandEvent& event);
 	//color depth

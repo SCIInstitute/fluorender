@@ -1955,13 +1955,6 @@ wxWindow* RenderViewPanel::CreateExtraCaptureControl(wxWindow* parent)
 	return panel;
 }
 
-void RenderViewPanel::InitOpenVR()
-{
-#ifdef _WIN32
-	if (m_canvas) m_canvas->InitOpenVR();
-#endif
-}
-
 void RenderViewPanel::SaveDefault(unsigned int mask)
 {
 	wxString str;
@@ -2047,7 +2040,7 @@ void RenderViewPanel::LoadSettings()
 	m_canvas->SetGradBg(glbin_settings.m_grad_bg);
 	m_canvas->SetPointVolumeMode(glbin_settings.m_point_volume_mode);
 	m_canvas->SetRulerUseTransf(glbin_settings.m_ruler_use_transf);
-	m_canvas->SetStereo(glbin_settings.m_stereo);
+	m_canvas->SetHologramMode(glbin_settings.m_hologram_mode);
 	m_canvas->SetSBS(glbin_settings.m_sbs);
 	m_canvas->SetEyeDist(glbin_settings.m_eye_dist);
 

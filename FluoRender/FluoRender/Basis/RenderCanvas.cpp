@@ -320,7 +320,7 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_enlarge(false),
 	m_enlarge_scale(1.0),
 	//vr settings
-	m_enable_vr(false),
+	m_hologram_mode(0),
 	m_enable_sbs(false),
 	m_use_openvr(false),
 	m_vr_eye_offset(6.0),
@@ -482,6 +482,11 @@ void RenderCanvas::InitOpenVR()
 		m_vr_system->GetRecommendedRenderTargetSize(&m_vr_size[0], &m_vr_size[1]);
 	}
 }
+
+void RenderCanvas::InitLookingGlass()
+{
+	glbin_lg_renderer.Init();
+}
 #endif
 
 RenderCanvas::~RenderCanvas()
@@ -516,18 +521,26 @@ RenderCanvas::~RenderCanvas()
 #endif
 
 #ifdef _WIN32
-	if (m_enable_vr && m_use_openvr)
+	if (m_hologram_mode)
 	{
-		//vr shutdown
-		vr::VR_Shutdown();
-		//UnloadVR();
+		if (m_hologram_mode == 1 && m_use_openvr)
+		{
+			//vr shutdown
+			vr::VR_Shutdown();
+			//UnloadVR();
+		}
+		if (m_hologram_mode == 2)
+		{
+			glbin_lg_renderer.Close();
+		}
 	}
-#endif
 
-#if defined(_WIN32) && defined(USE_XINPUT)
+#ifdef USE_XINPUT
 	if (m_controller)
 		delete m_controller;
 #endif
+#endif
+
 
 	m_loader.StopAll();
 
@@ -750,15 +763,21 @@ void RenderCanvas::HandleCamera(bool vr)
 		eye += center;
 	}
 
-	if (vr && m_enable_vr)
+	if (vr && m_hologram_mode)
 	{
-		fluo::Vector side = GetSide();
-		side *= (m_vr_eye_idx ? 1.0 : -1.0) * m_vr_eye_offset / 2.0;
-		glm::vec3 offset(side.x(), side.y(), side.z());
-		m_mv_mat = glm::lookAt(
-			eye + offset,
-			center + offset,
-			up);
+		if (m_hologram_mode == 1)
+		{
+			fluo::Vector side = GetSide();
+			side *= (m_vr_eye_idx ? 1.0 : -1.0) * m_vr_eye_offset / 2.0;
+			glm::vec3 offset(side.x(), side.y(), side.z());
+			m_mv_mat = glm::lookAt(
+				eye + offset,
+				center + offset,
+				up);
+		}
+		else if (m_hologram_mode == 2)
+		{
+		}
 	}
 	else
 	{
@@ -2263,11 +2282,8 @@ void RenderCanvas::GetRenderSize(int &nx, int &ny)
 	{
 		nx = GetGLSize().x;
 		ny = GetGLSize().y;
-		if (m_enable_vr)
-		{
-			if (!m_enable_sbs)
-				nx /= 2;
-		}
+		if (m_hologram_mode == 1 && !m_enable_sbs)
+			nx /= 2;
 	}
 }
 
@@ -2303,7 +2319,7 @@ void RenderCanvas::PrepVRBuffer()
 
 void RenderCanvas::BindRenderBuffer()
 {
-	if (m_enable_vr)
+	if (m_hologram_mode == 1)
 	{
 		std::string vr_buf_name;
 		if (m_vr_eye_idx)
@@ -2315,6 +2331,9 @@ void RenderCanvas::BindRenderBuffer()
 				vr_buf_name);
 		if (vr_buffer)
 			vr_buffer->bind();
+	}
+	else if (m_hologram_mode == 2)
+	{
 	}
 	else
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -5442,10 +5461,14 @@ void RenderCanvas::ForceDraw()
 	m_drawing = true;
 	PreDraw();
 
-	if (m_enable_vr)
+	if (m_hologram_mode == 1)
 	{
 		PrepVRBuffer();
 		BindRenderBuffer();
+	}
+	else if (m_hologram_mode == 2)
+	{
+
 	}
 
 	switch (m_draw_type)
@@ -5524,7 +5547,7 @@ void RenderCanvas::ForceDraw()
 	}
 
 	//swap
-	if (m_enable_vr)
+	if (m_hologram_mode == 1)
 	{
 		if (m_vr_eye_idx)
 		{
@@ -5537,6 +5560,10 @@ void RenderCanvas::ForceDraw()
 			m_vr_eye_idx = 1;
 			RefreshGL(99);
 		}
+	}
+	else if (m_hologram_mode == 2)
+	{
+
 	}
 	else
 		SwapBuffers();
@@ -10667,7 +10694,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 	{
 		if (glbin_moviemaker.IsRunning())
 			return;
-		if (m_enable_vr)
+		if (m_hologram_mode)
 			return;
 
 		m_retain_finalbuffer = true;

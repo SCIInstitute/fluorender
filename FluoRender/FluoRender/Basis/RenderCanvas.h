@@ -135,7 +135,10 @@ public:
 	//for degugging, this allows inspection of the pixel format actually given.
 #ifdef _WIN32
 	int GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd);
+	void InitOpenVR();
+	void InitLookingGlass();
 #endif
+
 	wxString GetOGLVersion();
 	//initialization
 	void Init();
@@ -585,10 +588,11 @@ public:
 		return m_enlarge_scale;
 	}
 
-	//stereo/vr
-	void SetStereo(bool bval)
+	//hologram mode
+	//0: disabled; 1: stereograph; 2: looking glass;
+	void SetHologramMode(int val)
 	{
-		m_enable_vr = bval;
+		m_hologram_mode = val;
 	}
 	void SetSBS(bool bval)
 	{
@@ -1161,7 +1165,7 @@ private:
 	bool m_full_screen;
 
 	//enable vr
-	bool m_enable_vr;
+	int m_hologram_mode;//0: disabled; 1: stereograph; 2: looking glass;
 	bool m_enable_sbs;
 	bool m_use_openvr;
 	uint32_t m_vr_size[2];
@@ -1184,7 +1188,6 @@ private:
 #ifdef _WIN32
 	//wacom tablet
 	HCTX TabletInit(HWND hWnd, HINSTANCE hInst);
-	void InitOpenVR();
 #endif
 
 	void DrawBounds();

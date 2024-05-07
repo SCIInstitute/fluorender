@@ -135,8 +135,8 @@ public:
 	int m_wav_color3;
 	int m_wav_color4;
 
-	int m_disp_id;			//display
-	bool m_stereo;			//stereo
+	int m_disp_id;			//display id
+	int m_hologram_mode;	//0: disabled; 1: stereograph; 2: looking glass;
 	bool m_sbs;
 	double m_eye_dist;
 	bool m_stay_top;		//full screen
