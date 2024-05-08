@@ -63,6 +63,7 @@ namespace flvr
 			loc_ui[i] = -1;
 			loc_vec4[i] = -1;
 			loc_mat4[i] = -1;
+			loc_int4[i] = -1;
 		}
 	}
 	ShaderProgram::ShaderProgram(const string& vert_shader,
@@ -78,6 +79,7 @@ namespace flvr
 			loc_ui[i] = -1;
 			loc_vec4[i] = -1;
 			loc_mat4[i] = -1;
+			loc_int4[i] = -1;
 		}
 	}
 	ShaderProgram::ShaderProgram(const string& vert_shader,
@@ -95,6 +97,7 @@ namespace flvr
 			loc_ui[i] = -1;
 			loc_vec4[i] = -1;
 			loc_mat4[i] = -1;
+			loc_int4[i] = -1;
 		}
 	}
 
@@ -427,6 +430,26 @@ namespace flvr
 			}
 			if (loc_ui[i] >= 0)
 				glUniform1ui(loc_ui[i], value);
+		}
+	}
+
+	void ShaderProgram::setLocalParamInt4(int i, int x, int y, int z, int w)
+	{
+		if (shaders_supported())
+		{
+			const char* loc_strings[] = { "lci0", "lci1", "lci2", "lci3",
+				"lci4", "lci5", "lci6", "lci7",
+				"lci8", "lci9", "lci10", "lci11",
+				"lci12", "lci13", "lci14", "lci15" };
+
+			if (loc_int4[i] == -1)
+			{
+				loc_int4[i] = glGetUniformLocation(id_, loc_strings[i]);
+				if (loc_int4[i] == -1)
+					loc_int4[i]--;
+			}
+			if (loc_int4[i] >= 0)
+				glUniform4i(loc_int4[i], x, y, z, w);
 		}
 	}
 

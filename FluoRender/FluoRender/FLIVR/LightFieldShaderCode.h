@@ -45,32 +45,18 @@
 "in vec2 texCoords;\n" \
 "out vec4 fragColor;\n" \
 "\n" \
-"// Calibration values\n" \
-"uniform float pitch;\n" \
-"uniform float tilt;\n" \
-"uniform float center;\n" \
-"uniform int invView;\n" \
-"uniform float subp;\n" \
-"uniform float displayAspect;\n" \
-"uniform int ri;\n" \
-"uniform int bi;\n" \
-"\n" \
-"// Quilt settings\n" \
-"uniform vec3 tile;\n" \
-"uniform vec2 viewPortion;\n" \
-"uniform float quiltAspect;\n" \
-"uniform int overscan;\n" \
-"uniform int quiltInvert;\n" \
-"\n" \
-"uniform int debug;\n" \
-"\n" \
-"uniform sampler2D screenTex;\n" \
+"uniform vec4 loc0;//pitch, tilt, center, subp\n" \
+"uniform vec4 loc1;//viewPortion, displayAspect, quiltAspect\n" \
+"uniform vec4 loc2;//tile, overscan\n" \
+"uniform int4 lci0;//invView, ri, bi, quiltInvert\n" \
+"uniform uint loci0;//debug\n" \
+"uniform sampler2D tex0;//screenTex\n" \
 "\n" \
 "vec2 texArr(vec3 uvz)\n" \
 "{\n" \
 "	// decide which section to take from based on the z.\n" \
-"	float x = (mod(uvz.z, tile.x) + uvz.x) / tile.x;\n" \
-"	float y = (floor(uvz.z / tile.x) + uvz.y) / tile.y;\n" \
+"	float x = (mod(uvz.z, loc2.x) + uvz.x) / loc2.x;\n" \
+"	float y = (floor(uvz.z / loc2.x) + uvz.y) / loc2.y;\n" \
 "	return vec2(x, y) * viewPortion.xy;\n" \
 "}\n" \
 "\n" \
@@ -82,28 +68,29 @@
 "\n" \
 "void main()\n" \
 "{\n" \
-"	if (debug == 1)\n" \
+"	if (loci0 == 1)\n" \
 "	{\n" \
 "		fragColor = texture(screenTex, texCoords.xy);\n" \
 "	}\n" \
-"	else {\n" \
+"	else\n" \
+"	{\n" \
 "		float invert = 1.0;\n" \
-"		if (invView + quiltInvert == 1) invert = -1.0;\n" \
+"		if (lci0.x + lci0.w == 1) invert = -1.0;\n" \
 "		vec3 nuv = vec3(texCoords.xy, 0.0);\n" \
 "		nuv -= 0.5;\n" \
-"		float modx = clamp(step(quiltAspect, displayAspect) * step(float(overscan), 0.5) + step(displayAspect, quiltAspect) * step(0.5, float(overscan)), 0, 1);\n" \
-"		nuv.x = modx * nuv.x * displayAspect / quiltAspect + (1.0 - modx) * nuv.x;\n" \
-"		nuv.y = modx * nuv.y + (1.0 - modx) * nuv.y * quiltAspect / displayAspect;\n" \
+"		float modx = clamp(step(loc1.w, loc1.z) * step(loc2.w, 0.5) + step(loc1.z, loc1.w) * step(0.5, loc2.w), 0, 1);\n" \
+"		nuv.x = modx * nuv.x * loc1.z / loc1.w + (1.0 - modx) * nuv.x;\n" \
+"		nuv.y = modx * nuv.y + (1.0 - modx) * nuv.y * loc1.w / loc1.z;\n" \
 "		nuv += 0.5;\n" \
 "		clip(nuv);\n" \
 "		clip(1.0 - nuv);\n" \
 "		vec4 rgb[3];\n" \
 "		for (int i = 0; i < 3; i++)\n" \
 "		{\n" \
-"			nuv.z = (texCoords.x + i * subp + texCoords.y * tilt) * pitch - center;\n" \
+"			nuv.z = (texCoords.x + i * loc0.w + texCoords.y * loc0.y) * loc0.x - loc0.z;\n" \
 "			nuv.z = mod(nuv.z + ceil(abs(nuv.z)), 1.0);\n" \
 "			nuv.z *= invert;\n" \
-"			nuv.z *= tile.z;\n" \
+"			nuv.z *= loc2.z;\n" \
 "			vec3 coords1 = nuv;\n" \
 "			vec3 coords2 = nuv;\n" \
 "			coords1.y = coords2.y = clamp(nuv.y, 0.005, 0.995);\n" \
@@ -113,7 +100,7 @@
 "			vec4 col2 = texture(screenTex, texArr(coords2));\n" \
 "			rgb[i] = mix(col1, col2, nuv.z - coords1.z);\n" \
 "		}\n" \
-"		fragColor = vec4(rgb[ri].r, rgb[1].g, rgb[bi].b, 1.0);\n" \
+"		fragColor = vec4(rgb[lci0.y].r, rgb[1].g, rgb[lci0.z].b, 1.0);\n" \
 "	}\n" \
 "}\n"
 

@@ -485,7 +485,12 @@ void RenderCanvas::InitOpenVR()
 
 void RenderCanvas::InitLookingGlass()
 {
-	glbin_lg_renderer.Init();
+	bool bval = glbin_lg_renderer.Init();
+	if (!bval)
+	{
+		m_hologram_mode = 0;
+		glbin_settings.m_hologram_mode = 0;
+	}
 }
 #endif
 

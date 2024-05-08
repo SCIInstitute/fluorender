@@ -34,11 +34,37 @@ public:
 	LookingGlassRenderer();
 	~LookingGlassRenderer();
 
-	void Init();
+	bool Init();
 	void Close();
+	void SetPreset(int val);
+	void Setup();
+	void Draw();
+	int GetView() { return m_cur_view; }
 
 private:
 	bool m_initialized;
+	int m_dev_index;
+
+	// quilt settings
+	// more info at
+	// https://docs.lookingglassfactory.com/HoloPlayCAPI/guides/quilt/
+	int m_preset;		// Set up the quilt settings according to the preset passed
+						// 0: 32 views
+						// 1: 45 views, normally used one
+						// 2: 45 views for 8k display
+						// Feel free to customize if you want
+	int m_width;		// Total width of the quilt texture
+	int m_height;		// Total height of the quilt texture
+	int m_rows;			// Number of columns in the quilt
+	int m_columns;		// Number of rows in the quilt
+	int m_totalViews;	// The total number of views in the quilt.
+						// Note that this number might be lower than rows *
+						// columns
+						// qs_viewWidth & qs_viewHeight could be calculated by given numbers
+	int m_viewWidth;	//quilt view dimensions
+	int m_viewHeight;
+
+	int m_cur_view;		//index to the view
 };
 
 #endif//LookingGlassRenderer_h

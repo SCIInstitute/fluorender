@@ -64,6 +64,8 @@ namespace flvr
 		void setLocalParamMatrix(int, float*);
 		//set integer
 		void setLocalParamUInt(int, unsigned int);
+		//set integer vector (4x1)
+		void setLocalParamInt4(int, int, int, int, int);
 
 		// Call init_shaders_supported before shaders_supported queries!
 		static bool init();
@@ -93,6 +95,7 @@ namespace flvr
 		int loc_ui[MAX_SHADER_UNIFORMS];
 		int loc_vec4[MAX_SHADER_UNIFORMS];
 		int loc_mat4[MAX_SHADER_UNIFORMS];
+		int loc_int4[MAX_SHADER_UNIFORMS];
 
 		static bool init_;
 		static bool supported_;
