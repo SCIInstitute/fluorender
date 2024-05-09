@@ -491,6 +491,8 @@ void RenderCanvas::InitLookingGlass()
 		m_hologram_mode = 0;
 		glbin_settings.m_hologram_mode = 0;
 	}
+	glbin_lg_renderer.Setup();
+	glbin_lg_renderer.Clear(m_bg_color);
 }
 #endif
 
@@ -10765,11 +10767,7 @@ void RenderCanvas::SetBackgroundColor(fluo::Color &color)
 	{
 		m_bg_color_inv = fluo::Color(1.0, 1.0, 1.0);
 	}
-	//if (m_vrv)
-	//{
-	//	wxColor c(std::round(color.r()*255.0), std::round(color.g()*255.0), std::round(color.b()*255.0));
-	//	m_vrv->m_bg_color_picker->SetColour(c);
-	//}
+	glbin_lg_renderer.Clear(m_bg_color);
 }
 
 void RenderCanvas::SetFog(bool b)

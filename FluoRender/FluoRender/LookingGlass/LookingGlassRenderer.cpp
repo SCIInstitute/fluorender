@@ -144,8 +144,22 @@ void LookingGlassRenderer::SetPreset(int val)
 
 void LookingGlassRenderer::Setup()
 {
-	flvr::ShaderProgram* shader =
-		glbin_light_field_shader_factory.shader(0);
+	//set up framebuffer for quilt
+	flvr::Framebuffer* quilt_buffer =
+		glbin_framebuffer_manager.framebuffer(
+			flvr::FB_Render_RGBA, m_width, m_height, "quilt");
+	quilt_buffer->protect();
+
+	flvr::ShaderProgram* shader = 0;
+	//set up shader to render texture
+	shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+	}
+	//set up shader to render quilt
+	shader = glbin_light_field_shader_factory.shader(0);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -170,11 +184,62 @@ void LookingGlassRenderer::Setup()
 	int quiltInvert = 0;
 	shader->setLocalParamInt4(0, invView, ri, bi, quiltInvert);
 	shader->setLocalParamUInt(0, 0);
+
+	shader->release();
+}
+
+void LookingGlassRenderer::Clear(const fluo::Color& color)
+{
+	flvr::Framebuffer* quilt_buffer =
+		glbin_framebuffer_manager.framebuffer("quilt");
+	quilt_buffer->bind();
+	glClearDepth(1.0);
+	glClearColor(color.r(), color.g(), color.b(), 0.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void LookingGlassRenderer::Draw()
 {
+	//draw view tex to quilt
+	//bind quilt frame buffer
+	glActiveTexture(GL_TEXTURE0);
+	flvr::Framebuffer* quilt_buffer =
+		glbin_framebuffer_manager.framebuffer("quilt");
+	quilt_buffer->bind();
+	//texture lookup shader
+	flvr::ShaderProgram* shader = 0;
+	shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	//set up view port for place texture
+	GLint viewport[4];
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	// get the x and y origin for this view
+	int x = (m_cur_view % m_columns) * m_viewWidth;
+	int y = int(std::round(float(m_cur_view) / float(m_columns))) * m_viewHeight;
+	glViewport(x, y, m_viewWidth, m_viewHeight);
+	flvr::VertexArray* quad_va =
+		glbin_vertex_array_manager.vertex_array(flvr::VA_Norm_Square);
+	quad_va->draw();
+	shader->release();
+
+	//move index for next
 	m_cur_view++;
 	if (m_cur_view == m_totalViews)
 		m_cur_view = 0;
+
+	//draw quilt to view
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	// reset viewport
+	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+	glEnable(GL_BLEND);
+	glBlendEquation(GL_FUNC_ADD);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_DEPTH_TEST);
+	shader = glbin_light_field_shader_factory.shader(0);
+	shader->bind();
+	quilt_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	quad_va->draw();
+	shader->release();
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glEnable(GL_DEPTH_TEST);
 }

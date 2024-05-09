@@ -38,6 +38,7 @@ public:
 	void Close();
 	void SetPreset(int val);
 	void Setup();
+	void Clear(const fluo::Color& color);
 	void Draw();
 	int GetView() { return m_cur_view; }
 
