@@ -768,9 +768,9 @@ void RenderCanvas::HandleCamera(bool vr)
 
 	if (vr && m_hologram_mode)
 	{
+		fluo::Vector side = GetSide();
 		if (m_hologram_mode == 1)
 		{
-			fluo::Vector side = GetSide();
 			side *= (m_vr_eye_idx ? 1.0 : -1.0) * m_vr_eye_offset / 2.0;
 			glm::vec3 offset(side.x(), side.y(), side.z());
 			m_mv_mat = glm::lookAt(
@@ -780,6 +780,14 @@ void RenderCanvas::HandleCamera(bool vr)
 		}
 		else if (m_hologram_mode == 2)
 		{
+			double f = glbin_lg_renderer.GetOffset();
+			side *= (m_ortho_right - m_ortho_left) / 4.0;//max offset
+			side *= f;
+			glm::vec3 offset(side.x(), side.y(), side.z());
+			m_mv_mat = glm::lookAt(
+				eye + offset,
+				center + offset,
+				up);
 		}
 	}
 	else
@@ -10767,7 +10775,9 @@ void RenderCanvas::SetBackgroundColor(fluo::Color &color)
 	{
 		m_bg_color_inv = fluo::Color(1.0, 1.0, 1.0);
 	}
-	glbin_lg_renderer.Clear(m_bg_color);
+
+	if (m_hologram_mode == 2)
+		glbin_lg_renderer.Clear(m_bg_color);
 }
 
 void RenderCanvas::SetFog(bool b)

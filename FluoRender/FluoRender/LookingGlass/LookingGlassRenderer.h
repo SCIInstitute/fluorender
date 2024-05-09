@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef LookingGlassRenderer_h
 #define LookingGlassRenderer_h
 
+#include <Types/Color.h>
+
 class LookingGlassRenderer
 {
 public:
@@ -40,7 +42,7 @@ public:
 	void Setup();
 	void Clear(const fluo::Color& color);
 	void Draw();
-	int GetView() { return m_cur_view; }
+	double GetOffset();//range of offset [-1, 1]; 0 = center
 
 private:
 	bool m_initialized;

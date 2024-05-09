@@ -243,3 +243,9 @@ void LookingGlassRenderer::Draw()
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glEnable(GL_DEPTH_TEST);
 }
+
+double LookingGlassRenderer::GetOffset()
+{
+	double len = double(m_totalViews) / 2;
+	return (m_cur_view - len) / len;
+}

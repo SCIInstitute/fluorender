@@ -1529,8 +1529,6 @@ void MovieMaker::MakeKeysLookingGlass(int frames)
 	fluo::Vector side = m_view->GetSide();
 	fluo::Vector trans = side * (m_view->m_ortho_right - m_view->m_ortho_left);
 	trans /= 4;
-	double x, y, z;
-	m_view->GetObjTrans(x, y, z);
 
 	//for the view
 	keycode.l0 = 1;
@@ -1546,10 +1544,10 @@ void MovieMaker::MakeKeysLookingGlass(int frames)
 	flkey = new FlKeyDouble(keycode, trans.x());
 	glbin_interpolator.AddKey(flkey);
 	keycode.l2_name = "obj_trans_y";
-	flkey = new FlKeyDouble(keycode, y);
+	flkey = new FlKeyDouble(keycode, trans.y());
 	glbin_interpolator.AddKey(flkey);
 	keycode.l2_name = "obj_trans_z";
-	flkey = new FlKeyDouble(keycode, z);
+	flkey = new FlKeyDouble(keycode, trans.z());
 	glbin_interpolator.AddKey(flkey);
 	keycode.l2_name = "aov";
 	flkey = new FlKeyDouble(keycode, 42);
@@ -1564,10 +1562,10 @@ void MovieMaker::MakeKeysLookingGlass(int frames)
 	flkey = new FlKeyDouble(keycode, -trans.x());
 	glbin_interpolator.AddKey(flkey);
 	keycode.l2_name = "obj_trans_y";
-	flkey = new FlKeyDouble(keycode, y);
+	flkey = new FlKeyDouble(keycode, -trans.y());
 	glbin_interpolator.AddKey(flkey);
 	keycode.l2_name = "obj_trans_z";
-	flkey = new FlKeyDouble(keycode, z);
+	flkey = new FlKeyDouble(keycode, -trans.z());
 	glbin_interpolator.AddKey(flkey);
 	keycode.l2_name = "aov";
 	flkey = new FlKeyDouble(keycode, 42);
