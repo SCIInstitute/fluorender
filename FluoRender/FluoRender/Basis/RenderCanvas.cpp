@@ -3983,10 +3983,15 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	if (m_hologram_mode == 2)
 	{
 		//make sure all views are drawn for the quilt
-		if (glbin_lg_renderer.GetCurView())
+		int vi = glbin_lg_renderer.GetCurView();
+		if (vi)
+		{
 			event.RequestMore(true);
-		refresh = true;
-		vc.insert(gstNull);
+			refresh = true;
+			vc.insert(gstNull);
+		}
+		else
+			event.RequestMore(false);
 	}
 
 	if (m_frame && m_frame->GetBenchmark())

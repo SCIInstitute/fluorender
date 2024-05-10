@@ -207,6 +207,9 @@ void LookingGlassRenderer::Draw()
 	flvr::Framebuffer* quilt_buffer =
 		glbin_framebuffer_manager.framebuffer("quilt");
 	quilt_buffer->bind();
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);//debug
+	glDisable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
 	//texture lookup shader
 	flvr::ShaderProgram* shader = 0;
 	shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
@@ -229,7 +232,6 @@ void LookingGlassRenderer::Draw()
 	shader->release();
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	GLHINT;
 	//move index for next
 	m_cur_view++;
 	if (m_cur_view == m_totalViews)
@@ -239,8 +241,8 @@ void LookingGlassRenderer::Draw()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// reset viewport
 	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-	glDisable(GL_BLEND);
-	glDisable(GL_DEPTH_TEST);
+	//glDisable(GL_BLEND);
+	//glDisable(GL_DEPTH_TEST);
 	shader = glbin_light_field_shader_factory.shader(0);
 	shader->bind();
 	quilt_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
