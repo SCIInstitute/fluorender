@@ -48,7 +48,7 @@
 "uniform vec4 loc0;//pitch, tilt, center, subp\n" \
 "uniform vec4 loc1;//viewPortion, displayAspect, quiltAspect\n" \
 "uniform vec4 loc2;//tile, overscan\n" \
-"uniform int4 lci0;//invView, ri, bi, quiltInvert\n" \
+"uniform ivec4 lci0;//invView, ri, bi, quiltInvert\n" \
 "uniform uint loci0;//debug\n" \
 "uniform sampler2D tex0;//screenTex\n" \
 "\n" \
@@ -57,7 +57,7 @@
 "	// decide which section to take from based on the z.\n" \
 "	float x = (mod(uvz.z, loc2.x) + uvz.x) / loc2.x;\n" \
 "	float y = (floor(uvz.z / loc2.x) + uvz.y) / loc2.y;\n" \
-"	return vec2(x, y) * viewPortion.xy;\n" \
+"	return vec2(x, y) * loc1.xy;\n" \
 "}\n" \
 "\n" \
 "// recreate CG clip function (clear pixel if any component is negative)\n" \
@@ -70,7 +70,7 @@
 "{\n" \
 "	if (loci0 == 1)\n" \
 "	{\n" \
-"		fragColor = texture(screenTex, texCoords.xy);\n" \
+"		fragColor = texture(tex0, texCoords.xy);\n" \
 "	}\n" \
 "	else\n" \
 "	{\n" \
@@ -96,8 +96,8 @@
 "			coords1.y = coords2.y = clamp(nuv.y, 0.005, 0.995);\n" \
 "			coords1.z = floor(nuv.z);\n" \
 "			coords2.z = ceil(nuv.z);\n" \
-"			vec4 col1 = texture(screenTex, texArr(coords1));\n" \
-"			vec4 col2 = texture(screenTex, texArr(coords2));\n" \
+"			vec4 col1 = texture(tex0, texArr(coords1));\n" \
+"			vec4 col2 = texture(tex0, texArr(coords2));\n" \
 "			rgb[i] = mix(col1, col2, nuv.z - coords1.z);\n" \
 "		}\n" \
 "		fragColor = vec4(rgb[lci0.y].r, rgb[1].g, rgb[lci0.z].b, 1.0);\n" \

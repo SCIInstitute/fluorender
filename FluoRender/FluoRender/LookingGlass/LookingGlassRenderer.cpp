@@ -210,6 +210,7 @@ void LookingGlassRenderer::Draw()
 	//texture lookup shader
 	flvr::ShaderProgram* shader = 0;
 	shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	shader->bind();
 	//set up view port for place texture
 	GLint viewport[4];
 	glGetIntegerv(GL_VIEWPORT, viewport);
@@ -217,12 +218,18 @@ void LookingGlassRenderer::Draw()
 	int x = (m_cur_view % m_columns) * m_viewWidth;
 	int y = int(std::round(float(m_cur_view) / float(m_columns))) * m_viewHeight;
 	glViewport(x, y, m_viewWidth, m_viewHeight);
+	//bind texture
+	flvr::Framebuffer* view_buffer =
+		glbin_framebuffer_manager.framebuffer("quilt view");
+	if (view_buffer)
+		view_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	flvr::VertexArray* quad_va =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Norm_Square);
 	quad_va->draw();
 	shader->release();
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+	GLHINT;
 	//move index for next
 	m_cur_view++;
 	if (m_cur_view == m_totalViews)
@@ -258,4 +265,13 @@ double LookingGlassRenderer::GetOffset()
 {
 	double len = double(m_totalViews) / 2;
 	return (m_cur_view - len) / len;
+}
+
+void LookingGlassRenderer::BindRenderBuffer(int nx, int ny)
+{
+	flvr::Framebuffer* buffer =
+		glbin_framebuffer_manager.framebuffer(
+			flvr::FB_Render_RGBA, nx, ny, "quilt view");
+	if (buffer)
+		buffer->bind();
 }

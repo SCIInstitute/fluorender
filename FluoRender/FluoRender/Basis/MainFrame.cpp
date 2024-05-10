@@ -848,8 +848,6 @@ MainFrame::MainFrame(
 	//hologram
 	if (glbin_settings.m_hologram_mode == 1)
 		m_vrv_list[0]->m_canvas->InitOpenVR();
-	else if (glbin_settings.m_hologram_mode == 2)
-		m_vrv_list[0]->m_canvas->InitLookingGlass();
 
 	//keyboard shortcuts
 	wxAcceleratorEntry entries[5];

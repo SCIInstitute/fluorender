@@ -1166,6 +1166,7 @@ private:
 
 	//enable vr
 	int m_hologram_mode;//0: disabled; 1: stereograph; 2: looking glass;
+	bool m_lg_initiated;
 	bool m_enable_sbs;
 	bool m_use_openvr;
 	uint32_t m_vr_size[2];

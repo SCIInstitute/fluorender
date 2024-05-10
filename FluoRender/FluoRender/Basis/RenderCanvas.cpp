@@ -321,6 +321,7 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_enlarge_scale(1.0),
 	//vr settings
 	m_hologram_mode(0),
+	m_lg_initiated(false),
 	m_enable_sbs(false),
 	m_use_openvr(false),
 	m_vr_eye_offset(6.0),
@@ -485,14 +486,18 @@ void RenderCanvas::InitOpenVR()
 
 void RenderCanvas::InitLookingGlass()
 {
+	if (m_lg_initiated)
+		return;
 	bool bval = glbin_lg_renderer.Init();
 	if (!bval)
 	{
 		m_hologram_mode = 0;
 		glbin_settings.m_hologram_mode = 0;
+		return;
 	}
 	glbin_lg_renderer.Setup();
 	glbin_lg_renderer.Clear();
+	m_lg_initiated = true;
 }
 #endif
 
@@ -2342,6 +2347,12 @@ void RenderCanvas::BindRenderBuffer()
 				vr_buf_name);
 		if (vr_buffer)
 			vr_buffer->bind();
+	}
+	else if (m_hologram_mode == 2)
+	{
+		int nx, ny;
+		GetRenderSize(nx, ny);
+		glbin_lg_renderer.BindRenderBuffer(nx, ny);
 	}
 	else
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -5462,6 +5473,9 @@ void RenderCanvas::ForceDraw()
 	Init();
 	wxPaintDC dc(this);
 
+	if (m_hologram_mode == 2)
+		InitLookingGlass();
+
 	if (m_resize)
 		m_retain_finalbuffer = false;
 
@@ -5481,6 +5495,10 @@ void RenderCanvas::ForceDraw()
 	if (m_hologram_mode == 1)
 	{
 		PrepVRBuffer();
+		BindRenderBuffer();
+	}
+	else if (m_hologram_mode == 2)
+	{
 		BindRenderBuffer();
 	}
 
@@ -5576,11 +5594,6 @@ void RenderCanvas::ForceDraw()
 	}
 	else if (m_hologram_mode == 2)
 	{
-		//bind texture
-		flvr::Framebuffer* final_buffer =
-			glbin_framebuffer_manager.framebuffer("final");
-		if (final_buffer)
-			final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 		glbin_lg_renderer.Draw();
 		SwapBuffers();
 	}

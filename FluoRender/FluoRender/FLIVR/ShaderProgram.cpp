@@ -29,6 +29,7 @@
 #include "ShaderProgram.h"
 #include <Types/Utils.h>
 #include <compatibility.h>
+#include <Debug.h>
 #include <ctime>
 #include <cstdio>
 #include <sstream>
@@ -242,7 +243,12 @@ namespace flvr
 			if (shader_status[0] == GL_FALSE)
 			{
 				glGetShaderInfoLog(v_shader, sizeof(shader_log), shader_length, shader_log);
-				std::cerr << "Error compiling vertex shader: " << shader_log << std::endl;
+#ifdef _DEBUG
+				std::string str = shader_log;
+				std::wstring wstr = L"Error compiling vertex shader: " + s2ws(str) + L"\n";
+				DBGPRINT(wstr.c_str());
+				//std::cerr << "Error compiling vertex shader: " << shader_log << std::endl;
+#endif
 				attach_vert = false;
 			}
 
@@ -259,7 +265,12 @@ namespace flvr
 			if (shader_status[0] == GL_FALSE)
 			{
 				glGetShaderInfoLog(f_shader, sizeof(shader_log), shader_length, shader_log);
-				std::cerr << "Error compiling fragment shader: " << shader_log << std::endl;
+#ifdef _DEBUG
+				std::string str = shader_log;
+				std::wstring wstr = L"Error compiling fragment shader: " + s2ws(str) + L"\n";
+				DBGPRINT(wstr.c_str());
+				//std::cerr << "Error compiling fragment shader: " << shader_log << std::endl;
+#endif
 				attach_frag = false;
 			}
 
@@ -279,7 +290,12 @@ namespace flvr
 				if (shader_status[0] == GL_FALSE)
 				{
 					glGetShaderInfoLog(f_shader, sizeof(shader_log), shader_length, shader_log);
-					std::cerr << "Error compiling geometry shader: " << shader_log << std::endl;
+#ifdef _DEBUG
+					std::string str = shader_log;
+					std::wstring wstr = L"Error compiling geometry shader: " + s2ws(str) + L"\n";
+					DBGPRINT(wstr.c_str());
+					//std::cerr << "Error compiling geometry shader: " << shader_log << std::endl;
+#endif
 					attach_frag = false;
 				}
 			}
@@ -297,7 +313,12 @@ namespace flvr
 			if (shader_status[0] == GL_FALSE)
 			{
 				glGetProgramInfoLog(id_, sizeof(shader_log), shader_length, shader_log);
-				std::cerr << "Error linking shaders: " << shader_log << std::endl;
+#ifdef _DEBUG
+				std::string str = shader_log;
+				std::wstring wstr = L"Error linking shaders: " + s2ws(str) + L"\n";
+				DBGPRINT(wstr.c_str());
+				//std::cerr << "Error linking shaders: " << shader_log << std::endl;
+#endif
 				return true;
 			}
 

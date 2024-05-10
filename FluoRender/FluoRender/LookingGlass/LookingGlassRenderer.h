@@ -45,6 +45,7 @@ public:
 	int GetViewNum();
 	int GetCurView();
 	double GetOffset();//range of offset [-1, 1]; 0 = center
+	void BindRenderBuffer(int nx, int ny);
 
 private:
 	bool m_initialized;
