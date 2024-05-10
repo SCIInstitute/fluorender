@@ -188,13 +188,13 @@ void LookingGlassRenderer::Setup()
 	shader->release();
 }
 
-void LookingGlassRenderer::Clear(const fluo::Color& color)
+void LookingGlassRenderer::Clear()
 {
 	flvr::Framebuffer* quilt_buffer =
 		glbin_framebuffer_manager.framebuffer("quilt");
 	quilt_buffer->bind();
-	glClearDepth(1.0);
-	glClearColor(color.r(), color.g(), color.b(), 0.0);
+	glClearDepth(1);
+	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -221,6 +221,7 @@ void LookingGlassRenderer::Draw()
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Norm_Square);
 	quad_va->draw();
 	shader->release();
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	//move index for next
 	m_cur_view++;
@@ -231,9 +232,7 @@ void LookingGlassRenderer::Draw()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// reset viewport
 	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-	glEnable(GL_BLEND);
-	glBlendEquation(GL_FUNC_ADD);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	shader = glbin_light_field_shader_factory.shader(0);
 	shader->bind();
@@ -241,6 +240,7 @@ void LookingGlassRenderer::Draw()
 	quad_va->draw();
 	shader->release();
 	glBindTexture(GL_TEXTURE_2D, 0);
+	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 }
 

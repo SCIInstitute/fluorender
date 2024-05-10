@@ -40,7 +40,7 @@ public:
 	void Close();
 	void SetPreset(int val);
 	void Setup();
-	void Clear(const fluo::Color& color);
+	void Clear();
 	void Draw();
 	double GetOffset();//range of offset [-1, 1]; 0 = center
 

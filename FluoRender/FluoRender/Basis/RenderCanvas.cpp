@@ -492,7 +492,7 @@ void RenderCanvas::InitLookingGlass()
 		glbin_settings.m_hologram_mode = 0;
 	}
 	glbin_lg_renderer.Setup();
-	glbin_lg_renderer.Clear(m_bg_color);
+	glbin_lg_renderer.Clear();
 }
 #endif
 
@@ -2342,9 +2342,6 @@ void RenderCanvas::BindRenderBuffer()
 				vr_buf_name);
 		if (vr_buffer)
 			vr_buffer->bind();
-	}
-	else if (m_hologram_mode == 2)
-	{
 	}
 	else
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -5477,10 +5474,6 @@ void RenderCanvas::ForceDraw()
 		PrepVRBuffer();
 		BindRenderBuffer();
 	}
-	else if (m_hologram_mode == 2)
-	{
-
-	}
 
 	switch (m_draw_type)
 	{
@@ -5574,7 +5567,13 @@ void RenderCanvas::ForceDraw()
 	}
 	else if (m_hologram_mode == 2)
 	{
-
+		//bind texture
+		flvr::Framebuffer* final_buffer =
+			glbin_framebuffer_manager.framebuffer("final");
+		if (final_buffer)
+			final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+		glbin_lg_renderer.Draw();
+		SwapBuffers();
 	}
 	else
 		SwapBuffers();
@@ -10775,9 +10774,6 @@ void RenderCanvas::SetBackgroundColor(fluo::Color &color)
 	{
 		m_bg_color_inv = fluo::Color(1.0, 1.0, 1.0);
 	}
-
-	if (m_hologram_mode == 2)
-		glbin_lg_renderer.Clear(m_bg_color);
 }
 
 void RenderCanvas::SetFog(bool b)
