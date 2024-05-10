@@ -3969,6 +3969,15 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		//m_retain_finalbuffer = true;
 	}
 
+	if (m_hologram_mode == 2)
+	{
+		//make sure all views are drawn for the quilt
+		if (glbin_lg_renderer.GetCurView())
+			event.RequestMore(true);
+		refresh = true;
+		vc.insert(gstNull);
+	}
+
 	if (m_frame && m_frame->GetBenchmark())
 	{
 		double fps = 1.0 / glbin.getStopWatch(gstStopWatch)->average();

@@ -244,6 +244,16 @@ void LookingGlassRenderer::Draw()
 	glEnable(GL_DEPTH_TEST);
 }
 
+int LookingGlassRenderer::GetViewNum()
+{
+	return m_totalViews;
+}
+
+int LookingGlassRenderer::GetCurView()
+{
+	return m_cur_view;
+}
+
 double LookingGlassRenderer::GetOffset()
 {
 	double len = double(m_totalViews) / 2;
