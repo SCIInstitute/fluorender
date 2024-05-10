@@ -183,7 +183,6 @@ void LookingGlassRenderer::Setup()
 	int bi = hpc_GetDevicePropertyBi(m_dev_index);
 	int quiltInvert = 0;
 	shader->setLocalParamInt4(0, invView, ri, bi, quiltInvert);
-	shader->setLocalParamUInt(0, 0);
 
 	shader->release();
 }
@@ -219,7 +218,7 @@ void LookingGlassRenderer::Draw()
 	glGetIntegerv(GL_VIEWPORT, viewport);
 	// get the x and y origin for this view
 	int x = (m_cur_view % m_columns) * m_viewWidth;
-	int y = int(std::round(float(m_cur_view) / float(m_columns))) * m_viewHeight;
+	int y = int(float(m_cur_view) / float(m_columns)) * m_viewHeight;
 	glViewport(x, y, m_viewWidth, m_viewHeight);
 	//bind texture
 	flvr::Framebuffer* view_buffer =
@@ -228,6 +227,7 @@ void LookingGlassRenderer::Draw()
 		view_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	flvr::VertexArray* quad_va =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Norm_Square);
+	//if (m_cur_view != 3)//debug
 	quad_va->draw();
 	shader->release();
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -245,6 +245,7 @@ void LookingGlassRenderer::Draw()
 	//glDisable(GL_DEPTH_TEST);
 	shader = glbin_light_field_shader_factory.shader(0);
 	shader->bind();
+	shader->setLocalParamUInt(0, glbin_settings.m_hologram_debug?1:0);//show quilt
 	quilt_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	quad_va->draw();
 	shader->release();

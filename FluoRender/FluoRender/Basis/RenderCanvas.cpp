@@ -714,6 +714,8 @@ void RenderCanvas::Clear()
 
 void RenderCanvas::HandleProjection(int nx, int ny, bool vr)
 {
+	if (ny == 0 || m_aov == 0 || m_scale_factor == 0)
+		return;
 	if (!m_free)
 		m_distance = m_radius / tan(d2r(m_aov / 2.0)) / m_scale_factor;
 

@@ -74,6 +74,7 @@ EVT_CHECKBOX(ID_SBSChk, SettingDlg::OnSBSCheck)
 EVT_COMMAND_SCROLL(ID_EyeDistSldr, SettingDlg::OnEyeDistChange)
 EVT_TEXT(ID_EyeDistText, SettingDlg::OnEyeDistEdit)
 EVT_CHECKBOX(ID_LookingGlassChk, SettingDlg::OnLookingGlassCheck)
+EVT_CHECKBOX(ID_HoloDebugChk, SettingDlg::OnHoloDebugCheck)
 //display id
 EVT_COMBOBOX(ID_DispIdCombo, SettingDlg::OnDispIdComb)
 //color depth
@@ -586,6 +587,11 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 		"Enable Holography");
 	sizer1_5->Add(5, 5);
 	sizer1_5->Add(m_looking_glass_chk, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer1_6 = new wxBoxSizer(wxHORIZONTAL);
+	m_holo_debug_chk = new wxCheckBox(page, ID_HoloDebugChk,
+		"Show Quilt");
+	sizer1_6->Add(20, 5);
+	sizer1_6->Add(m_holo_debug_chk, 0, wxALIGN_CENTER);
 	group1->Add(10, 5);
 	group1->Add(sizer1_1, 0, wxEXPAND);
 	group1->Add(10, 5);
@@ -596,6 +602,8 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	group1->Add(sizer1_4, 0, wxEXPAND);
 	group1->Add(10, 5);
 	group1->Add(sizer1_5, 0, wxEXPAND);
+	group1->Add(10, 5);
+	group1->Add(sizer1_6, 0, wxEXPAND);
 	group1->Add(10, 5);
 
 	//full screen display
@@ -994,6 +1002,7 @@ void SettingDlg::UpdateUI()
 		m_eye_dist_sldr->Disable();
 		m_eye_dist_text->Disable();
 		m_looking_glass_chk->SetValue(false);
+		m_holo_debug_chk->Disable();
 	}
 	else if (glbin_settings.m_hologram_mode == 1)
 	{
@@ -1002,6 +1011,7 @@ void SettingDlg::UpdateUI()
 		m_eye_dist_sldr->Enable();
 		m_eye_dist_text->Enable();
 		m_looking_glass_chk->SetValue(false);
+		m_holo_debug_chk->Disable();
 	}
 	else if (glbin_settings.m_hologram_mode == 2)
 	{
@@ -1010,10 +1020,12 @@ void SettingDlg::UpdateUI()
 		m_eye_dist_sldr->Disable();
 		m_eye_dist_text->Disable();
 		m_looking_glass_chk->SetValue(true);
+		m_holo_debug_chk->Enable();
 	}
 	m_sbs_chk->SetValue(glbin_settings.m_sbs);
 	m_eye_dist_sldr->ChangeValue(std::round(glbin_settings.m_eye_dist * 10.0));
 	m_eye_dist_text->ChangeValue(wxString::Format("%.1f", glbin_settings.m_eye_dist));
+	m_holo_debug_chk->SetValue(glbin_settings.m_hologram_debug);
 	//display id
 	m_disp_id_comb->Select(glbin_settings.m_disp_id);
 	//color depth
@@ -1440,6 +1452,7 @@ void SettingDlg::OnStereoCheck(wxCommandEvent &event)
 		m_eye_dist_sldr->Disable();
 		m_eye_dist_text->Disable();
 		m_looking_glass_chk->SetValue(false);
+		m_holo_debug_chk->Disable();
 	}
 	else if (glbin_settings.m_hologram_mode == 1)
 	{
@@ -1448,6 +1461,7 @@ void SettingDlg::OnStereoCheck(wxCommandEvent &event)
 		m_eye_dist_sldr->Enable();
 		m_eye_dist_text->Enable();
 		m_looking_glass_chk->SetValue(false);
+		m_holo_debug_chk->Disable();
 	}
 	if (m_frame && 0 < m_frame->GetViewNum())
 	{
@@ -1518,6 +1532,7 @@ void SettingDlg::OnLookingGlassCheck(wxCommandEvent& event)
 		m_eye_dist_sldr->Disable();
 		m_eye_dist_text->Disable();
 		m_looking_glass_chk->SetValue(false);
+		m_holo_debug_chk->Disable();
 	}
 	else if (glbin_settings.m_hologram_mode == 2)
 	{
@@ -1526,6 +1541,7 @@ void SettingDlg::OnLookingGlassCheck(wxCommandEvent& event)
 		m_eye_dist_sldr->Disable();
 		m_eye_dist_text->Disable();
 		m_looking_glass_chk->SetValue(true);
+		m_holo_debug_chk->Enable();
 	}
 	if (m_frame && 0 < m_frame->GetViewNum())
 	{
@@ -1533,6 +1549,19 @@ void SettingDlg::OnLookingGlassCheck(wxCommandEvent& event)
 		if (view)
 		{
 			view->SetHologramMode(glbin_settings.m_hologram_mode);
+			view->RefreshGL(39);
+		}
+	}
+}
+
+void SettingDlg::OnHoloDebugCheck(wxCommandEvent& event)
+{
+	glbin_settings.m_hologram_debug = m_holo_debug_chk->GetValue();
+	if (m_frame && 0 < m_frame->GetViewNum())
+	{
+		RenderCanvas* view = m_frame->GetView(0);
+		if (view)
+		{
 			view->RefreshGL(39);
 		}
 	}

@@ -74,6 +74,7 @@ class SettingDlg : public wxPanel
 		ID_EyeDistSldr,
 		ID_EyeDistText,
 		ID_LookingGlassChk,
+		ID_HoloDebugChk,
 		//display id
 		ID_DispIdCombo,
 		//color depth
@@ -180,6 +181,7 @@ private:
 	wxSingleSlider *m_eye_dist_sldr;
 	wxTextCtrl *m_eye_dist_text;
 	wxCheckBox* m_looking_glass_chk;
+	wxCheckBox* m_holo_debug_chk;
 	//display
 	wxComboBox* m_disp_id_comb;
 	//color depth
@@ -290,6 +292,7 @@ private:
 	void OnEyeDistChange(wxScrollEvent &event);
 	void OnEyeDistEdit(wxCommandEvent &event);
 	void OnLookingGlassCheck(wxCommandEvent& event);
+	void OnHoloDebugCheck(wxCommandEvent& event);
 	//display id
 	void OnDispIdComb(wxCommandEvent& event);
 	//color depth
