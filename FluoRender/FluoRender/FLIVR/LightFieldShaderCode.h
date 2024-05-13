@@ -30,26 +30,30 @@
 #define LightFieldShaderCode_h
 
 #define LIGHT_FIELD_SHADER_VERTEX \
-"layout(location = 0)\n\
-in vec2 vertPos_data;\n\
-\n\
-out vec2 texCoords;\n\
+"//LIGHT_FIELD_SHADER_VERTEX\n\
+layout(location = 0) in vec3 InVertex;\n\
+layout(location = 1) in vec3 InTexCoord;\n\
+out vec3 OutVertex;\n\
+out vec3 OutTexCoord;\n\
 \n\
 void main()\n\
 {\n\
-	gl_Position = vec4(vertPos_data.xy, 0.0, 1.0);\n\
-	texCoords = (vertPos_data.xy + 1.0) * 0.5;\n\
+	gl_Position = vec4(InVertex, 1.0);\n\
+	OutTexCoord = InTexCoord;\n\
+	OutVertex = InVertex;\n\
 }\n"
 
 #define LIGHT_FIELD_SHADER_FRAG \
-"in vec2 texCoords;\n\
+"//LIGHT_FIELD_SHADER_FRAG\n\
+in vec3 OutVertex;\n\
+in vec3 OutTexCoord;\n\
 out vec4 fragColor;\n\
 \n\
-uniform vec4 loc0;//pitch, tilt, center, subp\n\
-uniform vec4 loc1;//viewPortion, displayAspect, quiltAspect\n\
-uniform vec4 loc2;//tile, overscan\n\
-uniform ivec4 lci0;//invView, ri, bi, quiltInvert\n\
-uniform uint loci0;//debug\n\
+uniform vec4 loc0;//pitch, tilt, center, subp {246.87834, -0.18404308, 0.24427177, 0.00021701389}\n\
+uniform vec4 loc1;//viewPortion, displayAspect, quiltAspect {0.99975586, 0.99975586, 0.75, 0.75}\n\
+uniform vec4 loc2;//tile, overscan {5, 9, 45, 0}\n\
+uniform ivec4 lci0;//invView, ri, bi, quiltInvert {1, 0, 2, 0}\n\
+uniform uint loci0;//debug {0}\n\
 uniform sampler2D tex0;//screenTex\n\
 \n\
 vec2 texArr(vec3 uvz)\n\
@@ -70,13 +74,13 @@ void main()\n\
 {\n\
 	if (loci0 == 1)\n\
 	{\n\
-		fragColor = texture(tex0, texCoords.xy);\n\
+		fragColor = texture(tex0, OutTexCoord.xy);\n\
 	}\n\
 	else\n\
 	{\n\
 		float invert = 1.0;\n\
 		if (lci0.x + lci0.w == 1) invert = -1.0;\n\
-		vec3 nuv = vec3(texCoords.xy, 0.0);\n\
+		vec3 nuv = vec3(OutTexCoord.xy, 0.0);\n\
 		nuv -= 0.5;\n\
 		float modx = clamp(step(loc1.w, loc1.z) * step(loc2.w, 0.5) + step(loc1.z, loc1.w) * step(0.5, loc2.w), 0, 1);\n\
 		nuv.x = modx * nuv.x * loc1.z / loc1.w + (1.0 - modx) * nuv.x;\n\
@@ -87,7 +91,7 @@ void main()\n\
 		vec4 rgb[3];\n\
 		for (int i = 0; i < 3; i++)\n\
 		{\n\
-			nuv.z = (texCoords.x + i * loc0.w + texCoords.y * loc0.y) * loc0.x - loc0.z;\n\
+			nuv.z = (OutTexCoord.x + i * loc0.w + OutTexCoord.y * loc0.y) * loc0.x - loc0.z;\n\
 			nuv.z = mod(nuv.z + ceil(abs(nuv.z)), 1.0);\n\
 			nuv.z *= invert;\n\
 			nuv.z *= loc2.z;\n\

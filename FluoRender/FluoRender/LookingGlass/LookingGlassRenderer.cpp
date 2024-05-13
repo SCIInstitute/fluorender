@@ -181,7 +181,7 @@ void LookingGlassRenderer::Setup()
 	int invView = hpc_GetDevicePropertyInvView(m_dev_index);
 	int ri = hpc_GetDevicePropertyRi(m_dev_index);
 	int bi = hpc_GetDevicePropertyBi(m_dev_index);
-	int quiltInvert = 0;
+	int quiltInvert = 1;
 	shader->setLocalParamInt4(0, invView, ri, bi, quiltInvert);
 
 	shader->release();
