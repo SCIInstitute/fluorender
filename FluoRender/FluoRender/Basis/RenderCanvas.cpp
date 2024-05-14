@@ -788,13 +788,14 @@ void RenderCanvas::HandleCamera(bool vr)
 		else if (m_hologram_mode == 2)
 		{
 			double f = glbin_lg_renderer.GetOffset();
-			side *= (m_ortho_right - m_ortho_left) / 10.0;//max offset
+			side *= glbin_settings.m_lg_offset;
 			side *= f;
 			glm::vec3 offset(side.x(), side.y(), side.z());
 			m_mv_mat = glm::lookAt(
 				eye + offset,
 				center + offset,
 				up);
+			//SetLockCenterVol();
 		}
 	}
 	else

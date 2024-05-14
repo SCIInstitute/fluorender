@@ -74,6 +74,8 @@ EVT_CHECKBOX(ID_SBSChk, SettingDlg::OnSBSCheck)
 EVT_COMMAND_SCROLL(ID_EyeDistSldr, SettingDlg::OnEyeDistChange)
 EVT_TEXT(ID_EyeDistText, SettingDlg::OnEyeDistEdit)
 EVT_CHECKBOX(ID_LookingGlassChk, SettingDlg::OnLookingGlassCheck)
+EVT_COMMAND_SCROLL(ID_LgOffsetSldr, SettingDlg::OnLgOffsetChange)
+EVT_TEXT(ID_LgOffsetText, SettingDlg::OnLgOffsetEdit)
 EVT_CHECKBOX(ID_HoloDebugChk, SettingDlg::OnHoloDebugCheck)
 //display id
 EVT_COMBOBOX(ID_DispIdCombo, SettingDlg::OnDispIdComb)
@@ -573,7 +575,8 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	sizer1_3->Add(20, 5);
 	sizer1_3->Add(m_sbs_chk, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_4 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Eye distance");
+	st = new wxStaticText(page, 0, "Eye Distance:",
+		wxDefaultPosition, FromDIP(wxSize(70, 20)));
 	m_eye_dist_sldr = new wxSingleSlider(page, ID_EyeDistSldr, 200, 0, 2000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_eye_dist_text = new wxTextCtrl(page, ID_EyeDistText, "20.0",
@@ -588,10 +591,25 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	sizer1_5->Add(5, 5);
 	sizer1_5->Add(m_looking_glass_chk, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_6 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Install Looking Glass Bridge and connect a Looking Glass display.\nThen send the full-screen render view to the display.");
+	sizer1_6->Add(20, 5);
+	sizer1_6->Add(st, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer1_7 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "View Offset:",
+		wxDefaultPosition, FromDIP(wxSize(70, 20)));
+	m_lg_offset_sldr = new wxSingleSlider(page, ID_LgOffsetSldr, 180, 0, 360,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_lg_offset_text = new wxTextCtrl(page, ID_LgOffsetText, "180",
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
+	sizer1_7->Add(20, 5);
+	sizer1_7->Add(st, 0, wxALIGN_CENTER);
+	sizer1_7->Add(m_lg_offset_sldr, 1, wxEXPAND);
+	sizer1_7->Add(m_lg_offset_text, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer1_8 = new wxBoxSizer(wxHORIZONTAL);
 	m_holo_debug_chk = new wxCheckBox(page, ID_HoloDebugChk,
 		"Show Quilt");
-	sizer1_6->Add(20, 5);
-	sizer1_6->Add(m_holo_debug_chk, 0, wxALIGN_CENTER);
+	sizer1_8->Add(20, 5);
+	sizer1_8->Add(m_holo_debug_chk, 0, wxALIGN_CENTER);
 	group1->Add(10, 5);
 	group1->Add(sizer1_1, 0, wxEXPAND);
 	group1->Add(10, 5);
@@ -604,6 +622,10 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	group1->Add(sizer1_5, 0, wxEXPAND);
 	group1->Add(10, 5);
 	group1->Add(sizer1_6, 0, wxEXPAND);
+	group1->Add(10, 5);
+	group1->Add(sizer1_7, 0, wxEXPAND);
+	group1->Add(10, 5);
+	group1->Add(sizer1_8, 0, wxEXPAND);
 	group1->Add(10, 5);
 
 	//full screen display
@@ -1012,6 +1034,8 @@ void SettingDlg::UpdateUI()
 		m_eye_dist_sldr->Disable();
 		m_eye_dist_text->Disable();
 		m_looking_glass_chk->SetValue(false);
+		m_lg_offset_sldr->Disable();
+		m_lg_offset_text->Disable();
 		m_holo_debug_chk->Disable();
 	}
 	else if (glbin_settings.m_hologram_mode == 1)
@@ -1021,6 +1045,8 @@ void SettingDlg::UpdateUI()
 		m_eye_dist_sldr->Enable();
 		m_eye_dist_text->Enable();
 		m_looking_glass_chk->SetValue(false);
+		m_lg_offset_sldr->Disable();
+		m_lg_offset_text->Disable();
 		m_holo_debug_chk->Disable();
 	}
 	else if (glbin_settings.m_hologram_mode == 2)
@@ -1030,11 +1056,15 @@ void SettingDlg::UpdateUI()
 		m_eye_dist_sldr->Disable();
 		m_eye_dist_text->Disable();
 		m_looking_glass_chk->SetValue(true);
+		m_lg_offset_sldr->Enable();
+		m_lg_offset_text->Enable();
 		m_holo_debug_chk->Enable();
 	}
 	m_sbs_chk->SetValue(glbin_settings.m_sbs);
 	m_eye_dist_sldr->ChangeValue(std::round(glbin_settings.m_eye_dist * 10.0));
 	m_eye_dist_text->ChangeValue(wxString::Format("%.1f", glbin_settings.m_eye_dist));
+	m_lg_offset_sldr->ChangeValue(glbin_settings.m_lg_offset);
+	m_lg_offset_text->ChangeValue(wxString::Format("%.0f", glbin_settings.m_lg_offset));
 	m_holo_debug_chk->SetValue(glbin_settings.m_hologram_debug);
 	//display id
 	m_disp_id_comb->Select(glbin_settings.m_disp_id);
@@ -1462,6 +1492,8 @@ void SettingDlg::OnStereoCheck(wxCommandEvent &event)
 		m_eye_dist_sldr->Disable();
 		m_eye_dist_text->Disable();
 		m_looking_glass_chk->SetValue(false);
+		m_lg_offset_sldr->Disable();
+		m_lg_offset_text->Disable();
 		m_holo_debug_chk->Disable();
 	}
 	else if (glbin_settings.m_hologram_mode == 1)
@@ -1471,6 +1503,8 @@ void SettingDlg::OnStereoCheck(wxCommandEvent &event)
 		m_eye_dist_sldr->Enable();
 		m_eye_dist_text->Enable();
 		m_looking_glass_chk->SetValue(false);
+		m_lg_offset_sldr->Disable();
+		m_lg_offset_text->Disable();
 		m_holo_debug_chk->Disable();
 	}
 	if (m_frame && 0 < m_frame->GetViewNum())
@@ -1542,6 +1576,8 @@ void SettingDlg::OnLookingGlassCheck(wxCommandEvent& event)
 		m_eye_dist_sldr->Disable();
 		m_eye_dist_text->Disable();
 		m_looking_glass_chk->SetValue(false);
+		m_lg_offset_sldr->Disable();
+		m_lg_offset_text->Disable();
 		m_holo_debug_chk->Disable();
 	}
 	else if (glbin_settings.m_hologram_mode == 2)
@@ -1551,6 +1587,8 @@ void SettingDlg::OnLookingGlassCheck(wxCommandEvent& event)
 		m_eye_dist_sldr->Disable();
 		m_eye_dist_text->Disable();
 		m_looking_glass_chk->SetValue(true);
+		m_lg_offset_sldr->Enable();
+		m_lg_offset_text->Enable();
 		m_holo_debug_chk->Enable();
 	}
 	if (m_frame && 0 < m_frame->GetViewNum())
@@ -1559,6 +1597,32 @@ void SettingDlg::OnLookingGlassCheck(wxCommandEvent& event)
 		if (view)
 		{
 			view->SetHologramMode(glbin_settings.m_hologram_mode);
+			view->RefreshGL(39);
+		}
+	}
+}
+
+void SettingDlg::OnLgOffsetChange(wxScrollEvent& event)
+{
+	glbin_settings.m_lg_offset = m_lg_offset_sldr->GetValue();
+	wxString str = wxString::Format("%.0f", glbin_settings.m_lg_offset);
+	if (str != m_lg_offset_text->GetValue())
+		m_lg_offset_text->SetValue(str);
+}
+
+void SettingDlg::OnLgOffsetEdit(wxCommandEvent& event)
+{
+	wxString str = m_lg_offset_text->GetValue();
+	long lval;
+	str.ToLong(&lval);
+	m_lg_offset_sldr->ChangeValue(lval);
+	glbin_settings.m_lg_offset = lval;
+
+	if (m_frame && 0 < m_frame->GetViewNum())
+	{
+		RenderCanvas* view = m_frame->GetView(0);
+		if (view)
+		{
 			view->RefreshGL(39);
 		}
 	}

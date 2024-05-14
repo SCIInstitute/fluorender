@@ -117,6 +117,7 @@ public:
 	void SetAov(double val, bool notify);
 	void SetFree(bool val);
 	void SetFullScreen();
+	void CloseFullScreen();
 
 	void SetDepthAttenEnable(bool val);
 	void SetDepthAtten(double val, bool notify);

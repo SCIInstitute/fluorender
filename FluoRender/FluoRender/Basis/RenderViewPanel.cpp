@@ -1214,6 +1214,12 @@ void RenderViewPanel::SetFullScreen()
 	}
 }
 
+void RenderViewPanel::CloseFullScreen()
+{
+	if (m_canvas->GetParent() == m_full_frame)
+		m_canvas->Close();
+}
+
 void RenderViewPanel::SetDepthAttenEnable(bool val)
 {
 	m_canvas->SetFog(val);

@@ -938,6 +938,7 @@ void MainFrame::OnClose(wxCloseEvent &event)
 			vrv_saved = true;
 			break;
 		}
+		m_vrv_list[i]->CloseFullScreen();
 	}
 	if (!vrv_saved && !m_vrv_list.empty())
 		m_vrv_list[0]->SaveDefault(0xaff);
