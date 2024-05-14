@@ -610,14 +610,24 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	wxBoxSizer* group2 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Fullscreen on Display"), wxVERTICAL);
 	wxBoxSizer* sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Display ID:",
+	st = new wxStaticText(page, 0, "Display:",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)));
 	m_disp_id_comb = new wxComboBox(page, ID_DispIdCombo, "",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	int dn = wxDisplay::GetCount();
+	wxDisplay* display = 0;
+	wxString disp_name;
 	std::vector<wxString> list1;
 	for (int i = 0; i < dn; ++i)
-		list1.push_back(wxString::Format("%d", i));
+	{
+		display = new wxDisplay(i);
+		disp_name = display->GetName();
+		if (disp_name.IsEmpty())
+			list1.push_back(wxString::Format("%d", i));
+		else
+			list1.push_back(wxString::Format("%d", i) + ": " + disp_name);
+		delete display;
+	}
 	m_disp_id_comb->Append(list1);
 	sizer2_1->Add(st, 0, wxALIGN_CENTER);
 	sizer2_1->Add(5, 5);
@@ -633,7 +643,7 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	st = new wxStaticText(page, 0, "Color Depth:",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)));
 	m_color_depth_comb = new wxComboBox(page, ID_ColorDepthCombo, "",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	std::vector<wxString> list2 = { "8", "10", "16" };
 	m_color_depth_comb->Append(list2);
 	sizer3_1->Add(st, 0, wxALIGN_CENTER);

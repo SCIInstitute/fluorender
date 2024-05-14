@@ -3985,7 +3985,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	if (m_hologram_mode == 2)
 	{
 		//make sure all views are drawn for the quilt
-		int vi = glbin_lg_renderer.GetCurView();
+		int vi = glbin_lg_renderer.GetCurViewCount();
 		if (vi)
 		{
 			event.RequestMore(true);

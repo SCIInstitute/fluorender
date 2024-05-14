@@ -36,7 +36,8 @@ DEALINGS IN THE SOFTWARE.
 LookingGlassRenderer::LookingGlassRenderer() :
 	m_initialized(false),
 	m_dev_index(0),
-	m_cur_view(0)
+	m_cur_view(0),
+	m_cur_view_cnt(0)
 {
 	SetPreset(1);
 }
@@ -140,6 +141,7 @@ void LookingGlassRenderer::SetPreset(int val)
 	}
 	m_viewWidth = int(float(m_width) / float(m_columns));
 	m_viewHeight = int(float(m_height) / float(m_rows));
+	m_double_views = m_totalViews * 2;
 }
 
 void LookingGlassRenderer::Setup()
@@ -227,15 +229,12 @@ void LookingGlassRenderer::Draw()
 		view_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	flvr::VertexArray* quad_va =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Norm_Square);
-	//if (m_cur_view != 3)//debug
 	quad_va->draw();
 	shader->release();
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	//move index for next
-	m_cur_view++;
-	if (m_cur_view == m_totalViews)
-		m_cur_view = 0;
+	advance_views();
 
 	//draw quilt to view
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -254,14 +253,9 @@ void LookingGlassRenderer::Draw()
 	glEnable(GL_DEPTH_TEST);
 }
 
-int LookingGlassRenderer::GetViewNum()
+int LookingGlassRenderer::GetCurViewCount()
 {
-	return m_totalViews;
-}
-
-int LookingGlassRenderer::GetCurView()
-{
-	return m_cur_view;
+	return m_cur_view_cnt;
 }
 
 double LookingGlassRenderer::GetOffset()
@@ -277,4 +271,14 @@ void LookingGlassRenderer::BindRenderBuffer(int nx, int ny)
 			flvr::FB_Render_RGBA, nx, ny, "quilt view");
 	if (buffer)
 		buffer->bind();
+}
+
+void LookingGlassRenderer::advance_views()
+{
+	m_cur_view++;
+	if (m_cur_view == m_totalViews)
+		m_cur_view = 0;
+	m_cur_view_cnt++;
+	if (m_cur_view_cnt == m_double_views)
+		m_cur_view_cnt = 0;
 }

@@ -42,8 +42,7 @@ public:
 	void Setup();
 	void Clear();
 	void Draw();
-	int GetViewNum();
-	int GetCurView();
+	int GetCurViewCount();
 	double GetOffset();//range of offset [-1, 1]; 0 = center
 	void BindRenderBuffer(int nx, int ny);
 
@@ -71,6 +70,11 @@ private:
 	int m_viewHeight;
 
 	int m_cur_view;		//index to the view
+	int m_cur_view_cnt;	//current view X2
+	int m_double_views;	//total view X2 for correct refresh during interactions
+
+private:
+	void advance_views();
 };
 
 #endif//LookingGlassRenderer_h
