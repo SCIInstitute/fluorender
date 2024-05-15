@@ -42,7 +42,8 @@ public:
 	void Setup();
 	void Clear();
 	void Draw();
-	int GetCurViewCount();
+	void SetUpdating(bool val) { m_updating = val; }//setting changed if true
+	bool GetFinished() { return m_finished; }
 	double GetOffset();//range of offset [-1, 1]; 0 = center
 	void BindRenderBuffer(int nx, int ny);
 
@@ -70,8 +71,8 @@ private:
 	int m_viewHeight;
 
 	int m_cur_view;		//index to the view
-	int m_cur_view_cnt;	//current view X2
-	int m_double_views;	//total view X2 for correct refresh during interactions
+	bool m_updating;	//still updating
+	bool m_finished;	//finished rendering all views with consistent settings
 
 private:
 	void advance_views();

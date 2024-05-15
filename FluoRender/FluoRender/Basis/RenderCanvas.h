@@ -546,7 +546,10 @@ public:
 	//start loop update
 	void StartLoopUpdate();
 	void HaltLoopUpdate();
-	void RefreshGL(int debug_code, bool erase = false, bool start_loop = true);
+	void RefreshGL(int debug_code,
+		bool erase = false,
+		bool start_loop = true,
+		bool lg_changed = true);
 
 	//rulers
 	void DrawRulers();

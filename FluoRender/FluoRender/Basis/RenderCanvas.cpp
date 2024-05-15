@@ -3934,6 +3934,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	bool ref_stat = false;
 	bool start_loop = true;
 	bool set_focus = false;
+	bool lg_changed = false;
 	m_retain_finalbuffer = false;
 
 	//check memory swap status
@@ -3945,6 +3946,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		{
 			refresh = true;
 			start_loop = false;
+			lg_changed = true;
 			vc.insert(gstNull);
 		}
 	}
@@ -3953,6 +3955,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		if (glbin_moviemaker.GetView() == this)
 		{
 			refresh = glbin_moviemaker.Action();
+			lg_changed = true;
 			event.RequestMore(glbin_moviemaker.IsRunning());
 			if (refresh)
 			{
@@ -3969,6 +3972,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		m_test_speed)
 	{
 		refresh = true;
+		lg_changed = true;
 		if (glbin_settings.m_mem_swap &&
 			flvr::TextureRenderer::get_done_update_loop())
 			m_pre_draw = true;
@@ -3979,6 +3983,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	{
 		event.RequestMore(true);
 		refresh = true;
+		lg_changed = true;
 		vc.insert(gstNull);
 		//m_retain_finalbuffer = true;
 	}
@@ -3986,15 +3991,15 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	if (m_hologram_mode == 2)
 	{
 		//make sure all views are drawn for the quilt
-		int vi = glbin_lg_renderer.GetCurViewCount();
-		if (vi)
+		if (glbin_lg_renderer.GetFinished())
+			event.RequestMore(false);
+		else
 		{
 			event.RequestMore(true);
 			refresh = true;
+			lg_changed = false;
 			vc.insert(gstNull);
 		}
-		else
-			event.RequestMore(false);
 	}
 
 	if (m_frame && m_frame->GetBenchmark())
@@ -4008,6 +4013,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		m_frame->SetTitle(title);
 
 		refresh = true;
+		lg_changed = true;
 		vc.insert(gstNull);
 		if (glbin_settings.m_mem_swap &&
 			flvr::TextureRenderer::get_done_update_loop())
@@ -4054,6 +4060,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		}
 		m_update_rot_ctr = false;
 		refresh = true;
+		lg_changed = true;
 		vc.insert(gstNull);
 	}
 
@@ -4075,6 +4082,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			{
 				m_draw_mask = false;
 				refresh = true;
+				lg_changed = true;
 				set_focus = true;
 				vc.insert(gstNull);
 			}
@@ -4083,6 +4091,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			{
 				m_draw_mask = true;
 				refresh = true;
+				lg_changed = true;
 				vc.insert(gstNull);
 			}
 
@@ -4103,6 +4112,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				m_obj_transz += trans.z();
 				//if (m_persp) SetSortBricks();
 				refresh = true;
+				lg_changed = true;
 				set_focus = true;
 				vc.insert(gstNull);
 			}
@@ -4126,6 +4136,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				m_obj_transz += trans.z();
 				//if (m_persp) SetSortBricks();
 				refresh = true;
+				lg_changed = true;
 				set_focus = true;
 				vc.insert(gstNull);
 			}
@@ -4148,6 +4159,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				m_obj_transz += trans.z();
 				//if (m_persp) SetSortBricks();
 				refresh = true;
+				lg_changed = true;
 				set_focus = true;
 				vc.insert(gstNull);
 			}
@@ -4170,6 +4182,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				m_obj_transz += trans.z();
 				//if (m_persp) SetSortBricks();
 				refresh = true;
+				lg_changed = true;
 				set_focus = true;
 				vc.insert(gstNull);
 			}
@@ -4189,6 +4202,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				if (m_frame && m_frame->GetMovieView())
 					m_frame->GetMovieView()->IncFrame();
 				refresh = true;
+				lg_changed = true;
 				set_focus = true;
 				vc.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum });
 			}
@@ -4205,6 +4219,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				if (m_frame && m_frame->GetMovieView())
 					m_frame->GetMovieView()->DecFrame();
 				refresh = true;
+				lg_changed = true;
 				set_focus = true;
 				vc.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum });
 			}
@@ -4221,6 +4236,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				if (m_frame && m_frame->GetClippingView())
 					m_frame->GetClippingView()->MoveLinkedClippingPlanes(-1);
 				refresh = true;
+				lg_changed = true;
 				set_focus = true;
 				vc.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
 			}
@@ -4235,6 +4251,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				if (m_frame && m_frame->GetClippingView())
 					m_frame->GetClippingView()->MoveLinkedClippingPlanes(1);
 				refresh = true;
+				lg_changed = true;
 				set_focus = true;
 				vc.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
 			}
@@ -4252,6 +4269,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				if (m_frame && m_frame->GetTraceDlg())
 					m_frame->GetTraceDlg()->CellUpdate();
 				refresh = true;
+				lg_changed = true;
 				set_focus = true;
 				vc.insert(gstNull);
 			}
@@ -4266,6 +4284,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				if (m_frame && m_frame->GetTraceDlg())
 					m_frame->GetTraceDlg()->CellLink(false);
 				refresh = true;
+				lg_changed = true;
 				set_focus = true;
 				vc.insert(gstNull);
 			}
@@ -4280,6 +4299,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				if (m_frame && m_frame->GetTraceDlg())
 					m_frame->GetTraceDlg()->CellNewID(false);
 				refresh = true;
+				lg_changed = true;
 				set_focus = true;
 				vc.insert(gstNull);
 			}
@@ -4296,6 +4316,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 					m_frame->GetTraceDlg()->CompClear();
 				m_clear_mask = true;
 				refresh = true;
+				lg_changed = true;
 				set_focus = true;
 				vc.insert(gstNull);
 			}
@@ -4340,6 +4361,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 					m_frame->GetComponentDlg()->IncludeComps();
 				m_comp_include = true;
 				refresh = true;
+				lg_changed = true;
 				set_focus = true;
 				vc.insert(gstNull);
 			}
@@ -4354,6 +4376,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 					m_frame->GetComponentDlg()->ExcludeComps();
 				m_comp_exclude = true;
 				refresh = true;
+				lg_changed = true;
 				set_focus = true;
 				vc.insert(gstNull);
 			}
@@ -4368,6 +4391,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 					m_frame->GetMeasureDlg()->Relax();
 				m_ruler_relax = true;
 				refresh = true;
+				lg_changed = true;
 				set_focus = true;
 				vc.insert(gstNull);
 			}
@@ -4394,6 +4418,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 					glbin_seg_grow.Compute();
 				}
 				refresh = true;
+				lg_changed = true;
 				vc.insert(gstNull);
 				start_loop = true;
 				//update
@@ -4418,7 +4443,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 					m_frame->GetStatusBar()->PushStatusText("Forced Refresh");
 				wxSizeEvent e;
 				OnResize(e);
-				RefreshGL(14);
+				RefreshGL(14, false, true, true);
 				if (m_frame && m_frame->GetStatusBar())
 					m_frame->GetStatusBar()->PopStatusText();
 				return;
@@ -4466,6 +4491,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			m_interactive = true;
 			m_update_rot_ctr = true;
 			refresh = true;
+			lg_changed = true;
 			vc.insert(gstNull);
 		}
 		//zoom/dolly
@@ -4487,6 +4513,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			}
 			m_interactive = true;
 			refresh = true;
+			lg_changed = true;
 			vc.insert(gstScaleFactor);
 		}
 		//rotate
@@ -4519,6 +4546,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				m_rotz += 360.0;
 			m_interactive = true;
 			refresh = true;
+			lg_changed = true;
 			vc.insert(gstCamRotation);
 		}
 		//pan
@@ -4537,6 +4565,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			m_interactive = true;
 			m_update_rot_ctr = true;
 			refresh = true;
+			lg_changed = true;
 			vc.insert(gstNull);
 		}
 	}
@@ -4547,12 +4576,12 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	{
 		m_clear_buffer = true;
 		m_updating = true;
-		RefreshGL(15, ref_stat, start_loop);
+		RefreshGL(15, ref_stat, start_loop, lg_changed);
 		m_vrv->FluoRefresh(0, vc, {-1});
 	}
 	else if (glbin_settings.m_inf_loop)
 	{
-		RefreshGL(0, false, true);
+		RefreshGL(0, false, true, true);
 		event.RequestMore(true);
 		return;
 	}
@@ -9729,7 +9758,8 @@ void RenderCanvas::HaltLoopUpdate()
 //new function to refresh
 void RenderCanvas::RefreshGL(int debug_code,
 	bool erase,
-	bool start_loop)
+	bool start_loop,
+	bool lg_changed)
 {
 	//m_force_clear = force_clear;
 	//m_interactive = interactive;
@@ -9744,6 +9774,7 @@ void RenderCanvas::RefreshGL(int debug_code,
 		StartLoopUpdate();
 	SetSortBricks();
 	m_refresh = true;
+	glbin_lg_renderer.SetUpdating(lg_changed);
 	Refresh(erase);
 	//Update();
 }

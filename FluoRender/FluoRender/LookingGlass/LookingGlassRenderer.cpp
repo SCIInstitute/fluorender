@@ -37,7 +37,8 @@ LookingGlassRenderer::LookingGlassRenderer() :
 	m_initialized(false),
 	m_dev_index(0),
 	m_cur_view(0),
-	m_cur_view_cnt(0)
+	m_updating(false),
+	m_finished(false)
 {
 	SetPreset(1);
 }
@@ -141,7 +142,6 @@ void LookingGlassRenderer::SetPreset(int val)
 	}
 	m_viewWidth = int(float(m_width) / float(m_columns));
 	m_viewHeight = int(float(m_height) / float(m_rows));
-	m_double_views = m_totalViews * 2;
 }
 
 void LookingGlassRenderer::Setup()
@@ -202,6 +202,7 @@ void LookingGlassRenderer::Clear()
 
 void LookingGlassRenderer::Draw()
 {
+	m_finished = false;
 	//draw view tex to quilt
 	//bind quilt frame buffer
 	glActiveTexture(GL_TEXTURE0);
@@ -253,11 +254,6 @@ void LookingGlassRenderer::Draw()
 	glEnable(GL_DEPTH_TEST);
 }
 
-int LookingGlassRenderer::GetCurViewCount()
-{
-	return m_cur_view_cnt;
-}
-
 double LookingGlassRenderer::GetOffset()
 {
 	double len = double(m_totalViews) / 2;
@@ -277,8 +273,9 @@ void LookingGlassRenderer::advance_views()
 {
 	m_cur_view++;
 	if (m_cur_view == m_totalViews)
+	{
 		m_cur_view = 0;
-	m_cur_view_cnt++;
-	if (m_cur_view_cnt == m_double_views)
-		m_cur_view_cnt = 0;
+		if (!m_updating)
+			m_finished = true;
+	}
 }
