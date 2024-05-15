@@ -597,9 +597,9 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	wxBoxSizer* sizer1_7 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "View Offset:",
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
-	m_lg_offset_sldr = new wxSingleSlider(page, ID_LgOffsetSldr, 180, 0, 360,
+	m_lg_offset_sldr = new wxSingleSlider(page, ID_LgOffsetSldr, 20, 0, 90,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_lg_offset_text = new wxTextCtrl(page, ID_LgOffsetText, "180",
+	m_lg_offset_text = new wxTextCtrl(page, ID_LgOffsetText, "20",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	sizer1_7->Add(20, 5);
 	sizer1_7->Add(st, 0, wxALIGN_CENTER);
