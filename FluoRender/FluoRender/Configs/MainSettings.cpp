@@ -98,7 +98,7 @@ MainSettings::MainSettings()
 	m_sbs = false;
 	m_eye_dist = 20.0;
 	m_hologram_debug = false;
-	m_lg_offset = 20;
+	m_lg_offset = 24;
 	m_stay_top = false;
 	m_show_cursor = true;
 	m_color_depth = 0;
@@ -290,7 +290,7 @@ void MainSettings::Read()
 		fconfig.Read("sbs enable", &m_sbs, false);
 		fconfig.Read("eye dist", &m_eye_dist, 20.0);
 		fconfig.Read("hologram debug", &m_hologram_debug, false);
-		fconfig.Read("lg offset", &m_lg_offset, 20);
+		fconfig.Read("lg offset", &m_lg_offset, 24);
 		fconfig.Read("stay top", &m_stay_top, false);
 		fconfig.Read("show cursor", &m_show_cursor, true);
 		fconfig.Read("color depth", &m_color_depth, 0);
