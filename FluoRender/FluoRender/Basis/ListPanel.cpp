@@ -235,7 +235,7 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 			{
 				RenderCanvas* view = m_frame->GetView(i);
 				add_to_menu->Append(Menu_View_start + i,
-					view->m_vrv->GetName());
+					view->m_renderview_panel->GetName());
 			}
 
 			menu.Append(Menu_AddTo, "Add to", add_to_menu);

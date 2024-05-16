@@ -679,7 +679,7 @@ void MovieMaker::InsertKey(int index)
 	{
 		VolumeData* vd = glbin_data_manager.GetVolumeData(i);
 		keycode.l0 = 1;
-		keycode.l0_name = m_view->m_vrv->GetName();
+		keycode.l0_name = m_view->m_renderview_panel->GetName();
 		keycode.l1 = 2;
 		keycode.l1_name = vd->GetName();
 		//display
@@ -752,9 +752,9 @@ void MovieMaker::InsertKey(int index)
 	}
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = m_view->m_vrv->GetName();
+	keycode.l0_name = m_view->m_renderview_panel->GetName();
 	keycode.l1 = 1;
-	keycode.l1_name = m_view->m_vrv->GetName();
+	keycode.l1_name = m_view->m_renderview_panel->GetName();
 	//rotation
 	keycode.l2 = 0;
 	keycode.l2_name = "rotation";
@@ -992,9 +992,9 @@ void MovieMaker::MakeKeysCameraTumble()
 
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = m_view->m_vrv->GetName();
+	keycode.l0_name = m_view->m_renderview_panel->GetName();
 	keycode.l1 = 1;
-	keycode.l1_name = m_view->m_vrv->GetName();
+	keycode.l1_name = m_view->m_renderview_panel->GetName();
 	//rotation
 	keycode.l2 = 0;
 	keycode.l2_name = "rotation";
@@ -1063,9 +1063,9 @@ void MovieMaker::MakeKeysCameraZoom()
 
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = m_view->m_vrv->GetName();
+	keycode.l0_name = m_view->m_renderview_panel->GetName();
 	keycode.l1 = 1;
-	keycode.l1_name = m_view->m_vrv->GetName();
+	keycode.l1_name = m_view->m_renderview_panel->GetName();
 	//scale
 	keycode.l2 = 0;
 	keycode.l2_name = "scale";
@@ -1115,7 +1115,7 @@ void MovieMaker::MakeKeysTimeSequence()
 
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = m_view->m_vrv->GetName();
+	keycode.l0_name = m_view->m_renderview_panel->GetName();
 	//time point
 	keycode.l2 = 0;
 	keycode.l2_name = "frame";
@@ -1212,7 +1212,7 @@ void MovieMaker::MakeKeysTimeColormap()
 
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = m_view->m_vrv->GetName();
+	keycode.l0_name = m_view->m_renderview_panel->GetName();
 	//time point
 	keycode.l2 = 0;
 	keycode.l2_name = "color";
@@ -1273,9 +1273,9 @@ void MovieMaker::MakeKeysClipZ(int type)
 
 	//for the view
 	keycode1.l0 = 1;
-	keycode1.l0_name = m_view->m_vrv->GetName();
+	keycode1.l0_name = m_view->m_renderview_panel->GetName();
 	keycode2.l0 = 1;
-	keycode2.l0_name = m_view->m_vrv->GetName();
+	keycode2.l0_name = m_view->m_renderview_panel->GetName();
 	//time point
 	keycode1.l2 = 0;
 	keycode1.l2_name = "z1_val";
@@ -1362,7 +1362,7 @@ void MovieMaker::AddChannToView()
 
 	//for view
 	keycode.l0 = 1;
-	keycode.l0_name = m_view->m_vrv->GetName();
+	keycode.l0_name = m_view->m_renderview_panel->GetName();
 	//display only
 	keycode.l2 = 0;
 	keycode.l2_name = "display";
@@ -1444,7 +1444,7 @@ void MovieMaker::MakeKeysChannComb(int comb)
 		{
 			VolumeData* vd = m_view->GetAllVolumeData(i);
 			keycode.l0 = 1;
-			keycode.l0_name = m_view->m_vrv->GetName();
+			keycode.l0_name = m_view->m_renderview_panel->GetName();
 			keycode.l1 = 2;
 			keycode.l1_name = vd->GetName();
 			//display only
@@ -1532,9 +1532,9 @@ void MovieMaker::MakeKeysLookingGlass(int frames)
 
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = m_view->m_vrv->GetName();
+	keycode.l0_name = m_view->m_renderview_panel->GetName();
 	keycode.l1 = 1;
-	keycode.l1_name = m_view->m_vrv->GetName();
+	keycode.l1_name = m_view->m_renderview_panel->GetName();
 	//scale
 	keycode.l2 = 0;
 

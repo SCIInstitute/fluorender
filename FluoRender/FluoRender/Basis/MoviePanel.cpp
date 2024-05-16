@@ -1238,7 +1238,7 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		{
 			RenderCanvas* view = m_frame->GetView(i);
 			if (view && m_views_cmb)
-				m_views_cmb->Append(view->m_vrv->GetName());
+				m_views_cmb->Append(view->m_renderview_panel->GetName());
 		}
 	}
 	if (update_all || FOUND_VALUE(gstMovViewIndex))

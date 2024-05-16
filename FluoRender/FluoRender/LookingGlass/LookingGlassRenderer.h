@@ -45,7 +45,7 @@ public:
 	void Setup();
 	void Clear();
 	void Draw();
-	void SetUpdating(bool val) { m_updating = val; }//setting changed if true
+	void SetUpdating(bool val);//setting changed if true
 	bool GetFinished() { return m_finished; }
 	double GetOffset();//range of offset [-1, 1]; 0 = center
 	void BindRenderBuffer(int nx, int ny);
@@ -76,6 +76,7 @@ private:
 
 	int m_cur_view;		//index to the view
 	bool m_updating;	//still updating
+	int m_upd_view;		//view number when updating starts
 	bool m_finished;	//finished rendering all views with consistent settings
 
 private:

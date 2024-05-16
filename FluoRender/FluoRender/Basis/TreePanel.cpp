@@ -2548,7 +2548,7 @@ void TreePanel::UpdateTree()
 			continue;
 		int j, k;
 
-		wxString view_name = view->m_vrv->GetName();
+		wxString view_name = view->m_renderview_panel->GetName();
 		view->OrganizeLayers();
 		wxTreeItemId vrv_item = AddViewItem(view_name);
 		SetViewItemImage(vrv_item, view->GetDraw());

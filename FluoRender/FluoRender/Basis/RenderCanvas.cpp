@@ -146,7 +146,7 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_ruler_use_transf(false),
 	//private
 	m_frame(frame),
-	m_vrv(parent),
+	m_renderview_panel(parent),
 	//populated lists of data
 	m_vd_pop_dirty(true),
 	m_md_pop_dirty(true),
@@ -498,9 +498,10 @@ void RenderCanvas::InitLookingGlass()
 	glbin_lg_renderer.SetDevIndex(glbin_settings.m_lg_dev_id);
 	glbin_lg_renderer.Setup();
 	glbin_lg_renderer.Clear();
-	glbin_settings.m_lg_offset = glbin_lg_renderer.GetHalfCone();
+	if (glbin_settings.m_lg_offset == 0)
+		glbin_settings.m_lg_offset = glbin_lg_renderer.GetHalfCone();
 	glbin_settings.m_disp_id = glbin_lg_renderer.GetDisplayId();
-	m_vrv->SetFullScreen();
+	m_renderview_panel->SetFullScreen();
 	m_lg_initiated = true;
 }
 #endif
@@ -618,8 +619,8 @@ RenderCanvas::~RenderCanvas()
 	if (m_full_screen)
 	{
 		m_full_screen = false;
-		m_vrv->m_canvas = 0;
-		m_vrv->m_full_frame = 0;
+		m_renderview_panel->m_canvas = 0;
+		m_renderview_panel->m_full_frame = 0;
 		if (m_frame)
 		{
 			m_frame->ClearVrvList();
@@ -643,7 +644,7 @@ void RenderCanvas::OnResize(wxSizeEvent& event)
 		m_size = size;
 
 	RefreshGL(1);
-	m_vrv->FluoUpdate({ gstScaleFactor });
+	m_renderview_panel->FluoUpdate({ gstScaleFactor });
 }
 
 void RenderCanvas::Init()
@@ -3856,7 +3857,7 @@ void RenderCanvas::PickMesh()
 			if (m_frame && m_frame->GetTree())
 			{
 				//m_frame->GetTree()->SetFocus();
-				m_frame->GetTree()->Select(m_vrv->GetName(), md->GetName());
+				m_frame->GetTree()->Select(m_renderview_panel->GetName(), md->GetName());
 			}
 			RefreshGL(27);
 		}
@@ -3865,7 +3866,7 @@ void RenderCanvas::PickMesh()
 	{
 		if (m_frame && m_frame->GetCurSelType() == 3 &&
 			m_frame->GetTree())
-			m_frame->GetTree()->Select(m_vrv->GetName(), "");
+			m_frame->GetTree()->Select(m_renderview_panel->GetName(), "");
 	}
 	m_mv_mat = mv_temp;
 }
@@ -3924,7 +3925,7 @@ void RenderCanvas::PickVolume()
 		if (m_frame && m_frame->GetTree())
 		{
 			//m_frame->GetTree()->SetFocus();
-			m_frame->GetTree()->Select(m_vrv->GetName(), picked_vd->GetName());
+			m_frame->GetTree()->Select(m_renderview_panel->GetName(), picked_vd->GetName());
 		}
 		//update label selection
 		SetCompSelection(ip, kmode);
@@ -3961,7 +3962,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
-		if (flvr::TextureRenderer::active_view_ == m_vrv->m_id)
+		if (flvr::TextureRenderer::active_view_ == m_renderview_panel->m_id)
 		{
 			refresh = true;
 			start_loop = false;
@@ -4596,7 +4597,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		m_clear_buffer = true;
 		m_updating = true;
 		RefreshGL(15, ref_stat, start_loop, lg_changed);
-		m_vrv->FluoRefresh(0, vc, {-1});
+		m_renderview_panel->FluoRefresh(0, vc, {-1});
 	}
 	else if (glbin_settings.m_inf_loop)
 	{
@@ -4616,23 +4617,23 @@ void RenderCanvas::OnKeyDown(wxKeyEvent& event)
 void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
 {
 	m_fullscreen_trigger.Stop();
-	if (!m_frame || !m_vrv)
+	if (!m_frame || !m_renderview_panel)
 		return;
 
 	m_full_screen = false;
 	if (m_benchmark)
 	{
-		if (m_vrv->m_full_frame)
-			m_vrv->m_full_frame->Hide();
+		if (m_renderview_panel->m_full_frame)
+			m_renderview_panel->m_full_frame->Hide();
 		if (m_frame)
 			m_frame->Close();
 	}
-	else if (GetParent() == m_vrv->m_full_frame)
+	else if (GetParent() == m_renderview_panel->m_full_frame)
 	{
-		Reparent(m_vrv);
-		m_vrv->m_view_sizer->Add(this, 1, wxEXPAND);
-		m_vrv->Layout();
-		m_vrv->m_full_frame->Hide();
+		Reparent(m_renderview_panel);
+		m_renderview_panel->m_view_sizer->Add(this, 1, wxEXPAND);
+		m_renderview_panel->Layout();
+		m_renderview_panel->m_full_frame->Hide();
 		if (m_frame)
 		{
 #ifdef _WIN32
@@ -4745,7 +4746,7 @@ void RenderCanvas::SetParamCapture(wxString &cap_file, int begin_frame, int end_
 void RenderCanvas::SetParams(double t)
 {
 	fluo::ValueCollection vc;
-	if (!m_vrv)
+	if (!m_renderview_panel)
 		return;
 	if (!m_frame)
 		return;
@@ -4754,7 +4755,7 @@ void RenderCanvas::SetParams(double t)
 	m_param_cur_num = std::round(t);
 	FlKeyCode keycode;
 	keycode.l0 = 1;
-	keycode.l0_name = m_vrv->GetName();
+	keycode.l0_name = m_renderview_panel->GetName();
 
 	for (int i = 0; i<GetAllVolumeNum(); i++)
 	{
@@ -4846,7 +4847,7 @@ void RenderCanvas::SetParams(double t)
 	bool bx, by, bz;
 	//for the view
 	keycode.l1 = 1;
-	keycode.l1_name = m_vrv->GetName();
+	keycode.l1_name = m_renderview_panel->GetName();
 	//translation
 	double tx, ty, tz;
 	keycode.l2 = 0;
@@ -5794,7 +5795,7 @@ void RenderCanvas::SetScale121()
 
 	RefreshGL(21);
 
-	m_vrv->FluoUpdate({ gstScaleFactor });
+	m_renderview_panel->FluoUpdate({ gstScaleFactor });
 }
 
 void RenderCanvas::SetPinRotCenter(bool pin)
@@ -5829,7 +5830,7 @@ void RenderCanvas::SetPersp(bool persp)
 		//restore scale factor
 		m_scale_factor = m_scale_factor_saved;
 
-		m_vrv->FluoUpdate({ gstScaleFactor, gstFree });
+		m_renderview_panel->FluoUpdate({ gstScaleFactor, gstFree });
 		SetRotations(m_rotx, m_roty, m_rotz, true);
 	}
 
@@ -5890,7 +5891,7 @@ void RenderCanvas::SetFree(bool free)
 		m_obj_transz = m_obj_transz_saved;
 		//restore scale factor
 		m_scale_factor = m_scale_factor_saved;
-		m_vrv->FluoUpdate({ gstScaleFactor });
+		m_renderview_panel->FluoUpdate({ gstScaleFactor });
 
 		SetRotations(m_rotx, m_roty, m_rotz, true);
 	}
@@ -9343,10 +9344,10 @@ void RenderCanvas::StartLoopUpdate()
 	if (glbin_settings.m_mem_swap)
 	{
 		if (flvr::TextureRenderer::active_view_ > 0 &&
-			flvr::TextureRenderer::active_view_ != m_vrv->m_id)
+			flvr::TextureRenderer::active_view_ != m_renderview_panel->m_id)
 			return;
 		else
-			flvr::TextureRenderer::active_view_ = m_vrv->m_id;
+			flvr::TextureRenderer::active_view_ = m_renderview_panel->m_id;
 
 		int nx, ny;
 		GetRenderSize(nx, ny);
@@ -9784,7 +9785,7 @@ void RenderCanvas::RefreshGL(int debug_code,
 	//m_interactive = interactive;
 
 	//for debugging refresh events
-	//DBGPRINT(L"%d\trefresh\t%d\t%d\n", m_vrv->m_id, debug_code, m_interactive);
+	//DBGPRINT(L"%d\trefresh\t%d\t%d\n", m_renderview_panel->m_id, debug_code, m_interactive);
 	//if (!m_interactive)
 	//	m_frame->UpdateProps();
 
@@ -10103,8 +10104,8 @@ void RenderCanvas::GetTraces(bool update)
 	//add traces to trace dialog
 	if (update)
 	{
-		if (m_vrv && m_frame && m_frame->GetTraceDlg())
-			m_frame->GetTraceDlg()->GetSettings(m_vrv->m_canvas);
+		if (m_renderview_panel && m_frame && m_frame->GetTraceDlg())
+			m_frame->GetTraceDlg()->GetSettings(m_renderview_panel->m_canvas);
 	}
 }
 
@@ -10600,7 +10601,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 					if (!hold_old)
 						RefreshGL(30);
 					//DBGPRINT(L"refresh requested\n");
-					m_vrv->FluoUpdate({ gstCamRotation });
+					m_renderview_panel->FluoUpdate({ gstCamRotation });
 				}
 				if (event.MiddleIsDown() || (event.ControlDown() && event.LeftIsDown()))
 				{
@@ -10651,7 +10652,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 					//SetSortBricks();
 					RefreshGL(32);
 
-					m_vrv->FluoUpdate({ gstScaleFactor });
+					m_renderview_panel->FluoUpdate({ gstScaleFactor });
 				}
 			}
 		}
@@ -10762,7 +10763,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 				double value = wheel * m_scale_factor / 1000.0;
 				if (m_scale_factor + value > 0.01)
 					m_scale_factor += value;
-				m_vrv->FluoUpdate({ gstScaleFactor });
+				m_renderview_panel->FluoUpdate({ gstScaleFactor });
 			}
 		}
 
@@ -10859,8 +10860,8 @@ void RenderCanvas::SetBackgroundColor(fluo::Color &color)
 void RenderCanvas::SetFog(bool b)
 {
 	m_use_fog = b;
-	//if (m_vrv)
-	//	m_vrv->m_left_toolbar->ToggleTool(RenderViewPanel::ID_DepthAttenChk, b);
+	//if (m_renderview_panel)
+	//	m_renderview_panel->m_left_toolbar->ToggleTool(RenderViewPanel::ID_DepthAttenChk, b);
 }
 
 void RenderCanvas::SetRotations(double rotx, double roty, double rotz, bool notify)
@@ -10895,7 +10896,7 @@ void RenderCanvas::SetRotations(double rotx, double roty, double rotz, bool noti
 	m_up = fluo::Vector(up2.x, up2.y, up2.z);
 
 	if (notify)
-		m_vrv->FluoUpdate({ gstCamRotation });
+		m_renderview_panel->FluoUpdate({ gstCamRotation });
 }
 
 int RenderCanvas::GetOrientation()

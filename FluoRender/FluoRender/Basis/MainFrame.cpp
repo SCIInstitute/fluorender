@@ -2434,7 +2434,7 @@ void MainFrame::DeleteVRenderView(wxString &name)
 	for (int i=0; i<GetViewNum(); i++)
 	{
 		RenderCanvas* canvas = GetView(i);
-		if (canvas && name == canvas->m_vrv->GetName() && canvas->m_vrv->m_id > 1)
+		if (canvas && name == canvas->m_renderview_panel->GetName() && canvas->m_renderview_panel->m_id > 1)
 		{
 			DeleteVRenderView(i);
 			return;

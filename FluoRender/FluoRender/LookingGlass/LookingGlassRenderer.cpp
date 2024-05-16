@@ -274,6 +274,12 @@ void LookingGlassRenderer::Draw()
 	glEnable(GL_DEPTH_TEST);
 }
 
+void LookingGlassRenderer::SetUpdating(bool val)
+{
+	m_updating = val;
+	m_upd_view = m_cur_view;
+}
+
 double LookingGlassRenderer::GetOffset()
 {
 	double len = double(m_totalViews - 1) / 2;
@@ -293,9 +299,7 @@ void LookingGlassRenderer::advance_views()
 {
 	m_cur_view++;
 	if (m_cur_view == m_totalViews)
-	{
 		m_cur_view = 0;
-		if (!m_updating)
-			m_finished = true;
-	}
+	if (!m_updating && m_cur_view == m_upd_view)
+		m_finished = true;
 }

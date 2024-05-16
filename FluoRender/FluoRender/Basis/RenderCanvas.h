@@ -799,7 +799,7 @@ public:
 	}
 
 public:
-	RenderViewPanel* m_vrv;
+	RenderViewPanel* m_renderview_panel;
 	//set gl context
 	bool m_set_gl;
 	//capture modes
