@@ -3957,6 +3957,20 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	bool lg_changed = false;
 	m_retain_finalbuffer = false;
 
+	if (m_hologram_mode == 2)
+	{
+		//make sure all views are drawn for the quilt
+		if (glbin_lg_renderer.GetFinished())
+			event.RequestMore(false);
+		else
+		{
+			event.RequestMore(true);
+			refresh = true;
+			lg_changed = false;
+			vc.insert(gstNull);
+		}
+	}
+
 	//check memory swap status
 	if (glbin_settings.m_mem_swap &&
 		flvr::TextureRenderer::get_start_update_loop() &&
@@ -3974,11 +3988,15 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	{
 		if (glbin_moviemaker.GetView() == this)
 		{
-			refresh = glbin_moviemaker.Action();
-			lg_changed = true;
+			DBGPRINT(L"lg finished: %d, cur view: %d\n",
+				glbin_lg_renderer.GetFinished(),
+				glbin_lg_renderer.GetCurView());
+			if (glbin_lg_renderer.GetFinished())
+				refresh = glbin_moviemaker.Action();
 			event.RequestMore(glbin_moviemaker.IsRunning());
 			if (refresh)
 			{
+				lg_changed = true;
 				vc.insert(gstCamRotation);
 				if (!glbin_moviemaker.IsRunning())
 					vc.insert(gstMovPlay);
@@ -4006,20 +4024,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		lg_changed = true;
 		vc.insert(gstNull);
 		//m_retain_finalbuffer = true;
-	}
-
-	if (m_hologram_mode == 2)
-	{
-		//make sure all views are drawn for the quilt
-		if (glbin_lg_renderer.GetFinished())
-			event.RequestMore(false);
-		else
-		{
-			event.RequestMore(true);
-			refresh = true;
-			lg_changed = false;
-			vc.insert(gstNull);
-		}
 	}
 
 	if (m_frame && m_frame->GetBenchmark())

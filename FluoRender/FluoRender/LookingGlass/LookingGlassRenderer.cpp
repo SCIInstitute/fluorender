@@ -39,7 +39,7 @@ LookingGlassRenderer::LookingGlassRenderer() :
 	m_dev_index(0),
 	m_cur_view(0),
 	m_updating(false),
-	m_finished(false)
+	m_finished(true)
 {
 	SetPreset(1);
 }

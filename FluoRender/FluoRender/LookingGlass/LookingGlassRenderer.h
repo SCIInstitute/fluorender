@@ -46,6 +46,7 @@ public:
 	void Clear();
 	void Draw();
 	void SetUpdating(bool val);//setting changed if true
+	int GetCurView() { return m_cur_view; }
 	bool GetFinished() { return m_finished; }
 	double GetOffset();//range of offset [-1, 1]; 0 = center
 	void BindRenderBuffer(int nx, int ny);
