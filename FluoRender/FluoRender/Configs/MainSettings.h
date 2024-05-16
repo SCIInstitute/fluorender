@@ -141,6 +141,7 @@ public:
 	double m_eye_dist;
 	bool m_hologram_debug;	//0: normal; 1: show quilt
 	double m_lg_offset;		//offset distance from center for lg rendering
+	int m_lg_dev_id;		//in case of multiple lg displays
 	bool m_stay_top;		//full screen
 	bool m_show_cursor;
 	int m_color_depth;		//for hdr and 10-bit displays

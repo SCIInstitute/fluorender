@@ -1597,6 +1597,8 @@ void SettingDlg::OnLookingGlassCheck(wxCommandEvent& event)
 		if (view)
 		{
 			view->SetHologramMode(glbin_settings.m_hologram_mode);
+			if (glbin_settings.m_hologram_mode == 2)
+				view->InitLookingGlass();
 			view->RefreshGL(39);
 		}
 	}

@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <HoloPlayCore.h>
 #include <compatibility.h>
+#include <wx/display.h>
 #include <string>
 #include <Debug.h>
 
@@ -97,6 +98,7 @@ bool LookingGlassRenderer::Init()
 	DBGPRINT(L"%d devices connected.\n", ival);
 	if (ival < 1)
 		return false;
+	m_viewCone = hpc_GetDevicePropertyFloat(m_dev_index, "/calibration/viewCone/value");
 	m_initialized = true;
 	return true;
 }
@@ -108,6 +110,24 @@ void LookingGlassRenderer::Close()
 		hpc_CloseApp();
 		m_initialized = false;
 	}
+}
+
+int LookingGlassRenderer::GetDisplayId()
+{
+	if (!m_initialized)
+		return 0;
+
+	//get screen rect
+	int w, h, x, y;
+	w = hpc_GetDevicePropertyScreenW(m_dev_index);
+	h = hpc_GetDevicePropertyScreenH(m_dev_index);
+	x = hpc_GetDevicePropertyWinX(m_dev_index);
+	y = hpc_GetDevicePropertyWinY(m_dev_index);
+
+	int id = wxDisplay::GetFromPoint(wxPoint(x + w / 2, y + h / 2));
+	if (id != wxNOT_FOUND)
+		return id;
+	return 0;
 }
 
 void LookingGlassRenderer::SetPreset(int val)
@@ -256,7 +276,7 @@ void LookingGlassRenderer::Draw()
 
 double LookingGlassRenderer::GetOffset()
 {
-	double len = double(m_totalViews) / 2;
+	double len = double(m_totalViews - 1) / 2;
 	return (m_cur_view - len) / len;
 }
 

@@ -38,6 +38,9 @@ public:
 
 	bool Init();
 	void Close();
+	void SetDevIndex(int val) { m_dev_index = val; }
+	int GetDisplayId();
+	double GetHalfCone() { return m_viewCone / 2; }
 	void SetPreset(int val);
 	void Setup();
 	void Clear();
@@ -69,6 +72,7 @@ private:
 						// qs_viewWidth & qs_viewHeight could be calculated by given numbers
 	int m_viewWidth;	//quilt view dimensions
 	int m_viewHeight;
+	double m_viewCone;
 
 	int m_cur_view;		//index to the view
 	bool m_updating;	//still updating

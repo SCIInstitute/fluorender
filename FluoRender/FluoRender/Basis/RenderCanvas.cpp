@@ -495,8 +495,12 @@ void RenderCanvas::InitLookingGlass()
 		glbin_settings.m_hologram_mode = 0;
 		return;
 	}
+	glbin_lg_renderer.SetDevIndex(glbin_settings.m_lg_dev_id);
 	glbin_lg_renderer.Setup();
 	glbin_lg_renderer.Clear();
+	glbin_settings.m_lg_offset = glbin_lg_renderer.GetHalfCone();
+	glbin_settings.m_disp_id = glbin_lg_renderer.GetDisplayId();
+	m_vrv->SetFullScreen();
 	m_lg_initiated = true;
 }
 #endif
