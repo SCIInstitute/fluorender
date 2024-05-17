@@ -3988,18 +3988,20 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	{
 		if (glbin_moviemaker.GetView() == this)
 		{
-			DBGPRINT(L"lg finished: %d, cur view: %d\n",
-				glbin_lg_renderer.GetFinished(),
-				glbin_lg_renderer.GetCurView());
+			//DBGPRINT(L"lg finished: %d, cur view: %d\n",
+			//	glbin_lg_renderer.GetFinished(),
+			//	glbin_lg_renderer.GetCurView());
 			if (glbin_lg_renderer.GetFinished())
-				refresh = glbin_moviemaker.Action();
-			event.RequestMore(glbin_moviemaker.IsRunning());
-			if (refresh)
 			{
-				lg_changed = true;
-				vc.insert(gstCamRotation);
-				if (!glbin_moviemaker.IsRunning())
-					vc.insert(gstMovPlay);
+				refresh = glbin_moviemaker.Action();
+				event.RequestMore(glbin_moviemaker.IsRunning());
+				if (refresh)
+				{
+					lg_changed = true;
+					vc.insert(gstCamRotation);
+					if (!glbin_moviemaker.IsRunning())
+						vc.insert(gstMovPlay);
+				}
 			}
 		}
 	}

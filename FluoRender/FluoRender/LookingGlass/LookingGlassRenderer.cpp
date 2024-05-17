@@ -277,7 +277,8 @@ void LookingGlassRenderer::Draw()
 void LookingGlassRenderer::SetUpdating(bool val)
 {
 	m_updating = val;
-	m_upd_view = m_cur_view;
+	if (val)
+		m_upd_view = m_cur_view;
 }
 
 double LookingGlassRenderer::GetOffset()
