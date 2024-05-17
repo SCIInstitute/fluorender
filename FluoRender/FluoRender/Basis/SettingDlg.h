@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _SETTINGDLG_H_
 #define _SETTINGDLG_H_
 
+#include <PropPanel.h>
 #include <wx/wx.h>
 #include <wx/treectrl.h>
 #include <vector>
@@ -35,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 //enum BitmapFontType;
 class MainFrame;
 class wxSingleSlider;
-class SettingDlg : public wxPanel
+class SettingDlg : public PropPanel
 {
 	enum
 	{
@@ -140,12 +141,9 @@ public:
 	SettingDlg(MainFrame* frame);
 	~SettingDlg();
 
-	void UpdateUI();
-	void UpdateDeviceTree();
-	void UpdateTextureSize();
-
-private:
-	MainFrame* m_frame;
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	//void UpdateDeviceTree();
+	//void UpdateTextureSize();
 
 private:
 	//save project
@@ -246,6 +244,13 @@ private:
 	wxButton *m_close_btn;
 
 private:
+	wxWindow* CreateProjectPage(wxWindow *parent);
+	wxWindow* CreateRenderingPage(wxWindow *parent);
+	wxWindow* CreatePerformancePage(wxWindow *parent);
+	wxWindow* CreateDisplayPage(wxWindow* parent);
+	wxWindow* CreateFormatPage(wxWindow *parent);
+	wxWindow* CreateJavaPage(wxWindow *parent);
+
 	//streaming disable/enable
 	void EnableStreaming(bool enable);
 
@@ -257,13 +262,6 @@ private:
 	void OnSave(wxCommandEvent &event);
 	void OnClose(wxCommandEvent &event);
 	void OnShow(wxShowEvent &event);
-
-	wxWindow* CreateProjectPage(wxWindow *parent);
-	wxWindow* CreateRenderingPage(wxWindow *parent);
-	wxWindow* CreatePerformancePage(wxWindow *parent);
-	wxWindow* CreateDisplayPage(wxWindow* parent);
-	wxWindow* CreateFormatPage(wxWindow *parent);
-	wxWindow* CreateJavaPage(wxWindow *parent);
 
 	//projec save
 	void OnProjectSaveCheck(wxCommandEvent &event);

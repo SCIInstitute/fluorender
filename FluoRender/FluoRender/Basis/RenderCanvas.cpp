@@ -664,7 +664,7 @@ void RenderCanvas::Init()
 		if (m_frame)
 		{
 			m_frame->SetTextureUndos();
-			m_frame->GetSettingDlg()->UpdateTextureSize();
+			//m_frame->GetSettingDlg()->UpdateTextureSize();
 		}
 		//glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
 		glEnable(GL_MULTISAMPLE);

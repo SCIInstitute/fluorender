@@ -28,8 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef LookingGlassRenderer_h
 #define LookingGlassRenderer_h
 
-#include <Types/Color.h>
-
 class LookingGlassRenderer
 {
 public:

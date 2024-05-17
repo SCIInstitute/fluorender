@@ -1371,10 +1371,10 @@ void MainFrame::OnOpenVolume(wxCommandEvent& event)
 		fopendlg->GetPaths(paths);
 		LoadVolumes(paths, false, canvas);
 
-		if (m_setting_dlg)
-		{
-			m_setting_dlg->UpdateUI();
-		}
+		//if (m_setting_dlg)
+		//{
+		//	m_setting_dlg->UpdateUI();
+		//}
 	}
 
 	delete fopendlg;
@@ -1396,10 +1396,10 @@ void MainFrame::OnImportVolume(wxCommandEvent& event)
 		fopendlg->GetPaths(paths);
 		LoadVolumes(paths, true, canvas);
 
-		if (m_setting_dlg)
-		{
-			m_setting_dlg->UpdateUI();
-		}
+		//if (m_setting_dlg)
+		//{
+		//	m_setting_dlg->UpdateUI();
+		//}
 	}
 
 	delete fopendlg;
@@ -2164,6 +2164,7 @@ bool MainFrame::update_props(int excl_self, PropPanel* p1, PropPanel* p2)
 
 void MainFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, PropPanel* panel)
 {
+	//panels
 	if (update_props(excl_self, m_list_panel, panel))
 		m_list_panel->FluoUpdate(vc);
 	if (update_props(excl_self, m_tree_panel, panel))
@@ -2180,6 +2181,9 @@ void MainFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, Prop
 	for (auto i : m_prop_pages)
 		if (update_props(excl_self, i, panel))
 			i->FluoUpdate(vc);
+	//dialogs
+	if (update_props(excl_self, m_setting_dlg, panel))
+		m_setting_dlg->FluoUpdate(vc);
 }
 
 VolumePropPanel* MainFrame::FindVolumeProps(const wxString& name)
@@ -3554,7 +3558,7 @@ void MainFrame::OpenProject(wxString& filename)
 		glbin_settings.m_update_order = update_order;
 		glbin_settings.m_inf_loop = inf_loop;
 		glbin_settings.GetMemorySettings();
-		m_setting_dlg->UpdateUI();
+		//m_setting_dlg->UpdateUI();
 	}
 
 	//read data list
@@ -4857,7 +4861,7 @@ void MainFrame::OpenProject(wxString& filename)
 
 void MainFrame::OnSettings(wxCommandEvent& event)
 {
-	m_setting_dlg->UpdateDeviceTree();
+	//m_setting_dlg->UpdateDeviceTree();
 	m_aui_mgr.GetPane(m_setting_dlg).Show();
 	m_aui_mgr.GetPane(m_setting_dlg).Float();
 	m_aui_mgr.Update();

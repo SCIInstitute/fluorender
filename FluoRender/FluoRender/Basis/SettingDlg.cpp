@@ -185,24 +185,6 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Font:");
 	m_font_cmb = new wxComboBox(page, ID_FontCmb, "",
 		wxDefaultPosition, FromDIP(wxSize(150, -1)), 0, NULL, wxCB_READONLY);
-	//populate fonts
-	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-	exePath = wxPathOnly(exePath);
-	wxString loc = exePath + GETSLASH() + "Fonts" +
-		GETSLASH() + "*.ttf";
-	wxLogNull logNo;
-	wxArrayString list;
-	wxString file = wxFindFirstFile(loc);
-	while (!file.empty())
-	{
-		file = wxFileNameFromPath(file);
-		file = file.BeforeLast('.');
-		list.Add(file);
-		file = wxFindNextFile();
-	}
-	list.Sort();
-	for (size_t i = 0; i < list.GetCount(); ++i)
-		m_font_cmb->Append(list[i]);
 	sizer2_1->Add(st);
 	sizer2_1->Add(10, 10);
 	sizer2_1->Add(m_font_cmb);
@@ -219,9 +201,8 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Color:");
 	m_text_color_cmb = new wxComboBox(page, ID_TextColorCmb, "",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
-	m_text_color_cmb->Append("BG inverted");
-	m_text_color_cmb->Append("Background");
-	m_text_color_cmb->Append("Vol sec color");
+	std::vector<wxString> items2 = { "BG inverted", "Background", "Vol sec color" };
+	m_text_color_cmb->Append(items2);
 	sizer2_1->Add(st);
 	sizer2_1->Add(10, 10);
 	sizer2_1->Add(m_text_color_cmb);
@@ -939,14 +920,14 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 }
 
 SettingDlg::SettingDlg(MainFrame *frame) :
-	wxPanel(frame, wxID_ANY,
+	PropPanel(frame, frame,
 		wxDefaultPosition,
 		frame->FromDIP(wxSize(450, 750)),
-		0, "SettingDlg"),
-	m_frame(frame)
+		0, "SettingDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	Freeze();
 	SetDoubleBuffered(true);
 
 	//notebook
@@ -974,28 +955,92 @@ SettingDlg::SettingDlg(MainFrame *frame) :
 	sizerV->Add(group_b, 0, wxEXPAND);
 	SetSizerAndFit(sizerV);
 	Layout();
+	SetAutoLayout(true);
+	SetScrollRate(10, 10);
 
-	UpdateUI();
+	Thaw();
 }
 
 SettingDlg::~SettingDlg()
 {
 }
 
-void SettingDlg::UpdateUI()
+void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 {
 	//update user interface
-	//save project
-	m_prj_save_chk->SetValue(glbin_settings.m_prj_save);
-	m_prj_save_inc_chk->SetValue(glbin_settings.m_prj_save_inc);
-	//realtime compression
-	m_realtime_cmp_chk->SetValue(glbin_settings.m_realtime_compress);
-	//script break
-	m_script_break_chk->SetValue(glbin_settings.m_script_break);
-	//inverse slider
-	m_inverse_slider_chk->SetValue(glbin_settings.m_inverse_slider);
-	//multifunc button
-	m_mul_func_btn_comb->Select(glbin_settings.m_mulfunc);
+	if (FOUND_VALUE(gstNull))
+		return;
+	bool update_all = vc.empty();
+
+	//project page
+	//project save
+	if (update_all || FOUND_VALUE(gstSaveProjectEnable))
+	{
+		m_prj_save_chk->SetValue(glbin_settings.m_prj_save);
+		m_prj_save_inc_chk->SetValue(glbin_settings.m_prj_save_inc);
+		//realtime compression
+		m_realtime_cmp_chk->SetValue(glbin_settings.m_realtime_compress);
+		//script break
+		m_script_break_chk->SetValue(glbin_settings.m_script_break);
+		//inverse slider
+		m_inverse_slider_chk->SetValue(glbin_settings.m_inverse_slider);
+		//multifunc button
+		m_mul_func_btn_comb->Select(glbin_settings.m_mulfunc);
+	}
+
+	//font
+	if (update_all || FOUND_VALUE(gstFontFile))
+	{
+		//populate fonts
+		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+		exePath = wxPathOnly(exePath);
+		wxString loc = exePath + GETSLASH() + "Fonts" +
+			GETSLASH() + "*.ttf";
+		wxLogNull logNo;
+		wxArrayString list;
+		wxString file = wxFindFirstFile(loc);
+		while (!file.empty())
+		{
+			file = wxFileNameFromPath(file);
+			file = file.BeforeLast('.');
+			list.Add(file);
+			file = wxFindNextFile();
+		}
+		list.Sort();
+		for (size_t i = 0; i < list.GetCount(); ++i)
+			m_font_cmb->Append(list[i]);
+	}
+	if (update_all || FOUND_VALUE(gstSettingsFont))
+	{
+		wxString str = glbin_settings.m_font_file.BeforeLast('.');
+		int font_sel = m_font_cmb->FindString(str);
+		if (font_sel != wxNOT_FOUND)
+			m_font_cmb->Select(font_sel);
+		m_font_size_cmb->ChangeValue(wxString::Format("%d", glbin_settings.m_text_size));
+		m_text_color_cmb->Select(glbin_settings.m_text_color);
+	}
+
+	//line width
+	if (update_all || FOUND_VALUE(gstLineWidth))
+	{
+		m_line_width_text->ChangeValue(wxString::Format("%.0f", glbin_settings.m_line_width));
+		m_line_width_sldr->ChangeValue(std::round(glbin_settings.m_line_width));
+	}
+
+	//paint history depth
+	if (update_all || FOUND_VALUE(gstPaintHistory))
+	{
+		m_paint_hist_depth_text->ChangeValue(wxString::Format("%d", glbin_brush_def.m_paint_hist_depth));
+		m_paint_hist_depth_sldr->ChangeValue(glbin_brush_def.m_paint_hist_depth);
+	}
+
+	//pencil distance
+	if (update_all || FOUND_VALUE(gstPencilDist))
+	{
+		m_pencil_dist_text->ChangeValue(wxString::Format("%.0f", glbin_settings.m_pencil_dist));
+		m_pencil_dist_sldr->ChangeValue(glbin_settings.m_pencil_dist);
+	}
+
 	//mouse interactions
 	m_mouse_int_chk->SetValue(glbin_settings.m_mouse_int);
 	//depth peeling
@@ -1095,22 +1140,6 @@ void SettingDlg::UpdateUI()
 	}
 	//no tex pack
 	flvr::ShaderProgram::set_no_tex_upack(glbin_settings.m_no_tex_pack);
-	//font
-	wxString str = glbin_settings.m_font_file.BeforeLast('.');
-	int font_sel = m_font_cmb->FindString(str);
-	if (font_sel != wxNOT_FOUND)
-		m_font_cmb->Select(font_sel);
-	m_font_size_cmb->ChangeValue(wxString::Format("%d", glbin_settings.m_text_size));
-	m_text_color_cmb->Select(glbin_settings.m_text_color);
-	//line width
-	m_line_width_text->ChangeValue(wxString::Format("%.0f", glbin_settings.m_line_width));
-	m_line_width_sldr->ChangeValue(std::round(glbin_settings.m_line_width));
-	//paint history depth
-	m_paint_hist_depth_text->ChangeValue(wxString::Format("%d", glbin_brush_def.m_paint_hist_depth));
-	m_paint_hist_depth_sldr->ChangeValue(glbin_brush_def.m_paint_hist_depth);
-	//pencil distance
-	m_pencil_dist_text->ChangeValue(wxString::Format("%.0f", glbin_settings.m_pencil_dist));
-	m_pencil_dist_sldr->ChangeValue(glbin_settings.m_pencil_dist);
 	//memory settings
 	m_streaming_chk->SetValue(glbin_settings.m_mem_swap);
 	EnableStreaming(glbin_settings.m_mem_swap);
@@ -1147,52 +1176,53 @@ void SettingDlg::UpdateUI()
 		m_browse_bioformats_btn->Enable(false);
 		break;
 	}
-}
 
-void SettingDlg::UpdateDeviceTree()
-{
-	m_device_tree->DeleteAllItems();
-	//cl device tree
-	std::vector<flvr::CLPlatform>* devices = flvr::KernelProgram::GetDeviceList();
-	int pid = flvr::KernelProgram::get_platform_id();
-	int did = flvr::KernelProgram::get_device_id();
-	wxTreeItemId root = m_device_tree->AddRoot("Computer");
-	std::string name;
-	if (devices)
+	if (update_all || gstDeviceTree)
 	{
-		for (int i = 0; i < devices->size(); ++i)
+		m_device_tree->DeleteAllItems();
+		//cl device tree
+		std::vector<flvr::CLPlatform>* devices = flvr::KernelProgram::GetDeviceList();
+		int pid = flvr::KernelProgram::get_platform_id();
+		int did = flvr::KernelProgram::get_device_id();
+		wxTreeItemId root = m_device_tree->AddRoot("Computer");
+		std::string name;
+		if (devices)
 		{
-			flvr::CLPlatform* platform = &((*devices)[i]);
-			name = platform->vendor;
-			name.back() = ';';
-			name += " " + platform->name;
-			wxTreeItemId pfitem = m_device_tree->AppendItem(root, name);
-			for (int j = 0; j < platform->devices.size(); ++j)
+			for (int i = 0; i < devices->size(); ++i)
 			{
-				flvr::CLDevice* device = &(platform->devices[j]);
-				name = device->vendor;
+				flvr::CLPlatform* platform = &((*devices)[i]);
+				name = platform->vendor;
 				name.back() = ';';
-				name += " " + device->name;
-				wxTreeItemId dvitem = m_device_tree->AppendItem(pfitem, name);
-				if (i == pid && j == did)
-					m_device_tree->SelectItem(dvitem);
+				name += " " + platform->name;
+				wxTreeItemId pfitem = m_device_tree->AppendItem(root, name);
+				for (int j = 0; j < platform->devices.size(); ++j)
+				{
+					flvr::CLDevice* device = &(platform->devices[j]);
+					name = device->vendor;
+					name.back() = ';';
+					name += " " + device->name;
+					wxTreeItemId dvitem = m_device_tree->AppendItem(pfitem, name);
+					if (i == pid && j == did)
+						m_device_tree->SelectItem(dvitem);
+				}
 			}
 		}
+		m_device_tree->ExpandAll();
+		m_device_tree->SetFocus();
 	}
-	m_device_tree->ExpandAll();
-	m_device_tree->SetFocus();
-}
 
-void SettingDlg::UpdateTextureSize()
-{
-	if (!glbin_settings.m_use_max_texture_size)
+	//texture size
+	if (update_all || gstMaxTextureSize)
 	{
-		m_max_texture_size_text->ChangeValue(
-			wxString::Format("%d", flvr::ShaderProgram::
-				max_texture_size()));
+		if (!glbin_settings.m_use_max_texture_size)
+		{
+			m_max_texture_size_text->ChangeValue(
+				wxString::Format("%d", flvr::ShaderProgram::
+					max_texture_size()));
+		}
+		else
+			flvr::ShaderProgram::set_max_texture_size(glbin_settings.m_max_texture_size);
 	}
-	else
-		flvr::ShaderProgram::set_max_texture_size(glbin_settings.m_max_texture_size);
 }
 
 //events
