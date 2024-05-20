@@ -652,6 +652,8 @@ void RenderCanvas::Init()
 	if (!m_initialized)
 	{
 		flvr::ShaderProgram::init_shaders_supported();
+		flvr::ShaderProgram::set_max_texture_size(glbin_settings.m_max_texture_size);
+		flvr::ShaderProgram::set_no_tex_upack(glbin_settings.m_no_tex_pack);
 		flvr::KernelProgram::set_platform_id(glbin_settings.m_cl_platform_id);
 		flvr::KernelProgram::set_device_id(glbin_settings.m_cl_device_id);
 		flvr::KernelProgram::init_kernels_supported();

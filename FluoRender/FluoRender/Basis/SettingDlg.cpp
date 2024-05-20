@@ -354,7 +354,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	group3->Add(st);
 	group3->Add(10, 5);
 
-	//link rotations
+	//rotations
 	wxBoxSizer* group4 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Rotations"), wxVERTICAL);
 	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
@@ -702,42 +702,11 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(75, 23)), 0, NULL, wxCB_READONLY);
 	m_wav_color4_cmb = new wxComboBox(page, ID_WavColor4Cmb, "",
 		wxDefaultPosition, FromDIP(wxSize(75, 23)), 0, NULL, wxCB_READONLY);
-	//1
-	m_wav_color1_cmb->Append("Red");
-	m_wav_color1_cmb->Append("Green");
-	m_wav_color1_cmb->Append("Blue");
-	m_wav_color1_cmb->Append("Cyan");
-	m_wav_color1_cmb->Append("Magenta");
-	m_wav_color1_cmb->Append("Yellow");
-	m_wav_color1_cmb->Append("Orange");
-	m_wav_color1_cmb->Append("White");
-	//2
-	m_wav_color2_cmb->Append("Red");
-	m_wav_color2_cmb->Append("Green");
-	m_wav_color2_cmb->Append("Blue");
-	m_wav_color2_cmb->Append("Cyan");
-	m_wav_color2_cmb->Append("Magenta");
-	m_wav_color2_cmb->Append("Yellow");
-	m_wav_color2_cmb->Append("Orange");
-	m_wav_color2_cmb->Append("White");
-	//3
-	m_wav_color3_cmb->Append("Red");
-	m_wav_color3_cmb->Append("Green");
-	m_wav_color3_cmb->Append("Blue");
-	m_wav_color3_cmb->Append("Cyan");
-	m_wav_color3_cmb->Append("Magenta");
-	m_wav_color3_cmb->Append("Yellow");
-	m_wav_color3_cmb->Append("Orange");
-	m_wav_color3_cmb->Append("White");
-	//4
-	m_wav_color4_cmb->Append("Red");
-	m_wav_color4_cmb->Append("Green");
-	m_wav_color4_cmb->Append("Blue");
-	m_wav_color4_cmb->Append("Cyan");
-	m_wav_color4_cmb->Append("Magenta");
-	m_wav_color4_cmb->Append("Yellow");
-	m_wav_color4_cmb->Append("Orange");
-	m_wav_color4_cmb->Append("White");
+	std::vector<wxString> list = { "Red", "Green", "Blue", "Cyan", "Magenta", "Yellow", "Orange", "White" };
+	m_wav_color1_cmb->Append(list);
+	m_wav_color2_cmb->Append(list);
+	m_wav_color3_cmb->Append(list);
+	m_wav_color4_cmb->Append(list);
 	sizer2_1->Add(35, 20);
 	sizer2_1->Add(m_wav_color1_cmb);
 	sizer2_1->Add(25, 20);
@@ -1041,143 +1010,146 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_pencil_dist_sldr->ChangeValue(glbin_settings.m_pencil_dist);
 	}
 
-	//mouse interactions
-	m_mouse_int_chk->SetValue(glbin_settings.m_mouse_int);
-	//depth peeling
-	m_peeling_layers_sldr->ChangeValue(glbin_settings.m_peeling_layers);
-	m_peeling_layers_text->ChangeValue(wxString::Format("%d", glbin_settings.m_peeling_layers));
 	//micro blending
-	m_micro_blend_chk->SetValue(glbin_settings.m_micro_blend);
+	if (update_all || FOUND_VALUE(gstMicroBlendEnable))
+		m_micro_blend_chk->SetValue(glbin_settings.m_micro_blend);
+
+	//depth peeling
+	if (update_all || FOUND_VALUE(gstPeelNum))
+	{
+		m_peeling_layers_sldr->ChangeValue(glbin_settings.m_peeling_layers);
+		m_peeling_layers_text->ChangeValue(wxString::Format("%d", glbin_settings.m_peeling_layers));
+	}
+
 	//shadow direction
-	if (glbin_settings.m_shadow_dir)
+	if (update_all || FOUND_VALUE(gstShadowDir))
 	{
-		m_shadow_dir_chk->SetValue(true);
-		m_shadow_dir_sldr->Enable();
-		m_shadow_dir_text->Enable();
+		bool bval = glbin_settings.m_shadow_dir;
+		m_shadow_dir_chk->SetValue(bval);
+		m_shadow_dir_sldr->Enable(bval);
+		m_shadow_dir_text->Enable(bval);
+		double deg = GetShadowDir();
+		m_shadow_dir_sldr->ChangeValue(std::round(deg));
+		m_shadow_dir_text->ChangeValue(wxString::Format("%.2f", deg));
 	}
-	else
+
+	//rotations
+	if (update_all || FOUND_VALUE(gstSettingsRot))
 	{
-		m_shadow_dir_chk->SetValue(false);
-		m_shadow_dir_sldr->Disable();
-		m_shadow_dir_text->Disable();
-		glbin_settings.m_shadow_dir_x = 0.0;
-		glbin_settings.m_shadow_dir_y = 0.0;
+		//rot center anchor thresh
+		m_pin_threshold_sldr->ChangeValue(std::round(glbin_settings.m_pin_threshold*10.0));
+		m_pin_threshold_text->ChangeValue(wxString::Format("%.0f", glbin_settings.m_pin_threshold*100.0));
 	}
-	double deg = GetShadowDir();
-	m_shadow_dir_sldr->ChangeValue(std::round(deg));
-	m_shadow_dir_text->ChangeValue(wxString::Format("%.2f", deg));
-	//rot center anchor thresh
-	m_pin_threshold_sldr->ChangeValue(std::round(glbin_settings.m_pin_threshold*10.0));
-	m_pin_threshold_text->ChangeValue(wxString::Format("%.0f", glbin_settings.m_pin_threshold*100.0));
+
 	//gradient background
-	m_grad_bg_chk->SetValue(glbin_settings.m_grad_bg);
-	//stereo
-	if (glbin_settings.m_hologram_mode == 0)
-	{
-		m_stereo_chk->SetValue(false);
-		m_sbs_chk->Disable();
-		m_eye_dist_sldr->Disable();
-		m_eye_dist_text->Disable();
-		m_looking_glass_chk->SetValue(false);
-		m_lg_offset_sldr->Disable();
-		m_lg_offset_text->Disable();
-		m_holo_debug_chk->Disable();
-	}
-	else if (glbin_settings.m_hologram_mode == 1)
-	{
-		m_stereo_chk->SetValue(true);
-		m_sbs_chk->Enable();
-		m_eye_dist_sldr->Enable();
-		m_eye_dist_text->Enable();
-		m_looking_glass_chk->SetValue(false);
-		m_lg_offset_sldr->Disable();
-		m_lg_offset_text->Disable();
-		m_holo_debug_chk->Disable();
-	}
-	else if (glbin_settings.m_hologram_mode == 2)
-	{
-		m_stereo_chk->SetValue(false);
-		m_sbs_chk->Disable();
-		m_eye_dist_sldr->Disable();
-		m_eye_dist_text->Disable();
-		m_looking_glass_chk->SetValue(true);
-		m_lg_offset_sldr->Enable();
-		m_lg_offset_text->Enable();
-		m_holo_debug_chk->Enable();
-	}
-	m_sbs_chk->SetValue(glbin_settings.m_sbs);
-	m_eye_dist_sldr->ChangeValue(std::round(glbin_settings.m_eye_dist * 10.0));
-	m_eye_dist_text->ChangeValue(wxString::Format("%.1f", glbin_settings.m_eye_dist));
-	m_lg_offset_sldr->ChangeValue(glbin_settings.m_lg_offset);
-	m_lg_offset_text->ChangeValue(wxString::Format("%.0f", glbin_settings.m_lg_offset));
-	m_holo_debug_chk->SetValue(glbin_settings.m_hologram_debug);
-	//display id
-	m_disp_id_comb->Select(glbin_settings.m_disp_id);
-	//color depth
-	m_color_depth_comb->Select(glbin_settings.m_color_depth);
-	//override vox
-	m_override_vox_chk->SetValue(glbin_settings.m_override_vox);
-	//wavelength to color
-	m_wav_color1_cmb->Select(glbin_settings.m_wav_color1 - 1);
-	m_wav_color2_cmb->Select(glbin_settings.m_wav_color2 - 1);
-	m_wav_color3_cmb->Select(glbin_settings.m_wav_color3 - 1);
-	m_wav_color4_cmb->Select(glbin_settings.m_wav_color4 - 1);
-	//max texture size
-	m_max_texture_size_chk->SetValue(glbin_settings.m_use_max_texture_size);
-	if (glbin_settings.m_use_max_texture_size)
-	{
-		flvr::ShaderProgram::set_max_texture_size(glbin_settings.m_max_texture_size);
-		m_max_texture_size_text->ChangeValue(
-			wxString::Format("%d", glbin_settings.m_max_texture_size));
-		m_max_texture_size_text->Enable();
-	}
-	else
-	{
-		m_max_texture_size_text->ChangeValue(
-			wxString::Format("%d", flvr::ShaderProgram::
-				max_texture_size()));
-		m_max_texture_size_text->Disable();
-	}
-	//no tex pack
-	flvr::ShaderProgram::set_no_tex_upack(glbin_settings.m_no_tex_pack);
+	if (update_all || FOUND_VALUE(gstGradBg))
+		m_grad_bg_chk->SetValue(glbin_settings.m_grad_bg);
+
+	//performance page
+	//mouse interactions
+	if (update_all || FOUND_VALUE(gstMouseInt))
+		m_mouse_int_chk->SetValue(glbin_settings.m_mouse_int);
+
 	//memory settings
-	m_streaming_chk->SetValue(glbin_settings.m_mem_swap);
-	EnableStreaming(glbin_settings.m_mem_swap);
-	m_update_order_rbox->SetSelection(glbin_settings.m_update_order);
-	m_graphics_mem_text->ChangeValue(wxString::Format("%d", (int)glbin_settings.m_graphics_mem));
-	m_graphics_mem_sldr->ChangeValue(std::round(glbin_settings.m_graphics_mem / 100.0));
-	m_large_data_text->ChangeValue(wxString::Format("%d", (int)glbin_settings.m_large_data_size));
-	m_large_data_sldr->ChangeValue(std::round(glbin_settings.m_large_data_size / 10.0));
-	m_block_size_text->ChangeValue(wxString::Format("%d", glbin_settings.m_force_brick_size));
-	m_block_size_sldr->ChangeValue(std::round(log(glbin_settings.m_force_brick_size) / log(2.0)));
-	m_response_time_text->ChangeValue(wxString::Format("%d", glbin_settings.m_up_time));
-	m_response_time_sldr->ChangeValue(std::round(glbin_settings.m_up_time / 10.0));
-	m_detail_level_offset_text->ChangeValue(wxString::Format("%d", -glbin_settings.m_detail_level_offset));
-	m_detail_level_offset_sldr->ChangeValue(-glbin_settings.m_detail_level_offset);
-
-	//java
-	m_java_jvm_text->ChangeValue(glbin_settings.m_jvm_path);
-	m_java_ij_text->ChangeValue(glbin_settings.m_ij_path);
-	m_java_bioformats_text->ChangeValue(glbin_settings.m_bioformats_path);
-	switch (glbin_settings.m_ij_mode)
+	if (update_all || FOUND_VALUE(gstStreamEnable))
 	{
-	case 0:
-		mp_radio_button_imagej->SetValue(true);
-		m_java_jvm_text->Enable(true);
-		m_java_bioformats_text->Enable(true);
-		m_browse_jvm_btn->Enable(true);
-		m_browse_bioformats_btn->Enable(true);
-		break;
-	case 1:
-		mp_radio_button_fiji->SetValue(true);
-		m_java_jvm_text->Enable(false);
-		m_java_bioformats_text->Enable(false);
-		m_browse_jvm_btn->Enable(false);
-		m_browse_bioformats_btn->Enable(false);
-		break;
+		m_streaming_chk->SetValue(glbin_settings.m_mem_swap);
+		EnableStreaming(glbin_settings.m_mem_swap);
+		m_update_order_rbox->SetSelection(glbin_settings.m_update_order);
+		m_graphics_mem_text->ChangeValue(wxString::Format("%d", (int)glbin_settings.m_graphics_mem));
+		m_graphics_mem_sldr->ChangeValue(std::round(glbin_settings.m_graphics_mem / 100.0));
+		m_large_data_text->ChangeValue(wxString::Format("%d", (int)glbin_settings.m_large_data_size));
+		m_large_data_sldr->ChangeValue(std::round(glbin_settings.m_large_data_size / 10.0));
+		m_block_size_text->ChangeValue(wxString::Format("%d", glbin_settings.m_force_brick_size));
+		m_block_size_sldr->ChangeValue(std::round(log(glbin_settings.m_force_brick_size) / log(2.0)));
+		m_response_time_text->ChangeValue(wxString::Format("%d", glbin_settings.m_up_time));
+		m_response_time_sldr->ChangeValue(std::round(glbin_settings.m_up_time / 10.0));
+		m_detail_level_offset_text->ChangeValue(wxString::Format("%d", -glbin_settings.m_detail_level_offset));
+		m_detail_level_offset_sldr->ChangeValue(-glbin_settings.m_detail_level_offset);
 	}
 
-	if (update_all || gstDeviceTree)
+	//display page
+	//stereo
+	if (update_all || FOUND_VALUE(gstHologramMode))
+	{
+		if (glbin_settings.m_hologram_mode == 0)
+		{
+			m_stereo_chk->SetValue(false);
+			m_sbs_chk->Disable();
+			m_eye_dist_sldr->Disable();
+			m_eye_dist_text->Disable();
+			m_looking_glass_chk->SetValue(false);
+			m_lg_offset_sldr->Disable();
+			m_lg_offset_text->Disable();
+			m_holo_debug_chk->Disable();
+		}
+		else if (glbin_settings.m_hologram_mode == 1)
+		{
+			m_stereo_chk->SetValue(true);
+			m_sbs_chk->Enable();
+			m_eye_dist_sldr->Enable();
+			m_eye_dist_text->Enable();
+			m_looking_glass_chk->SetValue(false);
+			m_lg_offset_sldr->Disable();
+			m_lg_offset_text->Disable();
+			m_holo_debug_chk->Disable();
+		}
+		else if (glbin_settings.m_hologram_mode == 2)
+		{
+			m_stereo_chk->SetValue(false);
+			m_sbs_chk->Disable();
+			m_eye_dist_sldr->Disable();
+			m_eye_dist_text->Disable();
+			m_looking_glass_chk->SetValue(true);
+			m_lg_offset_sldr->Enable();
+			m_lg_offset_text->Enable();
+			m_holo_debug_chk->Enable();
+		}
+		m_sbs_chk->SetValue(glbin_settings.m_sbs);
+		m_eye_dist_sldr->ChangeValue(std::round(glbin_settings.m_eye_dist * 10.0));
+		m_eye_dist_text->ChangeValue(wxString::Format("%.1f", glbin_settings.m_eye_dist));
+		m_lg_offset_sldr->ChangeValue(glbin_settings.m_lg_offset);
+		m_lg_offset_text->ChangeValue(wxString::Format("%.0f", glbin_settings.m_lg_offset));
+		m_holo_debug_chk->SetValue(glbin_settings.m_hologram_debug);
+	}
+
+	//display id
+	if (update_all || FOUND_VALUE(gstFullscreenDisplay))
+		m_disp_id_comb->Select(glbin_settings.m_disp_id);
+
+	//color depth
+	if (update_all || FOUND_VALUE(gstDisplayColorDepth))
+		m_color_depth_comb->Select(glbin_settings.m_color_depth);
+
+	//format page
+	//override vox
+	if (update_all || FOUND_VALUE(gstOverrideVoxSpc))
+		m_override_vox_chk->SetValue(glbin_settings.m_override_vox);
+
+	//wavelength to color
+	if (update_all || FOUND_VALUE(gstWavelengthColors))
+	{
+		m_wav_color1_cmb->Select(glbin_settings.m_wav_color1 - 1);
+		m_wav_color2_cmb->Select(glbin_settings.m_wav_color2 - 1);
+		m_wav_color3_cmb->Select(glbin_settings.m_wav_color3 - 1);
+		m_wav_color4_cmb->Select(glbin_settings.m_wav_color4 - 1);
+	}
+
+	//max texture size
+	if (update_all || FOUND_VALUE(gstMaxTextureSize))
+	{
+		bool bval = glbin_settings.m_use_max_texture_size;
+		m_max_texture_size_chk->SetValue(bval);
+		m_max_texture_size_text->Enable(bval);
+		wxString str;
+		if (bval)
+			str = wxString::Format("%d", glbin_settings.m_max_texture_size);
+		else
+			str = wxString::Format("%d", flvr::ShaderProgram::max_texture_size());
+		m_max_texture_size_text->ChangeValue(str);
+	}
+
+	if (update_all || FOUND_VALUE(gstDeviceTree))
 	{
 		m_device_tree->DeleteAllItems();
 		//cl device tree
@@ -1211,17 +1183,29 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_device_tree->SetFocus();
 	}
 
-	//texture size
-	if (update_all || gstMaxTextureSize)
+	//java
+	if (update_all || FOUND_VALUE(gstSettingsJava))
 	{
-		if (!glbin_settings.m_use_max_texture_size)
+		m_java_jvm_text->ChangeValue(glbin_settings.m_jvm_path);
+		m_java_ij_text->ChangeValue(glbin_settings.m_ij_path);
+		m_java_bioformats_text->ChangeValue(glbin_settings.m_bioformats_path);
+		switch (glbin_settings.m_ij_mode)
 		{
-			m_max_texture_size_text->ChangeValue(
-				wxString::Format("%d", flvr::ShaderProgram::
-					max_texture_size()));
+		case 0:
+			mp_radio_button_imagej->SetValue(true);
+			m_java_jvm_text->Enable(true);
+			m_java_bioformats_text->Enable(true);
+			m_browse_jvm_btn->Enable(true);
+			m_browse_bioformats_btn->Enable(true);
+			break;
+		case 1:
+			mp_radio_button_fiji->SetValue(true);
+			m_java_jvm_text->Enable(false);
+			m_java_bioformats_text->Enable(false);
+			m_browse_jvm_btn->Enable(false);
+			m_browse_bioformats_btn->Enable(false);
+			break;
 		}
-		else
-			flvr::ShaderProgram::set_max_texture_size(glbin_settings.m_max_texture_size);
 	}
 }
 
@@ -1437,7 +1421,6 @@ void SettingDlg::EnableStreaming(bool enable)
 		m_detail_level_offset_sldr->Disable();
 		m_detail_level_offset_text->Disable();
 	}
-	m_frame->RefreshCanvases();
 }
 
 void SettingDlg::SetShadowDir(double deg)
@@ -1800,6 +1783,7 @@ void SettingDlg::OnStreamingChk(wxCommandEvent &event)
 	else
 		glbin_settings.m_mem_swap = false;
 	EnableStreaming(glbin_settings.m_mem_swap);
+	m_frame->RefreshCanvases();
 }
 
 void SettingDlg::OnUpdateOrderChange(wxCommandEvent &event)

@@ -203,6 +203,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstShadow "shadow"
 #define gstShadowEnable "shadow enable"
 #define gstShadowInt "shadow int"
+#define gstShadowDir "shdow dir"
 #define gstShadowDirEnable "shadow dir enable"
 #define gstShadowDirX "shadow dir x"
 #define gstShadowDirY "shadow dir y"
@@ -411,7 +412,11 @@ DEALINGS IN THE SOFTWARE.
 #define gstPointVolumeMode "point volume mode"//0: use view plane; 1: use max value; 2: use accumulated value
 #define gstRulerUseTransf "ruler use transf"//ruler use volume transfer function
 #define gstRulerTransient "ruler transient"//ruler is time dependent
+#define gstSettingsRot "settings rot"//settings for rotations
 #define gstLinkedRot "linked rot"//link rotation to views
+#define gstMouseInt "mouse int"//reduce computations for mouse interactions
+#define gstFullscreenDisplay "fullscreen display"
+#define gstDisplayColorDepth "display color depth"
 #define gstPaintCount "paint count"//count voxels after painting
 #define gstPaintColocalize "paint colocalize"//compute colocalization after painting
 #define gstRulerRelax "ruler relax"//compute ruler relax after drawing
@@ -562,6 +567,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstLoadMainThread "load main thread"
 #define gstResMode "res mode"
 #define gstFullScreen "full screen"
+#define gstHologramMode "hologram mode"
 #define gstVrEnable "vr enable"
 #define gstOpenvrEnable "openvr enable"
 #define gstVrSizeX "vr size x"
@@ -589,6 +595,7 @@ DEALINGS IN THE SOFTWARE.
 //processor properties should be moved in the future
 #define gstSelUndo "sel undo"//selector undo
 #define gstSelRedo "sel redo"
+#define gstSettingsJava "settings java"
 
 //dialog agent common
 #define gstUseSelection "use selection"//use mask selection
@@ -697,6 +704,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstSaveProjectEnable "save project enable"
 #define gstProjectPath "project path"
 #define gstTestParam "test param"
+#define gstWavelengthColors "wavelengthe colors"
 #define gstWaveColor1 "wave color1"
 #define gstWaveColor2 "wave color2"
 #define gstWaveColor3 "wave color3"
