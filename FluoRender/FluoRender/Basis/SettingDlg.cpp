@@ -129,8 +129,6 @@ EVT_RADIOBUTTON(ID_RadioButtonImageJ, SettingDlg::onJavaRadioButtonImageJ)
 EVT_RADIOBUTTON(ID_RadioButtonFiji, SettingDlg::onJavaRadioButtonFiji)
 //device tree
 EVT_TREE_SEL_CHANGED(ID_DeviceTree, SettingDlg::OnSelChanged)
-//show
-EVT_SHOW(SettingDlg::OnShow)
 END_EVENT_TABLE()
 
 wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
@@ -1223,11 +1221,6 @@ void SettingDlg::OnClose(wxCommandEvent &event)
 		m_frame->ShowPane(this, false);
 }
 
-void SettingDlg::OnShow(wxShowEvent &event)
-{
-	//GetSettings();
-}
-
 void SettingDlg::OnProjectSaveCheck(wxCommandEvent &event)
 {
 	glbin_settings.m_prj_save = m_prj_save_chk->GetValue();
@@ -1256,25 +1249,13 @@ void SettingDlg::OnInverseSliderCheck(wxCommandEvent& event)
 void SettingDlg::OnMulFuncBtnComb(wxCommandEvent& event)
 {
 	glbin_settings.m_mulfunc = m_mul_func_btn_comb->GetCurrentSelection();
-	m_frame->UpdateProps({ gstMultiFuncTips });
+	FluoRefresh(3, { gstMultiFuncTips }, { -1 });
 }
 
 void SettingDlg::OnMouseIntCheck(wxCommandEvent &event)
 {
 	glbin_settings.m_mouse_int = m_mouse_int_chk->GetValue();
-
-	if (m_frame)
-	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetAdaptive(glbin_settings.m_mouse_int);
-				view->RefreshGL(39);
-			}
-		}
-	}
+	FluoRefresh(3, { gstNull });
 }
 
 void SettingDlg::OnPeelingLayersChange(wxScrollEvent &event)
@@ -1294,37 +1275,13 @@ void SettingDlg::OnPeelingLayersEdit(wxCommandEvent &event)
 		return;
 	m_peeling_layers_sldr->ChangeValue(ival);
 	glbin_settings.m_peeling_layers = ival;
-
-	if (m_frame)
-	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetPeelingLayers(ival);
-				view->RefreshGL(39);
-			}
-		}
-	}
+	FluoRefresh(3, { gstNull });
 }
 
 void SettingDlg::OnMicroBlendCheck(wxCommandEvent &event)
 {
 	glbin_settings.m_micro_blend = m_micro_blend_chk->GetValue();
-
-	if (m_frame)
-	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetBlendSlices(glbin_settings.m_micro_blend);
-				view->RefreshGL(39);
-			}
-		}
-	}
+	FluoRefresh(3, { gstNull });
 }
 
 //shadow direction
@@ -1350,16 +1307,7 @@ void SettingDlg::OnShadowDirCheck(wxCommandEvent &event)
 		glbin_settings.m_shadow_dir_y = 0.0;
 		glbin_settings.m_shadow_dir = false;
 	}
-
-	if (m_frame)
-	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-				view->RefreshGL(39);
-		}
-	}
+	FluoRefresh(3, { gstNull });
 }
 
 void SettingDlg::OnShadowDirChange(wxScrollEvent &event)
@@ -1377,16 +1325,7 @@ void SettingDlg::OnShadowDirEdit(wxCommandEvent &event)
 	str.ToDouble(&deg);
 	m_shadow_dir_sldr->ChangeValue(std::round(deg));
 	SetShadowDir(deg);
-
-	if (m_frame)
-	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-				view->RefreshGL(39);
-		}
-	}
+	FluoRefresh(3, { gstNull });
 }
 
 void SettingDlg::EnableStreaming(bool enable)
@@ -1439,19 +1378,7 @@ double SettingDlg::GetShadowDir()
 void SettingDlg::OnGradBgCheck(wxCommandEvent &event)
 {
 	glbin_settings.m_grad_bg = m_grad_bg_chk->GetValue();
-
-	if (m_frame)
-	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetGradBg(glbin_settings.m_grad_bg);
-				view->RefreshGL(39);
-			}
-		}
-	}
+	FluoRefresh(3, { gstNull });
 }
 
 //rot center anchor thresh
@@ -1478,13 +1405,7 @@ void SettingDlg::OnRotLink(wxCommandEvent& event)
 	bool linked_rot = m_rot_link_chk->GetValue();
 	RenderCanvas::m_linked_rot = linked_rot;
 	RenderCanvas::m_master_linked_view = 0;
-
-	if (m_frame && 0 < m_frame->GetViewNum())
-	{
-		RenderCanvas* view = m_frame->GetView(0);
-		if (view)
-			view->RefreshGL(39);
-	}
+	FluoRefresh(3, { gstNull });
 }
 
 //stereo
@@ -1498,51 +1419,13 @@ void SettingDlg::OnStereoCheck(wxCommandEvent &event)
 	}
 	else
 		glbin_settings.m_hologram_mode = 0;
-	if (glbin_settings.m_hologram_mode == 0)
-	{
-		m_stereo_chk->SetValue(false);
-		m_sbs_chk->Disable();
-		m_eye_dist_sldr->Disable();
-		m_eye_dist_text->Disable();
-		m_looking_glass_chk->SetValue(false);
-		m_lg_offset_sldr->Disable();
-		m_lg_offset_text->Disable();
-		m_holo_debug_chk->Disable();
-	}
-	else if (glbin_settings.m_hologram_mode == 1)
-	{
-		m_stereo_chk->SetValue(true);
-		m_sbs_chk->Enable();
-		m_eye_dist_sldr->Enable();
-		m_eye_dist_text->Enable();
-		m_looking_glass_chk->SetValue(false);
-		m_lg_offset_sldr->Disable();
-		m_lg_offset_text->Disable();
-		m_holo_debug_chk->Disable();
-	}
-	if (m_frame && 0 < m_frame->GetViewNum())
-	{
-		RenderCanvas* view = m_frame->GetView(0);
-		if (view)
-		{
-			view->SetHologramMode(glbin_settings.m_hologram_mode);
-			view->RefreshGL(39);
-		}
-	}
+	FluoRefresh(2, { gstHologramMode });
 }
 
 void SettingDlg::OnSBSCheck(wxCommandEvent& event)
 {
 	glbin_settings.m_sbs = m_sbs_chk->GetValue();
-	if (m_frame && 0 < m_frame->GetViewNum())
-	{
-		RenderCanvas* view = m_frame->GetView(0);
-		if (view)
-		{
-			view->SetSBS(glbin_settings.m_sbs);
-			view->RefreshGL(39);
-		}
-	}
+	FluoRefresh(3, { gstNull });
 }
 
 void SettingDlg::OnEyeDistChange(wxScrollEvent &event)
@@ -1560,16 +1443,7 @@ void SettingDlg::OnEyeDistEdit(wxCommandEvent &event)
 	str.ToDouble(&dval);
 	m_eye_dist_sldr->ChangeValue(std::round(dval * 10.0));
 	glbin_settings.m_eye_dist = dval;
-
-	if (m_frame && 0 < m_frame->GetViewNum())
-	{
-		RenderCanvas* view = m_frame->GetView(0);
-		if (view)
-		{
-			view->SetEyeDist(glbin_settings.m_eye_dist);
-			view->RefreshGL(39);
-		}
-	}
+	FluoRefresh(3, { gstNull });
 }
 
 void SettingDlg::OnLookingGlassCheck(wxCommandEvent& event)
@@ -1582,39 +1456,7 @@ void SettingDlg::OnLookingGlassCheck(wxCommandEvent& event)
 	}
 	else
 		glbin_settings.m_hologram_mode = 0;
-	if (glbin_settings.m_hologram_mode == 0)
-	{
-		m_stereo_chk->SetValue(false);
-		m_sbs_chk->Disable();
-		m_eye_dist_sldr->Disable();
-		m_eye_dist_text->Disable();
-		m_looking_glass_chk->SetValue(false);
-		m_lg_offset_sldr->Disable();
-		m_lg_offset_text->Disable();
-		m_holo_debug_chk->Disable();
-	}
-	else if (glbin_settings.m_hologram_mode == 2)
-	{
-		m_stereo_chk->SetValue(false);
-		m_sbs_chk->Disable();
-		m_eye_dist_sldr->Disable();
-		m_eye_dist_text->Disable();
-		m_looking_glass_chk->SetValue(true);
-		m_lg_offset_sldr->Enable();
-		m_lg_offset_text->Enable();
-		m_holo_debug_chk->Enable();
-	}
-	if (m_frame && 0 < m_frame->GetViewNum())
-	{
-		RenderCanvas* view = m_frame->GetView(0);
-		if (view)
-		{
-			view->SetHologramMode(glbin_settings.m_hologram_mode);
-			if (glbin_settings.m_hologram_mode == 2)
-				view->InitLookingGlass();
-			view->RefreshGL(39);
-		}
-	}
+	FluoRefresh(2, { gstHologramMode });
 }
 
 void SettingDlg::OnLgOffsetChange(wxScrollEvent& event)
@@ -1632,28 +1474,13 @@ void SettingDlg::OnLgOffsetEdit(wxCommandEvent& event)
 	str.ToLong(&lval);
 	m_lg_offset_sldr->ChangeValue(lval);
 	glbin_settings.m_lg_offset = lval;
-
-	if (m_frame && 0 < m_frame->GetViewNum())
-	{
-		RenderCanvas* view = m_frame->GetView(0);
-		if (view)
-		{
-			view->RefreshGL(39);
-		}
-	}
+	FluoRefresh(3, { gstNull });
 }
 
 void SettingDlg::OnHoloDebugCheck(wxCommandEvent& event)
 {
 	glbin_settings.m_hologram_debug = m_holo_debug_chk->GetValue();
-	if (m_frame && 0 < m_frame->GetViewNum())
-	{
-		RenderCanvas* view = m_frame->GetView(0);
-		if (view)
-		{
-			view->RefreshGL(39);
-		}
-	}
+	FluoRefresh(3, { gstNull });
 }
 
 //display id
@@ -1696,51 +1523,30 @@ void SettingDlg::OnColorDepthComb(wxCommandEvent& event)
 void SettingDlg::OnOverrideVoxCheck(wxCommandEvent &event)
 {
 	glbin_settings.m_override_vox = m_override_vox_chk->GetValue();
-	glbin_data_manager.SetOverrideVox(glbin_settings.m_override_vox);
 }
 
 void SettingDlg::OnWavColor1Change(wxCommandEvent &event)
 {
 	if (m_wav_color1_cmb)
 		glbin_settings.m_wav_color1 = m_wav_color1_cmb->GetCurrentSelection() + 1;
-	glbin_data_manager.SetWavelengthColor(
-			glbin_settings.m_wav_color1,
-			glbin_settings.m_wav_color2,
-			glbin_settings.m_wav_color3,
-			glbin_settings.m_wav_color4);
 }
 
 void SettingDlg::OnWavColor2Change(wxCommandEvent &event)
 {
 	if (m_wav_color2_cmb)
 		glbin_settings.m_wav_color2 = m_wav_color2_cmb->GetCurrentSelection() + 1;
-	glbin_data_manager.SetWavelengthColor(
-			glbin_settings.m_wav_color1,
-			glbin_settings.m_wav_color2,
-			glbin_settings.m_wav_color3,
-			glbin_settings.m_wav_color4);
 }
 
 void SettingDlg::OnWavColor3Change(wxCommandEvent &event)
 {
 	if (m_wav_color3_cmb)
 		glbin_settings.m_wav_color3 = m_wav_color3_cmb->GetCurrentSelection() + 1;
-	glbin_data_manager.SetWavelengthColor(
-			glbin_settings.m_wav_color1,
-			glbin_settings.m_wav_color2,
-			glbin_settings.m_wav_color3,
-			glbin_settings.m_wav_color4);
 }
 
 void SettingDlg::OnWavColor4Change(wxCommandEvent &event)
 {
 	if (m_wav_color4_cmb)
 		glbin_settings.m_wav_color4 = m_wav_color4_cmb->GetCurrentSelection() + 1;
-	glbin_data_manager.SetWavelengthColor(
-			glbin_settings.m_wav_color1,
-			glbin_settings.m_wav_color2,
-			glbin_settings.m_wav_color3,
-			glbin_settings.m_wav_color4);
 }
 
 //texture size
@@ -1783,7 +1589,7 @@ void SettingDlg::OnStreamingChk(wxCommandEvent &event)
 	else
 		glbin_settings.m_mem_swap = false;
 	EnableStreaming(glbin_settings.m_mem_swap);
-	m_frame->RefreshCanvases();
+	FluoRefresh(3, { gstNull });
 }
 
 void SettingDlg::OnUpdateOrderChange(wxCommandEvent &event)
@@ -1882,77 +1688,43 @@ void SettingDlg::OnDetailLevelOffsetEdit(wxCommandEvent &event)
 	str.ToLong(&val);
 	m_detail_level_offset_sldr->ChangeValue(val);
 	glbin_settings.m_detail_level_offset = -val;
-
-	if (m_frame)
-	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-				view->RefreshGL(39);
-		}
-	}
+	FluoRefresh(3, { gstNull });
 }
 
 //font
 void SettingDlg::OnFontChange(wxCommandEvent &event)
 {
 	wxString str = m_font_cmb->GetValue();
-	if (str != "")
-	{
-		glbin_settings.m_font_file = str + ".ttf";
-		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-		exePath = wxPathOnly(exePath);
-		wxString loc = exePath + GETSLASH() + "Fonts" +
-			GETSLASH() + str + ".ttf";
+	if (str.IsEmpty())
+		return;
 
-		if (m_frame)
-		{
-			glbin_text_tex_manager.load_face(loc.ToStdString());
-			glbin_text_tex_manager.SetSize(glbin_settings.m_text_size);
-			for (int i = 0; i < m_frame->GetViewNum(); i++)
-			{
-				RenderCanvas* view = m_frame->GetView(i);
-				if (view)
-					view->RefreshGL(39);
-			}
-		}
-	}
+	glbin_settings.m_font_file = str + ".ttf";
+	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+	exePath = wxPathOnly(exePath);
+	wxString loc = exePath + GETSLASH() + "Fonts" +
+		GETSLASH() + str + ".ttf";
+
+	glbin_text_tex_manager.load_face(loc.ToStdString());
+	glbin_text_tex_manager.SetSize(glbin_settings.m_text_size);
+	FluoRefresh(3, { gstNull });
 }
 
 void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
 {
 	wxString str = m_font_size_cmb->GetValue();
 	long size;
-	if (str.ToLong(&size))
-	{
-		glbin_settings.m_text_size = size;
+	if (!str.ToLong(&size))
+		return;
 
-		if (m_frame)
-		{
-			glbin_text_tex_manager.SetSize(glbin_settings.m_text_size);
-			for (int i = 0; i < m_frame->GetViewNum(); i++)
-			{
-				RenderCanvas* view = m_frame->GetView(i);
-				if (view)
-					view->RefreshGL(39);
-			}
-		}
-	}
+	glbin_settings.m_text_size = size;
+	glbin_text_tex_manager.SetSize(glbin_settings.m_text_size);
+	FluoRefresh(3, { gstNull });
 }
 
 void SettingDlg::OnTextColorChange(wxCommandEvent &event)
 {
 	glbin_settings.m_text_color = m_text_color_cmb->GetCurrentSelection();
-	if (m_frame)
-	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-				view->RefreshGL(39);
-		}
-	}
+	FluoRefresh(3, { gstNull });
 }
 
 //line width
@@ -1968,20 +1740,12 @@ void SettingDlg::OnLineWidthText(wxCommandEvent &event)
 {
 	wxString str = m_line_width_text->GetValue();
 	unsigned long ival;
-	if (str.ToULong(&ival))
-	{
-		m_line_width_sldr->ChangeValue(ival);
-		glbin_settings.m_line_width = ival;
-		if (m_frame)
-		{
-			for (int i = 0; i < m_frame->GetViewNum(); i++)
-			{
-				RenderCanvas* view = m_frame->GetView(i);
-				if (view)
-					view->RefreshGL(39);
-			}
-		}
-	}
+	if (!str.ToULong(&ival))
+		return;
+
+	m_line_width_sldr->ChangeValue(ival);
+	glbin_settings.m_line_width = ival;
+	FluoRefresh(3, { gstNull });
 }
 
 //paint history depth
@@ -1997,11 +1761,11 @@ void SettingDlg::OnPaintHistDepthEdit(wxCommandEvent &event)
 {
 	wxString str = m_paint_hist_depth_text->GetValue();
 	unsigned long ival;
-	str.ToULong(&ival);
+	if (!str.ToULong(&ival))
+		return;
 	m_paint_hist_depth_sldr->ChangeValue(ival);
 	glbin_brush_def.m_paint_hist_depth = ival;
-	if (m_frame)
-		m_frame->SetTextureUndos();
+	flvr::Texture::mask_undo_num_ = (size_t)(ival);
 }
 
 //pencil distance

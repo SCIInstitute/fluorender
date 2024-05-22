@@ -1390,29 +1390,8 @@ public:
 	bool CheckNames(wxString &str);
 
 	//wavelength to color
-	void SetWavelengthColor(int c1, int c2, int c3, int c4);
 	fluo::Color GetWavelengthColor(double wavelength);
 	fluo::Color GetColor(int);
-
-	//override voxel size
-	void SetOverrideVox(bool val)
-	{ m_override_vox = val; }
-	bool GetOverrideVox()
-	{ return m_override_vox; }
-
-	//flags for pvxml settings
-	void SetPvxmlFlipX(bool flip) {m_pvxml_flip_x = flip;}
-	bool GetPvxmlFlipX() {return m_pvxml_flip_x;}
-	void SetPvxmlFlipY(bool flip) {m_pvxml_flip_y = flip;}
-	bool GetPvxmlFlipY() {return m_pvxml_flip_y;}
-	void SetPvxmlSeqType(int value) { m_pvxml_seq_type = value; }
-	int GetPvxmlSeqType() { return m_pvxml_seq_type; }
-
-public:
-	bool m_vol_test_wiref;		//wireframe mode
-
-	//wavelength to color table
-	fluo::Color m_vol_wav[4];
 
 private:
 	MainFrame* m_frame;
@@ -1442,12 +1421,6 @@ private:
 	//project path
 	wxString m_prj_path;
 	wxString m_prj_file;
-	//override voxel size
-	bool m_override_vox;
-	//flgs for pvxml flipping
-	bool m_pvxml_flip_x;
-	bool m_pvxml_flip_y;
-	int m_pvxml_seq_type;
 
 	//fp convert
 	bool m_fp_convert;

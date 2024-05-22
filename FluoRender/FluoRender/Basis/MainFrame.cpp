@@ -833,18 +833,6 @@ MainFrame::MainFrame(
 		GETSLASH() + "FreeSans.ttf";
 	glbin_text_tex_manager.load_face(font_file.ToStdString());
 	glbin_text_tex_manager.SetSize(glbin_settings.m_text_size);
-	//volume
-	glbin_data_manager.m_vol_test_wiref = glbin_settings.m_test_wiref;
-	int c1 = glbin_settings.m_wav_color1;
-	int c2 = glbin_settings.m_wav_color2;
-	int c3 = glbin_settings.m_wav_color3;
-	int c4 = glbin_settings.m_wav_color4;
-	if (c1 && c2 && c3 && c4)
-		glbin_data_manager.SetWavelengthColor(c1, c2, c3, c4);
-	glbin_data_manager.SetOverrideVox(glbin_settings.m_override_vox);
-	glbin_data_manager.SetPvxmlFlipX(glbin_settings.m_pvxml_flip_x);
-	glbin_data_manager.SetPvxmlFlipY(glbin_settings.m_pvxml_flip_y);
-	glbin_data_manager.SetPvxmlSeqType(glbin_settings.m_pvxml_seq_type);
 	//hologram
 	if (glbin_settings.m_hologram_mode == 1)
 		m_vrv_list[0]->m_canvas->InitOpenVR();
@@ -2839,8 +2827,8 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 
 	wxString str;
 
+	fconfig.SetPath("/settings");
 	//save streaming mode
-	fconfig.SetPath("/memory settings");
 	fconfig.Write("mouse int", glbin_settings.m_mouse_int);
 	fconfig.Write("mem swap", glbin_settings.m_mem_swap);
 	fconfig.Write("graphics mem", glbin_settings.m_graphics_mem);
@@ -2849,6 +2837,8 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 	fconfig.Write("up time", glbin_settings.m_up_time);
 	fconfig.Write("update order", glbin_settings.m_update_order);
 	fconfig.Write("inf loop", glbin_settings.m_inf_loop);
+	//save peeling layers
+	fconfig.Write("peeling layers", glbin_settings.m_peeling_layers);
 
 	//save data list
 	//volume
@@ -3243,7 +3233,6 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 			fconfig.Write("backgroundcolor", str);
 			fconfig.Write("drawtype", canvas->GetDrawType());
 			fconfig.Write("volmethod", canvas->GetVolMethod());
-			fconfig.Write("peellayers", canvas->GetPeelingLayers());
 			fconfig.Write("fog", canvas->GetFog());
 			fconfig.Write("fogintensity", (double)canvas->GetFogIntensity());
 			fconfig.Write("draw_camctr", canvas->m_draw_camctr);
@@ -3528,37 +3517,35 @@ void MainFrame::OpenProject(wxString& filename)
 		"Reading project file. Please wait.",
 		100, this, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
+	bool bval;
+	double dval;
+	int ival;
 	//read streaming mode
-	if (fconfig.Exists("/memory settings"))
+	if (fconfig.Exists("/settings"))
 	{
-		fconfig.SetPath("/memory settings");
-		bool mouse_int = true;
-		fconfig.Read("mouse int", &mouse_int);
-		bool mem_swap = false;
-		fconfig.Read("mem swap", &mem_swap);
-		double graphics_mem = 1000.0;
-		fconfig.Read("graphics mem", &graphics_mem);
-		double large_data_size = 1000.0;
-		fconfig.Read("large data size", &large_data_size);
-		int force_brick_size = 128;
-		fconfig.Read("force brick size", &force_brick_size);
-		int up_time = 100;
-		fconfig.Read("up time", &up_time);
-		int update_order = 0;
-		fconfig.Read("update order", &update_order);
-		bool inf_loop = false;
-		fconfig.Read("inf loop", &inf_loop);
-
-		glbin_settings.m_mouse_int = mouse_int;
-		glbin_settings.m_mem_swap = mem_swap;
-		glbin_settings.m_graphics_mem = graphics_mem;
-		glbin_settings.m_large_data_size = large_data_size;
-		glbin_settings.m_force_brick_size = force_brick_size;
-		glbin_settings.m_up_time = up_time;
-		glbin_settings.m_update_order = update_order;
-		glbin_settings.m_inf_loop = inf_loop;
+		fconfig.SetPath("/settings");
+		fconfig.Read("mouse int", &bval, true);
+		glbin_settings.m_mouse_int = bval;
+		fconfig.Read("mem swap", &bval, false);
+		glbin_settings.m_mem_swap = bval;
+		fconfig.Read("graphics mem", &dval, 1000.0);
+		glbin_settings.m_graphics_mem = dval;
+		fconfig.Read("large data size", &dval, 1000.0);
+		glbin_settings.m_large_data_size = dval;
+		fconfig.Read("force brick size", &ival, 128);
+		glbin_settings.m_force_brick_size = ival;
+		fconfig.Read("up time", &ival, 100);
+		glbin_settings.m_up_time = ival;
+		fconfig.Read("update order", &ival, 0);
+		glbin_settings.m_update_order = ival;
+		fconfig.Read("inf loop", &bval, false);
+		glbin_settings.m_inf_loop = bval;
+		//graphics memory setting may have changed
 		glbin_settings.GetMemorySettings();
-		//m_setting_dlg->UpdateUI();
+		//peeling layers
+		fconfig.Read("peeling layers", &ival, 1);
+		glbin_settings.m_peeling_layers = ival;
+		UpdateProps({ gstMouseInt, gstStreamEnable, gstPeelNum });
 	}
 
 	//read data list
@@ -4086,9 +4073,6 @@ void MainFrame::OpenProject(wxString& filename)
 
 			canvas->ClearAll();
 
-			if (i==0 && m_setting_dlg && glbin_settings.m_test_speed)
-				canvas->m_test_speed = true;
-
 			wxString str;
 			//old
 			//volumes
@@ -4332,9 +4316,6 @@ void MainFrame::OpenProject(wxString& filename)
 				int volmethod;
 				if (fconfig.Read("volmethod", &volmethod))
 					canvas->SetVolMethod(volmethod);
-				int peellayers;
-				if (fconfig.Read("peellayers", &peellayers))
-					canvas->SetPeelingLayers(peellayers);
 				bool fog;
 				if (fconfig.Read("fog", &fog))
 					canvas->SetFog(fog);
@@ -5110,12 +5091,6 @@ void MainFrame::ShowScriptBreakDlg(bool show)
 	m_aui_mgr.Update();
 	if (show)
 		m_script_break_dlg->SetFocus();
-}
-
-void MainFrame::SetTextureUndos()
-{
-	if (m_setting_dlg)
-		flvr::Texture::mask_undo_num_ = (size_t)(glbin_brush_def.m_paint_hist_depth);
 }
 
 //quit option

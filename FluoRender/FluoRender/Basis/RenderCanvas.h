@@ -406,9 +406,6 @@ public:
 	fluo::Color GetBackgroundColor();
 	fluo::Color GetTextColor();
 	void SetBackgroundColor(fluo::Color &color);
-	void SetGradBg(bool val) { m_grad_bg = val; }
-	void SetPointVolumeMode(int val) { m_point_volume_mode = val; }
-	void SetRulerUseTransf(bool val) { m_ruler_use_transf = val; }
 
 	//disply modes
 	int GetDrawType() { return m_draw_type; }
@@ -418,12 +415,6 @@ public:
 	bool GetFog() { return m_use_fog; }
 	void SetFogIntensity(double i) { m_fog_intensity = i; }
 	double GetFogIntensity() { return m_fog_intensity; }
-	void SetPeelingLayers(int n) { m_peeling_layers = n; }
-	int GetPeelingLayers() { return m_peeling_layers; }
-	void SetBlendSlices(bool val) { m_blend_slices = val; }
-	bool GetBlendSlices() { return m_blend_slices; }
-	void SetAdaptive(bool val) { m_adaptive = val; }
-	bool GetAdaptive() { return m_adaptive; }
 
 	//movie capture
 	void Set3DRotCapture(double start_angle,
@@ -589,21 +580,6 @@ public:
 	double GetEnlargeScale()
 	{
 		return m_enlarge_scale;
-	}
-
-	//hologram mode
-	//0: disabled; 1: stereograph; 2: looking glass;
-	void SetHologramMode(int val)
-	{
-		m_hologram_mode = val;
-	}
-	void SetSBS(bool bval)
-	{
-		m_enable_sbs = bval;
-	}
-	void SetEyeDist(double dval)
-	{
-		m_vr_eye_offset = dval / 2.0;
 	}
 
 	//read pixels
@@ -834,14 +810,10 @@ public:
 	int m_draw_info;
 	bool m_load_update;
 	bool m_draw_frame;
-	bool m_test_speed;
 	bool m_draw_clip;
 	bool m_draw_legend;
 	bool m_draw_colormap;
 	bool m_mouse_focus;
-	bool m_test_wiref;
-	bool m_draw_bounds;
-	bool m_draw_grid;
 	bool m_draw_rulers;
 	//current volume
 	VolumeData *m_cur_vol;
@@ -872,10 +844,6 @@ public:
 	bool m_update_rot_ctr;//rot center needs update
 	double m_pin_pick_thresh;//ray casting threshold value
 	fluo::Point m_pin_ctr;//the center point for view rotation
-	//mode in determining depth of volume
-	int m_point_volume_mode;  //0: use view plane; 1: use max value; 2: use accumulated value
-							  //ruler use volume transfer function
-	bool m_ruler_use_transf;
 	//linked rotation
 	static bool m_linked_rot;
 	static RenderCanvas* m_master_linked_view;
@@ -918,7 +886,6 @@ private:
 	//bg color
 	fluo::Color m_bg_color;
 	fluo::Color m_bg_color_inv;
-	bool m_grad_bg;
 	//frustrum
 	double m_aov;
 	double m_near_clip;
@@ -950,7 +917,6 @@ private:
 	bool m_force_clear;
 	bool m_interactive;
 	bool m_clear_buffer;
-	bool m_adaptive;
 	int m_brush_state;  //sets the button state of the tree panel
 						//0-not set
 						//2-append
@@ -1032,8 +998,6 @@ private:
 	bool m_draw_all;
 	int m_draw_type;
 	int m_vol_method;
-	int m_peeling_layers;
-	bool m_blend_slices;
 
 	//fog
 	bool m_use_fog;
@@ -1168,12 +1132,9 @@ private:
 	bool m_full_screen;
 
 	//enable vr
-	int m_hologram_mode;//0: disabled; 1: stereograph; 2: looking glass;
-	bool m_lg_initiated;
-	bool m_enable_sbs;
 	bool m_use_openvr;
+	bool m_lg_initiated;
 	uint32_t m_vr_size[2];
-	double m_vr_eye_offset;
 	int m_vr_eye_idx;//0: left; 1: right
 #ifdef _WIN32
 	vr::IVRSystem *m_vr_system;
@@ -1182,8 +1143,6 @@ private:
 	bool m_control_connected;
 #endif
 #endif
-
-	//handle rulers
 
 	//focused slider
 	wxBasisSlider* m_focused_slider;

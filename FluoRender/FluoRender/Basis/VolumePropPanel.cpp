@@ -3109,9 +3109,8 @@ bool VolumePropPanel::SetSpacings()
 	str.ToDouble(&spcz);
 	if (spcz<=0.0)
 		return false;
-	bool override_vox = glbin_settings.m_override_vox;
 
-	if ((m_sync_group || override_vox) && m_group)
+	if ((m_sync_group || glbin_settings.m_override_vox) && m_group)
 	{
 		for (int i = 0; i < m_group->GetVolumeNum(); i++)
 		{

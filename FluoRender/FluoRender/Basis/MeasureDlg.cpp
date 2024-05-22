@@ -1327,7 +1327,7 @@ void MeasureDlg::GetSettings(RenderCanvas* vrv)
 			m_toolbar2->ToggleTool(ID_MagnetBtn, true);
 	}
 
-	switch (m_view->m_point_volume_mode)
+	switch (glbin_settings.m_point_volume_mode)
 	{
 	case 0:
 		m_view_plane_rd->SetValue(true);
@@ -1346,7 +1346,7 @@ void MeasureDlg::GetSettings(RenderCanvas* vrv)
 		break;
 	}
 
-	m_use_transfer_chk->SetValue(m_view->m_ruler_use_transf);
+	m_use_transfer_chk->SetValue(glbin_settings.m_ruler_use_transf);
 	//ruler exports df/f
 	m_df_f_chk->SetValue(glbin_settings.m_ruler_df_f);
 	glbin_ruler_handler.SetBackground(glbin_settings.m_ruler_df_f);
@@ -2199,7 +2199,6 @@ void MeasureDlg::OnIntensityMethodCheck(wxCommandEvent& event)
 		mode = 2;
 		break;
 	}
-	m_view->m_point_volume_mode = mode;
 	glbin_settings.m_point_volume_mode = mode;
 }
 
@@ -2209,7 +2208,6 @@ void MeasureDlg::OnUseTransferCheck(wxCommandEvent& event)
 		return;
 
 	bool use_transfer = m_use_transfer_chk->GetValue();
-	m_view->m_ruler_use_transf = use_transfer;
 	glbin_settings.m_ruler_use_transf = use_transfer;
 }
 

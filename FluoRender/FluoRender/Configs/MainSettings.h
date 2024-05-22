@@ -160,7 +160,8 @@ public:
 	int m_ruler_size_thresh;//grow ruler size thresh
 	double m_pencil_dist;	//distance between two points for pencil tool
 	int m_point_volume_mode;//point volume mode
-
+							//0: use view plane; 1: use max value; 2: use accumulated value
+	
 	bool m_mem_swap;		//enable memory swap
 	double m_graphics_mem;	//in MB
 							//it's the user setting

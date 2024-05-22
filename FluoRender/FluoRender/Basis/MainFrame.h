@@ -305,9 +305,6 @@ public:
 	void ShowMachineLearningDlg();
 	void ShowScriptBreakDlg(bool show=true);
 
-	//tex renderer settings
-	void SetTextureUndos();
-
 	//quit option
 	void OnQuit(wxCommandEvent& event);
 	//show info

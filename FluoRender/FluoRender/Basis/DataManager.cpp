@@ -5134,17 +5134,9 @@ void MeshGroup::RandomizeColor()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 DataManager::DataManager() :
-	m_vol_test_wiref(false),
 	m_use_defaults(true),
-	m_override_vox(true),
 	m_ser_num(0)
 {
-	//wavelength to color table
-	m_vol_wav[0] = fluo::Color(1.0, 1.0, 1.0);
-	m_vol_wav[1] = fluo::Color(1.0, 1.0, 1.0);
-	m_vol_wav[2] = fluo::Color(1.0, 1.0, 1.0);
-	m_vol_wav[3] = fluo::Color(1.0, 1.0, 1.0);
-
 	//slice sequence
 	m_sliceSequence = false;
 	//read channels
@@ -5211,7 +5203,7 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 		if (m_use_defaults)
 		{
 			//props not managed by ml
-			vd->SetWireframe(m_vol_test_wiref);
+			vd->SetWireframe(glbin_settings.m_test_wiref);
 			vd->SetSampleRate(glbin_vol_def.m_sample_rate);
 			if (!vd->GetSpcFromFile())
 				vd->SetBaseSpacings(
@@ -5224,44 +5216,6 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 	else if (m_use_defaults)
 	{
 		glbin_vol_def.Apply(vd);
-		//vd->SetWireframe(m_vol_test_wiref);
-		//vd->SetGamma(glbin_vol_def.m_gamma);
-		//vd->SetBoundary(m_vol_exb);
-		//vd->SetSaturation(m_vol_of1);
-		//vd->SetLeftThresh(m_vol_lth);
-		//vd->SetRightThresh(m_vol_hth);
-		//vd->SetAlpha(m_vol_alf);
-		//vd->SetSampleRate(m_vol_spr);
-		//double amb, diff, spec, shine;
-		//vd->GetMaterial(amb, diff, spec, shine);
-		//vd->SetMaterial(m_vol_lsh, diff, spec, m_vol_hsh);
-		//if (!vd->GetSpcFromFile())
-		//	vd->SetBaseSpacings(m_vol_xsp, m_vol_ysp, m_vol_zsp);
-		//vd->SetColormapMode(m_vol_cmm);
-		//vd->SetColormapInv(m_vol_cmi?-1.0:1.0);
-		//vd->SetColormap(m_vol_cmp);
-		//vd->SetColormapProj(m_vol_cmj);
-		//vd->SetColormapValues(m_vol_lcm, m_vol_hcm);
-
-		//vd->SetAlphaEnable(m_vol_eap);
-		//int resx, resy, resz;
-		//vd->GetResolution(resx, resy, resz);
-		//if (resz > 1)
-		//	vd->SetShadingEnable(m_vol_esh);
-		//else
-		//	vd->SetShadingEnable(false);
-		//vd->SetMode(m_vol_mip?1:0);
-		//vd->SetAlphaPower(m_vol_trp ? 2.0 : 1.0);
-		//vd->SetNR(m_vol_nrd);
-		//vd->SetLabelMode(m_vol_com);
-		////interpolation
-		//vd->SetInterpolate(m_vol_interp);
-		////inversion
-		//vd->SetInvert(m_vol_inv);
-
-		////shadow
-		//vd->SetShadowEnable(m_vol_shw);
-		//vd->SetShadowIntensity(m_vol_swi);
 	}
 }
 
@@ -5382,9 +5336,9 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 			else if (type == LOAD_TYPE_PVXML)
 			{
 				reader = new PVXMLReader();
-				((PVXMLReader*)reader)->SetFlipX(m_pvxml_flip_x);
-				((PVXMLReader*)reader)->SetFlipY(m_pvxml_flip_y);
-				((PVXMLReader*)reader)->SetSeqType(m_pvxml_seq_type);
+				((PVXMLReader*)reader)->SetFlipX(glbin_settings.m_pvxml_flip_x);
+				((PVXMLReader*)reader)->SetFlipY(glbin_settings.m_pvxml_flip_y);
+				((PVXMLReader*)reader)->SetSeqType(glbin_settings.m_pvxml_seq_type);
 			}
 			else if (type == LOAD_TYPE_BRKXML)
 				reader = new BRKXMLReader();
@@ -5768,7 +5722,7 @@ void DataManager::AddVolumeData(VolumeData* vd)
 	if (i>1)
 		vd->SetName(new_name);
 
-	if (m_override_vox)
+	if (glbin_settings.m_override_vox)
 	{
 		if (m_vd_list.size() > 0)
 		{
@@ -5956,26 +5910,18 @@ fluo::Color DataManager::GetColor(int c)
 	return result;
 }
 
-void DataManager::SetWavelengthColor(int c1, int c2, int c3, int c4)
-{
-	m_vol_wav[0] = GetColor(c1);
-	m_vol_wav[1] = GetColor(c2);
-	m_vol_wav[2] = GetColor(c3);
-	m_vol_wav[3] = GetColor(c4);
-}
-
 fluo::Color DataManager::GetWavelengthColor(double wavelength)
 {
 	if (wavelength < 340.0)
 		return fluo::Color(1.0, 1.0, 1.0);
 	else if (wavelength < 440.0)
-		return m_vol_wav[0];
+		return GetColor(glbin_settings.m_wav_color1);
 	else if (wavelength < 500.0)
-		return m_vol_wav[1];
+		return GetColor(glbin_settings.m_wav_color2);
 	else if (wavelength < 600.0)
-		return m_vol_wav[2];
+		return GetColor(glbin_settings.m_wav_color3);
 	else if (wavelength < 750.0)
-		return m_vol_wav[3];
+		return GetColor(glbin_settings.m_wav_color4);
 	else
 		return fluo::Color(1.0, 1.0, 1.0);
 }

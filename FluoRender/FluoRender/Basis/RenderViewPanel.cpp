@@ -2036,19 +2036,6 @@ void RenderViewPanel::LoadSettings()
 {
 	glbin_view_def.Apply(m_canvas);
 	m_rot_slider = glbin_view_def.m_rot_slider;
-	m_canvas->m_test_speed = glbin_settings.m_test_speed;
-	m_canvas->m_test_wiref = glbin_settings.m_test_wiref;
-	m_canvas->m_draw_bounds = glbin_settings.m_test_wiref;
-	m_canvas->m_draw_grid = glbin_settings.m_test_wiref;
-	m_canvas->SetPeelingLayers(glbin_settings.m_peeling_layers);
-	m_canvas->SetBlendSlices(glbin_settings.m_micro_blend);
-	m_canvas->SetAdaptive(glbin_settings.m_mouse_int);
-	m_canvas->SetGradBg(glbin_settings.m_grad_bg);
-	m_canvas->SetPointVolumeMode(glbin_settings.m_point_volume_mode);
-	m_canvas->SetRulerUseTransf(glbin_settings.m_ruler_use_transf);
-	m_canvas->SetHologramMode(glbin_settings.m_hologram_mode);
-	m_canvas->SetSBS(glbin_settings.m_sbs);
-	m_canvas->SetEyeDist(glbin_settings.m_eye_dist);
 
 	FluoRefresh(2, {}, { m_frame->GetView(m_canvas) });
 }

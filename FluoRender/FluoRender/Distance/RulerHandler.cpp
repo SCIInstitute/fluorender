@@ -565,7 +565,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 	if (!m_view)
 		return;
 
-	int point_volume_mode = m_view->m_point_volume_mode;
+	int point_volume_mode = glbin_settings.m_point_volume_mode;
 	size_t rwt = m_view->m_tseq_cur_num;
 	if (m_ruler) m_ruler->SetWorkTime(rwt);
 	//DBGPRINT(L"Ruler:%d\n", m_ruler);
@@ -628,7 +628,8 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 		{
 			m_vp.SetVolumeData(m_view->m_cur_vol);
 			double t = m_vp.GetPointVolume(mx, my,
-				point_volume_mode, m_view->m_ruler_use_transf, 0.5,
+				point_volume_mode,
+				glbin_settings.m_ruler_use_transf, 0.5,
 				p, ip);
 			if (t <= 0.0)
 			{
@@ -732,12 +733,13 @@ bool RulerHandler::MoveRuler(int mx, int my)
 	int interp = m_ruler->GetInterp();
 
 	fluo::Point point, ip, tmp;
-	if (m_view->m_point_volume_mode)
+	if (glbin_settings.m_point_volume_mode)
 	{
 		m_vp.SetVolumeData(m_view->m_cur_vol);
 		double t = m_vp.GetPointVolume(mx, my,
-			m_view->m_point_volume_mode, m_view->m_ruler_use_transf, 0.5,
-			point, ip);
+			glbin_settings.m_point_volume_mode,
+			glbin_settings.m_ruler_use_transf,
+			0.5, point, ip);
 		if (t <= 0.0)
 		{
 			tmp = m_point->GetPoint(rwt, interp);
@@ -774,12 +776,13 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 	int interp = m_ruler->GetInterp();
 
 	fluo::Point point, ip, tmp;
-	if (m_view->m_point_volume_mode)
+	if (glbin_settings.m_point_volume_mode)
 	{
 		m_vp.SetVolumeData(m_view->m_cur_vol);
 		double t = m_vp.GetPointVolume(mx, my,
-			m_view->m_point_volume_mode, m_view->m_ruler_use_transf, 0.5,
-			point, ip);
+			glbin_settings.m_point_volume_mode,
+			glbin_settings.m_ruler_use_transf,
+			0.5, point, ip);
 		if (t <= 0.0)
 		{
 			tmp = m_point->GetPoint(rwt, interp);
@@ -1011,7 +1014,7 @@ void RulerHandler::AddMagStrokePoint(int mx, int my)
 	if (!m_view)
 		return;
 
-	int point_volume_mode = m_view->m_point_volume_mode;
+	int point_volume_mode = glbin_settings.m_point_volume_mode;
 	fluo::Point p, ip, planep;
 	fluo::Point* pplanep = 0;
 
@@ -1019,8 +1022,9 @@ void RulerHandler::AddMagStrokePoint(int mx, int my)
 	{
 		m_vp.SetVolumeData(m_view->m_cur_vol);
 		double t = m_vp.GetPointVolume(mx, my,
-			point_volume_mode, m_view->m_ruler_use_transf, 0.5,
-			p, ip);
+			point_volume_mode,
+			glbin_settings.m_ruler_use_transf,
+			0.5, p, ip);
 		if (t <= 0.0)
 		{
 			t = m_vp.GetPointPlane(mx, my, pplanep, true, p);

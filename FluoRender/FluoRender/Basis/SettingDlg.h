@@ -261,7 +261,6 @@ private:
 	//event handling
 	void OnSave(wxCommandEvent &event);
 	void OnClose(wxCommandEvent &event);
-	void OnShow(wxShowEvent &event);
 
 	//projec save
 	void OnProjectSaveCheck(wxCommandEvent &event);

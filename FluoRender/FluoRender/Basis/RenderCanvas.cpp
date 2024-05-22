@@ -112,12 +112,10 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_load_update(false),
 	m_retain_finalbuffer(false),
 	m_draw_frame(false),
-	m_test_speed(false),
 	m_draw_clip(false),
 	m_draw_legend(false),
 	m_draw_colormap(false),
 	m_mouse_focus(false),
-	m_test_wiref(false),
 	m_draw_rulers(true),
 	//current volume
 	m_cur_vol(0),
@@ -140,10 +138,6 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_scale_factor_saved(1.0),
 	//scale mode
 	m_scale_mode(0),
-	//mode in determining depth of volume
-	m_point_volume_mode(0),
-	//ruler use volume transfer function
-	m_ruler_use_transf(false),
 	//private
 	m_frame(frame),
 	m_renderview_panel(parent),
@@ -160,7 +154,6 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	//bg color
 	m_bg_color(0.0, 0.0, 0.0),
 	m_bg_color_inv(1.0, 1.0, 1.0),
-	m_grad_bg(false),
 	//frustrum
 	m_aov(15.0),
 	m_near_clip(0.1),
@@ -175,7 +168,6 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_force_clear(false),
 	m_interactive(false),
 	m_clear_buffer(false),
-	m_adaptive(true),
 	m_brush_state(0),
 	m_grow_on(false),
 	//resizing
@@ -229,13 +221,9 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	old_mouse_X(-1), old_mouse_Y(-1),
 	prv_mouse_X(-1), prv_mouse_Y(-1),
 	//draw controls
-	m_draw_bounds(false),
 	m_draw_all(true),
-	m_draw_grid(false),
 	m_draw_type(1),
 	m_vol_method(VOL_METHOD_SEQ),
-	m_peeling_layers(1),
-	m_blend_slices(false),
 	//fog
 	m_use_fog(true),
 	m_fog_intensity(0.0),
@@ -320,11 +308,8 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_enlarge(false),
 	m_enlarge_scale(1.0),
 	//vr settings
-	m_hologram_mode(0),
 	m_lg_initiated(false),
-	m_enable_sbs(false),
 	m_use_openvr(false),
-	m_vr_eye_offset(6.0),
 	m_vr_eye_idx(0)
 #if defined(_WIN32) && defined(USE_XINPUT)
 	,
@@ -491,7 +476,6 @@ void RenderCanvas::InitLookingGlass()
 	bool bval = glbin_lg_renderer.Init();
 	if (!bval)
 	{
-		m_hologram_mode = 0;
 		glbin_settings.m_hologram_mode = 0;
 		return;
 	}
@@ -535,15 +519,15 @@ RenderCanvas::~RenderCanvas()
 		UnloadWintab();
 	}
 
-	if (m_hologram_mode)
+	if (glbin_settings.m_hologram_mode)
 	{
-		if (m_hologram_mode == 1 && m_use_openvr)
+		if (glbin_settings.m_hologram_mode == 1 && m_use_openvr)
 		{
 			//vr shutdown
 			vr::VR_Shutdown();
 			//UnloadVR();
 		}
-		if (m_hologram_mode == 2)
+		if (glbin_settings.m_hologram_mode == 2)
 		{
 			glbin_lg_renderer.Close();
 		}
@@ -663,12 +647,7 @@ void RenderCanvas::Init()
 			flvr::TextureRenderer::gl_context_ = ctx;
 #endif
 		glbin_settings.GetMemorySettings();
-		if (m_frame)
-		{
-			m_frame->SetTextureUndos();
-			//m_frame->GetSettingDlg()->UpdateTextureSize();
-		}
-		//glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
+		flvr::Texture::mask_undo_num_ = (size_t)(glbin_brush_def.m_paint_hist_depth);
 		glEnable(GL_MULTISAMPLE);
 
 		m_initialized = true;
@@ -780,19 +759,19 @@ void RenderCanvas::HandleCamera(bool vr)
 		eye += center;
 	}
 
-	if (vr && m_hologram_mode)
+	if (vr && glbin_settings.m_hologram_mode)
 	{
 		fluo::Vector side = GetSide();
-		if (m_hologram_mode == 1)
+		if (glbin_settings.m_hologram_mode == 1)
 		{
-			side *= (m_vr_eye_idx ? 1.0 : -1.0) * m_vr_eye_offset / 2.0;
+			side *= (m_vr_eye_idx ? 1.0 : -1.0) * glbin_settings.m_eye_dist / 2.0;
 			glm::vec3 offset(side.x(), side.y(), side.z());
 			m_mv_mat = glm::lookAt(
 				eye + offset,
 				center + offset,
 				up);
 		}
-		else if (m_hologram_mode == 2)
+		else if (glbin_settings.m_hologram_mode == 2)
 		{
 			double f = glbin_lg_renderer.GetOffset();
 			//linear shift
@@ -947,7 +926,7 @@ void RenderCanvas::Draw()
 	glViewport(0, 0, (GLint)nx, (GLint)ny);
 
 	//gradient background
-	if (m_grad_bg)
+	if (glbin_settings.m_grad_bg)
 		DrawGradBg();
 
 	//projection
@@ -963,7 +942,7 @@ void RenderCanvas::Draw()
 		if (m_use_fog)
 			CalcFogRange();
 
-		if (m_draw_grid)
+		if (glbin_settings.m_test_wiref)
 			DrawGrid();
 
 		if (m_draw_clip)
@@ -980,7 +959,7 @@ void RenderCanvas::Draw()
 		if (m_draw_clip)
 			DrawClippingPlanes(FRONT_FACE);
 
-		if (m_draw_bounds)
+		if (glbin_settings.m_test_wiref)
 			DrawBounds();
 
 		if (m_draw_annotations)
@@ -1020,7 +999,7 @@ void RenderCanvas::DrawDP()
 	glViewport(0, 0, (GLint)nx, (GLint)ny);
 
 	//gradient background
-	if (m_grad_bg)
+	if (glbin_settings.m_grad_bg)
 		DrawGradBg();
 
 	//projection
@@ -1037,7 +1016,7 @@ void RenderCanvas::DrawDP()
 		if (m_use_fog)
 			CalcFogRange();
 
-		if (m_draw_grid)
+		if (glbin_settings.m_test_wiref)
 			DrawGrid();
 
 		if (m_draw_clip)
@@ -1050,7 +1029,7 @@ void RenderCanvas::DrawDP()
 		m_use_fog = false;
 
 		//draw depth values of each layer into the buffers
-		for (i = 0; i<m_peeling_layers; i++)
+		for (i = 0; i<glbin_settings.m_peeling_layers; i++)
 		{
 			name = "peel buffer" + std::to_string(i);
 			peel_buffer =
@@ -1092,7 +1071,7 @@ void RenderCanvas::DrawDP()
 		m_use_fog = use_fog_save;
 
 		//draw depth peeling
-		for (i = m_peeling_layers; i >= 0; i--)
+		for (i = glbin_settings.m_peeling_layers; i >= 0; i--)
 		{
 			if (i == 0)
 			{
@@ -1111,9 +1090,9 @@ void RenderCanvas::DrawDP()
 			}
 			else
 			{
-				if (m_peeling_layers == 1)
+				if (glbin_settings.m_peeling_layers == 1)
 				{
-					//i == m_peeling_layers == 1
+					//i == glbin_settings.m_peeling_layers == 1
 					glActiveTexture(GL_TEXTURE15);
 					name = "peel buffer" + std::to_string(0);
 					peel_buffer =
@@ -1122,7 +1101,7 @@ void RenderCanvas::DrawDP()
 						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 					glActiveTexture(GL_TEXTURE0);
 				}
-				else if (m_peeling_layers == 2)
+				else if (glbin_settings.m_peeling_layers == 2)
 				{
 					glActiveTexture(GL_TEXTURE14);
 					name = "peel buffer" + std::to_string(0);
@@ -1138,9 +1117,9 @@ void RenderCanvas::DrawDP()
 						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 					glActiveTexture(GL_TEXTURE0);
 				}
-				else if (m_peeling_layers > 2)
+				else if (glbin_settings.m_peeling_layers > 2)
 				{
-					if (i == m_peeling_layers)
+					if (i == glbin_settings.m_peeling_layers)
 					{
 						glActiveTexture(GL_TEXTURE14);
 						name = "peel buffer" + std::to_string(i-2);
@@ -1197,19 +1176,19 @@ void RenderCanvas::DrawDP()
 				}
 
 				//draw volumes
-				if (m_peeling_layers == 1)
-					//i == m_peeling_layers == 1
+				if (glbin_settings.m_peeling_layers == 1)
+					//i == glbin_settings.m_peeling_layers == 1
 					DrawVolumes(5);//draw volume after 15
-				else if (m_peeling_layers == 2)
+				else if (glbin_settings.m_peeling_layers == 2)
 				{
 					if (i == 2)
 						DrawVolumes(2);//draw volume after 15
 					else if (i == 1)
 						DrawVolumes(4);//draw volume after 14 and before 15
 				}
-				else if (m_peeling_layers > 2)
+				else if (glbin_settings.m_peeling_layers > 2)
 				{
-					if (i == m_peeling_layers)
+					if (i == glbin_settings.m_peeling_layers)
 						DrawVolumes(2);//draw volume after 15
 					else if (i == 1)
 						DrawVolumes(4);//draw volume after 14 and before 15
@@ -1224,19 +1203,19 @@ void RenderCanvas::DrawDP()
 				glBlendEquation(GL_FUNC_ADD);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-				if (m_peeling_layers == 1)
-					//i == m_peeling_layers == 1
+				if (glbin_settings.m_peeling_layers == 1)
+					//i == glbin_settings.m_peeling_layers == 1
 					DrawMeshes(5);//draw mesh at 15
-				else if (m_peeling_layers == 2)
+				else if (glbin_settings.m_peeling_layers == 2)
 				{
 					if (i == 2)
 						DrawMeshes(2);//draw mesh after 14
 					else if (i == 1)
 						DrawMeshes(4);//draw mesh before 15
 				}
-				else if (m_peeling_layers > 2)
+				else if (glbin_settings.m_peeling_layers > 2)
 				{
-					if (i == m_peeling_layers)
+					if (i == glbin_settings.m_peeling_layers)
 						DrawMeshes(2);//draw mesh after 14
 					else if (i == 1)
 						DrawMeshes(4);//draw mesh before 15
@@ -1262,7 +1241,7 @@ void RenderCanvas::DrawDP()
 		if (m_draw_clip)
 			DrawClippingPlanes(FRONT_FACE);
 
-		if (m_draw_bounds)
+		if (glbin_settings.m_test_wiref)
 			DrawBounds();
 
 		if (m_draw_annotations)
@@ -2323,7 +2302,8 @@ void RenderCanvas::GetRenderSize(int &nx, int &ny)
 	{
 		nx = GetGLSize().x;
 		ny = GetGLSize().y;
-		if (m_hologram_mode == 1 && !m_enable_sbs)
+		if (glbin_settings.m_hologram_mode == 1 &&
+			!glbin_settings.m_sbs)
 			nx /= 2;
 	}
 }
@@ -2360,7 +2340,7 @@ void RenderCanvas::PrepVRBuffer()
 
 void RenderCanvas::BindRenderBuffer()
 {
-	if (m_hologram_mode == 1)
+	if (glbin_settings.m_hologram_mode == 1)
 	{
 		std::string vr_buf_name;
 		if (m_vr_eye_idx)
@@ -2373,7 +2353,7 @@ void RenderCanvas::BindRenderBuffer()
 		if (vr_buffer)
 			vr_buffer->bind();
 	}
-	else if (m_hologram_mode == 2)
+	else if (glbin_settings.m_hologram_mode == 2)
 	{
 		int nx, ny;
 		GetRenderSize(nx, ny);
@@ -2398,7 +2378,7 @@ void RenderCanvas::DrawVRBuffer()
 	GetRenderSize(vr_x, vr_y);
 	gl_x = GetGLSize().x;
 	gl_y = GetGLSize().y;
-	if (m_enable_sbs)
+	if (glbin_settings.m_sbs)
 		vr_x /= 2;
 	int vp_y = std::round((double)gl_x * vr_y / vr_x / 2.0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -2649,7 +2629,7 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 		vd->SetViewport(vp);
 		vd->SetClearColor(clear_color);
 		vd->SetCurFramebuffer(m_cur_framebuffer);
-		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
+		vd->Draw(!m_persp, glbin_settings.m_mouse_int, m_interactive, m_scale_factor, Get121ScaleFactor());
 	}
 
 	if (vd->GetShadowEnable())
@@ -2863,7 +2843,7 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 		vd->SetViewport(vp);
 		vd->SetClearColor(clear_color);
 		vd->SetCurFramebuffer(m_cur_framebuffer);
-		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
+		vd->Draw(!m_persp, glbin_settings.m_mouse_int, m_interactive, m_scale_factor, Get121ScaleFactor());
 		//restore
 		if (color_mode == 0)
 			vd->SetColormapProj(saved_colormap_proj);
@@ -3100,7 +3080,7 @@ void RenderCanvas::DrawOLShading(VolumeData* vd)
 	vd->SetStreamMode(2);
 	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 	vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-	vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
+	vd->Draw(!m_persp, glbin_settings.m_mouse_int, m_interactive, m_scale_factor, Get121ScaleFactor());
 	vd->RestoreMode();
 	vd->SetColormapMode(colormode);
 	vd->SetAlphaEnable(alpha);
@@ -3366,7 +3346,7 @@ void RenderCanvas::DrawOLShadows(vector<VolumeData*> &vlist)
 		vd->SetViewport(vp);
 		vd->SetClearColor(clear_color);
 		vd->SetCurFramebuffer(m_cur_framebuffer);
-		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
+		vd->Draw(!m_persp, glbin_settings.m_mouse_int, m_interactive, m_scale_factor, Get121ScaleFactor());
 		//restore
 		vd->RestoreMode();
 		vd->SetMaskMode(msk_mode);
@@ -3399,7 +3379,7 @@ void RenderCanvas::DrawOLShadows(vector<VolumeData*> &vlist)
 		m_mvr->set_viewport(vp);
 		m_mvr->set_clear_color(clear_color);
 		m_mvr->set_cur_framebuffer(m_cur_framebuffer);
-		m_mvr->draw(m_test_wiref, m_adaptive, m_interactive, !m_persp, m_intp);
+		m_mvr->draw(glbin_settings.m_test_wiref, glbin_settings.m_mouse_int, m_interactive, !m_persp, m_intp);
 
 		for (i = 0; i<list.size(); i++)
 		{
@@ -3522,7 +3502,7 @@ void RenderCanvas::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	GLfloat zoom = m_scale_factor;
 	GLfloat sf121 = Get121ScaleFactor();
 
-	m_mvr->set_blend_slices(m_blend_slices);
+	m_mvr->set_blend_slices(glbin_settings.m_micro_blend);
 
 	int i;
 	m_mvr->clear_vr();
@@ -3593,7 +3573,7 @@ void RenderCanvas::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	m_mvr->set_viewport(vp);
 	m_mvr->set_clear_color(clear_color);
 	m_mvr->set_cur_framebuffer(m_cur_framebuffer);
-	m_mvr->draw(m_test_wiref, m_adaptive, m_interactive, !m_persp, m_intp);
+	m_mvr->draw(glbin_settings.m_test_wiref, glbin_settings.m_mouse_int, m_interactive, !m_persp, m_intp);
 
 	//draw shadows
 	DrawOLShadows(list);
@@ -3959,7 +3939,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	bool lg_changed = false;
 	m_retain_finalbuffer = false;
 
-	if (m_hologram_mode == 2)
+	if (glbin_settings.m_hologram_mode == 2)
 	{
 		//make sure all views are drawn for the quilt
 		if (glbin_lg_renderer.GetFinished())
@@ -4011,7 +3991,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	if (m_capture_rotat ||
 		m_capture_tsequ ||
 		m_capture_param ||
-		m_test_speed)
+		glbin_settings.m_test_speed)
 	{
 		refresh = true;
 		lg_changed = true;
@@ -5538,7 +5518,7 @@ void RenderCanvas::ForceDraw()
 	Init();
 	wxPaintDC dc(this);
 
-	if (m_hologram_mode == 2)
+	if (glbin_settings.m_hologram_mode == 2)
 		InitLookingGlass();
 
 	if (m_resize)
@@ -5557,12 +5537,12 @@ void RenderCanvas::ForceDraw()
 	m_drawing = true;
 	PreDraw();
 
-	if (m_hologram_mode == 1)
+	if (glbin_settings.m_hologram_mode == 1)
 	{
 		PrepVRBuffer();
 		BindRenderBuffer();
 	}
-	else if (m_hologram_mode == 2)
+	else if (glbin_settings.m_hologram_mode == 2)
 	{
 		BindRenderBuffer();
 	}
@@ -5643,7 +5623,7 @@ void RenderCanvas::ForceDraw()
 	}
 
 	//swap
-	if (m_hologram_mode == 1)
+	if (glbin_settings.m_hologram_mode == 1)
 	{
 		if (m_vr_eye_idx)
 		{
@@ -5657,7 +5637,7 @@ void RenderCanvas::ForceDraw()
 			RefreshGL(99);
 		}
 	}
-	else if (m_hologram_mode == 2)
+	else if (glbin_settings.m_hologram_mode == 2)
 	{
 		glbin_lg_renderer.Draw();
 		SwapBuffers();
@@ -8898,7 +8878,7 @@ void RenderCanvas::DrawInfo(int nx, int ny, bool intactive)
 		}
 	}
 
-	if (m_test_wiref)
+	if (glbin_settings.m_test_wiref)
 	{
 		if (m_vol_method == VOL_METHOD_MULTI && m_mvr)
 		{
@@ -9768,7 +9748,7 @@ void RenderCanvas::StartLoopUpdate()
 			if (m_draw_type == 1)
 				flvr::TextureRenderer::set_total_brick_num(total_num);
 			else if (m_draw_type == 2)
-				flvr::TextureRenderer::set_total_brick_num(total_num*(m_peeling_layers+1));
+				flvr::TextureRenderer::set_total_brick_num(total_num*(glbin_settings.m_peeling_layers+1));
 			flvr::TextureRenderer::reset_done_current_chan();
 		}
 	}
@@ -10793,7 +10773,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 	{
 		if (glbin_moviemaker.IsRunning())
 			return;
-		if (m_hologram_mode)
+		if (glbin_settings.m_hologram_mode)
 			return;
 
 		m_retain_finalbuffer = true;
