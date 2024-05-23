@@ -1358,11 +1358,6 @@ void MainFrame::OnOpenVolume(wxCommandEvent& event)
 		wxArrayString paths;
 		fopendlg->GetPaths(paths);
 		LoadVolumes(paths, false, canvas);
-
-		//if (m_setting_dlg)
-		//{
-		//	m_setting_dlg->UpdateUI();
-		//}
 	}
 
 	delete fopendlg;
@@ -1383,11 +1378,6 @@ void MainFrame::OnImportVolume(wxCommandEvent& event)
 		wxArrayString paths;
 		fopendlg->GetPaths(paths);
 		LoadVolumes(paths, true, canvas);
-
-		//if (m_setting_dlg)
-		//{
-		//	m_setting_dlg->UpdateUI();
-		//}
 	}
 
 	delete fopendlg;

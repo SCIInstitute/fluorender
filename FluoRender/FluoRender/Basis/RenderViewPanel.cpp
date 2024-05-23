@@ -1181,6 +1181,7 @@ void RenderViewPanel::SetFullScreen()
 	if (m_canvas->GetParent() != m_full_frame)
 	{
 		m_view_sizer->Detach(m_canvas);
+		m_view_sizer->AddStretchSpacer();
 		m_canvas->Reparent(m_full_frame);
 		//get display id
 		int disp_id = glbin_settings.m_disp_id;

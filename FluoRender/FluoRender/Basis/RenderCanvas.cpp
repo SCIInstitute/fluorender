@@ -477,6 +477,7 @@ void RenderCanvas::InitLookingGlass()
 	if (!bval)
 	{
 		glbin_settings.m_hologram_mode = 0;
+		m_renderview_panel->FluoRefresh(0, { gstHologramMode }, { -1 });
 		return;
 	}
 	glbin_lg_renderer.SetDevIndex(glbin_settings.m_lg_dev_id);
@@ -485,6 +486,7 @@ void RenderCanvas::InitLookingGlass()
 	if (glbin_settings.m_lg_offset == 0)
 		glbin_settings.m_lg_offset = glbin_lg_renderer.GetHalfCone();
 	glbin_settings.m_disp_id = glbin_lg_renderer.GetDisplayId();
+	m_renderview_panel->FluoRefresh(0, { gstHologramMode, gstFullscreenDisplay }, { -1 });
 	m_renderview_panel->SetFullScreen();
 	m_lg_initiated = true;
 }
@@ -650,6 +652,7 @@ void RenderCanvas::Init()
 		flvr::Texture::mask_undo_num_ = (size_t)(glbin_brush_def.m_paint_hist_depth);
 		glEnable(GL_MULTISAMPLE);
 
+		m_renderview_panel->FluoRefresh(0, { gstMaxTextureSize, gstDeviceTree }, { -1 });
 		m_initialized = true;
 
 		glbin.getStopWatch(gstStopWatch)->start();
@@ -4619,6 +4622,7 @@ void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
 	else if (GetParent() == m_renderview_panel->m_full_frame)
 	{
 		Reparent(m_renderview_panel);
+		m_renderview_panel->m_view_sizer->Clear();
 		m_renderview_panel->m_view_sizer->Add(this, 1, wxEXPAND);
 		m_renderview_panel->Layout();
 		m_renderview_panel->m_full_frame->Hide();
