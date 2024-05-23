@@ -33,117 +33,15 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/treectrl.h>
 #include <vector>
 
-//enum BitmapFontType;
 class MainFrame;
 class wxSingleSlider;
 class SettingDlg : public PropPanel
 {
-	enum
-	{
-		//project save
-		ID_PrjSaveChk = ID_SETTING,
-		ID_PrjSaveIncChk,
-		//real time compress
-		ID_RealtimeCmpChk,
-		//allow script break
-		ID_ScriptBreakChk,
-		//inverse vertical sliders
-		ID_InverseSliderChk,
-		//multi function button
-		ID_MulFuncBtnComb,
-		//mouse interactions
-		ID_MouseIntChk,
-		//depth peeling
-		ID_PeelingLayersSldr,
-		ID_PeelingLayersText,
-		//micro blending
-		ID_MicroBlendChk,
-		//shadow
-		ID_ShadowDirChk,
-		ID_ShadowDirSldr,
-		ID_ShadowDirText,
-		//gradient background
-		ID_GradBgChk,
-		//auto rot center anchor threshold
-		ID_PinThreshSldr,
-		ID_PinThreshText,
-		//link rotations
-		ID_RotLinkChk,
-		//stereo
-		ID_StereoChk,
-		ID_SBSChk,
-		ID_EyeDistSldr,
-		ID_EyeDistText,
-		ID_LookingGlassChk,
-		ID_LgOffsetSldr,
-		ID_LgOffsetText,
-		ID_HoloDebugChk,
-		//display id
-		ID_DispIdCombo,
-		//color depth
-		ID_ColorDepthCombo,
-		//override vox
-		ID_OverrideVoxChk,
-		//component size
-		ID_ComponentSizeText,
-		ID_ContactFactorText,
-		//wavelength to color
-		ID_WavColor1Cmb,
-		ID_WavColor2Cmb,
-		ID_WavColor3Cmb,
-		ID_WavColor4Cmb,
-		//memory settings
-		ID_StreamingChk,
-		ID_UpdateOrderRbox,
-		ID_GraphicsMemSldr,
-		ID_GraphicsMemText,
-		ID_LargeDataSldr,
-		ID_LargeDataText,
-		ID_BlockSizeSldr,
-		ID_BlockSizeText,
-		ID_ResponseTimeSldr,
-		ID_ResponseTimeText,
-		ID_DetailLevelOffsetSldr,
-		ID_DetailLevelOffsetText,
-		//texture size
-		ID_MaxTextureSizeChk,
-		ID_MaxTextureSizeText,
-		//font
-		ID_FontCmb,
-		ID_FontSizeCmb,
-		ID_TextColorCmb,
-		//line width
-		ID_LineWidthSldr,
-		ID_LineWidthText,
-		//paint history depth
-		ID_PaintHistDepthSldr,
-		ID_PaintHistDepthText,
-		//pencil distance
-		ID_PencilDistSldr,
-		ID_PencilDistText,
-		//save/close
-		ID_SaveBtn,
-		ID_CloseBtn,
-		//Java settings
-		ID_JavaJVMText,
-		ID_JavaIJText,
-		ID_JavaBioformatsText,
-		ID_JavaJvmBrowseBtn,
-		ID_JavaIJBrowseBtn,
-		ID_JavaBioformatsBrowseBtn,
-		ID_RadioButtonImageJ,
-		ID_RadioButtonFiji,
-		//device tree
-		ID_DeviceTree
-	};
-
 public:
 	SettingDlg(MainFrame* frame);
 	~SettingDlg();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
-	//void UpdateDeviceTree();
-	//void UpdateTextureSize();
 
 private:
 	//save project
@@ -347,8 +245,6 @@ private:
 	void onJavaRadioButtonFiji(wxCommandEvent &event);
 	//device tree
 	void OnSelChanged(wxTreeEvent& event);
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_SETTINGDLG_H_

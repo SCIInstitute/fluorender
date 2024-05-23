@@ -36,101 +36,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stdpaths.h>
 #include <wx/display.h>
 
-BEGIN_EVENT_TABLE(SettingDlg, wxPanel)
-EVT_BUTTON(ID_SaveBtn, SettingDlg::OnSave)
-EVT_BUTTON(ID_CloseBtn, SettingDlg::OnClose)
-//project save
-EVT_CHECKBOX(ID_PrjSaveChk, SettingDlg::OnProjectSaveCheck)
-EVT_CHECKBOX(ID_PrjSaveIncChk, SettingDlg::OnProjectSaveIncCheck)
-//real time compress
-EVT_CHECKBOX(ID_RealtimeCmpChk, SettingDlg::OnRealtimeCompressCheck)
-//script break
-EVT_CHECKBOX(ID_ScriptBreakChk, SettingDlg::OnScriptBreakCheck)
-//inverse sliders
-EVT_CHECKBOX(ID_InverseSliderChk, SettingDlg::OnInverseSliderCheck)
-//multi function button
-EVT_COMBOBOX(ID_MulFuncBtnComb, SettingDlg::OnMulFuncBtnComb)
-//mouse interactions
-EVT_CHECKBOX(ID_MouseIntChk, SettingDlg::OnMouseIntCheck)
-//depth peeling
-EVT_COMMAND_SCROLL(ID_PeelingLayersSldr, SettingDlg::OnPeelingLayersChange)
-EVT_TEXT(ID_PeelingLayersText, SettingDlg::OnPeelingLayersEdit)
-//micro blend
-EVT_CHECKBOX(ID_MicroBlendChk, SettingDlg::OnMicroBlendCheck)
-//shadow direction
-EVT_CHECKBOX(ID_ShadowDirChk, SettingDlg::OnShadowDirCheck)
-EVT_COMMAND_SCROLL(ID_ShadowDirSldr, SettingDlg::OnShadowDirChange)
-EVT_TEXT(ID_ShadowDirText, SettingDlg::OnShadowDirEdit)
-//gradient background
-EVT_CHECKBOX(ID_GradBgChk, SettingDlg::OnGradBgCheck)
-//rot center anchor threshold
-EVT_COMMAND_SCROLL(ID_PinThreshSldr, SettingDlg::OnPinThresholdChange)
-EVT_TEXT(ID_PinThreshText, SettingDlg::OnPinThresholdEdit)
-//link render views rotations
-EVT_CHECKBOX(ID_RotLinkChk, SettingDlg::OnRotLink)
-//stereo
-EVT_CHECKBOX(ID_StereoChk, SettingDlg::OnStereoCheck)
-EVT_CHECKBOX(ID_SBSChk, SettingDlg::OnSBSCheck)
-EVT_COMMAND_SCROLL(ID_EyeDistSldr, SettingDlg::OnEyeDistChange)
-EVT_TEXT(ID_EyeDistText, SettingDlg::OnEyeDistEdit)
-EVT_CHECKBOX(ID_LookingGlassChk, SettingDlg::OnLookingGlassCheck)
-EVT_COMMAND_SCROLL(ID_LgOffsetSldr, SettingDlg::OnLgOffsetChange)
-EVT_TEXT(ID_LgOffsetText, SettingDlg::OnLgOffsetEdit)
-EVT_CHECKBOX(ID_HoloDebugChk, SettingDlg::OnHoloDebugCheck)
-//display id
-EVT_COMBOBOX(ID_DispIdCombo, SettingDlg::OnDispIdComb)
-//color depth
-EVT_COMBOBOX(ID_ColorDepthCombo, SettingDlg::OnColorDepthComb)
-//override vox
-EVT_CHECKBOX(ID_OverrideVoxChk, SettingDlg::OnOverrideVoxCheck)
-//wavelength to color
-EVT_COMBOBOX(ID_WavColor1Cmb, SettingDlg::OnWavColor1Change)
-EVT_COMBOBOX(ID_WavColor2Cmb, SettingDlg::OnWavColor2Change)
-EVT_COMBOBOX(ID_WavColor3Cmb, SettingDlg::OnWavColor3Change)
-EVT_COMBOBOX(ID_WavColor4Cmb, SettingDlg::OnWavColor4Change)
-//texture size
-EVT_CHECKBOX(ID_MaxTextureSizeChk, SettingDlg::OnMaxTextureSizeChk)
-EVT_TEXT(ID_MaxTextureSizeText, SettingDlg::OnMaxTextureSizeEdit)
-//memory settings
-EVT_CHECKBOX(ID_StreamingChk, SettingDlg::OnStreamingChk)
-EVT_RADIOBOX(ID_UpdateOrderRbox, SettingDlg::OnUpdateOrderChange)
-EVT_COMMAND_SCROLL(ID_GraphicsMemSldr, SettingDlg::OnGraphicsMemChange)
-EVT_TEXT(ID_GraphicsMemText, SettingDlg::OnGraphicsMemEdit)
-EVT_COMMAND_SCROLL(ID_LargeDataSldr, SettingDlg::OnLargeDataChange)
-EVT_TEXT(ID_LargeDataText, SettingDlg::OnLargeDataEdit)
-EVT_COMMAND_SCROLL(ID_BlockSizeSldr, SettingDlg::OnBlockSizeChange)
-EVT_TEXT(ID_BlockSizeText, SettingDlg::OnBlockSizeEdit)
-EVT_COMMAND_SCROLL(ID_ResponseTimeSldr, SettingDlg::OnResponseTimeChange)
-EVT_TEXT(ID_ResponseTimeText, SettingDlg::OnResponseTimeEdit)
-EVT_COMMAND_SCROLL(ID_DetailLevelOffsetSldr, SettingDlg::OnDetailLevelOffsetChange)
-EVT_TEXT(ID_DetailLevelOffsetText, SettingDlg::OnDetailLevelOffsetEdit)
-//font
-EVT_COMBOBOX(ID_FontCmb, SettingDlg::OnFontChange)
-EVT_COMBOBOX(ID_FontSizeCmb, SettingDlg::OnFontSizeChange)
-EVT_TEXT(ID_FontSizeCmb, SettingDlg::OnFontSizeChange)
-EVT_COMBOBOX(ID_TextColorCmb, SettingDlg::OnTextColorChange)
-//line width
-EVT_COMMAND_SCROLL(ID_LineWidthSldr, SettingDlg::OnLineWidthSldr)
-EVT_TEXT(ID_LineWidthText, SettingDlg::OnLineWidthText)
-//paint history depth
-EVT_COMMAND_SCROLL(ID_PaintHistDepthSldr, SettingDlg::OnPaintHistDepthChange)
-EVT_TEXT(ID_PaintHistDepthText, SettingDlg::OnPaintHistDepthEdit)
-//pencil distance
-EVT_COMMAND_SCROLL(ID_PencilDistSldr, SettingDlg::OnPencilDistChange)
-EVT_TEXT(ID_PencilDistText, SettingDlg::OnPencilDistEdit)
-//Java settings
-EVT_TEXT(ID_JavaJVMText, SettingDlg::OnJavaJvmEdit)
-EVT_TEXT(ID_JavaIJText, SettingDlg::OnJavaIJEdit)
-EVT_TEXT(ID_JavaBioformatsText, SettingDlg::OnJavaBioformatsEdit)
-EVT_BUTTON(ID_JavaJvmBrowseBtn, SettingDlg::onJavaJvmBrowse)
-EVT_BUTTON(ID_JavaIJBrowseBtn, SettingDlg::onJavaIJBrowse)
-EVT_BUTTON(ID_JavaBioformatsBrowseBtn, SettingDlg::onJavaBioformatsBrowse)
-EVT_RADIOBUTTON(ID_RadioButtonImageJ, SettingDlg::onJavaRadioButtonImageJ)
-EVT_RADIOBUTTON(ID_RadioButtonFiji, SettingDlg::onJavaRadioButtonFiji)
-//device tree
-EVT_TREE_SEL_CHANGED(ID_DeviceTree, SettingDlg::OnSelChanged)
-END_EVENT_TABLE()
-
 wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 {
 	//validator: integer
@@ -142,22 +47,28 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	//project save
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Open/Save/Script Run/UI"), wxVERTICAL);
-	m_prj_save_chk = new wxCheckBox(page, ID_PrjSaveChk,
+	m_prj_save_chk = new wxCheckBox(page, wxID_ANY,
 		"Save project when capture viewport or export movie.");
-	m_prj_save_inc_chk = new wxCheckBox(page, ID_PrjSaveIncChk,
+	m_prj_save_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnProjectSaveCheck, this);
+	m_prj_save_inc_chk = new wxCheckBox(page, wxID_ANY,
 		"Save project in new files with incremental serial numbers.");
-	m_realtime_cmp_chk = new wxCheckBox(page, ID_RealtimeCmpChk,
+	m_prj_save_inc_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnProjectSaveIncCheck, this);
+	m_realtime_cmp_chk = new wxCheckBox(page, wxID_ANY,
 		"Compress data in graphics memory when loading.");
-	m_script_break_chk = new wxCheckBox(page, ID_ScriptBreakChk,
+	m_realtime_cmp_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnRealtimeCompressCheck, this);
+	m_script_break_chk = new wxCheckBox(page, wxID_ANY,
 		"Allow script information prompts.");
-	m_inverse_slider_chk = new wxCheckBox(page, ID_InverseSliderChk,
+	m_script_break_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnScriptBreakCheck, this);
+	m_inverse_slider_chk = new wxCheckBox(page, wxID_ANY,
 		"Invert vertical slider orientation.");
+	m_inverse_slider_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnInverseSliderCheck, this);
 	wxBoxSizer* sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Set multifunction buttons to:");
-	m_mul_func_btn_comb = new wxComboBox(page, ID_MulFuncBtnComb, "",
+	m_mul_func_btn_comb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> items = {"Sync Channels", "Focused Scroll", "Use Default", "Use ML", "Undo", "Enable/Disable"};
 	m_mul_func_btn_comb->Append(items);
+	m_mul_func_btn_comb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnMulFuncBtnComb, this);
 	sizer1_1->Add(st);
 	sizer1_1->Add(10, 10);
 	sizer1_1->Add(m_mul_func_btn_comb);
@@ -181,26 +92,30 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 		new wxStaticBox(page, wxID_ANY, "Render View Text"), wxVERTICAL);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Font:");
-	m_font_cmb = new wxComboBox(page, ID_FontCmb, "",
+	m_font_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(150, -1)), 0, NULL, wxCB_READONLY);
+	m_font_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnFontChange, this);
 	sizer2_1->Add(st);
 	sizer2_1->Add(10, 10);
 	sizer2_1->Add(m_font_cmb);
 	sizer2_1->Add(10, 10);
 	st = new wxStaticText(page, 0, "Size:");
-	m_font_size_cmb = new wxComboBox(page, ID_FontSizeCmb, "",
+	m_font_size_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(50, -1)), 0, NULL);
 	for (int df = 3; df < 18; ++df)
 		m_font_size_cmb->Append(wxString::Format("%d", int(std::round(std::pow(df, 1.5)))));
+	m_font_size_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnFontSizeChange, this);
+	m_font_size_cmb->Bind(wxEVT_TEXT, &SettingDlg::OnFontSizeChange, this);
 	sizer2_1->Add(st);
 	sizer2_1->Add(10, 10);
 	sizer2_1->Add(m_font_size_cmb);
 	sizer2_1->Add(10, 10);
 	st = new wxStaticText(page, 0, "Color:");
-	m_text_color_cmb = new wxComboBox(page, ID_TextColorCmb, "",
+	m_text_color_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> items2 = { "BG inverted", "Background", "Vol sec color" };
 	m_text_color_cmb->Append(items2);
+	m_text_color_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnTextColorChange, this);
 	sizer2_1->Add(st);
 	sizer2_1->Add(10, 10);
 	sizer2_1->Add(m_text_color_cmb);
@@ -217,10 +132,12 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	wxBoxSizer *group3 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Line Width"), wxVERTICAL);
 	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_line_width_sldr = new wxSingleSlider(page, ID_LineWidthSldr, 3, 1, 10,
+	m_line_width_sldr = new wxSingleSlider(page, wxID_ANY, 3, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_line_width_text = new wxTextCtrl(page, ID_LineWidthText, "3",
+	m_line_width_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnLineWidthSldr, this);
+	m_line_width_text = new wxTextCtrl(page, wxID_ANY, "3",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
+	m_line_width_text->Bind(wxEVT_TEXT, &SettingDlg::OnLineWidthText, this);
 	sizer3_1->Add(m_line_width_sldr, 1, wxEXPAND);
 	sizer3_1->Add(m_line_width_text, 0, wxALIGN_CENTER);
 	group3->Add(10, 5);
@@ -231,10 +148,12 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	wxBoxSizer *group4 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Paint History"), wxVERTICAL);
 	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_paint_hist_depth_sldr = new wxSingleSlider(page, ID_PaintHistDepthSldr, 0, 0, 10,
+	m_paint_hist_depth_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_paint_hist_depth_text = new wxTextCtrl(page, ID_PaintHistDepthText, "0",
+	m_paint_hist_depth_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnPaintHistDepthChange, this);
+	m_paint_hist_depth_text = new wxTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
+	m_paint_hist_depth_text->Bind(wxEVT_TEXT, &SettingDlg::OnPaintHistDepthEdit, this);
 	st = new wxStaticText(page, 0,
 		"The number of undo steps for paint brush selection.\n" \
 		"Set the value to 0 to disable history.\n" \
@@ -251,10 +170,12 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	wxBoxSizer* group5 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Ruler Point Distance"), wxVERTICAL);
 	wxBoxSizer* sizer5_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_pencil_dist_sldr = new wxSingleSlider(page, ID_PencilDistSldr, 30, 1, 100,
+	m_pencil_dist_sldr = new wxSingleSlider(page, wxID_ANY, 30, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_pencil_dist_text = new wxTextCtrl(page, ID_PencilDistText, "30",
+	m_pencil_dist_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnPencilDistChange, this);
+	m_pencil_dist_text = new wxTextCtrl(page, wxID_ANY, "30",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
+	m_pencil_dist_text->Bind(wxEVT_TEXT, &SettingDlg::OnPencilDistEdit, this);
 	st = new wxStaticText(page, 0,
 		"The pixel distance between two ruler points for pencil and magnet.\n");
 	sizer5_1->Add(m_pencil_dist_sldr, 1, wxEXPAND);
@@ -298,8 +219,9 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	//micro blending
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Micro Blending"), wxVERTICAL);
-	m_micro_blend_chk = new wxCheckBox(page, ID_MicroBlendChk,
+	m_micro_blend_chk = new wxCheckBox(page, wxID_ANY,
 		"Enable Micro Blending");
+	m_micro_blend_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnMicroBlendCheck, this);
 	st = new wxStaticText(page, 0,
 		"Micro Blending works only on multiple channels in the depth mode.\n"\
 		"Enable Micro Blending to render the colors of the colocalized voxels correctly.\n"\
@@ -314,10 +236,12 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	wxBoxSizer *group2 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Mesh Transparency Quality"), wxVERTICAL);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_peeling_layers_sldr = new wxSingleSlider(page, ID_PeelingLayersSldr, 1, 1, 10,
+	m_peeling_layers_sldr = new wxSingleSlider(page, wxID_ANY, 1, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_peeling_layers_text = new wxTextCtrl(page, ID_PeelingLayersText, "1",
+	m_peeling_layers_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnPeelingLayersChange, this);
+	m_peeling_layers_text = new wxTextCtrl(page, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
+	m_peeling_layers_text->Bind(wxEVT_TEXT, &SettingDlg::OnPeelingLayersEdit, this);
 	st = new wxStaticText(page, 0,
 		"The number of depth peeling layers for rendering transparent mesh objects.\n"\
 		"Set higher numbers only for complex geometries.\n"\
@@ -334,13 +258,16 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	wxBoxSizer *group3 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Shadow Direction"), wxVERTICAL);
 	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_shadow_dir_chk = new wxCheckBox(page, ID_ShadowDirChk,
+	m_shadow_dir_chk = new wxCheckBox(page, wxID_ANY,
 		"Enable directional shadow");
-	m_shadow_dir_sldr = new wxSingleSlider(page, ID_ShadowDirSldr, -45, -180, 180,
+	m_shadow_dir_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnShadowDirCheck, this);
+	m_shadow_dir_sldr = new wxSingleSlider(page, wxID_ANY, -45, -180, 180,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shadow_dir_sldr->SetRangeStyle(2);
-	m_shadow_dir_text = new wxTextCtrl(page, ID_ShadowDirText, "-45",
+	m_shadow_dir_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnShadowDirChange, this);
+	m_shadow_dir_text = new wxTextCtrl(page, wxID_ANY, "-45",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_fp2);
+	m_shadow_dir_text->Bind(wxEVT_TEXT, &SettingDlg::OnShadowDirEdit, this);
 	st = new wxStaticText(page, 0,
 		"The direction of the shadows, when shadow is enabled for volume data.");
 	sizer3_1->Add(m_shadow_dir_chk, 0, wxALIGN_CENTER);
@@ -357,16 +284,19 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 		new wxStaticBox(page, wxID_ANY, "Rotations"), wxVERTICAL);
 	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Rot. center anchor start");
-	m_pin_threshold_sldr = new wxSingleSlider(page, ID_PinThreshSldr, 100, 10, 500,
+	m_pin_threshold_sldr = new wxSingleSlider(page, wxID_ANY, 100, 10, 500,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_pin_threshold_text = new wxTextCtrl(page, ID_PinThreshText, "1000",
+	m_pin_threshold_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnPinThresholdChange, this);
+	m_pin_threshold_text = new wxTextCtrl(page, wxID_ANY, "1000",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
+	m_pin_threshold_text->Bind(wxEVT_TEXT, &SettingDlg::OnPinThresholdEdit, this);
 	sizer4_1->Add(st, 0, wxALIGN_CENTER);
 	sizer4_1->Add(m_pin_threshold_sldr, 1, wxEXPAND);
 	sizer4_1->Add(m_pin_threshold_text, 0, wxALIGN_CENTER);
 	wxBoxSizer *sizer4_2 = new wxBoxSizer(wxHORIZONTAL);
-	m_rot_link_chk = new wxCheckBox(page, ID_RotLinkChk,
+	m_rot_link_chk = new wxCheckBox(page, wxID_ANY,
 		"Link all rendering views' rotations.");
+	m_rot_link_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnRotLink, this);
 	sizer4_2->Add(m_rot_link_chk, 0, wxALIGN_CENTER);
 	group4->Add(10, 5);
 	group4->Add(sizer4_1, 0, wxEXPAND);
@@ -378,8 +308,9 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	wxBoxSizer *group5 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Gradient Background"), wxVERTICAL);
 	wxBoxSizer *sizer5_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_grad_bg_chk = new wxCheckBox(page, ID_GradBgChk,
+	m_grad_bg_chk = new wxCheckBox(page, wxID_ANY,
 		"Enable gradient background");
+	m_grad_bg_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnGradBgCheck, this);
 	sizer5_1->Add(m_grad_bg_chk, 0, wxALIGN_CENTER);
 	group5->Add(10, 5);
 	group5->Add(sizer5_1, 0, wxEXPAND);
@@ -414,9 +345,10 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	//mouse interactions
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Variable Sample Rate"), wxVERTICAL);
-	m_mouse_int_chk = new wxCheckBox(page, ID_MouseIntChk,
+	m_mouse_int_chk = new wxCheckBox(page, wxID_ANY,
 		"Reduce volume sample rate for mouse interactions.\n"\
 		"Enable this option if mouse interaction speed is slow.");
+	m_mouse_int_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnMouseIntCheck, this);
 	group1->Add(10, 5);
 	group1->Add(m_mouse_int_chk);
 	group1->Add(10, 5);
@@ -424,20 +356,24 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	//memory settings
 	wxBoxSizer *group2 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Large Data Streaming"), wxVERTICAL);
-	m_streaming_chk = new wxCheckBox(page, ID_StreamingChk,
+	m_streaming_chk = new wxCheckBox(page, wxID_ANY,
 		"Enable streaming for large data.");
+	m_streaming_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnStreamingChk, this);
 	wxString choices[2] = {"Back to front", "Front to back"};
-	m_update_order_rbox = new wxRadioBox(page, ID_UpdateOrderRbox,
+	m_update_order_rbox = new wxRadioBox(page, wxID_ANY,
 		"Update order", wxDefaultPosition, wxDefaultSize,
 		2, choices, 0, wxRA_SPECIFY_COLS);
+	m_update_order_rbox->Bind(wxEVT_RADIOBOX, &SettingDlg::OnUpdateOrderChange, this);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Graphics Memory:",
 		wxDefaultPosition, FromDIP(wxSize(110, -1)));
 	sizer2_1->Add(st);
-	m_graphics_mem_sldr = new wxSingleSlider(page, ID_GraphicsMemSldr, 10, 1, 100,
+	m_graphics_mem_sldr = new wxSingleSlider(page, wxID_ANY, 10, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_graphics_mem_text = new wxTextCtrl(page, ID_GraphicsMemText, "1000",
+	m_graphics_mem_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnGraphicsMemChange, this);
+	m_graphics_mem_text = new wxTextCtrl(page, wxID_ANY, "1000",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
+	m_graphics_mem_text->Bind(wxEVT_TEXT, &SettingDlg::OnGraphicsMemEdit, this);
 	st = new wxStaticText(page, 0, "MB",
 		wxDefaultPosition, FromDIP(wxSize(20, -1)));
 	sizer2_1->Add(m_graphics_mem_sldr, 1, wxEXPAND);
@@ -447,10 +383,12 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Large Data Size:",
 		wxDefaultPosition, FromDIP(wxSize(110, -1)));
 	sizer2_2->Add(st);
-	m_large_data_sldr = new wxSingleSlider(page, ID_LargeDataSldr, 20, 0, 200,
+	m_large_data_sldr = new wxSingleSlider(page, wxID_ANY, 20, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_large_data_text = new wxTextCtrl(page, ID_LargeDataText, "200",
+	m_large_data_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnLargeDataChange, this);
+	m_large_data_text = new wxTextCtrl(page, wxID_ANY, "200",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
+	m_large_data_text->Bind(wxEVT_TEXT, &SettingDlg::OnLargeDataEdit, this);
 	st = new wxStaticText(page, 0, "MB",
 		wxDefaultPosition, FromDIP(wxSize(20, -1)));
 	sizer2_2->Add(m_large_data_sldr, 1, wxEXPAND);
@@ -460,10 +398,12 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Brick Size:",
 		wxDefaultPosition, FromDIP(wxSize(110, -1)));
 	sizer2_3->Add(st);
-	m_block_size_sldr = new wxSingleSlider(page, ID_BlockSizeSldr, 7, 6, 12,
+	m_block_size_sldr = new wxSingleSlider(page, wxID_ANY, 7, 6, 12,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_block_size_text = new wxTextCtrl(page, ID_BlockSizeText, "128",
+	m_block_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnBlockSizeChange, this);
+	m_block_size_text = new wxTextCtrl(page, wxID_ANY, "128",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
+	m_block_size_text->Bind(wxEVT_TEXT, &SettingDlg::OnBlockSizeEdit, this);
 	st = new wxStaticText(page, 0, "vx",
 		wxDefaultPosition, FromDIP(wxSize(20, -1)));
 	sizer2_3->Add(m_block_size_sldr, 1, wxEXPAND);
@@ -473,10 +413,12 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Response Time:",
 		wxDefaultPosition, FromDIP(wxSize(110, -1)));
 	sizer2_4->Add(st);
-	m_response_time_sldr = new wxSingleSlider(page, ID_ResponseTimeSldr, 10, 1, 100,
+	m_response_time_sldr = new wxSingleSlider(page, wxID_ANY, 10, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_response_time_text = new wxTextCtrl(page, ID_ResponseTimeText, "100",
+	m_response_time_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnResponseTimeChange, this);
+	m_response_time_text = new wxTextCtrl(page, wxID_ANY, "100",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
+	m_response_time_text->Bind(wxEVT_TEXT, &SettingDlg::OnResponseTimeEdit, this);
 	st = new wxStaticText(page, 0, "ms",
 		wxDefaultPosition, FromDIP(wxSize(20, -1)));
 	sizer2_4->Add(m_response_time_sldr, 1, wxEXPAND);
@@ -486,10 +428,12 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Detail Level Offset:",
 		wxDefaultPosition, FromDIP(wxSize(110, -1)));
 	sizer2_5->Add(st);
-	m_detail_level_offset_sldr = new wxSingleSlider(page, ID_DetailLevelOffsetSldr, 0, -5, 5,
+	m_detail_level_offset_sldr = new wxSingleSlider(page, wxID_ANY, 0, -5, 5,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_detail_level_offset_text = new wxTextCtrl(page, ID_DetailLevelOffsetText, "0",
+	m_detail_level_offset_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnDetailLevelOffsetChange, this);
+	m_detail_level_offset_text = new wxTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int2);
+	m_detail_level_offset_text->Bind(wxEVT_TEXT, &SettingDlg::OnDetailLevelOffsetEdit, this);
 	sizer2_5->Add(m_detail_level_offset_sldr, 1, wxEXPAND);
 	sizer2_5->Add(m_detail_level_offset_text, 0, wxALIGN_CENTER);
 	sizer2_5->Add(20, 5);
@@ -540,8 +484,9 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	wxBoxSizer* group1 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Stereography / Virtual Reality / Holography"), wxVERTICAL);
 	wxBoxSizer* sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_stereo_chk = new wxCheckBox(page, ID_StereoChk,
+	m_stereo_chk = new wxCheckBox(page, wxID_ANY,
 		"Enable stereography");
+	m_stereo_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnStereoCheck, this);
 	sizer1_1->Add(5, 5);
 	sizer1_1->Add(m_stereo_chk, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
@@ -549,24 +494,28 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	sizer1_2->Add(20, 5);
 	sizer1_2->Add(st, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
-	m_sbs_chk = new wxCheckBox(page, ID_SBSChk,
+	m_sbs_chk = new wxCheckBox(page, wxID_ANY,
 		"Aspect Ratio for 3D TV");
+	m_sbs_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnSBSCheck, this);
 	sizer1_3->Add(20, 5);
 	sizer1_3->Add(m_sbs_chk, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_4 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Eye Distance:",
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
-	m_eye_dist_sldr = new wxSingleSlider(page, ID_EyeDistSldr, 200, 0, 2000,
+	m_eye_dist_sldr = new wxSingleSlider(page, wxID_ANY, 200, 0, 2000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_eye_dist_text = new wxTextCtrl(page, ID_EyeDistText, "20.0",
+	m_eye_dist_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnEyeDistChange, this);
+	m_eye_dist_text = new wxTextCtrl(page, wxID_ANY, "20.0",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_fp1);
+	m_eye_dist_text->Bind(wxEVT_TEXT, &SettingDlg::OnEyeDistEdit, this);
 	sizer1_4->Add(20, 5);
 	sizer1_4->Add(st, 0, wxALIGN_CENTER);
 	sizer1_4->Add(m_eye_dist_sldr, 1, wxEXPAND);
 	sizer1_4->Add(m_eye_dist_text, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_5 = new wxBoxSizer(wxHORIZONTAL);
-	m_looking_glass_chk = new wxCheckBox(page, ID_LookingGlassChk,
+	m_looking_glass_chk = new wxCheckBox(page, wxID_ANY,
 		"Enable Holography");
+	m_looking_glass_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnLookingGlassCheck, this);
 	sizer1_5->Add(5, 5);
 	sizer1_5->Add(m_looking_glass_chk, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_6 = new wxBoxSizer(wxHORIZONTAL);
@@ -576,17 +525,20 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	wxBoxSizer* sizer1_7 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "View Offset:",
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
-	m_lg_offset_sldr = new wxSingleSlider(page, ID_LgOffsetSldr, 20, 0, 90,
+	m_lg_offset_sldr = new wxSingleSlider(page, wxID_ANY, 20, 0, 90,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_lg_offset_text = new wxTextCtrl(page, ID_LgOffsetText, "20",
+	m_lg_offset_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnLgOffsetChange, this);
+	m_lg_offset_text = new wxTextCtrl(page, wxID_ANY, "20",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
+	m_lg_offset_text->Bind(wxEVT_TEXT, &SettingDlg::OnLgOffsetEdit, this);
 	sizer1_7->Add(20, 5);
 	sizer1_7->Add(st, 0, wxALIGN_CENTER);
 	sizer1_7->Add(m_lg_offset_sldr, 1, wxEXPAND);
 	sizer1_7->Add(m_lg_offset_text, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_8 = new wxBoxSizer(wxHORIZONTAL);
-	m_holo_debug_chk = new wxCheckBox(page, ID_HoloDebugChk,
+	m_holo_debug_chk = new wxCheckBox(page, wxID_ANY,
 		"Show Quilt");
+	m_holo_debug_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnHoloDebugCheck, this);
 	sizer1_8->Add(20, 5);
 	sizer1_8->Add(m_holo_debug_chk, 0, wxALIGN_CENTER);
 	group1->Add(10, 5);
@@ -613,8 +565,9 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	wxBoxSizer* sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Display:",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)));
-	m_disp_id_comb = new wxComboBox(page, ID_DispIdCombo, "",
+	m_disp_id_comb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+	m_disp_id_comb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnDispIdComb, this);
 	int dn = wxDisplay::GetCount();
 	wxDisplay* display = 0;
 	wxString disp_name;
@@ -643,8 +596,9 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	wxBoxSizer* sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Color Depth:",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)));
-	m_color_depth_comb = new wxComboBox(page, ID_ColorDepthCombo, "",
+	m_color_depth_comb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+	m_color_depth_comb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnColorDepthComb, this);
 	std::vector<wxString> list2 = { "8", "10", "16" };
 	m_color_depth_comb->Append(list2);
 	sizer3_1->Add(st, 0, wxALIGN_CENTER);
@@ -680,8 +634,9 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Override Voxel Size"), wxVERTICAL);
 	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_override_vox_chk = new wxCheckBox(page, ID_OverrideVoxChk,
+	m_override_vox_chk = new wxCheckBox(page, wxID_ANY,
 		"Get voxel size info from the first opened data set.");
+	m_override_vox_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnOverrideVoxCheck, this);
 	sizer1_1->Add(m_override_vox_chk, 0, wxALIGN_CENTER);
 	group1->Add(10, 5);
 	group1->Add(sizer1_1, 0, wxEXPAND);
@@ -692,19 +647,23 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 		new wxStaticBox(page, wxID_ANY, "Default Colors for Excitation Wavelengths (nm) (for raw microscopy formats)"), wxVERTICAL);
 	//combo box line
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_wav_color1_cmb = new wxComboBox(page, ID_WavColor1Cmb, "",
+	m_wav_color1_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(75, 23)), 0, NULL, wxCB_READONLY);
-	m_wav_color2_cmb = new wxComboBox(page, ID_WavColor2Cmb, "",
+	m_wav_color2_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(75, 23)), 0, NULL, wxCB_READONLY);
-	m_wav_color3_cmb = new wxComboBox(page, ID_WavColor3Cmb, "",
+	m_wav_color3_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(75, 23)), 0, NULL, wxCB_READONLY);
-	m_wav_color4_cmb = new wxComboBox(page, ID_WavColor4Cmb, "",
+	m_wav_color4_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(75, 23)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> list = { "Red", "Green", "Blue", "Cyan", "Magenta", "Yellow", "Orange", "White" };
 	m_wav_color1_cmb->Append(list);
 	m_wav_color2_cmb->Append(list);
 	m_wav_color3_cmb->Append(list);
 	m_wav_color4_cmb->Append(list);
+	m_wav_color1_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnWavColor1Change, this);
+	m_wav_color2_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnWavColor2Change, this);
+	m_wav_color3_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnWavColor3Change, this);
+	m_wav_color4_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnWavColor4Change, this);
 	sizer2_1->Add(35, 20);
 	sizer2_1->Add(m_wav_color1_cmb);
 	sizer2_1->Add(25, 20);
@@ -753,10 +712,12 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	wxBoxSizer *group3 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Max Texture Size"), wxVERTICAL);
 	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_max_texture_size_chk = new wxCheckBox(page, ID_MaxTextureSizeChk,
+	m_max_texture_size_chk = new wxCheckBox(page, wxID_ANY,
 		"Set max texture size");
-	m_max_texture_size_text = new wxTextCtrl(page, ID_MaxTextureSizeText, "2048",
+	m_max_texture_size_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnMaxTextureSizeChk, this);
+	m_max_texture_size_text = new wxTextCtrl(page, wxID_ANY, "2048",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
+	m_max_texture_size_text->Bind(wxEVT_TEXT, &SettingDlg::OnMaxTextureSizeEdit, this);
 	sizer3_1->Add(m_max_texture_size_chk, 0, wxALIGN_CENTER);
 	sizer3_1->Add(10, 10);
 	sizer3_1->Add(m_max_texture_size_text, 0, wxALIGN_CENTER);
@@ -775,9 +736,10 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	//cl devices
 	wxBoxSizer *group4 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "OpenCL Devices"), wxVERTICAL);
-	m_device_tree = new wxTreeCtrl(page, ID_DeviceTree,
+	m_device_tree = new wxTreeCtrl(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize,
 		wxTR_FULL_ROW_HIGHLIGHT);
+	m_device_tree->Bind(wxEVT_TREE_SEL_CHANGED, &SettingDlg::OnSelChanged, this);
 	st = new wxStaticText(page, 0,
 		"Select an OpenCL device that is also the rendering GPU.\n"\
 		"Restart FluoRender after changing OpenCL devices.");
@@ -814,12 +776,18 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 	wxBoxSizer *sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *sizer1_3 = new wxBoxSizer(wxHORIZONTAL);	
 
-	m_java_jvm_text = new wxTextCtrl(page, ID_JavaJVMText);
-	m_java_ij_text = new wxTextCtrl(page, ID_JavaIJText);
-	m_java_bioformats_text = new wxTextCtrl(page, ID_JavaBioformatsText);
-	m_browse_jvm_btn = new wxButton(page, ID_JavaJvmBrowseBtn, "Browse", wxDefaultPosition);
-	m_browse_ij_btn = new wxButton(page, ID_JavaIJBrowseBtn, "Browse", wxDefaultPosition);
-	m_browse_bioformats_btn = new wxButton(page, ID_JavaBioformatsBrowseBtn, "Browse", wxDefaultPosition);
+	m_java_jvm_text = new wxTextCtrl(page, wxID_ANY);
+	m_java_jvm_text->Bind(wxEVT_TEXT, &SettingDlg::OnJavaJvmEdit, this);
+	m_java_ij_text = new wxTextCtrl(page, wxID_ANY);
+	m_java_ij_text->Bind(wxEVT_TEXT, &SettingDlg::OnJavaIJEdit, this);
+	m_java_bioformats_text = new wxTextCtrl(page, wxID_ANY);
+	m_java_bioformats_text->Bind(wxEVT_TEXT, &SettingDlg::OnJavaBioformatsEdit, this);
+	m_browse_jvm_btn = new wxButton(page, wxID_ANY, "Browse", wxDefaultPosition);
+	m_browse_jvm_btn->Bind(wxEVT_BUTTON, &SettingDlg::onJavaJvmBrowse, this);
+	m_browse_ij_btn = new wxButton(page, wxID_ANY, "Browse", wxDefaultPosition);
+	m_browse_ij_btn->Bind(wxEVT_BUTTON, &SettingDlg::onJavaIJBrowse, this);
+	m_browse_bioformats_btn = new wxButton(page, wxID_ANY, "Browse", wxDefaultPosition);
+	m_browse_bioformats_btn->Bind(wxEVT_BUTTON, &SettingDlg::onJavaBioformatsBrowse, this);
 
 	sizer1_1->Add(m_java_jvm_text, 1, wxEXPAND);
 	sizer1_1->Add(m_browse_jvm_btn, 0, wxALIGN_CENTER);
@@ -832,8 +800,10 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 
 	//Added the radio button
 	st = new wxStaticText(page, 0, "Package:");
-	mp_radio_button_imagej = new wxRadioButton(page, ID_RadioButtonImageJ, "ImageJ", wxDefaultPosition);
-	mp_radio_button_fiji = new wxRadioButton(page, ID_RadioButtonFiji, "Fiji", wxDefaultPosition);
+	mp_radio_button_imagej = new wxRadioButton(page, wxID_ANY, "ImageJ", wxDefaultPosition);
+	mp_radio_button_imagej->Bind(wxEVT_RADIOBUTTON, &SettingDlg::onJavaRadioButtonImageJ, this);
+	mp_radio_button_fiji = new wxRadioButton(page, wxID_ANY, "Fiji", wxDefaultPosition);
+	mp_radio_button_fiji->Bind(wxEVT_RADIOBUTTON, &SettingDlg::onJavaRadioButtonFiji, this);
 	sizer1_0->Add(st);
 	sizer1_0->Add(5, 5);
 	sizer1_0->Add(mp_radio_button_imagej);
@@ -908,8 +878,10 @@ SettingDlg::SettingDlg(MainFrame *frame) :
 
 	//buttons
 	wxBoxSizer *group_b = new wxBoxSizer(wxHORIZONTAL);
-	m_save_btn = new wxButton(this, ID_SaveBtn, "Done");
-	m_close_btn = new wxButton(this, ID_CloseBtn, "Cancel");
+	m_save_btn = new wxButton(this, wxID_ANY, "Done");
+	m_save_btn->Bind(wxEVT_BUTTON, &SettingDlg::OnSave, this);
+	m_close_btn = new wxButton(this, wxID_ANY, "Cancel");
+	m_close_btn->Bind(wxEVT_BUTTON, &SettingDlg::OnClose, this);
 	group_b->Add(m_close_btn, 0, wxALIGN_CENTER);
 	group_b->AddStretchSpacer(1);
 	group_b->Add(m_save_btn, 0, wxALIGN_CENTER);
