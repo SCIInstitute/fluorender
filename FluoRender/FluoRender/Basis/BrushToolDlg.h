@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _BRUSHTOOLDLG_H_
 #define _BRUSHTOOLDLG_H_
 
+#include <PropPanel.h>
 #include <wx/wx.h>
 #include <wx/grid.h>
 #include <wx/tglbtn.h>
@@ -51,7 +52,7 @@ struct GridData
 	double wsize;
 };
 
-class BrushToolDlg : public wxPanel
+class BrushToolDlg : public PropPanel
 {
 public:
 	enum
@@ -129,32 +130,30 @@ public:
 	BrushToolDlg(MainFrame* frame);
 	~BrushToolDlg();
 
-	void GetSettings(RenderCanvas* view);
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+
+	void SetRenderCanvas(RenderCanvas* canvas) { m_canvas = canvas; }
 
 	//set the brush icon down
-	void SelectBrush(int id);
+	//void SelectBrush(int id);
 	//update undo status
-	void UpdateUndoRedo();
-	void UpdateMaskTb();
+	//void UpdateUndoRedo();
+	//void UpdateMaskTb();
 
 	//output
-	void Update(int mode);//mode: 0-size; 1-speed
-	void UpdateSize();
-	void UpdateSpeed();
+	//void Update(int mode);//mode: 0-size; 1-speed
+	//void UpdateSize();
+	//void UpdateSpeed();
 	void SetOutput(const GridData &data, const wxString &unit);
 	void CopyData();
 	void PasteData();
 
 private:
-	MainFrame* m_frame;
 	//current view
-	RenderCanvas *m_view;
+	RenderCanvas *m_canvas;
 
 	//max volume value
 	double m_max_value;
-	//default brush properties
-	double m_dft_gm_falloff;
-	double m_dft_scl_translate;
 	//output
 	bool m_hold_history;
 

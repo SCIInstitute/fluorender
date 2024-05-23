@@ -593,8 +593,10 @@ DEALINGS IN THE SOFTWARE.
 #define gstMouseIn "mouse in"
 #define gstRenderviewPanelId "renderview panel id"
 //processor properties should be moved in the future
+#define gstSelUndoRedo "sel undo redo"
 #define gstSelUndo "sel undo"//selector undo
 #define gstSelRedo "sel redo"
+#define gstSelMask "sel mask"
 #define gstSettingsJava "settings java"
 
 //dialog agent common
