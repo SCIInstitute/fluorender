@@ -1276,15 +1276,6 @@ wxWindow* MainFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
 
-	//slice sequence check box. TODO: Not suppotred as of now.
-	/*
-	wxCheckBox* ch1 = new wxCheckBox(panel, ID_READ_ZSLICES,
-		"Read a sequence as Z slices (the last digits in filenames are used to identify the sequence)");
-	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(MainFrame::OnCh1Check), NULL, panel);
-	ch1->SetValue(m_sliceSequence);
-	*/
-
 	//compression
 	wxCheckBox* ch2 = new wxCheckBox(panel, ID_COMPRESS,
 		"Compress data (loading will take longer time and data are compressed in graphics memory)");
@@ -1299,30 +1290,11 @@ wxWindow* MainFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 		wxCommandEventHandler(MainFrame::OnCh3Check), NULL, panel);
 	ch3->SetValue(glbin_settings.m_skip_brick);
 
-	//time sequence identifier. TODO: Not supported as of now.
-	/*
-	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	wxTextCtrl* txt1 = new wxTextCtrl(panel, ID_TSEQ_ID,
-		"", wxDefaultPosition, wxSize(80, 20));
-	txt1->ChangeValue(m_time_id);
-	txt1->Connect(txt1->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
-		wxCommandEventHandler(MainFrame::OnTxt1Change), NULL, panel);
-	wxStaticText* st = new wxStaticText(panel, 0,
-		"Time sequence identifier (digits after the identifier in filenames are used as time index)");
-	sizer1->Add(txt1);
-	sizer1->Add(10, 10);
-	sizer1->Add(st);
-	*/
-
-	//group1->Add(10, 10);
-	//group1->Add(ch1);
 	group1->Add(10, 10);
 	group1->Add(ch2);
 	group1->Add(10, 10);
 	group1->Add(ch3);
 	group1->Add(10, 10);
-	//group1->Add(sizer1);
-	//group1->Add(10, 10);
 
 	panel->SetSizerAndFit(group1);
 	panel->Layout();
@@ -1422,16 +1394,6 @@ void MainFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* 
 			"FluoRender: Loading volume data...",
 			"",
 			100, this, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
-
-		glbin_data_manager.SetSliceSequence(glbin_settings.m_slice_sequence);
-		glbin_data_manager.SetChannSequence(glbin_settings.m_chann_sequence);
-		glbin_data_manager.SetDigitOrder(glbin_settings.m_digit_order);
-		glbin_data_manager.SetSerNum(glbin_settings.m_ser_num);
-		glbin_data_manager.SetCompression(glbin_settings.m_realtime_compress);
-		glbin_data_manager.SetSkipBrick(glbin_settings.m_skip_brick);
-		glbin_data_manager.SetTimeId(glbin_settings.m_time_id);
-		glbin_data_manager.SetLoadMask(glbin_settings.m_load_mask);
-		glbin_data_manager.SetReaderFpConvert(false, 0, 1);
 
 		bool enable_4d = false;
 
@@ -3558,10 +3520,10 @@ void MainFrame::OpenProject(wxString& filename)
 				fconfig.SetPath(str);
 				bool compression = false;
 				fconfig.Read("compression", &compression);
-				glbin_data_manager.SetCompression(compression);
+				glbin_settings.m_realtime_compress = compression;
 				bool skip_brick = false;
 				fconfig.Read("skip_brick", &skip_brick);
-				glbin_data_manager.SetSkipBrick(skip_brick);
+				glbin_settings.m_skip_brick = skip_brick;
 				//path
 				if (fconfig.Read("path", &str))
 				{
@@ -3576,16 +3538,18 @@ void MainFrame::OpenProject(wxString& filename)
 					fconfig.Read("reader_type", &reader_type);
 					bool slice_seq = 0;
 					fconfig.Read("slice_seq", &slice_seq);
-					glbin_data_manager.SetSliceSequence(slice_seq);
+					glbin_settings.m_slice_sequence = slice_seq;
 					wxString time_id;
 					fconfig.Read("time_id", &time_id);
-					glbin_data_manager.SetTimeId(time_id);
+					glbin_settings.m_time_id = time_id;
 					bool fp_convert = false;
 					double minv, maxv;
 					fconfig.Read("fp_convert", &fp_convert, false);
 					fconfig.Read("fp_min", &minv, 0);
 					fconfig.Read("fp_max", &maxv, 1);
-					glbin_data_manager.SetReaderFpConvert(fp_convert, minv, maxv);
+					glbin_settings.m_fp_convert = fp_convert;
+					glbin_settings.m_fp_min = minv;
+					glbin_settings.m_fp_max = maxv;
 					wxString suffix = str.Mid(str.Find('.', true)).MakeLower();
 					if (reader_type == READER_IMAGEJ_TYPE)
 						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_IMAGEJ, true, cur_chan, cur_time);

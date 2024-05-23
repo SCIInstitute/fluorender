@@ -301,8 +301,6 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_2d_weight2 = 0;
 	m_2d_dmap = 0;
 
-	//compression
-	m_compression = false;
 	//resize
 	m_resize = false;
 	m_rnx = 0;
@@ -5134,23 +5132,8 @@ void MeshGroup::RandomizeColor()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 DataManager::DataManager() :
-	m_use_defaults(true),
-	m_ser_num(0)
+	m_frame(0)
 {
-	//slice sequence
-	m_sliceSequence = false;
-	//read channels
-	m_channSequence = false;
-	//digit order
-	m_digitOrder = 0;
-	//compression
-	m_compression = false;
-	//skip brick
-	m_skip_brick = false;
-	//time sequence identifier
-	m_timeId = "_T";
-	//load mask
-	m_load_mask = true;
 }
 
 DataManager::~DataManager()
@@ -5200,20 +5183,17 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 	if (use_ml)
 	{
 		vd->ApplyMlVolProp();
-		if (m_use_defaults)
-		{
-			//props not managed by ml
-			vd->SetWireframe(glbin_settings.m_test_wiref);
-			vd->SetSampleRate(glbin_vol_def.m_sample_rate);
-			if (!vd->GetSpcFromFile())
-				vd->SetBaseSpacings(
-					glbin_vol_def.m_spcx,
-					glbin_vol_def.m_spcy,
-					glbin_vol_def.m_spcz);
-			vd->SetLabelMode(glbin_vol_def.m_label_mode);
-		}
+		//props not managed by ml
+		vd->SetWireframe(glbin_settings.m_test_wiref);
+		vd->SetSampleRate(glbin_vol_def.m_sample_rate);
+		if (!vd->GetSpcFromFile())
+			vd->SetBaseSpacings(
+				glbin_vol_def.m_spcx,
+				glbin_vol_def.m_spcy,
+				glbin_vol_def.m_spcz);
+		vd->SetLabelMode(glbin_vol_def.m_label_mode);
 	}
-	else if (m_use_defaults)
+	else
 	{
 		glbin_vol_def.Apply(vd);
 	}
@@ -5292,24 +5272,24 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 	if (reader)
 	{
 		bool preprocess = false;
-		if (reader->GetSliceSeq() != m_sliceSequence)
+		if (reader->GetSliceSeq() != glbin_settings.m_slice_sequence)
 		{
-			reader->SetSliceSeq(m_sliceSequence);
+			reader->SetSliceSeq(glbin_settings.m_slice_sequence);
 			preprocess = true;
 		}
-		if (reader->GetChannSeq() != m_channSequence)
+		if (reader->GetChannSeq() != glbin_settings.m_chann_sequence)
 		{
-			reader->SetChannSeq(m_channSequence);
+			reader->SetChannSeq(glbin_settings.m_chann_sequence);
 			preprocess = true;
 		}
-		if (reader->GetDigitOrder() != m_digitOrder)
+		if (reader->GetDigitOrder() != glbin_settings.m_digit_order)
 		{
-			reader->SetDigitOrder(m_digitOrder);
+			reader->SetDigitOrder(glbin_settings.m_digit_order);
 			preprocess = true;
 		}
-		if (reader->GetTimeId() != m_timeId.ToStdWstring())
+		wstring str_w = glbin_settings.m_time_id.ToStdWstring();
+		if (reader->GetTimeId() != str_w)
 		{
-			wstring str_w = m_timeId.ToStdWstring();
 			reader->SetTimeId(str_w);
 			preprocess = true;
 		}
@@ -5358,19 +5338,19 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 		m_reader_list.push_back(reader);
 		wstring str_w = pathname.ToStdWstring();
 		reader->SetFile(str_w);
-		reader->SetSliceSeq(m_sliceSequence);
-		reader->SetChannSeq(m_channSequence);
-		reader->SetDigitOrder(m_digitOrder);
-		str_w = m_timeId.ToStdWstring();
+		reader->SetSliceSeq(glbin_settings.m_slice_sequence);
+		reader->SetChannSeq(glbin_settings.m_chann_sequence);
+		reader->SetDigitOrder(glbin_settings.m_digit_order);
+		str_w = glbin_settings.m_time_id.ToStdWstring();
 		reader->SetTimeId(str_w);
 		reader_return = reader->Preprocess();
 	}
 
 	if (type == LOAD_TYPE_TIFF)
 	{
-		if (m_fp_convert)
+		if (glbin_settings.m_fp_convert)
 		{
-			reader->SetFpRange(m_fp_min, m_fp_max);
+			reader->SetFpRange(glbin_settings.m_fp_min, glbin_settings.m_fp_max);
 		}
 		else if (reader->GetFpConvert())
 		{
@@ -5403,14 +5383,14 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 	}
 
 	//align data for compression if vtc is not supported
-	if (!GLEW_NV_texture_compression_vtc && m_compression)
+	if (!GLEW_NV_texture_compression_vtc && glbin_settings.m_realtime_compress)
 	{
 		reader->SetResize(1);
 		reader->SetAlignment(4);
 	}
 
-	if (m_ser_num > 0)
-		reader->LoadBatch(m_ser_num);
+	if (glbin_settings.m_ser_num > 0)
+		reader->LoadBatch(glbin_settings.m_ser_num);
 	int chan = reader->GetChanNum();
 	for (i=(ch_num>=0?ch_num:0);
 		i<(ch_num>=0?ch_num+1:chan); i++)
@@ -5419,7 +5399,7 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 		if (!vd)
 			continue;
 
-		vd->SetSkipBrick(m_skip_brick);
+		vd->SetSkipBrick(glbin_settings.m_skip_brick);
 		Nrrd* data = reader->Convert(t_num>=0?t_num:reader->GetCurTime(), i, true);
 		if (!data)
 			continue;
@@ -5443,12 +5423,12 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 		}
 
 		vd->SetReader(reader);
-		vd->SetCompression(m_compression);
+		vd->SetCompression(glbin_settings.m_realtime_compress);
 
 		bool valid_spc = reader->IsSpcInfoValid();
 		if (vd->Load(data, name, pathname))
 		{
-			if (m_load_mask)
+			if (glbin_settings.m_load_mask)
 			{
 				//mask
 				MSKReader msk_reader;

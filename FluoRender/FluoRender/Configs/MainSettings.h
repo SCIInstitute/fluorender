@@ -91,7 +91,7 @@ public:
 
 	bool m_slice_sequence;	//if slices are sequence
 	bool m_chann_sequence;	//read channels
-	int m_digit_order;		//digit order
+	int m_digit_order;		//digit order//0:chann first; 1:slice first
 	int m_ser_num;			//series number
 	bool m_skip_brick;		//brick skipping
 	bool m_load_mask;		//load volume mask
@@ -104,6 +104,9 @@ public:
 	bool m_realtime_compress;//real time compress
 	double m_mov_bitrate;	//bitrate for mov export (Mbits)
 	wxString m_mov_filename;//file name for mov export
+	bool m_fp_convert;		//convert floating point to int
+	double m_fp_min;		//min value of the floating point number
+	double m_fp_max;		//max value of the floating point number
 
 	bool m_run_script;		//script
 	bool m_script_break;	//allow script break

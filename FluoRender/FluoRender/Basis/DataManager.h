@@ -1318,24 +1318,9 @@ public:
 	wxString GetProjectFile();
 
 	//load volume
-	void SetReaderFpConvert(bool fp_convert, double minv, double maxv)
-	{
-		m_fp_convert = fp_convert;
-		m_fp_min = minv;
-		m_fp_max = maxv;
-	}
 	int LoadVolumeData(wxString &filename, int type, bool withImageJ, int ch_num=-1, int t_num=-1);
 	//set default
 	void SetVolumeDefault(VolumeData* vd);
-	//load volume options
-	void SetSliceSequence(bool ss) {m_sliceSequence = ss;}
-	void SetChannSequence(bool cs) { m_channSequence = cs; }
-	void SetDigitOrder(int order) { m_digitOrder = order; }
-	void SetSerNum(int num) { m_ser_num = num; }
-	void SetCompression(bool compression) {m_compression = compression;}
-	void SetSkipBrick(bool skip) {m_skip_brick = skip;}
-	void SetTimeId(wxString str) {m_timeId = str;}
-	void SetLoadMask(bool load_mask) {m_load_mask = load_mask;}
 	void AddVolumeData(VolumeData* vd);
 	VolumeData* DuplicateVolumeData(VolumeData* vd);
 	void RemoveVolumeData(int index);
@@ -1400,32 +1385,9 @@ private:
 	vector <BaseReader*> m_reader_list;
 	vector <Annotations*> m_annotation_list;
 
-	bool m_use_defaults;
-
-	//slice sequence
-	bool m_sliceSequence;
-	//read channels
-	bool m_channSequence;
-	//digit order
-	int m_digitOrder;//0:chann first; 1:slice first
-	//series number
-	int m_ser_num;
-	//compression
-	bool m_compression;
-	//skip brick
-	bool m_skip_brick;
-	//time sequence identifier
-	wxString m_timeId;
-	//load volume mask
-	bool m_load_mask;
 	//project path
 	wxString m_prj_path;
 	wxString m_prj_file;
-
-	//fp convert
-	bool m_fp_convert;
-	double m_fp_min;
-	double m_fp_max;
 };
 
 #endif//_DATAMANAGER_H_
