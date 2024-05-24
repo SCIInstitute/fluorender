@@ -181,7 +181,7 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 	{
 		if (update)
 			m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
-		m_frame->RefreshCanvases({ m_frame->GetView(m_view) });
+		m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(m_view) });
 	}
 }
 

@@ -1237,7 +1237,7 @@ void VolumePropPanel::InitVRenderViews(unsigned int type)
 	{
 		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view)
 			{
 				view->InitView(type);
@@ -1266,7 +1266,7 @@ void VolumePropPanel::SetView(RenderCanvas *view)
 	m_view = view;
 }
 
-RenderCanvas* VolumePropPanel::GetView()
+RenderCanvas* VolumePropPanel::GetRenderCanvas()
 {
 	return m_view;
 }
@@ -1350,7 +1350,7 @@ void VolumePropPanel::EnableGamma(bool bval)
 	else if (m_vd)
 		m_vd->SetGammaEnable(bval);
 
-	FluoRefresh(0, { gstGamma3d }, { m_frame->GetView(m_view) });
+	FluoRefresh(0, { gstGamma3d }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::EnableSaturation(bool bval)
@@ -1367,7 +1367,7 @@ void VolumePropPanel::EnableSaturation(bool bval)
 	else if (m_vd)
 		m_vd->SetSaturationEnable(bval);
 
-	FluoRefresh(0, { gstSaturation }, { m_frame->GetView(m_view) });
+	FluoRefresh(0, { gstSaturation }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::EnableLuminance(bool bval)
@@ -1377,7 +1377,7 @@ void VolumePropPanel::EnableLuminance(bool bval)
 	else if (m_vd)
 		m_vd->SetLuminanceEnable(bval);
 
-	FluoRefresh(0, { gstColor }, { m_frame->GetView(m_view) });
+	FluoRefresh(0, { gstColor }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::EnableAlpha(bool bval)
@@ -1388,7 +1388,7 @@ void VolumePropPanel::EnableAlpha(bool bval)
 	else if (m_vd)
 		m_vd->SetAlphaEnable(bval);
 
-	FluoRefresh(0, { gstAlpha }, { m_frame->GetView(m_view) });
+	FluoRefresh(0, { gstAlpha }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::EnableShading(bool bval)
@@ -1402,7 +1402,7 @@ void VolumePropPanel::EnableShading(bool bval)
 	//m_thresh_sldr->Enable();
 	//m_left_thresh_text->Enable();
 	//m_right_thresh_text->Enable();
-	FluoRefresh(0, { gstShading }, { m_frame->GetView(m_view) });
+	FluoRefresh(0, { gstShading }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::EnableBoundary(bool bval)
@@ -1412,7 +1412,7 @@ void VolumePropPanel::EnableBoundary(bool bval)
 	else if (m_vd)
 		m_vd->SetBoundaryEnable(bval);
 
-	FluoRefresh(0, { gstBoundary }, { m_frame->GetView(m_view) });
+	FluoRefresh(0, { gstBoundary }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::EnableThresh(bool bval)
@@ -1422,7 +1422,7 @@ void VolumePropPanel::EnableThresh(bool bval)
 	else if (m_vd)
 		m_vd->SetThreshEnable(bval);
 
-	FluoRefresh(0, { gstThreshold }, { m_frame->GetView(m_view) });
+	FluoRefresh(0, { gstThreshold }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::EnableShadow(bool bval)
@@ -1440,7 +1440,7 @@ void VolumePropPanel::EnableShadow(bool bval)
 	//	m_left_thresh_text->Enable();
 	//	m_right_thresh_text->Enable();
 	//}
-	FluoRefresh(0, { gstShadow }, { m_frame->GetView(m_view) });
+	FluoRefresh(0, { gstShadow }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::EnableSample(bool bval)
@@ -1450,7 +1450,7 @@ void VolumePropPanel::EnableSample(bool bval)
 	else if (m_vd)
 		m_vd->SetSampleRateEnable(bval);
 
-	FluoRefresh(0, { gstSampleRate }, { m_frame->GetView(m_view) });
+	FluoRefresh(0, { gstSampleRate }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::EnableColormap(bool bval)
@@ -1473,7 +1473,7 @@ void VolumePropPanel::EnableColormap(bool bval)
 			adjust_view->UpdateSync();
 	}
 
-	FluoRefresh(0, { gstColormap }, { m_frame->GetView(m_view) });
+	FluoRefresh(0, { gstColormap }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::EnableMip(bool bval)
@@ -1483,7 +1483,7 @@ void VolumePropPanel::EnableMip(bool bval)
 	else if (m_vd)
 		m_vd->SetMode(bval ? 1 : 0);
 
-	FluoRefresh(0, { gstMipMode }, { m_frame->GetView(m_view) });
+	FluoRefresh(0, { gstMipMode }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::EnableTransparent(bool bval)
@@ -1493,7 +1493,7 @@ void VolumePropPanel::EnableTransparent(bool bval)
 	else if (m_vd)
 		m_vd->SetTransparent(bval);
 
-	FluoRefresh(0, { gstTransparent }, { m_frame->GetView(m_view) });
+	FluoRefresh(0, { gstTransparent }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 //set values
@@ -1504,9 +1504,9 @@ void VolumePropPanel::SetGamma(double val, bool notify)
 
 	m_vd->SetGamma(val);
 	if (notify)
-		FluoRefresh(1, { gstGamma3d }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstGamma3d }, { m_frame->GetRenderCanvas(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstNull }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SetSaturation(double val, bool notify)
@@ -1516,9 +1516,9 @@ void VolumePropPanel::SetSaturation(double val, bool notify)
 
 	m_vd->SetSaturation(val);
 	if (notify)
-		FluoRefresh(1, { gstSaturation }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstSaturation }, { m_frame->GetRenderCanvas(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstNull }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SetLuminance(double val, bool notify)
@@ -1544,9 +1544,9 @@ void VolumePropPanel::SetLuminance(double val, bool notify)
 	m_color2_btn->SetValue(wxc);
 
 	if (notify)
-		FluoRefresh(1, { gstColor, gstTreeColors, gstClipPlaneRangeColor }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstColor, gstTreeColors, gstClipPlaneRangeColor }, { m_frame->GetRenderCanvas(m_view) });
 	else
-		FluoRefresh(1, { gstTreeColors, gstClipPlaneRangeColor }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstTreeColors, gstClipPlaneRangeColor }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SetAlpha(double val, bool notify)
@@ -1556,9 +1556,9 @@ void VolumePropPanel::SetAlpha(double val, bool notify)
 
 	m_vd->SetAlpha(val);
 	if (notify)
-		FluoRefresh(1, { gstAlpha }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstAlpha }, { m_frame->GetRenderCanvas(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstNull }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SetLowShading(double val, bool notify)
@@ -1568,9 +1568,9 @@ void VolumePropPanel::SetLowShading(double val, bool notify)
 
 	m_vd->SetLowShading(val);
 	if (notify)
-		FluoRefresh(1, { gstShading }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstShading }, { m_frame->GetRenderCanvas(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstNull }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SetHiShading(double val, bool notify)
@@ -1580,9 +1580,9 @@ void VolumePropPanel::SetHiShading(double val, bool notify)
 
 	m_vd->SetHiShading(val);
 	if (notify)
-		FluoRefresh(1, { gstShading }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstShading }, { m_frame->GetRenderCanvas(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstNull }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SetBoundary(double val, bool notify)
@@ -1592,9 +1592,9 @@ void VolumePropPanel::SetBoundary(double val, bool notify)
 
 	m_vd->SetBoundary(val);
 	if (notify)
-		FluoRefresh(1, { gstBoundary }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstBoundary }, { m_frame->GetRenderCanvas(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstNull }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SetThresh(double val1, double val2, bool notify)
@@ -1605,9 +1605,9 @@ void VolumePropPanel::SetThresh(double val1, double val2, bool notify)
 	m_vd->SetLeftThresh(val1);
 	m_vd->SetRightThresh(val2);
 	if (notify)
-		FluoRefresh(1, { gstThreshold }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstThreshold }, { m_frame->GetRenderCanvas(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstNull }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SetShadowInt(double val, bool notify)
@@ -1617,9 +1617,9 @@ void VolumePropPanel::SetShadowInt(double val, bool notify)
 
 	m_vd->SetShadowIntensity(val);
 	if (notify)
-		FluoRefresh(1, { gstShadow }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstShadow }, { m_frame->GetRenderCanvas(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstNull }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SetSampleRate(double val, bool notify)
@@ -1629,9 +1629,9 @@ void VolumePropPanel::SetSampleRate(double val, bool notify)
 
 	m_vd->SetSampleRate(val);
 	if (notify)
-		FluoRefresh(1, { gstSampleRate }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstSampleRate }, { m_frame->GetRenderCanvas(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstNull }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SetColormapVal(double val1, double val2, bool notify)
@@ -1641,9 +1641,9 @@ void VolumePropPanel::SetColormapVal(double val1, double val2, bool notify)
 
 	m_vd->SetColormapValues(val1, val2);
 	if (notify)
-		FluoRefresh(1, { gstColormap }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstColormap }, { m_frame->GetRenderCanvas(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstNull }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 
@@ -1654,7 +1654,7 @@ void VolumePropPanel::SyncGamma(double val)
 		return;
 
 	m_group->SetGamma(val);
-	FluoRefresh(1, { gstGamma3d }, { m_frame->GetView(m_view) });
+	FluoRefresh(1, { gstGamma3d }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SyncSaturation(double val)
@@ -1663,7 +1663,7 @@ void VolumePropPanel::SyncSaturation(double val)
 		return;
 
 	m_group->SetSaturation(val);
-	FluoRefresh(1, { gstSaturation }, { m_frame->GetView(m_view) });
+	FluoRefresh(1, { gstSaturation }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SyncLuminance(double val)
@@ -1672,7 +1672,7 @@ void VolumePropPanel::SyncLuminance(double val)
 		return;
 
 	m_group->SetLuminance(val);
-	FluoRefresh(1, { gstColor, gstTreeColors, gstClipPlaneRangeColor }, { m_frame->GetView(m_view) });
+	FluoRefresh(1, { gstColor, gstTreeColors, gstClipPlaneRangeColor }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SyncAlpha(double val)
@@ -1681,7 +1681,7 @@ void VolumePropPanel::SyncAlpha(double val)
 		return;
 
 	m_group->SetAlpha(val);
-	FluoRefresh(1, { gstAlpha }, { m_frame->GetView(m_view) });
+	FluoRefresh(1, { gstAlpha }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SyncLowShading(double val)
@@ -1690,7 +1690,7 @@ void VolumePropPanel::SyncLowShading(double val)
 		return;
 
 	m_group->SetLowShading(val);
-	FluoRefresh(1, { gstShading }, { m_frame->GetView(m_view) });
+	FluoRefresh(1, { gstShading }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SyncHiShading(double val)
@@ -1699,7 +1699,7 @@ void VolumePropPanel::SyncHiShading(double val)
 		return;
 
 	m_group->SetHiShading(val);
-	FluoRefresh(1, { gstShading }, { m_frame->GetView(m_view) });
+	FluoRefresh(1, { gstShading }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SyncBoundary(double val)
@@ -1708,7 +1708,7 @@ void VolumePropPanel::SyncBoundary(double val)
 		return;
 
 	m_group->SetBoundary(val);
-	FluoRefresh(1, { gstBoundary }, { m_frame->GetView(m_view) });
+	FluoRefresh(1, { gstBoundary }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SyncThresh(double val1, double val2)
@@ -1718,7 +1718,7 @@ void VolumePropPanel::SyncThresh(double val1, double val2)
 
 	m_group->SetLeftThresh(val1);
 	m_group->SetRightThresh(val2);
-	FluoRefresh(1, { gstThreshold }, { m_frame->GetView(m_view) });
+	FluoRefresh(1, { gstThreshold }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SyncShadowInt(double val)
@@ -1727,7 +1727,7 @@ void VolumePropPanel::SyncShadowInt(double val)
 		return;
 
 	m_group->SetShadowIntensity(val);
-	FluoRefresh(1, { gstShadow }, { m_frame->GetView(m_view) });
+	FluoRefresh(1, { gstShadow }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SyncSampleRate(double val)
@@ -1744,7 +1744,7 @@ void VolumePropPanel::SyncSampleRate(double val)
 		}
 	else
 		m_group->SetSampleRate(val);
-	FluoRefresh(1, { gstSampleRate }, { m_frame->GetView(m_view) });
+	FluoRefresh(1, { gstSampleRate }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SyncColormapVal(double val1, double val2)
@@ -1753,7 +1753,7 @@ void VolumePropPanel::SyncColormapVal(double val1, double val2)
 		return;
 
 	m_group->SetColormapValues(val1, val2);
-	FluoRefresh(1, { gstColormap }, { m_frame->GetView(m_view) });
+	FluoRefresh(1, { gstColormap }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 
@@ -2534,7 +2534,7 @@ void VolumePropPanel::OnColormapInvBtn(wxCommandEvent &event)
 
 	EnableColormap(true);
 
-	FluoRefresh(1, { gstColormap }, { m_frame->GetView(m_view) });
+	FluoRefresh(1, { gstColormap }, { m_frame->GetRenderCanvas(m_view) });
 
 	//update colocalization
 	if (m_frame && m_frame->GetColocalizationDlg() &&
@@ -2559,7 +2559,7 @@ void VolumePropPanel::OnColormapCombo(wxCommandEvent &event)
 		EnableTransparent(true);
 	}
 
-	FluoRefresh(1, { gstColormap }, { m_frame->GetView(m_view) });
+	FluoRefresh(1, { gstColormap }, { m_frame->GetRenderCanvas(m_view) });
 
 	//update colocalization
 	if (m_frame && m_frame->GetColocalizationDlg() &&
@@ -2579,7 +2579,7 @@ void VolumePropPanel::OnColormapCombo2(wxCommandEvent &event)
 
 	EnableColormap(true);
 
-	FluoRefresh(1, { gstColormap }, { m_frame->GetView(m_view) });
+	FluoRefresh(1, { gstColormap }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 //6
@@ -2620,7 +2620,7 @@ void VolumePropPanel::OnColorChange(wxColor c)
 				adjust_view->UpdateSync();
 		}
 
-		FluoRefresh(1, { gstColor, gstLuminance, gstSecColor, gstTreeColors, gstClipPlaneRangeColor }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstColor, gstLuminance, gstSecColor, gstTreeColors, gstClipPlaneRangeColor }, { m_frame->GetRenderCanvas(m_view) });
 	}
 }
 
@@ -2630,7 +2630,7 @@ void VolumePropPanel::OnColor2Change(wxColor c)
 	if (m_vd)
 	{
 		m_vd->SetMaskColor(color);
-		FluoRefresh(1, { gstSecColor }, { m_frame->GetView(m_view) });
+		FluoRefresh(1, { gstSecColor }, { m_frame->GetRenderCanvas(m_view) });
 	}
 }
 
@@ -2906,7 +2906,7 @@ void VolumePropPanel::SetInvert()
 	else if (m_vd)
 		m_vd->SetInvert(inv);
 
-	FluoRefresh(0, { gstInvert }, { m_frame->GetView(m_view) });
+	FluoRefresh(0, { gstInvert }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SetComponentDisplay()
@@ -2918,7 +2918,7 @@ void VolumePropPanel::SetComponentDisplay()
 	else if (m_vd)
 		m_vd->SetLabelMode(mode);
 
-	FluoRefresh(0, { gstLabelMode }, { m_frame->GetView(m_view) });
+	FluoRefresh(0, { gstLabelMode }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 //interpolation
@@ -2933,7 +2933,7 @@ void VolumePropPanel::SetInterpolate()
 	if (m_view)
 		m_view->SetIntp(inv);
 
-	FluoRefresh(0, { gstInterpolate }, { m_frame->GetView(m_view) });
+	FluoRefresh(0, { gstInterpolate }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 //noise reduction
@@ -2960,7 +2960,7 @@ void VolumePropPanel::SetNoiseReduction()
 			m_vd->SetNR(val);
 	}
 
-	FluoRefresh(0, { gstNoiseRedct }, { m_frame->GetView(m_view) });
+	FluoRefresh(0, { gstNoiseRedct }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 //sync within group
@@ -3023,7 +3023,7 @@ void VolumePropPanel::SetSyncGroup()
 		m_group->SetColormapProj(m_vd->GetColormapProj());
 	}
 
-	FluoRefresh(1, { gstVolumeProps }, { m_frame->GetView(m_view) });
+	FluoRefresh(1, { gstVolumeProps }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 //depth mode
@@ -3051,7 +3051,7 @@ void VolumePropPanel::SetBlendDepth()
 			m_group->SetBlendMode(0);
 	}
 
-	FluoRefresh(0, { gstBlendMode }, { m_frame->GetView(m_view) });
+	FluoRefresh(0, { gstBlendMode }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 //legend
@@ -3061,7 +3061,7 @@ void VolumePropPanel::SetLegend()
 	if (m_vd)
 		m_vd->SetLegend(leg);
 
-	FluoRefresh(1, { gstLegend }, { m_frame->GetView(m_view) });
+	FluoRefresh(1, { gstLegend }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SaveDefault()
@@ -3082,7 +3082,7 @@ void VolumePropPanel::ResetDefault()
 	m_colormap_sldr->SetLink(false);
 	glbin_vol_def.Apply(m_vd);
 
-	FluoRefresh(0, { gstVolumeProps }, { m_frame->GetView(m_view) });
+	FluoRefresh(0, { gstVolumeProps }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 bool VolumePropPanel::SetSpacings()

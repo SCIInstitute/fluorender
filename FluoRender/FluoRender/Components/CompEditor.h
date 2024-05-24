@@ -48,7 +48,7 @@ namespace flrd
 		{
 			m_view = view;
 		}
-		RenderCanvas* GetView()
+		RenderCanvas* GetRenderCanvas()
 		{
 			return m_view;
 		}

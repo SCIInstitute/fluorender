@@ -302,10 +302,10 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 		
 		glbin_data_manager.LoadMeshData(mesh);
 		MeshData* md = glbin_data_manager.GetLastMeshData();
-		if (md && m_frame->GetView(0))
+		if (md && m_frame->GetRenderCanvas(0))
 		{
-			m_frame->GetView(0)->AddMeshData(md);
-			m_frame->GetView(0)->RefreshGL(39);
+			m_frame->GetRenderCanvas(0)->AddMeshData(md);
+			m_frame->GetRenderCanvas(0)->RefreshGL(39);
 		}
 		(*m_stat_text) <<
 			"The surface area of mesh object " <<

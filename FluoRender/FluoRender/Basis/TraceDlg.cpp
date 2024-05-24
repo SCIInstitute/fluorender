@@ -939,7 +939,7 @@ void TraceDlg::GetSettings(RenderCanvas* vrv)
 	m_map_contact_spin->SetValue(glbin_settings.m_contact_factor);
 }
 
-RenderCanvas* TraceDlg::GetView()
+RenderCanvas* TraceDlg::GetRenderCanvas()
 {
 	return m_view;
 }

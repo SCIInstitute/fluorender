@@ -2538,7 +2538,7 @@ void ComponentDlg::OutputMulti(int color_type)
 	if (refresh)
 	{
 		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
-		m_frame->RefreshCanvases({ m_frame->GetView(m_view) });
+		m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(m_view) });
 	}
 }
 
@@ -2590,7 +2590,7 @@ void ComponentDlg::OutputRgb(int color_type)
 	if (refresh)
 	{
 		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
-		m_frame->RefreshCanvases({ m_frame->GetView(m_view) });
+		m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(m_view) });
 	}
 }
 
@@ -2633,7 +2633,7 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 	if (refresh && m_frame)
 	{
 		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
-		m_frame->RefreshCanvases({ m_frame->GetView(m_view) });
+		m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(m_view) });
 	}
 }
 

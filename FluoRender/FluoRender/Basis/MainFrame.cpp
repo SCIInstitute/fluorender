@@ -176,6 +176,7 @@ MainFrame::MainFrame(
 	m_cur_sel_type(-1),
 	m_cur_sel_vol(-1),
 	m_cur_sel_mesh(-1),
+	m_cur_canvas(0),
 	m_benchmark(benchmark),
 	m_vd_copy(0),
 	m_copy_data(false),
@@ -881,7 +882,7 @@ MainFrame::~MainFrame()
 
 	for (int i=0; i<GetViewNum(); i++)
 	{
-		RenderCanvas* canvas = GetView(i);
+		RenderCanvas* canvas = GetRenderCanvas(i);
 		if (canvas)
 		{
 			canvas->ClearAll();
@@ -960,8 +961,8 @@ wxString MainFrame::CreateView(int row)
 	//reset gl
 	for (int i = 0; i < GetViewNum(); ++i)
 	{
-		if (GetView(i))
-			GetView(i)->m_set_gl = false;
+		if (GetRenderCanvas(i))
+			GetRenderCanvas(i)->m_set_gl = false;
 	}
 
 	//m_aui_mgr.Update();
@@ -984,7 +985,7 @@ wxString MainFrame::CreateView(int row)
 	//add volumes
 	if (GetViewNum() > 0)
 	{
-		RenderCanvas* view0 = GetView(0);
+		RenderCanvas* view0 = GetRenderCanvas(0);
 		if (view0)
 		{
 			for (int i = 0; i < view0->GetDispVolumeNum(); ++i)
@@ -1035,7 +1036,12 @@ int MainFrame::GetViewNum()
 	return m_vrv_list.size();
 }
 
-RenderCanvas* MainFrame::GetView(int index)
+RenderCanvas* MainFrame::GetCurRenderCanvas()
+{
+	return GetRenderCanvas(m_cur_canvas);
+}
+
+RenderCanvas* MainFrame::GetRenderCanvas(int index)
 {
 	if (index >= 0 && index < (int)m_vrv_list.size())
 	{
@@ -1046,7 +1052,7 @@ RenderCanvas* MainFrame::GetView(int index)
 	return 0;
 }
 
-RenderCanvas* MainFrame::GetView(wxString& name)
+RenderCanvas* MainFrame::GetRenderCanvas(wxString& name)
 {
 	for (size_t i=0; i < m_vrv_list.size(); ++i)
 	{
@@ -1057,7 +1063,7 @@ RenderCanvas* MainFrame::GetView(wxString& name)
 	return 0;
 }
 
-int MainFrame::GetView(RenderCanvas* canvas)
+int MainFrame::GetRenderCanvas(RenderCanvas* canvas)
 {
 	if (!canvas)
 		return 0;
@@ -1325,7 +1331,7 @@ void MainFrame::OnOpenVolume(wxCommandEvent& event)
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		RenderCanvas* canvas = GetView(0);
+		RenderCanvas* canvas = GetRenderCanvas(0);
 
 		wxArrayString paths;
 		fopendlg->GetPaths(paths);
@@ -1345,7 +1351,7 @@ void MainFrame::OnImportVolume(wxCommandEvent& event)
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		RenderCanvas* canvas = GetView(0);
+		RenderCanvas* canvas = GetRenderCanvas(0);
 
 		wxArrayString paths;
 		fopendlg->GetPaths(paths);
@@ -1366,7 +1372,7 @@ void MainFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* 
 	if (canvas)
 		v = canvas;
 	else
-		v = GetView(0);
+		v = GetRenderCanvas(0);
 
 	bool refresh = false;
 	fluo::ValueCollection vc;
@@ -1526,7 +1532,7 @@ void MainFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* 
 
 	if (refresh)
 	{
-		RefreshCanvases({ GetView(v) });
+		RefreshCanvases({ GetRenderCanvas(v) });
 		UpdateProps(vc);
 	}
 }
@@ -1589,7 +1595,7 @@ void MainFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imagej)
 void MainFrame::LoadMeshes(wxArrayString files, RenderCanvas* canvas)
 {
 	if (!canvas)
-		canvas = GetView(0);
+		canvas = GetRenderCanvas(0);
 
 	MeshData* md_sel = 0;
 
@@ -1634,7 +1640,7 @@ void MainFrame::LoadMeshes(wxArrayString files, RenderCanvas* canvas)
 	if (canvas)
 		canvas->InitView(INIT_BOUNDS|INIT_CENTER);
 
-	RefreshCanvases({ GetView(canvas) });
+	RefreshCanvases({ GetRenderCanvas(canvas) });
 	UpdateProps({ gstListCtrl, gstTreeCtrl });
 
 	delete prg_diag;
@@ -1649,7 +1655,7 @@ void MainFrame::OnOpenMesh(wxCommandEvent& event)
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		RenderCanvas* canvas = GetView(0);
+		RenderCanvas* canvas = GetRenderCanvas(0);
 		wxArrayString files;
 		fopendlg->GetPaths(files);
 
@@ -1787,6 +1793,7 @@ void MainFrame::OnSelection(int type,
 {
 	if (canvas)
 	{
+		m_cur_canvas = GetRenderCanvas(canvas);
 		glbin_ruler_handler.SetView(canvas);
 		glbin_ruler_handler.SetRulerList(canvas->GetRulerList());
 		glbin_ruler_renderer.SetView(canvas);
@@ -1861,7 +1868,7 @@ void MainFrame::OnSelection(int type,
 
 			for (size_t i=0; i< GetViewNum(); ++i)
 			{
-				RenderCanvas* v = GetView(i);
+				RenderCanvas* v = GetRenderCanvas(i);
 				if (!v)
 					continue;
 				v->m_cur_vol = vd;
@@ -2355,10 +2362,10 @@ void MainFrame::DeleteVRenderView(int i)
 		int j;
 		wxString str = m_vrv_list[i]->GetName();
 
-		for (j=0 ; j<GetView(i)->GetAllVolumeNum() ; j++)
-			GetView(i)->GetAllVolumeData(j)->SetDisp(true);
-		for (j=0 ; j< GetView(i)->GetMeshNum() ; j++)
-			GetView(i)->GetMeshData(j)->SetDisp(true);
+		for (j=0 ; j<GetRenderCanvas(i)->GetAllVolumeNum() ; j++)
+			GetRenderCanvas(i)->GetAllVolumeData(j)->SetDisp(true);
+		for (j=0 ; j< GetRenderCanvas(i)->GetMeshNum() ; j++)
+			GetRenderCanvas(i)->GetMeshData(j)->SetDisp(true);
 		RenderViewPanel* vrv = m_vrv_list[i];
 		m_vrv_list.erase(m_vrv_list.begin()+i);
 		m_aui_mgr.DetachPane(vrv);
@@ -2377,7 +2384,7 @@ void MainFrame::DeleteVRenderView(wxString &name)
 {
 	for (int i=0; i<GetViewNum(); i++)
 	{
-		RenderCanvas* canvas = GetView(i);
+		RenderCanvas* canvas = GetRenderCanvas(i);
 		if (canvas && name == canvas->m_renderview_panel->GetName() && canvas->m_renderview_panel->m_id > 1)
 		{
 			DeleteVRenderView(i);
@@ -2677,7 +2684,7 @@ void MainFrame::OnNewProject(wxCommandEvent& event)
 	m_adjust_view->SetVolumeData(0);
 	m_adjust_view->SetGroup(0);
 	m_adjust_view->SetGroupLink(0);
-	GetView(0)->ClearAll();
+	GetRenderCanvas(0)->ClearAll();
 	for (int i = m_vrv_list.size() - 1; i > 0; i--)
 		DeleteVRenderView(i);
 	RenderViewPanel::ResetID();
@@ -2687,9 +2694,9 @@ void MainFrame::OnNewProject(wxCommandEvent& event)
 	m_cur_sel_vol = 0;
 	m_cur_sel_mesh = 0;
 	glbin_moviemaker.Stop();
-	glbin_moviemaker.SetView(GetView(0));
+	glbin_moviemaker.SetView(GetRenderCanvas(0));
 	glbin_mov_def.Apply(&glbin_moviemaker);
-	m_trace_dlg->GetSettings(GetView(0));
+	m_trace_dlg->GetSettings(GetRenderCanvas(0));
 	glbin_interpolator.Clear();
 	RefreshCanvases();
 	UpdateProps({ gstListCtrl, gstTreeCtrl, gstParamList });
@@ -3086,7 +3093,7 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 	fconfig.Write("num", GetViewNum());
 	for (i=0; i<GetViewNum(); i++)
 	{
-		RenderCanvas* canvas = GetView(i);
+		RenderCanvas* canvas = GetRenderCanvas(i);
 		if (canvas)
 		{
 			str = wxString::Format("/views/%d", i);
@@ -3430,7 +3437,7 @@ void MainFrame::OpenProject(wxString& filename)
 	m_adjust_view->SetVolumeData(0);
 	m_adjust_view->SetGroup(0);
 	m_adjust_view->SetGroupLink(0);
-	GetView(0)->ClearAll();
+	GetRenderCanvas(0)->ClearAll();
 	for (i = m_vrv_list.size() - 1; i > 0; i--)
 		DeleteVRenderView(i);
 	//RenderViewPanel::ResetID();
@@ -4506,7 +4513,7 @@ void MainFrame::OpenProject(wxString& filename)
 			glbin_moviemaker.SetKeyframeEnable(bVal);
 		if (fconfig.Read("views_cmb", &iVal))
 		{
-			canvas = GetView(iVal);
+			canvas = GetRenderCanvas(iVal);
 			glbin_moviemaker.SetView(canvas);
 		}
 		if (fconfig.Read("rot_check", &bVal))

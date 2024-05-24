@@ -154,7 +154,7 @@ void CalculationDlg::OnLoadA(wxCommandEvent &event)
 				m_calc_a_text->ChangeValue(str);
 				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
-					RenderCanvas* view = m_frame->GetView(i);
+					RenderCanvas* view = m_frame->GetRenderCanvas(i);
 					if (view && view->GetVolumeData(str))
 					{
 						m_view = view;
@@ -171,7 +171,7 @@ void CalculationDlg::OnLoadA(wxCommandEvent &event)
 				m_calc_a_text->ChangeValue(str);
 				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
-					RenderCanvas* view = m_frame->GetView(i);
+					RenderCanvas* view = m_frame->GetRenderCanvas(i);
 					if (view && view->GetGroup(str))
 					{
 						m_view = view;
@@ -182,7 +182,7 @@ void CalculationDlg::OnLoadA(wxCommandEvent &event)
 			break;
 		}
 		if (!m_view)
-			m_view = m_frame->GetView(0);
+			m_view = m_frame->GetRenderCanvas(0);
 	}
 }
 
@@ -335,6 +335,6 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 	if (refresh)
 	{
 		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
-		m_frame->RefreshCanvases({ m_frame->GetView(m_view) });
+		m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(m_view) });
 	}
 }

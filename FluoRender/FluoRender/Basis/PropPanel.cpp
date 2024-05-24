@@ -73,7 +73,7 @@ void PropPanel::SetFocusVRenderViews(wxBasisSlider* slider)
 	{
 		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view)
 			{
 				view->SetFocusedSlider(slider);

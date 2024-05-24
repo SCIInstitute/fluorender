@@ -132,26 +132,7 @@ public:
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
-	void SetRenderCanvas(RenderCanvas* canvas) { m_canvas = canvas; }
-
-	//set the brush icon down
-	//void SelectBrush(int id);
-	//update undo status
-	//void UpdateUndoRedo();
-	//void UpdateMaskTb();
-
-	//output
-	//void Update(int mode);//mode: 0-size; 1-speed
-	//void UpdateSize();
-	//void UpdateSpeed();
-	void SetOutput(const GridData &data, const wxString &unit);
-	void CopyData();
-	void PasteData();
-
 private:
-	//current view
-	RenderCanvas *m_canvas;
-
 	//max volume value
 	double m_max_value;
 	//output
@@ -212,6 +193,12 @@ private:
 	wxCheckBox* m_history_chk;
 	wxButton* m_clear_hist_btn;
 	wxGrid *m_output_grid;
+
+private:
+	//output
+	void SetOutput(const GridData& data, const wxString& unit);
+	void CopyData();
+	void PasteData();
 
 private:
 	//event handling

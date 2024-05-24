@@ -168,7 +168,6 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_force_clear(false),
 	m_interactive(false),
 	m_clear_buffer(false),
-	m_brush_state(0),
 	m_grow_on(false),
 	//resizing
 	m_resize(false),
@@ -300,8 +299,6 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_full_screen(false),
 	m_drawing(false),
 	m_refresh(false),
-	m_paint_count(false),
-	m_paint_colocalize(false),
 	m_ruler_autorelax(false),
 	m_focused_slider(0),
 	m_keep_enlarge(false),
@@ -1835,12 +1832,12 @@ void RenderCanvas::SetIntMode(int mode)
 	m_int_mode = mode;
 	if (m_int_mode == 1)
 	{
-		m_brush_state = 0;
+		//glbin_vol_selector.SetMode(0);
 		m_draw_brush = false;
 	}
-	else if (m_int_mode == 10 ||
-		m_int_mode == 12)
-		SetPaintMode(9);
+	//else if (m_int_mode == 10 ||
+	//	m_int_mode == 12)
+	//	glbin_vol_selector.SetMode(9);
 }
 
 //set use 2d rendering results
@@ -1852,19 +1849,6 @@ void RenderCanvas::SetPaintUse2d(bool use2d)
 bool RenderCanvas::GetPaintUse2d()
 {
 	return glbin_vol_selector.GetPaintUse2d();
-}
-
-//segmentation mdoe selection
-void RenderCanvas::SetPaintMode(int mode)
-{
-	glbin_vol_selector.SetMode(mode);
-	m_brush_state = mode;
-	glbin_vol_selector.ChangeBrushSetsIndex();
-}
-
-int RenderCanvas::GetPaintMode()
-{
-	return glbin_vol_selector.GetMode();
 }
 
 void RenderCanvas::DrawCircles(double cx, double cy,
@@ -2177,10 +2161,8 @@ void RenderCanvas::Segment(bool push_mask)
 		mode == 8 ||
 		mode == 9)
 	{
-		if (m_paint_count)
-			count = true;
-		if (m_paint_colocalize)
-			colocal = true;
+		count = glbin_vol_selector.GetPaintCount();
+		colocal = glbin_vol_selector.GetPaintColocalize();
 	}
 
 	//update
@@ -3706,11 +3688,11 @@ void RenderCanvas::UpdateBrushState(bool focus)
 	}
 	else
 	{
-		if (m_brush_state)
+		if (glbin_vol_selector.GetMode())
 		{
 			if (wxGetKeyState(WXK_SHIFT))
 			{
-				m_brush_state = 0;
+				glbin_vol_selector.SetMode(0);
 				SetBrush(2);
 				if (tree_panel)
 					tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
@@ -3720,7 +3702,7 @@ void RenderCanvas::UpdateBrushState(bool focus)
 			}
 			else if (wxGetKeyState(wxKeyCode('Z')) && focus)
 			{
-				m_brush_state = 0;
+				glbin_vol_selector.SetMode(0);
 				SetBrush(4);
 				if (tree_panel)
 					tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
@@ -3730,7 +3712,7 @@ void RenderCanvas::UpdateBrushState(bool focus)
 			}
 			else if (wxGetKeyState(wxKeyCode('X')) && focus)
 			{
-				m_brush_state = 0;
+				glbin_vol_selector.SetMode(0);
 				SetBrush(3);
 				if (tree_panel)
 					tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
@@ -3740,7 +3722,7 @@ void RenderCanvas::UpdateBrushState(bool focus)
 			}
 			else
 			{
-				SetBrush(m_brush_state);
+				SetBrush(glbin_vol_selector.GetMode());
 				RefreshGL(12);
 			}
 		}
@@ -3971,7 +3953,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	}
 	else
 	{
-		if (glbin_moviemaker.GetView() == this)
+		if (glbin_moviemaker.GetRenderCanvas() == this)
 		{
 			//DBGPRINT(L"lg finished: %d, cur view: %d\n",
 			//	glbin_lg_renderer.GetFinished(),
@@ -5507,7 +5489,7 @@ void RenderCanvas::ForceDraw()
 		{
 			for (int i = 0; i< m_frame->GetViewNum(); i++)
 			{
-				RenderCanvas* view = m_frame->GetView(i);
+				RenderCanvas* view = m_frame->GetRenderCanvas(i);
 				if (view && view != this)
 				{
 					view->m_set_gl = false;
@@ -5670,7 +5652,7 @@ void RenderCanvas::ForceDraw()
 		{
 			for (int i = 0; i< m_frame->GetViewNum(); i++)
 			{
-				RenderCanvas* view = m_frame->GetView(i);
+				RenderCanvas* view = m_frame->GetRenderCanvas(i);
 				if (view && view != this)
 				{
 					view->SetRotations(m_rotx, m_roty, m_rotz, true);
@@ -10493,7 +10475,8 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		{
 			if (glbin_ruler_handler.GetRulerFinished())
 			{
-				SetIntMode(1);
+				//SetIntMode(1);
+				glbin_ruler_handler.SetMode(0);
 			}
 			else
 			{

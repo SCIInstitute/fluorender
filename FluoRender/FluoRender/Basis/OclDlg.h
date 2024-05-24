@@ -58,7 +58,7 @@ public:
 	~OclDlg();
 
 	void GetSettings(RenderCanvas* view);
-	RenderCanvas* GetView();
+	RenderCanvas* GetRenderCanvas();
 
 private:
 	MainFrame* m_frame;

@@ -188,7 +188,7 @@ public:
 
 	void GetSettings(RenderCanvas* vrv);
 	void UpdateRulerProps();
-	RenderCanvas* GetView();
+	RenderCanvas* GetRenderCanvas();
 	void UpdateList();
 
 	//processing

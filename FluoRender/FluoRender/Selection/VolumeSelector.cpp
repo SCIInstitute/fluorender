@@ -40,7 +40,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 VolumeSelector::VolumeSelector() :
-	m_view(0),
+	m_canvas(0),
 	m_vd(0),
 	m_2d_mask(0),
 	m_2d_weight1(0),
@@ -80,8 +80,9 @@ VolumeSelector::VolumeSelector() :
 	m_iter_normal(30),
 	m_iter_strong(60),
 	m_brush_sets_index(0),
-	m_test_speed(false)
-
+	m_test_speed(false),
+	m_paint_count(false),
+	m_paint_colocalize(false)
 {
 }
 
@@ -89,9 +90,43 @@ VolumeSelector::~VolumeSelector()
 {
 }
 
+void VolumeSelector::SetRenderCanvas(RenderCanvas* canvas)
+{
+	m_canvas = canvas;
+	SetMode(m_mode);
+}
+
+void VolumeSelector::SetMode(int mode)
+{
+	m_mode = mode;
+	ChangeBrushSetsIndex();
+	if (!m_canvas)
+		return;
+
+	switch (m_mode)
+	{
+	case 0://not used
+		m_canvas->SetIntMode(1);
+		break;
+	case 1://select
+	case 2://append
+	case 3://erase
+	case 4://diffuse
+	case 5://flood
+	case 6://clear
+	case 7://select all
+	case 8://select solid
+		m_canvas->SetIntMode(2);
+		break;
+	case 9://grow from point
+		m_canvas->SetIntMode(10);
+		break;
+	}
+}
+
 void VolumeSelector::Segment(bool push_mask, int mx, int my)
 {
-	if (!m_view || !m_vd)
+	if (!m_canvas || !m_vd)
 		return;
 
 	if (m_test_speed)
@@ -102,8 +137,8 @@ void VolumeSelector::Segment(bool push_mask, int mx, int my)
 		m_vd->SetMaskClear();
 
 	//save view
-	m_mv_mat = m_view->GetDrawMat();
-	m_prj_mat = m_view->GetProjection();
+	m_mv_mat = m_canvas->GetDrawMat();
+	m_prj_mat = m_canvas->GetProjection();
 
 	//mouse position
 	fluo::Vector mvec;//mouse vector in data space
@@ -131,7 +166,7 @@ void VolumeSelector::Segment(bool push_mask, int mx, int my)
 			final_buffer->tex_id(GL_COLOR_ATTACHMENT0),
 			chann_buffer->tex_id(GL_COLOR_ATTACHMENT0));
 	//orthographic
-	SetOrthographic(!m_view->GetPersp());
+	SetOrthographic(!m_canvas->GetPersp());
 
 	//modulate threshold with pressure
 	double gm_falloff_save, scl_translate_save;
@@ -150,7 +185,7 @@ void VolumeSelector::Segment(bool push_mask, int mx, int my)
 	double r = m_brush_radius2 - m_brush_radius1;
 	if (m_select_multi)
 	{
-		DataGroup* group = m_view->GetGroup(m_vd);
+		DataGroup* group = m_canvas->GetGroup(m_vd);
 		if (group && group->GetVolumeNum() > 1)
 		{
 			VolumeData* save = m_vd;
@@ -252,7 +287,7 @@ void VolumeSelector::Select(bool push_mask, double radius)
 		{
 			flrd::PaintBoxes pb;
 			pb.SetBricks(bricks);
-			pb.SetPersp(!m_view->GetPersp());
+			pb.SetPersp(!m_canvas->GetPersp());
 			fluo::Transform *tform = m_vd->GetTexture()->transform();
 			double mvmat[16];
 			tform->get_trans(mvmat);
@@ -268,7 +303,7 @@ void VolumeSelector::Select(bool push_mask, double radius)
 			pr.set(glm::value_ptr(m_prj_mat));
 			mat.set(glm::value_ptr(cmat));
 			pb.SetMats(mv, pr, mat);
-			pb.SetPaintTex(m_2d_mask, m_view->GetGLSize().x, m_view->GetGLSize().y);
+			pb.SetPaintTex(m_2d_mask, m_canvas->GetGLSize().x, m_canvas->GetGLSize().y);
 			if (m_mode == 9)
 				pb.SetMousePos(m_mx, m_my);
 			pb.Compute();
@@ -345,6 +380,24 @@ void VolumeSelector::Select(bool push_mask, double radius)
 		m_vd->SetUseMaskThreshold(false);
 		m_vd->GetTexture()->invalid_all_mask();
 	}
+}
+
+//erase selection
+void VolumeSelector::Clear()
+{
+
+}
+
+//extract a new volume excluding the selection
+void VolumeSelector::Erase()
+{
+
+}
+
+//extract a new volume of the selection
+void VolumeSelector::Extract()
+{
+
 }
 
 double VolumeSelector::HueCalculation(int mode, unsigned int label)
@@ -603,11 +656,11 @@ void VolumeSelector::ChangeBrushSetsIndex()
 //th udpate
 bool VolumeSelector::GetThUpdate()
 {
-	if (!m_view || (m_mode != 1 &&
+	if (!m_canvas || (m_mode != 1 &&
 		m_mode != 2 && m_mode != 4))
 		return false;
-	glm::mat4 mv_mat = m_view->GetDrawMat();
-	glm::mat4 prj_mat = m_view->GetProjection();
+	glm::mat4 mv_mat = m_canvas->GetDrawMat();
+	glm::mat4 prj_mat = m_canvas->GetProjection();
 	//compare view
 	if (mv_mat == m_mv_mat && prj_mat == m_prj_mat)
 		return true;
@@ -651,7 +704,7 @@ void VolumeSelector::RedoMask()
 
 bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)
 {
-	if (!m_view || !m_vd)
+	if (!m_canvas || !m_vd)
 		return false;
 	if (mx >= 0 && my >= 0 &&
 		m_mx0 >=0 && m_my0 >=0)
@@ -672,8 +725,8 @@ bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)
 		m_mx0 < 0 || m_my0 < 0)
 		return false;
 	
-	int nx = m_view->GetGLSize().x;
-	int ny = m_view->GetGLSize().y;
+	int nx = m_canvas->GetGLSize().x;
+	int ny = m_canvas->GetGLSize().y;
 	fluo::Transform *tform = m_vd->GetTexture()->transform();
 	double mvmat[16];
 	tform->get_trans(mvmat);
@@ -682,7 +735,7 @@ bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)
 		mvmat[1], mvmat[5], mvmat[9], mvmat[13],
 		mvmat[2], mvmat[6], mvmat[10], mvmat[14],
 		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-	glm::mat4 mv_mat = m_view->GetDrawMat();
+	glm::mat4 mv_mat = m_canvas->GetDrawMat();
 	mv_mat = mv_mat * mv_mat2;
 	fluo::Transform mv, pr;
 	mv.set(glm::value_ptr(mv_mat));

@@ -597,6 +597,17 @@ DEALINGS IN THE SOFTWARE.
 #define gstSelUndo "sel undo"//selector undo
 #define gstSelRedo "sel redo"
 #define gstSelMask "sel mask"
+#define gstSelOptions "sel options"//edge detect etc
+#define gstBrushThreshold "brush threshold"
+#define gstBrushGmFalloff "brush gm falloff"
+#define gstBrush2dInf "brush 2d inf"
+#define gstBrushSize1 "brush size1"
+#define gstBrushSize2 "brush size2"
+#define gstBrushIter "brush iter"
+#define gstBrushSizeRel "brush size rel"
+#define gstBrushHistoryEnable "brush history enable"
+#define gstBrushCountResult "brush count result"
+#define gstBrushSpeedResult "brush speed result"
 #define gstSettingsJava "settings java"
 
 //dialog agent common

@@ -200,9 +200,10 @@ public:
 	//views
 	void RefreshCanvases(const std::set<int>& views = {});//view indices to update
 	int GetViewNum();
-	RenderCanvas* GetView(int index);
-	RenderCanvas* GetView(wxString& name);
-	int GetView(RenderCanvas* view);
+	RenderCanvas* GetCurRenderCanvas();
+	RenderCanvas* GetRenderCanvas(int index);
+	RenderCanvas* GetRenderCanvas(wxString& name);
+	int GetRenderCanvas(RenderCanvas* view);
 	void DeleteVRenderView(int i);
 	void DeleteVRenderView(wxString &name);
 
@@ -370,6 +371,8 @@ private:
 	int m_cur_sel_vol;
 	//mesh index
 	int m_cur_sel_mesh;
+	//the canvas current selection belongs
+	int m_cur_canvas;
 
 	//mac address
 	wxString m_address;

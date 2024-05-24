@@ -210,7 +210,7 @@ void KeyListCtrl::OnAct(wxListEvent& event)
 	int index = glbin_interpolator.GetKeyIndex(int(id));
 	double time = glbin_interpolator.GetKeyTime(index);
 
-	RenderCanvas* view = glbin_moviemaker.GetView();
+	RenderCanvas* view = glbin_moviemaker.GetRenderCanvas();
 	if (view)
 	{
 		view->SetParams(time);
@@ -999,7 +999,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	wxIntegerValidator<unsigned int> vald_int;
 
 	if (m_frame)
-		m_view = m_frame->GetView(glbin_mov_def.m_view_idx);
+		m_view = m_frame->GetRenderCanvas(glbin_mov_def.m_view_idx);
 
 	//notebook
 	m_notebook = new wxAuiNotebook(this, wxID_ANY,
@@ -1236,7 +1236,7 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_views_cmb->Clear();
 		for (i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view && m_views_cmb)
 				m_views_cmb->Append(view->m_renderview_panel->GetName());
 		}

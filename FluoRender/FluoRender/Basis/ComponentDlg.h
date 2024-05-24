@@ -206,7 +206,7 @@ public:
 	void Update();
 	void GetSettings();
 	void SetView(RenderCanvas* view);
-	RenderCanvas* GetView() { return m_view; }
+	RenderCanvas* GetRenderCanvas() { return m_view; }
 
 	void GenerateComp(bool command=true);
 	void Fixate(bool command = true);

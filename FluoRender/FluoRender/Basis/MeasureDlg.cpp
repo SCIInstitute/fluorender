@@ -1383,7 +1383,7 @@ void MeasureDlg::UpdateRulerProps()
 	m_interp_cmb->Select(interp);
 }
 
-RenderCanvas* MeasureDlg::GetView()
+RenderCanvas* MeasureDlg::GetRenderCanvas()
 {
 	return m_view;
 }

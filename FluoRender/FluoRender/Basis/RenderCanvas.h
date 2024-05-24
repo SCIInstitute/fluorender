@@ -487,10 +487,6 @@ public:
 	void SetPaintUse2d(bool use2d);
 	bool GetPaintUse2d();
 
-	//segmentation mode selection
-	void SetPaintMode(int mode);
-	int GetPaintMode();
-
 	//calculations
 	void SetVolumeA(VolumeData* vd);
 	void SetVolumeB(VolumeData* vd);
@@ -847,10 +843,6 @@ public:
 	//linked rotation
 	static bool m_linked_rot;
 	static RenderCanvas* m_master_linked_view;
-	//count after paint
-	bool m_paint_count;
-	//colocalize after paint
-	bool m_paint_colocalize;
 	//relax after ruler
 	bool m_ruler_autorelax;
 
@@ -917,12 +909,6 @@ private:
 	bool m_force_clear;
 	bool m_interactive;
 	bool m_clear_buffer;
-	int m_brush_state;  //sets the button state of the tree panel
-						//0-not set
-						//2-append
-						//3-erase
-						//4-diffuse
-						//8-solid
 	bool m_grow_on;//flag for grow is currently on for idle events
 	//resizing
 	bool m_resize;

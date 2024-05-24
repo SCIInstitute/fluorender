@@ -2479,7 +2479,7 @@ void ScriptProc::ChangeData()
 		m_frame->GetAdjustView()->SetVolumeData(0);
 		m_frame->GetAdjustView()->SetGroup(0);
 		m_frame->GetAdjustView()->SetGroupLink(0);
-		m_frame->GetView(0)->ClearAll();
+		m_frame->GetRenderCanvas(0)->ClearAll();
 		DataGroup::ResetID();
 		MeshGroup::ResetID();
 	}

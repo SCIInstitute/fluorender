@@ -53,11 +53,11 @@ namespace flrd
 		VolumeSelector();
 		~VolumeSelector();
 
-		void SetView(RenderCanvas* view) { m_view = view; }
+		void SetRenderCanvas(RenderCanvas* canvas);
 		void SetVolume(VolumeData *vd) { m_vd = vd; }
 		VolumeData* GetVolume() { return m_vd; }
 		//modes
-		void SetMode(int mode) { m_mode = mode; }
+		void SetMode(int mode);
 		int GetMode() { return m_mode; }
 		//init mask
 		void SetInitMask(int val) { m_init_mask = val; }
@@ -223,6 +223,9 @@ namespace flrd
 
 		void Segment(bool push_mask, int mx = 0, int my = 0);
 		void Select(bool push_mask, double radius);
+		void Clear();//erase selection
+		void Erase();//extract a new volume excluding the selection
+		void Extract();//extract a new volume of the selection
 		void CompExportRandomColor(int hmode, VolumeData* vd_r, VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide);
 		VolumeData* GetResult(bool pop);
 
@@ -243,8 +246,13 @@ namespace flrd
 		bool m_test_speed;
 		double GetSpanSec() { return m_span_sec; }
 
+		void SetPaintCount(bool val) { m_paint_count = val; }
+		bool GetPaintCount() { return m_paint_count; }
+		void SetPaintColocalize(bool val) { m_paint_colocalize = val; }
+		bool GetPaintColocalize() { return m_paint_colocalize; }
+
 	private:
-		RenderCanvas *m_view;
+		RenderCanvas *m_canvas;
 		VolumeData *m_vd;	//volume data for segmentation
 		unsigned int m_2d_mask;	//2d mask from painting
 		unsigned int m_2d_weight1;//2d weight map (after tone mapping)
@@ -253,8 +261,9 @@ namespace flrd
 		double m_prjmat[16];//projection matrix
 		int m_iter_num;		//iteration number for growing
 		int m_mode;			//segmentation modes
-							//1-select; 2-append; 3-erase; 4-diffuse;
-							//5-flood; 6-clear; 7-all; 8-solid;
+							//0-no selection
+							//1-select; 2-append; 3-unselect; 4-diffuse;
+							//5-flood; 6-unselect all; 7-select all; 8-solid;
 							//9-grow from point
 		int m_init_mask;	//0; 1-init only; 2-diffuse only; 3-init & diffuse
 		bool m_use2d;
@@ -314,6 +323,11 @@ namespace flrd
 
 		std::chrono::high_resolution_clock::time_point m_t1, m_t2;
 		double m_span_sec;
+
+		//count after paint
+		bool m_paint_count;
+		//colocalize after paint
+		bool m_paint_colocalize;
 
 	private:
 		double HueCalculation(int mode, unsigned int label);

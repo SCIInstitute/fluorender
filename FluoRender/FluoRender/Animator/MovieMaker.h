@@ -81,7 +81,7 @@ public:
 	//settings
 	void SetMainFrame(MainFrame* frame);
 	void SetView(RenderCanvas* view);
-	RenderCanvas* GetView();
+	RenderCanvas* GetRenderCanvas();
 	int GetViewIndex();
 	void SetFileName(const wxString& filename) { m_filename = filename; }
 	void SetLoop(bool val) { m_loop = val; }

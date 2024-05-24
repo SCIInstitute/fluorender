@@ -379,7 +379,7 @@ void MovieMaker::SetView(RenderCanvas* view)
 	m_view = view;
 }
 
-RenderCanvas* MovieMaker::GetView()
+RenderCanvas* MovieMaker::GetRenderCanvas()
 {
 	return m_view;
 }
@@ -391,7 +391,7 @@ int MovieMaker::GetViewIndex()
 
 	for (int i = 0; i < m_frame->GetViewNum(); ++i)
 	{
-		if (m_view == m_frame->GetView(i))
+		if (m_view == m_frame->GetRenderCanvas(i))
 			return i;
 	}
 
@@ -655,8 +655,8 @@ void MovieMaker::InsertKey(int index)
 		return;
 	if (!m_view)
 	{
-		if (m_frame->GetView(0))
-			m_view = m_frame->GetView(0);
+		if (m_frame->GetRenderCanvas(0))
+			m_view = m_frame->GetRenderCanvas(0);
 		else
 			return;
 	}
@@ -1410,8 +1410,8 @@ void MovieMaker::MakeKeysChannComb(int comb)
 		return;
 	if (!m_view)
 	{
-		if (m_frame->GetView(0))
-			m_view = m_frame->GetView(0);
+		if (m_frame->GetRenderCanvas(0))
+			m_view = m_frame->GetRenderCanvas(0);
 		else
 			return;
 	}

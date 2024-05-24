@@ -202,7 +202,7 @@ void OclDlg::GetSettings(RenderCanvas* view)
 	AddKernelsToList();
 }
 
-RenderCanvas* OclDlg::GetView()
+RenderCanvas* OclDlg::GetRenderCanvas()
 {
 	return m_view;
 }
@@ -385,7 +385,7 @@ void OclDlg::Execute()
 	if (refresh)
 	{
 		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
-		m_frame->RefreshCanvases({ m_frame->GetView(m_view) });
+		m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(m_view) });
 	}
 }
 

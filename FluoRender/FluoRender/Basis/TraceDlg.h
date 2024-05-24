@@ -168,7 +168,7 @@ public:
 	~TraceDlg();
 
 	void GetSettings(RenderCanvas* vrv);
-	RenderCanvas* GetView();
+	RenderCanvas* GetRenderCanvas();
 	void UpdateList();
 
 	//cell operations

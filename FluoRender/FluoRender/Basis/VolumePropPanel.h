@@ -83,7 +83,7 @@ public:
 
 	//sync view in depth mode
 	void SetView(RenderCanvas* view);
-	RenderCanvas* GetView();
+	RenderCanvas* GetRenderCanvas();
 
 	void ApplyMl();
 	void SaveMl();

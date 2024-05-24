@@ -173,7 +173,7 @@ void DataTreeCtrl::DeleteSelection()
 			{
 			case 1://view
 				{
-					RenderCanvas* view = m_frame->GetView(par_name);
+					RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
 					if (!view)
 						break;
 					LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
@@ -231,7 +231,7 @@ void DataTreeCtrl::DeleteSelection()
 				{
 					wxTreeItemId gpar_item = GetItemParent(par_item);
 					wxString gpar_name = GetItemText(gpar_item);
-					RenderCanvas* view = m_frame->GetView(gpar_name);
+					RenderCanvas* view = m_frame->GetRenderCanvas(gpar_name);
 					if (!view)
 						break;
 					LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
@@ -254,7 +254,7 @@ void DataTreeCtrl::DeleteSelection()
 				{
 					wxTreeItemId gpar_item = GetItemParent(par_item);
 					wxString gpar_name = GetItemText(gpar_item);
-					RenderCanvas* view = m_frame->GetView(gpar_name);
+					RenderCanvas* view = m_frame->GetRenderCanvas(gpar_name);
 					if (!view)
 						break;
 					LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
@@ -322,7 +322,7 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 					menu.Append(ID_AddDataGroup, "Add Volume Group");
 					menu.Append(ID_AddMeshGroup, "Add Mesh Group");
 					wxString str = GetItemText(sel_item);
-					if (str != m_frame->GetView(0)->GetName())
+					if (str != m_frame->GetRenderCanvas(0)->GetName())
 						menu.Append(ID_CloseView, "Close");
 				}
 				break;
@@ -457,7 +457,7 @@ void DataTreeCtrl::OnIsolate(wxCommandEvent& event)
 			}
 		}
 
-		RenderCanvas* view = m_frame->GetView(viewname);
+		RenderCanvas* view = m_frame->GetRenderCanvas(viewname);
 		if (view)
 		{
 			view->Isolate(item_type, itemname);
@@ -521,7 +521,7 @@ void DataTreeCtrl::OnShowAll(wxCommandEvent& event)
 			}
 		}
 
-		RenderCanvas* view = m_frame->GetView(viewname);
+		RenderCanvas* view = m_frame->GetRenderCanvas(viewname);
 		if (view)
 		{
 			view->ShowAll();
@@ -600,7 +600,7 @@ void DataTreeCtrl::OnAddMeshGroup(wxCommandEvent &event)
 		{
 			//view
 			wxString name = GetItemText(sel_item);
-			RenderCanvas* view = m_frame->GetView(name);
+			RenderCanvas* view = m_frame->GetRenderCanvas(name);
 			if (view)
 			{
 				wxString group_name = view->AddMGroup("");
@@ -619,7 +619,7 @@ void DataTreeCtrl::OnAddMeshGroup(wxCommandEvent &event)
 				{
 					//volume in view
 					wxString name = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetView(name);
+					RenderCanvas* view = m_frame->GetRenderCanvas(name);
 					if (view)
 					{
 						wxString group_name = view->AddMGroup("");
@@ -636,7 +636,7 @@ void DataTreeCtrl::OnAddMeshGroup(wxCommandEvent &event)
 						if (gpar_data && gpar_data->type == 1)
 						{
 							wxString name = GetItemText(gpar_item);
-							RenderCanvas* view = m_frame->GetView(name);
+							RenderCanvas* view = m_frame->GetRenderCanvas(name);
 							if (view)
 							{
 								wxString group_name = view->AddMGroup("");
@@ -658,7 +658,7 @@ void DataTreeCtrl::OnAddMeshGroup(wxCommandEvent &event)
 				{
 					//mesh in view
 					wxString name = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetView(name);
+					RenderCanvas* view = m_frame->GetRenderCanvas(name);
 					if (view)
 					{
 						wxString group_name = view->AddMGroup("");
@@ -675,7 +675,7 @@ void DataTreeCtrl::OnAddMeshGroup(wxCommandEvent &event)
 						if (gpar_data && gpar_data->type == 1)
 						{
 							wxString name = GetItemText(gpar_item);
-							RenderCanvas* view = m_frame->GetView(name);
+							RenderCanvas* view = m_frame->GetRenderCanvas(name);
 							if (view)
 							{
 								wxString group_name = view->AddMGroup("");
@@ -698,7 +698,7 @@ void DataTreeCtrl::OnAddMeshGroup(wxCommandEvent &event)
 				{
 					//group in view
 					wxString name = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetView(name);
+					RenderCanvas* view = m_frame->GetRenderCanvas(name);
 					if (view)
 					{
 						wxString group_name = view->AddMGroup("");
@@ -731,7 +731,7 @@ void DataTreeCtrl::OnAddDataGroup(wxCommandEvent& event)
 		{
 			//view
 			wxString name = GetItemText(sel_item);
-			RenderCanvas* view = m_frame->GetView(name);
+			RenderCanvas* view = m_frame->GetRenderCanvas(name);
 			if (view)
 			{
 				wxString group_name = view->AddGroup("");
@@ -750,7 +750,7 @@ void DataTreeCtrl::OnAddDataGroup(wxCommandEvent& event)
 				{
 					//volume in view
 					wxString name = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetView(name);
+					RenderCanvas* view = m_frame->GetRenderCanvas(name);
 					if (view)
 					{
 						wxString group_name = view->AddGroup("");
@@ -767,7 +767,7 @@ void DataTreeCtrl::OnAddDataGroup(wxCommandEvent& event)
 						if (gpar_data && gpar_data->type == 1)
 						{
 							wxString name = GetItemText(gpar_item);
-							RenderCanvas* view = m_frame->GetView(name);
+							RenderCanvas* view = m_frame->GetRenderCanvas(name);
 							if (view)
 							{
 								wxString group_name = view->AddGroup("");
@@ -789,7 +789,7 @@ void DataTreeCtrl::OnAddDataGroup(wxCommandEvent& event)
 				{
 					//mesh in view
 					wxString name = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetView(name);
+					RenderCanvas* view = m_frame->GetRenderCanvas(name);
 					if (view)
 					{
 						wxString group_name = view->AddGroup("");
@@ -806,7 +806,7 @@ void DataTreeCtrl::OnAddDataGroup(wxCommandEvent& event)
 						if (gpar_data && gpar_data->type == 1)
 						{
 							wxString name = GetItemText(gpar_item);
-							RenderCanvas* view = m_frame->GetView(name);
+							RenderCanvas* view = m_frame->GetRenderCanvas(name);
 							if (view)
 							{
 								wxString group_name = view->AddGroup("");
@@ -829,7 +829,7 @@ void DataTreeCtrl::OnAddDataGroup(wxCommandEvent& event)
 				{
 					//group in view
 					wxString name = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetView(name);
+					RenderCanvas* view = m_frame->GetRenderCanvas(name);
 					if (view)
 					{
 						wxString group_name = view->AddGroup("");
@@ -944,7 +944,7 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	if (item_data->type == 1)
 	{
 		//view
-		RenderCanvas* view = m_frame->GetView(name);
+		RenderCanvas* view = m_frame->GetRenderCanvas(name);
 		if (view)
 			view->RandomizeColor();
 	}
@@ -966,7 +966,7 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	{
 		//volume group
 		wxString par_name = GetItemText(GetItemParent(sel_item));
-		RenderCanvas* view = m_frame->GetView(par_name);
+		RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
 		if (view)
 		{
 			DataGroup* group = view->GetGroup(name);
@@ -978,7 +978,7 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	{
 		//mesh group
 		wxString par_name = GetItemText(GetItemParent(sel_item));
-		RenderCanvas* view = m_frame->GetView(par_name);
+		RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
 		if (view)
 		{
 			MeshGroup* group = view->GetMGroup(name);
@@ -1033,7 +1033,7 @@ void DataTreeCtrl::UpdateSelection()
 	//clear volume A for all views
 	for (int i=0; i< m_frame->GetViewNum(); i++)
 	{
-		RenderCanvas* view = m_frame->GetView(i);
+		RenderCanvas* view = m_frame->GetRenderCanvas(i);
 		if (view)
 			view->SetVolumeA(0);
 	}
@@ -1054,7 +1054,7 @@ void DataTreeCtrl::UpdateSelection()
 				//m_frame->OnSelection(0);
 				{
 					wxString str = GetItemText(sel_item);
-					RenderCanvas* view = m_frame->GetView(str);
+					RenderCanvas* view = m_frame->GetRenderCanvas(str);
 					m_frame->OnSelection(1, view, 0, 0, 0);
 				}
 				break;
@@ -1070,7 +1070,7 @@ void DataTreeCtrl::UpdateSelection()
 							{
 								//par is group
 								wxString str = GetItemText(GetItemParent(par_item));
-								RenderCanvas* view = m_frame->GetView(str);
+								RenderCanvas* view = m_frame->GetRenderCanvas(str);
 								if (view)
 								{
 									VolumeData* vd = glbin_data_manager.GetVolumeData(name);
@@ -1085,7 +1085,7 @@ void DataTreeCtrl::UpdateSelection()
 							{
 								//par is view
 								wxString str = GetItemText(par_item);
-								RenderCanvas* view = m_frame->GetView(str);
+								RenderCanvas* view = m_frame->GetRenderCanvas(str);
 								if (view)
 								{
 									VolumeData* vd = glbin_data_manager.GetVolumeData(name);
@@ -1108,7 +1108,7 @@ void DataTreeCtrl::UpdateSelection()
 						{
 							//par is group
 							wxString str = GetItemText(GetItemParent(par_item));
-							RenderCanvas* view = m_frame->GetView(str);
+							RenderCanvas* view = m_frame->GetRenderCanvas(str);
 							if (view)
 							{
 								MeshData* md = glbin_data_manager.GetMeshData(name);
@@ -1119,7 +1119,7 @@ void DataTreeCtrl::UpdateSelection()
 						{
 							//par is view
 							wxString str = GetItemText(par_item);
-							RenderCanvas* view = m_frame->GetView(str);
+							RenderCanvas* view = m_frame->GetRenderCanvas(str);
 							if (view)
 							{
 								MeshData* md = glbin_data_manager.GetMeshData(name);
@@ -1132,7 +1132,7 @@ void DataTreeCtrl::UpdateSelection()
 			case 4://annotations
 				{
 					wxString par_name = GetItemText(GetItemParent(sel_item));
-					RenderCanvas* view = m_frame->GetView(par_name);
+					RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
 					Annotations* ann = glbin_data_manager.GetAnnotations(name);
 					m_frame->OnSelection(4, view, 0, 0, 0, ann);
 				}
@@ -1140,7 +1140,7 @@ void DataTreeCtrl::UpdateSelection()
 			case 5://group
 				{
 					wxString par_name = GetItemText(GetItemParent(sel_item));
-					RenderCanvas* view = m_frame->GetView(par_name);
+					RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
 					if (view)
 					{
 						DataGroup* group = view->GetGroup(name);
@@ -1151,7 +1151,7 @@ void DataTreeCtrl::UpdateSelection()
 			case 6://mesh group
 				{
 					wxString par_name = GetItemText(GetItemParent(sel_item));
-					RenderCanvas* view = m_frame->GetView(par_name);
+					RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
 					if (view)
 					{
 						m_frame->OnSelection(0);
@@ -1295,7 +1295,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 			{
 			case 1://view
 				{
-					RenderCanvas* view = m_frame->GetView(name);
+					RenderCanvas* view = m_frame->GetRenderCanvas(name);
 					if (view)
 					{
 						if (rc)
@@ -1317,7 +1317,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 							vd->ToggleDisp();
 							for (int i=0; i< m_frame->GetViewNum(); i++)
 							{
-								RenderCanvas* view = m_frame->GetView(i);
+								RenderCanvas* view = m_frame->GetRenderCanvas(i);
 								if (view)
 									view->SetVolPopDirty();
 							}
@@ -1337,7 +1337,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 							md->ToggleDisp();
 							for (int i=0; i< m_frame->GetViewNum(); i++)
 							{
-								RenderCanvas* view = m_frame->GetView(i);
+								RenderCanvas* view = m_frame->GetRenderCanvas(i);
 								if (view)
 									view->SetMeshPopDirty();
 							}
@@ -1357,7 +1357,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 			case 5://group
 				{
 					wxString par_name = GetItemText(GetItemParent(sel_item));
-					RenderCanvas* view = m_frame->GetView(par_name);
+					RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
 					if (view)
 					{
 						DataGroup* group = view->GetGroup(name);
@@ -1377,7 +1377,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 			case 6://mesh group
 				{
 					wxString par_name = GetItemText(GetItemParent(sel_item));
-					RenderCanvas* view = m_frame->GetView(par_name);
+					RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
 					if (view)
 					{
 						MeshGroup* group = view->GetMGroup(name);
@@ -1488,7 +1488,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			if (src_type == 2 && dst_type == 5)
 			{
 				//move volume to the group in the same view
-				RenderCanvas* view = m_frame->GetView(src_par_name);
+				RenderCanvas* view = m_frame->GetRenderCanvas(src_par_name);
 				if (view)
 				{
 					wxString str("");
@@ -1498,7 +1498,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			else if (src_type==3 && dst_type==6)
 			{
 				//move mesh into a group
-				RenderCanvas* view = m_frame->GetView(src_par_name);
+				RenderCanvas* view = m_frame->GetRenderCanvas(src_par_name);
 				if (view)
 				{
 					wxString str("");
@@ -1507,7 +1507,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			}
 			else
 			{
-				RenderCanvas* view = m_frame->GetView(src_par_name);
+				RenderCanvas* view = m_frame->GetRenderCanvas(src_par_name);
 				if (view)
 					view->MoveLayerinView(src_name, dst_name);
 			}
@@ -1519,7 +1519,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 		{
 			//move volume within the same group
 			wxString str = GetItemText(GetItemParent(src_par_item));
-			RenderCanvas* view = m_frame->GetView(str);
+			RenderCanvas* view = m_frame->GetRenderCanvas(str);
 			if (view)
 				view->MoveLayerinGroup(src_par_name, src_name, dst_name);
 		}
@@ -1531,7 +1531,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			//move volume outside of the group
 			if (dst_type == 5) //dst is group
 			{
-				RenderCanvas* view = m_frame->GetView(dst_par_name);
+				RenderCanvas* view = m_frame->GetRenderCanvas(dst_par_name);
 				if (view)
 				{
 					wxString str("");
@@ -1540,7 +1540,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			}
 			else
 			{
-				RenderCanvas *view = m_frame->GetView(dst_par_name);
+				RenderCanvas *view = m_frame->GetRenderCanvas(dst_par_name);
 				if (view)
 					view->MoveLayertoView(src_par_name, src_name, dst_name);
 			}
@@ -1551,7 +1551,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			src_par_name == GetItemText(GetItemParent(dst_par_item))) //in the same view
 		{
 			//move volume into group
-			RenderCanvas* view = m_frame->GetView(src_par_name);
+			RenderCanvas* view = m_frame->GetRenderCanvas(src_par_name);
 			if (view)
 				view->MoveLayertoGroup(dst_par_name, src_name, dst_name);
 		}
@@ -1564,7 +1564,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 		{
 			//move volume from one group to another
 			wxString str = GetItemText(GetItemParent(src_par_item));
-			RenderCanvas* view = m_frame->GetView(str);
+			RenderCanvas* view = m_frame->GetRenderCanvas(str);
 			if (view)
 				view->MoveLayerfromtoGroup(src_par_name, dst_par_name, src_name, dst_name);
 		}
@@ -1574,7 +1574,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			GetItemText(GetItemParent(src_par_item)) == dst_name) //in the same view
 		{
 			//move volume outside of the group
-			RenderCanvas* view = m_frame->GetView(dst_name);
+			RenderCanvas* view = m_frame->GetRenderCanvas(dst_name);
 			if (view)
 			{
 				wxString str("");
@@ -1588,7 +1588,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 		{
 			//move mesh within the same group
 			wxString str = GetItemText(GetItemParent(src_par_item));
-			RenderCanvas* view = m_frame->GetView(str);
+			RenderCanvas* view = m_frame->GetRenderCanvas(str);
 			if (view)
 				view->MoveMeshinGroup(src_par_name, src_name, dst_name);
 		}
@@ -1600,7 +1600,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			//move mesh outside of the group
 			if (dst_type == 6) //dst is group
 			{
-				RenderCanvas* view = m_frame->GetView(dst_par_name);
+				RenderCanvas* view = m_frame->GetRenderCanvas(dst_par_name);
 				if (view)
 				{
 					wxString str("");
@@ -1609,7 +1609,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			}
 			else
 			{
-				RenderCanvas *view = m_frame->GetView(dst_par_name);
+				RenderCanvas *view = m_frame->GetRenderCanvas(dst_par_name);
 				if (view)
 					view->MoveMeshtoView(src_par_name, src_name, dst_name);
 			}
@@ -1620,7 +1620,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			src_par_name == GetItemText(GetItemParent(dst_par_item))) //in the same view
 		{
 			//move mesh into group
-			RenderCanvas* view = m_frame->GetView(src_par_name);
+			RenderCanvas* view = m_frame->GetRenderCanvas(src_par_name);
 			if (view)
 				view->MoveMeshtoGroup(dst_par_name, src_name, dst_name);
 		}
@@ -1633,7 +1633,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 		{
 			//move mesh from one group to another
 			wxString str = GetItemText(GetItemParent(src_par_item));
-			RenderCanvas* view = m_frame->GetView(str);
+			RenderCanvas* view = m_frame->GetRenderCanvas(str);
 			if (view)
 				view->MoveMeshfromtoGroup(src_par_name, dst_par_name, src_name, dst_name);
 		}
@@ -1643,7 +1643,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			GetItemText(GetItemParent(src_par_item)) == dst_name) //in the same view
 		{
 			//move mesh outside of the group
-			RenderCanvas* view = m_frame->GetView(dst_name);
+			RenderCanvas* view = m_frame->GetRenderCanvas(dst_name);
 			if (view)
 			{
 				wxString str("");
@@ -1667,7 +1667,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 		if (src_type == 2 && src_par_type == 5)
 		{
 			wxString str = GetItemText(GetItemParent(src_par_item));
-			RenderCanvas* view = m_frame->GetView(str);
+			RenderCanvas* view = m_frame->GetRenderCanvas(str);
 			if (view)
 			{
 				wxString str("");
@@ -1926,7 +1926,7 @@ void DataTreeCtrl::BrushClear()
 				{
 					//par is group
 					wxString str = GetItemText(GetItemParent(par_item));
-					RenderCanvas* view = m_frame->GetView(str);
+					RenderCanvas* view = m_frame->GetRenderCanvas(str);
 					if (view)
 					{
 						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
@@ -1947,7 +1947,7 @@ void DataTreeCtrl::BrushClear()
 				{
 					//par is view
 					wxString str = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetView(str);
+					RenderCanvas* view = m_frame->GetRenderCanvas(str);
 					if (view)
 					{
 						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
@@ -1989,7 +1989,7 @@ void DataTreeCtrl::BrushCreate()
 					//par is group
 					wxString group_name = GetItemText(par_item);
 					wxString str = GetItemText(GetItemParent(par_item));
-					RenderCanvas* vrv = m_frame->GetView(str);
+					RenderCanvas* vrv = m_frame->GetRenderCanvas(str);
 					if (vrv)
 					{
 						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
@@ -2004,7 +2004,7 @@ void DataTreeCtrl::BrushCreate()
 				{
 					//par is view
 					wxString str = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetView(str);
+					RenderCanvas* view = m_frame->GetRenderCanvas(str);
 					if (view)
 					{
 						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
@@ -2046,7 +2046,7 @@ void DataTreeCtrl::BrushCreateInv()
 					//par is group
 					wxString group_name = GetItemText(par_item);
 					wxString str = GetItemText(GetItemParent(par_item));
-					RenderCanvas* view = m_frame->GetView(str);
+					RenderCanvas* view = m_frame->GetRenderCanvas(str);
 					if (view)
 					{
 						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
@@ -2061,7 +2061,7 @@ void DataTreeCtrl::BrushCreateInv()
 				{
 					//par is view
 					wxString str = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetView(str);
+					RenderCanvas* view = m_frame->GetRenderCanvas(str);
 					if (view)
 					{
 						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
@@ -2113,7 +2113,7 @@ void DataTreeCtrl::PasteMask(int op)
 		{
 			//par is group
 			wxString str = GetItemText(GetItemParent(par_item));
-			view = m_frame->GetView(str);
+			view = m_frame->GetRenderCanvas(str);
 			str = GetItemText(par_item);
 			group = view->GetGroup(str);
 		}
@@ -2121,7 +2121,7 @@ void DataTreeCtrl::PasteMask(int op)
 		{
 			//par is view
 			wxString str = GetItemText(par_item);
-			view = m_frame->GetView(str);
+			view = m_frame->GetRenderCanvas(str);
 		}
 	}
 	bool apply_group = glbin_vol_selector.GetSelectGroup();
@@ -2307,7 +2307,7 @@ void TreePanel::UpdateTreeIcons()
 	int counter = 0;
 	for (i = 0; i < m_frame->GetViewNum(); i++)
 	{
-		RenderCanvas* view = m_frame->GetView(i);
+		RenderCanvas* view = m_frame->GetRenderCanvas(i);
 		wxTreeItemId vrv_item;
 		if (i == 0)
 			vrv_item = m_datatree->GetFirstChild(root, ck_view);
@@ -2423,7 +2423,7 @@ void TreePanel::UpdateTreeColors()
 	int counter = 0;
 	for (i = 0; i < m_frame->GetViewNum(); i++)
 	{
-		RenderCanvas* view = m_frame->GetView(i);
+		RenderCanvas* view = m_frame->GetRenderCanvas(i);
 
 		for (j = 0; j < view->GetLayerNum(); j++)
 		{
@@ -2543,7 +2543,7 @@ void TreePanel::UpdateTree()
 
 	for (int i = 0; i < m_frame->GetViewNum(); i++)
 	{
-		RenderCanvas* view = m_frame->GetView(i);
+		RenderCanvas* view = m_frame->GetRenderCanvas(i);
 		if (!view)
 			continue;
 		int j, k;
@@ -3015,7 +3015,7 @@ void TreePanel::BrushAppend()
 	{
 		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view)
 			{
 				view->SetIntMode(2);
@@ -3028,7 +3028,7 @@ void TreePanel::BrushAppend()
 	{
 		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view)
 			{
 				view->SetIntMode(1);
@@ -3048,7 +3048,7 @@ void TreePanel::BrushDiffuse()
 	{
 		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view)
 			{
 				view->SetIntMode(2);
@@ -3061,7 +3061,7 @@ void TreePanel::BrushDiffuse()
 	{
 		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view)
 			{
 				view->SetIntMode(1);
@@ -3082,7 +3082,7 @@ void TreePanel::BrushSolid(bool state)
 	{
 		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view)
 			{
 				view->SetIntMode(2);
@@ -3095,7 +3095,7 @@ void TreePanel::BrushSolid(bool state)
 	{
 		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view)
 			{
 				view->SetIntMode(1);
@@ -3116,7 +3116,7 @@ void TreePanel::BrushGrow(bool state)
 	{
 		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view)
 			{
 				view->SetIntMode(10);
@@ -3128,7 +3128,7 @@ void TreePanel::BrushGrow(bool state)
 	{
 		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view)
 			{
 				view->SetIntMode(1);
@@ -3148,7 +3148,7 @@ void TreePanel::BrushDesel()
 	{
 		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view)
 			{
 				view->SetIntMode(2);
@@ -3161,7 +3161,7 @@ void TreePanel::BrushDesel()
 	{
 		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view)
 			{
 				view->SetIntMode(1);
@@ -3187,7 +3187,7 @@ void TreePanel::BrushErase()
 	{
 		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view)
 			{
 				view->SetIntMode(1);
@@ -3210,7 +3210,7 @@ void TreePanel::BrushCreate()
 	{
 		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view)
 			{
 				view->SetIntMode(1);
