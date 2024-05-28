@@ -178,8 +178,8 @@ MainFrame::MainFrame(
 	m_cur_sel_mesh(-1),
 	m_cur_canvas(0),
 	m_benchmark(benchmark),
-	m_vd_copy(0),
-	m_copy_data(false),
+	//m_vd_copy(0),
+	//m_copy_data(false),
 	m_waker(0)
 {
 #ifdef _DARWIN
@@ -1799,7 +1799,7 @@ void MainFrame::OnSelection(int type,
 		glbin_ruler_renderer.SetView(canvas);
 		glbin_ruler_renderer.SetRulerList(canvas->GetRulerList());
 		glbin_volume_point.SetView(canvas);
-		glbin_vol_selector.SetView(canvas);
+		glbin_vol_selector.SetRenderCanvas(canvas);
 		glbin_vol_calculator.SetView(canvas);
 		glbin_script_proc.SetView(canvas);
 	}
@@ -1830,22 +1830,22 @@ void MainFrame::OnSelection(int type,
 	if (glbin_data_manager.GetMeshData(m_cur_sel_mesh))
 		glbin_data_manager.GetMeshData(m_cur_sel_mesh)->SetDrawBounds(false);
 
-	if (m_brush_tool_dlg)
-		m_brush_tool_dlg->GetSettings(canvas);
-	if (m_colocalization_dlg)
-		m_colocalization_dlg->SetView(canvas);
-	if (m_component_dlg)
-		m_component_dlg->SetView(canvas);
-	if (m_counting_dlg)
-		m_counting_dlg->GetSettings(canvas);
-	if (m_measure_dlg)
-		m_measure_dlg->GetSettings(canvas);
-	if (m_noise_cancelling_dlg)
-		m_noise_cancelling_dlg->GetSettings(canvas);
-	if (m_ocl_dlg)
-		m_ocl_dlg->GetSettings(canvas);
-	if (m_trace_dlg)
-		m_trace_dlg->GetSettings(canvas);
+	//if (m_brush_tool_dlg)
+	//	m_brush_tool_dlg->GetSettings(canvas);
+	//if (m_colocalization_dlg)
+	//	m_colocalization_dlg->SetView(canvas);
+	//if (m_component_dlg)
+	//	m_component_dlg->SetView(canvas);
+	//if (m_counting_dlg)
+	//	m_counting_dlg->GetSettings(canvas);
+	//if (m_measure_dlg)
+	//	m_measure_dlg->GetSettings(canvas);
+	//if (m_noise_cancelling_dlg)
+	//	m_noise_cancelling_dlg->GetSettings(canvas);
+	//if (m_ocl_dlg)
+	//	m_ocl_dlg->GetSettings(canvas);
+	//if (m_trace_dlg)
+	//	m_trace_dlg->GetSettings(canvas);
 
 	switch (type)
 	{

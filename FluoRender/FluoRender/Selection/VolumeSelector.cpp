@@ -33,6 +33,8 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/TextureRenderer.h>
 #include <Selection/PaintBoxes.h>
 #include <Selection/MaskBorder.h>
+#include <Calculate/Histogram.h>
+#include <Database/RecordHistParams.h>
 #include <wx/wx.h>
 #include <wx/stdpaths.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -42,6 +44,9 @@ using namespace flrd;
 VolumeSelector::VolumeSelector() :
 	m_canvas(0),
 	m_vd(0),
+	m_group(0),
+	m_vd_copy(0),
+	m_copy_data(false),
 	m_2d_mask(0),
 	m_2d_weight1(0),
 	m_2d_weight2(0),
@@ -124,7 +129,69 @@ void VolumeSelector::SetMode(int mode)
 	}
 }
 
+//segment volumes in current view
 void VolumeSelector::Segment(bool push_mask, int mx, int my)
+{
+	int mode = glbin_vol_selector.GetMode();
+
+	//add ml record
+	if (glbin.get_cg_table_enable() &&
+		glbin.get_cg_entry().getValid() &&
+		m_vd)
+	{
+		//histogram
+		flrd::Histogram histogram(m_vd);
+		histogram.SetUseMask(true);
+		flrd::EntryHist* eh = histogram.GetEntryHist();
+
+		if (eh)
+		{
+			//record
+			flrd::RecordHistParams* rec = new flrd::RecordHistParams();
+			rec->setInput(eh);
+			flrd::EntryParams* ep = new flrd::EntryParams(glbin.get_cg_entry());
+			rec->setOutput(ep);
+
+			//table
+			glbin.get_cg_table().addRecord(rec);
+		}
+	}
+
+	m_canvas->HandleCamera();
+	if (mode == 9)
+	{
+		//wxPoint mouse_pos = ScreenToClient(m_canvas->wxGetMousePosition());
+		glbin_vol_selector.Segment(push_mask, mx, my);
+	}
+	else
+		glbin_vol_selector.Segment(push_mask);
+
+	bool count = false;
+	bool colocal = false;
+	if (mode == 1 ||
+		mode == 2 ||
+		mode == 3 ||
+		mode == 4 ||
+		mode == 5 ||
+		mode == 7 ||
+		mode == 8 ||
+		mode == 9)
+	{
+		count = glbin_vol_selector.GetPaintCount();
+		colocal = glbin_vol_selector.GetPaintColocalize();
+	}
+
+	//update
+	//if (m_frame)
+	//{
+	//	if (m_frame->GetBrushToolDlg())
+	//		m_frame->GetBrushToolDlg()->Update(count ? 0 : 1);
+	//	if (colocal && m_frame->GetColocalizationDlg())
+	//		m_frame->GetColocalizationDlg()->Colocalize();
+	//}
+}
+
+void VolumeSelector::segment(bool push_mask, int mx, int my)
 {
 	if (!m_canvas || !m_vd)
 		return;
@@ -385,19 +452,34 @@ void VolumeSelector::Select(bool push_mask, double radius)
 //erase selection
 void VolumeSelector::Clear()
 {
-
+	int mode = m_mode;
+	m_mode = 6;
+	Segment(true);
+	m_mode = mode;
 }
 
 //extract a new volume excluding the selection
 void VolumeSelector::Erase()
 {
-
+	int mode = 6;
+	wxString vd_name;
+	if (m_vd)
+		vd_name = vd_name;
+	if (vd_name.Find("_DELETED") != wxNOT_FOUND)
+		mode = 7;
+	wxString group_name;
+	if (m_group)
+		group_name = m_group->GetName();
+	glbin_vol_calculator.CalculateGroup(mode, group_name);
 }
 
 //extract a new volume of the selection
 void VolumeSelector::Extract()
 {
-
+	wxString group_name;
+	if (m_group)
+		group_name = m_group->GetName();
+	glbin_vol_calculator.CalculateGroup(5, group_name);
 }
 
 double VolumeSelector::HueCalculation(int mode, unsigned int label)
@@ -700,6 +782,71 @@ void VolumeSelector::RedoMask()
 
 	m_vd->GetTexture()->mask_undos_forward();
 	m_vd->GetVR()->clear_tex_mask();
+}
+
+//mask operations
+void VolumeSelector::CopyMask(bool copy_data)
+{
+	if (GetMaskHold())
+		return;
+
+	if (m_vd)
+	{
+		m_vd_copy = m_vd;
+		m_copy_data = copy_data;
+	}
+}
+
+void VolumeSelector::PasteMask(int op)
+{
+	if (GetMaskHold())
+		return;
+
+	if (m_vd && m_vd_copy)
+	{
+		//prevent self copying
+		if (!m_copy_data &&
+			m_vd == m_vd_copy)
+			return;
+
+		//undo/redo
+		if (flvr::Texture::mask_undo_num_ > 0 &&
+			m_vd->GetTexture())
+			m_vd->GetTexture()->push_mask();
+		if (m_copy_data)
+		{
+			Nrrd* data = m_vd_copy->GetVolume(false);
+			if (m_vd_copy->GetBits() == 16)
+				m_vd->AddMask16(data, op, m_vd_copy->GetScalarScale());
+			else
+				m_vd->AddMask(data, op);
+		}
+		else
+			m_vd->AddMask(m_vd_copy->GetMask(false), op);
+
+		if (m_select_multi)
+		{
+			Nrrd* data = m_vd->GetMask(false);
+			if (data)
+			{
+				if (m_group)
+					m_group->AddMask(data, 0);
+				else
+				{
+					for (int i = 0; i < m_canvas->GetGroupNum(); ++i)
+						m_canvas->GetGroup(i)->AddMask(data, 0);
+				}
+
+			}
+		}
+
+		//m_frame->RefreshCanvases();
+		//if (m_frame->GetBrushToolDlg())
+		//	m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+		//if (m_frame->GetColocalizationDlg() &&
+		//	view->m_paint_colocalize)
+		//	m_frame->GetColocalizationDlg()->Colocalize();
+	}
 }
 
 bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)

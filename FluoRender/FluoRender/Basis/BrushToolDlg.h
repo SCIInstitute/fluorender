@@ -57,74 +57,37 @@ class BrushToolDlg : public PropPanel
 public:
 	enum
 	{
-		//group1
-		//toolbar
-		ID_BrushAppend = ID_BRUSH_TOOL,
-		ID_BrushDesel,
-		ID_BrushDiffuse,
-		ID_BrushErase,
-		ID_BrushClear,
-		ID_BrushCreate,
-		ID_BrushSolid,
-		ID_BrushUndo,
+		//brushes
+		ID_BrushUndo = 0,
 		ID_BrushRedo,
 		ID_Grow,
-		//toolbar2
-		ID_MaskCopy,
+		ID_BrushAppend,
+		ID_BrushDiffuse,
+		ID_BrushSolid,
+		ID_BrushDesel,
+		ID_BrushErase,
+		ID_BrushExtract,
+		ID_BrushClear
+	};
+	enum
+	{
+		//mask
+		ID_MaskCopy = 0,
 		ID_MaskCopyData,
 		ID_MaskPaste,
 		ID_MaskMerge,
 		ID_MaskExclude,
-		ID_MaskIntersect,
-		//selection strength
-		//falloff
-		ID_BrushSclTranslateSldr,
-		ID_BrushSclTranslateText,
-		//edge detect strength
-		ID_BrushGmFalloffSldr,
-		ID_BrushGmFalloffText,
-		//2dinfl
-		ID_Brush2dinflSldr,
-		ID_Brush2dinflText,
-		//edge detect
-		ID_BrushEdgeDetectChk,
-		//hidden removal
-		ID_BrushHiddenRemovalChk,
-		//select group
-		ID_BrushSelectGroupChk,
-		//estimate threshold
-		ID_EstimateThreshChk,
-		//brick accuracy
-		ID_AccurateBricksChk,
-		//brush properties
-		//brush size 1
-		ID_BrushSize1Sldr,
-		ID_BrushSize1Text,
-		//brush size 2
-		ID_BrushSize2Chk,
-		ID_BrushSize2Sldr,
-		ID_BrushSize2Text,
-		//iterations
-		ID_BrushIterWRd,
-		ID_BrushIterSRd,
-		ID_BrushIterSSRd,
-		//size relation
-		ID_BrushSizeDataRd,
-		ID_BrushSizeScreenRd,
-		//align
-		ID_AlignCenter,
-		ID_AlignXYZ,
+		ID_MaskIntersect
+	};
+	enum
+	{
+		//axis align
+		ID_AlignXYZ = 0,
 		ID_AlignYXZ,
 		ID_AlignZXY,
 		ID_AlignXZY,
 		ID_AlignYZX,
-		ID_AlignZYX,
-		//output
-		ID_UpdateBtn,
-		ID_AutoUpdateBtn,
-		ID_HistoryChk,
-		ID_ClearHistBtn,
-		ID_OutputGrid
+		ID_AlignZYX
 	};
 
 	BrushToolDlg(MainFrame* frame);
@@ -135,6 +98,8 @@ public:
 private:
 	//max volume value
 	double m_max_value;
+	//align center
+	bool m_align_center;
 	//output
 	bool m_hold_history;
 
@@ -179,7 +144,7 @@ private:
 	wxRadioButton* m_brush_size_data_rb;
 	wxRadioButton* m_brush_size_screen_rb;
 	//align
-	wxCheckBox* m_align_center;
+	wxCheckBox* m_align_center_chk;
 	wxButton* m_align_xyz;
 	wxButton* m_align_yxz;
 	wxButton* m_align_zxy;
@@ -204,23 +169,9 @@ private:
 	//event handling
 	//paint tools
 	//brush commands
-	void OnBrushUndo(wxCommandEvent& event);
-	void OnBrushRedo(wxCommandEvent& event);
-	void OnBrushAppend(wxCommandEvent& event);
-	void OnBrushDesel(wxCommandEvent& event);
-	void OnBrushDiffuse(wxCommandEvent& event);
-	void OnBrushErase(wxCommandEvent& event);
-	void OnBrushClear(wxCommandEvent& event);
-	void OnBrushCreate(wxCommandEvent& event);
-	void OnBrushSolid(wxCommandEvent& event);
-	void OnGrow(wxCommandEvent& event);
+	void OnToolBar(wxCommandEvent& event);
 	//mask toolbar
-	void OnMaskCopy(wxCommandEvent& event);
-	void OnMaskCopyData(wxCommandEvent& event);
-	void OnMaskPaste(wxCommandEvent& event);
-	void OnMaskMerge(wxCommandEvent& event);
-	void OnMaskExclude(wxCommandEvent& event);
-	void OnMaskIntersect(wxCommandEvent& event);
+	void OnMaskToolBar(wxCommandEvent& event);
 	//selection adjustment
 	//2d influence
 	void OnBrush2dinflChange(wxScrollEvent &event);
@@ -254,6 +205,7 @@ private:
 	//brush size relation
 	void OnBrushSizeRelationCheck(wxCommandEvent& event);
 	//align
+	void OnAlignCenterCheck(wxCommandEvent& event);
 	void OnAlignPca(wxCommandEvent& event);
 	//output
 	void OnUpdateBtn(wxCommandEvent& event);
@@ -262,8 +214,6 @@ private:
 	void OnClearHistBtn(wxCommandEvent& event);
 	void OnKeyDown(wxKeyEvent& event);
 	void OnSelectCell(wxGridEvent& event);
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_BRUSHTOOLDLG_H_

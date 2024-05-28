@@ -781,8 +781,8 @@ void DataListCtrl::OnSelect(wxListEvent &event)
 	if (item != -1)
 	{
 		wxString name = GetText(item, 1);
-		if (m_frame)
-			m_frame->GetTree()->Select("", name);
+		//if (m_frame)
+		//	m_frame->GetTree()->Select("", name);
 	}
 }
 

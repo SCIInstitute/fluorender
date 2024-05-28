@@ -491,9 +491,6 @@ public:
 	void SetVolumeA(VolumeData* vd);
 	void SetVolumeB(VolumeData* vd);
 
-	//segment volumes in current view
-	void Segment(bool push_mask);
-
 	//brush properties
 	//change display
 	void ChangeBrushSize(int value);

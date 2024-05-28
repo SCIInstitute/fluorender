@@ -43,77 +43,6 @@ DEALINGS IN THE SOFTWARE.
 
 #define GM_2_ESTR(x) (1.0 - sqrt(1.0 - (x - 1.0) * (x - 1.0)))
 
-BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
-	//paint tools
-	//brush commands
-	EVT_TOOL(ID_BrushUndo, BrushToolDlg::OnBrushUndo)
-	EVT_TOOL(ID_BrushRedo, BrushToolDlg::OnBrushRedo)
-	EVT_TOOL(ID_BrushAppend, BrushToolDlg::OnBrushAppend)
-	EVT_TOOL(ID_BrushDesel, BrushToolDlg::OnBrushDesel)
-	EVT_TOOL(ID_BrushDiffuse, BrushToolDlg::OnBrushDiffuse)
-	EVT_TOOL(ID_BrushClear, BrushToolDlg::OnBrushClear)
-	EVT_TOOL(ID_BrushErase, BrushToolDlg::OnBrushErase)
-	EVT_TOOL(ID_BrushCreate, BrushToolDlg::OnBrushCreate)
-	EVT_TOOL(ID_BrushSolid, BrushToolDlg::OnBrushSolid)
-	EVT_TOOL(ID_Grow, BrushToolDlg::OnGrow)
-	//mask tools
-	EVT_TOOL(ID_MaskCopy, BrushToolDlg::OnMaskCopy)
-	EVT_TOOL(ID_MaskCopyData, BrushToolDlg::OnMaskCopyData)
-	EVT_TOOL(ID_MaskPaste, BrushToolDlg::OnMaskPaste)
-	EVT_TOOL(ID_MaskMerge, BrushToolDlg::OnMaskMerge)
-	EVT_TOOL(ID_MaskExclude, BrushToolDlg::OnMaskExclude)
-	EVT_TOOL(ID_MaskIntersect, BrushToolDlg::OnMaskIntersect)
-	//selection adjustment
-	//translate
-	EVT_COMMAND_SCROLL(ID_BrushSclTranslateSldr, BrushToolDlg::OnBrushSclTranslateChange)
-	EVT_TEXT(ID_BrushSclTranslateText, BrushToolDlg::OnBrushSclTranslateText)
-	//gm falloff
-	EVT_COMMAND_SCROLL(ID_BrushGmFalloffSldr, BrushToolDlg::OnBrushGmFalloffChange)
-	EVT_TEXT(ID_BrushGmFalloffText, BrushToolDlg::OnBrushGmFalloffText)
-	//2d influence
-	EVT_COMMAND_SCROLL(ID_Brush2dinflSldr, BrushToolDlg::OnBrush2dinflChange)
-	EVT_TEXT(ID_Brush2dinflText, BrushToolDlg::OnBrush2dinflText)
-	//edge detect
-	EVT_CHECKBOX(ID_BrushEdgeDetectChk, BrushToolDlg::OnBrushEdgeDetectChk)
-	//hidden removal
-	EVT_CHECKBOX(ID_BrushHiddenRemovalChk, BrushToolDlg::OnBrushHiddenRemovalChk)
-	//select group
-	EVT_CHECKBOX(ID_BrushSelectGroupChk, BrushToolDlg::OnBrushSelectGroupChk)
-	//estimate thresh
-	EVT_CHECKBOX(ID_EstimateThreshChk, BrushToolDlg::OnEstimateThreshChk)
-	//brick accuracy
-	EVT_CHECKBOX(ID_AccurateBricksChk, BrushToolDlg::OnAccurateBricksCheck)
-	//brush properties
-	//brush size 1
-	EVT_COMMAND_SCROLL(ID_BrushSize1Sldr, BrushToolDlg::OnBrushSize1Change)
-	EVT_TEXT(ID_BrushSize1Text, BrushToolDlg::OnBrushSize1Text)
-	//brush size 2
-	EVT_CHECKBOX(ID_BrushSize2Chk, BrushToolDlg::OnBrushSize2Chk)
-	EVT_COMMAND_SCROLL(ID_BrushSize2Sldr, BrushToolDlg::OnBrushSize2Change)
-	EVT_TEXT(ID_BrushSize2Text, BrushToolDlg::OnBrushSize2Text)
-	//brush iterrations
-	EVT_RADIOBUTTON(ID_BrushIterWRd, BrushToolDlg::OnBrushIterCheck)
-	EVT_RADIOBUTTON(ID_BrushIterSRd, BrushToolDlg::OnBrushIterCheck)
-	EVT_RADIOBUTTON(ID_BrushIterSSRd, BrushToolDlg::OnBrushIterCheck)
-	//brush size relation
-	EVT_RADIOBUTTON(ID_BrushSizeDataRd, BrushToolDlg::OnBrushSizeRelationCheck)
-	EVT_RADIOBUTTON(ID_BrushSizeScreenRd, BrushToolDlg::OnBrushSizeRelationCheck)
-	//align
-	EVT_BUTTON(ID_AlignXYZ, BrushToolDlg::OnAlignPca)
-	EVT_BUTTON(ID_AlignYXZ, BrushToolDlg::OnAlignPca)
-	EVT_BUTTON(ID_AlignZXY, BrushToolDlg::OnAlignPca)
-	EVT_BUTTON(ID_AlignXZY, BrushToolDlg::OnAlignPca)
-	EVT_BUTTON(ID_AlignYZX, BrushToolDlg::OnAlignPca)
-	EVT_BUTTON(ID_AlignZYX, BrushToolDlg::OnAlignPca)
-	//output
-	EVT_BUTTON(ID_UpdateBtn, BrushToolDlg::OnUpdateBtn)
-	EVT_TOGGLEBUTTON(ID_AutoUpdateBtn, BrushToolDlg::OnAutoUpdateBtn)
-	EVT_CHECKBOX(ID_HistoryChk, BrushToolDlg::OnHistoryChk)
-	EVT_BUTTON(ID_ClearHistBtn, BrushToolDlg::OnClearHistBtn)
-	EVT_KEY_DOWN(BrushToolDlg::OnKeyDown)
-	EVT_GRID_SELECT_CELL(BrushToolDlg::OnSelectCell)
-END_EVENT_TABLE()
-
 BrushToolDlg::BrushToolDlg(
 	MainFrame *frame):
 	PropPanel(frame, frame,
@@ -121,6 +50,7 @@ BrushToolDlg::BrushToolDlg(
 	frame->FromDIP(wxSize(500, 620)),
 	0, "BrushToolDlg"),
 	m_max_value(255.0),
+	m_align_center(false),
 	m_hold_history(false)
 {
 	// temporarily block events during constructor:
@@ -143,9 +73,7 @@ BrushToolDlg::BrushToolDlg(
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT);
 	wxBitmap bitmap;
 	bitmap = wxGetBitmapFromMemory(undo);
-#ifdef _DARWIN
-	m_toolbar->SetToolBitmapSize(bitmap.GetSize());
-#endif
+	//m_toolbar->SetToolBitmapSize(bitmap.GetSize());
 	m_toolbar->AddTool(
 		ID_BrushUndo, "Undo", bitmap,
 		"Rollback previous brush operation");
@@ -179,12 +107,13 @@ BrushToolDlg::BrushToolDlg(
 	m_toolbar->AddTool(ID_BrushErase, "Erase",
 		bitmap, "Erase highlighted structures");
 	bitmap = wxGetBitmapFromMemory(brush_create);
-	m_toolbar->AddTool(ID_BrushCreate, "Extract",
+	m_toolbar->AddTool(ID_BrushExtract, "Extract",
 		bitmap, "Extract highlighted structures out and create a new volume");
 	bitmap = wxGetBitmapFromMemory(brush_clear);
 	m_toolbar->AddSeparator();
 	m_toolbar->AddTool(ID_BrushClear, "Reset",
 		bitmap, "Reset all highlighted structures");
+	m_toolbar->Bind(wxEVT_TOOL, &BrushToolDlg::OnToolBar, this);
 	m_toolbar->Realize();
 
 	//mask tools
@@ -218,6 +147,7 @@ BrushToolDlg::BrushToolDlg(
 	m_mask_tb->AddTool(
 		ID_MaskIntersect, "Intersect", bitmap,
 		"Intersect selection mask from clipboard with current");
+	m_mask_tb->Bind(wxEVT_TOOL, &BrushToolDlg::OnMaskToolBar, this);
 	m_mask_tb->Realize();
 
 	//Selection adjustment
@@ -226,16 +156,21 @@ BrushToolDlg::BrushToolDlg(
 		wxVERTICAL);
 	//stop at boundary
 	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_estimate_thresh_chk = new wxCheckBox(this, ID_EstimateThreshChk, "Auto Clear:",
+	m_estimate_thresh_chk = new wxCheckBox(this, wxID_ANY, "Auto Clear:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-	m_edge_detect_chk = new wxCheckBox(this, ID_BrushEdgeDetectChk, "Edge Detect:",
+	m_estimate_thresh_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnEstimateThreshChk, this);
+	m_edge_detect_chk = new wxCheckBox(this, wxID_ANY, "Edge Detect:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-	m_hidden_removal_chk = new wxCheckBox(this, ID_BrushHiddenRemovalChk, "Visible Only:",
+	m_edge_detect_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnBrushEdgeDetectChk, this);
+	m_hidden_removal_chk = new wxCheckBox(this, wxID_ANY, "Visible Only:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-	m_select_group_chk = new wxCheckBox(this, ID_BrushSelectGroupChk, "Apply to Group:",
+	m_hidden_removal_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnBrushHiddenRemovalChk, this);
+	m_select_group_chk = new wxCheckBox(this, wxID_ANY, "Apply to Group:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-	m_accurate_bricks_chk = new wxCheckBox(this, ID_AccurateBricksChk, "Cross Bricks:",
+	m_select_group_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnBrushSelectGroupChk, this);
+	m_accurate_bricks_chk = new wxCheckBox(this, wxID_ANY, "Cross Bricks:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+	m_accurate_bricks_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnAccurateBricksCheck, this);
 	sizer1_1->Add(m_estimate_thresh_chk, 0, wxALIGN_CENTER);
 	sizer1_1->Add(5, 5);
 	sizer1_1->Add(m_edge_detect_chk, 0, wxALIGN_CENTER);
@@ -249,10 +184,12 @@ BrushToolDlg::BrushToolDlg(
 	wxBoxSizer *sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Threshold:",
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
-	m_brush_scl_translate_sldr = new wxSingleSlider(this, ID_BrushSclTranslateSldr, 0, 0, 2550,
+	m_brush_scl_translate_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 2550,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_brush_scl_translate_text = new wxTextCtrl(this, ID_BrushSclTranslateText, "0.0",
+	m_brush_scl_translate_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrushSclTranslateChange, this);
+	m_brush_scl_translate_text = new wxTextCtrl(this, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_fp1);
+	m_brush_scl_translate_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrushSclTranslateText, this);
 	sizer1_2->Add(5, 5);
 	sizer1_2->Add(st, 0, wxALIGN_CENTER);
 	sizer1_2->Add(m_brush_scl_translate_sldr, 1, wxEXPAND);
@@ -262,10 +199,12 @@ BrushToolDlg::BrushToolDlg(
 	wxBoxSizer *sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Edge STR:",
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
-	m_brush_gm_falloff_sldr = new wxSingleSlider(this, ID_BrushGmFalloffSldr, 0, 0, 1000,
+	m_brush_gm_falloff_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_brush_gm_falloff_text = new wxTextCtrl(this, ID_BrushGmFalloffText, "0.000",
+	m_brush_gm_falloff_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrushGmFalloffChange, this);
+	m_brush_gm_falloff_text = new wxTextCtrl(this, wxID_ANY, "0.000",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_fp3);
+	m_brush_gm_falloff_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrushGmFalloffText, this);
 	sizer1_3->Add(5, 5);
 	sizer1_3->Add(st, 0, wxALIGN_CENTER);
 	sizer1_3->Add(m_brush_gm_falloff_sldr, 1, wxEXPAND);
@@ -275,10 +214,12 @@ BrushToolDlg::BrushToolDlg(
 	wxBoxSizer *sizer1_4 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "2D Adj. Infl.:",
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
-	m_brush_2dinfl_sldr = new wxSingleSlider(this, ID_Brush2dinflSldr, 100, 0, 200,
+	m_brush_2dinfl_sldr = new wxSingleSlider(this, wxID_ANY, 100, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_INVERSE);
-	m_brush_2dinfl_text = new wxTextCtrl(this, ID_Brush2dinflText, "1.00",
+	m_brush_2dinfl_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrush2dinflChange, this);
+	m_brush_2dinfl_text = new wxTextCtrl(this, wxID_ANY, "1.00",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_fp2);
+	m_brush_2dinfl_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrush2dinflText, this);
 	sizer1_4->Add(5, 5);
 	sizer1_4->Add(st, 0, wxALIGN_CENTER);
 	sizer1_4->Add(m_brush_2dinfl_sldr, 1, wxEXPAND);
@@ -306,10 +247,12 @@ BrushToolDlg::BrushToolDlg(
 	wxBoxSizer *sizer2_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Center Size:",
 		wxDefaultPosition, FromDIP(wxSize(80, 20)), wxALIGN_RIGHT);
-	m_brush_size1_sldr = new wxSingleSlider(this, ID_BrushSize1Sldr, 10, 1, 300,
+	m_brush_size1_sldr = new wxSingleSlider(this, wxID_ANY, 10, 1, 300,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_brush_size1_text = new wxTextCtrl(this, ID_BrushSize1Text, "10",
+	m_brush_size1_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrushSize1Change, this);
+	m_brush_size1_text = new wxTextCtrl(this, wxID_ANY, "10",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_int);
+	m_brush_size1_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrushSize1Text, this);
 	sizer2_2->Add(5, 5);
 	sizer2_2->Add(st, 0, wxALIGN_CENTER);
 	sizer2_2->Add(m_brush_size1_sldr, 1, wxEXPAND);
@@ -317,17 +260,17 @@ BrushToolDlg::BrushToolDlg(
 	sizer2_2->Add(15, 15);
 	//brush size 2
 	wxBoxSizer *sizer2_3 = new wxBoxSizer(wxHORIZONTAL);
-	m_brush_size2_chk = new wxCheckBox(this, ID_BrushSize2Chk, "GrowSize",
+	m_brush_size2_chk = new wxCheckBox(this, wxID_ANY, "GrowSize",
 		wxDefaultPosition, FromDIP(wxSize(80, 20)), wxALIGN_RIGHT);
+	m_brush_size2_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnBrushSize2Chk, this);
 	st = new wxStaticText(this, 0, ":",
 		wxDefaultPosition, FromDIP(wxSize(5, 20)), wxALIGN_RIGHT);
-	m_brush_size2_sldr = new wxSingleSlider(this, ID_BrushSize2Sldr, 30, 1, 300,
+	m_brush_size2_sldr = new wxSingleSlider(this, wxID_ANY, 30, 1, 300,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_brush_size2_text = new wxTextCtrl(this, ID_BrushSize2Text, "30",
+	m_brush_size2_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrushSize2Change, this);
+	m_brush_size2_text = new wxTextCtrl(this, wxID_ANY, "30",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_int);
-	m_brush_size2_chk->SetValue(true);
-	m_brush_size2_sldr->Enable();
-	m_brush_size2_text->Enable();
+	m_brush_size2_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrushSize2Text, this);
 	sizer2_3->Add(m_brush_size2_chk, 0, wxALIGN_CENTER);
 	sizer2_3->Add(st, 0, wxALIGN_CENTER);
 	sizer2_3->Add(m_brush_size2_sldr, 1, wxEXPAND);
@@ -337,15 +280,15 @@ BrushToolDlg::BrushToolDlg(
 	wxBoxSizer *sizer2_4 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Growth:",
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
-	m_brush_iterw_rb = new wxRadioButton(this, ID_BrushIterWRd, "Weak",
+	m_brush_iterw_rb = new wxRadioButton(this, wxID_ANY, "Weak",
 		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-	m_brush_iters_rb = new wxRadioButton(this, ID_BrushIterSRd, "Normal",
+	m_brush_iters_rb = new wxRadioButton(this, wxID_ANY, "Normal",
 		wxDefaultPosition, wxDefaultSize);
-	m_brush_iterss_rb = new wxRadioButton(this, ID_BrushIterSSRd, "Strong",
+	m_brush_iterss_rb = new wxRadioButton(this, wxID_ANY, "Strong",
 		wxDefaultPosition, wxDefaultSize);
-	m_brush_iterw_rb->SetValue(false);
-	m_brush_iters_rb->SetValue(true);
-	m_brush_iterss_rb->SetValue(false);
+	m_brush_iterw_rb->Bind(wxEVT_RADIOBUTTON, &BrushToolDlg::OnBrushIterCheck, this);
+	m_brush_iters_rb->Bind(wxEVT_RADIOBUTTON, &BrushToolDlg::OnBrushIterCheck, this);
+	m_brush_iterss_rb->Bind(wxEVT_RADIOBUTTON, &BrushToolDlg::OnBrushIterCheck, this);
 	sizer2_4->Add(5, 5);
 	sizer2_4->Add(st, 0, wxALIGN_CENTER);
 	sizer2_4->Add(m_brush_iterw_rb, 0, wxALIGN_CENTER);
@@ -357,12 +300,12 @@ BrushToolDlg::BrushToolDlg(
 	wxBoxSizer *sizer2_5 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Dependent:",
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
-	m_brush_size_data_rb = new wxRadioButton(this, ID_BrushSizeDataRd, "Data",
+	m_brush_size_data_rb = new wxRadioButton(this, wxID_ANY, "Data",
 		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-	m_brush_size_screen_rb = new wxRadioButton(this, ID_BrushSizeScreenRd, "Screen",
+	m_brush_size_screen_rb = new wxRadioButton(this, wxID_ANY, "Screen",
 		wxDefaultPosition, wxDefaultSize);
-	m_brush_size_data_rb->SetValue(true);
-	m_brush_size_screen_rb->SetValue(false);
+	m_brush_size_data_rb->Bind(wxEVT_RADIOBUTTON, &BrushToolDlg::OnBrushSizeRelationCheck, this);
+	m_brush_size_screen_rb->Bind(wxEVT_RADIOBUTTON, &BrushToolDlg::OnBrushSizeRelationCheck, this);
 	sizer2_5->Add(5, 5);
 	sizer2_5->Add(st, 0, wxALIGN_CENTER);
 	sizer2_5->Add(m_brush_size_data_rb, 0, wxALIGN_CENTER);
@@ -384,10 +327,11 @@ BrushToolDlg::BrushToolDlg(
 	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY, "Align Render View to Selection"), wxVERTICAL);
 	wxBoxSizer* sizer31 = new wxBoxSizer(wxHORIZONTAL);
-	m_align_center = new wxCheckBox(this, ID_AlignCenter,
+	m_align_center_chk = new wxCheckBox(this, wxID_ANY,
 		"Move to Center", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	m_align_center_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnAlignCenterCheck, this);
 	sizer31->Add(5, 5);
-	sizer31->Add(m_align_center, 0, wxALIGN_CENTER);
+	sizer31->Add(m_align_center_chk, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer32 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Tri Axes:",
 		wxDefaultPosition, wxDefaultSize);
@@ -403,6 +347,12 @@ BrushToolDlg::BrushToolDlg(
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_zyx = new wxButton(this, ID_AlignZYX, "ZYX",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
+	m_align_xyz->Bind(wxEVT_BUTTON, &BrushToolDlg::OnAlignPca, this);
+	m_align_yxz->Bind(wxEVT_BUTTON, &BrushToolDlg::OnAlignPca, this);
+	m_align_zxy->Bind(wxEVT_BUTTON, &BrushToolDlg::OnAlignPca, this);
+	m_align_xzy->Bind(wxEVT_BUTTON, &BrushToolDlg::OnAlignPca, this);
+	m_align_yzx->Bind(wxEVT_BUTTON, &BrushToolDlg::OnAlignPca, this);
+	m_align_zyx->Bind(wxEVT_BUTTON, &BrushToolDlg::OnAlignPca, this);
 	sizer32->Add(5, 5);
 	sizer32->Add(st, 0, wxALIGN_CENTER);
 	sizer32->Add(5, 5);
@@ -430,14 +380,18 @@ BrushToolDlg::BrushToolDlg(
 		new wxStaticBox(this, wxID_ANY, "Output"),
 		wxVERTICAL);
 	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_update_btn = new wxButton(this, ID_UpdateBtn, "Paint Size",
+	m_update_btn = new wxButton(this, wxID_ANY, "Paint Size",
 		wxDefaultPosition, wxDefaultSize);
-	m_auto_update_btn = new wxToggleButton(this, ID_AutoUpdateBtn,
+	m_update_btn->Bind(wxEVT_BUTTON, &BrushToolDlg::OnUpdateBtn, this);
+	m_auto_update_btn = new wxToggleButton(this, wxID_ANY,
 		"Auto Update", wxDefaultPosition, wxDefaultSize);
-	m_history_chk = new wxCheckBox(this, ID_HistoryChk,
+	m_auto_update_btn->Bind(wxEVT_BUTTON, &BrushToolDlg::OnAutoUpdateBtn, this);
+	m_history_chk = new wxCheckBox(this, wxID_ANY,
 		"Hold History", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	m_clear_hist_btn = new wxButton(this, ID_ClearHistBtn,
+	m_history_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnHistoryChk, this);
+	m_clear_hist_btn = new wxButton(this, wxID_ANY,
 		"Clear History", wxDefaultPosition, wxDefaultSize);
+	m_clear_hist_btn->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnClearHistBtn, this);
 	sizer4_1->Add(m_update_btn, 0, wxALIGN_CENTER);
 	sizer4_1->Add(m_auto_update_btn, 0, wxALIGN_CENTER);
 	sizer4_1->AddStretchSpacer(1);
@@ -445,7 +399,7 @@ BrushToolDlg::BrushToolDlg(
 	sizer4_1->Add(5, 5);
 	sizer4_1->Add(m_clear_hist_btn, 0, wxALIGN_CENTER);
 	//grid
-	m_output_grid = new wxGrid(this, ID_OutputGrid);
+	m_output_grid = new wxGrid(this, wxID_ANY);
 	m_output_grid->CreateGrid(0, 5);
 	m_output_grid->SetColLabelValue(0, "Voxel Count");
 	m_output_grid->SetColLabelValue(1, "Voxel Count\n(Int. Weighted)");
@@ -453,6 +407,8 @@ BrushToolDlg::BrushToolDlg(
 	m_output_grid->SetColLabelValue(3, "Physical Size");
 	m_output_grid->SetColLabelValue(4, "Physical Size\n(Int. Weighted)");
 	m_output_grid->Fit();
+	m_output_grid->Bind(wxEVT_KEY_DOWN, &BrushToolDlg::OnKeyDown, this);
+	m_output_grid->Bind(wxEVT_GRID_SELECT_CELL, &BrushToolDlg::OnSelectCell, this);
 	sizer4->Add(5, 5);
 	sizer4->Add(sizer4_1, 0, wxEXPAND);
 	sizer4->Add(5, 5);
@@ -485,23 +441,6 @@ BrushToolDlg::~BrushToolDlg()
 
 void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 {
-	//if (!view)
-	//	return;
-	//m_canvas = view;
-	////m_aligner->SetView(m_canvas);
-	////m_selector = m_canvas->GetVolumeSelector();
-	////if (!m_selector)
-	////	return;
-
-	//VolumeData* sel_vol = 0;
-	//if (m_frame)
-	//{
-	//	sel_vol = m_frame->GetCurSelVol();
-	//	m_frame->GetNoiseCancellingDlg()->GetSettings(m_canvas);
-	//	m_frame->GetCountingDlg()->GetSettings(m_canvas);
-	//	//vr_frame->GetColocalizationDlg()->GetSettings(m_canvas);
-	//}
-
 	VolumeData* sel_vol = m_frame->GetCurSelVol();
 	if (!sel_vol)
 		return;
@@ -540,7 +479,7 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstSelMask))
 	{
-		bval = m_frame && m_frame->m_vd_copy;
+		bval = glbin_vol_selector.GetCopyMaskVolume() != 0;
 		m_mask_tb->EnableTool(ID_MaskPaste, bval);
 		m_mask_tb->EnableTool(ID_MaskMerge, bval);
 		m_mask_tb->EnableTool(ID_MaskExclude, bval);
@@ -694,149 +633,126 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 }
 
 //brush commands
-void BrushToolDlg::OnBrushAppend(wxCommandEvent &event)
+void BrushToolDlg::OnToolBar(wxCommandEvent& event)
 {
-	int val = glbin_vol_selector.GetMode();
-	if (val != 2)
-		glbin_vol_selector.SetMode(2);
-	else
-		glbin_vol_selector.SetMode(0);
-	FluoRefresh(0, { gstBrushState }, { -1 });
-}
+	int id = event.GetId();
+	int mode = glbin_vol_selector.GetMode();
+	bool set_mode = false;
+	int excl_self = 0;
+	fluo::ValueCollection vc;
+	std::set<int> views;
 
-void BrushToolDlg::OnBrushDiffuse(wxCommandEvent &event)
-{
-	int val = glbin_vol_selector.GetMode();
-	if (val != 4)
-		glbin_vol_selector.SetMode(4);
-	else
-		glbin_vol_selector.SetMode(0);
-	FluoRefresh(0, { gstBrushState }, { -1 });
-}
+	switch (id)
+	{
+	case ID_BrushUndo:
+		glbin_vol_selector.UndoMask();
+		excl_self = 2;
+		vc.insert(gstSelUndo);
+		break;
+	case ID_BrushRedo:
+		glbin_vol_selector.RedoMask();
+		excl_self = 2;
+		vc.insert(gstSelUndo);
+		break;
+	case ID_Grow:
+		mode = mode == 9 ? 0 : 9;
+		set_mode = true;
+		excl_self = 0;
+		vc.insert(gstBrushState);
+		views.insert(-1);
+		break;
+	case ID_BrushAppend:
+		mode = mode == 2 ? 0 : 2;
+		set_mode = true;
+		excl_self = 0;
+		vc.insert(gstBrushState);
+		views.insert(-1);
+		break;
+	case ID_BrushDiffuse:
+		mode = mode == 4 ? 0 : 4;
+		set_mode = true;
+		excl_self = 0;
+		vc.insert(gstBrushState);
+		views.insert(-1);
+		break;
+	case ID_BrushSolid:
+		mode = mode == 8 ? 0 : 8;
+		set_mode = true;
+		excl_self = 0;
+		vc.insert(gstBrushState);
+		views.insert(-1);
+		break;
+	case ID_BrushDesel:
+		mode = mode == 3 ? 0 : 3;
+		set_mode = true;
+		excl_self = 0;
+		vc.insert(gstBrushState);
+		views.insert(-1);
+		break;
+	case ID_BrushErase:
+		glbin_vol_selector.Erase();
+		excl_self = 3;
+		vc.insert(gstNull);
+		break;
+	case ID_BrushExtract:
+		glbin_vol_selector.Extract();
+		excl_self = 3;
+		vc.insert(gstNull);
+		break;
+	case ID_BrushClear:
+		glbin_vol_selector.Clear();
+		excl_self = 3;
+		vc.insert(gstNull);
+		break;
+	}
 
-void BrushToolDlg::OnBrushSolid(wxCommandEvent &event)
-{
-	int val = glbin_vol_selector.GetMode();
-	if (val != 8)
-		glbin_vol_selector.SetMode(8);
-	else
-		glbin_vol_selector.SetMode(0);
-	FluoRefresh(0, { gstBrushState }, { -1 });
-}
-
-void BrushToolDlg::OnGrow(wxCommandEvent &event)
-{
-	int val = glbin_vol_selector.GetMode();
-	if (val != 9)
-		glbin_vol_selector.SetMode(9);
-	else
-		glbin_vol_selector.SetMode(0);
-	FluoRefresh(0, { gstBrushState }, { -1 });
-}
-
-void BrushToolDlg::OnBrushDesel(wxCommandEvent &event)
-{
-	int val = glbin_vol_selector.GetMode();
-	if (val != 3)
-		glbin_vol_selector.SetMode(3);
-	else
-		glbin_vol_selector.SetMode(0);
-	FluoRefresh(0, { gstBrushState }, { -1 });
-}
-
-void BrushToolDlg::OnBrushClear(wxCommandEvent &event)
-{
-	if (m_frame && m_frame->GetTree())
-		m_frame->GetTree()->BrushClear();
-}
-
-void BrushToolDlg::OnBrushErase(wxCommandEvent &event)
-{
-	m_toolbar->ToggleTool(ID_BrushAppend, false);
-	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
-	m_toolbar->ToggleTool(ID_BrushDesel, false);
-	m_toolbar->ToggleTool(ID_BrushSolid, false);
-	m_toolbar->ToggleTool(ID_Grow, false);
-
-	if (m_frame && m_frame->GetTree())
-		m_frame->GetTree()->BrushErase();
-}
-
-void BrushToolDlg::OnBrushCreate(wxCommandEvent &event)
-{
-	m_toolbar->ToggleTool(ID_BrushAppend, false);
-	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
-	m_toolbar->ToggleTool(ID_BrushDesel, false);
-	m_toolbar->ToggleTool(ID_BrushSolid, false);
-	m_toolbar->ToggleTool(ID_Grow, false);
-
-	if (m_frame && m_frame->GetTree())
-		m_frame->GetTree()->BrushCreate();
-}
-
-void BrushToolDlg::OnBrushUndo(wxCommandEvent &event)
-{
-	glbin_vol_selector.UndoMask();
-	if (m_canvas)
-		m_canvas->RefreshGL(39);
-	UpdateUndoRedo();
-}
-
-void BrushToolDlg::OnBrushRedo(wxCommandEvent &event)
-{
-	glbin_vol_selector.RedoMask();
-	if (m_canvas)
-		m_canvas->RefreshGL(39);
-	UpdateUndoRedo();
+	if (set_mode)
+		glbin_vol_selector.SetMode(mode);
+	FluoRefresh(excl_self, vc, views);
 }
 
 //mask tools
-void BrushToolDlg::OnMaskCopy(wxCommandEvent& event)
+void BrushToolDlg::OnMaskToolBar(wxCommandEvent& event)
 {
-	if (m_frame && m_frame->GetTree() &&
-		m_frame->GetTree()->GetTreeCtrl())
-		m_frame->GetTree()->GetTreeCtrl()->CopyMask(false);
-	UpdateMaskTb();
-}
+	int id = event.GetId();
+	int excl_self = 0;
+	fluo::ValueCollection vc;
 
-void BrushToolDlg::OnMaskCopyData(wxCommandEvent& event)
-{
-	if (m_frame && m_frame->GetTree() &&
-		m_frame->GetTree()->GetTreeCtrl())
-		m_frame->GetTree()->GetTreeCtrl()->CopyMask(true);
-	UpdateMaskTb();
-}
+	switch (id)
+	{
+	case ID_MaskCopy:
+		glbin_vol_selector.CopyMask(false);
+		excl_self = 2;
+		vc.insert(gstSelMask);
+		break;
+	case ID_MaskCopyData:
+		glbin_vol_selector.CopyMask(true);
+		excl_self = 2;
+		vc.insert(gstSelMask);
+		break;
+	case ID_MaskPaste:
+		glbin_vol_selector.PasteMask(0);
+		excl_self = 0;
+		vc.insert(gstSelUndo);
+		break;
+	case ID_MaskMerge:
+		glbin_vol_selector.PasteMask(1);
+		excl_self = 0;
+		vc.insert(gstSelUndo);
+		break;
+	case ID_MaskExclude:
+		glbin_vol_selector.PasteMask(2);
+		excl_self = 0;
+		vc.insert(gstSelUndo);
+		break;
+	case ID_MaskIntersect:
+		glbin_vol_selector.PasteMask(3);
+		excl_self = 0;
+		vc.insert(gstSelUndo);
+		break;
+	}
 
-void BrushToolDlg::OnMaskPaste(wxCommandEvent& event)
-{
-	if (m_frame && m_frame->GetTree() &&
-		m_frame->GetTree()->GetTreeCtrl())
-		m_frame->GetTree()->GetTreeCtrl()->PasteMask(0);
-	UpdateUndoRedo();
-}
-
-void BrushToolDlg::OnMaskMerge(wxCommandEvent& event)
-{
-	if (m_frame && m_frame->GetTree() &&
-		m_frame->GetTree()->GetTreeCtrl())
-		m_frame->GetTree()->GetTreeCtrl()->PasteMask(1);
-	UpdateUndoRedo();
-}
-
-void BrushToolDlg::OnMaskExclude(wxCommandEvent& event)
-{
-	if (m_frame && m_frame->GetTree() &&
-		m_frame->GetTree()->GetTreeCtrl())
-		m_frame->GetTree()->GetTreeCtrl()->PasteMask(2);
-	UpdateUndoRedo();
-}
-
-void BrushToolDlg::OnMaskIntersect(wxCommandEvent& event)
-{
-	if (m_frame && m_frame->GetTree() &&
-		m_frame->GetTree()->GetTreeCtrl())
-		m_frame->GetTree()->GetTreeCtrl()->PasteMask(3);
-	UpdateUndoRedo();
+	FluoRefresh(excl_self, vc);
 }
 
 //selection adjustment
@@ -859,11 +775,11 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent &event)
 
 	//set translate
 	glbin_vol_selector.SetBrushSclTranslate(val / m_max_value);
-	if (m_canvas && glbin_vol_selector.GetThUpdate())
+	if (glbin_vol_selector.GetThUpdate())
 	{
 		glbin_vol_selector.PopMask();
-		m_canvas->Segment(true);
-		m_canvas->RefreshGL(39);
+		glbin_vol_selector.Segment(true);
+		FluoRefresh(3, { gstNull });
 	}
 }
 
@@ -886,11 +802,11 @@ void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent &event)
 
 	//set gm falloff
 	glbin_vol_selector.SetBrushGmFalloff(GM_2_ESTR(val));
-	if (m_canvas && glbin_vol_selector.GetThUpdate())
+	if (glbin_vol_selector.GetThUpdate())
 	{
 		glbin_vol_selector.PopMask();
-		m_canvas->Segment(true);
-		m_canvas->RefreshGL(39);
+		glbin_vol_selector.Segment(true);
+		FluoRefresh(3, { gstNull });
 	}
 }
 
@@ -913,11 +829,11 @@ void BrushToolDlg::OnBrush2dinflText(wxCommandEvent &event)
 
 	//set 2d weight
 	glbin_vol_selector.SetW2d(val);
-	if (m_canvas && glbin_vol_selector.GetThUpdate())
+	if (glbin_vol_selector.GetThUpdate())
 	{
 		glbin_vol_selector.PopMask();
-		m_canvas->Segment(true);
-		m_canvas->RefreshGL(39);
+		glbin_vol_selector.Segment(true);
+		FluoRefresh(3, { gstNull });
 	}
 }
 
@@ -939,11 +855,11 @@ void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent &event)
 
 	//set edge detect
 	glbin_vol_selector.SetEdgeDetect(edge_detect);
-	if (m_canvas && glbin_vol_selector.GetThUpdate())
+	if (glbin_vol_selector.GetThUpdate())
 	{
 		glbin_vol_selector.PopMask();
-		m_canvas->Segment(true);
-		m_canvas->RefreshGL(39);
+		glbin_vol_selector.Segment(true);
+		FluoRefresh(3, { gstNull });
 	}
 }
 
@@ -963,11 +879,11 @@ void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent &event)
 
 	//set select group
 	glbin_vol_selector.SetSelectGroup(select_group);
-	if (m_canvas && glbin_vol_selector.GetThUpdate())
+	if (glbin_vol_selector.GetThUpdate())
 	{
 		glbin_vol_selector.PopMask();
-		m_canvas->Segment(true);
-		m_canvas->RefreshGL(39);
+		glbin_vol_selector.Segment(true);
+		FluoRefresh(3, { gstNull });
 	}
 }
 
@@ -1005,8 +921,7 @@ void BrushToolDlg::OnBrushSize1Text(wxCommandEvent &event)
 
 	//set size1
 	glbin_vol_selector.SetBrushSize(val, -1.0);
-	if (m_canvas->GetIntMode()==2)
-		m_canvas->RefreshGL(39);
+	FluoRefresh(3, { gstNull });
 }
 
 //brush size 2
@@ -1019,28 +934,12 @@ void BrushToolDlg::OnBrushSize2Chk(wxCommandEvent &event)
 	double val2;
 	str.ToDouble(&val2);
 
-	if (m_brush_size2_chk->GetValue())
-	{
-		m_brush_size2_sldr->Enable();
-		m_brush_size2_text->Enable();
-		if (m_canvas)
-		{
-			glbin_vol_selector.SetUseBrushSize2(true);
-			glbin_vol_selector.SetBrushSize(val1, val2);
-			m_canvas->RefreshGL(39);
-		}
-	}
-	else
-	{
-		m_brush_size2_sldr->Disable();
-		m_brush_size2_text->Disable();
-		if (m_canvas)
-		{
-			glbin_vol_selector.SetUseBrushSize2(false);
-			glbin_vol_selector.SetBrushSize(val1, val2);
-			m_canvas->RefreshGL(39);
-		}
-	}
+	bool bval = m_brush_size2_chk->GetValue();
+	m_brush_size2_sldr->Enable(bval);
+	m_brush_size2_text->Enable(bval);
+	glbin_vol_selector.SetUseBrushSize2(bval);
+	glbin_vol_selector.SetBrushSize(val1, val2);
+	FluoRefresh(3, { gstNull });
 }
 
 void BrushToolDlg::OnBrushSize2Change(wxScrollEvent &event)
@@ -1059,12 +958,8 @@ void BrushToolDlg::OnBrushSize2Text(wxCommandEvent &event)
 	m_brush_size2_sldr->ChangeValue(std::round(val));
 
 	//set size2
-	if (m_canvas)
-	{
-		glbin_vol_selector.SetBrushSize(-1.0, val);
-		if (m_canvas->GetIntMode()==2)
-			m_canvas->RefreshGL(39);
-	}
+	glbin_vol_selector.SetBrushSize(-1.0, val);
+	FluoRefresh(3, { gstNull });
 }
 
 //brush iterations
@@ -1098,56 +993,40 @@ void BrushToolDlg::OnBrushSizeRelationCheck(wxCommandEvent& event)
 }
 
 //align
+void BrushToolDlg::OnAlignCenterCheck(wxCommandEvent& event)
+{
+	m_align_center = m_align_center_chk->GetValue();
+}
+
 void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 {
-	int axis_type = 0;
-	switch (event.GetId())
-	{
-	case ID_AlignXYZ:
-		axis_type = 0;
-		break;
-	case ID_AlignYXZ:
-		axis_type = 1;
-		break;
-	case ID_AlignZXY:
-		axis_type = 2;
-		break;
-	case ID_AlignXZY:
-		axis_type = 3;
-		break;
-	case ID_AlignYZX:
-		axis_type = 4;
-		break;
-	case ID_AlignZYX:
-		axis_type = 5;
-		break;
-	}
+	int axis_type = event.GetId();
 
-	if (m_frame && m_canvas)
-	{
-		glbin_aligner.SetView(m_canvas);
-		VolumeData* vd = m_frame->GetCurSelVol();
-		if (vd && vd->GetTexture())
-		{
-			flrd::Cov cover(vd);
-			if (cover.Compute(0))
-			{
-				std::vector<double> cov = cover.GetCov();
-				fluo::Point center = cover.GetCenter();
-				glbin_aligner.SetCovMat(cov);
-				glbin_aligner.AlignPca(axis_type, false);
-				if (m_align_center->GetValue())
-				{
-					double tx, ty, tz;
-					m_canvas->GetObjCenters(tx, ty, tz);
-					m_canvas->SetObjTrans(
-						tx - center.x(),
-						center.y() - ty,
-						center.z() - tz);
-				}
-			}
-		}
-	}
+	//if (m_frame)
+	//{
+	//	glbin_aligner.SetView(m_canvas);
+	//	VolumeData* vd = m_frame->GetCurSelVol();
+	//	if (vd && vd->GetTexture())
+	//	{
+	//		flrd::Cov cover(vd);
+	//		if (cover.Compute(0))
+	//		{
+	//			std::vector<double> cov = cover.GetCov();
+	//			fluo::Point center = cover.GetCenter();
+	//			glbin_aligner.SetCovMat(cov);
+	//			glbin_aligner.AlignPca(axis_type, false);
+	//			if (m_align_center->GetValue())
+	//			{
+	//				double tx, ty, tz;
+	//				m_canvas->GetObjCenters(tx, ty, tz);
+	//				m_canvas->SetObjTrans(
+	//					tx - center.x(),
+	//					center.y() - ty,
+	//					center.z() - tz);
+	//			}
+	//		}
+	//	}
+	//}
 }
 
 //output
@@ -1175,7 +1054,8 @@ void BrushToolDlg::SetOutput(const GridData &data, const wxString &unit)
 
 void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)
 {
-	Output(0);
+	//Output(0);
+	FluoUpdate({ gstBrushCountResult });
 }
 
 void BrushToolDlg::OnAutoUpdateBtn(wxCommandEvent& event)

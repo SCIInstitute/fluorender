@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 
 class RenderCanvas;
 class VolumeData;
+class DataGroup;
 namespace flrd
 {
 	struct BrushRadiusSet
@@ -56,6 +57,7 @@ namespace flrd
 		void SetRenderCanvas(RenderCanvas* canvas);
 		void SetVolume(VolumeData *vd) { m_vd = vd; }
 		VolumeData* GetVolume() { return m_vd; }
+		void SetGroup(DataGroup* group) { m_group = group; }
 		//modes
 		void SetMode(int mode);
 		int GetMode() { return m_mode; }
@@ -221,6 +223,7 @@ namespace flrd
 		//th udpate
 		bool GetThUpdate();
 
+		//segment volumes in current view
 		void Segment(bool push_mask, int mx = 0, int my = 0);
 		void Select(bool push_mask, double radius);
 		void Clear();//erase selection
@@ -230,10 +233,22 @@ namespace flrd
 		VolumeData* GetResult(bool pop);
 
 		//mask
+		bool GetMaskHold()//check if other operations are on hold because painting is going on
+		{
+			return
+				m_mode == 1 || m_mode == 2 ||
+				m_mode == 3 || m_mode == 4 ||
+				m_mode == 8 || m_mode == 9;
+		}
 		void PushMask();
 		void PopMask();
 		void UndoMask();
 		void RedoMask();
+		//mask operations
+		void CopyMask(bool copy_data);
+		void SetCopyMaskVolume(VolumeData* vd) { m_vd_copy = vd; }
+		VolumeData* GetCopyMaskVolume() { return m_vd_copy; }
+		void PasteMask(int op);
 
 		//mouse position
 		void ResetMousePos()
@@ -254,6 +269,10 @@ namespace flrd
 	private:
 		RenderCanvas *m_canvas;
 		VolumeData *m_vd;	//volume data for segmentation
+		DataGroup* m_group;	//group of m_vd
+		VolumeData* m_vd_copy;//for copying mask source
+		bool m_copy_data;//copy data or mask
+
 		unsigned int m_2d_mask;	//2d mask from painting
 		unsigned int m_2d_weight1;//2d weight map (after tone mapping)
 		unsigned int m_2d_weight2;//2d weight map	(before tone mapping)
@@ -331,6 +350,7 @@ namespace flrd
 
 	private:
 		double HueCalculation(int mode, unsigned int label);
+		void segment(bool push_mask, int mx = 0, int my = 0);
 	};
 }
 #endif//_VOLUMESELECTOR_H_

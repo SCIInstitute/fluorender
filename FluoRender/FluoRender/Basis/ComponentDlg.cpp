@@ -2206,18 +2206,18 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 		m_view->RefreshGL(39);
 
 		//frame
-		if (m_frame)
-		{
-			if (m_frame->GetBrushToolDlg())
-			{
-				if (m_view->m_paint_count)
-					m_frame->GetBrushToolDlg()->Update(0);
-				m_frame->GetBrushToolDlg()->UpdateUndoRedo();
-			}
-			if (m_frame->GetColocalizationDlg() &&
-				m_view->m_paint_colocalize)
-				m_frame->GetColocalizationDlg()->Colocalize();
-		}
+		//if (m_frame)
+		//{
+		//	if (m_frame->GetBrushToolDlg())
+		//	{
+		//		if (m_view->m_paint_count)
+		//			m_frame->GetBrushToolDlg()->Update(0);
+		//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+		//	}
+		//	if (m_frame->GetColocalizationDlg() &&
+		//		m_view->m_paint_colocalize)
+		//		m_frame->GetColocalizationDlg()->Colocalize();
+		//}
 	}
 }
 
@@ -2253,18 +2253,18 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	m_view->RefreshGL(39);
 
 	//frame
-	if (m_frame)
-	{
-		if (m_frame->GetBrushToolDlg())
-		{
-			if (m_view->m_paint_count)
-				m_frame->GetBrushToolDlg()->Update(0);
-			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
-		}
-		if (m_frame->GetColocalizationDlg() &&
-			m_view->m_paint_colocalize)
-			m_frame->GetColocalizationDlg()->Colocalize();
-	}
+	//if (m_frame)
+	//{
+	//	if (m_frame->GetBrushToolDlg())
+	//	{
+	//		if (m_view->m_paint_count)
+	//			m_frame->GetBrushToolDlg()->Update(0);
+	//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	//	}
+	//	if (m_frame->GetColocalizationDlg() &&
+	//		m_view->m_paint_colocalize)
+	//		m_frame->GetColocalizationDlg()->Colocalize();
+	//}
 }
 
 void ComponentDlg::OnCompAll(wxCommandEvent &event)
@@ -2279,18 +2279,18 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 	m_view->RefreshGL(39);
 
 	//frame
-	if (m_frame)
-	{
-		if (m_frame->GetBrushToolDlg())
-		{
-			if (m_view->m_paint_count)
-				m_frame->GetBrushToolDlg()->Update(0);
-			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
-		}
-		if (m_frame->GetColocalizationDlg() &&
-			m_view->m_paint_colocalize)
-			m_frame->GetColocalizationDlg()->Colocalize();
-	}
+	//if (m_frame)
+	//{
+	//	if (m_frame->GetBrushToolDlg())
+	//	{
+	//		if (m_view->m_paint_count)
+	//			m_frame->GetBrushToolDlg()->Update(0);
+	//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	//	}
+	//	if (m_frame->GetColocalizationDlg() &&
+	//		m_view->m_paint_colocalize)
+	//		m_frame->GetColocalizationDlg()->Colocalize();
+	//}
 }
 
 void ComponentDlg::OnCompClear(wxCommandEvent &event)
@@ -2305,8 +2305,8 @@ void ComponentDlg::OnCompClear(wxCommandEvent &event)
 	m_view->RefreshGL(39);
 
 	//frame
-	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	//if (m_frame && m_frame->GetBrushToolDlg())
+	//	m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void ComponentDlg::OnShuffle(wxCommandEvent &event)
@@ -3424,18 +3424,18 @@ void ComponentDlg::SelectFullComp()
 	m_view->RefreshGL(39);
 
 	//frame
-	if (m_frame)
-	{
-		if (m_frame->GetBrushToolDlg())
-		{
-			if (m_view->m_paint_count)
-				m_frame->GetBrushToolDlg()->Update(0);
-			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
-		}
-		if (m_frame->GetColocalizationDlg() &&
-			m_view->m_paint_colocalize)
-			m_frame->GetColocalizationDlg()->Colocalize();
-	}
+	//if (m_frame)
+	//{
+	//	if (m_frame->GetBrushToolDlg())
+	//	{
+	//		if (m_view->m_paint_count)
+	//			m_frame->GetBrushToolDlg()->Update(0);
+	//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	//	}
+	//	if (m_frame->GetColocalizationDlg() &&
+	//		m_view->m_paint_colocalize)
+	//		m_frame->GetColocalizationDlg()->Colocalize();
+	//}
 }
 
 void ComponentDlg::ApplyRecord()
@@ -4200,18 +4200,18 @@ void ComponentDlg::IncludeComps()
 		m_view->RefreshGL(39);
 
 		//frame
-		if (m_frame)
-		{
-			if (m_frame->GetBrushToolDlg())
-			{
-				if (m_view->m_paint_count)
-					m_frame->GetBrushToolDlg()->Update(0);
-				m_frame->GetBrushToolDlg()->UpdateUndoRedo();
-			}
-			if (m_frame->GetColocalizationDlg() &&
-				m_view->m_paint_colocalize)
-				m_frame->GetColocalizationDlg()->Colocalize();
-		}
+		//if (m_frame)
+		//{
+		//	if (m_frame->GetBrushToolDlg())
+		//	{
+		//		if (m_view->m_paint_count)
+		//			m_frame->GetBrushToolDlg()->Update(0);
+		//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+		//	}
+		//	if (m_frame->GetColocalizationDlg() &&
+		//		m_view->m_paint_colocalize)
+		//		m_frame->GetColocalizationDlg()->Colocalize();
+		//}
 	}
 }
 
@@ -4252,17 +4252,17 @@ void ComponentDlg::ExcludeComps()
 		m_view->RefreshGL(39);
 
 		//frame
-		if (m_frame)
-		{
-			if (m_frame->GetBrushToolDlg())
-			{
-				if (m_view->m_paint_count)
-					m_frame->GetBrushToolDlg()->Update(0);
-				m_frame->GetBrushToolDlg()->UpdateUndoRedo();
-			}
-			if (m_frame->GetColocalizationDlg() &&
-				m_view->m_paint_colocalize)
-				m_frame->GetColocalizationDlg()->Colocalize();
-		}
+		//if (m_frame)
+		//{
+		//	if (m_frame->GetBrushToolDlg())
+		//	{
+		//		if (m_view->m_paint_count)
+		//			m_frame->GetBrushToolDlg()->Update(0);
+		//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+		//	}
+		//	if (m_frame->GetColocalizationDlg() &&
+		//		m_view->m_paint_colocalize)
+		//		m_frame->GetColocalizationDlg()->Colocalize();
+		//}
 	}
 }

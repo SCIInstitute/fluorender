@@ -91,7 +91,6 @@ DataTreeCtrl::DataTreeCtrl(
 	long style) :
 wxTreeCtrl(parent, wxID_ANY, pos, size, style),
 	m_frame(frame),
-	m_fixed(false),
 	m_scroll_pos(-1)
 {
 	// temporarily block events during constructor:
@@ -145,7 +144,7 @@ void DataTreeCtrl::TraversalDelete(wxTreeItemId item)
 
 void DataTreeCtrl::DeleteSelection()
 {
-	if (m_fixed)
+	if (glbin_vol_selector.GetMaskHold())
 		return;
 
 	wxTreeItemId sel_item = GetSelection();
@@ -277,7 +276,7 @@ void DataTreeCtrl::DeleteSelection()
 
 void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 {
-	if (m_fixed)
+	if (glbin_vol_selector.GetMaskHold())
 		return;
 
 	int flag;
@@ -336,7 +335,7 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 				menu.Append(ID_RemoveData, "Delete");
 				menu.AppendSeparator();
 				menu.Append(ID_CopyMask, "Copy Mask");
-				if (m_frame->m_vd_copy)
+				if (glbin_vol_selector.GetCopyMaskVolume())
 				{
 					menu.Append(ID_PasteMask, "Paste Mask");
 					menu.Append(ID_MergeMask, "Merge Mask");
@@ -411,7 +410,7 @@ void DataTreeCtrl::OnToggleDisp(wxCommandEvent& event)
 
 void DataTreeCtrl::OnIsolate(wxCommandEvent& event)
 {
-	if (m_fixed)
+	if (glbin_vol_selector.GetMaskHold())
 		return;
 
 	wxTreeItemId sel_item = GetSelection();
@@ -475,7 +474,7 @@ void DataTreeCtrl::OnIsolate(wxCommandEvent& event)
 
 void DataTreeCtrl::OnShowAll(wxCommandEvent& event)
 {
-	if (m_fixed)
+	if (glbin_vol_selector.GetMaskHold())
 		return;
 
 	wxTreeItemId sel_item = GetSelection();
@@ -544,7 +543,7 @@ void DataTreeCtrl::OnRemoveData(wxCommandEvent& event)
 
 void DataTreeCtrl::OnCloseView(wxCommandEvent& event)
 {
-	if (m_fixed)
+	if (glbin_vol_selector.GetMaskHold())
 		return;
 
 	wxTreeItemId sel_item = GetSelection();
@@ -562,7 +561,7 @@ void DataTreeCtrl::OnCloseView(wxCommandEvent& event)
 
 void DataTreeCtrl::OnManipulateData(wxCommandEvent& event)
 {
-	if (m_fixed)
+	if (glbin_vol_selector.GetMaskHold())
 		return;
 
 	wxTreeItemId sel_item = GetSelection();
@@ -581,7 +580,7 @@ void DataTreeCtrl::OnManipulateData(wxCommandEvent& event)
 
 void DataTreeCtrl::OnAddMeshGroup(wxCommandEvent &event)
 {
-	if (m_fixed)
+	if (glbin_vol_selector.GetMaskHold())
 		return;
 
 	wxTreeItemId sel_item = GetSelection();
@@ -712,7 +711,7 @@ void DataTreeCtrl::OnAddMeshGroup(wxCommandEvent &event)
 
 void DataTreeCtrl::OnAddDataGroup(wxCommandEvent& event)
 {
-	if (m_fixed)
+	if (glbin_vol_selector.GetMaskHold())
 		return;
 
 	wxTreeItemId sel_item = GetSelection();
@@ -930,7 +929,7 @@ void DataTreeCtrl::OnMachineLearning(wxCommandEvent& event)
 //randomize color
 void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 {
-	if (m_fixed)
+	if (glbin_vol_selector.GetMaskHold())
 		return;
 
 	wxTreeItemId sel_item = GetSelection();
@@ -996,30 +995,27 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 
 void DataTreeCtrl::OnCopyMask(wxCommandEvent& event)
 {
-	if (m_fixed)
-		return;
-
-	CopyMask(false);
+	glbin_vol_selector.CopyMask(false);
 }
 
 void DataTreeCtrl::OnPasteMask(wxCommandEvent& event)
 {
-	PasteMask(0);
+	glbin_vol_selector.PasteMask(0);
 }
 
 void DataTreeCtrl::OnMergeMask(wxCommandEvent& event)
 {
-	PasteMask(1);
+	glbin_vol_selector.PasteMask(1);
 }
 
 void DataTreeCtrl::OnExcludeMask(wxCommandEvent& event)
 {
-	PasteMask(2);
+	glbin_vol_selector.PasteMask(2);
 }
 
 void DataTreeCtrl::OnIntersectMask(wxCommandEvent& event)
 {
-	PasteMask(3);
+	glbin_vol_selector.PasteMask(3);
 }
 
 //
@@ -1265,7 +1261,7 @@ void DataTreeCtrl::OnSelChanged(wxTreeEvent& event)
 
 void DataTreeCtrl::OnSelChanging(wxTreeEvent &event)
 {
-	if (m_fixed)
+	if (glbin_vol_selector.GetMaskHold())
 		event.Veto();
 }
 
@@ -1276,7 +1272,7 @@ void DataTreeCtrl::OnDeleting(wxTreeEvent& event)
 
 void DataTreeCtrl::OnAct(wxTreeEvent &event)
 {
-	if (m_fixed)
+	if (glbin_vol_selector.GetMaskHold())
 		return;
 
 	wxTreeItemId sel_item = GetSelection();
@@ -1415,7 +1411,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 
 void DataTreeCtrl::OnBeginDrag(wxTreeEvent& event)
 {
-	if (m_fixed)
+	if (glbin_vol_selector.GetMaskHold())
 		return;
 
 	//remember pos
@@ -1455,7 +1451,7 @@ void DataTreeCtrl::OnBeginDrag(wxTreeEvent& event)
 
 void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 {
-	if (m_fixed)
+	if (glbin_vol_selector.GetMaskHold())
 		return;
 
 	wxTreeItemId src_item = m_drag_item,
@@ -1906,273 +1902,6 @@ void DataTreeCtrl::SetMGroupItemImage(const wxTreeItemId item, int image)
 	SetItemImage(item, image);
 }
 
-//brush commands (from the panel)
-void DataTreeCtrl::BrushClear()
-{
-	wxTreeItemId sel_item = GetSelection();
-
-	if (sel_item.IsOk() && m_frame)
-	{
-		//select data
-		wxString name = GetItemText(sel_item);
-		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-		if (item_data && item_data->type==2)
-		{
-			wxTreeItemId par_item = GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
-				if (par_item_data && par_item_data->type == 5)
-				{
-					//par is group
-					wxString str = GetItemText(GetItemParent(par_item));
-					RenderCanvas* view = m_frame->GetRenderCanvas(str);
-					if (view)
-					{
-						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
-						if (vd)
-						{
-							int int_mode = view->GetIntMode();
-							int paint_mode = view->GetPaintMode();
-							view->SetVolumeA(vd);
-							view->SetPaintMode(6);
-							view->Segment(true);
-							view->RefreshGL(39);
-							view->SetPaintMode(paint_mode);
-							view->SetIntMode(int_mode);
-						}
-					}
-				}
-				else if (par_item_data && par_item_data->type == 1)
-				{
-					//par is view
-					wxString str = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetRenderCanvas(str);
-					if (view)
-					{
-						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
-						if (vd)
-						{
-							int int_mode = view->GetIntMode();
-							int paint_mode = view->GetPaintMode();
-							view->SetVolumeA(vd);
-							view->SetPaintMode(6);
-							view->Segment(true);
-							view->RefreshGL(39);
-							view->SetPaintMode(paint_mode);
-							view->SetIntMode(int_mode);
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-void DataTreeCtrl::BrushCreate()
-{
-	wxTreeItemId sel_item = GetSelection();
-
-	if (sel_item.IsOk() && m_frame)
-	{
-		//select data
-		wxString name = GetItemText(sel_item);
-		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-		if (item_data && item_data->type==2)
-		{
-			wxTreeItemId par_item = GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
-				if (par_item_data && par_item_data->type == 5)
-				{
-					//par is group
-					wxString group_name = GetItemText(par_item);
-					wxString str = GetItemText(GetItemParent(par_item));
-					RenderCanvas* vrv = m_frame->GetRenderCanvas(str);
-					if (vrv)
-					{
-						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
-						if (vd)
-						{
-							glbin_vol_calculator.SetVolumeA(vd);
-							glbin_vol_calculator.CalculateGroup(5, group_name);
-						}
-					}
-				}
-				else if (par_item_data && par_item_data->type == 1)
-				{
-					//par is view
-					wxString str = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetRenderCanvas(str);
-					if (view)
-					{
-						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
-						if (vd)
-						{
-							glbin_vol_calculator.SetVolumeA(vd);
-							glbin_vol_calculator.CalculateGroup(5);
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-void DataTreeCtrl::BrushCreateInv()
-{
-	wxTreeItemId sel_item = GetSelection();
-
-	if (sel_item.IsOk() && m_frame)
-	{
-		//select data
-		wxString name = GetItemText(sel_item);
-		int cal_type = 6;
-		if (name.Find("_DELETED")==wxNOT_FOUND)
-			cal_type = 6;
-		else
-			cal_type = 7;
-
-		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-		if (item_data && item_data->type==2)
-		{
-			wxTreeItemId par_item = GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
-				if (par_item_data && par_item_data->type == 5)
-				{
-					//par is group
-					wxString group_name = GetItemText(par_item);
-					wxString str = GetItemText(GetItemParent(par_item));
-					RenderCanvas* view = m_frame->GetRenderCanvas(str);
-					if (view)
-					{
-						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
-						if (vd)
-						{
-							glbin_vol_calculator.SetVolumeA(vd);
-							glbin_vol_calculator.CalculateGroup(cal_type, group_name);
-						}
-					}
-				}
-				else if (par_item_data && par_item_data->type == 1)
-				{
-					//par is view
-					wxString str = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetRenderCanvas(str);
-					if (view)
-					{
-						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
-						if (vd)
-						{
-							glbin_vol_calculator.SetVolumeA(vd);
-							glbin_vol_calculator.CalculateGroup(cal_type);
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-//mask operations
-void DataTreeCtrl::CopyMask(bool copy_data)
-{
-	wxTreeItemId sel_item = GetSelection();
-	if (!sel_item.IsOk()) return;
-	if (!m_frame) return;
-
-	wxString name = GetItemText(sel_item);
-	VolumeData* vd = glbin_data_manager.GetVolumeData(name);
-	if (vd)
-	{
-		m_frame->m_vd_copy = vd;
-		m_frame->m_copy_data = copy_data;
-	}
-}
-
-void DataTreeCtrl::PasteMask(int op)
-{
-	if (m_fixed)
-		return;
-	wxTreeItemId sel_item = GetSelection();
-	if (!sel_item.IsOk()) return;
-	if (!m_frame) return;
-
-	wxString name = GetItemText(sel_item);
-	VolumeData* vd = glbin_data_manager.GetVolumeData(name);
-	RenderCanvas* view = 0;
-	DataGroup* group = 0;
-	wxTreeItemId par_item = GetItemParent(sel_item);
-	if (par_item.IsOk())
-	{
-		LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
-		if (par_item_data && par_item_data->type == 5)
-		{
-			//par is group
-			wxString str = GetItemText(GetItemParent(par_item));
-			view = m_frame->GetRenderCanvas(str);
-			str = GetItemText(par_item);
-			group = view->GetGroup(str);
-		}
-		else if (par_item_data && par_item_data->type == 1)
-		{
-			//par is view
-			wxString str = GetItemText(par_item);
-			view = m_frame->GetRenderCanvas(str);
-		}
-	}
-	bool apply_group = glbin_vol_selector.GetSelectGroup();
-
-	if (vd && m_frame->m_vd_copy)
-	{
-		//prevent self copying
-		if (!m_frame->m_copy_data &&
-			vd == m_frame->m_vd_copy)
-			return;
-
-		//undo/redo
-		if (flvr::Texture::mask_undo_num_ > 0 &&
-			vd->GetTexture())
-			vd->GetTexture()->push_mask();
-		if (m_frame->m_copy_data)
-		{
-			Nrrd* data = m_frame->m_vd_copy->GetVolume(false);
-			if (m_frame->m_vd_copy->GetBits() == 16)
-				vd->AddMask16(data, op, m_frame->m_vd_copy->GetScalarScale());
-			else
-				vd->AddMask(data, op);
-		}
-		else
-			vd->AddMask(m_frame->m_vd_copy->GetMask(false), op);
-
-		if (apply_group)
-		{
-			Nrrd* data = vd->GetMask(false);
-			if (data)
-			{
-				if (group)
-					group->AddMask(data, 0);
-				else
-				{
-					for (int i = 0; i < view->GetGroupNum(); ++i)
-						view->GetGroup(i)->AddMask(data, 0);
-				}
-
-			}
-		}
-
-		m_frame->RefreshCanvases();
-		if (m_frame->GetBrushToolDlg())
-			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
-		if (m_frame->GetColocalizationDlg() &&
-			view->m_paint_colocalize)
-			m_frame->GetColocalizationDlg()->Colocalize();
-	}
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BEGIN_EVENT_TABLE(TreePanel, wxPanel)
@@ -2186,7 +1915,7 @@ BEGIN_EVENT_TABLE(TreePanel, wxPanel)
 	EVT_TOOL(ID_BrushDiffuse, TreePanel::OnBrushDiffuse)
 	EVT_TOOL(ID_BrushClear, TreePanel::OnBrushClear)
 	EVT_TOOL(ID_BrushErase, TreePanel::OnBrushErase)
-	EVT_TOOL(ID_BrushCreate, TreePanel::OnBrushCreate)
+	EVT_TOOL(ID_BrushExtract, TreePanel::OnBrushCreate)
 	END_EVENT_TABLE()
 
 TreePanel::TreePanel(MainFrame* frame,
@@ -2237,7 +1966,7 @@ TreePanel::TreePanel(MainFrame* frame,
 	m_toolbar->AddTool(ID_BrushErase, "Erase",
 		bitmap, "Erase highlighted structures");
 	bitmap = wxGetBitmapFromMemory(brush_create);
-	m_toolbar->AddTool(ID_BrushCreate, "Extract", bitmap,
+	m_toolbar->AddTool(ID_BrushExtract, "Extract", bitmap,
 		"Extract highlighted structures out and create a new volume");
 	m_toolbar->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(brush_clear);
@@ -2280,6 +2009,7 @@ void TreePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		return;
 
 	bool update_all = vc.empty();
+	int ival;
 
 	//update icons only
 	if (update_all || FOUND_VALUE(gstTreeCtrl))
@@ -2293,7 +2023,18 @@ void TreePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	if (update_all || FOUND_VALUE(gstTreeSelection))
-		UpdateSelection();
+	{
+		if (m_datatree)
+			m_datatree->UpdateSelection();
+	}
+
+	if (update_all || FOUND_VALUE(gstBrushState))
+	{
+		ival = glbin_vol_selector.GetMode();
+		m_toolbar->ToggleTool(ID_BrushAppend, ival == 2);
+		m_toolbar->ToggleTool(ID_BrushDiffuse, ival == 4);
+		m_toolbar->ToggleTool(ID_BrushDesel, ival == 3);
+	}
 }
 
 void TreePanel::UpdateTreeIcons()
@@ -2580,17 +2321,17 @@ void TreePanel::UpdateTree()
 				ChangeIconColor(ii, wxc);
 				wxTreeItemId item = AddVolItem(vrv_item, vd->GetName());
 				SetVolItemImage(item, vd->GetDisp() ? 2 * ii + 1 : 2 * ii);
-				if (glbin_tree_sel == vd->GetName().ToStdString())
-				{
-					sel_item = item;
-					view->SetVolumeA(vd);
-					m_frame->GetBrushToolDlg()->GetSettings(view);
-					m_frame->GetMeasureDlg()->GetSettings(view);
-					m_frame->GetTraceDlg()->GetSettings(view);
-					m_frame->GetOclDlg()->GetSettings(view);
-					m_frame->GetComponentDlg()->SetView(view);
-					m_frame->GetColocalizationDlg()->SetView(view);
-				}
+				//if (glbin_tree_sel == vd->GetName().ToStdString())
+				//{
+				//	sel_item = item;
+				//	view->SetVolumeA(vd);
+				//	m_frame->GetBrushToolDlg()->GetSettings(view);
+				//	m_frame->GetMeasureDlg()->GetSettings(view);
+				//	m_frame->GetTraceDlg()->GetSettings(view);
+				//	m_frame->GetOclDlg()->GetSettings(view);
+				//	m_frame->GetComponentDlg()->SetView(view);
+				//	m_frame->GetColocalizationDlg()->SetView(view);
+				//}
 			}
 			break;
 			case 3://mesh data
@@ -2656,17 +2397,17 @@ void TreePanel::UpdateTree()
 					ChangeIconColor(ii, wxc);
 					wxTreeItemId item = AddVolItem(group_item, vd->GetName());
 					SetVolItemImage(item, vd->GetDisp() ? 2 * ii + 1 : 2 * ii);
-					if (glbin_tree_sel == vd->GetName().ToStdString())
-					{
-						sel_item = item;
-						view->SetVolumeA(vd);
-						m_frame->GetBrushToolDlg()->GetSettings(view);
-						m_frame->GetMeasureDlg()->GetSettings(view);
-						m_frame->GetTraceDlg()->GetSettings(view);
-						m_frame->GetOclDlg()->GetSettings(view);
-						m_frame->GetComponentDlg()->SetView(view);
-						m_frame->GetColocalizationDlg()->SetView(view);
-					}
+					//if (glbin_tree_sel == vd->GetName().ToStdString())
+					//{
+					//	sel_item = item;
+					//	view->SetVolumeA(vd);
+					//	m_frame->GetBrushToolDlg()->GetSettings(view);
+					//	m_frame->GetMeasureDlg()->GetSettings(view);
+					//	m_frame->GetTraceDlg()->GetSettings(view);
+					//	m_frame->GetOclDlg()->GetSettings(view);
+					//	m_frame->GetComponentDlg()->SetView(view);
+					//	m_frame->GetColocalizationDlg()->SetView(view);
+					//}
 				}
 				if (glbin_tree_sel == group->GetName().ToStdString())
 					sel_item = group_item;
@@ -2767,8 +2508,7 @@ void TreePanel::DeleteAll()
 	if (m_datatree)
 	{
 		m_datatree->DeleteAll();
-		if (m_frame)
-			m_frame->m_vd_copy = 0;
+		glbin_vol_selector.SetCopyMaskVolume(0);
 	}
 }
 
@@ -2876,51 +2616,51 @@ void TreePanel::SetMGroupItemImage(const wxTreeItemId item, int image)
 		m_datatree->SetMGroupItemImage(item, image);
 }
 
-void TreePanel::UpdateSelection()
-{
-	if (m_datatree)
-		m_datatree->UpdateSelection();
-}
+//void TreePanel::UpdateSelection()
+//{
+//	if (m_datatree)
+//		m_datatree->UpdateSelection();
+//}
+//
+//wxString TreePanel::GetCurrentSel()
+//{
+//	wxString str = "";
+//	if (m_datatree)
+//		str = m_datatree->GetCurrentSel();
+//	return str;
+//}
+//
+//void TreePanel::Select(wxString view, wxString name)
+//{
+//	if (m_datatree)
+//		m_datatree->Select(view, name);
+//}
 
-wxString TreePanel::GetCurrentSel()
-{
-	wxString str = "";
-	if (m_datatree)
-		str = m_datatree->GetCurrentSel();
-	return str;
-}
-
-void TreePanel::Select(wxString view, wxString name)
-{
-	if (m_datatree)
-		m_datatree->Select(view, name);
-}
-
-void TreePanel::SelectBrush(int id)
-{
-	m_toolbar->ToggleTool(ID_BrushAppend, false);
-	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
-	m_toolbar->ToggleTool(ID_BrushDesel, false);
-	m_datatree->m_fixed = false;
-
-	if (id)
-	{
-		m_toolbar->ToggleTool(id, true);
-		m_datatree->m_fixed = true;
-	}
-}
-
-int TreePanel::GetBrushSelected()
-{
-	if (m_toolbar->GetToolState(ID_BrushAppend))
-		return ID_BrushAppend;
-	else if (m_toolbar->GetToolState(ID_BrushDiffuse))
-		return ID_BrushDiffuse;
-	else if (m_toolbar->GetToolState(ID_BrushDesel))
-		return ID_BrushDesel;
-	else
-		return 0;
-}
+//void TreePanel::SelectBrush(int id)
+//{
+//	m_toolbar->ToggleTool(ID_BrushAppend, false);
+//	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
+//	m_toolbar->ToggleTool(ID_BrushDesel, false);
+//	m_datatree->m_fixed = false;
+//
+//	if (id)
+//	{
+//		m_toolbar->ToggleTool(id, true);
+//		m_datatree->m_fixed = true;
+//	}
+//}
+//
+//int TreePanel::GetBrushSelected()
+//{
+//	if (m_toolbar->GetToolState(ID_BrushAppend))
+//		return ID_BrushAppend;
+//	else if (m_toolbar->GetToolState(ID_BrushDiffuse))
+//		return ID_BrushDiffuse;
+//	else if (m_toolbar->GetToolState(ID_BrushDesel))
+//		return ID_BrushDesel;
+//	else
+//		return 0;
+//}
 
 void TreePanel::OnToggleView(wxCommandEvent &event)
 {
@@ -2951,274 +2691,216 @@ void TreePanel::OnRemoveData(wxCommandEvent &event)
 
 void TreePanel::OnBrushAppend(wxCommandEvent &event)
 {
-	BrushAppend();
-	if (m_frame && m_frame->GetBrushToolDlg())
-	{
-		if (m_toolbar->GetToolState(ID_BrushAppend))
-			m_frame->GetBrushToolDlg()->SelectBrush(BrushToolDlg::ID_BrushAppend);
-		else
-			m_frame->GetBrushToolDlg()->SelectBrush(0);
-	}
+	int val = glbin_vol_selector.GetMode();
+	if (val != 2)
+		glbin_vol_selector.SetMode(2);
+	else
+		glbin_vol_selector.SetMode(0);
+	FluoRefresh(0, { gstBrushState }, { -1 });
 }
 
 void TreePanel::OnBrushDiffuse(wxCommandEvent &event)
 {
-	BrushDiffuse();
-	if (m_frame && m_frame->GetBrushToolDlg())
-	{
-		if (m_toolbar->GetToolState(ID_BrushDiffuse))
-			m_frame->GetBrushToolDlg()->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
-		else
-			m_frame->GetBrushToolDlg()->SelectBrush(0);
-	}
+	int val = glbin_vol_selector.GetMode();
+	if (val != 4)
+		glbin_vol_selector.SetMode(4);
+	else
+		glbin_vol_selector.SetMode(0);
+	FluoRefresh(0, { gstBrushState }, { -1 });
 }
 
 void TreePanel::OnBrushDesel(wxCommandEvent &event)
 {
-	BrushDesel();
-	if (m_frame && m_frame->GetBrushToolDlg())
-	{
-		if (m_toolbar->GetToolState(ID_BrushDesel))
-			m_frame->GetBrushToolDlg()->SelectBrush(BrushToolDlg::ID_BrushDesel);
-		else
-			m_frame->GetBrushToolDlg()->SelectBrush(0);
-	}
+	int val = glbin_vol_selector.GetMode();
+	if (val != 3)
+		glbin_vol_selector.SetMode(3);
+	else
+		glbin_vol_selector.SetMode(0);
+	FluoRefresh(0, { gstBrushState }, { -1 });
 }
 
 void TreePanel::OnBrushClear(wxCommandEvent &event)
 {
-	BrushClear();
+	glbin_vol_selector.Clear();
+	FluoRefresh(3, { gstNull });
 }
 
 void TreePanel::OnBrushErase(wxCommandEvent &event)
 {
-	BrushErase();
-	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->SelectBrush(0);
+	glbin_vol_selector.Erase();
+	FluoRefresh(3, { gstNull });
 }
 
 void TreePanel::OnBrushCreate(wxCommandEvent &event)
 {
-	BrushCreate();
-	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->SelectBrush(0);
+	glbin_vol_selector.Extract();
+	FluoRefresh(3, { gstNull });
 }
 
 //control from outside
-void TreePanel::BrushAppend()
-{
-	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
-	m_toolbar->ToggleTool(ID_BrushDesel, false);
-	if (!m_frame) return;
+//void TreePanel::BrushAppend()
+//{
+//	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
+//	m_toolbar->ToggleTool(ID_BrushDesel, false);
+//	if (!m_frame) return;
+//
+//	if (m_toolbar->GetToolState(ID_BrushAppend))
+//	{
+//		for (int i=0; i< m_frame->GetViewNum(); i++)
+//		{
+//			RenderCanvas* view = m_frame->GetRenderCanvas(i);
+//			if (view)
+//			{
+//				view->SetIntMode(2);
+//				view->SetPaintMode(2);
+//				m_datatree->m_fixed = true;
+//			}
+//		}
+//	}
+//	else
+//	{
+//		for (int i=0; i< m_frame->GetViewNum(); i++)
+//		{
+//			RenderCanvas* view = m_frame->GetRenderCanvas(i);
+//			if (view)
+//			{
+//				view->SetIntMode(1);
+//				m_datatree->m_fixed = false;
+//			}
+//		}
+//	}
+//}
+//
+//void TreePanel::BrushDiffuse()
+//{
+//	m_toolbar->ToggleTool(ID_BrushAppend, false);
+//	m_toolbar->ToggleTool(ID_BrushDesel, false);
+//	if (!m_frame) return;
+//
+//	if (m_toolbar->GetToolState(ID_BrushDiffuse))
+//	{
+//		for (int i=0; i< m_frame->GetViewNum(); i++)
+//		{
+//			RenderCanvas* view = m_frame->GetRenderCanvas(i);
+//			if (view)
+//			{
+//				view->SetIntMode(2);
+//				view->SetPaintMode(4);
+//				m_datatree->m_fixed = true;
+//			}
+//		}
+//	}
+//	else
+//	{
+//		for (int i=0; i< m_frame->GetViewNum(); i++)
+//		{
+//			RenderCanvas* view = m_frame->GetRenderCanvas(i);
+//			if (view)
+//			{
+//				view->SetIntMode(1);
+//				m_datatree->m_fixed = false;
+//			}
+//		}
+//	}
+//}
+//
+//void TreePanel::BrushSolid(bool state)
+//{
+//	m_toolbar->ToggleTool(ID_BrushAppend, false);
+//	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
+//	m_toolbar->ToggleTool(ID_BrushDesel, false);
+//	if (!m_frame) return;
+//
+//	if (state)
+//	{
+//		for (int i=0; i< m_frame->GetViewNum(); i++)
+//		{
+//			RenderCanvas* view = m_frame->GetRenderCanvas(i);
+//			if (view)
+//			{
+//				view->SetIntMode(2);
+//				view->SetPaintMode(8);
+//				m_datatree->m_fixed = true;
+//			}
+//		}
+//	}
+//	else
+//	{
+//		for (int i=0; i< m_frame->GetViewNum(); i++)
+//		{
+//			RenderCanvas* view = m_frame->GetRenderCanvas(i);
+//			if (view)
+//			{
+//				view->SetIntMode(1);
+//				m_datatree->m_fixed = false;
+//			}
+//		}
+//	}
+//}
+//
+//void TreePanel::BrushGrow(bool state)
+//{
+//	m_toolbar->ToggleTool(ID_BrushAppend, false);
+//	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
+//	m_toolbar->ToggleTool(ID_BrushDesel, false);
+//	if (!m_frame) return;
+//
+//	if (state)
+//	{
+//		for (int i = 0; i < m_frame->GetViewNum(); i++)
+//		{
+//			RenderCanvas* view = m_frame->GetRenderCanvas(i);
+//			if (view)
+//			{
+//				view->SetIntMode(10);
+//				m_datatree->m_fixed = true;
+//			}
+//		}
+//	}
+//	else
+//	{
+//		for (int i = 0; i < m_frame->GetViewNum(); i++)
+//		{
+//			RenderCanvas* view = m_frame->GetRenderCanvas(i);
+//			if (view)
+//			{
+//				view->SetIntMode(1);
+//				m_datatree->m_fixed = false;
+//			}
+//		}
+//	}
+//}
+//
+//void TreePanel::BrushDesel()
+//{
+//	m_toolbar->ToggleTool(ID_BrushAppend, false);
+//	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
+//	if (!m_frame) return;
+//
+//	if (m_toolbar->GetToolState(ID_BrushDesel))
+//	{
+//		for (int i=0; i< m_frame->GetViewNum(); i++)
+//		{
+//			RenderCanvas* view = m_frame->GetRenderCanvas(i);
+//			if (view)
+//			{
+//				view->SetIntMode(2);
+//				view->SetPaintMode(3);
+//				m_datatree->m_fixed = true;
+//			}
+//		}
+//	}
+//	else
+//	{
+//		for (int i=0; i< m_frame->GetViewNum(); i++)
+//		{
+//			RenderCanvas* view = m_frame->GetRenderCanvas(i);
+//			if (view)
+//			{
+//				view->SetIntMode(1);
+//				m_datatree->m_fixed = false;
+//			}
+//		}
+//	}
+//}
 
-	if (m_toolbar->GetToolState(ID_BrushAppend))
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetRenderCanvas(i);
-			if (view)
-			{
-				view->SetIntMode(2);
-				view->SetPaintMode(2);
-				m_datatree->m_fixed = true;
-			}
-		}
-	}
-	else
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetRenderCanvas(i);
-			if (view)
-			{
-				view->SetIntMode(1);
-				m_datatree->m_fixed = false;
-			}
-		}
-	}
-}
-
-void TreePanel::BrushDiffuse()
-{
-	m_toolbar->ToggleTool(ID_BrushAppend, false);
-	m_toolbar->ToggleTool(ID_BrushDesel, false);
-	if (!m_frame) return;
-
-	if (m_toolbar->GetToolState(ID_BrushDiffuse))
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetRenderCanvas(i);
-			if (view)
-			{
-				view->SetIntMode(2);
-				view->SetPaintMode(4);
-				m_datatree->m_fixed = true;
-			}
-		}
-	}
-	else
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetRenderCanvas(i);
-			if (view)
-			{
-				view->SetIntMode(1);
-				m_datatree->m_fixed = false;
-			}
-		}
-	}
-}
-
-void TreePanel::BrushSolid(bool state)
-{
-	m_toolbar->ToggleTool(ID_BrushAppend, false);
-	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
-	m_toolbar->ToggleTool(ID_BrushDesel, false);
-	if (!m_frame) return;
-
-	if (state)
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetRenderCanvas(i);
-			if (view)
-			{
-				view->SetIntMode(2);
-				view->SetPaintMode(8);
-				m_datatree->m_fixed = true;
-			}
-		}
-	}
-	else
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetRenderCanvas(i);
-			if (view)
-			{
-				view->SetIntMode(1);
-				m_datatree->m_fixed = false;
-			}
-		}
-	}
-}
-
-void TreePanel::BrushGrow(bool state)
-{
-	m_toolbar->ToggleTool(ID_BrushAppend, false);
-	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
-	m_toolbar->ToggleTool(ID_BrushDesel, false);
-	if (!m_frame) return;
-
-	if (state)
-	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetRenderCanvas(i);
-			if (view)
-			{
-				view->SetIntMode(10);
-				m_datatree->m_fixed = true;
-			}
-		}
-	}
-	else
-	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetRenderCanvas(i);
-			if (view)
-			{
-				view->SetIntMode(1);
-				m_datatree->m_fixed = false;
-			}
-		}
-	}
-}
-
-void TreePanel::BrushDesel()
-{
-	m_toolbar->ToggleTool(ID_BrushAppend, false);
-	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
-	if (!m_frame) return;
-
-	if (m_toolbar->GetToolState(ID_BrushDesel))
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetRenderCanvas(i);
-			if (view)
-			{
-				view->SetIntMode(2);
-				view->SetPaintMode(3);
-				m_datatree->m_fixed = true;
-			}
-		}
-	}
-	else
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetRenderCanvas(i);
-			if (view)
-			{
-				view->SetIntMode(1);
-				m_datatree->m_fixed = false;
-			}
-		}
-	}
-}
-
-void TreePanel::BrushClear()
-{
-	if (m_datatree)
-		m_datatree->BrushClear();
-}
-
-void TreePanel::BrushErase()
-{
-	m_toolbar->ToggleTool(ID_BrushAppend, false);
-	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
-	m_toolbar->ToggleTool(ID_BrushDesel, false);
-
-	if (m_frame)
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetRenderCanvas(i);
-			if (view)
-			{
-				view->SetIntMode(1);
-				m_datatree->m_fixed = false;
-			}
-		}
-	}
-
-	if (m_datatree)
-		m_datatree->BrushCreateInv();
-}
-
-void TreePanel::BrushCreate()
-{
-	m_toolbar->ToggleTool(ID_BrushAppend, false);
-	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
-	m_toolbar->ToggleTool(ID_BrushDesel, false);
-
-	if (m_frame)
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetRenderCanvas(i);
-			if (view)
-			{
-				view->SetIntMode(1);
-				m_datatree->m_fixed = false;
-			}
-		}
-	}
-
-	if (m_datatree)
-		m_datatree->BrushCreate();
-}

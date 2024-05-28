@@ -43,8 +43,6 @@ DEALINGS IN THE SOFTWARE.
 #include <MeasureDlg.h>
 #include <VolumePropPanel.h>
 #include <Calculate/Count.h>
-#include <Calculate/Histogram.h>
-#include <Database/RecordHistParams.h>
 #include <Distance/Cov.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
@@ -2113,74 +2111,11 @@ void RenderCanvas::DisplayStroke()
 	glEnable(GL_DEPTH_TEST);
 }
 
-//segment volumes in current view
-void RenderCanvas::Segment(bool push_mask)
-{
-	int mode = glbin_vol_selector.GetMode();
-
-	//add ml record
-	if (glbin.get_cg_table_enable() &&
-		glbin.get_cg_entry().getValid() &&
-		m_cur_vol)
-	{
-		//histogram
-		flrd::Histogram histogram(m_cur_vol);
-		histogram.SetUseMask(true);
-		flrd::EntryHist* eh = histogram.GetEntryHist();
-
-		if (eh)
-		{
-			//record
-			flrd::RecordHistParams* rec = new flrd::RecordHistParams();
-			rec->setInput(eh);
-			flrd::EntryParams* ep = new flrd::EntryParams(glbin.get_cg_entry());
-			rec->setOutput(ep);
-
-			//table
-			glbin.get_cg_table().addRecord(rec);
-		}
-	}
-
-	HandleCamera();
-	if (mode == 9)
-	{
-		wxPoint mouse_pos = ScreenToClient(wxGetMousePosition());
-		glbin_vol_selector.Segment(push_mask, mouse_pos.x, mouse_pos.y);
-	}
-	else
-		glbin_vol_selector.Segment(push_mask);
-
-	bool count = false;
-	bool colocal = false;
-	if (mode == 1 ||
-		mode == 2 ||
-		mode == 3 ||
-		mode == 4 ||
-		mode == 5 ||
-		mode == 7 ||
-		mode == 8 ||
-		mode == 9)
-	{
-		count = glbin_vol_selector.GetPaintCount();
-		colocal = glbin_vol_selector.GetPaintColocalize();
-	}
-
-	//update
-	if (m_frame)
-	{
-		if (m_frame->GetBrushToolDlg())
-			m_frame->GetBrushToolDlg()->Update(count?0:1);
-		if (colocal && m_frame->GetColocalizationDlg())
-			m_frame->GetColocalizationDlg()->Colocalize();
-	}
-}
-
 //change brush display
 void RenderCanvas::ChangeBrushSize(int value)
 {
 	glbin_vol_selector.ChangeBrushSize(value, wxGetKeyState(WXK_CONTROL));
-	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->GetSettings(this);
+	m_renderview_panel->FluoRefresh(0, { gstBrushSize1, gstBrushSize2 }, {-1});
 }
 
 //calculations
@@ -3648,109 +3583,112 @@ void RenderCanvas::SetBrush(int mode)
 
 void RenderCanvas::UpdateBrushState(bool focus)
 {
-	TreePanel* tree_panel = 0;
-	BrushToolDlg* brush_dlg = 0;
-	if (m_frame)
-	{
-		tree_panel = m_frame->GetTree();
-		brush_dlg = m_frame->GetBrushToolDlg();
-	}
+	//TreePanel* tree_panel = 0;
+	//BrushToolDlg* brush_dlg = 0;
+	//if (m_frame)
+	//{
+	//	tree_panel = m_frame->GetTree();
+	//	brush_dlg = m_frame->GetBrushToolDlg();
+	//}
 
-	if (m_int_mode != 2 && m_int_mode != 7)
-	{
-		if (wxGetKeyState(WXK_SHIFT) && focus)
-		{
-			SetBrush(2);
-			if (tree_panel)
-				tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
-			if (brush_dlg)
-				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
-			RefreshGL(6);
-		}
-		else if (wxGetKeyState(wxKeyCode('Z')) && focus)
-		{
-			SetBrush(4);
-			if (tree_panel)
-				tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
-			if (brush_dlg)
-				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
-			RefreshGL(7);
-		}
-		else if (wxGetKeyState(wxKeyCode('X')) && focus)
-		{
-			SetBrush(3);
-			if (tree_panel)
-				tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
-			if (brush_dlg)
-				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
-			RefreshGL(8);
-		}
-	}
-	else
-	{
-		if (glbin_vol_selector.GetMode())
-		{
-			if (wxGetKeyState(WXK_SHIFT))
-			{
-				glbin_vol_selector.SetMode(0);
-				SetBrush(2);
-				if (tree_panel)
-					tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
-				if (brush_dlg)
-					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
-				RefreshGL(9);
-			}
-			else if (wxGetKeyState(wxKeyCode('Z')) && focus)
-			{
-				glbin_vol_selector.SetMode(0);
-				SetBrush(4);
-				if (tree_panel)
-					tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
-				if (brush_dlg)
-					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
-				RefreshGL(10);
-			}
-			else if (wxGetKeyState(wxKeyCode('X')) && focus)
-			{
-				glbin_vol_selector.SetMode(0);
-				SetBrush(3);
-				if (tree_panel)
-					tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
-				if (brush_dlg)
-					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
-				RefreshGL(11);
-			}
-			else
-			{
-				SetBrush(glbin_vol_selector.GetMode());
-				RefreshGL(12);
-			}
-		}
-		else if (!wxGetKeyState(WXK_SHIFT) &&
-			!wxGetKeyState(wxKeyCode('Z')) &&
-			!wxGetKeyState(wxKeyCode('X')))
-		{
-			if (wxGetMouseState().LeftIsDown())
-				Segment(true);
-			if (m_int_mode == 7)
-				m_int_mode = 5;
-			else
-				m_int_mode = 1;
-			m_paint_display = false;
-			m_draw_brush = false;
-			if (tree_panel)
-				tree_panel->SelectBrush(0);
-			if (brush_dlg)
-				brush_dlg->SelectBrush(0);
-			RefreshGL(13);
+	//if (m_int_mode != 2 && m_int_mode != 7)
+	//{
+	//	if (wxGetKeyState(WXK_SHIFT) && focus)
+	//	{
+	//		SetBrush(2);
+	//		if (tree_panel)
+	//			tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
+	//		if (brush_dlg)
+	//			brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
+	//		RefreshGL(6);
+	//	}
+	//	else if (wxGetKeyState(wxKeyCode('Z')) && focus)
+	//	{
+	//		SetBrush(4);
+	//		if (tree_panel)
+	//			tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
+	//		if (brush_dlg)
+	//			brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
+	//		RefreshGL(7);
+	//	}
+	//	else if (wxGetKeyState(wxKeyCode('X')) && focus)
+	//	{
+	//		SetBrush(3);
+	//		if (tree_panel)
+	//			tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
+	//		if (brush_dlg)
+	//			brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
+	//		RefreshGL(8);
+	//	}
+	//}
+	//else
+	//{
+	//	if (glbin_vol_selector.GetMode())
+	//	{
+	//		if (wxGetKeyState(WXK_SHIFT))
+	//		{
+	//			glbin_vol_selector.SetMode(0);
+	//			SetBrush(2);
+	//			if (tree_panel)
+	//				tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
+	//			if (brush_dlg)
+	//				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
+	//			RefreshGL(9);
+	//		}
+	//		else if (wxGetKeyState(wxKeyCode('Z')) && focus)
+	//		{
+	//			glbin_vol_selector.SetMode(0);
+	//			SetBrush(4);
+	//			if (tree_panel)
+	//				tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
+	//			if (brush_dlg)
+	//				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
+	//			RefreshGL(10);
+	//		}
+	//		else if (wxGetKeyState(wxKeyCode('X')) && focus)
+	//		{
+	//			glbin_vol_selector.SetMode(0);
+	//			SetBrush(3);
+	//			if (tree_panel)
+	//				tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
+	//			if (brush_dlg)
+	//				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
+	//			RefreshGL(11);
+	//		}
+	//		else
+	//		{
+	//			SetBrush(glbin_vol_selector.GetMode());
+	//			RefreshGL(12);
+	//		}
+	//	}
+	//	else if (!wxGetKeyState(WXK_SHIFT) &&
+	//		!wxGetKeyState(wxKeyCode('Z')) &&
+	//		!wxGetKeyState(wxKeyCode('X')))
+	//	{
+	//		if (wxGetMouseState().LeftIsDown())
+	//		{
+	//			wxPoint mp = ScreenToClient(wxGetMousePosition());
+	//			glbin_vol_selector.Segment(true, mp.x, mp.y);
+	//		}
+	//		if (m_int_mode == 7)
+	//			m_int_mode = 5;
+	//		else
+	//			m_int_mode = 1;
+	//		m_paint_display = false;
+	//		m_draw_brush = false;
+	//		if (tree_panel)
+	//			tree_panel->SelectBrush(0);
+	//		if (brush_dlg)
+	//			brush_dlg->SelectBrush(0);
+	//		RefreshGL(13);
 
-			if (m_prev_focus)
-			{
-				m_prev_focus->SetFocus();
-				m_prev_focus = 0;
-			}
-		}
-	}
+	//		if (m_prev_focus)
+	//		{
+	//			m_prev_focus->SetFocus();
+	//			m_prev_focus = 0;
+	//		}
+	//	}
+	//}
 }
 
 //selection
@@ -3821,19 +3759,19 @@ void RenderCanvas::PickMesh()
 		MeshData* md = m_md_pop_list[choose - 1];
 		if (md)
 		{
-			if (m_frame && m_frame->GetTree())
-			{
-				//m_frame->GetTree()->SetFocus();
-				m_frame->GetTree()->Select(m_renderview_panel->GetName(), md->GetName());
-			}
+			//if (m_frame && m_frame->GetTree())
+			//{
+			//	//m_frame->GetTree()->SetFocus();
+			//	m_frame->GetTree()->Select(m_renderview_panel->GetName(), md->GetName());
+			//}
 			RefreshGL(27);
 		}
 	}
 	else
 	{
-		if (m_frame && m_frame->GetCurSelType() == 3 &&
-			m_frame->GetTree())
-			m_frame->GetTree()->Select(m_renderview_panel->GetName(), "");
+		//if (m_frame && m_frame->GetCurSelType() == 3 &&
+		//	m_frame->GetTree())
+		//	m_frame->GetTree()->Select(m_renderview_panel->GetName(), "");
 	}
 	m_mv_mat = mv_temp;
 }
@@ -3891,8 +3829,7 @@ void RenderCanvas::PickVolume()
 	{
 		if (m_frame && m_frame->GetTree())
 		{
-			//m_frame->GetTree()->SetFocus();
-			m_frame->GetTree()->Select(m_renderview_panel->GetName(), picked_vd->GetName());
+			//m_frame->GetTree()->Select(m_renderview_panel->GetName(), picked_vd->GetName());
 		}
 		//update label selection
 		SetCompSelection(ip, kmode);
@@ -4303,8 +4240,9 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			if (wxGetKeyState(wxKeyCode('c')) &&
 				!m_clear_mask)
 			{
-				if (m_frame && m_frame->GetTree())
-					m_frame->GetTree()->BrushClear();
+				//if (m_frame && m_frame->GetTree())
+				//	m_frame->GetTree()->BrushClear();
+				glbin_vol_selector.Clear();
 				if (m_frame && m_frame->GetTraceDlg())
 					m_frame->GetTraceDlg()->CompClear();
 				m_clear_mask = true;
@@ -4401,7 +4339,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				int sz = glbin_settings.m_ruler_size_thresh;
 				//event.RequestMore();
 				glbin_vol_selector.SetInitMask(2);
-				Segment(false);
+				glbin_vol_selector.Segment(false, mouse_pos.x, mouse_pos.y);
 				glbin_vol_selector.SetInitMask(3);
 				if (m_int_mode == 12)
 				{
@@ -4415,15 +4353,15 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				vc.insert(gstNull);
 				start_loop = true;
 				//update
-				if (m_frame)
-				{
-					if (m_paint_count && m_frame->GetBrushToolDlg())
-						m_frame->GetBrushToolDlg()->Update(0);
-					if (m_paint_colocalize && m_frame->GetColocalizationDlg())
-						m_frame->GetColocalizationDlg()->Colocalize();
-					if (m_int_mode == 12 && m_frame->GetMeasureDlg())
-						m_frame->GetMeasureDlg()->GetSettings(this);
-				}
+				//if (m_frame)
+				//{
+				//	if (m_paint_count && m_frame->GetBrushToolDlg())
+				//		m_frame->GetBrushToolDlg()->Update(0);
+				//	if (m_paint_colocalize && m_frame->GetColocalizationDlg())
+				//		m_frame->GetColocalizationDlg()->Colocalize();
+				//	if (m_int_mode == 12 && m_frame->GetMeasureDlg())
+				//		m_frame->GetMeasureDlg()->GetSettings(this);
+				//}
 			}
 
 			//forced refresh
@@ -10326,7 +10264,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		{
 			glbin_vol_selector.ResetMousePos();
 			glbin_vol_selector.SetInitMask(1);
-			Segment(true);
+			glbin_vol_selector.Segment(true, mp.x(), mp.y());
 			glbin_vol_selector.SetInitMask(3);
 			if (m_int_mode == 12)
 				m_cur_vol->AddEmptyLabel(0, false);
@@ -10373,7 +10311,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		{
 			//segment volumes
 			m_paint_enable = true;
-			Segment(true);
+			glbin_vol_selector.Segment(true, mp.x(), mp.y());
 			m_int_mode = 4;
 			m_force_clear = true;
 			RefreshGL(27);
@@ -10398,7 +10336,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		{
 			//segment volume, calculate center, add ruler point
 			m_paint_enable = true;
-			Segment(true);
+			glbin_vol_selector.Segment(true, mp.x(), mp.y());
 			if (glbin_ruler_handler.GetType() == 3)
 				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
 			else
@@ -10475,8 +10413,9 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		{
 			if (glbin_ruler_handler.GetRulerFinished())
 			{
+				m_int_mode = 1;
 				//SetIntMode(1);
-				glbin_ruler_handler.SetMode(0);
+				//glbin_ruler_handler.SetMode(0);
 			}
 			else
 			{

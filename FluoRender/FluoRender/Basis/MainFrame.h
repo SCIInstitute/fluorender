@@ -318,10 +318,6 @@ public:
 	wxString ScriptDialog(const wxString& title,
 		const wxString& wildcard, long style);
 
-public: //public so export window can see it and set it. 
-	VolumeData* m_vd_copy;//for copying mask source
-	bool m_copy_data;//copy data or mask
-
 private:
 	wxAuiManager m_aui_mgr;
 	wxMenu* m_tb_menu_ui;

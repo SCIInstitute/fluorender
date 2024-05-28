@@ -253,8 +253,8 @@ void NoiseCancellingDlg::OnPreviewBtn(wxCommandEvent &event)
 
 void NoiseCancellingDlg::OnEraseBtn(wxCommandEvent &event)
 {
-	if (m_frame && m_frame->GetTree())
-		m_frame->GetTree()->BrushErase();
+	glbin_vol_selector.Erase();
+	//FluoRefresh(3, { gstNull });
 }
 
 void NoiseCancellingDlg::OnEnhanceSelChk(wxCommandEvent &event)

@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <ColocalizationDlg.h>
+#include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <Calculate/Compare.h>
@@ -559,8 +560,7 @@ void ColocalizationDlg::OnUseSelChk(wxCommandEvent &event)
 void ColocalizationDlg::OnAutoUpdate(wxCommandEvent &event)
 {
 	m_auto_update = m_auto_update_btn->GetValue();
-	if (m_view)
-		m_view->m_paint_colocalize = m_auto_update;
+	glbin_vol_selector.SetPaintColocalize(m_auto_update);
 }
 
 void ColocalizationDlg::OnMethodRdb(wxCommandEvent &event)

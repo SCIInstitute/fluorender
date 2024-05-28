@@ -133,15 +133,6 @@ public:
 	int TraversalSelect(wxTreeItemId item, wxString name);
 	void Select(wxString view, wxString name);
 
-	//brush commands (from the panel)
-	void BrushClear();
-	void BrushCreate();
-	void BrushCreateInv();
-
-	//mask operations
-	void CopyMask(bool copy_data);
-	void PasteMask(int op);
-
 	friend class TreePanel;
 
 private:
@@ -149,8 +140,6 @@ private:
 
 	//drag
 	wxTreeItemId m_drag_item;
-	//fix current selection
-	bool m_fixed;
 	//remember the pos
 	int m_scroll_pos;
 
@@ -216,7 +205,7 @@ public:
 		ID_BrushDiffuse,
 		ID_BrushErase,
 		ID_BrushClear,
-		ID_BrushCreate
+		ID_BrushExtract
 	};
 
 	TreePanel(MainFrame* frame,
@@ -265,22 +254,22 @@ public:
 	void SetMGroupItemImage(const wxTreeItemId item, int image);
 
 	//seelction
-	void UpdateSelection();
-	wxString GetCurrentSel();
-	void Select(wxString view, wxString name);
+	//void UpdateSelection();
+	//wxString GetCurrentSel();
+	//void Select(wxString view, wxString name);
 
-	//set the brush icon down
-	void SelectBrush(int id);
-	int GetBrushSelected();
-	//control from outside
-	void BrushAppend();
-	void BrushDiffuse();
-	void BrushDesel();
-	void BrushClear();
-	void BrushErase();
-	void BrushCreate();
-	void BrushSolid(bool state);
-	void BrushGrow(bool state);
+	////set the brush icon down
+	//void SelectBrush(int id);
+	//int GetBrushSelected();
+	////control from outside
+	//void BrushAppend();
+	//void BrushDiffuse();
+	//void BrushDesel();
+	//void BrushClear();
+	//void BrushErase();
+	//void BrushCreate();
+	//void BrushSolid(bool state);
+	//void BrushGrow(bool state);
 
 private:
 	DataTreeCtrl* m_datatree;

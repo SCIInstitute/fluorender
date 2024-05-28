@@ -1228,8 +1228,8 @@ void TraceDlg::UncertainFilter(bool input)
 	CellUpdate();
 
 	//frame
-	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	//if (m_frame && m_frame->GetBrushToolDlg())
+	//	m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::OnCompUncertainBtn(wxCommandEvent &event)
@@ -1671,8 +1671,8 @@ void TraceDlg::CompDelete()
 	CellUpdate();
 
 	//frame
-	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	//if (m_frame && m_frame->GetBrushToolDlg())
+	//	m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::CompClear()
@@ -1689,8 +1689,8 @@ void TraceDlg::CompClear()
 	m_trace_list_prev->DeleteAllItems();
 
 	//frame
-	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	//if (m_frame && m_frame->GetBrushToolDlg())
+	//	m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::OnCompIDText(wxCommandEvent &event)
@@ -1791,8 +1791,8 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 	CellUpdate();
 
 	//frame
-	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	//if (m_frame && m_frame->GetBrushToolDlg())
+	//	m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::OnCompExclusive(wxCommandEvent &event)
@@ -1824,8 +1824,8 @@ void TraceDlg::OnCompExclusive(wxCommandEvent &event)
 	CellUpdate();
 
 	//frame
-	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	//if (m_frame && m_frame->GetBrushToolDlg())
+	//	m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 //ID link controls
@@ -1866,8 +1866,8 @@ void TraceDlg::CellFull()
 	CellUpdate();
 
 	//frame
-	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	//if (m_frame && m_frame->GetBrushToolDlg())
+	//	m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, flrd::CelpList &list)
