@@ -5677,6 +5677,15 @@ void DataManager::RemoveMeshData(int index)
 	}
 }
 
+void DataManager::ClearMeshSelection()
+{
+	for (auto it : m_md_list)
+	{
+		if (it)
+			it->SetDrawBounds(false);
+	}
+}
+
 int DataManager::GetVolumeNum()
 {
 	return m_vd_list.size();

@@ -200,7 +200,7 @@ public:
 	//views
 	void RefreshCanvases(const std::set<int>& views = {});//view indices to update
 	int GetViewNum();
-	RenderCanvas* GetCurRenderCanvas();
+	//RenderCanvas* GetCurRenderCanvas();
 	RenderCanvas* GetRenderCanvas(int index);
 	RenderCanvas* GetRenderCanvas(wxString& name);
 	int GetRenderCanvas(RenderCanvas* view);
@@ -216,14 +216,7 @@ public:
 	//reset layout
 	void ResetLayout();
 
-	//on selections
-	void OnSelection(int type,	//0: nothing; 1:view; 2: volume; 3:mesh; 4:annotations; 5:group; 6:mesh manip
-		RenderCanvas* view=0,
-		DataGroup* group=0,
-		VolumeData* vd=0,
-		MeshData* md=0,
-		Annotations* ann=0);
-
+	//prop panels
 	wxWindow* AddProps(int type,//follow above
 		RenderCanvas* view = 0,
 		DataGroup* group = 0,
@@ -239,6 +232,7 @@ public:
 		Annotations* ann = 0,
 		bool show = true);
 	void UpdateProps(const fluo::ValueCollection &vc, int excl_self = 1, PropPanel* panel = 0);
+	void FluoUpdate(const fluo::ValueCollection& vc);
 	VolumePropPanel* FindVolumeProps(VolumeData* vd);
 	MeshPropPanel* FindMeshProps(MeshData* md);
 	AnnotatPropPanel* FindAnnotationProps(Annotations* ad);
@@ -280,11 +274,11 @@ public:
 	//script break dialog
 	ScriptBreakDlg* GetScriptBreakDlg();
 
-	//selection
-	int GetCurSelType();
-	VolumeData* GetCurSelVol();
-	//get current selected mesh
-	MeshData* GetCurSelMesh();
+	////selection
+	//int GetCurSelType();
+	//VolumeData* GetCurSelVol();
+	////get current selected mesh
+	//MeshData* GetCurSelMesh();
 
 	void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
 	void OpenProject(wxString& filename);
@@ -360,15 +354,15 @@ private:
 	//flag for show/hide views
 	bool m_ui_state;
 
-	//current selection (allow only one)
-	//selection type
-	int m_cur_sel_type; //0:root; 1:view; 2:volume; 3:mesh; 5:volume group; 6:mesh group
-	//current selected volume index
-	int m_cur_sel_vol;
-	//mesh index
-	int m_cur_sel_mesh;
-	//the canvas current selection belongs
-	int m_cur_canvas;
+	////current selection (allow only one)
+	////selection type
+	//int m_cur_sel_type; //0:root; 1:view; 2:volume; 3:mesh; 5:volume group; 6:mesh group
+	////current selected volume index
+	//int m_cur_sel_vol;
+	////mesh index
+	//int m_cur_sel_mesh;
+	////the canvas current selection belongs
+	//int m_cur_canvas;
 
 	//mac address
 	wxString m_address;
@@ -456,7 +450,7 @@ private:
 	void OnDraw(wxPaintEvent& event);
 	void OnKeyDown(wxKeyEvent& event);
 
-	bool update_props(int excl_self, PropPanel* p1, PropPanel* p2);
+	bool update_props(int excl_self, wxWindow* p1, wxWindow* p2);
 
 	DECLARE_EVENT_TABLE()
 };

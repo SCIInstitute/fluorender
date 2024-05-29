@@ -173,10 +173,6 @@ MainFrame::MainFrame(
 	//m_mesh_manip(0),
 	//m_annotation_prop(0),
 	m_ui_state(true),
-	m_cur_sel_type(-1),
-	m_cur_sel_vol(-1),
-	m_cur_sel_mesh(-1),
-	m_cur_canvas(0),
 	m_benchmark(benchmark),
 	//m_vd_copy(0),
 	//m_copy_data(false),
@@ -190,11 +186,11 @@ MainFrame::MainFrame(
 	glbin.apply_processor_settings();
 	glbin_vol_calculator.SetFrame(this);
 	glbin_script_proc.SetFrame(this);
+	glbin_data_manager.SetFrame(this);
+	glbin_current.mainframe = this;
 
 	// tell wxAuiManager to manage this frame
 	m_aui_mgr.SetManagedWindow(this);
-
-	glbin_data_manager.SetFrame(this);
 
 	// set frame icon
 	wxIcon icon;
@@ -1036,11 +1032,6 @@ int MainFrame::GetViewNum()
 	return m_vrv_list.size();
 }
 
-RenderCanvas* MainFrame::GetCurRenderCanvas()
-{
-	return GetRenderCanvas(m_cur_canvas);
-}
-
 RenderCanvas* MainFrame::GetRenderCanvas(int index)
 {
 	if (index >= 0 && index < (int)m_vrv_list.size())
@@ -1513,10 +1504,7 @@ void MainFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* 
 		//UpdateList();
 		vc.insert(gstListCtrl);
 		vc.insert(gstTreeCtrl);
-		if (vd_sel)
-			glbin.set_tree_selection(vd_sel->GetName().ToStdString());
-		else
-			glbin.set_tree_selection("");
+		glbin_current.SetVolumeData(vd_sel);
 		v->InitView(INIT_BOUNDS|INIT_CENTER);
 		refresh = true;
 		vc.insert(gstScaleFactor);
@@ -1632,10 +1620,7 @@ void MainFrame::LoadMeshes(wxArrayString files, RenderCanvas* canvas)
 	}
 
 	//UpdateList();
-	if (md_sel)
-		glbin.set_tree_selection(md_sel->GetName().ToStdString());
-	else
-		glbin.set_tree_selection("");
+	glbin_current.SetMeshData(md_sel);
 
 	if (canvas)
 		canvas->InitView(INIT_BOUNDS|INIT_CENTER);
@@ -1783,148 +1768,170 @@ ListPanel *MainFrame::GetList()
 	return m_list_panel;
 }
 
-//on selections
-void MainFrame::OnSelection(int type,
-	RenderCanvas* canvas,
-	DataGroup* group,
-	VolumeData* vd,
-	MeshData* md,
-	Annotations* ann)
+//prop panels
+void MainFrame::FluoUpdate(const fluo::ValueCollection& vc)
 {
-	if (canvas)
+	int type = 0;
+	if (FOUND_VALUE(gstVolumePropPanel))
+		type = 2;
+	else if (FOUND_VALUE(gstMeshPropPanel))
+		type = 3;
+	else if (FOUND_VALUE(gstManipPropPanel))
+		type = 6;
+	else if (FOUND_VALUE(gstAnnotatPropPanel))
+		type = 4;
+	ShowPropPage(type,
+		glbin_current.canvas,
+		glbin_current.vol_group,
+		glbin_current.vol_data,
+		glbin_current.mesh_data,
+		glbin_current.ann_data);
+	if (type == 3)
 	{
-		m_cur_canvas = GetRenderCanvas(canvas);
-		glbin_ruler_handler.SetView(canvas);
-		glbin_ruler_handler.SetRulerList(canvas->GetRulerList());
-		glbin_ruler_renderer.SetView(canvas);
-		glbin_ruler_renderer.SetRulerList(canvas->GetRulerList());
-		glbin_volume_point.SetView(canvas);
-		glbin_vol_selector.SetRenderCanvas(canvas);
-		glbin_vol_calculator.SetView(canvas);
-		glbin_script_proc.SetView(canvas);
-	}
-
-	if (m_clip_view)
-	{
-		switch (type)
-		{
-		case 2:
-			m_clip_view->SetVolumeData(vd);
-			break;
-		case 3:
-			m_clip_view->SetMeshData(md);
-			break;
-		case 4:
-			if (ann)
-			{
-				VolumeData* vd_ann = ann->GetVolume();
-				m_clip_view->SetVolumeData(vd_ann);
-			}
-			break;
-		}
-		m_clip_view->SetRenderView(canvas);
-	}
-
-	m_cur_sel_type = type;
-	//clear mesh boundbox
-	if (glbin_data_manager.GetMeshData(m_cur_sel_mesh))
-		glbin_data_manager.GetMeshData(m_cur_sel_mesh)->SetDrawBounds(false);
-
-	//if (m_brush_tool_dlg)
-	//	m_brush_tool_dlg->GetSettings(canvas);
-	//if (m_colocalization_dlg)
-	//	m_colocalization_dlg->SetView(canvas);
-	//if (m_component_dlg)
-	//	m_component_dlg->SetView(canvas);
-	//if (m_counting_dlg)
-	//	m_counting_dlg->GetSettings(canvas);
-	//if (m_measure_dlg)
-	//	m_measure_dlg->GetSettings(canvas);
-	//if (m_noise_cancelling_dlg)
-	//	m_noise_cancelling_dlg->GetSettings(canvas);
-	//if (m_ocl_dlg)
-	//	m_ocl_dlg->GetSettings(canvas);
-	//if (m_trace_dlg)
-	//	m_trace_dlg->GetSettings(canvas);
-
-	switch (type)
-	{
-	case 0:  //root
-		break;
-	case 1:  //view
-		if (m_colocalization_dlg)
-			m_colocalization_dlg->SetGroup(group);
-		if (m_adjust_view)
-			m_adjust_view->SetRenderView(canvas);
-		//m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
-		//m_aui_mgr.Update();
-		break;
-	case 2:  //volume
-		if (vd && vd->GetDisp())
-		{
-			wxString str = vd->GetName();
-			ShowPropPage(2, canvas, group, vd, md, ann);
-			m_cur_sel_vol = glbin_data_manager.GetVolumeIndex(str);
-
-			for (size_t i=0; i< GetViewNum(); ++i)
-			{
-				RenderCanvas* v = GetRenderCanvas(i);
-				if (!v)
-					continue;
-				v->m_cur_vol = vd;
-			}
-		}
-		if (m_adjust_view)
-			m_adjust_view->SetVolumeData(vd);
-		if (m_colocalization_dlg)
-			m_colocalization_dlg->SetGroup(group);
-		break;
-	case 3:  //mesh
+		//clear mesh bounds
+		glbin_data_manager.ClearMeshSelection();
+		MeshData* md = glbin_current.mesh_data;
 		if (md)
-		{
-			wxString str = md->GetName();
-			ShowPropPage(3, canvas, group, vd, md, ann);
-			m_cur_sel_mesh = glbin_data_manager.GetMeshIndex(str);
 			md->SetDrawBounds(true);
-		}
-		if (m_colocalization_dlg)
-			m_colocalization_dlg->SetGroup(0);
-		break;
-	case 4:  //annotations
-		if (ann)
-		{
-			wxString str = ann->GetName();
-			ShowPropPage(4, canvas, group, vd, md, ann);
-		}
-		if (m_colocalization_dlg)
-			m_colocalization_dlg->SetGroup(0);
-		break;
-	case 5:  //group
-		if (m_adjust_view)
-			m_adjust_view->SetGroup(group);
-		if (m_calculation_dlg)
-			m_calculation_dlg->SetGroup(group);
-		if (m_colocalization_dlg)
-			m_colocalization_dlg->SetGroup(group);
-		//m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
-		//m_aui_mgr.Update();
-		break;
-	case 6:  //mesh manip
-		if (md)
-		{
-			wxString str = md->GetName();
-			ShowPropPage(6, canvas, group, vd, md, ann);
-		}
-		if (m_colocalization_dlg)
-			m_colocalization_dlg->SetGroup(0);
-		break;
-	default:
-		if (m_colocalization_dlg)
-			m_colocalization_dlg->SetGroup(0);
-		//m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
-		//m_aui_mgr.Update();
 	}
 }
+
+//void MainFrame::UpdateSelection()
+//{
+//	if (canvas)
+//	{
+//		m_cur_canvas = GetRenderCanvas(canvas);
+//		glbin_ruler_handler.SetView(canvas);
+//		glbin_ruler_handler.SetRulerList(canvas->GetRulerList());
+//		glbin_ruler_renderer.SetView(canvas);
+//		glbin_ruler_renderer.SetRulerList(canvas->GetRulerList());
+//		glbin_volume_point.SetView(canvas);
+//		glbin_vol_selector.SetRenderCanvas(canvas);
+//		glbin_vol_calculator.SetView(canvas);
+//		glbin_script_proc.SetView(canvas);
+//	}
+//
+//	if (m_clip_view)
+//	{
+//		switch (type)
+//		{
+//		case 2:
+//			m_clip_view->SetVolumeData(vd);
+//			break;
+//		case 3:
+//			m_clip_view->SetMeshData(md);
+//			break;
+//		case 4:
+//			if (ann)
+//			{
+//				VolumeData* vd_ann = ann->GetVolume();
+//				m_clip_view->SetVolumeData(vd_ann);
+//			}
+//			break;
+//		}
+//		m_clip_view->SetRenderView(canvas);
+//	}
+//
+//	m_cur_sel_type = type;
+//	//clear mesh boundbox
+//	if (glbin_data_manager.GetMeshData(m_cur_sel_mesh))
+//		glbin_data_manager.GetMeshData(m_cur_sel_mesh)->SetDrawBounds(false);
+//
+//	//if (m_brush_tool_dlg)
+//	//	m_brush_tool_dlg->GetSettings(canvas);
+//	//if (m_colocalization_dlg)
+//	//	m_colocalization_dlg->SetView(canvas);
+//	//if (m_component_dlg)
+//	//	m_component_dlg->SetView(canvas);
+//	//if (m_counting_dlg)
+//	//	m_counting_dlg->GetSettings(canvas);
+//	//if (m_measure_dlg)
+//	//	m_measure_dlg->GetSettings(canvas);
+//	//if (m_noise_cancelling_dlg)
+//	//	m_noise_cancelling_dlg->GetSettings(canvas);
+//	//if (m_ocl_dlg)
+//	//	m_ocl_dlg->GetSettings(canvas);
+//	//if (m_trace_dlg)
+//	//	m_trace_dlg->GetSettings(canvas);
+//
+//	switch (type)
+//	{
+//	case 0:  //root
+//		break;
+//	case 1:  //view
+//		if (m_colocalization_dlg)
+//			m_colocalization_dlg->SetGroup(group);
+//		if (m_adjust_view)
+//			m_adjust_view->SetRenderView(canvas);
+//		//m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
+//		//m_aui_mgr.Update();
+//		break;
+//	case 2:  //volume
+//		if (vd && vd->GetDisp())
+//		{
+//			wxString str = vd->GetName();
+//			ShowPropPage(2, canvas, group, vd, md, ann);
+//			m_cur_sel_vol = glbin_data_manager.GetVolumeIndex(str);
+//
+//			for (size_t i=0; i< GetViewNum(); ++i)
+//			{
+//				RenderCanvas* v = GetRenderCanvas(i);
+//				if (!v)
+//					continue;
+//				v->m_cur_vol = vd;
+//			}
+//		}
+//		if (m_adjust_view)
+//			m_adjust_view->SetVolumeData(vd);
+//		if (m_colocalization_dlg)
+//			m_colocalization_dlg->SetGroup(group);
+//		break;
+//	case 3:  //mesh
+//		if (md)
+//		{
+//			wxString str = md->GetName();
+//			ShowPropPage(3, canvas, group, vd, md, ann);
+//			m_cur_sel_mesh = glbin_data_manager.GetMeshIndex(str);
+//			md->SetDrawBounds(true);
+//		}
+//		if (m_colocalization_dlg)
+//			m_colocalization_dlg->SetGroup(0);
+//		break;
+//	case 4:  //annotations
+//		if (ann)
+//		{
+//			wxString str = ann->GetName();
+//			ShowPropPage(4, canvas, group, vd, md, ann);
+//		}
+//		if (m_colocalization_dlg)
+//			m_colocalization_dlg->SetGroup(0);
+//		break;
+//	case 5:  //group
+//		if (m_adjust_view)
+//			m_adjust_view->SetGroup(group);
+//		if (m_calculation_dlg)
+//			m_calculation_dlg->SetGroup(group);
+//		if (m_colocalization_dlg)
+//			m_colocalization_dlg->SetGroup(group);
+//		//m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
+//		//m_aui_mgr.Update();
+//		break;
+//	case 6:  //mesh manip
+//		if (md)
+//		{
+//			wxString str = md->GetName();
+//			ShowPropPage(6, canvas, group, vd, md, ann);
+//		}
+//		if (m_colocalization_dlg)
+//			m_colocalization_dlg->SetGroup(0);
+//		break;
+//	default:
+//		if (m_colocalization_dlg)
+//			m_colocalization_dlg->SetGroup(0);
+//		//m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
+//		//m_aui_mgr.Update();
+//	}
+//}
 
 wxWindow* MainFrame::AddProps(int type,
 	RenderCanvas* canvas,
@@ -2093,7 +2100,7 @@ void MainFrame::ShowPropPage(int type,
 	}
 }
 
-bool MainFrame::update_props(int excl_self, PropPanel* p1, PropPanel* p2)
+bool MainFrame::update_props(int excl_self, wxWindow* p1, wxWindow* p2)
 {
 	switch (excl_self)
 	{
@@ -2111,6 +2118,9 @@ bool MainFrame::update_props(int excl_self, PropPanel* p1, PropPanel* p2)
 
 void MainFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, PropPanel* panel)
 {
+	//frame
+	if (update_props(excl_self, this, panel))
+		FluoUpdate(vc);
 	//panels
 	if (update_props(excl_self, m_list_panel, panel))
 		m_list_panel->FluoUpdate(vc);
@@ -2314,24 +2324,6 @@ CalculationDlg* MainFrame::GetCalculationDlg()
 ScriptBreakDlg* MainFrame::GetScriptBreakDlg()
 {
 	return m_script_break_dlg;
-}
-
-//selection
-int MainFrame::GetCurSelType()
-{
-	return m_cur_sel_type;
-}
-
-//get current selected volume
-VolumeData* MainFrame::GetCurSelVol()
-{
-	return glbin_data_manager.GetVolumeData(m_cur_sel_vol);
-}
-
-//get current selected mesh
-MeshData* MainFrame::GetCurSelMesh()
-{
-	return glbin_data_manager.GetMeshData(m_cur_sel_mesh);
 }
 
 void MainFrame::RefreshCanvases(const std::set<int>& views)
@@ -2690,9 +2682,7 @@ void MainFrame::OnNewProject(wxCommandEvent& event)
 	RenderViewPanel::ResetID();
 	DataGroup::ResetID();
 	MeshGroup::ResetID();
-	m_cur_sel_type = 0;
-	m_cur_sel_vol = 0;
-	m_cur_sel_mesh = 0;
+	glbin_current.Clear();
 	glbin_moviemaker.Stop();
 	glbin_moviemaker.SetView(GetRenderCanvas(0));
 	glbin_mov_def.Apply(&glbin_moviemaker);
@@ -2798,6 +2788,20 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 	fconfig.Write("inf loop", glbin_settings.m_inf_loop);
 	//save peeling layers
 	fconfig.Write("peeling layers", glbin_settings.m_peeling_layers);
+
+	fconfig.SetPath("/current");
+	str = glbin_current.canvas ? glbin_current.canvas->GetName() : wxString("");
+	fconfig.Write("canvas", str);
+	str = glbin_current.vol_group ? glbin_current.vol_group->GetName() : wxString("");
+	fconfig.Write("vol group", str);
+	str = glbin_current.mesh_group ? glbin_current.mesh_group->GetName() : wxString("");
+	fconfig.Write("mesh group", str);
+	str = glbin_current.vol_data ? glbin_current.vol_data->GetName() : wxString("");
+	fconfig.Write("vol data", str);
+	str = glbin_current.mesh_data ? glbin_current.mesh_data->GetName() : wxString("");
+	fconfig.Write("mesh data", str);
+	str = glbin_current.ann_data ? glbin_current.ann_data->GetName() : wxString("");
+	fconfig.Write("ann data", str);
 
 	//save data list
 	//volume
@@ -3276,9 +3280,6 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 	}
 	//clipping planes
 	fconfig.SetPath("/prop_panel");
-	fconfig.Write("cur_sel_type", m_cur_sel_type);
-	fconfig.Write("cur_sel_vol", m_cur_sel_vol);
-	fconfig.Write("cur_sel_mesh", m_cur_sel_mesh);
 	fconfig.Write("chann_link", m_clip_view->GetChannLink());
 	fconfig.Write("hold planes", m_clip_view->GetHoldPlanes());
 	fconfig.Write("plane mode", int(m_clip_view->GetPlaneMode()));
@@ -3505,6 +3506,21 @@ void MainFrame::OpenProject(wxString& filename)
 		fconfig.Read("peeling layers", &ival, 1);
 		glbin_settings.m_peeling_layers = ival;
 		UpdateProps({ gstMouseInt, gstStreamEnable, gstPeelNum });
+	}
+
+	//current
+	glbin_current.Clear();
+	wxString cur_canvas, cur_vol_group, cur_mesh_group,
+		cur_vol_data, cur_mesh_data, cur_ann_data;
+	if (fconfig.Exists("/current"))
+	{
+		fconfig.SetPath("/current");
+		fconfig.Read("canvas", &cur_canvas, "");
+		fconfig.Read("vol group", &cur_vol_group, "");
+		fconfig.Read("mesh group", &cur_mesh_group, "");
+		fconfig.Read("vol data", &cur_vol_data, "");
+		fconfig.Read("mesh data", &cur_mesh_data, "");
+		fconfig.Read("ann data", &cur_ann_data, "");
 	}
 
 	//read data list
@@ -3879,6 +3895,7 @@ void MainFrame::OpenProject(wxString& filename)
 			}
 			tick_cnt++;
 		}
+		glbin_current.vol_data = glbin_data_manager.GetVolumeData(cur_vol_data);
 	}
 	//mesh
 	if (fconfig.Exists("/data/mesh"))
@@ -3996,6 +4013,7 @@ void MainFrame::OpenProject(wxString& filename)
 			}
 			tick_cnt++;
 		}
+		glbin_current.mesh_data = glbin_data_manager.GetMeshData(cur_mesh_data);
 	}
 	//annotations
 	if (fconfig.Exists("/data/annotations"))
@@ -4015,6 +4033,7 @@ void MainFrame::OpenProject(wxString& filename)
 				}
 			}
 		}
+		glbin_current.ann_data = glbin_data_manager.GetAnnotations(cur_ann_data);
 	}
 
 	bool bVal;
@@ -4186,6 +4205,8 @@ void MainFrame::OpenProject(wxString& filename)
 													}
 												}
 											}
+											if (group->GetName() == cur_vol_group)
+												glbin_current.vol_group = group;
 										}
 										canvas->SetVolPopDirty();
 									}
@@ -4227,6 +4248,8 @@ void MainFrame::OpenProject(wxString& filename)
 													}
 												}
 											}
+											if (group->GetName() == cur_mesh_group)
+												glbin_current.mesh_group = group;
 										}
 										canvas->SetMeshPopDirty();
 									}
@@ -4449,39 +4472,13 @@ void MainFrame::OpenProject(wxString& filename)
 				glbin_ruler_handler.Read(fconfig, i);
 			}
 		}
+		glbin_current.canvas = GetRenderCanvas(cur_canvas);
 	}
 
-	//current selected volume
+	//clipping planes
 	if (fconfig.Exists("/prop_panel"))
 	{
 		fconfig.SetPath("/prop_panel");
-		int cur_sel_type, cur_sel_vol, cur_sel_mesh;
-		if (fconfig.Read("cur_sel_type", &cur_sel_type) &&
-			fconfig.Read("cur_sel_vol", &cur_sel_vol) &&
-			fconfig.Read("cur_sel_mesh", &cur_sel_mesh))
-		{
-			m_cur_sel_type = cur_sel_type;
-			m_cur_sel_vol = cur_sel_vol;
-			m_cur_sel_mesh = cur_sel_mesh;
-			switch (m_cur_sel_type)
-			{
-			case 2:  //volume
-				OnSelection(2, 0, 0, glbin_data_manager.GetVolumeData(cur_sel_vol));
-				break;
-			case 3:  //mesh
-				OnSelection(3, 0, 0, 0, glbin_data_manager.GetMeshData(cur_sel_mesh));
-				break;
-			}
-		}
-		else if (fconfig.Read("cur_sel_vol", &cur_sel_vol))
-		{
-			m_cur_sel_vol = cur_sel_vol;
-			if (m_cur_sel_vol != -1)
-			{
-				VolumeData* vd = glbin_data_manager.GetVolumeData(m_cur_sel_vol);
-				OnSelection(2, 0, 0, vd);
-			}
-		}
 		bool bval;
 		if (fconfig.Read("chann_link", &bval))
 			m_clip_view->SetChannLink(bval);
@@ -4629,6 +4626,8 @@ void MainFrame::OpenProject(wxString& filename)
 		}
 	}
 
+	//selection
+
 	//interpolator
 	if (fconfig.Exists("/interpolator"))
 	{
@@ -4763,35 +4762,35 @@ void MainFrame::OpenProject(wxString& filename)
 		//m_recorder_dlg->UpdateList();
 	}
 
-	if (m_cur_sel_type != -1)
-	{
-		switch (m_cur_sel_type)
-		{
-		case 2:  //volume
-			if (glbin_data_manager.GetVolumeData(m_cur_sel_vol))
-				glbin.set_tree_selection(glbin_data_manager.GetVolumeData(m_cur_sel_vol)->GetName().ToStdString());
-			else
-				glbin.set_tree_selection("");
-			break;
-		case 3:  //mesh
-			if (glbin_data_manager.GetMeshData(m_cur_sel_mesh))
-				glbin.set_tree_selection(glbin_data_manager.GetMeshData(m_cur_sel_mesh)->GetName().ToStdString());
-			else
-				glbin.set_tree_selection("");
-			break;
-		default:
-			glbin.set_tree_selection("");
-		}
-	}
-	else if (m_cur_sel_vol != -1)
-	{
-		if (glbin_data_manager.GetVolumeData(m_cur_sel_vol))
-			glbin.set_tree_selection(glbin_data_manager.GetVolumeData(m_cur_sel_vol)->GetName().ToStdString());
-		else
-			glbin.set_tree_selection("");
-	}
-	else
-		glbin.set_tree_selection("");
+	//if (m_cur_sel_type != -1)
+	//{
+	//	switch (m_cur_sel_type)
+	//	{
+	//	case 2:  //volume
+	//		if (glbin_data_manager.GetVolumeData(m_cur_sel_vol))
+	//			glbin.set_tree_selection(glbin_data_manager.GetVolumeData(m_cur_sel_vol)->GetName().ToStdString());
+	//		else
+	//			glbin.set_tree_selection("");
+	//		break;
+	//	case 3:  //mesh
+	//		if (glbin_data_manager.GetMeshData(m_cur_sel_mesh))
+	//			glbin.set_tree_selection(glbin_data_manager.GetMeshData(m_cur_sel_mesh)->GetName().ToStdString());
+	//		else
+	//			glbin.set_tree_selection("");
+	//		break;
+	//	default:
+	//		glbin.set_tree_selection("");
+	//	}
+	//}
+	//else if (m_cur_sel_vol != -1)
+	//{
+	//	if (glbin_data_manager.GetVolumeData(m_cur_sel_vol))
+	//		glbin.set_tree_selection(glbin_data_manager.GetVolumeData(m_cur_sel_vol)->GetName().ToStdString());
+	//	else
+	//		glbin.set_tree_selection("");
+	//}
+	//else
+	//	glbin.set_tree_selection("");
 
 	if (m_movie_panel)
 		m_movie_panel->SetView(0);

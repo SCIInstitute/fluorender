@@ -117,8 +117,7 @@ DEALINGS IN THE SOFTWARE.
 #define glbin_swhf fluo::Global::instance().getStopWatchFactory()
 
 //current selection
-#define glbin_list_sel fluo::Global::instance().get_list_selection()
-#define glbin_tree_sel fluo::Global::instance().get_tree_selection()
+#define glbin_current fluo::Global::instance().get_current_objects()
 
 namespace fluo
 {
@@ -237,10 +236,11 @@ namespace fluo
 		StopWatchFactory* getStopWatchFactory();
 
 		//current selection
-		void set_list_selection(const std::string& name) { list_selection_ = name; }
-		std::string get_list_selection() { return list_selection_; }
-		void set_tree_selection(const std::string& name) { tree_selection_ = name; }
-		std::string get_tree_selection() { return tree_selection_; }
+		//void set_list_selection(const std::string& name) { list_selection_ = name; }
+		//std::string get_list_selection() { return list_selection_; }
+		//void set_tree_selection(const std::string& name) { tree_selection_ = name; }
+		//std::string get_tree_selection() { return tree_selection_; }
+		CurrentObjects& get_current_objects() { return current_objects_; }
 
 	private:
 		static Global instance_;
@@ -313,8 +313,9 @@ namespace fluo
 		ref_ptr<Group> origin_;//the root of everything else
 
 		//current selection
-		std::string list_selection_;//name of the item selected on the list
-		std::string tree_selection_;//name of the item selected on the tree
+		//std::string list_selection_;//name of the item selected on the list
+		//std::string tree_selection_;//name of the item selected on the tree
+		CurrentObjects current_objects_;
 
 	private:
 		Global();

@@ -132,8 +132,6 @@ void VolumeSelector::SetMode(int mode)
 //segment volumes in current view
 void VolumeSelector::Segment(bool push_mask, int mx, int my)
 {
-	int mode = glbin_vol_selector.GetMode();
-
 	//add ml record
 	if (glbin.get_cg_table_enable() &&
 		glbin.get_cg_entry().getValid() &&
@@ -158,27 +156,27 @@ void VolumeSelector::Segment(bool push_mask, int mx, int my)
 	}
 
 	m_canvas->HandleCamera();
-	if (mode == 9)
+	if (m_mode == 9)
 	{
 		//wxPoint mouse_pos = ScreenToClient(m_canvas->wxGetMousePosition());
-		glbin_vol_selector.Segment(push_mask, mx, my);
+		segment(push_mask, mx, my);
 	}
 	else
-		glbin_vol_selector.Segment(push_mask);
+		segment(push_mask);
 
 	bool count = false;
 	bool colocal = false;
-	if (mode == 1 ||
-		mode == 2 ||
-		mode == 3 ||
-		mode == 4 ||
-		mode == 5 ||
-		mode == 7 ||
-		mode == 8 ||
-		mode == 9)
+	if (m_mode == 1 ||
+		m_mode == 2 ||
+		m_mode == 3 ||
+		m_mode == 4 ||
+		m_mode == 5 ||
+		m_mode == 7 ||
+		m_mode == 8 ||
+		m_mode == 9)
 	{
-		count = glbin_vol_selector.GetPaintCount();
-		colocal = glbin_vol_selector.GetPaintColocalize();
+		count = GetPaintCount();
+		colocal = GetPaintColocalize();
 	}
 
 	//update

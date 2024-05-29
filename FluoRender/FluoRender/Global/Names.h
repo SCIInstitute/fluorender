@@ -105,6 +105,12 @@ DEALINGS IN THE SOFTWARE.
 #define gstVolumePropAgent "VolumePropPanel"
 #define gstNonObjectValues "non object values"//values not from the managed object
 
+//panels
+#define gstVolumePropPanel "volume prop panel"
+#define gstMeshPropPanel "mesh prop panel"
+#define gstManipPropPanel "manip prop panel"
+#define gstAnnotatPropPanel "annotat prop panel"
+
 //root
 #define gstRoot "Scene Graph"
 #define gstSortValue "sort value"

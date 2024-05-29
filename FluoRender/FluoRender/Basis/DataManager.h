@@ -1298,8 +1298,58 @@ private:
 	bool m_disp;
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class MainFrame;
+class RenderCanvas;
+struct CurrentObjects
+{
+	CurrentObjects():
+		mainframe(0),
+		canvas(0),
+		vol_group(0),
+		mesh_group(0),
+		vol_data(0),
+		mesh_data(0),
+		ann_data(0)
+	{}
+
+	void Clear()
+	{
+		canvas = 0;
+		vol_group = 0;
+		mesh_group = 0;
+		vol_data = 0;
+		mesh_data = 0;
+		ann_data = 0;
+	}
+	void SetVolumeData(VolumeData* vd)
+	{
+		vol_data = vd;
+		mesh_data = 0;
+		ann_data = 0;
+	}
+	void SetMeshData(MeshData* md)
+	{
+		mesh_data = md;
+		vol_data = 0;
+		ann_data = 0;
+	}
+	void SetAnnotation(Annotations* ann)
+	{
+		ann_data = ann;
+		vol_data = 0;
+		mesh_data = 0;
+	}
+
+	MainFrame* mainframe;//this is temporary before a global scenegraph is added
+	RenderCanvas* canvas;
+	DataGroup* vol_group;
+	MeshGroup* mesh_group;
+	VolumeData* vol_data;
+	MeshData* mesh_data;
+	Annotations* ann_data;
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class DataManager
 {
 public:
@@ -1354,6 +1404,7 @@ public:
 			return 0;
 	};
 	void RemoveMeshData(int index);
+	void ClearMeshSelection();
 
 	//annotations
 	int LoadAnnotations(wxString &filename);

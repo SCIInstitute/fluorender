@@ -268,9 +268,9 @@ void DataTreeCtrl::DeleteSelection()
 
 	if (refresh)
 	{
-		glbin.set_tree_selection("");
-		m_frame->GetTree()->FluoRefresh(2, {gstTreeCtrl});
-		m_frame->OnSelection(1);
+		glbin_current.Clear();
+		m_frame->GetTree()->FluoRefresh(0, {gstTreeCtrl});
+		//m_frame->OnSelection(1);
 	}
 }
 
@@ -573,7 +573,8 @@ void DataTreeCtrl::OnManipulateData(wxCommandEvent& event)
 		{
 			wxString name = GetItemText(sel_item);
 			MeshData* md = glbin_data_manager.GetMeshData(name);
-			m_frame->OnSelection(6, 0, 0, 0, md);
+			m_frame->UpdateProps({ gstManipPropPanel });
+			//m_frame->OnSelection(6, 0, 0, 0, md);
 		}
 	}
 }
@@ -989,7 +990,7 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	m_scroll_pos = GetScrollPos(wxVERTICAL);
 	SetScrollPos(wxVERTICAL, m_scroll_pos);
 	UpdateSelection();
-	glbin.set_tree_selection(name.ToStdString());
+	//glbin.set_tree_selection(name.ToStdString());
 	m_frame->GetTree()->FluoRefresh(2, {gstTreeCtrl});
 }
 
@@ -1398,7 +1399,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 		if (rc)
 		{
 			vc.insert(gstTreeCtrl);
-			glbin.set_tree_selection(name.ToStdString());
+			//glbin.set_tree_selection(name.ToStdString());
 		}
 		else
 			vc.insert(gstTreeIcons);
@@ -1647,7 +1648,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			}
 		}
 
-		glbin.set_tree_selection(src_name.ToStdString());
+		//glbin.set_tree_selection(src_name.ToStdString());
 		refresh = true;
 	}
 	else if (src_item.IsOk() && src_par_item.IsOk() &&
@@ -1669,7 +1670,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 				wxString str("");
 				view->MoveLayertoView(src_par_name, src_name, str);
 
-				glbin.set_tree_selection(src_name.ToStdString());
+				//glbin.set_tree_selection(src_name.ToStdString());
 				refresh = true;
 			}
 		}
@@ -2273,8 +2274,8 @@ void TreePanel::UpdateTree()
 
 	wxString root_str = "Scene Graph";
 	wxTreeItemId root_item = AddRootItem(root_str);
-	if (glbin_tree_sel == root_str.ToStdString())
-		SelectItem(root_item);
+	//if (glbin_tree_sel == root_str.ToStdString())
+	//	SelectItem(root_item);
 	//append non-color icons for views
 	AppendIcon();
 	Expand(root_item);
@@ -2293,8 +2294,8 @@ void TreePanel::UpdateTree()
 		view->OrganizeLayers();
 		wxTreeItemId vrv_item = AddViewItem(view_name);
 		SetViewItemImage(vrv_item, view->GetDraw());
-		if (glbin_tree_sel == view_name.ToStdString())
-			SelectItem(vrv_item);
+		//if (glbin_tree_sel == view_name.ToStdString())
+		//	SelectItem(vrv_item);
 
 		for (j = 0; j < view->GetLayerNum(); j++)
 		{
@@ -2352,8 +2353,8 @@ void TreePanel::UpdateTree()
 				ChangeIconColor(ii, wxc);
 				wxTreeItemId item = AddMeshItem(vrv_item, md->GetName());
 				SetMeshItemImage(item, md->GetDisp() ? 2 * ii + 1 : 2 * ii);
-				if (glbin_tree_sel == md->GetName().ToStdString())
-					sel_item = item;
+				//if (glbin_tree_sel == md->GetName().ToStdString())
+				//	sel_item = item;
 			}
 			break;
 			case 4://annotations
@@ -2368,8 +2369,8 @@ void TreePanel::UpdateTree()
 				ChangeIconColor(ii, wxc);
 				wxTreeItemId item = AddAnnotationItem(vrv_item, ann->GetName());
 				SetAnnotationItemImage(item, ann->GetDisp() ? 2 * ii + 1 : 2 * ii);
-				if (glbin_tree_sel == ann->GetName().ToStdString())
-					sel_item = item;
+				//if (glbin_tree_sel == ann->GetName().ToStdString())
+				//	sel_item = item;
 			}
 			break;
 			case 5://group
@@ -2409,8 +2410,8 @@ void TreePanel::UpdateTree()
 					//	m_frame->GetColocalizationDlg()->SetView(view);
 					//}
 				}
-				if (glbin_tree_sel == group->GetName().ToStdString())
-					sel_item = group_item;
+				//if (glbin_tree_sel == group->GetName().ToStdString())
+				//	sel_item = group_item;
 			}
 			break;
 			case 6://mesh group
@@ -2440,11 +2441,11 @@ void TreePanel::UpdateTree()
 					ChangeIconColor(ii, wxc);
 					wxTreeItemId item = AddMeshItem(group_item, md->GetName());
 					SetMeshItemImage(item, md->GetDisp() ? 2 * ii + 1 : 2 * ii);
-					if (glbin_tree_sel == md->GetName().ToStdString())
-						sel_item = item;
+					//if (glbin_tree_sel == md->GetName().ToStdString())
+					//	sel_item = item;
 				}
-				if (glbin_tree_sel == group->GetName().ToStdString())
-					sel_item = group_item;
+				//if (glbin_tree_sel == group->GetName().ToStdString())
+				//	sel_item = group_item;
 			}
 			break;
 			}
