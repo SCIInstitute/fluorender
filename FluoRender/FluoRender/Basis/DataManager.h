@@ -1260,8 +1260,8 @@ public:
 	}
 	void RemoveMeshData(int index)
 	{
-		if (index>=0 && index<(int)m_md_list.size())
-			m_md_list.erase(m_md_list.begin()+index);
+		if (index >= 0 && index < (int)m_md_list.size())
+			m_md_list.erase(m_md_list.begin() + index);
 	}
 
 	//display functions
@@ -1302,7 +1302,7 @@ class MainFrame;
 class RenderCanvas;
 struct CurrentObjects
 {
-	CurrentObjects():
+	CurrentObjects() :
 		mainframe(0),
 		canvas(0),
 		vol_group(0),
@@ -1321,24 +1321,37 @@ struct CurrentObjects
 		mesh_data = 0;
 		ann_data = 0;
 	}
-	void SetVolumeData(VolumeData* vd)
+	//0:root, 1:view, 2:volume, 3:mesh, 4:annotations, 5:group, 6:mesh group, 7:ruler, 8:traces
+	int GetType()
 	{
-		vol_data = vd;
+		if (vol_data)
+			return 2;
+		if (mesh_data)
+			return 2;
+		if (ann_data)
+			return 4;
+		if (vol_group)
+			return 5;
+		if (mesh_group)
+			return 6;
+		if (canvas)
+			return 1;
+		return 0;
+	}
+	void SetCanvas(RenderCanvas* cnvs)
+	{
+		canvas = cnvs;
+		vol_group = 0;
+		mesh_group = 0;
+		vol_data = 0;
 		mesh_data = 0;
 		ann_data = 0;
 	}
-	void SetMeshData(MeshData* md)
-	{
-		mesh_data = md;
-		vol_data = 0;
-		ann_data = 0;
-	}
-	void SetAnnotation(Annotations* ann)
-	{
-		ann_data = ann;
-		vol_data = 0;
-		mesh_data = 0;
-	}
+	void SetVolumeGroup(DataGroup* g);
+	void SetMeshGroup(MeshGroup* g);
+	void SetVolumeData(VolumeData* vd);
+	void SetMeshData(MeshData* md);
+	void SetAnnotation(Annotations* ann);
 
 	MainFrame* mainframe;//this is temporary before a global scenegraph is added
 	RenderCanvas* canvas;

@@ -27,10 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <DataManager.h>
 #include <Global.h>
+#include <MainFrame.h>
+#include <RenderCanvas.h>
 #include <Calculate/VolumeSampler.h>
 #include <Calculate/VolumeBaker.h>
 #include <Calculate/Histogram.h>
-#include <MainFrame.h>
 #include <FpRangeDlg.h>
 #include "teem/Nrrd/nrrd.h"
 #include <wx/msgdlg.h>
@@ -5131,6 +5132,204 @@ void MeshGroup::RandomizeColor()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void CurrentObjects::SetVolumeGroup(DataGroup* g)
+{
+	if (!mainframe)
+		return;
+	bool found = false;
+	for (int i = 0; i < mainframe->GetViewNum(); ++i)
+	{
+		RenderCanvas* v = mainframe->GetRenderCanvas(i);
+		if (!v)
+			continue;
+		for (int j = 0; j < v->GetLayerNum(); ++j)
+		{
+			TreeLayer* l = v->GetLayer(j);
+			if (!l)
+				continue;
+			if (l->IsA() == 5)
+			{
+				DataGroup* group = (DataGroup*)l;
+				if (group == g)
+				{
+					canvas = v;
+					found = true;
+					break;
+				}
+			}
+		}
+	}
+	vol_group = g;
+	mesh_group = 0;
+	vol_data = 0;
+	mesh_data = 0;
+	ann_data = 0;
+}
+
+void CurrentObjects::SetMeshGroup(MeshGroup* g)
+{
+	if (!mainframe)
+		return;
+	bool found = false;
+	for (int i = 0; i < mainframe->GetViewNum(); ++i)
+	{
+		RenderCanvas* v = mainframe->GetRenderCanvas(i);
+		if (!v)
+			continue;
+		for (int j = 0; j < v->GetLayerNum(); ++j)
+		{
+			TreeLayer* l = v->GetLayer(j);
+			if (!l)
+				continue;
+			if (l->IsA() == 6)
+			{
+				MeshGroup* group = (MeshGroup*)l;
+				if (group == g)
+				{
+					canvas = v;
+					found = true;
+					break;
+				}
+			}
+		}
+	}
+	vol_group = 0;
+	mesh_group = g;
+	vol_data = 0;
+	mesh_data = 0;
+	ann_data = 0;
+}
+
+void CurrentObjects::SetVolumeData(VolumeData* vd)
+{
+	if (!mainframe)
+		return;
+	bool found = false;
+	for (int i = 0; i < mainframe->GetViewNum() && !found; ++i)
+	{
+		RenderCanvas* v = mainframe->GetRenderCanvas(i);
+		if (!v)
+			continue;
+		for (int j = 0; j < v->GetLayerNum() && !found; ++j)
+		{
+			TreeLayer* l = v->GetLayer(j);
+			if (!l)
+				continue;
+			if (l->IsA() == 2)
+			{
+				VolumeData* vd0 = (VolumeData*)l;
+				if (vd == vd0)
+				{
+					found = true;
+					canvas = v;
+					break;
+				}
+			}
+			else if (l->IsA() == 5)
+			{
+				DataGroup* g = (DataGroup*)l;
+				for (int k = 0; k < g->GetVolumeNum(); ++k)
+				{
+					VolumeData* vd0 = g->GetVolumeData(k);
+					if (vd == vd0)
+					{
+						found = true;
+						canvas = v;
+						vol_group = g;
+						break;
+					}
+				}
+			}
+		}
+	}
+	vol_data = vd;
+	mesh_data = 0;
+	mesh_group = 0;
+	ann_data = 0;
+}
+
+void CurrentObjects::SetMeshData(MeshData* md)
+{
+	if (!mainframe)
+		return;
+	bool found = false;
+	for (int i = 0; i < mainframe->GetViewNum() && !found; ++i)
+	{
+		RenderCanvas* v = mainframe->GetRenderCanvas(i);
+		if (!v)
+			continue;
+		for (int j = 0; j < v->GetLayerNum() && !found; ++j)
+		{
+			TreeLayer* l = v->GetLayer(j);
+			if (!l)
+				continue;
+			if (l->IsA() == 3)
+			{
+				MeshData* md0 = (MeshData*)l;
+				if (md == md0)
+				{
+					found = true;
+					canvas = v;
+					break;
+				}
+			}
+			else if (l->IsA() == 6)
+			{
+				MeshGroup* g = (MeshGroup*)l;
+				for (int k = 0; k < g->GetMeshNum(); ++k)
+				{
+					MeshData* md0 = g->GetMeshData(k);
+					if (md == md0)
+					{
+						found = true;
+						canvas = v;
+						mesh_group = g;
+						break;
+					}
+				}
+			}
+		}
+	}
+	mesh_data = md;
+	vol_group = 0;
+	vol_data = 0;
+	ann_data = 0;
+}
+
+void CurrentObjects::SetAnnotation(Annotations* ann)
+{
+	if (!mainframe)
+		return;
+	bool found = false;
+	for (int i = 0; i < mainframe->GetViewNum(); ++i)
+	{
+		RenderCanvas* v = mainframe->GetRenderCanvas(i);
+		if (!v)
+			continue;
+		for (int j = 0; j < v->GetLayerNum(); ++j)
+		{
+			TreeLayer* l = v->GetLayer(j);
+			if (!l)
+				continue;
+			if (l->IsA() == 4)
+			{
+				Annotations* a0 = (Annotations*)l;
+				if (a0 == ann)
+				{
+					canvas = v;
+					found = true;
+					break;
+				}
+			}
+		}
+	}
+	ann_data = ann;
+	vol_group = 0;
+	mesh_group = 0;
+	vol_data = 0;
+	mesh_data = 0;
+}
+
 DataManager::DataManager() :
 	m_frame(0)
 {
