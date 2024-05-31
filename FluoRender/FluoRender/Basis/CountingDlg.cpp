@@ -158,9 +158,9 @@ void CountingDlg::GetSettings(RenderCanvas* view)
 		return;
 	m_view = view;
 
-	VolumeData* sel_vol = 0;
-	if (m_frame)
-		sel_vol = m_frame->GetCurSelVol();
+	//VolumeData* sel_vol = 0;
+	//if (m_frame)
+	//	sel_vol = m_frame->GetCurSelVol();
 }
 
 void CountingDlg::OnCAIgnoreMaxChk(wxCommandEvent &event)

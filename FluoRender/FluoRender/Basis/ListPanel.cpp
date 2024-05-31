@@ -338,7 +338,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 					vd_add->SetColor(color);
 
 				DataGroup *group = view->AddVolumeData(vd_add);
-				m_frame->OnSelection(2, view, group, vd_add, 0);
+				glbin_current.SetVolumeData(vd_add);
 				if (view->GetVolMethod() == VOL_METHOD_MULTI)
 				{
 					OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
@@ -394,7 +394,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 	//m_frame->UpdateTree(name);
 	if (refresh)
 	{
-		glbin.set_tree_selection(name.ToStdString());
+		//glbin.set_tree_selection(name.ToStdString());
 		m_frame->GetTree()->FluoRefresh(2, { gstTreeCtrl }, { m_frame->GetRenderCanvas(view) });
 	}
 }
@@ -946,7 +946,8 @@ void DataListCtrl::DeleteSelection()
 			}
 		}
 		refresh = true;
-		glbin.set_tree_selection(name.ToStdString());
+		//glbin.set_tree_selection(name.ToStdString());
+		glbin_current.SetRoot();
 	}
 
 	if (refresh)

@@ -143,10 +143,10 @@ void CalculationDlg::OnLoadA(wxCommandEvent &event)
 	m_view = 0;
 	if (m_frame)
 	{
-		switch (m_frame->GetCurSelType())
+		switch (glbin_current.GetType())
 		{
 		case 2://volume
-			m_vol1 = m_frame->GetCurSelVol();
+			m_vol1 = glbin_current.vol_data;
 			m_group = 0;
 			if (m_vol1)
 			{
@@ -190,10 +190,10 @@ void CalculationDlg::OnLoadB(wxCommandEvent &event)
 {
 	if (m_frame)
 	{
-		switch (m_frame->GetCurSelType())
+		switch (glbin_current.GetType())
 		{
 		case 2://volume
-			m_vol2 = m_frame->GetCurSelVol();
+			m_vol2 = glbin_current.vol_data;
 			if (m_vol2)
 				m_calc_b_text->ChangeValue(m_vol2->GetName());
 			break;
@@ -328,13 +328,13 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 		//m_frame->UpdateList();
 		//m_frame->UpdateTree(m_group->GetName());
 		//m_view->RefreshGL(39);
-		glbin.set_tree_selection(m_group->GetName().ToStdString());
+		glbin_current.SetVolumeGroup(m_group);
 		refresh = true;
 	}
 
 	if (refresh)
 	{
-		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
+		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl, gstCurrentSelect });
 		m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(m_view) });
 	}
 }

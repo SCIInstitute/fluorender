@@ -269,7 +269,7 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 						menu.Append(TreePanel::ID_Expand, "Expand");
 					menu.AppendSeparator();
 					menu.Append(TreePanel::ID_RandomizeColor, "Randomize Colors");
-					menu.Append(TreePanel::ID_AddDataGroup, "Add Volume Group");
+					menu.Append(TreePanel::ID_AddVolGroup, "Add Volume Group");
 					menu.Append(TreePanel::ID_AddMeshGroup, "Add Mesh Group");
 					wxString str = GetItemText(sel_item);
 					if (str != m_frame->GetRenderCanvas(0)->GetName())
@@ -282,7 +282,7 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 				menu.Append(TreePanel::ID_ShowAll, "Show All");
 				menu.AppendSeparator();
 				menu.Append(TreePanel::ID_RandomizeColor, "Randomize Colors");
-				menu.Append(TreePanel::ID_AddDataGroup, "Add Volume Group");
+				menu.Append(TreePanel::ID_AddVolGroup, "Add Volume Group");
 				menu.Append(TreePanel::ID_RemoveData, "Delete");
 				menu.AppendSeparator();
 				menu.Append(TreePanel::ID_CopyMask, "Copy Mask");
@@ -330,7 +330,7 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 					menu.Append(TreePanel::ID_Expand, "Expand");
 				menu.AppendSeparator();
 				menu.Append(TreePanel::ID_RandomizeColor, "Randomize Colors");
-				menu.Append(TreePanel::ID_AddDataGroup, "Add Volume Group");
+				menu.Append(TreePanel::ID_AddVolGroup, "Add Volume Group");
 				menu.Append(TreePanel::ID_RemoveData, "Delete");
 				break;
 			case 6:  //mesh group
@@ -642,52 +642,6 @@ void DataTreeCtrl::SetMGroupItemImage(const wxTreeItemId item, int image)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-BEGIN_EVENT_TABLE(TreePanel, wxPanel)
-	EVT_TOOL(ID_AddGroup, TreePanel::OnAddDataGroup)
-	EVT_TOOL(ID_AddMGroup, TreePanel::OnAddMeshGroup)
-	EVT_TOOL(ID_RemoveData, TreePanel::OnRemoveData)
-	//brush commands
-	EVT_TOOL(ID_BrushAppend, TreePanel::OnBrushAppend)
-	EVT_TOOL(ID_BrushDesel, TreePanel::OnBrushDesel)
-	EVT_TOOL(ID_BrushDiffuse, TreePanel::OnBrushDiffuse)
-	EVT_TOOL(ID_BrushClear, TreePanel::OnBrushClear)
-	EVT_TOOL(ID_BrushErase, TreePanel::OnBrushErase)
-	EVT_TOOL(ID_BrushExtract, TreePanel::OnBrushCreate)
-	EVT_MENU(ID_ToggleDisp, TreePanel::OnToggleDisp)
-	EVT_MENU(ID_Isolate, TreePanel::OnIsolate)
-	EVT_MENU(ID_ShowAll, TreePanel::OnShowAll)
-	EVT_MENU(ID_RemoveData, TreePanel::OnRemoveData)
-	EVT_MENU(ID_CloseView, TreePanel::OnCloseView)
-	EVT_MENU(ID_ManipulateData, TreePanel::OnManipulateData)
-	EVT_MENU(ID_AddDataGroup, TreePanel::OnAddDataGroup)
-	EVT_MENU(ID_AddMeshGroup, TreePanel::OnAddMeshGroup)
-	EVT_MENU(ID_Expand, TreePanel::OnExpand)
-	EVT_MENU(ID_Edit, TreePanel::OnEdit)
-	EVT_MENU(ID_Measurement, TreePanel::OnMeasurement)
-	EVT_MENU(ID_Trace, TreePanel::OnTrace)
-	EVT_MENU(ID_NoiseCancelling, TreePanel::OnNoiseCancelling)
-	EVT_MENU(ID_Counting, TreePanel::OnCounting)
-	EVT_MENU(ID_Colocalization, TreePanel::OnColocalization)
-	EVT_MENU(ID_Convert, TreePanel::OnConvert)
-	EVT_MENU(ID_Ocl, TreePanel::OnOcl)
-	EVT_MENU(ID_Component, TreePanel::OnComponent)
-	EVT_MENU(ID_Calculations, TreePanel::OnCalculations)
-	EVT_MENU(ID_MachineLearning, TreePanel::OnMachineLearning)
-	EVT_MENU(ID_RandomizeColor, TreePanel::OnRandomizeColor)
-	EVT_MENU(ID_CopyMask, TreePanel::OnCopyMask)
-	EVT_MENU(ID_PasteMask, TreePanel::OnPasteMask)
-	EVT_MENU(ID_MergeMask, TreePanel::OnMergeMask)
-	EVT_MENU(ID_ExcludeMask, TreePanel::OnExcludeMask)
-	EVT_MENU(ID_IntersectMask, TreePanel::OnIntersectMask)
-	EVT_TREE_SEL_CHANGED(wxID_ANY, TreePanel::OnSelChanged)
-	EVT_TREE_SEL_CHANGING(wxID_ANY, TreePanel::OnSelChanging)
-	EVT_TREE_DELETE_ITEM(wxID_ANY, TreePanel::OnDeleting)
-	EVT_TREE_ITEM_ACTIVATED(wxID_ANY, TreePanel::OnAct)
-	EVT_TREE_BEGIN_DRAG(wxID_ANY, TreePanel::OnBeginDrag)
-	EVT_TREE_END_DRAG(wxID_ANY, TreePanel::OnEndDrag)
-END_EVENT_TABLE()
-
 TreePanel::TreePanel(MainFrame* frame,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -711,10 +665,10 @@ TreePanel::TreePanel(MainFrame* frame,
 	m_toolbar->AddTool(ID_ToggleDisp, "Toggle View", bitmap,
 		"Toggle the visibility of current selection");
 	bitmap = wxGetBitmapFromMemory(add_group);
-	m_toolbar->AddTool(ID_AddGroup, "Add Group", bitmap,
+	m_toolbar->AddTool(ID_AddVolGroup, "Add Group", bitmap,
 		"Add a volume data group to the selected view");
 	bitmap = wxGetBitmapFromMemory(add_mgroup);
-	m_toolbar->AddTool(ID_AddMGroup, "Add Mesh Group", bitmap,
+	m_toolbar->AddTool(ID_AddMeshGroup, "Add Mesh Group", bitmap,
 		"Add a mesh data group to the selected view");
 	bitmap = wxGetBitmapFromMemory(delet);
 	m_toolbar->AddTool(ID_RemoveData, "Delete", bitmap,
@@ -729,9 +683,9 @@ TreePanel::TreePanel(MainFrame* frame,
 		bitmap, wxNullBitmap,
 		"Diffuse highlighted structures by painting (hold Z)");
 	bitmap = wxGetBitmapFromMemory(brush_desel);
-	m_toolbar->AddCheckTool(ID_BrushDesel, "Reset",
+	m_toolbar->AddCheckTool(ID_BrushUnselect, "Unselect",
 		bitmap, wxNullBitmap,
-		"Reset highlighted structures by painting (hold X)");
+		"Unselect highlighted structures by painting (hold X)");
 	m_toolbar->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(brush_erase);
 	m_toolbar->AddTool(ID_BrushErase, "Erase",
@@ -754,16 +708,20 @@ TreePanel::TreePanel(MainFrame* frame,
 	SetSizer(sizer_v);
 	Layout();
 
+	//events
+	Bind(wxEVT_TOOL, &TreePanel::OnToolbar, this);
+	Bind(wxEVT_MENU, &TreePanel::OnMenu, this);
+	Bind(wxEVT_TREE_SEL_CHANGED, &TreePanel::OnSelChanged, this);
+	Bind(wxEVT_TREE_SEL_CHANGING, &TreePanel::OnSelChanging, this);
+	Bind(wxEVT_TREE_DELETE_ITEM, &TreePanel::OnDeleting, this);
+	Bind(wxEVT_TREE_ITEM_ACTIVATED, &TreePanel::OnAct, this);
+	Bind(wxEVT_TREE_BEGIN_DRAG, &TreePanel::OnBeginDrag, this);
+	Bind(wxEVT_TREE_END_DRAG, &TreePanel::OnEndDrag, this);
 	Bind(wxEVT_KEY_DOWN, &TreePanel::OnKeyDown, this);
 }
 
 TreePanel::~TreePanel()
 {
-}
-
-DataTreeCtrl* TreePanel::GetTreeCtrl()
-{
-	return m_datatree;
 }
 
 void TreePanel::LoadPerspective()
@@ -795,7 +753,7 @@ void TreePanel::FluoUpdate(const fluo::ValueCollection& vc)
 			UpdateTreeColors();
 	}
 
-	if (update_all || FOUND_VALUE(gstTreeSelection))
+	if (update_all || FOUND_VALUE(gstCurrentSelect))
 	{
 		UpdateTreeSel();
 	}
@@ -805,7 +763,7 @@ void TreePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		ival = glbin_vol_selector.GetMode();
 		m_toolbar->ToggleTool(ID_BrushAppend, ival == 2);
 		m_toolbar->ToggleTool(ID_BrushDiffuse, ival == 4);
-		m_toolbar->ToggleTool(ID_BrushDesel, ival == 3);
+		m_toolbar->ToggleTool(ID_BrushUnselect, ival == 3);
 	}
 }
 
@@ -934,18 +892,18 @@ void TreePanel::Action()
 
 		m_scroll_pos = GetScrollPos(wxVERTICAL);
 		refresh = true;
-		if (rc)
-		{
-			vc.insert(gstTreeCtrl);
-			//glbin.set_tree_selection(name.ToStdString());
-		}
-		else
-			vc.insert(gstTreeIcons);
+		//if (rc)
+		//{
+		//	vc.insert(gstTreeCtrl);
+		//	//glbin.set_tree_selection(name.ToStdString());
+		//}
+		//else
+		//	vc.insert(gstTreeIcons);
 		SetScrollPos(wxVERTICAL, m_scroll_pos);
 		//UpdateSelection();
 	}
-	if (refresh)
-		FluoRefresh(2, vc);
+	//if (refresh)
+	//	FluoRefresh(2, vc);
 }
 
 void TreePanel::UpdateTree()
@@ -1355,6 +1313,13 @@ void TreePanel::UpdateTreeColors()
 	Refresh(false);
 }
 
+void TreePanel::UpdateTreeSel()
+{
+	wxTreeItemId root = m_datatree->GetRootItem();
+	if (root.IsOk())
+		traversalSel(root);
+}
+
 void TreePanel::traversalSel(wxTreeItemId item)
 {
 	LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(item);
@@ -1387,6 +1352,7 @@ void TreePanel::traversalSel(wxTreeItemId item)
 			if (str1 == str2)
 				sel = true;
 		}
+		break;
 	case 3://mesh
 		if (glbin_current.GetType() == 3)
 		{
@@ -1397,6 +1363,7 @@ void TreePanel::traversalSel(wxTreeItemId item)
 			if (str1 == str2)
 				sel = true;
 		}
+		break;
 	case 4://annotations
 		if (glbin_current.GetType() == 4)
 		{
@@ -1407,6 +1374,7 @@ void TreePanel::traversalSel(wxTreeItemId item)
 			if (str1 == str2)
 				sel = true;
 		}
+		break;
 	case 5://volume group
 		if (glbin_current.GetType() == 5)
 		{
@@ -1417,6 +1385,7 @@ void TreePanel::traversalSel(wxTreeItemId item)
 			if (str1 == str2)
 				sel = true;
 		}
+		break;
 	case 6://mesh group
 		if (glbin_current.GetType() == 6)
 		{
@@ -1427,6 +1396,7 @@ void TreePanel::traversalSel(wxTreeItemId item)
 			if (str1 == str2)
 				sel = true;
 		}
+		break;
 	}
 
 	if (sel)
@@ -1444,11 +1414,741 @@ void TreePanel::traversalSel(wxTreeItemId item)
 	}
 }
 
-void TreePanel::UpdateTreeSel()
+void TreePanel::AddVolumeGroup()
 {
-	wxTreeItemId root = m_datatree->GetRootItem();
-	if (root.IsOk())
-		traversalSel(root);
+	if (glbin_vol_selector.GetMaskHold())
+		return;
+
+	wxTreeItemId sel_item = m_datatree->GetSelection();
+	if (!m_frame) return;
+
+	if (!sel_item.IsOk())
+	{
+		wxTreeItemIdValue cookie;
+		sel_item = m_datatree->GetFirstChild(m_datatree->GetRootItem(), cookie);
+	}
+
+	if (sel_item.IsOk())
+	{
+		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
+		if (item_data && item_data->type == 1)
+		{
+			//view
+			wxString name = m_datatree->GetItemText(sel_item);
+			RenderCanvas* view = m_frame->GetRenderCanvas(name);
+			if (view)
+			{
+				wxString group_name = view->AddGroup("");
+				m_datatree->AddGroupItem(sel_item, group_name);
+				m_datatree->Expand(sel_item);
+			}
+		}
+		else if (item_data && item_data->type == 2)
+		{
+			//volume
+			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
+			if (par_item.IsOk())
+			{
+				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
+				if (par_data && par_data->type == 1)
+				{
+					//volume in view
+					wxString name = m_datatree->GetItemText(par_item);
+					RenderCanvas* view = m_frame->GetRenderCanvas(name);
+					if (view)
+					{
+						wxString group_name = view->AddGroup("");
+						m_datatree->AddGroupItem(par_item, group_name);
+					}
+				}
+				else if (par_data && par_data->type == 5)
+				{
+					//volume in group
+					wxTreeItemId gpar_item = m_datatree->GetItemParent(par_item);
+					if (gpar_item.IsOk())
+					{
+						LayerInfo* gpar_data = (LayerInfo*)m_datatree->GetItemData(gpar_item);
+						if (gpar_data && gpar_data->type == 1)
+						{
+							wxString name = m_datatree->GetItemText(gpar_item);
+							RenderCanvas* view = m_frame->GetRenderCanvas(name);
+							if (view)
+							{
+								wxString group_name = view->AddGroup("");
+								m_datatree->AddGroupItem(gpar_item, group_name);
+							}
+						}
+					}
+				}
+			}
+		}
+		else if (item_data && item_data->type == 3)
+		{
+			//mesh
+			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
+			if (par_item.IsOk())
+			{
+				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
+				if (par_data && par_data->type == 1)
+				{
+					//mesh in view
+					wxString name = m_datatree->GetItemText(par_item);
+					RenderCanvas* view = m_frame->GetRenderCanvas(name);
+					if (view)
+					{
+						wxString group_name = view->AddGroup("");
+						m_datatree->AddGroupItem(par_item, group_name);
+					}
+				}
+				else if (par_data && par_data->type == 6)
+				{
+					//mesh in group
+					wxTreeItemId gpar_item = m_datatree->GetItemParent(par_item);
+					if (gpar_item.IsOk())
+					{
+						LayerInfo* gpar_data = (LayerInfo*)m_datatree->GetItemData(gpar_item);
+						if (gpar_data && gpar_data->type == 1)
+						{
+							wxString name = m_datatree->GetItemText(gpar_item);
+							RenderCanvas* view = m_frame->GetRenderCanvas(name);
+							if (view)
+							{
+								wxString group_name = view->AddGroup("");
+								m_datatree->AddGroupItem(gpar_item, group_name);
+							}
+						}
+					}
+				}
+			}
+		}
+		else if ((item_data && item_data->type == 5) ||
+			(item_data && item_data->type == 6))
+		{
+			//group
+			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
+			if (par_item.IsOk())
+			{
+				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
+				if (par_data && par_data->type == 1)
+				{
+					//group in view
+					wxString name = m_datatree->GetItemText(par_item);
+					RenderCanvas* view = m_frame->GetRenderCanvas(name);
+					if (view)
+					{
+						wxString group_name = view->AddGroup("");
+						m_datatree->AddGroupItem(par_item, group_name);
+					}
+				}
+			}
+		}
+	}
+}
+
+void TreePanel::AddMeshGroup()
+{
+	if (glbin_vol_selector.GetMaskHold())
+		return;
+
+	wxTreeItemId sel_item = m_datatree->GetSelection();
+	if (!m_frame) return;
+
+	if (!sel_item.IsOk())
+	{
+		wxTreeItemIdValue cookie;
+		sel_item = m_datatree->GetFirstChild(m_datatree->GetRootItem(), cookie);
+	}
+
+	if (sel_item.IsOk())
+	{
+		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
+		if (item_data && item_data->type == 1)
+		{
+			//view
+			wxString name = m_datatree->GetItemText(sel_item);
+			RenderCanvas* view = m_frame->GetRenderCanvas(name);
+			if (view)
+			{
+				wxString group_name = view->AddMGroup("");
+				m_datatree->AddMGroupItem(sel_item, group_name);
+				m_datatree->Expand(sel_item);
+			}
+		}
+		else if (item_data && item_data->type == 2)
+		{
+			//volume
+			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
+			if (par_item.IsOk())
+			{
+				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
+				if (par_data && par_data->type == 1)
+				{
+					//volume in view
+					wxString name = m_datatree->GetItemText(par_item);
+					RenderCanvas* view = m_frame->GetRenderCanvas(name);
+					if (view)
+					{
+						wxString group_name = view->AddMGroup("");
+						m_datatree->AddMGroupItem(par_item, group_name);
+					}
+				}
+				else if (par_data && par_data->type == 5)
+				{
+					//volume in group
+					wxTreeItemId gpar_item = m_datatree->GetItemParent(par_item);
+					if (gpar_item.IsOk())
+					{
+						LayerInfo* gpar_data = (LayerInfo*)m_datatree->GetItemData(gpar_item);
+						if (gpar_data && gpar_data->type == 1)
+						{
+							wxString name = m_datatree->GetItemText(gpar_item);
+							RenderCanvas* view = m_frame->GetRenderCanvas(name);
+							if (view)
+							{
+								wxString group_name = view->AddMGroup("");
+								m_datatree->AddMGroupItem(gpar_item, group_name);
+							}
+						}
+					}
+				}
+			}
+		}
+		else if (item_data && item_data->type == 3)
+		{
+			//mesh
+			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
+			if (par_item.IsOk())
+			{
+				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
+				if (par_data && par_data->type == 1)
+				{
+					//mesh in view
+					wxString name = m_datatree->GetItemText(par_item);
+					RenderCanvas* view = m_frame->GetRenderCanvas(name);
+					if (view)
+					{
+						wxString group_name = view->AddMGroup("");
+						m_datatree->AddMGroupItem(par_item, group_name);
+					}
+				}
+				else if (par_data && par_data->type == 6)
+				{
+					//mesh in group
+					wxTreeItemId gpar_item = m_datatree->GetItemParent(par_item);
+					if (gpar_item.IsOk())
+					{
+						LayerInfo* gpar_data = (LayerInfo*)m_datatree->GetItemData(gpar_item);
+						if (gpar_data && gpar_data->type == 1)
+						{
+							wxString name = m_datatree->GetItemText(gpar_item);
+							RenderCanvas* view = m_frame->GetRenderCanvas(name);
+							if (view)
+							{
+								wxString group_name = view->AddMGroup("");
+								m_datatree->AddMGroupItem(gpar_item, group_name);
+							}
+						}
+					}
+				}
+			}
+		}
+		else if ((item_data && item_data->type == 5) ||
+			(item_data && item_data->type == 6))
+		{
+			//group
+			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
+			if (par_item.IsOk())
+			{
+				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
+				if (par_data && par_data->type == 1)
+				{
+					//group in view
+					wxString name = m_datatree->GetItemText(par_item);
+					RenderCanvas* view = m_frame->GetRenderCanvas(name);
+					if (view)
+					{
+						wxString group_name = view->AddMGroup("");
+						m_datatree->AddMGroupItem(par_item, group_name);
+					}
+				}
+			}
+		}
+	}
+}
+
+void TreePanel::Expand()
+{
+	wxTreeItemId sel_item = m_datatree->GetSelection();
+	if (m_datatree->IsExpanded(sel_item))
+		m_datatree->Collapse(sel_item);
+	else
+		m_datatree->Expand(sel_item);
+}
+
+void TreePanel::RandomizeColor()
+{
+	if (glbin_vol_selector.GetMaskHold())
+		return;
+
+	wxTreeItemId sel_item = m_datatree->GetSelection();
+	if (!m_frame) return;
+	if (!sel_item.IsOk()) return;
+
+	LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
+	if (!item_data) return;
+
+	wxString name = m_datatree->GetItemText(sel_item);
+	if (item_data->type == 1)
+	{
+		//view
+		RenderCanvas* view = m_frame->GetRenderCanvas(name);
+		if (view)
+			view->RandomizeColor();
+	}
+	else if (item_data->type == 2)
+	{
+		//volume
+		VolumeData* vd = glbin_data_manager.GetVolumeData(name);
+		if (vd)
+			vd->RandomizeColor();
+	}
+	else if (item_data->type == 3)
+	{
+		//mesh
+		MeshData* md = glbin_data_manager.GetMeshData(name);
+		if (md)
+			md->RandomizeColor();
+	}
+	else if (item_data->type == 5)
+	{
+		//volume group
+		wxString par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item));
+		RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
+		if (view)
+		{
+			DataGroup* group = view->GetGroup(name);
+			if (group)
+				group->RandomizeColor();
+		}
+	}
+	else if (item_data->type == 6)
+	{
+		//mesh group
+		wxString par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item));
+		RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
+		if (view)
+		{
+			MeshGroup* group = view->GetMGroup(name);
+			if (group)
+				group->RandomizeColor();
+		}
+	}
+
+
+	m_scroll_pos = GetScrollPos(wxVERTICAL);
+	SetScrollPos(wxVERTICAL, m_scroll_pos);
+	//UpdateSelection();
+	//glbin.set_tree_selection(name.ToStdString());
+	//FluoRefresh(2, { gstTreeCtrl });
+}
+
+void TreePanel::CloseView()
+{
+	if (glbin_vol_selector.GetMaskHold())
+		return;
+
+	wxTreeItemId sel_item = m_datatree->GetSelection();
+
+	if (sel_item.IsOk() && m_frame)
+	{
+		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
+		if (item_data && item_data->type == 1)//view
+		{
+			wxString name = m_datatree->GetItemText(sel_item);
+			m_frame->DeleteVRenderView(name);
+		}
+	}
+}
+
+void TreePanel::Isolate()
+{
+	if (glbin_vol_selector.GetMaskHold())
+		return;
+
+	wxTreeItemId sel_item = m_datatree->GetSelection();
+	bool refresh = false;
+
+	if (sel_item.IsOk() && m_frame)
+	{
+		wxString viewname = "";
+		wxString itemname = "";
+		int item_type = 0;
+
+		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
+		if (item_data)
+		{
+			item_type = item_data->type;
+			itemname = m_datatree->GetItemText(sel_item);
+			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
+			if (par_item.IsOk())
+			{
+				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
+				if (par_data)
+				{
+					if (par_data->type == 1)
+					{
+						//view
+						viewname = m_datatree->GetItemText(par_item);
+					}
+					else if (par_data->type == 5 ||
+						par_data->type == 6)
+					{
+						wxTreeItemId gpar_item = m_datatree->GetItemParent(par_item);
+						if (gpar_item.IsOk())
+						{
+							LayerInfo* gpar_data = (LayerInfo*)m_datatree->GetItemData(gpar_item);
+							if (gpar_data && gpar_data->type == 1)
+							{
+								//view
+								viewname = m_datatree->GetItemText(gpar_item);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		RenderCanvas* view = m_frame->GetRenderCanvas(viewname);
+		if (view)
+		{
+			view->Isolate(item_type, itemname);
+			refresh = true;
+		}
+
+		//UpdateSelection();
+	}
+
+	//if (refresh)
+	//	FluoRefresh(2, { gstTreeIcons });
+}
+
+void TreePanel::ShowAll()
+{
+	if (glbin_vol_selector.GetMaskHold())
+		return;
+
+	wxTreeItemId sel_item = m_datatree->GetSelection();
+	bool refresh = false;
+
+	if (sel_item.IsOk() && m_frame)
+	{
+		wxString viewname = "";
+		wxString itemname = "";
+		int item_type = 0;
+
+		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
+		if (item_data)
+		{
+			item_type = item_data->type;
+			itemname = m_datatree->GetItemText(sel_item);
+			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
+			if (par_item.IsOk())
+			{
+				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
+				if (par_data)
+				{
+					if (par_data->type == 1)
+					{
+						//view
+						viewname = m_datatree->GetItemText(par_item);
+					}
+					else if (par_data->type == 5 ||
+						par_data->type == 6)
+					{
+						wxTreeItemId gpar_item = m_datatree->GetItemParent(par_item);
+						if (gpar_item.IsOk())
+						{
+							LayerInfo* gpar_data = (LayerInfo*)m_datatree->GetItemData(gpar_item);
+							if (gpar_data && gpar_data->type == 1)
+							{
+								//view
+								viewname = m_datatree->GetItemText(gpar_item);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		RenderCanvas* view = m_frame->GetRenderCanvas(viewname);
+		if (view)
+		{
+			view->ShowAll();
+			refresh = true;
+		}
+
+		//UpdateSelection();
+	}
+
+	//if (refresh)
+	//	FluoRefresh(2, { gstTreeIcons });
+}
+
+void TreePanel::ManipulateData()
+{
+	if (glbin_vol_selector.GetMaskHold())
+		return;
+
+	wxTreeItemId sel_item = m_datatree->GetSelection();
+
+	if (sel_item.IsOk() && m_frame)
+	{
+		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
+		if (item_data && item_data->type == 3)//mesh data
+		{
+			wxString name = m_datatree->GetItemText(sel_item);
+			MeshData* md = glbin_data_manager.GetMeshData(name);
+			m_frame->UpdateProps({ gstManipPropPanel });
+			//m_frame->OnSelection(6, 0, 0, 0, md);
+		}
+	}
+}
+
+void TreePanel::OnToolbar(wxCommandEvent& event)
+{
+	int id = event.GetId();
+	int excl_self = 0;
+	fluo::ValueCollection vc;
+	std::set<int> views;
+
+	switch (id)
+	{
+	case ID_ToggleDisp:
+		Action();
+		excl_self = 2;
+		if (wxGetKeyState(WXK_CONTROL))
+			vc.insert(gstTreeColors);
+		else
+			vc.insert(gstTreeIcons);
+		break;
+	case ID_AddVolGroup:
+	case ID_AddMeshGroup:
+		switch (id)
+		{
+			case ID_AddVolGroup:
+				AddVolumeGroup();
+				break;
+			case ID_AddMeshGroup:
+				AddMeshGroup();
+				break;
+		}
+		vc.insert(gstNull);
+		views.insert(-1);
+		break;
+	case ID_RemoveData:
+		m_datatree->DeleteSelection();
+		glbin_current.SetRoot();
+		vc.insert(gstTreeCtrl);
+		break;
+	case ID_BrushAppend:
+	case ID_BrushUnselect:
+	case ID_BrushDiffuse:
+	{
+		int val = glbin_vol_selector.GetMode();
+		int mode = 0;
+		switch (id)
+		{
+		case ID_BrushAppend:
+			mode = 2;
+			break;
+		case ID_BrushUnselect:
+			mode = 3;
+			break;
+		case ID_BrushDiffuse:
+			mode = 4;
+			break;
+		}
+		if (val != mode)
+			glbin_vol_selector.SetMode(mode);
+		else
+			glbin_vol_selector.SetMode(0);
+		vc.insert(gstBrushState);
+		views.insert(-1);
+	}
+		break;
+	case ID_BrushErase:
+	case ID_BrushClear:
+	case ID_BrushExtract:
+		switch (id)
+		{
+		case ID_BrushErase:
+			glbin_vol_selector.Erase();
+			break;
+		case ID_BrushClear:
+			glbin_vol_selector.Clear();
+			break;
+		case ID_BrushExtract:
+			glbin_vol_selector.Extract();
+			break;
+		}
+		excl_self = 3;
+		vc.insert(gstNull);
+		break;
+	}
+
+	FluoRefresh(excl_self, vc, views);
+}
+
+void TreePanel::OnMenu(wxCommandEvent& event)
+{
+	int id = event.GetId();
+	int excl_self = 0;
+	fluo::ValueCollection vc;
+	std::set<int> views;
+
+	switch (id)
+	{
+	case ID_ToggleDisp:
+		Action();
+		excl_self = 2;
+		if (wxGetKeyState(WXK_CONTROL))
+			vc.insert(gstTreeColors);
+		else
+			vc.insert(gstTreeIcons);
+		break;
+	case ID_AddVolGroup:
+	case ID_AddMeshGroup:
+		switch (id)
+		{
+		case ID_AddVolGroup:
+			AddVolumeGroup();
+			break;
+		case ID_AddMeshGroup:
+			AddMeshGroup();
+			break;
+		}
+		vc.insert(gstNull);
+		views.insert(-1);
+		break;
+	case ID_RemoveData:
+		m_datatree->DeleteSelection();
+		glbin_current.SetRoot();
+		vc.insert(gstTreeCtrl);
+		break;
+	case ID_Expand:
+		Expand();
+		vc.insert(gstNull);
+		views.insert(-1);
+		break;
+	case ID_RandomizeColor:
+		RandomizeColor();
+		vc.insert(gstTreeColors);
+		break;
+	case ID_CloseView:
+		CloseView();
+		break;
+	case ID_Isolate:
+	case ID_ShowAll:
+		switch (id)
+		{
+		case ID_Isolate:
+			Isolate();
+			break;
+		case ID_ShowAll:
+			ShowAll();
+			break;
+		}
+		excl_self = 2;
+		vc.insert(gstTreeIcons);
+		break;
+	case ID_CopyMask:
+		glbin_vol_selector.CopyMask(false);
+		vc.insert(gstNull);
+		views.insert(-1);
+		break;
+	case ID_PasteMask:
+	case ID_MergeMask:
+	case ID_ExcludeMask:
+	case ID_IntersectMask:
+	{
+		int ival = 0;
+		switch (id)
+		{
+		case ID_CopyMask:
+			ival = 0;
+			break;
+		case ID_MergeMask:
+			ival = 1;
+			break;
+		case ID_ExcludeMask:
+			ival = 2;
+			break;
+		case ID_IntersectMask:
+			ival = 3;
+			break;
+		}
+		glbin_vol_selector.PasteMask(ival);
+		vc.insert(gstNull);
+	}
+		break;
+	case ID_Edit:
+	case ID_Measurement:
+	case ID_Component:
+	case ID_Trace:
+	case ID_Calculations:
+	case ID_NoiseCancelling:
+	case ID_Counting:
+	case ID_Colocalization:
+	case ID_Convert:
+	case ID_Ocl:
+	case ID_MachineLearning:
+	case ID_ManipulateData:
+		switch (id)
+		{
+			case ID_Edit:
+				m_frame->ShowPaintTool();
+				break;
+			case ID_Measurement:
+				m_frame->ShowMeasureDlg();
+				break;
+			case ID_Component:
+				m_frame->ShowComponentDlg();
+				break;
+			case ID_Trace:
+				m_frame->ShowTraceDlg();
+				break;
+			case ID_Calculations:
+				m_frame->ShowCalculationDlg();
+				break;
+			case ID_NoiseCancelling:
+				m_frame->ShowNoiseCancellingDlg();
+				break;
+			case ID_Counting:
+				m_frame->ShowCountingDlg();
+				break;
+			case ID_Colocalization:
+				m_frame->ShowColocalizationDlg();
+				break;
+			case ID_Convert:
+				m_frame->ShowConvertDlg();
+				break;
+			case ID_Ocl:
+				m_frame->ShowOclDlg();
+				break;
+			case ID_MachineLearning:
+				m_frame->ShowMachineLearningDlg();
+				break;
+			case ID_ManipulateData:
+				ManipulateData();
+				break;
+		}
+		excl_self = 3;
+		vc.insert(gstNull);
+		views.insert(-1);
+		break;
+	}
+
+	FluoRefresh(excl_self, vc, views);
 }
 
 void TreePanel::OnSelChanged(wxTreeEvent& event)
@@ -1529,7 +2229,7 @@ void TreePanel::OnSelChanging(wxTreeEvent& event)
 
 void TreePanel::OnDeleting(wxTreeEvent& event)
 {
-	FluoUpdate({ gstTreeSelection });
+	FluoUpdate({ gstCurrentSelect });
 }
 
 void TreePanel::OnAct(wxTreeEvent& event)
@@ -1807,670 +2507,6 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 		FluoRefresh(2, { gstTreeCtrl });
 
 	SetScrollPos(wxVERTICAL, m_scroll_pos);
-}
-
-
-void TreePanel::OnRemoveData(wxCommandEvent &event)
-{
-	m_datatree->DeleteSelection();
-	glbin_current.SetRoot();
-	FluoRefresh(0, { gstTreeCtrl });
-}
-
-void TreePanel::OnBrushAppend(wxCommandEvent &event)
-{
-	int val = glbin_vol_selector.GetMode();
-	if (val != 2)
-		glbin_vol_selector.SetMode(2);
-	else
-		glbin_vol_selector.SetMode(0);
-	FluoRefresh(0, { gstBrushState }, { -1 });
-}
-
-void TreePanel::OnBrushDiffuse(wxCommandEvent &event)
-{
-	int val = glbin_vol_selector.GetMode();
-	if (val != 4)
-		glbin_vol_selector.SetMode(4);
-	else
-		glbin_vol_selector.SetMode(0);
-	FluoRefresh(0, { gstBrushState }, { -1 });
-}
-
-void TreePanel::OnBrushDesel(wxCommandEvent &event)
-{
-	int val = glbin_vol_selector.GetMode();
-	if (val != 3)
-		glbin_vol_selector.SetMode(3);
-	else
-		glbin_vol_selector.SetMode(0);
-	FluoRefresh(0, { gstBrushState }, { -1 });
-}
-
-void TreePanel::OnBrushClear(wxCommandEvent &event)
-{
-	glbin_vol_selector.Clear();
-	FluoRefresh(3, { gstNull });
-}
-
-void TreePanel::OnBrushErase(wxCommandEvent &event)
-{
-	glbin_vol_selector.Erase();
-	FluoRefresh(3, { gstNull });
-}
-
-void TreePanel::OnBrushCreate(wxCommandEvent &event)
-{
-	glbin_vol_selector.Extract();
-	FluoRefresh(3, { gstNull });
-}
-
-void TreePanel::OnToggleDisp(wxCommandEvent& event)
-{
-	Action();
-}
-
-void TreePanel::OnIsolate(wxCommandEvent& event)
-{
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-	bool refresh = false;
-
-	if (sel_item.IsOk() && m_frame)
-	{
-		wxString viewname = "";
-		wxString itemname = "";
-		int item_type = 0;
-
-		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
-		if (item_data)
-		{
-			item_type = item_data->type;
-			itemname = m_datatree->GetItemText(sel_item);
-			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
-				if (par_data)
-				{
-					if (par_data->type == 1)
-					{
-						//view
-						viewname = m_datatree->GetItemText(par_item);
-					}
-					else if (par_data->type == 5 ||
-						par_data->type == 6)
-					{
-						wxTreeItemId gpar_item = m_datatree->GetItemParent(par_item);
-						if (gpar_item.IsOk())
-						{
-							LayerInfo* gpar_data = (LayerInfo*)m_datatree->GetItemData(gpar_item);
-							if (gpar_data && gpar_data->type == 1)
-							{
-								//view
-								viewname = m_datatree->GetItemText(gpar_item);
-							}
-						}
-					}
-				}
-			}
-		}
-
-		RenderCanvas* view = m_frame->GetRenderCanvas(viewname);
-		if (view)
-		{
-			view->Isolate(item_type, itemname);
-			refresh = true;
-		}
-
-		//UpdateSelection();
-	}
-
-	if (refresh)
-		FluoRefresh(2, { gstTreeIcons });
-}
-
-void TreePanel::OnShowAll(wxCommandEvent& event)
-{
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-	bool refresh = false;
-
-	if (sel_item.IsOk() && m_frame)
-	{
-		wxString viewname = "";
-		wxString itemname = "";
-		int item_type = 0;
-
-		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
-		if (item_data)
-		{
-			item_type = item_data->type;
-			itemname = m_datatree->GetItemText(sel_item);
-			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
-				if (par_data)
-				{
-					if (par_data->type == 1)
-					{
-						//view
-						viewname = m_datatree->GetItemText(par_item);
-					}
-					else if (par_data->type == 5 ||
-						par_data->type == 6)
-					{
-						wxTreeItemId gpar_item = m_datatree->GetItemParent(par_item);
-						if (gpar_item.IsOk())
-						{
-							LayerInfo* gpar_data = (LayerInfo*)m_datatree->GetItemData(gpar_item);
-							if (gpar_data && gpar_data->type == 1)
-							{
-								//view
-								viewname = m_datatree->GetItemText(gpar_item);
-							}
-						}
-					}
-				}
-			}
-		}
-
-		RenderCanvas* view = m_frame->GetRenderCanvas(viewname);
-		if (view)
-		{
-			view->ShowAll();
-			refresh = true;
-		}
-
-		//UpdateSelection();
-	}
-
-	if (refresh)
-		FluoRefresh(2, { gstTreeIcons });
-}
-
-void TreePanel::OnCloseView(wxCommandEvent& event)
-{
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-
-	if (sel_item.IsOk() && m_frame)
-	{
-		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
-		if (item_data && item_data->type == 1)//view
-		{
-			wxString name = m_datatree->GetItemText(sel_item);
-			m_frame->DeleteVRenderView(name);
-		}
-	}
-}
-
-void TreePanel::OnManipulateData(wxCommandEvent& event)
-{
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-
-	if (sel_item.IsOk() && m_frame)
-	{
-		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
-		if (item_data && item_data->type == 3)//mesh data
-		{
-			wxString name = m_datatree->GetItemText(sel_item);
-			MeshData* md = glbin_data_manager.GetMeshData(name);
-			m_frame->UpdateProps({ gstManipPropPanel });
-			//m_frame->OnSelection(6, 0, 0, 0, md);
-		}
-	}
-}
-
-void TreePanel::OnAddMeshGroup(wxCommandEvent& event)
-{
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-	if (!m_frame) return;
-
-	if (!sel_item.IsOk())
-	{
-		wxTreeItemIdValue cookie;
-		sel_item = m_datatree->GetFirstChild(m_datatree->GetRootItem(), cookie);
-	}
-
-	if (sel_item.IsOk())
-	{
-		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
-		if (item_data && item_data->type == 1)
-		{
-			//view
-			wxString name = m_datatree->GetItemText(sel_item);
-			RenderCanvas* view = m_frame->GetRenderCanvas(name);
-			if (view)
-			{
-				wxString group_name = view->AddMGroup("");
-				m_datatree->AddMGroupItem(sel_item, group_name);
-				m_datatree->Expand(sel_item);
-			}
-		}
-		else if (item_data && item_data->type == 2)
-		{
-			//volume
-			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
-				if (par_data && par_data->type == 1)
-				{
-					//volume in view
-					wxString name = m_datatree->GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetRenderCanvas(name);
-					if (view)
-					{
-						wxString group_name = view->AddMGroup("");
-						m_datatree->AddMGroupItem(par_item, group_name);
-					}
-				}
-				else if (par_data && par_data->type == 5)
-				{
-					//volume in group
-					wxTreeItemId gpar_item = m_datatree->GetItemParent(par_item);
-					if (gpar_item.IsOk())
-					{
-						LayerInfo* gpar_data = (LayerInfo*)m_datatree->GetItemData(gpar_item);
-						if (gpar_data && gpar_data->type == 1)
-						{
-							wxString name = m_datatree->GetItemText(gpar_item);
-							RenderCanvas* view = m_frame->GetRenderCanvas(name);
-							if (view)
-							{
-								wxString group_name = view->AddMGroup("");
-								m_datatree->AddMGroupItem(gpar_item, group_name);
-							}
-						}
-					}
-				}
-			}
-		}
-		else if (item_data && item_data->type == 3)
-		{
-			//mesh
-			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
-				if (par_data && par_data->type == 1)
-				{
-					//mesh in view
-					wxString name = m_datatree->GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetRenderCanvas(name);
-					if (view)
-					{
-						wxString group_name = view->AddMGroup("");
-						m_datatree->AddMGroupItem(par_item, group_name);
-					}
-				}
-				else if (par_data && par_data->type == 6)
-				{
-					//mesh in group
-					wxTreeItemId gpar_item = m_datatree->GetItemParent(par_item);
-					if (gpar_item.IsOk())
-					{
-						LayerInfo* gpar_data = (LayerInfo*)m_datatree->GetItemData(gpar_item);
-						if (gpar_data && gpar_data->type == 1)
-						{
-							wxString name = m_datatree->GetItemText(gpar_item);
-							RenderCanvas* view = m_frame->GetRenderCanvas(name);
-							if (view)
-							{
-								wxString group_name = view->AddMGroup("");
-								m_datatree->AddMGroupItem(gpar_item, group_name);
-							}
-						}
-					}
-				}
-			}
-		}
-		else if ((item_data && item_data->type == 5) ||
-			(item_data && item_data->type == 6))
-		{
-			//group
-			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
-				if (par_data && par_data->type == 1)
-				{
-					//group in view
-					wxString name = m_datatree->GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetRenderCanvas(name);
-					if (view)
-					{
-						wxString group_name = view->AddMGroup("");
-						m_datatree->AddMGroupItem(par_item, group_name);
-					}
-				}
-			}
-		}
-	}
-}
-
-void TreePanel::OnAddDataGroup(wxCommandEvent& event)
-{
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-	if (!m_frame) return;
-
-	if (!sel_item.IsOk())
-	{
-		wxTreeItemIdValue cookie;
-		sel_item = m_datatree->GetFirstChild(m_datatree->GetRootItem(), cookie);
-	}
-
-	if (sel_item.IsOk())
-	{
-		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
-		if (item_data && item_data->type == 1)
-		{
-			//view
-			wxString name = m_datatree->GetItemText(sel_item);
-			RenderCanvas* view = m_frame->GetRenderCanvas(name);
-			if (view)
-			{
-				wxString group_name = view->AddGroup("");
-				m_datatree->AddGroupItem(sel_item, group_name);
-				m_datatree->Expand(sel_item);
-			}
-		}
-		else if (item_data && item_data->type == 2)
-		{
-			//volume
-			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
-				if (par_data && par_data->type == 1)
-				{
-					//volume in view
-					wxString name = m_datatree->GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetRenderCanvas(name);
-					if (view)
-					{
-						wxString group_name = view->AddGroup("");
-						m_datatree->AddGroupItem(par_item, group_name);
-					}
-				}
-				else if (par_data && par_data->type == 5)
-				{
-					//volume in group
-					wxTreeItemId gpar_item = m_datatree->GetItemParent(par_item);
-					if (gpar_item.IsOk())
-					{
-						LayerInfo* gpar_data = (LayerInfo*)m_datatree->GetItemData(gpar_item);
-						if (gpar_data && gpar_data->type == 1)
-						{
-							wxString name = m_datatree->GetItemText(gpar_item);
-							RenderCanvas* view = m_frame->GetRenderCanvas(name);
-							if (view)
-							{
-								wxString group_name = view->AddGroup("");
-								m_datatree->AddGroupItem(gpar_item, group_name);
-							}
-						}
-					}
-				}
-			}
-		}
-		else if (item_data && item_data->type == 3)
-		{
-			//mesh
-			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
-				if (par_data && par_data->type == 1)
-				{
-					//mesh in view
-					wxString name = m_datatree->GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetRenderCanvas(name);
-					if (view)
-					{
-						wxString group_name = view->AddGroup("");
-						m_datatree->AddGroupItem(par_item, group_name);
-					}
-				}
-				else if (par_data && par_data->type == 6)
-				{
-					//mesh in group
-					wxTreeItemId gpar_item = m_datatree->GetItemParent(par_item);
-					if (gpar_item.IsOk())
-					{
-						LayerInfo* gpar_data = (LayerInfo*)m_datatree->GetItemData(gpar_item);
-						if (gpar_data && gpar_data->type == 1)
-						{
-							wxString name = m_datatree->GetItemText(gpar_item);
-							RenderCanvas* view = m_frame->GetRenderCanvas(name);
-							if (view)
-							{
-								wxString group_name = view->AddGroup("");
-								m_datatree->AddGroupItem(gpar_item, group_name);
-							}
-						}
-					}
-				}
-			}
-		}
-		else if ((item_data && item_data->type == 5) ||
-			(item_data && item_data->type == 6))
-		{
-			//group
-			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
-				if (par_data && par_data->type == 1)
-				{
-					//group in view
-					wxString name = m_datatree->GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetRenderCanvas(name);
-					if (view)
-					{
-						wxString group_name = view->AddGroup("");
-						m_datatree->AddGroupItem(par_item, group_name);
-					}
-				}
-			}
-		}
-	}
-}
-
-void TreePanel::OnExpand(wxCommandEvent& event)
-{
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-	if (m_datatree->IsExpanded(sel_item))
-		m_datatree->Collapse(sel_item);
-	else
-		m_datatree->Expand(sel_item);
-}
-
-//edit
-void TreePanel::OnEdit(wxCommandEvent& event)
-{
-	if (m_frame)
-		m_frame->ShowPaintTool();
-}
-
-//measurement
-void TreePanel::OnMeasurement(wxCommandEvent& event)
-{
-	if (m_frame)
-		m_frame->ShowMeasureDlg();
-}
-
-//trace
-void TreePanel::OnTrace(wxCommandEvent& event)
-{
-	if (m_frame)
-		m_frame->ShowTraceDlg();
-}
-
-//noise cancelling
-void TreePanel::OnNoiseCancelling(wxCommandEvent& event)
-{
-	if (m_frame)
-		m_frame->ShowNoiseCancellingDlg();
-}
-
-//counting
-void TreePanel::OnCounting(wxCommandEvent& event)
-{
-	if (m_frame)
-		m_frame->ShowCountingDlg();
-}
-
-//colocalzation
-void TreePanel::OnColocalization(wxCommandEvent& event)
-{
-	if (m_frame)
-		m_frame->ShowColocalizationDlg();
-}
-
-//convert
-void TreePanel::OnConvert(wxCommandEvent& event)
-{
-	if (m_frame)
-		m_frame->ShowConvertDlg();
-}
-
-//ocl
-void TreePanel::OnOcl(wxCommandEvent& event)
-{
-	if (m_frame)
-		m_frame->ShowOclDlg();
-}
-
-//component
-void TreePanel::OnComponent(wxCommandEvent& event)
-{
-	if (m_frame)
-		m_frame->ShowComponentDlg();
-}
-
-//calculations
-void TreePanel::OnCalculations(wxCommandEvent& event)
-{
-	if (m_frame)
-		m_frame->ShowCalculationDlg();
-}
-
-//machine learning
-void TreePanel::OnMachineLearning(wxCommandEvent& event)
-{
-	if (m_frame)
-		m_frame->ShowMachineLearningDlg();
-}
-
-//randomize color
-void TreePanel::OnRandomizeColor(wxCommandEvent& event)
-{
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-	if (!m_frame) return;
-	if (!sel_item.IsOk()) return;
-
-	LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
-	if (!item_data) return;
-
-	wxString name = m_datatree->GetItemText(sel_item);
-	if (item_data->type == 1)
-	{
-		//view
-		RenderCanvas* view = m_frame->GetRenderCanvas(name);
-		if (view)
-			view->RandomizeColor();
-	}
-	else if (item_data->type == 2)
-	{
-		//volume
-		VolumeData* vd = glbin_data_manager.GetVolumeData(name);
-		if (vd)
-			vd->RandomizeColor();
-	}
-	else if (item_data->type == 3)
-	{
-		//mesh
-		MeshData* md = glbin_data_manager.GetMeshData(name);
-		if (md)
-			md->RandomizeColor();
-	}
-	else if (item_data->type == 5)
-	{
-		//volume group
-		wxString par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item));
-		RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
-		if (view)
-		{
-			DataGroup* group = view->GetGroup(name);
-			if (group)
-				group->RandomizeColor();
-		}
-	}
-	else if (item_data->type == 6)
-	{
-		//mesh group
-		wxString par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item));
-		RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
-		if (view)
-		{
-			MeshGroup* group = view->GetMGroup(name);
-			if (group)
-				group->RandomizeColor();
-		}
-	}
-
-
-	m_scroll_pos = GetScrollPos(wxVERTICAL);
-	SetScrollPos(wxVERTICAL, m_scroll_pos);
-	//UpdateSelection();
-	//glbin.set_tree_selection(name.ToStdString());
-	FluoRefresh(2, { gstTreeCtrl });
-}
-
-void TreePanel::OnCopyMask(wxCommandEvent& event)
-{
-	glbin_vol_selector.CopyMask(false);
-}
-
-void TreePanel::OnPasteMask(wxCommandEvent& event)
-{
-	glbin_vol_selector.PasteMask(0);
-}
-
-void TreePanel::OnMergeMask(wxCommandEvent& event)
-{
-	glbin_vol_selector.PasteMask(1);
-}
-
-void TreePanel::OnExcludeMask(wxCommandEvent& event)
-{
-	glbin_vol_selector.PasteMask(2);
-}
-
-void TreePanel::OnIntersectMask(wxCommandEvent& event)
-{
-	glbin_vol_selector.PasteMask(3);
 }
 
 void TreePanel::OnKeyDown(wxKeyEvent& event)

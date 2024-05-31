@@ -223,7 +223,7 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 	if (!m_frame)
 		return;
 
-	sel_vol = m_frame->GetCurSelVol();
+	sel_vol = glbin_current.vol_data;
 
 	if (!sel_vol)
 		return;
@@ -312,7 +312,7 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 			md->GetName() << " is " <<
 			wxString::Format("%f", area) << "\n";
 		refresh = true;
-		glbin.set_tree_selection("");
+		//glbin.set_tree_selection("");
 	}
 
 	delete prog_diag;

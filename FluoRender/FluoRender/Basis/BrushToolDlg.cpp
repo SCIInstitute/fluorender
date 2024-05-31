@@ -441,7 +441,7 @@ BrushToolDlg::~BrushToolDlg()
 
 void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 {
-	VolumeData* sel_vol = m_frame->GetCurSelVol();
+	VolumeData* sel_vol = glbin_current.vol_data;
 	if (!sel_vol)
 		return;
 
@@ -599,7 +599,7 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		data.size = data.voxel_sum * vvol;
 		data.wsize = data.voxel_wsum * vvol;
 		wxString unit;
-		RenderCanvas* canvas = m_frame->GetCurRenderCanvas();
+		RenderCanvas* canvas = glbin_current.canvas;
 		if (canvas)
 		{
 			switch (canvas->m_sb_unit)

@@ -4842,10 +4842,10 @@ void RenderCanvas::SetParams(double t)
 	vc.insert(gstTreeIcons);
 	vc.insert(gstTreeColors);
 	vc.insert(gstClipPlaneRangeColor);
-	if (m_cur_vol)
-		glbin.set_tree_selection(m_cur_vol->GetName().ToStdString());
-	else
-		glbin.set_tree_selection("");
+	//if (m_cur_vol)
+	//	glbin.set_tree_selection(m_cur_vol->GetName().ToStdString());
+	//else
+	//	glbin.set_tree_selection("");
 	m_frame->UpdateProps(vc);
 }
 
@@ -5059,16 +5059,16 @@ void RenderCanvas::ReloadVolumeData(int frame)
 
 	InitView(INIT_BOUNDS | INIT_CENTER);
 
-	if (m_frame)
-	{
-		VolumeData* vd = m_frame->GetCurSelVol();
-		if (vd)
-			glbin.set_tree_selection(vd->GetName().ToStdString());
-		else
-	glbin.set_tree_selection("");
+	//if (m_frame)
+	//{
+	//	VolumeData* vd = m_frame->GetCurSelVol();
+	//	if (vd)
+	//		glbin.set_tree_selection(vd->GetName().ToStdString());
+	//	else
+	//glbin.set_tree_selection("");
 	m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
 }
-}
+
 
 void RenderCanvas::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind)
 {
@@ -8110,9 +8110,9 @@ void RenderCanvas::DrawLegend()
 				cur_line++;
 			}
 			bool highlighted = false;
-			if (m_frame->GetCurSelType() == 2 &&
-				m_frame->GetCurSelVol() &&
-				m_frame->GetCurSelVol()->GetName() == wxstr)
+			if (glbin_current.GetType() == 2 &&
+				glbin_current.vol_data &&
+				glbin_current.vol_data->GetName() == wxstr)
 				highlighted = true;
 			xpos += xoffset;
 			ypos = ny - (lines - cur_line + 0.1) * font_height - yoffset;
@@ -8145,9 +8145,9 @@ void RenderCanvas::DrawLegend()
 			m_md_pop_list[i]->GetMaterial(amb, diff, spec, shine, alpha);
 			fluo::Color c(diff.r(), diff.g(), diff.b());
 			bool highlighted = false;
-			if (m_frame->GetCurSelType() == 3 &&
-				m_frame->GetCurSelMesh() &&
-				m_frame->GetCurSelMesh()->GetName() == wxstr)
+			if (glbin_current.GetType() == 3 &&
+				glbin_current.mesh_data &&
+				glbin_current.mesh_data->GetName() == wxstr)
 				highlighted = true;
 			xpos += xoffset;
 			ypos = ny - (lines - cur_line + 0.1) * font_height - yoffset;

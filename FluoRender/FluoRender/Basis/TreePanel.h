@@ -123,24 +123,28 @@ class TreePanel : public PropPanel
 public:
 	enum
 	{
-		ID_ToggleView = ID_TREE_PANEL2,
-		ID_AddGroup,
-		ID_AddMGroup,
+		//toobar
+		ID_ToggleDisp = 0,
+		ID_AddVolGroup,
+		ID_AddMeshGroup,
 		ID_RemoveData,
 		ID_BrushAppend,
-		ID_BrushDesel,
+		ID_BrushUnselect,
 		ID_BrushDiffuse,
 		ID_BrushErase,
 		ID_BrushClear,
 		ID_BrushExtract,
-		ID_ToggleDisp,
+		//menu
+		ID_Expand,
+		ID_RandomizeColor,
+		ID_CloseView,
 		ID_Isolate,
 		ID_ShowAll,
-		ID_CloseView,
-		ID_ManipulateData,
-		ID_AddDataGroup,
-		ID_AddMeshGroup,
-		ID_Expand,
+		ID_CopyMask,
+		ID_PasteMask,
+		ID_MergeMask,
+		ID_ExcludeMask,
+		ID_IntersectMask,
 		ID_Edit,
 		ID_Measurement,
 		ID_Component,
@@ -152,12 +156,7 @@ public:
 		ID_Convert,
 		ID_Ocl,
 		ID_MachineLearning,
-		ID_RandomizeColor,
-		ID_CopyMask,
-		ID_PasteMask,
-		ID_MergeMask,
-		ID_ExcludeMask,
-		ID_IntersectMask
+		ID_ManipulateData
 	};
 
 	TreePanel(MainFrame* frame,
@@ -166,8 +165,6 @@ public:
 		long style = 0,
 		const wxString& name = "TreePanel");
 	~TreePanel();
-
-	DataTreeCtrl* GetTreeCtrl();
 
 	virtual void LoadPerspective();
 	virtual void SavePerspective();
@@ -181,6 +178,18 @@ public:
 	void UpdateTreeColors();
 	void UpdateTreeSel();
 
+	//toolbar operations
+	void AddVolumeGroup();
+	void AddMeshGroup();
+
+	//menu operations
+	void Expand();
+	void RandomizeColor();
+	void CloseView();
+	void Isolate();
+	void ShowAll();
+	void ManipulateData();
+
 private:
 	void traversalSel(wxTreeItemId item);
 
@@ -192,51 +201,15 @@ private:
 	//drag
 	wxTreeItemId m_drag_item;
 
-	//brush commands
-	void OnBrushAppend(wxCommandEvent& event);
-	void OnBrushDesel(wxCommandEvent& event);
-	void OnBrushDiffuse(wxCommandEvent& event);
-	void OnBrushErase(wxCommandEvent& event);
-	void OnBrushClear(wxCommandEvent& event);
-	void OnBrushCreate(wxCommandEvent& event);
-
-	void OnRemoveData(wxCommandEvent& event);
-	void OnToggleDisp(wxCommandEvent& event);
-	void OnIsolate(wxCommandEvent& event);
-	void OnShowAll(wxCommandEvent& event);
-	void OnCloseView(wxCommandEvent& event);
-	void OnManipulateData(wxCommandEvent& event);
-	void OnAddDataGroup(wxCommandEvent& event);
-	void OnAddMeshGroup(wxCommandEvent& event);
-	void OnExpand(wxCommandEvent& event);
-	void OnEdit(wxCommandEvent& event);
-	void OnMeasurement(wxCommandEvent& event);
-	void OnTrace(wxCommandEvent& event);
-	void OnNoiseCancelling(wxCommandEvent& event);
-	void OnCounting(wxCommandEvent& event);
-	void OnColocalization(wxCommandEvent& event);
-	void OnConvert(wxCommandEvent& event);
-	void OnOcl(wxCommandEvent& event);
-	void OnComponent(wxCommandEvent& event);
-	void OnCalculations(wxCommandEvent& event);
-	void OnMachineLearning(wxCommandEvent& event);
-	void OnRandomizeColor(wxCommandEvent& event);
-	void OnCopyMask(wxCommandEvent& event);
-	void OnPasteMask(wxCommandEvent& event);
-	void OnMergeMask(wxCommandEvent& event);
-	void OnExcludeMask(wxCommandEvent& event);
-	void OnIntersectMask(wxCommandEvent& event);
-
+	void OnToolbar(wxCommandEvent& event);
+	void OnMenu(wxCommandEvent& event);
 	void OnSelChanged(wxTreeEvent& event);
 	void OnSelChanging(wxTreeEvent& event);
 	void OnDeleting(wxTreeEvent& event);
 	void OnAct(wxTreeEvent& event);
 	void OnBeginDrag(wxTreeEvent& event);
 	void OnEndDrag(wxTreeEvent& event);
-
 	void OnKeyDown(wxKeyEvent& event);
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_TREEPANEL_H_

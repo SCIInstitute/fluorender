@@ -377,7 +377,7 @@ void OclDlg::Execute()
 			glbin_data_manager.AddVolumeData(vd_r);
 			m_view->AddVolumeData(vd_r);
 			vd->SetDisp(false);
-			glbin.set_tree_selection(vd_r->GetName().ToStdString());
+			glbin_current.SetVolumeData(vd_r);
 			refresh = true;
 		}
 	}

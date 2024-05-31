@@ -147,7 +147,7 @@ void NoiseCancellingDlg::GetSettings(RenderCanvas* view)
 
 	VolumeData* sel_vol = 0;
 	if (m_frame)
-		sel_vol = m_frame->GetCurSelVol();
+		sel_vol = glbin_current.vol_data;
 	else
 		return;
 
@@ -219,7 +219,7 @@ void NoiseCancellingDlg::OnThresholdText(wxCommandEvent &event)
 	//change mask threshold
 	VolumeData* sel_vol = 0;
 	if (m_frame)
-		sel_vol = m_frame->GetCurSelVol();
+		sel_vol = glbin_current.vol_data;
 	if (sel_vol)
 		sel_vol->SetMaskThreshold(m_dft_thresh);
 	m_frame->RefreshCanvases();
@@ -266,7 +266,7 @@ void NoiseCancellingDlg::OnEnhanceSelChk(wxCommandEvent &event)
 
 	VolumeData* sel_vol = 0;
 	if (m_frame)
-		sel_vol = m_frame->GetCurSelVol();
+		sel_vol = glbin_current.vol_data;
 	if (enhance && sel_vol)
 	{
 		fluo::Color mask_color = sel_vol->GetMaskColor();

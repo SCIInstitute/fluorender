@@ -2530,7 +2530,7 @@ void ComponentDlg::OutputMulti(int color_type)
 				col = m_view->m_cur_vol->GetHdr();
 				group->SetHdrAll(col);
 			}
-			glbin.set_tree_selection(m_view->m_cur_vol->GetName().ToStdString());
+			glbin_current.SetVolumeData(m_view->m_cur_vol);
 			refresh = true;
 		}
 	}
@@ -2582,7 +2582,7 @@ void ComponentDlg::OutputRgb(int color_type)
 				col = m_view->m_cur_vol->GetHdr();
 				group->SetHdrAll(col);
 			}
-			glbin.set_tree_selection(m_view->m_cur_vol->GetName().ToStdString());
+			glbin_current.SetVolumeData(m_view->m_cur_vol);
 			refresh = true;
 		}
 	}
@@ -2626,7 +2626,7 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 		ann->SetTransform(m_view->m_cur_vol->GetTexture()->transform());
 		glbin_data_manager.AddAnnotations(ann);
 		m_view->AddAnnotations(ann);
-		glbin.set_tree_selection(m_view->m_cur_vol->GetName().ToStdString());
+		glbin_current.SetVolumeData(m_view->m_cur_vol);
 		refresh = true;;
 	}
 

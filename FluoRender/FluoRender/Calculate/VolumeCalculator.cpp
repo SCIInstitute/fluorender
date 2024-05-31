@@ -162,7 +162,7 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 					}
 					//m_frame->UpdateList();
 					//m_frame->UpdateTree(vd->GetName());
-					glbin.set_tree_selection(vd->GetName().ToStdString());
+					glbin_current.SetVolumeData(vd);
 					update = true;
 				}
 		}
