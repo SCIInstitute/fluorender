@@ -112,10 +112,6 @@ private:
 	void OnAct(wxListEvent &event);
 
 	DECLARE_EVENT_TABLE()
-protected: //Possible TODO
-	wxSize GetSizeAvailableForScrollTarget(const wxSize& size) {
-		return size - GetEffectiveMinSize();
-	}
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////

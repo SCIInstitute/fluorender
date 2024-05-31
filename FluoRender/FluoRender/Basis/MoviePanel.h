@@ -95,12 +95,6 @@ private:
 	void OnKeyUp(wxKeyEvent& event);
 	void OnScroll(wxScrollWinEvent& event);
 	void OnMouseScroll(wxMouseEvent& event);
-
-protected: //Possible TODO
-	wxSize GetSizeAvailableForScrollTarget(const wxSize& size)
-	{
-		return size - GetEffectiveMinSize();
-	}
 };
 
 class MoviePanel : public PropPanel

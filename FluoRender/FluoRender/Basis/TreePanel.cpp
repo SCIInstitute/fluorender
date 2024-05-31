@@ -65,8 +65,6 @@ wxTreeCtrl(parent, wxID_ANY, pos, size, style),
 	images->Add(icons[0]);
 	images->Add(icons[1]);
 	AssignImageList(images);
-
-	Bind(wxEVT_CONTEXT_MENU, &DataTreeCtrl::OnContextMenu, this);
 }
 
 DataTreeCtrl::~DataTreeCtrl()
@@ -225,145 +223,6 @@ void DataTreeCtrl::DeleteSelection()
 	}
 }
 
-void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
-{
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
-	int flag;
-	wxTreeItemId sel_item = HitTest(ScreenToClient(event.GetPosition()), flag);
-	if (!m_frame) return;
-
-	if (sel_item.IsOk())
-	{
-		SelectItem(sel_item);
-
-		wxPoint point = event.GetPosition();
-		// If from keyboard
-		if (point.x == -1 && point.y == -1) {
-			wxSize size = GetSize();
-			point.x = size.x / 2;
-			point.y = size.y / 2;
-		} else {
-			point = ScreenToClient(point);
-		}
-
-		wxMenu menu;
-		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-		if (item_data)
-		{
-			switch (item_data->type)
-			{
-			case 0:  //root
-				if (IsExpanded(sel_item))
-					menu.Append(TreePanel::ID_Expand, "Collapse");
-				else
-					menu.Append(TreePanel::ID_Expand, "Expand");
-				break;
-			case 1:  //view
-				{
-					menu.Append(TreePanel::ID_ToggleDisp, "Toggle Visibility");
-					if (IsExpanded(sel_item))
-						menu.Append(TreePanel::ID_Expand, "Collapse");
-					else
-						menu.Append(TreePanel::ID_Expand, "Expand");
-					menu.AppendSeparator();
-					menu.Append(TreePanel::ID_RandomizeColor, "Randomize Colors");
-					menu.Append(TreePanel::ID_AddVolGroup, "Add Volume Group");
-					menu.Append(TreePanel::ID_AddMeshGroup, "Add Mesh Group");
-					wxString str = GetItemText(sel_item);
-					if (str != m_frame->GetRenderCanvas(0)->GetName())
-						menu.Append(TreePanel::ID_CloseView, "Close");
-				}
-				break;
-			case 2:  //volume data
-				menu.Append(TreePanel::ID_ToggleDisp, "Toggle Visibility");
-				menu.Append(TreePanel::ID_Isolate, "Isolate");
-				menu.Append(TreePanel::ID_ShowAll, "Show All");
-				menu.AppendSeparator();
-				menu.Append(TreePanel::ID_RandomizeColor, "Randomize Colors");
-				menu.Append(TreePanel::ID_AddVolGroup, "Add Volume Group");
-				menu.Append(TreePanel::ID_RemoveData, "Delete");
-				menu.AppendSeparator();
-				menu.Append(TreePanel::ID_CopyMask, "Copy Mask");
-				if (glbin_vol_selector.GetCopyMaskVolume())
-				{
-					menu.Append(TreePanel::ID_PasteMask, "Paste Mask");
-					menu.Append(TreePanel::ID_MergeMask, "Merge Mask");
-					menu.Append(TreePanel::ID_ExcludeMask, "Exclude Mask");
-					menu.Append(TreePanel::ID_IntersectMask, "Intersect Mask");
-				}
-				menu.AppendSeparator();
-				menu.Append(TreePanel::ID_Edit, "Paint Brush...");
-				menu.Append(TreePanel::ID_Measurement, "Measurement...");
-				menu.Append(TreePanel::ID_Component, "Component Analyzer...");
-				menu.Append(TreePanel::ID_Trace, "Tracking...");
-				menu.Append(TreePanel::ID_Calculations, "Calculations...");
-				menu.Append(TreePanel::ID_NoiseCancelling, "Noise Reduction...");
-				menu.Append(TreePanel::ID_Counting, "Volume Size...");
-				menu.Append(TreePanel::ID_Colocalization, "Colocalization...");
-				menu.Append(TreePanel::ID_Convert, "Convert...");
-				menu.Append(TreePanel::ID_Ocl, "OpenCL Kernel Editor...");
-				menu.Append(TreePanel::ID_MachineLearning, "Machine Learning Manager...");
-				break;
-			case 3:  //mesh data
-				menu.Append(TreePanel::ID_ToggleDisp, "Toggle Visibility");
-				menu.Append(TreePanel::ID_Isolate, "Isolate");
-				menu.Append(TreePanel::ID_ShowAll, "Show All");
-				menu.AppendSeparator();
-				menu.Append(TreePanel::ID_RandomizeColor, "Randomize Colors");
-				menu.Append(TreePanel::ID_AddMeshGroup, "Add Mesh Group");
-				menu.Append(TreePanel::ID_RemoveData, "Delete");
-				menu.AppendSeparator();
-				menu.Append(TreePanel::ID_ManipulateData, "Manipulate");
-				break;
-			case 4:  //annotations
-				break;
-			case 5:  //data group
-				menu.Append(TreePanel::ID_ToggleDisp, "Toggle Visibility");
-				menu.Append(TreePanel::ID_Isolate, "Isolate");
-				menu.Append(TreePanel::ID_ShowAll, "Show All");
-				menu.AppendSeparator();
-				if (IsExpanded(sel_item))
-					menu.Append(TreePanel::ID_Expand, "Collapse");
-				else
-					menu.Append(TreePanel::ID_Expand, "Expand");
-				menu.AppendSeparator();
-				menu.Append(TreePanel::ID_RandomizeColor, "Randomize Colors");
-				menu.Append(TreePanel::ID_AddVolGroup, "Add Volume Group");
-				menu.Append(TreePanel::ID_RemoveData, "Delete");
-				break;
-			case 6:  //mesh group
-				menu.Append(TreePanel::ID_ToggleDisp, "Toggle Visibility");
-				menu.Append(TreePanel::ID_Isolate, "Isolate");
-				menu.Append(TreePanel::ID_ShowAll, "Show All");
-				menu.AppendSeparator();
-				if (IsExpanded(sel_item))
-					menu.Append(TreePanel::ID_Expand, "Collapse");
-				else
-					menu.Append(TreePanel::ID_Expand, "Expand");
-				menu.AppendSeparator();
-				menu.Append(TreePanel::ID_RandomizeColor, "Randomize Colors");
-				menu.Append(TreePanel::ID_AddMeshGroup, "Add Mesh Group");
-				menu.Append(TreePanel::ID_RemoveData, "Delete");
-				break;
-			}
-			PopupMenu( &menu, point.x, point.y );
-		}
-	}
-}
-
-wxString DataTreeCtrl::GetCurrentSel()
-{
-	wxTreeItemId sel_item = GetSelection();
-	if (sel_item.IsOk())
-	{
-		return GetItemText(sel_item);
-	}
-
-	return "";
-}
-
 int DataTreeCtrl::TraversalSelect(wxTreeItemId item, wxString name)
 {
 	int found = 0;
@@ -385,52 +244,6 @@ int DataTreeCtrl::TraversalSelect(wxTreeItemId item, wxString name)
 		SelectItem(item);
 	}
 	return found;
-}
-
-void DataTreeCtrl::Select(wxString view, wxString name)
-{
-	wxTreeItemIdValue cookie;
-	wxTreeItemId root = GetRootItem();
-	if (root.IsOk())
-	{
-		int found = 0;
-		wxTreeItemId view_item = GetFirstChild(root, cookie);
-		if (view_item.IsOk())
-		{
-			wxString view_name = GetItemText(view_item);
-			if (view_name == view ||
-				view == "")
-			{
-				if (name == "")
-				{
-					SelectItem(view_item);
-					found = 1;
-				}
-				else
-					found = TraversalSelect(view_item, name);
-			}
-		}
-		view_item = GetNextChild(root, cookie);
-		while (!found && view_item.IsOk())
-		{
-			wxString view_name = GetItemText(view_item);
-			if (view_name == view ||
-				view == "")
-			{
-				if (name == "")
-				{
-					SelectItem(view_item);
-					found = 1;
-				}
-				else
-					found = TraversalSelect(view_item, name);
-			}
-			view_item = GetNextChild(root, cookie);
-		}
-
-		if (!found)
-			SelectItem(GetRootItem());
-	}
 }
 
 //icons
@@ -709,6 +522,7 @@ TreePanel::TreePanel(MainFrame* frame,
 	Layout();
 
 	//events
+	Bind(wxEVT_CONTEXT_MENU, &TreePanel::OnContextMenu, this);
 	Bind(wxEVT_TOOL, &TreePanel::OnToolbar, this);
 	Bind(wxEVT_MENU, &TreePanel::OnMenu, this);
 	Bind(wxEVT_TREE_SEL_CHANGED, &TreePanel::OnSelChanged, this);
@@ -1912,6 +1726,131 @@ void TreePanel::ManipulateData()
 			//m_frame->OnSelection(6, 0, 0, 0, md);
 		}
 	}
+}
+
+void TreePanel::OnContextMenu(wxContextMenuEvent& event)
+{
+	if (glbin_vol_selector.GetMaskHold())
+		return;
+
+	int flag;
+	wxTreeItemId sel_item = m_datatree->HitTest(ScreenToClient(event.GetPosition()), flag);
+
+	if (!sel_item.IsOk())
+		return;
+
+	m_datatree->SelectItem(sel_item);
+
+	wxPoint point = event.GetPosition();
+	// If from keyboard
+	if (point.x == -1 && point.y == -1) {
+		wxSize size = GetSize();
+		point.x = size.x / 2;
+		point.y = size.y / 2;
+	}
+	else {
+		point = ScreenToClient(point);
+	}
+
+	wxMenu menu;
+	int type = glbin_current.GetType();
+	switch (type)
+	{
+	case 0:  //root
+		if (m_datatree->IsExpanded(sel_item))
+			menu.Append(TreePanel::ID_Expand, "Collapse");
+		else
+			menu.Append(TreePanel::ID_Expand, "Expand");
+		break;
+	case 1:  //view
+	{
+		menu.Append(TreePanel::ID_ToggleDisp, "Toggle Visibility");
+		if (m_datatree->IsExpanded(sel_item))
+			menu.Append(TreePanel::ID_Expand, "Collapse");
+		else
+			menu.Append(TreePanel::ID_Expand, "Expand");
+		menu.AppendSeparator();
+		menu.Append(TreePanel::ID_RandomizeColor, "Randomize Colors");
+		menu.Append(TreePanel::ID_AddVolGroup, "Add Volume Group");
+		menu.Append(TreePanel::ID_AddMeshGroup, "Add Mesh Group");
+		wxString str = m_datatree->GetItemText(sel_item);
+		if (str != m_frame->GetRenderCanvas(0)->GetName())
+			menu.Append(TreePanel::ID_CloseView, "Close");
+	}
+	break;
+	case 2:  //volume data
+		menu.Append(TreePanel::ID_ToggleDisp, "Toggle Visibility");
+		menu.Append(TreePanel::ID_Isolate, "Isolate");
+		menu.Append(TreePanel::ID_ShowAll, "Show All");
+		menu.AppendSeparator();
+		menu.Append(TreePanel::ID_RandomizeColor, "Randomize Colors");
+		menu.Append(TreePanel::ID_AddVolGroup, "Add Volume Group");
+		menu.Append(TreePanel::ID_RemoveData, "Delete");
+		menu.AppendSeparator();
+		menu.Append(TreePanel::ID_CopyMask, "Copy Mask");
+		if (glbin_vol_selector.GetCopyMaskVolume())
+		{
+			menu.Append(TreePanel::ID_PasteMask, "Paste Mask");
+			menu.Append(TreePanel::ID_MergeMask, "Merge Mask");
+			menu.Append(TreePanel::ID_ExcludeMask, "Exclude Mask");
+			menu.Append(TreePanel::ID_IntersectMask, "Intersect Mask");
+		}
+		menu.AppendSeparator();
+		menu.Append(TreePanel::ID_Edit, "Paint Brush...");
+		menu.Append(TreePanel::ID_Measurement, "Measurement...");
+		menu.Append(TreePanel::ID_Component, "Component Analyzer...");
+		menu.Append(TreePanel::ID_Trace, "Tracking...");
+		menu.Append(TreePanel::ID_Calculations, "Calculations...");
+		menu.Append(TreePanel::ID_NoiseCancelling, "Noise Reduction...");
+		menu.Append(TreePanel::ID_Counting, "Volume Size...");
+		menu.Append(TreePanel::ID_Colocalization, "Colocalization...");
+		menu.Append(TreePanel::ID_Convert, "Convert...");
+		menu.Append(TreePanel::ID_Ocl, "OpenCL Kernel Editor...");
+		menu.Append(TreePanel::ID_MachineLearning, "Machine Learning Manager...");
+		break;
+	case 3:  //mesh data
+		menu.Append(TreePanel::ID_ToggleDisp, "Toggle Visibility");
+		menu.Append(TreePanel::ID_Isolate, "Isolate");
+		menu.Append(TreePanel::ID_ShowAll, "Show All");
+		menu.AppendSeparator();
+		menu.Append(TreePanel::ID_RandomizeColor, "Randomize Colors");
+		menu.Append(TreePanel::ID_AddMeshGroup, "Add Mesh Group");
+		menu.Append(TreePanel::ID_RemoveData, "Delete");
+		menu.AppendSeparator();
+		menu.Append(TreePanel::ID_ManipulateData, "Manipulate");
+		break;
+	case 4:  //annotations
+		break;
+	case 5:  //data group
+		menu.Append(TreePanel::ID_ToggleDisp, "Toggle Visibility");
+		menu.Append(TreePanel::ID_Isolate, "Isolate");
+		menu.Append(TreePanel::ID_ShowAll, "Show All");
+		menu.AppendSeparator();
+		if (m_datatree->IsExpanded(sel_item))
+			menu.Append(TreePanel::ID_Expand, "Collapse");
+		else
+			menu.Append(TreePanel::ID_Expand, "Expand");
+		menu.AppendSeparator();
+		menu.Append(TreePanel::ID_RandomizeColor, "Randomize Colors");
+		menu.Append(TreePanel::ID_AddVolGroup, "Add Volume Group");
+		menu.Append(TreePanel::ID_RemoveData, "Delete");
+		break;
+	case 6:  //mesh group
+		menu.Append(TreePanel::ID_ToggleDisp, "Toggle Visibility");
+		menu.Append(TreePanel::ID_Isolate, "Isolate");
+		menu.Append(TreePanel::ID_ShowAll, "Show All");
+		menu.AppendSeparator();
+		if (m_datatree->IsExpanded(sel_item))
+			menu.Append(TreePanel::ID_Expand, "Collapse");
+		else
+			menu.Append(TreePanel::ID_Expand, "Expand");
+		menu.AppendSeparator();
+		menu.Append(TreePanel::ID_RandomizeColor, "Randomize Colors");
+		menu.Append(TreePanel::ID_AddMeshGroup, "Add Mesh Group");
+		menu.Append(TreePanel::ID_RemoveData, "Delete");
+		break;
+	}
+	PopupMenu(&menu, point.x, point.y);
 }
 
 void TreePanel::OnToolbar(wxCommandEvent& event)

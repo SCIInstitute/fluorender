@@ -38,25 +38,25 @@ DEALINGS IN THE SOFTWARE.
 //resources
 #include <img/icons.h>
 
-BEGIN_EVENT_TABLE(DataListCtrl, wxListCtrl)
-EVT_LIST_ITEM_ACTIVATED(wxID_ANY, DataListCtrl::OnAct)
-EVT_LIST_ITEM_SELECTED(wxID_ANY, DataListCtrl::OnSelect)
-EVT_CONTEXT_MENU(DataListCtrl::OnContextMenu)
-EVT_MENU_RANGE(Menu_View_start, Menu_View_start + 10, DataListCtrl::OnAddToView)
-EVT_MENU(Menu_Del, DataListCtrl::OnDelete)
-EVT_MENU(Menu_Rename, DataListCtrl::OnRename)
-EVT_MENU(Menu_Save, DataListCtrl::OnSave)
-EVT_MENU(Menu_Bake, DataListCtrl::OnBake)
-EVT_MENU(Menu_SaveMask, DataListCtrl::OnSaveMask)
-EVT_KEY_DOWN(DataListCtrl::OnKeyDown)
-EVT_KEY_UP(DataListCtrl::OnKeyUp)
-EVT_MOUSE_EVENTS(DataListCtrl::OnMouse)
-EVT_TEXT_ENTER(ID_RenameText, DataListCtrl::OnEndEditName)
-EVT_SCROLLWIN(DataListCtrl::OnScroll)
-EVT_MOUSEWHEEL(DataListCtrl::OnScroll)
-END_EVENT_TABLE()
+//BEGIN_EVENT_TABLE(DataListCtrl, wxListCtrl)
+//EVT_LIST_ITEM_ACTIVATED(wxID_ANY, DataListCtrl::OnAct)
+//EVT_LIST_ITEM_SELECTED(wxID_ANY, DataListCtrl::OnSelect)
+//EVT_CONTEXT_MENU(DataListCtrl::OnContextMenu)
+//EVT_MENU_RANGE(Menu_View_start, Menu_View_start + 10, DataListCtrl::OnAddToView)
+//EVT_MENU(Menu_Del, DataListCtrl::OnDelete)
+//EVT_MENU(Menu_Rename, DataListCtrl::OnRename)
+//EVT_MENU(Menu_Save, DataListCtrl::OnSave)
+//EVT_MENU(Menu_Bake, DataListCtrl::OnBake)
+//EVT_MENU(Menu_SaveMask, DataListCtrl::OnSaveMask)
+//EVT_KEY_DOWN(DataListCtrl::OnKeyDown)
+//EVT_KEY_UP(DataListCtrl::OnKeyUp)
+//EVT_MOUSE_EVENTS(DataListCtrl::OnMouse)
+//EVT_TEXT_ENTER(ID_RenameText, DataListCtrl::OnEndEditName)
+//EVT_SCROLLWIN(DataListCtrl::OnScroll)
+//EVT_MOUSEWHEEL(DataListCtrl::OnScroll)
+//END_EVENT_TABLE()
 
-VolumeData* DataListCtrl::m_vd = 0;
+//VolumeData* DataListCtrl::m_vd = 0;
 
 DataListCtrl::DataListCtrl(
 	MainFrame* frame,
@@ -81,14 +81,9 @@ DataListCtrl::DataListCtrl(
 	itemCol.SetText("Path");
 	this->InsertColumn(2, itemCol);
 
-	m_rename_text = new wxTextCtrl(this, ID_RenameText, "",
+	m_rename_text = new wxTextCtrl(this, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 	m_rename_text->Hide();
-}
-
-DataListCtrl::~DataListCtrl()
-{
-	delete m_rename_text;
 }
 
 void DataListCtrl::Append(int type, wxString name, wxString path)
@@ -165,133 +160,6 @@ void DataListCtrl::SetSelection(int type, wxString &name)
 		}
 		else
 			break;
-	}
-}
-
-void DataListCtrl::SaveSelMask()
-{
-	long item = GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-	if (item != -1 && GetItemText(item) == "Volume")
-	{
-		wxString name = GetText(item, 1);
-		if (m_frame)
-		{
-			VolumeData* vd = glbin_data_manager.GetVolumeData(name);
-			if (vd)
-			{
-				vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
-				vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
-			}
-		}
-	}
-}
-
-void DataListCtrl::SaveAllMasks()
-{
-	long item = GetNextItem(-1);
-	while (item != -1)
-	{
-		if (GetItemText(item) == "Volume")
-		{
-			wxString name = GetText(item, 1);
-			if (m_frame)
-			{
-				VolumeData* vd = glbin_data_manager.GetVolumeData(name);
-				if (vd)
-				{
-					vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
-					vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
-				}
-			}
-		}
-		item = GetNextItem(item);
-	}
-}
-
-void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
-{
-	if (GetSelectedItemCount() > 0)
-	{
-		wxPoint point = event.GetPosition();
-		// If from keyboard
-		if (point.x == -1 && point.y == -1)
-		{
-			wxSize size = GetSize();
-			point.x = size.x / 2;
-			point.y = size.y / 2;
-		}
-		else
-		{
-			point = ScreenToClient(point);
-		}
-
-		if (m_frame)
-		{
-			wxMenu menu;
-			wxMenu *add_to_menu = new wxMenu;
-			for (int i = 0; i < m_frame->GetViewNum(); ++i)
-			{
-				RenderCanvas* view = m_frame->GetRenderCanvas(i);
-				add_to_menu->Append(Menu_View_start + i,
-					view->m_renderview_panel->GetName());
-			}
-
-			menu.Append(Menu_AddTo, "Add to", add_to_menu);
-			if (GetSelectedItemCount() == 1)
-			{
-				menu.Append(Menu_Del, "Delete");
-				menu.Append(Menu_Rename, "Rename");
-				//save/save as
-				long item = GetNextItem(-1,
-					wxLIST_NEXT_ALL,
-					wxLIST_STATE_SELECTED);
-				if (item != -1)
-				{
-					if (GetItemText(item) == "Volume")
-					{
-						wxString name = GetText(item, 1);
-						VolumeData* vd = glbin_data_manager.GetVolumeData(name);
-						if (vd)
-						{
-							if (vd->GetPath() == "")
-								menu.Append(Menu_Save, "Save...");
-							else
-								menu.Append(Menu_Save, "Save As...");
-							menu.Append(Menu_Bake, "Bake...");
-							menu.Append(Menu_SaveMask, "Save Mask");
-						}
-					}
-					else if (GetItemText(item) == "Mesh")
-					{
-						wxString name = GetText(item, 1);
-						MeshData* md = glbin_data_manager.GetMeshData(name);
-						if (md)
-						{
-							if (md->GetPath() == "")
-								menu.Append(Menu_Save, "Save...");
-							else
-								menu.Append(Menu_Save, "Save As...");
-						}
-					}
-					else if (GetItemText(item) == "Annotations")
-					{
-						wxString name = GetText(item, 1);
-						Annotations* ann = glbin_data_manager.GetAnnotations(name);
-						if (ann)
-						{
-							if (ann->GetPath() == "")
-								menu.Append(Menu_Save, "Save...");
-							else
-								menu.Append(Menu_Save, "Save As...");
-						}
-					}
-				}
-			}
-
-			PopupMenu(&menu, point.x, point.y);
-		}
 	}
 }
 
@@ -396,27 +264,6 @@ void DataListCtrl::AddToView(int menu_index, long item)
 	{
 		//glbin.set_tree_selection(name.ToStdString());
 		m_frame->GetTree()->FluoRefresh(2, { gstTreeCtrl }, { m_frame->GetRenderCanvas(view) });
-	}
-}
-
-void DataListCtrl::OnAddToView(wxCommandEvent& event)
-{
-	int menu_index = event.GetId() - Menu_View_start;
-	int num = GetSelectedItemCount();
-
-	if (num > 0)
-	{
-		long item = -1;
-		for (;; )
-		{
-			item = GetNextItem(item,
-				wxLIST_NEXT_ALL,
-				wxLIST_STATE_SELECTED);
-			if (item == -1)
-				break;
-
-			AddToView(menu_index, item);
-		}
 	}
 }
 
@@ -1117,11 +964,14 @@ void ListPanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstListCtrl))
 		UpdateList();
+
+	if (update_all || FOUND_VALUE(gstCurrentSelect))
+		UpdateSelection();
 }
 
 void ListPanel::UpdateList()
 {
-	DeleteAllItems();
+	m_datalist->DeleteAllItems();
 
 	for (int i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
 	{
@@ -1130,7 +980,7 @@ void ListPanel::UpdateList()
 		{
 			wxString name = vd->GetName();
 			wxString path = vd->GetPath();
-			Append(DATA_VOLUME, name, path);
+			m_datalist->Append(DATA_VOLUME, name, path);
 		}
 	}
 
@@ -1141,7 +991,7 @@ void ListPanel::UpdateList()
 		{
 			wxString name = md->GetName();
 			wxString path = md->GetPath();
-			Append(DATA_MESH, name, path);
+			m_datalist->Append(DATA_MESH, name, path);
 		}
 	}
 
@@ -1152,59 +1002,138 @@ void ListPanel::UpdateList()
 		{
 			wxString name = ann->GetName();
 			wxString path = ann->GetPath();
-			Append(DATA_ANNOTATIONS, name, path);
+			m_datalist->Append(DATA_ANNOTATIONS, name, path);
 		}
 	}
 }
 
-void ListPanel::Append(int type, wxString name, wxString path)
+void ListPanel::UpdateSelection()
 {
-	if (m_datalist)
-		m_datalist->Append(type, name, path);
+
 }
 
-wxString ListPanel::GetText(long item, int col)
+void ListPanel::SaveSelMask()
 {
-	wxString str = "";
-	if (m_datalist)
-		str = m_datalist->GetText(item, col);
-	return str;
-}
-
-void ListPanel::SetText(long item, int col, wxString &str)
-{
-	if (m_datalist)
-		m_datalist->SetText(item, col, str);
-}
-
-void ListPanel::DeleteAll()
-{
-	if (m_datalist)
-		m_datalist->DeleteAll();
-}
-
-void ListPanel::DeleteAllItems()
-{
-	if (m_datalist)
-		m_datalist->DeleteAllItems();
-}
-
-void ListPanel::SetSelection(int type, wxString &name)
-{
-	if (m_datalist)
-		m_datalist->SetSelection(type, name);
+	VolumeData* vd = glbin_current.vol_data;
+	if (vd)
+	{
+		vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
+		vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
+	}
 }
 
 void ListPanel::SaveAllMasks()
 {
-	if (m_datalist)
-		m_datalist->SaveAllMasks();
+	VolumeData* vd = glbin_current.vol_data;
+	if (vd)
+	{
+		vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
+		vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
+	}
+}
+
+void ListPanel::OnContextMenu(wxContextMenuEvent& event)
+{
+	int seln = m_datalist->GetSelectedItemCount();
+	if (seln == 0)
+		return;
+
+	wxPoint point = event.GetPosition();
+	// If from keyboard
+	if (point.x == -1 && point.y == -1)
+	{
+		wxSize size = GetSize();
+		point.x = size.x / 2;
+		point.y = size.y / 2;
+	}
+	else
+	{
+		point = ScreenToClient(point);
+	}
+
+	wxMenu menu;
+	wxMenu* add_to_menu = new wxMenu;
+	for (int i = 0; i < m_frame->GetViewNum(); ++i)
+	{
+		RenderCanvas* view = m_frame->GetRenderCanvas(i);
+		add_to_menu->Append(ID_ViewID + i,
+			view->m_renderview_panel->GetName());
+	}
+
+	menu.Append(ID_AddToView, "Add to", add_to_menu);
+	if (seln > 1)
+	{
+		PopupMenu(&menu, point.x, point.y);
+		return;
+	}
+
+	menu.Append(ID_Delete, "Delete");
+	menu.Append(ID_Rename, "Rename");
+	//save/save as
+	switch (glbin_current.GetType())
+	{
+	case 2://volume
+	{
+		VolumeData* vd = glbin_current.vol_data;
+		if (vd)
+		{
+			if (vd->GetPath() == "")
+				menu.Append(ID_Save, "Save...");
+			else
+				menu.Append(ID_Save, "Save As...");
+			menu.Append(ID_Bake, "Bake...");
+			menu.Append(ID_SaveMask, "Save Mask");
+		}
+	}
+		break;
+	case 3://mesh
+	{
+		MeshData* md = glbin_current.mesh_data;
+		if (md)
+		{
+			if (md->GetPath() == "")
+				menu.Append(ID_Save, "Save...");
+			else
+				menu.Append(ID_Save, "Save As...");
+		}
+	}
+		break;
+	case 4://annotations
+	{
+		Annotations* ann = glbin_current.ann_data;
+		if (ann)
+		{
+			if (ann->GetPath() == "")
+				menu.Append(ID_Save, "Save...");
+			else
+				menu.Append(ID_Save, "Save As...");
+		}
+	}
+		break;
+	}
+
+	PopupMenu(&menu, point.x, point.y);
 }
 
 void ListPanel::OnAddToView(wxCommandEvent& event)
 {
-	wxListEvent list_event;
-	m_datalist->OnAct(list_event);
+	int menu_index = event.GetId() - ID_ViewID;
+	int num = m_datalist->GetSelectedItemCount();
+
+	if (num > 0)
+	{
+		long item = -1;
+		for (;; )
+		{
+			item = m_datalist->GetNextItem(item,
+				wxLIST_NEXT_ALL,
+				wxLIST_STATE_SELECTED);
+			if (item == -1)
+				break;
+
+			m_datalist->AddToView(menu_index, item);
+		}
+	}
 }
 
 void ListPanel::OnRename(wxCommandEvent& event)
@@ -1234,5 +1163,5 @@ void ListPanel::OnDelete(wxCommandEvent& event)
 
 void ListPanel::OnDeleteAll(wxCommandEvent &event)
 {
-	DeleteAll();
+	m_datalist->DeleteAll();
 }

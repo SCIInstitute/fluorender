@@ -80,6 +80,7 @@ private:
 	void DeleteSelection();
 	//traversal delete
 	void TraversalDelete(wxTreeItemId item);
+	int TraversalSelect(wxTreeItemId item, wxString name);
 	//root item
 	wxTreeItemId AddRootItem(const wxString &text);
 	void ExpandRootItem();
@@ -102,22 +103,14 @@ private:
 	wxTreeItemId AddMGroupItem(wxTreeItemId par_item, const wxString &text);
 	void SetMGroupItemImage(const wxTreeItemId item, int image);
 
-	//void UpdateSelection();
-	wxString GetCurrentSel();
-	int TraversalSelect(wxTreeItemId item, wxString name);
-	void Select(wxString view, wxString name);
-
 	//change the color of just one icon of the dual,
 	//either enable(type=0), or disable(type=1)
 	void ChangeIconColor(int which, wxColor c, int type);
-
-	void OnContextMenu(wxContextMenuEvent &event);
 
 	friend class TreePanel;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 class TreePanel : public PropPanel
 {
 public:
@@ -201,6 +194,7 @@ private:
 	//drag
 	wxTreeItemId m_drag_item;
 
+	void OnContextMenu(wxContextMenuEvent& event);
 	void OnToolbar(wxCommandEvent& event);
 	void OnMenu(wxCommandEvent& event);
 	void OnSelChanged(wxTreeEvent& event);
