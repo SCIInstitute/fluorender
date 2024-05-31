@@ -40,6 +40,9 @@ DEALINGS IN THE SOFTWARE.
 class LayerInfo : public wxTreeItemData
 {
 public:
+	LayerInfo() :
+		wxTreeItemData(),
+		type(0) {}
 	int type;	//0-root; 1-view; 
 				//2-volume data; 3-mesh data;
 				//5-group; 6-mesh group
@@ -47,7 +50,6 @@ public:
 
 class MainFrame;
 class VolumeData;
-
 class DataTreeCtrl: public wxTreeCtrl
 {
 public:
@@ -61,6 +63,9 @@ public:
 		wxTR_NO_LINES|
 		wxTR_FULL_ROW_HIGHLIGHT);
 	~DataTreeCtrl();
+
+private:
+	MainFrame* m_frame;
 
 	//icon operations
 	//change the color of the icon dual
@@ -102,23 +107,13 @@ public:
 	int TraversalSelect(wxTreeItemId item, wxString name);
 	void Select(wxString view, wxString name);
 
-	friend class TreePanel;
-
-private:
-	MainFrame* m_frame;
-
-private:
 	//change the color of just one icon of the dual,
 	//either enable(type=0), or disable(type=1)
 	void ChangeIconColor(int which, wxColor c, int type);
 
-	void OnContextMenu(wxContextMenuEvent &event );
+	void OnContextMenu(wxContextMenuEvent &event);
 
-
-	void OnKeyDown(wxKeyEvent& event);
-	void OnKeyUp(wxKeyEvent& event);
-
-	DECLARE_EVENT_TABLE()
+	friend class TreePanel;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,7 +136,6 @@ public:
 		ID_ToggleDisp,
 		ID_Isolate,
 		ID_ShowAll,
-		ID_RemoveData,
 		ID_CloseView,
 		ID_ManipulateData,
 		ID_AddDataGroup,
@@ -187,23 +181,6 @@ public:
 	void UpdateTreeColors();
 	void UpdateTreeSel();
 
-	//item operations
-	void TraversalDelete(wxTreeItemId item);
-	wxTreeItemId AddRootItem(const wxString &text);
-	void ExpandRootItem();
-	wxTreeItemId AddViewItem(const wxString &text);
-	void SetViewItemImage(const wxTreeItemId& item, int image);
-	wxTreeItemId AddVolItem(wxTreeItemId par_item, const wxString &text);
-	void SetVolItemImage(const wxTreeItemId item, int image);
-	wxTreeItemId AddMeshItem(wxTreeItemId par_item, const wxString &text);
-	void SetMeshItemImage(const wxTreeItemId item, int image);
-	wxTreeItemId AddAnnotationItem(wxTreeItemId par_item, const wxString &text);
-	void SetAnnotationItemImage(const wxTreeItemId item, int image);
-	wxTreeItemId AddGroupItem(wxTreeItemId par_item, const wxString &text);
-	void SetGroupItemImage(const wxTreeItemId item, int image);
-	wxTreeItemId AddMGroupItem(wxTreeItemId par_item, const wxString &text);
-	void SetMGroupItemImage(const wxTreeItemId item, int image);
-
 private:
 	void traversalSel(wxTreeItemId item);
 
@@ -215,8 +192,6 @@ private:
 	//drag
 	wxTreeItemId m_drag_item;
 
-	void OnToggleView(wxCommandEvent& event);
-	void OnRemoveData(wxCommandEvent& event);
 	//brush commands
 	void OnBrushAppend(wxCommandEvent& event);
 	void OnBrushDesel(wxCommandEvent& event);
@@ -225,10 +200,10 @@ private:
 	void OnBrushClear(wxCommandEvent& event);
 	void OnBrushCreate(wxCommandEvent& event);
 
+	void OnRemoveData(wxCommandEvent& event);
 	void OnToggleDisp(wxCommandEvent& event);
 	void OnIsolate(wxCommandEvent& event);
 	void OnShowAll(wxCommandEvent& event);
-	void OnRemoveData(wxCommandEvent& event);
 	void OnCloseView(wxCommandEvent& event);
 	void OnManipulateData(wxCommandEvent& event);
 	void OnAddDataGroup(wxCommandEvent& event);
@@ -258,6 +233,8 @@ private:
 	void OnAct(wxTreeEvent& event);
 	void OnBeginDrag(wxTreeEvent& event);
 	void OnEndDrag(wxTreeEvent& event);
+
+	void OnKeyDown(wxKeyEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };

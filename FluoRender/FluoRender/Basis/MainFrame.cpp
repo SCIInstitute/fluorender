@@ -2682,7 +2682,7 @@ void MainFrame::OnNewProject(wxCommandEvent& event)
 	RenderViewPanel::ResetID();
 	DataGroup::ResetID();
 	MeshGroup::ResetID();
-	glbin_current.Clear();
+	glbin_current.SetRoot();
 	glbin_moviemaker.Stop();
 	glbin_moviemaker.SetView(GetRenderCanvas(0));
 	glbin_mov_def.Apply(&glbin_moviemaker);
@@ -3509,7 +3509,7 @@ void MainFrame::OpenProject(wxString& filename)
 	}
 
 	//current
-	glbin_current.Clear();
+	glbin_current.SetRoot();
 	wxString cur_canvas, cur_vol_group, cur_mesh_group,
 		cur_vol_data, cur_mesh_data, cur_ann_data;
 	if (fconfig.Exists("/current"))

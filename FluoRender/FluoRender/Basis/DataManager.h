@@ -1312,15 +1312,6 @@ struct CurrentObjects
 		ann_data(0)
 	{}
 
-	void Clear()
-	{
-		canvas = 0;
-		vol_group = 0;
-		mesh_group = 0;
-		vol_data = 0;
-		mesh_data = 0;
-		ann_data = 0;
-	}
 	//0:root, 1:view, 2:volume, 3:mesh, 4:annotations, 5:group, 6:mesh group, 7:ruler, 8:traces
 	int GetType()
 	{
@@ -1337,6 +1328,15 @@ struct CurrentObjects
 		if (canvas)
 			return 1;
 		return 0;
+	}
+	void SetRoot()
+	{
+		canvas = 0;
+		vol_group = 0;
+		mesh_group = 0;
+		vol_data = 0;
+		mesh_data = 0;
+		ann_data = 0;
 	}
 	void SetCanvas(RenderCanvas* cnvs)
 	{
