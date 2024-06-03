@@ -34,29 +34,8 @@ DEALINGS IN THE SOFTWARE.
 #include <OutputAdjPanel.h>
 #include <Formats/png_resource.h>
 #include <wx/valnum.h>
-
 //resources
 #include <img/icons.h>
-
-//BEGIN_EVENT_TABLE(DataListCtrl, wxListCtrl)
-//EVT_LIST_ITEM_ACTIVATED(wxID_ANY, DataListCtrl::OnAct)
-//EVT_LIST_ITEM_SELECTED(wxID_ANY, DataListCtrl::OnSelect)
-//EVT_CONTEXT_MENU(DataListCtrl::OnContextMenu)
-//EVT_MENU_RANGE(Menu_View_start, Menu_View_start + 10, DataListCtrl::OnAddToView)
-//EVT_MENU(Menu_Del, DataListCtrl::OnDelete)
-//EVT_MENU(Menu_Rename, DataListCtrl::OnRename)
-//EVT_MENU(Menu_Save, DataListCtrl::OnSave)
-//EVT_MENU(Menu_Bake, DataListCtrl::OnBake)
-//EVT_MENU(Menu_SaveMask, DataListCtrl::OnSaveMask)
-//EVT_KEY_DOWN(DataListCtrl::OnKeyDown)
-//EVT_KEY_UP(DataListCtrl::OnKeyUp)
-//EVT_MOUSE_EVENTS(DataListCtrl::OnMouse)
-//EVT_TEXT_ENTER(ID_RenameText, DataListCtrl::OnEndEditName)
-//EVT_SCROLLWIN(DataListCtrl::OnScroll)
-//EVT_MOUSEWHEEL(DataListCtrl::OnScroll)
-//END_EVENT_TABLE()
-
-//VolumeData* DataListCtrl::m_vd = 0;
 
 DataListCtrl::DataListCtrl(
 	MainFrame* frame,
@@ -124,155 +103,7 @@ void DataListCtrl::SetText(long item, int col, wxString &str)
 	SetItem(info);
 }
 
-void DataListCtrl::SetSelection(int type, wxString &name)
-{
-	wxString str_type;
-	switch (type)
-	{
-	case DATA_VOLUME:
-		str_type = "Volume";
-		break;
-	case DATA_MESH:
-		str_type = "Mesh";
-		break;
-	case DATA_ANNOTATIONS:
-		str_type = "Annotations";
-		break;
-	}
-
-	long item = -1;
-	for (;;)
-	{
-		item = GetNextItem(item,
-			wxLIST_NEXT_ALL,
-			wxLIST_STATE_DONTCARE);
-		if (item != -1)
-		{
-			wxString item_type = GetText(item, 0);
-			wxString item_name = GetText(item, 1);
-
-			if (item_type == str_type &&
-				item_name == name)
-			{
-				SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-				break;
-			}
-		}
-		else
-			break;
-	}
-}
-
-void DataListCtrl::AddToView(int menu_index, long item)
-{
-	if (!m_frame)
-		return;
-
-	bool view_empty = true;
-	wxString name = "";
-
-	RenderCanvas* view = m_frame->GetRenderCanvas(menu_index);
-	if (GetItemText(item) == "Volume")
-	{
-		name = GetText(item, 1);
-		VolumeData* vd = glbin_data_manager.GetVolumeData(name);
-		if (vd)
-		{
-			if (view)
-			{
-				VolumeData* vd_add = vd;
-
-				for (int i = 0; i < m_frame->GetViewNum(); ++i)
-				{
-					RenderCanvas* v = m_frame->GetRenderCanvas(i);
-					if (v && v->GetVolumeData(name))
-					{
-						vd_add = glbin_data_manager.DuplicateVolumeData(vd);
-						break;
-					}
-				}
-
-				int chan_num = view->GetAny();
-				view_empty = chan_num > 0 ? false : view_empty;
-				fluo::Color color(1.0, 1.0, 1.0);
-				if (chan_num == 0)
-					color = fluo::Color(1.0, 0.0, 0.0);
-				else if (chan_num == 1)
-					color = fluo::Color(0.0, 1.0, 0.0);
-				else if (chan_num == 2)
-					color = fluo::Color(0.0, 0.0, 1.0);
-
-				if (chan_num >= 0 && chan_num < 3)
-					vd_add->SetColor(color);
-
-				DataGroup *group = view->AddVolumeData(vd_add);
-				glbin_current.SetVolumeData(vd_add);
-				if (view->GetVolMethod() == VOL_METHOD_MULTI)
-				{
-					OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
-					if (adjust_view)
-					{
-						adjust_view->SetRenderView(view);
-						adjust_view->UpdateSync();
-					}
-				}
-			}
-		}
-	}
-	else if (GetItemText(item) == "Mesh")
-	{
-		name = GetText(item, 1);
-		MeshData* md = glbin_data_manager.GetMeshData(name);
-		if (md)
-		{
-			if (view)
-			{
-				int chan_num = view->GetAny();
-				view_empty = chan_num > 0 ? false : view_empty;
-				view->AddMeshData(md);
-			}
-		}
-	}
-	else if (GetItemText(item) == "Annotations")
-	{
-		name = GetText(item, 1);
-		Annotations* ann = glbin_data_manager.GetAnnotations(name);
-		if (ann)
-		{
-			if (view)
-			{
-				int chan_num = view->GetAny();
-				view_empty = chan_num > 0 ? false : view_empty;
-				view->AddAnnotations(ann);
-			}
-		}
-	}
-
-	bool refresh = false;
-	//update
-	if (view)
-	{
-		if (view_empty)
-			view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
-		else
-			view->InitView(INIT_BOUNDS | INIT_CENTER);
-		refresh = true;
-		//view->RefreshGL(39);
-	}
-	//m_frame->UpdateTree(name);
-	if (refresh)
-	{
-		//glbin.set_tree_selection(name.ToStdString());
-		m_frame->GetTree()->FluoRefresh(2, { gstTreeCtrl }, { m_frame->GetRenderCanvas(view) });
-	}
-}
-
-void DataListCtrl::OnDelete(wxCommandEvent &event)
-{
-	DeleteSelection();
-}
-
-void DataListCtrl::OnRename(wxCommandEvent& event)
+void DataListCtrl::StartEdit()
 {
 	long item = GetNextItem(-1,
 		wxLIST_NEXT_ALL,
@@ -291,590 +122,15 @@ void DataListCtrl::OnRename(wxCommandEvent& event)
 	}
 }
 
-//crop
-void DataListCtrl::OnCropCheck(wxCommandEvent &event)
+wxString DataListCtrl::EndEdit()
 {
-	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
-	if (ch1)
-		glbin_settings.m_save_crop = ch1->GetValue();
-}
-
-//compress
-void DataListCtrl::OnCompCheck(wxCommandEvent &event)
-{
-	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
-	if (ch1)
-		glbin_settings.m_save_compress = ch1->GetValue();
-}
-
-void DataListCtrl::OnResizeCheck(wxCommandEvent &event)
-{
-	wxCheckBox* comp_chk = (wxCheckBox*)event.GetEventObject();
-	if (!comp_chk)
-		return;
-	bool resize = comp_chk->GetValue();
-	wxWindow* panel = comp_chk->GetParent();
-	if (!panel)
-		return;
-	wxTextCtrl* size_x_txt = (wxTextCtrl*)panel->FindWindow(ID_RESIZE_X_TXT);
-	wxTextCtrl* size_y_txt = (wxTextCtrl*)panel->FindWindow(ID_RESIZE_Y_TXT);
-	wxTextCtrl* size_z_txt = (wxTextCtrl*)panel->FindWindow(ID_RESIZE_Z_TXT);
-	//set size values
-	if (size_x_txt && size_y_txt && size_z_txt)
-	{
-		if (m_vd && resize)
-		{
-			int nx, ny, nz;
-			m_vd->GetResolution(nx, ny, nz);
-			size_x_txt->ChangeValue(wxString::Format("%d", nx));
-			size_y_txt->ChangeValue(wxString::Format("%d", ny));
-			size_z_txt->ChangeValue(wxString::Format("%d", nz));
-		}
-		else
-		{
-			size_x_txt->ChangeValue("");
-			size_y_txt->ChangeValue("");
-			size_z_txt->ChangeValue("");
-		}
-	}
-	if (m_vd)
-		m_vd->SetResize(resize ? 1 : 0, -1, -1, -1);
-}
-
-void DataListCtrl::OnSizeXText(wxCommandEvent &event)
-{
-	wxTextCtrl* size_x_txt = (wxTextCtrl*)event.GetEventObject();
-	if (size_x_txt && m_vd)
-		m_vd->SetResize(-1, STOI(size_x_txt->GetValue().fn_str()), -1, -1);
-}
-
-void DataListCtrl::OnSizeYText(wxCommandEvent &event)
-{
-	wxTextCtrl* size_y_txt = (wxTextCtrl*)event.GetEventObject();
-	if (size_y_txt && m_vd)
-		m_vd->SetResize(-1, -1, STOI(size_y_txt->GetValue().fn_str()), -1);
-}
-
-void DataListCtrl::OnSizeZText(wxCommandEvent &event)
-{
-	wxTextCtrl* size_z_txt = (wxTextCtrl*)event.GetEventObject();
-	if (size_z_txt && m_vd)
-		m_vd->SetResize(-1, -1, -1, STOI(size_z_txt->GetValue().fn_str()));
-}
-
-void DataListCtrl::OnFilterChange(wxCommandEvent &event)
-{
-	wxComboBox* combo = (wxComboBox*)event.GetEventObject();
-	if (combo)
-		glbin_settings.m_save_filter = combo->GetSelection();
-}
-
-wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
-{
-	wxIntegerValidator<unsigned int> vald_int;
-
-	wxPanel* panel = new wxPanel(parent);
-#ifdef _DARWIN
-	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
-#endif
-	wxBoxSizer *group1 = new wxStaticBoxSizer(
-		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
-
-	//compressed
-	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	wxCheckBox* comp_chk = new wxCheckBox(panel, ID_LZW_COMP,
-		"Lempel-Ziv-Welch Compression");
-	comp_chk->Connect(comp_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(DataListCtrl::OnCompCheck), NULL, panel);
-	comp_chk->SetValue(glbin_settings.m_save_compress);
-	sizer1->Add(10, 10);
-	sizer1->Add(comp_chk);
-	//crop
-	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
-	wxCheckBox* crop_chk = new wxCheckBox(panel, ID_CROP,
-		"Use Clipping Planes to Crop");
-	crop_chk->Connect(crop_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(DataListCtrl::OnCropCheck), NULL, panel);
-	crop_chk->SetValue(glbin_settings.m_save_crop);
-	sizer2->Add(10, 10);
-	sizer2->Add(crop_chk);
-	//resize
-	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
-	wxCheckBox* resize_chk = new wxCheckBox(panel, ID_RESIZE_CHK,
-		"Resize");
-	resize_chk->Connect(resize_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(DataListCtrl::OnResizeCheck), NULL, panel);
-	wxTextCtrl* size_x_txt = new wxTextCtrl(panel, ID_RESIZE_X_TXT, "",
-		wxDefaultPosition, parent->FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
-	size_x_txt->Connect(size_x_txt->GetId(), wxEVT_TEXT,
-		wxCommandEventHandler(DataListCtrl::OnSizeXText), NULL, panel);
-	wxTextCtrl* size_y_txt = new wxTextCtrl(panel, ID_RESIZE_Y_TXT, "",
-		wxDefaultPosition, parent->FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
-	size_y_txt->Connect(size_y_txt->GetId(), wxEVT_TEXT,
-		wxCommandEventHandler(DataListCtrl::OnSizeYText), NULL, panel);
-	wxTextCtrl* size_z_txt = new wxTextCtrl(panel, ID_RESIZE_Z_TXT, "",
-		wxDefaultPosition, parent->FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
-	size_z_txt->Connect(size_z_txt->GetId(), wxEVT_TEXT,
-		wxCommandEventHandler(DataListCtrl::OnSizeZText), NULL, panel);
-	wxComboBox* combo = new wxComboBox(panel, ID_FILTER,
-		"Filter", wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
-	combo->Connect(combo->GetId(), wxEVT_COMMAND_COMBOBOX_SELECTED,
-		wxCommandEventHandler(DataListCtrl::OnFilterChange), NULL, panel);
-	std::vector<std::string> combo_list;
-	combo_list.push_back("Nearest neighbor");
-	combo_list.push_back("Bilinear");
-	combo_list.push_back("Trilinear");
-	combo_list.push_back("Box");
-	for (size_t i = 0; i < combo_list.size(); ++i)
-		combo->Append(combo_list[i]);
-	combo->SetSelection(glbin_settings.m_save_filter);
-
-	if (m_vd)
-	{
-		bool resize;
-		int nx, ny, nz;
-		m_vd->GetResize(resize, nx, ny, nz);
-		resize_chk->SetValue(resize);
-		if (resize)
-		{
-			size_x_txt->ChangeValue(std::to_string(nx));
-			size_y_txt->ChangeValue(std::to_string(ny));
-			size_z_txt->ChangeValue(std::to_string(nz));
-		}
-	}
-	sizer3->Add(10, 10);
-	sizer3->Add(resize_chk, 0, wxALIGN_CENTER);
-	sizer3->Add(10, 10);
-	sizer3->Add(size_x_txt, 0, wxALIGN_CENTER);
-	sizer3->Add(10, 10);
-	sizer3->Add(size_y_txt, 0, wxALIGN_CENTER);
-	sizer3->Add(10, 10);
-	sizer3->Add(size_z_txt, 0, wxALIGN_CENTER);
-	sizer3->Add(10, 10);
-	sizer3->Add(combo, 0, wxALIGN_CENTER);
-
-	//group
-	group1->Add(10, 10);
-	group1->Add(sizer1);
-	group1->Add(10, 10);
-	group1->Add(sizer2);
-	group1->Add(10, 10);
-	group1->Add(sizer3);
-	group1->Add(10, 20);
-
-	panel->SetSizerAndFit(group1);
-	panel->Layout();
-
-	return panel;
-}
-
-void DataListCtrl::OnSave(wxCommandEvent& event)
-{
-	long item = GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-	if (item != -1)
-	{
-		wxString name = GetText(item, 1);
-
-		if (GetItemText(item) == "Volume")
-		{
-
-			if (m_frame)
-				m_vd = glbin_data_manager.GetVolumeData(name);
-			else
-				return;
-			fluo::Quaternion q = m_frame->GetRenderCanvas(0)->GetClipRotation();
-			if (m_vd)
-				m_vd->SetResize(0, 0, 0, 0);
-
-			wxFileDialog *fopendlg = new wxFileDialog(
-				m_frame, "Save Volume Data", "", "",
-				"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
-				"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
-				"Utah Nrrd file (*.nrrd)|*.nrrd",
-				wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-			fopendlg->SetExtraControlCreator(CreateExtraControl);
-
-			int rval = fopendlg->ShowModal();
-
-			if (rval == wxID_OK)
-			{
-				wxString filename = fopendlg->GetPath();
-				if (m_vd)
-				{
-					m_vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
-						glbin_settings.m_save_crop, glbin_settings.m_save_filter,
-						false, glbin_settings.m_save_compress,
-						fluo::Point(), q, fluo::Point(), false);
-					wxString str = m_vd->GetPath();
-					SetText(item, 2, str);
-				}
-			}
-			delete fopendlg;
-
-			if (m_vd)
-				m_vd->SetResize(0, 0, 0, 0);
-		}
-		else if (GetItemText(item) == "Mesh")
-		{
-			wxFileDialog *fopendlg = new wxFileDialog(
-				m_frame, "Save Mesh Data", "", "",
-				"OBJ file (*.obj)|*.obj",
-				wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-
-			int rval = fopendlg->ShowModal();
-
-			if (rval == wxID_OK)
-			{
-				wxString filename = fopendlg->GetPath();
-
-				if (m_frame)
-				{
-					MeshData* md = glbin_data_manager.GetMeshData(name);
-					if (md)
-					{
-						md->Save(filename);
-						wxString str = md->GetPath();
-						SetText(item, 2, str);
-					}
-				}
-			}
-			delete fopendlg;
-		}
-		else if (GetItemText(item) == "Annotations")
-		{
-			wxFileDialog *fopendlg = new wxFileDialog(
-				m_frame, "Save Annotations", "", "",
-				"Text file (*.txt)|*.txt",
-				wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-
-			int rval = fopendlg->ShowModal();
-
-			if (rval == wxID_OK)
-			{
-				wxString filename = fopendlg->GetPath();
-
-				if (m_frame)
-				{
-					Annotations* ann = glbin_data_manager.GetAnnotations(name);
-					if (ann)
-					{
-						ann->Save(filename);
-						wxString str = ann->GetPath();
-						SetText(item, 2, str);
-					}
-				}
-			}
-			delete fopendlg;
-		}
-	}
-}
-
-void DataListCtrl::OnBake(wxCommandEvent& event)
-{
-	long item = GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-	if (item != -1 && GetItemText(item) == "Volume")
-	{
-		wxString name = GetText(item, 1);
-
-		wxFileDialog *fopendlg = new wxFileDialog(
-			m_frame, "Bake Volume Data", "", "",
-			"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
-			"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
-			"Utah Nrrd file (*.nrrd)|*.nrrd",
-			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-		fopendlg->SetExtraControlCreator(CreateExtraControl);
-
-		int rval = fopendlg->ShowModal();
-
-		if (rval == wxID_OK)
-		{
-			wxString filename = fopendlg->GetPath();
-
-			if (m_frame)
-			{
-				fluo::Quaternion q = m_frame->GetRenderCanvas(0)->GetClipRotation();
-				VolumeData* vd = glbin_data_manager.GetVolumeData(name);
-				if (vd)
-				{
-					vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
-						glbin_settings.m_save_crop, glbin_settings.m_save_filter,
-						true, glbin_settings.m_save_compress,
-						fluo::Point(), q, fluo::Point(), false);
-					wxString str = vd->GetPath();
-					SetText(item, 2, str);
-				}
-			}
-		}
-
-		delete fopendlg;
-	}
-}
-
-void DataListCtrl::OnSaveMask(wxCommandEvent& event)
-{
-	SaveSelMask();
-}
-
-void DataListCtrl::OnSelect(wxListEvent &event)
-{
-	long item = GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-
-	if (item != -1)
-	{
-		wxString name = GetText(item, 1);
-		//if (m_frame)
-		//	m_frame->GetTree()->Select("", name);
-	}
-}
-
-void DataListCtrl::OnAct(wxListEvent &event)
-{
-	int index = 0;
-	long item = GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-	if (m_frame && item != -1)
-	{
-		index = m_frame->GetViewNum() - 1;
-		AddToView(index, item);
-	}
-}
-
-void DataListCtrl::OnKeyDown(wxKeyEvent& event)
-{
-	if (event.GetKeyCode() == WXK_DELETE ||
-		event.GetKeyCode() == WXK_BACK)
-		DeleteSelection();
-	//event.Skip();
-}
-
-void DataListCtrl::OnKeyUp(wxKeyEvent& event)
-{
-	event.Skip();
-}
-
-void DataListCtrl::OnMouse(wxMouseEvent &event)
-{
-	if (event.Button(wxMOUSE_BTN_ANY))
-		m_rename_text->Hide();
-	event.Skip();
-}
-
-void DataListCtrl::EndEdit(bool update)
-{
+	wxString str;
 	if (!m_rename_text->IsShown())
-		return;
+		return str;
 
-	if (update)
-	{
-		wxString new_name = m_rename_text->GetValue();
-
-		long item = GetNextItem(-1,
-			wxLIST_NEXT_ALL,
-			wxLIST_STATE_SELECTED);
-
-		if (item != -1)
-		{
-			wxString name = GetText(item, 1);
-
-			if (new_name != name)
-			{
-				wxString new_name2 = new_name;
-				for (int i = 1; glbin_data_manager.CheckNames(new_name2); i++)
-					new_name2 = new_name + wxString::Format("_%d", i);
-
-
-				if (GetItemText(item) == "Volume")
-				{
-					VolumeData* vd = glbin_data_manager.GetVolumeData(name);
-					if (vd)
-						vd->SetName(new_name2);
-				}
-				else if (GetItemText(item) == "Mesh")
-				{
-					MeshData* md = glbin_data_manager.GetMeshData(name);
-					if (md)
-						md->SetName(new_name2);
-				}
-				else if (GetItemText(item) == "Annotations")
-				{
-					Annotations* ann = glbin_data_manager.GetAnnotations(name);
-					if (ann)
-						ann->SetName(new_name2);
-				}
-
-				//update ui
-				SetText(item, 1, new_name2);
-			}
-		}
-	}
-
+	str = m_rename_text->GetValue();
 	m_rename_text->Hide();
-}
-
-void DataListCtrl::OnEndEditName(wxCommandEvent& event)
-{
-	EndEdit();
-}
-
-void DataListCtrl::DeleteSelection()
-{
-	wxString name = "";
-	bool refresh = false;
-
-	if (m_frame && GetSelectedItemCount() > 0)
-	{
-		long item = GetNextItem(-1,
-			wxLIST_NEXT_ALL,
-			wxLIST_STATE_SELECTED);
-		if (item != -1)
-		{
-			if (GetItemText(item) == "Volume")
-			{
-				name = GetText(item, 1);
-				int i;
-				//from view
-				for (int i = 0; i < m_frame->GetViewNum(); i++)
-				{
-					RenderCanvas* view = m_frame->GetRenderCanvas(i);
-					if (view)
-					{
-						view->RemoveVolumeDataDup(name);
-					}
-				}
-				//from datamanager
-				int index = glbin_data_manager.GetVolumeIndex(name);
-				if (index != -1)
-				{
-					glbin_data_manager.RemoveVolumeData(index);
-				}
-			}
-			else if (GetItemText(item) == "Mesh")
-			{
-				name = GetText(item, 1);
-				int i;
-				//from view
-				for (int i = 0; i < m_frame->GetViewNum(); i++)
-				{
-					RenderCanvas* view = m_frame->GetRenderCanvas(i);
-					if (view)
-					{
-						view->RemoveMeshData(name);
-					}
-				}
-				//from datamanager
-				int index = glbin_data_manager.GetMeshIndex(name);
-				if (index != -1)
-				{
-					glbin_data_manager.RemoveMeshData(index);
-				}
-			}
-			else if (GetItemText(item) == "Annotations")
-			{
-				name = GetText(item, 1);
-				int i;
-				//from view
-				for (int i = 0; i < m_frame->GetViewNum(); i++)
-				{
-					RenderCanvas* view = m_frame->GetRenderCanvas(i);
-					if (view)
-						view->RemoveAnnotations(name);
-				}
-				//from datamanager
-				int index = glbin_data_manager.GetAnnotationIndex(name);
-				if (index != -1)
-					glbin_data_manager.RemoveAnnotations(index);
-			}
-		}
-		refresh = true;
-		//glbin.set_tree_selection(name.ToStdString());
-		glbin_current.SetRoot();
-	}
-
-	if (refresh)
-		m_frame->GetTree()->FluoRefresh(2, { gstTreeCtrl });
-}
-
-void DataListCtrl::DeleteAll()
-{
-	wxString name = "";
-
-	long item = GetNextItem(-1);
-	while (item != -1 && m_frame)
-	{
-		if (GetItemText(item) == "Volume")
-		{
-			name = GetText(item, 1);
-			int i;
-			//from view
-			for (int i = 0; i < m_frame->GetViewNum(); i++)
-			{
-				RenderCanvas* view = m_frame->GetRenderCanvas(i);
-				if (view)
-					view->RemoveVolumeDataDup(name);
-			}
-			//from datamanager
-			int index = glbin_data_manager.GetVolumeIndex(name);
-			if (index != -1)
-				glbin_data_manager.RemoveVolumeData(index);
-		}
-		else if (GetItemText(item) == "Mesh")
-		{
-			name = GetText(item, 1);
-			int i;
-			//from view
-			for (int i = 0; i < m_frame->GetViewNum(); i++)
-			{
-				RenderCanvas* view = m_frame->GetRenderCanvas(i);
-				if (view)
-					view->RemoveMeshData(name);
-			}
-			//from datamanager
-			int index = glbin_data_manager.GetMeshIndex(name);
-			if (index != -1)
-				glbin_data_manager.RemoveMeshData(index);
-		}
-		else if (GetItemText(item) == "Annotations")
-		{
-			name = GetText(item, 1);
-			int i;
-			//from view
-			for (int i = 0; i < m_frame->GetViewNum(); i++)
-			{
-				RenderCanvas* view = m_frame->GetRenderCanvas(i);
-				if (view)
-					view->RemoveAnnotations(name);
-			}
-			//from datamanager
-			int index = glbin_data_manager.GetAnnotationIndex(name);
-			if (index != -1)
-				glbin_data_manager.RemoveAnnotations(index);
-		}
-
-		item = GetNextItem(item);
-	}
-
-	DeleteAllItems();
-	if (m_frame)
-		m_frame->GetTree()->FluoRefresh(2, { gstTreeCtrl });
-}
-
-void DataListCtrl::OnScroll(wxScrollWinEvent& event)
-{
-	EndEdit(false);
-	event.Skip(true);
-}
-
-void DataListCtrl::OnScroll(wxMouseEvent& event)
-{
-	EndEdit(false);
-	event.Skip(true);
+	return str;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1009,7 +265,271 @@ void ListPanel::UpdateList()
 
 void ListPanel::UpdateSelection()
 {
+	int type = glbin_current.GetType();
+	wxString name, item_type;
+	switch (type)
+	{
+	case 2://volume
+	{
+		VolumeData* vd = glbin_current.vol_data;
+		if (vd)
+			name = vd->GetName();
+		item_type = "Volume";
+	}
+	break;
+	case 3://mesh
+	{
+		MeshData* md = glbin_current.mesh_data;
+		if (md)
+			name = md->GetName();
+		item_type = "Mesh";
+	}
+	break;
+	case 4://annotations
+	{
+		Annotations* ann = glbin_current.ann_data;
+		if (ann)
+			name = ann->GetName();
+		item_type = "Annotations";
+	}
+	break;
+	}
 
+	long item = -1;
+	for (;;)
+	{
+		item = m_datalist->GetNextItem(item,
+			wxLIST_NEXT_ALL,
+			wxLIST_STATE_DONTCARE);
+		if (item != -1)
+		{
+			wxString stype = m_datalist->GetText(item, 0);
+			wxString sname = m_datalist->GetText(item, 1);
+
+			if (stype == item_type &&
+				sname == name)
+			{
+				m_datalist->SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+				break;
+			}
+		}
+		else
+			break;
+	}
+}
+
+void ListPanel::AddSelectionToView(int view)
+{
+	RenderCanvas* canvas = m_frame->GetRenderCanvas(view);
+	if (!canvas)
+		return;
+	bool view_empty = true;
+	int type = glbin_current.GetType();
+	switch (type)
+	{
+	case 2://volume
+	{
+		VolumeData* vd = glbin_current.vol_data;
+		if (!vd)
+			break;
+
+		wxString name = vd->GetName();
+		VolumeData* vd_add = vd;
+
+		for (int i = 0; i < m_frame->GetViewNum(); ++i)
+		{
+			RenderCanvas* v = m_frame->GetRenderCanvas(i);
+			if (v && v->GetVolumeData(name))
+			{
+				vd_add = glbin_data_manager.DuplicateVolumeData(vd);
+				break;
+			}
+		}
+
+		int chan_num = canvas->GetAny();
+		view_empty = chan_num > 0 ? false : view_empty;
+		fluo::Color color(1.0, 1.0, 1.0);
+		if (chan_num == 0)
+			color = fluo::Color(1.0, 0.0, 0.0);
+		else if (chan_num == 1)
+			color = fluo::Color(0.0, 1.0, 0.0);
+		else if (chan_num == 2)
+			color = fluo::Color(0.0, 0.0, 1.0);
+
+		if (chan_num >= 0 && chan_num < 3)
+			vd_add->SetColor(color);
+
+		DataGroup* group = canvas->AddVolumeData(vd_add);
+		glbin_current.SetVolumeData(vd_add);
+		if (canvas->GetVolMethod() == VOL_METHOD_MULTI)
+		{
+			OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
+			if (adjust_view)
+			{
+				adjust_view->SetRenderView(canvas);
+				adjust_view->UpdateSync();
+			}
+		}
+	}
+		break;
+	case 3://mesh
+	{
+		MeshData* md = glbin_current.mesh_data;
+		if (!md)
+			break;
+		int chan_num = canvas->GetAny();
+		view_empty = chan_num > 0 ? false : view_empty;
+		canvas->AddMeshData(md);
+	}
+		break;
+	case 4://annotations
+	{
+		Annotations* ann = glbin_current.ann_data;
+		if (!ann)
+			break;
+		int chan_num = canvas->GetAny();
+		view_empty = chan_num > 0 ? false : view_empty;
+		canvas->AddAnnotations(ann);
+	}
+		break;
+	}
+
+	//update
+	if (view)
+	{
+		if (view_empty)
+			canvas->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
+		else
+			canvas->InitView(INIT_BOUNDS | INIT_CENTER);
+	}
+	//m_frame->UpdateTree(name);
+	//glbin.set_tree_selection(name.ToStdString());
+	FluoRefresh(2, { gstTreeCtrl }, { view });
+}
+
+void ListPanel::RenameSelection(const wxString& name)
+{
+	wxString new_name = name;
+	for (int i = 1; glbin_data_manager.CheckNames(new_name); i++)
+		new_name = new_name + wxString::Format("_%d", i);
+	int type = glbin_current.GetType();
+
+	switch (type)
+	{
+	case 2://volume
+	{
+		VolumeData* vd = glbin_current.vol_data;
+		if (vd)
+			vd->SetName(new_name);
+	}
+		break;
+	case 3://mesh
+	{
+		MeshData* md = glbin_current.mesh_data;
+		if (md)
+			md->SetName(new_name);
+	}
+		break;
+	case 4://annotations
+	{
+		Annotations* ann = glbin_current.ann_data;
+		if (ann)
+			ann->SetName(new_name);
+	}
+		break;
+	}
+	FluoRefresh(2, { gstTreeCtrl });
+}
+
+void ListPanel::DeleteSelection()
+{
+	int type = glbin_current.GetType();
+
+	switch (type)
+	{
+	case 2://volume
+	{
+		VolumeData* vd = glbin_current.vol_data;
+		if (!vd)
+			break;
+		wxString name = vd->GetName();
+		//from view
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
+		{
+			RenderCanvas* view = m_frame->GetRenderCanvas(i);
+			if (view)
+			{
+				view->RemoveVolumeDataDup(name);
+			}
+		}
+		//from datamanager
+		int index = glbin_data_manager.GetVolumeIndex(name);
+		if (index != -1)
+		{
+			glbin_data_manager.RemoveVolumeData(index);
+		}
+	}
+	break;
+	case 3://mesh
+	{
+		MeshData* md = glbin_current.mesh_data;
+		if (!md)
+			break;
+		wxString name = md->GetName();
+		//from view
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
+		{
+			RenderCanvas* view = m_frame->GetRenderCanvas(i);
+			if (view)
+			{
+				view->RemoveMeshData(name);
+			}
+		}
+		//from datamanager
+		int index = glbin_data_manager.GetMeshIndex(name);
+		if (index != -1)
+		{
+			glbin_data_manager.RemoveMeshData(index);
+		}
+	}
+	break;
+	case 4://annotations
+	{
+		Annotations* ann = glbin_current.ann_data;
+		if (!ann)
+			break;
+		wxString name = ann->GetName();
+		//from view
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
+		{
+			RenderCanvas* view = m_frame->GetRenderCanvas(i);
+			if (view)
+				view->RemoveAnnotations(name);
+		}
+		//from datamanager
+		int index = glbin_data_manager.GetAnnotationIndex(name);
+		if (index != -1)
+			glbin_data_manager.RemoveAnnotations(index);
+	}
+	break;
+	}
+
+	//glbin.set_tree_selection(name.ToStdString());
+	glbin_current.SetRoot();
+	FluoRefresh(2, { gstTreeCtrl, gstListCtrl });
+}
+
+void ListPanel::DeleteAll()
+{
+	for (int i = 0; i < m_frame->GetViewNum(); ++i)
+	{
+		RenderCanvas* canvas = m_frame->GetRenderCanvas(i);
+		if (canvas)
+			canvas->ClearAll();
+	}
+	glbin_data_manager.ClearAll();
+	//DeleteAllItems();
+	FluoRefresh(2, { gstTreeCtrl, gstListCtrl });
 }
 
 void ListPanel::SaveSelMask()
@@ -1117,51 +637,404 @@ void ListPanel::OnContextMenu(wxContextMenuEvent& event)
 
 void ListPanel::OnAddToView(wxCommandEvent& event)
 {
-	int menu_index = event.GetId() - ID_ViewID;
-	int num = m_datalist->GetSelectedItemCount();
-
-	if (num > 0)
-	{
-		long item = -1;
-		for (;; )
-		{
-			item = m_datalist->GetNextItem(item,
-				wxLIST_NEXT_ALL,
-				wxLIST_STATE_SELECTED);
-			if (item == -1)
-				break;
-
-			m_datalist->AddToView(menu_index, item);
-		}
-	}
+	int ival = event.GetId() - ID_ViewID;
+	AddSelectionToView(ival);
 }
 
 void ListPanel::OnRename(wxCommandEvent& event)
 {
-	m_datalist->OnRename(event);
+	m_datalist->StartEdit();
 }
 
 void ListPanel::OnSave(wxCommandEvent& event)
 {
-	m_datalist->OnSave(event);
+	int type = glbin_current.GetType();
+	long item = m_datalist->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+
+	switch (type)
+	{
+	case 2://volume
+	{
+		VolumeData* vd = glbin_current.vol_data;
+		if (!vd)
+			break;
+		fluo::Quaternion q = m_frame->GetRenderCanvas(0)->GetClipRotation();
+		vd->SetResize(0, 0, 0, 0);
+
+		wxFileDialog* fopendlg = new wxFileDialog(
+			m_frame, "Save Volume Data", "", "",
+			"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
+			"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
+			"Utah Nrrd file (*.nrrd)|*.nrrd",
+			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+		fopendlg->SetExtraControlCreator(CreateExtraControl);
+
+		int rval = fopendlg->ShowModal();
+
+		if (rval == wxID_OK)
+		{
+			wxString filename = fopendlg->GetPath();
+			vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
+				glbin_settings.m_save_crop, glbin_settings.m_save_filter,
+				false, glbin_settings.m_save_compress,
+				fluo::Point(), q, fluo::Point(), false);
+			wxString str = vd->GetPath();
+			m_datalist->SetText(item, 2, str);
+		}
+		delete fopendlg;
+	}
+	break;
+	case 3://mesh
+	{
+		MeshData* md = glbin_current.mesh_data;
+		if (!md)
+			break;
+		wxFileDialog* fopendlg = new wxFileDialog(
+			m_frame, "Save Mesh Data", "", "",
+			"OBJ file (*.obj)|*.obj",
+			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+		int rval = fopendlg->ShowModal();
+
+		if (rval == wxID_OK)
+		{
+			wxString filename = fopendlg->GetPath();
+
+			md->Save(filename);
+			wxString str = md->GetPath();
+			m_datalist->SetText(item, 2, str);
+		}
+		delete fopendlg;
+	}
+	break;
+	case 4://annotations
+	{
+		Annotations* ann = glbin_current.ann_data;
+		if (!ann)
+			break;
+		wxFileDialog* fopendlg = new wxFileDialog(
+			m_frame, "Save Annotations", "", "",
+			"Text file (*.txt)|*.txt",
+			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+		int rval = fopendlg->ShowModal();
+
+		if (rval == wxID_OK)
+		{
+			wxString filename = fopendlg->GetPath();
+
+			ann->Save(filename);
+			wxString str = ann->GetPath();
+			m_datalist->SetText(item, 2, str);
+		}
+		delete fopendlg;
+	}
+	break;
+	}
 }
 
 void ListPanel::OnBake(wxCommandEvent& event)
 {
-	m_datalist->OnBake(event);
+	int type = glbin_current.GetType();
+	long item = m_datalist->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
+		return;
+
+	wxFileDialog* fopendlg = new wxFileDialog(
+		m_frame, "Bake Volume Data", "", "",
+		"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
+		"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
+		"Utah Nrrd file (*.nrrd)|*.nrrd",
+		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	fopendlg->SetExtraControlCreator(CreateExtraControl);
+
+	int rval = fopendlg->ShowModal();
+
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg->GetPath();
+
+		fluo::Quaternion q = m_frame->GetRenderCanvas(0)->GetClipRotation();
+		vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
+			glbin_settings.m_save_crop, glbin_settings.m_save_filter,
+			true, glbin_settings.m_save_compress,
+			fluo::Point(), q, fluo::Point(), false);
+		wxString str = vd->GetPath();
+		m_datalist->SetText(item, 2, str);
+	}
+
+	delete fopendlg;
 }
 
 void ListPanel::OnSaveMask(wxCommandEvent& event)
 {
-	m_datalist->OnSaveMask(event);
+	SaveSelMask();
 }
 
 void ListPanel::OnDelete(wxCommandEvent& event)
 {
-	m_datalist->DeleteSelection();
+	DeleteSelection();
 }
 
 void ListPanel::OnDeleteAll(wxCommandEvent &event)
 {
-	m_datalist->DeleteAll();
+	DeleteAll();
 }
+
+void ListPanel::OnSelect(wxListEvent& event)
+{
+	long item = m_datalist->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+
+	if (item == -1)
+		return;
+
+	wxString stype = m_datalist->GetText(item, 0);
+	wxString name = m_datalist->GetText(item, 1);
+
+	if (stype == "Volume")
+	{
+		glbin_current.vol_data = glbin_data_manager.GetVolumeData(name);
+	}
+	else if (stype == "Mesh")
+	{
+		glbin_current.mesh_data = glbin_data_manager.GetMeshData(name);
+	}
+	else if (stype == "Annotations")
+	{
+		glbin_current.ann_data = glbin_data_manager.GetAnnotations(name);
+	}
+
+	FluoRefresh(2, { gstTreeSelection });
+}
+
+void ListPanel::OnAct(wxListEvent& event)
+{
+	AddSelectionToView(0);
+}
+
+void ListPanel::OnKeyDown(wxKeyEvent& event)
+{
+	if (event.GetKeyCode() == WXK_DELETE ||
+		event.GetKeyCode() == WXK_BACK)
+		DeleteSelection();
+	//event.Skip();
+}
+
+void ListPanel::OnKeyUp(wxKeyEvent& event)
+{
+	event.Skip();
+}
+
+void ListPanel::OnMouse(wxMouseEvent& event)
+{
+	if (event.Button(wxMOUSE_BTN_ANY))
+		m_datalist->EndEdit();
+	event.Skip();
+}
+
+void ListPanel::OnEndEditName(wxCommandEvent& event)
+{
+	wxString str = m_datalist->EndEdit();
+	RenameSelection(str);
+	event.Skip();
+}
+
+void ListPanel::OnScroll(wxScrollWinEvent& event)
+{
+	m_datalist->EndEdit();
+	event.Skip();
+}
+
+void ListPanel::OnScroll(wxMouseEvent& event)
+{
+	m_datalist->EndEdit();
+	event.Skip();
+}
+
+//crop
+void ListPanel::OnCropCheck(wxCommandEvent& event)
+{
+	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
+	if (ch1)
+		glbin_settings.m_save_crop = ch1->GetValue();
+}
+
+//compress
+void ListPanel::OnCompCheck(wxCommandEvent& event)
+{
+	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
+	if (ch1)
+		glbin_settings.m_save_compress = ch1->GetValue();
+}
+
+void ListPanel::OnResizeCheck(wxCommandEvent& event)
+{
+	if (!glbin_current.vol_data)
+		return;
+	wxCheckBox* comp_chk = (wxCheckBox*)event.GetEventObject();
+	if (!comp_chk)
+		return;
+	bool resize = comp_chk->GetValue();
+	wxWindow* panel = comp_chk->GetParent();
+	if (!panel)
+		return;
+	wxTextCtrl* size_x_txt = (wxTextCtrl*)panel->FindWindow(ID_RESIZE_X_TXT);
+	wxTextCtrl* size_y_txt = (wxTextCtrl*)panel->FindWindow(ID_RESIZE_Y_TXT);
+	wxTextCtrl* size_z_txt = (wxTextCtrl*)panel->FindWindow(ID_RESIZE_Z_TXT);
+	//set size values
+	if (size_x_txt && size_y_txt && size_z_txt)
+	{
+		if (glbin_current.vol_data && resize)
+		{
+			int nx, ny, nz;
+			glbin_current.vol_data->GetResolution(nx, ny, nz);
+			size_x_txt->ChangeValue(wxString::Format("%d", nx));
+			size_y_txt->ChangeValue(wxString::Format("%d", ny));
+			size_z_txt->ChangeValue(wxString::Format("%d", nz));
+		}
+		else
+		{
+			size_x_txt->ChangeValue("");
+			size_y_txt->ChangeValue("");
+			size_z_txt->ChangeValue("");
+		}
+	}
+	if (glbin_current.vol_data)
+		glbin_current.vol_data->SetResize(resize ? 1 : 0, -1, -1, -1);
+}
+
+void ListPanel::OnSizeXText(wxCommandEvent& event)
+{
+	wxTextCtrl* size_x_txt = (wxTextCtrl*)event.GetEventObject();
+	if (size_x_txt && glbin_current.vol_data)
+		glbin_current.vol_data->SetResize(-1, STOI(size_x_txt->GetValue().fn_str()), -1, -1);
+}
+
+void ListPanel::OnSizeYText(wxCommandEvent& event)
+{
+	wxTextCtrl* size_y_txt = (wxTextCtrl*)event.GetEventObject();
+	if (size_y_txt && glbin_current.vol_data)
+		glbin_current.vol_data->SetResize(-1, -1, STOI(size_y_txt->GetValue().fn_str()), -1);
+}
+
+void ListPanel::OnSizeZText(wxCommandEvent& event)
+{
+	wxTextCtrl* size_z_txt = (wxTextCtrl*)event.GetEventObject();
+	if (size_z_txt && glbin_current.vol_data)
+		glbin_current.vol_data->SetResize(-1, -1, -1, STOI(size_z_txt->GetValue().fn_str()));
+}
+
+void ListPanel::OnFilterChange(wxCommandEvent& event)
+{
+	wxComboBox* combo = (wxComboBox*)event.GetEventObject();
+	if (combo)
+		glbin_settings.m_save_filter = combo->GetSelection();
+}
+
+wxWindow* ListPanel::CreateExtraControl(wxWindow* parent)
+{
+	wxIntegerValidator<unsigned int> vald_int;
+
+	wxPanel* panel = new wxPanel(parent);
+#ifdef _DARWIN
+	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+#endif
+	wxBoxSizer* group1 = new wxStaticBoxSizer(
+		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
+
+	//compressed
+	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	wxCheckBox* comp_chk = new wxCheckBox(panel, ID_LZW_COMP,
+		"Lempel-Ziv-Welch Compression");
+	comp_chk->Connect(comp_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(ListPanel::OnCompCheck), NULL, panel);
+	comp_chk->SetValue(glbin_settings.m_save_compress);
+	sizer1->Add(10, 10);
+	sizer1->Add(comp_chk);
+	//crop
+	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	wxCheckBox* crop_chk = new wxCheckBox(panel, ID_CROP,
+		"Use Clipping Planes to Crop");
+	crop_chk->Connect(crop_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(ListPanel::OnCropCheck), NULL, panel);
+	crop_chk->SetValue(glbin_settings.m_save_crop);
+	sizer2->Add(10, 10);
+	sizer2->Add(crop_chk);
+	//resize
+	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
+	wxCheckBox* resize_chk = new wxCheckBox(panel, ID_RESIZE_CHK,
+		"Resize");
+	resize_chk->Connect(resize_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(ListPanel::OnResizeCheck), NULL, panel);
+	wxTextCtrl* size_x_txt = new wxTextCtrl(panel, ID_RESIZE_X_TXT, "",
+		wxDefaultPosition, parent->FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
+	size_x_txt->Connect(size_x_txt->GetId(), wxEVT_TEXT,
+		wxCommandEventHandler(ListPanel::OnSizeXText), NULL, panel);
+	wxTextCtrl* size_y_txt = new wxTextCtrl(panel, ID_RESIZE_Y_TXT, "",
+		wxDefaultPosition, parent->FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
+	size_y_txt->Connect(size_y_txt->GetId(), wxEVT_TEXT,
+		wxCommandEventHandler(ListPanel::OnSizeYText), NULL, panel);
+	wxTextCtrl* size_z_txt = new wxTextCtrl(panel, ID_RESIZE_Z_TXT, "",
+		wxDefaultPosition, parent->FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
+	size_z_txt->Connect(size_z_txt->GetId(), wxEVT_TEXT,
+		wxCommandEventHandler(ListPanel::OnSizeZText), NULL, panel);
+	wxComboBox* combo = new wxComboBox(panel, ID_FILTER,
+		"Filter", wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+	combo->Connect(combo->GetId(), wxEVT_COMMAND_COMBOBOX_SELECTED,
+		wxCommandEventHandler(ListPanel::OnFilterChange), NULL, panel);
+	std::vector<std::string> combo_list;
+	combo_list.push_back("Nearest neighbor");
+	combo_list.push_back("Bilinear");
+	combo_list.push_back("Trilinear");
+	combo_list.push_back("Box");
+	for (size_t i = 0; i < combo_list.size(); ++i)
+		combo->Append(combo_list[i]);
+	combo->SetSelection(glbin_settings.m_save_filter);
+
+	if (glbin_current.vol_data)
+	{
+		bool resize;
+		int nx, ny, nz;
+		glbin_current.vol_data->GetResize(resize, nx, ny, nz);
+		resize_chk->SetValue(resize);
+		if (resize)
+		{
+			size_x_txt->ChangeValue(std::to_string(nx));
+			size_y_txt->ChangeValue(std::to_string(ny));
+			size_z_txt->ChangeValue(std::to_string(nz));
+		}
+	}
+	sizer3->Add(10, 10);
+	sizer3->Add(resize_chk, 0, wxALIGN_CENTER);
+	sizer3->Add(10, 10);
+	sizer3->Add(size_x_txt, 0, wxALIGN_CENTER);
+	sizer3->Add(10, 10);
+	sizer3->Add(size_y_txt, 0, wxALIGN_CENTER);
+	sizer3->Add(10, 10);
+	sizer3->Add(size_z_txt, 0, wxALIGN_CENTER);
+	sizer3->Add(10, 10);
+	sizer3->Add(combo, 0, wxALIGN_CENTER);
+
+	//group
+	group1->Add(10, 10);
+	group1->Add(sizer1);
+	group1->Add(10, 10);
+	group1->Add(sizer2);
+	group1->Add(10, 10);
+	group1->Add(sizer3);
+	group1->Add(10, 20);
+
+	panel->SetSizerAndFit(group1);
+	panel->Layout();
+
+	return panel;
+}
+

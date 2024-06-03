@@ -44,19 +44,15 @@ public:
 		long style = wxLC_REPORT | wxLC_SINGLE_SEL);
 
 	void Append(int type, wxString name, wxString path);
-	wxString GetText(long item, int col);
 	void SetText(long item, int col, wxString &str);
-	void SetSelection(int type, wxString &name);
-	void DeleteSelection();
-	void DeleteAll();
-	void AddToView(int menu_index, long item);
-	void EndEdit(bool update = true);
+	wxString GetText(long item, int col);
+	void StartEdit();
+	wxString EndEdit();
 
 	friend class ListPanel;
 
 private:
 	MainFrame* m_frame;
-	//static VolumeData* m_vd;
 	wxTextCtrl *m_rename_text;
 };
 
@@ -102,6 +98,11 @@ public:
 	void UpdateList();
 	void UpdateSelection();
 
+	void AddSelectionToView(int view);
+	void RenameSelection(const wxString& name);
+	void DeleteSelection();
+	void DeleteAll();
+
 	void SaveSelMask();
 	void SaveAllMasks();
 
@@ -119,20 +120,6 @@ private:
 	void OnDelete(wxCommandEvent& event);
 	void OnDeleteAll(wxCommandEvent& event);
 
-	void OnDelete(wxCommandEvent& event);
-	void OnRename(wxCommandEvent& event);
-	void OnCropCheck(wxCommandEvent& event);
-	void OnCompCheck(wxCommandEvent& event);
-	void OnResizeCheck(wxCommandEvent& event);
-	void OnSizeXText(wxCommandEvent& event);
-	void OnSizeYText(wxCommandEvent& event);
-	void OnSizeZText(wxCommandEvent& event);
-	void OnFilterChange(wxCommandEvent& event);
-	static wxWindow* CreateExtraControl(wxWindow* parent);
-	void OnSave(wxCommandEvent& event);
-	void OnBake(wxCommandEvent& event);
-	void OnSaveMask(wxCommandEvent& event);
-
 	void OnSelect(wxListEvent& event);
 	void OnAct(wxListEvent& event);
 	void OnKeyDown(wxKeyEvent& event);
@@ -141,6 +128,15 @@ private:
 	void OnEndEditName(wxCommandEvent& event);
 	void OnScroll(wxScrollWinEvent& event);
 	void OnScroll(wxMouseEvent& event);
+
+	void OnCropCheck(wxCommandEvent& event);
+	void OnCompCheck(wxCommandEvent& event);
+	void OnResizeCheck(wxCommandEvent& event);
+	void OnSizeXText(wxCommandEvent& event);
+	void OnSizeYText(wxCommandEvent& event);
+	void OnSizeZText(wxCommandEvent& event);
+	void OnFilterChange(wxCommandEvent& event);
+	static wxWindow* CreateExtraControl(wxWindow* parent);
 
 	DECLARE_EVENT_TABLE()
 };
