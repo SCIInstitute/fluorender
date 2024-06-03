@@ -42,7 +42,8 @@ DataListCtrl::DataListCtrl(
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-	wxListCtrl(parent, wxID_ANY, pos, size, style)
+	wxListCtrl(parent, wxID_ANY, pos, size, style),
+	m_selected(-1)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -61,6 +62,8 @@ DataListCtrl::DataListCtrl(
 	m_rename_text = new wxTextCtrl(this, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 	m_rename_text->Hide();
+
+	Bind(wxEVT_LIST_ITEM_SELECTED, &DataListCtrl::OnSelectionChanged, this);
 }
 
 void DataListCtrl::Append(int type, wxString name, wxString path)
@@ -129,6 +132,17 @@ wxString DataListCtrl::EndEdit()
 	str = m_rename_text->GetValue();
 	m_rename_text->Hide();
 	return str;
+}
+
+void DataListCtrl::OnSelectionChanged(wxListEvent& event)
+{
+	wxFont font;
+	//if (m_selected != -1)
+	//{
+	//	font = GetItemFont(m_selected);
+	//	font.setbo
+	//}
+	event.Skip();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -852,7 +866,9 @@ void ListPanel::OnSelect(wxListEvent& event)
 		glbin_current.SetAnnotation(glbin_data_manager.GetAnnotations(name));
 	}
 
-	FluoRefresh(2, { gstTreeSelection });
+	FluoRefresh(0, { gstCurrentSelect });
+
+	event.Skip();
 }
 
 void ListPanel::OnAct(wxListEvent& event)

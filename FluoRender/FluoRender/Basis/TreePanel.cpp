@@ -63,54 +63,14 @@ wxTreeCtrl(parent, wxID_ANY, pos, size, style)
 	images->Add(icons[0]);
 	images->Add(icons[1]);
 	AssignImageList(images);
+	m_selected.Unset();
+
+	Bind(wxEVT_TREE_SEL_CHANGED, &DataTreeCtrl::OnSelectionChanged, this);
 }
 
 DataTreeCtrl::~DataTreeCtrl()
 {
-	//TraversalDelete(GetRootItem());
 }
-
-//traversal delete
-//void DataTreeCtrl::TraversalDelete(wxTreeItemId item)
-//{
-//	wxTreeItemIdValue cookie;
-//	wxTreeItemId child_item = GetFirstChild(item, cookie);
-//	if (child_item.IsOk())
-//		TraversalDelete(child_item);
-//	child_item = GetNextChild(item, cookie);
-//	while (child_item.IsOk())
-//	{
-//		TraversalDelete(child_item);
-//		child_item = GetNextChild(item, cookie);
-//	}
-//
-//	LayerInfo* item_data = (LayerInfo*)GetItemData(item);
-//	delete item_data;
-//	SetItemData(item, 0);
-//}
-//
-//int DataTreeCtrl::TraversalSelect(wxTreeItemId item, wxString name)
-//{
-//	int found = 0;
-//	wxTreeItemIdValue cookie;
-//	wxTreeItemId child_item = GetFirstChild(item, cookie);
-//	if (child_item.IsOk())
-//		found = TraversalSelect(child_item, name);
-//	child_item = GetNextChild(item, cookie);
-//	while (!found && child_item.IsOk())
-//	{
-//		found = TraversalSelect(child_item, name);
-//		child_item = GetNextChild(item, cookie);
-//	}
-//
-//	wxString item_name = GetItemText(item);
-//	if (item_name == name)
-//	{
-//		found = 1;
-//		SelectItem(item);
-//	}
-//	return found;
-//}
 
 //icons
 void DataTreeCtrl::AppendIcon()
@@ -320,6 +280,16 @@ void DataTreeCtrl::SetMGroupItemImage(const wxTreeItemId item, int image)
 	SetItemImage(item, image);
 }
 
+void DataTreeCtrl::OnSelectionChanged(wxTreeEvent& event)
+{
+	if (m_selected.IsOk())
+		SetItemBold(m_selected, false);
+	m_selected = GetSelection();
+	if (m_selected.IsOk())
+		SetItemBold(m_selected);
+	event.Skip();
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 TreePanel::TreePanel(MainFrame* frame,
 	const wxPoint& pos,
@@ -468,8 +438,6 @@ void TreePanel::UpdateTree()
 
 	wxString root_str = "Scene Graph";
 	wxTreeItemId root_item = m_datatree->AddRootItem(root_str);
-	//if (glbin_tree_sel == root_str.ToStdString())
-	//	SelectItem(root_item);
 	//append non-color icons for views
 	m_datatree->AppendIcon();
 	m_datatree->Expand(root_item);
@@ -632,10 +600,11 @@ void TreePanel::UpdateTree()
 		}
 	}
 
-	if (sel_item.IsOk())
-		m_datatree->SelectItem(sel_item);
 	m_datatree->ExpandAll();
 	m_datatree->SetScrollPos(wxVERTICAL, 0);
+
+	if (sel_item.IsOk())
+		m_datatree->SelectItem(sel_item);
 }
 
 void TreePanel::UpdateTreeIcons()
@@ -957,7 +926,7 @@ void TreePanel::traversalSel(wxTreeItemId item)
 	}
 
 	wxTreeItemIdValue cookie;
-	wxTreeItemId child_item = m_datatree->GetNextChild(item, cookie);
+	wxTreeItemId child_item = m_datatree->GetFirstChild(item, cookie);
 	while (child_item.IsOk())
 	{
 		traversalSel(child_item);
@@ -1672,6 +1641,8 @@ void TreePanel::OnSelChanged(wxTreeEvent& event)
 	if (!sel_item.IsOk())
 		return;
 
+	fluo::ValueCollection vc;
+
 	//select data
 	wxString name = m_datatree->GetItemText(sel_item);
 	LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
@@ -1693,18 +1664,21 @@ void TreePanel::OnSelChanged(wxTreeEvent& event)
 		{
 			VolumeData* vd = glbin_data_manager.GetVolumeData(name);
 			glbin_current.SetVolumeData(vd);
+			vc.insert(gstVolumePropPanel);
 		}
 			break;
 		case 3://mesh data
 		{
 			MeshData* md = glbin_data_manager.GetMeshData(name);
 			glbin_current.SetMeshData(md);
+			vc.insert(gstMeshPropPanel);
 		}
 			break;
 		case 4://annotations
 		{
 			Annotations* ann = glbin_data_manager.GetAnnotations(name);
 			glbin_current.SetAnnotation(ann);
+			vc.insert(gstAnnotatPropPanel);
 		}
 			break;
 		case 5://volume group
@@ -1732,7 +1706,10 @@ void TreePanel::OnSelChanged(wxTreeEvent& event)
 		}
 	}
 
-	FluoRefresh(0, {});
+	vc.insert(gstCurrentSelect);
+	FluoRefresh(1, { vc });
+
+	event.Skip();
 }
 
 void TreePanel::OnSelChanging(wxTreeEvent& event)

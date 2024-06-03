@@ -65,6 +65,8 @@ public:
 	~DataTreeCtrl();
 
 private:
+	wxTreeItemId m_selected;
+
 	//icon operations
 	//change the color of the icon dual
 	void ChangeIconColor(int i, wxColor c);
@@ -100,6 +102,9 @@ private:
 	//change the color of just one icon of the dual,
 	//either enable(type=0), or disable(type=1)
 	void ChangeIconColor(int which, wxColor c, int type);
+
+	//events
+	void OnSelectionChanged(wxTreeEvent& event);
 
 	friend class TreePanel;
 };
