@@ -1043,7 +1043,7 @@ RenderCanvas* MainFrame::GetRenderCanvas(int index)
 	return 0;
 }
 
-RenderCanvas* MainFrame::GetRenderCanvas(wxString& name)
+RenderCanvas* MainFrame::GetRenderCanvas(const wxString& name)
 {
 	for (size_t i=0; i < m_vrv_list.size(); ++i)
 	{
@@ -2372,7 +2372,7 @@ void MainFrame::DeleteVRenderView(int i)
 	}
 }
 
-void MainFrame::DeleteVRenderView(wxString &name)
+void MainFrame::DeleteVRenderView(const wxString &name)
 {
 	for (int i=0; i<GetViewNum(); i++)
 	{

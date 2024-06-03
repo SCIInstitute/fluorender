@@ -38,13 +38,11 @@ DEALINGS IN THE SOFTWARE.
 #include <img/icons.h>
 
 DataListCtrl::DataListCtrl(
-	MainFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-	wxListCtrl(parent, wxID_ANY, pos, size, style),
-	m_frame(frame)
+	wxListCtrl(parent, wxID_ANY, pos, size, style)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -134,20 +132,9 @@ wxString DataListCtrl::EndEdit()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-BEGIN_EVENT_TABLE(ListPanel, wxPanel)
-EVT_TOOL(ID_AddToView, ListPanel::OnAddToView)
-EVT_TOOL(ID_Rename, ListPanel::OnRename)
-EVT_TOOL(ID_Save, ListPanel::OnSave)
-EVT_TOOL(ID_Bake, ListPanel::OnBake)
-EVT_TOOL(ID_SaveMask, ListPanel::OnSaveMask)
-EVT_TOOL(ID_Delete, ListPanel::OnDelete)
-EVT_TOOL(ID_DeleteAll, ListPanel::OnDeleteAll)
-END_EVENT_TABLE()
-
-ListPanel::ListPanel(MainFrame *frame,
-	const wxPoint &pos,
-	const wxSize &size,
+ListPanel::ListPanel(MainFrame* frame,
+	const wxPoint& pos,
+	const wxSize& size,
 	long style,
 	const wxString& name) :
 	PropPanel(frame, frame, pos, size, style, name)
@@ -156,7 +143,7 @@ ListPanel::ListPanel(MainFrame *frame,
 	wxEventBlocker blocker(this);
 
 	//create data list
-	m_datalist = new DataListCtrl(frame, this);
+	m_datalist = new DataListCtrl(this);
 
 	//create tool bar
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
@@ -195,6 +182,18 @@ ListPanel::ListPanel(MainFrame *frame,
 
 	SetSizer(sizer_v);
 	Layout();
+
+	//events
+	Bind(wxEVT_CONTEXT_MENU, &ListPanel::OnContextMenu, this);
+	Bind(wxEVT_TOOL, &ListPanel::OnToolbar, this);
+	Bind(wxEVT_MENU, &ListPanel::OnMenu, this);
+	Bind(wxEVT_LIST_ITEM_SELECTED, &ListPanel::OnSelect, this);
+	Bind(wxEVT_LIST_ITEM_ACTIVATED, &ListPanel::OnAct, this);
+	Bind(wxEVT_KEY_DOWN, &ListPanel::OnKeyDown, this);
+	Bind(wxEVT_KEY_UP, &ListPanel::OnKeyUp, this);
+	Bind(wxEVT_SCROLLWIN_THUMBTRACK, &ListPanel::OnScrollWin, this);
+	Bind(wxEVT_LEFT_DOWN, &ListPanel::OnMouse, this);
+	Bind(wxEVT_MOUSEWHEEL, &ListPanel::OnScroll, this);
 }
 
 ListPanel::~ListPanel()
@@ -407,6 +406,15 @@ void ListPanel::AddSelectionToView(int view)
 	FluoRefresh(2, { gstTreeCtrl }, { view });
 }
 
+void ListPanel::AddSelToCurView()
+{
+	int view = 0;
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (canvas)
+		view = m_frame->GetRenderCanvas(canvas);
+	AddSelectionToView(view);
+}
+
 void ListPanel::RenameSelection(const wxString& name)
 {
 	wxString new_name = name;
@@ -439,6 +447,142 @@ void ListPanel::RenameSelection(const wxString& name)
 		break;
 	}
 	FluoRefresh(2, { gstTreeCtrl });
+}
+
+void ListPanel::SaveSelection()
+{
+	int type = glbin_current.GetType();
+	long item = m_datalist->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+
+	switch (type)
+	{
+	case 2://volume
+	{
+		VolumeData* vd = glbin_current.vol_data;
+		if (!vd)
+			break;
+		fluo::Quaternion q = m_frame->GetRenderCanvas(0)->GetClipRotation();
+		vd->SetResize(0, 0, 0, 0);
+
+		wxFileDialog* fopendlg = new wxFileDialog(
+			m_frame, "Save Volume Data", "", "",
+			"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
+			"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
+			"Utah Nrrd file (*.nrrd)|*.nrrd",
+			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+		fopendlg->SetExtraControlCreator(CreateExtraControl);
+
+		int rval = fopendlg->ShowModal();
+
+		if (rval == wxID_OK)
+		{
+			wxString filename = fopendlg->GetPath();
+			vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
+				glbin_settings.m_save_crop, glbin_settings.m_save_filter,
+				false, glbin_settings.m_save_compress,
+				fluo::Point(), q, fluo::Point(), false);
+			wxString str = vd->GetPath();
+			m_datalist->SetText(item, 2, str);
+		}
+		delete fopendlg;
+	}
+	break;
+	case 3://mesh
+	{
+		MeshData* md = glbin_current.mesh_data;
+		if (!md)
+			break;
+		wxFileDialog* fopendlg = new wxFileDialog(
+			m_frame, "Save Mesh Data", "", "",
+			"OBJ file (*.obj)|*.obj",
+			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+		int rval = fopendlg->ShowModal();
+
+		if (rval == wxID_OK)
+		{
+			wxString filename = fopendlg->GetPath();
+
+			md->Save(filename);
+			wxString str = md->GetPath();
+			m_datalist->SetText(item, 2, str);
+		}
+		delete fopendlg;
+	}
+	break;
+	case 4://annotations
+	{
+		Annotations* ann = glbin_current.ann_data;
+		if (!ann)
+			break;
+		wxFileDialog* fopendlg = new wxFileDialog(
+			m_frame, "Save Annotations", "", "",
+			"Text file (*.txt)|*.txt",
+			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+		int rval = fopendlg->ShowModal();
+
+		if (rval == wxID_OK)
+		{
+			wxString filename = fopendlg->GetPath();
+
+			ann->Save(filename);
+			wxString str = ann->GetPath();
+			m_datalist->SetText(item, 2, str);
+		}
+		delete fopendlg;
+	}
+	break;
+	}
+}
+
+void ListPanel::BakeSelection()
+{
+	int type = glbin_current.GetType();
+	long item = m_datalist->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
+		return;
+
+	wxFileDialog* fopendlg = new wxFileDialog(
+		m_frame, "Bake Volume Data", "", "",
+		"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
+		"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
+		"Utah Nrrd file (*.nrrd)|*.nrrd",
+		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	fopendlg->SetExtraControlCreator(CreateExtraControl);
+
+	int rval = fopendlg->ShowModal();
+
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg->GetPath();
+
+		fluo::Quaternion q = m_frame->GetRenderCanvas(0)->GetClipRotation();
+		vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
+			glbin_settings.m_save_crop, glbin_settings.m_save_filter,
+			true, glbin_settings.m_save_compress,
+			fluo::Point(), q, fluo::Point(), false);
+		wxString str = vd->GetPath();
+		m_datalist->SetText(item, 2, str);
+	}
+
+	delete fopendlg;
+}
+
+void ListPanel::SaveSelMask()
+{
+	VolumeData* vd = glbin_current.vol_data;
+	if (vd)
+	{
+		vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
+		vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
+	}
 }
 
 void ListPanel::DeleteSelection()
@@ -532,26 +676,6 @@ void ListPanel::DeleteAll()
 	FluoRefresh(2, { gstTreeCtrl, gstListCtrl });
 }
 
-void ListPanel::SaveSelMask()
-{
-	VolumeData* vd = glbin_current.vol_data;
-	if (vd)
-	{
-		vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
-		vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
-	}
-}
-
-void ListPanel::SaveAllMasks()
-{
-	VolumeData* vd = glbin_current.vol_data;
-	if (vd)
-	{
-		vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
-		vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
-	}
-}
-
 void ListPanel::OnContextMenu(wxContextMenuEvent& event)
 {
 	int seln = m_datalist->GetSelectedItemCount();
@@ -635,156 +759,72 @@ void ListPanel::OnContextMenu(wxContextMenuEvent& event)
 	PopupMenu(&menu, point.x, point.y);
 }
 
-void ListPanel::OnAddToView(wxCommandEvent& event)
+void ListPanel::OnToolbar(wxCommandEvent& event)
 {
-	int ival = event.GetId() - ID_ViewID;
-	AddSelectionToView(ival);
+	int id = event.GetId();
+
+	switch (id)
+	{
+	case ID_AddToView:
+		AddSelToCurView();
+		break;
+	case ID_Rename:
+		m_datalist->StartEdit();
+		break;
+	case ID_Save:
+		SaveSelection();
+		break;
+	case ID_Bake:
+		BakeSelection();
+		break;
+	case ID_SaveMask:
+		SaveSelMask();
+		break;
+	case ID_Delete:
+		DeleteSelection();
+		break;
+	case ID_DeleteAll:
+		DeleteAll();
+		break;
+	}
 }
 
-void ListPanel::OnRename(wxCommandEvent& event)
+void ListPanel::OnMenu(wxCommandEvent& event)
 {
-	m_datalist->StartEdit();
-}
+	int id = event.GetId();
 
-void ListPanel::OnSave(wxCommandEvent& event)
-{
-	int type = glbin_current.GetType();
-	long item = m_datalist->GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-
-	switch (type)
+	if (id < ID_ViewID)
 	{
-	case 2://volume
-	{
-		VolumeData* vd = glbin_current.vol_data;
-		if (!vd)
-			break;
-		fluo::Quaternion q = m_frame->GetRenderCanvas(0)->GetClipRotation();
-		vd->SetResize(0, 0, 0, 0);
-
-		wxFileDialog* fopendlg = new wxFileDialog(
-			m_frame, "Save Volume Data", "", "",
-			"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
-			"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
-			"Utah Nrrd file (*.nrrd)|*.nrrd",
-			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-		fopendlg->SetExtraControlCreator(CreateExtraControl);
-
-		int rval = fopendlg->ShowModal();
-
-		if (rval == wxID_OK)
+		switch (id)
 		{
-			wxString filename = fopendlg->GetPath();
-			vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
-				glbin_settings.m_save_crop, glbin_settings.m_save_filter,
-				false, glbin_settings.m_save_compress,
-				fluo::Point(), q, fluo::Point(), false);
-			wxString str = vd->GetPath();
-			m_datalist->SetText(item, 2, str);
-		}
-		delete fopendlg;
-	}
-	break;
-	case 3://mesh
-	{
-		MeshData* md = glbin_current.mesh_data;
-		if (!md)
+		case ID_AddToView:
+			AddSelToCurView();
 			break;
-		wxFileDialog* fopendlg = new wxFileDialog(
-			m_frame, "Save Mesh Data", "", "",
-			"OBJ file (*.obj)|*.obj",
-			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-
-		int rval = fopendlg->ShowModal();
-
-		if (rval == wxID_OK)
-		{
-			wxString filename = fopendlg->GetPath();
-
-			md->Save(filename);
-			wxString str = md->GetPath();
-			m_datalist->SetText(item, 2, str);
-		}
-		delete fopendlg;
-	}
-	break;
-	case 4://annotations
-	{
-		Annotations* ann = glbin_current.ann_data;
-		if (!ann)
+		case ID_Rename:
+			m_datalist->StartEdit();
 			break;
-		wxFileDialog* fopendlg = new wxFileDialog(
-			m_frame, "Save Annotations", "", "",
-			"Text file (*.txt)|*.txt",
-			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-
-		int rval = fopendlg->ShowModal();
-
-		if (rval == wxID_OK)
-		{
-			wxString filename = fopendlg->GetPath();
-
-			ann->Save(filename);
-			wxString str = ann->GetPath();
-			m_datalist->SetText(item, 2, str);
+		case ID_Save:
+			SaveSelection();
+			break;
+		case ID_Bake:
+			BakeSelection();
+			break;
+		case ID_SaveMask:
+			SaveSelMask();
+			break;
+		case ID_Delete:
+			DeleteSelection();
+			break;
+		case ID_DeleteAll:
+			DeleteAll();
+			break;
 		}
-		delete fopendlg;
 	}
-	break;
-	}
-}
-
-void ListPanel::OnBake(wxCommandEvent& event)
-{
-	int type = glbin_current.GetType();
-	long item = m_datalist->GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-
-	VolumeData* vd = glbin_current.vol_data;
-	if (!vd)
-		return;
-
-	wxFileDialog* fopendlg = new wxFileDialog(
-		m_frame, "Bake Volume Data", "", "",
-		"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
-		"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
-		"Utah Nrrd file (*.nrrd)|*.nrrd",
-		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	fopendlg->SetExtraControlCreator(CreateExtraControl);
-
-	int rval = fopendlg->ShowModal();
-
-	if (rval == wxID_OK)
+	else
 	{
-		wxString filename = fopendlg->GetPath();
-
-		fluo::Quaternion q = m_frame->GetRenderCanvas(0)->GetClipRotation();
-		vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
-			glbin_settings.m_save_crop, glbin_settings.m_save_filter,
-			true, glbin_settings.m_save_compress,
-			fluo::Point(), q, fluo::Point(), false);
-		wxString str = vd->GetPath();
-		m_datalist->SetText(item, 2, str);
+		int ival = id - ID_ViewID;
+		AddSelectionToView(ival);
 	}
-
-	delete fopendlg;
-}
-
-void ListPanel::OnSaveMask(wxCommandEvent& event)
-{
-	SaveSelMask();
-}
-
-void ListPanel::OnDelete(wxCommandEvent& event)
-{
-	DeleteSelection();
-}
-
-void ListPanel::OnDeleteAll(wxCommandEvent &event)
-{
-	DeleteAll();
 }
 
 void ListPanel::OnSelect(wxListEvent& event)
@@ -801,15 +841,15 @@ void ListPanel::OnSelect(wxListEvent& event)
 
 	if (stype == "Volume")
 	{
-		glbin_current.vol_data = glbin_data_manager.GetVolumeData(name);
+		glbin_current.SetVolumeData(glbin_data_manager.GetVolumeData(name));
 	}
 	else if (stype == "Mesh")
 	{
-		glbin_current.mesh_data = glbin_data_manager.GetMeshData(name);
+		glbin_current.SetMeshData(glbin_data_manager.GetMeshData(name));
 	}
 	else if (stype == "Annotations")
 	{
-		glbin_current.ann_data = glbin_data_manager.GetAnnotations(name);
+		glbin_current.SetAnnotation(glbin_data_manager.GetAnnotations(name));
 	}
 
 	FluoRefresh(2, { gstTreeSelection });
@@ -817,7 +857,7 @@ void ListPanel::OnSelect(wxListEvent& event)
 
 void ListPanel::OnAct(wxListEvent& event)
 {
-	AddSelectionToView(0);
+	AddSelToCurView();
 }
 
 void ListPanel::OnKeyDown(wxKeyEvent& event)
@@ -847,7 +887,7 @@ void ListPanel::OnEndEditName(wxCommandEvent& event)
 	event.Skip();
 }
 
-void ListPanel::OnScroll(wxScrollWinEvent& event)
+void ListPanel::OnScrollWin(wxScrollWinEvent& event)
 {
 	m_datalist->EndEdit();
 	event.Skip();

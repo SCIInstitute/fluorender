@@ -4258,8 +4258,14 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			if (wxGetKeyState(wxKeyCode('m')) &&
 				!m_save_mask)
 			{
-				if (m_frame && m_frame->GetList())
-					m_frame->GetList()->SaveAllMasks();
+				//if (m_frame && m_frame->GetList())
+				//	m_frame->GetList()->SaveAllMasks();
+				VolumeData* vd = glbin_current.vol_data;
+				if (vd)
+				{
+					vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
+					vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
+				}
 				m_save_mask = true;
 				set_focus = true;
 			}

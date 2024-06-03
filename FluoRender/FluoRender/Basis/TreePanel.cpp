@@ -46,13 +46,11 @@ DEALINGS IN THE SOFTWARE.
 #include <img/icons.h>
 
 DataTreeCtrl::DataTreeCtrl(
-	MainFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-wxTreeCtrl(parent, wxID_ANY, pos, size, style),
-	m_frame(frame)
+wxTreeCtrl(parent, wxID_ANY, pos, size, style)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -69,182 +67,50 @@ wxTreeCtrl(parent, wxID_ANY, pos, size, style),
 
 DataTreeCtrl::~DataTreeCtrl()
 {
-	TraversalDelete(GetRootItem());
-}
-
-//delete
-void DataTreeCtrl::DeleteAll()
-{
-	if (!IsEmpty())
-	{
-		//safe deletion, may be unnecessary
-		TraversalDelete(GetRootItem());
-		DeleteAllItems();
-	}
+	//TraversalDelete(GetRootItem());
 }
 
 //traversal delete
-void DataTreeCtrl::TraversalDelete(wxTreeItemId item)
-{
-	wxTreeItemIdValue cookie;
-	wxTreeItemId child_item = GetFirstChild(item, cookie);
-	if (child_item.IsOk())
-		TraversalDelete(child_item);
-	child_item = GetNextChild(item, cookie);
-	while (child_item.IsOk())
-	{
-		TraversalDelete(child_item);
-		child_item = GetNextChild(item, cookie);
-	}
-
-	LayerInfo* item_data = (LayerInfo*)GetItemData(item);
-	delete item_data;
-	SetItemData(item, 0);
-}
-
-void DataTreeCtrl::DeleteSelection()
-{
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
-	wxTreeItemId sel_item = GetSelection();
-
-	if (sel_item.IsOk() && m_frame)
-	{
-		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-		if (item_data && item_data->type == 1)//view
-		{
-			wxString name = GetItemText(sel_item);
-			m_frame->DeleteVRenderView(name);
-		}
-
-		wxString name_data = GetItemText(sel_item);
-		wxTreeItemId par_item = GetItemParent(sel_item);
-		if (!par_item.IsOk())
-			return;
-		wxString par_name = GetItemText(par_item);
-
-		LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
-		if (par_item_data)
-		{
-			switch (par_item_data->type)
-			{
-			case 1://view
-				{
-					RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
-					if (!view)
-						break;
-					LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-					if (item_data)
-					{
-						if (item_data->type == 2)//volume data
-						{
-							VolumeData* vd = view->GetVolumeData(name_data);
-							if (vd)
-							{
-								vd->SetDisp(true);
-								view->RemoveVolumeData(name_data);
-								if (view->GetVolMethod() == VOL_METHOD_MULTI)
-								{
-									OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
-									if (adjust_view)
-									{
-										adjust_view->SetRenderView(view);
-										adjust_view->UpdateSync();
-									}
-								}
-							}
-						}
-						else if (item_data->type == 3)//mesh data
-						{
-							MeshData* md = view->GetMeshData(name_data);
-							if (md)
-							{
-								md->SetDisp(true);
-								view->RemoveMeshData(name_data);
-							}
-						}
-						else if (item_data->type == 4)//annotations
-						{
-							Annotations* ann = view->GetAnnotations(name_data);
-							if (ann)
-							{
-								ann->SetDisp(true);
-								view->RemoveAnnotations(name_data);
-							}
-						}
-						else if (item_data->type == 5)//group
-						{
-							view->RemoveGroup(name_data);
-						}
-						else if (item_data->type == 6)//mesh group
-						{
-							view->RemoveGroup(name_data);
-						}
-					}
-				}
-				break;
-			case 5://group
-				{
-					wxTreeItemId gpar_item = GetItemParent(par_item);
-					wxString gpar_name = GetItemText(gpar_item);
-					RenderCanvas* view = m_frame->GetRenderCanvas(gpar_name);
-					if (!view)
-						break;
-					LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-					if (item_data && item_data->type == 2)
-						view->RemoveVolumeData(name_data);
-
-					if (view->GetVolMethod() == VOL_METHOD_MULTI)
-					{
-						OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
-						if (adjust_view)
-						{
-							adjust_view->SetRenderView(view);
-							adjust_view->UpdateSync();
-						}
-					}
-				}
-				break;
-			case 6://mesh group
-				{
-					wxTreeItemId gpar_item = GetItemParent(par_item);
-					wxString gpar_name = GetItemText(gpar_item);
-					RenderCanvas* view = m_frame->GetRenderCanvas(gpar_name);
-					if (!view)
-						break;
-					LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-					if (item_data && item_data->type==3)
-						view->RemoveMeshData(name_data);
-			}
-				break;
-			}
-		}
-	}
-}
-
-int DataTreeCtrl::TraversalSelect(wxTreeItemId item, wxString name)
-{
-	int found = 0;
-	wxTreeItemIdValue cookie;
-	wxTreeItemId child_item = GetFirstChild(item, cookie);
-	if (child_item.IsOk())
-		found = TraversalSelect(child_item, name);
-	child_item = GetNextChild(item, cookie);
-	while (!found && child_item.IsOk())
-	{
-		found = TraversalSelect(child_item, name);
-		child_item = GetNextChild(item, cookie);
-	}
-
-	wxString item_name = GetItemText(item);
-	if (item_name == name)
-	{
-		found = 1;
-		SelectItem(item);
-	}
-	return found;
-}
+//void DataTreeCtrl::TraversalDelete(wxTreeItemId item)
+//{
+//	wxTreeItemIdValue cookie;
+//	wxTreeItemId child_item = GetFirstChild(item, cookie);
+//	if (child_item.IsOk())
+//		TraversalDelete(child_item);
+//	child_item = GetNextChild(item, cookie);
+//	while (child_item.IsOk())
+//	{
+//		TraversalDelete(child_item);
+//		child_item = GetNextChild(item, cookie);
+//	}
+//
+//	LayerInfo* item_data = (LayerInfo*)GetItemData(item);
+//	delete item_data;
+//	SetItemData(item, 0);
+//}
+//
+//int DataTreeCtrl::TraversalSelect(wxTreeItemId item, wxString name)
+//{
+//	int found = 0;
+//	wxTreeItemIdValue cookie;
+//	wxTreeItemId child_item = GetFirstChild(item, cookie);
+//	if (child_item.IsOk())
+//		found = TraversalSelect(child_item, name);
+//	child_item = GetNextChild(item, cookie);
+//	while (!found && child_item.IsOk())
+//	{
+//		found = TraversalSelect(child_item, name);
+//		child_item = GetNextChild(item, cookie);
+//	}
+//
+//	wxString item_name = GetItemText(item);
+//	if (item_name == name)
+//	{
+//		found = 1;
+//		SelectItem(item);
+//	}
+//	return found;
+//}
 
 //icons
 void DataTreeCtrl::AppendIcon()
@@ -466,7 +332,7 @@ TreePanel::TreePanel(MainFrame* frame,
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);
 	//create data tree
-	m_datatree = new DataTreeCtrl(frame, this);
+	m_datatree = new DataTreeCtrl(this);
 
 	//create tool bar
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
@@ -583,141 +449,12 @@ void TreePanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 void TreePanel::Action()
 {
-	if (glbin_vol_selector.GetMaskHold())
-		return;
+	bool bval = wxGetKeyState(WXK_CONTROL);
 
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-	wxString name = "";
-	bool rc = wxGetKeyState(WXK_CONTROL);
-	bool refresh = false;
-	fluo::ValueCollection vc;
-
-	if (sel_item.IsOk() && m_frame)
-	{
-		name = m_datatree->GetItemText(sel_item);
-		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
-		if (item_data)
-		{
-			switch (item_data->type)
-			{
-			case 1://view
-			{
-				RenderCanvas* view = m_frame->GetRenderCanvas(name);
-				if (view)
-				{
-					if (rc)
-						view->RandomizeColor();
-					else
-						view->ToggleDraw();
-				}
-			}
-			break;
-			case 2://volume data
-			{
-				VolumeData* vd = glbin_data_manager.GetVolumeData(name);
-				if (vd)
-				{
-					if (rc)
-						vd->RandomizeColor();
-					else
-					{
-						vd->ToggleDisp();
-						for (int i = 0; i < m_frame->GetViewNum(); i++)
-						{
-							RenderCanvas* view = m_frame->GetRenderCanvas(i);
-							if (view)
-								view->SetVolPopDirty();
-						}
-					}
-				}
-			}
-			break;
-			case 3://mesh data
-			{
-				MeshData* md = glbin_data_manager.GetMeshData(name);
-				if (md)
-				{
-					if (rc)
-						md->RandomizeColor();
-					else
-					{
-						md->ToggleDisp();
-						for (int i = 0; i < m_frame->GetViewNum(); i++)
-						{
-							RenderCanvas* view = m_frame->GetRenderCanvas(i);
-							if (view)
-								view->SetMeshPopDirty();
-						}
-					}
-				}
-			}
-			break;
-			case 4://annotations
-			{
-				Annotations* ann = glbin_data_manager.GetAnnotations(name);
-				if (ann)
-				{
-					ann->ToggleDisp();
-				}
-			}
-			break;
-			case 5://group
-			{
-				wxString par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item));
-				RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
-				if (view)
-				{
-					DataGroup* group = view->GetGroup(name);
-					if (group)
-					{
-						if (rc)
-							group->RandomizeColor();
-						else
-						{
-							group->ToggleDisp();
-							view->SetVolPopDirty();
-						}
-					}
-				}
-			}
-			break;
-			case 6://mesh group
-			{
-				wxString par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item));
-				RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
-				if (view)
-				{
-					MeshGroup* group = view->GetMGroup(name);
-					if (group)
-					{
-						if (rc)
-							group->RandomizeColor();
-						else
-						{
-							group->ToggleDisp();
-							view->SetMeshPopDirty();
-						}
-					}
-				}
-			}
-			break;
-			}
-		}
-
-		m_scroll_pos = GetScrollPos(wxVERTICAL);
-		refresh = true;
-		//if (rc)
-		//{
-		//	vc.insert(gstTreeCtrl);
-		//	//glbin.set_tree_selection(name.ToStdString());
-		//}
-		//else
-		//	vc.insert(gstTreeIcons);
-		SetScrollPos(wxVERTICAL, m_scroll_pos);
-		//UpdateSelection();
-	}
-	//if (refresh)
-	//	FluoRefresh(2, vc);
+	if (bval)
+		RandomizeColor();
+	else
+		ToggleDisplay();
 }
 
 void TreePanel::UpdateTree()
@@ -725,8 +462,8 @@ void TreePanel::UpdateTree()
 	if (!m_frame || !m_datatree)
 		return;
 
-	m_datatree->DeleteAll();
 	glbin_vol_selector.SetCopyMaskVolume(0);
+	m_datatree->DeleteAllItems();
 	m_datatree->ClearIcons();
 
 	wxString root_str = "Scene Graph";
@@ -1233,130 +970,12 @@ void TreePanel::AddVolumeGroup()
 	if (glbin_vol_selector.GetMaskHold())
 		return;
 
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-	if (!m_frame) return;
+	RenderCanvas* view = glbin_current.canvas;
+	wxString name = view->AddGroup("");
+	DataGroup* group = view->GetGroup(name);
+	glbin_current.SetVolumeGroup(group);
 
-	if (!sel_item.IsOk())
-	{
-		wxTreeItemIdValue cookie;
-		sel_item = m_datatree->GetFirstChild(m_datatree->GetRootItem(), cookie);
-	}
-
-	if (sel_item.IsOk())
-	{
-		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
-		if (item_data && item_data->type == 1)
-		{
-			//view
-			wxString name = m_datatree->GetItemText(sel_item);
-			RenderCanvas* view = m_frame->GetRenderCanvas(name);
-			if (view)
-			{
-				wxString group_name = view->AddGroup("");
-				m_datatree->AddGroupItem(sel_item, group_name);
-				m_datatree->Expand(sel_item);
-			}
-		}
-		else if (item_data && item_data->type == 2)
-		{
-			//volume
-			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
-				if (par_data && par_data->type == 1)
-				{
-					//volume in view
-					wxString name = m_datatree->GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetRenderCanvas(name);
-					if (view)
-					{
-						wxString group_name = view->AddGroup("");
-						m_datatree->AddGroupItem(par_item, group_name);
-					}
-				}
-				else if (par_data && par_data->type == 5)
-				{
-					//volume in group
-					wxTreeItemId gpar_item = m_datatree->GetItemParent(par_item);
-					if (gpar_item.IsOk())
-					{
-						LayerInfo* gpar_data = (LayerInfo*)m_datatree->GetItemData(gpar_item);
-						if (gpar_data && gpar_data->type == 1)
-						{
-							wxString name = m_datatree->GetItemText(gpar_item);
-							RenderCanvas* view = m_frame->GetRenderCanvas(name);
-							if (view)
-							{
-								wxString group_name = view->AddGroup("");
-								m_datatree->AddGroupItem(gpar_item, group_name);
-							}
-						}
-					}
-				}
-			}
-		}
-		else if (item_data && item_data->type == 3)
-		{
-			//mesh
-			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
-				if (par_data && par_data->type == 1)
-				{
-					//mesh in view
-					wxString name = m_datatree->GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetRenderCanvas(name);
-					if (view)
-					{
-						wxString group_name = view->AddGroup("");
-						m_datatree->AddGroupItem(par_item, group_name);
-					}
-				}
-				else if (par_data && par_data->type == 6)
-				{
-					//mesh in group
-					wxTreeItemId gpar_item = m_datatree->GetItemParent(par_item);
-					if (gpar_item.IsOk())
-					{
-						LayerInfo* gpar_data = (LayerInfo*)m_datatree->GetItemData(gpar_item);
-						if (gpar_data && gpar_data->type == 1)
-						{
-							wxString name = m_datatree->GetItemText(gpar_item);
-							RenderCanvas* view = m_frame->GetRenderCanvas(name);
-							if (view)
-							{
-								wxString group_name = view->AddGroup("");
-								m_datatree->AddGroupItem(gpar_item, group_name);
-							}
-						}
-					}
-				}
-			}
-		}
-		else if ((item_data && item_data->type == 5) ||
-			(item_data && item_data->type == 6))
-		{
-			//group
-			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
-				if (par_data && par_data->type == 1)
-				{
-					//group in view
-					wxString name = m_datatree->GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetRenderCanvas(name);
-					if (view)
-					{
-						wxString group_name = view->AddGroup("");
-						m_datatree->AddGroupItem(par_item, group_name);
-					}
-				}
-			}
-		}
-	}
+	FluoUpdate({ gstTreeCtrl });
 }
 
 void TreePanel::AddMeshGroup()
@@ -1364,130 +983,105 @@ void TreePanel::AddMeshGroup()
 	if (glbin_vol_selector.GetMaskHold())
 		return;
 
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-	if (!m_frame) return;
+	RenderCanvas* view = glbin_current.canvas;
+	wxString name = view->AddMGroup("");
+	MeshGroup* group = view->GetMGroup(name);
+	glbin_current.SetMeshGroup(group);
 
-	if (!sel_item.IsOk())
+
+	FluoUpdate({ gstTreeCtrl });
+}
+
+void TreePanel::DeleteSelection()
+{
+	if (glbin_vol_selector.GetMaskHold())
+		return;
+
+	int type = glbin_current.GetType();
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (canvas)
+		return;
+
+	switch (type)
 	{
-		wxTreeItemIdValue cookie;
-		sel_item = m_datatree->GetFirstChild(m_datatree->GetRootItem(), cookie);
+	case 1://view
+	{
+		wxString name = canvas->GetName();
+		m_frame->DeleteVRenderView(name);
 	}
-
-	if (sel_item.IsOk())
+		break;
+	case 2://volume
 	{
-		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
-		if (item_data && item_data->type == 1)
+		VolumeData* vd = glbin_current.vol_data;
+		if (vd)
 		{
-			//view
-			wxString name = m_datatree->GetItemText(sel_item);
-			RenderCanvas* view = m_frame->GetRenderCanvas(name);
-			if (view)
-			{
-				wxString group_name = view->AddMGroup("");
-				m_datatree->AddMGroupItem(sel_item, group_name);
-				m_datatree->Expand(sel_item);
-			}
-		}
-		else if (item_data && item_data->type == 2)
-		{
-			//volume
-			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
-				if (par_data && par_data->type == 1)
-				{
-					//volume in view
-					wxString name = m_datatree->GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetRenderCanvas(name);
-					if (view)
-					{
-						wxString group_name = view->AddMGroup("");
-						m_datatree->AddMGroupItem(par_item, group_name);
-					}
-				}
-				else if (par_data && par_data->type == 5)
-				{
-					//volume in group
-					wxTreeItemId gpar_item = m_datatree->GetItemParent(par_item);
-					if (gpar_item.IsOk())
-					{
-						LayerInfo* gpar_data = (LayerInfo*)m_datatree->GetItemData(gpar_item);
-						if (gpar_data && gpar_data->type == 1)
-						{
-							wxString name = m_datatree->GetItemText(gpar_item);
-							RenderCanvas* view = m_frame->GetRenderCanvas(name);
-							if (view)
-							{
-								wxString group_name = view->AddMGroup("");
-								m_datatree->AddMGroupItem(gpar_item, group_name);
-							}
-						}
-					}
-				}
-			}
-		}
-		else if (item_data && item_data->type == 3)
-		{
-			//mesh
-			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
-				if (par_data && par_data->type == 1)
-				{
-					//mesh in view
-					wxString name = m_datatree->GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetRenderCanvas(name);
-					if (view)
-					{
-						wxString group_name = view->AddMGroup("");
-						m_datatree->AddMGroupItem(par_item, group_name);
-					}
-				}
-				else if (par_data && par_data->type == 6)
-				{
-					//mesh in group
-					wxTreeItemId gpar_item = m_datatree->GetItemParent(par_item);
-					if (gpar_item.IsOk())
-					{
-						LayerInfo* gpar_data = (LayerInfo*)m_datatree->GetItemData(gpar_item);
-						if (gpar_data && gpar_data->type == 1)
-						{
-							wxString name = m_datatree->GetItemText(gpar_item);
-							RenderCanvas* view = m_frame->GetRenderCanvas(name);
-							if (view)
-							{
-								wxString group_name = view->AddMGroup("");
-								m_datatree->AddMGroupItem(gpar_item, group_name);
-							}
-						}
-					}
-				}
-			}
-		}
-		else if ((item_data && item_data->type == 5) ||
-			(item_data && item_data->type == 6))
-		{
-			//group
-			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
-				if (par_data && par_data->type == 1)
-				{
-					//group in view
-					wxString name = m_datatree->GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetRenderCanvas(name);
-					if (view)
-					{
-						wxString group_name = view->AddMGroup("");
-						m_datatree->AddMGroupItem(par_item, group_name);
-					}
-				}
-			}
+			vd->SetDisp(true);
+			wxString name = vd->GetName();
+			canvas->RemoveVolumeData(name);
 		}
 	}
+	break;
+	case 3://mesh
+	{
+		MeshData* md = glbin_current.mesh_data;
+		if (md)
+		{
+			md->SetDisp(true);
+			wxString name = md->GetName();
+			canvas->RemoveMeshData(name);
+		}
+	}
+	break;
+	case 4://annotations
+	{
+		Annotations* ann = glbin_current.ann_data;
+		if (ann)
+		{
+			ann->SetDisp(true);
+			wxString name = ann->GetName();
+			canvas->RemoveAnnotations(name);
+		}
+	}
+	break;
+	case 5://volume group
+	{
+		DataGroup* group = glbin_current.vol_group;
+		if (group)
+		{
+			wxString name = group->GetName();
+			canvas->RemoveGroup(name);
+		}
+	}
+	break;
+	case 6://mesh group
+	{
+		MeshGroup* group = glbin_current.mesh_group;
+		if (group)
+		{
+			wxString name = group->GetName();
+			canvas->RemoveGroup(name);
+		}
+	}
+	}
+
+	glbin_current.SetRoot();
+
+	FluoRefresh(0, { gstTreeCtrl });
+}
+
+//delete
+void TreePanel::DeleteAll()
+{
+	for (int i = m_frame->GetViewNum() - 1; i > 0; --i)
+	{
+		m_frame->DeleteVRenderView(i);
+	}
+
+	m_frame->GetRenderCanvas(0)->ClearAll();
+
+	glbin_current.SetRoot();
+
+	FluoRefresh(0, { gstTreeCtrl });
 }
 
 void TreePanel::Expand()
@@ -1499,71 +1093,136 @@ void TreePanel::Expand()
 		m_datatree->Expand(sel_item);
 }
 
+void TreePanel::ToggleDisplay()
+{
+	if (glbin_vol_selector.GetMaskHold())
+		return;
+
+	int type = glbin_current.GetType();
+
+	switch (type)
+	{
+	case 1://canvas
+	{
+		//view
+		RenderCanvas* view = glbin_current.canvas;
+		if (view)
+			view->ToggleDraw();
+	}
+	break;
+	case 2://volume data
+	{
+		//volume
+		RenderCanvas* view = glbin_current.canvas;
+		VolumeData* vd = glbin_current.vol_data;
+		if (view && vd)
+		{
+			vd->ToggleDisp();
+			view->SetVolPopDirty();
+		}
+	}
+	break;
+	case 3://mesh data
+	{
+		//mesh
+		RenderCanvas* view = glbin_current.canvas;
+		MeshData* md = glbin_current.mesh_data;
+		if (view && md)
+		{
+			md->ToggleDisp();
+			view->SetMeshPopDirty();
+		}
+	}
+	break;
+	case 4://annotations
+	{
+		Annotations* ann = glbin_current.ann_data;
+		if (ann)
+			ann->ToggleDisp();
+	}
+	break;
+	case 5://volume group
+	{
+		//volume group
+		RenderCanvas* view = glbin_current.canvas;
+		DataGroup* group = glbin_current.vol_group;
+		if (view && group)
+		{
+			group->ToggleDisp();
+			view->SetVolPopDirty();
+		}
+	}
+	break;
+	case 6://mesh group
+	{
+		//mesh group
+		RenderCanvas* view = glbin_current.canvas;
+		MeshGroup* group = glbin_current.mesh_group;
+		if (view && group)
+		{
+			group->ToggleDisp();
+			view->SetVolPopDirty();
+		}
+	}
+	}
+
+	m_scroll_pos = GetScrollPos(wxVERTICAL);
+	SetScrollPos(wxVERTICAL, m_scroll_pos);
+
+	FluoRefresh(0, { gstTreeIcons });
+}
+
 void TreePanel::RandomizeColor()
 {
 	if (glbin_vol_selector.GetMaskHold())
 		return;
 
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-	if (!m_frame) return;
-	if (!sel_item.IsOk()) return;
+	int type = glbin_current.GetType();
 
-	LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
-	if (!item_data) return;
-
-	wxString name = m_datatree->GetItemText(sel_item);
-	if (item_data->type == 1)
+	switch (type)
+	{
+	case 1://canvas
 	{
 		//view
-		RenderCanvas* view = m_frame->GetRenderCanvas(name);
+		RenderCanvas* view = glbin_current.canvas;
 		if (view)
 			view->RandomizeColor();
 	}
-	else if (item_data->type == 2)
+	break;
+	case 2://volume data
 	{
 		//volume
-		VolumeData* vd = glbin_data_manager.GetVolumeData(name);
+		VolumeData* vd = glbin_current.vol_data;
 		if (vd)
 			vd->RandomizeColor();
 	}
-	else if (item_data->type == 3)
+	break;
+	case 3://mesh data
 	{
 		//mesh
-		MeshData* md = glbin_data_manager.GetMeshData(name);
+		MeshData* md = glbin_current.mesh_data;
 		if (md)
 			md->RandomizeColor();
 	}
-	else if (item_data->type == 5)
+	break;
+	case 5://volume group
 	{
 		//volume group
-		wxString par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item));
-		RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
-		if (view)
-		{
-			DataGroup* group = view->GetGroup(name);
-			if (group)
-				group->RandomizeColor();
-		}
+		DataGroup* group = glbin_current.vol_group;
+		if (group)
+			group->RandomizeColor();
 	}
-	else if (item_data->type == 6)
+	break;
+	case 6://mesh group
 	{
 		//mesh group
-		wxString par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item));
-		RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
-		if (view)
-		{
-			MeshGroup* group = view->GetMGroup(name);
-			if (group)
-				group->RandomizeColor();
-		}
+		MeshGroup* group = glbin_current.mesh_group;
+		if (group)
+			group->RandomizeColor();
+	}
 	}
 
-
-	m_scroll_pos = GetScrollPos(wxVERTICAL);
-	SetScrollPos(wxVERTICAL, m_scroll_pos);
-	//UpdateSelection();
-	//glbin.set_tree_selection(name.ToStdString());
-	//FluoRefresh(2, { gstTreeCtrl });
+	FluoRefresh(0, { gstTreeIcons });
 }
 
 void TreePanel::CloseView()
@@ -1571,17 +1230,15 @@ void TreePanel::CloseView()
 	if (glbin_vol_selector.GetMaskHold())
 		return;
 
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-
-	if (sel_item.IsOk() && m_frame)
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (canvas)
 	{
-		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
-		if (item_data && item_data->type == 1)//view
-		{
-			wxString name = m_datatree->GetItemText(sel_item);
-			m_frame->DeleteVRenderView(name);
-		}
+		wxString name = canvas->GetName();
+		m_frame->DeleteVRenderView(name);
 	}
+
+	glbin_current.SetRoot();
+	FluoRefresh(0, { gstTreeCtrl, gstCurrentSelect });
 }
 
 void TreePanel::Isolate()
@@ -1589,61 +1246,40 @@ void TreePanel::Isolate()
 	if (glbin_vol_selector.GetMaskHold())
 		return;
 
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-	bool refresh = false;
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
 
-	if (sel_item.IsOk() && m_frame)
+	wxString name;
+	int type = glbin_current.GetType();
+	switch (type)
 	{
-		wxString viewname = "";
-		wxString itemname = "";
-		int item_type = 0;
-
-		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
-		if (item_data)
-		{
-			item_type = item_data->type;
-			itemname = m_datatree->GetItemText(sel_item);
-			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
-				if (par_data)
-				{
-					if (par_data->type == 1)
-					{
-						//view
-						viewname = m_datatree->GetItemText(par_item);
-					}
-					else if (par_data->type == 5 ||
-						par_data->type == 6)
-					{
-						wxTreeItemId gpar_item = m_datatree->GetItemParent(par_item);
-						if (gpar_item.IsOk())
-						{
-							LayerInfo* gpar_data = (LayerInfo*)m_datatree->GetItemData(gpar_item);
-							if (gpar_data && gpar_data->type == 1)
-							{
-								//view
-								viewname = m_datatree->GetItemText(gpar_item);
-							}
-						}
-					}
-				}
-			}
-		}
-
-		RenderCanvas* view = m_frame->GetRenderCanvas(viewname);
-		if (view)
-		{
-			view->Isolate(item_type, itemname);
-			refresh = true;
-		}
-
-		//UpdateSelection();
+	case 1://view
+		break;
+	case 2://volume
+		if (glbin_current.vol_data)
+			name = glbin_current.vol_data->GetName();
+		break;
+	case 3://mesh
+		if (glbin_current.mesh_data)
+			name = glbin_current.mesh_data->GetName();
+		break;
+	case 4://annotations
+		if (glbin_current.ann_data)
+			name = glbin_current.ann_data->GetName();
+		break;
+	case 5://volume group
+		if (glbin_current.vol_group)
+			name = glbin_current.vol_group->GetName();
+		break;
+	case 6://mesh group
+		if (glbin_current.mesh_group)
+			name = glbin_current.mesh_group->GetName();
+		break;
 	}
 
-	//if (refresh)
-	//	FluoRefresh(2, { gstTreeIcons });
+	canvas->Isolate(type, name);
+	FluoRefresh(2, { gstTreeIcons });
 }
 
 void TreePanel::ShowAll()
@@ -1651,61 +1287,12 @@ void TreePanel::ShowAll()
 	if (glbin_vol_selector.GetMaskHold())
 		return;
 
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-	bool refresh = false;
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
 
-	if (sel_item.IsOk() && m_frame)
-	{
-		wxString viewname = "";
-		wxString itemname = "";
-		int item_type = 0;
-
-		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
-		if (item_data)
-		{
-			item_type = item_data->type;
-			itemname = m_datatree->GetItemText(sel_item);
-			wxTreeItemId par_item = m_datatree->GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*)m_datatree->GetItemData(par_item);
-				if (par_data)
-				{
-					if (par_data->type == 1)
-					{
-						//view
-						viewname = m_datatree->GetItemText(par_item);
-					}
-					else if (par_data->type == 5 ||
-						par_data->type == 6)
-					{
-						wxTreeItemId gpar_item = m_datatree->GetItemParent(par_item);
-						if (gpar_item.IsOk())
-						{
-							LayerInfo* gpar_data = (LayerInfo*)m_datatree->GetItemData(gpar_item);
-							if (gpar_data && gpar_data->type == 1)
-							{
-								//view
-								viewname = m_datatree->GetItemText(gpar_item);
-							}
-						}
-					}
-				}
-			}
-		}
-
-		RenderCanvas* view = m_frame->GetRenderCanvas(viewname);
-		if (view)
-		{
-			view->ShowAll();
-			refresh = true;
-		}
-
-		//UpdateSelection();
-	}
-
-	//if (refresh)
-	//	FluoRefresh(2, { gstTreeIcons });
+	canvas->ShowAll();
+	FluoRefresh(2, { gstTreeIcons });
 }
 
 void TreePanel::ManipulateData()
@@ -1713,19 +1300,7 @@ void TreePanel::ManipulateData()
 	if (glbin_vol_selector.GetMaskHold())
 		return;
 
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-
-	if (sel_item.IsOk() && m_frame)
-	{
-		LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
-		if (item_data && item_data->type == 3)//mesh data
-		{
-			wxString name = m_datatree->GetItemText(sel_item);
-			MeshData* md = glbin_data_manager.GetMeshData(name);
-			m_frame->UpdateProps({ gstManipPropPanel });
-			//m_frame->OnSelection(6, 0, 0, 0, md);
-		}
-	}
+	m_frame->UpdateProps({ gstManipPropPanel });
 }
 
 void TreePanel::OnContextMenu(wxContextMenuEvent& event)
@@ -1885,7 +1460,7 @@ void TreePanel::OnToolbar(wxCommandEvent& event)
 		views.insert(-1);
 		break;
 	case ID_RemoveData:
-		m_datatree->DeleteSelection();
+		DeleteSelection();
 		glbin_current.SetRoot();
 		vc.insert(gstTreeCtrl);
 		break;
@@ -1970,7 +1545,7 @@ void TreePanel::OnMenu(wxCommandEvent& event)
 		views.insert(-1);
 		break;
 	case ID_RemoveData:
-		m_datatree->DeleteSelection();
+		DeleteSelection();
 		glbin_current.SetRoot();
 		vc.insert(gstTreeCtrl);
 		break;
@@ -2452,7 +2027,7 @@ void TreePanel::OnKeyDown(wxKeyEvent& event)
 {
 	if (event.GetKeyCode() == WXK_DELETE ||
 		event.GetKeyCode() == WXK_BACK)
-		m_datatree->DeleteSelection();
+		DeleteSelection();
 	glbin_current.SetRoot();
 	FluoRefresh(0, { gstTreeCtrl });
 	//event.Skip();

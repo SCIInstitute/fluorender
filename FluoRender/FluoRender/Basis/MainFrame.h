@@ -202,10 +202,10 @@ public:
 	int GetViewNum();
 	//RenderCanvas* GetCurRenderCanvas();
 	RenderCanvas* GetRenderCanvas(int index);
-	RenderCanvas* GetRenderCanvas(wxString& name);
+	RenderCanvas* GetRenderCanvas(const wxString& name);
 	int GetRenderCanvas(RenderCanvas* view);
 	void DeleteVRenderView(int i);
-	void DeleteVRenderView(wxString &name);
+	void DeleteVRenderView(const wxString &name);
 
 	//organize render views
 	void OrganizeVRenderViews(int mode);

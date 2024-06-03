@@ -53,7 +53,7 @@ class VolumeData;
 class DataTreeCtrl: public wxTreeCtrl
 {
 public:
-	DataTreeCtrl(MainFrame* frame,
+	DataTreeCtrl(
 		wxWindow* parent,
 		const wxPoint& pos=wxDefaultPosition,
 		const wxSize& size=wxDefaultSize,
@@ -65,8 +65,6 @@ public:
 	~DataTreeCtrl();
 
 private:
-	MainFrame* m_frame;
-
 	//icon operations
 	//change the color of the icon dual
 	void ChangeIconColor(int i, wxColor c);
@@ -74,13 +72,9 @@ private:
 	void ClearIcons();
 	int GetIconNum();
 
+	//void TraversalDelete(wxTreeItemId item);
+	//int TraversalSelect(wxTreeItemId item, wxString name);
 	//item operations
-	//delete all
-	void DeleteAll();
-	void DeleteSelection();
-	//traversal delete
-	void TraversalDelete(wxTreeItemId item);
-	int TraversalSelect(wxTreeItemId item, wxString name);
 	//root item
 	wxTreeItemId AddRootItem(const wxString &text);
 	void ExpandRootItem();
@@ -174,9 +168,13 @@ public:
 	//toolbar operations
 	void AddVolumeGroup();
 	void AddMeshGroup();
+	//delete all
+	void DeleteSelection();
+	void DeleteAll();
 
 	//menu operations
 	void Expand();
+	void ToggleDisplay();
 	void RandomizeColor();
 	void CloseView();
 	void Isolate();

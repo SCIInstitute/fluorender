@@ -37,7 +37,7 @@ class VolumeData;
 class DataListCtrl : public wxListCtrl
 {
 public:
-	DataListCtrl(MainFrame *frame,
+	DataListCtrl(
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -52,7 +52,6 @@ public:
 	friend class ListPanel;
 
 private:
-	MainFrame* m_frame;
 	wxTextCtrl *m_rename_text;
 };
 
@@ -99,26 +98,22 @@ public:
 	void UpdateSelection();
 
 	void AddSelectionToView(int view);
+	void AddSelToCurView();
 	void RenameSelection(const wxString& name);
+	void SaveSelection();
+	void BakeSelection();
+	void SaveSelMask();
 	void DeleteSelection();
 	void DeleteAll();
 
-	void SaveSelMask();
-	void SaveAllMasks();
 
 private:
 	wxToolBar *m_toolbar;
 	DataListCtrl *m_datalist;
 
 	void OnContextMenu(wxContextMenuEvent& event);
-	void OnAddToView(wxCommandEvent& event);
-
-	void OnRename(wxCommandEvent& event);
-	void OnSave(wxCommandEvent& event);
-	void OnBake(wxCommandEvent& event);
-	void OnSaveMask(wxCommandEvent& event);
-	void OnDelete(wxCommandEvent& event);
-	void OnDeleteAll(wxCommandEvent& event);
+	void OnToolbar(wxCommandEvent& event);
+	void OnMenu(wxCommandEvent& event);
 
 	void OnSelect(wxListEvent& event);
 	void OnAct(wxListEvent& event);
@@ -126,7 +121,7 @@ private:
 	void OnKeyUp(wxKeyEvent& event);
 	void OnMouse(wxMouseEvent& event);
 	void OnEndEditName(wxCommandEvent& event);
-	void OnScroll(wxScrollWinEvent& event);
+	void OnScrollWin(wxScrollWinEvent& event);
 	void OnScroll(wxMouseEvent& event);
 
 	void OnCropCheck(wxCommandEvent& event);
@@ -137,8 +132,6 @@ private:
 	void OnSizeZText(wxCommandEvent& event);
 	void OnFilterChange(wxCommandEvent& event);
 	static wxWindow* CreateExtraControl(wxWindow* parent);
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_LISTPANEL_H_
