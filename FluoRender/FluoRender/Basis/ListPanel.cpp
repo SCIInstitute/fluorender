@@ -308,23 +308,25 @@ void ListPanel::UpdateSelection()
 	break;
 	}
 
-	long item = -1;
+	long item1 = -1;
+	long item2 = -1;
 	for (;;)
 	{
-		item = m_datalist->GetNextItem(item,
+		item2 = m_datalist->GetNextItem(item1,
 			wxLIST_NEXT_ALL,
 			wxLIST_STATE_DONTCARE);
-		if (item != -1)
+		if (item1 != -1 && item2 != item1)
 		{
-			wxString stype = m_datalist->GetText(item, 0);
-			wxString sname = m_datalist->GetText(item, 1);
+			wxString stype = m_datalist->GetText(item2, 0);
+			wxString sname = m_datalist->GetText(item2, 1);
 
 			if (stype == item_type &&
 				sname == name)
 			{
-				m_datalist->SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+				m_datalist->SetItemState(item2, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 				break;
 			}
+			item1 = item2;
 		}
 		else
 			break;
