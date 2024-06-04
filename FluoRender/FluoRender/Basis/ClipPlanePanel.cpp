@@ -432,7 +432,7 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	VolumeData* vd = glbin_current.vol_data;
 	MeshData* md = glbin_current.mesh_data;
-	if (!vd || !md)
+	if (!vd && !md)
 		return;
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)

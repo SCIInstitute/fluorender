@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _COLOCALIZATIONDLG_H_
 #define _COLOCALIZATIONDLG_H_
 
+#include <PropPanel.h>
 #include <wx/wx.h>
 #include <wx/tglbtn.h>
 #include <wx/grid.h>
@@ -38,41 +39,34 @@ DEALINGS IN THE SOFTWARE.
 class MainFrame;
 class RenderCanvas;
 class DataGroup;
-class ColocalizationDlg : public wxPanel
+class ColocalizationDlg : public PropPanel
 {
 public:
-	enum
-	{
-		ID_ColocalizeBtn = ID_COLOCALIZE,
-		ID_UseSelChk,
-		ID_AutoUpdateBtn,
-		//settings
-		ID_ProductRdb,
-		ID_MinValueRdb,
-		ID_LogicalAndRdb,
-		//formats
-		ID_IntWeightBtn,
-		ID_RatioBtn,
-		ID_PhysicalBtn,
-		ID_ColorMapBtn,
+	//enum
+	//{
+	//	ID_ColocalizeBtn = ID_COLOCALIZE,
+	//	ID_UseSelChk,
+	//	ID_AutoUpdateBtn,
+	//	//settings
+	//	ID_ProductRdb,
+	//	ID_MinValueRdb,
+	//	ID_LogicalAndRdb,
+	//	//formats
+	//	ID_IntWeightBtn,
+	//	ID_RatioBtn,
+	//	ID_PhysicalBtn,
+	//	ID_ColorMapBtn,
 
-		//output
-		ID_HistoryChk,
-		ID_ClearHistBtn,
-		ID_OutputGrid
-	};
+	//	//output
+	//	ID_HistoryChk,
+	//	ID_ClearHistBtn,
+	//	ID_OutputGrid
+	//};
 
 	ColocalizationDlg(MainFrame* frame);
 	~ColocalizationDlg();
 
-	void SetView(RenderCanvas* view)
-	{
-		m_view = view;
-	}
-	void SetGroup(DataGroup* group)
-	{
-		m_group = group;
-	}
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 	//execute
 	void Colocalize();
@@ -83,23 +77,20 @@ public:
 	void PasteData();
 
 	//settings
-	void GetSettings();
+	//void GetSettings();
 
-	bool GetThreshUpdate()
-	{
-		return m_auto_update && (m_method == 2);
-	}
-	bool GetColormapUpdate()
-	{
-		return m_auto_update && m_colormap;
-	}
+	//bool GetThreshUpdate()
+	//{
+	//	return m_auto_update && (m_method == 2);
+	//}
+	//bool GetColormapUpdate()
+	//{
+	//	return m_auto_update && m_colormap;
+	//}
 
 private:
-	MainFrame* m_frame;
-	//current view
-	RenderCanvas* m_view;
-	DataGroup *m_group;
-
+	//output
+	bool m_hold_history;
 	wxString m_output_file;
 
 	//use selection
@@ -112,8 +103,6 @@ private:
 	bool m_get_ratio;
 	bool m_physical_size;
 	bool m_colormap;
-	//output
-	bool m_hold_history;
 	//colormap
 	double m_cm_min;
 	double m_cm_max;
@@ -178,7 +167,7 @@ private:
 	void OnSelectCell(wxGridEvent& event);
 	void OnGridLabelClick(wxGridEvent& event);
 
-	DECLARE_EVENT_TABLE()
+	//DECLARE_EVENT_TABLE()
 };
 
 #endif//_COLOCALIZATIONDLG_H_
