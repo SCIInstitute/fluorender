@@ -137,11 +137,21 @@ wxString DataListCtrl::EndEdit()
 void DataListCtrl::OnSelectionChanged(wxListEvent& event)
 {
 	wxFont font;
-	//if (m_selected != -1)
-	//{
-	//	font = GetItemFont(m_selected);
-	//	font.setbo
-	//}
+	if (m_selected != -1)
+	{
+		font = GetItemFont(m_selected);
+		font.SetWeight(wxFONTWEIGHT_NORMAL);
+		SetItemFont(m_selected, font);
+	}
+	m_selected = GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+	if (m_selected != -1)
+	{
+		font = GetItemFont(m_selected);
+		font.SetWeight(wxFONTWEIGHT_BOLD);
+		SetItemFont(m_selected, font);
+	}
 	event.Skip();
 }
 
@@ -308,29 +318,41 @@ void ListPanel::UpdateSelection()
 	break;
 	}
 
-	long item1 = -1;
-	long item2 = -1;
-	for (;;)
+	for (int i = 0; i < m_datalist->GetItemCount(); ++i)
 	{
-		item2 = m_datalist->GetNextItem(item1,
-			wxLIST_NEXT_ALL,
-			wxLIST_STATE_DONTCARE);
-		if (item1 != -1 && item2 != item1)
-		{
-			wxString stype = m_datalist->GetText(item2, 0);
-			wxString sname = m_datalist->GetText(item2, 1);
+		wxString stype = m_datalist->GetText(i, 0);
+		wxString sname = m_datalist->GetText(i, 1);
 
-			if (stype == item_type &&
-				sname == name)
-			{
-				m_datalist->SetItemState(item2, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-				break;
-			}
-			item1 = item2;
-		}
-		else
+		if (stype == item_type &&
+			sname == name)
+		{
+			m_datalist->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 			break;
+		}
 	}
+	//long item1 = -1;
+	//long item2 = -1;
+	//for (;;)
+	//{
+	//	item2 = m_datalist->GetNextItem(item1,
+	//		wxLIST_NEXT_ALL,
+	//		wxLIST_STATE_DONTCARE);
+	//	if (item1 != -1 && item2 != item1)
+	//	{
+	//		wxString stype = m_datalist->GetText(item2, 0);
+	//		wxString sname = m_datalist->GetText(item2, 1);
+
+	//		if (stype == item_type &&
+	//			sname == name)
+	//		{
+	//			m_datalist->SetItemState(item2, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	//			break;
+	//		}
+	//		item1 = item2;
+	//	}
+	//	else
+	//		break;
+	//}
 }
 
 void ListPanel::AddSelectionToView(int view)
@@ -868,7 +890,7 @@ void ListPanel::OnSelect(wxListEvent& event)
 		glbin_current.SetAnnotation(glbin_data_manager.GetAnnotations(name));
 	}
 
-	FluoRefresh(0, { gstCurrentSelect });
+	FluoRefresh(1, { gstCurrentSelect });
 
 	event.Skip();
 }
