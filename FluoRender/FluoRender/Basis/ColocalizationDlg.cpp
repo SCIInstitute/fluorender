@@ -36,8 +36,7 @@ ColocalizationDlg::ColocalizationDlg(MainFrame* frame) :
 		wxDefaultPosition,
 		frame->FromDIP(wxSize(500, 500)),
 		0, "ColocalizationDlg"),
-		m_hold_history(false),
-		m_test_speed(false)
+		m_hold_history(false)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -218,7 +217,7 @@ void ColocalizationDlg::SetOutput()
 	int i, k;
 
 	k = 0;
-	cur_line = m_titles;
+	cur_line = glbin_colocalizer.GetTitles();
 	do
 	{
 		cur_field = cur_line.BeforeFirst('\t');
@@ -240,7 +239,7 @@ void ColocalizationDlg::SetOutput()
 		(glbin_colocal_def.m_cm_max - glbin_colocal_def.m_cm_min) > 0.0;
 
 	i = 0;
-	copy_data = m_values;
+	copy_data = glbin_colocalizer.GetValues();
 	do
 	{
 		k = 0;
@@ -336,245 +335,10 @@ void ColocalizationDlg::PasteData()
 {
 }
 
-//execute
-void ColocalizationDlg::Colocalize()
-{
-	RenderCanvas* canvas = glbin_current.canvas;
-	DataGroup* group = glbin_current.vol_group;
-	if (!group)
-		return;
-
-	int num = group->GetVolumeNum();
-	if (num < 2)
-		return;
-
-	//spacings, assuming they are all same for channels
-	double spcx, spcy, spcz;
-	double spc;
-	wxString unit;
-	VolumeData* vd = group->GetVolumeData(0);
-	if (!vd)
-	{
-		spc = spcx = spcy = spcz = 1.0;
-	}
-	else
-	{
-		vd->GetSpacings(spcx, spcy, spcz);
-		spc = spcx * spcy * spcz;
-	}
-	if (canvas)
-	{
-		switch (canvas->m_sb_unit)
-		{
-		case 0:
-			unit = L"nm\u00B3";
-			break;
-		case 1:
-		default:
-			unit = L"\u03BCm\u00B3";
-			break;
-		case 2:
-			unit = L"mm\u00B3";
-			break;
-		}
-	}
-
-	//result
-	std::vector<std::vector<double>> rm;//result matrix
-	rm.reserve(num);
-	for (size_t i = 0; i < num; ++i)
-	{
-		rm.push_back(std::vector<double>());
-		rm[i].reserve(num);
-		for (size_t j = 0; j < num; ++j)
-			rm[i].push_back(0);
-	}
-
-	m_titles.Clear();
-	m_values.Clear();
-	m_tps.clear();
-
-	//fill the matrix
-	if (glbin_colocal_def.m_method == 0 || glbin_colocal_def.m_method == 1 ||
-		(glbin_colocal_def.m_method == 2 && !glbin_colocal_def.m_int_weighted))
-	{
-		//dot product and min value
-		//symmetric matrix
-		for (int it1 = 0; it1 < num; ++it1)
-		{
-			for (int it2 = it1; it2 < num; ++it2)
-			{
-				VolumeData* vd1 = group->GetVolumeData(it1);
-				VolumeData* vd2 = group->GetVolumeData(it2);
-				if (!vd1 || !vd2 ||
-					!vd1->GetDisp() ||
-					!vd2->GetDisp())
-					continue;
-
-				flrd::ChannelCompare compare(vd1, vd2);
-				compare.SetUseMask(glbin_colocal_def.m_use_mask);
-				compare.SetIntWeighted(glbin_colocal_def.m_int_weighted);
-				compare.prework = std::bind(
-					&ColocalizationDlg::StartTimer, this, std::placeholders::_1);
-				compare.postwork = std::bind(
-					&ColocalizationDlg::StopTimer, this, std::placeholders::_1);
-				switch (glbin_colocal_def.m_method)
-				{
-				case 0://dot product
-					compare.Product();
-					break;
-				case 1://min value
-					compare.MinValue();
-					break;
-				case 2://threshold
-				{
-					//get threshold values
-					float th1, th2, th3, th4;
-					th1 = (float)(vd1->GetLeftThresh());
-					th2 = (float)(vd1->GetRightThresh());
-					th3 = (float)(vd2->GetLeftThresh());
-					th4 = (float)(vd2->GetRightThresh());
-					compare.Threshold(th1, th2, th3, th4);
-				}
-				break;
-				}
-				rm[it1][it2] = compare.Result();
-				if (it1 != it2)
-					rm[it2][it1] = compare.Result();
-			}
-		}
-	}
-	else if (glbin_colocal_def.m_method == 2 && glbin_colocal_def.m_int_weighted)
-	{
-		//threshold, asymmetrical
-		for (int it1 = 0; it1 < num; ++it1)
-		for (int it2 = 0; it2 < num; ++it2)
-		{
-			VolumeData* vd1 = group->GetVolumeData(it1);
-			VolumeData* vd2 = group->GetVolumeData(it2);
-			if (!vd1 || !vd2 ||
-				!vd1->GetDisp() ||
-				!vd2->GetDisp())
-				continue;
-
-			flrd::ChannelCompare compare(vd1, vd2);
-			compare.SetUseMask(glbin_colocal_def.m_use_mask);
-			compare.SetIntWeighted(glbin_colocal_def.m_int_weighted);
-			compare.prework = std::bind(
-					&ColocalizationDlg::StartTimer, this, std::placeholders::_1);
-			compare.postwork = std::bind(
-					&ColocalizationDlg::StopTimer, this, std::placeholders::_1);
-			//get threshold values
-			float th1, th2, th3, th4;
-			th1 = (float)(vd1->GetLeftThresh());
-			th2 = (float)(vd1->GetRightThresh());
-			th3 = (float)(vd2->GetLeftThresh());
-			th4 = (float)(vd2->GetRightThresh());
-			compare.Threshold(th1, th2, th3, th4);
-			rm[it1][it2] = compare.Result();
-		}
-	}
-
-	if (m_test_speed)
-	{
-		m_titles += "Function\t";
-		m_titles += "Time\n";
-	}
-	else
-	{
-		wxString name;
-		double v;
-		glbin_colocal_def.ResetMinMax();
-		for (size_t i = 0; i < num; ++i)
-		{
-			if (glbin_colocal_def.m_get_ratio)
-				m_titles += wxString::Format("%d (%%)", int(i + 1));
-			else
-				m_titles += wxString::Format("%d", int(i + 1));
-			VolumeData* vd = group->GetVolumeData(i);
-			if (vd)
-				name = vd->GetName();
-			else
-				name = "";
-			m_titles += ": " + name;
-			if (i < num - 1)
-				m_titles += "\t";
-			else
-				m_titles += "\n";
-		}
-		for (int it1 = 0; it1 < num; ++it1)
-			for (int it2 = 0; it2 < num; ++it2)
-			{
-				if (glbin_colocal_def.m_get_ratio)
-				{
-					if (rm[it2][it2])
-					{
-						v = rm[it1][it2] * 100.0 / rm[it1][it1];
-						glbin_colocal_def.SetMinMax(v);
-						m_values += wxString::Format("%f", v);
-					}
-					else
-					{
-						glbin_colocal_def.SetMinMax(0.0);
-						m_values += "0";
-					}
-				}
-				else
-				{
-					if (glbin_colocal_def.m_physical_size)
-					{
-						v = rm[it1][it2] * spc;
-						glbin_colocal_def.SetMinMax(v);
-						m_values += wxString::Format("%f", v);
-						m_values += unit;
-					}
-					else
-					{
-						v = rm[it1][it2];
-						glbin_colocal_def.SetMinMax(v);
-						if (glbin_colocal_def.m_int_weighted)
-							m_values += wxString::Format("%f", v);
-						else
-							m_values += wxString::Format("%.0f", v);
-					}
-				}
-				if (it2 < num - 1)
-					m_values += "\t";
-				else
-					m_values += "\n";
-			}
-	}
-
-	FluoUpdate({ gstColocalResult });
-}
-
-void ColocalizationDlg::StartTimer(const std::string& str)
-{
-	if (m_test_speed)
-	{
-		m_tps.push_back(std::chrono::high_resolution_clock::now());
-	}
-}
-
-void ColocalizationDlg::StopTimer(const std::string& str)
-{
-	if (m_test_speed)
-	{
-		auto t0 = m_tps.back();
-		m_tps.push_back(std::chrono::high_resolution_clock::now());
-		std::chrono::duration<double> time_span =
-			std::chrono::duration_cast<std::chrono::duration<double>>(
-				m_tps.back() - t0);
-
-		m_values += str + "\t";
-		m_values += wxString::Format("%.4f", time_span.count());
-		m_values += " sec.\n";
-	}
-}
-
 void ColocalizationDlg::OnColocalizenBtn(wxCommandEvent &event)
 {
-	Colocalize();
+	glbin_colocalizer.Compute();
+	FluoUpdate({ gstColocalResult });
 }
 
 void ColocalizationDlg::OnUseSelChk(wxCommandEvent &event)
@@ -582,7 +346,10 @@ void ColocalizationDlg::OnUseSelChk(wxCommandEvent &event)
 	glbin_colocal_def.m_use_mask = m_use_sel_chk->GetValue();
 
 	if (glbin_colocal_def.m_auto_update)
-		Colocalize();
+	{
+		glbin_colocalizer.Compute();
+		FluoUpdate({ gstColocalResult });
+	}
 }
 
 void ColocalizationDlg::OnAutoUpdate(wxCommandEvent &event)
@@ -600,7 +367,10 @@ void ColocalizationDlg::OnMethodRdb(wxCommandEvent &event)
 		glbin_colocal_def.m_method = 2;
 
 	if (glbin_colocal_def.m_auto_update)
-		Colocalize();
+	{
+		glbin_colocalizer.Compute();
+		FluoUpdate({ gstColocalResult });
+	}
 }
 
 //format
@@ -609,7 +379,10 @@ void ColocalizationDlg::OnIntWeightBtn(wxCommandEvent &event)
 	glbin_colocal_def.m_int_weighted = m_int_weight_btn->GetValue();
 
 	if (glbin_colocal_def.m_auto_update)
-		Colocalize();
+	{
+		glbin_colocalizer.Compute();
+		FluoUpdate({ gstColocalResult });
+	}
 }
 
 void ColocalizationDlg::OnRatioBtn(wxCommandEvent &event)
@@ -617,7 +390,10 @@ void ColocalizationDlg::OnRatioBtn(wxCommandEvent &event)
 	glbin_colocal_def.m_get_ratio = m_ratio_btn->GetValue();
 
 	if (glbin_colocal_def.m_auto_update)
-		Colocalize();
+	{
+		glbin_colocalizer.Compute();
+		FluoUpdate({ gstColocalResult });
+	}
 }
 
 void ColocalizationDlg::OnPhysicalBtn(wxCommandEvent &event)
@@ -625,7 +401,10 @@ void ColocalizationDlg::OnPhysicalBtn(wxCommandEvent &event)
 	glbin_colocal_def.m_physical_size = m_physical_btn->GetValue();
 
 	if (glbin_colocal_def.m_auto_update)
-		Colocalize();
+	{
+		glbin_colocalizer.Compute();
+		FluoUpdate({ gstColocalResult });
+	}
 }
 
 void ColocalizationDlg::OnColorMapBtn(wxCommandEvent &event)
@@ -633,7 +412,10 @@ void ColocalizationDlg::OnColorMapBtn(wxCommandEvent &event)
 	glbin_colocal_def.m_colormap = m_colormap_btn->GetValue();
 
 	if (glbin_colocal_def.m_auto_update)
-		Colocalize();
+	{
+		glbin_colocalizer.Compute();
+		FluoUpdate({ gstColocalResult });
+	}
 }
 
 void ColocalizationDlg::OnHistoryChk(wxCommandEvent& event)

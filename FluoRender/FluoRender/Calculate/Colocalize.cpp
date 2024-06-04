@@ -25,216 +25,251 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <Count.h>
+#include <Colocalize.h>
 #include <Global.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/TextureBrick.h>
-#include <FLIVR/Texture.h>
-#include <algorithm>
+#include <RenderCanvas.h>
 
 using namespace flrd;
 
-const char* str_cl_count_voxels = \
-"const sampler_t samp =\n" \
-"	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
-"	CLK_FILTER_NEAREST;\n" \
-"\n" \
-"__kernel void kernel_0(\n" \
-"	__read_only image3d_t data,\n" \
-"	__read_only image3d_t mask,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz,\n" \
-"	unsigned int gsxy,\n" \
-"	unsigned int gsx,\n" \
-"	__global unsigned int* count,\n" \
-"	__global float* wcount)\n" \
-"{\n" \
-"	int3 gid = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
-"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	unsigned int lsum = 0;\n" \
-"	float lwsum = 0.0f;\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		float v1 = read_imagef(data, samp, ijk).x;\n" \
-"		float v2 = read_imagef(mask, samp, ijk).x;\n" \
-"		if (v2 > 0.0f)\n" \
-"		{\n" \
-"			lsum++;\n" \
-"			lwsum += v1;\n" \
-"		}\n" \
-"	}\n" \
-"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(count+index, lsum);\n" \
-"	atomic_xchg(wcount+index, lwsum);\n" \
-"}\n";
-
-CountVoxels::CountVoxels(VolumeData* vd)
-	: m_vd(vd),
-	m_use_mask(false),
-	m_sum(0),
-	m_wsum(0.0)
+Colocalize::Colocalize() :
+	m_test_speed(false)
 {
 }
 
-CountVoxels::~CountVoxels()
+Colocalize::~Colocalize()
 {
 }
 
-bool CountVoxels::CheckBricks()
+void Colocalize::Compute()
 {
-	if (!m_vd)
-		return false;
-	if (!m_vd->GetTexture())
-		return false;
-	int brick_num = m_vd->GetTexture()->get_brick_num();
-	if (!brick_num)
-		return false;
-	return true;
-}
+	RenderCanvas* canvas = glbin_current.canvas;
+	DataGroup* group = glbin_current.vol_group;
+	if (!group)
+		return;
 
-bool CountVoxels::GetInfo(
-	flvr::TextureBrick* b,
-	long &bits, long &nx, long &ny, long &nz)
-{
-	bits = b->nb(0)*8;
-	nx = b->nx();
-	ny = b->ny();
-	nz = b->nz();
-	return true;
-}
+	int num = group->GetVolumeNum();
+	if (num < 2)
+		return;
 
-void* CountVoxels::GetVolDataBrick(flvr::TextureBrick* b)
-{
-	if (!b)
-		return 0;
-
-	long nx, ny, nz;
-	int bits = 8;
-	int c = 0;
-	int nb = 1;
-
-	c = m_use_mask ? b->nmask() : 0;
-	nb = b->nb(c);
-	nx = b->nx();
-	ny = b->ny();
-	nz = b->nz();
-	bits = nb * 8;
-	unsigned long long mem_size = (unsigned long long)nx*
-		(unsigned long long)ny*(unsigned long long)nz*(unsigned long long)nb;
-	unsigned char* temp = new unsigned char[mem_size];
-	unsigned char* tempp = temp;
-	unsigned char* tp = (unsigned char*)(b->tex_data(c));
-	unsigned char* tp2;
-	for (unsigned int k = 0; k < nz; ++k)
+	//spacings, assuming they are all same for channels
+	double spcx, spcy, spcz;
+	double spc;
+	wxString unit;
+	VolumeData* vd = group->GetVolumeData(0);
+	if (!vd)
 	{
-		tp2 = tp;
-		for (unsigned int j = 0; j < ny; ++j)
-		{
-			memcpy(tempp, tp2, nx*nb);
-			tempp += nx * nb;
-			tp2 += b->sx()*nb;
-		}
-		tp += b->sx()*b->sy()*nb;
+		spc = spcx = spcy = spcz = 1.0;
 	}
-	return (void*)temp;
-}
-
-void* CountVoxels::GetVolData(VolumeData* vd)
-{
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	Nrrd* nrrd_data = 0;
-	if (m_use_mask)
-		nrrd_data = vd->GetMask(false);
-	if (!nrrd_data)
-		nrrd_data = vd->GetVolume(false);
-	if (!nrrd_data)
-		return 0;
-	return nrrd_data->data;
-}
-
-void CountVoxels::Count()
-{
-	if (!CheckBricks())
-		return;
-	if (!m_vd->GetMask(false))
-		return;
-
-	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_count_voxels);
-	if (!kernel_prog)
-		return;
-	int kernel_index = -1;
-	string name = "kernel_0";
-	if (kernel_prog->valid())
-		kernel_index = kernel_prog->findKernel(name);
 	else
-		kernel_index = kernel_prog->createKernel(name);
-
-	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
-
-	m_sum = 0; m_wsum = 0.0;
-	for (size_t i = 0; i < brick_num; ++i)
 	{
-		flvr::TextureBrick* b = (*bricks)[i];
-		long nx, ny, nz, bits;
-		if (!GetInfo(b, bits, nx, ny, nz))
-			continue;
-		//get tex ids
-		GLint tid = m_vd->GetVR()->load_brick(b);
-		GLint mid = m_vd->GetVR()->load_brick_mask(b);
-
-		//compute workload
-		flvr::GroupSize gsize;
-		kernel_prog->get_group_size(kernel_index, nx, ny, nz, gsize);
-
-		size_t local_size[3] = { 1, 1, 1 };
-		size_t global_size[3] = {
-			size_t(gsize.gsx), size_t(gsize.gsy), size_t(gsize.gsz) };
-
-		//set
-		unsigned int* sum = new unsigned int[gsize.gsxyz];
-		float *wsum = new float[gsize.gsxyz];
-		kernel_prog->setKernelArgBegin(kernel_index);
-		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
-		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(sum));
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(wsum));
-
-		//execute
-		kernel_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
-		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*(gsize.gsxyz), sum, sum);
-		kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz), wsum, wsum);
-
-		//release buffer
-		kernel_prog->releaseMemObject(kernel_index, 0, 0, tid);
-		kernel_prog->releaseMemObject(kernel_index, 1, 0, mid);
-		kernel_prog->releaseMemObject(sizeof(unsigned int)*(gsize.gsxyz), sum);
-		kernel_prog->releaseMemObject(sizeof(float)*(gsize.gsxyz), wsum);
-
-		//sum
-		for (int i = 0; i < gsize.gsxyz; ++i)
+		vd->GetSpacings(spcx, spcy, spcz);
+		spc = spcx * spcy * spcz;
+	}
+	if (canvas)
+	{
+		switch (canvas->m_sb_unit)
 		{
-			m_sum += sum[i];
-			m_wsum += wsum[i];
+		case 0:
+			unit = L"nm\u00B3";
+			break;
+		case 1:
+		default:
+			unit = L"\u03BCm\u00B3";
+			break;
+		case 2:
+			unit = L"mm\u00B3";
+			break;
 		}
-		delete[] sum;
-		delete[] wsum;
+	}
+
+	//result
+	std::vector<std::vector<double>> rm;//result matrix
+	rm.reserve(num);
+	for (size_t i = 0; i < num; ++i)
+	{
+		rm.push_back(std::vector<double>());
+		rm[i].reserve(num);
+		for (size_t j = 0; j < num; ++j)
+			rm[i].push_back(0);
+	}
+
+	m_titles.Clear();
+	m_values.Clear();
+	m_tps.clear();
+
+	//fill the matrix
+	if (glbin_colocal_def.m_method == 0 || glbin_colocal_def.m_method == 1 ||
+		(glbin_colocal_def.m_method == 2 && !glbin_colocal_def.m_int_weighted))
+	{
+		//dot product and min value
+		//symmetric matrix
+		for (int it1 = 0; it1 < num; ++it1)
+		{
+			for (int it2 = it1; it2 < num; ++it2)
+			{
+				VolumeData* vd1 = group->GetVolumeData(it1);
+				VolumeData* vd2 = group->GetVolumeData(it2);
+				if (!vd1 || !vd2 ||
+					!vd1->GetDisp() ||
+					!vd2->GetDisp())
+					continue;
+
+				flrd::ChannelCompare compare(vd1, vd2);
+				compare.SetUseMask(glbin_colocal_def.m_use_mask);
+				compare.SetIntWeighted(glbin_colocal_def.m_int_weighted);
+				compare.prework = std::bind(
+					&Colocalize::StartTimer, this, std::placeholders::_1);
+				compare.postwork = std::bind(
+					&Colocalize::StopTimer, this, std::placeholders::_1);
+				switch (glbin_colocal_def.m_method)
+				{
+				case 0://dot product
+					compare.Product();
+					break;
+				case 1://min value
+					compare.MinValue();
+					break;
+				case 2://threshold
+				{
+					//get threshold values
+					float th1, th2, th3, th4;
+					th1 = (float)(vd1->GetLeftThresh());
+					th2 = (float)(vd1->GetRightThresh());
+					th3 = (float)(vd2->GetLeftThresh());
+					th4 = (float)(vd2->GetRightThresh());
+					compare.Threshold(th1, th2, th3, th4);
+				}
+				break;
+				}
+				rm[it1][it2] = compare.Result();
+				if (it1 != it2)
+					rm[it2][it1] = compare.Result();
+			}
+		}
+	}
+	else if (glbin_colocal_def.m_method == 2 && glbin_colocal_def.m_int_weighted)
+	{
+		//threshold, asymmetrical
+		for (int it1 = 0; it1 < num; ++it1)
+			for (int it2 = 0; it2 < num; ++it2)
+			{
+				VolumeData* vd1 = group->GetVolumeData(it1);
+				VolumeData* vd2 = group->GetVolumeData(it2);
+				if (!vd1 || !vd2 ||
+					!vd1->GetDisp() ||
+					!vd2->GetDisp())
+					continue;
+
+				flrd::ChannelCompare compare(vd1, vd2);
+				compare.SetUseMask(glbin_colocal_def.m_use_mask);
+				compare.SetIntWeighted(glbin_colocal_def.m_int_weighted);
+				compare.prework = std::bind(
+					&Colocalize::StartTimer, this, std::placeholders::_1);
+				compare.postwork = std::bind(
+					&Colocalize::StopTimer, this, std::placeholders::_1);
+				//get threshold values
+				float th1, th2, th3, th4;
+				th1 = (float)(vd1->GetLeftThresh());
+				th2 = (float)(vd1->GetRightThresh());
+				th3 = (float)(vd2->GetLeftThresh());
+				th4 = (float)(vd2->GetRightThresh());
+				compare.Threshold(th1, th2, th3, th4);
+				rm[it1][it2] = compare.Result();
+			}
+	}
+
+	if (m_test_speed)
+	{
+		m_titles += "Function\t";
+		m_titles += "Time\n";
+	}
+	else
+	{
+		wxString name;
+		double v;
+		glbin_colocal_def.ResetMinMax();
+		for (size_t i = 0; i < num; ++i)
+		{
+			if (glbin_colocal_def.m_get_ratio)
+				m_titles += wxString::Format("%d (%%)", int(i + 1));
+			else
+				m_titles += wxString::Format("%d", int(i + 1));
+			VolumeData* vd = group->GetVolumeData(i);
+			if (vd)
+				name = vd->GetName();
+			else
+				name = "";
+			m_titles += ": " + name;
+			if (i < num - 1)
+				m_titles += "\t";
+			else
+				m_titles += "\n";
+		}
+		for (int it1 = 0; it1 < num; ++it1)
+			for (int it2 = 0; it2 < num; ++it2)
+			{
+				if (glbin_colocal_def.m_get_ratio)
+				{
+					if (rm[it2][it2])
+					{
+						v = rm[it1][it2] * 100.0 / rm[it1][it1];
+						glbin_colocal_def.SetMinMax(v);
+						m_values += wxString::Format("%f", v);
+					}
+					else
+					{
+						glbin_colocal_def.SetMinMax(0.0);
+						m_values += "0";
+					}
+				}
+				else
+				{
+					if (glbin_colocal_def.m_physical_size)
+					{
+						v = rm[it1][it2] * spc;
+						glbin_colocal_def.SetMinMax(v);
+						m_values += wxString::Format("%f", v);
+						m_values += unit;
+					}
+					else
+					{
+						v = rm[it1][it2];
+						glbin_colocal_def.SetMinMax(v);
+						if (glbin_colocal_def.m_int_weighted)
+							m_values += wxString::Format("%f", v);
+						else
+							m_values += wxString::Format("%.0f", v);
+					}
+				}
+				if (it2 < num - 1)
+					m_values += "\t";
+				else
+					m_values += "\n";
+			}
+	}
+}
+
+void Colocalize::StartTimer(const std::string& str)
+{
+	if (m_test_speed)
+	{
+		m_tps.push_back(std::chrono::high_resolution_clock::now());
+	}
+}
+
+void Colocalize::StopTimer(const std::string& str)
+{
+	if (m_test_speed)
+	{
+		auto t0 = m_tps.back();
+		m_tps.push_back(std::chrono::high_resolution_clock::now());
+		std::chrono::duration<double> time_span =
+			std::chrono::duration_cast<std::chrono::duration<double>>(
+				m_tps.back() - t0);
+
+		m_values += str + "\t";
+		m_values += wxString::Format("%.4f", time_span.count());
+		m_values += " sec.\n";
 	}
 }
 

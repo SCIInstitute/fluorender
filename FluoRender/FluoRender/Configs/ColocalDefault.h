@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _COLOCALDEFAULT_H_
 
 #include <wx/fileconf.h>
+#include <limits>
 
 class ColocalDefault
 {

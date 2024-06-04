@@ -25,48 +25,35 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_Count_h
-#define FL_Count_h
+#ifndef _COLOCALIZE_H_
+#define _COLOCALIZE_H_
 
-#include <DataManager.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
+#include <Compare.h>
+#include <wx/string.h>
+#include <chrono>
 
-using namespace std;
-
-class VolumeData;
 namespace flrd
 {
-	class CountVoxels
+	class Colocalize
 	{
 	public:
-		CountVoxels(VolumeData* vd);
-		~CountVoxels();
+		Colocalize();
+		~Colocalize();
 
-		void SetUseMask(bool use_mask)
-		{ m_use_mask = use_mask; }
-		bool GetUseMask()
-		{ return m_use_mask; }
-
-		void Count();
-		unsigned int GetSum()
-		{ return m_sum; }
-		float GetWeightedSum()
-		{ return m_wsum; }
+		void Compute();
+		wxString GetTitles() { return m_titles; }
+		wxString GetValues() { return m_values; }
 
 	private:
-		VolumeData *m_vd;
-		bool m_use_mask;//use mask instead of data
-		//result
-		unsigned int m_sum;
-		float m_wsum;
+		wxString m_titles, m_values;//results
+		bool m_test_speed;
+		std::vector<std::chrono::high_resolution_clock::time_point> m_tps;
 
-		bool CheckBricks();
-		bool GetInfo(flvr::TextureBrick* b,
-			long &bits, long &nx, long &ny, long &nz);
-		void* GetVolDataBrick(flvr::TextureBrick* b);
-		void* GetVolData(VolumeData* vd);
+	private:
+		//speed test
+		void StartTimer(const std::string& str);
+		void StopTimer(const std::string& str);
 	};
 
 }
-#endif//FL_Count_h
+#endif//_COLOCALIZE_H_

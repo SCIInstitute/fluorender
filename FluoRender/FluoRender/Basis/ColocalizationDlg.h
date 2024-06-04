@@ -33,8 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/tglbtn.h>
 #include <wx/grid.h>
 #include <wx/clipbrd.h>
-#include <limits>
-#include <chrono>
 
 class MainFrame;
 class RenderCanvas;
@@ -42,35 +40,11 @@ class DataGroup;
 class ColocalizationDlg : public PropPanel
 {
 public:
-	//enum
-	//{
-	//	ID_ColocalizeBtn = ID_COLOCALIZE,
-	//	ID_UseSelChk,
-	//	ID_AutoUpdateBtn,
-	//	//settings
-	//	ID_ProductRdb,
-	//	ID_MinValueRdb,
-	//	ID_LogicalAndRdb,
-	//	//formats
-	//	ID_IntWeightBtn,
-	//	ID_RatioBtn,
-	//	ID_PhysicalBtn,
-	//	ID_ColorMapBtn,
-
-	//	//output
-	//	ID_HistoryChk,
-	//	ID_ClearHistBtn,
-	//	ID_OutputGrid
-	//};
-
 	ColocalizationDlg(MainFrame* frame);
 	~ColocalizationDlg();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	void SetOutput();
-
-	//execute
-	void Colocalize();
 
 	void CopyData();
 	void PasteData();
@@ -79,11 +53,6 @@ private:
 	//output
 	bool m_hold_history;
 	wxString m_output_file;
-
-	//speed test
-	bool m_test_speed;
-	std::vector<std::chrono::high_resolution_clock::time_point> m_tps;
-	wxString m_titles, m_values;
 
 	//interface
 	//colocalization
@@ -106,10 +75,6 @@ private:
 	wxGrid *m_output_grid;
 
 private:
-	//speed test
-	void StartTimer(const std::string& str);
-	void StopTimer(const std::string& str);
-
 	//calculate
 	void OnColocalizenBtn(wxCommandEvent &event);
 	void OnUseSelChk(wxCommandEvent &event);
