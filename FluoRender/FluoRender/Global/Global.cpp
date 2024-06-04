@@ -357,6 +357,11 @@ MovieDefault& Global::get_movie_def()
 	return main_settings_.m_movie_def;
 }
 
+ColocalDefault& Global::get_colocal_def()
+{
+	return main_settings_.m_colocal_def;
+}
+
 AsyncTimer* Global::getAsyncTimer(const std::string& name)
 {
 	return glbin_atmf->findFirst(name);

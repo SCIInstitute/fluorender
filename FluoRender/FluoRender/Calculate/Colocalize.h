@@ -25,53 +25,48 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _COLOCALDEFAULT_H_
-#define _COLOCALDEFAULT_H_
+#ifndef FL_Count_h
+#define FL_Count_h
 
-#include <wx/fileconf.h>
+#include <DataManager.h>
+#include <FLIVR/KernelProgram.h>
+#include <FLIVR/VolKernel.h>
 
-class ColocalDefault
+using namespace std;
+
+class VolumeData;
+namespace flrd
 {
-public:
-	ColocalDefault();
-	~ColocalDefault();
+	class CountVoxels
+	{
+	public:
+		CountVoxels(VolumeData* vd);
+		~CountVoxels();
 
-	void Read(wxFileConfig& f);
-	void Save(wxFileConfig& f);
+		void SetUseMask(bool use_mask)
+		{ m_use_mask = use_mask; }
+		bool GetUseMask()
+		{ return m_use_mask; }
 
-	bool GetThreshUpdate()
-	{
-		return m_auto_update && (m_method == 2);
-	}
-	bool GetColormapUpdate()
-	{
-		return m_auto_update && m_colormap;
-	}
-	//reset min max
-	void ResetMinMax()
-	{
-		m_cm_min = std::numeric_limits<double>::max();
-		m_cm_max = -m_cm_min;
-	}
-	void SetMinMax(double v)
-	{
-		m_cm_min = std::min(v, m_cm_min);
-		m_cm_max = std::max(v, m_cm_max);
-	}
+		void Count();
+		unsigned int GetSum()
+		{ return m_sum; }
+		float GetWeightedSum()
+		{ return m_wsum; }
 
-public:
-	//default values
-	bool m_use_mask;
-	bool m_auto_update;
-	//method
-	int m_method;//0:dot product; 1:min value; 2:threshold
-	//format
-	bool m_int_weighted;
-	bool m_get_ratio;
-	bool m_physical_size;
-	bool m_colormap;
-	//colormap
-	double m_cm_min;
-	double m_cm_max;
-};
-#endif
+	private:
+		VolumeData *m_vd;
+		bool m_use_mask;//use mask instead of data
+		//result
+		unsigned int m_sum;
+		float m_wsum;
+
+		bool CheckBricks();
+		bool GetInfo(flvr::TextureBrick* b,
+			long &bits, long &nx, long &ny, long &nz);
+		void* GetVolDataBrick(flvr::TextureBrick* b);
+		void* GetVolData(VolumeData* vd);
+	};
+
+}
+#endif//FL_Count_h

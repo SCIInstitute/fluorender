@@ -86,8 +86,7 @@ VolumeSelector::VolumeSelector() :
 	m_iter_strong(60),
 	m_brush_sets_index(0),
 	m_test_speed(false),
-	m_paint_count(false),
-	m_paint_colocalize(false)
+	m_paint_count(false)
 {
 }
 
@@ -176,7 +175,7 @@ void VolumeSelector::Segment(bool push_mask, int mx, int my)
 		m_mode == 9)
 	{
 		count = GetPaintCount();
-		colocal = GetPaintColocalize();
+		//colocal = GetPaintColocalize();
 	}
 
 	//update

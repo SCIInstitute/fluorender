@@ -627,6 +627,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstIntWeighted "int weighted"
 #define gstGetRatio "get ratio"
 #define gstPhysSize "phys size"
+#define gstColocalColormap "colocal colormap"
+#define gstColocalResult "colocal result"
 //component agent
 #define gstRecordCmd "record cmd"//record command for comps
 #define gstRunCmd "run cmd"//run command

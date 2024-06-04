@@ -263,8 +263,8 @@ namespace flrd
 
 		void SetPaintCount(bool val) { m_paint_count = val; }
 		bool GetPaintCount() { return m_paint_count; }
-		void SetPaintColocalize(bool val) { m_paint_colocalize = val; }
-		bool GetPaintColocalize() { return m_paint_colocalize; }
+		//void SetPaintColocalize(bool val) { m_paint_colocalize = val; }
+		//bool GetPaintColocalize() { return m_paint_colocalize; }
 
 	private:
 		RenderCanvas *m_canvas;
@@ -346,7 +346,7 @@ namespace flrd
 		//count after paint
 		bool m_paint_count;
 		//colocalize after paint
-		bool m_paint_colocalize;
+		//bool m_paint_colocalize;
 
 	private:
 		double HueCalculation(int mode, unsigned int label);

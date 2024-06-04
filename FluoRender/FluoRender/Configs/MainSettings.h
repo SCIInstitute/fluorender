@@ -46,6 +46,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ViewDefault.h>
 #include <VolumeDefault.h>
 #include <MovieDefault.h>
+#include <ColocalDefault.h>
 #include <wx/string.h>
 #include <string>
 
@@ -74,6 +75,7 @@ public:
 	ViewDefault m_view_def;
 	VolumeDataDefault m_vol_def;
 	MovieDefault m_movie_def;
+	ColocalDefault m_colocal_def;
 
 public:
 	//default values

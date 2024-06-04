@@ -67,45 +67,18 @@ public:
 	~ColocalizationDlg();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	void SetOutput();
 
 	//execute
 	void Colocalize();
 
-	//output
-	void SetOutput(wxString &titles, wxString &values);
 	void CopyData();
 	void PasteData();
-
-	//settings
-	//void GetSettings();
-
-	//bool GetThreshUpdate()
-	//{
-	//	return m_auto_update && (m_method == 2);
-	//}
-	//bool GetColormapUpdate()
-	//{
-	//	return m_auto_update && m_colormap;
-	//}
 
 private:
 	//output
 	bool m_hold_history;
 	wxString m_output_file;
-
-	//use selection
-	bool m_use_mask;
-	bool m_auto_update;
-	//method
-	int m_method;//0:dot product; 1:min value; 2:threshold
-	//format
-	bool m_int_weighted;
-	bool m_get_ratio;
-	bool m_physical_size;
-	bool m_colormap;
-	//colormap
-	double m_cm_min;
-	double m_cm_max;
 
 	//speed test
 	bool m_test_speed;
@@ -133,17 +106,6 @@ private:
 	wxGrid *m_output_grid;
 
 private:
-	//reset min max
-	void ResetMinMax()
-	{
-		m_cm_min = std::numeric_limits<double>::max();
-		m_cm_max = -m_cm_min;
-	}
-	void SetMinMax(double v)
-	{
-		m_cm_min = std::min(v, m_cm_min);
-		m_cm_max = std::max(v, m_cm_max);
-	}
 	//speed test
 	void StartTimer(const std::string& str);
 	void StopTimer(const std::string& str);
@@ -166,8 +128,6 @@ private:
 	void OnKeyDown(wxKeyEvent& event);
 	void OnSelectCell(wxGridEvent& event);
 	void OnGridLabelClick(wxGridEvent& event);
-
-	//DECLARE_EVENT_TABLE()
 };
 
 #endif//_COLOCALIZATIONDLG_H_

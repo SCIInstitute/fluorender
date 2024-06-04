@@ -2233,9 +2233,9 @@ void VolumePropPanel::OnThreshChange(wxScrollEvent &event)
 		SetThresh(val1, val2, false);
 
 	//update colocalization
-	if (m_frame && m_frame->GetColocalizationDlg() &&
-		m_frame->GetColocalizationDlg()->GetThreshUpdate())
-		m_frame->GetColocalizationDlg()->Colocalize();
+	//if (m_frame && m_frame->GetColocalizationDlg() &&
+	//	m_frame->GetColocalizationDlg()->GetThreshUpdate())
+	//	m_frame->GetColocalizationDlg()->Colocalize();
 }
 
 void VolumePropPanel::OnThreshText(wxCommandEvent &event)
@@ -2265,9 +2265,9 @@ void VolumePropPanel::OnThreshText(wxCommandEvent &event)
 		SetThresh(val1, val2, false);
 
 	//update colocalization
-	if (m_frame && m_frame->GetColocalizationDlg() &&
-		m_frame->GetColocalizationDlg()->GetThreshUpdate())
-		m_frame->GetColocalizationDlg()->Colocalize();
+	//if (m_frame && m_frame->GetColocalizationDlg() &&
+	//	m_frame->GetColocalizationDlg()->GetThreshUpdate())
+	//	m_frame->GetColocalizationDlg()->Colocalize();
 }
 
 void VolumePropPanel::OnThreshLink(wxCommandEvent& event)
@@ -2537,9 +2537,9 @@ void VolumePropPanel::OnColormapInvBtn(wxCommandEvent &event)
 	FluoRefresh(1, { gstColormap }, { m_frame->GetRenderCanvas(m_view) });
 
 	//update colocalization
-	if (m_frame && m_frame->GetColocalizationDlg() &&
-		m_frame->GetColocalizationDlg()->GetColormapUpdate())
-		m_frame->GetColocalizationDlg()->Colocalize();
+	//if (m_frame && m_frame->GetColocalizationDlg() &&
+	//	m_frame->GetColocalizationDlg()->GetColormapUpdate())
+	//	m_frame->GetColocalizationDlg()->Colocalize();
 	event.Skip();
 }
 
@@ -2562,9 +2562,9 @@ void VolumePropPanel::OnColormapCombo(wxCommandEvent &event)
 	FluoRefresh(1, { gstColormap }, { m_frame->GetRenderCanvas(m_view) });
 
 	//update colocalization
-	if (m_frame && m_frame->GetColocalizationDlg() &&
-		m_frame->GetColocalizationDlg()->GetColormapUpdate())
-		m_frame->GetColocalizationDlg()->Colocalize();
+	//if (m_frame && m_frame->GetColocalizationDlg() &&
+	//	m_frame->GetColocalizationDlg()->GetColormapUpdate())
+	//	m_frame->GetColocalizationDlg()->Colocalize();
 	event.Skip();
 }
 

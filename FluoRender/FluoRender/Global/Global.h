@@ -82,6 +82,7 @@ DEALINGS IN THE SOFTWARE.
 #define glbin_view_def fluo::Global::instance().get_view_def()
 #define glbin_vol_def fluo::Global::instance().get_vol_def()
 #define glbin_mov_def fluo::Global::instance().get_movie_def()
+#define glbin_colocal_def fluo::Global::instance().get_colocal_def()
 //processors
 #define glbin_comp_generator fluo::Global::instance().get_comp_generator()
 #define glbin_comp_analyzer fluo::Global::instance().get_comp_analyzer()
@@ -195,6 +196,7 @@ namespace fluo
 		ViewDefault& get_view_def();
 		VolumeDataDefault& get_vol_def();
 		MovieDefault& get_movie_def();
+		ColocalDefault& get_colocal_def();
 
 		//data processors
 		void apply_processor_settings();
