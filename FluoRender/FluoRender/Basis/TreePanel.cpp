@@ -1278,7 +1278,8 @@ void TreePanel::OnContextMenu(wxContextMenuEvent& event)
 		return;
 
 	int flag;
-	wxTreeItemId sel_item = m_datatree->HitTest(ScreenToClient(event.GetPosition()), flag);
+	wxTreeItemId sel_item = m_datatree->HitTest(
+		m_datatree->ScreenToClient(event.GetPosition()), flag);
 
 	if (!sel_item.IsOk())
 		return;

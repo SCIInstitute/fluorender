@@ -184,7 +184,6 @@ MainFrame::MainFrame(
 	//create this first to read the settings
 	glbin_settings.Read();
 	glbin.apply_processor_settings();
-	glbin_vol_calculator.SetFrame(this);
 	glbin_script_proc.SetFrame(this);
 	glbin_data_manager.SetFrame(this);
 	glbin_current.mainframe = this;

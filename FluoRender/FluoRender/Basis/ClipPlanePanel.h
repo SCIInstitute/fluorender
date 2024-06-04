@@ -72,14 +72,6 @@ public:
 	virtual void SavePerspective();
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
-	//set view
-	void SetRenderView(RenderCanvas* view);
-	void SetVolumeData(VolumeData* vd);
-	void SetMeshData(MeshData* md);
-	int GetSelType();
-	VolumeData* GetVolumeData();
-	MeshData* GetMeshData();
-
 	bool GetChannLink()
 	{ return m_chann_link; }
 	void SetChannLink(bool chann);
@@ -113,11 +105,7 @@ public:
 	void ClearUndo();
 
 private:
-	RenderCanvas* m_view;
 	wxAuiNotebook* m_notebook;
-	int m_sel_type;		//curent selection type
-	VolumeData* m_vd;	//current volume data
-	MeshData* m_md;		//current mesh data
 	bool m_chann_link;
 	bool m_draw_clip;
 	bool m_hold_planes;

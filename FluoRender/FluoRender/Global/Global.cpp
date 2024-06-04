@@ -318,7 +318,6 @@ void Global::apply_processor_settings()
 		glbin_settings.m_varth,
 		glbin_settings.m_gauth);
 	glbin_script_proc.SetBreak(glbin_settings.m_script_break);
-	glbin_vol_calculator.SetVolumeSelector(&m_vol_selector);
 	glbin_brush_def.Apply(&m_vol_selector);
 	glbin_seg_grow.SetRulerHandler(&m_ruler_handler);
 }

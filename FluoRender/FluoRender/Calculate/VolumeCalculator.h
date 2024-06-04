@@ -43,10 +43,6 @@ namespace flrd
 		VolumeCalculator();
 		~VolumeCalculator();
 
-		void SetFrame(MainFrame* frame) { m_frame = frame; }
-		void SetView(RenderCanvas* view) { m_view = view; }
-		void SetVolumeSelector(VolumeSelector* selector) { m_selector = selector; }
-
 		void SetVolumeA(VolumeData *vd);
 		void SetVolumeB(VolumeData *vd);
 
@@ -63,9 +59,6 @@ namespace flrd
 		void Calculate(int type);
 
 	private:
-		MainFrame* m_frame;
-		RenderCanvas* m_view;
-		VolumeSelector* m_selector;
 		std::vector<VolumeData*> m_vd_r;//result volume data (stack)
 
 		VolumeData *m_vd_a;	//volume data A

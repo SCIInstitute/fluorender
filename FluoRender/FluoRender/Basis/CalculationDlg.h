@@ -28,48 +28,22 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _CALCULATIONDLG_H_
 #define _CALCULATIONDLG_H_
 
+#include <PropPanel.h>
 #include <wx/wx.h>
 
 class MainFrame;
 class RenderCanvas;
 class VolumeData;
 class DataGroup;
-class CalculationDlg : public wxPanel
+class CalculationDlg : public PropPanel
 {
 public:
-	enum
-	{
-		//calculations
-		//operand A
-		ID_CalcLoadABtn = ID_CALCULATION,
-		ID_CalcAText,
-		//operand B
-		ID_CalcLoadBBtn,
-		ID_CalcBText,
-		//two-opeartors
-		ID_CalcSubBtn,
-		ID_CalcAddBtn,
-		ID_CalcDivBtn,
-		ID_CalcIscBtn,
-		//one-opeartors
-		ID_CalcFillBtn,
-		ID_CalcCombineBtn
-	};
-
 	CalculationDlg(MainFrame* frame);
 	~CalculationDlg();
 
-	void SetGroup(DataGroup* group);
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 private:
-	MainFrame* m_frame;
-	//current view
-	RenderCanvas *m_view;
-	//current volume
-	VolumeData *m_vol1;
-	VolumeData *m_vol2;
-	DataGroup *m_group;
-
 	//calculations
 	//operands
 	wxButton *m_calc_load_a_btn;
@@ -98,8 +72,6 @@ private:
 	//one-operators
 	void OnCalcFill(wxCommandEvent &event);
 	void OnCalcCombine(wxCommandEvent &event);
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_CALCULATIONDLG_H_

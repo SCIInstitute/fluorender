@@ -35,9 +35,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 VolumeCalculator::VolumeCalculator():
-	m_frame(0),
-	m_view(0),
-	m_selector(0),
+	m_threshold(0),
 	m_vd_a(0),
 	m_vd_b(0),
 	m_type(0)
@@ -82,8 +80,6 @@ VolumeData* VolumeCalculator::GetResult(bool pop)
 
 void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 {
-	if (!m_view || !m_frame)
-		return;
 	bool update = false;
 	bool refresh = false;
 
@@ -138,37 +134,38 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 			type == 8 ||
 			type == 9)
 		{
-				if (add)
-				{
-					glbin_data_manager.AddVolumeData(vd);
-					//vr_frame->GetDataManager()->SetVolumeDefault(vd);
-					m_view->AddVolumeData(vd, prev_group);
+			if (add)
+			{
+				glbin_data_manager.AddVolumeData(vd);
+				//vr_frame->GetDataManager()->SetVolumeDefault(vd);
+				if (glbin_current.canvas)
+					glbin_current.canvas->AddVolumeData(vd, prev_group);
 
-					if (type == 5 ||
-						type == 6 ||
-						type == 9)
-					{
-						vd_a->SetDisp(false);
-					}
-					else if (type == 1 ||
-						type == 2 ||
-						type == 3 ||
-						type == 4)
-					{
-						vd_a->SetDisp(false);
-						VolumeData* vd_b = GetVolumeB();
-						if (vd_b)
-							vd_b->SetDisp(false);
-					}
-					//m_frame->UpdateList();
-					//m_frame->UpdateTree(vd->GetName());
-					glbin_current.SetVolumeData(vd);
-					update = true;
+				if (type == 5 ||
+					type == 6 ||
+					type == 9)
+				{
+					vd_a->SetDisp(false);
 				}
+				else if (type == 1 ||
+					type == 2 ||
+					type == 3 ||
+					type == 4)
+				{
+					vd_a->SetDisp(false);
+					VolumeData* vd_b = GetVolumeB();
+					if (vd_b)
+						vd_b->SetDisp(false);
+				}
+				//m_frame->UpdateList();
+				//m_frame->UpdateTree(vd->GetName());
+				glbin_current.SetVolumeData(vd);
+				update = true;
+			}
 		}
 		else if (type == 7)
 		{
-			VolumePropPanel* page = m_frame->FindVolumeProps(vd);
+			VolumePropPanel* page = glbin_current.mainframe->FindVolumeProps(vd);
 			vd_a->Replace(vd);
 			delete vd;
 			//m_frame->GetPropView()->SetVolumeData(vd_a);
@@ -180,8 +177,8 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 	if (refresh)
 	{
 		if (update)
-			m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
-		m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(m_view) });
+			glbin_current.mainframe->UpdateProps({ gstListCtrl, gstTreeCtrl });
+		glbin_current.mainframe->RefreshCanvases();
 	}
 }
 
@@ -192,15 +189,16 @@ void VolumeCalculator::CalculateGroup(int type, wxString prev_group, bool add)
 		type == 7)
 	{
 		vector<VolumeData*> vd_list;
-		if (m_selector && m_selector->GetSelectGroup())
+		if (glbin_vol_selector.GetSelectGroup())
 		{
 			VolumeData* vd = GetVolumeA();
 			DataGroup* group = 0;
-			if (vd)
+			RenderCanvas* canvas = glbin_current.canvas;
+			if (vd && canvas)
 			{
-				for (int i = 0; i < m_view->GetLayerNum(); i++)
+				for (int i = 0; i < canvas->GetLayerNum(); i++)
 				{
-					TreeLayer* layer = m_view->GetLayer(i);
+					TreeLayer* layer = canvas->GetLayer(i);
 					if (layer && layer->IsA() == 5)
 					{
 						DataGroup* tmp_group = (DataGroup*)layer;
@@ -439,7 +437,7 @@ void VolumeCalculator::FillHoles(double thresh)
 	wxProgressDialog *prog_diag = new wxProgressDialog(
 		"FluoRender: Voxel Consolidation",
 		"Consolidating... Please wait.",
-		100, m_frame,
+		100, glbin_current.mainframe,
 		wxPD_SMOOTH | wxPD_ELAPSED_TIME | wxPD_AUTO_HIDE);
 	int progress = 0;
 	int total_prg = nx * 2;

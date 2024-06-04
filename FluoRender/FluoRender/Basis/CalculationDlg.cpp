@@ -31,28 +31,11 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderCanvas.h>
 #include <Calculate/CombineList.h>
 
-BEGIN_EVENT_TABLE(CalculationDlg, wxPanel)
-	//calculations
-	//operands
-	EVT_BUTTON(ID_CalcLoadABtn, CalculationDlg::OnLoadA)
-	EVT_BUTTON(ID_CalcLoadBBtn, CalculationDlg::OnLoadB)
-	//operators
-	EVT_BUTTON(ID_CalcSubBtn, CalculationDlg::OnCalcSub)
-	EVT_BUTTON(ID_CalcAddBtn, CalculationDlg::OnCalcAdd)
-	EVT_BUTTON(ID_CalcDivBtn, CalculationDlg::OnCalcDiv)
-	EVT_BUTTON(ID_CalcIscBtn, CalculationDlg::OnCalcIsc)
-	//one-operators
-	EVT_BUTTON(ID_CalcFillBtn, CalculationDlg::OnCalcFill)
-	EVT_BUTTON(ID_CalcCombineBtn, CalculationDlg::OnCalcCombine)
-END_EVENT_TABLE()
-
 CalculationDlg::CalculationDlg(MainFrame *frame)
-	: wxPanel(frame, wxID_ANY,
+	: PropPanel(frame, frame,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(500, 350)),
-	0, "CalculationDlg"),
-	m_frame(frame),
-	m_group(0)
+	0, "CalculationDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -64,10 +47,11 @@ CalculationDlg::CalculationDlg(MainFrame *frame)
 	wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Operand A:",
 		wxDefaultPosition, FromDIP(wxSize(75, 20)));
-	m_calc_load_a_btn = new wxButton(this, ID_CalcLoadABtn, "Load",
+	m_calc_load_a_btn = new wxButton(this, wxID_ANY, "Load",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)));
-	m_calc_a_text = new wxTextCtrl(this, ID_CalcAText, "",
-		wxDefaultPosition, FromDIP(wxSize(200, 20)));
+	m_calc_a_text = new wxTextCtrl(this, wxID_ANY, "",
+		wxDefaultPosition, FromDIP(wxSize(200, 20)), wxTE_READONLY);
+	m_calc_load_a_btn->Bind(wxEVT_BUTTON, &CalculationDlg::OnLoadA, this);
 	sizer1->Add(st, 0, wxALIGN_CENTER);
 	sizer1->Add(m_calc_load_a_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_calc_a_text, 1, wxEXPAND);
@@ -75,10 +59,11 @@ CalculationDlg::CalculationDlg(MainFrame *frame)
 	wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Operand B:",
 		wxDefaultPosition, FromDIP(wxSize(75, 20)));
-	m_calc_load_b_btn = new wxButton(this, ID_CalcLoadBBtn, "Load",
+	m_calc_load_b_btn = new wxButton(this, wxID_ANY, "Load",
 		wxDefaultPosition, FromDIP(wxSize(50, 20)));
-	m_calc_b_text = new wxTextCtrl(this, ID_CalcBText, "",
-		wxDefaultPosition, FromDIP(wxSize(200, 20)));
+	m_calc_b_text = new wxTextCtrl(this, wxID_ANY, "",
+		wxDefaultPosition, FromDIP(wxSize(200, 20)), wxTE_READONLY);
+	m_calc_load_b_btn->Bind(wxEVT_BUTTON, &CalculationDlg::OnLoadB, this);
 	sizer2->Add(st, 0, wxALIGN_CENTER);
 	sizer2->Add(m_calc_load_b_btn, 0, wxALIGN_CENTER);
 	sizer2->Add(m_calc_b_text, 1, wxEXPAND);
@@ -87,24 +72,30 @@ CalculationDlg::CalculationDlg(MainFrame *frame)
 		new wxStaticBox(this, wxID_ANY,
 			"Single-valued Operators (Require only A)"), wxHORIZONTAL);
 	//sizer3
-	m_calc_fill_btn = new wxButton(this, ID_CalcFillBtn, "Consolidate Voxels",
+	m_calc_fill_btn = new wxButton(this, wxID_ANY, "Consolidate Voxels",
 		wxDefaultPosition, FromDIP(wxSize(50, 25)));
-	m_calc_combine_btn = new wxButton(this, ID_CalcCombineBtn, "Combine Group",
+	m_calc_combine_btn = new wxButton(this, wxID_ANY, "Combine Group",
 		wxDefaultPosition, FromDIP(wxSize(50, 25)));
+	m_calc_fill_btn->Bind(wxEVT_BUTTON, &CalculationDlg::OnCalcFill, this);
+	m_calc_combine_btn->Bind(wxEVT_BUTTON, &CalculationDlg::OnCalcCombine, this);
 	sizer3->Add(m_calc_fill_btn, 1, wxEXPAND);
 	sizer3->Add(m_calc_combine_btn, 1, wxEXPAND);
 	//two operators
 	wxBoxSizer *sizer4 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY,
 			"Two-valued Operators (Require both A and B)"), wxHORIZONTAL);
-	m_calc_sub_btn = new wxButton(this, ID_CalcSubBtn, "Subtract",
+	m_calc_sub_btn = new wxButton(this, wxID_ANY, "Subtract",
 		wxDefaultPosition, FromDIP(wxSize(50, 25)));
-	m_calc_add_btn = new wxButton(this, ID_CalcAddBtn, "Add",
+	m_calc_add_btn = new wxButton(this, wxID_ANY, "Add",
 		wxDefaultPosition, FromDIP(wxSize(50, 25)));
-	m_calc_div_btn = new wxButton(this, ID_CalcDivBtn, "Divide",
+	m_calc_div_btn = new wxButton(this, wxID_ANY, "Divide",
 		wxDefaultPosition, FromDIP(wxSize(50, 25)));
-	m_calc_isc_btn = new wxButton(this, ID_CalcIscBtn, "Colocalize",
+	m_calc_isc_btn = new wxButton(this, wxID_ANY, "Colocalize",
 		wxDefaultPosition, FromDIP(wxSize(50, 25)));
+	m_calc_sub_btn->Bind(wxEVT_BUTTON, &CalculationDlg::OnCalcSub, this);
+	m_calc_add_btn->Bind(wxEVT_BUTTON, &CalculationDlg::OnCalcAdd, this);
+	m_calc_div_btn->Bind(wxEVT_BUTTON, &CalculationDlg::OnCalcDiv, this);
+	m_calc_isc_btn->Bind(wxEVT_BUTTON, &CalculationDlg::OnCalcIsc, this);
 	sizer4->Add(m_calc_sub_btn, 1, wxEXPAND);
 	sizer4->Add(m_calc_add_btn, 1, wxEXPAND);
 	sizer4->Add(m_calc_div_btn, 1, wxEXPAND);
@@ -131,210 +122,145 @@ CalculationDlg::~CalculationDlg()
 
 }
 
-void CalculationDlg::SetGroup(DataGroup* group)
+void CalculationDlg::FluoUpdate(const fluo::ValueCollection& vc)
 {
-	m_group = group;
+	//update user interface
+	if (FOUND_VALUE(gstNull))
+		return;
+	bool update_all = vc.empty();
+
+	wxString str;
+	if (update_all || FOUND_VALUE(gstVolumeA))
+	{
+		VolumeData* vd = glbin_vol_calculator.GetVolumeA();
+		if (vd)
+		{
+			str = vd->GetName();
+			m_calc_a_text->ChangeValue(str);
+		}
+	}
+
+	if (update_all || FOUND_VALUE(gstVolumeB))
+	{
+		VolumeData* vd = glbin_vol_calculator.GetVolumeB();
+		if (vd)
+		{
+			str = vd->GetName();
+			m_calc_b_text->ChangeValue(str);
+		}
+	}
 }
 
 //calculations
 //operands
 void CalculationDlg::OnLoadA(wxCommandEvent &event)
 {
-	m_view = 0;
-	if (m_frame)
-	{
-		switch (glbin_current.GetType())
-		{
-		case 2://volume
-			m_vol1 = glbin_current.vol_data;
-			m_group = 0;
-			if (m_vol1)
-			{
-				wxString str = m_vol1->GetName();
-				m_calc_a_text->ChangeValue(str);
-				for (int i = 0; i < m_frame->GetViewNum(); i++)
-				{
-					RenderCanvas* view = m_frame->GetRenderCanvas(i);
-					if (view && view->GetVolumeData(str))
-					{
-						m_view = view;
-						break;
-					}
-				}
-			}
-			break;
-		case 5://volume group
-			m_vol1 = 0;
-			if (m_group)
-			{
-				wxString str = m_group->GetName();
-				m_calc_a_text->ChangeValue(str);
-				for (int i = 0; i < m_frame->GetViewNum(); i++)
-				{
-					RenderCanvas* view = m_frame->GetRenderCanvas(i);
-					if (view && view->GetGroup(str))
-					{
-						m_view = view;
-						break;
-					}
-				}
-			}
-			break;
-		}
-		if (!m_view)
-			m_view = m_frame->GetRenderCanvas(0);
-	}
+	glbin_vol_calculator.SetVolumeA(
+		glbin_current.vol_data
+	);
+
+	FluoUpdate({ gstVolumeA });
 }
 
 void CalculationDlg::OnLoadB(wxCommandEvent &event)
 {
-	if (m_frame)
-	{
-		switch (glbin_current.GetType())
-		{
-		case 2://volume
-			m_vol2 = glbin_current.vol_data;
-			if (m_vol2)
-				m_calc_b_text->ChangeValue(m_vol2->GetName());
-			break;
-		case 5://volume group
-			if (m_group)
-				m_calc_b_text->ChangeValue(m_group->GetName());
-			break;
-		}
-	}
+	glbin_vol_calculator.SetVolumeB(
+		glbin_current.vol_data
+	);
+
+	FluoUpdate({ gstVolumeB });
 }
 
 //operators
 void CalculationDlg::OnCalcSub(wxCommandEvent &event)
 {
-	if (!m_frame || !m_view)
-		return;
-	if (!m_vol1 || !m_vol2)
-		return;
-
-	glbin_vol_calculator.SetVolumeA(m_vol1);
-	glbin_vol_calculator.SetVolumeB(m_vol2);
 	glbin_vol_calculator.CalculateGroup(1);
 }
 
 void CalculationDlg::OnCalcAdd(wxCommandEvent &event)
 {
-	if (!m_frame || !m_view)
-		return;
-	if (!m_vol1 || !m_vol2)
-		return;
-
-	glbin_vol_calculator.SetVolumeA(m_vol1);
-	glbin_vol_calculator.SetVolumeB(m_vol2);
 	glbin_vol_calculator.CalculateGroup(2);
 }
 
 void CalculationDlg::OnCalcDiv(wxCommandEvent &event)
 {
-	if (!m_frame || !m_view)
-		return;
-	if (!m_vol1 || !m_vol2)
-		return;
-
-	glbin_vol_calculator.SetVolumeA(m_vol1);
-	glbin_vol_calculator.SetVolumeB(m_vol2);
 	glbin_vol_calculator.CalculateGroup(3);
 }
 
 void CalculationDlg::OnCalcIsc(wxCommandEvent &event)
 {
-	if (!m_frame || !m_view)
-		return;
-	if (!m_vol1 || !m_vol2)
-		return;
-
-	glbin_vol_calculator.SetVolumeA(m_vol1);
-	glbin_vol_calculator.SetVolumeB(m_vol2);
 	glbin_vol_calculator.CalculateGroup(4);
 }
 
 //one-operators
 void CalculationDlg::OnCalcFill(wxCommandEvent &event)
 {
-	if (!m_frame || !m_view)
-		return;
-	if (!m_vol1)
-		return;
-
-	glbin_vol_calculator.SetVolumeA(m_vol1);
-	m_vol2 = 0;
 	glbin_vol_calculator.SetVolumeB(0);
-	m_calc_b_text->Clear();
 	glbin_vol_calculator.CalculateGroup(9);
+	FluoUpdate({ gstVolumeB });
 }
 
 void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 {
-	if (!m_frame || !m_view)
+	DataGroup* group = glbin_current.vol_group;
+	if (!group)
 		return;
-	if (m_calc_a_text->GetValue() == "")
-		return;
-	if (!m_group)
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
 		return;
 
-	bool refresh = false;
 	flrd::CombineList Op;
-	wxString name = m_group->GetName() + "_combined";
+	wxString name = group->GetName() + "_combined";
 	Op.SetName(name);
 	std::list<VolumeData*> channs;
-	for (int i = 0; i < m_group->GetVolumeNum(); ++i)
+	for (int i = 0; i < group->GetVolumeNum(); ++i)
 	{
-		VolumeData* vd = m_group->GetVolumeData(i);
+		VolumeData* vd = group->GetVolumeData(i);
 		if (!vd)
 			continue;
 		channs.push_back(vd);
 	}
+	if (channs.empty())
+		return;
+
 	Op.SetVolumes(channs);
-	if (Op.Execute())
-	{
-		std::list<VolumeData*> results;
-		Op.GetResults(results);
-		if (results.empty())
-			return;
+	if (!Op.Execute())
+		return;
 
-		wxString group_name = "";
-		DataGroup* group = 0;
-		VolumeData* volume = 0;
-		for (auto i = results.begin(); i != results.end(); ++i)
+	std::list<VolumeData*> results;
+	Op.GetResults(results);
+	if (results.empty())
+		return;
+
+	wxString group_name = "";
+	group = 0;
+	VolumeData* volume = 0;
+	for (auto i = results.begin(); i != results.end(); ++i)
+	{
+		VolumeData* vd = *i;
+		if (vd)
 		{
-			VolumeData* vd = *i;
-			if (vd)
+			if (!volume) volume = vd;
+			glbin_data_manager.AddVolumeData(vd);
+			if (i == results.begin())
 			{
-				if (!volume) volume = vd;
-				glbin_data_manager.AddVolumeData(vd);
-				if (i == results.begin())
-				{
-					group_name = m_view->AddGroup("");
-					group = m_view->GetGroup(group_name);
-				}
-				m_view->AddVolumeData(vd, group_name);
+				group_name = canvas->AddGroup("");
+				group = canvas->GetGroup(group_name);
 			}
+			canvas->AddVolumeData(vd, group_name);
 		}
-		if (group && volume)
-		{
-			fluo::Color col = volume->GetGammaColor();
-			group->SetGammaAll(col);
-			col = volume->GetBrightness();
-			group->SetBrightnessAll(col);
-			col = volume->GetHdr();
-			group->SetHdrAll(col);
-		}
-		//m_frame->UpdateList();
-		//m_frame->UpdateTree(m_group->GetName());
-		//m_view->RefreshGL(39);
-		glbin_current.SetVolumeGroup(m_group);
-		refresh = true;
 	}
-
-	if (refresh)
+	if (group && volume)
 	{
-		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl, gstCurrentSelect });
-		m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(m_view) });
+		fluo::Color col = volume->GetGammaColor();
+		group->SetGammaAll(col);
+		col = volume->GetBrightness();
+		group->SetBrightnessAll(col);
+		col = volume->GetHdr();
+		group->SetHdrAll(col);
 	}
+	glbin_current.SetVolumeGroup(group);
+
+	FluoRefresh(1, { gstVolumePropPanel, gstListCtrl, gstTreeCtrl, gstCurrentSelect },
+		{ m_frame->GetRenderCanvas(canvas) });
 }
