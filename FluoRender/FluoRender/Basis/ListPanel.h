@@ -65,7 +65,7 @@ class ListPanel : public PropPanel
 {
 	enum
 	{
-		ID_LZW_COMP,
+		ID_LZW_COMP = 0,
 		ID_CROP,
 		ID_RESIZE_CHK,
 		ID_RESIZE_X_TXT,

@@ -39,10 +39,13 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 ComponentGenerator::ComponentGenerator()
-	: m_vd(0),
-	prework(0),
-	postwork(0)
+	: m_vd(0)
 {
+	glbin_comp_def.Apply(this);
+	prework = std::bind(
+		&ComponentGenerator::StartTimer, this, std::placeholders::_1);
+	postwork = std::bind(
+		&ComponentGenerator::StopTimer, this, std::placeholders::_1);
 }
 
 ComponentGenerator::~ComponentGenerator()
@@ -57,6 +60,160 @@ bool ComponentGenerator::CheckBricks()
 	if (!bricks || bricks->size() == 0)
 		return false;
 	return true;
+}
+
+//high-level functions
+void ComponentGenerator::GenerateComp(bool command)
+{
+	if (!m_vd)
+		return;
+
+	//int clean_iter = m_clean_iter;
+	//int clean_size = m_clean_size_vl;
+	//if (!m_clean)
+	//{
+	//	clean_iter = 0;
+	//	clean_size = 0;
+	//}
+
+	//get brick number
+	int bn = m_vd->GetAllBrickNum();
+	double scale = m_vd->GetScalarScale();
+
+	//glbin_comp_generator.SetVolumeData(vd);
+	m_titles.Clear();
+	m_values.Clear();
+	m_tps.clear();
+	m_tps.push_back(std::chrono::high_resolution_clock::now());
+
+	m_vd->AddEmptyMask(1, !m_use_sel);//select all if no mask, otherwise keep
+	if (m_fixate && m_vd->GetLabel(false))
+	{
+		m_vd->LoadLabel2();
+		SetIDBit(m_fix_size);
+	}
+	else
+	{
+		m_vd->AddEmptyLabel(0, !m_use_sel);
+		ShuffleID();
+	}
+
+	if (m_use_dist_field)
+	{
+		if (m_density)
+			DistDensityField();
+		else
+			DistGrow();
+	}
+	else
+	{
+		if (m_density)
+			DensityField();
+		else
+			Grow();
+	}
+
+	CleanNoise();
+
+	if (bn > 1)
+		FillBorders();
+
+	m_tps.push_back(std::chrono::high_resolution_clock::now());
+	std::chrono::duration<double> time_span =
+		std::chrono::duration_cast<std::chrono::duration<double>>(
+			m_tps.back() - m_tps.front());
+	if (m_test_speed)
+	{
+		m_titles += "Function\t";
+		m_titles += "Time\n";
+		m_values += "Total\t";
+	}
+	else
+	{
+		m_titles += "Total time\n";
+	}
+	m_values += wxString::Format("%.4f", time_span.count());
+	m_values += " sec.\n";
+	//SetOutput(m_titles, m_values);
+
+	//update
+	//m_view->RefreshGL(39);
+
+	if (command && m_record_cmd)
+		AddCmd("generate");
+
+	m_vd->SetMlCompGenApplied(false);
+}
+
+void ComponentGenerator::Fixate(bool command)
+{
+	if (!m_vd)
+		return;
+	m_vd->PushLabel(true);
+
+	if (command && m_record_cmd)
+		AddCmd("fixate");
+}
+
+void ComponentGenerator::Clean(bool command)
+{
+	if (!m_vd)
+		return;
+
+	//int clean_iter = m_clean_iter;
+	//int clean_size = m_clean_size_vl;
+	//if (!m_clean)
+	//{
+	//	clean_iter = 0;
+	//	clean_size = 0;
+	//}
+
+	//get brick number
+	int bn = m_vd->GetAllBrickNum();
+
+	//glbin_comp_generator.SetVolumeData(vd);
+	//glbin_comp_def.Apply(&glbin_comp_generator);
+	//glbin_comp_generator.SetUseMask(use_sel);
+
+	m_vd->AddEmptyMask(1, !m_use_sel);
+
+	if (bn > 1)
+		ClearBorders();
+
+	CleanNoise();
+
+	if (bn > 1)
+		FillBorders();
+
+	//m_view->RefreshGL(39);
+
+	if (command && m_record_cmd)
+		AddCmd("clean");
+}
+
+void ComponentGenerator::ApplyRecord()
+{
+	//generate components using records
+	if (!m_vd)
+		return;
+
+	//glbin_comp_generator.SetVolumeData(vd);
+	m_vd->AddEmptyMask(1);
+	if (!m_vd->GetMlCompGenApplied())
+	{
+		m_vd->AddEmptyLabel(0);
+		ShuffleID();
+	}
+	GenerateDB();
+
+	int bn = m_vd->GetAllBrickNum();
+	if (bn > 1)
+		FillBorders();
+
+	//update
+	//m_view->RefreshGL(39);
+
+	m_vd->SetMlCompGenApplied(true);
 }
 
 void ComponentGenerator::ShuffleID()
@@ -1013,7 +1170,7 @@ void ComponentGenerator::DistDensityField()
 		AddEntry();
 }
 
-void ComponentGenerator::Cleanup()
+void ComponentGenerator::CleanNoise()
 {
 	if (m_clean_iter <= 0)
 		return;
@@ -1632,3 +1789,373 @@ void ComponentGenerator::GenerateDB()
 			postwork(__FUNCTION__);
 	}
 }
+
+//command
+void ComponentGenerator::LoadCmd(const wxString& filename)
+{
+	wxFileInputStream is(filename);
+	if (!is.IsOk())
+		return;
+	wxFileConfig fconfig(is);
+	//m_cmd_file_text->ChangeValue(filename);
+
+	m_command.clear();
+	int cmd_count = 0;
+	wxString str;
+	std::string cmd_str = "/cmd" + std::to_string(cmd_count);
+	while (fconfig.Exists(cmd_str))
+	{
+		flrd::CompCmdParams params;
+		fconfig.SetPath(cmd_str);
+		str = fconfig.Read("type", "");
+		if (str == "generate" ||
+			str == "clean" ||
+			str == "fixate")
+			params.push_back(str.ToStdString());
+		else
+			continue;
+		long lval;
+		if (fconfig.Read("iter", &lval))
+		{
+			params.push_back("iter"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("use_dist_field", &lval))
+		{
+			params.push_back("use_dist_field"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("dist_filter_size", &lval))
+		{
+			params.push_back("dist_filter_size"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("max_dist", &lval))
+		{
+			params.push_back("max_dist"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("diff", &lval))
+		{
+			params.push_back("diff"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("density", &lval))
+		{
+			params.push_back("density"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("density_window_size", &lval))
+		{
+			params.push_back("density_window_size"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("density_stats_size", &lval))
+		{
+			params.push_back("density_stats_size"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("cleanb", &lval))
+		{
+			params.push_back("cleanb"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("clean_iter", &lval))
+		{
+			params.push_back("clean_iter"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("clean_size_vl", &lval))
+		{
+			params.push_back("clean_size_vl"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("grow_fixed", &lval))
+		{
+			params.push_back("grow_fixed"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("fix_size", &lval))
+		{
+			params.push_back("fix_size"); params.push_back(std::to_string(lval));
+		}
+		double dval;
+		if (fconfig.Read("thresh", &dval))
+		{
+			params.push_back("thresh"); params.push_back(std::to_string(dval));
+		}
+		if (fconfig.Read("dist_strength", &dval))
+		{
+			params.push_back("dist_strength"); params.push_back(std::to_string(dval));
+		}
+		if (fconfig.Read("dist_thresh", &dval))
+		{
+			params.push_back("dist_thresh"); params.push_back(std::to_string(dval));
+		}
+		if (fconfig.Read("falloff", &dval))
+		{
+			params.push_back("falloff"); params.push_back(std::to_string(dval));
+		}
+		if (fconfig.Read("density_thresh", &dval))
+		{
+			params.push_back("density_thresh"); params.push_back(std::to_string(dval));
+		}
+		if (fconfig.Read("varth", &dval))
+		{
+			params.push_back("varth"); params.push_back(std::to_string(dval));
+		}
+
+		m_command.push_back(params);
+		cmd_count++;
+		cmd_str = "/cmd" + std::to_string(cmd_count);
+	}
+	//record
+	//int ival = m_command.size();
+	//m_cmd_count_text->ChangeValue(wxString::Format("%d", ival));
+}
+
+void ComponentGenerator::SaveCmd(const wxString& filename)
+{
+	if (m_command.empty())
+	{
+		AddCmd("generate");
+	}
+
+	wxFileConfig fconfig("", "", filename, "",
+		wxCONFIG_USE_LOCAL_FILE);
+	fconfig.DeleteAll();
+
+	int cmd_count = 0;
+	std::string str, str2;
+
+	for (auto it = m_command.begin();
+		it != m_command.end(); ++it)
+	{
+		if (it->empty())
+			continue;
+		if ((*it)[0] == "generate" ||
+			(*it)[0] == "clean" ||
+			(*it)[0] == "fixate")
+		{
+			str = "/cmd" + std::to_string(cmd_count++);
+			fconfig.SetPath(str);
+			str = (*it)[0];
+			fconfig.Write("type", wxString(str));
+		}
+		for (auto it2 = it->begin();
+			it2 != it->end(); ++it2)
+		{
+			if (*it2 == "iter" ||
+				*it2 == "use_dist_field" ||
+				*it2 == "dist_filter_size" ||
+				*it2 == "max_dist" ||
+				*it2 == "diff" ||
+				*it2 == "density" ||
+				*it2 == "density_window_size" ||
+				*it2 == "density_stats_size" ||
+				*it2 == "cleanb" ||
+				*it2 == "clean_iter" ||
+				*it2 == "clean_size_vl" ||
+				*it2 == "fix_size" ||
+				*it2 == "grow_fixed")
+			{
+				str = (*it2);
+				++it2;
+				str2 = (*it2);
+				fconfig.Write(str, std::stoi(str2));
+			}
+			else if (*it2 == "thresh" ||
+				*it2 == "dist_strength" ||
+				*it2 == "dist_thresh" ||
+				*it2 == "falloff" ||
+				*it2 == "density_thresh" ||
+				*it2 == "varth")
+			{
+				str = (*it2);
+				++it2;
+				str2 = (*it2);
+				fconfig.Write(str, std::stod(str2));
+			}
+		}
+	}
+
+	SaveConfig(fconfig, filename);
+	//m_cmd_file_text->ChangeValue(filename);
+}
+
+void ComponentGenerator::AddCmd(const std::string& type)
+{
+	if (!m_command.empty())
+	{
+		flrd::CompCmdParams& params = m_command.back();
+		if (!params.empty())
+		{
+			if ((params[0] == "generate" ||
+				params[0] == "fixate") &&
+				params[0] == type)
+			{
+				//replace
+				m_command.pop_back();
+			}
+			//else do nothing
+		}
+	}
+	//add
+	flrd::CompCmdParams params;
+	if (type == "generate")
+	{
+		params.push_back("generate");
+		params.push_back("iter"); params.push_back(std::to_string(m_iter));
+		params.push_back("thresh"); params.push_back(std::to_string(m_thresh));
+		params.push_back("use_dist_field"); params.push_back(std::to_string(m_use_dist_field));
+		params.push_back("dist_strength"); params.push_back(std::to_string(m_dist_strength));
+		params.push_back("dist_filter_size"); params.push_back(std::to_string(m_dist_filter_size));
+		params.push_back("max_dist"); params.push_back(std::to_string(m_max_dist));
+		params.push_back("dist_thresh"); params.push_back(std::to_string(m_dist_thresh));
+		params.push_back("diff"); params.push_back(std::to_string(m_diff));
+		params.push_back("falloff"); params.push_back(std::to_string(m_falloff));
+		params.push_back("density"); params.push_back(std::to_string(m_density));
+		params.push_back("density_thresh"); params.push_back(std::to_string(m_density_thresh));
+		params.push_back("varth"); params.push_back(std::to_string(m_varth));
+		params.push_back("density_window_size"); params.push_back(std::to_string(m_density_window_size));
+		params.push_back("density_stats_size"); params.push_back(std::to_string(m_density_stats_size));
+		params.push_back("cleanb"); params.push_back(std::to_string(m_clean));
+		params.push_back("clean_iter"); params.push_back(std::to_string(m_clean_iter));
+		params.push_back("clean_size_vl"); params.push_back(std::to_string(m_clean_size_vl));
+		params.push_back("grow_fixed"); params.push_back(std::to_string(m_grow_fixed));
+	}
+	else if (type == "clean")
+	{
+		params.push_back("clean");
+		params.push_back("clean_iter"); params.push_back(std::to_string(m_clean_iter));
+		params.push_back("clean_size_vl"); params.push_back(std::to_string(m_clean_size_vl));
+	}
+	else if (type == "fixate")
+	{
+		params.push_back("fixate");
+		params.push_back("fix_size"); params.push_back(std::to_string(m_fix_size));
+	}
+	m_command.push_back(params);
+
+	//record
+	//int ival = m_command.size();
+	//m_cmd_count_text->ChangeValue(wxString::Format("%d", ival));
+}
+
+void ComponentGenerator::ResetCmd()
+{
+	m_command.clear();
+	//m_record_cmd_btn->SetValue(false);
+	m_record_cmd = false;
+	//record
+	//int ival = m_command.size();
+	//m_cmd_count_text->ChangeValue(wxString::Format("%d", ival));
+}
+
+void ComponentGenerator::PlayCmd(double tfactor)
+{
+	//disable first
+	m_fixate = false;
+	glbin_comp_def.m_auto_update = false;
+	//m_auto_update_btn->SetValue(false);
+
+	if (m_command.empty())
+	{
+		//the threshold factor is used to lower the threshold value for semi auto segmentation
+		m_tfactor = tfactor;
+		GenerateComp(false);
+		m_tfactor = 1.0;
+		return;
+	}
+
+	for (auto it = m_command.begin();
+		it != m_command.end(); ++it)
+	{
+		if (it->empty())
+			continue;
+		if ((*it)[0] == "generate")
+		{
+			for (auto it2 = it->begin();
+				it2 != it->end(); ++it2)
+			{
+				if (*it2 == "iter")
+					m_iter = std::stoi(*(++it2));
+				else if (*it2 == "thresh")
+					m_thresh = std::stod(*(++it2));
+				else if (*it2 == "use_dist_field")
+					m_use_dist_field = std::stoi(*(++it2));
+				else if (*it2 == "dist_strength")
+					m_dist_strength = std::stod(*(++it2));
+				else if (*it2 == "dist_filter_size")
+					m_dist_filter_size = std::stod(*(++it2));
+				else if (*it2 == "max_dist")
+					m_max_dist = std::stoi(*(++it2));
+				else if (*it2 == "dist_thresh")
+					m_dist_thresh = std::stod(*(++it2));
+				else if (*it2 == "diff")
+					m_diff = std::stoi(*(++it2));
+				else if (*it2 == "falloff")
+					m_falloff = std::stod(*(++it2));
+				else if (*it2 == "density")
+					m_density = std::stoi(*(++it2));
+				else if (*it2 == "density_thresh")
+					m_density_thresh = std::stod(*(++it2));
+				else if (*it2 == "varth")
+					m_varth = std::stod(*(++it2));
+				else if (*it2 == "density_window_size")
+					m_density_window_size = std::stoi(*(++it2));
+				else if (*it2 == "density_stats_size")
+					m_density_stats_size = std::stoi(*(++it2));
+				else if (*it2 == "cleanb")
+					m_clean = std::stoi(*(++it2));
+				else if (*it2 == "clean_iter")
+					m_clean_iter = std::stoi(*(++it2));
+				else if (*it2 == "clean_size_vl")
+					m_clean_size_vl = std::stoi(*(++it2));
+				else if (*it2 == "grow_fixed")
+					m_grow_fixed = std::stoi(*(++it2));
+			}
+			GenerateComp(false);
+		}
+		else if ((*it)[0] == "clean")
+		{
+			m_clean = true;
+			for (auto it2 = it->begin();
+				it2 != it->end(); ++it2)
+			{
+				if (*it2 == "clean_iter")
+					m_clean_iter = std::stoi(*(++it2));
+				else if (*it2 == "clean_size_vl")
+					m_clean_size_vl = std::stoi(*(++it2));
+			}
+			Clean(false);
+		}
+		else if ((*it)[0] == "fixate")
+		{
+			m_fixate = true;
+			for (auto it2 = it->begin();
+				it2 != it->end(); ++it2)
+			{
+				if (*it2 == "fix_size")
+					m_fix_size = std::stoi(*(++it2));
+			}
+			//GenerateComp();
+			Fixate(false);
+			//return;
+		}
+	}
+	//Update();
+}
+
+void ComponentGenerator::StartTimer(const std::string& str)
+{
+	if (m_test_speed)
+	{
+		m_tps.push_back(std::chrono::high_resolution_clock::now());
+	}
+}
+
+void ComponentGenerator::StopTimer(const std::string& str)
+{
+	if (m_test_speed)
+	{
+		auto t0 = m_tps.back();
+		m_tps.push_back(std::chrono::high_resolution_clock::now());
+		std::chrono::duration<double> time_span =
+			std::chrono::duration_cast<std::chrono::duration<double>>(
+				m_tps.back() - t0);
+
+		m_values += str + "\t";
+		m_values += wxString::Format("%.4f", time_span.count());
+		m_values += " sec.\n";
+	}
+}
+

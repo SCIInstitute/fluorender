@@ -28,7 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _COMPONENTDLG_H_
 #define _COMPONENTDLG_H_
 
-#include "Main.h"
+#include <Main.h>
+#include <PropPanel.h>
 #include <DataManager.h>
 #include <Components/CompGenerator.h>
 #include <Components/CompAnalyzer.h>
@@ -49,184 +50,169 @@ class VolumeData;
 class wxSingleSlider;
 
 DECLARE_APP(VRenderApp)
-class ComponentDlg : public wxPanel
+class ComponentDlg : public PropPanel
 {
 public:
-	enum
-	{
-		// load / save
-		ID_LoadSettingsText = ID_COMPONENT,
-		ID_LoadSettingsBtn,
-		ID_SaveSettingsBtn,
-		ID_SaveasSettingsBtn,
+	//enum
+	//{
+	//	// load / save
+	//	ID_LoadSettingsText = ID_COMPONENT,
+	//	ID_LoadSettingsBtn,
+	//	ID_SaveSettingsBtn,
+	//	ID_SaveasSettingsBtn,
 
-		//generate page
-		//iterations
-		ID_IterSldr,
-		ID_IterText,
-		//threshold
-		ID_ThreshSldr,
-		ID_ThreshText,
-		//distance field
-		ID_UseDistFieldCheck,
-		ID_DistStrengthSldr,
-		ID_DistStrengthText,
-		ID_DistFilterSizeSldr,
-		ID_DistFilterSizeText,
-		ID_MaxDistSldr,
-		ID_MaxDistText,
-		ID_DistThreshSldr,
-		ID_DistThreshText,
-		//falloff
-		ID_DiffCheck,
-		ID_FalloffSldr,
-		ID_FalloffText,
-		//size
-		ID_SizeCheck,
-		ID_SizeSldr,
-		ID_SizeText,
-		//density
-		ID_DensityCheck,
-		ID_DensitySldr,
-		ID_DensityText,
-		ID_VarthSldr,
-		ID_VarthText,
-		ID_DensityWindowSizeSldr,
-		ID_DensityWindowsSizeText,
-		ID_DensityStatsSizeSldr,
-		ID_DensityStatsSizeText,
-		//fixate
-		ID_FixateCheck,
-		ID_GrowFixedCheck,
-		ID_FixUpdateBtn,
-		ID_FixSizeSldr,
-		ID_FixSizeText,
-		//clean
-		ID_CleanCheck,
-		ID_CleanBtn,
-		ID_CleanIterSldr,
-		ID_CleanIterText,
-		ID_CleanLimitSldr,
-		ID_CleanLimitText,
-		//record
-		ID_CmdCountText,
-		ID_RecordCmdBtn,
-		ID_PlayCmdBtn,
-		ID_ResetCmdBtn,
-		ID_CmdFileText,
-		ID_SaveCmdBtn,
-		ID_LoadCmdBtn,
+	//	//generate page
+	//	//iterations
+	//	ID_IterSldr,
+	//	ID_IterText,
+	//	//threshold
+	//	ID_ThreshSldr,
+	//	ID_ThreshText,
+	//	//distance field
+	//	ID_UseDistFieldCheck,
+	//	ID_DistStrengthSldr,
+	//	ID_DistStrengthText,
+	//	ID_DistFilterSizeSldr,
+	//	ID_DistFilterSizeText,
+	//	ID_MaxDistSldr,
+	//	ID_MaxDistText,
+	//	ID_DistThreshSldr,
+	//	ID_DistThreshText,
+	//	//falloff
+	//	ID_DiffCheck,
+	//	ID_FalloffSldr,
+	//	ID_FalloffText,
+	//	//size
+	//	ID_SizeCheck,
+	//	ID_SizeSldr,
+	//	ID_SizeText,
+	//	//density
+	//	ID_DensityCheck,
+	//	ID_DensitySldr,
+	//	ID_DensityText,
+	//	ID_VarthSldr,
+	//	ID_VarthText,
+	//	ID_DensityWindowSizeSldr,
+	//	ID_DensityWindowsSizeText,
+	//	ID_DensityStatsSizeSldr,
+	//	ID_DensityStatsSizeText,
+	//	//fixate
+	//	ID_FixateCheck,
+	//	ID_GrowFixedCheck,
+	//	ID_FixUpdateBtn,
+	//	ID_FixSizeSldr,
+	//	ID_FixSizeText,
+	//	//clean
+	//	ID_CleanCheck,
+	//	ID_CleanBtn,
+	//	ID_CleanIterSldr,
+	//	ID_CleanIterText,
+	//	ID_CleanLimitSldr,
+	//	ID_CleanLimitText,
+	//	//record
+	//	ID_CmdCountText,
+	//	ID_RecordCmdBtn,
+	//	ID_PlayCmdBtn,
+	//	ID_ResetCmdBtn,
+	//	ID_CmdFileText,
+	//	ID_SaveCmdBtn,
+	//	ID_LoadCmdBtn,
 
-		//clustering page
-		ID_ClusterMethodExmaxRd,
-		ID_ClusterMethodDbscanRd,
-		ID_ClusterMethodKmeansRd,
-		//parameters
-		ID_ClusterClnumSldr,
-		ID_ClusterClnumText,
-		ID_ClusterMaxIterSldr,
-		ID_ClusterMaxIterText,
-		ID_ClusterTolSldr,
-		ID_ClusterTolText,
-		ID_ClusterSizeSldr,
-		ID_ClusterSizeText,
-		ID_ClusterEpsSldr,
-		ID_ClusterEpsText,
+	//	//clustering page
+	//	ID_ClusterMethodExmaxRd,
+	//	ID_ClusterMethodDbscanRd,
+	//	ID_ClusterMethodKmeansRd,
+	//	//parameters
+	//	ID_ClusterClnumSldr,
+	//	ID_ClusterClnumText,
+	//	ID_ClusterMaxIterSldr,
+	//	ID_ClusterMaxIterText,
+	//	ID_ClusterTolSldr,
+	//	ID_ClusterTolText,
+	//	ID_ClusterSizeSldr,
+	//	ID_ClusterSizeText,
+	//	ID_ClusterEpsSldr,
+	//	ID_ClusterEpsText,
 
-		//analysis page
-		//selection
-		ID_CompIdText,
-		ID_CompIdXBtn,
-		ID_AnalysisMinCheck,
-		ID_AnalysisMinSpin,
-		ID_AnalysisMaxCheck,
-		ID_AnalysisMaxSpin,
-		ID_CompFullBtn,
-		ID_CompExclusiveBtn,
-		ID_CompAppendBtn,
-		ID_CompAllBtn,
-		ID_CompClearBtn,
-		ID_ShuffleBtn,
-		//ID edit controls
-		ID_NewIdText,
-		ID_NewIdXBtn,
-		ID_CompNewBtn,
-		ID_CompAddBtn,
-		ID_CompReplaceBtn,
-		ID_CompCleanBkgBtn,
-		ID_CompCombineBtn,
-		//options
-		ID_ConSizeSldr,
-		ID_ConSizeText,
-		ID_ConsistentCheck,
-		ID_ColocalCheck,
-		//output
-		ID_OutputMultiRb,
-		ID_OutputRgbRb,
-		ID_OutputRandomBtn,
-		ID_OutputSizeBtn,
-		ID_OutputIdBtn,
-		ID_OutputSnBtn,
-		//Distance
-		ID_DistNeighborCheck,
-		ID_DistAllChanCheck,
-		ID_DistNeighborSldr,
-		ID_DistNeighborText,
-		ID_DistOutputBtn,
-		//align
-		ID_AlignCenter,
-		ID_AlignXYZ,
-		ID_AlignYXZ,
-		ID_AlignZXY,
-		ID_AlignXZY,
-		ID_AlignYZX,
-		ID_AlignZYX,
+	//	//analysis page
+	//	//selection
+	//	ID_CompIdText,
+	//	ID_CompIdXBtn,
+	//	ID_AnalysisMinCheck,
+	//	ID_AnalysisMinSpin,
+	//	ID_AnalysisMaxCheck,
+	//	ID_AnalysisMaxSpin,
+	//	ID_CompFullBtn,
+	//	ID_CompExclusiveBtn,
+	//	ID_CompAppendBtn,
+	//	ID_CompAllBtn,
+	//	ID_CompClearBtn,
+	//	ID_ShuffleBtn,
+	//	//ID edit controls
+	//	ID_NewIdText,
+	//	ID_NewIdXBtn,
+	//	ID_CompNewBtn,
+	//	ID_CompAddBtn,
+	//	ID_CompReplaceBtn,
+	//	ID_CompCleanBkgBtn,
+	//	ID_CompCombineBtn,
+	//	//options
+	//	ID_ConSizeSldr,
+	//	ID_ConSizeText,
+	//	ID_ConsistentCheck,
+	//	ID_ColocalCheck,
+	//	//output
+	//	ID_OutputMultiRb,
+	//	ID_OutputRgbRb,
+	//	ID_OutputRandomBtn,
+	//	ID_OutputSizeBtn,
+	//	ID_OutputIdBtn,
+	//	ID_OutputSnBtn,
+	//	//Distance
+	//	ID_DistNeighborCheck,
+	//	ID_DistAllChanCheck,
+	//	ID_DistNeighborSldr,
+	//	ID_DistNeighborText,
+	//	ID_DistOutputBtn,
+	//	//align
+	//	ID_AlignCenter,
+	//	ID_AlignXYZ,
+	//	ID_AlignYXZ,
+	//	ID_AlignZXY,
+	//	ID_AlignXZY,
+	//	ID_AlignYZX,
+	//	ID_AlignZYX,
 
-		//execute
-		ID_Notebook,
-		ID_UseSelChk,
-		ID_UseMlChk,
-		ID_GenerateBtn,
-		ID_AutoUpdateBtn,
-		ID_ClusterBtn,
-		ID_AnalyzeBtn,
-		ID_AnalyzeSelBtn,
+	//	//execute
+	//	ID_Notebook,
+	//	ID_UseSelChk,
+	//	ID_UseMlChk,
+	//	ID_GenerateBtn,
+	//	ID_AutoUpdateBtn,
+	//	ID_ClusterBtn,
+	//	ID_AnalyzeBtn,
+	//	ID_AnalyzeSelBtn,
 
-		//output
-		ID_IncludeBtn,
-		ID_ExcludeBtn,
-		ID_HistoryChk,
-		ID_ClearHistBtn,
-		ID_OutputGrid
-	};
+	//	//output
+	//	ID_IncludeBtn,
+	//	ID_ExcludeBtn,
+	//	ID_HistoryChk,
+	//	ID_ClearHistBtn,
+	//	ID_OutputGrid
+	//};
 
 	ComponentDlg(MainFrame* frame);
 	~ComponentDlg();
 
-	void Update();
-	void GetSettings();
-	void SetView(RenderCanvas* view);
-	RenderCanvas* GetRenderCanvas() { return m_view; }
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	void SetOutput(wxString &titles, wxString &values);
+	//void Update();
+	//void GetSettings();
+	//void SetView(RenderCanvas* view);
+	//RenderCanvas* GetRenderCanvas() { return m_view; }
 
-	void GenerateComp(bool command=true);
-	void Fixate(bool command = true);
-	void Clean(bool command = true);
-	void SelectFullComp();
 
-	//learning functions
-	void ApplyRecord();
 
-	//flrd::ComponentAnalyzer* GetAnalyzer()
-	//{
-	//	return &m_comp_analyzer;
-	//}
-
-	//command
-	void LoadCmd(const wxString &filename);
-	void SaveCmd(const wxString &filename);
-	void AddCmd(const std::string &type);
-	void ResetCmd();
-	void PlayCmd(double tfactor);
 
 	//in and out cell lists
 	flrd::CelpList &GetInCells()
@@ -235,21 +221,10 @@ public:
 	{ return m_out_cells; }
 
 	//output
-	void SetOutput(wxString &titles, wxString &values);
 	void CopyData();
 	void PasteData();
 
-	//select comps
-	bool GetCellList(flrd::CelpList &cl, bool links=false);
-	void GetCompSelection();
-	void SetCompSelection(std::set<unsigned long long>& ids, int mode);
-	void IncludeComps();
-	void ExcludeComps();
-
 private:
-	MainFrame* m_frame;
-	RenderCanvas* m_view;
-
 	//progress
 	float m_prog_bit;
 	float m_prog;
@@ -258,18 +233,9 @@ private:
 	unsigned int m_cell_new_id;
 	bool m_cell_new_id_empty;
 
-	//record
-	bool m_record_cmd;
-	flrd::CompCommand m_command;
-
 	//in and out cell lists for tracking
 	flrd::CelpList m_in_cells;
 	flrd::CelpList m_out_cells;
-
-	//speed test
-	bool m_test_speed;
-	std::vector<std::chrono::high_resolution_clock::time_point> m_tps;
-	wxString m_titles, m_values;
 
 	//output
 	bool m_hold_history;
@@ -280,15 +246,12 @@ private:
 
 	//tab control
 	wxNotebook *m_notebook;
-	//wxScrolledWindow* m_adv_page;
 
 	//load/save settings
 	wxTextCtrl* m_load_settings_text;
 	wxButton* m_load_settings_btn;
 	wxButton* m_save_settings_btn;
 	wxButton* m_saveas_settings_btn;
-
-	//wxCollapsiblePane* m_initial_grow_pane;
 
 	//generate page
 	wxSingleSlider* m_iter_sldr;
@@ -436,12 +399,6 @@ private:
 		std::vector<unsigned int> &bids, wxArrayInt &sel, bool bricks);
 	void AddSelCoordArray(std::vector<unsigned int> &ids,
 		std::vector<unsigned int> &bids, wxGridCellCoordsArray &sel, bool bricks);
-	void FindCelps(flrd::CelpList &list,
-		flrd::CelpListIter &it, bool links = false);
-
-	//speed test
-	void StartTimer(const std::string& str);
-	void StopTimer(const std::string& str);
 
 	wxWindow* CreateCompGenPage(wxWindow *parent);
 	wxWindow* CreateClusteringPage(wxWindow *parent);
@@ -451,8 +408,6 @@ private:
 	void OnLoadSettings(wxCommandEvent &event);
 	void OnSaveSettings(wxCommandEvent &event);
 	void OnSaveasSettings(wxCommandEvent &event);
-	//void OnPaneChange(wxCollapsiblePaneEvent& event);
-	//wxCollapsiblePane* CreateInitialGrowPane(wxWindow *parent);
 
 	//comp generate page
 	void OnIterSldr(wxScrollEvent &event);
@@ -597,7 +552,7 @@ private:
 	//splitter
 	void OnSplitterDclick(wxSplitterEvent& event);
 
-	DECLARE_EVENT_TABLE()
+	//DECLARE_EVENT_TABLE()
 };
 
 #endif//_COMPONENTDLG_H_

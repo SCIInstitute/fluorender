@@ -25,16 +25,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "CompSelector.h"
-#include "CompAnalyzer.h"
-#include <DataManager.h>
+#include <CompSelector.h>
+#include <CompAnalyzer.h>
+#include <Global.h>
 #include <set>
 
 using namespace flrd;
 
 ComponentSelector::ComponentSelector()
 	: m_vd(0),
-	m_analyzer(0),
 	m_sel_all(false),
 	m_id(0),
 	m_use_min(false),
@@ -49,14 +48,291 @@ ComponentSelector::~ComponentSelector()
 {
 }
 
-void ComponentSelector::SetAnalyzer(ComponentAnalyzer* analyzer)
+void ComponentSelector::SelectFullComp()
 {
-	m_analyzer = analyzer;
+	if (!m_vd)
+		return;
+
+	//get id
+	wxString str = m_comp_id_text->GetValue();
+	if (str.empty())
+	{
+		if (!m_view || !m_view->m_cur_vol)
+			return;
+		//get current mask
+		glbin_comp_selector.SetVolume(m_view->m_cur_vol);
+		//cell size filter
+		bool use = m_analysis_min_check->GetValue();
+		unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
+		glbin_comp_selector.SetMinNum(use, num);
+		use = m_analysis_max_check->GetValue();
+		num = (unsigned int)(m_analysis_max_spin->GetValue());
+		glbin_comp_selector.SetMaxNum(use, num);
+		glbin_comp_selector.SetAnalyzer(&glbin_comp_analyzer);
+		glbin_comp_selector.CompFull();
+	}
+	else
+	{
+		wxCommandEvent e;
+		OnCompAppend(e);
+	}
+
+	//m_view->RefreshGL(39);
+
+	//frame
+	//if (m_frame)
+	//{
+	//	if (m_frame->GetBrushToolDlg())
+	//	{
+	//		if (m_view->m_paint_count)
+	//			m_frame->GetBrushToolDlg()->Update(0);
+	//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	//	}
+	//	if (m_frame->GetColocalizationDlg() &&
+	//		m_view->m_paint_colocalize)
+	//		m_frame->GetColocalizationDlg()->Colocalize();
+	//}
 }
 
-ComponentAnalyzer* ComponentSelector::GetAnalyzer()
+bool ComponentSelector::GetCellList(flrd::CelpList& cl, bool links)
 {
-	return m_analyzer;
+	flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
+	if (!list || list->empty())
+		return false;
+
+	cl.min = list->min;
+	cl.max = list->max;
+	cl.sx = list->sx;
+	cl.sy = list->sy;
+	cl.sz = list->sz;
+
+	bool sel_all = false;
+	std::vector<unsigned int> ids;
+	std::vector<unsigned int> bids;
+	int bn = glbin_comp_analyzer.GetBrickNum();
+
+	//selected cells are retrieved using different functions
+	wxArrayInt seli = m_output_grid->GetSelectedCols();
+	if (seli.GetCount() > 0)
+		sel_all = true;
+	if (!sel_all)
+	{
+		seli = m_output_grid->GetSelectedRows();
+		AddSelArrayInt(ids, bids, seli, bn > 1);
+		//wxGridCellCoordsArray sela =
+		//	m_output_grid->GetSelectionBlockBottomRight();
+		//AddSelCoordArray(ids, bids, sela, bn > 1);
+		//sela = m_output_grid->GetSelectionBlockTopLeft();
+		//AddSelCoordArray(ids, bids, sela, bn > 1);
+		//sela = m_output_grid->GetSelectedCells();
+		//AddSelCoordArray(ids, bids, sela, bn > 1);
+	}
+
+	double sx = list->sx;
+	double sy = list->sy;
+	double sz = list->sz;
+	if (sel_all)
+	{
+		for (auto it = list->begin(); it != list->end(); ++it)
+			FindCelps(cl, it, links);
+	}
+	else
+	{
+		for (size_t i = 0; i < ids.size(); ++i)
+		{
+			unsigned long long key = ids[i];
+			unsigned int bid = 0;
+			if (bn > 1)
+			{
+				key = bids[i];
+				key = (key << 32) | ids[i];
+				bid = bids[i];
+			}
+			auto it = list->find(key);
+			if (it != list->end())
+				FindCelps(cl, it, links);
+		}
+	}
+
+	if (cl.empty())
+		return false;
+	return true;
+}
+
+void ComponentSelector::GetCompSelection()
+{
+	if (m_view)
+	{
+		flrd::CelpList cl;
+		GetCellList(cl);
+		m_view->SetCellList(cl);
+		m_view->SetInteractive(false);
+		m_view->RefreshGL(39);
+	}
+}
+
+void ComponentSelector::SetCompSelection(std::set<unsigned long long>& ids, int mode)
+{
+	if (ids.empty())
+		return;
+
+	int bn = glbin_comp_analyzer.GetBrickNum();
+
+	wxString str;
+	unsigned long ulv;
+	unsigned long long ull;
+	bool flag = mode == 1;
+	int lasti = -1;
+	wxArrayInt sel = m_output_grid->GetSelectedRows();
+	std::set<int> rows;
+	for (int i = 0; i < sel.GetCount(); ++i)
+		rows.insert(sel[i]);
+	for (int i = 0; i < m_output_grid->GetNumberRows(); ++i)
+	{
+		str = m_output_grid->GetCellValue(i, 0);
+		if (!str.ToULong(&ulv))
+			continue;
+		if (bn > 1)
+		{
+			str = m_output_grid->GetCellValue(i, 1);
+			if (!str.ToULongLong(&ull))
+				continue;
+			ull = (ull << 32) | ulv;
+		}
+		else
+			ull = ulv;
+		if (ids.find(ull) != ids.end())
+		{
+			if (!flag)
+			{
+				m_output_grid->ClearSelection();
+				flag = true;
+			}
+			if (mode == 0)
+			{
+				m_output_grid->SelectRow(i, true);
+				lasti = i;
+			}
+			else
+			{
+				if (rows.find(i) != rows.end())
+					m_output_grid->DeselectRow(i);
+				else
+				{
+					m_output_grid->SelectRow(i, true);
+					lasti = i;
+				}
+			}
+		}
+	}
+
+	if (flag)
+	{
+		GetCompSelection();
+		if (lasti >= 0)
+			m_output_grid->GoToCell(lasti, 0);
+	}
+}
+
+void ComponentSelector::IncludeComps()
+{
+	if (!m_view || !m_view->m_cur_vol)
+		return;
+
+	flrd::CelpList cl;
+	if (GetCellList(cl, true))
+	{
+		//clear complist
+		flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
+		for (auto it = list->begin();
+			it != list->end();)
+		{
+			if (cl.find(it->second->GetEId()) == cl.end())
+				it = list->erase(it);
+			else
+				++it;
+		}
+		//select cl
+		glbin_comp_selector.SetVolume(m_view->m_cur_vol);
+		glbin_comp_selector.SelectList(cl);
+		ClearOutputGrid();
+		string titles, values;
+		glbin_comp_analyzer.OutputFormHeader(titles);
+		glbin_comp_analyzer.OutputCompListStr(values, 0);
+		wxString str1(titles), str2(values);
+		SetOutput(str1, str2);
+
+		cl.clear();
+		m_view->SetCellList(cl);
+		m_view->SetInteractive(false);
+		m_view->RefreshGL(39);
+
+		//frame
+		//if (m_frame)
+		//{
+		//	if (m_frame->GetBrushToolDlg())
+		//	{
+		//		if (m_view->m_paint_count)
+		//			m_frame->GetBrushToolDlg()->Update(0);
+		//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+		//	}
+		//	if (m_frame->GetColocalizationDlg() &&
+		//		m_view->m_paint_colocalize)
+		//		m_frame->GetColocalizationDlg()->Colocalize();
+		//}
+	}
+}
+
+void ComponentSelector::ExcludeComps()
+{
+	if (!m_view || !m_view->m_cur_vol)
+		return;
+
+	flrd::CelpList cl;
+	if (GetCellList(cl, true))
+	{
+		//clear complist
+		flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
+		for (auto it = list->begin();
+			it != list->end();)
+		{
+			if (cl.find(it->second->GetEId()) != cl.end())
+				it = list->erase(it);
+			else
+				++it;
+		}
+		glbin_comp_selector.SetVolume(m_view->m_cur_vol);
+		std::vector<unsigned long long> ids;
+		for (auto it = list->begin();
+			it != list->end(); ++it)
+			ids.push_back(it->second->GetEId());
+		glbin_comp_selector.Delete(ids);
+		ClearOutputGrid();
+		string titles, values;
+		glbin_comp_analyzer.OutputFormHeader(titles);
+		glbin_comp_analyzer.OutputCompListStr(values, 0);
+		wxString str1(titles), str2(values);
+		SetOutput(str1, str2);
+
+		cl.clear();
+		m_view->SetCellList(cl);
+		m_view->SetInteractive(false);
+		m_view->RefreshGL(39);
+
+		//frame
+		//if (m_frame)
+		//{
+		//	if (m_frame->GetBrushToolDlg())
+		//	{
+		//		if (m_view->m_paint_count)
+		//			m_frame->GetBrushToolDlg()->Update(0);
+		//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+		//	}
+		//	if (m_frame->GetColocalizationDlg() &&
+		//		m_view->m_paint_colocalize)
+		//		m_frame->GetColocalizationDlg()->Colocalize();
+		//}
+	}
 }
 
 void ComponentSelector::CompFull()
@@ -119,12 +395,12 @@ void ComponentSelector::CompFull()
 				if (label_iter == sel_labels.end())
 				{
 					Cell* info = new Cell(label_value, brick_id);
-					if (!m_analyzer || !m_analyzer->GetAnalyzed())
+					if (!glbin_comp_analyzer.GetAnalyzed())
 						info->SetSizeUi(1);
 					sel_labels.insert(std::pair<unsigned long long, Celp>
 						(info->GetEId(), Celp(info)));
 				}
-				else if (!m_analyzer || !m_analyzer->GetAnalyzed())
+				else if (!glbin_comp_analyzer.GetAnalyzed())
 					label_iter->second->Inc();
 			}
 		}
@@ -231,8 +507,8 @@ void ComponentSelector::Select(bool all, bool rmask)
 	{
 		CelpList sel_labels;
 		CelpList* comp_list = 0;
-		if (m_analyzer && m_analyzer->GetAnalyzed())
-			comp_list = m_analyzer->GetCelpList();
+		if (glbin_comp_analyzer.GetAnalyzed())
+			comp_list = glbin_comp_analyzer.GetCelpList();
 		else
 		{
 			for (index = 0; index < for_size; ++index)
@@ -289,46 +565,43 @@ void ComponentSelector::Select(bool all, bool rmask)
 	else
 	{
 		bool simple_select = true;
-		if (m_analyzer)
+		simple_select = false;
+		CelpList* analyzer_list = glbin_comp_analyzer.GetCelpList();
+		auto iter = analyzer_list->find(m_id);
+		if (iter == analyzer_list->end())
+			simple_select = true;
+		else
 		{
-			simple_select = false;
-			CelpList* analyzer_list = m_analyzer->GetCelpList();
-			auto iter = analyzer_list->find(m_id);
-			if (iter == analyzer_list->end())
-				simple_select = true;
-			else
+			glbin_comp_analyzer.GetCellGraph()->ClearVisited();
+			CelpList comp_list;
+			if (glbin_comp_analyzer.GetCellGraph()->
+				GetLinkedComps(iter->second, comp_list))
 			{
-				m_analyzer->GetCellGraph()->ClearVisited();
-				CelpList comp_list;
-				if (m_analyzer->GetCellGraph()->
-					GetLinkedComps(iter->second, comp_list))
+				for (index = 0; index < for_size; ++index)
 				{
-					for (index = 0; index < for_size; ++index)
+					if (data_label[index])
 					{
-						if (data_label[index])
+						label_value = data_label[index];
+						bid = tex->get_brick_id(index);
+						label_iter = comp_list.find(Cell::GetKey(label_value, bid));
+						if (label_iter != comp_list.end())
 						{
-							label_value = data_label[index];
-							bid = tex->get_brick_id(index);
-							label_iter = comp_list.find(Cell::GetKey(label_value, bid));
-							if (label_iter != comp_list.end())
+							if (m_use_min || m_use_max)
 							{
-								if (m_use_min || m_use_max)
-								{
-									size = label_iter->second->GetSizeUi();
-									if (CompareSize(size))
-										SelectMask(data_mask, index, 255, tex);
-									else
-										data_mask[index] = 0;
-								}
-								else
+								size = label_iter->second->GetSizeUi();
+								if (CompareSize(size))
 									SelectMask(data_mask, index, 255, tex);
+								else
+									data_mask[index] = 0;
 							}
+							else
+								SelectMask(data_mask, index, 255, tex);
 						}
 					}
 				}
-				else
-					simple_select = true;
 			}
+			else
+				simple_select = true;
 		}
 
 		if (simple_select)
@@ -617,10 +890,10 @@ void ComponentSelector::SelectList(CelpList& list)
 
 inline CelpList* ComponentSelector::GetListFromAnalyzer(CelpList &list_in, CelpList &list_out)
 {
-	if (m_analyzer && m_analyzer->GetAnalyzed())
+	if (glbin_comp_analyzer.GetAnalyzed())
 	{
 		//assign graph node identifier for sel_labels
-		CelpList* analyzer_list = m_analyzer->GetCelpList();
+		CelpList* analyzer_list = glbin_comp_analyzer.GetCelpList();
 		for (auto iter = list_in.begin(); iter != list_in.end(); )
 		{
 			auto iter2 = analyzer_list->find(iter->first);
@@ -634,9 +907,9 @@ inline CelpList* ComponentSelector::GetListFromAnalyzer(CelpList &list_in, CelpL
 			iter->second->SetSizeUi(iter2->second->GetSizeUi());
 			++iter;
 		}
-		if (m_analyzer->GetCellGraph()->
+		if (glbin_comp_analyzer.GetCellGraph()->
 			GetLinkedComps(list_in, list_out,
-				m_analyzer->GetSizeLimit()))
+				glbin_comp_analyzer.GetSizeLimit()))
 			return &list_out;
 		else
 			return &list_in;
@@ -658,3 +931,28 @@ void ComponentSelector::SelectMask(unsigned char* mask,
 			b->valid_mask();
 	}
 }
+
+void ComponentSelector::FindCelps(flrd::CelpList& list,
+	flrd::CelpListIter& it, bool links)
+{
+	list.insert(pair<unsigned long long, flrd::Celp>
+		(it->second->GetEId(), it->second));
+
+	if (links)
+	{
+		flrd::CellGraph* graph = glbin_comp_analyzer.GetCellGraph();
+		graph->ClearVisited();
+		flrd::CelpList links;
+		if (graph->GetLinkedComps(it->second, links,
+			glbin_comp_analyzer.GetSizeLimit()))
+		{
+			for (auto it2 = links.begin();
+				it2 != links.end(); ++it2)
+			{
+				list.insert(pair<unsigned long long, flrd::Celp>
+					(it2->second->GetEId(), it2->second));
+			}
+		}
+	}
+}
+

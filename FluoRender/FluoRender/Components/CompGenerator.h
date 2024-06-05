@@ -112,6 +112,13 @@ namespace flrd
 		void SetFillBorder(double val) { m_fill_border = val; }
 		double GetFillBorder() { return m_fill_border; }
 
+		//high-level functions
+		void GenerateComp(bool command = true);
+		void Fixate(bool command = true);
+		void Clean(bool command = true);
+		//learning functions
+		void ApplyRecord();
+
 		//segmentation functions
 		void ShuffleID();
 		void SetIDBit(int);
@@ -120,7 +127,7 @@ namespace flrd
 		void DensityField();
 		void DistGrow();
 		void DistDensityField();
-		void Cleanup();
+		void CleanNoise();
 		void ClearBorders();
 		void FillBorders();
 
@@ -128,6 +135,14 @@ namespace flrd
 		void AddEntry();
 		void AddCleanEntry();
 		void GenerateDB();
+
+		//command
+		void LoadCmd(const wxString& filename);
+		void SaveCmd(const wxString& filename);
+		void AddCmd(const std::string& type);
+		void ResetCmd();
+		void PlayCmd(double tfactor);
+
 
 		//unused
 		//void OrderID_2D();
@@ -179,9 +194,21 @@ namespace flrd
 		//fill borders
 		double m_fill_border;
 
+		//record
+		bool m_record_cmd;
+		CompCommand m_command;
+
+		//speed test
+		bool m_test_speed;
+		std::vector<std::chrono::high_resolution_clock::time_point> m_tps;
+		wxString m_titles, m_values;
+
 	private:
 		bool CheckBricks();
 		unsigned int reverse_bit(unsigned int val, unsigned int len);
+		//speed test
+		void StartTimer(const std::string& str);
+		void StopTimer(const std::string& str);
 	};
 
 	inline unsigned int ComponentGenerator::reverse_bit(unsigned int val, unsigned int len)

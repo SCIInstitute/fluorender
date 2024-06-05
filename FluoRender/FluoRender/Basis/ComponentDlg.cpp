@@ -46,159 +46,157 @@ DEALINGS IN THE SOFTWARE.
 #include <set>
 #include <fstream>
 
-BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
-	//EVT_COLLAPSIBLEPANE_CHANGED(wxID_ANY, ComponentDlg::OnPaneChange)
-	//load save settings
-	EVT_BUTTON(ID_LoadSettingsBtn, ComponentDlg::OnLoadSettings)
-	EVT_BUTTON(ID_SaveSettingsBtn, ComponentDlg::OnSaveSettings)
-	EVT_BUTTON(ID_SaveasSettingsBtn, ComponentDlg::OnSaveasSettings)
-	//comp gen page
-	EVT_COMMAND_SCROLL(ID_IterSldr, ComponentDlg::OnIterSldr)
-	EVT_TEXT(ID_IterText, ComponentDlg::OnIterText)
-	EVT_COMMAND_SCROLL(ID_ThreshSldr, ComponentDlg::OnThreshSldr)
-	EVT_TEXT(ID_ThreshText, ComponentDlg::OnThreshText)
-	//distance field
-	EVT_CHECKBOX(ID_UseDistFieldCheck, ComponentDlg::OnUseDistFieldCheck)
-	EVT_COMMAND_SCROLL(ID_DistStrengthSldr, ComponentDlg::OnDistStrengthSldr)
-	EVT_TEXT(ID_DistStrengthText, ComponentDlg::OnDistStrengthText)
-	EVT_COMMAND_SCROLL(ID_DistFilterSizeSldr, ComponentDlg::OnDistFilterSizeSldr)
-	EVT_TEXT(ID_DistFilterSizeText, ComponentDlg::OnDistFitlerSizeText)
-	EVT_COMMAND_SCROLL(ID_MaxDistSldr, ComponentDlg::OnMaxDistSldr)
-	EVT_TEXT(ID_MaxDistText, ComponentDlg::OnMaxDistText)
-	EVT_COMMAND_SCROLL(ID_DistThreshSldr, ComponentDlg::OnDistThreshSldr)
-	EVT_TEXT(ID_DistThreshText, ComponentDlg::OnDistThreshText)
-	//diffusion
-	EVT_CHECKBOX(ID_DiffCheck, ComponentDlg::OnDiffCheck)
-	EVT_COMMAND_SCROLL(ID_FalloffSldr, ComponentDlg::OnFalloffSldr)
-	EVT_TEXT(ID_FalloffText, ComponentDlg::OnFalloffText)
-	EVT_CHECKBOX(ID_SizeCheck, ComponentDlg::OnSizeCheck)
-	EVT_COMMAND_SCROLL(ID_SizeSldr, ComponentDlg::OnSizeSldr)
-	EVT_TEXT(ID_SizeText, ComponentDlg::OnSizeText)
-	//density
-	EVT_CHECKBOX(ID_DensityCheck, ComponentDlg::OnDensityCheck)
-	EVT_COMMAND_SCROLL(ID_DensitySldr, ComponentDlg::OnDensitySldr)
-	EVT_TEXT(ID_DensityText, ComponentDlg::OnDensityText)
-	EVT_COMMAND_SCROLL(ID_VarthSldr, ComponentDlg::OnVarthSldr)
-	EVT_TEXT(ID_VarthText, ComponentDlg::OnVarthText)
-	EVT_COMMAND_SCROLL(ID_DensityWindowSizeSldr, ComponentDlg::OnDensityWindowSizeSldr)
-	EVT_TEXT(ID_DensityWindowsSizeText, ComponentDlg::OnDensityWindowSizeText)
-	EVT_COMMAND_SCROLL(ID_DensityStatsSizeSldr, ComponentDlg::OnDensityStatsSizeSldr)
-	EVT_TEXT(ID_DensityStatsSizeText, ComponentDlg::OnDensityStatsSizeText)
-	//fixate
-	EVT_CHECKBOX(ID_FixateCheck, ComponentDlg::OnFixateCheck)
-	EVT_CHECKBOX(ID_GrowFixedCheck, ComponentDlg::OnGrowFixedCheck)
-	EVT_BUTTON(ID_FixUpdateBtn, ComponentDlg::OnFixUpdateBtn)
-	EVT_COMMAND_SCROLL(ID_FixSizeSldr, ComponentDlg::OnFixSizeSldr)
-	EVT_TEXT(ID_FixSizeText, ComponentDlg::OnFixSizeText)
-	//clean
-	EVT_CHECKBOX(ID_CleanCheck, ComponentDlg::OnCleanCheck)
-	EVT_BUTTON(ID_CleanBtn, ComponentDlg::OnCleanBtn)
-	EVT_COMMAND_SCROLL(ID_CleanIterSldr, ComponentDlg::OnCleanIterSldr)
-	EVT_TEXT(ID_CleanIterText, ComponentDlg::OnCleanIterText)
-	EVT_COMMAND_SCROLL(ID_CleanLimitSldr, ComponentDlg::OnCleanLimitSldr)
-	EVT_TEXT(ID_CleanLimitText, ComponentDlg::OnCleanLimitText)
-	//record
-	EVT_TOGGLEBUTTON(ID_RecordCmdBtn, ComponentDlg::OnRecordCmd)
-	EVT_BUTTON(ID_PlayCmdBtn, ComponentDlg::OnPlayCmd)
-	EVT_BUTTON(ID_ResetCmdBtn, ComponentDlg::OnResetCmd)
-	EVT_BUTTON(ID_SaveCmdBtn, ComponentDlg::OnSaveCmd)
-	EVT_BUTTON(ID_LoadCmdBtn, ComponentDlg::OnLoadCmd)
-
-	//clustering page
-	EVT_RADIOBUTTON(ID_ClusterMethodExmaxRd, ComponentDlg::OnClusterMethodExmaxCheck)
-	EVT_RADIOBUTTON(ID_ClusterMethodDbscanRd, ComponentDlg::OnClusterMethodDbscanCheck)
-	EVT_RADIOBUTTON(ID_ClusterMethodKmeansRd, ComponentDlg::OnClusterMethodKmeansCheck)
-	//parameters
-	EVT_COMMAND_SCROLL(ID_ClusterClnumSldr, ComponentDlg::OnClusterClnumSldr)
-	EVT_TEXT(ID_ClusterClnumText, ComponentDlg::OnClusterClnumText)
-	EVT_COMMAND_SCROLL(ID_ClusterMaxIterSldr, ComponentDlg::OnClusterMaxiterSldr)
-	EVT_TEXT(ID_ClusterMaxIterText, ComponentDlg::OnClusterMaxiterText)
-	EVT_COMMAND_SCROLL(ID_ClusterTolSldr, ComponentDlg::OnClusterTolSldr)
-	EVT_TEXT(ID_ClusterTolText, ComponentDlg::OnClusterTolText)
-	EVT_COMMAND_SCROLL(ID_ClusterSizeSldr, ComponentDlg::OnClusterSizeSldr)
-	EVT_TEXT(ID_ClusterSizeText, ComponentDlg::OnClusterSizeText)
-	EVT_COMMAND_SCROLL(ID_ClusterEpsSldr, ComponentDlg::OnClusterEpsSldr)
-	EVT_TEXT(ID_ClusterEpsText, ComponentDlg::OnClusterepsText)
-
-	//analysis page
-	EVT_TEXT(ID_CompIdText, ComponentDlg::OnCompIdText)
-	EVT_TEXT_ENTER(ID_CompIdText, ComponentDlg::OnCompFull)
-	EVT_BUTTON(ID_CompIdXBtn, ComponentDlg::OnCompIdXBtn)
-	EVT_CHECKBOX(ID_AnalysisMinCheck, ComponentDlg::OnAnalysisMinCheck)
-	EVT_SPINCTRL(ID_AnalysisMinSpin, ComponentDlg::OnAnalysisMinSpin)
-	EVT_TEXT(ID_AnalysisMinSpin, ComponentDlg::OnAnalysisMinText)
-	EVT_CHECKBOX(ID_AnalysisMaxCheck, ComponentDlg::OnAnalysisMaxCheck)
-	EVT_SPINCTRL(ID_AnalysisMaxSpin, ComponentDlg::OnAnalysisMaxSpin)
-	EVT_TEXT(ID_AnalysisMaxSpin, ComponentDlg::OnAnalysisMaxText)
-	EVT_BUTTON(ID_CompFullBtn, ComponentDlg::OnCompFull)
-	EVT_BUTTON(ID_CompExclusiveBtn, ComponentDlg::OnCompExclusive)
-	EVT_BUTTON(ID_CompAppendBtn, ComponentDlg::OnCompAppend)
-	EVT_BUTTON(ID_CompAllBtn, ComponentDlg::OnCompAll)
-	EVT_BUTTON(ID_CompClearBtn, ComponentDlg::OnCompClear)
-	EVT_BUTTON(ID_ShuffleBtn, ComponentDlg::OnShuffle)
-	//modify
-	EVT_TEXT(ID_NewIdText, ComponentDlg::OnNewIDText)
-	EVT_BUTTON(ID_NewIdXBtn, ComponentDlg::OnNewIDX)
-	EVT_BUTTON(ID_CompNewBtn, ComponentDlg::OnCompNew)
-	EVT_BUTTON(ID_CompAddBtn, ComponentDlg::OnCompAdd)
-	EVT_BUTTON(ID_CompReplaceBtn, ComponentDlg::OnCompReplace)
-	EVT_BUTTON(ID_CompCleanBkgBtn, ComponentDlg::OnCompCleanBkg)
-	EVT_BUTTON(ID_CompCombineBtn, ComponentDlg::OnCompCombine)
-	//options
-	EVT_COMMAND_SCROLL(ID_ConSizeSldr, ComponentDlg::OnConSizeSldr)
-	EVT_TEXT(ID_ConSizeText, ComponentDlg::OnConSizeText)
-	EVT_CHECKBOX(ID_ConsistentCheck, ComponentDlg::OnConsistentCheck)
-	EVT_CHECKBOX(ID_ColocalCheck, ComponentDlg::OnColocalCheck)
-	//output
-	EVT_RADIOBUTTON(ID_OutputMultiRb, ComponentDlg::OnOutputTypeRadio)
-	EVT_RADIOBUTTON(ID_OutputRgbRb, ComponentDlg::OnOutputTypeRadio)
-	EVT_BUTTON(ID_OutputRandomBtn, ComponentDlg::OnOutputChannels)
-	EVT_BUTTON(ID_OutputSizeBtn, ComponentDlg::OnOutputChannels)
-	EVT_BUTTON(ID_OutputIdBtn, ComponentDlg::OnOutputAnnotation)
-	EVT_BUTTON(ID_OutputSnBtn, ComponentDlg::OnOutputAnnotation)
-	//distance
-	EVT_CHECKBOX(ID_DistNeighborCheck, ComponentDlg::OnDistNeighborCheck)
-	EVT_CHECKBOX(ID_DistAllChanCheck, ComponentDlg::OnDistAllChanCheck)
-	EVT_COMMAND_SCROLL(ID_DistNeighborSldr, ComponentDlg::OnDistNeighborSldr)
-	EVT_TEXT(ID_DistNeighborText, ComponentDlg::OnDistNeighborText)
-	EVT_BUTTON(ID_DistOutputBtn, ComponentDlg::OnDistOutput)
-	//align
-	EVT_BUTTON(ID_AlignXYZ, ComponentDlg::OnAlignPca)
-	EVT_BUTTON(ID_AlignYXZ, ComponentDlg::OnAlignPca)
-	EVT_BUTTON(ID_AlignZXY, ComponentDlg::OnAlignPca)
-	EVT_BUTTON(ID_AlignXZY, ComponentDlg::OnAlignPca)
-	EVT_BUTTON(ID_AlignYZX, ComponentDlg::OnAlignPca)
-	EVT_BUTTON(ID_AlignZYX, ComponentDlg::OnAlignPca)
-
-	//execute
-	EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, ComponentDlg::OnNotebook)
-	EVT_CHECKBOX(ID_UseSelChk, ComponentDlg::OnUseSelChk)
-	EVT_CHECKBOX(ID_UseMlChk, ComponentDlg::OnUseMlChk)
-	EVT_BUTTON(ID_GenerateBtn, ComponentDlg::OnGenerate)
-	EVT_TOGGLEBUTTON(ID_AutoUpdateBtn, ComponentDlg::OnAutoUpdate)
-	EVT_BUTTON(ID_ClusterBtn, ComponentDlg::OnCluster)
-	EVT_BUTTON(ID_AnalyzeBtn, ComponentDlg::OnAnalyze)
-	EVT_BUTTON(ID_AnalyzeSelBtn, ComponentDlg::OnAnalyzeSel)
-	//output
-	EVT_BUTTON(ID_IncludeBtn, ComponentDlg::OnIncludeBtn)
-	EVT_BUTTON(ID_ExcludeBtn, ComponentDlg::OnExcludeBtn)
-	EVT_CHECKBOX(ID_HistoryChk, ComponentDlg::OnHistoryChk)
-	EVT_BUTTON(ID_ClearHistBtn, ComponentDlg::OnClearHistBtn)
-	//EVT_KEY_DOWN(ComponentDlg::OnKeyDown)
-	EVT_GRID_SELECT_CELL(ComponentDlg::OnSelectCell)
-	EVT_GRID_RANGE_SELECT(ComponentDlg::OnRangeSelect)
-	EVT_GRID_LABEL_LEFT_CLICK(ComponentDlg::OnGridLabelClick)
-	//split
-	EVT_SPLITTER_DCLICK(wxID_ANY, ComponentDlg::OnSplitterDclick)
-END_EVENT_TABLE()
+//BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
+//	//EVT_COLLAPSIBLEPANE_CHANGED(wxID_ANY, ComponentDlg::OnPaneChange)
+//	//load save settings
+//	EVT_BUTTON(ID_LoadSettingsBtn, ComponentDlg::OnLoadSettings)
+//	EVT_BUTTON(ID_SaveSettingsBtn, ComponentDlg::OnSaveSettings)
+//	EVT_BUTTON(ID_SaveasSettingsBtn, ComponentDlg::OnSaveasSettings)
+//	//comp gen page
+//	EVT_COMMAND_SCROLL(ID_IterSldr, ComponentDlg::OnIterSldr)
+//	EVT_TEXT(ID_IterText, ComponentDlg::OnIterText)
+//	EVT_COMMAND_SCROLL(ID_ThreshSldr, ComponentDlg::OnThreshSldr)
+//	EVT_TEXT(ID_ThreshText, ComponentDlg::OnThreshText)
+//	//distance field
+//	EVT_CHECKBOX(ID_UseDistFieldCheck, ComponentDlg::OnUseDistFieldCheck)
+//	EVT_COMMAND_SCROLL(ID_DistStrengthSldr, ComponentDlg::OnDistStrengthSldr)
+//	EVT_TEXT(ID_DistStrengthText, ComponentDlg::OnDistStrengthText)
+//	EVT_COMMAND_SCROLL(ID_DistFilterSizeSldr, ComponentDlg::OnDistFilterSizeSldr)
+//	EVT_TEXT(ID_DistFilterSizeText, ComponentDlg::OnDistFitlerSizeText)
+//	EVT_COMMAND_SCROLL(ID_MaxDistSldr, ComponentDlg::OnMaxDistSldr)
+//	EVT_TEXT(ID_MaxDistText, ComponentDlg::OnMaxDistText)
+//	EVT_COMMAND_SCROLL(ID_DistThreshSldr, ComponentDlg::OnDistThreshSldr)
+//	EVT_TEXT(ID_DistThreshText, ComponentDlg::OnDistThreshText)
+//	//diffusion
+//	EVT_CHECKBOX(ID_DiffCheck, ComponentDlg::OnDiffCheck)
+//	EVT_COMMAND_SCROLL(ID_FalloffSldr, ComponentDlg::OnFalloffSldr)
+//	EVT_TEXT(ID_FalloffText, ComponentDlg::OnFalloffText)
+//	EVT_CHECKBOX(ID_SizeCheck, ComponentDlg::OnSizeCheck)
+//	EVT_COMMAND_SCROLL(ID_SizeSldr, ComponentDlg::OnSizeSldr)
+//	EVT_TEXT(ID_SizeText, ComponentDlg::OnSizeText)
+//	//density
+//	EVT_CHECKBOX(ID_DensityCheck, ComponentDlg::OnDensityCheck)
+//	EVT_COMMAND_SCROLL(ID_DensitySldr, ComponentDlg::OnDensitySldr)
+//	EVT_TEXT(ID_DensityText, ComponentDlg::OnDensityText)
+//	EVT_COMMAND_SCROLL(ID_VarthSldr, ComponentDlg::OnVarthSldr)
+//	EVT_TEXT(ID_VarthText, ComponentDlg::OnVarthText)
+//	EVT_COMMAND_SCROLL(ID_DensityWindowSizeSldr, ComponentDlg::OnDensityWindowSizeSldr)
+//	EVT_TEXT(ID_DensityWindowsSizeText, ComponentDlg::OnDensityWindowSizeText)
+//	EVT_COMMAND_SCROLL(ID_DensityStatsSizeSldr, ComponentDlg::OnDensityStatsSizeSldr)
+//	EVT_TEXT(ID_DensityStatsSizeText, ComponentDlg::OnDensityStatsSizeText)
+//	//fixate
+//	EVT_CHECKBOX(ID_FixateCheck, ComponentDlg::OnFixateCheck)
+//	EVT_CHECKBOX(ID_GrowFixedCheck, ComponentDlg::OnGrowFixedCheck)
+//	EVT_BUTTON(ID_FixUpdateBtn, ComponentDlg::OnFixUpdateBtn)
+//	EVT_COMMAND_SCROLL(ID_FixSizeSldr, ComponentDlg::OnFixSizeSldr)
+//	EVT_TEXT(ID_FixSizeText, ComponentDlg::OnFixSizeText)
+//	//clean
+//	EVT_CHECKBOX(ID_CleanCheck, ComponentDlg::OnCleanCheck)
+//	EVT_BUTTON(ID_CleanBtn, ComponentDlg::OnCleanBtn)
+//	EVT_COMMAND_SCROLL(ID_CleanIterSldr, ComponentDlg::OnCleanIterSldr)
+//	EVT_TEXT(ID_CleanIterText, ComponentDlg::OnCleanIterText)
+//	EVT_COMMAND_SCROLL(ID_CleanLimitSldr, ComponentDlg::OnCleanLimitSldr)
+//	EVT_TEXT(ID_CleanLimitText, ComponentDlg::OnCleanLimitText)
+//	//record
+//	EVT_TOGGLEBUTTON(ID_RecordCmdBtn, ComponentDlg::OnRecordCmd)
+//	EVT_BUTTON(ID_PlayCmdBtn, ComponentDlg::OnPlayCmd)
+//	EVT_BUTTON(ID_ResetCmdBtn, ComponentDlg::OnResetCmd)
+//	EVT_BUTTON(ID_SaveCmdBtn, ComponentDlg::OnSaveCmd)
+//	EVT_BUTTON(ID_LoadCmdBtn, ComponentDlg::OnLoadCmd)
+//
+//	//clustering page
+//	EVT_RADIOBUTTON(ID_ClusterMethodExmaxRd, ComponentDlg::OnClusterMethodExmaxCheck)
+//	EVT_RADIOBUTTON(ID_ClusterMethodDbscanRd, ComponentDlg::OnClusterMethodDbscanCheck)
+//	EVT_RADIOBUTTON(ID_ClusterMethodKmeansRd, ComponentDlg::OnClusterMethodKmeansCheck)
+//	//parameters
+//	EVT_COMMAND_SCROLL(ID_ClusterClnumSldr, ComponentDlg::OnClusterClnumSldr)
+//	EVT_TEXT(ID_ClusterClnumText, ComponentDlg::OnClusterClnumText)
+//	EVT_COMMAND_SCROLL(ID_ClusterMaxIterSldr, ComponentDlg::OnClusterMaxiterSldr)
+//	EVT_TEXT(ID_ClusterMaxIterText, ComponentDlg::OnClusterMaxiterText)
+//	EVT_COMMAND_SCROLL(ID_ClusterTolSldr, ComponentDlg::OnClusterTolSldr)
+//	EVT_TEXT(ID_ClusterTolText, ComponentDlg::OnClusterTolText)
+//	EVT_COMMAND_SCROLL(ID_ClusterSizeSldr, ComponentDlg::OnClusterSizeSldr)
+//	EVT_TEXT(ID_ClusterSizeText, ComponentDlg::OnClusterSizeText)
+//	EVT_COMMAND_SCROLL(ID_ClusterEpsSldr, ComponentDlg::OnClusterEpsSldr)
+//	EVT_TEXT(ID_ClusterEpsText, ComponentDlg::OnClusterepsText)
+//
+//	//analysis page
+//	EVT_TEXT(ID_CompIdText, ComponentDlg::OnCompIdText)
+//	EVT_TEXT_ENTER(ID_CompIdText, ComponentDlg::OnCompFull)
+//	EVT_BUTTON(ID_CompIdXBtn, ComponentDlg::OnCompIdXBtn)
+//	EVT_CHECKBOX(ID_AnalysisMinCheck, ComponentDlg::OnAnalysisMinCheck)
+//	EVT_SPINCTRL(ID_AnalysisMinSpin, ComponentDlg::OnAnalysisMinSpin)
+//	EVT_TEXT(ID_AnalysisMinSpin, ComponentDlg::OnAnalysisMinText)
+//	EVT_CHECKBOX(ID_AnalysisMaxCheck, ComponentDlg::OnAnalysisMaxCheck)
+//	EVT_SPINCTRL(ID_AnalysisMaxSpin, ComponentDlg::OnAnalysisMaxSpin)
+//	EVT_TEXT(ID_AnalysisMaxSpin, ComponentDlg::OnAnalysisMaxText)
+//	EVT_BUTTON(ID_CompFullBtn, ComponentDlg::OnCompFull)
+//	EVT_BUTTON(ID_CompExclusiveBtn, ComponentDlg::OnCompExclusive)
+//	EVT_BUTTON(ID_CompAppendBtn, ComponentDlg::OnCompAppend)
+//	EVT_BUTTON(ID_CompAllBtn, ComponentDlg::OnCompAll)
+//	EVT_BUTTON(ID_CompClearBtn, ComponentDlg::OnCompClear)
+//	EVT_BUTTON(ID_ShuffleBtn, ComponentDlg::OnShuffle)
+//	//modify
+//	EVT_TEXT(ID_NewIdText, ComponentDlg::OnNewIDText)
+//	EVT_BUTTON(ID_NewIdXBtn, ComponentDlg::OnNewIDX)
+//	EVT_BUTTON(ID_CompNewBtn, ComponentDlg::OnCompNew)
+//	EVT_BUTTON(ID_CompAddBtn, ComponentDlg::OnCompAdd)
+//	EVT_BUTTON(ID_CompReplaceBtn, ComponentDlg::OnCompReplace)
+//	EVT_BUTTON(ID_CompCleanBkgBtn, ComponentDlg::OnCompCleanBkg)
+//	EVT_BUTTON(ID_CompCombineBtn, ComponentDlg::OnCompCombine)
+//	//options
+//	EVT_COMMAND_SCROLL(ID_ConSizeSldr, ComponentDlg::OnConSizeSldr)
+//	EVT_TEXT(ID_ConSizeText, ComponentDlg::OnConSizeText)
+//	EVT_CHECKBOX(ID_ConsistentCheck, ComponentDlg::OnConsistentCheck)
+//	EVT_CHECKBOX(ID_ColocalCheck, ComponentDlg::OnColocalCheck)
+//	//output
+//	EVT_RADIOBUTTON(ID_OutputMultiRb, ComponentDlg::OnOutputTypeRadio)
+//	EVT_RADIOBUTTON(ID_OutputRgbRb, ComponentDlg::OnOutputTypeRadio)
+//	EVT_BUTTON(ID_OutputRandomBtn, ComponentDlg::OnOutputChannels)
+//	EVT_BUTTON(ID_OutputSizeBtn, ComponentDlg::OnOutputChannels)
+//	EVT_BUTTON(ID_OutputIdBtn, ComponentDlg::OnOutputAnnotation)
+//	EVT_BUTTON(ID_OutputSnBtn, ComponentDlg::OnOutputAnnotation)
+//	//distance
+//	EVT_CHECKBOX(ID_DistNeighborCheck, ComponentDlg::OnDistNeighborCheck)
+//	EVT_CHECKBOX(ID_DistAllChanCheck, ComponentDlg::OnDistAllChanCheck)
+//	EVT_COMMAND_SCROLL(ID_DistNeighborSldr, ComponentDlg::OnDistNeighborSldr)
+//	EVT_TEXT(ID_DistNeighborText, ComponentDlg::OnDistNeighborText)
+//	EVT_BUTTON(ID_DistOutputBtn, ComponentDlg::OnDistOutput)
+//	//align
+//	EVT_BUTTON(ID_AlignXYZ, ComponentDlg::OnAlignPca)
+//	EVT_BUTTON(ID_AlignYXZ, ComponentDlg::OnAlignPca)
+//	EVT_BUTTON(ID_AlignZXY, ComponentDlg::OnAlignPca)
+//	EVT_BUTTON(ID_AlignXZY, ComponentDlg::OnAlignPca)
+//	EVT_BUTTON(ID_AlignYZX, ComponentDlg::OnAlignPca)
+//	EVT_BUTTON(ID_AlignZYX, ComponentDlg::OnAlignPca)
+//
+//	//execute
+//	EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, ComponentDlg::OnNotebook)
+//	EVT_CHECKBOX(ID_UseSelChk, ComponentDlg::OnUseSelChk)
+//	EVT_CHECKBOX(ID_UseMlChk, ComponentDlg::OnUseMlChk)
+//	EVT_BUTTON(ID_GenerateBtn, ComponentDlg::OnGenerate)
+//	EVT_TOGGLEBUTTON(ID_AutoUpdateBtn, ComponentDlg::OnAutoUpdate)
+//	EVT_BUTTON(ID_ClusterBtn, ComponentDlg::OnCluster)
+//	EVT_BUTTON(ID_AnalyzeBtn, ComponentDlg::OnAnalyze)
+//	EVT_BUTTON(ID_AnalyzeSelBtn, ComponentDlg::OnAnalyzeSel)
+//	//output
+//	EVT_BUTTON(ID_IncludeBtn, ComponentDlg::OnIncludeBtn)
+//	EVT_BUTTON(ID_ExcludeBtn, ComponentDlg::OnExcludeBtn)
+//	EVT_CHECKBOX(ID_HistoryChk, ComponentDlg::OnHistoryChk)
+//	EVT_BUTTON(ID_ClearHistBtn, ComponentDlg::OnClearHistBtn)
+//	//EVT_KEY_DOWN(ComponentDlg::OnKeyDown)
+//	EVT_GRID_SELECT_CELL(ComponentDlg::OnSelectCell)
+//	EVT_GRID_RANGE_SELECT(ComponentDlg::OnRangeSelect)
+//	EVT_GRID_LABEL_LEFT_CLICK(ComponentDlg::OnGridLabelClick)
+//	//split
+//	EVT_SPLITTER_DCLICK(wxID_ANY, ComponentDlg::OnSplitterDclick)
+//END_EVENT_TABLE()
 
 ComponentDlg::ComponentDlg(MainFrame *frame)
-	: wxPanel(frame, wxID_ANY,
+	: PropPanel(frame, frame,
 		wxDefaultPosition,
 		frame->FromDIP(wxSize(600, 800)),
 		0, "ComponentDlg"),
-	m_frame(frame),
-	m_view(0),
 	m_hold_history(false),
 	m_test_speed(false),
 	m_cell_new_id(0),
@@ -1097,7 +1095,7 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	return page;
 }
 
-void ComponentDlg::Update()
+void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 {
 	//update ui
 	m_use_sel_chk->SetValue(glbin_comp_def.m_use_sel);
@@ -1215,15 +1213,6 @@ void ComponentDlg::Update()
 	m_history_chk->SetValue(m_hold_history);
 }
 
-void ComponentDlg::GetSettings()
-{
-
-	//read values
-	//LoadSettings("");
-	//glbin_comp_def.Apply(&m_comp_analyzer);
-	Update();
-}
-
 void ComponentDlg::OnLoadSettings(wxCommandEvent& event)
 {
 	wxFileDialog* fopendlg = new wxFileDialog(
@@ -1275,13 +1264,6 @@ void ComponentDlg::OnSaveasSettings(wxCommandEvent& event)
 
 	if (fopendlg)
 		delete fopendlg;
-}
-
-void ComponentDlg::SetView(RenderCanvas* view)
-{
-	m_view = view;
-	if (m_view)
-		glbin_aligner.SetView(m_view);
 }
 
 //comp generate page
@@ -1751,170 +1733,6 @@ void ComponentDlg::OnCleanLimitText(wxCommandEvent &event)
 }
 
 //record
-void ComponentDlg::AddCmd(const std::string &type)
-{
-	if (!m_command.empty())
-	{
-		flrd::CompCmdParams &params = m_command.back();
-		if (!params.empty())
-		{
-			if ((params[0] == "generate" ||
-				params[0] == "fixate") &&
-				params[0] == type)
-			{
-				//replace
-				m_command.pop_back();
-			}
-			//else do nothing
-		}
-	}
-	//add
-	flrd::CompCmdParams params;
-	if (type == "generate")
-	{
-		params.push_back("generate");
-		params.push_back("iter"); params.push_back(std::to_string(glbin_comp_def.m_iter));
-		params.push_back("thresh"); params.push_back(std::to_string(glbin_comp_def.m_thresh));
-		params.push_back("use_dist_field"); params.push_back(std::to_string(glbin_comp_def.m_use_dist_field));
-		params.push_back("dist_strength"); params.push_back(std::to_string(glbin_comp_def.m_dist_strength));
-		params.push_back("dist_filter_size"); params.push_back(std::to_string(glbin_comp_def.m_dist_filter_size));
-		params.push_back("max_dist"); params.push_back(std::to_string(glbin_comp_def.m_max_dist));
-		params.push_back("dist_thresh"); params.push_back(std::to_string(glbin_comp_def.m_dist_thresh));
-		params.push_back("diff"); params.push_back(std::to_string(glbin_comp_def.m_diff));
-		params.push_back("falloff"); params.push_back(std::to_string(glbin_comp_def.m_falloff));
-		params.push_back("density"); params.push_back(std::to_string(glbin_comp_def.m_density));
-		params.push_back("density_thresh"); params.push_back(std::to_string(glbin_comp_def.m_density_thresh));
-		params.push_back("varth"); params.push_back(std::to_string(glbin_comp_def.m_varth));
-		params.push_back("density_window_size"); params.push_back(std::to_string(glbin_comp_def.m_density_window_size));
-		params.push_back("density_stats_size"); params.push_back(std::to_string(glbin_comp_def.m_density_stats_size));
-		params.push_back("cleanb"); params.push_back(std::to_string(glbin_comp_def.m_clean));
-		params.push_back("clean_iter"); params.push_back(std::to_string(glbin_comp_def.m_clean_iter));
-		params.push_back("clean_size_vl"); params.push_back(std::to_string(glbin_comp_def.m_clean_size_vl));
-		params.push_back("grow_fixed"); params.push_back(std::to_string(glbin_comp_def.m_grow_fixed));
-	}
-	else if (type == "clean")
-	{
-		params.push_back("clean");
-		params.push_back("clean_iter"); params.push_back(std::to_string(glbin_comp_def.m_clean_iter));
-		params.push_back("clean_size_vl"); params.push_back(std::to_string(glbin_comp_def.m_clean_size_vl));
-	}
-	else if (type == "fixate")
-	{
-		params.push_back("fixate");
-		params.push_back("fix_size"); params.push_back(std::to_string(glbin_comp_def.m_fix_size));
-	}
-	m_command.push_back(params);
-
-	//record
-	int ival = m_command.size();
-	m_cmd_count_text->ChangeValue(wxString::Format("%d", ival));
-}
-
-void ComponentDlg::ResetCmd()
-{
-	m_command.clear();
-	m_record_cmd_btn->SetValue(false);
-	m_record_cmd = false;
-	//record
-	int ival = m_command.size();
-	m_cmd_count_text->ChangeValue(wxString::Format("%d", ival));
-}
-
-void ComponentDlg::PlayCmd(double tfactor)
-{
-	//disable first
-	glbin_comp_def.m_fixate = false;
-	glbin_comp_def.m_auto_update = false;
-	m_auto_update_btn->SetValue(false);
-
-	if (m_command.empty())
-	{
-		//the threshold factor is used to lower the threshold value for semi auto segmentation
-		glbin_comp_def.m_tfactor = tfactor;
-		GenerateComp(false);
-		glbin_comp_def.m_tfactor = 1.0;
-		return;
-	}
-
-	for (auto it = m_command.begin();
-		it != m_command.end(); ++it)
-	{
-		if (it->empty())
-			continue;
-		if ((*it)[0] == "generate")
-		{
-			for (auto it2 = it->begin();
-				it2 != it->end(); ++it2)
-			{
-				if (*it2 == "iter")
-					glbin_comp_def.m_iter = std::stoi(*(++it2));
-				else if (*it2 == "thresh")
-					glbin_comp_def.m_thresh = std::stod(*(++it2));
-				else if (*it2 == "use_dist_field")
-					glbin_comp_def.m_use_dist_field = std::stoi(*(++it2));
-				else if (*it2 == "dist_strength")
-					glbin_comp_def.m_dist_strength = std::stod(*(++it2));
-				else if (*it2 == "dist_filter_size")
-					glbin_comp_def.m_dist_filter_size = std::stod(*(++it2));
-				else if (*it2 == "max_dist")
-					glbin_comp_def.m_max_dist = std::stoi(*(++it2));
-				else if (*it2 == "dist_thresh")
-					glbin_comp_def.m_dist_thresh = std::stod(*(++it2));
-				else if (*it2 == "diff")
-					glbin_comp_def.m_diff = std::stoi(*(++it2));
-				else if (*it2 == "falloff")
-					glbin_comp_def.m_falloff = std::stod(*(++it2));
-				else if (*it2 == "density")
-					glbin_comp_def.m_density = std::stoi(*(++it2));
-				else if (*it2 == "density_thresh")
-					glbin_comp_def.m_density_thresh = std::stod(*(++it2));
-				else if (*it2 == "varth")
-					glbin_comp_def.m_varth = std::stod(*(++it2));
-				else if (*it2 == "density_window_size")
-					glbin_comp_def.m_density_window_size = std::stoi(*(++it2));
-				else if (*it2 == "density_stats_size")
-					glbin_comp_def.m_density_stats_size = std::stoi(*(++it2));
-				else if (*it2 == "cleanb")
-					glbin_comp_def.m_clean = std::stoi(*(++it2));
-				else if (*it2 == "clean_iter")
-					glbin_comp_def.m_clean_iter = std::stoi(*(++it2));
-				else if (*it2 == "clean_size_vl")
-					glbin_comp_def.m_clean_size_vl = std::stoi(*(++it2));
-				else if (*it2 == "grow_fixed")
-					glbin_comp_def.m_grow_fixed = std::stoi(*(++it2));
-			}
-			GenerateComp(false);
-		}
-		else if ((*it)[0] == "clean")
-		{
-			glbin_comp_def.m_clean = true;
-			for (auto it2 = it->begin();
-				it2 != it->end(); ++it2)
-			{
-				if (*it2 == "clean_iter")
-					glbin_comp_def.m_clean_iter = std::stoi(*(++it2));
-				else if (*it2 == "clean_size_vl")
-					glbin_comp_def.m_clean_size_vl = std::stoi(*(++it2));
-			}
-			Clean(false);
-		}
-		else if ((*it)[0] == "fixate")
-		{
-			glbin_comp_def.m_fixate = true;
-			for (auto it2 = it->begin();
-				it2 != it->end(); ++it2)
-			{
-				if (*it2 == "fix_size")
-					glbin_comp_def.m_fix_size = std::stoi(*(++it2));
-			}
-			//GenerateComp();
-			Fixate(false);
-			//return;
-		}
-	}
-	Update();
-}
-
 void ComponentDlg::OnRecordCmd(wxCommandEvent &event)
 {
 	m_record_cmd = m_record_cmd_btn->GetValue();
@@ -2981,9 +2799,8 @@ void ComponentDlg::OnAlignPca(wxCommandEvent& event)
 	glbin_aligner.SetRulerList(&rulerlist);
 	glbin_aligner.SetAxisType(axis_type);
 	glbin_aligner.SetAlignCenter(m_align_center->GetValue());
+	glbin_aligner.SetView(glbin_current.canvas);
 	glbin_aligner.AlignPca(true);
-	//if (m_align_center->GetValue())
-	//	AlignCenter(&ruler);
 }
 
 void ComponentDlg::ClearOutputGrid()
@@ -3251,225 +3068,6 @@ bool ComponentDlg::GetIds(std::string &str, unsigned int &id, int &brick_id)
 	}
 	brick_id = 0;
 	return true;
-}
-
-void ComponentDlg::GenerateComp(bool command)
-{
-	if (!m_view)
-		return;
-	VolumeData* vd = m_view->m_cur_vol;
-	if (!vd)
-		return;
-
-	//int clean_iter = m_clean_iter;
-	//int clean_size = m_clean_size_vl;
-	//if (!m_clean)
-	//{
-	//	clean_iter = 0;
-	//	clean_size = 0;
-	//}
-
-	//get brick number
-	int bn = vd->GetAllBrickNum();
-	double scale = vd->GetScalarScale();
-
-	glbin_comp_generator.SetVolumeData(vd);
-	glbin_comp_generator.prework = std::bind(
-			&ComponentDlg::StartTimer, this, std::placeholders::_1);
-	glbin_comp_generator.postwork = std::bind(
-			&ComponentDlg::StopTimer, this, std::placeholders::_1);
-	glbin_comp_def.Apply(&glbin_comp_generator);
-	m_titles.Clear();
-	m_values.Clear();
-	m_tps.clear();
-	m_tps.push_back(std::chrono::high_resolution_clock::now());
-
-	//glbin_comp_generator.SetUseSel(use_sel);
-
-	vd->AddEmptyMask(1, !glbin_comp_def.m_use_sel);//select all if no mask, otherwise keep
-	if (glbin_comp_def.m_fixate && vd->GetLabel(false))
-	{
-		vd->LoadLabel2();
-		glbin_comp_generator.SetIDBit(glbin_comp_def.m_fix_size);
-	}
-	else
-	{
-		vd->AddEmptyLabel(0, !glbin_comp_def.m_use_sel);
-		glbin_comp_generator.ShuffleID();
-	}
-
-	if (glbin_comp_def.m_use_dist_field)
-	{
-		if (glbin_comp_def.m_density)
-			glbin_comp_generator.DistDensityField();
-		else
-			glbin_comp_generator.DistGrow();
-	}
-	else
-	{
-		if (glbin_comp_def.m_density)
-			glbin_comp_generator.DensityField();
-		else
-			glbin_comp_generator.Grow();
-	}
-
-	glbin_comp_generator.Cleanup();
-
-	if (bn > 1)
-		glbin_comp_generator.FillBorders();
-
-	m_tps.push_back(std::chrono::high_resolution_clock::now());
-	std::chrono::duration<double> time_span =
-		std::chrono::duration_cast<std::chrono::duration<double>>(
-			m_tps.back() - m_tps.front());
-	if (m_test_speed)
-	{
-		m_titles += "Function\t";
-		m_titles += "Time\n";
-		m_values += "Total\t";
-	}
-	else
-	{
-		m_titles += "Total time\n";
-	}
-	m_values += wxString::Format("%.4f", time_span.count());
-	m_values += " sec.\n";
-	SetOutput(m_titles, m_values);
-
-	//update
-	m_view->RefreshGL(39);
-
-	if (command && m_record_cmd)
-		AddCmd("generate");
-
-	vd->SetMlCompGenApplied(false);
-}
-
-void ComponentDlg::Fixate(bool command)
-{
-	if (!m_view)
-		return;
-	VolumeData* vd = m_view->m_cur_vol;
-	if (!vd)
-		return;
-	vd->PushLabel(true);
-
-	if (command && m_record_cmd)
-		AddCmd("fixate");
-}
-
-void ComponentDlg::Clean(bool command)
-{
-	if (!m_view)
-		return;
-	VolumeData* vd = m_view->m_cur_vol;
-	if (!vd)
-		return;
-
-	//int clean_iter = m_clean_iter;
-	//int clean_size = m_clean_size_vl;
-	//if (!m_clean)
-	//{
-	//	clean_iter = 0;
-	//	clean_size = 0;
-	//}
-
-	//get brick number
-	int bn = vd->GetAllBrickNum();
-
-	glbin_comp_generator.SetVolumeData(vd);
-	glbin_comp_def.Apply(&glbin_comp_generator);
-	//glbin_comp_generator.SetUseMask(use_sel);
-
-	vd->AddEmptyMask(1, !glbin_comp_def.m_use_sel);
-
-	if (bn > 1)
-		glbin_comp_generator.ClearBorders();
-
-	glbin_comp_generator.Cleanup();
-
-	if (bn > 1)
-		glbin_comp_generator.FillBorders();
-
-	m_view->RefreshGL(39);
-
-	if (command && m_record_cmd)
-		AddCmd("clean");
-}
-
-void ComponentDlg::SelectFullComp()
-{
-	//get id
-	wxString str = m_comp_id_text->GetValue();
-	if (str.empty())
-	{
-		if (!m_view || !m_view->m_cur_vol)
-			return;
-		//get current mask
-		glbin_comp_selector.SetVolume(m_view->m_cur_vol);
-		//cell size filter
-		bool use = m_analysis_min_check->GetValue();
-		unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
-		glbin_comp_selector.SetMinNum(use, num);
-		use = m_analysis_max_check->GetValue();
-		num = (unsigned int)(m_analysis_max_spin->GetValue());
-		glbin_comp_selector.SetMaxNum(use, num);
-		glbin_comp_selector.SetAnalyzer(&glbin_comp_analyzer);
-		glbin_comp_selector.CompFull();
-	}
-	else
-	{
-		wxCommandEvent e;
-		OnCompAppend(e);
-	}
-
-	m_view->RefreshGL(39);
-
-	//frame
-	//if (m_frame)
-	//{
-	//	if (m_frame->GetBrushToolDlg())
-	//	{
-	//		if (m_view->m_paint_count)
-	//			m_frame->GetBrushToolDlg()->Update(0);
-	//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
-	//	}
-	//	if (m_frame->GetColocalizationDlg() &&
-	//		m_view->m_paint_colocalize)
-	//		m_frame->GetColocalizationDlg()->Colocalize();
-	//}
-}
-
-void ComponentDlg::ApplyRecord()
-{
-	//generate components using records
-	if (!m_view)
-		return;
-	VolumeData* vd = m_view->m_cur_vol;
-	if (!vd)
-		return;
-
-	glbin_comp_generator.SetVolumeData(vd);
-	glbin_comp_generator.prework = std::bind(
-		&ComponentDlg::StartTimer, this, std::placeholders::_1);
-	glbin_comp_generator.postwork = std::bind(
-		&ComponentDlg::StopTimer, this, std::placeholders::_1);
-	vd->AddEmptyMask(1);
-	if (!vd->GetMlCompGenApplied())
-	{
-		vd->AddEmptyLabel(0);
-		glbin_comp_generator.ShuffleID();
-	}
-	glbin_comp_generator.GenerateDB();
-
-	int bn = vd->GetAllBrickNum();
-	if (bn > 1)
-		glbin_comp_generator.FillBorders();
-
-	//update
-	m_view->RefreshGL(39);
-
-	vd->SetMlCompGenApplied(true);
 }
 
 void ComponentDlg::OnAnalyze(wxCommandEvent &event)
@@ -3761,71 +3359,6 @@ void ComponentDlg::PasteData()
 	*/
 }
 
-bool ComponentDlg::GetCellList(flrd::CelpList &cl, bool links)
-{
-	flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
-	if (!list || list->empty())
-		return false;
-
-	cl.min = list->min;
-	cl.max = list->max;
-	cl.sx = list->sx;
-	cl.sy = list->sy;
-	cl.sz = list->sz;
-
-	bool sel_all = false;
-	std::vector<unsigned int> ids;
-	std::vector<unsigned int> bids;
-	int bn = glbin_comp_analyzer.GetBrickNum();
-
-	//selected cells are retrieved using different functions
-	wxArrayInt seli = m_output_grid->GetSelectedCols();
-	if (seli.GetCount() > 0)
-		sel_all = true;
-	if (!sel_all)
-	{
-		seli = m_output_grid->GetSelectedRows();
-		AddSelArrayInt(ids, bids, seli, bn > 1);
-		//wxGridCellCoordsArray sela =
-		//	m_output_grid->GetSelectionBlockBottomRight();
-		//AddSelCoordArray(ids, bids, sela, bn > 1);
-		//sela = m_output_grid->GetSelectionBlockTopLeft();
-		//AddSelCoordArray(ids, bids, sela, bn > 1);
-		//sela = m_output_grid->GetSelectedCells();
-		//AddSelCoordArray(ids, bids, sela, bn > 1);
-	}
-
-	double sx = list->sx;
-	double sy = list->sy;
-	double sz = list->sz;
-	if (sel_all)
-	{
-		for (auto it = list->begin(); it != list->end(); ++it)
-			FindCelps(cl, it, links);
-	}
-	else
-	{
-		for (size_t i = 0; i < ids.size(); ++i)
-		{
-			unsigned long long key = ids[i];
-			unsigned int bid = 0;
-			if (bn > 1)
-			{
-				key = bids[i];
-				key = (key << 32) | ids[i];
-				bid = bids[i];
-			}
-			auto it = list->find(key);
-			if (it != list->end())
-				FindCelps(cl, it, links);
-		}
-	}
-
-	if (cl.empty())
-		return false;
-	return true;
-}
-
 void ComponentDlg::AddSelArrayInt(std::vector<unsigned int> &ids,
 	std::vector<unsigned int> &bids, wxArrayInt &sel, bool bricks)
 {
@@ -3864,407 +3397,3 @@ void ComponentDlg::AddSelCoordArray(std::vector<unsigned int> &ids,
 	}
 }
 
-void ComponentDlg::FindCelps(flrd::CelpList &list,
-	flrd::CelpListIter &it, bool links)
-{
-	list.insert(pair<unsigned long long, flrd::Celp>
-		(it->second->GetEId(), it->second));
-
-	if (links)
-	{
-		flrd::CellGraph* graph = glbin_comp_analyzer.GetCellGraph();
-		graph->ClearVisited();
-		flrd::CelpList links;
-		if (graph->GetLinkedComps(it->second, links,
-			glbin_comp_analyzer.GetSizeLimit()))
-		{
-			for (auto it2 = links.begin();
-				it2 != links.end(); ++it2)
-			{
-				list.insert(pair<unsigned long long, flrd::Celp>
-					(it2->second->GetEId(), it2->second));
-			}
-		}
-	}
-}
-
-//command
-void ComponentDlg::LoadCmd(const wxString &filename)
-{
-	wxFileInputStream is(filename);
-	if (!is.IsOk())
-		return;
-	wxFileConfig fconfig(is);
-	m_cmd_file_text->ChangeValue(filename);
-
-	m_command.clear();
-	int cmd_count = 0;
-	wxString str;
-	std::string cmd_str = "/cmd" + std::to_string(cmd_count);
-	while (fconfig.Exists(cmd_str))
-	{
-		flrd::CompCmdParams params;
-		fconfig.SetPath(cmd_str);
-		str = fconfig.Read("type", "");
-		if (str == "generate" ||
-			str == "clean" ||
-			str == "fixate")
-			params.push_back(str.ToStdString());
-		else
-			continue;
-		long lval;
-		if (fconfig.Read("iter", &lval))
-		{
-			params.push_back("iter"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("use_dist_field", &lval))
-		{
-			params.push_back("use_dist_field"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("dist_filter_size", &lval))
-		{
-			params.push_back("dist_filter_size"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("max_dist", &lval))
-		{
-			params.push_back("max_dist"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("diff", &lval))
-		{
-			params.push_back("diff"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("density", &lval))
-		{
-			params.push_back("density"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("density_window_size", &lval))
-		{
-			params.push_back("density_window_size"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("density_stats_size", &lval))
-		{
-			params.push_back("density_stats_size"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("cleanb", &lval))
-		{
-			params.push_back("cleanb"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("clean_iter", &lval))
-		{
-			params.push_back("clean_iter"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("clean_size_vl", &lval))
-		{
-			params.push_back("clean_size_vl"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("grow_fixed", &lval))
-		{
-			params.push_back("grow_fixed"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("fix_size", &lval))
-		{
-			params.push_back("fix_size"); params.push_back(std::to_string(lval));
-		}
-		double dval;
-		if (fconfig.Read("thresh", &dval))
-		{
-			params.push_back("thresh"); params.push_back(std::to_string(dval));
-		}
-		if (fconfig.Read("dist_strength", &dval))
-		{
-			params.push_back("dist_strength"); params.push_back(std::to_string(dval));
-		}
-		if (fconfig.Read("dist_thresh", &dval))
-		{
-			params.push_back("dist_thresh"); params.push_back(std::to_string(dval));
-		}
-		if (fconfig.Read("falloff", &dval))
-		{
-			params.push_back("falloff"); params.push_back(std::to_string(dval));
-		}
-		if (fconfig.Read("density_thresh", &dval))
-		{
-			params.push_back("density_thresh"); params.push_back(std::to_string(dval));
-		}
-		if (fconfig.Read("varth", &dval))
-		{
-			params.push_back("varth"); params.push_back(std::to_string(dval));
-		}
-
-		m_command.push_back(params);
-		cmd_count++;
-		cmd_str = "/cmd" + std::to_string(cmd_count);
-	}
-	//record
-	int ival = m_command.size();
-	m_cmd_count_text->ChangeValue(wxString::Format("%d", ival));
-}
-
-void ComponentDlg::SaveCmd(const wxString &filename)
-{
-	if (m_command.empty())
-	{
-		AddCmd("generate");
-	}
-
-	wxFileConfig fconfig("", "", filename, "",
-		wxCONFIG_USE_LOCAL_FILE);
-	fconfig.DeleteAll();
-
-	int cmd_count = 0;
-	std::string str, str2;
-
-	for (auto it = m_command.begin();
-		it != m_command.end(); ++it)
-	{
-		if (it->empty())
-			continue;
-		if ((*it)[0] == "generate" ||
-			(*it)[0] == "clean" ||
-			(*it)[0] == "fixate")
-		{
-			str = "/cmd" + std::to_string(cmd_count++);
-			fconfig.SetPath(str);
-			str = (*it)[0];
-			fconfig.Write("type", wxString(str));
-		}
-		for (auto it2 = it->begin();
-			it2 != it->end(); ++it2)
-		{
-			if (*it2 == "iter" ||
-				*it2 == "use_dist_field" ||
-				*it2 == "dist_filter_size" ||
-				*it2 == "max_dist" ||
-				*it2 == "diff" ||
-				*it2 == "density" ||
-				*it2 == "density_window_size" ||
-				*it2 == "density_stats_size" ||
-				*it2 == "cleanb" ||
-				*it2 == "clean_iter" ||
-				*it2 == "clean_size_vl" ||
-				*it2 == "fix_size" ||
-				*it2 == "grow_fixed")
-			{
-				str = (*it2);
-				++it2;
-				str2 = (*it2);
-				fconfig.Write(str, std::stoi(str2));
-			}
-			else if (*it2 == "thresh" ||
-				*it2 == "dist_strength" ||
-				*it2 == "dist_thresh" ||
-				*it2 == "falloff" ||
-				*it2 == "density_thresh" ||
-				*it2 == "varth")
-			{
-				str = (*it2);
-				++it2;
-				str2 = (*it2);
-				fconfig.Write(str, std::stod(str2));
-			}
-		}
-	}
-
-	SaveConfig(fconfig, filename);
-	m_cmd_file_text->ChangeValue(filename);
-}
-
-void ComponentDlg::StartTimer(const std::string& str)
-{
-	if (m_test_speed)
-	{
-		m_tps.push_back(std::chrono::high_resolution_clock::now());
-	}
-}
-
-void ComponentDlg::StopTimer(const std::string& str)
-{
-	if (m_test_speed)
-	{
-		auto t0 = m_tps.back();
-		m_tps.push_back(std::chrono::high_resolution_clock::now());
-		std::chrono::duration<double> time_span =
-			std::chrono::duration_cast<std::chrono::duration<double>>(
-				m_tps.back() - t0);
-
-		m_values += str + "\t";
-		m_values += wxString::Format("%.4f", time_span.count());
-		m_values += " sec.\n";
-	}
-}
-
-void ComponentDlg::GetCompSelection()
-{
-	if (m_view)
-	{
-		flrd::CelpList cl;
-		GetCellList(cl);
-		m_view->SetCellList(cl);
-		m_view->SetInteractive(false);
-		m_view->RefreshGL(39);
-	}
-}
-
-void ComponentDlg::SetCompSelection(std::set<unsigned long long>& ids, int mode)
-{
-	if (ids.empty())
-		return;
-
-	int bn = glbin_comp_analyzer.GetBrickNum();
-
-	wxString str;
-	unsigned long ulv;
-	unsigned long long ull;
-	bool flag = mode==1;
-	int lasti = -1;
-	wxArrayInt sel = m_output_grid->GetSelectedRows();
-	std::set<int> rows;
-	for (int i = 0; i < sel.GetCount(); ++i)
-		rows.insert(sel[i]);
-	for (int i = 0; i < m_output_grid->GetNumberRows(); ++i)
-	{
-		str = m_output_grid->GetCellValue(i, 0);
-		if (!str.ToULong(&ulv))
-			continue;
-		if (bn > 1)
-		{
-			str = m_output_grid->GetCellValue(i, 1);
-			if (!str.ToULongLong(&ull))
-				continue;
-			ull = (ull << 32) | ulv;
-		}
-		else
-			ull = ulv;
-		if (ids.find(ull) != ids.end())
-		{
-			if (!flag)
-			{
-				m_output_grid->ClearSelection();
-				flag = true;
-			}
-			if (mode == 0)
-			{
-				m_output_grid->SelectRow(i, true);
-				lasti = i;
-			}
-			else
-			{
-				if (rows.find(i) != rows.end())
-					m_output_grid->DeselectRow(i);
-				else
-				{
-					m_output_grid->SelectRow(i, true);
-					lasti = i;
-				}
-			}
-		}
-	}
-
-	if (flag)
-	{
-		GetCompSelection();
-		if (lasti >= 0)
-			m_output_grid->GoToCell(lasti, 0);
-	}
-}
-
-void ComponentDlg::IncludeComps()
-{
-	if (!m_view || !m_view->m_cur_vol)
-		return;
-
-	flrd::CelpList cl;
-	if (GetCellList(cl, true))
-	{
-		//clear complist
-		flrd::CelpList *list = glbin_comp_analyzer.GetCelpList();
-		for (auto it = list->begin();
-			it != list->end();)
-		{
-			if (cl.find(it->second->GetEId()) == cl.end())
-				it = list->erase(it);
-			else
-				++it;
-		}
-		//select cl
-		glbin_comp_selector.SetVolume(m_view->m_cur_vol);
-		glbin_comp_selector.SelectList(cl);
-		ClearOutputGrid();
-		string titles, values;
-		glbin_comp_analyzer.OutputFormHeader(titles);
-		glbin_comp_analyzer.OutputCompListStr(values, 0);
-		wxString str1(titles), str2(values);
-		SetOutput(str1, str2);
-
-		cl.clear();
-		m_view->SetCellList(cl);
-		m_view->SetInteractive(false);
-		m_view->RefreshGL(39);
-
-		//frame
-		//if (m_frame)
-		//{
-		//	if (m_frame->GetBrushToolDlg())
-		//	{
-		//		if (m_view->m_paint_count)
-		//			m_frame->GetBrushToolDlg()->Update(0);
-		//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
-		//	}
-		//	if (m_frame->GetColocalizationDlg() &&
-		//		m_view->m_paint_colocalize)
-		//		m_frame->GetColocalizationDlg()->Colocalize();
-		//}
-	}
-}
-
-void ComponentDlg::ExcludeComps()
-{
-	if (!m_view || !m_view->m_cur_vol)
-		return;
-
-	flrd::CelpList cl;
-	if (GetCellList(cl, true))
-	{
-		//clear complist
-		flrd::CelpList *list = glbin_comp_analyzer.GetCelpList();
-		for (auto it = list->begin();
-			it != list->end();)
-		{
-			if (cl.find(it->second->GetEId()) != cl.end())
-				it = list->erase(it);
-			else
-				++it;
-		}
-		glbin_comp_selector.SetVolume(m_view->m_cur_vol);
-		std::vector<unsigned long long> ids;
-		for (auto it = list->begin();
-			it != list->end(); ++it)
-			ids.push_back(it->second->GetEId());
-		glbin_comp_selector.Delete(ids);
-		ClearOutputGrid();
-		string titles, values;
-		glbin_comp_analyzer.OutputFormHeader(titles);
-		glbin_comp_analyzer.OutputCompListStr(values, 0);
-		wxString str1(titles), str2(values);
-		SetOutput(str1, str2);
-
-		cl.clear();
-		m_view->SetCellList(cl);
-		m_view->SetInteractive(false);
-		m_view->RefreshGL(39);
-
-		//frame
-		//if (m_frame)
-		//{
-		//	if (m_frame->GetBrushToolDlg())
-		//	{
-		//		if (m_view->m_paint_count)
-		//			m_frame->GetBrushToolDlg()->Update(0);
-		//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
-		//	}
-		//	if (m_frame->GetColocalizationDlg() &&
-		//		m_view->m_paint_colocalize)
-		//		m_frame->GetColocalizationDlg()->Colocalize();
-		//}
-	}
-}

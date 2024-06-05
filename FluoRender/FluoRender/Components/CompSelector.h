@@ -49,8 +49,6 @@ namespace flrd
 		{ m_vd = vd; }
 		VolumeData* GetVolume()
 		{ return m_vd; }
-		void SetAnalyzer(ComponentAnalyzer* analyzer);
-		ComponentAnalyzer* GetAnalyzer();
 		void SetSelAll(bool value)
 		{ m_sel_all = value; }
 		bool GetSelAll()
@@ -64,6 +62,15 @@ namespace flrd
 		void SetMaxNum(bool use, unsigned int num)
 		{ m_use_max = use; m_max_num = num; }
 
+		//high-level functions
+		void SelectFullComp();
+		bool GetCellList(flrd::CelpList& cl, bool links = false);
+		void GetCompSelection();
+		void SetCompSelection(std::set<unsigned long long>& ids, int mode);
+		void IncludeComps();
+		void ExcludeComps();
+
+		//select functions
 		void CompFull();
 		void All();
 		void Select(bool all, bool rmask = true);
@@ -75,7 +82,6 @@ namespace flrd
 
 	private:
 		VolumeData* m_vd;
-		ComponentAnalyzer* m_analyzer;
 		bool m_sel_all;
 		unsigned long long m_id;
 		bool m_use_min;
@@ -88,6 +94,8 @@ namespace flrd
 		CelpList* GetListFromAnalyzer(CelpList &list_in, CelpList &list_out);
 		void SelectMask(unsigned char* mask,
 			unsigned long long idx, unsigned char v, flvr::Texture* tex);
+		void FindCelps(flrd::CelpList& list,
+			flrd::CelpListIter& it, bool links = false);
 	};
 
 	inline bool ComponentSelector::CompareSize(
