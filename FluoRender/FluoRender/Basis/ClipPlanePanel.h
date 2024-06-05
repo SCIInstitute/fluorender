@@ -32,23 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/spinbutt.h>
 #include <wx/aui/auibook.h>
 
-//plane modes
-enum PLANE_MODES
-{
-	kNormal,
-	kFrame6,
-	kFrame3,
-	kLowTrans,
-	kLowTransBack,
-	kNormalBack,
-	kNone
-};
-
 class MainFrame;
-class RenderCanvas;
-class VolumeData;
-class MeshData;
-class DataManager;
 class wxDoubleSlider;
 class wxSingleSlider;
 class ClipPlanePanel: public PropPanel
@@ -71,16 +55,6 @@ public:
 	virtual void LoadPerspective();
 	virtual void SavePerspective();
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
-
-	bool GetChannLink()
-	{ return m_chann_link; }
-	void SetChannLink(bool chann);
-	bool GetHoldPlanes()
-	{ return m_hold_planes; }
-	void SetHoldPlanes(bool hold);
-	PLANE_MODES GetPlaneMode()
-	{ return m_plane_mode; }
-	void SetPlaneMode(PLANE_MODES mode);
 
 	bool GetXLink();
 	bool GetYLink();
@@ -106,10 +80,6 @@ public:
 
 private:
 	wxAuiNotebook* m_notebook;
-	bool m_chann_link;
-	bool m_draw_clip;
-	bool m_hold_planes;
-	PLANE_MODES m_plane_mode;
 	bool m_enable_all;
 
 	//1st line

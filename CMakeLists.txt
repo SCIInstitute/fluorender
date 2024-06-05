@@ -108,10 +108,7 @@ endif()
 
 #UI IDs
 add_definitions(-DID_START=5999)
-add_definitions(-DID_BRUSH_TOOL=ID_START+1)
-add_definitions(-DID_CALCULATION=ID_BRUSH_TOOL+51)
-add_definitions(-DID_COLOCALIZE=ID_CALCULATION+41)
-add_definitions(-DID_COMPONENT=ID_COLOCALIZE+11)
+add_definitions(-DID_COMPONENT=ID_START)
 add_definitions(-DID_CONVERT=ID_COMPONENT+171)
 add_definitions(-DID_COUNTING=ID_CONVERT+21)
 add_definitions(-DID_LIST_PANEL1=ID_COUNTING+21)

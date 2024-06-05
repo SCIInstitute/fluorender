@@ -61,7 +61,6 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 	m_default_saved(false),
 	m_draw_scalebar(0),
 	m_bg_color_inv(false),
-	m_draw_clip(false),
 	m_rot_slider(true),
 	m_pin_by_user(0),
 	m_pin_by_scale(false)
@@ -1122,22 +1121,6 @@ void RenderViewPanel::SetBgColorInvert(bool val)
 	FluoRefresh(2, { gstBgColor, gstBgColorInv }, { m_frame->GetRenderCanvas(m_canvas) });
 }
 
-void RenderViewPanel::SetDrawClipPlanes(bool val)
-{
-	bool draw_clip = m_canvas->m_draw_clip;
-	if (val && !draw_clip)
-	{
-		m_canvas->m_draw_clip = true;
-		m_canvas->m_clip_mask = -1;
-		FluoRefresh(2, {gstNull}, { m_frame->GetRenderCanvas(m_canvas) });
-	}
-	else if (!val && draw_clip)
-	{
-		m_canvas->m_draw_clip = false;
-		FluoRefresh(2, {gstNull}, { m_frame->GetRenderCanvas(m_canvas) });
-	}
-}
-
 void RenderViewPanel::SetAov(double val, bool notify)
 {
 	if (val < 11)
@@ -1407,8 +1390,11 @@ void RenderViewPanel::OnBgInvBtn(wxCommandEvent& event)
 
 void RenderViewPanel::OnAovSldrIdle(wxIdleEvent& event)
 {
-	if (m_frame->GetClippingView()->GetHoldPlanes())
+	if (glbin_settings.m_clip_hold)
+	{
+		glbin_settings.m_clip_display = true;
 		return;
+	}
 	if (m_canvas->m_capture)
 		return;
 
@@ -1417,20 +1403,21 @@ void RenderViewPanel::OnAovSldrIdle(wxIdleEvent& event)
 	wxWindow* window = wxWindow::FindFocus();
 	if (window && reg.Contains(pos))
 	{
-		if (!m_draw_clip)
+		if (!glbin_settings.m_clip_display)
 		{
-			SetDrawClipPlanes(true);
-			m_draw_clip = true;
+			m_canvas->m_clip_mask = -1;
+			glbin_settings.m_clip_display = true;
 		}
 	}
 	else
 	{
-		if (m_draw_clip)
+		if (glbin_settings.m_clip_display)
 		{
-			SetDrawClipPlanes(false);
-			m_draw_clip = false;
+			glbin_settings.m_clip_display = false;
 		}
 	}
+	FluoRefresh(3, { gstNull },
+		{ m_frame->GetRenderCanvas(m_canvas) });
 	event.Skip();
 }
 

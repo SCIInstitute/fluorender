@@ -85,7 +85,10 @@ MainSettings::MainSettings()
 	m_pin_threshold = 10.0;
 	m_soft_threshold = 0.0;
 	m_line_width = 3.0;
-	m_plane_mode = 0;
+	m_clip_mode = cm_Normal;
+	m_clip_link = false;
+	m_clip_display = false;
+	m_clip_hold = false;
 
 	m_shadow_dir = false;
 	m_shadow_dir_x = 0.0;
@@ -269,7 +272,10 @@ void MainSettings::Read()
 		fconfig.Read("pin thresh", &m_pin_threshold, 10.0);
 		fconfig.Read("soft thresh", &m_soft_threshold, 0.0);
 		fconfig.Read("line width", &m_line_width, 3.0);
-		fconfig.Read("clip plane disp", &m_plane_mode, 0);
+		fconfig.Read("clip mode", &m_clip_mode, cm_Normal);
+		fconfig.Read("clip link", &m_clip_link, false);
+		fconfig.Read("clip display", &m_clip_display, false);
+		fconfig.Read("clip hold", &m_clip_hold, false);
 	}
 	//shadow
 	if (fconfig.Exists("/shadow"))
@@ -507,7 +513,10 @@ void MainSettings::Save()
 	fconfig.Write("pin thresh", m_pin_threshold);
 	fconfig.Write("soft thresh", m_soft_threshold);
 	fconfig.Write("line width", m_line_width);
-	fconfig.Write("clip plane disp", m_plane_mode);
+	fconfig.Write("clip mode", m_clip_mode);
+	fconfig.Write("clip link", m_clip_link);
+	fconfig.Write("clip display", m_clip_display);
+	fconfig.Write("clip hold", m_clip_hold);
 
 	//shadow
 	fconfig.SetPath("/shadow");

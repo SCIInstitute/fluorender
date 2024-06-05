@@ -448,7 +448,6 @@ MainFrame::MainFrame(
 	//clipping view
 	m_clip_view = new ClipPlanePanel(this,
 		wxDefaultPosition, FromDIP(wxSize(140,700)));
-	m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(glbin_settings.m_plane_mode));
 
 	//adjust view
 	m_adjust_view = new OutputAdjPanel(this,
@@ -3279,9 +3278,9 @@ void MainFrame::SaveProject(wxString& filename, bool inc)
 	}
 	//clipping planes
 	fconfig.SetPath("/prop_panel");
-	fconfig.Write("chann_link", m_clip_view->GetChannLink());
-	fconfig.Write("hold planes", m_clip_view->GetHoldPlanes());
-	fconfig.Write("plane mode", int(m_clip_view->GetPlaneMode()));
+	fconfig.Write("clip link", glbin_settings.m_clip_link);
+	fconfig.Write("clip hold", glbin_settings.m_clip_hold);
+	fconfig.Write("clip mode", glbin_settings.m_clip_mode);
 	fconfig.Write("x_link", m_clip_view->GetXLink());
 	fconfig.Write("y_link", m_clip_view->GetYLink());
 	fconfig.Write("z_link", m_clip_view->GetZLink());
@@ -4479,13 +4478,12 @@ void MainFrame::OpenProject(wxString& filename)
 	{
 		fconfig.SetPath("/prop_panel");
 		bool bval;
-		if (fconfig.Read("chann_link", &bval))
-			m_clip_view->SetChannLink(bval);
-		if (fconfig.Read("hold planes", &bval))
-			m_clip_view->SetHoldPlanes(bval);
-		int mode;
-		if (fconfig.Read("plane mode", &mode))
-			m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(mode));
+		if (fconfig.Read("clip link", &bval))
+			glbin_settings.m_clip_link = bval;
+		if (fconfig.Read("clip hold", &bval))
+			glbin_settings.m_clip_hold = bval;
+		if (fconfig.Read("plane mode", &ival))
+			glbin_settings.m_clip_mode = ival;
 		if (fconfig.Read("x_link", &bval))
 			m_clip_view->SetXLink(bval);
 		if (fconfig.Read("y_link", &bval))

@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Vector.h>
 
 class RenderCanvas;
-
+class VolumeData;
 namespace flrd
 {
 	class RulerAlign
@@ -40,12 +40,19 @@ namespace flrd
 	public:
 		RulerAlign():
 			m_view(0),
-			m_axis_type(0) {};
+			m_vd(0),
+			m_axis_type(0),
+			m_align_center(false) {};
 		~RulerAlign() {};
 
 		void SetView(RenderCanvas* view)
 		{
 			m_view = view;
+		}
+
+		void SetVolumeData(VolumeData* vd)
+		{
+			m_vd = vd;
 		}
 
 		void AddRuler(Ruler* ruler);
@@ -73,23 +80,39 @@ namespace flrd
 			AddRuler(ruler);
 		}
 
-		void SetCovMat(std::vector<double> &cov)
+		//void SetCovMat(std::vector<double> &cov)
+		//{
+		//	m_cov.assign(cov.begin(), cov.end());
+		//}
+
+		void SetAxisType(int val)
 		{
-			m_cov.assign(cov.begin(), cov.end());
+			m_axis_type = val;
 		}
 
-		void AlignRuler(int axis_type);//axis_type: 0-x; 1-y; 2-z
-		void AlignPca(int axis_type, bool cov=true);//0-xyz; 1-yxz; 2-zxy, 3-xzy; 4-yzx; 5-zyx
+		void SetAlignCenter(bool val)
+		{
+			m_align_center = val;
+		}
+		bool GetAlignCenter()
+		{
+			return m_align_center;
+		}
+
+		void AlignRuler();//axis_type: 0-x; 1-y; 2-z
+		void AlignPca(bool);//0-xyz; 1-yxz; 2-zxy, 3-xzy; 4-yzx; 5-zyx
 
 	private:
 		RenderCanvas *m_view;
+		VolumeData* m_vd;
 		std::vector<fluo::Point> m_point_list;
 		int m_axis_type;
 		fluo::Vector m_axis;
 		fluo::Vector m_axis_x;
 		fluo::Vector m_axis_y;
 		fluo::Vector m_axis_z;
-		std::vector<double> m_cov;
+		//std::vector<double> m_cov;
+		bool m_align_center;
 	};
 }
 

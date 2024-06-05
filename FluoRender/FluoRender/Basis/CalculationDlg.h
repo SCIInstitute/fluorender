@@ -29,12 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define _CALCULATIONDLG_H_
 
 #include <PropPanel.h>
-#include <wx/wx.h>
 
 class MainFrame;
-class RenderCanvas;
-class VolumeData;
-class DataGroup;
 class CalculationDlg : public PropPanel
 {
 public:

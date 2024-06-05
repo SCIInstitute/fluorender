@@ -2979,9 +2979,11 @@ void ComponentDlg::OnAlignPca(wxCommandEvent& event)
 	}
 	rulerlist.push_back(&ruler);
 	glbin_aligner.SetRulerList(&rulerlist);
-	glbin_aligner.AlignPca(axis_type);
-	if (m_align_center->GetValue())
-		AlignCenter(&ruler);
+	glbin_aligner.SetAxisType(axis_type);
+	glbin_aligner.SetAlignCenter(m_align_center->GetValue());
+	glbin_aligner.AlignPca(true);
+	//if (m_align_center->GetValue())
+	//	AlignCenter(&ruler);
 }
 
 void ComponentDlg::ClearOutputGrid()

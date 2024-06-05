@@ -25,36 +25,41 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _ANNOTATPROPPANEL_H_
-#define _ANNOTATPROPPANEL_H_
+#ifndef _OUTADJDEFAULT_H_
+#define _OUTADJDEFAULT_H_
 
-#include <PropPanel.h>
+#include <wx/fileconf.h>
+#include <wx/string.h>
 
-class Annotations;
-class AnnotatPropPanel : public PropPanel
+class RenderCanvas;
+class TreeLayer;
+class OutAdjDefault
 {
 public:
-	AnnotatPropPanel(MainFrame* frame,
-		wxWindow* parent,
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = 0,
-		const wxString& name = "AnnotatPropPanel");
-	~AnnotatPropPanel();
+	OutAdjDefault();
+	~OutAdjDefault();
 
-	void SetAnnotations(Annotations* ann);
-	Annotations* GetAnnotations();
+	void Read(wxFileConfig& f);
+	void Save(wxFileConfig& f);
+	void Set(RenderCanvas* view);
+	void Apply(RenderCanvas* view);
+	void Set(TreeLayer* layer);
+	void Apply(TreeLayer* layer);
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
-
-private:
-	Annotations* m_ann;
-
-	wxTextCtrl* m_memo_text;
-	wxButton* m_memo_update_btn;
-
-	//memo
-	void OnMemoUpdateBtn(wxCommandEvent& event);
+public:
+	//default values
+	bool m_split;//if panels for RGB are split
+	bool m_sync_r;
+	bool m_sync_g;
+	bool m_sync_b;
+	double m_gamma_r;
+	double m_gamma_g;
+	double m_gamma_b;
+	double m_brightness_r;
+	double m_brightness_g;
+	double m_brightness_b;
+	double m_hdr_r;
+	double m_hdr_g;
+	double m_hdr_b;
 };
-
-#endif//_ANNOTATPROPPANEL_H_
+#endif

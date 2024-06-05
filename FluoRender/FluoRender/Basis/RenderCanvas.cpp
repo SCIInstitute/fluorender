@@ -110,7 +110,6 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_load_update(false),
 	m_retain_finalbuffer(false),
 	m_draw_frame(false),
-	m_draw_clip(false),
 	m_draw_legend(false),
 	m_draw_colormap(false),
 	m_mouse_focus(false),
@@ -943,7 +942,7 @@ void RenderCanvas::Draw()
 		if (glbin_settings.m_test_wiref)
 			DrawGrid();
 
-		if (m_draw_clip)
+		if (glbin_settings.m_clip_display)
 			DrawClippingPlanes(BACK_FACE);
 
 		//setup
@@ -954,7 +953,7 @@ void RenderCanvas::Draw()
 		DrawVolumes();
 
 		//draw the clipping planes
-		if (m_draw_clip)
+		if (glbin_settings.m_clip_display)
 			DrawClippingPlanes(FRONT_FACE);
 
 		if (glbin_settings.m_test_wiref)
@@ -1017,7 +1016,7 @@ void RenderCanvas::DrawDP()
 		if (glbin_settings.m_test_wiref)
 			DrawGrid();
 
-		if (m_draw_clip)
+		if (glbin_settings.m_clip_display)
 			DrawClippingPlanes(BACK_FACE);
 
 		//setup
@@ -1236,7 +1235,7 @@ void RenderCanvas::DrawDP()
 		if (GetMeshShadow(darkness))
 			DrawOLShadowsMesh(darkness);
 
-		if (m_draw_clip)
+		if (glbin_settings.m_clip_display)
 			DrawClippingPlanes(FRONT_FACE);
 
 		if (glbin_settings.m_test_wiref)
@@ -7381,27 +7380,22 @@ void RenderCanvas::DrawBounds()
 void RenderCanvas::DrawClippingPlanes(int face_winding)
 {
 	int i;
-	bool link = false;
-	PLANE_MODES plane_mode = kNormal;
-	if (m_frame && m_frame->GetClippingView())
-	{
-		link = m_frame->GetClippingView()->GetChannLink();
-		plane_mode = m_frame->GetClippingView()->GetPlaneMode();
-	}
+	bool link = glbin_settings.m_clip_link;
+	int plane_mode = glbin_settings.m_clip_mode;
 	double width = glbin_settings.m_line_width;
 
-	if (plane_mode == kNone)
+	if (plane_mode == cm_None)
 		return;
 
-	bool draw_plane = plane_mode != kFrame6 && plane_mode != kFrame3;
-	bool border = plane_mode == kFrame6 ||
+	bool draw_plane = plane_mode != cm_Frame6 && plane_mode != cm_Frame3;
+	bool border = plane_mode == cm_Frame6 ||
 		(m_clip_mask == -1 && face_winding == FRONT_FACE) ||
 		m_clip_mask != -1;
-	if (!border && plane_mode == kFrame3)
+	if (!border && plane_mode == cm_Frame3)
 		return;
 
-	if ((plane_mode == kLowTransBack ||
-		plane_mode == kNormalBack) &&
+	if ((plane_mode == cm_LowTransBack ||
+		plane_mode == cm_NormalBack) &&
 		m_clip_mask == -1)
 	{
 		glCullFace(GL_FRONT);
@@ -7542,17 +7536,17 @@ void RenderCanvas::DrawClippingPlanes(int face_winding)
 				m_clip_mask == 32 ||
 				m_clip_mask == 64)
 			)
-			plane_trans = plane_mode == kLowTrans ||
-			plane_mode == kLowTransBack ? 0.1 : 0.3;
+			plane_trans = plane_mode == cm_LowTrans ||
+			plane_mode == cm_LowTransBack ? 0.1 : 0.3;
 
 		if (face_winding == FRONT_FACE)
 		{
-			plane_trans = plane_mode == kLowTrans ||
-				plane_mode == kLowTransBack ? 0.1 : 0.3;
+			plane_trans = plane_mode == cm_LowTrans ||
+				plane_mode == cm_LowTransBack ? 0.1 : 0.3;
 		}
 
-		if (plane_mode == kNormal ||
-			plane_mode == kNormalBack)
+		if (plane_mode == cm_Normal ||
+			plane_mode == cm_NormalBack)
 		{
 			if (!link)
 				color = vd->GetColor();
@@ -7631,8 +7625,8 @@ void RenderCanvas::DrawClippingPlanes(int face_winding)
 		{
 			if (draw_plane)
 			{
-				if (plane_mode == kNormal ||
-					plane_mode == kNormalBack)
+				if (plane_mode == cm_Normal ||
+					plane_mode == cm_NormalBack)
 					shader1->setLocalParam(0, 1.0, 0.5, 0.5, plane_trans);
 				else
 					shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -7654,8 +7648,8 @@ void RenderCanvas::DrawClippingPlanes(int face_winding)
 		{
 			if (draw_plane)
 			{
-				if (plane_mode == kNormal ||
-					plane_mode == kNormalBack)
+				if (plane_mode == cm_Normal ||
+					plane_mode == cm_NormalBack)
 					shader1->setLocalParam(0, 1.0, 0.5, 1.0, plane_trans);
 				else
 					shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -7677,8 +7671,8 @@ void RenderCanvas::DrawClippingPlanes(int face_winding)
 		{
 			if (draw_plane)
 			{
-				if (plane_mode == kNormal ||
-					plane_mode == kNormalBack)
+				if (plane_mode == cm_Normal ||
+					plane_mode == cm_NormalBack)
 					shader1->setLocalParam(0, 0.5, 1.0, 0.5, plane_trans);
 				else
 					shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -7700,8 +7694,8 @@ void RenderCanvas::DrawClippingPlanes(int face_winding)
 		{
 			if (draw_plane)
 			{
-				if (plane_mode == kNormal ||
-					plane_mode == kNormalBack)
+				if (plane_mode == cm_Normal ||
+					plane_mode == cm_NormalBack)
 					shader1->setLocalParam(0, 1.0, 1.0, 0.5, plane_trans);
 				else
 					shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -7723,8 +7717,8 @@ void RenderCanvas::DrawClippingPlanes(int face_winding)
 		{
 			if (draw_plane)
 			{
-				if (plane_mode == kNormal ||
-					plane_mode == kNormalBack)
+				if (plane_mode == cm_Normal ||
+					plane_mode == cm_NormalBack)
 					shader1->setLocalParam(0, 0.5, 0.5, 1.0, plane_trans);
 				else
 					shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -7746,8 +7740,8 @@ void RenderCanvas::DrawClippingPlanes(int face_winding)
 		{
 			if (draw_plane)
 			{
-				if (plane_mode == kNormal ||
-					plane_mode == kNormalBack)
+				if (plane_mode == cm_Normal ||
+					plane_mode == cm_NormalBack)
 					shader1->setLocalParam(0, 0.5, 1.0, 1.0, plane_trans);
 				else
 					shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);

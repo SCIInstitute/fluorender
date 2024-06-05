@@ -203,7 +203,7 @@ void ColocalizationDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_auto_update_btn->SetValue(glbin_colocal_def.m_auto_update);
 	}
 
-	if (update_all || FOUND_VALUE(gstColocalResult))
+	if (FOUND_VALUE(gstColocalResult))
 	{
 		SetOutput();
 	}

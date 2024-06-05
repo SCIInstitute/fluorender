@@ -50,6 +50,18 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/string.h>
 #include <string>
 
+//clipping plane modes
+enum CLIPPLANE_MODES
+{
+	cm_Normal = 0,
+	cm_Frame6,
+	cm_Frame3,
+	cm_LowTrans,
+	cm_LowTransBack,
+	cm_NormalBack,
+	cm_None
+};
+
 class MainSettings
 {
 public:
@@ -129,7 +141,10 @@ public:
 	double m_pin_threshold;	//rot center anchor thresh
 	double m_soft_threshold;
 	double m_line_width;	//line width
-	int m_plane_mode;		//clipping plane display mode
+	int m_clip_mode;		//clipping plane display mode
+	bool m_clip_link;		//link clipping planes in view
+	bool m_clip_display;	//show clipping planes in view
+	bool m_clip_hold;		//hold clipping plane display when mouse is outside of panel
 
 	bool m_shadow_dir;		//enable directional shaow
 	double m_shadow_dir_x;	//x comp of shadow direction

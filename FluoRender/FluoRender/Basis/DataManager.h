@@ -1338,15 +1338,7 @@ struct CurrentObjects
 		mesh_data = 0;
 		ann_data = 0;
 	}
-	void SetCanvas(RenderCanvas* cnvs)
-	{
-		canvas = cnvs;
-		vol_group = 0;
-		mesh_group = 0;
-		vol_data = 0;
-		mesh_data = 0;
-		ann_data = 0;
-	}
+	void SetCanvas(RenderCanvas* cnvs);
 	void SetVolumeGroup(DataGroup* g);
 	void SetMeshGroup(MeshGroup* g);
 	void SetVolumeData(VolumeData* vd);

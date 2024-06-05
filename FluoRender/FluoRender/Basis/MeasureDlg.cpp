@@ -2513,7 +2513,8 @@ void MeasureDlg::OnAlignRuler(wxCommandEvent& event)
 		axis_type = 5;
 		break;
 	}
-	glbin_aligner.AlignRuler(axis_type);
+	glbin_aligner.SetAxisType(axis_type);
+	glbin_aligner.AlignRuler();
 	if (m_align_center->GetValue())
 		AlignCenter(ruler, 0);
 }
@@ -2555,8 +2556,10 @@ void MeasureDlg::OnAlignPca(wxCommandEvent& event)
 		axis_type = 5;
 		break;
 	}
-	glbin_aligner.AlignPca(axis_type);
-	if (m_align_center->GetValue())
-		AlignCenter(0, &list);
+	glbin_aligner.SetAxisType(axis_type);
+	glbin_aligner.SetAlignCenter(m_align_center->GetValue());
+	glbin_aligner.AlignPca(true);
+	//if (m_align_center->GetValue())
+	//	AlignCenter(0, &list);
 }
 

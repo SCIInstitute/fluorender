@@ -29,20 +29,12 @@ DEALINGS IN THE SOFTWARE.
 #define _BRUSHTOOLDLG_H_
 
 #include <PropPanel.h>
-#include <wx/wx.h>
 #include <wx/grid.h>
 #include <wx/tglbtn.h>
 #include <wx/clipbrd.h>
 
 class MainFrame;
-class RenderCanvas;
-class VolumeData;
 class wxSingleSlider;
-namespace flrd
-{
-	class RulerAlign;
-	class VolumeSelector;
-}
 struct GridData
 {
 	int voxel_sum;

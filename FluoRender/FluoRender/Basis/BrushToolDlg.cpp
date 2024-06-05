@@ -33,7 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <CountingDlg.h>
 #include <TreePanel.h>
 #include <Calculate/Count.h>
-#include <Distance/Cov.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
@@ -571,6 +570,13 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_brush_size_screen_rb->SetValue(!bval);
 	}
 
+	//align center
+	if (update_all || FOUND_VALUE(gstAlignCenter))
+	{
+		bval = glbin_aligner.GetAlignCenter();
+		m_align_center_chk->SetValue(bval);
+	}
+
 	//output
 	if (update_all || FOUND_VALUE(gstBrushHistoryEnable))
 		m_history_chk->SetValue(m_hold_history);
@@ -995,38 +1001,19 @@ void BrushToolDlg::OnBrushSizeRelationCheck(wxCommandEvent& event)
 //align
 void BrushToolDlg::OnAlignCenterCheck(wxCommandEvent& event)
 {
-	m_align_center = m_align_center_chk->GetValue();
+	bool bval = m_align_center_chk->GetValue();
+	glbin_aligner.SetAlignCenter(bval);
 }
 
 void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 {
-	int axis_type = event.GetId();
-
-	//if (m_frame)
-	//{
-	//	glbin_aligner.SetView(m_canvas);
-	//	VolumeData* vd = m_frame->GetCurSelVol();
-	//	if (vd && vd->GetTexture())
-	//	{
-	//		flrd::Cov cover(vd);
-	//		if (cover.Compute(0))
-	//		{
-	//			std::vector<double> cov = cover.GetCov();
-	//			fluo::Point center = cover.GetCenter();
-	//			glbin_aligner.SetCovMat(cov);
-	//			glbin_aligner.AlignPca(axis_type, false);
-	//			if (m_align_center->GetValue())
-	//			{
-	//				double tx, ty, tz;
-	//				m_canvas->GetObjCenters(tx, ty, tz);
-	//				m_canvas->SetObjTrans(
-	//					tx - center.x(),
-	//					center.y() - ty,
-	//					center.z() - tz);
-	//			}
-	//		}
-	//	}
-	//}
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
+		return;
+	glbin_aligner.SetVolumeData(vd);
+	glbin_aligner.SetAxisType(event.GetId());
+	glbin_aligner.SetView(glbin_current.canvas);
+	glbin_aligner.AlignPca(false);
 }
 
 //output
@@ -1054,7 +1041,6 @@ void BrushToolDlg::SetOutput(const GridData &data, const wxString &unit)
 
 void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)
 {
-	//Output(0);
 	FluoUpdate({ gstBrushCountResult });
 }
 

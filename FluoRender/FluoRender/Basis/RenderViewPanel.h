@@ -113,7 +113,6 @@ public:
 	void SetScaleUnit(int val);
 	void SetBgColor(fluo::Color val);
 	void SetBgColorInvert(bool val);
-	void SetDrawClipPlanes(bool val);
 	void SetAov(double val, bool notify);
 	void SetFree(bool val);
 	void SetFullScreen();
@@ -148,7 +147,6 @@ public:
 	int m_id;
 	int m_draw_scalebar;
 	bool m_bg_color_inv;
-	bool m_draw_clip;
 	//rot slider style
 	bool m_rot_slider;
 	double m_dpi_sf, m_dpi_sf2;

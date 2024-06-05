@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Utils.h>
 #include <RenderCanvas.h>
 #include <Distance/Pca.h>
+#include <Distance/Cov.h>
 
 using namespace flrd;
 
@@ -48,13 +49,12 @@ void RulerAlign::AddRuler(Ruler* ruler)
 	}
 }
 
-void RulerAlign::AlignRuler(int axis_type)
+void RulerAlign::AlignRuler()
 {
 	if (!m_view)
 		return;
 	if (m_point_list.size() < 2)
 		return;
-	m_axis_type = axis_type;
 	fluo::Vector axis;
 	switch (m_axis_type)
 	{
@@ -94,13 +94,22 @@ void RulerAlign::AlignRuler(int axis_type)
 	m_view->RefreshGL(50);
 }
 
-void RulerAlign::AlignPca(int axis_type, bool cov)
+void RulerAlign::AlignPca(bool rulers)
 {
 	Pca solver;
-	if (cov)
+	fluo::Point center;
+	if (rulers)
 		solver.SetPoints(m_point_list);
 	else
-		solver.SetCovMat(m_cov);
+	{
+		Cov cover(m_vd);
+		if (cover.Compute(0))
+		{
+			std::vector<double> cov = cover.GetCov();
+			center = cover.GetCenter();
+			solver.SetCovMat(cov);
+		}
+	}
 	solver.Compute();
 
 	fluo::Vector source0 = solver.GetAxis(0);
@@ -112,7 +121,6 @@ void RulerAlign::AlignPca(int axis_type, bool cov)
 	m_axis_y = source1;
 	m_axis_z = source2;
 
-	m_axis_type = axis_type;
 	fluo::Vector target0;
 	fluo::Vector target1;
 	switch (m_axis_type)
@@ -171,5 +179,16 @@ void RulerAlign::AlignPca(int axis_type, bool cov)
 	m_view->ResetZeroRotations(qx, qy, qz);
 	q2.ToEuler(qx, qy, qz);
 	m_view->SetRotations(qx, -qy, -qz, true);
+
+	if (m_align_center)
+	{
+		double tx, ty, tz;
+		m_view->GetObjCenters(tx, ty, tz);
+		m_view->SetObjTrans(
+			tx - center.x(),
+			center.y() - ty,
+			center.z() - tz);
+	}
+
 	m_view->RefreshGL(50);
 }

@@ -803,7 +803,6 @@ public:
 	int m_draw_info;
 	bool m_load_update;
 	bool m_draw_frame;
-	bool m_draw_clip;
 	bool m_draw_legend;
 	bool m_draw_colormap;
 	bool m_mouse_focus;

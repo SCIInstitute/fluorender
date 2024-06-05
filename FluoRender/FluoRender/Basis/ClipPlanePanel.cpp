@@ -45,10 +45,6 @@ ClipPlanePanel::ClipPlanePanel(
 	long style,
 	const wxString& name) :
 	PropPanel(frame, frame, pos, size, style, name),
-m_draw_clip(false),
-m_hold_planes(false),
-m_chann_link(false),
-m_plane_mode(kNormal),
 m_enable_all(true)
 {
 	// temporarily block events during constructor:
@@ -432,11 +428,7 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	VolumeData* vd = glbin_current.vol_data;
 	MeshData* md = glbin_current.mesh_data;
-	if (!vd && !md)
-		return;
 	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
-		return;
 
 	//mf button tips
 	if (update_all || FOUND_VALUE(gstMultiFuncTips))
@@ -487,36 +479,50 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		}
 	}
 
+	//link channels in view
+	if (update_all || FOUND_VALUE(gstClipLinkChan))
+	{
+		m_toolbar->ToggleTool(ID_LinkChannelsBtn,
+			glbin_settings.m_clip_link);
+	}
+
+	//hold clipping planes
+	if (update_all || FOUND_VALUE(gstClipHold))
+	{
+		m_toolbar->ToggleTool(ID_HoldPlanesBtn,
+			glbin_settings.m_clip_hold);
+	}
+
 	//modes
 	if (update_all || FOUND_VALUE(gstClipPlaneMode))
 	{
-		switch (m_plane_mode)
+		switch (glbin_settings.m_clip_mode)
 		{
-		case kNormal:
+		case cm_Normal:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmapFromMemory(clip_normal));
 			break;
-		case kFrame6:
+		case cm_Frame6:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmapFromMemory(clip_frame6));
 			break;
-		case kFrame3:
+		case cm_Frame3:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmapFromMemory(clip_frame3));
 			break;
-		case kLowTrans:
+		case cm_LowTrans:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmapFromMemory(clip_low));
 			break;
-		case kLowTransBack:
+		case cm_LowTransBack:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmapFromMemory(clip_low_back));
 			break;
-		case kNormalBack:
+		case cm_NormalBack:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmapFromMemory(clip_normal_back));
 			break;
-		case kNone:
+		case cm_None:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmapFromMemory(clip_none));
 			break;
@@ -753,32 +759,6 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 }
 
-void ClipPlanePanel::SetChannLink(bool chann)
-{
-	m_chann_link = chann;
-	m_toolbar->ToggleTool(ID_LinkChannelsBtn,chann);
-}
-
-void ClipPlanePanel::SetHoldPlanes(bool hold)
-{
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
-		return;
-	m_hold_planes = hold;
-	m_toolbar->ToggleTool(ID_HoldPlanesBtn, hold);
-	if (hold)
-	{
-		canvas->m_draw_clip = true;
-		canvas->m_clip_mask = -1;
-	}
-}
-
-void ClipPlanePanel::SetPlaneMode(PLANE_MODES mode)
-{
-	m_plane_mode = mode;
-	FluoRefresh(2, { gstClipPlaneMode }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
-}
-
 void ClipPlanePanel::OnToolbar(wxCommandEvent& event)
 {
 	int id = event.GetId();
@@ -798,8 +778,9 @@ void ClipPlanePanel::OnToolbar(wxCommandEvent& event)
 
 void ClipPlanePanel::LinkChannels()
 {
-	m_chann_link = m_toolbar->GetToolState(ID_LinkChannelsBtn);
-	if (m_chann_link)
+	bool bval = m_toolbar->GetToolState(ID_LinkChannelsBtn);
+	glbin_settings.m_clip_link = bval;
+	if (bval)
 	{
 		wxString str;
 		//x1
@@ -834,36 +815,17 @@ void ClipPlanePanel::LinkChannels()
 
 void ClipPlanePanel::HoldPlanes()
 {
-	m_hold_planes = m_toolbar->GetToolState(ID_HoldPlanesBtn);
+	glbin_settings.m_clip_hold = m_toolbar->GetToolState(ID_HoldPlanesBtn);
 }
 
 void ClipPlanePanel::SetPlaneMode()
 {
-	switch (m_plane_mode)
-	{
-	case kNormal:
-		m_plane_mode = kFrame6;
-		break;
-	case kFrame6:
-		m_plane_mode = kFrame3;
-		break;
-	case kFrame3:
-		m_plane_mode = kLowTrans;
-		break;
-	case kLowTrans:
-		m_plane_mode = kLowTransBack;
-		break;
-	case kLowTransBack:
-		m_plane_mode = kNormalBack;
-		break;
-	case kNormalBack:
-		m_plane_mode = kNone;
-		break;
-	case kNone:
-		m_plane_mode = kNormal;
-		break;
-	}
-	SetPlaneMode(m_plane_mode);
+	int ival = glbin_settings.m_clip_mode;
+	ival++;
+	ival = ival > cm_None ? cm_Normal : ival;
+	glbin_settings.m_clip_mode = ival;
+	FluoRefresh(2, { gstClipPlaneMode },
+		{m_frame->GetRenderCanvas(glbin_current.canvas)});
 }
 
 void ClipPlanePanel::OnClipResetBtn(wxCommandEvent &event)
@@ -1073,9 +1035,9 @@ void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 	if (!canvas)
 		return;
 
-	if (m_hold_planes)
+	if (glbin_settings.m_clip_hold)
 	{
-		m_draw_clip = true;
+		glbin_settings.m_clip_display = true;
 		return;
 	}
 
@@ -1087,24 +1049,21 @@ void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 	wxWindow *window = wxWindow::FindFocus();
 	if (window && reg.Contains(pos))
 	{
-		if (!m_draw_clip)
+		if (!glbin_settings.m_clip_display)
 		{
-			canvas->m_draw_clip = true;
 			canvas->m_clip_mask = -1;
-			canvas->RefreshGL(51);
-			m_draw_clip = true;
+			glbin_settings.m_clip_display = true;
 		}
 	}
 	else
 	{
-		if (m_draw_clip)
+		if (glbin_settings.m_clip_display)
 		{
-			canvas->m_draw_clip = false;
-			canvas->RefreshGL(51);
-			m_draw_clip = false;
+			glbin_settings.m_clip_display = false;
 		}
 	}
-
+	FluoRefresh(3, { gstNull },
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 bool ClipPlanePanel::GetXLink()
@@ -1162,7 +1121,7 @@ void ClipPlanePanel::SetClipValue(int i, int val, bool link)
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!vd || !canvas)
 		return;
-	if (m_chann_link)
+	if (glbin_settings.m_clip_link)
 		canvas->SetClipValue(i, val);
 	else
 		vd->SetClipValue(i, val);
@@ -1219,7 +1178,7 @@ void ClipPlanePanel::SetClipValues(int i, int val1, int val2)
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!vd || !canvas)
 		return;
-	if (m_chann_link)
+	if (glbin_settings.m_clip_link)
 		canvas->SetClipValues(i, val1, val2);
 	else
 		vd->SetClipValues(i, val1, val2);
@@ -1250,7 +1209,7 @@ void ClipPlanePanel::SetClipValues(const int val[6])
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!vd || !canvas)
 		return;
-	if (m_chann_link)
+	if (glbin_settings.m_clip_link)
 		canvas->SetClipValues(val);
 	else
 		vd->SetClipValues(val);
@@ -1268,7 +1227,7 @@ void ClipPlanePanel::ResetClipValues()
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!vd || !canvas)
 		return;
-	if (m_chann_link)
+	if (glbin_settings.m_clip_link)
 		canvas->ResetClipValues();
 	else
 		vd->ResetClipValues();
@@ -1290,7 +1249,7 @@ void ClipPlanePanel::ResetClipValuesX()
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!vd || !canvas)
 		return;
-	if (m_chann_link)
+	if (glbin_settings.m_clip_link)
 		canvas->ResetClipValuesX();
 	else
 		vd->ResetClipValuesX();
@@ -1309,7 +1268,7 @@ void ClipPlanePanel::ResetClipValuesY()
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!vd || !canvas)
 		return;
-	if (m_chann_link)
+	if (glbin_settings.m_clip_link)
 		canvas->ResetClipValuesY();
 	else
 		vd->ResetClipValuesY();
@@ -1328,7 +1287,7 @@ void ClipPlanePanel::ResetClipValuesZ()
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!vd || !canvas)
 		return;
-	if (m_chann_link)
+	if (glbin_settings.m_clip_link)
 		canvas->ResetClipValuesZ();
 	else
 		vd->ResetClipValuesZ();
@@ -1682,7 +1641,7 @@ void ClipPlanePanel::UpdateSampleRate()
 	//good rate
 	if (vd->GetSampleRate() < 2.0)
 		vd->SetSampleRate(2.0);
-	if (m_chann_link)
+	if (glbin_settings.m_clip_link)
 	{
 		int i;
 		for (i = 0; i < glbin_data_manager.GetVolumeNum(); i++)

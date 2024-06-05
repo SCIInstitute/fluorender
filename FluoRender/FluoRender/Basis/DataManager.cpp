@@ -5132,6 +5132,18 @@ void MeshGroup::RandomizeColor()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void CurrentObjects::SetCanvas(RenderCanvas* cnvs)
+{
+	canvas = cnvs;
+	vol_group = 0;
+	mesh_group = 0;
+	vol_data = 0;
+	mesh_data = 0;
+	ann_data = 0;
+	if (canvas)
+		canvas->m_cur_vol = 0;
+}
+
 void CurrentObjects::SetVolumeGroup(DataGroup* g)
 {
 	if (!mainframe)
@@ -5164,6 +5176,8 @@ void CurrentObjects::SetVolumeGroup(DataGroup* g)
 	vol_data = 0;
 	mesh_data = 0;
 	ann_data = 0;
+	if (canvas)
+		canvas->m_cur_vol = 0;
 }
 
 void CurrentObjects::SetMeshGroup(MeshGroup* g)
@@ -5198,6 +5212,8 @@ void CurrentObjects::SetMeshGroup(MeshGroup* g)
 	vol_data = 0;
 	mesh_data = 0;
 	ann_data = 0;
+	if (canvas)
+		canvas->m_cur_vol = 0;
 }
 
 void CurrentObjects::SetVolumeData(VolumeData* vd)
@@ -5246,6 +5262,8 @@ void CurrentObjects::SetVolumeData(VolumeData* vd)
 	mesh_data = 0;
 	mesh_group = 0;
 	ann_data = 0;
+	if (canvas)
+		canvas->m_cur_vol = vd;
 }
 
 void CurrentObjects::SetMeshData(MeshData* md)
@@ -5294,6 +5312,8 @@ void CurrentObjects::SetMeshData(MeshData* md)
 	vol_group = 0;
 	vol_data = 0;
 	ann_data = 0;
+	if (canvas)
+		canvas->m_cur_vol = 0;
 }
 
 void CurrentObjects::SetAnnotation(Annotations* ann)
@@ -5328,6 +5348,8 @@ void CurrentObjects::SetAnnotation(Annotations* ann)
 	mesh_group = 0;
 	vol_data = 0;
 	mesh_data = 0;
+	if (canvas)
+		canvas->m_cur_vol = 0;
 }
 
 DataManager::DataManager() :
