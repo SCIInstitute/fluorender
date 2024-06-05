@@ -25,41 +25,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _OUTADJDEFAULT_H_
-#define _OUTADJDEFAULT_H_
+#ifndef _STATES_H_
+#define _STATES_H_
 
-#include <wx/fileconf.h>
-#include <wx/string.h>
-
-class RenderCanvas;
-class TreeLayer;
-class OutAdjDefault
+class States
 {
 public:
-	OutAdjDefault();
-	~OutAdjDefault();
+	States();
+	~States();
 
-	void Read(wxFileConfig& f);
-	void Save(wxFileConfig& f);
-	void Set(RenderCanvas* view);
-	void Apply(RenderCanvas* view);
-	void Set(TreeLayer* layer);
-	void Apply(TreeLayer* layer);
+	bool ClipDisplayChanged();
 
 public:
-	//default values
-	bool m_split;//if panels for RGB are split
-	bool m_sync_r;
-	bool m_sync_g;
-	bool m_sync_b;
-	double m_gamma_r;
-	double m_gamma_g;
-	double m_gamma_b;
-	double m_brightness_r;
-	double m_brightness_g;
-	double m_brightness_b;
-	double m_hdr_r;
-	double m_hdr_g;
-	double m_hdr_b;
+	bool m_mouse_in_clip_plane_panel;
+	bool m_mouse_in_aov_slider;
+	bool m_clip_display;	//show clipping planes in view
 };
 #endif

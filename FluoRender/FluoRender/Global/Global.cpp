@@ -362,6 +362,12 @@ ColocalDefault& Global::get_colocal_def()
 	return main_settings_.m_colocal_def;
 }
 
+//states
+States& Global::get_states()
+{
+	return states_;
+}
+
 AsyncTimer* Global::getAsyncTimer(const std::string& name)
 {
 	return glbin_atmf->findFirst(name);

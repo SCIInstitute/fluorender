@@ -87,7 +87,6 @@ MainSettings::MainSettings()
 	m_line_width = 3.0;
 	m_clip_mode = cm_Normal;
 	m_clip_link = false;
-	m_clip_display = false;
 	m_clip_hold = false;
 
 	m_shadow_dir = false;
@@ -274,7 +273,6 @@ void MainSettings::Read()
 		fconfig.Read("line width", &m_line_width, 3.0);
 		fconfig.Read("clip mode", &m_clip_mode, cm_Normal);
 		fconfig.Read("clip link", &m_clip_link, false);
-		fconfig.Read("clip display", &m_clip_display, false);
 		fconfig.Read("clip hold", &m_clip_hold, false);
 	}
 	//shadow
@@ -515,7 +513,6 @@ void MainSettings::Save()
 	fconfig.Write("line width", m_line_width);
 	fconfig.Write("clip mode", m_clip_mode);
 	fconfig.Write("clip link", m_clip_link);
-	fconfig.Write("clip display", m_clip_display);
 	fconfig.Write("clip hold", m_clip_hold);
 
 	//shadow

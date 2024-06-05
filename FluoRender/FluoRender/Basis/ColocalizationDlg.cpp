@@ -28,8 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #include <ColocalizationDlg.h>
 #include <Global.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
-#include <Calculate/Compare.h>
 
 ColocalizationDlg::ColocalizationDlg(MainFrame* frame) :
 	PropPanel(frame, frame,

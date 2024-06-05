@@ -816,6 +816,9 @@ void ClipPlanePanel::LinkChannels()
 void ClipPlanePanel::HoldPlanes()
 {
 	glbin_settings.m_clip_hold = m_toolbar->GetToolState(ID_HoldPlanesBtn);
+	glbin_states.ClipDisplayChanged();
+	FluoRefresh(3, { gstNull },
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void ClipPlanePanel::SetPlaneMode()
@@ -1035,35 +1038,18 @@ void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 	if (!canvas)
 		return;
 
-	if (glbin_settings.m_clip_hold)
-	{
-		glbin_settings.m_clip_display = true;
-		return;
-	}
-
 	if (canvas->m_capture)
 		return;
 
 	wxPoint pos = wxGetMousePosition();
 	wxRect reg = GetScreenRect();
 	wxWindow *window = wxWindow::FindFocus();
-	if (window && reg.Contains(pos))
-	{
-		if (!glbin_settings.m_clip_display)
-		{
-			canvas->m_clip_mask = -1;
-			glbin_settings.m_clip_display = true;
-		}
-	}
-	else
-	{
-		if (glbin_settings.m_clip_display)
-		{
-			glbin_settings.m_clip_display = false;
-		}
-	}
-	FluoRefresh(3, { gstNull },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+	bool bval = window && reg.Contains(pos);
+	glbin_states.m_mouse_in_clip_plane_panel = bval;
+	if (glbin_states.ClipDisplayChanged())
+		FluoRefresh(3, { gstNull },
+			{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+	event.Skip();
 }
 
 bool ClipPlanePanel::GetXLink()

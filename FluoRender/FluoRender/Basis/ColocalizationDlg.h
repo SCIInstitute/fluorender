@@ -29,14 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #define _COLOCALIZATIONDLG_H_
 
 #include <PropPanel.h>
-#include <wx/wx.h>
 #include <wx/tglbtn.h>
 #include <wx/grid.h>
 #include <wx/clipbrd.h>
 
 class MainFrame;
-class RenderCanvas;
-class DataGroup;
 class ColocalizationDlg : public PropPanel
 {
 public:

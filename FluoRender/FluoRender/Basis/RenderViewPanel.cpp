@@ -1390,34 +1390,17 @@ void RenderViewPanel::OnBgInvBtn(wxCommandEvent& event)
 
 void RenderViewPanel::OnAovSldrIdle(wxIdleEvent& event)
 {
-	if (glbin_settings.m_clip_hold)
-	{
-		glbin_settings.m_clip_display = true;
-		return;
-	}
 	if (m_canvas->m_capture)
 		return;
 
 	wxPoint pos = wxGetMousePosition();
 	wxRect reg = m_aov_sldr->GetScreenRect();
 	wxWindow* window = wxWindow::FindFocus();
-	if (window && reg.Contains(pos))
-	{
-		if (!glbin_settings.m_clip_display)
-		{
-			m_canvas->m_clip_mask = -1;
-			glbin_settings.m_clip_display = true;
-		}
-	}
-	else
-	{
-		if (glbin_settings.m_clip_display)
-		{
-			glbin_settings.m_clip_display = false;
-		}
-	}
-	FluoRefresh(3, { gstNull },
-		{ m_frame->GetRenderCanvas(m_canvas) });
+	bool bval = window && reg.Contains(pos);
+	glbin_states.m_mouse_in_aov_slider = bval;
+	if (glbin_states.ClipDisplayChanged())
+		FluoRefresh(3, { gstNull },
+			{ m_frame->GetRenderCanvas(m_canvas) });
 	event.Skip();
 }
 

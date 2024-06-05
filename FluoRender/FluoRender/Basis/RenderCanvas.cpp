@@ -942,7 +942,7 @@ void RenderCanvas::Draw()
 		if (glbin_settings.m_test_wiref)
 			DrawGrid();
 
-		if (glbin_settings.m_clip_display)
+		if (glbin_states.m_clip_display)
 			DrawClippingPlanes(BACK_FACE);
 
 		//setup
@@ -953,7 +953,7 @@ void RenderCanvas::Draw()
 		DrawVolumes();
 
 		//draw the clipping planes
-		if (glbin_settings.m_clip_display)
+		if (glbin_states.m_clip_display)
 			DrawClippingPlanes(FRONT_FACE);
 
 		if (glbin_settings.m_test_wiref)
@@ -1016,7 +1016,7 @@ void RenderCanvas::DrawDP()
 		if (glbin_settings.m_test_wiref)
 			DrawGrid();
 
-		if (glbin_settings.m_clip_display)
+		if (glbin_states.m_clip_display)
 			DrawClippingPlanes(BACK_FACE);
 
 		//setup
@@ -1235,7 +1235,7 @@ void RenderCanvas::DrawDP()
 		if (GetMeshShadow(darkness))
 			DrawOLShadowsMesh(darkness);
 
-		if (glbin_settings.m_clip_display)
+		if (glbin_states.m_clip_display)
 			DrawClippingPlanes(FRONT_FACE);
 
 		if (glbin_settings.m_test_wiref)

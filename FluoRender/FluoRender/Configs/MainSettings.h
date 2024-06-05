@@ -143,7 +143,6 @@ public:
 	double m_line_width;	//line width
 	int m_clip_mode;		//clipping plane display mode
 	bool m_clip_link;		//link clipping planes in view
-	bool m_clip_display;	//show clipping planes in view
 	bool m_clip_hold;		//hold clipping plane display when mouse is outside of panel
 
 	bool m_shadow_dir;		//enable directional shaow

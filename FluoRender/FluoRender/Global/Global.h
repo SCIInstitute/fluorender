@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <Group.hpp>
 #include <MainSettings.h>
+#include <States.h>
 #include <Tracking/VolCache.h>
 #include <Database/Params.h>
 #include <Database/EntryParams.h>
@@ -84,6 +85,8 @@ DEALINGS IN THE SOFTWARE.
 #define glbin_vol_def fluo::Global::instance().get_vol_def()
 #define glbin_mov_def fluo::Global::instance().get_movie_def()
 #define glbin_colocal_def fluo::Global::instance().get_colocal_def()
+//states
+#define glbin_states fluo::Global::instance().get_states()
 //processors
 #define glbin_comp_generator fluo::Global::instance().get_comp_generator()
 #define glbin_comp_analyzer fluo::Global::instance().get_comp_analyzer()
@@ -200,6 +203,9 @@ namespace fluo
 		MovieDefault& get_movie_def();
 		ColocalDefault& get_colocal_def();
 
+		//states
+		States& get_states();
+
 		//data processors
 		void apply_processor_settings();
 		flrd::ComponentGenerator& get_comp_generator() { return m_comp_generator; }
@@ -273,6 +279,9 @@ namespace fluo
 
 		//settings
 		MainSettings main_settings_;
+
+		//states
+		States states_;
 
 		//the data processors
 		flrd::ComponentGenerator m_comp_generator;
