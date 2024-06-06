@@ -68,6 +68,7 @@ DEALINGS IN THE SOFTWARE.
 #include <LightFieldShader.h>
 #include <TextRenderer.h>
 #include <LookingGlassRenderer.h>
+#include <Clusterizer.h>
 
 #define glbin fluo::Global::instance()
 #define glbin_cache_queue fluo::Global::instance().get_cache_queue()
@@ -107,6 +108,7 @@ DEALINGS IN THE SOFTWARE.
 #define glbin_data_manager fluo::Global::instance().get_data_manager()
 #define glbin_lg_renderer fluo::Global::instance().get_looking_glass_renderer()
 #define glbin_colocalizer fluo::Global::instance().get_colocalizer()
+#define glbin_clusterizer fluo::Global::instance().get_clusterizer()
 //graphics resources
 #define glbin_vol_kernel_factory fluo::Global::instance().get_vol_kernel_factory()
 #define glbin_framebuffer_manager fluo::Global::instance().get_framebuffer_manager()
@@ -227,6 +229,7 @@ namespace fluo
 		DataManager& get_data_manager() { return m_data_manager; }
 		LookingGlassRenderer& get_looking_glass_renderer() { return m_lg_renderer; }
 		flrd::Colocalize& get_colocalizer() { return m_colocalizer; }
+		flrd::Clusterizer& get_clusterizer() { return m_clusterizer; }
 
 		//graphics resources
 		flvr::VolKernelFactory& get_vol_kernel_factory() { return vol_kernel_factory_; }
@@ -303,6 +306,7 @@ namespace fluo
 		DataManager m_data_manager;
 		LookingGlassRenderer m_lg_renderer;
 		flrd::Colocalize m_colocalizer;
+		flrd::Clusterizer m_clusterizer;
 
 		//graphics resources
 		//kernel for calculation

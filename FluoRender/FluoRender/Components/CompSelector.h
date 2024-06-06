@@ -63,7 +63,6 @@ namespace flrd
 		{ m_use_max = use; m_max_num = num; }
 
 		//high-level functions
-		void SelectFullComp();
 		bool GetCellList(flrd::CelpList& cl, bool links = false);
 		void GetCompSelection();
 		void SetCompSelection(std::set<unsigned long long>& ids, int mode);

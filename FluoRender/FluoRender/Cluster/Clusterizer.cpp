@@ -25,102 +25,193 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "ClusterMethod.h"
-#include <boost/qvm/vec_access.hpp>
+#include <Clusterizer.h>
+#include <Global.h>
+#include <Cluster/dbscan.h>
+#include <Cluster/kmeans.h>
+#include <Cluster/exmax.h>
 
 using namespace flrd;
 
-void ClusterMethod::AddClusterPoint(const EmVec &p, const float value, int cid)
+void Clusterizer::Compute()
 {
-	pClusterPoint pp(new ClusterPoint);
-	pp->id = m_id_counter++;
-	pp->cid = cid;
-	pp->visited = false;
-	pp->noise = true;
-	using namespace boost::qvm;
-	pp->centeri = p;
-	pp->centerf = { A0(p)*A0(m_spc), A1(p)*A1(m_spc), A2(p)*A2(m_spc) };
-	pp->intensity = value;
-	m_data.push_back(pp);
-	if (cid > -1)
-		m_use_init_cluster = true;
-}
+	m_in_cells.clear();
+	m_out_cells.clear();
 
-void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
-	size_t nx, size_t ny, size_t nz,
-	bool out_cells, unsigned int inc)
-{
-	m_id_list.clear();
-	if (out_cells)
-		m_out_cells.clear();
-
-	unsigned int id2 = id;
-	unsigned long long index;
-	int i, j, k;
-	Cell* cell = 0;
-
-	for (size_t ii = 0; ii < m_result.size(); ++ii)
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
+		return;
+	flvr::Texture* tex = vd->GetTexture();
+	if (!tex)
+		return;
+	Nrrd* nrrd_data = tex->get_nrrd(0);
+	if (!nrrd_data)
+		return;
+	int bits = vd->GetBits();
+	void* data_data = nrrd_data->data;
+	if (!data_data)
+		return;
+	//get mask
+	Nrrd* nrrd_mask = vd->GetMask(true);
+	if (!nrrd_mask)
+		return;
+	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
+	if (!data_mask)
+		return;
+	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+	if (!nrrd_label)
 	{
-		Cluster &cluster = m_result[ii];
-		do
+		vd->AddEmptyLabel();
+		nrrd_label = tex->get_nrrd(tex->nlabel());
+	}
+	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_label)
+		return;
+
+	int nx, ny, nz;
+	vd->GetResolution(nx, ny, nz);
+	double scale = vd->GetScalarScale();
+	double spcx, spcy, spcz;
+	vd->GetSpacings(spcx, spcy, spcz);
+
+	flrd::ClusterMethod* method = 0;
+	//switch method
+	if (glbin_comp_def.m_cluster_method_exmax)
+	{
+		flrd::ClusterExmax* method_exmax = new flrd::ClusterExmax();
+		method_exmax->SetClnum(glbin_comp_def.m_cluster_clnum);
+		method_exmax->SetMaxiter(glbin_comp_def.m_cluster_maxiter);
+		method_exmax->SetProbTol(glbin_comp_def.m_cluster_tol);
+		method = method_exmax;
+	}
+	else if (glbin_comp_def.m_cluster_method_dbscan)
+	{
+		flrd::ClusterDbscan* method_dbscan = new flrd::ClusterDbscan();
+		method_dbscan->SetSize(glbin_comp_def.m_cluster_size);
+		method_dbscan->SetEps(glbin_comp_def.m_cluster_eps);
+		method = method_dbscan;
+	}
+	else if (glbin_comp_def.m_cluster_method_kmeans)
+	{
+		flrd::ClusterKmeans* method_kmeans = new flrd::ClusterKmeans();
+		method_kmeans->SetClnum(glbin_comp_def.m_cluster_clnum);
+		method_kmeans->SetMaxiter(glbin_comp_def.m_cluster_maxiter);
+		method = method_kmeans;
+	}
+
+	if (!method)
+		return;
+
+	method->SetSpacings(spcx, spcy, spcz);
+
+	//add cluster points
+	size_t i, j, k;
+	size_t index;
+	size_t nxyz = nx * ny * nz;
+	unsigned char mask_value;
+	float data_value;
+	unsigned int label_value;
+	bool use_init_cluster = false;
+	struct CmpCnt
+	{
+		unsigned int id;
+		unsigned int size;
+		bool operator<(const CmpCnt& cc) const
 		{
-			id2 += inc;
-			if (id2 == id)
-				break;
-		} while (!id2 || FindId(label, id2, nx, ny, nz));
-
-		if (out_cells)
-			cell = new Cell(id2);
-
-		for (ClusterIter iter = cluster.begin();
-			iter != cluster.end(); ++iter)
-		{
-			i = int(boost::qvm::A0((*iter)->centeri) + 0.5);
-			if (i <= 0 || i >= nx - 1)
-				continue;
-			j = int(boost::qvm::A1((*iter)->centeri) + 0.5);
-			if (j <= 0 || j >= ny - 1)
-				continue;
-			k = int(boost::qvm::A2((*iter)->centeri) + 0.5);
-			if (k < 0 || k > nz - 1)
-				continue;
-			index = nx*ny*k + nx*j + i;
-			((unsigned int*)label)[index] = id2;
-
-			if (out_cells)
-				cell->Inc(i, j, k, (*iter)->intensity);
+			return size > cc.size;
 		}
-		m_id_list.push_back(id2);
-
-		if (out_cells)
-			m_out_cells.insert(std::pair<unsigned int, Celp>
-				(id2, Celp(cell)));
-	}
-}
-
-bool ClusterMethod::FindId(void* label, unsigned int id,
-	size_t nx, size_t ny, size_t nz)
-{
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
-	unsigned long long index;
-	for (index = 0; index < for_size; ++index)
+	};
+	std::unordered_map<unsigned int, CmpCnt> init_clusters;
+	std::set<CmpCnt> ordered_clusters;
+	if (glbin_comp_def.m_cluster_method_exmax)
 	{
-		if (((unsigned int*)label)[index] == id)
-			return true;
-	}
-	return false;
-}
-
-void ClusterMethod::AddIDsToData()
-{
-	for (size_t ii = 0; ii < m_result.size(); ++ii)
-	{
-		Cluster &cluster = m_result[ii];
-		for (auto iter = cluster.begin();
-			iter != cluster.end(); ++iter)
+		for (index = 0; index < nxyz; ++index)
 		{
-			(*iter)->cid = ii;
+			mask_value = data_mask[index];
+			if (!mask_value)
+				continue;
+			label_value = data_label[index];
+			if (!label_value)
+				continue;
+			auto it = init_clusters.find(label_value);
+			if (it == init_clusters.end())
+			{
+				CmpCnt cc = { label_value, 1 };
+				init_clusters.insert(std::pair<unsigned int, CmpCnt>(
+					label_value, cc));
+			}
+			else
+			{
+				it->second.size++;
+			}
+		}
+		if (init_clusters.size() >= glbin_comp_def.m_cluster_clnum)
+		{
+			for (auto it = init_clusters.begin();
+				it != init_clusters.end(); ++it)
+				ordered_clusters.insert(it->second);
+			use_init_cluster = true;
 		}
 	}
+
+	for (i = 0; i < nx; ++i)
+		for (j = 0; j < ny; ++j)
+			for (k = 0; k < nz; ++k)
+			{
+				index = nx * ny * k + nx * j + i;
+				mask_value = data_mask[index];
+				if (mask_value)
+				{
+					if (bits == 8)
+						data_value = ((unsigned char*)data_data)[index] / 255.0f;
+					else if (bits == 16)
+						data_value = ((unsigned short*)data_data)[index] * scale / 65535.0f;
+					flrd::EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
+					label_value = data_label[index];
+					int cid = -1;
+					if (use_init_cluster)
+					{
+						cid = 0;
+						bool found = false;
+						for (auto it = ordered_clusters.begin();
+							it != ordered_clusters.end(); ++it)
+						{
+							if (label_value == it->id)
+							{
+								found = true;
+								break;
+							}
+							cid++;
+						}
+						if (!found)
+							cid = -1;
+					}
+					method->AddClusterPoint(
+						pnt, data_value, cid);
+
+					//add to list
+					auto iter = m_in_cells.find(label_value);
+					if (iter != m_in_cells.end())
+					{
+						iter->second->Inc(i, j, k, data_value);
+					}
+					else
+					{
+						flrd::Cell* cell = new flrd::Cell(label_value);
+						cell->Inc(i, j, k, data_value);
+						m_in_cells.insert(std::pair<unsigned int, flrd::Celp>
+							(label_value, flrd::Celp(cell)));
+					}
+				}
+			}
+
+	if (method->Execute())
+	{
+		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz, true);
+		m_out_cells = method->GetCellList();
+		vd->GetVR()->clear_tex_label();
+		//m_view->RefreshGL(39);//refresh needs to be performed by caller
+	}
+
+	delete method;
 }

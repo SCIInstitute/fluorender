@@ -48,52 +48,6 @@ ComponentSelector::~ComponentSelector()
 {
 }
 
-void ComponentSelector::SelectFullComp()
-{
-	if (!m_vd)
-		return;
-
-	//get id
-	wxString str = m_comp_id_text->GetValue();
-	if (str.empty())
-	{
-		if (!m_view || !m_view->m_cur_vol)
-			return;
-		//get current mask
-		glbin_comp_selector.SetVolume(m_view->m_cur_vol);
-		//cell size filter
-		bool use = m_analysis_min_check->GetValue();
-		unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
-		glbin_comp_selector.SetMinNum(use, num);
-		use = m_analysis_max_check->GetValue();
-		num = (unsigned int)(m_analysis_max_spin->GetValue());
-		glbin_comp_selector.SetMaxNum(use, num);
-		glbin_comp_selector.SetAnalyzer(&glbin_comp_analyzer);
-		glbin_comp_selector.CompFull();
-	}
-	else
-	{
-		wxCommandEvent e;
-		OnCompAppend(e);
-	}
-
-	//m_view->RefreshGL(39);
-
-	//frame
-	//if (m_frame)
-	//{
-	//	if (m_frame->GetBrushToolDlg())
-	//	{
-	//		if (m_view->m_paint_count)
-	//			m_frame->GetBrushToolDlg()->Update(0);
-	//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
-	//	}
-	//	if (m_frame->GetColocalizationDlg() &&
-	//		m_view->m_paint_colocalize)
-	//		m_frame->GetColocalizationDlg()->Colocalize();
-	//}
-}
-
 bool ComponentSelector::GetCellList(flrd::CelpList& cl, bool links)
 {
 	flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();

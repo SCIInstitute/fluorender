@@ -310,13 +310,13 @@ endif()
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender)
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender)
 
-# Basis
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Basis)
-file(GLOB bss_src FluoRender/FluoRender/Basis/*.cpp)
-file(GLOB bss_hdr FluoRender/FluoRender/Basis/*.h)
-file(GLOB bss_nvs FluoRender/FluoRender/Basis/*.natvis)
-add_library(BASIS_OBJ OBJECT
-  ${bss_src} ${bss_hdr} ${bss_nvs})
+# Fui
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Fui)
+file(GLOB fui_src FluoRender/FluoRender/Fui/*.cpp)
+file(GLOB fui_hdr FluoRender/FluoRender/Fui/*.h)
+file(GLOB fui_nvs FluoRender/FluoRender/Fui/*.natvis)
+add_library(FUI_OBJ OBJECT
+  ${fui_src} ${fui_hdr} ${fui_nvs})
 
 # Controls
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Controls)
@@ -594,7 +594,7 @@ if(APPLE)
   include(BundleUtilities)
   add_executable(FluoRender MACOSX_BUNDLE
     ${src} ${hdr} ${rsc} ${icns}
-    $<TARGET_OBJECTS:BASIS_OBJ>
+    $<TARGET_OBJECTS:FUI_OBJ>
     $<TARGET_OBJECTS:CONTROLS_OBJ>
     $<TARGET_OBJECTS:CONFIGS_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
@@ -636,7 +636,7 @@ elseif(UNIX OR MINGW)
   #include(BundleUtilities)
   add_executable(FluoRender
     ${src} ${hdr} ${rsc} ${icns}
-    $<TARGET_OBJECTS:BASIS_OBJ>
+    $<TARGET_OBJECTS:FUI_OBJ>
     $<TARGET_OBJECTS:CONTROLS_OBJ>
     $<TARGET_OBJECTS:CONFIGS_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
@@ -710,7 +710,7 @@ elseif(WIN32)
     if (USE_XINPUT)
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
-      $<TARGET_OBJECTS:BASIS_OBJ>
+      $<TARGET_OBJECTS:FUI_OBJ>
       $<TARGET_OBJECTS:CONTROLS_OBJ>
       $<TARGET_OBJECTS:CONFIGS_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
@@ -743,7 +743,7 @@ elseif(WIN32)
     else()
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
-      $<TARGET_OBJECTS:BASIS_OBJ>
+      $<TARGET_OBJECTS:FUI_OBJ>
       $<TARGET_OBJECTS:CONTROLS_OBJ>
       $<TARGET_OBJECTS:CONFIGS_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
@@ -775,7 +775,7 @@ elseif(WIN32)
     endif()
     add_executable(Tester
       ${tester_src} ${tester_hdr}
-      $<TARGET_OBJECTS:BASIS_OBJ>
+      $<TARGET_OBJECTS:FUI_OBJ>
       $<TARGET_OBJECTS:CONTROLS_OBJ>
       $<TARGET_OBJECTS:CONFIGS_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
