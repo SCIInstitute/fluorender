@@ -31,9 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Main.h>
 #include <PropPanel.h>
 #include <DataManager.h>
-#include <Components/CompGenerator.h>
-#include <Components/CompAnalyzer.h>
-#include <Distance/RulerAlign.h>
 #include <wx/wx.h>
 #include <wx/collpane.h>
 #include <wx/notebook.h>
@@ -42,177 +39,49 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/grid.h>
 #include <wx/clipbrd.h>
 #include <wx/splitter.h>
-#include <chrono>
 
 class MainFrame;
-class RenderCanvas;
-class VolumeData;
 class wxSingleSlider;
-
 DECLARE_APP(VRenderApp)
 class ComponentDlg : public PropPanel
 {
 public:
-	//enum
-	//{
-	//	// load / save
-	//	ID_LoadSettingsText = ID_COMPONENT,
-	//	ID_LoadSettingsBtn,
-	//	ID_SaveSettingsBtn,
-	//	ID_SaveasSettingsBtn,
-
-	//	//generate page
-	//	//iterations
-	//	ID_IterSldr,
-	//	ID_IterText,
-	//	//threshold
-	//	ID_ThreshSldr,
-	//	ID_ThreshText,
-	//	//distance field
-	//	ID_UseDistFieldCheck,
-	//	ID_DistStrengthSldr,
-	//	ID_DistStrengthText,
-	//	ID_DistFilterSizeSldr,
-	//	ID_DistFilterSizeText,
-	//	ID_MaxDistSldr,
-	//	ID_MaxDistText,
-	//	ID_DistThreshSldr,
-	//	ID_DistThreshText,
-	//	//falloff
-	//	ID_DiffCheck,
-	//	ID_FalloffSldr,
-	//	ID_FalloffText,
-	//	//size
-	//	ID_SizeCheck,
-	//	ID_SizeSldr,
-	//	ID_SizeText,
-	//	//density
-	//	ID_DensityCheck,
-	//	ID_DensitySldr,
-	//	ID_DensityText,
-	//	ID_VarthSldr,
-	//	ID_VarthText,
-	//	ID_DensityWindowSizeSldr,
-	//	ID_DensityWindowsSizeText,
-	//	ID_DensityStatsSizeSldr,
-	//	ID_DensityStatsSizeText,
-	//	//fixate
-	//	ID_FixateCheck,
-	//	ID_GrowFixedCheck,
-	//	ID_FixUpdateBtn,
-	//	ID_FixSizeSldr,
-	//	ID_FixSizeText,
-	//	//clean
-	//	ID_CleanCheck,
-	//	ID_CleanBtn,
-	//	ID_CleanIterSldr,
-	//	ID_CleanIterText,
-	//	ID_CleanLimitSldr,
-	//	ID_CleanLimitText,
-	//	//record
-	//	ID_CmdCountText,
-	//	ID_RecordCmdBtn,
-	//	ID_PlayCmdBtn,
-	//	ID_ResetCmdBtn,
-	//	ID_CmdFileText,
-	//	ID_SaveCmdBtn,
-	//	ID_LoadCmdBtn,
-
-	//	//clustering page
-	//	ID_ClusterMethodExmaxRd,
-	//	ID_ClusterMethodDbscanRd,
-	//	ID_ClusterMethodKmeansRd,
-	//	//parameters
-	//	ID_ClusterClnumSldr,
-	//	ID_ClusterClnumText,
-	//	ID_ClusterMaxIterSldr,
-	//	ID_ClusterMaxIterText,
-	//	ID_ClusterTolSldr,
-	//	ID_ClusterTolText,
-	//	ID_ClusterSizeSldr,
-	//	ID_ClusterSizeText,
-	//	ID_ClusterEpsSldr,
-	//	ID_ClusterEpsText,
-
-	//	//analysis page
-	//	//selection
-	//	ID_CompIdText,
-	//	ID_CompIdXBtn,
-	//	ID_AnalysisMinCheck,
-	//	ID_AnalysisMinSpin,
-	//	ID_AnalysisMaxCheck,
-	//	ID_AnalysisMaxSpin,
-	//	ID_CompFullBtn,
-	//	ID_CompExclusiveBtn,
-	//	ID_CompAppendBtn,
-	//	ID_CompAllBtn,
-	//	ID_CompClearBtn,
-	//	ID_ShuffleBtn,
-	//	//ID edit controls
-	//	ID_NewIdText,
-	//	ID_NewIdXBtn,
-	//	ID_CompNewBtn,
-	//	ID_CompAddBtn,
-	//	ID_CompReplaceBtn,
-	//	ID_CompCleanBkgBtn,
-	//	ID_CompCombineBtn,
-	//	//options
-	//	ID_ConSizeSldr,
-	//	ID_ConSizeText,
-	//	ID_ConsistentCheck,
-	//	ID_ColocalCheck,
-	//	//output
-	//	ID_OutputMultiRb,
-	//	ID_OutputRgbRb,
-	//	ID_OutputRandomBtn,
-	//	ID_OutputSizeBtn,
-	//	ID_OutputIdBtn,
-	//	ID_OutputSnBtn,
-	//	//Distance
-	//	ID_DistNeighborCheck,
-	//	ID_DistAllChanCheck,
-	//	ID_DistNeighborSldr,
-	//	ID_DistNeighborText,
-	//	ID_DistOutputBtn,
-	//	//align
-	//	ID_AlignCenter,
-	//	ID_AlignXYZ,
-	//	ID_AlignYXZ,
-	//	ID_AlignZXY,
-	//	ID_AlignXZY,
-	//	ID_AlignYZX,
-	//	ID_AlignZYX,
-
-	//	//execute
-	//	ID_Notebook,
-	//	ID_UseSelChk,
-	//	ID_UseMlChk,
-	//	ID_GenerateBtn,
-	//	ID_AutoUpdateBtn,
-	//	ID_ClusterBtn,
-	//	ID_AnalyzeBtn,
-	//	ID_AnalyzeSelBtn,
-
-	//	//output
-	//	ID_IncludeBtn,
-	//	ID_ExcludeBtn,
-	//	ID_HistoryChk,
-	//	ID_ClearHistBtn,
-	//	ID_OutputGrid
-	//};
+	enum
+	{
+		//clustering page
+		ID_ClusterMethodExmaxRd = 0,
+		ID_ClusterMethodDbscanRd,
+		ID_ClusterMethodKmeansRd
+	};
+	enum
+	{
+		//output
+		ID_OutputMultiRb = 0,
+		ID_OutputRgbRb
+	};
+	enum
+	{
+		ID_OutputRandomBtn = 0,
+		ID_OutputSizeBtn,
+		ID_OutputIdBtn,
+		ID_OutputSnBtn
+	};
+	enum
+	{
+		//align
+		ID_AlignXYZ = 0,
+		ID_AlignYXZ,
+		ID_AlignZXY,
+		ID_AlignXZY,
+		ID_AlignYZX,
+		ID_AlignZYX,
+	};
 
 	ComponentDlg(MainFrame* frame);
 	~ComponentDlg();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	void SetOutput(wxString &titles, wxString &values);
-	//void Update();
-	//void GetSettings();
-	//void SetView(RenderCanvas* view);
-	//RenderCanvas* GetRenderCanvas() { return m_view; }
-
-
-
 
 	//output
 	void CopyData();
@@ -222,10 +91,6 @@ private:
 	//progress
 	float m_prog_bit;
 	float m_prog;
-
-	//modify
-	unsigned int m_cell_new_id;
-	bool m_cell_new_id_empty;
 
 	//output
 	bool m_hold_history;
@@ -380,87 +245,88 @@ private:
 	wxGrid *m_output_grid;
 
 private:
-	bool GetIds(std::string &str, unsigned int &id, int &brick_id);
-	void AlignCenter(flrd::Ruler* ruler);
-	void ClearOutputGrid();
-	int GetDistMatSize();
-	void AddSelArrayInt(std::vector<unsigned int> &ids,
-		std::vector<unsigned int> &bids, wxArrayInt &sel, bool bricks);
-	void AddSelCoordArray(std::vector<unsigned int> &ids,
-		std::vector<unsigned int> &bids, wxGridCellCoordsArray &sel, bool bricks);
+	//common ops
+	void OnShuffle(wxCommandEvent& event);
+	void OnUseSelChk(wxCommandEvent& event);
+	void OnUseMlChk(wxCommandEvent& event);
+	void OnGenerate(wxCommandEvent& event);
+	void OnAutoUpdate(wxCommandEvent& event);
+	void OnCluster(wxCommandEvent& event);
+	void OnAnalyze(wxCommandEvent& event);
+	void OnAnalyzeSel(wxCommandEvent& event);
 
+	//stats text
+	void OnIncludeBtn(wxCommandEvent& event);
+	void OnExcludeBtn(wxCommandEvent& event);
+	void OnHistoryChk(wxCommandEvent& event);
+	void OnClearHistBtn(wxCommandEvent& event);
+
+	//grid
+	void OnKeyDown(wxKeyEvent& event);
+	void OnSelectCell(wxGridEvent& event);
+	void OnRangeSelect(wxGridRangeSelectEvent& event);
+	void OnGridLabelClick(wxGridEvent& event);
+
+	//splitter
+	void OnSplitterDclick(wxSplitterEvent& event);
+	void OnNotebook(wxBookCtrlEvent& event);
+
+	//pages
 	wxWindow* CreateCompGenPage(wxWindow *parent);
 	wxWindow* CreateClusteringPage(wxWindow *parent);
 	wxWindow* CreateAnalysisPage(wxWindow *parent);
 
-	//load/save settings
-	void OnLoadSettings(wxCommandEvent &event);
-	void OnSaveSettings(wxCommandEvent &event);
-	void OnSaveasSettings(wxCommandEvent &event);
-
-	//comp generate page
+	//comp gen page
 	void OnIterSldr(wxScrollEvent &event);
 	void OnIterText(wxCommandEvent &event);
-	void OnThreshSldr(wxScrollEvent &event);
-	void OnThreshText(wxCommandEvent &event);
-	//dist field
-	void OnUseDistFieldCheck(wxCommandEvent &event);
-	void EnableUseDistField(bool value);
-	void OnDistStrengthSldr(wxScrollEvent &event);
-	void OnDistStrengthText(wxCommandEvent &event);
-	void OnDistFilterSizeSldr(wxScrollEvent &event);
-	void OnDistFitlerSizeText(wxCommandEvent &event);
-	void OnMaxDistSldr(wxScrollEvent &event);
-	void OnMaxDistText(wxCommandEvent &event);
-	void OnDistThreshSldr(wxScrollEvent &event);
-	void OnDistThreshText(wxCommandEvent &event);
+	void OnThreshSldr(wxScrollEvent& event);
+	void OnThreshText(wxCommandEvent& event);
 	//diff
-	void EnableDiff(bool value);
-	void OnDiffCheck(wxCommandEvent &event);
-	void OnFalloffSldr(wxScrollEvent &event);
-	void OnFalloffText(wxCommandEvent &event);
-	void EnableSize(bool value);
-	void OnSizeCheck(wxCommandEvent &event);
-	void OnSizeSldr(wxScrollEvent &event);
-	void OnSizeText(wxCommandEvent &event);
+	void OnDiffCheck(wxCommandEvent& event);
+	void OnFalloffSldr(wxScrollEvent& event);
+	void OnFalloffText(wxCommandEvent& event);
 	//density
-	void EnableDensity(bool value);
-	void OnDensityCheck(wxCommandEvent &event);
-	void OnDensitySldr(wxScrollEvent &event);
-	void OnDensityText(wxCommandEvent &event);
-	void OnVarthSldr(wxScrollEvent &event);
-	void OnVarthText(wxCommandEvent &event);
-	void OnDensityWindowSizeSldr(wxScrollEvent &event);
-	void OnDensityWindowSizeText(wxCommandEvent &event);
-	void OnDensityStatsSizeSldr(wxScrollEvent &event);
-	void OnDensityStatsSizeText(wxCommandEvent &event);
+	void OnDensityCheck(wxCommandEvent& event);
+	void OnDensitySldr(wxScrollEvent& event);
+	void OnDensityText(wxCommandEvent& event);
+	void OnVarthSldr(wxScrollEvent& event);
+	void OnVarthText(wxCommandEvent& event);
+	void OnDensityWindowSizeSldr(wxScrollEvent& event);
+	void OnDensityWindowSizeText(wxCommandEvent& event);
+	void OnDensityStatsSizeSldr(wxScrollEvent& event);
+	void OnDensityStatsSizeText(wxCommandEvent& event);
+	//dist field
+	void OnUseDistFieldCheck(wxCommandEvent& event);
+	void OnDistStrengthSldr(wxScrollEvent& event);
+	void OnDistStrengthText(wxCommandEvent& event);
+	void OnDistThreshSldr(wxScrollEvent& event);
+	void OnDistThreshText(wxCommandEvent& event);
+	void OnDistFilterSizeSldr(wxScrollEvent& event);
+	void OnDistFitlerSizeText(wxCommandEvent& event);
+	void OnMaxDistSldr(wxScrollEvent& event);
+	void OnMaxDistText(wxCommandEvent& event);
 	//fixate
-	void OnFixateCheck(wxCommandEvent &event);
-	void EnableFixate(bool value);
-	void OnGrowFixedCheck(wxCommandEvent &event);
-	void OnFixUpdateBtn(wxCommandEvent &event);
-	void OnFixSizeSldr(wxScrollEvent &event);
-	void OnFixSizeText(wxCommandEvent &event);
+	void OnFixateCheck(wxCommandEvent& event);
+	void OnGrowFixedCheck(wxCommandEvent& event);
+	void OnFixUpdateBtn(wxCommandEvent& event);
+	void OnFixSizeSldr(wxScrollEvent& event);
+	void OnFixSizeText(wxCommandEvent& event);
 	//clean
-	void EnableClean(bool value);
-	void OnCleanCheck(wxCommandEvent &event);
-	void OnCleanBtn(wxCommandEvent &event);
-	void OnCleanIterSldr(wxScrollEvent &event);
-	void OnCleanIterText(wxCommandEvent &event);
-	void OnCleanLimitSldr(wxScrollEvent &event);
-	void OnCleanLimitText(wxCommandEvent &event);
+	void OnCleanCheck(wxCommandEvent& event);
+	void OnCleanBtn(wxCommandEvent& event);
+	void OnCleanIterSldr(wxScrollEvent& event);
+	void OnCleanIterText(wxCommandEvent& event);
+	void OnCleanLimitSldr(wxScrollEvent& event);
+	void OnCleanLimitText(wxCommandEvent& event);
 	//record
-	void OnRecordCmd(wxCommandEvent &event);
-	void OnPlayCmd(wxCommandEvent &event);
-	void OnResetCmd(wxCommandEvent &event);
-	void OnSaveCmd(wxCommandEvent &event);
-	void OnLoadCmd(wxCommandEvent &event);
+	void OnRecordCmd(wxCommandEvent& event);
+	void OnPlayCmd(wxCommandEvent& event);
+	void OnResetCmd(wxCommandEvent& event);
+	void OnLoadCmd(wxCommandEvent& event);
+	void OnSaveCmd(wxCommandEvent& event);
 
 	//clustering page
-	void UpdateClusterMethod();
-	void OnClusterMethodExmaxCheck(wxCommandEvent &event);
-	void OnClusterMethodDbscanCheck(wxCommandEvent &event);
-	void OnClusterMethodKmeansCheck(wxCommandEvent &event);
+	void OnClusterMethodCheck(wxCommandEvent &event);
 	//parameters
 	void OnClusterClnumSldr(wxScrollEvent &event);
 	void OnClusterClnumText(wxCommandEvent &event);
@@ -482,12 +348,11 @@ private:
 	void OnAnalysisMaxCheck(wxCommandEvent &event);
 	void OnAnalysisMaxSpin(wxSpinEvent &event);
 	void OnAnalysisMaxText(wxCommandEvent &event);
-	void OnCompFull(wxCommandEvent &event);
-	void OnCompExclusive(wxCommandEvent &event);
 	void OnCompAppend(wxCommandEvent &event);
+	void OnCompExclusive(wxCommandEvent &event);
 	void OnCompAll(wxCommandEvent &event);
+	void OnCompFull(wxCommandEvent &event);
 	void OnCompClear(wxCommandEvent &event);
-	void OnShuffle(wxCommandEvent &event);
 	//modify
 	void OnNewIDText(wxCommandEvent &event);
 	void OnNewIDX(wxCommandEvent& event);
@@ -514,34 +379,29 @@ private:
 	void OnDistNeighborText(wxCommandEvent &event);
 	void OnDistOutput(wxCommandEvent &event);
 	//align
+	void OnAlignCenterChk(wxCommandEvent& event);
 	void OnAlignPca(wxCommandEvent& event);
+
+
+	bool GetIds(std::string &str, unsigned int &id, int &brick_id);
+	void AlignCenter(flrd::Ruler* ruler);
+	void ClearOutputGrid();
+	int GetDistMatSize();
+	void AddSelArrayInt(std::vector<unsigned int> &ids,
+		std::vector<unsigned int> &bids, wxArrayInt &sel, bool bricks);
+	void AddSelCoordArray(std::vector<unsigned int> &ids,
+		std::vector<unsigned int> &bids, wxGridCellCoordsArray &sel, bool bricks);
+
+
+
+
 
 	//execute
 	void EnableGenerate();
-	void OnNotebook(wxBookCtrlEvent &event);
-	void OnUseMlChk(wxCommandEvent &event);
-	void OnUseSelChk(wxCommandEvent &event);
-	void OnGenerate(wxCommandEvent &event);
-	void OnAutoUpdate(wxCommandEvent &event);
-	void OnCluster(wxCommandEvent &event);
-	void OnAnalyze(wxCommandEvent &event);
-	void OnAnalyzeSel(wxCommandEvent &event);
 	void Analyze(bool sel);
 
-	//output
-	void OnIncludeBtn(wxCommandEvent &event);
-	void OnExcludeBtn(wxCommandEvent &event);
-	void OnHistoryChk(wxCommandEvent& event);
-	void OnClearHistBtn(wxCommandEvent& event);
-	void OnKeyDown(wxKeyEvent& event);
-	void OnSelectCell(wxGridEvent& event);
-	void OnRangeSelect(wxGridRangeSelectEvent& event);
-	void OnGridLabelClick(wxGridEvent& event);
 
-	//splitter
-	void OnSplitterDclick(wxSplitterEvent& event);
 
-	//DECLARE_EVENT_TABLE()
 };
 
 #endif//_COMPONENTDLG_H_

@@ -31,7 +31,11 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-ComponentEditor::ComponentEditor()
+ComponentEditor::ComponentEditor() :
+	m_vd(0),
+	m_view(0),
+	m_id(0),
+	m_id_empty(true)
 {
 
 }
@@ -44,6 +48,33 @@ ComponentEditor::~ComponentEditor()
 wxString ComponentEditor::GetOutput()
 {
 	return m_output;
+}
+
+fluo::Color ComponentEditor::GetColor()
+{
+	fluo::Color c;
+	if (m_id_empty)
+		c = fluo::Color(1, 1, 1);
+	else
+	{
+		if (m_id == 0)
+			c = fluo::Color(0.094117674, 0.654901961, 0.709803922);
+		else
+		{
+			int shuffle = 0;
+			if (m_vd)
+				shuffle = m_vd->GetShuffle();
+			c = fluo::Color(m_id, shuffle);
+		}
+	}
+	return c;
+}
+
+wxColor ComponentEditor::GetWxColor()
+{
+	fluo::Color c = GetColor();
+	wxColor wxc = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
+	return wxc;
 }
 
 void ComponentEditor::Clean(int mode)
@@ -88,7 +119,7 @@ void ComponentEditor::Clean(int mode)
 	m_vd->GetVR()->clear_tex_current();
 }
 
-void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append, bool track)
+void ComponentEditor::NewId(bool append, bool track)
 {
 	if (!m_view)
 		return;
@@ -138,7 +169,7 @@ void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append, bool tr
 
 	//get ID of currently/previously masked region
 	unsigned int id_vol = 0;
-	if (id_empty)
+	if (m_id_empty)
 	{
 		for (index = 0; index < for_size; ++index)
 		{
@@ -154,7 +185,7 @@ void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append, bool tr
 	//generate a unique ID
 	unsigned int new_id = 0;
 	unsigned int inc = 0;
-	if (id_empty)
+	if (m_id_empty)
 	{
 		if (id_vol)
 		{
@@ -169,9 +200,9 @@ void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append, bool tr
 	}
 	else
 	{
-		if (id)
+		if (m_id)
 		{
-			new_id = id;
+			new_id = m_id;
 			inc = 253;
 		}
 		else
@@ -237,13 +268,13 @@ void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append, bool tr
 	}
 }
 
-void ComponentEditor::Replace(unsigned int id, bool id_empty)
+void ComponentEditor::Replace()
 {
 	if (!m_view)
 		return;
-	if (id_empty)
+	if (m_id_empty)
 		return;
-	if (!id)
+	if (!m_id)
 		return;
 
 	int cur_time = m_view->m_tseq_cur_num;
@@ -279,10 +310,10 @@ void ComponentEditor::Replace(unsigned int id, bool id_empty)
 		old_id = data_label[index];
 		if (!data_mask[index] ||
 			!old_id ||
-			old_id == id)
+			old_id == m_id)
 			continue;
 
-		data_label[index] = id;
+		data_label[index] = m_id;
 	}
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_current();
@@ -290,14 +321,13 @@ void ComponentEditor::Replace(unsigned int id, bool id_empty)
 	vd->SaveLabel(true, cur_time, vd->GetCurChannel());
 }
 
-void ComponentEditor::Replace(unsigned int id,
-	bool id_empty, CelpList &list)
+void ComponentEditor::Replace(CelpList &list)
 {
 	if (!m_view)
 		return;
-	if (id_empty)
+	if (m_id_empty)
 		return;
-	if (!id)
+	if (!m_id)
 		return;
 
 	//trace group
@@ -341,7 +371,7 @@ void ComponentEditor::Replace(unsigned int id,
 		old_id = data_label[index];
 		if (!data_mask[index] ||
 			!old_id ||
-			old_id == id)
+			old_id == m_id)
 			continue;
 
 		list_rep_iter = list_rep.find(old_id);
@@ -354,7 +384,7 @@ void ComponentEditor::Replace(unsigned int id,
 		cell_iter = list.find(old_id);
 		if (cell_iter != list.end())
 		{
-			new_id = id;
+			new_id = m_id;
 			while (vd->SearchLabel(new_id))
 				new_id += 253;
 			//add cell to list_rep

@@ -42,6 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Python/PyDlc.h>
 #include <CompGenerator.h>
 #include <CompSelector.h>
+#include <CompEditor.h>
 #include <VolumeSelector.h>
 #include <CompAnalyzer.h>
 #include <VolumeCalculator.h>
@@ -92,6 +93,7 @@ DEALINGS IN THE SOFTWARE.
 #define glbin_comp_generator fluo::Global::instance().get_comp_generator()
 #define glbin_comp_analyzer fluo::Global::instance().get_comp_analyzer()
 #define glbin_comp_selector fluo::Global::instance().get_comp_selector()
+#define glbin_comp_editor fluo::Global::instance().get_comp_editor()
 #define glbin_vol_selector fluo::Global::instance().get_vol_selector()
 #define glbin_vol_calculator fluo::Global::instance().get_vol_calculator()
 #define glbin_kernel_executor fluo::Global::instance().get_kernel_executor()
@@ -213,6 +215,7 @@ namespace fluo
 		flrd::ComponentGenerator& get_comp_generator() { return m_comp_generator; }
 		flrd::ComponentAnalyzer& get_comp_analyzer() { return m_comp_analyzer; }
 		flrd::ComponentSelector& get_comp_selector() { return m_comp_selector; }
+		flrd::ComponentEditor& get_comp_editor() { return m_comp_editor; }
 		flrd::VolumeSelector& get_vol_selector() { return m_vol_selector; }
 		flrd::VolumeCalculator& get_vol_calculator() { return m_vol_calculator; }
 		KernelExecutor& get_kernel_executor() { return m_kernel_executor; }
@@ -290,6 +293,7 @@ namespace fluo
 		flrd::ComponentGenerator m_comp_generator;
 		flrd::ComponentAnalyzer m_comp_analyzer;
 		flrd::ComponentSelector m_comp_selector;
+		flrd::ComponentEditor m_comp_editor;
 		flrd::VolumeSelector m_vol_selector;
 		flrd::VolumeCalculator m_vol_calculator;
 		KernelExecutor m_kernel_executor;

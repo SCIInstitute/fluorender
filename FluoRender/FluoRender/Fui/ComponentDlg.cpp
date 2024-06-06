@@ -43,160 +43,12 @@ DEALINGS IN THE SOFTWARE.
 #include <set>
 #include <fstream>
 
-//BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
-//	//EVT_COLLAPSIBLEPANE_CHANGED(wxID_ANY, ComponentDlg::OnPaneChange)
-//	//load save settings
-//	EVT_BUTTON(ID_LoadSettingsBtn, ComponentDlg::OnLoadSettings)
-//	EVT_BUTTON(ID_SaveSettingsBtn, ComponentDlg::OnSaveSettings)
-//	EVT_BUTTON(ID_SaveasSettingsBtn, ComponentDlg::OnSaveasSettings)
-//	//comp gen page
-//	EVT_COMMAND_SCROLL(ID_IterSldr, ComponentDlg::OnIterSldr)
-//	EVT_TEXT(ID_IterText, ComponentDlg::OnIterText)
-//	EVT_COMMAND_SCROLL(ID_ThreshSldr, ComponentDlg::OnThreshSldr)
-//	EVT_TEXT(ID_ThreshText, ComponentDlg::OnThreshText)
-//	//distance field
-//	EVT_CHECKBOX(ID_UseDistFieldCheck, ComponentDlg::OnUseDistFieldCheck)
-//	EVT_COMMAND_SCROLL(ID_DistStrengthSldr, ComponentDlg::OnDistStrengthSldr)
-//	EVT_TEXT(ID_DistStrengthText, ComponentDlg::OnDistStrengthText)
-//	EVT_COMMAND_SCROLL(ID_DistFilterSizeSldr, ComponentDlg::OnDistFilterSizeSldr)
-//	EVT_TEXT(ID_DistFilterSizeText, ComponentDlg::OnDistFitlerSizeText)
-//	EVT_COMMAND_SCROLL(ID_MaxDistSldr, ComponentDlg::OnMaxDistSldr)
-//	EVT_TEXT(ID_MaxDistText, ComponentDlg::OnMaxDistText)
-//	EVT_COMMAND_SCROLL(ID_DistThreshSldr, ComponentDlg::OnDistThreshSldr)
-//	EVT_TEXT(ID_DistThreshText, ComponentDlg::OnDistThreshText)
-//	//diffusion
-//	EVT_CHECKBOX(ID_DiffCheck, ComponentDlg::OnDiffCheck)
-//	EVT_COMMAND_SCROLL(ID_FalloffSldr, ComponentDlg::OnFalloffSldr)
-//	EVT_TEXT(ID_FalloffText, ComponentDlg::OnFalloffText)
-//	EVT_CHECKBOX(ID_SizeCheck, ComponentDlg::OnSizeCheck)
-//	EVT_COMMAND_SCROLL(ID_SizeSldr, ComponentDlg::OnSizeSldr)
-//	EVT_TEXT(ID_SizeText, ComponentDlg::OnSizeText)
-//	//density
-//	EVT_CHECKBOX(ID_DensityCheck, ComponentDlg::OnDensityCheck)
-//	EVT_COMMAND_SCROLL(ID_DensitySldr, ComponentDlg::OnDensitySldr)
-//	EVT_TEXT(ID_DensityText, ComponentDlg::OnDensityText)
-//	EVT_COMMAND_SCROLL(ID_VarthSldr, ComponentDlg::OnVarthSldr)
-//	EVT_TEXT(ID_VarthText, ComponentDlg::OnVarthText)
-//	EVT_COMMAND_SCROLL(ID_DensityWindowSizeSldr, ComponentDlg::OnDensityWindowSizeSldr)
-//	EVT_TEXT(ID_DensityWindowsSizeText, ComponentDlg::OnDensityWindowSizeText)
-//	EVT_COMMAND_SCROLL(ID_DensityStatsSizeSldr, ComponentDlg::OnDensityStatsSizeSldr)
-//	EVT_TEXT(ID_DensityStatsSizeText, ComponentDlg::OnDensityStatsSizeText)
-//	//fixate
-//	EVT_CHECKBOX(ID_FixateCheck, ComponentDlg::OnFixateCheck)
-//	EVT_CHECKBOX(ID_GrowFixedCheck, ComponentDlg::OnGrowFixedCheck)
-//	EVT_BUTTON(ID_FixUpdateBtn, ComponentDlg::OnFixUpdateBtn)
-//	EVT_COMMAND_SCROLL(ID_FixSizeSldr, ComponentDlg::OnFixSizeSldr)
-//	EVT_TEXT(ID_FixSizeText, ComponentDlg::OnFixSizeText)
-//	//clean
-//	EVT_CHECKBOX(ID_CleanCheck, ComponentDlg::OnCleanCheck)
-//	EVT_BUTTON(ID_CleanBtn, ComponentDlg::OnCleanBtn)
-//	EVT_COMMAND_SCROLL(ID_CleanIterSldr, ComponentDlg::OnCleanIterSldr)
-//	EVT_TEXT(ID_CleanIterText, ComponentDlg::OnCleanIterText)
-//	EVT_COMMAND_SCROLL(ID_CleanLimitSldr, ComponentDlg::OnCleanLimitSldr)
-//	EVT_TEXT(ID_CleanLimitText, ComponentDlg::OnCleanLimitText)
-//	//record
-//	EVT_TOGGLEBUTTON(ID_RecordCmdBtn, ComponentDlg::OnRecordCmd)
-//	EVT_BUTTON(ID_PlayCmdBtn, ComponentDlg::OnPlayCmd)
-//	EVT_BUTTON(ID_ResetCmdBtn, ComponentDlg::OnResetCmd)
-//	EVT_BUTTON(ID_SaveCmdBtn, ComponentDlg::OnSaveCmd)
-//	EVT_BUTTON(ID_LoadCmdBtn, ComponentDlg::OnLoadCmd)
-//
-//	//clustering page
-//	EVT_RADIOBUTTON(ID_ClusterMethodExmaxRd, ComponentDlg::OnClusterMethodExmaxCheck)
-//	EVT_RADIOBUTTON(ID_ClusterMethodDbscanRd, ComponentDlg::OnClusterMethodDbscanCheck)
-//	EVT_RADIOBUTTON(ID_ClusterMethodKmeansRd, ComponentDlg::OnClusterMethodKmeansCheck)
-//	//parameters
-//	EVT_COMMAND_SCROLL(ID_ClusterClnumSldr, ComponentDlg::OnClusterClnumSldr)
-//	EVT_TEXT(ID_ClusterClnumText, ComponentDlg::OnClusterClnumText)
-//	EVT_COMMAND_SCROLL(ID_ClusterMaxIterSldr, ComponentDlg::OnClusterMaxiterSldr)
-//	EVT_TEXT(ID_ClusterMaxIterText, ComponentDlg::OnClusterMaxiterText)
-//	EVT_COMMAND_SCROLL(ID_ClusterTolSldr, ComponentDlg::OnClusterTolSldr)
-//	EVT_TEXT(ID_ClusterTolText, ComponentDlg::OnClusterTolText)
-//	EVT_COMMAND_SCROLL(ID_ClusterSizeSldr, ComponentDlg::OnClusterSizeSldr)
-//	EVT_TEXT(ID_ClusterSizeText, ComponentDlg::OnClusterSizeText)
-//	EVT_COMMAND_SCROLL(ID_ClusterEpsSldr, ComponentDlg::OnClusterEpsSldr)
-//	EVT_TEXT(ID_ClusterEpsText, ComponentDlg::OnClusterepsText)
-//
-//	//analysis page
-//	EVT_TEXT(ID_CompIdText, ComponentDlg::OnCompIdText)
-//	EVT_TEXT_ENTER(ID_CompIdText, ComponentDlg::OnCompFull)
-//	EVT_BUTTON(ID_CompIdXBtn, ComponentDlg::OnCompIdXBtn)
-//	EVT_CHECKBOX(ID_AnalysisMinCheck, ComponentDlg::OnAnalysisMinCheck)
-//	EVT_SPINCTRL(ID_AnalysisMinSpin, ComponentDlg::OnAnalysisMinSpin)
-//	EVT_TEXT(ID_AnalysisMinSpin, ComponentDlg::OnAnalysisMinText)
-//	EVT_CHECKBOX(ID_AnalysisMaxCheck, ComponentDlg::OnAnalysisMaxCheck)
-//	EVT_SPINCTRL(ID_AnalysisMaxSpin, ComponentDlg::OnAnalysisMaxSpin)
-//	EVT_TEXT(ID_AnalysisMaxSpin, ComponentDlg::OnAnalysisMaxText)
-//	EVT_BUTTON(ID_CompFullBtn, ComponentDlg::OnCompFull)
-//	EVT_BUTTON(ID_CompExclusiveBtn, ComponentDlg::OnCompExclusive)
-//	EVT_BUTTON(ID_CompAppendBtn, ComponentDlg::OnCompAppend)
-//	EVT_BUTTON(ID_CompAllBtn, ComponentDlg::OnCompAll)
-//	EVT_BUTTON(ID_CompClearBtn, ComponentDlg::OnCompClear)
-//	EVT_BUTTON(ID_ShuffleBtn, ComponentDlg::OnShuffle)
-//	//modify
-//	EVT_TEXT(ID_NewIdText, ComponentDlg::OnNewIDText)
-//	EVT_BUTTON(ID_NewIdXBtn, ComponentDlg::OnNewIDX)
-//	EVT_BUTTON(ID_CompNewBtn, ComponentDlg::OnCompNew)
-//	EVT_BUTTON(ID_CompAddBtn, ComponentDlg::OnCompAdd)
-//	EVT_BUTTON(ID_CompReplaceBtn, ComponentDlg::OnCompReplace)
-//	EVT_BUTTON(ID_CompCleanBkgBtn, ComponentDlg::OnCompCleanBkg)
-//	EVT_BUTTON(ID_CompCombineBtn, ComponentDlg::OnCompCombine)
-//	//options
-//	EVT_COMMAND_SCROLL(ID_ConSizeSldr, ComponentDlg::OnConSizeSldr)
-//	EVT_TEXT(ID_ConSizeText, ComponentDlg::OnConSizeText)
-//	EVT_CHECKBOX(ID_ConsistentCheck, ComponentDlg::OnConsistentCheck)
-//	EVT_CHECKBOX(ID_ColocalCheck, ComponentDlg::OnColocalCheck)
-//	//output
-//	EVT_RADIOBUTTON(ID_OutputMultiRb, ComponentDlg::OnOutputTypeRadio)
-//	EVT_RADIOBUTTON(ID_OutputRgbRb, ComponentDlg::OnOutputTypeRadio)
-//	EVT_BUTTON(ID_OutputRandomBtn, ComponentDlg::OnOutputChannels)
-//	EVT_BUTTON(ID_OutputSizeBtn, ComponentDlg::OnOutputChannels)
-//	EVT_BUTTON(ID_OutputIdBtn, ComponentDlg::OnOutputAnnotation)
-//	EVT_BUTTON(ID_OutputSnBtn, ComponentDlg::OnOutputAnnotation)
-//	//distance
-//	EVT_CHECKBOX(ID_DistNeighborCheck, ComponentDlg::OnDistNeighborCheck)
-//	EVT_CHECKBOX(ID_DistAllChanCheck, ComponentDlg::OnDistAllChanCheck)
-//	EVT_COMMAND_SCROLL(ID_DistNeighborSldr, ComponentDlg::OnDistNeighborSldr)
-//	EVT_TEXT(ID_DistNeighborText, ComponentDlg::OnDistNeighborText)
-//	EVT_BUTTON(ID_DistOutputBtn, ComponentDlg::OnDistOutput)
-//	//align
-//	EVT_BUTTON(ID_AlignXYZ, ComponentDlg::OnAlignPca)
-//	EVT_BUTTON(ID_AlignYXZ, ComponentDlg::OnAlignPca)
-//	EVT_BUTTON(ID_AlignZXY, ComponentDlg::OnAlignPca)
-//	EVT_BUTTON(ID_AlignXZY, ComponentDlg::OnAlignPca)
-//	EVT_BUTTON(ID_AlignYZX, ComponentDlg::OnAlignPca)
-//	EVT_BUTTON(ID_AlignZYX, ComponentDlg::OnAlignPca)
-//
-//	//execute
-//	EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, ComponentDlg::OnNotebook)
-//	EVT_CHECKBOX(ID_UseSelChk, ComponentDlg::OnUseSelChk)
-//	EVT_CHECKBOX(ID_UseMlChk, ComponentDlg::OnUseMlChk)
-//	EVT_BUTTON(ID_GenerateBtn, ComponentDlg::OnGenerate)
-//	EVT_TOGGLEBUTTON(ID_AutoUpdateBtn, ComponentDlg::OnAutoUpdate)
-//	EVT_BUTTON(ID_ClusterBtn, ComponentDlg::OnCluster)
-//	EVT_BUTTON(ID_AnalyzeBtn, ComponentDlg::OnAnalyze)
-//	EVT_BUTTON(ID_AnalyzeSelBtn, ComponentDlg::OnAnalyzeSel)
-//	//output
-//	EVT_BUTTON(ID_IncludeBtn, ComponentDlg::OnIncludeBtn)
-//	EVT_BUTTON(ID_ExcludeBtn, ComponentDlg::OnExcludeBtn)
-//	EVT_CHECKBOX(ID_HistoryChk, ComponentDlg::OnHistoryChk)
-//	EVT_BUTTON(ID_ClearHistBtn, ComponentDlg::OnClearHistBtn)
-//	//EVT_KEY_DOWN(ComponentDlg::OnKeyDown)
-//	EVT_GRID_SELECT_CELL(ComponentDlg::OnSelectCell)
-//	EVT_GRID_RANGE_SELECT(ComponentDlg::OnRangeSelect)
-//	EVT_GRID_LABEL_LEFT_CLICK(ComponentDlg::OnGridLabelClick)
-//	//split
-//	EVT_SPLITTER_DCLICK(wxID_ANY, ComponentDlg::OnSplitterDclick)
-//END_EVENT_TABLE()
-
 ComponentDlg::ComponentDlg(MainFrame *frame)
 	: PropPanel(frame, frame,
 		wxDefaultPosition,
 		frame->FromDIP(wxSize(600, 800)),
 		0, "ComponentDlg"),
-	m_hold_history(false),
-	m_cell_new_id(0),
-	m_cell_new_id_empty(true)
+	m_hold_history(false)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -212,7 +64,7 @@ ComponentDlg::ComponentDlg(MainFrame *frame)
 	panel_top = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
 	wxBoxSizer* sizerT = new wxBoxSizer(wxHORIZONTAL);
 	//notebook
-	m_notebook = new wxNotebook(panel_top, ID_Notebook);
+	m_notebook = new wxNotebook(panel_top, wxID_ANY);
 	m_notebook->AddPage(CreateCompGenPage(m_notebook), "Generate");
 	m_notebook->AddPage(CreateClusteringPage(m_notebook), "Cluster");
 	m_notebook->AddPage(CreateAnalysisPage(m_notebook), "Analysis");
@@ -221,22 +73,30 @@ ComponentDlg::ComponentDlg(MainFrame *frame)
 
 	panel_bot = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	m_shuffle_btn = new wxButton(panel_bot, ID_ShuffleBtn, "Shuffle",
+	m_shuffle_btn = new wxButton(panel_bot, wxID_ANY, "Shuffle",
 		wxDefaultPosition, wxDefaultSize);
-	m_use_sel_chk = new wxCheckBox(panel_bot, ID_UseSelChk, "Use Paint",
+	m_use_sel_chk = new wxCheckBox(panel_bot, wxID_ANY, "Use Paint",
 		wxDefaultPosition, wxDefaultSize);
-	m_use_ml_chk = new wxCheckBox(panel_bot, ID_UseMlChk, "Use M.L.",
+	m_use_ml_chk = new wxCheckBox(panel_bot, wxID_ANY, "Use M.L.",
 		wxDefaultPosition, wxDefaultSize);
-	m_generate_btn = new wxButton(panel_bot, ID_GenerateBtn, "Generate",
+	m_generate_btn = new wxButton(panel_bot, wxID_ANY, "Generate",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)));
-	m_auto_update_btn = new wxToggleButton(panel_bot, ID_AutoUpdateBtn, "Auto Update",
+	m_auto_update_btn = new wxToggleButton(panel_bot, wxID_ANY, "Auto Update",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)));
-	m_cluster_btn = new wxButton(panel_bot, ID_ClusterBtn, "Cluster",
+	m_cluster_btn = new wxButton(panel_bot, wxID_ANY, "Cluster",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)));
-	m_analyze_btn = new wxButton(panel_bot, ID_AnalyzeBtn, "Analyze",
+	m_analyze_btn = new wxButton(panel_bot, wxID_ANY, "Analyze",
 		wxDefaultPosition, wxDefaultSize);
-	m_analyze_sel_btn = new wxButton(panel_bot, ID_AnalyzeSelBtn, "Analyze Paint",
+	m_analyze_sel_btn = new wxButton(panel_bot, wxID_ANY, "Analyze Paint",
 		wxDefaultPosition, wxDefaultSize);
+	m_shuffle_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnShuffle, this);
+	m_use_sel_chk->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnUseSelChk, this);
+	m_use_ml_chk->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnUseMlChk, this);
+	m_generate_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnGenerate, this);
+	m_auto_update_btn->Bind(wxEVT_TOGGLEBUTTON, &ComponentDlg::OnAutoUpdate, this);
+	m_cluster_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnCluster, this);
+	m_analyze_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnAnalyze, this);
+	m_analyze_sel_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnAnalyzeSel, this);
 	sizer1->Add(m_shuffle_btn, 0, wxALIGN_CENTER);
 	sizer1->AddStretchSpacer();
 	sizer1->Add(m_use_ml_chk, 0, wxALIGN_CENTER);
@@ -253,14 +113,18 @@ ComponentDlg::ComponentDlg(MainFrame *frame)
 		new wxStaticBox(panel_bot, wxID_ANY, "Output"),
 		wxVERTICAL);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_include_btn = new wxButton(panel_bot, ID_IncludeBtn,
+	m_include_btn = new wxButton(panel_bot, wxID_ANY,
 		"Include", wxDefaultPosition, wxDefaultSize);
-	m_exclude_btn = new wxButton(panel_bot, ID_ExcludeBtn,
+	m_exclude_btn = new wxButton(panel_bot, wxID_ANY,
 		"Exclude", wxDefaultPosition, wxDefaultSize);
-	m_history_chk = new wxCheckBox(panel_bot, ID_HistoryChk,
+	m_history_chk = new wxCheckBox(panel_bot, wxID_ANY,
 		"Hold History", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	m_clear_hist_btn = new wxButton(panel_bot, ID_ClearHistBtn,
+	m_clear_hist_btn = new wxButton(panel_bot, wxID_ANY,
 		"Clear History", wxDefaultPosition, wxDefaultSize);
+	m_include_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnIncludeBtn, this);
+	m_exclude_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnExcludeBtn, this);
+	m_history_chk->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnHistoryChk, this);
+	m_clear_hist_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnClearHistBtn, this);
 	sizer2_1->Add(m_include_btn, 0, wxALIGN_CENTER);
 	sizer2_1->Add(m_exclude_btn, 0, wxALIGN_CENTER);
 	sizer2_1->AddStretchSpacer(1);
@@ -268,11 +132,13 @@ ComponentDlg::ComponentDlg(MainFrame *frame)
 	sizer2_1->Add(5, 5);
 	sizer2_1->Add(m_clear_hist_btn, 0, wxALIGN_CENTER);
 	//grid
-	m_output_grid = new wxGrid(panel_bot, ID_OutputGrid);
+	m_output_grid = new wxGrid(panel_bot, wxID_ANY);
 	m_output_grid->CreateGrid(0, 1);
 	m_output_grid->Fit();
-	m_output_grid->Connect(wxID_ANY, wxEVT_KEY_DOWN,
-		wxKeyEventHandler(ComponentDlg::OnKeyDown), NULL, this);
+	m_output_grid->Bind(wxEVT_KEY_DOWN, &ComponentDlg::OnKeyDown, this);
+	m_output_grid->Bind(wxEVT_GRID_SELECT_CELL, &ComponentDlg::OnSelectCell, this);
+	m_output_grid->Bind(wxEVT_GRID_RANGE_SELECT, &ComponentDlg::OnRangeSelect, this);
+	m_output_grid->Bind(wxEVT_GRID_LABEL_LEFT_CLICK, &ComponentDlg::OnGridLabelClick, this);
 	sizer2->Add(5, 5);
 	sizer2->Add(sizer2_1, 0, wxEXPAND);
 	sizer2->Add(5, 5);
@@ -290,12 +156,14 @@ ComponentDlg::ComponentDlg(MainFrame *frame)
 
 	splittermain->SetSashGravity(0.0);
 	splittermain->SplitHorizontally(panel_top, panel_bot, 500);
+	Bind(wxEVT_SPLITTER_DOUBLECLICKED, &ComponentDlg::OnSplitterDclick, this);
+	Bind(wxEVT_NOTEBOOK_PAGE_CHANGED, &ComponentDlg::OnNotebook, this);
 
 	SetSizer(mainsizer);
 	panel_top->Layout();
 	panel_bot->Layout();
 
-	GetSettings();
+	//GetSettings();
 	//LoadTable();
 }
 
@@ -319,10 +187,12 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Iterations:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_iter_sldr = new wxSingleSlider(page, ID_IterSldr, 0, 0, 100,
+	m_iter_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_iter_text = new wxTextCtrl(page, ID_IterText, "0",
+	m_iter_text = new wxTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_iter_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnIterSldr, this);
+	m_iter_text->Bind(wxEVT_TEXT, &ComponentDlg::OnIterText, this);
 	sizer1->Add(2, 2);
 	sizer1->Add(st, 0, wxALIGN_CENTER);
 	sizer1->Add(m_iter_sldr, 1, wxEXPAND);
@@ -332,10 +202,12 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Threshold:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_thresh_sldr = new wxSingleSlider(page, ID_ThreshSldr, 0, 0, 1000,
+	m_thresh_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_thresh_text = new wxTextCtrl(page, ID_ThreshText, "0.000",
+	m_thresh_text = new wxTextCtrl(page, wxID_ANY, "0.000",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
+	m_thresh_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnThreshSldr, this);
+	m_thresh_text->Bind(wxEVT_TEXT, &ComponentDlg::OnThreshText, this);
 	sizer2->Add(2, 2);
 	sizer2->Add(st, 0, wxALIGN_CENTER);
 	sizer2->Add(m_thresh_sldr, 1, wxEXPAND);
@@ -343,62 +215,59 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer2->Add(2, 2);
 
 	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
-	m_diff_check = new wxCheckBox(page, ID_DiffCheck, "Enable Diffusion",
+	m_diff_check = new wxCheckBox(page, wxID_ANY, "Enable Diffusion",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	m_diff_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnDiffCheck, this);
 	sizer3->Add(2, 2);
 	sizer3->Add(m_diff_check, 0, wxALIGN_CENTER);
 
 	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Smoothness:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_falloff_sldr = new wxSingleSlider(page, ID_FalloffSldr, 0, 0, 1000,
+	m_falloff_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_falloff_text = new wxTextCtrl(page, ID_FalloffText, "0.000",
+	m_falloff_text = new wxTextCtrl(page, wxID_ANY, "0.000",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
+	m_falloff_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnFalloffSldr, this);
+	m_falloff_text->Bind(wxEVT_TEXT, &ComponentDlg::OnFalloffText, this);
 	sizer4->Add(2, 2);
 	sizer4->Add(st, 0, wxALIGN_CENTER);
 	sizer4->Add(m_falloff_sldr, 1, wxEXPAND);
 	sizer4->Add(m_falloff_text, 0, wxALIGN_CENTER);
 	sizer4->Add(2, 2);
 
-	//size not used
-	//m_size_check = new wxCheckBox(page, ID_SizeCheck, "Enable Size Limiter",
-	//	wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	//m_size_check->Hide();
-	//m_size_sldr = new wxSingleSlider(page, ID_SizeSldr, 100, 0, 500,
-	//	wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	//m_size_text = new wxTextCtrl(page, ID_SizeText, "100",
-	//	wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
-	//m_size_sldr->Hide();
-	//m_size_text->Hide();
-
 	//density
 	wxBoxSizer* sizer5 = new wxBoxSizer(wxHORIZONTAL);
-	m_density_check = new wxCheckBox(page, ID_DensityCheck, "Use Density Field",
+	m_density_check = new wxCheckBox(page, wxID_ANY, "Use Density Field",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	m_density_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnDensityCheck, this);
 	sizer5->Add(2, 2);
 	sizer5->Add(m_density_check, 0, wxALIGN_CENTER);
-	//
+
 	wxBoxSizer* sizer6 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Separation:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_density_sldr = new wxSingleSlider(page, ID_DensitySldr, 1000, 0, 10000,
+	m_density_sldr = new wxSingleSlider(page, wxID_ANY, 1000, 0, 10000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_density_text = new wxTextCtrl(page, ID_DensityText, "1.0",
+	m_density_text = new wxTextCtrl(page, wxID_ANY, "1.0",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
+	m_density_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDensitySldr, this);
+	m_density_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDensityText, this);
 	sizer6->Add(2, 2);
 	sizer6->Add(st, 0, wxALIGN_CENTER);
 	sizer6->Add(m_density_sldr, 1, wxEXPAND);
 	sizer6->Add(m_density_text, 0, wxALIGN_CENTER);
 	sizer6->Add(2, 2);
-	//
+
 	wxBoxSizer* sizer61 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Noise Level:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_varth_sldr = new wxSingleSlider(page, ID_VarthSldr, 0, 0, 1000,
+	m_varth_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_varth_text = new wxTextCtrl(page, ID_VarthText, "0.0",
+	m_varth_text = new wxTextCtrl(page, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
+	m_varth_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnVarthSldr, this);
+	m_varth_text->Bind(wxEVT_TEXT, &ComponentDlg::OnVarthText, this);
 	sizer61->Add(2, 2);
 	sizer61->Add(st, 0, wxALIGN_CENTER);
 	sizer61->Add(m_varth_sldr, 1, wxEXPAND);
@@ -408,10 +277,12 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	wxBoxSizer* sizer7 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Filter Size:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_density_window_size_sldr = new wxSingleSlider(page, ID_DensityWindowSizeSldr, 5, 1, 20,
+	m_density_window_size_sldr = new wxSingleSlider(page, wxID_ANY, 5, 1, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_density_window_size_text = new wxTextCtrl(page, ID_DensityWindowsSizeText, "5",
+	m_density_window_size_text = new wxTextCtrl(page, wxID_ANY, "5",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_density_window_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDensityWindowSizeSldr, this);
+	m_density_window_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDensityWindowSizeText, this);
 	sizer7->Add(2, 2);
 	sizer7->Add(st, 0, wxALIGN_CENTER);
 	sizer7->Add(m_density_window_size_sldr, 1, wxEXPAND);
@@ -421,10 +292,12 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	wxBoxSizer* sizer8 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Feature Size:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_density_stats_size_sldr = new wxSingleSlider(page, ID_DensityStatsSizeSldr, 15, 1, 100,
+	m_density_stats_size_sldr = new wxSingleSlider(page, wxID_ANY, 15, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_density_stats_size_text = new wxTextCtrl(page, ID_DensityStatsSizeText, "15",
+	m_density_stats_size_text = new wxTextCtrl(page, wxID_ANY, "15",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_density_stats_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDensityStatsSizeSldr, this);
+	m_density_stats_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDensityStatsSizeText, this);
 	sizer8->Add(2, 2);
 	sizer8->Add(st, 0, wxALIGN_CENTER);
 	sizer8->Add(m_density_stats_size_sldr, 1, wxEXPAND);
@@ -433,53 +306,66 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 
 	//distance field
 	wxBoxSizer* sizer9 = new wxBoxSizer(wxHORIZONTAL);
-	m_use_dist_field_check = new wxCheckBox(page, ID_UseDistFieldCheck, "Use Distance Field",
+	m_use_dist_field_check = new wxCheckBox(page, wxID_ANY, "Use Distance Field",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	m_use_dist_field_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnUseDistFieldCheck, this);
 	sizer9->Add(2, 2);
 	sizer9->Add(m_use_dist_field_check, 0, wxALIGN_CENTER);
+
 	wxBoxSizer* sizer10 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Strength:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_dist_strength_sldr = new wxSingleSlider(page, ID_DistStrengthSldr, 500, 0, 1000,
+	m_dist_strength_sldr = new wxSingleSlider(page, wxID_ANY, 500, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_dist_strength_text = new wxTextCtrl(page, ID_DistStrengthText, "0.5",
+	m_dist_strength_text = new wxTextCtrl(page, wxID_ANY, "0.5",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
+	m_dist_strength_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDistStrengthSldr, this);
+	m_dist_strength_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDistStrengthText, this);
 	sizer10->Add(2, 2);
 	sizer10->Add(st, 0, wxALIGN_CENTER);
 	sizer10->Add(m_dist_strength_sldr, 1, wxEXPAND);
 	sizer10->Add(m_dist_strength_text, 0, wxALIGN_CENTER);
 	sizer10->Add(2, 2);
+
 	wxBoxSizer* sizer11 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Perimeter Value:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_dist_thresh_sldr = new wxSingleSlider(page, ID_DistThreshSldr, 0, 0, 1000,
+	m_dist_thresh_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_dist_thresh_text = new wxTextCtrl(page, ID_DistThreshText, "0.000",
+	m_dist_thresh_text = new wxTextCtrl(page, wxID_ANY, "0.000",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
+	m_dist_thresh_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDistThreshSldr, this);
+	m_dist_thresh_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDistThreshText, this);
 	sizer11->Add(2, 2);
 	sizer11->Add(st, 0, wxALIGN_CENTER);
 	sizer11->Add(m_dist_thresh_sldr, 1, wxEXPAND);
 	sizer11->Add(m_dist_thresh_text, 0, wxALIGN_CENTER);
 	sizer11->Add(2, 2);
+
 	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Filter Size:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_dist_filter_size_sldr = new wxSingleSlider(page, ID_DistFilterSizeSldr, 3, 1, 20,
+	m_dist_filter_size_sldr = new wxSingleSlider(page, wxID_ANY, 3, 1, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_dist_filter_size_text = new wxTextCtrl(page, ID_DistFilterSizeText, "3",
+	m_dist_filter_size_text = new wxTextCtrl(page, wxID_ANY, "3",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_dist_filter_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDistFilterSizeSldr, this);
+	m_dist_filter_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDistFitlerSizeText, this);
 	sizer12->Add(2, 2);
 	sizer12->Add(st, 0, wxALIGN_CENTER);
 	sizer12->Add(m_dist_filter_size_sldr, 1, wxEXPAND);
 	sizer12->Add(m_dist_filter_size_text, 0, wxALIGN_CENTER);
 	sizer12->Add(2, 2);
+
 	wxBoxSizer* sizer13 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Feature Size:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_max_dist_sldr = new wxSingleSlider(page, ID_MaxDistSldr, 30, 1, 255,
+	m_max_dist_sldr = new wxSingleSlider(page, wxID_ANY, 30, 1, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_max_dist_text = new wxTextCtrl(page, ID_MaxDistText, "30",
+	m_max_dist_text = new wxTextCtrl(page, wxID_ANY, "30",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_max_dist_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnMaxDistSldr, this);
+	m_max_dist_text->Bind(wxEVT_TEXT, &ComponentDlg::OnMaxDistText, this);
 	sizer13->Add(2, 2);
 	sizer13->Add(st, 0, wxALIGN_CENTER);
 	sizer13->Add(m_max_dist_sldr, 1, wxEXPAND);
@@ -488,12 +374,15 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 
 	//fixate
 	wxBoxSizer* sizer14 = new wxBoxSizer(wxHORIZONTAL);
-	m_fixate_check = new wxCheckBox(page, ID_FixateCheck, "Fixate Grown Regions",
+	m_fixate_check = new wxCheckBox(page, wxID_ANY, "Fixate Grown Regions",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	m_grow_fixed_check = new wxCheckBox(page, ID_GrowFixedCheck, "Continue on Fixiated Regions",
+	m_grow_fixed_check = new wxCheckBox(page, wxID_ANY, "Continue on Fixiated Regions",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	m_fix_update_btn = new wxButton(page, ID_FixUpdateBtn, "Refix",
+	m_fix_update_btn = new wxButton(page, wxID_ANY, "Refix",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
+	m_fixate_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnFixateCheck, this);
+	m_grow_fixed_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnGrowFixedCheck, this);
+	m_fix_update_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnFixUpdateBtn, this);
 	sizer14->Add(2, 2);
 	sizer14->Add(m_fixate_check, 0, wxALIGN_CENTER);
 	sizer14->Add(2, 2);
@@ -501,13 +390,16 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer14->AddStretchSpacer(1);
 	sizer14->Add(m_fix_update_btn, 0, wxALIGN_CENTER);
 	sizer14->Add(2, 2);
+
 	wxBoxSizer* sizer15 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Stop Size:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_fix_size_sldr = new wxSingleSlider(page, ID_FixSizeSldr, 50, 1, 200,
+	m_fix_size_sldr = new wxSingleSlider(page, wxID_ANY, 50, 1, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_fix_size_text = new wxTextCtrl(page, ID_FixSizeText, "50",
+	m_fix_size_text = new wxTextCtrl(page, wxID_ANY, "50",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_fix_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnFixSizeSldr, this);
+	m_fix_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnFixSizeText, this);
 	sizer15->Add(2, 2);
 	sizer15->Add(st, 0, wxALIGN_CENTER);
 	sizer15->Add(m_fix_size_sldr, 1, wxEXPAND);
@@ -516,10 +408,12 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 
 	//clean
 	wxBoxSizer* sizer16 = new wxBoxSizer(wxHORIZONTAL);
-	m_clean_check = new wxCheckBox(page, ID_CleanCheck, "Clean Up",
+	m_clean_check = new wxCheckBox(page, wxID_ANY, "Clean Up",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	m_clean_btn = new wxButton(page, ID_CleanBtn, "Clean More",
+	m_clean_btn = new wxButton(page, wxID_ANY, "Clean More",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
+	m_clean_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnCleanCheck, this);
+	m_clean_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnCleanBtn, this);
 	sizer16->Add(2, 2);
 	sizer16->Add(m_clean_check, 0, wxALIGN_CENTER);
 	sizer16->AddStretchSpacer(1);
@@ -530,23 +424,28 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	wxBoxSizer* sizer17 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Iterations:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_clean_iter_sldr = new wxSingleSlider(page, ID_CleanIterSldr, 5, 1, 50,
+	m_clean_iter_sldr = new wxSingleSlider(page, wxID_ANY, 5, 1, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_clean_iter_text = new wxTextCtrl(page, ID_CleanIterText, "5",
+	m_clean_iter_text = new wxTextCtrl(page, wxID_ANY, "5",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_clean_iter_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnCleanIterSldr, this);
+	m_clean_iter_text->Bind(wxEVT_TEXT, &ComponentDlg::OnCleanIterText, this);
 	sizer17->Add(2, 2);
 	sizer17->Add(st, 0, wxALIGN_CENTER);
 	sizer17->Add(m_clean_iter_sldr, 1, wxEXPAND);
 	sizer17->Add(m_clean_iter_text, 0, wxALIGN_CENTER);
 	sizer17->Add(2, 2);
-	//iterations
+
+	//limit
 	wxBoxSizer* sizer18 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Stop Size:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_clean_limit_sldr = new wxSingleSlider(page, ID_CleanLimitSldr, 5, 1, 50,
+	m_clean_limit_sldr = new wxSingleSlider(page, wxID_ANY, 5, 1, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_clean_limit_text = new wxTextCtrl(page, ID_CleanLimitText, "5",
+	m_clean_limit_text = new wxTextCtrl(page, wxID_ANY, "5",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_clean_limit_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnCleanLimitSldr, this);
+	m_clean_limit_text->Bind(wxEVT_TEXT, &ComponentDlg::OnCleanLimitText, this);
 	sizer18->Add(2, 2);
 	sizer18->Add(st, 0, wxALIGN_CENTER);
 	sizer18->Add(m_clean_limit_sldr, 1, wxEXPAND);
@@ -557,14 +456,17 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	wxBoxSizer* sizer19 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Recorder:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_cmd_count_text = new wxTextCtrl(page, ID_CmdCountText, "",
+	m_cmd_count_text = new wxTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxTE_READONLY | wxTE_RIGHT);
-	m_record_cmd_btn = new wxToggleButton(page, ID_RecordCmdBtn, "Record",
+	m_record_cmd_btn = new wxToggleButton(page, wxID_ANY, "Record",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)));
-	m_play_cmd_btn = new wxButton(page, ID_PlayCmdBtn, "Play",
+	m_play_cmd_btn = new wxButton(page, wxID_ANY, "Play",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)));
-	m_reset_cmd_btn = new wxButton(page, ID_ResetCmdBtn, "Reset",
+	m_reset_cmd_btn = new wxButton(page, wxID_ANY, "Reset",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)));
+	m_record_cmd_btn->Bind(wxEVT_TOGGLEBUTTON, &ComponentDlg::OnRecordCmd, this);
+	m_play_cmd_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnPlayCmd, this);
+	m_reset_cmd_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnResetCmd, this);
 	sizer19->Add(2, 2);
 	sizer19->Add(st, 0, wxALIGN_CENTER);
 	sizer19->AddStretchSpacer();
@@ -573,15 +475,18 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer19->Add(m_play_cmd_btn, 0, wxALIGN_CENTER);
 	sizer19->Add(m_reset_cmd_btn, 0, wxALIGN_CENTER);
 	sizer19->Add(2, 2);
+
 	wxBoxSizer* sizer20 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Save File:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_cmd_file_text = new wxTextCtrl(page, ID_CmdFileText, "",
+	m_cmd_file_text = new wxTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize);
-	m_load_cmd_btn = new wxButton(page, ID_LoadCmdBtn, "Load",
+	m_load_cmd_btn = new wxButton(page, wxID_ANY, "Load",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)));
-	m_save_cmd_btn = new wxButton(page, ID_SaveCmdBtn, "Save",
+	m_save_cmd_btn = new wxButton(page, wxID_ANY, "Save",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)));
+	m_load_cmd_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnLoadCmd, this);
+	m_save_cmd_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnSaveCmd, this);
 	sizer20->Add(2, 2);
 	sizer20->Add(st, 0, wxALIGN_CENTER);
 	sizer20->Add(m_cmd_file_text, 1, wxALIGN_CENTER);
@@ -680,6 +585,7 @@ wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 		"DBSCAN", wxDefaultPosition, wxDefaultSize);
 	m_cluster_method_kmeans_rd = new wxRadioButton(page, ID_ClusterMethodKmeansRd,
 		"K-Means", wxDefaultPosition, wxDefaultSize);
+	m_cluster_method_exmax_rd->Bind(wxEVT_RADIOBUTTON, &ComponentDlg::OnClusterMethodCheck, this);
 	sizer11->Add(5, 5);
 	sizer11->Add(st, 0, wxALIGN_CENTER);
 	sizer11->Add(m_cluster_method_kmeans_rd, 0, wxALIGN_CENTER);
@@ -700,10 +606,12 @@ wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 	wxBoxSizer *sizer21 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Cluster Number:",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
-	m_cluster_clnum_sldr = new wxSingleSlider(page, ID_ClusterClnumSldr, 2, 2, 10,
+	m_cluster_clnum_sldr = new wxSingleSlider(page, wxID_ANY, 2, 2, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cluster_clnum_text = new wxTextCtrl(page, ID_ClusterClnumText, "2",
+	m_cluster_clnum_text = new wxTextCtrl(page, wxID_ANY, "2",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_cluster_clnum_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnClusterClnumSldr, this);
+	m_cluster_clnum_text->Bind(wxEVT_TEXT, &ComponentDlg::OnClusterClnumText, this);
 	sizer21->Add(5, 5);
 	sizer21->Add(st, 0, wxALIGN_CENTER);
 	sizer21->Add(m_cluster_clnum_sldr, 1, wxEXPAND);
@@ -713,10 +621,12 @@ wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 	wxBoxSizer *sizer22 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Max Iterations:",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
-	m_cluster_maxiter_sldr = new wxSingleSlider(page, ID_ClusterMaxIterSldr, 200, 1, 1000,
+	m_cluster_maxiter_sldr = new wxSingleSlider(page, wxID_ANY, 200, 1, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cluster_maxiter_text = new wxTextCtrl(page, ID_ClusterMaxIterText, "200",
+	m_cluster_maxiter_text = new wxTextCtrl(page, wxID_ANY, "200",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_cluster_maxiter_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnClusterMaxiterSldr, this);
+	m_cluster_maxiter_text->Bind(wxEVT_TEXT, &ComponentDlg::OnClusterMaxiterText, this);
 	sizer22->Add(5, 5);
 	sizer22->Add(st, 0, wxALIGN_CENTER);
 	sizer22->Add(m_cluster_maxiter_sldr, 1, wxEXPAND);
@@ -726,10 +636,12 @@ wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 	wxBoxSizer *sizer23 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Tolerance:",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
-	m_cluster_tol_sldr = new wxSingleSlider(page, ID_ClusterTolSldr, 0.90, 1, 100,
+	m_cluster_tol_sldr = new wxSingleSlider(page, wxID_ANY, 0.90, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cluster_tol_text = new wxTextCtrl(page, ID_ClusterTolText, "0.90",
+	m_cluster_tol_text = new wxTextCtrl(page, wxID_ANY, "0.90",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp2);
+	m_cluster_tol_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnClusterTolSldr, this);
+	m_cluster_tol_text->Bind(wxEVT_TEXT, &ComponentDlg::OnClusterTolText, this);
 	sizer23->Add(5, 5);
 	sizer23->Add(st, 0, wxALIGN_CENTER);
 	sizer23->Add(m_cluster_tol_sldr, 1, wxEXPAND);
@@ -739,10 +651,12 @@ wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 	wxBoxSizer *sizer24 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Min. Size:",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
-	m_cluster_size_sldr = new wxSingleSlider(page, ID_ClusterSizeSldr, 60, 1, 100,
+	m_cluster_size_sldr = new wxSingleSlider(page, wxID_ANY, 60, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cluster_size_text = new wxTextCtrl(page, ID_ClusterSizeText, "60",
+	m_cluster_size_text = new wxTextCtrl(page, wxID_ANY, "60",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_cluster_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnClusterSizeSldr, this);
+	m_cluster_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnClusterSizeText, this);
 	sizer24->Add(5, 5);
 	sizer24->Add(st, 0, wxALIGN_CENTER);
 	sizer24->Add(m_cluster_size_sldr, 1, wxEXPAND);
@@ -752,10 +666,12 @@ wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 	wxBoxSizer *sizer25 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Neighborhood:",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
-	m_cluster_eps_sldr = new wxSingleSlider(page, ID_ClusterEpsSldr, 25, 5, 100,
+	m_cluster_eps_sldr = new wxSingleSlider(page, wxID_ANY, 25, 5, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cluster_eps_text = new wxTextCtrl(page, ID_ClusterEpsText, "2.5",
+	m_cluster_eps_text = new wxTextCtrl(page, wxID_ANY, "2.5",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp1);
+	m_cluster_eps_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnClusterEpsSldr, this);
+	m_cluster_eps_text->Bind(wxEVT_TEXT, &ComponentDlg::OnClusterepsText, this);
 	sizer25->Add(5, 5);
 	sizer25->Add(st, 0, wxALIGN_CENTER);
 	sizer25->Add(m_cluster_eps_sldr, 1, wxEXPAND);
@@ -816,21 +732,30 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	wxBoxSizer* sizer11 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "ID:",
 		wxDefaultPosition, wxDefaultSize);
-	m_comp_id_text = new wxTextCtrl(page, ID_CompIdText, "",
+	m_comp_id_text = new wxTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(80, 23)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
-	m_comp_id_x_btn = new wxButton(page, ID_CompIdXBtn, "X",
+	m_comp_id_x_btn = new wxButton(page, wxID_ANY, "X",
 		wxDefaultPosition, FromDIP(wxSize(23, 23)));
 	//size limiters
-	m_analysis_min_check = new wxCheckBox(page, ID_AnalysisMinCheck, "Min:",
+	m_analysis_min_check = new wxCheckBox(page, wxID_ANY, "Min:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-	m_analysis_min_spin = new wxSpinCtrl(page, ID_AnalysisMinSpin, "0",
+	m_analysis_min_spin = new wxSpinCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(80, 23)), wxSP_ARROW_KEYS, 0,
 		std::numeric_limits<int>::max(), 0);
-	m_analysis_max_check = new wxCheckBox(page, ID_AnalysisMaxCheck, "Max:",
+	m_analysis_max_check = new wxCheckBox(page, wxID_ANY, "Max:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-	m_analysis_max_spin = new wxSpinCtrl(page, ID_AnalysisMaxSpin, "100",
+	m_analysis_max_spin = new wxSpinCtrl(page, wxID_ANY, "100",
 		wxDefaultPosition, FromDIP(wxSize(80, 23)), wxSP_ARROW_KEYS, 0,
 		std::numeric_limits<int>::max(), 100);
+	m_comp_id_text->Bind(wxEVT_TEXT, &ComponentDlg::OnCompIdText, this);
+	m_comp_id_text->Bind(wxEVT_TEXT_ENTER, &ComponentDlg::OnCompFull, this);
+	m_comp_id_x_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnCompIdXBtn, this);
+	m_analysis_min_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnAnalysisMinCheck, this);
+	m_analysis_min_spin->Bind(wxEVT_SPINCTRL, &ComponentDlg::OnAnalysisMinSpin, this);
+	m_analysis_min_spin->Bind(wxEVT_TEXT, &ComponentDlg::OnAnalysisMinText, this);
+	m_analysis_max_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnAnalysisMaxCheck, this);
+	m_analysis_max_spin->Bind(wxEVT_SPINCTRL, &ComponentDlg::OnAnalysisMaxSpin, this);
+	m_analysis_max_spin->Bind(wxEVT_TEXT, &ComponentDlg::OnAnalysisMaxText, this);
 	sizer11->Add(5, 5);
 	sizer11->Add(st, 0, wxALIGN_CENTER);
 	sizer11->Add(m_comp_id_text, 0, wxALIGN_CENTER);
@@ -845,16 +770,21 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer11->Add(m_analysis_max_spin, 0, wxALIGN_CENTER);
 	//buttons
 	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
-	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Append",
+	m_comp_append_btn = new wxButton(page, wxID_ANY, "Append",
 		wxDefaultPosition, wxDefaultSize);
-	m_comp_exclusive_btn = new wxButton(page, ID_CompExclusiveBtn, "Exclusive",
+	m_comp_exclusive_btn = new wxButton(page, wxID_ANY, "Exclusive",
 		wxDefaultPosition, wxDefaultSize);
-	m_comp_all_btn = new wxButton(page, ID_CompAllBtn, "AllVox",
+	m_comp_all_btn = new wxButton(page, wxID_ANY, "AllVox",
 		wxDefaultPosition, wxDefaultSize);
-	m_comp_full_btn = new wxButton(page, ID_CompFullBtn, "Fulfill",
+	m_comp_full_btn = new wxButton(page, wxID_ANY, "Fulfill",
 		wxDefaultPosition, wxDefaultSize);
-	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
+	m_comp_clear_btn = new wxButton(page, wxID_ANY, "Clear",
 		wxDefaultPosition, wxDefaultSize);
+	m_comp_append_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnCompAppend, this);
+	m_comp_exclusive_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnCompExclusive, this);
+	m_comp_all_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnCompAll, this);
+	m_comp_full_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnCompFull, this);
+	m_comp_clear_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnCompClear, this);
 	sizer12->Add(5, 5);
 	sizer12->Add(m_comp_append_btn, 1, wxEXPAND);
 	sizer12->Add(m_comp_exclusive_btn, 1, wxEXPAND);
@@ -876,26 +806,33 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	wxBoxSizer* sizer21 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "ID:",
 		wxDefaultPosition, wxDefaultSize);
-	m_new_id_text = new wxTextCtrl(page, ID_NewIdText, "",
+	m_new_id_text = new wxTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(80, 23)), wxTE_RIGHT);
-	m_new_id_x_btn = new wxButton(page, ID_NewIdXBtn, "X",
+	m_new_id_x_btn = new wxButton(page, wxID_ANY, "X",
 		wxDefaultPosition, FromDIP(wxSize(23, 23)));
+	m_new_id_text->Bind(wxEVT_TEXT, &ComponentDlg::OnNewIDText, this);
+	m_new_id_x_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnNewIDX, this);
 	sizer21->Add(5, 5);
 	sizer21->Add(st, 0, wxALIGN_CENTER);
 	sizer21->Add(m_new_id_text, 0, wxALIGN_CENTER);
 	sizer21->Add(m_new_id_x_btn, 0, wxALIGN_CENTER);
 	//buttons
 	wxBoxSizer* sizer22 = new wxBoxSizer(wxHORIZONTAL);
-	m_comp_new_btn = new wxButton(page, ID_CompNewBtn, "Assign",
+	m_comp_new_btn = new wxButton(page, wxID_ANY, "Assign",
 		wxDefaultPosition, wxDefaultSize);
-	m_comp_add_btn = new wxButton(page, ID_CompAddBtn, "Add",
+	m_comp_add_btn = new wxButton(page, wxID_ANY, "Add",
 		wxDefaultPosition, wxDefaultSize);
-	m_comp_replace_btn = new wxButton(page, ID_CompReplaceBtn, "Replace",
+	m_comp_replace_btn = new wxButton(page, wxID_ANY, "Replace",
 		wxDefaultPosition, wxDefaultSize);
-	m_comp_clean_bkg_btn = new wxButton(page, ID_CompCleanBkgBtn, "Clear Paint",
+	m_comp_clean_bkg_btn = new wxButton(page, wxID_ANY, "Clear Paint",
 		wxDefaultPosition, wxDefaultSize);
-	m_comp_combine_btn = new wxButton(page, ID_CompCombineBtn, "Combine",
+	m_comp_combine_btn = new wxButton(page, wxID_ANY, "Combine",
 		wxDefaultPosition, wxDefaultSize);
+	m_comp_new_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnCompNew, this);
+	m_comp_add_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnCompAdd, this);
+	m_comp_replace_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnCompReplace, this);
+	m_comp_clean_bkg_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnCompCleanBkg, this);
+	m_comp_combine_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnCompCombine, this);
 	sizer22->Add(5, 5);
 	sizer22->Add(m_comp_new_btn, 1, wxEXPAND);
 	sizer22->Add(m_comp_add_btn, 1, wxEXPAND);
@@ -917,10 +854,12 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	wxBoxSizer *sizer31 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Contact Size:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_con_size_sldr = new wxSingleSlider(page, ID_ConSizeSldr, 5, 0, 100,
+	m_con_size_sldr = new wxSingleSlider(page, wxID_ANY, 5, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_con_size_text = new wxTextCtrl(page, ID_ConSizeText, "5",
+	m_con_size_text = new wxTextCtrl(page, wxID_ANY, "5",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_con_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnConSizeSldr, this);
+	m_con_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnConSizeText, this);
 	sizer31->Add(5, 5);
 	sizer31->Add(st, 0, wxALIGN_CENTER);
 	sizer31->Add(5, 5);
@@ -929,13 +868,15 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer31->Add(m_con_size_text, 0, wxALIGN_CENTER);
 	sizer31->Add(5, 5);
 	wxBoxSizer *sizer32 = new wxBoxSizer(wxHORIZONTAL);
-	m_consistent_check = new wxCheckBox(page, ID_ConsistentCheck, "Make color consistent for multiple bricks",
+	m_consistent_check = new wxCheckBox(page, wxID_ANY, "Make color consistent for multiple bricks",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	sizer32->Add(5, 5);
 	sizer32->Add(m_consistent_check, 0, wxALIGN_CENTER);
 	wxBoxSizer *sizer33 = new wxBoxSizer(wxHORIZONTAL);
-	m_colocal_check = new wxCheckBox(page, ID_ColocalCheck, "Compute colocalization with other channels",
+	m_colocal_check = new wxCheckBox(page, wxID_ANY, "Compute colocalization with other channels",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	m_consistent_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnConsistentCheck, this);
+	m_colocal_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnColocalCheck, this);
 	sizer33->Add(5, 5);
 	sizer33->Add(m_colocal_check, 0, wxALIGN_CENTER);
 	//
@@ -959,6 +900,8 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 	m_output_rgb_rb = new wxRadioButton(page, ID_OutputRgbRb, "R+G+B",
 		wxDefaultPosition, wxDefaultSize);
+	m_output_multi_rb->Bind(wxEVT_RADIOBUTTON, &ComponentDlg::OnOutputTypeRadio, this);
+	m_output_rgb_rb->Bind(wxEVT_RADIOBUTTON, &ComponentDlg::OnOutputTypeRadio, this);
 	sizer41->Add(5, 5);
 	sizer41->Add(st, 0, wxALIGN_CENTER);
 	sizer41->Add(m_output_multi_rb, 0, wxALIGN_CENTER);
@@ -977,6 +920,10 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(65, 23)));
 	m_output_sn_btn = new wxButton(page, ID_OutputSnBtn, "Serial No.",
 		wxDefaultPosition, FromDIP(wxSize(75, 23)));
+	m_output_random_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputChannels, this);
+	m_output_size_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputChannels, this);
+	m_output_id_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputAnnotation, this);
+	m_output_sn_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputAnnotation, this);
 	sizer42->Add(5, 5);
 	sizer42->Add(st, 0, wxALIGN_CENTER);
 	sizer42->Add(m_output_random_btn, 1, wxEXPAND);
@@ -995,12 +942,15 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		new wxStaticBox(page, wxID_ANY, "Distances"),
 		wxVERTICAL);
 	wxBoxSizer *sizer51 = new wxBoxSizer(wxHORIZONTAL);
-	m_dist_neighbor_check = new wxCheckBox(page, ID_DistNeighborCheck, "Filter Nearest Neighbors",
+	m_dist_neighbor_check = new wxCheckBox(page, wxID_ANY, "Filter Nearest Neighbors",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	m_dist_all_chan_check = new wxCheckBox(page, ID_DistAllChanCheck, "All Channel Results",
+	m_dist_all_chan_check = new wxCheckBox(page, wxID_ANY, "All Channel Results",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	m_dist_output_btn = new wxButton(page, ID_DistOutputBtn, "Compute",
+	m_dist_output_btn = new wxButton(page, wxID_ANY, "Compute",
 		wxDefaultPosition, wxDefaultSize);
+	m_dist_neighbor_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnDistNeighborCheck, this);
+	m_dist_all_chan_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnDistAllChanCheck, this);
+	m_dist_output_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnDistOutput, this);
 	sizer51->Add(5, 5);
 	sizer51->Add(m_dist_neighbor_check, 0, wxALIGN_CENTER);
 	sizer51->Add(5, 5);
@@ -1009,10 +959,12 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer51->Add(m_dist_output_btn, 0, wxALIGN_CENTER);
 	sizer51->Add(5, 5);
 	wxBoxSizer *sizer52 = new wxBoxSizer(wxHORIZONTAL);
-	m_dist_neighbor_sldr = new wxSingleSlider(page, ID_DistNeighborSldr, 1, 1, 20,
+	m_dist_neighbor_sldr = new wxSingleSlider(page, wxID_ANY, 1, 1, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_dist_neighbor_text = new wxTextCtrl(page, ID_DistNeighborText, "1",
+	m_dist_neighbor_text = new wxTextCtrl(page, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_dist_neighbor_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDistNeighborSldr, this);
+	m_dist_neighbor_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDistNeighborText, this);
 	sizer52->Add(5, 5);
 	sizer52->Add(m_dist_neighbor_sldr, 1, wxEXPAND);
 	sizer52->Add(5, 5);
@@ -1030,8 +982,9 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		new wxStaticBox(page, wxID_ANY, "Align Render View to Analyzed Components"),
 		wxVERTICAL);
 	wxBoxSizer* sizer61 = new wxBoxSizer(wxHORIZONTAL);
-	m_align_center = new wxCheckBox(page, ID_AlignCenter,
+	m_align_center = new wxCheckBox(page, wxID_ANY,
 		"Move to Center", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	m_align_center->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnAlignCenterChk, this);
 	sizer61->Add(5, 5);
 	sizer61->Add(m_align_center, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer62 = new wxBoxSizer(wxHORIZONTAL);
@@ -1049,6 +1002,12 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_zyx = new wxButton(page, ID_AlignZYX, "ZYX",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
+	m_align_xyz->Bind(wxEVT_BUTTON, &ComponentDlg::OnAlignPca, this);
+	m_align_yxz->Bind(wxEVT_BUTTON, &ComponentDlg::OnAlignPca, this);
+	m_align_zxy->Bind(wxEVT_BUTTON, &ComponentDlg::OnAlignPca, this);
+	m_align_xzy->Bind(wxEVT_BUTTON, &ComponentDlg::OnAlignPca, this);
+	m_align_yzx->Bind(wxEVT_BUTTON, &ComponentDlg::OnAlignPca, this);
+	m_align_zyx->Bind(wxEVT_BUTTON, &ComponentDlg::OnAlignPca, this);
 	sizer62->Add(5, 5);
 	sizer62->Add(st, 0, wxALIGN_CENTER);
 	sizer62->Add(m_align_xyz, 1, wxEXPAND);
@@ -1314,12 +1273,12 @@ void ComponentDlg::EnableUseDistField(bool value)
 	m_dist_thresh_text->Enable(value);
 }
 
-void ComponentDlg::EnableDiff(bool value)
-{
-	glbin_comp_def.m_diff = value;
-	m_falloff_sldr->Enable(value);
-	m_falloff_text->Enable(value);
-}
+//void ComponentDlg::EnableDiff(bool value)
+//{
+//	glbin_comp_def.m_diff = value;
+//	m_falloff_sldr->Enable(value);
+//	m_falloff_text->Enable(value);
+//}
 
 void ComponentDlg::OnDistStrengthSldr(wxScrollEvent &event)
 {
@@ -1910,22 +1869,18 @@ void ComponentDlg::OnClusterepsText(wxCommandEvent &event)
 //analysis page
 void ComponentDlg::OnCompIdText(wxCommandEvent &event)
 {
-	int shuffle = 0;
-	if (m_view && m_view->m_cur_vol)
-		shuffle = m_view->m_cur_vol->GetShuffle();
-	wxString str = m_comp_id_text->GetValue();
 	unsigned long id;
-	wxColor color(255, 255, 255);
+	wxColor color;
+	wxString str = m_comp_id_text->GetValue();
 	if (str.ToULong(&id))
 	{
-		if (!id)
-			color = wxColor(24, 167, 181);
-		else
-		{
-			fluo::Color c(id, shuffle);
-			color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
-		}
+		glbin_comp_editor.SetVolume(glbin_current.vol_data);
+		glbin_comp_editor.SetId(id, false);
 	}
+	else
+		glbin_comp_editor.SetId(0, true);
+
+	color = glbin_comp_editor.GetWxColor();
 	m_comp_id_text->SetBackgroundColour(color);
 	m_comp_id_text->Refresh();
 }
@@ -1990,9 +1945,6 @@ void ComponentDlg::OnCompFull(wxCommandEvent &event)
 
 void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-
 	wxString str;
 	std::string sstr;
 	//get id
@@ -2004,7 +1956,7 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 	if (GetIds(sstr, id, brick_id))
 	{
 		//get current mask
-		glbin_comp_selector.SetVolume(m_view->m_cur_vol);
+		glbin_comp_selector.SetVolume(glbin_current.vol_data);
 		glbin_comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
 
 		//cell size filter
@@ -2014,10 +1966,9 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 		use = m_analysis_max_check->GetValue();
 		num = (unsigned int)(m_analysis_max_spin->GetValue());
 		glbin_comp_selector.SetMaxNum(use, num);
-		glbin_comp_selector.SetAnalyzer(&glbin_comp_analyzer);
 		glbin_comp_selector.Exclusive();
 
-		m_view->RefreshGL(39);
+		FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 
 		//frame
 		//if (m_frame)
@@ -2037,9 +1988,6 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 
 void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-
 	wxString str;
 	std::string sstr;
 	//get id
@@ -2051,7 +1999,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	get_all = !get_all;
 
 	//get current mask
-	glbin_comp_selector.SetVolume(m_view->m_cur_vol);
+	glbin_comp_selector.SetVolume(glbin_current.vol_data);
 	glbin_comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
 
 	//cell size filter
@@ -2061,10 +2009,9 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	use = m_analysis_max_check->GetValue();
 	num = (unsigned int)(m_analysis_max_spin->GetValue());
 	glbin_comp_selector.SetMaxNum(use, num);
-	glbin_comp_selector.SetAnalyzer(&glbin_comp_analyzer);
 	glbin_comp_selector.Select(get_all);
 
-	m_view->RefreshGL(39);
+	FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 
 	//frame
 	//if (m_frame)
@@ -2083,14 +2030,11 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 
 void ComponentDlg::OnCompAll(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-
 	//get current vd
-	glbin_comp_selector.SetVolume(m_view->m_cur_vol);
+	glbin_comp_selector.SetVolume(glbin_current.vol_data);
 	glbin_comp_selector.All();
 
-	m_view->RefreshGL(39);
+	FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 
 	//frame
 	//if (m_frame)
@@ -2109,14 +2053,11 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 
 void ComponentDlg::OnCompClear(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-
 	//get current vd
-	glbin_comp_selector.SetVolume(m_view->m_cur_vol);
+	glbin_comp_selector.SetVolume(glbin_current.vol_data);
 	glbin_comp_selector.Clear();
 
-	m_view->RefreshGL(39);
+	FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 
 	//frame
 	//if (m_frame && m_frame->GetBrushToolDlg())
@@ -2125,45 +2066,31 @@ void ComponentDlg::OnCompClear(wxCommandEvent &event)
 
 void ComponentDlg::OnShuffle(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-
 	//get current vd
-	VolumeData* vd = m_view->m_cur_vol;
+	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return;
 
 	vd->IncShuffle();
-	m_view->RefreshGL(39);
+	FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 //modify
 void ComponentDlg::OnNewIDText(wxCommandEvent &event)
 {
-	int shuffle = 0;
-	if (m_view && m_view->m_cur_vol)
-		shuffle = m_view->m_cur_vol->GetShuffle();
-	wxString str = m_new_id_text->GetValue();
 	unsigned long id;
-	wxColor color(255, 255, 255);
+	wxColor color;
+	wxString str = m_new_id_text->GetValue();
 	if (str.ToULong(&id))
 	{
-		if (!id)
-			color = wxColor(24, 167, 181);
-		else
-		{
-			fluo::Color c(id, shuffle);
-			color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
-		}
-		m_new_id_text->SetBackgroundColour(color);
-		m_cell_new_id = id;
-		m_cell_new_id_empty = false;
+		glbin_comp_editor.SetVolume(glbin_current.vol_data);
+		glbin_comp_editor.SetId(id, false);
 	}
 	else
-	{
-		m_new_id_text->SetBackgroundColour(color);
-		m_cell_new_id_empty = true;
-	}
+		glbin_comp_editor.SetId(0, true);
+
+	color = glbin_comp_editor.GetWxColor();
+	m_new_id_text->SetBackgroundColour(color);
 	m_new_id_text->Refresh();
 }
 
@@ -2174,55 +2101,37 @@ void ComponentDlg::OnNewIDX(wxCommandEvent& event)
 
 void ComponentDlg::OnCompNew(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-	flrd::ComponentEditor editor;
-	editor.SetView(m_view);
-	editor.NewId(m_cell_new_id,
-		m_cell_new_id_empty, false, false);
-	m_view->RefreshGL(39);
+	glbin_comp_editor.SetView(glbin_current.canvas);
+	glbin_comp_editor.NewId(false, false);
+	FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void ComponentDlg::OnCompAdd(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-	flrd::ComponentEditor editor;
-	editor.SetView(m_view);
-	editor.NewId(m_cell_new_id,
-		m_cell_new_id_empty, true, false);
-	m_view->RefreshGL(39);
+	glbin_comp_editor.SetView(glbin_current.canvas);
+	glbin_comp_editor.NewId(true, false);
+	FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void ComponentDlg::OnCompReplace(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-	flrd::ComponentEditor editor;
-	editor.SetView(m_view);
-	editor.Replace(m_cell_new_id,
-		m_cell_new_id_empty);
-	m_view->RefreshGL(39);
+	glbin_comp_editor.SetView(glbin_current.canvas);
+	glbin_comp_editor.Replace();
+	FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void ComponentDlg::OnCompCleanBkg(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-	flrd::ComponentEditor editor;
-	editor.SetVolume(m_view->m_cur_vol);
-	editor.Clean(0);
-	m_view->RefreshGL(39);
+	glbin_comp_editor.SetVolume(glbin_current.vol_data);
+	glbin_comp_editor.Clean(0);
+	FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void ComponentDlg::OnCompCombine(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-	flrd::ComponentEditor editor;
-	editor.SetView(m_view);
-	editor.Combine();
-	m_view->RefreshGL(39);
+	glbin_comp_editor.SetView(glbin_current.canvas);
+	glbin_comp_editor.Combine();
+	FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void ComponentDlg::OnConSizeSldr(wxScrollEvent &event)

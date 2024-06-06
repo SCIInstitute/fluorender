@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <Cell.h>
 #include <wx/string.h>
+#include <wx/colour.h>
 
 class RenderCanvas;
 class VolumeData;
@@ -60,12 +61,19 @@ namespace flrd
 		{
 			return m_vd;
 		}
+		void SetId(unsigned int id, bool id_empty)
+		{
+			m_id = id;
+			m_id_empty = id_empty;
+		}
+		fluo::Color GetColor();
+		wxColor GetWxColor();
 		wxString GetOutput();
 
 		void Clean(int mode);
-		void NewId(unsigned int id, bool id_empty, bool append, bool track);
-		void Replace(unsigned int id, bool id_empty);
-		void Replace(unsigned int id, bool id_empty, CelpList &list);
+		void NewId(bool append, bool track);
+		void Replace();
+		void Replace(CelpList &list);
 		void Combine();
 		void Combine(CelpList &list);
 
@@ -73,6 +81,8 @@ namespace flrd
 		VolumeData* m_vd;
 		RenderCanvas* m_view;
 		wxString m_output;
+		unsigned int m_id;
+		bool m_id_empty;
 
 	private:
 		//read/delete volume cache from file
