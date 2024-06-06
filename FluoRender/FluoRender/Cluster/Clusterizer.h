@@ -25,42 +25,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_ClusterMethod_h
-#define FL_ClusterMethod_h
+#ifndef _CLUSTER_H_
+#define _CLUSTER_H_
 
-#include <boost/qvm/vec.hpp>
-#include <boost/qvm/mat.hpp>
-#include <boost/qvm/vec_operations.hpp>
-#include <boost/shared_ptr.hpp>
-#include <list>
-#include <vector>
-#include <Tracking/Cell.h>
+#include <ClusterMethod.h>
 
 namespace flrd
 {
-	typedef boost::qvm::vec<double, 3> EmVec;
-	typedef boost::qvm::mat<double, 3, 3> EmMat;
-
-	struct ClusterPoint
-	{
-		unsigned int id;
-		int cid;//cluster id at initialization
-		bool visited;
-		bool noise;
-		EmVec centeri;
-		EmVec centerf;
-		float intensity;
-	};
-
-	typedef boost::shared_ptr<ClusterPoint> pClusterPoint;
-
-	inline float Dist(const ClusterPoint &p1, const ClusterPoint &p2, float w)
-	{
-		EmVec p1p2 = p1.centerf - p2.centerf;
-		float int_diff = fabs(p1.intensity - p2.intensity);
-		return boost::qvm::mag(p1p2) + w * int_diff;
-	}
-
 	class Cluster : public std::list<pClusterPoint>
 	{
 	public:
@@ -181,4 +152,4 @@ namespace flrd
 		CelpList m_out_cells;
 	};
 }
-#endif//FL_ClusterMethod_h
+#endif//_CLUSTER_H_
