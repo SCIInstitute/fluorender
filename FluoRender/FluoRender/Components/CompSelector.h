@@ -61,6 +61,10 @@ namespace flrd
 		{ m_use_min = use; m_min_num = num; }
 		void SetMaxNum(bool use, unsigned int num)
 		{ m_use_max = use; m_max_num = num; }
+		bool GetUseMin() { return m_use_min; }
+		bool GetUseMax() { return m_use_max; }
+		int GetMinNum() { return m_min_num; }
+		int GetMaxNum() { return m_max_num; }
 
 		//high-level functions
 		bool GetCellList(flrd::CelpList& cl, bool links = false);

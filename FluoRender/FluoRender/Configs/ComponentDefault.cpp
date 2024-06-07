@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <compatibility.h>
 #include <CompGenerator.h>
+#include <CompSelector.h>
+#include <Clusterizer.h>
 #include <wx/stdpaths.h>
 #include <wx/wfstream.h>
 
@@ -65,9 +67,7 @@ ComponentDefault::ComponentDefault()
 	m_fill_border = 0.1;
 
 	//cluster
-	m_cluster_method_kmeans = true;
-	m_cluster_method_exmax = false;
-	m_cluster_method_dbscan = false;
+	m_cluster_method = 0;
 	m_cluster_clnum = 2;
 	m_cluster_maxiter = 200;
 	m_cluster_tol = 0.9f;
@@ -157,9 +157,7 @@ void ComponentDefault::Read(wxFileConfig& f)
 	f.Read("fill_border", &m_fill_border);
 
 	//cluster
-	f.Read("cluster_method_kmeans", &m_cluster_method_kmeans);
-	f.Read("cluster_method_exmax", &m_cluster_method_exmax);
-	f.Read("cluster_method_dbscan", &m_cluster_method_dbscan);
+	f.Read("cluster_method", &m_cluster_method);
 	//parameters
 	f.Read("cluster_clnum", &m_cluster_clnum);
 	f.Read("cluster_maxiter", &m_cluster_maxiter);
@@ -221,9 +219,7 @@ void ComponentDefault::Save(wxFileConfig& f)
 	f.Write("fill_border", m_fill_border);
 
 	//cluster
-	f.Write("cluster_method_kmeans", m_cluster_method_kmeans);
-	f.Write("cluster_method_exmax", m_cluster_method_exmax);
-	f.Write("cluster_method_dbscan", m_cluster_method_dbscan);
+	f.Write("cluster_method", m_cluster_method);
 	//parameters
 	f.Write("cluster_clnum", m_cluster_clnum);
 	f.Write("cluster_maxiter", m_cluster_maxiter);
@@ -317,4 +313,50 @@ void ComponentDefault::Apply(flrd::ComponentGenerator* cg)
 	cg->SetCleanIter(m_clean_iter);
 	cg->SetCleanSize(m_clean_size_vl);
 	cg->SetFillBorder(m_fill_border);
+}
+
+void ComponentDefault::Set(flrd::Clusterizer* cl)
+{
+	if (!cl)
+		return;
+
+	m_cluster_method = cl->GetMethod();
+	m_cluster_clnum = cl->GetNum();
+	m_cluster_maxiter = cl->GetMaxIter();
+	m_cluster_tol = cl->GetTol();
+	m_cluster_size = cl->GetSize();
+	m_cluster_eps = cl->GetEps();
+}
+
+void ComponentDefault::Apply(flrd::Clusterizer* cl)
+{
+	if (!cl)
+		return;
+
+	cl->SetMethod(m_cluster_method);
+	cl->SetNum(m_cluster_clnum);
+	cl->SetMaxIter(m_cluster_maxiter);
+	cl->SetTol(m_cluster_tol);
+	cl->SetSize(m_cluster_size);
+	cl->SetEps(m_cluster_eps);
+}
+
+void ComponentDefault::Set(flrd::ComponentSelector* cs)
+{
+	if (!cs)
+		return;
+
+	m_use_min = cs->GetUseMin();
+	m_min_num = cs->GetMinNum();
+	m_use_max = cs->GetUseMax();
+	m_max_num = cs->GetMaxNum();
+}
+
+void ComponentDefault::Apply(flrd::ComponentSelector* cs)
+{
+	if (!cs)
+		return;
+
+	cs->SetMinNum(m_use_min, m_min_num);
+	cs->SetMaxNum(m_use_max, m_max_num);
 }

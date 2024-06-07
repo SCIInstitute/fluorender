@@ -35,11 +35,23 @@ namespace flrd
 	class Clusterizer
 	{
 	public:
-		Clusterizer() {};
-		~Clusterizer() {};
+		Clusterizer();
+		~Clusterizer();
 
 		void Compute();
 
+		void SetMethod(int val) { m_method = val; }
+		int GetMethod() { return m_method; }
+		void SetNum(int val) { m_num = val; }
+		int GetNum() { return m_num; }
+		void SetMaxIter(int val) { m_maxiter = val; }
+		int GetMaxIter() { return m_maxiter; }
+		void SetTol(float val) { m_tol = val; }
+		float GetTol() { return m_tol; }
+		void SetSize(int val) { m_size = val; }
+		int GetSize() { return m_size; }
+		void SetEps(double val) { m_eps = val; }
+		double GetEps() { return m_eps; }
 		//in and out cell lists
 		flrd::CelpList& GetInCells()
 		{
@@ -51,6 +63,14 @@ namespace flrd
 		}
 
 	protected:
+		//settings
+		int m_method;//0:exmax; 1:dbscan; 2:kmeans
+		//parameters
+		int m_num;
+		int m_maxiter;
+		float m_tol;
+		int m_size;
+		double m_eps;
 		//in and out cell lists for tracking
 		flrd::CelpList m_in_cells;
 		flrd::CelpList m_out_cells;

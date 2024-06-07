@@ -34,6 +34,8 @@ namespace flrd
 {
 	class ComponentGenerator;
 	class ComponentAnalyzer;
+	class Clusterizer;
+	class ComponentSelector;
 }
 class ComponentDefault
 {
@@ -47,16 +49,15 @@ public:
 	void Save(wxFileConfig& f);
 	void Set(flrd::ComponentGenerator* cg);
 	void Apply(flrd::ComponentGenerator* cg);
+	void Set(flrd::Clusterizer* cl);
+	void Apply(flrd::Clusterizer* cl);
+	void Set(flrd::ComponentSelector* cs);
+	void Apply(flrd::ComponentSelector* cs);
+
 	//void Set(flrd::ComponentAnalyzer* ca);
 	//void Apply(flrd::ComponentAnalyzer* ca);
 
 public:
-	//default values
-	//bool m_ca_select_only; m_use_sel
-	//int m_ca_min;
-	//int m_ca_max;
-	//bool m_ca_ignore_max; m_use_min && !m_use_max
-
 	//generate settings
 	bool m_use_sel;
 	bool m_use_ml;
@@ -92,9 +93,7 @@ public:
 	double m_fill_border;
 
 	//cluster settings
-	bool m_cluster_method_exmax;
-	bool m_cluster_method_dbscan;
-	bool m_cluster_method_kmeans;
+	int m_cluster_method;//0:exmax; 1:dbscan; 2:kmeans
 	//parameters
 	int m_cluster_clnum;
 	int m_cluster_maxiter;
@@ -110,10 +109,6 @@ public:
 	//options
 	bool m_consistent;
 	bool m_colocal;
-
-	////modify
-	//unsigned int m_cell_new_id;
-	//bool m_cell_new_id_empty;
 
 	//distance
 	bool m_use_dist_neighbor;

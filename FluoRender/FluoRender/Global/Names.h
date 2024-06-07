@@ -631,6 +631,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstColocalColormap "colocal colormap"
 #define gstColocalResult "colocal result"
 //component agent
+#define gstCompPage "comp page"//current page of the comp window
 #define gstRecordCmd "record cmd"//record command for comps
 #define gstRunCmd "run cmd"//run command
 #define gstIteration "iteration"//number of iterations

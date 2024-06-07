@@ -397,7 +397,6 @@ private:
 
 
 	//execute
-	void EnableGenerate();
 	void Analyze(bool sel);
 
 

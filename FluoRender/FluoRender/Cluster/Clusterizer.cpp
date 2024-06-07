@@ -33,6 +33,15 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
+Clusterizer::Clusterizer()
+{
+	glbin_comp_def.Apply(this);
+}
+
+Clusterizer::~Clusterizer()
+{
+}
+
 void Clusterizer::Compute()
 {
 	m_in_cells.clear();
@@ -76,7 +85,9 @@ void Clusterizer::Compute()
 
 	flrd::ClusterMethod* method = 0;
 	//switch method
-	if (glbin_comp_def.m_cluster_method_exmax)
+	switch (m_method)
+	{
+	case 0:
 	{
 		flrd::ClusterExmax* method_exmax = new flrd::ClusterExmax();
 		method_exmax->SetClnum(glbin_comp_def.m_cluster_clnum);
@@ -84,19 +95,23 @@ void Clusterizer::Compute()
 		method_exmax->SetProbTol(glbin_comp_def.m_cluster_tol);
 		method = method_exmax;
 	}
-	else if (glbin_comp_def.m_cluster_method_dbscan)
+		break;
+	case 1:
 	{
 		flrd::ClusterDbscan* method_dbscan = new flrd::ClusterDbscan();
 		method_dbscan->SetSize(glbin_comp_def.m_cluster_size);
 		method_dbscan->SetEps(glbin_comp_def.m_cluster_eps);
 		method = method_dbscan;
 	}
-	else if (glbin_comp_def.m_cluster_method_kmeans)
+		break;
+	case 2:
 	{
 		flrd::ClusterKmeans* method_kmeans = new flrd::ClusterKmeans();
 		method_kmeans->SetClnum(glbin_comp_def.m_cluster_clnum);
 		method_kmeans->SetMaxiter(glbin_comp_def.m_cluster_maxiter);
 		method = method_kmeans;
+	}
+		break;
 	}
 
 	if (!method)
@@ -123,7 +138,7 @@ void Clusterizer::Compute()
 	};
 	std::unordered_map<unsigned int, CmpCnt> init_clusters;
 	std::set<CmpCnt> ordered_clusters;
-	if (glbin_comp_def.m_cluster_method_exmax)
+	if (m_method == 0)
 	{
 		for (index = 0; index < nxyz; ++index)
 		{
@@ -154,56 +169,54 @@ void Clusterizer::Compute()
 		}
 	}
 
-	for (i = 0; i < nx; ++i)
-		for (j = 0; j < ny; ++j)
-			for (k = 0; k < nz; ++k)
+	for (i = 0; i < nx; ++i) for (j = 0; j < ny; ++j) for (k = 0; k < nz; ++k)
+	{
+		index = nx * ny * k + nx * j + i;
+		mask_value = data_mask[index];
+		if (mask_value)
+		{
+			if (bits == 8)
+				data_value = ((unsigned char*)data_data)[index] / 255.0f;
+			else if (bits == 16)
+				data_value = ((unsigned short*)data_data)[index] * scale / 65535.0f;
+			flrd::EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
+			label_value = data_label[index];
+			int cid = -1;
+			if (use_init_cluster)
 			{
-				index = nx * ny * k + nx * j + i;
-				mask_value = data_mask[index];
-				if (mask_value)
+				cid = 0;
+				bool found = false;
+				for (auto it = ordered_clusters.begin();
+					it != ordered_clusters.end(); ++it)
 				{
-					if (bits == 8)
-						data_value = ((unsigned char*)data_data)[index] / 255.0f;
-					else if (bits == 16)
-						data_value = ((unsigned short*)data_data)[index] * scale / 65535.0f;
-					flrd::EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
-					label_value = data_label[index];
-					int cid = -1;
-					if (use_init_cluster)
+					if (label_value == it->id)
 					{
-						cid = 0;
-						bool found = false;
-						for (auto it = ordered_clusters.begin();
-							it != ordered_clusters.end(); ++it)
-						{
-							if (label_value == it->id)
-							{
-								found = true;
-								break;
-							}
-							cid++;
-						}
-						if (!found)
-							cid = -1;
+						found = true;
+						break;
 					}
-					method->AddClusterPoint(
-						pnt, data_value, cid);
-
-					//add to list
-					auto iter = m_in_cells.find(label_value);
-					if (iter != m_in_cells.end())
-					{
-						iter->second->Inc(i, j, k, data_value);
-					}
-					else
-					{
-						flrd::Cell* cell = new flrd::Cell(label_value);
-						cell->Inc(i, j, k, data_value);
-						m_in_cells.insert(std::pair<unsigned int, flrd::Celp>
-							(label_value, flrd::Celp(cell)));
-					}
+					cid++;
 				}
+				if (!found)
+					cid = -1;
 			}
+			method->AddClusterPoint(
+				pnt, data_value, cid);
+
+			//add to list
+			auto iter = m_in_cells.find(label_value);
+			if (iter != m_in_cells.end())
+			{
+				iter->second->Inc(i, j, k, data_value);
+			}
+			else
+			{
+				flrd::Cell* cell = new flrd::Cell(label_value);
+				cell->Inc(i, j, k, data_value);
+				m_in_cells.insert(std::pair<unsigned int, flrd::Celp>
+					(label_value, flrd::Celp(cell)));
+			}
+		}
+	}
 
 	if (method->Execute())
 	{

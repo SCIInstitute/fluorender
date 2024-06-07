@@ -41,7 +41,7 @@ ComponentSelector::ComponentSelector()
 	m_min_num(0),
 	m_max_num(0)
 {
-
+	glbin_comp_def.Apply(this);
 }
 
 ComponentSelector::~ComponentSelector()
