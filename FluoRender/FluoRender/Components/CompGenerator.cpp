@@ -2135,6 +2135,21 @@ void ComponentGenerator::PlayCmd(double tfactor)
 	//Update();
 }
 
+void ComponentGenerator::SetRecordCmd(bool val)
+{
+	m_record_cmd = val;
+}
+
+bool ComponentGenerator::GetRecordCmd()
+{
+	return m_record_cmd;
+}
+
+int ComponentGenerator::GetCmdNum()
+{
+	return m_command.size();
+}
+
 void ComponentGenerator::StartTimer(const std::string& str)
 {
 	if (m_test_speed)

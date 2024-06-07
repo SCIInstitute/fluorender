@@ -622,6 +622,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstHoldHistory "hold history"
 #define gstTestSpeed "test speed"
 #define gstUseTransferFunc "use transfer func"
+#define gstUseMachineLearning "use machine learning"
 //colocal agent
 #define gstColocalMethod "colocal method"//0:dot product; 1:min value; 2:threshold
 #define gstIntWeighted "int weighted"
@@ -632,8 +633,8 @@ DEALINGS IN THE SOFTWARE.
 //component agent
 #define gstRecordCmd "record cmd"//record command for comps
 #define gstRunCmd "run cmd"//run command
-#define gstThreshScale "thresh scale"
 #define gstIteration "iteration"//number of iterations
+#define gstCompThreshold "comp threshold"
 #define gstUseDiffusion "use diffusion"//diffusion settings
 #define gstDiffusionFalloff "diffusion falloff"
 #define gstUseDensityField "use density field"//density field settings
@@ -647,6 +648,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstMaxDist "max dist"
 #define gstDistFieldThresh "dist field thresh"
 #define gstFixateEnable "fixate enable"//fixate settings
+#define gstGrowFixed "grow fixed"//Continue on Fixiated Regions
 #define gstFixateSize "fixate size"
 #define gstCleanEnable "clean enable"//clean settings
 #define gstCleanIteration "clean iteration"

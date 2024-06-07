@@ -56,6 +56,8 @@ namespace flrd
 
 		void SetUseSel(bool val) { m_use_sel = val; }
 		bool GetUseSel() { return m_use_sel; }
+		void SetUseMl(bool val) { m_use_ml = val; }
+		bool GetUseMl() { return m_use_ml; }
 		void SetIter(int val) { m_iter = val; }
 		int GetIter() { return m_iter; }
 		void SetThresh(double val) { m_thresh = val; }
@@ -64,7 +66,7 @@ namespace flrd
 		double GetTFactor() { return m_tfactor; }
 		//distance
 		void SetUseDistField(bool val) { m_use_dist_field = val; }
-		bool GetUseDustField() { return m_use_dist_field; }
+		bool GetUseDistField() { return m_use_dist_field; }
 		void SetDistStrength(double val) { m_dist_strength = val; }
 		double GetDistStrength() { return m_dist_strength; }
 		void SetDistFilterSize(int val) { m_dist_filter_size = val; }
@@ -142,7 +144,9 @@ namespace flrd
 		void AddCmd(const std::string& type);
 		void ResetCmd();
 		void PlayCmd(double tfactor);
-
+		void SetRecordCmd(bool val);
+		bool GetRecordCmd();
+		int GetCmdNum();
 
 		//unused
 		//void OrderID_2D();
@@ -163,6 +167,7 @@ namespace flrd
 		VolumeData *m_vd;
 
 		bool m_use_sel;//use mask instead of data
+		bool m_use_ml;//use machine learning
 		int m_iter;//iteration
 		double m_thresh;
 		double m_tfactor;

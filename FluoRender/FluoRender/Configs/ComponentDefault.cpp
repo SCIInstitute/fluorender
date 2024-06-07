@@ -88,14 +88,14 @@ ComponentDefault::ComponentDefault()
 	m_dist_neighbor = 1;
 	m_use_dist_allchan = false;
 
+	//output
+	m_output_type = 1;
+
 	//update
 	m_auto_update = false;
 
 	//record
 	m_record_cmd = false;
-
-	//output
-	m_output_type = 1;
 }
 
 ComponentDefault::~ComponentDefault()
@@ -172,10 +172,23 @@ void ComponentDefault::Read(wxFileConfig& f)
 	f.Read("min_num", &m_min_num);
 	f.Read("use_max", &m_use_max);
 	f.Read("max_num", &m_max_num);
-	//colocalization
+	//options
+	f.Read("consistent", &m_consistent);
 	f.Read("colocal", &m_colocal);
+
+	//distance
+	f.Read("use_dist_neighbor", &m_use_dist_neighbor);
+	f.Read("dist_neighbor", &m_dist_neighbor);
+	f.Read("use_dist_allchan", &m_use_dist_allchan);
+
 	//output
 	f.Read("output_type", &m_output_type);
+
+	//auto update
+	f.Read("auto_update", &m_auto_update);
+
+	//record
+	f.Read("record_cmd", &m_record_cmd);
 }
 
 void ComponentDefault::Save(wxFileConfig& f)
@@ -223,15 +236,55 @@ void ComponentDefault::Save(wxFileConfig& f)
 	f.Write("min_num", m_min_num);
 	f.Write("use_max", m_use_max);
 	f.Write("max_num", m_max_num);
-	//colocalization
+	//options
+	f.Write("consistent", m_consistent);
 	f.Write("colocal", m_colocal);
+
+	//distance
+	f.Write("use_dist_neighbor", m_use_dist_neighbor);
+	f.Write("dist_neighbor", m_dist_neighbor);
+	f.Write("use_dist_allchan", m_use_dist_allchan);
+
 	//output
 	f.Write("output_type", m_output_type);
+
+	//auto update
+	f.Write("auto_update", m_auto_update);
+
+	//record
+	f.Write("record_cmd", m_record_cmd);
 }
 
 void ComponentDefault::Set(flrd::ComponentGenerator* cg)
 {
-	//
+	if (!cg)
+		return;
+
+	m_use_sel = cg->GetUseSel();
+	m_use_ml = cg->GetUseMl();
+	m_iter = cg->GetIter();
+	m_thresh = cg->GetThresh();
+	m_tfactor = cg->GetTFactor();
+	m_use_dist_field = cg->GetUseDistField();
+	m_dist_strength = cg->GetDistStrength();
+	m_dist_filter_size = cg->GetDistFilterSize();
+	m_max_dist = cg->GetMaxDist();
+	m_dist_thresh = cg->GetDistThresh();
+	m_diff = cg->GetDiffusion();
+	m_falloff = cg->GetFalloff();
+	m_size = cg->GetSize();
+	m_size_lm = cg->GetSizeLimit();
+	m_density = cg->GetDensity();
+	m_density_thresh = cg->GetDensityThresh();
+	m_varth = cg->GetVarThresh();
+	m_density_window_size = cg->GetDensityWinSize();
+	m_density_stats_size = cg->GetDensityStatSize();
+	m_fixate = cg->GetFixate();
+	m_grow_fixed = cg->GetGrowFixed();
+	m_clean = cg->GetClean();
+	m_clean_iter = cg->GetCleanIter();
+	m_clean_size_vl = cg->GetCleanSize();
+	m_fill_border = cg->GetFillBorder();
 }
 
 void ComponentDefault::Apply(flrd::ComponentGenerator* cg)
@@ -240,6 +293,7 @@ void ComponentDefault::Apply(flrd::ComponentGenerator* cg)
 		return;
 
 	cg->SetUseSel(m_use_sel);
+	cg->SetUseMl(m_use_ml);
 	cg->SetIter(m_iter);
 	cg->SetThresh(m_thresh);
 	cg->SetTFactor(m_tfactor);
