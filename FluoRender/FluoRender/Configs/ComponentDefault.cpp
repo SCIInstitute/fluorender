@@ -357,6 +357,8 @@ void ComponentDefault::Apply(flrd::ComponentSelector* cs)
 	if (!cs)
 		return;
 
-	cs->SetMinNum(m_use_min, m_min_num);
-	cs->SetMaxNum(m_use_max, m_max_num);
+	cs->SetUseMin(m_use_min);
+	cs->SetUseMax(m_use_max);
+	cs->SetMinNum(m_min_num);
+	cs->SetMaxNum(m_max_num);
 }

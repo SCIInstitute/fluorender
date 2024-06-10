@@ -666,6 +666,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstMaxValue "max value"
 #define gstCompId "comp id"
 #define gstCompIdStr "comp id str"
+#define gstCompIdColor "comp id color"
 #define gstCompSizeLimit "comp size limit"
 #define gstCompConsistent "comp consistent"
 #define gstCompColocal "comp colocal"

@@ -32,10 +32,10 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-ComponentSelector::ComponentSelector()
-	: m_vd(0),
+ComponentSelector::ComponentSelector():
 	m_sel_all(false),
 	m_id(0),
+	m_id_empty(true),
 	m_use_min(false),
 	m_use_max(false),
 	m_min_num(0),
@@ -46,6 +46,53 @@ ComponentSelector::ComponentSelector()
 
 ComponentSelector::~ComponentSelector()
 {
+}
+
+void ComponentSelector::SetId(const std::string& str)
+{
+	unsigned int id = 0;
+	int brick_id = 0;
+	bool id_empty = false;
+
+	std::string::size_type sz;
+	try
+	{
+		id = std::stoul(str, &sz);
+	}
+	catch (...)
+	{
+		id_empty = true;
+	}
+	std::string str2;
+	if (sz < str.size())
+	{
+		brick_id = id;
+		for (size_t i = sz; i < str.size() - 1; ++i)
+		{
+			if (std::isdigit(static_cast<unsigned char>(str[i])))
+			{
+				str2 = str.substr(i);
+				try
+				{
+					id = std::stoul(str2);
+				}
+				catch (...)
+				{
+					id_empty = true;
+				}
+			}
+		}
+	}
+
+	SetId(flrd::Cell::GetKey(id, brick_id), id_empty);
+}
+
+void ComponentSelector::SelectFullComp()
+{
+	if (m_id_empty)
+		CompFull();
+	else
+		Select(true);
 }
 
 bool ComponentSelector::GetCellList(flrd::CelpList& cl, bool links)
@@ -190,7 +237,7 @@ void ComponentSelector::SetCompSelection(std::set<unsigned long long>& ids, int 
 
 void ComponentSelector::IncludeComps()
 {
-	if (!m_view || !m_view->m_cur_vol)
+	if (!m_view)
 		return;
 
 	flrd::CelpList cl;
@@ -207,7 +254,6 @@ void ComponentSelector::IncludeComps()
 				++it;
 		}
 		//select cl
-		glbin_comp_selector.SetVolume(m_view->m_cur_vol);
 		glbin_comp_selector.SelectList(cl);
 		ClearOutputGrid();
 		string titles, values;
@@ -239,7 +285,7 @@ void ComponentSelector::IncludeComps()
 
 void ComponentSelector::ExcludeComps()
 {
-	if (!m_view || !m_view->m_cur_vol)
+	if (!m_view)
 		return;
 
 	flrd::CelpList cl;
@@ -255,7 +301,6 @@ void ComponentSelector::ExcludeComps()
 			else
 				++it;
 		}
-		glbin_comp_selector.SetVolume(m_view->m_cur_vol);
 		std::vector<unsigned long long> ids;
 		for (auto it = list->begin();
 			it != list->end(); ++it)
@@ -291,23 +336,24 @@ void ComponentSelector::ExcludeComps()
 
 void ComponentSelector::CompFull()
 {
-	if (!m_vd)
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
 		return;
-	flvr::Texture* tex = m_vd->GetTexture();
+	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
 	if (flvr::Texture::mask_undo_num_>0)
 		tex->push_mask();
 
 	//get current mask
-	Nrrd* nrrd_mask = m_vd->GetMask(true);
+	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 		return;
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
 	if (!data_mask)
 		return;
 	//get current label
-	Nrrd* nrrd_label = m_vd->GetLabel(true);
+	Nrrd* nrrd_label = vd->GetLabel(true);
 	if (!nrrd_label)
 		return;
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
@@ -326,7 +372,7 @@ void ComponentSelector::CompFull()
 	unsigned int brick_id;
 	CelpList sel_labels;
 	CelpListIter label_iter;
-	m_vd->GetResolution(nx, ny, nz);
+	vd->GetResolution(nx, ny, nz);
 
 	for (size_t bi = 0; bi < bn; ++bi)
 	{
@@ -403,38 +449,39 @@ void ComponentSelector::CompFull()
 		b->valid_mask();
 	}
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_mask();
+	vd->GetVR()->clear_tex_mask();
 }
 
 void ComponentSelector::Select(bool all, bool rmask)
 {
 	//get current mask
-	if (!m_vd)
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
 		return;
-	flvr::Texture* tex = m_vd->GetTexture();
+	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
 	if (flvr::Texture::mask_undo_num_>0)
 		tex->push_mask();
 
-	Nrrd* nrrd_mask = m_vd->GetMask(rmask);
+	Nrrd* nrrd_mask = vd->GetMask(rmask);
 	if (!nrrd_mask)
 	{
-		m_vd->AddEmptyMask(0);
-		nrrd_mask = m_vd->GetMask(false);
+		vd->AddEmptyMask(0);
+		nrrd_mask = vd->GetMask(false);
 	}
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
 	if (!data_mask)
 		return;
 	//get current label
-	Nrrd* nrrd_label = m_vd->GetLabel(true);
+	Nrrd* nrrd_label = vd->GetLabel(true);
 	if (!nrrd_label)
 		return;
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
 	if (!data_label)
 		return;
 
-	int bn = m_vd->GetBrickNum();
+	int bn = vd->GetBrickNum();
 	unsigned int idsel, bidsel;
 	if (bn > 1)
 	{
@@ -449,7 +496,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 
 	//select append
 	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	vd->GetResolution(nx, ny, nz);
 	unsigned long long for_size = (unsigned long long)nx*
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
@@ -604,7 +651,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 		}
 	}
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_mask(false);
+	vd->GetVR()->clear_tex_mask(false);
 }
 
 void ComponentSelector::Exclusive()
@@ -616,18 +663,19 @@ void ComponentSelector::Exclusive()
 void ComponentSelector::All()
 {
 	//get current mask
-	if (!m_vd)
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
 		return;
 
 	if (flvr::Texture::mask_undo_num_>0 &&
-		m_vd->GetTexture())
-		m_vd->GetTexture()->push_mask();
+		vd->GetTexture())
+		vd->GetTexture()->push_mask();
 
-	Nrrd* nrrd_mask = m_vd->GetMask(true);
+	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 	{
-		m_vd->AddEmptyMask(0);
-		nrrd_mask = m_vd->GetMask(false);
+		vd->AddEmptyMask(0);
+		nrrd_mask = vd->GetMask(false);
 	}
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
 	if (!data_mask)
@@ -635,26 +683,27 @@ void ComponentSelector::All()
 
 	//select append
 	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	vd->GetResolution(nx, ny, nz);
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
 	std::memset(data_mask, 255, for_size);
-	m_vd->GetTexture()->valid_all_mask();
+	vd->GetTexture()->valid_all_mask();
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_mask();
+	vd->GetVR()->clear_tex_mask();
 }
 
 void ComponentSelector::Clear(bool invalidate)
 {
 	//get current mask
-	if (!m_vd)
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
 		return;
 
 	if (flvr::Texture::mask_undo_num_>0 &&
-		m_vd->GetTexture())
-		m_vd->GetTexture()->push_mask();
+		vd->GetTexture())
+		vd->GetTexture()->push_mask();
 
-	Nrrd* nrrd_mask = m_vd->GetMask(true);
+	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 		return;
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
@@ -663,32 +712,33 @@ void ComponentSelector::Clear(bool invalidate)
 
 	//select append
 	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	vd->GetResolution(nx, ny, nz);
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
 	std::memset(data_mask, 0, for_size);
 	//invalidate label mask in gpu
 	if (invalidate)
-		m_vd->GetVR()->clear_tex_mask();
-	m_vd->GetTexture()->invalid_all_mask();
+		vd->GetVR()->clear_tex_mask();
+	vd->GetTexture()->invalid_all_mask();
 }
 
 void ComponentSelector::Delete()
 {
 	//get current mask
-	if (!m_vd)
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
 		return;
-	flvr::Texture* tex = m_vd->GetTexture();
+	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
-	Nrrd* nrrd_mask = m_vd->GetMask(true);
+	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 		return;
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
 	if (!data_mask)
 		return;
 	//get current label
-	Nrrd* nrrd_label = m_vd->GetLabel(true);
+	Nrrd* nrrd_label = vd->GetLabel(true);
 	if (!nrrd_label)
 		return;
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
@@ -696,7 +746,7 @@ void ComponentSelector::Delete()
 		return;
 	//select append
 	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	vd->GetResolution(nx, ny, nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
@@ -708,7 +758,7 @@ void ComponentSelector::Delete()
 			data_mask[index] = 0;
 	}
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_mask();
+	vd->GetVR()->clear_tex_mask();
 }
 
 void ComponentSelector::Delete(std::vector<unsigned long long> &ids)
@@ -716,19 +766,20 @@ void ComponentSelector::Delete(std::vector<unsigned long long> &ids)
 	bool clear_all = ids.empty();
 
 	//get current mask
-	if (!m_vd)
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
 		return;
-	flvr::Texture* tex = m_vd->GetTexture();
+	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
-	Nrrd* nrrd_mask = m_vd->GetMask(true);
+	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 		return;
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
 	if (!data_mask)
 		return;
 	//get current label
-	Nrrd* nrrd_label = m_vd->GetLabel(true);
+	Nrrd* nrrd_label = vd->GetLabel(true);
 	if (!nrrd_label)
 		return;
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
@@ -736,12 +787,12 @@ void ComponentSelector::Delete(std::vector<unsigned long long> &ids)
 		return;
 	//select append
 	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	vd->GetResolution(nx, ny, nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long key;
-	int bn = m_vd->GetBrickNum();
+	int bn = vd->GetBrickNum();
 	for (index = 0; index < for_size; ++index)
 	{
 		if (clear_all)
@@ -751,7 +802,7 @@ void ComponentSelector::Delete(std::vector<unsigned long long> &ids)
 			if (bn > 1)
 				key = flrd::Cell::GetKey(
 					data_label[index],
-					m_vd->GetTexture()->
+					vd->GetTexture()->
 					get_brick_id(index));
 			else
 				key = data_label[index];
@@ -763,33 +814,34 @@ void ComponentSelector::Delete(std::vector<unsigned long long> &ids)
 		}
 	}
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_mask();
+	vd->GetVR()->clear_tex_mask();
 	if (clear_all)
 		tex->invalid_all_mask();
 }
 
 void ComponentSelector::SelectList(CelpList& list)
 {
-	if (!m_vd)
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
 		return;
 
-	flvr::Texture* tex = m_vd->GetTexture();
+	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
 	if (flvr::Texture::mask_undo_num_ > 0)
 		tex->push_mask();
 
-	Nrrd* nrrd_mask = m_vd->GetMask(true);
+	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 	{
-		m_vd->AddEmptyMask(0);
-		nrrd_mask = m_vd->GetMask(false);
+		vd->AddEmptyMask(0);
+		nrrd_mask = vd->GetMask(false);
 	}
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
 	if (!data_mask)
 		return;
 	//get current label
-	Nrrd* nrrd_label = m_vd->GetLabel(true);
+	Nrrd* nrrd_label = vd->GetLabel(true);
 	if (!nrrd_label)
 		return;
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
@@ -806,7 +858,7 @@ void ComponentSelector::SelectList(CelpList& list)
 	unsigned long long key;
 	int i, j, k;
 	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	vd->GetResolution(nx, ny, nz);
 	for (size_t bi = 0; bi < bn; ++bi)
 	{
 		flvr::TextureBrick* b = (*bricks)[bi];
@@ -839,7 +891,7 @@ void ComponentSelector::SelectList(CelpList& list)
 	//}
 
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_mask();
+	vd->GetVR()->clear_tex_mask();
 }
 
 inline CelpList* ComponentSelector::GetListFromAnalyzer(CelpList &list_in, CelpList &list_out)

@@ -189,8 +189,6 @@ private:
 	wxButton* m_comp_clear_btn;
 	wxButton* m_shuffle_btn;
 	//modify
-	wxTextCtrl* m_new_id_text;
-	wxButton* m_new_id_x_btn;
 	wxButton* m_comp_new_btn;
 	wxButton* m_comp_add_btn;
 	wxButton* m_comp_replace_btn;
@@ -340,6 +338,7 @@ private:
 	void OnClusterepsText(wxCommandEvent &event);
 
 	//analysis page
+	//id
 	void OnCompIdText(wxCommandEvent &event);
 	void OnCompIdXBtn(wxCommandEvent &event);
 	void OnAnalysisMinCheck(wxCommandEvent &event);
@@ -348,14 +347,13 @@ private:
 	void OnAnalysisMaxCheck(wxCommandEvent &event);
 	void OnAnalysisMaxSpin(wxSpinEvent &event);
 	void OnAnalysisMaxText(wxCommandEvent &event);
+	//select
 	void OnCompAppend(wxCommandEvent &event);
 	void OnCompExclusive(wxCommandEvent &event);
 	void OnCompAll(wxCommandEvent &event);
 	void OnCompFull(wxCommandEvent &event);
 	void OnCompClear(wxCommandEvent &event);
 	//modify
-	void OnNewIDText(wxCommandEvent &event);
-	void OnNewIDX(wxCommandEvent& event);
 	void OnCompNew(wxCommandEvent& event);
 	void OnCompAdd(wxCommandEvent& event);
 	void OnCompReplace(wxCommandEvent& event);
@@ -368,8 +366,6 @@ private:
 	void OnColocalCheck(wxCommandEvent &event);
 	//output
 	void OnOutputTypeRadio(wxCommandEvent &event);
-	void OutputMulti(int color_type);
-	void OutputRgb(int color_type);
 	void OnOutputChannels(wxCommandEvent &event);
 	void OnOutputAnnotation(wxCommandEvent &event);
 	//distance
@@ -383,7 +379,6 @@ private:
 	void OnAlignPca(wxCommandEvent& event);
 
 
-	bool GetIds(std::string &str, unsigned int &id, int &brick_id);
 	void AlignCenter(flrd::Ruler* ruler);
 	void ClearOutputGrid();
 	int GetDistMatSize();

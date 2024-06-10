@@ -45,22 +45,6 @@ namespace flrd
 		ComponentEditor();
 		~ComponentEditor();
 
-		void SetView(RenderCanvas* view)
-		{
-			m_view = view;
-		}
-		RenderCanvas* GetRenderCanvas()
-		{
-			return m_view;
-		}
-		void SetVolume(VolumeData* vd)
-		{
-			m_vd = vd;
-		}
-		VolumeData* GetVolume()
-		{
-			return m_vd;
-		}
 		void SetId(unsigned int id, bool id_empty)
 		{
 			m_id = id;
@@ -78,8 +62,6 @@ namespace flrd
 		void Combine(CelpList &list);
 
 	private:
-		VolumeData* m_vd;
-		RenderCanvas* m_view;
 		wxString m_output;
 		unsigned int m_id;
 		bool m_id_empty;

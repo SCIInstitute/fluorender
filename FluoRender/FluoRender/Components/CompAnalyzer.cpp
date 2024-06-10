@@ -26,6 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "CompAnalyzer.h"
+#include <Global.h>
+#include <RenderCanvas.h>
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -35,13 +37,13 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-ComponentAnalyzer::ComponentAnalyzer(VolumeData* vd)
+ComponentAnalyzer::ComponentAnalyzer()
 	: m_analyzed(false),
 	m_colocal(false),
 	m_bn(0),
 	m_slimit(5)
 {
-	m_compgroup = AddCompGroup(vd);
+	//m_compgroup = AddCompGroup(vd);
 }
 
 ComponentAnalyzer::~ComponentAnalyzer()
@@ -89,7 +91,7 @@ int ComponentAnalyzer::GetColocalization(
 	return num;
 }
 
-void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
+void ComponentAnalyzer::Analyze(bool sel)
 {
 	if (!m_compgroup)
 		return;
@@ -285,7 +287,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			//colocalization
 			std::vector<unsigned int> sumi;
 			std::vector<double> sumd;
-			if (colocal) GetColocalization(brick_id, i, j, k, sumi, sumd);
+			if (m_colocal) GetColocalization(brick_id, i, j, k, sumi, sumd);
 
 			//find in list
 			iter = comp_list_brick.find(id);
@@ -293,7 +295,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			{
 				//not found
 				Cell* info = 0;
-				if (colocal)
+				if (m_colocal)
 					info = new Cell(id, brick_id,
 						1, value, ext,
 						i + b->ox(), j + b->oy(), k + b->oz(),
@@ -309,7 +311,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			}
 			else
 			{
-				if (colocal)
+				if (m_colocal)
 					iter->second->Inc(1, value, ext,
 						i + b->ox(), j + b->oy(), k + b->oz(),
 						sx, sy, sz,
@@ -357,12 +359,12 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 	}
 
 	MatchBricks(sel);
-	UpdateMaxCompSize(colocal);
-	if (consistent)
+	UpdateMaxCompSize(m_colocal);
+	if (m_consistent)
 		MakeColorConsistent();
 
 	m_compgroup->dirty = false;
-	m_colocal = colocal && m_vd_list.size();
+	m_colocal = m_colocal && m_vd_list.size();
 	if (!sel)
 		m_analyzed = true;
 }
@@ -973,7 +975,7 @@ unsigned int ComponentAnalyzer::GetExt(unsigned int* data_label,
 	return surface_vox ? 1 : 0;
 }
 
-bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int type)
+bool ComponentAnalyzer::OutputAnnotations()
 {
 	if (!m_compgroup)
 		return false;
@@ -1005,11 +1007,13 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int ty
 
 	if (comps.empty() ||
 		m_compgroup->dirty)
-		Analyze(true, consistent);
+		Analyze(true);
 
 	std::string sinfo;
 	ostringstream oss;
 	std::string str;
+
+	Annotations* ann = new Annotations();
 
 	int bn = vd->GetAllBrickNum();
 	graph.ClearVisited();
@@ -1030,22 +1034,81 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int ty
 		oss << double(i->second->GetSizeUi())*spcx*spcy*spcz << "\t";
 		oss << i->second->GetMean(scale);
 		sinfo = oss.str();
-		switch (type)
+		switch (m_annot_type)
 		{
-		case 0://id
+		case 1://id
 			str = std::to_string(i->second->Id());
 			break;
-		case 1://sn
+		case 2://sn
 			str = std::to_string(count);
 		}
 		fluo::Point p = i->second->GetCenter(1.0 / nx, 1.0 / ny, 1.0 / nz);
-		ann.AddText(str, p, sinfo);
+		ann->AddText(str, p, sinfo);
 		++count;
 	}
+
+	ann->SetVolume(vd);
+	ann->SetTransform(vd->GetTexture()->transform());
+	glbin_data_manager.AddAnnotations(ann);
+	RenderCanvas* view = glbin_current.canvas;
+	if (view)
+		view->AddAnnotations(ann);
+
 	return true;
 }
 
-bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int color_type, bool consistent)
+bool ComponentAnalyzer::OutputChannels()
+{
+	bool result = false;
+	std::list<VolumeData*> channs;
+	switch (m_channel_type)
+	{
+	case 1:
+		result = OutputMultiChannels(channs);
+		break;
+	case 2:
+		result = OutputRgbChannels(channs);
+		break;
+	}
+
+	wxString group_name = "";
+	DataGroup* group = 0;
+	RenderCanvas* view = glbin_current.canvas;
+	if (!view)
+		return false;
+	
+	for (auto i = channs.begin(); i != channs.end(); ++i)
+	{
+		VolumeData* vd = *i;
+		if (vd)
+		{
+			glbin_data_manager.AddVolumeData(vd);
+			if (i == channs.begin())
+			{
+				group_name = view->AddGroup("");
+				group = view->GetGroup(group_name);
+			}
+			view->AddVolumeData(vd, group_name);
+		}
+	}
+	if (group)
+	{
+		//group->SetSyncRAll(true);
+		//group->SetSyncGAll(true);
+		//group->SetSyncBAll(true);
+		fluo::Color col = view->m_cur_vol->GetGammaColor();
+		group->SetGammaAll(col);
+		col = view->m_cur_vol->GetBrightness();
+		group->SetBrightnessAll(col);
+		col = view->m_cur_vol->GetHdr();
+		group->SetHdrAll(col);
+	}
+	glbin_current.SetVolumeData(view->m_cur_vol);
+
+	return result;
+}
+
+bool ComponentAnalyzer::OutputMultiChannels(std::list<VolumeData*>& channs)
 {
 	if (!m_compgroup)
 		return false;
@@ -1057,7 +1120,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 
 	if (comps.empty() ||
 		m_compgroup->dirty)
-		Analyze(true, consistent);
+		Analyze(true);
 
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
@@ -1217,7 +1280,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 
 		//settings
 		fluo::Color c;
-		if (GetColor(i->second->Id(), i->second->BrickId(), vd, color_type, c))
+		if (GetColor(i->second->Id(), i->second->BrickId(), vd, c))
 		{
 			vdn->SetColor(c);
 			vdn->SetAlphaEnable(vd->GetAlphaEnable());
@@ -1241,7 +1304,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 	return true;
 }
 
-bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color_type, bool consistent)
+bool ComponentAnalyzer::OutputRgbChannels(std::list<VolumeData*> &channs)
 {
 	if (!m_compgroup)
 		return false;
@@ -1253,7 +1316,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 
 	if (comps.empty() ||
 		m_compgroup->dirty)
-		Analyze(true, consistent);
+		Analyze(true);
 
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
@@ -1344,7 +1407,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	for (index = 0; index < for_size; ++index)
 	{
 		value_label = data_label[index];
-		if (GetColor(value_label, tex->get_brick_id(index), vd, color_type, color))
+		if (GetColor(value_label, tex->get_brick_id(index), vd, color))
 		{
 			//assign colors
 			double value;//0-255
@@ -1417,8 +1480,9 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 }
 
 bool ComponentAnalyzer::GetColor(
-	unsigned int id, int brick_id,
-	VolumeData* vd, int color_type,
+	unsigned int id,
+	int brick_id,
+	VolumeData* vd,
 	fluo::Color &color)
 {
 	if (!id)
@@ -1426,7 +1490,7 @@ bool ComponentAnalyzer::GetColor(
 	//comp list
 	CelpList &comps = m_compgroup->celps;
 
-	switch (color_type)
+	switch (m_color_type)
 	{
 	case 1:
 	default:

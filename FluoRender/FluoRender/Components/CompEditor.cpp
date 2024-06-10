@@ -32,8 +32,6 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 ComponentEditor::ComponentEditor() :
-	m_vd(0),
-	m_view(0),
 	m_id(0),
 	m_id_empty(true)
 {
@@ -62,8 +60,8 @@ fluo::Color ComponentEditor::GetColor()
 		else
 		{
 			int shuffle = 0;
-			if (m_vd)
-				shuffle = m_vd->GetShuffle();
+			if (glbin_current.vol_data)
+				shuffle = glbin_current.vol_data->GetShuffle();
 			c = fluo::Color(m_id, shuffle);
 		}
 	}
@@ -79,17 +77,18 @@ wxColor ComponentEditor::GetWxColor()
 
 void ComponentEditor::Clean(int mode)
 {
-	if (!m_vd)
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
 		return;
 
-	Nrrd* nrrd_mask = m_vd->GetMask(true);
+	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 		return;
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
 	if (!data_mask)
 		return;
 	//get current label
-	Nrrd* nrrd_label = m_vd->GetLabel(true);
+	Nrrd* nrrd_label = vd->GetLabel(true);
 	if (!nrrd_label)
 		return;
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
@@ -97,7 +96,7 @@ void ComponentEditor::Clean(int mode)
 		return;
 
 	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	vd->GetResolution(nx, ny, nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
@@ -116,23 +115,24 @@ void ComponentEditor::Clean(int mode)
 			break;
 		}
 	}
-	m_vd->GetVR()->clear_tex_current();
+	vd->GetVR()->clear_tex_current();
 }
 
 void ComponentEditor::NewId(bool append, bool track)
 {
-	if (!m_view)
+	RenderCanvas* view = glbin_current.canvas;
+	if (!view)
 		return;
 
 	//trace group
-	TraceGroup *trace_group = m_view->GetTraceGroup();
+	TraceGroup *trace_group = view->GetTraceGroup();
 	if (!trace_group)
 	{
-		m_view->CreateTraceGroup();
-		trace_group = m_view->GetTraceGroup();
+		view->CreateTraceGroup();
+		trace_group = view->GetTraceGroup();
 	}
 
-	VolumeData* vd = m_view->m_cur_vol;
+	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return;
 	Nrrd* nrrd_mask = 0;
@@ -251,7 +251,7 @@ void ComponentEditor::NewId(bool append, bool track)
 	vd->GetVR()->clear_tex_current();
 
 	//save label mask to disk
-	int cur_time = m_view->m_tseq_cur_num;
+	int cur_time = view->m_tseq_cur_num;
 	vd->SaveLabel(true, cur_time, vd->GetCurChannel());
 
 	if (new_id && track)
@@ -270,18 +270,16 @@ void ComponentEditor::NewId(bool append, bool track)
 
 void ComponentEditor::Replace()
 {
-	if (!m_view)
-		return;
 	if (m_id_empty)
 		return;
 	if (!m_id)
 		return;
-
-	int cur_time = m_view->m_tseq_cur_num;
-	//get current mask
-	VolumeData* vd = m_view->m_cur_vol;
+	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return;
+
+	int cur_time = glbin_moviemaker.GetSeqCurNum();
+	//get current mask
 	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 		return;
@@ -323,22 +321,23 @@ void ComponentEditor::Replace()
 
 void ComponentEditor::Replace(CelpList &list)
 {
-	if (!m_view)
-		return;
 	if (m_id_empty)
 		return;
 	if (!m_id)
 		return;
-
-	//trace group
-	TraceGroup *trace_group = m_view->GetTraceGroup();
-	bool track_map = trace_group && trace_group->GetTrackMap()->GetFrameNum();
-	int cur_time = m_view->m_tseq_cur_num;
-
-	//get current mask
-	VolumeData* vd = m_view->m_cur_vol;
+	RenderCanvas* view = glbin_current.canvas;
+	if (!view)
+		return;
+	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return;
+
+	//trace group
+	TraceGroup *trace_group = view->GetTraceGroup();
+	bool track_map = trace_group && trace_group->GetTrackMap()->GetFrameNum();
+	int cur_time = glbin_moviemaker.GetSeqCurNum();
+
+	//get current mask
 	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 		return;
@@ -404,14 +403,11 @@ void ComponentEditor::Replace(CelpList &list)
 
 void ComponentEditor::Combine()
 {
-	if (!m_view)
-		return;
-
-	int cur_time = m_view->m_tseq_cur_num;
-	//get current mask
-	VolumeData* vd = m_view->m_cur_vol;
+	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return;
+	int cur_time = glbin_moviemaker.GetSeqCurNum();
+	//get current mask
 	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 		return;
@@ -454,15 +450,20 @@ void ComponentEditor::Combine()
 
 void ComponentEditor::Combine(CelpList &list)
 {
-	if (!m_view)
+	RenderCanvas* view = glbin_current.canvas;
+	if (!view)
 		return;
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
+		return;
+
 	if (list.size() <= 1)
 		return;//nothing to combine
 	//trace group
-	TraceGroup *trace_group = m_view->GetTraceGroup();
+	TraceGroup *trace_group = view->GetTraceGroup();
 	if (!trace_group)
 		return;
-	int cur_time = m_view->m_tseq_cur_num;
+	int cur_time = glbin_moviemaker.GetSeqCurNum();
 
 	//find the largest cell in the list
 	flrd::Celp cell;
@@ -483,9 +484,6 @@ void ComponentEditor::Combine(CelpList &list)
 		return;
 
 	//get current mask
-	VolumeData* vd = m_view->m_cur_vol;
-	if (!vd)
-		return;
 	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 		return;
@@ -531,9 +529,7 @@ void ComponentEditor::Combine(CelpList &list)
 void ComponentEditor::ReadVolCache(VolCache& vol_cache)
 {
 	//get volume, readers
-	if (!m_view)
-		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return;
 	BaseReader* reader = vd->GetReader();
@@ -541,10 +537,11 @@ void ComponentEditor::ReadVolCache(VolCache& vol_cache)
 		return;
 	LBLReader lbl_reader;
 
+	int cur_time = glbin_moviemaker.GetSeqCurNum();
 	int chan = vd->GetCurChannel();
 	int frame = vol_cache.frame;
 
-	if (frame == m_view->m_tseq_cur_num)
+	if (frame == cur_time)
 	{
 		flvr::Texture* tex = vd->GetTexture();
 		if (!tex)
@@ -580,9 +577,7 @@ void ComponentEditor::ReadVolCache(VolCache& vol_cache)
 
 void ComponentEditor::DelVolCache(VolCache& vol_cache)
 {
-	if (!m_view)
-		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return;
 	BaseReader* reader = vd->GetReader();
@@ -590,6 +585,7 @@ void ComponentEditor::DelVolCache(VolCache& vol_cache)
 		return;
 	int chan = vd->GetCurChannel();
 	int frame = vol_cache.frame;
+	int cur_time = glbin_moviemaker.GetSeqCurNum();
 
 	if (vol_cache.valid && vol_cache.modified)
 	{
@@ -605,7 +601,7 @@ void ComponentEditor::DelVolCache(VolCache& vol_cache)
 	}
 
 	vol_cache.valid = false;
-	if (frame != m_view->m_tseq_cur_num)
+	if (frame != cur_time)
 	{
 		if (vol_cache.data)
 			nrrdNuke((Nrrd*)vol_cache.nrrd_data);

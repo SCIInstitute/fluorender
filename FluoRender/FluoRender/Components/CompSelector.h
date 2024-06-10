@@ -45,28 +45,28 @@ namespace flrd
 		ComponentSelector();
 		~ComponentSelector();
 
-		void SetVolume(VolumeData* vd)
-		{ m_vd = vd; }
-		VolumeData* GetVolume()
-		{ return m_vd; }
 		void SetSelAll(bool value)
 		{ m_sel_all = value; }
 		bool GetSelAll()
 		{ return m_sel_all; }
-		void SetId(unsigned long long id)
-		{ m_id = id; }
-		unsigned long long GetId()
-		{ return m_id; }
-		void SetMinNum(bool use, unsigned int num)
-		{ m_use_min = use; m_min_num = num; }
-		void SetMaxNum(bool use, unsigned int num)
-		{ m_use_max = use; m_max_num = num; }
+		void SetId(unsigned long long id, bool empty)
+		{
+			m_id = id; m_id_empty = empty;
+		}
+		void SetId(const std::string& str);
+		unsigned long long GetId() { return m_id; }
+		bool GetIdEmpty() { return m_id_empty; }
+		void SetUseMin(bool val) { m_use_min = val; }
+		void SetUseMax(bool val) { m_use_max = val; }
 		bool GetUseMin() { return m_use_min; }
 		bool GetUseMax() { return m_use_max; }
+		void SetMinNum(unsigned int num) { m_min_num = num; }
+		void SetMaxNum(unsigned int num) { m_max_num = num; }
 		int GetMinNum() { return m_min_num; }
 		int GetMaxNum() { return m_max_num; }
 
 		//high-level functions
+		void SelectFullComp();
 		bool GetCellList(flrd::CelpList& cl, bool links = false);
 		void GetCompSelection();
 		void SetCompSelection(std::set<unsigned long long>& ids, int mode);
@@ -84,9 +84,9 @@ namespace flrd
 		void SelectList(CelpList& list);
 
 	private:
-		VolumeData* m_vd;
 		bool m_sel_all;
 		unsigned long long m_id;
+		bool m_id_empty;
 		bool m_use_min;
 		bool m_use_max;
 		unsigned int m_min_num;

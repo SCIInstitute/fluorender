@@ -57,17 +57,27 @@ namespace flrd
 	class ComponentAnalyzer
 	{
 	public:
-		ComponentAnalyzer(VolumeData* vd=0);
+		ComponentAnalyzer();
 		~ComponentAnalyzer();
+
+		bool GetAnalyzed()
+		{ return m_analyzed; }
 
 		unsigned int GetSizeLimit()
 		{ return m_slimit; }
 		void SetSizeLimit(unsigned int size)
 		{ m_slimit = size; }
-		bool GetAnalyzed()
-		{ return m_analyzed; }
-		bool GetColocal()
-		{ return m_colocal; }
+		void SetColocal(bool val) { m_colocal = val; }
+		bool GetColocal() { return m_colocal; }
+		void SetConsistent(bool val) { m_consistent = val; }
+		bool GetConsistent() { return m_consistent; }
+		void SetColorType(int val) { m_color_type = val; }
+		int GetColorType() { return m_color_type; }
+		void SetChannelType(int val) { m_channel_type = val; }
+		int GetChannelType() { return m_channel_type; }
+		void SetAnnotType(int val) { m_annot_type = val; }
+		int GetAnnotType() { return m_annot_type; }
+
 		void SetVolume(VolumeData* vd)
 		{
 			if (!vd)
@@ -123,7 +133,7 @@ namespace flrd
 			return m_bn;
 		}
 
-		void Analyze(bool sel, bool consistent, bool colocal=false);
+		void Analyze(bool sel);
 		void MatchBricks(bool sel);
 		void UpdateMaxCompSize(bool);
 		void MakeColorConsistent();
@@ -138,19 +148,25 @@ namespace flrd
 		void OutputCompListStream(std::ostream &stream, int verbose, std::string comp_header = "");
 		void OutputCompListStr(std::string &str, int verbose, std::string comp_header="");
 		void OutputCompListFile(std::string &filename, int verbose, std::string comp_header = "");
-		bool GenAnnotations(Annotations &ann, bool consistent, int type);
-		//color_type: 1-id-based; 2-size-based
-		bool GenMultiChannels(std::list<VolumeData*> &channs, int color_type, bool consistent);
-		bool GenRgbChannels(std::list<VolumeData*> &channs, int color_type, bool consistent);
+
+		bool OutputChannels();
+		bool OutputMultiChannels(std::list<VolumeData*> &channs);
+		bool OutputRgbChannels(std::list<VolumeData*> &channs);
+		bool OutputAnnotations();
 
 		//update progress
 		CompAnalyzerFunc m_sig_progress;
 
 	private:
 		bool m_analyzed;//if used
-		int m_bn;
-		bool m_colocal;
 		unsigned int m_slimit;//size limit for connecting components
+		bool m_colocal;
+		bool m_consistent;
+		int m_channel_type;//channel type: 1-multichannel; 2-rgb channel
+		int m_color_type;//color_type: 1-id-based; 2-size-based
+		int m_annot_type;//annot type: 1-id; 2:serianl number
+
+		int m_bn;
 		std::vector<VolumeData*> m_vd_list;//list of volumes for colocalization analysis
 
 		std::vector<CompGroup> m_comp_groups;//each analyzed volume can have comp results saved
@@ -163,8 +179,9 @@ namespace flrd
 			int nx, int ny, int nz,
 			int i, int j, int k);
 
-		bool GetColor(unsigned int id, int brick_id,
-			VolumeData* vd, int color_type,
+		bool GetColor(unsigned int id,
+			int brick_id,
+			VolumeData* vd,
 			fluo::Color &color);
 		int GetColocalization(size_t bid,
 			unsigned int bi,

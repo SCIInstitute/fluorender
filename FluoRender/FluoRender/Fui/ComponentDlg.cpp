@@ -723,9 +723,9 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 
-	//selection tools
+	//id tools
 	wxBoxSizer *sizer1 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Selection Tools"),
+		new wxStaticBox(page, wxID_ANY, "Selection and Modification by IDs"),
 		wxVERTICAL);
 	wxBoxSizer* sizer11 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "ID:",
@@ -766,7 +766,7 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer11->Add(m_analysis_max_check, 0, wxALIGN_CENTER);
 	sizer11->Add(10, 10);
 	sizer11->Add(m_analysis_max_spin, 0, wxALIGN_CENTER);
-	//buttons
+	//selection
 	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
 	m_comp_append_btn = new wxButton(page, wxID_ANY, "Append",
 		wxDefaultPosition, wxDefaultSize);
@@ -790,32 +790,8 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer12->Add(5, 5);
 	sizer12->Add(m_comp_full_btn, 1, wxEXPAND);
 	sizer12->Add(m_comp_clear_btn, 1, wxEXPAND);
-	//
-	sizer1->Add(10, 10);
-	sizer1->Add(sizer11, 1, wxEXPAND);
-	sizer1->Add(10, 10);
-	sizer1->Add(sizer12, 1, wxEXPAND);
-	sizer1->Add(10, 10);
-
 	//modify
-	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Modify IDs"),
-		wxVERTICAL);
-	wxBoxSizer* sizer21 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "ID:",
-		wxDefaultPosition, wxDefaultSize);
-	m_new_id_text = new wxTextCtrl(page, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(80, 23)), wxTE_RIGHT);
-	m_new_id_x_btn = new wxButton(page, wxID_ANY, "X",
-		wxDefaultPosition, FromDIP(wxSize(23, 23)));
-	m_new_id_text->Bind(wxEVT_TEXT, &ComponentDlg::OnNewIDText, this);
-	m_new_id_x_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnNewIDX, this);
-	sizer21->Add(5, 5);
-	sizer21->Add(st, 0, wxALIGN_CENTER);
-	sizer21->Add(m_new_id_text, 0, wxALIGN_CENTER);
-	sizer21->Add(m_new_id_x_btn, 0, wxALIGN_CENTER);
-	//buttons
-	wxBoxSizer* sizer22 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer13 = new wxBoxSizer(wxHORIZONTAL);
 	m_comp_new_btn = new wxButton(page, wxID_ANY, "Assign",
 		wxDefaultPosition, wxDefaultSize);
 	m_comp_add_btn = new wxButton(page, wxID_ANY, "Add",
@@ -831,25 +807,27 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	m_comp_replace_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnCompReplace, this);
 	m_comp_clean_bkg_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnCompCleanBkg, this);
 	m_comp_combine_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnCompCombine, this);
-	sizer22->Add(5, 5);
-	sizer22->Add(m_comp_new_btn, 1, wxEXPAND);
-	sizer22->Add(m_comp_add_btn, 1, wxEXPAND);
-	sizer22->Add(m_comp_replace_btn, 1, wxEXPAND);
-	sizer22->Add(5, 5);
-	sizer22->Add(m_comp_clean_bkg_btn, 1, wxEXPAND);
-	sizer22->Add(m_comp_combine_btn, 1, wxEXPAND);
+	sizer13->Add(5, 5);
+	sizer13->Add(m_comp_new_btn, 1, wxEXPAND);
+	sizer13->Add(m_comp_add_btn, 1, wxEXPAND);
+	sizer13->Add(m_comp_replace_btn, 1, wxEXPAND);
+	sizer13->Add(5, 5);
+	sizer13->Add(m_comp_clean_bkg_btn, 1, wxEXPAND);
+	sizer13->Add(m_comp_combine_btn, 1, wxEXPAND);
 	//
-	sizer2->Add(10, 10);
-	sizer2->Add(sizer21, 1, wxEXPAND);
-	sizer2->Add(10, 10);
-	sizer2->Add(sizer22, 1, wxEXPAND);
-	sizer2->Add(10, 10);
+	sizer1->Add(10, 10);
+	sizer1->Add(sizer11, 1, wxEXPAND);
+	sizer1->Add(10, 10);
+	sizer1->Add(sizer12, 1, wxEXPAND);
+	sizer1->Add(10, 10);
+	sizer1->Add(sizer13, 1, wxEXPAND);
+	sizer1->Add(10, 10);
 
 	//Options
-	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Options"),
 		wxVERTICAL);
-	wxBoxSizer *sizer31 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer21 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Contact Size:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_con_size_sldr = new wxSingleSlider(page, wxID_ANY, 5, 0, 100,
@@ -858,40 +836,40 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_con_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnConSizeSldr, this);
 	m_con_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnConSizeText, this);
-	sizer31->Add(5, 5);
-	sizer31->Add(st, 0, wxALIGN_CENTER);
-	sizer31->Add(5, 5);
-	sizer31->Add(m_con_size_sldr, 1, wxEXPAND);
-	sizer31->Add(5, 5);
-	sizer31->Add(m_con_size_text, 0, wxALIGN_CENTER);
-	sizer31->Add(5, 5);
-	wxBoxSizer *sizer32 = new wxBoxSizer(wxHORIZONTAL);
+	sizer21->Add(5, 5);
+	sizer21->Add(st, 0, wxALIGN_CENTER);
+	sizer21->Add(5, 5);
+	sizer21->Add(m_con_size_sldr, 1, wxEXPAND);
+	sizer21->Add(5, 5);
+	sizer21->Add(m_con_size_text, 0, wxALIGN_CENTER);
+	sizer21->Add(5, 5);
+	wxBoxSizer *sizer22 = new wxBoxSizer(wxHORIZONTAL);
 	m_consistent_check = new wxCheckBox(page, wxID_ANY, "Make color consistent for multiple bricks",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	sizer32->Add(5, 5);
-	sizer32->Add(m_consistent_check, 0, wxALIGN_CENTER);
-	wxBoxSizer *sizer33 = new wxBoxSizer(wxHORIZONTAL);
+	sizer22->Add(5, 5);
+	sizer22->Add(m_consistent_check, 0, wxALIGN_CENTER);
+	wxBoxSizer *sizer23 = new wxBoxSizer(wxHORIZONTAL);
 	m_colocal_check = new wxCheckBox(page, wxID_ANY, "Compute colocalization with other channels",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_consistent_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnConsistentCheck, this);
 	m_colocal_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnColocalCheck, this);
-	sizer33->Add(5, 5);
-	sizer33->Add(m_colocal_check, 0, wxALIGN_CENTER);
+	sizer23->Add(5, 5);
+	sizer23->Add(m_colocal_check, 0, wxALIGN_CENTER);
 	//
-	sizer3->Add(10, 10);
-	sizer3->Add(sizer31, 0, wxEXPAND);
-	sizer3->Add(10, 10);
-	sizer3->Add(sizer32, 0, wxEXPAND);
-	sizer3->Add(10, 10);
-	sizer3->Add(sizer33, 0, wxEXPAND);
-	sizer3->Add(10, 10);
+	sizer2->Add(10, 10);
+	sizer2->Add(sizer21, 0, wxEXPAND);
+	sizer2->Add(10, 10);
+	sizer2->Add(sizer22, 0, wxEXPAND);
+	sizer2->Add(10, 10);
+	sizer2->Add(sizer23, 0, wxEXPAND);
+	sizer2->Add(10, 10);
 
 	//output
-	wxBoxSizer *sizer4 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Output as New Channels"),
 		wxVERTICAL);
 	//radios
-	wxBoxSizer *sizer41 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer31 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Channel Type:",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	m_output_multi_rb = new wxRadioButton(page, ID_OutputMultiRb, "Each Comp.",
@@ -900,14 +878,14 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize);
 	m_output_multi_rb->Bind(wxEVT_RADIOBUTTON, &ComponentDlg::OnOutputTypeRadio, this);
 	m_output_rgb_rb->Bind(wxEVT_RADIOBUTTON, &ComponentDlg::OnOutputTypeRadio, this);
-	sizer41->Add(5, 5);
-	sizer41->Add(st, 0, wxALIGN_CENTER);
-	sizer41->Add(m_output_multi_rb, 0, wxALIGN_CENTER);
-	sizer41->Add(5, 5);
-	sizer41->Add(m_output_rgb_rb, 0, wxALIGN_CENTER);
-	sizer41->Add(5, 5);
+	sizer31->Add(5, 5);
+	sizer31->Add(st, 0, wxALIGN_CENTER);
+	sizer31->Add(m_output_multi_rb, 0, wxALIGN_CENTER);
+	sizer31->Add(5, 5);
+	sizer31->Add(m_output_rgb_rb, 0, wxALIGN_CENTER);
+	sizer31->Add(5, 5);
 	//buttons
-	wxBoxSizer *sizer42 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer32 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Output:",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	m_output_random_btn = new wxButton(page, ID_OutputRandomBtn, "Random Colors",
@@ -922,24 +900,24 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	m_output_size_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputChannels, this);
 	m_output_id_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputAnnotation, this);
 	m_output_sn_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputAnnotation, this);
-	sizer42->Add(5, 5);
-	sizer42->Add(st, 0, wxALIGN_CENTER);
-	sizer42->Add(m_output_random_btn, 1, wxEXPAND);
-	sizer42->Add(m_output_size_btn, 1, wxEXPAND);
-	sizer42->Add(m_output_id_btn, 1, wxEXPAND);
-	sizer42->Add(m_output_sn_btn, 1, wxEXPAND);
-	sizer42->Add(5, 5);
+	sizer32->Add(5, 5);
+	sizer32->Add(st, 0, wxALIGN_CENTER);
+	sizer32->Add(m_output_random_btn, 1, wxEXPAND);
+	sizer32->Add(m_output_size_btn, 1, wxEXPAND);
+	sizer32->Add(m_output_id_btn, 1, wxEXPAND);
+	sizer32->Add(m_output_sn_btn, 1, wxEXPAND);
+	sizer32->Add(5, 5);
 	//
-	sizer4->Add(10, 10);
-	sizer4->Add(sizer41, 1, wxEXPAND);
-	sizer4->Add(10, 10);
-	sizer4->Add(sizer42, 1, wxEXPAND);
-	sizer4->Add(10, 10);
+	sizer3->Add(10, 10);
+	sizer3->Add(sizer31, 1, wxEXPAND);
+	sizer3->Add(10, 10);
+	sizer3->Add(sizer32, 1, wxEXPAND);
+	sizer3->Add(10, 10);
 
-	wxBoxSizer *sizer5 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer4 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Distances"),
 		wxVERTICAL);
-	wxBoxSizer *sizer51 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer41 = new wxBoxSizer(wxHORIZONTAL);
 	m_dist_neighbor_check = new wxCheckBox(page, wxID_ANY, "Filter Nearest Neighbors",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_dist_all_chan_check = new wxCheckBox(page, wxID_ANY, "All Channel Results",
@@ -949,43 +927,43 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	m_dist_neighbor_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnDistNeighborCheck, this);
 	m_dist_all_chan_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnDistAllChanCheck, this);
 	m_dist_output_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnDistOutput, this);
-	sizer51->Add(5, 5);
-	sizer51->Add(m_dist_neighbor_check, 0, wxALIGN_CENTER);
-	sizer51->Add(5, 5);
-	sizer51->Add(m_dist_all_chan_check, 0, wxALIGN_CENTER);
-	sizer51->AddStretchSpacer(1);
-	sizer51->Add(m_dist_output_btn, 0, wxALIGN_CENTER);
-	sizer51->Add(5, 5);
-	wxBoxSizer *sizer52 = new wxBoxSizer(wxHORIZONTAL);
+	sizer41->Add(5, 5);
+	sizer41->Add(m_dist_neighbor_check, 0, wxALIGN_CENTER);
+	sizer41->Add(5, 5);
+	sizer41->Add(m_dist_all_chan_check, 0, wxALIGN_CENTER);
+	sizer41->AddStretchSpacer(1);
+	sizer41->Add(m_dist_output_btn, 0, wxALIGN_CENTER);
+	sizer41->Add(5, 5);
+	wxBoxSizer *sizer42 = new wxBoxSizer(wxHORIZONTAL);
 	m_dist_neighbor_sldr = new wxSingleSlider(page, wxID_ANY, 1, 1, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_dist_neighbor_text = new wxTextCtrl(page, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_dist_neighbor_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDistNeighborSldr, this);
 	m_dist_neighbor_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDistNeighborText, this);
-	sizer52->Add(5, 5);
-	sizer52->Add(m_dist_neighbor_sldr, 1, wxEXPAND);
-	sizer52->Add(5, 5);
-	sizer52->Add(m_dist_neighbor_text, 0, wxALIGN_CENTER);
-	sizer52->Add(5, 5);
+	sizer42->Add(5, 5);
+	sizer42->Add(m_dist_neighbor_sldr, 1, wxEXPAND);
+	sizer42->Add(5, 5);
+	sizer42->Add(m_dist_neighbor_text, 0, wxALIGN_CENTER);
+	sizer42->Add(5, 5);
 	//
-	sizer5->Add(10, 10);
-	sizer5->Add(sizer51, 0, wxEXPAND);
-	sizer5->Add(10, 10);
-	sizer5->Add(sizer52, 0, wxEXPAND);
-	sizer5->Add(10, 10);
+	sizer4->Add(10, 10);
+	sizer4->Add(sizer41, 0, wxEXPAND);
+	sizer4->Add(10, 10);
+	sizer4->Add(sizer42, 0, wxEXPAND);
+	sizer4->Add(10, 10);
 
 	//alignment
-	wxBoxSizer *sizer6 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer5 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Align Render View to Analyzed Components"),
 		wxVERTICAL);
-	wxBoxSizer* sizer61 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer51 = new wxBoxSizer(wxHORIZONTAL);
 	m_align_center = new wxCheckBox(page, wxID_ANY,
 		"Move to Center", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_align_center->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnAlignCenterChk, this);
-	sizer61->Add(5, 5);
-	sizer61->Add(m_align_center, 0, wxALIGN_CENTER);
-	wxBoxSizer* sizer62 = new wxBoxSizer(wxHORIZONTAL);
+	sizer51->Add(5, 5);
+	sizer51->Add(m_align_center, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer52 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Tri Axes:",
 		wxDefaultPosition, FromDIP(wxSize(50, 22)));
 	m_align_xyz = new wxButton(page, ID_AlignXYZ, "XYZ",
@@ -1006,20 +984,20 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	m_align_xzy->Bind(wxEVT_BUTTON, &ComponentDlg::OnAlignPca, this);
 	m_align_yzx->Bind(wxEVT_BUTTON, &ComponentDlg::OnAlignPca, this);
 	m_align_zyx->Bind(wxEVT_BUTTON, &ComponentDlg::OnAlignPca, this);
-	sizer62->Add(5, 5);
-	sizer62->Add(st, 0, wxALIGN_CENTER);
-	sizer62->Add(m_align_xyz, 1, wxEXPAND);
-	sizer62->Add(m_align_yxz, 1, wxEXPAND);
-	sizer62->Add(m_align_zxy, 1, wxEXPAND);
-	sizer62->Add(m_align_xzy, 1, wxEXPAND);
-	sizer62->Add(m_align_yzx, 1, wxEXPAND);
-	sizer62->Add(m_align_zyx, 1, wxEXPAND);
+	sizer52->Add(5, 5);
+	sizer52->Add(st, 0, wxALIGN_CENTER);
+	sizer52->Add(m_align_xyz, 1, wxEXPAND);
+	sizer52->Add(m_align_yxz, 1, wxEXPAND);
+	sizer52->Add(m_align_zxy, 1, wxEXPAND);
+	sizer52->Add(m_align_xzy, 1, wxEXPAND);
+	sizer52->Add(m_align_yzx, 1, wxEXPAND);
+	sizer52->Add(m_align_zyx, 1, wxEXPAND);
 	//
-	sizer6->Add(5, 5);
-	sizer6->Add(sizer61, 1, wxEXPAND);
-	sizer6->Add(5, 5);
-	sizer6->Add(sizer62, 1, wxEXPAND);
-	sizer6->Add(5, 5);
+	sizer5->Add(5, 5);
+	sizer5->Add(sizer51, 1, wxEXPAND);
+	sizer5->Add(5, 5);
+	sizer5->Add(sizer52, 1, wxEXPAND);
+	sizer5->Add(5, 5);
 
 	//all
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
@@ -1033,8 +1011,6 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizerv->Add(sizer4, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer5, 0, wxEXPAND);
-	sizerv->Add(10, 10);
-	sizerv->Add(sizer6, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 
 	page->SetSizer(sizerv);
@@ -1058,6 +1034,7 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	int ival;
 	double dval;
 	bool bval;
+	unsigned long long uval;
 
 	if (update_all || FOUND_VALUE(gstUseSelection))
 		m_use_sel_chk->SetValue(glbin_comp_generator.GetUseSel());
@@ -1272,6 +1249,13 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	//analysis page
+	//id text
+	if (update_all || FOUND_VALUE(gstCompIdColor))
+	{
+		wxColor color = glbin_comp_editor.GetWxColor();
+		m_comp_id_text->SetBackgroundColour(color);
+		m_comp_id_text->Refresh();
+	}
 	//size limiters
 	if (update_all || FOUND_VALUE(gstUseMin))
 	{
@@ -1298,14 +1282,20 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 	//options
 	if (update_all || FOUND_VALUE(gstCompConsistent))
-		m_consistent_check->SetValue(glbin_comp_def.m_consistent);
+	{
+		bval = glbin_comp_analyzer.GetConsistent();
+		m_consistent_check->SetValue(bval);
+	}
 	if (update_all || FOUND_VALUE(gstCompColocal))
-		m_colocal_check->SetValue(glbin_comp_def.m_colocal);
+	{
+		bval = glbin_comp_analyzer.GetColocal();
+		m_colocal_check->SetValue(bval);
+	}
 
 	//output type
 	if (update_all || FOUND_VALUE(gstCompOutputType))
 	{
-		ival = glbin_comp_def.m_output_type;
+		ival = glbin_comp_analyzer.GetColorType();
 		m_output_multi_rb->SetValue(ival == 1);
 		m_output_rgb_rb->SetValue(ival == 2);
 	}
@@ -1636,44 +1626,50 @@ void ComponentDlg::OnDensityStatsSizeText(wxCommandEvent &event)
 
 void ComponentDlg::OnFixateCheck(wxCommandEvent &event)
 {
-	glbin_comp_def.m_fixate = m_fixate_check->GetValue();
-	EnableFixate(glbin_comp_def.m_fixate);
+	bool bval = m_fixate_check->GetValue();
+	glbin_comp_generator.SetFixate(bval);
 
-	if (glbin_comp_def.m_fixate)
-		Fixate();
+	if (bval)
+		glbin_comp_generator.Fixate();
 
 	if (glbin_comp_def.m_auto_update)
 	{
-		bool bval = glbin_comp_def.m_clean;
-		glbin_comp_def.m_clean = false;
-		GenerateComp(false);
-		glbin_comp_def.m_clean = bval;
+		bval = glbin_comp_generator.GetClean();
+		glbin_comp_generator.SetClean(false);
+		glbin_comp_generator.GenerateComp(false);
+		glbin_comp_generator.SetClean(bval);
+		FluoRefresh(2, { gstFixateEnable });
 	}
+	else
+		FluoUpdate({ gstFixateEnable });
 }
 
 void ComponentDlg::OnGrowFixedCheck(wxCommandEvent &event)
 {
-	glbin_comp_def.m_grow_fixed = m_grow_fixed_check->GetValue();
+	bool bval = m_grow_fixed_check->GetValue();
+	glbin_comp_generator.SetGrowFixed(bval);
 
 	if (glbin_comp_def.m_auto_update)
 	{
-		bool bval = glbin_comp_def.m_clean;
-		glbin_comp_def.m_clean = false;
-		GenerateComp(false);
-		glbin_comp_def.m_clean = bval;
+		bval = glbin_comp_generator.GetClean();
+		glbin_comp_generator.SetClean(false);
+		glbin_comp_generator.GenerateComp(false);
+		glbin_comp_generator.SetClean(bval);
+		FluoRefresh(3, { gstNull });
 	}
 }
 
 void ComponentDlg::OnFixUpdateBtn(wxCommandEvent &event)
 {
-	Fixate();
+	glbin_comp_generator.Fixate();
 
 	if (glbin_comp_def.m_auto_update)
 	{
-		bool bval = glbin_comp_def.m_clean;
-		glbin_comp_def.m_clean = false;
-		GenerateComp(false);
-		glbin_comp_def.m_clean = bval;
+		bool bval = glbin_comp_generator.GetClean();
+		glbin_comp_generator.SetClean(false);
+		glbin_comp_generator.GenerateComp(false);
+		glbin_comp_generator.SetClean(bval);
+		FluoRefresh(3, { gstNull });
 	}
 }
 
@@ -1689,21 +1685,26 @@ void ComponentDlg::OnFixSizeText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_fix_size_text->GetValue().ToLong(&val);
-	glbin_comp_def.m_fix_size = val;
-	m_fix_size_sldr->ChangeValue(glbin_comp_def.m_fix_size);
+	m_fix_size_sldr->ChangeValue(val);
+	glbin_comp_generator.SetFixSize(val);
 
 	if (glbin_comp_def.m_auto_update)
-		GenerateComp(false);
-	if (m_record_cmd)
-		AddCmd("fixate");
+		glbin_comp_generator.GenerateComp(false);
+	if (glbin_comp_generator.GetRecordCmd())
+		glbin_comp_generator.AddCmd("fixate");
+	FluoRefresh(2, { gstRecordCmd });
 }
 
 void ComponentDlg::OnCleanCheck(wxCommandEvent &event)
 {
-	EnableClean(m_clean_check->GetValue());
+	bool bval = m_clean_check->GetValue();
+	glbin_comp_generator.SetClean(bval);
 
 	if (glbin_comp_def.m_auto_update)
-		GenerateComp();
+	{
+		glbin_comp_generator.GenerateComp();
+		FluoRefresh(3, { gstNull });
+	}
 }
 
 void ComponentDlg::OnCleanIterSldr(wxScrollEvent &event)
@@ -1718,11 +1719,14 @@ void ComponentDlg::OnCleanIterText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_clean_iter_text->GetValue().ToLong(&val);
-	glbin_comp_def.m_clean_iter = (int)val;
-	m_clean_iter_sldr->ChangeValue(glbin_comp_def.m_clean_iter);
+	m_clean_iter_sldr->ChangeValue(val);
+	glbin_comp_generator.SetCleanIter(val);
 
 	if (glbin_comp_def.m_auto_update)
-		GenerateComp();
+	{
+		glbin_comp_generator.GenerateComp();
+		FluoRefresh(3, { gstNull });
+	}
 }
 
 void ComponentDlg::OnCleanLimitSldr(wxScrollEvent &event)
@@ -1737,17 +1741,21 @@ void ComponentDlg::OnCleanLimitText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_clean_limit_text->GetValue().ToLong(&val);
-	glbin_comp_def.m_clean_size_vl = (int)val;
-	m_clean_limit_sldr->ChangeValue(glbin_comp_def.m_clean_size_vl);
+	m_clean_limit_sldr->ChangeValue(val);
+	glbin_comp_generator.SetCleanSize(val);
 
 	if (glbin_comp_def.m_auto_update)
-		GenerateComp();
+	{
+		glbin_comp_generator.GenerateComp();
+		FluoRefresh(3, { gstNull });
+	}
 }
 
 //record
 void ComponentDlg::OnRecordCmd(wxCommandEvent &event)
 {
-	m_record_cmd = m_record_cmd_btn->GetValue();
+	bool val = m_record_cmd_btn->GetValue();
+	glbin_comp_generator.SetRecordCmd(val);
 }
 
 void ComponentDlg::OnPlayCmd(wxCommandEvent &event)
@@ -1795,28 +1803,11 @@ void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
 }
 
 //clustering page
-void ComponentDlg::OnClusterMethodExmaxCheck(wxCommandEvent &event)
+void ComponentDlg::OnClusterMethodCheck(wxCommandEvent &event)
 {
-	glbin_comp_def.m_cluster_method_exmax = true;
-	glbin_comp_def.m_cluster_method_dbscan = false;
-	glbin_comp_def.m_cluster_method_kmeans = false;
-	UpdateClusterMethod();
-}
-
-void ComponentDlg::OnClusterMethodDbscanCheck(wxCommandEvent &event)
-{
-	glbin_comp_def.m_cluster_method_exmax = false;
-	glbin_comp_def.m_cluster_method_dbscan = true;
-	glbin_comp_def.m_cluster_method_kmeans = false;
-	UpdateClusterMethod();
-}
-
-void ComponentDlg::OnClusterMethodKmeansCheck(wxCommandEvent &event)
-{
-	glbin_comp_def.m_cluster_method_exmax = false;
-	glbin_comp_def.m_cluster_method_dbscan = false;
-	glbin_comp_def.m_cluster_method_kmeans = true;
-	UpdateClusterMethod();
+	int id = event.GetId();
+	glbin_clusterizer.SetMethod(id);
+	FluoUpdate({ gstClusterMethod });
 }
 
 //parameters
@@ -1832,8 +1823,8 @@ void ComponentDlg::OnClusterClnumText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_cluster_clnum_text->GetValue().ToLong(&val);
-	glbin_comp_def.m_cluster_clnum = (int)val;
-	m_cluster_clnum_sldr->ChangeValue(glbin_comp_def.m_cluster_clnum);
+	m_cluster_clnum_sldr->ChangeValue(val);
+	glbin_clusterizer.SetNum(val);
 }
 
 void ComponentDlg::OnClusterMaxiterSldr(wxScrollEvent &event)
@@ -1848,8 +1839,8 @@ void ComponentDlg::OnClusterMaxiterText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_cluster_maxiter_text->GetValue().ToLong(&val);
-	glbin_comp_def.m_cluster_maxiter = (int)val;
-	m_cluster_maxiter_sldr->ChangeValue(glbin_comp_def.m_cluster_maxiter);
+	m_cluster_maxiter_sldr->ChangeValue(val);
+	glbin_clusterizer.SetMaxIter(val);
 }
 
 void ComponentDlg::OnClusterTolSldr(wxScrollEvent &event)
@@ -1864,8 +1855,8 @@ void ComponentDlg::OnClusterTolText(wxCommandEvent &event)
 {
 	double val = 0.9;
 	m_cluster_tol_text->GetValue().ToDouble(&val);
-	glbin_comp_def.m_cluster_tol = (float)val;
 	m_cluster_tol_sldr->ChangeValue(std::round(val * 100));
+	glbin_clusterizer.SetTol((float)val);
 }
 
 void ComponentDlg::OnClusterSizeSldr(wxScrollEvent &event)
@@ -1880,8 +1871,8 @@ void ComponentDlg::OnClusterSizeText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_cluster_size_text->GetValue().ToLong(&val);
-	glbin_comp_def.m_cluster_size = (int)val;
-	m_cluster_size_sldr->ChangeValue(glbin_comp_def.m_cluster_size);
+	m_cluster_size_sldr->ChangeValue(val);
+	glbin_clusterizer.SetSize(val);
 }
 
 void ComponentDlg::OnClusterEpsSldr(wxScrollEvent &event)
@@ -1896,157 +1887,100 @@ void ComponentDlg::OnClusterepsText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_cluster_eps_text->GetValue().ToDouble(&val);
-	glbin_comp_def.m_cluster_eps = val;
-	m_cluster_eps_sldr->ChangeValue(std::round(glbin_comp_def.m_cluster_eps * 10.0));
+	m_cluster_eps_sldr->ChangeValue(std::round(val * 10.0));
+	glbin_clusterizer.SetEps(val);
 }
 
 //analysis page
 void ComponentDlg::OnCompIdText(wxCommandEvent &event)
 {
 	unsigned long id;
-	wxColor color;
 	wxString str = m_comp_id_text->GetValue();
+	glbin_comp_selector.SetId(str.ToStdString());
 	if (str.ToULong(&id))
-	{
-		glbin_comp_editor.SetVolume(glbin_current.vol_data);
 		glbin_comp_editor.SetId(id, false);
-	}
 	else
 		glbin_comp_editor.SetId(0, true);
-
-	color = glbin_comp_editor.GetWxColor();
-	m_comp_id_text->SetBackgroundColour(color);
-	m_comp_id_text->Refresh();
+	FluoUpdate({ gstCompIdColor });
 }
 
 void ComponentDlg::OnCompIdXBtn(wxCommandEvent &event)
 {
 	m_comp_id_text->Clear();
+	FluoUpdate({ gstCompIdColor });
 }
 
 void ComponentDlg::OnAnalysisMinCheck(wxCommandEvent &event)
 {
-	if (m_analysis_min_check->GetValue())
-	{
-		m_analysis_min_spin->Enable();
-		glbin_comp_def.m_use_min = true;
-	}
-	else
-	{
-		m_analysis_min_spin->Disable();
-		glbin_comp_def.m_use_min = false;
-	}
+	bool bval = m_analysis_min_check->GetValue();
+	m_analysis_min_spin->Enable(bval);
+	glbin_comp_selector.SetUseMin(bval);
+	FluoUpdate({ gstUseMin });
 }
 
 void ComponentDlg::OnAnalysisMinSpin(wxSpinEvent &event)
 {
-	glbin_comp_def.m_min_num = m_analysis_min_spin->GetValue();
+	int val = m_analysis_min_spin->GetValue();
+	glbin_comp_selector.SetMinNum(val);
 }
 
 void ComponentDlg::OnAnalysisMinText(wxCommandEvent &event)
 {
-	glbin_comp_def.m_min_num = m_analysis_min_spin->GetValue();
+	int val = m_analysis_min_spin->GetValue();
+	glbin_comp_selector.SetMinNum(val);
 }
 
 void ComponentDlg::OnAnalysisMaxCheck(wxCommandEvent &event)
 {
-	if (m_analysis_max_check->GetValue())
-	{
-		m_analysis_max_spin->Enable();
-		glbin_comp_def.m_use_max = true;
-	}
-	else
-	{
-		m_analysis_max_spin->Disable();
-		glbin_comp_def.m_use_max = false;
-	}
+	bool bval = m_analysis_max_check->GetValue();
+	m_analysis_max_spin->Enable(bval);
+	glbin_comp_selector.SetUseMax(bval);
+	FluoUpdate({ gstUseMax });
 }
 
 void ComponentDlg::OnAnalysisMaxSpin(wxSpinEvent &event)
 {
-	glbin_comp_def.m_max_num = m_analysis_max_spin->GetValue();
+	int val = m_analysis_max_spin->GetValue();
+	glbin_comp_selector.SetMaxNum(val);
 }
 
 void ComponentDlg::OnAnalysisMaxText(wxCommandEvent &event)
 {
-	glbin_comp_def.m_max_num = m_analysis_max_spin->GetValue();
+	int val = m_analysis_max_spin->GetValue();
+	glbin_comp_selector.SetMaxNum(val);
 }
 
 void ComponentDlg::OnCompFull(wxCommandEvent &event)
 {
-	SelectFullComp();
+	glbin_comp_selector.SelectFullComp();
+	FluoRefresh(0, { gstComp, gstSelUndo });
 }
 
 void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 {
-	wxString str;
-	std::string sstr;
-	//get id
-	unsigned int id;
-	int brick_id;
-	str = m_comp_id_text->GetValue();
-	sstr = str.ToStdString();
+	glbin_comp_selector.Exclusive();
+	FluoRefresh(0, { gstComp, gstSelUndo });
 
-	if (GetIds(sstr, id, brick_id))
-	{
-		//get current mask
-		glbin_comp_selector.SetVolume(glbin_current.vol_data);
-		glbin_comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
-
-		//cell size filter
-		bool use = m_analysis_min_check->GetValue();
-		unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
-		glbin_comp_selector.SetMinNum(use, num);
-		use = m_analysis_max_check->GetValue();
-		num = (unsigned int)(m_analysis_max_spin->GetValue());
-		glbin_comp_selector.SetMaxNum(use, num);
-		glbin_comp_selector.Exclusive();
-
-		FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
-
-		//frame
-		//if (m_frame)
-		//{
-		//	if (m_frame->GetBrushToolDlg())
-		//	{
-		//		if (m_view->m_paint_count)
-		//			m_frame->GetBrushToolDlg()->Update(0);
-		//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
-		//	}
-		//	if (m_frame->GetColocalizationDlg() &&
-		//		m_view->m_paint_colocalize)
-		//		m_frame->GetColocalizationDlg()->Colocalize();
-		//}
-	}
+	//frame
+	//if (m_frame)
+	//{
+	//	if (m_frame->GetBrushToolDlg())
+	//	{
+	//		if (m_view->m_paint_count)
+	//			m_frame->GetBrushToolDlg()->Update(0);
+	//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	//	}
+	//	if (m_frame->GetColocalizationDlg() &&
+	//		m_view->m_paint_colocalize)
+	//		m_frame->GetColocalizationDlg()->Colocalize();
+	//}
 }
 
 void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 {
-	wxString str;
-	std::string sstr;
-	//get id
-	unsigned int id;
-	int brick_id;
-	str = m_comp_id_text->GetValue();
-	sstr = str.ToStdString();
-	bool get_all = GetIds(sstr, id, brick_id);
-	get_all = !get_all;
-
-	//get current mask
-	glbin_comp_selector.SetVolume(glbin_current.vol_data);
-	glbin_comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
-
-	//cell size filter
-	bool use = m_analysis_min_check->GetValue();
-	unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
-	glbin_comp_selector.SetMinNum(use, num);
-	use = m_analysis_max_check->GetValue();
-	num = (unsigned int)(m_analysis_max_spin->GetValue());
-	glbin_comp_selector.SetMaxNum(use, num);
+	bool get_all = glbin_comp_selector.GetIdEmpty();
 	glbin_comp_selector.Select(get_all);
-
-	FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
-
+	FluoRefresh(0, { gstComp, gstSelUndo });
 	//frame
 	//if (m_frame)
 	//{
@@ -2064,11 +1998,8 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 
 void ComponentDlg::OnCompAll(wxCommandEvent &event)
 {
-	//get current vd
-	glbin_comp_selector.SetVolume(glbin_current.vol_data);
 	glbin_comp_selector.All();
-
-	FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(0, { gstComp, gstSelUndo });
 
 	//frame
 	//if (m_frame)
@@ -2087,15 +2018,8 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 
 void ComponentDlg::OnCompClear(wxCommandEvent &event)
 {
-	//get current vd
-	glbin_comp_selector.SetVolume(glbin_current.vol_data);
 	glbin_comp_selector.Clear();
-
-	FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
-
-	//frame
-	//if (m_frame && m_frame->GetBrushToolDlg())
-	//	m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	FluoRefresh(0, { gstComp, gstSelUndo });
 }
 
 void ComponentDlg::OnShuffle(wxCommandEvent &event)
@@ -2106,66 +2030,37 @@ void ComponentDlg::OnShuffle(wxCommandEvent &event)
 		return;
 
 	vd->IncShuffle();
-	FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
-}
-
-//modify
-void ComponentDlg::OnNewIDText(wxCommandEvent &event)
-{
-	unsigned long id;
-	wxColor color;
-	wxString str = m_new_id_text->GetValue();
-	if (str.ToULong(&id))
-	{
-		glbin_comp_editor.SetVolume(glbin_current.vol_data);
-		glbin_comp_editor.SetId(id, false);
-	}
-	else
-		glbin_comp_editor.SetId(0, true);
-
-	color = glbin_comp_editor.GetWxColor();
-	m_new_id_text->SetBackgroundColour(color);
-	m_new_id_text->Refresh();
-}
-
-void ComponentDlg::OnNewIDX(wxCommandEvent& event)
-{
-	m_new_id_text->Clear();
+	FluoRefresh(3, { gstNull });
 }
 
 void ComponentDlg::OnCompNew(wxCommandEvent& event)
 {
-	glbin_comp_editor.SetView(glbin_current.canvas);
 	glbin_comp_editor.NewId(false, false);
-	FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(3, { gstNull });
 }
 
 void ComponentDlg::OnCompAdd(wxCommandEvent& event)
 {
-	glbin_comp_editor.SetView(glbin_current.canvas);
 	glbin_comp_editor.NewId(true, false);
-	FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(3, { gstNull });
 }
 
 void ComponentDlg::OnCompReplace(wxCommandEvent& event)
 {
-	glbin_comp_editor.SetView(glbin_current.canvas);
 	glbin_comp_editor.Replace();
-	FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(3, { gstNull });
 }
 
 void ComponentDlg::OnCompCleanBkg(wxCommandEvent& event)
 {
-	glbin_comp_editor.SetVolume(glbin_current.vol_data);
 	glbin_comp_editor.Clean(0);
-	FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(3, { gstNull });
 }
 
 void ComponentDlg::OnCompCombine(wxCommandEvent& event)
 {
-	glbin_comp_editor.SetView(glbin_current.canvas);
 	glbin_comp_editor.Combine();
-	FluoRefresh(3, { gstNull }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(3, { gstNull });
 }
 
 void ComponentDlg::OnConSizeSldr(wxScrollEvent &event)
@@ -2186,12 +2081,14 @@ void ComponentDlg::OnConSizeText(wxCommandEvent &event)
 
 void ComponentDlg::OnConsistentCheck(wxCommandEvent &event)
 {
-	glbin_comp_def.m_consistent = m_consistent_check->GetValue();
+	bool bval = m_consistent_check->GetValue();
+	glbin_comp_analyzer.SetConsistent(bval);
 }
 
 void ComponentDlg::OnColocalCheck(wxCommandEvent &event)
 {
-	glbin_comp_def.m_colocal = m_colocal_check->GetValue();
+	bool bval = m_colocal_check->GetValue();
+	glbin_comp_analyzer.SetColocal(bval);
 }
 
 //output
@@ -2201,159 +2098,40 @@ void ComponentDlg::OnOutputTypeRadio(wxCommandEvent &event)
 	switch (id)
 	{
 	case ID_OutputMultiRb:
-		glbin_comp_def.m_output_type = 1;
+		glbin_comp_analyzer.SetChannelType(1);
 		break;
 	case ID_OutputRgbRb:
-		glbin_comp_def.m_output_type = 2;
+		glbin_comp_analyzer.SetChannelType(2);
 		break;
 	}
 }
 
-void ComponentDlg::OutputMulti(int color_type)
-{
-	if (!m_view || !m_view->m_cur_vol)
-		return;
-	bool refresh = false;
-
-	glbin_comp_analyzer.SetVolume(m_view->m_cur_vol);
-	list<VolumeData*> channs;
-	if (glbin_comp_analyzer.GenMultiChannels(channs, color_type, glbin_comp_def.m_consistent))
-	{
-		if (m_frame)
-		{
-			wxString group_name = "";
-			DataGroup* group = 0;
-			for (auto i = channs.begin(); i != channs.end(); ++i)
-			{
-				VolumeData* vd = *i;
-				if (vd)
-				{
-					glbin_data_manager.AddVolumeData(vd);
-					if (i == channs.begin())
-					{
-						group_name = m_view->AddGroup("");
-						group = m_view->GetGroup(group_name);
-					}
-					m_view->AddVolumeData(vd, group_name);
-				}
-			}
-			if (group)
-			{
-				//group->SetSyncRAll(true);
-				//group->SetSyncGAll(true);
-				//group->SetSyncBAll(true);
-				fluo::Color col = m_view->m_cur_vol->GetGammaColor();
-				group->SetGammaAll(col);
-				col = m_view->m_cur_vol->GetBrightness();
-				group->SetBrightnessAll(col);
-				col = m_view->m_cur_vol->GetHdr();
-				group->SetHdrAll(col);
-			}
-			glbin_current.SetVolumeData(m_view->m_cur_vol);
-			refresh = true;
-		}
-	}
-
-	if (refresh)
-	{
-		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
-		m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(m_view) });
-	}
-}
-
-void ComponentDlg::OutputRgb(int color_type)
-{
-	if (!m_view || !m_view->m_cur_vol)
-		return;
-	bool refresh = false;
-
-	glbin_comp_analyzer.SetVolume(m_view->m_cur_vol);
-	list<VolumeData*> channs;
-	if (glbin_comp_analyzer.GenRgbChannels(channs, color_type, glbin_comp_def.m_consistent))
-	{
-		if (m_frame)
-		{
-			wxString group_name = "";
-			DataGroup* group = 0;
-			for (auto i = channs.begin(); i != channs.end(); ++i)
-			{
-				VolumeData* vd = *i;
-				if (vd)
-				{
-					glbin_data_manager.AddVolumeData(vd);
-					if (i == channs.begin())
-					{
-						group_name = m_view->AddGroup("");
-						group = m_view->GetGroup(group_name);
-					}
-					m_view->AddVolumeData(vd, group_name);
-				}
-			}
-			if (group)
-			{
-				//group->SetSyncRAll(true);
-				//group->SetSyncGAll(true);
-				//group->SetSyncBAll(true);
-				fluo::Color col = m_view->m_cur_vol->GetGammaColor();
-				group->SetGammaAll(col);
-				col = m_view->m_cur_vol->GetBrightness();
-				group->SetBrightnessAll(col);
-				col = m_view->m_cur_vol->GetHdr();
-				group->SetHdrAll(col);
-			}
-			glbin_current.SetVolumeData(m_view->m_cur_vol);
-			refresh = true;
-		}
-	}
-
-	if (refresh)
-	{
-		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
-		m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(m_view) });
-	}
-}
-
-void ComponentDlg::OnOutputChannels(wxCommandEvent &event)
+void ComponentDlg::OnOutputChannels(wxCommandEvent& event)
 {
 	int id = event.GetId();
-	int color_type;
+	int val;
 	if (id == ID_OutputRandomBtn)
-		color_type = 1;
+		val = 1;
 	else if (id == ID_OutputSizeBtn)
-		color_type = 2;
+		val = 2;
 
-	if (glbin_comp_def.m_output_type == 1)
-		OutputMulti(color_type);
-	else if (glbin_comp_def.m_output_type == 2)
-		OutputRgb(color_type);
+	glbin_comp_analyzer.SetColorType(val);
+	glbin_comp_analyzer.OutputChannels();
+	FluoRefresh(0, { gstListCtrl, gstTreeCtrl });
 }
 
 void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 {
-	int type = 0;
-	if (event.GetId() == ID_OutputSnBtn)
-		type = 1;
-	if (!m_view || !m_view->m_cur_vol)
-		return;
-	bool refresh = false;
+	int id = event.GetId();
+	int val;
+	if (id == ID_OutputIdBtn)
+		val = 1;
+	else if (id == ID_OutputSnBtn)
+		val = 2;
 
-	glbin_comp_analyzer.SetVolume(m_view->m_cur_vol);
-	Annotations* ann = new Annotations();
-	if (glbin_comp_analyzer.GenAnnotations(*ann, glbin_comp_def.m_consistent, type))
-	{
-		ann->SetVolume(m_view->m_cur_vol);
-		ann->SetTransform(m_view->m_cur_vol->GetTexture()->transform());
-		glbin_data_manager.AddAnnotations(ann);
-		m_view->AddAnnotations(ann);
-		glbin_current.SetVolumeData(m_view->m_cur_vol);
-		refresh = true;;
-	}
-
-	if (refresh && m_frame)
-	{
-		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
-		m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(m_view) });
-	}
+	glbin_comp_analyzer.SetAnnotType(val);
+	glbin_comp_analyzer.OutputAnnotations();
+	FluoRefresh(0, { gstListCtrl, gstTreeCtrl });
 }
 
 //distance
@@ -2712,7 +2490,7 @@ void ComponentDlg::ClearOutputGrid()
 
 void ComponentDlg::OnNotebook(wxBookCtrlEvent &event)
 {
-	EnableGenerate();
+	FluoUpdate({ gstCompPage });
 }
 
 void ComponentDlg::OnUseSelChk(wxCommandEvent &event)
@@ -2748,42 +2526,6 @@ void ComponentDlg::OnCluster(wxCommandEvent &event)
 void ComponentDlg::OnCleanBtn(wxCommandEvent &event)
 {
 	Clean();
-}
-
-bool ComponentDlg::GetIds(std::string &str, unsigned int &id, int &brick_id)
-{
-	std::string::size_type sz;
-	try
-	{
-		id = std::stoul(str, &sz);
-	}
-	catch (...)
-	{
-		return false;
-	}
-	std::string str2;
-	if (sz < str.size())
-	{
-		brick_id = id;
-		for (size_t i = sz; i< str.size() - 1; ++i)
-		{
-			if (std::isdigit(static_cast<unsigned char>(str[i])))
-			{
-				str2 = str.substr(i);
-				try
-				{
-					id = std::stoul(str2);
-				}
-				catch(...)
-				{
-					return false;
-				}
-				return true;
-			}
-		}
-	}
-	brick_id = 0;
-	return true;
 }
 
 void ComponentDlg::OnAnalyze(wxCommandEvent &event)
