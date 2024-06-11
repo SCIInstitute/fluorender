@@ -115,6 +115,7 @@ namespace flrd
 		double GetFillBorder() { return m_fill_border; }
 
 		//high-level functions
+		void Compute();
 		void GenerateComp(bool command = true);
 		void Fixate(bool command = true);
 		void Clean(bool command = true);

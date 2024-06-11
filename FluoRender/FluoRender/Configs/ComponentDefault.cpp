@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 #include <CompGenerator.h>
 #include <CompSelector.h>
+#include <CompAnalyzer.h>
 #include <Clusterizer.h>
 #include <wx/stdpaths.h>
 #include <wx/wfstream.h>
@@ -79,17 +80,18 @@ ComponentDefault::ComponentDefault()
 	m_min_num = 0;
 	m_use_max = false;
 	m_max_num = 0;
-	//colocalization
+
+	//analyzer
+	m_slimit = 5;
 	m_colocal = false;
 	m_consistent = false;
-
+	m_channel_type = 1;
+	m_color_type = 1;
+	m_annot_type = 1;
 	//distance
 	m_use_dist_neighbor = false;
-	m_dist_neighbor = 1;
+	m_dist_neighbor_num = 1;
 	m_use_dist_allchan = false;
-
-	//output
-	m_output_type = 1;
 
 	//update
 	m_auto_update = false;
@@ -170,17 +172,18 @@ void ComponentDefault::Read(wxFileConfig& f)
 	f.Read("min_num", &m_min_num);
 	f.Read("use_max", &m_use_max);
 	f.Read("max_num", &m_max_num);
-	//options
-	f.Read("consistent", &m_consistent);
-	f.Read("colocal", &m_colocal);
 
+	//analyzer
+	f.Read("size limit", &m_slimit);
+	f.Read("colocal", &m_colocal);
+	f.Read("consistent", &m_consistent);
+	f.Read("channel type", &m_channel_type);
+	f.Read("color type", &m_color_type);
+	f.Read("annot type", &m_annot_type);
 	//distance
 	f.Read("use_dist_neighbor", &m_use_dist_neighbor);
-	f.Read("dist_neighbor", &m_dist_neighbor);
+	f.Read("dist_neighbor", &m_dist_neighbor_num);
 	f.Read("use_dist_allchan", &m_use_dist_allchan);
-
-	//output
-	f.Read("output_type", &m_output_type);
 
 	//auto update
 	f.Read("auto_update", &m_auto_update);
@@ -232,17 +235,18 @@ void ComponentDefault::Save(wxFileConfig& f)
 	f.Write("min_num", m_min_num);
 	f.Write("use_max", m_use_max);
 	f.Write("max_num", m_max_num);
-	//options
-	f.Write("consistent", m_consistent);
-	f.Write("colocal", m_colocal);
 
+	//analyzer
+	f.Write("size limit", m_slimit);
+	f.Write("colocal", m_colocal);
+	f.Write("consistent", m_consistent);
+	f.Write("channel type", m_channel_type);
+	f.Write("color type", m_color_type);
+	f.Write("annot type", m_annot_type);
 	//distance
 	f.Write("use_dist_neighbor", m_use_dist_neighbor);
-	f.Write("dist_neighbor", m_dist_neighbor);
+	f.Write("dist_neighbor", m_dist_neighbor_num);
 	f.Write("use_dist_allchan", m_use_dist_allchan);
-
-	//output
-	f.Write("output_type", m_output_type);
 
 	//auto update
 	f.Write("auto_update", m_auto_update);
@@ -361,4 +365,36 @@ void ComponentDefault::Apply(flrd::ComponentSelector* cs)
 	cs->SetUseMax(m_use_max);
 	cs->SetMinNum(m_min_num);
 	cs->SetMaxNum(m_max_num);
+}
+
+void ComponentDefault::Set(flrd::ComponentAnalyzer* ca)
+{
+	if (!ca)
+		return;
+
+	m_slimit = ca->GetSizeLimit();
+	m_colocal = ca->GetColocal();
+	m_consistent = ca->GetConsistent();
+	m_channel_type = ca->GetChannelType();
+	m_color_type = ca->GetColorType();
+	m_annot_type = ca->GetAnnotType();
+	m_use_dist_neighbor = ca->GetUseDistNeighbor();
+	m_dist_neighbor_num = ca->GetDistNeighborNum();
+	m_use_dist_allchan = ca->GetUseDistAllchan();
+}
+
+void ComponentDefault::Apply(flrd::ComponentAnalyzer* ca)
+{
+	if (!ca)
+		return;
+
+	ca->SetSizeLimit(m_slimit);
+	ca->SetColocal(m_colocal);
+	ca->SetConsistent(m_consistent);
+	ca->SetChannelType(m_channel_type);
+	ca->SetColorType(m_color_type);
+	ca->SetAnnotType(m_annot_type);
+	ca->SetUseDistNeighbor(m_use_dist_neighbor);
+	ca->SetDistNeighborNum(m_dist_neighbor_num);
+	ca->SetUseDistAllchan(m_use_dist_allchan);
 }

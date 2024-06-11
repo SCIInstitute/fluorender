@@ -958,11 +958,11 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		new wxStaticBox(page, wxID_ANY, "Align Render View to Analyzed Components"),
 		wxVERTICAL);
 	wxBoxSizer* sizer51 = new wxBoxSizer(wxHORIZONTAL);
-	m_align_center = new wxCheckBox(page, wxID_ANY,
+	m_align_center_chk = new wxCheckBox(page, wxID_ANY,
 		"Move to Center", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	m_align_center->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnAlignCenterChk, this);
+	m_align_center_chk->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnAlignCenterChk, this);
 	sizer51->Add(5, 5);
-	sizer51->Add(m_align_center, 0, wxALIGN_CENTER);
+	sizer51->Add(m_align_center_chk, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer52 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Tri Axes:",
 		wxDefaultPosition, FromDIP(wxSize(50, 22)));
@@ -1280,7 +1280,7 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_analysis_max_spin->SetValue(ival);
 	}
 
-	//options
+	//analyzer settings
 	if (update_all || FOUND_VALUE(gstCompConsistent))
 	{
 		bval = glbin_comp_analyzer.GetConsistent();
@@ -1303,19 +1303,29 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	//Distances
 	if (update_all || FOUND_VALUE(gstDistNeighbor))
 	{
-		bval = glbin_comp_def.m_use_dist_neighbor;
+		bval = glbin_comp_analyzer.GetUseDistNeighbor();
 		m_dist_neighbor_check->SetValue(bval);
 		m_dist_neighbor_sldr->Enable(bval);
 		m_dist_neighbor_text->Enable(bval);
 	}
 	if (update_all || FOUND_VALUE(gstDistNeighborValue))
 	{
-		ival = glbin_comp_def.m_dist_neighbor;
+		ival = glbin_comp_analyzer.GetDistNeighborNum();
 		m_dist_neighbor_sldr->ChangeValue(ival);
 		m_dist_neighbor_text->ChangeValue(wxString::Format("%d", ival));
 	}
 	if (update_all || FOUND_VALUE(gstDistAllChan))
-		m_dist_all_chan_check->SetValue(glbin_comp_def.m_use_dist_allchan);
+	{
+		bval = glbin_comp_analyzer.GetUseDistAllchan();
+		m_dist_all_chan_check->SetValue(bval);
+	}
+
+	//align center
+	if (update_all || FOUND_VALUE(gstAlignCenter))
+	{
+		bval = glbin_aligner.GetAlignCenter();
+		m_align_center_chk->SetValue(bval);
+	}
 
 	//page
 	if (update_all || FOUND_VALUE(gstCompPage))
@@ -1333,8 +1343,109 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		panel_bot->Layout();
 	}
 
-	////output
-	//m_history_chk->SetValue(m_hold_history);
+	//output
+	if (FOUND_VALUE(gstCompAnalysisResult))
+	{
+		m_output_grid->DeleteRows(0, m_output_grid->GetNumberRows());
+		size_t size = glbin_comp_analyzer.GetListSize();
+		if (size < 1e5)
+		{
+			wxFileDialog* fopendlg = new wxFileDialog(
+				this, "Save Analysis Data", "", "",
+				"Text file (*.txt)|*.txt",
+				wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+			int rval = fopendlg->ShowModal();
+			if (rval == wxID_OK)
+			{
+				wxString filename = fopendlg->GetPath();
+				string str = filename.ToStdString();
+				glbin_comp_analyzer.OutputCompListFile(str, 1);
+			}
+			if (fopendlg)
+				delete fopendlg;
+		}
+		else
+		{
+			string titles, values;
+			glbin_comp_analyzer.OutputFormHeader(titles);
+			glbin_comp_analyzer.OutputCompListStr(values, 0);
+			wxString str1(titles), str2(values);
+			OutputAnalysis(str1, str2);
+		}
+	}
+}
+
+void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
+{
+	wxString copy_data;
+	wxString cur_field;
+	wxString cur_line;
+	int i, k;
+	int id_idx = -1;
+
+	k = 0;
+	cur_line = titles;
+	do
+	{
+		cur_field = cur_line.BeforeFirst('\t');
+		cur_line = cur_line.AfterFirst('\t');
+		if (m_output_grid->GetNumberCols() <= k)
+			m_output_grid->InsertCols(k);
+		m_output_grid->SetColLabelValue(k, cur_field);
+		if (cur_field == "ID")
+			id_idx = k;
+		++k;
+	} while (cur_line.IsEmpty() == false);
+
+	fluo::Color c;
+	VolumeData* vd = glbin_current.vol_data;
+	unsigned long lval;
+	wxColor color;
+
+	i = 0;
+	copy_data = values;
+	do
+	{
+		k = 0;
+		cur_line = copy_data.BeforeFirst('\n');
+		copy_data = copy_data.AfterFirst('\n');
+		if (m_output_grid->GetNumberRows() <= i ||
+			m_hold_history)
+			m_output_grid->InsertRows(i);
+		do
+		{
+			cur_field = cur_line.BeforeFirst('\t');
+			cur_line = cur_line.AfterFirst('\t');
+			m_output_grid->SetCellValue(i, k, cur_field);
+			if (k == id_idx && vd)
+			{
+				if (cur_field.ToULong(&lval))
+				{
+					c = fluo::Color(lval, vd->GetShuffle());
+					color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
+				}
+				else
+					color = wxColor(255, 255, 255);
+				m_output_grid->SetCellBackgroundColour(i, k, color);
+			}
+			++k;
+		} while (cur_line.IsEmpty() == false);
+		++i;
+	} while (copy_data.IsEmpty() == false);
+
+	//delete columnsand rows if the old has more
+	if (!m_hold_history)
+	{
+		if (m_output_grid->GetNumberCols() > k)
+			m_output_grid->DeleteCols(k,
+				m_output_grid->GetNumberCols() - k);
+		if (m_output_grid->GetNumberRows() > i)
+			m_output_grid->DeleteRows(i,
+				m_output_grid->GetNumberRows() - i);
+	}
+
+	m_output_grid->AutoSizeColumns();
+	m_output_grid->ClearSelection();
 }
 
 //comp generate page
@@ -1705,6 +1816,12 @@ void ComponentDlg::OnCleanCheck(wxCommandEvent &event)
 		glbin_comp_generator.GenerateComp();
 		FluoRefresh(3, { gstNull });
 	}
+}
+
+void ComponentDlg::OnCleanBtn(wxCommandEvent& event)
+{
+	glbin_comp_generator.Clean();
+	FluoRefresh(3, { gstNull });
 }
 
 void ComponentDlg::OnCleanIterSldr(wxScrollEvent &event)
@@ -2137,14 +2254,15 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 //distance
 void ComponentDlg::OnDistNeighborCheck(wxCommandEvent &event)
 {
-	glbin_comp_def.m_use_dist_neighbor = m_dist_neighbor_check->GetValue();
-	m_dist_neighbor_sldr->Enable(glbin_comp_def.m_use_dist_neighbor);
-	m_dist_neighbor_text->Enable(glbin_comp_def.m_use_dist_neighbor);
+	bool bval = m_dist_neighbor_check->GetValue();
+	glbin_comp_analyzer.SetUseDistNeighbor(bval);
+	FluoUpdate({ gstDistNeighbor });
 }
 
 void ComponentDlg::OnDistAllChanCheck(wxCommandEvent &event)
 {
-	glbin_comp_def.m_use_dist_allchan = m_dist_all_chan_check->GetValue();
+	bool bval = m_dist_all_chan_check->GetValue();
+	glbin_comp_analyzer.SetUseDistAllchan(bval);
 }
 
 void ComponentDlg::OnDistNeighborSldr(wxScrollEvent &event)
@@ -2159,333 +2277,26 @@ void ComponentDlg::OnDistNeighborText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_dist_neighbor_text->GetValue().ToLong(&val);
-	glbin_comp_def.m_dist_neighbor = (int)val;
-	m_dist_neighbor_sldr->ChangeValue(glbin_comp_def.m_dist_neighbor);
-}
-
-int ComponentDlg::GetDistMatSize()
-{
-	int gsize = glbin_comp_analyzer.GetCompGroupSize();
-	if (glbin_comp_def.m_use_dist_allchan && gsize > 1)
-	{
-		int matsize = 0;
-		for (int i = 0; i < gsize; ++i)
-		{
-			flrd::CompGroup* compgroup = glbin_comp_analyzer.GetCompGroup(i);
-			if (!compgroup)
-				continue;
-			matsize += compgroup->celps.size();
-		}
-		return matsize;
-	}
-	else
-	{
-		flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
-		if (!list)
-			return 0;
-		return list->size();
-	}
+	m_dist_neighbor_sldr->ChangeValue(val);
+	glbin_comp_analyzer.SetDistNeighborNum(val);
 }
 
 void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 {
-	int num = GetDistMatSize();
-	if (num <= 0)
-		return;
-	int gsize = glbin_comp_analyzer.GetCompGroupSize();
-	int bn = glbin_comp_analyzer.GetBrickNum();
-
-	//result
-	std::string str;
-	std::vector<std::vector<double>> rm;//result matrix
-	std::vector<std::string> nl;//name list
-	std::vector<int> gn;//group number
-	rm.reserve(num);
-	nl.reserve(num);
-	if (gsize > 1)
-		gn.reserve(num);
-	for (size_t i = 0; i < num; ++i)
-	{
-		rm.push_back(std::vector<double>());
-		rm[i].reserve(num);
-		for (size_t j = 0; j < num; ++j)
-			rm[i].push_back(0);
-	}
-
-	//compute
-	double sx, sy, sz;
-	std::vector<fluo::Point> pos;
-	pos.reserve(num);
-	int num2 = 0;//actual number
-	if (glbin_comp_def.m_use_dist_allchan && gsize > 1)
-	{
-		for (int i = 0; i < gsize; ++i)
-		{
-			flrd::CompGroup* compgroup = glbin_comp_analyzer.GetCompGroup(i);
-			if (!compgroup)
-				continue;
-
-			flrd::CellGraph &graph = compgroup->graph;
-			flrd::CelpList* list = &(compgroup->celps);
-			sx = list->sx;
-			sy = list->sy;
-			sz = list->sz;
-			if (bn > 1)
-				graph.ClearVisited();
-
-			for (auto it = list->begin();
-				it != list->end(); ++it)
-			{
-				if (bn > 1)
-				{
-					if (graph.Visited(it->second))
-						continue;
-					flrd::CelpList links;
-					graph.GetLinkedComps(it->second, links,
-						glbin_comp_analyzer.GetSizeLimit());
-				}
-
-				pos.push_back(it->second->GetCenter(sx, sy, sz));
-				str = std::to_string(i + 1);
-				str += ":";
-				str += std::to_string(it->second->Id());
-				nl.push_back(str);
-				gn.push_back(i);
-				num2++;
-			}
-		}
-	}
-	else
-	{
-		flrd::CellGraph &graph = glbin_comp_analyzer.GetCompGroup(0)->graph;
-		flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
-		sx = list->sx;
-		sy = list->sy;
-		sz = list->sz;
-		if (bn > 1)
-			graph.ClearVisited();
-
-		for (auto it = list->begin();
-			it != list->end(); ++it)
-		{
-			if (bn > 1)
-			{
-				if (graph.Visited(it->second))
-					continue;
-				flrd::CelpList links;
-				graph.GetLinkedComps(it->second, links,
-					glbin_comp_analyzer.GetSizeLimit());
-			}
-
-			pos.push_back(it->second->GetCenter(sx, sy, sz));
-			str = std::to_string(it->second->Id());
-			nl.push_back(str);
-			num2++;
-		}
-	}
-	double dist = 0;
-	for (int i = 0; i < num2; ++i)
-	{
-		for (int j = i; j < num2; ++j)
-		{
-			dist = (pos[i] - pos[j]).length();
-			rm[i][j] = dist;
-			rm[j][i] = dist;
-		}
-	}
-
-	bool bdist = glbin_comp_def.m_use_dist_neighbor &&
-		glbin_comp_def.m_dist_neighbor > 0 &&
-		glbin_comp_def.m_dist_neighbor < num2-1;
-
-	std::vector<double> in_group;//distances with in a group
-	std::vector<double> out_group;//distance between groups
-	in_group.reserve(num2*num2 / 2);
-	out_group.reserve(num2*num2 / 2);
-	std::vector<std::vector<int>> im;//index matrix
-	if (bdist)
-	{
-		//sort with indices
-		im.reserve(num2);
-		for (size_t i = 0; i < num2; ++i)
-		{
-			im.push_back(std::vector<int>());
-			im[i].reserve(num2);
-			for (size_t j = 0; j < num2; ++j)
-				im[i].push_back(j);
-		}
-		//copy rm
-		std::vector<std::vector<double>> rm2 = rm;
-		//sort
-		for (size_t i = 0; i < num2; ++i)
-		{
-			std::sort(im[i].begin(), im[i].end(),
-				[&](int ii, int jj) {return rm2[i][ii] < rm2[i][jj]; });
-		}
-		//fill rm
-		for (size_t i = 0; i < num2; ++i)
-			for (size_t j = 0; j < num2; ++j)
-			{
-				rm[i][j] = rm2[i][im[i][j]];
-				if (gsize > 1 && j > 0 &&
-					j <= glbin_comp_def.m_dist_neighbor)
-				{
-					if (gn[i] == gn[im[i][j]])
-						in_group.push_back(rm[i][j]);
-					else
-						out_group.push_back(rm[i][j]);
-				}
-			}
-	}
-	else
-	{
-		if (gsize > 1)
-		{
-			for (int i = 0; i < num2; ++i)
-				for (int j = i + 1; j < num2; ++j)
-				{
-					if (gn[i] == gn[j])
-						in_group.push_back(rm[i][j]);
-					else
-						out_group.push_back(rm[i][j]);
-				}
-		}
-	}
-
-	wxFileDialog *fopendlg = new wxFileDialog(
-		this, "Save Analysis Data", "", "",
-		"Text file (*.txt)|*.txt",
-		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	int rval = fopendlg->ShowModal();
-	if (rval == wxID_OK)
-	{
-		wxString filename = fopendlg->GetPath();
-		string str = filename.ToStdString();
-		std::ofstream outfile;
-		outfile.open(str, std::ofstream::out);
-		//output result matrix
-		size_t dnum = bdist ? (glbin_comp_def.m_dist_neighbor+1) : num2;
-		for (size_t i = 0; i < num2; ++i)
-		{
-			outfile << nl[i] << "\t";
-			for (size_t j = bdist?1:0; j < dnum; ++j)
-			{
-				outfile << rm[i][j];
-				if (j < dnum - 1)
-					outfile << "\t";
-			}
-			outfile << "\n";
-		}
-		//index matrix
-		if (bdist)
-		{
-			outfile << "\n";
-			for (size_t i = 0; i < num2; ++i)
-			{
-				outfile << nl[i] << "\t";
-				for (size_t j = bdist ? 1 : 0; j < dnum; ++j)
-				{
-					outfile << im[i][j] + 1;
-					if (j < dnum - 1)
-						outfile << "\t";
-				}
-				outfile << "\n";
-			}
-		}
-		//output in_group and out_group distances
-		if (gsize > 1)
-		{
-			outfile << "\nIn group Distances\t";
-			for (size_t i = 0; i < in_group.size(); ++i)
-			{
-				outfile << in_group[i];
-				if (i < in_group.size() - 1)
-					outfile << "\t";
-			}
-			outfile << "\n";
-			outfile << "Out group Distances\t";
-			for (size_t i = 0; i < out_group.size(); ++i)
-			{
-				outfile << out_group[i];
-				if (i < out_group.size() - 1)
-					outfile << "\t";
-			}
-			outfile << "\n";
-		}
-		outfile.close();
-	}
-	if (fopendlg)
-		delete fopendlg;
+	OutputDistance();
 }
 
-void ComponentDlg::AlignCenter(flrd::Ruler* ruler)
+void ComponentDlg::OnAlignCenterChk(wxCommandEvent& event)
 {
-	if (!ruler)
-		return;
-	fluo::Point center = ruler->GetCenter();
-	double tx, ty, tz;
-	m_view->GetObjCenters(tx, ty, tz);
-	m_view->SetObjTrans(
-		tx - center.x(),
-		center.y() - ty,
-		center.z() - tz);
+	bool bval = m_align_center_chk->GetValue();
+	glbin_aligner.SetAlignCenter(bval);
+	FluoRefresh(1, { gstAlignCenter }, { -1 });
 }
 
 void ComponentDlg::OnAlignPca(wxCommandEvent& event)
 {
-	flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
-	if (!list || list->size() < 3)
-		return;
-
-	double sx = list->sx;
-	double sy = list->sy;
-	double sz = list->sz;
-	flrd::RulerList rulerlist;
-	flrd::Ruler ruler;
-	ruler.SetRulerType(1);
-	fluo::Point pt;
-	for (auto it = list->begin();
-		it != list->end(); ++it)
-	{
-		pt = it->second->GetCenter(sx, sy, sz);
-		ruler.AddPoint(pt);
-	}
-	ruler.SetFinished();
-
-	int axis_type = 0;
-	switch (event.GetId())
-	{
-	case ID_AlignXYZ:
-		axis_type = 0;
-		break;
-	case ID_AlignYXZ:
-		axis_type = 1;
-		break;
-	case ID_AlignZXY:
-		axis_type = 2;
-		break;
-	case ID_AlignXZY:
-		axis_type = 3;
-		break;
-	case ID_AlignYZX:
-		axis_type = 4;
-		break;
-	case ID_AlignZYX:
-		axis_type = 5;
-		break;
-	}
-	rulerlist.push_back(&ruler);
-	glbin_aligner.SetRulerList(&rulerlist);
-	glbin_aligner.SetAxisType(axis_type);
-	glbin_aligner.SetAlignCenter(m_align_center->GetValue());
-	glbin_aligner.SetView(glbin_current.canvas);
-	glbin_aligner.AlignPca(true);
-}
-
-void ComponentDlg::ClearOutputGrid()
-{
-	int row = m_output_grid->GetNumberRows();
-	m_output_grid->DeleteRows(0, row, true);
+	AlignPca(event.GetId());
+	FluoRefresh(3, { gstNull });
 }
 
 void ComponentDlg::OnNotebook(wxBookCtrlEvent &event)
@@ -2495,182 +2306,47 @@ void ComponentDlg::OnNotebook(wxBookCtrlEvent &event)
 
 void ComponentDlg::OnUseSelChk(wxCommandEvent &event)
 {
-	glbin_comp_def.m_use_sel = m_use_sel_chk->GetValue();
+	bool bval = m_use_sel_chk->GetValue();
+	glbin_comp_generator.SetUseSel(bval);
 }
 
 void ComponentDlg::OnUseMlChk(wxCommandEvent &event)
 {
-	glbin_comp_def.m_use_ml = m_use_ml_chk->GetValue();
+	bool bval = m_use_ml_chk->GetValue();
+	glbin_comp_generator.SetUseMl(bval);
 }
 
 void ComponentDlg::OnGenerate(wxCommandEvent &event)
 {
-	if (glbin_comp_def.m_use_ml)
-		ApplyRecord();
-	else
-		GenerateComp();
+	glbin_comp_generator.Compute();
+	FluoRefresh(3, { gstNull });
 }
 
 void ComponentDlg::OnAutoUpdate(wxCommandEvent &event)
 {
-	glbin_comp_def.m_auto_update = m_auto_update_btn->GetValue();
-	if (glbin_comp_def.m_auto_update)
-		GenerateComp();
+	bool bval = m_auto_update_btn->GetValue();
+	glbin_comp_def.m_auto_update = bval;
+	if (bval)
+	{
+		glbin_comp_generator.GenerateComp();
+		FluoRefresh(3, { gstNull });
+	}
 }
 
 void ComponentDlg::OnCluster(wxCommandEvent &event)
 {
-	Cluster();
-}
-
-void ComponentDlg::OnCleanBtn(wxCommandEvent &event)
-{
-	Clean();
+	glbin_clusterizer.Compute();
+	FluoRefresh(3, { gstNull });
 }
 
 void ComponentDlg::OnAnalyze(wxCommandEvent &event)
 {
-	Analyze(false);
+	glbin_comp_analyzer.Analyze(false);
 }
 
 void ComponentDlg::OnAnalyzeSel(wxCommandEvent &event)
 {
-	Analyze(true);
-}
-
-void ComponentDlg::Analyze(bool sel)
-{
-	if (!m_view)
-		return;
-	VolumeData* vd = m_view->m_cur_vol;
-	if (!vd)
-		return;
-
-	int bn = vd->GetAllBrickNum();
-	m_prog_bit = 97.0f / float(bn * 2 + (glbin_comp_def.m_consistent?1:0));
-	m_prog = 0.0f;
-
-	glbin_comp_analyzer.SetVolume(vd);
-	if (glbin_comp_def.m_colocal)
-	{
-		glbin_comp_analyzer.ClearCoVolumes();
-		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
-		{
-			VolumeData* vdi = m_view->GetDispVolumeData(i);
-			if (vdi != vd)
-				glbin_comp_analyzer.AddCoVolume(vdi);
-		}
-	}
-	glbin_comp_analyzer.Analyze(sel, glbin_comp_def.m_consistent, glbin_comp_def.m_colocal);
-
-	if (glbin_comp_def.m_consistent)
-	{
-		//invalidate label mask in gpu
-		vd->GetVR()->clear_tex_label();
-		m_view->RefreshGL(39);
-	}
-
-	if (glbin_comp_analyzer.GetListSize() > 10000)
-	{
-		wxFileDialog *fopendlg = new wxFileDialog(
-			this, "Save Analysis Data", "", "",
-			"Text file (*.txt)|*.txt",
-			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-		int rval = fopendlg->ShowModal();
-		if (rval == wxID_OK)
-		{
-			wxString filename = fopendlg->GetPath();
-			string str = filename.ToStdString();
-			glbin_comp_analyzer.OutputCompListFile(str, 1);
-		}
-		if (fopendlg)
-			delete fopendlg;
-	}
-	else
-	{
-		string titles, values;
-		glbin_comp_analyzer.OutputFormHeader(titles);
-		glbin_comp_analyzer.OutputCompListStr(values, 0);
-		wxString str1(titles), str2(values);
-		SetOutput(str1, str2);
-	}
-
-	//connection.disconnect();
-}
-
-void ComponentDlg::SetOutput(wxString &titles, wxString &values)
-{
-	wxString copy_data;
-	wxString cur_field;
-	wxString cur_line;
-	int i, k;
-	int id_idx = -1;
-
-	k = 0;
-	cur_line = titles;
-	do
-	{
-		cur_field = cur_line.BeforeFirst('\t');
-		cur_line = cur_line.AfterFirst('\t');
-		if (m_output_grid->GetNumberCols() <= k)
-			m_output_grid->InsertCols(k);
-		m_output_grid->SetColLabelValue(k, cur_field);
-		if (cur_field == "ID")
-			id_idx = k;
-		++k;
-	} while (cur_line.IsEmpty() == false);
-
-	fluo::Color c;
-	VolumeData* vd = 0;
-	if (m_view && m_view->m_cur_vol)
-		vd = m_view->m_cur_vol;
-	unsigned long lval;
-	wxColor color;
-
-	i = 0;
-	copy_data = values;
-	do
-	{
-		k = 0;
-		cur_line = copy_data.BeforeFirst('\n');
-		copy_data = copy_data.AfterFirst('\n');
-		if (m_output_grid->GetNumberRows() <= i ||
-			m_hold_history)
-			m_output_grid->InsertRows(i);
-		do
-		{
-			cur_field = cur_line.BeforeFirst('\t');
-			cur_line = cur_line.AfterFirst('\t');
-			m_output_grid->SetCellValue(i, k, cur_field);
-			if (k == id_idx && vd)
-			{
-				if (cur_field.ToULong(&lval))
-				{
-					c = fluo::Color(lval, vd->GetShuffle());
-					color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
-				}
-				else
-					color = wxColor(255, 255, 255);
-				m_output_grid->SetCellBackgroundColour(i, k, color);
-			}
-			++k;
-		} while (cur_line.IsEmpty() == false);
-		++i;
-	} while (copy_data.IsEmpty() == false);
-
-	//delete columnsand rows if the old has more
-	if (!m_hold_history)
-	{
-		if (m_output_grid->GetNumberCols() > k)
-			m_output_grid->DeleteCols(k,
-				m_output_grid->GetNumberCols() - k);
-		if (m_output_grid->GetNumberRows() > i)
-			m_output_grid->DeleteRows(i,
-				m_output_grid->GetNumberRows() - i);
-	}
-
-	m_output_grid->AutoSizeColumns();
-	m_output_grid->ClearSelection();
+	glbin_comp_analyzer.Analyze(true);
 }
 
 void ComponentDlg::OnIncludeBtn(wxCommandEvent &event)
@@ -2815,6 +2491,84 @@ void ComponentDlg::PasteData()
 			k = k2;
 		} while (copy_data.IsEmpty() == false);
 	*/
+}
+
+void ComponentDlg::OutputDistance()
+{
+	wxFileDialog* fopendlg = new wxFileDialog(
+		this, "Save Analysis Data", "", "",
+		"Text file (*.txt)|*.txt",
+		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg->GetPath();
+		string str = filename.ToStdString();
+		std::ofstream outfile;
+		outfile.open(str, std::ofstream::out);
+		//output result matrix
+		glbin_comp_analyzer.OutputDistance(outfile);
+		outfile.close();
+	}
+	if (fopendlg)
+		delete fopendlg;
+}
+
+void ComponentDlg::AlignPca(int axis_type)
+{
+	flrd::RulerList list = glbin_comp_analyzer.GetRulerListFromCelp();
+	glbin_aligner.SetRulerList(&list);
+	glbin_aligner.SetAxisType(axis_type);
+	glbin_aligner.SetView(glbin_current.canvas);
+	glbin_aligner.AlignPca(true);
+}
+
+void ComponentDlg::IncludeComps()
+{
+	//get list of selected comps
+	wxArrayInt seli = m_output_grid->GetSelectedCols();
+	bool sel_all = seli.GetCount();
+	flrd::CelpList cl;
+	if (!sel_all)
+	{
+		std::vector<unsigned int> ids;
+		std::vector<unsigned int> bids;
+		seli = m_output_grid->GetSelectedRows();
+		int bn = glbin_comp_analyzer.GetBrickNum();
+		AddSelArrayInt(ids, bids, seli, bn > 1);
+		glbin_comp_analyzer.SetSelectedIds(ids, bids);
+		glbin_comp_analyzer.GetSelectedCelp(cl, true);
+	}
+	else
+		glbin_comp_analyzer.GetAllCelp(cl, true);
+
+	glbin_comp_selector.SelectList(cl);
+
+	FluoRefresh(2, { gstCompAnalysisResult });
+}
+
+void ComponentDlg::ExcludeComps()
+{
+	//get list of selected comps
+	wxArrayInt seli = m_output_grid->GetSelectedCols();
+	bool sel_all = seli.GetCount();
+	flrd::CelpList cl;
+	if (!sel_all)
+	{
+		std::vector<unsigned int> ids;
+		std::vector<unsigned int> bids;
+		seli = m_output_grid->GetSelectedRows();
+		int bn = glbin_comp_analyzer.GetBrickNum();
+		AddSelArrayInt(ids, bids, seli, bn > 1);
+		glbin_comp_analyzer.SetSelectedIds(ids, bids);
+		glbin_comp_analyzer.GetSelectedCelp(cl, true);
+	}
+	else
+		glbin_comp_analyzer.GetAllCelp(cl, true);
+
+	glbin_comp_selector.EraseList(cl);
+
+	FluoRefresh(2, { gstCompAnalysisResult });
 }
 
 void ComponentDlg::AddSelArrayInt(std::vector<unsigned int> &ids,

@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _COMPONENTDLG_H_
 #define _COMPONENTDLG_H_
 
-#include <Main.h>
 #include <PropPanel.h>
 #include <DataManager.h>
 #include <wx/wx.h>
@@ -42,7 +41,6 @@ DEALINGS IN THE SOFTWARE.
 
 class MainFrame;
 class wxSingleSlider;
-DECLARE_APP(VRenderApp)
 class ComponentDlg : public PropPanel
 {
 public:
@@ -81,11 +79,18 @@ public:
 	~ComponentDlg();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
-	void SetOutput(wxString &titles, wxString &values);
 
 	//output
 	void CopyData();
 	void PasteData();
+
+	void OutputAnalysis(wxString &titles, wxString &values);
+	void OutputDistance();
+	void AlignPca(int axis_type);
+
+	//selection
+	void IncludeComps();
+	void ExcludeComps();
 
 private:
 	//progress
@@ -218,7 +223,7 @@ private:
 	wxTextCtrl* m_dist_neighbor_text;
 	wxButton* m_dist_output_btn;
 	//align
-	wxCheckBox* m_align_center;
+	wxCheckBox* m_align_center_chk;
 	wxButton* m_align_xyz;
 	wxButton* m_align_yxz;
 	wxButton* m_align_zxy;
@@ -241,6 +246,12 @@ private:
 	wxCheckBox* m_history_chk;
 	wxButton* m_clear_hist_btn;
 	wxGrid *m_output_grid;
+
+private:
+	void AddSelArrayInt(std::vector<unsigned int>& ids,
+		std::vector<unsigned int>& bids, wxArrayInt& sel, bool bricks);
+	void AddSelCoordArray(std::vector<unsigned int>& ids,
+		std::vector<unsigned int>& bids, wxGridCellCoordsArray& sel, bool bricks);
 
 private:
 	//common ops
@@ -377,25 +388,6 @@ private:
 	//align
 	void OnAlignCenterChk(wxCommandEvent& event);
 	void OnAlignPca(wxCommandEvent& event);
-
-
-	void AlignCenter(flrd::Ruler* ruler);
-	void ClearOutputGrid();
-	int GetDistMatSize();
-	void AddSelArrayInt(std::vector<unsigned int> &ids,
-		std::vector<unsigned int> &bids, wxArrayInt &sel, bool bricks);
-	void AddSelCoordArray(std::vector<unsigned int> &ids,
-		std::vector<unsigned int> &bids, wxGridCellCoordsArray &sel, bool bricks);
-
-
-
-
-
-	//execute
-	void Analyze(bool sel);
-
-
-
 };
 
 #endif//_COMPONENTDLG_H_

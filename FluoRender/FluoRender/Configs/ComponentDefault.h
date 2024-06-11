@@ -53,9 +53,8 @@ public:
 	void Apply(flrd::Clusterizer* cl);
 	void Set(flrd::ComponentSelector* cs);
 	void Apply(flrd::ComponentSelector* cs);
-
-	//void Set(flrd::ComponentAnalyzer* ca);
-	//void Apply(flrd::ComponentAnalyzer* ca);
+	void Set(flrd::ComponentAnalyzer* ca);
+	void Apply(flrd::ComponentAnalyzer* ca);
 
 public:
 	//generate settings
@@ -106,17 +105,19 @@ public:
 	int m_min_num;
 	bool m_use_max;
 	int m_max_num;
-	//options
+
+	//analyzer
+	unsigned int m_slimit;//size limit for connecting components
 	bool m_consistent;
 	bool m_colocal;
+	int m_channel_type;//channel type: 1-multichannel; 2-rgb channel
+	int m_color_type;//color_type: 1-id-based; 2-size-based
+	int m_annot_type;//annot type: 1-id; 2:serianl number
 
 	//distance
 	bool m_use_dist_neighbor;
-	int m_dist_neighbor;
+	int m_dist_neighbor_num;
 	bool m_use_dist_allchan;
-
-	//output
-	int m_output_type;//1-multi; 2-rgb;
 
 	//auto udate
 	bool m_auto_update;

@@ -6,10 +6,10 @@
 
 using namespace std;
 
-class VRenderApp
+class FluoRenderApp
 {};
-VRenderApp dummy;
-VRenderApp& wxGetApp()
+FluoRenderApp dummy;
+FluoRenderApp& wxGetApp()
 {
 	return dummy;
 }

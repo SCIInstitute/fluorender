@@ -67,11 +67,8 @@ namespace flrd
 
 		//high-level functions
 		void SelectFullComp();
-		bool GetCellList(flrd::CelpList& cl, bool links = false);
 		void GetCompSelection();
 		void SetCompSelection(std::set<unsigned long long>& ids, int mode);
-		void IncludeComps();
-		void ExcludeComps();
 
 		//select functions
 		void CompFull();
@@ -82,6 +79,7 @@ namespace flrd
 		void Delete();
 		void Delete(std::vector<unsigned long long> &ids);
 		void SelectList(CelpList& list);
+		void EraseList(CelpList& list);
 
 	private:
 		bool m_sel_all;
@@ -97,8 +95,6 @@ namespace flrd
 		CelpList* GetListFromAnalyzer(CelpList &list_in, CelpList &list_out);
 		void SelectMask(unsigned char* mask,
 			unsigned long long idx, unsigned char v, flvr::Texture* tex);
-		void FindCelps(flrd::CelpList& list,
-			flrd::CelpListIter& it, bool links = false);
 	};
 
 	inline bool ComponentSelector::CompareSize(

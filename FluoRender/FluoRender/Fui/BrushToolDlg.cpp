@@ -49,7 +49,6 @@ BrushToolDlg::BrushToolDlg(
 	frame->FromDIP(wxSize(500, 620)),
 	0, "BrushToolDlg"),
 	m_max_value(255.0),
-	m_align_center(false),
 	m_hold_history(false)
 {
 	// temporarily block events during constructor:
@@ -1003,6 +1002,7 @@ void BrushToolDlg::OnAlignCenterCheck(wxCommandEvent& event)
 {
 	bool bval = m_align_center_chk->GetValue();
 	glbin_aligner.SetAlignCenter(bval);
+	FluoRefresh(1, { gstAlignCenter }, { -1 });
 }
 
 void BrushToolDlg::OnAlignPca(wxCommandEvent& event)

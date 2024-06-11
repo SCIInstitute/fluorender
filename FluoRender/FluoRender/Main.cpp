@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stdpaths.h>
 #include <wx/filefn.h>
 
-IMPLEMENT_APP(VRenderApp)
+IMPLEMENT_APP(FluoRenderApp)
 
 static const wxCmdLineEntryDesc g_cmdLineDesc[] =
 {
@@ -74,7 +74,7 @@ static const wxCmdLineEntryDesc g_cmdLineDesc[] =
 	{ wxCMD_LINE_NONE }
 };
 
-bool VRenderApp::OnInit()
+bool FluoRenderApp::OnInit()
 {
 	//_CrtSetBreakAlloc(331430);
 	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -122,19 +122,19 @@ bool VRenderApp::OnInit()
 	return true;
 }
 
-int VRenderApp::OnExit()
+int FluoRenderApp::OnExit()
 {
 	JVMInitializer::destroyJVM();
 	return 0;
 }
 
-void VRenderApp::OnInitCmdLine(wxCmdLineParser& parser)
+void FluoRenderApp::OnInitCmdLine(wxCmdLineParser& parser)
 {
 	parser.SetDesc(g_cmdLineDesc);
 	parser.SetSwitchChars("-");
 }
 
-bool VRenderApp::OnCmdLineParsed(wxCmdLineParser& parser)
+bool FluoRenderApp::OnCmdLineParsed(wxCmdLineParser& parser)
 {
 	m_file_num = 0;
 	m_benchmark = false;

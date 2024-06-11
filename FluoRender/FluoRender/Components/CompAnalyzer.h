@@ -63,10 +63,8 @@ namespace flrd
 		bool GetAnalyzed()
 		{ return m_analyzed; }
 
-		unsigned int GetSizeLimit()
-		{ return m_slimit; }
-		void SetSizeLimit(unsigned int size)
-		{ m_slimit = size; }
+		unsigned int GetSizeLimit() { return m_slimit; }
+		void SetSizeLimit(unsigned int size) { m_slimit = size; }
 		void SetColocal(bool val) { m_colocal = val; }
 		bool GetColocal() { return m_colocal; }
 		void SetConsistent(bool val) { m_consistent = val; }
@@ -77,6 +75,12 @@ namespace flrd
 		int GetChannelType() { return m_channel_type; }
 		void SetAnnotType(int val) { m_annot_type = val; }
 		int GetAnnotType() { return m_annot_type; }
+		void SetUseDistNeighbor(bool val) { m_use_dist_neighbor = val; }
+		bool GetUseDistNeighbor() { return m_use_dist_neighbor; }
+		void SetDistNeighborNum(int val) { m_dist_neighbor_num = val; }
+		int GetDistNeighborNum() { return m_dist_neighbor_num; }
+		void SetUseDistAllchan(bool val) { m_use_dist_allchan = val; }
+		bool GetUseDistAllchan() { return m_use_dist_allchan; }
 
 		void SetVolume(VolumeData* vd)
 		{
@@ -154,6 +158,19 @@ namespace flrd
 		bool OutputRgbChannels(std::list<VolumeData*> &channs);
 		bool OutputAnnotations();
 
+		//distance
+		void OutputDistance(std::ostream &stream);
+		size_t GetDistMatSize();
+
+		//align
+		RulerList GetRulerListFromCelp();
+
+		//list
+		void SetSelectedIds(const std::vector<unsigned int>& ids,
+			const std::vector<unsigned int>& bids);
+		bool GetSelectedCelp(CelpList& cl, bool links = false);
+		bool GetAllCelp(CelpList& cl, bool links = false);
+
 		//update progress
 		CompAnalyzerFunc m_sig_progress;
 
@@ -166,11 +183,20 @@ namespace flrd
 		int m_color_type;//color_type: 1-id-based; 2-size-based
 		int m_annot_type;//annot type: 1-id; 2:serianl number
 
-		int m_bn;
-		std::vector<VolumeData*> m_vd_list;//list of volumes for colocalization analysis
+		//distance
+		bool m_use_dist_neighbor;
+		int m_dist_neighbor_num;
+		bool m_use_dist_allchan;
 
+		int m_bn;
+
+		std::vector<VolumeData*> m_vd_list;//list of volumes for colocalization analysis
 		std::vector<CompGroup> m_comp_groups;//each analyzed volume can have comp results saved
 		CompGroup* m_compgroup;//current group
+
+		//selection
+		std::vector<unsigned int> m_sel_ids;
+		std::vector<unsigned int> m_sel_bids;
 
 	private:
 		unsigned int GetExt(unsigned int* data_label,
@@ -217,6 +243,11 @@ namespace flrd
 			compgroup->vd = vd;
 			return compgroup;
 		}
+
+		//get list
+		void FindCelps(CelpList& list,
+			CelpListIter& it, bool links = false);
 	};
+
 }
 #endif//FL_CompAnalyzer_h

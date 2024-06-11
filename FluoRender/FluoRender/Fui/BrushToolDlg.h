@@ -90,8 +90,6 @@ public:
 private:
 	//max volume value
 	double m_max_value;
-	//align center
-	bool m_align_center;
 	//output
 	bool m_hold_history;
 

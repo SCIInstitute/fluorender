@@ -44,6 +44,7 @@ ComponentAnalyzer::ComponentAnalyzer()
 	m_slimit(5)
 {
 	//m_compgroup = AddCompGroup(vd);
+	glbin_comp_def.Apply(this);
 }
 
 ComponentAnalyzer::~ComponentAnalyzer()
@@ -93,11 +94,28 @@ int ComponentAnalyzer::GetColocalization(
 
 void ComponentAnalyzer::Analyze(bool sel)
 {
-	if (!m_compgroup)
-		return;
-	VolumeData* vd = m_compgroup->vd;
+	VolumeData* vd = glbin_current.vol_data;
 	if (!vd || !vd->GetTexture())
 		return;
+
+	if (!FindCompGroup(vd))
+		m_compgroup = AddCompGroup(vd);
+
+	if (m_colocal)
+	{
+		ClearCoVolumes();
+		RenderCanvas* view = glbin_current.canvas;
+		if (view)
+		{
+			for (int i = 0; i < view->GetDispVolumeNum(); ++i)
+			{
+				VolumeData* vdi = view->GetDispVolumeData(i);
+				if (vdi != vd)
+					AddCoVolume(vdi);
+			}
+		}
+	}
+
 	double sx, sy, sz;
 	vd->GetSpacings(sx, sy, sz);
 	vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
@@ -361,7 +379,10 @@ void ComponentAnalyzer::Analyze(bool sel)
 	MatchBricks(sel);
 	UpdateMaxCompSize(m_colocal);
 	if (m_consistent)
+	{
 		MakeColorConsistent();
+		vd->GetVR()->clear_tex_label();
+	}
 
 	m_compgroup->dirty = false;
 	m_colocal = m_colocal && m_vd_list.size();
@@ -1479,6 +1500,323 @@ bool ComponentAnalyzer::OutputRgbChannels(std::list<VolumeData*> &channs)
 	return true;
 }
 
+void ComponentAnalyzer::OutputDistance(std::ostream& stream)
+{
+	size_t num = GetDistMatSize();
+	if (!num)
+		return;
+
+	size_t gsize = m_comp_groups.size();
+
+	//result
+	std::string str;
+	std::vector<std::vector<double>> rm;//result matrix
+	std::vector<std::string> nl;//name list
+	std::vector<int> gn;//group number
+	rm.reserve(num);
+	nl.reserve(num);
+	if (gsize > 1)
+		gn.reserve(num);
+	for (size_t i = 0; i < num; ++i)
+	{
+		rm.push_back(std::vector<double>());
+		rm[i].reserve(num);
+		for (size_t j = 0; j < num; ++j)
+			rm[i].push_back(0);
+	}
+
+	//compute
+	double sx, sy, sz;
+	std::vector<fluo::Point> pos;
+	pos.reserve(num);
+	int num2 = 0;//actual number
+	if (m_use_dist_allchan && gsize > 1)
+	{
+		for (size_t i = 0; i < gsize; ++i)
+		{
+			flrd::CellGraph& graph = m_comp_groups[i].graph;
+			flrd::CelpList* list = &(m_comp_groups[i].celps);
+			sx = list->sx;
+			sy = list->sy;
+			sz = list->sz;
+			if (m_bn > 1)
+				graph.ClearVisited();
+
+			for (auto it = list->begin();
+				it != list->end(); ++it)
+			{
+				if (m_bn > 1)
+				{
+					if (graph.Visited(it->second))
+						continue;
+					flrd::CelpList links;
+					graph.GetLinkedComps(it->second, links, m_slimit);
+				}
+
+				pos.push_back(it->second->GetCenter(sx, sy, sz));
+				str = std::to_string(i + 1);
+				str += ":";
+				str += std::to_string(it->second->Id());
+				nl.push_back(str);
+				gn.push_back(i);
+				num2++;
+			}
+		}
+	}
+	else
+	{
+		flrd::CellGraph& graph = m_comp_groups[0].graph;
+		flrd::CelpList* list = &(m_compgroup->celps);
+		sx = list->sx;
+		sy = list->sy;
+		sz = list->sz;
+		if (m_bn > 1)
+			graph.ClearVisited();
+
+		for (auto it = list->begin();
+			it != list->end(); ++it)
+		{
+			if (m_bn > 1)
+			{
+				if (graph.Visited(it->second))
+					continue;
+				flrd::CelpList links;
+				graph.GetLinkedComps(it->second, links, m_slimit);
+			}
+
+			pos.push_back(it->second->GetCenter(sx, sy, sz));
+			str = std::to_string(it->second->Id());
+			nl.push_back(str);
+			num2++;
+		}
+	}
+	double dist = 0;
+	for (int i = 0; i < num2; ++i)
+	{
+		for (int j = i; j < num2; ++j)
+		{
+			dist = (pos[i] - pos[j]).length();
+			rm[i][j] = dist;
+			rm[j][i] = dist;
+		}
+	}
+
+	bool bdist = m_use_dist_neighbor &&
+		m_dist_neighbor_num > 0 &&
+		m_dist_neighbor_num < num2 - 1;
+
+	std::vector<double> in_group;//distances with in a group
+	std::vector<double> out_group;//distance between groups
+	in_group.reserve(num2 * num2 / 2);
+	out_group.reserve(num2 * num2 / 2);
+	std::vector<std::vector<int>> im;//index matrix
+	if (bdist)
+	{
+		//sort with indices
+		im.reserve(num2);
+		for (size_t i = 0; i < num2; ++i)
+		{
+			im.push_back(std::vector<int>());
+			im[i].reserve(num2);
+			for (size_t j = 0; j < num2; ++j)
+				im[i].push_back(j);
+		}
+		//copy rm
+		std::vector<std::vector<double>> rm2 = rm;
+		//sort
+		for (size_t i = 0; i < num2; ++i)
+		{
+			std::sort(im[i].begin(), im[i].end(),
+				[&](int ii, int jj) {return rm2[i][ii] < rm2[i][jj]; });
+		}
+		//fill rm
+		for (size_t i = 0; i < num2; ++i)
+			for (size_t j = 0; j < num2; ++j)
+			{
+				rm[i][j] = rm2[i][im[i][j]];
+				if (gsize > 1 && j > 0 &&
+					j <= m_dist_neighbor_num)
+				{
+					if (gn[i] == gn[im[i][j]])
+						in_group.push_back(rm[i][j]);
+					else
+						out_group.push_back(rm[i][j]);
+				}
+			}
+	}
+	else
+	{
+		if (gsize > 1)
+		{
+			for (int i = 0; i < num2; ++i)
+				for (int j = i + 1; j < num2; ++j)
+				{
+					if (gn[i] == gn[j])
+						in_group.push_back(rm[i][j]);
+					else
+						out_group.push_back(rm[i][j]);
+				}
+		}
+	}
+
+	size_t dnum = bdist ? (m_dist_neighbor_num + 1) : num2;
+	for (size_t i = 0; i < num2; ++i)
+	{
+		stream << nl[i] << "\t";
+		for (size_t j = bdist ? 1 : 0; j < dnum; ++j)
+		{
+			stream << rm[i][j];
+			if (j < dnum - 1)
+				stream << "\t";
+		}
+		stream << "\n";
+	}
+	//index matrix
+	if (bdist)
+	{
+		stream << "\n";
+		for (size_t i = 0; i < num2; ++i)
+		{
+			stream << nl[i] << "\t";
+			for (size_t j = bdist ? 1 : 0; j < dnum; ++j)
+			{
+				stream << im[i][j] + 1;
+				if (j < dnum - 1)
+					stream << "\t";
+			}
+			stream << "\n";
+		}
+	}
+	//output in_group and out_group distances
+	if (gsize > 1)
+	{
+		stream << "\nIn group Distances\t";
+		for (size_t i = 0; i < in_group.size(); ++i)
+		{
+			stream << in_group[i];
+			if (i < in_group.size() - 1)
+				stream << "\t";
+		}
+		stream << "\n";
+		stream << "Out group Distances\t";
+		for (size_t i = 0; i < out_group.size(); ++i)
+		{
+			stream << out_group[i];
+			if (i < out_group.size() - 1)
+				stream << "\t";
+		}
+		stream << "\n";
+	}
+}
+
+size_t ComponentAnalyzer::GetDistMatSize()
+{
+	size_t gsize = m_comp_groups.size();
+	if (m_use_dist_allchan && gsize > 1)
+	{
+		size_t matsize = 0;
+		for (int i = 0; i < gsize; ++i)
+		{
+			matsize += m_comp_groups[i].celps.size();
+		}
+		return matsize;
+	}
+	else
+	{
+		return m_compgroup->celps.size();
+	}
+}
+
+RulerList ComponentAnalyzer::GetRulerListFromCelp()
+{
+	RulerList rulerlist;
+
+	if (!m_compgroup)
+		return rulerlist;
+
+	CelpList* list = &(m_compgroup->celps);
+	if (!list || list->size() < 3)
+		return rulerlist;
+
+	double sx = list->sx;
+	double sy = list->sy;
+	double sz = list->sz;
+	Ruler ruler;
+	ruler.SetRulerType(1);
+	fluo::Point pt;
+	for (auto it = list->begin();
+		it != list->end(); ++it)
+	{
+		pt = it->second->GetCenter(sx, sy, sz);
+		ruler.AddPoint(pt);
+	}
+	ruler.SetFinished();
+
+	rulerlist.push_back(&ruler);
+
+	return rulerlist;
+}
+
+void ComponentAnalyzer::SetSelectedIds(const std::vector<unsigned int>& ids,
+	const std::vector<unsigned int>& bids)
+{
+	m_sel_ids = ids;
+	m_sel_bids = bids;
+}
+
+bool ComponentAnalyzer::GetSelectedCelp(CelpList& cl, bool links)
+{
+	CelpList* list = &(m_compgroup->celps);
+	if (!list || list->empty())
+		return false;
+
+	cl.min = list->min;
+	cl.max = list->max;
+	cl.sx = list->sx;
+	cl.sy = list->sy;
+	cl.sz = list->sz;
+
+	int bn = glbin_comp_analyzer.GetBrickNum();
+	for (size_t i = 0; i < m_sel_ids.size(); ++i)
+	{
+		unsigned long long key = m_sel_ids[i];
+		unsigned int bid = 0;
+		if (bn > 1)
+		{
+			key = m_sel_bids[i];
+			key = (key << 32) | m_sel_ids[i];
+			bid = m_sel_bids[i];
+		}
+		auto it = list->find(key);
+		if (it != list->end())
+			FindCelps(cl, it, links);
+	}
+
+	if (cl.empty())
+		return false;
+	return true;
+}
+
+bool ComponentAnalyzer::GetAllCelp(CelpList& cl, bool links)
+{
+	CelpList* list = &(m_compgroup->celps);
+	if (!list || list->empty())
+		return false;
+
+	cl.min = list->min;
+	cl.max = list->max;
+	cl.sx = list->sx;
+	cl.sy = list->sy;
+	cl.sz = list->sz;
+
+	for (auto it = list->begin(); it != list->end(); ++it)
+		FindCelps(cl, it, links);
+
+	if (cl.empty())
+		return false;
+	return true;
+}
+
 bool ComponentAnalyzer::GetColor(
 	unsigned int id,
 	int brick_id,
@@ -1629,3 +1967,28 @@ unsigned int ComponentAnalyzer::GetNonconflictId(
 
 	return result;
 }
+
+void ComponentAnalyzer::FindCelps(CelpList& list,
+	CelpListIter& it, bool links)
+{
+	list.insert(pair<unsigned long long, flrd::Celp>
+		(it->second->GetEId(), it->second));
+
+	if (links)
+	{
+		flrd::CellGraph* graph = glbin_comp_analyzer.GetCellGraph();
+		graph->ClearVisited();
+		flrd::CelpList links;
+		if (graph->GetLinkedComps(it->second, links,
+			glbin_comp_analyzer.GetSizeLimit()))
+		{
+			for (auto it2 = links.begin();
+				it2 != links.end(); ++it2)
+			{
+				list.insert(pair<unsigned long long, flrd::Celp>
+					(it2->second->GetEId(), it2->second));
+			}
+		}
+	}
+}
+

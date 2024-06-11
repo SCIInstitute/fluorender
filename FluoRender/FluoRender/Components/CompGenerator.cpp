@@ -63,6 +63,14 @@ bool ComponentGenerator::CheckBricks()
 }
 
 //high-level functions
+void ComponentGenerator::Compute()
+{
+	if (m_use_ml)
+		ApplyRecord();
+	else
+		GenerateComp();
+}
+
 void ComponentGenerator::GenerateComp(bool command)
 {
 	if (!m_vd)
