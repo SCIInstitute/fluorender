@@ -31,7 +31,6 @@
 #include <ShaderProgram.h>
 #include <TextureBrick.h>
 #include <KernelProgram.h>
-#include <utility.h>
 #include <compatibility.h>
 #include <fstream>
 #include <iostream>

@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <RenderCanvas.h>
 #include <MainFrame.h>
-#include <utility.h>
+#include <compatibility.h>
 #include <FLIVR/TextureRenderer.h>
 #include <Selection/PaintBoxes.h>
 #include <Selection/MaskBorder.h>

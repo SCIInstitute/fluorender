@@ -26,8 +26,8 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include "VertexArray.h"
-#include <utility.h>
+#include <VertexArray.h>
+#include <compatibility.h>
 
 namespace flvr
 {

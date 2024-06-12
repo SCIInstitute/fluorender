@@ -313,9 +313,16 @@ include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender)
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Fui)
 file(GLOB fui_src FluoRender/FluoRender/Fui/*.cpp)
 file(GLOB fui_hdr FluoRender/FluoRender/Fui/*.h)
-file(GLOB fui_nvs FluoRender/FluoRender/Fui/*.natvis)
 add_library(FUI_OBJ OBJECT
-  ${fui_src} ${fui_hdr} ${fui_nvs})
+  ${fui_src} ${fui_hdr})
+
+# Utilities
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Utilities)
+file(GLOB utl_src FluoRender/FluoRender/Utilities/*.cpp)
+file(GLOB utl_hdr FluoRender/FluoRender/Utilities/*.h)
+file(GLOB utl_nvs FluoRender/FluoRender/Utilities/*.natvis)
+add_library(UTL_OBJ OBJECT
+  ${utl_src} ${utl_hdr} ${utl_nvs})
 
 # Controls
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Controls)
@@ -345,6 +352,13 @@ file(GLOB fmt_hdr FluoRender/FluoRender/Formats/*.h)
 file(GLOB fmt_rsc FluoRender/FluoRender/Formats/*.class)
 add_library(FORMATS_OBJ OBJECT
   ${fmt_src} ${fmt_hdr} ${fmt_rsc})
+
+# Filters
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Filters)
+file(GLOB fltr_src FluoRender/FluoRender/Filters/*.cpp)
+file(GLOB fltr_hdr FluoRender/FluoRender/Filters/*.h)
+add_library(FILTERS_OBJ OBJECT
+  ${fltr_src} ${fltr_hdr})
 
 # Video
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Video)
@@ -594,6 +608,7 @@ if(APPLE)
   add_executable(FluoRender MACOSX_BUNDLE
     ${src} ${hdr} ${rsc} ${icns}
     $<TARGET_OBJECTS:FUI_OBJ>
+    $<TARGET_OBJECTS:UTL_OBJ>
     $<TARGET_OBJECTS:CONTROLS_OBJ>
     $<TARGET_OBJECTS:CONFIGS_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
@@ -607,6 +622,7 @@ if(APPLE)
     $<TARGET_OBJECTS:FILEIO_OBJ>
     $<TARGET_OBJECTS:TIMER_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
+    $<TARGET_OBJECTS:FILTERS_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
     $<TARGET_OBJECTS:TRACKING_OBJ>
     $<TARGET_OBJECTS:COMPONENTS_OBJ>
@@ -636,6 +652,7 @@ elseif(UNIX OR MINGW)
   add_executable(FluoRender
     ${src} ${hdr} ${rsc} ${icns}
     $<TARGET_OBJECTS:FUI_OBJ>
+    $<TARGET_OBJECTS:UTL_OBJ>
     $<TARGET_OBJECTS:CONTROLS_OBJ>
     $<TARGET_OBJECTS:CONFIGS_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
@@ -649,6 +666,7 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:FILEIO_OBJ>
     $<TARGET_OBJECTS:TIMER_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
+    $<TARGET_OBJECTS:FILTERS_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
     $<TARGET_OBJECTS:TRACKING_OBJ>
     $<TARGET_OBJECTS:COMPONENTS_OBJ>
@@ -710,6 +728,7 @@ elseif(WIN32)
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
       $<TARGET_OBJECTS:FUI_OBJ>
+      $<TARGET_OBJECTS:UTL_OBJ>
       $<TARGET_OBJECTS:CONTROLS_OBJ>
       $<TARGET_OBJECTS:CONFIGS_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
@@ -723,6 +742,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:ANIMATORS_OBJ>
       $<TARGET_OBJECTS:TIMER_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
+      $<TARGET_OBJECTS:FILTERS_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
       $<TARGET_OBJECTS:COMPONENTS_OBJ>
@@ -743,6 +763,7 @@ elseif(WIN32)
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
       $<TARGET_OBJECTS:FUI_OBJ>
+      $<TARGET_OBJECTS:UTL_OBJ>
       $<TARGET_OBJECTS:CONTROLS_OBJ>
       $<TARGET_OBJECTS:CONFIGS_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
@@ -756,6 +777,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:ANIMATORS_OBJ>
       $<TARGET_OBJECTS:TIMER_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
+      $<TARGET_OBJECTS:FILTERS_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
       $<TARGET_OBJECTS:COMPONENTS_OBJ>
@@ -775,6 +797,7 @@ elseif(WIN32)
     add_executable(Tester
       ${tester_src} ${tester_hdr}
       $<TARGET_OBJECTS:FUI_OBJ>
+      $<TARGET_OBJECTS:UTL_OBJ>
       $<TARGET_OBJECTS:CONTROLS_OBJ>
       $<TARGET_OBJECTS:CONFIGS_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
@@ -788,6 +811,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:ANIMATORS_OBJ>
       $<TARGET_OBJECTS:TIMER_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
+      $<TARGET_OBJECTS:FILTERS_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
       $<TARGET_OBJECTS:COMPONENTS_OBJ>

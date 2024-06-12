@@ -33,13 +33,13 @@ DEALINGS IN THE SOFTWARE.
 #include <Calculate/VolumeBaker.h>
 #include <Calculate/Histogram.h>
 #include <FpRangeDlg.h>
-#include "teem/Nrrd/nrrd.h"
+#include <teem/Nrrd/nrrd.h>
 #include <wx/msgdlg.h>
 #include <wx/progdlg.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/stdpaths.h>
-#include "utility.h"
+#include <compatibility.h>
 #include <sstream>
 #include <fstream>
 #include <algorithm>

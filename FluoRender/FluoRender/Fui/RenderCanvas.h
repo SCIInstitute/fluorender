@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <DataManager.h>
 #include <VolumeLoader.h>
-#include <utility.h>
 #include <KernelExecutor.h>
 #include <Calculate/VolumeCalculator.h>
 #include <Selection/VolumeSelector.h>

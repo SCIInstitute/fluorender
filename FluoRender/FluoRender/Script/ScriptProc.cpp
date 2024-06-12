@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Global.h>
 #include <Distance/Camera2Ruler.h>
+#include <compatibility.h>
 #include <ScriptVisitors.h>
 #include <RenderCanvas.h>
 #include <MainFrame.h>
@@ -42,7 +43,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/WalkCycle.h>
 #include <Tracking/Registrator.h>
 #include <Python/PyBase.h>
-#include <utility.h>
 #include <wx/filefn.h>
 #include <wx/stdpaths.h>
 #include <wx/mimetype.h>
