@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
-#include <Converters/VolumeMeshConv.h>
 #include <wxSingleSlider.h>
 #include <wx/progdlg.h>
 #include <wx/valnum.h>

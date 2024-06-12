@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _COMPONENTDLG_H_
 
 #include <PropPanel.h>
-#include <wx/wx.h>
 #include <wx/collpane.h>
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>

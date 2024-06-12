@@ -32,19 +32,17 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 
-BEGIN_EVENT_TABLE(CountingDlg, wxPanel)
-	//component analyzer
-	EVT_CHECKBOX(ID_CAIgnoreMaxChk, CountingDlg::OnCAIgnoreMaxChk)
-	EVT_BUTTON(ID_CAAnalyzeBtn, CountingDlg::OnCAAnalyzeBtn)
-END_EVENT_TABLE()
+//BEGIN_EVENT_TABLE(CountingDlg, wxPanel)
+//	//component analyzer
+//	EVT_CHECKBOX(ID_CAIgnoreMaxChk, CountingDlg::OnCAIgnoreMaxChk)
+//	EVT_BUTTON(ID_CAAnalyzeBtn, CountingDlg::OnCAAnalyzeBtn)
+//END_EVENT_TABLE()
 
 CountingDlg::CountingDlg(MainFrame *frame)
-: wxPanel(frame, wxID_ANY,
+: PropPanel(frame, frame,
 wxDefaultPosition,
 frame->FromDIP(wxSize(400, 150)),
 0, "CountingDlg"),
-m_frame(frame),
-m_view(0),
 m_max_value(255.0)
 {
 	// temporarily block events during constructor:
@@ -132,6 +130,11 @@ CountingDlg::~CountingDlg()
 {
 }
 
+void CountingDlg::FluoUpdate(const fluo::ValueCollection& vc)
+{
+
+}
+
 //load default
 void CountingDlg::LoadDefault()
 {
@@ -150,17 +153,6 @@ void CountingDlg::LoadDefault()
 	bval = glbin_comp_def.m_use_min && !glbin_comp_def.m_use_max;
 	m_ca_ignore_max_chk->SetValue(bval);
 	m_ca_max_text->Enable(bval);
-}
-
-void CountingDlg::GetSettings(RenderCanvas* view)
-{
-	if (!view)
-		return;
-	m_view = view;
-
-	//VolumeData* sel_vol = 0;
-	//if (m_frame)
-	//	sel_vol = m_frame->GetCurSelVol();
 }
 
 void CountingDlg::OnCAIgnoreMaxChk(wxCommandEvent& event)

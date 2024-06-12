@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _CONVERTDLG_H_
 
 #include <PropPanel.h>
-#include <wx/wx.h>
 
 class wxSingleSlider;
 class ConvertDlg : public PropPanel

@@ -28,37 +28,29 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _COUNTINGDLG_H_
 #define _COUNTINGDLG_H_
 
-#include <wx/wx.h>
+#include <PropPanel.h>
 
-class MainFrame;
-class RenderCanvas;
-class VolumeData;
-class DataGroup;
-class CountingDlg : public wxPanel
+class CountingDlg : public PropPanel
 {
 public:
-	enum
-	{
-		ID_CASelectOnlyChk = ID_COUNTING,
-		ID_CAMinText,
-		ID_CAMaxText,
-		ID_CAIgnoreMaxChk,
-		ID_CAAnalyzeBtn,
-		ID_CACompsText,
-		ID_CAVolumeText,
-		ID_CAVolUnitText
-	};
+	//enum
+	//{
+	//	ID_CASelectOnlyChk = ID_COUNTING,
+	//	ID_CAMinText,
+	//	ID_CAMaxText,
+	//	ID_CAIgnoreMaxChk,
+	//	ID_CAAnalyzeBtn,
+	//	ID_CACompsText,
+	//	ID_CAVolumeText,
+	//	ID_CAVolUnitText
+	//};
 
 	CountingDlg(MainFrame* frame);
 	~CountingDlg();
 
-	void GetSettings(RenderCanvas* view);
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 private:
-	MainFrame* m_frame;
-	//current view
-	RenderCanvas *m_view;
-
 	//max volume value
 	double m_max_value;
 
@@ -73,13 +65,9 @@ private:
 	wxTextCtrl *m_ca_vol_unit_text;
 
 private:
-	void LoadDefault();
-
 	//component analyzer
 	void OnCAAnalyzeBtn(wxCommandEvent& event);
 	void OnCAIgnoreMaxChk(wxCommandEvent& event);
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_COUNTINGDLG_H_
