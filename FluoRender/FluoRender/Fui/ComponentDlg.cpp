@@ -1373,6 +1373,9 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			OutputAnalysis(str1, str2);
 		}
 	}
+
+	if (FOUND_VALUE(gstCompListSelection))
+		UpdateCompSelection();
 }
 
 void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
@@ -2070,13 +2073,13 @@ void ComponentDlg::OnAnalysisMaxText(wxCommandEvent &event)
 void ComponentDlg::OnCompFull(wxCommandEvent &event)
 {
 	glbin_comp_selector.SelectFullComp();
-	FluoRefresh(0, { gstComp, gstSelUndo });
+	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo });
 }
 
 void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 {
 	glbin_comp_selector.Exclusive();
-	FluoRefresh(0, { gstComp, gstSelUndo });
+	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo });
 
 	//frame
 	//if (m_frame)
@@ -2097,7 +2100,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 {
 	bool get_all = glbin_comp_selector.GetIdEmpty();
 	glbin_comp_selector.Select(get_all);
-	FluoRefresh(0, { gstComp, gstSelUndo });
+	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo });
 	//frame
 	//if (m_frame)
 	//{
@@ -2116,7 +2119,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 void ComponentDlg::OnCompAll(wxCommandEvent &event)
 {
 	glbin_comp_selector.All();
-	FluoRefresh(0, { gstComp, gstSelUndo });
+	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo });
 
 	//frame
 	//if (m_frame)
@@ -2136,7 +2139,7 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 void ComponentDlg::OnCompClear(wxCommandEvent &event)
 {
 	glbin_comp_selector.Clear();
-	FluoRefresh(0, { gstComp, gstSelUndo });
+	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo });
 }
 
 void ComponentDlg::OnShuffle(wxCommandEvent &event)
@@ -2383,18 +2386,16 @@ void ComponentDlg::OnKeyDown(wxKeyEvent& event)
 
 void ComponentDlg::OnSelectCell(wxGridEvent& event)
 {
-	//int r = event.GetRow();
-	//int c = event.GetCol();
-	//m_output_grid->SelectBlock(r, c, r, c);
-
-	GetCompSelection();
+	glbin_comp_selector.SelectCompsCanvas();
+	FluoRefresh(3, { gstNull });
 
 	event.Skip();
 }
 
 void ComponentDlg::OnRangeSelect(wxGridRangeSelectEvent& event)
 {
-	GetCompSelection();
+	glbin_comp_selector.SelectCompsCanvas();
+	FluoRefresh(3, { gstNull });
 
 	event.Skip();
 }
@@ -2569,6 +2570,72 @@ void ComponentDlg::ExcludeComps()
 	glbin_comp_selector.EraseList(cl);
 
 	FluoRefresh(2, { gstCompAnalysisResult });
+}
+
+void ComponentDlg::UpdateCompSelection()
+{
+	std::set<unsigned long long> ids;
+	int mode = glbin_comp_selector.GetSelCompIdsMode();
+	glbin_comp_selector.GetSelectedCompIds(ids);
+	if (ids.empty())
+		return;
+
+	int bn = glbin_comp_analyzer.GetBrickNum();
+
+	wxString str;
+	unsigned long ulv;
+	unsigned long long ull;
+	bool flag = mode == 1;
+	int lasti = -1;
+	wxArrayInt sel = m_output_grid->GetSelectedRows();
+	std::set<int> rows;
+	for (int i = 0; i < sel.GetCount(); ++i)
+		rows.insert(sel[i]);
+	for (int i = 0; i < m_output_grid->GetNumberRows(); ++i)
+	{
+		str = m_output_grid->GetCellValue(i, 0);
+		if (!str.ToULong(&ulv))
+			continue;
+		if (bn > 1)
+		{
+			str = m_output_grid->GetCellValue(i, 1);
+			if (!str.ToULongLong(&ull))
+				continue;
+			ull = (ull << 32) | ulv;
+		}
+		else
+			ull = ulv;
+		if (ids.find(ull) != ids.end())
+		{
+			if (!flag)
+			{
+				m_output_grid->ClearSelection();
+				flag = true;
+			}
+			if (mode == 0)
+			{
+				m_output_grid->SelectRow(i, true);
+				lasti = i;
+			}
+			else
+			{
+				if (rows.find(i) != rows.end())
+					m_output_grid->DeselectRow(i);
+				else
+				{
+					m_output_grid->SelectRow(i, true);
+					lasti = i;
+				}
+			}
+		}
+	}
+
+	//if (flag)
+	//{
+	//	SelectCompsCanvas();
+	//	if (lasti >= 0)
+	//		m_output_grid->GoToCell(lasti, 0);
+	//}
 }
 
 void ComponentDlg::AddSelArrayInt(std::vector<unsigned int> &ids,

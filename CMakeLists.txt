@@ -108,8 +108,7 @@ endif()
 
 #UI IDs
 add_definitions(-DID_START=5999)
-add_definitions(-DID_COMPONENT=ID_START)
-add_definitions(-DID_CONVERT=ID_COMPONENT+171)
+add_definitions(-DID_CONVERT=ID_START+171)
 add_definitions(-DID_COUNTING=ID_CONVERT+21)
 add_definitions(-DID_MEASURE1=ID_COUNTING+11)
 add_definitions(-DID_MEASURE2=ID_MEASURE1+11)

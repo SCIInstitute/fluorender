@@ -1221,7 +1221,6 @@ void TraceDlg::UncertainFilter(bool input)
 	glbin_trackmap_proc.SetUncertainLow(ival);
 	glbin_trackmap_proc.GetCellsByUncertainty(list_in, list_out, m_cur_time);
 
-	glbin_comp_selector.SetVolume(m_view->m_cur_vol);
 	glbin_comp_selector.SelectList(list_out);
 
 	//update view
@@ -1414,10 +1413,10 @@ void TraceDlg::OnAnalyzeComp(wxCommandEvent &event)
 	if (!m_view)
 		return;
 	VolumeData* vd = m_view->m_cur_vol;
-	flrd::ComponentAnalyzer comp_analyzer(vd);
-	comp_analyzer.Analyze(true, true);
+	glbin_comp_analyzer.SetVolume(vd);
+	glbin_comp_analyzer.Analyze(true);
 	string str;
-	comp_analyzer.OutputCompListStr(str, 1);
+	glbin_comp_analyzer.OutputCompListStr(str, 1);
 	m_stat_text->ChangeValue(str);
 }
 
@@ -1658,10 +1657,9 @@ void TraceDlg::CompDelete()
 	}
 
 	//get current vd
-	glbin_comp_selector.SetVolume(m_view->m_cur_vol);
 	if (ids.size() == 1)
 	{
-		glbin_comp_selector.SetId(ids[0]);
+		glbin_comp_selector.SetId(ids[0], false);
 		glbin_comp_selector.Delete();
 	}
 	else
@@ -1681,7 +1679,6 @@ void TraceDlg::CompClear()
 		return;
 
 	//get current vd
-	glbin_comp_selector.SetVolume(m_view->m_cur_vol);
 	glbin_comp_selector.Clear();
 
 	//update view
@@ -1781,9 +1778,9 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 
 		unsigned int id = (unsigned int)ival;
 		//get current mask
-		glbin_comp_selector.SetVolume(m_view->m_cur_vol);
-		glbin_comp_selector.SetId(id);
-		glbin_comp_selector.SetMinNum(true, slimit);
+		glbin_comp_selector.SetId(id, false);
+		glbin_comp_selector.SetUseMin(true);
+		glbin_comp_selector.SetMinNum(slimit);
 		glbin_comp_selector.Select(get_all);
 	}
 
@@ -1814,9 +1811,9 @@ void TraceDlg::OnCompExclusive(wxCommandEvent &event)
 	{
 		unsigned int id = ival;
 		//get current mask
-		glbin_comp_selector.SetVolume(m_view->m_cur_vol);
-		glbin_comp_selector.SetId(id);
-		glbin_comp_selector.SetMinNum(true, slimit);
+		glbin_comp_selector.SetId(id, false);
+		glbin_comp_selector.SetUseMin(true);
+		glbin_comp_selector.SetMinNum(slimit);
 		glbin_comp_selector.Exclusive();
 	}
 
@@ -1859,8 +1856,8 @@ void TraceDlg::CellFull()
 	str.ToLong(&ival);
 	unsigned int slimit = (unsigned int)ival;
 	//get current mask
-	glbin_comp_selector.SetVolume(m_view->m_cur_vol);
-	glbin_comp_selector.SetMinNum(true, slimit);
+	glbin_comp_selector.SetUseMin(true);
+	glbin_comp_selector.SetMinNum(slimit);
 	glbin_comp_selector.CompFull();
 	//update view
 	CellUpdate();
@@ -1899,10 +1896,9 @@ void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, flrd::CelpLis
 
 void TraceDlg::CellNewID(bool append)
 {
-	flrd::ComponentEditor editor;
-	editor.SetView(m_view);
-	editor.NewId(m_cell_new_id,
-		m_cell_new_id_empty, append, true);
+	glbin_comp_editor.SetId(m_cell_new_id,
+		m_cell_new_id_empty);
+	glbin_comp_editor.NewId(append, true);
 	CellUpdate();
 }
 
@@ -2009,10 +2005,9 @@ void TraceDlg::CellReplaceID()
 		}
 	}
 
-	flrd::ComponentEditor editor;
-	editor.SetView(m_view);
-	editor.Replace(m_cell_new_id,
-		m_cell_new_id_empty, list_cur);
+	glbin_comp_editor.SetId(m_cell_new_id,
+		m_cell_new_id_empty);
+	glbin_comp_editor.Replace(list_cur);
 
 	CellUpdate();
 }
@@ -2046,9 +2041,7 @@ void TraceDlg::CellCombineID()
 		}
 	}
 
-	flrd::ComponentEditor editor;
-	editor.SetView(m_view);
-	editor.Combine(list_cur);
+	glbin_comp_editor.Combine(list_cur);
 
 	//update view
 	CellUpdate();
@@ -2152,8 +2145,8 @@ void TraceDlg::OnCellLinkAll(wxCommandEvent &event)
 	//register file reading and deleteing functions
 	glbin_reg_cache_queue_func(this, TraceDlg::ReadVolCache, TraceDlg::DelVolCache);
 	glbin_cache_queue.set_max_size(3);
-	flrd::CelpList in = m_frame->GetComponentDlg()->GetInCells();
-	flrd::CelpList out = m_frame->GetComponentDlg()->GetOutCells();
+	flrd::CelpList in = glbin_clusterizer.GetInCells();
+	flrd::CelpList out = glbin_clusterizer.GetOutCells();
 	glbin_trackmap_proc.RelinkCells(in, out, m_cur_time);
 
 	CellUpdate();

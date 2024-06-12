@@ -91,6 +91,7 @@ public:
 	//selection
 	void IncludeComps();
 	void ExcludeComps();
+	void UpdateCompSelection();
 
 private:
 	//progress

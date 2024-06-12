@@ -185,11 +185,11 @@ void ComponentDefault::Read(wxFileConfig& f)
 	f.Read("dist_neighbor", &m_dist_neighbor_num);
 	f.Read("use_dist_allchan", &m_use_dist_allchan);
 
-	//auto update
-	f.Read("auto_update", &m_auto_update);
+	////auto update
+	//f.Read("auto_update", &m_auto_update);
 
-	//record
-	f.Read("record_cmd", &m_record_cmd);
+	////record
+	//f.Read("record_cmd", &m_record_cmd);
 }
 
 void ComponentDefault::Save(wxFileConfig& f)

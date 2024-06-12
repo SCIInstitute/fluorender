@@ -3841,12 +3841,10 @@ void RenderCanvas::PickVolume()
 void RenderCanvas::SetCompSelection(fluo::Point& p, int mode)
 {
 	//update selection
-	if (m_frame && m_frame->GetComponentDlg())
-	{
-		std::set<unsigned long long> ids;
-		glbin_comp_analyzer.GetCompsPoint(p, ids);
-		m_frame->GetComponentDlg()->SetCompSelection(ids, mode);
-	}
+	std::set<unsigned long long> ids;
+	glbin_comp_analyzer.GetCompsPoint(p, ids);
+	glbin_comp_selector.SetSelectedCompIds(ids, mode);
+	m_frame->UpdateProps({ gstCompListSelection });
 }
 
 void RenderCanvas::OnIdle(wxIdleEvent& event)
@@ -4193,8 +4191,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				wxGetKeyState(wxKeyCode('f')))
 			{
 				m_cell_full = true;
-				if (m_frame && m_frame->GetComponentDlg())
-					m_frame->GetComponentDlg()->SelectFullComp();
+				glbin_comp_selector.SelectFullComp();
 				if (m_frame && m_frame->GetTraceDlg())
 					m_frame->GetTraceDlg()->CellUpdate();
 				refresh = true;

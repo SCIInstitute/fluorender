@@ -187,13 +187,13 @@ void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
 	glbin_comp_generator.Grow();
 
 	glbin_comp_analyzer.SetVolume(vd);
-	glbin_comp_analyzer.Analyze(select, true, false);
+	glbin_comp_analyzer.Analyze(select);
 
-	glbin_comp_selector.SetVolume(vd);
 	//cell size filter
-	glbin_comp_selector.SetMinNum(false, 0);
-	glbin_comp_selector.SetMaxNum(true, size);
-	glbin_comp_selector.SetAnalyzer(&glbin_comp_analyzer);
+	glbin_comp_selector.SetUseMin(false);
+	glbin_comp_selector.SetUseMax(true);
+	glbin_comp_selector.SetMinNum(0);
+	glbin_comp_selector.SetMaxNum(size);
 	glbin_comp_selector.CompFull();
 
 	m_view->RefreshGL(39);

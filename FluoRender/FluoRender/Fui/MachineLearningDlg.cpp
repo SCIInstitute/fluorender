@@ -562,7 +562,7 @@ void MLCompGenPanel::OnApplyRec(wxCommandEvent& event)
 {
 	if (!m_frame)
 		return;
-	m_frame->GetComponentDlg()->ApplyRecord();
+	glbin_comp_generator.ApplyRecord();
 }
 
 void MLCompGenPanel::OnBotGridAutoSize(wxGridSizeEvent& event)

@@ -107,7 +107,7 @@ public:
 	int m_max_num;
 
 	//analyzer
-	unsigned int m_slimit;//size limit for connecting components
+	size_t m_slimit;//size limit for connecting components
 	bool m_consistent;
 	bool m_colocal;
 	int m_channel_type;//channel type: 1-multichannel; 2-rgb channel

@@ -595,9 +595,9 @@ void ScriptProc::RunPreTracking()
 	int slimit;
 	m_fconfig->Read("size_limit", &slimit, 0);
 	//before updating volume
-	flrd::ComponentAnalyzer comp_analyzer(cur_vol);
-	comp_analyzer.Analyze(true, true);
-	flrd::CelpList* list = comp_analyzer.GetCelpList();
+	glbin_comp_analyzer.SetVolume(cur_vol);
+	glbin_comp_analyzer.Analyze(true);
+	flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
 	m_sel_labels.clear();
 	for (auto it = list->begin();
 		it != list->end(); ++it)
@@ -693,7 +693,6 @@ void ScriptProc::RunMaskTracking()
 	{
 		//rewind
 		//flrd::ComponentSelector comp_selector(cur_vol);
-		glbin_comp_selector.SetVolume(cur_vol);
 		glbin_comp_selector.All();
 		return;
 	}
@@ -792,8 +791,7 @@ void ScriptProc::RunCompSelect()
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
-		//flrd::ComponentSelector comp_selector(*i);
-		glbin_comp_selector.SetVolume(*i);
+		glbin_current.SetVolumeData(*i);
 
 		switch (mode)
 		{
@@ -806,9 +804,15 @@ void ScriptProc::RunCompSelect()
 		case 2:
 		default:
 			if (comp_min)
-				glbin_comp_selector.SetMinNum(true, comp_min);
+			{
+				glbin_comp_selector.SetUseMin(true);
+				glbin_comp_selector.SetMinNum(comp_min);
+			}
 			if (comp_max)
-				glbin_comp_selector.SetMaxNum(true, comp_max);
+			{
+				glbin_comp_selector.SetUseMax(true);
+				glbin_comp_selector.SetMaxNum(comp_max);
+			}
 			glbin_comp_selector.Select(true);
 		}
 	}
@@ -830,13 +834,12 @@ void ScriptProc::RunCompEdit()
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
-		flrd::ComponentEditor editor;
-		editor.SetVolume(*i);
+		glbin_current.SetVolumeData(*i);
 
 		switch (edit_type)
 		{
 		case 0:
-			editor.Clean(mode);
+			glbin_comp_editor.Clean(mode);
 			break;
 		}
 	}
@@ -1149,9 +1152,10 @@ void ScriptProc::RunCompAnalysis()
 		itvol != vlist.end(); ++itvol, ++ch)
 	{
 		int bn = (*itvol)->GetAllBrickNum();
-		flrd::ComponentAnalyzer comp_analyzer(*itvol);
-		comp_analyzer.SetSizeLimit(slimit);
-		comp_analyzer.Analyze(selected, consistent);
+		glbin_comp_analyzer.SetVolume(*itvol);
+		glbin_comp_analyzer.SetSizeLimit(slimit);
+		glbin_comp_analyzer.SetConsistent(consistent);
+		glbin_comp_analyzer.Analyze(selected);
 
 		//output
 		//time group
@@ -1166,8 +1170,8 @@ void ScriptProc::RunCompAnalysis()
 		fluo::Group* cmdg = chg->getOrAddGroup(m_type.ToStdString());
 		cmdg->addSetValue("type", m_type.ToStdString());
 
-		CelpList* celp_list = comp_analyzer.GetCelpList();
-		CellGraph* graph = comp_analyzer.GetCellGraph();
+		CelpList* celp_list = glbin_comp_analyzer.GetCelpList();
+		CellGraph* graph = glbin_comp_analyzer.GetCellGraph();
 		if (!celp_list || !graph)
 			continue;
 		double sx = celp_list->sx;
@@ -1329,8 +1333,6 @@ void ScriptProc::RunGenerateComp()
 	std::vector<VolumeData*> vlist;
 	if (!GetVolumes(vlist))
 		return;
-	if (!(m_frame->GetComponentDlg()))
-		return;
 
 	wxString ml_table_file;
 	m_fconfig->Read("ml_table", &ml_table_file);
@@ -1344,9 +1346,9 @@ void ScriptProc::RunGenerateComp()
 	m_fconfig->Read("comp_command", &cmdfile);
 	cmdfile = GetInputFile(cmdfile, "Commands");
 	if (cmdfile.IsEmpty())
-		m_frame->GetComponentDlg()->ResetCmd();
+		glbin_comp_generator.ResetCmd();
 	else
-		m_frame->GetComponentDlg()->LoadCmd(cmdfile);
+		glbin_comp_generator.LoadCmd(cmdfile);
 
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
@@ -1356,10 +1358,10 @@ void ScriptProc::RunGenerateComp()
 		{
 			flrd::TableHistParams& table = glbin.get_cg_table();
 			table.open(ml_table_file.ToStdString());
-			m_frame->GetComponentDlg()->ApplyRecord();
+			glbin_comp_generator.ApplyRecord();
 		}
 		else
-			m_frame->GetComponentDlg()->PlayCmd(tfac);
+			glbin_comp_generator.PlayCmd(tfac);
 	}
 }
 

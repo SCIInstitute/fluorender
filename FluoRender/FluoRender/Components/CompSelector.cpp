@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CompSelector.h>
 #include <CompAnalyzer.h>
 #include <Global.h>
+#include <RenderCanvas.h>
 #include <set>
 
 using namespace flrd;
@@ -95,79 +96,23 @@ void ComponentSelector::SelectFullComp()
 		Select(true);
 }
 
-void ComponentSelector::GetCompSelection()
+void ComponentSelector::SelectCompsCanvas()
 {
-	if (m_view)
-	{
-		flrd::CelpList cl;
-		GetCellList(cl);
-		m_view->SetCellList(cl);
-		m_view->SetInteractive(false);
-		m_view->RefreshGL(39);
-	}
-}
-
-void ComponentSelector::SetCompSelection(std::set<unsigned long long>& ids, int mode)
-{
-	if (ids.empty())
+	RenderCanvas* view = glbin_current.canvas;
+	if (!view)
 		return;
 
-	int bn = glbin_comp_analyzer.GetBrickNum();
+	flrd::CelpList cl;
+	glbin_comp_analyzer.GetAllCelp(cl);
+	view->SetCellList(cl);
+	view->SetInteractive(false);
+	//view->RefreshGL(39);
+}
 
-	wxString str;
-	unsigned long ulv;
-	unsigned long long ull;
-	bool flag = mode == 1;
-	int lasti = -1;
-	wxArrayInt sel = m_output_grid->GetSelectedRows();
-	std::set<int> rows;
-	for (int i = 0; i < sel.GetCount(); ++i)
-		rows.insert(sel[i]);
-	for (int i = 0; i < m_output_grid->GetNumberRows(); ++i)
-	{
-		str = m_output_grid->GetCellValue(i, 0);
-		if (!str.ToULong(&ulv))
-			continue;
-		if (bn > 1)
-		{
-			str = m_output_grid->GetCellValue(i, 1);
-			if (!str.ToULongLong(&ull))
-				continue;
-			ull = (ull << 32) | ulv;
-		}
-		else
-			ull = ulv;
-		if (ids.find(ull) != ids.end())
-		{
-			if (!flag)
-			{
-				m_output_grid->ClearSelection();
-				flag = true;
-			}
-			if (mode == 0)
-			{
-				m_output_grid->SelectRow(i, true);
-				lasti = i;
-			}
-			else
-			{
-				if (rows.find(i) != rows.end())
-					m_output_grid->DeselectRow(i);
-				else
-				{
-					m_output_grid->SelectRow(i, true);
-					lasti = i;
-				}
-			}
-		}
-	}
-
-	if (flag)
-	{
-		GetCompSelection();
-		if (lasti >= 0)
-			m_output_grid->GoToCell(lasti, 0);
-	}
+void ComponentSelector::SetSelectedCompIds(const std::set<unsigned long long>& ids, int mode)
+{
+	m_sel_ids = ids;
+	m_sel_mode = mode;
 }
 
 void ComponentSelector::CompFull()

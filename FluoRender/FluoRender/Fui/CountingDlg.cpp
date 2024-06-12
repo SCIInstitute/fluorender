@@ -189,7 +189,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 	glbin_comp_generator.Grow();
 
 	glbin_comp_analyzer.SetVolume(vd);
-	glbin_comp_analyzer.Analyze(select, true, false);
+	glbin_comp_analyzer.Analyze(select);
 	m_view->RefreshGL(39);
 
 	flrd::CelpList *list = glbin_comp_analyzer.GetCelpList();

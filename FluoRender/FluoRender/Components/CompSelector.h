@@ -67,8 +67,10 @@ namespace flrd
 
 		//high-level functions
 		void SelectFullComp();
-		void GetCompSelection();
-		void SetCompSelection(std::set<unsigned long long>& ids, int mode);
+		void SelectCompsCanvas();
+		void SetSelectedCompIds(const std::set<unsigned long long>& ids, int mode);
+		void GetSelectedCompIds(std::set<unsigned long long>& ids) { ids = m_sel_ids; }
+		int GetSelCompIdsMode() { return m_sel_mode; }
 
 		//select functions
 		void CompFull();
@@ -89,6 +91,8 @@ namespace flrd
 		bool m_use_max;
 		unsigned int m_min_num;
 		unsigned int m_max_num;
+		std::set<unsigned long long> m_sel_ids;
+		int m_sel_mode;//0:single; 1:multiple
 
 	private:
 		bool CompareSize(unsigned int size);
