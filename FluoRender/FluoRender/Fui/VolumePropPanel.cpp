@@ -2217,7 +2217,7 @@ void VolumePropPanel::OnThreshMF(wxCommandEvent& event)
 	}
 }
 
-void VolumePropPanel::OnThreshChange(wxScrollEvent &event)
+void VolumePropPanel::OnThreshChange(wxScrollEvent& event)
 {
 	int ival1 = m_thresh_sldr->GetLowValue();
 	int ival2 = m_thresh_sldr->GetHighValue();
@@ -2238,7 +2238,7 @@ void VolumePropPanel::OnThreshChange(wxScrollEvent &event)
 	//	m_frame->GetColocalizationDlg()->Colocalize();
 }
 
-void VolumePropPanel::OnThreshText(wxCommandEvent &event)
+void VolumePropPanel::OnThreshText(wxCommandEvent& event)
 {
 	wxObject* t = event.GetEventObject();
 	long ival1 = 0, ival2 = 0;
@@ -2321,14 +2321,14 @@ void VolumePropPanel::OnShadowMF(wxCommandEvent& event)
 	}
 }
 
-void VolumePropPanel::OnShadowChk(wxCommandEvent &event)
+void VolumePropPanel::OnShadowChk(wxCommandEvent& event)
 {
 	bool val = m_shadow_chk->GetValue();
 	EnableShadow(val);
 	event.Skip();
 }
 
-void VolumePropPanel::OnShadowChange(wxScrollEvent &event)
+void VolumePropPanel::OnShadowChange(wxScrollEvent& event)
 {
 	double val = m_shadow_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
@@ -2342,7 +2342,7 @@ void VolumePropPanel::OnShadowChange(wxScrollEvent &event)
 		SetShadowInt(val, false);
 }
 
-void VolumePropPanel::OnShadowText(wxCommandEvent &event)
+void VolumePropPanel::OnShadowText(wxCommandEvent& event)
 {
 	wxString str = m_shadow_text->GetValue();
 	double val = 0.0;
@@ -2452,14 +2452,14 @@ void VolumePropPanel::OnColormapMF(wxCommandEvent& event)
 	}
 }
 
-void VolumePropPanel::OnColormapChk(wxCommandEvent &event)
+void VolumePropPanel::OnColormapChk(wxCommandEvent& event)
 {
 	bool val = m_colormap_chk->GetValue();
 	EnableColormap(val);
 	event.Skip();
 }
 
-void VolumePropPanel::OnColormapChange(wxScrollEvent &event)
+void VolumePropPanel::OnColormapChange(wxScrollEvent& event)
 {
 	int ival1 = m_colormap_sldr->GetLowValue();
 	int ival2 = m_colormap_sldr->GetHighValue();
@@ -2475,7 +2475,7 @@ void VolumePropPanel::OnColormapChange(wxScrollEvent &event)
 		SetColormapVal(val1, val2, false);
 }
 
-void VolumePropPanel::OnColormapText(wxCommandEvent &event)
+void VolumePropPanel::OnColormapText(wxCommandEvent& event)
 {
 	wxObject* t = event.GetEventObject();
 	wxString str = m_colormap_low_text->GetValue();
@@ -2517,7 +2517,7 @@ void VolumePropPanel::OnColormapLink(wxCommandEvent& event)
 	m_colormap_link_tb->SetToolNormalBitmap(0, bitmap);
 }
 
-void VolumePropPanel::OnColormapInvBtn(wxCommandEvent &event)
+void VolumePropPanel::OnColormapInvBtn(wxCommandEvent& event)
 {
 	bool val = m_colormap_inv_btn->GetToolState(0);
 	if (val)
@@ -2543,7 +2543,7 @@ void VolumePropPanel::OnColormapInvBtn(wxCommandEvent &event)
 	event.Skip();
 }
 
-void VolumePropPanel::OnColormapCombo(wxCommandEvent &event)
+void VolumePropPanel::OnColormapCombo(wxCommandEvent& event)
 {
 	int colormap = m_colormap_combo->GetCurrentSelection();
 
@@ -2568,7 +2568,7 @@ void VolumePropPanel::OnColormapCombo(wxCommandEvent &event)
 	event.Skip();
 }
 
-void VolumePropPanel::OnColormapCombo2(wxCommandEvent &event)
+void VolumePropPanel::OnColormapCombo2(wxCommandEvent& event)
 {
 	int colormap_proj = m_colormap_combo2->GetCurrentSelection();
 

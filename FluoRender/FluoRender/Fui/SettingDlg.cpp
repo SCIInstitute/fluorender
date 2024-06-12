@@ -1180,20 +1180,20 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 }
 
 //events
-void SettingDlg::OnSave(wxCommandEvent &event)
+void SettingDlg::OnSave(wxCommandEvent& event)
 {
 	glbin_settings.Save();
 	if (m_frame)
 		m_frame->ShowPane(this, false);
 }
 
-void SettingDlg::OnClose(wxCommandEvent &event)
+void SettingDlg::OnClose(wxCommandEvent& event)
 {
 	if (m_frame)
 		m_frame->ShowPane(this, false);
 }
 
-void SettingDlg::OnProjectSaveCheck(wxCommandEvent &event)
+void SettingDlg::OnProjectSaveCheck(wxCommandEvent& event)
 {
 	glbin_settings.m_prj_save = m_prj_save_chk->GetValue();
 }
@@ -1203,7 +1203,7 @@ void SettingDlg::OnProjectSaveIncCheck(wxCommandEvent& event)
 	glbin_settings.m_prj_save_inc = m_prj_save_inc_chk->GetValue();
 }
 
-void SettingDlg::OnRealtimeCompressCheck(wxCommandEvent &event)
+void SettingDlg::OnRealtimeCompressCheck(wxCommandEvent& event)
 {
 	glbin_settings.m_realtime_compress = m_realtime_cmp_chk->GetValue();
 }
@@ -1224,13 +1224,13 @@ void SettingDlg::OnMulFuncBtnComb(wxCommandEvent& event)
 	FluoRefresh(3, { gstMultiFuncTips }, { -1 });
 }
 
-void SettingDlg::OnMouseIntCheck(wxCommandEvent &event)
+void SettingDlg::OnMouseIntCheck(wxCommandEvent& event)
 {
 	glbin_settings.m_mouse_int = m_mouse_int_chk->GetValue();
 	FluoRefresh(3, { gstNull });
 }
 
-void SettingDlg::OnPeelingLayersChange(wxScrollEvent &event)
+void SettingDlg::OnPeelingLayersChange(wxScrollEvent& event)
 {
 	int ival = m_peeling_layers_sldr->GetValue();;
 	wxString str = wxString::Format("%d", ival);
@@ -1238,7 +1238,7 @@ void SettingDlg::OnPeelingLayersChange(wxScrollEvent &event)
 		m_peeling_layers_text->SetValue(str);
 }
 
-void SettingDlg::OnPeelingLayersEdit(wxCommandEvent &event)
+void SettingDlg::OnPeelingLayersEdit(wxCommandEvent& event)
 {
 	wxString str = m_peeling_layers_text->GetValue();
 	long ival;
@@ -1250,14 +1250,14 @@ void SettingDlg::OnPeelingLayersEdit(wxCommandEvent &event)
 	FluoRefresh(3, { gstNull });
 }
 
-void SettingDlg::OnMicroBlendCheck(wxCommandEvent &event)
+void SettingDlg::OnMicroBlendCheck(wxCommandEvent& event)
 {
 	glbin_settings.m_micro_blend = m_micro_blend_chk->GetValue();
 	FluoRefresh(3, { gstNull });
 }
 
 //shadow direction
-void SettingDlg::OnShadowDirCheck(wxCommandEvent &event)
+void SettingDlg::OnShadowDirCheck(wxCommandEvent& event)
 {
 	if (m_shadow_dir_chk->GetValue())
 	{
@@ -1282,7 +1282,7 @@ void SettingDlg::OnShadowDirCheck(wxCommandEvent &event)
 	FluoRefresh(3, { gstNull });
 }
 
-void SettingDlg::OnShadowDirChange(wxScrollEvent &event)
+void SettingDlg::OnShadowDirChange(wxScrollEvent& event)
 {
 	double deg = m_shadow_dir_sldr->GetValue();
 	wxString str = wxString::Format("%.2f", deg);
@@ -1290,7 +1290,7 @@ void SettingDlg::OnShadowDirChange(wxScrollEvent &event)
 		m_shadow_dir_text->SetValue(str);
 }
 
-void SettingDlg::OnShadowDirEdit(wxCommandEvent &event)
+void SettingDlg::OnShadowDirEdit(wxCommandEvent& event)
 {
 	wxString str = m_shadow_dir_text->GetValue();
 	double deg;
@@ -1347,14 +1347,14 @@ double SettingDlg::GetShadowDir()
 }
 
 //gradient background
-void SettingDlg::OnGradBgCheck(wxCommandEvent &event)
+void SettingDlg::OnGradBgCheck(wxCommandEvent& event)
 {
 	glbin_settings.m_grad_bg = m_grad_bg_chk->GetValue();
 	FluoRefresh(3, { gstNull });
 }
 
 //rot center anchor thresh
-void SettingDlg::OnPinThresholdChange(wxScrollEvent &event)
+void SettingDlg::OnPinThresholdChange(wxScrollEvent& event)
 {
 	double dval = m_pin_threshold_sldr->GetValue();
 	wxString str = wxString::Format("%.0f", dval*10.0);
@@ -1362,7 +1362,7 @@ void SettingDlg::OnPinThresholdChange(wxScrollEvent &event)
 		m_pin_threshold_text->SetValue(str);
 }
 
-void SettingDlg::OnPinThresholdEdit(wxCommandEvent &event)
+void SettingDlg::OnPinThresholdEdit(wxCommandEvent& event)
 {
 	wxString str = m_pin_threshold_text->GetValue();
 	double dval;
@@ -1381,7 +1381,7 @@ void SettingDlg::OnRotLink(wxCommandEvent& event)
 }
 
 //stereo
-void SettingDlg::OnStereoCheck(wxCommandEvent &event)
+void SettingDlg::OnStereoCheck(wxCommandEvent& event)
 {
 	bool bval = m_stereo_chk->GetValue();
 	if (bval)
@@ -1400,7 +1400,7 @@ void SettingDlg::OnSBSCheck(wxCommandEvent& event)
 	FluoRefresh(3, { gstNull });
 }
 
-void SettingDlg::OnEyeDistChange(wxScrollEvent &event)
+void SettingDlg::OnEyeDistChange(wxScrollEvent& event)
 {
 	glbin_settings.m_eye_dist = m_eye_dist_sldr->GetValue() / 10.0;
 	wxString str = wxString::Format("%.1f", glbin_settings.m_eye_dist);
@@ -1408,7 +1408,7 @@ void SettingDlg::OnEyeDistChange(wxScrollEvent &event)
 		m_eye_dist_text->SetValue(str);
 }
 
-void SettingDlg::OnEyeDistEdit(wxCommandEvent &event)
+void SettingDlg::OnEyeDistEdit(wxCommandEvent& event)
 {
 	wxString str = m_eye_dist_text->GetValue();
 	double dval;
@@ -1492,37 +1492,37 @@ void SettingDlg::OnColorDepthComb(wxCommandEvent& event)
 }
 
 //override vox
-void SettingDlg::OnOverrideVoxCheck(wxCommandEvent &event)
+void SettingDlg::OnOverrideVoxCheck(wxCommandEvent& event)
 {
 	glbin_settings.m_override_vox = m_override_vox_chk->GetValue();
 }
 
-void SettingDlg::OnWavColor1Change(wxCommandEvent &event)
+void SettingDlg::OnWavColor1Change(wxCommandEvent& event)
 {
 	if (m_wav_color1_cmb)
 		glbin_settings.m_wav_color1 = m_wav_color1_cmb->GetCurrentSelection() + 1;
 }
 
-void SettingDlg::OnWavColor2Change(wxCommandEvent &event)
+void SettingDlg::OnWavColor2Change(wxCommandEvent& event)
 {
 	if (m_wav_color2_cmb)
 		glbin_settings.m_wav_color2 = m_wav_color2_cmb->GetCurrentSelection() + 1;
 }
 
-void SettingDlg::OnWavColor3Change(wxCommandEvent &event)
+void SettingDlg::OnWavColor3Change(wxCommandEvent& event)
 {
 	if (m_wav_color3_cmb)
 		glbin_settings.m_wav_color3 = m_wav_color3_cmb->GetCurrentSelection() + 1;
 }
 
-void SettingDlg::OnWavColor4Change(wxCommandEvent &event)
+void SettingDlg::OnWavColor4Change(wxCommandEvent& event)
 {
 	if (m_wav_color4_cmb)
 		glbin_settings.m_wav_color4 = m_wav_color4_cmb->GetCurrentSelection() + 1;
 }
 
 //texture size
-void SettingDlg::OnMaxTextureSizeChk(wxCommandEvent &event)
+void SettingDlg::OnMaxTextureSizeChk(wxCommandEvent& event)
 {
 	glbin_settings.m_use_max_texture_size = m_max_texture_size_chk->GetValue();
 	if (glbin_settings.m_use_max_texture_size)
@@ -1539,7 +1539,7 @@ void SettingDlg::OnMaxTextureSizeChk(wxCommandEvent &event)
 	}
 }
 
-void SettingDlg::OnMaxTextureSizeEdit(wxCommandEvent &event)
+void SettingDlg::OnMaxTextureSizeEdit(wxCommandEvent& event)
 {
 	if (glbin_settings.m_use_max_texture_size)
 	{
@@ -1554,7 +1554,7 @@ void SettingDlg::OnMaxTextureSizeEdit(wxCommandEvent &event)
 }
 
 //memory settings
-void SettingDlg::OnStreamingChk(wxCommandEvent &event)
+void SettingDlg::OnStreamingChk(wxCommandEvent& event)
 {
 	if (m_streaming_chk->GetValue())
 		glbin_settings.m_mem_swap = true;
@@ -1564,12 +1564,12 @@ void SettingDlg::OnStreamingChk(wxCommandEvent &event)
 	FluoRefresh(3, { gstNull });
 }
 
-void SettingDlg::OnUpdateOrderChange(wxCommandEvent &event)
+void SettingDlg::OnUpdateOrderChange(wxCommandEvent& event)
 {
 	glbin_settings.m_update_order = m_update_order_rbox->GetSelection();
 }
 
-void SettingDlg::OnGraphicsMemChange(wxScrollEvent &event)
+void SettingDlg::OnGraphicsMemChange(wxScrollEvent& event)
 {
 	int ival = m_graphics_mem_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival * 100);
@@ -1577,7 +1577,7 @@ void SettingDlg::OnGraphicsMemChange(wxScrollEvent &event)
 		m_graphics_mem_text->SetValue(str);
 }
 
-void SettingDlg::OnGraphicsMemEdit(wxCommandEvent &event)
+void SettingDlg::OnGraphicsMemEdit(wxCommandEvent& event)
 {
 	wxString str = m_graphics_mem_text->GetValue();
 	double val;
@@ -1588,7 +1588,7 @@ void SettingDlg::OnGraphicsMemEdit(wxCommandEvent &event)
 	glbin_settings.m_graphics_mem = val;
 }
 
-void SettingDlg::OnLargeDataChange(wxScrollEvent &event)
+void SettingDlg::OnLargeDataChange(wxScrollEvent& event)
 {
 	int ival = m_large_data_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival * 10);
@@ -1596,7 +1596,7 @@ void SettingDlg::OnLargeDataChange(wxScrollEvent &event)
 		m_large_data_text->SetValue(str);
 }
 
-void SettingDlg::OnLargeDataEdit(wxCommandEvent &event)
+void SettingDlg::OnLargeDataEdit(wxCommandEvent& event)
 {
 	wxString str = m_large_data_text->GetValue();
 	double val;
@@ -1607,7 +1607,7 @@ void SettingDlg::OnLargeDataEdit(wxCommandEvent &event)
 	glbin_settings.m_large_data_size = val;
 }
 
-void SettingDlg::OnBlockSizeChange(wxScrollEvent &event)
+void SettingDlg::OnBlockSizeChange(wxScrollEvent& event)
 {
 	int ival = m_block_size_sldr->GetValue();
 	wxString str = wxString::Format("%d", 2 << (ival - 1));
@@ -1615,7 +1615,7 @@ void SettingDlg::OnBlockSizeChange(wxScrollEvent &event)
 		m_block_size_text->SetValue(str);
 }
 
-void SettingDlg::OnBlockSizeEdit(wxCommandEvent &event)
+void SettingDlg::OnBlockSizeEdit(wxCommandEvent& event)
 {
 	wxString str = m_block_size_text->GetValue();
 	double val;
@@ -1626,7 +1626,7 @@ void SettingDlg::OnBlockSizeEdit(wxCommandEvent &event)
 	glbin_settings.m_force_brick_size = val;
 }
 
-void SettingDlg::OnResponseTimeChange(wxScrollEvent &event)
+void SettingDlg::OnResponseTimeChange(wxScrollEvent& event)
 {
 	int ival = m_response_time_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival * 10);
@@ -1634,7 +1634,7 @@ void SettingDlg::OnResponseTimeChange(wxScrollEvent &event)
 		m_response_time_text->SetValue(str);
 }
 
-void SettingDlg::OnResponseTimeEdit(wxCommandEvent &event)
+void SettingDlg::OnResponseTimeEdit(wxCommandEvent& event)
 {
 	wxString str = m_response_time_text->GetValue();
 	double val;
@@ -1645,7 +1645,7 @@ void SettingDlg::OnResponseTimeEdit(wxCommandEvent &event)
 	glbin_settings.m_up_time = val;
 }
 
-void SettingDlg::OnDetailLevelOffsetChange(wxScrollEvent &event)
+void SettingDlg::OnDetailLevelOffsetChange(wxScrollEvent& event)
 {
 	int ival = m_detail_level_offset_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
@@ -1653,7 +1653,7 @@ void SettingDlg::OnDetailLevelOffsetChange(wxScrollEvent &event)
 		m_detail_level_offset_text->SetValue(str);
 }
 
-void SettingDlg::OnDetailLevelOffsetEdit(wxCommandEvent &event)
+void SettingDlg::OnDetailLevelOffsetEdit(wxCommandEvent& event)
 {
 	wxString str = m_detail_level_offset_text->GetValue();
 	long val;
@@ -1664,7 +1664,7 @@ void SettingDlg::OnDetailLevelOffsetEdit(wxCommandEvent &event)
 }
 
 //font
-void SettingDlg::OnFontChange(wxCommandEvent &event)
+void SettingDlg::OnFontChange(wxCommandEvent& event)
 {
 	wxString str = m_font_cmb->GetValue();
 	if (str.IsEmpty())
@@ -1681,7 +1681,7 @@ void SettingDlg::OnFontChange(wxCommandEvent &event)
 	FluoRefresh(3, { gstNull });
 }
 
-void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
+void SettingDlg::OnFontSizeChange(wxCommandEvent& event)
 {
 	wxString str = m_font_size_cmb->GetValue();
 	long size;
@@ -1693,14 +1693,14 @@ void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
 	FluoRefresh(3, { gstNull });
 }
 
-void SettingDlg::OnTextColorChange(wxCommandEvent &event)
+void SettingDlg::OnTextColorChange(wxCommandEvent& event)
 {
 	glbin_settings.m_text_color = m_text_color_cmb->GetCurrentSelection();
 	FluoRefresh(3, { gstNull });
 }
 
 //line width
-void SettingDlg::OnLineWidthSldr(wxScrollEvent &event)
+void SettingDlg::OnLineWidthSldr(wxScrollEvent& event)
 {
 	int ival = m_line_width_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
@@ -1708,7 +1708,7 @@ void SettingDlg::OnLineWidthSldr(wxScrollEvent &event)
 		m_line_width_text->SetValue(str);
 }
 
-void SettingDlg::OnLineWidthText(wxCommandEvent &event)
+void SettingDlg::OnLineWidthText(wxCommandEvent& event)
 {
 	wxString str = m_line_width_text->GetValue();
 	unsigned long ival;
@@ -1721,7 +1721,7 @@ void SettingDlg::OnLineWidthText(wxCommandEvent &event)
 }
 
 //paint history depth
-void SettingDlg::OnPaintHistDepthChange(wxScrollEvent &event)
+void SettingDlg::OnPaintHistDepthChange(wxScrollEvent& event)
 {
 	int ival = m_paint_hist_depth_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
@@ -1729,7 +1729,7 @@ void SettingDlg::OnPaintHistDepthChange(wxScrollEvent &event)
 		m_paint_hist_depth_text->SetValue(str);
 }
 
-void SettingDlg::OnPaintHistDepthEdit(wxCommandEvent &event)
+void SettingDlg::OnPaintHistDepthEdit(wxCommandEvent& event)
 {
 	wxString str = m_paint_hist_depth_text->GetValue();
 	unsigned long ival;
@@ -1759,22 +1759,22 @@ void SettingDlg::OnPencilDistEdit(wxCommandEvent& event)
 }
 
 // Java settings.
-void SettingDlg::OnJavaJvmEdit(wxCommandEvent &event)
+void SettingDlg::OnJavaJvmEdit(wxCommandEvent& event)
 {
 	glbin_settings.m_jvm_path = m_java_jvm_text->GetValue();
 }
 
-void SettingDlg::OnJavaIJEdit(wxCommandEvent &event)
+void SettingDlg::OnJavaIJEdit(wxCommandEvent& event)
 {
 	glbin_settings.m_ij_path = m_java_ij_text->GetValue();
 }
 
-void SettingDlg::OnJavaBioformatsEdit(wxCommandEvent &event)
+void SettingDlg::OnJavaBioformatsEdit(wxCommandEvent& event)
 {
 	glbin_settings.m_bioformats_path = m_java_bioformats_text->GetValue();
 }
 
-void SettingDlg::onJavaJvmBrowse(wxCommandEvent &event)
+void SettingDlg::onJavaJvmBrowse(wxCommandEvent& event)
 {
 #ifdef _WIN32
 	wxFileDialog *fopendlg = new wxFileDialog(
@@ -1798,7 +1798,7 @@ void SettingDlg::onJavaJvmBrowse(wxCommandEvent &event)
 		delete fopendlg;
 }
 
-void SettingDlg::onJavaIJBrowse(wxCommandEvent &event)
+void SettingDlg::onJavaIJBrowse(wxCommandEvent& event)
 {
 #ifdef _WIN32	
 	//wxFileDialog *fopendlg = new wxFileDialog(
@@ -1828,7 +1828,7 @@ void SettingDlg::onJavaIJBrowse(wxCommandEvent &event)
 		delete fopendlg;
 }
 
-void SettingDlg::onJavaBioformatsBrowse(wxCommandEvent &event)
+void SettingDlg::onJavaBioformatsBrowse(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Choose the bioformats jar",
@@ -1846,7 +1846,7 @@ void SettingDlg::onJavaBioformatsBrowse(wxCommandEvent &event)
 		delete fopendlg;
 }
 
-void SettingDlg::onJavaRadioButtonImageJ(wxCommandEvent &event)
+void SettingDlg::onJavaRadioButtonImageJ(wxCommandEvent& event)
 {
 	m_java_jvm_text->Enable(true);
 	m_java_bioformats_text->Enable(true);
@@ -1855,7 +1855,7 @@ void SettingDlg::onJavaRadioButtonImageJ(wxCommandEvent &event)
 	glbin_settings.m_ij_mode = 0;
 }
 
-void SettingDlg::onJavaRadioButtonFiji(wxCommandEvent &event)
+void SettingDlg::onJavaRadioButtonFiji(wxCommandEvent& event)
 {
 	m_java_jvm_text->Enable(false);	
 	m_java_bioformats_text->Enable(false);

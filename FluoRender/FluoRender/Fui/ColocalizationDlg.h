@@ -33,7 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/grid.h>
 #include <wx/clipbrd.h>
 
-class MainFrame;
 class ColocalizationDlg : public PropPanel
 {
 public:
@@ -73,16 +72,16 @@ private:
 
 private:
 	//calculate
-	void OnColocalizenBtn(wxCommandEvent &event);
-	void OnUseSelChk(wxCommandEvent &event);
-	void OnAutoUpdate(wxCommandEvent &event);
+	void OnColocalizenBtn(wxCommandEvent& event);
+	void OnUseSelChk(wxCommandEvent& event);
+	void OnAutoUpdate(wxCommandEvent& event);
 	//settings
-	void OnMethodRdb(wxCommandEvent &event);
+	void OnMethodRdb(wxCommandEvent& event);
 	//format
-	void OnIntWeightBtn(wxCommandEvent &event);
-	void OnRatioBtn(wxCommandEvent &event);
-	void OnPhysicalBtn(wxCommandEvent &event);
-	void OnColorMapBtn(wxCommandEvent &event);
+	void OnIntWeightBtn(wxCommandEvent& event);
+	void OnRatioBtn(wxCommandEvent& event);
+	void OnPhysicalBtn(wxCommandEvent& event);
+	void OnColorMapBtn(wxCommandEvent& event);
 
 	//output
 	void OnHistoryChk(wxCommandEvent& event);

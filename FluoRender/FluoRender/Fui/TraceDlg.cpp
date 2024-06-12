@@ -1088,7 +1088,7 @@ void TraceDlg::OnSaveasTrace(wxCommandEvent& event)
 		delete fopendlg;
 }
 
-void TraceDlg::OnGhostNumChange(wxScrollEvent &event)
+void TraceDlg::OnGhostNumChange(wxScrollEvent& event)
 {
 	int ival = m_ghost_num_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
@@ -1096,7 +1096,7 @@ void TraceDlg::OnGhostNumChange(wxScrollEvent &event)
 		m_ghost_num_text->SetValue(str);
 }
 
-void TraceDlg::OnGhostNumText(wxCommandEvent &event)
+void TraceDlg::OnGhostNumText(wxCommandEvent& event)
 {
 	wxString str = m_ghost_num_text->GetValue();
 	long ival;
@@ -1114,7 +1114,7 @@ void TraceDlg::OnGhostNumText(wxCommandEvent &event)
 	}
 }
 
-void TraceDlg::OnGhostShowTail(wxCommandEvent &event)
+void TraceDlg::OnGhostShowTail(wxCommandEvent& event)
 {
 	bool show = m_ghost_show_tail_chk->GetValue();
 
@@ -1129,7 +1129,7 @@ void TraceDlg::OnGhostShowTail(wxCommandEvent &event)
 	}
 }
 
-void TraceDlg::OnGhostShowLead(wxCommandEvent &event)
+void TraceDlg::OnGhostShowLead(wxCommandEvent& event)
 {
 	bool show = m_ghost_show_lead_chk->GetValue();
 
@@ -1145,7 +1145,7 @@ void TraceDlg::OnGhostShowLead(wxCommandEvent &event)
 }
 
 //cell size filter
-void TraceDlg::OnCellSizeChange(wxScrollEvent &event)
+void TraceDlg::OnCellSizeChange(wxScrollEvent& event)
 {
 	int ival = m_cell_size_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
@@ -1153,7 +1153,7 @@ void TraceDlg::OnCellSizeChange(wxScrollEvent &event)
 		m_cell_size_text->SetValue(str);
 }
 
-void TraceDlg::OnCellSizeText(wxCommandEvent &event)
+void TraceDlg::OnCellSizeText(wxCommandEvent& event)
 {
 	wxString str = m_cell_size_text->GetValue();
 	long ival;
@@ -1231,12 +1231,12 @@ void TraceDlg::UncertainFilter(bool input)
 	//	m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
-void TraceDlg::OnCompUncertainBtn(wxCommandEvent &event)
+void TraceDlg::OnCompUncertainBtn(wxCommandEvent& event)
 {
 	UncertainFilter();
 }
 
-void TraceDlg::OnCompUncertainLowChange(wxScrollEvent &event)
+void TraceDlg::OnCompUncertainLowChange(wxScrollEvent& event)
 {
 	int ival = m_comp_uncertain_low_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
@@ -1244,7 +1244,7 @@ void TraceDlg::OnCompUncertainLowChange(wxScrollEvent &event)
 		m_comp_uncertain_low_text->SetValue(str);
 }
 
-void TraceDlg::OnCompUncertainLowText(wxCommandEvent &event)
+void TraceDlg::OnCompUncertainLowText(wxCommandEvent& event)
 {
 	wxString str = m_comp_uncertain_low_text->GetValue();
 	long ival;
@@ -1264,17 +1264,17 @@ void TraceDlg::OnCompUncertainLowText(wxCommandEvent &event)
 }
 
 //auto tracking
-void TraceDlg::OnGenMapBtn(wxCommandEvent &event)
+void TraceDlg::OnGenMapBtn(wxCommandEvent& event)
 {
 	GenMap();
 }
 
-void TraceDlg::OnRefineTBtn(wxCommandEvent &event)
+void TraceDlg::OnRefineTBtn(wxCommandEvent& event)
 {
 	RefineMap(m_cur_time);
 }
 
-void TraceDlg::OnRefineAllBtn(wxCommandEvent &event)
+void TraceDlg::OnRefineAllBtn(wxCommandEvent& event)
 {
 	RefineMap();
 }
@@ -1365,7 +1365,7 @@ void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
 	glbin_vertex_array_manager.set_dirty(flvr::VA_Rulers);
 }
 
-void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
+void TraceDlg::OnConvertConsistent(wxCommandEvent& event)
 {
 	if (!m_view)
 		return;
@@ -1408,7 +1408,7 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 	CellUpdate();
 }
 
-void TraceDlg::OnAnalyzeComp(wxCommandEvent &event)
+void TraceDlg::OnAnalyzeComp(wxCommandEvent& event)
 {
 	if (!m_view)
 		return;
@@ -1420,7 +1420,7 @@ void TraceDlg::OnAnalyzeComp(wxCommandEvent &event)
 	m_stat_text->ChangeValue(str);
 }
 
-void TraceDlg::OnAnalyzeLink(wxCommandEvent &event)
+void TraceDlg::OnAnalyzeLink(wxCommandEvent& event)
 {
 	if (!m_view)
 		return;
@@ -1453,7 +1453,7 @@ void TraceDlg::OnAnalyzeLink(wxCommandEvent &event)
 	}
 }
 
-void TraceDlg::OnAnalyzeUncertainHist(wxCommandEvent &event)
+void TraceDlg::OnAnalyzeUncertainHist(wxCommandEvent& event)
 {
 	if (!m_view)
 		return;
@@ -1546,7 +1546,7 @@ void TraceDlg::OnAnalyzeUncertainHist(wxCommandEvent &event)
 	}
 }
 
-void TraceDlg::OnAnalyzePath(wxCommandEvent &event)
+void TraceDlg::OnAnalyzePath(wxCommandEvent& event)
 {
 	if (!m_view)
 		return;
@@ -1610,7 +1610,7 @@ void TraceDlg::OnAnalyzePath(wxCommandEvent &event)
 	}
 }
 
-void TraceDlg::OnSaveResult(wxCommandEvent &event)
+void TraceDlg::OnSaveResult(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Save results", "", "",
@@ -1690,7 +1690,7 @@ void TraceDlg::CompClear()
 	//	m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
-void TraceDlg::OnCompIDText(wxCommandEvent &event)
+void TraceDlg::OnCompIDText(wxCommandEvent& event)
 {
 	if (event.GetId() == ID_CompIDText)
 	{
@@ -1706,18 +1706,18 @@ void TraceDlg::OnCompIDText(wxCommandEvent &event)
 	}
 }
 
-void TraceDlg::OnCompIDXBtn(wxCommandEvent &event)
+void TraceDlg::OnCompIDXBtn(wxCommandEvent& event)
 {
 	m_comp_id_text->Clear();
 	m_comp_id_text2->Clear();
 }
 
-void TraceDlg::OnCompClear(wxCommandEvent &event)
+void TraceDlg::OnCompClear(wxCommandEvent& event)
 {
 	CompClear();
 }
 
-void TraceDlg::OnShuffle(wxCommandEvent &event)
+void TraceDlg::OnShuffle(wxCommandEvent& event)
 {
 	if (!m_view)
 		return;
@@ -1731,7 +1731,7 @@ void TraceDlg::OnShuffle(wxCommandEvent &event)
 	m_view->RefreshGL(39);
 }
 
-void TraceDlg::OnCompFull(wxCommandEvent &event)
+void TraceDlg::OnCompFull(wxCommandEvent& event)
 {
 	//get id
 	wxString str = m_comp_id_text->GetValue();
@@ -1744,7 +1744,7 @@ void TraceDlg::OnCompFull(wxCommandEvent &event)
 	}
 }
 
-void TraceDlg::OnCompAppend(wxCommandEvent &event)
+void TraceDlg::OnCompAppend(wxCommandEvent& event)
 {
 	if (!m_view)
 		return;
@@ -1792,7 +1792,7 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 	//	m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
-void TraceDlg::OnCompExclusive(wxCommandEvent &event)
+void TraceDlg::OnCompExclusive(wxCommandEvent& event)
 {
 	if (!m_view)
 		return;
@@ -2125,12 +2125,12 @@ void TraceDlg::CellLink(bool exclusive)
 	m_view->RefreshGL(39);
 }
 
-void TraceDlg::OnCellLink(wxCommandEvent &event)
+void TraceDlg::OnCellLink(wxCommandEvent& event)
 {
 	CellLink(false);
 }
 
-void TraceDlg::OnCellLinkAll(wxCommandEvent &event)
+void TraceDlg::OnCellLinkAll(wxCommandEvent& event)
 {
 	if (!m_frame || !m_frame->GetComponentDlg())
 		return;
@@ -2152,12 +2152,12 @@ void TraceDlg::OnCellLinkAll(wxCommandEvent &event)
 	CellUpdate();
 }
 
-void TraceDlg::OnCellExclusiveLink(wxCommandEvent &event)
+void TraceDlg::OnCellExclusiveLink(wxCommandEvent& event)
 {
 	CellLink(true);
 }
 
-void TraceDlg::OnCellIsolate(wxCommandEvent &event)
+void TraceDlg::OnCellIsolate(wxCommandEvent& event)
 {
 	if (!m_view)
 		return;
@@ -2206,7 +2206,7 @@ void TraceDlg::OnCellIsolate(wxCommandEvent &event)
 	m_view->RefreshGL(39);
 }
 
-void TraceDlg::OnCellUnlink(wxCommandEvent &event)
+void TraceDlg::OnCellUnlink(wxCommandEvent& event)
 {
 	if (!m_view)
 		return;
@@ -2282,7 +2282,7 @@ void TraceDlg::OnCellUnlink(wxCommandEvent &event)
 }
 
 //ID edit controls
-void TraceDlg::OnCellNewIDText(wxCommandEvent &event)
+void TraceDlg::OnCellNewIDText(wxCommandEvent& event)
 {
 	int shuffle = 0;
 	if (m_view && m_view->m_cur_vol)
@@ -2311,27 +2311,27 @@ void TraceDlg::OnCellNewIDText(wxCommandEvent &event)
 	m_cell_new_id_text->Refresh();
 }
 
-void TraceDlg::OnCellNewIDX(wxCommandEvent &event)
+void TraceDlg::OnCellNewIDX(wxCommandEvent& event)
 {
 	m_cell_new_id_text->Clear();
 }
 
-void TraceDlg::OnCellNewID(wxCommandEvent &event)
+void TraceDlg::OnCellNewID(wxCommandEvent& event)
 {
 	CellNewID(false);
 }
 
-void TraceDlg::OnCellAppendID(wxCommandEvent &event)
+void TraceDlg::OnCellAppendID(wxCommandEvent& event)
 {
 	CellNewID(true);
 }
 
-void TraceDlg::OnCellReplaceID(wxCommandEvent &event)
+void TraceDlg::OnCellReplaceID(wxCommandEvent& event)
 {
 	CellReplaceID();
 }
 
-void TraceDlg::OnCellCombineID(wxCommandEvent &event)
+void TraceDlg::OnCellCombineID(wxCommandEvent& event)
 {
 	CellCombineID();
 }
@@ -2596,13 +2596,13 @@ void TraceDlg::DelVolCache(flrd::VolCache& vol_cache)
 	vol_cache.nrrd_label = 0;
 }
 
-void TraceDlg::OnCellPrev(wxCommandEvent &event)
+void TraceDlg::OnCellPrev(wxCommandEvent& event)
 {
 	if (m_frame && m_frame->GetMovieView())
 		m_frame->GetMovieView()->DecFrame();
 }
 
-void TraceDlg::OnCellNext(wxCommandEvent &event)
+void TraceDlg::OnCellNext(wxCommandEvent& event)
 {
 	if (m_frame && m_frame->GetMovieView())
 		m_frame->GetMovieView()->IncFrame();

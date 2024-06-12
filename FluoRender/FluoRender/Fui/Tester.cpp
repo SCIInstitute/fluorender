@@ -157,7 +157,7 @@ TesterDlg::~TesterDlg()
 }
 
 //sliders
-void TesterDlg::OnP1Change(wxScrollEvent &event)
+void TesterDlg::OnP1Change(wxScrollEvent& event)
 {
 /*	int ival = event.GetPosition();
 	double val = ival*4.0/1000.0;
@@ -175,7 +175,7 @@ void TesterDlg::OnP1Change(wxScrollEvent &event)
 */
 }
 
-void TesterDlg::OnP2Change(wxScrollEvent &event)
+void TesterDlg::OnP2Change(wxScrollEvent& event)
 {
 /*	int ival = event.GetPosition();
 	double val = ival*4.0/1000.0;
@@ -192,7 +192,7 @@ void TesterDlg::OnP2Change(wxScrollEvent &event)
 */
 }
 
-void TesterDlg::OnP3Change(wxScrollEvent &event)
+void TesterDlg::OnP3Change(wxScrollEvent& event)
 {
 /*	int ival = event.GetPosition();
 	double val = ival*4.0/1000.0;
@@ -209,7 +209,7 @@ void TesterDlg::OnP3Change(wxScrollEvent &event)
 */
 }
 
-void TesterDlg::OnP4Change(wxScrollEvent &event)
+void TesterDlg::OnP4Change(wxScrollEvent& event)
 {
 /*	int ival = event.GetPosition();
 	double val = ival*4.0/1000.0;

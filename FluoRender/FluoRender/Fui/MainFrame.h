@@ -383,15 +383,15 @@ private:
 	static wxWindow* CreateExtraControlProjectSave(wxWindow* parent);
 
 	//open dialog options
-	void OnCh11Check(wxCommandEvent &event);
-	void OnCh12Check(wxCommandEvent &event);
-	void OnCmbChange(wxCommandEvent &event);
-	void OnTxt1Change(wxCommandEvent &event);
-	void OnTxt2Change(wxCommandEvent &event);
-	void OnCh2Check(wxCommandEvent &event);
-	void OnCh3Check(wxCommandEvent &event);
-	void OnChEmbedCheck(wxCommandEvent &event);
-	void OnChSaveCmpCheck(wxCommandEvent &event);
+	void OnCh11Check(wxCommandEvent& event);
+	void OnCh12Check(wxCommandEvent& event);
+	void OnCmbChange(wxCommandEvent& event);
+	void OnTxt1Change(wxCommandEvent& event);
+	void OnTxt2Change(wxCommandEvent& event);
+	void OnCh2Check(wxCommandEvent& event);
+	void OnCh3Check(wxCommandEvent& event);
+	void OnChEmbedCheck(wxCommandEvent& event);
+	void OnChSaveCmpCheck(wxCommandEvent& event);
 
 	void OnClose(wxCloseEvent &event);
 	void OnExit(wxCommandEvent& event);
@@ -411,7 +411,7 @@ private:
 	void OnTwitter(wxCommandEvent& event);
 	void OnShowHideUI(wxCommandEvent& event);
 	void OnShowHideToolbar(wxCommandEvent& event);
-	void OnShowHideView(wxCommandEvent &event);
+	void OnShowHideView(wxCommandEvent& event);
 	//toolbar menus
 	void OnToolbarMenu(wxAuiToolBarEvent& event);
 

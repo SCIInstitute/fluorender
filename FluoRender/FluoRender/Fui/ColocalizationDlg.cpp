@@ -333,13 +333,13 @@ void ColocalizationDlg::PasteData()
 {
 }
 
-void ColocalizationDlg::OnColocalizenBtn(wxCommandEvent &event)
+void ColocalizationDlg::OnColocalizenBtn(wxCommandEvent& event)
 {
 	glbin_colocalizer.Compute();
 	FluoUpdate({ gstColocalResult });
 }
 
-void ColocalizationDlg::OnUseSelChk(wxCommandEvent &event)
+void ColocalizationDlg::OnUseSelChk(wxCommandEvent& event)
 {
 	glbin_colocal_def.m_use_mask = m_use_sel_chk->GetValue();
 
@@ -350,12 +350,12 @@ void ColocalizationDlg::OnUseSelChk(wxCommandEvent &event)
 	}
 }
 
-void ColocalizationDlg::OnAutoUpdate(wxCommandEvent &event)
+void ColocalizationDlg::OnAutoUpdate(wxCommandEvent& event)
 {
 	glbin_colocal_def.m_auto_update = m_auto_update_btn->GetValue();
 }
 
-void ColocalizationDlg::OnMethodRdb(wxCommandEvent &event)
+void ColocalizationDlg::OnMethodRdb(wxCommandEvent& event)
 {
 	if (m_product_rdb->GetValue())
 		glbin_colocal_def.m_method = 0;
@@ -372,7 +372,7 @@ void ColocalizationDlg::OnMethodRdb(wxCommandEvent &event)
 }
 
 //format
-void ColocalizationDlg::OnIntWeightBtn(wxCommandEvent &event)
+void ColocalizationDlg::OnIntWeightBtn(wxCommandEvent& event)
 {
 	glbin_colocal_def.m_int_weighted = m_int_weight_btn->GetValue();
 
@@ -383,7 +383,7 @@ void ColocalizationDlg::OnIntWeightBtn(wxCommandEvent &event)
 	}
 }
 
-void ColocalizationDlg::OnRatioBtn(wxCommandEvent &event)
+void ColocalizationDlg::OnRatioBtn(wxCommandEvent& event)
 {
 	glbin_colocal_def.m_get_ratio = m_ratio_btn->GetValue();
 
@@ -394,7 +394,7 @@ void ColocalizationDlg::OnRatioBtn(wxCommandEvent &event)
 	}
 }
 
-void ColocalizationDlg::OnPhysicalBtn(wxCommandEvent &event)
+void ColocalizationDlg::OnPhysicalBtn(wxCommandEvent& event)
 {
 	glbin_colocal_def.m_physical_size = m_physical_btn->GetValue();
 
@@ -405,7 +405,7 @@ void ColocalizationDlg::OnPhysicalBtn(wxCommandEvent &event)
 	}
 }
 
-void ColocalizationDlg::OnColorMapBtn(wxCommandEvent &event)
+void ColocalizationDlg::OnColorMapBtn(wxCommandEvent& event)
 {
 	glbin_colocal_def.m_colormap = m_colormap_btn->GetValue();
 

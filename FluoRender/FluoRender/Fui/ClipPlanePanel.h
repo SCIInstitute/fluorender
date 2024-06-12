@@ -32,7 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/spinbutt.h>
 #include <wx/aui/auibook.h>
 
-class MainFrame;
 class wxDoubleSlider;
 class wxSingleSlider;
 class ClipPlanePanel: public PropPanel
@@ -152,20 +151,20 @@ private:
 	void OnClipYMF(wxCommandEvent& event);
 	void OnClipZMF(wxCommandEvent& event);
 
-	void OnClipXChange(wxScrollEvent &event);
-	void OnClipYChange(wxScrollEvent &event);
-	void OnClipZChange(wxScrollEvent &event);
+	void OnClipXChange(wxScrollEvent& event);
+	void OnClipYChange(wxScrollEvent& event);
+	void OnClipZChange(wxScrollEvent& event);
 
-	void OnX1ClipEdit(wxCommandEvent &event);
-	void OnX2ClipEdit(wxCommandEvent &event);
-	void OnY1ClipEdit(wxCommandEvent &event);
-	void OnY2ClipEdit(wxCommandEvent &event);
-	void OnZ1ClipEdit(wxCommandEvent &event);
-	void OnZ2ClipEdit(wxCommandEvent &event);
+	void OnX1ClipEdit(wxCommandEvent& event);
+	void OnX2ClipEdit(wxCommandEvent& event);
+	void OnY1ClipEdit(wxCommandEvent& event);
+	void OnY2ClipEdit(wxCommandEvent& event);
+	void OnZ1ClipEdit(wxCommandEvent& event);
+	void OnZ2ClipEdit(wxCommandEvent& event);
 
-	void OnLinkXCheck(wxCommandEvent &event);
-	void OnLinkYCheck(wxCommandEvent &event);
-	void OnLinkZCheck(wxCommandEvent &event);
+	void OnLinkXCheck(wxCommandEvent& event);
+	void OnLinkYCheck(wxCommandEvent& event);
+	void OnLinkZCheck(wxCommandEvent& event);
 
 	//mouse
 	void UpdateSampleRate();
@@ -182,21 +181,21 @@ private:
 	void OnClipDistYEdit(wxCommandEvent& event);
 	void OnClipDistZEdit(wxCommandEvent& event);
 
-	void OnClipResetBtn(wxCommandEvent &event);
+	void OnClipResetBtn(wxCommandEvent& event);
 
-	void OnSetZeroBtn(wxCommandEvent &event);
-	void OnRotResetBtn(wxCommandEvent &event);
+	void OnSetZeroBtn(wxCommandEvent& event);
+	void OnRotResetBtn(wxCommandEvent& event);
 
 	void OnRotXMF(wxCommandEvent& event);
 	void OnRotYMF(wxCommandEvent& event);
 	void OnRotZMF(wxCommandEvent& event);
 
-	void OnXRotChange(wxScrollEvent &event);
-	void OnYRotChange(wxScrollEvent &event);
-	void OnZRotChange(wxScrollEvent &event);
-	void OnXRotEdit(wxCommandEvent &event);
-	void OnYRotEdit(wxCommandEvent &event);
-	void OnZRotEdit(wxCommandEvent &event);
+	void OnXRotChange(wxScrollEvent& event);
+	void OnYRotChange(wxScrollEvent& event);
+	void OnZRotChange(wxScrollEvent& event);
+	void OnXRotEdit(wxCommandEvent& event);
+	void OnYRotEdit(wxCommandEvent& event);
+	void OnZRotEdit(wxCommandEvent& event);
 
 	//spin buttons
 	void OnXRotSpinUp(wxSpinEvent& event);

@@ -241,13 +241,13 @@ private:
 
 	//1
 	void OnGammaMF(wxCommandEvent& event);
-	void OnGammaChange(wxScrollEvent &event);
-	void OnGammaText(wxCommandEvent &event);
+	void OnGammaChange(wxScrollEvent& event);
+	void OnGammaText(wxCommandEvent& event);
 	void OnGammaChk(wxCommandEvent& event);
 	//
 	void OnSaturationMF(wxCommandEvent& event);
-	void OnSaturationChange(wxScrollEvent &event);
-	void OnSaturationText(wxCommandEvent &event);
+	void OnSaturationChange(wxScrollEvent& event);
+	void OnSaturationText(wxCommandEvent& event);
 	void OnSaturationChk(wxCommandEvent& event);
 	//
 	void OnLuminanceMF(wxCommandEvent& event);
@@ -269,38 +269,38 @@ private:
 
 	//2
 	void OnBoundaryMF(wxCommandEvent& event);
-	void OnBoundaryChange(wxScrollEvent &event);
-	void OnBoundaryText(wxCommandEvent &event);
+	void OnBoundaryChange(wxScrollEvent& event);
+	void OnBoundaryText(wxCommandEvent& event);
 	void OnBoundaryChk(wxCommandEvent& event);
 	//
 	void OnThreshMF(wxCommandEvent& event);
-	void OnThreshChange(wxScrollEvent &event);
-	void OnThreshText(wxCommandEvent &event);
+	void OnThreshChange(wxScrollEvent& event);
+	void OnThreshText(wxCommandEvent& event);
 	void OnThreshLink(wxCommandEvent& event);
 	void OnThreshChk(wxCommandEvent& event);
 	//
 	void OnShadowMF(wxCommandEvent& event);
-	void OnShadowChange(wxScrollEvent &event);
-	void OnShadowText(wxCommandEvent &event);
-	void OnShadowChk(wxCommandEvent &event);
+	void OnShadowChange(wxScrollEvent& event);
+	void OnShadowText(wxCommandEvent& event);
+	void OnShadowChk(wxCommandEvent& event);
 	//
 	void OnSampleMF(wxCommandEvent& event);
-	void OnSampleChange(wxScrollEvent &event);
-	void OnSampleText(wxCommandEvent &event);
+	void OnSampleChange(wxScrollEvent& event);
+	void OnSampleText(wxCommandEvent& event);
 	void OnSampleChk(wxCommandEvent& event);
 	//
 	void OnColormapMF(wxCommandEvent& event);
-	void OnColormapChange(wxScrollEvent &event);
-	void OnColormapText(wxCommandEvent &event);
+	void OnColormapChange(wxScrollEvent& event);
+	void OnColormapText(wxCommandEvent& event);
 	void OnColormapLink(wxCommandEvent& event);
-	void OnColormapChk(wxCommandEvent &event);
+	void OnColormapChk(wxCommandEvent& event);
 
 	//others
 	void OnOptions(wxCommandEvent& event);
 	//color / colormap
-	void OnColormapInvBtn(wxCommandEvent &event);
-	void OnColormapCombo(wxCommandEvent &event);
-	void OnColormapCombo2(wxCommandEvent &event);
+	void OnColormapInvBtn(wxCommandEvent& event);
+	void OnColormapCombo(wxCommandEvent& event);
+	void OnColormapCombo2(wxCommandEvent& event);
 	int GetColorString(wxString& str, wxColor& wxc);
 	void OnColorChange(wxColor c);
 	void OnColorTextChange(wxCommandEvent& event);

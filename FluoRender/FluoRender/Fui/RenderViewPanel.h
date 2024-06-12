@@ -208,7 +208,7 @@ private:
 	void OnBgInvBtn(wxCommandEvent& event);
 	void OnAovSldrIdle(wxIdleEvent& event);
 	void OnAovChange(wxScrollEvent& event);
-	void OnAovText(wxCommandEvent &event);
+	void OnAovText(wxCommandEvent& event);
 	void OnToolBar2(wxCommandEvent& event);
 	void OnFullScreen(wxCommandEvent& event);
 
@@ -216,16 +216,16 @@ private:
 	void OnDepthAttenCheck(wxCommandEvent& event);
 	void OnDepthAttenChange(wxScrollEvent& event);
 	void OnDepthAttenEdit(wxCommandEvent& event);
-	void OnDepthAttenReset(wxCommandEvent &event);
+	void OnDepthAttenReset(wxCommandEvent& event);
 
 	//bar right
-	void OnPin(wxCommandEvent &event);
-	void OnCenter(wxCommandEvent &event);
-	void OnScale121(wxCommandEvent &event);
+	void OnPin(wxCommandEvent& event);
+	void OnCenter(wxCommandEvent& event);
+	void OnScale121(wxCommandEvent& event);
 	void OnScaleFactorChange(wxScrollEvent& event);
 	void OnScaleFactorEdit(wxCommandEvent& event);
 	void OnScaleMode(wxCommandEvent& event);
-	void OnScaleReset(wxCommandEvent &event);
+	void OnScaleReset(wxCommandEvent& event);
 	void OnScaleFactorSpinUp(wxSpinEvent& event);
 	void OnScaleFactorSpinDown(wxSpinEvent& event);
 
@@ -234,7 +234,7 @@ private:
 	void OnRotEdit(wxCommandEvent& event);
 	void OnRotScroll(wxScrollEvent& event);
 
-	void OnRotReset(wxCommandEvent &event);
+	void OnRotReset(wxCommandEvent& event);
 	void OnOrthoViewSelected(wxCommandEvent& event);
 
 	//capture options

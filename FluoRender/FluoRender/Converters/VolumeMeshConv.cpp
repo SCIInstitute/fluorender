@@ -25,10 +25,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "VolumeMeshConv.h"
-#include "MCTable.h"
+#include <VolumeMeshConv.h>
+#include <Global.h>
+#include <RenderCanvas.h>
+#include <MCTable.h>
 #include <Types/Utils.h>
 #include <compatibility.h>
+
+using namespace flrd;
 
 VolumeMeshConv::VolumeMeshConv() :
 	m_volume(0),
@@ -43,9 +47,12 @@ VolumeMeshConv::VolumeMeshConv() :
 	m_gamma(1.0),
 	m_lo_thresh(0.0),
 	m_hi_thresh(1.0),
+	m_sw(0),
 	m_saturation(1.0),
 	m_boundary(0.0),
-	m_use_mask(false)
+	m_use_mask(false),
+	m_weld(false),
+	m_area(0)
 {
 	m_mesh = new GLMmodel;
 	m_mesh->pathname = 0;
@@ -76,72 +83,61 @@ VolumeMeshConv::~VolumeMeshConv()
 {
 }
 
-void VolumeMeshConv::SetVolume(Nrrd* volume)
+void VolumeMeshConv::Compute()
 {
-	m_volume = volume;
-}
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
+		return;
 
-Nrrd* VolumeMeshConv::GetVolume()
-{
-	return m_volume;
-}
+	m_volume = vd->GetTexture()->get_nrrd(0);
+	vd->GetSpacings(m_spcx, m_spcy, m_spcz);
+	m_vol_max = vd->GetMaxValue();
+	//get use transfer function
+	if (m_use_transfer)
+	{
+		m_gamma = vd->GetGamma();
+		m_lo_thresh = vd->GetLeftThresh();
+		m_hi_thresh = vd->GetRightThresh();
+		m_saturation = vd->GetSaturation();
+		m_boundary = vd->GetBoundary();
+		m_sw = vd->GetSoftThreshold();
+	}
+	else
+	{
+		m_gamma = 1.0;
+		m_lo_thresh = 0.0;
+		m_hi_thresh = 1.0;
+		m_saturation = 1.0;
+		m_boundary = 0.0;
+	}
+	//get use selection
+	if (m_use_mask)
+	{
+		vd->GetVR()->return_mask();
+		m_mask = vd->GetTexture()->get_nrrd(vd->GetTexture()->nmask());
+	}
+	else
+		m_mask = 0;
 
-GLMmodel* VolumeMeshConv::GetMesh()
-{
-	return m_mesh;
-}
+	//start converting
+	Convert();
 
-void VolumeMeshConv::SetVolumeSpacings(double x, double y, double z)
-{
-	m_spcx = x;
-	m_spcy = y;
-	m_spcz = z;
-}
+	if (!m_mesh)
+		return;
 
-void VolumeMeshConv::SetVolumeUseTrans(bool use)
-{
-	m_use_transfer = use;
-}
+	if (m_weld)
+		glmWeld(m_mesh, 0.001 * fluo::Min(m_spcx, m_spcy, m_spcz));
+	float scale[3] = { 1.0f, 1.0f, 1.0f };
+	glmArea(m_mesh, scale, &m_area);
 
-void VolumeMeshConv::SetVolumeTransfer(double gamma, double lo_thresh,
-	double hi_thresh, double sw, double offset, double gm_thresh)
-{
-	m_gamma = gamma;
-	m_lo_thresh = lo_thresh;
-	m_hi_thresh = hi_thresh;
-	m_sw = sw;
-	m_saturation = offset;
-	m_boundary = gm_thresh;
-}
-
-void VolumeMeshConv::SetVolumeUseMask(bool use)
-{
-	m_use_mask = use;
-}
-
-void VolumeMeshConv::SetVolumeMask(Nrrd* mask)
-{
-	m_mask = mask;
-}
-
-void VolumeMeshConv::SetMaxValue(double mv)
-{
-	m_vol_max = mv;
-}
-
-void VolumeMeshConv::SetIsoValue(double iso)
-{
-	m_iso = iso;
-}
-
-void VolumeMeshConv::SetDownsample(int downsample)
-{
-	m_downsample = downsample;
-}
-
-void VolumeMeshConv::SetDownsampleZ(int downsample)
-{
-	m_downsample_z = downsample;
+	glbin_data_manager.LoadMeshData(m_mesh);
+	MeshData* md = glbin_data_manager.GetLastMeshData();
+	if (!md)
+		return;
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (canvas)
+		canvas->AddMeshData(md);
+	glbin_current.SetMeshData(md);
 }
 
 void VolumeMeshConv::Convert()

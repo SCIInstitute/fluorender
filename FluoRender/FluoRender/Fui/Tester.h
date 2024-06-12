@@ -93,10 +93,10 @@ private:
 	MainFrame* m_frame;
 
 	//sliders
-	void OnP1Change(wxScrollEvent &event);
-	void OnP2Change(wxScrollEvent &event);
-	void OnP3Change(wxScrollEvent &event);
-	void OnP4Change(wxScrollEvent &event);
+	void OnP1Change(wxScrollEvent& event);
+	void OnP2Change(wxScrollEvent& event);
+	void OnP3Change(wxScrollEvent& event);
+	void OnP4Change(wxScrollEvent& event);
 
 	//check boxes
 	void OnP1Check(wxCommandEvent& event);

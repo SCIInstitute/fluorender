@@ -163,14 +163,14 @@ void CountingDlg::GetSettings(RenderCanvas* view)
 	//	sel_vol = m_frame->GetCurSelVol();
 }
 
-void CountingDlg::OnCAIgnoreMaxChk(wxCommandEvent &event)
+void CountingDlg::OnCAIgnoreMaxChk(wxCommandEvent& event)
 {
 	bool val = m_ca_ignore_max_chk->GetValue();
 	m_ca_max_text->Enable(val);
 }
 
 //component analyze
-void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
+void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent& event)
 {
 	if (!m_view)
 		return;

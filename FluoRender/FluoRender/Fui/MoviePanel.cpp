@@ -2329,7 +2329,7 @@ void MoviePanel::EnableScript(bool val, const wxString& filename)
 }
 
 //ch1
-void MoviePanel::OnCh1Check(wxCommandEvent &event)
+void MoviePanel::OnCh1Check(wxCommandEvent& event)
 {
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
 	if (ch1)
@@ -2337,7 +2337,7 @@ void MoviePanel::OnCh1Check(wxCommandEvent &event)
 }
 
 //ch2
-void MoviePanel::OnCh2Check(wxCommandEvent &event)
+void MoviePanel::OnCh2Check(wxCommandEvent& event)
 {
 	wxCheckBox* ch2 = (wxCheckBox*)event.GetEventObject();
 	if (ch2)
@@ -2345,7 +2345,7 @@ void MoviePanel::OnCh2Check(wxCommandEvent &event)
 }
 
 //ch3
-void MoviePanel::OnCh3Check(wxCommandEvent &event)
+void MoviePanel::OnCh3Check(wxCommandEvent& event)
 {
 	wxCheckBox* ch3 = (wxCheckBox*)event.GetEventObject();
 	if (ch3)
@@ -2382,7 +2382,7 @@ void MoviePanel::OnDpiText(wxCommandEvent& event)
 }
 
 //enlarge output image
-void MoviePanel::OnChEnlargeCheck(wxCommandEvent &event)
+void MoviePanel::OnChEnlargeCheck(wxCommandEvent& event)
 {
 	wxCheckBox* ch_enlarge = (wxCheckBox*)event.GetEventObject();
 	if (ch_enlarge)
@@ -2414,7 +2414,7 @@ void MoviePanel::OnChEnlargeCheck(wxCommandEvent &event)
 	}
 }
 
-void MoviePanel::OnSlEnlargeScroll(wxScrollEvent &event)
+void MoviePanel::OnSlEnlargeScroll(wxScrollEvent& event)
 {
 	int ival = event.GetPosition();
 	wxSlider* sl_enlarge = (wxSlider*)event.GetEventObject();
@@ -2431,7 +2431,7 @@ void MoviePanel::OnSlEnlargeScroll(wxScrollEvent &event)
 	}
 }
 
-void MoviePanel::OnTxEnlargeText(wxCommandEvent &event)
+void MoviePanel::OnTxEnlargeText(wxCommandEvent& event)
 {
 	wxString str = event.GetString();
 	double dval;
@@ -2450,7 +2450,7 @@ void MoviePanel::OnTxEnlargeText(wxCommandEvent &event)
 }
 
 //movie quality
-void MoviePanel::OnMovieQuality(wxCommandEvent &event)
+void MoviePanel::OnMovieQuality(wxCommandEvent& event)
 {
 	wxString str = event.GetString();
 	double dval;
@@ -2471,7 +2471,7 @@ void MoviePanel::OnMovieQuality(wxCommandEvent &event)
 
 }
 //embed project
-void MoviePanel::OnChEmbedCheck(wxCommandEvent &event)
+void MoviePanel::OnChEmbedCheck(wxCommandEvent& event)
 {
 	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
 	if (ch_embed)

@@ -281,7 +281,7 @@ void OclDlg::OnExecuteNBtn(wxCommandEvent& event)
 		Execute();
 }
 
-void OclDlg::OnIterationsChange(wxScrollEvent &event)
+void OclDlg::OnIterationsChange(wxScrollEvent& event)
 {
 	int ival = m_iterations_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
@@ -289,7 +289,7 @@ void OclDlg::OnIterationsChange(wxScrollEvent &event)
 		m_iterations_txt->SetValue(str);
 }
 
-void OclDlg::OnIterationsEdit(wxCommandEvent &event)
+void OclDlg::OnIterationsEdit(wxCommandEvent& event)
 {
 	wxString str = m_iterations_txt->GetValue();
 	unsigned long ival;

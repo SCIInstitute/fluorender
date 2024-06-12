@@ -157,39 +157,39 @@ private:
 	double GetShadowDir();
 
 	//event handling
-	void OnSave(wxCommandEvent &event);
-	void OnClose(wxCommandEvent &event);
+	void OnSave(wxCommandEvent& event);
+	void OnClose(wxCommandEvent& event);
 
 	//projec save
-	void OnProjectSaveCheck(wxCommandEvent &event);
+	void OnProjectSaveCheck(wxCommandEvent& event);
 	void OnProjectSaveIncCheck(wxCommandEvent& event);
-	void OnRealtimeCompressCheck(wxCommandEvent &event);
+	void OnRealtimeCompressCheck(wxCommandEvent& event);
 	void OnScriptBreakCheck(wxCommandEvent& event);
 	void OnInverseSliderCheck(wxCommandEvent& event);
 	void OnMulFuncBtnComb(wxCommandEvent& event);
 	//mouse interaction
-	void OnMouseIntCheck(wxCommandEvent &event);
+	void OnMouseIntCheck(wxCommandEvent& event);
 	//peeling
-	void OnPeelingLayersChange(wxScrollEvent &event);
-	void OnPeelingLayersEdit(wxCommandEvent &event);
+	void OnPeelingLayersChange(wxScrollEvent& event);
+	void OnPeelingLayersEdit(wxCommandEvent& event);
 	//blending
-	void OnMicroBlendCheck(wxCommandEvent &event);
+	void OnMicroBlendCheck(wxCommandEvent& event);
 	//shadow
-	void OnShadowDirCheck(wxCommandEvent &event);
-	void OnShadowDirChange(wxScrollEvent &event);
-	void OnShadowDirEdit(wxCommandEvent &event);
+	void OnShadowDirCheck(wxCommandEvent& event);
+	void OnShadowDirChange(wxScrollEvent& event);
+	void OnShadowDirEdit(wxCommandEvent& event);
 	//gradient background
-	void OnGradBgCheck(wxCommandEvent &event);
+	void OnGradBgCheck(wxCommandEvent& event);
 	//rot center anchor threshold
-	void OnPinThresholdChange(wxScrollEvent &event);
-	void OnPinThresholdEdit(wxCommandEvent &event);
+	void OnPinThresholdChange(wxScrollEvent& event);
+	void OnPinThresholdEdit(wxCommandEvent& event);
 	//link rotations
 	void OnRotLink(wxCommandEvent& event);
 	//stereo
-	void OnStereoCheck(wxCommandEvent &event);
+	void OnStereoCheck(wxCommandEvent& event);
 	void OnSBSCheck(wxCommandEvent& event);
-	void OnEyeDistChange(wxScrollEvent &event);
-	void OnEyeDistEdit(wxCommandEvent &event);
+	void OnEyeDistChange(wxScrollEvent& event);
+	void OnEyeDistEdit(wxCommandEvent& event);
 	void OnLookingGlassCheck(wxCommandEvent& event);
 	void OnHoloDebugCheck(wxCommandEvent& event);
 	void OnLgOffsetChange(wxScrollEvent& event);
@@ -199,50 +199,50 @@ private:
 	//color depth
 	void OnColorDepthComb(wxCommandEvent& event);
 	//override vox
-	void OnOverrideVoxCheck(wxCommandEvent &event);
+	void OnOverrideVoxCheck(wxCommandEvent& event);
 	//wavelength color
-	void OnWavColor1Change(wxCommandEvent &event);
-	void OnWavColor2Change(wxCommandEvent &event);
-	void OnWavColor3Change(wxCommandEvent &event);
-	void OnWavColor4Change(wxCommandEvent &event);
+	void OnWavColor1Change(wxCommandEvent& event);
+	void OnWavColor2Change(wxCommandEvent& event);
+	void OnWavColor3Change(wxCommandEvent& event);
+	void OnWavColor4Change(wxCommandEvent& event);
 	//texture size
-	void OnMaxTextureSizeChk(wxCommandEvent &event);
-	void OnMaxTextureSizeEdit(wxCommandEvent &event);
+	void OnMaxTextureSizeChk(wxCommandEvent& event);
+	void OnMaxTextureSizeEdit(wxCommandEvent& event);
 	//memory settings
-	void OnStreamingChk(wxCommandEvent &event);
+	void OnStreamingChk(wxCommandEvent& event);
 	void OnUpdateOrderChange(wxCommandEvent & event);
-	void OnGraphicsMemChange(wxScrollEvent &event);
-	void OnGraphicsMemEdit(wxCommandEvent &event);
-	void OnLargeDataChange(wxScrollEvent &event);
-	void OnLargeDataEdit(wxCommandEvent &event);
-	void OnBlockSizeChange(wxScrollEvent &event);
-	void OnBlockSizeEdit(wxCommandEvent &event);
-	void OnResponseTimeChange(wxScrollEvent &event);
-	void OnResponseTimeEdit(wxCommandEvent &event);
-	void OnDetailLevelOffsetChange(wxScrollEvent &event);
-	void OnDetailLevelOffsetEdit(wxCommandEvent &event);
+	void OnGraphicsMemChange(wxScrollEvent& event);
+	void OnGraphicsMemEdit(wxCommandEvent& event);
+	void OnLargeDataChange(wxScrollEvent& event);
+	void OnLargeDataEdit(wxCommandEvent& event);
+	void OnBlockSizeChange(wxScrollEvent& event);
+	void OnBlockSizeEdit(wxCommandEvent& event);
+	void OnResponseTimeChange(wxScrollEvent& event);
+	void OnResponseTimeEdit(wxCommandEvent& event);
+	void OnDetailLevelOffsetChange(wxScrollEvent& event);
+	void OnDetailLevelOffsetEdit(wxCommandEvent& event);
 	//font
-	void OnFontChange(wxCommandEvent &event);
-	void OnFontSizeChange(wxCommandEvent &event);
-	void OnTextColorChange(wxCommandEvent &event);
+	void OnFontChange(wxCommandEvent& event);
+	void OnFontSizeChange(wxCommandEvent& event);
+	void OnTextColorChange(wxCommandEvent& event);
 	//line width
-	void OnLineWidthSldr(wxScrollEvent &event);
-	void OnLineWidthText(wxCommandEvent &event);
+	void OnLineWidthSldr(wxScrollEvent& event);
+	void OnLineWidthText(wxCommandEvent& event);
 	//paint history depth
-	void OnPaintHistDepthChange(wxScrollEvent &event);
-	void OnPaintHistDepthEdit(wxCommandEvent &event);
+	void OnPaintHistDepthChange(wxScrollEvent& event);
+	void OnPaintHistDepthEdit(wxCommandEvent& event);
 	//pencil distance
 	void OnPencilDistChange(wxScrollEvent& event);
 	void OnPencilDistEdit(wxCommandEvent& event);
 	// Java settings.
-	void OnJavaJvmEdit(wxCommandEvent &event);
-	void OnJavaIJEdit(wxCommandEvent &event);
-	void OnJavaBioformatsEdit(wxCommandEvent &event);
-	void onJavaJvmBrowse(wxCommandEvent &event);
-	void onJavaIJBrowse(wxCommandEvent &event);
-	void onJavaBioformatsBrowse(wxCommandEvent &event);
-	void onJavaRadioButtonImageJ(wxCommandEvent &event);
-	void onJavaRadioButtonFiji(wxCommandEvent &event);
+	void OnJavaJvmEdit(wxCommandEvent& event);
+	void OnJavaIJEdit(wxCommandEvent& event);
+	void OnJavaBioformatsEdit(wxCommandEvent& event);
+	void onJavaJvmBrowse(wxCommandEvent& event);
+	void onJavaIJBrowse(wxCommandEvent& event);
+	void onJavaBioformatsBrowse(wxCommandEvent& event);
+	void onJavaRadioButtonImageJ(wxCommandEvent& event);
+	void onJavaRadioButtonFiji(wxCommandEvent& event);
 	//device tree
 	void OnSelChanged(wxTreeEvent& event);
 };

@@ -92,13 +92,13 @@ private:
 
 private:
 	//threhsold
-	void OnThresholdChange(wxScrollEvent &event);
-	void OnThresholdText(wxCommandEvent &event);
-	void OnVoxelChange(wxScrollEvent &event);
-	void OnVoxelText(wxCommandEvent &event);
-	void OnPreviewBtn(wxCommandEvent &event);
-	void OnEraseBtn(wxCommandEvent &event);
-	void OnEnhanceSelChk(wxCommandEvent &event);
+	void OnThresholdChange(wxScrollEvent& event);
+	void OnThresholdText(wxCommandEvent& event);
+	void OnVoxelChange(wxScrollEvent& event);
+	void OnVoxelText(wxCommandEvent& event);
+	void OnPreviewBtn(wxCommandEvent& event);
+	void OnEraseBtn(wxCommandEvent& event);
+	void OnEnhanceSelChk(wxCommandEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };

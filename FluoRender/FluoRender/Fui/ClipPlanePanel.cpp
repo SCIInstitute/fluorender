@@ -831,7 +831,7 @@ void ClipPlanePanel::SetPlaneMode()
 		{m_frame->GetRenderCanvas(glbin_current.canvas)});
 }
 
-void ClipPlanePanel::OnClipResetBtn(wxCommandEvent &event)
+void ClipPlanePanel::OnClipResetBtn(wxCommandEvent& event)
 {
 	ResetClipValues();
 }
@@ -928,7 +928,7 @@ void ClipPlanePanel::OnClipZMF(wxCommandEvent& event)
 	}
 }
 
-void ClipPlanePanel::OnClipXChange(wxScrollEvent &event)
+void ClipPlanePanel::OnClipXChange(wxScrollEvent& event)
 {
 	int ival1 = m_clipx_sldr->GetLowValue();
 	int ival2 = m_clipx_sldr->GetHighValue();
@@ -944,7 +944,7 @@ void ClipPlanePanel::OnClipXChange(wxScrollEvent &event)
 	SetClipValues(i, ival1, ival2);
 }
 
-void ClipPlanePanel::OnX1ClipEdit(wxCommandEvent &event)
+void ClipPlanePanel::OnX1ClipEdit(wxCommandEvent& event)
 {
 	wxString str = m_x1_clip_text->GetValue();
 	long ival = 0;
@@ -953,7 +953,7 @@ void ClipPlanePanel::OnX1ClipEdit(wxCommandEvent &event)
 	SetClipValue(0, ival, link);
 }
 
-void ClipPlanePanel::OnX2ClipEdit(wxCommandEvent &event)
+void ClipPlanePanel::OnX2ClipEdit(wxCommandEvent& event)
 {
 	wxString str = m_x2_clip_text->GetValue();
 	long ival = 0;
@@ -962,7 +962,7 @@ void ClipPlanePanel::OnX2ClipEdit(wxCommandEvent &event)
 	SetClipValue(1, ival, link);
 }
 
-void ClipPlanePanel::OnClipYChange(wxScrollEvent &event)
+void ClipPlanePanel::OnClipYChange(wxScrollEvent& event)
 {
 	int ival1 = m_clipy_sldr->GetLowValue();
 	int ival2 = m_clipy_sldr->GetHighValue();
@@ -978,7 +978,7 @@ void ClipPlanePanel::OnClipYChange(wxScrollEvent &event)
 	SetClipValues(i, ival1, ival2);
 }
 
-void ClipPlanePanel::OnY1ClipEdit(wxCommandEvent &event)
+void ClipPlanePanel::OnY1ClipEdit(wxCommandEvent& event)
 {
 	wxString str = m_y1_clip_text->GetValue();
 	long ival = 0;
@@ -987,7 +987,7 @@ void ClipPlanePanel::OnY1ClipEdit(wxCommandEvent &event)
 	SetClipValue(2, ival, link);
 }
 
-void ClipPlanePanel::OnY2ClipEdit(wxCommandEvent &event)
+void ClipPlanePanel::OnY2ClipEdit(wxCommandEvent& event)
 {
 	wxString str = m_y2_clip_text->GetValue();
 	long ival = 0;
@@ -996,7 +996,7 @@ void ClipPlanePanel::OnY2ClipEdit(wxCommandEvent &event)
 	SetClipValue(3, ival, link);
 }
 
-void ClipPlanePanel::OnClipZChange(wxScrollEvent &event)
+void ClipPlanePanel::OnClipZChange(wxScrollEvent& event)
 {
 	int ival1 = m_clipz_sldr->GetLowValue();
 	int ival2 = m_clipz_sldr->GetHighValue();
@@ -1012,7 +1012,7 @@ void ClipPlanePanel::OnClipZChange(wxScrollEvent &event)
 	SetClipValues(i, ival1, ival2);
 }
 
-void ClipPlanePanel::OnZ1ClipEdit(wxCommandEvent &event)
+void ClipPlanePanel::OnZ1ClipEdit(wxCommandEvent& event)
 {
 	wxString str = m_z1_clip_text->GetValue();
 	long ival = 0;
@@ -1021,7 +1021,7 @@ void ClipPlanePanel::OnZ1ClipEdit(wxCommandEvent &event)
 	SetClipValue(4, ival, link);
 }
 
-void ClipPlanePanel::OnZ2ClipEdit(wxCommandEvent &event)
+void ClipPlanePanel::OnZ2ClipEdit(wxCommandEvent& event)
 {
 	wxString str = m_z2_clip_text->GetValue();
 	long ival = 0;
@@ -1286,19 +1286,19 @@ void ClipPlanePanel::ResetClipValuesZ()
 	FluoRefresh(2, { gstClipZ1, gstClipZ2 }, { m_frame->GetRenderCanvas(canvas) });
 }
 
-void ClipPlanePanel::OnLinkXCheck(wxCommandEvent &event)
+void ClipPlanePanel::OnLinkXCheck(wxCommandEvent& event)
 {
 	bool link = m_linkx_tb->GetToolState(0);
 	SetXLink(link);
 }
 
-void ClipPlanePanel::OnLinkYCheck(wxCommandEvent &event)
+void ClipPlanePanel::OnLinkYCheck(wxCommandEvent& event)
 {
 	bool link = m_linky_tb->GetToolState(0);
 	SetYLink(link);
 }
 
-void ClipPlanePanel::OnLinkZCheck(wxCommandEvent &event)
+void ClipPlanePanel::OnLinkZCheck(wxCommandEvent& event)
 {
 	bool link = m_linkz_tb->GetToolState(0);
 	SetZLink(link);
@@ -1340,7 +1340,7 @@ void ClipPlanePanel::OnClipDistZEdit(wxCommandEvent& event)
 		vd->SetClipDistZ(val);
 }
 
-void ClipPlanePanel::OnSetZeroBtn(wxCommandEvent &event)
+void ClipPlanePanel::OnSetZeroBtn(wxCommandEvent& event)
 {
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)
@@ -1351,7 +1351,7 @@ void ClipPlanePanel::OnSetZeroBtn(wxCommandEvent &event)
 		{ m_frame->GetRenderCanvas(canvas) });
 }
 
-void ClipPlanePanel::OnRotResetBtn(wxCommandEvent &event)
+void ClipPlanePanel::OnRotResetBtn(wxCommandEvent& event)
 {
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)
@@ -1447,7 +1447,7 @@ void ClipPlanePanel::OnRotZMF(wxCommandEvent& event)
 	}
 }
 
-void ClipPlanePanel::OnXRotChange(wxScrollEvent &event)
+void ClipPlanePanel::OnXRotChange(wxScrollEvent& event)
 {
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)
@@ -1458,7 +1458,7 @@ void ClipPlanePanel::OnXRotChange(wxScrollEvent &event)
 	FluoRefresh(2, { gstClipRotX }, { m_frame->GetRenderCanvas(canvas) });
 }
 
-void ClipPlanePanel::OnXRotEdit(wxCommandEvent &event)
+void ClipPlanePanel::OnXRotEdit(wxCommandEvent& event)
 {
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)
@@ -1472,7 +1472,7 @@ void ClipPlanePanel::OnXRotEdit(wxCommandEvent &event)
 	FluoRefresh(2, { gstNull }, { m_frame->GetRenderCanvas(canvas) });
 }
 
-void ClipPlanePanel::OnYRotChange(wxScrollEvent &event)
+void ClipPlanePanel::OnYRotChange(wxScrollEvent& event)
 {
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)
@@ -1483,7 +1483,7 @@ void ClipPlanePanel::OnYRotChange(wxScrollEvent &event)
 	FluoRefresh(2, { gstClipRotY }, { m_frame->GetRenderCanvas(canvas) });
 }
 
-void ClipPlanePanel::OnYRotEdit(wxCommandEvent &event)
+void ClipPlanePanel::OnYRotEdit(wxCommandEvent& event)
 {
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)
@@ -1497,7 +1497,7 @@ void ClipPlanePanel::OnYRotEdit(wxCommandEvent &event)
 	FluoRefresh(2, { gstNull }, { m_frame->GetRenderCanvas(canvas) });
 }
 
-void ClipPlanePanel::OnZRotChange(wxScrollEvent &event)
+void ClipPlanePanel::OnZRotChange(wxScrollEvent& event)
 {
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)
@@ -1508,7 +1508,7 @@ void ClipPlanePanel::OnZRotChange(wxScrollEvent &event)
 	FluoRefresh(2, { gstClipRotZ }, { m_frame->GetRenderCanvas(canvas) });
 }
 
-void ClipPlanePanel::OnZRotEdit(wxCommandEvent &event)
+void ClipPlanePanel::OnZRotEdit(wxCommandEvent& event)
 {
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)

@@ -1108,35 +1108,35 @@ void MainFrame::OnFullScreen(wxCommandEvent& event)
 }
 
 //open dialog options
-void MainFrame::OnCh11Check(wxCommandEvent &event)
+void MainFrame::OnCh11Check(wxCommandEvent& event)
 {
 	wxCheckBox* ch11 = (wxCheckBox*)event.GetEventObject();
 	if (ch11)
 		glbin_settings.m_slice_sequence = ch11->GetValue();
 }
 
-void MainFrame::OnCh12Check(wxCommandEvent &event)
+void MainFrame::OnCh12Check(wxCommandEvent& event)
 {
 	wxCheckBox* ch12 = (wxCheckBox*)event.GetEventObject();
 	if (ch12)
 		glbin_settings.m_chann_sequence = ch12->GetValue();
 }
 
-void MainFrame::OnCmbChange(wxCommandEvent &event)
+void MainFrame::OnCmbChange(wxCommandEvent& event)
 {
 	wxComboBox* combo = (wxComboBox*)event.GetEventObject();
 	if (combo)
 		glbin_settings.m_digit_order = combo->GetSelection();
 }
 
-void MainFrame::OnTxt1Change(wxCommandEvent &event)
+void MainFrame::OnTxt1Change(wxCommandEvent& event)
 {
 	wxTextCtrl* txt1 = (wxTextCtrl*)event.GetEventObject();
 	if (txt1)
 		glbin_settings.m_time_id = txt1->GetValue();
 }
 
-void MainFrame::OnTxt2Change(wxCommandEvent &event)
+void MainFrame::OnTxt2Change(wxCommandEvent& event)
 {
 	wxTextCtrl* txt2 = (wxTextCtrl*)event.GetEventObject();
 	if (txt2)
@@ -1148,14 +1148,14 @@ void MainFrame::OnTxt2Change(wxCommandEvent &event)
 	}
 }
 
-void MainFrame::OnCh2Check(wxCommandEvent &event)
+void MainFrame::OnCh2Check(wxCommandEvent& event)
 {
 	wxCheckBox* ch2 = (wxCheckBox*)event.GetEventObject();
 	if (ch2)
 		glbin_settings.m_realtime_compress = ch2->GetValue();
 }
 
-void MainFrame::OnCh3Check(wxCommandEvent &event)
+void MainFrame::OnCh3Check(wxCommandEvent& event)
 {
 	wxCheckBox* ch3 = (wxCheckBox*)event.GetEventObject();
 	if (ch3)
@@ -2615,14 +2615,14 @@ void MainFrame::ResetLayout()
 	glbin_settings.m_layout.Clear();
 }
 
-void MainFrame::OnChEmbedCheck(wxCommandEvent &event)
+void MainFrame::OnChEmbedCheck(wxCommandEvent& event)
 {
 	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
 	if (ch_embed)
 		glbin_settings.m_vrp_embed = ch_embed->GetValue();
 }
 
-void MainFrame::OnChSaveCmpCheck(wxCommandEvent &event)
+void MainFrame::OnChSaveCmpCheck(wxCommandEvent& event)
 {
 	wxCheckBox* ch_cmp = (wxCheckBox*)event.GetEventObject();
 	if (ch_cmp)
@@ -5102,7 +5102,7 @@ void MainFrame::OnShowHideToolbar(wxCommandEvent& event)
 	m_aui_mgr.Update();
 }
 
-void MainFrame::OnShowHideView(wxCommandEvent &event)
+void MainFrame::OnShowHideView(wxCommandEvent& event)
 {
 	int id = event.GetId();
 

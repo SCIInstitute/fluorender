@@ -76,8 +76,8 @@ private:
 	void LoadDefault();
 
 	//component analyzer
-	void OnCAAnalyzeBtn(wxCommandEvent &event);
-	void OnCAIgnoreMaxChk(wxCommandEvent &event);
+	void OnCAAnalyzeBtn(wxCommandEvent& event);
+	void OnCAIgnoreMaxChk(wxCommandEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };

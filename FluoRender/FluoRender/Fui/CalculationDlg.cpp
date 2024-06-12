@@ -153,7 +153,7 @@ void CalculationDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 //calculations
 //operands
-void CalculationDlg::OnLoadA(wxCommandEvent &event)
+void CalculationDlg::OnLoadA(wxCommandEvent& event)
 {
 	glbin_vol_calculator.SetVolumeA(
 		glbin_current.vol_data
@@ -162,7 +162,7 @@ void CalculationDlg::OnLoadA(wxCommandEvent &event)
 	FluoUpdate({ gstVolumeA });
 }
 
-void CalculationDlg::OnLoadB(wxCommandEvent &event)
+void CalculationDlg::OnLoadB(wxCommandEvent& event)
 {
 	glbin_vol_calculator.SetVolumeB(
 		glbin_current.vol_data
@@ -172,35 +172,35 @@ void CalculationDlg::OnLoadB(wxCommandEvent &event)
 }
 
 //operators
-void CalculationDlg::OnCalcSub(wxCommandEvent &event)
+void CalculationDlg::OnCalcSub(wxCommandEvent& event)
 {
 	glbin_vol_calculator.CalculateGroup(1);
 }
 
-void CalculationDlg::OnCalcAdd(wxCommandEvent &event)
+void CalculationDlg::OnCalcAdd(wxCommandEvent& event)
 {
 	glbin_vol_calculator.CalculateGroup(2);
 }
 
-void CalculationDlg::OnCalcDiv(wxCommandEvent &event)
+void CalculationDlg::OnCalcDiv(wxCommandEvent& event)
 {
 	glbin_vol_calculator.CalculateGroup(3);
 }
 
-void CalculationDlg::OnCalcIsc(wxCommandEvent &event)
+void CalculationDlg::OnCalcIsc(wxCommandEvent& event)
 {
 	glbin_vol_calculator.CalculateGroup(4);
 }
 
 //one-operators
-void CalculationDlg::OnCalcFill(wxCommandEvent &event)
+void CalculationDlg::OnCalcFill(wxCommandEvent& event)
 {
 	glbin_vol_calculator.SetVolumeB(0);
 	glbin_vol_calculator.CalculateGroup(9);
 	FluoUpdate({ gstVolumeB });
 }
 
-void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
+void CalculationDlg::OnCalcCombine(wxCommandEvent& event)
 {
 	DataGroup* group = glbin_current.vol_group;
 	if (!group)

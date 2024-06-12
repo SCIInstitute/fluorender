@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 
-class MainFrame;
 class CalculationDlg : public PropPanel
 {
 public:
@@ -58,16 +57,16 @@ private:
 private:
 	//calculations
 	//operands
-	void OnLoadA(wxCommandEvent &event);
-	void OnLoadB(wxCommandEvent &event);
+	void OnLoadA(wxCommandEvent& event);
+	void OnLoadB(wxCommandEvent& event);
 	//operators
-	void OnCalcSub(wxCommandEvent &event);
-	void OnCalcAdd(wxCommandEvent &event);
-	void OnCalcDiv(wxCommandEvent &event);
-	void OnCalcIsc(wxCommandEvent &event);
+	void OnCalcSub(wxCommandEvent& event);
+	void OnCalcAdd(wxCommandEvent& event);
+	void OnCalcDiv(wxCommandEvent& event);
+	void OnCalcIsc(wxCommandEvent& event);
 	//one-operators
-	void OnCalcFill(wxCommandEvent &event);
-	void OnCalcCombine(wxCommandEvent &event);
+	void OnCalcFill(wxCommandEvent& event);
+	void OnCalcCombine(wxCommandEvent& event);
 };
 
 #endif//_CALCULATIONDLG_H_

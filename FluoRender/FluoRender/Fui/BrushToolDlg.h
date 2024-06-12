@@ -33,7 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/tglbtn.h>
 #include <wx/clipbrd.h>
 
-class MainFrame;
 class wxSingleSlider;
 struct GridData
 {
@@ -164,32 +163,32 @@ private:
 	void OnMaskToolBar(wxCommandEvent& event);
 	//selection adjustment
 	//2d influence
-	void OnBrush2dinflChange(wxScrollEvent &event);
-	void OnBrush2dinflText(wxCommandEvent &event);
+	void OnBrush2dinflChange(wxScrollEvent& event);
+	void OnBrush2dinflText(wxCommandEvent& event);
 	//edge detect
-	void OnBrushEdgeDetectChk(wxCommandEvent &event);
+	void OnBrushEdgeDetectChk(wxCommandEvent& event);
 	//hidden removal
-	void OnBrushHiddenRemovalChk(wxCommandEvent &event);
+	void OnBrushHiddenRemovalChk(wxCommandEvent& event);
 	//estimate thresh
-	void OnEstimateThreshChk(wxCommandEvent &event);
+	void OnEstimateThreshChk(wxCommandEvent& event);
 	//select group
-	void OnBrushSelectGroupChk(wxCommandEvent &event);
+	void OnBrushSelectGroupChk(wxCommandEvent& event);
 	//brick accuracy
-	void OnAccurateBricksCheck(wxCommandEvent &event);
+	void OnAccurateBricksCheck(wxCommandEvent& event);
 	//translate
-	void OnBrushSclTranslateChange(wxScrollEvent &event);
-	void OnBrushSclTranslateText(wxCommandEvent &event);
+	void OnBrushSclTranslateChange(wxScrollEvent& event);
+	void OnBrushSclTranslateText(wxCommandEvent& event);
 	//gm falloff
-	void OnBrushGmFalloffChange(wxScrollEvent &event);
-	void OnBrushGmFalloffText(wxCommandEvent &event);
+	void OnBrushGmFalloffChange(wxScrollEvent& event);
+	void OnBrushGmFalloffText(wxCommandEvent& event);
 	//brush properties
 	//brush size 1
-	void OnBrushSize1Change(wxScrollEvent &event);
-	void OnBrushSize1Text(wxCommandEvent &event);
+	void OnBrushSize1Change(wxScrollEvent& event);
+	void OnBrushSize1Text(wxCommandEvent& event);
 	//brush size 2
-	void OnBrushSize2Chk(wxCommandEvent &event);
-	void OnBrushSize2Change(wxScrollEvent &event);
-	void OnBrushSize2Text(wxCommandEvent &event);
+	void OnBrushSize2Chk(wxCommandEvent& event);
+	void OnBrushSize2Change(wxScrollEvent& event);
+	void OnBrushSize2Text(wxCommandEvent& event);
 	//brush iterations
 	void OnBrushIterCheck(wxCommandEvent& event);
 	//brush size relation

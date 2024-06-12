@@ -28,35 +28,19 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _CONVERTDLG_H_
 #define _CONVERTDLG_H_
 
+#include <PropPanel.h>
 #include <wx/wx.h>
 
-class MainFrame;
 class wxSingleSlider;
-class ConvertDlg : public wxPanel
+class ConvertDlg : public PropPanel
 {
 public:
-	enum
-	{
-		ID_CnvVolMeshThreshSldr = ID_CONVERT,
-		ID_CnvVolMeshThreshText,
-		ID_CnvVolMeshDownsampleSldr,
-		ID_CnvVolMeshDownsampleText,
-		ID_CnvVolMeshDownsampleZSldr,
-		ID_CnvVolMeshDownsampleZText,
-		ID_CnvVolMeshUsetransfChk,
-		ID_CnvVolMeshSelectedChk,
-		ID_CnvVolMeshWeldChk,
-		ID_CnvVolMeshConvertBtn,
-		//output
-		ID_StatText
-	};
-
 	ConvertDlg(MainFrame* frame);
 	~ConvertDlg();
 
-private:
-	MainFrame* m_frame;
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
+private:
 	//convert from volume to polygon mesh
 	wxSingleSlider* m_cnv_vol_mesh_thresh_sldr;
 	wxTextCtrl* m_cnv_vol_mesh_thresh_text;
@@ -71,16 +55,17 @@ private:
 	//output
 	wxTextCtrl* m_stat_text;
 
-	//convert from volume to mesh
-	void OnCnvVolMeshThreshChange(wxScrollEvent &event);
-	void OnCnvVolMeshThreshText(wxCommandEvent &event);
-	void OnCnvVolMeshDownsampleChange(wxScrollEvent &event);
-	void OnCnvVolMeshDownsampleText(wxCommandEvent &event);
-	void OnCnvVolMeshDownsampleZChange(wxScrollEvent &event);
-	void OnCnvVolMeshDownsampleZText(wxCommandEvent &event);
+private:
+	void OnCnvVolMeshThreshChange(wxScrollEvent& event);
+	void OnCnvVolMeshThreshText(wxCommandEvent& event);
+	void OnCnvVolMeshDownsampleChange(wxScrollEvent& event);
+	void OnCnvVolMeshDownsampleText(wxCommandEvent& event);
+	void OnCnvVolMeshDownsampleZChange(wxScrollEvent& event);
+	void OnCnvVolMeshDownsampleZText(wxCommandEvent& event);
+	void OnCnvVolMeshUseTransfCheck(wxCommandEvent& event);
+	void OnCnvVolMeshUseSelCheck(wxCommandEvent& event);
+	void OnCnvVolMeshWeldVerticesCheck(wxCommandEvent& event);
 	void OnCnvVolMeshConvert(wxCommandEvent& event);
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_CONVERTDLG_H_

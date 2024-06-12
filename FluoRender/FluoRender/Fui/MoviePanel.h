@@ -291,7 +291,7 @@ private:
 	//basic rotation
 	void OnRotateChecked(wxCommandEvent& event);
 	void OnRotAxis(wxCommandEvent& event);
-	void OnDegreeText(wxCommandEvent &event);
+	void OnDegreeText(wxCommandEvent& event);
 	//rotation interpolation
 	void OnRotIntCmb(wxCommandEvent& event);
 	//sequence
@@ -329,22 +329,22 @@ private:
 	void OnSbSpinDown(wxSpinEvent& event);
 
 	//script
-	void OnRunScriptChk(wxCommandEvent &event);
-	void OnScriptFileEdit(wxCommandEvent &event);
-	void OnScriptClearBtn(wxCommandEvent &event);
-	void OnScriptFileBtn(wxCommandEvent &event);
+	void OnRunScriptChk(wxCommandEvent& event);
+	void OnScriptFileEdit(wxCommandEvent& event);
+	void OnScriptClearBtn(wxCommandEvent& event);
+	void OnScriptFileBtn(wxCommandEvent& event);
 	void OnScriptListSelected(wxListEvent &event);
 
 	//help
-	void OnChEnlargeCheck(wxCommandEvent &event);
-	void OnSlEnlargeScroll(wxScrollEvent &event);
-	void OnTxEnlargeText(wxCommandEvent &event);
-	void OnMovieQuality(wxCommandEvent &event);
-	void OnCh1Check(wxCommandEvent &event);
-	void OnCh2Check(wxCommandEvent &event);
-	void OnCh3Check(wxCommandEvent &event);
+	void OnChEnlargeCheck(wxCommandEvent& event);
+	void OnSlEnlargeScroll(wxScrollEvent& event);
+	void OnTxEnlargeText(wxCommandEvent& event);
+	void OnMovieQuality(wxCommandEvent& event);
+	void OnCh1Check(wxCommandEvent& event);
+	void OnCh2Check(wxCommandEvent& event);
+	void OnCh3Check(wxCommandEvent& event);
 	void OnDpiText(wxCommandEvent& event);
-	void OnChEmbedCheck(wxCommandEvent &event);
+	void OnChEmbedCheck(wxCommandEvent& event);
 	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
 };
 

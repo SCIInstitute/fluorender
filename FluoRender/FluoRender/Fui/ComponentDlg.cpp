@@ -1452,7 +1452,7 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 }
 
 //comp generate page
-void ComponentDlg::OnIterSldr(wxScrollEvent &event)
+void ComponentDlg::OnIterSldr(wxScrollEvent& event)
 {
 	int val = m_iter_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
@@ -1460,7 +1460,7 @@ void ComponentDlg::OnIterSldr(wxScrollEvent &event)
 		m_iter_text->SetValue(str);
 }
 
-void ComponentDlg::OnIterText(wxCommandEvent &event)
+void ComponentDlg::OnIterText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_iter_text->GetValue().ToLong(&val);
@@ -1474,7 +1474,7 @@ void ComponentDlg::OnIterText(wxCommandEvent &event)
 	}
 }
 
-void ComponentDlg::OnThreshSldr(wxScrollEvent &event)
+void ComponentDlg::OnThreshSldr(wxScrollEvent& event)
 {
 	double val = m_thresh_sldr->GetValue() / 1000.0;
 	wxString str = wxString::Format("%.3f", val);
@@ -1482,7 +1482,7 @@ void ComponentDlg::OnThreshSldr(wxScrollEvent &event)
 		m_thresh_text->SetValue(str);
 }
 
-void ComponentDlg::OnThreshText(wxCommandEvent &event)
+void ComponentDlg::OnThreshText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_thresh_text->GetValue().ToDouble(&val);
@@ -1496,7 +1496,7 @@ void ComponentDlg::OnThreshText(wxCommandEvent &event)
 	}
 }
 
-void ComponentDlg::OnDistStrengthSldr(wxScrollEvent &event)
+void ComponentDlg::OnDistStrengthSldr(wxScrollEvent& event)
 {
 	double val = m_dist_strength_sldr->GetValue() / 1000.0;
 	wxString str = wxString::Format("%.3f", val);
@@ -1504,7 +1504,7 @@ void ComponentDlg::OnDistStrengthSldr(wxScrollEvent &event)
 		m_dist_strength_text->SetValue(str);
 }
 
-void ComponentDlg::OnDistStrengthText(wxCommandEvent &event)
+void ComponentDlg::OnDistStrengthText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_dist_strength_text->GetValue().ToDouble(&val);
@@ -1518,7 +1518,7 @@ void ComponentDlg::OnDistStrengthText(wxCommandEvent &event)
 	}
 }
 
-void ComponentDlg::OnUseDistFieldCheck(wxCommandEvent &event)
+void ComponentDlg::OnUseDistFieldCheck(wxCommandEvent& event)
 {
 	bool bval = m_use_dist_field_check->GetValue();
 	glbin_comp_generator.SetUseDistField(bval);
@@ -1532,7 +1532,7 @@ void ComponentDlg::OnUseDistFieldCheck(wxCommandEvent &event)
 		FluoUpdate({ gstUseDistField });
 }
 
-void ComponentDlg::OnDistFilterSizeSldr(wxScrollEvent &event)
+void ComponentDlg::OnDistFilterSizeSldr(wxScrollEvent& event)
 {
 	int val = m_dist_filter_size_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
@@ -1540,7 +1540,7 @@ void ComponentDlg::OnDistFilterSizeSldr(wxScrollEvent &event)
 		m_dist_filter_size_text->SetValue(str);
 }
 
-void ComponentDlg::OnDistFitlerSizeText(wxCommandEvent &event)
+void ComponentDlg::OnDistFitlerSizeText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_dist_filter_size_text->GetValue().ToLong(&val);
@@ -1554,7 +1554,7 @@ void ComponentDlg::OnDistFitlerSizeText(wxCommandEvent &event)
 	}
 }
 
-void ComponentDlg::OnMaxDistSldr(wxScrollEvent &event)
+void ComponentDlg::OnMaxDistSldr(wxScrollEvent& event)
 {
 	int val = m_max_dist_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
@@ -1562,7 +1562,7 @@ void ComponentDlg::OnMaxDistSldr(wxScrollEvent &event)
 		m_max_dist_text->SetValue(str);
 }
 
-void ComponentDlg::OnMaxDistText(wxCommandEvent &event)
+void ComponentDlg::OnMaxDistText(wxCommandEvent& event)
 {
 	long val = 1;
 	m_max_dist_text->GetValue().ToLong(&val);
@@ -1578,7 +1578,7 @@ void ComponentDlg::OnMaxDistText(wxCommandEvent &event)
 	}
 }
 
-void ComponentDlg::OnDistThreshSldr(wxScrollEvent &event)
+void ComponentDlg::OnDistThreshSldr(wxScrollEvent& event)
 {
 	double val = m_dist_thresh_sldr->GetValue() / 1000.0;
 	wxString str = wxString::Format("%.3f", val);
@@ -1586,7 +1586,7 @@ void ComponentDlg::OnDistThreshSldr(wxScrollEvent &event)
 		m_dist_thresh_text->SetValue(str);
 }
 
-void ComponentDlg::OnDistThreshText(wxCommandEvent &event)
+void ComponentDlg::OnDistThreshText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_dist_thresh_text->GetValue().ToDouble(&val);
@@ -1600,7 +1600,7 @@ void ComponentDlg::OnDistThreshText(wxCommandEvent &event)
 	}
 }
 
-void ComponentDlg::OnDiffCheck(wxCommandEvent &event)
+void ComponentDlg::OnDiffCheck(wxCommandEvent& event)
 {
 	bool bval = m_diff_check->GetValue();
 	glbin_comp_generator.SetDiffusion(bval);
@@ -1614,7 +1614,7 @@ void ComponentDlg::OnDiffCheck(wxCommandEvent &event)
 		FluoUpdate({ gstUseDiffusion });
 }
 
-void ComponentDlg::OnFalloffSldr(wxScrollEvent &event)
+void ComponentDlg::OnFalloffSldr(wxScrollEvent& event)
 {
 	double val = m_falloff_sldr->GetValue() / 1000.0;
 	wxString str = wxString::Format("%.3f", val);
@@ -1622,7 +1622,7 @@ void ComponentDlg::OnFalloffSldr(wxScrollEvent &event)
 		m_falloff_text->SetValue(str);
 }
 
-void ComponentDlg::OnFalloffText(wxCommandEvent &event)
+void ComponentDlg::OnFalloffText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_falloff_text->GetValue().ToDouble(&val);
@@ -1636,7 +1636,7 @@ void ComponentDlg::OnFalloffText(wxCommandEvent &event)
 	}
 }
 
-void ComponentDlg::OnDensityCheck(wxCommandEvent &event)
+void ComponentDlg::OnDensityCheck(wxCommandEvent& event)
 {
 	bool bval = m_density_check->GetValue();
 	glbin_comp_generator.SetDensity(bval);
@@ -1650,7 +1650,7 @@ void ComponentDlg::OnDensityCheck(wxCommandEvent &event)
 		FluoUpdate({ gstUseDensityField });
 }
 
-void ComponentDlg::OnDensitySldr(wxScrollEvent &event)
+void ComponentDlg::OnDensitySldr(wxScrollEvent& event)
 {
 	double val = m_density_sldr->GetValue() / 1000.0;
 	wxString str = wxString::Format("%.3f", val);
@@ -1658,7 +1658,7 @@ void ComponentDlg::OnDensitySldr(wxScrollEvent &event)
 		m_density_text->SetValue(str);
 }
 
-void ComponentDlg::OnDensityText(wxCommandEvent &event)
+void ComponentDlg::OnDensityText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_density_text->GetValue().ToDouble(&val);
@@ -1672,7 +1672,7 @@ void ComponentDlg::OnDensityText(wxCommandEvent &event)
 	}
 }
 
-void ComponentDlg::OnVarthSldr(wxScrollEvent &event)
+void ComponentDlg::OnVarthSldr(wxScrollEvent& event)
 {
 	double val = m_varth_sldr->GetValue() / 10000.0;
 	wxString str = wxString::Format("%.4f", val);
@@ -1680,7 +1680,7 @@ void ComponentDlg::OnVarthSldr(wxScrollEvent &event)
 		m_varth_text->SetValue(str);
 }
 
-void ComponentDlg::OnVarthText(wxCommandEvent &event)
+void ComponentDlg::OnVarthText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_varth_text->GetValue().ToDouble(&val);
@@ -1694,7 +1694,7 @@ void ComponentDlg::OnVarthText(wxCommandEvent &event)
 	}
 }
 
-void ComponentDlg::OnDensityWindowSizeSldr(wxScrollEvent &event)
+void ComponentDlg::OnDensityWindowSizeSldr(wxScrollEvent& event)
 {
 	int val = m_density_window_size_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
@@ -1702,7 +1702,7 @@ void ComponentDlg::OnDensityWindowSizeSldr(wxScrollEvent &event)
 		m_density_window_size_text->SetValue(str);
 }
 
-void ComponentDlg::OnDensityWindowSizeText(wxCommandEvent &event)
+void ComponentDlg::OnDensityWindowSizeText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_density_window_size_text->GetValue().ToLong(&val);
@@ -1716,7 +1716,7 @@ void ComponentDlg::OnDensityWindowSizeText(wxCommandEvent &event)
 	}
 }
 
-void ComponentDlg::OnDensityStatsSizeSldr(wxScrollEvent &event)
+void ComponentDlg::OnDensityStatsSizeSldr(wxScrollEvent& event)
 {
 	int val = m_density_stats_size_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
@@ -1724,7 +1724,7 @@ void ComponentDlg::OnDensityStatsSizeSldr(wxScrollEvent &event)
 		m_density_stats_size_text->SetValue(str);
 }
 
-void ComponentDlg::OnDensityStatsSizeText(wxCommandEvent &event)
+void ComponentDlg::OnDensityStatsSizeText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_density_stats_size_text->GetValue().ToLong(&val);
@@ -1738,7 +1738,7 @@ void ComponentDlg::OnDensityStatsSizeText(wxCommandEvent &event)
 	}
 }
 
-void ComponentDlg::OnFixateCheck(wxCommandEvent &event)
+void ComponentDlg::OnFixateCheck(wxCommandEvent& event)
 {
 	bool bval = m_fixate_check->GetValue();
 	glbin_comp_generator.SetFixate(bval);
@@ -1758,7 +1758,7 @@ void ComponentDlg::OnFixateCheck(wxCommandEvent &event)
 		FluoUpdate({ gstFixateEnable });
 }
 
-void ComponentDlg::OnGrowFixedCheck(wxCommandEvent &event)
+void ComponentDlg::OnGrowFixedCheck(wxCommandEvent& event)
 {
 	bool bval = m_grow_fixed_check->GetValue();
 	glbin_comp_generator.SetGrowFixed(bval);
@@ -1773,7 +1773,7 @@ void ComponentDlg::OnGrowFixedCheck(wxCommandEvent &event)
 	}
 }
 
-void ComponentDlg::OnFixUpdateBtn(wxCommandEvent &event)
+void ComponentDlg::OnFixUpdateBtn(wxCommandEvent& event)
 {
 	glbin_comp_generator.Fixate();
 
@@ -1787,7 +1787,7 @@ void ComponentDlg::OnFixUpdateBtn(wxCommandEvent &event)
 	}
 }
 
-void ComponentDlg::OnFixSizeSldr(wxScrollEvent &event)
+void ComponentDlg::OnFixSizeSldr(wxScrollEvent& event)
 {
 	int val = m_fix_size_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
@@ -1795,7 +1795,7 @@ void ComponentDlg::OnFixSizeSldr(wxScrollEvent &event)
 		m_fix_size_text->SetValue(str);
 }
 
-void ComponentDlg::OnFixSizeText(wxCommandEvent &event)
+void ComponentDlg::OnFixSizeText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_fix_size_text->GetValue().ToLong(&val);
@@ -1809,7 +1809,7 @@ void ComponentDlg::OnFixSizeText(wxCommandEvent &event)
 	FluoRefresh(2, { gstRecordCmd });
 }
 
-void ComponentDlg::OnCleanCheck(wxCommandEvent &event)
+void ComponentDlg::OnCleanCheck(wxCommandEvent& event)
 {
 	bool bval = m_clean_check->GetValue();
 	glbin_comp_generator.SetClean(bval);
@@ -1827,7 +1827,7 @@ void ComponentDlg::OnCleanBtn(wxCommandEvent& event)
 	FluoRefresh(3, { gstNull });
 }
 
-void ComponentDlg::OnCleanIterSldr(wxScrollEvent &event)
+void ComponentDlg::OnCleanIterSldr(wxScrollEvent& event)
 {
 	int val = m_clean_iter_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
@@ -1835,7 +1835,7 @@ void ComponentDlg::OnCleanIterSldr(wxScrollEvent &event)
 		m_clean_iter_text->SetValue(str);
 }
 
-void ComponentDlg::OnCleanIterText(wxCommandEvent &event)
+void ComponentDlg::OnCleanIterText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_clean_iter_text->GetValue().ToLong(&val);
@@ -1849,7 +1849,7 @@ void ComponentDlg::OnCleanIterText(wxCommandEvent &event)
 	}
 }
 
-void ComponentDlg::OnCleanLimitSldr(wxScrollEvent &event)
+void ComponentDlg::OnCleanLimitSldr(wxScrollEvent& event)
 {
 	int val = m_clean_limit_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
@@ -1857,7 +1857,7 @@ void ComponentDlg::OnCleanLimitSldr(wxScrollEvent &event)
 		m_clean_limit_text->SetValue(str);
 }
 
-void ComponentDlg::OnCleanLimitText(wxCommandEvent &event)
+void ComponentDlg::OnCleanLimitText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_clean_limit_text->GetValue().ToLong(&val);
@@ -1872,23 +1872,23 @@ void ComponentDlg::OnCleanLimitText(wxCommandEvent &event)
 }
 
 //record
-void ComponentDlg::OnRecordCmd(wxCommandEvent &event)
+void ComponentDlg::OnRecordCmd(wxCommandEvent& event)
 {
 	bool val = m_record_cmd_btn->GetValue();
 	glbin_comp_generator.SetRecordCmd(val);
 }
 
-void ComponentDlg::OnPlayCmd(wxCommandEvent &event)
+void ComponentDlg::OnPlayCmd(wxCommandEvent& event)
 {
 	glbin_comp_generator.PlayCmd(1.0);
 }
 
-void ComponentDlg::OnResetCmd(wxCommandEvent &event)
+void ComponentDlg::OnResetCmd(wxCommandEvent& event)
 {
 	glbin_comp_generator.ResetCmd();
 }
 
-void ComponentDlg::OnLoadCmd(wxCommandEvent &event)
+void ComponentDlg::OnLoadCmd(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Choose a FluoRender component generator macro command",
@@ -1905,7 +1905,7 @@ void ComponentDlg::OnLoadCmd(wxCommandEvent &event)
 	glbin_comp_generator.LoadCmd(filename);
 }
 
-void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
+void ComponentDlg::OnSaveCmd(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Save a FluoRender component generator macro command",
@@ -1923,7 +1923,7 @@ void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
 }
 
 //clustering page
-void ComponentDlg::OnClusterMethodCheck(wxCommandEvent &event)
+void ComponentDlg::OnClusterMethodCheck(wxCommandEvent& event)
 {
 	int id = event.GetId();
 	glbin_clusterizer.SetMethod(id);
@@ -1931,7 +1931,7 @@ void ComponentDlg::OnClusterMethodCheck(wxCommandEvent &event)
 }
 
 //parameters
-void ComponentDlg::OnClusterClnumSldr(wxScrollEvent &event)
+void ComponentDlg::OnClusterClnumSldr(wxScrollEvent& event)
 {
 	int val = m_cluster_clnum_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
@@ -1939,7 +1939,7 @@ void ComponentDlg::OnClusterClnumSldr(wxScrollEvent &event)
 		m_cluster_clnum_text->SetValue(str);
 }
 
-void ComponentDlg::OnClusterClnumText(wxCommandEvent &event)
+void ComponentDlg::OnClusterClnumText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_cluster_clnum_text->GetValue().ToLong(&val);
@@ -1947,7 +1947,7 @@ void ComponentDlg::OnClusterClnumText(wxCommandEvent &event)
 	glbin_clusterizer.SetNum(val);
 }
 
-void ComponentDlg::OnClusterMaxiterSldr(wxScrollEvent &event)
+void ComponentDlg::OnClusterMaxiterSldr(wxScrollEvent& event)
 {
 	int val = m_cluster_maxiter_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
@@ -1955,7 +1955,7 @@ void ComponentDlg::OnClusterMaxiterSldr(wxScrollEvent &event)
 		m_cluster_maxiter_text->SetValue(str);
 }
 
-void ComponentDlg::OnClusterMaxiterText(wxCommandEvent &event)
+void ComponentDlg::OnClusterMaxiterText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_cluster_maxiter_text->GetValue().ToLong(&val);
@@ -1963,7 +1963,7 @@ void ComponentDlg::OnClusterMaxiterText(wxCommandEvent &event)
 	glbin_clusterizer.SetMaxIter(val);
 }
 
-void ComponentDlg::OnClusterTolSldr(wxScrollEvent &event)
+void ComponentDlg::OnClusterTolSldr(wxScrollEvent& event)
 {
 	int val = m_cluster_tol_sldr->GetValue();
 	wxString str = wxString::Format("%.2f", double(val) / 100.0);
@@ -1971,7 +1971,7 @@ void ComponentDlg::OnClusterTolSldr(wxScrollEvent &event)
 		m_cluster_tol_text->SetValue(str);
 }
 
-void ComponentDlg::OnClusterTolText(wxCommandEvent &event)
+void ComponentDlg::OnClusterTolText(wxCommandEvent& event)
 {
 	double val = 0.9;
 	m_cluster_tol_text->GetValue().ToDouble(&val);
@@ -1979,7 +1979,7 @@ void ComponentDlg::OnClusterTolText(wxCommandEvent &event)
 	glbin_clusterizer.SetTol((float)val);
 }
 
-void ComponentDlg::OnClusterSizeSldr(wxScrollEvent &event)
+void ComponentDlg::OnClusterSizeSldr(wxScrollEvent& event)
 {
 	int val = m_cluster_size_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
@@ -1987,7 +1987,7 @@ void ComponentDlg::OnClusterSizeSldr(wxScrollEvent &event)
 		m_cluster_size_text->SetValue(str);
 }
 
-void ComponentDlg::OnClusterSizeText(wxCommandEvent &event)
+void ComponentDlg::OnClusterSizeText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_cluster_size_text->GetValue().ToLong(&val);
@@ -1995,7 +1995,7 @@ void ComponentDlg::OnClusterSizeText(wxCommandEvent &event)
 	glbin_clusterizer.SetSize(val);
 }
 
-void ComponentDlg::OnClusterEpsSldr(wxScrollEvent &event)
+void ComponentDlg::OnClusterEpsSldr(wxScrollEvent& event)
 {
 	double val = m_cluster_eps_sldr->GetValue() / 10.0;
 	wxString str = wxString::Format("%.1f", val);
@@ -2003,7 +2003,7 @@ void ComponentDlg::OnClusterEpsSldr(wxScrollEvent &event)
 		m_cluster_eps_text->SetValue(str);
 }
 
-void ComponentDlg::OnClusterepsText(wxCommandEvent &event)
+void ComponentDlg::OnClusterepsText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_cluster_eps_text->GetValue().ToDouble(&val);
@@ -2012,7 +2012,7 @@ void ComponentDlg::OnClusterepsText(wxCommandEvent &event)
 }
 
 //analysis page
-void ComponentDlg::OnCompIdText(wxCommandEvent &event)
+void ComponentDlg::OnCompIdText(wxCommandEvent& event)
 {
 	unsigned long id;
 	wxString str = m_comp_id_text->GetValue();
@@ -2024,13 +2024,13 @@ void ComponentDlg::OnCompIdText(wxCommandEvent &event)
 	FluoUpdate({ gstCompIdColor });
 }
 
-void ComponentDlg::OnCompIdXBtn(wxCommandEvent &event)
+void ComponentDlg::OnCompIdXBtn(wxCommandEvent& event)
 {
 	m_comp_id_text->Clear();
 	FluoUpdate({ gstCompIdColor });
 }
 
-void ComponentDlg::OnAnalysisMinCheck(wxCommandEvent &event)
+void ComponentDlg::OnAnalysisMinCheck(wxCommandEvent& event)
 {
 	bool bval = m_analysis_min_check->GetValue();
 	m_analysis_min_spin->Enable(bval);
@@ -2038,19 +2038,19 @@ void ComponentDlg::OnAnalysisMinCheck(wxCommandEvent &event)
 	FluoUpdate({ gstUseMin });
 }
 
-void ComponentDlg::OnAnalysisMinSpin(wxSpinEvent &event)
+void ComponentDlg::OnAnalysisMinSpin(wxSpinEvent& event)
 {
 	int val = m_analysis_min_spin->GetValue();
 	glbin_comp_selector.SetMinNum(val);
 }
 
-void ComponentDlg::OnAnalysisMinText(wxCommandEvent &event)
+void ComponentDlg::OnAnalysisMinText(wxCommandEvent& event)
 {
 	int val = m_analysis_min_spin->GetValue();
 	glbin_comp_selector.SetMinNum(val);
 }
 
-void ComponentDlg::OnAnalysisMaxCheck(wxCommandEvent &event)
+void ComponentDlg::OnAnalysisMaxCheck(wxCommandEvent& event)
 {
 	bool bval = m_analysis_max_check->GetValue();
 	m_analysis_max_spin->Enable(bval);
@@ -2058,25 +2058,25 @@ void ComponentDlg::OnAnalysisMaxCheck(wxCommandEvent &event)
 	FluoUpdate({ gstUseMax });
 }
 
-void ComponentDlg::OnAnalysisMaxSpin(wxSpinEvent &event)
+void ComponentDlg::OnAnalysisMaxSpin(wxSpinEvent& event)
 {
 	int val = m_analysis_max_spin->GetValue();
 	glbin_comp_selector.SetMaxNum(val);
 }
 
-void ComponentDlg::OnAnalysisMaxText(wxCommandEvent &event)
+void ComponentDlg::OnAnalysisMaxText(wxCommandEvent& event)
 {
 	int val = m_analysis_max_spin->GetValue();
 	glbin_comp_selector.SetMaxNum(val);
 }
 
-void ComponentDlg::OnCompFull(wxCommandEvent &event)
+void ComponentDlg::OnCompFull(wxCommandEvent& event)
 {
 	glbin_comp_selector.SelectFullComp();
 	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo });
 }
 
-void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
+void ComponentDlg::OnCompExclusive(wxCommandEvent& event)
 {
 	glbin_comp_selector.Exclusive();
 	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo });
@@ -2096,7 +2096,7 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 	//}
 }
 
-void ComponentDlg::OnCompAppend(wxCommandEvent &event)
+void ComponentDlg::OnCompAppend(wxCommandEvent& event)
 {
 	bool get_all = glbin_comp_selector.GetIdEmpty();
 	glbin_comp_selector.Select(get_all);
@@ -2116,7 +2116,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	//}
 }
 
-void ComponentDlg::OnCompAll(wxCommandEvent &event)
+void ComponentDlg::OnCompAll(wxCommandEvent& event)
 {
 	glbin_comp_selector.All();
 	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo });
@@ -2136,13 +2136,13 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 	//}
 }
 
-void ComponentDlg::OnCompClear(wxCommandEvent &event)
+void ComponentDlg::OnCompClear(wxCommandEvent& event)
 {
 	glbin_comp_selector.Clear();
 	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo });
 }
 
-void ComponentDlg::OnShuffle(wxCommandEvent &event)
+void ComponentDlg::OnShuffle(wxCommandEvent& event)
 {
 	//get current vd
 	VolumeData* vd = glbin_current.vol_data;
@@ -2183,7 +2183,7 @@ void ComponentDlg::OnCompCombine(wxCommandEvent& event)
 	FluoRefresh(3, { gstNull });
 }
 
-void ComponentDlg::OnConSizeSldr(wxScrollEvent &event)
+void ComponentDlg::OnConSizeSldr(wxScrollEvent& event)
 {
 	int val = m_con_size_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
@@ -2191,7 +2191,7 @@ void ComponentDlg::OnConSizeSldr(wxScrollEvent &event)
 		m_con_size_text->SetValue(str);
 }
 
-void ComponentDlg::OnConSizeText(wxCommandEvent &event)
+void ComponentDlg::OnConSizeText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_con_size_text->GetValue().ToLong(&val);
@@ -2199,20 +2199,20 @@ void ComponentDlg::OnConSizeText(wxCommandEvent &event)
 	glbin_comp_analyzer.SetSizeLimit(val);
 }
 
-void ComponentDlg::OnConsistentCheck(wxCommandEvent &event)
+void ComponentDlg::OnConsistentCheck(wxCommandEvent& event)
 {
 	bool bval = m_consistent_check->GetValue();
 	glbin_comp_analyzer.SetConsistent(bval);
 }
 
-void ComponentDlg::OnColocalCheck(wxCommandEvent &event)
+void ComponentDlg::OnColocalCheck(wxCommandEvent& event)
 {
 	bool bval = m_colocal_check->GetValue();
 	glbin_comp_analyzer.SetColocal(bval);
 }
 
 //output
-void ComponentDlg::OnOutputTypeRadio(wxCommandEvent &event)
+void ComponentDlg::OnOutputTypeRadio(wxCommandEvent& event)
 {
 	int id = event.GetId();
 	switch (id)
@@ -2240,7 +2240,7 @@ void ComponentDlg::OnOutputChannels(wxCommandEvent& event)
 	FluoRefresh(0, { gstListCtrl, gstTreeCtrl });
 }
 
-void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
+void ComponentDlg::OnOutputAnnotation(wxCommandEvent& event)
 {
 	int id = event.GetId();
 	int val;
@@ -2255,20 +2255,20 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 }
 
 //distance
-void ComponentDlg::OnDistNeighborCheck(wxCommandEvent &event)
+void ComponentDlg::OnDistNeighborCheck(wxCommandEvent& event)
 {
 	bool bval = m_dist_neighbor_check->GetValue();
 	glbin_comp_analyzer.SetUseDistNeighbor(bval);
 	FluoUpdate({ gstDistNeighbor });
 }
 
-void ComponentDlg::OnDistAllChanCheck(wxCommandEvent &event)
+void ComponentDlg::OnDistAllChanCheck(wxCommandEvent& event)
 {
 	bool bval = m_dist_all_chan_check->GetValue();
 	glbin_comp_analyzer.SetUseDistAllchan(bval);
 }
 
-void ComponentDlg::OnDistNeighborSldr(wxScrollEvent &event)
+void ComponentDlg::OnDistNeighborSldr(wxScrollEvent& event)
 {
 	int val = m_dist_neighbor_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
@@ -2276,7 +2276,7 @@ void ComponentDlg::OnDistNeighborSldr(wxScrollEvent &event)
 		m_dist_neighbor_text->SetValue(str);
 }
 
-void ComponentDlg::OnDistNeighborText(wxCommandEvent &event)
+void ComponentDlg::OnDistNeighborText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_dist_neighbor_text->GetValue().ToLong(&val);
@@ -2284,7 +2284,7 @@ void ComponentDlg::OnDistNeighborText(wxCommandEvent &event)
 	glbin_comp_analyzer.SetDistNeighborNum(val);
 }
 
-void ComponentDlg::OnDistOutput(wxCommandEvent &event)
+void ComponentDlg::OnDistOutput(wxCommandEvent& event)
 {
 	OutputDistance();
 }
@@ -2307,25 +2307,25 @@ void ComponentDlg::OnNotebook(wxBookCtrlEvent &event)
 	FluoUpdate({ gstCompPage });
 }
 
-void ComponentDlg::OnUseSelChk(wxCommandEvent &event)
+void ComponentDlg::OnUseSelChk(wxCommandEvent& event)
 {
 	bool bval = m_use_sel_chk->GetValue();
 	glbin_comp_generator.SetUseSel(bval);
 }
 
-void ComponentDlg::OnUseMlChk(wxCommandEvent &event)
+void ComponentDlg::OnUseMlChk(wxCommandEvent& event)
 {
 	bool bval = m_use_ml_chk->GetValue();
 	glbin_comp_generator.SetUseMl(bval);
 }
 
-void ComponentDlg::OnGenerate(wxCommandEvent &event)
+void ComponentDlg::OnGenerate(wxCommandEvent& event)
 {
 	glbin_comp_generator.Compute();
 	FluoRefresh(3, { gstNull });
 }
 
-void ComponentDlg::OnAutoUpdate(wxCommandEvent &event)
+void ComponentDlg::OnAutoUpdate(wxCommandEvent& event)
 {
 	bool bval = m_auto_update_btn->GetValue();
 	glbin_comp_def.m_auto_update = bval;
@@ -2336,28 +2336,28 @@ void ComponentDlg::OnAutoUpdate(wxCommandEvent &event)
 	}
 }
 
-void ComponentDlg::OnCluster(wxCommandEvent &event)
+void ComponentDlg::OnCluster(wxCommandEvent& event)
 {
 	glbin_clusterizer.Compute();
 	FluoRefresh(3, { gstNull });
 }
 
-void ComponentDlg::OnAnalyze(wxCommandEvent &event)
+void ComponentDlg::OnAnalyze(wxCommandEvent& event)
 {
 	glbin_comp_analyzer.Analyze(false);
 }
 
-void ComponentDlg::OnAnalyzeSel(wxCommandEvent &event)
+void ComponentDlg::OnAnalyzeSel(wxCommandEvent& event)
 {
 	glbin_comp_analyzer.Analyze(true);
 }
 
-void ComponentDlg::OnIncludeBtn(wxCommandEvent &event)
+void ComponentDlg::OnIncludeBtn(wxCommandEvent& event)
 {
 	IncludeComps();
 }
 
-void ComponentDlg::OnExcludeBtn(wxCommandEvent &event)
+void ComponentDlg::OnExcludeBtn(wxCommandEvent& event)
 {
 	ExcludeComps();
 }

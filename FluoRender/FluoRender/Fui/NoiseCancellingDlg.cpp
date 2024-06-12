@@ -200,7 +200,7 @@ void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
 }
 
 //threshold
-void NoiseCancellingDlg::OnThresholdChange(wxScrollEvent &event)
+void NoiseCancellingDlg::OnThresholdChange(wxScrollEvent& event)
 {
 	int ival = m_threshold_sldr->GetValue();
 	wxString str = wxString::Format("%.1f", double (ival)/10.0);
@@ -208,7 +208,7 @@ void NoiseCancellingDlg::OnThresholdChange(wxScrollEvent &event)
 		m_threshold_text->SetValue(str);
 }
 
-void NoiseCancellingDlg::OnThresholdText(wxCommandEvent &event)
+void NoiseCancellingDlg::OnThresholdText(wxCommandEvent& event)
 {
 	wxString str = m_threshold_text->GetValue();
 	double val;
@@ -226,7 +226,7 @@ void NoiseCancellingDlg::OnThresholdText(wxCommandEvent &event)
 }
 
 //voxel size
-void NoiseCancellingDlg::OnVoxelChange(wxScrollEvent &event)
+void NoiseCancellingDlg::OnVoxelChange(wxScrollEvent& event)
 {
 	int ival = m_voxel_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
@@ -234,7 +234,7 @@ void NoiseCancellingDlg::OnVoxelChange(wxScrollEvent &event)
 		m_voxel_text->SetValue(str);
 }
 
-void NoiseCancellingDlg::OnVoxelText(wxCommandEvent &event)
+void NoiseCancellingDlg::OnVoxelText(wxCommandEvent& event)
 {
 	wxString str = m_voxel_text->GetValue();
 	long ival;
@@ -243,7 +243,7 @@ void NoiseCancellingDlg::OnVoxelText(wxCommandEvent &event)
 	m_voxel_sldr->ChangeValue(ival);
 }
 
-void NoiseCancellingDlg::OnPreviewBtn(wxCommandEvent &event)
+void NoiseCancellingDlg::OnPreviewBtn(wxCommandEvent& event)
 {
 	bool select = m_ca_select_only_chk->GetValue();
 	Preview(select, m_dft_size, m_dft_thresh);
@@ -251,13 +251,13 @@ void NoiseCancellingDlg::OnPreviewBtn(wxCommandEvent &event)
 	OnEnhanceSelChk(event);
 }
 
-void NoiseCancellingDlg::OnEraseBtn(wxCommandEvent &event)
+void NoiseCancellingDlg::OnEraseBtn(wxCommandEvent& event)
 {
 	glbin_vol_selector.Erase();
 	//FluoRefresh(3, { gstNull });
 }
 
-void NoiseCancellingDlg::OnEnhanceSelChk(wxCommandEvent &event)
+void NoiseCancellingDlg::OnEnhanceSelChk(wxCommandEvent& event)
 {
 	if (!m_previewed)
 		return;

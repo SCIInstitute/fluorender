@@ -683,6 +683,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstVolMeshDownXY "vol mesh down xy"
 #define gstVolMeshDownZ "vol mesh down z"
 #define gstVolMeshWeld "vol mesh weld"
+#define gstVolMeshInfo "vol mesh info"
 //counting agent
 //measure agent
 #define gstRulerEdited "ruler edited"

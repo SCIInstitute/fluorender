@@ -111,8 +111,8 @@ private:
 	void OnSaveAsBtn(wxCommandEvent& event);
 	void OnExecuteBtn(wxCommandEvent& event);
 	void OnExecuteNBtn(wxCommandEvent& event);
-	void OnIterationsChange(wxScrollEvent &event);
-	void OnIterationsEdit(wxCommandEvent &event);
+	void OnIterationsChange(wxScrollEvent& event);
+	void OnIterationsEdit(wxCommandEvent& event);
 	void OnKernelListSelected(wxListEvent& event);
 
 	DECLARE_EVENT_TABLE()

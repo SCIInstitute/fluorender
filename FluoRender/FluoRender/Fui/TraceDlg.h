@@ -338,9 +338,9 @@ private:
 	void OnSaveTrace(wxCommandEvent& event);
 	void OnSaveasTrace(wxCommandEvent& event);
 	//auto tracking
-	void OnGenMapBtn(wxCommandEvent &event);
-	void OnRefineTBtn(wxCommandEvent &event);
-	void OnRefineAllBtn(wxCommandEvent &event);
+	void OnGenMapBtn(wxCommandEvent& event);
+	void OnRefineTBtn(wxCommandEvent& event);
+	void OnRefineAllBtn(wxCommandEvent& event);
 	//settings
 	void OnMapIterSpin(wxSpinEvent& event);
 	void OnMapIterText(wxCommandEvent& event);
@@ -355,20 +355,20 @@ private:
 	void OnMapContactText(wxCommandEvent& event);
 	//selection page
 	//component tools
-	void OnCompIDText(wxCommandEvent &event);
-	void OnCompIDXBtn(wxCommandEvent &event);
-	void OnCompFull(wxCommandEvent &event);
-	void OnCompExclusive(wxCommandEvent &event);
-	void OnCompAppend(wxCommandEvent &event);
-	void OnCompClear(wxCommandEvent &event);
-	void OnShuffle(wxCommandEvent &event);
+	void OnCompIDText(wxCommandEvent& event);
+	void OnCompIDXBtn(wxCommandEvent& event);
+	void OnCompFull(wxCommandEvent& event);
+	void OnCompExclusive(wxCommandEvent& event);
+	void OnCompAppend(wxCommandEvent& event);
+	void OnCompClear(wxCommandEvent& event);
+	void OnShuffle(wxCommandEvent& event);
 	//cell size filter
-	void OnCellSizeChange(wxScrollEvent &event);
-	void OnCellSizeText(wxCommandEvent &event);
+	void OnCellSizeChange(wxScrollEvent& event);
+	void OnCellSizeText(wxCommandEvent& event);
 	//uncertainty filter
-	void OnCompUncertainBtn(wxCommandEvent &event);
-	void OnCompUncertainLowChange(wxScrollEvent &event);
-	void OnCompUncertainLowText(wxCommandEvent &event);
+	void OnCompUncertainBtn(wxCommandEvent& event);
+	void OnCompUncertainLowChange(wxScrollEvent& event);
+	void OnCompUncertainLowText(wxCommandEvent& event);
 	//link page
 	//ID lnik controls
 	void OnCellExclusiveLink(wxCommandEvent& event);
@@ -378,7 +378,7 @@ private:
 	void OnCellUnlink(wxCommandEvent& event);
 	//modify page
 	//ID edit controls
-	void OnCellNewIDText(wxCommandEvent &event);
+	void OnCellNewIDText(wxCommandEvent& event);
 	void OnCellNewIDX(wxCommandEvent& event);
 	void OnCellNewID(wxCommandEvent& event);
 	void OnCellAppendID(wxCommandEvent& event);
@@ -390,19 +390,19 @@ private:
 	void OnCellSegText(wxCommandEvent& event);
 	//analysis page
 	//conversion
-	void OnConvertToRulers(wxCommandEvent &event);
-	void OnConvertConsistent(wxCommandEvent &event);
+	void OnConvertToRulers(wxCommandEvent& event);
+	void OnConvertConsistent(wxCommandEvent& event);
 	//analysis
-	void OnAnalyzeComp(wxCommandEvent &event);
-	void OnAnalyzeLink(wxCommandEvent &event);
-	void OnAnalyzeUncertainHist(wxCommandEvent &event);
-	void OnAnalyzePath(wxCommandEvent &event);
-	void OnSaveResult(wxCommandEvent &event);
+	void OnAnalyzeComp(wxCommandEvent& event);
+	void OnAnalyzeLink(wxCommandEvent& event);
+	void OnAnalyzeUncertainHist(wxCommandEvent& event);
+	void OnAnalyzePath(wxCommandEvent& event);
+	void OnSaveResult(wxCommandEvent& event);
 	//ghost number
-	void OnGhostNumChange(wxScrollEvent &event);
-	void OnGhostNumText(wxCommandEvent &event);
-	void OnGhostShowTail(wxCommandEvent &event);
-	void OnGhostShowLead(wxCommandEvent &event);
+	void OnGhostNumChange(wxScrollEvent& event);
+	void OnGhostNumText(wxCommandEvent& event);
+	void OnGhostShowTail(wxCommandEvent& event);
+	void OnGhostShowLead(wxCommandEvent& event);
 	//time controls
 	void OnCellPrev(wxCommandEvent& event);
 	void OnCellNext(wxCommandEvent& event);

@@ -161,36 +161,36 @@ private:
 	void OnGHdrMF(wxCommandEvent& event);
 	void OnBHdrMF(wxCommandEvent& event);
 	//gamma
-	void OnRGammaChange(wxScrollEvent &event);
-	void OnRGammaText(wxCommandEvent &event);
-	void OnGGammaChange(wxScrollEvent &event);
-	void OnGGammaText(wxCommandEvent &event);
-	void OnBGammaChange(wxScrollEvent &event);
-	void OnBGammaText(wxCommandEvent &event);
+	void OnRGammaChange(wxScrollEvent& event);
+	void OnRGammaText(wxCommandEvent& event);
+	void OnGGammaChange(wxScrollEvent& event);
+	void OnGGammaText(wxCommandEvent& event);
+	void OnBGammaChange(wxScrollEvent& event);
+	void OnBGammaText(wxCommandEvent& event);
 	//brightness
-	void OnRBrightnessChange(wxScrollEvent &event);
-	void OnRBrightnessText(wxCommandEvent &event);
-	void OnGBrightnessChange(wxScrollEvent &event);
-	void OnGBrightnessText(wxCommandEvent &event);
-	void OnBBrightnessChange(wxScrollEvent &event);
-	void OnBBrightnessText(wxCommandEvent &event);
+	void OnRBrightnessChange(wxScrollEvent& event);
+	void OnRBrightnessText(wxCommandEvent& event);
+	void OnGBrightnessChange(wxScrollEvent& event);
+	void OnGBrightnessText(wxCommandEvent& event);
+	void OnBBrightnessChange(wxScrollEvent& event);
+	void OnBBrightnessText(wxCommandEvent& event);
 	//hdr
-	void OnRHdrChange(wxScrollEvent &event);
-	void OnRHdrText(wxCommandEvent &event);
-	void OnGHdrChange(wxScrollEvent &event);
-	void OnGHdrText(wxCommandEvent &event);
-	void OnBHdrChange(wxScrollEvent &event);
-	void OnBHdrText(wxCommandEvent &event);
+	void OnRHdrChange(wxScrollEvent& event);
+	void OnRHdrText(wxCommandEvent& event);
+	void OnGHdrChange(wxScrollEvent& event);
+	void OnGHdrText(wxCommandEvent& event);
+	void OnBHdrChange(wxScrollEvent& event);
+	void OnBHdrText(wxCommandEvent& event);
 	//reset
-	void OnRReset(wxCommandEvent &event);
-	void OnGReset(wxCommandEvent &event);
-	void OnBReset(wxCommandEvent &event);
+	void OnRReset(wxCommandEvent& event);
+	void OnGReset(wxCommandEvent& event);
+	void OnBReset(wxCommandEvent& event);
 	//sync check
-	void OnSyncRCheck(wxCommandEvent &event);
-	void OnSyncGCheck(wxCommandEvent &event);
-	void OnSyncBCheck(wxCommandEvent &event);
+	void OnSyncRCheck(wxCommandEvent& event);
+	void OnSyncGCheck(wxCommandEvent& event);
+	void OnSyncBCheck(wxCommandEvent& event);
 	//set default
-	void OnSaveDefault(wxCommandEvent &event);
+	void OnSaveDefault(wxCommandEvent& event);
 
 	void SyncColor(fluo::Color& c, double val);
 	void SyncGamma(fluo::Color& c, int i, double val, fluo::ValueCollection& vc, bool notify);

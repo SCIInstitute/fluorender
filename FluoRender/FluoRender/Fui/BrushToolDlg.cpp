@@ -762,7 +762,7 @@ void BrushToolDlg::OnMaskToolBar(wxCommandEvent& event)
 
 //selection adjustment
 //scalar translate
-void BrushToolDlg::OnBrushSclTranslateChange(wxScrollEvent &event)
+void BrushToolDlg::OnBrushSclTranslateChange(wxScrollEvent& event)
 {
 	int ival = m_brush_scl_translate_sldr->GetValue();
 	double val = double(ival)/10.0;
@@ -771,7 +771,7 @@ void BrushToolDlg::OnBrushSclTranslateChange(wxScrollEvent &event)
 		m_brush_scl_translate_text->SetValue(str);
 }
 
-void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent &event)
+void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent& event)
 {
 	wxString str = m_brush_scl_translate_text->GetValue();
 	double val;
@@ -789,7 +789,7 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent &event)
 }
 
 //gm falloff
-void BrushToolDlg::OnBrushGmFalloffChange(wxScrollEvent &event)
+void BrushToolDlg::OnBrushGmFalloffChange(wxScrollEvent& event)
 {
 	int ival = m_brush_gm_falloff_sldr->GetValue();
 	double val = double(ival) / 1000.0;
@@ -798,7 +798,7 @@ void BrushToolDlg::OnBrushGmFalloffChange(wxScrollEvent &event)
 		m_brush_gm_falloff_text->SetValue(str);
 }
 
-void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent &event)
+void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent& event)
 {
 	wxString str = m_brush_gm_falloff_text->GetValue();
 	double val;
@@ -816,7 +816,7 @@ void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent &event)
 }
 
 //2d influence
-void BrushToolDlg::OnBrush2dinflChange(wxScrollEvent &event)
+void BrushToolDlg::OnBrush2dinflChange(wxScrollEvent& event)
 {
 	int ival = m_brush_2dinfl_sldr->GetValue();
 	double val = double(ival)/100.0;
@@ -825,7 +825,7 @@ void BrushToolDlg::OnBrush2dinflChange(wxScrollEvent &event)
 		m_brush_2dinfl_text->SetValue(str);
 }
 
-void BrushToolDlg::OnBrush2dinflText(wxCommandEvent &event)
+void BrushToolDlg::OnBrush2dinflText(wxCommandEvent& event)
 {
 	wxString str = m_brush_2dinfl_text->GetValue();
 	double val;
@@ -843,7 +843,7 @@ void BrushToolDlg::OnBrush2dinflText(wxCommandEvent &event)
 }
 
 //edge detect
-void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent &event)
+void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent& event)
 {
 	bool edge_detect = m_edge_detect_chk->GetValue();
 
@@ -869,7 +869,7 @@ void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent &event)
 }
 
 //hidden removal
-void BrushToolDlg::OnBrushHiddenRemovalChk(wxCommandEvent &event)
+void BrushToolDlg::OnBrushHiddenRemovalChk(wxCommandEvent& event)
 {
 	bool hidden_removal = m_hidden_removal_chk->GetValue();
 
@@ -878,7 +878,7 @@ void BrushToolDlg::OnBrushHiddenRemovalChk(wxCommandEvent &event)
 }
 
 //select group
-void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent &event)
+void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent& event)
 {
 	bool select_group = m_select_group_chk->GetValue();
 
@@ -893,7 +893,7 @@ void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent &event)
 }
 
 //estimate threshold
-void BrushToolDlg::OnEstimateThreshChk(wxCommandEvent &event)
+void BrushToolDlg::OnEstimateThreshChk(wxCommandEvent& event)
 {
 	bool value = m_estimate_thresh_chk->GetValue();
 
@@ -901,7 +901,7 @@ void BrushToolDlg::OnEstimateThreshChk(wxCommandEvent &event)
 }
 
 //brick accuracy
-void BrushToolDlg::OnAccurateBricksCheck(wxCommandEvent &event)
+void BrushToolDlg::OnAccurateBricksCheck(wxCommandEvent& event)
 {
 	bool value = m_accurate_bricks_chk->GetValue();
 
@@ -909,7 +909,7 @@ void BrushToolDlg::OnAccurateBricksCheck(wxCommandEvent &event)
 }
 
 //brush size 1
-void BrushToolDlg::OnBrushSize1Change(wxScrollEvent &event)
+void BrushToolDlg::OnBrushSize1Change(wxScrollEvent& event)
 {
 	int ival = m_brush_size1_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
@@ -917,7 +917,7 @@ void BrushToolDlg::OnBrushSize1Change(wxScrollEvent &event)
 		m_brush_size1_text->SetValue(str);
 }
 
-void BrushToolDlg::OnBrushSize1Text(wxCommandEvent &event)
+void BrushToolDlg::OnBrushSize1Text(wxCommandEvent& event)
 {
 	wxString str = m_brush_size1_text->GetValue();
 	double val;
@@ -930,7 +930,7 @@ void BrushToolDlg::OnBrushSize1Text(wxCommandEvent &event)
 }
 
 //brush size 2
-void BrushToolDlg::OnBrushSize2Chk(wxCommandEvent &event)
+void BrushToolDlg::OnBrushSize2Chk(wxCommandEvent& event)
 {
 	wxString str = m_brush_size1_text->GetValue();
 	double val1;
@@ -947,7 +947,7 @@ void BrushToolDlg::OnBrushSize2Chk(wxCommandEvent &event)
 	FluoRefresh(3, { gstNull });
 }
 
-void BrushToolDlg::OnBrushSize2Change(wxScrollEvent &event)
+void BrushToolDlg::OnBrushSize2Change(wxScrollEvent& event)
 {
 	int ival = m_brush_size2_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
@@ -955,7 +955,7 @@ void BrushToolDlg::OnBrushSize2Change(wxScrollEvent &event)
 		m_brush_size2_text->SetValue(str);
 }
 
-void BrushToolDlg::OnBrushSize2Text(wxCommandEvent &event)
+void BrushToolDlg::OnBrushSize2Text(wxCommandEvent& event)
 {
 	wxString str = m_brush_size2_text->GetValue();
 	double val;

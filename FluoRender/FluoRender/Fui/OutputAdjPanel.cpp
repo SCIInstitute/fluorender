@@ -1057,7 +1057,7 @@ void OutputAdjPanel::OnBBrightnessText(wxCommandEvent& event)
 	SetBrightness(2, val, false);
 }
 
-void OutputAdjPanel::OnRHdrChange(wxScrollEvent &event)
+void OutputAdjPanel::OnRHdrChange(wxScrollEvent& event)
 {
 	double val = m_r_hdr_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
@@ -1065,7 +1065,7 @@ void OutputAdjPanel::OnRHdrChange(wxScrollEvent &event)
 	SetHdr(0, val, false);
 }
 
-void OutputAdjPanel::OnRHdrText(wxCommandEvent &event)
+void OutputAdjPanel::OnRHdrText(wxCommandEvent& event)
 {
 	wxString str = m_r_hdr_text->GetValue();
 	double val;
@@ -1074,7 +1074,7 @@ void OutputAdjPanel::OnRHdrText(wxCommandEvent &event)
 	SetHdr(0, val, false);
 }
 
-void OutputAdjPanel::OnGHdrChange(wxScrollEvent &event)
+void OutputAdjPanel::OnGHdrChange(wxScrollEvent& event)
 {
 	double val = m_g_hdr_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
@@ -1082,7 +1082,7 @@ void OutputAdjPanel::OnGHdrChange(wxScrollEvent &event)
 	SetHdr(1, val, false);
 }
 
-void OutputAdjPanel::OnGHdrText(wxCommandEvent &event)
+void OutputAdjPanel::OnGHdrText(wxCommandEvent& event)
 {
 	wxString str = m_g_hdr_text->GetValue();
 	double val;
@@ -1091,7 +1091,7 @@ void OutputAdjPanel::OnGHdrText(wxCommandEvent &event)
 	SetHdr(1, val, false);
 }
 
-void OutputAdjPanel::OnBHdrChange(wxScrollEvent &event)
+void OutputAdjPanel::OnBHdrChange(wxScrollEvent& event)
 {
 	double val = m_b_hdr_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
@@ -1099,7 +1099,7 @@ void OutputAdjPanel::OnBHdrChange(wxScrollEvent &event)
 	SetHdr(2, val, false);
 }
 
-void OutputAdjPanel::OnBHdrText(wxCommandEvent &event)
+void OutputAdjPanel::OnBHdrText(wxCommandEvent& event)
 {
 	wxString str = m_b_hdr_text->GetValue();
 	double val;
@@ -1108,25 +1108,25 @@ void OutputAdjPanel::OnBHdrText(wxCommandEvent &event)
 	SetHdr(2, val, false);
 }
 
-void OutputAdjPanel::OnSyncRCheck(wxCommandEvent &event)
+void OutputAdjPanel::OnSyncRCheck(wxCommandEvent& event)
 {
 	SetSync(0, m_sync_r_chk->GetToolState(0));
 	event.Skip();
 }
 
-void OutputAdjPanel::OnSyncGCheck(wxCommandEvent &event)
+void OutputAdjPanel::OnSyncGCheck(wxCommandEvent& event)
 {
 	SetSync(1, m_sync_g_chk->GetToolState(0));
 	event.Skip();
 }
 
-void OutputAdjPanel::OnSyncBCheck(wxCommandEvent &event)
+void OutputAdjPanel::OnSyncBCheck(wxCommandEvent& event)
 {
 	SetSync(2, m_sync_b_chk->GetToolState(0));
 	event.Skip();
 }
 
-void OutputAdjPanel::OnSaveDefault(wxCommandEvent &event)
+void OutputAdjPanel::OnSaveDefault(wxCommandEvent& event)
 {
 	switch (m_type)
 	{
@@ -1794,7 +1794,7 @@ void OutputAdjPanel::UpdateSync()
 
 }
 
-void OutputAdjPanel::OnRReset(wxCommandEvent &event)
+void OutputAdjPanel::OnRReset(wxCommandEvent& event)
 {
 	double dval;
 	dval = 1.0 / glbin_outadj_def.m_gamma_r;
@@ -1811,7 +1811,7 @@ void OutputAdjPanel::OnRReset(wxCommandEvent &event)
 	SetHdr(0, glbin_outadj_def.m_hdr_r, false);
 }
 
-void OutputAdjPanel::OnGReset(wxCommandEvent &event)
+void OutputAdjPanel::OnGReset(wxCommandEvent& event)
 {
 	double dval;
 	dval = 1.0 / glbin_outadj_def.m_gamma_g;
@@ -1828,7 +1828,7 @@ void OutputAdjPanel::OnGReset(wxCommandEvent &event)
 	SetHdr(1, glbin_outadj_def.m_hdr_g, false);
 }
 
-void OutputAdjPanel::OnBReset(wxCommandEvent &event)
+void OutputAdjPanel::OnBReset(wxCommandEvent& event)
 {
 	double dval;
 	dval = 1.0 / glbin_outadj_def.m_gamma_b;

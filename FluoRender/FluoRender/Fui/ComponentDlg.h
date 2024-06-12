@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _COMPONENTDLG_H_
 
 #include <PropPanel.h>
-#include <DataManager.h>
 #include <wx/wx.h>
 #include <wx/collpane.h>
 #include <wx/notebook.h>
@@ -39,7 +38,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clipbrd.h>
 #include <wx/splitter.h>
 
-class MainFrame;
 class wxSingleSlider;
 class ComponentDlg : public PropPanel
 {
@@ -287,8 +285,8 @@ private:
 	wxWindow* CreateAnalysisPage(wxWindow *parent);
 
 	//comp gen page
-	void OnIterSldr(wxScrollEvent &event);
-	void OnIterText(wxCommandEvent &event);
+	void OnIterSldr(wxScrollEvent& event);
+	void OnIterText(wxCommandEvent& event);
 	void OnThreshSldr(wxScrollEvent& event);
 	void OnThreshText(wxCommandEvent& event);
 	//diff
@@ -336,35 +334,35 @@ private:
 	void OnSaveCmd(wxCommandEvent& event);
 
 	//clustering page
-	void OnClusterMethodCheck(wxCommandEvent &event);
+	void OnClusterMethodCheck(wxCommandEvent& event);
 	//parameters
-	void OnClusterClnumSldr(wxScrollEvent &event);
-	void OnClusterClnumText(wxCommandEvent &event);
-	void OnClusterMaxiterSldr(wxScrollEvent &event);
-	void OnClusterMaxiterText(wxCommandEvent &event);
-	void OnClusterTolSldr(wxScrollEvent &event);
-	void OnClusterTolText(wxCommandEvent &event);
-	void OnClusterSizeSldr(wxScrollEvent &event);
-	void OnClusterSizeText(wxCommandEvent &event);
-	void OnClusterEpsSldr(wxScrollEvent &event);
-	void OnClusterepsText(wxCommandEvent &event);
+	void OnClusterClnumSldr(wxScrollEvent& event);
+	void OnClusterClnumText(wxCommandEvent& event);
+	void OnClusterMaxiterSldr(wxScrollEvent& event);
+	void OnClusterMaxiterText(wxCommandEvent& event);
+	void OnClusterTolSldr(wxScrollEvent& event);
+	void OnClusterTolText(wxCommandEvent& event);
+	void OnClusterSizeSldr(wxScrollEvent& event);
+	void OnClusterSizeText(wxCommandEvent& event);
+	void OnClusterEpsSldr(wxScrollEvent& event);
+	void OnClusterepsText(wxCommandEvent& event);
 
 	//analysis page
 	//id
-	void OnCompIdText(wxCommandEvent &event);
-	void OnCompIdXBtn(wxCommandEvent &event);
-	void OnAnalysisMinCheck(wxCommandEvent &event);
-	void OnAnalysisMinSpin(wxSpinEvent &event);
-	void OnAnalysisMinText(wxCommandEvent &event);
-	void OnAnalysisMaxCheck(wxCommandEvent &event);
-	void OnAnalysisMaxSpin(wxSpinEvent &event);
-	void OnAnalysisMaxText(wxCommandEvent &event);
+	void OnCompIdText(wxCommandEvent& event);
+	void OnCompIdXBtn(wxCommandEvent& event);
+	void OnAnalysisMinCheck(wxCommandEvent& event);
+	void OnAnalysisMinSpin(wxSpinEvent& event);
+	void OnAnalysisMinText(wxCommandEvent& event);
+	void OnAnalysisMaxCheck(wxCommandEvent& event);
+	void OnAnalysisMaxSpin(wxSpinEvent& event);
+	void OnAnalysisMaxText(wxCommandEvent& event);
 	//select
-	void OnCompAppend(wxCommandEvent &event);
-	void OnCompExclusive(wxCommandEvent &event);
-	void OnCompAll(wxCommandEvent &event);
-	void OnCompFull(wxCommandEvent &event);
-	void OnCompClear(wxCommandEvent &event);
+	void OnCompAppend(wxCommandEvent& event);
+	void OnCompExclusive(wxCommandEvent& event);
+	void OnCompAll(wxCommandEvent& event);
+	void OnCompFull(wxCommandEvent& event);
+	void OnCompClear(wxCommandEvent& event);
 	//modify
 	void OnCompNew(wxCommandEvent& event);
 	void OnCompAdd(wxCommandEvent& event);
@@ -372,20 +370,20 @@ private:
 	void OnCompCleanBkg(wxCommandEvent& event);
 	void OnCompCombine(wxCommandEvent& event);
 	//options
-	void OnConSizeSldr(wxScrollEvent &event);
-	void OnConSizeText(wxCommandEvent &event);
-	void OnConsistentCheck(wxCommandEvent &event);
-	void OnColocalCheck(wxCommandEvent &event);
+	void OnConSizeSldr(wxScrollEvent& event);
+	void OnConSizeText(wxCommandEvent& event);
+	void OnConsistentCheck(wxCommandEvent& event);
+	void OnColocalCheck(wxCommandEvent& event);
 	//output
-	void OnOutputTypeRadio(wxCommandEvent &event);
-	void OnOutputChannels(wxCommandEvent &event);
-	void OnOutputAnnotation(wxCommandEvent &event);
+	void OnOutputTypeRadio(wxCommandEvent& event);
+	void OnOutputChannels(wxCommandEvent& event);
+	void OnOutputAnnotation(wxCommandEvent& event);
 	//distance
-	void OnDistNeighborCheck(wxCommandEvent &event);
-	void OnDistAllChanCheck(wxCommandEvent &event);
-	void OnDistNeighborSldr(wxScrollEvent &event);
-	void OnDistNeighborText(wxCommandEvent &event);
-	void OnDistOutput(wxCommandEvent &event);
+	void OnDistNeighborCheck(wxCommandEvent& event);
+	void OnDistAllChanCheck(wxCommandEvent& event);
+	void OnDistNeighborSldr(wxScrollEvent& event);
+	void OnDistNeighborText(wxCommandEvent& event);
+	void OnDistOutput(wxCommandEvent& event);
 	//align
 	void OnAlignCenterChk(wxCommandEvent& event);
 	void OnAlignPca(wxCommandEvent& event);

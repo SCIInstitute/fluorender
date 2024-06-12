@@ -1697,21 +1697,21 @@ void RenderViewPanel::RefreshGL(bool interactive, bool start_loop)
 
 //bar top
 //ch1
-void RenderViewPanel::OnCh1Check(wxCommandEvent &event)
+void RenderViewPanel::OnCh1Check(wxCommandEvent& event)
 {
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
 	glbin_settings.m_save_compress = ch1->GetValue();
 }
 
 //save alpha
-void RenderViewPanel::OnChAlphaCheck(wxCommandEvent &event)
+void RenderViewPanel::OnChAlphaCheck(wxCommandEvent& event)
 {
 	wxCheckBox* ch_alpha = (wxCheckBox*)event.GetEventObject();
 	glbin_settings.m_save_alpha = ch_alpha->GetValue();
 }
 
 //save float
-void RenderViewPanel::OnChFloatCheck(wxCommandEvent &event)
+void RenderViewPanel::OnChFloatCheck(wxCommandEvent& event)
 {
 	wxCheckBox* ch_float = (wxCheckBox*)event.GetEventObject();
 	glbin_settings.m_save_float = ch_float->GetValue();
@@ -1748,14 +1748,14 @@ void RenderViewPanel::OnDpiText(wxCommandEvent& event)
 }
 
 //embde project
-void RenderViewPanel::OnChEmbedCheck(wxCommandEvent &event)
+void RenderViewPanel::OnChEmbedCheck(wxCommandEvent& event)
 {
 	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
 	glbin_settings.m_vrp_embed = ch_embed->GetValue();
 }
 
 //enlarge output image
-void RenderViewPanel::OnChEnlargeCheck(wxCommandEvent &event)
+void RenderViewPanel::OnChEnlargeCheck(wxCommandEvent& event)
 {
 	wxCheckBox* ch_enlarge = (wxCheckBox*)event.GetEventObject();
 	if (ch_enlarge)
@@ -1787,7 +1787,7 @@ void RenderViewPanel::OnChEnlargeCheck(wxCommandEvent &event)
 	}
 }
 
-void RenderViewPanel::OnSlEnlargeScroll(wxScrollEvent &event)
+void RenderViewPanel::OnSlEnlargeScroll(wxScrollEvent& event)
 {
 	int ival = event.GetPosition();
 	wxSlider* sl_enlarge = (wxSlider*)event.GetEventObject();
@@ -1804,7 +1804,7 @@ void RenderViewPanel::OnSlEnlargeScroll(wxScrollEvent &event)
 	}
 }
 
-void RenderViewPanel::OnTxEnlargeText(wxCommandEvent &event)
+void RenderViewPanel::OnTxEnlargeText(wxCommandEvent& event)
 {
 	wxString str = event.GetString();
 	double dval;
