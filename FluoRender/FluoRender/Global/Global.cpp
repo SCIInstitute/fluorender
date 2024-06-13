@@ -48,6 +48,8 @@ Global::Global() :
 	origin_ = ref_ptr<Group>(new Group());
 	origin_->setName(gstOrigin);
 	BuildFactories();
+
+	help_url_ = "https://github.com/SCIInstitute/fluorender";
 }
 
 void Global::gen_params_list()

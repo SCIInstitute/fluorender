@@ -28,23 +28,20 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _HELPDLG_H_
 #define _HELPDLG_H_
 
-#include <wx/wx.h>
+#include <PropPanel.h>
 #include <wx/html/htmlwin.h>
 
-class MainFrame;
-class HelpDlg : public wxPanel
+class HelpDlg : public PropPanel
 {
 public:
 	HelpDlg(MainFrame* frame);
 	~HelpDlg();
 
-	void LoadPage(wxString name);
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 private:
 	wxHtmlWindow *m_html;
 	wxString m_name;
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_HELPDLG_H_

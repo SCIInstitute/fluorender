@@ -131,6 +131,9 @@ DEALINGS IN THE SOFTWARE.
 //current selection
 #define glbin_current fluo::Global::instance().get_current_objects()
 
+//help url
+#define glbin_help_url fluo::Global::instance().get_help_url()
+
 namespace fluo
 {
 	class AsyncTimer;
@@ -262,6 +265,8 @@ namespace fluo
 		//std::string get_tree_selection() { return tree_selection_; }
 		CurrentObjects& get_current_objects() { return current_objects_; }
 
+		wxString& get_help_url() { return help_url_; }
+
 	private:
 		static Global instance_;
 
@@ -343,6 +348,9 @@ namespace fluo
 		//std::string list_selection_;//name of the item selected on the list
 		//std::string tree_selection_;//name of the item selected on the tree
 		CurrentObjects current_objects_;
+
+		//help url
+		wxString help_url_;
 
 	private:
 		Global();

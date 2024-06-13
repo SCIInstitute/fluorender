@@ -692,6 +692,8 @@ DEALINGS IN THE SOFTWARE.
 //fp range
 #define gstFpRangeMin "fp range min"
 #define gstFpRangeMax "fp range max"
+//help
+#define gstHelpUrl "help url"
 //measure agent
 #define gstRulerEdited "ruler edited"
 #define gstRulerRelaxIter "ruler relax iter"
