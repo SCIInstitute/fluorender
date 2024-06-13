@@ -28,12 +28,12 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _INTERPOLATOR_H_
 #define _INTERPOLATOR_H_
 
-#include <Animator/FlKey.h>
-#include <Animator/FlKeyDouble.h>
-#include <Animator/FlKeyQuaternion.h>
-#include <Animator/FlKeyBoolean.h>
-#include <Animator/FlKeyInt.h>
-#include <Animator/FlKeyColor.h>
+#include <FlKey.h>
+#include <FlKeyDouble.h>
+#include <FlKeyQuaternion.h>
+#include <FlKeyBoolean.h>
+#include <FlKeyInt.h>
+#include <FlKeyColor.h>
 #include <vector>
 #include <string>
 

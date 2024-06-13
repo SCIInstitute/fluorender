@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <MovieDefault.h>
 #include <Names.h>
-#include <Animator/MovieMaker.h>
+#include <MovieMaker.h>
 
 MovieDefault::MovieDefault()
 {

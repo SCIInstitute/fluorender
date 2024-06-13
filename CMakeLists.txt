@@ -106,6 +106,14 @@ add_definitions(-D_WIN32_WINNT=0x0602)
 add_definitions(-D_HAS_STD_BYTE=0)
 endif()
 
+# output directories
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 #UI IDs
 add_definitions(-DID_START=5999)
 add_definitions(-DID_CONVERT=ID_START+171)
@@ -136,14 +144,6 @@ add_definitions(-DTEEM_QNANHIBIT=1)
 
 # glm
 add_definitions(-DGLM_FORCE_RADIANS=1)
-
-# output directories
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # wxWidgets
 set(wxWidgets_USE_REL_AND_DBG ON)
@@ -192,7 +192,6 @@ file(COPY ${FluoRender_SOURCE_DIR}/wxWidgets/src/aui/auibook.cpp
   DESTINATION ${wxWidgets_ROOT_DIR}/src/aui)
 endif()
 
-
 # OpenGL
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
@@ -236,48 +235,9 @@ if (JNI_FOUND)
    #target_link_libraries(FluoRender ${JNI_LIBRARIES})
 endif()
 
-# teem
-# add zlib
-find_package(ZLIB)
-if(ZLIB_FOUND)
-  add_definitions(-DTEEM_ZLIB=1)
-  include_directories(${ZLIB_INCLUDE_DIRS})
-endif()
-
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem)
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Biff)
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Air)
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Hest)
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Nrrd)
-file(GLOB airsrc FluoRender/teem/Air/*.c)
-file(GLOB airhdr FluoRender/teem/Air/*.h)
-file(GLOB hestsrc FluoRender/teem/Hest/*.c)
-file(GLOB hesthdr FluoRender/teem/Hest/*.h)
-file(GLOB biffsrc FluoRender/teem/Biff/*.c)
-file(GLOB biffhdr FluoRender/teem/Biff/*.h)
-file(GLOB nrrdsrc FluoRender/teem/Nrrd/*.c)
-file(GLOB nrrdhdr FluoRender/teem/Nrrd/*.h)
-add_library(TEEM_OBJ OBJECT
-  ${airsrc} ${hestsrc} ${nrrdsrc} ${biffsrc}
-  ${airhdr} ${hesthdr} ${nrrdhdr} ${biffhdr})
-
-#eigen
-#include_directories(${FluoRender_SOURCE_DIR}/FluoRender/Eigen)
-
-# glew
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/glew)
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/glew/GL)
-file(GLOB gl_srcs FluoRender/glew/*.c)
-file(GLOB gl_hdrs1 FluoRender/glew/*.h)
-file(GLOB gl_hdrs2 FluoRender/glew/GL/*.h)
-add_library(GLEW_OBJ OBJECT
-  ${gl_srcs} ${gl_hdrs1} ${gl_hdrs2})
-
-# pole
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/pole)
-file(GLOB pole_srcs FluoRender/pole/pole.cpp)
-file(GLOB pole_hdrs FluoRender/pole/pole.h)
-add_library(POLE_OBJ OBJECT ${pole_srcs} ${pole_hdrs})
+# FluoRender
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender)
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender)
 
 # ffmpeg
 if(WIN32)
@@ -305,184 +265,45 @@ else()
 )
 endif()
 
-# FluoRender
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender)
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender)
+# freetype
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/freetype/include)
+if(WIN32)
+  file(GLOB FREETYPE_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/freetype/lib/*.lib)
+else()
+  find_package(Freetype REQUIRED)
+  include_directories(${FREETYPE_INCLUDE_DIRS})
+endif()
 
-# Fui
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Fui)
-file(GLOB fui_src FluoRender/FluoRender/Fui/*.cpp)
-file(GLOB fui_hdr FluoRender/FluoRender/Fui/*.h)
-add_library(FUI_OBJ OBJECT
-  ${fui_src} ${fui_hdr})
+# glew
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/glew)
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/glew/GL)
+file(GLOB gl_srcs FluoRender/glew/*.c)
+file(GLOB gl_hdrs1 FluoRender/glew/*.h)
+file(GLOB gl_hdrs2 FluoRender/glew/GL/*.h)
+add_library(GLEW_OBJ OBJECT
+  ${gl_srcs} ${gl_hdrs1} ${gl_hdrs2})
 
-# Utilities
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Utilities)
-file(GLOB utl_src FluoRender/FluoRender/Utilities/*.cpp)
-file(GLOB utl_hdr FluoRender/FluoRender/Utilities/*.h)
-file(GLOB utl_nvs FluoRender/FluoRender/Utilities/*.natvis)
-add_library(UTL_OBJ OBJECT
-  ${utl_src} ${utl_hdr} ${utl_nvs})
+# HoloPlay
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/include)
+if(WIN32)
+	if(${ARCHITECTURE} MATCHES 32)
+		file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/Win32/*.lib)
+    elseif(${ARCHITECTURE} MATCHES 64)
+		file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/Win64/*.lib)
+    endif()
+elseif(APPLE)
+	file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/macos/HoloPlayCore.bundle)
+else()
+	file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/linux/*.so)
+endif()
 
-# Controls
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Controls)
-file(GLOB ctrl_src FluoRender/FluoRender/Controls/*.cpp)
-file(GLOB ctrl_hdr FluoRender/FluoRender/Controls/*.h)
-add_library(CONTROLS_OBJ OBJECT
-  ${ctrl_src} ${ctrl_hdr})
-
-# Configs
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Configs)
-file(GLOB config_src FluoRender/FluoRender/Configs/*.cpp)
-file(GLOB config_hdr FluoRender/FluoRender/Configs/*.h)
-add_library(CONFIGS_OBJ OBJECT
-  ${config_src} ${config_hdr})
-
-# Global
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Global)
-file(GLOB glb_src FluoRender/FluoRender/Global/*.cpp)
-file(GLOB glb_hdr FluoRender/FluoRender/Global/*.h)
-add_library(GLOBAL_OBJ OBJECT
-  ${glb_src} ${glb_hdr})
-
-# Formats
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Formats)
-file(GLOB fmt_src FluoRender/FluoRender/Formats/*.cpp)
-file(GLOB fmt_hdr FluoRender/FluoRender/Formats/*.h)
-file(GLOB fmt_rsc FluoRender/FluoRender/Formats/*.class)
-add_library(FORMATS_OBJ OBJECT
-  ${fmt_src} ${fmt_hdr} ${fmt_rsc})
-
-# Filters
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Filters)
-file(GLOB fltr_src FluoRender/FluoRender/Filters/*.cpp)
-file(GLOB fltr_hdr FluoRender/FluoRender/Filters/*.h)
-add_library(FILTERS_OBJ OBJECT
-  ${fltr_src} ${fltr_hdr})
-
-# Video
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Video)
-file(GLOB vid_src FluoRender/FluoRender/Video/*.cpp)
-file(GLOB vid_hdr FluoRender/FluoRender/Video/*.h)
-add_library(VIDEO_OBJ OBJECT
-  ${vid_src} ${vid_hdr})
-
-# Tracking
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Tracking)
-file(GLOB trk_src FluoRender/FluoRender/Tracking/*.cpp)
-file(GLOB trk_hdr FluoRender/FluoRender/Tracking/*.h)
-add_library(TRACKING_OBJ OBJECT
-  ${trk_src} ${trk_hdr})
-
-# Components
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Components)
-file(GLOB cmp_src FluoRender/FluoRender/Components/*.cpp)
-file(GLOB cmp_hdr FluoRender/FluoRender/Components/*.h)
-add_library(COMPONENTS_OBJ OBJECT
-  ${cmp_src} ${cmp_hdr})
-
-# Selection
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Selection)
-file(GLOB sel_src FluoRender/FluoRender/Selection/*.cpp)
-file(GLOB sel_hdr FluoRender/FluoRender/Selection/*.h)
-add_library(SELECTION_OBJ OBJECT
-  ${sel_src} ${sel_hdr})
-
-# Script
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Script)
-file(GLOB scr_src FluoRender/FluoRender/Script/*.cpp)
-file(GLOB scr_hdr FluoRender/FluoRender/Script/*.h)
-add_library(SCRIPT_OBJ OBJECT
-  ${scr_src} ${scr_hdr})
-
-# Cluster
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Cluster)
-file(GLOB clstr_src FluoRender/FluoRender/Cluster/*.cpp)
-file(GLOB clstr_hdr FluoRender/FluoRender/Cluster/*.h)
-add_library(CLUSTER_OBJ OBJECT
-  ${clstr_src} ${clstr_hdr})
-
-# Distance
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Distance)
-file(GLOB dist_src FluoRender/FluoRender/Distance/*.cpp)
-file(GLOB dist_hdr FluoRender/FluoRender/Distance/*.h)
-add_library(DISTANCE_OBJ OBJECT
-  ${dist_src} ${dist_hdr})
-
-# Calculate
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Calculate)
-file(GLOB calc_src FluoRender/FluoRender/Calculate/*.cpp)
-file(GLOB calc_hdr FluoRender/FluoRender/Calculate/*.h)
-add_library(CALCULATE_OBJ OBJECT
-  ${calc_src} ${calc_hdr})
-
-# Database
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Database)
-file(GLOB dbs_src FluoRender/FluoRender/Database/*.cpp)
-file(GLOB dbs_hdr FluoRender/FluoRender/Database/*.h)
-add_library(DATABASE_OBJ OBJECT
-  ${dbs_src} ${dbs_hdr})
-
-# Animators
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Animators)
-file(GLOB ani_src FluoRender/FluoRender/Animator/*.cpp)
-file(GLOB ani_hdr FluoRender/FluoRender/Animator/*.h)
-add_library(ANIMATORS_OBJ OBJECT
-  ${ani_src} ${ani_hdr})
-
-# Flobject
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Flobject)
-file(GLOB obj_src FluoRender/FluoRender/Flobject/*.cpp)
-file(GLOB obj_hdr FluoRender/FluoRender/Flobject/*.hpp)
-add_library(FLOBJECT_OBJ OBJECT
-  ${obj_src} ${obj_hdr})
-
-# FileIO
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/FileIO)
-file(GLOB file_src FluoRender/FluoRender/FileIO/*.cpp)
-file(GLOB file_hdr FluoRender/FluoRender/FileIO/*.h)
-add_library(FILEIO_OBJ OBJECT
-  ${file_src} ${file_hdr})
-
-# Types
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Types)
-file(GLOB typ_src FluoRender/FluoRender/Types/*.cpp)
-file(GLOB typ_hdr FluoRender/FluoRender/Types/*.h)
-add_library(TYPES_OBJ OBJECT
-  ${typ_src} ${typ_hdr})
-
-# Timer
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Timer)
-file(GLOB timer_src FluoRender/FluoRender/Timer/*.cpp)
-file(GLOB timer_hdr FluoRender/FluoRender/Timer/*.hpp)
-add_library(TIMER_OBJ OBJECT
-  ${timer_src} ${timer_hdr})
-
-# FLIVR
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/FLIVR)
-file(GLOB fli_src FluoRender/FluoRender/FLIVR/*.cpp)
-file(GLOB fli_hdr FluoRender/FluoRender/FLIVR/*.h)
-add_library(FLIVR_OBJ OBJECT
-  ${fli_src} ${fli_hdr})
-
-# Converters
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Converters)
-file(GLOB cvt_src FluoRender/FluoRender/Converters/*.cpp)
-file(GLOB cvt_hdr FluoRender/FluoRender/Converters/*.h)
-add_library(CONVERTERS_OBJ OBJECT
-  ${cvt_src} ${cvt_hdr})
-
-# images
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/img)
-file(GLOB pngs_hdr FluoRender/FluoRender/img/*.h)
-file(GLOB pngs_src FluoRender/FluoRender/img/*.cpp)
-add_library(IMAGES_OBJ OBJECT  ${pngs_hdr} ${pngs_src})
-
-# Python
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Python)
-file(GLOB pyth_hdr FluoRender/FluoRender/Python/*.h)
-file(GLOB pyth_src FluoRender/FluoRender/Python/*.cpp)
-add_library(PYTHON_OBJ OBJECT  ${pyth_hdr} ${pyth_src})
+#nikon
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/nd2/include)
+if(WIN32)
+  file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/*.lib)
+else()
+  file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/*.a)
+endif()
 
 # OpenCL
 if(WIN32)
@@ -498,23 +319,6 @@ elseif(UNIX OR APPLE OR MINGW)
   include_directories(${OpenCL_INCLUDE_DIRS})
 endif()
 
-#nikon
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/nd2/include)
-if(WIN32)
-  file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/*.lib)
-else()
-  file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/*.a)
-endif()
-
-# freetype
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/freetype/include)
-if(WIN32)
-  file(GLOB FREETYPE_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/freetype/lib/*.lib)
-else()
-  find_package(Freetype REQUIRED)
-  include_directories(${FREETYPE_INCLUDE_DIRS})
-endif()
-
 # OpenVR
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/OpenVR/headers)
 if(WIN32)
@@ -523,26 +327,37 @@ if(WIN32)
 	endif()
 endif()
 
-# HoloPlay
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/include)
-if(WIN32)
-	if(${ARCHITECTURE} MATCHES 32)
-		file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/Win32/*.lib)
-    elseif(${ARCHITECTURE} MATCHES 64)
-		file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/Win64/*.lib)
-    endif()
-elseif(APPLE)
-	file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/macos/HoloPlayCore.bundle)
-else()
-	file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/linux/*.so)
-endif()
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/LookingGlass)
-file(GLOB lgr_src FluoRender/FluoRender/LookingGlass/*.cpp)
-file(GLOB lgr_hdr FluoRender/FluoRender/LookingGlass/*.h)
-add_library(LOOKINGGLASS_OBJ OBJECT
-  ${lgr_src} ${lgr_hdr})
+# pole
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/pole)
+file(GLOB pole_srcs FluoRender/pole/pole.cpp)
+file(GLOB pole_hdrs FluoRender/pole/pole.h)
+add_library(POLE_OBJ OBJECT ${pole_srcs} ${pole_hdrs})
 
-#XInput
+# teem
+# add zlib
+find_package(ZLIB)
+if(ZLIB_FOUND)
+  add_definitions(-DTEEM_ZLIB=1)
+  include_directories(${ZLIB_INCLUDE_DIRS})
+endif()
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem)
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Biff)
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Air)
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Hest)
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Nrrd)
+file(GLOB airsrc FluoRender/teem/Air/*.c)
+file(GLOB airhdr FluoRender/teem/Air/*.h)
+file(GLOB hestsrc FluoRender/teem/Hest/*.c)
+file(GLOB hesthdr FluoRender/teem/Hest/*.h)
+file(GLOB biffsrc FluoRender/teem/Biff/*.c)
+file(GLOB biffhdr FluoRender/teem/Biff/*.h)
+file(GLOB nrrdsrc FluoRender/teem/Nrrd/*.c)
+file(GLOB nrrdhdr FluoRender/teem/Nrrd/*.h)
+add_library(TEEM_OBJ OBJECT
+  ${airsrc} ${hestsrc} ${nrrdsrc} ${biffsrc}
+  ${airhdr} ${hesthdr} ${nrrdhdr} ${biffhdr})
+
+# XInput
 if(WIN32 AND USE_XINPUT)
 	include_directories(${FluoRender_SOURCE_DIR}/FluoRender/XInput)
 	file(GLOB xip_src FluoRender/XInput/*.cpp)
@@ -550,6 +365,195 @@ if(WIN32 AND USE_XINPUT)
 	add_library(XINPUT_OBJ OBJECT
 		${xip_src} ${xip_hdr})
 endif()
+
+# Animator
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Animator)
+file(GLOB ani_src FluoRender/FluoRender/Animator/*.cpp)
+file(GLOB ani_hdr FluoRender/FluoRender/Animator/*.h)
+add_library(ANIMATORS_OBJ OBJECT
+  ${ani_src} ${ani_hdr})
+
+# Calculate
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Calculate)
+file(GLOB calc_src FluoRender/FluoRender/Calculate/*.cpp)
+file(GLOB calc_hdr FluoRender/FluoRender/Calculate/*.h)
+add_library(CALCULATE_OBJ OBJECT
+  ${calc_src} ${calc_hdr})
+
+# Cluster
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Cluster)
+file(GLOB clstr_src FluoRender/FluoRender/Cluster/*.cpp)
+file(GLOB clstr_hdr FluoRender/FluoRender/Cluster/*.h)
+add_library(CLUSTER_OBJ OBJECT
+  ${clstr_src} ${clstr_hdr})
+
+# Components
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Components)
+file(GLOB cmp_src FluoRender/FluoRender/Components/*.cpp)
+file(GLOB cmp_hdr FluoRender/FluoRender/Components/*.h)
+add_library(COMPONENTS_OBJ OBJECT
+  ${cmp_src} ${cmp_hdr})
+
+# Configs
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Configs)
+file(GLOB config_src FluoRender/FluoRender/Configs/*.cpp)
+file(GLOB config_hdr FluoRender/FluoRender/Configs/*.h)
+add_library(CONFIGS_OBJ OBJECT
+  ${config_src} ${config_hdr})
+
+# Controls
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Controls)
+file(GLOB ctrl_src FluoRender/FluoRender/Controls/*.cpp)
+file(GLOB ctrl_hdr FluoRender/FluoRender/Controls/*.h)
+add_library(CONTROLS_OBJ OBJECT
+  ${ctrl_src} ${ctrl_hdr})
+
+# Converters
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Converters)
+file(GLOB cvt_src FluoRender/FluoRender/Converters/*.cpp)
+file(GLOB cvt_hdr FluoRender/FluoRender/Converters/*.h)
+add_library(CONVERTERS_OBJ OBJECT
+  ${cvt_src} ${cvt_hdr})
+
+# Database
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Database)
+file(GLOB dbs_src FluoRender/FluoRender/Database/*.cpp)
+file(GLOB dbs_hdr FluoRender/FluoRender/Database/*.h)
+add_library(DATABASE_OBJ OBJECT
+  ${dbs_src} ${dbs_hdr})
+
+# Distance
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Distance)
+file(GLOB dist_src FluoRender/FluoRender/Distance/*.cpp)
+file(GLOB dist_hdr FluoRender/FluoRender/Distance/*.h)
+add_library(DISTANCE_OBJ OBJECT
+  ${dist_src} ${dist_hdr})
+
+# FileIO
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/FileIO)
+file(GLOB file_src FluoRender/FluoRender/FileIO/*.cpp)
+file(GLOB file_hdr FluoRender/FluoRender/FileIO/*.h)
+add_library(FILEIO_OBJ OBJECT
+  ${file_src} ${file_hdr})
+
+# Filters
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Filters)
+file(GLOB fltr_src FluoRender/FluoRender/Filters/*.cpp)
+file(GLOB fltr_hdr FluoRender/FluoRender/Filters/*.h)
+add_library(FILTERS_OBJ OBJECT
+  ${fltr_src} ${fltr_hdr})
+
+# FLIVR
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/FLIVR)
+file(GLOB fli_src FluoRender/FluoRender/FLIVR/*.cpp)
+file(GLOB fli_hdr FluoRender/FluoRender/FLIVR/*.h)
+add_library(FLIVR_OBJ OBJECT
+  ${fli_src} ${fli_hdr})
+
+# Flobject
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Flobject)
+file(GLOB obj_src FluoRender/FluoRender/Flobject/*.cpp)
+file(GLOB obj_hdr FluoRender/FluoRender/Flobject/*.hpp)
+add_library(FLOBJECT_OBJ OBJECT
+  ${obj_src} ${obj_hdr})
+
+# Flui
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Flui)
+file(GLOB flui_src FluoRender/FluoRender/Flui/*.cpp)
+file(GLOB flui_hdr FluoRender/FluoRender/Flui/*.h)
+add_library(FLUI_OBJ OBJECT
+  ${flui_src} ${flui_hdr})
+
+# Formats
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Formats)
+file(GLOB fmt_src FluoRender/FluoRender/Formats/*.cpp)
+file(GLOB fmt_hdr FluoRender/FluoRender/Formats/*.h)
+file(GLOB fmt_rsc FluoRender/FluoRender/Formats/*.class)
+add_library(FORMATS_OBJ OBJECT
+  ${fmt_src} ${fmt_hdr} ${fmt_rsc})
+
+# Global
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Global)
+file(GLOB glb_src FluoRender/FluoRender/Global/*.cpp)
+file(GLOB glb_hdr FluoRender/FluoRender/Global/*.h)
+add_library(GLOBAL_OBJ OBJECT
+  ${glb_src} ${glb_hdr})
+
+# images
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/img)
+file(GLOB pngs_hdr FluoRender/FluoRender/img/*.h)
+file(GLOB pngs_src FluoRender/FluoRender/img/*.cpp)
+add_library(IMAGES_OBJ OBJECT  ${pngs_hdr} ${pngs_src})
+
+# LookingGlass
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/LookingGlass)
+file(GLOB lgr_src FluoRender/FluoRender/LookingGlass/*.cpp)
+file(GLOB lgr_hdr FluoRender/FluoRender/LookingGlass/*.h)
+add_library(LOOKINGGLASS_OBJ OBJECT
+  ${lgr_src} ${lgr_hdr})
+
+# Python
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Python)
+file(GLOB pyth_hdr FluoRender/FluoRender/Python/*.h)
+file(GLOB pyth_src FluoRender/FluoRender/Python/*.cpp)
+add_library(PYTHON_OBJ OBJECT  ${pyth_hdr} ${pyth_src})
+
+# Scene
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Scene)
+file(GLOB scn_src FluoRender/FluoRender/Scene/*.cpp)
+file(GLOB scn_hdr FluoRender/FluoRender/Scene/*.h)
+add_library(SCENE_OBJ OBJECT
+  ${scn_src} ${scn_hdr})
+
+# Script
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Script)
+file(GLOB scr_src FluoRender/FluoRender/Script/*.cpp)
+file(GLOB scr_hdr FluoRender/FluoRender/Script/*.h)
+add_library(SCRIPT_OBJ OBJECT
+  ${scr_src} ${scr_hdr})
+
+# Selection
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Selection)
+file(GLOB sel_src FluoRender/FluoRender/Selection/*.cpp)
+file(GLOB sel_hdr FluoRender/FluoRender/Selection/*.h)
+add_library(SELECTION_OBJ OBJECT
+  ${sel_src} ${sel_hdr})
+
+# Timer
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Timer)
+file(GLOB timer_src FluoRender/FluoRender/Timer/*.cpp)
+file(GLOB timer_hdr FluoRender/FluoRender/Timer/*.hpp)
+add_library(TIMER_OBJ OBJECT
+  ${timer_src} ${timer_hdr})
+
+# Tracking
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Tracking)
+file(GLOB trk_src FluoRender/FluoRender/Tracking/*.cpp)
+file(GLOB trk_hdr FluoRender/FluoRender/Tracking/*.h)
+add_library(TRACKING_OBJ OBJECT
+  ${trk_src} ${trk_hdr})
+
+# Types
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Types)
+file(GLOB typ_src FluoRender/FluoRender/Types/*.cpp)
+file(GLOB typ_hdr FluoRender/FluoRender/Types/*.h)
+add_library(TYPES_OBJ OBJECT
+  ${typ_src} ${typ_hdr})
+
+# Utilities
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Utilities)
+file(GLOB utl_src FluoRender/FluoRender/Utilities/*.cpp)
+file(GLOB utl_hdr FluoRender/FluoRender/Utilities/*.h)
+file(GLOB utl_nvs FluoRender/FluoRender/Utilities/*.natvis)
+add_library(UTL_OBJ OBJECT
+  ${utl_src} ${utl_hdr} ${utl_nvs})
+
+# Video
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Video)
+file(GLOB vid_src FluoRender/FluoRender/Video/*.cpp)
+file(GLOB vid_hdr FluoRender/FluoRender/Video/*.h)
+add_library(VIDEO_OBJ OBJECT
+  ${vid_src} ${vid_hdr})
 
 # other sources
 file(GLOB src FluoRender/FluoRender/*.cpp)
@@ -607,32 +611,33 @@ if(APPLE)
   include(BundleUtilities)
   add_executable(FluoRender MACOSX_BUNDLE
     ${src} ${hdr} ${rsc} ${icns}
-    $<TARGET_OBJECTS:FUI_OBJ>
-    $<TARGET_OBJECTS:UTL_OBJ>
-    $<TARGET_OBJECTS:CONTROLS_OBJ>
+    $<TARGET_OBJECTS:ANIMATORS_OBJ>
+    $<TARGET_OBJECTS:CALCULATE_OBJ>
+    $<TARGET_OBJECTS:CLUSTER_OBJ>
+    $<TARGET_OBJECTS:COMPONENTS_OBJ>
     $<TARGET_OBJECTS:CONFIGS_OBJ>
+    $<TARGET_OBJECTS:CONTROLS_OBJ>
+    $<TARGET_OBJECTS:CONVERTERS_OBJ>
+    $<TARGET_OBJECTS:DATABASE_OBJ>
+    $<TARGET_OBJECTS:DISTANCE_OBJ>
+    $<TARGET_OBJECTS:FILEIO_OBJ>
+    $<TARGET_OBJECTS:FILTERS_OBJ>
+    $<TARGET_OBJECTS:FLIVR_OBJ>
+    $<TARGET_OBJECTS:FLOBJECT_OBJ>
+    $<TARGET_OBJECTS:FLUI_OBJ>
+    $<TARGET_OBJECTS:FORMATS_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGES_OBJ>
-    $<TARGET_OBJECTS:CONVERTERS_OBJ>
-    $<TARGET_OBJECTS:FLIVR_OBJ>
     $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
-    $<TARGET_OBJECTS:ANIMATORS_OBJ>
-    $<TARGET_OBJECTS:TYPES_OBJ>
-    $<TARGET_OBJECTS:FLOBJECT_OBJ>
-    $<TARGET_OBJECTS:FILEIO_OBJ>
-    $<TARGET_OBJECTS:TIMER_OBJ>
-    $<TARGET_OBJECTS:FORMATS_OBJ>
-    $<TARGET_OBJECTS:FILTERS_OBJ>
-    $<TARGET_OBJECTS:VIDEO_OBJ>
-    $<TARGET_OBJECTS:TRACKING_OBJ>
-    $<TARGET_OBJECTS:COMPONENTS_OBJ>
-    $<TARGET_OBJECTS:SELECTION_OBJ>
-    $<TARGET_OBJECTS:SCRIPT_OBJ>
-    $<TARGET_OBJECTS:CLUSTER_OBJ>
-    $<TARGET_OBJECTS:DISTANCE_OBJ>
-    $<TARGET_OBJECTS:CALCULATE_OBJ>
-    $<TARGET_OBJECTS:DATABASE_OBJ>
     $<TARGET_OBJECTS:PYTHON_OBJ>
+    $<TARGET_OBJECTS:SCENE_OBJ>
+    $<TARGET_OBJECTS:SCRIPT_OBJ>
+    $<TARGET_OBJECTS:SELECTION_OBJ>
+    $<TARGET_OBJECTS:TIMER_OBJ>
+    $<TARGET_OBJECTS:TRACKING_OBJ>
+    $<TARGET_OBJECTS:TYPES_OBJ>
+    $<TARGET_OBJECTS:UTL_OBJ>
+    $<TARGET_OBJECTS:VIDEO_OBJ>
     $<TARGET_OBJECTS:GLEW_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
     $<TARGET_OBJECTS:TEEM_OBJ>
@@ -651,32 +656,33 @@ elseif(UNIX OR MINGW)
   #include(BundleUtilities)
   add_executable(FluoRender
     ${src} ${hdr} ${rsc} ${icns}
-    $<TARGET_OBJECTS:FUI_OBJ>
-    $<TARGET_OBJECTS:UTL_OBJ>
-    $<TARGET_OBJECTS:CONTROLS_OBJ>
+    $<TARGET_OBJECTS:ANIMATORS_OBJ>
+    $<TARGET_OBJECTS:CALCULATE_OBJ>
+    $<TARGET_OBJECTS:CLUSTER_OBJ>
+    $<TARGET_OBJECTS:COMPONENTS_OBJ>
     $<TARGET_OBJECTS:CONFIGS_OBJ>
+    $<TARGET_OBJECTS:CONTROLS_OBJ>
+    $<TARGET_OBJECTS:CONVERTERS_OBJ>
+    $<TARGET_OBJECTS:DATABASE_OBJ>
+    $<TARGET_OBJECTS:DISTANCE_OBJ>
+    $<TARGET_OBJECTS:FILEIO_OBJ>
+    $<TARGET_OBJECTS:FILTERS_OBJ>
+    $<TARGET_OBJECTS:FLIVR_OBJ>
+    $<TARGET_OBJECTS:FLOBJECT_OBJ>
+    $<TARGET_OBJECTS:FLUI_OBJ>
+    $<TARGET_OBJECTS:FORMATS_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGES_OBJ>
-    $<TARGET_OBJECTS:CONVERTERS_OBJ>
-    $<TARGET_OBJECTS:FLIVR_OBJ>
     $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
-    $<TARGET_OBJECTS:ANIMATORS_OBJ>
-    $<TARGET_OBJECTS:TYPES_OBJ>
-    $<TARGET_OBJECTS:FLOBJECT_OBJ>
-    $<TARGET_OBJECTS:FILEIO_OBJ>
-    $<TARGET_OBJECTS:TIMER_OBJ>
-    $<TARGET_OBJECTS:FORMATS_OBJ>
-    $<TARGET_OBJECTS:FILTERS_OBJ>
-    $<TARGET_OBJECTS:VIDEO_OBJ>
-    $<TARGET_OBJECTS:TRACKING_OBJ>
-    $<TARGET_OBJECTS:COMPONENTS_OBJ>
-    $<TARGET_OBJECTS:SELECTION_OBJ>
-    $<TARGET_OBJECTS:SCRIPT_OBJ>
-    $<TARGET_OBJECTS:CLUSTER_OBJ>
-    $<TARGET_OBJECTS:DISTANCE_OBJ>
-    $<TARGET_OBJECTS:CALCULATE_OBJ>
-    $<TARGET_OBJECTS:DATABASE_OBJ>
     $<TARGET_OBJECTS:PYTHON_OBJ>
+    $<TARGET_OBJECTS:SCENE_OBJ>
+    $<TARGET_OBJECTS:SCRIPT_OBJ>
+    $<TARGET_OBJECTS:SELECTION_OBJ>
+    $<TARGET_OBJECTS:TIMER_OBJ>
+    $<TARGET_OBJECTS:TRACKING_OBJ>
+    $<TARGET_OBJECTS:TYPES_OBJ>
+    $<TARGET_OBJECTS:UTL_OBJ>
+    $<TARGET_OBJECTS:VIDEO_OBJ>
     $<TARGET_OBJECTS:GLEW_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
     $<TARGET_OBJECTS:TEEM_OBJ>
@@ -727,32 +733,33 @@ elseif(WIN32)
     if (USE_XINPUT)
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
-      $<TARGET_OBJECTS:FUI_OBJ>
-      $<TARGET_OBJECTS:UTL_OBJ>
-      $<TARGET_OBJECTS:CONTROLS_OBJ>
-      $<TARGET_OBJECTS:CONFIGS_OBJ>
-      $<TARGET_OBJECTS:GLOBAL_OBJ>
-      $<TARGET_OBJECTS:TYPES_OBJ>
-      $<TARGET_OBJECTS:FLOBJECT_OBJ>
-      $<TARGET_OBJECTS:FILEIO_OBJ>
-      $<TARGET_OBJECTS:IMAGES_OBJ>
-      $<TARGET_OBJECTS:CONVERTERS_OBJ>
-      $<TARGET_OBJECTS:FLIVR_OBJ>
-      $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
       $<TARGET_OBJECTS:ANIMATORS_OBJ>
-      $<TARGET_OBJECTS:TIMER_OBJ>
-      $<TARGET_OBJECTS:FORMATS_OBJ>
-      $<TARGET_OBJECTS:FILTERS_OBJ>
-      $<TARGET_OBJECTS:VIDEO_OBJ>
-      $<TARGET_OBJECTS:TRACKING_OBJ>
-      $<TARGET_OBJECTS:COMPONENTS_OBJ>
-      $<TARGET_OBJECTS:SELECTION_OBJ>
-      $<TARGET_OBJECTS:SCRIPT_OBJ>
-      $<TARGET_OBJECTS:CLUSTER_OBJ>
-      $<TARGET_OBJECTS:DISTANCE_OBJ>
       $<TARGET_OBJECTS:CALCULATE_OBJ>
+      $<TARGET_OBJECTS:CLUSTER_OBJ>
+      $<TARGET_OBJECTS:COMPONENTS_OBJ>
+      $<TARGET_OBJECTS:CONFIGS_OBJ>
+      $<TARGET_OBJECTS:CONTROLS_OBJ>
+      $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:DATABASE_OBJ>
+      $<TARGET_OBJECTS:DISTANCE_OBJ>
+      $<TARGET_OBJECTS:FILEIO_OBJ>
+      $<TARGET_OBJECTS:FILTERS_OBJ>
+      $<TARGET_OBJECTS:FLIVR_OBJ>
+      $<TARGET_OBJECTS:FLOBJECT_OBJ>
+      $<TARGET_OBJECTS:FLUI_OBJ>
+      $<TARGET_OBJECTS:FORMATS_OBJ>
+      $<TARGET_OBJECTS:GLOBAL_OBJ>
+      $<TARGET_OBJECTS:IMAGES_OBJ>
+      $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
       $<TARGET_OBJECTS:PYTHON_OBJ>
+      $<TARGET_OBJECTS:SCENE_OBJ>
+      $<TARGET_OBJECTS:SCRIPT_OBJ>
+      $<TARGET_OBJECTS:SELECTION_OBJ>
+      $<TARGET_OBJECTS:TIMER_OBJ>
+      $<TARGET_OBJECTS:TRACKING_OBJ>
+      $<TARGET_OBJECTS:TYPES_OBJ>
+      $<TARGET_OBJECTS:UTL_OBJ>
+      $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>
@@ -762,32 +769,33 @@ elseif(WIN32)
     else()
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
-      $<TARGET_OBJECTS:FUI_OBJ>
-      $<TARGET_OBJECTS:UTL_OBJ>
-      $<TARGET_OBJECTS:CONTROLS_OBJ>
-      $<TARGET_OBJECTS:CONFIGS_OBJ>
-      $<TARGET_OBJECTS:GLOBAL_OBJ>
-      $<TARGET_OBJECTS:TYPES_OBJ>
-      $<TARGET_OBJECTS:FLOBJECT_OBJ>
-      $<TARGET_OBJECTS:FILEIO_OBJ>
-      $<TARGET_OBJECTS:IMAGES_OBJ>
-      $<TARGET_OBJECTS:CONVERTERS_OBJ>
-      $<TARGET_OBJECTS:FLIVR_OBJ>
-      $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
       $<TARGET_OBJECTS:ANIMATORS_OBJ>
-      $<TARGET_OBJECTS:TIMER_OBJ>
-      $<TARGET_OBJECTS:FORMATS_OBJ>
-      $<TARGET_OBJECTS:FILTERS_OBJ>
-      $<TARGET_OBJECTS:VIDEO_OBJ>
-      $<TARGET_OBJECTS:TRACKING_OBJ>
-      $<TARGET_OBJECTS:COMPONENTS_OBJ>
-      $<TARGET_OBJECTS:SELECTION_OBJ>
-      $<TARGET_OBJECTS:SCRIPT_OBJ>
-      $<TARGET_OBJECTS:CLUSTER_OBJ>
-      $<TARGET_OBJECTS:DISTANCE_OBJ>
       $<TARGET_OBJECTS:CALCULATE_OBJ>
+      $<TARGET_OBJECTS:CLUSTER_OBJ>
+      $<TARGET_OBJECTS:COMPONENTS_OBJ>
+      $<TARGET_OBJECTS:CONFIGS_OBJ>
+      $<TARGET_OBJECTS:CONTROLS_OBJ>
+      $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:DATABASE_OBJ>
+      $<TARGET_OBJECTS:DISTANCE_OBJ>
+      $<TARGET_OBJECTS:FILEIO_OBJ>
+      $<TARGET_OBJECTS:FILTERS_OBJ>
+      $<TARGET_OBJECTS:FLIVR_OBJ>
+      $<TARGET_OBJECTS:FLOBJECT_OBJ>
+      $<TARGET_OBJECTS:FLUI_OBJ>
+      $<TARGET_OBJECTS:FORMATS_OBJ>
+      $<TARGET_OBJECTS:GLOBAL_OBJ>
+      $<TARGET_OBJECTS:IMAGES_OBJ>
+      $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
       $<TARGET_OBJECTS:PYTHON_OBJ>
+      $<TARGET_OBJECTS:SCENE_OBJ>
+      $<TARGET_OBJECTS:SCRIPT_OBJ>
+      $<TARGET_OBJECTS:SELECTION_OBJ>
+      $<TARGET_OBJECTS:TIMER_OBJ>
+      $<TARGET_OBJECTS:TRACKING_OBJ>
+      $<TARGET_OBJECTS:TYPES_OBJ>
+      $<TARGET_OBJECTS:UTL_OBJ>
+      $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>
@@ -796,32 +804,33 @@ elseif(WIN32)
     endif()
     add_executable(Tester
       ${tester_src} ${tester_hdr}
-      $<TARGET_OBJECTS:FUI_OBJ>
-      $<TARGET_OBJECTS:UTL_OBJ>
-      $<TARGET_OBJECTS:CONTROLS_OBJ>
-      $<TARGET_OBJECTS:CONFIGS_OBJ>
-      $<TARGET_OBJECTS:GLOBAL_OBJ>
-      $<TARGET_OBJECTS:TYPES_OBJ>
-      $<TARGET_OBJECTS:FLOBJECT_OBJ>
-      $<TARGET_OBJECTS:FILEIO_OBJ>
-      $<TARGET_OBJECTS:IMAGES_OBJ>
-      $<TARGET_OBJECTS:CONVERTERS_OBJ>
-      $<TARGET_OBJECTS:FLIVR_OBJ>
-      $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
       $<TARGET_OBJECTS:ANIMATORS_OBJ>
-      $<TARGET_OBJECTS:TIMER_OBJ>
-      $<TARGET_OBJECTS:FORMATS_OBJ>
-      $<TARGET_OBJECTS:FILTERS_OBJ>
-      $<TARGET_OBJECTS:VIDEO_OBJ>
-      $<TARGET_OBJECTS:TRACKING_OBJ>
-      $<TARGET_OBJECTS:COMPONENTS_OBJ>
-      $<TARGET_OBJECTS:SELECTION_OBJ>
-      $<TARGET_OBJECTS:SCRIPT_OBJ>
-      $<TARGET_OBJECTS:CLUSTER_OBJ>
-      $<TARGET_OBJECTS:DISTANCE_OBJ>
       $<TARGET_OBJECTS:CALCULATE_OBJ>
+      $<TARGET_OBJECTS:CLUSTER_OBJ>
+      $<TARGET_OBJECTS:COMPONENTS_OBJ>
+      $<TARGET_OBJECTS:CONFIGS_OBJ>
+      $<TARGET_OBJECTS:CONTROLS_OBJ>
+      $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:DATABASE_OBJ>
+      $<TARGET_OBJECTS:DISTANCE_OBJ>
+      $<TARGET_OBJECTS:FILEIO_OBJ>
+      $<TARGET_OBJECTS:FILTERS_OBJ>
+      $<TARGET_OBJECTS:FLIVR_OBJ>
+      $<TARGET_OBJECTS:FLOBJECT_OBJ>
+      $<TARGET_OBJECTS:FLUI_OBJ>
+      $<TARGET_OBJECTS:FORMATS_OBJ>
+      $<TARGET_OBJECTS:GLOBAL_OBJ>
+      $<TARGET_OBJECTS:IMAGES_OBJ>
+      $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
       $<TARGET_OBJECTS:PYTHON_OBJ>
+      $<TARGET_OBJECTS:SCENE_OBJ>
+      $<TARGET_OBJECTS:SCRIPT_OBJ>
+      $<TARGET_OBJECTS:SELECTION_OBJ>
+      $<TARGET_OBJECTS:TIMER_OBJ>
+      $<TARGET_OBJECTS:TRACKING_OBJ>
+      $<TARGET_OBJECTS:TYPES_OBJ>
+      $<TARGET_OBJECTS:UTL_OBJ>
+      $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>

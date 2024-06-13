@@ -56,8 +56,8 @@ DEALINGS IN THE SOFTWARE.
 #include <SegGrow.h>
 #include <DistCalculator.h>
 #include <Colocalize.h>
-#include <Animator/Interpolator.h>
-#include <Animator/MovieMaker.h>
+#include <Interpolator.h>
+#include <MovieMaker.h>
 #include <DataManager.h>
 #include <VolKernel.h>
 #include <Framebuffer.h>
