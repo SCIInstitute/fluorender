@@ -37,11 +37,11 @@ DEALINGS IN THE SOFTWARE.
 //END_EVENT_TABLE()
 
 FpRangeDlg::FpRangeDlg(MainFrame *frame)
-: PropPanel(frame, frame,
+: PropDialog(frame, frame,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(400, 200)),
-	wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER|
-	wxMAXIMIZE_BOX|wxMINIMIZE_BOX| wxSTAY_ON_TOP,
+	wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER |
+	wxMAXIMIZE_BOX | wxMINIMIZE_BOX | wxSTAY_ON_TOP,
 	wxString("Data Conversion"))
 {
 	// temporarily block events during constructor:
@@ -63,6 +63,7 @@ FpRangeDlg::FpRangeDlg(MainFrame *frame)
 		wxDefaultPosition, wxDefaultSize);
 	m_min_text = new wxTextCtrl(this, wxID_ANY, "0.0",
 		wxDefaultPosition, wxDefaultSize , wxTE_RIGHT, vald_fp);
+	m_min_text->Bind(wxEVT_TEXT, &FpRangeDlg::OnMinText, this);
 	sizer2->Add(10, 10);
 	sizer2->Add(st, 0, wxALIGN_CENTER);
 	sizer2->Add(10, 10);
@@ -71,6 +72,7 @@ FpRangeDlg::FpRangeDlg(MainFrame *frame)
 		wxDefaultPosition, wxDefaultSize);
 	m_max_text = new wxTextCtrl(this, wxID_ANY, "1.0",
 		wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, vald_fp);
+	m_max_text->Bind(wxEVT_TEXT, &FpRangeDlg::OnMaxText, this);
 	sizer2->Add(10, 10);
 	sizer2->Add(st, 0, wxALIGN_CENTER);
 	sizer2->Add(10, 10);
@@ -78,10 +80,12 @@ FpRangeDlg::FpRangeDlg(MainFrame *frame)
 
 	//buttons
 	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
-	m_ok_btn = new wxButton(this, wxID_OK, "Yes",
+	m_ok_btn = new wxButton(this, wxID_ANY, "Yes",
 		wxDefaultPosition, wxDefaultSize);
-	m_cancel_btn = new wxButton(this, wxID_CANCEL, "Use Default",
+	m_cancel_btn = new wxButton(this, wxID_ANY, "Use Default",
 		wxDefaultPosition, wxDefaultSize);
+	m_ok_btn->Bind(wxEVT_BUTTON, &FpRangeDlg::OnOkBtn, this);
+	m_cancel_btn->Bind(wxEVT_BUTTON, &FpRangeDlg::OnCancelBtn, this);
 	sizer3->AddStretchSpacer(1);
 	sizer3->Add(m_ok_btn, 0, wxALIGN_CENTER);
 	sizer3->Add(5, 5);
@@ -100,6 +104,8 @@ FpRangeDlg::FpRangeDlg(MainFrame *frame)
 
 	SetSizer(sizer_v);
 	Layout();
+
+	Bind(wxEVT_SHOW, &FpRangeDlg::OnShow, this);
 }
 
 FpRangeDlg::~FpRangeDlg()
@@ -108,7 +114,25 @@ FpRangeDlg::~FpRangeDlg()
 
 void FpRangeDlg::FluoUpdate(const fluo::ValueCollection& vc)
 {
+	//update user interface
+	if (FOUND_VALUE(gstNull))
+		return;
+	bool update_all = vc.empty();
 
+	wxString str;
+
+	if (update_all || FOUND_VALUE(gstFpRangeMin))
+	{
+		m_fp_min = glbin_settings.m_fp_min;
+		str = wxString::Format("%.2f", m_fp_min);
+		m_min_text->ChangeValue(str);
+	}
+	if (update_all || FOUND_VALUE(gstFpRangeMax))
+	{
+		m_fp_max = glbin_settings.m_fp_max;
+		str = wxString::Format("%.2f", m_fp_max);
+		m_max_text->ChangeValue(str);
+	}
 }
 
 void FpRangeDlg::OnMinText(wxCommandEvent& event)
@@ -116,7 +140,7 @@ void FpRangeDlg::OnMinText(wxCommandEvent& event)
 	wxString str = m_min_text->GetValue();
 	double dval;
 	if (str.ToDouble(&dval))
-		glbin_settings.m_fp_min = dval;
+		m_fp_min = dval;
 }
 
 void FpRangeDlg::OnMaxText(wxCommandEvent& event)
@@ -124,5 +148,22 @@ void FpRangeDlg::OnMaxText(wxCommandEvent& event)
 	wxString str = m_max_text->GetValue();
 	double dval;
 	if (str.ToDouble(&dval))
-		glbin_settings.m_fp_max = dval;
+		m_fp_max = dval;
+}
+
+void FpRangeDlg::OnShow(wxShowEvent& event)
+{
+	FluoUpdate({});
+}
+
+void FpRangeDlg::OnOkBtn(wxCommandEvent& event)
+{
+	glbin_settings.m_fp_min = m_fp_min;
+	glbin_settings.m_fp_max = m_fp_max;
+	Hide();
+}
+
+void FpRangeDlg::OnCancelBtn(wxCommandEvent& event)
+{
+	Hide();
 }

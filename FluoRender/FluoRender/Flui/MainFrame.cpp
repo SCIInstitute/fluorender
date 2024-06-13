@@ -492,6 +492,7 @@ MainFrame::MainFrame(
 
 	//floating point volume range
 	m_fp_range_dlg = new FpRangeDlg(this);
+	m_fp_range_dlg->Hide();
 
 	//help dialog
 	m_help_dlg = new HelpDlg(this);
@@ -2118,7 +2119,7 @@ bool MainFrame::update_props(int excl_self, wxWindow* p1, wxWindow* p2)
 	return false;
 }
 
-void MainFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, PropPanel* panel)
+void MainFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, wxWindow* panel)
 {
 	//frame
 	if (update_props(excl_self, this, panel))

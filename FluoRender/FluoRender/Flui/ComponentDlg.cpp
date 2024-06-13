@@ -1101,14 +1101,14 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstDensityWindowSize))
 	{
 		ival = glbin_comp_generator.GetDensityWinSize();
-		m_density_window_size_sldr->ChangeValue(dval);
-		m_density_window_size_text->ChangeValue(wxString::Format("%d", dval));
+		m_density_window_size_sldr->ChangeValue(ival);
+		m_density_window_size_text->ChangeValue(wxString::Format("%d", ival));
 	}
 	if (update_all || FOUND_VALUE(gstDensityStatsSize))
 	{
 		ival = glbin_comp_generator.GetDensityStatSize();
-		m_density_stats_size_sldr->ChangeValue(dval);
-		m_density_stats_size_text->ChangeValue(wxString::Format("%d", dval));
+		m_density_stats_size_sldr->ChangeValue(ival);
+		m_density_stats_size_text->ChangeValue(wxString::Format("%d", ival));
 	}
 	//dist
 	if (update_all || FOUND_VALUE(gstUseDistField))
@@ -1133,14 +1133,14 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstDistFieldFilterSize))
 	{
 		ival = glbin_comp_generator.GetDistFilterSize();
-		m_dist_filter_size_sldr->ChangeValue(dval);
-		m_dist_filter_size_text->ChangeValue(wxString::Format("%d", dval));
+		m_dist_filter_size_sldr->ChangeValue(ival);
+		m_dist_filter_size_text->ChangeValue(wxString::Format("%d", ival));
 	}
 	if (update_all || FOUND_VALUE(gstMaxDist))
 	{
 		ival = glbin_comp_generator.GetMaxDist();
-		m_max_dist_sldr->ChangeValue(dval);
-		m_max_dist_text->ChangeValue(wxString::Format("%d", dval));
+		m_max_dist_sldr->ChangeValue(ival);
+		m_max_dist_text->ChangeValue(wxString::Format("%d", ival));
 	}
 	if (update_all || FOUND_VALUE(gstDistFieldThresh))
 	{
@@ -1243,7 +1243,7 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (update_all || FOUND_VALUE(gstClusterEps))
 	{
-		ival = glbin_clusterizer.GetEps();
+		dval = glbin_clusterizer.GetEps();
 		m_cluster_eps_sldr->ChangeValue(std::round(dval * 10.0));
 		m_cluster_eps_text->SetValue(wxString::Format("%.1f", dval));
 	}

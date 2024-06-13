@@ -5579,7 +5579,7 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 			FpRangeDlg* dlg = m_frame->GetFpRangeDlg();
 			//dlg->SetRange(minv, maxv);
 			dlg->CenterOnParent();
-			int rval = dlg->Show();
+			int rval = dlg->ShowModal();
 			//if (rval == wxID_OK)
 			//{
 			//	minv = dlg->GetMinValue();

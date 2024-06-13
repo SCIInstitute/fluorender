@@ -35,19 +35,14 @@ DEALINGS IN THE SOFTWARE.
 
 class MainFrame;
 class wxBasisSlider;
-class PropPanel: public wxScrolledWindow
+class PropBase
 {
 public:
-	PropPanel(MainFrame* frame,
-		wxWindow* parent,
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = 0,
-		const wxString& name = "PropPanel");
-	~PropPanel();
+	PropBase(MainFrame* frame);
+	~PropBase() {};
 
-	virtual void LoadPerspective();
-	virtual void SavePerspective();
+	virtual void LoadPerspective() {};
+	virtual void SavePerspective() {};
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {}) = 0;
 	//excl_self: 0 - update all; 1 - exclude this; 2 - only this; 3 - update none
 	virtual void FluoRefresh(int excl_self = 1,
@@ -58,7 +53,36 @@ public:
 protected:
 	MainFrame* m_frame;
 
-	double getDpiScaleFactor();
+	virtual double getDpiScaleFactor();
 };
+
+class PropPanel : public PropBase, public wxScrolledWindow
+{
+public:
+	PropPanel(MainFrame* frame,
+		wxWindow* parent,
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = 0,
+		const wxString& name = "PropPanel");
+	~PropPanel() {};
+
+protected:
+};
+
+class PropDialog : public PropBase, public wxDialog
+{
+public:
+	PropDialog(MainFrame* frame,
+		wxWindow* parent,
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = 0,
+		const wxString& name = "PropPanel");
+	~PropDialog() {};
+
+protected:
+};
+
 
 #endif//_PROPPANEL_H_

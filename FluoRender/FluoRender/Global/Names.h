@@ -689,6 +689,9 @@ DEALINGS IN THE SOFTWARE.
 #define gstCountMaxValue "count max value"
 #define gstCountUseMax "count use max"
 #define gstCountResult "count result"
+//fp range
+#define gstFpRangeMin "fp range min"
+#define gstFpRangeMax "fp range max"
 //measure agent
 #define gstRulerEdited "ruler edited"
 #define gstRulerRelaxIter "ruler relax iter"

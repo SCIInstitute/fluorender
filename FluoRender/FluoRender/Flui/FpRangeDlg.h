@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 
-class FpRangeDlg : public PropPanel
+class FpRangeDlg : public PropDialog
 {
 public:
 	FpRangeDlg(MainFrame* frame);
@@ -39,6 +39,9 @@ public:
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 private:
+	double m_fp_min;
+	double m_fp_max;
+
 	//text boxes
 	wxTextCtrl* m_min_text;
 	wxTextCtrl* m_max_text;
@@ -50,6 +53,9 @@ private:
 	//text boxes
 	void OnMinText(wxCommandEvent& event);
 	void OnMaxText(wxCommandEvent& event);
+	void OnShow(wxShowEvent& event);
+	void OnOkBtn(wxCommandEvent& event);
+	void OnCancelBtn(wxCommandEvent& event);
 };
 
 #endif//_FPRANGEDLG_H_

@@ -30,32 +30,12 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderCanvas.h>
 #include <RenderViewPanel.h>
 
-PropPanel::PropPanel(MainFrame* frame,
-	wxWindow* parent,
-	const wxPoint& pos,
-	const wxSize& size,
-	long style,
-	const wxString& name) :
-	wxScrolledWindow(parent, wxID_ANY, pos, size,style, name),
+PropBase::PropBase(MainFrame* frame):
 	m_frame(frame)
 {
 }
 
-PropPanel::~PropPanel()
-{
-}
-
-void PropPanel::LoadPerspective()
-{
-
-}
-
-void PropPanel::SavePerspective()
-{
-
-}
-
-void PropPanel::FluoRefresh(int excl_self,
+void PropBase::FluoRefresh(int excl_self,
 	const fluo::ValueCollection& vc, const std::set<int>& views)
 {
 	if (!m_frame)
@@ -64,10 +44,11 @@ void PropPanel::FluoRefresh(int excl_self,
 	if (dynamic_cast<RenderViewPanel*>(this))
 		view_excl = excl_self;
 	m_frame->RefreshCanvases(views);
-	m_frame->UpdateProps(vc, excl_self, this);//update ui but exclude this
+	wxWindow* win = dynamic_cast<wxWindow*>(this);
+	m_frame->UpdateProps(vc, excl_self, win);//update ui but exclude this
 }
 
-void PropPanel::SetFocusVRenderViews(wxBasisSlider* slider)
+void PropBase::SetFocusVRenderViews(wxBasisSlider* slider)
 {
 	if (m_frame)
 	{
@@ -82,9 +63,39 @@ void PropPanel::SetFocusVRenderViews(wxBasisSlider* slider)
 	}
 }
 
-double PropPanel::getDpiScaleFactor()
+double PropBase::getDpiScaleFactor()
 {
-	double dpi_sf = GetDPIScaleFactor();
-	double dpi_sf2 = std::round(dpi_sf - 0.1);
-	return dpi_sf2 < dpi_sf ? dpi_sf : 1;
+	wxWindow* win = dynamic_cast<wxWindow*>(this);
+	if (win)
+	{
+		double dpi_sf = win->GetDPIScaleFactor();
+		double dpi_sf2 = std::round(dpi_sf - 0.1);
+		return dpi_sf2 < dpi_sf ? dpi_sf : 1;
+	}
+	return 1;
 }
+
+PropPanel::PropPanel(MainFrame* frame,
+	wxWindow* parent,
+	const wxPoint& pos,
+	const wxSize& size,
+	long style,
+	const wxString& name) :
+	PropBase(frame),
+	wxScrolledWindow(parent, wxID_ANY, pos, size, style, name)
+{
+
+}
+
+PropDialog::PropDialog(MainFrame* frame,
+	wxWindow* parent,
+	const wxPoint& pos,
+	const wxSize& size,
+	long style,
+	const wxString& name) :
+	PropBase(frame),
+	wxDialog(parent, wxID_ANY, name, pos, size, style)
+{
+
+}
+

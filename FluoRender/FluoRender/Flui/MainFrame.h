@@ -232,7 +232,7 @@ public:
 		MeshData* md = 0,
 		Annotations* ann = 0,
 		bool show = true);
-	void UpdateProps(const fluo::ValueCollection &vc, int excl_self = 1, PropPanel* panel = 0);
+	void UpdateProps(const fluo::ValueCollection &vc, int excl_self = 1, wxWindow* panel = 0);
 	void FluoUpdate(const fluo::ValueCollection& vc);
 	VolumePropPanel* FindVolumeProps(VolumeData* vd);
 	MeshPropPanel* FindMeshProps(MeshData* md);
