@@ -59,15 +59,17 @@ m_max_value(255.0)
 	//component analyzer
 	//size of ccl
 	wxBoxSizer *sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_ca_select_only_chk = new wxCheckBox(this, ID_CASelectOnlyChk, "Selct. Only",
+	m_ca_select_only_chk = new wxCheckBox(this, wxID_ANY, "Selct. Only",
 		wxDefaultPosition, FromDIP(wxSize(95, 20)));
+	m_ca_select_only_chk->Bind(wxEVT_CHECKBOX, &CountingDlg::OnUseSelChk, this);
 	sizer_1->Add(m_ca_select_only_chk, 0, wxALIGN_CENTER);
 	sizer_1->AddStretchSpacer();
 	st = new wxStaticText(this, 0, "Min:",
 		wxDefaultPosition, FromDIP(wxSize(35, 15)));
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
-	m_ca_min_text = new wxTextCtrl(this, ID_CAMinText, "0",
+	m_ca_min_text = new wxTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
+	m_ca_min_text->Bind(wxEVT_TEXT, &CountingDlg::OnMinText, this);
 	sizer_1->Add(m_ca_min_text, 0, wxALIGN_CENTER);
 	st = new wxStaticText(this, 0, "vx",
 		wxDefaultPosition, FromDIP(wxSize(15, 15)));
@@ -76,39 +78,42 @@ m_max_value(255.0)
 	st = new wxStaticText(this, 0, "Max:",
 		wxDefaultPosition, FromDIP(wxSize(35, 15)));
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
-	m_ca_max_text = new wxTextCtrl(this, ID_CAMaxText, "1000",
+	m_ca_max_text = new wxTextCtrl(this, wxID_ANY, "1000",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
+	m_ca_max_text->Bind(wxEVT_TEXT, &CountingDlg::OnMaxText, this);
 	sizer_1->Add(m_ca_max_text, 0, wxALIGN_CENTER);
 	st = new wxStaticText(this, 0, "vx",
 		wxDefaultPosition, FromDIP(wxSize(15, 15)));
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->AddStretchSpacer();
-	m_ca_ignore_max_chk = new wxCheckBox(this, ID_CAIgnoreMaxChk, "Ignore Max");
+	m_ca_ignore_max_chk = new wxCheckBox(this, wxID_ANY, "Ignore Max");
+	m_ca_ignore_max_chk->Bind(wxEVT_CHECKBOX, &CountingDlg::OnIgnoreMaxChk, this);
 	sizer_1->Add(m_ca_ignore_max_chk, 0, wxALIGN_CENTER);
 	//text result
 	wxBoxSizer *sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Components:  ");
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
-	m_ca_comps_text = new wxTextCtrl(this, ID_CACompsText, "0",
+	m_ca_comps_text = new wxTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_READONLY | wxTE_RIGHT);
 	sizer_2->Add(m_ca_comps_text, 2, wxALIGN_CENTER);
 	st = new wxStaticText(this, 0, "Total Volume:  ");
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
-	m_ca_volume_text = new wxTextCtrl(this, ID_CAVolumeText, "0",
+	m_ca_volume_text = new wxTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_READONLY | wxTE_RIGHT);
 	sizer_2->Add(m_ca_volume_text, 2, wxALIGN_CENTER);
 	st = new wxStaticText(this, 0, "vx",
 		wxDefaultPosition, FromDIP(wxSize(15, 15)));
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(5, 5);
-	m_ca_vol_unit_text = new wxTextCtrl(this, ID_CAVolUnitText, "0",
+	m_ca_vol_unit_text = new wxTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(90, 20)), wxTE_READONLY | wxTE_RIGHT);
 	sizer_2->Add(m_ca_vol_unit_text, 3, wxALIGN_CENTER);
 	//export
 	wxBoxSizer *sizer_3 = new wxBoxSizer(wxHORIZONTAL);
 	sizer_3->AddStretchSpacer();
-	m_ca_analyze_btn = new wxButton(this, ID_CAAnalyzeBtn, "Analyze",
+	m_ca_analyze_btn = new wxButton(this, wxID_ANY, "Analyze",
 		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
+	m_ca_analyze_btn->Bind(wxEVT_BUTTON, &CountingDlg::OnAnalyzeBtn, this);
 	sizer_3->Add(m_ca_analyze_btn, 0, wxALIGN_CENTER);
 
 	//all controls
@@ -122,8 +127,6 @@ m_max_value(255.0)
 
 	SetSizer(sizerV);
 	Layout();
-
-	LoadDefault();
 }
 
 CountingDlg::~CountingDlg()
@@ -132,110 +135,131 @@ CountingDlg::~CountingDlg()
 
 void CountingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 {
+	//update user interface
+	if (FOUND_VALUE(gstNull))
+		return;
+	bool update_all = vc.empty();
 
-}
-
-//load default
-void CountingDlg::LoadDefault()
-{
 	bool bval;
+	int ival;
 	wxString str;
-	//component analyzer
+
 	//selected only
-	m_ca_select_only_chk->SetValue(glbin_comp_def.m_use_sel);
+	if (update_all || FOUND_VALUE(gstUseSelection))
+	{
+		bval = glbin_comp_generator.GetUseSel();
+		m_ca_select_only_chk->SetValue(bval);
+	}
 	//min voxel
-	str = wxString::Format("%d", glbin_comp_def.m_min_num);
-	m_ca_min_text->ChangeValue(str);
+	if (update_all || FOUND_VALUE(gstCountMinValue))
+	{
+		ival = glbin_comp_analyzer.GetMinNum();
+		str = wxString::Format("%d", ival);
+		m_ca_min_text->ChangeValue(str);
+	}
 	//max voxel
-	str = wxString::Format("%d", glbin_comp_def.m_max_num);
-	m_ca_max_text->ChangeValue(str);
+	if (update_all || FOUND_VALUE(gstCountMaxValue))
+	{
+		ival = glbin_comp_analyzer.GetMaxNum();
+		str = wxString::Format("%d", ival);
+		m_ca_max_text->ChangeValue(str);
+	}
 	//ignore max
-	bval = glbin_comp_def.m_use_min && !glbin_comp_def.m_use_max;
-	m_ca_ignore_max_chk->SetValue(bval);
-	m_ca_max_text->Enable(bval);
+	if (update_all || FOUND_VALUE(gstCountUseMax))
+	{
+		bval = !glbin_comp_analyzer.GetUseMax();
+		m_ca_ignore_max_chk->SetValue(bval);
+		m_ca_max_text->Enable(bval);
+	}
+	//result
+	if (FOUND_VALUE(gstCountResult))
+		OutputSize();
 }
 
-void CountingDlg::OnCAIgnoreMaxChk(wxCommandEvent& event)
+void CountingDlg::OutputSize()
+{
+	size_t count = glbin_comp_analyzer.GetCount();
+	size_t vox = glbin_comp_analyzer.GetVox();
+	double size = glbin_comp_analyzer.GetSize();
+
+	m_ca_comps_text->ChangeValue(wxString::Format("%d", count));
+	m_ca_volume_text->ChangeValue(wxString::Format("%d", vox));
+
+	wxString vol_unit_text;
+	vol_unit_text = wxString::Format("%.0f", size);
+	vol_unit_text += " ";
+	RenderCanvas* view = glbin_current.canvas;
+	if (!view)
+		return;
+	switch (view->m_sb_unit)
+	{
+	case 0:
+		vol_unit_text += L"nm\u00B3";
+		break;
+	case 1:
+	default:
+		vol_unit_text += L"\u03BCm\u00B3";
+		break;
+	case 2:
+		vol_unit_text += L"mm\u00B3";
+		break;
+	}
+
+	m_ca_vol_unit_text->ChangeValue(vol_unit_text);
+}
+
+void CountingDlg::OnUseSelChk(wxCommandEvent& event)
+{
+	bool bval = m_ca_select_only_chk->GetValue();
+	glbin_comp_generator.SetUseSel(bval);
+}
+
+void CountingDlg::OnMinText(wxCommandEvent& event)
+{
+	long ival;
+	wxString str = m_ca_min_text->GetValue();
+	if (str.ToLong(&ival))
+	{
+		glbin_comp_analyzer.SetUseMin(true);
+		glbin_comp_analyzer.SetMinNum(ival);
+	}
+}
+
+void CountingDlg::OnMaxText(wxCommandEvent& event)
+{
+	long ival;
+	wxString str = m_ca_max_text->GetValue();
+	if (str.ToLong(&ival))
+	{
+		glbin_comp_analyzer.SetUseMax(true);
+		glbin_comp_analyzer.SetMaxNum(ival);
+	}
+}
+
+void CountingDlg::OnIgnoreMaxChk(wxCommandEvent& event)
 {
 	bool val = m_ca_ignore_max_chk->GetValue();
-	m_ca_max_text->Enable(val);
+	glbin_comp_analyzer.SetUseMax(!val);
+	FluoUpdate({ gstCountUseMax });
 }
 
 //component analyze
-void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent& event)
+void CountingDlg::OnAnalyzeBtn(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return;
 
-	bool select = m_ca_select_only_chk->GetValue();
-
 	glbin_comp_generator.SetVolumeData(vd);
-	glbin_comp_generator.SetUseSel(select);
-	vd->AddEmptyMask(1, !glbin_comp_generator.GetUseSel());
-	vd->AddEmptyLabel(0, !glbin_comp_generator.GetUseSel());
+	bool sel = glbin_comp_generator.GetUseSel();
+	vd->AddEmptyMask(1, !sel);
+	vd->AddEmptyLabel(0, !sel);
 	glbin_comp_generator.ShuffleID();
-	double scale = vd->GetScalarScale();
 	glbin_comp_generator.Grow();
-
 	glbin_comp_analyzer.SetVolume(vd);
-	glbin_comp_analyzer.Analyze(select);
-	m_view->RefreshGL(39);
+	glbin_comp_analyzer.Analyze(sel);
+	glbin_comp_analyzer.Count();
 
-	flrd::CelpList *list = glbin_comp_analyzer.GetCelpList();
-	if (!list || list->empty())
-		return;
-
-	double min_voxels, max_voxels;
-	wxString str = m_ca_min_text->GetValue();
-	str.ToDouble(&min_voxels);
-	str = m_ca_max_text->GetValue();
-	str.ToDouble(&max_voxels);
-	bool ignore_max = m_ca_ignore_max_chk->GetValue();
-
-	int count = 0;
-	unsigned int vox = 0;
-	for (auto it = list->begin();
-		it != list->end(); ++it)
-	{
-		unsigned int sumi = it->second->GetSizeUi();
-		if (sumi > min_voxels &&
-			(ignore_max ||
-			(!ignore_max && sumi < max_voxels)))
-		{
-			++count;
-			vox += sumi;
-		}
-	}
-
-	if (count > 0)
-	{
-		m_ca_comps_text->ChangeValue(wxString::Format("%d", count));
-		m_ca_volume_text->ChangeValue(wxString::Format("%d", vox));
-
-		double spcx, spcy, spcz;
-		vd->GetSpacings(spcx, spcy, spcz);
-		double vol_unit = vox * spcx*spcy*spcz;
-		wxString vol_unit_text;
-		vol_unit_text = wxString::Format("%.0f", vol_unit);
-		vol_unit_text += " ";
-		switch (m_view->m_sb_unit)
-		{
-		case 0:
-			vol_unit_text += L"nm\u00B3";
-			break;
-		case 1:
-		default:
-			vol_unit_text += L"\u03BCm\u00B3";
-			break;
-		case 2:
-			vol_unit_text += L"mm\u00B3";
-			break;
-		}
-
-		m_ca_vol_unit_text->ChangeValue(vol_unit_text);
-	}
+	FluoRefresh(2, { gstCountResult });
 }
 

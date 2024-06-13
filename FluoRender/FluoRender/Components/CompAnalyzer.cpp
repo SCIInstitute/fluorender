@@ -626,6 +626,32 @@ void ComponentAnalyzer::MakeColorConsistent()
 	//m_sig_progress();
 }
 
+void ComponentAnalyzer::Count()
+{
+	flrd::CelpList* list = GetCelpList();
+	if (!list || list->empty())
+		return;
+
+	for (auto it = list->begin();
+		it != list->end(); ++it)
+	{
+		unsigned int sumi = it->second->GetSizeUi();
+		if (sumi > m_min_num &&
+			(!m_use_max ||
+				(m_use_max && sumi < m_max_num)))
+		{
+			++m_count;
+			m_vox += sumi;
+		}
+	}
+	VolumeData* vd = m_compgroup->vd;
+	if (!vd)
+		return;
+	double spcx, spcy, spcz;
+	vd->GetSpacings(spcx, spcy, spcz);
+	m_size = m_vox * spcx * spcy * spcz;
+}
+
 size_t ComponentAnalyzer::GetListSize()
 {
 	if (!m_compgroup)

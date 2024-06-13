@@ -685,6 +685,10 @@ DEALINGS IN THE SOFTWARE.
 #define gstVolMeshWeld "vol mesh weld"
 #define gstVolMeshInfo "vol mesh info"
 //counting agent
+#define gstCountMinValue "count min value"
+#define gstCountMaxValue "count max value"
+#define gstCountUseMax "count use max"
+#define gstCountResult "count result"
 //measure agent
 #define gstRulerEdited "ruler edited"
 #define gstRulerRelaxIter "ruler relax iter"

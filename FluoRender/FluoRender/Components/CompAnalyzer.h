@@ -136,11 +136,24 @@ namespace flrd
 		{
 			return m_bn;
 		}
+		//count
+		void SetUseMin(bool val) { m_use_min = val; }
+		void SetUseMax(bool val) { m_use_max = val; }
+		bool GetUseMin() { return m_use_min; }
+		bool GetUseMax() { return m_use_max; }
+		void SetMinNum(unsigned int num) { m_min_num = num; }
+		void SetMaxNum(unsigned int num) { m_max_num = num; }
+		int GetMinNum() { return m_min_num; }
+		int GetMaxNum() { return m_max_num; }
+		size_t GetCount() { return m_count; }
+		size_t GetVox() { return m_vox; }
+		double GetSize() { return m_size; }
 
 		void Analyze(bool sel);
 		void MatchBricks(bool sel);
 		void UpdateMaxCompSize(bool);
 		void MakeColorConsistent();
+		void Count();
 
 		size_t GetCompSize();
 		size_t GetListSize();
@@ -197,6 +210,16 @@ namespace flrd
 		//selection
 		std::vector<unsigned int> m_sel_ids;
 		std::vector<unsigned int> m_sel_bids;
+
+		//count
+		bool m_use_min;
+		bool m_use_max;
+		unsigned int m_min_num;
+		unsigned int m_max_num;
+		//result
+		size_t m_count;
+		size_t m_vox;
+		double m_size;
 
 	private:
 		unsigned int GetExt(unsigned int* data_label,

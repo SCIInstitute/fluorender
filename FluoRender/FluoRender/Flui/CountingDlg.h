@@ -49,6 +49,7 @@ public:
 	~CountingDlg();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	void OutputSize();
 
 private:
 	//max volume value
@@ -66,8 +67,11 @@ private:
 
 private:
 	//component analyzer
-	void OnCAAnalyzeBtn(wxCommandEvent& event);
-	void OnCAIgnoreMaxChk(wxCommandEvent& event);
+	void OnUseSelChk(wxCommandEvent& event);
+	void OnMinText(wxCommandEvent& event);
+	void OnMaxText(wxCommandEvent& event);
+	void OnIgnoreMaxChk(wxCommandEvent& event);
+	void OnAnalyzeBtn(wxCommandEvent& event);
 };
 
 #endif//_COUNTINGDLG_H_
