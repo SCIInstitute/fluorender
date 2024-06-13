@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <base_reader.h>
-#include <FLIVR/TextureBrick.h>
+#include <TextureBrick.h>
 #include <tinyxml2.h>
 
 using namespace std;

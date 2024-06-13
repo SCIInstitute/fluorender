@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define FL_Compare_h
 
 #include <DataManager.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
+#include <KernelProgram.h>
+#include <VolKernel.h>
 #include <functional>
 
 class VolumeData;

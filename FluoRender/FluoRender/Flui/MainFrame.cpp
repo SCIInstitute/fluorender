@@ -55,13 +55,14 @@ DEALINGS IN THE SOFTWARE.
 #include <CalculationDlg.h>
 #include <MachineLearningDlg.h>
 #include <ScriptBreakDlg.h>
+#include <FpRangeDlg.h>
 #include <AsyncTimerFactory.hpp>
 #include <Tester.h>
 #include <JVMInitializer.h>
-#include <Formats/png_resource.h>
-#include <Formats/msk_writer.h>
-#include <Formats/msk_reader.h>
-#include <Converters/VolumeMeshConv.h>
+#include <png_resource.h>
+#include <msk_writer.h>
+#include <msk_reader.h>
+#include <VolumeMeshConv.h>
 #include <wx/artprov.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
@@ -76,7 +77,7 @@ DEALINGS IN THE SOFTWARE.
 #include <cctype>
 
 //resources
-#include <img/icons.h>
+#include <icons.h>
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(wxID_EXIT, MainFrame::OnExit)
@@ -168,10 +169,7 @@ MainFrame::MainFrame(
 	m_component_dlg(0),
 	m_machine_learning_dlg(0),
 	m_script_break_dlg(0),
-	//m_volume_prop(0),
-	//m_mesh_prop(0),
-	//m_mesh_manip(0),
-	//m_annotation_prop(0),
+	m_fp_range_dlg(0),
 	m_ui_state(true),
 	m_benchmark(benchmark),
 	//m_vd_copy(0),
@@ -491,6 +489,9 @@ MainFrame::MainFrame(
 
 	//script break dialog
 	m_script_break_dlg = new ScriptBreakDlg(this);
+
+	//floating point volume range
+	m_fp_range_dlg = new FpRangeDlg(this);
 
 	//help dialog
 	m_help_dlg = new HelpDlg(this);
@@ -2140,6 +2141,18 @@ void MainFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, Prop
 		if (update_props(excl_self, i, panel))
 			i->FluoUpdate(vc);
 	//dialogs
+	if (update_props(excl_self, m_brush_tool_dlg, panel))
+		m_brush_tool_dlg->FluoUpdate(vc);
+	if (update_props(excl_self, m_calculation_dlg, panel))
+		m_calculation_dlg->FluoUpdate(vc);
+	if (update_props(excl_self, m_colocalization_dlg, panel))
+		m_colocalization_dlg->FluoUpdate(vc);
+	if (update_props(excl_self, m_component_dlg, panel))
+		m_component_dlg->FluoUpdate(vc);
+	if (update_props(excl_self, m_convert_dlg, panel))
+		m_convert_dlg->FluoUpdate(vc);
+	if (update_props(excl_self, m_counting_dlg, panel))
+		m_counting_dlg->FluoUpdate(vc);
 	if (update_props(excl_self, m_setting_dlg, panel))
 		m_setting_dlg->FluoUpdate(vc);
 }
@@ -2325,6 +2338,12 @@ CalculationDlg* MainFrame::GetCalculationDlg()
 ScriptBreakDlg* MainFrame::GetScriptBreakDlg()
 {
 	return m_script_break_dlg;
+}
+
+//floating point volume range
+FpRangeDlg* MainFrame::GetFpRangeDlg()
+{
+	return m_fp_range_dlg;
 }
 
 void MainFrame::RefreshCanvases(const std::set<int>& views)

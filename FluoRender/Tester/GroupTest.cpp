@@ -1,10 +1,10 @@
 #include "tests.h"
 #include "asserts.h"
 #include <vector>
-#include <Flobject/Group.hpp>
-#include <Flobject/ValueUpdateVisitor.hpp>
-#include <Flobject/DecycleVisitor.hpp>
-#include <Flobject/InfoVisitor.hpp>
+#include <Group.hpp>
+#include <ValueUpdateVisitor.hpp>
+#include <DecycleVisitor.hpp>
+#include <InfoVisitor.hpp>
 
 using namespace std;
 using namespace fluo;

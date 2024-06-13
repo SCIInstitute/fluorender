@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Types/Color.h>
-#include <Types/Utils.h>
+#include <Color.h>
+#include <Utils.h>
 
 namespace fluo
 {

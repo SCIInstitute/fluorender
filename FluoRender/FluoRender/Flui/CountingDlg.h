@@ -33,18 +33,6 @@ DEALINGS IN THE SOFTWARE.
 class CountingDlg : public PropPanel
 {
 public:
-	//enum
-	//{
-	//	ID_CASelectOnlyChk = ID_COUNTING,
-	//	ID_CAMinText,
-	//	ID_CAMaxText,
-	//	ID_CAIgnoreMaxChk,
-	//	ID_CAAnalyzeBtn,
-	//	ID_CACompsText,
-	//	ID_CAVolumeText,
-	//	ID_CAVolUnitText
-	//};
-
 	CountingDlg(MainFrame* frame);
 	~CountingDlg();
 

@@ -26,10 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Types/Plane.h>
-#include <Types/Point.h>
-#include <Types/Vector.h>
-#include <Types/Quaternion.h>
+#include <Plane.h>
+#include <Point.h>
+#include <Vector.h>
+#include <Quaternion.h>
 #include <iostream>
 
 namespace fluo

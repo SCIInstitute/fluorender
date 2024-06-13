@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _RulerHandler_H_
 #define _RulerHandler_H_
 
-#include <Distance/Ruler.h>
-#include <Selection/VolumePoint.h>
+#include <Ruler.h>
+#include <VolumePoint.h>
 #include <string>
 #include <algorithm>
 

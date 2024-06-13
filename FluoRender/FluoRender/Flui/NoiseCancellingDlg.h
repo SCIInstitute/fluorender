@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _NOISECANCELLINGDLG_H_
 
 #include <wx/wx.h>
-#include <Types/Color.h>
+#include <Color.h>
 
 class MainFrame;
 class RenderCanvas;

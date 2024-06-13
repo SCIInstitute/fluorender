@@ -29,8 +29,8 @@
 #ifndef _FLRAY_H_
 #define _FLRAY_H_
 
-#include <Types/Point.h>
-#include <Types/Vector.h>
+#include <Point.h>
+#include <Vector.h>
 
 namespace fluo
 {

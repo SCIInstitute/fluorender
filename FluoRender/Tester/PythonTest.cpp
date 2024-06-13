@@ -1,6 +1,6 @@
 #include "tests.h"
 #include "asserts.h"
-#include <Python/PyDlc.h>
+#include <PyDlc.h>
 #include <wx/wx.h>
 
 void PythonTest0()

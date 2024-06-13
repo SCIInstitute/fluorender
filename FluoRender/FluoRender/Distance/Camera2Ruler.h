@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _CAMERA2RULER_H_
 #define _CAMERA2RULER_H_
 
-#include <Distance/Ruler.h>
+#include <Ruler.h>
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <vector>

@@ -32,13 +32,13 @@ DEALINGS IN THE SOFTWARE.
 #include <NoiseCancellingDlg.h>
 #include <CountingDlg.h>
 #include <TreePanel.h>
-#include <Calculate/Count.h>
+#include <Count.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 //resources
-#include "Formats/png_resource.h"
-#include <img/icons.h>
+#include <png_resource.h>
+#include <icons.h>
 
 #define GM_2_ESTR(x) (1.0 - sqrt(1.0 - (x - 1.0) * (x - 1.0)))
 

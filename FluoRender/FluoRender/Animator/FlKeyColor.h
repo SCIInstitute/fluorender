@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _FLKEY_COLOR_H_
 
 #include "FlKey.h"
-#include <Types/Color.h>
+#include <Color.h>
 
 class FlKeyColor : public FlKey
 {

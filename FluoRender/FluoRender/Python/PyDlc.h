@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PyBase.h>
 #include <compatibility.h>
-#include <Types/Point.h>
+#include <Point.h>
 #include <regex>
 #include <boost/lexical_cast.hpp>
 

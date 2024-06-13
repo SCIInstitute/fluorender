@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <cl_code.h>
 #include <cl_code_db.h>
-#include <Database/EntryHist.h>
-#include <Database/EntryParams.h>
+#include <EntryHist.h>
+#include <EntryParams.h>
 #include <algorithm>
 #ifdef _DEBUG
 #include <Debug.h>

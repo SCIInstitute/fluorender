@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _SCRIPTPROC_H_
 #define _SCRIPTPROC_H_
 
-#include <Flobject/Group.hpp>
-#include <Tracking/VolCache.h>
-#include <Tracking/Cell.h>
+#include <Group.hpp>
+#include <VolCache.h>
+#include <Cell.h>
 #include <wx/string.h>
 #include <wx/fileconf.h>
 #include <vector>

@@ -28,10 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef REGISTRATOR_H
 #define REGISTRATOR_H
 
-#include <Types/Vector.h>
-#include <Types/Point.h>
-#include <Types/Transform.h>
-#include <Types/BBox.h>
+#include <Vector.h>
+#include <Point.h>
+#include <Transform.h>
+#include <BBox.h>
 
 class VolumeData;
 namespace flrd

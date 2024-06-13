@@ -32,9 +32,9 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <set>
 #include <map>
-#include <Types/Point.h>
-#include <Types/Color.h>
-#include <Types/Transform.h>
+#include <Point.h>
+#include <Color.h>
+#include <Transform.h>
 #include <wx/string.h>
 
 namespace flrd

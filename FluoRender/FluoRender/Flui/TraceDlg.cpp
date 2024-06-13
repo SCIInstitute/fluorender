@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MeasureDlg.h>
 #include <ComponentDlg.h>
 #include <MoviePanel.h>
-#include <Components/CompEditor.h>
+#include <CompEditor.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 #include <wx/clipbrd.h>
@@ -41,7 +41,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/txtstrm.h>
 #include <wx/dirdlg.h>
 #include <png_resource.h>
-#include <img/icons.h>
+#include <icons.h>
 #include <set>
 #include <limits>
 #include <chrono>

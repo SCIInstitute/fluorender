@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef EXGAUSS_H
 #define EXGAUSS_H
 
-#include <Types/Point.h>
+#include <Point.h>
 #include <list>
 
 namespace flrd

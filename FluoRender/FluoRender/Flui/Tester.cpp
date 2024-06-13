@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <Tester.h>
 #include <MainFrame.h>
-#include "Formats/tif_reader.h"
+#include <tif_reader.h>
 #include <wxSingleSlider.h>
 
 BEGIN_EVENT_TABLE(TesterDlg, wxDialog)

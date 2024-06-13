@@ -32,11 +32,11 @@ DEALINGS IN THE SOFTWARE.
 #include <Debug.h>
 #endif
 #include <ExGauss.h>
-#include <Types/BBox.h>
-#include <Types/Point.h>
-#include <Types/Vector.h>
-#include <Types/Transform.h>
-#include <Types/Neighbor.h>
+#include <BBox.h>
+#include <Point.h>
+#include <Vector.h>
+#include <Transform.h>
+#include <Neighbor.h>
 #include <unordered_map>
 
 namespace flrd

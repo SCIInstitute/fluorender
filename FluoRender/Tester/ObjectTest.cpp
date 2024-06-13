@@ -1,7 +1,7 @@
 #include "tests.h"
 #include "asserts.h"
 #include <vector>
-#include <Flobject/Object.hpp>
+#include <Object.hpp>
 
 using namespace std;
 using namespace fluo;

@@ -30,11 +30,11 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderCanvas.h>
 #include <MainFrame.h>
 #include <compatibility.h>
-#include <FLIVR/TextureRenderer.h>
-#include <Selection/PaintBoxes.h>
-#include <Selection/MaskBorder.h>
-#include <Calculate/Histogram.h>
-#include <Database/RecordHistParams.h>
+#include <TextureRenderer.h>
+#include <PaintBoxes.h>
+#include <MaskBorder.h>
+#include <Histogram.h>
+#include <RecordHistParams.h>
 #include <wx/wx.h>
 #include <wx/stdpaths.h>
 #include <glm/gtc/type_ptr.hpp>

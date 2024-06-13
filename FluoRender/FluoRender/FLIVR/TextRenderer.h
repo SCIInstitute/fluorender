@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TEXTRENDERER_H_
 #define _TEXTRENDERER_H_
 
-#include <Types/Color.h>
+#include <Color.h>
 #include <GL/glew.h>
 #include <string>
 #include <map>

@@ -1,6 +1,6 @@
 #include "tests.h"
 #include "asserts.h"
-#include <Distance/Camera2Ruler.h>
+#include <Camera2Ruler.h>
 
 void OpenCVTest0()
 {

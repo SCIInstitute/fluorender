@@ -29,8 +29,8 @@
 #ifndef _QUATERNION_H_
 #define _QUATERNION_H_
 
-#include <Types/Vector.h>
-#include <Types/Utils.h>
+#include <Vector.h>
+#include <Utils.h>
 #include <math.h>
 
 #pragma warning (disable : 4521 4522)

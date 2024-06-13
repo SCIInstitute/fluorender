@@ -30,9 +30,9 @@
 #define Texture_h
 
 #include <vector>
-#include <Types/Transform.h>
+#include <Transform.h>
 #include "TextureBrick.h"
-#include <Types/Utils.h>
+#include <Utils.h>
 #include <glm/glm.hpp>
 
 namespace flvr

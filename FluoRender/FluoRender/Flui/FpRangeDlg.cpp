@@ -25,25 +25,24 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "FpRangeDlg.h"
+#include <FpRangeDlg.h>
+#include <Global.h>
 #include <MainFrame.h>
 #include <wx/valnum.h>
 
-BEGIN_EVENT_TABLE(FpRangeDlg, wxDialog)
-//text boxes
-	EVT_TEXT(ID_MinValText, FpRangeDlg::OnMinText)
-	EVT_TEXT(ID_MaxValText, FpRangeDlg::OnMaxText)
-END_EVENT_TABLE()
+//BEGIN_EVENT_TABLE(FpRangeDlg, wxDialog)
+////text boxes
+//	EVT_TEXT(ID_MinValText, FpRangeDlg::OnMinText)
+//	EVT_TEXT(ID_MaxValText, FpRangeDlg::OnMaxText)
+//END_EVENT_TABLE()
 
 FpRangeDlg::FpRangeDlg(MainFrame *frame)
-: wxDialog(frame, wxID_ANY, wxString("Data Conversion"),
+: PropPanel(frame, frame,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(400, 200)),
 	wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER|
-	wxMAXIMIZE_BOX|wxMINIMIZE_BOX| wxSTAY_ON_TOP),
-m_min_val(0),
-m_max_val(0),
-m_frame(frame)
+	wxMAXIMIZE_BOX|wxMINIMIZE_BOX| wxSTAY_ON_TOP,
+	wxString("Data Conversion"))
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -62,7 +61,7 @@ m_frame(frame)
 	wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Minimum:",
 		wxDefaultPosition, wxDefaultSize);
-	m_min_text = new wxTextCtrl(this, ID_MinValText, "0.0",
+	m_min_text = new wxTextCtrl(this, wxID_ANY, "0.0",
 		wxDefaultPosition, wxDefaultSize , wxTE_RIGHT, vald_fp);
 	sizer2->Add(10, 10);
 	sizer2->Add(st, 0, wxALIGN_CENTER);
@@ -70,7 +69,7 @@ m_frame(frame)
 	sizer2->Add(m_min_text, 0, wxALIGN_CENTER);
 	st = new wxStaticText(this, 0, "Maximum:",
 		wxDefaultPosition, wxDefaultSize);
-	m_max_text = new wxTextCtrl(this, ID_MaxValText, "1.0",
+	m_max_text = new wxTextCtrl(this, wxID_ANY, "1.0",
 		wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, vald_fp);
 	sizer2->Add(10, 10);
 	sizer2->Add(st, 0, wxALIGN_CENTER);
@@ -101,21 +100,15 @@ m_frame(frame)
 
 	SetSizer(sizer_v);
 	Layout();
-
 }
 
 FpRangeDlg::~FpRangeDlg()
 {
 }
 
-void FpRangeDlg::SetRange(double min_val, double max_val)
+void FpRangeDlg::FluoUpdate(const fluo::ValueCollection& vc)
 {
-	m_min_val = min_val;
-	m_max_val = max_val;
-	wxString str = wxString::Format("%f", m_min_val);
-	m_min_text->ChangeValue(str);
-	str = wxString::Format("%f", m_max_val);
-	m_max_text->ChangeValue(str);
+
 }
 
 void FpRangeDlg::OnMinText(wxCommandEvent& event)
@@ -123,7 +116,7 @@ void FpRangeDlg::OnMinText(wxCommandEvent& event)
 	wxString str = m_min_text->GetValue();
 	double dval;
 	if (str.ToDouble(&dval))
-		m_min_val = dval;
+		glbin_settings.m_fp_min = dval;
 }
 
 void FpRangeDlg::OnMaxText(wxCommandEvent& event)
@@ -131,5 +124,5 @@ void FpRangeDlg::OnMaxText(wxCommandEvent& event)
 	wxString str = m_max_text->GetValue();
 	double dval;
 	if (str.ToDouble(&dval))
-		m_max_val = dval;
+		glbin_settings.m_fp_max = dval;
 }

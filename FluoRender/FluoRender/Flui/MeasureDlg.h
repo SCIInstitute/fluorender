@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clrpicker.h>
 #include <wx/spinctrl.h>
 #include <wx/tglbtn.h>
-#include <Types/Color.h>
+#include <Color.h>
 
 using namespace std;
 

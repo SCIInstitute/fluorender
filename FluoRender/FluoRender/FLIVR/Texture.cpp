@@ -30,7 +30,7 @@
 #include <ShaderProgram.h>
 #include <Texture.h>
 #include <TextureRenderer.h>
-#include <Types/Utils.h>
+#include <Utils.h>
 #include <algorithm>
 #include <inttypes.h>
 #include <glm/gtc/type_ptr.hpp>

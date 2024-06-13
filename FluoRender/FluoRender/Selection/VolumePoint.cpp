@@ -26,10 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Selection/VolumePoint.h>
+#include <VolumePoint.h>
 #include <DataManager.h>
 #include <RenderCanvas.h>
-#include <FLIVR/Texture.h>
+#include <Texture.h>
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace flrd;

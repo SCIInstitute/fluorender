@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <img/icons.h>
+#include <icons.h>
 
 /* mip.png - 436 bytes */
 const unsigned char icons::mip_png[436] = {

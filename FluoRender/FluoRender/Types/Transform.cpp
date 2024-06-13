@@ -26,10 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Types/Transform.h>
-#include <Types/Point.h>
-#include <Types/Plane.h>
-#include <Types/Utils.h>
+#include <Transform.h>
+#include <Point.h>
+#include <Plane.h>
+#include <Utils.h>
 #include <cstring>
 #include <iostream>
 

@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PaintBoxes.h>
 #include <Global.h>
-#include <Types/Point.h>
+#include <Point.h>
 
 using namespace flrd;
 

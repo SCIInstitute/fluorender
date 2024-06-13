@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_RulerAlign_h
 #define FL_RulerAlign_h
 
-#include <Distance/Ruler.h>
-#include <Types/Vector.h>
+#include <Ruler.h>
+#include <Vector.h>
 
 class RenderCanvas;
 class VolumeData;

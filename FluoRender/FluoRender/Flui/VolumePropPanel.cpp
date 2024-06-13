@@ -33,13 +33,13 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderViewPanel.h>
 #include <OutputAdjPanel.h>
 #include <ColocalizationDlg.h>
-#include <Calculate/Histogram.h>
-#include <Database/RecordHistParams.h>
-#include <FLIVR/MultiVolumeRenderer.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <Types/Color.h>
-#include <Types/BBox.h>
-#include <Types/Point.h>
+#include <Histogram.h>
+#include <RecordHistParams.h>
+#include <MultiVolumeRenderer.h>
+#include <VolumeRenderer.h>
+#include <Color.h>
+#include <BBox.h>
+#include <Point.h>
 #include <wxDoubleSlider.h>
 #include <wxSingleSlider.h>
 #include <wxUndoableCheckBox.h>
@@ -55,7 +55,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 #include <wx/hyperlink.h>
 #include <wx/stdpaths.h>
-#include <img/icons.h>
+#include <icons.h>
 #include <limits>
 #include <Debug.h>
 

@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
-#include <Calculate/CombineList.h>
+#include <CombineList.h>
 
 CalculationDlg::CalculationDlg(MainFrame *frame)
 	: PropPanel(frame, frame,

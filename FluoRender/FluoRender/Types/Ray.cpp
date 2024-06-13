@@ -26,8 +26,8 @@
    DEALINGS IN THE SOFTWARE.
  */
 
-#include <Types/Ray.h>
-#include <Types/Utils.h>
+#include <Ray.h>
+#include <Utils.h>
 
 namespace fluo
 {

@@ -27,10 +27,10 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <BasicStat.h>
 #include <Global.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/TextureBrick.h>
-#include <FLIVR/Texture.h>
+#include <VolumeRenderer.h>
+#include <KernelProgram.h>
+#include <TextureBrick.h>
+#include <Texture.h>
 #include <algorithm>
 
 using namespace flrd;

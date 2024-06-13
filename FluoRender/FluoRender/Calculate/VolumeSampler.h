@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUMESAMPLER_H_
 
 #include <DataManager.h>
-#include <Types/Vector.h>
-#include <Types/Quaternion.h>
+#include <Vector.h>
+#include <Quaternion.h>
 
 namespace flrd
 {

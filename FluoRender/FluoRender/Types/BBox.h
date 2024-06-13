@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _FLBBOX_H_
 #define _FLBBOX_H_
 
-#include <Types/Point.h>
-#include <Types/Utils.h>
+#include <Point.h>
+#include <Utils.h>
 #include <ostream>
 #include <algorithm>
 

@@ -29,10 +29,10 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-#include <FLIVR/ImgShader.h>
-#include <FLIVR/ShaderProgram.h>
-#include <FLIVR/VolShaderCode.h>
-#include <FLIVR/ImgShaderCode.h>
+#include <ImgShader.h>
+#include <ShaderProgram.h>
+#include <VolShaderCode.h>
+#include <ImgShaderCode.h>
 
 using std::string;
 using std::vector;

@@ -29,9 +29,9 @@
 #ifndef _FLMATRIX_H_
 #define _FLMATRIX_H_
 
-#include <Types/Utils.h>
-#include <Types/Vector.h>
-#include <Types/Point.h>
+#include <Utils.h>
+#include <Vector.h>
+#include <Point.h>
 
 namespace fluo
 {

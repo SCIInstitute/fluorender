@@ -42,8 +42,8 @@ DEALINGS IN THE SOFTWARE.
 #include <TraceDlg.h>
 #include <MeasureDlg.h>
 #include <VolumePropPanel.h>
-#include <Calculate/Count.h>
-#include <Distance/Cov.h>
+#include <Count.h>
+#include <Cov.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -53,7 +53,7 @@ DEALINGS IN THE SOFTWARE.
 #include <StopWatch.hpp>
 #include <StopWatchFactory.hpp>
 #include <png_resource.h>
-#include <img/icons.h>
+#include <icons.h>
 #include <array>
 
 bool RenderCanvas::m_linked_rot = false;

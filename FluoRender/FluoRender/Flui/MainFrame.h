@@ -110,6 +110,7 @@ class CalculationDlg;
 class ScriptBreakDlg;
 class MachineLearningDlg;
 class TesterDlg;
+class FpRangeDlg;
 
 class MainFrame: public wxFrame
 {
@@ -273,6 +274,8 @@ public:
 	CalculationDlg* GetCalculationDlg();
 	//script break dialog
 	ScriptBreakDlg* GetScriptBreakDlg();
+	//floating point voluem range
+	FpRangeDlg* GetFpRangeDlg();
 
 	////selection
 	//int GetCurSelType();
@@ -346,6 +349,7 @@ private:
 	CalculationDlg* m_calculation_dlg;
 	MachineLearningDlg* m_machine_learning_dlg;
 	ScriptBreakDlg* m_script_break_dlg;
+	FpRangeDlg* m_fp_range_dlg;
 	MoviePanel* m_movie_panel;
 	//prop panel children
 	std::vector<PropPanel*> m_prop_pages;

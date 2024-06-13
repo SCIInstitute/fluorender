@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RecordHistParams.h>
 #include <Global.h>
 #include <Table.h>
-#include <FileIO/File.h>
+#include <File.h>
 #include <cstring>
 
 using namespace flrd;

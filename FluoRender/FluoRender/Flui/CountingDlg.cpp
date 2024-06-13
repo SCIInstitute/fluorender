@@ -32,12 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 
-//BEGIN_EVENT_TABLE(CountingDlg, wxPanel)
-//	//component analyzer
-//	EVT_CHECKBOX(ID_CAIgnoreMaxChk, CountingDlg::OnCAIgnoreMaxChk)
-//	EVT_BUTTON(ID_CAAnalyzeBtn, CountingDlg::OnCAAnalyzeBtn)
-//END_EVENT_TABLE()
-
 CountingDlg::CountingDlg(MainFrame *frame)
 : PropPanel(frame, frame,
 wxDefaultPosition,

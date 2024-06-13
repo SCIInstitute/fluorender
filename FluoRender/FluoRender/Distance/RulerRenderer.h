@@ -29,10 +29,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _RulerRenderer_H_
 #define _RulerRenderer_H_
 
-#include <Distance/Ruler.h>
-#include <Types/Color.h>
-#include <Types/Point.h>
-#include <Types/Transform.h>
+#include <Ruler.h>
+#include <Color.h>
+#include <Point.h>
+#include <Transform.h>
 #include <vector>
 
 class RenderCanvas;

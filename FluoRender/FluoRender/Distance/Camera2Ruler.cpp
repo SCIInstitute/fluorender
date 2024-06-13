@@ -27,9 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "Camera2Ruler.h"
-#include <Distance/RulerHandler.h>
-#include <Types/Ray.h>
-#include <Types/Plane.h>
+#include <RulerHandler.h>
+#include <Ray.h>
+#include <Plane.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
 

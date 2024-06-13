@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <boost/shared_ptr.hpp>
 #include <list>
 #include <vector>
-#include <Tracking/Cell.h>
+#include <Cell.h>
 
 namespace flrd
 {

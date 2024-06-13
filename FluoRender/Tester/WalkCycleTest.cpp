@@ -1,6 +1,6 @@
 #include "tests.h"
 #include "asserts.h"
-#include <Distance/WalkCycle.h>
+#include <WalkCycle.h>
 #include <filesystem>
 
 void WalkCycleAvg(const std::string& f1,

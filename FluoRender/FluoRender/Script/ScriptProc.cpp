@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Distance/Camera2Ruler.h>
+#include <Camera2Ruler.h>
 #include <Global.h>
 #include <ScriptVisitors.h>
 #include <RenderCanvas.h>
@@ -37,11 +37,11 @@ DEALINGS IN THE SOFTWARE.
 #include <MoviePanel.h>
 #include <OutputAdjPanel.h>
 #include <ScriptBreakDlg.h>
-#include <Calculate/BackgStat.h>
-#include <Components/CompEditor.h>
-#include <Distance/WalkCycle.h>
-#include <Tracking/Registrator.h>
-#include <Python/PyBase.h>
+#include <BackgStat.h>
+#include <CompEditor.h>
+#include <WalkCycle.h>
+#include <Registrator.h>
+#include <PyBase.h>
 #include <compatibility.h>
 #include <wx/filefn.h>
 #include <wx/stdpaths.h>

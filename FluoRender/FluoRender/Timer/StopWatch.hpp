@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _STOPWATCH_H_
 #define _STOPWATCH_H_
 
-#include <Flobject/Node.hpp>
+#include <Node.hpp>
 
 #define gstStopWatch "default stop watch"
 

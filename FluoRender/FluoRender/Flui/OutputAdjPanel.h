@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _ADJUSTVIEW_H_
 
 #include <PropPanel.h>
-#include <Types/Color.h>
+#include <Color.h>
 #include <wx/aui/auibook.h>
 
 class MainFrame;

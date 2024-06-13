@@ -32,7 +32,7 @@
 #include "ShaderProgram.h"
 #include "MshShader.h"
 #include "glm.h"
-#include <Types/Plane.h>
+#include <Plane.h>
 #include <vector>
 #include <cstring>
 #include <glm/glm.hpp>

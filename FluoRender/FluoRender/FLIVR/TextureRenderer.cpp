@@ -31,8 +31,8 @@
 #include <TextureBrick.h>
 #include <TextureRenderer.h>
 #include <ShaderProgram.h>
-#include <Types/Color.h>
-#include <Types/Utils.h>
+#include <Color.h>
+#include <Utils.h>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 #include <compatibility.h>

@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define FL_Count_h
 
 #include <DataManager.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
+#include <KernelProgram.h>
+#include <VolKernel.h>
 
 using namespace std;
 

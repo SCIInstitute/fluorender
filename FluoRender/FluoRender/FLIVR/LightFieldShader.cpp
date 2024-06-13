@@ -26,9 +26,9 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include <FLIVR/LightFieldShader.h>
-#include <FLIVR/ShaderProgram.h>
-#include <FLIVR/LightFieldShaderCode.h>
+#include <LightFieldShader.h>
+#include <ShaderProgram.h>
+#include <LightFieldShaderCode.h>
 #include <sstream>
 #include <iostream>
 

@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 #include <wx/gbsizer.h>
 #include <png_resource.h>
-#include <img/icons.h>
+#include <icons.h>
 #include <Debug.h>
 
 ClipPlanePanel::ClipPlanePanel(

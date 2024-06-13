@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define _TRACEDLG_H_
 
 #include "Main.h"
-#include <Tracking/Cell.h>
-#include <Tracking/VolCache.h>
+#include <Cell.h>
+#include <VolCache.h>
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <wx/spinctrl.h>

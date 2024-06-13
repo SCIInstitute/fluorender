@@ -27,8 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <KernelExecutor.h>
 #include <Global.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
+#include <KernelProgram.h>
+#include <VolKernel.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <boost/chrono.hpp>

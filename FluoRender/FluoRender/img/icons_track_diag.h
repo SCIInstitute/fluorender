@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <img/icons.h>
+#include <icons.h>
 
 /* auto_assign_off.png - 2258 bytes */
 const unsigned char icons::auto_assign_off_png[2258] = {

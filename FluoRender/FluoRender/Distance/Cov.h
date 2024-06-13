@@ -29,9 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #define FL_Cov_h
 
 #include <DataManager.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
-#include <Types/Point.h>
+#include <KernelProgram.h>
+#include <VolKernel.h>
+#include <Point.h>
 #include <vector>
 
 using namespace std;

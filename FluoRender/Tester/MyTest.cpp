@@ -1,7 +1,7 @@
 ﻿#include "tests.h"
 #include "asserts.h"
-#include <Flobject/Group.hpp>
-#include <Flobject/InfoVisitor.hpp>
+#include <Group.hpp>
+#include <InfoVisitor.hpp>
 
 using namespace std;
 using namespace fluo;

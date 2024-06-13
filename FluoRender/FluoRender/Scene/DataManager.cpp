@@ -29,9 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
-#include <Calculate/VolumeSampler.h>
-#include <Calculate/VolumeBaker.h>
-#include <Calculate/Histogram.h>
+#include <VolumeSampler.h>
+#include <VolumeBaker.h>
+#include <Histogram.h>
 #include <FpRangeDlg.h>
 #include <teem/Nrrd/nrrd.h>
 #include <wx/msgdlg.h>
@@ -45,7 +45,7 @@ DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 #include <set>
 #include <glm/gtc/matrix_transform.hpp>
-#include <Types/Quaternion.h>
+#include <Quaternion.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 TreeLayer::TreeLayer()
@@ -5569,26 +5569,26 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 
 	if (type == LOAD_TYPE_TIFF)
 	{
-		if (glbin_settings.m_fp_convert)
-		{
-			reader->SetFpRange(glbin_settings.m_fp_min, glbin_settings.m_fp_max);
-		}
-		else if (reader->GetFpConvert())
+		if (!glbin_settings.m_fp_convert &&
+			reader->GetFpConvert())
 		{
 			double minv, maxv;
 			reader->GetFpRange(minv, maxv);
-			FpRangeDlg* dlg = new FpRangeDlg(m_frame);
-			dlg->SetRange(minv, maxv);
+			glbin_settings.m_fp_min = minv;
+			glbin_settings.m_fp_max = maxv;
+			FpRangeDlg* dlg = m_frame->GetFpRangeDlg();
+			//dlg->SetRange(minv, maxv);
 			dlg->CenterOnParent();
-			int rval = dlg->ShowModal();
-			if (rval == wxID_OK)
-			{
-				minv = dlg->GetMinValue();
-				maxv = dlg->GetMaxValue();
-				reader->SetFpRange(minv, maxv);
-			}
-			delete dlg;
+			int rval = dlg->Show();
+			//if (rval == wxID_OK)
+			//{
+			//	minv = dlg->GetMinValue();
+			//	maxv = dlg->GetMaxValue();
+			//	reader->SetFpRange(minv, maxv);
+			//}
+			//delete dlg;
 		}
+		reader->SetFpRange(glbin_settings.m_fp_min, glbin_settings.m_fp_max);
 	}
 
 	if (reader_return > 0)

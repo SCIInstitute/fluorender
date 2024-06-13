@@ -27,10 +27,10 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <VolumeRoi.h>
 #include <Global.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/TextureBrick.h>
-#include <FLIVR/Texture.h>
+#include <VolumeRenderer.h>
+#include <KernelProgram.h>
+#include <TextureBrick.h>
+#include <Texture.h>
 #ifdef _DEBUG
 #include <Debug.h>
 #endif

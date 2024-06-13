@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <Diffusion.h>
 #include <Global.h>
-#include <FLIVR/KernelProgram.h>
+#include <KernelProgram.h>
 #include <vector>
 
 using namespace flrd;

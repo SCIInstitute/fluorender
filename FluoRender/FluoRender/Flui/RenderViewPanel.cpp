@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-//#include <FLIVR/ShaderProgram.h>
+//#include <ShaderProgram.h>
 #include <RenderViewPanel.h>
 #include <Global.h>
 #include <MainFrame.h>
@@ -42,7 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 #include <limits>
 #include <png_resource.h>
-#include <img/icons.h>
+#include <icons.h>
 #include <wx/stdpaths.h>
 #include <wx/display.h>
 #include <Debug.h>

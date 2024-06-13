@@ -202,7 +202,7 @@ namespace fluo
 
 
 // This cannot be above due to circular dependencies
-#include <Types/Point.h>
+#include <Point.h>
 
 namespace fluo
 {

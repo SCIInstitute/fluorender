@@ -1,7 +1,7 @@
 #include "brkxml_reader.h"
-#include <FLIVR/TextureRenderer.h>
-#include <FLIVR/ShaderProgram.h>
-#include <Types/Utils.h>
+#include <TextureRenderer.h>
+#include <ShaderProgram.h>
+#include <Utils.h>
 #include <compatibility.h>
 #include <fstream>
 #include <iostream>

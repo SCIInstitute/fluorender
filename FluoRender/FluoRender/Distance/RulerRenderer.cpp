@@ -29,11 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #include <RulerRenderer.h>
 #include <Global.h>
 #include <RenderCanvas.h>
-#include <Types/Vector.h>
-#include <Types/Quaternion.h>
-#include <FLIVR/TextRenderer.h>
-#include <FLIVR/ShaderProgram.h>
-#include <FLIVR/TextureRenderer.h>
+#include <Vector.h>
+#include <Quaternion.h>
+#include <TextRenderer.h>
+#include <ShaderProgram.h>
+#include <TextureRenderer.h>
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace flrd;

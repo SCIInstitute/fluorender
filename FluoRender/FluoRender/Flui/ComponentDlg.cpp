@@ -31,8 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderCanvas.h>
 #include <BrushToolDlg.h>
 #include <ColocalizationDlg.h>
-#include <Components/CompEditor.h>
-#include <Database/RecordHistParams.h>
+#include <CompEditor.h>
+#include <RecordHistParams.h>
 #include <wxSingleSlider.h>
 #include <wx/scrolwin.h>
 #include <wx/valnum.h>

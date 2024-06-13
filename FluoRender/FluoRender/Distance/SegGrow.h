@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define FL_SegGrow_h
 
 #include <DataManager.h>
-#include <FLIVR/KernelProgram.h>
-#include <Types/Point.h>
+#include <KernelProgram.h>
+#include <Point.h>
 #include <set>
 
 namespace flrd

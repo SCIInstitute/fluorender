@@ -28,12 +28,12 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_PaintBoxes_h
 #define FL_PaintBoxes_h
 
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
-#include <Types/BBox.h>
-#include <Types/Vector.h>
-#include <Types/Transform.h>
-#include <FLIVR/TextureBrick.h>
+#include <KernelProgram.h>
+#include <VolKernel.h>
+#include <BBox.h>
+#include <Vector.h>
+#include <Transform.h>
+#include <TextureBrick.h>
 
 using namespace std;
 

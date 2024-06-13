@@ -40,10 +40,10 @@ DEALINGS IN THE SOFTWARE.
 #include <ComponentDlg.h>
 #include <compatibility.h>
 //resources
-#include <Formats/png_resource.h>
+#include <png_resource.h>
 #include <tick.xpm>
 #include <cross.xpm>
-#include <img/icons.h>
+#include <icons.h>
 
 DataTreeCtrl::DataTreeCtrl(
 	wxWindow* parent,

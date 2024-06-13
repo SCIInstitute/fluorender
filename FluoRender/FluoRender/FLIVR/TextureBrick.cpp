@@ -32,7 +32,7 @@
 #include <math.h>
 #include <TextureBrick.h>
 #include <TextureRenderer.h>
-#include <Types/Utils.h>
+#include <Utils.h>
 #include <utility>
 #include <iostream>
 #include <fstream>

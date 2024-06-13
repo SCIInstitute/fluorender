@@ -32,10 +32,10 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderViewPanel.h>
 #include <TreePanel.h>
 #include <OutputAdjPanel.h>
-#include <Formats/png_resource.h>
+#include <png_resource.h>
 #include <wx/valnum.h>
 //resources
-#include <img/icons.h>
+#include <icons.h>
 
 DataListCtrl::DataListCtrl(
 	wxWindow* parent,

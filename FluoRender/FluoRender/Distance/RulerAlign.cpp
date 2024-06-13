@@ -26,12 +26,12 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Distance/RulerAlign.h>
-#include <Types/Quaternion.h>
-#include <Types/Utils.h>
+#include <RulerAlign.h>
+#include <Quaternion.h>
+#include <Utils.h>
 #include <RenderCanvas.h>
-#include <Distance/Pca.h>
-#include <Distance/Cov.h>
+#include <Pca.h>
+#include <Cov.h>
 
 using namespace flrd;
 

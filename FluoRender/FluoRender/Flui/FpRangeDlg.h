@@ -28,33 +28,17 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _FPRANGEDLG_H_
 #define _FPRANGEDLG_H_
 
-#include <wx/wx.h>
-#include <wx/dialog.h>
+#include <PropPanel.h>
 
-class MainFrame;
-class FpRangeDlg : public wxDialog
+class FpRangeDlg : public PropPanel
 {
-	enum
-	{
-		ID_MinValText = ID_FP_RANGE,
-		ID_MaxValText
-	};
-
 public:
 	FpRangeDlg(MainFrame* frame);
 	~FpRangeDlg();
 
-	void SetRange(double min_val, double max_val);
-	double GetMinValue() { return m_min_val; }
-	double GetMaxValue() { return m_max_val; }
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 private:
-	MainFrame* m_frame;
-
-	//values
-	double m_min_val;
-	double m_max_val;
-
 	//text boxes
 	wxTextCtrl* m_min_text;
 	wxTextCtrl* m_max_text;
@@ -66,8 +50,6 @@ private:
 	//text boxes
 	void OnMinText(wxCommandEvent& event);
 	void OnMaxText(wxCommandEvent& event);
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_FPRANGEDLG_H_

@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_DistCalculator_h
 #define FL_DistCalculator_h
 
-#include <Tracking/Cell.h>
-#include <Distance/Ruler.h>
-#include <Distance/Relax.h>
+#include <Cell.h>
+#include <Ruler.h>
+#include <Relax.h>
 
 class VolumeData;
 namespace flrd

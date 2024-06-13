@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MOVIEDEFAULT_H_
 #define _MOVIEDEFAULT_H_
 
-#include <Types/Point.h>
+#include <Point.h>
 #include <wx/fileconf.h>
 #include <wx/string.h>
 

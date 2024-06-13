@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "EntryParams.h"
 #include <Table.h>
-#include <FileIO/File.h>
+#include <File.h>
 
 using namespace flrd;
 

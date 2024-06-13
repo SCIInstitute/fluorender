@@ -29,9 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #include <TrackMap.h>
 #include <Global.h>
 #include <Stencil.h>
-#include <Cluster/dbscan.h>
-#include <Cluster/kmeans.h>
-#include <Cluster/exmax.h>
+#include <dbscan.h>
+#include <kmeans.h>
+#include <exmax.h>
 #include <StencilCompare.h>
 #include <functional>
 #include <algorithm>

@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <RenderCanvas.h>
 #include <MCTable.h>
-#include <Types/Utils.h>
+#include <Utils.h>
 #include <compatibility.h>
 
 using namespace flrd;

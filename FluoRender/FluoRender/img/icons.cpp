@@ -25,16 +25,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <img/icons.h>
-#include "img/icons_main_toolbar_menu.h"
-#include "img/icons_render_view.h"
-#include "img/icons_clipping_view.h"
-#include "img/icons_list_views.h"
-#include "img/icons_brush_tools.h"
-#include "img/icons_ruler_tools.h"
-#include "img/icons_playback.h"
-#include "img/icons_volume_props.h"
-#include "img/icons_track_diag.h"
+#include <icons.h>
+#include <icons_main_toolbar_menu.h>
+#include <icons_render_view.h>
+#include <icons_clipping_view.h>
+#include <icons_list_views.h>
+#include <icons_brush_tools.h>
+#include <icons_ruler_tools.h>
+#include <icons_playback.h>
+#include <icons_volume_props.h>
+#include <icons_track_diag.h>
 
 //common icons
 /* icon_32.png - 2507 bytes */

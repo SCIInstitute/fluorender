@@ -30,8 +30,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include <vector>
 #include <DataManager.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
+#include <KernelProgram.h>
+#include <VolKernel.h>
 
 using namespace std;
 

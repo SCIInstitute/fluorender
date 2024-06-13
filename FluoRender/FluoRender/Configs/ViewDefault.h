@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VIEWDEFAULT_H_
 #define _VIEWDEFAULT_H_
 
-#include <Types/Color.h>
-#include <Types/Vector.h>
-#include <Types/Point.h>
+#include <Color.h>
+#include <Vector.h>
+#include <Point.h>
 #include <wx/fileconf.h>
 #include <wx/string.h>
 

@@ -39,9 +39,9 @@ DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include <iterator>
 //resources
-#include <Formats/png_resource.h>
+#include <png_resource.h>
 #include <ruler.xpm>
-#include <img/icons.h>
+#include <icons.h>
 
 BEGIN_EVENT_TABLE(RulerListCtrl, wxListCtrl)
 	EVT_KEY_DOWN(RulerListCtrl::OnKeyDown)

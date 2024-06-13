@@ -1,6 +1,6 @@
 #include "tests.h"
 #include "asserts.h"
-#include <Flobject/Object.hpp>
+#include <Object.hpp>
 
 using namespace fluo;
 

@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <vector>
 #include <set>
-#include <Tracking/Cell.h>
+#include <Cell.h>
 #include <DataManager.h>
 
 class VolumeData;

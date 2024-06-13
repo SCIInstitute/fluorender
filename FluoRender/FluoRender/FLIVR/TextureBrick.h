@@ -30,9 +30,9 @@
 #define TextureBrick_h
 
 #include "GL/glew.h"
-#include <Types/Ray.h>
-#include <Types/BBox.h>
-#include <Types/Plane.h>
+#include <Ray.h>
+#include <BBox.h>
+#include <Plane.h>
 #include <wx/thread.h>
 #include <vector>
 #include <nrrd.h>

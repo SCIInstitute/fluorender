@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include <png_resource.h>
-#include <img/icons.h>
+#include <icons.h>
 #include <key.xpm>
 #include <Debug.h>
 

@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUME_MESH_CONV_H_
 
 #include <vector>
-#include <FLIVR/glm.h>
-#include <Types/Vector.h>
+#include <glm.h>
+#include <Vector.h>
 #include <nrrd.h>
 
 namespace flrd

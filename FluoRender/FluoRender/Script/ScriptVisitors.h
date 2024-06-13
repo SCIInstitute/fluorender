@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _SCRIPTVISITORS_H_
 #define _SCRIPTVISITORS_H_
 
-#include <Flobject/InfoVisitor.hpp>
+#include <InfoVisitor.hpp>
 #include <compatibility.h>
 #include <iostream>
 #include <string>

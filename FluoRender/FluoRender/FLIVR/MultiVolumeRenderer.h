@@ -30,8 +30,8 @@
 #define MultiVolumeRenderer_h
 
 #include "GL/glew.h"
-#include <Types/BBox.h>
-#include <Types/Plane.h>
+#include <BBox.h>
+#include <Plane.h>
 #include "Texture.h"
 #include "VolumeRenderer.h"
 #include <vector>

@@ -28,10 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Relax_h
 #define FL_Relax_h
 
-#include <Distance/Ruler.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
-#include <Types/Point.h>
+#include <Ruler.h>
+#include <KernelProgram.h>
+#include <VolKernel.h>
+#include <Point.h>
 #include <vector>
 
 using namespace std;

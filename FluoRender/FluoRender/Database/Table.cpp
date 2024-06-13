@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "Table.h"
 #include "RecordHistParams.h"
-#include <FileIO/File.h>
+#include <File.h>
 #include <compatibility.h>
 #include <fstream>
 #if defined(_WIN32) || defined(_DARWIN)
