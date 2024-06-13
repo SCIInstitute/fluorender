@@ -532,6 +532,9 @@ void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	break;
 	}
 
+	if (FOUND_VALUE(gstUpdateSync))
+		UpdateSync();
+
 	//red
 	if (update_all || bSyncR)
 	{

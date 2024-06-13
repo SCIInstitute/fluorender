@@ -29,11 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define _LISTPANEL_H_
 
 #include <PropPanel.h>
-#include <wx/wx.h>
 #include <wx/listctrl.h>
 
-class MainFrame;
-class VolumeData;
 class DataListCtrl : public wxListCtrl
 {
 public:
@@ -110,11 +107,11 @@ public:
 	void DeleteSelection();
 	void DeleteAll();
 
-
 private:
 	wxToolBar *m_toolbar;
 	DataListCtrl *m_datalist;
 
+private:
 	void OnContextMenu(wxContextMenuEvent& event);
 	void OnToolbar(wxCommandEvent& event);
 	void OnMenu(wxCommandEvent& event);

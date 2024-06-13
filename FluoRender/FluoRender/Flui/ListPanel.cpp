@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <RenderViewPanel.h>
-#include <TreePanel.h>
 #include <OutputAdjPanel.h>
 #include <png_resource.h>
 #include <wx/valnum.h>
@@ -173,9 +172,7 @@ ListPanel::ListPanel(MainFrame* frame,
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER);
 	wxBitmap bitmap = wxGetBitmapFromMemory(view);
-#ifdef _DARWIN
 	m_toolbar->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_toolbar->AddTool(ID_AddToView, "Add to View",
 		bitmap, "Add: Add selected data set to render view");
 	bitmap = wxGetBitmapFromMemory(rename);
@@ -330,29 +327,6 @@ void ListPanel::UpdateSelection()
 			break;
 		}
 	}
-	//long item1 = -1;
-	//long item2 = -1;
-	//for (;;)
-	//{
-	//	item2 = m_datalist->GetNextItem(item1,
-	//		wxLIST_NEXT_ALL,
-	//		wxLIST_STATE_DONTCARE);
-	//	if (item1 != -1 && item2 != item1)
-	//	{
-	//		wxString stype = m_datalist->GetText(item2, 0);
-	//		wxString sname = m_datalist->GetText(item2, 1);
-
-	//		if (stype == item_type &&
-	//			sname == name)
-	//		{
-	//			m_datalist->SetItemState(item2, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-	//			break;
-	//		}
-	//		item1 = item2;
-	//	}
-	//	else
-	//		break;
-	//}
 }
 
 void ListPanel::AddSelectionToView(int view)
@@ -360,8 +334,11 @@ void ListPanel::AddSelectionToView(int view)
 	RenderCanvas* canvas = m_frame->GetRenderCanvas(view);
 	if (!canvas)
 		return;
+
+	fluo::ValueCollection vc;
 	bool view_empty = true;
 	int type = glbin_current.GetType();
+
 	switch (type)
 	{
 	case 2://volume
@@ -399,14 +376,7 @@ void ListPanel::AddSelectionToView(int view)
 		DataGroup* group = canvas->AddVolumeData(vd_add);
 		glbin_current.SetVolumeData(vd_add);
 		if (canvas->GetVolMethod() == VOL_METHOD_MULTI)
-		{
-			OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
-			if (adjust_view)
-			{
-				adjust_view->SetRenderView(canvas);
-				adjust_view->UpdateSync();
-			}
-		}
+			vc.insert(gstUpdateSync);
 	}
 		break;
 	case 3://mesh
@@ -439,9 +409,8 @@ void ListPanel::AddSelectionToView(int view)
 		else
 			canvas->InitView(INIT_BOUNDS | INIT_CENTER);
 	}
-	//m_frame->UpdateTree(name);
-	//glbin.set_tree_selection(name.ToStdString());
-	FluoRefresh(2, { gstTreeCtrl }, { view });
+	vc.insert(gstTreeCtrl);
+	FluoRefresh(2, vc, { view });
 }
 
 void ListPanel::AddSelToCurView()
@@ -696,7 +665,6 @@ void ListPanel::DeleteSelection()
 	break;
 	}
 
-	//glbin.set_tree_selection(name.ToStdString());
 	glbin_current.SetRoot();
 	FluoRefresh(2, { gstTreeCtrl, gstListCtrl });
 }
@@ -710,7 +678,6 @@ void ListPanel::DeleteAll()
 			canvas->ClearAll();
 	}
 	glbin_data_manager.ClearAll();
-	//DeleteAllItems();
 	FluoRefresh(2, { gstTreeCtrl, gstListCtrl });
 }
 

@@ -139,6 +139,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstSyncR "sync r"
 #define gstSyncG "sync g"
 #define gstSyncB "sync b"
+#define gstUpdateSync "update sync"
 //bounding box
 #define gstBounds "bounds"
 #define gstClipPlanes "clip planes"
