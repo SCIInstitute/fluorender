@@ -697,6 +697,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstHelpUrl "help url"
 //machine learning
 #define gstMlAutoStart "ml auto start"
+#define gstMlAutoLoadTable "ml auto load table"
 #define gstMlTopList "ml top list"
 #define gstMlCgAutoStart "ml cg auto start"
 #define gstMlVpAutoStart "ml vp auto start"

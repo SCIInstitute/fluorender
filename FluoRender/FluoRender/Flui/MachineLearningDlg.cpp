@@ -71,8 +71,6 @@ MachineLearningDlg::MachineLearningDlg(MainFrame *frame) :
 
 	//GetSettings();
 
-	//m_panel1->AutoLoadTable();
-	//m_panel2->AutoLoadTable();
 }
 
 MachineLearningDlg::~MachineLearningDlg()
@@ -452,6 +450,9 @@ void MLCompGenPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		bval = glbin_settings.m_cg_auto_start;
 		m_auto_start_check->SetValue(bval);
 	}
+
+	if (update_all || FOUND_VALUE(gstMlAutoLoadTable))
+		AutoLoadTable();
 }
 
 void MLCompGenPanel::OnNewTable(wxCommandEvent& event)
@@ -935,8 +936,12 @@ void MLVolPropPanel::OnDelRec(wxCommandEvent& event)
 
 void MLVolPropPanel::OnApplyRec(wxCommandEvent& event)
 {
-	//if (m_frame)
-	//	m_frame->GetPropView()->ApplyMl();
+	VolumeData* vd = glbin_current.vol_data;
+	DataGroup* group = glbin_current.vol_group;
+	if (group && group->GetVolumeSyncProp())
+		group->ApplyMlVolProp();
+	else if (vd)
+		vd->ApplyMlVolProp();
 }
 
 void MLVolPropPanel::OnBotGridAutoSize(wxGridSizeEvent& event)
