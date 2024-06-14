@@ -2154,6 +2154,12 @@ void MainFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, wxWi
 		m_convert_dlg->FluoUpdate(vc);
 	if (update_props(excl_self, m_counting_dlg, panel))
 		m_counting_dlg->FluoUpdate(vc);
+	if (update_props(excl_self, m_fp_range_dlg, panel))
+		m_fp_range_dlg->FluoUpdate(vc);
+	if (update_props(excl_self, m_help_dlg, panel))
+		m_help_dlg->FluoUpdate(vc);
+	if (update_props(excl_self, m_machine_learning_dlg, panel))
+		m_machine_learning_dlg->FluoUpdate(vc);
 	if (update_props(excl_self, m_setting_dlg, panel))
 		m_setting_dlg->FluoUpdate(vc);
 }

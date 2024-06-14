@@ -695,6 +695,12 @@ DEALINGS IN THE SOFTWARE.
 #define gstFpRangeMax "fp range max"
 //help
 #define gstHelpUrl "help url"
+//machine learning
+#define gstMlAutoStart "ml auto start"
+#define gstMlTopList "ml top list"
+#define gstMlCgAutoStart "ml cg auto start"
+#define gstMlVpAutoStart "ml vp auto start"
+#define gstMlVpAutoApply "ml vp auto apply"
 //measure agent
 #define gstRulerEdited "ruler edited"
 #define gstRulerRelaxIter "ruler relax iter"

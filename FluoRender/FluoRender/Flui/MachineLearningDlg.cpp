@@ -30,21 +30,14 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <ComponentDlg.h>
 #include <EntryHist.h>
-#include <wx/stdpaths.h>
 #include <format>
 #include <filesystem>
-#include <wx/checkbox.h>
-
-BEGIN_EVENT_TABLE(MachineLearningDlg, wxPanel)
-	EVT_CHECKBOX(ID_AutoStartAll, MachineLearningDlg::OnAutoStartAll)
-END_EVENT_TABLE()
 
 MachineLearningDlg::MachineLearningDlg(MainFrame *frame) :
-	wxPanel(frame, wxID_ANY,
+	PropPanel(frame, frame,
 		wxDefaultPosition,
 		frame->FromDIP(wxSize(450, 750)),
-		0, "SettingDlg"),
-	m_frame(frame)
+		0, "MachineLearningDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -52,18 +45,20 @@ MachineLearningDlg::MachineLearningDlg(MainFrame *frame) :
 
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	//auto start
-	m_auto_start_all = new wxCheckBox(this, ID_AutoStartAll, "Auto Start Learning",
+	m_auto_start_all = new wxCheckBox(this, wxID_ANY, "Auto Start Learning",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	m_auto_start_all->SetValue(glbin_settings.m_ml_auto_start_all);
+	m_auto_start_all->Bind(wxEVT_CHECKBOX, &MachineLearningDlg::OnAutoStartAll, this);
 	sizer1->AddStretchSpacer(1);
 	sizer1->Add(m_auto_start_all, 0, wxALIGN_CENTER);
 
 	//notebook
 	wxNotebook *notebook = new wxNotebook(this, wxID_ANY);
-	m_panel1 = new MLCompGenPanel(frame, notebook);
-	notebook->AddPage(m_panel1, "Component Generator");
-	m_panel2 = new MLVolPropPanel(frame, notebook);
-	notebook->AddPage(m_panel2, "Volume Properties");
+	MLCompGenPanel* panel1 = new MLCompGenPanel(frame, notebook);
+	MLVolPropPanel* panel2 = new MLVolPropPanel(frame, notebook);
+	notebook->AddPage(panel1, "Component Generator");
+	notebook->AddPage(panel2, "Volume Properties");
+	m_panels.push_back(panel1);
+	m_panels.push_back(panel2);
 
 	//interface
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
@@ -76,32 +71,50 @@ MachineLearningDlg::MachineLearningDlg(MainFrame *frame) :
 
 	//GetSettings();
 
-	m_panel1->AutoLoadTable();
-	m_panel2->AutoLoadTable();
+	//m_panel1->AutoLoadTable();
+	//m_panel2->AutoLoadTable();
 }
 
 MachineLearningDlg::~MachineLearningDlg()
 {
 }
 
+void MachineLearningDlg::FluoUpdate(const fluo::ValueCollection& vc)
+{
+	//update user interface
+	if (FOUND_VALUE(gstNull))
+		return;
+	bool update_all = vc.empty();
+
+	bool bval;
+
+	if (update_all || FOUND_VALUE(gstMlAutoStart))
+	{
+		bval = glbin_settings.m_ml_auto_start_all;
+		m_auto_start_all->SetValue(bval);
+	}
+
+	for (auto it : m_panels)
+	{
+		if (it)
+			it->FluoUpdate(vc);
+	}
+}
+
 void MachineLearningDlg::OnAutoStartAll(wxCommandEvent& event)
 {
 	bool bval = m_auto_start_all->GetValue();
-	m_panel1->SetAutoStart(bval);
-	m_panel2->SetAutoStart(bval);
 	glbin_settings.m_ml_auto_start_all = bval;
-	glbin_settings.m_cg_auto_start = bval;
-	glbin_settings.m_vp_auto_start = bval;
+	FluoUpdate({ gstMlAutoStart });
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 MachineLearningPanel::MachineLearningPanel(
 	MainFrame* frame, wxWindow* parent) :
-	wxPanel(parent, wxID_ANY,
+	PropPanel(frame, parent,
 		wxDefaultPosition,
 		frame->FromDIP(wxSize(450, 750)),
 		0, "MachineLearningPanel"),
-	m_frame(frame),
 	m_record(false)
 {
 	m_exepath = wxStandardPaths::Get().GetExecutablePath();
@@ -129,39 +142,32 @@ void MachineLearningPanel::Create()
 	wxBoxSizer* sizerTop = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(m_panel_top, wxID_ANY, m_top_grid_name,
 		wxDefaultPosition, wxDefaultSize);
-	m_top_grid = new wxGrid(m_panel_top, m_top_grid_id);
+	m_top_grid = new wxGrid(m_panel_top, wxID_ANY);
 	m_top_grid->CreateGrid(1, 5);
 	m_top_grid->SetColLabelValue(0, "Name");
 	m_top_grid->SetColLabelValue(1, "Records");
 	m_top_grid->SetColLabelValue(2, "Notes");
 	m_top_grid->SetColLabelValue(3, "Date modified");
 	m_top_grid->SetColLabelValue(4, "Date created");
-	m_top_grid->Connect(m_top_grid_id, wxEVT_GRID_CELL_CHANGING,
-		wxGridEventHandler(MachineLearningPanel::OnTopGridCellChanging), NULL, this);
-	m_top_grid->Connect(m_top_grid_id, wxEVT_GRID_CELL_CHANGED,
-		wxGridEventHandler(MachineLearningPanel::OnTopGridCellChanged), NULL, this);
+	m_top_grid->Bind(wxEVT_GRID_CELL_CHANGING, &MachineLearningPanel::OnTopGridCellChanging, this);
+	m_top_grid->Bind(wxEVT_GRID_CELL_CHANGED, &MachineLearningPanel::OnTopGridCellChanged, this);
 	m_top_grid->Fit();
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	m_new_table_btn = new wxButton(m_panel_top, m_new_table_id, "New",
+	m_new_table_btn = new wxButton(m_panel_top, wxID_ANY, "New",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
-	m_load_table_btn = new wxButton(m_panel_top, m_load_table_id, "Load",
+	m_load_table_btn = new wxButton(m_panel_top, wxID_ANY, "Load",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
-	m_del_table_btn = new wxButton(m_panel_top, m_del_table_id, "Delete",
+	m_del_table_btn = new wxButton(m_panel_top, wxID_ANY, "Delete",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
-	m_dup_table_btn = new wxButton(m_panel_top, m_dup_table_id, "Duplicate",
+	m_dup_table_btn = new wxButton(m_panel_top, wxID_ANY, "Duplicate",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
-	m_auto_load_btn = new wxButton(m_panel_top, m_auto_load_id, "Auto Load",
+	m_auto_load_btn = new wxButton(m_panel_top, wxID_ANY, "Auto Load",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
-	m_new_table_btn->Connect(m_new_table_id, wxEVT_BUTTON,
-		wxCommandEventHandler(MachineLearningPanel::OnNewTable), NULL, this);
-	m_load_table_btn->Connect(m_load_table_id, wxEVT_BUTTON,
-		wxCommandEventHandler(MachineLearningPanel::OnLoadTable), NULL, this);
-	m_del_table_btn->Connect(m_del_table_id, wxEVT_BUTTON,
-		wxCommandEventHandler(MachineLearningPanel::OnDelTable), NULL, this);
-	m_dup_table_btn->Connect(m_dup_table_id, wxEVT_BUTTON,
-		wxCommandEventHandler(MachineLearningPanel::OnDupTable), NULL, this);
-	m_auto_load_btn->Connect(m_auto_load_id, wxEVT_BUTTON,
-		wxCommandEventHandler(MachineLearningPanel::OnAutoLoad), NULL, this);
+	m_new_table_btn->Bind(wxEVT_BUTTON, &MachineLearningPanel::OnNewTable, this);
+	m_load_table_btn->Bind(wxEVT_BUTTON, &MachineLearningPanel::OnLoadTable, this);
+	m_del_table_btn->Bind(wxEVT_BUTTON, &MachineLearningPanel::OnDelTable, this);
+	m_dup_table_btn->Bind(wxEVT_BUTTON, &MachineLearningPanel::OnDupTable, this);
+	m_auto_load_btn->Bind(wxEVT_BUTTON, &MachineLearningPanel::OnAutoLoad, this);
 	sizer1->Add(5, 5);
 	sizer1->Add(m_new_table_btn, 1, wxEXPAND);
 	sizer1->Add(m_load_table_btn, 1, wxEXPAND);
@@ -183,27 +189,22 @@ void MachineLearningPanel::Create()
 	wxBoxSizer* sizerBot = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(m_panel_bot, wxID_ANY, m_bot_grid_name,
 		wxDefaultPosition, wxDefaultSize);
-	m_bot_grid = new wxGrid(m_panel_bot, m_bot_grid_id);
+	m_bot_grid = new wxGrid(m_panel_bot, wxID_ANY);
 	m_bot_grid->CreateGrid(1, 2);
 	m_bot_grid->SetColLabelValue(0, "Features");
 	m_bot_grid->SetColLabelValue(1, "Parameters");
-	m_bot_grid->Connect(m_bot_grid_id, wxEVT_GRID_COL_AUTO_SIZE,
-		wxGridSizeEventHandler(MachineLearningPanel::OnBotGridAutoSize), NULL, this);
-	m_bot_grid->Connect(m_bot_grid_id, wxEVT_GRID_CELL_CHANGING,
-		wxGridEventHandler(MachineLearningPanel::OnBotGridCellChanging), NULL, this);
-	m_bot_grid->Connect(m_bot_grid_id, wxEVT_GRID_CELL_CHANGED,
-		wxGridEventHandler(MachineLearningPanel::OnBotGridCellChanged), NULL, this);
+	m_bot_grid->Bind(wxEVT_GRID_COL_AUTO_SIZE, &MachineLearningPanel::OnBotGridAutoSize, this);
+	m_bot_grid->Bind(wxEVT_GRID_CELL_CHANGING, &MachineLearningPanel::OnBotGridCellChanging, this);
+	m_bot_grid->Bind(wxEVT_GRID_CELL_CHANGED, &MachineLearningPanel::OnBotGridCellChanged, this);
 	m_bot_grid->Fit();
 	m_sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	m_bot_table_name = new wxStaticText(m_panel_bot, wxID_ANY, "No table loaded");
-	m_auto_start_check = new wxCheckBox(m_panel_bot, m_auto_start_id, "Auto Start",
+	m_auto_start_check = new wxCheckBox(m_panel_bot, wxID_ANY, "Auto Start",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	m_auto_start_check->Connect(m_auto_start_id, wxEVT_CHECKBOX,
-		wxCommandEventHandler(MachineLearningPanel::OnAutoStartRec), NULL, this);
-	m_start_rec_btn = new wxToggleButton(m_panel_bot, m_start_rec_id, "Start",
+	m_auto_start_check->Bind(wxEVT_CHECKBOX, &MachineLearningPanel::OnAutoStartRec, this);
+	m_start_rec_btn = new wxToggleButton(m_panel_bot, wxID_ANY, "Start",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
-	m_start_rec_btn->Connect(m_start_rec_id, wxEVT_TOGGLEBUTTON,
-		wxCommandEventHandler(MachineLearningPanel::OnStartRec), NULL, this);
+	m_start_rec_btn->Bind(wxEVT_TOGGLEBUTTON, &MachineLearningPanel::OnStartRec, this);
 	if (m_record)
 	{
 		m_start_rec_btn->SetLabel("Started");
@@ -214,14 +215,12 @@ void MachineLearningPanel::Create()
 		m_start_rec_btn->SetLabel("Start");
 		m_start_rec_btn->SetValue(false);
 	}
-	m_del_rec_btn = new wxButton(m_panel_bot, m_del_rec_id, "Delete",
+	m_del_rec_btn = new wxButton(m_panel_bot, wxID_ANY, "Delete",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
-	m_del_rec_btn->Connect(m_del_rec_id, wxEVT_BUTTON,
-		wxCommandEventHandler(MachineLearningPanel::OnDelRec), NULL, this);
-	m_apply_rec_btn = new wxButton(m_panel_bot, m_apply_rec_id, "Apply",
+	m_del_rec_btn->Bind(wxEVT_BUTTON, &MachineLearningPanel::OnDelRec, this);
+	m_apply_rec_btn = new wxButton(m_panel_bot, wxID_ANY, "Apply",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
-	m_apply_rec_btn->Connect(m_apply_rec_id, wxEVT_BUTTON,
-		wxCommandEventHandler(MachineLearningPanel::OnApplyRec), NULL, this);
+	m_apply_rec_btn->Bind(wxEVT_BUTTON, &MachineLearningPanel::OnApplyRec, this);
 	m_sizer2->Add(5, 5);
 	m_sizer2->Add(m_bot_table_name, 0, wxALIGN_CENTER);
 	m_sizer2->AddStretchSpacer(1);
@@ -254,6 +253,17 @@ void MachineLearningPanel::Create()
 	SetSizer(mainsizer);
 	m_panel_top->Layout();
 	m_panel_bot->Layout();
+}
+
+void MachineLearningPanel::FluoUpdate(const fluo::ValueCollection& vc)
+{
+	//update user interface
+	if (FOUND_VALUE(gstNull))
+		return;
+	bool update_all = vc.empty();
+
+	if (update_all || FOUND_VALUE(gstMlTopList))
+		PopTopList();
 }
 
 void MachineLearningPanel::PopTopList()
@@ -403,26 +413,12 @@ MLCompGenPanel::MLCompGenPanel(
 	m_dir = "Database";
 	m_ext = ".cgtbl";
 	m_top_grid_name = "Data Sets";
-	m_top_grid_id = ID_TopGrid;
-	m_new_table_id = ID_NewTableBtn;
-	m_load_table_id = ID_LoadTableBtn;
-	m_del_table_id = ID_DelTableBtn;
-	m_dup_table_id = ID_DupTableBtn;
-	m_auto_load_id = ID_AutoLoadBtn;
 	m_bot_grid_name = "Machine Learning Records";
-	m_bot_grid_id = ID_BotGrid;
-	m_auto_start_id = ID_AutoStartChk;
-	m_start_rec_id = ID_StartRecBtn;
-	m_del_rec_id = ID_DelRecBtn;
-	m_apply_rec_id = ID_ApplyRecBtn;
 	Create();
-	PopTopList();
 
 	flrd::TableHistParams& table = glbin.get_cg_table();
 	table.setUpdateFunc(std::bind(
 		&MLCompGenPanel::UpdateList, this, std::placeholders::_1));
-
-	m_auto_start_check->SetValue(glbin_settings.m_cg_auto_start);
 }
 
 MLCompGenPanel::~MLCompGenPanel()
@@ -435,6 +431,26 @@ MLCompGenPanel::~MLCompGenPanel()
 		std::string filename = m_exepath;
 		filename += GETSLASHA() + m_dir + GETSLASHA() + name + m_ext;
 		table.save(filename);
+	}
+}
+
+void MLCompGenPanel::FluoUpdate(const fluo::ValueCollection& vc)
+{
+	MachineLearningPanel::FluoUpdate(vc);
+
+	//update user interface
+	if (FOUND_VALUE(gstNull))
+		return;
+	bool update_all = vc.empty();
+
+	bool bval;
+
+	if (update_all ||
+		FOUND_VALUE(gstMlAutoStart) ||
+		FOUND_VALUE(gstMlCgAutoStart))
+	{
+		bval = glbin_settings.m_cg_auto_start;
+		m_auto_start_check->SetValue(bval);
 	}
 }
 
@@ -731,6 +747,12 @@ void MLCompGenPanel::SaveTable(const std::string& filename)
 	glbin.get_cg_table().save(str);
 }
 
+void MLCompGenPanel::SetAutoStart(bool bval)
+{
+	//MachineLearningPanel::SetAutoStart(bval);
+	glbin_settings.m_cg_auto_start = bval;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 MLVolPropPanel::MLVolPropPanel(
 	MainFrame* frame, wxWindow* parent) :
@@ -739,25 +761,13 @@ MLVolPropPanel::MLVolPropPanel(
 	m_dir = "Database";
 	m_ext = ".vptbl";
 	m_top_grid_name = "Data Sets";
-	m_top_grid_id = ID_TopGrid;
-	m_new_table_id = ID_NewTableBtn;
-	m_load_table_id = ID_LoadTableBtn;
-	m_del_table_id = ID_DelTableBtn;
-	m_dup_table_id = ID_DupTableBtn;
-	m_auto_load_id = ID_AutoLoadBtn;
 	m_bot_grid_name = "Machine Learning Records";
-	m_bot_grid_id = ID_BotGrid;
-	m_auto_start_id = ID_AutoStartChk;
-	m_start_rec_id = ID_StartRecBtn;
-	m_del_rec_id = ID_DelRecBtn;
-	m_apply_rec_id = ID_ApplyRecBtn;
 	Create();
-	PopTopList();
+
 	//add more options
-	m_auto_apply_chk = new wxCheckBox(m_panel_bot, ID_AutoApplyChk, "Auto Apply",
+	m_auto_apply_chk = new wxCheckBox(m_panel_bot, wxID_ANY, "Auto Apply",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	m_auto_apply_chk->Connect(ID_AutoApplyChk, wxEVT_CHECKBOX,
-		wxCommandEventHandler(MLVolPropPanel::OnAutoApply), NULL, this);
+	m_auto_apply_chk->Bind(wxEVT_CHECKBOX, &MLVolPropPanel::OnAutoApply, this);
 	m_sizer2->Add(m_auto_apply_chk, 0);
 	m_sizer2->Add(5, 5);
 	m_panel_bot->Layout();
@@ -765,9 +775,6 @@ MLVolPropPanel::MLVolPropPanel(
 	flrd::TableHistParams& table = glbin.get_vp_table();
 	table.setUpdateFunc(std::bind(
 		&MLVolPropPanel::UpdateList, this, std::placeholders::_1));
-
-	m_auto_start_check->SetValue(glbin_settings.m_vp_auto_start);
-	m_auto_apply_chk->SetValue(glbin_settings.m_vp_auto_apply);
 }
 
 MLVolPropPanel::~MLVolPropPanel()
@@ -780,6 +787,32 @@ MLVolPropPanel::~MLVolPropPanel()
 		std::string filename = m_exepath;
 		filename += GETSLASHA() + m_dir + GETSLASHA() + name + m_ext;
 		table.save(filename);
+	}
+}
+
+void MLVolPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
+{
+	MachineLearningPanel::FluoUpdate(vc);
+
+	//update user interface
+	if (FOUND_VALUE(gstNull))
+		return;
+	bool update_all = vc.empty();
+
+	bool bval;
+
+	if (update_all ||
+		FOUND_VALUE(gstMlAutoStart) ||
+		FOUND_VALUE(gstMlVpAutoStart))
+	{
+		bval = glbin_settings.m_vp_auto_start;
+		m_auto_start_check->SetValue(bval);
+	}
+
+	if (update_all || FOUND_VALUE(gstMlVpAutoApply))
+	{
+		bval = glbin_settings.m_vp_auto_apply;
+		m_auto_apply_chk->SetValue(bval);
 	}
 }
 
@@ -1070,6 +1103,12 @@ void MLVolPropPanel::SaveTable(const std::string& filename)
 	std::string str = m_exepath;
 	str += GETSLASHA() + m_dir + GETSLASHA() + filename + m_ext;
 	glbin.get_vp_table().save(str);
+}
+
+void MLVolPropPanel::SetAutoStart(bool bval)
+{
+	//MachineLearningPanel::SetAutoStart(bval);
+	glbin_settings.m_vp_auto_start = bval;
 }
 
 void MLVolPropPanel::OnAutoApply(wxCommandEvent& event)

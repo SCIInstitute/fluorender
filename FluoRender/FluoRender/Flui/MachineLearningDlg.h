@@ -28,41 +28,37 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MACHINELEARNINGDLG_H_
 #define _MACHINELEARNINGDLG_H_
 
-#include <wx/wx.h>
+#include <PropPanel.h>
 #include <wx/notebook.h>
 #include <wx/grid.h>
 #include <wx/splitter.h>
 #include <wx/tglbtn.h>
+#include <wx/checkbox.h>
+#include <wx/stdpaths.h>
 #include <string>
+#include <vector>
 
-class MainFrame;
-class MLCompGenPanel;
-class MLVolPropPanel;
-class MachineLearningDlg : public wxPanel
+class MachineLearningPanel;
+class MachineLearningDlg : public PropPanel
 {
 public:
-	enum
-	{
-		ID_AutoStartAll = ID_LEARNING
-	};
 	MachineLearningDlg(MainFrame* frame);
 	~MachineLearningDlg();
 
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+
 private:
-	MainFrame* m_frame;
-	//
 	wxCheckBox* m_auto_start_all;
-	MLCompGenPanel* m_panel1;
-	MLVolPropPanel* m_panel2;
+	std::vector<MachineLearningPanel*> m_panels;
+	//MLCompGenPanel* m_panel1;
+	//MLVolPropPanel* m_panel2;
 
 private:
 	void OnAutoStartAll(wxCommandEvent& event);
-
-	DECLARE_EVENT_TABLE()
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-class MachineLearningPanel : public wxPanel
+class MachineLearningPanel : public PropPanel
 {
 public:
 	MachineLearningPanel(MainFrame* frame,
@@ -70,6 +66,7 @@ public:
 	~MachineLearningPanel();
 
 	void Create();
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	virtual void PopTopList();
 	virtual void UpdateList(int index);
 	virtual void UpdateTopList();
@@ -80,39 +77,27 @@ public:
 	virtual void SetAutoStart(bool bval) { m_auto_start_check->SetValue(bval); }
 
 protected:
-	MainFrame* m_frame;
 	wxSplitterWindow* m_splitter;
 	//
 	wxPanel* m_panel_top;
 	wxGrid *m_top_grid;
 	wxString m_top_grid_name;
-	wxWindowID m_top_grid_id;
 	wxButton* m_new_table_btn;
-	wxWindowID m_new_table_id;
 	wxButton* m_load_table_btn;
-	wxWindowID m_load_table_id;
 	wxButton* m_del_table_btn;
-	wxWindowID m_del_table_id;
 	wxButton* m_dup_table_btn;
-	wxWindowID m_dup_table_id;
 	wxButton* m_auto_load_btn;
-	wxWindowID m_auto_load_id;
 	//
 	wxPanel* m_panel_bot;
 	wxGrid *m_bot_grid;
 	wxString m_bot_grid_name;
-	wxWindowID m_bot_grid_id;
 	wxBoxSizer* m_sizer2;
 	wxStaticText* m_bot_table_name;
 	wxStaticText* m_start_prompt_text;
 	wxCheckBox* m_auto_start_check;
-	wxWindowID m_auto_start_id;
 	wxToggleButton* m_start_rec_btn;
-	wxWindowID m_start_rec_id;
 	wxButton* m_del_rec_btn;
-	wxWindowID m_del_rec_id;
 	wxButton* m_apply_rec_btn;
-	wxWindowID m_apply_rec_id;
 
 	bool m_record;//state for recording
 	std::string m_dir;//dir for searching tables
@@ -146,28 +131,16 @@ protected:
 class MLCompGenPanel : public MachineLearningPanel
 {
 public:
-	enum
-	{
-		ID_TopGrid = ID_LEARNING_COMP_GEN,
-		ID_NewTableBtn,
-		ID_LoadTableBtn,
-		ID_DelTableBtn,
-		ID_DupTableBtn,
-		ID_AutoLoadBtn,
-		ID_BotGrid,
-		ID_AutoStartChk,
-		ID_StartRecBtn,
-		ID_DelRecBtn,
-		ID_ApplyRecBtn
-	};
 	MLCompGenPanel(MainFrame* frame,
 		wxWindow* parent);
 	~MLCompGenPanel();
 
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	virtual void UpdateBotList();
 	virtual void AutoLoadTable();
 	virtual void LoadTable(const std::string& filename);
 	virtual void SaveTable(const std::string& filename);
+	virtual void SetAutoStart(bool bval);
 
 protected:
 	virtual void OnNewTable(wxCommandEvent& event);
@@ -192,29 +165,16 @@ private:
 class MLVolPropPanel : public MachineLearningPanel
 {
 public:
-	enum
-	{
-		ID_TopGrid = ID_LEARNING_VOL_PROP,
-		ID_NewTableBtn,
-		ID_LoadTableBtn,
-		ID_DelTableBtn,
-		ID_DupTableBtn,
-		ID_AutoLoadBtn,
-		ID_BotGrid,
-		ID_AutoStartChk,
-		ID_StartRecBtn,
-		ID_DelRecBtn,
-		ID_ApplyRecBtn,
-		ID_AutoApplyChk
-	};
 	MLVolPropPanel(MainFrame* frame,
 		wxWindow* parent);
 	~MLVolPropPanel();
 
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	virtual void UpdateBotList();
 	virtual void AutoLoadTable();
 	virtual void LoadTable(const std::string& filename);
 	virtual void SaveTable(const std::string& filename);
+	virtual void SetAutoStart(bool bval);
 
 protected:
 	virtual void OnNewTable(wxCommandEvent& event);
