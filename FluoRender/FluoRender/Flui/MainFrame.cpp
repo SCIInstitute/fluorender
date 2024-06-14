@@ -75,70 +75,69 @@ DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include <sstream>
 #include <cctype>
-
 //resources
 #include <icons.h>
 
-BEGIN_EVENT_TABLE(MainFrame, wxFrame)
-	EVT_MENU(wxID_EXIT, MainFrame::OnExit)
-	EVT_MENU(ID_ViewNew, MainFrame::OnNewView)
-	EVT_MENU(ID_Layout, MainFrame::OnLayout)
-	EVT_MENU(ID_Reset, MainFrame::OnReset)
-	EVT_MENU(ID_FullScreen, MainFrame::OnFullScreen)
-	EVT_MENU(ID_OpenVolume, MainFrame::OnOpenVolume)
-	EVT_MENU(ID_OpenMesh, MainFrame::OnOpenMesh)
-	EVT_MENU(ID_ViewOrganize, MainFrame::OnOrganize)
-	EVT_MENU(ID_CheckUpdates, MainFrame::OnCheckUpdates)
-	EVT_MENU(ID_Info, MainFrame::OnInfo)
-	EVT_MENU(ID_NewProject, MainFrame::OnNewProject)
-	EVT_MENU(ID_SaveProject, MainFrame::OnSaveProject)
-	EVT_MENU(ID_SaveAsProject, MainFrame::OnSaveAsProject)
-	EVT_MENU(ID_OpenProject, MainFrame::OnOpenProject)
-	EVT_MENU(ID_Settings, MainFrame::OnSettings)
-	EVT_MENU(ID_ImportVolume, MainFrame::OnImportVolume)
-	EVT_MENU(ID_Undo, MainFrame::OnUndo)
-	EVT_MENU(ID_Redo, MainFrame::OnRedo)
-	//tools
-	EVT_MENU(ID_LastTool, MainFrame::OnLastTool)
-	EVT_MENU(ID_PaintTool, MainFrame::OnPaintTool)
-	EVT_MENU(ID_Measure, MainFrame::OnMeasure)
-	EVT_MENU(ID_Trace, MainFrame::OnTrace)
-	EVT_MENU(ID_NoiseCancelling, MainFrame::OnNoiseCancelling)
-	EVT_MENU(ID_Counting, MainFrame::OnCounting)
-	EVT_MENU(ID_Colocalization, MainFrame::OnColocalization)
-	EVT_MENU(ID_Convert, MainFrame::OnConvert)
-	EVT_MENU(ID_Ocl, MainFrame::OnOcl)
-	EVT_MENU(ID_Component, MainFrame::OnComponent)
-	EVT_MENU(ID_Calculations, MainFrame::OnCalculations)
-	EVT_MENU(ID_MachineLearning, MainFrame::OnMachineLearning)
-	//
-	EVT_MENU(ID_Youtube, MainFrame::OnYoutube)
-	EVT_MENU(ID_Twitter, MainFrame::OnTwitter)
-	EVT_MENU(ID_Facebook, MainFrame::OnFacebook)
-	EVT_MENU(ID_Manual, MainFrame::OnManual)
-	EVT_MENU(ID_Tutorial, MainFrame::OnTutorial)
-	EVT_MENU(ID_ShowHideUI, MainFrame::OnShowHideUI)
-	EVT_MENU(ID_ShowHideToolbar, MainFrame::OnShowHideToolbar)
-	//ui menu events
-	EVT_MENU(ID_UIProjView, MainFrame::OnShowHideView)
-	EVT_MENU(ID_UIMovieView, MainFrame::OnShowHideView)
-	EVT_MENU(ID_UIAdjView, MainFrame::OnShowHideView)
-	EVT_MENU(ID_UIClipView, MainFrame::OnShowHideView)
-	EVT_MENU(ID_UIPropView, MainFrame::OnShowHideView)
-	//toolbar menus
-	EVT_AUITOOLBAR_TOOL_DROPDOWN(wxID_ANY, MainFrame::OnToolbarMenu)
-	//panes
-	EVT_AUI_PANE_CLOSE(MainFrame::OnPaneClose)
-	//prop panel
-	EVT_AUINOTEBOOK_PAGE_CLOSE(wxID_ANY, MainFrame::OnPropPageClose)
-	//draw background
-	EVT_PAINT(MainFrame::OnDraw)
-	//process key event
-	EVT_KEY_DOWN(MainFrame::OnKeyDown)
-	//close
-	EVT_CLOSE(MainFrame::OnClose)
-END_EVENT_TABLE()
-
+//BEGIN_EVENT_TABLE(MainFrame, wxFrame)
+//	EVT_MENU(wxID_EXIT, MainFrame::OnExit)
+//	EVT_MENU(ID_ViewNew, MainFrame::OnNewView)
+//	EVT_MENU(ID_Layout, MainFrame::OnLayout)
+//	EVT_MENU(ID_Reset, MainFrame::OnReset)
+//	EVT_MENU(ID_FullScreen, MainFrame::OnFullScreen)
+//	EVT_MENU(ID_OpenVolume, MainFrame::OnOpenVolume)
+//	EVT_MENU(ID_OpenMesh, MainFrame::OnOpenMesh)
+//	EVT_MENU(ID_ViewOrganize, MainFrame::OnOrganize)
+//	EVT_MENU(ID_CheckUpdates, MainFrame::OnCheckUpdates)
+//	EVT_MENU(ID_Info, MainFrame::OnInfo)
+//	EVT_MENU(ID_NewProject, MainFrame::OnNewProject)
+//	EVT_MENU(ID_SaveProject, MainFrame::OnSaveProject)
+//	EVT_MENU(ID_SaveAsProject, MainFrame::OnSaveAsProject)
+//	EVT_MENU(ID_OpenProject, MainFrame::OnOpenProject)
+//	EVT_MENU(ID_Settings, MainFrame::OnSettings)
+//	EVT_MENU(ID_ImportVolume, MainFrame::OnImportVolume)
+//	EVT_MENU(ID_Undo, MainFrame::OnUndo)
+//	EVT_MENU(ID_Redo, MainFrame::OnRedo)
+//	//tools
+//	EVT_MENU(ID_LastTool, MainFrame::OnLastTool)
+//	EVT_MENU(ID_PaintTool, MainFrame::OnPaintTool)
+//	EVT_MENU(ID_Measure, MainFrame::OnMeasure)
+//	EVT_MENU(ID_Trace, MainFrame::OnTrace)
+//	EVT_MENU(ID_NoiseCancelling, MainFrame::OnNoiseCancelling)
+//	EVT_MENU(ID_Counting, MainFrame::OnCounting)
+//	EVT_MENU(ID_Colocalization, MainFrame::OnColocalization)
+//	EVT_MENU(ID_Convert, MainFrame::OnConvert)
+//	EVT_MENU(ID_Ocl, MainFrame::OnOcl)
+//	EVT_MENU(ID_Component, MainFrame::OnComponent)
+//	EVT_MENU(ID_Calculations, MainFrame::OnCalculations)
+//	EVT_MENU(ID_MachineLearning, MainFrame::OnMachineLearning)
+//	//
+//	EVT_MENU(ID_Youtube, MainFrame::OnYoutube)
+//	EVT_MENU(ID_Twitter, MainFrame::OnTwitter)
+//	EVT_MENU(ID_Facebook, MainFrame::OnFacebook)
+//	EVT_MENU(ID_Manual, MainFrame::OnManual)
+//	EVT_MENU(ID_Tutorial, MainFrame::OnTutorial)
+//	EVT_MENU(ID_ShowHideUI, MainFrame::OnShowHideUI)
+//	EVT_MENU(ID_ShowHideToolbar, MainFrame::OnShowHideToolbar)
+//	//ui menu events
+//	EVT_MENU(ID_UIProjView, MainFrame::OnShowHideView)
+//	EVT_MENU(ID_UIMovieView, MainFrame::OnShowHideView)
+//	EVT_MENU(ID_UIAdjView, MainFrame::OnShowHideView)
+//	EVT_MENU(ID_UIClipView, MainFrame::OnShowHideView)
+//	EVT_MENU(ID_UIPropView, MainFrame::OnShowHideView)
+//	//toolbar menus
+//	EVT_AUITOOLBAR_TOOL_DROPDOWN(wxID_ANY, MainFrame::OnToolbarMenu)
+//	//panes
+//	EVT_AUI_PANE_CLOSE(MainFrame::OnPaneClose)
+//	//prop panel
+//	EVT_AUINOTEBOOK_PAGE_CLOSE(wxID_ANY, MainFrame::OnPropPageClose)
+//	//draw background
+//	EVT_PAINT(MainFrame::OnDraw)
+//	//process key event
+//	EVT_KEY_DOWN(MainFrame::OnKeyDown)
+//	//close
+//	EVT_CLOSE(MainFrame::OnClose)
+//END_EVENT_TABLE()
+//
 MainFrame::MainFrame(
 	wxFrame* frame,
 	const wxString& title,
@@ -335,6 +334,7 @@ MainFrame::MainFrame(
 	m_main_tb->AddTool(item_id, str1, bitmap, str3);
 	m_main_tb->SetToolDropDown(item_id, true);
 	m_main_tb->SetCustomOverflowItems(prepend_items, append_items);
+	m_main_tb->Bind(wxEVT_MENU, &MainFrame::OnMainToolbar, this);
 	m_main_tb->Realize();
 
 	//create the menu for UI management

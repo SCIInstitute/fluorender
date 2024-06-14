@@ -114,11 +114,11 @@ class FpRangeDlg;
 
 class MainFrame: public wxFrame
 {
-	enum
+/*	enum
 	{
 		//file
 		//file\new
-		ID_NewProject = ID_VRENDER_FRAME,
+		ID_NewProject = 0,
 		ID_SaveProject,
 		ID_SaveAsProject,
 		//file\open
@@ -182,7 +182,7 @@ class MainFrame: public wxFrame
 		ID_TSEQ_ID,
 		ID_EMBED_FILES,
 		ID_LZW_COMP
-	};
+	};*/
 
 public:
 	MainFrame(wxFrame* frame,
@@ -201,7 +201,6 @@ public:
 	//views
 	void RefreshCanvases(const std::set<int>& views = {});//view indices to update
 	int GetViewNum();
-	//RenderCanvas* GetCurRenderCanvas();
 	RenderCanvas* GetRenderCanvas(int index);
 	RenderCanvas* GetRenderCanvas(const wxString& name);
 	int GetRenderCanvas(RenderCanvas* view);
@@ -276,12 +275,6 @@ public:
 	ScriptBreakDlg* GetScriptBreakDlg();
 	//floating point voluem range
 	FpRangeDlg* GetFpRangeDlg();
-
-	////selection
-	//int GetCurSelType();
-	//VolumeData* GetCurSelVol();
-	////get current selected mesh
-	//MeshData* GetCurSelMesh();
 
 	void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
 	void OpenProject(wxString& filename);
@@ -358,16 +351,6 @@ private:
 	//flag for show/hide views
 	bool m_ui_state;
 
-	////current selection (allow only one)
-	////selection type
-	//int m_cur_sel_type; //0:root; 1:view; 2:volume; 3:mesh; 5:volume group; 6:mesh group
-	////current selected volume index
-	//int m_cur_sel_vol;
-	////mesh index
-	//int m_cur_sel_mesh;
-	////the canvas current selection belongs
-	//int m_cur_canvas;
-
 	//mac address
 	wxString m_address;
 
@@ -397,6 +380,11 @@ private:
 	void OnChEmbedCheck(wxCommandEvent& event);
 	void OnChSaveCmpCheck(wxCommandEvent& event);
 
+	//toolbar
+	void OnMainToolbar(wxCommandEvent& event);
+	//toolbar menus
+	void OnToolbarMenu(wxAuiToolBarEvent& event);
+
 	void OnClose(wxCloseEvent &event);
 	void OnExit(wxCommandEvent& event);
 	void OnNewView(wxCommandEvent& event);
@@ -416,8 +404,6 @@ private:
 	void OnShowHideUI(wxCommandEvent& event);
 	void OnShowHideToolbar(wxCommandEvent& event);
 	void OnShowHideView(wxCommandEvent& event);
-	//toolbar menus
-	void OnToolbarMenu(wxAuiToolBarEvent& event);
 
 	//panes
 	void OnPaneClose(wxAuiManagerEvent& event);
@@ -455,8 +441,6 @@ private:
 	void OnKeyDown(wxKeyEvent& event);
 
 	bool update_props(int excl_self, wxWindow* p1, wxWindow* p2);
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_MAINFRAME_H_
