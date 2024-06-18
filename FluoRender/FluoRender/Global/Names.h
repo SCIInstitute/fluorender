@@ -110,6 +110,12 @@ DEALINGS IN THE SOFTWARE.
 #define gstMeshPropPanel "mesh prop panel"
 #define gstManipPropPanel "manip prop panel"
 #define gstAnnotatPropPanel "annotat prop panel"
+#define gstProjPanel "proj panel"
+#define gstMoviePanel "movie panel"
+#define gstPropPanel "prop panel"
+#define gstOutAdjPanel "out adj panel"
+#define gstClipPlanePanel "clip plane panel"
+#define gstMainToolbar "main toolbar"
 
 //root
 #define gstRoot "Scene Graph"

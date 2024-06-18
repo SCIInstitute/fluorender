@@ -37,8 +37,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/aui/auibar.h>
 #include <vector>
 
-using namespace std;
-
 #define VERSION_CONTACT "http://www.sci.utah.edu/software/fluorender.html"
 #define VERSION_AUTHORS "YONG WAN\t\tHIDEO OTSUNA\nCHUCK HANSEN\tCHI-BIN CHIEN\n"\
 						"BRIG BAGLEY\tTAKASHI KAWASE\nKEI ITO\t\tREMALDEEP SINGH"
@@ -114,66 +112,91 @@ class FpRangeDlg;
 
 class MainFrame: public wxFrame
 {
-/*	enum
-	{
-		//file
-		//file\new
-		ID_NewProject = 0,
-		ID_SaveProject,
-		ID_SaveAsProject,
-		//file\open
-		ID_Open,
-		ID_OpenProject,
-		ID_OpenVolume,
-		ID_OpenMesh,
-		//ImageJ\open
-		ID_ImportVolume,
-		//undo/redo
-		ID_Undo,
-		ID_Redo,
-		//view
-		ID_FullScreen,
-		ID_ViewNew,
-		ID_Layout,
-		ID_Reset,
-		ID_ShowHideUI,
-		//tools
-		ID_LastTool,
-		ID_PaintTool,
-		ID_Measure,
-		ID_Trace,
-		ID_NoiseCancelling,
-		ID_Counting,
-		ID_Colocalization,
-		ID_Convert,
-		ID_Ocl,
-		ID_Component,
-		ID_Calculations,
-		ID_MachineLearning,
-		//
-		ID_Settings,
-		//UI menu
-		ID_UIProjView,
-		ID_UIMovieView,
-		ID_UIAdjView,
-		ID_UIClipView,
-		ID_UIPropView,
-		ID_ViewOrganize,
-		//right aligned items
-		ID_RightTool,
-		ID_CheckUpdates,
-		ID_Youtube,
-		ID_Facebook,
-		ID_Manual,
-		ID_Tutorial,
-		ID_Twitter,
-		ID_Info,
-		ID_ShowHideToolbar
-	};
-
 	enum
 	{
-		ID_READ_ZSLICE,
+		//toolbar
+		ID_OpenVolume = 0,
+		ID_ImportVolume,
+		ID_OpenProject,
+		ID_SaveProject,
+		ID_ViewNew,
+		ID_Panels,
+		ID_OpenMesh,
+		ID_LastTool,
+		ID_Undo,
+		ID_Redo,
+		ID_Settings,
+		ID_CheckUpdates,
+		ID_Youtube,
+		ID_Twitter,
+		ID_Info,
+		//toolbar menu items
+		ID_ProjPanel,
+		ID_MoviePanel,
+		ID_OutAdjPanel,
+		ID_ClipPlanePanel,
+		ID_PropPanel,
+		ID_BrushDlg,
+		ID_MeasureDlg,
+		ID_ComponentDlg,
+		ID_TrackDlg,
+		ID_CalcDlg,
+		ID_NoiseCancelDlg,
+		ID_CountDlg,
+		ID_ColocalDlg,
+		ID_ConvertDlg,
+		ID_OclDlg,
+		ID_MlDlg,
+		//main menu items
+		//file
+		ID_NewProjMenu,
+		ID_OpenVolumeMenu,
+		ID_ImportVolumeMenu,
+		ID_OpenMeshMenu,
+		ID_OpenProjMenu,
+		ID_SaveProjMenu,
+		ID_SaveAsProjMenu,
+		ID_Exit,
+		//edit
+		ID_UndoMenu,
+		ID_RedoMenu,
+		//tools
+		ID_BrushDlgMenu,
+		ID_MeasureDlgMenu,
+		ID_CompDlgMenu,
+		ID_TrackDlgMenu,
+		ID_CalcDlgMenu,
+		ID_NoiseCancelDlgMenu,
+		ID_CountDlgMenu,
+		ID_ColocalDlgMenu,
+		ID_ConvertDlgMenu,
+		ID_OclDlgMenu,
+		ID_MlDlgMenu,
+		//window
+		ID_ToolbarMenu,
+		ID_PanelsMenu,
+		ID_ProjPanelMenu,
+		ID_MoviePanelMenu,
+		ID_OutAdjPanelMenu,
+		ID_ClipPlanePanelMenu,
+		ID_PropPanelMenu,
+		ID_LayoutMenu,
+		ID_ResetMenu,
+		ID_ViewNewMenu,
+		ID_FullscreenMenu,
+		//help
+		ID_CheckUpdatesMenu,
+		ID_YoutubeMenu,
+		ID_TwitterMenu,
+		ID_FacebookMenu,
+		ID_ManualMenu,
+		ID_TutorialMenu,
+		ID_InfoMenu
+	};
+	//extra options
+	enum
+	{
+		ID_READ_ZSLICE = 0,
 		ID_READ_CHANN,
 		ID_DIGI_ORDER,
 		ID_SER_NUM,
@@ -182,7 +205,7 @@ class MainFrame: public wxFrame
 		ID_TSEQ_ID,
 		ID_EMBED_FILES,
 		ID_LZW_COMP
-	};*/
+	};
 
 public:
 	MainFrame(wxFrame* frame,
@@ -195,26 +218,10 @@ public:
 		bool hidepanels);
 	~MainFrame();
 
+	bool GetBenchmark();
+
 	TreePanel *GetTree();
 	ListPanel *GetList();
-
-	//views
-	void RefreshCanvases(const std::set<int>& views = {});//view indices to update
-	int GetViewNum();
-	RenderCanvas* GetRenderCanvas(int index);
-	RenderCanvas* GetRenderCanvas(const wxString& name);
-	int GetRenderCanvas(RenderCanvas* view);
-	void DeleteVRenderView(int i);
-	void DeleteVRenderView(const wxString &name);
-
-	//organize render views
-	void OrganizeVRenderViews(int mode);
-	//hide/show tools
-	void ToggleAllTools(bool cur_state);
-	//show/hide panes
-	void ShowPane(wxPanel* pane, bool show=true);
-	//reset layout
-	void ResetLayout();
 
 	//prop panels
 	wxWindow* AddProps(int type,//follow above
@@ -276,37 +283,69 @@ public:
 	//floating point voluem range
 	FpRangeDlg* GetFpRangeDlg();
 
-	void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
-	void OpenProject(wxString& filename);
-	void SaveProject(wxString& filename, bool inc);//inc: save incrementally
-	void LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* view = 0);
-	void LoadMeshes(wxArrayString files, RenderCanvas* view = 0);
+	//views
+	void RefreshCanvases(const std::set<int>& views = {});//view indices to update
+	int GetViewNum();
+	RenderCanvas* GetRenderCanvas(int index);
+	RenderCanvas* GetRenderCanvas(const wxString& name);
+	int GetRenderCanvas(RenderCanvas* view);
+	RenderCanvas* GetLastRenderCanvas();
+	wxString CreateView(int row = 1);
+	void DeleteVRenderView(int i);
+	void DeleteVRenderView(const wxString& name);
+	void ClearVrvList();
 
+	//menu operations
+	//volume
+	void OpenVolume();
+	void ImportVolume();
+	void LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* view = 0);
+	void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
+	//mesh
+	void OpenMesh();
+	void LoadMeshes(wxArrayString files, RenderCanvas* view = 0);
+	//project
+	void NewProject();
+	void OpenProject();
+	void OpenProject(wxString& filename);
+	void SaveProject();
+	void SaveAsProject();
+	void SaveProject(wxString& filename, bool inc);//inc: save incrementally
+	//hide/show tools
+	void ToggleAllPanels(bool cur_state);
+	void ToggleLastTool();
+	void ShowPane(wxPanel* pane, bool show = true);
 	//show dialogs
-	void ShowPaintTool();
+	void ShowSettingDlg();
+	void ShowBrushDlg();
 	void ShowMeasureDlg();
+	void ShowComponentDlg();
 	void ShowTraceDlg();
+	void ShowCalculationDlg();
 	void ShowNoiseCancellingDlg();
 	void ShowCountingDlg();
 	void ShowColocalizationDlg();
 	void ShowConvertDlg();
 	void ShowOclDlg();
-	void ShowComponentDlg();
-	void ShowCalculationDlg();
 	void ShowMachineLearningDlg();
-	void ShowScriptBreakDlg(bool show=true);
-
-	//quit option
-	void OnQuit(wxCommandEvent& event);
-	//show info
-	void OnInfo(wxCommandEvent& event);
-
-	bool GetBenchmark();
-
-	void ClearVrvList();
-
+	void ShowScriptBreakDlg(bool show = true);
+	void ShowInfo();
 	wxString ScriptDialog(const wxString& title,
 		const wxString& wildcard, long style);
+	//panels
+	void ShowProjPanel();
+	void ShowMoviePanel();
+	void ShowOutAdjPanel();
+	void ShowClipPlanePanel();
+	void ShowPropPanel();
+	//main toolbar
+	void ShowToolbar();
+	//organize render views
+	void OrganizeVRenderViews(int mode);
+	//reset layout
+	void ResetLayout();
+	//fullscreen
+	void FullScreen();
 
 private:
 	wxAuiManager m_aui_mgr;
@@ -317,6 +356,7 @@ private:
 	//main top menu
 	wxMenuBar* m_top_menu;
 	wxMenu* m_top_file;
+	wxMenu* m_top_edit;
 	wxMenu* m_top_tools;
 	wxMenu* m_top_window;
 	wxMenu* m_top_help;
@@ -348,8 +388,6 @@ private:
 	std::vector<PropPanel*> m_prop_pages;
 	//tester
 	TesterDlg* m_tester;
-	//flag for show/hide views
-	bool m_ui_state;
 
 	//mac address
 	wxString m_address;
@@ -362,13 +400,21 @@ private:
 	wxTimer* m_waker;
 
 private:
-	//views
-	wxString CreateView(int row=1);
-	RenderCanvas* GetLastView();
+	//toolbar menus
+	void OnToolbarMenu(wxAuiToolBarEvent& event);
+	//main menu
+	void OnMainMenu(wxCommandEvent& event);
+	//panes
+	void OnPaneClose(wxAuiManagerEvent& event);
+	//prop pages
+	void OnPropPageClose(wxAuiNotebookEvent& event);
+	//close
+	void OnClose(wxCloseEvent &event);
+
+	//extra controls in dialogs
 	static wxWindow* CreateExtraControlVolume(wxWindow* parent);
 	static wxWindow* CreateExtraControlVolumeForImport(wxWindow* parent);
 	static wxWindow* CreateExtraControlProjectSave(wxWindow* parent);
-
 	//open dialog options
 	void OnCh11Check(wxCommandEvent& event);
 	void OnCh12Check(wxCommandEvent& event);
@@ -380,66 +426,7 @@ private:
 	void OnChEmbedCheck(wxCommandEvent& event);
 	void OnChSaveCmpCheck(wxCommandEvent& event);
 
-	//toolbar
-	void OnMainToolbar(wxCommandEvent& event);
-	//toolbar menus
-	void OnToolbarMenu(wxAuiToolBarEvent& event);
-
-	void OnClose(wxCloseEvent &event);
-	void OnExit(wxCommandEvent& event);
-	void OnNewView(wxCommandEvent& event);
-	void OnLayout(wxCommandEvent& event);
-	void OnReset(wxCommandEvent& event);
-	void OnFullScreen(wxCommandEvent& event);
-	void OnOpenVolume(wxCommandEvent& event);
-	void OnImportVolume(wxCommandEvent& event);
-	void OnOpenMesh(wxCommandEvent& event);
-	void OnOrganize(wxCommandEvent& event);
-	void OnCheckUpdates(wxCommandEvent& event);
-	void OnFacebook(wxCommandEvent& event);
-	void OnManual(wxCommandEvent& event);
-	void OnTutorial(wxCommandEvent& event);
-	void OnYoutube(wxCommandEvent& event);
-	void OnTwitter(wxCommandEvent& event);
-	void OnShowHideUI(wxCommandEvent& event);
-	void OnShowHideToolbar(wxCommandEvent& event);
-	void OnShowHideView(wxCommandEvent& event);
-
-	//panes
-	void OnPaneClose(wxAuiManagerEvent& event);
-
-	//prop pages
-	void OnPropPageClose(wxAuiNotebookEvent& event);
-
-	//project
-	void OnNewProject(wxCommandEvent& event);
-	void OnSaveProject(wxCommandEvent& event);
-	void OnSaveAsProject(wxCommandEvent& event);
-	void OnOpenProject(wxCommandEvent& event);
-
-	void OnSettings(wxCommandEvent& event);
-
-	//undo redo
-	void OnUndo(wxCommandEvent& event);
-	void OnRedo(wxCommandEvent& event);
-
-	//tools
-	void OnLastTool(wxCommandEvent& event);
-	void OnPaintTool(wxCommandEvent& event);
-	void OnMeasure(wxCommandEvent& event);
-	void OnTrace(wxCommandEvent& event);
-	void OnNoiseCancelling(wxCommandEvent& event);
-	void OnCounting(wxCommandEvent& event);
-	void OnColocalization(wxCommandEvent& event);
-	void OnConvert(wxCommandEvent& event);
-	void OnOcl(wxCommandEvent& event);
-	void OnComponent(wxCommandEvent& event);
-	void OnCalculations(wxCommandEvent& event);
-	void OnMachineLearning(wxCommandEvent& event);
-
-	void OnDraw(wxPaintEvent& event);
-	void OnKeyDown(wxKeyEvent& event);
-
+private:
 	bool update_props(int excl_self, wxWindow* p1, wxWindow* p2);
 };
 

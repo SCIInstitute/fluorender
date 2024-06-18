@@ -134,6 +134,10 @@ public:
 	const static unsigned char icon_undo_png[2692];
 	/* icon_redo.png - 2356 bytes */
 	const static unsigned char icon_redo_png[2356];
+	/* redo_mini.png - 662 bytes */
+	const static unsigned char redo_mini_png[662];
+	/* undo_mini.png - 669 bytes */
+	const static unsigned char undo_mini_png[669];
 	/* disp_adjust.png - 560 bytes */
 	const static unsigned char disp_adjust_png[560];
 	/* disp_clipping.png - 572 bytes */

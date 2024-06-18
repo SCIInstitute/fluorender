@@ -1590,7 +1590,7 @@ void TreePanel::OnMenu(wxCommandEvent& event)
 		switch (id)
 		{
 			case ID_Edit:
-				m_frame->ShowPaintTool();
+				m_frame->ShowBrushDlg();
 				break;
 			case ID_Measurement:
 				m_frame->ShowMeasureDlg();
