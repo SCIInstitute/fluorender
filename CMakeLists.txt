@@ -380,32 +380,32 @@ file(GLOB clstr_hdr FluoRender/FluoRender/Cluster/*.h)
 add_library(CLUSTER_OBJ OBJECT
   ${clstr_src} ${clstr_hdr})
 
-# Components
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Components)
-file(GLOB cmp_src FluoRender/FluoRender/Components/*.cpp)
-file(GLOB cmp_hdr FluoRender/FluoRender/Components/*.h)
-add_library(COMPONENTS_OBJ OBJECT
+# Component
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Component)
+file(GLOB cmp_src FluoRender/FluoRender/Component/*.cpp)
+file(GLOB cmp_hdr FluoRender/FluoRender/Component/*.h)
+add_library(COMPONENT_OBJ OBJECT
   ${cmp_src} ${cmp_hdr})
 
-# Configs
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Configs)
-file(GLOB config_src FluoRender/FluoRender/Configs/*.cpp)
-file(GLOB config_hdr FluoRender/FluoRender/Configs/*.h)
-add_library(CONFIGS_OBJ OBJECT
+# Config
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Config)
+file(GLOB config_src FluoRender/FluoRender/Config/*.cpp)
+file(GLOB config_hdr FluoRender/FluoRender/Config/*.h)
+add_library(CONFIG_OBJ OBJECT
   ${config_src} ${config_hdr})
 
-# Controls
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Controls)
-file(GLOB ctrl_src FluoRender/FluoRender/Controls/*.cpp)
-file(GLOB ctrl_hdr FluoRender/FluoRender/Controls/*.h)
-add_library(CONTROLS_OBJ OBJECT
+# Control
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Control)
+file(GLOB ctrl_src FluoRender/FluoRender/Control/*.cpp)
+file(GLOB ctrl_hdr FluoRender/FluoRender/Control/*.h)
+add_library(CONTROL_OBJ OBJECT
   ${ctrl_src} ${ctrl_hdr})
 
-# Converters
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Converters)
-file(GLOB cvt_src FluoRender/FluoRender/Converters/*.cpp)
-file(GLOB cvt_hdr FluoRender/FluoRender/Converters/*.h)
-add_library(CONVERTERS_OBJ OBJECT
+# Converter
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Converter)
+file(GLOB cvt_src FluoRender/FluoRender/Converter/*.cpp)
+file(GLOB cvt_hdr FluoRender/FluoRender/Converter/*.h)
+add_library(CONVERTER_OBJ OBJECT
   ${cvt_src} ${cvt_hdr})
 
 # Database
@@ -422,26 +422,19 @@ file(GLOB dist_hdr FluoRender/FluoRender/Distance/*.h)
 add_library(DISTANCE_OBJ OBJECT
   ${dist_src} ${dist_hdr})
 
-# FileIO
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/FileIO)
-file(GLOB file_src FluoRender/FluoRender/FileIO/*.cpp)
-file(GLOB file_hdr FluoRender/FluoRender/FileIO/*.h)
-add_library(FILEIO_OBJ OBJECT
+# File
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/File)
+file(GLOB file_src FluoRender/FluoRender/File/*.cpp)
+file(GLOB file_hdr FluoRender/FluoRender/File/*.h)
+add_library(FILE_OBJ OBJECT
   ${file_src} ${file_hdr})
 
-# Filters
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Filters)
-file(GLOB fltr_src FluoRender/FluoRender/Filters/*.cpp)
-file(GLOB fltr_hdr FluoRender/FluoRender/Filters/*.h)
-add_library(FILTERS_OBJ OBJECT
+# Filter
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Filter)
+file(GLOB fltr_src FluoRender/FluoRender/Filter/*.cpp)
+file(GLOB fltr_hdr FluoRender/FluoRender/Filter/*.h)
+add_library(FILTER_OBJ OBJECT
   ${fltr_src} ${fltr_hdr})
-
-# FLIVR
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/FLIVR)
-file(GLOB fli_src FluoRender/FluoRender/FLIVR/*.cpp)
-file(GLOB fli_hdr FluoRender/FluoRender/FLIVR/*.h)
-add_library(FLIVR_OBJ OBJECT
-  ${fli_src} ${fli_hdr})
 
 # Flobject
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Flobject)
@@ -450,6 +443,13 @@ file(GLOB obj_hdr FluoRender/FluoRender/Flobject/*.hpp)
 add_library(FLOBJECT_OBJ OBJECT
   ${obj_src} ${obj_hdr})
 
+# Flrender
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Flrender)
+file(GLOB flrd_src FluoRender/FluoRender/Flrender/*.cpp)
+file(GLOB flrd_hdr FluoRender/FluoRender/Flrender/*.h)
+add_library(FLRENDER_OBJ OBJECT
+  ${flrd_src} ${flrd_hdr})
+
 # Flui
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Flui)
 file(GLOB flui_src FluoRender/FluoRender/Flui/*.cpp)
@@ -457,12 +457,12 @@ file(GLOB flui_hdr FluoRender/FluoRender/Flui/*.h)
 add_library(FLUI_OBJ OBJECT
   ${flui_src} ${flui_hdr})
 
-# Formats
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Formats)
-file(GLOB fmt_src FluoRender/FluoRender/Formats/*.cpp)
-file(GLOB fmt_hdr FluoRender/FluoRender/Formats/*.h)
-file(GLOB fmt_rsc FluoRender/FluoRender/Formats/*.class)
-add_library(FORMATS_OBJ OBJECT
+# Format
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Format)
+file(GLOB fmt_src FluoRender/FluoRender/Format/*.cpp)
+file(GLOB fmt_hdr FluoRender/FluoRender/Format/*.h)
+file(GLOB fmt_rsc FluoRender/FluoRender/Format/*.class)
+add_library(FORMAT_OBJ OBJECT
   ${fmt_src} ${fmt_hdr} ${fmt_rsc})
 
 # Global
@@ -472,11 +472,13 @@ file(GLOB glb_hdr FluoRender/FluoRender/Global/*.h)
 add_library(GLOBAL_OBJ OBJECT
   ${glb_src} ${glb_hdr})
 
-# images
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/img)
-file(GLOB pngs_hdr FluoRender/FluoRender/img/*.h)
-file(GLOB pngs_src FluoRender/FluoRender/img/*.cpp)
-add_library(IMAGES_OBJ OBJECT  ${pngs_hdr} ${pngs_src})
+# Image
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Image)
+file(GLOB img_hdr FluoRender/FluoRender/Image/*.h)
+file(GLOB img_src FluoRender/FluoRender/Image/*.cpp)
+file(GLOB img_rsc FluoRender/FluoRender/Image/*.xpm)
+add_library(IMAGE_OBJ OBJECT
+  ${img_hdr} ${img_src} ${img_rsc})
 
 # LookingGlass
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/LookingGlass)
@@ -485,11 +487,19 @@ file(GLOB lgr_hdr FluoRender/FluoRender/LookingGlass/*.h)
 add_library(LOOKINGGLASS_OBJ OBJECT
   ${lgr_src} ${lgr_hdr})
 
+# Project
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Project)
+file(GLOB prj_src FluoRender/FluoRender/Project/*.cpp)
+file(GLOB prj_hdr FluoRender/FluoRender/Project/*.h)
+add_library(PROJECT_OBJ OBJECT
+  ${prj_src} ${prj_hdr})
+
 # Python
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Python)
 file(GLOB pyth_hdr FluoRender/FluoRender/Python/*.h)
 file(GLOB pyth_src FluoRender/FluoRender/Python/*.cpp)
-add_library(PYTHON_OBJ OBJECT  ${pyth_hdr} ${pyth_src})
+add_library(PYTHON_OBJ OBJECT
+  ${pyth_hdr} ${pyth_src})
 
 # Scene
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Scene)
@@ -526,20 +536,20 @@ file(GLOB trk_hdr FluoRender/FluoRender/Tracking/*.h)
 add_library(TRACKING_OBJ OBJECT
   ${trk_src} ${trk_hdr})
 
-# Types
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Types)
-file(GLOB typ_src FluoRender/FluoRender/Types/*.cpp)
-file(GLOB typ_hdr FluoRender/FluoRender/Types/*.h)
-add_library(TYPES_OBJ OBJECT
+# Type
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Type)
+file(GLOB typ_src FluoRender/FluoRender/Type/*.cpp)
+file(GLOB typ_hdr FluoRender/FluoRender/Type/*.h)
+add_library(TYPE_OBJ OBJECT
   ${typ_src} ${typ_hdr})
 
-# Utilities
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Utilities)
-file(GLOB utl_src FluoRender/FluoRender/Utilities/*.cpp)
-file(GLOB utl_hdr FluoRender/FluoRender/Utilities/*.h)
-file(GLOB utl_nvs FluoRender/FluoRender/Utilities/*.natvis)
-add_library(UTL_OBJ OBJECT
-  ${utl_src} ${utl_hdr} ${utl_nvs})
+# Utility
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Utility)
+file(GLOB utl_src FluoRender/FluoRender/Utility/*.cpp)
+file(GLOB utl_hdr FluoRender/FluoRender/Utility/*.h)
+file(GLOB utl_rsc FluoRender/FluoRender/Utility/*.natvis)
+add_library(UTILITY_OBJ OBJECT
+  ${utl_src} ${utl_hdr} ${utl_rsc})
 
 # Video
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Video)
@@ -547,11 +557,6 @@ file(GLOB vid_src FluoRender/FluoRender/Video/*.cpp)
 file(GLOB vid_hdr FluoRender/FluoRender/Video/*.h)
 add_library(VIDEO_OBJ OBJECT
   ${vid_src} ${vid_hdr})
-
-# other sources
-file(GLOB src FluoRender/FluoRender/*.cpp)
-file(GLOB hdr FluoRender/FluoRender/*.h)
-file(GLOB rsc FluoRender/FluoRender/img/*.xpm)
 
 # SynthBB
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/SynthBB)
@@ -607,29 +612,30 @@ if(APPLE)
     $<TARGET_OBJECTS:ANIMATORS_OBJ>
     $<TARGET_OBJECTS:CALCULATE_OBJ>
     $<TARGET_OBJECTS:CLUSTER_OBJ>
-    $<TARGET_OBJECTS:COMPONENTS_OBJ>
-    $<TARGET_OBJECTS:CONFIGS_OBJ>
-    $<TARGET_OBJECTS:CONTROLS_OBJ>
-    $<TARGET_OBJECTS:CONVERTERS_OBJ>
+    $<TARGET_OBJECTS:COMPONENT_OBJ>
+    $<TARGET_OBJECTS:CONFIG_OBJ>
+    $<TARGET_OBJECTS:CONTROL_OBJ>
+    $<TARGET_OBJECTS:CONVERTER_OBJ>
     $<TARGET_OBJECTS:DATABASE_OBJ>
     $<TARGET_OBJECTS:DISTANCE_OBJ>
-    $<TARGET_OBJECTS:FILEIO_OBJ>
-    $<TARGET_OBJECTS:FILTERS_OBJ>
-    $<TARGET_OBJECTS:FLIVR_OBJ>
+    $<TARGET_OBJECTS:FILE_OBJ>
+    $<TARGET_OBJECTS:FILTER_OBJ>
+    $<TARGET_OBJECTS:FLRENDER_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
     $<TARGET_OBJECTS:FLUI_OBJ>
-    $<TARGET_OBJECTS:FORMATS_OBJ>
+    $<TARGET_OBJECTS:FORMAT_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
-    $<TARGET_OBJECTS:IMAGES_OBJ>
+    $<TARGET_OBJECTS:IMAGE_OBJ>
     $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
+    $<TARGET_OBJECTS:PROJECT_OBJ>
     $<TARGET_OBJECTS:PYTHON_OBJ>
     $<TARGET_OBJECTS:SCENE_OBJ>
     $<TARGET_OBJECTS:SCRIPT_OBJ>
     $<TARGET_OBJECTS:SELECTION_OBJ>
     $<TARGET_OBJECTS:TIMER_OBJ>
     $<TARGET_OBJECTS:TRACKING_OBJ>
-    $<TARGET_OBJECTS:TYPES_OBJ>
-    $<TARGET_OBJECTS:UTL_OBJ>
+    $<TARGET_OBJECTS:TYPE_OBJ>
+    $<TARGET_OBJECTS:UTILITY_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
     $<TARGET_OBJECTS:GLEW_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
@@ -652,29 +658,30 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:ANIMATORS_OBJ>
     $<TARGET_OBJECTS:CALCULATE_OBJ>
     $<TARGET_OBJECTS:CLUSTER_OBJ>
-    $<TARGET_OBJECTS:COMPONENTS_OBJ>
-    $<TARGET_OBJECTS:CONFIGS_OBJ>
-    $<TARGET_OBJECTS:CONTROLS_OBJ>
-    $<TARGET_OBJECTS:CONVERTERS_OBJ>
+    $<TARGET_OBJECTS:COMPONENT_OBJ>
+    $<TARGET_OBJECTS:CONFIG_OBJ>
+    $<TARGET_OBJECTS:CONTROL_OBJ>
+    $<TARGET_OBJECTS:CONVERTER_OBJ>
     $<TARGET_OBJECTS:DATABASE_OBJ>
     $<TARGET_OBJECTS:DISTANCE_OBJ>
-    $<TARGET_OBJECTS:FILEIO_OBJ>
-    $<TARGET_OBJECTS:FILTERS_OBJ>
-    $<TARGET_OBJECTS:FLIVR_OBJ>
+    $<TARGET_OBJECTS:FILE_OBJ>
+    $<TARGET_OBJECTS:FILTER_OBJ>
+    $<TARGET_OBJECTS:FLRENDER_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
     $<TARGET_OBJECTS:FLUI_OBJ>
-    $<TARGET_OBJECTS:FORMATS_OBJ>
+    $<TARGET_OBJECTS:FORMAT_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
-    $<TARGET_OBJECTS:IMAGES_OBJ>
+    $<TARGET_OBJECTS:IMAGE_OBJ>
     $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
+    $<TARGET_OBJECTS:PROJECT_OBJ>
     $<TARGET_OBJECTS:PYTHON_OBJ>
     $<TARGET_OBJECTS:SCENE_OBJ>
     $<TARGET_OBJECTS:SCRIPT_OBJ>
     $<TARGET_OBJECTS:SELECTION_OBJ>
     $<TARGET_OBJECTS:TIMER_OBJ>
     $<TARGET_OBJECTS:TRACKING_OBJ>
-    $<TARGET_OBJECTS:TYPES_OBJ>
-    $<TARGET_OBJECTS:UTL_OBJ>
+    $<TARGET_OBJECTS:TYPE_OBJ>
+    $<TARGET_OBJECTS:UTILITY_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
     $<TARGET_OBJECTS:GLEW_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
@@ -729,29 +736,30 @@ elseif(WIN32)
       $<TARGET_OBJECTS:ANIMATORS_OBJ>
       $<TARGET_OBJECTS:CALCULATE_OBJ>
       $<TARGET_OBJECTS:CLUSTER_OBJ>
-      $<TARGET_OBJECTS:COMPONENTS_OBJ>
-      $<TARGET_OBJECTS:CONFIGS_OBJ>
-      $<TARGET_OBJECTS:CONTROLS_OBJ>
-      $<TARGET_OBJECTS:CONVERTERS_OBJ>
+      $<TARGET_OBJECTS:COMPONENT_OBJ>
+      $<TARGET_OBJECTS:CONFIG_OBJ>
+      $<TARGET_OBJECTS:CONTROL_OBJ>
+      $<TARGET_OBJECTS:CONVERTER_OBJ>
       $<TARGET_OBJECTS:DATABASE_OBJ>
       $<TARGET_OBJECTS:DISTANCE_OBJ>
-      $<TARGET_OBJECTS:FILEIO_OBJ>
-      $<TARGET_OBJECTS:FILTERS_OBJ>
-      $<TARGET_OBJECTS:FLIVR_OBJ>
+      $<TARGET_OBJECTS:FILE_OBJ>
+      $<TARGET_OBJECTS:FILTER_OBJ>
+      $<TARGET_OBJECTS:FLRENDER_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:FLUI_OBJ>
-      $<TARGET_OBJECTS:FORMATS_OBJ>
+      $<TARGET_OBJECTS:FORMAT_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
-      $<TARGET_OBJECTS:IMAGES_OBJ>
+      $<TARGET_OBJECTS:IMAGE_OBJ>
       $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
+      $<TARGET_OBJECTS:PROJECT_OBJ>
       $<TARGET_OBJECTS:PYTHON_OBJ>
       $<TARGET_OBJECTS:SCENE_OBJ>
       $<TARGET_OBJECTS:SCRIPT_OBJ>
       $<TARGET_OBJECTS:SELECTION_OBJ>
       $<TARGET_OBJECTS:TIMER_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
-      $<TARGET_OBJECTS:TYPES_OBJ>
-      $<TARGET_OBJECTS:UTL_OBJ>
+      $<TARGET_OBJECTS:TYPE_OBJ>
+      $<TARGET_OBJECTS:UTILITY_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
@@ -765,29 +773,30 @@ elseif(WIN32)
       $<TARGET_OBJECTS:ANIMATORS_OBJ>
       $<TARGET_OBJECTS:CALCULATE_OBJ>
       $<TARGET_OBJECTS:CLUSTER_OBJ>
-      $<TARGET_OBJECTS:COMPONENTS_OBJ>
-      $<TARGET_OBJECTS:CONFIGS_OBJ>
-      $<TARGET_OBJECTS:CONTROLS_OBJ>
-      $<TARGET_OBJECTS:CONVERTERS_OBJ>
+      $<TARGET_OBJECTS:COMPONENT_OBJ>
+      $<TARGET_OBJECTS:CONFIG_OBJ>
+      $<TARGET_OBJECTS:CONTROL_OBJ>
+      $<TARGET_OBJECTS:CONVERTER_OBJ>
       $<TARGET_OBJECTS:DATABASE_OBJ>
       $<TARGET_OBJECTS:DISTANCE_OBJ>
-      $<TARGET_OBJECTS:FILEIO_OBJ>
-      $<TARGET_OBJECTS:FILTERS_OBJ>
-      $<TARGET_OBJECTS:FLIVR_OBJ>
+      $<TARGET_OBJECTS:FILE_OBJ>
+      $<TARGET_OBJECTS:FILTER_OBJ>
+      $<TARGET_OBJECTS:FLRENDER_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:FLUI_OBJ>
-      $<TARGET_OBJECTS:FORMATS_OBJ>
+      $<TARGET_OBJECTS:FORMAT_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
-      $<TARGET_OBJECTS:IMAGES_OBJ>
+      $<TARGET_OBJECTS:IMAGE_OBJ>
       $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
+      $<TARGET_OBJECTS:PROJECT_OBJ>
       $<TARGET_OBJECTS:PYTHON_OBJ>
       $<TARGET_OBJECTS:SCENE_OBJ>
       $<TARGET_OBJECTS:SCRIPT_OBJ>
       $<TARGET_OBJECTS:SELECTION_OBJ>
       $<TARGET_OBJECTS:TIMER_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
-      $<TARGET_OBJECTS:TYPES_OBJ>
-      $<TARGET_OBJECTS:UTL_OBJ>
+      $<TARGET_OBJECTS:TYPE_OBJ>
+      $<TARGET_OBJECTS:UTILITY_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
@@ -800,29 +809,30 @@ elseif(WIN32)
       $<TARGET_OBJECTS:ANIMATORS_OBJ>
       $<TARGET_OBJECTS:CALCULATE_OBJ>
       $<TARGET_OBJECTS:CLUSTER_OBJ>
-      $<TARGET_OBJECTS:COMPONENTS_OBJ>
-      $<TARGET_OBJECTS:CONFIGS_OBJ>
-      $<TARGET_OBJECTS:CONTROLS_OBJ>
-      $<TARGET_OBJECTS:CONVERTERS_OBJ>
+      $<TARGET_OBJECTS:COMPONENT_OBJ>
+      $<TARGET_OBJECTS:CONFIG_OBJ>
+      $<TARGET_OBJECTS:CONTROL_OBJ>
+      $<TARGET_OBJECTS:CONVERTER_OBJ>
       $<TARGET_OBJECTS:DATABASE_OBJ>
       $<TARGET_OBJECTS:DISTANCE_OBJ>
-      $<TARGET_OBJECTS:FILEIO_OBJ>
-      $<TARGET_OBJECTS:FILTERS_OBJ>
-      $<TARGET_OBJECTS:FLIVR_OBJ>
+      $<TARGET_OBJECTS:FILE_OBJ>
+      $<TARGET_OBJECTS:FILTER_OBJ>
+      $<TARGET_OBJECTS:FLRENDER_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:FLUI_OBJ>
-      $<TARGET_OBJECTS:FORMATS_OBJ>
+      $<TARGET_OBJECTS:FORMAT_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
-      $<TARGET_OBJECTS:IMAGES_OBJ>
+      $<TARGET_OBJECTS:IMAGE_OBJ>
       $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
+      $<TARGET_OBJECTS:PROJECT_OBJ>
       $<TARGET_OBJECTS:PYTHON_OBJ>
       $<TARGET_OBJECTS:SCENE_OBJ>
       $<TARGET_OBJECTS:SCRIPT_OBJ>
       $<TARGET_OBJECTS:SELECTION_OBJ>
       $<TARGET_OBJECTS:TIMER_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
-      $<TARGET_OBJECTS:TYPES_OBJ>
-      $<TARGET_OBJECTS:UTL_OBJ>
+      $<TARGET_OBJECTS:TYPE_OBJ>
+      $<TARGET_OBJECTS:UTILITY_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
