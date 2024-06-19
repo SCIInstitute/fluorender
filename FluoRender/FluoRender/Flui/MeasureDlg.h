@@ -28,17 +28,18 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MEASUREDLG_H_
 #define _MEASUREDLG_H_
 
-#include <wx/wx.h>
+#include <PropPanel.h>
 #include <wx/listctrl.h>
 #include <wx/clrpicker.h>
 #include <wx/spinctrl.h>
 #include <wx/tglbtn.h>
 #include <Color.h>
 
-using namespace std;
+#define IntCol 3
+#define ColorCol 4
+#define CenterCol 8
+#define PointCol 10
 
-class MainFrame;
-class RenderCanvas;
 class MeasureDlg;
 namespace flrd
 {
@@ -47,16 +48,16 @@ namespace flrd
 }
 class RulerListCtrl : public wxListCtrl
 {
-	enum
-	{
-		ID_NameText = ID_MEASURE1,
-		ID_CenterText,
-		ID_ColorPicker,
-		ID_ToggleDisp
-	};
+	//enum
+	//{
+	//	ID_NameText = ID_MEASURE1,
+	//	ID_CenterText,
+	//	ID_ColorPicker,
+	//	ID_ToggleDisp
+	//};
 
 public:
-	RulerListCtrl(MainFrame *frame,
+	RulerListCtrl(
 		MeasureDlg* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -70,25 +71,15 @@ public:
 		double angle, wxString &center, bool time_dep,
 		int time, wxString &extra, wxString &points);
 	void AdjustSize();
-	void UpdateRulers(RenderCanvas* vrv=0);
-
-	bool GetCurrSelection(std::vector<int> &sel);
-	void ClearSelection();
-	void SelectGroup(unsigned int group);
-	void DeleteSelection();
-	void DeleteAll(bool cur_time=false);
-
-	void Export(wxString filename);
 
 	wxString GetText(long item, int col);
 	void SetText(long item, int col, wxString &str);
+	bool GetCurrSelection(std::vector<int> &sel);
+	void ClearSelection();
 
 	friend class MeasureDlg;
 
 private:
-	wxWindow* m_frame;
-	RenderCanvas *m_view;
-	MeasureDlg* m_measure_dlg;
 	wxImageList *m_images;
 	wxTextCtrl *m_name_text;
 	wxTextCtrl *m_center_text;
@@ -110,82 +101,82 @@ private:
 	void OnScroll(wxMouseEvent& event);
 	void OnTextFocus(wxCommandEvent& event);
 	void OnAct(wxListEvent &event);
-
-	DECLARE_EVENT_TABLE()
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-class MeasureDlg : public wxPanel
+class MeasureDlg : public PropPanel
 {
 public:
-	enum
-	{
-		ID_LocatorBtn = ID_MEASURE2,
-		ID_ProbeBtn,
-		ID_ProtractorBtn,
-		ID_RulerBtn,
-		ID_RulerMPBtn,
-		ID_EllipseBtn,
-		ID_GrowBtn,
-		ID_PencilBtn,
-		ID_RulerMoveBtn,
-		ID_RulerMovePointBtn,
-		ID_MagnetBtn,
-		ID_RulerMovePencilBtn,
-		ID_RulerDelBtn,
-		ID_RulerFlipBtn,
-		ID_RulerAvgBtn,
-		ID_LockBtn,
-		ID_PruneBtn,
-		ID_RelaxBtn,
-		ID_DeleteBtn,
-		ID_DeleteAllBtn,
-		ID_ProfileBtn,
-		ID_DistanceBtn,
-		ID_ProjectBtn,
-		ID_ExportBtn,
-		ID_ViewPlaneRd,
-		ID_MaxIntensityRd,
-		ID_AccIntensityRd,
-		ID_UseTransferChk,
-		ID_TransientChk,
-		ID_DF_FChk,
-		ID_AutoRelaxBtn,
-		ID_RelaxValueSpin,
-		ID_RelaxDataCmb,
-		//ruler list
-		ID_NewGroup,
-		ID_GroupText,
-		ID_ChgGroup,
-		ID_SelGroup,
-		ID_DispTglGroup,
-		//interpolation/key
-		ID_InterpCmb,
-		ID_DeleteKeyBtn,
-		ID_DeleteAllKeyBtn,
-		//align
-		ID_AlignCenter,
-		ID_AlignX,
-		ID_AlignY,
-		ID_AlignZ,
-		ID_AlignNX,
-		ID_AlignNY,
-		ID_AlignNZ,
-		ID_AlignXYZ,
-		ID_AlignYXZ,
-		ID_AlignZXY,
-		ID_AlignXZY,
-		ID_AlignYZX,
-		ID_AlignZYX,
-	};
+	//enum
+	//{
+	//	ID_LocatorBtn = ID_MEASURE2,
+	//	ID_ProbeBtn,
+	//	ID_ProtractorBtn,
+	//	ID_RulerBtn,
+	//	ID_RulerMPBtn,
+	//	ID_EllipseBtn,
+	//	ID_GrowBtn,
+	//	ID_PencilBtn,
+	//	ID_RulerMoveBtn,
+	//	ID_RulerMovePointBtn,
+	//	ID_MagnetBtn,
+	//	ID_RulerMovePencilBtn,
+	//	ID_RulerDelBtn,
+	//	ID_RulerFlipBtn,
+	//	ID_RulerAvgBtn,
+	//	ID_LockBtn,
+	//	ID_PruneBtn,
+	//	ID_RelaxBtn,
+	//	ID_DeleteBtn,
+	//	ID_DeleteAllBtn,
+	//	ID_ProfileBtn,
+	//	ID_DistanceBtn,
+	//	ID_ProjectBtn,
+	//	ID_ExportBtn,
+	//	ID_ViewPlaneRd,
+	//	ID_MaxIntensityRd,
+	//	ID_AccIntensityRd,
+	//	ID_UseTransferChk,
+	//	ID_TransientChk,
+	//	ID_DF_FChk,
+	//	ID_AutoRelaxBtn,
+	//	ID_RelaxValueSpin,
+	//	ID_RelaxDataCmb,
+	//	//ruler list
+	//	ID_NewGroup,
+	//	ID_GroupText,
+	//	ID_ChgGroup,
+	//	ID_SelGroup,
+	//	ID_DispTglGroup,
+	//	//interpolation/key
+	//	ID_InterpCmb,
+	//	ID_DeleteKeyBtn,
+	//	ID_DeleteAllKeyBtn,
+	//	//align
+	//	ID_AlignCenter,
+	//	ID_AlignX,
+	//	ID_AlignY,
+	//	ID_AlignZ,
+	//	ID_AlignNX,
+	//	ID_AlignNY,
+	//	ID_AlignNZ,
+	//	ID_AlignXYZ,
+	//	ID_AlignYXZ,
+	//	ID_AlignZXY,
+	//	ID_AlignXZY,
+	//	ID_AlignYZX,
+	//	ID_AlignZYX,
+	//};
 
 	MeasureDlg(MainFrame* frame);
 	~MeasureDlg();
 
-	void GetSettings(RenderCanvas* vrv);
-	void UpdateRulerProps();
-	RenderCanvas* GetRenderCanvas();
-	void UpdateList();
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	void UpdateRulerList();
+
+	void SelectGroup(unsigned int group);
+	void DeleteSelection();
+	void DeleteAll(bool cur_time = false);
 
 	//processing
 	void Relax();
@@ -196,10 +187,6 @@ public:
 	void Prune(int idx, int len);
 
 private:
-	MainFrame* m_frame;
-	//current view
-	RenderCanvas* m_view;
-
 	//list ctrl
 	wxButton* m_new_group;
 	wxTextCtrl* m_group_text;
@@ -291,8 +278,6 @@ private:
 	//align
 	void OnAlignRuler(wxCommandEvent& event);
 	void OnAlignPca(wxCommandEvent& event);
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_MEASUREDLG_H_
