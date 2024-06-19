@@ -70,8 +70,7 @@ public:
 
 	void SetMeshData(MeshData* md);
 	MeshData* GetMeshData();
-	void GetData();
-	void UpdateData();
+	void UpdateMeshData();
 
 private:
 	MeshData* m_md;

@@ -26,10 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <ManipPropPanel.h>
+#include <Global.h>
 #include <MainFrame.h>
 #include <DataManager.h>
 #include <compatibility.h>
-#include <Names.h>
 
 ManipPropPanel::ManipPropPanel(MainFrame* frame,
 	wxWindow* parent,
@@ -176,9 +176,49 @@ ManipPropPanel::~ManipPropPanel()
 {
 }
 
-void ManipPropPanel::FluoUpdate(const fluo::ValueCollection& values)
+void ManipPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 {
+	if (!m_md)
+		return;
 
+	//update user interface
+	if (FOUND_VALUE(gstNull))
+		return;
+	bool update_all = vc.empty();
+
+	double x, y, z;
+	wxString str;
+
+	if (update_all || FOUND_VALUE(gstMeshTranslation))
+	{
+		m_md->GetTranslation(x, y, z);
+		str = wxString::Format("%.2f", x);
+		m_x_trans_text->ChangeValue(str);
+		str = wxString::Format("%.2f", y);
+		m_y_trans_text->ChangeValue(str);
+		str = wxString::Format("%.2f", z);
+		m_z_trans_text->ChangeValue(str);
+	}
+	if (update_all || FOUND_VALUE(gstMeshRotation))
+	{
+		m_md->GetRotation(x, y, z);
+		str = wxString::Format("%.2f", x);
+		m_x_rot_text->ChangeValue(str);
+		str = wxString::Format("%.2f", y);
+		m_y_rot_text->ChangeValue(str);
+		str = wxString::Format("%.2f", z);
+		m_z_rot_text->ChangeValue(str);
+	}
+	if (update_all || FOUND_VALUE(gstMeshScale))
+	{
+		m_md->GetScaling(x, y, z);
+		str = wxString::Format("%.2f", x);
+		m_x_scl_text->ChangeValue(str);
+		str = wxString::Format("%.2f", y);
+		m_y_scl_text->ChangeValue(str);
+		str = wxString::Format("%.2f", z);
+		m_z_scl_text->ChangeValue(str);
+	}
 }
 
 void ManipPropPanel::SetMeshData(MeshData* md)
@@ -189,36 +229,6 @@ void ManipPropPanel::SetMeshData(MeshData* md)
 MeshData* ManipPropPanel::GetMeshData()
 {
 	return m_md;
-}
-
-void ManipPropPanel::GetData()
-{
-	if (!m_md)
-		return;
-
-	double x, y, z;
-	wxString str;
-	m_md->GetTranslation(x, y, z);
-	str = wxString::Format("%.2f", x);
-	m_x_trans_text->ChangeValue(str);
-	str = wxString::Format("%.2f", y);
-	m_y_trans_text->ChangeValue(str);
-	str = wxString::Format("%.2f", z);
-	m_z_trans_text->ChangeValue(str);
-	m_md->GetRotation(x, y, z);
-	str = wxString::Format("%.2f", x);
-	m_x_rot_text->ChangeValue(str);
-	str = wxString::Format("%.2f", y);
-	m_y_rot_text->ChangeValue(str);
-	str = wxString::Format("%.2f", z);
-	m_z_rot_text->ChangeValue(str);
-	m_md->GetScaling(x, y, z);
-	str = wxString::Format("%.2f", x);
-	m_x_scl_text->ChangeValue(str);
-	str = wxString::Format("%.2f", y);
-	m_y_scl_text->ChangeValue(str);
-	str = wxString::Format("%.2f", z);
-	m_z_scl_text->ChangeValue(str);
 }
 
 void ManipPropPanel::OnSpinUp(wxSpinEvent& event)
@@ -260,7 +270,7 @@ void ManipPropPanel::OnSpinUp(wxSpinEvent& event)
 		wxString str_val = text_ctrl->GetValue();
 		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str())+1);
 		text_ctrl->ChangeValue(str);
-		UpdateData();
+		UpdateMeshData();
 	}
 }
 
@@ -303,11 +313,11 @@ void ManipPropPanel::OnSpinDown(wxSpinEvent& event)
 		wxString str_val = text_ctrl->GetValue();
 		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str())-1);
 		text_ctrl->ChangeValue(str);
-		UpdateData();
+		UpdateMeshData();
 	}
 }
 
-void ManipPropPanel::UpdateData()
+void ManipPropPanel::UpdateMeshData()
 {
 	if (!m_md)
 		return;
@@ -342,6 +352,6 @@ void ManipPropPanel::UpdateData()
 
 void ManipPropPanel::OnValueEnter(wxCommandEvent& event)
 {
-	UpdateData();
+	UpdateMeshData();
 }
 

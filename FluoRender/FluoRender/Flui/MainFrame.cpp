@@ -1152,7 +1152,6 @@ wxWindow* MainFrame::AddProps(int type,
 		{
 			ManipPropPanel* pane = new ManipPropPanel(this, m_prop_panel);
 			pane->SetMeshData(md);
-			pane->GetData();
 			pane->SetName(md->GetName() + " M");
 			pane->Hide();
 			m_prop_pages.push_back(pane);

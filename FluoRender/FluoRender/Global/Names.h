@@ -323,12 +323,15 @@ DEALINGS IN THE SOFTWARE.
 #define gstLimitEnable "limit enable"//size limiter
 #define gstLimit "limit"
 //transformation
+#define gstMeshTranslation "mesh translation"
 #define gstTransX "trans x"
 #define gstTransY "trans y"
 #define gstTransZ "trans z"
+#define gstMeshRotation "mesh rotation"
 #define gstRotX "rot x"
 #define gstRotY "rot y"
 #define gstRotZ "rot z"
+#define gstMeshScale "mesh scale"
 
 //specific to ann
 #define gstVolume "volume"
