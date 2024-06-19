@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define PNG_RESOURCE_H
 
 #include <wx/wx.h>
+#include <wx/mstream.h>
 #include <compatibility.h>
-#include "wx/mstream.h"
 
 #define wxGetBitmapFromMemory(name) _wxGetBitmapFromMemory(icons::name ## _png, sizeof(icons::name ## _png))
 

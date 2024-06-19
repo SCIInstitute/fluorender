@@ -31,9 +31,9 @@
 
 #include <Color.h>
 #include <Plane.h>
-#include "Texture.h"
-#include "TextureRenderer.h"
-#include "ImgShader.h"
+#include <Texture.h>
+#include <TextureRenderer.h>
+#include <ImgShader.h>
 #include <LightFieldShader.h>
 
 namespace flvr

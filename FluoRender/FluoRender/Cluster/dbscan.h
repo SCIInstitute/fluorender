@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Dbscan_h
 #define FL_Dbscan_h
 
-#include "ClusterMethod.h"
+#include <ClusterMethod.h>
 
 namespace flrd
 {

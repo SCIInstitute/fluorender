@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _FLKEY_COLOR_H_
 #define _FLKEY_COLOR_H_
 
-#include "FlKey.h"
+#include <FlKey.h>
 #include <Color.h>
 
 class FlKeyColor : public FlKey

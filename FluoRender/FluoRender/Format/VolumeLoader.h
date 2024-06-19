@@ -29,8 +29,8 @@
 #ifndef _VOLUMELOADER_H_
 #define _VOLUMELOADER_H_
 
-#include "DataManager.h"
-#include "TextureBrick.h"
+#include <DataManager.h>
+#include <TextureBrick.h>
 #include <wx/thread.h>
 
 class VolumeLoader;

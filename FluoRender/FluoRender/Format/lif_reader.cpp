@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "lif_reader.h"
+#include <lif_reader.h>
 #include <compatibility.h>
 #include <wx/sstream.h>
 #include <stdio.h>

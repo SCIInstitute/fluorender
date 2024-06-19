@@ -30,8 +30,8 @@
 #define TextureRenderer_h
 
 #include <nrrd.h>
-#include "TextureBrick.h"
-#include "Texture.h"
+#include <TextureBrick.h>
+#include <Texture.h>
 #include <stdint.h>
 #include <glm/glm.hpp>
 #ifdef _DARWIN

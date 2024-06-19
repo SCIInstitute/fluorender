@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <cmath>
 #include <string>
 
-#include "JVMInitializer.h"
+#include <JVMInitializer.h>
 
 using namespace std;
 

@@ -29,7 +29,7 @@
 #ifndef TextureBrick_h
 #define TextureBrick_h
 
-#include "GL/glew.h"
+#include <GL/glew.h>
 #include <Ray.h>
 #include <BBox.h>
 #include <Plane.h>

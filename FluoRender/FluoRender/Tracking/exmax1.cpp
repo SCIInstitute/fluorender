@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifdef _DEBUG
 #include <Debug.h>
 #endif
-#include "exmax1.h"
+#include <exmax1.h>
 #include <algorithm>
 #include <fstream>
 #include <boost/qvm/mat_operations.hpp>

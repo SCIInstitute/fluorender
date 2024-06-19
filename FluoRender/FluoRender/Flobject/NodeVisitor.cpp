@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "NodeVisitor.hpp"
+#include <NodeVisitor.hpp>
 #include <Group.hpp>
 
 using namespace fluo;

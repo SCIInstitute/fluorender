@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "Table.h"
-#include "RecordHistParams.h"
+#include <Table.h>
+#include <RecordHistParams.h>
 #include <File.h>
 #include <compatibility.h>
 #include <fstream>

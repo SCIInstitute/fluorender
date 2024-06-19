@@ -29,9 +29,9 @@
 #ifndef MeshRenderer_h
 #define MeshRenderer_h
 
-#include "ShaderProgram.h"
-#include "MshShader.h"
-#include "glm.h"
+#include <ShaderProgram.h>
+#include <MshShader.h>
+#include <glm.h>
 #include <Plane.h>
 #include <vector>
 #include <cstring>

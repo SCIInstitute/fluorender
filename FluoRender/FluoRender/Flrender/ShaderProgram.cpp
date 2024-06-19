@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include "ShaderProgram.h"
+#include <ShaderProgram.h>
 #include <Utils.h>
 #include <compatibility.h>
 #include <Debug.h>

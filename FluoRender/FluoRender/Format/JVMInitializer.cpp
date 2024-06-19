@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "JVMInitializer.h"
+#include <JVMInitializer.h>
 #include <SettingDlg.h>
 #include <Debug.h>
 #include <wx/stdpaths.h>

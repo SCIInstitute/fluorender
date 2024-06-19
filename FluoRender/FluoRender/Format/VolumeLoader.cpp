@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include "VolumeLoader.h"
+#include <VolumeLoader.h>
 #include <wx/utils.h> 
 
 VolumeDecompressorThread::VolumeDecompressorThread(VolumeLoader *vl)

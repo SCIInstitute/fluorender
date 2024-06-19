@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _FLKEY_INT_H_
 #define _FLKEY_INT_H_
 
-#include "FlKey.h"
+#include <FlKey.h>
 
 class FlKeyInt : public FlKey
 {

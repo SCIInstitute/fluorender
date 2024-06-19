@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _FLKEY_DOUBLE_H_
 #define _FLKEY_DOUBLE_H_
 
-#include "FlKey.h"
+#include <FlKey.h>
 
 class FlKeyDouble : public FlKey
 {

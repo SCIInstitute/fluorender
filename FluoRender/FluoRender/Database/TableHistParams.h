@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TABLEHISTPARAMS_H_
 #define _TABLEHISTPARAMS_H_
 
-#include "Table.h"
+#include <Table.h>
 
 namespace flrd
 {

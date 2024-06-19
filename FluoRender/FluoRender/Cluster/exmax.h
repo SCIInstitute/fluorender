@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Exmax_h
 #define FL_Exmax_h
 
-#include "ClusterMethod.h"
+#include <ClusterMethod.h>
 
 namespace flrd
 {

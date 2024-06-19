@@ -17,7 +17,7 @@ coordinate generation (spheremap and planar projections) + more.
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "glm.h"
+#include <glm.h>
 #include <compatibility.h>
 
 #define T(x) (model->triangles[(x)])

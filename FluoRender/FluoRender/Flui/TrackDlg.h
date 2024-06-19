@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TRACEDLG_H_
 #define _TRACEDLG_H_
 
-#include "Main.h"
+#include <Main.h>
 #include <Cell.h>
 #include <VolCache.h>
 #include <wx/wx.h>

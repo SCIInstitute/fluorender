@@ -31,8 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <stdio.h>
 #include <compatibility.h>
 #include <vector>
-#include "pole/pole.h"
-#include "base_reader.h"
+#include <pole/pole.h>
+#include <base_reader.h>
 
 using namespace std;
 

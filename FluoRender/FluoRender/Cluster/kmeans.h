@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Kmeans_h
 #define FL_Kmeans_h
 
-#include "ClusterMethod.h"
+#include <ClusterMethod.h>
 
 namespace flrd
 {

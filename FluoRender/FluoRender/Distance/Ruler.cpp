@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "Ruler.h"
+#include <Ruler.h>
 #include <Quaternion.h>
 #include <Utils.h>
 

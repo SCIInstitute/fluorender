@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_VertexList_h
 #define FL_VertexList_h
 
-#include "Vertex.h"
+#include <Vertex.h>
 #include <unordered_map>
 #include <deque>
 #include <iostream>

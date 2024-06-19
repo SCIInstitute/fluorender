@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Vertex_h
 #define FL_Vertex_h
 
-#include "Cell.h"
+#include <Cell.h>
 #include <vector>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>

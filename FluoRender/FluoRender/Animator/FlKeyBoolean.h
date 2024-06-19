@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _FLKEY_BOOLEAN_H_
 #define _FLKEY_BOOLEAN_H_
 
-#include "FlKey.h"
+#include <FlKey.h>
 
 class FlKeyBoolean : public FlKey
 {
