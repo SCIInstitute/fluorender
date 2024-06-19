@@ -583,12 +583,12 @@ IF(APPLE)
   # set how it shows up in the Info.plist file
   SET(MACOSX_BUNDLE_ICON_FILE FluoRender_icon.icns)
   # set where in the bundle to put the icns file
-  SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/img/FluoRender_icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/Image/FluoRender_icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   # include the icns file in the target
-  SET(src ${src} ${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/img/FluoRender_icon.icns)
+  SET(src ${src} ${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/Image/FluoRender_icon.icns)
 ELSEIF(WIN32)
-  SET(icon_rc "${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/img/FluoRender.rc")
-  SET(icns "${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/img/fluorenderIcon.ico")
+  SET(icon_rc "${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/Image/FluoRender.rc")
+  SET(icns "${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/Image/fluorenderIcon.ico")
   SET(manifest_file "${CMAKE_CURRENT_SOURCE_DIR}/Manifest/fluorender.manifest")
   ADD_DEFINITIONS(-DICON_RC_FILE="${icns}")
   SET(src ${src} ${icon_rc} ${manifest_file})

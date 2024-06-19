@@ -101,7 +101,7 @@ class CountingDlg;
 class ConvertDlg;
 class ColocalizationDlg;
 class MeasureDlg;
-class TraceDlg;
+class TrackDlg;
 class OclDlg;
 class ComponentDlg;
 class CalculationDlg;
@@ -218,10 +218,20 @@ public:
 		bool hidepanels);
 	~MainFrame();
 
-	bool GetBenchmark();
+	void LoadPerspective(const wxString& str);
+	wxString SavePerspective();
 
-	TreePanel *GetTree();
-	ListPanel *GetList();
+	bool GetBenchmark();
+	//volume
+	void OpenVolume();
+	void ImportVolume();
+	//mesh
+	void OpenMesh();
+	//project
+	void NewProject();
+	void OpenProject();
+	void SaveProject();
+	void SaveAsProject();
 
 	//prop panels
 	wxWindow* AddProps(int type,//follow above
@@ -249,16 +259,19 @@ public:
 	AnnotatPropPanel* FindAnnotationProps(const wxString& str);
 	ManipPropPanel* FindMeshManip(const wxString& str);
 
-	//prop view
-	OutputAdjPanel* GetAdjustView();
+	//project panels
+	TreePanel* GetTreePanel();
+	ListPanel* GetListPanel();
+	//outadj view
+	OutputAdjPanel* GetOutAdjPanel();
 	//movie view
-	MoviePanel* GetMovieView();
+	MoviePanel* GetMoviePanel();
+	//clipping view
+	ClipPlanePanel* GetClipPlanPanel();
 	//system settings
 	SettingDlg* GetSettingDlg();
 	//help dialog
 	HelpDlg* GetHelpDlg();
-	//clipping view
-	ClipPlanePanel* GetClippingView();
 	//brush dialog
 	BrushToolDlg* GetBrushToolDlg();
 	//noise cancelling dialog
@@ -271,7 +284,7 @@ public:
 	//measure dialog
 	MeasureDlg* GetMeasureDlg();
 	//trace dialog
-	TraceDlg* GetTraceDlg();
+	TrackDlg* GetTrackDlg();
 	//ocl dialog
 	OclDlg* GetOclDlg();
 	//component dialog
@@ -284,43 +297,34 @@ public:
 	FpRangeDlg* GetFpRangeDlg();
 
 	//views
-	void RefreshCanvases(const std::set<int>& views = {});//view indices to update
-	int GetViewNum();
+	void RefreshCanvases(const std::set<int>& canvases = {});//view indices to update
+	int GetCanvasNum();
 	RenderCanvas* GetRenderCanvas(int index);
 	RenderCanvas* GetRenderCanvas(const wxString& name);
 	int GetRenderCanvas(RenderCanvas* view);
 	RenderCanvas* GetLastRenderCanvas();
-	wxString CreateView(int row = 1);
-	void DeleteVRenderView(int i);
-	void DeleteVRenderView(const wxString& name);
-	void ClearVrvList();
+	wxString CreateRenderView(int row = 1);
+	void DeleteRenderView(int i);
+	void DeleteRenderView(const wxString& name);
 
-	//menu operations
-	//volume
-	void OpenVolume();
-	void ImportVolume();
-	void LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* view = 0);
-	void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
-	//mesh
-	void OpenMesh();
-	void LoadMeshes(wxArrayString files, RenderCanvas* view = 0);
-	//project
-	void NewProject();
-	void OpenProject();
-	void OpenProject(wxString& filename);
-	void SaveProject();
-	void SaveAsProject();
-	void SaveProject(wxString& filename, bool inc);//inc: save incrementally
 	//hide/show tools
 	void ToggleAllPanels(bool cur_state);
 	void ToggleLastTool();
-	void ShowPane(wxPanel* pane, bool show = true);
-	//show dialogs
+	void ShowPanel(wxPanel* pane, bool show = true);
+	//main toolbar
+	void ShowToolbar();
+	//panels
+	void ShowProjPanel();
+	void ShowMoviePanel();
+	void ShowOutAdjPanel();
+	void ShowClipPlanePanel();
+	void ShowPropPanel();
+	//dialogs
 	void ShowSettingDlg();
 	void ShowBrushDlg();
 	void ShowMeasureDlg();
 	void ShowComponentDlg();
-	void ShowTraceDlg();
+	void ShowTrackDlg();
 	void ShowCalculationDlg();
 	void ShowNoiseCancellingDlg();
 	void ShowCountingDlg();
@@ -332,14 +336,6 @@ public:
 	void ShowInfo();
 	wxString ScriptDialog(const wxString& title,
 		const wxString& wildcard, long style);
-	//panels
-	void ShowProjPanel();
-	void ShowMoviePanel();
-	void ShowOutAdjPanel();
-	void ShowClipPlanePanel();
-	void ShowPropPanel();
-	//main toolbar
-	void ShowToolbar();
 	//organize render views
 	void OrganizeVRenderViews(int mode);
 	//reset layout
@@ -348,12 +344,14 @@ public:
 	void FullScreen();
 
 private:
+	//aui manager
 	wxAuiManager m_aui_mgr;
+	//main toolbar
+	wxAuiToolBar* m_main_tb;
 	wxMenu* m_tb_menu_ui;
 	wxMenu* m_tb_menu_edit;
 	wxMenu* m_tb_menu_update;
-	wxAuiToolBar* m_main_tb;
-	//main top menu
+	//main menu
 	wxMenuBar* m_top_menu;
 	wxMenu* m_top_file;
 	wxMenu* m_top_edit;
@@ -364,10 +362,13 @@ private:
 	wxAuiNotebook* m_proj_panel;
 	TreePanel *m_tree_panel;
 	ListPanel *m_list_panel;
-	std::vector<RenderViewPanel*> m_vrv_list;
+	std::vector<RenderViewPanel*> m_render_view_panels;
 	wxAuiNotebook *m_prop_panel;
-	ClipPlanePanel *m_clip_view;
-	OutputAdjPanel* m_adjust_view;
+	//prop panel children
+	std::vector<PropPanel*> m_prop_pages;
+	ClipPlanePanel *m_clip_plane_panel;
+	OutputAdjPanel* m_output_adj_panel;
+	MoviePanel* m_movie_panel;
 	SettingDlg* m_setting_dlg;
 	HelpDlg* m_help_dlg;
 	BrushToolDlg* m_brush_tool_dlg;
@@ -376,27 +377,21 @@ private:
 	ConvertDlg* m_convert_dlg;
 	ColocalizationDlg* m_colocalization_dlg;
 	MeasureDlg* m_measure_dlg;
-	TraceDlg* m_trace_dlg;
+	TrackDlg* m_track_dlg;
 	OclDlg* m_ocl_dlg;
 	ComponentDlg* m_component_dlg;
 	CalculationDlg* m_calculation_dlg;
 	MachineLearningDlg* m_machine_learning_dlg;
 	ScriptBreakDlg* m_script_break_dlg;
 	FpRangeDlg* m_fp_range_dlg;
-	MoviePanel* m_movie_panel;
-	//prop panel children
-	std::vector<PropPanel*> m_prop_pages;
 	//tester
-	TesterDlg* m_tester;
-
-	//mac address
-	wxString m_address;
-
-	//benchmark mode
-	bool m_benchmark;
+	TesterDlg* m_teser_dlg;
 
 	wxString m_title;
-
+	//mac address
+	wxString m_address;
+	//benchmark mode
+	bool m_benchmark;
 	wxTimer* m_waker;
 
 private:

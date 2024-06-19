@@ -115,7 +115,7 @@ bool FluoRenderApp::OnInit()
 		run_mov = true;
 	}
 	if (m_file_num > 0)
-		((MainFrame*)frame)->StartupLoad(m_files, run_mov, m_imagej);
+		glbin_data_manager.StartupLoad(m_files, run_mov, m_imagej);
 
 	// Adding JVm initialization.
 	JVMInitializer*	pInstance = JVMInitializer::getInstance(glbin_settings.GetJvmArgs());

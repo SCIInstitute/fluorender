@@ -71,6 +71,7 @@ DEALINGS IN THE SOFTWARE.
 #include <LookingGlassRenderer.h>
 #include <Clusterizer.h>
 #include <VolumeMeshConv.h>
+#include <Project.h>
 
 #define glbin fluo::Global::instance()
 #define glbin_cache_queue fluo::Global::instance().get_cache_queue()
@@ -130,6 +131,8 @@ DEALINGS IN THE SOFTWARE.
 
 //current selection
 #define glbin_current fluo::Global::instance().get_current_objects()
+//project
+#define glbin_project fluo::Global::instance().get_project()
 
 //help url
 #define glbin_help_url fluo::Global::instance().get_help_url()
@@ -259,11 +262,10 @@ namespace fluo
 		StopWatchFactory* getStopWatchFactory();
 
 		//current selection
-		//void set_list_selection(const std::string& name) { list_selection_ = name; }
-		//std::string get_list_selection() { return list_selection_; }
-		//void set_tree_selection(const std::string& name) { tree_selection_ = name; }
-		//std::string get_tree_selection() { return tree_selection_; }
 		CurrentObjects& get_current_objects() { return current_objects_; }
+
+		//project
+		Project& get_project() { return project_; }
 
 		wxString& get_help_url() { return help_url_; }
 
@@ -345,9 +347,10 @@ namespace fluo
 		ref_ptr<Group> origin_;//the root of everything else
 
 		//current selection
-		//std::string list_selection_;//name of the item selected on the list
-		//std::string tree_selection_;//name of the item selected on the tree
 		CurrentObjects current_objects_;
+
+		//project management
+		Project project_;
 
 		//help url
 		wxString help_url_;

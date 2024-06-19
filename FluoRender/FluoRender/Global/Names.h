@@ -116,6 +116,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstOutAdjPanel "out adj panel"
 #define gstClipPlanePanel "clip plane panel"
 #define gstMainToolbar "main toolbar"
+#define gstMainFrameTitle "main frame title"
 
 //root
 #define gstRoot "Scene Graph"

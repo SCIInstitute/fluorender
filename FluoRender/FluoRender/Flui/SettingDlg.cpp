@@ -1184,13 +1184,13 @@ void SettingDlg::OnSave(wxCommandEvent& event)
 {
 	glbin_settings.Save();
 	if (m_frame)
-		m_frame->ShowPane(this, false);
+		m_frame->ShowPanel(this, false);
 }
 
 void SettingDlg::OnClose(wxCommandEvent& event)
 {
 	if (m_frame)
-		m_frame->ShowPane(this, false);
+		m_frame->ShowPanel(this, false);
 }
 
 void SettingDlg::OnProjectSaveCheck(wxCommandEvent& event)

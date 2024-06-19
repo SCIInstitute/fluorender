@@ -1235,7 +1235,7 @@ void VolumePropPanel::InitVRenderViews(unsigned int type)
 {
 	if (m_frame)
 	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
+		for (int i = 0; i < m_frame->GetCanvasNum(); i++)
 		{
 			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view)
@@ -1468,7 +1468,7 @@ void VolumePropPanel::EnableColormap(bool bval)
 
 	if (m_frame)
 	{
-		OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
+		OutputAdjPanel* adjust_view = m_frame->GetOutAdjPanel();
 		if (adjust_view)
 			adjust_view->UpdateSync();
 	}
@@ -2615,7 +2615,7 @@ void VolumePropPanel::OnColorChange(wxColor c)
 
 		if (m_frame)
 		{
-			OutputAdjPanel *adjust_view = m_frame->GetAdjustView();
+			OutputAdjPanel *adjust_view = m_frame->GetOutAdjPanel();
 			if (adjust_view)
 				adjust_view->UpdateSync();
 		}

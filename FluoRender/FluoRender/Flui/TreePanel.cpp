@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <BrushToolDlg.h>
 #include <ColocalizationDlg.h>
 #include <MeasureDlg.h>
-#include <TraceDlg.h>
+#include <TrackDlg.h>
 #include <OclDlg.h>
 #include <ComponentDlg.h>
 #include <compatibility.h>
@@ -449,7 +449,7 @@ void TreePanel::UpdateTree()
 	if (sel_type == 0)
 		sel_item = root_item;
 
-	for (int i = 0; i < m_frame->GetViewNum(); i++)
+	for (int i = 0; i < m_frame->GetCanvasNum(); i++)
 	{
 		RenderCanvas* view = m_frame->GetRenderCanvas(i);
 		if (!view)
@@ -616,7 +616,7 @@ void TreePanel::UpdateTreeIcons()
 	wxTreeItemId root = m_datatree->GetRootItem();
 	wxTreeItemIdValue ck_view;
 	int counter = 0;
-	for (i = 0; i < m_frame->GetViewNum(); i++)
+	for (i = 0; i < m_frame->GetCanvasNum(); i++)
 	{
 		RenderCanvas* view = m_frame->GetRenderCanvas(i);
 		wxTreeItemId vrv_item;
@@ -732,7 +732,7 @@ void TreePanel::UpdateTreeColors()
 		return;
 	int i, j, k;
 	int counter = 0;
-	for (i = 0; i < m_frame->GetViewNum(); i++)
+	for (i = 0; i < m_frame->GetCanvasNum(); i++)
 	{
 		RenderCanvas* view = m_frame->GetRenderCanvas(i);
 
@@ -976,7 +976,7 @@ void TreePanel::DeleteSelection()
 	case 1://view
 	{
 		wxString name = canvas->GetName();
-		m_frame->DeleteVRenderView(name);
+		m_frame->DeleteRenderView(name);
 	}
 		break;
 	case 2://volume
@@ -1041,9 +1041,9 @@ void TreePanel::DeleteSelection()
 //delete
 void TreePanel::DeleteAll()
 {
-	for (int i = m_frame->GetViewNum() - 1; i > 0; --i)
+	for (int i = m_frame->GetCanvasNum() - 1; i > 0; --i)
 	{
-		m_frame->DeleteVRenderView(i);
+		m_frame->DeleteRenderView(i);
 	}
 
 	m_frame->GetRenderCanvas(0)->ClearAll();
@@ -1203,7 +1203,7 @@ void TreePanel::CloseView()
 	if (canvas)
 	{
 		wxString name = canvas->GetName();
-		m_frame->DeleteVRenderView(name);
+		m_frame->DeleteRenderView(name);
 	}
 
 	glbin_current.SetRoot();
@@ -1599,7 +1599,7 @@ void TreePanel::OnMenu(wxCommandEvent& event)
 				m_frame->ShowComponentDlg();
 				break;
 			case ID_Trace:
-				m_frame->ShowTraceDlg();
+				m_frame->ShowTrackDlg();
 				break;
 			case ID_Calculations:
 				m_frame->ShowCalculationDlg();

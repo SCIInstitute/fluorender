@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MoviePanel.h>
 #include <ComponentDlg.h>
 #include <ClipPlanePanel.h>
-#include <TraceDlg.h>
+#include <TrackDlg.h>
 #include <MeasureDlg.h>
 #include <VolumePropPanel.h>
 #include <Count.h>
@@ -603,7 +603,7 @@ RenderCanvas::~RenderCanvas()
 		m_renderview_panel->m_full_frame = 0;
 		if (m_frame)
 		{
-			m_frame->ClearVrvList();
+			//m_frame->EraseAllCanvases();
 			m_frame->Close();
 		}
 	}
@@ -1786,7 +1786,7 @@ void RenderCanvas::OrganizeLayers()
 
 			if (m_frame)
 			{
-				OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
+				OutputAdjPanel* adjust_view = m_frame->GetOutAdjPanel();
 				if (adjust_view)
 				{
 					adjust_view->SetGroupLink(le_group);
@@ -3586,7 +3586,7 @@ void RenderCanvas::UpdateBrushState(bool focus)
 	//BrushToolDlg* brush_dlg = 0;
 	//if (m_frame)
 	//{
-	//	tree_panel = m_frame->GetTree();
+	//	tree_panel = m_frame->GetTreePanel();
 	//	brush_dlg = m_frame->GetBrushToolDlg();
 	//}
 
@@ -3758,10 +3758,10 @@ void RenderCanvas::PickMesh()
 		MeshData* md = m_md_pop_list[choose - 1];
 		if (md)
 		{
-			//if (m_frame && m_frame->GetTree())
+			//if (m_frame && m_frame->GetTreePanel())
 			//{
-			//	//m_frame->GetTree()->SetFocus();
-			//	m_frame->GetTree()->Select(m_renderview_panel->GetName(), md->GetName());
+			//	//m_frame->GetTreePanel()->SetFocus();
+			//	m_frame->GetTreePanel()->Select(m_renderview_panel->GetName(), md->GetName());
 			//}
 			RefreshGL(27);
 		}
@@ -3769,8 +3769,8 @@ void RenderCanvas::PickMesh()
 	else
 	{
 		//if (m_frame && m_frame->GetCurSelType() == 3 &&
-		//	m_frame->GetTree())
-		//	m_frame->GetTree()->Select(m_renderview_panel->GetName(), "");
+		//	m_frame->GetTreePanel())
+		//	m_frame->GetTreePanel()->Select(m_renderview_panel->GetName(), "");
 	}
 	m_mv_mat = mv_temp;
 }
@@ -3826,9 +3826,9 @@ void RenderCanvas::PickVolume()
 
 	if (picked_vd)
 	{
-		if (m_frame && m_frame->GetTree())
+		if (m_frame && m_frame->GetTreePanel())
 		{
-			//m_frame->GetTree()->Select(m_renderview_panel->GetName(), picked_vd->GetName());
+			//m_frame->GetTreePanel()->Select(m_renderview_panel->GetName(), picked_vd->GetName());
 		}
 		//update label selection
 		SetCompSelection(ip, kmode);
@@ -4126,8 +4126,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				wxGetKeyState(WXK_SPACE)))
 			{
 				m_tseq_forward = true;
-				if (m_frame && m_frame->GetMovieView())
-					m_frame->GetMovieView()->IncFrame();
+				if (m_frame && m_frame->GetMoviePanel())
+					m_frame->GetMoviePanel()->IncFrame();
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
@@ -4143,8 +4143,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				wxGetKeyState(WXK_CONTROL)))
 			{
 				m_tseq_backward = true;
-				if (m_frame && m_frame->GetMovieView())
-					m_frame->GetMovieView()->DecFrame();
+				if (m_frame && m_frame->GetMoviePanel())
+					m_frame->GetMoviePanel()->DecFrame();
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
@@ -4160,8 +4160,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				wxGetKeyState(wxKeyCode('s')))
 			{
 				m_clip_up = true;
-				if (m_frame && m_frame->GetClippingView())
-					m_frame->GetClippingView()->MoveLinkedClippingPlanes(-1);
+				if (m_frame && m_frame->GetClipPlanPanel())
+					m_frame->GetClipPlanPanel()->MoveLinkedClippingPlanes(-1);
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
@@ -4175,8 +4175,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				wxGetKeyState(wxKeyCode('w')))
 			{
 				m_clip_down = true;
-				if (m_frame && m_frame->GetClippingView())
-					m_frame->GetClippingView()->MoveLinkedClippingPlanes(1);
+				if (m_frame && m_frame->GetClipPlanPanel())
+					m_frame->GetClipPlanPanel()->MoveLinkedClippingPlanes(1);
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
@@ -4192,8 +4192,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			{
 				m_cell_full = true;
 				glbin_comp_selector.SelectFullComp();
-				if (m_frame && m_frame->GetTraceDlg())
-					m_frame->GetTraceDlg()->CellUpdate();
+				if (m_frame && m_frame->GetTrackDlg())
+					m_frame->GetTrackDlg()->CellUpdate();
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
@@ -4207,8 +4207,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				wxGetKeyState(wxKeyCode('l')))
 			{
 				m_cell_link = true;
-				if (m_frame && m_frame->GetTraceDlg())
-					m_frame->GetTraceDlg()->CellLink(false);
+				if (m_frame && m_frame->GetTrackDlg())
+					m_frame->GetTrackDlg()->CellLink(false);
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
@@ -4222,8 +4222,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				wxGetKeyState(wxKeyCode('n')))
 			{
 				m_cell_new_id = true;
-				if (m_frame && m_frame->GetTraceDlg())
-					m_frame->GetTraceDlg()->CellNewID(false);
+				if (m_frame && m_frame->GetTrackDlg())
+					m_frame->GetTrackDlg()->CellNewID(false);
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
@@ -4236,11 +4236,11 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			if (wxGetKeyState(wxKeyCode('c')) &&
 				!m_clear_mask)
 			{
-				//if (m_frame && m_frame->GetTree())
-				//	m_frame->GetTree()->BrushClear();
+				//if (m_frame && m_frame->GetTreePanel())
+				//	m_frame->GetTreePanel()->BrushClear();
 				glbin_vol_selector.Clear();
-				if (m_frame && m_frame->GetTraceDlg())
-					m_frame->GetTraceDlg()->CompClear();
+				if (m_frame && m_frame->GetTrackDlg())
+					m_frame->GetTrackDlg()->CompClear();
 				m_clear_mask = true;
 				refresh = true;
 				lg_changed = true;
@@ -4254,8 +4254,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			if (wxGetKeyState(wxKeyCode('m')) &&
 				!m_save_mask)
 			{
-				//if (m_frame && m_frame->GetList())
-				//	m_frame->GetList()->SaveAllMasks();
+				//if (m_frame && m_frame->GetListPanel())
+				//	m_frame->GetListPanel()->SaveAllMasks();
 				VolumeData* vd = glbin_current.vol_data;
 				if (vd)
 				{
@@ -4664,7 +4664,7 @@ void RenderCanvas::SetParams(double t)
 		return;
 	if (!m_frame)
 		return;
-	ClipPlanePanel* clip_view = m_frame->GetClippingView();
+	ClipPlanePanel* clip_view = m_frame->GetClipPlanPanel();
 	m_frame_num_type = 1;
 	m_param_cur_num = std::round(t);
 	FlKeyCode keycode;
@@ -5427,7 +5427,7 @@ void RenderCanvas::ForceDraw()
 		m_set_gl = true;
 		if (m_frame)
 		{
-			for (int i = 0; i< m_frame->GetViewNum(); i++)
+			for (int i = 0; i< m_frame->GetCanvasNum(); i++)
 			{
 				RenderCanvas* view = m_frame->GetRenderCanvas(i);
 				if (view && view != this)
@@ -5590,7 +5590,7 @@ void RenderCanvas::ForceDraw()
 
 		if (m_frame)
 		{
-			for (int i = 0; i< m_frame->GetViewNum(); i++)
+			for (int i = 0; i< m_frame->GetCanvasNum(); i++)
 			{
 				RenderCanvas* view = m_frame->GetRenderCanvas(i);
 				if (view && view != this)
@@ -6144,8 +6144,8 @@ DataGroup* RenderCanvas::AddVolumeData(VolumeData* vd, wxString group_name)
 
 		if (m_frame)
 		{
-			m_frame->GetAdjustView()->SetVolumeData(vd);
-			m_frame->GetAdjustView()->SetGroupLink(group);
+			m_frame->GetOutAdjPanel()->SetVolumeData(vd);
+			m_frame->GetOutAdjPanel()->SetGroupLink(group);
 		}
 	}
 
@@ -6153,7 +6153,7 @@ DataGroup* RenderCanvas::AddVolumeData(VolumeData* vd, wxString group_name)
 
 	if (m_frame)
 	{
-		OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
+		OutputAdjPanel* adjust_view = m_frame->GetOutAdjPanel();
 		if (adjust_view)
 		{
 			adjust_view->SetGroupLink(group);
@@ -6234,7 +6234,7 @@ void RenderCanvas::ReplaceVolumeData(wxString &name, VolumeData *dst)
 	{
 		if (m_frame)
 		{
-			OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
+			OutputAdjPanel* adjust_view = m_frame->GetOutAdjPanel();
 			if (adjust_view)
 			{
 				adjust_view->SetVolumeData(dst);
@@ -6932,7 +6932,7 @@ void RenderCanvas::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst_
 
 	if (m_frame)
 	{
-		OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
+		OutputAdjPanel* adjust_view = m_frame->GetOutAdjPanel();
 		if (adjust_view)
 		{
 			adjust_view->SetVolumeData(src_vd);
@@ -7154,7 +7154,7 @@ wxString RenderCanvas::AddGroup(wxString str, wxString prev_group)
 	//set default settings
 	if (m_frame)
 	{
-		OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
+		OutputAdjPanel* adjust_view = m_frame->GetOutAdjPanel();
 		if (adjust_view && group)
 		{
 			//fluo::Color gamma, brightness, hdr;
@@ -7202,7 +7202,7 @@ DataGroup* RenderCanvas::AddOrGetGroup()
 	//set default settings
 	if (m_frame)
 	{
-		OutputAdjPanel* adjust_view = m_frame->GetAdjustView();
+		OutputAdjPanel* adjust_view = m_frame->GetOutAdjPanel();
 		if (adjust_view)
 		{
 			group->SetGammaColor(
@@ -10013,8 +10013,8 @@ void RenderCanvas::GetTraces(bool update)
 	//add traces to trace dialog
 	if (update)
 	{
-		if (m_renderview_panel && m_frame && m_frame->GetTraceDlg())
-			m_frame->GetTraceDlg()->GetSettings(m_renderview_panel->m_canvas);
+		if (m_renderview_panel && m_frame && m_frame->GetTrackDlg())
+			m_frame->GetTrackDlg()->GetSettings(m_renderview_panel->m_canvas);
 	}
 }
 

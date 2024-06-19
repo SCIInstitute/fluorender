@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ScriptVisitors.h>
 #include <RenderCanvas.h>
 #include <MainFrame.h>
-#include <TraceDlg.h>
+#include <TrackDlg.h>
 #include <NoiseCancellingDlg.h>
 #include <ComponentDlg.h>
 #include <MoviePanel.h>
@@ -274,8 +274,8 @@ bool ScriptProc::GetVolumes(std::vector<VolumeData*> &list)
 //add traces to trace dialog
 void ScriptProc::UpdateTraceDlg()
 {
-	if (m_view && m_frame && m_frame->GetTraceDlg())
-		m_frame->GetTraceDlg()->GetSettings(m_view);
+	if (m_view && m_frame && m_frame->GetTrackDlg())
+		m_frame->GetTrackDlg()->GetSettings(m_view);
 }
 
 int ScriptProc::TimeMode(std::string &str)
@@ -1560,11 +1560,11 @@ void ScriptProc::RunLinkCells()
 	if (!TimeCondition())
 		return;
 
-	if (!m_frame || !m_frame->GetTraceDlg())
+	if (!m_frame || !m_frame->GetTrackDlg())
 		return;
 
-	m_frame->GetTraceDlg()->GetSettings(m_view);
-	m_frame->GetTraceDlg()->LinkAddedCells(m_sel_labels);
+	m_frame->GetTrackDlg()->GetSettings(m_view);
+	m_frame->GetTrackDlg()->LinkAddedCells(m_sel_labels);
 }
 
 void ScriptProc::RunUnlinkCells()
@@ -1838,7 +1838,7 @@ void ScriptProc::RunCameraPoints()
 	if (m_frame)
 	{
 		glbin_settings.m_run_script = false;
-		m_frame->GetMovieView()->FluoUpdate({ gstRunScript });
+		m_frame->GetMoviePanel()->FluoUpdate({ gstRunScript });
 	}
 }
 
@@ -2475,12 +2475,12 @@ void ScriptProc::ChangeData()
 	VolumeData* vd = 0;
 	if (clear)
 	{
-		//m_frame->GetTree()->DeleteAll();
+		//m_frame->GetTreePanel()->DeleteAll();
 		glbin_ruler_handler.DeleteAll(false);
 		glbin_data_manager.ClearAll();
-		m_frame->GetAdjustView()->SetVolumeData(0);
-		m_frame->GetAdjustView()->SetGroup(0);
-		m_frame->GetAdjustView()->SetGroupLink(0);
+		m_frame->GetOutAdjPanel()->SetVolumeData(0);
+		m_frame->GetOutAdjPanel()->SetGroup(0);
+		m_frame->GetOutAdjPanel()->SetGroupLink(0);
 		m_frame->GetRenderCanvas(0)->ClearAll();
 		DataGroup::ResetID();
 		MeshGroup::ResetID();
@@ -2489,7 +2489,7 @@ void ScriptProc::ChangeData()
 	{
 		wxArrayString files;
 		files.Add(filename);
-		m_frame->LoadVolumes(files, imagej);
+		glbin_data_manager.LoadVolumes(files, imagej);
 		m_view->m_cur_vol_save = m_view->GetAllVolumeData(0);
 	}
 }
@@ -2511,7 +2511,7 @@ void ScriptProc::ChangeScript()
 		glbin_settings.m_run_script = run_script;
 	if (!filename.IsEmpty())
 		glbin_settings.m_script_file = filename;
-	m_frame->GetMovieView()->FluoUpdate({ gstScriptList });
+	m_frame->GetMoviePanel()->FluoUpdate({ gstScriptList });
 	m_fconfig_name = filename;
 }
 
@@ -2526,7 +2526,7 @@ void ScriptProc::LoadProject()
 	m_fconfig->Read("project_file", &filename, "");
 	filename = GetInputFile(filename, "Data");
 
-	m_frame->OpenProject(filename);
+	glbin_project.Open(filename);
 }
 
 bool ScriptProc::RunBreak()

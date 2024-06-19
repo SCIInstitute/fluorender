@@ -995,7 +995,7 @@ void RenderViewPanel::Capture()
 			wxString prop_file = new_folder + GETSLASH() + file_dlg.GetFilename() + "_project.vrp";
 			bool inc = wxFileExists(prop_file) &&
 				glbin_settings.m_prj_save_inc;
-			m_frame->SaveProject(prop_file, inc);
+			glbin_project.Save(prop_file, inc);
 		}
 	}
 }

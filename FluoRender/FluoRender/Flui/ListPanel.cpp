@@ -350,7 +350,7 @@ void ListPanel::AddSelectionToView(int view)
 		wxString name = vd->GetName();
 		VolumeData* vd_add = vd;
 
-		for (int i = 0; i < m_frame->GetViewNum(); ++i)
+		for (int i = 0; i < m_frame->GetCanvasNum(); ++i)
 		{
 			RenderCanvas* v = m_frame->GetRenderCanvas(i);
 			if (v && v->GetVolumeData(name))
@@ -605,7 +605,7 @@ void ListPanel::DeleteSelection()
 			break;
 		wxString name = vd->GetName();
 		//from view
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
+		for (int i = 0; i < m_frame->GetCanvasNum(); i++)
 		{
 			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view)
@@ -628,7 +628,7 @@ void ListPanel::DeleteSelection()
 			break;
 		wxString name = md->GetName();
 		//from view
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
+		for (int i = 0; i < m_frame->GetCanvasNum(); i++)
 		{
 			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view)
@@ -651,7 +651,7 @@ void ListPanel::DeleteSelection()
 			break;
 		wxString name = ann->GetName();
 		//from view
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
+		for (int i = 0; i < m_frame->GetCanvasNum(); i++)
 		{
 			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view)
@@ -671,7 +671,7 @@ void ListPanel::DeleteSelection()
 
 void ListPanel::DeleteAll()
 {
-	for (int i = 0; i < m_frame->GetViewNum(); ++i)
+	for (int i = 0; i < m_frame->GetCanvasNum(); ++i)
 	{
 		RenderCanvas* canvas = m_frame->GetRenderCanvas(i);
 		if (canvas)
@@ -702,7 +702,7 @@ void ListPanel::OnContextMenu(wxContextMenuEvent& event)
 
 	wxMenu menu;
 	wxMenu* add_to_menu = new wxMenu;
-	for (int i = 0; i < m_frame->GetViewNum(); ++i)
+	for (int i = 0; i < m_frame->GetCanvasNum(); ++i)
 	{
 		RenderCanvas* view = m_frame->GetRenderCanvas(i);
 		add_to_menu->Append(ID_ViewID + i,

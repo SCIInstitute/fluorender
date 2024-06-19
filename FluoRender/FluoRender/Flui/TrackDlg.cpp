@@ -2598,14 +2598,14 @@ void TrackDlg::DelVolCache(flrd::VolCache& vol_cache)
 
 void TrackDlg::OnCellPrev(wxCommandEvent& event)
 {
-	if (m_frame && m_frame->GetMovieView())
-		m_frame->GetMovieView()->DecFrame();
+	if (m_frame && m_frame->GetMoviePanel())
+		m_frame->GetMoviePanel()->DecFrame();
 }
 
 void TrackDlg::OnCellNext(wxCommandEvent& event)
 {
-	if (m_frame && m_frame->GetMovieView())
-		m_frame->GetMovieView()->IncFrame();
+	if (m_frame && m_frame->GetMoviePanel())
+		m_frame->GetMoviePanel()->IncFrame();
 }
 
 //auto tracking

@@ -217,7 +217,7 @@ void MovieMaker::PlaySave()
 		wxString prop_file = new_folder + GETSLASH()
 			+ name + "_project.vrp";
 		bool inc = wxFileExists(prop_file) && glbin_settings.m_prj_save_inc;
-		m_frame->SaveProject(prop_file, inc);
+		glbin_project.Save(prop_file, inc);
 	}
 
 	m_view->SetKeepEnlarge(true);
@@ -276,7 +276,7 @@ void MovieMaker::SetRendering(bool rewind)
 			gstMovCurTime,
 			gstMovPlay,
 			gstMovSeqNum },
-			2, m_frame->GetMovieView());
+			2, m_frame->GetMoviePanel());
 	}
 }
 
@@ -389,7 +389,7 @@ int MovieMaker::GetViewIndex()
 	if (!m_view || !m_frame)
 		return -1;
 
-	for (int i = 0; i < m_frame->GetViewNum(); ++i)
+	for (int i = 0; i < m_frame->GetCanvasNum(); ++i)
 	{
 		if (m_view == m_frame->GetRenderCanvas(i))
 			return i;

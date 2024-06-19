@@ -1234,7 +1234,7 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		int i = 0;
 		m_views_cmb->Clear();
-		for (i = 0; i < m_frame->GetViewNum(); i++)
+		for (i = 0; i < m_frame->GetCanvasNum(); i++)
 		{
 			RenderCanvas* view = m_frame->GetRenderCanvas(i);
 			if (view && m_views_cmb)

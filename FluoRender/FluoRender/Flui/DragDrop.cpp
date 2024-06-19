@@ -25,7 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "DragDrop.h"
+#include <DragDrop.h>
+#include <Global.h>
 #include <MainFrame.h>
 
 DnDFile::DnDFile(wxWindow *frame, wxWindow *view)
@@ -60,7 +61,7 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 					wxMessageBox("For project files, drag and drop to regions other than render views.");
 					return false;
 				}
-				vr_frame->OpenProject(filename);
+				glbin_project.Open(filename);
 			}
 			else if (suffix == ".nrrd" ||
 					 suffix == ".msk" ||
@@ -82,15 +83,15 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 					 suffix == ".avi" ||
 					 suffix == ".wmv")
 			{
-				vr_frame->LoadVolumes(filenames, false);
+				glbin_data_manager.LoadVolumes(filenames, false);
 			}
 			else if (suffix == ".obj")
 			{
-				vr_frame->LoadMeshes(filenames);
+				glbin_data_manager.LoadMeshes(filenames);
 			}
 			else
 			{
-				vr_frame->LoadVolumes(filenames, true);
+				glbin_data_manager.LoadVolumes(filenames, true);
 			}
 		}
 	}
