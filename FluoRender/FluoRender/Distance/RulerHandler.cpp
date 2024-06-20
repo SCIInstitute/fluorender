@@ -74,6 +74,20 @@ double RulerHandler::GetVolumeBgInt()
 	return m_vd->GetBackgroundInt();
 }
 
+void RulerHandler::ToggleDisplay(const std::set<int> list)
+{
+	if (!m_ruler_list)
+		return;
+
+	for (size_t i = 0; i < m_ruler_list->size(); ++i)
+	{
+		Ruler* ruler = (*m_ruler_list)[i];
+		if (!ruler) continue;
+		if (list.find(i) != list.end())
+			ruler->ToggleDisp();
+	}
+}
+
 bool RulerHandler::FindEditingRuler(double mx, double my)
 {
 	if (!m_view || !m_ruler_list)
@@ -1048,7 +1062,7 @@ void RulerHandler::AddMagStrokePoint(int mx, int my)
 	m_mouse = fluo::Point(mx, my, 0);
 }
 
-void RulerHandler::DeleteSelection(std::vector<int> &sel)
+void RulerHandler::DeleteSelection(const std::set<int> &sel)
 {
 	if (!m_ruler_list)
 		return;
@@ -1058,8 +1072,7 @@ void RulerHandler::DeleteSelection(std::vector<int> &sel)
 	{
 		auto it2 = std::next(it).base();
 		int idx = it2 - m_ruler_list->begin();
-		if (std::find(sel.begin(),
-			sel.end(), idx) != sel.end())
+		if (sel.find(idx) != sel.end())
 		{
 			if (*it2)
 				delete *it2;

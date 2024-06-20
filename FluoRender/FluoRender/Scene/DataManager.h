@@ -834,6 +834,7 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class Annotations;
 class AText
 {
 public:
@@ -1344,6 +1345,9 @@ struct CurrentObjects
 	void SetVolumeData(VolumeData* vd);
 	void SetMeshData(MeshData* md);
 	void SetAnnotation(Annotations* ann);
+
+	flrd::RulerList* GetRulerList();
+	flrd::Ruler* GetRuler();
 
 	MainFrame* mainframe;//this is temporary before a global scenegraph is added
 	RenderCanvas* canvas;

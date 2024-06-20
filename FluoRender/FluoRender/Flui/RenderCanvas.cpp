@@ -9722,6 +9722,11 @@ flrd::RulerList* RenderCanvas::GetRulerList()
 	return &m_ruler_list;
 }
 
+flrd::Ruler* RenderCanvas::GetCurRuler()
+{
+	return m_cur_ruler;
+}
+
 flrd::Ruler* RenderCanvas::GetRuler(unsigned int id)
 {
 	m_cur_ruler = 0;

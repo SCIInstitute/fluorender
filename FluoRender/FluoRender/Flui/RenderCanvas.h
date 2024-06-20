@@ -537,6 +537,7 @@ public:
 	//rulers
 	void DrawRulers();
 	flrd::RulerList* GetRulerList();
+	flrd::Ruler* GetCurRuler();
 	flrd::Ruler* GetRuler(unsigned int id);
 
 	//draw highlighted comps

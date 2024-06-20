@@ -109,6 +109,13 @@ namespace flrd
 			return 0;
 		}
 
+		Ruler* GetRuler(size_t i)
+		{
+			if (i < m_ruler_list->size())
+				return (*m_ruler_list)[i];
+			return 0;
+		}
+
 		int GetRulerIndex()
 		{
 			if (!m_ruler)
@@ -139,6 +146,10 @@ namespace flrd
 			return m_type;
 		}
 
+		//display
+		void ToggleDisplay(const std::set<int> list);
+
+		//search
 		bool FindEditingRuler(double mx, double my);
 		bool FindClosestRulerPoint(double mx, double my);
 		bool FindClosestRulerBranch(double mx, double my);
@@ -181,7 +192,7 @@ namespace flrd
 		void ClearMagStroke();
 		void AddMagStrokePoint(int mx, int my);
 
-		void DeleteSelection(std::vector<int> &sel);
+		void DeleteSelection(const std::set<int> &sel);
 		void DeleteAll(bool cur_time);
 
 		void Save(wxFileConfig &fconfig, int vi);

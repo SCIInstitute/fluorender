@@ -44,17 +44,12 @@ DEALINGS IN THE SOFTWARE.
 #include <icons.h>
 
 //BEGIN_EVENT_TABLE(RulerListCtrl, wxListCtrl)
-//	EVT_KEY_DOWN(RulerListCtrl::OnKeyDown)
-//	EVT_LIST_ITEM_SELECTED(wxID_ANY, RulerListCtrl::OnSelection)
-//	EVT_LIST_ITEM_DESELECTED(wxID_ANY, RulerListCtrl::OnEndSelection)
 //	EVT_TEXT(ID_NameText, RulerListCtrl::OnNameText)
 //	EVT_TEXT(ID_CenterText, RulerListCtrl::OnCenterText)
 //	EVT_COLOURPICKER_CHANGED(ID_ColorPicker, RulerListCtrl::OnColorChange)
 //	EVT_SCROLLWIN(RulerListCtrl::OnScroll)
 //	EVT_MOUSEWHEEL(RulerListCtrl::OnScroll)
 //	EVT_LIST_ITEM_ACTIVATED(wxID_ANY, RulerListCtrl::OnAct)
-//	EVT_CONTEXT_MENU(RulerListCtrl::OnContextMenu)
-//	EVT_MENU(ID_ToggleDisp, RulerListCtrl::OnToggleDisp)
 //END_EVENT_TABLE()
 
 RulerListCtrl::RulerListCtrl(
@@ -112,20 +107,16 @@ RulerListCtrl::RulerListCtrl(
 	AssignImageList(m_images, wxIMAGE_LIST_SMALL);
 
 	//frame edit
-	m_name_text = new wxTextCtrl(this, ID_NameText, "",
+	m_name_text = new wxTextCtrl(this, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize);
-	m_name_text->Connect(ID_NameText, wxEVT_LEFT_DCLICK,
-		wxCommandEventHandler(RulerListCtrl::OnTextFocus),
-		NULL, this);
+	m_name_text->Bind(wxEVT_LEFT_DCLICK, &RulerListCtrl::OnTextFocus, this);
 	m_name_text->Hide();
-	m_center_text = new wxTextCtrl(this, ID_CenterText, "",
+	m_center_text = new wxTextCtrl(this, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize);
-	m_center_text->Connect(ID_CenterText, wxEVT_LEFT_DCLICK,
-		wxCommandEventHandler(RulerListCtrl::OnTextFocus),
-		NULL, this);
+	m_center_text->Bind(wxEVT_LEFT_DCLICK, &RulerListCtrl::OnTextFocus, this);
 	m_center_text->Hide();
-	m_color_picker = new wxColourPickerCtrl(this,
-		ID_ColorPicker);
+	m_color_picker = new wxColourPickerCtrl(this, wxID_ANY);
+	//m_color_picker->Bind(wxEVT_COLOURPICKER_CHANGED, &MeasureDlg::OnColorChange, this);
 	m_color_picker->Hide();
 }
 
@@ -186,7 +177,28 @@ void RulerListCtrl::AdjustSize()
 	SetColumnWidth(col, wxLIST_AUTOSIZE_USEHEADER); col++;
 }
 
-bool RulerListCtrl::GetCurrSelection(std::vector<int> &sel)
+wxString RulerListCtrl::GetText(long item, int col)
+{
+	wxListItem info;
+	info.SetId(item);
+	info.SetColumn(col);
+	info.SetMask(wxLIST_MASK_TEXT);
+	GetItem(info);
+	return info.GetText();
+}
+
+void RulerListCtrl::SetText(long item, int col, wxString& str)
+{
+	wxListItem info;
+	info.SetId(item);
+	info.SetColumn(col);
+	info.SetMask(wxLIST_MASK_TEXT);
+	GetItem(info);
+	info.SetText(str);
+	SetItem(info);
+}
+
+bool RulerListCtrl::GetCurrSelection(std::set<int> &sel)
 {
 	long item = -1;
 	for (;;)
@@ -196,7 +208,7 @@ bool RulerListCtrl::GetCurrSelection(std::vector<int> &sel)
 			wxLIST_STATE_SELECTED);
 		if (item == -1)
 			break;
-		sel.push_back(int(item));
+		sel.insert(int(item));
 	}
 	if (!sel.empty())
 		return true;
@@ -217,106 +229,7 @@ void RulerListCtrl::ClearSelection()
 	}
 }
 
-void RulerListCtrl::OnKeyDown(wxKeyEvent& event)
-{
-	if ( event.GetKeyCode() == WXK_DELETE ||
-		event.GetKeyCode() == WXK_BACK)
-		DeleteSelection();
-	if (event.GetKeyCode() == wxKeyCode('C') &&
-		wxGetKeyState(WXK_CONTROL))
-	{
-		long item = GetNextItem(-1,
-			wxLIST_NEXT_ALL,
-			wxLIST_STATE_SELECTED);
-		if (item != -1)
-		{
-			flrd::Ruler* ruler = m_view->GetRuler(GetItemData(item));
-			if (ruler)
-			{
-				fluo::Point cp = ruler->GetCenter();
-				wxString center = wxString::Format("%.2f\t%.2f\t%.2f",
-					cp.x(), cp.y(), cp.z());
-				if (wxTheClipboard->Open())
-				{
-					wxTheClipboard->SetData(new wxTextDataObject(center));
-					wxTheClipboard->Close();
-				}
-			}
-		}
-	}
-	event.Skip();
-}
-
-wxString RulerListCtrl::GetText(long item, int col)
-{
-	wxListItem info;
-	info.SetId(item);
-	info.SetColumn(col);
-	info.SetMask(wxLIST_MASK_TEXT);
-	GetItem(info);
-	return info.GetText();
-}
-
-void RulerListCtrl::SetText(long item, int col, wxString &str)
-{
-	wxListItem info;
-	info.SetId(item);
-	info.SetColumn(col);
-	info.SetMask(wxLIST_MASK_TEXT);
-	GetItem(info);
-	info.SetText(str);
-	SetItem(info);
-}
-
-void RulerListCtrl::OnSelection(wxListEvent &event)
-{
-	long item = GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-	m_editing_item = item;
-	if (!m_view)
-		return;
-	flrd::Ruler* ruler = m_view->GetRuler(GetItemData(item));
-	if (!ruler || !ruler->GetDisp())
-		return;
-
-	wxRect rect;
-	wxString str;
-	//add frame text
-	GetSubItemRect(item, 0, rect);
-	str = GetText(item, 0);
-	m_name_text->SetPosition(rect.GetTopLeft());
-	m_name_text->SetSize(rect.GetSize());
-	m_name_text->ChangeValue(str);
-	m_name_text->Show();
-	//add color picker
-	GetSubItemRect(item, ColorCol, rect);
-	m_color_picker->SetPosition(rect.GetTopLeft());
-	m_color_picker->SetSize(rect.GetSize());
-	if (ruler->GetRulerType() == 2)
-	{
-		//locator
-		GetSubItemRect(item, CenterCol, rect);
-		str = GetText(item, CenterCol);
-		m_center_text->SetPosition(rect.GetTopLeft());
-		m_center_text->SetSize(rect.GetSize());
-		m_center_text->ChangeValue(str);
-		m_center_text->Show();
-	}
-	if (ruler->GetUseColor())
-	{
-		fluo::Color color = ruler->GetColor();
-		wxColor c(int(std::round(color.r()*255.0)),
-			int(std::round(color.g()*255.0)),
-			int(std::round(color.b()*255.0)));
-		m_color_picker->SetColour(c);
-	}
-	m_color_picker->Show();
-
-	m_measure_dlg->UpdateRulerProps();
-}
-
-void RulerListCtrl::EndEdit(bool update)
+void RulerListCtrl::EndEdit()
 {
 	if (m_name_text->IsShown())
 	{
@@ -324,13 +237,14 @@ void RulerListCtrl::EndEdit(bool update)
 		m_center_text->Hide();
 		m_color_picker->Hide();
 		m_editing_item = -1;
-		if (update) UpdateRulers();
+		//if (update) UpdateRulers();
 	}
 }
 
-void RulerListCtrl::OnEndSelection(wxListEvent &event)
+void RulerListCtrl::OnTextFocus(wxCommandEvent& event)
 {
-	EndEdit(false);
+	wxTextCtrl* object = (wxTextCtrl*)event.GetEventObject();
+	object->SetSelection(0, -1);
 }
 
 void RulerListCtrl::OnNameText(wxCommandEvent& event)
@@ -408,7 +322,7 @@ void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
 		return;
 	if (m_editing_item == -1)
 		return;
-	std::vector<int> sel;
+	std::set<int> sel;
 	if (!GetCurrSelection(sel))
 		return;
 
@@ -421,10 +335,9 @@ void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
 		int(std::round(color.b()*255)));
 	SetText(m_editing_item, ColorCol, str_color);
 
-	for (size_t i = 0; i < sel.size(); ++i)
+	for (auto i : sel)
 	{
-		int index = sel[i];
-		flrd::Ruler* ruler = m_view->GetRuler(GetItemData(index));
+		flrd::Ruler* ruler = m_view->GetRuler(GetItemData(i));
 		if (!ruler)
 			continue;
 		ruler->SetColor(color);
@@ -443,12 +356,6 @@ void RulerListCtrl::OnScroll(wxMouseEvent& event)
 {
 	EndEdit(false);
 	event.Skip(true);
-}
-
-void RulerListCtrl::OnTextFocus(wxCommandEvent& event)
-{
-	wxTextCtrl *object = (wxTextCtrl*)event.GetEventObject();
-	object->SetSelection(0, -1);
 }
 
 void RulerListCtrl::OnAct(wxListEvent &event)
@@ -470,56 +377,6 @@ void RulerListCtrl::OnAct(wxListEvent &event)
 	m_center_text->Hide();
 	m_color_picker->Hide();
 	SetItemState(item, 0, wxLIST_STATE_SELECTED);
-	m_view->RefreshGL(39);
-}
-
-void RulerListCtrl::OnContextMenu(wxContextMenuEvent &event)
-{
-	if (!GetSelectedItemCount())
-		return;
-
-	wxPoint point = event.GetPosition();
-	// If from keyboard
-	if (point.x == -1 && point.y == -1)
-	{
-		wxSize size = GetSize();
-		point.x = size.x / 2;
-		point.y = size.y / 2;
-	}
-	else
-	{
-		point = ScreenToClient(point);
-	}
-
-	wxMenu menu;
-	menu.Append(ID_ToggleDisp, "ToggleDisplay");
-	PopupMenu(&menu, point.x, point.y);
-}
-
-void RulerListCtrl::OnToggleDisp(wxCommandEvent& event)
-{
-	if (!m_view)
-		return;
-	std::vector<int> sel;
-	if (!GetCurrSelection(sel))
-		return;
-
-	for (size_t i = 0; i < sel.size(); ++i)
-	{
-		int index = sel[i];
-		flrd::Ruler* ruler = m_view->GetRuler(GetItemData(index));
-		if (!ruler) continue;
-		ruler->ToggleDisp();
-		bool disp = ruler->GetDisp();
-		if (disp)
-			SetItemBackgroundColour(index, wxColour(255, 255, 255));
-		else
-			SetItemBackgroundColour(index, wxColour(200, 200, 200));
-	}
-	//m_name_text->Hide();
-	//m_center_text->Hide();
-	//m_color_picker->Hide();
-	//SetItemState(item, 0, wxLIST_STATE_SELECTED);
 	m_view->RefreshGL(39);
 }
 
@@ -826,13 +683,17 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	sizer22->Add(m_delete_key_btn, 0, wxALIGN_CENTER);
 	sizer22->Add(m_delete_all_key_btn, 0, wxALIGN_CENTER);
 	//list
-	m_rulerlist = new RulerListCtrl(frame, this,
+	m_ruler_list = new RulerListCtrl(this,
 		wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
+	m_ruler_list->Bind(wxEVT_KEY_DOWN, &MeasureDlg::OnKeyDown, this);
+	m_ruler_list->Bind(wxEVT_CONTEXT_MENU, &MeasureDlg::OnContextMenu, this);
+	m_ruler_list->Bind(wxEVT_LIST_ITEM_SELECTED, &MeasureDlg::OnSelection, this);
+	m_ruler_list->Bind(wxEVT_LIST_ITEM_DESELECTED, &MeasureDlg::OnEndSelection, this);
 	sizer_2->Add(sizer21, 0, wxEXPAND);
 	sizer_2->Add(5, 5);
 	sizer_2->Add(sizer22, 0, wxEXPAND);
 	sizer_2->Add(5, 5);
-	sizer_2->Add(m_rulerlist, 1, wxEXPAND);
+	sizer_2->Add(m_ruler_list, 1, wxEXPAND);
 
 	//alignment
 	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(
@@ -912,6 +773,8 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	sizerV->Add(10, 10);
 	sizerV->Add(sizer_3, 0, wxEXPAND);
 
+	Bind(wxEVT_MENU, &MeasureDlg::OnMenuItem, this);
+
 	SetSizer(sizerV);
 	Layout();
 }
@@ -922,21 +785,40 @@ MeasureDlg::~MeasureDlg()
 
 void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 {
+	if (FOUND_VALUE(gstNull))
+		return;
 
+	bool update_all = vc.empty();
+
+	bool bval;
+
+	if (update_all || FOUND_VALUE(gstRulerListDisp))
+	{
+		wxColour c;
+		for (int i = 0; i < m_ruler_list->GetItemCount(); ++i)
+		{
+			flrd::Ruler* ruler = glbin_ruler_handler.GetRuler(i);
+			if (ruler)
+				continue;
+			bval = ruler->GetDisp();
+			c = bval ? wxColour(255, 255, 255) : wxColour(200, 200, 200);
+			m_ruler_list->SetItemBackgroundColour(i, c);
+		}
+	}
 }
 
 void MeasureDlg::UpdateRulerList()
 {
-	m_rulerlist->m_name_text->Hide();
-	m_rulerlist->m_center_text->Hide();
-	m_rulerlist->m_color_picker->Hide();
+	m_ruler_list->m_name_text->Hide();
+	m_ruler_list->m_center_text->Hide();
+	m_ruler_list->m_color_picker->Hide();
 	if (vrv)
 		m_view = vrv;
 
 	flrd::RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list) return;
 
-	std::vector<int> sel;
+	std::set<int> sel;
 	GetCurrSelection(sel);
 
 	std::vector<unsigned int> groups;
@@ -1032,12 +914,11 @@ void MeasureDlg::UpdateRulerList()
 
 	AdjustSize();
 
-	for (size_t i = 0; i < sel.size(); ++i)
+	for (auto i : sel)
 	{
-		int index = sel[i];
-		if (0 > index || ruler_list->size() <= index)
+		if (0 > i || ruler_list->size() <= i)
 			continue;
-		SetItemState(index, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+		SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	}
 
 	glbin_vertex_array_manager.set_dirty(flvr::VA_Rulers);
@@ -1045,7 +926,7 @@ void MeasureDlg::UpdateRulerList()
 
 void MeasureDlg::SelectGroup(unsigned int group)
 {
-	m_rulerlist->ClearSelection();
+	m_ruler_list->ClearSelection();
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)
 		return;
@@ -1057,14 +938,14 @@ void MeasureDlg::SelectGroup(unsigned int group)
 		flrd::Ruler* ruler = (*ruler_list)[i];
 		if (!ruler) continue;
 		if (ruler->Group() == group)
-			m_rulerlist->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+			m_ruler_list->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	}
 }
 
 void MeasureDlg::DeleteSelection()
 {
-	std::vector<int> sel;
-	GetCurrSelection(sel);
+	std::set<int> sel;
+	m_ruler_list->GetCurrSelection(sel);
 	glbin_ruler_handler.DeleteSelection(sel);
 	UpdateRulers();
 	m_view->RefreshGL(39);
@@ -1075,6 +956,15 @@ void MeasureDlg::DeleteAll(bool cur_time)
 	glbin_ruler_handler.DeleteAll(cur_time);
 	UpdateRulers();
 	m_view->RefreshGL(39);
+}
+
+void MeasureDlg::ToggleDispaly()
+{
+	std::set<int> sel;
+	if (!m_ruler_list->GetCurrSelection(sel))
+		return;
+	glbin_ruler_handler.ToggleDisplay(sel);
+	FluoRefresh(2, { gstRulerListDisp }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void MeasureDlg::Export(wxString filename)
@@ -1360,9 +1250,9 @@ void MeasureDlg::UpdateRulerProps()
 	int interp = 0;
 	if (m_view)
 	{
-		std::vector<int> sel;
+		std::set<int> sel;
 		flrd::RulerList* ruler_list = m_view->GetRulerList();
-		if (m_rulerlist->GetCurrSelection(sel))
+		if (m_ruler_list->GetCurrSelection(sel))
 		{
 			int index = sel[0];
 			if (index >= 0 && index < ruler_list->size())
@@ -1656,9 +1546,9 @@ void MeasureDlg::OnRulerFlip(wxCommandEvent& event)
 		return;
 
 	int count = 0;
-	std::vector<int> sel;
+	std::set<int> sel;
 	flrd::RulerList* ruler_list = m_view->GetRulerList();
-	if (m_rulerlist->GetCurrSelection(sel))
+	if (m_ruler_list->GetCurrSelection(sel))
 	{
 		for (size_t i = 0; i < sel.size(); ++i)
 		{
@@ -1845,9 +1735,9 @@ void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
 
 	fluo::Point avg;
 	int count = 0;
-	std::vector<int> sel;
+	std::set<int> sel;
 	flrd::RulerList* ruler_list = m_view->GetRulerList();
-	if (m_rulerlist->GetCurrSelection(sel))
+	if (m_ruler_list->GetCurrSelection(sel))
 	{
 		for (size_t i = 0; i < sel.size(); ++i)
 		{
@@ -1892,8 +1782,8 @@ void MeasureDlg::OnProfile(wxCommandEvent& event)
 	if (m_view)
 	{
 		glbin_ruler_handler.SetVolumeData(m_view->m_cur_vol);
-		std::vector<int> sel;
-		if (m_rulerlist->GetCurrSelection(sel))
+		std::set<int> sel;
+		if (m_ruler_list->GetCurrSelection(sel))
 		{
 			//export selected
 			for (size_t i = 0; i < sel.size(); ++i)
@@ -1939,9 +1829,9 @@ void MeasureDlg::OnDistance(wxCommandEvent& event)
 		filename = filename.substr(0, filename.find_last_of('.'));
 	}
 
-	std::vector<int> sel;
+	std::set<int> sel;
 	std::string fi;
-	if (m_rulerlist->GetCurrSelection(sel))
+	if (m_ruler_list->GetCurrSelection(sel))
 	{
 		//export selected
 		for (size_t i = 0; i < sel.size(); ++i)
@@ -1971,8 +1861,8 @@ void MeasureDlg::OnProject(wxCommandEvent& event)
 {
 	if (m_view)
 	{
-		std::vector<int> sel;
-		if (m_rulerlist->GetCurrSelection(sel))
+		std::set<int> sel;
+		if (m_ruler_list->GetCurrSelection(sel))
 		{
 			//export selected
 			for (size_t i = 0; i < sel.size(); ++i)
@@ -2044,8 +1934,8 @@ void MeasureDlg::Project(int idx)
 
 void MeasureDlg::Relax()
 {
-	std::vector<int> sel;
-	if (m_rulerlist->GetCurrSelection(sel))
+	std::set<int> sel;
+	if (m_ruler_list->GetCurrSelection(sel))
 	{
 		for (size_t i = 0; i < sel.size(); ++i)
 			Relax(sel[i]);
@@ -2083,8 +1973,8 @@ void MeasureDlg::Relax(int idx)
 
 void MeasureDlg::Prune(int len)
 {
-	std::vector<int> sel;
-	if (m_rulerlist->GetCurrSelection(sel))
+	std::set<int> sel;
+	if (m_ruler_list->GetCurrSelection(sel))
 	{
 		for (size_t i = 0; i < sel.size(); ++i)
 			Prune(sel[i], len);
@@ -2138,12 +2028,12 @@ void MeasureDlg::OnRelax(wxCommandEvent& event)
 
 void MeasureDlg::OnDelete(wxCommandEvent& event)
 {
-	m_rulerlist->DeleteSelection();
+	m_ruler_list->DeleteSelection();
 }
 
 void MeasureDlg::OnDeleteAll(wxCommandEvent& event)
 {
-	m_rulerlist->DeleteAll();
+	m_ruler_list->DeleteAll();
 }
 
 void MeasureDlg::OnExport(wxCommandEvent& event)
@@ -2158,7 +2048,7 @@ void MeasureDlg::OnExport(wxCommandEvent& event)
 	if (rval == wxID_OK)
 	{
 		wxString filename = fopendlg->GetPath();
-		m_rulerlist->Export(filename);
+		m_ruler_list->Export(filename);
 	}
 
 	if (fopendlg)
@@ -2204,21 +2094,21 @@ void MeasureDlg::OnTransientCheck(wxCommandEvent& event)
 	bool val = m_transient_chk->GetValue();
 
 	//change ruler setting
-	std::vector<int> sel;
-	if (!m_rulerlist->GetCurrSelection(sel))
+	std::set<int> sel;
+	if (!m_ruler_list->GetCurrSelection(sel))
 		return;
 	for (size_t i = 0; i < sel.size(); ++i)
 	{
 		int index = sel[i];
 		flrd::Ruler* ruler = m_view->GetRuler(
-			m_rulerlist->GetItemData(index));
+			m_ruler_list->GetItemData(index));
 		if (!ruler)
 			continue;
 		ruler->SetTransient(val);
 		if (val)
 			ruler->SetTransTime(m_view->m_tseq_cur_num);
 	}
-	m_rulerlist->UpdateRulers(m_view);
+	m_ruler_list->UpdateRulers(m_view);
 }
 
 void MeasureDlg::OnDF_FCheck(wxCommandEvent& event)
@@ -2227,7 +2117,7 @@ void MeasureDlg::OnDF_FCheck(wxCommandEvent& event)
 	glbin_ruler_handler.SetBackground(val);
 	if (val)
 		OnProfile(event);
-	m_rulerlist->UpdateRulers(m_view);
+	m_ruler_list->UpdateRulers(m_view);
 	glbin_settings.m_ruler_df_f = val;
 }
 
@@ -2273,19 +2163,19 @@ void MeasureDlg::OnChgGroup(wxCommandEvent& event)
 	//update group
 	if (!m_view)
 		return;
-	std::vector<int> sel;
-	if (!m_rulerlist->GetCurrSelection(sel))
+	std::set<int> sel;
+	if (!m_ruler_list->GetCurrSelection(sel))
 		return;
 	for (size_t i = 0; i < sel.size(); ++i)
 	{
 		int index = sel[i];
 		flrd::Ruler* ruler = m_view->GetRuler(
-			m_rulerlist->GetItemData(index));
+			m_ruler_list->GetItemData(index));
 		if (!ruler)
 			continue;
 		ruler->Group(ival);
 	}
-	m_rulerlist->UpdateRulers(m_view);
+	m_ruler_list->UpdateRulers(m_view);
 }
 
 void MeasureDlg::OnSelGroup(wxCommandEvent& event)
@@ -2293,7 +2183,7 @@ void MeasureDlg::OnSelGroup(wxCommandEvent& event)
 	unsigned long ival;
 	if (!m_group_text->GetValue().ToULong(&ival))
 		return;
-	m_rulerlist->SelectGroup(ival);
+	m_ruler_list->SelectGroup(ival);
 }
 
 void MeasureDlg::OnDispTglGroup(wxCommandEvent& event)
@@ -2320,9 +2210,9 @@ void MeasureDlg::OnDispTglGroup(wxCommandEvent& event)
 			}
 			ruler->SetDisp(disp);
 			if (disp)
-				m_rulerlist->SetItemBackgroundColour(i, wxColour(255, 255, 255));
+				m_ruler_list->SetItemBackgroundColour(i, wxColour(255, 255, 255));
 			else
-				m_rulerlist->SetItemBackgroundColour(i, wxColour(200, 200, 200));
+				m_ruler_list->SetItemBackgroundColour(i, wxColour(200, 200, 200));
 		}
 	}
 	m_view->RefreshGL(39);
@@ -2338,8 +2228,8 @@ void MeasureDlg::OnInterpCmb(wxCommandEvent& event)
 	if (!ruler_list)
 		return;
 	int interp = m_interp_cmb->GetSelection();
-	std::vector<int> sel;
-	if (m_rulerlist->GetCurrSelection(sel))
+	std::set<int> sel;
+	if (m_ruler_list->GetCurrSelection(sel))
 	{
 		for (size_t i = 0; i < sel.size(); ++i)
 		{
@@ -2354,7 +2244,7 @@ void MeasureDlg::OnInterpCmb(wxCommandEvent& event)
 	}
 	if (refresh)
 	{
-		m_rulerlist->UpdateRulers();
+		m_ruler_list->UpdateRulers();
 		m_view->RefreshGL(39);
 	}
 }
@@ -2368,8 +2258,8 @@ void MeasureDlg::OnDeleteKeyBtn(wxCommandEvent& event)
 	if (!ruler_list)
 		return;
 	int interp = m_interp_cmb->GetSelection();
-	std::vector<int> sel;
-	if (m_rulerlist->GetCurrSelection(sel))
+	std::set<int> sel;
+	if (m_ruler_list->GetCurrSelection(sel))
 	{
 		for (size_t i = 0; i < sel.size(); ++i)
 		{
@@ -2385,7 +2275,7 @@ void MeasureDlg::OnDeleteKeyBtn(wxCommandEvent& event)
 	}
 	if (refresh)
 	{
-		m_rulerlist->UpdateRulers();
+		m_ruler_list->UpdateRulers();
 		m_view->RefreshGL(39);
 	}
 }
@@ -2398,8 +2288,8 @@ void MeasureDlg::OnDeleteAllKeyBtn(wxCommandEvent& event)
 	if (!ruler_list)
 		return;
 	int interp = m_interp_cmb->GetSelection();
-	std::vector<int> sel;
-	if (m_rulerlist->GetCurrSelection(sel))
+	std::set<int> sel;
+	if (m_ruler_list->GetCurrSelection(sel))
 	{
 		for (size_t i = 0; i < sel.size(); ++i)
 		{
@@ -2460,13 +2350,13 @@ void MeasureDlg::SetProfile(int i)
 	}
 	else
 		str = wxString::Format("%.0f", dval);
-	m_rulerlist->SetText(i, IntCol, str);
+	m_ruler_list->SetText(i, IntCol, str);
 }
 
 void MeasureDlg::OnAlignRuler(wxCommandEvent& event)
 {
-	std::vector<int> sel;
-	if (!m_rulerlist->GetCurrSelection(sel))
+	std::set<int> sel;
+	if (!m_ruler_list->GetCurrSelection(sel))
 		return;
 	if (!m_view)
 		return;
@@ -2507,8 +2397,8 @@ void MeasureDlg::OnAlignRuler(wxCommandEvent& event)
 void MeasureDlg::OnAlignPca(wxCommandEvent& event)
 {
 	flrd::RulerList list;
-	std::vector<int> sel;
-	if (!m_rulerlist->GetCurrSelection(sel))
+	std::set<int> sel;
+	if (!m_ruler_list->GetCurrSelection(sel))
 		return;
 	if (!m_view)
 		return;
@@ -2546,5 +2436,123 @@ void MeasureDlg::OnAlignPca(wxCommandEvent& event)
 	glbin_aligner.AlignPca(true);
 	//if (m_align_center->GetValue())
 	//	AlignCenter(0, &list);
+}
+
+void MeasureDlg::OnKeyDown(wxKeyEvent& event)
+{
+	if (event.GetKeyCode() == WXK_DELETE ||
+		event.GetKeyCode() == WXK_BACK)
+		DeleteSelection();
+	if (event.GetKeyCode() == wxKeyCode('C') &&
+		wxGetKeyState(WXK_CONTROL))
+	{
+		long item = m_ruler_list->GetNextItem(-1,
+			wxLIST_NEXT_ALL,
+			wxLIST_STATE_SELECTED);
+		if (item != -1)
+		{
+			flrd::Ruler* ruler = glbin_current.GetRuler();
+			if (ruler)
+			{
+				fluo::Point cp = ruler->GetCenter();
+				wxString center = wxString::Format("%.2f\t%.2f\t%.2f",
+					cp.x(), cp.y(), cp.z());
+				if (wxTheClipboard->Open())
+				{
+					wxTheClipboard->SetData(new wxTextDataObject(center));
+					wxTheClipboard->Close();
+				}
+			}
+		}
+	}
+	event.Skip();
+}
+
+void MeasureDlg::OnContextMenu(wxContextMenuEvent& event)
+{
+	if (!m_ruler_list->GetSelectedItemCount())
+		return;
+
+	wxPoint point = event.GetPosition();
+	// If from keyboard
+	if (point.x == -1 && point.y == -1)
+	{
+		wxSize size = m_ruler_list->GetSize();
+		point.x = size.x / 2;
+		point.y = size.y / 2;
+	}
+	else
+	{
+		point = m_ruler_list->ScreenToClient(point);
+	}
+
+	wxMenu menu;
+	menu.Append(ID_ToggleDisp, "ToggleDisplay");
+	PopupMenu(&menu, point.x, point.y);
+}
+
+void MeasureDlg::OnMenuItem(wxCommandEvent& event)
+{
+	int id = event.GetId();
+
+	switch (id)
+	{
+	case ID_ToggleDisp:
+		ToggleDisplay();
+		break;
+	}
+}
+
+void MeasureDlg::OnSelection(wxListEvent& event)
+{
+	long item = GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+	m_editing_item = item;
+	if (!m_view)
+		return;
+	flrd::Ruler* ruler = m_view->GetRuler(GetItemData(item));
+	if (!ruler || !ruler->GetDisp())
+		return;
+
+	wxRect rect;
+	wxString str;
+	//add frame text
+	GetSubItemRect(item, 0, rect);
+	str = GetText(item, 0);
+	m_name_text->SetPosition(rect.GetTopLeft());
+	m_name_text->SetSize(rect.GetSize());
+	m_name_text->ChangeValue(str);
+	m_name_text->Show();
+	//add color picker
+	GetSubItemRect(item, ColorCol, rect);
+	m_color_picker->SetPosition(rect.GetTopLeft());
+	m_color_picker->SetSize(rect.GetSize());
+	if (ruler->GetRulerType() == 2)
+	{
+		//locator
+		GetSubItemRect(item, CenterCol, rect);
+		str = GetText(item, CenterCol);
+		m_center_text->SetPosition(rect.GetTopLeft());
+		m_center_text->SetSize(rect.GetSize());
+		m_center_text->ChangeValue(str);
+		m_center_text->Show();
+	}
+	if (ruler->GetUseColor())
+	{
+		fluo::Color color = ruler->GetColor();
+		wxColor c(int(std::round(color.r() * 255.0)),
+			int(std::round(color.g() * 255.0)),
+			int(std::round(color.b() * 255.0)));
+		m_color_picker->SetColour(c);
+	}
+	m_color_picker->Show();
+
+	m_measure_dlg->UpdateRulerProps();
+}
+
+void MeasureDlg::OnEndSelection(wxListEvent& event)
+{
+	m_ruler_list->EndEdit();
 }
 

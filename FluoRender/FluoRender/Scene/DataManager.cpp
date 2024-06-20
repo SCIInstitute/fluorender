@@ -5141,7 +5141,9 @@ void CurrentObjects::SetCanvas(RenderCanvas* cnvs)
 	mesh_data = 0;
 	ann_data = 0;
 	if (canvas)
+	{
 		canvas->m_cur_vol = 0;
+	}
 }
 
 void CurrentObjects::SetVolumeGroup(DataGroup* g)

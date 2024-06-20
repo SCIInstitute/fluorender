@@ -74,8 +74,9 @@ public:
 
 	wxString GetText(long item, int col);
 	void SetText(long item, int col, wxString &str);
-	bool GetCurrSelection(std::vector<int> &sel);
+	bool GetCurrSelection(std::set<int> &sel);
 	void ClearSelection();
+	void EndEdit();
 
 	friend class MeasureDlg;
 
@@ -87,26 +88,20 @@ private:
 	long m_editing_item;
 
 private:
-	void EndEdit(bool update=true);
-
-	void OnContextMenu(wxContextMenuEvent &event);
-	void OnToggleDisp(wxCommandEvent& event);
-	void OnKeyDown(wxKeyEvent& event);
-	void OnSelection(wxListEvent &event);
-	void OnEndSelection(wxListEvent &event);
-	void OnNameText(wxCommandEvent& event);
-	void OnCenterText(wxCommandEvent& event);
-	void OnColorChange(wxColourPickerEvent& event);
-	void OnScroll(wxScrollWinEvent& event);
-	void OnScroll(wxMouseEvent& event);
 	void OnTextFocus(wxCommandEvent& event);
-	void OnAct(wxListEvent &event);
+
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 class MeasureDlg : public PropPanel
 {
 public:
+	enum
+	{
+		//context menu
+		ID_ToggleDisp = 0
+	};
 	//enum
 	//{
 	//	ID_LocatorBtn = ID_MEASURE2,
@@ -178,6 +173,9 @@ public:
 	void DeleteSelection();
 	void DeleteAll(bool cur_time = false);
 
+	//
+	void ToggleDisplay();
+
 	//processing
 	void Relax();
 	void Relax(int idx);
@@ -198,7 +196,7 @@ private:
 	wxButton* m_delete_key_btn;
 	wxButton* m_delete_all_key_btn;
 	//list
-	RulerListCtrl *m_rulerlist;
+	RulerListCtrl *m_ruler_list;
 	//tool bar
 	wxToolBar *m_toolbar1;
 	wxToolBar *m_toolbar2;
@@ -278,6 +276,18 @@ private:
 	//align
 	void OnAlignRuler(wxCommandEvent& event);
 	void OnAlignPca(wxCommandEvent& event);
+	//list events
+	void OnKeyDown(wxKeyEvent& event);
+	void OnContextMenu(wxContextMenuEvent& event);
+	void OnMenuItem(wxCommandEvent& event);
+	void OnSelection(wxListEvent& event);
+	void OnEndSelection(wxListEvent& event);
+	void OnNameText(wxCommandEvent& event);
+	void OnCenterText(wxCommandEvent& event);
+	void OnColorChange(wxColourPickerEvent& event);
+	void OnScroll(wxScrollWinEvent& event);
+	void OnScroll(wxMouseEvent& event);
+	void OnAct(wxListEvent& event);
 };
 
 #endif//_MEASUREDLG_H_
