@@ -61,7 +61,7 @@ public:
 		MeasureDlg* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
-		long style=wxLC_REPORT|wxLC_SINGLE_SEL);
+		long style=wxLC_REPORT);
 	~RulerListCtrl();
 
 	void Append(bool enable, unsigned int id,
@@ -76,6 +76,7 @@ public:
 	void SetText(long item, int col, wxString &str);
 	bool GetCurrSelection(std::set<int> &sel);
 	void ClearSelection();
+	void StartEdit(int type, bool use_color, const fluo::Color& color);
 	void EndEdit();
 
 	friend class MeasureDlg;
@@ -85,12 +86,17 @@ private:
 	wxTextCtrl *m_name_text;
 	wxTextCtrl *m_center_text;
 	wxColourPickerCtrl *m_color_picker;
+
 	long m_editing_item;
+	wxString m_name;
+	fluo::Point m_center;
+	fluo::Color m_color;
 
 private:
 	void OnTextFocus(wxCommandEvent& event);
-
-
+	void OnNameText(wxCommandEvent& event);
+	void OnCenterText(wxCommandEvent& event);
+	void OnColorChange(wxColourPickerEvent& event);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -102,16 +108,20 @@ public:
 		//context menu
 		ID_ToggleDisp = 0
 	};
+	enum
+	{
+		//toolbar1
+		ID_LocatorBtn = 0,
+		ID_ProbeBtn,
+		ID_RulerBtn,
+		ID_ProtractorBtn,
+		ID_EllipseBtn,
+		ID_RulerMPBtn,
+		ID_PencilBtn,
+		ID_GrowBtn
+	};
 	//enum
 	//{
-	//	ID_LocatorBtn = ID_MEASURE2,
-	//	ID_ProbeBtn,
-	//	ID_ProtractorBtn,
-	//	ID_RulerBtn,
-	//	ID_RulerMPBtn,
-	//	ID_EllipseBtn,
-	//	ID_GrowBtn,
-	//	ID_PencilBtn,
 	//	ID_RulerMoveBtn,
 	//	ID_RulerMovePointBtn,
 	//	ID_MagnetBtn,
@@ -168,6 +178,7 @@ public:
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	void UpdateRulerList();
+	void UpdateRulerListCur();
 
 	void SelectGroup(unsigned int group);
 	void DeleteSelection();
@@ -175,6 +186,17 @@ public:
 
 	//
 	void ToggleDisplay();
+	void SetCurrentRuler();
+
+	//toolbar1
+	void Locator();
+	void Probe();
+	void Ruler();
+	void Protractor();
+	void Ellipse();
+	void RulerMP();
+	void Pencil();
+	void Grow();
 
 	//processing
 	void Relax();
@@ -183,6 +205,9 @@ public:
 	void SetEdit() { m_edited = true; }
 	void Prune(int len);//remove branches with length equal to or smaller than len
 	void Prune(int idx, int len);
+
+	void AlignCenter(flrd::Ruler* ruler, flrd::RulerList* ruler_list);
+	void SetProfile(int i);
 
 private:
 	//list ctrl
@@ -229,17 +254,7 @@ private:
 	bool m_edited;
 
 private:
-	void AlignCenter(flrd::Ruler* ruler, flrd::RulerList* ruler_list);
-	void SetProfile(int i);
-
-	void OnNewLocator(wxCommandEvent& event);
-	void OnNewProbe(wxCommandEvent& event);
-	void OnNewProtractor(wxCommandEvent& event);
-	void OnNewRuler(wxCommandEvent& event);
-	void OnNewRulerMP(wxCommandEvent& event);
-	void OnEllipse(wxCommandEvent& event);
-	void OnGrow(wxCommandEvent& event);
-	void OnPencil(wxCommandEvent& event);
+	void OnToolbar1(wxCommandEvent& event);
 	void OnRulerMove(wxCommandEvent& event);
 	void OnRulerMovePoint(wxCommandEvent& event);
 	void OnMagnet(wxCommandEvent& event);
@@ -282,11 +297,8 @@ private:
 	void OnMenuItem(wxCommandEvent& event);
 	void OnSelection(wxListEvent& event);
 	void OnEndSelection(wxListEvent& event);
-	void OnNameText(wxCommandEvent& event);
-	void OnCenterText(wxCommandEvent& event);
-	void OnColorChange(wxColourPickerEvent& event);
-	void OnScroll(wxScrollWinEvent& event);
-	void OnScroll(wxMouseEvent& event);
+	void OnScrollWin(wxScrollWinEvent& event);
+	void OnScrollMouse(wxMouseEvent& event);
 	void OnAct(wxListEvent& event);
 };
 

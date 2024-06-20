@@ -43,15 +43,6 @@ DEALINGS IN THE SOFTWARE.
 #include <ruler.xpm>
 #include <icons.h>
 
-//BEGIN_EVENT_TABLE(RulerListCtrl, wxListCtrl)
-//	EVT_TEXT(ID_NameText, RulerListCtrl::OnNameText)
-//	EVT_TEXT(ID_CenterText, RulerListCtrl::OnCenterText)
-//	EVT_COLOURPICKER_CHANGED(ID_ColorPicker, RulerListCtrl::OnColorChange)
-//	EVT_SCROLLWIN(RulerListCtrl::OnScroll)
-//	EVT_MOUSEWHEEL(RulerListCtrl::OnScroll)
-//	EVT_LIST_ITEM_ACTIVATED(wxID_ANY, RulerListCtrl::OnAct)
-//END_EVENT_TABLE()
-
 RulerListCtrl::RulerListCtrl(
 	MeasureDlg* parent,
 	const wxPoint& pos,
@@ -110,13 +101,15 @@ RulerListCtrl::RulerListCtrl(
 	m_name_text = new wxTextCtrl(this, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize);
 	m_name_text->Bind(wxEVT_LEFT_DCLICK, &RulerListCtrl::OnTextFocus, this);
+	m_name_text->Bind(wxEVT_TEXT, &RulerListCtrl::OnNameText, this);
 	m_name_text->Hide();
 	m_center_text = new wxTextCtrl(this, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize);
 	m_center_text->Bind(wxEVT_LEFT_DCLICK, &RulerListCtrl::OnTextFocus, this);
+	m_center_text->Bind(wxEVT_TEXT, &RulerListCtrl::OnCenterText, this);
 	m_center_text->Hide();
 	m_color_picker = new wxColourPickerCtrl(this, wxID_ANY);
-	//m_color_picker->Bind(wxEVT_COLOURPICKER_CHANGED, &MeasureDlg::OnColorChange, this);
+	m_color_picker->Bind(wxEVT_COLOURPICKER_CHANGED, &RulerListCtrl::OnColorChange, this);
 	m_color_picker->Hide();
 }
 
@@ -229,6 +222,46 @@ void RulerListCtrl::ClearSelection()
 	}
 }
 
+void RulerListCtrl::StartEdit(int type, bool use_color, const fluo::Color& color)
+{
+	long item = GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+	m_editing_item = item;
+
+	wxRect rect;
+	wxString str;
+	//add frame text
+	GetSubItemRect(item, 0, rect);
+	str = GetText(item, 0);
+	m_name_text->SetPosition(rect.GetTopLeft());
+	m_name_text->SetSize(rect.GetSize());
+	m_name_text->ChangeValue(str);
+	m_name_text->Show();
+	//add color picker
+	GetSubItemRect(item, ColorCol, rect);
+	m_color_picker->SetPosition(rect.GetTopLeft());
+	m_color_picker->SetSize(rect.GetSize());
+	if (type == 2)
+	{
+		//locator
+		GetSubItemRect(item, CenterCol, rect);
+		str = GetText(item, CenterCol);
+		m_center_text->SetPosition(rect.GetTopLeft());
+		m_center_text->SetSize(rect.GetSize());
+		m_center_text->ChangeValue(str);
+		m_center_text->Show();
+	}
+	if (use_color)
+	{
+		wxColor c(int(std::round(color.r() * 255.0)),
+			int(std::round(color.g() * 255.0)),
+			int(std::round(color.b() * 255.0)));
+		m_color_picker->SetColour(c);
+	}
+	m_color_picker->Show();
+}
+
 void RulerListCtrl::EndEdit()
 {
 	if (m_name_text->IsShown())
@@ -237,7 +270,6 @@ void RulerListCtrl::EndEdit()
 		m_center_text->Hide();
 		m_color_picker->Hide();
 		m_editing_item = -1;
-		//if (update) UpdateRulers();
 	}
 }
 
@@ -249,30 +281,11 @@ void RulerListCtrl::OnTextFocus(wxCommandEvent& event)
 
 void RulerListCtrl::OnNameText(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-	if (m_editing_item == -1)
-		return;
-
-	wxString str = m_name_text->GetValue();
-
-	flrd::Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
-	if (!ruler) return;
-	ruler->SetName(str);
-	SetText(m_editing_item, 0, str);
-	m_view->RefreshGL(39);
+	m_name = m_name_text->GetValue();
 }
 
 void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-	if (m_editing_item == -1)
-		return;
-	flrd::Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
-	if (!ruler || ruler->GetRulerType() != 2) return;
-	ruler->SetWorkTime(m_view->m_tseq_cur_num);
-
 	wxString str = m_center_text->GetValue();
 	wxString old_str = GetText(m_editing_item, CenterCol);
 	if (str == old_str)
@@ -307,77 +320,13 @@ void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 				return;
 		}
 	}
-	fluo::Point tmp(x, y, z);
-	ruler->SetPoint(0, tmp);
-	str = wxString::Format("(%.2f, %.2f, %.2f)",
-		x, y, z);
-	SetText(m_editing_item, CenterCol, str);
-	SetText(m_editing_item, PointCol, str);
-	m_view->RefreshGL(39);
+	m_center = fluo::Point(x, y, z);
 }
 
 void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
 {
-	if (!m_view)
-		return;
-	if (m_editing_item == -1)
-		return;
-	std::set<int> sel;
-	if (!GetCurrSelection(sel))
-		return;
-
 	wxColor c = event.GetColour();
-	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	wxString str_color;
-	str_color = wxString::Format("RGB(%d, %d, %d)",
-		int(std::round(color.r()*255)),
-		int(std::round(color.g()*255)),
-		int(std::round(color.b()*255)));
-	SetText(m_editing_item, ColorCol, str_color);
-
-	for (auto i : sel)
-	{
-		flrd::Ruler* ruler = m_view->GetRuler(GetItemData(i));
-		if (!ruler)
-			continue;
-		ruler->SetColor(color);
-	}
-
-	m_view->RefreshGL(39);
-}
-
-void RulerListCtrl::OnScroll(wxScrollWinEvent& event)
-{
-	EndEdit(false);
-	event.Skip(true);
-}
-
-void RulerListCtrl::OnScroll(wxMouseEvent& event)
-{
-	EndEdit(false);
-	event.Skip(true);
-}
-
-void RulerListCtrl::OnAct(wxListEvent &event)
-{
-	long item = GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-	if (!m_view)
-		return;
-	flrd::Ruler* ruler = m_view->GetRuler(GetItemData(item));
-	if (!ruler) return;
-	ruler->ToggleDisp();
-	bool disp = ruler->GetDisp();
-	if (disp)
-		SetItemBackgroundColour(item, wxColour(255, 255, 255));
-	else
-		SetItemBackgroundColour(item, wxColour(200, 200, 200));
-	m_name_text->Hide();
-	m_center_text->Hide();
-	m_color_picker->Hide();
-	SetItemState(item, 0, wxLIST_STATE_SELECTED);
-	m_view->RefreshGL(39);
+	m_color = fluo::Color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -490,6 +439,7 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	m_toolbar1->AddCheckTool(ID_GrowBtn, "Grow",
 		bitmap, wxNullBitmap,
 		"Click and hold to create ruler automatically based on data");
+	m_toolbar1->Bind(wxEVT_TOOL, &MeasureDlg::OnToolbar1, this);
 	m_toolbar1->Realize();
 	//toolbar2
 	m_toolbar2 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
@@ -774,6 +724,14 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	sizerV->Add(sizer_3, 0, wxEXPAND);
 
 	Bind(wxEVT_MENU, &MeasureDlg::OnMenuItem, this);
+	Bind(wxEVT_SCROLLWIN_TOP, &MeasureDlg::OnScrollWin, this);
+	Bind(wxEVT_SCROLLWIN_BOTTOM, &MeasureDlg::OnScrollWin, this);
+	Bind(wxEVT_SCROLLWIN_LINEUP, &MeasureDlg::OnScrollWin, this);
+	Bind(wxEVT_SCROLLWIN_LINEDOWN, &MeasureDlg::OnScrollWin, this);
+	Bind(wxEVT_SCROLLWIN_PAGEUP, &MeasureDlg::OnScrollWin, this);
+	Bind(wxEVT_SCROLLWIN_PAGEDOWN, &MeasureDlg::OnScrollWin, this);
+	Bind(wxEVT_SCROLLWIN_THUMBTRACK, &MeasureDlg::OnScrollWin, this);
+	Bind(wxEVT_MOUSEWHEEL, &MeasureDlg::OnScrollMouse, this);
 
 	SetSizer(sizerV);
 	Layout();
@@ -791,6 +749,33 @@ void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	bool update_all = vc.empty();
 
 	bool bval;
+	int ival;
+
+	if (update_all || FOUND_VALUE(gstRulerType))
+	{
+		RenderCanvas* canvas = glbin_current.canvas;
+		bval = canvas && canvas->GetIntMode() == 5;
+		ival = glbin_ruler_handler.GetType();
+		int mode = canvas ? canvas->GetIntMode() : 0;
+		m_toolbar1->ToggleTool(ID_LocatorBtn, bval && ival == 2);
+		m_toolbar1->ToggleTool(ID_ProbeBtn, bval && ival == 3);
+		m_toolbar1->ToggleTool(ID_RulerBtn, bval && ival == 0);
+		m_toolbar1->ToggleTool(ID_ProtractorBtn, bval && ival == 4);
+		m_toolbar1->ToggleTool(ID_EllipseBtn, bval && ival == 5);
+		m_toolbar1->ToggleTool(ID_RulerMPBtn, bval && ival == 1);
+		m_toolbar1->ToggleTool(ID_PencilBtn,mode == 13);
+		m_toolbar1->ToggleTool(ID_GrowBtn, mode == 12);
+	}
+
+	if (update_all || FOUND_VALUE(gstRulerList))
+	{
+		UpdateRulerList();
+	}
+
+	if (FOUND_VALUE(gstRulerListCur))
+	{
+		UpdateRulerListCur();
+	}
 
 	if (update_all || FOUND_VALUE(gstRulerListDisp))
 	{
@@ -805,6 +790,26 @@ void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			m_ruler_list->SetItemBackgroundColour(i, c);
 		}
 	}
+
+	if (update_all || FOUND_VALUE(gstRulerListSel))
+	{
+		ival = glbin_ruler_handler.GetRulerIndex();
+		m_ruler_list->SetItemState(ival, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	}
+
+	if (update_all || FOUND_VALUE(gstRulerTransient))
+	{
+		flrd::Ruler* ruler = glbin_current.GetRuler();
+		bval = ruler->GetTransient();
+		m_transient_chk->SetValue(bval);
+	}
+
+	if (update_all || FOUND_VALUE(gstRulerInterpolation))
+	{
+		flrd::Ruler* ruler = glbin_current.GetRuler();
+		ival = ruler->GetInterp();
+		m_interp_cmb->Select(ival);
+	}
 }
 
 void MeasureDlg::UpdateRulerList()
@@ -812,29 +817,29 @@ void MeasureDlg::UpdateRulerList()
 	m_ruler_list->m_name_text->Hide();
 	m_ruler_list->m_center_text->Hide();
 	m_ruler_list->m_color_picker->Hide();
-	if (vrv)
-		m_view = vrv;
 
-	flrd::RulerList* ruler_list = m_view->GetRulerList();
-	if (!ruler_list) return;
+	RenderCanvas* canvas = glbin_current.canvas;
+	flrd::RulerList* ruler_list = glbin_current.GetRulerList();
+	if (!ruler_list)
+		return;
 
-	std::set<int> sel;
-	GetCurrSelection(sel);
+	//std::set<int> sel;
+	//m_ruler_list->GetCurrSelection(sel);
 
 	std::vector<unsigned int> groups;
 	int group_num = ruler_list->GetGroupNum(groups);
 	std::vector<int> group_count(group_num, 0);
 
-	DeleteAllItems();
+	m_ruler_list->DeleteAllItems();
 
 	wxString points;
 	fluo::Point p;
 	int num_points;
 	size_t t;
-	if (m_view->m_frame_num_type == 1)
-		t = m_view->m_param_cur_num;
+	if (canvas->m_frame_num_type == 1)
+		t = canvas->m_param_cur_num;
 	else
-		t = m_view->m_tseq_cur_num;
+		t = canvas->m_tseq_cur_num;
 	for (int i = 0; i < (int)ruler_list->size(); i++)
 	{
 		flrd::Ruler* ruler = (*ruler_list)[i];
@@ -845,7 +850,7 @@ void MeasureDlg::UpdateRulerList()
 			continue;
 
 		wxString unit;
-		switch (m_view->m_sb_unit)
+		switch (canvas->m_sb_unit)
 		{
 		case 0:
 			unit = "nm";
@@ -904,7 +909,7 @@ void MeasureDlg::UpdateRulerList()
 		center = wxString::Format("(%.2f, %.2f, %.2f)",
 			cp.x(), cp.y(), cp.z());
 		wxString str = ruler->GetDelInfoValues(", ");
-		Append(ruler->GetDisp(), ruler->Id(),
+		m_ruler_list->Append(ruler->GetDisp(), ruler->Id(),
 			ruler->GetName(), group, count,
 			intensity, color,
 			ruler->GetNumBranch(), ruler->GetLength(), unit,
@@ -912,16 +917,32 @@ void MeasureDlg::UpdateRulerList()
 			ruler->GetTransTime(), str, points);
 	}
 
-	AdjustSize();
-
-	for (auto i : sel)
-	{
-		if (0 > i || ruler_list->size() <= i)
-			continue;
-		SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-	}
+	m_ruler_list->AdjustSize();
 
 	glbin_vertex_array_manager.set_dirty(flvr::VA_Rulers);
+}
+
+void MeasureDlg::UpdateRulerListCur()
+{
+	flrd::Ruler* ruler = glbin_ruler_handler.GetRuler();
+	int item = glbin_ruler_handler.GetRulerIndex();
+	if (!ruler)
+		return;
+
+	wxString str = ruler->GetName();
+	fluo::Point p = ruler->GetCenter();
+	fluo::Color c = ruler->GetColor();
+
+	m_ruler_list->SetText(item, 0, str);
+	str = wxString::Format("(%.2f, %.2f, %.2f)",
+		p.x(), p.y(), p.z());
+	m_ruler_list->SetText(item, CenterCol, str);
+	m_ruler_list->SetText(item, PointCol, str);
+	str = wxString::Format("RGB(%d, %d, %d)",
+		int(std::round(c.r() * 255)),
+		int(std::round(c.g() * 255)),
+		int(std::round(c.b() * 255)));
+	m_ruler_list->SetText(item, ColorCol, str);
 }
 
 void MeasureDlg::SelectGroup(unsigned int group)
@@ -958,7 +979,7 @@ void MeasureDlg::DeleteAll(bool cur_time)
 	m_view->RefreshGL(39);
 }
 
-void MeasureDlg::ToggleDispaly()
+void MeasureDlg::ToggleDisplay()
 {
 	std::set<int> sel;
 	if (!m_ruler_list->GetCurrSelection(sel))
@@ -967,576 +988,534 @@ void MeasureDlg::ToggleDispaly()
 	FluoRefresh(2, { gstRulerListDisp }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
-void MeasureDlg::Export(wxString filename)
+void MeasureDlg::SetCurrentRuler()
 {
-	if (!m_view) return;
-	flrd::RulerList* ruler_list = m_view->GetRulerList();
-	if (ruler_list)
-	{
-		std::ofstream os;
-		OutputStreamOpen(os, filename.ToStdString());
-
-		wxString str;
-		wxString unit;
-		int num_points;
-		fluo::Point p;
-		flrd::Ruler* ruler;
-		switch (m_view->m_sb_unit)
-		{
-		case 0:
-			unit = "nm";
-			break;
-		case 1:
-		default:
-			unit = L"\u03BCm";
-			break;
-		case 2:
-			unit = "mm";
-			break;
-		}
-
-		int ruler_num = ruler_list->size();
-		std::vector<unsigned int> groups;
-		std::vector<int> counts;
-		int group_num = ruler_list->GetGroupNumAndCount(groups, counts);
-		std::vector<int> group_count(group_num, 0);
-
-		if (ruler_num > 1)
-			os << "Ruler Count:\t" << ruler_num << "\n";
-		if (group_num > 1)
-		{
-			//group count
-			os << "Group Count:\t" << group_num << "\n";
-			for (int i = 0; i < group_num; ++i)
-			{
-				os << "Group " << groups[i];
-				if (i < group_num - 1)
-					os << "\t";
-				else
-					os << "\n";
-			}
-			for (int i = 0; i < group_num; ++i)
-			{
-				os << counts[i];
-				if (i < group_num - 1)
-					os << "\t";
-				else
-					os << "\n";
-			}
-		}
-
-		os << "Name\tGroup\tCount\tColor\tBranch\tLength(" << unit << ")\tAngle/Pitch(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
-
-		double f = 0.0;
-		fluo::Color color;
-		for (size_t i = 0; i < ruler_list->size(); i++)
-		{
-			//for each ruler
-			ruler = (*ruler_list)[i];
-			if (!ruler) continue;
-			ruler->SetWorkTime(m_view->m_tseq_cur_num);
-
-			os << ruler->GetName() << "\t";
-
-			//group and count
-			unsigned int group = ruler->Group();
-			os << group << "\t";
-			int count = 0;
-			auto iter = std::find(groups.begin(), groups.end(), group);
-			if (iter != groups.end())
-			{
-				int index = std::distance(groups.begin(), iter);
-				count = ++group_count[index];
-			}
-			os << count << "\t";
-
-			//color
-			if (ruler->GetUseColor())
-			{
-				color = ruler->GetColor();
-				str = wxString::Format("RGB(%d, %d, %d)",
-					int(std::round(color.r() * 255)),
-					int(std::round(color.g() * 255)),
-					int(std::round(color.b() * 255)));
-			}
-			else
-				str = "N/A";
-			os << str << "\t";
-
-			//branch count
-			str = wxString::Format("%d", ruler->GetNumBranch());
-			os << str << "\t";
-			//length
-			str = wxString::Format("%.2f", ruler->GetLength());
-			os << str << "\t";
-			//angle
-			str = wxString::Format("%.1f", ruler->GetAngle());
-			os << str << "\t";
-
-			str = "";
-			//start and end points
-			num_points = ruler->GetNumPoint();
-			if (num_points > 0)
-			{
-				p = ruler->GetPoint(0);
-				str += wxString::Format("%.2f\t%.2f\t%.2f\t", p.x(), p.y(), p.z());
-			}
-			if (num_points > 1)
-			{
-				p = ruler->GetPoint(num_points - 1);
-				str += wxString::Format("%.2f\t%.2f\t%.2f\t", p.x(), p.y(), p.z());
-			}
-			else
-				str += "\t\t\t";
-			os << str;
-
-			//time
-			if (ruler->GetTransient())
-				str = wxString::Format("%d", ruler->GetTransTime());
-			else
-				str = "N/A";
-			os << str << "\t";
-
-			//info values v1 v2
-			os << ruler->GetInfoValues() << "\n";
-
-			//export points
-			if (ruler->GetNumPoint() > 2)
-			{
-				os << ruler->GetPosNames();
-				os << ruler->GetPosValues();
-			}
-
-			//export profile
-			vector<flrd::ProfileBin>* profile = ruler->GetProfile();
-			if (profile && profile->size())
-			{
-				double sumd = 0.0;
-				unsigned long long sumull = 0;
-				os << ruler->GetInfoProfile() << "\n";
-				for (size_t j = 0; j < profile->size(); ++j)
-				{
-					//for each profile
-					int pixels = (*profile)[j].m_pixels;
-					if (pixels <= 0)
-						os << "0.0\t";
-					else
-					{
-						os << (*profile)[j].m_accum / pixels << "\t";
-						sumd += (*profile)[j].m_accum;
-						sumull += pixels;
-					}
-				}
-				//if (m_ruler_df_f)
-				//{
-				//	double avg = 0.0;
-				//	if (sumull != 0)
-				//		avg = sumd / double(sumull);
-				//	if (i == 0)
-				//	{
-				//		f = avg;
-				//		os << "\t" << f << "\t";
-				//	}
-				//	else
-				//	{
-				//		double df = avg - f;
-				//		if (f == 0.0)
-				//			os << "\t" << df << "\t";
-				//		else
-				//			os << "\t" << df / f << "\t";
-				//	}
-				//}
-				os << "\n";
-			}
-		}
-
-		os.close();
-	}
-}
-
-void MeasureDlg::GetSettings(RenderCanvas* vrv)
-{
-	m_view = vrv;
-	if (!m_view)
+	flrd::Ruler* ruler = glbin_ruler_handler.GetRuler();
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!ruler || !canvas)
 		return;
-
-	UpdateList();
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
-	m_toolbar2->ToggleTool(ID_MagnetBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	int int_mode = m_view->GetIntMode();
-	if (int_mode == 5 || int_mode == 7)
+	ruler->SetName(m_ruler_list->m_name);
+	if (ruler->GetRulerType() == 2)
 	{
-		int ruler_type = glbin_ruler_handler.GetType();
-		if (ruler_type == 0)
-			m_toolbar1->ToggleTool(ID_RulerBtn, true);
-		else if (ruler_type == 1)
-			m_toolbar1->ToggleTool(ID_RulerMPBtn, true);
-		else if (ruler_type == 2)
-			m_toolbar1->ToggleTool(ID_LocatorBtn, true);
-		else if (ruler_type == 3)
-			m_toolbar1->ToggleTool(ID_ProbeBtn, true);
-		else if (ruler_type == 4)
-			m_toolbar1->ToggleTool(ID_ProtractorBtn, true);
-		else if (ruler_type == 5)
-			m_toolbar1->ToggleTool(ID_EllipseBtn, true);
+		ruler->SetWorkTime(canvas->m_tseq_cur_num);
+		ruler->SetPoint(0, m_ruler_list->m_center);
 	}
-	else if (int_mode == 6)
-		m_toolbar2->ToggleTool(ID_RulerMovePointBtn, true);
-	else if (int_mode == 9)
-		m_toolbar2->ToggleTool(ID_RulerMoveBtn, true);
-	else if (int_mode == 11)
-		m_toolbar2->ToggleTool(ID_LockBtn, true);
-	else if (int_mode == 12)
-		m_toolbar1->ToggleTool(ID_GrowBtn, true);
-	else if (int_mode == 13)
-		m_toolbar1->ToggleTool(ID_PencilBtn, true);
-	else if (int_mode == 14)
-		m_toolbar3->ToggleTool(ID_RulerDelBtn, true);
-	else if (int_mode == 15)
-	{
-		bool mag_len = glbin_ruler_handler.GetRedistLength();
-		if (mag_len)
-			m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, true);
-		else
-			m_toolbar2->ToggleTool(ID_MagnetBtn, true);
-	}
-
-	switch (glbin_settings.m_point_volume_mode)
-	{
-	case 0:
-		m_view_plane_rd->SetValue(true);
-		m_max_intensity_rd->SetValue(false);
-		m_acc_intensity_rd->SetValue(false);
-		break;
-	case 1:
-		m_view_plane_rd->SetValue(false);
-		m_max_intensity_rd->SetValue(true);
-		m_acc_intensity_rd->SetValue(false);
-		break;
-	case 2:
-		m_view_plane_rd->SetValue(false);
-		m_max_intensity_rd->SetValue(false);
-		m_acc_intensity_rd->SetValue(true);
-		break;
-	}
-
-	m_use_transfer_chk->SetValue(glbin_settings.m_ruler_use_transf);
-	//ruler exports df/f
-	m_df_f_chk->SetValue(glbin_settings.m_ruler_df_f);
-	glbin_ruler_handler.SetBackground(glbin_settings.m_ruler_df_f);
-	//relax
-	m_relax_value_spin->SetValue(glbin_settings.m_ruler_relax_f1);
-	m_auto_relax_btn->SetValue(glbin_settings.m_ruler_auto_relax);
-	m_view->m_ruler_autorelax = glbin_settings.m_ruler_auto_relax;
-	m_relax_data_cmb->Select(glbin_settings.m_ruler_relax_type);
+	ruler->SetColor(m_ruler_list->m_color);
+	FluoRefresh(2, { gstRulerListCur },
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
-void MeasureDlg::UpdateRulerProps()
+void MeasureDlg::Locator()
 {
-	bool trans = false;
-	int interp = 0;
-	if (m_view)
-	{
-		std::set<int> sel;
-		flrd::RulerList* ruler_list = m_view->GetRulerList();
-		if (m_ruler_list->GetCurrSelection(sel))
-		{
-			int index = sel[0];
-			if (index >= 0 && index < ruler_list->size())
-			{
-				flrd::Ruler* r = (*ruler_list)[index];
-				if (r)
-				{
-					trans = r->GetTransient();
-					interp = r->GetInterp();
-				}
-			}
-		}
-	}
-	m_transient_chk->SetValue(trans);
-	m_interp_cmb->Select(interp);
-}
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
+	bool bval = canvas->GetIntMode() == 5;
+	int ival = glbin_ruler_handler.GetType();
 
-void MeasureDlg::OnNewLocator(wxCommandEvent& event)
-{
-	if (!m_view) return;
-
-	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
+	if (bval && ival == 1)
 		glbin_ruler_handler.FinishRuler();
 
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
-	m_toolbar2->ToggleTool(ID_MagnetBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	if (m_toolbar1->GetToolState(ID_LocatorBtn))
+	if (bval && ival == 2)
 	{
-		m_view->SetIntMode(5);
+		canvas->SetIntMode(1);
+	}
+	else
+	{
+		canvas->SetIntMode(5);
 		glbin_ruler_handler.SetType(2);
 	}
-	else
-	{
-		m_view->SetIntMode(1);
-	}
+
+	FluoUpdate({ gstRulerType });
 }
 
-void MeasureDlg::OnNewProbe(wxCommandEvent& event)
+void MeasureDlg::Probe()
 {
-	if (!m_view) return;
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
+	bool bval = canvas->GetIntMode() == 5;
+	int ival = glbin_ruler_handler.GetType();
 
-	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
+	if (bval && ival == 1)
 		glbin_ruler_handler.FinishRuler();
 
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
-	m_toolbar2->ToggleTool(ID_MagnetBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	if (m_toolbar1->GetToolState(ID_ProbeBtn))
+	if (bval && ival == 3)
 	{
-		m_view->SetIntMode(5);
+		canvas->SetIntMode(1);
+	}
+	else
+	{
+		canvas->SetIntMode(5);
 		glbin_ruler_handler.SetType(3);
 	}
-	else
-	{
-		m_view->SetIntMode(1);
-	}
+
+	FluoUpdate({ gstRulerType });
 }
 
-void MeasureDlg::OnNewProtractor(wxCommandEvent& event)
+void MeasureDlg::Ruler()
 {
-	if (!m_view) return;
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
+	bool bval = canvas->GetIntMode() == 5;
+	int ival = glbin_ruler_handler.GetType();
 
-	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
+	if (bval && ival == 1)
 		glbin_ruler_handler.FinishRuler();
 
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
-	m_toolbar2->ToggleTool(ID_MagnetBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	if (m_toolbar1->GetToolState(ID_ProtractorBtn))
+	if (bval && ival == 0)
 	{
-		m_view->SetIntMode(5);
-		glbin_ruler_handler.SetType(4);
+		canvas->SetIntMode(1);
 	}
 	else
 	{
-		m_view->SetIntMode(1);
-	}
-}
-
-void MeasureDlg::OnNewRuler(wxCommandEvent& event)
-{
-	if (!m_view) return;
-
-	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-		glbin_ruler_handler.FinishRuler();
-
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
-	m_toolbar2->ToggleTool(ID_MagnetBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	if (m_toolbar1->GetToolState(ID_RulerBtn))
-	{
-		m_view->SetIntMode(5);
+		canvas->SetIntMode(5);
 		glbin_ruler_handler.SetType(0);
 	}
-	else
-	{
-		m_view->SetIntMode(1);
-	}
+
+	FluoUpdate({ gstRulerType });
 }
 
-void MeasureDlg::OnNewRulerMP(wxCommandEvent& event)
+void MeasureDlg::Protractor()
 {
-	if (!m_view) return;
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
+	bool bval = canvas->GetIntMode() == 5;
+	int ival = glbin_ruler_handler.GetType();
 
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
-	m_toolbar2->ToggleTool(ID_MagnetBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
+	if (bval && ival == 1)
+		glbin_ruler_handler.FinishRuler();
 
-	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
+	if (bval && ival == 4)
 	{
-		m_view->SetIntMode(5);
-		glbin_ruler_handler.SetType(1);
+		canvas->SetIntMode(1);
 	}
 	else
 	{
-		m_view->SetIntMode(1);
-		glbin_ruler_handler.FinishRuler();
+		canvas->SetIntMode(5);
+		glbin_ruler_handler.SetType(4);
 	}
+
+	FluoUpdate({ gstRulerType });
 }
 
-void MeasureDlg::OnEllipse(wxCommandEvent& event)
+void MeasureDlg::Ellipse()
 {
-	if (!m_view) return;
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
+	bool bval = canvas->GetIntMode() == 5;
+	int ival = glbin_ruler_handler.GetType();
 
-	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
+	if (bval && ival == 1)
 		glbin_ruler_handler.FinishRuler();
 
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
-	m_toolbar2->ToggleTool(ID_MagnetBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	if (m_toolbar1->GetToolState(ID_EllipseBtn))
+	if (bval && ival == 5)
 	{
-		m_view->SetIntMode(5);
+		canvas->SetIntMode(1);
+	}
+	else
+	{
+		canvas->SetIntMode(5);
 		glbin_ruler_handler.SetType(5);
 	}
-	else
-	{
-		m_view->SetIntMode(1);
-	}
+
+	FluoUpdate({ gstRulerType });
 }
 
-void MeasureDlg::OnGrow(wxCommandEvent& event)
+void MeasureDlg::RulerMP()
 {
-	if (!m_view) return;
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
+	bool bval = canvas->GetIntMode() == 5;
+	int ival = glbin_ruler_handler.GetType();
 
-	glbin_ruler_handler.FinishRuler();
-
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
-	m_toolbar2->ToggleTool(ID_MagnetBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	if (m_toolbar1->GetToolState(ID_GrowBtn))
+	if (bval && ival == 1)
 	{
-		m_view->SetIntMode(12);
+		canvas->SetIntMode(1);
+		glbin_ruler_handler.FinishRuler();
+	}
+	else
+	{
+		canvas->SetIntMode(5);
 		glbin_ruler_handler.SetType(1);
-		glbin_ruler_renderer.SetDrawText(false);
-		//reset label volume
-		if (m_view->m_cur_vol)
-		{
-			m_view->m_cur_vol->
-				GetVR()->clear_tex_mask();
-			m_view->m_cur_vol->
-				GetVR()->clear_tex_label();
-			m_view->m_cur_vol->
-				AddEmptyMask(0, true);
-			m_view->m_cur_vol->
-				AddEmptyLabel(0, true);
-		}
 	}
-	else
-	{
-		m_view->SetIntMode(1);
-		glbin_ruler_renderer.SetDrawText(true);
-	}
+
+	FluoUpdate({ gstRulerType });
 }
 
-void MeasureDlg::OnPencil(wxCommandEvent& event)
+void MeasureDlg::Pencil()
 {
-	if (!m_view) return;
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
+	int ival = canvas->GetIntMode();
 
 	glbin_ruler_handler.FinishRuler();
 
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
-	m_toolbar2->ToggleTool(ID_MagnetBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	if (m_toolbar1->GetToolState(ID_PencilBtn))
+	if (ival == 13)
 	{
-		m_view->SetIntMode(13);
+		canvas->SetIntMode(1);
+		//if (m_view->m_canvas->GetRulerRenderer())
+		//	m_view->m_canvas->GetRulerRenderer()->SetDrawText(true);
+	}
+	else
+	{
+		canvas->SetIntMode(13);
 		glbin_ruler_handler.SetType(1);
 		//if (m_view->m_canvas->GetRulerRenderer())
 		//	m_view->m_canvas->GetRulerRenderer()->SetDrawText(false);
 	}
+
+	FluoUpdate({ gstRulerType });
+}
+
+void MeasureDlg::Grow()
+{
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
+	int ival = canvas->GetIntMode();
+
+	glbin_ruler_handler.FinishRuler();
+
+	if (ival == 12)
+	{
+		canvas->SetIntMode(1);
+		glbin_ruler_renderer.SetDrawText(true);
+	}
 	else
 	{
-		m_view->SetIntMode(1);
-		//if (m_view->m_canvas->GetRulerRenderer())
-		//	m_view->m_canvas->GetRulerRenderer()->SetDrawText(true);
+		canvas->SetIntMode(12);
+		glbin_ruler_handler.SetType(1);
+		glbin_ruler_renderer.SetDrawText(false);
+		//reset label volume
+		if (canvas->m_cur_vol)
+		{
+			canvas->m_cur_vol->
+				GetVR()->clear_tex_mask();
+			canvas->m_cur_vol->
+				GetVR()->clear_tex_label();
+			canvas->m_cur_vol->
+				AddEmptyMask(0, true);
+			canvas->m_cur_vol->
+				AddEmptyLabel(0, true);
+		}
+	}
+
+	FluoUpdate({ gstRulerType });
+}
+
+//void MeasureDlg::Export(wxString filename)
+//{
+//	if (!m_view) return;
+//	flrd::RulerList* ruler_list = m_view->GetRulerList();
+//	if (ruler_list)
+//	{
+//		std::ofstream os;
+//		OutputStreamOpen(os, filename.ToStdString());
+//
+//		wxString str;
+//		wxString unit;
+//		int num_points;
+//		fluo::Point p;
+//		flrd::Ruler* ruler;
+//		switch (m_view->m_sb_unit)
+//		{
+//		case 0:
+//			unit = "nm";
+//			break;
+//		case 1:
+//		default:
+//			unit = L"\u03BCm";
+//			break;
+//		case 2:
+//			unit = "mm";
+//			break;
+//		}
+//
+//		int ruler_num = ruler_list->size();
+//		std::vector<unsigned int> groups;
+//		std::vector<int> counts;
+//		int group_num = ruler_list->GetGroupNumAndCount(groups, counts);
+//		std::vector<int> group_count(group_num, 0);
+//
+//		if (ruler_num > 1)
+//			os << "Ruler Count:\t" << ruler_num << "\n";
+//		if (group_num > 1)
+//		{
+//			//group count
+//			os << "Group Count:\t" << group_num << "\n";
+//			for (int i = 0; i < group_num; ++i)
+//			{
+//				os << "Group " << groups[i];
+//				if (i < group_num - 1)
+//					os << "\t";
+//				else
+//					os << "\n";
+//			}
+//			for (int i = 0; i < group_num; ++i)
+//			{
+//				os << counts[i];
+//				if (i < group_num - 1)
+//					os << "\t";
+//				else
+//					os << "\n";
+//			}
+//		}
+//
+//		os << "Name\tGroup\tCount\tColor\tBranch\tLength(" << unit << ")\tAngle/Pitch(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
+//
+//		double f = 0.0;
+//		fluo::Color color;
+//		for (size_t i = 0; i < ruler_list->size(); i++)
+//		{
+//			//for each ruler
+//			ruler = (*ruler_list)[i];
+//			if (!ruler) continue;
+//			ruler->SetWorkTime(m_view->m_tseq_cur_num);
+//
+//			os << ruler->GetName() << "\t";
+//
+//			//group and count
+//			unsigned int group = ruler->Group();
+//			os << group << "\t";
+//			int count = 0;
+//			auto iter = std::find(groups.begin(), groups.end(), group);
+//			if (iter != groups.end())
+//			{
+//				int index = std::distance(groups.begin(), iter);
+//				count = ++group_count[index];
+//			}
+//			os << count << "\t";
+//
+//			//color
+//			if (ruler->GetUseColor())
+//			{
+//				color = ruler->GetColor();
+//				str = wxString::Format("RGB(%d, %d, %d)",
+//					int(std::round(color.r() * 255)),
+//					int(std::round(color.g() * 255)),
+//					int(std::round(color.b() * 255)));
+//			}
+//			else
+//				str = "N/A";
+//			os << str << "\t";
+//
+//			//branch count
+//			str = wxString::Format("%d", ruler->GetNumBranch());
+//			os << str << "\t";
+//			//length
+//			str = wxString::Format("%.2f", ruler->GetLength());
+//			os << str << "\t";
+//			//angle
+//			str = wxString::Format("%.1f", ruler->GetAngle());
+//			os << str << "\t";
+//
+//			str = "";
+//			//start and end points
+//			num_points = ruler->GetNumPoint();
+//			if (num_points > 0)
+//			{
+//				p = ruler->GetPoint(0);
+//				str += wxString::Format("%.2f\t%.2f\t%.2f\t", p.x(), p.y(), p.z());
+//			}
+//			if (num_points > 1)
+//			{
+//				p = ruler->GetPoint(num_points - 1);
+//				str += wxString::Format("%.2f\t%.2f\t%.2f\t", p.x(), p.y(), p.z());
+//			}
+//			else
+//				str += "\t\t\t";
+//			os << str;
+//
+//			//time
+//			if (ruler->GetTransient())
+//				str = wxString::Format("%d", ruler->GetTransTime());
+//			else
+//				str = "N/A";
+//			os << str << "\t";
+//
+//			//info values v1 v2
+//			os << ruler->GetInfoValues() << "\n";
+//
+//			//export points
+//			if (ruler->GetNumPoint() > 2)
+//			{
+//				os << ruler->GetPosNames();
+//				os << ruler->GetPosValues();
+//			}
+//
+//			//export profile
+//			vector<flrd::ProfileBin>* profile = ruler->GetProfile();
+//			if (profile && profile->size())
+//			{
+//				double sumd = 0.0;
+//				unsigned long long sumull = 0;
+//				os << ruler->GetInfoProfile() << "\n";
+//				for (size_t j = 0; j < profile->size(); ++j)
+//				{
+//					//for each profile
+//					int pixels = (*profile)[j].m_pixels;
+//					if (pixels <= 0)
+//						os << "0.0\t";
+//					else
+//					{
+//						os << (*profile)[j].m_accum / pixels << "\t";
+//						sumd += (*profile)[j].m_accum;
+//						sumull += pixels;
+//					}
+//				}
+//				//if (m_ruler_df_f)
+//				//{
+//				//	double avg = 0.0;
+//				//	if (sumull != 0)
+//				//		avg = sumd / double(sumull);
+//				//	if (i == 0)
+//				//	{
+//				//		f = avg;
+//				//		os << "\t" << f << "\t";
+//				//	}
+//				//	else
+//				//	{
+//				//		double df = avg - f;
+//				//		if (f == 0.0)
+//				//			os << "\t" << df << "\t";
+//				//		else
+//				//			os << "\t" << df / f << "\t";
+//				//	}
+//				//}
+//				os << "\n";
+//			}
+//		}
+//
+//		os.close();
+//	}
+//}
+
+//void MeasureDlg::GetSettings(RenderCanvas* vrv)
+//{
+//	m_view = vrv;
+//	if (!m_view)
+//		return;
+//
+//	UpdateList();
+//	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
+//	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
+//	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
+//	m_toolbar1->ToggleTool(ID_RulerBtn, false);
+//	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
+//	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
+//	m_toolbar1->ToggleTool(ID_GrowBtn, false);
+//	m_toolbar1->ToggleTool(ID_PencilBtn, false);
+//	m_toolbar3->ToggleTool(ID_RulerDelBtn, false);
+//	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
+//	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, false);
+//	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, false);
+//	m_toolbar2->ToggleTool(ID_MagnetBtn, false);
+//	m_toolbar2->ToggleTool(ID_LockBtn, false);
+//
+//	int int_mode = m_view->GetIntMode();
+//	if (int_mode == 5 || int_mode == 7)
+//	{
+//		int ruler_type = glbin_ruler_handler.GetType();
+//		if (ruler_type == 0)
+//			m_toolbar1->ToggleTool(ID_RulerBtn, true);
+//		else if (ruler_type == 1)
+//			m_toolbar1->ToggleTool(ID_RulerMPBtn, true);
+//		else if (ruler_type == 2)
+//			m_toolbar1->ToggleTool(ID_LocatorBtn, true);
+//		else if (ruler_type == 3)
+//			m_toolbar1->ToggleTool(ID_ProbeBtn, true);
+//		else if (ruler_type == 4)
+//			m_toolbar1->ToggleTool(ID_ProtractorBtn, true);
+//		else if (ruler_type == 5)
+//			m_toolbar1->ToggleTool(ID_EllipseBtn, true);
+//	}
+//	else if (int_mode == 6)
+//		m_toolbar2->ToggleTool(ID_RulerMovePointBtn, true);
+//	else if (int_mode == 9)
+//		m_toolbar2->ToggleTool(ID_RulerMoveBtn, true);
+//	else if (int_mode == 11)
+//		m_toolbar2->ToggleTool(ID_LockBtn, true);
+//	else if (int_mode == 12)
+//		m_toolbar1->ToggleTool(ID_GrowBtn, true);
+//	else if (int_mode == 13)
+//		m_toolbar1->ToggleTool(ID_PencilBtn, true);
+//	else if (int_mode == 14)
+//		m_toolbar3->ToggleTool(ID_RulerDelBtn, true);
+//	else if (int_mode == 15)
+//	{
+//		bool mag_len = glbin_ruler_handler.GetRedistLength();
+//		if (mag_len)
+//			m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, true);
+//		else
+//			m_toolbar2->ToggleTool(ID_MagnetBtn, true);
+//	}
+//
+//	switch (glbin_settings.m_point_volume_mode)
+//	{
+//	case 0:
+//		m_view_plane_rd->SetValue(true);
+//		m_max_intensity_rd->SetValue(false);
+//		m_acc_intensity_rd->SetValue(false);
+//		break;
+//	case 1:
+//		m_view_plane_rd->SetValue(false);
+//		m_max_intensity_rd->SetValue(true);
+//		m_acc_intensity_rd->SetValue(false);
+//		break;
+//	case 2:
+//		m_view_plane_rd->SetValue(false);
+//		m_max_intensity_rd->SetValue(false);
+//		m_acc_intensity_rd->SetValue(true);
+//		break;
+//	}
+//
+//	m_use_transfer_chk->SetValue(glbin_settings.m_ruler_use_transf);
+//	//ruler exports df/f
+//	m_df_f_chk->SetValue(glbin_settings.m_ruler_df_f);
+//	glbin_ruler_handler.SetBackground(glbin_settings.m_ruler_df_f);
+//	//relax
+//	m_relax_value_spin->SetValue(glbin_settings.m_ruler_relax_f1);
+//	m_auto_relax_btn->SetValue(glbin_settings.m_ruler_auto_relax);
+//	m_view->m_ruler_autorelax = glbin_settings.m_ruler_auto_relax;
+//	m_relax_data_cmb->Select(glbin_settings.m_ruler_relax_type);
+//}
+
+void MeasureDlg::OnToolbar1(wxCommandEvent& event)
+{
+	int id = event.GetId();
+
+	switch (id)
+	{
+	case ID_LocatorBtn:
+		Locator();
+		break;
+	case ID_ProbeBtn:
+		Probe();
+		break;
+	case ID_RulerBtn:
+		Ruler();
+		break;
+	case ID_ProtractorBtn:
+		Protractor();
+		break;
+	case ID_EllipseBtn:
+		Ellipse();
+		break;
+	case ID_RulerMPBtn:
+		RulerMP();
+		break;
+	case ID_PencilBtn:
+		Pencil();
+		break;
+	case ID_GrowBtn:
+		Grow();
+		break;
 	}
 }
 
@@ -2505,54 +2484,47 @@ void MeasureDlg::OnMenuItem(wxCommandEvent& event)
 
 void MeasureDlg::OnSelection(wxListEvent& event)
 {
-	long item = GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-	m_editing_item = item;
-	if (!m_view)
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
 		return;
-	flrd::Ruler* ruler = m_view->GetRuler(GetItemData(item));
+
+	long ival = event.GetIndex();
+
+	flrd::Ruler* ruler = canvas->GetRuler(
+		m_ruler_list->GetItemData(ival));
 	if (!ruler || !ruler->GetDisp())
 		return;
 
-	wxRect rect;
-	wxString str;
-	//add frame text
-	GetSubItemRect(item, 0, rect);
-	str = GetText(item, 0);
-	m_name_text->SetPosition(rect.GetTopLeft());
-	m_name_text->SetSize(rect.GetSize());
-	m_name_text->ChangeValue(str);
-	m_name_text->Show();
-	//add color picker
-	GetSubItemRect(item, ColorCol, rect);
-	m_color_picker->SetPosition(rect.GetTopLeft());
-	m_color_picker->SetSize(rect.GetSize());
-	if (ruler->GetRulerType() == 2)
-	{
-		//locator
-		GetSubItemRect(item, CenterCol, rect);
-		str = GetText(item, CenterCol);
-		m_center_text->SetPosition(rect.GetTopLeft());
-		m_center_text->SetSize(rect.GetSize());
-		m_center_text->ChangeValue(str);
-		m_center_text->Show();
-	}
-	if (ruler->GetUseColor())
-	{
-		fluo::Color color = ruler->GetColor();
-		wxColor c(int(std::round(color.r() * 255.0)),
-			int(std::round(color.g() * 255.0)),
-			int(std::round(color.b() * 255.0)));
-		m_color_picker->SetColour(c);
-	}
-	m_color_picker->Show();
-
-	m_measure_dlg->UpdateRulerProps();
+	int type = ruler->GetRulerType();
+	bool use_color = ruler->GetUseColor();
+	fluo::Color color = ruler->GetColor();
+	m_ruler_list->StartEdit(type, use_color, color);
+	
+	FluoUpdate({ gstRulerTransient, gstRulerInterpolation });
 }
 
 void MeasureDlg::OnEndSelection(wxListEvent& event)
 {
 	m_ruler_list->EndEdit();
+	SetCurrentRuler();
+}
+
+void MeasureDlg::OnScrollWin(wxScrollWinEvent& event)
+{
+	m_ruler_list->EndEdit();
+	SetCurrentRuler();
+	event.Skip(true);
+}
+
+void MeasureDlg::OnScrollMouse(wxMouseEvent& event)
+{
+	m_ruler_list->EndEdit();
+	SetCurrentRuler();
+	event.Skip(true);
+}
+
+void MeasureDlg::OnAct(wxListEvent& event)
+{
+	ToggleDisplay();
 }
 

@@ -719,7 +719,12 @@ DEALINGS IN THE SOFTWARE.
 #define gstRulerF1 "ruler f1"
 #define gstRulerRelaxType "ruler relax type"
 #define gstRulerDfoverf "ruler dfoverf"
+#define gstRulerList "ruler list"
+#define gstRulerListCur "ruler list cur"
 #define gstRulerListDisp "ruler list disp"
+#define gstRulerListSel "ruler list sel"
+#define gstRulerInterpolation "ruler interpolation"
+#define gstRulerType "ruler type"
 //movie agent
 #define gstMovPlay "mov play"
 #define gstMovLoop "mov loop"
