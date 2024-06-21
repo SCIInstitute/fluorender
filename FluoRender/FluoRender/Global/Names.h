@@ -724,7 +724,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstRulerListDisp "ruler list disp"
 #define gstRulerListSel "ruler list sel"
 #define gstRulerInterpolation "ruler interpolation"
-#define gstRulerType "ruler type"
+#define gstRulerTools "ruler tools"
 //movie agent
 #define gstMovPlay "mov play"
 #define gstMovLoop "mov loop"

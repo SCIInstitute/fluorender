@@ -146,6 +146,15 @@ namespace flrd
 			return m_type;
 		}
 
+		void SetEdited(bool val)
+		{
+			m_edited = val;
+		}
+		bool GetEdited()
+		{
+			return m_edited;
+		}
+
 		//display
 		void ToggleDisplay(const std::set<int> list);
 
@@ -179,6 +188,10 @@ namespace flrd
 		void AddPaintRulerPoint();
 		bool MoveRuler(int mx, int my);
 		bool EditPoint(int mx, int my, bool alt);
+		void Flip(const std::set<int>& rulers);
+		void AddAverage(const std::set<int>& rulers);
+		void Relax(const std::set<int>& rulers);
+		void Prune(const std::set<int>& rulers);
 		void Prune(int idx, int len);
 
 		//stroke for magnet
@@ -195,6 +208,7 @@ namespace flrd
 		void DeleteSelection(const std::set<int> &sel);
 		void DeleteAll(bool cur_time);
 
+		void Export(const wxString& filename);
 		void Save(wxFileConfig &fconfig, int vi);
 		void Read(wxFileConfig &fconfig, int vi);
 		std::string PrintRulers(bool h);//h-if prints hierarchy
@@ -206,6 +220,8 @@ namespace flrd
 		int Roi(int index);
 		int RoiAll();
 		int Distance(int index, std::string filename);
+
+		void Project(const std::set<int>& rulers, const wxString& filename);
 
 		void SetFsize(int ival)
 		{
@@ -265,6 +281,7 @@ namespace flrd
 		RulerList *m_ruler_list;
 		int m_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
 					//4: protractor; 5: ellipse
+		bool m_edited;
 
 		//get background intensity
 		bool m_background;

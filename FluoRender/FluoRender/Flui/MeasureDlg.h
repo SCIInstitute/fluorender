@@ -120,24 +120,32 @@ public:
 		ID_PencilBtn,
 		ID_GrowBtn
 	};
+	enum
+	{
+		//toolbar2
+		ID_RulerMoveBtn,
+		ID_RulerMovePointBtn,
+		ID_MagnetBtn,
+		ID_RulerMovePencilBtn,
+		ID_RulerFlipBtn,
+		ID_RulerAvgBtn,
+		ID_LockBtn,
+		ID_RelaxBtn,
+	};
+	enum
+	{
+		//toolbar3
+		ID_DeleteBtn,
+		ID_DeleteAllBtn,
+		ID_RulerDelBtn,
+		ID_PruneBtn,
+		ID_ProfileBtn,
+		ID_DistanceBtn,
+		ID_ProjectBtn,
+		ID_ExportBtn,
+	};
 	//enum
 	//{
-	//	ID_RulerMoveBtn,
-	//	ID_RulerMovePointBtn,
-	//	ID_MagnetBtn,
-	//	ID_RulerMovePencilBtn,
-	//	ID_RulerDelBtn,
-	//	ID_RulerFlipBtn,
-	//	ID_RulerAvgBtn,
-	//	ID_LockBtn,
-	//	ID_PruneBtn,
-	//	ID_RelaxBtn,
-	//	ID_DeleteBtn,
-	//	ID_DeleteAllBtn,
-	//	ID_ProfileBtn,
-	//	ID_DistanceBtn,
-	//	ID_ProjectBtn,
-	//	ID_ExportBtn,
 	//	ID_ViewPlaneRd,
 	//	ID_MaxIntensityRd,
 	//	ID_AccIntensityRd,
@@ -179,12 +187,6 @@ public:
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	void UpdateRulerList();
 	void UpdateRulerListCur();
-
-	void SelectGroup(unsigned int group);
-	void DeleteSelection();
-	void DeleteAll(bool cur_time = false);
-
-	//
 	void ToggleDisplay();
 	void SetCurrentRuler();
 
@@ -198,16 +200,32 @@ public:
 	void Pencil();
 	void Grow();
 
-	//processing
+	//toolbar2
+	void RulerMove();
+	void RulerMovePoint();
+	void Magnet();
+	void RulerMovePencil();
+	void RulerFlip();
+	void RulerAvg();
+	void Lock();
 	void Relax();
-	void Relax(int idx);
+
+	//toolbar3
+	void DeleteSelection();
+	void DeleteAll();
+	void DeletePoint();
+	void Prune();//remove branches with length equal to or smaller than len
+	void Profile();
+	void Distance();
+	void Project();
 	void Project(int idx);
-	void SetEdit() { m_edited = true; }
-	void Prune(int len);//remove branches with length equal to or smaller than len
-	void Prune(int idx, int len);
+	void Export();
 
 	void AlignCenter(flrd::Ruler* ruler, flrd::RulerList* ruler_list);
 	void SetProfile(int i);
+
+	void SelectGroup(unsigned int group);
+	void SetEdit() { m_edited = true; }
 
 private:
 	//list ctrl
@@ -255,22 +273,10 @@ private:
 
 private:
 	void OnToolbar1(wxCommandEvent& event);
-	void OnRulerMove(wxCommandEvent& event);
-	void OnRulerMovePoint(wxCommandEvent& event);
-	void OnMagnet(wxCommandEvent& event);
-	void OnRulerMovePencil(wxCommandEvent& event);
-	void OnRulerDel(wxCommandEvent& event);
-	void OnRulerFlip(wxCommandEvent& event);
-	void OnRulerAvg(wxCommandEvent& event);
-	void OnLock(wxCommandEvent& event);
-	void OnPrune(wxCommandEvent& event);
-	void OnRelax(wxCommandEvent& event);
-	void OnDelete(wxCommandEvent& event);
-	void OnDeleteAll(wxCommandEvent& event);
-	void OnProfile(wxCommandEvent& event);
-	void OnDistance(wxCommandEvent& event);
-	void OnProject(wxCommandEvent& event);
-	void OnExport(wxCommandEvent& event);
+	void OnToolbar2(wxCommandEvent& event);
+	void OnToolbar3(wxCommandEvent& event);
+
+
 	void OnIntensityMethodCheck(wxCommandEvent& event);
 	void OnUseTransferCheck(wxCommandEvent& event);
 	void OnTransientCheck(wxCommandEvent& event);
@@ -291,6 +297,7 @@ private:
 	//align
 	void OnAlignRuler(wxCommandEvent& event);
 	void OnAlignPca(wxCommandEvent& event);
+
 	//list events
 	void OnKeyDown(wxKeyEvent& event);
 	void OnContextMenu(wxContextMenuEvent& event);

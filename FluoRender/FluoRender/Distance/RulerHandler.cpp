@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Count.h>
 #include <BackgStat.h>
 #include <VolumeRoi.h>
+#include <DistCalculator.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <Nrrd/nrrd.h>
 #include <wx/fileconf.h>
@@ -58,7 +59,8 @@ RulerHandler::RulerHandler() :
 	m_mouse(fluo::Point(-1)),
 	m_fsize(1),
 	m_sample_type(1),
-	m_step_length(1)
+	m_step_length(1),
+	m_edited(false)
 {
 
 }
@@ -836,6 +838,102 @@ void RulerHandler::Prune(int idx, int len)
 	ruler->Prune(len);
 }
 
+void RulerHandler::Flip(const std::set<int>& rulers)
+{
+	if (!m_ruler_list)
+		return;
+
+	bool update_all = rulers.empty();
+
+	size_t c = 0;
+	for (auto i : *m_ruler_list)
+	{
+		if (update_all || rulers.find(c) != rulers.end())
+			i->Reverse();
+		c++;
+	}
+}
+
+void RulerHandler::AddAverage(const std::set<int>& rulers)
+{
+	if (!m_ruler_list)
+		return;
+
+	bool update_all = rulers.empty();
+
+	fluo::Point avg;
+	size_t c = 0, count = 0;
+	for (auto i : *m_ruler_list)
+	{
+		if (update_all || rulers.find(c) != rulers.end())
+		{
+			avg += i->GetCenter();
+			count++;
+		}
+		c++;
+	}
+
+	if (!count)
+		return;
+
+	avg /= double(count);
+	flrd::Ruler* ruler = new flrd::Ruler();
+	ruler->SetRulerType(2);
+	ruler->SetName("Average");
+	ruler->AddPoint(avg);
+	ruler->SetTransient(false);
+	ruler->SetTransTime(0);
+	m_ruler_list->push_back(ruler);
+}
+
+void RulerHandler::Relax(const std::set<int>& rulers)
+{
+	if (!m_ruler_list)
+		return;
+
+	bool update_all = rulers.empty();
+
+	flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
+	if (list && list->empty())
+		list = 0;
+	double infr = glbin_settings.m_ruler_infr;
+	int type = glbin_settings.m_ruler_relax_type;
+	int iter = glbin_settings.m_ruler_relax_iter;
+	double f1 = glbin_settings.m_ruler_relax_f1;
+	glbin_dist_calculator.SetF1(f1);
+	glbin_dist_calculator.SetInfr(infr);
+	glbin_dist_calculator.SetCelpList(list);
+	glbin_dist_calculator.SetVolume(glbin_current.vol_data);
+
+	size_t c = 0;
+	for (auto i : *m_ruler_list)
+	{
+		if (update_all || rulers.find(c) != rulers.end())
+		{
+			glbin_dist_calculator.SetRuler(i);
+			glbin_dist_calculator.CenterRuler(type, m_edited, iter);
+		}
+		c++;
+	}
+	m_edited = false;
+}
+
+void RulerHandler::Prune(const std::set<int>& rulers)
+{
+	if (!m_ruler_list)
+		return;
+
+	bool update_all = rulers.empty();
+
+	size_t c = 0;
+	for (auto i : *m_ruler_list)
+	{
+		if (update_all || rulers.find(c) != rulers.end())
+			Prune(c, 1);
+		c++;
+	}
+}
+
 //stroke for magnet
 void RulerHandler::ApplyMagPoint()
 {
@@ -1123,6 +1221,193 @@ void RulerHandler::DeleteAll(bool cur_time)
 	m_ruler = 0;
 	m_point = nullptr;
 	m_pindex = -1;
+}
+
+void RulerHandler::Export(const wxString& filename)
+{
+	if (!m_ruler_list)
+		return;
+	if (m_ruler_list)
+	{
+		std::ofstream os;
+		OutputStreamOpen(os, filename.ToStdString());
+
+		wxString str;
+		wxString unit;
+		int num_points;
+		fluo::Point p;
+		flrd::Ruler* ruler;
+		switch (m_view->m_sb_unit)
+		{
+		case 0:
+			unit = "nm";
+			break;
+		case 1:
+		default:
+			unit = L"\u03BCm";
+			break;
+		case 2:
+			unit = "mm";
+			break;
+		}
+
+		int ruler_num = m_ruler_list->size();
+		std::vector<unsigned int> groups;
+		std::vector<int> counts;
+		int group_num = m_ruler_list->GetGroupNumAndCount(groups, counts);
+		std::vector<int> group_count(group_num, 0);
+
+		if (ruler_num > 1)
+			os << "Ruler Count:\t" << ruler_num << "\n";
+		if (group_num > 1)
+		{
+			//group count
+			os << "Group Count:\t" << group_num << "\n";
+			for (int i = 0; i < group_num; ++i)
+			{
+				os << "Group " << groups[i];
+				if (i < group_num - 1)
+					os << "\t";
+				else
+					os << "\n";
+			}
+			for (int i = 0; i < group_num; ++i)
+			{
+				os << counts[i];
+				if (i < group_num - 1)
+					os << "\t";
+				else
+					os << "\n";
+			}
+		}
+
+		os << "Name\tGroup\tCount\tColor\tBranch\tLength(" << unit << ")\tAngle/Pitch(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
+
+		double f = 0.0;
+		fluo::Color color;
+		for (size_t i = 0; i < m_ruler_list->size(); i++)
+		{
+			//for each ruler
+			ruler = (*m_ruler_list)[i];
+			if (!ruler) continue;
+			ruler->SetWorkTime(m_view->m_tseq_cur_num);
+
+			os << ruler->GetName() << "\t";
+
+			//group and count
+			unsigned int group = ruler->Group();
+			os << group << "\t";
+			int count = 0;
+			auto iter = std::find(groups.begin(), groups.end(), group);
+			if (iter != groups.end())
+			{
+				int index = std::distance(groups.begin(), iter);
+				count = ++group_count[index];
+			}
+			os << count << "\t";
+
+			//color
+			if (ruler->GetUseColor())
+			{
+				color = ruler->GetColor();
+				str = wxString::Format("RGB(%d, %d, %d)",
+					int(std::round(color.r() * 255)),
+					int(std::round(color.g() * 255)),
+					int(std::round(color.b() * 255)));
+			}
+			else
+				str = "N/A";
+			os << str << "\t";
+
+			//branch count
+			str = wxString::Format("%d", ruler->GetNumBranch());
+			os << str << "\t";
+			//length
+			str = wxString::Format("%.2f", ruler->GetLength());
+			os << str << "\t";
+			//angle
+			str = wxString::Format("%.1f", ruler->GetAngle());
+			os << str << "\t";
+
+			str = "";
+			//start and end points
+			num_points = ruler->GetNumPoint();
+			if (num_points > 0)
+			{
+				p = ruler->GetPoint(0);
+				str += wxString::Format("%.2f\t%.2f\t%.2f\t", p.x(), p.y(), p.z());
+			}
+			if (num_points > 1)
+			{
+				p = ruler->GetPoint(num_points - 1);
+				str += wxString::Format("%.2f\t%.2f\t%.2f\t", p.x(), p.y(), p.z());
+			}
+			else
+				str += "\t\t\t";
+			os << str;
+
+			//time
+			if (ruler->GetTransient())
+				str = wxString::Format("%d", ruler->GetTransTime());
+			else
+				str = "N/A";
+			os << str << "\t";
+
+			//info values v1 v2
+			os << ruler->GetInfoValues() << "\n";
+
+			//export points
+			if (ruler->GetNumPoint() > 2)
+			{
+				os << ruler->GetPosNames();
+				os << ruler->GetPosValues();
+			}
+
+			//export profile
+			vector<flrd::ProfileBin>* profile = ruler->GetProfile();
+			if (profile && profile->size())
+			{
+				double sumd = 0.0;
+				unsigned long long sumull = 0;
+				os << ruler->GetInfoProfile() << "\n";
+				for (size_t j = 0; j < profile->size(); ++j)
+				{
+					//for each profile
+					int pixels = (*profile)[j].m_pixels;
+					if (pixels <= 0)
+						os << "0.0\t";
+					else
+					{
+						os << (*profile)[j].m_accum / pixels << "\t";
+						sumd += (*profile)[j].m_accum;
+						sumull += pixels;
+					}
+				}
+				//if (m_ruler_df_f)
+				//{
+				//	double avg = 0.0;
+				//	if (sumull != 0)
+				//		avg = sumd / double(sumull);
+				//	if (i == 0)
+				//	{
+				//		f = avg;
+				//		os << "\t" << f << "\t";
+				//	}
+				//	else
+				//	{
+				//		double df = avg - f;
+				//		if (f == 0.0)
+				//			os << "\t" << df << "\t";
+				//		else
+				//			os << "\t" << df / f << "\t";
+				//	}
+				//}
+				os << "\n";
+			}
+		}
+
+		os.close();
+	}
 }
 
 void RulerHandler::Save(wxFileConfig &fconfig, int vi)
