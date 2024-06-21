@@ -1014,6 +1014,8 @@ void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 	glbin_aligner.SetAxisType(event.GetId());
 	glbin_aligner.SetView(glbin_current.canvas);
 	glbin_aligner.AlignPca(false);
+	FluoRefresh(3, { gstNull },
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 //output

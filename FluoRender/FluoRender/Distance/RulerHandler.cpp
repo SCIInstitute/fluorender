@@ -47,7 +47,6 @@ RulerHandler::RulerHandler() :
 	m_group(0),
 	m_view(0),
 	m_vd(0),
-	m_ca(0),
 	m_ruler(0),
 	m_mag_ruler(0),
 	m_mag_branch(0),
@@ -70,10 +69,42 @@ RulerHandler::~RulerHandler()
 
 }
 
+void RulerHandler::GroupRulers(const std::set<int>& rulers)
+{
+	if (!m_ruler_list)
+		return;
+
+	bool update_all = rulers.empty();
+
+	size_t c = 0;
+	for (auto i : *m_ruler_list)
+	{
+		if (update_all || rulers.find(c) != rulers.end())
+			i->Group(m_group);
+		c++;
+	}
+}
+
 double RulerHandler::GetVolumeBgInt()
 {
 	if (!m_vd) return 0;
 	return m_vd->GetBackgroundInt();
+}
+
+void RulerHandler::GetRulerList(const std::set<int>& rulers, flrd::RulerList& list)
+{
+	if (!m_ruler_list)
+		return;
+
+	bool update_all = rulers.empty();
+
+	size_t c = 0;
+	for (auto i : *m_ruler_list)
+	{
+		if (update_all || rulers.find(c) != rulers.end())
+			list.push_back(i);
+		c++;
+	}
 }
 
 void RulerHandler::ToggleDisplay(const std::set<int> list)
@@ -87,6 +118,29 @@ void RulerHandler::ToggleDisplay(const std::set<int> list)
 		if (!ruler) continue;
 		if (list.find(i) != list.end())
 			ruler->ToggleDisp();
+	}
+}
+
+void RulerHandler::ToggleGroupDisp()
+{
+	if (!m_ruler_list)
+		return;
+
+	bool disp;
+	bool first = true;
+	for (size_t i = 0; i < m_ruler_list->size(); ++i)
+	{
+		Ruler* ruler = (*m_ruler_list)[i];
+		if (!ruler) continue;
+		if (ruler->Group() == m_group)
+		{
+			if (first)
+			{
+				first = false;
+				disp = !ruler->GetDisp();
+			}
+			ruler->SetDisp(disp);
+		}
 	}
 }
 
@@ -852,6 +906,7 @@ void RulerHandler::Flip(const std::set<int>& rulers)
 			i->Reverse();
 		c++;
 	}
+	m_edited = true;
 }
 
 void RulerHandler::AddAverage(const std::set<int>& rulers)
@@ -1673,6 +1728,22 @@ std::string RulerHandler::PrintRulers(bool h)
 	return s;
 }
 
+void RulerHandler::Profile(const std::set<int>& rulers)
+{
+	if (!m_ruler_list)
+		return;
+
+	bool update_all = rulers.empty();
+
+	size_t c = 0;
+	for (auto i : *m_ruler_list)
+	{
+		if (update_all || rulers.find(c) != rulers.end())
+			Profile(i);
+		c++;
+	}
+}
+
 int RulerHandler::Profile(Ruler* ruler)
 {
 	if (!m_view || !m_vd || !ruler)
@@ -1966,37 +2037,192 @@ int RulerHandler::RoiAll()
 	return c;
 }
 
-int RulerHandler::Distance(int index, std::string filename)
+void RulerHandler::Distance(const std::set<int>& rulers, const wxString& filename)
 {
-	if (!m_view || !m_ruler_list || !m_ca)
-		return 0;
-	if (index < 0 ||
-		index >= m_ruler_list->size())
-		return 0;
-
-	flrd::Ruler* ruler = (*m_ruler_list)[index];
-	if (ruler->GetNumPoint() < 1)
-		return 0;
-
-	fluo::Point p = ruler->GetCenter();
-
-	flrd::CelpList* list = m_ca->GetCelpList();
+	if (!m_ruler_list)
+		return;
+	flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
 	if (list->empty())
-		return 0;
+		return;
+
+	bool update_all = rulers.empty();
+
+	std::string str = filename.ToStdString();
+	str = str.substr(0, str.find_last_of('.'));
+	std::string fi;
 
 	double sx = list->sx;
 	double sy = list->sy;
 	double sz = list->sz;
-	for (auto it = list->begin();
-		it != list->end(); ++it)
+
+	size_t c = 0;
+	for (auto i : *m_ruler_list)
 	{
-		double dist = (p - it->second->GetCenter(sx, sy, sz)).length();
-		it->second->SetDistp(dist);
+		if (update_all || rulers.find(c) != rulers.end())
+		{
+			flrd::Ruler* ruler = i;
+			if (!ruler)
+				continue;
+			if (ruler->GetNumPoint() < 1)
+				continue;
+
+			fluo::Point p = ruler->GetCenter();
+			for (auto it = list->begin();
+				it != list->end(); ++it)
+			{
+				double dist = (p - it->second->GetCenter(sx, sy, sz)).length();
+				it->second->SetDistp(dist);
+			}
+
+			fi = str + std::to_string(c) + ".txt";
+			glbin_comp_analyzer.OutputCompListFile(fi, 1);
+		}
+		c++;
+	}
+}
+
+void RulerHandler::Project(const std::set<int>& rulers, const wxString& filename)
+{
+	if (!m_ruler_list)
+		return;
+	flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
+	if (list->empty())
+		return;
+	glbin_dist_calculator.SetCelpList(list);
+
+	bool update_all = rulers.empty();
+
+	string str = filename.ToStdString();
+	std::ofstream ofs;
+	ofs.open(str, std::ofstream::out);
+
+	size_t c = 0;
+	for (auto i : *m_ruler_list)
+	{
+		if (update_all || rulers.find(c) != rulers.end())
+		{
+			glbin_dist_calculator.SetRuler(i);
+			glbin_dist_calculator.Project();
+
+			std::vector<flrd::Celp> comps;
+			for (auto it = list->begin();
+				it != list->end(); ++it)
+				comps.push_back(it->second);
+			std::sort(comps.begin(), comps.end(),
+				[](const flrd::Celp& a, const flrd::Celp& b) -> bool
+				{
+					fluo::Point pa = a->GetProjp();
+					fluo::Point pb = b->GetProjp();
+					if (pa.z() != pb.z()) return pa.z() < pb.z();
+					else return pa.x() < pb.x();
+				});
+
+			for (auto it = comps.begin();
+				it != comps.end(); ++it)
+			{
+				ofs << (*it)->Id() << "\t";
+				fluo::Point p = (*it)->GetProjp();
+				ofs << p.x() << "\t";
+				ofs << p.y() << "\t";
+				ofs << p.z() << "\n";
+			}
+		}
+		c++;
 	}
 
-	m_ca->OutputCompListFile(filename, 1);
+	ofs.close();
+}
 
-	return 1;
+void RulerHandler::SetTransient(bool bval, const std::set<int>& rulers)
+{
+	if (!m_ruler_list)
+		return;
+
+	bool update_all = rulers.empty();
+
+	size_t t = 0;
+	if (glbin_current.canvas)
+		t = glbin_current.canvas->m_tseq_cur_num;
+
+	size_t c = 0;
+	for (auto i : *m_ruler_list)
+	{
+		if (update_all || rulers.find(c) != rulers.end())
+		{
+			if (!i)
+				continue;
+			i->SetTransient(bval);
+			if (bval)
+				i->SetTransTime(t);
+		}
+	}
+}
+
+void RulerHandler::SetInterp(int ival, const std::set<int>& rulers)
+{
+	if (!m_ruler_list)
+		return;
+
+	bool update_all = rulers.empty();
+
+	size_t c = 0;
+	for (auto i : *m_ruler_list)
+	{
+		if (update_all || rulers.find(c) != rulers.end())
+		{
+			if (!i)
+				continue;
+			i->SetInterp(ival);
+		}
+	}
+}
+
+void RulerHandler::DeleteKey(const std::set<int>& rulers)
+{
+	if (!m_ruler_list)
+		return;
+
+	bool update_all = rulers.empty();
+
+	size_t t = 0;
+	if (glbin_current.canvas)
+		t = glbin_current.canvas->m_tseq_cur_num;
+
+	size_t c = 0;
+	for (auto i : *m_ruler_list)
+	{
+		if (update_all || rulers.find(c) != rulers.end())
+		{
+			if (!i)
+				continue;
+			i->SetWorkTime(t);
+			i->DeleteKey();
+		}
+	}
+}
+
+void RulerHandler::DeleteAllKeys(const std::set<int>& rulers)
+{
+	if (!m_ruler_list)
+		return;
+
+	bool update_all = rulers.empty();
+
+	size_t t = 0;
+	if (glbin_current.canvas)
+		t = glbin_current.canvas->m_tseq_cur_num;
+
+	size_t c = 0;
+	for (auto i : *m_ruler_list)
+	{
+		if (update_all || rulers.find(c) != rulers.end())
+		{
+			if (!i)
+				continue;
+			i->SetWorkTime(t);
+			i->DeleteAllKey();
+		}
+	}
 }
 
 //get time points where keys exist

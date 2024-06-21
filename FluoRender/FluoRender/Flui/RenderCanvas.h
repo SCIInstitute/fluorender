@@ -839,8 +839,6 @@ public:
 	//linked rotation
 	static bool m_linked_rot;
 	static RenderCanvas* m_master_linked_view;
-	//relax after ruler
-	bool m_ruler_autorelax;
 
 private:
 	bool m_drawing;

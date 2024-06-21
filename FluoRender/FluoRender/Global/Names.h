@@ -714,6 +714,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstMlVpAutoApply "ml vp auto apply"
 //measure agent
 #define gstRulerEdited "ruler edited"
+#define gstRulerAutoRelax "ruler auto relax"
 #define gstRulerRelaxIter "ruler relax iter"
 #define gstRulerInfr "ruler infr"
 #define gstRulerF1 "ruler f1"
@@ -723,8 +724,11 @@ DEALINGS IN THE SOFTWARE.
 #define gstRulerListCur "ruler list cur"
 #define gstRulerListDisp "ruler list disp"
 #define gstRulerListSel "ruler list sel"
+#define gstRulerGroupSel "ruler group sel"
 #define gstRulerInterpolation "ruler interpolation"
 #define gstRulerTools "ruler tools"
+#define gstRulerProfile "ruler profile"
+#define gstRulerMethod "ruler method"
 //movie agent
 #define gstMovPlay "mov play"
 #define gstMovLoop "mov loop"

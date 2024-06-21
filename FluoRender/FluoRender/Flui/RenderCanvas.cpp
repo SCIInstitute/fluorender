@@ -296,7 +296,6 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_full_screen(false),
 	m_drawing(false),
 	m_refresh(false),
-	m_ruler_autorelax(false),
 	m_focused_slider(0),
 	m_keep_enlarge(false),
 	m_enlarge(false),
@@ -10362,7 +10361,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		{
 			if (m_frame && m_frame->GetMeasureDlg())
 			{
-				if (m_ruler_autorelax)
+				if (glbin_settings.m_ruler_auto_relax)
 				{
 					m_frame->GetMeasureDlg()->SetEdit();
 					m_frame->GetMeasureDlg()->Relax(
@@ -10426,7 +10425,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			}
 			if (m_frame && m_frame->GetMeasureDlg())
 			{
-				if (m_ruler_autorelax)
+				if (glbin_settings.m_ruler_auto_relax)
 				{
 					m_frame->GetMeasureDlg()->SetEdit();
 					m_frame->GetMeasureDlg()->Relax(

@@ -2299,7 +2299,8 @@ void ComponentDlg::OnAlignCenterChk(wxCommandEvent& event)
 void ComponentDlg::OnAlignPca(wxCommandEvent& event)
 {
 	AlignPca(event.GetId());
-	FluoRefresh(3, { gstNull });
+	FluoRefresh(3, { gstNull },
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void ComponentDlg::OnNotebook(wxBookCtrlEvent &event)
@@ -2522,6 +2523,8 @@ void ComponentDlg::AlignPca(int axis_type)
 	glbin_aligner.SetAxisType(axis_type);
 	glbin_aligner.SetView(glbin_current.canvas);
 	glbin_aligner.AlignPca(true);
+	FluoRefresh(3, { gstNull },
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void ComponentDlg::IncludeComps()

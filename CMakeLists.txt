@@ -116,9 +116,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #UI IDs
 add_definitions(-DID_START=5999)
-add_definitions(-DID_MEASURE1=ID_START+11)
-add_definitions(-DID_MEASURE2=ID_MEASURE1+11)
-add_definitions(-DID_NOISE_CANCEL=ID_MEASURE2+21)
+add_definitions(-DID_NOISE_CANCEL=ID_START+21)
 add_definitions(-DID_OCL=ID_NOISE_CANCEL+11)
 add_definitions(-DID_TESTER=ID_OCL+51)
 add_definitions(-DID_TRACE1=ID_TESTER+21)

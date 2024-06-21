@@ -91,7 +91,27 @@ void RulerAlign::AlignRuler()
 	m_view->ResetZeroRotations(qx, qy, qz);
 	q.ToEuler(qx, qy, qz);
 	m_view->SetRotations(qx, -qy, -qz, true);
-	m_view->RefreshGL(50);
+
+	if (m_align_center)
+	{
+		fluo::Point center;
+		size_t n = m_point_list.size();
+		if (n)
+		{
+			for (size_t i = 0; i < n; ++i)
+			{
+				center += m_point_list[i];
+			}
+			center /= double(n);
+		}
+
+		double tx, ty, tz;
+		m_view->GetObjCenters(tx, ty, tz);
+		m_view->SetObjTrans(
+			tx - center.x(),
+			center.y() - ty,
+			center.z() - tz);
+	}
 }
 
 void RulerAlign::AlignPca(bool rulers)
@@ -99,7 +119,19 @@ void RulerAlign::AlignPca(bool rulers)
 	Pca solver;
 	fluo::Point center;
 	if (rulers)
+	{
 		solver.SetPoints(m_point_list);
+
+		size_t n = m_point_list.size();
+		if (n)
+		{
+			for (size_t i = 0; i < n; ++i)
+			{
+				center += m_point_list[i];
+			}
+			center /= double(n);
+		}
+	}
 	else
 	{
 		Cov cover(m_vd);
@@ -189,6 +221,4 @@ void RulerAlign::AlignPca(bool rulers)
 			center.y() - ty,
 			center.z() - tz);
 	}
-
-	m_view->RefreshGL(50);
 }

@@ -40,7 +40,6 @@ class VolumeData;
 
 namespace flrd
 {
-	class ComponentAnalyzer;
 	class WalkCycle;
 	class RulerHandler
 	{
@@ -68,6 +67,13 @@ namespace flrd
 			m_group = group;
 		}
 
+		unsigned int GetGroup()
+		{
+			return m_group;
+		}
+
+		void GroupRulers(const std::set<int>& rulers);
+
 		void SetView(RenderCanvas* view)
 		{
 			m_view = view;
@@ -82,14 +88,15 @@ namespace flrd
 
 		double GetVolumeBgInt();
 
-		void SetCompAnalyzer(ComponentAnalyzer* ca)
-		{
-			m_ca = ca;
-		}
-
 		void SetRuler(Ruler* ruler)
 		{
 			m_ruler = ruler;
+		}
+
+		void SetRuler(size_t i)
+		{
+			if (i < m_ruler_list->size())
+				m_ruler = (*m_ruler_list)[i];
 		}
 
 		Ruler* GetRuler()
@@ -136,6 +143,8 @@ namespace flrd
 			return m_ruler_list;
 		}
 
+		void GetRulerList(const std::set<int>& rulers, flrd::RulerList& list);
+
 		void SetType(int type)
 		{
 			m_type = type;
@@ -157,6 +166,7 @@ namespace flrd
 
 		//display
 		void ToggleDisplay(const std::set<int> list);
+		void ToggleGroupDisp();
 
 		//search
 		bool FindEditingRuler(double mx, double my);
@@ -193,6 +203,24 @@ namespace flrd
 		void Relax(const std::set<int>& rulers);
 		void Prune(const std::set<int>& rulers);
 		void Prune(int idx, int len);
+		void Profile(const std::set<int>& rulers);
+		int Profile(Ruler* ruler);
+		int Profile(int index);
+		int ProfileAll();
+		void Distance(const std::set<int>& rulers, const wxString& filename);
+		void Project(const std::set<int>& rulers, const wxString& filename);
+
+		//transient over time
+		void SetTransient(bool bval, const std::set<int>& rulers);
+
+		//key
+		void SetInterp(int ival, const std::set<int>& rulers);
+		void DeleteKey(const std::set<int>& rulers);
+		void DeleteAllKeys(const std::set<int>& rulers);
+
+		int Roi(Ruler* ruler);
+		int Roi(int index);
+		int RoiAll();
 
 		//stroke for magnet
 		bool MagStrokeEmpty() { return m_mag_stroke.empty(); }
@@ -212,16 +240,6 @@ namespace flrd
 		void Save(wxFileConfig &fconfig, int vi);
 		void Read(wxFileConfig &fconfig, int vi);
 		std::string PrintRulers(bool h);//h-if prints hierarchy
-
-		int Profile(Ruler* ruler);
-		int Profile(int index);
-		int ProfileAll();
-		int Roi(Ruler* ruler);
-		int Roi(int index);
-		int RoiAll();
-		int Distance(int index, std::string filename);
-
-		void Project(const std::set<int>& rulers, const wxString& filename);
 
 		void SetFsize(int ival)
 		{
@@ -271,7 +289,6 @@ namespace flrd
 		unsigned int m_group;
 		RenderCanvas *m_view;
 		VolumeData * m_vd;
-		ComponentAnalyzer* m_ca;
 		VolumePoint m_vp;
 		Ruler *m_ruler;
 		Ruler* m_mag_ruler;
