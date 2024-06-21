@@ -968,15 +968,13 @@ void MeasureDlg::DeleteSelection()
 	std::set<int> sel;
 	m_ruler_list->GetCurrSelection(sel);
 	glbin_ruler_handler.DeleteSelection(sel);
-	UpdateRulers();
-	m_view->RefreshGL(39);
+	FluoRefresh(2, { gstRulerList, gstRulerListSel }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void MeasureDlg::DeleteAll(bool cur_time)
 {
 	glbin_ruler_handler.DeleteAll(cur_time);
-	UpdateRulers();
-	m_view->RefreshGL(39);
+	FluoRefresh(2, { gstRulerList, gstRulerListSel }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void MeasureDlg::ToggleDisplay()
