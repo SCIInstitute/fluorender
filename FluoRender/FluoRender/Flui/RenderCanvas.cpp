@@ -4833,20 +4833,16 @@ void RenderCanvas::SetParams(double t)
 		vc.insert(gstAov);
 	}
 
-	m_frame->GetMeasureDlg()->GetSettings(this);
 	//update ruler intensity values
 	glbin_ruler_handler.ProfileAll();
-	m_frame->GetMeasureDlg()->UpdateList();
 	SetVolPopDirty();
 
 	vc.insert(gstParamListSelect);
 	vc.insert(gstTreeIcons);
 	vc.insert(gstTreeColors);
 	vc.insert(gstClipPlaneRangeColor);
-	//if (m_cur_vol)
-	//	glbin.set_tree_selection(m_cur_vol->GetName().ToStdString());
-	//else
-	//	glbin.set_tree_selection("");
+	vc.insert(gstRulerList);
+
 	m_frame->UpdateProps(vc);
 }
 
@@ -4925,8 +4921,8 @@ void RenderCanvas::UpdateVolumeData(int frame, VolumeData* vd)
 				tex->set_FrameAndChannel(frame, vd->GetCurChannel());
 				vd->SetCurTime(reader->GetCurTime());
 				//update rulers
-				if (m_frame && m_frame->GetMeasureDlg())
-					m_frame->GetMeasureDlg()->UpdateList();
+				//if (m_frame && m_frame->GetMeasureDlg())
+				//	m_frame->GetMeasureDlg()->UpdateList();
 			}
 			else
 			{
@@ -4941,8 +4937,8 @@ void RenderCanvas::UpdateVolumeData(int frame, VolumeData* vd)
 				vd->SetSpacings(spcx, spcy, spcz);
 
 				//update rulers
-				if (m_frame && m_frame->GetMeasureDlg())
-					m_frame->GetMeasureDlg()->UpdateList();
+				//if (m_frame && m_frame->GetMeasureDlg())
+				//	m_frame->GetMeasureDlg()->UpdateList();
 
 				clear_pool = true;
 			}
@@ -5115,12 +5111,13 @@ void RenderCanvas::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool
 
 	//update ruler intensity values
 	glbin_ruler_handler.ProfileAll();
-	m_frame->GetMeasureDlg()->UpdateList();
+	//m_frame->GetMeasureDlg()->UpdateList();
 
 	//clear results if rewind
 	if (rewind)
 		glbin_script_proc.ClearResults();
 
+	m_frame->UpdateProps({ gstRulerList });
 	//RefreshGL(17);
 }
 
@@ -5213,7 +5210,7 @@ void RenderCanvas::Set3DBatFrame(int frame, int start_frame, int end_frame, bool
 
 	//update ruler intensity values
 	glbin_ruler_handler.ProfileAll();
-	m_frame->GetMeasureDlg()->UpdateList();
+	m_frame->UpdateProps({ gstRulerList });
 
 	//RefreshGL(18);
 }

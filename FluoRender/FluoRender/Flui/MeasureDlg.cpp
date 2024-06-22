@@ -273,10 +273,11 @@ void RulerListCtrl::EndEdit()
 	}
 }
 
-void RulerListCtrl::OnTextFocus(wxCommandEvent& event)
+void RulerListCtrl::OnTextFocus(wxMouseEvent& event)
 {
-	wxTextCtrl* object = (wxTextCtrl*)event.GetEventObject();
-	object->SetSelection(0, -1);
+	wxTextCtrl* object = dynamic_cast<wxTextCtrl*>(event.GetEventObject());
+	if (object)
+		object->SetSelection(0, -1);
 }
 
 void RulerListCtrl::OnNameText(wxCommandEvent& event)

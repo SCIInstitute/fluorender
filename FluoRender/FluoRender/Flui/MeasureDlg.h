@@ -85,7 +85,7 @@ private:
 	fluo::Color m_color;
 
 private:
-	void OnTextFocus(wxCommandEvent& event);
+	void OnTextFocus(wxMouseEvent& event);
 	void OnNameText(wxCommandEvent& event);
 	void OnCenterText(wxCommandEvent& event);
 	void OnColorChange(wxColourPickerEvent& event);
