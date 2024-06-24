@@ -200,6 +200,7 @@ namespace flrd
 		bool EditPoint(int mx, int my, bool alt);
 		void Flip(const std::set<int>& rulers);
 		void AddAverage(const std::set<int>& rulers);
+		void Relax();
 		void Relax(const std::set<int>& rulers);
 		void Prune(const std::set<int>& rulers);
 		void Prune(int idx, int len);
@@ -287,15 +288,15 @@ namespace flrd
 
 	private:
 		unsigned int m_group;
-		RenderCanvas *m_view;
-		VolumeData * m_vd;
+		//RenderCanvas *m_view;
+		//VolumeData * m_vd;
 		VolumePoint m_vp;
-		Ruler *m_ruler;
+		//Ruler *m_ruler;
 		Ruler* m_mag_ruler;
 		size_t m_mag_branch;
 		size_t m_mag_branch_point;
 		bool m_redist_len;
-		RulerList *m_ruler_list;
+		//RulerList *m_ruler_list;
 		int m_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
 					//4: protractor; 5: ellipse
 		bool m_edited;

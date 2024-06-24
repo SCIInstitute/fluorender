@@ -794,8 +794,11 @@ void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstRulerTransient))
 	{
 		flrd::Ruler* ruler = glbin_current.GetRuler();
-		bval = ruler->GetTransient();
-		m_transient_chk->SetValue(bval);
+		if(ruler)
+		{
+			bval = ruler->GetTransient();
+			m_transient_chk->SetValue(bval);
+		}
 	}
 
 	if (update_all || FOUND_VALUE(gstRulerUseTransf))
@@ -826,8 +829,11 @@ void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstRulerInterpolation))
 	{
 		flrd::Ruler* ruler = glbin_current.GetRuler();
-		ival = ruler->GetInterp();
-		m_interp_cmb->Select(ival);
+		if (ruler)
+		{
+			ival = ruler->GetInterp();
+			m_interp_cmb->Select(ival);
+		}
 	}
 
 	//align center

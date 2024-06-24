@@ -941,6 +941,27 @@ void RulerHandler::AddAverage(const std::set<int>& rulers)
 	m_ruler_list->push_back(ruler);
 }
 
+void RulerHandler::Relax()
+{
+	if (!m_ruler)
+		return;
+
+	flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
+	if (list && list->empty())
+		list = 0;
+	double infr = glbin_settings.m_ruler_infr;
+	int type = glbin_settings.m_ruler_relax_type;
+	int iter = glbin_settings.m_ruler_relax_iter;
+	double f1 = glbin_settings.m_ruler_relax_f1;
+	glbin_dist_calculator.SetF1(f1);
+	glbin_dist_calculator.SetInfr(infr);
+	glbin_dist_calculator.SetCelpList(list);
+	glbin_dist_calculator.SetVolume(glbin_current.vol_data);
+	glbin_dist_calculator.SetRuler(m_ruler);
+	glbin_dist_calculator.CenterRuler(type, m_edited, iter);
+	m_edited = false;
+}
+
 void RulerHandler::Relax(const std::set<int>& rulers)
 {
 	if (!m_ruler_list)

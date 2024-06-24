@@ -10225,9 +10225,8 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			}
 			if (m_int_mode == 14)
 				glbin_ruler_handler.DeletePoint();
-			if (m_frame && m_frame->GetMeasureDlg())
-				m_frame->GetMeasureDlg()->GetSettings(this);
 			RefreshGL(41);
+			m_frame->UpdateProps({ gstRulerList });
 		}
 
 		if (m_int_mode == 1 ||
@@ -10320,9 +10319,8 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		{
 			//add one point to a ruler
 			glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
-			if (m_frame && m_frame->GetMeasureDlg())
-				m_frame->GetMeasureDlg()->GetSettings(this);
 			RefreshGL(27);
+			m_frame->UpdateProps({ gstRulerList });
 			return;
 		}
 		else if (m_int_mode == 9 ||
@@ -10342,8 +10340,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			m_int_mode = 8;
 			m_force_clear = true;
 			RefreshGL(27);
-			if (m_frame && m_frame->GetMeasureDlg())
-				m_frame->GetMeasureDlg()->GetSettings(this);
+			m_frame->UpdateProps({ gstRulerList });
 			return;
 		}
 		else if (m_int_mode == 10 ||
@@ -10356,17 +10353,13 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		else if (m_int_mode == 13 &&
 			!event.AltDown())
 		{
-			if (m_frame && m_frame->GetMeasureDlg())
+			if (glbin_settings.m_ruler_auto_relax)
 			{
-				if (glbin_settings.m_ruler_auto_relax)
-				{
-					m_frame->GetMeasureDlg()->SetEdit();
-					m_frame->GetMeasureDlg()->Relax(
-						glbin_ruler_handler.GetRulerIndex());
-				}
-				m_frame->GetMeasureDlg()->GetSettings(this);
+				glbin_ruler_handler.SetEdited(true);
+				glbin_ruler_handler.Relax();
 			}
 			RefreshGL(29);
+			m_frame->UpdateProps({ gstRulerList });
 			return;
 		}
 		else if ((m_int_mode == 6 ||
@@ -10382,9 +10375,8 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 				glbin_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
 			glbin_ruler_handler.ApplyMagPoint();
 			glbin_ruler_handler.ClearMagStroke();
-			if (m_frame && m_frame->GetMeasureDlg())
-				m_frame->GetMeasureDlg()->GetSettings(this);
 			RefreshGL(29);
+			m_frame->UpdateProps({ gstRulerList });
 			return;
 		}
 		else if (m_int_mode == 16)
@@ -10420,17 +10412,13 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
 				glbin_ruler_handler.FinishRuler();
 			}
-			if (m_frame && m_frame->GetMeasureDlg())
+			if (glbin_settings.m_ruler_auto_relax)
 			{
-				if (glbin_settings.m_ruler_auto_relax)
-				{
-					m_frame->GetMeasureDlg()->SetEdit();
-					m_frame->GetMeasureDlg()->Relax(
-						glbin_ruler_handler.GetRulerIndex());
-				}
-				m_frame->GetMeasureDlg()->GetSettings(this);
+				glbin_ruler_handler.SetEdited(true);
+				glbin_ruler_handler.Relax();
 			}
 			RefreshGL(29);
+			m_frame->UpdateProps({ gstRulerList });
 			return;
 		}
 		//SetSortBricks();
@@ -10602,11 +10590,8 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			if (rval)
 			{
 				RefreshGL(35);
-				if (m_frame && m_frame->GetMeasureDlg())
-				{
-					m_frame->GetMeasureDlg()->GetSettings(this);
-					m_frame->GetMeasureDlg()->SetEdit();
-				}
+				m_frame->UpdateProps({ gstRulerList });
+				glbin_ruler_handler.SetEdited(true);
 			}
 		}
 		else if (m_int_mode == 13 && !event.AltDown())
@@ -10616,9 +10601,8 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			{
 				//add one point to a ruler
 				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), false);
-				if (m_frame && m_frame->GetMeasureDlg())
-					m_frame->GetMeasureDlg()->GetSettings(this);
 				RefreshGL(27);
+				m_frame->UpdateProps({ gstRulerList });
 			}
 		}
 		else if (m_int_mode == 15 && !event.AltDown())

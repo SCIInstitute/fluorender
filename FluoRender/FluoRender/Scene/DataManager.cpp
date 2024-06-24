@@ -5354,6 +5354,20 @@ void CurrentObjects::SetAnnotation(Annotations* ann)
 		canvas->m_cur_vol = 0;
 }
 
+flrd::RulerList* CurrentObjects::GetRulerList()
+{
+	if (!canvas)
+		return 0;
+	return canvas->GetRulerList();
+}
+
+flrd::Ruler* CurrentObjects::GetRuler()
+{
+	if (!canvas)
+		return 0;
+	return canvas->GetCurRuler();
+}
+
 DataManager::DataManager() :
 	m_frame(0)
 {

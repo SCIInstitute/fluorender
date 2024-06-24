@@ -1320,6 +1320,8 @@ void MainFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, wxWi
 		m_help_dlg->FluoUpdate(vc);
 	if (update_props(excl_self, m_machine_learning_dlg, panel))
 		m_machine_learning_dlg->FluoUpdate(vc);
+	if (update_props(excl_self, m_measure_dlg, panel))
+		m_measure_dlg->FluoUpdate(vc);
 	if (update_props(excl_self, m_setting_dlg, panel))
 		m_setting_dlg->FluoUpdate(vc);
 }
