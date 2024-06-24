@@ -1396,9 +1396,8 @@ void ScriptProc::RunRulerProfile()
 	for (auto itvol = vlist.begin();
 		itvol != vlist.end(); ++itvol, ++ch)
 	{
-		glbin_ruler_handler.SetVolumeData(*itvol);
-		for (size_t i = 0; i < ruler_list->size(); ++i)
-			glbin_ruler_handler.Profile(i);
+		glbin_current.SetVolumeData(*itvol);
+		glbin_ruler_handler.ProfileAll();
 
 		//output
 		//time group
@@ -1472,7 +1471,7 @@ void ScriptProc::RunRoi()
 	for (auto itvol = vlist.begin();
 		itvol != vlist.end(); ++itvol, ++ch)
 	{
-		glbin_ruler_handler.SetVolumeData(*itvol);
+		glbin_current.SetVolumeData(*itvol);
 
 		//output
 		//time group

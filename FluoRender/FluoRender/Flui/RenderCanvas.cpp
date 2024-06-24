@@ -84,6 +84,8 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	//public
 	//set gl
 	m_set_gl(false),
+	//ruler
+	m_cur_ruler(0),
 	//capture modes
 	m_capture(false),
 	m_capture_rotat(false),
@@ -1444,7 +1446,6 @@ void RenderCanvas::DrawVolumes(int peel)
 				if (!vd)
 					if (m_vd_pop_list.size())
 						vd = m_vd_pop_list[0];
-				glbin_volume_point.SetVolumeData(vd);
 				fluo::Point p;
 				if (glbin_volume_point.GetPointVolumeBox(nx / 2.0, ny / 2.0, false, p) > 0.0 ||
 					(vd && glbin_volume_point.GetPointPlane(nx / 2.0, ny / 2.0, 0, false, p) > 0.0))
@@ -6332,7 +6333,7 @@ void RenderCanvas::RemoveVolumeDataDup(wxString &name)
 	if (!vd_main)
 		return;
 
-	glbin_ruler_handler.SetVolumeData(0);
+	glbin_current.SetVolumeData(0);
 	
 	for (auto iter = m_layer_list.begin();
 		iter != m_layer_list.end();)
@@ -9710,12 +9711,19 @@ void RenderCanvas::DrawRulers()
 		return;
 	double width = glbin_settings.m_line_width;
 	glbin_ruler_renderer.SetLineSize(width);
+	glbin_ruler_renderer.SetView(this);
+	glbin_ruler_renderer.SetRulerList(&m_ruler_list);
 	glbin_ruler_renderer.Draw();
 }
 
 flrd::RulerList* RenderCanvas::GetRulerList()
 {
 	return &m_ruler_list;
+}
+
+void RenderCanvas::SetCurRuler(flrd::Ruler* ruler)
+{
+	m_cur_ruler = ruler;
 }
 
 flrd::Ruler* RenderCanvas::GetCurRuler()
@@ -10192,7 +10200,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 	fluo::Point mp = GetMousePos(event);
 
 	//mouse button down operations
-	glbin_ruler_handler.SetVolumeData(m_cur_vol);
+	//glbin_ruler_handler.SetVolumeData(m_cur_vol);
 	if (event.LeftDown())
 	{
 		if (m_draw_frame)

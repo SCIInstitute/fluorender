@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #define _RulerHandler_H_
 
 #include <Ruler.h>
-#include <VolumePoint.h>
 #include <string>
 #include <algorithm>
 
@@ -48,20 +47,7 @@ namespace flrd
 		~RulerHandler();
 
 		//handle group
-		void NewGroup()
-		{
-			if (m_ruler_list)
-			{
-				std::vector<unsigned int> groups;
-				int num = m_ruler_list->GetGroupNum(groups);
-				if (num)
-				{
-					auto it = std::max_element(groups.begin(), groups.end());
-					if (it != groups.end())
-						m_group = *it + 1;
-				}
-			}
-		}
+		void NewGroup();
 		void SetGroup(unsigned int group)
 		{
 			m_group = group;
@@ -74,74 +60,13 @@ namespace flrd
 
 		void GroupRulers(const std::set<int>& rulers);
 
-		void SetView(RenderCanvas* view)
-		{
-			m_view = view;
-			m_vp.SetView(view);
-		}
-
-		void SetVolumeData(VolumeData* vd)
-		{
-			m_vd = vd;
-			m_vp.SetVolumeData(vd);
-		}
-
 		double GetVolumeBgInt();
 
-		void SetRuler(Ruler* ruler)
-		{
-			m_ruler = ruler;
-		}
+		Ruler* GetRuler(const std::string& name);
 
-		void SetRuler(size_t i)
-		{
-			if (i < m_ruler_list->size())
-				m_ruler = (*m_ruler_list)[i];
-		}
+		Ruler* GetRuler(size_t i);
 
-		Ruler* GetRuler()
-		{
-			return m_ruler;
-		}
-
-		Ruler* GetRuler(const std::string& name)
-		{
-			if (!m_ruler_list)
-				return 0;
-			for (auto ruler : *m_ruler_list)
-			{
-				if (ruler->GetName() == name)
-					return ruler;
-			}
-			return 0;
-		}
-
-		Ruler* GetRuler(size_t i)
-		{
-			if (i < m_ruler_list->size())
-				return (*m_ruler_list)[i];
-			return 0;
-		}
-
-		int GetRulerIndex()
-		{
-			if (!m_ruler)
-				return -1;
-			for (int i = 0; i < m_ruler_list->size(); ++i)
-				if ((*m_ruler_list)[i] == m_ruler)
-					return i;
-			return -1;
-		}
-
-		void SetRulerList(RulerList* ruler_list)
-		{
-			m_ruler_list = ruler_list;
-		}
-
-		RulerList* GetRulerList()
-		{
-			return m_ruler_list;
-		}
+		int GetRulerIndex();
 
 		void GetRulerList(const std::set<int>& rulers, flrd::RulerList& list);
 
@@ -288,15 +213,10 @@ namespace flrd
 
 	private:
 		unsigned int m_group;
-		//RenderCanvas *m_view;
-		//VolumeData * m_vd;
-		VolumePoint m_vp;
-		//Ruler *m_ruler;
 		Ruler* m_mag_ruler;
 		size_t m_mag_branch;
 		size_t m_mag_branch_point;
 		bool m_redist_len;
-		//RulerList *m_ruler_list;
 		int m_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
 					//4: protractor; 5: ellipse
 		bool m_edited;

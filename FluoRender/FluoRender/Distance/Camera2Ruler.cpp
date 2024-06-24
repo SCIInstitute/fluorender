@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Camera2Ruler.h>
+#include <Global.h>
 #include <RulerHandler.h>
 #include <Ray.h>
 #include <Plane.h>
@@ -104,10 +105,7 @@ void Camera2Ruler::SetList(int i, const std::string& config)
 		if (fconfig.Exists("/views/0/rulers"))
 		{
 			fconfig.SetPath("/views/0/rulers");
-			RulerHandler handler;
-			list = new RulerList;
-			handler.SetRulerList(list);
-			handler.Read(fconfig, 0);
+			glbin_ruler_handler.Read(fconfig, 0);
 		}
 	}
 

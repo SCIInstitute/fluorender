@@ -339,6 +339,9 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	Freeze();
+	//SetDoubleBuffered(true);
+
 	wxIntegerValidator<unsigned int> vald_int;
 
 	wxStaticText* st;
@@ -346,9 +349,7 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	m_toolbar1 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER|wxTB_TEXT| wxTB_HORIZONTAL);
 	wxBitmap bitmap = wxGetBitmapFromMemory(locator);
-#ifdef _DARWIN
 	m_toolbar1->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_toolbar1->AddCheckTool(ID_LocatorBtn, "Locator",
 		bitmap, wxNullBitmap,
 		"Add locators to the render view by clicking");
@@ -386,9 +387,7 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	m_toolbar2 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT | wxTB_HORIZONTAL);
 	bitmap = wxGetBitmapFromMemory(move);
-#ifdef _DARWIN
 	m_toolbar2->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_toolbar2->AddCheckTool(ID_RulerMoveBtn, "Move",
 		bitmap, wxNullBitmap,
 		"Select and move ruler");
@@ -423,9 +422,7 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	m_toolbar3 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT | wxTB_HORIZONTAL);
 	bitmap = wxGetBitmapFromMemory(delet);
-#ifdef _DARWIN
 	m_toolbar3->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_toolbar3->AddTool(ID_DeleteBtn, "Delete", bitmap,
 		"Delete a selected ruler");
 	bitmap = wxGetBitmapFromMemory(del_all);
@@ -587,7 +584,7 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	sizer22->Add(m_delete_all_key_btn, 0, wxALIGN_CENTER);
 	//list
 	m_ruler_list = new RulerListCtrl(this,
-		wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
+		wxDefaultPosition, FromDIP(wxSize(200, 200)), wxLC_REPORT);
 	m_ruler_list->Bind(wxEVT_KEY_DOWN, &MeasureDlg::OnKeyDown, this);
 	m_ruler_list->Bind(wxEVT_CONTEXT_MENU, &MeasureDlg::OnContextMenu, this);
 	m_ruler_list->Bind(wxEVT_LIST_ITEM_SELECTED, &MeasureDlg::OnSelection, this);
@@ -701,6 +698,9 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 
 	SetSizer(sizerV);
 	Layout();
+	SetAutoLayout(true);
+	SetScrollRate(10, 10);
+	Thaw();
 }
 
 MeasureDlg::~MeasureDlg()
@@ -953,7 +953,7 @@ void MeasureDlg::UpdateRulerList()
 
 void MeasureDlg::UpdateRulerListCur()
 {
-	flrd::Ruler* ruler = glbin_ruler_handler.GetRuler();
+	flrd::Ruler* ruler = glbin_current.GetRuler();
 	int item = glbin_ruler_handler.GetRulerIndex();
 	if (!ruler)
 		return;
@@ -1002,7 +1002,7 @@ void MeasureDlg::ToggleDisplay()
 
 void MeasureDlg::SetCurrentRuler()
 {
-	flrd::Ruler* ruler = glbin_ruler_handler.GetRuler();
+	flrd::Ruler* ruler = glbin_current.GetRuler();
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!ruler || !canvas)
 		return;
@@ -1722,7 +1722,7 @@ void MeasureDlg::OnAlignCenterChk(wxCommandEvent& event)
 
 void MeasureDlg::OnAlignRuler(wxCommandEvent& event)
 {
-	flrd::Ruler* ruler = glbin_ruler_handler.GetRuler();
+	flrd::Ruler* ruler = glbin_current.GetRuler();
 	if (!ruler)
 		return;
 
@@ -1791,7 +1791,7 @@ void MeasureDlg::OnContextMenu(wxContextMenuEvent& event)
 	}
 	else
 	{
-		point = m_ruler_list->ScreenToClient(point);
+		point = ScreenToClient(point);
 	}
 
 	wxMenu menu;

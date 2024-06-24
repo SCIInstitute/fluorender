@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <VolumePoint.h>
+#include <Global.h>
 #include <DataManager.h>
 #include <RenderCanvas.h>
 #include <Texture.h>
@@ -39,10 +40,13 @@ double VolumePoint::GetPointVolume(
 	int mode, bool use_transf, double thresh,//params
 	fluo::Point &mp, fluo::Point &ip)
 {
-	if (!m_view || !m_vd)
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!m_vd)
+		m_vd = glbin_current.vol_data;
+	if (!canvas || !m_vd)
 		return -1.0;
-	int nx = m_view->GetGLSize().x;
-	int ny = m_view->GetGLSize().y;
+	int nx = canvas->GetGLSize().x;
+	int ny = canvas->GetGLSize().y;
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
@@ -54,11 +58,11 @@ double VolumePoint::GetPointVolume(
 	if (!data && m_vd->GetAllBrickNum() < 1) return -1.0;
 
 	//projection
-	m_view->HandleProjection(nx, ny);
+	canvas->HandleProjection(nx, ny);
 	//Transformation
-	m_view->HandleCamera();
-	glm::mat4 mv_temp = m_view->GetInvtMat();
-	glm::mat4 prj_mat = m_view->GetProjection();
+	canvas->HandleCamera();
+	glm::mat4 mv_temp = canvas->GetInvtMat();
+	glm::mat4 prj_mat = canvas->GetProjection();
 	fluo::Transform mv;
 	fluo::Transform p;
 	mv.set(glm::value_ptr(mv_temp));
@@ -253,10 +257,13 @@ double VolumePoint::GetPointVolumeBox(
 	bool calc_mats,
 	fluo::Point &mp)
 {
-	if (!m_view || !m_vd)
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!m_vd)
+		m_vd = glbin_current.vol_data;
+	if (!canvas || !m_vd)
 		return -1.0;
-	int nx = m_view->GetGLSize().x;
-	int ny = m_view->GetGLSize().y;
+	int nx = canvas->GetGLSize().x;
+	int ny = canvas->GetGLSize().y;
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
@@ -277,10 +284,10 @@ double VolumePoint::GetPointVolumeBox(
 		//HandleProjection(nx, ny);
 		//Transformation
 		//HandleCamera();
-		mv_temp = m_view->GetObjectMat();
+		mv_temp = canvas->GetObjectMat();
 	}
 	else
-		mv_temp = m_view->GetModelView();//m_mv_mat;
+		mv_temp = canvas->GetModelView();//m_mv_mat;
 
 	glm::mat4 mv_mat2 = glm::mat4(
 		mvmat[0], mvmat[4], mvmat[8], mvmat[12],
@@ -288,7 +295,7 @@ double VolumePoint::GetPointVolumeBox(
 		mvmat[2], mvmat[6], mvmat[10], mvmat[14],
 		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
 	mv_temp = mv_temp * mv_mat2;
-	glm::mat4 prj_mat = m_view->GetProjection();
+	glm::mat4 prj_mat = canvas->GetProjection();
 	mv.set(glm::value_ptr(mv_temp));
 	p.set(glm::value_ptr(prj_mat));
 
@@ -356,10 +363,13 @@ double VolumePoint::GetPointVolumeBox2(
 	double mx, double my,//mouse coord on screen
 	fluo::Point &p1, fluo::Point &p2)
 {
-	if (!m_view || !m_vd)
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!m_vd)
+		m_vd = glbin_current.vol_data;
+	if (!canvas || !m_vd)
 		return -1.0;
-	int nx = m_view->GetGLSize().x;
-	int ny = m_view->GetGLSize().y;
+	int nx = canvas->GetGLSize().x;
+	int ny = canvas->GetGLSize().y;
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
@@ -371,7 +381,7 @@ double VolumePoint::GetPointVolumeBox2(
 	//HandleProjection(nx, ny);
 	//Transformation
 	//HandleCamera();
-	glm::mat4 mv_temp = m_view->GetObjectMat();
+	glm::mat4 mv_temp = canvas->GetObjectMat();
 	fluo::Transform *tform = m_vd->GetTexture()->transform();
 	double mvmat[16];
 	tform->get_trans(mvmat);
@@ -381,7 +391,7 @@ double VolumePoint::GetPointVolumeBox2(
 		mvmat[2], mvmat[6], mvmat[10], mvmat[14],
 		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
 	mv_temp = mv_temp * mv_mat2;
-	glm::mat4 prj_mat = m_view->GetProjection();
+	glm::mat4 prj_mat = canvas->GetProjection();
 	fluo::Transform mv;
 	fluo::Transform p;
 	mv.set(glm::value_ptr(mv_temp));
@@ -459,10 +469,13 @@ double VolumePoint::GetPointPlane(
 	fluo::Point* planep, bool calc_mats,
 	fluo::Point &mp)
 {
-	if (!m_view)
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!m_vd)
+		m_vd = glbin_current.vol_data;
+	if (!canvas || !m_vd)
 		return -1.0;
-	int nx = m_view->GetGLSize().x;
-	int ny = m_view->GetGLSize().y;
+	int nx = canvas->GetGLSize().x;
+	int ny = canvas->GetGLSize().y;
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
@@ -471,22 +484,22 @@ double VolumePoint::GetPointPlane(
 	if (calc_mats)
 	{
 		//projection
-		m_view->HandleProjection(nx, ny);
+		canvas->HandleProjection(nx, ny);
 		//Transformation
-		m_view->HandleCamera();
-		mv_temp = m_view->GetObjectMat();
+		canvas->HandleCamera();
+		mv_temp = canvas->GetObjectMat();
 	}
 	else
-		mv_temp = m_view->GetModelView();//m_mv_mat;
+		mv_temp = canvas->GetModelView();//m_mv_mat;
 
-	glm::mat4 prj_mat = m_view->GetProjection();
+	glm::mat4 prj_mat = canvas->GetProjection();
 	fluo::Transform mv;
 	fluo::Transform p;
 	mv.set(glm::value_ptr(mv_temp));
 	p.set(glm::value_ptr(prj_mat));
 
 	fluo::Vector n(0.0, 0.0, 1.0);
-	fluo::Point center(0.0, 0.0, -m_view->GetCenterEyeDist());
+	fluo::Point center(0.0, 0.0, -canvas->GetCenterEyeDist());
 	if (planep)
 	{
 		center = *planep;

@@ -58,6 +58,6 @@ void HelpDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		return;
 	bool update_all = vc.empty();
 
-	if (update_all || FOUND_VALUE(gstHelpUrl))
-		m_html->LoadPage(glbin_help_url);
+	//if (update_all || FOUND_VALUE(gstHelpUrl))
+	//	m_html->LoadPage(glbin_help_url);
 }
