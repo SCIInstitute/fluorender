@@ -575,8 +575,10 @@ void ScriptProc::RunNoiseReduction()
 		glbin_vol_calculator.SetVolumeA(*i);
 
 		//selection
+		glbin_comp_def.m_nr_thresh = thresh;
+		glbin_comp_def.m_nr_size = size;
 		if (m_frame->GetNoiseCancellingDlg())
-			m_frame->GetNoiseCancellingDlg()->Preview(false, size, thresh);
+			m_frame->GetNoiseCancellingDlg()->Preview();
 		//delete
 		glbin_vol_calculator.CalculateGroup(6, "", false);
 	}

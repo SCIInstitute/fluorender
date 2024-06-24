@@ -759,10 +759,13 @@ DEALINGS IN THE SOFTWARE.
 #define gstParamListSelect "param list sel"
 #define gstParamKeyDuration "param key duration"
 //noise reduct agent
-#define gstEnhance "enhance"
-#define gstEqualizeSavedR "equalize saved r"
-#define gstEqualizeSavedG "equalize saved g"
-#define gstEqualizeSavedB "equalize saved b"
+#define gstNrThresh "nr thresh"
+#define gstNrSize "nr size"
+#define gstNrPreview "nr preview"
+#define gstNrHdr "nr hdr"
+#define gstNrHdrR "nr hdr r"
+#define gstNrHdrG "nr hdr g"
+#define gstNrHdrB "nr hdr b"
 //recorder agent
 #define gstSelectedKey "selected key"
 //setting agent/root

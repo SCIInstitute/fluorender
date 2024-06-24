@@ -132,7 +132,12 @@ void CountingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	//update user interface
 	if (FOUND_VALUE(gstNull))
 		return;
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
+		return;
+
 	bool update_all = vc.empty();
+	m_max_value = vd->GetMaxValue();
 
 	bool bval;
 	int ival;

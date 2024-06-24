@@ -43,7 +43,6 @@ DEALINGS IN THE SOFTWARE.
 #define UITEXT_NBPG4_0 "Scripts"
 #define UITEXT_NBPG4_1 "Scripts (Enabled)"
 
-class MainFrame;
 class RenderCanvas;
 class wxUndoableScrollBar;
 

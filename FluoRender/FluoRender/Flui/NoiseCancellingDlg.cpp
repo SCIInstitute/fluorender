@@ -33,27 +33,12 @@ DEALINGS IN THE SOFTWARE.
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 
-BEGIN_EVENT_TABLE(NoiseCancellingDlg, wxPanel)
-	EVT_COMMAND_SCROLL(ID_ThresholdSldr, NoiseCancellingDlg::OnThresholdChange)
-	EVT_TEXT(ID_ThresholdText, NoiseCancellingDlg::OnThresholdText)
-	EVT_COMMAND_SCROLL(ID_VoxelSldr, NoiseCancellingDlg::OnVoxelChange)
-	EVT_TEXT(ID_VoxelText, NoiseCancellingDlg::OnVoxelText)
-	EVT_BUTTON(ID_PreviewBtn, NoiseCancellingDlg::OnPreviewBtn)
-	EVT_BUTTON(ID_EraseBtn, NoiseCancellingDlg::OnEraseBtn)
-	EVT_CHECKBOX(ID_EnhanceSelChk, NoiseCancellingDlg::OnEnhanceSelChk)
-END_EVENT_TABLE()
-
 NoiseCancellingDlg::NoiseCancellingDlg(MainFrame *frame)
-: wxPanel(frame, wxID_ANY,
+: PropPanel(frame, frame,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(450, 200)),
 	0, "NoiseCancellingDlg"),
-	m_frame(frame),
-	m_view(0),
-	m_max_value(255.0),
-	m_dft_thresh(0.5),
-	m_dft_size(50),
-	m_previewed(false)
+	m_max_value(255.0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -70,12 +55,15 @@ NoiseCancellingDlg::NoiseCancellingDlg(MainFrame *frame)
 	wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Threshold:",
 		wxDefaultPosition, FromDIP(wxSize(75, 23)));
-	m_threshold_sldr = new wxSingleSlider(this, ID_ThresholdSldr, 0, 0, 2550,
+	m_threshold_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 2550,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_threshold_text = new wxTextCtrl(this, ID_ThresholdText, "0.0",
+	m_threshold_text = new wxTextCtrl(this, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_fp1);
-	m_preview_btn = new wxButton(this, ID_PreviewBtn, "Preview",
+	m_preview_btn = new wxButton(this, wxID_ANY, "Preview",
 		wxDefaultPosition, FromDIP(wxSize(70, 23)));
+	m_threshold_sldr->Bind(wxEVT_SCROLL_CHANGED, &NoiseCancellingDlg::OnThresholdChange, this);
+	m_threshold_text->Bind(wxEVT_TEXT, &NoiseCancellingDlg::OnThresholdText, this);
+	m_preview_btn->Bind(wxEVT_BUTTON, &NoiseCancellingDlg::OnPreviewBtn, this);
 	sizer1->Add(st, 0, wxALIGN_CENTER);
 	sizer1->Add(m_threshold_sldr, 1, wxEXPAND);
 	sizer1->Add(m_threshold_text, 0, wxALIGN_CENTER);
@@ -86,12 +74,15 @@ NoiseCancellingDlg::NoiseCancellingDlg(MainFrame *frame)
 	wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Voxel Size:",
 		wxDefaultPosition, FromDIP(wxSize(75, 23)));
-	m_voxel_sldr = new wxSingleSlider(this, ID_VoxelSldr, 1, 1, 500,
+	m_voxel_sldr = new wxSingleSlider(this, wxID_ANY, 1, 1, 500,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_voxel_text = new wxTextCtrl(this, ID_VoxelText, "1",
+	m_voxel_text = new wxTextCtrl(this, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
-	m_erase_btn = new wxButton(this, ID_EraseBtn, "Erase",
+	m_erase_btn = new wxButton(this, wxID_ANY, "Erase",
 		wxDefaultPosition, FromDIP(wxSize(70, 23)));
+	m_voxel_sldr->Bind(wxEVT_SCROLL_CHANGED, &NoiseCancellingDlg::OnVoxelChange, this);
+	m_voxel_text->Bind(wxEVT_TEXT, &NoiseCancellingDlg::OnVoxelText, this);
+	m_erase_btn->Bind(wxEVT_BUTTON, &NoiseCancellingDlg::OnEraseBtn, this);
 	sizer2->Add(st, 0, wxALIGN_CENTER);
 	sizer2->Add(m_voxel_sldr, 1, wxEXPAND);
 	sizer2->Add(m_voxel_text, 0, wxALIGN_CENTER);
@@ -100,14 +91,16 @@ NoiseCancellingDlg::NoiseCancellingDlg(MainFrame *frame)
 
 	//group3
 	wxBoxSizer *sizer3 = new wxBoxSizer(wxHORIZONTAL);
-	m_ca_select_only_chk = new wxCheckBox(this, ID_CASelectOnlyChk, "Selct. Only",
+	m_ca_select_only_chk = new wxCheckBox(this, wxID_ANY, "Selct. Only",
 		wxDefaultPosition, FromDIP(wxSize(95, 20)));
+	m_ca_select_only_chk->Bind(wxEVT_CHECKBOX, &NoiseCancellingDlg::OnSelOnlyChk, this);
 	sizer3->Add(m_ca_select_only_chk, 0, wxALIGN_CENTER);
 
 	//group4
 	wxBoxSizer *sizer4 = new wxBoxSizer(wxHORIZONTAL);
-	m_enhance_sel_chk = new wxCheckBox(this, ID_EnhanceSelChk, "Enhance selection",
+	m_enhance_sel_chk = new wxCheckBox(this, wxID_ANY, "Enhance selection",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+	m_enhance_sel_chk->Bind(wxEVT_CHECKBOX, &NoiseCancellingDlg::OnEnhanceSelChk, this);
 	sizer4->Add(m_enhance_sel_chk, 0, wxALIGN_CENTER);
 
 	//group5
@@ -139,64 +132,114 @@ NoiseCancellingDlg::~NoiseCancellingDlg()
 {
 }
 
-void NoiseCancellingDlg::GetSettings(RenderCanvas* view)
+void NoiseCancellingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 {
-	if (!view)
+	//update user interface
+	if (FOUND_VALUE(gstNull))
 		return;
-	m_view = view;
-
-	VolumeData* sel_vol = 0;
-	if (m_frame)
-		sel_vol = glbin_current.vol_data;
-	else
-		return;
-
-
-	//threshold range
-	if (sel_vol)
-	{
-		m_max_value = sel_vol->GetMaxValue();
-		//threshold
-		m_threshold_sldr->SetRange(0, std::round(m_max_value*10.0));
-		m_threshold_sldr->ChangeValue(std::round(m_dft_thresh*m_max_value*10.0));
-		m_threshold_text->ChangeValue(wxString::Format("%.1f", m_dft_thresh*m_max_value));
-		//voxel
-		int nx, ny, nz;
-		sel_vol->GetResolution(nx, ny, nz);
-		m_voxel_sldr->SetRange(1, nx);
-		m_voxel_sldr->ChangeValue(std::round(m_dft_size));
-		m_voxel_text->ChangeValue(wxString::Format("%d", int(std::round(m_dft_size))));
-		m_previewed = false;
-	}
-}
-
-void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
-{
-	if (!m_view)
-		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return;
 
+	bool update_all = vc.empty();
+	m_max_value = vd->GetMaxValue();
+
+	double dval;
+	int ival;
+
+	if (update_all || FOUND_VALUE(gstNrThresh))
+	{
+		//threshold
+		dval = glbin_comp_def.m_nr_thresh;
+		m_threshold_sldr->SetRange(0, std::round(m_max_value*10.0));
+		m_threshold_sldr->ChangeValue(std::round(dval * m_max_value * 10.0));
+		m_threshold_text->ChangeValue(wxString::Format("%.1f", dval * m_max_value));
+	}
+
+	if (update_all || FOUND_VALUE(gstNrSize))
+	{
+		//voxel
+		ival = glbin_comp_def.m_nr_size;
+		int nx, ny, nz;
+		vd->GetResolution(nx, ny, nz);
+		m_voxel_sldr->SetRange(1, nx);
+		m_voxel_sldr->ChangeValue(std::round(ival));
+		m_voxel_text->ChangeValue(wxString::Format("%d", int(std::round(ival))));
+	}
+
+	if (update_all || FOUND_VALUE(gstUseSelection))
+	{
+		m_ca_select_only_chk->SetValue(glbin_comp_generator.GetUseSel());
+	}
+
+	if (update_all || FOUND_VALUE(gstNrPreview))
+	{
+		m_enhance_sel_chk->SetValue(glbin_comp_def.m_nr_preview);
+	}
+}
+
+void NoiseCancellingDlg::Preview()
+{
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
+		return;
+
+	bool bval = glbin_comp_generator.GetUseSel();
+	glbin_comp_generator.SetThresh(glbin_comp_def.m_nr_thresh);
 	glbin_comp_generator.SetVolumeData(vd);
-	glbin_comp_generator.SetUseSel(select);
-	vd->AddEmptyMask(1, !glbin_comp_generator.GetUseSel());
-	vd->AddEmptyLabel(0, !glbin_comp_generator.GetUseSel());
+	vd->AddEmptyMask(1, !bval);
+	vd->AddEmptyLabel(0, !bval);
 	glbin_comp_generator.ShuffleID();
 	double scale = vd->GetScalarScale();
 	glbin_comp_generator.Grow();
 
 	glbin_comp_analyzer.SetVolume(vd);
-	glbin_comp_analyzer.Analyze(select);
+	glbin_comp_analyzer.Analyze(bval);
 
 	//cell size filter
 	glbin_comp_selector.SetUseMin(false);
 	glbin_comp_selector.SetUseMax(true);
 	glbin_comp_selector.SetMinNum(0);
-	glbin_comp_selector.SetMaxNum(size);
+	glbin_comp_selector.SetMaxNum(glbin_comp_def.m_nr_size);
 	glbin_comp_selector.CompFull();
 
-	m_view->RefreshGL(39);
+	glbin_comp_def.m_nr_preview = true;
+
+	Enhance();
+}
+
+void NoiseCancellingDlg::Enhance()
+{
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
+		return;
+
+	if (glbin_comp_def.m_nr_preview)
+	{
+		fluo::Color mask_color = vd->GetMaskColor();
+		double hdr_r = 0.0;
+		double hdr_g = 0.0;
+		double hdr_b = 0.0;
+		if (mask_color.r() > 0.0)
+			hdr_r = 0.4;
+		if (mask_color.g() > 0.0)
+			hdr_g = 0.4;
+		if (mask_color.b() > 0.0)
+			hdr_b = 0.4;
+		fluo::Color hdr_color(hdr_r, hdr_g, hdr_b);
+		glbin_comp_def.m_nr_hdr_r = vd->GetHdr().r();
+		glbin_comp_def.m_nr_hdr_g = vd->GetHdr().g();
+		glbin_comp_def.m_nr_hdr_b = vd->GetHdr().b();
+		vd->SetHdr(hdr_color);
+	}
+	else if (!glbin_comp_def.m_nr_preview)
+	{
+		fluo::Color c(
+			glbin_comp_def.m_nr_hdr_r,
+			glbin_comp_def.m_nr_hdr_g,
+			glbin_comp_def.m_nr_hdr_b);
+		vd->SetHdr(c);
+	}
 }
 
 //threshold
@@ -213,16 +256,14 @@ void NoiseCancellingDlg::OnThresholdText(wxCommandEvent& event)
 	wxString str = m_threshold_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_dft_thresh = val/m_max_value;
 	m_threshold_sldr->ChangeValue(std::round(val*10.0));
+	glbin_comp_def.m_nr_thresh = val/m_max_value;
 
 	//change mask threshold
-	VolumeData* sel_vol = 0;
-	if (m_frame)
-		sel_vol = glbin_current.vol_data;
-	if (sel_vol)
-		sel_vol->SetMaskThreshold(m_dft_thresh);
-	m_frame->RefreshCanvases();
+	VolumeData* vd = glbin_current.vol_data;
+	if (vd)
+		vd->SetMaskThreshold(glbin_comp_def.m_nr_thresh);
+	FluoRefresh(3, { gstNull });
 }
 
 //voxel size
@@ -239,54 +280,31 @@ void NoiseCancellingDlg::OnVoxelText(wxCommandEvent& event)
 	wxString str = m_voxel_text->GetValue();
 	long ival;
 	str.ToLong(&ival);
-	m_dft_size = ival;
 	m_voxel_sldr->ChangeValue(ival);
+	glbin_comp_def.m_nr_size = ival;
+}
+
+void NoiseCancellingDlg::OnSelOnlyChk(wxCommandEvent& event)
+{
+	bool bval = m_ca_select_only_chk->GetValue();
+	glbin_comp_generator.SetUseSel(bval);
+	FluoRefresh(1, { gstUseSelection }, { -1 });
 }
 
 void NoiseCancellingDlg::OnPreviewBtn(wxCommandEvent& event)
 {
-	bool select = m_ca_select_only_chk->GetValue();
-	Preview(select, m_dft_size, m_dft_thresh);
-	m_previewed = true;
-	OnEnhanceSelChk(event);
+	Preview();
+	FluoRefresh(1, { gstNrPreview }, { -1 });
 }
 
 void NoiseCancellingDlg::OnEraseBtn(wxCommandEvent& event)
 {
 	glbin_vol_selector.Erase();
-	//FluoRefresh(3, { gstNull });
+	FluoRefresh(3, { gstNull });
 }
 
 void NoiseCancellingDlg::OnEnhanceSelChk(wxCommandEvent& event)
 {
-	if (!m_previewed)
-		return;
-
-	bool enhance = m_enhance_sel_chk->GetValue();
-
-	VolumeData* sel_vol = 0;
-	if (m_frame)
-		sel_vol = glbin_current.vol_data;
-	if (enhance && sel_vol)
-	{
-		fluo::Color mask_color = sel_vol->GetMaskColor();
-		double hdr_r = 0.0;
-		double hdr_g = 0.0;
-		double hdr_b = 0.0;
-		if (mask_color.r() > 0.0)
-			hdr_r = 0.4;
-		if (mask_color.g() > 0.0)
-			hdr_g = 0.4;
-		if (mask_color.b() > 0.0)
-			hdr_b = 0.4;
-		fluo::Color hdr_color(hdr_r, hdr_g, hdr_b);
-		m_hdr = sel_vol->GetHdr();
-		sel_vol->SetHdr(hdr_color);
-	}
-	else if (!enhance && sel_vol)
-	{
-		sel_vol->SetHdr(m_hdr);
-	}
-	if (m_frame)
-		m_frame->RefreshCanvases();
+	glbin_comp_def.m_nr_preview = m_enhance_sel_chk->GetValue();
+	FluoRefresh(3, { gstNull });
 }

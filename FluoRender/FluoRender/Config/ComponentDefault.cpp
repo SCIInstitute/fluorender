@@ -67,6 +67,14 @@ ComponentDefault::ComponentDefault()
 	m_clean_size_vl = 5;
 	m_fill_border = 0.1;
 
+	//noise removal
+	m_nr_thresh = 0.5;
+	m_nr_size = 50;
+	m_nr_preview = false;
+	m_nr_hdr_r = 0;
+	m_nr_hdr_g = 0;
+	m_nr_hdr_b = 0;
+
 	//cluster
 	m_cluster_method = 0;
 	m_cluster_clnum = 2;
@@ -158,6 +166,14 @@ void ComponentDefault::Read(wxFileConfig& f)
 	f.Read("grow_fixed", &m_grow_fixed);
 	f.Read("fill_border", &m_fill_border);
 
+	//noise removal
+	f.Read("nr thresh", &m_nr_thresh);
+	f.Read("nr size", &m_nr_size);
+	f.Read("nr preview", &m_nr_preview);
+	f.Read("nr hdr r", &m_nr_hdr_r);
+	f.Read("nr hdr g", &m_nr_hdr_g);
+	f.Read("nr hdr b", &m_nr_hdr_b);
+
 	//cluster
 	f.Read("cluster_method", &m_cluster_method);
 	//parameters
@@ -220,6 +236,14 @@ void ComponentDefault::Save(wxFileConfig& f)
 	f.Write("clean_size_vl", m_clean_size_vl);
 	f.Write("grow_fixed", m_grow_fixed);
 	f.Write("fill_border", m_fill_border);
+
+	//noise removal
+	f.Write("nr thresh", m_nr_thresh);
+	f.Write("nr size", m_nr_size);
+	f.Write("nr preview", m_nr_preview);
+	f.Write("nr hdr r", m_nr_hdr_r);
+	f.Write("nr hdr g", m_nr_hdr_g);
+	f.Write("nr hdr b", m_nr_hdr_b);
 
 	//cluster
 	f.Write("cluster_method", m_cluster_method);

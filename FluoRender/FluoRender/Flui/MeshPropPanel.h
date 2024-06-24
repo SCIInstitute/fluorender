@@ -33,8 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clrpicker.h>
 #include <wx/slider.h>
 
-using namespace std;
-
 class RenderCanvas;
 class MeshData;
 class wxSingleSlider;

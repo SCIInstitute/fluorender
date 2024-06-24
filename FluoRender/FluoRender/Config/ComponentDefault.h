@@ -91,6 +91,14 @@ public:
 	//fill borders
 	double m_fill_border;
 
+	//noise removal settings
+	double m_nr_thresh;
+	int m_nr_size;
+	bool m_nr_preview;
+	double m_nr_hdr_r;
+	double m_nr_hdr_g;
+	double m_nr_hdr_b;
+
 	//cluster settings
 	int m_cluster_method;//0:exmax; 1:dbscan; 2:kmeans
 	//parameters

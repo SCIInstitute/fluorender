@@ -28,53 +28,36 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _NOISECANCELLINGDLG_H_
 #define _NOISECANCELLINGDLG_H_
 
-#include <wx/wx.h>
+#include <PropPanel.h>
 #include <Color.h>
 
-class MainFrame;
-class RenderCanvas;
-class VolumeData;
-class DataGroup;
 class wxSingleSlider;
-class NoiseCancellingDlg : public wxPanel
+class NoiseCancellingDlg : public PropPanel
 {
 public:
-	enum
-	{
-		ID_ThresholdSldr = ID_NOISE_CANCEL,
-		ID_ThresholdText,
-		ID_VoxelSldr,
-		ID_VoxelText,
-		ID_CASelectOnlyChk,
-		ID_PreviewBtn,
-		ID_EraseBtn,
-		ID_EnhanceSelChk
-	};
+	//enum
+	//{
+	//	ID_ThresholdSldr = ID_NOISE_CANCEL,
+	//	ID_ThresholdText,
+	//	ID_VoxelSldr,
+	//	ID_VoxelText,
+	//	ID_CASelectOnlyChk,
+	//	ID_PreviewBtn,
+	//	ID_EraseBtn,
+	//	ID_EnhanceSelChk
+	//};
 
 	NoiseCancellingDlg(MainFrame* frame);
 	~NoiseCancellingDlg();
 
-	void GetSettings(RenderCanvas* view);
-	void SetDftThresh(double thresh) {m_dft_thresh = thresh;}
-	void SetDftSize(double size) {m_dft_size = size;}
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
-	void Preview(bool select, double size, double thresh);
+	void Preview();
+	void Enhance();
 
 private:
-	MainFrame* m_frame;
-	//current view
-	RenderCanvas *m_view;
-
 	//max volume value
 	double m_max_value;
-	//default cs thresh
-	double m_dft_thresh;
-	//default nr size
-	double m_dft_size;
-
-	//remember previous hdr
-	bool m_previewed;
-	fluo::Color m_hdr;
 
 	wxCheckBox *m_ca_select_only_chk;
 	//threshold
@@ -96,11 +79,10 @@ private:
 	void OnThresholdText(wxCommandEvent& event);
 	void OnVoxelChange(wxScrollEvent& event);
 	void OnVoxelText(wxCommandEvent& event);
+	void OnSelOnlyChk(wxCommandEvent& event);
 	void OnPreviewBtn(wxCommandEvent& event);
 	void OnEraseBtn(wxCommandEvent& event);
 	void OnEnhanceSelChk(wxCommandEvent& event);
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_NOISECANCELLINGDLG_H_
