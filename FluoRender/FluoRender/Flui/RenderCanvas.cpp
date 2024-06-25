@@ -452,6 +452,7 @@ HCTX RenderCanvas::TabletInit(HWND hWnd, HINSTANCE hInst)
 
 void RenderCanvas::InitOpenVR()
 {
+#ifdef _WIN32
 	//openvr initilization
 	vr::EVRInitError vr_error;
 	m_vr_system = vr::VR_Init(&vr_error, vr::VRApplication_Scene, 0);
@@ -462,6 +463,7 @@ void RenderCanvas::InitOpenVR()
 		//get render size
 		m_vr_system->GetRecommendedRenderTargetSize(&m_vr_size[0], &m_vr_size[1]);
 	}
+#endif
 }
 
 void RenderCanvas::InitLookingGlass()

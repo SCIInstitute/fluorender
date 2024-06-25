@@ -134,9 +134,9 @@ public:
 	//for degugging, this allows inspection of the pixel format actually given.
 #ifdef _WIN32
 	int GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd);
+#endif
 	void InitOpenVR();
 	void InitLookingGlass();
-#endif
 
 	wxString GetOGLVersion();
 	//initialization
