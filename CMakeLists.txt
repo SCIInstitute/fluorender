@@ -210,9 +210,11 @@ endif()
 include_directories(${PNG_INCLUDE_DIR})
 if (PNG_FOUND)
   message (STATUS "PNG_INCLUDE_DIR=${PNG_INCLUDE_DIR}")
+endif()
 include_directories(${ZLIB_INCLUDE_DIRS})
 if (ZLIB_FOUND)
   message (STATUS "ZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIRS}")
+endif()
 endif()
 
 # OpenGL
