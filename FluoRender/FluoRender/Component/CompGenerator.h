@@ -28,11 +28,12 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_CompGenerator_h
 #define FL_CompGenerator_h
 
-#include <vector>
-#include <functional>
 #include <DataManager.h>
 #include <KernelProgram.h>
 #include <VolKernel.h>
+#include <vector>
+#include <functional>
+#include <chrono>
 
 using namespace std;
 
