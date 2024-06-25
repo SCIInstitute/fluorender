@@ -146,14 +146,6 @@ endif()
 find_package(wxWidgets COMPONENTS core base aui html xml adv gl stc scintilla REQUIRED)
 include(${wxWidgets_USE_FILE})
 set(wxWidgets_USE_STATIC ON)
-if(UNIX OR APPLE OR MINGW)
-  find_package(TIFF REQUIRED)
-  include_directories(${TIFF_INCLUDE_DIR})
-  find_package(PNG REQUIRED)
-  include_directories(${PNG_INCLUDE_DIR})
-else()
-  include_directories(${wxWidgets_ROOT_DIR}/src/tiff/libtiff)
-endif()
 add_definitions(-DUNICODE)
 add_definitions(-D_UNICODE)
 # solution for wxWidgets linking "ambiguous" errors
@@ -182,6 +174,26 @@ file(COPY ${FluoRender_SOURCE_DIR}/wxWidgets/include/wx/aui/auibook.h
 file(COPY ${FluoRender_SOURCE_DIR}/wxWidgets/src/aui/auibook.cpp
   DESTINATION ${wxWidgets_ROOT_DIR}/src/aui)
 endif()
+# libtiff
+set(TIFF_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/tiff/libtiff)
+set(PNG_PNG_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/png)
+set(ZLIB_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/zlib)
+include_directories(${TIFF_INCLUDE_DIR})
+include_directories(${PNG_PNG_INCLUDE_DIR})
+include_directories(${ZLIB_INCLUDE_DIR})
+if(WIN32)
+set(TIFF_LIBRARY_RELEASE ${wxWidgets_LIB_DIR}/wxtiff.lib)
+set(TIFF_LIBRARY_DEBUG ${wxWidgets_LIB_DIR}/wxtiffd.lib)
+set(PNG_LIBRARY_RELEASE ${wxWidgets_LIB_DIR}/wxpng.lib)
+set(PNG_LIBRARY_DEBUG ${wxWidgets_LIB_DIR}/wxpngd.lib)
+set(ZLIB_LIBRARY_RELEASE ${wxWidgets_LIB_DIR}/wxzlib.lib)
+set(ZLIB_LIBRARY_DEBUG ${wxWidgets_LIB_DIR}/wxzlibd.lib)
+elseif(APPLE)
+else()
+endif()
+find_package(TIFF REQUIRED)
+find_package(PNG REQUIRED)
+find_package(ZLIB REQUIRED PATHS ${wxWidgets_ROOT_DIR}/src/zlib)
 
 # OpenGL
 set(OpenGL_GL_PREFERENCE GLVND)
@@ -325,12 +337,6 @@ file(GLOB pole_hdrs FluoRender/pole/pole.h)
 add_library(POLE_OBJ OBJECT ${pole_srcs} ${pole_hdrs})
 
 # teem
-# add zlib
-find_package(ZLIB)
-if(ZLIB_FOUND)
-  add_definitions(-DTEEM_ZLIB=1)
-  include_directories(${ZLIB_INCLUDE_DIRS})
-endif()
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem)
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Biff)
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Air)
@@ -863,12 +869,7 @@ endif()
 if(APPLE)
   set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -L/usr/lib ${CMAKE_EXE_LINKER_FLAGS} -liconv -lbz2 -framework OpenCL -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration -framework VideoToolbox -framework Security -framework CoreMedia")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.11 -DWX_PRECOMP -std=c++11 -stdlib=libc++")
-  # make sure png is static linked
-  string(REGEX REPLACE "-lpng" "/usr/local/lib/libpng.a"
-    wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
-  string(REGEX REPLACE "-lpng" "/usr/local/lib/libpng.a"
-    CMAKE_MAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
-  string(REGEX REPLACE "/usr/local/lib/libfreetype.dylib" "/usr/local/lib/libfreetype.a;/usr/local/lib/libpng.a"
+  string(REGEX REPLACE "/usr/local/lib/libfreetype.dylib" "/usr/local/lib/libfreetype.a"
     FREETYPE_LIBRARIES ${FREETYPE_LIBRARIES})
   message(STATUS "${FREETYPE_LIBRARIES}")
 elseif(UNIX OR MINGW)
@@ -891,6 +892,9 @@ if(WIN32)
     ${OpenVR_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES}
+    ${TIFF_LIBRARIES}
+    ${PNG_LIBRARIES}
+    ${ZLIB_LIBRARIES}
     ${ND2_LIBRARIES}
     ${HDF5_LIBRARIES}
     ${OpenCV_LIBS}
@@ -900,14 +904,17 @@ if(WIN32)
     secur32.lib
     XInput.lib
     ${FFMPEG_LIBRARIES}
-    ${Python3_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${wxWidgets_LIBRARIES}
     ${OPENGL_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
-    ${ND2_LIBRARIES}
-    ${FREETYPE_LIBRARIES}
     ${OpenVR_LIBRARIES}
+    ${FREETYPE_LIBRARIES}
+    ${wxWidgets_LIBRARIES}
+    ${TIFF_LIBRARIES}
+    ${PNG_LIBRARIES}
+    ${ZLIB_LIBRARIES}
+    ${ND2_LIBRARIES}
     ${HDF5_LIBRARIES}
     ${OpenCV_LIBS}
     ${HoloPlay_LIBRARIES}
@@ -917,9 +924,10 @@ elseif(APPLE)
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
+    ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
-    ${wxWidgets_LIBRARIES}
     ${FREETYPE_LIBRARIES}
+    ${wxWidgets_LIBRARIES}
     ${TIFF_LIBRARIES}
     ${PNG_LIBRARIES}
     ${ZLIB_LIBRARIES}
@@ -934,13 +942,15 @@ else()
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
+    ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
-    ${wxWidgets_LIBRARIES}
     ${FREETYPE_LIBRARIES}
+    ${wxWidgets_LIBRARIES}
     ${TIFF_LIBRARIES}
     ${PNG_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${ND2_LIBRARIES}
+    ${HDF5_LIBRARIES}
     ${OpenCV_LIBS}
     ${HoloPlay_LIBRARIES}
   )
