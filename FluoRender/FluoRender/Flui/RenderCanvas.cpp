@@ -449,6 +449,7 @@ HCTX RenderCanvas::TabletInit(HWND hWnd, HINSTANCE hInst)
 
 	return hctx;
 }
+#endif
 
 void RenderCanvas::InitOpenVR()
 {
@@ -487,7 +488,6 @@ void RenderCanvas::InitLookingGlass()
 	m_renderview_panel->SetFullScreen();
 	m_lg_initiated = true;
 }
-#endif
 
 RenderCanvas::~RenderCanvas()
 {
