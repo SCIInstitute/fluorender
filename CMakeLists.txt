@@ -310,7 +310,7 @@ if(WIN32)
 		file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/Win64/*.lib)
     endif()
 elseif(APPLE)
-	file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/macos/HoloPlayCore.bundle)
+	file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/macos/HoloPlayCore.dylib)
 else()
 	file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/linux/*.so)
 endif()
@@ -949,6 +949,7 @@ elseif(APPLE)
     ${ND2_LIBRARIES}
     ${HDF5_LIBRARIES}
     ${OpenCV_LIBS}
+    ${HoloPlay_LIBRARIES}
   )
 else()
   target_link_libraries(FluoRender
@@ -966,6 +967,7 @@ else()
     ${ND2_LIBRARIES}
     ${HDF5_LIBRARIES}
     ${OpenCV_LIBS}
+    ${HoloPlay_LIBRARIES}
   )
 endif()
 
