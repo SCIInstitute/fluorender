@@ -177,6 +177,7 @@ endif()
 # libtiff
 set(TIFF_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/tiff/libtiff)
 set(PNG_PNG_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/png)
+set(ZLIB_DIR ${wxWidgets_ROOT_DIR}/src/zlib)
 set(ZLIB_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/zlib)
 include_directories(${TIFF_INCLUDE_DIR})
 include_directories(${PNG_PNG_INCLUDE_DIR})
@@ -198,7 +199,7 @@ set(ZLIB_LIBRARY_DEBUG ${wxWidgets_LIB_DIR}/libwxzlib-3.2.a)
 endif()
 find_package(TIFF REQUIRED)
 find_package(PNG REQUIRED)
-find_package(ZLIB REQUIRED PATHS ${wxWidgets_ROOT_DIR}/src/zlib)
+find_package(ZLIB REQUIRED)
 
 # OpenGL
 set(OpenGL_GL_PREFERENCE GLVND)
