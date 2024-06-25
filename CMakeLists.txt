@@ -940,7 +940,6 @@ elseif(APPLE)
     ${ND2_LIBRARIES}
     ${HDF5_LIBRARIES}
     ${OpenCV_LIBS}
-    ${HoloPlay_LIBRARIES}
   )
 else()
   target_link_libraries(FluoRender
@@ -958,7 +957,6 @@ else()
     ${ND2_LIBRARIES}
     ${HDF5_LIBRARIES}
     ${OpenCV_LIBS}
-    ${HoloPlay_LIBRARIES}
   )
 endif()
 
