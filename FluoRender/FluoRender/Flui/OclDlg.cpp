@@ -36,24 +36,11 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 #include <compatibility.h>
 
-BEGIN_EVENT_TABLE(OclDlg, wxPanel)
-	EVT_BUTTON(ID_BrowseBtn, OclDlg::OnBrowseBtn)
-	EVT_BUTTON(ID_SaveBtn, OclDlg::OnSaveBtn)
-	EVT_BUTTON(ID_SaveAsBtn, OclDlg::OnSaveAsBtn)
-	EVT_BUTTON(ID_ExecuteBtn, OclDlg::OnExecuteBtn)
-	EVT_BUTTON(ID_ExecuteNBtn, OclDlg::OnExecuteNBtn)
-	EVT_COMMAND_SCROLL(ID_IterationsSldr, OclDlg::OnIterationsChange)
-	EVT_TEXT(ID_IterationsTxt, OclDlg::OnIterationsEdit)
-	EVT_LIST_ITEM_SELECTED(ID_KernelList, OclDlg::OnKernelListSelected)
-END_EVENT_TABLE()
-
 OclDlg::OclDlg(MainFrame* frame) :
-wxPanel(frame, wxID_ANY,
-wxDefaultPosition,
-frame->FromDIP(wxSize(550, 600)),
-0, "OclDlg"),
-m_frame(frame),
-m_view(0)
+	PropPanel(frame, frame,
+	wxDefaultPosition,
+	frame->FromDIP(wxSize(550, 600)),
+	0, "OclDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -67,14 +54,17 @@ m_view(0)
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Kernel file:",
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
-	m_kernel_file_txt = new wxTextCtrl(this, ID_KernelFileTxt, "",
+	m_kernel_file_txt = new wxTextCtrl(this, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
-	m_browse_btn = new wxButton(this, ID_BrowseBtn, "Browse",
+	m_browse_btn = new wxButton(this, wxID_ANY, "Browse",
 		wxDefaultPosition, FromDIP(wxSize(70, 23)));
-	m_save_btn = new wxButton(this, ID_SaveBtn, "Save",
+	m_save_btn = new wxButton(this, wxID_ANY, "Save",
 		wxDefaultPosition, FromDIP(wxSize(70, 23)));
-	m_saveas_btn = new wxButton(this, ID_SaveAsBtn, "Save As",
+	m_saveas_btn = new wxButton(this, wxID_ANY, "Save As",
 		wxDefaultPosition, FromDIP(wxSize(70, 23)));
+	m_browse_btn->Bind(wxEVT_BUTTON, &OclDlg::OnBrowseBtn, this);
+	m_save_btn->Bind(wxEVT_BUTTON, &OclDlg::OnSaveBtn, this);
+	m_saveas_btn->Bind(wxEVT_BUTTON, &OclDlg::OnSaveAsBtn, this);
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_kernel_file_txt, 1, wxEXPAND);
@@ -86,14 +76,18 @@ m_view(0)
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Controls:",
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
-	m_execute_btn = new wxButton(this, ID_ExecuteBtn, "Run",
+	m_execute_btn = new wxButton(this, wxID_ANY, "Run",
 		wxDefaultPosition, FromDIP(wxSize(60, 23)));
-	m_execute_n_btn = new wxButton(this, ID_ExecuteNBtn, "Run N Times",
+	m_execute_n_btn = new wxButton(this, wxID_ANY, "Run N Times",
 		wxDefaultPosition, FromDIP(wxSize(80, 23)));
-	m_iterations_sldr = new wxSingleSlider(this, ID_IterationsSldr, 1, 1, 100,
+	m_iterations_sldr = new wxSingleSlider(this, wxID_ANY, 1, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_iterations_txt = new wxTextCtrl(this, ID_IterationsTxt, "1",
+	m_iterations_txt = new wxTextCtrl(this, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
+	m_execute_btn->Bind(wxEVT_BUTTON, &OclDlg::OnExecuteBtn, this);
+	m_execute_n_btn->Bind(wxEVT_BUTTON, &OclDlg::OnExecuteNBtn, this);
+	m_iterations_sldr->Bind(wxEVT_SCROLL_CHANGED, &OclDlg::OnIterationsChange, this);
+	m_iterations_txt->Bind(wxEVT_TEXT, &OclDlg::OnIterationsEdit, this);
 	sizer_2->Add(5, 5);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_execute_btn, 0, wxALIGN_CENTER);
@@ -104,22 +98,20 @@ m_view(0)
 	sizer_2->Add(5, 5);
 
 	//output
-	m_output_txt = new wxTextCtrl(this, ID_OutputTxt, "",
+	m_output_txt = new wxTextCtrl(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(-1, 100)), wxTE_READONLY|wxTE_MULTILINE);
 
 	//list
-	m_kernel_list = new wxListCtrl(this, ID_KernelList,
+	m_kernel_list = new wxListCtrl(this, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(-1, -1)), wxLC_REPORT | wxLC_SINGLE_SEL);
+	m_kernel_list->Bind(wxEVT_LIST_ITEM_SELECTED, &OclDlg::OnKernelListSelected, this);
 	wxListItem itemCol;
 	itemCol.SetText("Kernel Files");
 	m_kernel_list->InsertColumn(0, itemCol);
 	m_kernel_list->SetColumnWidth(0, 100);
 	//stc
-	m_LineNrID = 0;
-	m_DividerID = 1;
-	m_FoldingID = 2;
 	m_kernel_edit_stc = new wxStyledTextCtrl(
-		this, ID_KernelEditStc,
+		this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize);
 	wxFont font(10, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
 	m_kernel_edit_stc->StyleSetFont(wxSTC_STYLE_DEFAULT, font);
@@ -129,10 +121,10 @@ m_view(0)
 	m_kernel_edit_stc->StyleSetBackground(wxSTC_STYLE_LINENUMBER, *wxWHITE);
 	m_kernel_edit_stc->StyleSetForeground(wxSTC_STYLE_INDENTGUIDE, wxColour(wxT("DARK GREY")));
 	m_kernel_edit_stc->SetLexer(wxSTC_LEX_CPP);
-	m_kernel_edit_stc->SetMarginType(m_LineNrID, wxSTC_MARGIN_NUMBER);
+	m_kernel_edit_stc->SetMarginType(0, wxSTC_MARGIN_NUMBER);
 	m_kernel_edit_stc->StyleSetForeground(wxSTC_STYLE_LINENUMBER, wxColour(wxT("DARK GREY")));
 	m_kernel_edit_stc->StyleSetBackground(wxSTC_STYLE_LINENUMBER, *wxWHITE);
-	m_kernel_edit_stc->SetMarginWidth(m_LineNrID, 50);
+	m_kernel_edit_stc->SetMarginWidth(0, 50);
 	m_kernel_edit_stc->StyleSetBackground(wxSTC_STYLE_LASTPREDEFINED + 1, wxColour(244, 220, 220));
 	m_kernel_edit_stc->StyleSetForeground(wxSTC_STYLE_LASTPREDEFINED + 1, *wxBLACK);
 	m_kernel_edit_stc->StyleSetSizeFractional(wxSTC_STYLE_LASTPREDEFINED + 1,
@@ -156,9 +148,9 @@ m_view(0)
 	// a sample list of keywords, I haven't included them all to keep it short...
 	m_kernel_edit_stc->SetKeyWords(0, wxT("return for while break continue __kernel kernel_main __global"));
 	m_kernel_edit_stc->SetKeyWords(1, wxT("const int float void char double unsigned int4 float4 signed"));
-	m_kernel_edit_stc->SetMarginType(m_FoldingID, wxSTC_MARGIN_SYMBOL);
-	m_kernel_edit_stc->SetMarginMask(m_FoldingID, wxSTC_MASK_FOLDERS);
-	m_kernel_edit_stc->StyleSetBackground(m_FoldingID, *wxWHITE);
+	m_kernel_edit_stc->SetMarginType(2, wxSTC_MARGIN_SYMBOL);
+	m_kernel_edit_stc->SetMarginMask(2, wxSTC_MASK_FOLDERS);
+	m_kernel_edit_stc->StyleSetBackground(2, *wxWHITE);
 	// markers
 	m_kernel_edit_stc->MarkerDefine(wxSTC_MARKNUM_FOLDER, wxSTC_MARK_DOTDOTDOT, wxT("BLACK"), wxT("BLACK"));
 	m_kernel_edit_stc->MarkerDefine(wxSTC_MARKNUM_FOLDEROPEN, wxSTC_MARK_ARROWDOWN, wxT("BLACK"), wxT("BLACK"));
@@ -194,17 +186,103 @@ OclDlg::~OclDlg()
 {
 }
 
-void OclDlg::GetSettings(RenderCanvas* view)
+void OclDlg::FluoUpdate(const fluo::ValueCollection& vc)
 {
-	if (!view) return;
-	m_view = view;
+	//update user interface
+	if (FOUND_VALUE(gstNull))
+		return;
+	bool update_all = vc.empty();
 
-	AddKernelsToList();
+	if (update_all || FOUND_VALUE(gstKernelList))
+		UpdateKernelList();
+
+		
 }
 
-RenderCanvas* OclDlg::GetRenderCanvas()
+void OclDlg::UpdateKernelList()
 {
-	return m_view;
+	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+	exePath = wxPathOnly(exePath);
+	m_kernel_list->DeleteAllItems();
+	wxString loc = exePath + GETSLASH() + "CL_code" +
+		GETSLASH() + "*.cl";
+	wxLogNull logNo;
+	wxArrayString list;
+	wxString file = wxFindFirstFile(loc);
+	while (!file.empty())
+	{
+		file = wxFileNameFromPath(file);
+		file = file.BeforeLast('.');
+		list.Add(file);
+		file = wxFindNextFile();
+	}
+	list.Sort();
+	for (size_t i = 0; i < list.GetCount(); ++i)
+		m_kernel_list->InsertItem(
+			m_kernel_list->GetItemCount(),
+			list[i]);
+}
+
+void OclDlg::Execute()
+{
+	VolumeData* vd = glbin_current.vol_data;
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!vd || ! canvas)
+		return;
+
+	m_output_txt->ChangeValue("");
+
+	//KernelExecutor* executor = m_view->GetKernelExecutor();
+	//if (!executor)
+	//	return;
+
+	//currently, this is expected to be a convolution/filering kernel
+	//get cl code
+	wxString code = m_kernel_edit_stc->GetText();
+
+	//get volume currently selected
+	bool dup = true;
+	wxString vd_name = vd->GetName();
+	if (vd_name.Find("_CL") != wxNOT_FOUND)
+		dup = false;
+
+	glbin_kernel_executor.SetVolume(vd);
+	glbin_kernel_executor.SetCode(code);
+	glbin_kernel_executor.SetDuplicate(dup);
+	glbin_kernel_executor.Execute();
+
+	/*	Texture* tex = vd->GetTexture();
+	void* result = executor->GetResult()->GetTexture()->get_nrrd(0)->data;
+	int res_x, res_y, res_z;
+	vd->GetResolution(res_x, res_y, res_z);
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	min_filter(tex->get_nrrd(0)->data, result,
+	res_x, res_y, res_z);
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
+	(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";*/
+
+	wxString str;
+	glbin_kernel_executor.GetMessage(str);
+	(*m_output_txt) << str;
+
+	//add result for rendering
+	if (dup)
+	{
+		VolumeData* vd_r = glbin_kernel_executor.GetResult(true);
+		if (!vd_r)
+			return;
+		if (m_frame)
+		{
+			glbin_data_manager.AddVolumeData(vd_r);
+			canvas->AddVolumeData(vd_r);
+			vd->SetDisp(false);
+			glbin_current.SetVolumeData(vd_r);
+		}
+	}
+
+	FluoRefresh(1, { gstListCtrl, gstTreeCtrl },
+		{ m_frame->GetRenderCanvas(canvas) });
 }
 
 void OclDlg::OnBrowseBtn(wxCommandEvent& event)
@@ -297,98 +375,6 @@ void OclDlg::OnIterationsEdit(wxCommandEvent& event)
 	m_iterations_sldr->ChangeValue(ival);
 }
 
-void OclDlg::AddKernelsToList()
-{
-	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-	exePath = wxPathOnly(exePath);
-	m_kernel_list->DeleteAllItems();
-	wxString loc = exePath + GETSLASH() + "CL_code" +
-		GETSLASH() + "*.cl";
-	wxLogNull logNo;
-	wxArrayString list;
-	wxString file = wxFindFirstFile(loc);
-	while (!file.empty())
-	{
-		file = wxFileNameFromPath(file);
-		file = file.BeforeLast('.');
-		list.Add(file);
-		file = wxFindNextFile();
-	}
-	list.Sort();
-	for (size_t i = 0; i < list.GetCount(); ++i)
-		m_kernel_list->InsertItem(
-			m_kernel_list->GetItemCount(),
-			list[i]);
-}
-
-void OclDlg::Execute()
-{
-	m_output_txt->ChangeValue("");
-
-	bool refresh = false;
-
-	if (!m_view)
-		return;
-	//KernelExecutor* executor = m_view->GetKernelExecutor();
-	//if (!executor)
-	//	return;
-
-	//currently, this is expected to be a convolution/filering kernel
-	//get cl code
-	wxString code = m_kernel_edit_stc->GetText();
-
-	//get volume currently selected
-	VolumeData* vd = m_view->m_cur_vol;
-	if (!vd)
-		return;
-	bool dup = true;
-	wxString vd_name = vd->GetName();
-	if (vd_name.Find("_CL") != wxNOT_FOUND)
-		dup = false;
-
-	glbin_kernel_executor.SetVolume(vd);
-	glbin_kernel_executor.SetCode(code);
-	glbin_kernel_executor.SetDuplicate(dup);
-	glbin_kernel_executor.Execute();
-
-	/*	Texture* tex = vd->GetTexture();
-	void* result = executor->GetResult()->GetTexture()->get_nrrd(0)->data;
-	int res_x, res_y, res_z;
-	vd->GetResolution(res_x, res_y, res_z);
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	min_filter(tex->get_nrrd(0)->data, result,
-	res_x, res_y, res_z);
-	high_resolution_clock::time_point t2 = high_resolution_clock::now();
-	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
-	(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";*/
-
-	wxString str;
-	glbin_kernel_executor.GetMessage(str);
-	(*m_output_txt) << str;
-
-	//add result for rendering
-	if (dup)
-	{
-		VolumeData* vd_r = glbin_kernel_executor.GetResult(true);
-		if (!vd_r)
-			return;
-		if (m_frame)
-		{
-			glbin_data_manager.AddVolumeData(vd_r);
-			m_view->AddVolumeData(vd_r);
-			vd->SetDisp(false);
-			glbin_current.SetVolumeData(vd_r);
-			refresh = true;
-		}
-	}
-
-	if (refresh)
-	{
-		m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
-		m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(m_view) });
-	}
-}
-
 void OclDlg::OnKernelListSelected(wxListEvent& event)
 {
 	long item = m_kernel_list->GetNextItem(-1,
@@ -408,6 +394,7 @@ void OclDlg::OnKernelListSelected(wxListEvent& event)
 	}
 }
 
+#ifdef _DEBUG
 void OclDlg::copy_filter(void* data, void* result,
 	int brick_x, int brick_y, int brick_z)
 {
@@ -741,4 +728,4 @@ void OclDlg::morph_filter(void* data, void* result,
 		((unsigned char*)result)[index] = rvalue - dvalue;
 	}
 }
-
+#endif

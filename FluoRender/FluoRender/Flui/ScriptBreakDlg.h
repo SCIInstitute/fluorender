@@ -28,23 +28,22 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _SCRIPTBREAK_H_
 #define _SCRIPTBREAK_H_
 
-#include <wx/wx.h>
+#include <PropPanel.h>
 
-class MainFrame;
-class ScriptBreakDlg : public wxPanel
+class ScriptBreakDlg : public PropPanel
 {
 public:
-	enum
-	{
-		ID_ShownChk = ID_SCRIPT_BREAK,
-		ID_StopBtn,
-		ID_ContinueBtn
-	};
+	//enum
+	//{
+	//	ID_ShownChk = ID_SCRIPT_BREAK,
+	//	ID_StopBtn,
+	//	ID_ContinueBtn
+	//};
 	ScriptBreakDlg(MainFrame* frame);
 	~ScriptBreakDlg();
 
-	void SetScriptName(const wxString& str);
-	void SetInfo(const wxString& str);
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+
 	void Hold();
 
 private:
@@ -58,8 +57,6 @@ private:
 	void OnShownChk(wxCommandEvent& event);
 	void OnStopBtn(wxCommandEvent& event);
 	void OnContinueBtn(wxCommandEvent& event);
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_SCRIPTBREAK_H_

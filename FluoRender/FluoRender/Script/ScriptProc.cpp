@@ -2540,8 +2540,7 @@ bool ScriptProc::RunBreak()
 	if (!TimeCondition())
 		return false;
 
-	wxString info;
-	m_fconfig->Read("info", &info, "");
+	m_fconfig->Read("info", &m_info, "");
 	//info.Replace("\n", "\n");
 	bool reset = false;
 	m_fconfig->Read("reset", &reset, false);
@@ -2549,8 +2548,6 @@ bool ScriptProc::RunBreak()
 	ScriptBreakDlg* dlg = m_frame->GetScriptBreakDlg();
 	if (!dlg)
 		return false;
-	dlg->SetScriptName(m_fconfig_name);
-	dlg->SetInfo(info);
 	dlg->Hold();
 	return reset;
 }

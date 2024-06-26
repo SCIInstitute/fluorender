@@ -766,6 +766,11 @@ DEALINGS IN THE SOFTWARE.
 #define gstNrHdrR "nr hdr r"
 #define gstNrHdrG "nr hdr g"
 #define gstNrHdrB "nr hdr b"
+//ocl kernel
+#define gstKernelList "kernel list"
+//script break
+#define gstScriptBreakTitle "script break title"
+#define gstScriptBreakInfo "script break info"
 //recorder agent
 #define gstSelectedKey "selected key"
 //setting agent/root

@@ -28,36 +28,36 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TESTER_H_
 #define _TESTER_H_
 
-#include <wx/wx.h>
-#include <wx/dialog.h>
+#include <PropPanel.h>
 
-class MainFrame;
 class wxSingleSlider;
-class TesterDlg : public wxDialog
+class TesterDlg : public PropPanel
 {
-	enum
-	{
-		ID_P1Slider = ID_TESTER,
-		ID_P1Text,
-		ID_P1Check,
-		ID_P2Slider,
-		ID_P2Text,
-		ID_P2Check,
-		ID_P3Slider,
-		ID_P3Text,
-		ID_P3Check,
-		ID_P4Slider,
-		ID_P4Text,
-		ID_P4Check,
-		//all control
-		ID_AllCheck,
-		//buttons
-		ID_B1Btn
-	};
+	//enum
+	//{
+	//	ID_P1Slider = ID_TESTER,
+	//	ID_P1Text,
+	//	ID_P1Check,
+	//	ID_P2Slider,
+	//	ID_P2Text,
+	//	ID_P2Check,
+	//	ID_P3Slider,
+	//	ID_P3Text,
+	//	ID_P3Check,
+	//	ID_P4Slider,
+	//	ID_P4Text,
+	//	ID_P4Check,
+	//	//all control
+	//	ID_AllCheck,
+	//	//buttons
+	//	ID_B1Btn
+	//};
 
 public:
 	TesterDlg(MainFrame* frame);
 	~TesterDlg();
+
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 	//values
 	double m_p1;
@@ -90,8 +90,6 @@ public:
 	wxButton *m_b1_btn;
 
 private:
-	MainFrame* m_frame;
-
 	//sliders
 	void OnP1Change(wxScrollEvent& event);
 	void OnP2Change(wxScrollEvent& event);
@@ -109,8 +107,6 @@ private:
 
 	//buttons
 	void OnB1(wxCommandEvent& event);
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif//_TESTER_H_

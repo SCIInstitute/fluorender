@@ -29,24 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #define _NOISECANCELLINGDLG_H_
 
 #include <PropPanel.h>
-#include <Color.h>
 
 class wxSingleSlider;
 class NoiseCancellingDlg : public PropPanel
 {
 public:
-	//enum
-	//{
-	//	ID_ThresholdSldr = ID_NOISE_CANCEL,
-	//	ID_ThresholdText,
-	//	ID_VoxelSldr,
-	//	ID_VoxelText,
-	//	ID_CASelectOnlyChk,
-	//	ID_PreviewBtn,
-	//	ID_EraseBtn,
-	//	ID_EnhanceSelChk
-	//};
-
 	NoiseCancellingDlg(MainFrame* frame);
 	~NoiseCancellingDlg();
 

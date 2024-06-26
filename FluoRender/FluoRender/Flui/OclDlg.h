@@ -28,42 +28,23 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _OCLDLG_H_
 #define _OCLDLG_H_
 
-#include <wx/wx.h>
+#include <PropPanel.h>
 #include <wx/stc/stc.h>
 #include <wx/listctrl.h>
 #include <string>
 
-class MainFrame;
-class RenderCanvas;
 class wxSingleSlider;
-class OclDlg : public wxPanel
+class OclDlg : public PropPanel
 {
 public:
-	enum
-	{
-		ID_KernelFileTxt = ID_OCL,
-		ID_BrowseBtn,
-		ID_SaveBtn,
-		ID_SaveAsBtn,
-		ID_ExecuteBtn,
-		ID_ExecuteNBtn,
-		ID_IterationsSldr,
-		ID_IterationsTxt,
-		ID_KernelList,
-		ID_KernelEditStc,
-		ID_OutputTxt
-	};
-
 	OclDlg(MainFrame* frame);
 	~OclDlg();
 
-	void GetSettings(RenderCanvas* view);
-	RenderCanvas* GetRenderCanvas();
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	void UpdateKernelList();
+	void Execute();
 
 private:
-	MainFrame* m_frame;
-	RenderCanvas* m_view;
-
 	//ui
 	wxTextCtrl* m_kernel_file_txt;
 	wxButton* m_browse_btn;
@@ -81,14 +62,17 @@ private:
 	//stc
 	wxStyledTextCtrl* m_kernel_edit_stc;
 
-	int m_LineNrID;
-	int m_DividerID;
-	int m_FoldingID;
-
 private:
-	void AddKernelsToList();
-	void Execute();
+	void OnBrowseBtn(wxCommandEvent& event);
+	void OnSaveBtn(wxCommandEvent& event);
+	void OnSaveAsBtn(wxCommandEvent& event);
+	void OnExecuteBtn(wxCommandEvent& event);
+	void OnExecuteNBtn(wxCommandEvent& event);
+	void OnIterationsChange(wxScrollEvent& event);
+	void OnIterationsEdit(wxCommandEvent& event);
+	void OnKernelListSelected(wxListEvent& event);
 
+#ifdef _DEBUG
 	void copy_filter(void* data, void* result,
 		int brick_x, int brick_y, int brick_z);
 	void box_filter(void* data, void* result,
@@ -105,17 +89,7 @@ private:
 		int brick_x, int brick_y, int brick_z);
 	void morph_filter(void* data, void* result,
 		int brick_x, int brick_y, int brick_z);
-
-	void OnBrowseBtn(wxCommandEvent& event);
-	void OnSaveBtn(wxCommandEvent& event);
-	void OnSaveAsBtn(wxCommandEvent& event);
-	void OnExecuteBtn(wxCommandEvent& event);
-	void OnExecuteNBtn(wxCommandEvent& event);
-	void OnIterationsChange(wxScrollEvent& event);
-	void OnIterationsEdit(wxCommandEvent& event);
-	void OnKernelListSelected(wxListEvent& event);
-
-	DECLARE_EVENT_TABLE()
+#endif
 };
 
 #endif

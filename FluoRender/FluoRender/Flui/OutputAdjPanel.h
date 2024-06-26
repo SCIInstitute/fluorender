@@ -32,7 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Color.h>
 #include <wx/aui/auibook.h>
 
-class MainFrame;
 class RenderCanvas;
 class VolumeData;
 class DataGroup;

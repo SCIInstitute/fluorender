@@ -48,8 +48,8 @@ public:
 				//5-group; 6-mesh group
 };
 
-class MainFrame;
 class VolumeData;
+class TreePanel;
 class DataTreeCtrl: public wxTreeCtrl
 {
 public:

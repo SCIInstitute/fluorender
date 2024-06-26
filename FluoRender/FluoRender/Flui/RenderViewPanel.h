@@ -33,7 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clrpicker.h>
 #include <wx/spinbutt.h>
 
-class MainFrame;
 class RenderCanvas;
 class wxGLContext;
 class wxSingleSlider;

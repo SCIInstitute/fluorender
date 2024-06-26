@@ -26,38 +26,38 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <Tester.h>
+#include <Global.h>
 #include <MainFrame.h>
-#include <tif_reader.h>
 #include <wxSingleSlider.h>
 
-BEGIN_EVENT_TABLE(TesterDlg, wxDialog)
-	//sliders
-	EVT_COMMAND_SCROLL(ID_P1Slider, TesterDlg::OnP1Change)
-	EVT_COMMAND_SCROLL(ID_P2Slider, TesterDlg::OnP2Change)
-	EVT_COMMAND_SCROLL(ID_P3Slider, TesterDlg::OnP3Change)
-	EVT_COMMAND_SCROLL(ID_P4Slider, TesterDlg::OnP4Change)
-	//check boxes
-	EVT_CHECKBOX(ID_P1Check, TesterDlg::OnP1Check)
-	EVT_CHECKBOX(ID_P2Check, TesterDlg::OnP2Check)
-	EVT_CHECKBOX(ID_P3Check, TesterDlg::OnP3Check)
-	EVT_CHECKBOX(ID_P4Check, TesterDlg::OnP4Check)
-	//all control
-	EVT_CHECKBOX(ID_AllCheck, TesterDlg::OnAllCheck)
-	//buttons
-	EVT_BUTTON(ID_B1Btn, TesterDlg::OnB1)
-END_EVENT_TABLE()
+//BEGIN_EVENT_TABLE(TesterDlg, wxDialog)
+//	//sliders
+//	EVT_COMMAND_SCROLL(ID_P1Slider, TesterDlg::OnP1Change)
+//	EVT_COMMAND_SCROLL(ID_P2Slider, TesterDlg::OnP2Change)
+//	EVT_COMMAND_SCROLL(ID_P3Slider, TesterDlg::OnP3Change)
+//	EVT_COMMAND_SCROLL(ID_P4Slider, TesterDlg::OnP4Change)
+//	//check boxes
+//	EVT_CHECKBOX(ID_P1Check, TesterDlg::OnP1Check)
+//	EVT_CHECKBOX(ID_P2Check, TesterDlg::OnP2Check)
+//	EVT_CHECKBOX(ID_P3Check, TesterDlg::OnP3Check)
+//	EVT_CHECKBOX(ID_P4Check, TesterDlg::OnP4Check)
+//	//all control
+//	EVT_CHECKBOX(ID_AllCheck, TesterDlg::OnAllCheck)
+//	//buttons
+//	EVT_BUTTON(ID_B1Btn, TesterDlg::OnB1)
+//END_EVENT_TABLE()
 
 TesterDlg::TesterDlg(MainFrame *frame)
-: wxDialog(frame, wxID_ANY, wxString("Tester"),
+: PropPanel(frame, frame,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(600, 600)),
 	wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER|
-	wxMAXIMIZE_BOX|wxMINIMIZE_BOX),
+	wxMAXIMIZE_BOX|wxMINIMIZE_BOX,
+	wxString("Tester")),
 m_p1(1.0),
 m_p2(0.0),
 m_p3(0.0),
-m_p4(0.0),
-m_frame(frame)
+m_p4(0.0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -144,7 +144,8 @@ m_frame(frame)
 */	
 
 	wxBoxSizer *sizer_v = new wxBoxSizer(wxVERTICAL);
-	m_b1_btn = new wxButton(this, ID_B1Btn, "Click Me");
+	m_b1_btn = new wxButton(this, wxID_ANY, "Click Me");
+	m_b1_btn->Bind(wxEVT_BUTTON, &TesterDlg::TesterDlg::OnB1, this);
 	sizer_v->Add(m_b1_btn, 0);
 
 	SetSizer(sizer_v);
@@ -154,6 +155,14 @@ m_frame(frame)
 
 TesterDlg::~TesterDlg()
 {
+}
+
+void TesterDlg::FluoUpdate(const fluo::ValueCollection& vc)
+{
+	//update user interface
+	if (FOUND_VALUE(gstNull))
+		return;
+	bool update_all = vc.empty();
 }
 
 //sliders

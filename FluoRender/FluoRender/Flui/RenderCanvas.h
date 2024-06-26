@@ -113,7 +113,7 @@ DEALINGS IN THE SOFTWARE.
 #define INFO_Y		64
 #define INFO_Z		128
 
-#define ID_ftrigger	ID_VRENDER_VIEW1
+#define ID_ftrigger	0
 
 using namespace std;
 
@@ -1244,8 +1244,6 @@ private:
 	void ChangeCropFrame(fluo::Point& mp);
 
 	void switchLevel(VolumeData *vd);
-
-	DECLARE_EVENT_TABLE()
 
 	friend class RenderViewPanel;
 };

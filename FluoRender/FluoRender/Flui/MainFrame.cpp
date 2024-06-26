@@ -439,10 +439,6 @@ MainFrame::MainFrame(
 	//tester
 	//shown for testing parameters
 	m_teser_dlg = new TesterDlg(this);
-	if (glbin_settings.m_test_param)
-		m_teser_dlg->Show(true);
-	else
-		m_teser_dlg->Show(false);
 
 	//Add to the manager
 	m_aui_mgr.AddPane(m_main_tb, wxAuiPaneInfo().
@@ -576,6 +572,16 @@ MainFrame::MainFrame(
 		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_script_break_dlg).Float();
 	m_aui_mgr.GetPane(m_script_break_dlg).Hide();
+	//tester
+	m_aui_mgr.AddPane(m_teser_dlg, wxAuiPaneInfo().
+		Name("m_teser_dlg").Caption("Tests").
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
+	m_aui_mgr.GetPane(m_teser_dlg).Float();
+	if (glbin_settings.m_test_param)
+		m_aui_mgr.GetPane(m_script_break_dlg).Show();
+	else
+		m_aui_mgr.GetPane(m_script_break_dlg).Hide();
 
 	for (auto it : m_render_view_panels)
 		it->LoadSettings();
@@ -1322,8 +1328,16 @@ void MainFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, wxWi
 		m_machine_learning_dlg->FluoUpdate(vc);
 	if (update_props(excl_self, m_measure_dlg, panel))
 		m_measure_dlg->FluoUpdate(vc);
+	if (update_props(excl_self, m_noise_cancelling_dlg, panel))
+		m_noise_cancelling_dlg->FluoUpdate(vc);
+	if (update_props(excl_self, m_ocl_dlg, panel))
+		m_ocl_dlg->FluoUpdate(vc);
+	if (update_props(excl_self, m_script_break_dlg, panel))
+		m_script_break_dlg->FluoUpdate(vc);
 	if (update_props(excl_self, m_setting_dlg, panel))
 		m_setting_dlg->FluoUpdate(vc);
+	if (update_props(excl_self, m_teser_dlg, panel))
+		m_teser_dlg->FluoUpdate(vc);
 }
 
 VolumePropPanel* MainFrame::FindVolumeProps(const wxString& name)

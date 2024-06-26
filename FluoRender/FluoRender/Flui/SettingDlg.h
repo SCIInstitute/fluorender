@@ -33,7 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/treectrl.h>
 #include <vector>
 
-class MainFrame;
 class wxSingleSlider;
 class SettingDlg : public PropPanel
 {

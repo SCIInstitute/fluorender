@@ -63,16 +63,6 @@ HCTX RenderCanvas::m_hTab = 0;
 LOGCONTEXTA RenderCanvas::m_lc;
 #endif
 
-BEGIN_EVENT_TABLE(RenderCanvas, wxGLCanvas)
-EVT_PAINT(RenderCanvas::OnDraw)
-EVT_SIZE(RenderCanvas::OnResize)
-EVT_MOUSE_EVENTS(RenderCanvas::OnMouse)
-EVT_IDLE(RenderCanvas::OnIdle)
-EVT_KEY_DOWN(RenderCanvas::OnKeyDown)
-EVT_TIMER(ID_ftrigger, RenderCanvas::OnQuitFscreen)
-EVT_CLOSE(RenderCanvas::OnClose)
-END_EVENT_TABLE()
-
 RenderCanvas::RenderCanvas(MainFrame* frame,
 	RenderViewPanel* parent,
 	const wxGLAttributes& attriblist,
@@ -352,6 +342,21 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	else
 		m_benchmark = false;
 
+	//events
+	Bind(wxEVT_PAINT, &RenderCanvas::OnDraw, this);
+	Bind(wxEVT_SIZE, &RenderCanvas::OnResize, this);
+	Bind(wxEVT_LEFT_DOWN, &RenderCanvas::OnMouse, this);
+	Bind(wxEVT_LEFT_UP, &RenderCanvas::OnMouse, this);
+	Bind(wxEVT_MIDDLE_DOWN, &RenderCanvas::OnMouse, this);
+	Bind(wxEVT_MIDDLE_UP, &RenderCanvas::OnMouse, this);
+	Bind(wxEVT_RIGHT_DOWN, &RenderCanvas::OnMouse, this);
+	Bind(wxEVT_RIGHT_UP, &RenderCanvas::OnMouse, this);
+	Bind(wxEVT_MOTION, &RenderCanvas::OnMouse, this);
+	Bind(wxEVT_MOUSEWHEEL, &RenderCanvas::OnMouse, this);
+	Bind(wxEVT_IDLE, &RenderCanvas::OnIdle, this);
+	Bind(wxEVT_KEY_DOWN, &RenderCanvas::OnKeyDown, this);
+	Bind(wxEVT_CLOSE_WINDOW, &RenderCanvas::OnClose, this);
+	m_fullscreen_trigger.Bind(wxEVT_TIMER, &RenderCanvas::OnQuitFscreen, this);
 }
 
 #ifdef _WIN32

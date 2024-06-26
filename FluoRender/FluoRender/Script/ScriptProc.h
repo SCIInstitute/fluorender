@@ -71,6 +71,8 @@ namespace flrd
 		void SetBreak(bool bval) { m_break = bval; }
 		bool GetBreak() { return m_break; }
 		void SetBreakCount(int val = 0) { m_break_count = val; }
+		wxString GetTitle() { return m_fconfig_name; }
+		wxString GetInfo() { return m_info; }
 
 		//run 4d script
 		//return 0:failure; 1:normal; 2:break
@@ -86,6 +88,7 @@ namespace flrd
 		TimeMask m_time_mask;
 		wxFileConfig *m_fconfig;
 		wxString m_fconfig_name;
+		wxString m_info;
 		bool m_rewind;
 		bool m_break;
 		int m_break_count;

@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TRACEDLG_H_
 #define _TRACEDLG_H_
 
+#include <PropPanel.h>
 #include <Cell.h>
 #include <VolCache.h>
 #include <wx/wx.h>
@@ -37,17 +38,10 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/tglbtn.h>
 #include <vector>
 
-class MainFrame;
-class RenderCanvas;
+class TrackDlg;
 class wxSingleSlider;
 class TraceListCtrl : public wxListCtrl
 {
-	enum
-	{
-		Menu_CopyText = ID_TRACE1,
-		Menu_Delete
-	};
-
 public:
 	TraceListCtrl(MainFrame *frame,
 		wxWindow* parent,
@@ -58,114 +52,111 @@ public:
 
 	void Append(wxString &gtype, unsigned int id, wxColor color,
 		int size, double cx, double cy, double cz);
-	void UpdateTraces(RenderCanvas* vrv=0);
 	void DeleteSelection();
+	void CopySelection();
 	wxString GetText(long item, int col);
 
 	friend class TrackDlg;
 
 private:
-	RenderCanvas *m_view;
 	int m_type;//0-current; 1-previous
-
-private:
-	void OnKeyDown(wxKeyEvent& event);
-	void OnContextMenu(wxContextMenuEvent &event);
-	void OnCopySelection(wxCommandEvent& event);
-	void OnDeleteSelection(wxCommandEvent& event);
-
-	DECLARE_EVENT_TABLE()
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-class TrackDlg : public wxPanel
+class TrackDlg : public PropPanel
 {
 public:
 	enum
 	{
-		//map page
-		//load/save trace
-		ID_LoadTraceText = ID_TRACE2,
-		ID_ClearTraceBtn,
-		ID_LoadTraceBtn,
-		ID_SaveTraceBtn,
-		ID_SaveasTraceBtn,
-		//auto tracking
-		ID_GenMapPrg,
-		ID_GenMapBtn,
-		ID_RefineTBtn,
-		ID_RefineAllBtn,
-		//settings
-		ID_MapIterSpin,
-		ID_MapSizeSpin,
-		ID_MapConsistentBtn,
-		ID_MapMergeBtn,
-		ID_MapSplitBtn,
-		ID_MapSimilarSpin,
-		ID_MapContactSpin,
-		//selection page
-		//component tools
-		ID_CompIDText,
-		ID_CompIDXBtn,
-		ID_CompFullBtn,
-		ID_CompExclusiveBtn,
-		ID_CompAppendBtn,
-		ID_CompClearBtn,
-		ID_ShuffleBtn,
-		//comp size filter
-		ID_CellSizeSldr,
-		ID_CellSizeText,
-		//uncertainty filter
-		ID_CompUncertainBtn,
-		ID_CompUncertainLowSldr,
-		ID_CompUncertainLowText,
-		//link page
-		ID_CompIDText2,
-		ID_CellExclusiveLinkBtn,
-		ID_CellLinkBtn,
-		ID_CellLinkAllBtn,
-		ID_CellIsolateBtn,
-		ID_CellUnlinkBtn,
-		//modify page
-		//ID edit controls
-		ID_CellNewIDText,
-		ID_CellNewIDXBtn,
-		ID_CompAppend2Btn,
-		ID_CellNewIDBtn,
-		ID_CellAppendIDBtn,
-		ID_CellReplaceIDBtn,
-		ID_CellCombineIDBtn,
-		ID_CellSeparateBtn,
-		ID_CellSegBtn,
-		ID_CellSegText,
-		//analysis page
-		//conversion
-		ID_ConvertToRulersBtn,
-		ID_ConvertConsistentBtn,
-		//analysis
-		ID_AnalyzeCompBtn,
-		ID_AnalyzeLinkBtn,
-		ID_AnalyzeUncertainHistBtn,
-		ID_AnalyzePathBtn,
-		ID_SaveResultBtn,
-		//ghost num
-		ID_GhostNumSldr,
-		ID_GhostNumText,
-		ID_GhostShowTailChk,
-		ID_GhostShowLeadChk,
-		//time controls
-		ID_CellPrevBtn,
-		ID_CellNextBtn,
-		//output
-		ID_StatText
+		//menu items
+		ID_CopyText,
+		ID_Delete
 	};
 
+	//enum
+	//{
+	//	//map page
+	//	//load/save trace
+	//	ID_LoadTraceText = ID_TRACE2,
+	//	ID_ClearTraceBtn,
+	//	ID_LoadTraceBtn,
+	//	ID_SaveTraceBtn,
+	//	ID_SaveasTraceBtn,
+	//	//auto tracking
+	//	ID_GenMapPrg,
+	//	ID_GenMapBtn,
+	//	ID_RefineTBtn,
+	//	ID_RefineAllBtn,
+	//	//settings
+	//	ID_MapIterSpin,
+	//	ID_MapSizeSpin,
+	//	ID_MapConsistentBtn,
+	//	ID_MapMergeBtn,
+	//	ID_MapSplitBtn,
+	//	ID_MapSimilarSpin,
+	//	ID_MapContactSpin,
+	//	//selection page
+	//	//component tools
+	//	ID_CompIDText,
+	//	ID_CompIDXBtn,
+	//	ID_CompFullBtn,
+	//	ID_CompExclusiveBtn,
+	//	ID_CompAppendBtn,
+	//	ID_CompClearBtn,
+	//	ID_ShuffleBtn,
+	//	//comp size filter
+	//	ID_CellSizeSldr,
+	//	ID_CellSizeText,
+	//	//uncertainty filter
+	//	ID_CompUncertainBtn,
+	//	ID_CompUncertainLowSldr,
+	//	ID_CompUncertainLowText,
+	//	//link page
+	//	ID_CompIDText2,
+	//	ID_CellExclusiveLinkBtn,
+	//	ID_CellLinkBtn,
+	//	ID_CellLinkAllBtn,
+	//	ID_CellIsolateBtn,
+	//	ID_CellUnlinkBtn,
+	//	//modify page
+	//	//ID edit controls
+	//	ID_CellNewIDText,
+	//	ID_CellNewIDXBtn,
+	//	ID_CompAppend2Btn,
+	//	ID_CellNewIDBtn,
+	//	ID_CellAppendIDBtn,
+	//	ID_CellReplaceIDBtn,
+	//	ID_CellCombineIDBtn,
+	//	ID_CellSeparateBtn,
+	//	ID_CellSegBtn,
+	//	ID_CellSegText,
+	//	//analysis page
+	//	//conversion
+	//	ID_ConvertToRulersBtn,
+	//	ID_ConvertConsistentBtn,
+	//	//analysis
+	//	ID_AnalyzeCompBtn,
+	//	ID_AnalyzeLinkBtn,
+	//	ID_AnalyzeUncertainHistBtn,
+	//	ID_AnalyzePathBtn,
+	//	ID_SaveResultBtn,
+	//	//ghost num
+	//	ID_GhostNumSldr,
+	//	ID_GhostNumText,
+	//	ID_GhostShowTailChk,
+	//	ID_GhostShowLeadChk,
+	//	//time controls
+	//	ID_CellPrevBtn,
+	//	ID_CellNextBtn,
+	//	//output
+	//	ID_StatText
+	//};
 	TrackDlg(MainFrame* frame);
 	~TrackDlg();
 
-	void GetSettings(RenderCanvas* vrv);
-	RenderCanvas* GetRenderCanvas();
+	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	void UpdateList();
+	void UpdateTraces();
 
 	//cell operations
 	void CellUpdate();
@@ -262,7 +253,9 @@ private:
 
 	//link page
 	wxTextCtrl* m_comp_id_text2;
-	//same append button from selection page
+	wxButton* m_comp_id_x_btn2;
+	wxButton* m_comp_append_btn2;
+	wxButton* m_comp_clear_btn2;
 	//ID link controls
 	wxButton* m_cell_exclusive_link_btn;
 	wxButton* m_cell_link_btn;
@@ -274,7 +267,8 @@ private:
 	//ID edit controls
 	wxTextCtrl* m_cell_new_id_text;
 	wxButton* m_cell_new_id_x_btn;
-	wxButton* m_comp_append2_btn;
+	wxButton* m_comp_append_btn3;
+	wxButton* m_comp_clear_btn3;
 	wxButton* m_cell_new_id_btn;
 	wxButton* m_cell_append_id_btn;
 	wxButton* m_cell_replace_id_btn;
@@ -310,6 +304,7 @@ private:
 	//list ctrls
 	TraceListCtrl *m_trace_list_curr;
 	TraceListCtrl *m_trace_list_prev;
+	TraceListCtrl* m_active_list;
 
 	//output
 	wxTextCtrl* m_stat_text;
@@ -403,7 +398,11 @@ private:
 	void OnCellPrev(wxCommandEvent& event);
 	void OnCellNext(wxCommandEvent& event);
 
-	DECLARE_EVENT_TABLE()
+	//list
+	void OnSelectionChanged(wxListEvent& event);
+	void OnContextMenu(wxContextMenuEvent& event);
+	void OnMenuItem(wxCommandEvent& event);
+	void OnKeyDown(wxKeyEvent& event);
 };
 
 #endif//_TRACEDLG_H_
