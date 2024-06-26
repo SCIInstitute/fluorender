@@ -132,6 +132,7 @@ add_definitions(-DLX_STATIC_LINKING)
 add_definitions(-DTEEM_DIO=0)
 add_definitions(-DTEEM_ENDIAN=1234)
 add_definitions(-DTEEM_QNANHIBIT=1)
+add_definitions(-DTEEM_ZLIB=1)
 
 # glm
 add_definitions(-DGLM_FORCE_RADIANS=1)
@@ -884,9 +885,6 @@ endif()
 if(APPLE)
   set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -L/usr/lib ${CMAKE_EXE_LINKER_FLAGS} -liconv -lbz2 -framework OpenCL -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration -framework VideoToolbox -framework Security -framework CoreMedia")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.11 -DWX_PRECOMP -std=c++11 -stdlib=libc++")
-  string(REGEX REPLACE "/usr/local/lib/libfreetype.dylib" "/usr/local/lib/libfreetype.a"
-    FREETYPE_LIBRARIES ${FREETYPE_LIBRARIES})
-  message(STATUS "${FREETYPE_LIBRARIES}")
 elseif(UNIX OR MINGW)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread -ldl")
 endif()
