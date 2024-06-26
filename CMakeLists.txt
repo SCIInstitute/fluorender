@@ -578,6 +578,10 @@ file(GLOB vid_hdr FluoRender/FluoRender/Video/*.h)
 add_library(VIDEO_OBJ OBJECT
   ${vid_src} ${vid_hdr})
 
+# other sources
+file(GLOB src FluoRender/FluoRender/*.cpp)
+file(GLOB hdr FluoRender/FluoRender/*.h)
+
 # SynthBB
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/SynthBB)
 file(GLOB synthbb_hdr FluoRender/SynthBB/*.h)
