@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TRACEDLG_H_
 #define _TRACEDLG_H_
 
-#include <Main.h>
 #include <Cell.h>
 #include <VolCache.h>
 #include <wx/wx.h>
@@ -37,8 +36,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/notebook.h>
 #include <wx/tglbtn.h>
 #include <vector>
-
-using namespace std;
 
 class MainFrame;
 class RenderCanvas;
@@ -81,7 +78,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-DECLARE_APP(FluoRenderApp)
 class TrackDlg : public wxPanel
 {
 public:

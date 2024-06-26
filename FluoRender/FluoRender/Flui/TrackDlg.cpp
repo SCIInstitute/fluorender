@@ -1378,7 +1378,7 @@ void TrackDlg::OnConvertConsistent(wxCommandEvent& event)
 		return;
 
 	m_stat_text->ChangeValue("Generating consistent IDs in");
-	wxGetApp().Yield();
+	//wxGetApp().Yield();
 
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
 	glbin_trackmap_proc.SetTrackMap(track_map);
@@ -1394,14 +1394,14 @@ void TrackDlg::OnConvertConsistent(wxCommandEvent& event)
 	glbin_cache_queue.set_max_size(2);
 
 	(*m_stat_text) << wxString::Format("Frame %d\n", 0);
-	wxGetApp().Yield();
+	//wxGetApp().Yield();
 	glbin_trackmap_proc.MakeConsistent(0);
 
 	//remaining frames
 	for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
 	{
 		(*m_stat_text) << wxString::Format("Frame %d\n", int(fi));
-		wxGetApp().Yield();
+		//wxGetApp().Yield();
 		glbin_trackmap_proc.MakeConsistent(fi - 1, fi);
 	}
 
@@ -2629,7 +2629,7 @@ void TrackDlg::GenMap()
 
 	//start progress
 	m_stat_text->ChangeValue("Generating track map.\n");
-	wxGetApp().Yield();
+	//wxGetApp().Yield();
 	int frames = reader->GetTimeNum();
 
 	//get and set parameters
@@ -2660,7 +2660,7 @@ void TrackDlg::GenMap()
 	{
 		glbin_trackmap_proc.InitializeFrame(i);
 		(*m_stat_text) << wxString::Format("Time point %d initialized.\n", i);
-		wxGetApp().Yield();
+		//wxGetApp().Yield();
 
 		if (i < 1)
 			continue;
@@ -2668,13 +2668,13 @@ void TrackDlg::GenMap()
 		//link maps 1 and 2
 		glbin_trackmap_proc.LinkFrames(i - 1, i);
 		(*m_stat_text) << wxString::Format("Time point %d linked.\n", i);
-		wxGetApp().Yield();
+		//wxGetApp().Yield();
 
 		//check contacts and merge cells
 		glbin_trackmap_proc.ResolveGraph(i - 1, i);
 		glbin_trackmap_proc.ResolveGraph(i, i - 1);
 		(*m_stat_text) << wxString::Format("Time point %d merged.\n", i - 1);
-		wxGetApp().Yield();
+		//wxGetApp().Yield();
 
 		if (i < 2)
 			continue;
@@ -2683,13 +2683,13 @@ void TrackDlg::GenMap()
 		glbin_trackmap_proc.ProcessFrames(i - 2, i - 1);
 		glbin_trackmap_proc.ProcessFrames(i - 1, i - 2);
 		(*m_stat_text) << wxString::Format("Time point %d processed.\n", i - 1);
-		wxGetApp().Yield();
+		//wxGetApp().Yield();
 	}
 	//last frame
 	glbin_trackmap_proc.ProcessFrames(frames - 2, frames - 1);
 	glbin_trackmap_proc.ProcessFrames(frames - 1, frames - 2);
 	(*m_stat_text) << wxString::Format("Time point %d processed.\n", frames - 1);
-	wxGetApp().Yield();
+	//wxGetApp().Yield();
 
 	//iterations
 	for (size_t iteri = 0; iteri < glbin_settings.m_track_iter; ++iteri)
@@ -2700,7 +2700,7 @@ void TrackDlg::GenMap()
 			glbin_trackmap_proc.ProcessFrames(i - 2, i - 1);
 			glbin_trackmap_proc.ProcessFrames(i - 1, i - 2);
 			(*m_stat_text) << wxString::Format("Time point %d processed.\n", i - 1);
-			wxGetApp().Yield();
+			//wxGetApp().Yield();
 		}
 	}
 
@@ -2708,13 +2708,13 @@ void TrackDlg::GenMap()
 	if (glbin_settings.m_consistent_color)
 	{
 		(*m_stat_text) << wxString::Format("Set colors for frame 0\n");
-		wxGetApp().Yield();
+		//wxGetApp().Yield();
 		glbin_trackmap_proc.MakeConsistent(0);
 		//remaining frames
 		for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
 		{
 			(*m_stat_text) << wxString::Format("Set colors for frame %d\n", int(fi));
-			wxGetApp().Yield();
+			//wxGetApp().Yield();
 			glbin_trackmap_proc.MakeConsistent(fi - 1, fi);
 		}
 	}
@@ -2745,7 +2745,7 @@ void TrackDlg::RefineMap(int t, bool erase_v)
 	else
 		m_stat_text->ChangeValue(wxString::Format(
 			"Refining track map at time point %d.\n", t));
-	wxGetApp().Yield();
+	//wxGetApp().Yield();
 
 	//start progress
 	bool clear_counters = false;
@@ -2794,7 +2794,7 @@ void TrackDlg::RefineMap(int t, bool erase_v)
 			glbin_trackmap_proc.ProcessFrames(i, i + 1, erase_v);
 			glbin_trackmap_proc.ProcessFrames(i + 1, i, erase_v);
 			(*m_stat_text) << wxString::Format("Time point %d processed.\n", i + 1);
-			wxGetApp().Yield();
+			//wxGetApp().Yield();
 		}
 	}
 
@@ -2804,13 +2804,13 @@ void TrackDlg::RefineMap(int t, bool erase_v)
 		if (t < 0)
 		{
 			(*m_stat_text) << wxString::Format("Set colors for frame 0\n");
-			wxGetApp().Yield();
+			//wxGetApp().Yield();
 			glbin_trackmap_proc.MakeConsistent(0);
 			//remaining frames
 			for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
 			{
 				(*m_stat_text) << wxString::Format("Set colors for frame %d\n", int(fi));
-				wxGetApp().Yield();
+				//wxGetApp().Yield();
 				glbin_trackmap_proc.MakeConsistent(fi - 1, fi);
 			}
 		}

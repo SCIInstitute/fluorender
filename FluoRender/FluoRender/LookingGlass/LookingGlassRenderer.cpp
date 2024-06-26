@@ -51,6 +51,7 @@ LookingGlassRenderer::~LookingGlassRenderer()
 
 bool LookingGlassRenderer::Init()
 {
+#ifdef _WIN32
 	if (m_initialized)
 		return true;
 	hpc_client_error errco = hpc_InitializeApp("FluoRender", hpc_LICENSE_NONCOMMERCIAL);
@@ -101,19 +102,25 @@ bool LookingGlassRenderer::Init()
 	m_viewCone = hpc_GetDevicePropertyFloat(m_dev_index, "/calibration/viewCone/value");
 	m_initialized = true;
 	return true;
+#else
+	return false;
+#endif
 }
 
 void LookingGlassRenderer::Close()
 {
+#ifdef _WIN32
 	if (m_initialized)
 	{
 		hpc_CloseApp();
 		m_initialized = false;
 	}
+#endif
 }
 
 int LookingGlassRenderer::GetDisplayId()
 {
+#ifdef _WIN32
 	if (!m_initialized)
 		return 0;
 
@@ -127,6 +134,7 @@ int LookingGlassRenderer::GetDisplayId()
 	int id = wxDisplay::GetFromPoint(wxPoint(x + w / 2, y + h / 2));
 	if (id != wxNOT_FOUND)
 		return id;
+#endif
 	return 0;
 }
 
@@ -166,6 +174,7 @@ void LookingGlassRenderer::SetPreset(int val)
 
 void LookingGlassRenderer::Setup()
 {
+#ifdef _WIN32
 	//set up framebuffer for quilt
 	flvr::Framebuffer* quilt_buffer =
 		glbin_framebuffer_manager.framebuffer(
@@ -207,6 +216,7 @@ void LookingGlassRenderer::Setup()
 	shader->setLocalParamInt4(0, invView, ri, bi, quiltInvert);
 
 	shader->release();
+#endif
 }
 
 void LookingGlassRenderer::Clear()
