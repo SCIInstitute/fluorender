@@ -879,6 +879,15 @@ void Project::Open(wxString& filename)
 				}
 			}
 
+			//tracking group
+			if (fconfig.Exists(wxString::Format("/views/%d/track_group", i)))
+			{
+				if (fconfig.Read("track_file", &str))
+				{
+					canvas->LoadTrackGroup(str);
+				}
+			}
+
 			//properties
 			if (fconfig.Exists(wxString::Format("/views/%d/properties", i)))
 			{
@@ -1190,18 +1199,6 @@ void Project::Open(wxString& filename)
 		if (fconfig.Read("script_file", &sVal))
 			glbin_settings.m_script_file = sVal;
 		frame->GetMoviePanel()->FluoUpdate();
-	}
-
-	//tracking diag
-	if (fconfig.Exists("/track_diag"))
-	{
-		fconfig.SetPath("/track_diag");
-		wxString sVal;
-		if (fconfig.Read("track_file", &sVal))
-		{
-			frame->GetTrackDlg()->GetSettings(frame->GetRenderCanvas(0));
-			frame->GetTrackDlg()->LoadTrackFile(sVal);
-		}
 	}
 
 	//ui layout
@@ -1798,6 +1795,20 @@ void Project::Save(wxString& filename, bool inc)
 				}
 			}
 
+			//tracking group
+			fconfig.SetPath("/views/%d/track_group");
+			int ival = canvas->GetTrackFileExist(true);
+			if (ival == 1)
+			{
+				wxString new_folder;
+				new_folder = filename2 + "_files";
+				MkDirW(new_folder.ToStdWstring());
+				std::wstring wstr = filename2.ToStdWstring();
+				str = new_folder + GETSLASH() + GET_NAME(wstr) + ".track";
+				canvas->SaveTrackGroup(str);
+			}
+			fconfig.Write("track_file", canvas->GetTrackGroupFile());
+
 			//properties
 			fconfig.SetPath(wxString::Format("/views/%d/properties", i));
 			fconfig.Write("drawall", canvas->GetDraw());
@@ -1923,19 +1934,6 @@ void Project::Save(wxString& filename, bool inc)
 	fconfig.Write("end_frame", glbin_moviemaker.GetClipEndFrame());
 	fconfig.Write("run_script", glbin_settings.m_run_script);
 	fconfig.Write("script_file", glbin_settings.m_script_file);
-	//tracking diag
-	fconfig.SetPath("/track_diag");
-	int ival = frame->GetTrackDlg()->GetTrackFileExist(true);
-	if (ival == 1)
-	{
-		wxString new_folder;
-		new_folder = filename2 + "_files";
-		MkDirW(new_folder.ToStdWstring());
-		std::wstring wstr = filename2.ToStdWstring();
-		str = new_folder + GETSLASH() + GET_NAME(wstr) + ".track";
-		frame->GetTrackDlg()->SaveTrackFile(str);
-	}
-	fconfig.Write("track_file", frame->GetTrackDlg()->GetTrackFile());
 	//layout
 	fconfig.SetPath("/ui_layout");
 	fconfig.Write("dpi scale factor", frame->GetDPIScaleFactor());
@@ -2054,6 +2052,5 @@ void Project::Reset()
 	glbin_moviemaker.Stop();
 	glbin_moviemaker.SetView(frame->GetRenderCanvas(0));
 	glbin_mov_def.Apply(&glbin_moviemaker);
-	frame->GetTrackDlg()->GetSettings(frame->GetRenderCanvas(0));
 	glbin_interpolator.Clear();
 }

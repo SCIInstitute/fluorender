@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 #include <Cell.h>
-#include <VolCache.h>
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <wx/spinctrl.h>
@@ -73,84 +72,6 @@ public:
 		ID_Delete
 	};
 
-	//enum
-	//{
-	//	//map page
-	//	//load/save trace
-	//	ID_LoadTraceText = ID_TRACE2,
-	//	ID_ClearTraceBtn,
-	//	ID_LoadTraceBtn,
-	//	ID_SaveTraceBtn,
-	//	ID_SaveasTraceBtn,
-	//	//auto tracking
-	//	ID_GenMapPrg,
-	//	ID_GenMapBtn,
-	//	ID_RefineTBtn,
-	//	ID_RefineAllBtn,
-	//	//settings
-	//	ID_MapIterSpin,
-	//	ID_MapSizeSpin,
-	//	ID_MapConsistentBtn,
-	//	ID_MapMergeBtn,
-	//	ID_MapSplitBtn,
-	//	ID_MapSimilarSpin,
-	//	ID_MapContactSpin,
-	//	//selection page
-	//	//component tools
-	//	ID_CompIDText,
-	//	ID_CompIDXBtn,
-	//	ID_CompFullBtn,
-	//	ID_CompExclusiveBtn,
-	//	ID_CompAppendBtn,
-	//	ID_CompClearBtn,
-	//	ID_ShuffleBtn,
-	//	//comp size filter
-	//	ID_CellSizeSldr,
-	//	ID_CellSizeText,
-	//	//uncertainty filter
-	//	ID_CompUncertainBtn,
-	//	ID_CompUncertainLowSldr,
-	//	ID_CompUncertainLowText,
-	//	//link page
-	//	ID_CompIDText2,
-	//	ID_CellExclusiveLinkBtn,
-	//	ID_CellLinkBtn,
-	//	ID_CellLinkAllBtn,
-	//	ID_CellIsolateBtn,
-	//	ID_CellUnlinkBtn,
-	//	//modify page
-	//	//ID edit controls
-	//	ID_CellNewIDText,
-	//	ID_CellNewIDXBtn,
-	//	ID_CompAppend2Btn,
-	//	ID_CellNewIDBtn,
-	//	ID_CellAppendIDBtn,
-	//	ID_CellReplaceIDBtn,
-	//	ID_CellCombineIDBtn,
-	//	ID_CellSeparateBtn,
-	//	ID_CellSegBtn,
-	//	ID_CellSegText,
-	//	//analysis page
-	//	//conversion
-	//	ID_ConvertToRulersBtn,
-	//	ID_ConvertConsistentBtn,
-	//	//analysis
-	//	ID_AnalyzeCompBtn,
-	//	ID_AnalyzeLinkBtn,
-	//	ID_AnalyzeUncertainHistBtn,
-	//	ID_AnalyzePathBtn,
-	//	ID_SaveResultBtn,
-	//	//ghost num
-	//	ID_GhostNumSldr,
-	//	ID_GhostNumText,
-	//	ID_GhostShowTailChk,
-	//	ID_GhostShowLeadChk,
-	//	//time controls
-	//	ID_CellPrevBtn,
-	//	ID_CellNextBtn,
-	//	//output
-	//	ID_StatText
-	//};
 	TrackDlg(MainFrame* frame);
 	~TrackDlg();
 
@@ -158,33 +79,21 @@ public:
 	void UpdateList();
 	void UpdateTraces();
 
+	void LoadTrackFile(const wxString &file);
+	bool SaveTrackFile();
+	void SaveTrackFile(const wxString &file);
+	void SaveasTrackFile();
+
 	//cell operations
-	void CellUpdate();
-	void CellFull();
-	void CellLink(bool exclusive);
-	void CellNewID(bool append);
 	void CellEraseID();
 	void CellReplaceID();
 	void CellCombineID();
 	void CompDelete();
-	void CompClear();
-	//uncertain filtering
-	void UncertainFilter(bool input = false);
 	//link for external call
 	void LinkAddedCells(flrd::CelpList &list);
 
 	//measurement
 	void SaveOutputResult(wxString &filename);
-
-	//automatic tracking
-	void GenMap();
-	void RefineMap(int t=-1, bool erase_v=true);
-
-	//track map file
-	int GetTrackFileExist(bool save);//0:no trace group; 1:trace groups exists not saved; 2:saved
-	wxString GetTrackFile();
-	void LoadTrackFile(wxString &file);
-	void SaveTrackFile(wxString &file);
 
 private:
 	typedef struct
@@ -195,25 +104,11 @@ private:
 		int contact_num;
 	} comp_info;
 
-	MainFrame* m_frame;
-	//current view
-	RenderCanvas* m_view;
+	wxString m_comp_id;//select
+	wxString m_comp_id3;//modify / new id
+
 	//tab control
 	wxNotebook *m_notebook;
-
-	//time sequence setting
-	int m_cur_time;
-	int m_prv_time;
-
-	//cluster number
-	int m_clnum;
-
-	wxString m_track_file;
-
-	//ids
-	unsigned int m_cell_new_id;
-	bool m_cell_new_id_empty;
-
 	//map page
 	//load/save trace
 	wxTextCtrl* m_load_trace_text;
@@ -275,7 +170,7 @@ private:
 	wxButton* m_cell_combine_id_btn;
 	wxButton* m_cell_separate_id_btn;
 	wxButton* m_cell_segment_btn;
-	wxSpinCtrl* m_cell_segment_text;
+	wxSpinCtrl* m_cell_segment_spin;
 
 	//analysis page
 	//conversion
@@ -310,18 +205,12 @@ private:
 	wxTextCtrl* m_stat_text;
 
 private:
-	void AddLabel(long item, TraceListCtrl* trace_list_ctrl, flrd::CelpList &list);
 	wxWindow* CreateMapPage(wxWindow *parent);
 	wxWindow* CreateSelectPage(wxWindow *parent);
 	wxWindow* CreateLinkPage(wxWindow *parent);
 	wxWindow* CreateModifyPage(wxWindow *parent);
 	wxWindow* CreateAnalysisPage(wxWindow *parent);
 
-	//read/delete volume cache from file
-	void ReadVolCache(flrd::VolCache& vol_cache);
-	void DelVolCache(flrd::VolCache& vol_cache);
-
-private:
 	//map page
 	//load/save trace
 	void OnClearTrace(wxCommandEvent& event);
@@ -362,6 +251,8 @@ private:
 	void OnCompUncertainLowText(wxCommandEvent& event);
 	//link page
 	//ID lnik controls
+	void OnCompId2Text(wxCommandEvent& event);
+	void OnCompId2XBtn(wxCommandEvent& event);
 	void OnCellExclusiveLink(wxCommandEvent& event);
 	void OnCellLink(wxCommandEvent& event);
 	void OnCellLinkAll(wxCommandEvent& event);
@@ -389,6 +280,7 @@ private:
 	void OnAnalyzeUncertainHist(wxCommandEvent& event);
 	void OnAnalyzePath(wxCommandEvent& event);
 	void OnSaveResult(wxCommandEvent& event);
+
 	//ghost number
 	void OnGhostNumChange(wxScrollEvent& event);
 	void OnGhostNumText(wxCommandEvent& event);
@@ -399,6 +291,7 @@ private:
 	void OnCellNext(wxCommandEvent& event);
 
 	//list
+	void AddLabel(long item, TraceListCtrl* trace_list_ctrl, flrd::CelpList& list);
 	void OnSelectionChanged(wxListEvent& event);
 	void OnContextMenu(wxContextMenuEvent& event);
 	void OnMenuItem(wxCommandEvent& event);

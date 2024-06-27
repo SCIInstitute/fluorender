@@ -943,11 +943,11 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class TraceGroup : public TreeLayer
+class TrackGroup : public TreeLayer
 {
 public:
-	TraceGroup();
-	virtual ~TraceGroup();
+	TrackGroup();
+	virtual ~TrackGroup();
 
 	//reset counter
 	static void ResetID()
@@ -1348,6 +1348,7 @@ struct CurrentObjects
 
 	flrd::RulerList* GetRulerList();
 	flrd::Ruler* GetRuler();
+	TrackGroup* GetTrackGroup();
 
 	MainFrame* mainframe;//this is temporary before a global scenegraph is added
 	RenderCanvas* canvas;

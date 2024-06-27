@@ -125,11 +125,11 @@ void ComponentEditor::NewId(bool append, bool track)
 		return;
 
 	//trace group
-	TraceGroup *trace_group = view->GetTraceGroup();
-	if (!trace_group)
+	TrackGroup *trkg = view->GetTrackGroup();
+	if (!trkg)
 	{
-		view->CreateTraceGroup();
-		trace_group = view->GetTraceGroup();
+		view->CreateTrackGroup();
+		trkg = view->GetTrackGroup();
 	}
 
 	VolumeData* vd = glbin_current.vol_data;
@@ -256,8 +256,8 @@ void ComponentEditor::NewId(bool append, bool track)
 
 	if (new_id && track)
 	{
-		//trace_group->AddCell(cell, m_cur_time);
-		pTrackMap track_map = trace_group->GetTrackMap();
+		//trkg->AddCell(cell, m_cur_time);
+		pTrackMap track_map = trkg->GetTrackMap();
 		glbin_trackmap_proc.SetTrackMap(track_map);
 		//register file reading and deleteing functions
 		glbin_reg_cache_queue_func(this, ComponentEditor::ReadVolCache, ComponentEditor::DelVolCache);
@@ -333,8 +333,8 @@ void ComponentEditor::Replace(CelpList &list)
 		return;
 
 	//trace group
-	TraceGroup *trace_group = view->GetTraceGroup();
-	bool track_map = trace_group && trace_group->GetTrackMap()->GetFrameNum();
+	TrackGroup *trkg = view->GetTrackGroup();
+	bool track_map = trkg && trkg->GetTrackMap()->GetFrameNum();
 	int cur_time = glbin_moviemaker.GetSeqCurNum();
 
 	//get current mask
@@ -390,7 +390,7 @@ void ComponentEditor::Replace(CelpList &list)
 			list_rep.insert(pair<unsigned int, unsigned int>
 				(old_id, new_id));
 			if (track_map)
-				trace_group->ReplaceCellID(old_id, new_id,
+				trkg->ReplaceCellID(old_id, new_id,
 					cur_time);
 			data_label[index] = new_id;
 		}
@@ -460,8 +460,8 @@ void ComponentEditor::Combine(CelpList &list)
 	if (list.size() <= 1)
 		return;//nothing to combine
 	//trace group
-	TraceGroup *trace_group = view->GetTraceGroup();
-	if (!trace_group)
+	TrackGroup *trkg = view->GetTrackGroup();
+	if (!trkg)
 		return;
 	int cur_time = glbin_moviemaker.GetSeqCurNum();
 
@@ -521,7 +521,7 @@ void ComponentEditor::Combine(CelpList &list)
 	vd->SaveLabel(true, cur_time, vd->GetCurChannel());
 
 	//modify graphs
-	trace_group->CombineCells(cell, list,
+	trkg->CombineCells(cell, list,
 		cur_time);
 }
 

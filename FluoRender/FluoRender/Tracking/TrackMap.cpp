@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <TrackMap.h>
 #include <Global.h>
+#include <RenderCanvas.h>
 #include <Stencil.h>
 #include <dbscan.h>
 #include <kmeans.h>
@@ -58,7 +59,234 @@ TrackMap::~TrackMap()
 {
 }
 
-void TrackMapProcessor::SetTrackMap(pTrackMap& map)
+//auto tracking
+void TrackMapProcessor::GenMap()
+{
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
+	//get trace group
+	canvas->CreateTrackGroup();
+	TrackGroup* trkg = canvas->GetTrackGroup();
+	if (!trkg)
+		return;
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
+		return;
+	BaseReader* reader = vd->GetReader();
+	if (!reader)
+		return;
+
+	//start progress
+	//m_stat_text->ChangeValue("Generating track map.\n");
+	//wxGetApp().Yield();
+	int frames = reader->GetTimeNum();
+
+	//get and set parameters
+	flrd::pTrackMap track_map = trkg->GetTrackMap();
+	SetTrackMap(track_map);
+	int resx, resy, resz;
+	vd->GetResolution(resx, resy, resz);
+	double spcx, spcy, spcz;
+	vd->GetSpacings(spcx, spcy, spcz);
+	SetBits(vd->GetBits());
+	SetScale(vd->GetScalarScale());
+	SetSizes(resx, resy, resz);
+	SetSpacings(spcx, spcy, spcz);
+	SetSizeThresh(glbin_settings.m_component_size);
+	SetContactThresh(glbin_settings.m_contact_factor);
+	SetSimilarThresh(glbin_settings.m_similarity);
+	//register file reading and deleteing functions
+	glbin_reg_cache_queue_func(this, TrackMapProcessor::ReadVolCache, TrackMapProcessor::DelVolCache);
+	glbin_cache_queue.set_max_size(4);
+	//merge/split
+	SetMerge(glbin_settings.m_try_merge);
+	SetSplit(glbin_settings.m_try_split);
+
+	//start timing
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+	//initialization
+	for (int i = 0; i < frames; ++i)
+	{
+		InitializeFrame(i);
+		//(*m_stat_text) << wxString::Format("Time point %d initialized.\n", i);
+		//wxGetApp().Yield();
+
+		if (i < 1)
+			continue;
+
+		//link maps 1 and 2
+		LinkFrames(i - 1, i);
+		//(*m_stat_text) << wxString::Format("Time point %d linked.\n", i);
+		//wxGetApp().Yield();
+
+		//check contacts and merge cells
+		ResolveGraph(i - 1, i);
+		ResolveGraph(i, i - 1);
+		//(*m_stat_text) << wxString::Format("Time point %d merged.\n", i - 1);
+		//wxGetApp().Yield();
+
+		if (i < 2)
+			continue;
+
+		//further process
+		ProcessFrames(i - 2, i - 1);
+		ProcessFrames(i - 1, i - 2);
+		//(*m_stat_text) << wxString::Format("Time point %d processed.\n", i - 1);
+		//wxGetApp().Yield();
+	}
+	//last frame
+	ProcessFrames(frames - 2, frames - 1);
+	ProcessFrames(frames - 1, frames - 2);
+	//(*m_stat_text) << wxString::Format("Time point %d processed.\n", frames - 1);
+	//wxGetApp().Yield();
+
+	//iterations
+	for (size_t iteri = 0; iteri < glbin_settings.m_track_iter; ++iteri)
+	{
+		for (int i = 2; i <= frames; ++i)
+		{
+			//further process
+			ProcessFrames(i - 2, i - 1);
+			ProcessFrames(i - 1, i - 2);
+			//(*m_stat_text) << wxString::Format("Time point %d processed.\n", i - 1);
+			//wxGetApp().Yield();
+		}
+	}
+
+	//consistent colors
+	if (glbin_settings.m_consistent_color)
+	{
+		//(*m_stat_text) << wxString::Format("Set colors for frame 0\n");
+		//wxGetApp().Yield();
+		MakeConsistent(0);
+		//remaining frames
+		for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
+		{
+			//(*m_stat_text) << wxString::Format("Set colors for frame %d\n", int(fi));
+			//wxGetApp().Yield();
+			MakeConsistent(fi - 1, fi);
+		}
+	}
+
+	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> time_span = duration_cast<std::chrono::duration<double>>(t2 - t1);
+	//(*m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
+
+	//GetSettings(m_view);
+
+	canvas->GetTraces(false);
+}
+
+void TrackMapProcessor::RefineMap(int t, bool erase_v)
+{
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
+
+	//get trace group
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
+		return;
+	TrackGroup* trkg = canvas->GetTrackGroup();
+	if (!trkg)
+		return;
+	//if (t < 0)
+	//	m_stat_text->ChangeValue("Refining track map for all time points.\n");
+	//else
+	//	m_stat_text->ChangeValue(wxString::Format(
+	//		"Refining track map at time point %d.\n", t));
+	//wxGetApp().Yield();
+
+	//start progress
+	bool clear_counters = false;
+	flrd::pTrackMap track_map = trkg->GetTrackMap();
+	int start_frame, end_frame;
+	if (t < 0)
+	{
+		start_frame = 0;
+		end_frame = track_map->GetFrameNum() - 1;
+		clear_counters = true;
+	}
+	else
+		start_frame = end_frame = t;
+
+	//get and set parameters
+	SetTrackMap(track_map);
+	int resx, resy, resz;
+	vd->GetResolution(resx, resy, resz);
+	double spcx, spcy, spcz;
+	vd->GetSpacings(spcx, spcy, spcz);
+	SetBits(vd->GetBits());
+	SetScale(vd->GetScalarScale());
+	SetSizes(resx, resy, resz);
+	SetSpacings(spcx, spcy, spcz);
+	SetSizeThresh(glbin_settings.m_component_size);
+	SetContactThresh(glbin_settings.m_contact_factor);
+	SetSimilarThresh(glbin_settings.m_similarity);
+	//register file reading and deleteing functions
+	glbin_reg_cache_queue_func(this, TrackMapProcessor::ReadVolCache, TrackMapProcessor::DelVolCache);
+	glbin_cache_queue.set_max_size(4);
+	//merge/split
+	SetMerge(glbin_settings.m_try_merge);
+	SetSplit(glbin_settings.m_try_split);
+
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+
+	//not sure if counters need to be cleared for all refinement
+	//if (clear_counters)
+	//	ClearCounters();
+	//iterations
+	for (size_t iteri = 0; iteri < glbin_settings.m_track_iter; ++iteri)
+	{
+		for (int i = start_frame - 1; i <= end_frame; ++i)
+		{
+			//further process
+			ProcessFrames(i, i + 1, erase_v);
+			ProcessFrames(i + 1, i, erase_v);
+			//(*m_stat_text) << wxString::Format("Time point %d processed.\n", i + 1);
+			//wxGetApp().Yield();
+		}
+	}
+
+	//consistent colors
+	if (glbin_settings.m_consistent_color)
+	{
+		if (t < 0)
+		{
+			//(*m_stat_text) << wxString::Format("Set colors for frame 0\n");
+			//wxGetApp().Yield();
+			MakeConsistent(0);
+			//remaining frames
+			for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
+			{
+				//(*m_stat_text) << wxString::Format("Set colors for frame %d\n", int(fi));
+				//wxGetApp().Yield();
+				MakeConsistent(fi - 1, fi);
+			}
+		}
+		else
+		{
+			MakeConsistent(t - 1, t);
+		}
+	}
+
+	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> time_span = duration_cast<std::chrono::duration<double>>(t2 - t1);
+	//(*m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
+
+	canvas->GetTraces(false);
+}
+
+void TrackMapProcessor::SetUncertainLow(unsigned int value)
+{
+	m_uncertain_low = value;
+	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	if (trkg)
+		trkg->SetUncertainLow(value);
+}
+
+void TrackMapProcessor::SetTrackMap(const pTrackMap& map)
 {
 	m_map = map;
 }
@@ -85,6 +313,16 @@ void TrackMapProcessor::SetSpacings(float spcx, float spcy, float spcz)
 	m_map->m_spc_x = spcx;
 	m_map->m_spc_y = spcy;
 	m_map->m_spc_z = spcz;
+}
+
+void TrackMapProcessor::SetClusterNum(int val)
+{
+	m_cluster_num = val;
+}
+
+int TrackMapProcessor::GetClusterNum()
+{
+	return m_cluster_num;
 }
 
 bool TrackMapProcessor::InitializeFrame(size_t frame)
@@ -223,6 +461,99 @@ bool TrackMapProcessor::InitializeFrame(size_t frame)
 				AddContact(intra_graph, celp, iter->second, contact_value); \
 		} \
 	}
+
+//read/delete volume cache
+void TrackMapProcessor::ReadVolCache(flrd::VolCache& vol_cache)
+{
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
+	//get volume, readers
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
+		return;
+	BaseReader* reader = vd->GetReader();
+	if (!reader)
+		return;
+	LBLReader lbl_reader;
+
+	int chan = vd->GetCurChannel();
+	int frame = vol_cache.frame;
+
+	if (frame == canvas->m_tseq_cur_num)
+	{
+		flvr::Texture* tex = vd->GetTexture();
+		if (!tex)
+			return;
+
+		Nrrd* data = tex->get_nrrd(0);
+		vol_cache.nrrd_data = data;
+		vol_cache.data = data->data;
+		Nrrd* label = tex->get_nrrd(tex->nlabel());
+		vol_cache.nrrd_label = label;
+		vol_cache.label = label->data;
+		if (data && label)
+			vol_cache.valid = true;
+	}
+	else
+	{
+		Nrrd* data = reader->Convert(frame, chan, true);
+		if (!data)
+			return;
+		vol_cache.nrrd_data = data;
+		vol_cache.data = data->data;
+		wstring lblname = reader->GetCurLabelName(frame, chan);
+		lbl_reader.SetFile(lblname);
+		Nrrd* label = lbl_reader.Convert(frame, chan, true);
+		if (!label)
+			return;
+		vol_cache.nrrd_label = label;
+		vol_cache.label = label->data;
+		if (data && label)
+			vol_cache.valid = true;
+	}
+}
+
+void TrackMapProcessor::DelVolCache(flrd::VolCache& vol_cache)
+{
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
+		return;
+	BaseReader* reader = vd->GetReader();
+	if (!reader)
+		return;
+	int chan = vd->GetCurChannel();
+	int frame = vol_cache.frame;
+
+	if (vol_cache.valid && vol_cache.modified)
+	{
+		//save it first if modified
+		//assume that only label is modified
+		MSKWriter msk_writer;
+		msk_writer.SetData((Nrrd*)vol_cache.nrrd_label);
+		double spcx, spcy, spcz;
+		vd->GetSpacings(spcx, spcy, spcz);
+		msk_writer.SetSpacings(spcx, spcy, spcz);
+		wstring filename = reader->GetCurLabelName(frame, chan);
+		msk_writer.Save(filename, 1);
+	}
+
+	vol_cache.valid = false;
+	if (frame != canvas->m_tseq_cur_num)
+	{
+		if (vol_cache.data)
+			nrrdNuke((Nrrd*)vol_cache.nrrd_data);
+		if (vol_cache.label)
+			nrrdNuke((Nrrd*)vol_cache.nrrd_label);
+	}
+	vol_cache.data = 0;
+	vol_cache.nrrd_data = 0;
+	vol_cache.label = 0;
+	vol_cache.nrrd_label = 0;
+}
 
 bool TrackMapProcessor::CheckCellContact(
 	Celp &celp, void *data, void *label,
@@ -3111,11 +3442,14 @@ bool TrackMapProcessor::GetMappedCells(
 }
 
 //modifications
-bool TrackMapProcessor::LinkCells(
-	CelpList &list1, CelpList &list2,
-	size_t frame1, size_t frame2,
-	bool exclusive)
+bool TrackMapProcessor::LinkCells(bool exclusive)
 {
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
+	size_t frame1 = canvas->m_tseq_cur_num;
+	size_t frame2 = canvas->m_tseq_prv_num;
+
 	//check validity
 	if ((frame2 != frame1 + 1 &&
 		frame2 != frame1 - 1) ||
@@ -3131,8 +3465,8 @@ bool TrackMapProcessor::LinkCells(
 	CelpListIter cell;
 	unsigned int cell_id;
 
-	for (citer1 = list1.begin();
-	citer1 != list1.end(); ++citer1)
+	for (citer1 = m_list_in.begin();
+	citer1 != m_list_in.end(); ++citer1)
 	{
 		cell_id = citer1->second->Id();
 		cell = cell_list1.find(cell_id);
@@ -3148,8 +3482,8 @@ bool TrackMapProcessor::LinkCells(
 				(vert1->Id(), vert1));
 		}
 	}
-	for (citer2 = list2.begin();
-	citer2 != list2.end(); ++citer2)
+	for (citer2 = m_list_out.begin();
+	citer2 != m_list_out.end(); ++citer2)
 	{
 		cell_id = citer2->second->Id();
 		cell = cell_list2.find(cell_id);
@@ -3194,6 +3528,24 @@ bool TrackMapProcessor::LinkCells(
 			frame1, frame2);
 
 	return true;
+}
+
+bool TrackMapProcessor::LinkAllCells()
+{
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
+	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	if (!trkg)
+		return;
+
+	SetTrackMap(trkg->GetTrackMap());
+	glbin_reg_cache_queue_func(this, TrackMapProcessor::ReadVolCache, TrackMapProcessor::DelVolCache);
+	glbin_cache_queue.set_max_size(3);
+	flrd::CelpList in = glbin_clusterizer.GetInCells();
+	flrd::CelpList out = glbin_clusterizer.GetOutCells();
+	RelinkCells(in, out, canvas->m_tseq_cur_num);
+	canvas->GetTraces(false);
 }
 
 bool TrackMapProcessor::LinkCells(Celp &celp1, Celp &celp2,
@@ -3244,9 +3596,13 @@ bool TrackMapProcessor::LinkCells(Celp &celp1, Celp &celp2,
 	return true;
 }
 
-bool TrackMapProcessor::IsolateCells(
-	CelpList &list, size_t frame)
+bool TrackMapProcessor::IsolateCells()
 {
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
+	size_t frame = canvas->m_tseq_cur_num;
+
 	//check validity
 	size_t frame_num = m_map->m_frame_num;
 	if (frame >= frame_num)
@@ -3258,8 +3614,8 @@ bool TrackMapProcessor::IsolateCells(
 	CelpList &cell_list = m_map->m_celp_list.at(frame);
 	CelpListIter cell;
 
-	for (citer = list.begin();
-	citer != list.end(); ++citer)
+	for (citer = m_list_in.begin();
+	citer != m_list_in.end(); ++citer)
 	{
 		cell = cell_list.find(citer->second->Id());
 		if (cell == cell_list.end())
@@ -3290,13 +3646,19 @@ bool TrackMapProcessor::IsolateCells(
 			IsolateVertex(inter_graph, viter->second);
 	}
 
+	canvas->GetTraces(false);
+
 	return true;
 }
 
-bool TrackMapProcessor::UnlinkCells(
-	CelpList &list1, CelpList &list2,
-	size_t frame1, size_t frame2)
+bool TrackMapProcessor::UnlinkCells()
 {
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
+	size_t frame1 = canvas->m_tseq_cur_num;
+	size_t frame2 = canvas->m_tseq_prv_num;
+
 	//check validity
 	size_t frame_num = m_map->m_frame_num;
 	if (frame1 >= frame_num ||
@@ -3312,8 +3674,8 @@ bool TrackMapProcessor::UnlinkCells(
 	CelpList &cell_list2 = m_map->m_celp_list.at(frame2);
 	CelpListIter cell;
 
-	for (citer1 = list1.begin();
-	citer1 != list1.end(); ++citer1)
+	for (citer1 = m_list_in.begin();
+	citer1 != m_list_in.end(); ++citer1)
 	{
 		cell = cell_list1.find(citer1->second->Id());
 		if (cell == cell_list1.end())
@@ -3323,8 +3685,8 @@ bool TrackMapProcessor::UnlinkCells(
 			vlist1.insert(std::pair<unsigned int, Verp>
 				(vert1->Id(), vert1));
 	}
-	for (citer2 = list2.begin();
-	citer2 != list2.end(); ++citer2)
+	for (citer2 = m_list_out.begin();
+	citer2 != m_list_out.end(); ++citer2)
 	{
 		cell = cell_list2.find(citer2->second->Id());
 		if (cell == cell_list2.end())
@@ -3914,9 +4276,9 @@ bool TrackMapProcessor::ClusterCellsSplit(CelpList &list, size_t frame,
 }
 
 bool TrackMapProcessor::SegmentCells(
-	CelpList &list, size_t frame, int clnum)
+	CelpList &list, size_t frame)
 {
-	if (clnum < 2)
+	if (m_cluster_num < 2)
 		return false;
 
 	//get label and data from cache
@@ -3935,7 +4297,7 @@ bool TrackMapProcessor::SegmentCells(
 	size_t nz = m_map->m_size_z;
 	unsigned int label_value;
 	unsigned int id = 0;
-	float data_value;
+	float data_value = 0;
 
 	//add cluster points
 	for (auto cliter = list.begin();
@@ -3975,7 +4337,7 @@ bool TrackMapProcessor::SegmentCells(
 	//}
 
 	//run clustering
-	cs_proc_km.SetClnum(clnum);
+	cs_proc_km.SetClnum(m_cluster_num);
 	cs_proc_km.Execute();
 	cs_proc_km.AddIDsToData();
 	//cs_proc_em.SetData(cs_proc_km.GetData());
@@ -4047,6 +4409,27 @@ bool TrackMapProcessor::ReplaceCellID(
 	}
 
 	return true;
+}
+
+//track list
+void TrackMapProcessor::SetListIn(CelpList& list)
+{
+	m_list_in = list;
+}
+
+void TrackMapProcessor::SetListOut(CelpList& list)
+{
+	m_list_out = list;
+}
+
+CelpList& TrackMapProcessor::GetListIn()
+{
+	return m_list_in;
+}
+
+CelpList& TrackMapProcessor::GetListOut()
+{
+	return m_list_out;
 }
 
 void TrackMapProcessor::GetLinkLists(
@@ -4143,14 +4526,23 @@ void TrackMapProcessor::GetLinkLists(
 	}
 }
 
-void TrackMapProcessor::GetCellsByUncertainty(
-	CelpList &list_in, CelpList &list_out,
-	size_t frame)
+void TrackMapProcessor::GetCellsByUncertainty(bool filter_in_list)
 {
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (!canvas)
+		return;
+	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	if (!trkg)
+		return;
+	if (!trkg->GetTrackMap()->GetFrameNum())
+		return;
+	SetTrackMap(trkg->GetTrackMap());
+	size_t frame = canvas->m_tseq_cur_num;
 	if (frame >= m_map->m_frame_num)
 		return;
 
-	bool filter = !(list_in.empty());
+	m_list_out.clear();
+
 	unsigned int count;
 	Verp vertex;
 	Celp celp;
@@ -4179,13 +4571,13 @@ void TrackMapProcessor::GetCellsByUncertainty(
 							celp = pwcell_iter->lock();
 							if (!celp)
 								continue;
-							if (filter)
+							if (filter_in_list)
 							{
-								cell_iter = list_in.find(celp->Id());
-								if (cell_iter == list_in.end())
+								cell_iter = m_list_in.find(celp->Id());
+								if (cell_iter == m_list_in.end())
 									continue;
 							}
-							list_out.insert(std::pair<unsigned int, Celp>
+							m_list_out.insert(std::pair<unsigned int, Celp>
 								(celp->Id(), celp));
 						}
 					}
@@ -4203,13 +4595,13 @@ void TrackMapProcessor::GetCellsByUncertainty(
 							celp = pwcell_iter->lock();
 							if (!celp)
 								continue;
-							if (filter)
+							if (filter_in_list)
 							{
-								cell_iter = list_in.find(celp->Id());
-								if (cell_iter == list_in.end())
+								cell_iter = m_list_in.find(celp->Id());
+								if (cell_iter == m_list_in.end())
 									continue;
 							}
-							list_out.insert(std::pair<unsigned int, Celp>
+							m_list_out.insert(std::pair<unsigned int, Celp>
 								(celp->Id(), celp));
 						}
 					}
@@ -4239,13 +4631,13 @@ void TrackMapProcessor::GetCellsByUncertainty(
 							celp = pwcell_iter->lock();
 							if (!celp)
 								continue;
-							if (filter)
+							if (filter_in_list)
 							{
-								cell_iter = list_in.find(celp->Id());
-								if (cell_iter == list_in.end())
+								cell_iter = m_list_in.find(celp->Id());
+								if (cell_iter == m_list_in.end())
 									continue;
 							}
-							list_out.insert(std::pair<unsigned int, Celp>
+							m_list_out.insert(std::pair<unsigned int, Celp>
 								(celp->Id(), celp));
 						}
 					}
@@ -4263,13 +4655,13 @@ void TrackMapProcessor::GetCellsByUncertainty(
 							celp = pwcell_iter->lock();
 							if (!celp)
 								continue;
-							if (filter)
+							if (filter_in_list)
 							{
-								cell_iter = list_in.find(celp->Id());
-								if (cell_iter == list_in.end())
+								cell_iter = m_list_in.find(celp->Id());
+								if (cell_iter == m_list_in.end())
 									continue;
 							}
-							list_out.insert(std::pair<unsigned int, Celp>
+							m_list_out.insert(std::pair<unsigned int, Celp>
 								(celp->Id(), celp));
 						}
 					}
@@ -4277,6 +4669,8 @@ void TrackMapProcessor::GetCellsByUncertainty(
 			}
 		}
 	}
+
+	canvas->GetTraces(false);
 }
 
 void TrackMapProcessor::GetCellUncertainty(

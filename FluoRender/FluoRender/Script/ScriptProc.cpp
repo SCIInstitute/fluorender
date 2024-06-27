@@ -627,7 +627,7 @@ void ScriptProc::RunPostTracking()
 	if (!cur_vol)
 		UpdateTraceDlg();
 
-	TraceGroup* tg = m_view->GetTraceGroup();
+	TrackGroup* tg = m_view->GetTrackGroup();
 	if (!tg) return;
 
 	//after updating volume
@@ -684,11 +684,11 @@ void ScriptProc::RunMaskTracking()
 
 	VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
-	TraceGroup* tg = m_view->GetTraceGroup();
+	TrackGroup* tg = m_view->GetTrackGroup();
 	if (!tg)
 	{
-		m_view->CreateTraceGroup();
-		tg = m_view->GetTraceGroup();
+		m_view->CreateTrackGroup();
+		tg = m_view->GetTrackGroup();
 	}
 
 	if (m_view->m_tseq_cur_num == m_view->m_begin_play_frame)
@@ -1538,11 +1538,11 @@ void ScriptProc::RunAddCells()
 		return;
 	VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
-	TraceGroup* tg = m_view->GetTraceGroup();
+	TrackGroup* tg = m_view->GetTrackGroup();
 	if (!tg)
 	{
-		m_view->CreateTraceGroup();
-		tg = m_view->GetTraceGroup();
+		m_view->CreateTrackGroup();
+		tg = m_view->GetTrackGroup();
 	}
 
 	flrd::pTrackMap track_map = tg->GetTrackMap();
@@ -1575,7 +1575,7 @@ void ScriptProc::RunUnlinkCells()
 
 	VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
-	TraceGroup* tg = m_view->GetTraceGroup();
+	TrackGroup* tg = m_view->GetTrackGroup();
 	if (!tg) return;
 
 	flrd::pTrackMap track_map = tg->GetTrackMap();

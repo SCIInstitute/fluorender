@@ -552,11 +552,14 @@ public:
 	void OnMouse(wxMouseEvent& event);
 
 	//traces
-	TraceGroup* GetTraceGroup();
-	void CreateTraceGroup();
-	int LoadTraceGroup(wxString filename);
-	int SaveTraceGroup(wxString filename);
-	void ExportTrace(wxString filename, unsigned int id);
+	//track map file
+	int GetTrackFileExist(bool save);//0:no trace group; 1:trace groups exists not saved; 2:saved
+	TrackGroup* GetTrackGroup();
+	wxString GetTrackGroupFile();
+	void CreateTrackGroup();
+	int LoadTrackGroup(wxString filename);
+	int SaveTrackGroup(wxString filename);
+	void ExportTrackGroup(wxString filename, unsigned int id);
 	void DrawTraces();
 	void GetTraces(bool update = false);
 
@@ -860,7 +863,7 @@ private:
 	flrd::RulerList m_ruler_list;
 	flrd::Ruler *m_cur_ruler;
 	//traces
-	TraceGroup* m_trace_group;
+	TrackGroup* m_track_group;
 	//multivolume
 	flvr::MultiVolumeRenderer* m_mvr;
 	//highlighted comps

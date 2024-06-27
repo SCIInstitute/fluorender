@@ -70,7 +70,11 @@ namespace flrd
 		m_stencil_thresh(2){}
 		~TrackMapProcessor();
 
-		void SetTrackMap(pTrackMap& map);
+		//automatic tracking
+		void GenMap();
+		void RefineMap(int t = -1, bool erase_v = true);
+
+		void SetTrackMap(const pTrackMap& map);
 		void SetContactThresh(float value);
 		void SetSizeThresh(float value);
 		void SetSimilarThresh(float value);
@@ -87,6 +91,9 @@ namespace flrd
 		void SetBits(size_t bits);
 		void SetScale(float scale);
 		void SetSpacings(float spcx, float spcy, float spcz);
+
+		void SetClusterNum(int val);
+		int GetClusterNum();
 
 		//build cell list and intra graph
 		bool InitializeFrame(size_t frame);
@@ -124,13 +131,12 @@ namespace flrd
 			size_t frame1, size_t frame2);
 
 		//modifications
-		bool LinkCells(CelpList &list1, CelpList &list2,
-			size_t frame1, size_t frame2, bool exclusive);
+		bool LinkCells(bool exclusive);
+		bool LinkAllCells();
 		bool LinkCells(Celp &celp1, Celp &celp2,
 			size_t frame1, size_t frame2, bool exclusive);
-		bool IsolateCells(CelpList &list, size_t frame);
-		bool UnlinkCells(CelpList &list1, CelpList &list2,
-			size_t frame1, size_t frame2);
+		bool IsolateCells();
+		bool UnlinkCells();
 		//
 		bool AddCellDup(Celp & celp, size_t frame);
 		bool AddCell(Celp &celp, size_t frame, CelpListIter &iter);
@@ -139,21 +145,25 @@ namespace flrd
 		bool LinkAddedCells(CelpList &list, size_t frame1, size_t frame2);
 		bool CombineCells(Celp &celp, CelpList &list, size_t frame);
 		bool DivideCells(CelpList &list, size_t frame);
-		bool SegmentCells(CelpList &list, size_t frame, int clnum = 2);
+		bool SegmentCells(CelpList &list, size_t frame);
 		bool ReplaceCellID(unsigned int old_id,
 			unsigned int new_id, size_t frame);
 
 		//relink cells after segmentation
 		void RelinkCells(CelpList &in, CelpList& out, size_t frame);
 
+		//track list
+		void SetListIn(CelpList& list);
+		void SetListOut(CelpList& list);
+		CelpList& GetListIn();
+		CelpList& GetListOut();
 		//information
 		void GetLinkLists(size_t frame,
 			flrd::VertexList &in_orphan_list,
 			flrd::VertexList &out_orphan_list,
 			flrd::VertexList &in_multi_list,
 			flrd::VertexList &out_multi_list);
-		void GetCellsByUncertainty(CelpList &list_in, CelpList &list_out,
-			size_t frame);
+		void GetCellsByUncertainty(bool filter_in_list);
 		void GetCellUncertainty(CelpList &list, size_t frame);
 		void GetUncertainHist(UncertainHist &hist1, UncertainHist &hist2, size_t frame);
 		void GetUncertainHist(UncertainHist &hist, VertexList &vertex_list, InterGraph &graph);
@@ -185,8 +195,16 @@ namespace flrd
 		size_t m_frame1;
 		size_t m_frame2;
 		bool m_major_converge;//majority of the links have converged
+		int m_cluster_num;//for splitting cells
+
+		CelpList m_list_in;
+		CelpList m_list_out;
 
 	private:
+		//read/delete volume cache from file
+		void ReadVolCache(flrd::VolCache& vol_cache);
+		void DelVolCache(flrd::VolCache& vol_cache);
+
 		//modification
 		bool CheckCellContact(Celp &celp, void *data, void *label,
 			size_t ci, size_t cj, size_t ck);
@@ -372,11 +390,6 @@ namespace flrd
 	inline void TrackMapProcessor::SetLevelThresh(int level)
 	{
 		m_level_thresh = level;
-	}
-
-	inline void TrackMapProcessor::SetUncertainLow(unsigned int value)
-	{
-		m_uncertain_low = value;
 	}
 
 	inline void TrackMapProcessor::SetMerge(bool value)

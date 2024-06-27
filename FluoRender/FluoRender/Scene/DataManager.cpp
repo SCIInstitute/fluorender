@@ -4103,8 +4103,8 @@ AText* Annotations::GetAText(wxString str)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int TraceGroup::m_num = 0;
-TraceGroup::TraceGroup()
+int TrackGroup::m_num = 0;
+TrackGroup::TrackGroup()
 {
 	type = 8;//traces
 	m_num++;
@@ -4119,50 +4119,50 @@ TraceGroup::TraceGroup()
 	m_track_map = flrd::pTrackMap(new flrd::TrackMap());
 }
 
-TraceGroup::~TraceGroup()
+TrackGroup::~TrackGroup()
 {
 }
 
-void TraceGroup::SetCurTime(int time)
+void TrackGroup::SetCurTime(int time)
 {
 	m_cur_time = time;
 	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
 }
 
-int TraceGroup::GetCurTime()
+int TrackGroup::GetCurTime()
 {
 	return m_cur_time;
 }
-void TraceGroup::SetPrvTime(int time)
+void TrackGroup::SetPrvTime(int time)
 {
 	m_prv_time = time;
 }
 
-int TraceGroup::GetPrvTime()
+int TrackGroup::GetPrvTime()
 {
 	return m_prv_time;
 }
 
-void TraceGroup::SetGhostNum(int num)
+void TrackGroup::SetGhostNum(int num)
 {
 	m_ghost_num = num;
 	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
 }
 
-void TraceGroup::SetDrawTail(bool draw)
+void TrackGroup::SetDrawTail(bool draw)
 {
 	m_draw_tail = draw;
 	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
 }
 
-void TraceGroup::SetDrawLead(bool draw)
+void TrackGroup::SetDrawLead(bool draw)
 {
 	m_draw_lead = draw;
 	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
 }
 
 //get information
-void TraceGroup::GetLinkLists(size_t frame,
+void TrackGroup::GetLinkLists(size_t frame,
 	flrd::VertexList &in_orphan_list,
 	flrd::VertexList &out_orphan_list,
 	flrd::VertexList &in_multi_list,
@@ -4185,7 +4185,7 @@ void TraceGroup::GetLinkLists(size_t frame,
 		in_multi_list, out_multi_list);
 }
 
-void TraceGroup::ClearCellList()
+void TrackGroup::ClearCellList()
 {
 	m_cell_list.clear();
 	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
@@ -4196,7 +4196,7 @@ void TraceGroup::ClearCellList()
 //m_id_map: ids of current time point that are linked to previous
 //m_cur_time: current time value
 //time values are check with frame ids in the frame list
-void TraceGroup::UpdateCellList(flrd::CelpList &cur_sel_list)
+void TrackGroup::UpdateCellList(flrd::CelpList &cur_sel_list)
 {
 	ClearCellList();
 	flrd::CelpListIter cell_iter;
@@ -4229,24 +4229,24 @@ void TraceGroup::UpdateCellList(flrd::CelpList &cur_sel_list)
 	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
 }
 
-flrd::CelpList &TraceGroup::GetCellList()
+flrd::CelpList &TrackGroup::GetCellList()
 {
 	return m_cell_list;
 }
 
-bool TraceGroup::FindCell(unsigned int id)
+bool TrackGroup::FindCell(unsigned int id)
 {
 	return m_cell_list.find(id) != m_cell_list.end();
 }
 
 //modifications
-bool TraceGroup::AddCell(flrd::Celp &cell, size_t frame)
+bool TrackGroup::AddCell(flrd::Celp &cell, size_t frame)
 {
 	glbin_trackmap_proc.SetTrackMap(m_track_map);
 	return glbin_trackmap_proc.AddCellDup(cell, frame);
 }
 
-bool TraceGroup::LinkCells(flrd::CelpList &list1, flrd::CelpList &list2,
+bool TrackGroup::LinkCells(flrd::CelpList &list1, flrd::CelpList &list2,
 	size_t frame1, size_t frame2, bool exclusive)
 {
 	glbin_trackmap_proc.SetTrackMap(m_track_map);
@@ -4254,39 +4254,39 @@ bool TraceGroup::LinkCells(flrd::CelpList &list1, flrd::CelpList &list2,
 		frame1, frame2, exclusive);
 }
 
-bool TraceGroup::IsolateCells(flrd::CelpList &list, size_t frame)
+bool TrackGroup::IsolateCells(flrd::CelpList &list, size_t frame)
 {
 	glbin_trackmap_proc.SetTrackMap(m_track_map);
 	return glbin_trackmap_proc.IsolateCells(list, frame);
 }
 
-bool TraceGroup::UnlinkCells(flrd::CelpList &list1, flrd::CelpList &list2,
+bool TrackGroup::UnlinkCells(flrd::CelpList &list1, flrd::CelpList &list2,
 	size_t frame1, size_t frame2)
 {
 	glbin_trackmap_proc.SetTrackMap(m_track_map);
 	return glbin_trackmap_proc.UnlinkCells(list1, list2, frame1, frame2);
 }
 
-bool TraceGroup::CombineCells(flrd::Celp &cell, flrd::CelpList &list,
+bool TrackGroup::CombineCells(flrd::Celp &cell, flrd::CelpList &list,
 	size_t frame)
 {
 	glbin_trackmap_proc.SetTrackMap(m_track_map);
 	return glbin_trackmap_proc.CombineCells(cell, list, frame);
 }
 
-bool TraceGroup::DivideCells(flrd::CelpList &list, size_t frame)
+bool TrackGroup::DivideCells(flrd::CelpList &list, size_t frame)
 {
 	glbin_trackmap_proc.SetTrackMap(m_track_map);
 	return glbin_trackmap_proc.DivideCells(list, frame);
 }
 
-bool TraceGroup::ReplaceCellID(unsigned int old_id, unsigned int new_id, size_t frame)
+bool TrackGroup::ReplaceCellID(unsigned int old_id, unsigned int new_id, size_t frame)
 {
 	glbin_trackmap_proc.SetTrackMap(m_track_map);
 	return glbin_trackmap_proc.ReplaceCellID(old_id, new_id, frame);
 }
 
-bool TraceGroup::GetMappedRulers(flrd::RulerList &rulers)
+bool TrackGroup::GetMappedRulers(flrd::RulerList &rulers)
 {
 	size_t frame_num = m_track_map->GetFrameNum();
 	if (m_ghost_num <= 0 ||
@@ -4344,7 +4344,7 @@ bool TraceGroup::GetMappedRulers(flrd::RulerList &rulers)
 	return true;
 }
 
-unsigned int TraceGroup::GetMappedEdges(
+unsigned int TrackGroup::GetMappedEdges(
 	flrd::CelpList & sel_list1, flrd::CelpList & sel_list2,
 	std::vector<float>& verts,
 	size_t frame1, size_t frame2,
@@ -4432,7 +4432,7 @@ unsigned int TraceGroup::GetMappedEdges(
 	return result;
 }
 
-bool TraceGroup::GetMappedRulers(
+bool TrackGroup::GetMappedRulers(
 	flrd::CelpList& sel_list1, flrd::CelpList &sel_list2,
 	flrd::RulerList& rulers,
 	size_t frame1, size_t frame2)
@@ -4521,7 +4521,7 @@ bool TraceGroup::GetMappedRulers(
 	return true;
 }
 
-flrd::RulerListIter TraceGroup::FindRulerFromList(unsigned int id, flrd::RulerList &list)
+flrd::RulerListIter TrackGroup::FindRulerFromList(unsigned int id, flrd::RulerList &list)
 {
 	auto iter = list.begin();
 	while (iter != list.end())
@@ -4533,12 +4533,12 @@ flrd::RulerListIter TraceGroup::FindRulerFromList(unsigned int id, flrd::RulerLi
 	return iter;
 }
 
-void TraceGroup::Clear()
+void TrackGroup::Clear()
 {
 	m_track_map->Clear();
 }
 
-bool TraceGroup::Load(wxString &filename)
+bool TrackGroup::Load(wxString &filename)
 {
 	m_data_path = filename;
 	glbin_trackmap_proc.SetTrackMap(m_track_map);
@@ -4546,7 +4546,7 @@ bool TraceGroup::Load(wxString &filename)
 	return glbin_trackmap_proc.Import(str);
 }
 
-bool TraceGroup::Save(wxString &filename)
+bool TrackGroup::Save(wxString &filename)
 {
 	m_data_path = filename;
 	glbin_trackmap_proc.SetTrackMap(m_track_map);
@@ -4554,7 +4554,7 @@ bool TraceGroup::Save(wxString &filename)
 	return glbin_trackmap_proc.Export(str);
 }
 
-unsigned int TraceGroup::Draw(vector<float> &verts, int shuffle)
+unsigned int TrackGroup::Draw(vector<float> &verts, int shuffle)
 {
 	unsigned int result = 0;
 	size_t frame_num = m_track_map->GetFrameNum();
@@ -5368,6 +5368,14 @@ flrd::Ruler* CurrentObjects::GetRuler()
 	return canvas->GetCurRuler();
 }
 
+TrackGroup* CurrentObjects::GetTrackGroup()
+{
+	if (!canvas)
+		return 0;
+	return canvas->GetTrackGroup();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 DataManager::DataManager() :
 	m_frame(0)
 {

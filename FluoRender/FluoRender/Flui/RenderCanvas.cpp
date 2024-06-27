@@ -134,7 +134,7 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_vd_pop_dirty(true),
 	m_md_pop_dirty(true),
 	//traces
-	m_trace_group(0),
+	m_track_group(0),
 	//multivolume
 	m_mvr(0),
 	//initializaion
@@ -601,8 +601,8 @@ RenderCanvas::~RenderCanvas()
 	//delete rulers
 	m_ruler_list.DeleteRulers();
 
-	if (m_trace_group)
-		delete m_trace_group;
+	if (m_track_group)
+		delete m_track_group;
 
 	if (m_full_screen)
 	{
@@ -670,8 +670,8 @@ void RenderCanvas::ClearAll()
 	m_cur_vol_save = 0;
 	m_ruler_list.clear();
 	m_cur_ruler = 0;
-	if (m_trace_group)
-		m_trace_group->Clear();
+	if (m_track_group)
+		m_track_group->Clear();
 	m_cell_list.clear();
 	InitView();
 	SetClippingPlaneRotations(0, 0, 0);
@@ -9883,46 +9883,73 @@ void RenderCanvas::GetCellPoints(fluo::BBox& box,
 }
 
 //traces
-TraceGroup* RenderCanvas::GetTraceGroup()
+int RenderCanvas::GetTrackFileExist(bool save)
 {
-	return m_trace_group;
+	if (!m_track_group)
+		return 0;
+	if (!m_track_group->GetTrackMap())
+		return 0;
+	if (!m_track_group->GetTrackMap()->GetFrameNum())
+		return 0;
+	wxString filename = m_track_group->GetPath();
+	if (wxFileExists(filename))
+	{
+		if (save)
+			SaveTrackGroup(filename);
+		return 2;
+	}
+	else
+		return 1;
 }
 
-void RenderCanvas::CreateTraceGroup()
+TrackGroup* RenderCanvas::GetTrackGroup()
 {
-	if (m_trace_group)
-		delete m_trace_group;
-
-	m_trace_group = new TraceGroup;
+	return m_track_group;
 }
 
-int RenderCanvas::LoadTraceGroup(wxString filename)
+wxString RenderCanvas::GetTrackGroupFile()
 {
-	if (m_trace_group)
-		delete m_trace_group;
-
-	m_trace_group = new TraceGroup;
-	return m_trace_group->Load(filename);
+	wxString str;
+	if (m_track_group)
+		str = m_track_group->GetPath();
+	return str;
 }
 
-int RenderCanvas::SaveTraceGroup(wxString filename)
+void RenderCanvas::CreateTrackGroup()
 {
-	if (m_trace_group)
-		return m_trace_group->Save(filename);
+	if (m_track_group)
+		delete m_track_group;
+
+	m_track_group = new TrackGroup;
+}
+
+int RenderCanvas::LoadTrackGroup(wxString filename)
+{
+	if (m_track_group)
+		delete m_track_group;
+
+	m_track_group = new TrackGroup;
+	return m_track_group->Load(filename);
+}
+
+int RenderCanvas::SaveTrackGroup(wxString filename)
+{
+	if (m_track_group)
+		return m_track_group->Save(filename);
 	else
 		return 0;
 }
 
-void RenderCanvas::ExportTrace(wxString filename, unsigned int id)
+void RenderCanvas::ExportTrackGroup(wxString filename, unsigned int id)
 {
-	if (!m_trace_group)
+	if (!m_track_group)
 		return;
 }
 
 void RenderCanvas::DrawTraces()
 {
 	if (m_cur_vol &&
-		m_trace_group)
+		m_track_group)
 	{
 		double width = glbin_settings.m_line_width;
 
@@ -9955,7 +9982,7 @@ void RenderCanvas::DrawTraces()
 			if (va_traces->get_dirty())
 			{
 				vector<float> verts;
-				unsigned int num = m_trace_group->Draw(verts, m_cur_vol->GetShuffle());
+				unsigned int num = m_track_group->Draw(verts, m_cur_vol->GetShuffle());
 				if (num)
 				{
 					va_traces->buffer_data(flvr::VABuf_Coord,
@@ -9977,7 +10004,7 @@ void RenderCanvas::DrawTraces()
 
 void RenderCanvas::GetTraces(bool update)
 {
-	if (!m_trace_group)
+	if (!m_track_group)
 		return;
 
 	int ii, jj, kk;
@@ -10021,10 +10048,10 @@ void RenderCanvas::GetTraces(bool update)
 	}
 
 	//create id list
-	m_trace_group->SetCurTime(m_tseq_cur_num);
-	m_trace_group->SetPrvTime(m_tseq_cur_num);
-	m_trace_group->UpdateCellList(sel_labels);
-	//m_trace_group->SetPrvTime(m_tseq_prv_num);
+	m_track_group->SetCurTime(m_tseq_cur_num);
+	m_track_group->SetPrvTime(m_tseq_cur_num);
+	m_track_group->UpdateCellList(sel_labels);
+	//m_track_group->SetPrvTime(m_tseq_prv_num);
 
 	//add traces to trace dialog
 	if (update)
