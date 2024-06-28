@@ -50,21 +50,32 @@ namespace flrd
 			m_id = id;
 			m_id_empty = id_empty;
 		}
+
+		void SetList(const CelpList& list)
+		{
+			m_list = list;
+		}
+		CelpList& GetList()
+		{
+			return m_list;
+		}
+
 		fluo::Color GetColor();
 		wxColor GetWxColor();
 		wxString GetOutput();
 
 		void Clean(int mode);
 		void NewId(bool append, bool track);
-		void Replace();
-		void Replace(CelpList &list);
-		void Combine();
-		void Combine(CelpList &list);
+		void ReplaceId();
+		void ReplaceList();
+		void CombineId();
+		void CombineList();
 
 	private:
 		wxString m_output;
 		unsigned int m_id;
 		bool m_id_empty;
+		CelpList m_list;
 
 	private:
 		//read/delete volume cache from file

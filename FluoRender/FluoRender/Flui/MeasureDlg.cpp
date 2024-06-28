@@ -349,7 +349,6 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	m_toolbar1 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER|wxTB_TEXT| wxTB_HORIZONTAL);
 	wxBitmap bitmap = wxGetBitmapFromMemory(locator);
-	m_toolbar1->SetToolBitmapSize(bitmap.GetSize());
 	m_toolbar1->AddCheckTool(ID_LocatorBtn, "Locator",
 		bitmap, wxNullBitmap,
 		"Add locators to the render view by clicking");
@@ -387,7 +386,6 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	m_toolbar2 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT | wxTB_HORIZONTAL);
 	bitmap = wxGetBitmapFromMemory(move);
-	m_toolbar2->SetToolBitmapSize(bitmap.GetSize());
 	m_toolbar2->AddCheckTool(ID_RulerMoveBtn, "Move",
 		bitmap, wxNullBitmap,
 		"Select and move ruler");
@@ -422,7 +420,6 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	m_toolbar3 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT | wxTB_HORIZONTAL);
 	bitmap = wxGetBitmapFromMemory(delet);
-	m_toolbar3->SetToolBitmapSize(bitmap.GetSize());
 	m_toolbar3->AddTool(ID_DeleteBtn, "Delete", bitmap,
 		"Delete a selected ruler");
 	bitmap = wxGetBitmapFromMemory(del_all);
@@ -1525,6 +1522,8 @@ void MeasureDlg::OnToolbar1(wxCommandEvent& event)
 		Grow();
 		break;
 	}
+
+	event.StopPropagation();
 }
 
 void MeasureDlg::OnToolbar2(wxCommandEvent& event)
@@ -1558,6 +1557,8 @@ void MeasureDlg::OnToolbar2(wxCommandEvent& event)
 		Relax();
 		break;
 	}
+
+	event.StopPropagation();
 }
 
 void MeasureDlg::OnToolbar3(wxCommandEvent& event)
@@ -1591,6 +1592,8 @@ void MeasureDlg::OnToolbar3(wxCommandEvent& event)
 		Export();
 		break;
 	}
+
+	event.StopPropagation();
 }
 
 void MeasureDlg::OnIntensityMethodCheck(wxCommandEvent& event)
@@ -1773,7 +1776,7 @@ void MeasureDlg::OnKeyDown(wxKeyEvent& event)
 			}
 		}
 	}
-	event.Skip();
+	//event.Skip();
 }
 
 void MeasureDlg::OnContextMenu(wxContextMenuEvent& event)
@@ -1809,6 +1812,8 @@ void MeasureDlg::OnMenuItem(wxCommandEvent& event)
 		ToggleDisplay();
 		break;
 	}
+
+	event.StopPropagation();
 }
 
 void MeasureDlg::OnSelection(wxListEvent& event)

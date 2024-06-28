@@ -4199,12 +4199,10 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			{
 				m_cell_full = true;
 				glbin_comp_selector.SelectFullComp();
-				if (m_frame && m_frame->GetTrackDlg())
-					m_frame->GetTrackDlg()->CellUpdate();
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
-				vc.insert(gstNull);
+				vc.insert({ gstTrackList, gstSelUndoRedo });
 			}
 			if (m_cell_full &&
 				!wxGetKeyState(wxKeyCode('f')))
@@ -4214,12 +4212,11 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				wxGetKeyState(wxKeyCode('l')))
 			{
 				m_cell_link = true;
-				if (m_frame && m_frame->GetTrackDlg())
-					m_frame->GetTrackDlg()->CellLink(false);
+				glbin_trackmap_proc.LinkCells(false);
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
-				vc.insert(gstNull);
+				vc.insert({ gstTrackList, gstSelUndoRedo });
 			}
 			if (m_cell_link &&
 				!wxGetKeyState(wxKeyCode('l')))
@@ -4229,12 +4226,11 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				wxGetKeyState(wxKeyCode('n')))
 			{
 				m_cell_new_id = true;
-				if (m_frame && m_frame->GetTrackDlg())
-					m_frame->GetTrackDlg()->CellNewID(false);
+				glbin_comp_editor.NewId(false, true);
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
-				vc.insert(gstNull);
+				vc.insert({ gstTrackList, gstSelUndoRedo });
 			}
 			if (m_cell_new_id &&
 				!wxGetKeyState(wxKeyCode('n')))
@@ -4243,16 +4239,14 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			if (wxGetKeyState(wxKeyCode('c')) &&
 				!m_clear_mask)
 			{
-				//if (m_frame && m_frame->GetTreePanel())
-				//	m_frame->GetTreePanel()->BrushClear();
 				glbin_vol_selector.Clear();
-				if (m_frame && m_frame->GetTrackDlg())
-					m_frame->GetTrackDlg()->CompClear();
+				glbin_comp_selector.Clear();
+				GetTraces(false);
 				m_clear_mask = true;
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
-				vc.insert(gstNull);
+				vc.insert({ gstTrackList, gstSelUndoRedo });
 			}
 			if (!wxGetKeyState(wxKeyCode('c')) &&
 				m_clear_mask)
@@ -10054,11 +10048,11 @@ void RenderCanvas::GetTraces(bool update)
 	//m_track_group->SetPrvTime(m_tseq_prv_num);
 
 	//add traces to trace dialog
-	if (update)
-	{
-		if (m_renderview_panel && m_frame && m_frame->GetTrackDlg())
-			m_frame->GetTrackDlg()->GetSettings(m_renderview_panel->m_canvas);
-	}
+	//if (update)
+	//{
+	//	if (m_renderview_panel && m_frame && m_frame->GetTrackDlg())
+	//		m_frame->GetTrackDlg()->GetSettings(m_renderview_panel->m_canvas);
+	//}
 }
 
 void RenderCanvas::SetEnlarge(bool value)

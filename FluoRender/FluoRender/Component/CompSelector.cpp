@@ -542,8 +542,12 @@ void ComponentSelector::Delete()
 	vd->GetVR()->clear_tex_mask();
 }
 
-void ComponentSelector::Delete(std::vector<unsigned long long> &ids)
+void ComponentSelector::DeleteList()
 {
+	std::set<unsigned long long> ids;
+	for (auto it : m_list)
+		ids.insert(it.first);
+
 	bool clear_all = ids.empty();
 
 	//get current mask
@@ -600,7 +604,7 @@ void ComponentSelector::Delete(std::vector<unsigned long long> &ids)
 		tex->invalid_all_mask();
 }
 
-void ComponentSelector::SelectList(CelpList& list)
+void ComponentSelector::SelectList()
 {
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
@@ -652,7 +656,7 @@ void ComponentSelector::SelectList(CelpList& list)
 				(unsigned long long)nx*(unsigned long long)(j + b->oy()) + (unsigned long long)(i + b->ox());
 			key = brick_id;
 			key = (key << 32) | data_label[index];
-			if (list.find(key) != list.end())
+			if (m_list.find(key) != m_list.end())
 				SelectMask(data_mask, index, 255, tex);
 			else
 				data_mask[index] = 0;
@@ -675,7 +679,7 @@ void ComponentSelector::SelectList(CelpList& list)
 	vd->GetVR()->clear_tex_mask();
 }
 
-void ComponentSelector::EraseList(CelpList& list)
+void ComponentSelector::EraseList()
 {
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
@@ -725,7 +729,7 @@ void ComponentSelector::EraseList(CelpList& list)
 				(unsigned long long)nx * (unsigned long long)(j + b->oy()) + (unsigned long long)(i + b->ox());
 			key = brick_id;
 			key = (key << 32) | data_label[index];
-			if (list.find(key) != list.end())
+			if (m_list.find(key) != m_list.end())
 				SelectMask(data_mask, index, 0, tex);
 			else
 				data_mask[index] = 0;

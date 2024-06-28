@@ -308,9 +308,6 @@ TreePanel::TreePanel(MainFrame* frame,
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER);
 	wxBitmap bitmap = wxGetBitmapFromMemory(toggle_disp);
-#ifdef _DARWIN
-	m_toolbar->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_toolbar->AddTool(ID_ToggleDisp, "Toggle View", bitmap,
 		"Toggle the visibility of current selection");
 	bitmap = wxGetBitmapFromMemory(add_group);
@@ -346,6 +343,7 @@ TreePanel::TreePanel(MainFrame* frame,
 	bitmap = wxGetBitmapFromMemory(brush_clear);
 	m_toolbar->AddTool(ID_BrushClear, "Reset All",
 		bitmap, "Reset all highlighted structures");
+	m_toolbar->Bind(wxEVT_TOOL, &TreePanel::OnToolbar, this);
 	m_toolbar->Realize();
 
 	//organize positions
@@ -359,7 +357,6 @@ TreePanel::TreePanel(MainFrame* frame,
 
 	//events
 	Bind(wxEVT_CONTEXT_MENU, &TreePanel::OnContextMenu, this);
-	Bind(wxEVT_TOOL, &TreePanel::OnToolbar, this);
 	Bind(wxEVT_MENU, &TreePanel::OnMenu, this);
 	Bind(wxEVT_TREE_SEL_CHANGED, &TreePanel::OnSelChanged, this);
 	Bind(wxEVT_TREE_SEL_CHANGING, &TreePanel::OnSelChanging, this);
@@ -1481,6 +1478,8 @@ void TreePanel::OnToolbar(wxCommandEvent& event)
 	}
 
 	FluoRefresh(excl_self, vc, views);
+
+	event.StopPropagation();
 }
 
 void TreePanel::OnMenu(wxCommandEvent& event)
@@ -1633,6 +1632,8 @@ void TreePanel::OnMenu(wxCommandEvent& event)
 	}
 
 	FluoRefresh(excl_self, vc, views);
+
+	event.StopPropagation();
 }
 
 void TreePanel::OnSelChanged(wxTreeEvent& event)
@@ -2008,6 +2009,5 @@ void TreePanel::OnKeyDown(wxKeyEvent& event)
 		DeleteSelection();
 	glbin_current.SetRoot();
 	FluoRefresh(0, { gstTreeCtrl });
-	//event.Skip();
 }
 

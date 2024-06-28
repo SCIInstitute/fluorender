@@ -54,6 +54,8 @@ namespace flrd
 	class TrackMap;
 	typedef std::shared_ptr<TrackMap> pTrackMap;
 	typedef std::weak_ptr<TrackMap> pwTrackMap;
+	typedef std::function<void(const std::string&)> InfoOutFunc;
+
 	class TrackMapProcessor
 	{
 	public:
@@ -144,8 +146,8 @@ namespace flrd
 		bool RemoveCells(CelpList &list, size_t frame);
 		bool LinkAddedCells(CelpList &list, size_t frame1, size_t frame2);
 		bool CombineCells(Celp &celp, CelpList &list, size_t frame);
-		bool DivideCells(CelpList &list, size_t frame);
-		bool SegmentCells(CelpList &list, size_t frame);
+		bool DivideCells();
+		bool SegmentCells();
 		bool ReplaceCellID(unsigned int old_id,
 			unsigned int new_id, size_t frame);
 
@@ -158,16 +160,19 @@ namespace flrd
 		CelpList& GetListIn();
 		CelpList& GetListOut();
 		//information
+		void AnalyzeLink();
 		void GetLinkLists(size_t frame,
 			flrd::VertexList &in_orphan_list,
 			flrd::VertexList &out_orphan_list,
 			flrd::VertexList &in_multi_list,
 			flrd::VertexList &out_multi_list);
+		void AnalyzeUncertainty();
 		void GetCellsByUncertainty(bool filter_in_list);
-		void GetCellUncertainty(CelpList &list, size_t frame);
-		void GetUncertainHist(UncertainHist &hist1, UncertainHist &hist2, size_t frame);
-		void GetUncertainHist(UncertainHist &hist, VertexList &vertex_list, InterGraph &graph);
-		void GetPaths(CelpList &cell_list, PathList &path_list, size_t frame1, size_t frame2);
+		void GetCellUncertainty();
+		void GetUncertainHist();
+		void GetUncertainHist(UncertainHist& hist, VertexList &vertex_list, InterGraph &graph);
+		void AnalyzePath();
+		void GetPaths(PathList &path_list, size_t frame1, size_t frame2);
 
 		//tracking by matching user input
 		//mode: 0-compare adj; 1-compare start;
@@ -175,6 +180,14 @@ namespace flrd
 		bool TrackStencils(size_t frame1, size_t frame2,
 			fluo::Vector &extt, fluo::Vector &exta,
 			int mode, size_t start, int sim);
+
+		//conversion
+		void ConvertRulers();
+		void ConvertConsistent();
+
+		//info out
+		void RegisterInfoOutFunc(const InfoOutFunc& f);
+		void UnregisterInfoOutFunc();
 
 	private:
 		//the trackmap
@@ -366,6 +379,13 @@ namespace flrd
 			unsigned int v1_count, unsigned int v2_count,
 			unsigned int edge_count);
 
+		//output info
+		void WriteInfo(const std::string& str)
+		{
+			if (m_info_out)
+				m_info_out(str);
+		}
+		InfoOutFunc m_info_out;
 	};
 
 	inline TrackMapProcessor::~TrackMapProcessor()
@@ -420,6 +440,16 @@ namespace flrd
 	inline void TrackMapProcessor::SetStencilThresh(const fluo::Point &value)
 	{
 		m_stencil_thresh = value;
+	}
+
+	inline void TrackMapProcessor::RegisterInfoOutFunc(const InfoOutFunc& f)
+	{
+		m_info_out = f;
+	}
+
+	inline void TrackMapProcessor::UnregisterInfoOutFunc()
+	{
+		m_info_out = nullptr;
 	}
 
 	inline void TrackMapProcessor::WriteBool(std::ofstream& ofs, const bool value)

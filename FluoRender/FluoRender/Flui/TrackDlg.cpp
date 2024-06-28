@@ -111,29 +111,16 @@ void TraceListCtrl::Append(wxString &gtype, unsigned int id, wxColor color,
 
 void TraceListCtrl::DeleteSelection()
 {
-	if (m_type == 0)
+	long item = -1;
+	for (;;)
 	{
-		wxWindow* parent = GetParent();
-		if (parent)
-		{
-			((TrackDlg*)parent)->CompDelete();
-			//if (((TrackDlg*)parent)->GetManualAssist())
-			//	((TrackDlg*)parent)->CellLink(true);
-		}
-	}
-	else if (m_type == 1)
-	{
-		long item = -1;
-		for (;;)
-		{
-			item = GetNextItem(item,
-				wxLIST_NEXT_ALL,
-				wxLIST_STATE_SELECTED);
-			if (item == -1)
-				break;
-			else
-				DeleteItem(item);
-		}
+		item = GetNextItem(item,
+			wxLIST_NEXT_ALL,
+			wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			DeleteItem(item);
 	}
 }
 
@@ -729,6 +716,9 @@ TrackDlg::TrackDlg(MainFrame* frame)
 
 	Bind(wxEVT_MENU, &TrackDlg::OnMenuItem, this);
 
+	glbin_trackmap_proc.RegisterInfoOutFunc(
+		std::bind(&TrackDlg::WriteInfo, this, std::placeholders::_1));
+
 	SetSizer(sizer_v);
 	Layout();
 }
@@ -1072,6 +1062,23 @@ void TrackDlg::SaveasTrackFile()
 		delete fopendlg;
 }
 
+void TrackDlg::DeleteSelection(int type)
+{
+	if (type == 0)
+	{
+		glbin_comp_selector.DeleteList();
+		FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
+			{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+	}
+	else
+		m_active_list->DeleteSelection();
+}
+
+void TrackDlg::WriteInfo(const std::string& str)
+{
+	(*m_stat_text) << str;
+}
+
 void TrackDlg::OnClearTrace(wxCommandEvent& event)
 {
 	TrackGroup* trkg = glbin_current.GetTrackGroup();
@@ -1406,138 +1413,63 @@ void TrackDlg::OnCellAppendID(wxCommandEvent& event)
 
 void TrackDlg::OnCellReplaceID(wxCommandEvent& event)
 {
-	CellReplaceID();
+	glbin_comp_editor.ReplaceList();
+	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void TrackDlg::OnCellCombineID(wxCommandEvent& event)
 {
-	CellCombineID();
+	glbin_comp_editor.CombineList();
+	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void TrackDlg::OnCellSeparateID(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-
-	//trace group
-	TrackGroup* trkg = m_view->GetTrackGroup();
-	if (!trkg)
-		return;
-
-	//current T
-	flrd::CelpList list_cur;
-	//fill current list
-	long item = -1;
-	while (true)
-	{
-		item = m_trace_list_curr->GetNextItem(
-			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if (item == -1)
-			break;
-		else
-			AddLabel(item, m_trace_list_curr, list_cur);
-	}
-	if (list_cur.empty())
-	{
-		item = -1;
-		while (true)
-		{
-			item = m_trace_list_curr->GetNextItem(
-				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
-			if (item == -1)
-				break;
-			else
-				AddLabel(item, m_trace_list_curr, list_cur);
-		}
-	}
-	if (list_cur.size() <= 1)
-		//nothing to divide
-		return;
-
-	//modify graphs
-	trkg->DivideCells(list_cur, m_cur_time);
-
+	glbin_trackmap_proc.DivideCells();
+	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
+void TrackDlg::OnCellSegment(wxCommandEvent& event)
+{
+	glbin_trackmap_proc.SegmentCells();
+	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+}
+
+void TrackDlg::OnCellSegSpin(wxSpinEvent& event)
+{
+	glbin_trackmap_proc.SetClusterNum(m_cell_segment_spin->GetValue());
+}
+
+void TrackDlg::OnCellSegText(wxCommandEvent& event)
+{
+	glbin_trackmap_proc.SetClusterNum(m_cell_segment_spin->GetValue());
+}
 
 //analysis
 void TrackDlg::OnConvertToRulers(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-
-	TrackGroup* trkg = m_view->GetTrackGroup();
-	if (!trkg)
-		return;
-	VolumeData* vd = m_view->m_cur_vol;
-	if (!vd)
-		return;
-	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
-
-	//get rulers
-	flrd::RulerList rulers;
-	trkg->GetMappedRulers(rulers);
-	for (auto iter = rulers.begin();
-	iter != rulers.end(); ++iter)
-	{
-		(*iter)->Scale(spcx, spcy, spcz);
-		m_view->GetRulerList()->push_back(*iter);
-	}
-	m_view->RefreshGL(39);
-	//if (m_frame && m_frame->GetMeasureDlg())
-	//	m_frame->GetMeasureDlg()->GetSettings(m_view);
-	glbin_vertex_array_manager.set_dirty(flvr::VA_Rulers);
+	glbin_trackmap_proc.ConvertRulers();
+	FluoRefresh(0, { gstTrackList, gstSelUndoRedo, gstRulerList },
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void TrackDlg::OnConvertConsistent(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-
-	VolumeData* vd = m_view->m_cur_vol;
-	if (!vd)
-		return;
-	TrackGroup *trkg = m_view->GetTrackGroup();
-	if (!trkg)
-		return;
-
-	m_stat_text->ChangeValue("Generating consistent IDs in");
-	//wxGetApp().Yield();
-
-	flrd::pTrackMap track_map = trkg->GetTrackMap();
-	glbin_trackmap_proc.SetTrackMap(track_map);
-	int resx, resy, resz;
-	vd->GetResolution(resx, resy, resz);
-	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
-	glbin_trackmap_proc.SetBits(vd->GetBits());
-	glbin_trackmap_proc.SetScale(vd->GetScalarScale());
-	glbin_trackmap_proc.SetSizes(resx, resy, resz);
-	glbin_trackmap_proc.SetSpacings(spcx, spcy, spcz);
-	glbin_reg_cache_queue_func(this, TrackDlg::ReadVolCache, TrackDlg::DelVolCache);
-	glbin_cache_queue.set_max_size(2);
-
-	(*m_stat_text) << wxString::Format("Frame %d\n", 0);
-	//wxGetApp().Yield();
-	glbin_trackmap_proc.MakeConsistent(0);
-
-	//remaining frames
-	for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
-	{
-		(*m_stat_text) << wxString::Format("Frame %d\n", int(fi));
-		//wxGetApp().Yield();
-		glbin_trackmap_proc.MakeConsistent(fi - 1, fi);
-	}
-
-	CellUpdate();
+	glbin_trackmap_proc.ConvertConsistent();
+	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void TrackDlg::OnAnalyzeComp(wxCommandEvent& event)
 {
-	if (!m_view)
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
+
 	glbin_comp_analyzer.SetVolume(vd);
 	glbin_comp_analyzer.Analyze(true);
 	string str;
@@ -1547,192 +1479,32 @@ void TrackDlg::OnAnalyzeComp(wxCommandEvent& event)
 
 void TrackDlg::OnAnalyzeLink(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-
-	TrackGroup* trkg = m_view->GetTrackGroup();
-	if (!trkg)
-		return;
-	size_t frames = trkg->GetTrackMap()->GetFrameNum();
-	if (frames == 0)
-		m_stat_text->ChangeValue("ERROR! Generate a track map first.\n");
-	else
-		m_stat_text->ChangeValue(
-			wxString::Format("Time point number: %d\n", int(frames)));
-
-	(*m_stat_text) << "Time\tIn Orphan\tOut Orphan\tIn Multi\tOut Multi\n";
-	flrd::VertexList in_orphan_list;
-	flrd::VertexList out_orphan_list;
-	flrd::VertexList in_multi_list;
-	flrd::VertexList out_multi_list;
-	for (size_t fi = 0; fi < frames; ++fi)
-	{
-		trkg->GetLinkLists(fi,
-			in_orphan_list, out_orphan_list,
-			in_multi_list, out_multi_list);
-		(*m_stat_text) << int(fi) << "\t" <<
-			int(in_orphan_list.size()) << "\t" <<
-			int(out_orphan_list.size()) << "\t" <<
-			int(in_multi_list.size()) << "\t" <<
-			int(out_multi_list.size()) << "\n";
-	}
+	glbin_trackmap_proc.AnalyzeLink();
 }
 
 void TrackDlg::OnAnalyzeUncertainHist(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-	//trace group
-	TrackGroup *trkg = m_view->GetTrackGroup();
-	if (!trkg)
-		return;
-	if (!trkg->GetTrackMap()->GetFrameNum())
-		return;
-	flrd::CelpList list_in;
-	//fill inlist
-	long item = -1;
-	while (true)
-	{
-		item = m_trace_list_curr->GetNextItem(
-			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if (item == -1)
-			break;
-		else
-			AddLabel(item, m_trace_list_curr, list_in);
-	}
-	if (list_in.size() == 0)
-	{
-		item = -1;
-		while (true)
-		{
-			item = m_trace_list_curr->GetNextItem(
-				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
-			if (item == -1)
-				break;
-			else
-				AddLabel(item, m_trace_list_curr, list_in);
-		}
-	}
-
 	m_stat_text->ChangeValue("");
-
-	flrd::pTrackMap track_map = trkg->GetTrackMap();
-	glbin_trackmap_proc.SetTrackMap(track_map);
-	if (list_in.empty())
-	{
-		flrd::UncertainHist hist1, hist2;
-		glbin_trackmap_proc.GetUncertainHist(hist1, hist2, m_cur_time);
-		//header
-		(*m_stat_text) << "In\n";
-		(*m_stat_text) << "Level\t" << "Frequency\n";
-		int count = 0;
-		for (auto iter = hist1.begin();
-			iter != hist1.end(); ++iter)
-		{
-			while (iter->second.level > count)
-			{
-				(*m_stat_text) << count++ << "\t" << "0\n";
-			}
-			(*m_stat_text) << int(iter->second.level) << "\t" <<
-				int(iter->second.count) << "\n";
-			count++;
-		}
-
-		//header
-		(*m_stat_text) << "\n";
-		(*m_stat_text) << "Out\n";
-		(*m_stat_text) << "Level\t" << "Frequency\n";
-		count = 0;
-		for (auto iter = hist2.begin();
-		iter != hist2.end(); ++iter)
-		{
-			while (iter->second.level > count)
-			{
-				(*m_stat_text) << count++ << "\t" << "0\n";
-			}
-			(*m_stat_text) << int(iter->second.level) << "\t" <<
-				int(iter->second.count) << "\n";
-			count++;
-		}
-	}
-	else
-	{
-		glbin_trackmap_proc.GetCellUncertainty(list_in, m_cur_time);
-		//header
-		(*m_stat_text) << "ID\t" << "In\t" << "Out\n";
-		for (auto iter = list_in.begin();
-			iter != list_in.end(); ++iter)
-		{
-			wxString sid = wxString::Format("%u", iter->second->Id());
-			(*m_stat_text) << sid << "\t" <<
-				int(iter->second->GetCount0()) << "\t" <<
-				int(iter->second->GetCount1()) << "\n";
-		}
-	}
+	glbin_trackmap_proc.AnalyzeUncertainty();
 }
 
 void TrackDlg::OnAnalyzePath(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-	//trace group
-	TrackGroup *trkg = m_view->GetTrackGroup();
-	if (!trkg)
-		return;
-	if (!trkg->GetTrackMap()->GetFrameNum())
-		return;
-	flrd::CelpList list_in;
-	//fill inlist
-	long item = -1;
-	while (true)
-	{
-		item = m_trace_list_curr->GetNextItem(
-			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if (item == -1)
-			break;
-		else
-			AddLabel(item, m_trace_list_curr, list_in);
-	}
-	if (list_in.size() == 0)
-	{
-		item = -1;
-		while (true)
-		{
-			item = m_trace_list_curr->GetNextItem(
-				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
-			if (item == -1)
-				break;
-			else
-				AddLabel(item, m_trace_list_curr, list_in);
-		}
-	}
-
 	m_stat_text->ChangeValue("");
+	glbin_trackmap_proc.AnalyzePath();
+}
 
-	flrd::pTrackMap track_map = trkg->GetTrackMap();
-	glbin_trackmap_proc.SetTrackMap(track_map);
-	if (list_in.empty())
-		return;
+void TrackDlg::SaveOutputResult(wxString &filename)
+{
+	std::ofstream os;
+	OutputStreamOpen(os, filename.ToStdString());
 
-	m_stat_text->ChangeValue("");
-	std::ostream os(m_stat_text);
+	wxString str;
+	str = m_stat_text->GetValue();
 
-	if (m_cur_time > 0)
-	{
-		(*m_stat_text) << "Paths of T" << m_cur_time << " to T" << m_cur_time - 1 << ":\n";
-		flrd::PathList paths_prv;
-		glbin_trackmap_proc.GetPaths(list_in, paths_prv, m_cur_time, m_cur_time - 1);
-		for (size_t i = 0; i < paths_prv.size(); ++i)
-			os << paths_prv[i];
-	}
-	if (m_cur_time < track_map->GetFrameNum() - 1)
-	{
-		(*m_stat_text) << "Paths of T" << m_cur_time << " to T" << m_cur_time + 1 << ":\n";
-		flrd::PathList paths_nxt;
-		glbin_trackmap_proc.GetPaths(list_in, paths_nxt, m_cur_time, m_cur_time + 1);
-		for (size_t i = 0; i < paths_nxt.size(); ++i)
-			os << paths_nxt[i];
-	}
+	os << str;
+
+	os.close();
 }
 
 void TrackDlg::OnSaveResult(wxCommandEvent& event)
@@ -1749,322 +1521,6 @@ void TrackDlg::OnSaveResult(wxCommandEvent& event)
 	}
 	if (fopendlg)
 		delete fopendlg;
-}
-
-//Component tools
-void TrackDlg::CompDelete()
-{
-	if (!m_view)
-		return;
-
-	long item = -1;
-	wxString str;
-	unsigned long ival;
-	vector<unsigned long long> ids;
-	for (;;)
-	{
-		item = m_trace_list_curr->GetNextItem(item,
-			wxLIST_NEXT_ALL,
-			wxLIST_STATE_DONTCARE);
-
-		if (item == -1)
-			break;
-		else if (m_trace_list_curr->
-			GetItemState(item, wxLIST_STATE_SELECTED)
-			== wxLIST_STATE_SELECTED)
-			continue;
-		else
-		{
-			str = m_trace_list_curr->GetItemText(item, 1);
-			if (str.ToULong(&ival) && ival)
-				ids.push_back(ival);
-		}
-	}
-
-	//get current vd
-	if (ids.size() == 1)
-	{
-		glbin_comp_selector.SetId(ids[0], false);
-		glbin_comp_selector.Delete();
-	}
-	else
-		glbin_comp_selector.Delete(ids);
-
-	//update view
-	CellUpdate();
-
-	//frame
-	//if (m_frame && m_frame->GetBrushToolDlg())
-	//	m_frame->GetBrushToolDlg()->UpdateUndoRedo();
-}
-
-void TrackDlg::CellEraseID()
-{
-	if (!m_view)
-		return;
-
-	//trace group
-	TrackGroup *trkg = m_view->GetTrackGroup();
-	if (!trkg)
-	{
-		m_view->CreateTrackGroup();
-		trkg = m_view->GetTrackGroup();
-	}
-
-	VolumeData* vd = m_view->m_cur_vol;
-	if (!vd)
-		return;
-	//get prev mask
-	Nrrd* nrrd_mask = vd->GetMask(false);
-	if (!nrrd_mask)
-		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
-		return;
-
-	//get prev label
-	Nrrd* nrrd_label = vd->GetLabel(true);
-	if (!nrrd_label)
-		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
-
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
-	unsigned long long index;
-
-	//find old IDs
-	set<unsigned int> id_list;
-	for (index = 0; index < for_size; ++index)
-	{
-		if (data_mask[index] && data_label[index])
-			id_list.insert(data_label[index]);
-	}
-
-	if (!id_list.empty())
-	{
-		//current mask
-		nrrd_mask = vd->GetMask(true);
-		if (!nrrd_mask)
-			return;
-		data_mask = (unsigned char*)(nrrd_mask->data);
-		if (!data_mask)
-			return;
-
-		for (index = 0; index < for_size; ++index)
-		{
-			if (data_label[index] &&
-				id_list.find(data_label[index])
-				!= id_list.end() &&
-				!data_mask[index])
-				data_label[index] = 0;
-		}
-
-		//invalidate label mask in gpu
-		vd->GetVR()->clear_tex_current();
-		//save label mask to disk
-		vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
-	}
-
-	CellUpdate();
-}
-
-void TrackDlg::CellReplaceID()
-{
-	//current T
-	flrd::CelpList list_cur;
-	//fill current list
-	long item = -1;
-	while (true)
-	{
-		item = m_trace_list_curr->GetNextItem(
-			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if (item == -1)
-			break;
-		else
-			AddLabel(item, m_trace_list_curr, list_cur);
-	}
-	if (list_cur.empty())
-	{
-		item = -1;
-		while (true)
-		{
-			item = m_trace_list_curr->GetNextItem(
-				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
-			if (item == -1)
-				break;
-			else
-				AddLabel(item, m_trace_list_curr, list_cur);
-		}
-	}
-
-	glbin_comp_editor.SetId(m_cell_new_id,
-		m_cell_new_id_empty);
-	glbin_comp_editor.Replace(list_cur);
-
-	CellUpdate();
-}
-
-void TrackDlg::CellCombineID()
-{
-	//current T
-	flrd::CelpList list_cur;
-	//fill current list
-	long item = -1;
-	while (true)
-	{
-		item = m_trace_list_curr->GetNextItem(
-			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if (item == -1)
-			break;
-		else
-			AddLabel(item, m_trace_list_curr, list_cur);
-	}
-	if (list_cur.empty())
-	{
-		item = -1;
-		while (true)
-		{
-			item = m_trace_list_curr->GetNextItem(
-				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
-			if (item == -1)
-				break;
-			else
-				AddLabel(item, m_trace_list_curr, list_cur);
-		}
-	}
-
-	glbin_comp_editor.Combine(list_cur);
-
-	//update view
-	CellUpdate();
-}
-
-void TrackDlg::OnCellSegSpin(wxSpinEvent& event)
-{
-	m_clnum = m_cell_segment_spin->GetValue();
-}
-
-void TrackDlg::OnCellSegText(wxCommandEvent& event)
-{
-	m_clnum = m_cell_segment_spin->GetValue();
-}
-
-void TrackDlg::OnCellSegment(wxCommandEvent& event)
-{
-	if (m_clnum < 1)
-		return;
-	else if (m_clnum == 1)
-	{
-		OnCellCombineID(event);
-		return;
-	}
-	if (!m_view)
-		return;
-
-	//current T
-	flrd::CelpList list_cur;
-	//fill current list
-	long item = -1;
-	while (true)
-	{
-		item = m_trace_list_curr->GetNextItem(
-			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if (item == -1)
-			break;
-		else
-			AddLabel(item, m_trace_list_curr, list_cur);
-	}
-	if (list_cur.empty())
-	{
-		item = -1;
-		while (true)
-		{
-			item = m_trace_list_curr->GetNextItem(
-				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
-			if (item == -1)
-				break;
-			else
-				AddLabel(item, m_trace_list_curr, list_cur);
-		}
-	}
-	if (list_cur.size() == 0)
-		//nothing to segment
-		return;
-
-	//modify graphs
-	VolumeData* vd = m_view->m_cur_vol;
-	if (!vd)
-		return;
-	int resx, resy, resz;
-	vd->GetResolution(resx, resy, resz);
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-
-	TrackGroup *trkg = m_view->GetTrackGroup();
-	if (!trkg)
-		return;
-
-	flrd::pTrackMap track_map = trkg->GetTrackMap();
-	glbin_trackmap_proc.SetTrackMap(track_map);
-	glbin_trackmap_proc.SetBits(vd->GetBits());
-	glbin_trackmap_proc.SetScale(vd->GetScalarScale());
-	glbin_trackmap_proc.SetSizes(resx, resy, resz);
-	//register file reading and deleteing functions
-	glbin_reg_cache_queue_func(this, TrackDlg::ReadVolCache, TrackDlg::DelVolCache);
-	glbin_cache_queue.set_max_size(3);
-	glbin_trackmap_proc.SegmentCells(list_cur, m_cur_time);
-
-	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
-	//m_view->RefreshGL();
-	//update view
-	//CellUpdate();
-	RefineMap(m_cur_time);
-}
-
-void TrackDlg::LinkAddedCells(flrd::CelpList &list)
-{
-	if (!m_view)
-		return;
-
-	VolumeData* vd = m_view->m_cur_vol;
-	if (!vd)
-		return;
-	int resx, resy, resz;
-	vd->GetResolution(resx, resy, resz);
-	TrackGroup *trkg = m_view->GetTrackGroup();
-	if (!trkg)
-		return;
-
-	flrd::pTrackMap track_map = trkg->GetTrackMap();
-	glbin_trackmap_proc.SetTrackMap(track_map);
-	glbin_trackmap_proc.SetBits(vd->GetBits());
-	glbin_trackmap_proc.SetScale(vd->GetScalarScale());
-	glbin_trackmap_proc.SetSizes(resx, resy, resz);
-	//register file reading and deleteing functions
-	glbin_reg_cache_queue_func(this, TrackDlg::ReadVolCache, TrackDlg::DelVolCache);
-	glbin_cache_queue.set_max_size(3);
-	glbin_trackmap_proc.LinkAddedCells(list, m_cur_time, m_cur_time - 1);
-	glbin_trackmap_proc.LinkAddedCells(list, m_cur_time, m_cur_time + 1);
-	RefineMap(m_cur_time, false);
-}
-
-void TrackDlg::SaveOutputResult(wxString &filename)
-{
-	std::ofstream os;
-	OutputStreamOpen(os, filename.ToStdString());
-
-	wxString str;
-	str = m_stat_text->GetValue();
-
-	os << str;
-
-	os.close();
 }
 
 void TrackDlg::OnCellPrev(wxCommandEvent& event)
@@ -2199,7 +1655,11 @@ void TrackDlg::OnSelectionChanged(wxListEvent& event)
 	}
 
 	if (m_active_list == m_trace_list_curr)
+	{
 		glbin_trackmap_proc.SetListIn(list);
+		glbin_comp_editor.SetList(list);
+		glbin_comp_selector.SetList(list);
+	}
 	else if (m_active_list == m_trace_list_prev)
 		glbin_trackmap_proc.SetListOut(list);
 }
@@ -2244,9 +1704,11 @@ void TrackDlg::OnMenuItem(wxCommandEvent& event)
 		m_active_list->CopySelection();
 		break;
 	case ID_Delete:
-		m_active_list->DeleteSelection();
+		DeleteSelection(m_active_list->m_type);
 		break;
 	}
+
+	event.StopPropagation();
 }
 
 void TrackDlg::OnKeyDown(wxKeyEvent& event)
@@ -2256,11 +1718,9 @@ void TrackDlg::OnKeyDown(wxKeyEvent& event)
 
 	if (event.GetKeyCode() == WXK_DELETE ||
 		event.GetKeyCode() == WXK_BACK)
-		m_active_list->DeleteSelection();
+		DeleteSelection(m_active_list->m_type);
 	if (event.GetKeyCode() == wxKeyCode('C') &&
 		wxGetKeyState(WXK_CONTROL))
 		m_active_list->CopySelection();
-
-	event.Skip();
 }
 

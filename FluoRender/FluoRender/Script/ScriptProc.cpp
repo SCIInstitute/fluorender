@@ -274,8 +274,8 @@ bool ScriptProc::GetVolumes(std::vector<VolumeData*> &list)
 //add traces to trace dialog
 void ScriptProc::UpdateTraceDlg()
 {
-	if (m_view && m_frame && m_frame->GetTrackDlg())
-		m_frame->GetTrackDlg()->GetSettings(m_view);
+	if (m_frame && m_frame->GetTrackDlg())
+		m_frame->GetTrackDlg()->FluoUpdate();
 }
 
 int ScriptProc::TimeMode(std::string &str)
@@ -1561,11 +1561,24 @@ void ScriptProc::RunLinkCells()
 	if (!TimeCondition())
 		return;
 
-	if (!m_frame || !m_frame->GetTrackDlg())
+	VolumeData* vd = glbin_current.vol_data;
+	if (!vd)
+		return;
+	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	if (!trkg)
 		return;
 
-	m_frame->GetTrackDlg()->GetSettings(m_view);
-	m_frame->GetTrackDlg()->LinkAddedCells(m_sel_labels);
+	int resx, resy, resz;
+	vd->GetResolution(resx, resy, resz);
+	flrd::pTrackMap track_map = trkg->GetTrackMap();
+	glbin_trackmap_proc.SetTrackMap(track_map);
+	glbin_trackmap_proc.SetBits(vd->GetBits());
+	glbin_trackmap_proc.SetScale(vd->GetScalarScale());
+	glbin_trackmap_proc.SetSizes(resx, resy, resz);
+	//register file reading and deleteing functions
+	glbin_trackmap_proc.LinkAddedCells(m_sel_labels, m_view->m_tseq_cur_num, m_view->m_tseq_cur_num - 1);
+	glbin_trackmap_proc.LinkAddedCells(m_sel_labels, m_view->m_tseq_cur_num, m_view->m_tseq_cur_num + 1);
+	glbin_trackmap_proc.RefineMap(m_view->m_tseq_cur_num, false);
 }
 
 void ScriptProc::RunUnlinkCells()

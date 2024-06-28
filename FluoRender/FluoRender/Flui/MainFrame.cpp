@@ -77,11 +77,6 @@ DEALINGS IN THE SOFTWARE.
 //resources
 #include <icons.h>
 
-//BEGIN_EVENT_TABLE(MainFrame, wxFrame)
-//	//close
-//	EVT_CLOSE(MainFrame::OnClose)
-//END_EVENT_TABLE()
-//
 MainFrame::MainFrame(
 	wxFrame* frame,
 	const wxString& title,
@@ -579,9 +574,9 @@ MainFrame::MainFrame(
 		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_teser_dlg).Float();
 	if (glbin_settings.m_test_param)
-		m_aui_mgr.GetPane(m_script_break_dlg).Show();
+		m_aui_mgr.GetPane(m_teser_dlg).Show();
 	else
-		m_aui_mgr.GetPane(m_script_break_dlg).Hide();
+		m_aui_mgr.GetPane(m_teser_dlg).Hide();
 
 	for (auto it : m_render_view_panels)
 		it->LoadSettings();
@@ -1338,6 +1333,8 @@ void MainFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, wxWi
 		m_setting_dlg->FluoUpdate(vc);
 	if (update_props(excl_self, m_teser_dlg, panel))
 		m_teser_dlg->FluoUpdate(vc);
+	if (update_props(excl_self, m_track_dlg, panel))
+		m_track_dlg->FluoUpdate(vc);
 }
 
 VolumePropPanel* MainFrame::FindVolumeProps(const wxString& name)
@@ -1674,130 +1671,106 @@ void MainFrame::ShowPanel(wxPanel* pane, bool show)
 void MainFrame::ShowSettingDlg()
 {
 	m_aui_mgr.GetPane(m_setting_dlg).Show();
-	m_aui_mgr.GetPane(m_setting_dlg).Float();
 	m_aui_mgr.Update();
-	m_brush_tool_dlg->SetFocus();
 }
 
 void MainFrame::ShowBrushDlg()
 {
 	m_aui_mgr.GetPane(m_brush_tool_dlg).Show();
-	m_aui_mgr.GetPane(m_brush_tool_dlg).Float();
-	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_PAINT_BRUSH;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_paint_brush));
-	m_brush_tool_dlg->SetFocus();
+	m_aui_mgr.Update();
 }
 
 void MainFrame::ShowMeasureDlg()
 {
 	m_aui_mgr.GetPane(m_measure_dlg).Show();
-	m_aui_mgr.GetPane(m_measure_dlg).Float();
-	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_MEASUREMENT;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_measurement));
-	m_measure_dlg->SetFocus();
+	m_aui_mgr.Update();
 }
 
 void MainFrame::ShowTrackDlg()
 {
 	m_aui_mgr.GetPane(m_track_dlg).Show();
-	m_aui_mgr.GetPane(m_track_dlg).Float();
-	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_TRACKING;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_tracking));
-	m_track_dlg->SetFocus();
+	m_aui_mgr.Update();
 }
 
 void MainFrame::ShowNoiseCancellingDlg()
 {
 	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Show();
-	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Float();
-	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_NOISE_REDUCTION;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_noise_reduc));
-	m_noise_cancelling_dlg->SetFocus();
+	m_aui_mgr.Update();
 }
 
 void MainFrame::ShowCountingDlg()
 {
 	m_aui_mgr.GetPane(m_counting_dlg).Show();
-	m_aui_mgr.GetPane(m_counting_dlg).Float();
-	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_VOLUME_SIZE;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_volume_size));
-	m_counting_dlg->SetFocus();
+	m_aui_mgr.Update();
 }
 
 void MainFrame::ShowColocalizationDlg()
 {
 	m_aui_mgr.GetPane(m_colocalization_dlg).Show();
-	m_aui_mgr.GetPane(m_colocalization_dlg).Float();
-	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_COLOCALIZATION;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_colocalization));
-	m_colocalization_dlg->SetFocus();
+	m_aui_mgr.Update();
 }
 
 void MainFrame::ShowConvertDlg()
 {
 	m_aui_mgr.GetPane(m_convert_dlg).Show();
-	m_aui_mgr.GetPane(m_convert_dlg).Float();
-	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_CONVERT;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_convert));
-	m_convert_dlg->SetFocus();
+	m_aui_mgr.Update();
 }
 
 void MainFrame::ShowOclDlg()
 {
 	m_aui_mgr.GetPane(m_ocl_dlg).Show();
-	m_aui_mgr.GetPane(m_ocl_dlg).Float();
-	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_OPENCL;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_opencl));
-	m_ocl_dlg->SetFocus();
+	m_aui_mgr.Update();
 }
 
 void MainFrame::ShowComponentDlg()
 {
 	m_aui_mgr.GetPane(m_component_dlg).Show();
-	m_aui_mgr.GetPane(m_component_dlg).Float();
-	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_COMPONENT;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_components));
-	m_component_dlg->SetFocus();
+	m_aui_mgr.Update();
 }
 
 void MainFrame::ShowCalculationDlg()
 {
 	m_aui_mgr.GetPane(m_calculation_dlg).Show();
-	m_aui_mgr.GetPane(m_calculation_dlg).Float();
-	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_CALCULATIONS;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_calculations));
-	m_calculation_dlg->SetFocus();
+	m_aui_mgr.Update();
 }
 
 void MainFrame::ShowMachineLearningDlg()
 {
 	m_aui_mgr.GetPane(m_machine_learning_dlg).Show();
-	m_aui_mgr.GetPane(m_machine_learning_dlg).Float();
-	m_aui_mgr.Update();
 	glbin_settings.m_last_tool = TOOL_MACHINE_LEARNING;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_machine_learning));
-	m_machine_learning_dlg->SetFocus();
+	m_aui_mgr.Update();
 }
 
 void MainFrame::ShowScriptBreakDlg(bool show)
@@ -1832,7 +1805,6 @@ void MainFrame::ShowInfo()
 		bitmap = wxGetBitmapFromMemory(logo_snow);
 	else
 		bitmap = wxGetBitmapFromMemory(logo);
-	logo->SetToolBitmapSize(bitmap.GetSize());
 	logo->AddTool(wxID_ANY, "", bitmap);
 	logo->Realize();
 	left->Add(logo, 0, wxEXPAND);
@@ -2277,6 +2249,7 @@ void MainFrame::OnToolbarMenu(wxAuiToolBarEvent& event)
 		// make sure the button is "un-stuck"
 		tb->SetToolSticky(event.GetId(), false);
 	}
+
 	event.Skip();
 }
 
@@ -2506,6 +2479,8 @@ void MainFrame::OnMainMenu(wxCommandEvent& event)
 		ShowInfo();
 		break;
 	}
+
+	event.StopPropagation();
 }
 
 //panes

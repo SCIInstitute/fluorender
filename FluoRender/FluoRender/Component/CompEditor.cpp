@@ -268,7 +268,7 @@ void ComponentEditor::NewId(bool append, bool track)
 	}
 }
 
-void ComponentEditor::Replace()
+void ComponentEditor::ReplaceId()
 {
 	if (m_id_empty)
 		return;
@@ -319,7 +319,7 @@ void ComponentEditor::Replace()
 	vd->SaveLabel(true, cur_time, vd->GetCurChannel());
 }
 
-void ComponentEditor::Replace(CelpList &list)
+void ComponentEditor::ReplaceList()
 {
 	if (m_id_empty)
 		return;
@@ -331,9 +331,12 @@ void ComponentEditor::Replace(CelpList &list)
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return;
+	TrackGroup *trkg = glbin_current.GetTrackGroup();
+	if (!trkg)
+		return;
 
 	//trace group
-	TrackGroup *trkg = view->GetTrackGroup();
+	glbin_trackmap_proc.SetTrackMap(trkg->GetTrackMap());
 	bool track_map = trkg && trkg->GetTrackMap()->GetFrameNum();
 	int cur_time = glbin_moviemaker.GetSeqCurNum();
 
@@ -380,8 +383,8 @@ void ComponentEditor::Replace(CelpList &list)
 			continue;
 		}
 
-		cell_iter = list.find(old_id);
-		if (cell_iter != list.end())
+		cell_iter = m_list.find(old_id);
+		if (cell_iter != m_list.end())
 		{
 			new_id = m_id;
 			while (vd->SearchLabel(new_id))
@@ -389,8 +392,7 @@ void ComponentEditor::Replace(CelpList &list)
 			//add cell to list_rep
 			list_rep.insert(pair<unsigned int, unsigned int>
 				(old_id, new_id));
-			if (track_map)
-				trkg->ReplaceCellID(old_id, new_id,
+			glbin_trackmap_proc.ReplaceCellID(old_id, new_id,
 					cur_time);
 			data_label[index] = new_id;
 		}
@@ -401,7 +403,7 @@ void ComponentEditor::Replace(CelpList &list)
 	vd->SaveLabel(true, cur_time, vd->GetCurChannel());
 }
 
-void ComponentEditor::Combine()
+void ComponentEditor::CombineId()
 {
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
@@ -448,7 +450,7 @@ void ComponentEditor::Combine()
 	vd->SaveLabel(true, cur_time, vd->GetCurChannel());
 }
 
-void ComponentEditor::Combine(CelpList &list)
+void ComponentEditor::CombineList()
 {
 	RenderCanvas* view = glbin_current.canvas;
 	if (!view)
@@ -457,19 +459,20 @@ void ComponentEditor::Combine(CelpList &list)
 	if (!vd)
 		return;
 
-	if (list.size() <= 1)
+	if (m_list.size() <= 1)
 		return;//nothing to combine
 	//trace group
-	TrackGroup *trkg = view->GetTrackGroup();
+	TrackGroup *trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return;
+	glbin_trackmap_proc.SetTrackMap(trkg->GetTrackMap());
 	int cur_time = glbin_moviemaker.GetSeqCurNum();
 
 	//find the largest cell in the list
 	flrd::Celp cell;
 	flrd::CelpListIter cell_iter;
-	for (cell_iter = list.begin();
-		cell_iter != list.end(); ++cell_iter)
+	for (cell_iter = m_list.begin();
+		cell_iter != m_list.end(); ++cell_iter)
 	{
 		if (cell)
 		{
@@ -511,8 +514,8 @@ void ComponentEditor::Combine(CelpList &list)
 		if (!data_mask[index] ||
 			!data_label[index])
 			continue;
-		cell_iter = list.find(data_label[index]);
-		if (cell_iter != list.end())
+		cell_iter = m_list.find(data_label[index]);
+		if (cell_iter != m_list.end())
 			data_label[index] = cell->Id();
 	}
 	//invalidate label mask in gpu
@@ -521,7 +524,7 @@ void ComponentEditor::Combine(CelpList &list)
 	vd->SaveLabel(true, cur_time, vd->GetCurChannel());
 
 	//modify graphs
-	trkg->CombineCells(cell, list,
+	glbin_trackmap_proc.CombineCells(cell, m_list,
 		cur_time);
 }
 

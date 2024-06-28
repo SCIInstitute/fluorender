@@ -4239,53 +4239,6 @@ bool TrackGroup::FindCell(unsigned int id)
 	return m_cell_list.find(id) != m_cell_list.end();
 }
 
-//modifications
-bool TrackGroup::AddCell(flrd::Celp &cell, size_t frame)
-{
-	glbin_trackmap_proc.SetTrackMap(m_track_map);
-	return glbin_trackmap_proc.AddCellDup(cell, frame);
-}
-
-bool TrackGroup::LinkCells(flrd::CelpList &list1, flrd::CelpList &list2,
-	size_t frame1, size_t frame2, bool exclusive)
-{
-	glbin_trackmap_proc.SetTrackMap(m_track_map);
-	return glbin_trackmap_proc.LinkCells(list1, list2,
-		frame1, frame2, exclusive);
-}
-
-bool TrackGroup::IsolateCells(flrd::CelpList &list, size_t frame)
-{
-	glbin_trackmap_proc.SetTrackMap(m_track_map);
-	return glbin_trackmap_proc.IsolateCells(list, frame);
-}
-
-bool TrackGroup::UnlinkCells(flrd::CelpList &list1, flrd::CelpList &list2,
-	size_t frame1, size_t frame2)
-{
-	glbin_trackmap_proc.SetTrackMap(m_track_map);
-	return glbin_trackmap_proc.UnlinkCells(list1, list2, frame1, frame2);
-}
-
-bool TrackGroup::CombineCells(flrd::Celp &cell, flrd::CelpList &list,
-	size_t frame)
-{
-	glbin_trackmap_proc.SetTrackMap(m_track_map);
-	return glbin_trackmap_proc.CombineCells(cell, list, frame);
-}
-
-bool TrackGroup::DivideCells(flrd::CelpList &list, size_t frame)
-{
-	glbin_trackmap_proc.SetTrackMap(m_track_map);
-	return glbin_trackmap_proc.DivideCells(list, frame);
-}
-
-bool TrackGroup::ReplaceCellID(unsigned int old_id, unsigned int new_id, size_t frame)
-{
-	glbin_trackmap_proc.SetTrackMap(m_track_map);
-	return glbin_trackmap_proc.ReplaceCellID(old_id, new_id, frame);
-}
-
 bool TrackGroup::GetMappedRulers(flrd::RulerList &rulers)
 {
 	size_t frame_num = m_track_map->GetFrameNum();

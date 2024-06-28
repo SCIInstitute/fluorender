@@ -83,17 +83,10 @@ public:
 	bool SaveTrackFile();
 	void SaveTrackFile(const wxString &file);
 	void SaveasTrackFile();
+	void DeleteSelection(int type);
 
-	//cell operations
-	void CellEraseID();
-	void CellReplaceID();
-	void CellCombineID();
-	void CompDelete();
-	//link for external call
-	void LinkAddedCells(flrd::CelpList &list);
-
-	//measurement
-	void SaveOutputResult(wxString &filename);
+	//output
+	void WriteInfo(const std::string& str);
 
 private:
 	typedef struct
@@ -279,16 +272,18 @@ private:
 	void OnAnalyzeLink(wxCommandEvent& event);
 	void OnAnalyzeUncertainHist(wxCommandEvent& event);
 	void OnAnalyzePath(wxCommandEvent& event);
+	void SaveOutputResult(wxString& filename);
 	void OnSaveResult(wxCommandEvent& event);
+
+	//time controls
+	void OnCellPrev(wxCommandEvent& event);
+	void OnCellNext(wxCommandEvent& event);
 
 	//ghost number
 	void OnGhostNumChange(wxScrollEvent& event);
 	void OnGhostNumText(wxCommandEvent& event);
 	void OnGhostShowTail(wxCommandEvent& event);
 	void OnGhostShowLead(wxCommandEvent& event);
-	//time controls
-	void OnCellPrev(wxCommandEvent& event);
-	void OnCellNext(wxCommandEvent& event);
 
 	//list
 	void AddLabel(long item, TraceListCtrl* trace_list_ctrl, flrd::CelpList& list);

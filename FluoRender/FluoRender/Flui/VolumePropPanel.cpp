@@ -1818,7 +1818,6 @@ void VolumePropPanel::OnGammaChk(wxCommandEvent& event)
 {
 	bool val = m_gamma_chk->GetValue();
 	EnableGamma(val);
-	event.Skip();
 }
 
 void VolumePropPanel::OnSaturationMF(wxCommandEvent& event)
@@ -1886,7 +1885,6 @@ void VolumePropPanel::OnSaturationChk(wxCommandEvent& event)
 {
 	bool val = m_saturation_chk->GetValue();
 	EnableSaturation(val);
-	event.Skip();
 }
 
 void VolumePropPanel::OnLuminanceMF(wxCommandEvent& event)
@@ -1957,7 +1955,6 @@ void VolumePropPanel::OnLuminanceChk(wxCommandEvent& event)
 {
 	bool val = m_luminance_chk->GetValue();
 	EnableLuminance(val);
-	event.Skip();
 }
 
 void VolumePropPanel::OnAlphaMF(wxCommandEvent& event)
@@ -1992,7 +1989,6 @@ void VolumePropPanel::OnAlphaCheck(wxCommandEvent& event)
 {
 	bool val = m_alpha_chk->GetValue();
 	EnableAlpha(val);
-	event.Skip();
 }
 
 void VolumePropPanel::OnAlphaChange(wxScrollEvent& event)
@@ -2123,7 +2119,6 @@ void VolumePropPanel::OnShadingChk(wxCommandEvent& event)
 {
 	bool val = m_shade_chk->GetValue();
 	EnableShading(val);
-	event.Skip();
 }
 
 void VolumePropPanel::OnBoundaryMF(wxCommandEvent& event)
@@ -2186,7 +2181,6 @@ void VolumePropPanel::OnBoundaryChk(wxCommandEvent& event)
 {
 	bool val = m_boundary_chk->GetValue();
 	EnableBoundary(val);
-	event.Skip();
 }
 
 void VolumePropPanel::OnThreshMF(wxCommandEvent& event)
@@ -2289,7 +2283,6 @@ void VolumePropPanel::OnThreshChk(wxCommandEvent& event)
 {
 	bool val = m_thresh_chk->GetValue();
 	EnableThresh(val);
-	event.Skip();
 }
 
 //shadow
@@ -2325,7 +2318,6 @@ void VolumePropPanel::OnShadowChk(wxCommandEvent& event)
 {
 	bool val = m_shadow_chk->GetValue();
 	EnableShadow(val);
-	event.Skip();
 }
 
 void VolumePropPanel::OnShadowChange(wxScrollEvent& event)
@@ -2416,7 +2408,6 @@ void VolumePropPanel::OnSampleChk(wxCommandEvent& event)
 {
 	bool val = m_sample_chk->GetValue();
 	EnableSample(val);
-	event.Skip();
 }
 
 //colormap controls
@@ -2456,7 +2447,6 @@ void VolumePropPanel::OnColormapChk(wxCommandEvent& event)
 {
 	bool val = m_colormap_chk->GetValue();
 	EnableColormap(val);
-	event.Skip();
 }
 
 void VolumePropPanel::OnColormapChange(wxScrollEvent& event)
@@ -2540,7 +2530,6 @@ void VolumePropPanel::OnColormapInvBtn(wxCommandEvent& event)
 	//if (m_frame && m_frame->GetColocalizationDlg() &&
 	//	m_frame->GetColocalizationDlg()->GetColormapUpdate())
 	//	m_frame->GetColocalizationDlg()->Colocalize();
-	event.Skip();
 }
 
 void VolumePropPanel::OnColormapCombo(wxCommandEvent& event)
@@ -2565,7 +2554,6 @@ void VolumePropPanel::OnColormapCombo(wxCommandEvent& event)
 	//if (m_frame && m_frame->GetColocalizationDlg() &&
 	//	m_frame->GetColocalizationDlg()->GetColormapUpdate())
 	//	m_frame->GetColocalizationDlg()->Colocalize();
-	event.Skip();
 }
 
 void VolumePropPanel::OnColormapCombo2(wxCommandEvent& event)
@@ -2801,7 +2789,6 @@ void VolumePropPanel::OnColorBtn(wxColourPickerEvent& event)
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 
 	OnColorChange(wxc);
-	event.Skip();
 }
 
 void VolumePropPanel::OnColor2Btn(wxColourPickerEvent& event)
@@ -2812,7 +2799,6 @@ void VolumePropPanel::OnColor2Btn(wxColourPickerEvent& event)
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 
 	OnColor2Change(wxc);
-	event.Skip();
 }
 
 void VolumePropPanel::OnColorTextFocus(wxMouseEvent& event)
@@ -2868,7 +2854,8 @@ void VolumePropPanel::OnOptions(wxCommandEvent& event)
 		SaveDefault();
 		break;
 	}
-	event.Skip();
+
+	event.StopPropagation();
 }
 
 //ml
@@ -3160,6 +3147,5 @@ void VolumePropPanel::OnSpaceText(wxCommandEvent& event)
 		InitVRenderViews(INIT_BOUNDS|INIT_CENTER);
 		FluoRefresh(3, { gstNull });
 	}
-	event.Skip();
 }
 

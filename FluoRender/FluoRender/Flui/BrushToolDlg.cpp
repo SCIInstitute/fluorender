@@ -71,7 +71,6 @@ BrushToolDlg::BrushToolDlg(
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT);
 	wxBitmap bitmap;
 	bitmap = wxGetBitmapFromMemory(undo);
-	//m_toolbar->SetToolBitmapSize(bitmap.GetSize());
 	m_toolbar->AddTool(
 		ID_BrushUndo, "Undo", bitmap,
 		"Rollback previous brush operation");
@@ -118,9 +117,6 @@ BrushToolDlg::BrushToolDlg(
 	m_mask_tb = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT);
 	bitmap = wxGetBitmapFromMemory(mask_copy);
-#ifdef _DARWIN
-	m_mask_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_mask_tb->AddTool(
 		ID_MaskCopy, "Copy", bitmap,
 		"Copy current selection mask to clipboard");
@@ -714,6 +710,8 @@ void BrushToolDlg::OnToolBar(wxCommandEvent& event)
 	if (set_mode)
 		glbin_vol_selector.SetMode(mode);
 	FluoRefresh(excl_self, vc, views);
+
+	event.StopPropagation();
 }
 
 //mask tools
@@ -758,6 +756,8 @@ void BrushToolDlg::OnMaskToolBar(wxCommandEvent& event)
 	}
 
 	FluoRefresh(excl_self, vc);
+
+	event.StopPropagation();
 }
 
 //selection adjustment
@@ -1070,7 +1070,7 @@ void BrushToolDlg::OnKeyDown(wxKeyEvent& event)
 		else if (event.GetKeyCode() == wxKeyCode('V'))
 			PasteData();
 	}
-	event.Skip();
+	//event.Skip();
 }
 
 void BrushToolDlg::OnSelectCell(wxGridEvent& event)

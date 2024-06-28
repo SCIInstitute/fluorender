@@ -53,6 +53,8 @@ namespace flrd
 		}
 		void SetId(const std::string& str);
 		unsigned long long GetId() { return m_id; }
+		void SetList(const CelpList& list) { m_list = list; }
+		CelpList& GetList() { return m_list; }
 		bool GetIdEmpty() { return m_id_empty; }
 		void SetUseMin(bool val) { m_use_min = val; }
 		void SetUseMax(bool val) { m_use_max = val; }
@@ -77,9 +79,9 @@ namespace flrd
 		void Exclusive();
 		void Clear(bool invalidate=true);
 		void Delete();
-		void Delete(std::vector<unsigned long long> &ids);
-		void SelectList(CelpList& list);
-		void EraseList(CelpList& list);
+		void DeleteList();
+		void SelectList();
+		void EraseList();
 
 	private:
 		bool m_sel_all;
@@ -91,6 +93,7 @@ namespace flrd
 		unsigned int m_max_num;
 		std::set<unsigned long long> m_sel_ids;
 		int m_sel_mode;//0:single; 1:multiple
+		CelpList m_list;
 
 	private:
 		bool CompareSize(unsigned int size);

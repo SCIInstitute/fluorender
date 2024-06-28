@@ -58,9 +58,6 @@ m_enable_all(true)
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	wxBitmap bitmap;
 	bitmap = wxGetBitmapFromMemory(sync_chan);
-#ifdef _DARWIN
-	m_toolbar->SetToolBitmapSize(bitmap.GetSize());
-#endif
 	m_toolbar->AddCheckTool(ID_LinkChannelsBtn, "Sync All Channels",
 		bitmap, wxNullBitmap,
 		"Link all data channels to this cropping",
@@ -774,6 +771,8 @@ void ClipPlanePanel::OnToolbar(wxCommandEvent& event)
 		SetPlaneMode();
 		break;
 	}
+
+	event.StopPropagation();
 }
 
 void ClipPlanePanel::LinkChannels()

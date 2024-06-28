@@ -1000,18 +1000,6 @@ public:
 	flrd::CelpList &GetCellList();
 	bool FindCell(unsigned int id);
 
-	//modifications
-	bool AddCell(flrd::Celp &cell, size_t frame);
-	bool LinkCells(flrd::CelpList &list1, flrd::CelpList &list2,
-		size_t frame1, size_t frame2, bool exclusive);
-	bool IsolateCells(flrd::CelpList &list, size_t frame);
-	bool UnlinkCells(flrd::CelpList &list1, flrd::CelpList &list2,
-		size_t frame1, size_t frame2);
-	bool CombineCells(flrd::Celp &cell, flrd::CelpList &list,
-		size_t frame);
-	bool DivideCells(flrd::CelpList &list, size_t frame);
-	bool ReplaceCellID(unsigned int old_id, unsigned int new_id, size_t frame);
-
 	//rulers
 	bool GetMappedRulers(flrd::RulerList &rulers);
 

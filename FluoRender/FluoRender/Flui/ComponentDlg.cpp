@@ -2167,7 +2167,7 @@ void ComponentDlg::OnCompAdd(wxCommandEvent& event)
 
 void ComponentDlg::OnCompReplace(wxCommandEvent& event)
 {
-	glbin_comp_editor.Replace();
+	glbin_comp_editor.ReplaceId();
 	FluoRefresh(3, { gstNull });
 }
 
@@ -2179,7 +2179,7 @@ void ComponentDlg::OnCompCleanBkg(wxCommandEvent& event)
 
 void ComponentDlg::OnCompCombine(wxCommandEvent& event)
 {
-	glbin_comp_editor.Combine();
+	glbin_comp_editor.CombineId();
 	FluoRefresh(3, { gstNull });
 }
 
@@ -2243,7 +2243,7 @@ void ComponentDlg::OnOutputChannels(wxCommandEvent& event)
 void ComponentDlg::OnOutputAnnotation(wxCommandEvent& event)
 {
 	int id = event.GetId();
-	int val;
+	int val = 0;
 	if (id == ID_OutputIdBtn)
 		val = 1;
 	else if (id == ID_OutputSnBtn)
@@ -2382,7 +2382,7 @@ void ComponentDlg::OnKeyDown(wxKeyEvent& event)
 		else if (event.GetKeyCode() == wxKeyCode('V'))
 			PasteData();
 	}
-	event.Skip();
+	//event.Skip();
 }
 
 void ComponentDlg::OnSelectCell(wxGridEvent& event)
@@ -2390,7 +2390,7 @@ void ComponentDlg::OnSelectCell(wxGridEvent& event)
 	glbin_comp_selector.SelectCompsCanvas();
 	FluoRefresh(3, { gstNull });
 
-	event.Skip();
+	//event.Skip();
 }
 
 void ComponentDlg::OnRangeSelect(wxGridRangeSelectEvent& event)
@@ -2398,18 +2398,18 @@ void ComponentDlg::OnRangeSelect(wxGridRangeSelectEvent& event)
 	glbin_comp_selector.SelectCompsCanvas();
 	FluoRefresh(3, { gstNull });
 
-	event.Skip();
+	//event.Skip();
 }
 
 void ComponentDlg::OnGridLabelClick(wxGridEvent& event)
 {
 	m_output_grid->SetFocus();
-	event.Skip();
+	//event.Skip();
 }
 
 void ComponentDlg::OnSplitterDclick(wxSplitterEvent& event)
 {
-	event.Skip(false);
+	//event.Skip(false);
 }
 
 void ComponentDlg::CopyData()
@@ -2546,7 +2546,8 @@ void ComponentDlg::IncludeComps()
 	else
 		glbin_comp_analyzer.GetAllCelp(cl, true);
 
-	glbin_comp_selector.SelectList(cl);
+	glbin_comp_selector.SetList(cl);
+	glbin_comp_selector.SelectList();
 
 	FluoRefresh(2, { gstCompAnalysisResult });
 }
@@ -2570,7 +2571,8 @@ void ComponentDlg::ExcludeComps()
 	else
 		glbin_comp_analyzer.GetAllCelp(cl, true);
 
-	glbin_comp_selector.EraseList(cl);
+	glbin_comp_selector.SetList(cl);
+	glbin_comp_selector.EraseList();
 
 	FluoRefresh(2, { gstCompAnalysisResult });
 }

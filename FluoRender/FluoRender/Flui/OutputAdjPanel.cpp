@@ -1114,19 +1114,19 @@ void OutputAdjPanel::OnBHdrText(wxCommandEvent& event)
 void OutputAdjPanel::OnSyncRCheck(wxCommandEvent& event)
 {
 	SetSync(0, m_sync_r_chk->GetToolState(0));
-	event.Skip();
+	//event.Skip();
 }
 
 void OutputAdjPanel::OnSyncGCheck(wxCommandEvent& event)
 {
 	SetSync(1, m_sync_g_chk->GetToolState(0));
-	event.Skip();
+	//event.Skip();
 }
 
 void OutputAdjPanel::OnSyncBCheck(wxCommandEvent& event)
 {
 	SetSync(2, m_sync_b_chk->GetToolState(0));
-	event.Skip();
+	//event.Skip();
 }
 
 void OutputAdjPanel::OnSaveDefault(wxCommandEvent& event)

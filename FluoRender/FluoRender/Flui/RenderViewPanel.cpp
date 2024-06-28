@@ -1356,7 +1356,7 @@ void RenderViewPanel::OnToolBar(wxCommandEvent& event)
 		break;
 	}
 
-	event.Skip();
+	event.StopPropagation();
 }
 
 void RenderViewPanel::OnScaleText(wxCommandEvent& event)
@@ -1365,13 +1365,13 @@ void RenderViewPanel::OnScaleText(wxCommandEvent& event)
 	double len;
 	str.ToDouble(&len);
 	SetScaleText(len);
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnScaleUnit(wxCommandEvent& event)
 {
 	SetScaleUnit(m_scale_cmb->GetSelection());
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnBgColorChange(wxColourPickerEvent& event)
@@ -1379,13 +1379,13 @@ void RenderViewPanel::OnBgColorChange(wxColourPickerEvent& event)
 	wxColor c = m_bg_color_picker->GetColour();
 	fluo::Color color(c.Red() / 255.0, c.Green() / 255.0, c.Blue() / 255.0);
 	SetBgColor(color);
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnBgInvBtn(wxCommandEvent& event)
 {
 	SetBgColorInvert(!m_bg_color_inv);
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnAovSldrIdle(wxIdleEvent& event)
@@ -1401,7 +1401,7 @@ void RenderViewPanel::OnAovSldrIdle(wxIdleEvent& event)
 	if (glbin_states.ClipDisplayChanged())
 		FluoRefresh(3, { gstNull },
 			{ m_frame->GetRenderCanvas(m_canvas) });
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnAovChange(wxScrollEvent& event)
@@ -1413,7 +1413,7 @@ void RenderViewPanel::OnAovChange(wxScrollEvent& event)
 
 	SetAov(val, false);
 
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnAovText(wxCommandEvent& event)
@@ -1425,7 +1425,7 @@ void RenderViewPanel::OnAovText(wxCommandEvent& event)
 		ival = val;
 	m_aov_sldr->ChangeValue(ival);
 	SetAov(ival, false);
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnToolBar2(wxCommandEvent& event)
@@ -1441,19 +1441,20 @@ void RenderViewPanel::OnToolBar2(wxCommandEvent& event)
 		SaveDefault();
 		break;
 	}
-	event.Skip();
+
+	event.StopPropagation();
 }
 
 void RenderViewPanel::OnFullScreen(wxCommandEvent& event)
 {
 	SetFullScreen();
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnDepthAttenCheck(wxCommandEvent& event)
 {
 	SetDepthAttenEnable(m_depth_atten_btn->GetToolState(0));
-	event.Skip();
+	//event.Skip();
 }
 
 //bar left
@@ -1463,7 +1464,7 @@ void RenderViewPanel::OnDepthAttenChange(wxScrollEvent& event)
 	m_depth_atten_factor_text->ChangeValue(wxString::Format("%.2f", val));
 	m_depth_atten_factor_text->Update();
 	SetDepthAtten(val, false);
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnDepthAttenEdit(wxCommandEvent& event)
@@ -1473,14 +1474,14 @@ void RenderViewPanel::OnDepthAttenEdit(wxCommandEvent& event)
 	str.ToDouble(&val);
 	m_depth_atten_factor_sldr->ChangeValue(std::round(val * 100));
 	SetDepthAtten(val, false);
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnDepthAttenReset(wxCommandEvent& event)
 {
 	SetDepthAttenEnable(glbin_view_def.m_use_fog);
 	SetDepthAtten(glbin_view_def.m_fog_intensity, true);
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnPin(wxCommandEvent& event)
@@ -1492,19 +1493,19 @@ void RenderViewPanel::OnPin(wxCommandEvent& event)
 		m_pin_by_user = val ? 2 : 1;
 	m_canvas->SetPinRotCenter(val);
 	FluoRefresh(2, { gstPinRotCtr }, { m_frame->GetRenderCanvas(m_canvas) });
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnCenter(wxCommandEvent& event)
 {
 	SetCenter();
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnScale121(wxCommandEvent& event)
 {
 	SetScale121();
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnScaleFactorChange(wxScrollEvent& event)
@@ -1512,7 +1513,7 @@ void RenderViewPanel::OnScaleFactorChange(wxScrollEvent& event)
 	int ival = m_scale_factor_sldr->GetValue();
 	double dval = ival / 100.0;
 	SetScaleFactor(dval);
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnScaleFactorEdit(wxCommandEvent& event)
@@ -1525,7 +1526,7 @@ void RenderViewPanel::OnScaleFactorEdit(wxCommandEvent& event)
 		double dval = val / 100.0;
 		SetScaleFactor(dval);
 	}
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnScaleFactorSpinUp(wxSpinEvent& event)
@@ -1539,7 +1540,7 @@ void RenderViewPanel::OnScaleFactorSpinUp(wxSpinEvent& event)
 		val--;
 	if (val > 0)
 		SetScaleFactor(val / 100.0);
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnScaleFactorSpinDown(wxSpinEvent& event)
@@ -1553,13 +1554,13 @@ void RenderViewPanel::OnScaleFactorSpinDown(wxSpinEvent& event)
 		val++;
 	if (val > 0)
 		SetScaleFactor(val / 100.0);
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnScaleReset(wxCommandEvent& event)
 {
 	SetScaleFactor(glbin_view_def.m_scale_factor);
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnScaleMode(wxCommandEvent& event)
@@ -1568,7 +1569,7 @@ void RenderViewPanel::OnScaleMode(wxCommandEvent& event)
 	mode += 1;
 	mode = mode > 2 ? 0 : mode;
 	SetScaleMode(mode);
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnRotLockCheck(wxCommandEvent& event)
@@ -1584,7 +1585,8 @@ void RenderViewPanel::OnRotLockCheck(wxCommandEvent& event)
 		SetSliderType(m_rot_lock_btn->GetToolState(ID_RotSliderType));
 		break;
 	}
-	event.Skip();
+
+	event.StopPropagation();
 }
 
 void RenderViewPanel::OnRotEdit(wxCommandEvent& event)
@@ -1601,7 +1603,7 @@ void RenderViewPanel::OnRotEdit(wxCommandEvent& event)
 	m_y_rot_sldr->ChangeValue(std::round(roty));
 	m_z_rot_sldr->ChangeValue(std::round(rotz));
 	SetRotations(rotx, roty, rotz, false);
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnRotScroll(wxScrollEvent& event)
@@ -1618,7 +1620,7 @@ void RenderViewPanel::OnRotScroll(wxScrollEvent& event)
 	m_z_rot_text->Update();
 	//DBGPRINT(L"rot text update %d:\n", rand() % 10);
 	SetRotations(rotx, roty, rotz, false);
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnOrthoViewSelected(wxCommandEvent& event)
@@ -1651,7 +1653,7 @@ void RenderViewPanel::OnOrthoViewSelected(wxCommandEvent& event)
 		SetRotLock(true);
 	else
 		SetRotLock(false);
-	event.Skip();
+	//event.Skip();
 }
 
 void RenderViewPanel::OnRotReset(wxCommandEvent& event)
@@ -1667,7 +1669,8 @@ void RenderViewPanel::OnRotReset(wxCommandEvent& event)
 		SetRotations(0.0, 0.0, 0.0, true);
 		break;
 	}
-	event.Skip();
+
+	event.StopPropagation();
 }
 
 //reset counter

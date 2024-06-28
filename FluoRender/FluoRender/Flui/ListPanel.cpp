@@ -172,7 +172,6 @@ ListPanel::ListPanel(MainFrame* frame,
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER);
 	wxBitmap bitmap = wxGetBitmapFromMemory(view);
-	m_toolbar->SetToolBitmapSize(bitmap.GetSize());
 	m_toolbar->AddTool(ID_AddToView, "Add to View",
 		bitmap, "Add: Add selected data set to render view");
 	bitmap = wxGetBitmapFromMemory(rename);
@@ -193,6 +192,7 @@ ListPanel::ListPanel(MainFrame* frame,
 	bitmap = wxGetBitmapFromMemory(del_all);
 	m_toolbar->AddTool(ID_DeleteAll, "Delete All",
 		bitmap, "Delete All: Delete all data sets");
+	m_toolbar->Bind(wxEVT_TOOL, &ListPanel::OnToolbar, this);
 	m_toolbar->Realize();
 
 	//organize positions
@@ -206,7 +206,6 @@ ListPanel::ListPanel(MainFrame* frame,
 
 	//events
 	Bind(wxEVT_CONTEXT_MENU, &ListPanel::OnContextMenu, this);
-	Bind(wxEVT_TOOL, &ListPanel::OnToolbar, this);
 	Bind(wxEVT_MENU, &ListPanel::OnMenu, this);
 	Bind(wxEVT_LIST_ITEM_SELECTED, &ListPanel::OnSelect, this);
 	Bind(wxEVT_LIST_ITEM_ACTIVATED, &ListPanel::OnAct, this);
@@ -792,6 +791,8 @@ void ListPanel::OnToolbar(wxCommandEvent& event)
 		DeleteAll();
 		break;
 	}
+
+	event.StopPropagation();
 }
 
 void ListPanel::OnMenu(wxCommandEvent& event)
@@ -830,6 +831,8 @@ void ListPanel::OnMenu(wxCommandEvent& event)
 		int ival = id - ID_ViewID;
 		AddSelectionToView(ival);
 	}
+
+	event.StopPropagation();
 }
 
 void ListPanel::OnSelect(wxListEvent& event)
@@ -877,21 +880,21 @@ void ListPanel::OnKeyDown(wxKeyEvent& event)
 
 void ListPanel::OnKeyUp(wxKeyEvent& event)
 {
-	event.Skip();
+	//event.Skip();
 }
 
 void ListPanel::OnMouse(wxMouseEvent& event)
 {
 	if (event.Button(wxMOUSE_BTN_ANY))
 		m_datalist->EndEdit();
-	event.Skip();
+	//event.Skip();
 }
 
 void ListPanel::OnEndEditName(wxCommandEvent& event)
 {
 	wxString str = m_datalist->EndEdit();
 	RenameSelection(str);
-	event.Skip();
+	//event.Skip();
 }
 
 void ListPanel::OnScrollWin(wxScrollWinEvent& event)

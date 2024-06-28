@@ -114,11 +114,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#UI IDs
-add_definitions(-DID_START=5999)
-add_definitions(-DID_TRACE1=ID_START+21)
-add_definitions(-DID_TRACE2=ID_TRACE1+11)
-
 # static compile
 add_definitions(-DSTATIC_COMPILE)
 add_definitions(-DLX_STATIC_LINKING)
