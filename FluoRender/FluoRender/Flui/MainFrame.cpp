@@ -2248,9 +2248,10 @@ void MainFrame::OnToolbarMenu(wxAuiToolBarEvent& event)
 
 		// make sure the button is "un-stuck"
 		tb->SetToolSticky(event.GetId(), false);
+	
 	}
-
-	event.Skip();
+	else
+		event.Skip();
 }
 
 //toolbar
