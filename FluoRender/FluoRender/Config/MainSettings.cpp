@@ -83,7 +83,6 @@ MainSettings::MainSettings()
 	m_grad_bg = false;
 	m_mouse_int = true;
 	m_pin_threshold = 10.0;
-	m_soft_threshold = 0.0;
 	m_line_width = 3.0;
 	m_clip_mode = cm_Normal;
 	m_clip_link = false;
@@ -269,7 +268,6 @@ void MainSettings::Read()
 		fconfig.Read("grad bg", &m_grad_bg, false);
 		fconfig.Read("mouse int", &m_mouse_int, true);
 		fconfig.Read("pin thresh", &m_pin_threshold, 10.0);
-		fconfig.Read("soft thresh", &m_soft_threshold, 0.0);
 		fconfig.Read("line width", &m_line_width, 3.0);
 		fconfig.Read("clip mode", &m_clip_mode, cm_Normal);
 		fconfig.Read("clip link", &m_clip_link, false);
@@ -509,7 +507,6 @@ void MainSettings::Save()
 	fconfig.Write("grad bg", m_grad_bg);
 	fconfig.Write("mouse int", m_mouse_int);
 	fconfig.Write("pin thresh", m_pin_threshold);
-	fconfig.Write("soft thresh", m_soft_threshold);
 	fconfig.Write("line width", m_line_width);
 	fconfig.Write("clip mode", m_clip_mode);
 	fconfig.Write("clip link", m_clip_link);

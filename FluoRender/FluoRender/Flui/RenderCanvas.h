@@ -1232,7 +1232,6 @@ private:
 	void OnDraw(wxPaintEvent& event);
 	void OnResize(wxSizeEvent& event);
 	void OnIdle(wxIdleEvent& event);
-	void OnKeyDown(wxKeyEvent& event);
 	void OnQuitFscreen(wxTimerEvent& event);
 	void OnClose(wxCloseEvent& event);
 #ifdef _WIN32

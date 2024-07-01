@@ -56,6 +56,7 @@ public:
 	bool m_thresh_enable;
 	double m_lo_thresh;
 	double m_hi_thresh;
+	double m_sw;
 
 	bool m_luminance_enable;
 	double m_luminance;

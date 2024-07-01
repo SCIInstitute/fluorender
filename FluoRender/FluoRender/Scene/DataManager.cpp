@@ -110,7 +110,7 @@ VolumeData::VolumeData()
 	m_thresh_enable = true;
 	m_lo_thresh = 0.0;
 	m_hi_thresh = 1.0;
-	m_sw = glbin_settings.m_soft_threshold;
+	m_sw = 0.0;
 
 	m_luminance_enable = true;
 	m_luminance = 1.0;

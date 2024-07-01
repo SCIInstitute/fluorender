@@ -1435,24 +1435,28 @@ void TreePanel::OnToolbar(wxCommandEvent& event)
 	case ID_BrushUnselect:
 	case ID_BrushDiffuse:
 	{
-		int val = glbin_vol_selector.GetMode();
-		int mode = 0;
+		int mode = glbin_vol_selector.GetMode();
+		bool set_mode = false;
 		switch (id)
 		{
 		case ID_BrushAppend:
-			mode = 2;
+			mode = mode == 2 ? 0 : 2;
+			set_mode = true;
 			break;
 		case ID_BrushUnselect:
-			mode = 3;
+			mode = mode == 3 ? 0 : 3;
+			set_mode = true;
 			break;
 		case ID_BrushDiffuse:
-			mode = 4;
+			mode = mode == 4 ? 0 : 4;
+			set_mode = true;
 			break;
 		}
-		if (val != mode)
+		if (set_mode)
+		{
 			glbin_vol_selector.SetMode(mode);
-		else
-			glbin_vol_selector.SetMode(0);
+			glbin_states.m_brush_mode_toolbar = mode;
+		}
 		vc.insert(gstBrushState);
 		views.insert(-1);
 	}

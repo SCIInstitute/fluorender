@@ -130,25 +130,26 @@ void VolumeSelector::Segment(bool push_mask, int mx, int my)
 		return;
 
 	//add ml record
-	if (!glbin.get_cg_table_enable() ||
-		!glbin.get_cg_entry().getValid())
-		return;
-
-	//histogram
-	flrd::Histogram histogram(m_vd);
-	histogram.SetUseMask(true);
-	flrd::EntryHist* eh = histogram.GetEntryHist();
-
-	if (eh)
+	if (glbin.get_cg_table_enable() &&
+		glbin.get_cg_entry().getValid() &&
+		m_vd)
 	{
-		//record
-		flrd::RecordHistParams* rec = new flrd::RecordHistParams();
-		rec->setInput(eh);
-		flrd::EntryParams* ep = new flrd::EntryParams(glbin.get_cg_entry());
-		rec->setOutput(ep);
+		//histogram
+		flrd::Histogram histogram(m_vd);
+		histogram.SetUseMask(true);
+		flrd::EntryHist* eh = histogram.GetEntryHist();
 
-		//table
-		glbin.get_cg_table().addRecord(rec);
+		if (eh)
+		{
+			//record
+			flrd::RecordHistParams* rec = new flrd::RecordHistParams();
+			rec->setInput(eh);
+			flrd::EntryParams* ep = new flrd::EntryParams(glbin.get_cg_entry());
+			rec->setOutput(ep);
+
+			//table
+			glbin.get_cg_table().addRecord(rec);
+		}
 	}
 
 	RenderCanvas* canvas = glbin_current.canvas;
@@ -157,10 +158,7 @@ void VolumeSelector::Segment(bool push_mask, int mx, int my)
 
 	canvas->HandleCamera();
 	if (m_mode == 9)
-	{
-		//wxPoint mouse_pos = ScreenToClient(canvas->wxGetMousePosition());
 		segment(push_mask, mx, my);
-	}
 	else
 		segment(push_mask);
 

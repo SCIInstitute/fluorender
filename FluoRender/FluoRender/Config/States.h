@@ -40,5 +40,7 @@ public:
 	bool m_mouse_in_clip_plane_panel;
 	bool m_mouse_in_aov_slider;
 	bool m_clip_display;	//show clipping planes in view
+
+	int m_brush_mode_toolbar;	//brush state set from ui
 };
 #endif

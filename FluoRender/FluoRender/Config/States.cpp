@@ -51,3 +51,4 @@ bool States::ClipDisplayChanged()
 	bval = bval != m_clip_display;
 	return 	bval;
 }
+

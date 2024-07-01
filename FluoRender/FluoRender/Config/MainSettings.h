@@ -139,7 +139,6 @@ public:
 	bool m_grad_bg;
 	bool m_mouse_int;		//enable lower sample rate for mouse interactions
 	double m_pin_threshold;	//rot center anchor thresh
-	double m_soft_threshold;
 	double m_line_width;	//line width
 	int m_clip_mode;		//clipping plane display mode
 	bool m_clip_link;		//link clipping planes in view

@@ -708,7 +708,10 @@ void BrushToolDlg::OnToolBar(wxCommandEvent& event)
 	}
 
 	if (set_mode)
+	{
 		glbin_vol_selector.SetMode(mode);
+		glbin_states.m_brush_mode_toolbar = mode;
+	}
 	FluoRefresh(excl_self, vc, views);
 
 	event.StopPropagation();

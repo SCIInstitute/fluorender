@@ -45,6 +45,7 @@ VolumeDataDefault::VolumeDataDefault()
 	m_thresh_enable = true;
 	m_lo_thresh = 0.0;
 	m_hi_thresh = 1.0;
+	m_sw = 0.0;
 
 	m_luminance_enable = true;
 	m_luminance = 1.0;
@@ -113,6 +114,7 @@ void VolumeDataDefault::Read(wxFileConfig& f)
 	f.Read(gstThresholdEnable, &m_thresh_enable, true);
 	f.Read(gstLowThreshold, &m_lo_thresh, 0.0);
 	f.Read(gstHighThreshold, &m_hi_thresh, 1.0);
+	f.Read("soft thresh", &m_sw, 0.0);
 
 	f.Read(gstLuminanceEnable, &m_luminance_enable, true);
 	f.Read(gstLuminance, &m_luminance, 1.0);
@@ -169,6 +171,7 @@ void VolumeDataDefault::Save(wxFileConfig& f)
 	f.Write(gstThresholdEnable, m_thresh_enable);
 	f.Write(gstLowThreshold, m_lo_thresh);
 	f.Write(gstHighThreshold, m_hi_thresh);
+	f.Write("soft thresh", m_sw);
 
 	f.Write(gstLuminanceEnable, m_luminance_enable);
 	f.Write(gstLuminance, m_luminance);
@@ -226,6 +229,7 @@ void VolumeDataDefault::Set(VolumeData* vd)
 	m_thresh_enable = vd->GetThreshEnable();
 	m_lo_thresh = vd->GetLeftThresh();
 	m_hi_thresh = vd->GetRightThresh();
+	m_sw = vd->GetSoftThreshold();
 
 	m_luminance_enable = vd->GetLuminanceEnable();
 	m_luminance = vd->GetLuminance();
@@ -284,6 +288,7 @@ void VolumeDataDefault::Apply(VolumeData* vd)
 	vd->SetThreshEnable(m_thresh_enable);
 	vd->SetLeftThresh(m_lo_thresh);
 	vd->SetRightThresh(m_hi_thresh);
+	vd->SetSoftThreshsold(m_sw);
 
 	vd->SetLuminanceEnable(m_luminance_enable);
 	vd->SetLuminance(m_luminance);

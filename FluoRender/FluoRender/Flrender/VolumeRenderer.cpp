@@ -157,7 +157,8 @@ namespace flvr
 		filter_size_shp_(0.0),
 		inv_(copy.inv_),
 		compression_(copy.compression_),
-		alpha_power_(copy.alpha_power_)
+		alpha_power_(copy.alpha_power_),
+		sw_(0)
 	{
 		//mode
 		mode_ = copy.mode_;
@@ -570,7 +571,6 @@ namespace flvr
 		if (!tex_)
 			return;
 
-		double sw = glbin_settings.m_soft_threshold;
 		fluo::Ray view_ray = compute_view();
 		fluo::Ray snapview = compute_snapview(0.4);
 
@@ -729,7 +729,7 @@ namespace flvr
 
 		//transfer function
 		shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
-		shader->setLocalParam(3, 1.0/gamma3d_, gm_thresh_, offset_, sw);
+		shader->setLocalParam(3, 1.0/gamma3d_, gm_thresh_, offset_, sw_);
 		if (mode_==TextureRenderer::MODE_MIP &&
 			colormap_proj_)
 			shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,

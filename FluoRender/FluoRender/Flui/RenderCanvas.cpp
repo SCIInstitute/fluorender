@@ -354,7 +354,6 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	Bind(wxEVT_MOTION, &RenderCanvas::OnMouse, this);
 	Bind(wxEVT_MOUSEWHEEL, &RenderCanvas::OnMouse, this);
 	Bind(wxEVT_IDLE, &RenderCanvas::OnIdle, this);
-	Bind(wxEVT_KEY_DOWN, &RenderCanvas::OnKeyDown, this);
 	Bind(wxEVT_CLOSE_WINDOW, &RenderCanvas::OnClose, this);
 	Bind(wxEVT_TIMER, &RenderCanvas::OnQuitFscreen, this);
 }
@@ -3583,117 +3582,60 @@ void RenderCanvas::SetBrush(int mode)
 	}
 	m_paint_display = true;
 	m_draw_brush = true;
-	glbin_vol_selector.ChangeBrushSetsIndex();
+	//glbin_vol_selector.ChangeBrushSetsIndex();
 }
 
 bool RenderCanvas::UpdateBrushState(bool focus)
 {
 	bool refresh = false;
+	bool reset = false;
 
-	if (m_int_mode != 2 && m_int_mode != 7)
+	if (wxGetKeyState(WXK_SHIFT))
 	{
-		if (wxGetKeyState(WXK_SHIFT) && focus)
-		{
-			SetBrush(2);
-			refresh = true;
-			//if (tree_panel)
-			//	tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
-			//if (brush_dlg)
-			//	brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
-			//RefreshGL(6);
-		}
-		else if (wxGetKeyState(wxKeyCode('Z')) && focus)
-		{
-			SetBrush(4);
-			refresh = true;
-			//if (tree_panel)
-			//	tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
-			//if (brush_dlg)
-			//	brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
-			//RefreshGL(7);
-		}
-		else if (wxGetKeyState(wxKeyCode('X')) && focus)
-		{
-			SetBrush(3);
-			refresh = true;
-			//if (tree_panel)
-			//	tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
-			//if (brush_dlg)
-			//	brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
-			//RefreshGL(8);
-		}
+		glbin_states.m_brush_mode_toolbar = 0;
+		SetBrush(2);
+		refresh = true;
 	}
+	else if (wxGetKeyState(wxKeyCode('X')))
+	{
+		glbin_states.m_brush_mode_toolbar = 0;
+		SetBrush(3);
+		refresh = true;
+	}
+	else if (wxGetKeyState(wxKeyCode('Z')))
+	{
+		glbin_states.m_brush_mode_toolbar = 0;
+		SetBrush(4);
+		refresh = true;	}
 	else
 	{
-		if (glbin_vol_selector.GetMode())
+		if (!glbin_states.m_brush_mode_toolbar)
 		{
-			if (wxGetKeyState(WXK_SHIFT))
-			{
-				glbin_vol_selector.SetMode(0);
-				SetBrush(2);
-				refresh = true;
-				//if (tree_panel)
-				//	tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
-				//if (brush_dlg)
-				//	brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
-				//RefreshGL(9);
-			}
-			else if (wxGetKeyState(wxKeyCode('Z')) && focus)
-			{
-				glbin_vol_selector.SetMode(0);
-				SetBrush(4);
-				refresh = true;
-				//if (tree_panel)
-				//	tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
-				//if (brush_dlg)
-				//	brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
-				//RefreshGL(10);
-			}
-			else if (wxGetKeyState(wxKeyCode('X')) && focus)
-			{
-				glbin_vol_selector.SetMode(0);
-				SetBrush(3);
-				refresh = true;
-				//if (tree_panel)
-				//	tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
-				//if (brush_dlg)
-				//	brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
-				//RefreshGL(11);
-			}
-			else
-			{
-				SetBrush(glbin_vol_selector.GetMode());
-				refresh = true;
-				//RefreshGL(12);
-			}
+			glbin_states.m_brush_mode_toolbar = 0;
+			reset = true;
 		}
-		else if (!wxGetKeyState(WXK_SHIFT) &&
-			!wxGetKeyState(wxKeyCode('Z')) &&
-			!wxGetKeyState(wxKeyCode('X')))
-		{
-			if (wxGetMouseState().LeftIsDown())
-			{
-				wxPoint mp = ScreenToClient(wxGetMousePosition());
-				glbin_vol_selector.Segment(true, mp.x, mp.y);
-			}
-			if (m_int_mode == 7)
-				m_int_mode = 5;
-			else
-				m_int_mode = 1;
-			m_paint_display = false;
-			m_draw_brush = false;
-			refresh = true;
-			//if (tree_panel)
-			//	tree_panel->SelectBrush(0);
-			//if (brush_dlg)
-			//	brush_dlg->SelectBrush(0);
-			//RefreshGL(13);
+	}
 
-			if (m_prev_focus)
-			{
-				m_prev_focus->SetFocus();
-				m_prev_focus = 0;
-			}
+	if (reset)
+	{
+		if (wxGetMouseState().LeftIsDown())
+		{
+			wxPoint mp = ScreenToClient(wxGetMousePosition());
+			glbin_vol_selector.Segment(true, mp.x, mp.y);
+		}
+		if (m_int_mode == 7)
+			m_int_mode = 5;
+		else
+			m_int_mode = 1;
+		m_paint_display = false;
+		m_draw_brush = false;
+		SetBrush(0);
+		refresh = true;
+
+		if (m_prev_focus)
+		{
+			m_prev_focus->SetFocus();
+			m_prev_focus = 0;
 		}
 	}
 
@@ -3878,7 +3820,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			event.RequestMore(true);
 			refresh = true;
 			lg_changed = false;
-			vc.insert(gstNull);
 		}
 	}
 
@@ -3892,7 +3833,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			refresh = true;
 			start_loop = false;
 			lg_changed = true;
-			vc.insert(gstNull);
 		}
 	}
 	else
@@ -3927,7 +3867,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		if (glbin_settings.m_mem_swap &&
 			flvr::TextureRenderer::get_done_update_loop())
 			m_pre_draw = true;
-		vc.insert(gstNull);
 	}
 
 	if (m_use_openvr)
@@ -3935,7 +3874,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		event.RequestMore(true);
 		refresh = true;
 		lg_changed = true;
-		vc.insert(gstNull);
 		//m_retain_finalbuffer = true;
 	}
 
@@ -3951,7 +3889,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 
 		refresh = true;
 		lg_changed = true;
-		vc.insert(gstNull);
 		if (glbin_settings.m_mem_swap &&
 			flvr::TextureRenderer::get_done_update_loop())
 			m_pre_draw = true;
@@ -3998,7 +3935,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		m_update_rot_ctr = false;
 		refresh = true;
 		lg_changed = true;
-		vc.insert(gstNull);
 	}
 
 	wxPoint mouse_pos = wxGetMousePosition();
@@ -4017,7 +3953,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 
 		if (focus)
 		{
-
 			//draw_mask
 			if (wxGetKeyState(wxKeyCode('V')) &&
 				m_draw_mask)
@@ -4026,7 +3961,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
-				vc.insert(gstNull);
 			}
 			if (!wxGetKeyState(wxKeyCode('V')) &&
 				!m_draw_mask)
@@ -4034,7 +3968,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				m_draw_mask = true;
 				refresh = true;
 				lg_changed = true;
-				vc.insert(gstNull);
 			}
 
 			//move view
@@ -4056,7 +3989,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
-				vc.insert(gstNull);
 			}
 			if (m_move_left &&
 				(!wxGetKeyState(WXK_CONTROL) ||
@@ -4080,7 +4012,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
-				vc.insert(gstNull);
 			}
 			if (m_move_right &&
 				(!wxGetKeyState(WXK_CONTROL) ||
@@ -4103,7 +4034,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
-				vc.insert(gstNull);
 			}
 			if (m_move_up &&
 				(!wxGetKeyState(WXK_CONTROL) ||
@@ -4126,7 +4056,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
-				vc.insert(gstNull);
 			}
 			if (m_move_down &&
 				(!wxGetKeyState(WXK_CONTROL) ||
@@ -4287,13 +4216,11 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			{
 				ChangeBrushSize(-10);
 				set_focus = true;
-				vc.insert(gstNull);
 			}
 			if (wxGetKeyState(wxKeyCode(']')))
 			{
 				ChangeBrushSize(10);
 				set_focus = true;
-				vc.insert(gstNull);
 			}
 			//comp include
 			if (wxGetKeyState(WXK_RETURN) &&
@@ -4305,7 +4232,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
-				vc.insert(gstNull);
 			}
 			if (!wxGetKeyState(WXK_RETURN) &&
 				m_comp_include)
@@ -4320,7 +4246,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
-				vc.insert(gstNull);
 			}
 			if (!wxGetKeyState(wxKeyCode('\\')) &&
 				m_comp_exclude)
@@ -4335,7 +4260,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				refresh = true;
 				lg_changed = true;
 				set_focus = true;
-				vc.insert(gstNull);
 			}
 			if (!wxGetKeyState(wxKeyCode('r')) &&
 				m_ruler_relax)
@@ -4361,7 +4285,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				}
 				refresh = true;
 				lg_changed = true;
-				vc.insert(gstNull);
 				start_loop = true;
 				//update
 				//if (m_frame)
@@ -4434,7 +4357,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			m_update_rot_ctr = true;
 			refresh = true;
 			lg_changed = true;
-			vc.insert(gstNull);
 		}
 		//zoom/dolly
 		if (lefty != 0.0)
@@ -4508,7 +4430,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			m_update_rot_ctr = true;
 			refresh = true;
 			lg_changed = true;
-			vc.insert(gstNull);
 		}
 	}
 #endif
@@ -4519,6 +4440,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		m_clear_buffer = true;
 		m_updating = true;
 		RefreshGL(15, ref_stat, start_loop, lg_changed);
+		if (vc.empty())
+			vc.insert(gstNull);
 		m_renderview_panel->FluoRefresh(0, vc, {-1});
 	}
 	else if (glbin_settings.m_inf_loop)
@@ -4529,11 +4452,6 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	}
 	if (set_focus)
 		SetFocus();
-}
-
-void RenderCanvas::OnKeyDown(wxKeyEvent& event)
-{
-	event.Skip();
 }
 
 void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
