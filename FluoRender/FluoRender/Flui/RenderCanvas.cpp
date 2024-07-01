@@ -2128,7 +2128,6 @@ void RenderCanvas::ChangeBrushSize(int value)
 void RenderCanvas::SetVolumeA(VolumeData* vd)
 {
 	glbin_vol_calculator.SetVolumeA(vd);
-	glbin_vol_selector.SetVolume(vd);
 }
 
 void RenderCanvas::SetVolumeB(VolumeData* vd)
@@ -3587,114 +3586,118 @@ void RenderCanvas::SetBrush(int mode)
 	glbin_vol_selector.ChangeBrushSetsIndex();
 }
 
-void RenderCanvas::UpdateBrushState(bool focus)
+bool RenderCanvas::UpdateBrushState(bool focus)
 {
-	//TreePanel* tree_panel = 0;
-	//BrushToolDlg* brush_dlg = 0;
-	//if (m_frame)
-	//{
-	//	tree_panel = m_frame->GetTreePanel();
-	//	brush_dlg = m_frame->GetBrushToolDlg();
-	//}
+	bool refresh = false;
 
-	//if (m_int_mode != 2 && m_int_mode != 7)
-	//{
-	//	if (wxGetKeyState(WXK_SHIFT) && focus)
-	//	{
-	//		SetBrush(2);
-	//		if (tree_panel)
-	//			tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
-	//		if (brush_dlg)
-	//			brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
-	//		RefreshGL(6);
-	//	}
-	//	else if (wxGetKeyState(wxKeyCode('Z')) && focus)
-	//	{
-	//		SetBrush(4);
-	//		if (tree_panel)
-	//			tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
-	//		if (brush_dlg)
-	//			brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
-	//		RefreshGL(7);
-	//	}
-	//	else if (wxGetKeyState(wxKeyCode('X')) && focus)
-	//	{
-	//		SetBrush(3);
-	//		if (tree_panel)
-	//			tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
-	//		if (brush_dlg)
-	//			brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
-	//		RefreshGL(8);
-	//	}
-	//}
-	//else
-	//{
-	//	if (glbin_vol_selector.GetMode())
-	//	{
-	//		if (wxGetKeyState(WXK_SHIFT))
-	//		{
-	//			glbin_vol_selector.SetMode(0);
-	//			SetBrush(2);
-	//			if (tree_panel)
-	//				tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
-	//			if (brush_dlg)
-	//				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
-	//			RefreshGL(9);
-	//		}
-	//		else if (wxGetKeyState(wxKeyCode('Z')) && focus)
-	//		{
-	//			glbin_vol_selector.SetMode(0);
-	//			SetBrush(4);
-	//			if (tree_panel)
-	//				tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
-	//			if (brush_dlg)
-	//				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
-	//			RefreshGL(10);
-	//		}
-	//		else if (wxGetKeyState(wxKeyCode('X')) && focus)
-	//		{
-	//			glbin_vol_selector.SetMode(0);
-	//			SetBrush(3);
-	//			if (tree_panel)
-	//				tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
-	//			if (brush_dlg)
-	//				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
-	//			RefreshGL(11);
-	//		}
-	//		else
-	//		{
-	//			SetBrush(glbin_vol_selector.GetMode());
-	//			RefreshGL(12);
-	//		}
-	//	}
-	//	else if (!wxGetKeyState(WXK_SHIFT) &&
-	//		!wxGetKeyState(wxKeyCode('Z')) &&
-	//		!wxGetKeyState(wxKeyCode('X')))
-	//	{
-	//		if (wxGetMouseState().LeftIsDown())
-	//		{
-	//			wxPoint mp = ScreenToClient(wxGetMousePosition());
-	//			glbin_vol_selector.Segment(true, mp.x, mp.y);
-	//		}
-	//		if (m_int_mode == 7)
-	//			m_int_mode = 5;
-	//		else
-	//			m_int_mode = 1;
-	//		m_paint_display = false;
-	//		m_draw_brush = false;
-	//		if (tree_panel)
-	//			tree_panel->SelectBrush(0);
-	//		if (brush_dlg)
-	//			brush_dlg->SelectBrush(0);
-	//		RefreshGL(13);
+	if (m_int_mode != 2 && m_int_mode != 7)
+	{
+		if (wxGetKeyState(WXK_SHIFT) && focus)
+		{
+			SetBrush(2);
+			refresh = true;
+			//if (tree_panel)
+			//	tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
+			//if (brush_dlg)
+			//	brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
+			//RefreshGL(6);
+		}
+		else if (wxGetKeyState(wxKeyCode('Z')) && focus)
+		{
+			SetBrush(4);
+			refresh = true;
+			//if (tree_panel)
+			//	tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
+			//if (brush_dlg)
+			//	brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
+			//RefreshGL(7);
+		}
+		else if (wxGetKeyState(wxKeyCode('X')) && focus)
+		{
+			SetBrush(3);
+			refresh = true;
+			//if (tree_panel)
+			//	tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
+			//if (brush_dlg)
+			//	brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
+			//RefreshGL(8);
+		}
+	}
+	else
+	{
+		if (glbin_vol_selector.GetMode())
+		{
+			if (wxGetKeyState(WXK_SHIFT))
+			{
+				glbin_vol_selector.SetMode(0);
+				SetBrush(2);
+				refresh = true;
+				//if (tree_panel)
+				//	tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
+				//if (brush_dlg)
+				//	brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
+				//RefreshGL(9);
+			}
+			else if (wxGetKeyState(wxKeyCode('Z')) && focus)
+			{
+				glbin_vol_selector.SetMode(0);
+				SetBrush(4);
+				refresh = true;
+				//if (tree_panel)
+				//	tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
+				//if (brush_dlg)
+				//	brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
+				//RefreshGL(10);
+			}
+			else if (wxGetKeyState(wxKeyCode('X')) && focus)
+			{
+				glbin_vol_selector.SetMode(0);
+				SetBrush(3);
+				refresh = true;
+				//if (tree_panel)
+				//	tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
+				//if (brush_dlg)
+				//	brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
+				//RefreshGL(11);
+			}
+			else
+			{
+				SetBrush(glbin_vol_selector.GetMode());
+				refresh = true;
+				//RefreshGL(12);
+			}
+		}
+		else if (!wxGetKeyState(WXK_SHIFT) &&
+			!wxGetKeyState(wxKeyCode('Z')) &&
+			!wxGetKeyState(wxKeyCode('X')))
+		{
+			if (wxGetMouseState().LeftIsDown())
+			{
+				wxPoint mp = ScreenToClient(wxGetMousePosition());
+				glbin_vol_selector.Segment(true, mp.x, mp.y);
+			}
+			if (m_int_mode == 7)
+				m_int_mode = 5;
+			else
+				m_int_mode = 1;
+			m_paint_display = false;
+			m_draw_brush = false;
+			refresh = true;
+			//if (tree_panel)
+			//	tree_panel->SelectBrush(0);
+			//if (brush_dlg)
+			//	brush_dlg->SelectBrush(0);
+			//RefreshGL(13);
 
-	//		if (m_prev_focus)
-	//		{
-	//			m_prev_focus->SetFocus();
-	//			m_prev_focus = 0;
-	//		}
-	//	}
-	//}
+			if (m_prev_focus)
+			{
+				m_prev_focus->SetFocus();
+				m_prev_focus = 0;
+			}
+		}
+	}
+
+	return refresh;
 }
 
 //selection
@@ -4005,7 +4008,12 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	
 	if (mouse_in)
 	{
-		UpdateBrushState(focus);
+		if (UpdateBrushState(focus))
+		{
+			set_focus = true;
+			refresh = true;
+			vc.insert({ gstSelUndo, gstBrushState });
+		}
 
 		if (focus)
 		{
@@ -5108,7 +5116,6 @@ void RenderCanvas::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool
 
 	//restore currently selected volume
 	m_cur_vol = m_cur_vol_save;
-	glbin_vol_selector.SetVolume(m_cur_vol);
 	glbin_vol_calculator.SetVolumeA(m_cur_vol);
 
 	//update ruler intensity values
@@ -5207,7 +5214,6 @@ void RenderCanvas::Set3DBatFrame(int frame, int start_frame, int end_frame, bool
 
 	//restore currently selected volume
 	m_cur_vol = cur_vd_save;
-	glbin_vol_selector.SetVolume(m_cur_vol);
 	glbin_vol_calculator.SetVolumeA(m_cur_vol);
 
 	//update ruler intensity values

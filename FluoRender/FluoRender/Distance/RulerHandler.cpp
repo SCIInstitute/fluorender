@@ -841,7 +841,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 
 void RulerHandler::AddPaintRulerPoint()
 {
-	VolumeData* vd = glbin_vol_selector.GetVolume();
+	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return;
 	Ruler* ruler = glbin_current.GetRuler();

@@ -35,9 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <chrono>
 #include <cstring>
 
-class RenderCanvas;
 class VolumeData;
-class DataGroup;
 namespace flrd
 {
 	struct BrushRadiusSet
@@ -54,10 +52,8 @@ namespace flrd
 		VolumeSelector();
 		~VolumeSelector();
 
-		void SetRenderCanvas(RenderCanvas* canvas);
 		void SetVolume(VolumeData *vd) { m_vd = vd; }
-		VolumeData* GetVolume() { return m_vd; }
-		void SetGroup(DataGroup* group) { m_group = group; }
+		//VolumeData* GetVolume() { return m_vd; }
 		//modes
 		void SetMode(int mode);
 		int GetMode() { return m_mode; }
@@ -267,9 +263,7 @@ namespace flrd
 		//bool GetPaintColocalize() { return m_paint_colocalize; }
 
 	private:
-		RenderCanvas *m_canvas;
 		VolumeData *m_vd;	//volume data for segmentation
-		DataGroup* m_group;	//group of m_vd
 		VolumeData* m_vd_copy;//for copying mask source
 		bool m_copy_data;//copy data or mask
 

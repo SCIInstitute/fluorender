@@ -63,6 +63,7 @@ DEALINGS IN THE SOFTWARE.
 #include <msk_writer.h>
 #include <msk_reader.h>
 #include <VolumeMeshConv.h>
+#include <Debug.h>
 #include <wx/artprov.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
