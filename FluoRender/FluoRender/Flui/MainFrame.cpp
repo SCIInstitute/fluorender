@@ -111,7 +111,7 @@ MainFrame::MainFrame(
 	m_benchmark(benchmark),
 	//m_vd_copy(0),
 	//m_copy_data(false),
-	m_waker(0)
+	m_waker(this)
 {
 #ifdef _DARWIN
 	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
@@ -787,6 +787,7 @@ MainFrame::MainFrame(
 	Bind(wxEVT_MENU, &MainFrame::OnMainMenu, this);
 	Bind(wxEVT_AUI_PANE_CLOSE, &MainFrame::OnPaneClose, this);
 	Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
+	Bind(wxEVT_TIMER, [](wxTimerEvent& event) { wxWakeUpIdle(); });
 
 	if (fluo::InEpsilon(glbin_settings.m_dpi_scale_factor,
 		GetDPIScaleFactor()))
@@ -802,9 +803,7 @@ MainFrame::MainFrame(
 
 	m_aui_mgr.Update();
 
-	m_waker = new wxTimer(this);
-	m_waker->Bind(wxEVT_TIMER, [](wxTimerEvent& event) { wxWakeUpIdle(); });
-	m_waker->Start(100);
+	m_waker.Start(100);
 }
 
 MainFrame::~MainFrame()
@@ -846,11 +845,7 @@ MainFrame::~MainFrame()
 
 	m_aui_mgr.UnInit();
 
-	if (m_waker)
-	{
-		m_waker->Stop();
-		delete m_waker;
-	}
+	m_waker.Stop();
 }
 
 wxString MainFrame::CreateRenderView(int row)

@@ -356,7 +356,7 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	Bind(wxEVT_IDLE, &RenderCanvas::OnIdle, this);
 	Bind(wxEVT_KEY_DOWN, &RenderCanvas::OnKeyDown, this);
 	Bind(wxEVT_CLOSE_WINDOW, &RenderCanvas::OnClose, this);
-	m_fullscreen_trigger.Bind(wxEVT_TIMER, &RenderCanvas::OnQuitFscreen, this);
+	Bind(wxEVT_TIMER, &RenderCanvas::OnQuitFscreen, this);
 }
 
 #ifdef _WIN32

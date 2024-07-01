@@ -392,7 +392,7 @@ private:
 	wxString m_address;
 	//benchmark mode
 	bool m_benchmark;
-	wxTimer* m_waker;
+	wxTimer m_waker;
 
 private:
 	//toolbar menus

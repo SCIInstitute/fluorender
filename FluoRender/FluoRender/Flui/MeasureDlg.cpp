@@ -1776,7 +1776,6 @@ void MeasureDlg::OnKeyDown(wxKeyEvent& event)
 			}
 		}
 	}
-	//event.Skip();
 }
 
 void MeasureDlg::OnContextMenu(wxContextMenuEvent& event)

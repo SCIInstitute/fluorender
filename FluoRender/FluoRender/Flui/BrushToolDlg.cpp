@@ -1070,7 +1070,6 @@ void BrushToolDlg::OnKeyDown(wxKeyEvent& event)
 		else if (event.GetKeyCode() == wxKeyCode('V'))
 			PasteData();
 	}
-	//event.Skip();
 }
 
 void BrushToolDlg::OnSelectCell(wxGridEvent& event)

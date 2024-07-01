@@ -435,7 +435,6 @@ void ColocalizationDlg::OnKeyDown(wxKeyEvent& event)
 		else if (event.GetKeyCode() == wxKeyCode('V'))
 			PasteData();
 	}
-	//event.Skip();
 }
 
 void ColocalizationDlg::OnSelectCell(wxGridEvent& event)
@@ -443,11 +442,9 @@ void ColocalizationDlg::OnSelectCell(wxGridEvent& event)
 	int r = event.GetRow();
 	int c = event.GetCol();
 	m_output_grid->SelectBlock(r, c, r, c);
-	//event.Skip();
 }
 
 void ColocalizationDlg::OnGridLabelClick(wxGridEvent& event)
 {
 	m_output_grid->SetFocus();
-	//event.Skip();
 }

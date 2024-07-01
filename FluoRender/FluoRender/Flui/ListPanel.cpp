@@ -875,26 +875,22 @@ void ListPanel::OnKeyDown(wxKeyEvent& event)
 	if (event.GetKeyCode() == WXK_DELETE ||
 		event.GetKeyCode() == WXK_BACK)
 		DeleteSelection();
-	//event.Skip();
 }
 
 void ListPanel::OnKeyUp(wxKeyEvent& event)
 {
-	//event.Skip();
 }
 
 void ListPanel::OnMouse(wxMouseEvent& event)
 {
 	if (event.Button(wxMOUSE_BTN_ANY))
 		m_datalist->EndEdit();
-	//event.Skip();
 }
 
 void ListPanel::OnEndEditName(wxCommandEvent& event)
 {
 	wxString str = m_datalist->EndEdit();
 	RenameSelection(str);
-	//event.Skip();
 }
 
 void ListPanel::OnScrollWin(wxScrollWinEvent& event)

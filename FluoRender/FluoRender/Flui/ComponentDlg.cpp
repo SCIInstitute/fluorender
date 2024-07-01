@@ -2382,34 +2382,27 @@ void ComponentDlg::OnKeyDown(wxKeyEvent& event)
 		else if (event.GetKeyCode() == wxKeyCode('V'))
 			PasteData();
 	}
-	//event.Skip();
 }
 
 void ComponentDlg::OnSelectCell(wxGridEvent& event)
 {
 	glbin_comp_selector.SelectCompsCanvas();
 	FluoRefresh(3, { gstNull });
-
-	//event.Skip();
 }
 
 void ComponentDlg::OnRangeSelect(wxGridRangeSelectEvent& event)
 {
 	glbin_comp_selector.SelectCompsCanvas();
 	FluoRefresh(3, { gstNull });
-
-	//event.Skip();
 }
 
 void ComponentDlg::OnGridLabelClick(wxGridEvent& event)
 {
 	m_output_grid->SetFocus();
-	//event.Skip();
 }
 
 void ComponentDlg::OnSplitterDclick(wxSplitterEvent& event)
 {
-	//event.Skip(false);
 }
 
 void ComponentDlg::CopyData()

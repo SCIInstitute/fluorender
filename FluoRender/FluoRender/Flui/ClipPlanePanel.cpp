@@ -1048,7 +1048,6 @@ void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 	if (glbin_states.ClipDisplayChanged())
 		FluoRefresh(3, { gstNull },
 			{ m_frame->GetRenderCanvas(glbin_current.canvas) });
-	event.Skip();
 }
 
 bool ClipPlanePanel::GetXLink()
