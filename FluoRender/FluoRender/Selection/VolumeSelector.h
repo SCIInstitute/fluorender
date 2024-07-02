@@ -56,7 +56,7 @@ namespace flrd
 		//VolumeData* GetVolume() { return m_vd; }
 		//modes
 		void SetMode(int mode);
-		int GetMode() { return m_mode; }
+		int GetMode() { return m_mode_ext; }
 		//init mask
 		void SetInitMask(int val) { m_init_mask = val; }
 		int GetInitMask() { return m_init_mask; }
@@ -287,11 +287,12 @@ namespace flrd
 		double m_mvmat[16];	//modelview matrix
 		double m_prjmat[16];//projection matrix
 		int m_iter_num;		//iteration number for growing
-		int m_mode;			//segmentation modes
+		int m_mode_ext;		//segmentation modes
 							//0-no selection
 							//1-select; 2-append; 3-unselect; 4-diffuse;
 							//5-flood; 6-unselect all; 7-select all; 8-solid;
 							//9-grow from point
+		int m_mode;			//last mode if m_mode_ext is set to 0
 		int m_init_mask;	//0; 1-init only; 2-diffuse only; 3-init & diffuse
 		bool m_use2d;
 

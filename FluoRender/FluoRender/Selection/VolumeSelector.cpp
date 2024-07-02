@@ -50,7 +50,8 @@ VolumeSelector::VolumeSelector() :
 	m_2d_weight1(0),
 	m_2d_weight2(0),
 	m_iter_num(20),
-	m_mode(0),
+	m_mode_ext(0),
+	m_mode(2),
 	m_init_mask(3),
 	m_use2d(false),
 	m_update_order(true),
@@ -95,13 +96,15 @@ VolumeSelector::~VolumeSelector()
 
 void VolumeSelector::SetMode(int mode)
 {
-	m_mode = mode;
+	m_mode_ext = mode;
+	if (m_mode_ext)
+		m_mode = m_mode_ext;
 	ChangeBrushSetsIndex();
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)
 		return;
 
-	switch (m_mode)
+	switch (m_mode_ext)
 	{
 	case 0://not used
 		canvas->SetIntMode(1);

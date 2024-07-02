@@ -401,7 +401,6 @@ BrushToolDlg::BrushToolDlg(
 	m_output_grid->SetColLabelValue(3, "Physical Size");
 	m_output_grid->SetColLabelValue(4, "Physical Size\n(Int. Weighted)");
 	m_output_grid->Fit();
-	m_output_grid->Bind(wxEVT_KEY_DOWN, &BrushToolDlg::OnKeyDown, this);
 	m_output_grid->Bind(wxEVT_GRID_SELECT_CELL, &BrushToolDlg::OnSelectCell, this);
 	sizer4->Add(5, 5);
 	sizer4->Add(sizer4_1, 0, wxEXPAND);
@@ -424,6 +423,8 @@ BrushToolDlg::BrushToolDlg(
 	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer4, 1, wxEXPAND);
 	sizer_v->Add(10, 10);
+
+	Bind(wxEVT_KEY_DOWN, &BrushToolDlg::OnKeyDown, this);
 
 	SetSizer(sizer_v);
 	Layout();
