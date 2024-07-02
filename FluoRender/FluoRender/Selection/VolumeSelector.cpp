@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <wx/stdpaths.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <Debug.h>
 
 using namespace flrd;
 
@@ -864,6 +865,7 @@ void VolumeSelector::PasteMask(int op)
 
 bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)
 {
+	DBGPRINT(L"mx: %d\tmy: %d\n", mx, my);
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!m_vd)
 		m_vd = glbin_current.vol_data;

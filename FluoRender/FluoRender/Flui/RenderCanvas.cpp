@@ -3627,8 +3627,8 @@ bool RenderCanvas::UpdateBrushState(bool focus)
 		{
 			if (wxGetMouseState().LeftIsDown())
 			{
-				wxPoint mp = ScreenToClient(wxGetMousePosition());
-				glbin_vol_selector.Segment(true, mp.x, mp.y);
+				wxPoint mps = ScreenToClient(wxGetMousePosition());
+				glbin_vol_selector.Segment(true, mps.x, mps.y);
 			}
 
 			if (m_int_mode == 7)
@@ -3949,9 +3949,9 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		lg_changed = true;
 	}
 
-	wxPoint mouse_pos = wxGetMousePosition();
+	wxPoint mps = wxGetMousePosition();
 	wxRect view_reg = GetScreenRect();
-	bool mouse_in = view_reg.Contains(mouse_pos);
+	bool mouse_in = view_reg.Contains(mps);
 	bool focus = wxWindow::FindFocus() == this;
 	
 	if (mouse_in)
@@ -4286,7 +4286,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				int sz = glbin_settings.m_ruler_size_thresh;
 				//event.RequestMore();
 				glbin_vol_selector.SetInitMask(2);
-				glbin_vol_selector.Segment(false, mouse_pos.x, mouse_pos.y);
+				mps = ScreenToClient(mps);
+				glbin_vol_selector.Segment(false, mps.x, mps.y);
 				glbin_vol_selector.SetInitMask(3);
 				if (m_int_mode == 12)
 				{
@@ -10233,7 +10234,8 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		{
 			glbin_vol_selector.ResetMousePos();
 			glbin_vol_selector.SetInitMask(1);
-			glbin_vol_selector.Segment(true, mp.x(), mp.y());
+			wxPoint mps = ScreenToClient(wxGetMousePosition());
+			glbin_vol_selector.Segment(true, mps.x, mps.y);
 			glbin_vol_selector.SetInitMask(3);
 			if (m_int_mode == 12)
 				m_cur_vol->AddEmptyLabel(0, false);
@@ -10280,7 +10282,8 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		{
 			//segment volumes
 			m_paint_enable = true;
-			glbin_vol_selector.Segment(true, mp.x(), mp.y());
+			wxPoint mps = ScreenToClient(wxGetMousePosition());
+			glbin_vol_selector.Segment(true, mps.x, mps.y);
 			m_int_mode = 4;
 			m_force_clear = true;
 			RefreshGL(27);
@@ -10304,7 +10307,8 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		{
 			//segment volume, calculate center, add ruler point
 			m_paint_enable = true;
-			glbin_vol_selector.Segment(true, mp.x(), mp.y());
+			wxPoint mps = ScreenToClient(wxGetMousePosition());
+			glbin_vol_selector.Segment(true, mps.x, mps.y);
 			if (glbin_ruler_handler.GetType() == 3)
 				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
 			else
