@@ -199,6 +199,8 @@ namespace flrd
 					m_brush_radius1 = std::min(m_brush_radius2, m_brush_radius1);
 				}
 			}
+
+			SetBrushRadiusSet();
 		}
 		//brush sets
 		void GetBrushRadiusSet(std::vector<BrushRadiusSet>& sets)
@@ -208,6 +210,18 @@ namespace flrd
 		void SetBrushRadiusSet(const std::vector<BrushRadiusSet>& sets)
 		{
 			m_brush_radius_sets.assign(sets.begin(), sets.end());
+		}
+		void SetBrushRadiusSet()
+		{
+			for (auto& it : m_brush_radius_sets)
+			{
+				if (it.type == m_mode)
+				{
+					it.radius1 = m_brush_radius1;
+					it.radius2 = m_brush_radius2;
+					it.use_radius2 = m_use_brush_radius2;
+				}
+			}
 		}
 		void ChangeBrushSetsIndex();
 		//set use 2d rendering results

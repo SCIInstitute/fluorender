@@ -1456,6 +1456,7 @@ void TreePanel::OnToolbar(wxCommandEvent& event)
 		{
 			glbin_vol_selector.SetMode(mode);
 			glbin_states.m_brush_mode_toolbar = mode;
+			glbin_states.m_brush_mode_shortcut = 0;
 		}
 		vc.insert(gstBrushState);
 		views.insert(-1);

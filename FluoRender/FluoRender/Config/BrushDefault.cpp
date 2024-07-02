@@ -123,6 +123,8 @@ void BrushDefault::Read(wxFileConfig& f)
 			f.Read("radius2", &(m_brush_radius_sets[i].radius2));
 			//use radius 2
 			f.Read("use_radius2", &(m_brush_radius_sets[i].use_radius2));
+			//f.SetPath("/brush default/radius_settings");
+			f.SetPath("..");
 		}
 	}
 	if (m_brush_radius_sets.size() == 0)

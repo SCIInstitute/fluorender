@@ -42,5 +42,6 @@ public:
 	bool m_clip_display;	//show clipping planes in view
 
 	int m_brush_mode_toolbar;	//brush state set from ui
+	int m_brush_mode_shortcut;	//brush state set by shortcut
 };
 #endif

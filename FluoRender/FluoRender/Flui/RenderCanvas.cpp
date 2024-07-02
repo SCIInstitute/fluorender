@@ -3580,62 +3580,74 @@ void RenderCanvas::SetBrush(int mode)
 		m_int_mode = 2;
 		glbin_vol_selector.SetMode(mode);
 	}
-	m_paint_display = true;
-	m_draw_brush = true;
-	//glbin_vol_selector.ChangeBrushSetsIndex();
 }
 
 bool RenderCanvas::UpdateBrushState(bool focus)
 {
 	bool refresh = false;
-	bool reset = false;
 
 	if (wxGetKeyState(WXK_SHIFT))
 	{
 		glbin_states.m_brush_mode_toolbar = 0;
+		glbin_states.m_brush_mode_shortcut = 2;
+		m_paint_display = true;
+		m_draw_brush = true;
 		SetBrush(2);
 		refresh = true;
 	}
 	else if (wxGetKeyState(wxKeyCode('X')))
 	{
 		glbin_states.m_brush_mode_toolbar = 0;
+		glbin_states.m_brush_mode_shortcut = 3;
+		m_paint_display = true;
+		m_draw_brush = true;
 		SetBrush(3);
 		refresh = true;
 	}
 	else if (wxGetKeyState(wxKeyCode('Z')))
 	{
 		glbin_states.m_brush_mode_toolbar = 0;
+		glbin_states.m_brush_mode_shortcut = 4;
+		m_paint_display = true;
+		m_draw_brush = true;
 		SetBrush(4);
-		refresh = true;	}
+		refresh = true;
+	}
 	else
 	{
-		if (!glbin_states.m_brush_mode_toolbar)
+		if (glbin_states.m_brush_mode_toolbar)
 		{
+			m_paint_display = true;
+			m_draw_brush = true;
+		}
+		else if (!wxGetKeyState(WXK_SHIFT) &&
+			!wxGetKeyState(wxKeyCode('X')) &&
+			!wxGetKeyState(wxKeyCode('Z')) &&
+			glbin_states.m_brush_mode_shortcut)
+		{
+			if (wxGetMouseState().LeftIsDown())
+			{
+				wxPoint mp = ScreenToClient(wxGetMousePosition());
+				glbin_vol_selector.Segment(true, mp.x, mp.y);
+			}
+
+			if (m_int_mode == 7)
+				m_int_mode = 5;
+			else
+				m_int_mode = 1;
+
 			glbin_states.m_brush_mode_toolbar = 0;
-			reset = true;
-		}
-	}
+			glbin_states.m_brush_mode_shortcut = 0;
+			m_paint_display = false;
+			m_draw_brush = false;
+			SetBrush(0);
+			refresh = true;
 
-	if (reset)
-	{
-		if (wxGetMouseState().LeftIsDown())
-		{
-			wxPoint mp = ScreenToClient(wxGetMousePosition());
-			glbin_vol_selector.Segment(true, mp.x, mp.y);
-		}
-		if (m_int_mode == 7)
-			m_int_mode = 5;
-		else
-			m_int_mode = 1;
-		m_paint_display = false;
-		m_draw_brush = false;
-		SetBrush(0);
-		refresh = true;
-
-		if (m_prev_focus)
-		{
-			m_prev_focus->SetFocus();
-			m_prev_focus = 0;
+			if (m_prev_focus)
+			{
+				m_prev_focus->SetFocus();
+				m_prev_focus = 0;
+			}
 		}
 	}
 
@@ -3948,7 +3960,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		{
 			set_focus = true;
 			refresh = true;
-			vc.insert({ gstSelUndo, gstBrushState });
+			vc.insert({ gstSelUndo, gstBrushState, gstBrushSize1, gstBrushSize2 });
 		}
 
 		if (focus)

@@ -711,6 +711,7 @@ void BrushToolDlg::OnToolBar(wxCommandEvent& event)
 	{
 		glbin_vol_selector.SetMode(mode);
 		glbin_states.m_brush_mode_toolbar = mode;
+		glbin_states.m_brush_mode_shortcut = 0;
 	}
 	FluoRefresh(excl_self, vc, views);
 
