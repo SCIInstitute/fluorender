@@ -314,7 +314,7 @@ public:
 	double GetRightThresh();
 	double GetMlRightThresh();
 	//soft threshold
-	void SetSoftThreshsold(double val);
+	void SetSoftThreshold(double val);
 	double GetSoftThreshold();
 
 	void SetLuminanceEnable(bool);
@@ -356,11 +356,11 @@ public:
 	double GetMlSampleRate();
 
 	//colors
-	void SetColor(fluo::Color &color, bool update_hsv=true);
+	void SetColor(const fluo::Color &color, bool update_hsv=true);
 	fluo::Color GetColor();
 	void SetWlColor(bool bval = true);
 	bool GetWlColor();
-	void SetMaskColor(fluo::Color &color, bool set=true);
+	void SetMaskColor(const fluo::Color &color, bool set=true);
 	fluo::Color GetMaskColor();
 	bool GetMaskColorSet();
 	void ResetMaskColorSet();

@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeDefault.h>
 #include <DataManager.h>
 #include <Names.h>
+#include <Color.h>
 
 VolumeDataDefault::VolumeDataDefault()
 {
@@ -288,7 +289,7 @@ void VolumeDataDefault::Apply(VolumeData* vd)
 	vd->SetThreshEnable(m_thresh_enable);
 	vd->SetLeftThresh(m_lo_thresh);
 	vd->SetRightThresh(m_hi_thresh);
-	vd->SetSoftThreshsold(m_sw);
+	vd->SetSoftThreshold(m_sw);
 
 	vd->SetLuminanceEnable(m_luminance_enable);
 	vd->SetLuminance(m_luminance);
@@ -331,4 +332,73 @@ void VolumeDataDefault::Apply(VolumeData* vd)
 	vd->SetBlendMode(m_blend_mode);
 	vd->SetLegend(m_legend);
 	vd->SetLabelMode(m_label_mode);
+}
+
+void VolumeDataDefault::Copy(VolumeData* v1, VolumeData* v2)//v2 to v1
+{
+	if (!v1 || !v2)
+		return;
+
+	v1->SetGammaEnable(v2->GetGammaEnable());
+	v1->SetGamma(v2->GetGamma());
+
+	v1->SetBoundaryEnable(v2->GetBoundaryEnable());
+	v1->SetBoundary(v2->GetBoundary());
+
+	v1->SetSaturationEnable(v2->GetSaturationEnable());
+	v1->SetSaturation(v2->GetSaturation());
+
+	v1->SetThreshEnable(v2->GetThreshEnable());
+	v1->SetLeftThresh(v2->GetLeftThresh());
+	v1->SetRightThresh(v2->GetRightThresh());
+	v1->SetSoftThreshold(v2->GetSoftThreshold());
+
+	v1->SetLuminanceEnable(v2->GetLuminanceEnable());
+	v1->SetLuminance(v2->GetLuminance());
+
+	v1->SetAlphaEnable(v2->GetAlphaEnable());
+	v1->SetAlpha(v2->GetAlpha());
+
+	v1->SetShadingEnable(v2->GetShadingEnable());
+	v1->SetLowShading(v2->GetLowShading());
+	v1->SetHiShading(v2->GetHiShading());
+
+	v1->SetShadowEnable(v2->GetShadowEnable());
+	v1->SetShadowIntensity(v2->GetShadowIntensity());
+
+	v1->SetSampleRateEnable(v2->GetSampleRateEnable());
+	v1->SetSampleRate(v2->GetSampleRate());
+
+	double spcx, spcy, spcz;
+	v2->GetSpacings(spcx, spcy, spcz);
+	v1->SetBaseSpacings(spcx, spcy, spcz);
+
+	v1->SetColormapMode(v2->GetColormapMode());
+	v1->SetColormapDisp(v2->GetColormapDisp());
+	v1->SetColormapValues(v2->GetColormapLow(), v2->GetColormapHigh());
+	v1->SetColormapInv(v2->GetColormapInv());
+	v1->SetColormap(v2->GetColormap());
+	v1->SetColormapProj(v2->GetColormapProj());
+
+	v1->SetNR(v2->GetNR());
+	v1->SetInterpolate(v2->GetInterpolate());
+	v1->SetInvert(v2->GetInvert());
+	v1->SetMode(v2->GetMode());
+	v1->SetTransparent(v2->GetTransparent());
+
+	v1->SetBlendMode(v2->GetBlendMode());
+	v1->SetLegend(v2->GetLegend());
+	v1->SetLabelMode(v2->GetLabelMode());
+
+	v1->SetColor(v2->GetColor());
+
+	v1->SetGammaColor(v2->GetGammaColor());
+	v1->SetBrightness(v2->GetBrightness());
+	v1->SetHdr(v2->GetHdr());
+	for (int i : { 0, 1, 2})
+		v1->SetSync(i, v2->GetSync(i));
+
+	v1->SetScalarScale(v2->GetScalarScale());
+	v1->SetGMScale(v2->GetGMScale());
+	v1->SetMaxValue(v2->GetMaxValue());
 }

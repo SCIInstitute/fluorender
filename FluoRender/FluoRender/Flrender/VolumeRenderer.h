@@ -96,9 +96,9 @@ namespace flvr
 		double get_hi_thresh();
 		void set_soft_thresh(double val);
 		double get_soft_thresh();
-		void set_color(fluo::Color color);
+		void set_color(const fluo::Color& color);
 		fluo::Color get_color();
-		void set_mask_color(fluo::Color color, bool set=true);
+		void set_mask_color(const fluo::Color& color, bool set=true);
 		fluo::Color get_mask_color();
 		bool get_mask_color_set() {return mask_color_set_; }
 		void reset_mask_color_set() {mask_color_set_ = false;}

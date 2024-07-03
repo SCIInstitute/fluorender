@@ -93,37 +93,7 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 		if (planes && vd->GetVR())
 			vd->GetVR()->set_planes(planes);
 		//transfer function
-		vd->SetGamma(vd_a->GetGamma());
-		vd->SetBoundary(vd_a->GetBoundary());
-		vd->SetSaturation(vd_a->GetSaturation());
-		vd->SetLeftThresh(vd_a->GetLeftThresh());
-		vd->SetRightThresh(vd_a->GetRightThresh());
-		fluo::Color col = vd_a->GetColor();
-		vd->SetColor(col);
-		vd->SetAlpha(vd_a->GetAlpha());
-		//shading
-		vd->SetShadingEnable(vd_a->GetShadingEnable());
-		double amb, diff, spec, shine;
-		vd_a->GetMaterial(amb, diff, spec, shine);
-		vd->SetMaterial(amb, diff, spec, shine);
-		//shadow
-		vd->SetShadowEnable(vd_a->GetShadowEnable());
-		vd->SetShadowIntensity(vd_a->GetShadowIntensity());
-		//sample rate
-		vd->SetSampleRate(vd_a->GetSampleRate());
-		//2d adjusts
-		col = vd_a->GetGammaColor();
-		vd->SetGammaColor(col);
-		col = vd_a->GetBrightness();
-		vd->SetBrightness(col);
-		col = vd_a->GetHdr();
-		vd->SetHdr(col);
-		for (int i : { 0, 1, 2})
-			vd->SetSync(i, vd_a->GetSync(i));
-		//max
-		vd->SetScalarScale(vd_a->GetScalarScale());
-		vd->SetGMScale(vd_a->GetGMScale());
-		vd->SetMaxValue(vd_a->GetMaxValue());
+		glbin_vol_def.Copy(vd, vd_a);
 
 		if (type == 1 ||
 			type == 2 ||

@@ -267,7 +267,7 @@ namespace flvr
 		return sw_;
 	}
 
-	void VolumeRenderer::set_color(fluo::Color color)
+	void VolumeRenderer::set_color(const fluo::Color& color)
 	{
 		color_ = color;
 
@@ -294,7 +294,7 @@ namespace flvr
 		return color_;
 	}
 
-	void VolumeRenderer::set_mask_color(fluo::Color color, bool set)
+	void VolumeRenderer::set_mask_color(const fluo::Color& color, bool set)
 	{
 		mask_color_ = color;
 		mask_color_set_ = set;

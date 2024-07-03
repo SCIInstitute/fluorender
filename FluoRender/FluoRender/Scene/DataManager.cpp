@@ -1891,7 +1891,7 @@ double VolumeData::GetRightThresh()
 	return m_hi_thresh;
 }
 
-void VolumeData::SetSoftThreshsold(double val)
+void VolumeData::SetSoftThreshold(double val)
 {
 	m_sw = val;
 	if (m_vr)
@@ -2130,7 +2130,7 @@ double VolumeData::GetMlSampleRate()
 		return m_sample_rate;
 }
 
-void VolumeData::SetColor(fluo::Color &color, bool update_hsv)
+void VolumeData::SetColor(const fluo::Color &color, bool update_hsv)
 {
 	m_color = color;
 	if (update_hsv)
@@ -2154,7 +2154,7 @@ bool VolumeData::GetWlColor()
 	return m_wl_color;
 }
 
-void VolumeData::SetMaskColor(fluo::Color &color, bool set)
+void VolumeData::SetMaskColor(const fluo::Color &color, bool set)
 {
 	if (m_vr)
 		m_vr->set_mask_color(color, set);

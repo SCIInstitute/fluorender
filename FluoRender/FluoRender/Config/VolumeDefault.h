@@ -41,6 +41,7 @@ public:
 	void Save(wxFileConfig& f);
 	void Set(VolumeData* vd);
 	void Apply(VolumeData* vd);
+	void Copy(VolumeData* v1, VolumeData* v2);//v2 to v1
 
 public:
 	//default values

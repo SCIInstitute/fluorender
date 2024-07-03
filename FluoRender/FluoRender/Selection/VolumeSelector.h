@@ -234,8 +234,8 @@ namespace flrd
 		bool GetThUpdate();
 
 		//segment volumes in current view
-		void Segment(bool push_mask, int mx = 0, int my = 0);
-		void Select(bool push_mask, double radius);
+		void Segment(bool push_mask, bool est_th = true, int mx = 0, int my = 0);
+		void Select(bool push_mask, bool est_th, double radius);
 		void Clear();//erase selection
 		void Erase();//extract a new volume excluding the selection
 		void Extract();//extract a new volume of the selection
@@ -351,7 +351,7 @@ namespace flrd
 
 	private:
 		double HueCalculation(int mode, unsigned int label);
-		void segment(bool push_mask, int mx = 0, int my = 0);
+		void segment(bool push_mask, bool est_th, int mx, int my);
 	};
 }
 #endif//_VOLUMESELECTOR_H_

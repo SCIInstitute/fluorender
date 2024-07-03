@@ -3628,7 +3628,7 @@ bool RenderCanvas::UpdateBrushState()
 			if (wxGetMouseState().LeftIsDown())
 			{
 				wxPoint mps = ScreenToClient(wxGetMousePosition());
-				glbin_vol_selector.Segment(true, mps.x, mps.y);
+				glbin_vol_selector.Segment(true, true, mps.x, mps.y);
 			}
 
 			if (m_int_mode == 7)
@@ -3974,7 +3974,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		{
 			set_focus = true;
 			refresh = true;
-			vc.insert({ gstSelUndo, gstBrushState, gstBrushSize1, gstBrushSize2 });
+			vc.insert({ gstSelUndo, gstBrushState, gstBrushThreshold, gstBrushSize1, gstBrushSize2 });
 		}
 
 		//draw_mask
@@ -4299,7 +4299,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			//event.RequestMore();
 			glbin_vol_selector.SetInitMask(2);
 			mps = ScreenToClient(mps);
-			glbin_vol_selector.Segment(false, mps.x, mps.y);
+			glbin_vol_selector.Segment(false, true, mps.x, mps.y);
 			glbin_vol_selector.SetInitMask(3);
 			if (m_int_mode == 12)
 			{
@@ -10231,7 +10231,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			glbin_vol_selector.ResetMousePos();
 			glbin_vol_selector.SetInitMask(1);
 			wxPoint mps = ScreenToClient(wxGetMousePosition());
-			glbin_vol_selector.Segment(true, mps.x, mps.y);
+			glbin_vol_selector.Segment(true, true, mps.x, mps.y);
 			glbin_vol_selector.SetInitMask(3);
 			if (m_int_mode == 12)
 				m_cur_vol->AddEmptyLabel(0, false);
@@ -10279,11 +10279,11 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			//segment volumes
 			m_paint_enable = true;
 			wxPoint mps = ScreenToClient(wxGetMousePosition());
-			glbin_vol_selector.Segment(true, mps.x, mps.y);
+			glbin_vol_selector.Segment(true, true, mps.x, mps.y);
 			m_int_mode = 4;
 			m_force_clear = true;
 			RefreshGL(27);
-			m_frame->UpdateProps({ gstSelUndo });
+			m_frame->UpdateProps({ gstSelUndo, gstBrushThreshold });
 			return;
 		}
 		else if (m_int_mode == 5 &&
@@ -10305,7 +10305,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			//segment volume, calculate center, add ruler point
 			m_paint_enable = true;
 			wxPoint mps = ScreenToClient(wxGetMousePosition());
-			glbin_vol_selector.Segment(true, mps.x, mps.y);
+			glbin_vol_selector.Segment(true, true, mps.x, mps.y);
 			if (glbin_ruler_handler.GetType() == 3)
 				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
 			else
@@ -10313,7 +10313,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			m_int_mode = 8;
 			m_force_clear = true;
 			RefreshGL(27);
-			m_frame->UpdateProps({ gstRulerList, gstSelUndo });
+			m_frame->UpdateProps({ gstRulerList, gstSelUndo, gstBrushThreshold });
 			return;
 		}
 		else if (m_int_mode == 10 ||

@@ -793,8 +793,8 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent& event)
 	if (glbin_vol_selector.GetThUpdate())
 	{
 		glbin_vol_selector.PopMask();
-		glbin_vol_selector.Segment(true);
-		FluoRefresh(2, { gstSelUndo },
+		glbin_vol_selector.Segment(true, false);
+		FluoRefresh(2, { gstSelUndo, gstBrushThreshold },
 			{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 	}
 }
@@ -821,8 +821,8 @@ void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent& event)
 	if (glbin_vol_selector.GetThUpdate())
 	{
 		glbin_vol_selector.PopMask();
-		glbin_vol_selector.Segment(true);
-		FluoRefresh(2, { gstSelUndo },
+		glbin_vol_selector.Segment(true, false);
+		FluoRefresh(2, { gstSelUndo, gstBrushThreshold },
 			{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 	}
 }
@@ -849,8 +849,8 @@ void BrushToolDlg::OnBrush2dinflText(wxCommandEvent& event)
 	if (glbin_vol_selector.GetThUpdate())
 	{
 		glbin_vol_selector.PopMask();
-		glbin_vol_selector.Segment(true);
-		FluoRefresh(2, { gstSelUndo },
+		glbin_vol_selector.Segment(true, false);
+		FluoRefresh(2, { gstSelUndo, gstBrushThreshold },
 			{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 	}
 }
@@ -876,8 +876,8 @@ void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent& event)
 	if (glbin_vol_selector.GetThUpdate())
 	{
 		glbin_vol_selector.PopMask();
-		glbin_vol_selector.Segment(true);
-		FluoRefresh(2, { gstSelUndo },
+		glbin_vol_selector.Segment(true, false);
+		FluoRefresh(2, { gstSelUndo, gstBrushThreshold },
 			{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 	}
 }
@@ -901,8 +901,8 @@ void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent& event)
 	if (glbin_vol_selector.GetThUpdate())
 	{
 		glbin_vol_selector.PopMask();
-		glbin_vol_selector.Segment(true);
-		FluoRefresh(2, { gstSelUndo },
+		glbin_vol_selector.Segment(true, false);
+		FluoRefresh(2, { gstSelUndo, gstBrushThreshold },
 			{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 	}
 }

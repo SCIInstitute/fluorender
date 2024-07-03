@@ -126,7 +126,7 @@ void VolumeSelector::SetMode(int mode)
 }
 
 //segment volumes in current view
-void VolumeSelector::Segment(bool push_mask, int mx, int my)
+void VolumeSelector::Segment(bool push_mask, bool est_th, int mx, int my)
 {
 	if (!m_vd)
 		m_vd = glbin_current.vol_data;
@@ -162,9 +162,9 @@ void VolumeSelector::Segment(bool push_mask, int mx, int my)
 
 	canvas->HandleCamera();
 	if (m_mode == 9)
-		segment(push_mask, mx, my);
+		segment(push_mask, est_th, mx, my);
 	else
-		segment(push_mask);
+		segment(push_mask, est_th, 0, 0);
 
 	bool count = false;
 	bool colocal = false;
@@ -191,7 +191,7 @@ void VolumeSelector::Segment(bool push_mask, int mx, int my)
 	//}
 }
 
-void VolumeSelector::segment(bool push_mask, int mx, int my)
+void VolumeSelector::segment(bool push_mask, bool est_th, int mx, int my)
 {
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!m_vd)
@@ -265,16 +265,16 @@ void VolumeSelector::segment(bool push_mask, int mx, int my)
 				if (vd && vd->GetDisp())
 				{
 					m_vd = vd;
-					Select(push_mask, r);
+					Select(push_mask, est_th, r);
 				}
 			}
 			m_vd = save;
 		}
 		else
-			Select(push_mask, r);
+			Select(push_mask, est_th, r);
 	}
 	else
-		Select(push_mask, r);
+		Select(push_mask, est_th, r);
 
 	//restore
 	if (press)
@@ -293,7 +293,7 @@ void VolumeSelector::segment(bool push_mask, int mx, int my)
 	}
 }
 
-void VolumeSelector::Select(bool push_mask, double radius)
+void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 {
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!m_vd)
@@ -392,7 +392,8 @@ void VolumeSelector::Select(bool push_mask, double radius)
 	if (m_init_mask & 1)
 	{
 		int hr_mode = m_hidden_removal ? (m_ortho ? 1 : 2) : 0;
-		if ((m_mode == 1 || m_mode == 2) && m_estimate_threshold)
+		if ((m_mode == 1 || m_mode == 2) &&
+			m_estimate_threshold && est_th)
 		{
 			m_vd->DrawMask(0, m_mode, hr_mode, 0.0, gm_falloff, scl_falloff, 0.0, m_w2d, 0.0, 0, false, true);
 			m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
@@ -467,7 +468,8 @@ void VolumeSelector::Clear()
 //extract a new volume excluding the selection
 void VolumeSelector::Erase()
 {
-	m_vd = glbin_current.vol_data;
+	if (!m_vd)
+		m_vd = glbin_current.vol_data;
 	int mode = 6;
 	wxString vd_name;
 	if (m_vd)
@@ -478,16 +480,20 @@ void VolumeSelector::Erase()
 	DataGroup* group = glbin_current.vol_group;
 	if (group)
 		group_name = group->GetName();
+	glbin_vol_calculator.SetVolumeA(m_vd);
 	glbin_vol_calculator.CalculateGroup(mode, group_name);
 }
 
 //extract a new volume of the selection
 void VolumeSelector::Extract()
 {
+	if (!m_vd)
+		m_vd = glbin_current.vol_data;
 	wxString group_name;
 	DataGroup* group = glbin_current.vol_group;
 	if (group)
 		group_name = group->GetName();
+	glbin_vol_calculator.SetVolumeA(m_vd);
 	glbin_vol_calculator.CalculateGroup(5, group_name);
 }
 
