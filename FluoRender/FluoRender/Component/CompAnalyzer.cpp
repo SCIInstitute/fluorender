@@ -1143,14 +1143,18 @@ bool ComponentAnalyzer::OutputChannels()
 		//group->SetSyncRAll(true);
 		//group->SetSyncGAll(true);
 		//group->SetSyncBAll(true);
-		fluo::Color col = view->m_cur_vol->GetGammaColor();
-		group->SetGammaAll(col);
-		col = view->m_cur_vol->GetBrightness();
-		group->SetBrightnessAll(col);
-		col = view->m_cur_vol->GetHdr();
-		group->SetHdrAll(col);
+		VolumeData* vd = glbin_current.vol_data;
+		if (vd)
+		{
+			fluo::Color col = vd->GetGammaColor();
+			group->SetGammaAll(col);
+			col = vd->GetBrightness();
+			group->SetBrightnessAll(col);
+			col = vd->GetHdr();
+			group->SetHdrAll(col);
+		}
 	}
-	glbin_current.SetVolumeData(view->m_cur_vol);
+	//glbin_current.SetVolumeData(view->m_cur_vol);
 
 	return result;
 }

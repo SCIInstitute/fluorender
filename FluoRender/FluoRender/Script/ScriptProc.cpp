@@ -243,7 +243,7 @@ bool ScriptProc::GetVolumes(std::vector<VolumeData*> &list)
 	list.clear();
 	if (chan_mode == 0)
 	{
-		VolumeData* vol = m_view->m_cur_vol;
+		VolumeData* vol = glbin_current.vol_data;
 		if (vol)
 			list.push_back(vol);
 		else
@@ -454,7 +454,7 @@ wxString ScriptProc::GetDataDir(const wxString &ext)
 	//data dir
 	if (!m_view)
 		return "";
-	VolumeData* vol = m_view->m_cur_vol;
+	VolumeData* vol = glbin_current.vol_data;
 	if (!vol)
 		return "";
 	wxString path = vol->GetPath();
@@ -571,7 +571,7 @@ void ScriptProc::RunNoiseReduction()
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
-		m_view->m_cur_vol = *i;
+		//m_view->m_cur_vol = *i;
 		glbin_vol_calculator.SetVolumeA(*i);
 
 		//selection
@@ -589,7 +589,7 @@ void ScriptProc::RunPreTracking()
 	if (!TimeCondition())
 		return;
 
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol)
 		UpdateTraceDlg();
 
@@ -623,7 +623,7 @@ void ScriptProc::RunPostTracking()
 	if (!TimeCondition())
 		return;
 
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol)
 		UpdateTraceDlg();
 
@@ -682,7 +682,7 @@ void ScriptProc::RunMaskTracking()
 	if (!TimeCondition())
 		return;
 
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
 	TrackGroup* tg = m_view->GetTrackGroup();
 	if (!tg)
@@ -1355,7 +1355,7 @@ void ScriptProc::RunGenerateComp()
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
-		m_view->m_cur_vol = *i;
+		glbin_comp_generator.SetVolumeData(*i);
 		if (use_ml)
 		{
 			flrd::TableHistParams& table = glbin.get_cg_table();
@@ -1536,7 +1536,7 @@ void ScriptProc::RunAddCells()
 {
 	if (!TimeCondition())
 		return;
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
 	TrackGroup* tg = m_view->GetTrackGroup();
 	if (!tg)
@@ -1586,7 +1586,7 @@ void ScriptProc::RunUnlinkCells()
 	if (!TimeCondition())
 		return;
 
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
 	TrackGroup* tg = m_view->GetTrackGroup();
 	if (!tg) return;
@@ -1669,7 +1669,7 @@ void ScriptProc::RunRegistration()
 		return;
 
 	//always work on the selected volume
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
 
 	int curf = m_view->m_tseq_cur_num;
@@ -1813,7 +1813,7 @@ void ScriptProc::RunCameraPoints()
 
 	RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list || ruler_list->empty()) return;
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol)
 		return;
 	int nx, ny, nz;
@@ -2085,7 +2085,7 @@ void ScriptProc::RunDlcVideoAnalyze()
 	if (!TimeCondition())
 		return;
 	//always work on the selected volume
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
 
 	flrd::PyDlc* dlc = glbin.get_add_python<flrd::PyDlc>("dlc");
@@ -2120,7 +2120,7 @@ void ScriptProc::RunDlcGetRulers()
 	if (!TimeCondition())
 		return;
 	//always work on the selected volume
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
 
 	int toff = 0;
@@ -2160,7 +2160,7 @@ void ScriptProc::RunDlcCreateProj()
 	if (!TimeCondition())
 		return;
 	//always work on the selected volume
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
 
 	flrd::PyDlc* dlc = glbin.get_add_python<flrd::PyDlc>("dlc");
@@ -2570,7 +2570,7 @@ void ScriptProc::ReadVolCacheData(flrd::VolCache& vol_cache)
 {
 	if (!m_view) return;
 	//get volume, readers
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
 	BaseReader* reader = cur_vol->GetReader();
 	if (!reader)
@@ -2590,7 +2590,7 @@ void ScriptProc::ReadVolCacheDataMask(flrd::VolCache& vol_cache)
 {
 	if (!m_view) return;
 	//get volume, readers
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
 	BaseReader* reader = cur_vol->GetReader();
 	if (!reader)
@@ -2617,7 +2617,7 @@ void ScriptProc::ReadVolCacheDataLabel(flrd::VolCache& vol_cache)
 {
 	if (!m_view) return;
 	//get volume, readers
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
 	BaseReader* reader = cur_vol->GetReader();
 	if (!reader)
@@ -2659,7 +2659,7 @@ void ScriptProc::DelVolCacheData(flrd::VolCache& vol_cache)
 {
 	if (!m_view) return;
 	//get volume, readers
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
 	vol_cache.valid = false;
 	if (vol_cache.data)
@@ -2674,7 +2674,7 @@ void ScriptProc::DelVolCacheDataLabel(flrd::VolCache& vol_cache)
 {
 	if (!m_view) return;
 	//get volume, readers
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
 	vol_cache.valid = false;
 	if (vol_cache.data)

@@ -1225,16 +1225,13 @@ void MeasureDlg::Grow()
 		glbin_ruler_handler.SetType(1);
 		glbin_ruler_renderer.SetDrawText(false);
 		//reset label volume
-		if (canvas->m_cur_vol)
+		VolumeData* vd = glbin_current.vol_data;
+		if (vd)
 		{
-			canvas->m_cur_vol->
-				GetVR()->clear_tex_mask();
-			canvas->m_cur_vol->
-				GetVR()->clear_tex_label();
-			canvas->m_cur_vol->
-				AddEmptyMask(0, true);
-			canvas->m_cur_vol->
-				AddEmptyLabel(0, true);
+			vd->GetVR()->clear_tex_mask();
+			vd->GetVR()->clear_tex_label();
+			vd->AddEmptyMask(0, true);
+			vd->AddEmptyLabel(0, true);
 		}
 	}
 

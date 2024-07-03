@@ -10283,6 +10283,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			m_int_mode = 4;
 			m_force_clear = true;
 			RefreshGL(27);
+			m_frame->UpdateProps({ gstSelUndo });
 			return;
 		}
 		else if (m_int_mode == 5 &&
@@ -10312,7 +10313,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			m_int_mode = 8;
 			m_force_clear = true;
 			RefreshGL(27);
-			m_frame->UpdateProps({ gstRulerList });
+			m_frame->UpdateProps({ gstRulerList, gstSelUndo });
 			return;
 		}
 		else if (m_int_mode == 10 ||

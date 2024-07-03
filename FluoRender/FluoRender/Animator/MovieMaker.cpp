@@ -1180,7 +1180,7 @@ void MovieMaker::MakeKeysTimeColormap()
 	double v[7];
 	int tt[7];
 	int dt[7];
-	VolumeData* vd = m_view->m_cur_vol;
+	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		vd = m_view->GetAllVolumeData(0);
 	if (!vd)

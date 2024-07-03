@@ -5219,6 +5219,8 @@ void CurrentObjects::SetVolumeData(VolumeData* vd)
 	ann_data = 0;
 	if (canvas)
 		canvas->m_cur_vol = vd;
+	glbin_vol_selector.SetVolume(vd);
+	glbin_comp_generator.SetVolumeData(vd);
 }
 
 void CurrentObjects::SetMeshData(MeshData* md)

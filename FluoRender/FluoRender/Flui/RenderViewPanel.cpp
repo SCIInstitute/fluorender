@@ -834,10 +834,8 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			break;
 		case 2:
 		{
-			VolumeData* vd = 0;
-			if (m_canvas->m_cur_vol)
-				vd = m_canvas->m_cur_vol;
-			else if (m_canvas->m_vd_pop_list.size())
+			VolumeData* vd = m_canvas->m_cur_vol;
+			if (!vd && !m_canvas->m_vd_pop_list.empty())
 				vd = m_canvas->m_vd_pop_list[0];
 			if (!vd)
 				break;
@@ -1245,10 +1243,8 @@ void RenderViewPanel::SetScaleFactor(double val)
 			break;
 		case 2:
 		{
-			VolumeData* vd = 0;
-			if (m_canvas->m_cur_vol)
-				vd = m_canvas->m_cur_vol;
-			else if (m_canvas->m_vd_pop_list.size())
+			VolumeData* vd = m_canvas->m_cur_vol;
+			if (!vd && !m_canvas->m_vd_pop_list.empty())
 				vd = m_canvas->m_vd_pop_list[0];
 			double spcx, spcy, spcz;
 			if (vd)
