@@ -410,7 +410,7 @@ void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (FOUND_VALUE(gstNull))
 		return;
-	bool update_all = vc.empty();
+	bool update_all = vc.empty() || FOUND_VALUE(gstCurrentSelect);
 
 	//mf button tips
 	if (update_all || FOUND_VALUE(gstMultiFuncTips))

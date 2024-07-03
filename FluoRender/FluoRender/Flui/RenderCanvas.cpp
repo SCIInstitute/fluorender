@@ -3975,6 +3975,10 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			set_focus = true;
 			refresh = true;
 			vc.insert({ gstSelUndo, gstBrushState, gstBrushThreshold, gstBrushSize1, gstBrushSize2 });
+			if (glbin_brush_def.m_update_size)
+				vc.insert(gstBrushCountResult);
+			if (glbin_brush_def.m_update_colocal)
+				vc.insert(gstColocalResult);
 		}
 
 		//draw_mask
@@ -4312,17 +4316,13 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			lg_changed = true;
 			start_loop = true;
 			//update
-			//if (m_frame)
-			//{
-			//	if (m_paint_count && m_frame->GetBrushToolDlg())
-			//		m_frame->GetBrushToolDlg()->Update(0);
-			//	if (m_paint_colocalize && m_frame->GetColocalizationDlg())
-			//		m_frame->GetColocalizationDlg()->Colocalize();
-			//	if (m_int_mode == 12 && m_frame->GetMeasureDlg())
-			//		m_frame->GetMeasureDlg()->GetSettings(this);
-			//}
+			if (glbin_brush_def.m_update_size)
+				vc.insert(gstBrushCountResult);
+			if (glbin_brush_def.m_update_colocal)
+				vc.insert(gstColocalResult);
+			if (m_int_mode == 12)
+				vc.insert(gstRulerList);
 		}
-
 	}
 
 #if defined(_WIN32) && defined(USE_XINPUT)
@@ -10283,7 +10283,13 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			m_int_mode = 4;
 			m_force_clear = true;
 			RefreshGL(27);
-			m_frame->UpdateProps({ gstSelUndo, gstBrushThreshold });
+			fluo::ValueCollection vc;
+			vc.insert({ gstSelUndo, gstBrushThreshold });
+			if (glbin_brush_def.m_update_size)
+				vc.insert(gstBrushCountResult);
+			if (glbin_brush_def.m_update_colocal)
+				vc.insert(gstColocalResult);
+			m_frame->UpdateProps(vc);
 			return;
 		}
 		else if (m_int_mode == 5 &&
@@ -10313,7 +10319,13 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			m_int_mode = 8;
 			m_force_clear = true;
 			RefreshGL(27);
-			m_frame->UpdateProps({ gstRulerList, gstSelUndo, gstBrushThreshold });
+			fluo::ValueCollection vc;
+			vc.insert({ gstRulerList, gstSelUndo, gstBrushThreshold });
+			if (glbin_brush_def.m_update_size)
+				vc.insert(gstBrushCountResult);
+			if (glbin_brush_def.m_update_colocal)
+				vc.insert(gstColocalResult);
+			m_frame->UpdateProps(vc);
 			return;
 		}
 		else if (m_int_mode == 10 ||

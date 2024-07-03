@@ -263,11 +263,6 @@ namespace flrd
 		bool m_test_speed;
 		double GetSpanSec() { return m_span_sec; }
 
-		void SetPaintCount(bool val) { m_paint_count = val; }
-		bool GetPaintCount() { return m_paint_count; }
-		//void SetPaintColocalize(bool val) { m_paint_colocalize = val; }
-		//bool GetPaintColocalize() { return m_paint_colocalize; }
-
 	private:
 		VolumeData *m_vd;	//volume data for segmentation
 		VolumeData* m_vd_copy;//for copying mask source
@@ -343,11 +338,6 @@ namespace flrd
 
 		std::chrono::high_resolution_clock::time_point m_t1, m_t2;
 		double m_span_sec;
-
-		//count after paint
-		bool m_paint_count;
-		//colocalize after paint
-		//bool m_paint_colocalize;
 
 	private:
 		double HueCalculation(int mode, unsigned int label);

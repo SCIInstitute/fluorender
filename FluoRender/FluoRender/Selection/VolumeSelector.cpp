@@ -85,8 +85,7 @@ VolumeSelector::VolumeSelector() :
 	m_iter_normal(30),
 	m_iter_strong(60),
 	m_brush_sets_index(0),
-	m_test_speed(false),
-	m_paint_count(false)
+	m_test_speed(false)
 {
 }
 
@@ -165,30 +164,6 @@ void VolumeSelector::Segment(bool push_mask, bool est_th, int mx, int my)
 		segment(push_mask, est_th, mx, my);
 	else
 		segment(push_mask, est_th, 0, 0);
-
-	bool count = false;
-	bool colocal = false;
-	if (m_mode == 1 ||
-		m_mode == 2 ||
-		m_mode == 3 ||
-		m_mode == 4 ||
-		m_mode == 5 ||
-		m_mode == 7 ||
-		m_mode == 8 ||
-		m_mode == 9)
-	{
-		//count = glbin_brush_def.m_paint;
-		//colocal = GetPaintColocalize();
-	}
-
-	//update
-	//if (m_frame)
-	//{
-	//	if (m_frame->GetBrushToolDlg())
-	//		m_frame->GetBrushToolDlg()->Update(count ? 0 : 1);
-	//	if (colocal && m_frame->GetColocalizationDlg())
-	//		m_frame->GetColocalizationDlg()->Colocalize();
-	//}
 }
 
 void VolumeSelector::segment(bool push_mask, bool est_th, int mx, int my)
@@ -856,13 +831,6 @@ void VolumeSelector::PasteMask(int op)
 			if (group && data)
 				group->AddMask(data, 0);
 		}
-
-		//m_frame->RefreshCanvases();
-		//if (m_frame->GetBrushToolDlg())
-		//	m_frame->GetBrushToolDlg()->UpdateUndoRedo();
-		//if (m_frame->GetColocalizationDlg() &&
-		//	view->m_paint_colocalize)
-		//	m_frame->GetColocalizationDlg()->Colocalize();
 	}
 }
 

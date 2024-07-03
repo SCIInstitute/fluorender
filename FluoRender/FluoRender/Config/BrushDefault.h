@@ -83,5 +83,9 @@ public:
 	//brush size relation
 	bool m_brush_size_data;
 
+	//auto update
+	bool m_update_size;
+	bool m_update_colocal;
+
 };
 #endif

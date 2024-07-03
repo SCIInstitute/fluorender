@@ -415,7 +415,7 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 {
 	if (FOUND_VALUE(gstNull))
 		return;
-	bool update_all = vc.empty();
+	bool update_all = vc.empty() || FOUND_VALUE(gstCurrentSelect);
 
 	int type = glbin_current.GetType();
 	if (type != 2 && type != 3)

@@ -379,7 +379,7 @@ BrushToolDlg::BrushToolDlg(
 	m_update_btn->Bind(wxEVT_BUTTON, &BrushToolDlg::OnUpdateBtn, this);
 	m_auto_update_btn = new wxToggleButton(this, wxID_ANY,
 		"Auto Update", wxDefaultPosition, wxDefaultSize);
-	m_auto_update_btn->Bind(wxEVT_BUTTON, &BrushToolDlg::OnAutoUpdateBtn, this);
+	m_auto_update_btn->Bind(wxEVT_TOGGLEBUTTON, &BrushToolDlg::OnAutoUpdateBtn, this);
 	m_history_chk = new wxCheckBox(this, wxID_ANY,
 		"Hold History", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_history_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnHistoryChk, this);
@@ -428,6 +428,8 @@ BrushToolDlg::BrushToolDlg(
 
 	SetSizer(sizer_v);
 	Layout();
+	SetAutoLayout(true);
+	SetScrollRate(10, 10);
 }
 
 BrushToolDlg::~BrushToolDlg()
@@ -450,7 +452,7 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (sel_vol)
 		m_max_value = sel_vol->GetMaxValue();
 
-	if (update_all || FOUND_VALUE(gstSelUndo))
+	if (update_all || FOUND_VALUE(gstSelUndo) || FOUND_VALUE(gstCurrentSelect))
 	{
 		if (sel_vol && sel_vol->GetTexture())
 		{
@@ -476,7 +478,7 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_toolbar->ToggleTool(ID_BrushDesel, ival == 3);
 	}
 
-	if (update_all || FOUND_VALUE(gstSelMask))
+	if (update_all || FOUND_VALUE(gstSelMask) || FOUND_VALUE(gstCurrentSelect))
 	{
 		bval = glbin_vol_selector.GetCopyMaskVolume() != 0;
 		m_mask_tb->EnableTool(ID_MaskPaste, bval);
@@ -581,6 +583,12 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	//output
 	if (update_all || FOUND_VALUE(gstBrushHistoryEnable))
 		m_history_chk->SetValue(m_hold_history);
+
+	//auto update
+	if (update_all || FOUND_VALUE(gstAutoUpdate))
+	{
+		m_auto_update_btn->SetValue(glbin_brush_def.m_update_size);
+	}
 
 	if (sel_vol && FOUND_VALUE(gstBrushCountResult))
 	{
@@ -747,21 +755,37 @@ void BrushToolDlg::OnMaskToolBar(wxCommandEvent& event)
 		glbin_vol_selector.PasteMask(0);
 		excl_self = 0;
 		vc.insert(gstSelUndo);
+		if (glbin_brush_def.m_update_size)
+			vc.insert(gstBrushCountResult);
+		if (glbin_brush_def.m_update_colocal)
+			vc.insert(gstColocalResult);
 		break;
 	case ID_MaskMerge:
 		glbin_vol_selector.PasteMask(1);
 		excl_self = 0;
 		vc.insert(gstSelUndo);
+		if (glbin_brush_def.m_update_size)
+			vc.insert(gstBrushCountResult);
+		if (glbin_brush_def.m_update_colocal)
+			vc.insert(gstColocalResult);
 		break;
 	case ID_MaskExclude:
 		glbin_vol_selector.PasteMask(2);
 		excl_self = 0;
 		vc.insert(gstSelUndo);
+		if (glbin_brush_def.m_update_size)
+			vc.insert(gstBrushCountResult);
+		if (glbin_brush_def.m_update_colocal)
+			vc.insert(gstColocalResult);
 		break;
 	case ID_MaskIntersect:
 		glbin_vol_selector.PasteMask(3);
 		excl_self = 0;
 		vc.insert(gstSelUndo);
+		if (glbin_brush_def.m_update_size)
+			vc.insert(gstBrushCountResult);
+		if (glbin_brush_def.m_update_colocal)
+			vc.insert(gstColocalResult);
 		break;
 	}
 
@@ -790,13 +814,24 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent& event)
 
 	//set translate
 	glbin_vol_selector.SetBrushSclTranslate(val / m_max_value);
-	if (glbin_vol_selector.GetThUpdate())
+
+	if (!glbin_vol_selector.GetThUpdate())
+		return;
+
+	glbin_vol_selector.PopMask();
+	glbin_vol_selector.Segment(true, false);
+	fluo::ValueCollection vc;
+	int sx = 2;
+	vc.insert({ gstSelUndo, gstBrushThreshold });
+	if (glbin_brush_def.m_update_size)
+		vc.insert(gstBrushCountResult);
+	if (glbin_brush_def.m_update_colocal)
 	{
-		glbin_vol_selector.PopMask();
-		glbin_vol_selector.Segment(true, false);
-		FluoRefresh(2, { gstSelUndo, gstBrushThreshold },
-			{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		vc.insert(gstColocalResult);
+		sx = 0;
 	}
+	FluoRefresh(sx, vc,
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 //gm falloff
@@ -818,13 +853,24 @@ void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent& event)
 
 	//set gm falloff
 	glbin_vol_selector.SetBrushGmFalloff(GM_2_ESTR(val));
-	if (glbin_vol_selector.GetThUpdate())
+
+	if (!glbin_vol_selector.GetThUpdate())
+		return;
+
+	glbin_vol_selector.PopMask();
+	glbin_vol_selector.Segment(true, false);
+	fluo::ValueCollection vc;
+	int sx = 2;
+	vc.insert({ gstSelUndo, gstBrushThreshold });
+	if (glbin_brush_def.m_update_size)
+		vc.insert(gstBrushCountResult);
+	if (glbin_brush_def.m_update_colocal)
 	{
-		glbin_vol_selector.PopMask();
-		glbin_vol_selector.Segment(true, false);
-		FluoRefresh(2, { gstSelUndo, gstBrushThreshold },
-			{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		vc.insert(gstColocalResult);
+		sx = 0;
 	}
+	FluoRefresh(sx, vc,
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 //2d influence
@@ -846,40 +892,54 @@ void BrushToolDlg::OnBrush2dinflText(wxCommandEvent& event)
 
 	//set 2d weight
 	glbin_vol_selector.SetW2d(val);
-	if (glbin_vol_selector.GetThUpdate())
+
+	if (!glbin_vol_selector.GetThUpdate())
+		return;
+
+	glbin_vol_selector.PopMask();
+	glbin_vol_selector.Segment(true, false);
+	fluo::ValueCollection vc;
+	int sx = 2;
+	vc.insert({ gstSelUndo, gstBrushThreshold });
+	if (glbin_brush_def.m_update_size)
+		vc.insert(gstBrushCountResult);
+	if (glbin_brush_def.m_update_colocal)
 	{
-		glbin_vol_selector.PopMask();
-		glbin_vol_selector.Segment(true, false);
-		FluoRefresh(2, { gstSelUndo, gstBrushThreshold },
-			{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		vc.insert(gstColocalResult);
+		sx = 0;
 	}
+	FluoRefresh(sx, vc,
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 //edge detect
 void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent& event)
 {
-	bool edge_detect = m_edge_detect_chk->GetValue();
+	bool bval = m_edge_detect_chk->GetValue();
 
-	if (edge_detect)
-	{
-		m_brush_gm_falloff_sldr->Enable();
-		m_brush_gm_falloff_text->Enable();
-	}
-	else
-	{
-		m_brush_gm_falloff_sldr->Disable();
-		m_brush_gm_falloff_text->Disable();
-	}
+	m_brush_gm_falloff_sldr->Enable(bval);
+	m_brush_gm_falloff_text->Enable(bval);
 
 	//set edge detect
-	glbin_vol_selector.SetEdgeDetect(edge_detect);
-	if (glbin_vol_selector.GetThUpdate())
+	glbin_vol_selector.SetEdgeDetect(bval);
+
+	if (!glbin_vol_selector.GetThUpdate())
+		return;
+
+	glbin_vol_selector.PopMask();
+	glbin_vol_selector.Segment(true, false);
+	fluo::ValueCollection vc;
+	int sx = 2;
+	vc.insert({ gstSelUndo, gstBrushThreshold });
+	if (glbin_brush_def.m_update_size)
+		vc.insert(gstBrushCountResult);
+	if (glbin_brush_def.m_update_colocal)
 	{
-		glbin_vol_selector.PopMask();
-		glbin_vol_selector.Segment(true, false);
-		FluoRefresh(2, { gstSelUndo, gstBrushThreshold },
-			{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		vc.insert(gstColocalResult);
+		sx = 0;
 	}
+	FluoRefresh(sx, vc,
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 //hidden removal
@@ -898,13 +958,24 @@ void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent& event)
 
 	//set select group
 	glbin_vol_selector.SetSelectGroup(select_group);
-	if (glbin_vol_selector.GetThUpdate())
+
+	if (!glbin_vol_selector.GetThUpdate())
+		return;
+
+	glbin_vol_selector.PopMask();
+	glbin_vol_selector.Segment(true, false);
+	fluo::ValueCollection vc;
+	int sx = 2;
+	vc.insert({ gstSelUndo, gstBrushThreshold });
+	if (glbin_brush_def.m_update_size)
+		vc.insert(gstBrushCountResult);
+	if (glbin_brush_def.m_update_colocal)
 	{
-		glbin_vol_selector.PopMask();
-		glbin_vol_selector.Segment(true, false);
-		FluoRefresh(2, { gstSelUndo, gstBrushThreshold },
-			{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		vc.insert(gstColocalResult);
+		sx = 0;
 	}
+	FluoRefresh(sx, vc,
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 //estimate threshold
@@ -1063,7 +1134,7 @@ void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)
 
 void BrushToolDlg::OnAutoUpdateBtn(wxCommandEvent& event)
 {
-	glbin_vol_selector.SetPaintCount(m_auto_update_btn->GetValue());
+	glbin_brush_def.m_update_size = m_auto_update_btn->GetValue();
 }
 
 void BrushToolDlg::OnHistoryChk(wxCommandEvent& event)

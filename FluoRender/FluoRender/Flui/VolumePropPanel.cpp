@@ -1604,10 +1604,15 @@ void VolumePropPanel::SetThresh(double val1, double val2, bool notify)
 
 	m_vd->SetLeftThresh(val1);
 	m_vd->SetRightThresh(val2);
-	if (notify)
-		FluoRefresh(1, { gstThreshold }, { m_frame->GetRenderCanvas(m_view) });
-	else
-		FluoRefresh(1, { gstNull }, { m_frame->GetRenderCanvas(m_view) });
+
+	fluo::ValueCollection vc;
+	vc.insert(notify?gstThreshold: gstNull);
+	if (glbin_brush_def.m_update_size)
+		vc.insert(gstBrushCountResult);
+	if (glbin_brush_def.m_update_colocal)
+		vc.insert(gstColocalResult);
+
+	FluoRefresh(1, vc, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SetShadowInt(double val, bool notify)
@@ -1718,7 +1723,14 @@ void VolumePropPanel::SyncThresh(double val1, double val2)
 
 	m_group->SetLeftThresh(val1);
 	m_group->SetRightThresh(val2);
-	FluoRefresh(1, { gstThreshold }, { m_frame->GetRenderCanvas(m_view) });
+
+	fluo::ValueCollection vc;
+	vc.insert(gstThreshold);
+	if (glbin_brush_def.m_update_size)
+		vc.insert(gstBrushCountResult);
+	if (glbin_brush_def.m_update_colocal)
+		vc.insert(gstColocalResult);
+	FluoRefresh(1, vc, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SyncShadowInt(double val)
@@ -2225,11 +2237,6 @@ void VolumePropPanel::OnThreshChange(wxScrollEvent& event)
 		SyncThresh(val1, val2);
 	else
 		SetThresh(val1, val2, false);
-
-	//update colocalization
-	//if (m_frame && m_frame->GetColocalizationDlg() &&
-	//	m_frame->GetColocalizationDlg()->GetThreshUpdate())
-	//	m_frame->GetColocalizationDlg()->Colocalize();
 }
 
 void VolumePropPanel::OnThreshText(wxCommandEvent& event)
@@ -2257,11 +2264,6 @@ void VolumePropPanel::OnThreshText(wxCommandEvent& event)
 		SyncThresh(val1, val2);
 	else
 		SetThresh(val1, val2, false);
-
-	//update colocalization
-	//if (m_frame && m_frame->GetColocalizationDlg() &&
-	//	m_frame->GetColocalizationDlg()->GetThreshUpdate())
-	//	m_frame->GetColocalizationDlg()->Colocalize();
 }
 
 void VolumePropPanel::OnThreshLink(wxCommandEvent& event)
@@ -2524,12 +2526,13 @@ void VolumePropPanel::OnColormapInvBtn(wxCommandEvent& event)
 
 	EnableColormap(true);
 
+	fluo::ValueCollection vc;
+	vc.insert(gstColormap);
+	if (glbin_brush_def.m_update_size)
+		vc.insert(gstBrushCountResult);
+	if (glbin_brush_def.m_update_colocal)
+		vc.insert(gstColocalResult);
 	FluoRefresh(1, { gstColormap }, { m_frame->GetRenderCanvas(m_view) });
-
-	//update colocalization
-	//if (m_frame && m_frame->GetColocalizationDlg() &&
-	//	m_frame->GetColocalizationDlg()->GetColormapUpdate())
-	//	m_frame->GetColocalizationDlg()->Colocalize();
 }
 
 void VolumePropPanel::OnColormapCombo(wxCommandEvent& event)
@@ -2548,12 +2551,13 @@ void VolumePropPanel::OnColormapCombo(wxCommandEvent& event)
 		EnableTransparent(true);
 	}
 
+	fluo::ValueCollection vc;
+	vc.insert(gstColormap);
+	if (glbin_brush_def.m_update_size)
+		vc.insert(gstBrushCountResult);
+	if (glbin_brush_def.m_update_colocal)
+		vc.insert(gstColocalResult);
 	FluoRefresh(1, { gstColormap }, { m_frame->GetRenderCanvas(m_view) });
-
-	//update colocalization
-	//if (m_frame && m_frame->GetColocalizationDlg() &&
-	//	m_frame->GetColocalizationDlg()->GetColormapUpdate())
-	//	m_frame->GetColocalizationDlg()->Colocalize();
 }
 
 void VolumePropPanel::OnColormapCombo2(wxCommandEvent& event)

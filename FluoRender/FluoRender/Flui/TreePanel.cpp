@@ -1545,7 +1545,10 @@ void TreePanel::OnMenu(wxCommandEvent& event)
 			break;
 		}
 		glbin_vol_selector.PasteMask(ival);
-		vc.insert(gstNull);
+		if (glbin_brush_def.m_update_size)
+			vc.insert(gstBrushCountResult);
+		if (glbin_brush_def.m_update_colocal)
+			vc.insert(gstColocalResult);
 	}
 		break;
 	case ID_Edit:

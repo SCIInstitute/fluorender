@@ -70,6 +70,7 @@ AnnotatPropPanel::AnnotatPropPanel(MainFrame* frame,
 
 	SetSizer(sizer_v1);
 	Layout();
+	SetAutoLayout(true);
 	SetScrollRate(10, 10);
 }
 

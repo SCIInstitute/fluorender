@@ -2079,61 +2079,41 @@ void ComponentDlg::OnCompFull(wxCommandEvent& event)
 void ComponentDlg::OnCompExclusive(wxCommandEvent& event)
 {
 	glbin_comp_selector.Exclusive();
-	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo });
-
-	//frame
-	//if (m_frame)
-	//{
-	//	if (m_frame->GetBrushToolDlg())
-	//	{
-	//		if (m_view->m_paint_count)
-	//			m_frame->GetBrushToolDlg()->Update(0);
-	//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
-	//	}
-	//	if (m_frame->GetColocalizationDlg() &&
-	//		m_view->m_paint_colocalize)
-	//		m_frame->GetColocalizationDlg()->Colocalize();
-	//}
+	fluo::ValueCollection vc;
+	vc.insert({ gstCompAnalysisResult, gstSelUndo });
+	if (glbin_brush_def.m_update_size)
+		vc.insert(gstBrushCountResult);
+	if (glbin_brush_def.m_update_colocal)
+		vc.insert(gstColocalResult);
+	FluoRefresh(0, vc,
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void ComponentDlg::OnCompAppend(wxCommandEvent& event)
 {
 	bool get_all = glbin_comp_selector.GetIdEmpty();
 	glbin_comp_selector.Select(get_all);
-	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo });
-	//frame
-	//if (m_frame)
-	//{
-	//	if (m_frame->GetBrushToolDlg())
-	//	{
-	//		if (m_view->m_paint_count)
-	//			m_frame->GetBrushToolDlg()->Update(0);
-	//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
-	//	}
-	//	if (m_frame->GetColocalizationDlg() &&
-	//		m_view->m_paint_colocalize)
-	//		m_frame->GetColocalizationDlg()->Colocalize();
-	//}
+	fluo::ValueCollection vc;
+	vc.insert({ gstCompAnalysisResult, gstSelUndo });
+	if (glbin_brush_def.m_update_size)
+		vc.insert(gstBrushCountResult);
+	if (glbin_brush_def.m_update_colocal)
+		vc.insert(gstColocalResult);
+	FluoRefresh(0, vc,
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void ComponentDlg::OnCompAll(wxCommandEvent& event)
 {
 	glbin_comp_selector.All();
-	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo });
-
-	//frame
-	//if (m_frame)
-	//{
-	//	if (m_frame->GetBrushToolDlg())
-	//	{
-	//		if (m_view->m_paint_count)
-	//			m_frame->GetBrushToolDlg()->Update(0);
-	//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
-	//	}
-	//	if (m_frame->GetColocalizationDlg() &&
-	//		m_view->m_paint_colocalize)
-	//		m_frame->GetColocalizationDlg()->Colocalize();
-	//}
+	fluo::ValueCollection vc;
+	vc.insert({ gstCompAnalysisResult, gstSelUndo });
+	if (glbin_brush_def.m_update_size)
+		vc.insert(gstBrushCountResult);
+	if (glbin_brush_def.m_update_colocal)
+		vc.insert(gstColocalResult);
+	FluoRefresh(0, vc,
+		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void ComponentDlg::OnCompClear(wxCommandEvent& event)
@@ -2229,7 +2209,7 @@ void ComponentDlg::OnOutputTypeRadio(wxCommandEvent& event)
 void ComponentDlg::OnOutputChannels(wxCommandEvent& event)
 {
 	int id = event.GetId();
-	int val;
+	int val = 1;
 	if (id == ID_OutputRandomBtn)
 		val = 1;
 	else if (id == ID_OutputSizeBtn)
