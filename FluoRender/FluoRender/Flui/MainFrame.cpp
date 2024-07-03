@@ -274,6 +274,7 @@ MainFrame::MainFrame(
 	m_main_tb->SetToolDropDown(item_id, true);
 	m_main_tb->SetCustomOverflowItems(prepend_items, append_items);
 	m_main_tb->Bind(wxEVT_AUITOOLBAR_TOOL_DROPDOWN, &MainFrame::OnToolbarMenu, this);
+	m_main_tb->Bind(wxEVT_MOTION, &MainFrame::OnToolbarMotion, this);
 	m_main_tb->Realize();
 
 	//create the menu for UI management
@@ -593,9 +594,7 @@ MainFrame::MainFrame(
 	//drop target
 	SetDropTarget(new DnDFile(this));
 
-	CreateStatusBar(2);
-	GetStatusBar()->SetStatusText(wxString(FLUORENDER_TITLE)+
-		wxString(" started normally."));
+	m_statusbar = CreateStatusBar(2);
 
 	//main top menu
 	m_top_menu = new wxMenuBar;
@@ -800,11 +799,14 @@ MainFrame::MainFrame(
 	glbin_moviemaker.SetMainFrame(this);
 	glbin_moviemaker.SetView(vrv->m_canvas);
 	glbin_mov_def.Apply(&glbin_moviemaker);
-	UpdateProps({});
+
+	m_waker.Start(100);
 
 	m_aui_mgr.Update();
 
-	m_waker.Start(100);
+	glbin_states.m_status_str = wxString(FLUORENDER_TITLE) +
+		wxString(" started normally.");
+	UpdateProps({});
 }
 
 MainFrame::~MainFrame()
@@ -1089,8 +1091,25 @@ void MainFrame::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstMainFrameTitle))
 	{
-		str = m_title + "-" + glbin_data_manager.GetProjectFile();
+		str = glbin_data_manager.GetProjectFile();
+		if (str.IsEmpty())
+			str = m_title;
+		else
+			str = m_title + " - " + str;
 		SetTitle(str);
+	}
+
+	if (update_all || FOUND_VALUE(gstMainStatusbarText))
+	{
+		m_statusbar->SetStatusText(glbin_states.m_status_str);
+	}
+	if (FOUND_VALUE(gstMainStatusbarPush))
+	{
+		m_statusbar->PushStatusText(glbin_states.m_status_str);
+	}
+	if (FOUND_VALUE(gstMainStatusbarPop))
+	{
+		m_statusbar->PopStatusText();
 	}
 }
 
@@ -2248,6 +2267,12 @@ void MainFrame::OnToolbarMenu(wxAuiToolBarEvent& event)
 	}
 	else
 		event.Skip();
+}
+
+void MainFrame::OnToolbarMotion(wxMouseEvent& event)
+{
+	glbin_states.m_status_str = "over";
+	FluoUpdate({ gstMainStatusbarText });
 }
 
 //toolbar

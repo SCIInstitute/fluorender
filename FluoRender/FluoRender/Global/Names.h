@@ -117,6 +117,9 @@ DEALINGS IN THE SOFTWARE.
 #define gstClipPlanePanel "clip plane panel"
 #define gstMainToolbar "main toolbar"
 #define gstMainFrameTitle "main frame title"
+#define gstMainStatusbarText "main statusbar text"
+#define gstMainStatusbarPush "main statusbar push"
+#define gstMainStatusbarPop "main statusbar pop"
 
 //root
 #define gstRoot "Scene Graph"

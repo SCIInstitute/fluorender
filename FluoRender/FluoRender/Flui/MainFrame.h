@@ -387,6 +387,9 @@ private:
 	//tester
 	TesterDlg* m_teser_dlg;
 
+	//status
+	wxStatusBar* m_statusbar;
+
 	wxString m_title;
 	//mac address
 	wxString m_address;
@@ -397,6 +400,7 @@ private:
 private:
 	//toolbar menus
 	void OnToolbarMenu(wxAuiToolBarEvent& event);
+	void OnToolbarMotion(wxMouseEvent& event);
 	//main menu
 	void OnMainMenu(wxCommandEvent& event);
 	//panes

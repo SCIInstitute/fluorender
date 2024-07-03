@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _STATES_H_
 #define _STATES_H_
 
+#include <wx/string.h>
+
 class States
 {
 public:
@@ -43,5 +45,7 @@ public:
 
 	int m_brush_mode_toolbar;	//brush state set from ui
 	int m_brush_mode_shortcut;	//brush state set by shortcut
+
+	wxString m_status_str;		//string to show on main statusbar
 };
 #endif

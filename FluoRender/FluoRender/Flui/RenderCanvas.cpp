@@ -3960,13 +3960,12 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			SetFocus();
 			m_clear_buffer = true;
 			m_updating = true;
-			if (m_frame && m_frame->GetStatusBar())
-				m_frame->GetStatusBar()->PushStatusText("Forced Refresh");
+			glbin_states.m_status_str = "Forced Refresh";
+			m_frame->FluoUpdate({ gstMainStatusbarPush });
 			wxSizeEvent e;
 			OnResize(e);
 			RefreshGL(14, false, true, true);
-			if (m_frame && m_frame->GetStatusBar())
-				m_frame->GetStatusBar()->PopStatusText();
+			m_frame->FluoUpdate({ gstMainStatusbarPop });
 			return;
 		}
 
