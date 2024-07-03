@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <CombineList.h>
+#include <Global.h>
 #include <DataManager.h>
 
 using namespace flrd;
@@ -154,61 +155,18 @@ int CombineList::Execute()
 		if (!vd) vd = *iter;
 	}
 
+	if (vd)
+	{
+		glbin_vol_def.Copy(vd_r, vd);
+		glbin_vol_def.Copy(vd_g, vd);
+		glbin_vol_def.Copy(vd_b, vd);
+	}
 	fluo::Color red = fluo::Color(1.0, 0.0, 0.0);
 	fluo::Color green = fluo::Color(0.0, 1.0, 0.0);
 	fluo::Color blue = fluo::Color(0.0, 0.0, 1.0);
 	vd_r->SetColor(red);
 	vd_g->SetColor(green);
 	vd_b->SetColor(blue);
-
-	if (vd)
-	{
-		bool bval = vd->GetAlphaEnable();
-		vd_r->SetAlphaEnable(bval);
-		vd_g->SetAlphaEnable(bval);
-		vd_b->SetAlphaEnable(bval);
-		bval = vd->GetShadingEnable();
-		vd_r->SetShadingEnable(bval);
-		vd_g->SetShadingEnable(bval);
-		vd_b->SetShadingEnable(bval);
-		vd_r->SetShadowEnable(false);
-		vd_g->SetShadowEnable(false);
-		vd_b->SetShadowEnable(false);
-		//other settings
-		double dval = vd->GetGamma();
-		vd_r->SetGamma(dval);
-		vd_g->SetGamma(dval);
-		vd_b->SetGamma(dval);
-		dval = vd->GetBoundary();
-		vd_r->SetBoundary(dval);
-		vd_g->SetBoundary(dval);
-		vd_b->SetBoundary(dval);
-		dval = vd->GetSaturation();
-		vd_r->SetSaturation(dval);
-		vd_g->SetSaturation(dval);
-		vd_b->SetSaturation(dval);
-		dval = vd->GetLeftThresh();
-		vd_r->SetLeftThresh(dval);
-		vd_g->SetLeftThresh(dval);
-		vd_b->SetLeftThresh(dval);
-		dval = vd->GetRightThresh();
-		vd_r->SetRightThresh(dval);
-		vd_g->SetRightThresh(dval);
-		vd_b->SetRightThresh(dval);
-		dval = vd->GetAlpha();
-		vd_r->SetAlpha(dval);
-		vd_g->SetAlpha(dval);
-		vd_b->SetAlpha(dval);
-		dval = vd->GetSampleRate();
-		vd_r->SetSampleRate(dval);
-		vd_g->SetSampleRate(dval);
-		vd_b->SetSampleRate(dval);
-		double amb, diff, spec, shine;
-		vd->GetMaterial(amb, diff, spec, shine);
-		vd_r->SetMaterial(amb, diff, spec, shine);
-		vd_g->SetMaterial(amb, diff, spec, shine);
-		vd_b->SetMaterial(amb, diff, spec, shine);
-	}
 
 	m_results.push_back(vd_r);
 	m_results.push_back(vd_g);

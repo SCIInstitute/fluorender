@@ -115,6 +115,8 @@ CalculationDlg::CalculationDlg(MainFrame *frame)
 
 	SetSizer(sizer_v);
 	Layout();
+	SetAutoLayout(true);
+	SetScrollRate(10, 10);
 }
 
 CalculationDlg::~CalculationDlg()
