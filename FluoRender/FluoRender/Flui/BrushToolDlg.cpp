@@ -667,28 +667,28 @@ void BrushToolDlg::OnToolBar(wxCommandEvent& event)
 		mode = mode == 2 ? 0 : 2;
 		set_mode = true;
 		excl_self = 0;
-		vc.insert(gstBrushState);
+		vc.insert({ gstBrushState, gstBrushSize1, gstBrushSize2 });
 		views.insert(-1);
 		break;
 	case ID_BrushDiffuse:
 		mode = mode == 4 ? 0 : 4;
 		set_mode = true;
 		excl_self = 0;
-		vc.insert(gstBrushState);
+		vc.insert({ gstBrushState, gstBrushSize1, gstBrushSize2 });
 		views.insert(-1);
 		break;
 	case ID_BrushSolid:
 		mode = mode == 8 ? 0 : 8;
 		set_mode = true;
 		excl_self = 0;
-		vc.insert(gstBrushState);
+		vc.insert({ gstBrushState, gstBrushSize1, gstBrushSize2 });
 		views.insert(-1);
 		break;
 	case ID_BrushDesel:
 		mode = mode == 3 ? 0 : 3;
 		set_mode = true;
 		excl_self = 0;
-		vc.insert(gstBrushState);
+		vc.insert({ gstBrushState, gstBrushSize1, gstBrushSize2 });
 		views.insert(-1);
 		break;
 	case ID_BrushErase:

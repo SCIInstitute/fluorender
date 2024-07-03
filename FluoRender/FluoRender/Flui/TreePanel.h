@@ -201,7 +201,6 @@ private:
 	void OnToolbar(wxCommandEvent& event);
 	void OnMenu(wxCommandEvent& event);
 	void OnSelChanged(wxTreeEvent& event);
-	void OnSelChanging(wxTreeEvent& event);
 	void OnDeleting(wxTreeEvent& event);
 	void OnAct(wxTreeEvent& event);
 	void OnBeginDrag(wxTreeEvent& event);

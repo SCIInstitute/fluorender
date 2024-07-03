@@ -359,7 +359,6 @@ TreePanel::TreePanel(MainFrame* frame,
 	Bind(wxEVT_CONTEXT_MENU, &TreePanel::OnContextMenu, this);
 	Bind(wxEVT_MENU, &TreePanel::OnMenu, this);
 	Bind(wxEVT_TREE_SEL_CHANGED, &TreePanel::OnSelChanged, this);
-	Bind(wxEVT_TREE_SEL_CHANGING, &TreePanel::OnSelChanging, this);
 	Bind(wxEVT_TREE_DELETE_ITEM, &TreePanel::OnDeleting, this);
 	Bind(wxEVT_TREE_ITEM_ACTIVATED, &TreePanel::OnAct, this);
 	Bind(wxEVT_TREE_BEGIN_DRAG, &TreePanel::OnBeginDrag, this);
@@ -933,9 +932,6 @@ void TreePanel::traversalSel(wxTreeItemId item)
 
 void TreePanel::AddVolumeGroup()
 {
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
 	RenderCanvas* view = glbin_current.canvas;
 	wxString name = view->AddGroup("");
 	DataGroup* group = view->GetGroup(name);
@@ -946,9 +942,6 @@ void TreePanel::AddVolumeGroup()
 
 void TreePanel::AddMeshGroup()
 {
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
 	RenderCanvas* view = glbin_current.canvas;
 	wxString name = view->AddMGroup("");
 	MeshGroup* group = view->GetMGroup(name);
@@ -960,9 +953,6 @@ void TreePanel::AddMeshGroup()
 
 void TreePanel::DeleteSelection()
 {
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
 	int type = glbin_current.GetType();
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (canvas)
@@ -1061,9 +1051,6 @@ void TreePanel::Expand()
 
 void TreePanel::ToggleDisplay()
 {
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
 	int type = glbin_current.GetType();
 
 	switch (type)
@@ -1140,9 +1127,6 @@ void TreePanel::ToggleDisplay()
 
 void TreePanel::RandomizeColor()
 {
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
 	int type = glbin_current.GetType();
 
 	switch (type)
@@ -1193,9 +1177,6 @@ void TreePanel::RandomizeColor()
 
 void TreePanel::CloseView()
 {
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (canvas)
 	{
@@ -1209,9 +1190,6 @@ void TreePanel::CloseView()
 
 void TreePanel::Isolate()
 {
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)
 		return;
@@ -1250,9 +1228,6 @@ void TreePanel::Isolate()
 
 void TreePanel::ShowAll()
 {
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)
 		return;
@@ -1263,17 +1238,11 @@ void TreePanel::ShowAll()
 
 void TreePanel::ManipulateData()
 {
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
 	m_frame->UpdateProps({ gstManipPropPanel });
 }
 
 void TreePanel::OnContextMenu(wxContextMenuEvent& event)
 {
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
 	int flag;
 	wxTreeItemId sel_item = m_datatree->HitTest(
 		m_datatree->ScreenToClient(event.GetPosition()), flag);
@@ -1719,12 +1688,6 @@ void TreePanel::OnSelChanged(wxTreeEvent& event)
 	event.Skip();
 }
 
-void TreePanel::OnSelChanging(wxTreeEvent& event)
-{
-	if (glbin_vol_selector.GetMaskHold())
-		event.Veto();
-}
-
 void TreePanel::OnDeleting(wxTreeEvent& event)
 {
 	FluoUpdate({ gstCurrentSelect });
@@ -1737,9 +1700,6 @@ void TreePanel::OnAct(wxTreeEvent& event)
 
 void TreePanel::OnBeginDrag(wxTreeEvent& event)
 {
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
 	//remember pos
 	m_scroll_pos = GetScrollPos(wxVERTICAL);
 
@@ -1777,9 +1737,6 @@ void TreePanel::OnBeginDrag(wxTreeEvent& event)
 
 void TreePanel::OnEndDrag(wxTreeEvent& event)
 {
-	if (glbin_vol_selector.GetMaskHold())
-		return;
-
 	wxTreeItemId src_item = m_drag_item,
 		dst_item = event.GetItem(),
 		src_par_item = src_item.IsOk() ? m_datatree->GetItemParent(src_item) : 0,

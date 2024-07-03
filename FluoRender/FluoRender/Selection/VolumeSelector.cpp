@@ -808,9 +808,6 @@ void VolumeSelector::RedoMask()
 //mask operations
 void VolumeSelector::CopyMask(bool copy_data)
 {
-	if (GetMaskHold())
-		return;
-
 	if (!m_vd)
 		m_vd = glbin_current.vol_data;
 	if (m_vd)
@@ -822,9 +819,6 @@ void VolumeSelector::CopyMask(bool copy_data)
 
 void VolumeSelector::PasteMask(int op)
 {
-	if (GetMaskHold())
-		return;
-
 	if (!m_vd)
 		m_vd = glbin_current.vol_data;
 	if (m_vd && m_vd_copy)

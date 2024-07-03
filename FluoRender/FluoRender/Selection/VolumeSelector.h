@@ -242,14 +242,6 @@ namespace flrd
 		void CompExportRandomColor(int hmode, VolumeData* vd_r, VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide);
 		VolumeData* GetResult(bool pop);
 
-		//mask
-		bool GetMaskHold()//check if other operations are on hold because painting is going on
-		{
-			return
-				m_mode == 1 || m_mode == 2 ||
-				m_mode == 3 || m_mode == 4 ||
-				m_mode == 8 || m_mode == 9;
-		}
 		void PushMask();
 		void PopMask();
 		void UndoMask();
