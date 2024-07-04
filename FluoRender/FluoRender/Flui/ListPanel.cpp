@@ -173,7 +173,9 @@ ListPanel::ListPanel(MainFrame* frame,
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER);
 	wxBitmap bitmap = wxGetBitmapFromMemory(view);
 	m_toolbar->AddTool(ID_AddToView, "Add to View",
-		bitmap, "Add: Add selected data set to render view");
+		bitmap, wxBitmapBundle::FromBitmap(bitmap), wxITEM_NORMAL,
+		"Add: Add selected data set to render view",
+		"Add: Add selected data set to render view");
 	bitmap = wxGetBitmapFromMemory(rename);
 	m_toolbar->AddTool(ID_Rename, "Rename",
 		bitmap, "Rename: Rename selected data set");
