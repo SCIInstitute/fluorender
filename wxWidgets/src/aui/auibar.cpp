@@ -2926,6 +2926,10 @@ void wxAuiToolBar::OnMotion(wxMouseEvent& evt)
                     {
                         SetToolStatusHelp(packingHitItem->m_longHelp);
                     }
+                    else
+                    {
+                        SetToolStatusHelp(packingHitItem->m_shortHelp);
+                    }
                 }
             }
             else
