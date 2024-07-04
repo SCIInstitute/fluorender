@@ -400,7 +400,7 @@ private:
 private:
 	//toolbar menus
 	void OnToolbarMenu(wxAuiToolBarEvent& event);
-	void OnToolbarMotion(wxMouseEvent& event);
+	//void OnToolbarMotion(wxMouseEvent& event);
 	//main menu
 	void OnMainMenu(wxCommandEvent& event);
 	//panes

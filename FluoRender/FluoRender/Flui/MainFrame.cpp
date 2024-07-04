@@ -274,8 +274,8 @@ MainFrame::MainFrame(
 	m_main_tb->SetToolDropDown(item_id, true);
 	m_main_tb->SetCustomOverflowItems(prepend_items, append_items);
 	m_main_tb->Bind(wxEVT_AUITOOLBAR_TOOL_DROPDOWN, &MainFrame::OnToolbarMenu, this);
-	m_main_tb->Bind(wxEVT_ENTER_WINDOW, &MainFrame::OnToolbarMotion, this);
-	m_main_tb->Bind(wxEVT_LEAVE_WINDOW, &MainFrame::OnToolbarMotion, this);
+	//m_main_tb->Bind(wxEVT_ENTER_WINDOW, &MainFrame::OnToolbarMotion, this);
+	//m_main_tb->Bind(wxEVT_LEAVE_WINDOW, &MainFrame::OnToolbarMotion, this);
 	m_main_tb->Realize();
 
 	//create the menu for UI management
@@ -2270,18 +2270,18 @@ void MainFrame::OnToolbarMenu(wxAuiToolBarEvent& event)
 		event.Skip();
 }
 
-void MainFrame::OnToolbarMotion(wxMouseEvent& event)
-{
-	if (event.GetEventType() == wxEVT_LEAVE_WINDOW)
-	{
-		FluoUpdate({ gstMainStatusbarPop });
-	}
-	else if (event.GetEventType() == wxEVT_ENTER_WINDOW)
-	{
-		glbin_states.m_status_str = "toolbar test";
-		FluoUpdate({ gstMainStatusbarPush });
-	}
-}
+//void MainFrame::OnToolbarMotion(wxMouseEvent& event)
+//{
+//	if (event.GetEventType() == wxEVT_LEAVE_WINDOW)
+//	{
+//		FluoUpdate({ gstMainStatusbarPop });
+//	}
+//	else if (event.GetEventType() == wxEVT_ENTER_WINDOW)
+//	{
+//		glbin_states.m_status_str = "toolbar test";
+//		FluoUpdate({ gstMainStatusbarPush });
+//	}
+//}
 
 //toolbar
 void MainFrame::OnMainMenu(wxCommandEvent& event)
