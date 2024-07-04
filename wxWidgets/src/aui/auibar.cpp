@@ -31,7 +31,6 @@
 
 #include "wx/aui/auibar.h"
 #include "wx/aui/framemanager.h"
-#include "wx/aui/floatpane.h"
 
 #ifdef __WXMAC__
 #include "wx/osx/private.h"
@@ -854,7 +853,6 @@ void wxAuiToolBar::Init()
     m_actionPos = wxDefaultPosition;
     m_actionItem = NULL;
     m_tipItem = NULL;
-    m_help_item = NULL;
     m_art = new wxAuiDefaultToolBarArt;
     m_toolTextOrientation = wxAUI_TBTOOL_TEXT_BOTTOM;
     m_gripperSizerItem = NULL;
@@ -900,7 +898,6 @@ bool wxAuiToolBar::Create(wxWindow* parent,
     if (style & wxAUI_TB_HORZ_LAYOUT)
         SetToolTextOrientation(wxAUI_TBTOOL_TEXT_RIGHT);
     SetBackgroundStyle(wxBG_STYLE_PAINT);
-    m_hasPushedStatusText = false;
 
     return true;
 }
@@ -2606,12 +2603,6 @@ void wxAuiToolBar::OnLeftDown(wxMouseEvent& evt)
             m_actionItem = NULL;
             return;
         }
-        // Remove the Statusbar Help
-        if (m_hasPushedStatusText)
-        {
-            m_hasPushedStatusText = false;
-            ResetToolStatusHelp();
-        }
 
         UnsetToolTip();
 
@@ -2895,7 +2886,7 @@ void wxAuiToolBar::OnMotion(wxMouseEvent& evt)
     {
         SetHoverItem(hitItem);
 
-        // tooltips  and statusbar text handling
+        // tooltips handling
         if ( !HasFlag(wxAUI_TB_NO_TOOLTIPS) )
         {
             wxAuiToolBarItem* packingHitItem;
@@ -2911,33 +2902,9 @@ void wxAuiToolBar::OnMotion(wxMouseEvent& evt)
                     else
                         UnsetToolTip();
                 }
-                if (packingHitItem != m_help_item)
-                {
-                    m_help_item = packingHitItem;
-
-                    // Remove the previous Statusbar Help
-                    if (m_hasPushedStatusText)
-                    {
-                        m_hasPushedStatusText = false;
-                        ResetToolStatusHelp();
-                    }
-                    // Show the status bar Help 
-                    if (!packingHitItem->m_longHelp.empty())
-                    {
-                        SetToolStatusHelp(packingHitItem->m_longHelp);
-                    }
-                }
             }
             else
             {
-                // Remove the Statusbar Help
-                if (m_hasPushedStatusText)
-                {
-                    m_hasPushedStatusText = false;
-                    ResetToolStatusHelp();
-                }
-                m_help_item = NULL;
-
                 UnsetToolTip();
                 m_tipItem = NULL;
             }
@@ -2955,7 +2922,6 @@ void wxAuiToolBar::DoResetMouseState()
     SetPressedItem(NULL);
 
     m_tipItem = NULL;
-    m_help_item = NULL;
 
     // we have to reset those here, because the mouse-up handlers which do
     // it usually won't be called if we let go of a mouse button while we
@@ -2998,56 +2964,6 @@ void wxAuiToolBar::OnSetCursor(wxSetCursorEvent& evt)
     evt.SetCursor(cursor);
 }
 
-wxFrame * wxAuiToolBar::GetParentFrame()
-{
-    wxAuiFloatingFrame * parentFloatingFrame = wxDynamicCast(GetParent(), wxAuiFloatingFrame);
-    if (parentFloatingFrame)
-    {
-        wxFrame * parentFrame = wxDynamicCast(parentFloatingFrame->GetParent(), wxFrame);
-
-        return (parentFrame);
-    }
-    else // we're not a floating pane
-    {
-        wxFrame * parentFrame = wxDynamicCast(GetParent(), wxFrame);
-
-        return (parentFrame);
-    }
-}
-
-void wxAuiToolBar::SetToolStatusHelp(const wxString & helptext)
-{
-    wxFrame * frame = GetParentFrame();
-    if (frame)
-    {
-        wxStatusBar * sb = frame->GetStatusBar();
-
-        if (sb)
-        {
-            // Set the Status Text
-            if (!m_hasPushedStatusText)
-            {
-                m_hasPushedStatusText = true;
-                sb->PushStatusText(helptext);
-            }
-        }
-    }
-}
-
-void wxAuiToolBar::ResetToolStatusHelp()
-{
-    wxFrame * frame = GetParentFrame();
-    if (frame)
-    {
-        wxStatusBar * sb = frame->GetStatusBar();
-
-        if (sb)
-        {
-            // Remove the Statusbar Help
-            sb->PopStatusText();
-        }
-    }
-}
 
 #endif // wxUSE_AUI
 
