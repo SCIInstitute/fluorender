@@ -497,6 +497,13 @@ file(GLOB lgr_hdr FluoRender/FluoRender/LookingGlass/*.h)
 add_library(LOOKINGGLASS_OBJ OBJECT
   ${lgr_src} ${lgr_hdr})
 
+# Progress
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Progress)
+file(GLOB prg_src FluoRender/FluoRender/Progress/*.cpp)
+file(GLOB prg_hdr FluoRender/FluoRender/Progress/*.h)
+add_library(PROGRESS_OBJ OBJECT
+  ${prg_src} ${prg_hdr})
+
 # Project
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Project)
 file(GLOB prj_src FluoRender/FluoRender/Project/*.cpp)
@@ -641,6 +648,7 @@ if(APPLE)
     $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGE_OBJ>
     $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
+    $<TARGET_OBJECTS:PROGRESS_OBJ>
     $<TARGET_OBJECTS:PROJECT_OBJ>
     $<TARGET_OBJECTS:PYTHON_OBJ>
     $<TARGET_OBJECTS:SCENE_OBJ>
@@ -687,6 +695,7 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGE_OBJ>
     $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
+    $<TARGET_OBJECTS:PROGRESS_OBJ>
     $<TARGET_OBJECTS:PROJECT_OBJ>
     $<TARGET_OBJECTS:PYTHON_OBJ>
     $<TARGET_OBJECTS:SCENE_OBJ>
@@ -765,6 +774,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:IMAGE_OBJ>
       $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
+      $<TARGET_OBJECTS:PROGRESS_OBJ>
       $<TARGET_OBJECTS:PROJECT_OBJ>
       $<TARGET_OBJECTS:PYTHON_OBJ>
       $<TARGET_OBJECTS:SCENE_OBJ>
@@ -802,6 +812,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:IMAGE_OBJ>
       $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
+      $<TARGET_OBJECTS:PROGRESS_OBJ>
       $<TARGET_OBJECTS:PROJECT_OBJ>
       $<TARGET_OBJECTS:PYTHON_OBJ>
       $<TARGET_OBJECTS:SCENE_OBJ>
@@ -838,6 +849,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:IMAGE_OBJ>
       $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
+      $<TARGET_OBJECTS:PROGRESS_OBJ>
       $<TARGET_OBJECTS:PROJECT_OBJ>
       $<TARGET_OBJECTS:PYTHON_OBJ>
       $<TARGET_OBJECTS:SCENE_OBJ>

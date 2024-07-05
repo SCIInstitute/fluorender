@@ -35,7 +35,8 @@ DEALINGS IN THE SOFTWARE.
 #include <TrackDlg.h>
 #include <wx/wfstream.h>
 
-Project::Project()
+Project::Project() :
+	Progress()
 {
 }
 
@@ -57,9 +58,6 @@ void Project::Open(wxString& filename)
 	glbin_data_manager.ClearAll();
 	DataGroup::ResetID();
 	MeshGroup::ResetID();
-	//m_output_adj_panel->SetVolumeData(0);
-	//m_output_adj_panel->SetGroup(0);
-	//m_output_adj_panel->SetGroupLink(0);
 	frame->GetRenderCanvas(0)->ClearAll();
 	for (i = frame->GetCanvasNum() - 1; i > 0; i--)
 		frame->DeleteRenderView(i);
@@ -86,14 +84,11 @@ void Project::Open(wxString& filename)
 				"Please check update and download the new version.");
 	}
 
-	int ticks = 0;
+	int ticks = 3;
 	int tick_cnt = 1;
 	fconfig.Read("ticks", &ticks);
-	//wxProgressDialog* prg_diag = 0;
-	//prg_diag = new wxProgressDialog(
-	//	"FluoRender: Loading project...",
-	//	"Reading project file. Please wait.",
-	//	100, this, wxPD_SMOOTH | wxPD_ELAPSED_TIME | wxPD_AUTO_HIDE);
+
+	SetProgress(0, "FluoRender is reading the project file. Please wait.");
 
 	bool bval;
 	double dval;
@@ -149,9 +144,9 @@ void Project::Open(wxString& filename)
 		int num = fconfig.Read("num", 0l);
 		for (i = 0; i < num; i++)
 		{
-			//if (ticks && prg_diag)
-			//	prg_diag->Update(90 * tick_cnt / ticks,
-			//		"Reading and processing volume data. Please wait.");
+			SetProgress(90 * tick_cnt / ticks,
+				"FluoRender is reading and processing volume data. Please wait.");
+
 
 			wxString str;
 			str = wxString::Format("/data/volume/%d", i);
@@ -522,9 +517,8 @@ void Project::Open(wxString& filename)
 		int num = fconfig.Read("num", 0l);
 		for (i = 0; i < num; i++)
 		{
-			//if (ticks && prg_diag)
-			//	prg_diag->Update(90 * tick_cnt / ticks,
-			//		"Reading and processing mesh data. Please wait.");
+			SetProgress(90 * tick_cnt / ticks,
+				"FluoRender is reading and processing mesh data. Please wait.");
 
 			wxString str;
 			str = wxString::Format("/data/mesh/%d", i);
@@ -1349,9 +1343,7 @@ void Project::Open(wxString& filename)
 		}
 	}
 
-	//if (m_movie_panel)
-	//	m_movie_panel->SetView(0);
-	//delete prg_diag;
+	SetProgress(0, "");
 
 	frame->RefreshCanvases();
 	frame->UpdateProps({}, 0, 0);
@@ -1379,13 +1371,10 @@ void Project::Save(wxString& filename, bool inc)
 	fconfig.Write("ver_minor", VERSION_MINOR_TAG);
 
 	int ticks = glbin_data_manager.GetVolumeNum() + glbin_data_manager.GetMeshNum();
+	ticks = ticks ? ticks : 1;
 	int tick_cnt = 1;
 	fconfig.Write("ticks", ticks);
-	//wxProgressDialog* prg_diag = 0;
-	//prg_diag = new wxProgressDialog(
-	//	"FluoRender: Saving project...",
-	//	"Saving project file. Please wait.",
-	//	100, this, wxPD_SMOOTH | wxPD_ELAPSED_TIME | wxPD_AUTO_HIDE);
+	SetProgress(0, "FluoRender is saving the project file. Please wait.");
 
 	wxString str;
 
@@ -1422,9 +1411,8 @@ void Project::Save(wxString& filename, bool inc)
 	fconfig.Write("num", glbin_data_manager.GetVolumeNum());
 	for (i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
 	{
-		//if (ticks && prg_diag)
-		//	prg_diag->Update(90 * tick_cnt / ticks,
-		//		"Saving volume data. Please wait.");
+		SetProgress(90 * tick_cnt / ticks,
+			"FluoRender is saving volume data. Please wait.");
 		tick_cnt++;
 
 		VolumeData* vd = glbin_data_manager.GetVolumeData(i);
@@ -1614,9 +1602,8 @@ void Project::Save(wxString& filename, bool inc)
 	fconfig.Write("num", glbin_data_manager.GetMeshNum());
 	for (i = 0; i < glbin_data_manager.GetMeshNum(); i++)
 	{
-		//if (ticks && prg_diag)
-		//	prg_diag->Update(90 * tick_cnt / ticks,
-		//		"Saving mesh data. Please wait.");
+		SetProgress(90 * tick_cnt / ticks,
+			"FluoRender is saving mesh data. Please wait.");
 		tick_cnt++;
 
 		MeshData* md = glbin_data_manager.GetMeshData(i);
@@ -2023,7 +2010,7 @@ void Project::Save(wxString& filename, bool inc)
 
 	SaveConfig(fconfig, filename2);
 
-	//delete prg_diag;
+	SetProgress(0, "");
 	glbin_data_manager.SetProjectPath(filename2);
 
 	frame->UpdateProps({ gstListCtrl });

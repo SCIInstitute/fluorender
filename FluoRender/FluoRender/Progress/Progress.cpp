@@ -25,24 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-
-#ifndef _PROJECT_H_
-#define _PROJECT_H_
-
 #include <Progress.h>
-#include <wx/string.h>
 
-class Project : public Progress
+Progress::Progress() :
+	m_progress_func(0)
 {
-public:
-	Project();
-	~Project();
 
-	void Open(wxString& filename);
-	void Save(wxString& filename, bool inc);//inc: save incrementally
-	void Reset();
-
-private:
-};
-
-#endif//_PROJECT_H_
+}

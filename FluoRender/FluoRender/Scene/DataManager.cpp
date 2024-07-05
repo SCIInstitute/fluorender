@@ -5331,8 +5331,8 @@ TrackGroup* CurrentObjects::GetTrackGroup()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 DataManager::DataManager() :
-	m_frame(0),
-	m_progress_func(0)
+	Progress(),
+	m_frame(0)
 {
 }
 

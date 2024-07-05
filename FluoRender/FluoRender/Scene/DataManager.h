@@ -61,6 +61,7 @@ DEALINGS IN THE SOFTWARE.
 #include <mpg_reader.h>
 #include <TrackMap.h>
 #include <Ruler.h>
+#include <Progress.h>
 
 using namespace std;
 
@@ -1348,7 +1349,7 @@ struct CurrentObjects
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class DataManager
+class DataManager : public Progress
 {
 public:
 	DataManager();
@@ -1430,17 +1431,6 @@ public:
 	fluo::Color GetWavelengthColor(double wavelength);
 	fluo::Color GetColor(int);
 
-	//set progress
-	void SetProgressFunc(const std::function<void(int, const wxString&)>& f)
-	{
-		m_progress_func = f;
-	}
-	void SetProgress(int val, const wxString& str)
-	{
-		if (m_progress_func)
-			m_progress_func(val, str);
-	}
-
 private:
 	MainFrame* m_frame;
 	vector <VolumeData*> m_vd_list;
@@ -1451,9 +1441,6 @@ private:
 	//project path
 	wxString m_prj_path;
 	wxString m_prj_file;
-
-private:
-	std::function<void(int, const wxString&)> m_progress_func;
 };
 
 #endif//_DATAMANAGER_H_

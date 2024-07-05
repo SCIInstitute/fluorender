@@ -26,23 +26,30 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _PROJECT_H_
-#define _PROJECT_H_
+#ifndef _PROGRESS_H_
+#define _PROGRESS_H_
 
-#include <Progress.h>
 #include <wx/string.h>
 
-class Project : public Progress
+class Progress
 {
 public:
-	Project();
-	~Project();
+	Progress();
+	~Progress() {}
 
-	void Open(wxString& filename);
-	void Save(wxString& filename, bool inc);//inc: save incrementally
-	void Reset();
+	//set progress
+	void SetProgressFunc(const std::function<void(int, const wxString&)>& f)
+	{
+		m_progress_func = f;
+	}
+	void SetProgress(int val, const wxString& str)
+	{
+		if (m_progress_func)
+			m_progress_func(val, str);
+	}
 
 private:
+	std::function<void(int, const wxString&)> m_progress_func;
 };
 
-#endif//_PROJECT_H_
+#endif//_PROGRESS_H_
