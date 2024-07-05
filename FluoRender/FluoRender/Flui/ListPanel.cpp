@@ -173,27 +173,39 @@ ListPanel::ListPanel(MainFrame* frame,
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER);
 	wxBitmap bitmap = wxGetBitmapFromMemory(view);
 	m_toolbar->AddTool(ID_AddToView, "Add to View",
-		bitmap, wxBitmapBundle::FromBitmap(bitmap), wxITEM_NORMAL,
-		"Add: Add selected data set to render view",
-		"Add: Add selected data set to render view");
+		bitmap, "Add selected data set to render view");
+	m_toolbar->SetToolLongHelp(ID_AddToView,
+		"Add selected data set to render view");
 	bitmap = wxGetBitmapFromMemory(rename);
 	m_toolbar->AddTool(ID_Rename, "Rename",
-		bitmap, "Rename: Rename selected data set");
+		bitmap, "Rename selected data set");
+	m_toolbar->SetToolLongHelp(ID_Rename,
+		"Rename selected data set");
 	bitmap = wxGetBitmapFromMemory(save);
 	m_toolbar->AddTool(ID_Save, "Save As",
-		bitmap, "Save: Save selected volume data set");
+		bitmap, "Save selected volume data set");
+	m_toolbar->SetToolLongHelp(ID_Save,
+		"Save selected volume data set");
 	bitmap = wxGetBitmapFromMemory(bake);
 	m_toolbar->AddTool(ID_Bake, "Bake",
-		bitmap, "Bake: Apply the volume properties and save");
+		bitmap, "Apply the volume properties and save");
+	m_toolbar->SetToolLongHelp(ID_Bake,
+		"Apply the volume properties and save");
 	bitmap = wxGetBitmapFromMemory(save_mask);
 	m_toolbar->AddTool(ID_SaveMask, "Save Mask",
-		bitmap, "Save Mask: Save its mask to a file");
+		bitmap, "Save its mask to a file");
+	m_toolbar->SetToolLongHelp(ID_SaveMask,
+		"Save its mask to a file");
 	bitmap = wxGetBitmapFromMemory(delet);
 	m_toolbar->AddTool(ID_Delete, "Delete",
-		bitmap, "Delete: Delete selected data set");
+		bitmap, "Delete selected data set");
+	m_toolbar->SetToolLongHelp(ID_Delete,
+		"Delete selected data set");
 	bitmap = wxGetBitmapFromMemory(del_all);
 	m_toolbar->AddTool(ID_DeleteAll, "Delete All",
-		bitmap, "Delete All: Delete all data sets");
+		bitmap, "Delete all data sets");
+	m_toolbar->SetToolLongHelp(ID_DeleteAll,
+		"Delete all data sets");
 	m_toolbar->Bind(wxEVT_TOOL, &ListPanel::OnToolbar, this);
 	m_toolbar->Realize();
 

@@ -74,42 +74,52 @@ BrushToolDlg::BrushToolDlg(
 	m_toolbar->AddTool(
 		ID_BrushUndo, "Undo", bitmap,
 		"Rollback previous brush operation");
+	m_toolbar->SetToolLongHelp(ID_BrushUndo, "Rollback previous brush operation");
 	bitmap = wxGetBitmapFromMemory(redo);
 	m_toolbar->AddTool(
 		ID_BrushRedo, "Redo", bitmap,
 		"Redo the rollback brush operation");
+	m_toolbar->SetToolLongHelp(ID_BrushRedo, "Redo the rollback brush operation");
 	m_toolbar->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(grow);
 	m_toolbar->AddCheckTool(ID_Grow, "Grow",
 		bitmap, wxNullBitmap,
+		"Click and hold mouse button to grow selection mask from a point",
 		"Click and hold mouse button to grow selection mask from a point");
 	bitmap = wxGetBitmapFromMemory(brush_append);
 	m_toolbar->AddCheckTool(ID_BrushAppend, "Select",
 		bitmap, wxNullBitmap,
+		"Highlight structures by painting on the render view (hold Shift)",
 		"Highlight structures by painting on the render view (hold Shift)");
 	bitmap = wxGetBitmapFromMemory(brush_diffuse);
 	m_toolbar->AddCheckTool(ID_BrushDiffuse, "Diffuse",
 		bitmap, wxNullBitmap,
+		"Diffuse highlighted structures by painting (hold Z)",
 		"Diffuse highlighted structures by painting (hold Z)");
 	bitmap = wxGetBitmapFromMemory(brush_solid);
 	m_toolbar->AddCheckTool(ID_BrushSolid, "Solid",
 		bitmap, wxNullBitmap,
+		"Highlight structures with solid mask",
 		"Highlight structures with solid mask");
 	bitmap = wxGetBitmapFromMemory(brush_desel);
 	m_toolbar->AddCheckTool(ID_BrushDesel, "Unsel",
 		bitmap, wxNullBitmap,
+		"Reset highlighted structures by painting (hold X)",
 		"Reset highlighted structures by painting (hold X)");
 	m_toolbar->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(brush_erase);
 	m_toolbar->AddTool(ID_BrushErase, "Erase",
 		bitmap, "Erase highlighted structures");
+	m_toolbar->SetToolLongHelp(ID_BrushErase, "Erase highlighted structures");
 	bitmap = wxGetBitmapFromMemory(brush_create);
 	m_toolbar->AddTool(ID_BrushExtract, "Extract",
 		bitmap, "Extract highlighted structures out and create a new volume");
+	m_toolbar->SetToolLongHelp(ID_BrushExtract, "Extract highlighted structures out and create a new volume");
 	bitmap = wxGetBitmapFromMemory(brush_clear);
 	m_toolbar->AddSeparator();
 	m_toolbar->AddTool(ID_BrushClear, "Reset",
 		bitmap, "Reset all highlighted structures");
+	m_toolbar->SetToolLongHelp(ID_BrushClear, "Reset all highlighted structures");
 	m_toolbar->Bind(wxEVT_TOOL, &BrushToolDlg::OnToolBar, this);
 	m_toolbar->Realize();
 
@@ -120,27 +130,33 @@ BrushToolDlg::BrushToolDlg(
 	m_mask_tb->AddTool(
 		ID_MaskCopy, "Copy", bitmap,
 		"Copy current selection mask to clipboard");
+	m_mask_tb->SetToolLongHelp(ID_MaskCopy, "Copy current selection mask to clipboard");
 	bitmap = wxGetBitmapFromMemory(copy_data);
 	m_mask_tb->AddTool(
 		ID_MaskCopyData, "Data", bitmap,
 		"Copy current channel data as mask to clipboard");
+	m_mask_tb->SetToolLongHelp(ID_MaskCopyData, "Copy current channel data as mask to clipboard");
 	m_mask_tb->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(mask_paste);
 	m_mask_tb->AddTool(
 		ID_MaskPaste, "Paste", bitmap,
 		"Paste selection mask from clipboard");
+	m_mask_tb->SetToolLongHelp(ID_MaskPaste, "Paste selection mask from clipboard");
 	bitmap = wxGetBitmapFromMemory(mask_union);
 	m_mask_tb->AddTool(
 		ID_MaskMerge, "Merge", bitmap,
 		"Merge selection mask from clipboard with current");
+	m_mask_tb->SetToolLongHelp(ID_MaskMerge, "Merge selection mask from clipboard with current");
 	bitmap = wxGetBitmapFromMemory(mask_exclude);
 	m_mask_tb->AddTool(
 		ID_MaskExclude, "Exclude", bitmap,
 		"Exclude clipboard's selection mask from current");
+	m_mask_tb->SetToolLongHelp(ID_MaskExclude, "Exclude clipboard's selection mask from current");
 	bitmap = wxGetBitmapFromMemory(mask_intersect);
 	m_mask_tb->AddTool(
 		ID_MaskIntersect, "Intersect", bitmap,
 		"Intersect selection mask from clipboard with current");
+	m_mask_tb->SetToolLongHelp(ID_MaskIntersect, "Intersect selection mask from clipboard with current");
 	m_mask_tb->Bind(wxEVT_TOOL, &BrushToolDlg::OnMaskToolBar, this);
 	m_mask_tb->Realize();
 

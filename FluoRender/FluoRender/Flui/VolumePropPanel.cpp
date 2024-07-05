@@ -252,7 +252,9 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmap(unlink, dpi_sf);
 	m_thresh_link_tb->AddCheckTool(0, "",
-		bitmap, wxNullBitmap, "Link low and high threshold values");
+		bitmap, wxNullBitmap,
+		"Link low and high threshold values",
+		"Link low and high threshold values");
 	m_thresh_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	//bind events
 	m_thresh_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnThreshMF, this);
@@ -324,7 +326,9 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmap(unlink, dpi_sf);
 	m_colormap_link_tb->AddCheckTool(0, "",
-		bitmap, wxNullBitmap, "Link low and high colormap values");
+		bitmap, wxNullBitmap,
+		"Link low and high colormap values",
+		"Link low and high colormap values");
 	m_colormap_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	//bind events
 	m_colormap_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnColormapMF, this);
@@ -348,7 +352,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	//ml
 	bitmap = wxGetBitmap(starknot, dpi_sf);
-	m_options_toolbar->AddTool(ID_UseMlChk, "Use Machine Learning",
+	m_options_toolbar->AddToolWithHelp(ID_UseMlChk, "Use Machine Learning",
 		bitmap, "Generate properties using machine learning");
 	//transparency
 	bitmap = wxGetBitmap(transplo, dpi_sf);
@@ -356,69 +360,60 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		bitmap, wxNullBitmap,
 		"Enable High-Tarnsparency mode",
 		"Enable High-Tarnsparency mode");
-	m_options_toolbar->ToggleTool(ID_TranspChk, glbin_vol_def.m_transparent);
 	//MIP
 	bitmap = wxGetBitmap(mip, dpi_sf);
 	m_options_toolbar->AddCheckTool(ID_MipChk, "MIP",
 		bitmap, wxNullBitmap,
 		"Enable Maximum Intensity Projection (MIP) mode",
 		"Enable Maximum Intensity Projection (MIP) mode");
-	m_options_toolbar->ToggleTool(ID_MipChk, glbin_vol_def.m_mip_enable);
 	//inversion
 	bitmap = wxGetBitmap(invert_off, dpi_sf);
 	m_options_toolbar->AddCheckTool(ID_InvChk, "Invert",
 		bitmap, wxNullBitmap,
 		"Invert data intensity values",
 		"Invert data intensity values");
-	m_options_toolbar->ToggleTool(ID_InvChk, glbin_vol_def.m_inverted);
 	//component display
 	bitmap = wxGetBitmap(comp_off, dpi_sf);
 	m_options_toolbar->AddCheckTool(ID_CompChk, "Components",
 		bitmap, wxNullBitmap,
 		"Show components",
 		"Show components");
-	m_options_toolbar->ToggleTool(ID_CompChk, glbin_vol_def.m_label_mode);
 	//interpolation
 	bitmap = wxGetBitmap(interpolate, dpi_sf);
 	m_options_toolbar->AddCheckTool(ID_InterpolateChk, "Interpolate",
 		bitmap, wxNullBitmap,
 		"Enable spatial interpolation of voxel intensity values",
 		"Enable spatial interpolation of voxel intensity values");
-	m_options_toolbar->ToggleTool(ID_InterpolateChk, glbin_vol_def.m_interpolate);
 	//noise reduction
 	bitmap = wxGetBitmap(smooth_off, dpi_sf);
 	m_options_toolbar->AddCheckTool(ID_NRChk, "Smoothing",
 		bitmap, wxNullBitmap,
 		"Enable rendering result smoothing",
 		"Enable rendering result smoothing");
-	m_options_toolbar->ToggleTool(ID_NRChk, glbin_vol_def.m_noise_rd);
 	//sync group
 	bitmap = wxGetBitmap(sync_chan, dpi_sf);
 	m_options_toolbar->AddCheckTool(ID_SyncGroupChk,"Group Sync",
 		bitmap, wxNullBitmap,
 		"Sync current channel with other channels in the group",
 		"Sync current channel with other channels in the group");
-	m_options_toolbar->ToggleTool(ID_SyncGroupChk,false);
 	//depth mode
 	bitmap = wxGetBitmap(depth_off, dpi_sf);
 	m_options_toolbar->AddCheckTool(ID_DepthChk, "Depth Mode",
 		bitmap, wxNullBitmap,
 		"Enable Depth Mode within the group",
 		"Enable Depth Mode within the group");
-	m_options_toolbar->ToggleTool(ID_DepthChk, glbin_vol_def.m_blend_mode == 2);
 	//legend
 	bitmap = wxGetBitmap(legend, dpi_sf);
 	m_options_toolbar->AddCheckTool(ID_LegendChk, "Legend",
 		bitmap, wxNullBitmap,
 		"Enable name legend display for current channel",
 		"Enable name legend display for current channel");
-	m_options_toolbar->ToggleTool(ID_LegendChk, glbin_vol_def.m_legend);
 	//buttons
 	bitmap = wxGetBitmap(reset, dpi_sf);
-	m_options_toolbar->AddTool(ID_ResetDefault,"Reset",
+	m_options_toolbar->AddToolWithHelp(ID_ResetDefault,"Reset",
 		bitmap, "Reset all properties");
 	bitmap = wxGetBitmap(save_settings, dpi_sf);
-	m_options_toolbar->AddTool(ID_SaveDefault,"Save",
+	m_options_toolbar->AddToolWithHelp(ID_SaveDefault,"Save",
 		bitmap, "Set current settings as default");
 	m_options_toolbar->Bind(wxEVT_TOOL, &VolumePropPanel::OnOptions, this);
 	sizer_r1->AddStretchSpacer();
@@ -491,7 +486,6 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		bitmap, wxNullBitmap,
 		"Invert colormap",
 		"Invert colormap");
-	m_colormap_inv_btn->ToggleTool(0, false);
 	m_colormap_inv_btn->Bind(wxEVT_TOOL, &VolumePropPanel::OnColormapInvBtn, this);
 	m_colormap_inv_btn->Realize();
 	m_colormap_combo = new wxUndoableComboBox(this, wxID_ANY, "",

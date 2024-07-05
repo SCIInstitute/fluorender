@@ -62,16 +62,15 @@ m_enable_all(true)
 		bitmap, wxNullBitmap,
 		"Link all data channels to this cropping",
 		"Link all data channels to this cropping");
-	m_toolbar->ToggleTool(ID_LinkChannelsBtn, false);
 	bitmap = wxGetBitmapFromMemory(hold_clip);
 	m_toolbar->AddCheckTool(ID_HoldPlanesBtn, "Hold Plane Display",
 		bitmap, wxNullBitmap,
 		"Clipping planes are always shown",
 		"Clipping planes are always shown");
-	m_toolbar->ToggleTool(ID_HoldPlanesBtn, false);
 	bitmap = wxGetBitmapFromMemory(clip_normal);
 	m_toolbar->AddTool(ID_PlaneModesBtn, "Display Modes",
 		bitmap, "Toggle clipping plane display modes");
+	m_toolbar->SetToolLongHelp(ID_PlaneModesBtn, "Toggle clipping plane display modes");
 	m_toolbar->Bind(wxEVT_TOOL, &ClipPlanePanel::OnToolbar, this);
 	m_toolbar->Realize();
 	sizer_1->Add(5, 5, 0);
@@ -149,7 +148,9 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(unlink);
 	m_linkx_tb->AddCheckTool(0, "",
-		bitmap, wxNullBitmap, "Link two X clipping planes");
+		bitmap, wxNullBitmap,
+		"Link two X clipping planes",
+		"Link two X clipping planes");
 	m_clip_x_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnClipXMF, this);
 	m_clipx_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClipPlanePanel::OnClipXChange, this);
 	m_x1_clip_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnX1ClipEdit, this);
@@ -186,7 +187,9 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 	m_linky_tb = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_linky_tb->AddCheckTool(0, "",
-		bitmap, wxNullBitmap, "Link two Y clipping planes");
+		bitmap, wxNullBitmap,
+		"Link two Y clipping planes",
+		"Link two Y clipping planes");
 	m_clip_y_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnClipYMF, this);
 	m_clipy_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClipPlanePanel::OnClipYChange, this);
 	m_y1_clip_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnY1ClipEdit, this);
@@ -224,7 +227,9 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 	m_linkz_tb = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_linkz_tb->AddCheckTool(0, "",
-		bitmap, wxNullBitmap, "Link two Z clipping planes");
+		bitmap, wxNullBitmap,
+		"Link two Z clipping planes",
+		"Link two Z clipping planes");
 	m_clip_z_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnClipZMF, this);
 	m_clipz_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClipPlanePanel::OnClipZChange, this);
 	m_z1_clip_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnZ1ClipEdit, this);

@@ -44,6 +44,16 @@ public:
 		const wxString& name = "wxUndoableToolbar");
 
 	virtual void ToggleTool(int id, bool val);
+	wxToolBarToolBase* AddToolWithHelp(int toolid,
+		const wxString& label,
+		const wxBitmapBundle& bitmap,
+		const wxString& shortHelp = wxEmptyString,
+		wxItemKind kind = wxITEM_NORMAL)
+	{
+		wxToolBarToolBase* result = wxToolBar::AddTool(toolid, label, bitmap, shortHelp, kind);
+		SetToolLongHelp(toolid, shortHelp);
+		return result;
+	}
 
 private:
 	int id_;

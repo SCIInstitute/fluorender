@@ -328,7 +328,7 @@ void RenderViewPanel::CreateBar()
 
 	//capture
 	bitmap = wxGetBitmap(camera, m_dpi_sf2);
-	m_options_toolbar->AddTool(
+	m_options_toolbar->AddToolWithHelp(
 		ID_CaptureBtn, "Snap",
 		bitmap,
 		"Capture Render View as an image");
@@ -367,7 +367,7 @@ void RenderViewPanel::CreateBar()
 
 	//scale bar
 	bitmap = wxGetBitmap(scalebar, m_dpi_sf2);
-	m_options_toolbar->AddTool(
+	m_options_toolbar->AddToolWithHelp(
 		ID_ScaleBar, "Scale", bitmap,
 		"Toggle Scalebar Options (Off, On, On with text)");
 	m_options_toolbar->Bind(wxEVT_TOOL, &RenderViewPanel::OnToolBar, this);
@@ -437,7 +437,7 @@ void RenderViewPanel::CreateBar()
 
 	//save default
 	bitmap = wxGetBitmap(save_settings, m_dpi_sf2);
-	m_options_toolbar2->AddTool(
+	m_options_toolbar2->AddToolWithHelp(
 		ID_DefaultBtn, "Save", bitmap,
 		"Set Default Render View Settings");
 	m_options_toolbar2->Bind(wxEVT_TOOL, &RenderViewPanel::OnToolBar2, this);
@@ -453,6 +453,7 @@ void RenderViewPanel::CreateBar()
 	m_full_screen_btn->AddTool(
 		0, "Full Screen",
 		bitmap, "Show full screen");
+	m_full_screen_btn->SetToolLongHelp(0, "Show full screen");
 	m_full_screen_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnFullScreen, this);
 	m_full_screen_btn->Realize();
 	sizer_h_1->Add(m_full_screen_btn, 0, wxALIGN_CENTER);
@@ -489,6 +490,7 @@ void RenderViewPanel::CreateBar()
 	m_depth_atten_reset_btn->AddTool(
 		0, "Reset",
 		bitmap, "Reset Depth Attenuation Interval");
+	m_depth_atten_reset_btn->SetToolLongHelp(0, "Reset Depth Attenuation Interval");
 	m_depth_atten_reset_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnDepthAttenReset, this);
 	m_depth_atten_reset_btn->Realize();
 	sizer_v_3->AddSpacer(50);
@@ -521,6 +523,7 @@ void RenderViewPanel::CreateBar()
 	bitmap = wxGetBitmap(center, m_dpi_sf2);
 	m_center_btn->AddTool(0, "Center",
 		bitmap, "Center the Data on the Render View");
+	m_center_btn->SetToolLongHelp(0, "Center the Data on the Render View");
 	m_center_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnCenter, this);
 	m_center_btn->Realize();
 
@@ -532,6 +535,7 @@ void RenderViewPanel::CreateBar()
 	bitmap = wxGetBitmap(ratio, m_dpi_sf2);
 	m_scale_121_btn->AddTool(0, "1 to 1",
 		bitmap, "Auto-size the data to a 1:1 ratio");
+	m_scale_121_btn->SetToolLongHelp(0, "Auto-size the data to a 1:1 ratio");
 	m_scale_121_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnScale121, this);
 	m_scale_121_btn->Realize();
 
@@ -555,6 +559,7 @@ void RenderViewPanel::CreateBar()
 	bitmap = wxGetBitmap(reset, m_dpi_sf2);
 	m_scale_reset_btn->AddTool(0, "Reset",
 		bitmap, "Reset the Zoom");
+	m_scale_reset_btn->SetToolLongHelp(0, "Reset the Zoom");
 	m_scale_reset_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnScaleReset, this);
 	m_scale_reset_btn->Realize();
 	m_scale_mode_btn = new wxToolBar(this, wxID_ANY,
@@ -565,6 +570,7 @@ void RenderViewPanel::CreateBar()
 	m_scale_mode_btn->AddTool(
 		0, "Switch zoom ratio mode",
 		bitmap, "View-based zoom ratio");
+	m_scale_mode_btn->SetToolLongHelp(0, "View-based zoom ratio");
 	m_scale_mode_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnScaleMode, this);
 	m_scale_mode_btn->Realize();
 	sizer_v_4->AddSpacer(50);
@@ -640,9 +646,11 @@ void RenderViewPanel::CreateBar()
 	bitmap = wxGetBitmap(zrot, m_dpi_sf2);
 	m_reset_btn->AddTool(ID_ZeroRotBtn, "Set Zeros",
 		bitmap, "Set current angles as zeros");
+	m_reset_btn->SetToolLongHelp(ID_ZeroRotBtn, "Set current angles as zeros");
 	bitmap = wxGetBitmap(reset, m_dpi_sf2);
 	m_reset_btn->AddTool(ID_RotResetBtn,"Reset",
 		bitmap, "Reset Rotations");
+	m_reset_btn->SetToolLongHelp(ID_RotResetBtn, "Reset Rotations");
 	m_reset_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnRotReset, this);
 	m_reset_btn->Realize();
 
