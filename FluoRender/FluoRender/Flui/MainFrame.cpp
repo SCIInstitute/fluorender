@@ -25,6 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#include <Main.h>
 #include <MainFrame.h>
 #include <Global.h>
 #include <compatibility.h>
@@ -64,6 +65,7 @@ DEALINGS IN THE SOFTWARE.
 #include <msk_reader.h>
 #include <VolumeMeshConv.h>
 #include <Debug.h>
+#include <wxGaugeStatusbar.h>
 #include <wx/artprov.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
@@ -114,7 +116,7 @@ MainFrame::MainFrame(
 	//m_copy_data(false),
 	m_waker(this)
 {
-#ifdef _DARWIN
+#ifndef _WIN32
 	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
 #endif
 	//create this first to read the settings
@@ -122,6 +124,9 @@ MainFrame::MainFrame(
 	glbin.apply_processor_settings();
 	glbin_script_proc.SetFrame(this);
 	glbin_data_manager.SetFrame(this);
+	glbin_data_manager.SetProgressFunc(
+		std::bind(&MainFrame::SetProgress, this,
+			std::placeholders::_1, std::placeholders::_2));
 	glbin_current.mainframe = this;
 
 	// tell wxAuiManager to manage this frame
@@ -593,7 +598,8 @@ MainFrame::MainFrame(
 	//drop target
 	SetDropTarget(new DnDFile(this));
 
-	m_statusbar = CreateStatusBar(2);
+	m_statusbar = new wxGaugeStatusbar(this, wxID_ANY);
+	SetStatusBar(m_statusbar);
 
 	//main top menu
 	m_top_menu = new wxMenuBar;
@@ -2097,6 +2103,12 @@ void MainFrame::FullScreen()
 	}
 }
 
+void MainFrame::SetProgress(int val, const wxString& str)
+{
+	wxGetApp().Yield();
+	m_statusbar->SetGaugeValue(val);
+	m_statusbar->SetGaugeText(str);
+}
 
 void MainFrame::OpenVolume()
 {

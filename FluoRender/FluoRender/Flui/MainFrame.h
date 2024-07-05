@@ -109,6 +109,7 @@ class ScriptBreakDlg;
 class MachineLearningDlg;
 class TesterDlg;
 class FpRangeDlg;
+class wxGaugeStatusbar;
 
 class MainFrame: public wxFrame
 {
@@ -343,6 +344,9 @@ public:
 	//fullscreen
 	void FullScreen();
 
+	//set status bar callback
+	void SetProgress(int val, const wxString& str);
+
 private:
 	//aui manager
 	wxAuiManager m_aui_mgr;
@@ -388,7 +392,7 @@ private:
 	TesterDlg* m_teser_dlg;
 
 	//status
-	wxStatusBar* m_statusbar;
+	wxGaugeStatusbar* m_statusbar;
 
 	wxString m_title;
 	//mac address

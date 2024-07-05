@@ -25,47 +25,30 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _WXUNDOABLETOOLBAR_H_
-#define _WXUNDOABLETOOLBAR_H_
+#ifndef _WXGAUGESTATUSBAR_H_
+#define _WXGAUGESTATUSBAR_H_
 
-#include <Undoable.h>
-#include <wx/toolbar.h>
+#include <wx/wx.h>
+#include <wx/statusbr.h>
+#include <wx/gauge.h>
 
-typedef std::vector<bool> UTBData;
-class wxUndoableToolbar : public wxToolBar, public Undoable
+class wxGaugeStatusbar : public wxStatusBar
 {
 public:
-	wxUndoableToolbar(
+	wxGaugeStatusbar(
 		wxWindow *parent,
 		wxWindowID id,
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = wxTB_HORIZONTAL,
-		const wxString& name = "wxUndoableToolbar");
+		long style = wxSTB_DEFAULT_STYLE,
+		const wxString& name = "wxGaugeStatusbar");
 
-	virtual void ToggleTool(int id, bool val);
-	wxToolBarToolBase* AddToolWithHelp(int toolid,
-		const wxString& label,
-		const wxBitmapBundle& bitmap,
-		const wxString& shortHelp = wxEmptyString,
-		wxItemKind kind = wxITEM_NORMAL)
-	{
-		wxToolBarToolBase* result = wxToolBar::AddTool(toolid, label, bitmap, shortHelp, kind);
-		SetToolLongHelp(toolid, shortHelp);
-		return result;
-	}
+	void SetGaugeText(const wxString& str);
+	void SetGaugeValue(int val);
 
 private:
-	int id_;
+	wxGauge* m_gauge;
 
 private:
-	void OnChange(wxCommandEvent& event);
-
-private:
-	virtual void replace(double t);
-	virtual void push(double t);
-	virtual void update();
-	UTBData get_data();
+	void OnSize(wxSizeEvent& event);
 };
 
-#endif//_WXUNDOABLETOOLBAR_H_
+#endif//_WXGAUGESTATUSBAR_H_

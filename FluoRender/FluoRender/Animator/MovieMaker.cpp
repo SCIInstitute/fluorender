@@ -150,10 +150,6 @@ void MovieMaker::Rewind()
 		return;
 	Stop();
 	SetCurrentFrame(m_clip_start_frame);
-
-	//m_view->SetParams(0.);
-	//m_cur_frame_text->ChangeValue(wxString::Format("%d", m_cur_frame));
-	//SetProgress(0.);
 	SetRendering(true);
 }
 

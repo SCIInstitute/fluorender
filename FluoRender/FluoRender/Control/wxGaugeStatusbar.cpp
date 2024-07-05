@@ -25,105 +25,46 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <wxUndoableToolbar.h>
+#include <wxGaugeStatusbar.h>
 #include <Debug.h>
 
-wxUndoableToolbar::wxUndoableToolbar(
+wxGaugeStatusbar::wxGaugeStatusbar(
 	wxWindow *parent,
 	wxWindowID id,
-	const wxPoint& pos,
-	const wxSize& size,
 	long style,
 	const wxString& name):
-	wxToolBar(parent, id, pos, size, style, name),
-	Undoable(),
-	id_(-1)
+	wxStatusBar(parent, id, style, name)
 {
-	Bind(wxEVT_TOOL, &wxUndoableToolbar::OnChange, this);
+	SetFieldsCount(3);
+	const int w[] = { -1, -2, -1 };
+	SetStatusWidths(3, w);
+
+	m_gauge = new wxGauge(this, wxID_ANY, 100);
+
+	Bind(wxEVT_SIZE, &wxGaugeStatusbar::OnSize, this);
 }
 
-void wxUndoableToolbar::ToggleTool(int id, bool val)
+void wxGaugeStatusbar::SetGaugeText(const wxString& str)
 {
-	id_ = id;
-	bool val_ = GetToolState(id);
-	if (val_ != val || stack_.empty())
-	{
-		wxToolBar::ToggleTool(id, val);
-		double t;
-		if (time_sample(t))
-			push(t);
-		else
-			replace(t);
-	}
+	SetStatusText(str, 1);
 }
 
-void wxUndoableToolbar::OnChange(wxCommandEvent& event)
+void wxGaugeStatusbar::SetGaugeValue(int val)
 {
-	if (event.GetString() != "update")
+	m_gauge->SetValue(val);
+}
+
+void wxGaugeStatusbar::OnSize(wxSizeEvent& event)
+{
+	wxRect rect;
+	if (!GetFieldRect(2, rect))
 	{
-		double t;
-		if (time_sample(t))
-			push(t);
-		else
-			replace(t);
+		event.Skip();
+		return;
 	}
+
+	rect.Deflate(2);
+	m_gauge->SetSize(rect);	
 	event.Skip();
 }
 
-void wxUndoableToolbar::replace(double t)
-{
-	if (stack_.empty())
-		return;
-	UTBData val_ = get_data();
-	stack_[stack_pointer_] = std::pair<double, UTBData>(t, val_);
-}
-
-void wxUndoableToolbar::push(double t)
-{
-	size_t size = stack_.size();
-	UTBData val_ = get_data();
-	UTBData val;
-	if (size)
-		val = std::any_cast<UTBData>(stack_[stack_pointer_].second);
-	if (!size || val_ != val)
-	{
-		if (!size ||
-			stack_pointer_ == size - 1)
-			stack_.push_back(std::pair<double, UTBData>(t, val_));
-		else
-			stack_.insert(stack_.begin() + stack_pointer_,
-				std::pair<double, UTBData>(t, val_));
-		stack_pointer_++;
-		//DBGPRINT(L"\tsize:%d,pointer:%d,last:(%f, %d)\n",
-		//	stack_.size(), stack_pointer_, stack_.back().first,
-		//	std::any_cast<bool>(stack_.back().second));
-	}
-}
-
-void wxUndoableToolbar::update()
-{
-	UTBData val = std::any_cast<UTBData>(stack_[stack_pointer_].second);
-	for (size_t i = 0; i < val.size(); ++i)
-	{
-		if (val[i] != GetToolState(i))
-		{
-			wxToolBar::ToggleTool(i, val[i]);
-			id_ = i;
-		}
-	}
-
-	wxCommandEvent e(wxEVT_TOOL, id_);
-	e.SetEventObject(this);
-	e.SetString("update");
-	ProcessWindowEvent(e);
-	wxPostEvent(GetParent(), e);
-}
-
-UTBData wxUndoableToolbar::get_data()
-{
-	UTBData data;
-	int n = GetToolsCount();
-	for (size_t i = 0; i < n; ++i)
-		data.push_back(GetToolState(i));
-	return data;
-}

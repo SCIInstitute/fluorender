@@ -401,8 +401,8 @@ void RenderViewPanel::CreateBar()
 	m_bg_inv_btn->AddCheckTool(
 		0, "Invert",
 		bitmap, wxNullBitmap,
-		"Inver background color",
-		"Inver background color");
+		"Invert background color",
+		"Invert background color");
 	m_bg_inv_btn->Realize();
 	m_bg_color_picker->Bind(wxEVT_COLOURPICKER_CHANGED, &RenderViewPanel::OnBgColorChange, this);
 	m_bg_inv_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnBgInvBtn, this);

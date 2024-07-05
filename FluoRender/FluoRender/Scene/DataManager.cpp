@@ -35,7 +35,6 @@ DEALINGS IN THE SOFTWARE.
 #include <FpRangeDlg.h>
 #include <teem/Nrrd/nrrd.h>
 #include <wx/msgdlg.h>
-#include <wx/progdlg.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/stdpaths.h>
@@ -5332,7 +5331,8 @@ TrackGroup* CurrentObjects::GetTrackGroup()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 DataManager::DataManager() :
-	m_frame(0)
+	m_frame(0),
+	m_progress_func(0)
 {
 }
 
@@ -5451,8 +5451,6 @@ void DataManager::LoadVolumes(wxArrayString files, bool withImageJ)
 	if (!canvas)
 		return;
 
-	bool refresh = false;
-	wxProgressDialog* prg_diag = 0;
 	bool streaming = glbin_settings.m_mem_swap;
 	double gpu_size = glbin_settings.m_graphics_mem;
 	double data_size = glbin_settings.m_large_data_size;
@@ -5461,59 +5459,53 @@ void DataManager::LoadVolumes(wxArrayString files, bool withImageJ)
 	wxString str_streaming;
 	if (streaming)
 	{
-		str_streaming = "Large data streaming is currently ON\n";
-		str_streaming += wxString::Format("FluoRender uses up to %dMB GPU memory\n", int(std::round(gpu_size)));
-		str_streaming += wxString::Format("Data >%dMB are divided into %d voxel bricks\n",
+		str_streaming = "Large data streaming is currently ON. ";
+		str_streaming += wxString::Format("FluoRender uses up to %dMB GPU memory. ", int(std::round(gpu_size)));
+		str_streaming += wxString::Format("Data >%dMB are divided into %d voxel bricks. ",
 			int(data_size), brick_size);
-		str_streaming += wxString::Format("System response time: %dms", resp_time);
+		str_streaming += wxString::Format("System response time: %dms.", resp_time);
 	}
 	else
-		str_streaming = "Large data streaming is currently OFF";
+		str_streaming = "Large data streaming is currently OFF.";
 
-	prg_diag = new wxProgressDialog(
-		"FluoRender: Loading volume data...",
-		"",
-		100, m_frame, wxPD_SMOOTH | wxPD_ELAPSED_TIME | wxPD_AUTO_HIDE);
+	SetProgress(0, str_streaming);
 
 	bool enable_4d = false;
 
 	for (j = 0; j < (int)files.Count(); j++)
 	{
-		//wxGetApp().Yield();
-		prg_diag->Update(90 * (j + 1) / (int)files.Count(),
-			str_streaming);
-		prg_diag->CenterOnParent();
+		SetProgress(90 * (j + 1) / (int)files.Count(), str_streaming);
 
 		int ch_num = 0;
 		wxString filename = files[j];
 		wxString suffix = filename.Mid(filename.Find('.', true)).MakeLower();
 
 		if (withImageJ)
-			ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_IMAGEJ, true); //The type of data doesnt matter.
+			ch_num = LoadVolumeData(filename, LOAD_TYPE_IMAGEJ, true); //The type of data doesnt matter.
 		else if (suffix == ".nrrd" || suffix == ".msk" || suffix == ".lbl")
-			ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_NRRD, false);
+			ch_num = LoadVolumeData(filename, LOAD_TYPE_NRRD, false);
 		else if (suffix == ".tif" || suffix == ".tiff")
-			ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_TIFF, false);
+			ch_num = LoadVolumeData(filename, LOAD_TYPE_TIFF, false);
 		else if (suffix == ".oib")
-			ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_OIB, false);
+			ch_num = LoadVolumeData(filename, LOAD_TYPE_OIB, false);
 		else if (suffix == ".oif")
-			ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_OIF, false);
+			ch_num = LoadVolumeData(filename, LOAD_TYPE_OIF, false);
 		else if (suffix == ".lsm")
-			ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_LSM, false);
+			ch_num = LoadVolumeData(filename, LOAD_TYPE_LSM, false);
 		else if (suffix == ".xml")
-			ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_PVXML, false);
+			ch_num = LoadVolumeData(filename, LOAD_TYPE_PVXML, false);
 		else if (suffix == ".vvd")
-			ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_BRKXML, false);
+			ch_num = LoadVolumeData(filename, LOAD_TYPE_BRKXML, false);
 		else if (suffix == ".czi")
-			ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_CZI, false);
+			ch_num = LoadVolumeData(filename, LOAD_TYPE_CZI, false);
 		else if (suffix == ".nd2")
-			ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_ND2, false);
+			ch_num = LoadVolumeData(filename, LOAD_TYPE_ND2, false);
 		else if (suffix == ".lif")
-			ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_LIF, false);
+			ch_num = LoadVolumeData(filename, LOAD_TYPE_LIF, false);
 		else if (suffix == ".lof")
-			ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_LOF, false);
+			ch_num = LoadVolumeData(filename, LOAD_TYPE_LOF, false);
 		else if (suffix == ".mp4" || suffix == ".m4v" || suffix == ".mov" || suffix == ".avi" || suffix == ".wmv")
-			ch_num = glbin_data_manager.LoadVolumeData(filename, LOAD_TYPE_MPG, false);
+			ch_num = LoadVolumeData(filename, LOAD_TYPE_MPG, false);
 
 		if (ch_num > 1)
 		{
@@ -5522,7 +5514,7 @@ void DataManager::LoadVolumes(wxArrayString files, bool withImageJ)
 			{
 				for (int i = ch_num; i > 0; i--)
 				{
-					VolumeData* vd = glbin_data_manager.GetVolumeData(glbin_data_manager.GetVolumeNum() - i);
+					VolumeData* vd = GetVolumeData(GetVolumeNum() - i);
 					if (vd)
 					{
 						canvas->AddVolumeData(vd, group->GetName());
@@ -5549,7 +5541,7 @@ void DataManager::LoadVolumes(wxArrayString files, bool withImageJ)
 		}
 		else if (ch_num == 1)
 		{
-			VolumeData* vd = glbin_data_manager.GetVolumeData(glbin_data_manager.GetVolumeNum() - 1);
+			VolumeData* vd = GetVolumeData(GetVolumeNum() - 1);
 			if (vd)
 			{
 				if (!vd->GetWlColor())
@@ -5579,17 +5571,15 @@ void DataManager::LoadVolumes(wxArrayString files, bool withImageJ)
 				}
 			}
 		}
-		else { //TODO: Consult Wan here.
 
-		}
+		canvas->InitView(INIT_BOUNDS | INIT_CENTER);
+		m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(canvas) });
 	}
 
 	//UpdateList();
 	vc.insert(gstListCtrl);
 	vc.insert(gstTreeCtrl);
 	glbin_current.SetVolumeData(vd_sel);
-	canvas->InitView(INIT_BOUNDS | INIT_CENTER);
-	refresh = true;
 	vc.insert(gstScaleFactor);
 
 	if (enable_4d)
@@ -5597,14 +5587,10 @@ void DataManager::LoadVolumes(wxArrayString files, bool withImageJ)
 		glbin_moviemaker.SetSeqMode(1);
 		vc.insert(gstMovieAgent);
 	}
+	m_frame->UpdateProps(vc);
 
-	delete prg_diag;
+	SetProgress(0, "");
 
-	if (refresh)
-	{
-		m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(canvas) });
-		m_frame->UpdateProps(vc);
-	};
 }
 
 void DataManager::StartupLoad(wxArrayString files, bool run_mov, bool with_imagej)
@@ -5948,24 +5934,21 @@ void DataManager::LoadMeshes(wxArrayString files)
 		return;
 
 	MeshData* md_sel = 0;
-
-	wxProgressDialog* prg_diag = new wxProgressDialog(
-		"FluoRender: Loading mesh data...",
-		"Reading and processing selected mesh data. Please wait.",
-		100, m_frame, wxPD_SMOOTH | wxPD_ELAPSED_TIME | wxPD_AUTO_HIDE);
-
 	MeshGroup* group = 0;
 	if (files.Count() > 1)
 		group = canvas->AddOrGetMGroup();
 
+	SetProgress(0, "FluoRender is reading and processing selected mesh data. Please wait.");
+
 	for (int i = 0; i < (int)files.Count(); i++)
 	{
-		prg_diag->Update(90 * (i + 1) / (int)files.Count());
+		SetProgress(90 * (i + 1) / (int)files.Count(),
+			"FluoRender is reading and processing selected mesh data. Please wait.");
 
 		wxString filename = files[i];
-		glbin_data_manager.LoadMeshData(filename);
+		LoadMeshData(filename);
 
-		MeshData* md = glbin_data_manager.GetLastMeshData();
+		MeshData* md = GetLastMeshData();
 		if (canvas && md)
 		{
 			if (group)
@@ -5990,7 +5973,7 @@ void DataManager::LoadMeshes(wxArrayString files)
 	m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(canvas) });
 	m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
 
-	delete prg_diag;
+	SetProgress(0, "");
 }
 
 int DataManager::LoadMeshData(wxString &filename)
