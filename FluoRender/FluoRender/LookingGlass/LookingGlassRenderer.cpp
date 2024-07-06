@@ -127,6 +127,7 @@ int LookingGlassRenderer::GetDisplayId()
 	int id = wxDisplay::GetFromPoint(wxPoint(x + w / 2, y + h / 2));
 	if (id != wxNOT_FOUND)
 		return id;
+	return 0;
 }
 
 void LookingGlassRenderer::SetPreset(int val)

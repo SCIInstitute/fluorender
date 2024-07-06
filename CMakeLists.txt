@@ -1036,18 +1036,22 @@ endif()
 
 # holoplay
 if(WIN32)
-add_custom_command(TARGET FluoRender POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-    "${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/Win64/HoloPlayCore.dll"
-    "$<TARGET_FILE_DIR:FluoRender>")
-endif()
-if(APPLE)
-add_custom_command(TARGET FluoRender POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-    "${HoloPlay_LIBRARIES}"
-    "$<TARGET_FILE_DIR:FluoRender>"
-    )
-add_custom_command(TARGET FluoRender POST_BUILD COMMAND
-    ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/"
-    $<TARGET_FILE:FluoRender>)
+    add_custom_command(TARGET FluoRender POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        "${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/Win64/HoloPlayCore.dll"
+        "$<TARGET_FILE_DIR:FluoRender>")
+elseif(APPLE)
+    add_custom_command(TARGET FluoRender POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        "${HoloPlay_LIBRARIES}"
+        "$<TARGET_FILE_DIR:FluoRender>"
+        )
+    add_custom_command(TARGET FluoRender POST_BUILD COMMAND
+        ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/"
+        $<TARGET_FILE:FluoRender>)
+else()
+    add_custom_command(TARGET FluoRender POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        "${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/linux/libHoloPlayCore.so"
+        "$<TARGET_FILE_DIR:FluoRender>")
 endif()
