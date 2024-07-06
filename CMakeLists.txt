@@ -301,7 +301,7 @@ if(WIN32)
 		file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/Win64/*.lib)
     endif()
 elseif(APPLE)
-	file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/macos/HoloPlayCore.dylib)
+	file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/macos/libHoloPlayCore.dylib)
 else()
 	file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/linux/*.so)
 endif()
@@ -494,8 +494,13 @@ add_library(IMAGE_OBJ OBJECT
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/LookingGlass)
 file(GLOB lgr_src FluoRender/FluoRender/LookingGlass/*.cpp)
 file(GLOB lgr_hdr FluoRender/FluoRender/LookingGlass/*.h)
+if (APPLE)
+add_library(LOOKINGGLASS_OBJ OBJECT
+  ${lgr_src} ${lgr_hdr} ${HoloPlay_LIBRARIES})
+else()
 add_library(LOOKINGGLASS_OBJ OBJECT
   ${lgr_src} ${lgr_hdr})
+endif()
 
 # Progress
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Progress)
@@ -1027,8 +1032,22 @@ add_custom_command(TARGET FluoRender POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy
 	"${FluoRender_SOURCE_DIR}/FluoRender/OpenVR/lib/win64/openvr_api.dll"
 	"$<TARGET_FILE_DIR:FluoRender>")
+endif()
+
+# holoplay
+if(WIN32)
 add_custom_command(TARGET FluoRender POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy
-	"${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/Win64/HoloPlayCore.dll"
-	"$<TARGET_FILE_DIR:FluoRender>")
+    COMMAND ${CMAKE_COMMAND} -E copy
+    "${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/Win64/HoloPlayCore.dll"
+    "$<TARGET_FILE_DIR:FluoRender>")
+endif()
+if(APPLE)
+add_custom_command(TARGET FluoRender POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    "${HoloPlay_LIBRARIES}"
+    "$<TARGET_FILE_DIR:FluoRender>"
+    )
+add_custom_command(TARGET FluoRender POST_BUILD COMMAND
+    ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/"
+    $<TARGET_FILE:FluoRender>)
 endif()
