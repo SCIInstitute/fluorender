@@ -144,7 +144,7 @@ void Project::Open(wxString& filename)
 		int num = fconfig.Read("num", 0l);
 		for (i = 0; i < num; i++)
 		{
-			SetProgress(90 * tick_cnt / ticks,
+			SetProgress(100 * tick_cnt / ticks,
 				"FluoRender is reading and processing volume data. Please wait.");
 
 
@@ -517,7 +517,7 @@ void Project::Open(wxString& filename)
 		int num = fconfig.Read("num", 0l);
 		for (i = 0; i < num; i++)
 		{
-			SetProgress(90 * tick_cnt / ticks,
+			SetProgress(100 * tick_cnt / ticks,
 				"FluoRender is reading and processing mesh data. Please wait.");
 
 			wxString str;
@@ -1411,7 +1411,7 @@ void Project::Save(wxString& filename, bool inc)
 	fconfig.Write("num", glbin_data_manager.GetVolumeNum());
 	for (i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
 	{
-		SetProgress(90 * tick_cnt / ticks,
+		SetProgress(100 * tick_cnt / ticks,
 			"FluoRender is saving volume data. Please wait.");
 		tick_cnt++;
 
@@ -1602,7 +1602,7 @@ void Project::Save(wxString& filename, bool inc)
 	fconfig.Write("num", glbin_data_manager.GetMeshNum());
 	for (i = 0; i < glbin_data_manager.GetMeshNum(); i++)
 	{
-		SetProgress(90 * tick_cnt / ticks,
+		SetProgress(100 * tick_cnt / ticks,
 			"FluoRender is saving mesh data. Please wait.");
 		tick_cnt++;
 
