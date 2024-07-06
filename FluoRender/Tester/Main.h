@@ -29,10 +29,13 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
-class VRenderApp
-{};
-VRenderApp dummy;
-VRenderApp& wxGetApp()
+class FluoRenderApp
+{
+public:
+	void Yield() {}
+};
+FluoRenderApp dummy;
+FluoRenderApp& wxGetApp()
 {
 	return dummy;
 }
