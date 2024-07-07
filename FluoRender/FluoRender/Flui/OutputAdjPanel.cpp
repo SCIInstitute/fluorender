@@ -485,6 +485,13 @@ void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	bool bHdrR = FOUND_VALUE(gstEqualizeR);
 	bool bHdrG = FOUND_VALUE(gstEqualizeG);
 	bool bHdrB = FOUND_VALUE(gstEqualizeB);
+
+	if (FOUND_VALUE(gstUpdateSync))
+	{
+		UpdateSync();
+		bSyncR = bSyncG = bSyncB = true;
+	}
+
 	if (!(update_all ||
 		bSyncR || bSyncG || bSyncB ||
 		bGammaR || bGammaG || bGammaB ||
@@ -531,9 +538,6 @@ void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	break;
 	}
-
-	if (FOUND_VALUE(gstUpdateSync))
-		UpdateSync();
 
 	//red
 	if (update_all || bSyncR)
