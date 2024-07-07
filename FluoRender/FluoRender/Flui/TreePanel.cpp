@@ -1976,7 +1976,7 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 	{
 		FluoUpdate({ gstTreeCtrl });
 		glbin_current.SetSel(src_name);
-		FluoRefresh(0, { gstCurrentSelect });
+		FluoRefresh(0, { gstCurrentSelect, gstUpdateSync });
 	}
 
 	SetScrollPos(wxVERTICAL, m_scroll_pos);

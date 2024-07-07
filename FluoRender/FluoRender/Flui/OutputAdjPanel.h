@@ -48,24 +48,21 @@ public:
 	virtual void LoadPerspective();
 	virtual void SavePerspective();
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	void UpdateSync();
 
 	//disable/enable
 	void EnableAll(bool val);
-	//set volume adjustment to link to group
-	void SetGroupLink(DataGroup *group);
 
 	void SetSync(int i, bool val, bool update = true);
 	void SetGamma(int i, double val, bool update = true);
 	void SetBrightness(int i, double val, bool update = true);
 	void SetHdr(int i, double val, bool update = true);
 
-	void UpdateSync();
 
 	void ClearUndo();
 
 private:
 	wxAuiNotebook* m_notebook;
-	bool m_link_group;
 	bool m_enable_all;
 	//sync flags
 	bool m_sync[3];//for rgb

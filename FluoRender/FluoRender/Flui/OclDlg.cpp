@@ -281,7 +281,7 @@ void OclDlg::Execute()
 		}
 	}
 
-	FluoRefresh(1, { gstListCtrl, gstTreeCtrl },
+	FluoRefresh(1, { gstListCtrl, gstTreeCtrl, gstUpdateSync },
 		{ m_frame->GetRenderCanvas(canvas) });
 }
 

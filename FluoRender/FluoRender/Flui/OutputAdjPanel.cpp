@@ -44,7 +44,6 @@ OutputAdjPanel::OutputAdjPanel(MainFrame* frame,
 					   long style,
 					   const wxString& name) :
 	PropPanel(frame, frame, pos, size, style, name),
-m_link_group(false),
 m_enable_all(true)
 {
 	m_sync[0] = true;
@@ -653,19 +652,6 @@ void OutputAdjPanel::EnableAll(bool val)
 	m_dft_btn->Enable(val);
 }
 
-//set volume adjustment to link to group
-void OutputAdjPanel::SetGroupLink(DataGroup *group)
-{
-	if (group)
-	{
-		m_link_group = true;
-	}
-	else
-	{
-		m_link_group = false;
-	}
-}
-
 void OutputAdjPanel::ClearUndo()
 {
 	m_r_gamma_sldr->Clear();
@@ -1206,7 +1192,7 @@ void OutputAdjPanel::SyncGamma(int i)
 	int type = glbin_current.GetType();
 	RenderCanvas* canvas = 0;
 	VolumeData* vd = 0;
-	DataGroup* group = 0;
+	DataGroup* group = glbin_current.vol_group;
 	switch (type)
 	{
 	case 1:
@@ -1225,7 +1211,6 @@ void OutputAdjPanel::SyncGamma(int i)
 		break;
 	case 5:
 	{
-		group = glbin_current.vol_group;
 		if (group)
 			gamma = group->GetGammaColor();
 	}
@@ -1242,14 +1227,13 @@ void OutputAdjPanel::SyncGamma(int i)
 	case 2:
 		if (vd)
 			vd->SetGammaColor(gamma);
-		if (m_link_group && group)
+		if (group)
 			group->SetGammaAll(gamma);
 		break;
-	case 3:
+	case 5:
 		if (group)
-			group->SetGammaColor(gamma);
-		if (m_link_group && group)
 			group->SetGammaAll(gamma);
+		break;
 	}
 
 	fluo::ValueCollection vc;
@@ -1268,7 +1252,7 @@ void OutputAdjPanel::SyncBrightness(int i)
 	int type = glbin_current.GetType();
 	RenderCanvas* canvas = 0;
 	VolumeData* vd = 0;
-	DataGroup* group = 0;
+	DataGroup* group = glbin_current.vol_group;
 	switch (type)
 	{
 	case 1:
@@ -1287,7 +1271,6 @@ void OutputAdjPanel::SyncBrightness(int i)
 	}
 	case 5:
 	{
-		group = glbin_current.vol_group;
 		if (group)
 			brightness = group->GetBrightness();
 	}
@@ -1304,14 +1287,13 @@ void OutputAdjPanel::SyncBrightness(int i)
 	case 2:
 		if (vd)
 			vd->SetBrightness(brightness);
-		if (m_link_group && group)
+		if (group)
 			group->SetBrightnessAll(brightness);
 		break;
-	case 3:
+	case 5:
 		if (group)
-			group->SetBrightness(brightness);
-		if (m_link_group && group)
 			group->SetBrightnessAll(brightness);
+		break;
 	}
 
 	fluo::ValueCollection vc;
@@ -1330,7 +1312,7 @@ void OutputAdjPanel::SyncHdr(int i)
 	int type = glbin_current.GetType();
 	RenderCanvas* canvas = 0;
 	VolumeData* vd = 0;
-	DataGroup* group = 0;
+	DataGroup* group = glbin_current.vol_group;
 	switch (type)
 	{
 	case 1:
@@ -1366,14 +1348,13 @@ void OutputAdjPanel::SyncHdr(int i)
 	case 2:
 		if (vd)
 			vd->SetHdr(hdr);
-		if (m_link_group && group)
+		if (group)
 			group->SetHdrAll(hdr);
 		break;
-	case 3:
+	case 5:
 		if (group)
-			group->SetHdr(hdr);
-		if (m_link_group && group)
 			group->SetHdrAll(hdr);
+		break;
 	}
 
 	fluo::ValueCollection vc;
@@ -1420,7 +1401,7 @@ void OutputAdjPanel::SetSync(int i, bool val, bool update)
 		if (vd)
 		{
 			vd->SetSync(i, val);
-			if (m_link_group && group)
+			if (group)
 				group->SetSyncAll(i, val);
 			if (val)
 			{
@@ -1433,7 +1414,7 @@ void OutputAdjPanel::SetSync(int i, bool val, bool update)
 				vd->SetGammaColor(gamma);
 				vd->SetBrightness(brightness);
 				vd->SetHdr(hdr);
-				if (m_link_group && group)
+				if (group)
 				{
 					group->SetGammaAll(gamma);
 					group->SetBrightnessAll(brightness);
@@ -1446,8 +1427,7 @@ void OutputAdjPanel::SetSync(int i, bool val, bool update)
 		if (group)
 		{
 			group->SetSync(i, val);
-			if (m_link_group)
-				group->SetSyncAll(i, val);
+			group->SetSyncAll(i, val);
 			if (val)
 			{
 				gamma = group->GetGammaColor();
@@ -1456,15 +1436,9 @@ void OutputAdjPanel::SetSync(int i, bool val, bool update)
 				SyncColor(gamma, gamma[i]);
 				SyncColor(brightness, brightness[i]);
 				SyncColor(hdr, hdr[i]);
-				group->SetGammaColor(gamma);
-				group->SetBrightness(brightness);
-				group->SetHdr(hdr);
-				if (m_link_group)
-				{
-					group->SetGammaAll(gamma);
-					group->SetBrightnessAll(brightness);
-					group->SetHdrAll(hdr);
-				}
+				group->SetGammaAll(gamma);
+				group->SetBrightnessAll(brightness);
+				group->SetHdrAll(hdr);
 			}
 		}
 		break;
@@ -1518,14 +1492,13 @@ void OutputAdjPanel::SetGamma(int i, double val, bool notify)
 	case 2:
 		if (vd)
 			vd->SetGammaColor(gamma);
-		if (m_link_group && group)
+		if (group)
 			group->SetGammaAll(gamma);
 		break;
-	case 3:
+	case 5:
 		if (group)
-			group->SetGammaColor(gamma);
-		if (m_link_group && group)
 			group->SetGammaAll(gamma);
+		break;
 	}
 
 	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(glbin_current.canvas) });
@@ -1565,14 +1538,13 @@ void OutputAdjPanel::SetBrightness(int i, double val, bool notify)
 	case 2:
 		if (vd)
 			vd->SetBrightness(brightness);
-		if (m_link_group && group)
+		if (group)
 			group->SetBrightnessAll(brightness);
 		break;
-	case 3:
+	case 5:
 		if (group)
-			group->SetBrightness(brightness);
-		if (m_link_group && group)
 			group->SetBrightnessAll(brightness);
+		break;
 	}
 
 	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(glbin_current.canvas) });
@@ -1612,14 +1584,13 @@ void OutputAdjPanel::SetHdr(int i, double val, bool notify)
 	case 2:
 		if (vd)
 			vd->SetHdr(hdr);
-		if (m_link_group && group)
+		if (group)
 			group->SetHdrAll(hdr);
 		break;
-	case 3:
+	case 5:
 		if (group)
-			group->SetHdr(hdr);
-		if (m_link_group && group)
 			group->SetHdrAll(hdr);
+		break;
 	}
 
 	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(glbin_current.canvas) });
@@ -1636,7 +1607,7 @@ void OutputAdjPanel::UpdateSync()
 	RenderCanvas* canvas = glbin_current.canvas;
 	DataGroup* group = glbin_current.vol_group;
 
-	if ((type == 2 && m_link_group && group) ||
+	if ((type == 2 && group) ||
 		(type == 5 && group))
 	{
 		//use group
@@ -1706,10 +1677,6 @@ void OutputAdjPanel::UpdateSync()
 				SetHdr(2, hdr, true);
 			}
 		}
-	}
-	else if (type == 2 && !m_link_group && glbin_current.vol_data)
-	{
-		//use volume
 	}
 	else if (type == 1 && canvas)
 	{

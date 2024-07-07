@@ -2028,9 +2028,6 @@ void Project::Reset()
 	glbin_data_manager.ClearAll();
 	DataGroup::ResetID();
 	MeshGroup::ResetID();
-	//m_output_adj_panel->SetVolumeData(0);
-	//m_output_adj_panel->SetGroup(0);
-	//m_output_adj_panel->SetGroupLink(0);
 	frame->GetRenderCanvas(0)->ClearAll();
 	for (int i = frame->GetCanvasNum() - 1; i > 0; i--)
 		frame->DeleteRenderView(i);

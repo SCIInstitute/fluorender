@@ -944,7 +944,7 @@ wxString MainFrame::CreateRenderView(int row)
 
 	vrv->LoadSettings();
 
-	UpdateProps({ gstMovViewList, gstMovViewIndex, gstTreeCtrl });
+	UpdateProps({ gstMovViewList, gstMovViewIndex, gstTreeCtrl, gstUpdateSync });
 
 	return vrv->GetName();
 }

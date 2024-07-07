@@ -147,7 +147,7 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 	if (refresh)
 	{
 		if (update)
-			glbin_current.mainframe->UpdateProps({ gstListCtrl, gstTreeCtrl });
+			glbin_current.mainframe->UpdateProps({ gstListCtrl, gstTreeCtrl, gstUpdateSync });
 		glbin_current.mainframe->RefreshCanvases();
 	}
 }

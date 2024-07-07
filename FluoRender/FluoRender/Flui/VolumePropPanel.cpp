@@ -1460,14 +1460,7 @@ void VolumePropPanel::EnableColormap(bool bval)
 		m_vd->SetColormapDisp(bval);
 	}
 
-	if (m_frame)
-	{
-		OutputAdjPanel* adjust_view = m_frame->GetOutAdjPanel();
-		if (adjust_view)
-			adjust_view->UpdateSync();
-	}
-
-	FluoRefresh(0, { gstColormap }, { m_frame->GetRenderCanvas(m_view) });
+	FluoRefresh(0, { gstColormap, gstUpdateSync }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::EnableMip(bool bval)
@@ -2599,14 +2592,7 @@ void VolumePropPanel::OnColorChange(wxColor c)
 			m_color2_btn->SetValue(wxc);
 		}
 
-		if (m_frame)
-		{
-			OutputAdjPanel *adjust_view = m_frame->GetOutAdjPanel();
-			if (adjust_view)
-				adjust_view->UpdateSync();
-		}
-
-		FluoRefresh(1, { gstColor, gstLuminance, gstSecColor, gstTreeColors, gstClipPlaneRangeColor }, { m_frame->GetRenderCanvas(m_view) });
+		FluoRefresh(1, { gstColor, gstLuminance, gstSecColor, gstTreeColors, gstClipPlaneRangeColor, gstUpdateSync }, { m_frame->GetRenderCanvas(m_view) });
 	}
 }
 

@@ -263,6 +263,6 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent& event)
 	}
 	glbin_current.SetVolumeGroup(group);
 
-	FluoRefresh(1, { gstVolumePropPanel, gstListCtrl, gstTreeCtrl, gstCurrentSelect },
+	FluoRefresh(1, { gstVolumePropPanel, gstListCtrl, gstTreeCtrl, gstCurrentSelect, gstUpdateSync },
 		{ m_frame->GetRenderCanvas(canvas) });
 }

@@ -1789,16 +1789,6 @@ void RenderCanvas::OrganizeLayers()
 					le_group->InsertVolumeData(le_group->GetVolumeNum(), vd);
 				}
 			}
-
-			if (m_frame)
-			{
-				OutputAdjPanel* adjust_view = m_frame->GetOutAdjPanel();
-				if (adjust_view)
-				{
-					adjust_view->SetGroupLink(le_group);
-					adjust_view->UpdateSync();
-				}
-			}
 		}
 	}
 }
@@ -6072,18 +6062,9 @@ DataGroup* RenderCanvas::AddVolumeData(VolumeData* vd, wxString group_name)
 		for (int i : { 0, 1, 2})
 			vd->SetSync(i, group->GetSync(i));
 		glbin_current.vol_data = vd;
-		m_frame->GetOutAdjPanel()->SetGroupLink(group);
 	}
 
 	m_vd_pop_dirty = true;
-
-	OutputAdjPanel* adjust_view = m_frame->GetOutAdjPanel();
-	if (adjust_view)
-	{
-		adjust_view->SetGroupLink(group);
-		adjust_view->UpdateSync();
-	}
-
 	m_load_update = true;
 
 	return group;
@@ -6156,12 +6137,6 @@ void RenderCanvas::ReplaceVolumeData(wxString &name, VolumeData *dst)
 	if (found)
 	{
 		glbin_current.vol_data = dst;
-		OutputAdjPanel* adjust_view = m_frame->GetOutAdjPanel();
-		if (adjust_view)
-		{
-			if (!group) adjust_view->SetGroupLink(group);
-			adjust_view->UpdateSync();
-		}
 		VolumePropPanel* vprop_view = m_frame->FindVolumeProps(name);
 		if (vprop_view)
 			vprop_view->SetVolumeData(dst);
@@ -6851,12 +6826,6 @@ void RenderCanvas::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst_
 	m_md_pop_dirty = true;
 
 	glbin_current.vol_data = src_vd;
-	OutputAdjPanel* adjust_view = m_frame->GetOutAdjPanel();
-	if (adjust_view)
-	{
-		adjust_view->SetGroupLink(dst_group);
-		adjust_view->UpdateSync();
-	}
 }
 
 //move mesh within a group

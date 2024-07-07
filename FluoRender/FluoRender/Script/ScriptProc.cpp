@@ -2489,10 +2489,8 @@ void ScriptProc::ChangeData()
 	VolumeData* vd = 0;
 	if (clear)
 	{
-		//m_frame->GetTreePanel()->DeleteAll();
 		glbin_ruler_handler.DeleteAll(false);
 		glbin_data_manager.ClearAll();
-		m_frame->GetOutAdjPanel()->SetGroupLink(0);
 		m_frame->GetRenderCanvas(0)->ClearAll();
 		DataGroup::ResetID();
 		MeshGroup::ResetID();

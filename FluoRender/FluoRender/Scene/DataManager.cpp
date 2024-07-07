@@ -5658,6 +5658,7 @@ void DataManager::LoadVolumes(wxArrayString files, bool withImageJ)
 	//UpdateList();
 	vc.insert(gstListCtrl);
 	vc.insert(gstTreeCtrl);
+	vc.insert(gstUpdateSync);
 	glbin_current.SetVolumeData(vd_sel);
 	vc.insert(gstScaleFactor);
 
