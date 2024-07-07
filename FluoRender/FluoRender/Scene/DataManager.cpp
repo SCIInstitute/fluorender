@@ -5308,6 +5308,85 @@ void CurrentObjects::SetAnnotation(Annotations* ann)
 		canvas->m_cur_vol = 0;
 }
 
+void CurrentObjects::SetSel(const wxString& str)
+{
+	if (!mainframe)
+		return;
+	bool found = false;
+	for (int i = 0; i < mainframe->GetCanvasNum(); ++i)
+	{
+		RenderCanvas* v = mainframe->GetRenderCanvas(i);
+		if (!v)
+			continue;
+		if (v->GetName() == str)
+		{
+			SetCanvas(v);
+			return;
+		}
+		for (int j = 0; j < v->GetLayerNum(); ++j)
+		{
+			TreeLayer* l = v->GetLayer(j);
+			if (!l)
+				continue;
+			if (l->IsA() == 2)
+			{
+				SetVolumeData(dynamic_cast<VolumeData*>(l));
+				return;
+			}
+			else if (l->IsA() == 3)
+			{
+				SetMeshData(dynamic_cast<MeshData*>(l));
+				return;
+			}
+			else if (l->IsA() == 4)
+			{
+				SetAnnotation(dynamic_cast<Annotations*>(l));
+				return;
+			}
+			else if (l->IsA() == 5)
+			{
+				DataGroup* g = dynamic_cast<DataGroup*>(l);
+				if (!g)
+					continue;
+				if (g->GetName() == str)
+				{
+					SetVolumeGroup(g);
+					return;
+				}
+				for (int k = 0; k < g->GetVolumeNum(); ++k)
+				{
+					VolumeData* vd = g->GetVolumeData(k);
+					if (vd && vd->GetName() == str)
+					{
+						SetVolumeData(vd);
+						return;
+					}
+				}
+			}
+			else if (l->IsA() == 6)
+			{
+				MeshGroup* g = dynamic_cast<MeshGroup*>(l);
+				if (!g)
+					continue;
+				if (g->GetName() == str)
+				{
+					SetMeshGroup(g);
+					return;
+				}
+				for (int k = 0; k < g->GetMeshNum(); ++k)
+				{
+					MeshData* md = g->GetMeshData(k);
+					if (md && md->GetName() == str)
+					{
+						SetMeshData(md);
+						return;
+					}
+				}
+			}
+		}
+	}
+}
+
 flrd::RulerList* CurrentObjects::GetRulerList()
 {
 	if (!canvas)

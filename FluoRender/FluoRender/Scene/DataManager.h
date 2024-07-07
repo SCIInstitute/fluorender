@@ -1334,6 +1334,7 @@ struct CurrentObjects
 	void SetVolumeData(VolumeData* vd);
 	void SetMeshData(MeshData* md);
 	void SetAnnotation(Annotations* ann);
+	void SetSel(const wxString& str);
 
 	flrd::RulerList* GetRulerList();
 	flrd::Ruler* GetRuler();

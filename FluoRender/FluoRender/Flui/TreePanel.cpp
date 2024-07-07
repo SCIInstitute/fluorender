@@ -1756,6 +1756,7 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 		dst_par_item = dst_item.IsOk() ? m_datatree->GetItemParent(dst_item) : 0;
 	m_drag_item = (wxTreeItemId)0l;
 	bool refresh = false;
+	wxString src_name, src_par_name, dst_name, dst_par_name;
 
 	if (src_item.IsOk() && dst_item.IsOk() &&
 		src_par_item.IsOk() &&
@@ -1766,10 +1767,10 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 		int dst_type = ((LayerInfo*)m_datatree->GetItemData(dst_item))->type;
 		int dst_par_type = ((LayerInfo*)m_datatree->GetItemData(dst_par_item))->type;
 
-		wxString src_name = m_datatree->GetItemText(src_item);
-		wxString src_par_name = m_datatree->GetItemText(src_par_item);
-		wxString dst_name = m_datatree->GetItemText(dst_item);
-		wxString dst_par_name = m_datatree->GetItemText(dst_par_item);
+		src_name = m_datatree->GetItemText(src_item);
+		src_par_name = m_datatree->GetItemText(src_par_item);
+		dst_name = m_datatree->GetItemText(dst_item);
+		dst_par_name = m_datatree->GetItemText(dst_par_item);
 
 		if (src_par_type == 1 &&
 			dst_par_type == 1 &&
@@ -1953,8 +1954,8 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 		int src_type = ((LayerInfo*)m_datatree->GetItemData(src_item))->type;
 		int src_par_type = ((LayerInfo*)m_datatree->GetItemData(src_par_item))->type;
 
-		wxString src_name = m_datatree->GetItemText(src_item);
-		wxString src_par_name = m_datatree->GetItemText(src_par_item);
+		src_name = m_datatree->GetItemText(src_item);
+		src_par_name = m_datatree->GetItemText(src_par_item);
 
 		if (src_type == 2 && src_par_type == 5)
 		{
@@ -1972,7 +1973,11 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 	}
 
 	if (refresh)
-		FluoRefresh(2, { gstTreeCtrl });
+	{
+		FluoUpdate({ gstTreeCtrl });
+		glbin_current.SetSel(src_name);
+		FluoRefresh(0, { gstCurrentSelect });
+	}
 
 	SetScrollPos(wxVERTICAL, m_scroll_pos);
 }
