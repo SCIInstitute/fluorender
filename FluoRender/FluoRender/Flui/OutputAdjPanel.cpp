@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
+#include <DataManager.h>
 #include <wxSingleSlider.h>
 #include <wxUndoableToolbar.h>
 #include <wx/valnum.h>
@@ -43,10 +44,6 @@ OutputAdjPanel::OutputAdjPanel(MainFrame* frame,
 					   long style,
 					   const wxString& name) :
 	PropPanel(frame, frame, pos, size, style, name),
-m_type(-1),
-m_view(0),
-m_vd(0),
-m_group(0),
 m_link_group(false),
 m_enable_all(true)
 {
@@ -403,7 +400,8 @@ void OutputAdjPanel::SavePerspective()
 
 void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)
 {
-	if (m_type != 1 && m_type != 2 && m_type != 5)
+	int type = glbin_current.GetType();
+	if (type != 1 && type != 2 && type != 5)
 	{
 		EnableAll(false);
 		return;
@@ -499,36 +497,39 @@ void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	fluo::Color brightness;
 	fluo::Color hdr;
 
-	switch (m_type)
+	switch (type)
 	{
 	case 1://view
-		if (m_view)
+	{
+		RenderCanvas* canvas = glbin_current.canvas;
+		if (canvas)
 		{
 			for (int i : {0, 1, 2})
-				m_sync[i] = m_view->GetSync(i);
-			gamma = m_view->GetGammaColor();
-			brightness = m_view->GetBrightness();
-			hdr = m_view->GetHdr();
+				m_sync[i] = canvas->GetSync(i);
+			gamma = canvas->GetGammaColor();
+			brightness = canvas->GetBrightness();
+			hdr = canvas->GetHdr();
 		}
-		break;
+	}
+	break;
 	case 2://volume data
 	case 5://group
-		{
-			TreeLayer* layer = 0;
-			if (m_type == 2 && m_vd)
-				layer = (TreeLayer*)m_vd;
-			else if (m_type == 5 && m_group)
-				layer = (TreeLayer*)m_group;
+	{
+		TreeLayer* layer = 0;
+		if (type == 2)
+			layer = dynamic_cast<TreeLayer*>(glbin_current.vol_data);
+		else if (type == 5)
+			layer = dynamic_cast<TreeLayer*>(glbin_current.vol_group);
 
-			if (layer)
-			{
-				for (int i : {0, 1, 2})
-					m_sync[i] = layer->GetSync(i);
-				gamma = layer->GetGammaColor();
-				brightness = layer->GetBrightness();
-				hdr = layer->GetHdr();
-			}
+		if (layer)
+		{
+			for (int i : {0, 1, 2})
+				m_sync[i] = layer->GetSync(i);
+			gamma = layer->GetGammaColor();
+			brightness = layer->GetBrightness();
+			hdr = layer->GetHdr();
 		}
+	}
 	break;
 	}
 
@@ -652,80 +653,15 @@ void OutputAdjPanel::EnableAll(bool val)
 	m_dft_btn->Enable(val);
 }
 
-//set view
-void OutputAdjPanel::SetRenderView(RenderCanvas *view)
-{
-	if (view)
-	{
-		m_view = view;
-		m_type = 1;
-	}
-	else
-	{
-		m_type = -1;
-	}
-	FluoUpdate();
-}
-
-RenderCanvas* OutputAdjPanel::GetRenderView()
-{
-	return m_view;
-}
-
-//set volume data
-void OutputAdjPanel::SetVolumeData(VolumeData* vd)
-{
-	if (m_vd != vd)
-		ClearUndo();
-
-	if (vd)
-	{
-		m_vd = vd;
-		m_type = 2;
-	}
-	else
-	{
-		m_type = -1;
-	}
-	FluoUpdate();
-}
-
-VolumeData* OutputAdjPanel::GetVolumeData()
-{
-	return m_vd;
-}
-
-//set group
-void OutputAdjPanel::SetGroup(DataGroup *group)
-{
-	if (group)
-	{
-		m_group = group;
-		m_type = 5;
-	}
-	else
-	{
-		m_type = -1;
-	}
-	FluoUpdate();
-}
-
-DataGroup* OutputAdjPanel::GetGroup()
-{
-	return m_group;
-}
-
 //set volume adjustment to link to group
 void OutputAdjPanel::SetGroupLink(DataGroup *group)
 {
 	if (group)
 	{
-		m_group = group;
 		m_link_group = true;
 	}
 	else
 	{
-		m_group = 0;
 		m_link_group = false;
 	}
 }
@@ -1128,19 +1064,17 @@ void OutputAdjPanel::OnSyncBCheck(wxCommandEvent& event)
 
 void OutputAdjPanel::OnSaveDefault(wxCommandEvent& event)
 {
-	switch (m_type)
+	int type = glbin_current.GetType();
+	switch (type)
 	{
 	case 1://view
-		if (m_view)
-			glbin_outadj_def.Set(m_view);
+		glbin_outadj_def.Set(glbin_current.canvas);
 		break;
 	case 2://volume data
-		if (m_vd)
-			glbin_outadj_def.Set(m_vd);
+		glbin_outadj_def.Set(glbin_current.vol_data);
 		break;
 	case 5://group
-		if (m_group)
-			glbin_outadj_def.Set(m_group);
+		glbin_outadj_def.Set(glbin_current.vol_group);
 		break;
 	}
 }
@@ -1269,40 +1203,53 @@ void OutputAdjPanel::SyncHdr(fluo::Color& c, int i, double val, fluo::ValueColle
 void OutputAdjPanel::SyncGamma(int i)
 {
 	fluo::Color gamma;
-	switch (m_type)
+	int type = glbin_current.GetType();
+	RenderCanvas* canvas = 0;
+	VolumeData* vd = 0;
+	DataGroup* group = 0;
+	switch (type)
 	{
 	case 1:
-		if (m_view)
-			gamma = m_view->GetGammaColor();
+	{
+		canvas = glbin_current.canvas;
+		if (canvas)
+			gamma = canvas->GetGammaColor();
+	}
 		break;
 	case 2:
-		if (m_vd)
-			gamma = m_vd->GetGammaColor();
+	{
+		vd = glbin_current.vol_data;
+		if (vd)
+			gamma = vd->GetGammaColor();
+	}
 		break;
 	case 5:
-		if (m_group)
-			gamma = m_group->GetGammaColor();
+	{
+		group = glbin_current.vol_group;
+		if (group)
+			gamma = group->GetGammaColor();
+	}
 		break;
 	}
 	for (int j : {0, 1, 2})
 		if (j != i) gamma[j] = gamma[i];
-	switch (m_type)
+	switch (type)
 	{
 	case 1:
-		if (m_view)
-			m_view->SetGammaColor(gamma);
+		if (canvas)
+			canvas->SetGammaColor(gamma);
 		break;
 	case 2:
-		if (m_vd)
-			m_vd->SetGammaColor(gamma);
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
+		if (vd)
+			vd->SetGammaColor(gamma);
+		if (m_link_group && group)
+			group->SetGammaAll(gamma);
 		break;
 	case 3:
-		if (m_group)
-			m_group->SetGammaColor(gamma);
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
+		if (group)
+			group->SetGammaColor(gamma);
+		if (m_link_group && group)
+			group->SetGammaAll(gamma);
 	}
 
 	fluo::ValueCollection vc;
@@ -1312,46 +1259,59 @@ void OutputAdjPanel::SyncGamma(int i)
 		vc.insert(gstGammaG);
 	if (i != 2)
 		vc.insert(gstGammaB);
-	FluoRefresh(2, vc, {m_frame->GetRenderCanvas(m_view)});
+	FluoRefresh(2, vc, {m_frame->GetRenderCanvas(glbin_current.canvas)});
 }
 
 void OutputAdjPanel::SyncBrightness(int i)
 {
 	fluo::Color brightness;
-	switch (m_type)
+	int type = glbin_current.GetType();
+	RenderCanvas* canvas = 0;
+	VolumeData* vd = 0;
+	DataGroup* group = 0;
+	switch (type)
 	{
 	case 1:
-		if (m_view)
-			brightness = m_view->GetBrightness();
+	{
+		canvas = glbin_current.canvas;
+		if (canvas)
+			brightness = canvas->GetBrightness();
+	}
 		break;
 	case 2:
-		if (m_vd)
-			brightness = m_vd->GetBrightness();
+	{
+		vd = glbin_current.vol_data;
+		if (vd)
+			brightness = vd->GetBrightness();
 		break;
+	}
 	case 5:
-		if (m_group)
-			brightness = m_group->GetBrightness();
+	{
+		group = glbin_current.vol_group;
+		if (group)
+			brightness = group->GetBrightness();
+	}
 		break;
 	}
 	for (int j : {0, 1, 2})
 		if (j != i) brightness[j] = brightness[i];
-	switch (m_type)
+	switch (type)
 	{
 	case 1:
-		if (m_view)
-			m_view->SetBrightness(brightness);
+		if (canvas)
+			canvas->SetBrightness(brightness);
 		break;
 	case 2:
-		if (m_vd)
-			m_vd->SetBrightness(brightness);
-		if (m_link_group && m_group)
-			m_group->SetBrightnessAll(brightness);
+		if (vd)
+			vd->SetBrightness(brightness);
+		if (m_link_group && group)
+			group->SetBrightnessAll(brightness);
 		break;
 	case 3:
-		if (m_group)
-			m_group->SetBrightness(brightness);
-		if (m_link_group && m_group)
-			m_group->SetBrightnessAll(brightness);
+		if (group)
+			group->SetBrightness(brightness);
+		if (m_link_group && group)
+			group->SetBrightnessAll(brightness);
 	}
 
 	fluo::ValueCollection vc;
@@ -1361,46 +1321,59 @@ void OutputAdjPanel::SyncBrightness(int i)
 		vc.insert(gstBrightnessG);
 	if (i != 2)
 		vc.insert(gstBrightnessB);
-	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(m_view) });
+	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void OutputAdjPanel::SyncHdr(int i)
 {
 	fluo::Color hdr;
-	switch (m_type)
+	int type = glbin_current.GetType();
+	RenderCanvas* canvas = 0;
+	VolumeData* vd = 0;
+	DataGroup* group = 0;
+	switch (type)
 	{
 	case 1:
-		if (m_view)
-			hdr = m_view->GetHdr();
+	{
+		canvas = glbin_current.canvas;
+		if (canvas)
+			hdr = canvas->GetHdr();
+	}
 		break;
 	case 2:
-		if (m_vd)
-			hdr = m_vd->GetHdr();
+	{
+		vd = glbin_current.vol_data;
+		if (vd)
+			hdr = vd->GetHdr();
+	}
 		break;
 	case 5:
-		if (m_group)
-			hdr = m_group->GetHdr();
+	{
+		group = glbin_current.vol_group;
+		if (group)
+			hdr = group->GetHdr();
+	}
 		break;
 	}
 	for (int j : {0, 1, 2})
 		if (j != i) hdr[j] = hdr[i];
-	switch (m_type)
+	switch (type)
 	{
 	case 1:
-		if (m_view)
-			m_view->SetHdr(hdr);
+		if (canvas)
+			canvas->SetHdr(hdr);
 		break;
 	case 2:
-		if (m_vd)
-			m_vd->SetHdr(hdr);
-		if (m_link_group && m_group)
-			m_group->SetHdrAll(hdr);
+		if (vd)
+			vd->SetHdr(hdr);
+		if (m_link_group && group)
+			group->SetHdrAll(hdr);
 		break;
 	case 3:
-		if (m_group)
-			m_group->SetHdr(hdr);
-		if (m_link_group && m_group)
-			m_group->SetHdrAll(hdr);
+		if (group)
+			group->SetHdr(hdr);
+		if (m_link_group && group)
+			group->SetHdrAll(hdr);
 	}
 
 	fluo::ValueCollection vc;
@@ -1410,83 +1383,87 @@ void OutputAdjPanel::SyncHdr(int i)
 		vc.insert(gstEqualizeG);
 	if (i != 2)
 		vc.insert(gstEqualizeB);
-	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(m_view) });
+	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void OutputAdjPanel::SetSync(int i, bool val, bool update)
 {
 	m_sync[i] = val;
 	fluo::Color gamma, brightness, hdr;
+	int type = glbin_current.GetType();
+	RenderCanvas* canvas = glbin_current.canvas;
+	VolumeData* vd = glbin_current.vol_data;
+	DataGroup* group = glbin_current.vol_group;
 
-	switch (m_type)
+	switch (type)
 	{
 	case 1://view
-		if (m_view)
+		if (canvas)
 		{
-			m_view->SetSync(i, val);
+			canvas->SetSync(i, val);
 
 			if (val)
 			{
-				gamma = m_view->GetGammaColor();
-				brightness = m_view->GetBrightness();
-				hdr = m_view->GetHdr();
+				gamma = canvas->GetGammaColor();
+				brightness = canvas->GetBrightness();
+				hdr = canvas->GetHdr();
 				SyncColor(gamma, gamma[i]);
 				SyncColor(brightness, brightness[i]);
 				SyncColor(hdr, hdr[i]);
-				m_view->SetGammaColor(gamma);
-				m_view->SetBrightness(brightness);
-				m_view->SetHdr(hdr);
+				canvas->SetGammaColor(gamma);
+				canvas->SetBrightness(brightness);
+				canvas->SetHdr(hdr);
 			}
 		}
 		break;
 	case 2://volume data
-		if (m_vd)
+		if (vd)
 		{
-			m_vd->SetSync(i, val);
-			if (m_link_group && m_group)
-				m_group->SetSyncAll(i, val);
+			vd->SetSync(i, val);
+			if (m_link_group && group)
+				group->SetSyncAll(i, val);
 			if (val)
 			{
-				gamma = m_vd->GetGammaColor();
-				brightness = m_vd->GetBrightness();
-				hdr = m_vd->GetHdr();
+				gamma = vd->GetGammaColor();
+				brightness = vd->GetBrightness();
+				hdr = vd->GetHdr();
 				SyncColor(gamma, gamma[i]);
 				SyncColor(brightness, brightness[i]);
 				SyncColor(hdr, hdr[i]);
-				m_vd->SetGammaColor(gamma);
-				m_vd->SetBrightness(brightness);
-				m_vd->SetHdr(hdr);
-				if (m_link_group && m_group)
+				vd->SetGammaColor(gamma);
+				vd->SetBrightness(brightness);
+				vd->SetHdr(hdr);
+				if (m_link_group && group)
 				{
-					m_group->SetGammaAll(gamma);
-					m_group->SetBrightnessAll(brightness);
-					m_group->SetHdrAll(hdr);
+					group->SetGammaAll(gamma);
+					group->SetBrightnessAll(brightness);
+					group->SetHdrAll(hdr);
 				}
 			}
 		}
 		break;
 	case 5://group
-		if (m_group)
+		if (group)
 		{
-			m_group->SetSync(i, val);
+			group->SetSync(i, val);
 			if (m_link_group)
-				m_group->SetSyncAll(i, val);
+				group->SetSyncAll(i, val);
 			if (val)
 			{
-				gamma = m_group->GetGammaColor();
-				brightness = m_group->GetBrightness();
-				hdr = m_group->GetHdr();
+				gamma = group->GetGammaColor();
+				brightness = group->GetBrightness();
+				hdr = group->GetHdr();
 				SyncColor(gamma, gamma[i]);
 				SyncColor(brightness, brightness[i]);
 				SyncColor(hdr, hdr[i]);
-				m_group->SetGammaColor(gamma);
-				m_group->SetBrightness(brightness);
-				m_group->SetHdr(hdr);
+				group->SetGammaColor(gamma);
+				group->SetBrightness(brightness);
+				group->SetHdr(hdr);
 				if (m_link_group)
 				{
-					m_group->SetGammaAll(gamma);
-					m_group->SetBrightnessAll(brightness);
-					m_group->SetHdrAll(hdr);
+					group->SetGammaAll(gamma);
+					group->SetBrightnessAll(brightness);
+					group->SetHdrAll(hdr);
 				}
 			}
 		}
@@ -1503,134 +1480,149 @@ void OutputAdjPanel::SetSync(int i, bool val, bool update)
 		if (i != 2 && m_sync[2])
 			vc.insert(gstSyncB);
 
-		FluoRefresh(2, vc, { m_frame->GetRenderCanvas(m_view) });
+		FluoRefresh(2, vc, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 	}
 }
 
 void OutputAdjPanel::SetGamma(int i, double val, bool notify)
 {
 	fluo::Color gamma;
-	switch (m_type)
+	int type = glbin_current.GetType();
+	RenderCanvas* canvas = glbin_current.canvas;
+	VolumeData* vd = glbin_current.vol_data;
+	DataGroup* group = glbin_current.vol_group;
+
+	switch (type)
 	{
 	case 1://view
-		if (m_view)
-			gamma = m_view->GetGammaColor();
+		if (canvas)
+			gamma = canvas->GetGammaColor();
 		break;
 	case 2://volume
-		if (m_vd)
-			gamma = m_vd->GetGammaColor();
+		if (vd)
+			gamma = vd->GetGammaColor();
 		break;
 	case 5://group
-		if (m_group)
-			gamma = m_group->GetGammaColor();
+		if (group)
+			gamma = group->GetGammaColor();
 		break;
 	}
 	fluo::ValueCollection vc;
 	SyncGamma(gamma, i, val, vc, notify);
-	switch (m_type)
+	switch (type)
 	{
 	case 1:
-		if (m_view)
-			m_view->SetGammaColor(gamma);
+		if (canvas)
+			canvas->SetGammaColor(gamma);
 		break;
 	case 2:
-		if (m_vd)
-			m_vd->SetGammaColor(gamma);
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
+		if (vd)
+			vd->SetGammaColor(gamma);
+		if (m_link_group && group)
+			group->SetGammaAll(gamma);
 		break;
 	case 3:
-		if (m_group)
-			m_group->SetGammaColor(gamma);
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
+		if (group)
+			group->SetGammaColor(gamma);
+		if (m_link_group && group)
+			group->SetGammaAll(gamma);
 	}
 
-	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(m_view) });
+	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void OutputAdjPanel::SetBrightness(int i, double val, bool notify)
 {
 	fluo::Color brightness;
-	switch (m_type)
+	int type = glbin_current.GetType();
+	RenderCanvas* canvas = glbin_current.canvas;
+	VolumeData* vd = glbin_current.vol_data;
+	DataGroup* group = glbin_current.vol_group;
+
+	switch (type)
 	{
 	case 1://view
-		if (m_view)
-			brightness = m_view->GetBrightness();
+		if (canvas)
+			brightness = canvas->GetBrightness();
 		break;
 	case 2://volume
-		if (m_vd)
-			brightness = m_vd->GetBrightness();
+		if (vd)
+			brightness = vd->GetBrightness();
 		break;
 	case 5://group
-		if (m_group)
-			brightness = m_group->GetBrightness();
+		if (group)
+			brightness = group->GetBrightness();
 		break;
 	}
 	fluo::ValueCollection vc;
 	SyncBrightness(brightness, i, val, vc, notify);
-	switch (m_type)
+	switch (type)
 	{
 	case 1:
-		if (m_view)
-			m_view->SetBrightness(brightness);
+		if (canvas)
+			canvas->SetBrightness(brightness);
 		break;
 	case 2:
-		if (m_vd)
-			m_vd->SetBrightness(brightness);
-		if (m_link_group && m_group)
-			m_group->SetBrightnessAll(brightness);
+		if (vd)
+			vd->SetBrightness(brightness);
+		if (m_link_group && group)
+			group->SetBrightnessAll(brightness);
 		break;
 	case 3:
-		if (m_group)
-			m_group->SetBrightness(brightness);
-		if (m_link_group && m_group)
-			m_group->SetBrightnessAll(brightness);
+		if (group)
+			group->SetBrightness(brightness);
+		if (m_link_group && group)
+			group->SetBrightnessAll(brightness);
 	}
 
-	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(m_view) });
+	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void OutputAdjPanel::SetHdr(int i, double val, bool notify)
 {
 	fluo::Color hdr;
-	switch (m_type)
+	int type = glbin_current.GetType();
+	RenderCanvas* canvas = glbin_current.canvas;
+	VolumeData* vd = glbin_current.vol_data;
+	DataGroup* group = glbin_current.vol_group;
+
+	switch (type)
 	{
 	case 1://view
-		if (m_view)
-			hdr = m_view->GetHdr();
+		if (canvas)
+			hdr = canvas->GetHdr();
 		break;
 	case 2://volume
-		if (m_vd)
-			hdr = m_vd->GetHdr();
+		if (vd)
+			hdr = vd->GetHdr();
 		break;
 	case 5://group
-		if (m_group)
-			hdr = m_group->GetHdr();
+		if (group)
+			hdr = group->GetHdr();
 		break;
 	}
 	fluo::ValueCollection vc;
 	SyncHdr(hdr, i, val, vc, notify);
-	switch (m_type)
+	switch (type)
 	{
 	case 1:
-		if (m_view)
-			m_view->SetHdr(hdr);
+		if (canvas)
+			canvas->SetHdr(hdr);
 		break;
 	case 2:
-		if (m_vd)
-			m_vd->SetHdr(hdr);
-		if (m_link_group && m_group)
-			m_group->SetHdrAll(hdr);
+		if (vd)
+			vd->SetHdr(hdr);
+		if (m_link_group && group)
+			group->SetHdrAll(hdr);
 		break;
 	case 3:
-		if (m_group)
-			m_group->SetHdr(hdr);
-		if (m_link_group && m_group)
-			m_group->SetHdrAll(hdr);
+		if (group)
+			group->SetHdr(hdr);
+		if (m_link_group && group)
+			group->SetHdrAll(hdr);
 	}
 
-	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(m_view) });
+	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
 void OutputAdjPanel::UpdateSync()
@@ -1640,14 +1632,17 @@ void OutputAdjPanel::UpdateSync()
 	bool r_v = false;
 	bool g_v = false;
 	bool b_v = false;
+	int type = glbin_current.GetType();
+	RenderCanvas* canvas = glbin_current.canvas;
+	DataGroup* group = glbin_current.vol_group;
 
-	if ((m_type == 2 && m_link_group && m_group) ||
-		(m_type == 5 && m_group))
+	if ((type == 2 && m_link_group && group) ||
+		(type == 5 && group))
 	{
 		//use group
-		for (i=0; i<m_group->GetVolumeNum(); i++)
+		for (i=0; i<group->GetVolumeNum(); i++)
 		{
-			VolumeData* vd = m_group->GetVolumeData(i);
+			VolumeData* vd = group->GetVolumeData(i);
 			if (vd)
 			{
 				if (vd->GetColormapMode())
@@ -1687,15 +1682,15 @@ void OutputAdjPanel::UpdateSync()
 			double gamma = 1.0, brightness = 1.0, hdr = 0.0;
 			if (r_v)
 			{
-				gamma = m_group->GetGammaColor().r();
-				brightness = m_group->GetBrightness().r();
-				hdr = m_group->GetHdr().r();
+				gamma = group->GetGammaColor().r();
+				brightness = group->GetBrightness().r();
+				hdr = group->GetHdr().r();
 			}
 			else if (g_v)
 			{
-				gamma = m_group->GetGammaColor().g();
-				brightness = m_group->GetBrightness().g();
-				hdr = m_group->GetHdr().g();
+				gamma = group->GetGammaColor().g();
+				brightness = group->GetBrightness().g();
+				hdr = group->GetHdr().g();
 			}
 
 			if (g_v)
@@ -1712,19 +1707,19 @@ void OutputAdjPanel::UpdateSync()
 			}
 		}
 	}
-	else if (m_type == 2 && !m_link_group && m_vd)
+	else if (type == 2 && !m_link_group && glbin_current.vol_data)
 	{
 		//use volume
 	}
-	else if (m_type == 1 && m_view)
+	else if (type == 1 && canvas)
 	{
 		//means this is depth mode
-		if (m_view->GetVolMethod() != VOL_METHOD_MULTI)
+		if (canvas->GetVolMethod() != VOL_METHOD_MULTI)
 			return;
 		
-		for (i=0; i<m_view->GetDispVolumeNum(); i++)
+		for (i=0; i<canvas->GetDispVolumeNum(); i++)
 		{
-			VolumeData* vd = m_view->GetDispVolumeData(i);
+			VolumeData* vd = canvas->GetDispVolumeData(i);
 			if (vd)
 			{
 				if (vd->GetColormapMode())
@@ -1766,15 +1761,15 @@ void OutputAdjPanel::UpdateSync()
 			double gamma = 1.0, brightness = 1.0, hdr = 0.0;
 			if (r_v)
 			{
-				gamma = m_view->GetGammaColor().r();
-				brightness = m_view->GetBrightness().r();
-				hdr = m_view->GetHdr().r();
+				gamma = canvas->GetGammaColor().r();
+				brightness = canvas->GetBrightness().r();
+				hdr = canvas->GetHdr().r();
 			}
 			else if (g_v)
 			{
-				gamma = m_view->GetGammaColor().g();
-				brightness = m_view->GetBrightness().g();
-				hdr = m_view->GetHdr().g();
+				gamma = canvas->GetGammaColor().g();
+				brightness = canvas->GetBrightness().g();
+				hdr = canvas->GetHdr().g();
 			}
 
 			if (g_v)

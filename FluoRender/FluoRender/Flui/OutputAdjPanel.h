@@ -32,8 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Color.h>
 #include <wx/aui/auibook.h>
 
-class RenderCanvas;
-class VolumeData;
 class DataGroup;
 class wxSingleSlider;
 class wxUndoableToolbar;
@@ -53,20 +51,6 @@ public:
 
 	//disable/enable
 	void EnableAll(bool val);
-	//get type
-	int GetType()
-	{
-		return m_type;
-	}
-	//set view
-	void SetRenderView(RenderCanvas *view);
-	RenderCanvas* GetRenderView();
-	//set volume data
-	void SetVolumeData(VolumeData* vd);
-	VolumeData* GetVolumeData();
-	//set group
-	void SetGroup(DataGroup *group);
-	DataGroup* GetGroup();
 	//set volume adjustment to link to group
 	void SetGroupLink(DataGroup *group);
 
@@ -80,10 +64,6 @@ public:
 	void ClearUndo();
 
 private:
-	int m_type;
-	RenderCanvas *m_view;
-	VolumeData* m_vd;
-	DataGroup* m_group;
 	wxAuiNotebook* m_notebook;
 	bool m_link_group;
 	bool m_enable_all;

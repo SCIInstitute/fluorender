@@ -2492,8 +2492,6 @@ void ScriptProc::ChangeData()
 		//m_frame->GetTreePanel()->DeleteAll();
 		glbin_ruler_handler.DeleteAll(false);
 		glbin_data_manager.ClearAll();
-		m_frame->GetOutAdjPanel()->SetVolumeData(0);
-		m_frame->GetOutAdjPanel()->SetGroup(0);
 		m_frame->GetOutAdjPanel()->SetGroupLink(0);
 		m_frame->GetRenderCanvas(0)->ClearAll();
 		DataGroup::ResetID();
