@@ -2277,7 +2277,7 @@ void RenderCanvas::BindRenderBuffer()
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void RenderCanvas::ClearVRBuffer()
+void RenderCanvas::ClearRenderBuffer()
 {
 	BindRenderBuffer();
 	//clear color buffer to black for compositing
@@ -5384,14 +5384,9 @@ void RenderCanvas::ForceDraw()
 	PreDraw();
 
 	if (glbin_settings.m_hologram_mode == 1)
-	{
 		PrepVRBuffer();
-		BindRenderBuffer();
-	}
-	else if (glbin_settings.m_hologram_mode == 2)
-	{
-		BindRenderBuffer();
-	}
+	if (glbin_settings.m_hologram_mode)
+		ClearRenderBuffer();
 
 	switch (m_draw_type)
 	{
