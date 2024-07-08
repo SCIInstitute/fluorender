@@ -173,6 +173,22 @@ namespace flvr
 	"	FragColor = c;\n" \
 	"}\n"
 
+#define IMG_SHADER_CODE_SOLIDTEX_LOOKUP \
+"//IMG_SHADER_CODE_SOLIDTEX_LOOKUP\n" \
+"in vec3 OutVertex;\n" \
+"in vec3 OutTexCoord;\n" \
+"out vec4 FragColor;\n" \
+"\n" \
+"// IMG_SHADER_CODE_SOLIDTEX_LOOKUP\n" \
+"uniform sampler2D tex0;\n" \
+"\n" \
+"void main()\n" \
+"{\n" \
+"	vec4 t = vec4(OutTexCoord, 1.0);\n" \
+"	vec4 c = texture(tex0, t.xy);\n" \
+"	FragColor = vec4(c.xyz, 1.0);\n" \
+"}\n"
+
 #define IMG_SHADER_CODE_BRIGHTNESS_CONTRAST \
 	"//IMG_SHADER_CODE_BRIGHTNESS_CONTRAST\n" \
 	"in vec3 OutVertex;\n" \
@@ -688,6 +704,7 @@ namespace flvr
 			z << IMG_VTX_CODE_DRAW_TEXT;
 			break;
 		case IMG_SHADER_TEXTURE_LOOKUP:
+		case IMG_SHADER_SOLIDTEX_LOOKUP:
 		case IMG_SHDR_BRIGHTNESS_CONTRAST:
 		case IMG_SHDR_BRIGHTNESS_CONTRAST_HDR:
 		case IMG_SHDR_GRADIENT_MAP:
@@ -758,6 +775,9 @@ namespace flvr
 			break;
 		case IMG_SHADER_TEXTURE_LOOKUP:
 			z << IMG_SHADER_CODE_TEXTURE_LOOKUP;
+			break;
+		case IMG_SHADER_SOLIDTEX_LOOKUP:
+			z << IMG_SHADER_CODE_SOLIDTEX_LOOKUP;
 			break;
 		case IMG_SHDR_BRIGHTNESS_CONTRAST:
 			z << IMG_SHADER_CODE_BRIGHTNESS_CONTRAST;

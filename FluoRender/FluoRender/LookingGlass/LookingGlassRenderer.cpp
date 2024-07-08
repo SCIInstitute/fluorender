@@ -174,7 +174,7 @@ void LookingGlassRenderer::Setup()
 
 	flvr::ShaderProgram* shader = 0;
 	//set up shader to render texture
-	shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	shader = glbin_img_shader_factory.shader(IMG_SHADER_SOLIDTEX_LOOKUP);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -234,7 +234,7 @@ void LookingGlassRenderer::Draw()
 	glDisable(GL_DEPTH_TEST);
 	//texture lookup shader
 	flvr::ShaderProgram* shader = 0;
-	shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	shader = glbin_img_shader_factory.shader(IMG_SHADER_SOLIDTEX_LOOKUP);
 	shader->bind();
 	//set up view port for place texture
 	GLint viewport[4];

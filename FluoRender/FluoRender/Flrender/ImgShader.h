@@ -55,6 +55,7 @@ namespace flvr
 #define IMG_SHDR_DRAW_TEXT					18
 #define IMG_SHDR_DRAW_THICK_LINES			19
 #define IMG_SHDR_DRAW_THICK_LINES_COLOR		20
+#define IMG_SHADER_SOLIDTEX_LOOKUP			21
 
 	class ShaderProgram;
 
