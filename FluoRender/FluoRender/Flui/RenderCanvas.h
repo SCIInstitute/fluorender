@@ -1175,13 +1175,13 @@ private:
 	void DrawAnnotations();
 	//framebuffer
 	void BindRenderBuffer();
-	void ClearRenderBuffer();
 	//draw out the framebuffer after composition
 	void PrepFinalBuffer();
 	void ClearFinalBuffer();
 	void DrawFinalBuffer();
 	//vr buffers
 	void PrepVRBuffer();
+	void ClearVRBuffer();
 	void DrawVRBuffer();
 	//different volume drawing modes
 	void DrawVolumesMulti(vector<VolumeData*> &list, int peel = 0);
