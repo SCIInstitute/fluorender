@@ -2272,6 +2272,9 @@ void RenderCanvas::BindRenderBuffer()
 		int nx, ny;
 		GetRenderSize(nx, ny);
 		glbin_lg_renderer.BindRenderBuffer(nx, ny);
+		glClearDepth(1.0);
+		glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 0.0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 	else
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);

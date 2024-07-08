@@ -1179,7 +1179,11 @@ void RenderViewPanel::SetFullScreen()
 		wxDisplay display(disp_id);
 		wxRect rect = display.GetGeometry();
 		m_full_frame->SetSize(rect.GetSize());
-		m_full_frame->SetPosition(rect.GetPosition());
+		wxPoint pos = rect.GetPosition();
+#ifdef _DARWIN
+		pos -= wxPoint(0, 10);
+#endif
+		m_full_frame->SetPosition(pos);
 #ifdef _WIN32
 		m_full_frame->ShowFullScreen(true);
 #endif
