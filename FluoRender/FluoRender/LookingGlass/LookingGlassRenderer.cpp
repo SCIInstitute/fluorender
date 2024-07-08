@@ -174,7 +174,7 @@ void LookingGlassRenderer::Setup()
 
 	flvr::ShaderProgram* shader = 0;
 	//set up shader to render texture
-	shader = glbin_img_shader_factory.shader(IMG_SHADER_SOLIDTEX_LOOKUP);
+	shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -234,7 +234,7 @@ void LookingGlassRenderer::Draw()
 	glDisable(GL_DEPTH_TEST);
 	//texture lookup shader
 	flvr::ShaderProgram* shader = 0;
-	shader = glbin_img_shader_factory.shader(IMG_SHADER_SOLIDTEX_LOOKUP);
+	shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 	shader->bind();
 	//set up view port for place texture
 	GLint viewport[4];
@@ -243,10 +243,6 @@ void LookingGlassRenderer::Draw()
 	int x = (m_cur_view % m_columns) * m_viewWidth;
 	int y = int(float(m_cur_view) / float(m_columns)) * m_viewHeight;
 	glViewport(x, y, m_viewWidth, m_viewHeight);
-	glEnable(GL_SCISSOR_TEST);
-	glScissor(x, y, m_viewWidth, m_viewHeight);
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glClear(GL_COLOR_BUFFER_BIT);
 	//bind texture
 	flvr::Framebuffer* view_buffer =
 		glbin_framebuffer_manager.framebuffer("quilt view");
@@ -257,7 +253,6 @@ void LookingGlassRenderer::Draw()
 	quad_va->draw();
 	shader->release();
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glDisable(GL_SCISSOR_TEST);
 
 	//move index for next
 	advance_views();
@@ -266,7 +261,6 @@ void LookingGlassRenderer::Draw()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// reset viewport
 	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-	glScissor(viewport[0], viewport[1], viewport[2], viewport[3]);
 	//glDisable(GL_BLEND);
 	//glDisable(GL_DEPTH_TEST);
 	shader = glbin_light_field_shader_factory.shader(0);
