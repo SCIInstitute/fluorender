@@ -1180,7 +1180,9 @@ void RenderViewPanel::SetFullScreen()
 		wxRect rect = display.GetGeometry();
 		m_full_frame->SetSize(rect.GetSize());
 		m_full_frame->SetPosition(rect.GetPosition());
+#ifdef _WIN32
 		m_full_frame->ShowFullScreen(true);
+#endif
 		m_canvas->SetPosition(wxPoint(0, 0));
 		m_canvas->SetSize(m_full_frame->GetSize());
 		if (glbin_settings.m_stay_top)
