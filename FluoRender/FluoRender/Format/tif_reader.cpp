@@ -1821,6 +1821,8 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	if (!val)
 		return NULL;
 
+	bool show_progress = total_size > 2e8;
+
 	int max_value = 0;
 
 	void* buf = 0;
@@ -1890,6 +1892,8 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 			pageindex += m_chan_num;
 			//if (!imagej_raw_)
 			//	InvalidatePageInfo();
+			if (show_progress)
+				SetProgress(std::round(100.0 * (i + 1) / numPages), "NOT_SET");
 		}
 	}
 	else
@@ -2090,6 +2094,8 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 				break;
 			//if (!imagej_raw_)
 			//	InvalidatePageInfo();
+			if (show_progress)
+				SetProgress(std::round(100.0 * (pageindex + 1) / for_size), "NOT_SET");
 		}
 	}
 

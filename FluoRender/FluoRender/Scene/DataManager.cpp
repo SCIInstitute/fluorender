@@ -5547,13 +5547,11 @@ void DataManager::LoadVolumes(wxArrayString files, bool withImageJ)
 	else
 		str_streaming = "Large data streaming is currently OFF.";
 
-	SetProgress(0, str_streaming);
-
 	bool enable_4d = false;
 
 	for (j = 0; j < (int)files.Count(); j++)
 	{
-		SetProgress(90 * (j + 1) / (int)files.Count(), str_streaming);
+		SetProgress(std::round(100.0 * (j + 1) / files.Count()), str_streaming);
 
 		int ch_num = 0;
 		wxString filename = files[j];
@@ -5882,6 +5880,7 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 	if (glbin_settings.m_ser_num > 0)
 		reader->LoadBatch(glbin_settings.m_ser_num);
 	int chan = reader->GetChanNum();
+	reader->SetProgressFunc(GetProgressFunc());
 	for (i=(ch_num>=0?ch_num:0);
 		i<(ch_num>=0?ch_num+1:chan); i++)
 	{
@@ -6018,11 +6017,9 @@ void DataManager::LoadMeshes(wxArrayString files)
 	if (files.Count() > 1)
 		group = canvas->AddOrGetMGroup();
 
-	SetProgress(0, "FluoRender is reading and processing selected mesh data. Please wait.");
-
 	for (int i = 0; i < (int)files.Count(); i++)
 	{
-		SetProgress(90 * (i + 1) / (int)files.Count(),
+		SetProgress(std::round(100.0 * (i + 1) / files.Count()),
 			"FluoRender is reading and processing selected mesh data. Please wait.");
 
 		wxString filename = files[i];

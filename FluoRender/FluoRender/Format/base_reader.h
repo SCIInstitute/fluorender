@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _BASE_READER_H_
 #define _BASE_READER_H_
 
+#include <Progress.h>
 #include <string>
 #include <nrrd.h>
 #include <vector>
@@ -66,7 +67,7 @@ using namespace std;
 #define READER_LOF_TYPE	11
 #define READER_MPG_TYPE	12
 
-class BaseReader
+class BaseReader : public Progress
 {
 public:
 	//BaseReader();

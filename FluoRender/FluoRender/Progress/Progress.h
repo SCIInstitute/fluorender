@@ -42,14 +42,28 @@ public:
 	{
 		m_progress_func = f;
 	}
+	std::function<void(int, const wxString&)> GetProgressFunc()
+	{
+		return m_progress_func;
+	}
 	void SetProgress(int val, const wxString& str)
 	{
+		int prg = std::round(m_min + (val / 100.0) * m_range);
 		if (m_progress_func)
-			m_progress_func(val, str);
+			m_progress_func(prg, str);
+	}
+	void SetRange(int v1, int v2)
+	{
+		m_min = std::min(v1, v2);
+		m_max = std::max(v1, v2);
+		m_range = m_max - m_min;
 	}
 
 private:
 	std::function<void(int, const wxString&)> m_progress_func;
+	int m_min;
+	int m_max;
+	int m_range;
 };
 
 #endif//_PROGRESS_H_

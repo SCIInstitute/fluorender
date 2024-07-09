@@ -2110,7 +2110,8 @@ void MainFrame::SetProgress(int val, const wxString& str)
 {
 	wxGetApp().Yield();
 	m_statusbar->SetGaugeValue(val);
-	m_statusbar->SetGaugeText(str);
+	if (str != "NOT_SET")
+		m_statusbar->SetGaugeText(str);
 }
 
 void MainFrame::OpenVolume()

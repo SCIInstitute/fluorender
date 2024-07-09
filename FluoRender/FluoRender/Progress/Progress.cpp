@@ -28,7 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Progress.h>
 
 Progress::Progress() :
-	m_progress_func(0)
+	m_progress_func(0),
+	m_min(0),
+	m_max(100),
+	m_range(100)
 {
 
 }
