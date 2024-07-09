@@ -58,6 +58,18 @@ public:
 		m_max = std::max(v1, v2);
 		m_range = m_max - m_min;
 	}
+	int GetMin()
+	{
+		return m_min;
+	}
+	int GetMax()
+	{
+		return m_max;
+	}
+	int GetRange()
+	{
+		return m_range;
+	}
 
 private:
 	std::function<void(int, const wxString&)> m_progress_func;

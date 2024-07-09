@@ -1442,6 +1442,10 @@ private:
 	//project path
 	wxString m_prj_path;
 	wxString m_prj_file;
+
+	//for reading files and channels
+	size_t m_cur_file;
+	size_t m_file_num;
 };
 
 #endif//_DATAMANAGER_H_

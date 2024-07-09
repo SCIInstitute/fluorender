@@ -5411,7 +5411,9 @@ TrackGroup* CurrentObjects::GetTrackGroup()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 DataManager::DataManager() :
 	Progress(),
-	m_frame(0)
+	m_frame(0),
+	m_cur_file(0),
+	m_file_num(0)
 {
 }
 
@@ -5519,7 +5521,6 @@ wxString DataManager::GetProjectFile()
 
 void DataManager::LoadVolumes(wxArrayString files, bool withImageJ)
 {
-	int j;
 	fluo::ValueCollection vc;
 	VolumeData* vd_sel = 0;
 	DataGroup* group_sel = 0;
@@ -5548,13 +5549,14 @@ void DataManager::LoadVolumes(wxArrayString files, bool withImageJ)
 		str_streaming = "Large data streaming is currently OFF.";
 
 	bool enable_4d = false;
+	m_file_num = files.Count();
 
-	for (j = 0; j < (int)files.Count(); j++)
+	for (m_cur_file = 0; m_cur_file < m_file_num; m_cur_file++)
 	{
-		SetProgress(std::round(100.0 * (j + 1) / files.Count()), str_streaming);
+		SetProgress(std::round(100.0 * (m_cur_file + 1) / files.Count()), str_streaming);
 
 		int ch_num = 0;
-		wxString filename = files[j];
+		wxString filename = files[m_cur_file];
 		wxString suffix = filename.Mid(filename.Find('.', true)).MakeLower();
 
 		if (withImageJ)
@@ -5612,7 +5614,7 @@ void DataManager::LoadVolumes(wxArrayString files, bool withImageJ)
 							enable_4d = true;
 					}
 				}
-				if (j > 0)
+				if (m_cur_file > 0)
 					group->SetDisp(false);
 			}
 		}
@@ -5881,9 +5883,18 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 		reader->LoadBatch(glbin_settings.m_ser_num);
 	int chan = reader->GetChanNum();
 	reader->SetProgressFunc(GetProgressFunc());
+
+	int v1 = std::round(100.0 * m_cur_file / m_file_num);
+	int v2 = std::round(100.0 * (m_cur_file + 1) / m_file_num);
+	SetRange(v1, v2);
+	int r = GetRange();
+
 	for (i=(ch_num>=0?ch_num:0);
 		i<(ch_num>=0?ch_num+1:chan); i++)
 	{
+		reader->SetRange(v1 + std::round(double(i) * r / chan),
+			v1 + std::round(double(i + 1) * r / chan));
+
 		VolumeData *vd = new VolumeData();
 		if (!vd)
 			continue;
@@ -5998,8 +6009,10 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 		if (type == LOAD_TYPE_MPG)
 			vd->SetAlphaEnable(false);
 
+		SetProgress(std::round(100.0 * (i + 1) / chan), "NOT_SET");
 	}
 
+	SetRange(0, 100);
 	return result;
 }
 
