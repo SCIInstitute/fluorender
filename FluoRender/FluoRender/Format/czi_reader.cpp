@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <czi_reader.h>
 #include <compatibility.h>
+#include <Global.h>
 #include <wx/sstream.h>
 #include <stdio.h>
 #include <set>
@@ -218,8 +219,6 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 	if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
 		return 0;
 
-	int i, j;
-
 	if (t >= 0 && t < m_time_num &&
 		c >= 0 && c < m_chan_num &&
 		m_slice_num > 0 &&
@@ -235,47 +234,45 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 			return 0;
 		}
 		//allocate memory for nrrd
+		bool show_progress = false;
+		size_t blk_num = cinfo->blocks.size();
+		unsigned long long mem_size = (unsigned long long)m_x_size*
+			(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+		void* val = 0;
 		switch (m_datatype)
 		{
 		case 1://8-bit
-		{
-			unsigned long long mem_size = (unsigned long long)m_x_size*
-				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
-			unsigned char *val = new (std::nothrow) unsigned char[mem_size];
-			for (i = 0; i < (int)cinfo->blocks.size(); i++)
-			{
-				SubBlockInfo* sbi = &(cinfo->blocks[i]);
-				ReadSegSubBlock(pfile, sbi, val);
-			}
-			//create nrrd
-			data = nrrdNew();
-			nrrdWrap(data, val, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-			nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-			nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
-			nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-			nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-		}
-		break;
+			val = new (std::nothrow) unsigned char[mem_size];
+			show_progress = mem_size > glbin_settings.m_prg_size;
+			break;
 		case 2://16-bit
+			val = new (std::nothrow) unsigned short[mem_size];
+			show_progress = mem_size * 2 > glbin_settings.m_prg_size;
+			break;
+		}
+
+		for (size_t i = 0; i < blk_num; i++)
 		{
-			unsigned long long mem_size = (unsigned long long)m_x_size*
-				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
-			unsigned short *val = new (std::nothrow) unsigned short[mem_size];
-			for (i = 0; i < (int)cinfo->blocks.size(); i++)
-			{
-				SubBlockInfo* sbi = &(cinfo->blocks[i]);
-				ReadSegSubBlock(pfile, sbi, val);
-			}
-			//create nrrd
-			data = nrrdNew();
+			SubBlockInfo* sbi = &(cinfo->blocks[i]);
+			ReadSegSubBlock(pfile, sbi, val);
+			if (show_progress && m_time_num == 1)
+				SetProgress(std::round(100.0 * (i + 1) / blk_num), "NOT_SET");
+		}
+		//create nrrd
+		data = nrrdNew();
+		switch (m_datatype)
+		{
+		case 1:
+			nrrdWrap(data, val, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			break;
+		case 2:
 			nrrdWrap(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-			nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-			nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
-			nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-			nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			break;
 		}
-		break;
-		}
+		nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
+		nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
+		nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+		nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
 	}
 
 	m_scalar_scale = 65535.0 / m_max_value;

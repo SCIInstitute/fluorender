@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <tif_reader.h>
+#include <Global.h>
 #include <boost/filesystem.hpp>
 #include <compatibility.h>
 #include <sstream>
@@ -1821,7 +1822,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	if (!val)
 		return NULL;
 
-	bool show_progress = total_size > 2e8;
+	bool show_progress = total_size > glbin_settings.m_prg_size;
 
 	int max_value = 0;
 
@@ -1892,7 +1893,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 			pageindex += m_chan_num;
 			//if (!imagej_raw_)
 			//	InvalidatePageInfo();
-			if (show_progress)
+			if (show_progress && m_time_num == 1)
 				SetProgress(std::round(100.0 * (i + 1) / numPages), "NOT_SET");
 		}
 	}
@@ -2094,7 +2095,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 				break;
 			//if (!imagej_raw_)
 			//	InvalidatePageInfo();
-			if (show_progress)
+			if (show_progress && m_time_num == 1)
 				SetProgress(std::round(100.0 * (pageindex + 1) / for_size), "NOT_SET");
 		}
 	}

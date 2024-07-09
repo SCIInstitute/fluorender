@@ -65,6 +65,7 @@ MainSettings::MainSettings()
 	m_fp_convert = false;
 	m_fp_min = 0;
 	m_fp_max = 1;
+	m_prg_size = 1e8;
 
 	m_script_break = true;
 	m_run_script = false;
@@ -231,6 +232,7 @@ void MainSettings::Read()
 		fconfig.Read("fp convert", &m_fp_convert, false);
 		fconfig.Read("fp min", &m_fp_min, 0);
 		fconfig.Read("fp max", &m_fp_max, 1);
+		fconfig.Read("prg size", &m_prg_size, 1e8);
 	}
 	//script
 	if (fconfig.Exists("/script"))
@@ -478,6 +480,7 @@ void MainSettings::Save()
 	fconfig.Write("fp convert", m_fp_convert);
 	fconfig.Write("fp min", m_fp_min);
 	fconfig.Write("fp max", m_fp_max);
+	fconfig.Write("prg size", m_prg_size);
 
 	//script
 	fconfig.SetPath("/script");

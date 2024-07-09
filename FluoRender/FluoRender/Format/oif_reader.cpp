@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <oif_reader.h>
 #include <compatibility.h>
+#include <Global.h>
 #include <algorithm>
 
 OIFReader::OIFReader()
@@ -611,11 +612,12 @@ Nrrd* OIFReader::Convert(int t, int c, bool get_max)
 		unsigned long long mem_size = (unsigned long long)m_x_size*
 			(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
 		unsigned short *val = new (std::nothrow) unsigned short[mem_size];
+		bool show_progress = mem_size > glbin_settings.m_prg_size;
 
 		//read the channel
 		ChannelInfo *cinfo = &m_oif_info[t].dataset[c];
-		int i;
-		for (i = 0; i<int(cinfo->size()); i++)
+		size_t num = cinfo->size();
+		for (size_t i = 0; i < num; i++)
 		{
 			char *pbyData = 0;
 			wstring file_name = (*cinfo)[i];
@@ -645,6 +647,9 @@ Nrrd* OIFReader::Convert(int t, int c, bool get_max)
 
 			if (pbyData)
 				delete[]pbyData;
+
+			if (show_progress && m_time_num == 1)
+				SetProgress(std::round(100.0 * (i + 1) / num), "NOT_SET");
 		}
 
 		//create nrrd

@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <lsm_reader.h>
 #include <compatibility.h>
+#include <Global.h>
 #include <stdio.h>
 
 LSMReader::LSMReader()
@@ -700,8 +701,6 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
 	if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
 		return 0;
 
-	int i, j;
-
 	if (t >= 0 && t < m_time_num &&
 		c >= 0 && c < m_chan_num &&
 		m_slice_num > 0 &&
@@ -711,80 +710,88 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
 		c < (int)m_lsm_info[t].size())
 	{
 		//allocate memory for nrrd
+		bool show_progress = false;
+		ChannelInfo *cinfo = &m_lsm_info[t][c];
+		size_t blk_num = cinfo->size();
+		unsigned long long mem_size = (unsigned long long)m_x_size *
+			(unsigned long long)m_y_size * (unsigned long long)m_slice_num;
+		void* val = 0;
 		switch (m_datatype)
 		{
 		case 1://8-bit
-		{
-			unsigned long long mem_size = (unsigned long long)m_x_size*
-				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
-			unsigned char *val = new (std::nothrow) unsigned char[mem_size];
-			ChannelInfo *cinfo = &m_lsm_info[t][c];
-			for (i = 0; i < (int)cinfo->size(); i++)
-			{
-				if (m_l4gb ?
-					FSEEK64(pfile, ((uint64_t((*cinfo)[i].offset_high)) << 32) + (*cinfo)[i].offset, SEEK_SET) == 0 :
-					FSEEK64(pfile, (*cinfo)[i].offset, SEEK_SET) == 0)
-				{
-					unsigned int val_pos = m_x_size*m_y_size*i;
-					if (m_compression == 1)
-						fread(val + val_pos, sizeof(unsigned char), (*cinfo)[i].size, pfile);
-					else if (m_compression == 5)
-					{
-						unsigned char* tif = new (std::nothrow) unsigned char[(*cinfo)[i].size];
-						fread(tif, sizeof(unsigned char), (*cinfo)[i].size, pfile);
-						LZWDecode(tif, val + val_pos, (*cinfo)[i].size);
-						for (j = 0; j < m_y_size; j++)
-							DecodeAcc8(val + val_pos + j*m_x_size, m_x_size, 1);
-						delete[]tif;
-					}
-				}
-			}
-			//create nrrd
-			data = nrrdNew();
-			nrrdWrap(data, val, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-			nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-			nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
-			nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-			nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-		}
-		break;
+			val = new (std::nothrow) unsigned char[mem_size];
+			show_progress = mem_size > glbin_settings.m_prg_size;
+			break;
 		case 2://16-bit
 		case 3:
+			val = new (std::nothrow) unsigned short[mem_size];
+			show_progress = mem_size * 2 > glbin_settings.m_prg_size;
+			break;
+		}
+
+		for (size_t i = 0; i < blk_num; i++)
 		{
-			unsigned long long mem_size = (unsigned long long)m_x_size*
-				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
-			unsigned short *val = new (std::nothrow) unsigned short[mem_size];
-			ChannelInfo *cinfo = &m_lsm_info[t][c];
-			for (i = 0; i < (int)cinfo->size(); i++)
+			if (m_l4gb ?
+				FSEEK64(pfile, ((uint64_t((*cinfo)[i].offset_high)) << 32) + (*cinfo)[i].offset, SEEK_SET) == 0 :
+				FSEEK64(pfile, (*cinfo)[i].offset, SEEK_SET) == 0)
 			{
-				if (m_l4gb ?
-					FSEEK64(pfile, ((uint64_t((*cinfo)[i].offset_high)) << 32) + (*cinfo)[i].offset, SEEK_SET) == 0 :
-					FSEEK64(pfile, (*cinfo)[i].offset, SEEK_SET) == 0)
+				size_t val_pos = 0;
+				switch (m_datatype)
 				{
-					unsigned int val_pos = m_x_size*m_y_size*i;
-					if (m_compression == 1)
-						fread(val + val_pos, sizeof(unsigned char), (*cinfo)[i].size, pfile);
-					else if (m_compression == 5)
-					{
-						unsigned char* tif = new (std::nothrow) unsigned char[(*cinfo)[i].size];
-						fread(tif, sizeof(unsigned char), (*cinfo)[i].size, pfile);
-						LZWDecode(tif, (tidata_t)(val + val_pos), (*cinfo)[i].size);
-						for (j = 0; j < m_y_size; j++)
-							DecodeAcc16((tidata_t)(val + val_pos + j*m_x_size), m_x_size, 1);
-						delete[]tif;
-					}
+				case 1:
+					val_pos = m_x_size * m_y_size * i;
+					break;
+				case 2:
+				case 3:
+					val_pos = m_x_size * m_y_size * i * 2;
+					break;
 				}
+
+				if (m_compression == 1)
+				{
+					fread(tidata_t(val) + val_pos, sizeof(uint8_t), (*cinfo)[i].size, pfile);
+				}
+				else if (m_compression == 5)
+				{
+					unsigned char* tif = new (std::nothrow) unsigned char[(*cinfo)[i].size];
+					fread(tif, sizeof(unsigned char), (*cinfo)[i].size, pfile);
+					LZWDecode(tif, tidata_t(val) + val_pos, (*cinfo)[i].size);
+					for (size_t j = 0; j < m_y_size; j++)
+					{
+						switch (m_datatype)
+						{
+						case 1:
+							DecodeAcc8(tidata_t(val) + val_pos + j * m_x_size, m_x_size, 1);
+							break;
+						case 2:
+						case 3:
+							DecodeAcc16(tidata_t(val) + val_pos + j * m_x_size * 2, m_x_size, 1);
+							break;
+						}
+					}
+					delete[]tif;
+				}
+
+				if (show_progress && m_time_num == 1)
+					SetProgress(std::round(100.0 * (i + 1) / blk_num), "NOT_SET");
 			}
-			//create nrrd
-			data = nrrdNew();
+		}
+		//create nrrd
+		data = nrrdNew();
+		switch (m_datatype)
+		{
+		case 1:
+			nrrdWrap(data, val, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			break;
+		case 2:
+		case 3:
 			nrrdWrap(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-			nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-			nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
-			nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-			nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			break;
 		}
-		break;
-		}
+		nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
+		nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
+		nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+		nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
 	}
 
 	fclose(pfile);

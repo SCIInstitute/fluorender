@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <nd2_reader.h>
 #include <compatibility.h>
+#include <Global.h>
 #include <stdio.h>
 #include <json.hpp>
 #if defined(_DEBUG) || defined(__linux__)
@@ -390,7 +391,11 @@ bool ND2Reader::ReadChannel(LIMFILEHANDLE h, int t, int c, void* val)
 	unsigned long long pos;
 	int bytes = m_bits / 8;
 	unsigned char *dst, *src;
-	for (size_t i = 0; i < cinfo->chann.size(); ++i)
+	size_t num = cinfo->chann.size();
+	unsigned long long mem_size = m_x_size * m_y_size * m_slice_num;
+	bool show_progress = mem_size > glbin_settings.m_prg_size;
+
+	for (size_t i = 0; i < num; ++i)
 	{
 		int seq = cinfo->chann[i].seq;
 		int z = cinfo->chann[i].slice;
@@ -399,17 +404,23 @@ bool ND2Reader::ReadChannel(LIMFILEHANDLE h, int t, int c, void* val)
 		LIMPICTURE pic = { 0 };
 		Lim_FileGetImageData(h, seq, &pic);
 		pos = xysize * z + m_x_size * y + x;//consider it a brick
+
 		for (unsigned int j = 0; j < pic.uiHeight; ++j)
-		for (unsigned int k = 0; k < pic.uiWidth; ++k)
 		{
-			dst = (unsigned char*)val;
-			dst += (pos + m_x_size * j + k) * bytes;
-			src = (unsigned char*)(pic.pImageData);
-			src += pic.uiWidthBytes * j + k * pic.uiComponents * bytes + c * bytes;
-			memcpy(dst, src, bytes);
+			for (unsigned int k = 0; k < pic.uiWidth; ++k)
+			{
+				dst = (unsigned char*)val;
+				dst += (pos + m_x_size * j + k) * bytes;
+				src = (unsigned char*)(pic.pImageData);
+				src += pic.uiWidthBytes * j + k * pic.uiComponents * bytes + c * bytes;
+				memcpy(dst, src, bytes);
+			}
 		}
 
 		Lim_DestroyPicture(&pic);
+
+		if (show_progress && m_time_num == 1)
+			SetProgress(std::round(100.0 * (i + 1) / num), "NOT_SET");
 	}
 
 	return true;

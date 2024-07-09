@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <oib_reader.h>
 #include <compatibility.h>
+#include <Global.h>
 #include <algorithm>
 
 OIBReader::OIBReader()
@@ -706,23 +707,31 @@ Nrrd *OIBReader::Convert(int t, int c, bool get_max)
 		//storage
 		POLE::Storage pStg(ws2s(path_name).c_str());
 		//open
-		if (pStg.open()) {
+		if (pStg.open())
+		{
 			//allocate memory for nrrd
 			unsigned long long mem_size = (unsigned long long)m_x_size*
 				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
 			unsigned short *val = new (std::nothrow) unsigned short[mem_size];
+			bool show_progress = mem_size > glbin_settings.m_prg_size;
+
 			//enumerate
-			std::list<std::string> entries =
-				pStg.entries();
+			std::list<std::string> entries = pStg.entries();
+			size_t i = 0;
+			size_t num = entries.size();
 			for (std::list<std::string>::iterator it = entries.begin();
-			it != entries.end(); ++it) {
-				if (pStg.isDirectory(*it)) {
+				it != entries.end(); ++it, ++i)
+			{
+				if (pStg.isDirectory(*it))
+				{
 					std::list<std::string> streams = pStg.GetAllStreams(*it);
 					size_t num = 0;
 					ChannelInfo *cinfo = &m_oib_info[t].dataset[c];
 					for (std::list<std::string>::iterator its = streams.begin();
-					its != streams.end(); ++its) {
-						if (num >= cinfo->size()) break;
+						its != streams.end(); ++its)
+					{
+						if (num >= cinfo->size())
+							break;
 						//fix the stream name
 						std::string str_name = ws2s((*cinfo)[num].stream_name);
 						std::string name = (*it) + std::string("/") + str_name;
@@ -739,8 +748,8 @@ Nrrd *OIBReader::Convert(int t, int c, bool get_max)
 							if (!pbyData)
 								return NULL;
 							//read
-							if (pStm.read(pbyData, sz)) {
-
+							if (pStm.read(pbyData, sz))
+							{
 								//copy tiff to val
 								ReadTiff(pbyData, val, num);
 
@@ -755,6 +764,9 @@ Nrrd *OIBReader::Convert(int t, int c, bool get_max)
 						num++;
 					}
 				}
+
+				if (show_progress && m_time_num == 1)
+					SetProgress(std::round(100.0 * (i + 1) / num), "NOT_SET");
 			}
 
 			//create nrrd
@@ -771,7 +783,8 @@ Nrrd *OIBReader::Convert(int t, int c, bool get_max)
 				nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size,
 					(size_t)m_y_size, (size_t)m_slice_num);
 			}
-			else {
+			else
+			{
 				//something is wrong
 				if (val)
 					delete[]val;

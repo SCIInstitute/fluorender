@@ -121,6 +121,7 @@ public:
 	bool m_fp_convert;		//convert floating point to int
 	double m_fp_min;		//min value of the floating point number
 	double m_fp_max;		//max value of the floating point number
+	double m_prg_size;		//min data size to show progress in reader
 
 	bool m_run_script;		//script
 	bool m_script_break;	//allow script break
