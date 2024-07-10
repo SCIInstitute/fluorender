@@ -114,6 +114,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+cmake_path(GET FluoRender_SOURCE_DIR PARENT_PATH PARENT_DIR)
+
 # static compile
 add_definitions(-DSTATIC_COMPILE)
 add_definitions(-DLX_STATIC_LINKING)
@@ -162,7 +164,11 @@ endif()
 if (WIN32)
 file(COPY ${FluoRender_SOURCE_DIR}/wxWidgets/include/wx/aui/auibook.h
   DESTINATION ${wxWidgets_ROOT_DIR}/include/wx/aui)
+file(COPY ${FluoRender_SOURCE_DIR}/wxWidgets/include/wx/aui/auibar.h
+  DESTINATION ${wxWidgets_ROOT_DIR}/include/wx/aui)
 file(COPY ${FluoRender_SOURCE_DIR}/wxWidgets/src/aui/auibook.cpp
+  DESTINATION ${wxWidgets_ROOT_DIR}/src/aui)
+file(COPY ${FluoRender_SOURCE_DIR}/wxWidgets/src/aui/auibar.cpp
   DESTINATION ${wxWidgets_ROOT_DIR}/src/aui)
 endif()
 # libtiff
@@ -212,6 +218,9 @@ set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
 find_package(Boost COMPONENTS system chrono filesystem REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
+
+# dlib
+add_subdirectory(${PARENT_DIR}/dlib-19.24.4 dlib_build)
 
 #opencv
 find_package(OpenCV REQUIRED)
@@ -359,17 +368,6 @@ file(GLOB nrrdhdr FluoRender/teem/Nrrd/*.h)
 add_library(TEEM_OBJ OBJECT
   ${airsrc} ${hestsrc} ${nrrdsrc} ${biffsrc}
   ${airhdr} ${hesthdr} ${nrrdhdr} ${biffhdr})
-
-# tensorflow
-#set(TENSORFLOW_SOURCE_DIR "" CACHE PATH
-#  "Directory that contains the TensorFlow project" )
-#if(NOT TENSORFLOW_SOURCE_DIR)
-#  get_filename_component(TENSORFLOW_SOURCE_DIR
-#    "${CMAKE_CURRENT_LIST_DIR}/../../../../" ABSOLUTE)
-#endif()
-#add_subdirectory(
-#  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite"
-#  "${CMAKE_CURRENT_BINARY_DIR}/tensorflow-lite" EXCLUDE_FROM_ALL)
 
 # XInput
 if(WIN32 AND USE_XINPUT)
@@ -899,7 +897,7 @@ if(WIN32)
   target_link_libraries(FluoRender
     secur32.lib
     XInput.lib
-    #tensorflow-lite
+    dlib::dlib
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
@@ -919,6 +917,7 @@ if(WIN32)
   target_link_libraries(Tester
     secur32.lib
     XInput.lib
+    dlib::dlib
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
