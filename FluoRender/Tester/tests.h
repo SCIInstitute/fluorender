@@ -31,3 +31,6 @@ void WalkCycleCompare(const std::string& datafile, const std::string& cyclefile,
 void PhaseGraph(const std::string& infile, const std::string& cyclefile, size_t ol);
 void ComputeVariance(const std::string& cycle_file, const std::vector<std::string>& sample_list, size_t ol);
 void ComputeTime(const std::string& cycle_file, const std::vector<std::string>& sample_list, size_t ol, double d);
+void WalkTest(int argc, char* argv[]);
+
+void DLTest();
