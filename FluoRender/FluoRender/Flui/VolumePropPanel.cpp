@@ -3051,7 +3051,11 @@ void VolumePropPanel::ResetDefault()
 
 	m_thresh_sldr->SetLink(false);
 	m_colormap_sldr->SetLink(false);
-	glbin_vol_def.Apply(m_vd);
+
+	if (m_sync_group && m_group)
+		glbin_vol_def.Apply(m_group);
+	else
+		glbin_vol_def.Apply(m_vd);
 
 	FluoRefresh(0, { gstVolumeProps }, { m_frame->GetRenderCanvas(m_view) });
 }

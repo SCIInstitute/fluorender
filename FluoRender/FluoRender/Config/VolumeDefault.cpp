@@ -402,3 +402,62 @@ void VolumeDataDefault::Copy(VolumeData* v1, VolumeData* v2)//v2 to v1
 	v1->SetGMScale(v2->GetGMScale());
 	v1->SetMaxValue(v2->GetMaxValue());
 }
+
+void VolumeDataDefault::Apply(DataGroup* g)
+{
+	if (!g)
+		return;
+
+	//int resx, resy, resz;
+	//g->GetResolution(resx, resy, resz);
+
+	g->SetGammaEnable(m_gamma_enable);
+	g->SetGamma(m_gamma);
+
+	g->SetBoundaryEnable(m_boundary_enable);
+	g->SetBoundary(m_boundary);
+
+	g->SetSaturationEnable(m_saturation_enable);
+	g->SetSaturation(m_saturation);
+
+	g->SetThreshEnable(m_thresh_enable);
+	g->SetLeftThresh(m_lo_thresh);
+	g->SetRightThresh(m_hi_thresh);
+	//g->SetSoftThreshold(m_sw);
+
+	g->SetLuminanceEnable(m_luminance_enable);
+	g->SetLuminance(m_luminance);
+
+	g->SetAlphaEnable(m_alpha_enable);
+	g->SetAlpha(m_alpha);
+
+	g->SetShadingEnable(m_shading_enable);
+	g->SetLowShading(m_low_shading);
+	g->SetHiShading(m_high_shading);
+
+	g->SetShadowEnable(m_shadow_enable);
+	g->SetShadowIntensity(m_shadow_intensity);
+
+	g->SetSampleRateEnable(m_sample_rate_enable);
+	g->SetSampleRate(m_sample_rate);
+
+	//if (!g->GetSpcFromFile())
+	//	g->SetBaseSpacings(m_spcx, m_spcy, m_spcz);
+
+	g->SetColormapMode(m_colormap_mode);
+	g->SetColormapDisp(m_colormap_disp);
+	g->SetColormapValues(m_colormap_low_value, m_colormap_hi_value);
+	g->SetColormapInv(m_colormap_inv);
+	g->SetColormap(m_colormap_type);
+	g->SetColormapProj(m_colormap_proj);
+
+	g->SetNR(m_noise_rd);
+	g->SetInterpolate(m_interpolate);
+	g->SetInvert(m_inverted);
+	g->SetMode(m_mip_enable ? 1 : 0);
+	g->SetTransparent(m_transparent);
+
+	g->SetBlendMode(m_blend_mode);
+	//g->SetLegend(m_legend);
+	g->SetLabelMode(m_label_mode);
+}

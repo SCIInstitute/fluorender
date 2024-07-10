@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/fileconf.h>
 
 class VolumeData;
+class DataGroup;
 class VolumeDataDefault
 {
 public:
@@ -42,6 +43,7 @@ public:
 	void Set(VolumeData* vd);
 	void Apply(VolumeData* vd);
 	void Copy(VolumeData* v1, VolumeData* v2);//v2 to v1
+	void Apply(DataGroup* g);
 
 public:
 	//default values

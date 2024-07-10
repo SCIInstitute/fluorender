@@ -815,6 +815,9 @@ void MLVolPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		bval = glbin_settings.m_vp_auto_apply;
 		m_auto_apply_chk->SetValue(bval);
 	}
+
+	if (update_all || FOUND_VALUE(gstMlAutoLoadTable))
+		AutoLoadTable();
 }
 
 void MLVolPropPanel::OnNewTable(wxCommandEvent& event)
