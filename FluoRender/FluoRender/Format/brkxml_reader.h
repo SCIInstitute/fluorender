@@ -72,8 +72,9 @@ public:
 	void SetLevel(int lv);
 	int GetCopyableLevel() {return m_copy_lv;}
 
-	void build_bricks(vector<flvr::TextureBrick*> &tbrks, int lv = -1);
-	void build_pyramid(vector<flvr::Pyramid_Level> &pyramid, vector<vector<vector<vector<flvr::FileLocInfo *>>>> &filenames, int t, int c);
+	void build_bricks(std::vector<flvr::TextureBrick*> &tbrks, int lv = -1);
+	void build_pyramid(std::vector<flvr::Pyramid_Level> &pyramid,
+		std::vector<std::vector<std::vector<std::vector<flvr::FileLocInfo *>>>> &filenames, int t, int c);
 	void OutputInfo();
 
 	void GetLandmark(int index, wstring &name, double &x, double &y, double &z, double &spcx, double &spcy, double &spcz);
@@ -130,10 +131,10 @@ private:
 		int brick_baseD;
 		int bit_depth;
 		int file_type;
-		vector<vector<vector<flvr::FileLocInfo *>>> filename;//Frame->Channel->BrickID->Filename
-		vector<BrickInfo *> bricks;
+		std::vector<std::vector<std::vector<flvr::FileLocInfo *>>> filename;//Frame->Channel->BrickID->Filename
+		std::vector<BrickInfo *> bricks;
 	};
-	vector<LevelInfo> m_pyramid;
+	std::vector<LevelInfo> m_pyramid;
 
 	
 	struct ImageInfo
@@ -158,7 +159,7 @@ private:
 
 	//3d batch
 	bool m_batch;
-	vector<wstring> m_batch_list;
+	std::vector<wstring> m_batch_list;
 	int m_cur_batch;
 
 	int m_slice_num;
@@ -185,17 +186,18 @@ private:
 		double x, y, z;
 		double spcx, spcy, spcz;
 	};
-	vector<Landmark> m_landmarks;
+	std::vector<Landmark> m_landmarks;
 	wstring m_metadata_id;
 
 private:
 	ImageInfo ReadImageInfo(tinyxml2::XMLElement *seqNode);
 	void ReadBrick(tinyxml2::XMLElement *brickNode, BrickInfo &binfo);
 	void ReadLevel(tinyxml2::XMLElement* lvNode, LevelInfo &lvinfo);
-	void ReadFilenames(tinyxml2::XMLElement* fileRootNode, vector<vector<vector<flvr::FileLocInfo *>>> &filename);
-	void ReadPackedBricks(tinyxml2::XMLElement* packNode, vector<BrickInfo *> &brks);
+	void ReadFilenames(tinyxml2::XMLElement* fileRootNode,
+		std::vector<std::vector<std::vector<flvr::FileLocInfo *>>> &filename);
+	void ReadPackedBricks(tinyxml2::XMLElement* packNode, std::vector<BrickInfo *> &brks);
 	void Readbox(tinyxml2::XMLElement *boxNode, double &x0, double &y0, double &z0, double &x1, double &y1, double &z1);
-	void ReadPyramid(tinyxml2::XMLElement *lvRootNode, vector<LevelInfo> &pylamid);
+	void ReadPyramid(tinyxml2::XMLElement *lvRootNode, std::vector<LevelInfo> &pylamid);
 
 	void Clear();
 };

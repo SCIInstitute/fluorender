@@ -99,7 +99,7 @@ double VolumePoint::GetPointVolume(
 	double max_int = 0.0;
 	double alpha = 0.0;
 	double value = 0.0;
-	vector<fluo::Plane*> *planes = 0;
+	std::vector<fluo::Plane*> *planes = 0;
 	double mspc = 1.0;
 	if (m_vd->GetSampleRate() > 0.0)
 		mspc = sqrt(spcx*spcx + spcy * spcy + spcz * spcz) / m_vd->GetSampleRate();
@@ -267,7 +267,7 @@ double VolumePoint::GetPointVolumeBox(
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	vector<fluo::Plane*> *planes = m_vd->GetVR()->get_planes();
+	std::vector<fluo::Plane*> *planes = m_vd->GetVR()->get_planes();
 	if (planes->size() != 6)
 		return -1.0;
 
@@ -373,7 +373,7 @@ double VolumePoint::GetPointVolumeBox2(
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	vector<fluo::Plane*> *planes = m_vd->GetVR()->get_planes();
+	std::vector<fluo::Plane*> *planes = m_vd->GetVR()->get_planes();
 	if (planes->size() != 6)
 		return -1.0;
 

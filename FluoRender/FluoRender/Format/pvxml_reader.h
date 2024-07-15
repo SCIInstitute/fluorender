@@ -109,16 +109,16 @@ private:
 		double x_start;
 		double y_start;
 		double z_start;
-		vector<ChannelInfo> channels;
+		std::vector<ChannelInfo> channels;
 	};
 	struct SequenceInfo
 	{
 		int grid_index;
 		bool apart;
-		vector<FrameInfo> frames;
+		std::vector<FrameInfo> frames;
 	};
-	typedef vector<SequenceInfo> TimeDataInfo;
-	vector<TimeDataInfo> m_pvxml_info;
+	typedef std::vector<SequenceInfo> TimeDataInfo;
+	std::vector<TimeDataInfo> m_pvxml_info;
 
 	//struct for PVStateShard
 	struct StateShard
@@ -151,7 +151,7 @@ private:
 		int bit_depth;
 	};
 	StateShard m_current_state;
-	vector<StateShard> m_state_shard_stack;
+	std::vector<StateShard> m_state_shard_stack;
 
 	//struct for sequence bbox
 	struct SeqBox
@@ -186,7 +186,7 @@ private:
 			y_max = sb.y_max>y_max?sb.y_max:y_max;
 		}
 	};
-	vector<SeqBox> m_seq_boxes;
+	std::vector<SeqBox> m_seq_boxes;
 	bool m_new_seq;//starts a new sequence
 
 	double m_x_min, m_y_min, m_z_min;
@@ -231,7 +231,7 @@ private:
 		int chan_num;
 		double wavelength;
 	};
-	vector<WavelengthInfo> m_excitation_wavelength_list;
+	std::vector<WavelengthInfo> m_excitation_wavelength_list;
 
 private:
 	bool ConvertS(int c, TimeDataInfo* time_data_info, unsigned short *val);

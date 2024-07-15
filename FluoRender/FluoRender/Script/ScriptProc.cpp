@@ -1424,7 +1424,7 @@ void ScriptProc::RunRulerProfile()
 			fluo::Node* ruler_node = cmdg->getOrAddNode(std::to_string(ruler->Id()+1));
 			ruler_node->addSetValue("type", std::string("ruler"));
 
-			vector<flrd::ProfileBin>* profile = ruler->GetProfile();
+			std::vector<flrd::ProfileBin>* profile = ruler->GetProfile();
 			if (profile && profile->size())
 			{
 				double dval, dist;

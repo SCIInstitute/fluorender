@@ -141,7 +141,7 @@ EntryHist* Histogram::GetEntryHist()
 		kernel_index = kernel_prog->createKernel("kernel_1");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 
 	//sum histogram
 	unsigned int* sh = new unsigned int[m_bins + 1]();

@@ -47,7 +47,7 @@ namespace flrd
 			m_view_only(false), m_mouse_pos(false) {}
 		~PaintBoxes() {}
 
-		void SetBricks(vector<flvr::TextureBrick*> *bricks)
+		void SetBricks(std::vector<flvr::TextureBrick*> *bricks)
 		{
 			m_bricks = bricks;
 		}
@@ -95,7 +95,7 @@ namespace flrd
 		void Compute();
 
 	private:
-		vector<flvr::TextureBrick*> *m_bricks;
+		std::vector<flvr::TextureBrick*> *m_bricks;
 		int m_paint_tex;//2d tex of paint strokes
 		int m_ptx, m_pty;//tex size
 		bool m_view_only;//only test for view intersection
@@ -117,7 +117,7 @@ namespace flrd
 		};
 
 	private:
-		bool GetBrickBoxes(vector<BrickBox> &bbs);
+		bool GetBrickBoxes(std::vector<BrickBox> &bbs);
 		void BrickViewInt();
 		void BrickRayInt();
 		bool test_against_view(const fluo::BBox &bbox);

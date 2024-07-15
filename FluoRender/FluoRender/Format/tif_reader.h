@@ -211,9 +211,9 @@ private:
 	{
 		int type;	//0-single file;1-sequence
 		int filenumber;	//filenumber for sorting
-		vector<SliceInfo> slices;
+		std::vector<SliceInfo> slices;
 	};
-	vector<TimeDataInfo> m_4d_seq;
+	std::vector<TimeDataInfo> m_4d_seq;
 
 	struct NamePattern
 	{
@@ -224,9 +224,9 @@ private:
 		int use;//0:z sections; 1:channels; 2:time
 		wstring str;//content
 	};
-	deque<NamePattern> m_name_patterns;
-	set<int> m_slice_count;
-	set<int> m_chann_count;//counting total numbers in preprocessing
+	std::deque<NamePattern> m_name_patterns;
+	std::set<int> m_slice_count;
+	std::set<int> m_chann_count;//counting total numbers in preprocessing
 
 	bool m_slice_seq;
 	bool m_chann_seq;
@@ -281,10 +281,10 @@ private:
 		unsigned long ul_strip_num;
 		//strip offsets
 		bool b_strip_offsets;
-		vector<unsigned long long> ull_strip_offsets;
+		std::vector<unsigned long long> ull_strip_offsets;
 		//strip byte counts
 		bool b_strip_byte_counts;
-		vector<unsigned long long> ull_strip_byte_counts;
+		std::vector<unsigned long long> ull_strip_byte_counts;
 		//rows per strip
 		bool b_rows_per_strip;
 		unsigned long ul_rows_per_strip;
@@ -310,10 +310,10 @@ private:
 		unsigned long ul_tile_num;
 		//tile offsets
 		bool b_tile_offsets;
-		vector<unsigned long long> ull_tile_offsets;
+		std::vector<unsigned long long> ull_tile_offsets;
 		//tile byte counts
 		bool b_tile_byte_counts;
-		vector<unsigned long long> ull_tile_byte_counts;
+		std::vector<unsigned long long> ull_tile_byte_counts;
 		//next page offset
 		bool b_next_page_offset;
 		unsigned long long ull_next_page_offset;
@@ -425,7 +425,7 @@ private:
 	static bool tif_sort(const TimeDataInfo& info1, const TimeDataInfo& info2);
 	static bool tif_slice_sort(const SliceInfo& info1, const SliceInfo& info2);
 	//read tiff
-	Nrrd* ReadTiff(vector<SliceInfo> &filelist, int c, bool get_max);
+	Nrrd* ReadTiff(std::vector<SliceInfo> &filelist, int c, bool get_max);
 
 	//name pattern
 	void AnalyzeNamePattern(std::wstring &path_name);

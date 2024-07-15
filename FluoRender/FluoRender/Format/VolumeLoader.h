@@ -82,7 +82,7 @@ public:
 	~VolumeLoader();
 	void Queue(VolumeLoaderData brick);
 	void ClearQueues();
-	void Set(vector<VolumeLoaderData> vld);
+	void Set(std::vector<VolumeLoaderData> vld);
 	void Abort();
 	void StopAll();
 	bool Run();
@@ -105,10 +105,10 @@ public:
 protected:
 	VolumeLoaderThread *m_thread;
 	wxCriticalSection m_pThreadCS;
-	vector<VolumeLoaderData> m_queues;
-	vector<VolumeLoaderData> m_queued;
-	vector<VolumeDecompressorData> m_decomp_queues;
-	vector<VolumeDecompressorThread *> m_decomp_threads;
+	std::vector<VolumeLoaderData> m_queues;
+	std::vector<VolumeLoaderData> m_queued;
+	std::vector<VolumeDecompressorData> m_decomp_queues;
+	std::vector<VolumeDecompressorThread *> m_decomp_threads;
 	unordered_map<flvr::TextureBrick*, VolumeLoaderData> m_loaded;
 	int m_running_decomp_th;
 	int m_max_decomp_th;

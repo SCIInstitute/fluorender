@@ -110,7 +110,7 @@ private:
 		int chan_num;
 		double wavelength;
 	};
-	vector<WavelengthInfo> m_excitation_wavelength_list;
+	std::vector<WavelengthInfo> m_excitation_wavelength_list;
 
 	struct TileScanInfo
 	{
@@ -126,7 +126,7 @@ private:
 			posx(0), posy(0), posz(0)
 		{}
 	};
-	typedef vector<TileScanInfo> TileList;
+	typedef std::vector<TileScanInfo> TileList;
 	struct SubBlockInfo
 	{
 		int chan;//channel number

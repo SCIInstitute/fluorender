@@ -126,9 +126,9 @@ int LSMReader::Preprocess()
 			return READER_FORMAT_ERROR;
 		}
 
-		vector<unsigned int> offsets;
-		vector<unsigned int> offset_highs;
-		vector<unsigned int> sizes;
+		std::vector<unsigned int> offsets;
+		std::vector<unsigned int> offset_highs;
+		std::vector<unsigned int> sizes;
 
 		for (i = 0; i < entry_num; i++)
 		{
@@ -450,7 +450,7 @@ void LSMReader::ReadLsmInfo(FILE* pfile, unsigned char* pdata, unsigned int size
 			int track_cnt = 0;
 			int ill_chan_cnt = 0;
 			int last_sub = 0;//1:tracks; 2:track; 3:ill_chans; 4:ill_chan;
-			vector<unsigned int> entry_list;
+			std::vector<unsigned int> entry_list;
 			bool sub_tracks = false, sub_track = false, sub_ill_chans = false, sub_ill_chan = false;
 
 			while (fread(&uentry, sizeof(unsigned int), 1, pfile) == 1)

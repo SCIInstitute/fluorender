@@ -42,7 +42,7 @@ using namespace std;
 
 namespace flvr
 {
-	map<wstring, wstring> TextureBrick::cache_table_ = map<wstring, wstring>();
+	std::map<wstring, wstring> TextureBrick::cache_table_ = std::map<wstring, wstring>();
 
 	TextureBrick::TextureBrick(Nrrd* n0, Nrrd* n1,
 		int nx, int ny, int nz, int nc, int* nb,

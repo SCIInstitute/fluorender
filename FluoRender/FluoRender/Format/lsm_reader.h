@@ -87,9 +87,9 @@ private:
 		unsigned int offset_high;//if it is larger than 4GB, this is the high 32 bits of the 64-bit address
 		unsigned int size;		//size in lsm file
 	};
-	typedef vector<SliceInfo> ChannelInfo;		//all slices form a channel
-	typedef vector<ChannelInfo> DatasetInfo;	//channels form a dataset
-	vector<DatasetInfo> m_lsm_info;				//datasets of different time points form an lsm file
+	typedef std::vector<SliceInfo> ChannelInfo;		//all slices form a channel
+	typedef std::vector<ChannelInfo> DatasetInfo;	//channels form a dataset
+	std::vector<DatasetInfo> m_lsm_info;				//datasets of different time points form an lsm file
 
 
 	int m_time_num;
@@ -118,7 +118,7 @@ private:
 		int chan_num;
 		double wavelength;
 	};
-	vector<WavelengthInfo> m_excitation_wavelength_list;
+	std::vector<WavelengthInfo> m_excitation_wavelength_list;
 
 private:
 	void ReadLsmInfo(FILE* pfile, unsigned char* pdata, unsigned int size);

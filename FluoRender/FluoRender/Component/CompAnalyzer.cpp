@@ -118,7 +118,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 
 	double sx, sy, sz;
 	vd->GetSpacings(sx, sy, sz);
-	vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
 	if (!bricks || bricks->size() == 0)
 		return;
 	size_t bn = bricks->size();
@@ -398,7 +398,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 	if (!vd || !vd->GetTexture())
 		return;
 	flvr::Texture* tex = vd->GetTexture();
-	vector<flvr::TextureBrick*> *bricks = tex->get_bricks_id();
+	std::vector<flvr::TextureBrick*> *bricks = tex->get_bricks_id();
 	if (!bricks || bricks->size() <= 1)
 		return;
 	//comp list
@@ -572,7 +572,7 @@ void ComponentAnalyzer::MakeColorConsistent()
 	if (!vd || !vd->GetTexture())
 		return;
 	flvr::Texture* tex = vd->GetTexture();
-	vector<flvr::TextureBrick*> *bricks = tex->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = tex->get_bricks();
 	if (!bricks || bricks->size() <= 1)
 		return;
 	//comp list

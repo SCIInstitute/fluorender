@@ -45,7 +45,7 @@ typedef struct
 	double t;	//key time
 	double dt;	//duration
 	int type;	//interpolation method: 0-linear; 1-spline
-	vector<FlKey*> keys; //keys
+	std::vector<FlKey*> keys; //keys
 	string desc;//descriptions
 } FlKeyGroup;
 
@@ -78,7 +78,7 @@ public:
 	string GetKeyDesc(int index);
 	int GetLastIndex()
 	{ return (int)m_key_list.size() - 1;}
-	vector<FlKeyGroup*>* GetKeyList()
+	std::vector<FlKeyGroup*>* GetKeyList()
 	{ return &m_key_list; }
 
 	//modify
@@ -108,7 +108,7 @@ public:
 private:
 	//adding: 0-disabled; 1-enabled
 	int m_adding;
-	vector<FlKeyGroup*> m_key_list;
+	std::vector<FlKeyGroup*> m_key_list;
 
 private:
 	FlKey* SearchKey(FlKeyCode keycode, FlKeyGroup* g);

@@ -444,8 +444,8 @@ int VolumeData::Load(Nrrd* data, wxString &name, wxString &path)
 	if (m_reader && m_reader->GetType()==READER_BRKXML_TYPE)
 	{
 		BRKXMLReader *breader = (BRKXMLReader*)m_reader;
-		vector<flvr::Pyramid_Level> pyramid;
-		vector<vector<vector<vector<flvr::FileLocInfo *>>>> fnames;
+		std::vector<flvr::Pyramid_Level> pyramid;
+		std::vector<std::vector<std::vector<std::vector<flvr::FileLocInfo *>>>> fnames;
 		int ftype = BRICK_FILE_TYPE_NONE;
 
 		breader->build_pyramid(pyramid, fnames, 0, breader->GetCurChan());
@@ -473,7 +473,7 @@ int VolumeData::Load(Nrrd* data, wxString &name, wxString &path)
 		if (m_vr)
 			delete m_vr;
 
-		vector<fluo::Plane*> planelist(0);
+		std::vector<fluo::Plane*> planelist(0);
 		fluo::Plane* plane = 0;
 		//x
 		plane = new fluo::Plane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(1.0, 0.0, 0.0));
@@ -645,7 +645,7 @@ void VolumeData::AddEmptyData(int bits,
 	m_tex->set_spacings(spcx, spcy, spcz);
 
 	//clipping planes
-	vector<fluo::Plane*> planelist(0);
+	std::vector<fluo::Plane*> planelist(0);
 	fluo::Plane* plane = 0;
 	//x
 	plane = new fluo::Plane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(1.0, 0.0, 0.0));
@@ -1471,7 +1471,7 @@ fluo::BBox VolumeData::GetBounds()
 
 fluo::BBox VolumeData::GetClippedBounds()
 {
-	vector<fluo::Plane*> *planes = m_vr->get_planes();
+	std::vector<fluo::Plane*> *planes = m_vr->get_planes();
 	if (planes->size() != 6)
 		return m_bounds;
 
@@ -1760,7 +1760,7 @@ double VolumeData::GetGamma()
 
 double VolumeData::GetMlGamma()
 {
-	if (m_ep)
+	if (!m_ep)
 		return m_ep->getParam("gamma3d");
 	else
 		return m_gamma;
@@ -2610,7 +2610,7 @@ bool VolumeData::GetTransparent()
 void VolumeData::GetClipValues(int &ox, int &oy, int &oz,
 	int &nx, int &ny, int &nz)
 {
-	vector<fluo::Plane*> *planes = m_vr->get_planes();
+	std::vector<fluo::Plane*> *planes = m_vr->get_planes();
 	if (planes->size() != 6)
 		return;
 
@@ -2638,7 +2638,7 @@ void VolumeData::SetClipValue(int i, int val)
 {
 	if (i < 0 || i > 5)
 		return;
-	vector<fluo::Plane*>* planes = 0;
+	std::vector<fluo::Plane*>* planes = 0;
 	if (GetVR())
 		planes = GetVR()->get_planes();
 	if (!planes)
@@ -2687,7 +2687,7 @@ void VolumeData::SetClipValue(int i, int val)
 
 void VolumeData::SetClipValues(int i, int val1, int val2)
 {
-	vector<fluo::Plane*>* planes = 0;
+	std::vector<fluo::Plane*>* planes = 0;
 	if (GetVR())
 		planes = GetVR()->get_planes();
 	if (!planes)
@@ -2741,7 +2741,7 @@ void VolumeData::SetClipValues(int i, int val1, int val2)
 
 void VolumeData::SetClipValues(const int val[6])
 {
-	vector<fluo::Plane*>* planes = 0;
+	std::vector<fluo::Plane*>* planes = 0;
 	if (GetVR())
 		planes = GetVR()->get_planes();
 	if (!planes)
@@ -2793,7 +2793,7 @@ void VolumeData::SetClipValues(const int val[6])
 
 void VolumeData::ResetClipValues()
 {
-	vector<fluo::Plane*>* planes = 0;
+	std::vector<fluo::Plane*>* planes = 0;
 	if (GetVR())
 		planes = GetVR()->get_planes();
 	if (!planes)
@@ -2838,7 +2838,7 @@ void VolumeData::ResetClipValues()
 
 void VolumeData::ResetClipValuesX()
 {
-	vector<fluo::Plane*>* planes = 0;
+	std::vector<fluo::Plane*>* planes = 0;
 	if (GetVR())
 		planes = GetVR()->get_planes();
 	if (!planes)
@@ -2858,7 +2858,7 @@ void VolumeData::ResetClipValuesX()
 
 void VolumeData::ResetClipValuesY()
 {
-	vector<fluo::Plane*>* planes = 0;
+	std::vector<fluo::Plane*>* planes = 0;
 	if (GetVR())
 		planes = GetVR()->get_planes();
 	if (!planes)
@@ -2878,7 +2878,7 @@ void VolumeData::ResetClipValuesY()
 
 void VolumeData::ResetClipValuesZ()
 {
-	vector<fluo::Plane*>* planes = 0;
+	std::vector<fluo::Plane*>* planes = 0;
 	if (GetVR())
 		planes = GetVR()->get_planes();
 	if (!planes)
@@ -2899,7 +2899,7 @@ void VolumeData::ResetClipValuesZ()
 //randomize color
 void VolumeData::RandomizeColor()
 {
-	double hue = (double)rand()/(RAND_MAX) * 360.0;
+	double hue = (double)std::rand()/(RAND_MAX) * 360.0;
 	fluo::Color color(fluo::HSVColor(hue, 1.0, 1.0));
 	SetColor(color);
 }
@@ -3002,7 +3002,7 @@ flrd::EntryParams* VolumeData::GetMlParams()
 			return 0;
 		//get entry from table
 		flrd::TableHistParams& table = glbin.get_vp_table();
-		m_ep = table.findNearestOutput(eh);
+		m_ep = new flrd::EntryParams(table.infer(eh));
 		delete eh;
 	}
 	return m_ep;
@@ -3132,7 +3132,7 @@ m_data(0),
 	m_scale[2] = 1.0;
 
 	double hue, sat, val;
-	hue = double(rand()%360);
+	hue = double(std::rand()%360);
 	sat = 1.0;
 	val = 1.0;
 	fluo::Color color(fluo::HSVColor(hue, sat, val));
@@ -3665,7 +3665,7 @@ void MeshData::GetScaling(double &x, double &y, double &z)
 //randomize color
 void MeshData::RandomizeColor()
 {
-	double hue = (double)rand()/(RAND_MAX) * 360.0;
+	double hue = (double)std::rand()/(RAND_MAX) * 360.0;
 	fluo::Color color(fluo::HSVColor(hue, 1.0, 1.0));
 	SetColor(color, MESH_COLOR_DIFF);
 	fluo::Color amb = color * 0.3;
@@ -4028,7 +4028,7 @@ bool Annotations::InsideClippingPlanes(fluo::Point &pos)
 	if (!m_vd)
 		return true;
 
-	vector<fluo::Plane*> *planes = m_vd->GetVR()->get_planes();
+	std::vector<fluo::Plane*> *planes = m_vd->GetVR()->get_planes();
 	if (!planes)
 		return true;
 	if (planes->size() != 6)
@@ -4506,7 +4506,7 @@ bool TrackGroup::Save(wxString &filename)
 	return glbin_trackmap_proc.Export(str);
 }
 
-unsigned int TrackGroup::Draw(vector<float> &verts, int shuffle)
+unsigned int TrackGroup::Draw(std::vector<float> &verts, int shuffle)
 {
 	unsigned int result = 0;
 	size_t frame_num = m_track_map->GetFrameNum();
@@ -5035,7 +5035,7 @@ void DataGroup::RandomizeColor()
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
 		{
-			double hue = (double)rand()/(RAND_MAX) * 360.0;
+			double hue = (double)std::rand()/(RAND_MAX) * 360.0;
 			fluo::Color color(fluo::HSVColor(hue, 1.0, 1.0));
 			vd->SetColor(color);
 		}
@@ -5074,7 +5074,7 @@ void MeshGroup::RandomizeColor()
 		MeshData* md = GetMeshData(i);
 		if (md)
 		{
-			double hue = (double)rand()/(RAND_MAX) * 360.0;
+			double hue = (double)std::rand()/(RAND_MAX) * 360.0;
 			fluo::Color color(fluo::HSVColor(hue, 1.0, 1.0));
 			md->SetColor(color, MESH_COLOR_DIFF);
 			fluo::Color amb = color * 0.3;

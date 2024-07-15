@@ -589,7 +589,7 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		}
 	}
 
-	vector<fluo::Plane*>* planes = 0;
+	std::vector<fluo::Plane*>* planes = 0;
 	switch (type)
 	{
 	case 2:	//volume

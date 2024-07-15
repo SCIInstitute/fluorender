@@ -95,7 +95,7 @@ void PaintBoxes::Compute()
 		return;
 	}
 
-	vector<BrickBox> bbs;
+	std::vector<BrickBox> bbs;
 	if (!GetBrickBoxes(bbs))
 		return;
 
@@ -177,7 +177,7 @@ void PaintBoxes::Compute()
 	delete[] hits;
 }
 
-bool PaintBoxes::GetBrickBoxes(vector<BrickBox> &bbs)
+bool PaintBoxes::GetBrickBoxes(std::vector<BrickBox> &bbs)
 {
 	if (!m_bricks)
 		return false;

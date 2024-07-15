@@ -137,6 +137,9 @@ DEALINGS IN THE SOFTWARE.
 //help url
 #define glbin_help_url fluo::Global::instance().get_help_url()
 
+//ml output size
+#define glbin_vp_size 26
+
 namespace fluo
 {
 	class AsyncTimer;

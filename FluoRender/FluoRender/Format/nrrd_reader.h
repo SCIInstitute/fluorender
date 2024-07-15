@@ -88,7 +88,7 @@ private:
 		int filenumber;
 		wstring filename;
 	};
-	vector<TimeDataInfo> m_4d_seq;
+	std::vector<TimeDataInfo> m_4d_seq;
 	int m_cur_time;
 
 	int m_time_num;

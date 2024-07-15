@@ -86,8 +86,8 @@ private:
 	wstring m_subdir_name;
 
 	int m_type;	//0-time data in a single file; 1-time data in a file sequence
-	typedef vector<wstring> ChannelInfo;	//slices form a channel
-	typedef vector<ChannelInfo> DatasetInfo;//channels form dataset
+	typedef std::vector<wstring> ChannelInfo;	//slices form a channel
+	typedef std::vector<ChannelInfo> DatasetInfo;//channels form dataset
 	struct TimeDataInfo
 	{
 		int filenumber;		//if type is 1, file number for time data
@@ -95,7 +95,7 @@ private:
 		wstring subdirname;	//subdirectory name
 		DatasetInfo dataset;//a list of the channels
 	};
-	vector<TimeDataInfo> m_oif_info;		//time data form the complete oif dataset
+	std::vector<TimeDataInfo> m_oif_info;		//time data form the complete oif dataset
 	int m_oif_t;	//current time point in oib info for reading
 
 	int m_time_num;
@@ -106,7 +106,7 @@ private:
 		int chan_num;
 		double wavelength;
 	};
-	vector<WavelengthInfo> m_excitation_wavelength_list;
+	std::vector<WavelengthInfo> m_excitation_wavelength_list;
 	int m_slice_num;
 	int m_x_size;
 	int m_y_size;

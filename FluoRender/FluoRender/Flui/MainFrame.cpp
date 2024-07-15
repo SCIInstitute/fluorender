@@ -243,7 +243,7 @@ MainFrame::MainFrame(
 	m_main_tb->AddTool(ID_Settings, "Configurations", bitmap,
 		"Settings of FluoRender");
 	m_main_tb->AddSeparator();
-	int num = rand() % 4;
+	int num = std::rand() % 4;
 	wxString str1, str2, str3;
 	int item_id;
 	switch (num)

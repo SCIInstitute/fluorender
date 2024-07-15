@@ -357,7 +357,7 @@ void Project::Open(wxString& filename)
 								vd->SetScalings(sclx, scly, sclz);
 						}
 
-						vector<fluo::Plane*>* planes = 0;
+						std::vector<fluo::Plane*>* planes = 0;
 						if (vd->GetVR())
 							planes = vd->GetVR()->get_planes();
 						int iresx, iresy, iresz;
@@ -1221,7 +1221,7 @@ void Project::Open(wxString& filename)
 		glbin_interpolator.Clear();
 		if (fconfig.Read("max_id", &iVal))
 			Interpolator::m_id = iVal;
-		vector<FlKeyGroup*>* key_list = glbin_interpolator.GetKeyList();
+		std::vector<FlKeyGroup*>* key_list = glbin_interpolator.GetKeyList();
 		int group_num = fconfig.Read("num", 0l);
 		for (i = 0; i < group_num; i++)
 		{
@@ -1518,7 +1518,7 @@ void Project::Save(wxString& filename, bool inc)
 			fconfig.Write("scl", str);
 
 			//planes
-			vector<fluo::Plane*>* planes = 0;
+			std::vector<fluo::Plane*>* planes = 0;
 			if (vd->GetVR())
 				planes = vd->GetVR()->get_planes();
 			if (planes && planes->size() == 6)

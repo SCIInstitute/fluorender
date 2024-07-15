@@ -684,7 +684,7 @@ void MovieMaker::InsertKey(int index)
 		flkeyB = new FlKeyBoolean(keycode, vd->GetDisp());
 		glbin_interpolator.AddKey(flkeyB);
 		//clipping planes
-		vector<fluo::Plane*>* planes = vd->GetVR()->get_planes();
+		std::vector<fluo::Plane*>* planes = vd->GetVR()->get_planes();
 		if (!planes)
 			continue;
 		if (planes->size() != 6)
@@ -1421,7 +1421,7 @@ void MovieMaker::MakeKeysChannComb(int comb)
 
 	int i;
 	int numChan = m_view->GetAllVolumeNum();
-	vector<bool> chan_mask;
+	std::vector<bool> chan_mask;
 	//initiate mask
 	for (i = 0; i < numChan; i++)
 	{

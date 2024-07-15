@@ -152,7 +152,7 @@ void VolumeMeshConv::Convert()
 		m_downsample_z = 1;
 
 	//triangle list
-	vector<MCTriangle> tri_list;
+	std::vector<MCTriangle> tri_list;
 
 	//add default group
 	GLMgroup* group = new GLMgroup;

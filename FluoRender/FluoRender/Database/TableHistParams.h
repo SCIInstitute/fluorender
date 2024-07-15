@@ -29,6 +29,12 @@ DEALINGS IN THE SOFTWARE.
 #define _TABLEHISTPARAMS_H_
 
 #include <Table.h>
+#include <Numbers.h>
+#include <compatibility.h>
+#include <dlib/dnn.h>
+
+using namespace dlib;
+using net_type = loss_metric<fc<gno_vp_output_size, input<matrix<double, 0, 1>>>>;
 
 namespace flrd
 {
@@ -40,7 +46,7 @@ namespace flrd
 		virtual ~TableHistParams();
 
 		//query funcs
-		EntryParams* findNearestOutput(EntryHist* input);
+		EntryParams infer(EntryHist* input);
 
 		virtual void addRecord(Record* rec);
 
@@ -82,6 +88,17 @@ namespace flrd
 		void computeHistSize(Record* rec = 0);
 		void getParams(Record* rec);
 		void computeParamIter(Record* rec = 0);
+
+		//models for inference
+		EntryParams nearest_neighbor(EntryHist* input);
+		EntryParams dnn(EntryHist* input);
+
+		//training
+		void dnn_train();
+
+		//network def here
+		net_type m_net;
+		dnn_trainer<net_type>* m_trainer;
 	};
 }
 

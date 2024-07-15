@@ -880,7 +880,7 @@ void RenderCanvas::CalcFogRange()
 		minz = numeric_limits<double>::max();
 		maxz = -numeric_limits<double>::max();
 
-		vector<fluo::Point> points;
+		std::vector<fluo::Point> points;
 		points.push_back(fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Min().z()));
 		points.push_back(fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Max().z()));
 		points.push_back(fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Min().z()));
@@ -1364,7 +1364,7 @@ void RenderCanvas::DrawVolumes(int peel)
 
 		PopVolumeList();
 
-		vector<VolumeData*> quota_vd_list;
+		std::vector<VolumeData*> quota_vd_list;
 		if (glbin_settings.m_mem_swap)
 		{
 			//set start time for the texture renderer
@@ -1403,7 +1403,7 @@ void RenderCanvas::DrawVolumes(int peel)
 				{
 					//priority: 1-selected channel; 2-group contains selected channel; 3-linear distance to above
 					//not considering mask for now
-					vector<VolumeData*>::iterator cur_iter;
+					std::vector<VolumeData*>::iterator cur_iter;
 					cur_iter = find(m_vd_pop_list.begin(), m_vd_pop_list.end(), m_cur_vol);
 					size_t cur_index = distance(m_vd_pop_list.begin(), cur_iter);
 					int vd_index;
@@ -1488,7 +1488,7 @@ void RenderCanvas::DrawVolumes(int peel)
 		else
 		{
 			int i, j;
-			vector<VolumeData*> list;
+			std::vector<VolumeData*> list;
 			for (i = (int)m_layer_list.size() - 1; i >= 0; i--)
 			{
 				if (!m_layer_list[i])
@@ -2366,7 +2366,7 @@ void RenderCanvas::DrawVRBuffer()
 
 //Draw the volmues with compositing
 //peel==true -- depth peeling
-void RenderCanvas::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int peel)
+void RenderCanvas::DrawVolumesComp(std::vector<VolumeData*> &list, bool mask, int peel)
 {
 	if (list.size() <= 0)
 		return;
@@ -2551,7 +2551,7 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 
 	if (vd->GetShadowEnable())
 	{
-		vector<VolumeData*> list;
+		std::vector<VolumeData*> list;
 		list.push_back(vd);
 		DrawOLShadows(list);
 	}
@@ -2861,7 +2861,7 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 
 	if (shadow)
 	{
-		vector<VolumeData*> list;
+		std::vector<VolumeData*> list;
 		list.push_back(vd);
 		DrawOLShadows(list);
 	}
@@ -3170,7 +3170,7 @@ void RenderCanvas::DrawOLShadowsMesh(double darkness)
 	glEnable(GL_DEPTH_TEST);
 }
 
-void RenderCanvas::DrawOLShadows(vector<VolumeData*> &vlist)
+void RenderCanvas::DrawOLShadows(std::vector<VolumeData*> &vlist)
 {
 	if (vlist.empty())
 		return;
@@ -3185,9 +3185,9 @@ void RenderCanvas::DrawOLShadows(vector<VolumeData*> &vlist)
 
 	size_t i;
 	bool has_shadow = false;
-	vector<int> colormodes;
-	vector<bool> shadings;
-	vector<VolumeData*> list;
+	std::vector<int> colormodes;
+	std::vector<bool> shadings;
+	std::vector<VolumeData*> list;
 	//generate list
 	for (i = 0; i<vlist.size(); i++)
 	{
@@ -3402,7 +3402,7 @@ void RenderCanvas::DrawOLShadows(vector<VolumeData*> &vlist)
 
 //draw multi volumes with depth consideration
 //peel==true -- depth peeling
-void RenderCanvas::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
+void RenderCanvas::DrawVolumesMulti(std::vector<VolumeData*> &list, int peel)
 {
 	if (list.empty())
 		return;
@@ -4615,7 +4615,7 @@ void RenderCanvas::SetParams(double t)
 			vd->SetDisp(bval);
 
 		//clipping planes
-		vector<fluo::Plane*> *planes = vd->GetVR()->get_planes();
+		std::vector<fluo::Plane*> *planes = vd->GetVR()->get_planes();
 		if (!planes) continue;
 		if (planes->size() != 6) continue;
 		fluo::Plane *plane = 0;
@@ -4881,7 +4881,7 @@ void RenderCanvas::UpdateVolumeData(int frame, VolumeData* vd)
 void RenderCanvas::ReloadVolumeData(int frame)
 {
 	int i, j;
-	vector<BaseReader*> reader_list;
+	std::vector<BaseReader*> reader_list;
 	m_bat_folder = "";
 
 	for (i = 0; i < (int)m_vd_pop_list.size(); i++)
@@ -5549,7 +5549,7 @@ void RenderCanvas::SetCenter()
 		fluo::BBox bbox = vd->GetBounds();
 		flvr::VolumeRenderer *vr = vd->GetVR();
 		if (!vr) return;
-		vector<fluo::Plane*> *planes = vr->get_planes();
+		std::vector<fluo::Plane*> *planes = vr->get_planes();
 		if (planes->size() != 6) return;
 		double x1, x2, y1, y2, z1, z2;
 		double abcd[4];
@@ -7339,7 +7339,7 @@ void RenderCanvas::DrawClippingPlanes(int face_winding)
 		if (!vr)
 			continue;
 
-		vector<fluo::Plane*> *planes = vr->get_planes();
+		std::vector<fluo::Plane*> *planes = vr->get_planes();
 		if (planes->size() != 6)
 			continue;
 
@@ -7782,7 +7782,7 @@ void RenderCanvas::DrawFrame()
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
 	//draw frame
-	vector<std::pair<unsigned int, double>> params;
+	std::vector<std::pair<unsigned int, double>> params;
 	params.push_back(std::pair<unsigned int, double>(0, glbin_moviemaker.GetCropX()));
 	params.push_back(std::pair<unsigned int, double>(1, glbin_moviemaker.GetCropY()));
 	params.push_back(std::pair<unsigned int, double>(2, glbin_moviemaker.GetCropW()));
@@ -8152,7 +8152,7 @@ void RenderCanvas::DrawGradBg()
 			std::min(hsv_color1.val() + 0.5, 1.0)));
 	}
 
-	vector<float> vertex;
+	std::vector<float> vertex;
 	vertex.reserve(48);
 	vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
 	vertex.push_back(m_bg_color.r()); vertex.push_back(m_bg_color.g()); vertex.push_back(m_bg_color.b());
@@ -8417,7 +8417,7 @@ void RenderCanvas::DrawColormap()
 
 	wxString str;
 	wstring wstr;
-	vector<float> vertex;
+	std::vector<float> vertex;
 	vertex.reserve(98);
 	//draw colormap
 	if (m_draw_frame)
@@ -8663,7 +8663,7 @@ void RenderCanvas::DrawInfo(int nx, int ny, bool intactive)
 			m_cur_vol->GetResolution(resx, resy, resz);
 			double spcx, spcy, spcz;
 			m_cur_vol->GetSpacings(spcx, spcy, spcz);
-			vector<fluo::Plane*> *planes = m_cur_vol->GetVR()->get_planes();
+			std::vector<fluo::Plane*> *planes = m_cur_vol->GetVR()->get_planes();
 			fluo::Plane* plane = (*planes)[4];
 			double abcd[4];
 			plane->get_copy(abcd);
@@ -8815,7 +8815,7 @@ void RenderCanvas::UpdateClips()
 	if (m_clip_mode == 1)
 		m_q_cl.FromEuler(m_rotx, -m_roty, -m_rotz);
 
-	vector<fluo::Plane*> *planes = 0;
+	std::vector<fluo::Plane*> *planes = 0;
 	for (int i = 0; i < (int)m_vd_pop_list.size(); i++)
 	{
 		if (!m_vd_pop_list[i])
@@ -8979,7 +8979,7 @@ void RenderCanvas::SetClipMode(int mode)
 
 void RenderCanvas::RestorePlanes()
 {
-	vector<fluo::Plane*> *planes = 0;
+	std::vector<fluo::Plane*> *planes = 0;
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
 		if (!m_vd_pop_list[i])
@@ -9184,7 +9184,7 @@ void RenderCanvas::StartLoopUpdate()
 					vd->GetVR()->m_mv_mat2 = vd->GetVR()->m_mv_mat * vd->GetVR()->m_mv_mat2;
 
 					fluo::Ray view_ray = vd->GetVR()->compute_view();
-					vector<flvr::TextureBrick*> *bricks = 0;
+					std::vector<flvr::TextureBrick*> *bricks = 0;
 					bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 					if (!bricks || bricks->size() == 0)
 						continue;
@@ -9221,10 +9221,10 @@ void RenderCanvas::StartLoopUpdate()
 			}
 		}
 
-		vector<VolumeLoaderData> queues;
+		std::vector<VolumeLoaderData> queues;
 		if (m_vol_method == VOL_METHOD_MULTI)
 		{
-			vector<VolumeData*> list;
+			std::vector<VolumeData*> list;
 			for (i = 0; i<m_vd_pop_list.size(); i++)
 			{
 				VolumeData* vd = m_vd_pop_list[i];
@@ -9233,20 +9233,20 @@ void RenderCanvas::StartLoopUpdate()
 				flvr::Texture* tex = vd->GetTexture();
 				if (!tex)
 					continue;
-				vector<flvr::TextureBrick*> *bricks = tex->get_bricks();
+				std::vector<flvr::TextureBrick*> *bricks = tex->get_bricks();
 				if (!bricks || bricks->size() == 0)
 					continue;
 				list.push_back(vd);
 			}
 
-			vector<VolumeLoaderData> tmp_shade;
-			vector<VolumeLoaderData> tmp_shadow;
+			std::vector<VolumeLoaderData> tmp_shade;
+			std::vector<VolumeLoaderData> tmp_shadow;
 			for (i = 0; i < list.size(); i++)
 			{
 				VolumeData* vd = list[i];
 				flvr::Texture* tex = vd->GetTexture();
 				fluo::Ray view_ray = vd->GetVR()->compute_view();
-				vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+				std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 				int mode = vd->GetMode() == 1 ? 1 : 0;
 				bool shade = (mode == 1 && vd->GetShadingEnable());
 				bool shadow = vd->GetShadowEnable();
@@ -9322,15 +9322,15 @@ void RenderCanvas::StartLoopUpdate()
 				case 2://volume data (this won't happen now)
 				{
 					VolumeData* vd = (VolumeData*)m_layer_list[i];
-					vector<VolumeLoaderData> tmp_shade;
-					vector<VolumeLoaderData> tmp_shadow;
+					std::vector<VolumeLoaderData> tmp_shade;
+					std::vector<VolumeLoaderData> tmp_shadow;
 					if (vd && vd->GetDisp() && vd->isBrxml())
 					{
 						flvr::Texture* tex = vd->GetTexture();
 						if (!tex)
 							continue;
 						fluo::Ray view_ray = vd->GetVR()->compute_view();
-						vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+						std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 						if (!bricks || bricks->size() == 0)
 							continue;
 						int mode = vd->GetMode() == 1 ? 1 : 0;
@@ -9383,7 +9383,7 @@ void RenderCanvas::StartLoopUpdate()
 				break;
 				case 5://group
 				{
-					vector<VolumeData*> list;
+					std::vector<VolumeData*> list;
 					DataGroup* group = (DataGroup*)m_layer_list[i];
 					if (!group->GetDisp())
 						continue;
@@ -9396,7 +9396,7 @@ void RenderCanvas::StartLoopUpdate()
 						if (!tex)
 							continue;
 						fluo::Ray view_ray = vd->GetVR()->compute_view();
-						vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+						std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 						if (!bricks || bricks->size() == 0)
 							continue;
 						list.push_back(vd);
@@ -9404,9 +9404,9 @@ void RenderCanvas::StartLoopUpdate()
 					if (list.empty())
 						continue;
 
-					vector<VolumeLoaderData> tmp_q;
-					vector<VolumeLoaderData> tmp_shade;
-					vector<VolumeLoaderData> tmp_shadow;
+					std::vector<VolumeLoaderData> tmp_q;
+					std::vector<VolumeLoaderData> tmp_shade;
+					std::vector<VolumeLoaderData> tmp_shadow;
 					if (group->GetBlendMode() == VOL_METHOD_MULTI)
 					{
 						for (k = 0; k < list.size(); k++)
@@ -9414,7 +9414,7 @@ void RenderCanvas::StartLoopUpdate()
 							VolumeData* vd = list[k];
 							flvr::Texture* tex = vd->GetTexture();
 							fluo::Ray view_ray = vd->GetVR()->compute_view();
-							vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+							std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 							int mode = vd->GetMode() == 1 ? 1 : 0;
 							bool shade = (mode == 1 && vd->GetShadingEnable());
 							bool shadow = vd->GetShadowEnable();
@@ -9489,7 +9489,7 @@ void RenderCanvas::StartLoopUpdate()
 							VolumeData* vd = list[j];
 							flvr::Texture* tex = vd->GetTexture();
 							fluo::Ray view_ray = vd->GetVR()->compute_view();
-							vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+							std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 							int mode = vd->GetMode() == 1 ? 1 : 0;
 							bool shade = (mode == 1 && vd->GetShadingEnable());
 							bool shadow = vd->GetShadowEnable();
@@ -9664,7 +9664,7 @@ void RenderCanvas::DrawCells()
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Rulers);
 	if (va_rulers)
 	{
-		vector<float> verts;
+		std::vector<float> verts;
 		unsigned int num = DrawCellVerts(verts);
 		if (num)
 		{
@@ -9680,7 +9680,7 @@ void RenderCanvas::DrawCells()
 		shader->release();
 }
 
-unsigned int RenderCanvas::DrawCellVerts(vector<float>& verts)
+unsigned int RenderCanvas::DrawCellVerts(std::vector<float>& verts)
 {
 	float w = glbin_text_tex_manager.GetSize() / 4.0f;
 	float px = 0, py = 0;
@@ -9866,7 +9866,7 @@ void RenderCanvas::DrawTraces()
 		{
 			if (va_traces->get_dirty())
 			{
-				vector<float> verts;
+				std::vector<float> verts;
 				unsigned int num = m_track_group->Draw(verts, m_cur_vol->GetShuffle());
 				if (num)
 				{
@@ -10804,7 +10804,7 @@ void RenderCanvas::CalcFrame()
 		maxx = -1.0;
 		miny = 1.0;
 		maxy = -1.0;
-		vector<fluo::Point> points;
+		std::vector<fluo::Point> points;
 		fluo::BBox bbox = m_cur_vol->GetBounds();
 		points.push_back(fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Min().z()));
 		points.push_back(fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Max().z()));
@@ -11057,8 +11057,8 @@ void RenderCanvas::switchLevel(VolumeData *vd)
 			default:
 				res_scale = 1.0;
 			}
-			vector<double> sfs;
-			vector<double> spx, spy, spz;
+			std::vector<double> sfs;
+			std::vector<double> spx, spy, spz;
 			int lvnum = vtex->GetLevelNum();
 			for (int i = 0; i < lvnum; i++)
 			{
@@ -11096,7 +11096,7 @@ void RenderCanvas::switchLevel(VolumeData *vd)
 		}
 		if (prev_lv != new_lv)
 		{
-			vector<flvr::TextureBrick*> *bricks = vtex->get_bricks();
+			std::vector<flvr::TextureBrick*> *bricks = vtex->get_bricks();
 			if (bricks)
 			{
 				for (int i = 0; i < bricks->size(); i++)

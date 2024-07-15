@@ -1550,7 +1550,7 @@ void RulerHandler::Export(const wxString& filename)
 		}
 
 		//export profile
-		vector<flrd::ProfileBin>* profile = ruler->GetProfile();
+		std::vector<flrd::ProfileBin>* profile = ruler->GetProfile();
 		if (profile && profile->size())
 		{
 			double sumd = 0.0;

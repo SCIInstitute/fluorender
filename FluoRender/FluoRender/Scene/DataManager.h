@@ -701,7 +701,7 @@ private:
 	//estimated threshold
 	double m_est_thresh;
 
-	vector<VD_Landmark> m_landmarks;
+	std::vector<VD_Landmark> m_landmarks;
 	wstring m_metadata_id;
 
 	//mask cleared
@@ -923,7 +923,7 @@ public:
 
 private:
 	static int m_num;
-	vector<AText*> m_alist;
+	std::vector<AText*> m_alist;
 	fluo::Transform *m_tform;
 	VolumeData* m_vd;
 
@@ -1010,7 +1010,7 @@ public:
 	bool Save(wxString &filename);
 
 	//draw
-	unsigned int Draw(vector<float> &verts, int shuffle);
+	unsigned int Draw(std::vector<float> &verts, int shuffle);
 
 	//pattern search
 /*	typedef struct
@@ -1196,7 +1196,7 @@ public:
 private:
 	static int m_num;
 	//wxString m_name;
-	vector <VolumeData*> m_vd_list;
+	std::vector <VolumeData*> m_vd_list;
 	bool m_sync_volume_prop;
 
 	bool m_disp;
@@ -1283,7 +1283,7 @@ public:
 
 private:
 	static int m_num;
-	vector<MeshData*> m_md_list;
+	std::vector<MeshData*> m_md_list;
 	bool m_sync_mesh_prop;
 	bool m_disp;
 };
@@ -1434,10 +1434,10 @@ public:
 
 private:
 	MainFrame* m_frame;
-	vector <VolumeData*> m_vd_list;
-	vector <MeshData*> m_md_list;
-	vector <BaseReader*> m_reader_list;
-	vector <Annotations*> m_annotation_list;
+	std::vector <VolumeData*> m_vd_list;
+	std::vector <MeshData*> m_md_list;
+	std::vector <BaseReader*> m_reader_list;
+	std::vector <Annotations*> m_annotation_list;
 
 	//project path
 	wxString m_prj_path;

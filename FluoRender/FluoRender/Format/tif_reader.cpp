@@ -692,7 +692,7 @@ void TIFReader::SetPageInfo(uint16_t tag, uint64_t answer)
 
 void TIFReader::SetPageInfoVector(uint16_t tag, uint16_t type, uint64_t cnt, void* data)
 {
-	vector<unsigned long long>* v = 0;
+	std::vector<unsigned long long>* v = 0;
 	if (tag == kStripOffsetsTag)
 	{
 		m_page_info.b_strip_offsets = true;

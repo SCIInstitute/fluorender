@@ -588,7 +588,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 	if (!data_vd_b) return;
 
 	if (hide)
-		m_randv = int((double)rand()/(RAND_MAX)*900+100);
+		m_randv = int((double)std::rand()/(RAND_MAX)*900+100);
 	//populate the data
 	unsigned long long idx;
 	for (idx = 0; idx < for_size; ++idx)

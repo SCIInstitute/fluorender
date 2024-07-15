@@ -662,8 +662,8 @@ void ChannelCompare::Product()
 		kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
-	vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1 = (float)(m_vd1->GetScalarScale());
 	float ss2 = (float)(m_vd2->GetScalarScale());
 
@@ -770,8 +770,8 @@ void ChannelCompare::MinValue()
 		kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
-	vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1 = (float)(m_vd1->GetScalarScale());
 	float ss2 = (float)(m_vd2->GetScalarScale());
 
@@ -878,8 +878,8 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
-	vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1 = (float)(m_vd1->GetScalarScale());
 	float ss2 = (float)(m_vd2->GetScalarScale());
 
@@ -978,8 +978,8 @@ void ChannelCompare::Average(float weight, flvr::Argument& avg)
 		kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
-	vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1 = (float)(m_vd1->GetScalarScale());
 	float ss2 = (float)(m_vd2->GetScalarScale());
 

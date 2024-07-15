@@ -180,7 +180,7 @@ void CountVoxels::Count()
 		kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 
 	m_sum = 0; m_wsum = 0.0;
 	for (size_t i = 0; i < brick_num; ++i)

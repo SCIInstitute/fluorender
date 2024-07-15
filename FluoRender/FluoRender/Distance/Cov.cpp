@@ -169,7 +169,7 @@ bool Cov::ComputeCenter()
 	int kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 
 	//get center
 	std::memset(m_center, 0, sizeof(float) * 3);
@@ -250,7 +250,7 @@ bool Cov::ComputeCov()
 	int kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 
 	//get cov
 	for (size_t i = 0; i < brick_num; ++i)

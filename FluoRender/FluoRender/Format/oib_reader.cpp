@@ -92,7 +92,7 @@ int OIBReader::Preprocess()
 		return READER_OPEN_FAIL;
 
 	//search time sequence files
-	std::vector< std::wstring> list;
+	std::vector<std::wstring> list;
 	if (!FIND_FILES_4D(m_path_name, m_time_id, list, m_cur_time))
 	{
 		ReadSingleOib();
@@ -869,8 +869,8 @@ void OIBReader::ReadTiff(unsigned char *pbyData, unsigned short *val, int z)
 	//strip info
 	int strips = 0;
 	int rows = 0;
-	vector <unsigned int> strip_offsets;
-	vector <unsigned int> strip_bytes;
+	std::vector<unsigned int> strip_offsets;
+	std::vector<unsigned int> strip_bytes;
 	//get strip info
 	unsigned int s_num1 = 0;
 	unsigned int s_num2 = 0;

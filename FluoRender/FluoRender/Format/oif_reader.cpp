@@ -712,8 +712,8 @@ void OIFReader::ReadTiff(char *pbyData, unsigned short *val, int z)
 	//strip info
 	int strips = 0;
 	int rows = 0;
-	vector <unsigned int> strip_offsets;
-	vector <unsigned int> strip_bytes;
+	std::vector <unsigned int> strip_offsets;
+	std::vector <unsigned int> strip_bytes;
 	//get strip info
 	unsigned int s_num1 = 0;
 	unsigned int s_num2 = 0;

@@ -93,8 +93,8 @@ class OIBReader : public BaseReader
          wstring stream_name;
          wstring file_name;
       };
-      typedef vector<SliceInfo> ChannelInfo;    //slices form a channel
-      typedef vector<ChannelInfo> DatasetInfo;  //channels form a dataset
+      typedef std::vector<SliceInfo> ChannelInfo;    //slices form a channel
+      typedef std::vector<ChannelInfo> DatasetInfo;  //channels form a dataset
       struct TimeDataInfo              //
       {
          int filenumber;    //if type is 1, file number for current time data
@@ -102,7 +102,7 @@ class OIBReader : public BaseReader
          wstring substgname;  //substorage name
          DatasetInfo dataset;  //a list of the channels
       };
-      vector<TimeDataInfo> m_oib_info;      // time data form the complete oib dataset
+      std::vector<TimeDataInfo> m_oib_info;      // time data form the complete oib dataset
       int m_oib_t;  //current time point in oib info for reading
 
       int m_time_num;
@@ -113,7 +113,7 @@ class OIBReader : public BaseReader
          int chan_num;
          double wavelength;
       };
-      vector<WavelengthInfo> m_excitation_wavelength_list;
+      std::vector<WavelengthInfo> m_excitation_wavelength_list;
       int m_slice_num;
       int m_x_size;
       int m_y_size;

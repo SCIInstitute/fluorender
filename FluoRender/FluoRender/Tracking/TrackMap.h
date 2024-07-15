@@ -591,7 +591,7 @@ namespace flrd
 		int c = graph.counter;
 		if (c < 4)
 			return true;
-		int r = c / 2 + rand() % c;
+		int r = c / 2 + std::rand() % c;
 		return count < r;
 
 		//if (rand() % c < 10)

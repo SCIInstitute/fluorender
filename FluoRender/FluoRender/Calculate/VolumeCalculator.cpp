@@ -89,7 +89,7 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 	if (vd && vd_a)
 	{
 		//clipping planes
-		vector<fluo::Plane*> *planes = vd_a->GetVR() ? vd_a->GetVR()->get_planes() : 0;
+		std::vector<fluo::Plane*> *planes = vd_a->GetVR() ? vd_a->GetVR()->get_planes() : 0;
 		if (planes && vd->GetVR())
 			vd->GetVR()->set_planes(planes);
 		//transfer function
@@ -158,7 +158,7 @@ void VolumeCalculator::CalculateGroup(int type, wxString prev_group, bool add)
 		type == 6 ||
 		type == 7)
 	{
-		vector<VolumeData*> vd_list;
+		std::vector<VolumeData*> vd_list;
 		if (glbin_vol_selector.GetSelectGroup())
 		{
 			VolumeData* vd = GetVolumeA();

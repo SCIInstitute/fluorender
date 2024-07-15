@@ -775,7 +775,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 	//  TextureRenderer::finished_bricks_ += (int)vr_list_.size();
 }
 
-vector<TextureBrick*> *MultiVolumeRenderer::get_combined_bricks(
+std::vector<TextureBrick*> *MultiVolumeRenderer::get_combined_bricks(
 	fluo::Point& center, fluo::Ray& view, bool is_orthographic)
 {
 	if (!vr_list_.size())

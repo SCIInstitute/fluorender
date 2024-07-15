@@ -543,7 +543,7 @@ public:
 
 	//draw highlighted comps
 	void DrawCells();
-	unsigned int DrawCellVerts(vector<float>& verts);
+	unsigned int DrawCellVerts(std::vector<float>& verts);
 	void GetCellPoints(fluo::BBox& box,
 		fluo::Point& p1, fluo::Point& p2, fluo::Point& p3, fluo::Point& p4,
 		fluo::Transform& mv, fluo::Transform& p);
@@ -854,11 +854,11 @@ private:
 	MainFrame* m_frame;
 	//populated lists of data
 	bool m_vd_pop_dirty;
-	vector <VolumeData*> m_vd_pop_list;
+	std::vector <VolumeData*> m_vd_pop_list;
 	bool m_md_pop_dirty;
-	vector <MeshData*> m_md_pop_list;
+	std::vector <MeshData*> m_md_pop_list;
 	//real data list
-	vector <TreeLayer*> m_layer_list;
+	std::vector <TreeLayer*> m_layer_list;
 	//ruler list
 	flrd::RulerList m_ruler_list;
 	flrd::Ruler *m_cur_ruler;
@@ -1184,13 +1184,13 @@ private:
 	void ClearVRBuffer();
 	void DrawVRBuffer();
 	//different volume drawing modes
-	void DrawVolumesMulti(vector<VolumeData*> &list, int peel = 0);
-	void DrawVolumesComp(vector<VolumeData*> &list, bool mask = false, int peel = 0);
+	void DrawVolumesMulti(std::vector<VolumeData*> &list, int peel = 0);
+	void DrawVolumesComp(std::vector<VolumeData*> &list, bool mask = false, int peel = 0);
 	void DrawMIP(VolumeData* vd, int peel = 0);
 	void DrawOVER(VolumeData* vd, bool mask, int peel = 0);
 	//overlay passes
 	void DrawOLShading(VolumeData* vd);
-	void DrawOLShadows(vector<VolumeData*> &vlist);
+	void DrawOLShadows(std::vector<VolumeData*> &vlist);
 	void DrawOLShadowsMesh(double darkenss);
 
 	//get mesh shadow

@@ -156,7 +156,7 @@ bool KernelExecutor::Execute()
 	//get bricks
 	fluo::Ray view_ray(fluo::Point(0.802, 0.267, 0.534), fluo::Vector(0.802, 0.267, 0.534));
 	tex->set_sort_bricks();
-	vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray);
+	std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray);
 	if (!bricks || bricks->size() == 0)
 	{
 		m_message = "Volume empty.\n";
@@ -166,7 +166,7 @@ bool KernelExecutor::Execute()
 	m_message = "";
 	//execute for each brick
 	flvr::TextureBrick *b, *b_r;
-	vector<flvr::TextureBrick*> *bricks_r;
+	std::vector<flvr::TextureBrick*> *bricks_r;
 	void *result;
 
 	if (m_duplicate)
@@ -201,7 +201,7 @@ bool KernelExecutor::Execute()
 		if (m_vd)
 		{
 			//clipping planes
-			vector<fluo::Plane*> *planes = m_vd->GetVR() ? m_vd->GetVR()->get_planes() : 0;
+			std::vector<fluo::Plane*> *planes = m_vd->GetVR() ? m_vd->GetVR()->get_planes() : 0;
 			if (planes && vd->GetVR())
 				vd->GetVR()->set_planes(planes);
 			//transfer function

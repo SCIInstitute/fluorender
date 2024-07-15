@@ -154,7 +154,7 @@ void VolumeRoi::Run()
 	kernel_index0 = kernel_prog->createKernel("kernel_0");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*>* bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*>* bricks = m_vd->GetTexture()->get_bricks();
 
 	//init
 	m_sum = 0;
