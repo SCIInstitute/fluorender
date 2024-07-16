@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RecordHistParams.h>
 #include <algorithm>
 #include <dlib/dnn.h>
+#include <Numbers.h>
 
 using namespace flrd;
 using namespace dlib;

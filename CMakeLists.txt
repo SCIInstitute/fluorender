@@ -573,6 +573,13 @@ file(GLOB trk_hdr FluoRender/FluoRender/Tracking/*.h)
 add_library(TRACKING_OBJ OBJECT
   ${trk_src} ${trk_hdr})
 
+# Trainer
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Trainer)
+file(GLOB trainer_src FluoRender/FluoRender/Trainer/*.cpp)
+file(GLOB trainer_hdr FluoRender/FluoRender/Trainer/*.h)
+add_library(TRAINER_OBJ OBJECT
+  ${trainer_src} ${trainer_hdr})
+
 # Type
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Type)
 file(GLOB typ_src FluoRender/FluoRender/Type/*.cpp)
@@ -676,6 +683,7 @@ if(APPLE)
     $<TARGET_OBJECTS:SELECTION_OBJ>
     $<TARGET_OBJECTS:TIMER_OBJ>
     $<TARGET_OBJECTS:TRACKING_OBJ>
+    $<TARGET_OBJECTS:TRAINER_OBJ>
     $<TARGET_OBJECTS:TYPE_OBJ>
     $<TARGET_OBJECTS:UTILITY_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
@@ -723,6 +731,7 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:SELECTION_OBJ>
     $<TARGET_OBJECTS:TIMER_OBJ>
     $<TARGET_OBJECTS:TRACKING_OBJ>
+    $<TARGET_OBJECTS:TRAINER_OBJ>
     $<TARGET_OBJECTS:TYPE_OBJ>
     $<TARGET_OBJECTS:UTILITY_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
@@ -802,6 +811,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:SELECTION_OBJ>
       $<TARGET_OBJECTS:TIMER_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
+      $<TARGET_OBJECTS:TRAINER_OBJ>
       $<TARGET_OBJECTS:TYPE_OBJ>
       $<TARGET_OBJECTS:UTILITY_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
@@ -840,6 +850,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:SELECTION_OBJ>
       $<TARGET_OBJECTS:TIMER_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
+      $<TARGET_OBJECTS:TRAINER_OBJ>
       $<TARGET_OBJECTS:TYPE_OBJ>
       $<TARGET_OBJECTS:UTILITY_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
@@ -942,6 +953,7 @@ if(WIN32)
   )
 elseif(APPLE)
   target_link_libraries(FluoRender
+    dlib::dlib
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
@@ -960,6 +972,7 @@ elseif(APPLE)
 else()
   target_link_libraries(FluoRender
     stdc++fs
+    dlib::dlib
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
