@@ -30,11 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Table.h>
 #include <Numbers.h>
-#include <compatibility.h>
-#include <dlib/dnn.h>
-
-using namespace dlib;
-using net_type = loss_metric<fc<gno_vp_output_size, input<matrix<double, 0, 1>>>>;
 
 namespace flrd
 {
@@ -97,8 +92,8 @@ namespace flrd
 		void dnn_train();
 
 		//network def here
-		net_type m_net;
-		dnn_trainer<net_type>* m_trainer;
+		//net_type m_net;
+		//dnn_trainer<net_type>* m_trainer;
 	};
 }
 

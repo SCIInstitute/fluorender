@@ -220,13 +220,13 @@ find_package(Boost COMPONENTS system chrono filesystem REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
 # dlib
-#add_subdirectory(${PARENT_DIR}/dlib-dir dlib_build)
+add_subdirectory(${PARENT_DIR}/dlib-dir dlib_build)
 include_directories(${PARENT_DIR}/dlib-dir)
-if(${CMAKE_BUILD_TYPE} MATCHES "Release")
-  file(GLOB DLIB_LIBRARY ${PARENT_DIR}/dlib-dir/build/dlib/Release/*.lib)
-elseif(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-  file(GLOB DLIB_LIBRARY ${PARENT_DIR}/dlib-dir/build/dlib/Debug/*.lib)
-endif()
+#if(${CMAKE_BUILD_TYPE} MATCHES "Release")
+#  file(GLOB DLIB_LIBRARY ${PARENT_DIR}/dlib-dir/build/dlib/Release/*.lib)
+#elseif(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+#  file(GLOB DLIB_LIBRARY ${PARENT_DIR}/dlib-dir/build/dlib/Debug/*.lib)
+#endif()
 
 #opencv
 find_package(OpenCV REQUIRED)
@@ -903,6 +903,7 @@ if(WIN32)
   target_link_libraries(FluoRender
     secur32.lib
     XInput.lib
+    dlib::dlib
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
@@ -918,11 +919,11 @@ if(WIN32)
     ${HDF5_LIBRARIES}
     ${OpenCV_LIBS}
     ${HoloPlay_LIBRARIES}
-    ${DLIB_LIBRARY}
   )
   target_link_libraries(Tester
     secur32.lib
     XInput.lib
+    dlib::dlib
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
@@ -938,7 +939,6 @@ if(WIN32)
     ${HDF5_LIBRARIES}
     ${OpenCV_LIBS}
     ${HoloPlay_LIBRARIES}
-    ${DLIB_LIBRARY}
   )
 elseif(APPLE)
   target_link_libraries(FluoRender

@@ -28,8 +28,11 @@ DEALINGS IN THE SOFTWARE.
 #include <TableHistParams.h>
 #include <RecordHistParams.h>
 #include <algorithm>
+#include <dlib/dnn.h>
 
 using namespace flrd;
+using namespace dlib;
+using net_type = loss_metric<fc<gno_vp_output_size, input<matrix<double, 0, 1>>>>;
 
 TableHistParams::TableHistParams() :
 	Table(),
@@ -39,8 +42,8 @@ TableHistParams::TableHistParams() :
 	m_param_cleanb(0),
 	m_param_clean_iter(0)
 {
-	m_trainer = new dnn_trainer<net_type>(m_net);
-	m_trainer->set_learning_rate(0.1);
+	//m_trainer = new dnn_trainer<net_type>(m_net);
+	//m_trainer->set_learning_rate(0.1);
 }
 
 TableHistParams::TableHistParams(const TableHistParams& table) :
@@ -51,14 +54,14 @@ TableHistParams::TableHistParams(const TableHistParams& table) :
 	m_param_cleanb(table.m_param_cleanb),
 	m_param_clean_iter(table.m_param_clean_iter)
 {
-	m_trainer = new dnn_trainer<net_type>(m_net);
-	m_trainer->set_learning_rate(0.1);
+	//m_trainer = new dnn_trainer<net_type>(m_net);
+	//m_trainer->set_learning_rate(0.1);
 }
 
 TableHistParams::~TableHistParams()
 {
-	if (m_trainer)
-		delete m_trainer;
+	//if (m_trainer)
+	//	delete m_trainer;
 }
 
 EntryParams TableHistParams::infer(EntryHist* input)
@@ -169,9 +172,9 @@ EntryParams TableHistParams::nearest_neighbor(EntryHist* input)
 
 EntryParams TableHistParams::dnn(EntryHist* input)
 {
-	m_trainer->get_net();
+	//m_trainer->get_net();
 
-	std::vector<float> ii = input->getStdData();
+	//std::vector<float> ii = input->getStdData();
 	//auto output = m_net(ii);
 
 	return EntryParams();
@@ -180,9 +183,11 @@ EntryParams TableHistParams::dnn(EntryHist* input)
 //training
 void TableHistParams::dnn_train()
 {
+	net_type m_net;
+	dnn_trainer<net_type>* m_trainer = new dnn_trainer<net_type>(m_net);
+
 	if (!m_trainer)
 		return;
-
 	//train all
 	if (m_data.size() < m_trainer->get_mini_batch_size())
 		return;
