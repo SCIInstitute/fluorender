@@ -34,7 +34,11 @@ DEALINGS IN THE SOFTWARE.
 
 namespace flrd
 {
-	using net_type = dlib::loss_metric<dlib::fc<2, dlib::input<dlib::matrix<double, 0, 1>>>>;
+	//adjust net definition to change behaviors
+	using net_type =
+		dlib::loss_mean_squared_multioutput<
+		dlib::fc<gno_vp_output_size,
+		dlib::input<dlib::matrix<float>>>>;
 
 	class DnnTrainer : public Trainer
 	{
@@ -44,15 +48,17 @@ namespace flrd
 
 		virtual void add(float*, float*);
 		virtual void train();
-		virtual float* infer();
+		virtual float* infer(float*);
+		virtual double get_rate();
 
 	protected:
 		net_type m_net;
 		dlib::dnn_trainer<net_type> m_trainer;
 
-		std::vector<dlib::matrix<double, 0, 1>> m_input;
-		std::vector<unsigned long> m_output;
+		std::vector<dlib::matrix<float>> m_input;
+		std::vector<dlib::matrix<float>> m_output;
 
+		dlib::matrix<float> m_result;
 	};
 }
 #endif

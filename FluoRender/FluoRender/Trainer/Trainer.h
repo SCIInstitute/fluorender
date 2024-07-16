@@ -38,7 +38,12 @@ namespace flrd
 
 		virtual void add(float*, float*) = 0;
 		virtual void train() = 0;
-		virtual float* infer() = 0;
+		virtual float* infer(float*) = 0;
+		virtual double get_rate() = 0;
+		bool is_valid() { return m_valid; }
+
+	protected:
+		bool m_valid;
 	};
 }
 #endif//_TRAINER_H_

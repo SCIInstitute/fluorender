@@ -56,10 +56,14 @@ TableHistParams::TableHistParams(const TableHistParams& table) :
 
 TableHistParams::~TableHistParams()
 {
+	if (m_dnn)
+		delete m_dnn;
 }
 
 EntryParams TableHistParams::infer(EntryHist* input)
 {
+	if (m_dnn && m_dnn->is_valid())
+		return dnn(input);
 	return nearest_neighbor(input);
 }
 
@@ -67,6 +71,7 @@ void TableHistParams::addRecord(Record* rec)
 {
 	Table::addRecord(rec);
 	compute(rec);
+	dnn_add(rec);
 }
 
 void TableHistParams::open(const std::string& filename)
@@ -79,9 +84,6 @@ void TableHistParams::compute(Record* rec)
 {
 	computeHistSize(rec);
 	computeParamIter(rec);
-	
-	if (m_dnn)
-		m_dnn->train();
 }
 
 void TableHistParams::computeHistSize(Record* rec)
@@ -147,6 +149,21 @@ void TableHistParams::computeParamIter(Record* rec)
 	}
 }
 
+void TableHistParams::dnn_add(Record* rec)
+{
+	if (!m_dnn)
+		return;
+
+	RecordHistParams* r = dynamic_cast<RecordHistParams*>(rec);
+	if (!r)
+		return;
+
+	std::vector<float> in = r->getInput()->getStdData();
+	std::vector<float> out = r->getOutput()->getStdData();
+
+	m_dnn->add(&in[0], &out[0]);
+}
+
 //models for inference
 EntryParams TableHistParams::nearest_neighbor(EntryHist* input)
 {
@@ -168,7 +185,39 @@ EntryParams TableHistParams::nearest_neighbor(EntryHist* input)
 
 EntryParams TableHistParams::dnn(EntryHist* input)
 {
+	EntryParams ep;
+	if (!m_dnn)
+		return ep;
 
-	return EntryParams();
+	std::vector<float> in = input->getStdData();
+	float* pout = m_dnn->infer(&in[0]);
+	std::vector<float> out(pout, pout + gno_vp_output_size);
+	//ep.setParams(glbin.get_params("vol_prop"));
+	ep.setParam("gamma3d", out[0]);
+	ep.setParam("extract_boundary", out[1]);
+	ep.setParam("low_offset", out[2]);
+	ep.setParam("low_threshold", out[3]);
+	ep.setParam("high_threshold", out[4]);
+	ep.setParam("luminance", out[5]);
+	ep.setParam("alpha_enable", out[6] > 0.5);
+	ep.setParam("alpha", out[7]);
+	ep.setParam("shading_enable", out[8] > 0.5);
+	ep.setParam("low_shading", out[9]);
+	ep.setParam("high_shading", out[10]);
+	ep.setParam("shadow_enable", out[11] > 0.5);
+	ep.setParam("shadow_intensity", out[12]);
+	ep.setParam("sample_rate", out[13]);
+	ep.setParam("colormap_enable", out[14] > 0.5);
+	ep.setParam("colormap_inv", out[15]);
+	ep.setParam("colormap_type", int(std::round(out[16])));
+	ep.setParam("colormap_proj", int(std::roundf(out[17])));
+	ep.setParam("colormap_low", out[18]);
+	ep.setParam("colormap_hi", out[19]);
+	ep.setParam("interp_enable", out[0] > 0.5);
+	ep.setParam("invert_enable", out[0] > 0.5);
+	ep.setParam("mip_enable", out[0] > 0.5);
+	ep.setParam("transparent_enable", out[0] > 0.5);
+	ep.setParam("denoise_enable", out[0] > 0.5);
+
+	return ep;
 }
-

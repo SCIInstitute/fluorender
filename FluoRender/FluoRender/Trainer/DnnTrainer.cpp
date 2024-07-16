@@ -41,9 +41,22 @@ DnnTrainer::~DnnTrainer()
 
 }
 
-void DnnTrainer::add(float* ii, float* oi)
+void DnnTrainer::add(float* in, float* out)
 {
+	dlib::matrix<float> tii(gno_vp_input_size, 1);
+	dlib::matrix<float> toi(gno_vp_output_size, 1);
 
+	for (int i = 0; i < gno_vp_input_size; ++i)
+		tii(i, 0) = in[i];
+	for (int i = 0; i < gno_vp_output_size; ++i)
+		toi(i, 0) = out[i];
+
+	m_input.push_back(tii);
+	m_output.push_back(toi);
+
+	size_t bs = m_trainer.get_mini_batch_size();
+	if (m_input.size() >= bs)
+		train();
 }
 
 void DnnTrainer::train()
@@ -59,13 +72,27 @@ void DnnTrainer::train()
 
 	m_input.clear();
 	m_output.clear();
+
+	m_valid = true;
 }
 
-float* DnnTrainer::infer()
+float* DnnTrainer::infer(float* in)
 {
-	//m_trainer->get_net();
+	m_trainer.get_net();
 
-	//std::vector<float> ii = input->getStdData();
-	//auto output = m_net(ii);
-	return 0;
+	dlib::matrix<float> tii(gno_vp_input_size, 1);
+	for (int i = 0; i < gno_vp_input_size; ++i)
+		tii(i, 0) = in[i];
+
+	m_result = m_net(tii);
+
+	return &m_result(0, 0);
+}
+
+double DnnTrainer::get_rate()
+{
+	if (!m_valid)
+		return 1;
+
+	return m_trainer.get_learning_rate();
 }

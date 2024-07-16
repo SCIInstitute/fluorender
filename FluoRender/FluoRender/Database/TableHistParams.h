@@ -87,11 +87,11 @@ namespace flrd
 		void computeHistSize(Record* rec = 0);
 		void getParams(Record* rec);
 		void computeParamIter(Record* rec = 0);
+		void dnn_add(Record*);
 
 		//models for inference
 		EntryParams nearest_neighbor(EntryHist* input);
 		EntryParams dnn(EntryHist* input);
-
 	};
 }
 

@@ -29,7 +29,8 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-Trainer::Trainer()
+Trainer::Trainer() :
+	m_valid(false)
 {
 
 }
