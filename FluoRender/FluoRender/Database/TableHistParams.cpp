@@ -28,12 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #include <TableHistParams.h>
 #include <RecordHistParams.h>
 #include <algorithm>
-#include <dlib/dnn.h>
-#include <Numbers.h>
+#include <DnnTrainer.h>
 
 using namespace flrd;
-using namespace dlib;
-using net_type = loss_metric<fc<gno_vp_output_size, input<matrix<double, 0, 1>>>>;
 
 TableHistParams::TableHistParams() :
 	Table(),
@@ -41,10 +38,9 @@ TableHistParams::TableHistParams() :
 	m_param_iter(0),
 	m_param_mxdist(0),
 	m_param_cleanb(0),
-	m_param_clean_iter(0)
+	m_param_clean_iter(0),
+	m_dnn(new DnnTrainer())
 {
-	//m_trainer = new dnn_trainer<net_type>(m_net);
-	//m_trainer->set_learning_rate(0.1);
 }
 
 TableHistParams::TableHistParams(const TableHistParams& table) :
@@ -53,16 +49,13 @@ TableHistParams::TableHistParams(const TableHistParams& table) :
 	m_param_iter(table.m_param_iter),
 	m_param_mxdist(table.m_param_mxdist),
 	m_param_cleanb(table.m_param_cleanb),
-	m_param_clean_iter(table.m_param_clean_iter)
+	m_param_clean_iter(table.m_param_clean_iter),
+	m_dnn(new DnnTrainer())
 {
-	//m_trainer = new dnn_trainer<net_type>(m_net);
-	//m_trainer->set_learning_rate(0.1);
 }
 
 TableHistParams::~TableHistParams()
 {
-	//if (m_trainer)
-	//	delete m_trainer;
 }
 
 EntryParams TableHistParams::infer(EntryHist* input)
@@ -86,7 +79,9 @@ void TableHistParams::compute(Record* rec)
 {
 	computeHistSize(rec);
 	computeParamIter(rec);
-	dnn_train();
+	
+	if (m_dnn)
+		m_dnn->train();
 }
 
 void TableHistParams::computeHistSize(Record* rec)
@@ -173,39 +168,7 @@ EntryParams TableHistParams::nearest_neighbor(EntryHist* input)
 
 EntryParams TableHistParams::dnn(EntryHist* input)
 {
-	//m_trainer->get_net();
-
-	//std::vector<float> ii = input->getStdData();
-	//auto output = m_net(ii);
 
 	return EntryParams();
 }
 
-//training
-void TableHistParams::dnn_train()
-{
-	net_type m_net;
-	dnn_trainer<net_type>* m_trainer = new dnn_trainer<net_type>(m_net);
-
-	if (!m_trainer)
-		return;
-	//train all
-	if (m_data.size() < m_trainer->get_mini_batch_size())
-		return;
-
-	std::vector<std::vector<float>> input;
-	std::vector<std::vector<float>> output;
-
-	for (auto i : m_data)
-	{
-		std::vector<float> ii;
-		std::vector<float> io;
-		i->getInputData(ii);
-		i->getOutputData(io);
-		input.push_back(ii);
-		output.push_back(io);
-	}
-
-	//while (m_trainer->get_learning_rate() >= 1e-2)
-	//	m_trainer->train_one_step(input, output);
-}

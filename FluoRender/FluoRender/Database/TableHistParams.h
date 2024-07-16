@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace flrd
 {
+	class Trainer;
 	class TableHistParams : public Table
 	{
 	public:
@@ -78,6 +79,10 @@ namespace flrd
 		float m_param_cleanb;
 		float m_param_clean_iter;
 
+		//trainer
+		Trainer* m_dnn;
+
+	private:
 		void compute(Record* rec = 0);
 		void computeHistSize(Record* rec = 0);
 		void getParams(Record* rec);
@@ -87,12 +92,6 @@ namespace flrd
 		EntryParams nearest_neighbor(EntryHist* input);
 		EntryParams dnn(EntryHist* input);
 
-		//training
-		void dnn_train();
-
-		//network def here
-		//net_type m_net;
-		//dnn_trainer<net_type>* m_trainer;
 	};
 }
 

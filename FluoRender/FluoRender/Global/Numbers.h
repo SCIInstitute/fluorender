@@ -28,7 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef NUMBERS_H
 #define NUMBERS_H
 
-//ml output size
+//ml volume property size
+#define gno_vp_input_size 15
 #define gno_vp_output_size 26
 
 #endif//NUMBERS_H
