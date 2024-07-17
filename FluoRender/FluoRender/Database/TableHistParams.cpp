@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RecordHistParams.h>
 #include <Reshape.h>
 #include <algorithm>
-#include <DnnTrainer.h>
+#include <VolPropDnnTrainer.h>
 
 using namespace flrd;
 
@@ -40,7 +40,7 @@ TableHistParams::TableHistParams() :
 	m_param_mxdist(0),
 	m_param_cleanb(0),
 	m_param_clean_iter(0),
-	m_dnn(new DnnTrainer())
+	m_dnn(0)
 {
 }
 
@@ -51,7 +51,7 @@ TableHistParams::TableHistParams(const TableHistParams& table) :
 	m_param_mxdist(table.m_param_mxdist),
 	m_param_cleanb(table.m_param_cleanb),
 	m_param_clean_iter(table.m_param_clean_iter),
-	m_dnn(new DnnTrainer())
+	m_dnn(0)
 {
 }
 
@@ -102,6 +102,7 @@ void TableHistParams::compute(Record* rec)
 {
 	computeHistSize(rec);
 	computeParamIter(rec);
+	create_dnn();
 }
 
 void TableHistParams::computeHistSize(Record* rec)
@@ -167,6 +168,29 @@ void TableHistParams::computeParamIter(Record* rec)
 	}
 }
 
+void TableHistParams::create_dnn()
+{
+	if (m_dnn)
+		return;
+
+	//for now only dnn for volume property
+	if (m_data.empty())
+		return;
+
+	Record* rec = m_data[0];
+	if (!rec)
+		return;
+	size_t si, so;
+	si = rec->getInputSize();
+	so = rec->getOutputSize();
+
+	if (si == gno_vp_input_size &&
+		so == gno_vp_output_size)
+	{
+		m_dnn = new VolPropDnnTrainer();
+	}
+}
+
 void TableHistParams::dnn_add(Record* rec)
 {
 	if (!m_dnn)
@@ -182,6 +206,7 @@ void TableHistParams::dnn_add(Record* rec)
 	m_dnn->add(&in[0], &out[0]);
 
 	m_trained_rec_num = m_dnn->get_trained_rec_num();
+	setModified();
 }
 
 //models for inference

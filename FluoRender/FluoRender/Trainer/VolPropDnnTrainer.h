@@ -25,32 +25,34 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _DNNTRAINER_H_
-#define _DNNTRAINER_H_
+#ifndef _VOLPROPDNNTRAINER_H_
+#define _VOLPROPDNNTRAINER_H_
 
-#include <Trainer.h>
-#include <dlib/dnn.h>
-#include <Numbers.h>
+#include <DnnTrainer.h>
 
 namespace flrd
 {
-	class DnnTrainer : public Trainer
+	//adjust net definition to change behaviors
+	using net_type_vp =
+		dlib::loss_mean_squared_multioutput<
+		dlib::fc<gno_vp_output_size,
+		dlib::input<dlib::matrix<float>>>>;
+
+	class VolPropDnnTrainer : public DnnTrainer
 	{
 	public :
-		DnnTrainer();
-		~DnnTrainer();
+		VolPropDnnTrainer();
+		~VolPropDnnTrainer();
 
-		virtual void add(float*, float*) = 0;
-		virtual void train() = 0;
-		virtual float* infer(float*) = 0;
-		virtual double get_rate() = 0;
-		virtual void set_model_file(const std::string& file) = 0;
+		virtual void add(float*, float*);
+		virtual void train();
+		virtual float* infer(float*);
+		virtual double get_rate();
+		virtual void set_model_file(const std::string& file);
 
 	protected:
-		std::vector<dlib::matrix<float>> m_input;
-		std::vector<dlib::matrix<float>> m_output;
-
-		dlib::matrix<float> m_result;
+		net_type_vp m_net;
+		dlib::dnn_trainer<net_type_vp> m_trainer;
 	};
 }
 #endif

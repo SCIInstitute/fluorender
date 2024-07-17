@@ -89,6 +89,7 @@ namespace flrd
 		void computeHistSize(Record* rec = 0);
 		void getParams(Record* rec);
 		void computeParamIter(Record* rec = 0);
+		void create_dnn();
 		void dnn_add(Record*);
 
 		//models for inference

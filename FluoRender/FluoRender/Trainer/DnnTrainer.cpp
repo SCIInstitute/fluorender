@@ -30,80 +30,11 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 DnnTrainer::DnnTrainer() :
-	Trainer(),
-	m_trainer(m_net)
+	Trainer()
 {
-	m_trainer.set_learning_rate(0.1);
-	m_trainer.set_mini_batch_size(20);
 }
 
 DnnTrainer::~DnnTrainer()
 {
-
 }
 
-void DnnTrainer::add(float* in, float* out)
-{
-	dlib::matrix<float> tii(gno_vp_input_size, 1);
-	dlib::matrix<float> toi(gno_vp_output_size, 1);
-
-	for (int i = 0; i < gno_vp_input_size; ++i)
-		tii(i, 0) = in[i];
-	for (int i = 0; i < gno_vp_output_size; ++i)
-		toi(i, 0) = out[i];
-
-	m_input.push_back(tii);
-	m_output.push_back(toi);
-
-	size_t bs = m_trainer.get_mini_batch_size();
-	if (m_input.size() >= bs)
-		train();
-}
-
-void DnnTrainer::train()
-{
-	//train all
-	size_t bs = m_trainer.get_mini_batch_size();
-	if (m_input.size() < bs ||
-		m_output.size() < bs)
-		return;
-
-	while (m_trainer.get_learning_rate() >= 1e-2)
-		m_trainer.train_one_step(m_input, m_output);
-
-	m_input.clear();
-	m_output.clear();
-
-	m_trainer.get_net();
-
-	m_valid = true;
-	m_trained_rec_num += bs;
-}
-
-float* DnnTrainer::infer(float* in)
-{
-	if (!m_valid)
-		return 0;
-
-	dlib::matrix<float> tii(gno_vp_input_size, 1);
-	for (int i = 0; i < gno_vp_input_size; ++i)
-		tii(i, 0) = in[i];
-
-	m_result = m_net(tii);
-
-	return &m_result(0, 0);
-}
-
-double DnnTrainer::get_rate()
-{
-	if (!m_valid)
-		return 1;
-
-	return m_trainer.get_learning_rate();
-}
-
-void DnnTrainer::set_model_file(const std::string& file)
-{
-	Trainer::set_model_file(file);
-	m_trainer.set_synchronization_file(file, std::chrono::minutes(5));
-}
