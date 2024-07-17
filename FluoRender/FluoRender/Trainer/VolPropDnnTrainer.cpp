@@ -34,7 +34,7 @@ VolPropDnnTrainer::VolPropDnnTrainer() :
 	m_trainer(m_net)
 {
 	m_trainer.set_learning_rate(0.1);
-	m_trainer.set_mini_batch_size(20);
+	m_trainer.set_mini_batch_size(16);
 }
 
 VolPropDnnTrainer::~VolPropDnnTrainer()
