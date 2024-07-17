@@ -62,6 +62,20 @@ namespace flrd
 			return false;
 		}
 
+		std::string getName(size_t i)
+		{
+			if (i < m_names.size())
+				return m_names[i];
+			return "";
+		}
+
+		Entry::ParamTypes getType(size_t i)
+		{
+			if (i < m_names.size())
+				return m_types[i];
+			return Entry::IPT_VOID;
+		}
+
 	private:
 		std::vector<std::string> m_names;//parameter names
 		std::unordered_map<std::string, size_t> m_name_index;//index of names

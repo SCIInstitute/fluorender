@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ColocalizationDlg.h>
 #include <Histogram.h>
 #include <RecordHistParams.h>
+#include <Reshape.h>
 #include <MultiVolumeRenderer.h>
 #include <VolumeRenderer.h>
 #include <Color.h>
@@ -1277,33 +1278,33 @@ void VolumePropPanel::ApplyMl()
 
 void VolumePropPanel::SaveMl()
 {
-	flrd::EntryParams* ep = new flrd::EntryParams();
-	ep->setParams(glbin.get_params("vol_prop"));
-	ep->setParam("gamma3d", float(m_vd->GetGamma()));
-	ep->setParam("extract_boundary", float(m_vd->GetBoundary()));
-	ep->setParam("low_offset", float(m_vd->GetSaturation()));
-	ep->setParam("low_threshold", float(m_vd->GetLeftThresh()));
-	ep->setParam("high_threshold", float(m_vd->GetRightThresh()));
-	ep->setParam("luminance", float(m_vd->GetLuminance()));
-	ep->setParam("alpha_enable", m_vd->GetAlphaEnable());
-	ep->setParam("alpha", float(m_vd->GetAlpha()));
-	ep->setParam("shading_enable", m_vd->GetShadingEnable());
-	ep->setParam("low_shading", float(m_vd->GetLowShading()));
-	ep->setParam("high_shading", float(m_vd->GetHiShading()));
-	ep->setParam("shadow_enable", m_vd->GetShadowEnable());
-	ep->setParam("shadow_intensity", float(m_vd->GetShadowIntensity()));
-	ep->setParam("sample_rate", float(m_vd->GetSampleRate()));
-	ep->setParam("colormap_enable", m_vd->GetColormapMode() == 1);
-	ep->setParam("colormap_inv", m_vd->GetColormapInv());
-	ep->setParam("colormap_type", m_vd->GetColormap());
-	ep->setParam("colormap_proj", m_vd->GetColormapProj());
-	ep->setParam("colormap_low", float(m_vd->GetColormapLow()));
-	ep->setParam("colormap_hi", float(m_vd->GetColormapHigh()));
-	ep->setParam("interp_enable", m_vd->GetInterpolate());
-	ep->setParam("invert_enable", m_vd->GetInvert());
-	ep->setParam("mip_enable", m_vd->GetMode() == 1);
-	ep->setParam("transparent_enable", m_vd->GetTransparent());
-	ep->setParam("denoise_enable", m_vd->GetNR());
+	std::vector<float> val;
+	val.push_back(float(m_vd->GetGamma()));
+	val.push_back(float(m_vd->GetBoundary()));
+	val.push_back(float(m_vd->GetSaturation()));
+	val.push_back(float(m_vd->GetLeftThresh()));
+	val.push_back(float(m_vd->GetRightThresh()));
+	val.push_back(float(m_vd->GetLuminance()));
+	val.push_back(float(m_vd->GetAlphaEnable()));
+	val.push_back(float(m_vd->GetAlpha()));
+	val.push_back(float(m_vd->GetShadingEnable()));
+	val.push_back(float(m_vd->GetLowShading()));
+	val.push_back(float(m_vd->GetHiShading()));
+	val.push_back(float(m_vd->GetShadowEnable()));
+	val.push_back(float(m_vd->GetShadowIntensity()));
+	val.push_back(float(m_vd->GetSampleRate()));
+	val.push_back(float(m_vd->GetColormapMode() == 1));
+	val.push_back(float(m_vd->GetColormapInv()));
+	val.push_back(float(m_vd->GetColormap()));
+	val.push_back(float(m_vd->GetColormapProj()));
+	val.push_back(float(m_vd->GetColormapLow()));
+	val.push_back(float(m_vd->GetColormapHigh()));
+	val.push_back(float(m_vd->GetInterpolate()));
+	val.push_back(float(m_vd->GetInvert()));
+	val.push_back(float(m_vd->GetMode() == 1));
+	val.push_back(float(m_vd->GetTransparent()));
+	val.push_back(float(m_vd->GetNR()));
+	flrd::EntryParams* ep = flrd::Reshape::get_entry_params("vol_prop", &val[0]);
 
 	//histogram
 	flrd::Histogram histogram(m_vd);

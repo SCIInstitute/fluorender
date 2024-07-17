@@ -25,74 +25,32 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _TABLEHISTPARAMS_H_
-#define _TABLEHISTPARAMS_H_
+#ifndef _RESHAPE_H_
+#define _RESHAPE_H_
 
-#include <Table.h>
+#include <Entry.h>
+#include <Params.h>
+#include <EntryParams.h>
+#include <unordered_map>
+#include <string>
 
 namespace flrd
 {
-	class Trainer;
-	class TableHistParams : public Table
+	class Reshape
 	{
 	public:
-		TableHistParams();
-		TableHistParams(const TableHistParams& table);
-		virtual ~TableHistParams();
+		Reshape() {}
+		~Reshape() {}
 
-		//query funcs
-		EntryParams* infer(EntryHist* input);
-
-		virtual void addRecord(Record* rec);
-
-		virtual void open(const std::string& filename);
-
-		float getHistPopl()
-		{
-			return m_hist_popl;
-		}
-
-		float getParamIter()
-		{
-			return m_param_iter;
-		}
-
-		float getParamMxdist()
-		{
-			return m_param_mxdist;
-		}
-
-		float getParamCleanb()
-		{
-			return m_param_cleanb;
-		}
-
-		float getParamCleanIter()
-		{
-			return m_param_clean_iter;
-		}
+		static Params* get_params(const std::string& name);
+		static EntryParams* get_entry_params(const std::string& name, float* val);
+		static size_t get_param_size(const std::string& name);
+		static void clear();
 
 	private:
-		float m_hist_popl;
-		float m_param_iter;
-		float m_param_mxdist;
-		float m_param_cleanb;
-		float m_param_clean_iter;
-
-		//trainer
-		Trainer* m_dnn;
-
-	private:
-		void compute(Record* rec = 0);
-		void computeHistSize(Record* rec = 0);
-		void getParams(Record* rec);
-		void computeParamIter(Record* rec = 0);
-		void dnn_add(Record*);
-
-		//models for inference
-		EntryParams* nearest_neighbor(EntryHist* input);
-		EntryParams* dnn(EntryHist* input);
+		static std::unordered_map<std::string, flrd::Params> params_list_;//available params
+		static EntryParams* result_;
 	};
 }
 
-#endif//_TABLEHISTPARAMS_H_
+#endif//_RESHAPE_H_

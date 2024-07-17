@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeSampler.h>
 #include <VolumeBaker.h>
 #include <Histogram.h>
+#include <Reshape.h>
 #include <FpRangeDlg.h>
 #include <teem/Nrrd/nrrd.h>
 #include <wx/msgdlg.h>
@@ -68,8 +69,6 @@ VolumeData::VolumeData()
 	m_dup = false;
 	m_dup_counter = 0;
 	m_dup_data = 0;
-
-	m_ep = 0;
 
 	type = 2;//volume
 
@@ -209,8 +208,6 @@ VolumeData::VolumeData(VolumeData &copy)
 		m_dup_data = copy.m_dup_data;
 	else
 		m_dup_data = &copy;
-
-	m_ep = 0;
 
 	m_vr = new flvr::VolumeRenderer(*copy.m_vr);
 	//layer properties
@@ -1760,8 +1757,8 @@ double VolumeData::GetGamma()
 
 double VolumeData::GetMlGamma()
 {
-	if (!m_ep)
-		return m_ep->getParam("gamma3d");
+	if (m_ep.getValid())
+		return m_ep.getParam("gamma3d");
 	else
 		return m_gamma;
 }
@@ -1795,8 +1792,8 @@ double VolumeData::GetBoundary()
 
 double VolumeData::GetMlBoundary()
 {
-	if (m_ep)
-		return m_ep->getParam("extract_boundary");
+	if (m_ep.getValid())
+		return m_ep.getParam("extract_boundary");
 	else
 		return m_boundary;
 }
@@ -1830,8 +1827,8 @@ double VolumeData::GetSaturation()
 
 double VolumeData::GetMlSaturation()
 {
-	if (m_ep)
-		return m_ep->getParam("low_offset");
+	if (m_ep.getValid())
+		return m_ep.getParam("low_offset");
 	else
 		return m_saturation;
 }
@@ -1871,8 +1868,8 @@ double VolumeData::GetLeftThresh()
 
 double VolumeData::GetMlLeftThresh()
 {
-	if (m_ep)
-		return m_ep->getParam("low_threshold");
+	if (m_ep.getValid())
+		return m_ep.getParam("low_threshold");
 	else
 		return m_lo_thresh;
 }
@@ -1904,8 +1901,8 @@ double VolumeData::GetSoftThreshold()
 
 double VolumeData::GetMlRightThresh()
 {
-	if (m_ep)
-		return m_ep->getParam("high_threshold");
+	if (m_ep.getValid())
+		return m_ep.getParam("high_threshold");
 	else
 		return m_hi_thresh;
 }
@@ -1944,8 +1941,8 @@ double VolumeData::GetLuminance()
 
 double VolumeData::GetMlLuminance()
 {
-	if (m_ep)
-		return m_ep->getParam("luminance");
+	if (m_ep.getValid())
+		return m_ep.getParam("luminance");
 	else
 		return m_luminance;
 }
@@ -1983,8 +1980,8 @@ double VolumeData::GetAlpha()
 
 double VolumeData::GetMlAlpha()
 {
-	if (m_ep)
-		return m_ep->getParam("alpha");
+	if (m_ep.getValid())
+		return m_ep.getParam("alpha");
 	else
 		return m_alpha;
 }
@@ -2043,8 +2040,8 @@ double VolumeData::GetLowShading()
 
 double VolumeData::GetMlLowShading()
 {
-	if (m_ep)
-		return m_ep->getParam("low_shading");
+	if (m_ep.getValid())
+		return m_ep.getParam("low_shading");
 	else
 		return GetLowShading();
 }
@@ -2058,8 +2055,8 @@ double VolumeData::GetHiShading()
 
 double VolumeData::GetMlHiShading()
 {
-	if (m_ep)
-		return m_ep->getParam("high_shading");
+	if (m_ep.getValid())
+		return m_ep.getParam("high_shading");
 	else
 		return GetHiShading();
 }
@@ -2087,8 +2084,8 @@ double VolumeData::GetShadowIntensity()
 
 double VolumeData::GetMlShadowIntensity()
 {
-	if (m_ep)
-		return m_ep->getParam("shadow_intensity");
+	if (m_ep.getValid())
+		return m_ep.getParam("shadow_intensity");
 	else
 		return m_shadow_intensity;
 }
@@ -2123,8 +2120,8 @@ double VolumeData::GetSampleRate()
 
 double VolumeData::GetMlSampleRate()
 {
-	if (m_ep)
-		return m_ep->getParam("sample_rate");
+	if (m_ep.getValid())
+		return m_ep.getParam("sample_rate");
 	else
 		return m_sample_rate;
 }
@@ -2279,8 +2276,8 @@ double VolumeData::GetColormapLow()
 
 double VolumeData::GetMlColormapLow()
 {
-	if (m_ep)
-		return m_ep->getParam("colormap_low");
+	if (m_ep.getValid())
+		return m_ep.getParam("colormap_low");
 	else
 		return m_colormap_low_value;
 }
@@ -2292,8 +2289,8 @@ double VolumeData::GetColormapHigh()
 
 double VolumeData::GetMlColormapHigh()
 {
-	if (m_ep)
-		return m_ep->getParam("colormap_hi");
+	if (m_ep.getValid())
+		return m_ep.getParam("colormap_hi");
 	else
 		return m_colormap_hi_value;
 }
@@ -2991,63 +2988,63 @@ void VolumeData::LoadLabel2()
 	}
 }
 
-flrd::EntryParams* VolumeData::GetMlParams()
+void VolumeData::GetMlParams()
 {
-	if (!m_ep)
+	if (!m_ep.getValid())
 	{
 		flrd::Histogram histogram(this);
 		histogram.SetUseMask(false);
 		flrd::EntryHist* eh = histogram.GetEntryHist();
 		if (!eh)
-			return 0;
+			return;
 		//get entry from table
 		flrd::TableHistParams& table = glbin.get_vp_table();
-		m_ep = new flrd::EntryParams(table.infer(eh));
+		m_ep = *table.infer(eh);
 		delete eh;
+		flrd::Reshape::clear();
 	}
-	return m_ep;
 }
 
 void VolumeData::ApplyMlVolProp()
 {
-	flrd::EntryParams* ep = GetMlParams();
+	GetMlParams();
 	//get histogram
-	if (ep)
+	if (m_ep.getValid())
 	{
 		//set parameters
 		double dval, dval2;
 		//extract boundary
-		dval = ep->getParam("extract_boundary");
+		dval = m_ep.getParam("extract_boundary");
 		SetBoundary(dval);
 		//gamma
-		dval = ep->getParam("gamma3d");
+		dval = m_ep.getParam("gamma3d");
 		SetGamma(dval);
 		//low offset
-		dval = ep->getParam("low_offset");
+		dval = m_ep.getParam("low_offset");
 		SetSaturation(dval);
 		//high offset
-		dval = ep->getParam("high_offset");
+		dval = m_ep.getParam("high_offset");
 		//low thresholding
-		dval = ep->getParam("low_threshold");
+		dval = m_ep.getParam("low_threshold");
 		SetLeftThresh(dval);
 		//high thresholding
-		dval = ep->getParam("high_threshold");
+		dval = m_ep.getParam("high_threshold");
 		SetRightThresh(dval);
 		//low shading
-		dval = ep->getParam("low_shading");
+		dval = m_ep.getParam("low_shading");
 		//high shading
-		dval2 = ep->getParam("high_shading");
+		dval2 = m_ep.getParam("high_shading");
 		double amb, diff, spec, shine;
 		GetMaterial(amb, diff, spec, shine);
 		SetMaterial(dval, diff, spec, dval2);
 		//alpha
-		dval = ep->getParam("alpha");
+		dval = m_ep.getParam("alpha");
 		SetAlpha(dval);
 		//sample rate
-		dval = ep->getParam("sample_rate");
+		dval = m_ep.getParam("sample_rate");
 		SetSampleRate(dval);
 		//luminance
-		dval = ep->getParam("luminance");
+		dval = m_ep.getParam("luminance");
 		double h, s, v;
 		GetHSV(h, s, v);
 		fluo::HSVColor hsv(h, s, dval);
@@ -3055,48 +3052,48 @@ void VolumeData::ApplyMlVolProp()
 		ResetMaskColorSet();
 		SetColor(color);
 		//colormap enable
-		dval = ep->getParam("colormap_enable");
+		dval = m_ep.getParam("colormap_enable");
 		SetColormapMode(dval>0.5);
 		//colormap inv
-		dval = ep->getParam("colormap_inv");
+		dval = m_ep.getParam("colormap_inv");
 		SetColormapInv(dval > 0.5 ? -1.0 : 1.0);
 		//colormap type
-		dval = ep->getParam("colormap_type");
+		dval = m_ep.getParam("colormap_type");
 		SetColormap(std::round(dval));
 		//colormap projection
-		dval = ep->getParam("colormap_proj");
+		dval = m_ep.getParam("colormap_proj");
 		SetColormapProj(std::round(dval));
 		//colormap low value
-		dval = ep->getParam("colormap_low");
+		dval = m_ep.getParam("colormap_low");
 		//colormap high value
-		dval2 = ep->getParam("colormap_hi");
+		dval2 = m_ep.getParam("colormap_hi");
 		SetColormapValues(dval, dval2);
 		//alpha
-		dval = ep->getParam("alpha_enable");
+		dval = m_ep.getParam("alpha_enable");
 		SetAlphaEnable(dval > 0.5);
 		//enable shading
-		dval = ep->getParam("shading_enable");
+		dval = m_ep.getParam("shading_enable");
 		SetShadingEnable(dval > 0.5);
 		//interpolation
-		dval = ep->getParam("interp_enable");
+		dval = m_ep.getParam("interp_enable");
 		SetInterpolate(dval > 0.5);
 		//inversion
-		dval = ep->getParam("invert_enable");
+		dval = m_ep.getParam("invert_enable");
 		SetInvert(dval > 0.5);
 		//enable mip
-		dval = ep->getParam("mip_enable");
+		dval = m_ep.getParam("mip_enable");
 		SetMode(std::round(dval));
 		//enable hi transp
-		dval = ep->getParam("transparent_enable");
+		dval = m_ep.getParam("transparent_enable");
 		SetAlphaPower(dval > 0.5 ? 2.0 : 1.0);
 		//noise reduction
-		dval = ep->getParam("denoise_enable");
+		dval = m_ep.getParam("denoise_enable");
 		SetNR(dval > 0.5);
 		//shadow
-		dval = ep->getParam("shadow_enable");
+		dval = m_ep.getParam("shadow_enable");
 		SetShadowEnable(dval > 0.5);
 		//shadow intensity
-		dval = ep->getParam("shadow_intensity");
+		dval = m_ep.getParam("shadow_intensity");
 		SetShadowIntensity(dval);
 	}
 }

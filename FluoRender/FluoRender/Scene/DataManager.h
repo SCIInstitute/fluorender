@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshRenderer.h>
 #include <VolumeRenderer.h>
 #include <VertexArray.h>
+#include <EntryParams.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
 #include <base_reader.h>
@@ -555,7 +556,7 @@ public:
 	void SetMlCompGenApplied(bool bval) { m_ml_comp_gen_applied = bval; }
 
 	//apply volume properties form machine learning
-	flrd::EntryParams* GetMlParams();
+	void GetMlParams();
 	void ApplyMlVolProp();
 
 private:
@@ -564,7 +565,7 @@ private:
 	int m_dup_counter;
 	VolumeData* m_dup_data;//duplicated from
 
-	flrd::EntryParams* m_ep;
+	flrd::EntryParams m_ep;
 
 	wxString m_tex_path;
 	fluo::BBox m_bounds;

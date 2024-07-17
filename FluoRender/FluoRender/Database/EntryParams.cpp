@@ -32,7 +32,8 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 EntryParams::EntryParams() :
-	m_params(nullptr)
+	m_params(nullptr),
+	m_valid(false)
 {}
 
 EntryParams::EntryParams(const EntryParams& ent) :

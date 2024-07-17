@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <cl_code_db.h>
 #include <EntryHist.h>
 #include <EntryParams.h>
+#include <Reshape.h>
 #include <algorithm>
 #ifdef _DEBUG
 #include <Debug.h>
@@ -1480,7 +1481,7 @@ void ComponentGenerator::GenerateDB()
 	//check table size
 	unsigned int rec = table.getRecSize();
 	unsigned int bin = EntryHist::m_bins;
-	unsigned int par = glbin.get_params("comp_gen")->size();
+	unsigned int par = flrd::Reshape::get_param_size("comp_gen");
 	if (!(rec && bin && par))
 		return;
 
