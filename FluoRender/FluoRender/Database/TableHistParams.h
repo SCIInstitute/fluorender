@@ -47,6 +47,8 @@ namespace flrd
 
 		virtual void open(const std::string& filename);
 
+		void addUntrainedRecord();
+
 		float getHistPopl()
 		{
 			return m_hist_popl;

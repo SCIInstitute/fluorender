@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TRAINER_H_
 #define _TRAINER_H_
 
+#include <string>
+
 namespace flrd
 {
 	class Trainer
@@ -36,14 +38,24 @@ namespace flrd
 		Trainer();
 		~Trainer();
 
+		virtual void set_trained_rec_num(size_t val) { m_trained_rec_num = val; }
+		virtual size_t get_trained_rec_num() { return m_trained_rec_num; }
+
 		virtual void add(float*, float*) = 0;
+
 		virtual void train() = 0;
 		virtual float* infer(float*) = 0;
+
 		virtual double get_rate() = 0;
 		bool is_valid() { return m_valid; }
 
+		virtual void set_model_file(const std::string& file) { m_model_file = file; }
+		virtual std::string get_model_file() { return m_model_file; }
+
 	protected:
 		bool m_valid;
+		size_t m_trained_rec_num;
+		std::string m_model_file;
 	};
 }
 #endif//_TRAINER_H_

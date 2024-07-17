@@ -50,6 +50,7 @@ namespace flrd
 		virtual void train();
 		virtual float* infer(float*);
 		virtual double get_rate();
+		virtual void set_model_file(const std::string& file);
 
 	protected:
 		net_type m_net;

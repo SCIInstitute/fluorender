@@ -79,6 +79,23 @@ void TableHistParams::open(const std::string& filename)
 {
 	Table::open(filename);
 	compute();
+
+	if (m_dnn)
+	{
+		m_dnn->set_model_file(filename + ".model");
+		m_dnn->set_trained_rec_num(m_trained_rec_num);
+	}
+	addUntrainedRecord();
+}
+
+void TableHistParams::addUntrainedRecord()
+{
+
+	if (m_data.size() <= m_trained_rec_num)
+		return;
+	
+	for (size_t i = m_trained_rec_num; i < m_data.size(); ++i)
+		dnn_add(m_data[i]);
 }
 
 void TableHistParams::compute(Record* rec)
@@ -163,6 +180,8 @@ void TableHistParams::dnn_add(Record* rec)
 	std::vector<float> out = r->getOutput()->getStdData();
 
 	m_dnn->add(&in[0], &out[0]);
+
+	m_trained_rec_num = m_dnn->get_trained_rec_num();
 }
 
 //models for inference

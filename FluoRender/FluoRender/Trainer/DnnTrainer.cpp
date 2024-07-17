@@ -34,6 +34,7 @@ DnnTrainer::DnnTrainer() :
 	m_trainer(m_net)
 {
 	m_trainer.set_learning_rate(0.1);
+	m_trainer.set_mini_batch_size(20);
 }
 
 DnnTrainer::~DnnTrainer()
@@ -73,12 +74,16 @@ void DnnTrainer::train()
 	m_input.clear();
 	m_output.clear();
 
+	m_trainer.get_net();
+
 	m_valid = true;
+	m_trained_rec_num += bs;
 }
 
 float* DnnTrainer::infer(float* in)
 {
-	m_trainer.get_net();
+	if (!m_valid)
+		return 0;
 
 	dlib::matrix<float> tii(gno_vp_input_size, 1);
 	for (int i = 0; i < gno_vp_input_size; ++i)
@@ -95,4 +100,10 @@ double DnnTrainer::get_rate()
 		return 1;
 
 	return m_trainer.get_learning_rate();
+}
+
+void DnnTrainer::set_model_file(const std::string& file)
+{
+	Trainer::set_model_file(file);
+	m_trainer.set_synchronization_file(file, std::chrono::minutes(5));
 }

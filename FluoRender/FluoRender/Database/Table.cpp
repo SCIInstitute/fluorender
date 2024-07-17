@@ -45,7 +45,8 @@ Table::Table():
 	m_recnum(0),
 	m_modified(false),
 	m_update_func(nullptr),
-	m_params(0)
+	m_params(0),
+	m_trained_rec_num(0)
 {
 	m_modify_time = m_create_time = std::time(0);
 }
@@ -55,7 +56,8 @@ Table::Table(const Table& table) :
 	m_notes(table.m_notes),
 	m_recnum(table.m_recnum),
 	m_update_func(nullptr),
-	m_params(table.m_params)
+	m_params(table.m_params),
+	m_trained_rec_num(0)
 {
 	std::string tname = table.m_name;
 	if (tname.empty())
@@ -253,6 +255,14 @@ void Table::open(const std::string& filename, bool info)
 		}
 	}
 
+	//trainer
+	if (file.check(TAG_TABLE_TRAINED_NUM))
+	{
+		file.readValue(m_trained_rec_num);
+	}
+	else
+		m_trained_rec_num = 0;
+
 	file.endRead();
 	m_modified = false;
 }
@@ -289,6 +299,10 @@ void Table::save(const std::string& filename)
 	//data
 	for (auto i : m_data)
 		i->save(file);
+
+	//trainer
+	file.writeValue(TAG_TABLE_TRAINED_NUM);
+	file.writeValue(m_trained_rec_num);
 
 	file.endWrite();
 	m_modified = false;

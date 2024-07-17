@@ -54,7 +54,8 @@ namespace flrd
 				TAG_TABLE_NOTES,
 				TAG_TABLE_NOTE_SIZE,
 				TAG_TABLE_NAME,
-				TAG_TABLE_NAME_SIZE
+				TAG_TABLE_NAME_SIZE,
+				TAG_TABLE_TRAINED_NUM
 			};
 
 			Table();
@@ -164,6 +165,8 @@ namespace flrd
 			size_t m_recnum;
 			std::vector<Record*> m_data;
 			Params* m_params;//type of records
+			//trainer
+			size_t m_trained_rec_num;
 
 			//update
 			TableUpdateFunc m_update_func;

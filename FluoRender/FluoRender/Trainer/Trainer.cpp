@@ -30,7 +30,8 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 Trainer::Trainer() :
-	m_valid(false)
+	m_valid(false),
+	m_trained_rec_num(0)
 {
 
 }
