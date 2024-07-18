@@ -84,13 +84,12 @@ void TableHistParams::open(const std::string& filename)
 	{
 		m_dnn->set_model_file(filename + ".model");
 		m_dnn->set_trained_rec_num(m_trained_rec_num);
+		addUntrainedRecord();
 	}
-	addUntrainedRecord();
 }
 
 void TableHistParams::addUntrainedRecord()
 {
-
 	if (m_data.size() <= m_trained_rec_num)
 		return;
 	

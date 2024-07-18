@@ -149,7 +149,7 @@ void MachineLearningPanel::Create()
 	m_top_grid->SetColLabelValue(4, "Date created");
 	m_top_grid->Bind(wxEVT_GRID_CELL_CHANGING, &MachineLearningPanel::OnTopGridCellChanging, this);
 	m_top_grid->Bind(wxEVT_GRID_CELL_CHANGED, &MachineLearningPanel::OnTopGridCellChanged, this);
-	m_top_grid->Fit();
+	//m_top_grid->Fit();
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	m_new_table_btn = new wxButton(m_panel_top, wxID_ANY, "New",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
@@ -1095,15 +1095,16 @@ void MLVolPropPanel::LoadTable(const std::string& filename)
 	std::string str = m_exepath;
 	str += GETSLASHA() + m_dir + GETSLASHA();
 	flrd::TableHistParams& table = glbin.get_vp_table();
+	std::string str2;
 	//save existing table if modified
 	if (table.getModified())
 	{
 		std::string name = table.getName();
-		str += name + m_ext;
-		table.save(str);
+		str2 = str + name + m_ext;
+		table.save(str2);
 	}
-	str += filename + m_ext;
-	table.open(str);
+	str2 = str + filename + m_ext;
+	table.open(str2);
 }
 
 void MLVolPropPanel::SaveTable(const std::string& filename)

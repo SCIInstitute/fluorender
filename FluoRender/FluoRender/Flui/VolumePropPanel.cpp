@@ -1279,31 +1279,32 @@ void VolumePropPanel::ApplyMl()
 void VolumePropPanel::SaveMl()
 {
 	std::vector<float> val;
-	val.push_back(float(m_vd->GetGamma()));
 	val.push_back(float(m_vd->GetBoundary()));
+	val.push_back(float(m_vd->GetGamma()));
 	val.push_back(float(m_vd->GetSaturation()));
+	val.push_back(float(1));
 	val.push_back(float(m_vd->GetLeftThresh()));
 	val.push_back(float(m_vd->GetRightThresh()));
-	val.push_back(float(m_vd->GetLuminance()));
-	val.push_back(float(m_vd->GetAlphaEnable()));
-	val.push_back(float(m_vd->GetAlpha()));
-	val.push_back(float(m_vd->GetShadingEnable()));
 	val.push_back(float(m_vd->GetLowShading()));
 	val.push_back(float(m_vd->GetHiShading()));
-	val.push_back(float(m_vd->GetShadowEnable()));
-	val.push_back(float(m_vd->GetShadowIntensity()));
+	val.push_back(float(m_vd->GetAlpha()));
 	val.push_back(float(m_vd->GetSampleRate()));
+	val.push_back(float(m_vd->GetLuminance()));
 	val.push_back(float(m_vd->GetColormapMode() == 1));
 	val.push_back(float(m_vd->GetColormapInv()));
 	val.push_back(float(m_vd->GetColormap()));
 	val.push_back(float(m_vd->GetColormapProj()));
 	val.push_back(float(m_vd->GetColormapLow()));
 	val.push_back(float(m_vd->GetColormapHigh()));
+	val.push_back(float(m_vd->GetAlphaEnable()));
+	val.push_back(float(m_vd->GetShadingEnable()));
 	val.push_back(float(m_vd->GetInterpolate()));
 	val.push_back(float(m_vd->GetInvert()));
 	val.push_back(float(m_vd->GetMode() == 1));
 	val.push_back(float(m_vd->GetTransparent()));
 	val.push_back(float(m_vd->GetNR()));
+	val.push_back(float(m_vd->GetShadowEnable()));
+	val.push_back(float(m_vd->GetShadowIntensity()));
 	flrd::EntryParams* ep = flrd::Reshape::get_entry_params("vol_prop", &val[0]);
 
 	//histogram

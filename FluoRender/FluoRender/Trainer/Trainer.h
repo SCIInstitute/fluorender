@@ -38,7 +38,11 @@ namespace flrd
 		Trainer();
 		~Trainer();
 
-		virtual void set_trained_rec_num(size_t val) { m_trained_rec_num = val; }
+		virtual void set_trained_rec_num(size_t val)
+		{
+			m_trained_rec_num = val;
+			m_valid = m_trained_rec_num > 0;
+		}
 		virtual size_t get_trained_rec_num() { return m_trained_rec_num; }
 
 		virtual void add(float*, float*) = 0;
