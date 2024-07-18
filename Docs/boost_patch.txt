@@ -1,0 +1,17 @@
+--- boost_1_82_0/tools/build/src/tools/msvc.jam.orig    2023-04-10 09:48:06.000000000 -0400
++++ boost_1_82_0/tools/build/src/tools/msvc.jam 2024-06-10 18:38:03.106212200 -0400
+@@ -1119,6 +1119,14 @@
+         }
+         else
+         {
++            if [ MATCH "(14.4)" : $(version) ]
++            {
++                if $(.debug-configuration)
++                {
++                    ECHO "notice: [generate-setup-cmd] $(version) is 14.4x" ;
++                }
++                parent = [ path.native [ path.join  $(parent) "..\\..\\..\\..\\..\\Auxiliary\\Build" ] ] ;
++            }
+             if [ MATCH "(14.3)" : $(version) ]
+             {
+                 if $(.debug-configuration)
