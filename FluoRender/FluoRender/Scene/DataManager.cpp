@@ -3014,37 +3014,37 @@ void VolumeData::ApplyMlVolProp()
 		//set parameters
 		double dval, dval2;
 		//extract boundary
-		dval = m_ep.getParam("extract_boundary");
+		dval = std::max(0.0f, m_ep.getParam("extract_boundary"));
 		SetBoundary(dval);
 		//gamma
-		dval = m_ep.getParam("gamma3d");
+		dval = std::max(0.0f, m_ep.getParam("gamma3d"));
 		SetGamma(dval);
 		//low offset
-		dval = m_ep.getParam("low_offset");
+		dval = std::max(0.0f, m_ep.getParam("low_offset"));
 		SetSaturation(dval);
 		//high offset
-		dval = m_ep.getParam("high_offset");
+		dval = std::max(0.0f, m_ep.getParam("high_offset"));
 		//low thresholding
-		dval = m_ep.getParam("low_threshold");
+		dval = std::max(0.0f, m_ep.getParam("low_threshold"));
 		SetLeftThresh(dval);
 		//high thresholding
-		dval = m_ep.getParam("high_threshold");
+		dval = std::max(0.0f, m_ep.getParam("high_threshold"));
 		SetRightThresh(dval);
 		//low shading
-		dval = m_ep.getParam("low_shading");
+		dval = std::max(0.0f, m_ep.getParam("low_shading"));
 		//high shading
-		dval2 = m_ep.getParam("high_shading");
+		dval2 = std::max(0.0f, m_ep.getParam("high_shading"));
 		double amb, diff, spec, shine;
 		GetMaterial(amb, diff, spec, shine);
 		SetMaterial(dval, diff, spec, dval2);
 		//alpha
-		dval = m_ep.getParam("alpha");
+		dval = std::max(0.0f, m_ep.getParam("alpha"));
 		SetAlpha(dval);
 		//sample rate
-		dval = m_ep.getParam("sample_rate");
+		dval = std::max(0.1f, m_ep.getParam("sample_rate"));
 		SetSampleRate(dval);
 		//luminance
-		dval = m_ep.getParam("luminance");
+		dval = std::max(0.0f, m_ep.getParam("luminance"));
 		double h, s, v;
 		GetHSV(h, s, v);
 		fluo::HSVColor hsv(h, s, dval);
@@ -3064,9 +3064,9 @@ void VolumeData::ApplyMlVolProp()
 		dval = m_ep.getParam("colormap_proj");
 		SetColormapProj(std::round(dval));
 		//colormap low value
-		dval = m_ep.getParam("colormap_low");
+		dval = std::max(0.0f, m_ep.getParam("colormap_low"));
 		//colormap high value
-		dval2 = m_ep.getParam("colormap_hi");
+		dval2 = std::max(0.0f, m_ep.getParam("colormap_hi"));
 		SetColormapValues(dval, dval2);
 		//alpha
 		dval = m_ep.getParam("alpha_enable");
@@ -3093,7 +3093,7 @@ void VolumeData::ApplyMlVolProp()
 		dval = m_ep.getParam("shadow_enable");
 		SetShadowEnable(dval > 0.5);
 		//shadow intensity
-		dval = m_ep.getParam("shadow_intensity");
+		dval = std::max(0.0f, m_ep.getParam("shadow_intensity"));
 		SetShadowIntensity(dval);
 	}
 }
