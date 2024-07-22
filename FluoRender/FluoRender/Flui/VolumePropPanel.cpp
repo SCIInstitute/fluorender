@@ -1272,8 +1272,7 @@ void VolumePropPanel::ApplyMl()
 		m_group->ApplyMlVolProp();
 	else if (m_vd)
 		m_vd->ApplyMlVolProp();
-	//GetSettings();
-	FluoRefresh(0);
+	FluoRefresh(0, { gstVolumeProps }, { m_frame->GetRenderCanvas(m_view) });
 }
 
 void VolumePropPanel::SaveMl()
