@@ -30,6 +30,9 @@ DEALINGS IN THE SOFTWARE.
 #include <Reshape.h>
 #include <algorithm>
 #include <VolPropDnnTrainer.h>
+#include <filesystem>
+//#include <chrono>
+//#include <Debug.h>
 
 using namespace flrd;
 
@@ -82,9 +85,18 @@ void TableHistParams::open(const std::string& filename)
 
 	if (m_dnn)
 	{
-		m_dnn->set_model_file(filename + ".model");
+		//std::chrono::high_resolution_clock::time_point p0, p1;
+		//p0 = std::chrono::high_resolution_clock::now();
+		std::string model_file = filename + ".model";
+		if (!std::filesystem::exists(model_file))
+			m_trained_rec_num = 0;
+		m_dnn->set_model_file(model_file);
 		m_dnn->set_trained_rec_num(m_trained_rec_num);
 		addUntrainedRecord();
+		//p1 = std::chrono::high_resolution_clock::now();
+		//std::chrono::duration<double> span =
+		//	std::chrono::duration_cast<std::chrono::duration<double>>(p1 - p0);
+		//DBGPRINT(L"%.4f sec.\n", span.count());
 	}
 }
 
