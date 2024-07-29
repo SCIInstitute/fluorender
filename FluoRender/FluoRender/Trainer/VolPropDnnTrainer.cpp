@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
+#define VP_TRAIN_STEPS 10000
+
 VolPropDnnTrainer::VolPropDnnTrainer() :
 	DnnTrainer(),
 	m_trainer(m_net)
@@ -68,7 +70,7 @@ void VolPropDnnTrainer::train()
 		m_output.size() < bs)
 		return;
 
-	while (m_trainer.get_learning_rate() >= 1e-2)
+	for (int i = 0; i < VP_TRAIN_STEPS; ++i)
 		m_trainer.train_one_step(m_input, m_output);
 
 	m_input.clear();
