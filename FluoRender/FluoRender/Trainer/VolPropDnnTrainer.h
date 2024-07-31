@@ -36,7 +36,9 @@ namespace flrd
 	using net_type_vp =
 		dlib::loss_mean_squared_multioutput<
 		dlib::fc<gno_vp_output_size,
-		dlib::input<dlib::matrix<float>>>>;
+		dlib::relu<dlib::fc<gno_vp_input_size,
+		dlib::input<dlib::matrix<float>>
+		>>>>;
 
 	class VolPropDnnTrainer : public DnnTrainer
 	{
