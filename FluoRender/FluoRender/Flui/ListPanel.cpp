@@ -679,7 +679,7 @@ void ListPanel::DeleteSelection()
 	}
 
 	glbin_current.SetRoot();
-	FluoRefresh(2, { gstTreeCtrl, gstListCtrl });
+	FluoRefresh(0, { gstTreeCtrl, gstListCtrl });
 }
 
 void ListPanel::DeleteAll()
@@ -691,7 +691,8 @@ void ListPanel::DeleteAll()
 			canvas->ClearAll();
 	}
 	glbin_data_manager.ClearAll();
-	FluoRefresh(2, { gstTreeCtrl, gstListCtrl });
+	glbin_current.SetRoot();
+	FluoRefresh(0, { gstTreeCtrl, gstListCtrl });
 }
 
 void ListPanel::OnContextMenu(wxContextMenuEvent& event)

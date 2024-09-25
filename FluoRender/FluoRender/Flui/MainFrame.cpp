@@ -1230,6 +1230,19 @@ void MainFrame::ShowPropPage(int type,
 	Annotations* ann,
 	bool show )
 {
+	if (!type)
+	{
+		int n = 0;
+		n += glbin_data_manager.GetVolumeNum();
+		n += glbin_data_manager.GetMeshNum();
+		n += glbin_data_manager.GetAnnotationNum();
+		if (!n)
+		{
+			m_prop_panel->DeleteAllPages();
+			m_prop_pages.clear();
+			return;
+		}
+	}
 	//find page
 	wxWindow* page = 0;
 	wxString name;
