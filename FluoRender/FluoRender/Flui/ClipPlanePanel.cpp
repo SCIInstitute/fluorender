@@ -733,28 +733,31 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	//rotations
-	double rotx, roty, rotz;
-	canvas->GetClippingPlaneRotations(rotx, roty, rotz);
-	//x
-	if (update_all || FOUND_VALUE(gstClipRotX))
+	if (canvas)
 	{
-		m_x_rot_sldr->ChangeValue(std::round(rotx));
-		m_x_rot_text->ChangeValue(wxString::Format("%.1f", double(rotx)));
-		m_x_rot_text->Update();
-	}
-	//y
-	if (update_all || FOUND_VALUE(gstClipRotY))
-	{
-		m_y_rot_sldr->ChangeValue(std::round(roty));
-		m_y_rot_text->ChangeValue(wxString::Format("%.1f", double(roty)));
-		m_y_rot_text->Update();
-	}
-	//z
-	if (update_all || FOUND_VALUE(gstClipRotZ))
-	{
-		m_z_rot_sldr->ChangeValue(std::round(rotz));
-		m_z_rot_text->ChangeValue(wxString::Format("%.1f", double(rotz)));
-		m_z_rot_text->Update();
+		double rotx, roty, rotz;
+		canvas->GetClippingPlaneRotations(rotx, roty, rotz);
+		//x
+		if (update_all || FOUND_VALUE(gstClipRotX))
+		{
+			m_x_rot_sldr->ChangeValue(std::round(rotx));
+			m_x_rot_text->ChangeValue(wxString::Format("%.1f", double(rotx)));
+			m_x_rot_text->Update();
+		}
+		//y
+		if (update_all || FOUND_VALUE(gstClipRotY))
+		{
+			m_y_rot_sldr->ChangeValue(std::round(roty));
+			m_y_rot_text->ChangeValue(wxString::Format("%.1f", double(roty)));
+			m_y_rot_text->Update();
+		}
+		//z
+		if (update_all || FOUND_VALUE(gstClipRotZ))
+		{
+			m_z_rot_sldr->ChangeValue(std::round(rotz));
+			m_z_rot_text->ChangeValue(wxString::Format("%.1f", double(rotz)));
+			m_z_rot_text->Update();
+		}
 	}
 
 	EnableAll(true);

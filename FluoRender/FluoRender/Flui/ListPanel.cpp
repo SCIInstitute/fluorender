@@ -423,7 +423,7 @@ void ListPanel::AddSelectionToView(int view)
 			canvas->InitView(INIT_BOUNDS | INIT_CENTER);
 	}
 	vc.insert(gstTreeCtrl);
-	FluoRefresh(2, vc, { view });
+	FluoRefresh(0, vc, { view });
 }
 
 void ListPanel::AddSelToCurView()

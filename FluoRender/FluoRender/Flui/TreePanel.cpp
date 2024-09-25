@@ -965,7 +965,7 @@ void TreePanel::DeleteSelection()
 {
 	int type = glbin_current.GetType();
 	RenderCanvas* canvas = glbin_current.canvas;
-	if (canvas)
+	if (!canvas)
 		return;
 
 	switch (type)
@@ -1032,7 +1032,7 @@ void TreePanel::DeleteSelection()
 
 	glbin_current.SetRoot();
 
-	FluoRefresh(0, { gstTreeCtrl });
+	FluoRefresh(0, { gstTreeCtrl, gstListCtrl });
 }
 
 //delete
