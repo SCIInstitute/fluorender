@@ -38,6 +38,8 @@ public:
 
 	bool ClipDisplayChanged();
 
+	void SetModal(bool bval = true);
+
 public:
 	bool m_mouse_in_clip_plane_panel;
 	bool m_mouse_in_aov_slider;
@@ -45,6 +47,8 @@ public:
 
 	int m_brush_mode_toolbar;	//brush state set from ui
 	int m_brush_mode_shortcut;	//brush state set by shortcut
+
+	bool m_modal_shown;	//a modal dialog is currently shown, disable keyboard shortcuts
 
 	wxString m_status_str;		//string to show on main statusbar
 };

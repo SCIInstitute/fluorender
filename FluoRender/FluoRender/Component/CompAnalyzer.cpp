@@ -532,6 +532,8 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 
 void ComponentAnalyzer::UpdateMaxCompSize(bool colocal)
 {
+	if (!m_compgroup)
+		return;
 	//comp list
 	CelpList &comps = m_compgroup->celps;
 	//graph for linking multiple bricks
@@ -644,6 +646,8 @@ void ComponentAnalyzer::Count()
 			m_vox += sumi;
 		}
 	}
+	if (!m_compgroup)
+		return;
 	VolumeData* vd = m_compgroup->vd;
 	if (!vd)
 		return;
@@ -1595,6 +1599,8 @@ void ComponentAnalyzer::OutputDistance(std::ostream& stream)
 	}
 	else
 	{
+		if (!m_compgroup)
+			return;
 		flrd::CellGraph& graph = m_comp_groups[0].graph;
 		flrd::CelpList* list = &(m_compgroup->celps);
 		sx = list->sx;
@@ -1753,6 +1759,8 @@ size_t ComponentAnalyzer::GetDistMatSize()
 	}
 	else
 	{
+		if (!m_compgroup)
+			return 0;
 		return m_compgroup->celps.size();
 	}
 }
@@ -1796,6 +1804,8 @@ void ComponentAnalyzer::SetSelectedIds(const std::vector<unsigned int>& ids,
 
 bool ComponentAnalyzer::GetSelectedCelp(CelpList& cl, bool links)
 {
+	if (!m_compgroup)
+		return false;
 	CelpList* list = &(m_compgroup->celps);
 	if (!list || list->empty())
 		return false;
@@ -1829,6 +1839,8 @@ bool ComponentAnalyzer::GetSelectedCelp(CelpList& cl, bool links)
 
 bool ComponentAnalyzer::GetAllCelp(CelpList& cl, bool links)
 {
+	if (!m_compgroup)
+		return false;
 	CelpList* list = &(m_compgroup->celps);
 	if (!list || list->empty())
 		return false;
@@ -1853,6 +1865,8 @@ bool ComponentAnalyzer::GetColor(
 	VolumeData* vd,
 	fluo::Color &color)
 {
+	if (!m_compgroup)
+		return false;
 	if (!id)
 		return false;
 	//comp list

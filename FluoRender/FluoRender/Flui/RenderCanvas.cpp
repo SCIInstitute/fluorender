@@ -3943,7 +3943,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	}
 
 	wxPoint mps = wxGetMousePosition();
-	bool mouse_over = wxFindWindowAtPoint(mps) == this;
+	bool mouse_over = wxFindWindowAtPoint(mps) == this &&
+		!glbin_states.m_modal_shown;
 
 	if (mouse_over)
 	{
