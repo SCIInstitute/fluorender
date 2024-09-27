@@ -1327,6 +1327,7 @@ void RenderCanvas::DrawVolumes(int peel)
 
 	//draw
 	if (m_load_update ||
+		glbin_settings.m_hologram_mode == 2 ||
 		(!m_retain_finalbuffer &&
 			m_int_mode != 2 &&
 			m_int_mode != 7 &&
