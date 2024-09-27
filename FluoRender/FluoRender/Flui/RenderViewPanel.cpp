@@ -1719,7 +1719,9 @@ void RenderViewPanel::OnDpiText(wxCommandEvent& event)
 	wxSlider* sl_enlarge = (wxSlider*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_SLDR);
 	wxTextCtrl* tx_enlarge = (wxTextCtrl*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_TEXT);
 	bool enlarge = lval > 72;
-	m_canvas->SetEnlarge(enlarge);
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (canvas)
+		canvas->SetEnlarge(enlarge);
 	if (ch_enlarge)
 		ch_enlarge->SetValue(enlarge);
 	double enlarge_scale = (double)lval / 72.0;
@@ -1749,7 +1751,9 @@ void RenderViewPanel::OnChEnlargeCheck(wxCommandEvent& event)
 	if (ch_enlarge)
 	{
 		bool enlarge = ch_enlarge->GetValue();
-		m_canvas->SetEnlarge(enlarge);
+		RenderCanvas* canvas = glbin_current.canvas;
+		if (canvas)
+			canvas->SetEnlarge(enlarge);
 		if (ch_enlarge->GetParent())
 		{
 			wxSlider* sl_enlarge = (wxSlider*)
@@ -1797,7 +1801,9 @@ void RenderViewPanel::OnTxEnlargeText(wxCommandEvent& event)
 	wxString str = event.GetString();
 	double dval;
 	str.ToDouble(&dval);
-	m_canvas->SetEnlargeScale(dval);
+	RenderCanvas* canvas = glbin_current.canvas;
+	if (canvas)
+		canvas->SetEnlargeScale(dval);
 	int ival = std::round(dval * 10);
 	wxTextCtrl* tx_enlarge = (wxTextCtrl*)event.GetEventObject();
 	if (tx_enlarge && tx_enlarge->GetParent())
