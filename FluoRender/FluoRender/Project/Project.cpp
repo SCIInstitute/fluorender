@@ -138,6 +138,7 @@ void Project::Open(wxString& filename)
 
 	//read data list
 	//volume
+	glbin_data_manager.SetProgressFunc(GetProgressFunc());
 	if (fconfig.Exists("/data/volume"))
 	{
 		fconfig.SetPath("/data/volume");
@@ -147,7 +148,9 @@ void Project::Open(wxString& filename)
 			SetProgress(100 * tick_cnt / ticks,
 				"FluoRender is reading and processing volume data. Please wait.");
 
-
+			glbin_data_manager.SetRange(
+				std::round(100.0 * tick_cnt / ticks),
+				std::round(100.0 * (tick_cnt + 1) / ticks));
 			wxString str;
 			str = wxString::Format("/data/volume/%d", i);
 			if (fconfig.Exists(str))

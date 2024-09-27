@@ -5668,6 +5668,7 @@ void DataManager::LoadVolumes(wxArrayString files, bool withImageJ)
 
 	SetProgress(0, "");
 
+	m_file_num = 0;
 }
 
 void DataManager::StartupLoad(wxArrayString files, bool run_mov, bool with_imagej)
@@ -5881,9 +5882,18 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 	int chan = reader->GetChanNum();
 	reader->SetProgressFunc(GetProgressFunc());
 
-	int v1 = std::round(100.0 * m_cur_file / m_file_num);
-	int v2 = std::round(100.0 * (m_cur_file + 1) / m_file_num);
-	SetRange(v1, v2);
+	int v1, v2;
+	if (m_file_num)
+	{
+		v1 = std::round(100.0 * m_cur_file / m_file_num);
+		v2 = std::round(100.0 * (m_cur_file + 1) / m_file_num);
+		SetRange(v1, v2);
+	}
+	else
+	{
+		v1 = GetMin();
+		v2 = GetMax();
+	}
 	int r = GetRange();
 
 	for (i=(ch_num>=0?ch_num:0);
