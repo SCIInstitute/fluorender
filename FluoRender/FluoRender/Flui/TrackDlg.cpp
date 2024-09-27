@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MoviePanel.h>
 #include <CompEditor.h>
 #include <wxSingleSlider.h>
+#include <ModalDlg.h>
 #include <Color.h>
 #include <wx/valnum.h>
 #include <wx/clipbrd.h>
@@ -1047,7 +1048,7 @@ void TrackDlg::SaveTrackFile(const wxString& file)
 
 void TrackDlg::SaveasTrackFile()
 {
-	wxFileDialog* fopendlg = new wxFileDialog(
+	ModalDlg* fopendlg = new ModalDlg(
 		m_frame, "Save a FluoRender track file",
 		"", "", "*.track", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
@@ -1089,7 +1090,7 @@ void TrackDlg::OnClearTrace(wxCommandEvent& event)
 
 void TrackDlg::OnLoadTrace(wxCommandEvent& event)
 {
-	wxFileDialog *fopendlg = new wxFileDialog(
+	ModalDlg *fopendlg = new ModalDlg(
 		m_frame, "Choose a FluoRender track file",
 		"", "", "*.track", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 
@@ -1509,7 +1510,7 @@ void TrackDlg::SaveOutputResult(wxString &filename)
 
 void TrackDlg::OnSaveResult(wxCommandEvent& event)
 {
-	wxFileDialog *fopendlg = new wxFileDialog(
+	ModalDlg *fopendlg = new ModalDlg(
 		m_frame, "Save results", "", "",
 		"Text file (*.txt)|*.txt",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);

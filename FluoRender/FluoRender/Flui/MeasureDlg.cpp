@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
+#include <ModalDlg.h>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include <wx/wfstream.h>
@@ -1468,7 +1469,7 @@ void MeasureDlg::Profile()
 
 void MeasureDlg::Distance()
 {
-	wxFileDialog* fopendlg = new wxFileDialog(
+	ModalDlg* fopendlg = new ModalDlg(
 		this, "Save Analysis Data", "", "",
 		"Text file (*.txt)|*.txt",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
@@ -1487,7 +1488,7 @@ void MeasureDlg::Distance()
 
 void MeasureDlg::Project()
 {
-	wxFileDialog* fopendlg = new wxFileDialog(
+	ModalDlg* fopendlg = new ModalDlg(
 		this, "Save Analysis Data", "", "",
 		"Text file (*.txt)|*.txt",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
@@ -1506,7 +1507,7 @@ void MeasureDlg::Project()
 
 void MeasureDlg::Export()
 {
-	wxFileDialog* fopendlg = new wxFileDialog(
+	ModalDlg* fopendlg = new ModalDlg(
 		m_frame, "Export rulers", "", "",
 		"Text file (*.txt)|*.txt",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);

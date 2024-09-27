@@ -66,6 +66,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeMeshConv.h>
 #include <Debug.h>
 #include <wxGaugeStatusbar.h>
+#include <ModalDlg.h>
 #include <wx/artprov.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
@@ -1887,7 +1888,7 @@ wxString MainFrame::ScriptDialog(const wxString& title,
 {
 	glbin_moviemaker.Hold();
 	wxString result;
-	wxFileDialog* dlg = new wxFileDialog(
+	ModalDlg* dlg = new ModalDlg(
 		this, title, "", "",
 		wildcard, style);
 	int rval = dlg->ShowModal();
@@ -2129,7 +2130,7 @@ void MainFrame::SetProgress(int val, const wxString& str)
 
 void MainFrame::OpenVolume()
 {
-	wxFileDialog* fopendlg = new wxFileDialog(
+	ModalDlg* fopendlg = new ModalDlg(
 		this, "Choose the volume data file", "", "",
 		"All Supported|*.tif;*.tiff;*.lif;*.lof;*.nd2;*.oib;*.oif;*.xml;*.lsm;*.czi;*.nrrd;*.vvd;*.mp4;*.m4v;*.mov;*.avi;*.wmv|"\
 		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
@@ -2160,7 +2161,7 @@ void MainFrame::OpenVolume()
 
 void MainFrame::ImportVolume()
 {
-	wxFileDialog* fopendlg = new wxFileDialog(
+	ModalDlg* fopendlg = new ModalDlg(
 		this, "Choose the volume data file", "", "", "All Files|*.*",
 		wxFD_OPEN | wxFD_MULTIPLE);
 	fopendlg->SetExtraControlCreator(CreateExtraControlVolumeForImport);
@@ -2178,7 +2179,7 @@ void MainFrame::ImportVolume()
 
 void MainFrame::OpenMesh()
 {
-	wxFileDialog* fopendlg = new wxFileDialog(
+	ModalDlg* fopendlg = new ModalDlg(
 		this, "Choose the mesh data file",
 		"", "", "*.obj", wxFD_OPEN | wxFD_MULTIPLE);
 
@@ -2203,7 +2204,7 @@ void MainFrame::NewProject()
 
 void MainFrame::OpenProject()
 {
-	wxFileDialog* fopendlg = new wxFileDialog(
+	ModalDlg* fopendlg = new ModalDlg(
 		this, "Choose Project File",
 		"", "", "*.vrp", wxFD_OPEN);
 
@@ -2241,7 +2242,7 @@ void MainFrame::SaveAsProject()
 	std::wstring filename;
 	bool default_valid = SEP_PATH_NAME(default_path, path, filename);
 
-	wxFileDialog* fopendlg = new wxFileDialog(
+	ModalDlg* fopendlg = new ModalDlg(
 		this, "Save Project File",
 		default_valid ? path : L"", default_valid ? filename : L"",
 		"*.vrp", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);

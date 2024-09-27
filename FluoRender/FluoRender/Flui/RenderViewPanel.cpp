@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wxUndoableScrollBar.h>
 #include <wxUndoableToolbar.h>
 #include <wxUndoableColorPicker.h>
+#include <ModalDlg.h>
 #include <wx/utils.h>
 #include <wx/valnum.h>
 #include <tiffio.h>
@@ -984,7 +985,7 @@ void RenderViewPanel::Capture()
 	m_canvas->SetEnlarge(false);
 	m_canvas->SetEnlargeScale(1.0);
 
-	wxFileDialog file_dlg(m_frame, "Save captured image", "", "", "*.tif", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	ModalDlg file_dlg(m_frame, "Save captured image", "", "", "*.tif", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 	file_dlg.SetExtraControlCreator(CreateExtraCaptureControl);
 	int rval = file_dlg.ShowModal();
 	if (rval == wxID_OK)

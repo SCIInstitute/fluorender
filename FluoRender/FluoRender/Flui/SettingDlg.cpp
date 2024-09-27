@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderCanvas.h>
 #include <RenderViewPanel.h>
 #include <wxSingleSlider.h>
+#include <ModalDlg.h>
 #include <wx/valnum.h>
 #include <wx/notebook.h>
 #include <wx/stdpaths.h>
@@ -1777,11 +1778,11 @@ void SettingDlg::OnJavaBioformatsEdit(wxCommandEvent& event)
 void SettingDlg::onJavaJvmBrowse(wxCommandEvent& event)
 {
 #ifdef _WIN32
-	wxFileDialog *fopendlg = new wxFileDialog(
+	ModalDlg *fopendlg = new ModalDlg(
 		m_frame, "Choose the jvm dll file",
 		"", "", "*.dll", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 #else
-	wxFileDialog* fopendlg = new wxFileDialog(
+	ModalDlg* fopendlg = new ModalDlg(
 		m_frame, "Choose the libjvm.dylib file",
 		"", "", "*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 #endif
@@ -1801,14 +1802,14 @@ void SettingDlg::onJavaJvmBrowse(wxCommandEvent& event)
 void SettingDlg::onJavaIJBrowse(wxCommandEvent& event)
 {
 #ifdef _WIN32	
-	//wxFileDialog *fopendlg = new wxFileDialog(
+	//ModalDlg *fopendlg = new ModalDlg(
 	//	m_frame, "Choose the imageJ/fiji directory",
 	//	"", "", "*.jar", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	wxDirDialog *fopendlg = new wxDirDialog(
 		m_frame, "Choose the imageJ/fiji directory",
 		"", wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
 #else
-	wxFileDialog* fopendlg = new wxFileDialog(
+	ModalDlg* fopendlg = new ModalDlg(
 		m_frame, "Choose the imageJ/fiji app",
 		"", "", "*.app", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 #endif
@@ -1830,7 +1831,7 @@ void SettingDlg::onJavaIJBrowse(wxCommandEvent& event)
 
 void SettingDlg::onJavaBioformatsBrowse(wxCommandEvent& event)
 {
-	wxFileDialog *fopendlg = new wxFileDialog(
+	ModalDlg *fopendlg = new ModalDlg(
 		m_frame, "Choose the bioformats jar",
 		"", "", "*.jar", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 

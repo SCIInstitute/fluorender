@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CompEditor.h>
 #include <RecordHistParams.h>
 #include <wxSingleSlider.h>
+#include <ModalDlg.h>
 #include <wx/scrolwin.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
@@ -1350,7 +1351,7 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		size_t size = glbin_comp_analyzer.GetListSize();
 		if (size < 1e5)
 		{
-			wxFileDialog* fopendlg = new wxFileDialog(
+			ModalDlg* fopendlg = new ModalDlg(
 				this, "Save Analysis Data", "", "",
 				"Text file (*.txt)|*.txt",
 				wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
@@ -1890,7 +1891,7 @@ void ComponentDlg::OnResetCmd(wxCommandEvent& event)
 
 void ComponentDlg::OnLoadCmd(wxCommandEvent& event)
 {
-	wxFileDialog *fopendlg = new wxFileDialog(
+	ModalDlg *fopendlg = new ModalDlg(
 		m_frame, "Choose a FluoRender component generator macro command",
 		"", "", "*.txt;*.dft", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	int rval = fopendlg->ShowModal();
@@ -1907,7 +1908,7 @@ void ComponentDlg::OnLoadCmd(wxCommandEvent& event)
 
 void ComponentDlg::OnSaveCmd(wxCommandEvent& event)
 {
-	wxFileDialog *fopendlg = new wxFileDialog(
+	ModalDlg *fopendlg = new ModalDlg(
 		m_frame, "Save a FluoRender component generator macro command",
 		"", "", "*.txt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 	int rval = fopendlg->ShowModal();
@@ -2470,7 +2471,7 @@ void ComponentDlg::PasteData()
 
 void ComponentDlg::OutputDistance()
 {
-	wxFileDialog* fopendlg = new wxFileDialog(
+	ModalDlg* fopendlg = new ModalDlg(
 		this, "Save Analysis Data", "", "",
 		"Text file (*.txt)|*.txt",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);

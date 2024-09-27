@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderCanvas.h>
 #include <RenderViewPanel.h>
 #include <OutputAdjPanel.h>
+#include <ModalDlg.h>
 #include <png_resource.h>
 #include <wx/valnum.h>
 //resources
@@ -486,7 +487,7 @@ void ListPanel::SaveSelection()
 		fluo::Quaternion q = m_frame->GetRenderCanvas(0)->GetClipRotation();
 		vd->SetResize(0, 0, 0, 0);
 
-		wxFileDialog* fopendlg = new wxFileDialog(
+		ModalDlg* fopendlg = new ModalDlg(
 			m_frame, "Save Volume Data", "", "",
 			"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
 			"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
@@ -514,7 +515,7 @@ void ListPanel::SaveSelection()
 		MeshData* md = glbin_current.mesh_data;
 		if (!md)
 			break;
-		wxFileDialog* fopendlg = new wxFileDialog(
+		ModalDlg* fopendlg = new ModalDlg(
 			m_frame, "Save Mesh Data", "", "",
 			"OBJ file (*.obj)|*.obj",
 			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
@@ -537,7 +538,7 @@ void ListPanel::SaveSelection()
 		Annotations* ann = glbin_current.ann_data;
 		if (!ann)
 			break;
-		wxFileDialog* fopendlg = new wxFileDialog(
+		ModalDlg* fopendlg = new ModalDlg(
 			m_frame, "Save Annotations", "", "",
 			"Text file (*.txt)|*.txt",
 			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
@@ -569,7 +570,7 @@ void ListPanel::BakeSelection()
 	if (!vd)
 		return;
 
-	wxFileDialog* fopendlg = new wxFileDialog(
+	ModalDlg* fopendlg = new ModalDlg(
 		m_frame, "Bake Volume Data", "", "",
 		"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
 		"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\

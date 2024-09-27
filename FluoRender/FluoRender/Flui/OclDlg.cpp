@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <wxSingleSlider.h>
+#include <ModalDlg.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/stdpaths.h>
@@ -287,7 +288,7 @@ void OclDlg::Execute()
 
 void OclDlg::OnBrowseBtn(wxCommandEvent& event)
 {
-	wxFileDialog *fopendlg = new wxFileDialog(
+	ModalDlg *fopendlg = new ModalDlg(
 		m_frame, "Choose an OpenCL kernel file", 
 		"", "", "OpenCL kernel file|*.cl;*.txt", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 
@@ -318,7 +319,7 @@ void OclDlg::OnSaveBtn(wxCommandEvent& event)
 
 void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 {
-	wxFileDialog *fopendlg = new wxFileDialog(
+	ModalDlg *fopendlg = new ModalDlg(
 		m_frame, "Choose an OpenCL kernel file", 
 		"", "", "OpenCL kernel file|*.cl;*.txt", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 

@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderCanvas.h>
 #include <RenderViewPanel.h>
 #include <wxUndoableScrollBar.h>
+#include <ModalDlg.h>
 #include <tiffio.h>
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
@@ -1874,7 +1875,7 @@ void MoviePanel::OnFullFrameText(wxCommandEvent& event)
 
 void MoviePanel::OnSave(wxCommandEvent& event)
 {
-	wxFileDialog* fopendlg = new wxFileDialog(
+	ModalDlg* fopendlg = new ModalDlg(
 		m_frame, "Save Movie Sequence",
 		"", "output", "MOV file (*.mov)|*.mov|TIF files (*.tif)|*.tif",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
@@ -2215,7 +2216,7 @@ void MoviePanel::OnScriptClearBtn(wxCommandEvent& event)
 
 void MoviePanel::OnScriptFileBtn(wxCommandEvent& event)
 {
-	wxFileDialog* fopendlg = new wxFileDialog(
+	ModalDlg* fopendlg = new ModalDlg(
 		m_frame, "Choose a 4D script file", "", "",
 		"4D script file (*.txt)|*.txt",
 		wxFD_OPEN);
