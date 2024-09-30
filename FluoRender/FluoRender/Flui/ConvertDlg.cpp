@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <wxSingleSlider.h>
-#include <wx/progdlg.h>
 #include <wx/valnum.h>
 
 ConvertDlg::ConvertDlg(MainFrame *frame) :

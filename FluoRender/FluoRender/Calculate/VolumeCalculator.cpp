@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <VolumePropPanel.h>
-#include <wx/progdlg.h>
 
 using namespace flrd;
 
@@ -404,13 +403,9 @@ void VolumeCalculator::FillHoles(double thresh)
 	int nx, ny, nz;
 	m_vd_a->GetResolution(nx, ny, nz);
 
-	wxProgressDialog *prog_diag = new wxProgressDialog(
-		"FluoRender: Voxel Consolidation",
-		"Consolidating... Please wait.",
-		100, glbin_current.mainframe,
-		wxPD_SMOOTH | wxPD_ELAPSED_TIME | wxPD_AUTO_HIDE);
 	int progress = 0;
 	int total_prg = nx * 2;
+	SetProgress(0, "FluoRender is filling gaps in the volume. Please wait.");
 
 	int i, j, k;
 	fluo::BBox bbox;
@@ -432,11 +427,10 @@ void VolumeCalculator::FillHoles(double thresh)
 				((unsigned char*)data_r)[index] = 255;
 			}
 		}
-		if (prog_diag)
-		{
-			progress++;
-			prog_diag->Update(95 * (progress + 1) / total_prg);
-		}
+
+		progress++;
+		SetProgress(100 * (progress + 1) / total_prg,
+			"FluoRender is filling gaps in the volume. Please wait.");
 	}
 
 	double dx = (bbox.Max() - bbox.Min()).x() / 2.0;
@@ -561,11 +555,10 @@ void VolumeCalculator::FillHoles(double thresh)
 			}
 		}
 
-		if (prog_diag)
-		{
-			progress++;
-			prog_diag->Update(95 * (progress + 1) / total_prg);
-		}
+		progress++;
+		SetProgress(100 * (progress + 1) / total_prg,
+			"FluoRender is filling gaps in the volume. Please wait.");
 	}
-	delete prog_diag;
+
+	SetProgress(0, "");
 }

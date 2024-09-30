@@ -131,6 +131,12 @@ MainFrame::MainFrame(
 	glbin_project.SetProgressFunc(
 		std::bind(&MainFrame::SetProgress, this,
 			std::placeholders::_1, std::placeholders::_2));
+	glbin_vol_converter.SetProgressFunc(
+		std::bind(&MainFrame::SetProgress, this,
+			std::placeholders::_1, std::placeholders::_2));
+	glbin_vol_calculator.SetProgressFunc(
+		std::bind(&MainFrame::SetProgress, this,
+			std::placeholders::_1, std::placeholders::_2));
 	glbin_current.mainframe = this;
 
 	// tell wxAuiManager to manage this frame

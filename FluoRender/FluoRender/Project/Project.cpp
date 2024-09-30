@@ -138,7 +138,7 @@ void Project::Open(wxString& filename)
 
 	//read data list
 	//volume
-	glbin_data_manager.SetProgressFunc(GetProgressFunc());
+	//glbin_data_manager.SetProgressFunc(GetProgressFunc());
 	if (fconfig.Exists("/data/volume"))
 	{
 		fconfig.SetPath("/data/volume");

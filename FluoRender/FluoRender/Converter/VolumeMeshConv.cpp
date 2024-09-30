@@ -119,16 +119,30 @@ void VolumeMeshConv::Compute()
 	else
 		m_mask = 0;
 
+	SetProgress(0, "FluoRender is converting volume to mesh. Please wait.");
+	if (m_weld)
+		SetRange(0, 80);
+	else
+		SetRange(0, 100);
 	//start converting
 	Convert();
 
 	if (!m_mesh)
+	{
+		SetProgress(0, "");
 		return;
+	}
 
+	SetRange(0, 100);
 	if (m_weld)
+	{
+		SetProgress(80, "FluoRender is welding vertices. Please wait.");
 		glmWeld(m_mesh, 0.001 * fluo::Min(m_spcx, m_spcy, m_spcz));
+	}
 	float scale[3] = { 1.0f, 1.0f, 1.0f };
 	glmArea(m_mesh, scale, &m_area);
+
+	SetProgress(0, "");
 
 	glbin_data_manager.LoadMeshData(m_mesh);
 	MeshData* md = glbin_data_manager.GetLastMeshData();
@@ -169,70 +183,82 @@ void VolumeMeshConv::Convert()
 	m_ny = int(m_volume->axis[1].size);
 	m_nz = int(m_volume->axis[2].size);
 
+	int v1, v2, range;
+	v1 = GetMin();
+	v2 = GetMax();
+	range = GetRange();
+	SetRange(v1, v1 + range / 2);
+
 	//marching cubes
 	//parse the volume data
 	//it has a 1 voxel border, in case the values touch the border
 	int i, j, k;
-	for (i=-1; i<m_nx+m_downsample; i+=m_downsample)
-	for (j=-1; j<m_ny+m_downsample; j+=m_downsample)
-	for (k=-1; k<m_nz+m_downsample_z; k+=m_downsample_z)
+	for (k = -1; k < m_nz + m_downsample_z; k += m_downsample_z)
 	{
-		//current cube is (i, j, k)
-		//27 neighbors
-		double neighbors[3][3][3];
-		int ii, jj, kk;
-		for (ii=0; ii<3; ii++)
-		for (jj=0; jj<3; jj++)
-		for (kk=0; kk<3; kk++)
-			neighbors[ii][jj][kk] =
-			GetValue(i+(ii-1)*m_downsample,
-			j+(jj-1)*m_downsample, k+(kk-1)*m_downsample_z);
-		//8 vertices
-		double verts[8];
-		verts[0] = GetMaxNeighbor(neighbors, 0, 0, 0);
-		verts[1] = GetMaxNeighbor(neighbors, 1, 0, 0);
-		verts[2] = GetMaxNeighbor(neighbors, 1, 1, 0);
-		verts[3] = GetMaxNeighbor(neighbors, 0, 1, 0);
-		verts[4] = GetMaxNeighbor(neighbors, 0, 0, 1);
-		verts[5] = GetMaxNeighbor(neighbors, 1, 0, 1);
-		verts[6] = GetMaxNeighbor(neighbors, 1, 1, 1);
-		verts[7] = GetMaxNeighbor(neighbors, 0, 1, 1);
-
-		//calculate cube index
-		int cubeindex = 0;
-		for (int n=0; n<8; n++)
-			if (verts[n] <= m_iso)
-				cubeindex |= (1<<n);
-
-		//check if it's completely inside or outside
-		if (!edgeTable[cubeindex])
-			continue;
-
-		//get intersection vertices on edge
-		fluo::Vector intverts[12];
-		if(edgeTable[cubeindex] & 1) intverts[0] = Intersect(verts, 0, 1, i, j, k);
-		if(edgeTable[cubeindex] & 2) intverts[1] = Intersect(verts, 1, 2, i, j, k);
-		if(edgeTable[cubeindex] & 4) intverts[2] = Intersect(verts, 2, 3, i, j, k);
-		if(edgeTable[cubeindex] & 8) intverts[3] = Intersect(verts, 3, 0, i, j, k);
-		if(edgeTable[cubeindex] & 16) intverts[4] = Intersect(verts, 4, 5, i, j, k);
-		if(edgeTable[cubeindex] & 32) intverts[5] = Intersect(verts, 5, 6, i, j, k);
-		if(edgeTable[cubeindex] & 64) intverts[6] = Intersect(verts, 6, 7, i, j, k);
-		if(edgeTable[cubeindex] & 128) intverts[7] = Intersect(verts, 7, 4, i, j, k);
-		if(edgeTable[cubeindex] & 256) intverts[8] = Intersect(verts, 0, 4, i, j, k);
-		if(edgeTable[cubeindex] & 512) intverts[9] = Intersect(verts, 1, 5, i, j, k);
-		if(edgeTable[cubeindex] & 1024) intverts[10] = Intersect(verts, 2, 6, i, j, k);
-		if(edgeTable[cubeindex] & 2048) intverts[11] = Intersect(verts, 3, 7, i, j, k);
-
-		//build triangles
-		for (int n=0; triTable[cubeindex][n] != -1; n+=3)
+		SetProgress(100 * (k + 1) / (m_nz + m_downsample_z + 1),
+			"FluoRender is converting volume to mesh. Please wait.");
+		for (j = -1; j < m_ny + m_downsample; j += m_downsample)
+		for (i = -1; i < m_nx + m_downsample; i += m_downsample)
 		{
-			MCTriangle tri;
-			tri.p[0] = intverts[triTable[cubeindex][n+2]];
-			tri.p[1] = intverts[triTable[cubeindex][n+1]];
-			tri.p[2] = intverts[triTable[cubeindex][n]];
-			tri_list.push_back(tri);
+			//current cube is (i, j, k)
+			//27 neighbors
+			double neighbors[3][3][3];
+			int ii, jj, kk;
+			for (ii = 0; ii < 3; ii++)
+				for (jj = 0; jj < 3; jj++)
+					for (kk = 0; kk < 3; kk++)
+						neighbors[ii][jj][kk] =
+						GetValue(i + (ii - 1) * m_downsample,
+							j + (jj - 1) * m_downsample, k + (kk - 1) * m_downsample_z);
+			//8 vertices
+			double verts[8];
+			verts[0] = GetMaxNeighbor(neighbors, 0, 0, 0);
+			verts[1] = GetMaxNeighbor(neighbors, 1, 0, 0);
+			verts[2] = GetMaxNeighbor(neighbors, 1, 1, 0);
+			verts[3] = GetMaxNeighbor(neighbors, 0, 1, 0);
+			verts[4] = GetMaxNeighbor(neighbors, 0, 0, 1);
+			verts[5] = GetMaxNeighbor(neighbors, 1, 0, 1);
+			verts[6] = GetMaxNeighbor(neighbors, 1, 1, 1);
+			verts[7] = GetMaxNeighbor(neighbors, 0, 1, 1);
+
+			//calculate cube index
+			int cubeindex = 0;
+			for (int n = 0; n < 8; n++)
+				if (verts[n] <= m_iso)
+					cubeindex |= (1 << n);
+
+			//check if it's completely inside or outside
+			if (!edgeTable[cubeindex])
+				continue;
+
+			//get intersection vertices on edge
+			fluo::Vector intverts[12];
+			if (edgeTable[cubeindex] & 1) intverts[0] = Intersect(verts, 0, 1, i, j, k);
+			if (edgeTable[cubeindex] & 2) intverts[1] = Intersect(verts, 1, 2, i, j, k);
+			if (edgeTable[cubeindex] & 4) intverts[2] = Intersect(verts, 2, 3, i, j, k);
+			if (edgeTable[cubeindex] & 8) intverts[3] = Intersect(verts, 3, 0, i, j, k);
+			if (edgeTable[cubeindex] & 16) intverts[4] = Intersect(verts, 4, 5, i, j, k);
+			if (edgeTable[cubeindex] & 32) intverts[5] = Intersect(verts, 5, 6, i, j, k);
+			if (edgeTable[cubeindex] & 64) intverts[6] = Intersect(verts, 6, 7, i, j, k);
+			if (edgeTable[cubeindex] & 128) intverts[7] = Intersect(verts, 7, 4, i, j, k);
+			if (edgeTable[cubeindex] & 256) intverts[8] = Intersect(verts, 0, 4, i, j, k);
+			if (edgeTable[cubeindex] & 512) intverts[9] = Intersect(verts, 1, 5, i, j, k);
+			if (edgeTable[cubeindex] & 1024) intverts[10] = Intersect(verts, 2, 6, i, j, k);
+			if (edgeTable[cubeindex] & 2048) intverts[11] = Intersect(verts, 3, 7, i, j, k);
+
+			//build triangles
+			for (int n = 0; triTable[cubeindex][n] != -1; n += 3)
+			{
+				MCTriangle tri;
+				tri.p[0] = intverts[triTable[cubeindex][n + 2]];
+				tri.p[1] = intverts[triTable[cubeindex][n + 1]];
+				tri.p[2] = intverts[triTable[cubeindex][n]];
+				tri_list.push_back(tri);
+			}
 		}
 	}
+
+	SetRange(v1 + range / 2, v2);
 
 	int numtriangles = int(tri_list.size());
 	m_mesh->numvertices = numtriangles*3;
@@ -246,8 +272,12 @@ void VolumeMeshConv::Convert()
 	GLfloat* vertices = m_mesh->vertices;
 	int numvertices = 1;
 	numtriangles = 0;
-	for (int n=0; n<(int)tri_list.size(); n++)
+	size_t tri_list_size = tri_list.size();
+	for (size_t n = 0; n < tri_list_size; ++n)
 	{
+		SetProgress(100 * n / tri_list_size,
+			"FluoRender is converting volume to mesh. Please wait.");
+
 		MCTriangle tri = tri_list[n];
 
 		//copy data
@@ -278,6 +308,7 @@ void VolumeMeshConv::Convert()
 		numtriangles++;
 	}
 	
+	SetRange(v1, v2);
 }
 
 double VolumeMeshConv::GetValue(int x, int y, int z)

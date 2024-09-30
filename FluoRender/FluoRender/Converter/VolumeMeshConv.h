@@ -28,15 +28,16 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUME_MESH_CONV_H_
 #define _VOLUME_MESH_CONV_H_
 
+#include <Vector.h>
+#include <Progress.h>
 #include <vector>
 #include <glm.h>
-#include <Vector.h>
 #include <nrrd.h>
 
 namespace flrd
 {
 	//convert volume data to mesh
-	class VolumeMeshConv
+	class VolumeMeshConv : public Progress
 	{
 	public:
 		VolumeMeshConv();

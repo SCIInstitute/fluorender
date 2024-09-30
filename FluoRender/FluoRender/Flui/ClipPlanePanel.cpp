@@ -537,13 +537,18 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	switch (type)
 	{
 	case 2:	//volume
-		vd->GetResolution(resx, resy, resz);
+		resx = resy = resz = 0;
 		resx_n = resy_n = resz_n = 0;
+		if (!vd)
+			break;
+		vd->GetResolution(resx, resy, resz);
 		fc = vd->GetColor();
 		break;
 	case 3:	//mesh
 		resx = resy = resz = 0;
 		resx_n = resy_n = resz_n = 0;
+		if (!md)
+			break;
 		fc = md->GetColor();
 		break;
 	}
@@ -575,15 +580,15 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		switch (type)
 		{
 		case 2:	//volume
-		{
+			if (!vd)
+				break;
 			m_yz_dist_text->ChangeValue(
 				wxString::Format("%d", vd->GetClipDistX()));
 			m_xz_dist_text->ChangeValue(
 				wxString::Format("%d", vd->GetClipDistY()));
 			m_xy_dist_text->ChangeValue(
 				wxString::Format("%d", vd->GetClipDistZ()));
-		}
-		break;
+			break;
 		case 3:	//mesh
 			break;
 		}
@@ -593,11 +598,11 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	switch (type)
 	{
 	case 2:	//volume
-		if (vd->GetVR())
+		if (vd && vd->GetVR())
 			planes = vd->GetVR()->get_planes();
 		break;
 	case 3:	//mesh
-		if (md->GetMR())
+		if (md && md->GetMR())
 			planes = md->GetMR()->get_planes();
 		break;
 	}

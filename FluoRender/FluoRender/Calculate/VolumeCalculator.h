@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMECALCULATOR_H_
 #define _VOLUMECALCULATOR_H_
 
+#include <Progress.h>
 #include <vector>
 #include <wx/string.h>
 
@@ -37,7 +38,7 @@ class RenderCanvas;
 namespace flrd
 {
 	class VolumeSelector;
-	class VolumeCalculator
+	class VolumeCalculator : public Progress
 	{
 	public:
 		VolumeCalculator();
