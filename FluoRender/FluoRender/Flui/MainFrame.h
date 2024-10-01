@@ -116,7 +116,8 @@ class MainFrame: public wxFrame
 	enum
 	{
 		//toolbar
-		ID_OpenVolume = 0,
+		ID_Null = 0,
+		ID_OpenVolume,
 		ID_ImportVolume,
 		ID_OpenProject,
 		ID_SaveProject,
