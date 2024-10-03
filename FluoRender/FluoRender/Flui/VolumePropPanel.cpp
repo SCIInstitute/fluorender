@@ -2840,7 +2840,7 @@ void VolumePropPanel::OnOptions(wxCommandEvent& event)
 		break;
 	}
 
-	event.StopPropagation();
+	event.Skip();
 }
 
 //ml

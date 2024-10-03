@@ -1556,7 +1556,7 @@ void MeasureDlg::OnToolbar1(wxCommandEvent& event)
 		break;
 	}
 
-	event.StopPropagation();
+	event.Skip();
 }
 
 void MeasureDlg::OnToolbar2(wxCommandEvent& event)
@@ -1591,7 +1591,7 @@ void MeasureDlg::OnToolbar2(wxCommandEvent& event)
 		break;
 	}
 
-	event.StopPropagation();
+	event.Skip();
 }
 
 void MeasureDlg::OnToolbar3(wxCommandEvent& event)
@@ -1626,7 +1626,7 @@ void MeasureDlg::OnToolbar3(wxCommandEvent& event)
 		break;
 	}
 
-	event.StopPropagation();
+	event.Skip();
 }
 
 void MeasureDlg::OnIntensityMethodCheck(wxCommandEvent& event)
@@ -1845,7 +1845,7 @@ void MeasureDlg::OnMenuItem(wxCommandEvent& event)
 		break;
 	}
 
-	event.StopPropagation();
+	event.Skip();
 }
 
 void MeasureDlg::OnSelection(wxListEvent& event)

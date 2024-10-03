@@ -1367,7 +1367,7 @@ void RenderViewPanel::OnToolBar(wxCommandEvent& event)
 		break;
 	}
 
-	event.StopPropagation();
+	event.Skip();
 }
 
 void RenderViewPanel::OnScaleText(wxCommandEvent& event)
@@ -1445,7 +1445,7 @@ void RenderViewPanel::OnToolBar2(wxCommandEvent& event)
 		break;
 	}
 
-	event.StopPropagation();
+	event.Skip();
 }
 
 void RenderViewPanel::OnFullScreen(wxCommandEvent& event)
@@ -1575,7 +1575,7 @@ void RenderViewPanel::OnRotLockCheck(wxCommandEvent& event)
 		break;
 	}
 
-	event.StopPropagation();
+	event.Skip();
 }
 
 void RenderViewPanel::OnRotEdit(wxCommandEvent& event)
@@ -1655,7 +1655,7 @@ void RenderViewPanel::OnRotReset(wxCommandEvent& event)
 		break;
 	}
 
-	event.StopPropagation();
+	event.Skip();
 }
 
 //reset counter

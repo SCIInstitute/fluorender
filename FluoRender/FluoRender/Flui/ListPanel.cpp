@@ -808,7 +808,7 @@ void ListPanel::OnToolbar(wxCommandEvent& event)
 		break;
 	}
 
-	event.StopPropagation();
+	event.Skip();
 }
 
 void ListPanel::OnMenu(wxCommandEvent& event)
@@ -848,7 +848,7 @@ void ListPanel::OnMenu(wxCommandEvent& event)
 		AddSelectionToView(ival);
 	}
 
-	event.StopPropagation();
+	event.Skip();
 }
 
 void ListPanel::OnSelect(wxListEvent& event)

@@ -1709,7 +1709,7 @@ void TrackDlg::OnMenuItem(wxCommandEvent& event)
 		break;
 	}
 
-	event.StopPropagation();
+	event.Skip();
 }
 
 void TrackDlg::OnKeyDown(wxKeyEvent& event)

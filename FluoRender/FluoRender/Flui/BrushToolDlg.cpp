@@ -745,7 +745,7 @@ void BrushToolDlg::OnToolBar(wxCommandEvent& event)
 	}
 	FluoRefresh(excl_self, vc, views);
 
-	event.StopPropagation();
+	event.Skip();
 }
 
 //mask tools
@@ -807,7 +807,7 @@ void BrushToolDlg::OnMaskToolBar(wxCommandEvent& event)
 
 	FluoRefresh(excl_self, vc);
 
-	event.StopPropagation();
+	event.Skip();
 }
 
 //selection adjustment
