@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 #include <wxDoubleSlider.h>
 #include <wxSingleSlider.h>
+#include <wxUndoableToolbar.h>
 #include <wx/valnum.h>
 #include <wx/gbsizer.h>
 #include <png_resource.h>
@@ -54,7 +55,7 @@ m_enable_all(true)
 
 	//sync channels 1
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_toolbar = new wxToolBar(this, wxID_ANY,
+	m_toolbar = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	wxBitmap bitmap;
 	bitmap = wxGetBitmapFromMemory(sync_chan);
@@ -103,6 +104,7 @@ m_enable_all(true)
 	glbin.add_undo_control(m_x_rot_sldr);
 	glbin.add_undo_control(m_y_rot_sldr);
 	glbin.add_undo_control(m_z_rot_sldr);
+	glbin.add_undo_control(m_toolbar);
 
 	Thaw();
 }
@@ -116,6 +118,7 @@ ClipPlanePanel::~ClipPlanePanel()
 	glbin.del_undo_control(m_x_rot_sldr);
 	glbin.del_undo_control(m_y_rot_sldr);
 	glbin.del_undo_control(m_z_rot_sldr);
+	glbin.del_undo_control(m_toolbar);
 
 	SetFocusVRenderViews(0);
 }
@@ -790,8 +793,9 @@ void ClipPlanePanel::OnToolbar(wxCommandEvent& event)
 
 void ClipPlanePanel::LinkChannels()
 {
-	bool bval = m_toolbar->GetToolState(ID_LinkChannelsBtn);
-	glbin_settings.m_clip_link = bval;
+	//bool bval = m_toolbar->GetToolState(ID_LinkChannelsBtn);
+	glbin_settings.m_clip_link = !glbin_settings.m_clip_link;
+	bool bval = glbin_settings.m_clip_link;
 	if (bval)
 	{
 		wxString str;
@@ -823,13 +827,14 @@ void ClipPlanePanel::LinkChannels()
 		int val[6] = { (int)x1_val, (int)x2_val, (int)y1_val, (int)y2_val, (int)z1_val, (int)z2_val };
 		SetClipValues(val);
 	}
+	FluoUpdate({ gstClipLinkChan });
 }
 
 void ClipPlanePanel::HoldPlanes()
 {
 	glbin_settings.m_clip_hold = m_toolbar->GetToolState(ID_HoldPlanesBtn);
 	glbin_states.ClipDisplayChanged();
-	FluoRefresh(3, { gstNull },
+	FluoRefresh(2, { gstClipHold },
 		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 

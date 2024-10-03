@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 
 class wxDoubleSlider;
 class wxSingleSlider;
+class wxUndoableToolbar;
 class ClipPlanePanel: public PropPanel
 {
 	enum
@@ -82,7 +83,7 @@ private:
 	bool m_enable_all;
 
 	//1st line
-	wxToolBar *m_toolbar;
+	wxUndoableToolbar* m_toolbar;
 	wxButton *m_clip_reset_btn;
 	//fix plane rotations
 	wxButton *m_set_zero_btn;
