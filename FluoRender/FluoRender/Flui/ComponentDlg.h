@@ -386,6 +386,8 @@ private:
 	//align
 	void OnAlignCenterChk(wxCommandEvent& event);
 	void OnAlignPca(wxCommandEvent& event);
+	//resize
+	void OnSize(wxSizeEvent& event);
 };
 
 #endif//_COMPONENTDLG_H_

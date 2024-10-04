@@ -68,9 +68,8 @@ MachineLearningDlg::MachineLearningDlg(MainFrame *frame) :
 	sizerV->Add(notebook, 1, wxEXPAND);
 	SetSizerAndFit(sizerV);
 	Layout();
-
-	//GetSettings();
-
+	SetAutoLayout(true);
+	SetScrollRate(10, 10);
 }
 
 MachineLearningDlg::~MachineLearningDlg()
@@ -194,7 +193,7 @@ void MachineLearningPanel::Create()
 	m_bot_grid->Bind(wxEVT_GRID_COL_AUTO_SIZE, &MachineLearningPanel::OnBotGridAutoSize, this);
 	m_bot_grid->Bind(wxEVT_GRID_CELL_CHANGING, &MachineLearningPanel::OnBotGridCellChanging, this);
 	m_bot_grid->Bind(wxEVT_GRID_CELL_CHANGED, &MachineLearningPanel::OnBotGridCellChanged, this);
-	m_bot_grid->Fit();
+	//m_bot_grid->Fit();
 	m_sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	m_bot_table_name = new wxStaticText(m_panel_bot, wxID_ANY, "No table loaded");
 	m_auto_start_check = new wxCheckBox(m_panel_bot, wxID_ANY, "Auto Start",

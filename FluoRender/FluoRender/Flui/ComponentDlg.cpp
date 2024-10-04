@@ -135,7 +135,7 @@ ComponentDlg::ComponentDlg(MainFrame *frame)
 	//grid
 	m_output_grid = new wxGrid(panel_bot, wxID_ANY);
 	m_output_grid->CreateGrid(0, 1);
-	m_output_grid->Fit();
+	//m_output_grid->Fit();
 	m_output_grid->Bind(wxEVT_KEY_DOWN, &ComponentDlg::OnKeyDown, this);
 	m_output_grid->Bind(wxEVT_GRID_SELECT_CELL, &ComponentDlg::OnSelectCell, this);
 	m_output_grid->Bind(wxEVT_GRID_RANGE_SELECT, &ComponentDlg::OnRangeSelect, this);
@@ -159,6 +159,7 @@ ComponentDlg::ComponentDlg(MainFrame *frame)
 	splittermain->SplitHorizontally(panel_top, panel_bot, 500);
 	Bind(wxEVT_SPLITTER_DOUBLECLICKED, &ComponentDlg::OnSplitterDclick, this);
 	Bind(wxEVT_NOTEBOOK_PAGE_CHANGED, &ComponentDlg::OnNotebook, this);
+	Bind(wxEVT_SIZE, &ComponentDlg::OnSize, this);
 
 	SetSizer(mainsizer);
 	panel_top->Layout();
@@ -1448,7 +1449,7 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 				m_output_grid->GetNumberRows() - i);
 	}
 
-	m_output_grid->AutoSizeColumns();
+	//m_output_grid->AutoSizeColumns();
 	m_output_grid->ClearSelection();
 }
 
@@ -2282,6 +2283,28 @@ void ComponentDlg::OnAlignPca(wxCommandEvent& event)
 	AlignPca(event.GetId());
 	FluoRefresh(3, { gstNull },
 		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+}
+
+void ComponentDlg::OnSize(wxSizeEvent& event)
+{
+	if (!m_output_grid)
+		return;
+
+	wxSize size = GetSize();
+	wxPoint p1 = GetScreenPosition();
+	wxPoint p2 = m_output_grid->GetScreenPosition();
+	int height, margin;
+	if (m_output_grid->GetNumberRows())
+		height = m_output_grid->GetRowSize(0) * 8;
+	else
+		height = 80;
+	margin = size.y + p1.y - p2.y - 20;
+	if (margin > height)
+		size.y = margin;
+	else
+		size.y = height;
+	size.x -= 15;
+	m_output_grid->SetMaxSize(size);
 }
 
 void ComponentDlg::OnNotebook(wxBookCtrlEvent &event)

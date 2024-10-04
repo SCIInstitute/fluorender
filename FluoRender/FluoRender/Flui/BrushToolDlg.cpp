@@ -416,7 +416,7 @@ BrushToolDlg::BrushToolDlg(
 	m_output_grid->SetColLabelValue(2, "Average\nIntensity");
 	m_output_grid->SetColLabelValue(3, "Physical Size");
 	m_output_grid->SetColLabelValue(4, "Physical Size\n(Int. Weighted)");
-	m_output_grid->Fit();
+	//m_output_grid->Fit();
 	m_output_grid->Bind(wxEVT_GRID_SELECT_CELL, &BrushToolDlg::OnSelectCell, this);
 	sizer4->Add(5, 5);
 	sizer4->Add(sizer4_1, 0, wxEXPAND);
@@ -441,6 +441,7 @@ BrushToolDlg::BrushToolDlg(
 	sizer_v->Add(10, 10);
 
 	Bind(wxEVT_KEY_DOWN, &BrushToolDlg::OnKeyDown, this);
+	Bind(wxEVT_SIZE, &BrushToolDlg::OnSize, this);
 
 	SetSizer(sizer_v);
 	Layout();
@@ -1139,7 +1140,7 @@ void BrushToolDlg::SetOutput(const GridData &data, const wxString &unit)
 	m_output_grid->SetCellValue(0, 4,
 		wxString::Format("%f", data.wsize) + unit);
 	//m_output_grid->Fit();
-	m_output_grid->AutoSizeColumns();
+	//m_output_grid->AutoSizeColumns();
 	m_output_grid->ClearSelection();
 }
 
@@ -1179,6 +1180,28 @@ void BrushToolDlg::OnSelectCell(wxGridEvent& event)
 	int r = event.GetRow();
 	int c = event.GetCol();
 	m_output_grid->SelectBlock(r, c, r, c);
+}
+
+void BrushToolDlg::OnSize(wxSizeEvent& event)
+{
+	if (!m_output_grid)
+		return;
+
+	wxSize size = GetSize();
+	wxPoint p1 = GetScreenPosition();
+	wxPoint p2 = m_output_grid->GetScreenPosition();
+	int height, margin;
+	if (m_output_grid->GetNumberRows())
+		height = m_output_grid->GetRowSize(0) * 8;
+	else
+		height = 80;
+	margin = size.y + p1.y - p2.y - 20;
+	if (margin > height)
+		size.y = margin;
+	else
+		size.y = height;
+	size.x -= 15;
+	m_output_grid->SetMaxSize(size);
 }
 
 void BrushToolDlg::CopyData()

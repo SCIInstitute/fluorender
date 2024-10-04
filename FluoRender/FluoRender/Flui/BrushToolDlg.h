@@ -203,6 +203,8 @@ private:
 	void OnClearHistBtn(wxCommandEvent& event);
 	void OnKeyDown(wxKeyEvent& event);
 	void OnSelectCell(wxGridEvent& event);
+	//resize
+	void OnSize(wxSizeEvent& event);
 };
 
 #endif//_BRUSHTOOLDLG_H_

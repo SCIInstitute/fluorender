@@ -89,6 +89,8 @@ private:
 	void OnKeyDown(wxKeyEvent& event);
 	void OnSelectCell(wxGridEvent& event);
 	void OnGridLabelClick(wxGridEvent& event);
+	//resize
+	void OnSize(wxSizeEvent& event);
 };
 
 #endif//_COLOCALIZATIONDLG_H_

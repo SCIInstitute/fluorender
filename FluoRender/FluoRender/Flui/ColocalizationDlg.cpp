@@ -130,7 +130,7 @@ ColocalizationDlg::ColocalizationDlg(MainFrame* frame) :
 	//grid
 	m_output_grid = new wxGrid(this, wxID_ANY);
 	m_output_grid->CreateGrid(0, 1);
-	m_output_grid->Fit();
+	//m_output_grid->Fit();
 	m_output_grid->Bind(wxEVT_GRID_SELECT_CELL, &ColocalizationDlg::OnSelectCell, this);
 	m_output_grid->Bind(wxEVT_GRID_LABEL_LEFT_CLICK, &ColocalizationDlg::OnGridLabelClick, this);
 	sizer2->Add(5, 5);
@@ -150,6 +150,7 @@ ColocalizationDlg::ColocalizationDlg(MainFrame* frame) :
 	Layout();
 
 	Bind(wxEVT_KEY_DOWN, &ColocalizationDlg::OnKeyDown, this);
+	Bind(wxEVT_SIZE, &ColocalizationDlg::OnSize, this);
 }
 
 ColocalizationDlg::~ColocalizationDlg()
@@ -278,7 +279,7 @@ void ColocalizationDlg::SetOutput()
 	else
 		m_output_grid->SetDefaultColSize(70, true);
 
-	m_output_grid->Fit();
+	//m_output_grid->Fit();
 	m_output_grid->Layout();
 	m_output_grid->ClearSelection();
 	m_output_grid->AdjustScrollbars();
@@ -447,4 +448,26 @@ void ColocalizationDlg::OnSelectCell(wxGridEvent& event)
 void ColocalizationDlg::OnGridLabelClick(wxGridEvent& event)
 {
 	m_output_grid->SetFocus();
+}
+
+void ColocalizationDlg::OnSize(wxSizeEvent& event)
+{
+	if (!m_output_grid)
+		return;
+
+	wxSize size = GetSize();
+	wxPoint p1 = GetScreenPosition();
+	wxPoint p2 = m_output_grid->GetScreenPosition();
+	int height, margin;
+	if (m_output_grid->GetNumberRows())
+		height = m_output_grid->GetRowSize(0) * 8;
+	else
+		height = 80;
+	margin = size.y + p1.y - p2.y - 20;
+	if (margin > height)
+		size.y = margin;
+	else
+		size.y = height;
+	size.x -= 15;
+	m_output_grid->SetMaxSize(size);
 }
