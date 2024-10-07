@@ -95,6 +95,8 @@ void ComponentGenerator::GenerateComp(bool command)
 	m_tps.clear();
 	m_tps.push_back(std::chrono::high_resolution_clock::now());
 
+	SetProgress(0, "Initializing component generation.");
+
 	m_vd->AddEmptyMask(1, !m_use_sel);//select all if no mask, otherwise keep
 	if (m_fixate && m_vd->GetLabel(false))
 	{
@@ -106,6 +108,9 @@ void ComponentGenerator::GenerateComp(bool command)
 		m_vd->AddEmptyLabel(0, !m_use_sel);
 		ShuffleID();
 	}
+
+	SetProgress(10, "Generating components.");
+	SetRange(10, 60);
 
 	if (m_use_dist_field)
 	{
@@ -122,10 +127,17 @@ void ComponentGenerator::GenerateComp(bool command)
 			Grow();
 	}
 
-	CleanNoise();
+	if (m_clean)
+	{
+		SetRange(60, 90);
+		CleanNoise();
+	}
 
 	if (bn > 1)
+	{
+		SetRange(90, 100);
 		FillBorders();
+	}
 
 	m_tps.push_back(std::chrono::high_resolution_clock::now());
 	std::chrono::duration<double> time_span =
@@ -145,13 +157,13 @@ void ComponentGenerator::GenerateComp(bool command)
 	m_values += " sec.\n";
 	//SetOutput(m_titles, m_values);
 
-	//update
-	//m_view->RefreshGL(39);
-
 	if (command && m_record_cmd)
 		AddCmd("generate");
 
 	m_vd->SetMlCompGenApplied(false);
+
+	SetRange(0, 100);
+	SetProgress(0, "");
 }
 
 void ComponentGenerator::Fixate(bool command)
@@ -496,6 +508,9 @@ void ComponentGenerator::Grow()
 		kernel_index0 = kernel_prog->createKernel("kernel_0");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	int ticks = brick_num * m_iter;
+	int count = 0;
+
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -549,7 +564,13 @@ void ComponentGenerator::Grow()
 
 		//execute
 		for (int j = 0; j < biter; ++j)
+		{
+			SetProgress(100 * count / ticks,
+				"Generating components.");
+			count++;
+
 			kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
+		}
 
 		//read back
 		kernel_prog->copyBufTex3D(arg_label, lid,
@@ -1207,6 +1228,9 @@ void ComponentGenerator::CleanNoise()
 	}
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	int ticks = brick_num * m_clean_iter;
+	int count = 0;
+
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -1292,8 +1316,12 @@ void ComponentGenerator::CleanNoise()
 			kernel_prog->setKernelArgument(arg_mask);
 
 		//execute
-		for (int j = 0; j < m_iter; ++j)
+		for (int j = 0; j < m_clean_iter; ++j)
 		{
+			SetProgress(100 * count / ticks,
+				"Cleaning components.");
+			count++;
+
 			kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
 			kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
 			kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
@@ -1392,11 +1420,15 @@ void ComponentGenerator::FillBorders()
 		kernel_index = kernel_prog->createKernel("kernel_0");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	int count = 0;
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks_id();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		if (prework)
 			prework("");
+		SetProgress(100 * count / brick_num,
+			"Filling borders.");
+		count++;
 
 		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_sel && !b->is_mask_valid())

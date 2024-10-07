@@ -90,6 +90,22 @@ public:
 	void ExcludeComps();
 	void UpdateCompSelection();
 
+	//setting funcs for sliders
+	void SetIter(int val);
+	void SetThresh(double val);
+	void SetDistStrength(double val);
+	void SetDistFilterSize(int val);
+	void SetMaxDist(int val);
+	void SetDistThresh(double val);
+	void SetFalloff(double val);
+	void SetDensity(double val);
+	void SetVarth(double val);
+	void SetDensityWindowSize(int val);
+	void SetDensityStatsSize(int val);
+	void SetFixSize(int val);
+	void SetCleanIter(int val);
+	void SetCleanLimit(int val);
+
 private:
 	//progress
 	float m_prog_bit;
@@ -309,7 +325,7 @@ private:
 	void OnDistThreshSldr(wxScrollEvent& event);
 	void OnDistThreshText(wxCommandEvent& event);
 	void OnDistFilterSizeSldr(wxScrollEvent& event);
-	void OnDistFitlerSizeText(wxCommandEvent& event);
+	void OnDistFilterSizeText(wxCommandEvent& event);
 	void OnMaxDistSldr(wxScrollEvent& event);
 	void OnMaxDistText(wxCommandEvent& event);
 	//fixate

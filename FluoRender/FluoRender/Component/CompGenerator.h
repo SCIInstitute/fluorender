@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <DataManager.h>
 #include <KernelProgram.h>
 #include <VolKernel.h>
+#include <Progress.h>
 #include <vector>
 #include <functional>
 #include <chrono>
@@ -44,7 +45,7 @@ namespace flrd
 	//comand types: generate, clean, fixate
 	typedef std::vector<CompCmdParams> CompCommand;
 	typedef std::function<void(const std::string&)> CompGenFunc;
-	class ComponentGenerator
+	class ComponentGenerator : public Progress
 	{
 	public:
 		ComponentGenerator();

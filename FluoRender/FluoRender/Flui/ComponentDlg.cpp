@@ -43,6 +43,7 @@ DEALINGS IN THE SOFTWARE.
 #include <cctype>
 #include <set>
 #include <fstream>
+#include <Debug.h>
 
 ComponentDlg::ComponentDlg(MainFrame *frame)
 	: PropPanel(frame, frame,
@@ -350,7 +351,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	m_dist_filter_size_text = new wxTextCtrl(page, wxID_ANY, "3",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_dist_filter_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDistFilterSizeSldr, this);
-	m_dist_filter_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDistFitlerSizeText, this);
+	m_dist_filter_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDistFilterSizeText, this);
 	sizer12->Add(2, 2);
 	sizer12->Add(st, 0, wxALIGN_CENTER);
 	sizer12->Add(m_dist_filter_size_sldr, 1, wxEXPAND);
@@ -1453,27 +1454,205 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 	m_output_grid->ClearSelection();
 }
 
+//setting funcs for sliders
+void ComponentDlg::SetIter(int val)
+{
+	glbin_comp_generator.SetIter(val);
+
+	if (glbin_comp_def.m_auto_update)
+	{
+		glbin_comp_generator.GenerateComp();
+		FluoRefresh(2, { gstIteration });
+	}
+	else
+		FluoUpdate({ gstIteration });
+}
+
+void ComponentDlg::SetThresh(double val)
+{
+	glbin_comp_generator.SetThresh(val);
+
+	if (glbin_comp_def.m_auto_update)
+	{
+		glbin_comp_generator.GenerateComp();
+		FluoRefresh(2, { gstCompThreshold });
+	}
+	else
+		FluoUpdate({ gstCompThreshold });
+}
+
+void ComponentDlg::SetDistStrength(double val)
+{
+	glbin_comp_generator.SetDistStrength(val);
+
+	if (glbin_comp_def.m_auto_update)
+	{
+		glbin_comp_generator.GenerateComp();
+		FluoRefresh(2, { gstDistFieldStrength });
+	}
+	else
+		FluoUpdate({ gstDistFieldStrength });
+}
+
+void ComponentDlg::SetDistFilterSize(int val)
+{
+	glbin_comp_generator.SetDistFilterSize(val);
+
+	if (glbin_comp_def.m_auto_update)
+	{
+		glbin_comp_generator.GenerateComp();
+		FluoRefresh(2, { gstDistFieldFilterSize });
+	}
+	else
+		FluoUpdate({ gstDistFieldFilterSize });
+}
+
+void ComponentDlg::SetMaxDist(int val)
+{
+	glbin_comp_generator.SetMaxDist(val);
+
+	if (glbin_comp_def.m_auto_update)
+	{
+		glbin_comp_generator.GenerateComp();
+		FluoRefresh(2, { gstMaxDist });
+	}
+	else
+		FluoUpdate({ gstMaxDist });
+}
+
+void ComponentDlg::SetDistThresh(double val)
+{
+	glbin_comp_generator.SetDistThresh(val);
+
+	if (glbin_comp_def.m_auto_update)
+	{
+		glbin_comp_generator.GenerateComp();
+		FluoRefresh(2, { gstDistFieldThresh });
+	}
+	else
+		FluoUpdate({ gstDistFieldThresh });
+}
+
+void ComponentDlg::SetFalloff(double val)
+{
+	glbin_comp_generator.SetFalloff(val);
+
+	if (glbin_comp_def.m_auto_update)
+	{
+		glbin_comp_generator.GenerateComp();
+		FluoRefresh(2, { gstDiffusionFalloff });
+	}
+	else
+		FluoUpdate({ gstDiffusionFalloff });
+}
+
+void ComponentDlg::SetDensity(double val)
+{
+	glbin_comp_generator.SetDensityThresh(val);
+
+	if (glbin_comp_def.m_auto_update)
+	{
+		glbin_comp_generator.GenerateComp();
+		FluoRefresh(2, { gstDensityFieldThresh });
+	}
+	else
+		FluoUpdate({ gstDensityFieldThresh });
+}
+
+void ComponentDlg::SetVarth(double val)
+{
+	glbin_comp_generator.SetVarThresh(val);
+
+	if (glbin_comp_def.m_auto_update)
+	{
+		glbin_comp_generator.GenerateComp();
+		FluoRefresh(2, { gstDensityVarThresh });
+	}
+	else
+		FluoUpdate({ gstDensityVarThresh });
+}
+
+void ComponentDlg::SetDensityWindowSize(int val)
+{
+	glbin_comp_generator.SetDensityWinSize(val);
+
+	if (glbin_comp_def.m_auto_update)
+	{
+		glbin_comp_generator.GenerateComp();
+		FluoRefresh(2, { gstDensityWindowSize });
+	}
+	else
+		FluoUpdate({ gstDensityWindowSize });
+}
+
+void ComponentDlg::SetDensityStatsSize(int val)
+{
+	glbin_comp_generator.SetDensityStatSize(val);
+
+	if (glbin_comp_def.m_auto_update)
+	{
+		glbin_comp_generator.GenerateComp();
+		FluoRefresh(2, { gstDensityStatsSize });
+	}
+	else
+		FluoUpdate({ gstDensityStatsSize });
+}
+
+void ComponentDlg::SetFixSize(int val)
+{
+	glbin_comp_generator.SetFixSize(val);
+
+	if (glbin_comp_def.m_auto_update)
+		glbin_comp_generator.GenerateComp(false);
+	if (glbin_comp_generator.GetRecordCmd())
+		glbin_comp_generator.AddCmd("fixate");
+	FluoRefresh(2, { gstRecordCmd, gstFixateSize });
+}
+
+void ComponentDlg::SetCleanIter(int val)
+{
+	glbin_comp_generator.SetCleanIter(val);
+
+	if (glbin_comp_def.m_auto_update)
+	{
+		glbin_comp_generator.GenerateComp();
+		FluoRefresh(2, { gstCleanIteration });
+	}
+	else
+		FluoUpdate({ gstCleanIteration });
+}
+
+void ComponentDlg::SetCleanLimit(int val)
+{
+	glbin_comp_generator.SetCleanSize(val);
+
+	if (glbin_comp_def.m_auto_update)
+	{
+		glbin_comp_generator.GenerateComp();
+		FluoRefresh(2, { gstCleanSize });
+	}
+	else
+		FluoUpdate({ gstCleanSize });
+}
+
 //comp generate page
 void ComponentDlg::OnIterSldr(wxScrollEvent& event)
 {
 	int val = m_iter_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
 	if (str != m_iter_text->GetValue())
-		m_iter_text->SetValue(str);
+	{
+		m_iter_text->ChangeValue(str);
+		SetIter(val);
+	}
 }
 
 void ComponentDlg::OnIterText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_iter_text->GetValue().ToLong(&val);
-	m_iter_sldr->ChangeValue(val);
-	glbin_comp_generator.SetIter(val);
-
-	if (glbin_comp_def.m_auto_update)
-	{
-		glbin_comp_generator.GenerateComp();
-		FluoRefresh(3, { gstNull });
-	}
+	if (m_iter_sldr->ChangeValue(val))
+		SetIter(val);
 }
 
 void ComponentDlg::OnThreshSldr(wxScrollEvent& event)
@@ -1481,21 +1660,18 @@ void ComponentDlg::OnThreshSldr(wxScrollEvent& event)
 	double val = m_thresh_sldr->GetValue() / 1000.0;
 	wxString str = wxString::Format("%.3f", val);
 	if (str != m_thresh_text->GetValue())
+	{
 		m_thresh_text->SetValue(str);
+		SetThresh(val);
+	}
 }
 
 void ComponentDlg::OnThreshText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_thresh_text->GetValue().ToDouble(&val);
-	m_thresh_sldr->ChangeValue(std::round(val * 1000.0));
-	glbin_comp_generator.SetThresh(val);
-
-	if (glbin_comp_def.m_auto_update)
-	{
-		glbin_comp_generator.GenerateComp();
-		FluoRefresh(3, { gstNull });
-	}
+	if (m_thresh_sldr->ChangeValue(std::round(val * 1000.0)))
+		SetThresh(val);
 }
 
 void ComponentDlg::OnDistStrengthSldr(wxScrollEvent& event)
@@ -1503,21 +1679,18 @@ void ComponentDlg::OnDistStrengthSldr(wxScrollEvent& event)
 	double val = m_dist_strength_sldr->GetValue() / 1000.0;
 	wxString str = wxString::Format("%.3f", val);
 	if (str != m_dist_strength_text->GetValue())
+	{
 		m_dist_strength_text->SetValue(str);
+		SetDistStrength(val);
+	}
 }
 
 void ComponentDlg::OnDistStrengthText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_dist_strength_text->GetValue().ToDouble(&val);
-	m_dist_strength_sldr->ChangeValue(std::round(val * 1000.0));
-	glbin_comp_generator.SetDistStrength(val);
-
-	if (glbin_comp_def.m_auto_update)
-	{
-		glbin_comp_generator.GenerateComp();
-		FluoRefresh(3, { gstNull });
-	}
+	if (m_dist_strength_sldr->ChangeValue(std::round(val * 1000.0)))
+		SetDistStrength(val);
 }
 
 void ComponentDlg::OnUseDistFieldCheck(wxCommandEvent& event)
@@ -1539,21 +1712,18 @@ void ComponentDlg::OnDistFilterSizeSldr(wxScrollEvent& event)
 	int val = m_dist_filter_size_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
 	if (str != m_dist_filter_size_text->GetValue())
+	{
 		m_dist_filter_size_text->SetValue(str);
+		SetDistFilterSize(val);
+	}
 }
 
-void ComponentDlg::OnDistFitlerSizeText(wxCommandEvent& event)
+void ComponentDlg::OnDistFilterSizeText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_dist_filter_size_text->GetValue().ToLong(&val);
-	m_dist_filter_size_sldr->ChangeValue(val);
-	glbin_comp_generator.SetDistFilterSize(val);
-
-	if (glbin_comp_def.m_auto_update)
-	{
-		glbin_comp_generator.GenerateComp();
-		FluoRefresh(3, { gstNull });
-	}
+	if (m_dist_filter_size_sldr->ChangeValue(val))
+		SetDistFilterSize(val);
 }
 
 void ComponentDlg::OnMaxDistSldr(wxScrollEvent& event)
@@ -1561,7 +1731,10 @@ void ComponentDlg::OnMaxDistSldr(wxScrollEvent& event)
 	int val = m_max_dist_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
 	if (str != m_max_dist_text->GetValue())
+	{
 		m_max_dist_text->SetValue(str);
+		SetMaxDist(val);
+	}
 }
 
 void ComponentDlg::OnMaxDistText(wxCommandEvent& event)
@@ -1570,14 +1743,8 @@ void ComponentDlg::OnMaxDistText(wxCommandEvent& event)
 	m_max_dist_text->GetValue().ToLong(&val);
 	if (val > 255)
 		val = 255;
-	m_max_dist_sldr->ChangeValue(val);
-	glbin_comp_generator.SetMaxDist(val);
-
-	if (glbin_comp_def.m_auto_update)
-	{
-		glbin_comp_generator.GenerateComp();
-		FluoRefresh(3, { gstNull });
-	}
+	if (m_max_dist_sldr->ChangeValue(val))
+		SetMaxDist(val);
 }
 
 void ComponentDlg::OnDistThreshSldr(wxScrollEvent& event)
@@ -1585,21 +1752,18 @@ void ComponentDlg::OnDistThreshSldr(wxScrollEvent& event)
 	double val = m_dist_thresh_sldr->GetValue() / 1000.0;
 	wxString str = wxString::Format("%.3f", val);
 	if (str != m_dist_thresh_text->GetValue())
+	{
 		m_dist_thresh_text->SetValue(str);
+		SetDistThresh(val);
+	}
 }
 
 void ComponentDlg::OnDistThreshText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_dist_thresh_text->GetValue().ToDouble(&val);
-	m_dist_thresh_sldr->ChangeValue(std::round(val * 1000.0));
-	glbin_comp_generator.SetDistThresh(val);
-
-	if (glbin_comp_def.m_auto_update)
-	{
-		glbin_comp_generator.GenerateComp();
-		FluoRefresh(3, { gstNull });
-	}
+	if (m_dist_thresh_sldr->ChangeValue(std::round(val * 1000.0)))
+		SetDistThresh(val);
 }
 
 void ComponentDlg::OnDiffCheck(wxCommandEvent& event)
@@ -1621,21 +1785,18 @@ void ComponentDlg::OnFalloffSldr(wxScrollEvent& event)
 	double val = m_falloff_sldr->GetValue() / 1000.0;
 	wxString str = wxString::Format("%.3f", val);
 	if (str != m_falloff_text->GetValue())
+	{
 		m_falloff_text->SetValue(str);
+		SetFalloff(val);
+	}
 }
 
 void ComponentDlg::OnFalloffText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_falloff_text->GetValue().ToDouble(&val);
-	m_falloff_sldr->ChangeValue(std::round(val * 1000.0));
-	glbin_comp_generator.SetFalloff(val);
-
-	if (glbin_comp_def.m_auto_update)
-	{
-		glbin_comp_generator.GenerateComp();
-		FluoRefresh(3, { gstNull });
-	}
+	if (m_falloff_sldr->ChangeValue(std::round(val * 1000.0)))
+		SetFalloff(val);
 }
 
 void ComponentDlg::OnDensityCheck(wxCommandEvent& event)
@@ -1657,21 +1818,18 @@ void ComponentDlg::OnDensitySldr(wxScrollEvent& event)
 	double val = m_density_sldr->GetValue() / 1000.0;
 	wxString str = wxString::Format("%.3f", val);
 	if (str != m_density_text->GetValue())
+	{
 		m_density_text->SetValue(str);
+		SetDensity(val);
+	}
 }
 
 void ComponentDlg::OnDensityText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_density_text->GetValue().ToDouble(&val);
-	m_density_sldr->ChangeValue(std::round(val * 1000.0));
-	glbin_comp_generator.SetDensityThresh(val);
-
-	if (glbin_comp_def.m_auto_update)
-	{
-		glbin_comp_generator.GenerateComp();
-		FluoRefresh(3, { gstNull });
-	}
+	if (m_density_sldr->ChangeValue(std::round(val * 1000.0)))
+		SetDensity(val);
 }
 
 void ComponentDlg::OnVarthSldr(wxScrollEvent& event)
@@ -1679,21 +1837,18 @@ void ComponentDlg::OnVarthSldr(wxScrollEvent& event)
 	double val = m_varth_sldr->GetValue() / 10000.0;
 	wxString str = wxString::Format("%.4f", val);
 	if (str != m_varth_text->GetValue())
+	{
 		m_varth_text->SetValue(str);
+		SetVarth(val);
+	}
 }
 
 void ComponentDlg::OnVarthText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_varth_text->GetValue().ToDouble(&val);
-	m_varth_sldr->ChangeValue(std::round(val * 10000.0));
-	glbin_comp_generator.SetVarThresh(val);
-
-	if (glbin_comp_def.m_auto_update)
-	{
-		glbin_comp_generator.GenerateComp();
-		FluoRefresh(3, { gstNull });
-	}
+	if (m_varth_sldr->ChangeValue(std::round(val * 10000.0)))
+		SetVarth(val);
 }
 
 void ComponentDlg::OnDensityWindowSizeSldr(wxScrollEvent& event)
@@ -1701,21 +1856,18 @@ void ComponentDlg::OnDensityWindowSizeSldr(wxScrollEvent& event)
 	int val = m_density_window_size_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
 	if (str != m_density_window_size_text->GetValue())
+	{
 		m_density_window_size_text->SetValue(str);
+		SetDensityWindowSize(val);
+	}
 }
 
 void ComponentDlg::OnDensityWindowSizeText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_density_window_size_text->GetValue().ToLong(&val);
-	m_density_window_size_sldr->ChangeValue(val);
-	glbin_comp_generator.SetDensityWinSize(val);
-
-	if (glbin_comp_def.m_auto_update)
-	{
-		glbin_comp_generator.GenerateComp();
-		FluoRefresh(3, { gstNull });
-	}
+	if (m_density_window_size_sldr->ChangeValue(val))
+		SetDensityWindowSize(val);
 }
 
 void ComponentDlg::OnDensityStatsSizeSldr(wxScrollEvent& event)
@@ -1723,21 +1875,18 @@ void ComponentDlg::OnDensityStatsSizeSldr(wxScrollEvent& event)
 	int val = m_density_stats_size_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
 	if (str != m_density_stats_size_text->GetValue())
+	{
 		m_density_stats_size_text->SetValue(str);
+		SetDensityStatsSize(val);
+	}
 }
 
 void ComponentDlg::OnDensityStatsSizeText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_density_stats_size_text->GetValue().ToLong(&val);
-	m_density_stats_size_sldr->ChangeValue(val);
-	glbin_comp_generator.SetDensityStatSize(val);
-
-	if (glbin_comp_def.m_auto_update)
-	{
-		glbin_comp_generator.GenerateComp();
-		FluoRefresh(3, { gstNull });
-	}
+	if (m_density_stats_size_sldr->ChangeValue(val))
+		SetDensityStatsSize(val);
 }
 
 void ComponentDlg::OnFixateCheck(wxCommandEvent& event)
@@ -1794,21 +1943,18 @@ void ComponentDlg::OnFixSizeSldr(wxScrollEvent& event)
 	int val = m_fix_size_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
 	if (str != m_fix_size_text->GetValue())
+	{
 		m_fix_size_text->SetValue(str);
+		SetFixSize(val);
+	}
 }
 
 void ComponentDlg::OnFixSizeText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_fix_size_text->GetValue().ToLong(&val);
-	m_fix_size_sldr->ChangeValue(val);
-	glbin_comp_generator.SetFixSize(val);
-
-	if (glbin_comp_def.m_auto_update)
-		glbin_comp_generator.GenerateComp(false);
-	if (glbin_comp_generator.GetRecordCmd())
-		glbin_comp_generator.AddCmd("fixate");
-	FluoRefresh(2, { gstRecordCmd });
+	if (m_fix_size_sldr->ChangeValue(val))
+		SetFixSize(val);
 }
 
 void ComponentDlg::OnCleanCheck(wxCommandEvent& event)
@@ -1834,21 +1980,18 @@ void ComponentDlg::OnCleanIterSldr(wxScrollEvent& event)
 	int val = m_clean_iter_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
 	if (str != m_clean_iter_text->GetValue())
+	{
 		m_clean_iter_text->SetValue(str);
+		SetCleanIter(val);
+	}
 }
 
 void ComponentDlg::OnCleanIterText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_clean_iter_text->GetValue().ToLong(&val);
-	m_clean_iter_sldr->ChangeValue(val);
-	glbin_comp_generator.SetCleanIter(val);
-
-	if (glbin_comp_def.m_auto_update)
-	{
-		glbin_comp_generator.GenerateComp();
-		FluoRefresh(3, { gstNull });
-	}
+	if (m_clean_iter_sldr->ChangeValue(val))
+		SetCleanIter(val);
 }
 
 void ComponentDlg::OnCleanLimitSldr(wxScrollEvent& event)
@@ -1856,21 +1999,18 @@ void ComponentDlg::OnCleanLimitSldr(wxScrollEvent& event)
 	int val = m_clean_limit_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
 	if (str != m_clean_limit_text->GetValue())
+	{
 		m_clean_limit_text->SetValue(str);
+		SetCleanLimit(val);
+	}
 }
 
 void ComponentDlg::OnCleanLimitText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_clean_limit_text->GetValue().ToLong(&val);
-	m_clean_limit_sldr->ChangeValue(val);
-	glbin_comp_generator.SetCleanSize(val);
-
-	if (glbin_comp_def.m_auto_update)
-	{
-		glbin_comp_generator.GenerateComp();
-		FluoRefresh(3, { gstNull });
-	}
+	if (m_clean_limit_sldr->ChangeValue(val))
+		SetCleanLimit(val);
 }
 
 //record
