@@ -28,6 +28,12 @@ DEALINGS IN THE SOFTWARE.
 
 #include <base_reader.h>
 
+BaseReader::BaseReader() :
+	Progress()
+{
+
+}
+
 int BaseReader::LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0)
 {
 	//initialize codec state

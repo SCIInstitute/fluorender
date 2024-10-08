@@ -30,7 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <sstream>
 #include <inttypes.h>
 
-LBLReader::LBLReader()
+LBLReader::LBLReader():
+	BaseReader()
 {
 	m_fp_convert = false;
 	m_fp_min = 0;

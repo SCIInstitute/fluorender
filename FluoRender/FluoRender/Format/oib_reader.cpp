@@ -30,7 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <algorithm>
 
-OIBReader::OIBReader()
+OIBReader::OIBReader():
+	BaseReader()
 {
 	m_time_num = 0;
 	m_cur_time = -1;

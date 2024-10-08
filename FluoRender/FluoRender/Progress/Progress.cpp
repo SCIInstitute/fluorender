@@ -26,6 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <Progress.h>
+#include <Global.h>
+#include <MainFrame.h>
 
 Progress::Progress() :
 	m_progress_func(0),
@@ -33,5 +35,7 @@ Progress::Progress() :
 	m_max(100),
 	m_range(100)
 {
-
+	SetProgressFunc(
+		std::bind(&MainFrame::SetProgress, glbin_current.mainframe,
+			std::placeholders::_1, std::placeholders::_2));
 }

@@ -112,7 +112,8 @@ LIMSTR Lim_FileGetFrameMetadata(LIMFILEHANDLE hFile, LIMUINT uiSeqIndex)
 #include <Nd2ReadSdk.h>
 #endif
 
-ND2Reader::ND2Reader()
+ND2Reader::ND2Reader():
+	BaseReader()
 {
 	m_time_num = 0;
 	m_cur_time = -1;

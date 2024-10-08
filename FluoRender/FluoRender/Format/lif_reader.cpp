@@ -32,7 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <stdio.h>
 //#include <fstream>
 
-LIFReader::LIFReader()
+LIFReader::LIFReader():
+	BaseReader()
 {
 	m_tile_scan = false;
 	m_time_num = 0;

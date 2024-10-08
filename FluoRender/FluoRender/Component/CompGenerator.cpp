@@ -40,7 +40,9 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 ComponentGenerator::ComponentGenerator()
-	: m_vd(0)
+	: m_vd(0),
+	m_busy(false),
+	Progress()
 {
 	glbin_comp_def.Apply(this);
 	prework = std::bind(
@@ -77,6 +79,7 @@ void ComponentGenerator::GenerateComp(bool command)
 	if (!m_vd)
 		return;
 
+	m_busy = true;
 	//int clean_iter = m_clean_iter;
 	//int clean_size = m_clean_size_vl;
 	//if (!m_clean)
@@ -164,6 +167,7 @@ void ComponentGenerator::GenerateComp(bool command)
 
 	SetRange(0, 100);
 	SetProgress(0, "");
+	m_busy = false;
 }
 
 void ComponentGenerator::Fixate(bool command)
@@ -181,6 +185,7 @@ void ComponentGenerator::Clean(bool command)
 	if (!m_vd)
 		return;
 
+	m_busy = true;
 	//int clean_iter = m_clean_iter;
 	//int clean_size = m_clean_size_vl;
 	//if (!m_clean)
@@ -196,20 +201,36 @@ void ComponentGenerator::Clean(bool command)
 	//glbin_comp_def.Apply(&glbin_comp_generator);
 	//glbin_comp_generator.SetUseMask(use_sel);
 
+	SetProgress(0, "Initializing component generation.");
+
 	m_vd->AddEmptyMask(1, !m_use_sel);
 
 	if (bn > 1)
+	{
+		SetRange(0, 30);
 		ClearBorders();
+	}
 
-	CleanNoise();
+	if (m_clean)
+	{
+		SetRange(30, 90);
+		CleanNoise();
+	}
 
 	if (bn > 1)
+	{
+		SetRange(90, 100);
 		FillBorders();
+	}
 
 	//m_view->RefreshGL(39);
 
 	if (command && m_record_cmd)
 		AddCmd("clean");
+
+	SetRange(0, 100);
+	SetProgress(0, "");
+	m_busy = false;
 }
 
 void ComponentGenerator::ApplyRecord()
@@ -218,23 +239,36 @@ void ComponentGenerator::ApplyRecord()
 	if (!m_vd)
 		return;
 
+	m_busy = true;
 	//glbin_comp_generator.SetVolumeData(vd);
+	SetProgress(0, "Initializing component generation.");
+
 	m_vd->AddEmptyMask(1);
 	if (!m_vd->GetMlCompGenApplied())
 	{
 		m_vd->AddEmptyLabel(0);
 		ShuffleID();
 	}
+
+	SetProgress(10, "Generating components.");
+	SetRange(10, 90);
 	GenerateDB();
 
 	int bn = m_vd->GetAllBrickNum();
 	if (bn > 1)
+	{
+		SetRange(90, 100);
 		FillBorders();
+	}
 
 	//update
 	//m_view->RefreshGL(39);
 
 	m_vd->SetMlCompGenApplied(true);
+
+	SetRange(0, 100);
+	SetProgress(0, "");
+	m_busy = false;
 }
 
 void ComponentGenerator::ShuffleID()
@@ -269,11 +303,16 @@ void ComponentGenerator::ShuffleID()
 	}
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	size_t count = 0;
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		if (prework)
 			prework("");
+
+		SetProgress(100 * count / brick_num,
+			"Shuffling IDs.");
+		count++;
 
 		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_sel)
@@ -386,11 +425,16 @@ void ComponentGenerator::SetIDBit(int psize)
 	}
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	size_t count = 0;
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		if (prework)
 			prework("");
+
+		SetProgress(100 * count / brick_num,
+			"Setting ID bits.");
+		count++;
 
 		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_sel)
@@ -508,8 +552,8 @@ void ComponentGenerator::Grow()
 		kernel_index0 = kernel_prog->createKernel("kernel_0");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	int ticks = brick_num * m_iter;
-	int count = 0;
+	size_t ticks = brick_num * m_iter;
+	size_t count = 0;
 
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
@@ -615,6 +659,8 @@ void ComponentGenerator::DensityField()
 
 	//processing by brick
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	size_t ticks = (4 + m_iter) * brick_num;
+	size_t count = 0;
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -694,7 +740,10 @@ void ComponentGenerator::DensityField()
 
 		//init
 		kernel_prog_dens->executeKernel(kernel_dens_index0, 3, global_size2, local_size);
-//#ifdef _DEBUG
+		SetProgress(100 * count / ticks,
+			"Generating components.");
+		count++;
+		//#ifdef _DEBUG
 //		//read back
 //		DBMIUINT8 densf(dnx, dny, 1);
 //		kernel_prog_dens->readBuffer(arg_densf, densf.data);
@@ -702,7 +751,10 @@ void ComponentGenerator::DensityField()
 		//group avg and var
 		global_size[0] = size_t(ngx); global_size[1] = size_t(ngy); global_size[2] = size_t(ngz);
 		kernel_prog_dens->executeKernel(kernel_dens_index1, 3, global_size, local_size);
-//#ifdef _DEBUG
+		SetProgress(100 * count / ticks,
+			"Generating components.");
+		count++;
+		//#ifdef _DEBUG
 //		//read back
 //		DBMIUINT8 gvar(ngx, ngy, 1);
 //		kernel_prog_dens->readBuffer(arg_gavg, gvar.data);
@@ -715,12 +767,18 @@ void ComponentGenerator::DensityField()
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		kernel_prog_dens->setKernelArgument(arg_gavg);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
+		SetProgress(100 * count / ticks,
+			"Generating components.");
+		count++;
 		//compute var
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2);
 		flvr::Argument arg_var =
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		kernel_prog_dens->setKernelArgument(arg_gvar);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
+		SetProgress(100 * count / ticks,
+			"Generating components.");
+		count++;
 
 		//release buffer
 		kernel_prog_dens->releaseMemObject(arg_gavg);
@@ -764,7 +822,13 @@ void ComponentGenerator::DensityField()
 
 		//execute
 		for (int j = 0; j < m_iter; ++j)
+		{
 			kernel_prog_grow->executeKernel(kernel_grow_index0, 3, global_size, local_size);
+
+			SetProgress(100 * count / ticks,
+				"Generating components.");
+			count++;
+		}
 
 		//read back
 		kernel_prog_grow->copyBufTex3D(arg_label, lid,
@@ -817,6 +881,8 @@ void ComponentGenerator::DistGrow()
 		kernel_index0 = kernel_prog->createKernel("kernel_0");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	size_t ticks = (1 + m_max_dist + m_iter) * brick_num;
+	size_t count = 0;
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -873,6 +939,9 @@ void ComponentGenerator::DistGrow()
 		}
 		//init
 		kernel_prog_dist->executeKernel(kernel_dist_index0, 3, global_size, local_size);
+		SetProgress(100 * count / ticks,
+			"Generating components.");
+		count++;
 		unsigned char nn, re;
 		for (int j = 0; j < m_max_dist; ++j)
 		{
@@ -882,6 +951,9 @@ void ComponentGenerator::DistGrow()
 			kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&nn));
 			kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&re));
 			kernel_prog_dist->executeKernel(kernel_dist_index1, 3, global_size, local_size);
+			SetProgress(100 * count / ticks,
+				"Generating components.");
+			count++;
 		}
 
 		//grow
@@ -917,7 +989,12 @@ void ComponentGenerator::DistGrow()
 
 		//execute
 		for (int j = 0; j < m_iter; ++j)
+		{
 			kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
+			SetProgress(100 * count / ticks,
+				"Generating components.");
+			count++;
+		}
 
 		//read back
 		kernel_prog->copyBufTex3D(arg_label, lid,
@@ -979,6 +1056,8 @@ void ComponentGenerator::DistDensityField()
 
 	//processing by brick
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	size_t ticks = (5 + m_max_dist + m_iter) * brick_num;
+	size_t count = 0;
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -1053,6 +1132,9 @@ void ComponentGenerator::DistDensityField()
 		}
 		//init
 		kernel_prog_dist->executeKernel(kernel_dist_index0, 3, global_size, local_size);
+		SetProgress(100 * count / ticks,
+			"Generating components.");
+		count++;
 		unsigned char nn, re;
 		for (int j = 0; j < m_max_dist; ++j)
 		{
@@ -1062,6 +1144,9 @@ void ComponentGenerator::DistDensityField()
 			kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&nn));
 			kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&re));
 			kernel_prog_dist->executeKernel(kernel_dist_index1, 3, global_size, local_size);
+			SetProgress(100 * count / ticks,
+				"Generating components.");
+			count++;
 		}
 //#ifdef _DEBUG
 //		//read back
@@ -1116,6 +1201,9 @@ void ComponentGenerator::DistDensityField()
 
 		//init
 		kernel_prog_dens->executeKernel(kernel_dens_index0, 3, global_size2, local_size);
+		SetProgress(100 * count / ticks,
+			"Generating components.");
+		count++;
 //#ifdef _DEBUG
 //		//read back
 //		DBMIUINT8 densf(dnx, dny, 1);
@@ -1124,6 +1212,9 @@ void ComponentGenerator::DistDensityField()
 		//group avg and var
 		global_size[0] = size_t(ngx); global_size[1] = size_t(ngy); global_size[2] = size_t(ngz);
 		kernel_prog_dens->executeKernel(kernel_dens_index1, 3, global_size, local_size);
+		SetProgress(100 * count / ticks,
+			"Generating components.");
+		count++;
 		//compute avg
 		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2);
@@ -1131,12 +1222,18 @@ void ComponentGenerator::DistDensityField()
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		kernel_prog_dens->setKernelArgument(arg_gavg);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
+		SetProgress(100 * count / ticks,
+			"Generating components.");
+		count++;
 		//compute var
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2);
 		flvr::Argument arg_var =
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		kernel_prog_dens->setKernelArgument(arg_gvar);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
+		SetProgress(100 * count / ticks,
+			"Generating components.");
+		count++;
 
 		//release buffer
 		kernel_prog_dens->releaseMemObject(arg_gavg);
@@ -1181,7 +1278,12 @@ void ComponentGenerator::DistDensityField()
 
 		//execute
 		for (int j = 0; j < m_iter; ++j)
+		{
 			kernel_prog_grow->executeKernel(kernel_grow_index0, 3, global_size, local_size);
+			SetProgress(100 * count / ticks,
+				"Generating components.");
+			count++;
+		}
 
 		//read back
 		kernel_prog_grow->copyBufTex3D(arg_label, lid,
@@ -1228,8 +1330,8 @@ void ComponentGenerator::CleanNoise()
 	}
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	int ticks = brick_num * m_clean_iter;
-	int count = 0;
+	size_t ticks = brick_num * m_clean_iter;
+	size_t count = 0;
 
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
@@ -1318,13 +1420,13 @@ void ComponentGenerator::CleanNoise()
 		//execute
 		for (int j = 0; j < m_clean_iter; ++j)
 		{
-			SetProgress(100 * count / ticks,
-				"Cleaning components.");
-			count++;
-
 			kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
 			kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
 			kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
+
+			SetProgress(100 * count / ticks,
+				"Cleaning components.");
+			count++;
 		}
 
 		//read back
@@ -1358,6 +1460,7 @@ void ComponentGenerator::ClearBorders()
 		kernel_index = kernel_prog->createKernel("kernel_0");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	size_t count = 0;
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -1391,6 +1494,9 @@ void ComponentGenerator::ClearBorders()
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
+		SetProgress(100 * count / brick_num,
+			"Clearing borders.");
+		count++;
 
 		//read back
 		kernel_prog->copyBufTex3D(arg_label, lid,
@@ -1420,15 +1526,12 @@ void ComponentGenerator::FillBorders()
 		kernel_index = kernel_prog->createKernel("kernel_0");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	int count = 0;
+	size_t count = 0;
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks_id();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		if (prework)
 			prework("");
-		SetProgress(100 * count / brick_num,
-			"Filling borders.");
-		count++;
 
 		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_sel && !b->is_mask_valid())
@@ -1462,6 +1565,10 @@ void ComponentGenerator::FillBorders()
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
+
+		SetProgress(100 * count / brick_num,
+			"Filling borders.");
+		count++;
 
 		//read back
 		kernel_prog->copyBufTex3D(arg_label, lid,
@@ -1561,6 +1668,8 @@ void ComponentGenerator::GenerateDB()
 
 	//processing by brick
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	size_t ticks = (4 + max_dist + iter + cleanb ? clean_iter : 0) * brick_num;
+	size_t count = 0;
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -1620,6 +1729,9 @@ void ComponentGenerator::GenerateDB()
 
 		//execute
 		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
+		SetProgress(100 * count / ticks,
+			"Generating components.");
+		count++;
 
 //#ifdef _DEBUG
 //		//read back
@@ -1662,6 +1774,10 @@ void ComponentGenerator::GenerateDB()
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
 		//init
 		kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
+		SetProgress(100 * count / ticks,
+			"Generating components.");
+		count++;
+
 		unsigned char nn, re;
 		for (int j = 0; j < max_dist; ++j)
 		{
@@ -1671,6 +1787,9 @@ void ComponentGenerator::GenerateDB()
 			kernel_prog->setKernelArgConst(sizeof(unsigned char), (void*)(&nn));
 			kernel_prog->setKernelArgConst(sizeof(unsigned char), (void*)(&re));
 			kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
+			SetProgress(100 * count / ticks,
+				"Generating components.");
+			count++;
 		}
 
 		//generate density field arg_densf
@@ -1705,9 +1824,15 @@ void ComponentGenerator::GenerateDB()
 
 		//mix fields
 		kernel_prog->executeKernel(kernel_index3, 3, global_size, local_size);
+		SetProgress(100 * count / ticks,
+			"Generating components.");
+		count++;
 		//gen avg and var
 		kernel_prog->executeKernel(kernel_index4, 3, global_size, local_size);
-//#ifdef _DEBUG
+		SetProgress(100 * count / ticks,
+			"Generating components.");
+		count++;
+		//#ifdef _DEBUG
 //		//read back
 //		DBMIUINT8 densf(nx, ny, 1);
 //		kernel_prog->readBuffer(arg_densf, densf.data);
@@ -1752,6 +1877,9 @@ void ComponentGenerator::GenerateDB()
 				kernel_prog->setKernelArgConst(sizeof(float), (void*)(&iterf));
 			}
 			kernel_prog->executeKernel(kernel_index5, 3, global_size, local_size);
+			SetProgress(100 * count / ticks,
+				"Generating components.");
+			count++;
 		}
 
 		//clean up
@@ -1815,6 +1943,9 @@ void ComponentGenerator::GenerateDB()
 				kernel_prog->executeKernel(kernel_index6, 3, global_size, local_size);
 				kernel_prog->executeKernel(kernel_index7, 3, global_size, local_size);
 				kernel_prog->executeKernel(kernel_index8, 3, global_size, local_size);
+				SetProgress(100 * count / ticks,
+					"Generating components.");
+				count++;
 			}
 		}
 

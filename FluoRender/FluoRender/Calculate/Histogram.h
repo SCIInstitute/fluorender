@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _Histogram_h_
 #define _Histogram_h_
 
+#include <Progress.h>
+
 class VolumeData;
 namespace flvr
 {
@@ -36,7 +38,7 @@ namespace flvr
 namespace flrd
 {
 	class EntryHist;
-	class Histogram
+	class Histogram : public Progress
 	{
 	public:
 		Histogram(VolumeData* vd);

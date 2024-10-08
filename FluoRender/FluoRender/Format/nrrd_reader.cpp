@@ -30,7 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 #include <sstream>
 
-NRRDReader::NRRDReader()
+NRRDReader::NRRDReader():
+	BaseReader()
 {
 	m_time_num = 0;
 	m_chan_num = 0;

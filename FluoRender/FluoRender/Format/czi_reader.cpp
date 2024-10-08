@@ -43,6 +43,7 @@ std::vector<std::string> CZIReader::m_types{
 	"DELETED"};
 
 CZIReader::CZIReader():
+	BaseReader(),
 	m_header_read(false),
 	m_multi_file(false),
 	m_file_part(0),

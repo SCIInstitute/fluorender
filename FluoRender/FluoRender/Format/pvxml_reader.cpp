@@ -32,7 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #include <iostream>
 
-PVXMLReader::PVXMLReader()
+PVXMLReader::PVXMLReader():
+	BaseReader()
 {
 	m_force_stack = false;
 

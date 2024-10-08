@@ -33,7 +33,8 @@ DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 //#include <fstream>
 
-LOFReader::LOFReader()
+LOFReader::LOFReader():
+	BaseReader()
 {
 	m_time_num = 0;
 	m_cur_time = -1;

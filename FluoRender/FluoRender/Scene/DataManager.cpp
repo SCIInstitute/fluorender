@@ -5880,7 +5880,6 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 	if (glbin_settings.m_ser_num > 0)
 		reader->LoadBatch(glbin_settings.m_ser_num);
 	int chan = reader->GetChanNum();
-	reader->SetProgressFunc(GetProgressFunc());
 
 	int v1, v2;
 	if (m_file_num)

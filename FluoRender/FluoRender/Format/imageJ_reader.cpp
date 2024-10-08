@@ -29,7 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 #include <wx/stdpaths.h>
 
-ImageJReader::ImageJReader()
+ImageJReader::ImageJReader():
+	BaseReader()
 {
 	m_pJVMInstance = 0;
 	m_imageJ_cls = 0;

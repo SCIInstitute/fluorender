@@ -28,7 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #include <mpg_reader.h>
 #include <compatibility.h>
 
-MPGReader::MPGReader()
+MPGReader::MPGReader():
+	BaseReader()
 {
 	m_time_num = 0;
 	m_cur_time = -1;

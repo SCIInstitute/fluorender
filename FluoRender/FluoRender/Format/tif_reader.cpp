@@ -32,7 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <sstream>
 #include <iomanip>
 
-TIFReader::TIFReader()
+TIFReader::TIFReader():
+	BaseReader()
 {
 	m_resize_type = 0;
 	m_resample_type = 0;

@@ -70,7 +70,7 @@ using namespace std;
 class BaseReader : public Progress
 {
 public:
-	//BaseReader();
+	BaseReader();
 	virtual ~BaseReader() {};
 
 	//get the reader type

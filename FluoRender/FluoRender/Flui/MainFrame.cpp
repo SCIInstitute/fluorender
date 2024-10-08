@@ -127,21 +127,14 @@ MainFrame::MainFrame(
 	glbin_data_manager.SetFrame(this);
 	glbin_current.mainframe = this;
 	//progress
+	//these global objects are constructed before mainframe. therefore need to set progress functions again
 	glbin_data_manager.SetProgressFunc(
 		std::bind(&MainFrame::SetProgress, this,
 			std::placeholders::_1, std::placeholders::_2));
-	glbin_project.SetProgressFunc(
-		std::bind(&MainFrame::SetProgress, this,
-			std::placeholders::_1, std::placeholders::_2));
-	glbin_vol_converter.SetProgressFunc(
-		std::bind(&MainFrame::SetProgress, this,
-			std::placeholders::_1, std::placeholders::_2));
-	glbin_vol_calculator.SetProgressFunc(
-		std::bind(&MainFrame::SetProgress, this,
-			std::placeholders::_1, std::placeholders::_2));
-	glbin_comp_generator.SetProgressFunc(
-		std::bind(&MainFrame::SetProgress, this,
-			std::placeholders::_1, std::placeholders::_2));
+	glbin_project.SetProgressFunc(glbin_data_manager.GetProgressFunc());
+	glbin_vol_converter.SetProgressFunc(glbin_data_manager.GetProgressFunc());
+	glbin_vol_calculator.SetProgressFunc(glbin_data_manager.GetProgressFunc());
+	glbin_comp_generator.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 
 	// tell wxAuiManager to manage this frame
 	m_aui_mgr.SetManagedWindow(this);

@@ -56,6 +56,8 @@ namespace flrd
 			m_vd = vd;
 		}
 
+		bool IsBusy() { return m_busy; }
+
 		void SetUseSel(bool val) { m_use_sel = val; }
 		bool GetUseSel() { return m_use_sel; }
 		void SetUseMl(bool val) { m_use_ml = val; }
@@ -168,6 +170,8 @@ namespace flrd
 
 	private:
 		VolumeData *m_vd;
+
+		bool m_busy;//it's currently working
 
 		bool m_use_sel;//use mask instead of data
 		bool m_use_ml;//use machine learning

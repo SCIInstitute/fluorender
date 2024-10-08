@@ -52,7 +52,8 @@ VolumeMeshConv::VolumeMeshConv() :
 	m_boundary(0.0),
 	m_use_mask(false),
 	m_weld(false),
-	m_area(0)
+	m_area(0),
+	Progress()
 {
 	m_mesh = new GLMmodel;
 	m_mesh->pathname = 0;

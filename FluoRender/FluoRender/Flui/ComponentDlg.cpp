@@ -60,7 +60,7 @@ ComponentDlg::ComponentDlg(MainFrame *frame)
 	wxBoxSizer *mainsizer = new wxBoxSizer(wxHORIZONTAL);
 	wxSplitterWindow *splittermain = new wxSplitterWindow(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxSP_THIN_SASH | wxSP_BORDER | wxSP_LIVE_UPDATE);
-	splittermain->SetMinimumPaneSize(160);
+	splittermain->SetMinimumPaneSize(500);
 	mainsizer->Add(splittermain, 1, wxBOTTOM | wxLEFT | wxEXPAND, 5);
 
 	panel_top = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
@@ -156,8 +156,6 @@ ComponentDlg::ComponentDlg(MainFrame *frame)
 	sizerB->Add(10, 10);
 	panel_bot->SetSizer(sizerB);
 
-	splittermain->SetSashGravity(0.0);
-	splittermain->SplitHorizontally(panel_top, panel_bot, 500);
 	Bind(wxEVT_SPLITTER_DOUBLECLICKED, &ComponentDlg::OnSplitterDclick, this);
 	Bind(wxEVT_NOTEBOOK_PAGE_CHANGED, &ComponentDlg::OnNotebook, this);
 	Bind(wxEVT_SIZE, &ComponentDlg::OnSize, this);
@@ -166,8 +164,8 @@ ComponentDlg::ComponentDlg(MainFrame *frame)
 	panel_top->Layout();
 	panel_bot->Layout();
 
-	//GetSettings();
-	//LoadTable();
+	splittermain->SetSashGravity(0.0);
+	splittermain->SplitHorizontally(panel_top, panel_bot, 500);
 }
 
 ComponentDlg::~ComponentDlg()
@@ -1459,7 +1457,8 @@ void ComponentDlg::SetIter(int val)
 {
 	glbin_comp_generator.SetIter(val);
 
-	if (glbin_comp_def.m_auto_update)
+	if (glbin_comp_def.m_auto_update &&
+		!glbin_comp_generator.IsBusy())
 	{
 		glbin_comp_generator.GenerateComp();
 		FluoRefresh(2, { gstIteration });
@@ -1472,7 +1471,8 @@ void ComponentDlg::SetThresh(double val)
 {
 	glbin_comp_generator.SetThresh(val);
 
-	if (glbin_comp_def.m_auto_update)
+	if (glbin_comp_def.m_auto_update &&
+		!glbin_comp_generator.IsBusy())
 	{
 		glbin_comp_generator.GenerateComp();
 		FluoRefresh(2, { gstCompThreshold });
@@ -1485,7 +1485,8 @@ void ComponentDlg::SetDistStrength(double val)
 {
 	glbin_comp_generator.SetDistStrength(val);
 
-	if (glbin_comp_def.m_auto_update)
+	if (glbin_comp_def.m_auto_update &&
+		!glbin_comp_generator.IsBusy())
 	{
 		glbin_comp_generator.GenerateComp();
 		FluoRefresh(2, { gstDistFieldStrength });
@@ -1498,7 +1499,8 @@ void ComponentDlg::SetDistFilterSize(int val)
 {
 	glbin_comp_generator.SetDistFilterSize(val);
 
-	if (glbin_comp_def.m_auto_update)
+	if (glbin_comp_def.m_auto_update &&
+		!glbin_comp_generator.IsBusy())
 	{
 		glbin_comp_generator.GenerateComp();
 		FluoRefresh(2, { gstDistFieldFilterSize });
@@ -1511,7 +1513,8 @@ void ComponentDlg::SetMaxDist(int val)
 {
 	glbin_comp_generator.SetMaxDist(val);
 
-	if (glbin_comp_def.m_auto_update)
+	if (glbin_comp_def.m_auto_update &&
+		!glbin_comp_generator.IsBusy())
 	{
 		glbin_comp_generator.GenerateComp();
 		FluoRefresh(2, { gstMaxDist });
@@ -1524,7 +1527,8 @@ void ComponentDlg::SetDistThresh(double val)
 {
 	glbin_comp_generator.SetDistThresh(val);
 
-	if (glbin_comp_def.m_auto_update)
+	if (glbin_comp_def.m_auto_update &&
+		!glbin_comp_generator.IsBusy())
 	{
 		glbin_comp_generator.GenerateComp();
 		FluoRefresh(2, { gstDistFieldThresh });
@@ -1537,7 +1541,8 @@ void ComponentDlg::SetFalloff(double val)
 {
 	glbin_comp_generator.SetFalloff(val);
 
-	if (glbin_comp_def.m_auto_update)
+	if (glbin_comp_def.m_auto_update &&
+		!glbin_comp_generator.IsBusy())
 	{
 		glbin_comp_generator.GenerateComp();
 		FluoRefresh(2, { gstDiffusionFalloff });
@@ -1550,7 +1555,8 @@ void ComponentDlg::SetDensity(double val)
 {
 	glbin_comp_generator.SetDensityThresh(val);
 
-	if (glbin_comp_def.m_auto_update)
+	if (glbin_comp_def.m_auto_update &&
+		!glbin_comp_generator.IsBusy())
 	{
 		glbin_comp_generator.GenerateComp();
 		FluoRefresh(2, { gstDensityFieldThresh });
@@ -1563,7 +1569,8 @@ void ComponentDlg::SetVarth(double val)
 {
 	glbin_comp_generator.SetVarThresh(val);
 
-	if (glbin_comp_def.m_auto_update)
+	if (glbin_comp_def.m_auto_update &&
+		!glbin_comp_generator.IsBusy())
 	{
 		glbin_comp_generator.GenerateComp();
 		FluoRefresh(2, { gstDensityVarThresh });
@@ -1576,7 +1583,8 @@ void ComponentDlg::SetDensityWindowSize(int val)
 {
 	glbin_comp_generator.SetDensityWinSize(val);
 
-	if (glbin_comp_def.m_auto_update)
+	if (glbin_comp_def.m_auto_update &&
+		!glbin_comp_generator.IsBusy())
 	{
 		glbin_comp_generator.GenerateComp();
 		FluoRefresh(2, { gstDensityWindowSize });
@@ -1589,7 +1597,8 @@ void ComponentDlg::SetDensityStatsSize(int val)
 {
 	glbin_comp_generator.SetDensityStatSize(val);
 
-	if (glbin_comp_def.m_auto_update)
+	if (glbin_comp_def.m_auto_update &&
+		!glbin_comp_generator.IsBusy())
 	{
 		glbin_comp_generator.GenerateComp();
 		FluoRefresh(2, { gstDensityStatsSize });
@@ -1602,18 +1611,24 @@ void ComponentDlg::SetFixSize(int val)
 {
 	glbin_comp_generator.SetFixSize(val);
 
-	if (glbin_comp_def.m_auto_update)
+	if (glbin_comp_def.m_auto_update &&
+		!glbin_comp_generator.IsBusy())
+	{
 		glbin_comp_generator.GenerateComp(false);
-	if (glbin_comp_generator.GetRecordCmd())
-		glbin_comp_generator.AddCmd("fixate");
-	FluoRefresh(2, { gstRecordCmd, gstFixateSize });
+		if (glbin_comp_generator.GetRecordCmd())
+			glbin_comp_generator.AddCmd("fixate");
+		FluoRefresh(2, { gstRecordCmd, gstFixateSize });
+	}
+	else
+		FluoUpdate({ gstFixateSize });
 }
 
 void ComponentDlg::SetCleanIter(int val)
 {
 	glbin_comp_generator.SetCleanIter(val);
 
-	if (glbin_comp_def.m_auto_update)
+	if (glbin_comp_def.m_auto_update &&
+		!glbin_comp_generator.IsBusy())
 	{
 		glbin_comp_generator.GenerateComp();
 		FluoRefresh(2, { gstCleanIteration });
@@ -1626,7 +1641,8 @@ void ComponentDlg::SetCleanLimit(int val)
 {
 	glbin_comp_generator.SetCleanSize(val);
 
-	if (glbin_comp_def.m_auto_update)
+	if (glbin_comp_def.m_auto_update &&
+		!glbin_comp_generator.IsBusy())
 	{
 		glbin_comp_generator.GenerateComp();
 		FluoRefresh(2, { gstCleanSize });
@@ -1965,8 +1981,10 @@ void ComponentDlg::OnCleanCheck(wxCommandEvent& event)
 	if (glbin_comp_def.m_auto_update)
 	{
 		glbin_comp_generator.GenerateComp();
-		FluoRefresh(3, { gstNull });
+		FluoRefresh(2, { gstCleanEnable });
 	}
+	else
+		FluoUpdate({ gstCleanEnable });
 }
 
 void ComponentDlg::OnCleanBtn(wxCommandEvent& event)

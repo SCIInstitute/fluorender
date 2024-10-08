@@ -37,7 +37,8 @@ VolumeCalculator::VolumeCalculator():
 	m_threshold(0),
 	m_vd_a(0),
 	m_vd_b(0),
-	m_type(0)
+	m_type(0),
+	Progress()
 {
 }
 

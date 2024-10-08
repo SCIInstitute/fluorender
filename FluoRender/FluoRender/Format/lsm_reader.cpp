@@ -30,7 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <stdio.h>
 
-LSMReader::LSMReader()
+LSMReader::LSMReader():
+	BaseReader()
 {
 	m_time_num = 0;
 	m_cur_time = -1;

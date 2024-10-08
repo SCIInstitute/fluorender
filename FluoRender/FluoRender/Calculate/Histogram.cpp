@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <Histogram.h>
 #include <Global.h>
+#include <MainFrame.h>
 #include <VolumeRenderer.h>
 #include <KernelProgram.h>
 #include <TextureBrick.h>
@@ -84,9 +85,9 @@ const char* str_cl_histogram =\
 Histogram::Histogram(VolumeData* vd) :
 	m_vd(vd),
 	m_use_mask(true),
-	m_bins(EntryHist::m_bins)
+	m_bins(EntryHist::m_bins),
+	Progress()
 {
-
 }
 
 Histogram::~Histogram()
@@ -141,6 +142,7 @@ EntryHist* Histogram::GetEntryHist()
 		kernel_index = kernel_prog->createKernel("kernel_1");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	size_t count = 0;
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 
 	//sum histogram
@@ -182,6 +184,10 @@ EntryHist* Histogram::GetEntryHist()
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
 		kernel_prog->readBuffer(sizeof(unsigned int)*(bin+1), sh, sh);
+
+		SetProgress(100 * count / brick_num,
+			"Computing histogram.");
+		count++;
 	}
 
 	if (sh[m_bins])
@@ -194,5 +200,7 @@ EntryHist* Histogram::GetEntryHist()
 	
 	kernel_prog->releaseAll();
 	delete[] sh;
+	SetProgress(0, "");
+
 	return hist;
 }
