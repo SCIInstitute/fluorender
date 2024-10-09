@@ -180,6 +180,8 @@ private:
 	wxTextCtrl* m_cmd_file_text;
 	wxButton* m_save_cmd_btn;
 	wxButton* m_load_cmd_btn;
+	//auto update
+	wxTimer m_auto_update_timer;
 
 	//clustering page
 	wxRadioButton* m_cluster_method_exmax_rd;
@@ -347,6 +349,9 @@ private:
 	void OnResetCmd(wxCommandEvent& event);
 	void OnLoadCmd(wxCommandEvent& event);
 	void OnSaveCmd(wxCommandEvent& event);
+	//auto update
+	void LaunchAutoUpdateTimer();
+	void OnAutoUpdateTimer(wxTimerEvent& event);
 
 	//clustering page
 	void OnClusterMethodCheck(wxCommandEvent& event);
