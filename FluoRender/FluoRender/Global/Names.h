@@ -685,6 +685,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstCompConsistent "comp consistent"
 #define gstCompColocal "comp colocal"
 #define gstCompOutputType "comp output type"//1-multi; 2-rgb;
+#define gstCompGenOutput "comp gen output"
 #define gstCompAnalysisResult "comp analysis result"
 #define gstCompListSelection "comp list selection"
 #define gstDistAllChan "dist all chan"

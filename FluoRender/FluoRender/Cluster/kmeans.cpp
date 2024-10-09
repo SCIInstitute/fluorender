@@ -56,6 +56,8 @@ bool ClusterKmeans::Execute()
 		Assign();
 		Update();
 		counter++;
+		SetProgress(100 * counter / (m_max_iter ? m_max_iter : 1),
+			"Computing K-Means.");
 	} while (!Converge() &&
 		counter < m_max_iter);
 

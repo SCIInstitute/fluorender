@@ -59,6 +59,14 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 	int i, j, k;
 	Cell* cell = 0;
 
+	size_t ticks = 0;
+	for (size_t ii = 0; ii < m_result.size(); ++ii)
+		ticks += m_result[ii].size();
+	if (!ticks)
+		ticks = 1;
+	else
+		ticks /= 100;
+	size_t count = 0;
 	for (size_t ii = 0; ii < m_result.size(); ++ii)
 	{
 		Cluster &cluster = m_result[ii];
@@ -89,12 +97,18 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 
 			if (out_cells)
 				cell->Inc(i, j, k, (*iter)->intensity);
+
+			if (count % 100 == 0)
+				SetProgress(count / ticks,
+					"Generating IDs.");
+			count++;
 		}
 		m_id_list.push_back(id2);
 
 		if (out_cells)
 			m_out_cells.insert(std::pair<unsigned int, Celp>
 				(id2, Celp(cell)));
+
 	}
 }
 

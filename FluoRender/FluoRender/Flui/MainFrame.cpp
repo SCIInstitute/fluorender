@@ -135,6 +135,7 @@ MainFrame::MainFrame(
 	glbin_vol_converter.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 	glbin_vol_calculator.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 	glbin_comp_generator.SetProgressFunc(glbin_data_manager.GetProgressFunc());
+	glbin_clusterizer.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 
 	// tell wxAuiManager to manage this frame
 	m_aui_mgr.SetManagedWindow(this);

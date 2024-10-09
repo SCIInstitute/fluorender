@@ -29,10 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #define _CLUSTERIZER_H_
 
 #include <ClusterMethod.h>
+#include <Progress.h>
 
 namespace flrd
 {
-	class Clusterizer
+	class Clusterizer : public Progress
 	{
 	public:
 		Clusterizer();

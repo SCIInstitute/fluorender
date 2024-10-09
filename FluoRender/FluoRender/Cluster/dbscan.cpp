@@ -86,6 +86,9 @@ void ClusterDbscan::ResetData()
 
 void ClusterDbscan::Dbscan()
 {
+	size_t ticks = m_data.size() / 100;
+	ticks = ticks ? ticks : 1;
+	size_t count = 0;
 	//an implementation of the DBSCAN algorithm
 	//see wikipedia.org
 	for (ClusterIter iter = m_data.begin();
@@ -101,6 +104,12 @@ void ClusterDbscan::Dbscan()
 			Cluster cluster;
 			ExpandCluster(p, neighbors, cluster);
 			m_result.push_back(cluster);
+		}
+		if (count % 100 == 0)
+		{
+			SetProgress(count / ticks,
+				"Computing DBSCAN.");
+			count++;
 		}
 	}
 }

@@ -44,6 +44,8 @@ Clusterizer::~Clusterizer()
 
 void Clusterizer::Compute()
 {
+	SetProgress(0, "Computing clusters.");
+
 	m_in_cells.clear();
 	m_out_cells.clear();
 
@@ -138,8 +140,12 @@ void Clusterizer::Compute()
 	};
 	std::unordered_map<unsigned int, CmpCnt> init_clusters;
 	std::set<CmpCnt> ordered_clusters;
+
+	size_t ticks = method == 0 ? nxyz / 500 : nxyz / 1000;
+	size_t count = 0;
 	if (m_method == 0)
 	{
+		SetRange(0, 20);
 		for (index = 0; index < nxyz; ++index)
 		{
 			mask_value = data_mask[index];
@@ -159,6 +165,12 @@ void Clusterizer::Compute()
 			{
 				it->second.size++;
 			}
+			if (index % 1000 == 0)
+			{
+				SetProgress(100 * count / ticks,
+					"Computing clusters");
+				count++;
+			}
 		}
 		if (init_clusters.size() >= glbin_comp_def.m_cluster_clnum)
 		{
@@ -169,6 +181,10 @@ void Clusterizer::Compute()
 		}
 	}
 
+	if (m_method == 0)
+		SetRange(20, 40);
+	else
+		SetRange(0, 40);
 	for (i = 0; i < nx; ++i) for (j = 0; j < ny; ++j) for (k = 0; k < nz; ++k)
 	{
 		index = nx * ny * k + nx * j + i;
@@ -216,10 +232,20 @@ void Clusterizer::Compute()
 					(label_value, flrd::Celp(cell)));
 			}
 		}
+		if (index % 1000 == 0)
+		{
+			SetProgress(100 * count / ticks,
+				"Computing clusters");
+			count++;
+		}
 	}
+
+	method->SetProgressFunc(GetProgressFunc());
+	method->SetRange(40, 90);
 
 	if (method->Execute())
 	{
+		method->SetRange(90, 100);
 		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz, true);
 		m_out_cells = method->GetCellList();
 		vd->GetVR()->clear_tex_label();
@@ -227,4 +253,7 @@ void Clusterizer::Compute()
 	}
 
 	delete method;
+
+	SetRange(0, 100);
+	SetProgress(0, "");
 }

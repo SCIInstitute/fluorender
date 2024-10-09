@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <list>
 #include <vector>
 #include <Cell.h>
+#include <Progress.h>
 
 namespace flrd
 {
@@ -132,13 +133,14 @@ namespace flrd
 		std::vector<Cluster> m_list;
 	};
 
-	class ClusterMethod
+	class ClusterMethod : public Progress
 	{
 	public:
 		ClusterMethod() :
 			m_id_counter(1),
 			m_use_init_cluster(false),
-			m_spc({1, 1, 1}) {};
+			m_spc({1, 1, 1}),
+			Progress() {};
 		virtual ~ClusterMethod() {};
 
 		void SetData(Cluster &data)

@@ -67,6 +67,8 @@ bool ClusterExmax::Execute()
 		//histograom test
 		GenUncertainty(0.05);
 		counter++;
+		SetProgress(100 * counter / m_max_iter,
+			"Computing ExMax.");
 	} while (!Converge() &&
 		counter < m_max_iter);
 

@@ -587,6 +587,8 @@ wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 	m_cluster_method_kmeans_rd = new wxRadioButton(page, ID_ClusterMethodKmeansRd,
 		"K-Means", wxDefaultPosition, wxDefaultSize);
 	m_cluster_method_exmax_rd->Bind(wxEVT_RADIOBUTTON, &ComponentDlg::OnClusterMethodCheck, this);
+	m_cluster_method_dbscan_rd->Bind(wxEVT_RADIOBUTTON, &ComponentDlg::OnClusterMethodCheck, this);
+	m_cluster_method_kmeans_rd->Bind(wxEVT_RADIOBUTTON, &ComponentDlg::OnClusterMethodCheck, this);
 	sizer11->Add(5, 5);
 	sizer11->Add(st, 0, wxALIGN_CENTER);
 	sizer11->Add(m_cluster_method_kmeans_rd, 0, wxALIGN_CENTER);
@@ -1347,9 +1349,22 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	//output
+	if (FOUND_VALUE(gstCompGenOutput))
+	{
+		int rn = m_output_grid->GetNumberRows();
+		if (rn)
+			m_output_grid->DeleteRows(0, rn);
+		wxString str1, str2;
+		str1 = glbin_comp_generator.GetTitles();
+		str2 = glbin_comp_generator.GetValues();
+		OutputAnalysis(str1, str2);
+	}
+
 	if (FOUND_VALUE(gstCompAnalysisResult))
 	{
-		m_output_grid->DeleteRows(0, m_output_grid->GetNumberRows());
+		int rn = m_output_grid->GetNumberRows();
+		if (rn)
+			m_output_grid->DeleteRows(0, rn);
 		size_t size = glbin_comp_analyzer.GetListSize();
 		if (size < 1e5)
 		{
@@ -1624,14 +1639,8 @@ void ComponentDlg::OnUseDistFieldCheck(wxCommandEvent& event)
 {
 	bool bval = m_use_dist_field_check->GetValue();
 	glbin_comp_generator.SetUseDistField(bval);
-
-	if (glbin_comp_def.m_auto_update)
-	{
-		glbin_comp_generator.GenerateComp();
-		FluoRefresh(2, { gstUseDistField });
-	}
-	else
-		FluoUpdate({ gstUseDistField });
+	FluoUpdate({ gstUseDistField });
+	LaunchAutoUpdateTimer();
 }
 
 void ComponentDlg::OnDistFilterSizeSldr(wxScrollEvent& event)
@@ -1697,14 +1706,8 @@ void ComponentDlg::OnDiffCheck(wxCommandEvent& event)
 {
 	bool bval = m_diff_check->GetValue();
 	glbin_comp_generator.SetDiffusion(bval);
-
-	if (glbin_comp_def.m_auto_update)
-	{
-		glbin_comp_generator.GenerateComp();
-		FluoRefresh(2, { gstUseDiffusion });
-	}
-	else
-		FluoUpdate({ gstUseDiffusion });
+	FluoUpdate({ gstUseDiffusion });
+	LaunchAutoUpdateTimer();
 }
 
 void ComponentDlg::OnFalloffSldr(wxScrollEvent& event)
@@ -1730,14 +1733,8 @@ void ComponentDlg::OnDensityCheck(wxCommandEvent& event)
 {
 	bool bval = m_density_check->GetValue();
 	glbin_comp_generator.SetDensity(bval);
-
-	if (glbin_comp_def.m_auto_update)
-	{
-		glbin_comp_generator.GenerateComp();
-		FluoRefresh(2, { gstUseDensityField });
-	}
-	else
-		FluoUpdate({ gstUseDensityField });
+	FluoUpdate({ gstUseDensityField });
+	LaunchAutoUpdateTimer();
 }
 
 void ComponentDlg::OnDensitySldr(wxScrollEvent& event)
@@ -1888,14 +1885,8 @@ void ComponentDlg::OnCleanCheck(wxCommandEvent& event)
 {
 	bool bval = m_clean_check->GetValue();
 	glbin_comp_generator.SetClean(bval);
-
-	if (glbin_comp_def.m_auto_update)
-	{
-		glbin_comp_generator.GenerateComp();
-		FluoRefresh(2, { gstCleanEnable });
-	}
-	else
-		FluoUpdate({ gstCleanEnable });
+	FluoUpdate({ gstCleanEnable });
+	LaunchAutoUpdateTimer();
 }
 
 void ComponentDlg::OnCleanBtn(wxCommandEvent& event)
@@ -2007,7 +1998,7 @@ void ComponentDlg::OnAutoUpdateTimer(wxTimerEvent& event)
 		return;
 	m_auto_update_timer.Stop();
 	glbin_comp_generator.GenerateComp();
-	FluoRefresh(3, { gstNull });
+	FluoRefresh(2, { gstCompGenOutput });
 }
 
 //clustering page
@@ -2413,18 +2404,14 @@ void ComponentDlg::OnUseMlChk(wxCommandEvent& event)
 void ComponentDlg::OnGenerate(wxCommandEvent& event)
 {
 	glbin_comp_generator.Compute();
-	FluoRefresh(3, { gstNull });
+	FluoRefresh(2, { gstCompGenOutput });
 }
 
 void ComponentDlg::OnAutoUpdate(wxCommandEvent& event)
 {
 	bool bval = m_auto_update_btn->GetValue();
 	glbin_comp_def.m_auto_update = bval;
-	if (bval)
-	{
-		glbin_comp_generator.GenerateComp();
-		FluoRefresh(3, { gstNull });
-	}
+	LaunchAutoUpdateTimer();
 }
 
 void ComponentDlg::OnCluster(wxCommandEvent& event)
@@ -2460,7 +2447,9 @@ void ComponentDlg::OnHistoryChk(wxCommandEvent& event)
 
 void ComponentDlg::OnClearHistBtn(wxCommandEvent& event)
 {
-	m_output_grid->DeleteRows(0, m_output_grid->GetNumberRows());
+	int rn = m_output_grid->GetNumberRows();
+	if (rn)
+		m_output_grid->DeleteRows(0, rn);
 }
 
 void ComponentDlg::OnKeyDown(wxKeyEvent& event)

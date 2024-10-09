@@ -164,6 +164,10 @@ namespace flrd
 		//	float, float, float);
 		//void DistField(int iter, float th, int dsize, float sscale);
 
+		//output
+		wxString GetTitles() { return m_titles; }
+		wxString GetValues() { return m_values; }
+
 		//update progress
 		CompGenFunc prework;
 		CompGenFunc postwork;
