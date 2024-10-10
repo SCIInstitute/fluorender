@@ -1351,9 +1351,7 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	//output
 	if (FOUND_VALUE(gstCompGenOutput))
 	{
-		int rn = m_output_grid->GetNumberRows();
-		if (rn)
-			m_output_grid->DeleteRows(0, rn);
+		DeleteGridRows();
 		wxString str1, str2;
 		str1 = glbin_comp_generator.GetTitles();
 		str2 = glbin_comp_generator.GetValues();
@@ -1362,9 +1360,7 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (FOUND_VALUE(gstCompAnalysisResult))
 	{
-		int rn = m_output_grid->GetNumberRows();
-		if (rn)
-			m_output_grid->DeleteRows(0, rn);
+		DeleteGridRows();
 		size_t size = glbin_comp_analyzer.GetListSize();
 		bool saved = false;
 		if (size > 1e4)
@@ -2211,7 +2207,7 @@ void ComponentDlg::OnShuffle(wxCommandEvent& event)
 		return;
 
 	vd->IncShuffle();
-	FluoRefresh(3, { gstNull });
+	FluoRefresh(2, { gstCompAnalysisResult });
 }
 
 void ComponentDlg::OnCompNew(wxCommandEvent& event)
@@ -2451,9 +2447,7 @@ void ComponentDlg::OnHistoryChk(wxCommandEvent& event)
 
 void ComponentDlg::OnClearHistBtn(wxCommandEvent& event)
 {
-	int rn = m_output_grid->GetNumberRows();
-	if (rn)
-		m_output_grid->DeleteRows(0, rn);
+	DeleteGridRows();
 }
 
 void ComponentDlg::OnKeyDown(wxKeyEvent& event)
@@ -2469,14 +2463,39 @@ void ComponentDlg::OnKeyDown(wxKeyEvent& event)
 
 void ComponentDlg::OnSelectCell(wxGridEvent& event)
 {
-	glbin_comp_selector.SelectCompsCanvas();
-	FluoRefresh(3, { gstNull });
+	int row = event.GetRow();
+	if (event.Selecting())
+	{
+		m_sel.insert(row);
+	}
+	else
+	{
+		auto it = m_sel.find(row);
+		if (it != m_sel.end())
+			m_sel.erase(it);
+	}
+	SelectGridCells();
 }
 
 void ComponentDlg::OnRangeSelect(wxGridRangeSelectEvent& event)
 {
-	glbin_comp_selector.SelectCompsCanvas();
-	FluoRefresh(3, { gstNull });
+	int r1 = event.GetTopRow();
+	int r2 = event.GetBottomRow();
+	if (event.Selecting())
+	{
+		for (int i = r1; i <= r2; ++i)
+			m_sel.insert(i);
+	}
+	else
+	{
+		for (int i = r1; i <= r2; ++i)
+		{
+			auto it = m_sel.find(i);
+			if (it != m_sel.end())
+				m_sel.erase(it);
+		}
+	}
+	SelectGridCells();
 }
 
 void ComponentDlg::OnGridLabelClick(wxGridEvent& event)
@@ -2659,7 +2678,10 @@ void ComponentDlg::UpdateCompSelection()
 	int mode = glbin_comp_selector.GetSelCompIdsMode();
 	glbin_comp_selector.GetSelectedCompIds(ids);
 	if (ids.empty())
+	{
+		m_output_grid->ClearSelection();
 		return;
+	}
 
 	int bn = glbin_comp_analyzer.GetBrickNum();
 
@@ -2711,15 +2733,55 @@ void ComponentDlg::UpdateCompSelection()
 		}
 	}
 
-	//if (flag)
-	//{
-	//	SelectCompsCanvas();
-	//	if (lasti >= 0)
-	//		m_output_grid->GoToCell(lasti, 0);
-	//}
+	if (flag)
+	{
+		//SelectCompsCanvas();
+		if (lasti >= 0)
+			m_output_grid->GoToCell(lasti, 0);
+	}
 }
 
-void ComponentDlg::AddSelArrayInt(std::vector<unsigned int> &ids,
+void ComponentDlg::SelectGridCells()
+{
+	int bn = glbin_comp_analyzer.GetBrickNum();
+	std::vector<unsigned long long> ids;
+	//selected cells are retrieved using different functions
+	bool sel_all = false;
+	//if (seli.GetCount() >= m_output_grid->GetNumberRows())
+	//	sel_all = true;
+	wxString str;
+	unsigned long ulval;
+	unsigned long long id;
+	for (auto it : m_sel)
+	{
+		id = 0;
+		str = m_output_grid->GetCellValue(it, 0);
+		if (str.ToULong(&ulval))
+			id = ulval;
+		if (bn > 1)
+		{
+			str = m_output_grid->GetCellValue(it, 1);
+			if (str.ToULong(&ulval))
+				id = ((unsigned long long)(ulval) << 32) | id;
+		}
+		if (id)
+			ids.push_back(id);
+	}
+	glbin_comp_selector.SelectCompsCanvas(ids, sel_all);
+	FluoRefresh(3, { gstNull });
+}
+
+void ComponentDlg::DeleteGridRows()
+{
+	int rn = m_output_grid->GetNumberRows();
+	if (rn)
+	{
+		m_output_grid->DeleteRows(0, rn);
+		m_sel.clear();
+	}
+}
+
+void ComponentDlg::AddSelArrayInt(std::vector<unsigned int>& ids,
 	std::vector<unsigned int> &bids, wxArrayInt &sel, bool bricks)
 {
 	wxString str;

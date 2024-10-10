@@ -96,14 +96,17 @@ void ComponentSelector::SelectFullComp()
 		Select(true);
 }
 
-void ComponentSelector::SelectCompsCanvas()
+void ComponentSelector::SelectCompsCanvas(const std::vector<unsigned long long>& ids, bool sel_all)
 {
 	RenderCanvas* view = glbin_current.canvas;
 	if (!view)
 		return;
 
 	flrd::CelpList cl;
-	glbin_comp_analyzer.GetAllCelp(cl);
+	if (sel_all)
+		glbin_comp_analyzer.GetAllCelp(cl);
+	else
+		glbin_comp_analyzer.GetCelpFromIds(cl, ids);
 	view->SetCellList(cl);
 	view->SetInteractive(false);
 	//view->RefreshGL(39);

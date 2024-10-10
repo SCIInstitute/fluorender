@@ -1859,6 +1859,33 @@ bool ComponentAnalyzer::GetAllCelp(CelpList& cl, bool links)
 	return true;
 }
 
+bool ComponentAnalyzer::GetCelpFromIds(CelpList& cl, const std::vector<unsigned long long>& ids, bool links)
+{
+	if (!m_compgroup)
+		return false;
+	CelpList* list = &(m_compgroup->celps);
+	if (!list || list->empty())
+		return false;
+
+	cl.min = list->min;
+	cl.max = list->max;
+	cl.sx = list->sx;
+	cl.sy = list->sy;
+	cl.sz = list->sz;
+
+	for (size_t i = 0; i < ids.size(); ++i)
+	{
+		unsigned long long key = ids[i];
+		auto it = list->find(key);
+		if (it != list->end())
+			FindCelps(cl, it, links);
+	}
+
+	if (cl.empty())
+		return false;
+	return true;
+}
+
 bool ComponentAnalyzer::GetColor(
 	unsigned int id,
 	int brick_id,

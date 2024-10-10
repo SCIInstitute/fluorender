@@ -89,6 +89,8 @@ public:
 	void IncludeComps();
 	void ExcludeComps();
 	void UpdateCompSelection();
+	void SelectGridCells();
+	void DeleteGridRows();
 
 	//setting funcs for sliders
 	void SetIter(int val);
@@ -110,6 +112,9 @@ private:
 	//progress
 	float m_prog_bit;
 	float m_prog;
+
+	//selected rows of output grid
+	std::set<size_t> m_sel;
 
 	//output
 	bool m_hold_history;

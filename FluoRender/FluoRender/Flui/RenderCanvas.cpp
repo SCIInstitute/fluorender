@@ -3782,14 +3782,13 @@ void RenderCanvas::PickVolume()
 		}
 	}
 
+	//update label selection
+	SetCompSelection(ip, kmode);
+
 	if (picked_vd)
 	{
-		if (m_frame && m_frame->GetTreePanel())
-		{
-			//m_frame->GetTreePanel()->Select(m_renderview_panel->GetName(), picked_vd->GetName());
-		}
-		//update label selection
-		SetCompSelection(ip, kmode);
+		glbin_current.SetVolumeData(picked_vd);
+		m_frame->UpdateProps({ gstCurrentSelect });
 
 		if (m_pick_lock_center)
 			m_lock_center = pp;

@@ -183,6 +183,7 @@ namespace flrd
 			const std::vector<unsigned int>& bids);
 		bool GetSelectedCelp(CelpList& cl, bool links = false);
 		bool GetAllCelp(CelpList& cl, bool links = false);
+		bool GetCelpFromIds(CelpList& cl, const std::vector<unsigned long long>& ids, bool links = false);
 
 		//update progress
 		CompAnalyzerFunc m_sig_progress;

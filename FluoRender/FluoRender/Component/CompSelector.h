@@ -67,7 +67,7 @@ namespace flrd
 
 		//high-level functions
 		void SelectFullComp();
-		void SelectCompsCanvas();
+		void SelectCompsCanvas(const std::vector<unsigned long long>& ids, bool sel_all);
 		void SetSelectedCompIds(const std::set<unsigned long long>& ids, int mode);
 		void GetSelectedCompIds(std::set<unsigned long long>& ids) { ids = m_sel_ids; }
 		int GetSelCompIdsMode() { return m_sel_mode; }
