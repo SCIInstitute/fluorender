@@ -1366,10 +1366,11 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		if (rn)
 			m_output_grid->DeleteRows(0, rn);
 		size_t size = glbin_comp_analyzer.GetListSize();
-		if (size < 1e5)
+		bool saved = false;
+		if (size > 1e4)
 		{
 			ModalDlg* fopendlg = new ModalDlg(
-				this, "Save Analysis Data", "", "",
+				this, "Component count is over 10000. Save in a file?", "", "",
 				"Text file (*.txt)|*.txt",
 				wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 			int rval = fopendlg->ShowModal();
@@ -1378,11 +1379,12 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 				wxString filename = fopendlg->GetPath();
 				string str = filename.ToStdString();
 				glbin_comp_analyzer.OutputCompListFile(str, 1);
+				saved = true;
 			}
 			if (fopendlg)
 				delete fopendlg;
 		}
-		else
+		if (!saved)
 		{
 			string titles, values;
 			glbin_comp_analyzer.OutputFormHeader(titles);
@@ -2423,11 +2425,13 @@ void ComponentDlg::OnCluster(wxCommandEvent& event)
 void ComponentDlg::OnAnalyze(wxCommandEvent& event)
 {
 	glbin_comp_analyzer.Analyze(false);
+	FluoUpdate({ gstCompAnalysisResult });
 }
 
 void ComponentDlg::OnAnalyzeSel(wxCommandEvent& event)
 {
 	glbin_comp_analyzer.Analyze(true);
+	FluoUpdate({ gstCompAnalysisResult });
 }
 
 void ComponentDlg::OnIncludeBtn(wxCommandEvent& event)
