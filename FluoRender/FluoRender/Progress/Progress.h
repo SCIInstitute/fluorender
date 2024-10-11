@@ -71,11 +71,17 @@ public:
 		return m_range;
 	}
 
+	bool IsBusy() { return m_busy; }
+
+protected:
+	bool m_busy;//it's currently working
+
 private:
 	std::function<void(int, const wxString&)> m_progress_func;
 	int m_min;
 	int m_max;
 	int m_range;
+
 };
 
 #endif//_PROGRESS_H_

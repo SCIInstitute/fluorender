@@ -41,10 +41,9 @@ using namespace flrd;
 
 ComponentGenerator::ComponentGenerator()
 	: m_vd(0),
-	m_busy(false),
 	Progress()
 {
-	glbin_comp_def.Apply(this);
+	//glbin_comp_def.Apply(this);
 	prework = std::bind(
 		&ComponentGenerator::StartTimer, this, std::placeholders::_1);
 	postwork = std::bind(

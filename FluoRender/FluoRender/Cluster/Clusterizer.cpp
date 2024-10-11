@@ -35,7 +35,7 @@ using namespace flrd;
 
 Clusterizer::Clusterizer()
 {
-	glbin_comp_def.Apply(this);
+	//glbin_comp_def.Apply(this);
 }
 
 Clusterizer::~Clusterizer()

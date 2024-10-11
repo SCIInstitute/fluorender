@@ -28,15 +28,13 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_CompAnalyzer_h
 #define FL_CompAnalyzer_h
 
+#include <DataManager.h>
+#include <Progress.h>
+#include <Cell.h>
 #include <functional>
 #include <string>
 #include <vector>
 #include <set>
-#include <Cell.h>
-#include <DataManager.h>
-
-class VolumeData;
-class Annotations;
 
 namespace flrd
 {
@@ -54,7 +52,7 @@ namespace flrd
 
 	typedef std::function<void()> CompAnalyzerFunc;
 
-	class ComponentAnalyzer
+	class ComponentAnalyzer : public Progress
 	{
 	public:
 		ComponentAnalyzer();

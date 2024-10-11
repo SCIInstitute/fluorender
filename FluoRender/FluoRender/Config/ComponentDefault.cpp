@@ -421,4 +421,9 @@ void ComponentDefault::Apply(flrd::ComponentAnalyzer* ca)
 	ca->SetUseDistNeighbor(m_use_dist_neighbor);
 	ca->SetDistNeighborNum(m_dist_neighbor_num);
 	ca->SetUseDistAllchan(m_use_dist_allchan);
+
+	ca->SetUseMin(m_use_min);
+	ca->SetUseMax(m_use_max);
+	ca->SetMinNum(m_min_num);
+	ca->SetMaxNum(m_max_num);
 }

@@ -1396,6 +1396,7 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 {
+	int max_lines = 10000;
 	wxString copy_data;
 	wxString cur_field;
 	wxString cur_line;
@@ -1450,9 +1451,10 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 			++k;
 		} while (cur_line.IsEmpty() == false);
 		++i;
-	} while (copy_data.IsEmpty() == false);
+	} while (copy_data.IsEmpty() == false &&
+		i < max_lines);
 
-	//delete columnsand rows if the old has more
+	//delete columns and rows if the old has more
 	if (!m_hold_history)
 	{
 		if (m_output_grid->GetNumberCols() > k)
@@ -2112,6 +2114,7 @@ void ComponentDlg::OnAnalysisMinCheck(wxCommandEvent& event)
 	bool bval = m_analysis_min_check->GetValue();
 	m_analysis_min_spin->Enable(bval);
 	glbin_comp_selector.SetUseMin(bval);
+	glbin_comp_analyzer.SetUseMin(bval);
 	FluoUpdate({ gstUseMin });
 }
 
@@ -2119,12 +2122,14 @@ void ComponentDlg::OnAnalysisMinSpin(wxSpinEvent& event)
 {
 	int val = m_analysis_min_spin->GetValue();
 	glbin_comp_selector.SetMinNum(val);
+	glbin_comp_analyzer.SetMinNum(val);
 }
 
 void ComponentDlg::OnAnalysisMinText(wxCommandEvent& event)
 {
 	int val = m_analysis_min_spin->GetValue();
 	glbin_comp_selector.SetMinNum(val);
+	glbin_comp_analyzer.SetMinNum(val);
 }
 
 void ComponentDlg::OnAnalysisMaxCheck(wxCommandEvent& event)
@@ -2132,6 +2137,7 @@ void ComponentDlg::OnAnalysisMaxCheck(wxCommandEvent& event)
 	bool bval = m_analysis_max_check->GetValue();
 	m_analysis_max_spin->Enable(bval);
 	glbin_comp_selector.SetUseMax(bval);
+	glbin_comp_analyzer.SetUseMax(bval);
 	FluoUpdate({ gstUseMax });
 }
 
@@ -2139,12 +2145,14 @@ void ComponentDlg::OnAnalysisMaxSpin(wxSpinEvent& event)
 {
 	int val = m_analysis_max_spin->GetValue();
 	glbin_comp_selector.SetMaxNum(val);
+	glbin_comp_analyzer.SetMaxNum(val);
 }
 
 void ComponentDlg::OnAnalysisMaxText(wxCommandEvent& event)
 {
 	int val = m_analysis_max_spin->GetValue();
 	glbin_comp_selector.SetMaxNum(val);
+	glbin_comp_analyzer.SetMaxNum(val);
 }
 
 void ComponentDlg::OnCompFull(wxCommandEvent& event)

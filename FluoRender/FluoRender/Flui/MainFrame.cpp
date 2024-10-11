@@ -123,6 +123,13 @@ MainFrame::MainFrame(
 	//create this first to read the settings
 	glbin_settings.Read();
 	glbin.apply_processor_settings();
+	glbin_comp_def.Apply(&glbin_clusterizer);
+	glbin_comp_def.Apply(&glbin_comp_analyzer);
+	glbin_comp_def.Apply(&glbin_comp_generator);
+	glbin_comp_def.Apply(&glbin_comp_selector);
+	glbin_brush_def.Apply(&glbin_vol_selector);
+
+	//set frame
 	glbin_script_proc.SetFrame(this);
 	glbin_data_manager.SetFrame(this);
 	glbin_current.mainframe = this;
@@ -135,6 +142,7 @@ MainFrame::MainFrame(
 	glbin_vol_converter.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 	glbin_vol_calculator.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 	glbin_comp_generator.SetProgressFunc(glbin_data_manager.GetProgressFunc());
+	glbin_comp_analyzer.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 	glbin_clusterizer.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 
 	// tell wxAuiManager to manage this frame

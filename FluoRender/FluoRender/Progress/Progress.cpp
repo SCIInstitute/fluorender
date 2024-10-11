@@ -33,7 +33,8 @@ Progress::Progress() :
 	m_progress_func(0),
 	m_min(0),
 	m_max(100),
-	m_range(100)
+	m_range(100),
+	m_busy(false)
 {
 	SetProgressFunc(
 		std::bind(&MainFrame::SetProgress, glbin_current.mainframe,

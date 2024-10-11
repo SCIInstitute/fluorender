@@ -38,13 +38,14 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 ComponentAnalyzer::ComponentAnalyzer()
-	: m_analyzed(false),
+	: Progress(),
+	m_analyzed(false),
 	m_colocal(false),
 	m_bn(0),
 	m_slimit(5)
 {
 	//m_compgroup = AddCompGroup(vd);
-	glbin_comp_def.Apply(this);
+	//glbin_comp_def.Apply(this);
 }
 
 ComponentAnalyzer::~ComponentAnalyzer()
@@ -98,6 +99,9 @@ void ComponentAnalyzer::Analyze(bool sel)
 	if (!vd || !vd->GetTexture())
 		return;
 
+	double prog = 0;
+	SetProgress(prog, "Analyzing components.");
+
 	if (!FindCompGroup(vd))
 		m_compgroup = AddCompGroup(vd);
 
@@ -115,6 +119,9 @@ void ComponentAnalyzer::Analyze(bool sel)
 			}
 		}
 	}
+
+	prog += 10;
+	SetProgress(prog, "Analyzing components.");
 
 	double sx, sy, sz;
 	vd->GetSpacings(sx, sy, sz);
@@ -141,6 +148,15 @@ void ComponentAnalyzer::Analyze(bool sel)
 	if (sel)
 		vd->GetVR()->return_mask();
 
+	unsigned int size_limit;
+	if (bn > 1)
+		size_limit = m_slimit;
+	else
+		size_limit = 0;
+	if (m_use_min)
+		size_limit = std::max(m_min_num, size_limit);
+
+	//progress range is 10 - 90
 	int bits;
 	for (size_t bi = 0; bi < bn; ++bi)
 	{
@@ -253,6 +269,9 @@ void ComponentAnalyzer::Analyze(bool sel)
 				return;
 		}
 
+		prog += 80 * (0.2 + double(bi) / bn);
+		SetProgress(prog, "Analyzing components.");
+
 		unsigned int id = 0;
 		unsigned int brick_id = b->get_id();
 		double value;
@@ -269,6 +288,13 @@ void ComponentAnalyzer::Analyze(bool sel)
 		CelpListIter iter;
 		for (index = 0; index < for_size; ++index)
 		{
+			if (index % 10000 == 0)
+			{
+				prog += 320000.0 * (bi + 1) / for_size / bn;
+				SetProgress(prog,
+					"Analyzing components.");
+			}
+
 			value = 0.0;
 			if (sel)
 			{
@@ -341,14 +367,19 @@ void ComponentAnalyzer::Analyze(bool sel)
 			}
 		}
 
-		unsigned int size_limit;
+		size_t count = 0;
+		size_t ticks = comp_list_brick.size();
 		for (iter = comp_list_brick.begin();
 			iter != comp_list_brick.end(); ++iter)
 		{
-			if (bn > 1)
-				size_limit = m_slimit;
-			else
-				size_limit = 0;
+			if (count % 10000 == 0)
+			{
+				prog += 320000.0 * (bi + 1) / ticks / bn;
+				SetProgress(prog,
+					"Analyzing components.");
+			}
+			count++;
+
 			if (iter->second->GetSize() < size_limit)
 				continue;
 			//iter->second->var = sqrt(iter->second->m2 / (iter->second->sumi));
@@ -372,9 +403,10 @@ void ComponentAnalyzer::Analyze(bool sel)
 			if (data_mask) delete[] (unsigned char*)data_mask;
 			if (data_label) delete[] (unsigned int*)data_label;
 		}
-
-		//m_sig_progress();
 	}
+
+	prog = 90;
+	SetProgress(prog, "Analyzing components.");
 
 	MatchBricks(sel);
 	UpdateMaxCompSize(m_colocal);
@@ -388,6 +420,9 @@ void ComponentAnalyzer::Analyze(bool sel)
 	m_colocal = m_colocal && m_vd_list.size();
 	if (!sel)
 		m_analyzed = true;
+
+	SetRange(0, 100);
+	SetProgress(0, "");
 }
 
 void ComponentAnalyzer::MatchBricks(bool sel)
