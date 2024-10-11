@@ -497,6 +497,19 @@ namespace flrd
 		{
 			return m_transient;
 		}
+		//display
+		void SetDisplay(int type, bool bval)
+		{
+			if (type >= 0 && type < 3)
+				m_disp_part[type] = bval;
+		}
+		bool GetDisplay(int type)
+		{
+			if (type >= 0 && type < 3)
+				return m_disp_part[type];
+			return true;
+		}
+
 		void SetTransTime(size_t t)
 		{
 			m_trans_time = t;
@@ -653,6 +666,8 @@ namespace flrd
 		//transient
 		bool m_transient;
 		size_t m_trans_time;
+		//display
+		bool m_disp_part[3];//point, line, name
 
 		//extra info
 		wxString m_info_names;

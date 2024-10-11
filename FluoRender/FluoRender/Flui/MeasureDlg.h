@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/spinctrl.h>
 #include <wx/tglbtn.h>
 #include <Color.h>
+#include <Point.h>
 
 #define IntCol 3
 #define ColorCol 4
@@ -83,12 +84,17 @@ private:
 	wxString m_name;
 	fluo::Point m_center;
 	fluo::Color m_color;
+	bool m_color_set;
 
 private:
 	void OnTextFocus(wxMouseEvent& event);
 	void OnNameText(wxCommandEvent& event);
 	void OnCenterText(wxCommandEvent& event);
 	void OnColorChange(wxColourPickerEvent& event);
+
+private:
+	fluo::Point GetPointFromString(const wxString& str);
+	fluo::Color GetColorFromWxColor(const wxColor& c);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -226,7 +232,11 @@ private:
 	wxRadioButton *m_acc_intensity_rd;
 	wxCheckBox *m_use_transfer_chk;
 	wxCheckBox *m_transient_chk;
-	wxCheckBox *m_df_f_chk;
+	//display options
+	wxCheckBox* m_disp_point_chk;
+	wxCheckBox* m_disp_line_chk;
+	wxCheckBox* m_disp_name_chk;
+	//relax
 	wxToggleButton *m_auto_relax_btn;
 	wxSpinCtrlDouble* m_relax_value_spin;
 	wxComboBox *m_relax_data_cmb;
@@ -253,7 +263,9 @@ private:
 	void OnIntensityMethodCheck(wxCommandEvent& event);
 	void OnTransientCheck(wxCommandEvent& event);
 	void OnUseTransferCheck(wxCommandEvent& event);
-	void OnDF_FCheck(wxCommandEvent& event);
+	void OnDispPointCheck(wxCommandEvent& event);
+	void OnDispLineCheck(wxCommandEvent& event);
+	void OnDispNameCheck(wxCommandEvent& event);
 	void OnAutoRelax(wxCommandEvent& event);
 	void OnRelaxData(wxCommandEvent& event);
 	void OnRelaxValueSpin(wxSpinDoubleEvent& event);

@@ -10297,6 +10297,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		else if (m_int_mode == 13 &&
 			!event.AltDown())
 		{
+			glbin_ruler_handler.FinishRuler();
 			if (glbin_settings.m_ruler_auto_relax)
 			{
 				glbin_ruler_handler.SetEdited(true);

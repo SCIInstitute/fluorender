@@ -51,6 +51,10 @@ Ruler::Ruler()
 	//transient
 	m_transient = false;
 	m_trans_time = 0;
+	//display
+	m_disp_part[0] = true;//point
+	m_disp_part[1] = true;//line
+	m_disp_part[2] = true;//name
 
 	//brush size
 	m_brush_size = 0.0;

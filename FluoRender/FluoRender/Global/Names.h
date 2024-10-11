@@ -724,6 +724,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstRulerF1 "ruler f1"
 #define gstRulerRelaxType "ruler relax type"
 #define gstRulerDfoverf "ruler dfoverf"
+#define gstRulerDisp "ruler disp"
 #define gstRulerList "ruler list"
 #define gstRulerListCur "ruler list cur"
 #define gstRulerListDisp "ruler list disp"

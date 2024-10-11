@@ -144,6 +144,8 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 		ruler->SetWorkTime(rwt);
 		if (!ruler->GetDisp()) continue;
 		int interp = ruler->GetInterp();
+		bool draw_square = ruler->GetDisplay(0);
+		bool draw_line = ruler->GetDisplay(1);
 
 		if (!ruler->GetTransient() ||
 			(ruler->GetTransient() &&
@@ -156,7 +158,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 			if (ruler->GetRulerType() == 5)
 			{
 				int np = ruler->GetNumPoint();
-				if (np == 1)
+				if (np == 1 && draw_square)
 				{
 					//draw square
 					rp1 = ruler->GetRulerPoint(0);
@@ -191,43 +193,49 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 					double ra, rb;
 					ra = (pps[0] - pps[1]).length() / 2.0;
 					rb = (pps[2] - pps[3]).length() / 2.0;
-					for (size_t j = 0; j < 4; ++j)
+					if (draw_square)
 					{
-						p1 = mv.transform(pps[j]);
+						for (size_t j = 0; j < 4; ++j)
+						{
+							p1 = mv.transform(pps[j]);
+							p1 = p.transform(p1);
+							if ((persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
+								(!persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
+								continue;
+							px = (p1.x() + 1.0) * nx / 2.0;
+							py = (p1.y() + 1.0) * ny / 2.0;
+							if (rps[j]->GetLocked())
+								DrawPoint(verts, 1, px, py, w, c);
+							else
+								DrawPoint(verts, 0, px, py, w, c);
+							num += 8;
+						}
+						//draw center
+						p1 = mv.transform(ppc);
 						p1 = p.transform(p1);
 						if ((persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
 							(!persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
 							continue;
 						px = (p1.x() + 1.0)*nx / 2.0;
 						py = (p1.y() + 1.0)*ny / 2.0;
-						if (rps[j]->GetLocked())
-							DrawPoint(verts, 1, px, py, w, c);
-						else
-							DrawPoint(verts, 0, px, py, w, c);
-						num += 8;
+						verts.push_back(px - w); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px); verts.push_back(py - w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px); verts.push_back(py + w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						num += 4;
 					}
-					//draw center
-					p1 = mv.transform(ppc);
-					p1 = p.transform(p1);
-					if ((persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
-						(!persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
-						continue;
-					px = (p1.x() + 1.0)*nx / 2.0;
-					py = (p1.y() + 1.0)*ny / 2.0;
-					verts.push_back(px - w); verts.push_back(py); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					verts.push_back(px + w); verts.push_back(py); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					verts.push_back(px); verts.push_back(py - w); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					verts.push_back(px); verts.push_back(py + w); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					num += 4;
-					//draw arcs
-					DrawArc(ppc, pps[0], pps[2], c, mv, p, verts, num);
-					DrawArc(ppc, pps[2], pps[1], c, mv, p, verts, num);
-					DrawArc(ppc, pps[1], pps[3], c, mv, p, verts, num);
-					DrawArc(ppc, pps[3], pps[0], c, mv, p, verts, num);
+					if (draw_line)
+					{
+						//draw arcs
+						DrawArc(ppc, pps[0], pps[2], c, mv, p, verts, num);
+						DrawArc(ppc, pps[2], pps[1], c, mv, p, verts, num);
+						DrawArc(ppc, pps[1], pps[3], c, mv, p, verts, num);
+						DrawArc(ppc, pps[3], pps[0], c, mv, p, verts, num);
+					}
 				}
 			}
 			else if (ruler->GetRulerType() == 1 &&
@@ -246,23 +254,27 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 							continue;
 						px = (p2.x() + 1.0)*nx / 2.0;
 						py = (p2.y() + 1.0)*ny / 2.0;
-						if (bi == 0 && j == 0)
+						if (draw_square)
 						{
-							if (rp2->GetLocked())
-								DrawPoint(verts, 3, px, py, w, c);
+							if (bi == 0 && j == 0)
+							{
+								if (rp2->GetLocked())
+									DrawPoint(verts, 3, px, py, w, c);
+								else
+									DrawPoint(verts, 2, px, py, w, c);
+							}
 							else
-								DrawPoint(verts, 2, px, py, w, c);
+							{
+								if (rp2->GetLocked())
+									DrawPoint(verts, 1, px, py, w, c);
+								else
+									DrawPoint(verts, 0, px, py, w, c);
+							}
+							num += 8;
 						}
-						else
+						if (j > 0 && draw_line)
 						{
-							if (rp2->GetLocked())
-								DrawPoint(verts, 1, px, py, w, c);
-							else
-								DrawPoint(verts, 0, px, py, w, c);
-						}
-						num += 8;
-						if (j > 0)
-						{
+							//draw line
 							p1 = ruler->GetPoint(bi, j - 1);
 							p1 = mv.transform(p1);
 							p1 = p.transform(p1);
@@ -292,22 +304,25 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 						continue;
 					px = (p2.x() + 1.0)*nx / 2.0;
 					py = (p2.y() + 1.0)*ny / 2.0;
-					if (ruler->GetNumPoint() > 1 && j == 0)
+					if (draw_square)
 					{
-						if (rp2->GetLocked())
-							DrawPoint(verts, 3, px, py, w, c);
+						if (ruler->GetNumPoint() > 1 && j == 0)
+						{
+							if (rp2->GetLocked())
+								DrawPoint(verts, 3, px, py, w, c);
+							else
+								DrawPoint(verts, 2, px, py, w, c);
+						}
 						else
-							DrawPoint(verts, 2, px, py, w, c);
+						{
+							if (rp2->GetLocked())
+								DrawPoint(verts, 1, px, py, w, c);
+							else
+								DrawPoint(verts, 0, px, py, w, c);
+						}
+						num += 8;
 					}
-					else
-					{
-						if (rp2->GetLocked())
-							DrawPoint(verts, 1, px, py, w, c);
-						else
-							DrawPoint(verts, 0, px, py, w, c);
-					}
-					num += 8;
-					if (j > 0)
+					if (j > 0 && draw_line)
 					{
 						p1 = ruler->GetPoint(j - 1);
 						p1 = mv.transform(p1);
@@ -325,7 +340,8 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 					}
 				}
 				if (ruler->GetRulerType() == 4 &&
-					ruler->GetNumPoint() >= 3)
+					ruler->GetNumPoint() >= 3 &&
+					draw_line)
 				{
 					fluo::Point center = ruler->GetPoint(1);
 					fluo::Vector v1 = ruler->GetPoint(0) - center;
@@ -529,6 +545,7 @@ void RulerRenderer::DrawText(int nx, int ny)
 		if (!ruler) continue;
 		ruler->SetWorkTime(rwt);
 		if (!ruler->GetDisp()) continue;
+		if (!ruler->GetDisplay(2)) continue;
 		if (!ruler->GetTransient() ||
 			(ruler->GetTransient() &&
 				ruler->GetTransTime() == tseq_cur_num))

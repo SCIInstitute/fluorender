@@ -2303,6 +2303,28 @@ void RulerHandler::SetTransient(bool bval, const std::set<int>& rulers)
 			if (bval)
 				i->SetTransTime(t);
 		}
+		c++;
+	}
+}
+
+void RulerHandler::SetDisplay(bool bval, const std::set<int>& rulers, int type)
+{
+	RulerList* list = glbin_current.GetRulerList();
+	if (!list)
+		return;
+
+	bool update_all = rulers.empty();
+
+	size_t c = 0;
+	for (auto i : *list)
+	{
+		if (update_all || rulers.find(c) != rulers.end())
+		{
+			if (!i)
+				continue;
+			i->SetDisplay(type, bval);
+		}
+		c++;
 	}
 }
 
@@ -2323,6 +2345,7 @@ void RulerHandler::SetInterp(int ival, const std::set<int>& rulers)
 				continue;
 			i->SetInterp(ival);
 		}
+		c++;
 	}
 }
 
@@ -2348,6 +2371,7 @@ void RulerHandler::DeleteKey(const std::set<int>& rulers)
 			i->SetWorkTime(t);
 			i->DeleteKey();
 		}
+		c++;
 	}
 }
 
@@ -2373,6 +2397,7 @@ void RulerHandler::DeleteAllKeys(const std::set<int>& rulers)
 			i->SetWorkTime(t);
 			i->DeleteAllKey();
 		}
+		c++;
 	}
 }
 
