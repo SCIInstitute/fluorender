@@ -181,8 +181,8 @@ void CountingDlg::OutputSize()
 	size_t vox = glbin_comp_analyzer.GetVox();
 	double size = glbin_comp_analyzer.GetSize();
 
-	m_ca_comps_text->ChangeValue(wxString::Format("%d", count));
-	m_ca_volume_text->ChangeValue(wxString::Format("%d", vox));
+	m_ca_comps_text->ChangeValue(wxString::Format("%llu", count));
+	m_ca_volume_text->ChangeValue(wxString::Format("%llu", vox));
 
 	wxString vol_unit_text;
 	vol_unit_text = wxString::Format("%.0f", size);

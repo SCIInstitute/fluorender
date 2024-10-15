@@ -48,6 +48,13 @@ namespace flrd
 		CompGroup() :
 			vd(0), dirty(true)
 		{}
+
+		void Clear()
+		{
+			celps.clear();
+			graph.clear();
+			dirty = true;
+		}
 	};
 
 	typedef std::function<void()> CompAnalyzerFunc;

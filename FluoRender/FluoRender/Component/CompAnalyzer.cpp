@@ -105,6 +105,8 @@ void ComponentAnalyzer::Analyze(bool sel)
 	if (!FindCompGroup(vd))
 		m_compgroup = AddCompGroup(vd);
 
+	m_compgroup->Clear();
+
 	if (m_colocal)
 	{
 		ClearCoVolumes();
@@ -665,6 +667,10 @@ void ComponentAnalyzer::MakeColorConsistent()
 
 void ComponentAnalyzer::Count()
 {
+	m_count = 0;
+	m_vox = 0;
+	m_size = 0;
+
 	flrd::CelpList* list = GetCelpList();
 	if (!list || list->empty())
 		return;
