@@ -193,6 +193,10 @@ void NoiseCancellingDlg::Preview()
 	double scale = vd->GetScalarScale();
 	glbin_comp_generator.Grow();
 
+	glbin_comp_analyzer.SetUseMin(false);
+	glbin_comp_analyzer.SetUseMax(true);
+	glbin_comp_analyzer.SetMinNum(0);
+	glbin_comp_analyzer.SetMaxNum(glbin_comp_def.m_nr_size);
 	glbin_comp_analyzer.SetVolume(vd);
 	glbin_comp_analyzer.Analyze(bval);
 
@@ -240,6 +244,7 @@ void NoiseCancellingDlg::Enhance()
 			glbin_comp_def.m_nr_hdr_b);
 		vd->SetHdr(c);
 	}
+	FluoRefresh(3, { gstNull });
 }
 
 //threshold
