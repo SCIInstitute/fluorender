@@ -297,6 +297,10 @@ private:
 	void OnScrollWin(wxScrollWinEvent& event);
 	void OnScrollMouse(wxMouseEvent& event);
 	void OnAct(wxListEvent& event);
+	//edit
+	//void OnNameChange(wxCommandEvent& event);
+	//void OnCenterChange(wxCommandEvent& event);
+	//void OnColorChange(wxColourPickerEvent& event);
 };
 
 #endif//_MEASUREDLG_H_

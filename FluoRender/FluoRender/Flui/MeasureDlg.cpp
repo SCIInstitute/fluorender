@@ -286,6 +286,10 @@ void RulerListCtrl::OnTextFocus(wxMouseEvent& event)
 void RulerListCtrl::OnNameText(wxCommandEvent& event)
 {
 	m_name = m_name_text->GetValue();
+	wxWindow* par = GetParent();
+	MeasureDlg* md = dynamic_cast<MeasureDlg*>(par);
+	if (md)
+		md->SetCurrentRuler();
 }
 
 void RulerListCtrl::OnCenterText(wxCommandEvent& event)
@@ -296,6 +300,11 @@ void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 		return;
 
 	m_center = GetPointFromString(str);
+
+	wxWindow* par = GetParent();
+	MeasureDlg* md = dynamic_cast<MeasureDlg*>(par);
+	if (md)
+		md->SetCurrentRuler();
 }
 
 void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
@@ -303,6 +312,11 @@ void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
 	wxColor c = event.GetColour();
 	m_color = GetColorFromWxColor(c);
 	m_color_set = true;
+
+	wxWindow* par = GetParent();
+	MeasureDlg* md = dynamic_cast<MeasureDlg*>(par);
+	if (md)
+		md->SetCurrentRuler();
 }
 
 fluo::Point RulerListCtrl::GetPointFromString(const wxString& str)
@@ -1984,4 +1998,20 @@ void MeasureDlg::OnAct(wxListEvent& event)
 {
 	ToggleDisplay();
 }
+
+//edit
+//void MeasureDlg::OnNameChange(wxCommandEvent& event)
+//{
+//	SetCurrentRuler();
+//}
+//
+//void MeasureDlg::OnCenterChange(wxCommandEvent& event)
+//{
+//	SetCurrentRuler();
+//}
+//
+//void MeasureDlg::OnColorChange(wxColourPickerEvent& event)
+//{
+//	SetCurrentRuler();
+//}
 
