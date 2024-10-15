@@ -1593,8 +1593,8 @@ void ComponentDlg::OnIterText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_iter_text->GetValue().ToLong(&val);
-	if (m_iter_sldr->ChangeValue(val))
-		SetIter(val);
+	m_iter_sldr->ChangeValue(val);
+	SetIter(val);
 }
 
 void ComponentDlg::OnThreshSldr(wxScrollEvent& event)
@@ -1612,8 +1612,8 @@ void ComponentDlg::OnThreshText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_thresh_text->GetValue().ToDouble(&val);
-	if (m_thresh_sldr->ChangeValue(std::round(val * 1000.0)))
-		SetThresh(val);
+	m_thresh_sldr->ChangeValue(std::round(val * 1000.0));
+	SetThresh(val);
 }
 
 void ComponentDlg::OnDistStrengthSldr(wxScrollEvent& event)
@@ -1631,8 +1631,8 @@ void ComponentDlg::OnDistStrengthText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_dist_strength_text->GetValue().ToDouble(&val);
-	if (m_dist_strength_sldr->ChangeValue(std::round(val * 1000.0)))
-		SetDistStrength(val);
+	m_dist_strength_sldr->ChangeValue(std::round(val * 1000.0));
+	SetDistStrength(val);
 }
 
 void ComponentDlg::OnUseDistFieldCheck(wxCommandEvent& event)
@@ -1658,8 +1658,8 @@ void ComponentDlg::OnDistFilterSizeText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_dist_filter_size_text->GetValue().ToLong(&val);
-	if (m_dist_filter_size_sldr->ChangeValue(val))
-		SetDistFilterSize(val);
+	m_dist_filter_size_sldr->ChangeValue(val);
+	SetDistFilterSize(val);
 }
 
 void ComponentDlg::OnMaxDistSldr(wxScrollEvent& event)
@@ -1679,8 +1679,8 @@ void ComponentDlg::OnMaxDistText(wxCommandEvent& event)
 	m_max_dist_text->GetValue().ToLong(&val);
 	if (val > 255)
 		val = 255;
-	if (m_max_dist_sldr->ChangeValue(val))
-		SetMaxDist(val);
+	m_max_dist_sldr->ChangeValue(val);
+	SetMaxDist(val);
 }
 
 void ComponentDlg::OnDistThreshSldr(wxScrollEvent& event)
@@ -1698,8 +1698,8 @@ void ComponentDlg::OnDistThreshText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_dist_thresh_text->GetValue().ToDouble(&val);
-	if (m_dist_thresh_sldr->ChangeValue(std::round(val * 1000.0)))
-		SetDistThresh(val);
+	m_dist_thresh_sldr->ChangeValue(std::round(val * 1000.0));
+	SetDistThresh(val);
 }
 
 void ComponentDlg::OnDiffCheck(wxCommandEvent& event)
@@ -1725,8 +1725,8 @@ void ComponentDlg::OnFalloffText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_falloff_text->GetValue().ToDouble(&val);
-	if (m_falloff_sldr->ChangeValue(std::round(val * 1000.0)))
-		SetFalloff(val);
+	m_falloff_sldr->ChangeValue(std::round(val * 1000.0));
+	SetFalloff(val);
 }
 
 void ComponentDlg::OnDensityCheck(wxCommandEvent& event)
@@ -1752,8 +1752,8 @@ void ComponentDlg::OnDensityText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_density_text->GetValue().ToDouble(&val);
-	if (m_density_sldr->ChangeValue(std::round(val * 1000.0)))
-		SetDensity(val);
+	m_density_sldr->ChangeValue(std::round(val * 1000.0));
+	SetDensity(val);
 }
 
 void ComponentDlg::OnVarthSldr(wxScrollEvent& event)
@@ -1771,8 +1771,8 @@ void ComponentDlg::OnVarthText(wxCommandEvent& event)
 {
 	double val = 0.0;
 	m_varth_text->GetValue().ToDouble(&val);
-	if (m_varth_sldr->ChangeValue(std::round(val * 10000.0)))
-		SetVarth(val);
+	m_varth_sldr->ChangeValue(std::round(val * 10000.0));
+	SetVarth(val);
 }
 
 void ComponentDlg::OnDensityWindowSizeSldr(wxScrollEvent& event)
@@ -1790,8 +1790,8 @@ void ComponentDlg::OnDensityWindowSizeText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_density_window_size_text->GetValue().ToLong(&val);
-	if (m_density_window_size_sldr->ChangeValue(val))
-		SetDensityWindowSize(val);
+	m_density_window_size_sldr->ChangeValue(val);
+	SetDensityWindowSize(val);
 }
 
 void ComponentDlg::OnDensityStatsSizeSldr(wxScrollEvent& event)
@@ -1809,8 +1809,8 @@ void ComponentDlg::OnDensityStatsSizeText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_density_stats_size_text->GetValue().ToLong(&val);
-	if (m_density_stats_size_sldr->ChangeValue(val))
-		SetDensityStatsSize(val);
+	m_density_stats_size_sldr->ChangeValue(val);
+	SetDensityStatsSize(val);
 }
 
 void ComponentDlg::OnFixateCheck(wxCommandEvent& event)
@@ -1877,8 +1877,8 @@ void ComponentDlg::OnFixSizeText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_fix_size_text->GetValue().ToLong(&val);
-	if (m_fix_size_sldr->ChangeValue(val))
-		SetFixSize(val);
+	m_fix_size_sldr->ChangeValue(val);
+	SetFixSize(val);
 }
 
 void ComponentDlg::OnCleanCheck(wxCommandEvent& event)
@@ -1910,8 +1910,8 @@ void ComponentDlg::OnCleanIterText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_clean_iter_text->GetValue().ToLong(&val);
-	if (m_clean_iter_sldr->ChangeValue(val))
-		SetCleanIter(val);
+	m_clean_iter_sldr->ChangeValue(val);
+	SetCleanIter(val);
 }
 
 void ComponentDlg::OnCleanLimitSldr(wxScrollEvent& event)
@@ -1929,8 +1929,8 @@ void ComponentDlg::OnCleanLimitText(wxCommandEvent& event)
 {
 	long val = 0;
 	m_clean_limit_text->GetValue().ToLong(&val);
-	if (m_clean_limit_sldr->ChangeValue(val))
-		SetCleanLimit(val);
+	m_clean_limit_sldr->ChangeValue(val);
+	SetCleanLimit(val);
 }
 
 //record

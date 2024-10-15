@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Cell.h>
 #include <VertexList.h>
 #include <VolCache.h>
+#include <Progress.h>
 #include <fstream>
 #include <memory>
 #include <deque>
@@ -56,10 +57,11 @@ namespace flrd
 	typedef std::weak_ptr<TrackMap> pwTrackMap;
 	typedef std::function<void(const std::string&)> InfoOutFunc;
 
-	class TrackMapProcessor
+	class TrackMapProcessor : public Progress
 	{
 	public:
 		TrackMapProcessor() :
+		Progress(),
 		m_contact_thresh(0.6f),
 		m_size_thresh(25.0f),
 		m_similar_thresh(0.2f),

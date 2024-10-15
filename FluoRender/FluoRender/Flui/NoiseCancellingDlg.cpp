@@ -193,6 +193,11 @@ void NoiseCancellingDlg::Preview()
 	double scale = vd->GetScalarScale();
 	glbin_comp_generator.Grow();
 
+	bool use_min = glbin_comp_analyzer.GetUseMin();
+	bool use_max = glbin_comp_analyzer.GetUseMax();
+	int min_num = glbin_comp_analyzer.GetMinNum();
+	int max_num = glbin_comp_analyzer.GetMaxNum();
+
 	glbin_comp_analyzer.SetUseMin(false);
 	glbin_comp_analyzer.SetUseMax(true);
 	glbin_comp_analyzer.SetMinNum(0);
@@ -210,6 +215,16 @@ void NoiseCancellingDlg::Preview()
 	glbin_comp_def.m_nr_preview = true;
 
 	Enhance();
+
+	//restore settings
+	glbin_comp_analyzer.SetUseMin(use_min);
+	glbin_comp_analyzer.SetUseMax(use_max);
+	glbin_comp_analyzer.SetMinNum(min_num);
+	glbin_comp_analyzer.SetMaxNum(max_num);
+	glbin_comp_selector.SetUseMin(use_min);
+	glbin_comp_selector.SetUseMax(use_max);
+	glbin_comp_selector.SetMinNum(min_num);
+	glbin_comp_selector.SetMaxNum(max_num);
 }
 
 void NoiseCancellingDlg::Enhance()

@@ -77,10 +77,14 @@ void TrackMapProcessor::GenMap()
 	if (!reader)
 		return;
 
-	//start progress
-	WriteInfo("Generating track map.\n");
-	//wxGetApp().Yield();
+	std::string info_str;
 	int frames = reader->GetTimeNum();
+	size_t ticks = (glbin_settings.m_track_iter + 2) * frames;
+	size_t count = 0;
+	//start progress
+	info_str = "Generating track map.\n";
+	WriteInfo(info_str);
+	SetProgress(0, info_str);
 
 	//get and set parameters
 	flrd::pTrackMap track_map = trkg->GetTrackMap();
@@ -110,7 +114,8 @@ void TrackMapProcessor::GenMap()
 	{
 		InitializeFrame(i);
 		WriteInfo("Time point " + std::to_string(i) + " initialized.\n");
-		//wxGetApp().Yield();
+		SetProgress(100.0 * count / ticks, info_str);
+		count++;
 
 		if (i < 1)
 			continue;
@@ -118,13 +123,11 @@ void TrackMapProcessor::GenMap()
 		//link maps 1 and 2
 		LinkFrames(i - 1, i);
 		WriteInfo("Time point " + std::to_string(i) + " linked.\n");
-		//wxGetApp().Yield();
 
 		//check contacts and merge cells
 		ResolveGraph(i - 1, i);
 		ResolveGraph(i, i - 1);
 		WriteInfo("Time point " + std::to_string(i) + " merged.\n");
-		//wxGetApp().Yield();
 
 		if (i < 2)
 			continue;
@@ -133,13 +136,12 @@ void TrackMapProcessor::GenMap()
 		ProcessFrames(i - 2, i - 1);
 		ProcessFrames(i - 1, i - 2);
 		WriteInfo("Time point " + std::to_string(i) + " processed.\n");
-		//wxGetApp().Yield();
 	}
 	//last frame
 	ProcessFrames(frames - 2, frames - 1);
 	ProcessFrames(frames - 1, frames - 2);
 	WriteInfo("Time point " + std::to_string(frames - 1) + " processed.\n");
-	//wxGetApp().Yield();
+	SetProgress(100.0 * count / ticks, info_str);
 
 	//iterations
 	for (size_t iteri = 0; iteri < glbin_settings.m_track_iter; ++iteri)
@@ -150,7 +152,8 @@ void TrackMapProcessor::GenMap()
 			ProcessFrames(i - 2, i - 1);
 			ProcessFrames(i - 1, i - 2);
 			WriteInfo("Time point " + std::to_string(i - 1) + " processed.\n");
-			//wxGetApp().Yield();
+			SetProgress(100.0 * count / ticks, info_str);
+			count++;
 		}
 	}
 
@@ -158,13 +161,14 @@ void TrackMapProcessor::GenMap()
 	if (glbin_settings.m_consistent_color)
 	{
 		WriteInfo("Set colors for frame 0\n");
-		//wxGetApp().Yield();
 		MakeConsistent(0);
 		//remaining frames
 		for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
 		{
 			WriteInfo("Set colors for frame " + std::to_string(fi) + "\n");
-			//wxGetApp().Yield();
+			SetProgress(100.0 * count / ticks, info_str);
+			count++;
+
 			MakeConsistent(fi - 1, fi);
 		}
 	}
@@ -172,8 +176,8 @@ void TrackMapProcessor::GenMap()
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> time_span = duration_cast<std::chrono::duration<double>>(t2 - t1);
 	WriteInfo("Wall clock time: " + std::to_string(time_span.count()) + "s.\n");
-
-	//GetSettings(m_view);
+	SetProgress(0, "");
+	SetRange(0, 100);
 
 	canvas->GetTraces(false);
 }

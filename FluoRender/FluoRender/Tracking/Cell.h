@@ -149,6 +149,7 @@ namespace flrd
 			m_celvrtx(CellGraph::null_vertex())
 		{
 			m_center = fluo::Point(x, y, z);
+			m_pos = m_center;
 			m_box.extend(m_center);
 			m_pca.AddPointScale(m_center, sx, sy, sz);
 		}
@@ -167,6 +168,7 @@ namespace flrd
 			m_celvrtx(CellGraph::null_vertex())
 		{
 			m_center = fluo::Point(x, y, z);
+			m_pos = m_center;
 			m_box.extend(m_center);
 			m_pca.AddPointScale(m_center, sx, sy, sz);
 			m_size_ui_list = sumi;

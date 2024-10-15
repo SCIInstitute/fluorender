@@ -382,7 +382,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 			}
 			count++;
 
-			if (iter->second->GetSize() < size_limit)
+			if (iter->second->GetSizeUi() < size_limit)
 				continue;
 			//iter->second->var = sqrt(iter->second->m2 / (iter->second->sumi));
 			//iter->second->mean *= scale;
