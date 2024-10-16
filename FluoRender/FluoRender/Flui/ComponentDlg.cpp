@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RecordHistParams.h>
 #include <wxSingleSlider.h>
 #include <ModalDlg.h>
+#include <Progress.h>
 #include <wx/scrolwin.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
@@ -1422,10 +1423,16 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 	unsigned long lval;
 	wxColor color;
 
+	Progress prg;
+	prg.SetProgress(0, "Updating component list.");
+
 	i = 0;
 	copy_data = values;
 	do
 	{
+		if (i % 100 == 0)
+			prg.SetProgress(100.0 * i / max_lines, "Updating component list.");
+
 		k = 0;
 		cur_line = copy_data.BeforeFirst('\n');
 		copy_data = copy_data.AfterFirst('\n');
@@ -1451,6 +1458,7 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 			++k;
 		} while (cur_line.IsEmpty() == false);
 		++i;
+
 	} while (copy_data.IsEmpty() == false &&
 		i < max_lines);
 
@@ -1467,6 +1475,8 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 
 	//m_output_grid->AutoSizeColumns();
 	m_output_grid->ClearSelection();
+
+	prg.SetProgress(0, "");
 }
 
 //setting funcs for sliders
