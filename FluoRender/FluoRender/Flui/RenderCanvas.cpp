@@ -3716,21 +3716,17 @@ void RenderCanvas::PickMesh()
 		MeshData* md = m_md_pop_list[choose - 1];
 		if (md)
 		{
-			//if (m_frame && m_frame->GetTreePanel())
-			//{
-			//	//m_frame->GetTreePanel()->SetFocus();
-			//	m_frame->GetTreePanel()->Select(m_renderview_panel->GetName(), md->GetName());
-			//}
+			glbin_current.SetMeshData(md);
 			RefreshGL(27);
 		}
 	}
 	else
 	{
-		//if (m_frame && m_frame->GetCurSelType() == 3 &&
-		//	m_frame->GetTreePanel())
-		//	m_frame->GetTreePanel()->Select(m_renderview_panel->GetName(), "");
+		glbin_current.SetMeshData(0);
 	}
 	m_mv_mat = mv_temp;
+
+	m_frame->UpdateProps({ gstCurrentSelect });
 }
 
 void RenderCanvas::PickVolume()

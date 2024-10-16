@@ -1309,7 +1309,7 @@ struct CurrentObjects
 		if (vol_data)
 			return 2;
 		if (mesh_data)
-			return 2;
+			return 3;
 		if (ann_data)
 			return 4;
 		if (vol_group)
