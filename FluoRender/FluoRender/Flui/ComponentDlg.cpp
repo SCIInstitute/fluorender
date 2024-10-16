@@ -2213,6 +2213,7 @@ void ComponentDlg::OnCompAll(wxCommandEvent& event)
 
 void ComponentDlg::OnCompClear(wxCommandEvent& event)
 {
+	glbin_vol_selector.Clear();
 	glbin_comp_selector.Clear();
 	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo });
 }

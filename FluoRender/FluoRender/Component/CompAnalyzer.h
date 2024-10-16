@@ -159,6 +159,7 @@ namespace flrd
 		void UpdateMaxCompSize(bool);
 		void MakeColorConsistent();
 		void Count();
+		void ClearCompGroup();
 
 		size_t GetCompSize();
 		size_t GetListSize();

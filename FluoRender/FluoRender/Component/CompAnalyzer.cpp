@@ -697,6 +697,13 @@ void ComponentAnalyzer::Count()
 	m_size = m_vox * spcx * spcy * spcz;
 }
 
+void ComponentAnalyzer::ClearCompGroup()
+{
+	if (!m_compgroup)
+		return;
+	m_compgroup->Clear();
+}
+
 size_t ComponentAnalyzer::GetListSize()
 {
 	if (!m_compgroup)
