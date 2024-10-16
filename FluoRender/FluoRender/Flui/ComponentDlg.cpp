@@ -52,7 +52,8 @@ ComponentDlg::ComponentDlg(MainFrame *frame)
 		frame->FromDIP(wxSize(600, 800)),
 		0, "ComponentDlg"),
 	m_hold_history(false),
-	m_auto_update_timer(this)
+	m_auto_update_timer(this),
+	m_max_lines(1000)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -1364,11 +1365,11 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		DeleteGridRows();
 		size_t size = glbin_comp_analyzer.GetListSize();
 		bool saved = false;
-		if (size > 1e4)
+		if (size > m_max_lines)
 		{
-			ModalDlg* fopendlg = new ModalDlg(
-				this, "Component count is over 10000. Save in a file?", "", "",
-				"Text file (*.txt)|*.txt",
+			ModalDlg* fopendlg = new ModalDlg(this,
+				wxString::Format("Component count is over %d. Save in a file?", m_max_lines),
+				"", "", "Text file (*.txt)|*.txt",
 				wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 			int rval = fopendlg->ShowModal();
 			if (rval == wxID_OK)
@@ -1397,7 +1398,6 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 {
-	int max_lines = 10000;
 	wxString copy_data;
 	wxString cur_field;
 	wxString cur_line;
@@ -1430,8 +1430,8 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 	copy_data = values;
 	do
 	{
-		if (i % 100 == 0)
-			prg.SetProgress(100.0 * i / max_lines, "Updating component list.");
+		if (i % 10 == 0)
+			prg.SetProgress(100.0 * i / m_max_lines, "Updating component list.");
 
 		k = 0;
 		cur_line = copy_data.BeforeFirst('\n');
@@ -1460,7 +1460,7 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 		++i;
 
 	} while (copy_data.IsEmpty() == false &&
-		i < max_lines);
+		i < m_max_lines);
 
 	//delete columns and rows if the old has more
 	if (!m_hold_history)

@@ -109,9 +109,7 @@ public:
 	void SetCleanLimit(int val);
 
 private:
-	//progress
-	float m_prog_bit;
-	float m_prog;
+	int m_max_lines;
 
 	//selected rows of output grid
 	std::set<size_t> m_sel;
