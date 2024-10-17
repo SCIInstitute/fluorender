@@ -246,6 +246,7 @@ void OclDlg::Execute()
 	wxString vd_name = vd->GetName();
 	if (vd_name.Find("_CL") != wxNOT_FOUND)
 		dup = false;
+	//bool dup = false;
 
 	glbin_kernel_executor.SetVolume(vd);
 	glbin_kernel_executor.SetCode(code);

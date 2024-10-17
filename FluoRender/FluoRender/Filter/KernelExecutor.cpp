@@ -199,44 +199,45 @@ bool KernelExecutor::Execute()
 			return false;
 
 		if (m_vd)
-		{
-			//clipping planes
-			std::vector<fluo::Plane*> *planes = m_vd->GetVR() ? m_vd->GetVR()->get_planes() : 0;
-			if (planes && vd->GetVR())
-				vd->GetVR()->set_planes(planes);
-			//transfer function
-			vd->SetGamma(m_vd->GetGamma());
-			vd->SetBoundary(m_vd->GetBoundary());
-			vd->SetSaturation(m_vd->GetSaturation());
-			vd->SetLeftThresh(m_vd->GetLeftThresh());
-			vd->SetRightThresh(m_vd->GetRightThresh());
-			fluo::Color col = m_vd->GetColor();
-			vd->SetColor(col);
-			vd->SetAlpha(m_vd->GetAlpha());
-			//shading
-			vd->SetShadingEnable(m_vd->GetShadingEnable());
-			double amb, diff, spec, shine;
-			m_vd->GetMaterial(amb, diff, spec, shine);
-			vd->SetMaterial(amb, diff, spec, shine);
-			//shadow
-			vd->SetShadowEnable(m_vd->GetShadowEnable());
-			vd->SetShadowIntensity(m_vd->GetShadowIntensity());
-			//sample rate
-			vd->SetSampleRate(m_vd->GetSampleRate());
-			//2d adjusts
-			col = m_vd->GetGammaColor();
-			vd->SetGammaColor(col);
-			col = m_vd->GetBrightness();
-			vd->SetBrightness(col);
-			col = m_vd->GetHdr();
-			vd->SetHdr(col);
-			for (int i : { 0, 1, 2})
-				vd->SetSync(i, m_vd->GetSync(i));
-			//max and scale
-			vd->SetMaxValue(m_vd->GetMaxValue());
-			vd->SetScalarScale(m_vd->GetScalarScale());
-			//vd->SetCurChannel(m_vd->GetCurChannel());
-		}
+			glbin_vol_def.Copy(vd, m_vd);
+		//{
+		//	//clipping planes
+		//	std::vector<fluo::Plane*> *planes = m_vd->GetVR() ? m_vd->GetVR()->get_planes() : 0;
+		//	if (planes && vd->GetVR())
+		//		vd->GetVR()->set_planes(planes);
+		//	//transfer function
+		//	vd->SetGamma(m_vd->GetGamma());
+		//	vd->SetBoundary(m_vd->GetBoundary());
+		//	vd->SetSaturation(m_vd->GetSaturation());
+		//	vd->SetLeftThresh(m_vd->GetLeftThresh());
+		//	vd->SetRightThresh(m_vd->GetRightThresh());
+		//	fluo::Color col = m_vd->GetColor();
+		//	vd->SetColor(col);
+		//	vd->SetAlpha(m_vd->GetAlpha());
+		//	//shading
+		//	vd->SetShadingEnable(m_vd->GetShadingEnable());
+		//	double amb, diff, spec, shine;
+		//	m_vd->GetMaterial(amb, diff, spec, shine);
+		//	vd->SetMaterial(amb, diff, spec, shine);
+		//	//shadow
+		//	vd->SetShadowEnable(m_vd->GetShadowEnable());
+		//	vd->SetShadowIntensity(m_vd->GetShadowIntensity());
+		//	//sample rate
+		//	vd->SetSampleRate(m_vd->GetSampleRate());
+		//	//2d adjusts
+		//	col = m_vd->GetGammaColor();
+		//	vd->SetGammaColor(col);
+		//	col = m_vd->GetBrightness();
+		//	vd->SetBrightness(col);
+		//	col = m_vd->GetHdr();
+		//	vd->SetHdr(col);
+		//	for (int i : { 0, 1, 2})
+		//		vd->SetSync(i, m_vd->GetSync(i));
+		//	//max and scale
+		//	vd->SetMaxValue(m_vd->GetMaxValue());
+		//	vd->SetScalarScale(m_vd->GetScalarScale());
+		//	//vd->SetCurChannel(m_vd->GetCurChannel());
+		//}
 	}
 	else
 		result = tex->get_nrrd(0)->data;
