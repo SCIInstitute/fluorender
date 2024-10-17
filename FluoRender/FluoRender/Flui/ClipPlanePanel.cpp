@@ -832,6 +832,8 @@ void ClipPlanePanel::HoldPlanes()
 {
 	glbin_settings.m_clip_hold = m_toolbar->GetToolState(ID_HoldPlanesBtn);
 	glbin_states.ClipDisplayChanged();
+	if (glbin_current.canvas)
+		glbin_current.canvas->m_clip_mask = -1;
 	FluoRefresh(2, { gstClipHold },
 		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
@@ -1062,8 +1064,11 @@ void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 	bool bval = window && reg.Contains(pos);
 	glbin_states.m_mouse_in_clip_plane_panel = bval;
 	if (glbin_states.ClipDisplayChanged())
+	{
+		canvas->m_clip_mask = -1;
 		FluoRefresh(3, { gstNull },
 			{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+	}
 }
 
 bool ClipPlanePanel::GetXLink()
