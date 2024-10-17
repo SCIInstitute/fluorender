@@ -1462,8 +1462,6 @@ void TreePanel::OnToolbar(wxCommandEvent& event)
 	}
 
 	FluoRefresh(excl_self, vc, views);
-
-	event.Skip();
 }
 
 void TreePanel::OnMenu(wxCommandEvent& event)
@@ -1619,8 +1617,6 @@ void TreePanel::OnMenu(wxCommandEvent& event)
 	}
 
 	FluoRefresh(excl_self, vc, views);
-
-	event.Skip();
 }
 
 void TreePanel::OnSelChanged(wxTreeEvent& event)

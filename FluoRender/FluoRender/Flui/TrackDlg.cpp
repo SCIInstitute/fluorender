@@ -1708,8 +1708,6 @@ void TrackDlg::OnMenuItem(wxCommandEvent& event)
 		DeleteSelection(m_active_list->m_type);
 		break;
 	}
-
-	event.Skip();
 }
 
 void TrackDlg::OnKeyDown(wxKeyEvent& event)

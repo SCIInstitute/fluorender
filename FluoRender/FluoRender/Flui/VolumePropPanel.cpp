@@ -2839,8 +2839,6 @@ void VolumePropPanel::OnOptions(wxCommandEvent& event)
 		SaveDefault();
 		break;
 	}
-
-	event.Skip();
 }
 
 //ml

@@ -1366,8 +1366,6 @@ void RenderViewPanel::OnToolBar(wxCommandEvent& event)
 		SetDrawScalebar(m_draw_scalebar);
 		break;
 	}
-
-	event.Skip();
 }
 
 void RenderViewPanel::OnScaleText(wxCommandEvent& event)
@@ -1444,8 +1442,6 @@ void RenderViewPanel::OnToolBar2(wxCommandEvent& event)
 		SaveDefault();
 		break;
 	}
-
-	event.Skip();
 }
 
 void RenderViewPanel::OnFullScreen(wxCommandEvent& event)
@@ -1574,8 +1570,6 @@ void RenderViewPanel::OnRotLockCheck(wxCommandEvent& event)
 		SetSliderType(m_rot_lock_btn->GetToolState(ID_RotSliderType));
 		break;
 	}
-
-	event.Skip();
 }
 
 void RenderViewPanel::OnRotEdit(wxCommandEvent& event)
@@ -1654,8 +1648,6 @@ void RenderViewPanel::OnRotReset(wxCommandEvent& event)
 		SetRotations(0.0, 0.0, 0.0, true);
 		break;
 	}
-
-	event.Skip();
 }
 
 //reset counter

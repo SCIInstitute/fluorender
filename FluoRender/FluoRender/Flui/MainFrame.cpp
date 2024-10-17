@@ -2317,18 +2317,6 @@ void MainFrame::OnToolbarMenu(wxAuiToolBarEvent& event)
 //toolbar
 void MainFrame::OnMainMenu(wxCommandEvent& event)
 {
-	wxObject* obj = event.GetEventObject();
-	wxMenu* menu_obj = dynamic_cast<wxMenu*>(obj);
-	if (!menu_obj)
-	{
-		wxWindow* win_obj = dynamic_cast<wxWindow*>(obj);
-		if (!win_obj)
-			return;
-		wxWindow* win = win_obj->GetParent();
-		if (win != this)
-			return;
-	}
-
 	int id = event.GetId();
 
 	switch (id)
@@ -2553,7 +2541,7 @@ void MainFrame::OnMainMenu(wxCommandEvent& event)
 		break;
 	}
 
-	event.StopPropagation();
+	//event.StopPropagation();
 }
 
 //panes

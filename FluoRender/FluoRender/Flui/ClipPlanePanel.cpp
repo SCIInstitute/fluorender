@@ -787,8 +787,6 @@ void ClipPlanePanel::OnToolbar(wxCommandEvent& event)
 		SetPlaneMode();
 		break;
 	}
-
-	event.Skip();
 }
 
 void ClipPlanePanel::LinkChannels()

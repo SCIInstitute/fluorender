@@ -807,8 +807,6 @@ void ListPanel::OnToolbar(wxCommandEvent& event)
 		DeleteAll();
 		break;
 	}
-
-	event.Skip();
 }
 
 void ListPanel::OnMenu(wxCommandEvent& event)
@@ -847,8 +845,6 @@ void ListPanel::OnMenu(wxCommandEvent& event)
 		int ival = id - ID_ViewID;
 		AddSelectionToView(ival);
 	}
-
-	event.Skip();
 }
 
 void ListPanel::OnSelect(wxListEvent& event)

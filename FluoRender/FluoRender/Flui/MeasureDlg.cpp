@@ -1626,8 +1626,6 @@ void MeasureDlg::OnToolbar1(wxCommandEvent& event)
 		Grow();
 		break;
 	}
-
-	event.Skip();
 }
 
 void MeasureDlg::OnToolbar2(wxCommandEvent& event)
@@ -1661,8 +1659,6 @@ void MeasureDlg::OnToolbar2(wxCommandEvent& event)
 		Relax();
 		break;
 	}
-
-	event.Skip();
 }
 
 void MeasureDlg::OnToolbar3(wxCommandEvent& event)
@@ -1696,8 +1692,6 @@ void MeasureDlg::OnToolbar3(wxCommandEvent& event)
 		Export();
 		break;
 	}
-
-	event.Skip();
 }
 
 void MeasureDlg::OnIntensityMethodCheck(wxCommandEvent& event)
@@ -1949,8 +1943,6 @@ void MeasureDlg::OnMenuItem(wxCommandEvent& event)
 		ToggleDisplay();
 		break;
 	}
-
-	event.Skip();
 }
 
 void MeasureDlg::OnSelection(wxListEvent& event)
@@ -1984,14 +1976,14 @@ void MeasureDlg::OnScrollWin(wxScrollWinEvent& event)
 {
 	m_ruler_list->EndEdit();
 	SetCurrentRuler();
-	event.Skip(true);
+	event.Skip();
 }
 
 void MeasureDlg::OnScrollMouse(wxMouseEvent& event)
 {
 	m_ruler_list->EndEdit();
 	SetCurrentRuler();
-	event.Skip(true);
+	event.Skip();
 }
 
 void MeasureDlg::OnAct(wxListEvent& event)

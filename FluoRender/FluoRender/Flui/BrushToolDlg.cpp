@@ -745,8 +745,6 @@ void BrushToolDlg::OnToolBar(wxCommandEvent& event)
 		glbin_states.m_brush_mode_shortcut = 0;
 	}
 	FluoRefresh(excl_self, vc, views);
-
-	event.Skip();
 }
 
 //mask tools
@@ -807,8 +805,6 @@ void BrushToolDlg::OnMaskToolBar(wxCommandEvent& event)
 	}
 
 	FluoRefresh(excl_self, vc);
-
-	event.Skip();
 }
 
 //selection adjustment

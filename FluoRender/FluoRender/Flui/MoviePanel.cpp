@@ -445,13 +445,13 @@ void KeyListCtrl::OnEndDrag(wxMouseEvent& event)
 void KeyListCtrl::OnScroll(wxScrollWinEvent& event)
 {
 	EndEdit(false);
-	event.Skip(true);
+	event.Skip();
 }
 
 void KeyListCtrl::OnMouseScroll(wxMouseEvent& event)
 {
 	EndEdit(false);
-	event.Skip(true);
+	event.Skip();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
