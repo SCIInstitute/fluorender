@@ -73,6 +73,7 @@ namespace flrd
 		void SetBreakCount(int val = 0) { m_break_count = val; }
 		wxString GetTitle() { return m_fconfig_name; }
 		wxString GetInfo() { return m_info; }
+		void LoadScriptFile();
 
 		//run 4d script
 		//return 0:failure; 1:normal; 2:break

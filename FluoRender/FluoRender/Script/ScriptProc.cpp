@@ -59,33 +59,46 @@ ScriptProc::ScriptProc() :
 	m_view(0),
 	m_break(true),
 	m_rewind(false),
-	m_break_count(0)
+	m_break_count(0),
+	m_fconfig(0)
 {
 	m_output = fluo::ref_ptr<fluo::Group>(new fluo::Group());
 }
 
 ScriptProc::~ScriptProc()
 {
+	if (m_fconfig)
+		delete m_fconfig;
+}
+
+void ScriptProc::LoadScriptFile()
+{
+	wxString scriptfile = glbin_settings.m_script_file;
+	if (!scriptfile.IsEmpty() &&
+		m_fconfig_name != scriptfile)
+	{
+		m_fconfig_name = scriptfile;
+		wxFileInputStream is(m_fconfig_name);
+		if (is.IsOk())
+		{
+			if (m_fconfig)
+				delete m_fconfig;
+			m_fconfig = new wxFileConfig(is);
+		}
+	}
 }
 
 //run 4d script
 //return 0:failure; 1:normal; 2:break
 int ScriptProc::Run4DScript(TimeMask tm, bool rewind)
 {
+	LoadScriptFile();
+	if (!m_fconfig)
+		return 0;
+
 	m_frame = glbin_current.mainframe;
 	m_view = glbin_current.canvas;
 
-	m_fconfig = 0;
-	m_fconfig_name = "";
-	wxString scriptfile = glbin_settings.m_script_file;
-	if (scriptfile.IsEmpty())
-		return 0;
-	m_fconfig_name = scriptfile;
-	wxFileInputStream is(m_fconfig_name);
-	if (!is.IsOk())
-		return 0;
-	//wxFileConfig fconfig(is);
-	m_fconfig = new wxFileConfig(is);
 	m_time_mask = tm;
 	m_rewind = rewind;
 	if (m_rewind)
@@ -201,7 +214,6 @@ int ScriptProc::Run4DScript(TimeMask tm, bool rewind)
 		}
 	}
 
-	delete m_fconfig;
 	return 1;
 }
 
@@ -277,8 +289,11 @@ bool ScriptProc::GetVolumes(std::vector<VolumeData*> &list)
 //add traces to trace dialog
 void ScriptProc::UpdateTraceDlg()
 {
-	if (m_frame && m_frame->GetTrackDlg())
-		m_frame->GetTrackDlg()->FluoUpdate();
+	//if (m_frame && m_frame->GetTrackDlg())
+	//	m_frame->GetTrackDlg()->FluoUpdate();
+	if (m_frame)
+		m_frame->FluoUpdate(
+			{ gstTrackList });
 }
 
 int ScriptProc::TimeMode(std::string &str)
@@ -2525,7 +2540,7 @@ void ScriptProc::ChangeScript()
 	if (!filename.IsEmpty())
 		glbin_settings.m_script_file = filename;
 	m_frame->GetMoviePanel()->FluoUpdate({ gstScriptList });
-	m_fconfig_name = filename;
+	//m_fconfig_name = filename;
 }
 
 void ScriptProc::LoadProject()

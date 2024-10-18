@@ -46,12 +46,6 @@ public:
 	{
 		return m_progress_func;
 	}
-	void SetProgress(int val, const wxString& str)
-	{
-		int prg = std::round(m_min + (val / 100.0) * m_range);
-		if (m_progress_func)
-			m_progress_func(prg, str);
-	}
 	void SetRange(int v1, int v2)
 	{
 		m_min = std::min(v1, v2);
@@ -72,6 +66,8 @@ public:
 	}
 
 	bool IsBusy() { return m_busy; }
+
+	void SetProgress(int val, const wxString& str);
 
 protected:
 	bool m_busy;//it's currently working

@@ -40,3 +40,13 @@ Progress::Progress() :
 		std::bind(&MainFrame::SetProgress, glbin_current.mainframe,
 			std::placeholders::_1, std::placeholders::_2));
 }
+
+void Progress::SetProgress(int val, const wxString& str)
+{
+	if (glbin_moviemaker.IsRunning())
+		return;
+
+	int prg = std::round(m_min + (val / 100.0) * m_range);
+	if (m_progress_func)
+		m_progress_func(prg, str);
+}
