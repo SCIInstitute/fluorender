@@ -72,6 +72,9 @@ ScriptProc::~ScriptProc()
 //return 0:failure; 1:normal; 2:break
 int ScriptProc::Run4DScript(TimeMask tm, bool rewind)
 {
+	m_frame = glbin_current.mainframe;
+	m_view = glbin_current.canvas;
+
 	m_fconfig = 0;
 	m_fconfig_name = "";
 	wxString scriptfile = glbin_settings.m_script_file;
