@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _KERNELEXECUTOR_H_
 #define _KERNELEXECUTOR_H_
 
+#include <Progress.h>
 #include <wx/string.h>
 #include <vector>
 
@@ -36,7 +37,7 @@ namespace flvr
 {
 	class KernelProgram;
 }
-class KernelExecutor
+class KernelExecutor : public Progress
 {
 public:
 	KernelExecutor();

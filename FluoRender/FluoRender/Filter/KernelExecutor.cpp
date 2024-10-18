@@ -36,7 +36,8 @@ DEALINGS IN THE SOFTWARE.
 using namespace boost::chrono;
 
 KernelExecutor::KernelExecutor()
-	: m_vd(0),
+	: Progress(),
+	m_vd(0),
 	m_duplicate(true)
 {
 }
@@ -169,6 +170,8 @@ bool KernelExecutor::Execute()
 	std::vector<flvr::TextureBrick*> *bricks_r;
 	void *result;
 
+	SetProgress(0, "Running OpenCL kernel.");
+
 	if (m_duplicate)
 	{
 		//result
@@ -198,53 +201,18 @@ bool KernelExecutor::Execute()
 		if (!bricks_r || bricks_r->size() == 0)
 			return false;
 
-		if (m_vd)
-			glbin_vol_def.Copy(vd, m_vd);
-		//{
-		//	//clipping planes
-		//	std::vector<fluo::Plane*> *planes = m_vd->GetVR() ? m_vd->GetVR()->get_planes() : 0;
-		//	if (planes && vd->GetVR())
-		//		vd->GetVR()->set_planes(planes);
-		//	//transfer function
-		//	vd->SetGamma(m_vd->GetGamma());
-		//	vd->SetBoundary(m_vd->GetBoundary());
-		//	vd->SetSaturation(m_vd->GetSaturation());
-		//	vd->SetLeftThresh(m_vd->GetLeftThresh());
-		//	vd->SetRightThresh(m_vd->GetRightThresh());
-		//	fluo::Color col = m_vd->GetColor();
-		//	vd->SetColor(col);
-		//	vd->SetAlpha(m_vd->GetAlpha());
-		//	//shading
-		//	vd->SetShadingEnable(m_vd->GetShadingEnable());
-		//	double amb, diff, spec, shine;
-		//	m_vd->GetMaterial(amb, diff, spec, shine);
-		//	vd->SetMaterial(amb, diff, spec, shine);
-		//	//shadow
-		//	vd->SetShadowEnable(m_vd->GetShadowEnable());
-		//	vd->SetShadowIntensity(m_vd->GetShadowIntensity());
-		//	//sample rate
-		//	vd->SetSampleRate(m_vd->GetSampleRate());
-		//	//2d adjusts
-		//	col = m_vd->GetGammaColor();
-		//	vd->SetGammaColor(col);
-		//	col = m_vd->GetBrightness();
-		//	vd->SetBrightness(col);
-		//	col = m_vd->GetHdr();
-		//	vd->SetHdr(col);
-		//	for (int i : { 0, 1, 2})
-		//		vd->SetSync(i, m_vd->GetSync(i));
-		//	//max and scale
-		//	vd->SetMaxValue(m_vd->GetMaxValue());
-		//	vd->SetScalarScale(m_vd->GetScalarScale());
-		//	//vd->SetCurChannel(m_vd->GetCurChannel());
-		//}
+		glbin_vol_def.Copy(vd, m_vd);
 	}
 	else
 		result = tex->get_nrrd(0)->data;
 
 	bool kernel_exe = true;
-	for (unsigned int i = 0; i<bricks->size(); ++i)
+	size_t brick_num = bricks->size();
+
+	for (size_t i = 0; i<brick_num; ++i)
 	{
+		SetProgress(100.0 * i / brick_num, "Running OpenCL kernel.");
+
 		b = (*bricks)[i];
 		if (m_duplicate) b_r = (*bricks_r)[i];
 		GLint data_id = vr->load_brick(b);
@@ -254,7 +222,7 @@ bool KernelExecutor::Execute()
 		if (kernel)
 		{
 			m_message += "OpenCL kernel created.\n";
-			if (bricks->size() == 1)
+			if (brick_num == 1)
 				kernel_exe = ExecuteKernel(kernel, data_id, result, res_x, res_y, res_z, chars);
 			else
 			{
@@ -300,11 +268,14 @@ bool KernelExecutor::Execute()
 		if (m_duplicate && !m_vd_r.empty())
 			delete m_vd_r.back();
 		m_vd_r.pop_back();
+		SetProgress(0, "");
 		return false;
 	}
 
 	if (!m_duplicate)
 		m_vd->GetVR()->clear_tex_current();
+
+	SetProgress(0, "");
 
 	return true;
 }

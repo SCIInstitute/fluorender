@@ -642,44 +642,6 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 	vd_r->SetColor(red);
 	vd_g->SetColor(green);
 	vd_b->SetColor(blue);
-	//bool bval = m_vd->GetAlphaEnable();
-	//vd_r->SetAlphaEnable(bval);
-	//vd_g->SetAlphaEnable(bval);
-	//vd_b->SetAlphaEnable(bval);
-	//bval = m_vd->GetShadingEnable();
-	//vd_r->SetShadingEnable(bval);
-	//vd_g->SetShadingEnable(bval);
-	//vd_b->SetShadingEnable(bval);
-	//vd_r->SetShadowEnable(false);
-	//vd_g->SetShadowEnable(false);
-	//vd_b->SetShadowEnable(false);
-	////other settings
-	//double amb, diff, spec, shine;
-	//m_vd->GetMaterial(amb, diff, spec, shine);
-	//vd_r->SetGamma(m_vd->GetGamma());
-	//vd_r->SetBoundary(m_vd->GetBoundary());
-	//vd_r->SetSaturation(m_vd->GetSaturation());
-	//vd_r->SetLeftThresh(m_vd->GetLeftThresh());
-	//vd_r->SetRightThresh(m_vd->GetRightThresh());
-	//vd_r->SetAlpha(m_vd->GetAlpha());
-	//vd_r->SetSampleRate(m_vd->GetSampleRate());
-	//vd_r->SetMaterial(amb, diff, spec, shine);
-	//vd_g->SetGamma(m_vd->GetGamma());
-	//vd_g->SetBoundary(m_vd->GetBoundary());
-	//vd_g->SetSaturation(m_vd->GetSaturation());
-	//vd_g->SetLeftThresh(m_vd->GetLeftThresh());
-	//vd_g->SetRightThresh(m_vd->GetRightThresh());
-	//vd_g->SetAlpha(m_vd->GetAlpha());
-	//vd_g->SetSampleRate(m_vd->GetSampleRate());
-	//vd_g->SetMaterial(amb, diff, spec, shine);
-	//vd_b->SetGamma(m_vd->GetGamma());
-	//vd_b->SetBoundary(m_vd->GetBoundary());
-	//vd_b->SetSaturation(m_vd->GetSaturation());
-	//vd_b->SetLeftThresh(m_vd->GetLeftThresh());
-	//vd_b->SetRightThresh(m_vd->GetRightThresh());
-	//vd_b->SetAlpha(m_vd->GetAlpha());
-	//vd_b->SetSampleRate(m_vd->GetSampleRate());
-	//vd_b->SetMaterial(amb, diff, spec, shine);
 
 	if (push_new)
 	{

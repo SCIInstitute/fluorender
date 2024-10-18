@@ -145,6 +145,7 @@ MainFrame::MainFrame(
 	glbin_comp_analyzer.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 	glbin_clusterizer.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 	glbin_trackmap_proc.SetProgressFunc(glbin_data_manager.GetProgressFunc());
+	glbin_kernel_executor.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 
 	// tell wxAuiManager to manage this frame
 	m_aui_mgr.SetManagedWindow(this);

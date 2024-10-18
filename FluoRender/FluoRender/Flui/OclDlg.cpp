@@ -283,8 +283,13 @@ void OclDlg::Execute()
 		}
 	}
 
-	FluoRefresh(1, { gstListCtrl, gstTreeCtrl, gstUpdateSync },
-		{ m_frame->GetRenderCanvas(canvas) });
+	fluo::ValueCollection vc;
+	if (dup)
+		vc.insert({ gstListCtrl, gstTreeCtrl, gstUpdateSync });
+	else
+		vc.insert({ gstNull });
+
+	FluoRefresh(1, vc, { m_frame->GetRenderCanvas(canvas) });
 }
 
 void OclDlg::OnBrowseBtn(wxCommandEvent& event)
@@ -357,8 +362,16 @@ void OclDlg::OnExecuteNBtn(wxCommandEvent& event)
 	unsigned long ival;
 	str.ToULong(&ival);
 
+	glbin_kernel_executor.SetProgress(0, "Running OpenCL kernel.");
+
 	for (int i=0; i<ival; ++i)
+	{
+		glbin_kernel_executor.SetRange(100.0 * i / ival, 100.0 * (i + 1) / ival);
 		Execute();
+	}
+
+	glbin_kernel_executor.SetRange(0, 100);
+	glbin_kernel_executor.SetProgress(0, "");
 }
 
 void OclDlg::OnIterationsChange(wxScrollEvent& event)
