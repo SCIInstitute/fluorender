@@ -3651,24 +3651,30 @@ bool RenderCanvas::UpdateBrushState()
 //selection
 void RenderCanvas::Pick()
 {
-	if (m_draw_all)
-	{
-		PickVolume();
-		PickMesh();
-	}
+	if (!m_draw_all)
+		return;
+
+	bool vol_sel = PickVolume();
+	bool mesh_sel = PickMesh();
+	fluo::ValueCollection vc = { gstCurrentSelect };
+	if (vol_sel)
+		vc.insert(gstCompListSelection);
+	else if (!mesh_sel)
+		glbin_current.SetMeshData(0);
+	m_frame->UpdateProps(vc);
 }
 
-void RenderCanvas::PickMesh()
+bool RenderCanvas::PickMesh()
 {
 	int i;
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
 	if (nx <= 0 || ny <= 0)
-		return;
+		return false;
 	wxPoint mouse_pos = ScreenToClient(wxGetMousePosition());
 	if (mouse_pos.x<0 || mouse_pos.x >= nx ||
 		mouse_pos.y <= 0 || mouse_pos.y>ny)
-		return;
+		return false;
 
 	//projection
 	HandleProjection(nx, ny);
@@ -3711,6 +3717,7 @@ void RenderCanvas::PickMesh()
 		choose = pick_buffer->read_value(mouse_pos.x, ny - mouse_pos.y);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_cur_framebuffer);
 
+	bool selected = false;
 	if (choose >0 && choose <= (int)m_md_pop_list.size())
 	{
 		MeshData* md = m_md_pop_list[choose - 1];
@@ -3718,18 +3725,19 @@ void RenderCanvas::PickMesh()
 		{
 			glbin_current.SetMeshData(md);
 			RefreshGL(27);
+			selected = true;
 		}
 	}
-	else
-	{
-		glbin_current.SetMeshData(0);
-	}
+	//else
+	//{
+	//	glbin_current.SetMeshData(0);
+	//}
 	m_mv_mat = mv_temp;
 
-	m_frame->UpdateProps({ gstCurrentSelect });
+	return selected;
 }
 
-void RenderCanvas::PickVolume()
+bool RenderCanvas::PickVolume()
 {
 	int kmode = wxGetKeyState(WXK_CONTROL) ? 1 : 0;
 	double dist = 0.0;
@@ -3784,11 +3792,12 @@ void RenderCanvas::PickVolume()
 	if (picked_vd)
 	{
 		glbin_current.SetVolumeData(picked_vd);
-		m_frame->UpdateProps({ gstCurrentSelect });
 
 		if (m_pick_lock_center)
 			m_lock_center = pp;
 	}
+
+	return picked_vd != 0;
 }
 
 void RenderCanvas::SetCompSelection(fluo::Point& p, int mode)
@@ -3797,7 +3806,7 @@ void RenderCanvas::SetCompSelection(fluo::Point& p, int mode)
 	std::set<unsigned long long> ids;
 	glbin_comp_analyzer.GetCompsPoint(p, ids);
 	glbin_comp_selector.SetSelectedCompIds(ids, mode);
-	m_frame->UpdateProps({ gstCompListSelection });
+	//m_frame->UpdateProps({ gstCompListSelection });
 }
 
 void RenderCanvas::OnIdle(wxIdleEvent& event)

@@ -1224,8 +1224,8 @@ private:
 
 	//selection
 	void Pick();
-	void PickMesh();
-	void PickVolume();
+	bool PickMesh();
+	bool PickVolume();
 	void SetCompSelection(fluo::Point& p, int mode);//node: 0-exclusive; 1-add or remove
 
 	//system call
