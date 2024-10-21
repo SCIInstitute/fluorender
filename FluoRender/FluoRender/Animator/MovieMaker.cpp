@@ -1201,17 +1201,38 @@ void MovieMaker::MakeKeysTimeColormap()
 
 	FlKeyCode keycode;
 	FlKeyColor* flkey = 0;
+	FlKeyDouble* flkey_frame = 0;
 	FlKeyGroup* kg = 0;
 
 	double t = glbin_interpolator.GetLastT();
 	if (t > 0.0) t += m_key_duration;
 
+	////for the view
+	//keycode.l0 = 1;
+	//keycode.l0_name = m_view->m_renderview_panel->GetName();
+	////time point
+	//keycode.l2 = 0;
+	//keycode.l2_name = "frame";
+
+	////initial
+	//glbin_interpolator.Begin(t, m_seq_all_num);
+	//for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
+	//{
+	//	VolumeData* vd = m_view->GetAllVolumeData(i);
+	//	if (!vd)
+	//		continue;
+	//	keycode.l1 = 2;
+	//	keycode.l1_name = vd->GetName();
+	//	flkey = new FlKeyDouble(keycode, 0);
+	//	glbin_interpolator.AddKey(flkey);
+	//}
+	//glbin_interpolator.End();
+
 	//for the view
 	keycode.l0 = 1;
 	keycode.l0_name = m_view->m_renderview_panel->GetName();
-	//time point
+	//color
 	keycode.l2 = 0;
-	keycode.l2_name = "color";
 
 	for (int i = 0; i < 7; ++i)
 	{
@@ -1227,8 +1248,13 @@ void MovieMaker::MakeKeysTimeColormap()
 				continue;
 			keycode.l1 = 2;
 			keycode.l1_name = vd->GetName();
+			keycode.l2_name = "color";
 			flkey = new FlKeyColor(keycode, c[i]);
 			glbin_interpolator.AddKey(flkey);
+			//time
+			keycode.l2_name = "frame";
+			flkey_frame = new FlKeyDouble(keycode, tt[i]);
+			glbin_interpolator.AddKey(flkey_frame);
 		}
 		glbin_interpolator.End();
 		kg = glbin_interpolator.GetKeyGroupFromTime(t);
