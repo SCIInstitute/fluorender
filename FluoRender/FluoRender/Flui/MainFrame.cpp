@@ -1058,14 +1058,12 @@ void MainFrame::FluoUpdate(const fluo::ValueCollection& vc)
 		glbin_current.vol_data,
 		glbin_current.mesh_data,
 		glbin_current.ann_data);
-	if (type == 3)
-	{
-		//clear mesh bounds
-		glbin_data_manager.ClearMeshSelection();
-		MeshData* md = glbin_current.mesh_data;
-		if (md)
-			md->SetDrawBounds(true);
-	}
+
+	//clear mesh bounds
+	glbin_data_manager.ClearMeshSelection();
+	MeshData* md = glbin_current.mesh_data;
+	if (md)
+		md->SetDrawBounds(true);
 
 	bool update_all = vc.empty();
 	bool bval;
