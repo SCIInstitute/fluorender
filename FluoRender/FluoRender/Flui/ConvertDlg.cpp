@@ -289,6 +289,12 @@ void ConvertDlg::OnCnvVolMeshUseTransfCheck(wxCommandEvent& event)
 {
 	bool bval = m_cnv_vol_mesh_usetransf_chk->GetValue();
 	glbin_vol_converter.SetVolumeUseTrans(bval);
+	wxString str;
+	if (bval)
+		str = "0.01";
+	else
+		str = "0.50";
+	m_cnv_vol_mesh_thresh_text->SetValue(str);
 }
 
 void ConvertDlg::OnCnvVolMeshUseSelCheck(wxCommandEvent& event)
