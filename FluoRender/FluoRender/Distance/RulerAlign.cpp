@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <RulerAlign.h>
+#include <Global.h>
 #include <Quaternion.h>
 #include <Utils.h>
 #include <RenderCanvas.h>
@@ -37,6 +38,7 @@ using namespace flrd;
 
 void RulerAlign::AddRuler(Ruler* ruler)
 {
+	m_view = glbin_current.canvas;
 	if (!m_view)
 		return;
 	fluo::Point p;
@@ -51,6 +53,7 @@ void RulerAlign::AddRuler(Ruler* ruler)
 
 void RulerAlign::AlignRuler()
 {
+	m_view = glbin_current.canvas;
 	if (!m_view)
 		return;
 	if (m_point_list.size() < 2)
@@ -116,6 +119,9 @@ void RulerAlign::AlignRuler()
 
 void RulerAlign::AlignPca(bool rulers)
 {
+	m_view = glbin_current.canvas;
+	if (!m_view)
+		return;
 	Pca solver;
 	fluo::Point center;
 	if (rulers)
