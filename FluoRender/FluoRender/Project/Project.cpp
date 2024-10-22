@@ -2039,4 +2039,5 @@ void Project::Reset()
 	glbin_moviemaker.SetView(frame->GetRenderCanvas(0));
 	glbin_mov_def.Apply(&glbin_moviemaker);
 	glbin_interpolator.Clear();
+	glbin_volume_point.SetVolumeData(0);
 }
