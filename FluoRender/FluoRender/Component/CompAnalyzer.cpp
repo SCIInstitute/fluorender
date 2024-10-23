@@ -702,6 +702,7 @@ void ComponentAnalyzer::ClearCompGroup()
 	if (!m_compgroup)
 		return;
 	m_compgroup->Clear();
+	m_compgroup->vd = 0;
 }
 
 size_t ComponentAnalyzer::GetListSize()

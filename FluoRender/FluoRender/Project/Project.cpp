@@ -2040,4 +2040,5 @@ void Project::Reset()
 	glbin_mov_def.Apply(&glbin_moviemaker);
 	glbin_interpolator.Clear();
 	glbin_volume_point.SetVolumeData(0);
+	glbin_comp_analyzer.ClearCompGroup();
 }
