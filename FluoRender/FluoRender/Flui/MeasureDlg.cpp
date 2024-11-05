@@ -1149,7 +1149,8 @@ void MeasureDlg::Locator()
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)
 		return;
-	bool bval = canvas->GetIntMode() == 5;
+	int mode = canvas->GetIntMode();
+	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
 	if (bval && ival == 1)
@@ -1173,7 +1174,8 @@ void MeasureDlg::Probe()
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)
 		return;
-	bool bval = canvas->GetIntMode() == 5;
+	int mode = canvas->GetIntMode();
+	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
 	if (bval && ival == 1)
@@ -1197,7 +1199,8 @@ void MeasureDlg::Ruler()
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)
 		return;
-	bool bval = canvas->GetIntMode() == 5;
+	int mode = canvas->GetIntMode();
+	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
 	if (bval && ival == 1)
@@ -1221,7 +1224,8 @@ void MeasureDlg::Protractor()
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)
 		return;
-	bool bval = canvas->GetIntMode() == 5;
+	int mode = canvas->GetIntMode();
+	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
 	if (bval && ival == 1)
@@ -1245,7 +1249,8 @@ void MeasureDlg::Ellipse()
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)
 		return;
-	bool bval = canvas->GetIntMode() == 5;
+	int mode = canvas->GetIntMode();
+	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
 	if (bval && ival == 1)
@@ -1269,7 +1274,8 @@ void MeasureDlg::RulerMP()
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!canvas)
 		return;
-	bool bval = canvas->GetIntMode() == 5;
+	int mode = canvas->GetIntMode();
+	bool bval = mode == 5;
 	int ival = glbin_ruler_handler.GetType();
 
 	if (bval && ival == 1)
@@ -1279,6 +1285,8 @@ void MeasureDlg::RulerMP()
 	}
 	else
 	{
+		if (mode == 13)
+			glbin_ruler_handler.FinishRuler();
 		canvas->SetIntMode(5);
 		glbin_ruler_handler.SetType(1);
 	}
@@ -1351,7 +1359,7 @@ void MeasureDlg::RulerMove()
 	if (!canvas)
 		return;
 	int mode = canvas->GetIntMode();
-	bool bval = mode == 5;
+	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
 	if (bval && ival == 1)
@@ -1371,7 +1379,7 @@ void MeasureDlg::RulerMovePoint()
 	if (!canvas)
 		return;
 	int mode = canvas->GetIntMode();
-	bool bval = mode == 5;
+	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
 	if (bval && ival == 1)
@@ -1391,7 +1399,7 @@ void MeasureDlg::Magnet()
 	if (!canvas)
 		return;
 	int mode = canvas->GetIntMode();
-	bool bval = mode == 5;
+	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
 	if (bval && ival == 1)
@@ -1415,7 +1423,7 @@ void MeasureDlg::RulerMovePencil()
 	if (!canvas)
 		return;
 	int mode = canvas->GetIntMode();
-	bool bval = mode == 5;
+	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
 	if (bval && ival == 1)
@@ -1459,7 +1467,7 @@ void MeasureDlg::Lock()
 	if (!canvas)
 		return;
 	int mode = canvas->GetIntMode();
-	bool bval = mode == 5;
+	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
 	if (bval && ival == 1)
@@ -1505,7 +1513,7 @@ void MeasureDlg::DeletePoint()
 	if (!canvas)
 		return;
 	int mode = canvas->GetIntMode();
-	bool bval = mode == 5;
+	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
 	if (bval && ival == 1)

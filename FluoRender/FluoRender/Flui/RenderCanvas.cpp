@@ -10164,7 +10164,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 
 		if (m_int_mode == 1 ||
 			((m_int_mode == 5 ||
-			m_int_mode == 13 ||
+			//m_int_mode == 13 ||
 			m_int_mode == 15) &&
 			event.AltDown()) ||
 			((m_int_mode == 6 ||
@@ -10201,6 +10201,15 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 				m_cur_vol->AddEmptyLabel(0, false);
 			m_force_clear = true;
 			m_grow_on = true;
+		}
+
+		if (m_int_mode == 13 &&
+			!event.AltDown())
+		{
+			//add one point to a ruler
+			glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 2);
+			RefreshGL(26);
+			m_frame->UpdateProps({ gstRulerList });
 		}
 
 		return;
@@ -10260,7 +10269,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			!event.AltDown())
 		{
 			//add one point to a ruler
-			glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
+			glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 1);
 			RefreshGL(27);
 			m_frame->UpdateProps({ gstRulerList });
 			return;
@@ -10277,7 +10286,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			wxPoint mps = ScreenToClient(wxGetMousePosition());
 			glbin_vol_selector.Segment(true, true, mps.x, mps.y);
 			if (glbin_ruler_handler.GetType() == 3)
-				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
+				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 0);
 			else
 				glbin_ruler_handler.AddPaintRulerPoint();
 			m_int_mode = 8;
@@ -10302,7 +10311,6 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		else if (m_int_mode == 13 &&
 			!event.AltDown())
 		{
-			glbin_ruler_handler.FinishRuler();
 			if (glbin_settings.m_ruler_auto_relax)
 			{
 				glbin_ruler_handler.SetEdited(true);
@@ -10359,7 +10367,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			}
 			else
 			{
-				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
+				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 1);
 				glbin_ruler_handler.FinishRuler();
 			}
 			if (glbin_settings.m_ruler_auto_relax)
@@ -10550,7 +10558,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			if (glbin_ruler_handler.GetMouseDist(mp.x(), mp.y(), dist))
 			{
 				//add one point to a ruler
-				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), false);
+				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 0);
 				RefreshGL(27);
 				m_frame->UpdateProps({ gstRulerList });
 			}

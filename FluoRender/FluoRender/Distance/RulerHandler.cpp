@@ -718,7 +718,7 @@ bool RulerHandler::GetMouseDist(int mx, int my, double dist)
 	return (p - m_mouse).length() > dist;
 }
 
-void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
+void RulerHandler::AddRulerPoint(int mx, int my, int branch)
 {
 	RenderCanvas* canvas = glbin_current.canvas;
 	RulerList* list = glbin_current.GetRulerList();
@@ -731,7 +731,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 	if (ruler) ruler->SetWorkTime(rwt);
 	//DBGPRINT(L"Ruler:%d\n", m_ruler);
 
-	if (m_type == 1 && branch)
+	if (branch && m_type == 1)
 	{
 		if (FindEditingRuler(mx, my))
 		{
@@ -743,6 +743,11 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 				m_mouse = fluo::Point(mx, my, 0);
 				return;
 			}
+		}
+		else if (branch == 2)
+		{
+			FinishRuler();
+			return;
 		}
 	}
 	if (m_type == 3)

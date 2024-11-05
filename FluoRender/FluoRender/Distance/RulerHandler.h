@@ -119,7 +119,7 @@ namespace flrd
 		void AddRulerPoint(fluo::Point &p);
 		void AddRulerPointAfterId(fluo::Point &p, unsigned int id, std::set<unsigned int> &cid, std::set<unsigned int> &bid);
 		bool GetMouseDist(int mx, int my, double dist);
-		void AddRulerPoint(int mx, int my, bool branch);
+		void AddRulerPoint(int mx, int my, int branch);//branch:0-na; 1-polyline; 2-pencil
 		void AddPaintRulerPoint();
 		bool MoveRuler(int mx, int my);
 		bool EditPoint(int mx, int my, bool alt);
