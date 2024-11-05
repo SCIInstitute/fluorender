@@ -167,8 +167,9 @@ void KeyListCtrl::Update()
 		Append(id, time, duration, interp, desc);
 	}
 
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < 4; ++i)
 		SetColumnWidth(i, wxLIST_AUTOSIZE_USEHEADER);
+	SetColumnWidth(4, wxLIST_AUTOSIZE);
 }
 
 void KeyListCtrl::UpdateText()
@@ -598,7 +599,8 @@ wxWindow* MoviePanel::CreateKeyframePage(wxWindow *parent)
 	sizer2->Add(m_interpolation_cmb, 0, wxALIGN_CENTER);
 
 	//list
-	m_keylist = new KeyListCtrl(page, m_frame);
+	m_keylist = new KeyListCtrl(page, m_frame,
+		wxDefaultPosition, FromDIP(wxSize(200, 200)), wxLC_REPORT);
 	m_keylist->Bind(wxEVT_LIST_ITEM_ACTIVATED, &MoviePanel::OnAct, this);
 
 	//key buttons
@@ -628,6 +630,9 @@ wxWindow* MoviePanel::CreateKeyframePage(wxWindow *parent)
 	m_cam_lock_chk = new wxCheckBox(page, wxID_ANY,
 		"Lock View Target:");
 	m_cam_lock_chk->Bind(wxEVT_CHECKBOX, &MoviePanel::OnCamLockChk, this);
+	sizer4->Add(5, 5);
+	sizer4->Add(m_cam_lock_chk, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer5 = new wxBoxSizer(wxHORIZONTAL);
 	m_cam_lock_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	std::vector<wxString> list2 = { "Image center", "Click view", "Ruler", "Selection" };
@@ -636,13 +641,11 @@ wxWindow* MoviePanel::CreateKeyframePage(wxWindow *parent)
 	m_cam_lock_btn = new wxButton(page, wxID_ANY, "Apply");
 	m_cam_lock_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnCamLockBtn, this);
 	m_cam_lock_btn->SetToolTip("Apply camera viewing direction lock to the target");
-	sizer4->Add(5, 5);
-	sizer4->Add(m_cam_lock_chk, 0, wxALIGN_CENTER);
-	sizer4->AddStretchSpacer(1);
-	sizer4->Add(m_cam_lock_cmb, 0, wxALIGN_CENTER);
-	sizer4->Add(5, 5);
-	sizer4->Add(m_cam_lock_btn, 0, wxALIGN_CENTER);
-	sizer4->Add(5, 5);
+	sizer5->AddStretchSpacer(1);
+	sizer5->Add(m_cam_lock_cmb, 0, wxALIGN_CENTER);
+	sizer5->Add(5, 5);
+	sizer5->Add(m_cam_lock_btn, 0, wxALIGN_CENTER);
+	sizer5->Add(5, 5);
 
 
 	//vertical sizer
@@ -657,6 +660,8 @@ wxWindow* MoviePanel::CreateKeyframePage(wxWindow *parent)
 	sizerv->Add(sizer3, 0, wxEXPAND);
 	sizerv->Add(5, 5);
 	sizerv->Add(sizer4, 0, wxEXPAND);
+	sizerv->Add(5, 5);
+	sizerv->Add(sizer5, 0, wxEXPAND);
 	sizerv->Add(5, 5);
 	//set the page
 	page->SetSizer(sizerv);
