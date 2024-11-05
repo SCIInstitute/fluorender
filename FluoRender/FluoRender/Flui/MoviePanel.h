@@ -79,7 +79,6 @@ private:
 	void EndEdit(bool update = true);
 
 private:
-	void OnAct(wxListEvent& event);
 	void OnSelection(wxListEvent& event);
 	void OnEndSelection(wxListEvent& event);
 	void OnFrameText(wxCommandEvent& event);
@@ -301,6 +300,7 @@ private:
 	void OnSeqIncBtn(wxCommandEvent& event);
 
 	//keyframe movie
+	void OnAct(wxListEvent& event);
 	void OnKeyframeChk(wxCommandEvent& event);
 	void OnDurationText(wxCommandEvent& event);
 	void OnInterpolation(wxCommandEvent& event);

@@ -105,7 +105,6 @@ KeyListCtrl::KeyListCtrl(
 	m_description_text->Bind(wxEVT_TEXT, &KeyListCtrl::OnDescritionText, this);
 
 	//event handling
-	Bind(wxEVT_LIST_ITEM_ACTIVATED, &KeyListCtrl::OnAct, this);
 	Bind(wxEVT_LIST_ITEM_SELECTED, &KeyListCtrl::OnSelection, this);
 	Bind(wxEVT_LIST_ITEM_DESELECTED, &KeyListCtrl::OnEndSelection, this);
 	Bind(wxEVT_KEY_DOWN, &KeyListCtrl::OnKeyDown, this);
@@ -194,28 +193,6 @@ void KeyListCtrl::UpdateText()
 		SetText(i, 3, str);
 		str = desc;
 		SetText(i, 4, str);
-	}
-}
-
-void KeyListCtrl::OnAct(wxListEvent& event)
-{
-	long item = GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-	if (item == -1)
-		return;
-	wxString str = GetItemText(item);
-	long id;
-	str.ToLong(&id);
-
-	int index = glbin_interpolator.GetKeyIndex(int(id));
-	double time = glbin_interpolator.GetKeyTime(index);
-
-	RenderCanvas* view = glbin_moviemaker.GetRenderCanvas();
-	if (view)
-	{
-		view->SetParams(time);
-		m_frame->RefreshCanvases({glbin_moviemaker.GetViewIndex()});
 	}
 }
 
@@ -622,6 +599,7 @@ wxWindow* MoviePanel::CreateKeyframePage(wxWindow *parent)
 
 	//list
 	m_keylist = new KeyListCtrl(page, m_frame);
+	m_keylist->Bind(wxEVT_LIST_ITEM_ACTIVATED, &MoviePanel::OnAct, this);
 
 	//key buttons
 	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
@@ -1970,6 +1948,28 @@ void MoviePanel::OnSeqIncBtn(wxCommandEvent& event)
 	glbin_moviemaker.SetSeqCurNum(val + 1);
 	FluoRefresh(2,
 		{ gstCurrentFrame, gstMovProgSlider, gstMovSeqNum },
+		{ glbin_mov_def.m_view_idx });
+}
+
+void MoviePanel::OnAct(wxListEvent& event)
+{
+	long item = m_keylist->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+	if (item == -1)
+		return;
+	wxString str = m_keylist->GetItemText(item);
+	long id;
+	str.ToLong(&id);
+
+	int index = glbin_interpolator.GetKeyIndex(int(id));
+	double time = glbin_interpolator.GetKeyTime(index);
+	glbin_moviemaker.SetCurrentFrame(time);
+
+	RenderCanvas* view = glbin_moviemaker.GetRenderCanvas();
+	if (view)
+		view->SetParams(time);
+	FluoRefresh(2, { gstCurrentFrame, gstMovProgSlider, gstMovSeqNum, gstParamListSelect}, 
 		{ glbin_mov_def.m_view_idx });
 }
 
