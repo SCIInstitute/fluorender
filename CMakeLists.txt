@@ -38,13 +38,16 @@ if (NOT WIN32 AND NOT APPLE)
   endif()
 endif()
 
-# to build for Win7, disable xinput
 if (WIN32)
+# to build for Win7, disable xinput
   SET(USE_XINPUT ON CACHE BOOL "Use Xinput on Windows")
   if (USE_XINPUT)
     add_definitions(-DUSE_XINPUT=1)
   endif()
+# option to build with multithreading
+  SET(USE_MP_COMPILE ON CACHE BOOL "Enable Multithreaded Compile")
 endif()
+
 
 cmake_minimum_required(VERSION 3.5)
 
@@ -753,7 +756,9 @@ elseif(WIN32)
     add_definitions(-D_WIN32)
     if(MSVC)
       #add_definitions(-DSEQAN_C++11_STANDARD=ON)
-      add_definitions(/MP)
+      if (USE_MP_COMPILE)
+        add_definitions(/MP)
+      endif()
       add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
       add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
       add_definitions(-Dinline=__inline)
