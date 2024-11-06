@@ -60,7 +60,7 @@ TrackListCtrl::TrackListCtrl(
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
-	SetDoubleBuffered(true);
+	//SetDoubleBuffered(true);
 
 	wxListItem itemCol;
 	itemCol.SetText("");
@@ -864,7 +864,7 @@ void TrackDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		UpdateTrackList();
 		UpdateTracks();
-		Layout();
+		//Layout();
 	}
 }
 
