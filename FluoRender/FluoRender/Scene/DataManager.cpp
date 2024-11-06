@@ -5652,7 +5652,6 @@ void DataManager::LoadVolumes(wxArrayString files, bool withImageJ)
 		m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(canvas) });
 	}
 
-	//UpdateList();
 	vc.insert(gstListCtrl);
 	vc.insert(gstTreeCtrl);
 	vc.insert(gstUpdateSync);
@@ -6060,7 +6059,6 @@ void DataManager::LoadMeshes(wxArrayString files)
 		}
 	}
 
-	//UpdateList();
 	glbin_current.SetMeshData(md_sel);
 
 	if (canvas)

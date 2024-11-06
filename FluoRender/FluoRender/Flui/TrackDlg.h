@@ -39,15 +39,15 @@ DEALINGS IN THE SOFTWARE.
 
 class TrackDlg;
 class wxSingleSlider;
-class TraceListCtrl : public wxListCtrl
+class TrackListCtrl : public wxListCtrl
 {
 public:
-	TraceListCtrl(MainFrame *frame,
+	TrackListCtrl(MainFrame *frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxSize(100, 100),
 		long style = wxLC_REPORT);
-	~TraceListCtrl();
+	~TrackListCtrl();
 
 	void Append(wxString &gtype, unsigned int id, wxColor color,
 		int size, double cx, double cy, double cz);
@@ -76,8 +76,8 @@ public:
 	~TrackDlg();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
-	void UpdateList();
-	void UpdateTraces();
+	void UpdateTrackList();
+	void UpdateTracks();
 
 	void LoadTrackFile(const wxString &file);
 	bool SaveTrackFile();
@@ -190,9 +190,9 @@ private:
 	wxStaticText* m_cell_time_prev_st;
 
 	//list ctrls
-	TraceListCtrl *m_trace_list_curr;
-	TraceListCtrl *m_trace_list_prev;
-	TraceListCtrl* m_active_list;
+	TrackListCtrl *m_trace_list_curr;
+	TrackListCtrl *m_trace_list_prev;
+	TrackListCtrl* m_active_list;
 
 	//output
 	wxTextCtrl* m_stat_text;
@@ -286,7 +286,7 @@ private:
 	void OnGhostShowLead(wxCommandEvent& event);
 
 	//list
-	void AddLabel(long item, TraceListCtrl* trace_list_ctrl, flrd::CelpList& list);
+	void AddLabel(long item, TrackListCtrl* trace_list_ctrl, flrd::CelpList& list);
 	void OnSelectionChanged(wxListEvent& event);
 	void OnContextMenu(wxContextMenuEvent& event);
 	void OnMenuItem(wxCommandEvent& event);

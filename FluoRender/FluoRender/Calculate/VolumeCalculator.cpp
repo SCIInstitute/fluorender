@@ -127,8 +127,6 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 					if (vd_b)
 						vd_b->SetDisp(false);
 				}
-				//m_frame->UpdateList();
-				//m_frame->UpdateTree(vd->GetName());
 				glbin_current.SetVolumeData(vd);
 				update = true;
 			}
@@ -138,10 +136,8 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 			VolumePropPanel* page = glbin_current.mainframe->FindVolumeProps(vd);
 			vd_a->Replace(vd);
 			delete vd;
-			//m_frame->GetPropView()->SetVolumeData(vd_a);
 			page->SetVolumeData(vd_a);
 		}
-		//m_view->RefreshGL(5);
 		refresh = true;
 	}
 	if (refresh)

@@ -4096,12 +4096,13 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			wxGetKeyState(WXK_SPACE)))
 		{
 			m_tseq_forward = true;
-			if (m_frame && m_frame->GetMoviePanel())
-				m_frame->GetMoviePanel()->IncFrame();
+			int frame = glbin_moviemaker.GetCurrentFrame();
+			frame++;
+			glbin_moviemaker.SetCurrentFrame(frame);
 			refresh = true;
 			lg_changed = true;
 			set_focus = true;
-			vc.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum });
+			vc.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
 		}
 		if (m_tseq_forward &&
 			!wxGetKeyState(wxKeyCode('d')))
@@ -4113,12 +4114,13 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			wxGetKeyState(WXK_CONTROL)))
 		{
 			m_tseq_backward = true;
-			if (m_frame && m_frame->GetMoviePanel())
-				m_frame->GetMoviePanel()->DecFrame();
+			int frame = glbin_moviemaker.GetCurrentFrame();
+			frame--;
+			glbin_moviemaker.SetCurrentFrame(frame);
 			refresh = true;
 			lg_changed = true;
 			set_focus = true;
-			vc.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum });
+			vc.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
 		}
 		if (m_tseq_backward &&
 			!wxGetKeyState(wxKeyCode('a')))
@@ -4834,54 +4836,52 @@ void RenderCanvas::Get4DSeqRange(int &start_frame, int &end_frame)
 
 void RenderCanvas::UpdateVolumeData(int frame, VolumeData* vd)
 {
-	if (vd && vd->GetReader())
+	if (!vd)
+		return;
+
+	if (vd->GetCurTime() == frame)
+		return;
+
+	BaseReader* reader = vd->GetReader();
+	if (!reader)
+		return;
+
+	bool clear_pool = false;
+
+	flvr::Texture *tex = vd->GetTexture();
+	if (tex && tex->isBrxml())
 	{
-		BaseReader* reader = vd->GetReader();
-		bool clear_pool = false;
-
-		if (vd->GetCurTime() != frame)
+		BRKXMLReader *br = (BRKXMLReader *)reader;
+		br->SetCurTime(frame);
+		int curlv = tex->GetCurLevel();
+		for (int j = 0; j < br->GetLevelNum(); j++)
 		{
-			flvr::Texture *tex = vd->GetTexture();
-			if (tex && tex->isBrxml())
-			{
-				BRKXMLReader *br = (BRKXMLReader *)reader;
-				br->SetCurTime(frame);
-				int curlv = tex->GetCurLevel();
-				for (int j = 0; j < br->GetLevelNum(); j++)
-				{
-					tex->setLevel(j);
-					if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
-				}
-				tex->setLevel(curlv);
-				tex->set_FrameAndChannel(frame, vd->GetCurChannel());
-				vd->SetCurTime(reader->GetCurTime());
-				//update rulers
-				//if (m_frame && m_frame->GetMeasureDlg())
-				//	m_frame->GetMeasureDlg()->UpdateList();
-			}
-			else
-			{
-				double spcx, spcy, spcz;
-				vd->GetSpacings(spcx, spcy, spcz);
-
-				Nrrd* data = reader->Convert(frame, vd->GetCurChannel(), false);
-				if (!vd->Replace(data, false))
-					return;
-
-				vd->SetCurTime(reader->GetCurTime());
-				vd->SetSpacings(spcx, spcy, spcz);
-
-				//update rulers
-				//if (m_frame && m_frame->GetMeasureDlg())
-				//	m_frame->GetMeasureDlg()->UpdateList();
-
-				clear_pool = true;
-			}
+			tex->setLevel(j);
+			if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
 		}
-
-		if (clear_pool && vd->GetVR())
-			vd->GetVR()->clear_tex_pool();
+		tex->setLevel(curlv);
+		tex->set_FrameAndChannel(frame, vd->GetCurChannel());
+		vd->SetCurTime(reader->GetCurTime());
 	}
+	else
+	{
+		double spcx, spcy, spcz;
+		vd->GetSpacings(spcx, spcy, spcz);
+
+		Nrrd* data = reader->Convert(frame, vd->GetCurChannel(), false);
+		if (!vd->Replace(data, false))
+			return;
+
+		vd->SetCurTime(reader->GetCurTime());
+		vd->SetSpacings(spcx, spcy, spcz);
+
+		clear_pool = true;
+	}
+
+	m_frame->UpdateProps({ gstRulerList });
+
+	if (clear_pool && vd->GetVR())
+		vd->GetVR()->clear_tex_pool();
 }
 
 void RenderCanvas::ReloadVolumeData(int frame)
@@ -5045,14 +5045,12 @@ void RenderCanvas::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool
 
 	//update ruler intensity values
 	glbin_ruler_handler.ProfileAll();
-	//m_frame->GetMeasureDlg()->UpdateList();
 
 	//clear results if rewind
 	if (rewind)
 		glbin_script_proc.ClearResults();
 
 	m_frame->UpdateProps({ gstRulerList });
-	//RefreshGL(17);
 }
 
 void RenderCanvas::Get3DBatRange(int &start_frame, int &end_frame)

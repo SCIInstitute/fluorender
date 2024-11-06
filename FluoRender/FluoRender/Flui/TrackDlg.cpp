@@ -42,13 +42,14 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/dirdlg.h>
+#include <wx/stdpaths.h>
 #include <png_resource.h>
 #include <icons.h>
 #include <set>
 #include <limits>
 #include <chrono>
 
-TraceListCtrl::TraceListCtrl(
+TrackListCtrl::TrackListCtrl(
 	MainFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
@@ -82,11 +83,11 @@ TraceListCtrl::TraceListCtrl(
 	SetColumnWidth(5, wxLIST_AUTOSIZE_USEHEADER);
 }
 
-TraceListCtrl::~TraceListCtrl()
+TrackListCtrl::~TrackListCtrl()
 {
 }
 
-void TraceListCtrl::Append(wxString &gtype, unsigned int id, wxColor color,
+void TrackListCtrl::Append(wxString &gtype, unsigned int id, wxColor color,
 	int size, double cx, double cy, double cz)
 {
 	wxString str = "";
@@ -110,7 +111,7 @@ void TraceListCtrl::Append(wxString &gtype, unsigned int id, wxColor color,
 	SetItemBackgroundColour(tmp, color);
 }
 
-void TraceListCtrl::DeleteSelection()
+void TrackListCtrl::DeleteSelection()
 {
 	long item = -1;
 	for (;;)
@@ -125,7 +126,7 @@ void TraceListCtrl::DeleteSelection()
 	}
 }
 
-void TraceListCtrl::CopySelection()
+void TrackListCtrl::CopySelection()
 {
 	long item = GetNextItem(-1,
 		wxLIST_NEXT_ALL,
@@ -141,7 +142,7 @@ void TraceListCtrl::CopySelection()
 	}
 }
 
-wxString TraceListCtrl::GetText(long item, int col)
+wxString TrackListCtrl::GetText(long item, int col)
 {
 	wxListItem info;
 	info.SetId(item);
@@ -677,9 +678,9 @@ TrackDlg::TrackDlg(MainFrame* frame)
 	sizer_21->Add(m_cell_time_prev_st, 1, wxEXPAND);
 	//controls
 	wxBoxSizer* sizer_22 = new wxBoxSizer(wxHORIZONTAL);
-	m_trace_list_curr = new TraceListCtrl(frame, this);
+	m_trace_list_curr = new TrackListCtrl(frame, this);
 	m_trace_list_curr->m_type = 0;
-	m_trace_list_prev = new TraceListCtrl(frame, this);
+	m_trace_list_prev = new TrackListCtrl(frame, this);
 	m_trace_list_prev->m_type = 1;
 	m_active_list = 0;
 	m_trace_list_curr->Bind(wxEVT_KEY_DOWN, &TrackDlg::OnKeyDown, this);
@@ -861,13 +862,13 @@ void TrackDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstTrackList))
 	{
-		UpdateList();
-		UpdateTraces();
+		UpdateTrackList();
+		UpdateTracks();
 		Layout();
 	}
 }
 
-void TrackDlg::UpdateList()
+void TrackDlg::UpdateTrackList()
 {
 	TrackGroup* trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
@@ -933,7 +934,7 @@ void TrackDlg::UpdateList()
 	}
 }
 
-void TrackDlg::UpdateTraces()
+void TrackDlg::UpdateTracks()
 {
 	TrackGroup* trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
@@ -1120,6 +1121,13 @@ void TrackDlg::OnSaveasTrace(wxCommandEvent& event)
 void TrackDlg::OnGenMapBtn(wxCommandEvent& event)
 {
 	glbin_trackmap_proc.GenMap();
+	//enable script
+	glbin_settings.m_run_script = true;
+	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+	exePath = wxPathOnly(exePath);
+	glbin_settings.m_script_file = exePath + GETSLASH() + "Scripts" +
+		GETSLASH() + "track_selected_results.txt";
+	m_frame->UpdateProps({ gstMovPlay, gstRunScript, gstScriptFile, gstScriptSelect });
 }
 
 void TrackDlg::OnRefineTBtn(wxCommandEvent& event)
@@ -1598,7 +1606,7 @@ void TrackDlg::OnGhostShowLead(wxCommandEvent& event)
 		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
 }
 
-void TrackDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, flrd::CelpList& list)
+void TrackDlg::AddLabel(long item, TrackListCtrl* trace_list_ctrl, flrd::CelpList& list)
 {
 	wxString str;
 	unsigned long id;
@@ -1627,7 +1635,7 @@ void TrackDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, flrd::CelpLis
 
 void TrackDlg::OnSelectionChanged(wxListEvent& event)
 {
-	m_active_list = dynamic_cast<TraceListCtrl*>(event.GetEventObject());
+	m_active_list = dynamic_cast<TrackListCtrl*>(event.GetEventObject());
 	if (!m_active_list)
 		return;
 	flrd::CelpList list;
@@ -1667,7 +1675,7 @@ void TrackDlg::OnSelectionChanged(wxListEvent& event)
 
 void TrackDlg::OnContextMenu(wxContextMenuEvent& event)
 {
-	m_active_list = dynamic_cast<TraceListCtrl*>(event.GetEventObject());
+	m_active_list = dynamic_cast<TrackListCtrl*>(event.GetEventObject());
 	if (!m_active_list)
 		return;
 	if (!m_active_list->GetSelectedItemCount())
