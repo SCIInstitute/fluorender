@@ -36,7 +36,7 @@ namespace flrd
 	{
 	public:
 		Trainer();
-		~Trainer();
+		virtual ~Trainer();
 
 		virtual void set_trained_rec_num(size_t val)
 		{
