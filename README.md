@@ -5,6 +5,11 @@ FluoRender Source Code
 
 This is the open-source repository for FluoRender, an interactive rendering tool for confocal microscopy data visualization. It combines the renderings of multi-channel volume data and polygon mesh data, where the properties of each dataset can be adjusted independently and quickly. The tool is designed especially for neurobiologists, and it helps them better visualize the fluorescent-stained confocal samples.
 
+Contact
+========
+
+If there are any problems, email: yong.wan@utah.edu
+
 Aknowledgements
 ========
 If you use FluoRender in work that leads to published research, we humbly ask that you add the following to the 'Acknowledgments' section of your paper: 
@@ -178,8 +183,3 @@ Building FluoRender
     - On Mac OS, add this setting to info.plist:
     <key>NSHighResolutionCapable</key>
     <true/>
-
-Contact
-========
-
-If there are any problems, email: fluorender@sci.utah.edu
