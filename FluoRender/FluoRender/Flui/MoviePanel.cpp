@@ -1329,7 +1329,7 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_degree_text->Enable(bval);
 		m_rot_int_cmb->Enable(bval);
 	}
-	
+
 	if (update_all || FOUND_VALUE(gstMovRotAxis))
 	{
 		ival = glbin_moviemaker.GetRotateAxis();
@@ -1457,7 +1457,7 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_sb_dx_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetScalebarX()));
 		m_sb_dy_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetScalebarY()));
 	}
-	
+
 	if (update_all || FOUND_VALUE(gstRunScript))
 	{
 		bval = glbin_settings.m_run_script;
@@ -1532,7 +1532,7 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 void MoviePanel::SetFps(double val)
 {
 	glbin_moviemaker.SetFps(val);
-	
+
 	FluoUpdate({ gstMovFps, gstMovLength });
 }
 
@@ -1974,7 +1974,7 @@ void MoviePanel::OnAct(wxListEvent& event)
 	RenderCanvas* view = glbin_moviemaker.GetRenderCanvas();
 	if (view)
 		view->SetParams(time);
-	FluoRefresh(2, { gstCurrentFrame, gstMovProgSlider, gstMovSeqNum, gstParamListSelect}, 
+	FluoRefresh(2, { gstCurrentFrame, gstMovProgSlider, gstMovSeqNum, gstParamListSelect},
 		{ glbin_mov_def.m_view_idx });
 }
 
@@ -2437,6 +2437,8 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
 	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+#elifdef __linux__
+    panel->SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);

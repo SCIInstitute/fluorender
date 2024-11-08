@@ -1004,6 +1004,8 @@ wxWindow* ListPanel::CreateExtraControl(wxWindow* parent)
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
 	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+#elifdef __linux__
+    panel->SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
 	wxBoxSizer* group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);

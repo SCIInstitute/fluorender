@@ -117,8 +117,10 @@ MainFrame::MainFrame(
 	//m_copy_data(false),
 	m_waker(this)
 {
-#ifndef _WIN32
+#ifdef _DARWIN
 	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+#elifdef __linux__
+    SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
 	//create this first to read the settings
 	glbin_settings.Read();
@@ -375,7 +377,7 @@ MainFrame::MainFrame(
 	//use the project panel for both tree and list
 	m_proj_panel = new wxAuiNotebook(this, wxID_ANY,
 		wxDefaultPosition, panel_size,
-		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE | 
+		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
 		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE |
 		wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
 	m_proj_panel->SetName("ProjectPanel");
@@ -639,7 +641,7 @@ MainFrame::MainFrame(
 		m = m_top_file->Append(ID_ImportVolumeMenu, "&Import Volume",
 			"Import a volume data set using ImageJ");
 		m->SetBitmap(wxGetBitmapFromMemory(icon_import_mini));
-	}	
+	}
 	m = m_top_file->Append(ID_OpenMeshMenu, "Open &Mesh",
 		"Open a mesh data set and add it the render view");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_mesh_mini));
@@ -805,7 +807,7 @@ MainFrame::MainFrame(
 	entries[4].Set(wxACCEL_CTRL, (int)'O', ID_OpenVolumeMenu);
 	wxAcceleratorTable accel(5, entries);
 	SetAcceleratorTable(accel);
-	
+
 	//events
 	Bind(wxEVT_MENU, &MainFrame::OnMainMenu, this);
 	Bind(wxEVT_AUI_PANE_CLOSE, &MainFrame::OnPaneClose, this);
@@ -2307,7 +2309,7 @@ void MainFrame::OnToolbarMenu(wxAuiToolBarEvent& event)
 
 		// make sure the button is "un-stuck"
 		tb->SetToolSticky(event.GetId(), false);
-	
+
 	}
 	else
 		event.Skip();
@@ -2587,7 +2589,9 @@ wxWindow* MainFrame::CreateExtraControlVolume(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
-	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+#elifdef __linux__
+    SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
 	wxStaticText* st1, * st2;
 
@@ -2690,7 +2694,9 @@ wxWindow* MainFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
-	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+#elifdef __linux__
+    SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
 	wxBoxSizer* group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
@@ -2725,7 +2731,9 @@ wxWindow* MainFrame::CreateExtraControlProjectSave(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
-	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+#elifdef __linux__
+    SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
 	wxBoxSizer* group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);

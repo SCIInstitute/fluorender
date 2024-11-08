@@ -208,31 +208,31 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 	m_view_sizer->Add(m_canvas, 1, wxEXPAND);
 #ifdef _DEBUG
 	//example Pixel format descriptor detailing each part
-	//PIXELFORMATDESCRIPTOR pfd = { 
-	// sizeof(PIXELFORMATDESCRIPTOR),  //  size of this pfd  
-	// 1,                     // version number  
-	// PFD_DRAW_TO_WINDOW |   // support window  
-	// PFD_SUPPORT_OPENGL |   // support OpenGL  
-	// PFD_DOUBLEBUFFER,      // double buffered  
-	// PFD_TYPE_RGBA,         // RGBA type  
-	// 24,                    // 24-bit color depth  
-	// 0, 0, 0, 0, 0, 0,      // color bits ignored  
-	// 0,                     // no alpha buffer  
-	// 0,                     // shift bit ignored  
-	// 0,                     // no accumulation buffer  
-	// 0, 0, 0, 0,            // accum bits ignored  
-	// 32,                    // 32-bit z-buffer      
-	// 0,                     // no stencil buffer  
-	// 0,                     // no auxiliary buffer  
-	// PFD_MAIN_PLANE,        // main layer  
-	// 0,                     // reserved  
-	// 0, 0, 0                // layer masks ignored  
-	// }; 
+	//PIXELFORMATDESCRIPTOR pfd = {
+	// sizeof(PIXELFORMATDESCRIPTOR),  //  size of this pfd
+	// 1,                     // version number
+	// PFD_DRAW_TO_WINDOW |   // support window
+	// PFD_SUPPORT_OPENGL |   // support OpenGL
+	// PFD_DOUBLEBUFFER,      // double buffered
+	// PFD_TYPE_RGBA,         // RGBA type
+	// 24,                    // 24-bit color depth
+	// 0, 0, 0, 0, 0, 0,      // color bits ignored
+	// 0,                     // no alpha buffer
+	// 0,                     // shift bit ignored
+	// 0,                     // no accumulation buffer
+	// 0, 0, 0, 0,            // accum bits ignored
+	// 32,                    // 32-bit z-buffer
+	// 0,                     // no stencil buffer
+	// 0,                     // no auxiliary buffer
+	// PFD_MAIN_PLANE,        // main layer
+	// 0,                     // reserved
+	// 0, 0, 0                // layer masks ignored
+	// };
 	PIXELFORMATDESCRIPTOR  pfd;
 	//check ret. this is an error code when the pixel format is invalid.
 	int ret = m_canvas->GetPixelFormat(&pfd);
 #endif
-	
+
 	//get actual version
 	glGetIntegerv(GL_MAJOR_VERSION, &gl_major_ver);
 	glGetIntegerv(GL_MINOR_VERSION, &gl_minor_ver);
@@ -1814,6 +1814,8 @@ wxWindow* RenderViewPanel::CreateExtraCaptureControl(wxWindow* parent)
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
 	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+#elifdef __linux__
+    panel->SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
