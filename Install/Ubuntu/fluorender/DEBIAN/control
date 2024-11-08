@@ -1,0 +1,8 @@
+Package: fluorender
+Version: 2.31
+Section: base
+Priority: optional
+Depends:
+Maintainer: Yong Wan <yong.wan@utah.edu>
+Architecture: all
+Description: FluoRender

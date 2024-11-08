@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=FluoRender
+Comment=FluoRender
+Exec=/usr/local/bin/FluoRender
+Icon=fluorender
+Terminal=false
