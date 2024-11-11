@@ -71,7 +71,7 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 Source: ".\bin\VC_redist.x64.exe"; DestDir: {app}; Flags: deleteafterinstall
 
 [Run]
-Filename: {app}\VC_redist.x64.exe; Check: VCRedistNeedsInstall; Parameters: "/passive"; StatusMsg: Installing VC++ 2017 Redistributable...; Flags: 
+Filename: {app}\VC_redist.x64.exe; Check: VCRedistNeedsInstall; Parameters: "/passive"; StatusMsg: Installing VC++ 2022 Redistributable...; Flags: 
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent 
     
 [Icons]
@@ -83,7 +83,7 @@ Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Fil
                      
 [Code]   
 const
-	vcredist2017_productcode_x64 = '{2CD849A7-86A1-34A6-B8F9-D72F5B21A9AE}';
+	vcredist2022_productcode_x64 = '{77169412-f642-45e7-b533-0c6f48de12f9}';
   msvc_hkey_location = 'SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\';
   fr64_hkey_location = 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\';function VCRedistNeedsInstall: Boolean;
 begin
@@ -92,8 +92,8 @@ begin
   // this statement, the following won't install your VC redist only when
   // the Visual C++ 2010 Redist (x86) and Visual C++ 2010 SP1 Redist(x86)
   // are installed for the current user
-  Result := not msiproduct(vcredist2017_productcode_x64) and
-        not RegKeyExists(HKEY_LOCAL_MACHINE, msvc_hkey_location + vcredist2017_productcode_x64);
+  Result := not msiproduct(vcredist2022_productcode_x64) and
+        not RegKeyExists(HKEY_LOCAL_MACHINE, msvc_hkey_location + vcredist2022_productcode_x64);
 end;
 function BeginSetup(MyAppName: string; MyAppID: string; MyAppVersion: string): boolean;      
 var
