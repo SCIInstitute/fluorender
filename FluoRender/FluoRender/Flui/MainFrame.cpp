@@ -120,7 +120,7 @@ MainFrame::MainFrame(
 #ifdef _DARWIN
 	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
 #elifdef __linux__
-    SetWindowVariant(wxWINDOW_VARIANT_MINI);
+	SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
 	//create this first to read the settings
 	glbin_settings.Read();
@@ -2589,9 +2589,9 @@ wxWindow* MainFrame::CreateExtraControlVolume(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
-	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
 #elifdef __linux__
-    SetWindowVariant(wxWINDOW_VARIANT_MINI);
+	panel->SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
 	wxStaticText* st1, * st2;
 
@@ -2694,9 +2694,9 @@ wxWindow* MainFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
-	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
 #elifdef __linux__
-    SetWindowVariant(wxWINDOW_VARIANT_MINI);
+	panel->SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
 	wxBoxSizer* group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
@@ -2731,9 +2731,9 @@ wxWindow* MainFrame::CreateExtraControlProjectSave(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
-	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
 #elifdef __linux__
-    SetWindowVariant(wxWINDOW_VARIANT_MINI);
+	panel->SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
 	wxBoxSizer* group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
