@@ -5,4 +5,11 @@ echo "Post installation process started"
 echo "Change permissions in product home"
 cd ${PRODUCT_HOME}
 chmod -R a+rwx MacOS
+# Check if libaec is installed
+if ! brew list libaec &>/dev/null; then
+    echo "libaec not found. Installing..."
+    brew install libaec
+else
+    echo "libaec is already installed."
+fi
 echo "Post installation process finished"

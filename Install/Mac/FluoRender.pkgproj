@@ -21,12 +21,24 @@
 							<key>CHILDREN</key>
 							<array>
 								<dict>
+									<key>BUNDLE_CAN_DOWNGRADE</key>
+									<false/>
+									<key>BUNDLE_POSTINSTALL_PATH</key>
+									<dict>
+										<key>PATH_TYPE</key>
+										<integer>0</integer>
+									</dict>
+									<key>BUNDLE_PREINSTALL_PATH</key>
+									<dict>
+										<key>PATH_TYPE</key>
+										<integer>0</integer>
+									</dict>
 									<key>CHILDREN</key>
 									<array/>
 									<key>GID</key>
 									<integer>80</integer>
 									<key>PATH</key>
-									<string>/Users/basisunus/Documents/FluoRender/bin/Release/FluoRender.app</string>
+									<string>/Users/basisunus/Documents/GitHub/fluorender/build/bin/Release/FluoRender.app</string>
 									<key>PATH_TYPE</key>
 									<integer>0</integer>
 									<key>PERMISSIONS</key>
@@ -505,7 +517,7 @@
 				<key>USE_HFS+_COMPRESSION</key>
 				<false/>
 				<key>VERSION</key>
-				<string>2.29.1</string>
+				<string>2.31</string>
 			</dict>
 			<key>TYPE</key>
 			<integer>0</integer>
