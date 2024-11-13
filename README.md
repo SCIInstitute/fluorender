@@ -46,8 +46,10 @@ Wan, Y., et al. (2017). FluoRender: joint free-hand segmentation and visualizati
 
 Building FluoRender
 ========
-Requirements
-========
+
+<h1>Requirements</h1>
+
+
  * Windows 10 and later : Visual Studio 15.0 2017 and later
 
    Or Mac OS 10.11 and later : Latest Xcode and command line tools
