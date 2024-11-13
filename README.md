@@ -205,12 +205,13 @@ Building FluoRender
    
    * Build the solution. Use CMake to generate both "Release" and "Debug" configurations if you wish to build both in Visual Studio.<br/><br/>
     	**Notes for Visual Studio**
-    - Visual Studio may not set the correct machine target when building 64 bit. 
+      - Visual Studio may not set the correct machine target when building 64 bit.
+
      Check <code>Project Properties -> Configuration Properties -> Linker -> Command line</code>. Make sure "Additional Options" is <code>/machine:X64</code> NOT <code>/machine:X86</code>. <br/>
     	
-    - You may need to right-click FluoRender project on the Solution Explorer to "Set as StartUp Project" for it to run. <br/>
-    - If you are building on Windows 8 or later, you will need to set a Visual Studio Graphics Option. This enables the application to build in higher definition.<br/>
+      - You may need to right-click FluoRender project on the Solution Explorer to "Set as StartUp Project" for it to run. <br/>
+      - If you are building on Windows 8 or later, you will need to set a Visual Studio Graphics Option. This enables the application to build in higher definition.<br/>
       <code>Project Properties -> Manifest Tool -> Input and Output -> Enable DPI Awareness -> Yes </code> <br/>
-    - On Mac OS, add this setting to info.plist:
+      - On Mac OS, add this setting to info.plist:
     <key>NSHighResolutionCapable</key>
     <true/>
