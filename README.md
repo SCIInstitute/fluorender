@@ -1,3 +1,5 @@
+![logo_crop_03-01](https://github.com/user-attachments/assets/ecc3051b-d977-4fd6-a0e1-32637a0c7e59)
+
 FluoRender
 ========
 
