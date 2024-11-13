@@ -1,16 +1,33 @@
 ![logo_crop_03-01](https://github.com/user-attachments/assets/ecc3051b-d977-4fd6-a0e1-32637a0c7e59)
 
-FluoRender
+Download
 ========
 
-FluoRender Source Code
+This is the open-source repository for FluoRender, an interactive tool for flourescence microscopy data visualization and analysis. Download the installer package for your operating system (OS).
 
-This is the open-source repository for FluoRender, an interactive rendering tool for confocal microscopy data visualization. It combines the renderings of multi-channel volume data and polygon mesh data, where the properties of each dataset can be adjusted independently and quickly. The tool is designed especially for neurobiologists, and it helps them better visualize the fluorescent-stained confocal samples.
+**Windows:** [Version 2.31](https://github.com/SCIInstitute/fluorender/releases/download/v2.31/FluoRender2.31_win64.exe)
+
+**Mac OS:** [Version 2.31](https://github.com/SCIInstitute/fluorender/releases/download/v2.31/FluoRender2.31_mac64.pkg)
+
+**Ubuntu:** [Version 2.31](https://github.com/SCIInstitute/fluorender/releases/download/v2.31/fluorender2.31_ubuntu22.04_amd64.deb)
+
+Documentation
+========
+
+**User Manual:** [Version 2.30](https://github.com/SCIInstitute/fluorender/releases/download/v2.30/FluoRender2.30_Manual.pdf)
+
+**Tutorials:** [Version 2.30](https://github.com/SCIInstitute/fluorender/releases/download/v2.30/FluoRender2.30_Tutorials.pdf)
+
+**Video Tutorials:** [YouTube Playlist](https://youtu.be/zq41x-Q7LU0?feature=shared)
 
 Contact
 ========
 
-If there are any problems, email: yong.wan@utah.edu
+Contact the developer for any questions or suggestions:
+
+**Email:** yong.wan@utah.edu
+
+**Facebook Page:** https://www.facebook.com/fluorender
 
 Aknowledgements
 ========
@@ -22,10 +39,15 @@ Wan, Y., et al. (2017). FluoRender: joint free-hand segmentation and visualizati
 <strong>Author: </strong> Yong Wan<br/>
 <strong>Developer: </strong> Brig Bagley<br/>
 
+Building FluoRender
+========
 Requirements
 ========
- * Windows 10+ : Visual Studio 15.0 2017+
-   OSX 10.11+  : Latest Xcode and command line tools
+ * Windows 10 and later : Visual Studio 15.0 2017 and later
+
+   Or Mac OS 10.11 and later : Latest Xcode and command line tools
+
+   Or Ubuntu Linux 22.04 and later
  * Git (https://git-scm.com/)
  * CMake 3.5+ (http://www.cmake.org/)
  * wxWidgets (https://github.com/wxWidgets/wxWidgets)
@@ -34,9 +56,7 @@ Requirements
  * Dlib (http://dlib.net)
 
 
-Building FluoRender
-========
-<h4>Linux</h4> 
+<h1>Linux</h1> 
 
 1) Make sure OpenGL and OpenCL drivers are correctly installed and configured. This is OS and hardware dependent.
 
@@ -72,7 +92,7 @@ Building FluoRender
 
 6) Build FluoRender. An IDE such as CodeBlocks can be used.
 
-<h4>Mac</h4> 
+<h1>Mac OS</h1> 
 
 1) Clone the latest wxWidgets using GIT (<code>git clone git@github.com:wxWidgets/wxWidgets.git</code>).
    
@@ -119,7 +139,7 @@ Building FluoRender
 
 5) Open the Xcode file generated to build and run FluoRender.
 
-<h4>Windows</h4> 
+<h1>Windows</h1> 
 
 1) Clone the latest wxWidgets using GIT (<code>git clone git@github.com:wxWidgets/wxWidgets.git</code>).
    
