@@ -22,12 +22,14 @@ Wan, Y., et al. (2017). FluoRender: joint free-hand segmentation and visualizati
 
 Requirements
 ========
- * Git (https://git-scm.com/)
- * CMake 2.8+ (http://www.cmake.org/)
- * wxWidgets (https://github.com/wxWidgets/wxWidgets)
  * Windows 10+ : Visual Studio 15.0 2017+
- * OSX 10.11+  : Latest Xcode and command line tools
+   OSX 10.11+  : Latest Xcode and command line tools
+ * Git (https://git-scm.com/)
+ * CMake 3.5+ (http://www.cmake.org/)
+ * wxWidgets (https://github.com/wxWidgets/wxWidgets)
  * Boost 1.78.0+ (http://www.boost.org/users/download/#live)
+ * OpenCV (https://opencv.org/)
+ * Dlib (http://dlib.net)
 
 
 Building FluoRender
