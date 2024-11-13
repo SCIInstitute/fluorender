@@ -2,8 +2,7 @@
 
 This is the open-source repository for FluoRender, an interactive tool for flourescence microscopy data visualization and analysis.
 
-Download
-========
+<h1>Download</h1>
 
 Download the installer package for your operating system (OS).
 
@@ -13,8 +12,7 @@ Download the installer package for your operating system (OS).
 
 **Ubuntu:** [Version 2.31](https://github.com/SCIInstitute/fluorender/releases/download/v2.31/fluorender2.31_ubuntu22.04_amd64.deb)
 
-Documentation
-========
+<h1>Documentation</h1>
 
 **User Manual:** [Version 2.30](https://github.com/SCIInstitute/fluorender/releases/download/v2.30/FluoRender2.30_Manual.pdf)
 
@@ -22,8 +20,7 @@ Documentation
 
 **Video Tutorials:** [YouTube Playlist](https://youtu.be/zq41x-Q7LU0?feature=shared)
 
-Contact
-========
+<h1>Contact</h1>
 
 Contact the developer for any questions or suggestions:
 
@@ -31,30 +28,25 @@ Contact the developer for any questions or suggestions:
 
 **Facebook Page:** [FluoRender on Facebook](https://www.facebook.com/fluorender)
 
-Hardware Requirements
-========
+<h1>Hardware Requirements</h1>
 
 FluoRender can run on most personal computers including desktops and laptops. The key component is a modern GPU (Graphic Processing Unit). A powerful GPU is helpful to process large data.
 
-Aknowledgments
-========
+<h1>Aknowledgments</h1>
+
+<strong>Code Contributors: </strong> Yong Wan, Brig Bagley, Takashi Kawase, Remaldeep Singh, etc.<br/>
 If you use FluoRender in work that leads to published research, we humbly ask that you add the following to the 'Acknowledgments' section of your paper: 
 "This work was made possible in part by software funded by the NIH: Fluorender: Visualization-Based and Interactive Analysis for Multichannel Microscopy Data, R01EB023947."
 If you would like to cite FluoRender, you may reference the following publication:
 Wan, Y., et al. (2017). FluoRender: joint free-hand segmentation and visualization for many-channel fluorescence data analysis. BMC Bioinformatics, 18:280.
 
-<strong>Code Contributors: </strong> Yong Wan, Brig Bagley, Takashi Kawase, Remaldeep Singh, etc.<br/>
-
-Building FluoRender
-========
+<h1>Building FluoRender</h1>
 
 <h2>Common Dependencies</h2>
 
 Some third-party dependencies are included in the FluoRender source code. Other dependencies need to be prepared before building FluoRender.
- * Windows 10 and later : Visual Studio 2017 and later
-
-   Or Mac OS 11 (Big Sur) and later : Updated Xcode and command line tools
-
+ * Windows 10 and later : Visual Studio 2017 and later<br/>
+   Or Mac OS 11 (Big Sur) and later : Updated Xcode and command line tools<br/>
    Or Ubuntu Linux 22.04 (tested to work)
  * Git (https://git-scm.com/) for managing the source code
  * CMake (http://www.cmake.org/) for generating building projects
