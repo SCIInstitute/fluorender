@@ -29,6 +29,11 @@ Contact the developer for any questions or suggestions:
 
 **Facebook Page:** https://www.facebook.com/fluorender
 
+Hardware Requirements
+========
+
+FluoRender can run on most personal computers including desktops and laptops. The key component is a modern GPU (Graphic Processing Unit). A powerful GPU is helpful to process large data.
+
 Aknowledgements
 ========
 If you use FluoRender in work that leads to published research, we humbly ask that you add the following to the 'Acknowledgments' section of your paper: 
