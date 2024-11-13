@@ -25,9 +25,9 @@ Contact
 
 Contact the developer for any questions or suggestions:
 
-**Email:** yong.wan@utah.edu
+**Email:** [yong.wan@utah.edu](yong.wan@utah.edu)
 
-**Facebook Page:** https://www.facebook.com/fluorender
+**Facebook Page:** [FluoRender on Facebook](https://www.facebook.com/fluorender)
 
 Hardware Requirements
 ========
