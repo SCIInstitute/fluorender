@@ -1,0 +1,17 @@
+//codesign -f -s WG354P62PL libNd2File.dylib
+
+//codesign --sign WG354P62PL FluoRender.app
+
+xcrun notarytool submit FluoRender.zip --apple-id "yong.wan@utah.edu" --team-id WG354P62PL --password zhlv-tzpv-sgzq-wvle --wait
+
+xcrun stapler staple FluoRender.app
+
+productsign --sign WG354P62PL FluoRender.pkg FluoRender2.31_mac64.pkg
+
+xcrun notarytool submit FluoRender2.31_mac64.pkg --apple-id "yong.wan@utah.edu" --team-id WG354P62PL --password yghf-hwoq-qhif-nsmz --wait
+
+xcrun stapler staple FluoRender2.31_mac64.pkg
+
+xcrun notarytool log 0f8a4792-49eb-4670-813c-d6f94bfdaf1e --apple-id "yong.wan@utah.edu" --team-id WG354P62PL --password yghf-hwoq-qhif-nsmz
+
+pkgutil --check-signature FluoRender2.31_mac64.pkg
