@@ -1,0 +1,3 @@
+pkgbuild --root / --identifier edu.utah.sci.fluorender.pkg --version 2.31 --install-location /Applications --scripts / FluoRender.pkg
+
+pkgbuild --distribution distribution.xml --resources /resources --package-path ./ FluoRender2.31_mac64.pkg

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="1">
+    <title>FluoRender Installer</title>
+    <background file="background.png" alignment="bottomleft" scaling="proportional"/>
+    <welcome file="welcome.txt"/>
+    <license file="license.txt"/>
+    <choices-outline>
+        <line choice="default">
+            <line choice="app"/>
+        </line>
+    </choices-outline>
+    <choice id="default"/>
+    <choice id="app" title="FluoRender" description="Install FluoRender">
+        <pkg-ref id="edu.utah.sci.fluorender.pkg"/>
+    </choice>
+    <pkg-ref id="edu.utah.sci.fluorender.pkg" installKBytes="88888" version="2.31" auth="Root">#FluoRender.pkg</pkg-ref>
+</installer-gui-script>
