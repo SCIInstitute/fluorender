@@ -1,6 +1,8 @@
 cmake set static libs: libsz, libtiff, libpng, libfreetype
 
-Info Deployment Target: 10.15
+Build Settings/Architectures: Architectures: Standard Architectures
+Build Active Architecture Only: No
+Info Deployment Target: 11.5 (Big Sur)
 FluoRender/Resources/Info.plist: NSHighResolutionCapable YES
 Code Signing Identity: Developer ID Application...
 Codesign options --deep --timestamp
