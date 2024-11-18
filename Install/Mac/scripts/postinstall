@@ -38,15 +38,21 @@ install_library() {
 
 # Function to check and install Python
 install_python() {
-    if ! command -v python3 &> /dev/null; then
-        echo "Python3 not found. Installing..."
+    if ! command -v python3.10 &> /dev/null; then
+        echo "Python3.10 not found. Installing..."
+
+        # Install Homebrew if not installed
+        if ! command -v brew &> /dev/null; then
+            echo "Homebrew not found. Installing Homebrew..."
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        fi
 
         # Install Python using Homebrew
-        brew install python
+        brew install python@3.10
 
-        echo "Python3 installed successfully."
+        echo "Python3.10 installed successfully."
     else
-        echo "Python3 already exists."
+        echo "Python3.10 already exists."
     fi
 }
 
