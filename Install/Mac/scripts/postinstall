@@ -38,17 +38,13 @@ install_library() {
 
 # Function to check and install Python
 install_python() {
-    if ! command -v python3.10 &> /dev/null; then
+    if ! command -v python3.10 &> /dev/null;
+    then
         echo "Python3.10 not found. Installing..."
 
-        # Install Homebrew if not installed
-        if ! command -v brew &> /dev/null; then
-            echo "Homebrew not found. Installing Homebrew..."
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        fi
-
-        # Install Python using Homebrew
-        brew install python@3.10
+        # Download and install
+        /usr/bin/curl -o python-installer.pkg https://www.python.org/ftp/python/3.10.0/python-3.10.0post2-macos11.pkg
+        sudo installer -pkg python-installer.pkg -target /
 
         echo "Python3.10 installed successfully."
     else
