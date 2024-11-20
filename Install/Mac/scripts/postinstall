@@ -1,40 +1,26 @@
 #!/bin/bash
-PRODUCT_HOME=/Applications/FluoRender.app/Contents
+
 echo "Post installation process started"
+
 #Change permissions in home directory
 echo "Change permissions in product home"
-cd ${PRODUCT_HOME}
-chmod -R a+rwx MacOS
+chmod -R a+rwx /Applications/FluoRender.app/Contents/MacOS
 
-# Function to check and install Python
-install_python() {
-    if ! command -v python3.10 &> /dev/null;
-    then
-        echo "Python3.10 not found. Installing..."
-
-        # Download and install
-        /usr/bin/curl -o python-installer.pkg https://www.python.org/ftp/python/3.10.0/python-3.10.0post2-macos11.pkg
-        sudo installer -pkg python-installer.pkg -target /
-
-        echo "Python3.10 installed successfully."
-    else
-        echo "Python3.10 already exists."
-    fi
-}
-
-# Check and install Python
-install_python
-
-# Check if Homebrew is installed
-if ! command -v brew &> /dev/null; then
-    echo "Homebrew not found. Installing Homebrew..."
+# Check if Python 3.10 is installed
+if ! python3.10 --version &> /dev/null; then
+    echo "Python 3.10 not found. Installing Python 3.10..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    brew install python@3.10
+else
+    echo "Python 3.10 is already installed."
 fi
 
-# Check if hdf5 is installed
+# Check if HDF5 is installed
 if ! brew list hdf5 &> /dev/null; then
-    echo "hdf5 not found. Installing hdf5..."
+    echo "HDF5 not found. Installing HDF5..."
     brew install hdf5
 else
-    echo "hdf5 is already installed."
+    echo "HDF5 is already installed."
 fi
+
+echo "Postinstall script completed."
