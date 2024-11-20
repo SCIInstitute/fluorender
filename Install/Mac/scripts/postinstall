@@ -6,36 +6,6 @@ echo "Change permissions in product home"
 cd ${PRODUCT_HOME}
 chmod -R a+rwx MacOS
 
-#!/bin/bash
-
-# Function to check and install a library
-install_library() {
-    local lib_name=$1
-    local brew_package=$2
-
-    if [ ! -f /usr/local/lib/$lib_name ]; then
-        echo "$lib_name not found. Installing..."
-
-        # Install Homebrew if not installed
-        if ! command -v brew &> /dev/null; then
-            echo "Homebrew not found. Installing Homebrew..."
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        fi
-
-        # Install the library using Homebrew
-        brew install $brew_package
-
-        # Create a symlink to the library if necessary
-        if [ ! -f /usr/local/lib/$lib_name ]; then
-            ln -s /usr/local/opt/$brew_package/lib/$lib_name /usr/local/lib/$lib_name
-        fi
-
-        echo "$lib_name installed successfully."
-    else
-        echo "$lib_name already exists."
-    fi
-}
-
 # Function to check and install Python
 install_python() {
     if ! command -v python3.10 &> /dev/null;
@@ -54,9 +24,3 @@ install_python() {
 
 # Check and install Python
 install_python
-
-# Check and install libblas.dylib
-install_library "libBLAS.dylib" "openblas"
-
-# Check and install liblapack.dylib
-install_library "libLAPCK.dylib" "openblas"
