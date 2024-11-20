@@ -60,6 +60,3 @@ install_library "libBLAS.dylib" "openblas"
 
 # Check and install liblapack.dylib
 install_library "libLAPCK.dylib" "openblas"
-
-# Check and install libsz.2.dylib
-install_library "libsz.2.dylib" "libaec"

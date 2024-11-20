@@ -189,7 +189,7 @@ if(WIN32)
     set(ZLIB_LIBRARY_DEBUG ${wxWidgets_LIB_DIR}/wxzlibd.lib)
 elseif(APPLE)
     #file(GLOB AEC_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/libaec/MacOS/lib/*.a)
-    find_package(AEC REQUIRED)
+    find_package(libaec REQUIRED)
 endif()
 find_package(TIFF REQUIRED)
 find_package(PNG REQUIRED)
@@ -963,7 +963,7 @@ if(WIN32)
 elseif(APPLE)
   target_link_libraries(FluoRender
     dlib::dlib
-    ${AEC_LIBRARIES}
+    ${libaec_LIBRARY}
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}

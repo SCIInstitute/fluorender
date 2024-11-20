@@ -1,4 +1,4 @@
-cmake set static libs: libsz, libtiff, libpng, libfreetype
+cmake set static libs: libsz, libtiff, libpng, libfreetype, libaec
 
 Build Settings/Architectures: Architectures: Standard Architectures
 Build Active Architecture Only: No
