@@ -1,5 +1,5 @@
-chmod +x FluoRender_install/scripts/postinstall
+chmod +x scripts/postinstall
 
-pkgbuild --root FluoRender_install/Applications --identifier edu.utah.sci.fluorender.pkg --version 2.31 --scripts FluoRender_install/scripts --install-location /Applications FluoRender.pkg
+pkgbuild --root Applications --identifier edu.utah.sci.fluorender.pkg --version 2.31 --scripts scripts --install-location /Applications FluoRender.pkg
 
-productbuild --distribution FluoRender_install/distribution.xml --resources FluoRender_install/resources --package-path . FluoRender2.31_mac64.pkg
+productbuild --distribution distribution.xml --resources resources --package-path . FluoRender2.31_mac64.pkg
