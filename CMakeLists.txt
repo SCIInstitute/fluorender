@@ -49,7 +49,7 @@ if (WIN32)
 endif()
 
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 
 # for MSVC builds
 if(WIN32)
@@ -63,6 +63,10 @@ endif()
 #  set(CMAKE_C_COMPILER "gcc-12")
 #  set(CMAKE_CXX_COMPILER "/usr/bin/g++-12")
 #endif()
+
+if (APPLE)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "11.5" CACHE STRING "Minimum OS X deployment version")
+endif()
 
 project(FluoRender)
 
@@ -650,6 +654,8 @@ ENDIF()
 
 # platform specific rules
 if(APPLE)
+  set_target_properties(ANIMATORS_OBJ PROPERTIES MACOSX_DEPOLYMENT_TARGET "11.5")
+  set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++")
   # Mac OS X
   if(NOT OPEN_GL_HEADER_LOC)
     add_definitions(-DOPEN_GL_HEADER_LOC=<OpenGL/gl.h>)
@@ -697,6 +703,7 @@ if(APPLE)
     $<TARGET_OBJECTS:POLE_OBJ>
     $<TARGET_OBJECTS:TEEM_OBJ>
     )
+  set_target_properties(FluoRender PROPERTIES MACOSX_DEPLOYMENT_TARGET "11.5")
 elseif(UNIX OR MINGW)
   # Linux
   #if(NOT OPEN_GL_HEADER_LOC)

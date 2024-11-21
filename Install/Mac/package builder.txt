@@ -1,8 +1,8 @@
 chmod +x scripts/postinstall
 
-pkgbuild --root Applications --identifier edu.utah.sci.fluorender.pkg --version 2.31 --scripts scripts --install-location /Applications FluoRender.pkg
+pkgbuild --root Applications --install-location /Applications --scripts scripts --identifier edu.utah.sci.fluorender --version 2.31 --output FluoRender.pkg
 
-productbuild --distribution distribution.xml --resources resources --package-path . FluoRender2.31_mac64.pkg
+productbuild --distribution distribution.xml --resources resources --package-path . --scripts scripts --output FluoRender2.31_mac64.pkg
 
 sudo installer -pkg FluoRender2.31_mac64.pkg -target /
 
