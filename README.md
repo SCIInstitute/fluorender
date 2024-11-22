@@ -2,7 +2,7 @@
 
 This is the open-source repository for FluoRender, an interactive tool for flourescence microscopy data visualization and analysis.
 
-<h1>Download</h1>
+<h1 id="download">Download</h1>
 
 Download the installer package for your operating system (OS).
 
@@ -12,7 +12,7 @@ Download the installer package for your operating system (OS).
 
 **Ubuntu:** [Version 2.31](https://github.com/SCIInstitute/fluorender/releases/download/v2.31/fluorender2.31_ubuntu22.04_amd64.deb)
 
-<h1>Documentation</h1>
+<h1 id="documentation">Documentation</h1>
 
 **User Manual:** [Version 2.30](https://github.com/SCIInstitute/fluorender/releases/download/v2.30/FluoRender2.30_Manual.pdf)
 
@@ -20,7 +20,7 @@ Download the installer package for your operating system (OS).
 
 **Video Tutorials:** [YouTube Playlist](https://youtu.be/zq41x-Q7LU0?feature=shared)
 
-<h1>Contact</h1>
+<h1 id="contact">Contact</h1>
 
 Contact the developer for any questions or suggestions:
 
