@@ -763,44 +763,63 @@ void RenderCanvas::HandleCamera(bool vr)
 		eye += center;
 	}
 
-	if (vr && glbin_settings.m_hologram_mode)
+	if (vr)
 	{
-		fluo::Vector side = GetSide();
-		if (glbin_settings.m_hologram_mode == 1)
+		if (m_use_openvr)
 		{
-			side *= (m_vr_eye_idx ? 1.0 : -1.0) * glbin_settings.m_eye_dist / 2.0;
-			glm::vec3 offset(side.x(), side.y(), side.z());
-			m_mv_mat = glm::lookAt(
-				eye + offset,
-				center + offset,
-				up);
+#ifdef _WIN32
+			//get tracking pose matrix
+			vr::TrackedDevicePose_t trackedDevicePose[vr::k_unMaxTrackedDeviceCount];
+			m_vr_system->GetDeviceToAbsoluteTrackingPose(vr::TrackingUniverseStanding, 0,
+				trackedDevicePose, vr::k_unMaxTrackedDeviceCount);
+			vr::HmdMatrix34_t hmdMatrix = trackedDevicePose[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking;
+			glm::mat4 modelViewMatrix = glm::mat4(
+				hmdMatrix.m[0][0], hmdMatrix.m[1][0], hmdMatrix.m[2][0], 0.0f,
+				hmdMatrix.m[0][1], hmdMatrix.m[1][1], hmdMatrix.m[2][1], 0.0f,
+				hmdMatrix.m[0][2], hmdMatrix.m[1][2], hmdMatrix.m[2][2], 0.0f,
+				hmdMatrix.m[0][3], hmdMatrix.m[1][3], hmdMatrix.m[2][3], 1.0f );
+			m_mv_mat = glm::inverse(modelViewMatrix);
+#endif
 		}
-		else if (glbin_settings.m_hologram_mode == 2)
+		else if (glbin_settings.m_hologram_mode)
 		{
-			double f = glbin_lg_renderer.GetOffset();
-			//linear shift
-			//side *= glbin_settings.m_lg_offset;
-			//side *= f;
-			//glm::vec3 offset(side.x(), side.y(), side.z());
-			//m_mv_mat = glm::lookAt(
-			//	eye + offset,
-			//	center + offset,
-			//	up);
+			fluo::Vector side = GetSide();
+			if (glbin_settings.m_hologram_mode == 1)
+			{
+				side *= (m_vr_eye_idx ? 1.0 : -1.0) * glbin_settings.m_eye_dist / 2.0;
+				glm::vec3 offset(side.x(), side.y(), side.z());
+				m_mv_mat = glm::lookAt(
+					eye + offset,
+					center + offset,
+					up);
+			}
+			else if (glbin_settings.m_hologram_mode == 2)
+			{
+				double f = glbin_lg_renderer.GetOffset();
+				//linear shift
+				//side *= glbin_settings.m_lg_offset;
+				//side *= f;
+				//glm::vec3 offset(side.x(), side.y(), side.z());
+				//m_mv_mat = glm::lookAt(
+				//	eye + offset,
+				//	center + offset,
+				//	up);
 
-			//turntable
-			double ang = f * glbin_settings.m_lg_offset;//half angle
-			glm::mat4 rot(1);
-			rot = glm::rotate(rot, float(glm::radians(-ang)), up);
-			glm::vec4 vv = glm::vec4(eye - center, 1);
-			vv = rot * vv;
-			glm::vec3 new_eye = center + glm::vec3(vv);
-			glm::vec3 new_view = glm::vec3(vv);
-			new_view = glm::normalize(new_view);
-			glm::vec3 new_up = glm::cross(new_view, up);
-			new_up = glm::cross(new_up, new_view);
-			m_mv_mat = glm::lookAt(new_eye, center, new_up);
-			eye = new_eye;
-			up = new_up;
+				//turntable
+				double ang = f * glbin_settings.m_lg_offset;//half angle
+				glm::mat4 rot(1);
+				rot = glm::rotate(rot, float(glm::radians(-ang)), up);
+				glm::vec4 vv = glm::vec4(eye - center, 1);
+				vv = rot * vv;
+				glm::vec3 new_eye = center + glm::vec3(vv);
+				glm::vec3 new_view = glm::vec3(vv);
+				new_view = glm::normalize(new_view);
+				glm::vec3 new_up = glm::cross(new_view, up);
+				new_up = glm::cross(new_up, new_view);
+				m_mv_mat = glm::lookAt(new_eye, center, new_up);
+				eye = new_eye;
+				up = new_up;
+			}
 		}
 	}
 	else
