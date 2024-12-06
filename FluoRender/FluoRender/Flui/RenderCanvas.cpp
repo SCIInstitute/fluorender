@@ -4401,13 +4401,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		if (leftx != 0.0)
 		{
 			event.RequestMore(true);
-			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-			m_head.normalize();
-			fluo::Vector side = fluo::Cross(m_up, m_head);
-			fluo::Vector trans = side * (leftx*sclr*(m_ortho_right - m_ortho_left) / double(nx));
-			m_obj_transx += trans.x();
-			m_obj_transy += trans.y();
-			m_obj_transz += trans.z();
+			ControllerMoveHorizontal(leftx * sclr, nx, ny);
 			m_interactive = true;
 			m_update_rot_ctr = true;
 			refresh = true;
@@ -4416,19 +4410,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		if (lefty != 0.0)
 		{
 			event.RequestMore(true);
-			double delta = lefty * sclr / (double)ny;
-			if (m_scale_factor < 1e3)
-				m_scale_factor += m_scale_factor * delta;
-			if (m_free)
-			{
-				fluo::Vector pos(m_transx, m_transy, m_transz);
-				pos.normalize();
-				fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
-				ctr -= delta * pos * 1000;
-				m_ctrx = ctr.x();
-				m_ctry = ctr.y();
-				m_ctrz = ctr.z();
-			}
+			ControllerZoomDolly(leftx * sclr, nx, ny);
 			m_interactive = true;
 			refresh = true;
 			vc.insert(gstScaleFactor);
@@ -4437,30 +4419,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		if (rghtx != 0.0 || rghty != 0.0)
 		{
 			event.RequestMore(true);
-			fluo::Quaternion q_delta = Trackball(rghtx*sclr, rghty*sclr);
-			m_q *= q_delta;
-			m_q.Normalize();
-			fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
-			fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
-			m_transx = cam_pos2.x;
-			m_transy = cam_pos2.y;
-			m_transz = cam_pos2.z;
-			fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
-			fluo::Quaternion up2 = (-m_q) * up * m_q;
-			m_up = fluo::Vector(up2.x, up2.y, up2.z);
-			m_q.ToEuler(m_rotx, m_roty, m_rotz);
-			if (m_roty > 360.0)
-				m_roty -= 360.0;
-			if (m_roty < 0.0)
-				m_roty += 360.0;
-			if (m_rotx > 360.0)
-				m_rotx -= 360.0;
-			if (m_rotx < 0.0)
-				m_rotx += 360.0;
-			if (m_rotz > 360.0)
-				m_rotz -= 360.0;
-			if (m_rotz < 0.0)
-				m_rotz += 360.0;
+			ControllerRotate(rghtx * sclr, rghty * sclr, nx, ny);
 			m_interactive = true;
 			refresh = true;
 			vc.insert(gstCamRotation);
@@ -4498,13 +4457,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		if (leftx != 0.0)
 		{
 			event.RequestMore(true);
-			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-			m_head.normalize();
-			fluo::Vector side = fluo::Cross(m_up, m_head);
-			fluo::Vector trans = side * (leftx*sclr*(m_ortho_right - m_ortho_left) / double(nx));
-			m_obj_transx += trans.x();
-			m_obj_transy += trans.y();
-			m_obj_transz += trans.z();
+			ControllerMoveHorizontal(leftx * sclr, nx, ny);
 			m_interactive = true;
 			m_update_rot_ctr = true;
 			refresh = true;
@@ -4514,19 +4467,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		if (lefty != 0.0)
 		{
 			event.RequestMore(true);
-			double delta = lefty * sclr / (double)ny;
-			if (m_scale_factor < 1e3)
-				m_scale_factor += m_scale_factor * delta;
-			if (m_free)
-			{
-				fluo::Vector pos(m_transx, m_transy, m_transz);
-				pos.normalize();
-				fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
-				ctr -= delta * pos * 1000;
-				m_ctrx = ctr.x();
-				m_ctry = ctr.y();
-				m_ctrz = ctr.z();
-			}
+			ControllerZoomDolly(leftx * sclr, nx, ny);
 			m_interactive = true;
 			refresh = true;
 			lg_changed = true;
@@ -4536,30 +4477,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		if (rghtx != 0.0 || rghty != 0.0)
 		{
 			event.RequestMore(true);
-			fluo::Quaternion q_delta = Trackball(rghtx*sclr, rghty*sclr);
-			m_q *= q_delta;
-			m_q.Normalize();
-			fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
-			fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
-			m_transx = cam_pos2.x;
-			m_transy = cam_pos2.y;
-			m_transz = cam_pos2.z;
-			fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
-			fluo::Quaternion up2 = (-m_q) * up * m_q;
-			m_up = fluo::Vector(up2.x, up2.y, up2.z);
-			m_q.ToEuler(m_rotx, m_roty, m_rotz);
-			if (m_roty > 360.0)
-				m_roty -= 360.0;
-			if (m_roty < 0.0)
-				m_roty += 360.0;
-			if (m_rotx > 360.0)
-				m_rotx -= 360.0;
-			if (m_rotx < 0.0)
-				m_rotx += 360.0;
-			if (m_rotz > 360.0)
-				m_rotz -= 360.0;
-			if (m_rotz < 0.0)
-				m_rotz += 360.0;
+			ControllerRotate(rghtx * sclr, rghty * sclr, nx, ny);
 			m_interactive = true;
 			refresh = true;
 			lg_changed = true;
@@ -4569,15 +4487,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		if (px != 0 || py != 0)
 		{
 			event.RequestMore(true);
-			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-			m_head.normalize();
-			fluo::Vector side = fluo::Cross(m_up, m_head);
-			fluo::Vector trans =
-				side * (double(px)*(m_ortho_right - m_ortho_left) / double(nx)) +
-				m_up * (double(py)*(m_ortho_top - m_ortho_bottom) / double(ny));
-			m_obj_transx += trans.x() * m_scale_factor;
-			m_obj_transy += trans.y() * m_scale_factor;
-			m_obj_transz += trans.z() * m_scale_factor;
+			ControllerPan(px, py, nx, ny);
 			m_interactive = true;
 			m_update_rot_ctr = true;
 			refresh = true;
@@ -11262,6 +11172,76 @@ void RenderCanvas::switchLevel(VolumeData *vd)
 			vtex->set_sort_bricks();
 		}
 	}
+}
+
+//controller interactions
+void RenderCanvas::ControllerMoveHorizontal(double dval, int nx, int ny)
+{
+	m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+	m_head.normalize();
+	fluo::Vector side = fluo::Cross(m_up, m_head);
+	fluo::Vector trans = side * (dval*(m_ortho_right - m_ortho_left) / double(nx));
+	m_obj_transx += trans.x();
+	m_obj_transy += trans.y();
+	m_obj_transz += trans.z();
+}
+
+void RenderCanvas::ControllerZoomDolly(double dval, int nx, int ny)
+{
+	double delta = dval / (double)ny;
+	if (m_scale_factor < 1e3)
+		m_scale_factor += m_scale_factor * delta;
+	if (m_free)
+	{
+		fluo::Vector pos(m_transx, m_transy, m_transz);
+		pos.normalize();
+		fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
+		ctr -= delta * pos * 1000;
+		m_ctrx = ctr.x();
+		m_ctry = ctr.y();
+		m_ctrz = ctr.z();
+	}
+}
+
+void RenderCanvas::ControllerRotate(double dx, double dy, int nx, int ny)
+{
+	fluo::Quaternion q_delta = Trackball(dx, dy);
+	m_q *= q_delta;
+	m_q.Normalize();
+	fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
+	fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
+	m_transx = cam_pos2.x;
+	m_transy = cam_pos2.y;
+	m_transz = cam_pos2.z;
+	fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
+	fluo::Quaternion up2 = (-m_q) * up * m_q;
+	m_up = fluo::Vector(up2.x, up2.y, up2.z);
+	m_q.ToEuler(m_rotx, m_roty, m_rotz);
+	if (m_roty > 360.0)
+		m_roty -= 360.0;
+	if (m_roty < 0.0)
+		m_roty += 360.0;
+	if (m_rotx > 360.0)
+		m_rotx -= 360.0;
+	if (m_rotx < 0.0)
+		m_rotx += 360.0;
+	if (m_rotz > 360.0)
+		m_rotz -= 360.0;
+	if (m_rotz < 0.0)
+		m_rotz += 360.0;
+}
+
+void RenderCanvas::ControllerPan(double dx, double dy, int nx, int ny)
+{
+	m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+	m_head.normalize();
+	fluo::Vector side = fluo::Cross(m_up, m_head);
+	fluo::Vector trans =
+		side * (dx * (m_ortho_right - m_ortho_left) / double(nx)) +
+		m_up * (dy * (m_ortho_top - m_ortho_bottom) / double(ny));
+	m_obj_transx += trans.x() * m_scale_factor;
+	m_obj_transy += trans.y() * m_scale_factor;
+	m_obj_transz += trans.z() * m_scale_factor;
 }
 
 #ifdef _WIN32

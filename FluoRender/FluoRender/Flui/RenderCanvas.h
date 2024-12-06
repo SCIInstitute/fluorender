@@ -1247,6 +1247,12 @@ private:
 
 	void switchLevel(VolumeData *vd);
 
+	//controller interactions
+	void ControllerMoveHorizontal(double dval, int nx, int ny);
+	void ControllerZoomDolly(double dval, int nx, int ny);
+	void ControllerRotate(double dx, double dy, int nx, int ny);
+	void ControllerPan(double dx, double dy, int nx, int ny);
+
 	friend class RenderViewPanel;
 };
 
