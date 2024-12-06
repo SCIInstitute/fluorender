@@ -14,9 +14,9 @@ Download the installer package for your operating system (OS).
 
 <h1 id="documentation">Documentation</h1>
 
-**User Manual:** [Version 2.30](https://github.com/SCIInstitute/fluorender/releases/download/v2.30/FluoRender2.30_Manual.pdf)
+**User Manual:** [Version 2.31](https://github.com/SCIInstitute/fluorender/releases/download/v2.31/FluoRender2.31_Manual.pdf)
 
-**Tutorials:** [Version 2.30](https://github.com/SCIInstitute/fluorender/releases/download/v2.30/FluoRender2.30_Tutorials.pdf)
+**Tutorials:** [Version 2.31](https://github.com/SCIInstitute/fluorender/releases/download/v2.31/FluoRender2.31_Tutorials.pdf)
 
 **Video Tutorials:** [YouTube Playlist](https://youtu.be/zq41x-Q7LU0?feature=shared)
 
