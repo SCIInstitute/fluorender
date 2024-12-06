@@ -74,6 +74,7 @@ private:
 	wxCheckBox *m_rot_link_chk;
 	//stereo
 	wxCheckBox *m_stereo_chk;
+	wxCheckBox* m_mv_hmd_chk;
 	wxCheckBox* m_sbs_chk;
 	wxSingleSlider *m_eye_dist_sldr;
 	wxTextCtrl *m_eye_dist_text;
@@ -186,6 +187,7 @@ private:
 	void OnRotLink(wxCommandEvent& event);
 	//stereo
 	void OnStereoCheck(wxCommandEvent& event);
+	void OnMvHmdCheck(wxCommandEvent& event);
 	void OnSBSCheck(wxCommandEvent& event);
 	void OnEyeDistChange(wxScrollEvent& event);
 	void OnEyeDistEdit(wxCommandEvent& event);

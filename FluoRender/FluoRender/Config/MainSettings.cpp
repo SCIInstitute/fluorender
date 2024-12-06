@@ -100,6 +100,7 @@ MainSettings::MainSettings()
 
 	m_disp_id = 0;
 	m_hologram_mode = 0;
+	m_mv_hmd = true;
 	m_sbs = false;
 	m_eye_dist = 20.0;
 	m_hologram_debug = false;
@@ -298,6 +299,7 @@ void MainSettings::Read()
 		fconfig.SetPath("/display");
 		fconfig.Read("disp id", &m_disp_id, 0);
 		fconfig.Read("hologram mode", &m_hologram_mode, 0);
+		fconfig.Read("mv hmd", &m_mv_hmd, true);
 		fconfig.Read("sbs enable", &m_sbs, false);
 		fconfig.Read("eye dist", &m_eye_dist, 20.0);
 		fconfig.Read("hologram debug", &m_hologram_debug, false);
@@ -532,6 +534,7 @@ void MainSettings::Save()
 	fconfig.SetPath("/display");
 	fconfig.Write("disp id", m_disp_id);
 	fconfig.Write("hologram mode", m_hologram_mode);
+	fconfig.Write("mv hmd", m_mv_hmd);
 	fconfig.Write("sbs enable", m_sbs);
 	fconfig.Write("eye dist", m_eye_dist);
 	fconfig.Write("hologram debug", m_hologram_debug);

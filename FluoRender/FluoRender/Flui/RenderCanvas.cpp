@@ -768,17 +768,26 @@ void RenderCanvas::HandleCamera(bool vr)
 		if (m_use_openvr)
 		{
 #ifdef _WIN32
-			//get tracking pose matrix
-			vr::TrackedDevicePose_t trackedDevicePose[vr::k_unMaxTrackedDeviceCount];
-			m_vr_system->GetDeviceToAbsoluteTrackingPose(vr::TrackingUniverseStanding, 0,
-				trackedDevicePose, vr::k_unMaxTrackedDeviceCount);
-			vr::HmdMatrix34_t hmdMatrix = trackedDevicePose[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking;
-			glm::mat4 modelViewMatrix = glm::mat4(
-				hmdMatrix.m[0][0], hmdMatrix.m[1][0], hmdMatrix.m[2][0], 0.0f,
-				hmdMatrix.m[0][1], hmdMatrix.m[1][1], hmdMatrix.m[2][1], 0.0f,
-				hmdMatrix.m[0][2], hmdMatrix.m[1][2], hmdMatrix.m[2][2], 0.0f,
-				hmdMatrix.m[0][3], hmdMatrix.m[1][3], hmdMatrix.m[2][3], 1.0f );
-			m_mv_mat = glm::inverse(modelViewMatrix);
+			if (glbin_settings.m_mv_hmd)
+			{
+				//get tracking pose matrix
+				vr::TrackedDevicePose_t trackedDevicePose[vr::k_unMaxTrackedDeviceCount];
+				m_vr_system->GetDeviceToAbsoluteTrackingPose(vr::TrackingUniverseStanding, 0,
+					trackedDevicePose, vr::k_unMaxTrackedDeviceCount);
+				vr::HmdMatrix34_t hmdMatrix = trackedDevicePose[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking;
+				glm::mat4 modelViewMatrix = glm::mat4(
+					hmdMatrix.m[0][0], hmdMatrix.m[1][0], hmdMatrix.m[2][0], 0.0f,
+					hmdMatrix.m[0][1], hmdMatrix.m[1][1], hmdMatrix.m[2][1], 0.0f,
+					hmdMatrix.m[0][2], hmdMatrix.m[1][2], hmdMatrix.m[2][2], 0.0f,
+					hmdMatrix.m[0][3], hmdMatrix.m[1][3], hmdMatrix.m[2][3], 1.0f );
+				glm::mat4 mv_hmd = glm::inverse(modelViewMatrix);
+				m_mv_mat = glm::lookAt(eye, center, up);
+				m_mv_mat = mv_hmd * m_mv_mat;
+			}
+			else
+			{
+				m_mv_mat = glm::lookAt(eye, center, up);
+			}
 #endif
 		}
 		else if (glbin_settings.m_hologram_mode)
@@ -4343,6 +4352,121 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				vc.insert(gstRulerList);
 		}
 	}
+
+#if defined(_WIN32)
+	//vr controller, similar to xinput
+	if (m_use_openvr)
+	{
+		double dzone = 0.2;
+		double sclr = 20;
+		double leftx = 0, lefty = 0, rghtx = 0, rghty = 0;
+		//scan all controllers
+		for (vr::TrackedDeviceIndex_t deviceIndex = 0;
+			deviceIndex < vr::k_unMaxTrackedDeviceCount;
+			++deviceIndex)
+		{
+			if (m_vr_system->IsTrackedDeviceConnected(deviceIndex))
+			{
+				vr::ETrackedDeviceClass deviceClass = m_vr_system->GetTrackedDeviceClass(deviceIndex);
+				if (deviceClass == vr::TrackedDeviceClass_Controller)
+				{
+					vr::VRControllerState_t state;
+					m_vr_system->GetControllerState(deviceIndex, &state, sizeof(state));
+
+					if (m_vr_system->GetControllerRoleForTrackedDeviceIndex(deviceIndex) ==
+						vr::TrackedControllerRole_LeftHand)
+					{
+						//left controller
+						leftx = state.rAxis[0].x;
+						lefty = state.rAxis[0].y;
+					}
+					else
+					{
+						//right controlelr
+						rghtx = state.rAxis[0].x;
+						rghty = state.rAxis[0].y;
+					}
+				}
+			}
+		}
+
+		if (leftx > -dzone && leftx < dzone) leftx = 0.0;
+		if (lefty > -dzone && lefty < dzone) lefty = 0.0;
+		if (rghtx > -dzone && rghtx < dzone) rghtx = 0.0;
+		if (rghty > -dzone && rghty < dzone) rghty = 0.0;
+
+		int nx = GetGLSize().x;
+		int ny = GetGLSize().y;
+		//horizontal move
+		if (leftx != 0.0)
+		{
+			event.RequestMore(true);
+			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+			m_head.normalize();
+			fluo::Vector side = fluo::Cross(m_up, m_head);
+			fluo::Vector trans = side * (leftx*sclr*(m_ortho_right - m_ortho_left) / double(nx));
+			m_obj_transx += trans.x();
+			m_obj_transy += trans.y();
+			m_obj_transz += trans.z();
+			m_interactive = true;
+			m_update_rot_ctr = true;
+			refresh = true;
+		}
+		//zoom/dolly
+		if (lefty != 0.0)
+		{
+			event.RequestMore(true);
+			double delta = lefty * sclr / (double)ny;
+			if (m_scale_factor < 1e3)
+				m_scale_factor += m_scale_factor * delta;
+			if (m_free)
+			{
+				fluo::Vector pos(m_transx, m_transy, m_transz);
+				pos.normalize();
+				fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
+				ctr -= delta * pos * 1000;
+				m_ctrx = ctr.x();
+				m_ctry = ctr.y();
+				m_ctrz = ctr.z();
+			}
+			m_interactive = true;
+			refresh = true;
+			vc.insert(gstScaleFactor);
+		}
+		//rotate
+		if (rghtx != 0.0 || rghty != 0.0)
+		{
+			event.RequestMore(true);
+			fluo::Quaternion q_delta = Trackball(rghtx*sclr, rghty*sclr);
+			m_q *= q_delta;
+			m_q.Normalize();
+			fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
+			fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
+			m_transx = cam_pos2.x;
+			m_transy = cam_pos2.y;
+			m_transz = cam_pos2.z;
+			fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
+			fluo::Quaternion up2 = (-m_q) * up * m_q;
+			m_up = fluo::Vector(up2.x, up2.y, up2.z);
+			m_q.ToEuler(m_rotx, m_roty, m_rotz);
+			if (m_roty > 360.0)
+				m_roty -= 360.0;
+			if (m_roty < 0.0)
+				m_roty += 360.0;
+			if (m_rotx > 360.0)
+				m_rotx -= 360.0;
+			if (m_rotx < 0.0)
+				m_rotx += 360.0;
+			if (m_rotz > 360.0)
+				m_rotz -= 360.0;
+			if (m_rotz < 0.0)
+				m_rotz += 360.0;
+			m_interactive = true;
+			refresh = true;
+			vc.insert(gstCamRotation);
+		}
+	}
+#endif
 
 #if defined(_WIN32) && defined(USE_XINPUT)
 	//xinput controller

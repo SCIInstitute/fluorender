@@ -495,12 +495,18 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	sizer1_2->Add(20, 5);
 	sizer1_2->Add(st, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
+	m_mv_hmd_chk = new wxCheckBox(page, wxID_ANY,
+		"Get Model-View Matrix from HMD");
+	m_mv_hmd_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnMvHmdCheck, this);
+	sizer1_3->Add(20, 5);
+	sizer1_3->Add(m_mv_hmd_chk, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer1_4 = new wxBoxSizer(wxHORIZONTAL);
 	m_sbs_chk = new wxCheckBox(page, wxID_ANY,
 		"Aspect Ratio for 3D TV");
 	m_sbs_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnSBSCheck, this);
-	sizer1_3->Add(20, 5);
-	sizer1_3->Add(m_sbs_chk, 0, wxALIGN_CENTER);
-	wxBoxSizer* sizer1_4 = new wxBoxSizer(wxHORIZONTAL);
+	sizer1_4->Add(20, 5);
+	sizer1_4->Add(m_sbs_chk, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer1_5 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Eye Distance:",
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
 	m_eye_dist_sldr = new wxSingleSlider(page, wxID_ANY, 200, 0, 2000,
@@ -509,21 +515,21 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	m_eye_dist_text = new wxTextCtrl(page, wxID_ANY, "20.0",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_fp1);
 	m_eye_dist_text->Bind(wxEVT_TEXT, &SettingDlg::OnEyeDistEdit, this);
-	sizer1_4->Add(20, 5);
-	sizer1_4->Add(st, 0, wxALIGN_CENTER);
-	sizer1_4->Add(m_eye_dist_sldr, 1, wxEXPAND);
-	sizer1_4->Add(m_eye_dist_text, 0, wxALIGN_CENTER);
-	wxBoxSizer* sizer1_5 = new wxBoxSizer(wxHORIZONTAL);
+	sizer1_5->Add(20, 5);
+	sizer1_5->Add(st, 0, wxALIGN_CENTER);
+	sizer1_5->Add(m_eye_dist_sldr, 1, wxEXPAND);
+	sizer1_5->Add(m_eye_dist_text, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer1_6 = new wxBoxSizer(wxHORIZONTAL);
 	m_looking_glass_chk = new wxCheckBox(page, wxID_ANY,
 		"Enable Holography");
 	m_looking_glass_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnLookingGlassCheck, this);
-	sizer1_5->Add(5, 5);
-	sizer1_5->Add(m_looking_glass_chk, 0, wxALIGN_CENTER);
-	wxBoxSizer* sizer1_6 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Install Looking Glass Bridge and connect a Looking Glass display.\nThen send the full-screen render view to the display.");
-	sizer1_6->Add(20, 5);
-	sizer1_6->Add(st, 0, wxALIGN_CENTER);
+	sizer1_6->Add(5, 5);
+	sizer1_6->Add(m_looking_glass_chk, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_7 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Install Looking Glass Bridge and connect a Looking Glass display.\nThen send the full-screen render view to the display.");
+	sizer1_7->Add(20, 5);
+	sizer1_7->Add(st, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer1_8 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "View Offset:",
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
 	m_lg_offset_sldr = new wxSingleSlider(page, wxID_ANY, 20, 0, 90,
@@ -532,16 +538,16 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	m_lg_offset_text = new wxTextCtrl(page, wxID_ANY, "20",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_lg_offset_text->Bind(wxEVT_TEXT, &SettingDlg::OnLgOffsetEdit, this);
-	sizer1_7->Add(20, 5);
-	sizer1_7->Add(st, 0, wxALIGN_CENTER);
-	sizer1_7->Add(m_lg_offset_sldr, 1, wxEXPAND);
-	sizer1_7->Add(m_lg_offset_text, 0, wxALIGN_CENTER);
-	wxBoxSizer* sizer1_8 = new wxBoxSizer(wxHORIZONTAL);
+	sizer1_8->Add(20, 5);
+	sizer1_8->Add(st, 0, wxALIGN_CENTER);
+	sizer1_8->Add(m_lg_offset_sldr, 1, wxEXPAND);
+	sizer1_8->Add(m_lg_offset_text, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer1_9 = new wxBoxSizer(wxHORIZONTAL);
 	m_holo_debug_chk = new wxCheckBox(page, wxID_ANY,
 		"Show Quilt");
 	m_holo_debug_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnHoloDebugCheck, this);
-	sizer1_8->Add(20, 5);
-	sizer1_8->Add(m_holo_debug_chk, 0, wxALIGN_CENTER);
+	sizer1_9->Add(20, 5);
+	sizer1_9->Add(m_holo_debug_chk, 0, wxALIGN_CENTER);
 	group1->Add(10, 5);
 	group1->Add(sizer1_1, 0, wxEXPAND);
 	group1->Add(10, 5);
@@ -558,6 +564,8 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	group1->Add(sizer1_7, 0, wxEXPAND);
 	group1->Add(10, 5);
 	group1->Add(sizer1_8, 0, wxEXPAND);
+	group1->Add(10, 5);
+	group1->Add(sizer1_9, 0, wxEXPAND);
 	group1->Add(10, 5);
 
 	//full screen display
@@ -1046,6 +1054,7 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		if (glbin_settings.m_hologram_mode == 0)
 		{
 			m_stereo_chk->SetValue(false);
+			m_mv_hmd_chk->Disable();
 			m_sbs_chk->Disable();
 			m_eye_dist_sldr->Disable();
 			m_eye_dist_text->Disable();
@@ -1057,6 +1066,7 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		else if (glbin_settings.m_hologram_mode == 1)
 		{
 			m_stereo_chk->SetValue(true);
+			m_mv_hmd_chk->Enable();
 			m_sbs_chk->Enable();
 			m_eye_dist_sldr->Enable();
 			m_eye_dist_text->Enable();
@@ -1068,6 +1078,7 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		else if (glbin_settings.m_hologram_mode == 2)
 		{
 			m_stereo_chk->SetValue(false);
+			m_mv_hmd_chk->Disable();
 			m_sbs_chk->Disable();
 			m_eye_dist_sldr->Disable();
 			m_eye_dist_text->Disable();
@@ -1076,6 +1087,7 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			m_lg_offset_text->Enable();
 			m_holo_debug_chk->Enable();
 		}
+		m_mv_hmd_chk->SetValue(glbin_settings.m_mv_hmd);
 		m_sbs_chk->SetValue(glbin_settings.m_sbs);
 		m_eye_dist_sldr->ChangeValue(std::round(glbin_settings.m_eye_dist * 10.0));
 		m_eye_dist_text->ChangeValue(wxString::Format("%.1f", glbin_settings.m_eye_dist));
@@ -1393,6 +1405,12 @@ void SettingDlg::OnStereoCheck(wxCommandEvent& event)
 	else
 		glbin_settings.m_hologram_mode = 0;
 	FluoRefresh(2, { gstHologramMode });
+}
+
+void SettingDlg::OnMvHmdCheck(wxCommandEvent& event)
+{
+	glbin_settings.m_mv_hmd = m_mv_hmd_chk->GetValue();
+	FluoRefresh(3, { gstNull });
 }
 
 void SettingDlg::OnSBSCheck(wxCommandEvent& event)
