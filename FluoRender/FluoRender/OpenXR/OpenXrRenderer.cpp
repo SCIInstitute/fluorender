@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 
 OpenXrRenderer::OpenXrRenderer() :
+	m_initialized(false),
 	m_instance(0),
 	m_session(0),
 	m_space(0),
@@ -50,7 +51,6 @@ OpenXrRenderer::OpenXrRenderer() :
 	m_dead_zone(0.2f),
 	m_scaler(20.0f)
 {
-
 }
 
 OpenXrRenderer::~OpenXrRenderer()
@@ -58,47 +58,77 @@ OpenXrRenderer::~OpenXrRenderer()
 
 }
 
-bool OpenXrRenderer::Init()
+bool OpenXrRenderer::Init(void* hdc, void* hglrc)
 {
+	if (m_initialized)
+		return m_initialized;
+
 #ifdef _WIN32
+	XrResult result;
+
+	// Define application information
+	XrApplicationInfo appInfo = {};
+	strcpy(appInfo.applicationName, "FluoRender");
+	appInfo.applicationVersion = 1;
+	strcpy(appInfo.engineName, "FLRENDER");
+	appInfo.engineVersion = 1;
+	appInfo.apiVersion = XR_MAKE_VERSION(1, 0, 0);
+
+	// Define instance create info
+	XrInstanceCreateInfo instanceCreateInfo = { XR_TYPE_INSTANCE_CREATE_INFO };
+	instanceCreateInfo.applicationInfo = appInfo;
+	const char* enabledExtensions[] = { XR_KHR_OPENGL_ENABLE_EXTENSION_NAME };
+	instanceCreateInfo.enabledExtensionCount = 1;
+	instanceCreateInfo.enabledExtensionNames = enabledExtensions;
+
 	// OpenXR initialization
-	XrInstanceCreateInfo instanceCreateInfo = {};
-	instanceCreateInfo.type = XR_TYPE_INSTANCE_CREATE_INFO;
-	std::strcpy(instanceCreateInfo.applicationInfo.applicationName, "FluoRender");
-	instanceCreateInfo.applicationInfo.applicationVersion = 2;
-	std::strcpy(instanceCreateInfo.applicationInfo.engineName, "FLRENDER");
-	instanceCreateInfo.applicationInfo.engineVersion = 2;
-	instanceCreateInfo.applicationInfo.apiVersion = XR_CURRENT_API_VERSION;
-	xrCreateInstance(&instanceCreateInfo, &m_instance);
+	result = xrCreateInstance(&instanceCreateInfo, &m_instance);
+	if (result != XR_SUCCESS) return false;
 
 	XrSystemGetInfo systemGetInfo = {};
 	systemGetInfo.type = XR_TYPE_SYSTEM_GET_INFO;
 	systemGetInfo.formFactor = XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY;
-	xrGetSystem(m_instance, &systemGetInfo, &m_sys_id);
+	result = xrGetSystem(m_instance, &systemGetInfo, &m_sys_id);
+	if (result != XR_SUCCESS) return false;
 
+	// Get OpenGL graphics requirements
+	PFN_xrGetOpenGLGraphicsRequirementsKHR xrGetOpenGLGraphicsRequirementsKHR = nullptr;
+	result = xrGetInstanceProcAddr(m_instance, "xrGetOpenGLGraphicsRequirementsKHR", (PFN_xrVoidFunction*)&xrGetOpenGLGraphicsRequirementsKHR);
+	if (result != XR_SUCCESS) return false;
+	XrGraphicsRequirementsOpenGLKHR requirements = { XR_TYPE_GRAPHICS_REQUIREMENTS_OPENGL_KHR };
+	result = xrGetOpenGLGraphicsRequirementsKHR(m_instance, m_sys_id, &requirements);
+	if (result != XR_SUCCESS) return false;
+	XrGraphicsBindingOpenGLWin32KHR graphicsBindingOpenGL = { XR_TYPE_GRAPHICS_BINDING_OPENGL_WIN32_KHR };
+	graphicsBindingOpenGL.hDC = static_cast<HDC>(hdc);
+	graphicsBindingOpenGL.hGLRC = static_cast<HGLRC>(hglrc);
 	XrSessionCreateInfo sessionCreateInfo = {};
 	sessionCreateInfo.type = XR_TYPE_SESSION_CREATE_INFO;
-	sessionCreateInfo.next = NULL;
+	sessionCreateInfo.next = (void*)&graphicsBindingOpenGL;
+	sessionCreateInfo.createFlags = 0;
 	sessionCreateInfo.systemId = m_sys_id;
-	xrCreateSession(m_instance, &sessionCreateInfo, &m_session);
+	result = xrCreateSession(m_instance, &sessionCreateInfo, &m_session);
+	if (result != XR_SUCCESS) return false;
 
 	// Create an action set
 	XrActionSetCreateInfo actionSetCreateInfo{ XR_TYPE_ACTION_SET_CREATE_INFO };
 	std::strcpy(actionSetCreateInfo.actionSetName, "fluo_act_set");
 	std::strcpy(actionSetCreateInfo.localizedActionSetName, "FluoRender_act_set");
 	actionSetCreateInfo.priority = 0;
-	xrCreateActionSet(m_instance, &actionSetCreateInfo, &m_act_set);
+	result = xrCreateActionSet(m_instance, &actionSetCreateInfo, &m_act_set);
+	if (result != XR_SUCCESS) return false;
 
 	// Create actions for left and right hand controllers
 	XrActionCreateInfo actionCreateInfo{ XR_TYPE_ACTION_CREATE_INFO };
 	actionCreateInfo.actionType = XR_ACTION_TYPE_FLOAT_INPUT;
 	std::strcpy(actionCreateInfo.actionName, "left_hand");
 	std::strcpy(actionCreateInfo.localizedActionName, "Left Hand");
-	xrCreateAction(m_act_set, &actionCreateInfo, &m_act_left);
+	result = xrCreateAction(m_act_set, &actionCreateInfo, &m_act_left);
+	if (result != XR_SUCCESS) return false;
 
 	std::strcpy(actionCreateInfo.actionName, "right_hand");
 	std::strcpy(actionCreateInfo.localizedActionName, "Right Hand");
-	xrCreateAction(m_act_set, &actionCreateInfo, &m_act_right);
+	result = xrCreateAction(m_act_set, &actionCreateInfo, &m_act_right);
+	if (result != XR_SUCCESS) return false;
 
 	// Suggest bindings for the actions
 	XrPath interactionProfilePath;
@@ -118,13 +148,15 @@ bool OpenXrRenderer::Init()
 	suggestedBindings.interactionProfile = interactionProfilePath;
 	suggestedBindings.suggestedBindings = bindings.data();
 	suggestedBindings.countSuggestedBindings = static_cast<uint32_t>(bindings.size());
-	xrSuggestInteractionProfileBindings(m_instance, &suggestedBindings);
+	result = xrSuggestInteractionProfileBindings(m_instance, &suggestedBindings);
+	if (result != XR_SUCCESS) return false;
 
 	// Attach the action set to the session
 	XrSessionActionSetsAttachInfo attachInfo{ XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO };
 	attachInfo.actionSets = &m_act_set;
 	attachInfo.countActionSets = 1;
-	xrAttachSessionActionSets(m_session, &attachInfo);
+	result = xrAttachSessionActionSets(m_session, &attachInfo);
+	if (result != XR_SUCCESS) return false;
 
 	// Create a reference space with the desired initial pose
 	XrReferenceSpaceCreateInfo spaceCreateInfo = { XR_TYPE_REFERENCE_SPACE_CREATE_INFO };
@@ -135,7 +167,8 @@ bool OpenXrRenderer::Init()
 	spaceCreateInfo.poseInReferenceSpace.position.z = 0.0f;
 
 	XrSpace space;
-	xrCreateReferenceSpace(m_session, &spaceCreateInfo, &space);
+	result = xrCreateReferenceSpace(m_session, &spaceCreateInfo, &space);
+	if (result != XR_SUCCESS) return false;
 
 	//frame state
 	m_frame.type = XR_TYPE_FRAME_STATE;
@@ -146,16 +179,14 @@ bool OpenXrRenderer::Init()
 	// Get render size
 	XrViewConfigurationView views[2];
 	uint32_t viewCount = 0;
-	xrEnumerateViewConfigurationViews(
+	result = xrEnumerateViewConfigurationViews(
 		m_instance, m_sys_id,
 		XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO,
 		2, &viewCount, views);
+	if (result != XR_SUCCESS || viewCount == 0) return false;
 
-	if (viewCount > 0)
-	{
-		m_size[0] = views[0].recommendedImageRectWidth;
-		m_size[1] = views[0].recommendedImageRectHeight;
-	}
+	m_size[0] = views[0].recommendedImageRectWidth;
+	m_size[1] = views[0].recommendedImageRectHeight;
 
 	//swapchain
 	XrSwapchainCreateInfo swapchainCreateInfo{XR_TYPE_SWAPCHAIN_CREATE_INFO};
@@ -168,8 +199,10 @@ bool OpenXrRenderer::Init()
 	swapchainCreateInfo.arraySize = 1;
 	swapchainCreateInfo.mipCount = 1;
 
-	xrCreateSwapchain(m_session, &swapchainCreateInfo, &m_swap_chain_left);
-	xrCreateSwapchain(m_session, &swapchainCreateInfo, &m_swap_chain_right);
+	result = xrCreateSwapchain(m_session, &swapchainCreateInfo, &m_swap_chain_left);
+	if (result != XR_SUCCESS) return false;
+	result = xrCreateSwapchain(m_session, &swapchainCreateInfo, &m_swap_chain_right);
+	if (result != XR_SUCCESS) return false;
 
 	//infos
 	m_acquire_info.type = XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO;
@@ -180,10 +213,9 @@ bool OpenXrRenderer::Init()
 	//projection
 	m_layer_proj.type = XR_TYPE_COMPOSITION_LAYER_PROJECTION;
 
-	return true;
-#else
-	return false;
+	m_initialized = true;
 #endif
+	return m_initialized;
 }
 
 void OpenXrRenderer::Close()

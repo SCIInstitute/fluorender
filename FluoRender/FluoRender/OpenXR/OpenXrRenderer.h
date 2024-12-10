@@ -29,9 +29,22 @@ DEALINGS IN THE SOFTWARE.
 #ifndef OpenXrRenderer_h
 #define OpenXrRenderer_h
 
+#ifdef _WIN32
+#define WINDOWS_LEAN_AND_MEAN
+#include <Windows.h>
+#include <unknwn.h>
+#endif
 #include <openxr/openxr.h>
 #include <openxr/openxr_platform.h>
 #include <glm/glm.hpp>
+
+#define OPENXR_CHECK(x, y)                                                                                                                                  \
+    {                                                                                                                                                       \
+        XrResult result = (x);                                                                                                                              \
+        if (!XR_SUCCEEDED(result)) {                                                                                                                        \
+            std::cerr << "ERROR: OPENXR: " << int(result) << y << std::endl; \
+        }                                                                                                                                                   \
+    }
 
 class OpenXrRenderer
 {
@@ -39,7 +52,7 @@ public:
 	OpenXrRenderer();
 	~OpenXrRenderer();
 
-	bool Init();
+	bool Init(void*, void*);
 	void Close();
 
 	uint32_t GetSize(int i)
@@ -62,6 +75,7 @@ public:
 	void DrawRight(uint32_t right_buffer);
 
 private:
+	bool m_initialized;
 #ifdef _WIN32
 	XrInstance m_instance;
 	XrSystemId m_sys_id;

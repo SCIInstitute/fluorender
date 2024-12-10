@@ -457,7 +457,15 @@ HCTX RenderCanvas::TabletInit(HWND hWnd, HINSTANCE hInst)
 
 void RenderCanvas::InitOpenXR()
 {
-	m_use_openxr = glbin_xr_renderer.Init();
+	if (m_use_openxr)
+		return;
+#ifdef _WIN32
+	HDC hdc = GetDC(GetHandle());
+	HGLRC hglrc = wglGetCurrentContext();
+	m_use_openxr = glbin_xr_renderer.Init(
+		static_cast<void*>(hdc),
+		static_cast<void*>(hglrc));
+#endif
 }
 
 void RenderCanvas::InitLookingGlass()
@@ -5347,8 +5355,15 @@ void RenderCanvas::ForceDraw()
 	Init();
 	wxPaintDC dc(this);
 
-	if (glbin_settings.m_hologram_mode == 2)
+	switch (glbin_settings.m_hologram_mode)
+	{
+	case 1:
+		InitOpenXR();
+		break;
+	case 2:
 		InitLookingGlass();
+		break;
+	}
 
 	if (m_resize)
 		m_retain_finalbuffer = false;

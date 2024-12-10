@@ -232,11 +232,6 @@ include_directories(${Boost_INCLUDE_DIR})
 # dlib
 add_subdirectory(${PARENT_DIR}/dlib-dir dlib_build)
 include_directories(${PARENT_DIR}/dlib-dir)
-#if(${CMAKE_BUILD_TYPE} MATCHES "Release")
-#  file(GLOB DLIB_LIBRARY ${PARENT_DIR}/dlib-dir/build/dlib/Release/*.lib)
-#elseif(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-#  file(GLOB DLIB_LIBRARY ${PARENT_DIR}/dlib-dir/build/dlib/Debug/*.lib)
-#endif()
 
 #opencv
 find_package(OpenCV REQUIRED)
@@ -356,13 +351,11 @@ endif()
 # OpenXR
 include_directories(${PARENT_DIR}/OpenXR-SDK/include)
 if(WIN32)
-	if(${ARCHITECTURE} MATCHES 64)
-        if(${CMAKE_BUILD_TYPE} MATCHES "Release")
-		    file(GLOB OpenXR_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Release/*.lib)
-        elseif(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-		    file(GLOB OpenXR_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Debug/*.lib)
-        endif()
-	endif()
+    file(GLOB OpenXR_RELEASE_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Release/*.lib)
+    file(GLOB OpenXR_DEBUG_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Debug/*.lib)
+    set(OpenXR_LIBRARIES $<$<CONFIG:Release>:${OpenXR_RELEASE_LIBRARIES}> $<$<CONFIG:Debug>:${OpenXR_DEBUG_LIBRARIES}>)
+    add_definitions(-DXR_USE_PLATFORM_WIN32)
+    add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
 endif()
 
 # pole
