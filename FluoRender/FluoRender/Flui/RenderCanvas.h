@@ -79,8 +79,6 @@ DEALINGS IN THE SOFTWARE.
 #endif
 #endif
 
-#include <openvr.h>
-
 #define VOL_METHOD_SEQ    1
 #define VOL_METHOD_MULTI  2
 #define VOL_METHOD_COMP    3
@@ -135,7 +133,7 @@ public:
 #ifdef _WIN32
 	int GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd);
 #endif
-	void InitOpenVR();
+	void InitOpenXR();
 	void InitLookingGlass();
 
 	wxString GetOGLVersion();
@@ -1116,12 +1114,10 @@ private:
 	bool m_full_screen;
 
 	//enable vr
-	bool m_use_openvr;
+	bool m_use_openxr;
 	bool m_lg_initiated;
-	uint32_t m_vr_size[2];
 	int m_vr_eye_idx;//0: left; 1: right
 #ifdef _WIN32
-	vr::IVRSystem *m_vr_system;
 #ifdef USE_XINPUT
 	XboxController* m_controller;
 	bool m_control_connected;

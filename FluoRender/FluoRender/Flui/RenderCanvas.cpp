@@ -294,7 +294,7 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_enlarge_scale(1.0),
 	//vr settings
 	m_lg_initiated(false),
-	m_use_openvr(false),
+	m_use_openxr(false),
 	m_vr_eye_idx(0)
 #if defined(_WIN32) && defined(USE_XINPUT)
 	,
@@ -455,20 +455,9 @@ HCTX RenderCanvas::TabletInit(HWND hWnd, HINSTANCE hInst)
 }
 #endif
 
-void RenderCanvas::InitOpenVR()
+void RenderCanvas::InitOpenXR()
 {
-#ifdef _WIN32
-	//openvr initilization
-	vr::EVRInitError vr_error;
-	m_vr_system = vr::VR_Init(&vr_error, vr::VRApplication_Scene, 0);
-	if (vr_error == vr::VRInitError_None &&
-		vr::VRCompositor())
-	{
-		m_use_openvr = true;
-		//get render size
-		m_vr_system->GetRecommendedRenderTargetSize(&m_vr_size[0], &m_vr_size[1]);
-	}
-#endif
+	m_use_openxr = glbin_xr_renderer.Init();
 }
 
 void RenderCanvas::InitLookingGlass()
@@ -524,11 +513,9 @@ RenderCanvas::~RenderCanvas()
 
 	if (glbin_settings.m_hologram_mode)
 	{
-		if (glbin_settings.m_hologram_mode == 1 && m_use_openvr)
+		if (glbin_settings.m_hologram_mode == 1 && m_use_openxr)
 		{
-			//vr shutdown
-			vr::VR_Shutdown();
-			//UnloadVR();
+			glbin_xr_renderer.Close();
 		}
 		if (glbin_settings.m_hologram_mode == 2)
 		{
@@ -715,17 +702,10 @@ void RenderCanvas::HandleProjection(int nx, int ny, bool vr)
 	m_ortho_bottom = -m_radius / m_scale_factor;
 	m_ortho_top = -m_ortho_bottom;
 
-	if (vr && m_use_openvr)
+	if (vr && m_use_openxr)
 	{
-#ifdef _WIN32
 		//get projection matrix
-		vr::EVREye eye = m_vr_eye_idx ? vr::Eye_Right : vr::Eye_Left;
-		auto proj_mat = m_vr_system->GetProjectionMatrix(eye, m_near_clip, m_far_clip);
-		static int ti[] = { 0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15 };
-		for (int i = 0; i < 16; ++i)
-			glm::value_ptr(m_proj_mat)[i] =
-			((float*)(proj_mat.m))[ti[i]];
-#endif
+		m_proj_mat = glbin_xr_renderer.GetProjectionMatrix(m_vr_eye_idx, m_near_clip, m_far_clip);
 	}
 	else
 	{
@@ -765,22 +745,12 @@ void RenderCanvas::HandleCamera(bool vr)
 
 	if (vr)
 	{
-		if (m_use_openvr)
+		if (m_use_openxr)
 		{
-#ifdef _WIN32
 			if (glbin_settings.m_mv_hmd)
 			{
 				//get tracking pose matrix
-				vr::TrackedDevicePose_t trackedDevicePose[vr::k_unMaxTrackedDeviceCount];
-				m_vr_system->GetDeviceToAbsoluteTrackingPose(vr::TrackingUniverseStanding, 0,
-					trackedDevicePose, vr::k_unMaxTrackedDeviceCount);
-				vr::HmdMatrix34_t hmdMatrix = trackedDevicePose[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking;
-				glm::mat4 modelViewMatrix = glm::mat4(
-					hmdMatrix.m[0][0], hmdMatrix.m[1][0], hmdMatrix.m[2][0], 0.0f,
-					hmdMatrix.m[0][1], hmdMatrix.m[1][1], hmdMatrix.m[2][1], 0.0f,
-					hmdMatrix.m[0][2], hmdMatrix.m[1][2], hmdMatrix.m[2][2], 0.0f,
-					hmdMatrix.m[0][3], hmdMatrix.m[1][3], hmdMatrix.m[2][3], 1.0f );
-				glm::mat4 mv_hmd = glm::inverse(modelViewMatrix);
+				glm::mat4 mv_hmd = glbin_xr_renderer.GetModelViewMatrix();
 				m_mv_mat = glm::lookAt(eye, center, up);
 				m_mv_mat = mv_hmd * m_mv_mat;
 			}
@@ -788,7 +758,6 @@ void RenderCanvas::HandleCamera(bool vr)
 			{
 				m_mv_mat = glm::lookAt(eye, center, up);
 			}
-#endif
 		}
 		else if (glbin_settings.m_hologram_mode)
 		{
@@ -2236,10 +2205,10 @@ void RenderCanvas::DrawFinalBuffer()
 //vr buffers
 void RenderCanvas::GetRenderSize(int &nx, int &ny)
 {
-	if (m_use_openvr)
+	if (m_use_openxr)
 	{
-		nx = m_vr_size[0];
-		ny = m_vr_size[1];
+		nx = glbin_xr_renderer.GetSize(0);
+		ny = glbin_xr_renderer.GetSize(1);
 	}
 	else
 	{
@@ -2253,12 +2222,10 @@ void RenderCanvas::GetRenderSize(int &nx, int &ny)
 
 void RenderCanvas::PrepVRBuffer()
 {
-	if (m_use_openvr)
+	if (m_use_openxr)
 	{
-#ifdef _WIN32
-		std::array<vr::TrackedDevicePose_t, vr::k_unMaxTrackedDeviceCount> tracked_device_poses;
-		vr::VRCompositor()->WaitGetPoses(tracked_device_poses.data(), tracked_device_poses.size(), NULL, 0);
-#endif
+		if (m_vr_eye_idx == 0)
+			glbin_xr_renderer.BeginFrame();
 	}
 
 	int nx, ny;
@@ -2351,16 +2318,9 @@ void RenderCanvas::DrawVRBuffer()
 	if (quad_va)
 		quad_va->draw();
 	//openvr left eye
-	if (m_use_openvr)
+	if (m_use_openxr)
 	{
-#ifdef _WIN32
-		vr::Texture_t left_eye = {};
-		left_eye.handle = reinterpret_cast<void*>(
-			(unsigned long long)(buffer->tex_id(GL_COLOR_ATTACHMENT0)));
-		left_eye.eType = vr::TextureType_OpenGL;
-		left_eye.eColorSpace = vr::ColorSpace_Gamma;
-		vr::VRCompositor()->Submit(vr::Eye_Left, &left_eye, nullptr);
-#endif
+		glbin_xr_renderer.DrawLeft(buffer->tex_id(GL_COLOR_ATTACHMENT0));
 	}
 	//right eye
 	buffer =
@@ -2372,17 +2332,11 @@ void RenderCanvas::DrawVRBuffer()
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Right_Square);
 	if (quad_va)
 		quad_va->draw();
-	//openvr left eye
-	if (m_use_openvr)
+	//openvr right eye
+	if (m_use_openxr)
 	{
-#ifdef _WIN32
-		vr::Texture_t right_eye = {};
-		right_eye.handle = reinterpret_cast<void*>(
-			(unsigned long long)(buffer->tex_id(GL_COLOR_ATTACHMENT0)));
-		right_eye.eType = vr::TextureType_OpenGL;
-		right_eye.eColorSpace = vr::ColorSpace_Gamma;
-		vr::VRCompositor()->Submit(vr::Eye_Right, &right_eye, nullptr);
-#endif
+		glbin_xr_renderer.DrawRight(buffer->tex_id(GL_COLOR_ATTACHMENT0));
+		glbin_xr_renderer.EndFrame();
 	}
 
 	if (img_shader && img_shader->valid())
@@ -3907,7 +3861,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			m_pre_draw = true;
 	}
 
-	if (m_use_openvr)
+	if (m_use_openxr)
 	{
 		event.RequestMore(true);
 		refresh = true;
@@ -4355,45 +4309,14 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 
 #if defined(_WIN32)
 	//vr controller, similar to xinput
-	if (m_use_openvr)
+	if (m_use_openxr)
 	{
-		double dzone = 0.2;
-		double sclr = 20;
-		double leftx = 0, lefty = 0, rghtx = 0, rghty = 0;
-		//scan all controllers
-		for (vr::TrackedDeviceIndex_t deviceIndex = 0;
-			deviceIndex < vr::k_unMaxTrackedDeviceCount;
-			++deviceIndex)
-		{
-			if (m_vr_system->IsTrackedDeviceConnected(deviceIndex))
-			{
-				vr::ETrackedDeviceClass deviceClass = m_vr_system->GetTrackedDeviceClass(deviceIndex);
-				if (deviceClass == vr::TrackedDeviceClass_Controller)
-				{
-					vr::VRControllerState_t state;
-					m_vr_system->GetControllerState(deviceIndex, &state, sizeof(state));
-
-					if (m_vr_system->GetControllerRoleForTrackedDeviceIndex(deviceIndex) ==
-						vr::TrackedControllerRole_LeftHand)
-					{
-						//left controller
-						leftx = state.rAxis[0].x;
-						lefty = state.rAxis[0].y;
-					}
-					else
-					{
-						//right controlelr
-						rghtx = state.rAxis[0].x;
-						rghty = state.rAxis[0].y;
-					}
-				}
-			}
-		}
-
-		if (leftx > -dzone && leftx < dzone) leftx = 0.0;
-		if (lefty > -dzone && lefty < dzone) lefty = 0.0;
-		if (rghtx > -dzone && rghtx < dzone) rghtx = 0.0;
-		if (rghty > -dzone && rghty < dzone) rghty = 0.0;
+		float leftx, lefty, rightx, righty;
+		glbin_xr_renderer.GetControllerStates();
+		leftx = glbin_xr_renderer.GetControllerLeftThumbstickX();
+		lefty = glbin_xr_renderer.GetControllerLeftThumbstickY();
+		rightx = glbin_xr_renderer.GetControllerRightThumbstickX();
+		righty = glbin_xr_renderer.GetControllerRightThumbstickY();
 
 		int nx = GetGLSize().x;
 		int ny = GetGLSize().y;
@@ -4401,7 +4324,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		if (leftx != 0.0)
 		{
 			event.RequestMore(true);
-			ControllerMoveHorizontal(leftx * sclr, nx, ny);
+			ControllerMoveHorizontal(leftx, nx, ny);
 			m_interactive = true;
 			m_update_rot_ctr = true;
 			refresh = true;
@@ -4410,16 +4333,16 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		if (lefty != 0.0)
 		{
 			event.RequestMore(true);
-			ControllerZoomDolly(leftx * sclr, nx, ny);
+			ControllerZoomDolly(leftx, nx, ny);
 			m_interactive = true;
 			refresh = true;
 			vc.insert(gstScaleFactor);
 		}
 		//rotate
-		if (rghtx != 0.0 || rghty != 0.0)
+		if (rightx != 0.0 || righty != 0.0)
 		{
 			event.RequestMore(true);
-			ControllerRotate(rghtx * sclr, rghty * sclr, nx, ny);
+			ControllerRotate(rightx, righty, nx, ny);
 			m_interactive = true;
 			refresh = true;
 			vc.insert(gstCamRotation);

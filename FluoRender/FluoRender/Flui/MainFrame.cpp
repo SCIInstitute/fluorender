@@ -796,7 +796,7 @@ MainFrame::MainFrame(
 	glbin_text_tex_manager.SetSize(glbin_settings.m_text_size);
 	//hologram
 	if (glbin_settings.m_hologram_mode == 1)
-		m_render_view_panels[0]->m_canvas->InitOpenVR();
+		m_render_view_panels[0]->m_canvas->InitOpenXR();
 
 	//keyboard shortcuts
 	wxAcceleratorEntry entries[5];

@@ -69,6 +69,7 @@ DEALINGS IN THE SOFTWARE.
 #include <LightFieldShader.h>
 #include <TextRenderer.h>
 #include <LookingGlassRenderer.h>
+#include <OpenXrRenderer.h>
 #include <Clusterizer.h>
 #include <VolumeMeshConv.h>
 #include <Project.h>
@@ -111,6 +112,7 @@ DEALINGS IN THE SOFTWARE.
 #define glbin_moviemaker fluo::Global::instance().get_movie_maker()
 #define glbin_data_manager fluo::Global::instance().get_data_manager()
 #define glbin_lg_renderer fluo::Global::instance().get_looking_glass_renderer()
+#define glbin_xr_renderer fluo::Global::instance().get_open_xr_renderer()
 #define glbin_colocalizer fluo::Global::instance().get_colocalizer()
 #define glbin_clusterizer fluo::Global::instance().get_clusterizer()
 #define glbin_vol_converter fluo::Global::instance().get_vol_converter()
@@ -233,6 +235,7 @@ namespace fluo
 		MovieMaker& get_movie_maker() { return m_movie_maker; }
 		DataManager& get_data_manager() { return m_data_manager; }
 		LookingGlassRenderer& get_looking_glass_renderer() { return m_lg_renderer; }
+		OpenXrRenderer& get_open_xr_renderer() { return m_xr_renderer; }
 		flrd::Colocalize& get_colocalizer() { return m_colocalizer; }
 		flrd::Clusterizer& get_clusterizer() { return m_clusterizer; }
 		flrd::VolumeMeshConv& get_vol_converter() { return m_vol_converter; }
@@ -311,6 +314,7 @@ namespace fluo
 		MovieMaker m_movie_maker;
 		DataManager m_data_manager;
 		LookingGlassRenderer m_lg_renderer;
+		OpenXrRenderer m_xr_renderer;
 		flrd::Colocalize m_colocalizer;
 		flrd::Clusterizer m_clusterizer;
 		flrd::VolumeMeshConv m_vol_converter;

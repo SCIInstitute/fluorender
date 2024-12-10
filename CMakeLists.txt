@@ -353,11 +353,15 @@ elseif(UNIX OR APPLE OR MINGW)
   include_directories(${OpenCL_INCLUDE_DIRS})
 endif()
 
-# OpenVR
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/OpenVR/headers)
+# OpenXR
+include_directories(${PARENT_DIR}/OpenXR-SDK/include)
 if(WIN32)
 	if(${ARCHITECTURE} MATCHES 64)
-		file(GLOB OpenVR_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/OpenVR/lib/win64/*.lib)
+        if(${CMAKE_BUILD_TYPE} MATCHES "Release")
+		    file(GLOB OpenXR_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Release/*.lib)
+        elseif(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+		    file(GLOB OpenXR_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Debug/*.lib)
+        endif()
 	endif()
 endif()
 
@@ -527,6 +531,13 @@ add_library(LOOKINGGLASS_OBJ OBJECT
   ${lgr_src} ${lgr_hdr})
 endif()
 
+# OpenXR
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/OpenXR)
+file(GLOB oxr_src FluoRender/FluoRender/OpenXR/*.cpp)
+file(GLOB oxr_hdr FluoRender/FluoRender/OpenXR/*.h)
+add_library(OPENXR_OBJ OBJECT
+  ${oxr_src} ${oxr_hdr})
+
 # Progress
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Progress)
 file(GLOB prg_src FluoRender/FluoRender/Progress/*.cpp)
@@ -687,6 +698,7 @@ if(APPLE)
     $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGE_OBJ>
     $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
+    $<TARGET_OBJECTS:OPENXR_OBJ>
     $<TARGET_OBJECTS:PROGRESS_OBJ>
     $<TARGET_OBJECTS:PROJECT_OBJ>
     $<TARGET_OBJECTS:PYTHON_OBJ>
@@ -736,6 +748,7 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGE_OBJ>
     $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
+    $<TARGET_OBJECTS:OPENXR_OBJ>
     $<TARGET_OBJECTS:PROGRESS_OBJ>
     $<TARGET_OBJECTS:PROJECT_OBJ>
     $<TARGET_OBJECTS:PYTHON_OBJ>
@@ -818,6 +831,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:IMAGE_OBJ>
       $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
+      $<TARGET_OBJECTS:OPENXR_OBJ>
       $<TARGET_OBJECTS:PROGRESS_OBJ>
       $<TARGET_OBJECTS:PROJECT_OBJ>
       $<TARGET_OBJECTS:PYTHON_OBJ>
@@ -857,6 +871,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:IMAGE_OBJ>
       $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
+      $<TARGET_OBJECTS:OPENXR_OBJ>
       $<TARGET_OBJECTS:PROGRESS_OBJ>
       $<TARGET_OBJECTS:PROJECT_OBJ>
       $<TARGET_OBJECTS:PYTHON_OBJ>
@@ -936,7 +951,7 @@ if(WIN32)
     ${Boost_LIBRARIES}
     ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
-    ${OpenVR_LIBRARIES}
+    ${OpenXR_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES}
     ${TIFF_LIBRARIES}
@@ -956,7 +971,7 @@ if(WIN32)
     ${Boost_LIBRARIES}
     ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
-    ${OpenVR_LIBRARIES}
+    ${OpenXR_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES}
     ${TIFF_LIBRARIES}
@@ -1072,14 +1087,6 @@ add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Benchmark"
   "$<TARGET_FILE_DIR:FluoRender>")
-
-# openvr
-if(WIN32)
-add_custom_command(TARGET FluoRender POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy
-	"${FluoRender_SOURCE_DIR}/FluoRender/OpenVR/lib/win64/openvr_api.dll"
-	"$<TARGET_FILE_DIR:FluoRender>")
-endif()
 
 # holoplay
 if(WIN32)
