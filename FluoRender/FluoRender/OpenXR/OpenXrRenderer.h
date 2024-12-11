@@ -46,6 +46,13 @@ DEALINGS IN THE SOFTWARE.
         }                                                                                                                                                   \
     }
 
+XrBool32 OpenXRMessageCallbackFunction(XrDebugUtilsMessageSeverityFlagsEXT messageSeverity, XrDebugUtilsMessageTypeFlagsEXT messageType, const XrDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData);
+
+template <typename T>
+inline bool BitwiseCheck(const T& value, const T& checkValue) {
+	return ((value & checkValue) == checkValue);
+}
+
 class OpenXrRenderer
 {
 public:
@@ -78,15 +85,48 @@ private:
 	bool m_initialized;
 #ifdef _WIN32
 	XrInstance m_instance;
+
+	std::vector<const char*> m_activeInstanceExtensions = {};
+	XrDebugUtilsMessengerEXT m_debugUtilsMessenger = XR_NULL_HANDLE;
+
 	XrSystemId m_sys_id;
+
+	std::vector<XrViewConfigurationType> m_app_view_configs =
+	{
+		XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO,
+		XR_VIEW_CONFIGURATION_TYPE_PRIMARY_MONO
+	};
+	std::vector<XrViewConfigurationType> m_view_configs;
+	XrViewConfigurationType m_view_config =
+		XR_VIEW_CONFIGURATION_TYPE_MAX_ENUM;
+	std::vector<XrViewConfigurationView> m_view_config_views;
+
+	std::vector<XrEnvironmentBlendMode> m_app_env_blend_modes =
+	{
+		XR_ENVIRONMENT_BLEND_MODE_OPAQUE,
+		XR_ENVIRONMENT_BLEND_MODE_ADDITIVE
+	};
+	std::vector<XrEnvironmentBlendMode> m_env_blend_modes = {};
+	XrEnvironmentBlendMode m_env_blend_mode =
+		XR_ENVIRONMENT_BLEND_MODE_MAX_ENUM;
+
 	XrSession m_session;
 	XrSpace m_space;
+
+	struct SwapchainInfo
+	{
+		XrSwapchain swapchain = XR_NULL_HANDLE;
+		int64_t swapchainFormat = 0;
+		std::vector<void*> imageViews;
+	};
+	std::vector<SwapchainInfo> m_swapchain_infos_color = {};
+	std::vector<SwapchainInfo> m_swapchain_infos_depth = {};
+
 	XrActionSet m_act_set;
 	XrAction m_act_left;
 	XrAction m_act_right;
-	XrFrameState m_frame;
-	XrSwapchain m_swap_chain_left;
-	XrSwapchain m_swap_chain_right;
+	XrFrameState m_frame_state;
+
 	XrSwapchainImageAcquireInfo m_acquire_info;
 	XrSwapchainImageWaitInfo m_wait_info;
 	XrSwapchainImageReleaseInfo m_release_info;
@@ -100,6 +140,46 @@ private:
 	float m_right_y;
 	float m_dead_zone;
 	float m_scaler;
+
+private:
+	bool CreateInstance();
+	void DestroyInstance();
+
+	void CreateDebugMessenger();
+	void DestroyDebugMessenger();
+
+	void GetInstanceProperties();
+	bool GetSystemID();
+	bool GetViewConfigurationViews();
+	bool GetEnvironmentBlendModes();
+
+	bool CreateSession(void* hdc, void* hglrc);
+	void DestroySession();
+
+	bool CreateReferenceSpace();
+	void DestroyReferenceSpace();
+
+	bool CreateSwapchains();
+	void DestroySwapchains();
+
+	void* CreateImageView(int type, XrSwapchain swapchain, uint32_t index);//0:color 1:depth
+	void DestroyImageView(void*& imageView);
 };
+
+inline bool IsStringInVector(
+	std::vector<const char*> list,
+	const char* name)
+{
+	bool found = false;
+	for (auto& item : list)
+	{
+		if (strcmp(name, item) == 0)
+		{
+			found = true;
+			break;
+		}
+	}
+	return found;
+}
 
 #endif//OpenXrRenderer_h

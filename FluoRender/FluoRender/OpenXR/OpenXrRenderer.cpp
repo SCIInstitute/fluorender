@@ -32,6 +32,10 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/gtc/matrix_transform.hpp>
 #include <cstring>
 #include <vector>
+#include <algorithm>
+#ifdef _DEBUG
+#include <Debug.h>
+#endif
 
 OpenXrRenderer::OpenXrRenderer() :
 	m_initialized(false),
@@ -41,8 +45,6 @@ OpenXrRenderer::OpenXrRenderer() :
 	m_act_set(0),
 	m_act_left(0),
 	m_act_right(0),
-	m_swap_chain_left(0),
-	m_swap_chain_right(0),
 	m_size{0, 0},
 	m_left_x(0.0f),
 	m_left_y(0.0f),
@@ -66,48 +68,32 @@ bool OpenXrRenderer::Init(void* hdc, void* hglrc)
 #ifdef _WIN32
 	XrResult result;
 
-	// Define application information
-	XrApplicationInfo appInfo = {};
-	strcpy(appInfo.applicationName, "FluoRender");
-	appInfo.applicationVersion = 1;
-	strcpy(appInfo.engineName, "FLRENDER");
-	appInfo.engineVersion = 1;
-	appInfo.apiVersion = XR_MAKE_VERSION(1, 0, 0);
-
-	// Define instance create info
-	XrInstanceCreateInfo instanceCreateInfo = { XR_TYPE_INSTANCE_CREATE_INFO };
-	instanceCreateInfo.applicationInfo = appInfo;
-	const char* enabledExtensions[] = { XR_KHR_OPENGL_ENABLE_EXTENSION_NAME };
-	instanceCreateInfo.enabledExtensionCount = 1;
-	instanceCreateInfo.enabledExtensionNames = enabledExtensions;
-
 	// OpenXR initialization
-	result = xrCreateInstance(&instanceCreateInfo, &m_instance);
-	if (result != XR_SUCCESS) return false;
+	if (!CreateInstance())
+		return false;
 
-	XrSystemGetInfo systemGetInfo = {};
-	systemGetInfo.type = XR_TYPE_SYSTEM_GET_INFO;
-	systemGetInfo.formFactor = XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY;
-	result = xrGetSystem(m_instance, &systemGetInfo, &m_sys_id);
-	if (result != XR_SUCCESS) return false;
+#ifdef _DEBUG
+	CreateDebugMessenger();
+	GetInstanceProperties();
+#endif
 
-	// Get OpenGL graphics requirements
-	PFN_xrGetOpenGLGraphicsRequirementsKHR xrGetOpenGLGraphicsRequirementsKHR = nullptr;
-	result = xrGetInstanceProcAddr(m_instance, "xrGetOpenGLGraphicsRequirementsKHR", (PFN_xrVoidFunction*)&xrGetOpenGLGraphicsRequirementsKHR);
-	if (result != XR_SUCCESS) return false;
-	XrGraphicsRequirementsOpenGLKHR requirements = { XR_TYPE_GRAPHICS_REQUIREMENTS_OPENGL_KHR };
-	result = xrGetOpenGLGraphicsRequirementsKHR(m_instance, m_sys_id, &requirements);
-	if (result != XR_SUCCESS) return false;
-	XrGraphicsBindingOpenGLWin32KHR graphicsBindingOpenGL = { XR_TYPE_GRAPHICS_BINDING_OPENGL_WIN32_KHR };
-	graphicsBindingOpenGL.hDC = static_cast<HDC>(hdc);
-	graphicsBindingOpenGL.hGLRC = static_cast<HGLRC>(hglrc);
-	XrSessionCreateInfo sessionCreateInfo = {};
-	sessionCreateInfo.type = XR_TYPE_SESSION_CREATE_INFO;
-	sessionCreateInfo.next = (void*)&graphicsBindingOpenGL;
-	sessionCreateInfo.createFlags = 0;
-	sessionCreateInfo.systemId = m_sys_id;
-	result = xrCreateSession(m_instance, &sessionCreateInfo, &m_session);
-	if (result != XR_SUCCESS) return false;
+	if (!GetSystemID())
+		return false;
+
+	// Get render size
+	if (!GetViewConfigurationViews())
+		return false;
+
+	GetEnvironmentBlendModes();
+
+	if (!CreateSession(hdc, hglrc))
+		return false;
+
+	if (!CreateReferenceSpace())
+		return false;
+
+	if (!CreateSwapchains())
+		return false;
 
 	// Create an action set
 	XrActionSetCreateInfo actionSetCreateInfo{ XR_TYPE_ACTION_SET_CREATE_INFO };
@@ -149,7 +135,10 @@ bool OpenXrRenderer::Init(void* hdc, void* hglrc)
 	suggestedBindings.suggestedBindings = bindings.data();
 	suggestedBindings.countSuggestedBindings = static_cast<uint32_t>(bindings.size());
 	result = xrSuggestInteractionProfileBindings(m_instance, &suggestedBindings);
-	if (result != XR_SUCCESS) return false;
+#ifdef _DEBUG
+	if (result != XR_SUCCESS)
+		DBGPRINT(L"xrSuggestInteractionProfileBindings failed.\n");
+#endif
 
 	// Attach the action set to the session
 	XrSessionActionSetsAttachInfo attachInfo{ XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO };
@@ -158,51 +147,12 @@ bool OpenXrRenderer::Init(void* hdc, void* hglrc)
 	result = xrAttachSessionActionSets(m_session, &attachInfo);
 	if (result != XR_SUCCESS) return false;
 
-	// Create a reference space with the desired initial pose
-	XrReferenceSpaceCreateInfo spaceCreateInfo = { XR_TYPE_REFERENCE_SPACE_CREATE_INFO };
-	spaceCreateInfo.referenceSpaceType = XR_REFERENCE_SPACE_TYPE_STAGE;  // or XR_REFERENCE_SPACE_TYPE_LOCAL
-	spaceCreateInfo.poseInReferenceSpace.orientation.w = 1.0f;  // No rotation
-	spaceCreateInfo.poseInReferenceSpace.position.x = 0.0f;
-	spaceCreateInfo.poseInReferenceSpace.position.y = 0.0f;
-	spaceCreateInfo.poseInReferenceSpace.position.z = 0.0f;
-
-	XrSpace space;
-	result = xrCreateReferenceSpace(m_session, &spaceCreateInfo, &space);
-	if (result != XR_SUCCESS) return false;
-
 	//frame state
-	m_frame.type = XR_TYPE_FRAME_STATE;
-	m_frame.predictedDisplayTime = 0;
-	m_frame.predictedDisplayPeriod = 0;
-	m_frame.shouldRender = XR_TRUE;
+	m_frame_state.type = XR_TYPE_FRAME_STATE;
+	m_frame_state.predictedDisplayTime = 0;
+	m_frame_state.predictedDisplayPeriod = 0;
+	m_frame_state.shouldRender = XR_TRUE;
 
-	// Get render size
-	XrViewConfigurationView views[2];
-	uint32_t viewCount = 0;
-	result = xrEnumerateViewConfigurationViews(
-		m_instance, m_sys_id,
-		XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO,
-		2, &viewCount, views);
-	if (result != XR_SUCCESS || viewCount == 0) return false;
-
-	m_size[0] = views[0].recommendedImageRectWidth;
-	m_size[1] = views[0].recommendedImageRectHeight;
-
-	//swapchain
-	XrSwapchainCreateInfo swapchainCreateInfo{XR_TYPE_SWAPCHAIN_CREATE_INFO};
-	swapchainCreateInfo.usageFlags = XR_SWAPCHAIN_USAGE_COLOR_ATTACHMENT_BIT;
-	swapchainCreateInfo.format = GL_RGBA32F; // Use the appropriate format for your images
-	swapchainCreateInfo.sampleCount = 1;
-	swapchainCreateInfo.width = m_size[0]; // Set the width of the swapchain
-	swapchainCreateInfo.height = m_size[1]; // Set the height of the swapchain
-	swapchainCreateInfo.faceCount = 1;
-	swapchainCreateInfo.arraySize = 1;
-	swapchainCreateInfo.mipCount = 1;
-
-	result = xrCreateSwapchain(m_session, &swapchainCreateInfo, &m_swap_chain_left);
-	if (result != XR_SUCCESS) return false;
-	result = xrCreateSwapchain(m_session, &swapchainCreateInfo, &m_swap_chain_right);
-	if (result != XR_SUCCESS) return false;
 
 	//infos
 	m_acquire_info.type = XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO;
@@ -221,7 +171,6 @@ bool OpenXrRenderer::Init(void* hdc, void* hglrc)
 void OpenXrRenderer::Close()
 {
 #ifdef _WIN32
-	//
 	if (m_act_left != XR_NULL_HANDLE)
 	{
 		xrDestroyAction(m_act_left);
@@ -234,25 +183,14 @@ void OpenXrRenderer::Close()
 	{
 		xrDestroyActionSet(m_act_set);
 	}
-	if (m_swap_chain_left != XR_NULL_HANDLE)
-	{
-		xrDestroySwapchain(m_swap_chain_left);
-	}
-	if (m_swap_chain_left != XR_NULL_HANDLE)
-	{
-		xrDestroySwapchain(m_swap_chain_left);
-	}
-	// End the session
-	if (m_session != XR_NULL_HANDLE)
-	{
-		xrEndSession(m_session);
-		xrDestroySession(m_session);
-	}
-	// Destroy the instance
-	if (m_instance != XR_NULL_HANDLE)
-	{
-		xrDestroyInstance(m_instance);
-	}
+	//
+	DestroySwapchains();
+	DestroyReferenceSpace();
+	DestroySession();
+#ifdef _DEBUG
+	DestroyDebugMessenger();
+#endif
+	DestroyInstance();
 #endif
 }
 
@@ -414,7 +352,7 @@ void OpenXrRenderer::BeginFrame()
 {
 #ifdef _WIN32
 	// Wait for the next frame
-	xrWaitFrame(m_session, nullptr, &m_frame);
+	xrWaitFrame(m_session, nullptr, &m_frame_state);
 
 	// Begin the frame
 	XrFrameBeginInfo frameBeginInfo{ XR_TYPE_FRAME_BEGIN_INFO };
@@ -427,7 +365,7 @@ void OpenXrRenderer::EndFrame()
 #ifdef _WIN32
 	// End the frame
 	XrFrameEndInfo frameEndInfo{ XR_TYPE_FRAME_END_INFO };
-	frameEndInfo.displayTime = m_frame.predictedDisplayTime;
+	frameEndInfo.displayTime = m_frame_state.predictedDisplayTime;
 	frameEndInfo.environmentBlendMode = XR_ENVIRONMENT_BLEND_MODE_OPAQUE;
 	frameEndInfo.layerCount = 0; // Add your layers here
 	frameEndInfo.layers = nullptr;
@@ -439,15 +377,15 @@ void OpenXrRenderer::DrawLeft(uint32_t left_buffer)
 {
 #ifdef _WIN32
 	// Acquire, copy, and release for left eye
-	uint32_t leftImageIndex;
-	xrAcquireSwapchainImage(m_swap_chain_left, &m_acquire_info, &leftImageIndex);
-	xrWaitSwapchainImage(m_swap_chain_left, &m_wait_info);
-	//CopyFramebufferToSwapchainImage(leftFramebuffer, leftImageIndex, width, height);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, left_buffer);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, leftImageIndex);
-	glBlitFramebuffer(0, 0, m_size[0], m_size[1], 0, 0, m_size[0], m_size[1], GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	xrReleaseSwapchainImage(m_swap_chain_left, &m_release_info);
+	//uint32_t leftImageIndex;
+	//xrAcquireSwapchainImage(m_swap_chain_left, &m_acquire_info, &leftImageIndex);
+	//xrWaitSwapchainImage(m_swap_chain_left, &m_wait_info);
+	////CopyFramebufferToSwapchainImage(leftFramebuffer, leftImageIndex, width, height);
+	//glBindFramebuffer(GL_READ_FRAMEBUFFER, left_buffer);
+	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, leftImageIndex);
+	//glBlitFramebuffer(0, 0, m_size[0], m_size[1], 0, 0, m_size[0], m_size[1], GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//xrReleaseSwapchainImage(m_swap_chain_left, &m_release_info);
 #endif
 }
 
@@ -455,14 +393,655 @@ void OpenXrRenderer::DrawRight(uint32_t right_buffer)
 {
 #ifdef _WIN32
 	// Acquire, copy, and release for right eye
-	uint32_t rightImageIndex;
-	xrAcquireSwapchainImage(m_swap_chain_right, &m_acquire_info, &rightImageIndex);
-	xrWaitSwapchainImage(m_swap_chain_right, &m_wait_info);
-	//CopyFramebufferToSwapchainImage(rightFramebuffer, rightImageIndex, width, height);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, right_buffer);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rightImageIndex);
-	glBlitFramebuffer(0, 0, m_size[0], m_size[1], 0, 0, m_size[0], m_size[1], GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	xrReleaseSwapchainImage(m_swap_chain_right, &m_release_info);
+	//uint32_t rightImageIndex;
+	//xrAcquireSwapchainImage(m_swap_chain_right, &m_acquire_info, &rightImageIndex);
+	//xrWaitSwapchainImage(m_swap_chain_right, &m_wait_info);
+	////CopyFramebufferToSwapchainImage(rightFramebuffer, rightImageIndex, width, height);
+	//glBindFramebuffer(GL_READ_FRAMEBUFFER, right_buffer);
+	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rightImageIndex);
+	//glBlitFramebuffer(0, 0, m_size[0], m_size[1], 0, 0, m_size[0], m_size[1], GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//xrReleaseSwapchainImage(m_swap_chain_right, &m_release_info);
 #endif
+}
+
+bool OpenXrRenderer::CreateInstance()
+{
+#ifdef _WIN32
+	XrResult result;
+	// Define application information
+	// The application/engine name and version are user-definied.
+	// These may help IHVs or runtimes.
+	XrApplicationInfo appInfo = {};
+	strncpy(appInfo.applicationName, "FluoRender", XR_MAX_APPLICATION_NAME_SIZE);
+	appInfo.applicationVersion = 1;
+	strncpy(appInfo.engineName, "FLRENDER", XR_MAX_ENGINE_NAME_SIZE);
+	appInfo.engineVersion = 1;
+	appInfo.apiVersion = XR_CURRENT_API_VERSION; //XR_MAKE_VERSION(1, 0, 0);
+
+	// Add additional instance layers/extensions that the application wants.
+	// Add both required and requested instance extensions.
+	std::vector<std::string> instanceExtensions = {};
+	instanceExtensions.push_back(XR_EXT_DEBUG_UTILS_EXTENSION_NAME);
+	instanceExtensions.push_back(XR_KHR_OPENGL_ENABLE_EXTENSION_NAME);
+
+	// Get all the API Layers from the OpenXR runtime.
+	uint32_t apiLayerCount = 0;
+	std::vector<XrApiLayerProperties> apiLayerProperties;
+	result = xrEnumerateApiLayerProperties(0, &apiLayerCount, nullptr);
+	if (result != XR_SUCCESS) return false;
+	apiLayerProperties.resize(apiLayerCount, {XR_TYPE_API_LAYER_PROPERTIES});
+	result = xrEnumerateApiLayerProperties(apiLayerCount, &apiLayerCount, apiLayerProperties.data());
+	if (result != XR_SUCCESS) return false;
+
+	// Check the requested API layers against the ones from the OpenXR.
+	// If found add it to the Active API Layers.
+	std::vector<std::string> apiLayers = {};
+	std::vector<const char *> activeAPILayers = {};
+	for (auto& requestLayer : apiLayers)
+	{
+		for (auto& layerProperty : apiLayerProperties)
+		{
+			// strcmp returns 0 if the strings match.
+			if (strcmp(requestLayer.c_str(),
+				layerProperty.layerName) != 0)
+			{
+				continue;
+			}
+			else
+			{
+				activeAPILayers.push_back(
+					requestLayer.c_str());
+				break;
+			}
+		}
+	}
+
+	// Get all the Instance Extensions from the OpenXR instance.
+	uint32_t extensionCount = 0;
+	std::vector<XrExtensionProperties> extensionProperties;
+	result = xrEnumerateInstanceExtensionProperties(
+		nullptr, 0, &extensionCount, nullptr);
+	if (result != XR_SUCCESS) return false;
+	extensionProperties.resize(extensionCount, {XR_TYPE_EXTENSION_PROPERTIES});
+	result = xrEnumerateInstanceExtensionProperties(
+		nullptr, extensionCount, &extensionCount,
+		extensionProperties.data());
+	if (result != XR_SUCCESS) return false;
+
+	// Check the requested Instance Extensions against the ones from the OpenXR runtime.
+	// If an extension is found add it to Active Instance Extensions.
+	// Log error if the Instance Extension is not found.
+	for (auto& requestedInstanceExtension : instanceExtensions)
+	{
+		bool found = false;
+		for (auto& extensionProperty : extensionProperties) {
+			// strcmp returns 0 if the strings match.
+			if (strcmp(requestedInstanceExtension.c_str(),
+				extensionProperty.extensionName) != 0)
+			{
+				continue;
+			}
+			else
+			{
+				m_activeInstanceExtensions.push_back(requestedInstanceExtension.c_str());
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+		{
+#ifdef _DEBUG
+			DBGPRINT(L"Failed to find OpenXR instance extension: %s\n",
+				requestedInstanceExtension.c_str());
+#endif
+		}
+	}
+
+	// Fill out an XrInstanceCreateInfo structure and create an XrInstance.
+	// XR_DOCS_TAG_BEGIN_XrInstanceCreateInfo
+	XrInstanceCreateInfo instanceCI{XR_TYPE_INSTANCE_CREATE_INFO};
+	instanceCI.createFlags = 0;
+	instanceCI.applicationInfo = appInfo;
+	instanceCI.enabledApiLayerCount = static_cast<uint32_t>(activeAPILayers.size());
+	instanceCI.enabledApiLayerNames = activeAPILayers.data();
+	instanceCI.enabledExtensionCount = static_cast<uint32_t>(m_activeInstanceExtensions.size());
+	instanceCI.enabledExtensionNames = m_activeInstanceExtensions.data();
+	result = xrCreateInstance(&instanceCI, &m_instance);
+	if (result != XR_SUCCESS) return false;
+
+	return true;
+#endif
+	return false;
+}
+
+void OpenXrRenderer::DestroyInstance()
+{
+	// Destroy the instance
+	if (m_instance != XR_NULL_HANDLE)
+	{
+		xrDestroyInstance(m_instance);
+	}
+}
+
+void OpenXrRenderer::CreateDebugMessenger()
+{
+#ifdef _WIN32
+	XrResult result;
+	if (IsStringInVector(m_activeInstanceExtensions,
+		XR_EXT_DEBUG_UTILS_EXTENSION_NAME))
+	{
+		// Set the userCallback to OpenXRMessageCallbackFunction().
+		XrDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCI{ XR_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT };
+		debugUtilsMessengerCI.messageSeverities = XR_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+		debugUtilsMessengerCI.messageTypes = XR_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_TYPE_CONFORMANCE_BIT_EXT;
+		debugUtilsMessengerCI.userCallback = (PFN_xrDebugUtilsMessengerCallbackEXT)OpenXRMessageCallbackFunction;
+		debugUtilsMessengerCI.userData = nullptr;
+
+		// Load xrCreateDebugUtilsMessengerEXT() function pointer as it is not default loaded by the OpenXR loader.
+		XrDebugUtilsMessengerEXT debugUtilsMessenger{};
+		PFN_xrCreateDebugUtilsMessengerEXT xrCreateDebugUtilsMessengerEXT;
+		result = xrGetInstanceProcAddr(m_instance, "xrCreateDebugUtilsMessengerEXT", (PFN_xrVoidFunction*)&xrCreateDebugUtilsMessengerEXT);
+		if (result != XR_SUCCESS ||
+			!xrCreateDebugUtilsMessengerEXT) return;
+
+		// Finally create and return the XrDebugUtilsMessengerEXT.
+		result = xrCreateDebugUtilsMessengerEXT(m_instance, &debugUtilsMessengerCI, &debugUtilsMessenger);
+	}
+#endif
+}
+
+void OpenXrRenderer::DestroyDebugMessenger()
+{
+	if (m_debugUtilsMessenger != XR_NULL_HANDLE)
+	{
+		// Load xrDestroyDebugUtilsMessengerEXT() function pointer as it is not default loaded by the OpenXR loader.
+		PFN_xrDestroyDebugUtilsMessengerEXT xrDestroyDebugUtilsMessengerEXT;
+		XrResult result = xrGetInstanceProcAddr(m_instance, "xrDestroyDebugUtilsMessengerEXT",
+			(PFN_xrVoidFunction*)&xrDestroyDebugUtilsMessengerEXT);
+		if (result != XR_SUCCESS ||
+			!xrDestroyDebugUtilsMessengerEXT) return;
+		// Destroy the provided XrDebugUtilsMessengerEXT.
+		xrDestroyDebugUtilsMessengerEXT(m_debugUtilsMessenger);
+	}
+}
+
+void OpenXrRenderer::GetInstanceProperties()
+{
+	// Get the instance's properties and log the runtime name and version.
+	XrInstanceProperties instanceProperties{XR_TYPE_INSTANCE_PROPERTIES};
+	xrGetInstanceProperties(m_instance, &instanceProperties);
+#ifdef _DEBUG
+	DBGPRINT(L"OpenXR Runtime: %s - %d.%d.%d\n",
+		instanceProperties.runtimeName,
+		XR_VERSION_MAJOR(instanceProperties.runtimeVersion),
+		XR_VERSION_MINOR(instanceProperties.runtimeVersion),
+		XR_VERSION_PATCH(instanceProperties.runtimeVersion));
+#endif
+}
+
+bool OpenXrRenderer::GetSystemID()
+{
+#ifdef _WIN32
+	XrResult result;
+	// Get the XrSystemId from the instance and the supplied XrFormFactor.
+	XrFormFactor formFactor = XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY;
+	XrSystemGetInfo systemGI{ XR_TYPE_SYSTEM_GET_INFO };
+	systemGI.formFactor = formFactor;
+	result = xrGetSystem(m_instance, &systemGI, &m_sys_id);
+	if (result != XR_SUCCESS) return false;
+
+	// Get the System's properties for some general information about the hardware and the vendor.
+#ifdef _DEBUG
+	XrSystemProperties systemProperties = {XR_TYPE_SYSTEM_PROPERTIES};
+	result = xrGetSystemProperties(m_instance, m_sys_id, &systemProperties);
+#endif
+
+	return true;
+#endif
+	return false;
+}
+
+bool OpenXrRenderer::GetViewConfigurationViews()
+{
+#ifdef _WIN32
+	XrResult result;
+	// Gets the View Configuration Types.
+	// The first call gets the count of the array that will be returned.
+	// The next call fills out the array.
+	uint32_t viewConfigurationCount = 0;
+	result = xrEnumerateViewConfigurations(
+		m_instance, m_sys_id, 0, &viewConfigurationCount, nullptr);
+	if (result != XR_SUCCESS) return false;
+	m_view_configs.resize(viewConfigurationCount);
+	result = xrEnumerateViewConfigurations(
+		m_instance, m_sys_id, viewConfigurationCount,
+		&viewConfigurationCount, m_view_configs.data());
+	if (result != XR_SUCCESS) return false;
+
+	// Pick the first application supported View Configuration Type con supported by the hardware.
+	for (const XrViewConfigurationType& viewConfiguration : m_app_view_configs)
+	{
+		if (std::find(m_view_configs.begin(), m_view_configs.end(),
+			viewConfiguration) != m_view_configs.end())
+		{
+			m_view_config = viewConfiguration;
+			break;
+		}
+	}
+	if (m_view_config == XR_VIEW_CONFIGURATION_TYPE_MAX_ENUM)
+	{
+		// Failed to find a view configuration type.
+		// Defaulting to XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO.
+		m_view_config = XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO;
+	}
+
+	// Gets the View Configuration Views.
+	// The first call gets the count of the array that will be returned.
+	// The next call fills out the array.
+	uint32_t viewConfigurationViewCount = 0;
+	result = xrEnumerateViewConfigurationViews(
+		m_instance, m_sys_id, m_view_config, 0,
+		&viewConfigurationViewCount, nullptr);
+	if (result != XR_SUCCESS) return false;
+	m_view_config_views.resize(
+		viewConfigurationViewCount, {XR_TYPE_VIEW_CONFIGURATION_VIEW});
+	result = xrEnumerateViewConfigurationViews(
+		m_instance, m_sys_id, m_view_config,
+		viewConfigurationViewCount, &viewConfigurationViewCount,
+		m_view_config_views.data());
+	if (result != XR_SUCCESS) return false;
+
+	uint32_t viewCount = m_view_config_views.size();
+	if (viewCount == 0) return false;
+	m_size[0] = m_view_config_views[0].recommendedImageRectWidth;
+	m_size[1] = m_view_config_views[0].recommendedImageRectHeight;
+
+	return true;
+#endif
+	return false;
+}
+
+bool OpenXrRenderer::GetEnvironmentBlendModes()
+{
+#ifdef _WIN32
+	XrResult result;
+	// Retrieves the available blend modes.
+	// The first call gets the count of the array that will be returned.
+	// The next call fills out the array.
+	uint32_t environmentBlendModeCount = 0;
+	result = xrEnumerateEnvironmentBlendModes(m_instance, m_sys_id, m_view_config,
+		0, &environmentBlendModeCount, nullptr);
+	if (result != XR_SUCCESS) return false;
+
+	m_env_blend_modes.resize(environmentBlendModeCount);
+	result = xrEnumerateEnvironmentBlendModes(m_instance, m_sys_id, m_view_config,
+		environmentBlendModeCount, &environmentBlendModeCount,
+		m_env_blend_modes.data());
+	if (result != XR_SUCCESS) return false;
+
+	// Pick the first application supported blend mode supported by the hardware.
+	for (const XrEnvironmentBlendMode& environmentBlendMode :
+		m_app_env_blend_modes)
+	{
+		if (std::find(m_env_blend_modes.begin(), m_env_blend_modes.end(),
+			environmentBlendMode) != m_env_blend_modes.end())
+		{
+			m_env_blend_mode = environmentBlendMode;
+			break;
+		}
+	}
+	if (m_env_blend_mode == XR_ENVIRONMENT_BLEND_MODE_MAX_ENUM)
+	{
+#ifdef _DEBUG
+		DBGPRINT(L"Failed to find a compatible blend mode. Defaulting to XR_ENVIRONMENT_BLEND_MODE_OPAQUE.\n");
+#endif
+		m_env_blend_mode = XR_ENVIRONMENT_BLEND_MODE_OPAQUE;
+	}
+
+	return true;
+#endif
+	return false;
+}
+
+bool OpenXrRenderer::CreateSession(void* hdc, void* hglrc)
+{
+#ifdef _WIN32
+	XrResult result;
+	// Create an XrSessionCreateInfo structure.
+	XrSessionCreateInfo sessionCI{XR_TYPE_SESSION_CREATE_INFO};
+	// Create a std::unique_ptr<GraphicsAPI_...> from the instance and system.
+	// This call sets up a graphics API that's suitable for use with OpenXR.
+	// Get OpenGL graphics requirements
+	PFN_xrGetOpenGLGraphicsRequirementsKHR xrGetOpenGLGraphicsRequirementsKHR = nullptr;
+	result = xrGetInstanceProcAddr(m_instance, "xrGetOpenGLGraphicsRequirementsKHR", (PFN_xrVoidFunction*)&xrGetOpenGLGraphicsRequirementsKHR);
+	if (result != XR_SUCCESS) return false;
+	XrGraphicsRequirementsOpenGLKHR requirements = { XR_TYPE_GRAPHICS_REQUIREMENTS_OPENGL_KHR };
+	result = xrGetOpenGLGraphicsRequirementsKHR(m_instance, m_sys_id, &requirements);
+	if (result != XR_SUCCESS) return false;
+	XrGraphicsBindingOpenGLWin32KHR graphicsBindingOpenGL = { XR_TYPE_GRAPHICS_BINDING_OPENGL_WIN32_KHR };
+	graphicsBindingOpenGL.hDC = static_cast<HDC>(hdc);
+	graphicsBindingOpenGL.hGLRC = static_cast<HGLRC>(hglrc);
+
+	// Fill out the XrSessionCreateInfo structure and create an XrSession.
+	sessionCI.next = (void*)&graphicsBindingOpenGL;
+	sessionCI.createFlags = 0;
+	sessionCI.systemId = m_sys_id;
+	result = xrCreateSession(m_instance, &sessionCI, &m_session);
+	if (result != XR_SUCCESS) return false;
+
+	return true;
+#endif
+	return false;
+}
+
+void OpenXrRenderer::DestroySession()
+{
+	// End the session
+	if (m_session != XR_NULL_HANDLE)
+	{
+		xrEndSession(m_session);
+		xrDestroySession(m_session);
+	}
+}
+
+bool OpenXrRenderer::CreateReferenceSpace()
+{
+#ifdef _WIN32
+	XrResult result;
+	// Fill out an XrReferenceSpaceCreateInfo structure and create a reference XrSpace, specifying a Local space with an identity pose as the origin.
+	XrReferenceSpaceCreateInfo referenceSpaceCI{XR_TYPE_REFERENCE_SPACE_CREATE_INFO};
+	referenceSpaceCI.referenceSpaceType = XR_REFERENCE_SPACE_TYPE_LOCAL;// or XR_REFERENCE_SPACE_TYPE_STAGE
+	referenceSpaceCI.poseInReferenceSpace = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}};
+	result = xrCreateReferenceSpace(m_session, &referenceSpaceCI, &m_space);
+	if (result != XR_SUCCESS) return false;
+
+	return true;
+#endif
+	return false;
+}
+
+void OpenXrRenderer::DestroyReferenceSpace()
+{
+	if (m_space != XR_NULL_HANDLE)
+	{
+		xrDestroySpace(m_space);
+	}
+}
+
+bool OpenXrRenderer::CreateSwapchains()
+{
+#ifdef _WIN32
+	XrResult result;
+	// Get the supported swapchain formats as an array of int64_t and ordered by runtime preference.
+	uint32_t formatCount = 0;
+	result = xrEnumerateSwapchainFormats(m_session, 0, &formatCount, nullptr);
+	if (result != XR_SUCCESS) return false;
+	std::vector<int64_t> formats(formatCount);
+	result = xrEnumerateSwapchainFormats(
+		m_session, formatCount, &formatCount, formats.data());
+	if (result != XR_SUCCESS) return false;
+
+	std::vector<int64_t> supportSFColor = {
+		GL_RGB10_A2,
+		GL_RGBA16F,
+		// The two below should only be used as a fallback, as they are linear color formats without enough bits for color
+		// depth, thus leading to banding.
+		GL_RGBA8,
+		GL_RGBA8_SNORM,
+	};
+	std::vector<int64_t> supportSFDepth = {
+		GL_DEPTH_COMPONENT32F,
+		GL_DEPTH_COMPONENT32,
+		GL_DEPTH_COMPONENT24,
+		GL_DEPTH_COMPONENT16 };
+
+	const std::vector<int64_t>::const_iterator& itor_color =
+		std::find_first_of(formats.begin(), formats.end(),
+		std::begin(supportSFColor), std::end(supportSFColor));
+	if (itor_color == formats.end())
+	{
+#ifdef _DEBUG
+		DBGPRINT(L"Failed to find color format for Swapchain.\n");
+#endif
+	}
+	const std::vector<int64_t>::const_iterator& itor_depth =
+		std::find_first_of(formats.begin(), formats.end(),
+		std::begin(supportSFDepth), std::end(supportSFDepth));
+	if (itor_depth == formats.end())
+	{
+#ifdef _DEBUG
+		DBGPRINT(L"Failed to find depth format for Swapchain.\n");
+#endif
+	}
+
+	//Resize the SwapchainInfo to match the number of view in the View Configuration.
+	m_swapchain_infos_color.resize(m_view_config_views.size());
+	m_swapchain_infos_depth.resize(m_view_config_views.size());
+
+	// Per view, create a color and depth swapchain, and their associated image views.
+	for (size_t i = 0; i < m_view_config_views.size(); i++)
+	{
+		SwapchainInfo& colorSwapchainInfo = m_swapchain_infos_color[i];
+		SwapchainInfo& depthSwapchainInfo = m_swapchain_infos_depth[i];
+
+		// Fill out an XrSwapchainCreateInfo structure and create an XrSwapchain.
+		// Color.
+		XrSwapchainCreateInfo swapchainCI{ XR_TYPE_SWAPCHAIN_CREATE_INFO };
+		swapchainCI.createFlags = 0;
+		swapchainCI.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_COLOR_ATTACHMENT_BIT;
+		swapchainCI.format = *itor_color;
+		swapchainCI.sampleCount = m_view_config_views[i].recommendedSwapchainSampleCount;  // Use the recommended values from the XrViewConfigurationView.
+		swapchainCI.width = m_view_config_views[i].recommendedImageRectWidth;
+		swapchainCI.height = m_view_config_views[i].recommendedImageRectHeight;
+		swapchainCI.faceCount = 1;
+		swapchainCI.arraySize = 1;
+		swapchainCI.mipCount = 1;
+		result = xrCreateSwapchain(m_session, &swapchainCI, &colorSwapchainInfo.swapchain);
+		if (result != XR_SUCCESS) return false;
+		colorSwapchainInfo.swapchainFormat = swapchainCI.format;  // Save the swapchain format for later use.
+
+		// Depth.
+		swapchainCI.createFlags = 0;
+		swapchainCI.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+		swapchainCI.format = *itor_depth;
+		swapchainCI.sampleCount = m_view_config_views[i].recommendedSwapchainSampleCount;  // Use the recommended values from the XrViewConfigurationView.
+		swapchainCI.width = m_view_config_views[i].recommendedImageRectWidth;
+		swapchainCI.height = m_view_config_views[i].recommendedImageRectHeight;
+		swapchainCI.faceCount = 1;
+		swapchainCI.arraySize = 1;
+		swapchainCI.mipCount = 1;
+		result = xrCreateSwapchain(m_session, &swapchainCI, &depthSwapchainInfo.swapchain);
+		if (result != XR_SUCCESS) return false;
+		depthSwapchainInfo.swapchainFormat = swapchainCI.format;  // Save the swapchain format for later use.
+
+		// Get the number of images in the color/depth swapchain and allocate Swapchain image data via GraphicsAPI to store the returned array.
+		uint32_t colorSwapchainImageCount = 0;
+		result = xrEnumerateSwapchainImages(colorSwapchainInfo.swapchain, 0, &colorSwapchainImageCount, nullptr);
+		if (result != XR_SUCCESS) return false;
+		std::vector<XrSwapchainImageOpenGLKHR> swapchain_images;
+		swapchain_images.resize(colorSwapchainImageCount, { XR_TYPE_SWAPCHAIN_IMAGE_OPENGL_KHR });
+		XrSwapchainImageBaseHeader* colorSwapchainImages = reinterpret_cast<XrSwapchainImageBaseHeader*>(swapchain_images.data());
+		result = xrEnumerateSwapchainImages(colorSwapchainInfo.swapchain,
+			colorSwapchainImageCount, &colorSwapchainImageCount, colorSwapchainImages);
+		if (result != XR_SUCCESS) return false;
+
+		uint32_t depthSwapchainImageCount = 0;
+		result = xrEnumerateSwapchainImages(depthSwapchainInfo.swapchain, 0, &depthSwapchainImageCount, nullptr);
+		swapchain_images.resize(depthSwapchainImageCount, { XR_TYPE_SWAPCHAIN_IMAGE_OPENGL_KHR });
+		XrSwapchainImageBaseHeader* depthSwapchainImages = reinterpret_cast<XrSwapchainImageBaseHeader*>(swapchain_images.data());
+		result = xrEnumerateSwapchainImages(depthSwapchainInfo.swapchain,
+			depthSwapchainImageCount, &depthSwapchainImageCount, depthSwapchainImages);
+		if (result != XR_SUCCESS) return false;
+
+		// Per image in the swapchains, fill out a GraphicsAPI::ImageViewCreateInfo structure and create a color/depth image view.
+		for (uint32_t j = 0; j < colorSwapchainImageCount; j++)
+		{
+			colorSwapchainInfo.imageViews.push_back(CreateImageView(0, colorSwapchainInfo.swapchain, j));
+		}
+		for (uint32_t j = 0; j < depthSwapchainImageCount; j++)
+		{
+			depthSwapchainInfo.imageViews.push_back(CreateImageView(1, depthSwapchainInfo.swapchain, j));
+		}
+	}
+
+	return true;
+#endif
+	return false;
+
+	//XrSwapchainCreateInfo swapchainCreateInfo{XR_TYPE_SWAPCHAIN_CREATE_INFO};
+	//swapchainCreateInfo.usageFlags = XR_SWAPCHAIN_USAGE_COLOR_ATTACHMENT_BIT;
+	//swapchainCreateInfo.format = GL_RGBA32F; // Use the appropriate format for your images
+	//swapchainCreateInfo.sampleCount = 1;
+	//swapchainCreateInfo.width = m_size[0]; // Set the width of the swapchain
+	//swapchainCreateInfo.height = m_size[1]; // Set the height of the swapchain
+	//swapchainCreateInfo.faceCount = 1;
+	//swapchainCreateInfo.arraySize = 1;
+	//swapchainCreateInfo.mipCount = 1;
+
+	//result = xrCreateSwapchain(m_session, &swapchainCreateInfo, &m_swap_chain_left);
+	//if (result != XR_SUCCESS) return false;
+	//result = xrCreateSwapchain(m_session, &swapchainCreateInfo, &m_swap_chain_right);
+	//if (result != XR_SUCCESS) return false;
+}
+
+void OpenXrRenderer::DestroySwapchains()
+{
+	// Per view in the view configuration:
+	for (size_t i = 0; i < m_view_config_views.size(); i++)
+	{
+		SwapchainInfo& colorSwapchainInfo = m_swapchain_infos_color[i];
+		SwapchainInfo& depthSwapchainInfo = m_swapchain_infos_depth[i];
+
+		// Destroy the color and depth image views from GraphicsAPI.
+		for (void*& imageView : colorSwapchainInfo.imageViews)
+		{
+			DestroyImageView(imageView);
+		}
+		for (void*& imageView : depthSwapchainInfo.imageViews)
+		{
+			DestroyImageView(imageView);
+		}
+
+		// Free the Swapchain Image Data.
+		//m_graphicsAPI->FreeSwapchainImageData(colorSwapchainInfo.swapchain);
+		//m_graphicsAPI->FreeSwapchainImageData(depthSwapchainInfo.swapchain);
+
+		// Destroy the swapchains.
+		xrDestroySwapchain(colorSwapchainInfo.swapchain);
+		xrDestroySwapchain(depthSwapchainInfo.swapchain);
+	}
+	// XR_DOCS_TAG_END_DestroySwapchains
+}
+
+void* OpenXrRenderer::CreateImageView(int type, XrSwapchain swapchain, uint32_t index)
+{
+	GLuint framebuffer = 0;
+	GLenum attachment;
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+	switch (type)
+	{
+	case 0://color
+		attachment = GL_COLOR_ATTACHMENT0;
+		break;
+	case 1://depth
+		attachment = GL_DEPTH_ATTACHMENT;
+		break;
+	}
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
+		attachment, GL_TEXTURE_2D,
+		XR_TYPE_SWAPCHAIN_IMAGE_OPENGL_KHR, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	return (void *)(uint64_t)framebuffer;
+}
+
+void OpenXrRenderer::DestroyImageView(void *&imageView)
+{
+	GLuint framebuffer = (GLuint)(uint64_t)imageView;
+	glDeleteFramebuffers(1, &framebuffer);
+	imageView = nullptr;
+}
+
+XrBool32 OpenXRMessageCallbackFunction(
+	XrDebugUtilsMessageSeverityFlagsEXT messageSeverity,
+	XrDebugUtilsMessageTypeFlagsEXT messageType,
+	const XrDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+	void* pUserData)
+{
+	// Lambda to covert an XrDebugUtilsMessageSeverityFlagsEXT to std::string. Bitwise check to concatenate multiple severities to the output string.
+	auto GetMessageSeverityString = [](XrDebugUtilsMessageSeverityFlagsEXT messageSeverity) -> std::string {
+		bool separator = false;
+
+		std::string msgFlags;
+		if (BitwiseCheck(messageSeverity, XR_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT)) {
+			msgFlags += "VERBOSE";
+			separator = true;
+		}
+		if (BitwiseCheck(messageSeverity, XR_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)) {
+			if (separator) {
+				msgFlags += ",";
+			}
+			msgFlags += "INFO";
+			separator = true;
+		}
+		if (BitwiseCheck(messageSeverity, XR_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)) {
+			if (separator) {
+				msgFlags += ",";
+			}
+			msgFlags += "WARN";
+			separator = true;
+		}
+		if (BitwiseCheck(messageSeverity, XR_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)) {
+			if (separator) {
+				msgFlags += ",";
+			}
+			msgFlags += "ERROR";
+		}
+		return msgFlags;
+		};
+	// Lambda to covert an XrDebugUtilsMessageTypeFlagsEXT to std::string. Bitwise check to concatenate multiple types to the output string.
+	auto GetMessageTypeString = [](XrDebugUtilsMessageTypeFlagsEXT messageType) -> std::string {
+		bool separator = false;
+
+		std::string msgFlags;
+		if (BitwiseCheck(messageType, XR_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT)) {
+			msgFlags += "GEN";
+			separator = true;
+		}
+		if (BitwiseCheck(messageType, XR_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT)) {
+			if (separator) {
+				msgFlags += ",";
+			}
+			msgFlags += "SPEC";
+			separator = true;
+		}
+		if (BitwiseCheck(messageType, XR_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT)) {
+			if (separator) {
+				msgFlags += ",";
+			}
+			msgFlags += "PERF";
+		}
+		return msgFlags;
+		};
+
+	// Collect message data.
+	std::string functionName = (pCallbackData->functionName) ? pCallbackData->functionName : "";
+	std::string messageSeverityStr = GetMessageSeverityString(messageSeverity);
+	std::string messageTypeStr = GetMessageTypeString(messageType);
+	std::string messageId = (pCallbackData->messageId) ? pCallbackData->messageId : "";
+	std::string message = (pCallbackData->message) ? pCallbackData->message : "";
+
+	// String stream final message.
+	//std::stringstream errorMessage;
+	//errorMessage << functionName << "(" << messageSeverityStr << " / " << messageTypeStr << "): msgNum: " << messageId << " - " << message;
+
+	//// Log and debug break.
+	//std::cerr << errorMessage.str() << std::endl;
+	//if (BitwiseCheck(messageSeverity, XR_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)) {
+	//	DEBUG_BREAK;
+	//}
+	return XrBool32();
 }
