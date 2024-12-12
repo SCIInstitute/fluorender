@@ -710,12 +710,12 @@ void RenderCanvas::HandleProjection(int nx, int ny, bool vr)
 	m_ortho_bottom = -m_radius / m_scale_factor;
 	m_ortho_top = -m_ortho_bottom;
 
-	if (vr && m_use_openxr)
-	{
-		//get projection matrix
-		m_proj_mat = glbin_xr_renderer.GetProjectionMatrix(m_vr_eye_idx);
-	}
-	else
+	//if (vr && m_use_openxr)
+	//{
+	//	//get projection matrix
+	//	m_proj_mat = glbin_xr_renderer.GetProjectionMatrix(m_vr_eye_idx);
+	//}
+	//else
 	{
 		if (m_persp)
 		{
