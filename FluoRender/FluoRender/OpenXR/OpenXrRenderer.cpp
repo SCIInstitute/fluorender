@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Framebuffer.h>
 #include <OpenXrRenderer.h>
 #include <glm/gtc/matrix_transform.hpp>
-#include <compatibility.h>
 #include <cstring>
 #include <vector>
 #include <algorithm>
@@ -39,13 +38,6 @@ DEALINGS IN THE SOFTWARE.
 #endif
 
 OpenXrRenderer::OpenXrRenderer() :
-	m_initialized(false),
-	m_instance(0),
-	m_session(0),
-	m_space(0),
-	m_act_set(0),
-	m_act_left(0),
-	m_act_right(0),
 	m_size{0, 0},
 	m_left_x(0.0f),
 	m_left_y(0.0f),
@@ -96,73 +88,7 @@ bool OpenXrRenderer::Init(void* hdc, void* hglrc)
 	if (!CreateSwapchains())
 		return false;
 
-	// Create an action set
-	XrActionSetCreateInfo actionSetCreateInfo{ XR_TYPE_ACTION_SET_CREATE_INFO };
-	std::strcpy(actionSetCreateInfo.actionSetName, "fluo_act_set");
-	std::strcpy(actionSetCreateInfo.localizedActionSetName, "FluoRender_act_set");
-	actionSetCreateInfo.priority = 0;
-	result = xrCreateActionSet(m_instance, &actionSetCreateInfo, &m_act_set);
-	if (result != XR_SUCCESS) return false;
-
-	// Create actions for left and right hand controllers
-	XrActionCreateInfo actionCreateInfo{ XR_TYPE_ACTION_CREATE_INFO };
-	actionCreateInfo.actionType = XR_ACTION_TYPE_FLOAT_INPUT;
-	std::strcpy(actionCreateInfo.actionName, "left_hand");
-	std::strcpy(actionCreateInfo.localizedActionName, "Left Hand");
-	result = xrCreateAction(m_act_set, &actionCreateInfo, &m_act_left);
-	if (result != XR_SUCCESS) return false;
-
-	std::strcpy(actionCreateInfo.actionName, "right_hand");
-	std::strcpy(actionCreateInfo.localizedActionName, "Right Hand");
-	result = xrCreateAction(m_act_set, &actionCreateInfo, &m_act_right);
-	if (result != XR_SUCCESS) return false;
-
-	// Suggest bindings for the actions
-	XrPath interactionProfilePath;
-	xrStringToPath(m_instance, "/interaction_profiles/khr/simple_controller", &interactionProfilePath);
-
-	XrPath leftHandPath, rightHandPath;
-	xrStringToPath(m_instance, "/user/hand/left", &leftHandPath);
-	xrStringToPath(m_instance, "/user/hand/right", &rightHandPath);
-
-	std::vector<XrActionSuggestedBinding> bindings =
-	{
-		{m_act_left, leftHandPath},
-		{m_act_right, rightHandPath}
-	};
-
-	XrInteractionProfileSuggestedBinding suggestedBindings{ XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING };
-	suggestedBindings.interactionProfile = interactionProfilePath;
-	suggestedBindings.suggestedBindings = bindings.data();
-	suggestedBindings.countSuggestedBindings = static_cast<uint32_t>(bindings.size());
-	result = xrSuggestInteractionProfileBindings(m_instance, &suggestedBindings);
-#ifdef _DEBUG
-	if (result != XR_SUCCESS)
-		DBGPRINT(L"xrSuggestInteractionProfileBindings failed.\n");
-#endif
-
-	// Attach the action set to the session
-	XrSessionActionSetsAttachInfo attachInfo{ XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO };
-	attachInfo.actionSets = &m_act_set;
-	attachInfo.countActionSets = 1;
-	result = xrAttachSessionActionSets(m_session, &attachInfo);
-	if (result != XR_SUCCESS) return false;
-
-	//frame state
-	m_frame_state.type = XR_TYPE_FRAME_STATE;
-	m_frame_state.predictedDisplayTime = 0;
-	m_frame_state.predictedDisplayPeriod = 0;
-	m_frame_state.shouldRender = XR_TRUE;
-
-
-	//infos
-	m_acquire_info.type = XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO;
-	m_wait_info.type = XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO;
-	m_wait_info.timeout = XR_INFINITE_DURATION;
-	m_release_info.type = XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO;
-
-	//projection
-	m_layer_proj.type = XR_TYPE_COMPOSITION_LAYER_PROJECTION;
+	CreateActions();
 
 	m_initialized = true;
 #endif
@@ -172,19 +98,8 @@ bool OpenXrRenderer::Init(void* hdc, void* hglrc)
 void OpenXrRenderer::Close()
 {
 #ifdef _WIN32
-	if (m_act_left != XR_NULL_HANDLE)
-	{
-		xrDestroyAction(m_act_left);
-	}
-	if (m_act_right != XR_NULL_HANDLE)
-	{
-		xrDestroyAction(m_act_right);
-	}
-	if (m_act_set != XR_NULL_HANDLE)
-	{
-		xrDestroyActionSet(m_act_set);
-	}
 	//
+	DestroyActions();
 	DestroySwapchains();
 	DestroyReferenceSpace();
 	DestroySession();
@@ -195,106 +110,28 @@ void OpenXrRenderer::Close()
 #endif
 }
 
-glm::mat4 OpenXrRenderer::GetProjectionMatrix(int eye_index, float near_clip, float far_clip)
+glm::mat4 OpenXrRenderer::GetProjectionMatrix(int eye_index)
 {
-	glm::mat4 proj_mat = glm::mat4(1.0f);
-
-#ifdef _WIN32
-	XrViewConfigurationType viewType = XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO;
-
-	uint32_t viewCount = 0;
-	xrEnumerateViewConfigurationViews(m_instance, m_sys_id, viewType, 0, &viewCount, nullptr);
-	std::vector<XrViewConfigurationView> views(viewCount, { XR_TYPE_VIEW_CONFIGURATION_VIEW });
-	xrEnumerateViewConfigurationViews(m_instance, m_sys_id, viewType, viewCount, &viewCount, views.data());
-
-	if (eye_index < viewCount)
+	switch (eye_index)
 	{
-		XrViewConfigurationView view = views[eye_index];
-
-		// Create the projection matrix for the specified eye
-		XrFrameState frameState = { XR_TYPE_FRAME_STATE };
-		xrWaitFrame(m_session, nullptr, &frameState);
-
-		XrViewLocateInfo viewLocateInfo = { XR_TYPE_VIEW_LOCATE_INFO };
-		viewLocateInfo.viewConfigurationType = viewType;
-		viewLocateInfo.displayTime = frameState.predictedDisplayTime;
-		viewLocateInfo.space = XR_NULL_HANDLE;
-
-		std::vector<XrView> xrViews(viewCount, { XR_TYPE_VIEW });
-		xrLocateViews(m_session, &viewLocateInfo, nullptr, viewCount, &viewCount, xrViews.data());
-
-		if (eye_index < xrViews.size())
-		{
-			XrFovf fov = xrViews[eye_index].fov;
-			float tanLeft = tanf(fov.angleLeft);
-			float tanRight = tanf(fov.angleRight);
-			float tanUp = tanf(fov.angleUp);
-			float tanDown = tanf(fov.angleDown);
-
-			float tanWidth = tanRight - tanLeft;
-			float tanHeight = tanUp - tanDown;
-
-			proj_mat = glm::frustum(
-				tanLeft * near_clip, tanRight * near_clip,
-				tanDown * near_clip, tanUp * near_clip,
-				near_clip, far_clip);
-		}
+	case 0://left
+		return m_proj_mat[0];
+	case 1://right
+		return m_proj_mat[1];
 	}
-#endif
-
-	return proj_mat;
+	return m_proj_mat[0];
 }
 
-glm::mat4 OpenXrRenderer::GetModelViewMatrix()
+glm::mat4 OpenXrRenderer::GetModelViewMatrix(int eye_index)
 {
-	glm::mat4 mv_mat = glm::mat4(1.0f);
-
-#ifdef _WIN32
-	XrFrameState frameState = { XR_TYPE_FRAME_STATE };
-	xrWaitFrame(m_session, nullptr, &frameState);
-
-	XrViewLocateInfo viewLocateInfo = { XR_TYPE_VIEW_LOCATE_INFO };
-	viewLocateInfo.viewConfigurationType = XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO;
-	viewLocateInfo.displayTime = frameState.predictedDisplayTime;
-	viewLocateInfo.space = m_space;
-
-	XrViewState viewState = { XR_TYPE_VIEW_STATE };
-	uint32_t viewCountOutput;
-	std::vector<XrView> views(2, { XR_TYPE_VIEW });
-	xrLocateViews(m_session, &viewLocateInfo, &viewState, views.size(), &viewCountOutput, views.data());
-
-	if (viewState.viewStateFlags & XR_VIEW_STATE_POSITION_VALID_BIT &&
-		viewState.viewStateFlags & XR_VIEW_STATE_ORIENTATION_VALID_BIT)
+	switch (eye_index)
 	{
-
-		XrPosef pose = views[0].pose;
-		glm::mat4 viewMatrix = glm::mat4(
-			1.0f - 2.0f * (pose.orientation.y * pose.orientation.y + pose.orientation.z * pose.orientation.z),
-			2.0f * (pose.orientation.x * pose.orientation.y + pose.orientation.w * pose.orientation.z),
-			2.0f * (pose.orientation.x * pose.orientation.z - pose.orientation.w * pose.orientation.y),
-			0.0f,
-
-			2.0f * (pose.orientation.x * pose.orientation.y - pose.orientation.w * pose.orientation.z),
-			1.0f - 2.0f * (pose.orientation.x * pose.orientation.x + pose.orientation.z * pose.orientation.z),
-			2.0f * (pose.orientation.y * pose.orientation.z + pose.orientation.w * pose.orientation.x),
-			0.0f,
-
-			2.0f * (pose.orientation.x * pose.orientation.z + pose.orientation.w * pose.orientation.y),
-			2.0f * (pose.orientation.y * pose.orientation.z - pose.orientation.w * pose.orientation.x),
-			1.0f - 2.0f * (pose.orientation.x * pose.orientation.x + pose.orientation.y * pose.orientation.y),
-			0.0f,
-
-			pose.position.x,
-			pose.position.y,
-			pose.position.z,
-			1.0f
-		);
-
-		mv_mat = glm::inverse(viewMatrix);
+	case 0://left
+		return m_mv_mat[0];
+	case 1://right
+		return m_mv_mat[1];
 	}
-#endif
-
-	return mv_mat;
+	return m_mv_mat[0];
 }
 
 void OpenXrRenderer::GetControllerStates()
@@ -352,57 +189,191 @@ void OpenXrRenderer::GetControllerStates()
 void OpenXrRenderer::BeginFrame()
 {
 #ifdef _WIN32
+	PollEvents();
+
 	// Wait for the next frame
-	xrWaitFrame(m_session, nullptr, &m_frame_state);
+	xrWaitFrame(m_session, &m_frame_wait_info, &m_frame_state);
 
 	// Begin the frame
-	XrFrameBeginInfo frameBeginInfo{ XR_TYPE_FRAME_BEGIN_INFO };
-	xrBeginFrame(m_session, &frameBeginInfo);
+	xrBeginFrame(m_session, &m_frame_begin_info);
+
+	m_render_layer_info.predictedDisplayTime = m_frame_state.predictedDisplayTime;
+	m_render_layer_info.layers.clear();
+
+	//bool sessionActive = (
+	//	m_session_state == XR_SESSION_STATE_SYNCHRONIZED ||
+	//	m_session_state == XR_SESSION_STATE_VISIBLE ||
+	//	m_session_state == XR_SESSION_STATE_FOCUSED);
+	//m_should_render = sessionActive && m_frame_state.shouldRender;
+	//m_should_render = m_frame_state.shouldRender;
+	if (!m_frame_state.shouldRender)
+		return;
+
+	// Locate the views from the view configuration within the (reference) space at the display time.
+	std::vector<XrView> views(m_view_config_views.size(), { XR_TYPE_VIEW });
+
+	XrViewState viewState{ XR_TYPE_VIEW_STATE };  // Will contain information on whether the position and/or orientation is valid and/or tracked.
+	XrViewLocateInfo viewLocateInfo{ XR_TYPE_VIEW_LOCATE_INFO };
+	viewLocateInfo.viewConfigurationType = m_view_config;
+	viewLocateInfo.displayTime = m_render_layer_info.predictedDisplayTime;
+	viewLocateInfo.space = m_space;
+	uint32_t viewCount = 0;
+	XrResult result = xrLocateViews(
+		m_session, &viewLocateInfo, &viewState,
+		static_cast<uint32_t>(views.size()),
+		&viewCount, views.data());
+	if (result != XR_SUCCESS) return;
+
+	m_render_layer_info.layerProjectionViews.resize(
+		viewCount, { XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW });
+
+	// Per view in the view configuration:
+	for (uint32_t i = 0; i < viewCount; i++)
+	{
+		// Get the width and height and construct the viewport and scissors.
+		const uint32_t &width = m_view_config_views[i].recommendedImageRectWidth;
+		const uint32_t &height = m_view_config_views[i].recommendedImageRectHeight;
+		// Fill out the XrCompositionLayerProjectionView structure specifying the pose and fov from the view.
+		// This also associates the swapchain image with this layer projection view.
+		m_render_layer_info.layerProjectionViews[i] = { XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW };
+		m_render_layer_info.layerProjectionViews[i].pose = views[i].pose;
+		m_render_layer_info.layerProjectionViews[i].fov = views[i].fov;
+		m_render_layer_info.layerProjectionViews[i].subImage.imageRect.offset.x = 0;
+		m_render_layer_info.layerProjectionViews[i].subImage.imageRect.offset.y = 0;
+		m_render_layer_info.layerProjectionViews[i].subImage.imageRect.extent.width = static_cast<int32_t>(width);
+		m_render_layer_info.layerProjectionViews[i].subImage.imageRect.extent.height = static_cast<int32_t>(height);
+		m_render_layer_info.layerProjectionViews[i].subImage.imageArrayIndex = 0;  // Useful for multiview rendering.
+
+		// Compute the view-projection transform.
+		if (i < 2)
+		{
+			XrFovf fov = views[i].fov;
+			float tanLeft = tanf(fov.angleLeft);
+			float tanRight = tanf(fov.angleRight);
+			float tanUp = tanf(fov.angleUp);
+			float tanDown = tanf(fov.angleDown);
+
+			float tanWidth = tanRight - tanLeft;
+			float tanHeight = tanUp - tanDown;
+
+			m_proj_mat[i] = glm::frustum(
+				tanLeft * m_near_clip, tanRight * m_near_clip,
+				tanDown * m_near_clip, tanUp * m_near_clip,
+				m_near_clip, m_far_clip);
+
+			//
+			XrPosef pose = views[i].pose;
+			glm::mat4 viewMatrix = glm::mat4(
+				1.0f - 2.0f * (pose.orientation.y * pose.orientation.y + pose.orientation.z * pose.orientation.z),
+				2.0f * (pose.orientation.x * pose.orientation.y + pose.orientation.w * pose.orientation.z),
+				2.0f * (pose.orientation.x * pose.orientation.z - pose.orientation.w * pose.orientation.y),
+				0.0f,
+
+				2.0f * (pose.orientation.x * pose.orientation.y - pose.orientation.w * pose.orientation.z),
+				1.0f - 2.0f * (pose.orientation.x * pose.orientation.x + pose.orientation.z * pose.orientation.z),
+				2.0f * (pose.orientation.y * pose.orientation.z + pose.orientation.w * pose.orientation.x),
+				0.0f,
+
+				2.0f * (pose.orientation.x * pose.orientation.z + pose.orientation.w * pose.orientation.y),
+				2.0f * (pose.orientation.y * pose.orientation.z - pose.orientation.w * pose.orientation.x),
+				1.0f - 2.0f * (pose.orientation.x * pose.orientation.x + pose.orientation.y * pose.orientation.y),
+				0.0f,
+
+				pose.position.x,
+				pose.position.y,
+				pose.position.z,
+				1.0f
+			);
+
+			m_mv_mat[i] = glm::inverse(viewMatrix);
+		}
+	}
 #endif
 }
 
 void OpenXrRenderer::EndFrame()
 {
+	if (!m_frame_state.shouldRender)
+		return;
 #ifdef _WIN32
+	// Fill out the XrCompositionLayerProjection structure for usage with xrEndFrame().
+	m_render_layer_info.layerProjection.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT | XR_COMPOSITION_LAYER_CORRECT_CHROMATIC_ABERRATION_BIT;
+	m_render_layer_info.layerProjection.space = m_space;
+	m_render_layer_info.layerProjection.viewCount = static_cast<uint32_t>(m_render_layer_info.layerProjectionViews.size());
+	m_render_layer_info.layerProjection.views = m_render_layer_info.layerProjectionViews.data();
+	m_render_layer_info.layers.push_back(
+		reinterpret_cast<XrCompositionLayerBaseHeader*>(
+			&m_render_layer_info.layerProjection));
 	// End the frame
 	XrFrameEndInfo frameEndInfo{ XR_TYPE_FRAME_END_INFO };
 	frameEndInfo.displayTime = m_frame_state.predictedDisplayTime;
-	frameEndInfo.environmentBlendMode = XR_ENVIRONMENT_BLEND_MODE_OPAQUE;
-	frameEndInfo.layerCount = 0; // Add your layers here
-	frameEndInfo.layers = nullptr;
-	xrEndFrame(m_session, &frameEndInfo);
+	frameEndInfo.environmentBlendMode = m_env_blend_mode;
+	frameEndInfo.layerCount = static_cast<uint32_t>(m_render_layer_info.layers.size());
+	frameEndInfo.layers = m_render_layer_info.layers.data();
+	XrResult result = xrEndFrame(m_session, &frameEndInfo);
+	if (result != XR_SUCCESS)
+	{
+#ifdef _DEBUG
+		DBGPRINT(L"xrEndFrame failed.\n");
+#endif
+	}
 #endif
 }
 
-void OpenXrRenderer::DrawLeft(uint32_t left_buffer)
+void OpenXrRenderer::Draw(const std::vector<uint32_t> &fbos)
 {
+	if (!m_frame_state.shouldRender)
+		return;
 #ifdef _WIN32
-	// Acquire, copy, and release for left eye
-	//uint32_t leftImageIndex;
-	//xrAcquireSwapchainImage(m_swap_chain_left, &m_acquire_info, &leftImageIndex);
-	//xrWaitSwapchainImage(m_swap_chain_left, &m_wait_info);
-	////CopyFramebufferToSwapchainImage(leftFramebuffer, leftImageIndex, width, height);
-	//glBindFramebuffer(GL_READ_FRAMEBUFFER, left_buffer);
-	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, leftImageIndex);
-	//glBlitFramebuffer(0, 0, m_size[0], m_size[1], 0, 0, m_size[0], m_size[1], GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//xrReleaseSwapchainImage(m_swap_chain_left, &m_release_info);
-#endif
-}
+	uint32_t viewCount = m_render_layer_info.layerProjectionViews.size();
+	// Per view in the view configuration:
+	for (uint32_t i = 0; i < viewCount; i++)
+	{
+		// Get the width and height and construct the viewport and scissors.
+		const uint32_t &width = m_view_config_views[i].recommendedImageRectWidth;
+		const uint32_t &height = m_view_config_views[i].recommendedImageRectHeight;
 
-void OpenXrRenderer::DrawRight(uint32_t right_buffer)
-{
-#ifdef _WIN32
-	// Acquire, copy, and release for right eye
-	//uint32_t rightImageIndex;
-	//xrAcquireSwapchainImage(m_swap_chain_right, &m_acquire_info, &rightImageIndex);
-	//xrWaitSwapchainImage(m_swap_chain_right, &m_wait_info);
-	////CopyFramebufferToSwapchainImage(rightFramebuffer, rightImageIndex, width, height);
-	//glBindFramebuffer(GL_READ_FRAMEBUFFER, right_buffer);
-	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rightImageIndex);
-	//glBlitFramebuffer(0, 0, m_size[0], m_size[1], 0, 0, m_size[0], m_size[1], GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//xrReleaseSwapchainImage(m_swap_chain_right, &m_release_info);
+		SwapchainInfo& colorSwapchainInfo = m_swapchain_infos_color[i];
+		SwapchainInfo& depthSwapchainInfo = m_swapchain_infos_depth[i];
+
+		// Acquire and wait for an image from the swapchains.
+		// Get the image index of an image in the swapchains.
+		// The timeout is infinite.
+		uint32_t colorImageIndex = 0;
+		uint32_t depthImageIndex = 0;
+		XrSwapchainImageAcquireInfo acquireInfo{ XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO };
+		OPENXR_CHECK(xrAcquireSwapchainImage(colorSwapchainInfo.swapchain, &acquireInfo, &colorImageIndex), "Failed to acquire Image from the Color Swapchian");
+		if (m_use_depth)
+			OPENXR_CHECK(xrAcquireSwapchainImage(depthSwapchainInfo.swapchain, &acquireInfo, &depthImageIndex), "Failed to acquire Image from the Depth Swapchian");
+
+		XrSwapchainImageWaitInfo waitInfo = { XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO };
+		waitInfo.timeout = XR_INFINITE_DURATION;
+		OPENXR_CHECK(xrWaitSwapchainImage(colorSwapchainInfo.swapchain, &waitInfo), "Failed to wait for Image from the Color Swapchain");
+		if (m_use_depth)
+			OPENXR_CHECK(xrWaitSwapchainImage(depthSwapchainInfo.swapchain, &waitInfo), "Failed to wait for Image from the Depth Swapchain");
+
+		// Fill out the XrCompositionLayerProjectionView structure specifying the pose and fov from the view.
+		// This also associates the swapchain image with this layer projection view.
+		m_render_layer_info.layerProjectionViews[i].subImage.swapchain = colorSwapchainInfo.swapchain;
+
+		//copy buffer
+		if (fbos.size() > i)
+		{
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[i]);
+			// Read pixels to PBO
+			GLuint dest_fbo = (GLuint)(uint64_t)(colorSwapchainInfo.imageViews[colorImageIndex]);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest_fbo);
+			glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			// Write pixels to destination FBO
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
+
+		// Give the swapchain image back to OpenXR, allowing the compositor to use the image.
+		XrSwapchainImageReleaseInfo releaseInfo{ XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO };
+		OPENXR_CHECK(xrReleaseSwapchainImage(colorSwapchainInfo.swapchain, &releaseInfo), "Failed to release Image back to the Color Swapchain");
+		if (m_use_depth)
+			OPENXR_CHECK(xrReleaseSwapchainImage(depthSwapchainInfo.swapchain, &releaseInfo), "Failed to release Image back to the Depth Swapchain");
+	}
 #endif
 }
 
@@ -845,20 +816,6 @@ bool OpenXrRenderer::CreateSwapchains()
 		if (result != XR_SUCCESS) return false;
 		colorSwapchainInfo.swapchainFormat = swapchainCI.format;  // Save the swapchain format for later use.
 
-		// Depth.
-		swapchainCI.createFlags = 0;
-		swapchainCI.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-		swapchainCI.format = *itor_depth;
-		swapchainCI.sampleCount = m_view_config_views[i].recommendedSwapchainSampleCount;  // Use the recommended values from the XrViewConfigurationView.
-		swapchainCI.width = m_view_config_views[i].recommendedImageRectWidth;
-		swapchainCI.height = m_view_config_views[i].recommendedImageRectHeight;
-		swapchainCI.faceCount = 1;
-		swapchainCI.arraySize = 1;
-		swapchainCI.mipCount = 1;
-		result = xrCreateSwapchain(m_session, &swapchainCI, &depthSwapchainInfo.swapchain);
-		if (result != XR_SUCCESS) return false;
-		depthSwapchainInfo.swapchainFormat = swapchainCI.format;  // Save the swapchain format for later use.
-
 		// Get the number of images in the color/depth swapchain and allocate Swapchain image data via GraphicsAPI to store the returned array.
 		uint32_t colorSwapchainImageCount = 0;
 		result = xrEnumerateSwapchainImages(colorSwapchainInfo.swapchain, 0, &colorSwapchainImageCount, nullptr);
@@ -870,22 +827,40 @@ bool OpenXrRenderer::CreateSwapchains()
 			colorSwapchainImageCount, &colorSwapchainImageCount, colorSwapchainImages);
 		if (result != XR_SUCCESS) return false;
 
-		uint32_t depthSwapchainImageCount = 0;
-		result = xrEnumerateSwapchainImages(depthSwapchainInfo.swapchain, 0, &depthSwapchainImageCount, nullptr);
-		swapchain_images.resize(depthSwapchainImageCount, { XR_TYPE_SWAPCHAIN_IMAGE_OPENGL_KHR });
-		XrSwapchainImageBaseHeader* depthSwapchainImages = reinterpret_cast<XrSwapchainImageBaseHeader*>(swapchain_images.data());
-		result = xrEnumerateSwapchainImages(depthSwapchainInfo.swapchain,
-			depthSwapchainImageCount, &depthSwapchainImageCount, depthSwapchainImages);
-		if (result != XR_SUCCESS) return false;
-
 		// Per image in the swapchains, fill out a GraphicsAPI::ImageViewCreateInfo structure and create a color/depth image view.
 		for (uint32_t j = 0; j < colorSwapchainImageCount; j++)
 		{
 			colorSwapchainInfo.imageViews.push_back(CreateImageView(0, colorSwapchainInfo.swapchain, j));
 		}
-		for (uint32_t j = 0; j < depthSwapchainImageCount; j++)
+
+		// Depth.
+		if (m_use_depth)
 		{
-			depthSwapchainInfo.imageViews.push_back(CreateImageView(1, depthSwapchainInfo.swapchain, j));
+			swapchainCI.createFlags = 0;
+			swapchainCI.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+			swapchainCI.format = *itor_depth;
+			swapchainCI.sampleCount = m_view_config_views[i].recommendedSwapchainSampleCount;  // Use the recommended values from the XrViewConfigurationView.
+			swapchainCI.width = m_view_config_views[i].recommendedImageRectWidth;
+			swapchainCI.height = m_view_config_views[i].recommendedImageRectHeight;
+			swapchainCI.faceCount = 1;
+			swapchainCI.arraySize = 1;
+			swapchainCI.mipCount = 1;
+			result = xrCreateSwapchain(m_session, &swapchainCI, &depthSwapchainInfo.swapchain);
+			if (result != XR_SUCCESS) return false;
+			depthSwapchainInfo.swapchainFormat = swapchainCI.format;  // Save the swapchain format for later use.
+
+			uint32_t depthSwapchainImageCount = 0;
+			result = xrEnumerateSwapchainImages(depthSwapchainInfo.swapchain, 0, &depthSwapchainImageCount, nullptr);
+			swapchain_images.resize(depthSwapchainImageCount, { XR_TYPE_SWAPCHAIN_IMAGE_OPENGL_KHR });
+			XrSwapchainImageBaseHeader* depthSwapchainImages = reinterpret_cast<XrSwapchainImageBaseHeader*>(swapchain_images.data());
+			result = xrEnumerateSwapchainImages(depthSwapchainInfo.swapchain,
+				depthSwapchainImageCount, &depthSwapchainImageCount, depthSwapchainImages);
+			if (result != XR_SUCCESS) return false;
+
+			for (uint32_t j = 0; j < depthSwapchainImageCount; j++)
+			{
+				depthSwapchainInfo.imageViews.push_back(CreateImageView(1, depthSwapchainInfo.swapchain, j));
+			}
 		}
 	}
 
@@ -922,26 +897,29 @@ void OpenXrRenderer::DestroySwapchains()
 		{
 			DestroyImageView(imageView);
 		}
-		for (void*& imageView : depthSwapchainInfo.imageViews)
+		// Destroy the swapchains.
+		xrDestroySwapchain(colorSwapchainInfo.swapchain);
+
+		if (m_use_depth)
 		{
-			DestroyImageView(imageView);
+			for (void*& imageView : depthSwapchainInfo.imageViews)
+			{
+				DestroyImageView(imageView);
+			}
+
+			xrDestroySwapchain(depthSwapchainInfo.swapchain);
 		}
 
 		// Free the Swapchain Image Data.
 		//m_graphicsAPI->FreeSwapchainImageData(colorSwapchainInfo.swapchain);
 		//m_graphicsAPI->FreeSwapchainImageData(depthSwapchainInfo.swapchain);
-
-		// Destroy the swapchains.
-		xrDestroySwapchain(colorSwapchainInfo.swapchain);
-		xrDestroySwapchain(depthSwapchainInfo.swapchain);
 	}
-	// XR_DOCS_TAG_END_DestroySwapchains
 }
 
 void* OpenXrRenderer::CreateImageView(int type, XrSwapchain swapchain, uint32_t index)
 {
 	GLuint framebuffer = 0;
-	GLenum attachment;
+	GLenum attachment = GL_COLOR_ATTACHMENT0;
 	glGenFramebuffers(1, &framebuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
@@ -967,6 +945,207 @@ void OpenXrRenderer::DestroyImageView(void *&imageView)
 	GLuint framebuffer = (GLuint)(uint64_t)imageView;
 	glDeleteFramebuffers(1, &framebuffer);
 	imageView = nullptr;
+}
+
+void OpenXrRenderer::PollEvents()
+{
+#ifdef _WIN32
+	// Poll OpenXR for a new event.
+	XrEventDataBuffer eventData{ XR_TYPE_EVENT_DATA_BUFFER };
+	auto XrPollEvents = [&]() -> bool
+	{
+		eventData = { XR_TYPE_EVENT_DATA_BUFFER };
+		return xrPollEvent(m_instance, &eventData) == XR_SUCCESS;
+	};
+
+	while (XrPollEvents())
+	{
+		switch (eventData.type)
+		{
+			// Log the number of lost events from the runtime.
+			case XR_TYPE_EVENT_DATA_EVENTS_LOST:
+			{
+				XrEventDataEventsLost* eventsLost =
+					reinterpret_cast<XrEventDataEventsLost*>(&eventData);
+#ifdef _DEBUG
+				DBGPRINT(L"OPENXR: Events Lost: %d\n", eventsLost->lostEventCount);
+#endif
+				break;
+			}
+			// Log that an instance loss is pending and shutdown the application.
+			case XR_TYPE_EVENT_DATA_INSTANCE_LOSS_PENDING:
+			{
+				XrEventDataInstanceLossPending* instanceLossPending =
+					reinterpret_cast<XrEventDataInstanceLossPending*>(&eventData);
+#ifdef _DEBUG
+				DBGPRINT(L"OPENXR: Instance Loss Pending at: %llu\n", instanceLossPending->lossTime);
+#endif
+				//m_sessionRunning = false;
+				//m_applicationRunning = false;
+				break;
+			}
+			// Log that the interaction profile has changed.
+			case XR_TYPE_EVENT_DATA_INTERACTION_PROFILE_CHANGED:
+			{
+				XrEventDataInteractionProfileChanged* interactionProfileChanged =
+					reinterpret_cast<XrEventDataInteractionProfileChanged*>(&eventData);
+#ifdef _DEBUG
+				DBGPRINT(L"OPENXR: Interaction Profile changed for Session: %llu\n", interactionProfileChanged->session);
+#endif
+				if (interactionProfileChanged->session != m_session)
+				{
+#ifdef _DEBUG
+					DBGPRINT(L"XrEventDataInteractionProfileChanged for unknown Session\n");
+#endif
+					break;
+				}
+				break;
+			}
+			// Log that there's a reference space change pending.
+			case XR_TYPE_EVENT_DATA_REFERENCE_SPACE_CHANGE_PENDING:
+			{
+				XrEventDataReferenceSpaceChangePending* referenceSpaceChangePending =
+					reinterpret_cast<XrEventDataReferenceSpaceChangePending*>(&eventData);
+#ifdef _DEBUG
+				DBGPRINT(L"OPENXR: Reference Space Change pending for Session: %llu\n", referenceSpaceChangePending->session);
+#endif
+				if (referenceSpaceChangePending->session != m_session)
+				{
+#ifdef _DEBUG
+					DBGPRINT(L"XrEventDataReferenceSpaceChangePending for unknown Session\n");
+#endif
+					break;
+				}
+				break;
+			}
+			// Session State changes:
+			case XR_TYPE_EVENT_DATA_SESSION_STATE_CHANGED:
+			{
+				XrEventDataSessionStateChanged* sessionStateChanged =
+					reinterpret_cast<XrEventDataSessionStateChanged*>(&eventData);
+				if (sessionStateChanged->session != m_session)
+				{
+#ifdef _DEBUG
+					DBGPRINT(L"XrEventDataSessionStateChanged for unknown Session\n");
+#endif
+					break;
+				}
+
+				if (sessionStateChanged->state == XR_SESSION_STATE_READY)
+				{
+					// SessionState is ready. Begin the XrSession using the XrViewConfigurationType.
+					XrSessionBeginInfo sessionBeginInfo{ XR_TYPE_SESSION_BEGIN_INFO };
+					sessionBeginInfo.primaryViewConfigurationType = m_view_config;
+					xrBeginSession(m_session, &sessionBeginInfo);
+					//m_sessionRunning = true;
+				}
+				if (sessionStateChanged->state == XR_SESSION_STATE_STOPPING)
+				{
+					// SessionState is stopping. End the XrSession.
+					xrEndSession(m_session);
+					//m_sessionRunning = false;
+				}
+				if (sessionStateChanged->state == XR_SESSION_STATE_EXITING)
+				{
+					// SessionState is exiting. Exit the application.
+					//m_sessionRunning = false;
+					//m_applicationRunning = false;
+				}
+				if (sessionStateChanged->state == XR_SESSION_STATE_LOSS_PENDING)
+				{
+					// SessionState is loss pending. Exit the application.
+					// It's possible to try a reestablish an XrInstance and XrSession, but we will simply exit here.
+					//m_sessionRunning = false;
+					//m_applicationRunning = false;
+				}
+				// Store state for reference across the application.
+				m_session_state = sessionStateChanged->state;
+				break;
+			}
+			default:
+			{
+				break;
+			}
+		}
+	}
+#endif
+}
+
+bool OpenXrRenderer::CreateActions()
+{
+#ifdef _WIN32
+	XrResult result;
+	// Create an action set
+	XrActionSetCreateInfo actionSetCreateInfo{ XR_TYPE_ACTION_SET_CREATE_INFO };
+	std::strcpy(actionSetCreateInfo.actionSetName, "fluo_act_set");
+	std::strcpy(actionSetCreateInfo.localizedActionSetName, "FluoRender_act_set");
+	actionSetCreateInfo.priority = 0;
+	result = xrCreateActionSet(m_instance, &actionSetCreateInfo, &m_act_set);
+	if (result != XR_SUCCESS) return false;
+
+	// Create actions for left and right hand controllers
+	XrActionCreateInfo actionCreateInfo{ XR_TYPE_ACTION_CREATE_INFO };
+	actionCreateInfo.actionType = XR_ACTION_TYPE_FLOAT_INPUT;
+	std::strcpy(actionCreateInfo.actionName, "left_hand");
+	std::strcpy(actionCreateInfo.localizedActionName, "Left Hand");
+	result = xrCreateAction(m_act_set, &actionCreateInfo, &m_act_left);
+	if (result != XR_SUCCESS) return false;
+
+	std::strcpy(actionCreateInfo.actionName, "right_hand");
+	std::strcpy(actionCreateInfo.localizedActionName, "Right Hand");
+	result = xrCreateAction(m_act_set, &actionCreateInfo, &m_act_right);
+	if (result != XR_SUCCESS) return false;
+
+	// Suggest bindings for the actions
+	XrPath interactionProfilePath;
+	xrStringToPath(m_instance, "/interaction_profiles/khr/simple_controller", &interactionProfilePath);
+
+	XrPath leftHandPath, rightHandPath;
+	xrStringToPath(m_instance, "/user/hand/left", &leftHandPath);
+	xrStringToPath(m_instance, "/user/hand/right", &rightHandPath);
+
+	std::vector<XrActionSuggestedBinding> bindings =
+	{
+		{m_act_left, leftHandPath},
+		{m_act_right, rightHandPath}
+	};
+
+	XrInteractionProfileSuggestedBinding suggestedBindings{ XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING };
+	suggestedBindings.interactionProfile = interactionProfilePath;
+	suggestedBindings.suggestedBindings = bindings.data();
+	suggestedBindings.countSuggestedBindings = static_cast<uint32_t>(bindings.size());
+	result = xrSuggestInteractionProfileBindings(m_instance, &suggestedBindings);
+#ifdef _DEBUG
+	if (result != XR_SUCCESS)
+		DBGPRINT(L"xrSuggestInteractionProfileBindings failed.\n");
+#endif
+
+	// Attach the action set to the session
+	XrSessionActionSetsAttachInfo attachInfo{ XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO };
+	attachInfo.actionSets = &m_act_set;
+	attachInfo.countActionSets = 1;
+	result = xrAttachSessionActionSets(m_session, &attachInfo);
+	if (result != XR_SUCCESS) return false;
+
+	return true;
+#endif
+	return false;
+}
+
+void OpenXrRenderer::DestroyActions()
+{
+	if (m_act_left != XR_NULL_HANDLE)
+	{
+		xrDestroyAction(m_act_left);
+	}
+	if (m_act_right != XR_NULL_HANDLE)
+	{
+		xrDestroyAction(m_act_right);
+	}
+	if (m_act_set != XR_NULL_HANDLE)
+	{
+		xrDestroyActionSet(m_act_set);
+	}
 }
 
 XrBool32 OpenXRMessageCallbackFunction(

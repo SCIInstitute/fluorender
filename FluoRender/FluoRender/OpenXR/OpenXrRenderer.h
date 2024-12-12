@@ -29,9 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef OpenXrRenderer_h
 #define OpenXrRenderer_h
 
+#include <compatibility.h>
 #ifdef _WIN32
-#define WINDOWS_LEAN_AND_MEAN
-#include <Windows.h>
 #include <unknwn.h>
 #endif
 #include <openxr/openxr.h>
@@ -67,8 +66,8 @@ public:
 		return m_size[i];
 	}
 
-	glm::mat4 GetProjectionMatrix(int eye_index, float near_clip, float far_clip);
-	glm::mat4 GetModelViewMatrix();
+	glm::mat4 GetProjectionMatrix(int eye_index);
+	glm::mat4 GetModelViewMatrix(int eye_index);
 	void GetControllerStates();
 	float GetControllerLeftThumbstickX() { return m_left_x; }
 	float GetControllerLeftThumbstickY() { return m_left_y; }
@@ -77,14 +76,18 @@ public:
 
 	void BeginFrame();
 	void EndFrame();
+	void Draw(const std::vector<uint32_t> &fbos);
 
-	void DrawLeft(uint32_t left_buffer);
-	void DrawRight(uint32_t right_buffer);
+	void SetClips(float near_clip, float far_clip)
+	{
+		m_near_clip = near_clip;
+		m_far_clip = far_clip;
+	}
 
 private:
-	bool m_initialized;
+	bool m_initialized = false;
 #ifdef _WIN32
-	XrInstance m_instance;
+	XrInstance m_instance = XR_NULL_HANDLE;
 
 	std::vector<const char*> m_activeInstanceExtensions = {};
 	std::vector<std::string> m_instanceExtensions = {};
@@ -111,9 +114,12 @@ private:
 	XrEnvironmentBlendMode m_env_blend_mode =
 		XR_ENVIRONMENT_BLEND_MODE_MAX_ENUM;
 
-	XrSession m_session;
-	XrSpace m_space;
+	XrSession m_session = {};
+	XrSessionState m_session_state = XR_SESSION_STATE_UNKNOWN;
 
+	XrSpace m_space = XR_NULL_HANDLE;
+
+	bool m_use_depth = false;
 	struct SwapchainInfo
 	{
 		XrSwapchain swapchain = XR_NULL_HANDLE;
@@ -123,16 +129,22 @@ private:
 	std::vector<SwapchainInfo> m_swapchain_infos_color = {};
 	std::vector<SwapchainInfo> m_swapchain_infos_depth = {};
 
-	XrActionSet m_act_set;
-	XrAction m_act_left;
-	XrAction m_act_right;
-	XrFrameState m_frame_state;
+	//rendering
+	XrFrameState m_frame_state = {XR_TYPE_FRAME_STATE};
+	XrFrameWaitInfo m_frame_wait_info = {XR_TYPE_FRAME_WAIT_INFO};
+	XrFrameBeginInfo m_frame_begin_info = { XR_TYPE_FRAME_BEGIN_INFO };
+	struct RenderLayerInfo {
+		XrTime predictedDisplayTime = 0;
+		std::vector<XrCompositionLayerBaseHeader*> layers;
+		XrCompositionLayerProjection layerProjection = { XR_TYPE_COMPOSITION_LAYER_PROJECTION };
+		std::vector<XrCompositionLayerProjectionView> layerProjectionViews;
+	};
+	RenderLayerInfo m_render_layer_info;
 
-	XrSwapchainImageAcquireInfo m_acquire_info;
-	XrSwapchainImageWaitInfo m_wait_info;
-	XrSwapchainImageReleaseInfo m_release_info;
-	XrCompositionLayerProjection m_layer_proj;
-	XrCompositionLayerProjectionView m_proj_views[2];
+	XrActionSet m_act_set = XR_NULL_HANDLE;
+	XrAction m_act_left = XR_NULL_HANDLE;
+	XrAction m_act_right = XR_NULL_HANDLE;
+
 #endif
 	uint32_t m_size[2];
 	float m_left_x;
@@ -141,6 +153,11 @@ private:
 	float m_right_y;
 	float m_dead_zone;
 	float m_scaler;
+
+	float m_near_clip = 0.1f;
+	float m_far_clip = 1000.0f;
+	glm::mat4 m_proj_mat[2] = { glm::mat4(1.0f), glm::mat4(1.0f) };
+	glm::mat4 m_mv_mat[2] = { glm::mat4(1.0f), glm::mat4(1.0f) };
 
 private:
 	bool CreateInstance();
@@ -165,6 +182,11 @@ private:
 
 	void* CreateImageView(int type, XrSwapchain swapchain, uint32_t index);//0:color 1:depth
 	void DestroyImageView(void*& imageView);
+
+	void PollEvents();
+
+	bool CreateActions();
+	void DestroyActions();
 };
 
 inline bool IsStringInVector(

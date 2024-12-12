@@ -713,7 +713,7 @@ void RenderCanvas::HandleProjection(int nx, int ny, bool vr)
 	if (vr && m_use_openxr)
 	{
 		//get projection matrix
-		m_proj_mat = glbin_xr_renderer.GetProjectionMatrix(m_vr_eye_idx, m_near_clip, m_far_clip);
+		m_proj_mat = glbin_xr_renderer.GetProjectionMatrix(m_vr_eye_idx);
 	}
 	else
 	{
@@ -758,7 +758,7 @@ void RenderCanvas::HandleCamera(bool vr)
 			if (glbin_settings.m_mv_hmd)
 			{
 				//get tracking pose matrix
-				glm::mat4 mv_hmd = glbin_xr_renderer.GetModelViewMatrix();
+				glm::mat4 mv_hmd = glbin_xr_renderer.GetModelViewMatrix(m_vr_eye_idx);
 				m_mv_mat = glm::lookAt(eye, center, up);
 				m_mv_mat = mv_hmd * m_mv_mat;
 			}
@@ -2295,64 +2295,23 @@ void RenderCanvas::ClearVRBuffer()
 
 void RenderCanvas::DrawVRBuffer()
 {
-	int vr_x, vr_y, gl_x, gl_y;
-	GetRenderSize(vr_x, vr_y);
-	gl_x = GetGLSize().x;
-	gl_y = GetGLSize().y;
-	if (glbin_settings.m_sbs)
-		vr_x /= 2;
-	int vp_y = std::round((double)gl_x * vr_y / vr_x / 2.0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, gl_x, vp_y);
-	glDisable(GL_BLEND);
-	glDisable(GL_DEPTH_TEST);
-
-	flvr::ShaderProgram* img_shader =
-		glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
-	if (img_shader)
-	{
-		if (!img_shader->valid())
-			img_shader->create();
-		img_shader->bind();
-	}
+	std::vector<uint32_t> fbos;
 	//left eye
 	flvr::Framebuffer* buffer =
 		glbin_framebuffer_manager.framebuffer(
 			"vr left");
-	if (buffer)
-		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-	flvr::VertexArray* quad_va =
-		glbin_vertex_array_manager.vertex_array(flvr::VA_Left_Square);
-	if (quad_va)
-		quad_va->draw();
-	//openvr left eye
-	if (m_use_openxr)
-	{
-		glbin_xr_renderer.DrawLeft(buffer->tex_id(GL_COLOR_ATTACHMENT0));
-	}
+	fbos.push_back(buffer->tex_id(GL_COLOR_ATTACHMENT0));
 	//right eye
 	buffer =
 		glbin_framebuffer_manager.framebuffer(
 			"vr right");
-	if (buffer)
-		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-	quad_va =
-		glbin_vertex_array_manager.vertex_array(flvr::VA_Right_Square);
-	if (quad_va)
-		quad_va->draw();
-	//openvr right eye
+	fbos.push_back(buffer->tex_id(GL_COLOR_ATTACHMENT0));
+	//openxr draw
 	if (m_use_openxr)
 	{
-		glbin_xr_renderer.DrawRight(buffer->tex_id(GL_COLOR_ATTACHMENT0));
+		glbin_xr_renderer.Draw(fbos);
 		glbin_xr_renderer.EndFrame();
 	}
-
-	if (img_shader && img_shader->valid())
-		img_shader->release();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glEnable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
 }
 
 //Draw the volmues with compositing
