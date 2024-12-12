@@ -87,6 +87,7 @@ private:
 	XrInstance m_instance;
 
 	std::vector<const char*> m_activeInstanceExtensions = {};
+	std::vector<std::string> m_instanceExtensions = {};
 	XrDebugUtilsMessengerEXT m_debugUtilsMessenger = XR_NULL_HANDLE;
 
 	XrSystemId m_sys_id;

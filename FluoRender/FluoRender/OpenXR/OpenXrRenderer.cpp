@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Framebuffer.h>
 #include <OpenXrRenderer.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <compatibility.h>
 #include <cstring>
 #include <vector>
 #include <algorithm>
@@ -417,13 +418,14 @@ bool OpenXrRenderer::CreateInstance()
 	appInfo.applicationVersion = 1;
 	strncpy(appInfo.engineName, "FLRENDER", XR_MAX_ENGINE_NAME_SIZE);
 	appInfo.engineVersion = 1;
-	appInfo.apiVersion = XR_CURRENT_API_VERSION; //XR_MAKE_VERSION(1, 0, 0);
+	//there is no way to know which version is supported before creating the instance
+	//so, use the lowest version number for now
+	appInfo.apiVersion = XR_MAKE_VERSION(1, 0, 0); //XR_CURRENT_API_VERSION;
 
 	// Add additional instance layers/extensions that the application wants.
 	// Add both required and requested instance extensions.
-	std::vector<std::string> instanceExtensions = {};
-	instanceExtensions.push_back(XR_EXT_DEBUG_UTILS_EXTENSION_NAME);
-	instanceExtensions.push_back(XR_KHR_OPENGL_ENABLE_EXTENSION_NAME);
+	m_instanceExtensions.push_back(XR_EXT_DEBUG_UTILS_EXTENSION_NAME);
+	m_instanceExtensions.push_back(XR_KHR_OPENGL_ENABLE_EXTENSION_NAME);
 
 	// Get all the API Layers from the OpenXR runtime.
 	uint32_t apiLayerCount = 0;
@@ -472,7 +474,7 @@ bool OpenXrRenderer::CreateInstance()
 	// Check the requested Instance Extensions against the ones from the OpenXR runtime.
 	// If an extension is found add it to Active Instance Extensions.
 	// Log error if the Instance Extension is not found.
-	for (auto& requestedInstanceExtension : instanceExtensions)
+	for (auto& requestedInstanceExtension : m_instanceExtensions)
 	{
 		bool found = false;
 		for (auto& extensionProperty : extensionProperties) {
@@ -571,9 +573,11 @@ void OpenXrRenderer::GetInstanceProperties()
 	// Get the instance's properties and log the runtime name and version.
 	XrInstanceProperties instanceProperties{XR_TYPE_INSTANCE_PROPERTIES};
 	xrGetInstanceProperties(m_instance, &instanceProperties);
+	std::string str = instanceProperties.runtimeName;
+	std::wstring wstr = s2ws(str);
 #ifdef _DEBUG
 	DBGPRINT(L"OpenXR Runtime: %s - %d.%d.%d\n",
-		instanceProperties.runtimeName,
+		wstr.c_str(),
 		XR_VERSION_MAJOR(instanceProperties.runtimeVersion),
 		XR_VERSION_MINOR(instanceProperties.runtimeVersion),
 		XR_VERSION_PATCH(instanceProperties.runtimeVersion));
