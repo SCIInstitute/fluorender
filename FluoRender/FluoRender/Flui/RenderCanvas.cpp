@@ -807,6 +807,10 @@ void RenderCanvas::HandleCamera(bool vr)
 				up = new_up;
 			}
 		}
+		else
+		{
+			m_mv_mat = glm::lookAt(eye, center, up);
+		}
 	}
 	else
 	{
