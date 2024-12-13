@@ -907,11 +907,14 @@ void Project::Open(wxString& filename)
 				if (fconfig.Read("aov", &aov))
 					canvas->SetAov(aov);
 				double nearclip;
-				if (fconfig.Read("nearclip", &nearclip))
-					canvas->SetNearClip(nearclip);
 				double farclip;
-				if (fconfig.Read("farclip", &farclip))
+				if (fconfig.Read("nearclip", &nearclip) &&
+					fconfig.Read("farclip", &farclip))
+				{
+					canvas->SetNearClip(nearclip);
 					canvas->SetFarClip(farclip);
+					glbin_xr_renderer.SetClips(nearclip, farclip);
+				}
 				if (fconfig.Read("backgroundcolor", &str))
 				{
 					float r, g, b;

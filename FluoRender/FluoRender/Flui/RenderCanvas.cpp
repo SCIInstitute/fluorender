@@ -146,7 +146,7 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	//frustrum
 	m_aov(15.0),
 	m_near_clip(0.1),
-	m_far_clip(100.0),
+	m_far_clip(1000.0),
 	//interpolation
 	m_intp(true),
 	//previous focus
@@ -710,12 +710,12 @@ void RenderCanvas::HandleProjection(int nx, int ny, bool vr)
 	m_ortho_bottom = -m_radius / m_scale_factor;
 	m_ortho_top = -m_ortho_bottom;
 
-	//if (vr && m_use_openxr)
-	//{
-	//	//get projection matrix
-	//	m_proj_mat = glbin_xr_renderer.GetProjectionMatrix(m_vr_eye_idx);
-	//}
-	//else
+	if (vr && m_use_openxr)
+	{
+		//get projection matrix
+		m_proj_mat = glbin_xr_renderer.GetProjectionMatrix(m_vr_eye_idx);
+	}
+	else
 	{
 		if (m_persp)
 		{
@@ -2299,17 +2299,62 @@ void RenderCanvas::ClearVRBuffer()
 
 void RenderCanvas::DrawVRBuffer()
 {
-	std::vector<uint32_t> fbos;
+	int vr_x, vr_y, gl_x, gl_y;
+	GetRenderSize(vr_x, vr_y);
+	gl_x = GetGLSize().x;
+	gl_y = GetGLSize().y;
+	if (glbin_settings.m_sbs)
+		vr_x /= 2;
+	int vp_y = std::round((double)gl_x * vr_y / vr_x / 2.0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, gl_x, vp_y);
+	glDisable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
+
+	//draw in fluorender
+	flvr::ShaderProgram* img_shader =
+		glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	if (img_shader)
+	{
+		if (!img_shader->valid())
+			img_shader->create();
+		img_shader->bind();
+	}
 	//left eye
-	flvr::Framebuffer* buffer =
+	flvr::Framebuffer* buffer_left =
 		glbin_framebuffer_manager.framebuffer(
 			"vr left");
-	fbos.push_back(buffer->tex_id(GL_COLOR_ATTACHMENT0));
+	if (buffer_left)
+		buffer_left->bind_texture(GL_COLOR_ATTACHMENT0);
+	flvr::VertexArray* quad_va =
+		glbin_vertex_array_manager.vertex_array(flvr::VA_Left_Square);
+	if (quad_va)
+		quad_va->draw();
+
 	//right eye
-	buffer =
+	flvr::Framebuffer* buffer_right =
 		glbin_framebuffer_manager.framebuffer(
 			"vr right");
-	fbos.push_back(buffer->tex_id(GL_COLOR_ATTACHMENT0));
+	if (buffer_right)
+		buffer_right->bind_texture(GL_COLOR_ATTACHMENT0);
+	quad_va =
+		glbin_vertex_array_manager.vertex_array(flvr::VA_Right_Square);
+	if (quad_va)
+		quad_va->draw();
+
+	if (img_shader && img_shader->valid())
+		img_shader->release();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glEnable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+
+	//draw in headset
+	std::vector<uint32_t> fbos;
+	//left eye
+	fbos.push_back(buffer_left->id());
+	//right eye
+	fbos.push_back(buffer_right->id());
 	//openxr draw
 	if (m_use_openxr)
 	{
@@ -7150,6 +7195,7 @@ void RenderCanvas::InitView(unsigned int type)
 				m_radius = 348.0;
 			m_near_clip = m_radius / 1000.0;
 			m_far_clip = m_radius * 100.0;
+			glbin_xr_renderer.SetClips(m_near_clip, m_far_clip);
 		}
 	}
 
