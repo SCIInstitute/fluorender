@@ -116,6 +116,8 @@ private:
 
 	XrSession m_session = {};
 	XrSessionState m_session_state = XR_SESSION_STATE_UNKNOWN;
+	bool m_app_running = true;
+	bool m_session_running = false;
 
 	XrSpace m_space = XR_NULL_HANDLE;
 

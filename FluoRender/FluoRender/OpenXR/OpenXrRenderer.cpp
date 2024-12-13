@@ -188,8 +188,14 @@ void OpenXrRenderer::GetControllerStates()
 
 void OpenXrRenderer::BeginFrame()
 {
+	if (!m_app_running)
+		return;
+
 #ifdef _WIN32
 	PollEvents();
+
+	if (!m_session_running)
+		return;
 
 	// Wait for the next frame
 	xrWaitFrame(m_session, &m_frame_wait_info, &m_frame_state);
@@ -293,6 +299,8 @@ void OpenXrRenderer::BeginFrame()
 
 void OpenXrRenderer::EndFrame()
 {
+	if (!m_app_running || !m_session_running)
+		return;
 	if (!m_frame_state.shouldRender)
 		return;
 #ifdef _WIN32
@@ -322,6 +330,8 @@ void OpenXrRenderer::EndFrame()
 
 void OpenXrRenderer::Draw(const std::vector<uint32_t> &fbos)
 {
+	if (!m_app_running || !m_session_running)
+		return;
 	if (!m_frame_state.shouldRender)
 		return;
 #ifdef _WIN32
@@ -359,11 +369,15 @@ void OpenXrRenderer::Draw(const std::vector<uint32_t> &fbos)
 		//copy buffer
 		if (fbos.size() > i)
 		{
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[i]);
-			// Read pixels to PBO
 			GLuint dest_fbo = (GLuint)(uint64_t)(colorSwapchainInfo.imageViews[colorImageIndex]);
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest_fbo);
-			glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
+			glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
+			//glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[i]);
+			//// Read pixels to PBO
+			//GLuint dest_fbo = (GLuint)(uint64_t)(colorSwapchainInfo.imageViews[colorImageIndex]);
+			//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest_fbo);
+			//glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 			// Write pixels to destination FBO
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
@@ -980,8 +994,8 @@ void OpenXrRenderer::PollEvents()
 #ifdef _DEBUG
 				DBGPRINT(L"OPENXR: Instance Loss Pending at: %llu\n", instanceLossPending->lossTime);
 #endif
-				//m_sessionRunning = false;
-				//m_applicationRunning = false;
+				m_session_running = false;
+				m_app_running = false;
 				break;
 			}
 			// Log that the interaction profile has changed.
@@ -1037,26 +1051,26 @@ void OpenXrRenderer::PollEvents()
 					XrSessionBeginInfo sessionBeginInfo{ XR_TYPE_SESSION_BEGIN_INFO };
 					sessionBeginInfo.primaryViewConfigurationType = m_view_config;
 					xrBeginSession(m_session, &sessionBeginInfo);
-					//m_sessionRunning = true;
+					m_session_running = true;
 				}
 				if (sessionStateChanged->state == XR_SESSION_STATE_STOPPING)
 				{
 					// SessionState is stopping. End the XrSession.
 					xrEndSession(m_session);
-					//m_sessionRunning = false;
+					m_session_running = false;
 				}
 				if (sessionStateChanged->state == XR_SESSION_STATE_EXITING)
 				{
 					// SessionState is exiting. Exit the application.
-					//m_sessionRunning = false;
-					//m_applicationRunning = false;
+					m_session_running = false;
+					m_app_running = false;
 				}
 				if (sessionStateChanged->state == XR_SESSION_STATE_LOSS_PENDING)
 				{
 					// SessionState is loss pending. Exit the application.
 					// It's possible to try a reestablish an XrInstance and XrSession, but we will simply exit here.
-					//m_sessionRunning = false;
-					//m_applicationRunning = false;
+					m_session_running = false;
+					m_app_running = false;
 				}
 				// Store state for reference across the application.
 				m_session_state = sessionStateChanged->state;
