@@ -369,15 +369,16 @@ void OpenXrRenderer::Draw(const std::vector<uint32_t> &fbos)
 		//copy buffer
 		if (fbos.size() > i)
 		{
-			GLuint dest_fbo = (GLuint)(uint64_t)(colorSwapchainInfo.imageViews[colorImageIndex]);
-			glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
-			glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);
-			//glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[i]);
-			//// Read pixels to PBO
 			//GLuint dest_fbo = (GLuint)(uint64_t)(colorSwapchainInfo.imageViews[colorImageIndex]);
-			//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest_fbo);
-			//glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			//glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
+			//glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+			//glClear(GL_COLOR_BUFFER_BIT);
+
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[i]);
+			// Read pixels to PBO
+			GLuint dest_fbo = (GLuint)(uint64_t)(colorSwapchainInfo.imageViews[colorImageIndex]);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest_fbo);
+			glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 			// Write pixels to destination FBO
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
@@ -844,7 +845,7 @@ bool OpenXrRenderer::CreateSwapchains()
 		// Per image in the swapchains, fill out a GraphicsAPI::ImageViewCreateInfo structure and create a color/depth image view.
 		for (uint32_t j = 0; j < colorSwapchainImageCount; j++)
 		{
-			colorSwapchainInfo.imageViews.push_back(CreateImageView(0, colorSwapchainInfo.swapchain, j));
+			colorSwapchainInfo.imageViews.push_back(CreateImageView(0, (void*)(uint64_t)swapchain_images[j].image));
 		}
 
 		// Depth.
@@ -873,7 +874,7 @@ bool OpenXrRenderer::CreateSwapchains()
 
 			for (uint32_t j = 0; j < depthSwapchainImageCount; j++)
 			{
-				depthSwapchainInfo.imageViews.push_back(CreateImageView(1, depthSwapchainInfo.swapchain, j));
+				depthSwapchainInfo.imageViews.push_back(CreateImageView(1, (void*)(uint64_t)swapchain_images[j].image));
 			}
 		}
 	}
@@ -930,7 +931,7 @@ void OpenXrRenderer::DestroySwapchains()
 	}
 }
 
-void* OpenXrRenderer::CreateImageView(int type, XrSwapchain swapchain, uint32_t index)
+void* OpenXrRenderer::CreateImageView(int type, void* tid)
 {
 	GLuint framebuffer = 0;
 	GLenum attachment = GL_COLOR_ATTACHMENT0;
@@ -946,9 +947,10 @@ void* OpenXrRenderer::CreateImageView(int type, XrSwapchain swapchain, uint32_t 
 		attachment = GL_DEPTH_ATTACHMENT;
 		break;
 	}
+	GLuint tex_id = (GLuint)(uint64_t)tid;
 	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
 		attachment, GL_TEXTURE_2D,
-		XR_TYPE_SWAPCHAIN_IMAGE_OPENGL_KHR, 0);
+		tex_id, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	return (void *)(uint64_t)framebuffer;

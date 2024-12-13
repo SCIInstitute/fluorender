@@ -182,7 +182,7 @@ private:
 	bool CreateSwapchains();
 	void DestroySwapchains();
 
-	void* CreateImageView(int type, XrSwapchain swapchain, uint32_t index);//0:color 1:depth
+	void* CreateImageView(int type, void* tid);//0:color 1:depth
 	void DestroyImageView(void*& imageView);
 
 	void PollEvents();
