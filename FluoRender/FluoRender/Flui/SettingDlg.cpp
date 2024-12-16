@@ -478,6 +478,8 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	wxIntegerValidator<unsigned int> vald_int;
 	wxFloatingPointValidator<double> vald_fp1(1);
 	wxStaticText* st;
+	std::vector<wxString> cmb_str;
+
 	wxPanel* page = new wxPanel(parent);
 	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
@@ -491,9 +493,16 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	sizer1_1->Add(5, 5);
 	sizer1_1->Add(m_stereo_chk, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Install SteamVR and restart. Otherwise side-by-side only.");
+	st = new wxStaticText(page, 0, "VR API:",
+		wxDefaultPosition, FromDIP(wxSize(100, -1)));
+	m_xr_api_cmb = new wxComboBox(page, wxID_ANY, "",
+		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+	m_xr_api_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnXrApiComb, this);
+	cmb_str = { "N/A", "OpenXR", "OpenVR" };
+	m_xr_api_cmb->Append(cmb_str);
 	sizer1_2->Add(20, 5);
 	sizer1_2->Add(st, 0, wxALIGN_CENTER);
+	sizer1_2->Add(m_xr_api_cmb, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
 	m_mv_hmd_chk = new wxCheckBox(page, wxID_ANY,
 		"Get Model-View Matrix from HMD");
@@ -580,18 +589,18 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	int dn = wxDisplay::GetCount();
 	wxDisplay* display = 0;
 	wxString disp_name;
-	std::vector<wxString> list1;
+	cmb_str.clear();
 	for (int i = 0; i < dn; ++i)
 	{
 		display = new wxDisplay(i);
 		disp_name = display->GetName();
 		if (disp_name.IsEmpty())
-			list1.push_back(wxString::Format("%d", i));
+			cmb_str.push_back(wxString::Format("%d", i));
 		else
-			list1.push_back(wxString::Format("%d", i) + ": " + disp_name);
+			cmb_str.push_back(wxString::Format("%d", i) + ": " + disp_name);
 		delete display;
 	}
-	m_disp_id_comb->Append(list1);
+	m_disp_id_comb->Append(cmb_str);
 	sizer2_1->Add(st, 0, wxALIGN_CENTER);
 	sizer2_1->Add(5, 5);
 	sizer2_1->Add(m_disp_id_comb, 0, wxALIGN_CENTER);
@@ -608,8 +617,8 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	m_color_depth_comb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	m_color_depth_comb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnColorDepthComb, this);
-	std::vector<wxString> list2 = { "8", "10", "16" };
-	m_color_depth_comb->Append(list2);
+	cmb_str = { "8", "10", "16" };
+	m_color_depth_comb->Append(cmb_str);
 	sizer3_1->Add(st, 0, wxALIGN_CENTER);
 	sizer3_1->Add(5, 5);
 	sizer3_1->Add(m_color_depth_comb, 0, wxALIGN_CENTER);
@@ -1088,6 +1097,7 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			m_holo_debug_chk->Enable();
 		}
 		m_mv_hmd_chk->SetValue(glbin_settings.m_mv_hmd);
+		m_xr_api_cmb->Select(glbin_settings.m_xr_api);
 		m_sbs_chk->SetValue(glbin_settings.m_sbs);
 		m_eye_dist_sldr->ChangeValue(std::round(glbin_settings.m_eye_dist * 10.0));
 		m_eye_dist_text->ChangeValue(wxString::Format("%.1f", glbin_settings.m_eye_dist));
@@ -1405,6 +1415,11 @@ void SettingDlg::OnStereoCheck(wxCommandEvent& event)
 	else
 		glbin_settings.m_hologram_mode = 0;
 	FluoRefresh(2, { gstHologramMode });
+}
+
+void SettingDlg::OnXrApiComb(wxCommandEvent& event)
+{
+	glbin_settings.m_xr_api = m_xr_api_cmb->GetCurrentSelection();
 }
 
 void SettingDlg::OnMvHmdCheck(wxCommandEvent& event)

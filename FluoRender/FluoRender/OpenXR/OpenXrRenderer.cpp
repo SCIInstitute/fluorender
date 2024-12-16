@@ -39,13 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #endif
 
 OpenXrRenderer::OpenXrRenderer() :
-	m_size{0, 0},
-	m_left_x(0.0f),
-	m_left_y(0.0f),
-	m_right_x(0.0f),
-	m_right_y(0.0f),
-	m_dead_zone(0.2f),
-	m_scaler(20.0f)
+	BaseXrRenderer()
 {
 }
 
@@ -109,30 +103,6 @@ void OpenXrRenderer::Close()
 #endif
 	DestroyInstance();
 #endif
-}
-
-glm::mat4 OpenXrRenderer::GetProjectionMatrix(int eye_index)
-{
-	switch (eye_index)
-	{
-	case 0://left
-		return m_proj_mat[0];
-	case 1://right
-		return m_proj_mat[1];
-	}
-	return m_proj_mat[0];
-}
-
-glm::mat4 OpenXrRenderer::GetModelViewMatrix(int eye_index)
-{
-	switch (eye_index)
-	{
-	case 0://left
-		return m_mv_mat[0];
-	case 1://right
-		return m_mv_mat[1];
-	}
-	return m_mv_mat[0];
 }
 
 void OpenXrRenderer::GetControllerStates()

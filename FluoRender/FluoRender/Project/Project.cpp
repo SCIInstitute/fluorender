@@ -913,7 +913,8 @@ void Project::Open(wxString& filename)
 				{
 					canvas->SetNearClip(nearclip);
 					canvas->SetFarClip(farclip);
-					glbin_xr_renderer.SetClips(nearclip, farclip);
+					if (glbin_xr_renderer)
+						glbin_xr_renderer->SetClips(nearclip, farclip);
 				}
 				if (fconfig.Read("backgroundcolor", &str))
 				{

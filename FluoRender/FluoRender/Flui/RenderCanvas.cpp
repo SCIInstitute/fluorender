@@ -462,9 +462,10 @@ void RenderCanvas::InitOpenXR()
 #ifdef _WIN32
 	HDC hdc = GetDC(GetHandle());
 	HGLRC hglrc = wglGetCurrentContext();
-	m_use_openxr = glbin_xr_renderer.Init(
-		static_cast<void*>(hdc),
-		static_cast<void*>(hglrc));
+	if (glbin_xr_renderer)
+		m_use_openxr = glbin_xr_renderer->Init(
+			static_cast<void*>(hdc),
+			static_cast<void*>(hglrc));
 #endif
 }
 
@@ -523,7 +524,8 @@ RenderCanvas::~RenderCanvas()
 	{
 		if (glbin_settings.m_hologram_mode == 1 && m_use_openxr)
 		{
-			glbin_xr_renderer.Close();
+			if (glbin_xr_renderer)
+				glbin_xr_renderer->Close();
 		}
 		if (glbin_settings.m_hologram_mode == 2)
 		{
@@ -713,7 +715,7 @@ void RenderCanvas::HandleProjection(int nx, int ny, bool vr)
 	if (vr && m_use_openxr)
 	{
 		//get projection matrix
-		m_proj_mat = glbin_xr_renderer.GetProjectionMatrix(m_vr_eye_idx);
+		m_proj_mat = glbin_xr_renderer->GetProjectionMatrix(m_vr_eye_idx);
 	}
 	else
 	{
@@ -758,7 +760,7 @@ void RenderCanvas::HandleCamera(bool vr)
 			if (glbin_settings.m_mv_hmd)
 			{
 				//get tracking pose matrix
-				glm::mat4 mv_hmd = glbin_xr_renderer.GetModelViewMatrix(m_vr_eye_idx);
+				glm::mat4 mv_hmd = glbin_xr_renderer->GetModelViewMatrix(m_vr_eye_idx);
 				m_mv_mat = glm::lookAt(eye, center, up);
 				m_mv_mat = mv_hmd * m_mv_mat;
 			}
@@ -2219,8 +2221,8 @@ void RenderCanvas::GetRenderSize(int &nx, int &ny)
 {
 	if (m_use_openxr)
 	{
-		nx = glbin_xr_renderer.GetSize(0);
-		ny = glbin_xr_renderer.GetSize(1);
+		nx = glbin_xr_renderer->GetSize(0);
+		ny = glbin_xr_renderer->GetSize(1);
 	}
 	else
 	{
@@ -2237,7 +2239,7 @@ void RenderCanvas::PrepVRBuffer()
 	if (m_use_openxr)
 	{
 		if (m_vr_eye_idx == 0)
-			glbin_xr_renderer.BeginFrame();
+			glbin_xr_renderer->BeginFrame();
 	}
 
 	int nx, ny;
@@ -2358,8 +2360,8 @@ void RenderCanvas::DrawVRBuffer()
 	//openxr draw
 	if (m_use_openxr)
 	{
-		glbin_xr_renderer.Draw(fbos);
-		glbin_xr_renderer.EndFrame();
+		glbin_xr_renderer->Draw(fbos);
+		glbin_xr_renderer->EndFrame();
 	}
 }
 
@@ -4328,11 +4330,11 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	if (m_use_openxr)
 	{
 		float leftx, lefty, rightx, righty;
-		glbin_xr_renderer.GetControllerStates();
-		leftx = glbin_xr_renderer.GetControllerLeftThumbstickX();
-		lefty = glbin_xr_renderer.GetControllerLeftThumbstickY();
-		rightx = glbin_xr_renderer.GetControllerRightThumbstickX();
-		righty = glbin_xr_renderer.GetControllerRightThumbstickY();
+		glbin_xr_renderer->GetControllerStates();
+		leftx = glbin_xr_renderer->GetControllerLeftThumbstickX();
+		lefty = glbin_xr_renderer->GetControllerLeftThumbstickY();
+		rightx = glbin_xr_renderer->GetControllerRightThumbstickX();
+		righty = glbin_xr_renderer->GetControllerRightThumbstickY();
 
 		int nx = GetGLSize().x;
 		int ny = GetGLSize().y;
@@ -7195,7 +7197,8 @@ void RenderCanvas::InitView(unsigned int type)
 				m_radius = 348.0;
 			m_near_clip = m_radius / 1000.0;
 			m_far_clip = m_radius * 100.0;
-			glbin_xr_renderer.SetClips(m_near_clip, m_far_clip);
+			if (glbin_xr_renderer)
+				glbin_xr_renderer->SetClips(m_near_clip, m_far_clip);
 		}
 	}
 

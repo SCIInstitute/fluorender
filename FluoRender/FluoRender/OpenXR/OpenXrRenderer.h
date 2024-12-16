@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #endif
 #include <openxr/openxr.h>
 #include <openxr/openxr_platform.h>
-#include <glm/glm.hpp>
+#include <BaseXrRenderer.h>
 
 #define OPENXR_CHECK(x, y)                                                                                                                                  \
     {                                                                                                                                                       \
@@ -52,40 +52,22 @@ inline bool BitwiseCheck(const T& value, const T& checkValue) {
 	return ((value & checkValue) == checkValue);
 }
 
-class OpenXrRenderer
+class OpenXrRenderer : public BaseXrRenderer
 {
 public:
 	OpenXrRenderer();
-	~OpenXrRenderer();
+	virtual ~OpenXrRenderer();
 
-	bool Init(void*, void*);
-	void Close();
+	bool Init(void*, void*) override;
+	void Close() override;
 
-	uint32_t GetSize(int i)
-	{
-		return m_size[i];
-	}
+	void GetControllerStates() override;
 
-	glm::mat4 GetProjectionMatrix(int eye_index);
-	glm::mat4 GetModelViewMatrix(int eye_index);
-	void GetControllerStates();
-	float GetControllerLeftThumbstickX() { return m_left_x; }
-	float GetControllerLeftThumbstickY() { return m_left_y; }
-	float GetControllerRightThumbstickX() { return m_right_x; }
-	float GetControllerRightThumbstickY() { return m_right_y; }
-
-	void BeginFrame();
-	void EndFrame();
-	void Draw(const std::vector<uint32_t> &fbos);
-
-	void SetClips(float near_clip, float far_clip)
-	{
-		m_near_clip = near_clip;
-		m_far_clip = far_clip;
-	}
+	void BeginFrame() override;
+	void EndFrame() override;
+	void Draw(const std::vector<uint32_t> &fbos) override;
 
 private:
-	bool m_initialized = false;
 #ifdef _WIN32
 	XrInstance m_instance = XR_NULL_HANDLE;
 
@@ -93,7 +75,7 @@ private:
 	std::vector<std::string> m_instanceExtensions = {};
 	XrDebugUtilsMessengerEXT m_debugUtilsMessenger = XR_NULL_HANDLE;
 
-	XrSystemId m_sys_id;
+	XrSystemId m_sys_id = 0;
 
 	std::vector<XrViewConfigurationType> m_app_view_configs =
 	{
@@ -148,18 +130,6 @@ private:
 	XrAction m_act_right = XR_NULL_HANDLE;
 
 #endif
-	uint32_t m_size[2];
-	float m_left_x;
-	float m_left_y;
-	float m_right_x;
-	float m_right_y;
-	float m_dead_zone;
-	float m_scaler;
-
-	float m_near_clip = 0.1f;
-	float m_far_clip = 1000.0f;
-	glm::mat4 m_proj_mat[2] = { glm::mat4(1.0f), glm::mat4(1.0f) };
-	glm::mat4 m_mv_mat[2] = { glm::mat4(1.0f), glm::mat4(1.0f) };
 
 private:
 	bool CreateInstance();

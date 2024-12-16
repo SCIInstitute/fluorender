@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <StopWatchFactory.hpp>
 #include <SearchVisitor.hpp>
 #include <Reshape.h>
+#include <memory>
 
 using namespace fluo;
 
@@ -254,4 +255,23 @@ void Global::BuildFactories()
 	f2->createDefault();
 	origin_->addChild(f2);
 
+}
+
+BaseXrRenderer* Global::get_xr_renderer()
+{
+	if (m_xr_renderer)
+		return m_xr_renderer.get();
+	//create
+	switch (glbin_settings.m_xr_api)
+	{
+	case 0://disabled
+	default:
+		return 0;
+	case 1://openxr
+		m_xr_renderer = std::make_unique<OpenXrRenderer>();
+		return m_xr_renderer.get();
+	case 2://openvr
+		m_xr_renderer = std::make_unique<OpenVrRenderer>();
+	}
+	return 0;
 }
