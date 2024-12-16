@@ -302,7 +302,7 @@ void OpenXrRenderer::EndFrame()
 #endif
 }
 
-void OpenXrRenderer::Draw(const std::vector<uint32_t> &fbos)
+void OpenXrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 {
 	if (!m_app_running || !m_session_running)
 		return;
@@ -348,7 +348,7 @@ void OpenXrRenderer::Draw(const std::vector<uint32_t> &fbos)
 			//glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 			//glClear(GL_COLOR_BUFFER_BIT);
 
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[i]);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[i]->id());
 			// Read pixels to PBO
 			GLuint dest_fbo = (GLuint)(uint64_t)(colorSwapchainInfo.imageViews[colorImageIndex]);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest_fbo);

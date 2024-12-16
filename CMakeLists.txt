@@ -358,6 +358,15 @@ if(WIN32)
     add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
 endif()
 
+# OpenVR
+include_directories(${PARENT_DIR}/openvr/headers)
+if(WIN32)
+#    file(GLOB OpenVR_RELEASE_LIBRARIES ${PARENT_DIR}/openvr/bin/win64/Release/*.lib)
+#    file(GLOB OpenVR_DEBUG_LIBRARIES ${PARENT_DIR}/openvr/bin/win64/Debug/*.lib)
+#    set(OpenVR_LIBRARIES $<$<CONFIG:Release>:${OpenVR_RELEASE_LIBRARIES}> $<$<CONFIG:Debug>:${OpenVR_DEBUG_LIBRARIES}>)
+    file(GLOB OpenVR_LIBRARIES ${PARENT_DIR}/openvr/lib/win64/*.lib)
+endif()
+
 # pole
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/pole)
 file(GLOB pole_srcs FluoRender/pole/pole.cpp)
@@ -945,6 +954,7 @@ if(WIN32)
     ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
     ${OpenXR_LIBRARIES}
+    ${OpenVR_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES}
     ${TIFF_LIBRARIES}
@@ -964,7 +974,6 @@ if(WIN32)
     ${Boost_LIBRARIES}
     ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
-    ${OpenXR_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES}
     ${TIFF_LIBRARIES}
@@ -1080,6 +1089,14 @@ add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Benchmark"
   "$<TARGET_FILE_DIR:FluoRender>")
+
+# openvr
+if(WIN32)
+add_custom_command(TARGET FluoRender POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+	"${FluoRender_SOURCE_DIR}/FluoRender/OpenVR/lib/win64/openvr_api.dll"
+    "$<TARGET_FILE_DIR:FluoRender>")
+endif()
 
 # holoplay
 if(WIN32)

@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <OpenVrRenderer.h>
+#include <Global.h>
+#include <Framebuffer.h>
 
 OpenVrRenderer::OpenVrRenderer() :
 	BaseXrRenderer()
@@ -44,6 +46,15 @@ bool OpenVrRenderer::Init(void* hdc, void* hglrc)
 		return m_initialized;
 
 #ifdef _WIN32
+	//openvr initilization
+	vr::EVRInitError vr_error;
+	m_vr_system = vr::VR_Init(&vr_error, vr::VRApplication_Scene, 0);
+	if (vr_error == vr::VRInitError_None &&
+		vr::VRCompositor())
+	{
+		//get render size
+		m_vr_system->GetRecommendedRenderTargetSize(&m_size[0], &m_size[1]);
+	}
 
 	m_initialized = true;
 #endif
@@ -52,20 +63,134 @@ bool OpenVrRenderer::Init(void* hdc, void* hglrc)
 
 void OpenVrRenderer::Close()
 {
+	if (!m_initialized)
+		return;
+
+	vr::VR_Shutdown();
 }
 
 void OpenVrRenderer::GetControllerStates()
 {
+#ifdef _WIN32
+	//scan all controllers
+	for (vr::TrackedDeviceIndex_t deviceIndex = 0;
+		deviceIndex < vr::k_unMaxTrackedDeviceCount;
+		++deviceIndex)
+	{
+		if (m_vr_system->IsTrackedDeviceConnected(deviceIndex))
+		{
+			vr::ETrackedDeviceClass deviceClass = m_vr_system->GetTrackedDeviceClass(deviceIndex);
+			if (deviceClass == vr::TrackedDeviceClass_Controller)
+			{
+				vr::VRControllerState_t state;
+				m_vr_system->GetControllerState(deviceIndex, &state, sizeof(state));
+
+				if (m_vr_system->GetControllerRoleForTrackedDeviceIndex(deviceIndex) ==
+					vr::TrackedControllerRole_LeftHand)
+				{
+					//left controller
+					m_left_x = state.rAxis[0].x;
+					m_left_y = state.rAxis[0].y;
+				}
+				else
+				{
+					//right controlelr
+					m_right_x = state.rAxis[0].x;
+					m_right_y = state.rAxis[0].y;
+				}
+			}
+		}
+	}
+#endif
+
+	if (m_left_x > -m_dead_zone && m_left_x < m_dead_zone) m_left_x = 0.0;
+	if (m_left_y > -m_dead_zone && m_left_y < m_dead_zone) m_left_y = 0.0;
+	if (m_right_x > -m_dead_zone && m_right_x < m_dead_zone) m_right_x = 0.0;
+	if (m_right_y > -m_dead_zone && m_right_y < m_dead_zone) m_right_y = 0.0;
+
+	m_left_x *= m_scaler;
+	m_left_y *= m_scaler;
+	m_right_x *= m_scaler;
+	m_right_y *= m_scaler;
 }
 
 void OpenVrRenderer::BeginFrame()
 {
+#ifdef _WIN32
+	std::array<vr::TrackedDevicePose_t, vr::k_unMaxTrackedDeviceCount> tracked_device_poses;
+	vr::VRCompositor()->WaitGetPoses(tracked_device_poses.data(), tracked_device_poses.size(), NULL, 0);
+
+	//get projection matrix
+	for (int eye_index = 0; eye_index < 2; ++eye_index)
+	{
+		vr::EVREye eye = eye_index ? vr::Eye_Right : vr::Eye_Left;
+		auto proj_mat = m_vr_system->GetProjectionMatrix(eye, m_near_clip, m_far_clip);
+		static int ti[] = { 0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15 };
+		for (int i = 0; i < 16; ++i)
+			glm::value_ptr(m_proj_mat[eye_index])[i] =
+			((float*)(proj_mat.m))[ti[i]];
+	}
+
+	//get tracking pose matrix
+	vr::TrackedDevicePose_t trackedDevicePose[vr::k_unMaxTrackedDeviceCount];
+	m_vr_system->GetDeviceToAbsoluteTrackingPose(vr::TrackingUniverseStanding, 0,
+		trackedDevicePose, vr::k_unMaxTrackedDeviceCount);
+	vr::HmdMatrix34_t hmdMatrix = trackedDevicePose[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking;
+	glm::mat4 modelViewMatrix = glm::mat4(
+		hmdMatrix.m[0][0], hmdMatrix.m[1][0], hmdMatrix.m[2][0], 0.0f,
+		hmdMatrix.m[0][1], hmdMatrix.m[1][1], hmdMatrix.m[2][1], 0.0f,
+		hmdMatrix.m[0][2], hmdMatrix.m[1][2], hmdMatrix.m[2][2], 0.0f,
+		hmdMatrix.m[0][3], hmdMatrix.m[1][3], hmdMatrix.m[2][3], 1.0f );
+	for (int eye_index = 0; eye_index < 2; ++eye_index)
+	{
+		m_mv_mat[eye_index] = ApplyEyeOffsets(modelViewMatrix, eye_index);
+		m_mv_mat[eye_index] = glm::inverse(m_mv_mat[eye_index]);
+	}
+#endif
 }
 
 void OpenVrRenderer::EndFrame()
 {
 }
 
-void OpenVrRenderer::Draw(const std::vector<uint32_t> &fbos)
+void OpenVrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 {
+#ifdef _WIN32
+	for (int eye_index = 0; eye_index < 2; ++eye_index)
+	{
+		if (fbos.size() <= eye_index)
+			break;
+
+		vr::Texture_t eye_tex = {};
+		eye_tex.handle = reinterpret_cast<void*>(
+			(unsigned long long)(fbos[eye_index]->tex_id(GL_COLOR_ATTACHMENT0)));
+		eye_tex.eType = vr::TextureType_OpenGL;
+		eye_tex.eColorSpace = vr::ColorSpace_Gamma;
+		vr::EVREye eye = eye_index ? vr::Eye_Right : vr::Eye_Left;
+		vr::VRCompositor()->Submit(eye, &eye_tex, nullptr);
+	}
+#endif
+}
+
+glm::mat4 OpenVrRenderer::ApplyEyeOffsets(const glm::mat4& mv, int eye_index)
+{
+	if (eye_index < 0 || eye_index > 1)
+		return glm::mat4(1.0);
+	float eye_dist = glbin_settings.m_eye_dist;
+	// Calculate the offset for each eye
+	glm::vec3 offset;
+	switch (eye_index)
+	{
+	case 0://left
+		offset = glm::vec3(-eye_dist / 2.0f, 0.0f, 0.0f);
+		break;
+	case 1://right
+		offset = glm::vec3(eye_dist / 2.0f, 0.0f, 0.0f);
+		break;
+	}
+
+	// Apply the offsets to the view matrices
+	glm::mat4 transl = glm::translate(glm::mat4(1.0f), offset);
+
+	return mv * transl;
 }

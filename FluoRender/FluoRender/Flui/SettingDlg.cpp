@@ -493,12 +493,12 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	sizer1_1->Add(5, 5);
 	sizer1_1->Add(m_stereo_chk, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "VR API:",
+	st = new wxStaticText(page, 0, "API:",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)));
 	m_xr_api_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	m_xr_api_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnXrApiComb, this);
-	cmb_str = { "N/A", "OpenXR", "OpenVR" };
+	cmb_str = { "Cardboard", "OpenXR", "OpenVR" };
 	m_xr_api_cmb->Append(cmb_str);
 	sizer1_2->Add(20, 5);
 	sizer1_2->Add(st, 0, wxALIGN_CENTER);
@@ -1063,6 +1063,7 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		if (glbin_settings.m_hologram_mode == 0)
 		{
 			m_stereo_chk->SetValue(false);
+			m_xr_api_cmb->Disable();
 			m_mv_hmd_chk->Disable();
 			m_sbs_chk->Disable();
 			m_eye_dist_sldr->Disable();
@@ -1075,6 +1076,7 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		else if (glbin_settings.m_hologram_mode == 1)
 		{
 			m_stereo_chk->SetValue(true);
+			m_xr_api_cmb->Enable();
 			m_mv_hmd_chk->Enable();
 			m_sbs_chk->Enable();
 			m_eye_dist_sldr->Enable();
@@ -1087,6 +1089,7 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		else if (glbin_settings.m_hologram_mode == 2)
 		{
 			m_stereo_chk->SetValue(false);
+			m_xr_api_cmb->Disable();
 			m_mv_hmd_chk->Disable();
 			m_sbs_chk->Disable();
 			m_eye_dist_sldr->Disable();

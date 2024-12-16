@@ -32,6 +32,10 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/glm.hpp>
 #include <vector>
 
+namespace flvr
+{
+	class Framebuffer;
+}
 class BaseXrRenderer
 {
 public:
@@ -56,7 +60,7 @@ public:
 
 	virtual void BeginFrame() = 0;
 	virtual void EndFrame() = 0;
-	virtual void Draw(const std::vector<uint32_t> &fbos) = 0;
+	virtual void Draw(const std::vector<flvr::Framebuffer*> &fbos) = 0;
 
 	virtual void SetClips(float near_clip, float far_clip)
 	{
@@ -71,8 +75,8 @@ protected:
 	float m_left_y = 0.0f;
 	float m_right_x = 0.0f;
 	float m_right_y = 0.0f;
-	float m_dead_zone = 0.0f;
-	float m_scaler = 1.0f;
+	float m_dead_zone = 0.2f;
+	float m_scaler = 20.0f;
 
 	float m_near_clip = 0.1f;
 	float m_far_clip = 1000.0f;

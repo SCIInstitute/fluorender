@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #define OpenVrRenderer_h
 
 #include <BaseXrRenderer.h>
+#include <openvr.h>
+#include <glm/gtc/type_ptr.hpp>
 
 class OpenVrRenderer : public BaseXrRenderer
 {
@@ -44,8 +46,14 @@ public:
 
 	void BeginFrame() override;
 	void EndFrame() override;
-	void Draw(const std::vector<uint32_t> &fbos) override;
+	void Draw(const std::vector<flvr::Framebuffer*> &fbos) override;
 
 private:
+#ifdef _WIN32
+	vr::IVRSystem* m_vr_system;
+#endif
+
+private:
+	glm::mat4 ApplyEyeOffsets(const glm::mat4& mv, int eye_index);
 };
 #endif//OpenVrRenderer_h

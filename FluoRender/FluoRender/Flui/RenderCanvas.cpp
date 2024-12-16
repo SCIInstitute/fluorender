@@ -2352,11 +2352,11 @@ void RenderCanvas::DrawVRBuffer()
 	glEnable(GL_DEPTH_TEST);
 
 	//draw in headset
-	std::vector<uint32_t> fbos;
+	std::vector<flvr::Framebuffer*> fbos;
 	//left eye
-	fbos.push_back(buffer_left->id());
+	fbos.push_back(buffer_left);
 	//right eye
-	fbos.push_back(buffer_right->id());
+	fbos.push_back(buffer_right);
 	//openxr draw
 	if (m_use_openxr)
 	{

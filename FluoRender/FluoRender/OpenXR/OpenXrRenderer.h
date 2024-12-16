@@ -65,7 +65,7 @@ public:
 
 	void BeginFrame() override;
 	void EndFrame() override;
-	void Draw(const std::vector<uint32_t> &fbos) override;
+	void Draw(const std::vector<flvr::Framebuffer*> &fbos) override;
 
 private:
 #ifdef _WIN32
