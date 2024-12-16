@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <GL/glew.h>
 #include <Framebuffer.h>
 #include <OpenXrRenderer.h>
+#include <Global.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <cstring>
 #include <vector>
@@ -236,6 +237,9 @@ void OpenXrRenderer::BeginFrame()
 	// Per view in the view configuration:
 	for (uint32_t i = 0; i < viewCount; i++)
 	{
+		// offset eye pos
+		ApplyEyeOffsets(&views[i], i);
+
 		// Get the width and height and construct the viewport and scissors.
 		const uint32_t &width = m_view_config_views[i].recommendedImageRectWidth;
 		const uint32_t &height = m_view_config_views[i].recommendedImageRectHeight;
@@ -1162,6 +1166,36 @@ void OpenXrRenderer::DestroyActions()
 	{
 		xrDestroyActionSet(m_act_set);
 	}
+}
+
+void OpenXrRenderer::ApplyEyeOffsets(XrView* views, int eye_index)
+{
+	if (!views)
+		return;
+	if (eye_index < 0 || eye_index > 1)
+		return;
+	float eye_dist = glbin_settings.m_eye_dist;
+	// Calculate the offset for each eye
+	glm::vec3 offset;
+	switch (eye_index)
+	{
+	case 0://left
+		offset = glm::vec3(-eye_dist / 2.0f, 0.0f, 0.0f);
+		break;
+	case 1://right
+		offset = glm::vec3(eye_dist / 2.0f, 0.0f, 0.0f);
+		break;
+	}
+
+	// Adjust the eye pose
+	glm::vec3 pos(
+		views->pose.position.x,
+		views->pose.position.y,
+		views->pose.position.z);
+	pos += offset;
+	views->pose.position.x = pos.x;
+	views->pose.position.y = pos.y;
+	views->pose.position.z = pos.z;
 }
 
 XrBool32 OpenXRMessageCallbackFunction(

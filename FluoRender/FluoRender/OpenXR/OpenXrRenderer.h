@@ -189,6 +189,8 @@ private:
 
 	bool CreateActions();
 	void DestroyActions();
+
+	void ApplyEyeOffsets(XrView* views, int eye_index);
 };
 
 inline bool IsStringInVector(
