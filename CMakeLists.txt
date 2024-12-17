@@ -364,6 +364,7 @@ if(WIN32)
 #    file(GLOB OpenVR_RELEASE_LIBRARIES ${PARENT_DIR}/openvr/bin/win64/Release/*.lib)
 #    file(GLOB OpenVR_DEBUG_LIBRARIES ${PARENT_DIR}/openvr/bin/win64/Debug/*.lib)
 #    set(OpenVR_LIBRARIES $<$<CONFIG:Release>:${OpenVR_RELEASE_LIBRARIES}> $<$<CONFIG:Debug>:${OpenVR_DEBUG_LIBRARIES}>)
+#    add_definitions(-DOPENVR_BUILD_STATIC)
     file(GLOB OpenVR_LIBRARIES ${PARENT_DIR}/openvr/lib/win64/*.lib)
 endif()
 

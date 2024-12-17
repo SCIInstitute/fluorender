@@ -940,14 +940,14 @@ void RenderCanvas::Draw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, (GLint)nx, (GLint)ny);
 
-	//gradient background
-	if (glbin_settings.m_grad_bg)
-		DrawGradBg();
-
 	//projection
 	HandleProjection(nx, ny, true);
 	//Transformation
 	HandleCamera(true);
+
+	//gradient background
+	if (glbin_settings.m_grad_bg)
+		DrawGradBg();
 
 	if (m_draw_all)
 	{
@@ -1013,14 +1013,14 @@ void RenderCanvas::DrawDP()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, (GLint)nx, (GLint)ny);
 
-	//gradient background
-	if (glbin_settings.m_grad_bg)
-		DrawGradBg();
-
 	//projection
 	HandleProjection(nx, ny, true);
 	//Transformation
 	HandleCamera(true);
+
+	//gradient background
+	if (glbin_settings.m_grad_bg)
+		DrawGradBg();
 
 	if (m_draw_all)
 	{
