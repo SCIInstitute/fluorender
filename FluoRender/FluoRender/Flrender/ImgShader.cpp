@@ -630,6 +630,34 @@ namespace flvr
 	"	if (d<loc0.z) FragColor = vec4(1.0, 1.0, 1.0, 0.5);\n" \
 	"}\n"
 
+#define IMG_SHADER_CODE_GRADIENT_BACKGROUND \
+	"//IMG_SHADER_CODE_GRADIENT_BACKGROUND\n" \
+	"in vec3 OutVertex;\n" \
+	"in vec3 OutTexCoord;\n" \
+	"out vec4 FragColor;\n" \
+	"uniform vec4 loc0; //bg color\n" \
+	"uniform vec4 loc1; //color1\n" \
+	"uniform vec4 loc2; //color2\n" \
+	"uniform mat4 matrix0;//transformation\n" \
+	"\n" \
+	"void main()\n" \
+	"{\n" \
+	"	vec4 p = vec4(OutTexCoord, 1.0);\n" \
+	"	p.xy = p.xy * 2.0 - vec2(1.0);\n" \
+	"	p = matrix0 * p;\n" \
+	"	p /= p.w;\n" \
+	"	vec3 dir = normalize(p.xyz);\n" \
+	"	float d = degrees(asin(dir.y));\n" \
+	"	vec4 color;\n" \
+	"	if (d < -1.0)\n" \
+	"		color = mix(loc2, loc0, (-1.0 - d) / 89.0);\n" \
+	"	else if (d < 0.0)\n" \
+	"		color = mix(loc1, loc2, -d / 1.0);\n" \
+	"	else\n" \
+	"		color = mix(loc1, loc0, d / 90.0);\n" \
+	"	FragColor = vec4(color.rgb, 1.0);\n" \
+	"}\n"
+
 	ImgShader::ImgShader(int type, int colormap) : 
 		type_(type),
 		colormap_(colormap),
@@ -702,6 +730,7 @@ namespace flvr
 		case IMG_SHDR_BLEND_BRIGHT_BACKGROUND:
 		case IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR:
 		case IMG_SHDR_PAINT:
+		case IMG_SHDR_GRADIENT_BACKGROUND:
 		default:
 			z << IMG_VERTEX_CODE;
 			break;
@@ -807,6 +836,9 @@ namespace flvr
 			break;
 		case IMG_SHDR_DRAW_TEXT:
 			z << IMG_FRG_CODE_DRAW_TEXT;
+			break;
+		case IMG_SHDR_GRADIENT_BACKGROUND:
+			z << IMG_SHADER_CODE_GRADIENT_BACKGROUND;
 			break;
 		default:
 			z << IMG_SHADER_CODE_TEXTURE_LOOKUP;

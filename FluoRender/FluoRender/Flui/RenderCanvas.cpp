@@ -8121,11 +8121,7 @@ void RenderCanvas::DrawName(
 
 void RenderCanvas::DrawGradBg()
 {
-	glm::mat4 proj_mat = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
-
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_BLEND);
-
+	//define colors
 	fluo::Color color1, color2;
 	fluo::HSVColor hsv_color1(m_bg_color);
 	if (hsv_color1.val() > 0.5)
@@ -8143,10 +8139,10 @@ void RenderCanvas::DrawGradBg()
 		{
 			color1 = fluo::Color(fluo::HSVColor(hsv_color1.hue(),
 				hsv_color1.sat() * 0.1,
-				std::max(hsv_color1.val() - 0.5, 0.0)));
+				std::max(hsv_color1.val() - 0.6, 0.0)));
 			color2 = fluo::Color(fluo::HSVColor(hsv_color1.hue(),
 				hsv_color1.sat() * 0.3,
-				std::max(hsv_color1.val() - 0.3, 0.0)));
+				std::max(hsv_color1.val() - 0.5, 0.0)));
 		}
 	}
 	else
@@ -8156,46 +8152,42 @@ void RenderCanvas::DrawGradBg()
 			std::min(hsv_color1.val() + 0.7, 1.0)));
 		color2 = fluo::Color(fluo::HSVColor(hsv_color1.hue(),
 			hsv_color1.sat() * 0.3,
-			std::min(hsv_color1.val() + 0.5, 1.0)));
+			std::min(hsv_color1.val() + 0.2, 1.0)));
 	}
 
-	std::vector<float> vertex;
-	vertex.reserve(48);
-	vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
-	vertex.push_back(m_bg_color.r()); vertex.push_back(m_bg_color.g()); vertex.push_back(m_bg_color.b());
-	vertex.push_back(1.0); vertex.push_back(0.0); vertex.push_back(0.0);
-	vertex.push_back(m_bg_color.r()); vertex.push_back(m_bg_color.g()); vertex.push_back(m_bg_color.b());
-	vertex.push_back(0.0); vertex.push_back(0.3); vertex.push_back(0.0);
-	vertex.push_back(color1.r()); vertex.push_back(color1.g()); vertex.push_back(color1.b());
-	vertex.push_back(1.0); vertex.push_back(0.3); vertex.push_back(0.0);
-	vertex.push_back(color1.r()); vertex.push_back(color1.g()); vertex.push_back(color1.b());
-	vertex.push_back(0.0); vertex.push_back(0.5); vertex.push_back(0.0);
-	vertex.push_back(color2.r()); vertex.push_back(color2.g()); vertex.push_back(color2.b());
-	vertex.push_back(1.0); vertex.push_back(0.5); vertex.push_back(0.0);
-	vertex.push_back(color2.r()); vertex.push_back(color2.g()); vertex.push_back(color2.b());
-	vertex.push_back(0.0); vertex.push_back(1.0); vertex.push_back(0.0);
-	vertex.push_back(m_bg_color.r()); vertex.push_back(m_bg_color.g()); vertex.push_back(m_bg_color.b());
-	vertex.push_back(1.0); vertex.push_back(1.0); vertex.push_back(0.0);
-	vertex.push_back(m_bg_color.r()); vertex.push_back(m_bg_color.g()); vertex.push_back(m_bg_color.b());
+	//compute horizon
+	glm::mat4 trans_mat = m_mv_mat;
+	trans_mat = glm::inverse(trans_mat);
+#ifdef _DEBUG
+	glm::vec4 p1 = glm::vec4(0.0, 0.0, 0.0, 1.0);
+	p1 = trans_mat * p1;
+	p1 /= p1.w;
+	glm::vec3 directionViewSpace = glm::vec3(p1);
+	float pitch = glm::degrees(std::asin(directionViewSpace.y / glm::length(directionViewSpace)));
+	DBGPRINT(L"pitch: %.4f\n", pitch);
+#endif
 
+	//set up shader
 	flvr::ShaderProgram* shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
+		glbin_img_shader_factory.shader(IMG_SHDR_GRADIENT_BACKGROUND);
 	if (shader)
 	{
 		if (!shader->valid())
 			shader->create();
 		shader->bind();
 	}
-	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
+	shader->setLocalParam(0, m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 1.0);
+	shader->setLocalParam(1, color1.r(), color1.g(), color1.b(), 1.0);
+	shader->setLocalParam(2, color2.r(), color2.g(), color2.b(), 1.0);
+	shader->setLocalParamMatrix(0, glm::value_ptr(trans_mat));
 
-	flvr::VertexArray* va_bkg =
-		glbin_vertex_array_manager.vertex_array(flvr::VA_Grad_Bkg);
-	if (va_bkg)
-	{
-		va_bkg->set_param(vertex);
-		va_bkg->draw();
-	}
+	//draw
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
 
+	DrawViewQuad();
+
+	//restore
 	if (shader && shader->valid())
 		shader->release();
 	glEnable(GL_DEPTH_TEST);
