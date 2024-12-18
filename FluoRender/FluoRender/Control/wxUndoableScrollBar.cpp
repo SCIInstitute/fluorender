@@ -39,13 +39,16 @@ wxUndoableScrollBar::wxUndoableScrollBar(
 	const wxString& name):
 	wxScrollBar(parent, id, pos, size, style, val, name),
 	Undoable(),
-	timer_(this)
+	timer_(this),
+	track_(false)
 {
 	Bind(wxEVT_LEFT_DOWN, &wxUndoableScrollBar::OnLeftDown, this);
 	Bind(wxEVT_LEFT_UP, &wxUndoableScrollBar::OnLeftUp, this);
 	Bind(wxEVT_SCROLL_THUMBTRACK, &wxUndoableScrollBar::OnTrack, this);
 	Bind(wxEVT_SCROLL_LINEDOWN, &wxUndoableScrollBar::OnLineDown, this);
 	Bind(wxEVT_SCROLL_LINEUP, &wxUndoableScrollBar::OnLineUp, this);
+	Bind(wxEVT_SCROLL_PAGEUP, &wxUndoableScrollBar::OnScrollPageUp, this);
+	Bind(wxEVT_SCROLL_PAGEDOWN, &wxUndoableScrollBar::OnScrollPageDown, this);
 }
 
 void wxUndoableScrollBar::SetMode(int val)
@@ -89,6 +92,8 @@ void wxUndoableScrollBar::SetThumbPosition2(int val)
 	}
 	else if (mode_ == 1)
 	{
+		if (track_)
+			return;
 		SetThumbPosition(
 			(GetRange() - GetThumbSize()) / 2);
 	}
@@ -100,7 +105,7 @@ void wxUndoableScrollBar::SetValue(int val)
 	value_ = fluo::RotateClamp2(val, low_, high_);
 	bool changed = old != value_;
 
-	if (changed && mode_ == 0)
+	if (changed)
 		SetThumbPosition2(value_);
 
 	if (changed || stack_.empty())
@@ -128,7 +133,7 @@ void wxUndoableScrollBar::ChangeValue(int val)
 	value_ = fluo::RotateClamp2(val, low_, high_);
 	bool changed = old != value_;
 
-	if (changed && mode_ == 0)
+	if (changed)
 		SetThumbPosition2(value_);
 
 	if (changed || stack_.empty())
@@ -180,6 +185,7 @@ void wxUndoableScrollBar::OnLeftUp(wxMouseEvent& event)
 
 void wxUndoableScrollBar::OnTrack(wxScrollEvent& event)
 {
+	track_ = true;
 	if (mode_ == 0)
 		SetValue(GetThumbPosition() + low_);
 	else if (mode_ == 1)
@@ -190,6 +196,7 @@ void wxUndoableScrollBar::OnTrack(wxScrollEvent& event)
 
 void wxUndoableScrollBar::OnRelease(wxScrollEvent& event)
 {
+	track_ = false;
 	timer_.Stop();
 	SetThumbPosition2(value_);
 	event.Skip();
@@ -204,6 +211,18 @@ void wxUndoableScrollBar::OnLineDown(wxScrollEvent& event)
 void wxUndoableScrollBar::OnLineUp(wxScrollEvent& event)
 {
 	SetValue(value_ - 1);
+	event.Skip();
+}
+
+void wxUndoableScrollBar::OnScrollPageDown(wxScrollEvent& event)
+{
+	SetValue(value_ + GetPageSize());
+	event.Skip();
+}
+
+void wxUndoableScrollBar::OnScrollPageUp(wxScrollEvent& event)
+{
+	SetValue(value_ - GetPageSize());
 	event.Skip();
 }
 

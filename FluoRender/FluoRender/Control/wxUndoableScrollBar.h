@@ -58,6 +58,7 @@ private:
 	int high_;
 	int mode_;//0: normal slider; 1: jog
 	wxTimer timer_;
+	bool track_;
 
 private:
 	void OnTimer(wxTimerEvent& event);
@@ -67,6 +68,8 @@ private:
 	void OnRelease(wxScrollEvent& event);
 	void OnLineDown(wxScrollEvent& event);
 	void OnLineUp(wxScrollEvent& event);
+	void OnScrollPageUp(wxScrollEvent& event);
+	void OnScrollPageDown(wxScrollEvent& event);
 
 private:
 	virtual void replace(double t);
