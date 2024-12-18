@@ -649,12 +649,14 @@ namespace flvr
 	"	vec3 dir = normalize(p.xyz);\n" \
 	"	float d = degrees(asin(dir.y));\n" \
 	"	vec4 color;\n" \
-	"	if (d < -1.0)\n" \
-	"		color = mix(loc2, loc0, (-1.0 - d) / 89.0);\n" \
-	"	else if (d < 0.0)\n" \
-	"		color = mix(loc1, loc2, -d / 1.0);\n" \
+	"	float v1 = -11.0;\n" \
+	"	float v2 = -9.0;\n" \
+	"	if (d < v1)\n" \
+	"		color = mix(loc2, loc0, (v1 - d) / (v1 + 90.0));\n" \
+	"	else if (d < v2)\n" \
+	"		color = mix(loc1, loc2, (v2 - d) / (v2 - v1));\n" \
 	"	else\n" \
-	"		color = mix(loc1, loc0, d / 90.0);\n" \
+	"		color = mix(loc1, loc0, (d - v2) / (90.0 - v2));\n" \
 	"	FragColor = vec4(color.rgb, 1.0);\n" \
 	"}\n"
 

@@ -8156,7 +8156,11 @@ void RenderCanvas::DrawGradBg()
 	}
 
 	//compute horizon
-	glm::mat4 trans_mat = m_mv_mat;
+	int nx, ny;
+	GetRenderSize(nx, ny);
+	double aspect = (double)nx / (double)ny;
+	glm::mat4 proj_mat = glm::perspective(glm::radians(45.0), aspect, m_near_clip, m_far_clip);
+	glm::mat4 trans_mat = m_proj_mat * m_mv_mat;
 	trans_mat = glm::inverse(trans_mat);
 #ifdef _DEBUG
 	glm::vec4 p1 = glm::vec4(0.0, 0.0, 0.0, 1.0);
