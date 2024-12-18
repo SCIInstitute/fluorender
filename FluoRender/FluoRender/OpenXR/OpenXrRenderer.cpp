@@ -68,6 +68,9 @@ bool OpenXrRenderer::Init(void* hdc, void* hglrc)
 	if (!GetSystemID())
 		return false;
 
+	CreateActionSet();
+	SuggestBindings();
+
 	// Get render size
 	if (!GetViewConfigurationViews())
 		return false;
@@ -77,13 +80,14 @@ bool OpenXrRenderer::Init(void* hdc, void* hglrc)
 	if (!CreateSession(hdc, hglrc))
 		return false;
 
+	CreateActionPoses();
+	AttachActionSet();
+
 	if (!CreateReferenceSpace())
 		return false;
 
 	if (!CreateSwapchains())
 		return false;
-
-	CreateActions();
 
 	m_initialized = true;
 #endif
@@ -110,7 +114,7 @@ void OpenXrRenderer::GetControllerStates()
 #ifdef _WIN32
 	// Poll the state for the left hand thumbstick
 	XrActionStateGetInfo getInfo{ XR_TYPE_ACTION_STATE_GET_INFO };
-	getInfo.action = m_act_left;
+	getInfo.action = m_js_act;
 
 	XrActionStateFloat stateFloatX{ XR_TYPE_ACTION_STATE_FLOAT };
 	XrActionStateFloat stateFloatY{ XR_TYPE_ACTION_STATE_FLOAT };
@@ -130,7 +134,7 @@ void OpenXrRenderer::GetControllerStates()
 	}
 
 	// Poll the state for the right hand thumbstick
-	getInfo.action = m_act_right;
+	getInfo.action = m_js_act;
 
 	// Get the X coordinate
 	getInfo.subactionPath = XR_NULL_PATH;
@@ -1061,76 +1065,121 @@ void OpenXrRenderer::PollEvents()
 #endif
 }
 
-bool OpenXrRenderer::CreateActions()
+bool OpenXrRenderer::CreateAction(XrAction &xrAction,
+		const char *name, XrActionType xrActionType,
+		std::vector<const char *> subaction_paths)
 {
-#ifdef _WIN32
-	XrResult result;
-	// Create an action set
-	XrActionSetCreateInfo actionSetCreateInfo{ XR_TYPE_ACTION_SET_CREATE_INFO };
-	std::strcpy(actionSetCreateInfo.actionSetName, "fluo_act_set");
-	std::strcpy(actionSetCreateInfo.localizedActionSetName, "FluoRender_act_set");
-	actionSetCreateInfo.priority = 0;
-	result = xrCreateActionSet(m_instance, &actionSetCreateInfo, &m_act_set);
-	if (result != XR_SUCCESS) return false;
-
-	// Create actions for left and right hand controllers
-	XrActionCreateInfo actionCreateInfo{ XR_TYPE_ACTION_CREATE_INFO };
-	actionCreateInfo.actionType = XR_ACTION_TYPE_FLOAT_INPUT;
-	std::strcpy(actionCreateInfo.actionName, "left_hand");
-	std::strcpy(actionCreateInfo.localizedActionName, "Left Hand");
-	result = xrCreateAction(m_act_set, &actionCreateInfo, &m_act_left);
-	if (result != XR_SUCCESS) return false;
-
-	std::strcpy(actionCreateInfo.actionName, "right_hand");
-	std::strcpy(actionCreateInfo.localizedActionName, "Right Hand");
-	result = xrCreateAction(m_act_set, &actionCreateInfo, &m_act_right);
-	if (result != XR_SUCCESS) return false;
-
-	// Suggest bindings for the actions
-	XrPath interactionProfilePath;
-	xrStringToPath(m_instance, "/interaction_profiles/khr/simple_controller", &interactionProfilePath);
-
-	XrPath leftHandPath, rightHandPath;
-	xrStringToPath(m_instance, "/user/hand/left", &leftHandPath);
-	xrStringToPath(m_instance, "/user/hand/right", &rightHandPath);
-
-	std::vector<XrActionSuggestedBinding> bindings =
-	{
-		{m_act_left, leftHandPath},
-		{m_act_right, rightHandPath}
-	};
-
-	XrInteractionProfileSuggestedBinding suggestedBindings{ XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING };
-	suggestedBindings.interactionProfile = interactionProfilePath;
-	suggestedBindings.suggestedBindings = bindings.data();
-	suggestedBindings.countSuggestedBindings = static_cast<uint32_t>(bindings.size());
-	result = xrSuggestInteractionProfileBindings(m_instance, &suggestedBindings);
-#ifdef _DEBUG
+	XrActionCreateInfo actionCI{ XR_TYPE_ACTION_CREATE_INFO };
+	// The type of action: float input, pose, haptic output etc.
+	actionCI.actionType = xrActionType;
+	// Subaction paths, e.g. left and right hand. To distinguish the same action performed on different devices.
+	std::vector<XrPath> subaction_xrpaths;
+	for (auto p : subaction_paths) {
+		subaction_xrpaths.push_back(CreateXrPath(p));
+	}
+	actionCI.countSubactionPaths = (uint32_t)subaction_xrpaths.size();
+	actionCI.subactionPaths = subaction_xrpaths.data();
+	// The internal name the runtime uses for this Action.
+	strncpy(actionCI.actionName, name, XR_MAX_ACTION_NAME_SIZE);
+	// Localized names are required so there is a human-readable action name to show the user if they are rebinding the Action in an options screen.
+	strncpy(actionCI.localizedActionName, name, XR_MAX_LOCALIZED_ACTION_NAME_SIZE);
+	XrResult result = xrCreateAction(m_act_set, &actionCI, &xrAction);
 	if (result != XR_SUCCESS)
-		DBGPRINT(L"xrSuggestInteractionProfileBindings failed.\n");
-#endif
+		return false;
+	return true;
+}
 
-	// Attach the action set to the session
-	XrSessionActionSetsAttachInfo attachInfo{ XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO };
-	attachInfo.actionSets = &m_act_set;
-	attachInfo.countActionSets = 1;
-	result = xrAttachSessionActionSets(m_session, &attachInfo);
+bool OpenXrRenderer::CreateActionSet()
+{
+	XrResult result;
+	XrActionSetCreateInfo actionSetCI{ XR_TYPE_ACTION_SET_CREATE_INFO };
+	// The internal name the runtime uses for this Action Set.
+	strncpy(actionSetCI.actionSetName, "fluorender-actionset", XR_MAX_ACTION_SET_NAME_SIZE);
+	// Localized names are required so there is a human-readable action name to show the user if they are rebinding Actions in an options screen.
+	strncpy(actionSetCI.localizedActionSetName, "FluoRender ActionSet", XR_MAX_LOCALIZED_ACTION_SET_NAME_SIZE);
+	// Set a priority: this comes into play when we have multiple Action Sets, and determines which Action takes priority in binding to a specific input.
+	actionSetCI.priority = 0;
+
+	result = xrCreateActionSet(m_instance, &actionSetCI, &m_act_set);
 	if (result != XR_SUCCESS) return false;
+
+	// An Action for grabbing cubes.
+	//CreateAction(m_grabCubeAction, "grab-cube", XR_ACTION_TYPE_FLOAT_INPUT, { "/user/hand/left", "/user/hand/right" });
+	//CreateAction(m_spawnCubeAction, "spawn-cube", XR_ACTION_TYPE_BOOLEAN_INPUT);
+	//CreateAction(m_changeColorAction, "change-color", XR_ACTION_TYPE_BOOLEAN_INPUT, { "/user/hand/left", "/user/hand/right" });
+	// An Action for the position of the palm of the user's hand - appropriate for the location of a grabbing Actions.
+	//CreateAction(m_palmPoseAction, "palm-pose", XR_ACTION_TYPE_POSE_INPUT, { "/user/hand/left", "/user/hand/right" });
+	// An Action for a vibration output on one or other hand.
+	//CreateAction(m_buzzAction, "buzz", XR_ACTION_TYPE_VIBRATION_OUTPUT, { "/user/hand/left", "/user/hand/right" });
+	// For later convenience we create the XrPaths for the subaction path names.
+	m_hand_paths[0] = CreateXrPath("/user/hand/left");
+	m_hand_paths[1] = CreateXrPath("/user/hand/right");
 
 	return true;
-#endif
-	return false;
+}
+
+bool OpenXrRenderer::SuggestBindings()
+{
+	auto SuggestBindings = [this](const char* profile_path, std::vector<XrActionSuggestedBinding> bindings) -> bool
+	{
+		// The application can call xrSuggestInteractionProfileBindings once per interaction profile that it supports.
+		XrInteractionProfileSuggestedBinding interactionProfileSuggestedBinding{ XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING };
+		interactionProfileSuggestedBinding.interactionProfile = CreateXrPath(profile_path);
+		interactionProfileSuggestedBinding.suggestedBindings = bindings.data();
+		interactionProfileSuggestedBinding.countSuggestedBindings = (uint32_t)bindings.size();
+		if (xrSuggestInteractionProfileBindings(m_instance, &interactionProfileSuggestedBinding) == XrResult::XR_SUCCESS)
+			return true;
+		//XR_TUT_LOG("Failed to suggest bindings with " << profile_path);
+		return false;
+	};
+
+	bool any_ok = false;
+	// Each Action here has two paths, one for each SubAction path.
+	any_ok |= SuggestBindings("/interaction_profiles/khr/simple_controller", {{m_pose_act, CreateXrPath("/user/hand/left/input/grip/pose")},
+																			  {m_pose_act, CreateXrPath("/user/hand/right/input/grip/pose")},
+																			  {m_js_act, CreateXrPath("/user/hand/left/output/haptic")},
+																			  {m_js_act, CreateXrPath("/user/hand/right/output/haptic")} });
+	// XR_DOCS_TAG_END_SuggestBindings2
+	// XR_DOCS_TAG_BEGIN_SuggestTouchNativeBindings
+	// Each Action here has two paths, one for each SubAction path.
+	any_ok |= SuggestBindings("/interaction_profiles/oculus/touch_controller", {{m_pose_act, CreateXrPath("/user/hand/left/input/grip/pose")},
+																			  {m_pose_act, CreateXrPath("/user/hand/right/input/grip/pose")},
+																			  {m_js_act, CreateXrPath("/user/hand/left/output/haptic")},
+																			  {m_js_act, CreateXrPath("/user/hand/right/output/haptic")} });
+	// XR_DOCS_TAG_END_SuggestTouchNativeBindings
+	// XR_DOCS_TAG_BEGIN_SuggestBindings3
+	if (!any_ok) return false;
+	return true;
+}
+
+void OpenXrRenderer::RecordCurrentBindings()
+{
+
+}
+
+XrSpace OpenXrRenderer::CreateActionPoseSpace(XrAction action, const char* path = nullptr)
+{
+
+}
+
+void OpenXrRenderer::CreateActionPoses()
+{
+}
+
+void OpenXrRenderer::AttachActionSet()
+{
+
 }
 
 void OpenXrRenderer::DestroyActions()
 {
-	if (m_act_left != XR_NULL_HANDLE)
+	if (m_pose_act != XR_NULL_HANDLE)
 	{
-		xrDestroyAction(m_act_left);
+		xrDestroyAction(m_pose_act);
 	}
-	if (m_act_right != XR_NULL_HANDLE)
+	if (m_js_act != XR_NULL_HANDLE)
 	{
-		xrDestroyAction(m_act_right);
+		xrDestroyAction(m_js_act);
 	}
 	if (m_act_set != XR_NULL_HANDLE)
 	{
@@ -1248,3 +1297,58 @@ XrBool32 OpenXRMessageCallbackFunction(
 	//}
 	return XrBool32();
 }
+
+/*#ifdef _WIN32
+	XrResult result;
+	// Create an action set
+	XrActionSetCreateInfo actionSetCreateInfo{ XR_TYPE_ACTION_SET_CREATE_INFO };
+	std::strcpy(actionSetCreateInfo.actionSetName, "fluo_act_set");
+	std::strcpy(actionSetCreateInfo.localizedActionSetName, "FluoRender_act_set");
+	actionSetCreateInfo.priority = 0;
+	result = xrCreateActionSet(m_instance, &actionSetCreateInfo, &m_act_set);
+	if (result != XR_SUCCESS) return;
+
+	// Create actions for left and right hand controllers
+	XrActionCreateInfo actionCreateInfo{ XR_TYPE_ACTION_CREATE_INFO };
+	actionCreateInfo.actionType = XR_ACTION_TYPE_FLOAT_INPUT;
+	std::strcpy(actionCreateInfo.actionName, "left_hand");
+	std::strcpy(actionCreateInfo.localizedActionName, "Left Hand");
+	result = xrCreateAction(m_act_set, &actionCreateInfo, &m_act_left);
+	if (result != XR_SUCCESS) return;
+
+	std::strcpy(actionCreateInfo.actionName, "right_hand");
+	std::strcpy(actionCreateInfo.localizedActionName, "Right Hand");
+	result = xrCreateAction(m_act_set, &actionCreateInfo, &m_act_right);
+	if (result != XR_SUCCESS) return;
+
+	// Suggest bindings for the actions
+	XrPath interactionProfilePath;
+	xrStringToPath(m_instance, "/interaction_profiles/khr/simple_controller", &interactionProfilePath);
+
+	XrPath leftHandPath, rightHandPath;
+	xrStringToPath(m_instance, "/user/hand/left", &leftHandPath);
+	xrStringToPath(m_instance, "/user/hand/right", &rightHandPath);
+
+	std::vector<XrActionSuggestedBinding> bindings =
+	{
+		{m_act_left, leftHandPath},
+		{m_act_right, rightHandPath}
+	};
+
+	XrInteractionProfileSuggestedBinding suggestedBindings{ XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING };
+	suggestedBindings.interactionProfile = interactionProfilePath;
+	suggestedBindings.suggestedBindings = bindings.data();
+	suggestedBindings.countSuggestedBindings = static_cast<uint32_t>(bindings.size());
+	result = xrSuggestInteractionProfileBindings(m_instance, &suggestedBindings);
+#ifdef _DEBUG
+	if (result != XR_SUCCESS)
+		DBGPRINT(L"xrSuggestInteractionProfileBindings failed.\n");
+#endif
+
+	// Attach the action set to the session
+	XrSessionActionSetsAttachInfo attachInfo{ XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO };
+	attachInfo.actionSets = &m_act_set;
+	attachInfo.countActionSets = 1;
+	result = xrAttachSessionActionSets(m_session, &attachInfo);
+	if (result != XR_SUCCESS) return;
+#endif*/

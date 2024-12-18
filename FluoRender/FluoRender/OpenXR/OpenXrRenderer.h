@@ -126,8 +126,10 @@ private:
 	RenderLayerInfo m_render_layer_info;
 
 	XrActionSet m_act_set = XR_NULL_HANDLE;
-	XrAction m_act_left = XR_NULL_HANDLE;
-	XrAction m_act_right = XR_NULL_HANDLE;
+	XrAction m_pose_act;
+	XrAction m_js_act;
+	// The XrPaths for left and right hand hands or controllers.
+	XrPath m_hand_paths[2] = {0, 0};
 
 #endif
 
@@ -157,7 +159,38 @@ private:
 
 	void PollEvents();
 
-	bool CreateActions();
+	XrPath CreateXrPath(const char* path_string)
+	{
+		XrPath xrPath;
+		OPENXR_CHECK(xrStringToPath(m_instance, path_string, &xrPath), "Failed to create XrPath from string.");
+		return xrPath;
+	}
+	std::string FromXrPath(XrPath path)
+	{
+		uint32_t strl;
+		char text[XR_MAX_PATH_LENGTH];
+		XrResult res;
+		res = xrPathToString(m_instance, path, XR_MAX_PATH_LENGTH, &strl, text);
+		std::string str;
+		if (res == XR_SUCCESS)
+		{
+			str = text;
+		}
+		else
+		{
+			OPENXR_CHECK(res, "Failed to retrieve path.");
+		}
+		return str;
+	}
+	bool CreateAction(XrAction &xrAction,
+		const char *name, XrActionType xrActionType,
+		std::vector<const char *> subaction_paths = {});
+	bool CreateActionSet();
+	bool SuggestBindings();
+	void RecordCurrentBindings();
+	XrSpace CreateActionPoseSpace(XrAction action, const char* path = nullptr);
+	void CreateActionPoses();
+	void AttachActionSet();
 	void DestroyActions();
 
 	void ApplyEyeOffsets(XrView* views, int eye_index);
