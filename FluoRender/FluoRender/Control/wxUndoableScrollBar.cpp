@@ -185,12 +185,14 @@ void wxUndoableScrollBar::OnLeftUp(wxMouseEvent& event)
 
 void wxUndoableScrollBar::OnTrack(wxScrollEvent& event)
 {
-	track_ = true;
 	if (mode_ == 0)
 		SetValue(GetThumbPosition() + low_);
 	else if (mode_ == 1)
+	{
+		track_ = true;
 		if (!timer_.IsRunning())
 			timer_.Start(50);
+	}
 	event.Skip();
 }
 
