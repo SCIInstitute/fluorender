@@ -8159,17 +8159,38 @@ void RenderCanvas::DrawGradBg()
 	int nx, ny;
 	GetRenderSize(nx, ny);
 	double aspect = (double)nx / (double)ny;
-	glm::mat4 proj_mat = glm::perspective(glm::radians(45.0), aspect, m_near_clip, m_far_clip);
-	glm::mat4 trans_mat = m_proj_mat * m_mv_mat;
+	double oh = 1000;
+	double ow = oh * aspect;
+	glm::mat4 proj_mat = glm::ortho(-ow, ow, -oh, oh, 0.1, 1.0);
+	glm::mat4 mv_mat = m_mv_mat;
+	mv_mat[3][0] = 0.0;
+	mv_mat[3][1] = 0.0;
+	mv_mat[3][2] = -4000.0;
+	glm::mat4 trans_mat = proj_mat * mv_mat;
 	trans_mat = glm::inverse(trans_mat);
-#ifdef _DEBUG
-	glm::vec4 p1 = glm::vec4(0.0, 0.0, 0.0, 1.0);
-	p1 = trans_mat * p1;
-	p1 /= p1.w;
-	glm::vec3 directionViewSpace = glm::vec3(p1);
-	float pitch = glm::degrees(std::asin(directionViewSpace.y / glm::length(directionViewSpace)));
-	DBGPRINT(L"pitch: %.4f\n", pitch);
-#endif
+
+	//ndc transformation
+	auto compute_angle = [](const glm::vec2& tc, const glm::mat4& trans)
+	{
+		glm::vec2 ndc = 2.0f * tc - glm::vec2(1.0f);
+		glm::vec4 p = glm::vec4(ndc, 0.0f, 1.0f);
+		p = trans * p;
+		p /= p.w;
+		glm::vec3 dir = glm::vec3(p.x, p.y, p.z);
+		dir = glm::normalize(dir);
+		return glm::degrees(glm::asin(dir.y));
+	};
+	double v0, v1, v2, v3;//min angle, band 1, band 2, max value
+	v0 = compute_angle(glm::vec2(0.0, 0.0), trans_mat);
+	v1 = compute_angle(glm::vec2(1.0, 0.0), trans_mat);
+	v2 = compute_angle(glm::vec2(1.0, 1.0), trans_mat);
+	v3 = compute_angle(glm::vec2(0.0, 1.0), trans_mat);
+	double mind = std::min({ v0, v1, v2, v3 });
+	double maxd = std::max({ v0, v1, v2, v3 });
+	v0 = mind;
+	v1 = -8;
+	v2 = -4;
+	v3 = maxd;
 
 	//set up shader
 	flvr::ShaderProgram* shader =
@@ -8183,6 +8204,7 @@ void RenderCanvas::DrawGradBg()
 	shader->setLocalParam(0, m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 1.0);
 	shader->setLocalParam(1, color1.r(), color1.g(), color1.b(), 1.0);
 	shader->setLocalParam(2, color2.r(), color2.g(), color2.b(), 1.0);
+	shader->setLocalParam(3, v0, v1, v2, v3);
 	shader->setLocalParamMatrix(0, glm::value_ptr(trans_mat));
 
 	//draw

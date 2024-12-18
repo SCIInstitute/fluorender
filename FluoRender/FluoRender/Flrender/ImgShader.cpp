@@ -638,6 +638,7 @@ namespace flvr
 	"uniform vec4 loc0; //bg color\n" \
 	"uniform vec4 loc1; //color1\n" \
 	"uniform vec4 loc2; //color2\n" \
+	"uniform vec4 loc3; //(v0, v1, v2, v3)\n" \
 	"uniform mat4 matrix0;//transformation\n" \
 	"\n" \
 	"void main()\n" \
@@ -649,14 +650,12 @@ namespace flvr
 	"	vec3 dir = normalize(p.xyz);\n" \
 	"	float d = degrees(asin(dir.y));\n" \
 	"	vec4 color;\n" \
-	"	float v1 = -11.0;\n" \
-	"	float v2 = -9.0;\n" \
-	"	if (d < v1)\n" \
-	"		color = mix(loc2, loc0, (v1 - d) / (v1 + 90.0));\n" \
-	"	else if (d < v2)\n" \
-	"		color = mix(loc1, loc2, (v2 - d) / (v2 - v1));\n" \
+	"	if (d < loc3.y)\n" \
+	"		color = mix(loc2, loc0, (loc3.y - d) / (loc3.y - loc3.x));\n" \
+	"	else if (d < loc3.z)\n" \
+	"		color = mix(loc1, loc2, (loc3.z - d) / (loc3.z - loc3.y));\n" \
 	"	else\n" \
-	"		color = mix(loc1, loc0, (d - v2) / (90.0 - v2));\n" \
+	"		color = mix(loc1, loc0, (d - loc3.z) / (loc3.w - loc3.z));\n" \
 	"	FragColor = vec4(color.rgb, 1.0);\n" \
 	"}\n"
 
