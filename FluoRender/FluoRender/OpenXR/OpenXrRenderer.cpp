@@ -1140,13 +1140,13 @@ bool OpenXrRenderer::SuggestBindings()
 	// Each Action here has two paths, one for each SubAction path.
 	any_ok |= SuggestBindings("/interaction_profiles/khr/simple_controller", {{m_pose_act, CreateXrPath("/user/hand/left/input/grip/pose")},
 																			  {m_pose_act, CreateXrPath("/user/hand/right/input/grip/pose")},
-																			  {m_js_act, CreateXrPath("/user/hand/left/input/system/touch")},
-																			  {m_js_act, CreateXrPath("/user/hand/right/input/system/touch")} });
+																			  {m_js_act, CreateXrPath("/user/hand/left/input/thumbstick")},
+																			  {m_js_act, CreateXrPath("/user/hand/right/input/thumbstick")} });
 	// Each Action here has two paths, one for each SubAction path.
 	any_ok |= SuggestBindings("/interaction_profiles/oculus/touch_controller", {{m_pose_act, CreateXrPath("/user/hand/left/input/grip/pose")},
 																			  {m_pose_act, CreateXrPath("/user/hand/right/input/grip/pose")},
-																			  {m_js_act, CreateXrPath("/user/hand/left/input/system/touch")},
-																			  {m_js_act, CreateXrPath("/user/hand/right/input/system/touch")} });
+																			  {m_js_act, CreateXrPath("/user/hand/left/input/thumbstick")},
+																			  {m_js_act, CreateXrPath("/user/hand/right/input/thumbstick")} });
 	if (!any_ok) return false;
 	return true;
 }
