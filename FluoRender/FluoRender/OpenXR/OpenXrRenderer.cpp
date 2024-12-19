@@ -1157,9 +1157,10 @@ void OpenXrRenderer::RecordCurrentBindings()
 
 }
 
-XrSpace OpenXrRenderer::CreateActionPoseSpace(XrAction action, const char* path = nullptr)
+XrSpace OpenXrRenderer::CreateActionPoseSpace(XrAction action, const char* path)
 {
-
+	XrSpace space;
+	return space;
 }
 
 void OpenXrRenderer::CreateActionPoses()

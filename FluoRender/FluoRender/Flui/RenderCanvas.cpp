@@ -8162,7 +8162,7 @@ void RenderCanvas::DrawGradBg()
 	double oh = 1000;
 	double ow = oh * aspect;
 	glm::mat4 proj_mat = glm::ortho(-ow, ow, -oh, oh, 0.1, 1.0);
-	glm::mat4 mv_mat = m_mv_mat;
+	glm::mat4 mv_mat = glm::inverse(m_mv_mat);
 	mv_mat[3][0] = 0.0;
 	mv_mat[3][1] = 0.0;
 	mv_mat[3][2] = -4000.0;
