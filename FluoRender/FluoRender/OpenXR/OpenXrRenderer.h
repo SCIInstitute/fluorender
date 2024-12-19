@@ -127,6 +127,7 @@ private:
 
 	XrActionSet m_act_set = XR_NULL_HANDLE;
 	XrAction m_js_act;//joystick
+	XrActionStateVector2f m_js_state[2] = { {XR_TYPE_ACTION_STATE_VECTOR2F}, {XR_TYPE_ACTION_STATE_VECTOR2F} };
 	XrAction m_pose_act;//hand or controller
 	// The XrPaths for left and right hand hands or controllers.
 	XrPath m_hand_paths[2] = {0, 0};

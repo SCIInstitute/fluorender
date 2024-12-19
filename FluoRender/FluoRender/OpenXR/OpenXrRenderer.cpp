@@ -111,44 +111,16 @@ void OpenXrRenderer::Close()
 
 void OpenXrRenderer::GetControllerStates()
 {
-#ifdef _WIN32
-	// Poll the state for the left hand thumbstick
-	XrActionStateGetInfo getInfo{ XR_TYPE_ACTION_STATE_GET_INFO };
-	getInfo.action = m_js_act;
-
-	XrActionStateFloat stateFloatX{ XR_TYPE_ACTION_STATE_FLOAT };
-	XrActionStateFloat stateFloatY{ XR_TYPE_ACTION_STATE_FLOAT };
-
-	// Get the X coordinate
-	getInfo.subactionPath = XR_NULL_PATH;
-	xrGetActionStateFloat(m_session, &getInfo, &stateFloatX);
-
-	// Get the Y coordinate
-	getInfo.subactionPath = XR_NULL_PATH;
-	xrGetActionStateFloat(m_session, &getInfo, &stateFloatY);
-
-	if (stateFloatX.isActive && stateFloatY.isActive)
+	if (m_js_state[0].isActive)
 	{
-		m_left_x = stateFloatX.currentState;
-		m_left_y = stateFloatY.currentState;
+		m_left_x = m_js_state[0].currentState.x;
+		m_left_y = m_js_state[0].currentState.y;
 	}
-
-	// Poll the state for the right hand thumbstick
-	getInfo.action = m_js_act;
-
-	// Get the X coordinate
-	getInfo.subactionPath = XR_NULL_PATH;
-	xrGetActionStateFloat(m_session, &getInfo, &stateFloatX);
-
-	// Get the Y coordinate
-	getInfo.subactionPath = XR_NULL_PATH;
-	xrGetActionStateFloat(m_session, &getInfo, &stateFloatY);
-
-	if (stateFloatX.isActive && stateFloatY.isActive) {
-		m_right_x = stateFloatX.currentState;
-		m_right_y = stateFloatY.currentState;
+	if (m_js_state[1].isActive)
+	{
+		m_right_x = m_js_state[1].currentState.x;
+		m_right_y = m_js_state[1].currentState.y;
 	}
-#endif
 
 	if (m_left_x > -m_dead_zone && m_left_x < m_dead_zone) m_left_x = 0.0;
 	if (m_left_y > -m_dead_zone && m_left_y < m_dead_zone) m_left_y = 0.0;
@@ -863,21 +835,6 @@ bool OpenXrRenderer::CreateSwapchains()
 	return true;
 #endif
 	return false;
-
-	//XrSwapchainCreateInfo swapchainCreateInfo{XR_TYPE_SWAPCHAIN_CREATE_INFO};
-	//swapchainCreateInfo.usageFlags = XR_SWAPCHAIN_USAGE_COLOR_ATTACHMENT_BIT;
-	//swapchainCreateInfo.format = GL_RGBA32F; // Use the appropriate format for your images
-	//swapchainCreateInfo.sampleCount = 1;
-	//swapchainCreateInfo.width = m_size[0]; // Set the width of the swapchain
-	//swapchainCreateInfo.height = m_size[1]; // Set the height of the swapchain
-	//swapchainCreateInfo.faceCount = 1;
-	//swapchainCreateInfo.arraySize = 1;
-	//swapchainCreateInfo.mipCount = 1;
-
-	//result = xrCreateSwapchain(m_session, &swapchainCreateInfo, &m_swap_chain_left);
-	//if (result != XR_SUCCESS) return false;
-	//result = xrCreateSwapchain(m_session, &swapchainCreateInfo, &m_swap_chain_right);
-	//if (result != XR_SUCCESS) return false;
 }
 
 void OpenXrRenderer::DestroySwapchains()
@@ -905,10 +862,6 @@ void OpenXrRenderer::DestroySwapchains()
 
 			xrDestroySwapchain(depthSwapchainInfo.swapchain);
 		}
-
-		// Free the Swapchain Image Data.
-		//m_graphicsAPI->FreeSwapchainImageData(colorSwapchainInfo.swapchain);
-		//m_graphicsAPI->FreeSwapchainImageData(depthSwapchainInfo.swapchain);
 	}
 }
 
@@ -1115,7 +1068,7 @@ void OpenXrRenderer::PollActions(XrTime predictedTime)
 	{
 		actionStateGetInfo.action = m_js_act;
 		actionStateGetInfo.subactionPath = m_hand_paths[i];
-		//result = xrGetActionStateFloat(m_session, &actionStateGetInfo, &m_grabState[i]);
+		result = xrGetActionStateVector2f(m_session, &actionStateGetInfo, &m_js_state[i]);
 	}
 }
 
@@ -1388,58 +1341,3 @@ XrBool32 OpenXRMessageCallbackFunction(
 	//}
 	return XrBool32();
 }
-
-/*#ifdef _WIN32
-	XrResult result;
-	// Create an action set
-	XrActionSetCreateInfo actionSetCreateInfo{ XR_TYPE_ACTION_SET_CREATE_INFO };
-	std::strcpy(actionSetCreateInfo.actionSetName, "fluo_act_set");
-	std::strcpy(actionSetCreateInfo.localizedActionSetName, "FluoRender_act_set");
-	actionSetCreateInfo.priority = 0;
-	result = xrCreateActionSet(m_instance, &actionSetCreateInfo, &m_act_set);
-	if (result != XR_SUCCESS) return;
-
-	// Create actions for left and right hand controllers
-	XrActionCreateInfo actionCreateInfo{ XR_TYPE_ACTION_CREATE_INFO };
-	actionCreateInfo.actionType = XR_ACTION_TYPE_FLOAT_INPUT;
-	std::strcpy(actionCreateInfo.actionName, "left_hand");
-	std::strcpy(actionCreateInfo.localizedActionName, "Left Hand");
-	result = xrCreateAction(m_act_set, &actionCreateInfo, &m_act_left);
-	if (result != XR_SUCCESS) return;
-
-	std::strcpy(actionCreateInfo.actionName, "right_hand");
-	std::strcpy(actionCreateInfo.localizedActionName, "Right Hand");
-	result = xrCreateAction(m_act_set, &actionCreateInfo, &m_act_right);
-	if (result != XR_SUCCESS) return;
-
-	// Suggest bindings for the actions
-	XrPath interactionProfilePath;
-	xrStringToPath(m_instance, "/interaction_profiles/khr/simple_controller", &interactionProfilePath);
-
-	XrPath leftHandPath, rightHandPath;
-	xrStringToPath(m_instance, "/user/hand/left", &leftHandPath);
-	xrStringToPath(m_instance, "/user/hand/right", &rightHandPath);
-
-	std::vector<XrActionSuggestedBinding> bindings =
-	{
-		{m_act_left, leftHandPath},
-		{m_act_right, rightHandPath}
-	};
-
-	XrInteractionProfileSuggestedBinding suggestedBindings{ XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING };
-	suggestedBindings.interactionProfile = interactionProfilePath;
-	suggestedBindings.suggestedBindings = bindings.data();
-	suggestedBindings.countSuggestedBindings = static_cast<uint32_t>(bindings.size());
-	result = xrSuggestInteractionProfileBindings(m_instance, &suggestedBindings);
-#ifdef _DEBUG
-	if (result != XR_SUCCESS)
-		DBGPRINT(L"xrSuggestInteractionProfileBindings failed.\n");
-#endif
-
-	// Attach the action set to the session
-	XrSessionActionSetsAttachInfo attachInfo{ XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO };
-	attachInfo.actionSets = &m_act_set;
-	attachInfo.countActionSets = 1;
-	result = xrAttachSessionActionSets(m_session, &attachInfo);
-	if (result != XR_SUCCESS) return;
-#endif*/
