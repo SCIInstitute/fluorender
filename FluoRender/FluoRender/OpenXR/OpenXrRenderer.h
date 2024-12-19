@@ -126,10 +126,19 @@ private:
 	RenderLayerInfo m_render_layer_info;
 
 	XrActionSet m_act_set = XR_NULL_HANDLE;
-	XrAction m_pose_act;
-	XrAction m_js_act;
+	XrAction m_js_act;//joystick
+	XrAction m_pose_act;//hand or controller
 	// The XrPaths for left and right hand hands or controllers.
 	XrPath m_hand_paths[2] = {0, 0};
+	// The spaces that represents the two hand poses.
+	XrSpace m_hand_pose_space[2];
+	XrActionStatePose m_hand_pose_state[2] = { {XR_TYPE_ACTION_STATE_POSE}, {XR_TYPE_ACTION_STATE_POSE} };
+	// In STAGE space, viewHeightM should be 0. In LOCAL space, it should be offset downwards, below the viewer's initial position.
+	float m_view_hm = 1.5f;
+	// The current poses obtained from the XrSpaces.
+	XrPosef m_hand_pose[2] = {
+		{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -m_view_hm}},
+		{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -m_view_hm}} };
 
 #endif
 
@@ -158,6 +167,7 @@ private:
 	void DestroyImageView(void*& imageView);
 
 	void PollEvents();
+	void PollActions(XrTime predictedTime);
 
 	XrPath CreateXrPath(const char* path_string)
 	{

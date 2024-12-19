@@ -190,6 +190,9 @@ void OpenXrRenderer::BeginFrame()
 	if (!m_frame_state.shouldRender)
 		return;
 
+	// poll actions here because they require a predicted display time, which we've only just obtained.
+	PollActions(m_frame_state.predictedDisplayTime);
+
 	// Locate the views from the view configuration within the (reference) space at the display time.
 	std::vector<XrView> views(m_view_config_views.size(), { XR_TYPE_VIEW });
 
@@ -993,6 +996,7 @@ void OpenXrRenderer::PollEvents()
 #endif
 					break;
 				}
+				RecordCurrentBindings();
 				break;
 			}
 			// Log that there's a reference space change pending.
@@ -1065,6 +1069,56 @@ void OpenXrRenderer::PollEvents()
 #endif
 }
 
+void OpenXrRenderer::PollActions(XrTime predictedTime)
+{
+	XrResult result;
+	// Update our action set with up-to-date input data.
+	// First, we specify the actionSet we are polling.
+	XrActiveActionSet activeActionSet{};
+	activeActionSet.actionSet = m_act_set;
+	activeActionSet.subactionPath = XR_NULL_PATH;
+	// Now we sync the Actions to make sure they have current data.
+	XrActionsSyncInfo actionsSyncInfo{ XR_TYPE_ACTIONS_SYNC_INFO };
+	actionsSyncInfo.countActiveActionSets = 1;
+	actionsSyncInfo.activeActionSets = &activeActionSet;
+	result = xrSyncActions(m_session, &actionsSyncInfo);
+	if (result != XR_SUCCESS) return;
+
+	XrActionStateGetInfo actionStateGetInfo{ XR_TYPE_ACTION_STATE_GET_INFO };
+	// We pose a single Action, twice - once for each subAction Path.
+	actionStateGetInfo.action = m_pose_act;
+	// For each hand, get the pose state if possible.
+	for (int i = 0; i < 2; i++)
+	{
+		// Specify the subAction Path.
+		actionStateGetInfo.subactionPath = m_hand_paths[i];
+		result = xrGetActionStatePose(m_session, &actionStateGetInfo, &m_hand_pose_state[i]);
+		if (result != XR_SUCCESS) return;
+
+		if (m_hand_pose_state[i].isActive)
+		{
+			XrSpaceLocation spaceLocation{ XR_TYPE_SPACE_LOCATION };
+			XrResult res = xrLocateSpace(m_hand_pose_space[i], m_space, predictedTime, &spaceLocation);
+			if (XR_UNQUALIFIED_SUCCESS(res) &&
+				(spaceLocation.locationFlags & XR_SPACE_LOCATION_POSITION_VALID_BIT) != 0 &&
+				(spaceLocation.locationFlags & XR_SPACE_LOCATION_ORIENTATION_VALID_BIT) != 0) {
+				m_hand_pose[i] = spaceLocation.pose;
+			}
+			else {
+				m_hand_pose_state[i].isActive = false;
+			}
+		}
+	}
+
+	// joystick
+	for (int i = 0; i < 2; i++)
+	{
+		actionStateGetInfo.action = m_js_act;
+		actionStateGetInfo.subactionPath = m_hand_paths[i];
+		//result = xrGetActionStateFloat(m_session, &actionStateGetInfo, &m_grabState[i]);
+	}
+}
+
 bool OpenXrRenderer::CreateAction(XrAction &xrAction,
 		const char *name, XrActionType xrActionType,
 		std::vector<const char *> subaction_paths)
@@ -1103,14 +1157,10 @@ bool OpenXrRenderer::CreateActionSet()
 	result = xrCreateActionSet(m_instance, &actionSetCI, &m_act_set);
 	if (result != XR_SUCCESS) return false;
 
-	// An Action for grabbing cubes.
-	//CreateAction(m_grabCubeAction, "grab-cube", XR_ACTION_TYPE_FLOAT_INPUT, { "/user/hand/left", "/user/hand/right" });
-	//CreateAction(m_spawnCubeAction, "spawn-cube", XR_ACTION_TYPE_BOOLEAN_INPUT);
-	//CreateAction(m_changeColorAction, "change-color", XR_ACTION_TYPE_BOOLEAN_INPUT, { "/user/hand/left", "/user/hand/right" });
+	// action for joistick pos
+	CreateAction(m_js_act, "joystick", XR_ACTION_TYPE_FLOAT_INPUT, { "/user/hand/left", "/user/hand/right" });
 	// An Action for the position of the palm of the user's hand - appropriate for the location of a grabbing Actions.
-	//CreateAction(m_palmPoseAction, "palm-pose", XR_ACTION_TYPE_POSE_INPUT, { "/user/hand/left", "/user/hand/right" });
-	// An Action for a vibration output on one or other hand.
-	//CreateAction(m_buzzAction, "buzz", XR_ACTION_TYPE_VIBRATION_OUTPUT, { "/user/hand/left", "/user/hand/right" });
+	CreateAction(m_pose_act, "palm-pose", XR_ACTION_TYPE_POSE_INPUT, { "/user/hand/left", "/user/hand/right" });
 	// For later convenience we create the XrPaths for the subaction path names.
 	m_hand_paths[0] = CreateXrPath("/user/hand/left");
 	m_hand_paths[1] = CreateXrPath("/user/hand/right");
@@ -1137,43 +1187,83 @@ bool OpenXrRenderer::SuggestBindings()
 	// Each Action here has two paths, one for each SubAction path.
 	any_ok |= SuggestBindings("/interaction_profiles/khr/simple_controller", {{m_pose_act, CreateXrPath("/user/hand/left/input/grip/pose")},
 																			  {m_pose_act, CreateXrPath("/user/hand/right/input/grip/pose")},
-																			  {m_js_act, CreateXrPath("/user/hand/left/output/haptic")},
-																			  {m_js_act, CreateXrPath("/user/hand/right/output/haptic")} });
-	// XR_DOCS_TAG_END_SuggestBindings2
-	// XR_DOCS_TAG_BEGIN_SuggestTouchNativeBindings
+																			  {m_js_act, CreateXrPath("/user/hand/left/input/system/touch")},
+																			  {m_js_act, CreateXrPath("/user/hand/right/input/system/touch")} });
 	// Each Action here has two paths, one for each SubAction path.
 	any_ok |= SuggestBindings("/interaction_profiles/oculus/touch_controller", {{m_pose_act, CreateXrPath("/user/hand/left/input/grip/pose")},
 																			  {m_pose_act, CreateXrPath("/user/hand/right/input/grip/pose")},
-																			  {m_js_act, CreateXrPath("/user/hand/left/output/haptic")},
-																			  {m_js_act, CreateXrPath("/user/hand/right/output/haptic")} });
-	// XR_DOCS_TAG_END_SuggestTouchNativeBindings
-	// XR_DOCS_TAG_BEGIN_SuggestBindings3
+																			  {m_js_act, CreateXrPath("/user/hand/left/input/system/touch")},
+																			  {m_js_act, CreateXrPath("/user/hand/right/input/system/touch")} });
 	if (!any_ok) return false;
 	return true;
 }
 
 void OpenXrRenderer::RecordCurrentBindings()
 {
-
+	if (m_session)
+	{
+		XrResult result;
+		// now we are ready to:
+		XrInteractionProfileState interactionProfile = { XR_TYPE_INTERACTION_PROFILE_STATE, 0, 0 };
+		// for each action, what is the binding?
+		result = xrGetCurrentInteractionProfile(m_session, m_hand_paths[0], &interactionProfile);
+		if (interactionProfile.interactionProfile)
+		{
+#ifdef _DEBUG
+			DBGPRINT(L"user/hand/left ActiveProfile %s\n",
+				s2ws(FromXrPath(interactionProfile.interactionProfile).c_str()));
+#endif
+		}
+		result = xrGetCurrentInteractionProfile(m_session, m_hand_paths[1], &interactionProfile);
+		if (interactionProfile.interactionProfile)
+		{
+#ifdef _DEBUG
+			DBGPRINT(L"user/hand/right ActiveProfile %s\n",
+				s2ws(FromXrPath(interactionProfile.interactionProfile).c_str()));
+#endif
+		}
+	}
 }
 
 XrSpace OpenXrRenderer::CreateActionPoseSpace(XrAction action, const char* path)
 {
-	XrSpace space;
-	return space;
+	XrSpace xrSpace;
+	const XrPosef xrPoseIdentity = { {0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f} };
+	// Create frame of reference for a pose action
+	XrActionSpaceCreateInfo actionSpaceCI{ XR_TYPE_ACTION_SPACE_CREATE_INFO };
+	actionSpaceCI.action = action;
+	actionSpaceCI.poseInActionSpace = xrPoseIdentity;
+	if (path)
+		actionSpaceCI.subactionPath = CreateXrPath(path);
+	XrResult result = xrCreateActionSpace(m_session, &actionSpaceCI, &xrSpace);
+	return xrSpace;
 }
 
 void OpenXrRenderer::CreateActionPoses()
 {
+	m_hand_pose_space[0] = CreateActionPoseSpace(m_pose_act, "/user/hand/left");
+	m_hand_pose_space[1] = CreateActionPoseSpace(m_pose_act, "/user/hand/right");
 }
 
 void OpenXrRenderer::AttachActionSet()
 {
-
+	// Attach the action set we just made to the session. We could attach multiple action sets!
+	XrSessionActionSetsAttachInfo actionSetAttachInfo{ XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO };
+	actionSetAttachInfo.countActionSets = 1;
+	actionSetAttachInfo.actionSets = &m_act_set;
+	XrResult result = xrAttachSessionActionSets(m_session, &actionSetAttachInfo);
 }
 
 void OpenXrRenderer::DestroyActions()
 {
+	if (m_hand_pose_space[0] != XR_NULL_HANDLE)
+	{
+		xrDestroySpace(m_hand_pose_space[0]);
+	}
+	if (m_hand_pose_space[1] != XR_NULL_HANDLE)
+	{
+		xrDestroySpace(m_hand_pose_space[1]);
+	}
 	if (m_pose_act != XR_NULL_HANDLE)
 	{
 		xrDestroyAction(m_pose_act);
