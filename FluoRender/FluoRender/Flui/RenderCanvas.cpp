@@ -4351,7 +4351,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		if (lefty != 0.0)
 		{
 			event.RequestMore(true);
-			ControllerZoomDolly(leftx, nx, ny);
+			ControllerZoomDolly(lefty, nx, ny);
 			m_interactive = true;
 			refresh = true;
 			vc.insert(gstScaleFactor);
@@ -4408,7 +4408,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		if (lefty != 0.0)
 		{
 			event.RequestMore(true);
-			ControllerZoomDolly(leftx * sclr, nx, ny);
+			ControllerZoomDolly(lefty * sclr, nx, ny);
 			m_interactive = true;
 			refresh = true;
 			lg_changed = true;

@@ -1063,6 +1063,14 @@ void OpenXrRenderer::PollActions(XrTime predictedTime)
 		}
 	}
 
+	//grab
+	for (int i = 0; i < 2; i++)
+	{
+		actionStateGetInfo.action = m_grab_act;
+		actionStateGetInfo.subactionPath = m_hand_paths[i];
+		result = xrGetActionStateFloat(m_session, &actionStateGetInfo, &m_grab_state[i]);
+	}
+
 	// joystick
 	for (int i = 0; i < 2; i++)
 	{
@@ -1111,7 +1119,9 @@ bool OpenXrRenderer::CreateActionSet()
 	if (result != XR_SUCCESS) return false;
 
 	// action for joistick pos
-	CreateAction(m_js_act, "joystick", XR_ACTION_TYPE_FLOAT_INPUT, { "/user/hand/left", "/user/hand/right" });
+	CreateAction(m_js_act, "joystick", XR_ACTION_TYPE_VECTOR2F_INPUT, { "/user/hand/left", "/user/hand/right" });
+	// action for grabbing
+	CreateAction(m_grab_act, "grab", XR_ACTION_TYPE_FLOAT_INPUT, { "/user/hand/left", "/user/hand/right" });
 	// An Action for the position of the palm of the user's hand - appropriate for the location of a grabbing Actions.
 	CreateAction(m_pose_act, "palm-pose", XR_ACTION_TYPE_POSE_INPUT, { "/user/hand/left", "/user/hand/right" });
 	// For later convenience we create the XrPaths for the subaction path names.
@@ -1138,15 +1148,38 @@ bool OpenXrRenderer::SuggestBindings()
 
 	bool any_ok = false;
 	// Each Action here has two paths, one for each SubAction path.
-	any_ok |= SuggestBindings("/interaction_profiles/khr/simple_controller", {{m_pose_act, CreateXrPath("/user/hand/left/input/grip/pose")},
-																			  {m_pose_act, CreateXrPath("/user/hand/right/input/grip/pose")},
-																			  {m_js_act, CreateXrPath("/user/hand/left/input/thumbstick")},
-																			  {m_js_act, CreateXrPath("/user/hand/right/input/thumbstick")} });
-	// Each Action here has two paths, one for each SubAction path.
-	any_ok |= SuggestBindings("/interaction_profiles/oculus/touch_controller", {{m_pose_act, CreateXrPath("/user/hand/left/input/grip/pose")},
-																			  {m_pose_act, CreateXrPath("/user/hand/right/input/grip/pose")},
-																			  {m_js_act, CreateXrPath("/user/hand/left/input/thumbstick")},
-																			  {m_js_act, CreateXrPath("/user/hand/right/input/thumbstick")} });
+	// generic controller
+	any_ok |= SuggestBindings("/interaction_profiles/khr/simple_controller", {
+		{m_grab_act, CreateXrPath("/user/hand/left/input/select/click")},
+		{m_grab_act, CreateXrPath("/user/hand/right/input/select/click")},
+		{m_pose_act, CreateXrPath("/user/hand/left/input/grip/pose")},
+		{m_pose_act, CreateXrPath("/user/hand/right/input/grip/pose")},
+		{m_js_act, CreateXrPath("/user/hand/left/input/thumbstick")},
+		{m_js_act, CreateXrPath("/user/hand/right/input/thumbstick")} });
+	// Meta
+	any_ok |= SuggestBindings("/interaction_profiles/oculus/touch_controller", {
+		{m_grab_act, CreateXrPath("/user/hand/left/input/squeeze/value")},
+		{m_grab_act, CreateXrPath("/user/hand/right/input/squeeze/value")},
+		{m_pose_act, CreateXrPath("/user/hand/left/input/grip/pose")},
+		{m_pose_act, CreateXrPath("/user/hand/right/input/grip/pose")},
+		{m_js_act, CreateXrPath("/user/hand/left/input/thumbstick")},
+		{m_js_act, CreateXrPath("/user/hand/right/input/thumbstick")} });
+	// Windows Mixed Reality
+	any_ok |= SuggestBindings("/interaction_profiles/microsoft/motion_controller", {
+		{m_grab_act, CreateXrPath("/user/hand/left/input/squeeze/value")},
+		{m_grab_act, CreateXrPath("/user/hand/right/input/squeeze/value")},
+		{m_pose_act, CreateXrPath("/user/hand/left/input/grip/pose")},
+		{m_pose_act, CreateXrPath("/user/hand/right/input/grip/pose")},
+		{m_js_act, CreateXrPath("/user/hand/left/input/thumbstick")},
+		{m_js_act, CreateXrPath("/user/hand/right/input/thumbstick")} });
+	// SteamVR
+	any_ok |= SuggestBindings("/interaction_profiles/htc/vive_controller", {
+		{m_grab_act, CreateXrPath("/user/hand/left/input/grip/value")},
+		{m_grab_act, CreateXrPath("/user/hand/right/input/grip/value")},
+		{m_pose_act, CreateXrPath("/user/hand/left/input/grip/pose")},
+		{m_pose_act, CreateXrPath("/user/hand/right/input/grip/pose")},
+		{m_js_act, CreateXrPath("/user/hand/left/input/thumbstick")},
+		{m_js_act, CreateXrPath("/user/hand/right/input/thumbstick")} });
 	if (!any_ok) return false;
 	return true;
 }
