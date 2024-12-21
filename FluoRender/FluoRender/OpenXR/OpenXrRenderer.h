@@ -207,6 +207,7 @@ private:
 	void DestroyActions();
 
 	void ApplyEyeOffsets(XrView* views, int eye_index);
+	glm::mat4 XrPoseToMat4(const XrPosef& pose);
 };
 
 inline bool IsStringInVector(

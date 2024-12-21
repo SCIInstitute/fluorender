@@ -4329,12 +4329,10 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	//vr controller, similar to xinput
 	if (m_use_openxr)
 	{
-		float leftx, lefty, rightx, righty;
 		glbin_xr_renderer->GetControllerStates();
+		float leftx, lefty, rightx, righty;
 		leftx = glbin_xr_renderer->GetControllerLeftThumbstickX();
 		lefty = glbin_xr_renderer->GetControllerLeftThumbstickY();
-		rightx = glbin_xr_renderer->GetControllerRightThumbstickX();
-		righty = glbin_xr_renderer->GetControllerRightThumbstickY();
 
 		int nx = GetGLSize().x;
 		int ny = GetGLSize().y;
@@ -4356,14 +4354,30 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			refresh = true;
 			vc.insert(gstScaleFactor);
 		}
-		//rotate
-		if (rightx != 0.0 || righty != 0.0)
+
+		if (glbin_xr_renderer->GetGrab())
 		{
 			event.RequestMore(true);
-			ControllerRotate(rightx, righty, nx, ny);
+			glm::mat4 rot_mat = glbin_xr_renderer->GetGrabMatrix();
+			GrabRotate(rot_mat);
 			m_interactive = true;
 			refresh = true;
 			vc.insert(gstCamRotation);
+		}
+		else
+		{
+			rightx = glbin_xr_renderer->GetControllerRightThumbstickX();
+			righty = glbin_xr_renderer->GetControllerRightThumbstickY();
+
+			//rotate
+			if (rightx != 0.0 || righty != 0.0)
+			{
+				event.RequestMore(true);
+				ControllerRotate(rightx, righty, nx, ny);
+				m_interactive = true;
+				refresh = true;
+				vc.insert(gstCamRotation);
+			}
 		}
 	}
 #endif
@@ -9206,7 +9220,8 @@ void RenderCanvas::StartLoopUpdate()
 						mvmat[1], mvmat[5], mvmat[9], mvmat[13],
 						mvmat[2], mvmat[6], mvmat[10], mvmat[14],
 						mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-					vd->GetVR()->m_mv_mat2 = vd->GetVR()->m_mv_mat * vd->GetVR()->m_mv_mat2;
+					vd->GetVR()->m_mv_mat2 = vd->GetVR()->m_mv_mat *
+						vd->GetVR()->m_tex_mat * vd->GetVR()->m_mv_mat2;
 
 					fluo::Ray view_ray = vd->GetVR()->compute_view();
 					std::vector<flvr::TextureBrick*> *bricks = 0;
@@ -11210,6 +11225,40 @@ void RenderCanvas::ControllerPan(double dx, double dy, int nx, int ny)
 	m_obj_transx += trans.x() * m_scale_factor;
 	m_obj_transy += trans.y() * m_scale_factor;
 	m_obj_transz += trans.z() * m_scale_factor;
+}
+
+void RenderCanvas::GrabRotate(const glm::mat4& pose)
+{
+	// Extract the rotation matrix (upper-left 3x3 part of the 4x4 matrix)
+	glm::mat3 rotationMatrix = glm::mat3(pose);
+	// Convert rotation matrix to quaternion
+	glm::quat q = glm::quat_cast(rotationMatrix);
+	//glm::quat rotationQuat = glm::angleAxis(glm::radians(-50.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	//q = rotationQuat * q;
+
+	m_q = fluo::Quaternion(q.x, q.y, q.z, q.w);
+	m_q.Normalize();
+	fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
+	fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
+	m_transx = cam_pos2.x;
+	m_transy = cam_pos2.y;
+	m_transz = cam_pos2.z;
+	fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
+	fluo::Quaternion up2 = (-m_q) * up * m_q;
+	m_up = fluo::Vector(up2.x, up2.y, up2.z);
+	m_q.ToEuler(m_rotx, m_roty, m_rotz);
+	if (m_roty > 360.0)
+		m_roty -= 360.0;
+	if (m_roty < 0.0)
+		m_roty += 360.0;
+	if (m_rotx > 360.0)
+		m_rotx -= 360.0;
+	if (m_rotx < 0.0)
+		m_rotx += 360.0;
+	if (m_rotz > 360.0)
+		m_rotz -= 360.0;
+	if (m_rotz < 0.0)
+		m_rotz += 360.0;
 }
 
 #ifdef _WIN32

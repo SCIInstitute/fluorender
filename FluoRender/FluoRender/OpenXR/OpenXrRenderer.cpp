@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Framebuffer.h>
 #include <OpenXrRenderer.h>
 #include <Global.h>
+#include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <cstring>
 #include <vector>
@@ -111,6 +112,50 @@ void OpenXrRenderer::Close()
 
 void OpenXrRenderer::GetControllerStates()
 {
+	bool grab[2] = { false, false };
+	//grab
+	if (m_grab_state[0].isActive &&
+		m_grab_state[0].currentState > 0.5f)
+	{
+		grab[0] = true;
+	}
+	else if (m_grab_state[1].isActive &&
+		m_grab_state[1].currentState > 0.5f)
+	{
+		grab[1] = true;
+	}
+
+	if (grab[0])
+	{
+		m_grab[0] = !m_grab[0];
+		m_grab[1] = false;
+	}
+	if (grab[1])
+	{
+		m_grab[0] = false;
+		m_grab[1] = !m_grab[1];
+	}
+	if (m_grab[0])
+	{
+		m_grab_mat = XrPoseToMat4(m_hand_pose[0]);
+		m_grab_mat[3][0] = 0.0;
+		m_grab_mat[3][1] = 0.0;
+		m_grab_mat[3][2] = 0.0;
+	}
+	else if (m_grab[1])
+	{
+		m_grab_mat = XrPoseToMat4(m_hand_pose[1]);
+		m_grab_mat[3][0] = 0.0;
+		m_grab_mat[3][1] = 0.0;
+		m_grab_mat[3][2] = 0.0;
+	}
+	else
+	{
+		m_grab_mat = glm::mat4(1.0);
+	}
+
+
+	//joystick
 	if (m_js_state[0].isActive)
 	{
 		m_left_x = m_js_state[0].currentState.x;
@@ -1292,6 +1337,24 @@ void OpenXrRenderer::ApplyEyeOffsets(XrView* views, int eye_index)
 	views->pose.position.x = pos.x;
 	views->pose.position.y = pos.y;
 	views->pose.position.z = pos.z;
+}
+
+// Function to convert XrPose to glm::mat4
+glm::mat4 OpenXrRenderer::XrPoseToMat4(const XrPosef& pose)
+{
+	// Extract position
+	glm::vec3 position(pose.position.x, pose.position.y, pose.position.z);
+
+	// Extract orientation (quaternion)
+	glm::quat orientation(pose.orientation.w, pose.orientation.x, pose.orientation.y, pose.orientation.z);
+
+	// Convert quaternion to rotation matrix
+	glm::mat4 rotationMatrix = glm::mat4_cast(orientation);
+
+	// Create transformation matrix
+	glm::mat4 transformationMatrix = glm::translate(glm::mat4(1.0f), position) * rotationMatrix;
+
+	return transformationMatrix;
 }
 
 XrBool32 OpenXRMessageCallbackFunction(

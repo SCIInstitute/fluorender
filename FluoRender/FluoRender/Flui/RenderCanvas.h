@@ -1073,7 +1073,7 @@ private:
 	//glm matrices
 	glm::mat4 m_mv_mat;
 	glm::mat4 m_proj_mat;
-	glm::mat4 m_tex_mat;
+	glm::mat4 m_tex_mat = glm::mat4(1.0);
 
 	//text renderer
 	flvr::TextRenderer m_text_renderer;
@@ -1248,6 +1248,7 @@ private:
 	void ControllerZoomDolly(double dval, int nx, int ny);
 	void ControllerRotate(double dx, double dy, int nx, int ny);
 	void ControllerPan(double dx, double dy, int nx, int ny);
+	void GrabRotate(const glm::mat4& pose);
 
 	friend class RenderViewPanel;
 };

@@ -311,7 +311,7 @@ namespace flvr
 		glm::mat4 m_mv_mat;
 		glm::mat4 m_mv_mat2;
 		glm::mat4 m_proj_mat;
-		glm::mat4 m_tex_mat;
+		glm::mat4 m_tex_mat = glm::mat4(1.0);
 
 		//renderer manages vertex array objects
 		VertexArray* va_slices_;

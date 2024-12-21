@@ -57,3 +57,7 @@ glm::mat4 BaseXrRenderer::GetModelViewMatrix(int eye_index)
 	return m_mv_mat[0];
 }
 
+glm::mat4 BaseXrRenderer::GetGrabMatrix()
+{
+	return m_grab_mat;
+}

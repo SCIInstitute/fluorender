@@ -51,6 +51,8 @@ public:
 
 	virtual glm::mat4 GetProjectionMatrix(int eye_index);
 	virtual glm::mat4 GetModelViewMatrix(int eye_index);
+	virtual glm::mat4 GetGrabMatrix();
+	virtual bool GetGrab() { return m_grab[0] || m_grab[1]; }
 
 	virtual void GetControllerStates() = 0;
 	virtual float GetControllerLeftThumbstickX() { return m_left_x; }
@@ -77,11 +79,13 @@ protected:
 	float m_right_y = 0.0f;
 	float m_dead_zone = 0.2f;
 	float m_scaler = 20.0f;
+	bool m_grab[2] = { false, false };
 
 	float m_near_clip = 0.1f;
 	float m_far_clip = 1000.0f;
 	glm::mat4 m_proj_mat[2] = { glm::mat4(1.0f), glm::mat4(1.0f) };
 	glm::mat4 m_mv_mat[2] = { glm::mat4(1.0f), glm::mat4(1.0f) };
+	glm::mat4 m_grab_mat = glm::mat4(1.0f);
 
 private:
 };
