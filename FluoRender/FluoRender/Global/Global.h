@@ -71,6 +71,7 @@ DEALINGS IN THE SOFTWARE.
 #include <LookingGlassRenderer.h>
 #include <OpenXrRenderer.h>
 #include <OpenVrRenderer.h>
+#include <HololensRenderer.h>
 #include <Clusterizer.h>
 #include <VolumeMeshConv.h>
 #include <Project.h>

@@ -47,11 +47,6 @@ DEALINGS IN THE SOFTWARE.
 
 XrBool32 OpenXRMessageCallbackFunction(XrDebugUtilsMessageSeverityFlagsEXT messageSeverity, XrDebugUtilsMessageTypeFlagsEXT messageType, const XrDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData);
 
-template <typename T>
-inline bool BitwiseCheck(const T& value, const T& checkValue) {
-	return ((value & checkValue) == checkValue);
-}
-
 class OpenXrRenderer : public BaseXrRenderer
 {
 public:
@@ -67,7 +62,7 @@ public:
 	void EndFrame() override;
 	void Draw(const std::vector<flvr::Framebuffer*> &fbos) override;
 
-private:
+protected:
 #ifdef _WIN32
 	XrInstance m_instance = XR_NULL_HANDLE;
 
@@ -145,7 +140,7 @@ private:
 
 #endif
 
-private:
+protected:
 	bool CreateInstance();
 	void DestroyInstance();
 
@@ -209,21 +204,5 @@ private:
 	void ApplyEyeOffsets(XrView* views, int eye_index);
 	glm::mat4 XrPoseToMat4(const XrPosef& pose);
 };
-
-inline bool IsStringInVector(
-	std::vector<const char*> list,
-	const char* name)
-{
-	bool found = false;
-	for (auto& item : list)
-	{
-		if (strcmp(name, item) == 0)
-		{
-			found = true;
-			break;
-		}
-	}
-	return found;
-}
 
 #endif//OpenXrRenderer_h

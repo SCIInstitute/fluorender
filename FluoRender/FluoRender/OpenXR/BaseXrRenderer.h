@@ -32,6 +32,27 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/glm.hpp>
 #include <vector>
 
+template <typename T>
+inline bool BitwiseCheck(const T& value, const T& checkValue) {
+	return ((value & checkValue) == checkValue);
+}
+
+inline bool IsStringInVector(
+	std::vector<const char*> list,
+	const char* name)
+{
+	bool found = false;
+	for (auto& item : list)
+	{
+		if (strcmp(name, item) == 0)
+		{
+			found = true;
+			break;
+		}
+	}
+	return found;
+}
+
 namespace flvr
 {
 	class Framebuffer;

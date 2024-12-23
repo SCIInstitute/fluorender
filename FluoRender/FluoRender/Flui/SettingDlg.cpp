@@ -498,7 +498,7 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	m_xr_api_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	m_xr_api_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnXrApiComb, this);
-	cmb_str = { "Cardboard", "OpenXR", "OpenVR" };
+	cmb_str = { "Cardboard", "OpenXR", "OpenVR", "Hololens" };
 	m_xr_api_cmb->Append(cmb_str);
 	sizer1_2->Add(20, 5);
 	sizer1_2->Add(st, 0, wxALIGN_CENTER);
