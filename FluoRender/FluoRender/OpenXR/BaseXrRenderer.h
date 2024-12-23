@@ -79,6 +79,7 @@ protected:
 	float m_right_y = 0.0f;
 	float m_dead_zone = 0.2f;
 	float m_scaler = 20.0f;
+	bool m_grab_prev[2] = { false, false };
 	bool m_grab[2] = { false, false };
 
 	float m_near_clip = 0.1f;

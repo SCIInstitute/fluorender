@@ -119,22 +119,25 @@ void OpenXrRenderer::GetControllerStates()
 	{
 		grab[0] = true;
 	}
-	else if (m_grab_state[1].isActive &&
+	if (m_grab_state[1].isActive &&
 		m_grab_state[1].currentState > 0.5f)
 	{
 		grab[1] = true;
 	}
 
-	if (grab[0])
+	if (grab[0] && !m_grab_prev[0])
 	{
 		m_grab[0] = !m_grab[0];
 		m_grab[1] = false;
 	}
-	if (grab[1])
+	if (grab[1] && !m_grab_prev[1])
 	{
 		m_grab[0] = false;
 		m_grab[1] = !m_grab[1];
 	}
+	m_grab_prev[0] = grab[0];
+	m_grab_prev[1] = grab[1];
+
 	if (m_grab[0])
 	{
 		m_grab_mat = XrPoseToMat4(m_hand_pose[0]);
