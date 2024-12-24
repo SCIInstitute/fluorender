@@ -55,6 +55,7 @@ public:
 	void Draw(const std::vector<flvr::Framebuffer*> &fbos) override;
 
 private:
+	bool CreateInstance() override;
 };
 
 #endif//HololensRenderer_h

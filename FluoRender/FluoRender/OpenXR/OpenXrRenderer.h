@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 #ifdef _WIN32
 #include <unknwn.h>
+#include <d3d11.h>
 #endif
 #include <openxr/openxr.h>
 #include <openxr/openxr_platform.h>
@@ -141,31 +142,31 @@ protected:
 #endif
 
 protected:
-	bool CreateInstance();
-	void DestroyInstance();
+	virtual bool CreateInstance();
+	virtual void DestroyInstance();
 
-	void CreateDebugMessenger();
-	void DestroyDebugMessenger();
+	virtual void CreateDebugMessenger();
+	virtual void DestroyDebugMessenger();
 
-	void GetInstanceProperties();
-	bool GetSystemID();
-	bool GetViewConfigurationViews();
-	bool GetEnvironmentBlendModes();
+	virtual void GetInstanceProperties();
+	virtual bool GetSystemID();
+	virtual bool GetViewConfigurationViews();
+	virtual bool GetEnvironmentBlendModes();
 
-	bool CreateSession(void* hdc, void* hglrc);
-	void DestroySession();
+	virtual bool CreateSession(void* hdc, void* hglrc);
+	virtual void DestroySession();
 
-	bool CreateReferenceSpace();
-	void DestroyReferenceSpace();
+	virtual bool CreateReferenceSpace();
+	virtual void DestroyReferenceSpace();
 
-	bool CreateSwapchains();
-	void DestroySwapchains();
+	virtual bool CreateSwapchains();
+	virtual void DestroySwapchains();
 
-	void* CreateImageView(int type, void* tid);//0:color 1:depth
-	void DestroyImageView(void*& imageView);
+	virtual void* CreateImageView(int type, void* tid);//0:color 1:depth
+	virtual void DestroyImageView(void*& imageView);
 
-	void PollEvents();
-	void PollActions(XrTime predictedTime);
+	virtual void PollEvents();
+	virtual void PollActions(XrTime predictedTime);
 
 	XrPath CreateXrPath(const char* path_string)
 	{
@@ -190,16 +191,16 @@ protected:
 		}
 		return str;
 	}
-	bool CreateAction(XrAction &xrAction,
+	virtual bool CreateAction(XrAction &xrAction,
 		const char *name, XrActionType xrActionType,
 		std::vector<const char *> subaction_paths = {});
-	bool CreateActionSet();
-	bool SuggestBindings();
-	void RecordCurrentBindings();
-	XrSpace CreateActionPoseSpace(XrAction action, const char* path = nullptr);
-	void CreateActionPoses();
-	void AttachActionSet();
-	void DestroyActions();
+	virtual bool CreateActionSet();
+	virtual bool SuggestBindings();
+	virtual void RecordCurrentBindings();
+	virtual XrSpace CreateActionPoseSpace(XrAction action, const char* path = nullptr);
+	virtual void CreateActionPoses();
+	virtual void AttachActionSet();
+	virtual void DestroyActions();
 
 	void ApplyEyeOffsets(XrView* views, int eye_index);
 	glm::mat4 XrPoseToMat4(const XrPosef& pose);

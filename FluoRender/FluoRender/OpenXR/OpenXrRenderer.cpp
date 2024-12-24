@@ -54,7 +54,6 @@ bool OpenXrRenderer::Init(void* hdc, void* hglrc)
 	if (m_initialized)
 		return m_initialized;
 
-#ifdef _WIN32
 	XrResult result;
 
 	// OpenXR initialization
@@ -91,14 +90,12 @@ bool OpenXrRenderer::Init(void* hdc, void* hglrc)
 		return false;
 
 	m_initialized = true;
-#endif
+
 	return m_initialized;
 }
 
 void OpenXrRenderer::Close()
 {
-#ifdef _WIN32
-	//
 	DestroyActions();
 	DestroySwapchains();
 	DestroyReferenceSpace();
@@ -107,7 +104,6 @@ void OpenXrRenderer::Close()
 	DestroyDebugMessenger();
 #endif
 	DestroyInstance();
-#endif
 }
 
 void OpenXrRenderer::GetControllerStates()
@@ -186,7 +182,6 @@ void OpenXrRenderer::BeginFrame()
 	if (!m_app_running)
 		return;
 
-#ifdef _WIN32
 	PollEvents();
 
 	if (!m_session_running)
@@ -295,7 +290,6 @@ void OpenXrRenderer::BeginFrame()
 			m_mv_mat[i] = glm::inverse(viewMatrix);
 		}
 	}
-#endif
 }
 
 void OpenXrRenderer::EndFrame()
@@ -304,7 +298,7 @@ void OpenXrRenderer::EndFrame()
 		return;
 	if (!m_frame_state.shouldRender)
 		return;
-#ifdef _WIN32
+
 	// Fill out the XrCompositionLayerProjection structure for usage with xrEndFrame().
 	m_render_layer_info.layerProjection.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT | XR_COMPOSITION_LAYER_CORRECT_CHROMATIC_ABERRATION_BIT;
 	m_render_layer_info.layerProjection.space = m_space;
@@ -326,7 +320,6 @@ void OpenXrRenderer::EndFrame()
 		DBGPRINT(L"xrEndFrame failed.\n");
 #endif
 	}
-#endif
 }
 
 void OpenXrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
@@ -335,7 +328,7 @@ void OpenXrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		return;
 	if (!m_frame_state.shouldRender)
 		return;
-#ifdef _WIN32
+
 	uint32_t viewCount = m_render_layer_info.layerProjectionViews.size();
 	// Per view in the view configuration:
 	for (uint32_t i = 0; i < viewCount; i++)
@@ -390,12 +383,10 @@ void OpenXrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		if (m_use_depth)
 			OPENXR_CHECK(xrReleaseSwapchainImage(depthSwapchainInfo.swapchain, &releaseInfo), "Failed to release Image back to the Depth Swapchain");
 	}
-#endif
 }
 
 bool OpenXrRenderer::CreateInstance()
 {
-#ifdef _WIN32
 	XrResult result;
 	// Define application information
 	// The application/engine name and version are user-definied.
@@ -500,8 +491,6 @@ bool OpenXrRenderer::CreateInstance()
 	if (result != XR_SUCCESS) return false;
 
 	return true;
-#endif
-	return false;
 }
 
 void OpenXrRenderer::DestroyInstance()
@@ -515,7 +504,6 @@ void OpenXrRenderer::DestroyInstance()
 
 void OpenXrRenderer::CreateDebugMessenger()
 {
-#ifdef _WIN32
 	XrResult result;
 	if (IsStringInVector(m_activeInstanceExtensions,
 		XR_EXT_DEBUG_UTILS_EXTENSION_NAME))
@@ -537,7 +525,6 @@ void OpenXrRenderer::CreateDebugMessenger()
 		// Finally create and return the XrDebugUtilsMessengerEXT.
 		result = xrCreateDebugUtilsMessengerEXT(m_instance, &debugUtilsMessengerCI, &debugUtilsMessenger);
 	}
-#endif
 }
 
 void OpenXrRenderer::DestroyDebugMessenger()
@@ -573,7 +560,6 @@ void OpenXrRenderer::GetInstanceProperties()
 
 bool OpenXrRenderer::GetSystemID()
 {
-#ifdef _WIN32
 	XrResult result;
 	// Get the XrSystemId from the instance and the supplied XrFormFactor.
 	XrFormFactor formFactor = XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY;
@@ -589,13 +575,10 @@ bool OpenXrRenderer::GetSystemID()
 #endif
 
 	return true;
-#endif
-	return false;
 }
 
 bool OpenXrRenderer::GetViewConfigurationViews()
 {
-#ifdef _WIN32
 	XrResult result;
 	// Gets the View Configuration Types.
 	// The first call gets the count of the array that will be returned.
@@ -649,13 +632,10 @@ bool OpenXrRenderer::GetViewConfigurationViews()
 	m_size[1] = m_view_config_views[0].recommendedImageRectHeight;
 
 	return true;
-#endif
-	return false;
 }
 
 bool OpenXrRenderer::GetEnvironmentBlendModes()
 {
-#ifdef _WIN32
 	XrResult result;
 	// Retrieves the available blend modes.
 	// The first call gets the count of the array that will be returned.
@@ -691,13 +671,10 @@ bool OpenXrRenderer::GetEnvironmentBlendModes()
 	}
 
 	return true;
-#endif
-	return false;
 }
 
 bool OpenXrRenderer::CreateSession(void* hdc, void* hglrc)
 {
-#ifdef _WIN32
 	XrResult result;
 	// Create an XrSessionCreateInfo structure.
 	XrSessionCreateInfo sessionCI{XR_TYPE_SESSION_CREATE_INFO};
@@ -722,8 +699,6 @@ bool OpenXrRenderer::CreateSession(void* hdc, void* hglrc)
 	if (result != XR_SUCCESS) return false;
 
 	return true;
-#endif
-	return false;
 }
 
 void OpenXrRenderer::DestroySession()
@@ -738,7 +713,6 @@ void OpenXrRenderer::DestroySession()
 
 bool OpenXrRenderer::CreateReferenceSpace()
 {
-#ifdef _WIN32
 	XrResult result;
 	// Fill out an XrReferenceSpaceCreateInfo structure and create a reference XrSpace, specifying a Local space with an identity pose as the origin.
 	XrReferenceSpaceCreateInfo referenceSpaceCI{XR_TYPE_REFERENCE_SPACE_CREATE_INFO};
@@ -748,8 +722,6 @@ bool OpenXrRenderer::CreateReferenceSpace()
 	if (result != XR_SUCCESS) return false;
 
 	return true;
-#endif
-	return false;
 }
 
 void OpenXrRenderer::DestroyReferenceSpace()
@@ -762,7 +734,6 @@ void OpenXrRenderer::DestroyReferenceSpace()
 
 bool OpenXrRenderer::CreateSwapchains()
 {
-#ifdef _WIN32
 	XrResult result;
 	// Get the supported swapchain formats as an array of int64_t and ordered by runtime preference.
 	uint32_t formatCount = 0;
@@ -881,8 +852,6 @@ bool OpenXrRenderer::CreateSwapchains()
 	}
 
 	return true;
-#endif
-	return false;
 }
 
 void OpenXrRenderer::DestroySwapchains()
@@ -947,7 +916,6 @@ void OpenXrRenderer::DestroyImageView(void *&imageView)
 
 void OpenXrRenderer::PollEvents()
 {
-#ifdef _WIN32
 	// Poll OpenXR for a new event.
 	XrEventDataBuffer eventData{ XR_TYPE_EVENT_DATA_BUFFER };
 	auto XrPollEvents = [&]() -> bool
@@ -1067,7 +1035,6 @@ void OpenXrRenderer::PollEvents()
 			}
 		}
 	}
-#endif
 }
 
 void OpenXrRenderer::PollActions(XrTime predictedTime)

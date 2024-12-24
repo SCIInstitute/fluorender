@@ -45,7 +45,6 @@ bool OpenVrRenderer::Init(void* hdc, void* hglrc)
 	if (m_initialized)
 		return m_initialized;
 
-#ifdef _WIN32
 	//openvr initilization
 	vr::EVRInitError vr_error;
 	m_vr_system = vr::VR_Init(&vr_error, vr::VRApplication_Scene, 0);
@@ -55,9 +54,10 @@ bool OpenVrRenderer::Init(void* hdc, void* hglrc)
 		//get render size
 		m_vr_system->GetRecommendedRenderTargetSize(&m_size[0], &m_size[1]);
 	}
+	else
+		return false;
 
 	m_initialized = true;
-#endif
 	return m_initialized;
 }
 
@@ -71,7 +71,6 @@ void OpenVrRenderer::Close()
 
 void OpenVrRenderer::GetControllerStates()
 {
-#ifdef _WIN32
 	//scan all controllers
 	for (vr::TrackedDeviceIndex_t deviceIndex = 0;
 		deviceIndex < vr::k_unMaxTrackedDeviceCount;
@@ -101,7 +100,6 @@ void OpenVrRenderer::GetControllerStates()
 			}
 		}
 	}
-#endif
 
 	if (m_left_x > -m_dead_zone && m_left_x < m_dead_zone) m_left_x = 0.0;
 	if (m_left_y > -m_dead_zone && m_left_y < m_dead_zone) m_left_y = 0.0;
@@ -116,7 +114,6 @@ void OpenVrRenderer::GetControllerStates()
 
 void OpenVrRenderer::BeginFrame()
 {
-#ifdef _WIN32
 	std::array<vr::TrackedDevicePose_t, vr::k_unMaxTrackedDeviceCount> tracked_device_poses;
 	vr::VRCompositor()->WaitGetPoses(tracked_device_poses.data(), tracked_device_poses.size(), NULL, 0);
 
@@ -146,7 +143,6 @@ void OpenVrRenderer::BeginFrame()
 		m_mv_mat[eye_index] = ApplyEyeOffsets(modelViewMatrix, eye_index);
 		m_mv_mat[eye_index] = glm::inverse(m_mv_mat[eye_index]);
 	}
-#endif
 }
 
 void OpenVrRenderer::EndFrame()
@@ -155,7 +151,6 @@ void OpenVrRenderer::EndFrame()
 
 void OpenVrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 {
-#ifdef _WIN32
 	for (int eye_index = 0; eye_index < 2; ++eye_index)
 	{
 		if (fbos.size() <= eye_index)
@@ -169,7 +164,6 @@ void OpenVrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		vr::EVREye eye = eye_index ? vr::Eye_Right : vr::Eye_Left;
 		vr::VRCompositor()->Submit(eye, &eye_tex, nullptr);
 	}
-#endif
 }
 
 glm::mat4 OpenVrRenderer::ApplyEyeOffsets(const glm::mat4& mv, int eye_index)

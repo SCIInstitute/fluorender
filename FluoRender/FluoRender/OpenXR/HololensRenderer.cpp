@@ -54,7 +54,6 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 	if (m_initialized)
 		return m_initialized;
 
-#ifdef _WIN32
 	XrResult result;
 
 	// OpenXR initialization
@@ -91,14 +90,12 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 		return false;
 
 	m_initialized = true;
-#endif
+
 	return m_initialized;
 }
 
 void HololensRenderer::Close()
 {
-#ifdef _WIN32
-	//
 	DestroyActions();
 	DestroySwapchains();
 	DestroyReferenceSpace();
@@ -107,7 +104,6 @@ void HololensRenderer::Close()
 	DestroyDebugMessenger();
 #endif
 	DestroyInstance();
-#endif
 }
 
 void HololensRenderer::GetControllerStates()
@@ -186,7 +182,6 @@ void HololensRenderer::BeginFrame()
 	if (!m_app_running)
 		return;
 
-#ifdef _WIN32
 	PollEvents();
 
 	if (!m_session_running)
@@ -295,7 +290,6 @@ void HololensRenderer::BeginFrame()
 			m_mv_mat[i] = glm::inverse(viewMatrix);
 		}
 	}
-#endif
 }
 
 void HololensRenderer::EndFrame()
@@ -304,7 +298,7 @@ void HololensRenderer::EndFrame()
 		return;
 	if (!m_frame_state.shouldRender)
 		return;
-#ifdef _WIN32
+
 	// Fill out the XrCompositionLayerProjection structure for usage with xrEndFrame().
 	m_render_layer_info.layerProjection.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT | XR_COMPOSITION_LAYER_CORRECT_CHROMATIC_ABERRATION_BIT;
 	m_render_layer_info.layerProjection.space = m_space;
@@ -326,7 +320,6 @@ void HololensRenderer::EndFrame()
 		DBGPRINT(L"xrEndFrame failed.\n");
 #endif
 	}
-#endif
 }
 
 void HololensRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
@@ -335,7 +328,7 @@ void HololensRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		return;
 	if (!m_frame_state.shouldRender)
 		return;
-#ifdef _WIN32
+
 	uint32_t viewCount = m_render_layer_info.layerProjectionViews.size();
 	// Per view in the view configuration:
 	for (uint32_t i = 0; i < viewCount; i++)
@@ -390,6 +383,112 @@ void HololensRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		if (m_use_depth)
 			OPENXR_CHECK(xrReleaseSwapchainImage(depthSwapchainInfo.swapchain, &releaseInfo), "Failed to release Image back to the Depth Swapchain");
 	}
-#endif
 }
 
+bool HololensRenderer::CreateInstance()
+{
+	XrResult result;
+	// Define application information
+	// The application/engine name and version are user-definied.
+	// These may help IHVs or runtimes.
+	XrApplicationInfo appInfo = {};
+	strncpy(appInfo.applicationName, "FluoRender", XR_MAX_APPLICATION_NAME_SIZE);
+	appInfo.applicationVersion = 1;
+	strncpy(appInfo.engineName, "FLHOLOLENS", XR_MAX_ENGINE_NAME_SIZE);
+	appInfo.engineVersion = 1;
+	//there is no way to know which version is supported before creating the instance
+	//so, use the lowest version number for now
+	appInfo.apiVersion = XR_MAKE_VERSION(1, 0, 0); //XR_CURRENT_API_VERSION;
+
+	// Add additional instance layers/extensions that the application wants.
+	// Add both required and requested instance extensions.
+	m_instanceExtensions.push_back(XR_EXT_DEBUG_UTILS_EXTENSION_NAME);
+	m_instanceExtensions.push_back(XR_KHR_OPENGL_ENABLE_EXTENSION_NAME);
+
+	// Get all the API Layers from the OpenXR runtime.
+	uint32_t apiLayerCount = 0;
+	std::vector<XrApiLayerProperties> apiLayerProperties;
+	result = xrEnumerateApiLayerProperties(0, &apiLayerCount, nullptr);
+	if (result != XR_SUCCESS) return false;
+	apiLayerProperties.resize(apiLayerCount, { XR_TYPE_API_LAYER_PROPERTIES });
+	result = xrEnumerateApiLayerProperties(apiLayerCount, &apiLayerCount, apiLayerProperties.data());
+	if (result != XR_SUCCESS) return false;
+
+	// Check the requested API layers against the ones from the OpenXR.
+	// If found add it to the Active API Layers.
+	std::vector<std::string> apiLayers = {};
+	std::vector<const char*> activeAPILayers = {};
+	for (auto& requestLayer : apiLayers)
+	{
+		for (auto& layerProperty : apiLayerProperties)
+		{
+			// strcmp returns 0 if the strings match.
+			if (strcmp(requestLayer.c_str(),
+				layerProperty.layerName) != 0)
+			{
+				continue;
+			}
+			else
+			{
+				activeAPILayers.push_back(
+					requestLayer.c_str());
+				break;
+			}
+		}
+	}
+
+	// Get all the Instance Extensions from the OpenXR instance.
+	uint32_t extensionCount = 0;
+	std::vector<XrExtensionProperties> extensionProperties;
+	result = xrEnumerateInstanceExtensionProperties(
+		nullptr, 0, &extensionCount, nullptr);
+	if (result != XR_SUCCESS) return false;
+	extensionProperties.resize(extensionCount, { XR_TYPE_EXTENSION_PROPERTIES });
+	result = xrEnumerateInstanceExtensionProperties(
+		nullptr, extensionCount, &extensionCount,
+		extensionProperties.data());
+	if (result != XR_SUCCESS) return false;
+
+	// Check the requested Instance Extensions against the ones from the OpenXR runtime.
+	// If an extension is found add it to Active Instance Extensions.
+	// Log error if the Instance Extension is not found.
+	for (auto& requestedInstanceExtension : m_instanceExtensions)
+	{
+		bool found = false;
+		for (auto& extensionProperty : extensionProperties) {
+			// strcmp returns 0 if the strings match.
+			if (strcmp(requestedInstanceExtension.c_str(),
+				extensionProperty.extensionName) != 0)
+			{
+				continue;
+			}
+			else
+			{
+				m_activeInstanceExtensions.push_back(requestedInstanceExtension.c_str());
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+		{
+#ifdef _DEBUG
+			DBGPRINT(L"Failed to find OpenXR instance extension: %s\n",
+				requestedInstanceExtension.c_str());
+#endif
+		}
+	}
+
+	// Fill out an XrInstanceCreateInfo structure and create an XrInstance.
+	// XR_DOCS_TAG_BEGIN_XrInstanceCreateInfo
+	XrInstanceCreateInfo instanceCI{ XR_TYPE_INSTANCE_CREATE_INFO };
+	instanceCI.createFlags = 0;
+	instanceCI.applicationInfo = appInfo;
+	instanceCI.enabledApiLayerCount = static_cast<uint32_t>(activeAPILayers.size());
+	instanceCI.enabledApiLayerNames = activeAPILayers.data();
+	instanceCI.enabledExtensionCount = static_cast<uint32_t>(m_activeInstanceExtensions.size());
+	instanceCI.enabledExtensionNames = m_activeInstanceExtensions.data();
+	result = xrCreateInstance(&instanceCI, &m_instance);
+	if (result != XR_SUCCESS) return false;
+
+	return true;
+}

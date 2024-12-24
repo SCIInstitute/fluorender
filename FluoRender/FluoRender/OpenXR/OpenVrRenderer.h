@@ -49,11 +49,7 @@ public:
 	void Draw(const std::vector<flvr::Framebuffer*> &fbos) override;
 
 private:
-#ifdef _WIN32
 	vr::IVRSystem* m_vr_system;
-#endif
-
-private:
 	glm::mat4 ApplyEyeOffsets(const glm::mat4& mv, int eye_index);
 };
 #endif//OpenVrRenderer_h
