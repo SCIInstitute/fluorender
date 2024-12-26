@@ -357,6 +357,13 @@ if(WIN32)
     add_definitions(-DXR_USE_PLATFORM_WIN32)
     add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
     add_definitions(-DXR_USE_GRAPHICS_API_D3D11)
+    # Initialize NuGet
+    nuget_initialize()
+    # Add Holographic Remoting OpenXR package
+    nuget_add_dependencies(
+        PACKAGE Microsoft.Holographic.Remoting.OpenXr
+        VERSION 2.x.x
+    )
 elseif(APPLE)
     file(GLOB OpenXR_RELEASE_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Release/*.a)
     file(GLOB OpenXR_DEBUG_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Debug/*.a)

@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <cstring>
 #include <vector>
 #include <algorithm>
+#include <filesystem>
 #ifdef _DEBUG
 #include <Debug.h>
 #endif
@@ -54,6 +55,21 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 	if (m_initialized)
 		return m_initialized;
 
+	if (!m_options.isStandalone)
+	{
+		m_usingRemotingRuntime = EnableRemotingXR();
+
+		if (m_usingRemotingRuntime)
+		{
+			PrepareRemotingEnvironment();
+		}
+		else
+		{
+#ifdef _DEBUG
+			DBGPRINT(L"RemotingXR runtime not available. Running with default OpenXR runtime.\n");
+#endif
+		}
+	}
 	XrResult result;
 
 	// OpenXR initialization
@@ -385,6 +401,57 @@ void HololensRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 	}
 }
 
+bool HololensRenderer::EnableRemotingXR()
+{
+	wchar_t executablePath[MAX_PATH];
+	if (GetModuleFileNameW(NULL, executablePath, ARRAYSIZE(executablePath)) == 0)
+	{
+		return false;
+	}
+
+	std::filesystem::path filename(executablePath);
+	filename = filename.replace_filename("RemotingXR.json");
+
+	if (std::filesystem::exists(filename))
+	{
+		SetEnvironmentVariableW(L"XR_RUNTIME_JSON", filename.c_str());
+		return true;
+	}
+
+	return false;
+}
+
+void HololensRenderer::PrepareRemotingEnvironment()
+{
+	if (!m_options.secureConnection) {
+		return;
+	}
+
+	if (m_options.authenticationToken.empty()) {
+		throw std::logic_error("Authentication token must be specified for secure connections.");
+	}
+
+	if (m_options.listen) {
+		if (m_options.certificateStore.empty() || m_options.subjectName.empty()) {
+			throw std::logic_error("Certificate store and subject name must be specified for secure listening.");
+		}
+
+		constexpr size_t maxCertStoreSize = 1 << 20;
+		std::ifstream certStoreStream(m_options.certificateStore, std::ios::binary);
+		certStoreStream.seekg(0, std::ios_base::end);
+		const size_t certStoreSize = certStoreStream.tellg();
+		if (!certStoreStream.good() || certStoreSize == 0 || certStoreSize > maxCertStoreSize) {
+			throw std::logic_error("Error reading certificate store.");
+		}
+		certStoreStream.seekg(0, std::ios_base::beg);
+		m_certificateStore.resize(certStoreSize);
+		certStoreStream.read(reinterpret_cast<char*>(m_certificateStore.data()), certStoreSize);
+		if (certStoreStream.fail()) {
+			throw std::logic_error("Error reading certificate store.");
+		}
+	}
+}
+
 bool HololensRenderer::CreateInstance()
 {
 	XrResult result;
@@ -403,7 +470,19 @@ bool HololensRenderer::CreateInstance()
 	// Add additional instance layers/extensions that the application wants.
 	// Add both required and requested instance extensions.
 	m_instanceExtensions.push_back(XR_EXT_DEBUG_UTILS_EXTENSION_NAME);
-	m_instanceExtensions.push_back(XR_KHR_OPENGL_ENABLE_EXTENSION_NAME);
+	// D3D11 extension is required for this sample, so check if it's supported.
+	m_instanceExtensions.push_back(XR_KHR_D3D11_ENABLE_EXTENSION_NAME);
+	if (m_usingRemotingRuntime)
+	{
+		// If using the remoting runtime, the remoting extension must be present as well
+		m_instanceExtensions.push_back(XR_MSFT_HOLOGRAPHIC_REMOTING_EXTENSION_NAME);
+		m_instanceExtensions.push_back(XR_MSFT_HOLOGRAPHIC_REMOTING_FRAME_MIRRORING_EXTENSION_NAME);
+		m_instanceExtensions.push_back(XR_MSFT_HOLOGRAPHIC_REMOTING_SPEECH_EXTENSION_NAME);
+	}
+	// Additional optional extensions for enhanced functionality. Track whether enabled in m_optionalExtensions.
+	m_instanceExtensions.push_back(XR_KHR_COMPOSITION_LAYER_DEPTH_EXTENSION_NAME);
+	m_instanceExtensions.push_back(XR_MSFT_UNBOUNDED_REFERENCE_SPACE_EXTENSION_NAME);
+	m_instanceExtensions.push_back(XR_MSFT_SPATIAL_ANCHOR_EXTENSION_NAME);
 
 	// Get all the API Layers from the OpenXR runtime.
 	uint32_t apiLayerCount = 0;

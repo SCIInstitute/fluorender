@@ -64,7 +64,6 @@ public:
 	void Draw(const std::vector<flvr::Framebuffer*> &fbos) override;
 
 protected:
-#ifdef _WIN32
 	XrInstance m_instance = XR_NULL_HANDLE;
 
 	std::vector<const char*> m_activeInstanceExtensions = {};
@@ -138,8 +137,6 @@ protected:
 	XrPosef m_hand_pose[2] = {
 		{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -m_view_hm}},
 		{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -m_view_hm}} };
-
-#endif
 
 protected:
 	virtual bool CreateInstance();

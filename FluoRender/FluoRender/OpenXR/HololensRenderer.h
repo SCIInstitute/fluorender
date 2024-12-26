@@ -30,14 +30,28 @@ DEALINGS IN THE SOFTWARE.
 #define HololensRenderer_h
 
 #include <OpenXrRenderer.h>
+#include <openxr/openxr_msft_holographic_remoting.h>
+#include <openxr/openxr_msft_remoting_frame_mirroring.h>
+#include <openxr/openxr_msft_remoting_speech.h>
 
-#define OPENXR_CHECK(x, y)                                                                                                                                  \
-    {                                                                                                                                                       \
-        XrResult result = (x);                                                                                                                              \
-        if (!XR_SUCCEEDED(result)) {                                                                                                                        \
-            std::cerr << "ERROR: OPENXR: " << int(result) << y << std::endl; \
-        }                                                                                                                                                   \
-    }
+struct AppOptions
+{
+	bool listen{ false };
+	std::string host;
+	uint16_t port{ 0 };
+	uint16_t transportPort{ 0 };
+	bool isStandalone = false;
+	bool noUserWait = false;
+	bool useEphemeralPort = false;
+	bool secureConnection{ false };
+	std::string authenticationToken;
+	bool allowCertificateNameMismatch{ false };
+	bool allowUnverifiedCertificateChain{ false };
+	std::string certificateStore;
+	std::string keyPassphrase;
+	std::string subjectName;
+	std::string authenticationRealm{ "OpenXR Remoting" };
+};
 
 class HololensRenderer : public OpenXrRenderer
 {
@@ -55,7 +69,14 @@ public:
 	void Draw(const std::vector<flvr::Framebuffer*> &fbos) override;
 
 private:
+	bool EnableRemotingXR();
+	void PrepareRemotingEnvironment();
 	bool CreateInstance() override;
+
+private:
+	const AppOptions m_options;
+	bool m_usingRemotingRuntime{ false };
+	std::vector<uint8_t> m_certificateStore;
 };
 
 #endif//HololensRenderer_h
