@@ -45,11 +45,14 @@ HololensRenderer::HololensRenderer() :
 {
 	m_app_name = "FluoRender";
 	m_eng_name = "FLHOLOLENS";
+
+	//load msft specific functions
+	LoadFunctions();
 }
 
 HololensRenderer::~HololensRenderer()
 {
-
+	FreeLibrary(hModule);
 }
 
 bool HololensRenderer::Init(void* hdc, void* hglrc)
@@ -426,6 +429,48 @@ void HololensRenderer::SetExtensions()
 	m_instanceExtensions.push_back(XR_MSFT_SPATIAL_ANCHOR_EXTENSION_NAME);
 }
 
+void HololensRenderer::LoadFunctions()
+{
+	// Load the DLL
+	hModule = LoadLibrary(L"Microsoft.Holographic.Remoting.OpenXr.dll");
+	if (!hModule)
+	{
+#ifdef _DEBUG
+		DBGPRINT(L"Failed to load the DLL.\n");
+#endif
+		return;
+	}
+
+	// Get the function address
+	xrRemotingSetContextPropertiesMSFT =
+		(PFN_xrRemotingSetContextPropertiesMSFT)GetProcAddress(hModule, "xrRemotingSetContextPropertiesMSFT");
+	xrRemotingConnectMSFT =
+		(PFN_xrRemotingConnectMSFT)GetProcAddress(hModule, "xrRemotingConnectMSFT");
+	xrRemotingListenMSFT =
+		(PFN_xrRemotingListenMSFT)GetProcAddress(hModule, "xrRemotingListenMSFT");
+	xrRemotingDisconnectMSFT =
+		(PFN_xrRemotingDisconnectMSFT)GetProcAddress(hModule, "xrRemotingDisconnectMSFT");
+	xrRemotingGetConnectionStateMSFT =
+		(PFN_xrRemotingGetConnectionStateMSFT)GetProcAddress(hModule, "xrRemotingGetConnectionStateMSFT");
+	xrRemotingSetSecureConnectionClientCallbacksMSFT =
+		(PFN_xrRemotingSetSecureConnectionClientCallbacksMSFT)GetProcAddress(hModule, "xrRemotingSetSecureConnectionClientCallbacksMSFT");
+	xrRemotingSetSecureConnectionServerCallbacksMSFT =
+		(PFN_xrRemotingSetSecureConnectionServerCallbacksMSFT)GetProcAddress(hModule, "xrRemotingSetSecureConnectionServerCallbacksMSFT");
+	if (!xrRemotingSetContextPropertiesMSFT ||
+		!xrRemotingConnectMSFT ||
+		!xrRemotingListenMSFT ||
+		!xrRemotingDisconnectMSFT ||
+		!xrRemotingGetConnectionStateMSFT ||
+		!xrRemotingSetSecureConnectionClientCallbacksMSFT ||
+		!xrRemotingSetSecureConnectionServerCallbacksMSFT)
+	{
+#ifdef _DEBUG
+		DBGPRINT(L"Failed to get the function address.\n");
+#endif
+		return;
+	}
+}
+
 bool HololensRenderer::EnableRemotingXR()
 {
 	wchar_t executablePath[MAX_PATH];
@@ -485,17 +530,20 @@ void HololensRenderer::InitDevice()
 void HololensRenderer::Disconnect()
 {
 	XrRemotingDisconnectInfoMSFT disconnectInfo{ static_cast<XrStructureType>(XR_TYPE_REMOTING_DISCONNECT_INFO_MSFT) };
-	xrRemotingDisconnectMSFT(m_instance.Get(), m_systemId, &disconnectInfo));
+	xrRemotingDisconnectMSFT(m_instance, m_sys_id, &disconnectInfo);
 }
 
-void ConnectOrListen() {
-	if (!m_usingRemotingRuntime) {
+void HololensRenderer::ConnectOrListen()
+{
+	if (!m_usingRemotingRuntime)
+	{
 		return;
 	}
 
 	XrRemotingConnectionStateMSFT connectionState;
-	CHECK_XRCMD(m_extensions.xrRemotingGetConnectionStateMSFT(m_instance.Get(), m_systemId, &connectionState, nullptr));
-	if (connectionState != XR_REMOTING_CONNECTION_STATE_DISCONNECTED_MSFT) {
+	xrRemotingGetConnectionStateMSFT(m_instance, m_sys_id, &connectionState, nullptr);
+	if (connectionState != XR_REMOTING_CONNECTION_STATE_DISCONNECTED_MSFT)
+	{
 		return;
 	}
 
@@ -508,18 +556,19 @@ void ConnectOrListen() {
 		contextProperties.maxBitrateKbps = 20000;
 		contextProperties.videoCodec = XR_REMOTING_VIDEO_CODEC_H265_MSFT;
 		contextProperties.depthBufferStreamResolution = XR_REMOTING_DEPTH_BUFFER_STREAM_RESOLUTION_HALF_MSFT;
-		CHECK_XRCMD(m_extensions.xrRemotingSetContextPropertiesMSFT(m_instance.Get(), m_systemId, &contextProperties));
+		xrRemotingSetContextPropertiesMSFT(m_instance, m_sys_id, &contextProperties);
 	}
 
-	if (m_options.listen) {
-		if (m_options.secureConnection) {
+	if (m_options.listen)
+	{
+		if (m_options.secureConnection)
+		{
 			XrRemotingSecureConnectionServerCallbacksMSFT serverCallbacks;
 			serverCallbacks.context = this;
 			serverCallbacks.requestServerCertificateCallback = CertificateValidationCallbackStatic;
 			serverCallbacks.validateAuthenticationTokenCallback = AuthenticationValidationCallbackStatic;
 			serverCallbacks.authenticationRealm = m_options.authenticationRealm.c_str();
-			CHECK_XRCMD(
-				m_extensions.xrRemotingSetSecureConnectionServerCallbacksMSFT(m_instance.Get(), m_systemId, &serverCallbacks));
+			xrRemotingSetSecureConnectionServerCallbacksMSFT(m_instance, m_sys_id, &serverCallbacks);
 		}
 
 		XrRemotingListenInfoMSFT listenInfo{ static_cast<XrStructureType>(XR_TYPE_REMOTING_LISTEN_INFO_MSFT) };
@@ -527,24 +576,145 @@ void ConnectOrListen() {
 		listenInfo.handshakeListenPort = m_options.port != 0 ? m_options.port : 8265;
 		listenInfo.transportListenPort = m_options.transportPort != 0 ? m_options.transportPort : 8266;
 		listenInfo.secureConnection = m_options.secureConnection;
-		CHECK_XRCMD(m_extensions.xrRemotingListenMSFT(m_instance.Get(), m_systemId, &listenInfo));
+		xrRemotingListenMSFT(m_instance, m_sys_id, &listenInfo);
 	}
-	else {
-		if (m_options.secureConnection) {
+	else
+	{
+		if (m_options.secureConnection)
+		{
 			XrRemotingSecureConnectionClientCallbacksMSFT clientCallbacks;
 			clientCallbacks.context = this;
 			clientCallbacks.requestAuthenticationTokenCallback = AuthenticationRequestCallbackStatic;
 			clientCallbacks.validateServerCertificateCallback = CertificateValidationCallbackStatic;
 			clientCallbacks.performSystemValidation = true;
-
-			CHECK_XRCMD(
-				m_extensions.xrRemotingSetSecureConnectionClientCallbacksMSFT(m_instance.Get(), m_systemId, &clientCallbacks));
+			xrRemotingSetSecureConnectionClientCallbacksMSFT(m_instance, m_sys_id, &clientCallbacks);
 		}
 
 		XrRemotingConnectInfoMSFT connectInfo{ static_cast<XrStructureType>(XR_TYPE_REMOTING_CONNECT_INFO_MSFT) };
 		connectInfo.remoteHostName = m_options.host.empty() ? "127.0.0.1" : m_options.host.c_str();
 		connectInfo.remotePort = m_options.port != 0 ? m_options.port : 8265;
 		connectInfo.secureConnection = m_options.secureConnection;
-		CHECK_XRCMD(m_extensions.xrRemotingConnectMSFT(m_instance.Get(), m_systemId, &connectInfo));
+		xrRemotingConnectMSFT(m_instance, m_sys_id, &connectInfo);
 	}
+}
+
+XrResult HololensRenderer::AuthenticationRequestCallback(XrRemotingAuthenticationTokenRequestMSFT* authenticationTokenRequest)
+{
+	const std::string tokenUtf8 = m_options.authenticationToken;
+	const uint32_t tokenSize = static_cast<uint32_t>(tokenUtf8.size() + 1); // for null-termination
+	if (authenticationTokenRequest->tokenCapacityIn >= tokenSize)
+	{
+		memcpy(authenticationTokenRequest->tokenBuffer, tokenUtf8.c_str(), tokenSize);
+		authenticationTokenRequest->tokenSizeOut = tokenSize;
+		return XR_SUCCESS;
+	}
+	else
+	{
+		authenticationTokenRequest->tokenSizeOut = tokenSize;
+		return XR_ERROR_SIZE_INSUFFICIENT;
+	}
+}
+
+XrResult XRAPI_CALL
+HololensRenderer::AuthenticationRequestCallbackStatic(XrRemotingAuthenticationTokenRequestMSFT* authenticationTokenRequest)
+{
+	if (!authenticationTokenRequest->context)
+	{
+		return XR_ERROR_RUNTIME_FAILURE;
+	}
+
+	return reinterpret_cast<HololensRenderer*>(authenticationTokenRequest->context)
+		->AuthenticationRequestCallback(authenticationTokenRequest);
+}
+
+XrResult HololensRenderer::AuthenticationValidationCallback(XrRemotingAuthenticationTokenValidationMSFT* authenticationTokenValidation)
+{
+	const std::string tokenUtf8 = m_options.authenticationToken;
+	authenticationTokenValidation->tokenValidOut =
+		(authenticationTokenValidation->token != nullptr && tokenUtf8 == authenticationTokenValidation->token);
+	return XR_SUCCESS;
+}
+
+XrResult XRAPI_CALL
+HololensRenderer::AuthenticationValidationCallbackStatic(XrRemotingAuthenticationTokenValidationMSFT* authenticationTokenValidation)
+{
+	if (!authenticationTokenValidation->context)
+	{
+		return XR_ERROR_RUNTIME_FAILURE;
+	}
+
+	return reinterpret_cast<HololensRenderer*>(authenticationTokenValidation->context)
+		->AuthenticationValidationCallback(authenticationTokenValidation);
+}
+
+XrResult HololensRenderer::CertificateRequestCallback(XrRemotingServerCertificateRequestMSFT* serverCertificateRequest)
+{
+	const std::string subjectNameUtf8 = m_options.subjectName;
+	const std::string passPhraseUtf8 = m_options.keyPassphrase;
+
+	const uint32_t certStoreSize = static_cast<uint32_t>(m_certificateStore.size());
+	const uint32_t subjectNameSize = static_cast<uint32_t>(subjectNameUtf8.size() + 1); // for null-termination
+	const uint32_t passPhraseSize = static_cast<uint32_t>(passPhraseUtf8.size() + 1);   // for null-termination
+
+	serverCertificateRequest->certStoreSizeOut = certStoreSize;
+	serverCertificateRequest->subjectNameSizeOut = subjectNameSize;
+	serverCertificateRequest->keyPassphraseSizeOut = passPhraseSize;
+	if (serverCertificateRequest->certStoreCapacityIn < certStoreSize ||
+		serverCertificateRequest->subjectNameCapacityIn < subjectNameSize ||
+		serverCertificateRequest->keyPassphraseCapacityIn < passPhraseSize)
+	{
+		return XR_ERROR_SIZE_INSUFFICIENT;
+	}
+
+	// All buffers have sufficient size, so fill in the data
+	memcpy(serverCertificateRequest->certStoreBuffer, m_certificateStore.data(), certStoreSize);
+	memcpy(serverCertificateRequest->subjectNameBuffer, subjectNameUtf8.c_str(), subjectNameSize);
+	memcpy(serverCertificateRequest->keyPassphraseBuffer, passPhraseUtf8.c_str(), passPhraseSize);
+
+	return XR_SUCCESS;
+}
+
+XrResult XRAPI_CALL HololensRenderer::CertificateValidationCallbackStatic(XrRemotingServerCertificateRequestMSFT* serverCertificateRequest)
+{
+	if (!serverCertificateRequest->context)
+	{
+		return XR_ERROR_RUNTIME_FAILURE;
+	}
+
+	return reinterpret_cast<HololensRenderer*>(serverCertificateRequest->context)
+		->CertificateRequestCallback(serverCertificateRequest);
+}
+
+XrResult HololensRenderer::CertificateValidationCallback(XrRemotingServerCertificateValidationMSFT* serverCertificateValidation)
+{
+	if (!serverCertificateValidation->systemValidationResult)
+	{
+		return XR_ERROR_RUNTIME_FAILURE; // We requested system validation to be performed
+	}
+
+	serverCertificateValidation->validationResultOut = *serverCertificateValidation->systemValidationResult;
+	if (m_options.allowCertificateNameMismatch && serverCertificateValidation->validationResultOut.nameValidationResult ==
+		XR_REMOTING_CERTIFICATE_NAME_VALIDATION_RESULT_MISMATCH_MSFT)
+	{
+		serverCertificateValidation->validationResultOut.nameValidationResult =
+			XR_REMOTING_CERTIFICATE_NAME_VALIDATION_RESULT_MATCH_MSFT;
+	}
+	if (m_options.allowUnverifiedCertificateChain)
+	{
+		serverCertificateValidation->validationResultOut.trustedRoot = true;
+	}
+
+	return XR_SUCCESS;
+}
+
+XrResult XRAPI_CALL
+HololensRenderer::CertificateValidationCallbackStatic(XrRemotingServerCertificateValidationMSFT* serverCertificateValidation)
+{
+	if (!serverCertificateValidation->context)
+	{
+		return XR_ERROR_RUNTIME_FAILURE;
+	}
+
+	return reinterpret_cast<HololensRenderer*>(serverCertificateValidation->context)
+		->CertificateValidationCallback(serverCertificateValidation);
 }

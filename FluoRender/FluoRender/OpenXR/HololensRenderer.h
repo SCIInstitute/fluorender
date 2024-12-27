@@ -71,16 +71,37 @@ public:
 private:
 	void SetExtensions() override;
 
+	void LoadFunctions();
+
 	bool EnableRemotingXR();
 	void PrepareRemotingEnvironment();
 
 	void InitDevice();
 	void Disconnect();
+	void ConnectOrListen();
+
+	XrResult AuthenticationRequestCallback(XrRemotingAuthenticationTokenRequestMSFT* authenticationTokenRequest);
+	static XrResult XRAPI_CALL AuthenticationRequestCallbackStatic(XrRemotingAuthenticationTokenRequestMSFT* authenticationTokenRequest);
+	XrResult AuthenticationValidationCallback(XrRemotingAuthenticationTokenValidationMSFT* authenticationTokenValidation);
+	static XrResult XRAPI_CALL AuthenticationValidationCallbackStatic(XrRemotingAuthenticationTokenValidationMSFT* authenticationTokenValidation);
+	XrResult CertificateRequestCallback(XrRemotingServerCertificateRequestMSFT* serverCertificateRequest);
+	static XrResult XRAPI_CALL CertificateValidationCallbackStatic(XrRemotingServerCertificateRequestMSFT* serverCertificateRequest);
+	XrResult CertificateValidationCallback(XrRemotingServerCertificateValidationMSFT* serverCertificateValidation);
+	static XrResult XRAPI_CALL CertificateValidationCallbackStatic(XrRemotingServerCertificateValidationMSFT* serverCertificateValidation);
 
 private:
 	const AppOptions m_options;
 	bool m_usingRemotingRuntime{ false };
 	std::vector<uint8_t> m_certificateStore;
+
+	HMODULE hModule;
+	PFN_xrRemotingSetContextPropertiesMSFT xrRemotingSetContextPropertiesMSFT;
+	PFN_xrRemotingConnectMSFT xrRemotingConnectMSFT;
+	PFN_xrRemotingListenMSFT xrRemotingListenMSFT;
+	PFN_xrRemotingDisconnectMSFT xrRemotingDisconnectMSFT;
+	PFN_xrRemotingGetConnectionStateMSFT xrRemotingGetConnectionStateMSFT;
+	PFN_xrRemotingSetSecureConnectionClientCallbacksMSFT xrRemotingSetSecureConnectionClientCallbacksMSFT;
+	PFN_xrRemotingSetSecureConnectionServerCallbacksMSFT xrRemotingSetSecureConnectionServerCallbacksMSFT;
 };
 
 #endif//HololensRenderer_h
