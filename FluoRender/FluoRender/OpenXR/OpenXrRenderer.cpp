@@ -42,6 +42,8 @@ DEALINGS IN THE SOFTWARE.
 OpenXrRenderer::OpenXrRenderer() :
 	BaseXrRenderer()
 {
+	m_app_name = "FluoRender";
+	m_eng_name = "FLRENDER";
 }
 
 OpenXrRenderer::~OpenXrRenderer()
@@ -54,7 +56,7 @@ bool OpenXrRenderer::Init(void* hdc, void* hglrc)
 	if (m_initialized)
 		return m_initialized;
 
-	XrResult result;
+	SetExtensions();
 
 	// OpenXR initialization
 	if (!CreateInstance())
@@ -385,6 +387,14 @@ void OpenXrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 	}
 }
 
+void OpenXrRenderer::SetExtensions()
+{
+	// Add additional instance layers/extensions that the application wants.
+	// Add both required and requested instance extensions.
+	m_instanceExtensions.push_back(XR_EXT_DEBUG_UTILS_EXTENSION_NAME);
+	m_instanceExtensions.push_back(XR_KHR_OPENGL_ENABLE_EXTENSION_NAME);
+}
+
 bool OpenXrRenderer::CreateInstance()
 {
 	XrResult result;
@@ -392,18 +402,13 @@ bool OpenXrRenderer::CreateInstance()
 	// The application/engine name and version are user-definied.
 	// These may help IHVs or runtimes.
 	XrApplicationInfo appInfo = {};
-	strncpy(appInfo.applicationName, "FluoRender", XR_MAX_APPLICATION_NAME_SIZE);
+	strncpy(appInfo.applicationName, m_app_name.c_str(), XR_MAX_APPLICATION_NAME_SIZE);
 	appInfo.applicationVersion = 1;
-	strncpy(appInfo.engineName, "FLRENDER", XR_MAX_ENGINE_NAME_SIZE);
+	strncpy(appInfo.engineName, m_eng_name.c_str(), XR_MAX_ENGINE_NAME_SIZE);
 	appInfo.engineVersion = 1;
 	//there is no way to know which version is supported before creating the instance
 	//so, use the lowest version number for now
 	appInfo.apiVersion = XR_MAKE_VERSION(1, 0, 0); //XR_CURRENT_API_VERSION;
-
-	// Add additional instance layers/extensions that the application wants.
-	// Add both required and requested instance extensions.
-	m_instanceExtensions.push_back(XR_EXT_DEBUG_UTILS_EXTENSION_NAME);
-	m_instanceExtensions.push_back(XR_KHR_OPENGL_ENABLE_EXTENSION_NAME);
 
 	// Get all the API Layers from the OpenXR runtime.
 	uint32_t apiLayerCount = 0;

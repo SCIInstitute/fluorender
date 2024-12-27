@@ -64,6 +64,9 @@ public:
 	void Draw(const std::vector<flvr::Framebuffer*> &fbos) override;
 
 protected:
+	std::string m_app_name;
+	std::string m_eng_name;
+
 	XrInstance m_instance = XR_NULL_HANDLE;
 
 	std::vector<const char*> m_activeInstanceExtensions = {};
@@ -139,6 +142,7 @@ protected:
 		{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -m_view_hm}} };
 
 protected:
+	virtual void SetExtensions();
 	virtual bool CreateInstance();
 	virtual void DestroyInstance();
 

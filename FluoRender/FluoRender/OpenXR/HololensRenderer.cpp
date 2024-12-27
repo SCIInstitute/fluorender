@@ -43,6 +43,8 @@ DEALINGS IN THE SOFTWARE.
 HololensRenderer::HololensRenderer() :
 	OpenXrRenderer()
 {
+	m_app_name = "FluoRender";
+	m_eng_name = "FLHOLOLENS";
 }
 
 HololensRenderer::~HololensRenderer()
@@ -70,7 +72,8 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 #endif
 		}
 	}
-	XrResult result;
+
+	SetExtensions();
 
 	// OpenXR initialization
 	if (!CreateInstance())
@@ -86,6 +89,8 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 
 	CreateActionSet();
 	SuggestBindings();
+
+	InitDevice();
 
 	// Get render size
 	if (!GetViewConfigurationViews())
@@ -401,6 +406,26 @@ void HololensRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 	}
 }
 
+void HololensRenderer::SetExtensions()
+{
+	// Add additional instance layers/extensions that the application wants.
+	// Add both required and requested instance extensions.
+	m_instanceExtensions.push_back(XR_EXT_DEBUG_UTILS_EXTENSION_NAME);
+	// D3D11 extension is required for this sample, so check if it's supported.
+	m_instanceExtensions.push_back(XR_KHR_D3D11_ENABLE_EXTENSION_NAME);
+	if (m_usingRemotingRuntime)
+	{
+		// If using the remoting runtime, the remoting extension must be present as well
+		m_instanceExtensions.push_back(XR_MSFT_HOLOGRAPHIC_REMOTING_EXTENSION_NAME);
+		m_instanceExtensions.push_back(XR_MSFT_HOLOGRAPHIC_REMOTING_FRAME_MIRRORING_EXTENSION_NAME);
+		m_instanceExtensions.push_back(XR_MSFT_HOLOGRAPHIC_REMOTING_SPEECH_EXTENSION_NAME);
+	}
+	// Additional optional extensions for enhanced functionality. Track whether enabled in m_optionalExtensions.
+	m_instanceExtensions.push_back(XR_KHR_COMPOSITION_LAYER_DEPTH_EXTENSION_NAME);
+	m_instanceExtensions.push_back(XR_MSFT_UNBOUNDED_REFERENCE_SPACE_EXTENSION_NAME);
+	m_instanceExtensions.push_back(XR_MSFT_SPATIAL_ANCHOR_EXTENSION_NAME);
+}
+
 bool HololensRenderer::EnableRemotingXR()
 {
 	wchar_t executablePath[MAX_PATH];
@@ -452,122 +477,74 @@ void HololensRenderer::PrepareRemotingEnvironment()
 	}
 }
 
-bool HololensRenderer::CreateInstance()
+void HololensRenderer::InitDevice()
 {
-	XrResult result;
-	// Define application information
-	// The application/engine name and version are user-definied.
-	// These may help IHVs or runtimes.
-	XrApplicationInfo appInfo = {};
-	strncpy(appInfo.applicationName, "FluoRender", XR_MAX_APPLICATION_NAME_SIZE);
-	appInfo.applicationVersion = 1;
-	strncpy(appInfo.engineName, "FLHOLOLENS", XR_MAX_ENGINE_NAME_SIZE);
-	appInfo.engineVersion = 1;
-	//there is no way to know which version is supported before creating the instance
-	//so, use the lowest version number for now
-	appInfo.apiVersion = XR_MAKE_VERSION(1, 0, 0); //XR_CURRENT_API_VERSION;
 
-	// Add additional instance layers/extensions that the application wants.
-	// Add both required and requested instance extensions.
-	m_instanceExtensions.push_back(XR_EXT_DEBUG_UTILS_EXTENSION_NAME);
-	// D3D11 extension is required for this sample, so check if it's supported.
-	m_instanceExtensions.push_back(XR_KHR_D3D11_ENABLE_EXTENSION_NAME);
-	if (m_usingRemotingRuntime)
-	{
-		// If using the remoting runtime, the remoting extension must be present as well
-		m_instanceExtensions.push_back(XR_MSFT_HOLOGRAPHIC_REMOTING_EXTENSION_NAME);
-		m_instanceExtensions.push_back(XR_MSFT_HOLOGRAPHIC_REMOTING_FRAME_MIRRORING_EXTENSION_NAME);
-		m_instanceExtensions.push_back(XR_MSFT_HOLOGRAPHIC_REMOTING_SPEECH_EXTENSION_NAME);
-	}
-	// Additional optional extensions for enhanced functionality. Track whether enabled in m_optionalExtensions.
-	m_instanceExtensions.push_back(XR_KHR_COMPOSITION_LAYER_DEPTH_EXTENSION_NAME);
-	m_instanceExtensions.push_back(XR_MSFT_UNBOUNDED_REFERENCE_SPACE_EXTENSION_NAME);
-	m_instanceExtensions.push_back(XR_MSFT_SPATIAL_ANCHOR_EXTENSION_NAME);
+}
 
-	// Get all the API Layers from the OpenXR runtime.
-	uint32_t apiLayerCount = 0;
-	std::vector<XrApiLayerProperties> apiLayerProperties;
-	result = xrEnumerateApiLayerProperties(0, &apiLayerCount, nullptr);
-	if (result != XR_SUCCESS) return false;
-	apiLayerProperties.resize(apiLayerCount, { XR_TYPE_API_LAYER_PROPERTIES });
-	result = xrEnumerateApiLayerProperties(apiLayerCount, &apiLayerCount, apiLayerProperties.data());
-	if (result != XR_SUCCESS) return false;
+void HololensRenderer::Disconnect()
+{
+	XrRemotingDisconnectInfoMSFT disconnectInfo{ static_cast<XrStructureType>(XR_TYPE_REMOTING_DISCONNECT_INFO_MSFT) };
+	xrRemotingDisconnectMSFT(m_instance.Get(), m_systemId, &disconnectInfo));
+}
 
-	// Check the requested API layers against the ones from the OpenXR.
-	// If found add it to the Active API Layers.
-	std::vector<std::string> apiLayers = {};
-	std::vector<const char*> activeAPILayers = {};
-	for (auto& requestLayer : apiLayers)
-	{
-		for (auto& layerProperty : apiLayerProperties)
-		{
-			// strcmp returns 0 if the strings match.
-			if (strcmp(requestLayer.c_str(),
-				layerProperty.layerName) != 0)
-			{
-				continue;
-			}
-			else
-			{
-				activeAPILayers.push_back(
-					requestLayer.c_str());
-				break;
-			}
-		}
+void ConnectOrListen() {
+	if (!m_usingRemotingRuntime) {
+		return;
 	}
 
-	// Get all the Instance Extensions from the OpenXR instance.
-	uint32_t extensionCount = 0;
-	std::vector<XrExtensionProperties> extensionProperties;
-	result = xrEnumerateInstanceExtensionProperties(
-		nullptr, 0, &extensionCount, nullptr);
-	if (result != XR_SUCCESS) return false;
-	extensionProperties.resize(extensionCount, { XR_TYPE_EXTENSION_PROPERTIES });
-	result = xrEnumerateInstanceExtensionProperties(
-		nullptr, extensionCount, &extensionCount,
-		extensionProperties.data());
-	if (result != XR_SUCCESS) return false;
-
-	// Check the requested Instance Extensions against the ones from the OpenXR runtime.
-	// If an extension is found add it to Active Instance Extensions.
-	// Log error if the Instance Extension is not found.
-	for (auto& requestedInstanceExtension : m_instanceExtensions)
-	{
-		bool found = false;
-		for (auto& extensionProperty : extensionProperties) {
-			// strcmp returns 0 if the strings match.
-			if (strcmp(requestedInstanceExtension.c_str(),
-				extensionProperty.extensionName) != 0)
-			{
-				continue;
-			}
-			else
-			{
-				m_activeInstanceExtensions.push_back(requestedInstanceExtension.c_str());
-				found = true;
-				break;
-			}
-		}
-		if (!found)
-		{
-#ifdef _DEBUG
-			DBGPRINT(L"Failed to find OpenXR instance extension: %s\n",
-				requestedInstanceExtension.c_str());
-#endif
-		}
+	XrRemotingConnectionStateMSFT connectionState;
+	CHECK_XRCMD(m_extensions.xrRemotingGetConnectionStateMSFT(m_instance.Get(), m_systemId, &connectionState, nullptr));
+	if (connectionState != XR_REMOTING_CONNECTION_STATE_DISCONNECTED_MSFT) {
+		return;
 	}
 
-	// Fill out an XrInstanceCreateInfo structure and create an XrInstance.
-	// XR_DOCS_TAG_BEGIN_XrInstanceCreateInfo
-	XrInstanceCreateInfo instanceCI{ XR_TYPE_INSTANCE_CREATE_INFO };
-	instanceCI.createFlags = 0;
-	instanceCI.applicationInfo = appInfo;
-	instanceCI.enabledApiLayerCount = static_cast<uint32_t>(activeAPILayers.size());
-	instanceCI.enabledApiLayerNames = activeAPILayers.data();
-	instanceCI.enabledExtensionCount = static_cast<uint32_t>(m_activeInstanceExtensions.size());
-	instanceCI.enabledExtensionNames = m_activeInstanceExtensions.data();
-	result = xrCreateInstance(&instanceCI, &m_instance);
-	if (result != XR_SUCCESS) return false;
+	// Apply remote context properties while disconnected.
+	{
+		XrRemotingRemoteContextPropertiesMSFT contextProperties;
+		contextProperties =
+			XrRemotingRemoteContextPropertiesMSFT{ static_cast<XrStructureType>(XR_TYPE_REMOTING_REMOTE_CONTEXT_PROPERTIES_MSFT) };
+		contextProperties.enableAudio = false;
+		contextProperties.maxBitrateKbps = 20000;
+		contextProperties.videoCodec = XR_REMOTING_VIDEO_CODEC_H265_MSFT;
+		contextProperties.depthBufferStreamResolution = XR_REMOTING_DEPTH_BUFFER_STREAM_RESOLUTION_HALF_MSFT;
+		CHECK_XRCMD(m_extensions.xrRemotingSetContextPropertiesMSFT(m_instance.Get(), m_systemId, &contextProperties));
+	}
 
-	return true;
+	if (m_options.listen) {
+		if (m_options.secureConnection) {
+			XrRemotingSecureConnectionServerCallbacksMSFT serverCallbacks;
+			serverCallbacks.context = this;
+			serverCallbacks.requestServerCertificateCallback = CertificateValidationCallbackStatic;
+			serverCallbacks.validateAuthenticationTokenCallback = AuthenticationValidationCallbackStatic;
+			serverCallbacks.authenticationRealm = m_options.authenticationRealm.c_str();
+			CHECK_XRCMD(
+				m_extensions.xrRemotingSetSecureConnectionServerCallbacksMSFT(m_instance.Get(), m_systemId, &serverCallbacks));
+		}
+
+		XrRemotingListenInfoMSFT listenInfo{ static_cast<XrStructureType>(XR_TYPE_REMOTING_LISTEN_INFO_MSFT) };
+		listenInfo.listenInterface = m_options.host.empty() ? "0.0.0.0" : m_options.host.c_str();
+		listenInfo.handshakeListenPort = m_options.port != 0 ? m_options.port : 8265;
+		listenInfo.transportListenPort = m_options.transportPort != 0 ? m_options.transportPort : 8266;
+		listenInfo.secureConnection = m_options.secureConnection;
+		CHECK_XRCMD(m_extensions.xrRemotingListenMSFT(m_instance.Get(), m_systemId, &listenInfo));
+	}
+	else {
+		if (m_options.secureConnection) {
+			XrRemotingSecureConnectionClientCallbacksMSFT clientCallbacks;
+			clientCallbacks.context = this;
+			clientCallbacks.requestAuthenticationTokenCallback = AuthenticationRequestCallbackStatic;
+			clientCallbacks.validateServerCertificateCallback = CertificateValidationCallbackStatic;
+			clientCallbacks.performSystemValidation = true;
+
+			CHECK_XRCMD(
+				m_extensions.xrRemotingSetSecureConnectionClientCallbacksMSFT(m_instance.Get(), m_systemId, &clientCallbacks));
+		}
+
+		XrRemotingConnectInfoMSFT connectInfo{ static_cast<XrStructureType>(XR_TYPE_REMOTING_CONNECT_INFO_MSFT) };
+		connectInfo.remoteHostName = m_options.host.empty() ? "127.0.0.1" : m_options.host.c_str();
+		connectInfo.remotePort = m_options.port != 0 ? m_options.port : 8265;
+		connectInfo.secureConnection = m_options.secureConnection;
+		CHECK_XRCMD(m_extensions.xrRemotingConnectMSFT(m_instance.Get(), m_systemId, &connectInfo));
+	}
 }

@@ -351,19 +351,24 @@ endif()
 # OpenXR
 include_directories(${PARENT_DIR}/OpenXR-SDK/include)
 if(WIN32)
+    include_directories(${CMAKE_BINARY_DIR}/packages/Microsoft.Holographic.Remoting.OpenXr.2.9.4/build/native/include)
     file(GLOB OpenXR_RELEASE_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Release/*.lib)
     file(GLOB OpenXR_DEBUG_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Debug/*.lib)
     set(OpenXR_LIBRARIES $<$<CONFIG:Release>:${OpenXR_RELEASE_LIBRARIES}> $<$<CONFIG:Debug>:${OpenXR_DEBUG_LIBRARIES}>)
     add_definitions(-DXR_USE_PLATFORM_WIN32)
     add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
     add_definitions(-DXR_USE_GRAPHICS_API_D3D11)
+    add_definitions(-DXR_EXTENSION_PROTOTYPES)
+    # nuget
+    #set(NUGET_COMMAND "${FluoRender_SOURCE_DIR}/NuGet/nuget.exe" CACHE STRING "NuGet executable used for package installs. Empty means NuGetTools is disabled.")
+    #include(NuGetTools)
     # Initialize NuGet
-    nuget_initialize()
+    #nuget_initialize()
     # Add Holographic Remoting OpenXR package
-    nuget_add_dependencies(
-        PACKAGE Microsoft.Holographic.Remoting.OpenXr
-        VERSION 2.x.x
-    )
+    #nuget_add_dependencies(
+    #    PACKAGE Microsoft.Holographic.Remoting.OpenXr
+    #    VERSION 2.9.4
+    #)
 elseif(APPLE)
     file(GLOB OpenXR_RELEASE_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Release/*.a)
     file(GLOB OpenXR_DEBUG_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Debug/*.a)

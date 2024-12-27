@@ -69,9 +69,13 @@ public:
 	void Draw(const std::vector<flvr::Framebuffer*> &fbos) override;
 
 private:
+	void SetExtensions() override;
+
 	bool EnableRemotingXR();
 	void PrepareRemotingEnvironment();
-	bool CreateInstance() override;
+
+	void InitDevice();
+	void Disconnect();
 
 private:
 	const AppOptions m_options;
