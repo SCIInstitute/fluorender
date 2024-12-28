@@ -70,6 +70,7 @@ public:
 
 private:
 	void SetExtensions() override;
+	bool CreateSession(void* hdc, void* hdxrc) override;
 
 	void LoadFunctions();
 
@@ -89,12 +90,16 @@ private:
 	XrResult CertificateValidationCallback(XrRemotingServerCertificateValidationMSFT* serverCertificateValidation);
 	static XrResult XRAPI_CALL CertificateValidationCallbackStatic(XrRemotingServerCertificateValidationMSFT* serverCertificateValidation);
 
+	void InitializeSpeechRecognition(XrRemotingSpeechInitInfoMSFT& speechInitInfo);
+	bool LoadGrammarFile(std::vector<uint8_t>& grammarFileContent);
+
 private:
 	const AppOptions m_options;
 	bool m_usingRemotingRuntime{ false };
 	std::vector<uint8_t> m_certificateStore;
+	std::vector<const char*> m_dictionaryEntries;
+	std::vector<uint8_t> m_grammarFileContent;
 
-	HMODULE hModule;
 	PFN_xrRemotingSetContextPropertiesMSFT xrRemotingSetContextPropertiesMSFT;
 	PFN_xrRemotingConnectMSFT xrRemotingConnectMSFT;
 	PFN_xrRemotingListenMSFT xrRemotingListenMSFT;
@@ -102,6 +107,8 @@ private:
 	PFN_xrRemotingGetConnectionStateMSFT xrRemotingGetConnectionStateMSFT;
 	PFN_xrRemotingSetSecureConnectionClientCallbacksMSFT xrRemotingSetSecureConnectionClientCallbacksMSFT;
 	PFN_xrRemotingSetSecureConnectionServerCallbacksMSFT xrRemotingSetSecureConnectionServerCallbacksMSFT;
+
+	PFN_xrInitializeRemotingSpeechMSFT xrInitializeRemotingSpeechMSFT;
 };
 
 #endif//HololensRenderer_h

@@ -36,6 +36,8 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <algorithm>
 #include <filesystem>
+#include <string>
+#include <fstream>
 #ifdef _DEBUG
 #include <Debug.h>
 #endif
@@ -45,14 +47,10 @@ HololensRenderer::HololensRenderer() :
 {
 	m_app_name = "FluoRender";
 	m_eng_name = "FLHOLOLENS";
-
-	//load msft specific functions
-	LoadFunctions();
 }
 
 HololensRenderer::~HololensRenderer()
 {
-	FreeLibrary(hModule);
 }
 
 bool HololensRenderer::Init(void* hdc, void* hglrc)
@@ -81,6 +79,9 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 	// OpenXR initialization
 	if (!CreateInstance())
 		return false;
+
+	//load msft specific functions
+	LoadFunctions();
 
 #ifdef _DEBUG
 	CreateDebugMessenger();
@@ -429,46 +430,55 @@ void HololensRenderer::SetExtensions()
 	m_instanceExtensions.push_back(XR_MSFT_SPATIAL_ANCHOR_EXTENSION_NAME);
 }
 
-void HololensRenderer::LoadFunctions()
+bool HololensRenderer::CreateSession(void* hdc, void* hdxrc)
 {
-	// Load the DLL
-	hModule = LoadLibrary(L"Microsoft.Holographic.Remoting.OpenXr.dll");
-	if (!hModule)
+	XrResult result;
+	// Create an XrSessionCreateInfo structure.
+	XrSessionCreateInfo sessionCI{ XR_TYPE_SESSION_CREATE_INFO };
+	// Create a std::unique_ptr<GraphicsAPI_...> from the instance and system.
+	// This call sets up a graphics API that's suitable for use with OpenXR.
+	// Get D3D11 graphics requirements
+	PFN_xrGetD3D11GraphicsRequirementsKHR xrGetD3D11GraphicsRequirementsKHR = nullptr;
+	result = xrGetInstanceProcAddr(m_instance, "xrGetD3D11GraphicsRequirementsKHR", (PFN_xrVoidFunction*)&xrGetD3D11GraphicsRequirementsKHR);
+	if (result != XR_SUCCESS) return false;
+	XrGraphicsRequirementsD3D11KHR requirements = { XR_TYPE_GRAPHICS_REQUIREMENTS_D3D11_KHR };
+	result = xrGetD3D11GraphicsRequirementsKHR(m_instance, m_sys_id, &requirements);
+	if (result != XR_SUCCESS) return false;
+	XrGraphicsBindingD3D11KHR graphicsBindingD3D11 = { XR_TYPE_GRAPHICS_BINDING_D3D11_KHR };
+	//graphicsBindingOpenGL.hDC = static_cast<HDC>(hdc);
+	//graphicsBindingOpenGL.hGLRC = static_cast<HGLRC>(hglrc);
+
+	// Fill out the XrSessionCreateInfo structure and create an XrSession.
+	sessionCI.next = (void*)&graphicsBindingD3D11;
+	sessionCI.createFlags = 0;
+	sessionCI.systemId = m_sys_id;
+	result = xrCreateSession(m_instance, &sessionCI, &m_session);
+	if (result != XR_SUCCESS) return false;
+
+	// If remoting speech extension is enabled
+	if (m_usingRemotingRuntime)
 	{
-#ifdef _DEBUG
-		DBGPRINT(L"Failed to load the DLL.\n");
-#endif
-		return;
+		XrRemotingSpeechInitInfoMSFT speechInitInfo{ static_cast<XrStructureType>(XR_TYPE_REMOTING_SPEECH_INIT_INFO_MSFT) };
+		InitializeSpeechRecognition(speechInitInfo);
+		xrInitializeRemotingSpeechMSFT(m_session, &speechInitInfo);
 	}
 
+	return true;
+}
+
+void HololensRenderer::LoadFunctions()
+{
+	XrResult result;
 	// Get the function address
-	xrRemotingSetContextPropertiesMSFT =
-		(PFN_xrRemotingSetContextPropertiesMSFT)GetProcAddress(hModule, "xrRemotingSetContextPropertiesMSFT");
-	xrRemotingConnectMSFT =
-		(PFN_xrRemotingConnectMSFT)GetProcAddress(hModule, "xrRemotingConnectMSFT");
-	xrRemotingListenMSFT =
-		(PFN_xrRemotingListenMSFT)GetProcAddress(hModule, "xrRemotingListenMSFT");
-	xrRemotingDisconnectMSFT =
-		(PFN_xrRemotingDisconnectMSFT)GetProcAddress(hModule, "xrRemotingDisconnectMSFT");
-	xrRemotingGetConnectionStateMSFT =
-		(PFN_xrRemotingGetConnectionStateMSFT)GetProcAddress(hModule, "xrRemotingGetConnectionStateMSFT");
-	xrRemotingSetSecureConnectionClientCallbacksMSFT =
-		(PFN_xrRemotingSetSecureConnectionClientCallbacksMSFT)GetProcAddress(hModule, "xrRemotingSetSecureConnectionClientCallbacksMSFT");
-	xrRemotingSetSecureConnectionServerCallbacksMSFT =
-		(PFN_xrRemotingSetSecureConnectionServerCallbacksMSFT)GetProcAddress(hModule, "xrRemotingSetSecureConnectionServerCallbacksMSFT");
-	if (!xrRemotingSetContextPropertiesMSFT ||
-		!xrRemotingConnectMSFT ||
-		!xrRemotingListenMSFT ||
-		!xrRemotingDisconnectMSFT ||
-		!xrRemotingGetConnectionStateMSFT ||
-		!xrRemotingSetSecureConnectionClientCallbacksMSFT ||
-		!xrRemotingSetSecureConnectionServerCallbacksMSFT)
-	{
-#ifdef _DEBUG
-		DBGPRINT(L"Failed to get the function address.\n");
-#endif
-		return;
-	}
+	result = xrGetInstanceProcAddr(m_instance, "xrRemotingSetContextPropertiesMSFT", (PFN_xrVoidFunction*)&xrRemotingSetContextPropertiesMSFT);
+	result = xrGetInstanceProcAddr(m_instance, "xrRemotingConnectMSFT", (PFN_xrVoidFunction*)&xrRemotingConnectMSFT);
+	result = xrGetInstanceProcAddr(m_instance, "xrRemotingListenMSFT", (PFN_xrVoidFunction*)&xrRemotingListenMSFT);
+	result = xrGetInstanceProcAddr(m_instance, "xrRemotingDisconnectMSFT", (PFN_xrVoidFunction*)&xrRemotingDisconnectMSFT);
+	result = xrGetInstanceProcAddr(m_instance, "xrRemotingGetConnectionStateMSFT", (PFN_xrVoidFunction*)&xrRemotingGetConnectionStateMSFT);
+	result = xrGetInstanceProcAddr(m_instance, "xrRemotingSetSecureConnectionClientCallbacksMSFT", (PFN_xrVoidFunction*)&xrRemotingSetSecureConnectionClientCallbacksMSFT);
+	result = xrGetInstanceProcAddr(m_instance, "xrRemotingSetSecureConnectionServerCallbacksMSFT", (PFN_xrVoidFunction*)&xrRemotingSetSecureConnectionServerCallbacksMSFT);
+
+	result = xrGetInstanceProcAddr(m_instance, "xrInitializeRemotingSpeechMSFT", (PFN_xrVoidFunction*)&xrInitializeRemotingSpeechMSFT);
 }
 
 bool HololensRenderer::EnableRemotingXR()
@@ -717,4 +727,60 @@ HololensRenderer::CertificateValidationCallbackStatic(XrRemotingServerCertificat
 
 	return reinterpret_cast<HololensRenderer*>(serverCertificateValidation->context)
 		->CertificateValidationCallback(serverCertificateValidation);
+}
+
+void HololensRenderer::InitializeSpeechRecognition(XrRemotingSpeechInitInfoMSFT& speechInitInfo)
+{
+	// Specify the speech recognition language.
+	strcpy_s(speechInitInfo.language, "en-US");
+
+	// Initialize the dictionary.
+	m_dictionaryEntries = { "Red", "Blue", "Green", "Aquamarine", "Default" };
+	speechInitInfo.dictionaryEntries = m_dictionaryEntries.data();
+	speechInitInfo.dictionaryEntriesCount = static_cast<uint32_t>(m_dictionaryEntries.size());
+
+	// Initialize the grammar file if it exists.
+	if (LoadGrammarFile(m_grammarFileContent))
+	{
+		speechInitInfo.grammarFileSize = static_cast<uint32_t>(m_grammarFileContent.size());
+		speechInitInfo.grammarFileContent = m_grammarFileContent.data();
+	}
+}
+
+bool HololensRenderer::LoadGrammarFile(std::vector<uint8_t>& grammarFileContent)
+{
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+	char executablePath[MAX_PATH];
+	if (GetModuleFileNameA(NULL, executablePath, ARRAYSIZE(executablePath)) == 0)
+	{
+		return false;
+	}
+
+	std::filesystem::path filename(executablePath);
+	filename = filename.replace_filename("OpenXRSpeechGrammar.xml");
+
+	if (!std::filesystem::exists(filename))
+	{
+		return false;
+	}
+
+	std::string grammarFilePath{ filename.string() };
+	std::ifstream grammarFileStream(grammarFilePath, std::ios::binary);
+	const size_t grammarFileSize = std::filesystem::file_size(filename);
+	if (!grammarFileStream.good() || grammarFileSize == 0)
+	{
+		return false;
+	}
+
+	grammarFileContent.resize(grammarFileSize);
+	grammarFileStream.read(reinterpret_cast<char*>(grammarFileContent.data()), grammarFileSize);
+	if (grammarFileStream.fail())
+	{
+		return false;
+	}
+
+	return true;
+#else
+	return false;
+#endif
 }
