@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef HololensRenderer_h
 #define HololensRenderer_h
 
-#include <OpenXrRenderer.h>
+#include <WmrRenderer.h>
 #include <openxr/openxr_msft_holographic_remoting.h>
 #include <openxr/openxr_msft_remoting_frame_mirroring.h>
 #include <openxr/openxr_msft_remoting_speech.h>
@@ -53,7 +53,7 @@ struct AppOptions
 	std::string authenticationRealm{ "OpenXR Remoting" };
 };
 
-class HololensRenderer : public OpenXrRenderer
+class HololensRenderer : public WmrRenderer
 {
 public:
 	HololensRenderer();
@@ -62,26 +62,18 @@ public:
 	bool Init(void*, void*) override;
 	void Close() override;
 
-	void GetControllerStates() override;
-
-	void BeginFrame() override;
-	void EndFrame() override;
 	void Draw(const std::vector<flvr::Framebuffer*> &fbos) override;
 
-private:
+protected:
 	void SetExtensions() override;
 	bool CreateSession(void* hdc, void* hdxrc) override;
-	bool CreateSwapchains() override;
-	void* CreateImageView(int type, void* format, void* tid) override;//0:color 1:depth
-	void DestroyImageView(void*& imageView) override;
 
+private:
 	void LoadFunctions();
 
 	bool EnableRemotingXR();
 	void PrepareRemotingEnvironment();
 
-	bool CreateD3DDevice();
-	void DestroyD3DDevice();
 	void Disconnect();
 	void ConnectOrListen();
 
@@ -98,10 +90,6 @@ private:
 	bool LoadGrammarFile(std::vector<uint8_t>& grammarFileContent);
 
 private:
-	IDXGIFactory4* m_factory = nullptr;
-	ID3D11Device* m_device = nullptr;
-	ID3D11DeviceContext* m_im_context = nullptr;
-
 	const AppOptions m_options;
 	bool m_usingRemotingRuntime{ false };
 	std::vector<uint8_t> m_certificateStore;

@@ -156,7 +156,7 @@ public:
 
 	int m_disp_id;			//display id
 	int m_hologram_mode;	//0: disabled; 1: stereograph; 2: looking glass;
-	int m_xr_api;			//0: disabled; 1: OpenXR; 2: OpenVR; 3: Hololens
+	int m_xr_api;			//0: disabled; 1: OpenXR; 2: OpenVR; 3: WMR; 4: Hololens
 	bool m_mv_hmd;			//get modelview matrix from hmd
 	bool m_sbs;
 	double m_eye_dist;

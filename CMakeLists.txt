@@ -351,10 +351,11 @@ endif()
 # OpenXR
 include_directories(${PARENT_DIR}/OpenXR-SDK/include)
 if(WIN32)
+    #d3d11 dependencies
     include_directories(${CMAKE_BINARY_DIR}/packages/Microsoft.Holographic.Remoting.OpenXr.2.9.4/build/native/include)
     file(GLOB OpenXR_RELEASE_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Release/*.lib)
     file(GLOB OpenXR_DEBUG_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Debug/*.lib)
-    set(OpenXR_LIBRARIES $<$<CONFIG:Release>:${OpenXR_RELEASE_LIBRARIES}> $<$<CONFIG:Debug>:${OpenXR_DEBUG_LIBRARIES}>)
+    set(OpenXR_LIBRARIES $<$<CONFIG:Release>:${OpenXR_RELEASE_LIBRARIES} d3d11.lib dxgi.lib> $<$<CONFIG:Debug>:${OpenXR_DEBUG_LIBRARIES} d3d11.lib dxgi.lib>)
     add_definitions(-DXR_USE_PLATFORM_WIN32)
     add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
     add_definitions(-DXR_USE_GRAPHICS_API_D3D11)

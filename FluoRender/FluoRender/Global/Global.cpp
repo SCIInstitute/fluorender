@@ -276,7 +276,10 @@ BaseXrRenderer* Global::get_xr_renderer()
 	case 2://openvr
 		m_xr_renderer = std::make_unique<OpenVrRenderer>();
 		return m_xr_renderer.get();
-	case 3://hololens
+	case 3://wmr
+		m_xr_renderer = std::make_unique<WmrRenderer>();
+		return m_xr_renderer.get();
+	case 4://hololens
 		m_xr_renderer = std::make_unique<HololensRenderer>();
 		return m_xr_renderer.get();
 	}
