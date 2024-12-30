@@ -94,7 +94,7 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 	CreateActionSet();
 	SuggestBindings();
 
-	InitDevice();
+	CreateD3DDevice();
 
 	// Get render size
 	if (!GetViewConfigurationViews())
@@ -129,6 +129,7 @@ void HololensRenderer::Close()
 	DestroyDebugMessenger();
 #endif
 	DestroyInstance();
+	DestroyD3DDevice();
 }
 
 void HololensRenderer::GetControllerStates()
@@ -466,6 +467,161 @@ bool HololensRenderer::CreateSession(void* hdc, void* hdxrc)
 	return true;
 }
 
+bool HololensRenderer::CreateSwapchains()
+{
+	XrResult result;
+	// Get the supported swapchain formats as an array of int64_t and ordered by runtime preference.
+	uint32_t formatCount = 0;
+	result = xrEnumerateSwapchainFormats(m_session, 0, &formatCount, nullptr);
+	if (result != XR_SUCCESS) return false;
+	std::vector<int64_t> formats(formatCount);
+	result = xrEnumerateSwapchainFormats(
+		m_session, formatCount, &formatCount, formats.data());
+	if (result != XR_SUCCESS) return false;
+
+	std::vector<int64_t> supportSFColor = {
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		DXGI_FORMAT_B8G8R8A8_UNORM,
+		DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+		DXGI_FORMAT_B8G8R8A8_UNORM_SRGB };
+	std::vector<int64_t> supportSFDepth = {
+		DXGI_FORMAT_D32_FLOAT,
+		DXGI_FORMAT_D16_UNORM };
+
+	const std::vector<int64_t>::const_iterator& itor_color =
+		std::find_first_of(formats.begin(), formats.end(),
+			std::begin(supportSFColor), std::end(supportSFColor));
+	if (itor_color == formats.end())
+	{
+#ifdef _DEBUG
+		DBGPRINT(L"Failed to find color format for Swapchain.\n");
+#endif
+	}
+	const std::vector<int64_t>::const_iterator& itor_depth =
+		std::find_first_of(formats.begin(), formats.end(),
+			std::begin(supportSFDepth), std::end(supportSFDepth));
+	if (itor_depth == formats.end())
+	{
+#ifdef _DEBUG
+		DBGPRINT(L"Failed to find depth format for Swapchain.\n");
+#endif
+	}
+
+	//Resize the SwapchainInfo to match the number of view in the View Configuration.
+	m_swapchain_infos_color.resize(m_view_config_views.size());
+	m_swapchain_infos_depth.resize(m_view_config_views.size());
+
+	// Per view, create a color and depth swapchain, and their associated image views.
+	for (size_t i = 0; i < m_view_config_views.size(); i++)
+	{
+		SwapchainInfo& colorSwapchainInfo = m_swapchain_infos_color[i];
+		SwapchainInfo& depthSwapchainInfo = m_swapchain_infos_depth[i];
+
+		// Fill out an XrSwapchainCreateInfo structure and create an XrSwapchain.
+		// Color.
+		XrSwapchainCreateInfo swapchainCI{ XR_TYPE_SWAPCHAIN_CREATE_INFO };
+		swapchainCI.createFlags = 0;
+		swapchainCI.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_COLOR_ATTACHMENT_BIT;
+		swapchainCI.format = *itor_color;
+		swapchainCI.sampleCount = m_view_config_views[i].recommendedSwapchainSampleCount;  // Use the recommended values from the XrViewConfigurationView.
+		swapchainCI.width = m_view_config_views[i].recommendedImageRectWidth;
+		swapchainCI.height = m_view_config_views[i].recommendedImageRectHeight;
+		swapchainCI.faceCount = 1;
+		swapchainCI.arraySize = 1;
+		swapchainCI.mipCount = 1;
+		result = xrCreateSwapchain(m_session, &swapchainCI, &colorSwapchainInfo.swapchain);
+		if (result != XR_SUCCESS) return false;
+		colorSwapchainInfo.swapchainFormat = swapchainCI.format;  // Save the swapchain format for later use.
+
+		// Get the number of images in the color/depth swapchain and allocate Swapchain image data via GraphicsAPI to store the returned array.
+		uint32_t colorSwapchainImageCount = 0;
+		result = xrEnumerateSwapchainImages(colorSwapchainInfo.swapchain, 0, &colorSwapchainImageCount, nullptr);
+		if (result != XR_SUCCESS) return false;
+		std::vector<XrSwapchainImageD3D11KHR> swapchain_images;
+		swapchain_images.resize(colorSwapchainImageCount, { XR_TYPE_SWAPCHAIN_IMAGE_D3D11_KHR });
+		XrSwapchainImageBaseHeader* colorSwapchainImages = reinterpret_cast<XrSwapchainImageBaseHeader*>(swapchain_images.data());
+		result = xrEnumerateSwapchainImages(colorSwapchainInfo.swapchain,
+			colorSwapchainImageCount, &colorSwapchainImageCount, colorSwapchainImages);
+		if (result != XR_SUCCESS) return false;
+
+		// Per image in the swapchains, fill out a GraphicsAPI::ImageViewCreateInfo structure and create a color/depth image view.
+		for (uint32_t j = 0; j < colorSwapchainImageCount; j++)
+		{
+			colorSwapchainInfo.imageViews.push_back(CreateImageView(0, (void*)(uint64_t)swapchainCI.format, (void*)(uint64_t)swapchain_images[j].texture));
+		}
+
+		// Depth.
+		if (m_use_depth)
+		{
+			swapchainCI.createFlags = 0;
+			swapchainCI.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+			swapchainCI.format = *itor_depth;
+			swapchainCI.sampleCount = m_view_config_views[i].recommendedSwapchainSampleCount;  // Use the recommended values from the XrViewConfigurationView.
+			swapchainCI.width = m_view_config_views[i].recommendedImageRectWidth;
+			swapchainCI.height = m_view_config_views[i].recommendedImageRectHeight;
+			swapchainCI.faceCount = 1;
+			swapchainCI.arraySize = 1;
+			swapchainCI.mipCount = 1;
+			result = xrCreateSwapchain(m_session, &swapchainCI, &depthSwapchainInfo.swapchain);
+			if (result != XR_SUCCESS) return false;
+			depthSwapchainInfo.swapchainFormat = swapchainCI.format;  // Save the swapchain format for later use.
+
+			uint32_t depthSwapchainImageCount = 0;
+			result = xrEnumerateSwapchainImages(depthSwapchainInfo.swapchain, 0, &depthSwapchainImageCount, nullptr);
+			swapchain_images.resize(depthSwapchainImageCount, { XR_TYPE_SWAPCHAIN_IMAGE_D3D11_KHR });
+			XrSwapchainImageBaseHeader* depthSwapchainImages = reinterpret_cast<XrSwapchainImageBaseHeader*>(swapchain_images.data());
+			result = xrEnumerateSwapchainImages(depthSwapchainInfo.swapchain,
+				depthSwapchainImageCount, &depthSwapchainImageCount, depthSwapchainImages);
+			if (result != XR_SUCCESS) return false;
+
+			for (uint32_t j = 0; j < depthSwapchainImageCount; j++)
+			{
+				depthSwapchainInfo.imageViews.push_back(CreateImageView(1, (void*)(uint64_t)swapchainCI.format, (void*)(uint64_t)swapchain_images[j].texture));
+			}
+		}
+	}
+
+	return true;
+}
+
+void* HololensRenderer::CreateImageView(int type, void* format, void* tid)
+{
+	switch (type)
+	{
+		case 0://color
+		{
+			D3D11_RENDER_TARGET_VIEW_DESC rtvDesc{};
+			rtvDesc.Format = (DXGI_FORMAT)(uint64_t)format;
+			rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+			rtvDesc.Texture2D.MipSlice = 0;
+			ID3D11RenderTargetView* rtv = nullptr;
+			m_device->CreateRenderTargetView((ID3D11Resource*)(uint64_t)tid, &rtvDesc, &rtv);
+			return rtv;
+		}
+		case 1://depth
+		{
+			D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+			dsvDesc.Format = (DXGI_FORMAT)(uint64_t)format;
+			dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+			dsvDesc.Texture2D.MipSlice = 0;
+			ID3D11DepthStencilView* dsv = nullptr;
+			m_device->CreateDepthStencilView((ID3D11Resource*)(uint64_t)tid, &dsvDesc, &dsv);
+			return dsv;
+		}
+	}
+	return 0;
+}
+
+void HololensRenderer::DestroyImageView(void*& imageView)
+{
+	ID3D11View* d3d11ImageView = (ID3D11View*)imageView;
+	if (d3d11ImageView)
+	{
+		d3d11ImageView->Release();
+	}
+	imageView = nullptr;
+}
+
 void HololensRenderer::LoadFunctions()
 {
 	XrResult result;
@@ -532,9 +688,66 @@ void HololensRenderer::PrepareRemotingEnvironment()
 	}
 }
 
-void HololensRenderer::InitDevice()
+bool HololensRenderer::CreateD3DDevice()
 {
+	XrResult result;
 
+	result = xrGetInstanceProcAddr(m_instance, "xrGetD3D11GraphicsRequirementsKHR", (PFN_xrVoidFunction*)&xrGetD3D11GraphicsRequirementsKHR);
+	if (result != XR_SUCCESS) return false;
+	XrGraphicsRequirementsD3D11KHR graphicsRequirements{ XR_TYPE_GRAPHICS_REQUIREMENTS_D3D11_KHR };
+	result = xrGetD3D11GraphicsRequirementsKHR(m_instance, m_sys_id, &graphicsRequirements);
+	if (result != XR_SUCCESS) return false;
+
+	HRESULT hr = CreateDXGIFactory1(IID_PPV_ARGS(&m_factory));
+	if (!SUCCEEDED(hr)) return false;
+
+	IDXGIAdapter* adapter = nullptr;
+	DXGI_ADAPTER_DESC adapterDesc = {};
+	for (UINT i = 0; m_factory->EnumAdapters(i, &adapter) != DXGI_ERROR_NOT_FOUND; ++i)
+	{
+		adapter->GetDesc(&adapterDesc);
+		if (memcmp(&graphicsRequirements.adapterLuid, &adapterDesc.AdapterLuid, sizeof(LUID)) == 0) {
+			break;  // We have the matching adapter that OpenXR wants.
+		}
+		// If we don't get a match reset adapter to nullptr to force a throw.
+		adapter = nullptr;
+	}
+	if (adapter == nullptr)
+		return false;
+
+	hr = D3D11CreateDevice(
+		adapter,
+		D3D_DRIVER_TYPE_UNKNOWN,
+		0,
+		D3D11_CREATE_DEVICE_DEBUG,
+		&graphicsRequirements.minFeatureLevel,
+		1,
+		D3D11_SDK_VERSION,
+		&m_device,
+		nullptr,
+		&m_im_context);
+
+	if (!SUCCEEDED(hr)) return false;
+	return true;
+}
+
+void HololensRenderer::DestroyD3DDevice()
+{
+	if (m_im_context)
+	{
+		m_im_context->Release();
+		m_im_context = nullptr;
+	}
+	if (m_device)
+	{
+		m_device->Release();
+		m_device = nullptr;
+	}
+	if (m_factory)
+	{
+		m_factory->Release();
+		m_factory = nullptr;
+	}
 }
 
 void HololensRenderer::Disconnect()

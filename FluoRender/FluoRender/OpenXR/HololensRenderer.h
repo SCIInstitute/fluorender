@@ -71,13 +71,17 @@ public:
 private:
 	void SetExtensions() override;
 	bool CreateSession(void* hdc, void* hdxrc) override;
+	bool CreateSwapchains() override;
+	void* CreateImageView(int type, void* format, void* tid) override;//0:color 1:depth
+	void DestroyImageView(void*& imageView) override;
 
 	void LoadFunctions();
 
 	bool EnableRemotingXR();
 	void PrepareRemotingEnvironment();
 
-	void InitDevice();
+	bool CreateD3DDevice();
+	void DestroyD3DDevice();
 	void Disconnect();
 	void ConnectOrListen();
 
@@ -94,6 +98,10 @@ private:
 	bool LoadGrammarFile(std::vector<uint8_t>& grammarFileContent);
 
 private:
+	IDXGIFactory4* m_factory = nullptr;
+	ID3D11Device* m_device = nullptr;
+	ID3D11DeviceContext* m_im_context = nullptr;
+
 	const AppOptions m_options;
 	bool m_usingRemotingRuntime{ false };
 	std::vector<uint8_t> m_certificateStore;

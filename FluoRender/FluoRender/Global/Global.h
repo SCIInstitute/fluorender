@@ -69,12 +69,10 @@ DEALINGS IN THE SOFTWARE.
 #include <LightFieldShader.h>
 #include <TextRenderer.h>
 #include <LookingGlassRenderer.h>
-#include <OpenXrRenderer.h>
-#include <OpenVrRenderer.h>
-#include <HololensRenderer.h>
 #include <Clusterizer.h>
 #include <VolumeMeshConv.h>
 #include <Project.h>
+#include <BaseXrRenderer.h>
 
 #define glbin fluo::Global::instance()
 #define glbin_cache_queue fluo::Global::instance().get_cache_queue()

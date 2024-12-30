@@ -822,7 +822,7 @@ bool OpenXrRenderer::CreateSwapchains()
 		// Per image in the swapchains, fill out a GraphicsAPI::ImageViewCreateInfo structure and create a color/depth image view.
 		for (uint32_t j = 0; j < colorSwapchainImageCount; j++)
 		{
-			colorSwapchainInfo.imageViews.push_back(CreateImageView(0, (void*)(uint64_t)swapchain_images[j].image));
+			colorSwapchainInfo.imageViews.push_back(CreateImageView(0, (void*)(uint64_t)swapchainCI.format, (void*)(uint64_t)swapchain_images[j].image));
 		}
 
 		// Depth.
@@ -851,7 +851,7 @@ bool OpenXrRenderer::CreateSwapchains()
 
 			for (uint32_t j = 0; j < depthSwapchainImageCount; j++)
 			{
-				depthSwapchainInfo.imageViews.push_back(CreateImageView(1, (void*)(uint64_t)swapchain_images[j].image));
+				depthSwapchainInfo.imageViews.push_back(CreateImageView(1, (void*)(uint64_t)swapchainCI.format, (void*)(uint64_t)swapchain_images[j].image));
 			}
 		}
 	}
@@ -887,7 +887,7 @@ void OpenXrRenderer::DestroySwapchains()
 	}
 }
 
-void* OpenXrRenderer::CreateImageView(int type, void* tid)
+void* OpenXrRenderer::CreateImageView(int type, void* format, void* tid)
 {
 	GLuint framebuffer = 0;
 	GLenum attachment = GL_COLOR_ATTACHMENT0;

@@ -31,8 +31,11 @@ DEALINGS IN THE SOFTWARE.
 
 #include <compatibility.h>
 #ifdef _WIN32
+#define WINDOWS_LEAN_AND_MEAN
+#include <Windows.h>
 #include <unknwn.h>
-#include <d3d11.h>
+#include <d3d11_1.h>
+#include <dxgi1_6.h>
 #endif
 #include <openxr/openxr.h>
 #include <openxr/openxr_platform.h>
@@ -163,7 +166,7 @@ protected:
 	virtual bool CreateSwapchains();
 	virtual void DestroySwapchains();
 
-	virtual void* CreateImageView(int type, void* tid);//0:color 1:depth
+	virtual void* CreateImageView(int type, void* format, void* tid);//0:color 1:depth
 	virtual void DestroyImageView(void*& imageView);
 
 	virtual void PollEvents();

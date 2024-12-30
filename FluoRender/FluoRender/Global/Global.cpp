@@ -27,6 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Global.h>
+#include <OpenXrRenderer.h>
+#include <OpenVrRenderer.h>
+#include <HololensRenderer.h>
 #include <AsyncTimerFactory.hpp>
 #include <StopWatchFactory.hpp>
 #include <SearchVisitor.hpp>
