@@ -151,6 +151,10 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		// This also associates the swapchain image with this layer projection view.
 		m_render_layer_info.layerProjectionViews[i].subImage.swapchain = colorSwapchainInfo.swapchain;
 
+		//test
+		float clearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
+		m_im_context->ClearRenderTargetView((ID3D11RenderTargetView*)(colorSwapchainInfo.imageViews[colorImageIndex]), clearColor);
+
 		//copy buffer
 		//if (fbos.size() > i)
 		//{
@@ -174,6 +178,15 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		if (m_use_depth)
 			OPENXR_CHECK(xrReleaseSwapchainImage(depthSwapchainInfo.swapchain, &releaseInfo), "Failed to release Image back to the Depth Swapchain");
 	}
+
+	// Fill out the XrCompositionLayerProjection structure for usage with xrEndFrame().
+	m_render_layer_info.layerProjection.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT | XR_COMPOSITION_LAYER_CORRECT_CHROMATIC_ABERRATION_BIT;
+	m_render_layer_info.layerProjection.space = m_space;
+	m_render_layer_info.layerProjection.viewCount = static_cast<uint32_t>(m_render_layer_info.layerProjectionViews.size());
+	m_render_layer_info.layerProjection.views = m_render_layer_info.layerProjectionViews.data();
+	m_render_layer_info.layers.push_back(
+		reinterpret_cast<XrCompositionLayerBaseHeader*>(
+			&m_render_layer_info.layerProjection));
 }
 
 void WmrRenderer::SetExtensions()

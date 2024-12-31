@@ -43,7 +43,7 @@ OpenXrRenderer::OpenXrRenderer() :
 	BaseXrRenderer()
 {
 	m_app_name = "FluoRender";
-	m_eng_name = "FLRENDER";
+	m_eng_name = "FLOPENXR";
 }
 
 OpenXrRenderer::~OpenXrRenderer()
@@ -190,9 +190,12 @@ void OpenXrRenderer::BeginFrame()
 		return;
 
 	// Wait for the next frame
+	m_frame_wait_info = XrFrameWaitInfo({ XR_TYPE_FRAME_WAIT_INFO });
+	m_frame_state = XrFrameState({ XR_TYPE_FRAME_STATE });
 	xrWaitFrame(m_session, &m_frame_wait_info, &m_frame_state);
 
 	// Begin the frame
+	m_frame_begin_info = XrFrameBeginInfo({ XR_TYPE_FRAME_BEGIN_INFO });
 	xrBeginFrame(m_session, &m_frame_begin_info);
 
 	m_render_layer_info.predictedDisplayTime = m_frame_state.predictedDisplayTime;
@@ -298,17 +301,7 @@ void OpenXrRenderer::EndFrame()
 {
 	if (!m_app_running || !m_session_running)
 		return;
-	if (!m_frame_state.shouldRender)
-		return;
 
-	// Fill out the XrCompositionLayerProjection structure for usage with xrEndFrame().
-	m_render_layer_info.layerProjection.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT | XR_COMPOSITION_LAYER_CORRECT_CHROMATIC_ABERRATION_BIT;
-	m_render_layer_info.layerProjection.space = m_space;
-	m_render_layer_info.layerProjection.viewCount = static_cast<uint32_t>(m_render_layer_info.layerProjectionViews.size());
-	m_render_layer_info.layerProjection.views = m_render_layer_info.layerProjectionViews.data();
-	m_render_layer_info.layers.push_back(
-		reinterpret_cast<XrCompositionLayerBaseHeader*>(
-			&m_render_layer_info.layerProjection));
 	// End the frame
 	XrFrameEndInfo frameEndInfo{ XR_TYPE_FRAME_END_INFO };
 	frameEndInfo.displayTime = m_frame_state.predictedDisplayTime;
@@ -385,6 +378,15 @@ void OpenXrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		if (m_use_depth)
 			OPENXR_CHECK(xrReleaseSwapchainImage(depthSwapchainInfo.swapchain, &releaseInfo), "Failed to release Image back to the Depth Swapchain");
 	}
+
+	// Fill out the XrCompositionLayerProjection structure for usage with xrEndFrame().
+	m_render_layer_info.layerProjection.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT | XR_COMPOSITION_LAYER_CORRECT_CHROMATIC_ABERRATION_BIT;
+	m_render_layer_info.layerProjection.space = m_space;
+	m_render_layer_info.layerProjection.viewCount = static_cast<uint32_t>(m_render_layer_info.layerProjectionViews.size());
+	m_render_layer_info.layerProjection.views = m_render_layer_info.layerProjectionViews.data();
+	m_render_layer_info.layers.push_back(
+		reinterpret_cast<XrCompositionLayerBaseHeader*>(
+			&m_render_layer_info.layerProjection));
 }
 
 void OpenXrRenderer::SetExtensions()
