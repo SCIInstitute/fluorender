@@ -220,6 +220,9 @@ endif()
 # OpenGL
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
+add_definitions(-DGLEW_STATIC)
+find_package(GLEW REQUIRED)
+include_directories(${OPENGL_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
 
 # Boost
 # only find static libs:
@@ -302,15 +305,6 @@ else()
   find_package(Freetype REQUIRED)
   include_directories(${FREETYPE_INCLUDE_DIRS})
 endif()
-
-# glew
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/glew)
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/glew/GL)
-file(GLOB gl_srcs FluoRender/glew/*.c)
-file(GLOB gl_hdrs1 FluoRender/glew/*.h)
-file(GLOB gl_hdrs2 FluoRender/glew/GL/*.h)
-add_library(GLEW_OBJ OBJECT
-  ${gl_srcs} ${gl_hdrs1} ${gl_hdrs2})
 
 # HoloPlay
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/include)
@@ -740,7 +734,6 @@ if(APPLE)
     $<TARGET_OBJECTS:TYPE_OBJ>
     $<TARGET_OBJECTS:UTILITY_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
-    $<TARGET_OBJECTS:GLEW_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
     $<TARGET_OBJECTS:TEEM_OBJ>
     )
@@ -790,7 +783,6 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:TYPE_OBJ>
     $<TARGET_OBJECTS:UTILITY_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
-    $<TARGET_OBJECTS:GLEW_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
     $<TARGET_OBJECTS:TEEM_OBJ>
     )
@@ -873,7 +865,6 @@ elseif(WIN32)
       $<TARGET_OBJECTS:TYPE_OBJ>
       $<TARGET_OBJECTS:UTILITY_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
-      $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>
       $<TARGET_OBJECTS:WACUTILS_OBJ>
@@ -913,7 +904,6 @@ elseif(WIN32)
       $<TARGET_OBJECTS:TYPE_OBJ>
       $<TARGET_OBJECTS:UTILITY_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
-      $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>
       $<TARGET_OBJECTS:WACUTILS_OBJ>
@@ -931,7 +921,6 @@ elseif(WIN32)
       $<TARGET_OBJECTS:TYPE_OBJ>
       $<TARGET_OBJECTS:UTILITY_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
-      $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>
       $<TARGET_OBJECTS:WACUTILS_OBJ>
@@ -977,6 +966,7 @@ if(WIN32)
     dlib::dlib
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
+    ${GLEW_LIBRARIES}
     ${Boost_LIBRARIES}
     ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
@@ -998,6 +988,7 @@ if(WIN32)
     dlib::dlib
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
+    ${GLEW_LIBRARIES}
     ${Boost_LIBRARIES}
     ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
@@ -1017,6 +1008,7 @@ elseif(APPLE)
     #${AEC_LIBRARIES}
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
+    ${GLEW_LIBRARIES}
     ${Boost_LIBRARIES}
     ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
@@ -1036,6 +1028,7 @@ else()
     dlib::dlib
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
+    ${GLEW_LIBRARIES}
     ${Boost_LIBRARIES}
     ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}

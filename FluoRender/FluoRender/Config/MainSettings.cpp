@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <glew.h>
+#include <GL/glew.h>
 #include <MainSettings.h>
 #include <Names.h>
 #include <compatibility.h>
