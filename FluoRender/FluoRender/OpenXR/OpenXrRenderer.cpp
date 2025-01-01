@@ -368,7 +368,9 @@ void OpenXrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest_fbo);
 			glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 			// Write pixels to destination FBO
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			// Unbind the framebuffers
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		}
 
 		// Give the swapchain image back to OpenXR, allowing the compositor to use the image.

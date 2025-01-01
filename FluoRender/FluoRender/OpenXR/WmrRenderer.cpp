@@ -94,9 +94,6 @@ bool WmrRenderer::Init(void* hdc, void* hglrc)
 	if (!CreateSwapchains())
 		return false;
 
-	if (!CreateSharedTex())
-		return false;
-
 	m_initialized = true;
 
 	return m_initialized;
@@ -161,13 +158,14 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 			//float clearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
 			//m_im_context->ClearRenderTargetView((ID3D11RenderTargetView*)(colorSwapchainInfo.imageViews[colorImageIndex]), clearColor);
 
-			glBindFramebuffer(GL_FRAMEBUFFER, fbos[i]->id());
-			// Bind the shared texture
-			glBindTexture(GL_TEXTURE_2D, m_gl_tex);
-			// Copy the framebuffer to the shared texture
-			glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height);
-			// Unbind the framebuffer
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[i]->id());
+			// Read pixels to PBO
+			GLuint dest_fbo = (GLuint)(uint64_t)(m_gl_fbo);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest_fbo);
+			glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			// Unbind the framebuffers
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 			// Share the texture with Direct3D
 			glDXLockObjectsNV(m_device, 1, &m_interop);
@@ -313,6 +311,12 @@ bool WmrRenderer::CreateSwapchains()
 			colorSwapchainInfo.imageViews.push_back(CreateImageView(0, (void*)(uint64_t)swapchainCI.format, (void*)(uint64_t)swapchain_images[j].texture));
 		}
 
+		//create shared tex if not present
+		if (m_d3d_tex == nullptr)
+		{
+			CreateSharedTex(swapchainCI);
+		}
+
 		// Depth.
 		if (m_use_depth)
 		{
@@ -448,16 +452,16 @@ void WmrRenderer::DestroyD3DDevice()
 	}
 }
 
-bool WmrRenderer::CreateSharedTex()
+bool WmrRenderer::CreateSharedTex(const XrSwapchainCreateInfo& scci)
 {
 	// Describe the shared texture
 	D3D11_TEXTURE2D_DESC desc = {};
-	desc.Width = m_size[0];
-	desc.Height = m_size[1];
-	desc.MipLevels = 1;
-	desc.ArraySize = 1;
-	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	desc.SampleDesc.Count = 1;
+	desc.Width = scci.width;
+	desc.Height = scci.height;
+	desc.MipLevels = scci.mipCount;
+	desc.ArraySize = scci.arraySize;
+	desc.Format = static_cast<DXGI_FORMAT>(scci.format);
+	desc.SampleDesc.Count = scci.sampleCount;
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 	desc.MiscFlags = D3D11_RESOURCE_MISC_SHARED;
@@ -476,10 +480,27 @@ bool WmrRenderer::CreateSharedTex()
 	glBindTexture(GL_TEXTURE_2D, m_gl_tex);
 
 	// Create the OpenGL texture from the shared handle
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_size[0], m_size[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+	// assume the format is correct
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, scci.width, scci.width, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
 	// Register the texture with OpenGL
 	m_interop = glDXRegisterObjectNV(m_device, m_d3d_tex, m_gl_tex, GL_TEXTURE_2D, WGL_ACCESS_READ_WRITE_NV);
+
+	//create destination fbo for receiving images
+	glGenFramebuffers(1, &m_gl_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_gl_fbo);
+	// Attach the shared texture to the framebuffer
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_gl_tex, 0);
+	// Check if the framebuffer is complete
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		// Handle incomplete framebuffer status
+#ifdef _DEBUG
+		DBGPRINT(L"Framebuffer is not complete!\n");
+#endif
+		return false;
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	return true;
 }

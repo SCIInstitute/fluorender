@@ -52,7 +52,7 @@ protected:
 	virtual bool CreateD3DDevice();
 	virtual void DestroyD3DDevice();
 
-	virtual bool CreateSharedTex();
+	virtual bool CreateSharedTex(const XrSwapchainCreateInfo& scci);
 	virtual void DestroySharedTex();
 
 	virtual void LoadFunctions();
@@ -64,6 +64,7 @@ protected:
 
 	//shared tex
 	GLuint m_gl_tex = 0;
+	GLuint m_gl_fbo = 0;
 	ID3D11Texture2D* m_d3d_tex = nullptr;
 	HANDLE m_shared_hdl = nullptr;
 	HANDLE m_interop = nullptr;
