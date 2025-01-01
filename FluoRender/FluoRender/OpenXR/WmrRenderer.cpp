@@ -94,6 +94,9 @@ bool WmrRenderer::Init(void* hdc, void* hglrc)
 	if (!CreateSwapchains())
 		return false;
 
+	if (!CreateSharedTex())
+		return false;
+
 	m_initialized = true;
 
 	return m_initialized;
@@ -101,6 +104,7 @@ bool WmrRenderer::Init(void* hdc, void* hglrc)
 
 void WmrRenderer::Close()
 {
+	DestroySharedTex();
 	DestroyActions();
 	DestroySwapchains();
 	DestroyReferenceSpace();
