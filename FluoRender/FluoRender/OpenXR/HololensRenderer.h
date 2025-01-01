@@ -67,9 +67,9 @@ public:
 protected:
 	void SetExtensions() override;
 	bool CreateSession(void* hdc, void* hdxrc) override;
+	void LoadFunctions() override;
 
 private:
-	void LoadFunctions();
 
 	bool EnableRemotingXR();
 	void PrepareRemotingEnvironment();

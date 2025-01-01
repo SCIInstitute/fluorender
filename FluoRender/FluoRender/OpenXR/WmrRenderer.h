@@ -52,10 +52,27 @@ protected:
 	virtual bool CreateD3DDevice();
 	virtual void DestroyD3DDevice();
 
+	virtual bool CreateSharedTex();
+	virtual void DestroySharedTex();
+
+	virtual void LoadFunctions();
+
 protected:
 	IDXGIFactory4* m_factory = nullptr;
 	ID3D11Device* m_device = nullptr;
 	ID3D11DeviceContext* m_im_context = nullptr;
+
+	//shared tex
+	GLuint m_gl_tex = 0;
+	ID3D11Texture2D* m_d3d_tex = nullptr;
+	HANDLE m_shared_hdl = nullptr;
+	HANDLE m_interop = nullptr;
+
+	//func
+	PFNWGLDXREGISTEROBJECTNVPROC glDXRegisterObjectNV;
+	PFNWGLDXUNREGISTEROBJECTNVPROC glDXUnregisterObjectNV;
+	PFNWGLDXLOCKOBJECTSNVPROC glDXLockObjectsNV;
+	PFNWGLDXUNLOCKOBJECTSNVPROC glDXUnlockObjectsNV;
 };
 
 #endif//WmrRenderer_h

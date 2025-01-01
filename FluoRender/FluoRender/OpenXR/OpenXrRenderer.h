@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef OpenXrRenderer_h
 #define OpenXrRenderer_h
 
+#include <GL/glew.h>
+#include <GL/wglew.h>
 #include <compatibility.h>
 #ifdef _WIN32
 #define WINDOWS_LEAN_AND_MEAN

@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <GL/glew.h>
 #include <Framebuffer.h>
 #include <WmrRenderer.h>
 #include <Global.h>
@@ -151,26 +150,28 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		// This also associates the swapchain image with this layer projection view.
 		m_render_layer_info.layerProjectionViews[i].subImage.swapchain = colorSwapchainInfo.swapchain;
 
-		//test
-		float clearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
-		m_im_context->ClearRenderTargetView((ID3D11RenderTargetView*)(colorSwapchainInfo.imageViews[colorImageIndex]), clearColor);
-
 		//copy buffer
-		//if (fbos.size() > i)
-		//{
-		//	//GLuint dest_fbo = (GLuint)(uint64_t)(colorSwapchainInfo.imageViews[colorImageIndex]);
-		//	//glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
-		//	//glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-		//	//glClear(GL_COLOR_BUFFER_BIT);
+		if (fbos.size() > i)
+		{
+			//test
+			//float clearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
+			//m_im_context->ClearRenderTargetView((ID3D11RenderTargetView*)(colorSwapchainInfo.imageViews[colorImageIndex]), clearColor);
 
-		//	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[i]->id());
-		//	// Read pixels to PBO
-		//	GLuint dest_fbo = (GLuint)(uint64_t)(colorSwapchainInfo.imageViews[colorImageIndex]);
-		//	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest_fbo);
-		//	glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-		//	// Write pixels to destination FBO
-		//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//}
+			glBindFramebuffer(GL_FRAMEBUFFER, fbos[i]->id());
+			// Bind the shared texture
+			glBindTexture(GL_TEXTURE_2D, m_gl_tex);
+			// Copy the framebuffer to the shared texture
+			glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height);
+			// Unbind the framebuffer
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			// Share the texture with Direct3D
+			glDXLockObjectsNV(m_device, 1, &m_interop);
+			// Copy the shared texture to the swap chain image view
+			m_im_context->CopyResource((ID3D11Resource*)(colorSwapchainInfo.imageViews[colorImageIndex]), m_d3d_tex);
+			// Unlock the OpenGL texture
+			glDXUnlockObjectsNV(m_device, 1, &m_interop);
+		}
 
 		// Give the swapchain image back to OpenXR, allowing the compositor to use the image.
 		XrSwapchainImageReleaseInfo releaseInfo{ XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO };
@@ -443,3 +444,74 @@ void WmrRenderer::DestroyD3DDevice()
 	}
 }
 
+bool WmrRenderer::CreateSharedTex()
+{
+	// Describe the shared texture
+	D3D11_TEXTURE2D_DESC desc = {};
+	desc.Width = m_size[0];
+	desc.Height = m_size[1];
+	desc.MipLevels = 1;
+	desc.ArraySize = 1;
+	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.SampleDesc.Count = 1;
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+	desc.MiscFlags = D3D11_RESOURCE_MISC_SHARED;
+
+	// Create the shared texture
+	m_device->CreateTexture2D(&desc, nullptr, &m_d3d_tex);
+
+	// Get the shared handle
+	IDXGIResource* dxgiResource = nullptr;
+	m_d3d_tex->QueryInterface(__uuidof(IDXGIResource), (void**)&dxgiResource);
+	dxgiResource->GetSharedHandle(&m_shared_hdl);
+	dxgiResource->Release();
+
+	// Create an OpenGL texture
+	glGenTextures(1, &m_gl_tex);
+	glBindTexture(GL_TEXTURE_2D, m_gl_tex);
+
+	// Create the OpenGL texture from the shared handle
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_size[0], m_size[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+	// Register the texture with OpenGL
+	m_interop = glDXRegisterObjectNV(m_device, m_d3d_tex, m_gl_tex, GL_TEXTURE_2D, WGL_ACCESS_READ_WRITE_NV);
+
+	return true;
+}
+
+void WmrRenderer::DestroySharedTex()
+{
+	// Unregister the OpenGL texture
+	if (m_interop)
+	{
+		glDXUnregisterObjectNV(m_device, m_interop);
+	}
+
+	// Delete the OpenGL texture
+	if (m_gl_tex)
+	{
+		glDeleteTextures(1, &m_gl_tex);
+		m_gl_tex = 0;
+	}
+
+	// Release the Direct3D texture
+	if (m_d3d_tex)
+	{
+		m_d3d_tex->Release();
+		m_d3d_tex = nullptr;
+	}
+}
+
+void WmrRenderer::LoadFunctions()
+{
+	PFNWGLDXREGISTEROBJECTNVPROC glDXRegisterObjectNV =
+		(PFNWGLDXREGISTEROBJECTNVPROC)wglGetProcAddress("wglDXRegisterObjectNV");
+	PFNWGLDXUNREGISTEROBJECTNVPROC glDXUnregisterObjectNV =
+		(PFNWGLDXUNREGISTEROBJECTNVPROC)wglGetProcAddress("wglDXUnregisterObjectNV");
+	PFNWGLDXLOCKOBJECTSNVPROC glDXLockObjectsNV =
+		(PFNWGLDXLOCKOBJECTSNVPROC)wglGetProcAddress("wglDXLockObjectsNV");
+	PFNWGLDXUNLOCKOBJECTSNVPROC glDXUnlockObjectsNV =
+		(PFNWGLDXUNLOCKOBJECTSNVPROC)wglGetProcAddress("wglDXUnlockObjectsNV");
+
+}

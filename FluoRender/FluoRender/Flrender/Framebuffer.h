@@ -28,6 +28,7 @@
 #ifndef Framebuffer_h
 #define Framebuffer_h
 
+#include <GL/glew.h>
 #include <string>
 #include <vector>
 #ifdef __linux__
