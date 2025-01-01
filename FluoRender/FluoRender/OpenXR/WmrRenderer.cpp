@@ -168,7 +168,10 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 			// Read pixels to PBO
 			GLuint dest_fbo = (GLuint)(uint64_t)(m_gl_fbo);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest_fbo);
-			glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			glBlitFramebuffer(
+				0, 0, width, height,
+				0, height, width, 0,
+				GL_COLOR_BUFFER_BIT, GL_NEAREST);
 			// Unbind the framebuffers
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -177,37 +180,22 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 			wglDXUnlockObjectsNV(m_interop, 1, &m_gl_d3d_tex);
 
 			// Copy the shared texture to the swap chain image view
-			ID3D11Texture2D* swapchainTexture = static_cast<ID3D11Texture2D*>(colorSwapchainInfo.imageViews[colorImageIndex]);
+			ID3D11RenderTargetView* target_view = static_cast<ID3D11RenderTargetView*>(colorSwapchainInfo.imageViews[colorImageIndex]);
+			// Get the underlying texture from the render target view
+			ID3D11Resource* target_res;
+			target_view->GetResource(&target_res);
 			
-			/*try
+			try
 			{
-				m_im_context->CopyResource(swapchainTexture, m_d3d_tex);
+				m_im_context->CopyResource(target_res, m_d3d_tex);
 			}
 			catch (const std::exception& e)
 			{
 				DBGPRINT(L"%s\n", e.what());
-			}*/
+			}
 
-			// Define the source region to copy (optional)
-			D3D11_BOX srcBox;
-			srcBox.left = 0;
-			srcBox.top = 0;
-			srcBox.front = 0;
-			srcBox.right = width;
-			srcBox.bottom = height;
-			srcBox.back = 1;
-
-			// Perform the copy operation
-			m_im_context->CopySubresourceRegion(
-				swapchainTexture, // Destination resource
-				0,                // Destination subresource index
-				0,                // Destination X
-				0,                // Destination Y
-				0,                // Destination Z
-				m_d3d_tex,       // Source resource
-				0,                // Source subresource index
-				&srcBox           // Source box (optional, can be nullptr)
-			);
+			// Release the resource when done
+			target_res->Release();
 		}
 
 		// Give the swapchain image back to OpenXR, allowing the compositor to use the image.
@@ -500,6 +488,15 @@ bool WmrRenderer::CreateSharedTex(const XrSwapchainCreateInfo& scci)
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 	desc.MiscFlags = D3D11_RESOURCE_MISC_SHARED;
+
+	//desc.MipLevels = 1;
+	//desc.ArraySize = 1;
+	//desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	//desc.SampleDesc.Count = 1;
+	//desc.SampleDesc.Quality = 0;
+	//desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	//desc.CPUAccessFlags = 0;
+	//desc.MiscFlags = 0;
 
 	// Create the shared texture
 	m_device->CreateTexture2D(&desc, nullptr, &m_d3d_tex);
