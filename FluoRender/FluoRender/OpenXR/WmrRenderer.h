@@ -68,12 +68,13 @@ protected:
 	ID3D11Texture2D* m_d3d_tex = nullptr;
 	HANDLE m_shared_hdl = nullptr;
 	HANDLE m_interop = nullptr;
+	HANDLE m_gl_d3d_tex = nullptr;
 
 	//func
-	PFNWGLDXREGISTEROBJECTNVPROC glDXRegisterObjectNV;
-	PFNWGLDXUNREGISTEROBJECTNVPROC glDXUnregisterObjectNV;
-	PFNWGLDXLOCKOBJECTSNVPROC glDXLockObjectsNV;
-	PFNWGLDXUNLOCKOBJECTSNVPROC glDXUnlockObjectsNV;
+	//PFNWGLDXREGISTEROBJECTNVPROC glDXRegisterObjectNV = nullptr;
+	//PFNWGLDXUNREGISTEROBJECTNVPROC glDXUnregisterObjectNV = nullptr;
+	//PFNWGLDXLOCKOBJECTSNVPROC glDXLockObjectsNV = nullptr;
+	//PFNWGLDXUNLOCKOBJECTSNVPROC glDXUnlockObjectsNV = nullptr;
 };
 
 #endif//WmrRenderer_h

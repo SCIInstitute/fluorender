@@ -63,6 +63,9 @@ bool WmrRenderer::Init(void* hdc, void* hglrc)
 	if (!CreateInstance())
 		return false;
 
+	//load opengl-d3d interop functions
+	LoadFunctions();
+
 #ifdef _DEBUG
 	CreateDebugMessenger();
 	GetInstanceProperties();
@@ -158,6 +161,9 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 			//float clearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
 			//m_im_context->ClearRenderTargetView((ID3D11RenderTargetView*)(colorSwapchainInfo.imageViews[colorImageIndex]), clearColor);
 
+			// Share the texture with Direct3D
+			wglDXLockObjectsNV(m_interop, 1, &m_gl_d3d_tex);
+
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[i]->id());
 			// Read pixels to PBO
 			GLuint dest_fbo = (GLuint)(uint64_t)(m_gl_fbo);
@@ -167,12 +173,41 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-			// Share the texture with Direct3D
-			glDXLockObjectsNV(m_device, 1, &m_interop);
-			// Copy the shared texture to the swap chain image view
-			m_im_context->CopyResource((ID3D11Resource*)(colorSwapchainInfo.imageViews[colorImageIndex]), m_d3d_tex);
 			// Unlock the OpenGL texture
-			glDXUnlockObjectsNV(m_device, 1, &m_interop);
+			wglDXUnlockObjectsNV(m_interop, 1, &m_gl_d3d_tex);
+
+			// Copy the shared texture to the swap chain image view
+			ID3D11Texture2D* swapchainTexture = static_cast<ID3D11Texture2D*>(colorSwapchainInfo.imageViews[colorImageIndex]);
+			
+			/*try
+			{
+				m_im_context->CopyResource(swapchainTexture, m_d3d_tex);
+			}
+			catch (const std::exception& e)
+			{
+				DBGPRINT(L"%s\n", e.what());
+			}*/
+
+			// Define the source region to copy (optional)
+			D3D11_BOX srcBox;
+			srcBox.left = 0;
+			srcBox.top = 0;
+			srcBox.front = 0;
+			srcBox.right = width;
+			srcBox.bottom = height;
+			srcBox.back = 1;
+
+			// Perform the copy operation
+			m_im_context->CopySubresourceRegion(
+				swapchainTexture, // Destination resource
+				0,                // Destination subresource index
+				0,                // Destination X
+				0,                // Destination Y
+				0,                // Destination Z
+				m_d3d_tex,       // Source resource
+				0,                // Source subresource index
+				&srcBox           // Source box (optional, can be nullptr)
+			);
 		}
 
 		// Give the swapchain image back to OpenXR, allowing the compositor to use the image.
@@ -484,8 +519,33 @@ bool WmrRenderer::CreateSharedTex(const XrSwapchainCreateInfo& scci)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, scci.width, scci.width, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
 	// Register the texture with OpenGL
-	m_interop = glDXRegisterObjectNV(m_device, m_d3d_tex, m_gl_tex, GL_TEXTURE_2D, WGL_ACCESS_READ_WRITE_NV);
+	m_interop = wglDXOpenDeviceNV(m_device);
+	if (!m_interop)
+	{
+#ifdef _DEBUG
+		DBGPRINT(L"wglDXOpenDeviceNV failed!\n");
+#endif
+		return false;
+	}
 
+//	if (!wglDXSetResourceShareHandleNV(m_d3d_tex, m_shared_hdl))
+//	{
+//#ifdef _DEBUG
+//		DBGPRINT(L"wglDXSetResourceShareHandleNV failed!\n");
+//#endif
+//		return false;
+//	}
+
+	m_gl_d3d_tex = wglDXRegisterObjectNV(m_interop, m_d3d_tex, m_gl_tex, GL_TEXTURE_2D, WGL_ACCESS_READ_WRITE_NV);
+	if (!m_gl_d3d_tex)
+	{
+#ifdef _DEBUG
+		DBGPRINT(L"wglDXRegisterObjectNV failed!\n");
+#endif
+		return false;
+	}
+
+	wglDXLockObjectsNV(m_interop, 1, &m_gl_d3d_tex);
 	//create destination fbo for receiving images
 	glGenFramebuffers(1, &m_gl_fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_gl_fbo);
@@ -501,6 +561,7 @@ bool WmrRenderer::CreateSharedTex(const XrSwapchainCreateInfo& scci)
 		return false;
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	wglDXUnlockObjectsNV(m_interop, 1, &m_gl_d3d_tex);
 
 	return true;
 }
@@ -508,9 +569,9 @@ bool WmrRenderer::CreateSharedTex(const XrSwapchainCreateInfo& scci)
 void WmrRenderer::DestroySharedTex()
 {
 	// Unregister the OpenGL texture
-	if (m_interop)
+	if (m_gl_d3d_tex)
 	{
-		glDXUnregisterObjectNV(m_device, m_interop);
+		wglDXUnregisterObjectNV(m_device, m_gl_d3d_tex);
 	}
 
 	// Delete the OpenGL texture
@@ -518,6 +579,13 @@ void WmrRenderer::DestroySharedTex()
 	{
 		glDeleteTextures(1, &m_gl_tex);
 		m_gl_tex = 0;
+	}
+
+	// delete opengl frambuffer
+	if (m_gl_fbo)
+	{
+		glDeleteFramebuffers(1, &m_gl_fbo);
+		m_gl_fbo = 0;
 	}
 
 	// Release the Direct3D texture
@@ -530,13 +598,9 @@ void WmrRenderer::DestroySharedTex()
 
 void WmrRenderer::LoadFunctions()
 {
-	PFNWGLDXREGISTEROBJECTNVPROC glDXRegisterObjectNV =
-		(PFNWGLDXREGISTEROBJECTNVPROC)wglGetProcAddress("wglDXRegisterObjectNV");
-	PFNWGLDXUNREGISTEROBJECTNVPROC glDXUnregisterObjectNV =
-		(PFNWGLDXUNREGISTEROBJECTNVPROC)wglGetProcAddress("wglDXUnregisterObjectNV");
-	PFNWGLDXLOCKOBJECTSNVPROC glDXLockObjectsNV =
-		(PFNWGLDXLOCKOBJECTSNVPROC)wglGetProcAddress("wglDXLockObjectsNV");
-	PFNWGLDXUNLOCKOBJECTSNVPROC glDXUnlockObjectsNV =
-		(PFNWGLDXUNLOCKOBJECTSNVPROC)wglGetProcAddress("wglDXUnlockObjectsNV");
+	//glDXRegisterObjectNV = (PFNWGLDXREGISTEROBJECTNVPROC)wglGetProcAddress("wglDXRegisterObjectNV");
+	//glDXUnregisterObjectNV = (PFNWGLDXUNREGISTEROBJECTNVPROC)wglGetProcAddress("wglDXUnregisterObjectNV");
+	//glDXLockObjectsNV = (PFNWGLDXLOCKOBJECTSNVPROC)wglGetProcAddress("wglDXLockObjectsNV");
+	//glDXUnlockObjectsNV = (PFNWGLDXUNLOCKOBJECTSNVPROC)wglGetProcAddress("wglDXUnlockObjectsNV");
 
 }
