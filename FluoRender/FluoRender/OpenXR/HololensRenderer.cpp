@@ -120,6 +120,7 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 
 void HololensRenderer::Close()
 {
+	DestroySharedTex();
 	DestroyActions();
 	DestroySwapchains();
 	DestroyReferenceSpace();
@@ -129,69 +130,6 @@ void HololensRenderer::Close()
 #endif
 	DestroyInstance();
 	DestroyD3DDevice();
-}
-
-void HololensRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
-{
-	if (!m_app_running || !m_session_running)
-		return;
-	if (!m_frame_state.shouldRender)
-		return;
-
-	uint32_t viewCount = m_render_layer_info.layerProjectionViews.size();
-	// Per view in the view configuration:
-	for (uint32_t i = 0; i < viewCount; i++)
-	{
-		// Get the width and height and construct the viewport and scissors.
-		const uint32_t &width = m_view_config_views[i].recommendedImageRectWidth;
-		const uint32_t &height = m_view_config_views[i].recommendedImageRectHeight;
-
-		SwapchainInfo& colorSwapchainInfo = m_swapchain_infos_color[i];
-		SwapchainInfo& depthSwapchainInfo = m_swapchain_infos_depth[i];
-
-		// Acquire and wait for an image from the swapchains.
-		// Get the image index of an image in the swapchains.
-		// The timeout is infinite.
-		uint32_t colorImageIndex = 0;
-		uint32_t depthImageIndex = 0;
-		XrSwapchainImageAcquireInfo acquireInfo{ XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO };
-		OPENXR_CHECK(xrAcquireSwapchainImage(colorSwapchainInfo.swapchain, &acquireInfo, &colorImageIndex), "Failed to acquire Image from the Color Swapchian");
-		if (m_use_depth)
-			OPENXR_CHECK(xrAcquireSwapchainImage(depthSwapchainInfo.swapchain, &acquireInfo, &depthImageIndex), "Failed to acquire Image from the Depth Swapchian");
-
-		XrSwapchainImageWaitInfo waitInfo = { XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO };
-		waitInfo.timeout = XR_INFINITE_DURATION;
-		OPENXR_CHECK(xrWaitSwapchainImage(colorSwapchainInfo.swapchain, &waitInfo), "Failed to wait for Image from the Color Swapchain");
-		if (m_use_depth)
-			OPENXR_CHECK(xrWaitSwapchainImage(depthSwapchainInfo.swapchain, &waitInfo), "Failed to wait for Image from the Depth Swapchain");
-
-		// Fill out the XrCompositionLayerProjectionView structure specifying the pose and fov from the view.
-		// This also associates the swapchain image with this layer projection view.
-		m_render_layer_info.layerProjectionViews[i].subImage.swapchain = colorSwapchainInfo.swapchain;
-
-		//copy buffer
-		//if (fbos.size() > i)
-		//{
-		//	//GLuint dest_fbo = (GLuint)(uint64_t)(colorSwapchainInfo.imageViews[colorImageIndex]);
-		//	//glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
-		//	//glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-		//	//glClear(GL_COLOR_BUFFER_BIT);
-
-		//	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[i]->id());
-		//	// Read pixels to PBO
-		//	GLuint dest_fbo = (GLuint)(uint64_t)(colorSwapchainInfo.imageViews[colorImageIndex]);
-		//	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest_fbo);
-		//	glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-		//	// Write pixels to destination FBO
-		//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//}
-
-		// Give the swapchain image back to OpenXR, allowing the compositor to use the image.
-		XrSwapchainImageReleaseInfo releaseInfo{ XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO };
-		OPENXR_CHECK(xrReleaseSwapchainImage(colorSwapchainInfo.swapchain, &releaseInfo), "Failed to release Image back to the Color Swapchain");
-		if (m_use_depth)
-			OPENXR_CHECK(xrReleaseSwapchainImage(depthSwapchainInfo.swapchain, &releaseInfo), "Failed to release Image back to the Depth Swapchain");
-	}
 }
 
 void HololensRenderer::SetExtensions()
@@ -216,27 +154,9 @@ void HololensRenderer::SetExtensions()
 
 bool HololensRenderer::CreateSession(void* hdc, void* hdxrc)
 {
-	XrResult result;
-	// Create an XrSessionCreateInfo structure.
-	XrSessionCreateInfo sessionCI{ XR_TYPE_SESSION_CREATE_INFO };
-	// Create a std::unique_ptr<GraphicsAPI_...> from the instance and system.
-	// This call sets up a graphics API that's suitable for use with OpenXR.
-	// Get D3D11 graphics requirements
-	PFN_xrGetD3D11GraphicsRequirementsKHR xrGetD3D11GraphicsRequirementsKHR = nullptr;
-	result = xrGetInstanceProcAddr(m_instance, "xrGetD3D11GraphicsRequirementsKHR", (PFN_xrVoidFunction*)&xrGetD3D11GraphicsRequirementsKHR);
-	if (result != XR_SUCCESS) return false;
-	XrGraphicsRequirementsD3D11KHR requirements = { XR_TYPE_GRAPHICS_REQUIREMENTS_D3D11_KHR };
-	result = xrGetD3D11GraphicsRequirementsKHR(m_instance, m_sys_id, &requirements);
-	if (result != XR_SUCCESS) return false;
-	XrGraphicsBindingD3D11KHR graphicsBindingD3D11 = { XR_TYPE_GRAPHICS_BINDING_D3D11_KHR };
-	graphicsBindingD3D11.device = m_device;
-
-	// Fill out the XrSessionCreateInfo structure and create an XrSession.
-	sessionCI.next = (void*)&graphicsBindingD3D11;
-	sessionCI.createFlags = 0;
-	sessionCI.systemId = m_sys_id;
-	result = xrCreateSession(m_instance, &sessionCI, &m_session);
-	if (result != XR_SUCCESS) return false;
+	bool result = WmrRenderer::CreateSession(hdc, hdxrc);
+	if (!result)
+		return result;
 
 	// If remoting speech extension is enabled
 	if (m_usingRemotingRuntime)

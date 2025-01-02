@@ -570,7 +570,13 @@ void WmrRenderer::DestroySharedTex()
 	// Unregister the OpenGL texture
 	if (m_gl_d3d_tex)
 	{
-		wglDXUnregisterObjectNV(m_device, m_gl_d3d_tex);
+		wglDXUnregisterObjectNV(m_interop, m_gl_d3d_tex);
+	}
+
+	// Close OpenGL-D3D Interop
+	if (m_interop)
+	{
+		wglDXCloseDeviceNV(m_interop);
 	}
 
 	// Delete the OpenGL texture

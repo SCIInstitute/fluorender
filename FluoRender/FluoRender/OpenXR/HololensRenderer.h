@@ -62,7 +62,7 @@ public:
 	bool Init(void*, void*) override;
 	void Close() override;
 
-	void Draw(const std::vector<flvr::Framebuffer*> &fbos) override;
+	//void Draw(const std::vector<flvr::Framebuffer*> &fbos) override;
 
 protected:
 	void SetExtensions() override;
@@ -70,7 +70,6 @@ protected:
 	void LoadFunctions() override;
 
 private:
-
 	bool EnableRemotingXR();
 	void PrepareRemotingEnvironment();
 
