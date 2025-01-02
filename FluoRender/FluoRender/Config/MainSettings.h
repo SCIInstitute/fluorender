@@ -158,8 +158,9 @@ public:
 	int m_hologram_mode;	//0: disabled; 1: stereograph; 2: looking glass;
 	int m_xr_api;			//0: disabled; 1: OpenXR; 2: OpenVR; 3: WMR; 4: Hololens
 	bool m_mv_hmd;			//get modelview matrix from hmd
-	bool m_sbs;
-	double m_eye_dist;
+	bool m_sbs;				//side-by-side aspect ratio
+	double m_eye_dist;		//eye distance, not physical
+	std::string m_holo_ip;	//ip address for hololens
 	bool m_hologram_debug;	//0: normal; 1: show quilt
 	double m_lg_offset;		//offset distance from center for lg rendering
 	int m_lg_dev_id;		//in case of multiple lg displays

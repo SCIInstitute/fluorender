@@ -47,6 +47,7 @@ public:
 	virtual int ShowModal();
 
 private:
+	wxWindow* m_parent;
 };
 
 #endif//_MODAL_DLG_H_

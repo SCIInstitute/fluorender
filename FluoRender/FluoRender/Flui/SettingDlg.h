@@ -72,13 +72,14 @@ private:
 	wxTextCtrl *m_pin_threshold_text;
 	//rotations link
 	wxCheckBox *m_rot_link_chk;
-	//stereo
+	//vr
 	wxCheckBox *m_stereo_chk;
 	wxComboBox* m_xr_api_cmb;
 	wxCheckBox* m_mv_hmd_chk;
 	wxCheckBox* m_sbs_chk;
 	wxSingleSlider *m_eye_dist_sldr;
 	wxTextCtrl *m_eye_dist_text;
+	wxTextCtrl* m_holo_ip_text;
 	wxCheckBox* m_looking_glass_chk;
 	wxSingleSlider* m_lg_offset_sldr;
 	wxTextCtrl* m_lg_offset_text;
@@ -186,13 +187,14 @@ private:
 	void OnPinThresholdEdit(wxCommandEvent& event);
 	//link rotations
 	void OnRotLink(wxCommandEvent& event);
-	//stereo
+	//vr
 	void OnStereoCheck(wxCommandEvent& event);
 	void OnXrApiComb(wxCommandEvent& event);
 	void OnMvHmdCheck(wxCommandEvent& event);
 	void OnSBSCheck(wxCommandEvent& event);
 	void OnEyeDistChange(wxScrollEvent& event);
 	void OnEyeDistEdit(wxCommandEvent& event);
+	void OnHoloIpEdit(wxCommandEvent& event);
 	void OnLookingGlassCheck(wxCommandEvent& event);
 	void OnHoloDebugCheck(wxCommandEvent& event);
 	void OnLgOffsetChange(wxScrollEvent& event);

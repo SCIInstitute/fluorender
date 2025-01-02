@@ -36,6 +36,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/notebook.h>
 #include <wx/stdpaths.h>
 #include <wx/display.h>
+#include <wx/valtext.h>
+#include <wx/regex.h>
 
 wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 {
@@ -494,15 +496,36 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	sizer1_1->Add(m_stereo_chk, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "API:",
-		wxDefaultPosition, FromDIP(wxSize(100, -1)));
+		wxDefaultPosition, FromDIP(wxSize(30, -1)));
 	m_xr_api_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	m_xr_api_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnXrApiComb, this);
-	cmb_str = { "Cardboard", "OpenXR", "OpenVR", "Windows Mixed Reality", "Hololens" };
+#ifdef _WIN32
+	cmb_str = { "Cardboard", "OpenXR", "OpenVR", "Windows Mixed Reality", "Hololens Remote" };
+#else
+	cmb_str = { "Cardboard", "OpenXR", "OpenVR" };
+#endif
 	m_xr_api_cmb->Append(cmb_str);
 	sizer1_2->Add(20, 5);
 	sizer1_2->Add(st, 0, wxALIGN_CENTER);
 	sizer1_2->Add(m_xr_api_cmb, 0, wxALIGN_CENTER);
+#ifdef _WIN32
+	st = new wxStaticText(page, 0, "Hololens IP:",
+		wxDefaultPosition, FromDIP(wxSize(70, 20)));
+	wxArrayString allowedChars;
+	allowedChars.Add("0"); allowedChars.Add("1"); allowedChars.Add("2");
+	allowedChars.Add("3"); allowedChars.Add("4"); allowedChars.Add("5");
+	allowedChars.Add("6"); allowedChars.Add("7"); allowedChars.Add("8");
+	allowedChars.Add("9"); allowedChars.Add(".");
+	wxTextValidator val_ip(wxFILTER_INCLUDE_CHAR_LIST);
+	val_ip.SetIncludes(allowedChars);
+	m_holo_ip_text = new wxTextCtrl(page, wxID_ANY, "",
+		wxDefaultPosition, FromDIP(wxSize(100, 20)), 0, val_ip);
+	m_holo_ip_text->Bind(wxEVT_TEXT, &SettingDlg::OnHoloIpEdit, this);
+	sizer1_2->Add(20, 5);
+	sizer1_2->Add(st, 0, wxALIGN_CENTER);
+	sizer1_2->Add(m_holo_ip_text, 0, wxALIGN_CENTER);
+#endif
 	wxBoxSizer* sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
 	m_mv_hmd_chk = new wxCheckBox(page, wxID_ANY,
 		"Get Model-View Matrix from HMD");
@@ -1062,6 +1085,9 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		if (glbin_settings.m_hologram_mode == 0)
 		{
+#ifdef _WIN32
+			m_holo_ip_text->Disable();
+#endif
 			m_stereo_chk->SetValue(false);
 			m_xr_api_cmb->Disable();
 			m_mv_hmd_chk->Disable();
@@ -1075,6 +1101,9 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		}
 		else if (glbin_settings.m_hologram_mode == 1)
 		{
+#ifdef _WIN32
+			m_holo_ip_text->Enable();
+#endif
 			m_stereo_chk->SetValue(true);
 			m_xr_api_cmb->Enable();
 			m_mv_hmd_chk->Enable();
@@ -1088,6 +1117,9 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		}
 		else if (glbin_settings.m_hologram_mode == 2)
 		{
+#ifdef _WIN32
+			m_holo_ip_text->Disable();
+#endif
 			m_stereo_chk->SetValue(false);
 			m_xr_api_cmb->Disable();
 			m_mv_hmd_chk->Disable();
@@ -1099,6 +1131,9 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			m_lg_offset_text->Enable();
 			m_holo_debug_chk->Enable();
 		}
+#ifdef _WIN32
+		m_holo_ip_text->ChangeValue(wxString(glbin_settings.m_holo_ip));
+#endif
 		m_mv_hmd_chk->SetValue(glbin_settings.m_mv_hmd);
 		m_xr_api_cmb->Select(glbin_settings.m_xr_api);
 		m_sbs_chk->SetValue(glbin_settings.m_sbs);
@@ -1453,6 +1488,16 @@ void SettingDlg::OnEyeDistEdit(wxCommandEvent& event)
 	m_eye_dist_sldr->ChangeValue(std::round(dval * 10.0));
 	glbin_settings.m_eye_dist = dval;
 	FluoRefresh(3, { gstNull });
+}
+
+void SettingDlg::OnHoloIpEdit(wxCommandEvent& event)
+{
+	wxString str = m_holo_ip_text->GetValue();
+	wxRegEx regex("^(([0-9]{1,3})\\.){3}([0-9]{1,3})$");
+	if (regex.Matches(str))
+	{
+		glbin_settings.m_holo_ip = str;
+	}
 }
 
 void SettingDlg::OnLookingGlassCheck(wxCommandEvent& event)

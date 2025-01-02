@@ -37,7 +37,8 @@ ModalDlg::ModalDlg(wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	const wxString& name):
-wxFileDialog(parent, message, defaultDir, defaultFile, wildcard, style, pos, size, name)
+wxFileDialog(parent, message, defaultDir, defaultFile, wildcard, style, pos, size, name),
+m_parent(parent)
 {
 }
 
@@ -49,6 +50,8 @@ int ModalDlg::ShowModal()
 {
 	glbin_states.m_modal_shown = true;
 	int r = wxFileDialog::ShowModal();
+	wxPoint p = m_parent->GetPosition();
+	Move(p.x + 50, p.y + 50);
 	wxMilliSleep(110);
 	glbin_states.m_modal_shown = false;
 	return r;
