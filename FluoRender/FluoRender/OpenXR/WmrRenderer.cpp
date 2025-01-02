@@ -191,7 +191,9 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 			}
 			catch (const std::exception& e)
 			{
+#ifdef _DEBUG
 				DBGPRINT(L"%s\n", e.what());
+#endif
 			}
 
 			// Release the resource when done
@@ -595,9 +597,4 @@ void WmrRenderer::DestroySharedTex()
 
 void WmrRenderer::LoadFunctions()
 {
-	//glDXRegisterObjectNV = (PFNWGLDXREGISTEROBJECTNVPROC)wglGetProcAddress("wglDXRegisterObjectNV");
-	//glDXUnregisterObjectNV = (PFNWGLDXUNREGISTEROBJECTNVPROC)wglGetProcAddress("wglDXUnregisterObjectNV");
-	//glDXLockObjectsNV = (PFNWGLDXLOCKOBJECTSNVPROC)wglGetProcAddress("wglDXLockObjectsNV");
-	//glDXUnlockObjectsNV = (PFNWGLDXUNLOCKOBJECTSNVPROC)wglGetProcAddress("wglDXUnlockObjectsNV");
-
 }

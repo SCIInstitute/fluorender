@@ -69,12 +69,6 @@ protected:
 	HANDLE m_shared_hdl = nullptr;
 	HANDLE m_interop = nullptr;
 	HANDLE m_gl_d3d_tex = nullptr;
-
-	//func
-	//PFNWGLDXREGISTEROBJECTNVPROC glDXRegisterObjectNV = nullptr;
-	//PFNWGLDXUNREGISTEROBJECTNVPROC glDXUnregisterObjectNV = nullptr;
-	//PFNWGLDXLOCKOBJECTSNVPROC glDXLockObjectsNV = nullptr;
-	//PFNWGLDXUNLOCKOBJECTSNVPROC glDXUnlockObjectsNV = nullptr;
 };
 
 #endif//WmrRenderer_h
