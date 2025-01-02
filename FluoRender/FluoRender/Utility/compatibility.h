@@ -212,6 +212,23 @@ inline float nCr(int n, int r)
 	return result;
 }
 
+inline std::string split_host_name_and_port(const std::string& address, uint16_t& port)
+{
+	static std::basic_regex<char> addressMatcher("(?:(\\[.*\\])|([^:]*))(?:[:](\\d+))?");
+	std::match_results<typename std::string::const_iterator> results;
+	if (std::regex_match(address, results, addressMatcher)) {
+		if (results[3].matched) {
+			std::string portStr = results[3].str();
+			port = static_cast<uint16_t>(std::strtol(portStr.c_str(), nullptr, 10));
+		}
+
+		return (results[1].matched) ? results[1].str() : results[2].str();
+	}
+	else {
+		return address;
+	}
+}
+
 #ifdef _WIN32 //WINDOWS ONLY
 
 #include <cstdlib>

@@ -280,7 +280,11 @@ BaseXrRenderer* Global::get_xr_renderer()
 		m_xr_renderer = std::make_unique<WmrRenderer>();
 		return m_xr_renderer.get();
 	case 4://hololens
-		m_xr_renderer = std::make_unique<HololensRenderer>();
+		{
+			AppOptions options;
+			options.host = split_host_name_and_port(glbin_settings.m_holo_ip, options.port);
+			m_xr_renderer = std::make_unique<HololensRenderer>(options);
+		}
 		return m_xr_renderer.get();
 	}
 	return 0;

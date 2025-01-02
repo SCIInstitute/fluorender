@@ -41,11 +41,20 @@ DEALINGS IN THE SOFTWARE.
 #include <Debug.h>
 #endif
 
-HololensRenderer::HololensRenderer() :
-	WmrRenderer()
+HololensRenderer::HololensRenderer(const AppOptions& options) :
+	WmrRenderer(),
+	m_options(options),
+	m_secureConnectionCallbacks(m_options.authenticationToken,
+		m_options.allowCertificateNameMismatch,
+		m_options.allowUnverifiedCertificateChain,
+		m_options.keyPassphrase,
+		m_options.subjectName,
+		m_options.certificateStore,
+		m_options.listen)
 {
 	m_app_name = "FluoRender";
 	m_eng_name = "FLHOLOLENS";
+
 }
 
 HololensRenderer::~HololensRenderer()
@@ -101,6 +110,8 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 
 	GetEnvironmentBlendModes();
 
+	ConnectOrListen();
+
 	if (!CreateSession(hdc, hglrc))
 		return false;
 
@@ -130,6 +141,7 @@ void HololensRenderer::Close()
 #endif
 	DestroyInstance();
 	DestroyD3DDevice();
+	Disconnect();
 }
 
 void HololensRenderer::SetExtensions()
@@ -182,8 +194,196 @@ void HololensRenderer::LoadFunctions()
 	result = xrGetInstanceProcAddr(m_instance, "xrRemotingGetConnectionStateMSFT", (PFN_xrVoidFunction*)&xrRemotingGetConnectionStateMSFT);
 	result = xrGetInstanceProcAddr(m_instance, "xrRemotingSetSecureConnectionClientCallbacksMSFT", (PFN_xrVoidFunction*)&xrRemotingSetSecureConnectionClientCallbacksMSFT);
 	result = xrGetInstanceProcAddr(m_instance, "xrRemotingSetSecureConnectionServerCallbacksMSFT", (PFN_xrVoidFunction*)&xrRemotingSetSecureConnectionServerCallbacksMSFT);
-
 	result = xrGetInstanceProcAddr(m_instance, "xrInitializeRemotingSpeechMSFT", (PFN_xrVoidFunction*)&xrInitializeRemotingSpeechMSFT);
+	result = xrGetInstanceProcAddr(m_instance, "xrRetrieveRemotingSpeechRecognizedTextMSFT", (PFN_xrVoidFunction*)&xrRetrieveRemotingSpeechRecognizedTextMSFT);
+}
+
+void HololensRenderer::PollEvents()
+{
+	// Poll OpenXR for a new event.
+	XrEventDataBuffer eventData{ XR_TYPE_EVENT_DATA_BUFFER };
+	auto XrPollEvents = [&]() -> bool
+	{
+		eventData = { XR_TYPE_EVENT_DATA_BUFFER };
+		return xrPollEvent(m_instance, &eventData) == XR_SUCCESS;
+	};
+
+	while (XrPollEvents())
+	{
+		switch (eventData.type)
+		{
+		case XR_TYPE_EVENT_DATA_EVENTS_LOST:
+		{
+			XrEventDataEventsLost* eventsLost =
+				reinterpret_cast<XrEventDataEventsLost*>(&eventData);
+#ifdef _DEBUG
+			DBGPRINT(L"OPENXR: Events Lost: %d\n", eventsLost->lostEventCount);
+#endif
+			break;
+		}
+		// Log that an instance loss is pending and shutdown the application.
+		case XR_TYPE_EVENT_DATA_INSTANCE_LOSS_PENDING:
+		{
+			XrEventDataInstanceLossPending* instanceLossPending =
+				reinterpret_cast<XrEventDataInstanceLossPending*>(&eventData);
+#ifdef _DEBUG
+			DBGPRINT(L"OPENXR: Instance Loss Pending at: %llu\n", instanceLossPending->lossTime);
+#endif
+			m_session_running = false;
+			m_app_running = false;
+			break;
+		}
+		// Log that the interaction profile has changed.
+		case XR_TYPE_EVENT_DATA_INTERACTION_PROFILE_CHANGED:
+		{
+			XrEventDataInteractionProfileChanged* interactionProfileChanged =
+				reinterpret_cast<XrEventDataInteractionProfileChanged*>(&eventData);
+#ifdef _DEBUG
+			DBGPRINT(L"OPENXR: Interaction Profile changed for Session: %llu\n", interactionProfileChanged->session);
+#endif
+			if (interactionProfileChanged->session != m_session)
+			{
+#ifdef _DEBUG
+				DBGPRINT(L"XrEventDataInteractionProfileChanged for unknown Session\n");
+#endif
+				break;
+			}
+			RecordCurrentBindings();
+			break;
+		}
+		// Log that there's a reference space change pending.
+		case XR_TYPE_EVENT_DATA_REFERENCE_SPACE_CHANGE_PENDING:
+		{
+			XrEventDataReferenceSpaceChangePending* referenceSpaceChangePending =
+				reinterpret_cast<XrEventDataReferenceSpaceChangePending*>(&eventData);
+#ifdef _DEBUG
+			DBGPRINT(L"OPENXR: Reference Space Change pending for Session: %llu\n", referenceSpaceChangePending->session);
+#endif
+			if (referenceSpaceChangePending->session != m_session)
+			{
+#ifdef _DEBUG
+				DBGPRINT(L"XrEventDataReferenceSpaceChangePending for unknown Session\n");
+#endif
+				break;
+			}
+			break;
+		}
+		// Session State changes:
+		case XR_TYPE_EVENT_DATA_SESSION_STATE_CHANGED:
+		{
+			XrEventDataSessionStateChanged* sessionStateChanged =
+				reinterpret_cast<XrEventDataSessionStateChanged*>(&eventData);
+			if (sessionStateChanged->session != m_session)
+			{
+#ifdef _DEBUG
+				DBGPRINT(L"XrEventDataSessionStateChanged for unknown Session\n");
+#endif
+				break;
+			}
+
+			if (sessionStateChanged->state == XR_SESSION_STATE_READY)
+			{
+				// SessionState is ready. Begin the XrSession using the XrViewConfigurationType.
+				XrSessionBeginInfo sessionBeginInfo{ XR_TYPE_SESSION_BEGIN_INFO };
+				sessionBeginInfo.primaryViewConfigurationType = m_view_config;
+				xrBeginSession(m_session, &sessionBeginInfo);
+				m_session_running = true;
+			}
+			if (sessionStateChanged->state == XR_SESSION_STATE_STOPPING)
+			{
+				// SessionState is stopping. End the XrSession.
+				xrEndSession(m_session);
+				m_session_running = false;
+			}
+			if (sessionStateChanged->state == XR_SESSION_STATE_EXITING)
+			{
+				// SessionState is exiting. Exit the application.
+				m_session_running = false;
+				m_app_running = false;
+			}
+			if (sessionStateChanged->state == XR_SESSION_STATE_LOSS_PENDING)
+			{
+				// SessionState is loss pending. Exit the application.
+				// It's possible to try a reestablish an XrInstance and XrSession, but we will simply exit here.
+				m_session_running = false;
+				m_app_running = false;
+			}
+			// Store state for reference across the application.
+			m_session_state = sessionStateChanged->state;
+			break;
+		}
+		case XR_TYPE_REMOTING_EVENT_DATA_LISTENING_MSFT:
+		{
+#ifdef _DEBUG
+			DBGPRINT(L"Holographic Remoting: Listening on port %d",
+				reinterpret_cast<const XrRemotingEventDataListeningMSFT*>(&eventData)->listeningPort);
+#endif
+			break;
+		}
+		case XR_TYPE_REMOTING_EVENT_DATA_CONNECTED_MSFT:
+		{
+#ifdef _DEBUG
+			DBGPRINT(L"Holographic Remoting: Connected.");
+#endif
+
+			// If remoting speech extension is enabled
+			if (m_usingRemotingRuntime)
+			{
+				XrRemotingSpeechInitInfoMSFT speechInitInfo{ static_cast<XrStructureType>(XR_TYPE_REMOTING_SPEECH_INIT_INFO_MSFT) };
+				InitializeSpeechRecognition(speechInitInfo);
+
+				XrResult result = xrInitializeRemotingSpeechMSFT(m_session, &speechInitInfo);
+			}
+
+			break;
+		}
+		case XR_TYPE_REMOTING_EVENT_DATA_DISCONNECTED_MSFT:
+		{
+#ifdef _DEBUG
+			DBGPRINT(L"Holographic Remoting: Disconnected - Reason: %d",
+				reinterpret_cast<const XrRemotingEventDataDisconnectedMSFT*>(&eventData)->disconnectReason);
+#endif
+			break;
+		}
+		case XR_TYPE_EVENT_DATA_REMOTING_SPEECH_RECOGNIZED_MSFT:
+		{
+			auto speechEventData = reinterpret_cast<const XrEventDataRemotingSpeechRecognizedMSFT*>(&eventData);
+			std::string text;
+			uint32_t dataBytesCount = 0;
+			XrResult result = xrRetrieveRemotingSpeechRecognizedTextMSFT(
+				m_session, speechEventData->packetId, 0, &dataBytesCount, nullptr);
+			text.resize(dataBytesCount);
+			result = xrRetrieveRemotingSpeechRecognizedTextMSFT(
+				m_session, speechEventData->packetId, static_cast<uint32_t>(text.size()), &dataBytesCount, text.data());
+			HandleRecognizedSpeechText(text);
+			break;
+		}
+		case XR_TYPE_EVENT_DATA_REMOTING_SPEECH_RECOGNIZER_STATE_CHANGED_MSFT:
+		{
+			auto recognizerStateEventData =
+				reinterpret_cast<const XrEventDataRemotingSpeechRecognizerStateChangedMSFT*>(&eventData);
+			auto state = recognizerStateEventData->speechRecognizerState;
+			if (strlen(recognizerStateEventData->stateMessage) > 0)
+			{
+#ifdef _DEBUG
+				DBGPRINT(L"Speech recognizer initialization error: %s.", recognizerStateEventData->stateMessage);
+#endif
+			}
+
+			if (state == XR_REMOTING_SPEECH_RECOGNIZER_STATE_INITIALIZATION_FAILED_MSFT)
+			{
+#ifdef _DEBUG
+				DBGPRINT(L"Remoting speech recognizer initialization failed.");
+#endif
+			}
+			break;
+		}
+		default:
+		{
+			break;
+		}
+		}
+	}
 }
 
 bool HololensRenderer::EnableRemotingXR()
@@ -483,4 +683,9 @@ bool HololensRenderer::LoadGrammarFile(std::vector<uint8_t>& grammarFileContent)
 #else
 	return false;
 #endif
+}
+
+void HololensRenderer::HandleRecognizedSpeechText(const std::string& text)
+{
+
 }
