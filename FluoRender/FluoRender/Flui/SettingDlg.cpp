@@ -262,7 +262,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 		new wxStaticBox(page, wxID_ANY, "Shadow Direction"), wxVERTICAL);
 	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_shadow_dir_chk = new wxCheckBox(page, wxID_ANY,
-		"Enable directional shadow");
+		"Enable Directional Shadow");
 	m_shadow_dir_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnShadowDirCheck, this);
 	m_shadow_dir_sldr = new wxSingleSlider(page, wxID_ANY, -45, -180, 180,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -286,7 +286,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	wxBoxSizer* group4 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Rotations"), wxVERTICAL);
 	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Rot. center anchor start");
+	st = new wxStaticText(page, 0, "RC Anchor Start");
 	m_pin_threshold_sldr = new wxSingleSlider(page, wxID_ANY, 100, 10, 500,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_pin_threshold_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnPinThresholdChange, this);
@@ -298,7 +298,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	sizer4_1->Add(m_pin_threshold_text, 0, wxALIGN_CENTER);
 	wxBoxSizer *sizer4_2 = new wxBoxSizer(wxHORIZONTAL);
 	m_rot_link_chk = new wxCheckBox(page, wxID_ANY,
-		"Link all rendering views' rotations.");
+		"Link All Rendering Views' Rotations.");
 	m_rot_link_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnRotLink, this);
 	sizer4_2->Add(m_rot_link_chk, 0, wxALIGN_CENTER);
 	group4->Add(10, 5);
@@ -312,7 +312,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 		new wxStaticBox(page, wxID_ANY, "Gradient Background"), wxVERTICAL);
 	wxBoxSizer *sizer5_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_grad_bg_chk = new wxCheckBox(page, wxID_ANY,
-		"Enable gradient background");
+		"Enable Gradient Background");
 	m_grad_bg_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnGradBgCheck, this);
 	sizer5_1->Add(m_grad_bg_chk, 0, wxALIGN_CENTER);
 	group5->Add(10, 5);
@@ -360,11 +360,11 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	wxBoxSizer *group2 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Large Data Streaming"), wxVERTICAL);
 	m_streaming_chk = new wxCheckBox(page, wxID_ANY,
-		"Enable streaming for large data.");
+		"Enable Streaming for Large Data.");
 	m_streaming_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnStreamingChk, this);
-	wxString choices[2] = {"Back to front", "Front to back"};
+	wxString choices[2] = {"Back to Front", "Front to Back"};
 	m_update_order_rbox = new wxRadioBox(page, wxID_ANY,
-		"Update order", wxDefaultPosition, wxDefaultSize,
+		"Update Order", wxDefaultPosition, wxDefaultSize,
 		2, choices, 0, wxRA_SPECIFY_COLS);
 	m_update_order_rbox->Bind(wxEVT_RADIOBOX, &SettingDlg::OnUpdateOrderChange, this);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
@@ -490,7 +490,7 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 		new wxStaticBox(page, wxID_ANY, "Stereography / Virtual Reality / Holography"), wxVERTICAL);
 	wxBoxSizer* sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_stereo_chk = new wxCheckBox(page, wxID_ANY,
-		"Enable stereography");
+		"Enable Stereography");
 	m_stereo_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnStereoCheck, this);
 	sizer1_1->Add(5, 5);
 	sizer1_1->Add(m_stereo_chk, 0, wxALIGN_CENTER);
@@ -754,7 +754,7 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 		new wxStaticBox(page, wxID_ANY, "Max Texture Size"), wxVERTICAL);
 	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_max_texture_size_chk = new wxCheckBox(page, wxID_ANY,
-		"Set max texture size");
+		"Set Max Texture Size");
 	m_max_texture_size_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnMaxTextureSizeChk, this);
 	m_max_texture_size_text = new wxTextCtrl(page, wxID_ANY, "2048",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
