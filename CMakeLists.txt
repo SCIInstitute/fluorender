@@ -1123,7 +1123,8 @@ if(WIN32)
     add_custom_command(TARGET FluoRender POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
         "${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/Win64/HoloPlayCore.dll"
-        "$<TARGET_FILE_DIR:FluoRender>")
+        "$<TARGET_FILE_DIR:FluoRender>"
+    )
 elseif(APPLE)
     add_custom_command(TARGET FluoRender POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
@@ -1138,4 +1139,14 @@ else()
         COMMAND ${CMAKE_COMMAND} -E copy
         "${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/linux/libHoloPlayCore.so"
         "$<TARGET_FILE_DIR:FluoRender>")
+endif()
+
+# hololens
+if(WIN32)
+    file(GLOB HOLOLENS_FILES "${FluoRender_SOURCE_DIR}/FluoRender/Hololens/*.*")
+    add_custom_command(TARGET FluoRender POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${HOLOLENS_FILES}
+        "$<TARGET_FILE_DIR:FluoRender>"
+    )
 endif()

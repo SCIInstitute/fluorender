@@ -74,6 +74,8 @@ protected:
 
 	XrInstance m_instance = XR_NULL_HANDLE;
 
+	uint32_t m_extensionCount = 0;
+	std::vector<XrExtensionProperties> m_extensionProperties;
 	std::vector<const char*> m_activeInstanceExtensions = {};
 	std::vector<std::string> m_instanceExtensions = {};
 	XrDebugUtilsMessengerEXT m_debugUtilsMessenger = XR_NULL_HANDLE;

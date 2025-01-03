@@ -226,6 +226,8 @@ protected:
 	bool CreateSession(void* hdc, void* hdxrc) override;
 	void LoadFunctions() override;
 
+	bool CreateReferenceSpace() override;
+
 	void PollEvents() override;
 
 private:
@@ -253,6 +255,11 @@ private:
 	std::vector<uint8_t> m_certificateStore;
 	std::vector<const char*> m_dictionaryEntries;
 	std::vector<uint8_t> m_grammarFileContent;
+	struct {
+		bool DepthExtensionSupported{ false };
+		bool UnboundedRefSpaceSupported{ false };
+		bool SpatialAnchorSupported{ false };
+	} m_optionalExtensions;
 
 	PFN_xrRemotingSetContextPropertiesMSFT xrRemotingSetContextPropertiesMSFT;
 	PFN_xrRemotingConnectMSFT xrRemotingConnectMSFT;

@@ -446,15 +446,13 @@ bool OpenXrRenderer::CreateInstance()
 	}
 
 	// Get all the Instance Extensions from the OpenXR instance.
-	uint32_t extensionCount = 0;
-	std::vector<XrExtensionProperties> extensionProperties;
 	result = xrEnumerateInstanceExtensionProperties(
-		nullptr, 0, &extensionCount, nullptr);
+		nullptr, 0, &m_extensionCount, nullptr);
 	if (result != XR_SUCCESS) return false;
-	extensionProperties.resize(extensionCount, {XR_TYPE_EXTENSION_PROPERTIES});
+	m_extensionProperties.resize(m_extensionCount, {XR_TYPE_EXTENSION_PROPERTIES});
 	result = xrEnumerateInstanceExtensionProperties(
-		nullptr, extensionCount, &extensionCount,
-		extensionProperties.data());
+		nullptr, m_extensionCount, &m_extensionCount,
+		m_extensionProperties.data());
 	if (result != XR_SUCCESS) return false;
 
 	// Check the requested Instance Extensions against the ones from the OpenXR runtime.
@@ -463,7 +461,7 @@ bool OpenXrRenderer::CreateInstance()
 	for (auto& requestedInstanceExtension : m_instanceExtensions)
 	{
 		bool found = false;
-		for (auto& extensionProperty : extensionProperties) {
+		for (auto& extensionProperty : m_extensionProperties) {
 			// strcmp returns 0 if the strings match.
 			if (strcmp(requestedInstanceExtension.c_str(),
 				extensionProperty.extensionName) != 0)

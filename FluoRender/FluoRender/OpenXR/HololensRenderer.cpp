@@ -135,6 +135,7 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 void HololensRenderer::Close()
 {
 	DestroySharedTex();
+	Disconnect();
 	DestroyActions();
 	DestroySwapchains();
 	DestroyReferenceSpace();
@@ -144,27 +145,38 @@ void HololensRenderer::Close()
 #endif
 	DestroyInstance();
 	DestroyD3DDevice();
-	Disconnect();
 }
 
 void HololensRenderer::SetExtensions()
 {
+	// Add a specific extension to the list of extensions to be enabled, if it is supported.
+	auto EnableExtensionIfSupported = [&](const char* extensionName)
+	{
+	for (uint32_t i = 0; i < m_extensionCount; i++) {
+		if (strcmp(m_extensionProperties[i].extensionName, extensionName) == 0) {
+			m_instanceExtensions.push_back(extensionName);
+			return true;
+		}
+	}
+	return false;
+	};
+
 	// Add additional instance layers/extensions that the application wants.
 	// Add both required and requested instance extensions.
-	m_instanceExtensions.push_back(XR_EXT_DEBUG_UTILS_EXTENSION_NAME);
+	EnableExtensionIfSupported(XR_EXT_DEBUG_UTILS_EXTENSION_NAME);
 	// D3D11 extension is required for this sample, so check if it's supported.
 	m_instanceExtensions.push_back(XR_KHR_D3D11_ENABLE_EXTENSION_NAME);
 	if (m_usingRemotingRuntime)
 	{
 		// If using the remoting runtime, the remoting extension must be present as well
-		m_instanceExtensions.push_back(XR_MSFT_HOLOGRAPHIC_REMOTING_EXTENSION_NAME);
-		m_instanceExtensions.push_back(XR_MSFT_HOLOGRAPHIC_REMOTING_FRAME_MIRRORING_EXTENSION_NAME);
-		m_instanceExtensions.push_back(XR_MSFT_HOLOGRAPHIC_REMOTING_SPEECH_EXTENSION_NAME);
+		EnableExtensionIfSupported(XR_MSFT_HOLOGRAPHIC_REMOTING_EXTENSION_NAME);
+		EnableExtensionIfSupported(XR_MSFT_HOLOGRAPHIC_REMOTING_FRAME_MIRRORING_EXTENSION_NAME);
+		EnableExtensionIfSupported(XR_MSFT_HOLOGRAPHIC_REMOTING_SPEECH_EXTENSION_NAME);
 	}
 	// Additional optional extensions for enhanced functionality. Track whether enabled in m_optionalExtensions.
-	m_instanceExtensions.push_back(XR_KHR_COMPOSITION_LAYER_DEPTH_EXTENSION_NAME);
-	m_instanceExtensions.push_back(XR_MSFT_UNBOUNDED_REFERENCE_SPACE_EXTENSION_NAME);
-	m_instanceExtensions.push_back(XR_MSFT_SPATIAL_ANCHOR_EXTENSION_NAME);
+	m_optionalExtensions.DepthExtensionSupported = EnableExtensionIfSupported(XR_KHR_COMPOSITION_LAYER_DEPTH_EXTENSION_NAME);
+	m_optionalExtensions.UnboundedRefSpaceSupported = EnableExtensionIfSupported(XR_MSFT_UNBOUNDED_REFERENCE_SPACE_EXTENSION_NAME);
+	m_optionalExtensions.SpatialAnchorSupported = EnableExtensionIfSupported(XR_MSFT_SPATIAL_ANCHOR_EXTENSION_NAME);
 }
 
 bool HololensRenderer::CreateSession(void* hdc, void* hdxrc)
@@ -199,6 +211,28 @@ void HololensRenderer::LoadFunctions()
 	result = xrGetInstanceProcAddr(m_instance, "xrRemotingSetSecureConnectionServerCallbacksMSFT", (PFN_xrVoidFunction*)&xrRemotingSetSecureConnectionServerCallbacksMSFT);
 	result = xrGetInstanceProcAddr(m_instance, "xrInitializeRemotingSpeechMSFT", (PFN_xrVoidFunction*)&xrInitializeRemotingSpeechMSFT);
 	result = xrGetInstanceProcAddr(m_instance, "xrRetrieveRemotingSpeechRecognizedTextMSFT", (PFN_xrVoidFunction*)&xrRetrieveRemotingSpeechRecognizedTextMSFT);
+}
+
+bool HololensRenderer::CreateReferenceSpace()
+{
+	XrResult result;
+	// Fill out an XrReferenceSpaceCreateInfo structure and create a reference XrSpace, specifying a Local space with an identity pose as the origin.
+	XrReferenceSpaceCreateInfo referenceSpaceCI{ XR_TYPE_REFERENCE_SPACE_CREATE_INFO };
+	if (m_optionalExtensions.UnboundedRefSpaceSupported)
+	{
+		// Unbounded reference space provides the best app space for world-scale experiences.
+		referenceSpaceCI.referenceSpaceType = XR_REFERENCE_SPACE_TYPE_UNBOUNDED_MSFT;
+	}
+	else
+	{
+		// If running on a platform that does not support world-scale experiences, fall back to local space.
+		referenceSpaceCI.referenceSpaceType = XR_REFERENCE_SPACE_TYPE_LOCAL;
+	}
+	referenceSpaceCI.poseInReferenceSpace = { {0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f} };
+	result = xrCreateReferenceSpace(m_session, &referenceSpaceCI, &m_space);
+	if (result != XR_SUCCESS) return false;
+
+	return true;
 }
 
 void HololensRenderer::PollEvents()
