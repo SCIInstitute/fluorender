@@ -41,7 +41,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Debug.h>
 #endif
 
-HololensRenderer::HololensRenderer(const AppOptions& options) :
+HololensRenderer::HololensRenderer(const HololensOptions& options) :
 	WmrRenderer(),
 	m_options(options),
 	m_secureConnectionCallbacks(m_options.authenticationToken,
@@ -90,6 +90,8 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 	// OpenXR initialization
 	if (!CreateInstance())
 		return false;
+
+	CheckExtensions();
 
 	//load msft specific functions
 	LoadFunctions();
@@ -147,36 +149,54 @@ void HololensRenderer::Close()
 	DestroyD3DDevice();
 }
 
+void HololensRenderer::EndFrame()
+{
+	if (!m_app_running || !m_session_running)
+		return;
+
+	// End the frame
+	XrFrameEndInfo frameEndInfo{ XR_TYPE_FRAME_END_INFO };
+	frameEndInfo.displayTime = m_frame_state.predictedDisplayTime;
+	frameEndInfo.environmentBlendMode = m_env_blend_mode;
+	frameEndInfo.layerCount = static_cast<uint32_t>(m_render_layer_info.layers.size());
+	frameEndInfo.layers = m_render_layer_info.layers.data();
+
+	//mirror image, may not be necessary
+	XrRemotingFrameMirrorImageD3D11MSFT mirrorImageD3D11{
+		static_cast<XrStructureType>(XR_TYPE_REMOTING_FRAME_MIRROR_IMAGE_D3D11_MSFT) };
+	mirrorImageD3D11.texture = m_d3d_tex;
+	XrRemotingFrameMirrorImageInfoMSFT mirrorImageEndInfo{
+		static_cast<XrStructureType>(XR_TYPE_REMOTING_FRAME_MIRROR_IMAGE_INFO_MSFT) };
+	mirrorImageEndInfo.image = reinterpret_cast<const XrRemotingFrameMirrorImageBaseHeaderMSFT*>(&mirrorImageD3D11);
+	frameEndInfo.next = &mirrorImageEndInfo;
+
+	XrResult result = xrEndFrame(m_session, &frameEndInfo);
+	if (result != XR_SUCCESS)
+	{
+#ifdef _DEBUG
+		DBGPRINT(L"xrEndFrame failed.\n");
+#endif
+	}
+}
+
 void HololensRenderer::SetExtensions()
 {
-	// Add a specific extension to the list of extensions to be enabled, if it is supported.
-	auto EnableExtensionIfSupported = [&](const char* extensionName)
-	{
-	for (uint32_t i = 0; i < m_extensionCount; i++) {
-		if (strcmp(m_extensionProperties[i].extensionName, extensionName) == 0) {
-			m_instanceExtensions.push_back(extensionName);
-			return true;
-		}
-	}
-	return false;
-	};
-
 	// Add additional instance layers/extensions that the application wants.
 	// Add both required and requested instance extensions.
-	EnableExtensionIfSupported(XR_EXT_DEBUG_UTILS_EXTENSION_NAME);
+	m_instanceExtensions.push_back(XR_EXT_DEBUG_UTILS_EXTENSION_NAME);
 	// D3D11 extension is required for this sample, so check if it's supported.
 	m_instanceExtensions.push_back(XR_KHR_D3D11_ENABLE_EXTENSION_NAME);
 	if (m_usingRemotingRuntime)
 	{
 		// If using the remoting runtime, the remoting extension must be present as well
-		EnableExtensionIfSupported(XR_MSFT_HOLOGRAPHIC_REMOTING_EXTENSION_NAME);
-		EnableExtensionIfSupported(XR_MSFT_HOLOGRAPHIC_REMOTING_FRAME_MIRRORING_EXTENSION_NAME);
-		EnableExtensionIfSupported(XR_MSFT_HOLOGRAPHIC_REMOTING_SPEECH_EXTENSION_NAME);
+		m_instanceExtensions.push_back(XR_MSFT_HOLOGRAPHIC_REMOTING_EXTENSION_NAME);
+		m_instanceExtensions.push_back(XR_MSFT_HOLOGRAPHIC_REMOTING_FRAME_MIRRORING_EXTENSION_NAME);
+		m_instanceExtensions.push_back(XR_MSFT_HOLOGRAPHIC_REMOTING_SPEECH_EXTENSION_NAME);
 	}
 	// Additional optional extensions for enhanced functionality. Track whether enabled in m_optionalExtensions.
-	m_optionalExtensions.DepthExtensionSupported = EnableExtensionIfSupported(XR_KHR_COMPOSITION_LAYER_DEPTH_EXTENSION_NAME);
-	m_optionalExtensions.UnboundedRefSpaceSupported = EnableExtensionIfSupported(XR_MSFT_UNBOUNDED_REFERENCE_SPACE_EXTENSION_NAME);
-	m_optionalExtensions.SpatialAnchorSupported = EnableExtensionIfSupported(XR_MSFT_SPATIAL_ANCHOR_EXTENSION_NAME);
+	m_instanceExtensions.push_back(XR_KHR_COMPOSITION_LAYER_DEPTH_EXTENSION_NAME);
+	m_instanceExtensions.push_back(XR_MSFT_UNBOUNDED_REFERENCE_SPACE_EXTENSION_NAME);
+	m_instanceExtensions.push_back(XR_MSFT_SPATIAL_ANCHOR_EXTENSION_NAME);
 }
 
 bool HololensRenderer::CreateSession(void* hdc, void* hdxrc)
@@ -441,6 +461,27 @@ bool HololensRenderer::EnableRemotingXR()
 	}
 
 	return false;
+}
+
+void HololensRenderer::CheckExtensions()
+{
+	// Add a specific extension to the list of extensions to be enabled, if it is supported.
+	auto CheckExtension = [&](const char* extensionName)
+	{
+		for (uint32_t i = 0; i < m_extensionCount; i++)
+		{
+			if (strcmp(m_extensionProperties[i].extensionName, extensionName) == 0)
+			{
+				//m_instanceExtensions.push_back(extensionName);
+				return true;
+			}
+		}
+		return false;
+	};
+
+	m_optionalExtensions.DepthExtensionSupported = CheckExtension(XR_KHR_COMPOSITION_LAYER_DEPTH_EXTENSION_NAME);
+	m_optionalExtensions.UnboundedRefSpaceSupported = CheckExtension(XR_MSFT_UNBOUNDED_REFERENCE_SPACE_EXTENSION_NAME);
+	m_optionalExtensions.SpatialAnchorSupported = CheckExtension(XR_MSFT_SPATIAL_ANCHOR_EXTENSION_NAME);
 }
 
 void HololensRenderer::Disconnect()

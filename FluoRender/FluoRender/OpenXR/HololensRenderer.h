@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <openxr/openxr_msft_remoting_frame_mirroring.h>
 #include <openxr/openxr_msft_remoting_speech.h>
 
-struct AppOptions
+struct HololensOptions
 {
 	bool listen{ false };
 	std::string host;
@@ -213,13 +213,13 @@ private:
 class HololensRenderer : public WmrRenderer
 {
 public:
-	HololensRenderer(const AppOptions& options);
+	HololensRenderer(const HololensOptions& options);
 	virtual ~HololensRenderer();
 
 	bool Init(void*, void*) override;
 	void Close() override;
 
-	//void Draw(const std::vector<flvr::Framebuffer*> &fbos) override;
+	void EndFrame() override;
 
 protected:
 	void SetExtensions() override;
@@ -232,6 +232,8 @@ protected:
 
 private:
 	bool EnableRemotingXR();
+
+	void CheckExtensions();
 
 	void Disconnect();
 	void ConnectOrListen();
@@ -250,7 +252,7 @@ private:
 	void HandleRecognizedSpeechText(const std::string& text);
 
 private:
-	const AppOptions m_options;
+	const HololensOptions m_options;
 	bool m_usingRemotingRuntime{ false };
 	std::vector<uint8_t> m_certificateStore;
 	std::vector<const char*> m_dictionaryEntries;
