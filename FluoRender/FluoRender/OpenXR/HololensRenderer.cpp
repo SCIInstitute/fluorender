@@ -72,7 +72,10 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 
 		if (m_usingRemotingRuntime)
 		{
-			PrepareRemotingEnvironment();
+			if (m_options.secureConnection)
+			{
+				m_secureConnectionCallbacks.InitializeSecureConnection();
+			}
 		}
 		else
 		{
@@ -404,37 +407,6 @@ bool HololensRenderer::EnableRemotingXR()
 	}
 
 	return false;
-}
-
-void HololensRenderer::PrepareRemotingEnvironment()
-{
-	if (!m_options.secureConnection) {
-		return;
-	}
-
-	if (m_options.authenticationToken.empty()) {
-		throw std::logic_error("Authentication token must be specified for secure connections.");
-	}
-
-	if (m_options.listen) {
-		if (m_options.certificateStore.empty() || m_options.subjectName.empty()) {
-			throw std::logic_error("Certificate store and subject name must be specified for secure listening.");
-		}
-
-		constexpr size_t maxCertStoreSize = 1 << 20;
-		std::ifstream certStoreStream(m_options.certificateStore, std::ios::binary);
-		certStoreStream.seekg(0, std::ios_base::end);
-		const size_t certStoreSize = certStoreStream.tellg();
-		if (!certStoreStream.good() || certStoreSize == 0 || certStoreSize > maxCertStoreSize) {
-			throw std::logic_error("Error reading certificate store.");
-		}
-		certStoreStream.seekg(0, std::ios_base::beg);
-		m_certificateStore.resize(certStoreSize);
-		certStoreStream.read(reinterpret_cast<char*>(m_certificateStore.data()), certStoreSize);
-		if (certStoreStream.fail()) {
-			throw std::logic_error("Error reading certificate store.");
-		}
-	}
 }
 
 void HololensRenderer::Disconnect()

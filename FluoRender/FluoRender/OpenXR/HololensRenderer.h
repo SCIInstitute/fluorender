@@ -230,7 +230,6 @@ protected:
 
 private:
 	bool EnableRemotingXR();
-	void PrepareRemotingEnvironment();
 
 	void Disconnect();
 	void ConnectOrListen();
