@@ -219,8 +219,6 @@ public:
 	bool Init(void*, void*) override;
 	void Close() override;
 
-	void EndFrame() override;
-
 protected:
 	void SetExtensions() override;
 	void LoadFunctions() override;
@@ -263,8 +261,6 @@ private:
 		bool UnboundedRefSpaceSupported{ false };
 		bool SpatialAnchorSupported{ false };
 	} m_optionalExtensions;
-
-	IDXGISwapChain1* m_mirror_sch = nullptr;
 
 	PFN_xrRemotingSetContextPropertiesMSFT xrRemotingSetContextPropertiesMSFT;
 	PFN_xrRemotingConnectMSFT xrRemotingConnectMSFT;

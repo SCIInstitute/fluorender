@@ -151,38 +151,6 @@ void HololensRenderer::Close()
 	DestroyD3DDevice();
 }
 
-void HololensRenderer::EndFrame()
-{
-	if (!m_app_running || !m_session_running)
-		return;
-
-	// End the frame
-	XrFrameEndInfo frameEndInfo{ XR_TYPE_FRAME_END_INFO };
-	frameEndInfo.displayTime = m_frame_state.predictedDisplayTime;
-	frameEndInfo.environmentBlendMode = m_env_blend_mode;
-	frameEndInfo.layerCount = static_cast<uint32_t>(m_render_layer_info.layers.size());
-	frameEndInfo.layers = m_render_layer_info.layers.data();
-
-	//mirror image, may not be necessary
-	XrRemotingFrameMirrorImageD3D11MSFT mirrorImageD3D11{
-		static_cast<XrStructureType>(XR_TYPE_REMOTING_FRAME_MIRROR_IMAGE_D3D11_MSFT) };
-	ID3D11Texture2D* texture;
-	m_mirror_sch->GetBuffer(0, IID_PPV_ARGS(&texture));
-	mirrorImageD3D11.texture = texture;
-	XrRemotingFrameMirrorImageInfoMSFT mirrorImageEndInfo{
-		static_cast<XrStructureType>(XR_TYPE_REMOTING_FRAME_MIRROR_IMAGE_INFO_MSFT) };
-	mirrorImageEndInfo.image = reinterpret_cast<const XrRemotingFrameMirrorImageBaseHeaderMSFT*>(&mirrorImageD3D11);
-	frameEndInfo.next = 0;// &mirrorImageEndInfo;
-
-	XrResult result = xrEndFrame(m_session, &frameEndInfo);
-	if (result != XR_SUCCESS)
-	{
-#ifdef _DEBUG
-		DBGPRINT(L"xrEndFrame failed.\n");
-#endif
-	}
-}
-
 void HololensRenderer::SetExtensions()
 {
 	// Add additional instance layers/extensions that the application wants.
@@ -437,61 +405,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 bool HololensRenderer::CreateSharedTex(const XrSwapchainCreateInfo& scci)
 {
-	//WmrRenderer::CreateSharedTex(scci);
+	WmrRenderer::CreateSharedTex(scci);
 
-	DXGI_SWAP_CHAIN_DESC1 desc{};
-	desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-	desc.Stereo = false;
-	desc.SampleDesc.Count = 1;
-	desc.SampleDesc.Quality = 0;
-	desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	desc.BufferCount = 2;
-	desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-	desc.Flags = 0;
-	desc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
-	desc.Scaling = DXGI_SCALING_STRETCH;
-
-	IDXGIDevice1* dxgiDevice;
-	m_device->QueryInterface(&dxgiDevice);
-
-	IDXGIAdapter* dxgiAdapter;
-	dxgiDevice->GetAdapter(&dxgiAdapter);
-
-	IDXGIFactory2* dxgiFactory;
-	dxgiAdapter->GetParent(IID_PPV_ARGS(&dxgiFactory));
-
-	// Function to create a dummy window
-	const wchar_t CLASS_NAME[] = L"DummyWindowClass";
-	HINSTANCE hInstance = GetModuleHandle(NULL);
-
-	WNDCLASS wc = {};
-	wc.lpfnWndProc = WindowProc;
-	wc.hInstance = hInstance;
-	wc.lpszClassName = CLASS_NAME;
-
-	RegisterClass(&wc);
-
-	HWND hwnd = CreateWindowEx(
-		0,                              // Optional window styles.
-		CLASS_NAME,                     // Window class
-		L"Dummy Window",                // Window text
-		WS_OVERLAPPEDWINDOW,            // Window style
-		CW_USEDEFAULT, CW_USEDEFAULT,   // Size and position
-		CW_USEDEFAULT, CW_USEDEFAULT,   // Width and height
-		NULL,                           // Parent window    
-		NULL,                           // Menu
-		hInstance,                      // Instance handle
-		NULL                            // Additional application data
-	);
-
-	if (hwnd == NULL) {
-		return NULL;
-	}
-
-	// Hide the window
-	ShowWindow(hwnd, SW_HIDE);
-	dxgiFactory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER);
-	dxgiFactory->CreateSwapChainForHwnd(m_device, hwnd, &desc, nullptr, nullptr, &m_mirror_sch);
 
 	return true;
 }
