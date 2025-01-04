@@ -166,7 +166,9 @@ void HololensRenderer::EndFrame()
 	//mirror image, may not be necessary
 	XrRemotingFrameMirrorImageD3D11MSFT mirrorImageD3D11{
 		static_cast<XrStructureType>(XR_TYPE_REMOTING_FRAME_MIRROR_IMAGE_D3D11_MSFT) };
-	mirrorImageD3D11.texture = m_mirror_tex;
+	ID3D11Texture2D* texture;
+	m_mirror_sch->GetBuffer(0, IID_PPV_ARGS(&texture));
+	mirrorImageD3D11.texture = texture;
 	XrRemotingFrameMirrorImageInfoMSFT mirrorImageEndInfo{
 		static_cast<XrStructureType>(XR_TYPE_REMOTING_FRAME_MIRROR_IMAGE_INFO_MSFT) };
 	mirrorImageEndInfo.image = reinterpret_cast<const XrRemotingFrameMirrorImageBaseHeaderMSFT*>(&mirrorImageD3D11);
@@ -428,6 +430,11 @@ void HololensRenderer::PollEvents()
 	}
 }
 
+// Window procedure function
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
 bool HololensRenderer::CreateSharedTex(const XrSwapchainCreateInfo& scci)
 {
 	WmrRenderer::CreateSharedTex(scci);
@@ -453,13 +460,9 @@ bool HololensRenderer::CreateSharedTex(const XrSwapchainCreateInfo& scci)
 	IDXGIFactory2* dxgiFactory;
 	dxgiAdapter->GetParent(IID_PPV_ARGS(&dxgiFactory));
 
-	// Window procedure function
-	LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-		return DefWindowProc(hwnd, uMsg, wParam, lParam);
-	}
-
 	// Function to create a dummy window
 	const wchar_t CLASS_NAME[] = L"DummyWindowClass";
+	HINSTANCE hInstance = GetModuleHandle(NULL);
 
 	WNDCLASS wc = {};
 	wc.lpfnWndProc = WindowProc;
@@ -487,8 +490,8 @@ bool HololensRenderer::CreateSharedTex(const XrSwapchainCreateInfo& scci)
 
 	// Hide the window
 	ShowWindow(hwnd, SW_HIDE);
-	dxgiFactory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER));
-	dxgiFactory->CreateSwapChainForHwnd(m_device, hWnd, &desc, nullptr, nullptr, &m_mirror_sch);
+	dxgiFactory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER);
+	dxgiFactory->CreateSwapChainForHwnd(m_device, hwnd, &desc, nullptr, nullptr, &m_mirror_sch);
 
 	return true;
 }
