@@ -172,7 +172,7 @@ void HololensRenderer::EndFrame()
 	XrRemotingFrameMirrorImageInfoMSFT mirrorImageEndInfo{
 		static_cast<XrStructureType>(XR_TYPE_REMOTING_FRAME_MIRROR_IMAGE_INFO_MSFT) };
 	mirrorImageEndInfo.image = reinterpret_cast<const XrRemotingFrameMirrorImageBaseHeaderMSFT*>(&mirrorImageD3D11);
-	frameEndInfo.next = &mirrorImageEndInfo;
+	frameEndInfo.next = 0;// &mirrorImageEndInfo;
 
 	XrResult result = xrEndFrame(m_session, &frameEndInfo);
 	if (result != XR_SUCCESS)
@@ -437,7 +437,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 bool HololensRenderer::CreateSharedTex(const XrSwapchainCreateInfo& scci)
 {
-	WmrRenderer::CreateSharedTex(scci);
+	//WmrRenderer::CreateSharedTex(scci);
 
 	DXGI_SWAP_CHAIN_DESC1 desc{};
 	desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;

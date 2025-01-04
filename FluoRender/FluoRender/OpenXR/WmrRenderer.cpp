@@ -158,11 +158,11 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		if (fbos.size() > i)
 		{
 			//test
-			//float clearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
-			//m_im_context->ClearRenderTargetView((ID3D11RenderTargetView*)(colorSwapchainInfo.imageViews[colorImageIndex]), clearColor);
+			float clearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
+			m_im_context->ClearRenderTargetView((ID3D11RenderTargetView*)(colorSwapchainInfo.imageViews[colorImageIndex]), clearColor);
 
 			// Share the texture with Direct3D
-			wglDXLockObjectsNV(m_interop, 1, &m_gl_d3d_tex);
+/*			wglDXLockObjectsNV(m_interop, 1, &m_gl_d3d_tex);
 
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[i]->id());
 			// Read pixels to PBO
@@ -197,7 +197,7 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 			}
 
 			// Release the resource when done
-			target_res->Release();
+			target_res->Release();*/
 		}
 
 		// Give the swapchain image back to OpenXR, allowing the compositor to use the image.
