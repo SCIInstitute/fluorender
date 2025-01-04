@@ -115,6 +115,8 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 
 	GetEnvironmentBlendModes();
 
+	//PollEvents();
+
 	ConnectOrListen();
 
 	if (!CreateSession(hdc, hglrc))
@@ -164,7 +166,7 @@ void HololensRenderer::EndFrame()
 	//mirror image, may not be necessary
 	XrRemotingFrameMirrorImageD3D11MSFT mirrorImageD3D11{
 		static_cast<XrStructureType>(XR_TYPE_REMOTING_FRAME_MIRROR_IMAGE_D3D11_MSFT) };
-	mirrorImageD3D11.texture = m_d3d_tex;
+	mirrorImageD3D11.texture = m_mirror_tex;
 	XrRemotingFrameMirrorImageInfoMSFT mirrorImageEndInfo{
 		static_cast<XrStructureType>(XR_TYPE_REMOTING_FRAME_MIRROR_IMAGE_INFO_MSFT) };
 	mirrorImageEndInfo.image = reinterpret_cast<const XrRemotingFrameMirrorImageBaseHeaderMSFT*>(&mirrorImageD3D11);
@@ -197,23 +199,6 @@ void HololensRenderer::SetExtensions()
 	m_instanceExtensions.push_back(XR_KHR_COMPOSITION_LAYER_DEPTH_EXTENSION_NAME);
 	m_instanceExtensions.push_back(XR_MSFT_UNBOUNDED_REFERENCE_SPACE_EXTENSION_NAME);
 	m_instanceExtensions.push_back(XR_MSFT_SPATIAL_ANCHOR_EXTENSION_NAME);
-}
-
-bool HololensRenderer::CreateSession(void* hdc, void* hdxrc)
-{
-	bool result = WmrRenderer::CreateSession(hdc, hdxrc);
-	if (!result)
-		return result;
-
-	// If remoting speech extension is enabled
-	if (m_usingRemotingRuntime)
-	{
-		XrRemotingSpeechInitInfoMSFT speechInitInfo{ static_cast<XrStructureType>(XR_TYPE_REMOTING_SPEECH_INIT_INFO_MSFT) };
-		InitializeSpeechRecognition(speechInitInfo);
-		xrInitializeRemotingSpeechMSFT(m_session, &speechInitInfo);
-	}
-
-	return true;
 }
 
 void HololensRenderer::LoadFunctions()
@@ -443,6 +428,81 @@ void HololensRenderer::PollEvents()
 	}
 }
 
+bool HololensRenderer::CreateSharedTex(const XrSwapchainCreateInfo& scci)
+{
+	WmrRenderer::CreateSharedTex(scci);
+
+	DXGI_SWAP_CHAIN_DESC1 desc{};
+	desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	desc.Stereo = false;
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+	desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	desc.BufferCount = 2;
+	desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+	desc.Flags = 0;
+	desc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
+	desc.Scaling = DXGI_SCALING_STRETCH;
+
+	IDXGIDevice1* dxgiDevice;
+	m_device->QueryInterface(&dxgiDevice);
+
+	IDXGIAdapter* dxgiAdapter;
+	dxgiDevice->GetAdapter(&dxgiAdapter);
+
+	IDXGIFactory2* dxgiFactory;
+	dxgiAdapter->GetParent(IID_PPV_ARGS(&dxgiFactory));
+
+	// Window procedure function
+	LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+		return DefWindowProc(hwnd, uMsg, wParam, lParam);
+	}
+
+	// Function to create a dummy window
+	const wchar_t CLASS_NAME[] = L"DummyWindowClass";
+
+	WNDCLASS wc = {};
+	wc.lpfnWndProc = WindowProc;
+	wc.hInstance = hInstance;
+	wc.lpszClassName = CLASS_NAME;
+
+	RegisterClass(&wc);
+
+	HWND hwnd = CreateWindowEx(
+		0,                              // Optional window styles.
+		CLASS_NAME,                     // Window class
+		L"Dummy Window",                // Window text
+		WS_OVERLAPPEDWINDOW,            // Window style
+		CW_USEDEFAULT, CW_USEDEFAULT,   // Size and position
+		CW_USEDEFAULT, CW_USEDEFAULT,   // Width and height
+		NULL,                           // Parent window    
+		NULL,                           // Menu
+		hInstance,                      // Instance handle
+		NULL                            // Additional application data
+	);
+
+	if (hwnd == NULL) {
+		return NULL;
+	}
+
+	// Hide the window
+	ShowWindow(hwnd, SW_HIDE);
+	dxgiFactory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER));
+	dxgiFactory->CreateSwapChainForHwnd(m_device, hWnd, &desc, nullptr, nullptr, &m_mirror_sch);
+
+	return true;
+}
+
+void HololensRenderer::DestroySharedTex()
+{
+	WmrRenderer::DestroySharedTex();
+	//if (m_mirror_tex)
+	//{
+	//	m_mirror_tex->Release();
+	//	m_mirror_tex = nullptr;
+	//}
+}
+
 bool HololensRenderer::EnableRemotingXR()
 {
 	wchar_t executablePath[MAX_PATH];
@@ -487,7 +547,7 @@ void HololensRenderer::CheckExtensions()
 void HololensRenderer::Disconnect()
 {
 	XrRemotingDisconnectInfoMSFT disconnectInfo{ static_cast<XrStructureType>(XR_TYPE_REMOTING_DISCONNECT_INFO_MSFT) };
-	xrRemotingDisconnectMSFT(m_instance, m_sys_id, &disconnectInfo);
+	XrResult result = xrRemotingDisconnectMSFT(m_instance, m_sys_id, &disconnectInfo);
 }
 
 void HololensRenderer::ConnectOrListen()
@@ -497,8 +557,9 @@ void HololensRenderer::ConnectOrListen()
 		return;
 	}
 
+	XrResult result;
 	XrRemotingConnectionStateMSFT connectionState;
-	xrRemotingGetConnectionStateMSFT(m_instance, m_sys_id, &connectionState, nullptr);
+	result = xrRemotingGetConnectionStateMSFT(m_instance, m_sys_id, &connectionState, nullptr);
 	if (connectionState != XR_REMOTING_CONNECTION_STATE_DISCONNECTED_MSFT)
 	{
 		return;
@@ -513,7 +574,7 @@ void HololensRenderer::ConnectOrListen()
 		contextProperties.maxBitrateKbps = 20000;
 		contextProperties.videoCodec = XR_REMOTING_VIDEO_CODEC_H265_MSFT;
 		contextProperties.depthBufferStreamResolution = XR_REMOTING_DEPTH_BUFFER_STREAM_RESOLUTION_HALF_MSFT;
-		xrRemotingSetContextPropertiesMSFT(m_instance, m_sys_id, &contextProperties);
+		result = xrRemotingSetContextPropertiesMSFT(m_instance, m_sys_id, &contextProperties);
 	}
 
 	if (m_options.listen)
@@ -525,7 +586,7 @@ void HololensRenderer::ConnectOrListen()
 			serverCallbacks.requestServerCertificateCallback = CertificateValidationCallbackStatic;
 			serverCallbacks.validateAuthenticationTokenCallback = AuthenticationValidationCallbackStatic;
 			serverCallbacks.authenticationRealm = m_options.authenticationRealm.c_str();
-			xrRemotingSetSecureConnectionServerCallbacksMSFT(m_instance, m_sys_id, &serverCallbacks);
+			result = xrRemotingSetSecureConnectionServerCallbacksMSFT(m_instance, m_sys_id, &serverCallbacks);
 		}
 
 		XrRemotingListenInfoMSFT listenInfo{ static_cast<XrStructureType>(XR_TYPE_REMOTING_LISTEN_INFO_MSFT) };
@@ -533,7 +594,7 @@ void HololensRenderer::ConnectOrListen()
 		listenInfo.handshakeListenPort = m_options.port != 0 ? m_options.port : 8265;
 		listenInfo.transportListenPort = m_options.transportPort != 0 ? m_options.transportPort : 8266;
 		listenInfo.secureConnection = m_options.secureConnection;
-		xrRemotingListenMSFT(m_instance, m_sys_id, &listenInfo);
+		result = xrRemotingListenMSFT(m_instance, m_sys_id, &listenInfo);
 	}
 	else
 	{
@@ -544,14 +605,14 @@ void HololensRenderer::ConnectOrListen()
 			clientCallbacks.requestAuthenticationTokenCallback = AuthenticationRequestCallbackStatic;
 			clientCallbacks.validateServerCertificateCallback = CertificateValidationCallbackStatic;
 			clientCallbacks.performSystemValidation = true;
-			xrRemotingSetSecureConnectionClientCallbacksMSFT(m_instance, m_sys_id, &clientCallbacks);
+			result = xrRemotingSetSecureConnectionClientCallbacksMSFT(m_instance, m_sys_id, &clientCallbacks);
 		}
 
 		XrRemotingConnectInfoMSFT connectInfo{ static_cast<XrStructureType>(XR_TYPE_REMOTING_CONNECT_INFO_MSFT) };
 		connectInfo.remoteHostName = m_options.host.empty() ? "127.0.0.1" : m_options.host.c_str();
 		connectInfo.remotePort = m_options.port != 0 ? m_options.port : 8265;
 		connectInfo.secureConnection = m_options.secureConnection;
-		xrRemotingConnectMSFT(m_instance, m_sys_id, &connectInfo);
+		result = xrRemotingConnectMSFT(m_instance, m_sys_id, &connectInfo);
 	}
 }
 

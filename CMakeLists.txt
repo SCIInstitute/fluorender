@@ -1118,6 +1118,16 @@ add_custom_command(TARGET FluoRender POST_BUILD
     "$<TARGET_FILE_DIR:FluoRender>")
 endif()
 
+# openxr
+if(WIN32)
+set(OPENXR_DLL_DEBUG "${FluoRender_SOURCE_DIR}/FluoRender/OpenXR/openxr_loaderd.dll")
+set(OPENXR_DLL_RELEASE "${FluoRender_SOURCE_DIR}/FluoRender/OpenXR/openxr_loader.dll")
+add_custom_command(TARGET FluoRender POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<IF:$<CONFIG:Debug>,${OPENXR_DLL_DEBUG},${OPENXR_DLL_RELEASE}>
+    "$<TARGET_FILE_DIR:FluoRender>")
+endif()
+
 # holoplay
 if(WIN32)
     add_custom_command(TARGET FluoRender POST_BUILD

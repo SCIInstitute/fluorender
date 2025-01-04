@@ -231,15 +231,6 @@ bool WmrRenderer::CreateSession(void* hdc, void* hdxrc)
 	XrResult result;
 	// Create an XrSessionCreateInfo structure.
 	XrSessionCreateInfo sessionCI{ XR_TYPE_SESSION_CREATE_INFO };
-	// Create a std::unique_ptr<GraphicsAPI_...> from the instance and system.
-	// This call sets up a graphics API that's suitable for use with OpenXR.
-	// Get D3D11 graphics requirements
-	PFN_xrGetD3D11GraphicsRequirementsKHR xrGetD3D11GraphicsRequirementsKHR = nullptr;
-	result = xrGetInstanceProcAddr(m_instance, "xrGetD3D11GraphicsRequirementsKHR", (PFN_xrVoidFunction*)&xrGetD3D11GraphicsRequirementsKHR);
-	if (result != XR_SUCCESS) return false;
-	XrGraphicsRequirementsD3D11KHR requirements = { XR_TYPE_GRAPHICS_REQUIREMENTS_D3D11_KHR };
-	result = xrGetD3D11GraphicsRequirementsKHR(m_instance, m_sys_id, &requirements);
-	if (result != XR_SUCCESS) return false;
 	XrGraphicsBindingD3D11KHR graphicsBindingD3D11 = { XR_TYPE_GRAPHICS_BINDING_D3D11_KHR };
 	graphicsBindingD3D11.device = m_device;
 
@@ -442,13 +433,36 @@ bool WmrRenderer::CreateD3DDevice()
 	if (adapter == nullptr)
 		return false;
 
+	D3D_DRIVER_TYPE driverType = adapter == nullptr ? D3D_DRIVER_TYPE_HARDWARE : D3D_DRIVER_TYPE_UNKNOWN;
+	UINT creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+#ifdef _DEBUG
+	creationFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+	std::vector<D3D_FEATURE_LEVEL> featureLevels = { D3D_FEATURE_LEVEL_12_1,
+													D3D_FEATURE_LEVEL_12_0,
+													D3D_FEATURE_LEVEL_11_1,
+													D3D_FEATURE_LEVEL_11_0,
+													D3D_FEATURE_LEVEL_10_1,
+													D3D_FEATURE_LEVEL_10_0 };
+	featureLevels.erase(std::remove_if(featureLevels.begin(),
+		featureLevels.end(),
+		[&](D3D_FEATURE_LEVEL fl) { return fl < graphicsRequirements.minFeatureLevel; }),
+		featureLevels.end());
+	if (featureLevels.empty())
+	{
+#ifdef _DEBUG
+		DBGPRINT(L"Unsupported minimum feature level!\n");
+#endif
+		return false;
+	}
+
 	hr = D3D11CreateDevice(
 		adapter,
-		D3D_DRIVER_TYPE_UNKNOWN,
+		driverType,
 		0,
-		D3D11_CREATE_DEVICE_DEBUG,
-		&graphicsRequirements.minFeatureLevel,
-		1,
+		creationFlags,
+		featureLevels.data(),
+		(UINT)featureLevels.size(),
 		D3D11_SDK_VERSION,
 		&m_device,
 		nullptr,

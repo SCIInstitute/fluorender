@@ -1403,13 +1403,16 @@ XrBool32 OpenXRMessageCallbackFunction(
 	std::string message = (pCallbackData->message) ? pCallbackData->message : "";
 
 	// String stream final message.
-	//std::stringstream errorMessage;
-	//errorMessage << functionName << "(" << messageSeverityStr << " / " << messageTypeStr << "): msgNum: " << messageId << " - " << message;
+	std::stringstream errorMessage;
+	errorMessage << functionName << "(" << messageSeverityStr << " / " << messageTypeStr << "): msgNum: " << messageId << " - " << message;
 
+#ifdef _DEBUG
+	DBGPRINT(L"%s\n", s2ws(errorMessage.str()));
+#endif
 	//// Log and debug break.
 	//std::cerr << errorMessage.str() << std::endl;
-	//if (BitwiseCheck(messageSeverity, XR_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)) {
-	//	DEBUG_BREAK;
-	//}
+	if (BitwiseCheck(messageSeverity, XR_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)) {
+		return XrBool32(false);
+	}
 	return XrBool32();
 }

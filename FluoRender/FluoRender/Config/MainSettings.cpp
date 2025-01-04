@@ -104,7 +104,7 @@ MainSettings::MainSettings()
 	m_mv_hmd = true;
 	m_sbs = false;
 	m_eye_dist = 20.0;
-	m_holo_ip = "192.168.10.100";
+	m_holo_ip = "192.168.137.78";
 	m_hologram_debug = false;
 	m_lg_offset = 22;
 	m_lg_dev_id = 0;
@@ -306,7 +306,7 @@ void MainSettings::Read()
 		fconfig.Read("sbs enable", &m_sbs, false);
 		fconfig.Read("eye dist", &m_eye_dist, 20.0);
 		wxString str;
-		fconfig.Read("holo ip", &str, "192.168.10.100");
+		fconfig.Read("holo ip", &str, "192.168.137.78");
 		m_holo_ip = str.ToStdString();
 		fconfig.Read("hologram debug", &m_hologram_debug, false);
 		fconfig.Read("lg offset", &m_lg_offset, 22);

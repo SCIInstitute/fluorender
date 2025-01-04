@@ -223,12 +223,13 @@ public:
 
 protected:
 	void SetExtensions() override;
-	bool CreateSession(void* hdc, void* hdxrc) override;
 	void LoadFunctions() override;
-
 	bool CreateReferenceSpace() override;
 
 	void PollEvents() override;
+
+	bool CreateSharedTex(const XrSwapchainCreateInfo& scci) override;
+	void DestroySharedTex() override;
 
 private:
 	bool EnableRemotingXR();
@@ -262,6 +263,8 @@ private:
 		bool UnboundedRefSpaceSupported{ false };
 		bool SpatialAnchorSupported{ false };
 	} m_optionalExtensions;
+
+	IDXGISwapChain1* m_mirror_sch = nullptr;
 
 	PFN_xrRemotingSetContextPropertiesMSFT xrRemotingSetContextPropertiesMSFT;
 	PFN_xrRemotingConnectMSFT xrRemotingConnectMSFT;
