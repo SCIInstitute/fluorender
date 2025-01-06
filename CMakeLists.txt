@@ -136,6 +136,24 @@ add_definitions(-DTEEM_ZLIB=1)
 # glm
 add_definitions(-DGLM_FORCE_RADIANS=1)
 
+# Set the GLEW directory
+file(GLOB GLEW_DIRS "${PARENT_DIR}/glew*")
+list(GET GLEW_DIRS 0 GLEW_DIR)  # Get the first match
+set(GLEW_INCLUDE_DIR "${GLEW_DIR}/include")
+if(WIN32)
+    set(GLEW_SHARED_LIBRARY_DEBUG "${GLEW_DIR}/lib/Debug/x64/glew32d.lib")
+    set(GLEW_SHARED_LIBRARY_RELEASE "${GLEW_DIR}/lib/Release/x64/glew32.lib")
+    set(GLEW_STATIC_LIBRARY_DEBUG "${GLEW_DIR}/lib/Debug/x64/glew32sd.lib")
+    set(GLEW_STATIC_LIBRARY_RELEASE "${GLEW_DIR}/lib/Release/x64/glew32s.lib")
+endif()
+include_directories(${GLEW_INCLUDE_DIR})
+set(GLEW_USE_STATIC_LIBS ON)
+find_package(GLEW REQUIRED)
+# OpenGL
+set(OpenGL_GL_PREFERENCE GLVND)
+find_package(OpenGL REQUIRED)
+include_directories(${OPENGL_INCLUDE_DIRS})
+
 # wxWidgets
 file(GLOB WXWIDGETS_DIRS "${PARENT_DIR}/wxWidgets*")
 list(GET WXWIDGETS_DIRS 0 WXWIDGETS_DIR)  # Get the first match
@@ -226,24 +244,6 @@ include_directories(${ZLIB_INCLUDE_DIRS})
 if (ZLIB_FOUND)
     message (STATUS "ZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIRS}")
 endif()
-
-# OpenGL
-set(OpenGL_GL_PREFERENCE GLVND)
-find_package(OpenGL REQUIRED)
-include_directories(${OPENGL_INCLUDE_DIRS})
-# Set the GLEW directory
-file(GLOB GLEW_DIRS "${PARENT_DIR}/glew*")
-list(GET GLEW_DIRS 0 GLEW_DIR)  # Get the first match
-set(GLEW_INCLUDE_DIR "${GLEW_DIR}/include")
-if(WIN32)
-    set(GLEW_SHARED_LIBRARY_DEBUG "${GLEW_DIR}/lib/Debug/x64/glew32d.lib")
-    set(GLEW_SHARED_LIBRARY_RELEASE "${GLEW_DIR}/lib/Release/x64/glew32.lib")
-    set(GLEW_STATIC_LIBRARY_DEBUG "${GLEW_DIR}/lib/Debug/x64/glew32sd.lib")
-    set(GLEW_STATIC_LIBRARY_RELEASE "${GLEW_DIR}/lib/Release/x64/glew32s.lib")
-endif()
-include_directories(${GLEW_INCLUDE_DIR})
-set(GLEW_USE_STATIC_LIBS ON)
-find_package(GLEW REQUIRED)
 
 # Boost
 file(GLOB BOOST_DIRS "${PARENT_DIR}/boost*")
@@ -992,8 +992,8 @@ if(WIN32)
     XInput.lib
     dlib::dlib
     ${FFMPEG_LIBRARIES}
-    ${OPENGL_LIBRARIES}
     ${GLEW_LIBRARIES}
+    ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
     ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
@@ -1014,8 +1014,8 @@ if(WIN32)
     XInput.lib
     dlib::dlib
     ${FFMPEG_LIBRARIES}
-    ${OPENGL_LIBRARIES}
     ${GLEW_LIBRARIES}
+    ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
     ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
