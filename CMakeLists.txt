@@ -382,8 +382,41 @@ if(WIN32)
     add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
     add_definitions(-DXR_USE_GRAPHICS_API_D3D11)
     add_definitions(-DXR_EXTENSION_PROTOTYPES)
+
     # nuget
-    #set(NUGET_COMMAND "${FluoRender_SOURCE_DIR}/NuGet/nuget.exe" CACHE STRING "NuGet executable used for package installs. Empty means NuGetTools is disabled.")
+	# Convert to absolute path
+	get_filename_component(ABS_NUGET_EXECUTABLE "${FluoRender_SOURCE_DIR}/NuGet/nuget.exe" ABSOLUTE)
+	set(NUGET_EXECUTABLE ${ABS_NUGET_EXECUTABLE})
+	message(STATUS "NuGet executable path: ${NUGET_EXECUTABLE}")
+	
+    # Find the NuGet executable
+    find_program(NUGET_COMMAND NAMES nuget PATHS "${FluoRender_SOURCE_DIR}/NuGet")
+
+    # Ensure the NuGet executable was found
+    if(NOT NUGET_COMMAND)
+        message(FATAL_ERROR "NuGet executable not found. Please specify the correct path.")
+    endif()
+
+    # Specify the NuGet package and version
+    set(NUGET_PACKAGE Microsoft.Holographic.Remoting.OpenXr)
+    set(NUGET_VERSION 2.9.4)
+
+    # Download and install the NuGet package
+    execute_process(
+        COMMAND ${NUGET_COMMAND} install ${NUGET_PACKAGE} -Version ${NUGET_VERSION} -OutputDirectory ${CMAKE_BINARY_DIR}/packages
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+
+    # Set the path to the installed package
+    set(NUGET_PACKAGE_DIR ${CMAKE_BINARY_DIR}/packages/${NUGET_PACKAGE}.${NUGET_VERSION})
+
+    # Include directories
+    include_directories(${NUGET_PACKAGE_DIR}/build/native/include)
+
+    # Link libraries
+    link_directories(${NUGET_PACKAGE_DIR}/build/native/lib)
+
+#set(NUGET_COMMAND "${FluoRender_SOURCE_DIR}/NuGet/nuget.exe" CACHE STRING "NuGet executable used for package installs. Empty means NuGetTools is disabled.")
     #include(NuGetTools)
     # Initialize NuGet
     #nuget_initialize()
@@ -989,46 +1022,48 @@ target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
 # link the libraries
 if(WIN32)
   target_link_libraries(FluoRender
-    secur32.lib
-    XInput.lib
-    dlib::dlib
-    ${OPENGL_LIBRARIES}
-    ${GLEW_STATIC_LIBRARIES}
-    ${FFMPEG_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${Python3_LIBRARIES}
-    ${OpenCL_LIBRARIES}
-    ${OpenXR_LIBRARIES}
-    ${OpenVR_LIBRARIES}
+    dlib::dlib
+    ${FFMPEG_LIBRARIES}
     ${FREETYPE_LIBRARIES}
-    ${wxWidgets_LIBRARIES}
-    ${TIFF_LIBRARIES}
-    ${PNG_LIBRARIES}
-    ${ZLIB_LIBRARIES}
-    ${ND2_LIBRARIES}
+    ${GLEW_STATIC_LIBRARIES}
     ${HDF5_LIBRARIES}
-    ${OpenCV_LIBS}
     ${HoloPlay_LIBRARIES}
+    ${ND2_LIBRARIES}
+    ${OpenCL_LIBRARIES}
+    ${OpenCV_LIBS}
+    ${OPENGL_LIBRARIES}
+    ${OpenVR_LIBRARIES}
+    ${OpenXR_LIBRARIES}
+    ${PNG_LIBRARIES}
+    ${Python3_LIBRARIES}
+    ${TIFF_LIBRARIES}
+    secur32.lib
+    ${wxWidgets_LIBRARIES}
+    XInput.lib
+    ${ZLIB_LIBRARIES}
   )
   target_link_libraries(Tester
-    secur32.lib
-    XInput.lib
-    dlib::dlib
-    ${OPENGL_LIBRARIES}
-    ${GLEW_STATIC_LIBRARIES}
-    ${FFMPEG_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${Python3_LIBRARIES}
-    ${OpenCL_LIBRARIES}
+    dlib::dlib
+    ${FFMPEG_LIBRARIES}
     ${FREETYPE_LIBRARIES}
-    ${wxWidgets_LIBRARIES}
-    ${TIFF_LIBRARIES}
-    ${PNG_LIBRARIES}
-    ${ZLIB_LIBRARIES}
-    ${ND2_LIBRARIES}
+    ${GLEW_STATIC_LIBRARIES}
     ${HDF5_LIBRARIES}
-    ${OpenCV_LIBS}
     ${HoloPlay_LIBRARIES}
+    ${ND2_LIBRARIES}
+    ${OpenCL_LIBRARIES}
+    ${OpenCV_LIBS}
+    ${OPENGL_LIBRARIES}
+    ${OpenVR_LIBRARIES}
+    ${OpenXR_LIBRARIES}
+    ${PNG_LIBRARIES}
+    ${Python3_LIBRARIES}
+    ${TIFF_LIBRARIES}
+    secur32.lib
+    ${wxWidgets_LIBRARIES}
+    XInput.lib
+    ${ZLIB_LIBRARIES}
   )
 elseif(APPLE)
   target_link_libraries(FluoRender
