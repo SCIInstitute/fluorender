@@ -147,7 +147,8 @@ if(WIN32)
     set(GLEW_STATIC_LIBRARY_RELEASE "${GLEW_DIR}/lib/Release/x64/glew32s.lib")
 endif()
 include_directories(${GLEW_INCLUDE_DIR})
-set(GLEW_USE_STATIC_LIBS ON)
+add_definitions(-DGLEW_STATIC)
+set(GLEW_USE_STATIC_LIBS TRUE)
 find_package(GLEW REQUIRED)
 # OpenGL
 set(OpenGL_GL_PREFERENCE GLVND)
@@ -991,9 +992,9 @@ if(WIN32)
     secur32.lib
     XInput.lib
     dlib::dlib
-    ${FFMPEG_LIBRARIES}
-    ${GLEW_LIBRARIES}
     ${OPENGL_LIBRARIES}
+    ${GLEW_STATIC_LIBRARIES}
+    ${FFMPEG_LIBRARIES}
     ${Boost_LIBRARIES}
     ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
@@ -1013,9 +1014,9 @@ if(WIN32)
     secur32.lib
     XInput.lib
     dlib::dlib
-    ${FFMPEG_LIBRARIES}
-    ${GLEW_LIBRARIES}
     ${OPENGL_LIBRARIES}
+    ${GLEW_STATIC_LIBRARIES}
+    ${FFMPEG_LIBRARIES}
     ${Boost_LIBRARIES}
     ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
@@ -1032,10 +1033,9 @@ if(WIN32)
 elseif(APPLE)
   target_link_libraries(FluoRender
     dlib::dlib
-    #${AEC_LIBRARIES}
-    ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
-    ${GLEW_LIBRARIES}
+    ${GLEW_STATIC_LIBRARIES}
+    ${FFMPEG_LIBRARIES}
     ${Boost_LIBRARIES}
     ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
@@ -1053,9 +1053,9 @@ else()
   target_link_libraries(FluoRender
     stdc++fs
     dlib::dlib
-    ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
-    ${GLEW_LIBRARIES}
+    ${GLEW_STATIC_LIBRARIES}
+    ${FFMPEG_LIBRARIES}
     ${Boost_LIBRARIES}
     ${Python3_LIBRARIES}
     ${OpenCL_LIBRARIES}
