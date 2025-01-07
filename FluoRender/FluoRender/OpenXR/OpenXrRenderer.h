@@ -117,6 +117,8 @@ protected:
 	};
 	std::vector<SwapchainInfo> m_swapchain_infos_color = {};
 	std::vector<SwapchainInfo> m_swapchain_infos_depth = {};
+	std::vector<int64_t> m_preferred_color_formats = {};
+	std::vector<int64_t> m_preferred_depth_formats = {};
 
 	//rendering
 	XrFrameState m_frame_state = {XR_TYPE_FRAME_STATE};
@@ -169,6 +171,9 @@ protected:
 
 	virtual bool CreateSwapchains();
 	virtual void DestroySwapchains();
+	int64_t SelectSwapchainFormat(
+		const std::vector<int64_t>& enum_formats,
+		const std::vector<int64_t>& pref_formats);
 
 	virtual void* CreateImageView(int type, void* format, void* tid);//0:color 1:depth
 	virtual void DestroyImageView(void*& imageView);

@@ -46,6 +46,19 @@ WmrRenderer::WmrRenderer() :
 {
 	m_app_name = "FluoRender";
 	m_eng_name = "FLWMROPENXR";
+
+	m_preferred_color_formats =
+	{
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		DXGI_FORMAT_B8G8R8A8_UNORM,
+		DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+		DXGI_FORMAT_B8G8R8A8_UNORM_SRGB
+	};
+	m_preferred_depth_formats =
+	{
+		DXGI_FORMAT_D32_FLOAT,
+		DXGI_FORMAT_D16_UNORM
+	};
 }
 
 WmrRenderer::~WmrRenderer()
@@ -96,6 +109,10 @@ bool WmrRenderer::Init(void* hdc, void* hglrc)
 
 	if (!CreateSwapchains())
 		return false;
+
+	//create shared tex if not present
+	if (m_d3d_tex == nullptr)
+		CreateSharedTex();
 
 	m_initialized = true;
 
@@ -256,34 +273,6 @@ bool WmrRenderer::CreateSwapchains()
 		m_session, formatCount, &formatCount, formats.data());
 	if (result != XR_SUCCESS) return false;
 
-	std::vector<int64_t> supportSFColor = {
-		DXGI_FORMAT_R8G8B8A8_UNORM,
-		DXGI_FORMAT_B8G8R8A8_UNORM,
-		DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-		DXGI_FORMAT_B8G8R8A8_UNORM_SRGB };
-	std::vector<int64_t> supportSFDepth = {
-		DXGI_FORMAT_D32_FLOAT,
-		DXGI_FORMAT_D16_UNORM };
-
-	const std::vector<int64_t>::const_iterator& itor_color =
-		std::find_first_of(formats.begin(), formats.end(),
-			std::begin(supportSFColor), std::end(supportSFColor));
-	if (itor_color == formats.end())
-	{
-#ifdef _DEBUG
-		DBGPRINT(L"Failed to find color format for Swapchain.\n");
-#endif
-	}
-	const std::vector<int64_t>::const_iterator& itor_depth =
-		std::find_first_of(formats.begin(), formats.end(),
-			std::begin(supportSFDepth), std::end(supportSFDepth));
-	if (itor_depth == formats.end())
-	{
-#ifdef _DEBUG
-		DBGPRINT(L"Failed to find depth format for Swapchain.\n");
-#endif
-	}
-
 	//Resize the SwapchainInfo to match the number of view in the View Configuration.
 	m_swapchain_infos_color.resize(m_view_config_views.size());
 	m_swapchain_infos_depth.resize(m_view_config_views.size());
@@ -299,7 +288,7 @@ bool WmrRenderer::CreateSwapchains()
 		XrSwapchainCreateInfo swapchainCI{ XR_TYPE_SWAPCHAIN_CREATE_INFO };
 		swapchainCI.createFlags = 0;
 		swapchainCI.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_COLOR_ATTACHMENT_BIT;
-		swapchainCI.format = *itor_color;
+		swapchainCI.format = SelectSwapchainFormat(formats, m_preferred_color_formats);
 		swapchainCI.sampleCount = m_view_config_views[i].recommendedSwapchainSampleCount;  // Use the recommended values from the XrViewConfigurationView.
 		swapchainCI.width = m_view_config_views[i].recommendedImageRectWidth;
 		swapchainCI.height = m_view_config_views[i].recommendedImageRectHeight;
@@ -327,18 +316,12 @@ bool WmrRenderer::CreateSwapchains()
 			colorSwapchainInfo.imageViews.push_back(CreateImageView(0, (void*)(uint64_t)swapchainCI.format, (void*)(uint64_t)swapchain_images[j].texture));
 		}
 
-		//create shared tex if not present
-		if (m_d3d_tex == nullptr)
-		{
-			CreateSharedTex(swapchainCI);
-		}
-
 		// Depth.
 		if (m_use_depth)
 		{
 			swapchainCI.createFlags = 0;
 			swapchainCI.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-			swapchainCI.format = *itor_depth;
+			swapchainCI.format = SelectSwapchainFormat(formats, m_preferred_depth_formats);
 			swapchainCI.sampleCount = m_view_config_views[i].recommendedSwapchainSampleCount;  // Use the recommended values from the XrViewConfigurationView.
 			swapchainCI.width = m_view_config_views[i].recommendedImageRectWidth;
 			swapchainCI.height = m_view_config_views[i].recommendedImageRectHeight;
@@ -491,28 +474,57 @@ void WmrRenderer::DestroyD3DDevice()
 	}
 }
 
-bool WmrRenderer::CreateSharedTex(const XrSwapchainCreateInfo& scci)
+GLFormat WmrRenderer::TranslateD3D11ToGLFormat(DXGI_FORMAT d3dFormat)
+{
+	static const std::unordered_map<DXGI_FORMAT, GLFormat> formatMap =
+	{
+		{ DXGI_FORMAT_R8G8B8A8_UNORM, { GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE } },
+		{ DXGI_FORMAT_B8G8R8A8_UNORM, { GL_RGBA8, GL_BGRA, GL_UNSIGNED_BYTE } },
+		{ DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, { GL_SRGB8_ALPHA8, GL_RGBA, GL_UNSIGNED_BYTE } },
+		{ DXGI_FORMAT_B8G8R8A8_UNORM_SRGB, { GL_SRGB8_ALPHA8, GL_BGRA, GL_UNSIGNED_BYTE } },
+		{ DXGI_FORMAT_R8_UNORM, { GL_R8, GL_RED, GL_UNSIGNED_BYTE } },
+		{ DXGI_FORMAT_R16_FLOAT, { GL_R16F, GL_RED, GL_HALF_FLOAT } },
+		{ DXGI_FORMAT_R32_FLOAT, { GL_R32F, GL_RED, GL_FLOAT } },
+		{ DXGI_FORMAT_R16G16B16A16_FLOAT, { GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT } },
+		{ DXGI_FORMAT_R32G32B32A32_FLOAT, { GL_RGBA32F, GL_RGBA, GL_FLOAT } },
+		{ DXGI_FORMAT_D32_FLOAT, { GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT } },
+		{ DXGI_FORMAT_D24_UNORM_S8_UINT, { GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8 } },
+		// Add more formats as needed
+	};
+
+	auto it = formatMap.find(d3dFormat);
+	if (it != formatMap.end())
+	{
+		return it->second;
+	}
+	else
+	{
+		// Handle unsupported format
+		return { GL_NONE, GL_NONE, GL_NONE };
+	}
+}
+
+bool WmrRenderer::CreateSharedTex()
 {
 	// Describe the shared texture
 	D3D11_TEXTURE2D_DESC desc = {};
-	desc.Width = scci.width;
-	desc.Height = scci.height;
-	desc.MipLevels = scci.mipCount;
-	desc.ArraySize = scci.arraySize;
-	desc.Format = static_cast<DXGI_FORMAT>(scci.format);
-	desc.SampleDesc.Count = scci.sampleCount;
+	desc.Width = m_size[0];
+	desc.Height = m_size[1];
+	desc.MipLevels = 1;
+	desc.ArraySize = 1;
+	desc.Format = static_cast<DXGI_FORMAT>(m_swapchain_infos_color[0].swapchainFormat);
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+	desc.CPUAccessFlags = 0;
 	desc.MiscFlags = D3D11_RESOURCE_MISC_SHARED;
 
-	//desc.MipLevels = 1;
+	//desc.MipLevels = 0;
 	//desc.ArraySize = 1;
-	//desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	//desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
 	//desc.SampleDesc.Count = 1;
-	//desc.SampleDesc.Quality = 0;
-	//desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	//desc.CPUAccessFlags = 0;
-	//desc.MiscFlags = 0;
+	//desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
 	// Create the shared texture
 	m_device->CreateTexture2D(&desc, nullptr, &m_d3d_tex);
@@ -528,8 +540,13 @@ bool WmrRenderer::CreateSharedTex(const XrSwapchainCreateInfo& scci)
 	glBindTexture(GL_TEXTURE_2D, m_gl_tex);
 
 	// Create the OpenGL texture from the shared handle
-	// assume the format is correct
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, scci.width, scci.width, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+	GLFormat glFormat = TranslateD3D11ToGLFormat(desc.Format);
+	glTexImage2D(GL_TEXTURE_2D, 0,
+		glFormat.internalFormat,
+		m_size[0], m_size[1], 0,
+		glFormat.format,
+		glFormat.type,
+		nullptr);
 
 	// Register the texture with OpenGL
 	m_interop = wglDXOpenDeviceNV(m_device);

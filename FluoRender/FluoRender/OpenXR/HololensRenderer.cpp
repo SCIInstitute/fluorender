@@ -55,6 +55,16 @@ HololensRenderer::HololensRenderer(const HololensOptions& options) :
 	m_app_name = "FluoRender";
 	m_eng_name = "FLHOLOLENS";
 
+	m_preferred_color_formats =
+	{
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		DXGI_FORMAT_B8G8R8A8_UNORM
+	};
+	m_preferred_depth_formats =
+	{
+		DXGI_FORMAT_D32_FLOAT,
+		DXGI_FORMAT_D16_UNORM
+	};
 }
 
 HololensRenderer::~HololensRenderer()
@@ -115,8 +125,6 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 
 	GetEnvironmentBlendModes();
 
-	//PollEvents();
-
 	ConnectOrListen();
 
 	if (!CreateSession(hdc, hglrc))
@@ -130,6 +138,10 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 
 	if (!CreateSwapchains())
 		return false;
+
+	//create shared tex if not present
+	if (m_d3d_tex == nullptr)
+		CreateSharedTex();
 
 	m_initialized = true;
 

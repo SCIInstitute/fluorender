@@ -31,6 +31,13 @@ DEALINGS IN THE SOFTWARE.
 
 #include <OpenXrRenderer.h>
 
+struct GLFormat
+{
+	GLenum internalFormat;
+	GLenum format;
+	GLenum type;
+};
+
 class WmrRenderer : public OpenXrRenderer
 {
 public:
@@ -52,10 +59,12 @@ protected:
 	virtual bool CreateD3DDevice();
 	virtual void DestroyD3DDevice();
 
-	virtual bool CreateSharedTex(const XrSwapchainCreateInfo& scci);
+	virtual bool CreateSharedTex();
 	virtual void DestroySharedTex();
 
 	virtual void LoadFunctions();
+
+	GLFormat TranslateD3D11ToGLFormat(DXGI_FORMAT d3dFormat);
 
 protected:
 	IDXGIFactory4* m_factory = nullptr;

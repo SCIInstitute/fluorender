@@ -43,6 +43,23 @@ OpenXrRenderer::OpenXrRenderer() :
 {
 	m_app_name = "FluoRender";
 	m_eng_name = "FLOPENXR";
+
+	m_preferred_color_formats =
+	{
+		GL_RGB10_A2,
+		GL_RGBA16F,
+		// The two below should only be used as a fallback, as they are linear color formats without enough bits for color
+		// depth, thus leading to banding.
+		GL_RGBA8,
+		GL_RGBA8_SNORM,
+	};
+	m_preferred_depth_formats =
+	{
+		GL_DEPTH_COMPONENT32F,
+		GL_DEPTH_COMPONENT32,
+		GL_DEPTH_COMPONENT24,
+		GL_DEPTH_COMPONENT16
+	};
 }
 
 OpenXrRenderer::~OpenXrRenderer()
@@ -750,39 +767,6 @@ bool OpenXrRenderer::CreateSwapchains()
 		m_session, formatCount, &formatCount, formats.data());
 	if (result != XR_SUCCESS) return false;
 
-	std::vector<int64_t> supportSFColor = {
-		GL_RGB10_A2,
-		GL_RGBA16F,
-		// The two below should only be used as a fallback, as they are linear color formats without enough bits for color
-		// depth, thus leading to banding.
-		GL_RGBA8,
-		GL_RGBA8_SNORM,
-	};
-	std::vector<int64_t> supportSFDepth = {
-		GL_DEPTH_COMPONENT32F,
-		GL_DEPTH_COMPONENT32,
-		GL_DEPTH_COMPONENT24,
-		GL_DEPTH_COMPONENT16 };
-
-	const std::vector<int64_t>::const_iterator& itor_color =
-		std::find_first_of(formats.begin(), formats.end(),
-		std::begin(supportSFColor), std::end(supportSFColor));
-	if (itor_color == formats.end())
-	{
-#ifdef _DEBUG
-		DBGPRINT(L"Failed to find color format for Swapchain.\n");
-#endif
-	}
-	const std::vector<int64_t>::const_iterator& itor_depth =
-		std::find_first_of(formats.begin(), formats.end(),
-		std::begin(supportSFDepth), std::end(supportSFDepth));
-	if (itor_depth == formats.end())
-	{
-#ifdef _DEBUG
-		DBGPRINT(L"Failed to find depth format for Swapchain.\n");
-#endif
-	}
-
 	//Resize the SwapchainInfo to match the number of view in the View Configuration.
 	m_swapchain_infos_color.resize(m_view_config_views.size());
 	m_swapchain_infos_depth.resize(m_view_config_views.size());
@@ -798,7 +782,7 @@ bool OpenXrRenderer::CreateSwapchains()
 		XrSwapchainCreateInfo swapchainCI{ XR_TYPE_SWAPCHAIN_CREATE_INFO };
 		swapchainCI.createFlags = 0;
 		swapchainCI.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_COLOR_ATTACHMENT_BIT;
-		swapchainCI.format = *itor_color;
+		swapchainCI.format = SelectSwapchainFormat(formats, m_preferred_color_formats);
 		swapchainCI.sampleCount = m_view_config_views[i].recommendedSwapchainSampleCount;  // Use the recommended values from the XrViewConfigurationView.
 		swapchainCI.width = m_view_config_views[i].recommendedImageRectWidth;
 		swapchainCI.height = m_view_config_views[i].recommendedImageRectHeight;
@@ -831,7 +815,7 @@ bool OpenXrRenderer::CreateSwapchains()
 		{
 			swapchainCI.createFlags = 0;
 			swapchainCI.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-			swapchainCI.format = *itor_depth;
+			swapchainCI.format = SelectSwapchainFormat(formats, m_preferred_depth_formats);
 			swapchainCI.sampleCount = m_view_config_views[i].recommendedSwapchainSampleCount;  // Use the recommended values from the XrViewConfigurationView.
 			swapchainCI.width = m_view_config_views[i].recommendedImageRectWidth;
 			swapchainCI.height = m_view_config_views[i].recommendedImageRectHeight;
@@ -886,6 +870,21 @@ void OpenXrRenderer::DestroySwapchains()
 			xrDestroySwapchain(depthSwapchainInfo.swapchain);
 		}
 	}
+}
+
+int64_t OpenXrRenderer::SelectSwapchainFormat(const std::vector<int64_t>& enum_formats, const std::vector<int64_t>& pref_formats)
+{
+	for (int64_t preferredFormat : pref_formats)
+	{
+		if (std::find(enum_formats.begin(), enum_formats.end(), preferredFormat) != enum_formats.end())
+		{
+			return preferredFormat;
+		}
+	}
+#ifdef _DEBUG
+	DBGPRINT(L"Failed to find format for Swapchain.\n");
+#endif
+	return DXGI_FORMAT_UNKNOWN;
 }
 
 void* OpenXrRenderer::CreateImageView(int type, void* format, void* tid)
