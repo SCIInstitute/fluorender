@@ -226,9 +226,6 @@ protected:
 
 	void PollEvents() override;
 
-	bool CreateSharedTex(const XrSwapchainCreateInfo& scci) override;
-	void DestroySharedTex() override;
-
 private:
 	bool EnableRemotingXR();
 

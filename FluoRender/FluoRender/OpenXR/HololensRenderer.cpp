@@ -398,29 +398,6 @@ void HololensRenderer::PollEvents()
 	}
 }
 
-// Window procedure function
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	return DefWindowProc(hwnd, uMsg, wParam, lParam);
-}
-
-bool HololensRenderer::CreateSharedTex(const XrSwapchainCreateInfo& scci)
-{
-	WmrRenderer::CreateSharedTex(scci);
-
-
-	return true;
-}
-
-void HololensRenderer::DestroySharedTex()
-{
-	WmrRenderer::DestroySharedTex();
-	//if (m_mirror_tex)
-	//{
-	//	m_mirror_tex->Release();
-	//	m_mirror_tex = nullptr;
-	//}
-}
-
 bool HololensRenderer::EnableRemotingXR()
 {
 	wchar_t executablePath[MAX_PATH];
@@ -450,7 +427,6 @@ void HololensRenderer::CheckExtensions()
 		{
 			if (strcmp(m_extensionProperties[i].extensionName, extensionName) == 0)
 			{
-				//m_instanceExtensions.push_back(extensionName);
 				return true;
 			}
 		}
