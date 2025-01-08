@@ -1102,7 +1102,10 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		else if (glbin_settings.m_hologram_mode == 1)
 		{
 #ifdef _WIN32
-			m_holo_ip_text->Enable();
+			if (glbin_settings.m_xr_api == 4)
+				m_holo_ip_text->Enable();
+			else
+				m_holo_ip_text->Disable();
 #endif
 			m_stereo_chk->SetValue(true);
 			m_xr_api_cmb->Enable();
@@ -1458,6 +1461,7 @@ void SettingDlg::OnStereoCheck(wxCommandEvent& event)
 void SettingDlg::OnXrApiComb(wxCommandEvent& event)
 {
 	glbin_settings.m_xr_api = m_xr_api_cmb->GetCurrentSelection();
+	FluoRefresh(2, { gstHologramMode });
 }
 
 void SettingDlg::OnMvHmdCheck(wxCommandEvent& event)
