@@ -175,6 +175,7 @@ protected:
 		const std::vector<int64_t>& enum_formats,
 		const std::vector<int64_t>& pref_formats);
 
+	virtual bool CreateSwapchainImages(int type, uint32_t count, SwapchainInfo& info);
 	virtual void* CreateImageView(int type, void* format, void* tid);//0:color 1:depth
 	virtual void DestroyImageView(void*& imageView);
 

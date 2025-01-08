@@ -797,18 +797,7 @@ bool OpenXrRenderer::CreateSwapchains()
 		uint32_t colorSwapchainImageCount = 0;
 		result = xrEnumerateSwapchainImages(colorSwapchainInfo.swapchain, 0, &colorSwapchainImageCount, nullptr);
 		if (result != XR_SUCCESS) return false;
-		std::vector<XrSwapchainImageOpenGLKHR> swapchain_images;
-		swapchain_images.resize(colorSwapchainImageCount, { XR_TYPE_SWAPCHAIN_IMAGE_OPENGL_KHR });
-		XrSwapchainImageBaseHeader* colorSwapchainImages = reinterpret_cast<XrSwapchainImageBaseHeader*>(swapchain_images.data());
-		result = xrEnumerateSwapchainImages(colorSwapchainInfo.swapchain,
-			colorSwapchainImageCount, &colorSwapchainImageCount, colorSwapchainImages);
-		if (result != XR_SUCCESS) return false;
-
-		// Per image in the swapchains, fill out a GraphicsAPI::ImageViewCreateInfo structure and create a color/depth image view.
-		for (uint32_t j = 0; j < colorSwapchainImageCount; j++)
-		{
-			colorSwapchainInfo.imageViews.push_back(CreateImageView(0, (void*)(uint64_t)swapchainCI.format, (void*)(uint64_t)swapchain_images[j].image));
-		}
+		CreateSwapchainImages(0, colorSwapchainImageCount, colorSwapchainInfo);
 
 		// Depth.
 		if (m_use_depth)
@@ -828,16 +817,8 @@ bool OpenXrRenderer::CreateSwapchains()
 
 			uint32_t depthSwapchainImageCount = 0;
 			result = xrEnumerateSwapchainImages(depthSwapchainInfo.swapchain, 0, &depthSwapchainImageCount, nullptr);
-			swapchain_images.resize(depthSwapchainImageCount, { XR_TYPE_SWAPCHAIN_IMAGE_OPENGL_KHR });
-			XrSwapchainImageBaseHeader* depthSwapchainImages = reinterpret_cast<XrSwapchainImageBaseHeader*>(swapchain_images.data());
-			result = xrEnumerateSwapchainImages(depthSwapchainInfo.swapchain,
-				depthSwapchainImageCount, &depthSwapchainImageCount, depthSwapchainImages);
 			if (result != XR_SUCCESS) return false;
-
-			for (uint32_t j = 0; j < depthSwapchainImageCount; j++)
-			{
-				depthSwapchainInfo.imageViews.push_back(CreateImageView(1, (void*)(uint64_t)swapchainCI.format, (void*)(uint64_t)swapchain_images[j].image));
-			}
+			CreateSwapchainImages(1, depthSwapchainImageCount, depthSwapchainInfo);
 		}
 	}
 
@@ -884,7 +865,29 @@ int64_t OpenXrRenderer::SelectSwapchainFormat(const std::vector<int64_t>& enum_f
 #ifdef _DEBUG
 	DBGPRINT(L"Failed to find format for Swapchain.\n");
 #endif
-	return DXGI_FORMAT_UNKNOWN;
+	return 0;//unknown format placeholder
+}
+
+bool OpenXrRenderer::CreateSwapchainImages(int type, uint32_t count, SwapchainInfo& info)
+{
+	if (!count)
+		return false;
+	std::vector<XrSwapchainImageOpenGLKHR> swapchain_images;
+	swapchain_images.resize(count, { XR_TYPE_SWAPCHAIN_IMAGE_OPENGL_KHR });
+	XrSwapchainImageBaseHeader* colorSwapchainImages = reinterpret_cast<XrSwapchainImageBaseHeader*>(swapchain_images.data());
+	XrResult result = xrEnumerateSwapchainImages(info.swapchain,
+		count, &count, colorSwapchainImages);
+	if (result != XR_SUCCESS) return false;
+
+	// Per image in the swapchains, fill out a GraphicsAPI::ImageViewCreateInfo structure and create a color/depth image view.
+	for (uint32_t j = 0; j < count; j++)
+	{
+		info.imageViews.push_back(
+			CreateImageView(type,
+				(void*)(uint64_t)info.swapchainFormat,
+				(void*)(uint64_t)swapchain_images[j].image));
+	}
+	return true;
 }
 
 void* OpenXrRenderer::CreateImageView(int type, void* format, void* tid)

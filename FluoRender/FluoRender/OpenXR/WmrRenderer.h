@@ -52,7 +52,7 @@ public:
 protected:
 	void SetExtensions() override;
 	bool CreateSession(void* hdc, void* hdxrc) override;
-	bool CreateSwapchains() override;
+	bool CreateSwapchainImages(int type, uint32_t count, SwapchainInfo& info) override;
 	void* CreateImageView(int type, void* format, void* tid) override;//0:color 1:depth
 	void DestroyImageView(void*& imageView) override;
 
