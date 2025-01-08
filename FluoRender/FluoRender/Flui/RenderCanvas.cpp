@@ -11172,7 +11172,7 @@ void RenderCanvas::ControllerMoveHorizontal(double dval, int nx, int ny)
 void RenderCanvas::ControllerZoomDolly(double dval, int nx, int ny)
 {
 	double delta = dval / (double)ny;
-	if (m_scale_factor < 1e3)
+	if (m_scale_factor < 1e5 && m_scale_factor > 1e-3)
 		m_scale_factor += m_scale_factor * delta;
 	if (m_free)
 	{

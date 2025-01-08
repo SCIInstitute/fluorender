@@ -65,6 +65,9 @@ HololensRenderer::HololensRenderer(const HololensOptions& options) :
 		DXGI_FORMAT_D32_FLOAT,
 		DXGI_FORMAT_D16_UNORM
 	};
+
+	m_dead_zone = 0.0f;
+	m_scaler = 1.0f;
 }
 
 HololensRenderer::~HololensRenderer()
@@ -649,7 +652,49 @@ void HololensRenderer::InitializeSpeechRecognition(XrRemotingSpeechInitInfoMSFT&
 	strcpy_s(speechInitInfo.language, "en-US");
 
 	// Initialize the dictionary.
-	m_dictionaryEntries = { "Red", "Blue", "Green", "Aquamarine", "Default" };
+	m_command_table = {
+		//move closer
+		{"closer", "move_closer"},
+		{"move closer", "move_closer"},
+		{"come", "move_closer"},
+		{"come nearer", "move_closer"},
+		{"nearer", "move_closer"},
+		{"near", "move_closer"},
+		{"go near", "move_closer"},
+		{"approach", "move_closer"},
+		{"come closer", "move_closer"},
+		{"get closer", "move_closer"},
+		{"move near", "move_closer"},
+		{"step closer", "move_closer"},
+		{"step near", "move_closer"},
+		//move away
+		{"away", "move_away"},
+		{"move away", "move_away"},
+		{"go", "move_away"},
+		{"go farther", "move_away"},
+		{"farther", "move_away"},
+		{"far", "move_away"},
+		{"go far", "move_away"},
+		{"retreat", "move_away"},
+		{"back", "move_away"},
+		{"move back", "move_away"},
+		{"step back", "move_away"},
+		{"back off", "move_away"},
+		{"get away", "move_away"},
+		{"move farther", "move_away"},
+		//stop
+		{"stop", "stop"},
+		{"stay", "stop"},
+		{"halt", "stop"},
+		{"cease", "stop"},
+		{"pause", "stop"},
+		{"hold", "stop"},
+		{"freeze", "stop"}
+	};
+	for (const auto& pair : m_command_table)
+	{
+		m_dictionaryEntries.push_back(pair.first.c_str());
+	}
 	speechInitInfo.dictionaryEntries = m_dictionaryEntries.data();
 	speechInitInfo.dictionaryEntriesCount = static_cast<uint32_t>(m_dictionaryEntries.size());
 
@@ -701,5 +746,35 @@ bool HololensRenderer::LoadGrammarFile(std::vector<uint8_t>& grammarFileContent)
 
 void HololensRenderer::HandleRecognizedSpeechText(const std::string& text)
 {
+	std::string cstr = text;
+	std::transform(cstr.begin(), cstr.end(), cstr.begin(), ::tolower);
 
+	auto it = m_command_table.find(cstr);
+	if (it != m_command_table.end())
+	{
+		if (it->second == "move_closer")
+		{
+			if (m_left_y > 0.0f)
+				m_left_y += 1.0f;
+			else
+				m_left_y = 1.0f;
+		}
+		else if (it->second == "move_away")
+		{
+			if (m_left_y < 0.0f)
+				m_left_y -= 1.0f;
+			else
+				m_left_y = -1.0f;
+		}
+		else if (it->second == "stop")
+		{
+			m_left_y = 0.0f;
+		}
+	}
+	else
+	{
+#ifdef _DEBUG
+		DBGPRINT(L"Unrecognized command: %s\n", s2ws(text));
+#endif
+	}
 }

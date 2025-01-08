@@ -251,6 +251,7 @@ private:
 	const HololensOptions m_options;
 	bool m_usingRemotingRuntime{ false };
 	std::vector<uint8_t> m_certificateStore;
+	std::unordered_map<std::string, std::string> m_command_table;
 	std::vector<const char*> m_dictionaryEntries;
 	std::vector<uint8_t> m_grammarFileContent;
 	struct {

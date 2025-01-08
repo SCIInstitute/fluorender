@@ -76,10 +76,10 @@ public:
 	virtual bool GetGrab() { return m_grab[0] || m_grab[1]; }
 
 	virtual void GetControllerStates() = 0;
-	virtual float GetControllerLeftThumbstickX() { return m_left_x; }
-	virtual float GetControllerLeftThumbstickY() { return m_left_y; }
-	virtual float GetControllerRightThumbstickX() { return m_right_x; }
-	virtual float GetControllerRightThumbstickY() { return m_right_y; }
+	virtual float GetControllerLeftThumbstickX() { return m_left_x * m_scaler; }
+	virtual float GetControllerLeftThumbstickY() { return m_left_y * m_scaler; }
+	virtual float GetControllerRightThumbstickX() { return m_right_x * m_scaler; }
+	virtual float GetControllerRightThumbstickY() { return m_right_y * m_scaler; }
 
 	virtual void BeginFrame() = 0;
 	virtual void EndFrame() = 0;
@@ -98,7 +98,7 @@ protected:
 	float m_left_y = 0.0f;
 	float m_right_x = 0.0f;
 	float m_right_y = 0.0f;
-	float m_dead_zone = 0.2f;
+	float m_dead_zone = 0.1f;
 	float m_scaler = 20.0f;
 	bool m_grab_prev[2] = { false, false };
 	bool m_grab[2] = { false, false };

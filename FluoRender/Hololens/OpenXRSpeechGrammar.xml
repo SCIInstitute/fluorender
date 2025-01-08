@@ -4,8 +4,35 @@
 	<!-- See https://docs.microsoft.com/en-us/previous-versions/office/developer/speech-technologies/hh361658(v=office.14) for an example -->
 	<rule id="rootRule">
 		<one-of>
-			<item>Reverse Direction</item>
-			<item>Exit Program</item>
-		</one-of>
+            <!-- Move Closer Commands -->
+			<item>closer</item>
+			<item>move closer</item>
+            <item>come</item>
+            <item>come nearer</item>
+            <item>nearer</item>
+            <item>near</item>
+            <item>go near</item>
+            <item>approach</item>
+            <item>come closer</item>
+            <item>get closer</item>
+            <item>move near</item>
+            <item>step closer</item>
+            <item>step near</item>
+            <!-- Move Away Commands -->
+            <item>away</item>
+            <item>move away</item>
+            <item>go</item>
+            <item>go farther</item>
+            <item>farther</item>
+            <item>far</item>
+            <item>go far</item>
+            <item>retreat</item>
+            <item>back</item>
+            <item>move back</item>
+            <item>step back</item>
+            <item>back off</item>
+            <item>get away</item>
+            <item>move farther</item>
+        </one-of>
 	</rule>
 </grammar>

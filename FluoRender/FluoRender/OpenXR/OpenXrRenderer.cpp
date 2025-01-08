@@ -188,11 +188,6 @@ void OpenXrRenderer::GetControllerStates()
 	if (m_left_y > -m_dead_zone && m_left_y < m_dead_zone) m_left_y = 0.0;
 	if (m_right_x > -m_dead_zone && m_right_x < m_dead_zone) m_right_x = 0.0;
 	if (m_right_y > -m_dead_zone && m_right_y < m_dead_zone) m_right_y = 0.0;
-
-	m_left_x *= m_scaler;
-	m_left_y *= m_scaler;
-	m_right_x *= m_scaler;
-	m_right_y *= m_scaler;
 }
 
 void OpenXrRenderer::BeginFrame()
