@@ -30,9 +30,11 @@ DEALINGS IN THE SOFTWARE.
 #define HololensRenderer_h
 
 #include <WmrRenderer.h>
+#ifdef _WIN32
 #include <openxr/openxr_msft_holographic_remoting.h>
 #include <openxr/openxr_msft_remoting_frame_mirroring.h>
 #include <openxr/openxr_msft_remoting_speech.h>
+#endif
 
 struct HololensOptions
 {
@@ -53,6 +55,7 @@ struct HololensOptions
 	std::string authenticationRealm{ "OpenXR Remoting" };
 };
 
+#ifdef _WIN32
 class SecureConnectionCallbacks
 {
 public:
@@ -209,6 +212,7 @@ private:
 	std::vector<uint8_t> m_certificateStore;
 	const bool m_listen;
 };
+#endif
 
 class HololensRenderer : public WmrRenderer
 {
@@ -227,6 +231,7 @@ protected:
 	void PollEvents() override;
 
 private:
+#ifdef _WIN32
 	bool EnableRemotingXR();
 
 	void CheckExtensions();
@@ -271,6 +276,7 @@ private:
 	PFN_xrRetrieveRemotingSpeechRecognizedTextMSFT xrRetrieveRemotingSpeechRecognizedTextMSFT;
 
 	SecureConnectionCallbacks m_secureConnectionCallbacks;
+#endif
 };
 
 #endif//HololensRenderer_h

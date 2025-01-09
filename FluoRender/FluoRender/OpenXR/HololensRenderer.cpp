@@ -42,19 +42,25 @@ DEALINGS IN THE SOFTWARE.
 #endif
 
 HololensRenderer::HololensRenderer(const HololensOptions& options) :
-	WmrRenderer(),
-	m_options(options),
-	m_secureConnectionCallbacks(m_options.authenticationToken,
+	WmrRenderer()
+	,m_options(options)
+#ifdef _WIN32
+	,m_secureConnectionCallbacks(m_options.authenticationToken,
 		m_options.allowCertificateNameMismatch,
 		m_options.allowUnverifiedCertificateChain,
 		m_options.keyPassphrase,
 		m_options.subjectName,
 		m_options.certificateStore,
 		m_options.listen)
+#endif
 {
 	m_app_name = "FluoRender";
 	m_eng_name = "FLHOLOLENS";
 
+	m_dead_zone = 0.0f;
+	m_scaler = 1.0f;
+
+#ifdef _WIN32
 	m_preferred_color_formats =
 	{
 		DXGI_FORMAT_R8G8B8A8_UNORM,
@@ -65,9 +71,7 @@ HololensRenderer::HololensRenderer(const HololensOptions& options) :
 		DXGI_FORMAT_D32_FLOAT,
 		DXGI_FORMAT_D16_UNORM
 	};
-
-	m_dead_zone = 0.0f;
-	m_scaler = 1.0f;
+#endif
 }
 
 HololensRenderer::~HololensRenderer()
@@ -79,6 +83,7 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 	if (m_initialized)
 		return m_initialized;
 
+#ifdef _WIN32
 	if (!m_options.isStandalone)
 	{
 		m_usingRemotingRuntime = EnableRemotingXR();
@@ -97,6 +102,7 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 #endif
 		}
 	}
+#endif
 
 	SetExtensions();
 
@@ -128,7 +134,9 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 
 	GetEnvironmentBlendModes();
 
+#ifdef _WIN32
 	ConnectOrListen();
+#endif
 
 	if (!CreateSession(hdc, hglrc))
 		return false;
@@ -143,8 +151,7 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 		return false;
 
 	//create shared tex if not present
-	if (m_d3d_tex == nullptr)
-		CreateSharedTex();
+	CreateSharedTex();
 
 	m_initialized = true;
 
@@ -168,6 +175,7 @@ void HololensRenderer::Close()
 
 void HololensRenderer::SetExtensions()
 {
+#ifdef _WIN32
 	// Add additional instance layers/extensions that the application wants.
 	// Add both required and requested instance extensions.
 	m_instanceExtensions.push_back(XR_EXT_DEBUG_UTILS_EXTENSION_NAME);
@@ -184,12 +192,14 @@ void HololensRenderer::SetExtensions()
 	m_instanceExtensions.push_back(XR_KHR_COMPOSITION_LAYER_DEPTH_EXTENSION_NAME);
 	m_instanceExtensions.push_back(XR_MSFT_UNBOUNDED_REFERENCE_SPACE_EXTENSION_NAME);
 	m_instanceExtensions.push_back(XR_MSFT_SPATIAL_ANCHOR_EXTENSION_NAME);
+#endif
 }
 
 void HololensRenderer::LoadFunctions()
 {
 	WmrRenderer::LoadFunctions();
 
+#ifdef _WIN32
 	XrResult result;
 	// Get the function address
 	result = xrGetInstanceProcAddr(m_instance, "xrRemotingSetContextPropertiesMSFT", (PFN_xrVoidFunction*)&xrRemotingSetContextPropertiesMSFT);
@@ -201,10 +211,12 @@ void HololensRenderer::LoadFunctions()
 	result = xrGetInstanceProcAddr(m_instance, "xrRemotingSetSecureConnectionServerCallbacksMSFT", (PFN_xrVoidFunction*)&xrRemotingSetSecureConnectionServerCallbacksMSFT);
 	result = xrGetInstanceProcAddr(m_instance, "xrInitializeRemotingSpeechMSFT", (PFN_xrVoidFunction*)&xrInitializeRemotingSpeechMSFT);
 	result = xrGetInstanceProcAddr(m_instance, "xrRetrieveRemotingSpeechRecognizedTextMSFT", (PFN_xrVoidFunction*)&xrRetrieveRemotingSpeechRecognizedTextMSFT);
+#endif
 }
 
 bool HololensRenderer::CreateReferenceSpace()
 {
+#ifdef _WIN32
 	XrResult result;
 	// Fill out an XrReferenceSpaceCreateInfo structure and create a reference XrSpace, specifying a Local space with an identity pose as the origin.
 	XrReferenceSpaceCreateInfo referenceSpaceCI{ XR_TYPE_REFERENCE_SPACE_CREATE_INFO };
@@ -221,7 +233,7 @@ bool HololensRenderer::CreateReferenceSpace()
 	referenceSpaceCI.poseInReferenceSpace = { {0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f} };
 	result = xrCreateReferenceSpace(m_session, &referenceSpaceCI, &m_space);
 	if (result != XR_SUCCESS) return false;
-
+#endif
 	return true;
 }
 
@@ -339,6 +351,7 @@ void HololensRenderer::PollEvents()
 			m_session_state = sessionStateChanged->state;
 			break;
 		}
+#ifdef _WIN32
 		case XR_TYPE_REMOTING_EVENT_DATA_LISTENING_MSFT:
 		{
 #ifdef _DEBUG
@@ -405,6 +418,7 @@ void HololensRenderer::PollEvents()
 			}
 			break;
 		}
+#endif
 		default:
 		{
 			break;
@@ -413,6 +427,7 @@ void HololensRenderer::PollEvents()
 	}
 }
 
+#ifdef _WIN32
 bool HololensRenderer::EnableRemotingXR()
 {
 	wchar_t executablePath[MAX_PATH];
@@ -778,3 +793,4 @@ void HololensRenderer::HandleRecognizedSpeechText(const std::string& text)
 #endif
 	}
 }
+#endif

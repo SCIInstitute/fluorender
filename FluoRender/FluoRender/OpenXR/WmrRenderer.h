@@ -64,6 +64,7 @@ protected:
 
 	virtual void LoadFunctions();
 
+#ifdef _WIN32
 	GLFormat TranslateD3D11ToGLFormat(DXGI_FORMAT d3dFormat);
 
 protected:
@@ -78,6 +79,7 @@ protected:
 	HANDLE m_shared_hdl = nullptr;
 	HANDLE m_interop = nullptr;
 	HANDLE m_gl_d3d_tex = nullptr;
+#endif
 };
 
 #endif//WmrRenderer_h

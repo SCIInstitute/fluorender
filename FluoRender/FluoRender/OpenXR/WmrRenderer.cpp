@@ -47,6 +47,7 @@ WmrRenderer::WmrRenderer() :
 	m_app_name = "FluoRender";
 	m_eng_name = "FLWMROPENXR";
 
+#ifdef _WIN32
 	m_preferred_color_formats =
 	{
 		DXGI_FORMAT_R8G8B8A8_UNORM,
@@ -59,6 +60,7 @@ WmrRenderer::WmrRenderer() :
 		DXGI_FORMAT_D32_FLOAT,
 		DXGI_FORMAT_D16_UNORM
 	};
+#endif
 }
 
 WmrRenderer::~WmrRenderer()
@@ -111,8 +113,7 @@ bool WmrRenderer::Init(void* hdc, void* hglrc)
 		return false;
 
 	//create shared tex if not present
-	if (m_d3d_tex == nullptr)
-		CreateSharedTex();
+	CreateSharedTex();
 
 	m_initialized = true;
 
@@ -171,6 +172,7 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		// This also associates the swapchain image with this layer projection view.
 		m_render_layer_info.layerProjectionViews[i].subImage.swapchain = colorSwapchainInfo.swapchain;
 
+#ifdef _WIN32
 		//copy buffer
 		if (fbos.size() > i)
 		{
@@ -216,6 +218,7 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 			// Release the resource when done
 			target_res->Release();
 		}
+#endif
 
 		// Give the swapchain image back to OpenXR, allowing the compositor to use the image.
 		XrSwapchainImageReleaseInfo releaseInfo{ XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO };
@@ -236,15 +239,18 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 
 void WmrRenderer::SetExtensions()
 {
+#ifdef _WIN32
 	// Add additional instance layers/extensions that the application wants.
 	// Add both required and requested instance extensions.
 	m_instanceExtensions.push_back(XR_EXT_DEBUG_UTILS_EXTENSION_NAME);
 	// D3D11 extension is required for this sample, so check if it's supported.
 	m_instanceExtensions.push_back(XR_KHR_D3D11_ENABLE_EXTENSION_NAME);
+#endif
 }
 
 bool WmrRenderer::CreateSession(void* hdc, void* hdxrc)
 {
+#ifdef _WIN32
 	XrResult result;
 	// Create an XrSessionCreateInfo structure.
 	XrSessionCreateInfo sessionCI{ XR_TYPE_SESSION_CREATE_INFO };
@@ -257,6 +263,7 @@ bool WmrRenderer::CreateSession(void* hdc, void* hdxrc)
 	sessionCI.systemId = m_sys_id;
 	result = xrCreateSession(m_instance, &sessionCI, &m_session);
 	if (result != XR_SUCCESS) return false;
+#endif
 
 	return true;
 }
@@ -265,6 +272,8 @@ bool WmrRenderer::CreateSwapchainImages(int type, uint32_t count, SwapchainInfo&
 {
 	if (!count)
 		return false;
+
+#ifdef _WIN32
 	std::vector<XrSwapchainImageD3D11KHR> swapchain_images;
 	swapchain_images.resize(count, { XR_TYPE_SWAPCHAIN_IMAGE_D3D11_KHR });
 	XrSwapchainImageBaseHeader* colorSwapchainImages = reinterpret_cast<XrSwapchainImageBaseHeader*>(swapchain_images.data());
@@ -280,11 +289,14 @@ bool WmrRenderer::CreateSwapchainImages(int type, uint32_t count, SwapchainInfo&
 				(void*)(uint64_t)info.swapchainFormat,
 				(void*)(uint64_t)swapchain_images[j].texture));
 	}
+#endif
+
 	return true;
 }
 
 void* WmrRenderer::CreateImageView(int type, void* format, void* tid)
 {
+#ifdef _WIN32
 	switch (type)
 	{
 		case 0://color
@@ -308,21 +320,25 @@ void* WmrRenderer::CreateImageView(int type, void* format, void* tid)
 			return dsv;
 		}
 	}
+#endif
 	return 0;
 }
 
 void WmrRenderer::DestroyImageView(void*& imageView)
 {
+#ifdef _WIN32
 	ID3D11View* d3d11ImageView = (ID3D11View*)imageView;
 	if (d3d11ImageView)
 	{
 		d3d11ImageView->Release();
 	}
+#endif
 	imageView = nullptr;
 }
 
 bool WmrRenderer::CreateD3DDevice()
 {
+#ifdef _WIN32
 	XrResult result;
 
 	PFN_xrGetD3D11GraphicsRequirementsKHR xrGetD3D11GraphicsRequirementsKHR = nullptr;
@@ -385,11 +401,13 @@ bool WmrRenderer::CreateD3DDevice()
 		&m_im_context);
 
 	if (!SUCCEEDED(hr)) return false;
+#endif
 	return true;
 }
 
 void WmrRenderer::DestroyD3DDevice()
 {
+#ifdef _WIN32
 	if (m_im_context)
 	{
 		m_im_context->Release();
@@ -405,8 +423,10 @@ void WmrRenderer::DestroyD3DDevice()
 		m_factory->Release();
 		m_factory = nullptr;
 	}
+#endif
 }
 
+#ifdef _WIN32
 GLFormat WmrRenderer::TranslateD3D11ToGLFormat(DXGI_FORMAT d3dFormat)
 {
 	static const std::unordered_map<DXGI_FORMAT, GLFormat> formatMap =
@@ -436,9 +456,14 @@ GLFormat WmrRenderer::TranslateD3D11ToGLFormat(DXGI_FORMAT d3dFormat)
 		return { GL_NONE, GL_NONE, GL_NONE };
 	}
 }
+#endif
 
 bool WmrRenderer::CreateSharedTex()
 {
+#ifdef _WIN32
+	if (m_d3d_tex != nullptr)
+		return true;
+
 	// Describe the shared texture
 	D3D11_TEXTURE2D_DESC desc = {};
 	desc.Width = m_size[0];
@@ -452,12 +477,6 @@ bool WmrRenderer::CreateSharedTex()
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 	desc.CPUAccessFlags = 0;
 	desc.MiscFlags = D3D11_RESOURCE_MISC_SHARED;
-
-	//desc.MipLevels = 0;
-	//desc.ArraySize = 1;
-	//desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-	//desc.SampleDesc.Count = 1;
-	//desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
 	// Create the shared texture
 	m_device->CreateTexture2D(&desc, nullptr, &m_d3d_tex);
@@ -517,12 +536,13 @@ bool WmrRenderer::CreateSharedTex()
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	wglDXUnlockObjectsNV(m_interop, 1, &m_gl_d3d_tex);
-
+#endif
 	return true;
 }
 
 void WmrRenderer::DestroySharedTex()
 {
+#ifdef _WIN32
 	// Unregister the OpenGL texture
 	if (m_gl_d3d_tex)
 	{
@@ -555,6 +575,7 @@ void WmrRenderer::DestroySharedTex()
 		m_d3d_tex->Release();
 		m_d3d_tex = nullptr;
 	}
+#endif
 }
 
 void WmrRenderer::LoadFunctions()
