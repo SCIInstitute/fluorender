@@ -466,7 +466,15 @@ void RenderCanvas::InitOpenXR()
 		m_use_openxr = glbin_xr_renderer->Init(
 			static_cast<void*>(hdc),
 			static_cast<void*>(hglrc));
+#else
+	if (glbin_xr_renderer)
+		m_use_openxr = glbin_xr_renderer->Init(0, 0);
 #endif
+	if (!m_use_openxr)
+	{
+		glbin_settings.m_xr_api = 0;
+		m_frame->UpdateProps({ gstHologramMode });
+	}
 }
 
 void RenderCanvas::InitLookingGlass()
