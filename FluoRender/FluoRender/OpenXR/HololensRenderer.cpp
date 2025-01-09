@@ -704,7 +704,35 @@ void HololensRenderer::InitializeSpeechRecognition(XrRemotingSpeechInitInfoMSFT&
 		{"cease", "stop"},
 		{"pause", "stop"},
 		{"hold", "stop"},
-		{"freeze", "stop"}
+		{"freeze", "stop"},
+		//rotate left
+		{"left", "rotate_left"},
+		{"rotate left", "rotate_left"},
+		{"roll left", "rotate_left"},
+		{"turn left", "rotate_left"},
+		{"spin left", "rotate_left"},
+		//rotate right
+		{"right", "rotate_right"},
+		{"rotate right", "rotate_right"},
+		{"roll right", "rotate_right"},
+		{"turn right", "rotate_right"},
+		{"spin right", "rotate_right"},
+		{"rotate", "rotate_right"},
+		{"roll", "rotate_right"},
+		{"turn", "rotate_right"},
+		{"spin", "rotate_right"},
+		//rotate up
+		{"up", "rotate_up"},
+		{"rotate up", "rotate_up"},
+		{"roll up", "rotate_up"},
+		{"turn up", "rotate_up"},
+		{"spin up", "rotate_up"},
+		//rotate down
+		{"down", "rotate_down"},
+		{"rotate down", "rotate_down"},
+		{"roll down", "rotate_down"},
+		{"turn down", "rotate_down"},
+		{"spin down", "rotate_down"}
 	};
 	for (const auto& pair : m_command_table)
 	{
@@ -784,6 +812,36 @@ void HololensRenderer::HandleRecognizedSpeechText(const std::string& text)
 		else if (it->second == "stop")
 		{
 			m_left_y = 0.0f;
+			m_right_x = 0.0f;
+			m_right_y = 0.0f;
+		}
+		else if (it->second == "rotate_left")
+		{
+			if (m_right_x < 0.0f)
+				m_right_x -= 1.0f;
+			else
+				m_right_x = -1.0f;
+		}
+		else if (it->second == "rotate_right")
+		{
+			if (m_right_x > 0.0f)
+				m_right_x += 1.0f;
+			else
+				m_right_x = 1.0f;
+		}
+		else if (it->second == "rotate_up")
+		{
+			if (m_right_y > 0.0f)
+				m_right_y += 1.0f;
+			else
+				m_right_y = 1.0f;
+		}
+		else if (it->second == "rotate_down")
+		{
+			if (m_right_y < 0.0f)
+				m_right_y -= 1.0f;
+			else
+				m_right_y = -1.0f;
 		}
 	}
 	else

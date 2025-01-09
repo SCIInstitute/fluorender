@@ -1168,8 +1168,8 @@ bool OpenXrRenderer::SuggestBindings()
 	// Each Action here has two paths, one for each SubAction path.
 	// generic controller
 	any_ok |= SuggestBindings("/interaction_profiles/khr/simple_controller", {
-		{m_grab_act, CreateXrPath("/user/hand/left/input/squeeze/value")},
-		{m_grab_act, CreateXrPath("/user/hand/right/input/squeeze/value")},
+		{m_grab_act, CreateXrPath("/user/hand/left/input/select/click")},
+		{m_grab_act, CreateXrPath("/user/hand/right/input/select/click")},
 		{m_pose_act, CreateXrPath("/user/hand/left/input/grip/pose")},
 		{m_pose_act, CreateXrPath("/user/hand/right/input/grip/pose")},
 		{m_js_act, CreateXrPath("/user/hand/left/input/thumbstick")},
@@ -1190,6 +1190,12 @@ bool OpenXrRenderer::SuggestBindings()
 		{m_pose_act, CreateXrPath("/user/hand/right/input/grip/pose")},
 		{m_js_act, CreateXrPath("/user/hand/left/input/thumbstick")},
 		{m_js_act, CreateXrPath("/user/hand/right/input/thumbstick")} });
+	// Hololens
+	any_ok |= SuggestBindings("/interaction_profiles/microsoft/hand_interaction", {
+		{m_grab_act, CreateXrPath("/user/hand/left/input/select/click")},
+		{m_grab_act, CreateXrPath("/user/hand/right/input/select/click")},
+		{m_pose_act, CreateXrPath("/user/hand/left/input/grip/pose")},
+		{m_pose_act, CreateXrPath("/user/hand/right/input/grip/pose")} });
 	// SteamVR
 	any_ok |= SuggestBindings("/interaction_profiles/htc/vive_controller", {
 		{m_grab_act, CreateXrPath("/user/hand/left/input/grip/value")},

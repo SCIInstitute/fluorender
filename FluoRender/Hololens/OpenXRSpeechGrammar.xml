@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <grammar xmlns="http://www.w3.org/2001/06/grammar" version="1.0" xml:lang="en-US" root="rootRule">
-	<!-- The first way to load a grammer is by specifying a grammer.xml file according to the https://www.w3.org/TR/speech-grammar/ standard. -->
-	<!-- See https://docs.microsoft.com/en-us/previous-versions/office/developer/speech-technologies/hh361658(v=office.14) for an example -->
-	<rule id="rootRule">
-		<one-of>
+    <!-- The first way to load a grammer is by specifying a grammer.xml file according to the https://www.w3.org/TR/speech-grammar/ standard. -->
+    <!-- See https://docs.microsoft.com/en-us/previous-versions/office/developer/speech-technologies/hh361658(v=office.14) for an example -->
+    <rule id="rootRule">
+        <one-of>
             <!-- Move Closer Commands -->
-			<item>closer</item>
-			<item>move closer</item>
+            <item>closer</item>
+            <item>move closer</item>
             <item>come</item>
             <item>come nearer</item>
             <item>nearer</item>
@@ -33,6 +33,42 @@
             <item>back off</item>
             <item>get away</item>
             <item>move farther</item>
+            <!-- Stop Commands -->
+            <item>stop</item>
+            <item>stay</item>
+            <item>halt</item>
+            <item>cease</item>
+            <item>pause</item>
+            <item>hold</item>
+            <item>freeze</item>
+            <!-- Rotate Left Commands -->
+            <item>left</item>
+            <item>rotate left</item>
+            <item>roll left</item>
+            <item>turn left</item>
+            <item>spin left</item>
+            <!-- Rotate Right Commands -->
+            <item>right</item>
+            <item>rotate right</item>
+            <item>roll right</item>
+            <item>turn right</item>
+            <item>spin right</item>
+            <item>rotate</item>
+            <item>roll</item>
+            <item>turn</item>
+            <item>spin</item>
+            <!-- Rotate Up Commands -->
+            <item>up</item>
+            <item>rotate up</item>
+            <item>roll up</item>
+            <item>turn up</item>
+            <item>spin up</item>
+            <!-- Rotate Down Commands -->
+            <item>down</item>
+            <item>rotate down</item>
+            <item>roll down</item>
+            <item>turn down</item>
+            <item>spin down</item>
         </one-of>
-	</rule>
+    </rule>
 </grammar>
