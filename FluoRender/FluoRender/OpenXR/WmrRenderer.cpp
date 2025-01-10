@@ -142,6 +142,25 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		return;
 
 	uint32_t viewCount = m_render_layer_info.layerProjectionViews.size();
+	//SwapchainInfo& colorSwapchainInfo = m_swapchain_infos_color[i];
+	//SwapchainInfo& depthSwapchainInfo = m_swapchain_infos_depth[i];
+
+	// Acquire and wait for an image from the swapchains.
+	// Get the image index of an image in the swapchains.
+	// The timeout is infinite.
+	uint32_t colorImageIndex = 0;
+	uint32_t depthImageIndex = 0;
+	XrSwapchainImageAcquireInfo acquireInfo{ XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO };
+	OPENXR_CHECK(xrAcquireSwapchainImage(m_swapchain_infos_color.swapchain, &acquireInfo, &colorImageIndex), "Failed to acquire Image from the Color Swapchian");
+	if (m_use_depth)
+		OPENXR_CHECK(xrAcquireSwapchainImage(m_swapchain_infos_depth.swapchain, &acquireInfo, &depthImageIndex), "Failed to acquire Image from the Depth Swapchian");
+
+	XrSwapchainImageWaitInfo waitInfo = { XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO };
+	waitInfo.timeout = XR_INFINITE_DURATION;
+	OPENXR_CHECK(xrWaitSwapchainImage(m_swapchain_infos_color.swapchain, &waitInfo), "Failed to wait for Image from the Color Swapchain");
+	if (m_use_depth)
+		OPENXR_CHECK(xrWaitSwapchainImage(m_swapchain_infos_depth.swapchain, &waitInfo), "Failed to wait for Image from the Depth Swapchain");
+
 	// Per view in the view configuration:
 	for (uint32_t i = 0; i < viewCount; i++)
 	{
@@ -149,31 +168,12 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		const uint32_t &width = m_view_config_views[i].recommendedImageRectWidth;
 		const uint32_t &height = m_view_config_views[i].recommendedImageRectHeight;
 
-		SwapchainInfo& colorSwapchainInfo = m_swapchain_infos_color[i];
-		SwapchainInfo& depthSwapchainInfo = m_swapchain_infos_depth[i];
-
-		// Acquire and wait for an image from the swapchains.
-		// Get the image index of an image in the swapchains.
-		// The timeout is infinite.
-		uint32_t colorImageIndex = 0;
-		uint32_t depthImageIndex = 0;
-		XrSwapchainImageAcquireInfo acquireInfo{ XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO };
-		OPENXR_CHECK(xrAcquireSwapchainImage(colorSwapchainInfo.swapchain, &acquireInfo, &colorImageIndex), "Failed to acquire Image from the Color Swapchian");
-		if (m_use_depth)
-			OPENXR_CHECK(xrAcquireSwapchainImage(depthSwapchainInfo.swapchain, &acquireInfo, &depthImageIndex), "Failed to acquire Image from the Depth Swapchian");
-
-		XrSwapchainImageWaitInfo waitInfo = { XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO };
-		waitInfo.timeout = XR_INFINITE_DURATION;
-		OPENXR_CHECK(xrWaitSwapchainImage(colorSwapchainInfo.swapchain, &waitInfo), "Failed to wait for Image from the Color Swapchain");
-		if (m_use_depth)
-			OPENXR_CHECK(xrWaitSwapchainImage(depthSwapchainInfo.swapchain, &waitInfo), "Failed to wait for Image from the Depth Swapchain");
-
 		// Fill out the XrCompositionLayerProjectionView structure specifying the pose and fov from the view.
 		// This also associates the swapchain image with this layer projection view.
-		m_render_layer_info.layerProjectionViews[i].subImage.swapchain = colorSwapchainInfo.swapchain;
+		m_render_layer_info.layerProjectionViews[i].subImage.swapchain = m_swapchain_infos_color.swapchain;
 		if (m_use_depth)
 		{
-			m_render_layer_info.depthInfoViews[i].subImage.swapchain = depthSwapchainInfo.swapchain;
+			m_render_layer_info.depthInfoViews[i].subImage.swapchain = m_swapchain_infos_depth.swapchain;
 			// Chain depth info struct to the corresponding projection layer view's next pointer
 			m_render_layer_info.layerProjectionViews[i].next = &m_render_layer_info.depthInfoViews[i];
 		}
@@ -184,7 +184,7 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		{
 			//test
 			float clearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
-			m_im_context->ClearRenderTargetView((ID3D11RenderTargetView*)(colorSwapchainInfo.imageViews[colorImageIndex]), clearColor);
+			m_im_context->ClearRenderTargetView((ID3D11RenderTargetView*)(m_swapchain_infos_color.imageViews[colorImageIndex]), clearColor);
 			//if (m_use_depth)
 			//	m_im_context->ClearDepthStencilView((ID3D11DepthStencilView*)(depthSwapchainInfo.imageViews[depthImageIndex]), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
@@ -207,7 +207,7 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 			wglDXUnlockObjectsNV(m_interop, 1, &m_gl_d3d_tex);
 
 			// Copy the shared texture to the swap chain image view
-			ID3D11RenderTargetView* target_view = static_cast<ID3D11RenderTargetView*>(colorSwapchainInfo.imageViews[colorImageIndex]);
+			ID3D11RenderTargetView* target_view = static_cast<ID3D11RenderTargetView*>(m_swapchain_infos_color.imageViews[colorImageIndex]);
 			// Get the underlying texture from the render target view
 			ID3D11Resource* target_res;
 			target_view->GetResource(&target_res);
@@ -230,9 +230,9 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 
 		// Give the swapchain image back to OpenXR, allowing the compositor to use the image.
 		XrSwapchainImageReleaseInfo releaseInfo{ XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO };
-		OPENXR_CHECK(xrReleaseSwapchainImage(colorSwapchainInfo.swapchain, &releaseInfo), "Failed to release Image back to the Color Swapchain");
+		OPENXR_CHECK(xrReleaseSwapchainImage(m_swapchain_infos_color.swapchain, &releaseInfo), "Failed to release Image back to the Color Swapchain");
 		if (m_use_depth)
-			OPENXR_CHECK(xrReleaseSwapchainImage(depthSwapchainInfo.swapchain, &releaseInfo), "Failed to release Image back to the Depth Swapchain");
+			OPENXR_CHECK(xrReleaseSwapchainImage(m_swapchain_infos_depth.swapchain, &releaseInfo), "Failed to release Image back to the Depth Swapchain");
 	}
 
 	// Fill out the XrCompositionLayerProjection structure for usage with xrEndFrame().
@@ -477,7 +477,7 @@ bool WmrRenderer::CreateSharedTex()
 	desc.Height = m_size[1];
 	desc.MipLevels = 1;
 	desc.ArraySize = 1;
-	desc.Format = static_cast<DXGI_FORMAT>(m_swapchain_infos_color[0].swapchainFormat);
+	desc.Format = static_cast<DXGI_FORMAT>(m_swapchain_infos_color.swapchainFormat);
 	desc.SampleDesc.Count = 1;
 	desc.SampleDesc.Quality = 0;
 	desc.Usage = D3D11_USAGE_DEFAULT;

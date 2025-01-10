@@ -115,8 +115,8 @@ protected:
 		int64_t swapchainFormat = 0;
 		std::vector<void*> imageViews;
 	};
-	std::vector<SwapchainInfo> m_swapchain_infos_color = {};
-	std::vector<SwapchainInfo> m_swapchain_infos_depth = {};
+	SwapchainInfo m_swapchain_infos_color = {};
+	SwapchainInfo m_swapchain_infos_depth = {};
 	std::vector<int64_t> m_preferred_color_formats = {};
 	std::vector<int64_t> m_preferred_depth_formats = {};
 
