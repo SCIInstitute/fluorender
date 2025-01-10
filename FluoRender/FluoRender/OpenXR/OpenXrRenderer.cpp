@@ -907,9 +907,13 @@ void* OpenXrRenderer::CreateImageView(int type, int eye, void* format, void* tid
 		break;
 	}
 	GLuint tex_id = (GLuint)(uint64_t)tid;
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
-		attachment, GL_TEXTURE_2D,
-		tex_id, 0);
+	//glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
+	//	attachment, GL_TEXTURE_2D,
+	//	tex_id, 0);
+	glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER,
+		attachment, tex_id,
+		0, // mipmap level
+		eye); // layer (eye)
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	return (void *)(uint64_t)framebuffer;
