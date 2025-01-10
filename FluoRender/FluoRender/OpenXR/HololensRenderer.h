@@ -223,8 +223,6 @@ public:
 	bool Init(void*, void*) override;
 	void Close() override;
 
-	void Draw(const std::vector<flvr::Framebuffer*>& fbos) override;
-
 protected:
 	void SetExtensions() override;
 	void LoadFunctions() override;
@@ -234,8 +232,6 @@ protected:
 
 private:
 #ifdef _WIN32
-	void CreateDepthStencilView();
-
 	bool EnableRemotingXR();
 
 	void CheckExtensions();
@@ -257,9 +253,6 @@ private:
 	void HandleRecognizedSpeechText(const std::string& text);
 
 private:
-	ID3D11Texture2D* m_depth_stencil_tex;
-	ID3D11DepthStencilView* m_depth_stencil_view;
-
 	const HololensOptions m_options;
 	bool m_usingRemotingRuntime{ false };
 	std::vector<uint8_t> m_certificateStore;

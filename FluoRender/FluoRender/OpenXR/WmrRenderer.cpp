@@ -151,7 +151,7 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		{
 			uint32_t array_index = m_color_image_index * 2 + i;
 			//test
-			//float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+			//float clearColor[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
 			//m_im_context->ClearRenderTargetView((ID3D11RenderTargetView*)(m_swapchain_infos_color.imageViews[array_index]), clearColor);
 			//if (m_use_depth)
 			//	m_im_context->ClearDepthStencilView((ID3D11DepthStencilView*)(m_swapchain_infos_depth.imageViews[array_index]), D3D11_CLEAR_DEPTH, 1.0f, 0);
@@ -179,10 +179,11 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 			// Get the underlying texture from the render target view
 			ID3D11Resource* target_res;
 			target_view->GetResource(&target_res);
-			
+			D3D11_BOX srcBox = { 0, 0, 0, m_size[0], m_size[1], 1 };
+
 			try
 			{
-				m_im_context->CopyResource(target_res, m_d3d_tex);
+				m_im_context->CopySubresourceRegion(target_res, i, 0, 0, 0, m_d3d_tex, 0, &srcBox);
 			}
 			catch (const std::exception& e)
 			{
