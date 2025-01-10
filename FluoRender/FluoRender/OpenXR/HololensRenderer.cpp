@@ -60,16 +60,20 @@ HololensRenderer::HololensRenderer(const HololensOptions& options) :
 	m_dead_zone = 0.0f;
 	m_scaler = 1.0f;
 
+	m_use_depth = true;
+
 #ifdef _WIN32
 	m_preferred_color_formats =
 	{
 		DXGI_FORMAT_R8G8B8A8_UNORM,
-		DXGI_FORMAT_B8G8R8A8_UNORM
+		DXGI_FORMAT_B8G8R8A8_UNORM,
 	};
 	m_preferred_depth_formats =
 	{
 		DXGI_FORMAT_D32_FLOAT,
-		DXGI_FORMAT_D16_UNORM
+		DXGI_FORMAT_D16_UNORM,
+		DXGI_FORMAT_D24_UNORM_S8_UINT,
+		DXGI_FORMAT_D32_FLOAT_S8X24_UINT,
 	};
 #endif
 }

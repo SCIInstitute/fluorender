@@ -129,6 +129,7 @@ protected:
 		std::vector<XrCompositionLayerBaseHeader*> layers;
 		XrCompositionLayerProjection layerProjection = { XR_TYPE_COMPOSITION_LAYER_PROJECTION };
 		std::vector<XrCompositionLayerProjectionView> layerProjectionViews;
+		std::vector<XrCompositionLayerDepthInfoKHR> depthInfoViews;
 	};
 	RenderLayerInfo m_render_layer_info;
 

@@ -211,6 +211,7 @@ void OpenXrRenderer::BeginFrame()
 
 	m_render_layer_info.predictedDisplayTime = m_frame_state.predictedDisplayTime;
 	m_render_layer_info.layers.clear();
+	m_render_layer_info.layerProjection.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT | XR_COMPOSITION_LAYER_CORRECT_CHROMATIC_ABERRATION_BIT;
 
 	//bool sessionActive = (
 	//	m_session_state == XR_SESSION_STATE_SYNCHRONIZED ||
@@ -230,7 +231,7 @@ void OpenXrRenderer::BeginFrame()
 	XrViewState viewState{ XR_TYPE_VIEW_STATE };  // Will contain information on whether the position and/or orientation is valid and/or tracked.
 	XrViewLocateInfo viewLocateInfo{ XR_TYPE_VIEW_LOCATE_INFO };
 	viewLocateInfo.viewConfigurationType = m_view_config;
-	viewLocateInfo.displayTime = m_render_layer_info.predictedDisplayTime;
+	viewLocateInfo.displayTime = m_frame_state.predictedDisplayTime;
 	viewLocateInfo.space = m_space;
 	uint32_t viewCount = 0;
 	XrResult result = xrLocateViews(
@@ -241,6 +242,9 @@ void OpenXrRenderer::BeginFrame()
 
 	m_render_layer_info.layerProjectionViews.resize(
 		viewCount, { XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW });
+	if (m_use_depth)
+		m_render_layer_info.depthInfoViews.resize(
+			viewCount, { XR_TYPE_COMPOSITION_LAYER_DEPTH_INFO_KHR });
 
 	// Per view in the view configuration:
 	for (uint32_t i = 0; i < viewCount; i++)
@@ -251,16 +255,26 @@ void OpenXrRenderer::BeginFrame()
 		// Get the width and height and construct the viewport and scissors.
 		const uint32_t &width = m_view_config_views[i].recommendedImageRectWidth;
 		const uint32_t &height = m_view_config_views[i].recommendedImageRectHeight;
+		const XrRect2Di imageRect = { {0, 0}, {(int32_t)width, (int32_t)height} };
 		// Fill out the XrCompositionLayerProjectionView structure specifying the pose and fov from the view.
 		// This also associates the swapchain image with this layer projection view.
 		m_render_layer_info.layerProjectionViews[i] = { XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW };
 		m_render_layer_info.layerProjectionViews[i].pose = views[i].pose;
 		m_render_layer_info.layerProjectionViews[i].fov = views[i].fov;
-		m_render_layer_info.layerProjectionViews[i].subImage.imageRect.offset.x = 0;
-		m_render_layer_info.layerProjectionViews[i].subImage.imageRect.offset.y = 0;
-		m_render_layer_info.layerProjectionViews[i].subImage.imageRect.extent.width = static_cast<int32_t>(width);
-		m_render_layer_info.layerProjectionViews[i].subImage.imageRect.extent.height = static_cast<int32_t>(height);
-		m_render_layer_info.layerProjectionViews[i].subImage.imageArrayIndex = 0;  // Useful for multiview rendering.
+		m_render_layer_info.layerProjectionViews[i].subImage.imageRect = imageRect;
+		m_render_layer_info.layerProjectionViews[i].subImage.imageArrayIndex = i;  // Useful for multiview rendering.
+
+		if (m_use_depth)
+		{
+			m_render_layer_info.depthInfoViews[i] = { XR_TYPE_COMPOSITION_LAYER_DEPTH_INFO_KHR };
+			m_render_layer_info.depthInfoViews[i].minDepth = 0;
+			m_render_layer_info.depthInfoViews[i].maxDepth = 1;
+			m_render_layer_info.depthInfoViews[i].nearZ = m_near_clip;
+			m_render_layer_info.depthInfoViews[i].farZ = m_far_clip;
+			//m_render_layer_info.depthInfoViews[i].subImage.swapchain = depthSwapchain.Handle.Get();
+			m_render_layer_info.depthInfoViews[i].subImage.imageRect = imageRect;
+			m_render_layer_info.depthInfoViews[i].subImage.imageArrayIndex = i;
+		}
 
 		// Compute the view-projection transform.
 		if (i < 2)
@@ -365,6 +379,12 @@ void OpenXrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		// Fill out the XrCompositionLayerProjectionView structure specifying the pose and fov from the view.
 		// This also associates the swapchain image with this layer projection view.
 		m_render_layer_info.layerProjectionViews[i].subImage.swapchain = colorSwapchainInfo.swapchain;
+		if (m_use_depth)
+		{
+			m_render_layer_info.depthInfoViews[i].subImage.swapchain = depthSwapchainInfo.swapchain;
+			// Chain depth info struct to the corresponding projection layer view's next pointer
+			m_render_layer_info.layerProjectionViews[i].next = &m_render_layer_info.depthInfoViews[i];
+		}
 
 		//copy buffer
 		if (fbos.size() > i)
@@ -393,7 +413,6 @@ void OpenXrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 	}
 
 	// Fill out the XrCompositionLayerProjection structure for usage with xrEndFrame().
-	m_render_layer_info.layerProjection.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT | XR_COMPOSITION_LAYER_CORRECT_CHROMATIC_ABERRATION_BIT;
 	m_render_layer_info.layerProjection.space = m_space;
 	m_render_layer_info.layerProjection.viewCount = static_cast<uint32_t>(m_render_layer_info.layerProjectionViews.size());
 	m_render_layer_info.layerProjection.views = m_render_layer_info.layerProjectionViews.data();
@@ -782,7 +801,7 @@ bool OpenXrRenderer::CreateSwapchains()
 		swapchainCI.width = m_view_config_views[i].recommendedImageRectWidth;
 		swapchainCI.height = m_view_config_views[i].recommendedImageRectHeight;
 		swapchainCI.faceCount = 1;
-		swapchainCI.arraySize = 1;
+		swapchainCI.arraySize = 2;
 		swapchainCI.mipCount = 1;
 		result = xrCreateSwapchain(m_session, &swapchainCI, &colorSwapchainInfo.swapchain);
 		if (result != XR_SUCCESS) return false;
@@ -804,7 +823,7 @@ bool OpenXrRenderer::CreateSwapchains()
 			swapchainCI.width = m_view_config_views[i].recommendedImageRectWidth;
 			swapchainCI.height = m_view_config_views[i].recommendedImageRectHeight;
 			swapchainCI.faceCount = 1;
-			swapchainCI.arraySize = 1;
+			swapchainCI.arraySize = 2;
 			swapchainCI.mipCount = 1;
 			result = xrCreateSwapchain(m_session, &swapchainCI, &depthSwapchainInfo.swapchain);
 			if (result != XR_SUCCESS) return false;

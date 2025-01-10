@@ -171,14 +171,22 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		// Fill out the XrCompositionLayerProjectionView structure specifying the pose and fov from the view.
 		// This also associates the swapchain image with this layer projection view.
 		m_render_layer_info.layerProjectionViews[i].subImage.swapchain = colorSwapchainInfo.swapchain;
+		if (m_use_depth)
+		{
+			m_render_layer_info.depthInfoViews[i].subImage.swapchain = depthSwapchainInfo.swapchain;
+			// Chain depth info struct to the corresponding projection layer view's next pointer
+			m_render_layer_info.layerProjectionViews[i].next = &m_render_layer_info.depthInfoViews[i];
+		}
 
 #ifdef _WIN32
 		//copy buffer
 		if (fbos.size() > i)
 		{
 			//test
-			//float clearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
-			//m_im_context->ClearRenderTargetView((ID3D11RenderTargetView*)(colorSwapchainInfo.imageViews[colorImageIndex]), clearColor);
+			float clearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
+			m_im_context->ClearRenderTargetView((ID3D11RenderTargetView*)(colorSwapchainInfo.imageViews[colorImageIndex]), clearColor);
+			//if (m_use_depth)
+			//	m_im_context->ClearDepthStencilView((ID3D11DepthStencilView*)(depthSwapchainInfo.imageViews[depthImageIndex]), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 			// Share the texture with Direct3D
 			wglDXLockObjectsNV(m_interop, 1, &m_gl_d3d_tex);
@@ -228,7 +236,6 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 	}
 
 	// Fill out the XrCompositionLayerProjection structure for usage with xrEndFrame().
-	m_render_layer_info.layerProjection.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT | XR_COMPOSITION_LAYER_CORRECT_CHROMATIC_ABERRATION_BIT;
 	m_render_layer_info.layerProjection.space = m_space;
 	m_render_layer_info.layerProjection.viewCount = static_cast<uint32_t>(m_render_layer_info.layerProjectionViews.size());
 	m_render_layer_info.layerProjection.views = m_render_layer_info.layerProjectionViews.data();
