@@ -246,6 +246,23 @@ void OpenXrRenderer::BeginFrame()
 		m_render_layer_info.depthInfoViews.resize(
 			viewCount, { XR_TYPE_COMPOSITION_LAYER_DEPTH_INFO_KHR });
 
+	//get which image in the chain to draw
+	m_color_image_index = 0;
+	m_depth_image_index = 0;
+	// Acquire and wait for an image from the swapchains.
+	// Get the image index of an image in the swapchains.
+	// The timeout is infinite.
+	XrSwapchainImageAcquireInfo acquireInfo{ XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO };
+	OPENXR_CHECK(xrAcquireSwapchainImage(m_swapchain_infos_color.swapchain, &acquireInfo, &m_color_image_index), "Failed to acquire Image from the Color Swapchian");
+	if (m_use_depth)
+		OPENXR_CHECK(xrAcquireSwapchainImage(m_swapchain_infos_depth.swapchain, &acquireInfo, &m_depth_image_index), "Failed to acquire Image from the Depth Swapchian");
+
+	XrSwapchainImageWaitInfo waitInfo = { XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO };
+	waitInfo.timeout = XR_INFINITE_DURATION;
+	OPENXR_CHECK(xrWaitSwapchainImage(m_swapchain_infos_color.swapchain, &waitInfo), "Failed to wait for Image from the Color Swapchain");
+	if (m_use_depth)
+		OPENXR_CHECK(xrWaitSwapchainImage(m_swapchain_infos_depth.swapchain, &waitInfo), "Failed to wait for Image from the Depth Swapchain");
+
 	// Per view in the view configuration:
 	for (uint32_t i = 0; i < viewCount; i++)
 	{
@@ -261,6 +278,7 @@ void OpenXrRenderer::BeginFrame()
 		m_render_layer_info.layerProjectionViews[i] = { XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW };
 		m_render_layer_info.layerProjectionViews[i].pose = views[i].pose;
 		m_render_layer_info.layerProjectionViews[i].fov = views[i].fov;
+		m_render_layer_info.layerProjectionViews[i].subImage.swapchain = m_swapchain_infos_color.swapchain;
 		m_render_layer_info.layerProjectionViews[i].subImage.imageRect = imageRect;
 		m_render_layer_info.layerProjectionViews[i].subImage.imageArrayIndex = i;  // Useful for multiview rendering.
 
@@ -271,13 +289,15 @@ void OpenXrRenderer::BeginFrame()
 			m_render_layer_info.depthInfoViews[i].maxDepth = 1;
 			m_render_layer_info.depthInfoViews[i].nearZ = m_near_clip;
 			m_render_layer_info.depthInfoViews[i].farZ = m_far_clip;
-			//m_render_layer_info.depthInfoViews[i].subImage.swapchain = depthSwapchain.Handle.Get();
+			m_render_layer_info.depthInfoViews[i].subImage.swapchain = m_swapchain_infos_depth.swapchain;
 			m_render_layer_info.depthInfoViews[i].subImage.imageRect = imageRect;
 			m_render_layer_info.depthInfoViews[i].subImage.imageArrayIndex = i;
+			// Chain depth info struct to the corresponding projection layer view's next pointer
+			m_render_layer_info.layerProjectionViews[i].next = &m_render_layer_info.depthInfoViews[i];
 		}
 
 		// Compute the view-projection transform.
-		if (i < 2)
+		if (i < viewCount)
 		{
 			XrFovf fov = views[i].fov;
 			float tanLeft = tanf(fov.angleLeft);
@@ -327,6 +347,22 @@ void OpenXrRenderer::EndFrame()
 	if (!m_app_running || !m_session_running)
 		return;
 
+	// Give the swapchain image back to OpenXR, allowing the compositor to use the image.
+	XrSwapchainImageReleaseInfo releaseInfo{ XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO };
+	OPENXR_CHECK(xrReleaseSwapchainImage(m_swapchain_infos_color.swapchain, &releaseInfo), "Failed to release Image back to the Color Swapchain");
+	if (m_use_depth)
+		OPENXR_CHECK(xrReleaseSwapchainImage(m_swapchain_infos_depth.swapchain, &releaseInfo), "Failed to release Image back to the Depth Swapchain");
+	if (m_frame_state.shouldRender)
+	{
+		// Fill out the XrCompositionLayerProjection structure for usage with xrEndFrame().
+		m_render_layer_info.layerProjection.space = m_space;
+		m_render_layer_info.layerProjection.viewCount = static_cast<uint32_t>(m_render_layer_info.layerProjectionViews.size());
+		m_render_layer_info.layerProjection.views = m_render_layer_info.layerProjectionViews.data();
+		m_render_layer_info.layers.push_back(
+			reinterpret_cast<XrCompositionLayerBaseHeader*>(
+				&m_render_layer_info.layerProjection));
+	}
+
 	// End the frame
 	XrFrameEndInfo frameEndInfo{ XR_TYPE_FRAME_END_INFO };
 	frameEndInfo.displayTime = m_frame_state.predictedDisplayTime;
@@ -350,42 +386,9 @@ void OpenXrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		return;
 
 	uint32_t viewCount = m_render_layer_info.layerProjectionViews.size();
-	//SwapchainInfo& colorSwapchainInfo = m_swapchain_infos_color[i];
-	//SwapchainInfo& depthSwapchainInfo = m_swapchain_infos_depth[i];
-
-	// Acquire and wait for an image from the swapchains.
-	// Get the image index of an image in the swapchains.
-	// The timeout is infinite.
-	uint32_t colorImageIndex = 0;
-	uint32_t depthImageIndex = 0;
-	XrSwapchainImageAcquireInfo acquireInfo{ XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO };
-	OPENXR_CHECK(xrAcquireSwapchainImage(m_swapchain_infos_color.swapchain, &acquireInfo, &colorImageIndex), "Failed to acquire Image from the Color Swapchian");
-	if (m_use_depth)
-		OPENXR_CHECK(xrAcquireSwapchainImage(m_swapchain_infos_depth.swapchain, &acquireInfo, &depthImageIndex), "Failed to acquire Image from the Depth Swapchian");
-
-	XrSwapchainImageWaitInfo waitInfo = { XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO };
-	waitInfo.timeout = XR_INFINITE_DURATION;
-	OPENXR_CHECK(xrWaitSwapchainImage(m_swapchain_infos_color.swapchain, &waitInfo), "Failed to wait for Image from the Color Swapchain");
-	if (m_use_depth)
-		OPENXR_CHECK(xrWaitSwapchainImage(m_swapchain_infos_depth.swapchain, &waitInfo), "Failed to wait for Image from the Depth Swapchain");
-
 	// Per view in the view configuration:
 	for (uint32_t i = 0; i < viewCount; i++)
 	{
-		// Get the width and height and construct the viewport and scissors.
-		const uint32_t &width = m_view_config_views[i].recommendedImageRectWidth;
-		const uint32_t &height = m_view_config_views[i].recommendedImageRectHeight;
-
-		// Fill out the XrCompositionLayerProjectionView structure specifying the pose and fov from the view.
-		// This also associates the swapchain image with this layer projection view.
-		m_render_layer_info.layerProjectionViews[i].subImage.swapchain = m_swapchain_infos_color.swapchain;
-		if (m_use_depth)
-		{
-			m_render_layer_info.depthInfoViews[i].subImage.swapchain = m_swapchain_infos_depth.swapchain;
-			// Chain depth info struct to the corresponding projection layer view's next pointer
-			m_render_layer_info.layerProjectionViews[i].next = &m_render_layer_info.depthInfoViews[i];
-		}
-
 		//copy buffer
 		if (fbos.size() > i)
 		{
@@ -396,29 +399,16 @@ void OpenXrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[i]->id());
 			// Read pixels to PBO
-			GLuint dest_fbo = (GLuint)(uint64_t)(m_swapchain_infos_color.imageViews[colorImageIndex]);
+			uint32_t array_index = m_color_image_index * 2 + i;
+			GLuint dest_fbo = (GLuint)(uint64_t)(m_swapchain_infos_color.imageViews[array_index]);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest_fbo);
-			glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			glBlitFramebuffer(0, 0, m_size[0], m_size[1], 0, 0, m_size[0], m_size[1], GL_COLOR_BUFFER_BIT, GL_NEAREST);
 			// Write pixels to destination FBO
 			// Unbind the framebuffers
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		}
-
-		// Give the swapchain image back to OpenXR, allowing the compositor to use the image.
-		XrSwapchainImageReleaseInfo releaseInfo{ XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO };
-		OPENXR_CHECK(xrReleaseSwapchainImage(m_swapchain_infos_color.swapchain, &releaseInfo), "Failed to release Image back to the Color Swapchain");
-		if (m_use_depth)
-			OPENXR_CHECK(xrReleaseSwapchainImage(m_swapchain_infos_depth.swapchain, &releaseInfo), "Failed to release Image back to the Depth Swapchain");
 	}
-
-	// Fill out the XrCompositionLayerProjection structure for usage with xrEndFrame().
-	m_render_layer_info.layerProjection.space = m_space;
-	m_render_layer_info.layerProjection.viewCount = static_cast<uint32_t>(m_render_layer_info.layerProjectionViews.size());
-	m_render_layer_info.layerProjection.views = m_render_layer_info.layerProjectionViews.data();
-	m_render_layer_info.layers.push_back(
-		reinterpret_cast<XrCompositionLayerBaseHeader*>(
-			&m_render_layer_info.layerProjection));
 }
 
 void OpenXrRenderer::SetExtensions()
@@ -790,85 +780,73 @@ bool OpenXrRenderer::CreateSwapchains()
 	const uint32_t imageRectWidth = m_view_config_views[0].recommendedImageRectWidth;
 	const uint32_t imageRectHeight = m_view_config_views[0].recommendedImageRectHeight;
 	const uint32_t swapchainSampleCount = m_view_config_views[0].recommendedSwapchainSampleCount;
-	//for (size_t i = 0; i < m_view_config_views.size(); i++)
-	//{
-		//SwapchainInfo& colorSwapchainInfo = m_swapchain_infos_color[i];
-		//SwapchainInfo& depthSwapchainInfo = m_swapchain_infos_depth[i];
 
-		// Fill out an XrSwapchainCreateInfo structure and create an XrSwapchain.
-		// Color.
-		XrSwapchainCreateInfo swapchainCI{ XR_TYPE_SWAPCHAIN_CREATE_INFO };
+	// Fill out an XrSwapchainCreateInfo structure and create an XrSwapchain.
+	// Color.
+	XrSwapchainCreateInfo swapchainCI{ XR_TYPE_SWAPCHAIN_CREATE_INFO };
+	swapchainCI.createFlags = 0;
+	swapchainCI.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_COLOR_ATTACHMENT_BIT;
+	swapchainCI.format = SelectSwapchainFormat(formats, m_preferred_color_formats);
+	swapchainCI.sampleCount = swapchainSampleCount;  // Use the recommended values from the XrViewConfigurationView.
+	swapchainCI.width = imageRectWidth;
+	swapchainCI.height = imageRectHeight;
+	swapchainCI.faceCount = 1;
+	swapchainCI.arraySize = array_size;
+	swapchainCI.mipCount = 1;
+	result = xrCreateSwapchain(m_session, &swapchainCI, &m_swapchain_infos_color.swapchain);
+	if (result != XR_SUCCESS) return false;
+	m_swapchain_infos_color.swapchainFormat = swapchainCI.format;  // Save the swapchain format for later use.
+
+	// Get the number of images in the color/depth swapchain and allocate Swapchain image data via GraphicsAPI to store the returned array.
+	uint32_t colorSwapchainImageCount = 0;
+	result = xrEnumerateSwapchainImages(m_swapchain_infos_color.swapchain, 0, &colorSwapchainImageCount, nullptr);
+	if (result != XR_SUCCESS) return false;
+	CreateSwapchainImages(0, colorSwapchainImageCount, m_swapchain_infos_color);
+
+	// Depth.
+	if (m_use_depth)
+	{
 		swapchainCI.createFlags = 0;
-		swapchainCI.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_COLOR_ATTACHMENT_BIT;
-		swapchainCI.format = SelectSwapchainFormat(formats, m_preferred_color_formats);
-		swapchainCI.sampleCount = swapchainSampleCount;  // Use the recommended values from the XrViewConfigurationView.
-		swapchainCI.width = imageRectWidth;
-		swapchainCI.height = imageRectHeight;
-		swapchainCI.faceCount = 1;
-		swapchainCI.arraySize = array_size;
-		swapchainCI.mipCount = 1;
-		result = xrCreateSwapchain(m_session, &swapchainCI, &m_swapchain_infos_color.swapchain);
+		swapchainCI.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+		swapchainCI.format = SelectSwapchainFormat(formats, m_preferred_depth_formats);
+		//swapchainCI.sampleCount = m_view_config_views[i].recommendedSwapchainSampleCount;  // Use the recommended values from the XrViewConfigurationView.
+		//swapchainCI.width = m_view_config_views[i].recommendedImageRectWidth;
+		//swapchainCI.height = m_view_config_views[i].recommendedImageRectHeight;
+		//swapchainCI.faceCount = 1;
+		//swapchainCI.arraySize = 2;
+		//swapchainCI.mipCount = 1;
+		result = xrCreateSwapchain(m_session, &swapchainCI, &m_swapchain_infos_depth.swapchain);
 		if (result != XR_SUCCESS) return false;
-		m_swapchain_infos_color.swapchainFormat = swapchainCI.format;  // Save the swapchain format for later use.
+		m_swapchain_infos_depth.swapchainFormat = swapchainCI.format;  // Save the swapchain format for later use.
 
-		// Get the number of images in the color/depth swapchain and allocate Swapchain image data via GraphicsAPI to store the returned array.
-		uint32_t colorSwapchainImageCount = 0;
-		result = xrEnumerateSwapchainImages(m_swapchain_infos_color.swapchain, 0, &colorSwapchainImageCount, nullptr);
+		uint32_t depthSwapchainImageCount = 0;
+		result = xrEnumerateSwapchainImages(m_swapchain_infos_depth.swapchain, 0, &depthSwapchainImageCount, nullptr);
 		if (result != XR_SUCCESS) return false;
-		CreateSwapchainImages(0, colorSwapchainImageCount, m_swapchain_infos_color);
-
-		// Depth.
-		if (m_use_depth)
-		{
-			swapchainCI.createFlags = 0;
-			swapchainCI.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-			swapchainCI.format = SelectSwapchainFormat(formats, m_preferred_depth_formats);
-			//swapchainCI.sampleCount = m_view_config_views[i].recommendedSwapchainSampleCount;  // Use the recommended values from the XrViewConfigurationView.
-			//swapchainCI.width = m_view_config_views[i].recommendedImageRectWidth;
-			//swapchainCI.height = m_view_config_views[i].recommendedImageRectHeight;
-			//swapchainCI.faceCount = 1;
-			//swapchainCI.arraySize = 2;
-			//swapchainCI.mipCount = 1;
-			result = xrCreateSwapchain(m_session, &swapchainCI, &m_swapchain_infos_depth.swapchain);
-			if (result != XR_SUCCESS) return false;
-			m_swapchain_infos_depth.swapchainFormat = swapchainCI.format;  // Save the swapchain format for later use.
-
-			uint32_t depthSwapchainImageCount = 0;
-			result = xrEnumerateSwapchainImages(m_swapchain_infos_depth.swapchain, 0, &depthSwapchainImageCount, nullptr);
-			if (result != XR_SUCCESS) return false;
-			CreateSwapchainImages(1, depthSwapchainImageCount, m_swapchain_infos_depth);
-		}
-	//}
+		CreateSwapchainImages(1, depthSwapchainImageCount, m_swapchain_infos_depth);
+	}
 
 	return true;
 }
 
 void OpenXrRenderer::DestroySwapchains()
 {
-	// Per view in the view configuration:
-	//for (size_t i = 0; i < m_view_config_views.size(); i++)
-	//{
-		//SwapchainInfo& colorSwapchainInfo = m_swapchain_infos_color[i];
-		//SwapchainInfo& depthSwapchainInfo = m_swapchain_infos_depth[i];
+	// Destroy the color and depth image views from GraphicsAPI.
+	for (void*& imageView : m_swapchain_infos_color.imageViews)
+	{
+		DestroyImageView(imageView);
+	}
+	// Destroy the swapchains.
+	xrDestroySwapchain(m_swapchain_infos_color.swapchain);
 
-		// Destroy the color and depth image views from GraphicsAPI.
+	if (m_use_depth)
+	{
 		for (void*& imageView : m_swapchain_infos_color.imageViews)
 		{
 			DestroyImageView(imageView);
 		}
-		// Destroy the swapchains.
+
 		xrDestroySwapchain(m_swapchain_infos_color.swapchain);
-
-		if (m_use_depth)
-		{
-			for (void*& imageView : m_swapchain_infos_color.imageViews)
-			{
-				DestroyImageView(imageView);
-			}
-
-			xrDestroySwapchain(m_swapchain_infos_color.swapchain);
-		}
-	//}
+	}
 }
 
 int64_t OpenXrRenderer::SelectSwapchainFormat(const std::vector<int64_t>& enum_formats, const std::vector<int64_t>& pref_formats)
@@ -901,14 +879,18 @@ bool OpenXrRenderer::CreateSwapchainImages(int type, uint32_t count, SwapchainIn
 	for (uint32_t j = 0; j < count; j++)
 	{
 		info.imageViews.push_back(
-			CreateImageView(type,
+			CreateImageView(type, 0,
+				(void*)(uint64_t)info.swapchainFormat,
+				(void*)(uint64_t)swapchain_images[j].image));
+		info.imageViews.push_back(
+			CreateImageView(type, 1,
 				(void*)(uint64_t)info.swapchainFormat,
 				(void*)(uint64_t)swapchain_images[j].image));
 	}
 	return true;
 }
 
-void* OpenXrRenderer::CreateImageView(int type, void* format, void* tid)
+void* OpenXrRenderer::CreateImageView(int type, int eye, void* format, void* tid)
 {
 	GLuint framebuffer = 0;
 	GLenum attachment = GL_COLOR_ATTACHMENT0;

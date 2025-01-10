@@ -142,51 +142,19 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 		return;
 
 	uint32_t viewCount = m_render_layer_info.layerProjectionViews.size();
-	//SwapchainInfo& colorSwapchainInfo = m_swapchain_infos_color[i];
-	//SwapchainInfo& depthSwapchainInfo = m_swapchain_infos_depth[i];
-
-	// Acquire and wait for an image from the swapchains.
-	// Get the image index of an image in the swapchains.
-	// The timeout is infinite.
-	uint32_t colorImageIndex = 0;
-	uint32_t depthImageIndex = 0;
-	XrSwapchainImageAcquireInfo acquireInfo{ XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO };
-	OPENXR_CHECK(xrAcquireSwapchainImage(m_swapchain_infos_color.swapchain, &acquireInfo, &colorImageIndex), "Failed to acquire Image from the Color Swapchian");
-	if (m_use_depth)
-		OPENXR_CHECK(xrAcquireSwapchainImage(m_swapchain_infos_depth.swapchain, &acquireInfo, &depthImageIndex), "Failed to acquire Image from the Depth Swapchian");
-
-	XrSwapchainImageWaitInfo waitInfo = { XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO };
-	waitInfo.timeout = XR_INFINITE_DURATION;
-	OPENXR_CHECK(xrWaitSwapchainImage(m_swapchain_infos_color.swapchain, &waitInfo), "Failed to wait for Image from the Color Swapchain");
-	if (m_use_depth)
-		OPENXR_CHECK(xrWaitSwapchainImage(m_swapchain_infos_depth.swapchain, &waitInfo), "Failed to wait for Image from the Depth Swapchain");
-
 	// Per view in the view configuration:
 	for (uint32_t i = 0; i < viewCount; i++)
 	{
-		// Get the width and height and construct the viewport and scissors.
-		const uint32_t &width = m_view_config_views[i].recommendedImageRectWidth;
-		const uint32_t &height = m_view_config_views[i].recommendedImageRectHeight;
-
-		// Fill out the XrCompositionLayerProjectionView structure specifying the pose and fov from the view.
-		// This also associates the swapchain image with this layer projection view.
-		m_render_layer_info.layerProjectionViews[i].subImage.swapchain = m_swapchain_infos_color.swapchain;
-		if (m_use_depth)
-		{
-			m_render_layer_info.depthInfoViews[i].subImage.swapchain = m_swapchain_infos_depth.swapchain;
-			// Chain depth info struct to the corresponding projection layer view's next pointer
-			m_render_layer_info.layerProjectionViews[i].next = &m_render_layer_info.depthInfoViews[i];
-		}
-
 #ifdef _WIN32
 		//copy buffer
 		if (fbos.size() > i)
 		{
+			uint32_t array_index = m_color_image_index * 2 + i;
 			//test
-			float clearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
-			m_im_context->ClearRenderTargetView((ID3D11RenderTargetView*)(m_swapchain_infos_color.imageViews[colorImageIndex]), clearColor);
+			//float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+			//m_im_context->ClearRenderTargetView((ID3D11RenderTargetView*)(m_swapchain_infos_color.imageViews[array_index]), clearColor);
 			//if (m_use_depth)
-			//	m_im_context->ClearDepthStencilView((ID3D11DepthStencilView*)(depthSwapchainInfo.imageViews[depthImageIndex]), D3D11_CLEAR_DEPTH, 1.0f, 0);
+			//	m_im_context->ClearDepthStencilView((ID3D11DepthStencilView*)(m_swapchain_infos_depth.imageViews[array_index]), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 			// Share the texture with Direct3D
 			wglDXLockObjectsNV(m_interop, 1, &m_gl_d3d_tex);
@@ -196,8 +164,8 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 			GLuint dest_fbo = (GLuint)(uint64_t)(m_gl_fbo);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest_fbo);
 			glBlitFramebuffer(
-				0, 0, width, height,
-				0, height, width, 0,
+				0, 0, m_size[0], m_size[1],
+				0, m_size[1], m_size[0], 0,
 				GL_COLOR_BUFFER_BIT, GL_NEAREST);
 			// Unbind the framebuffers
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
@@ -207,7 +175,7 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 			wglDXUnlockObjectsNV(m_interop, 1, &m_gl_d3d_tex);
 
 			// Copy the shared texture to the swap chain image view
-			ID3D11RenderTargetView* target_view = static_cast<ID3D11RenderTargetView*>(m_swapchain_infos_color.imageViews[colorImageIndex]);
+			ID3D11RenderTargetView* target_view = static_cast<ID3D11RenderTargetView*>(m_swapchain_infos_color.imageViews[array_index]);
 			// Get the underlying texture from the render target view
 			ID3D11Resource* target_res;
 			target_view->GetResource(&target_res);
@@ -227,21 +195,7 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 			target_res->Release();
 		}
 #endif
-
-		// Give the swapchain image back to OpenXR, allowing the compositor to use the image.
-		XrSwapchainImageReleaseInfo releaseInfo{ XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO };
-		OPENXR_CHECK(xrReleaseSwapchainImage(m_swapchain_infos_color.swapchain, &releaseInfo), "Failed to release Image back to the Color Swapchain");
-		if (m_use_depth)
-			OPENXR_CHECK(xrReleaseSwapchainImage(m_swapchain_infos_depth.swapchain, &releaseInfo), "Failed to release Image back to the Depth Swapchain");
 	}
-
-	// Fill out the XrCompositionLayerProjection structure for usage with xrEndFrame().
-	m_render_layer_info.layerProjection.space = m_space;
-	m_render_layer_info.layerProjection.viewCount = static_cast<uint32_t>(m_render_layer_info.layerProjectionViews.size());
-	m_render_layer_info.layerProjection.views = m_render_layer_info.layerProjectionViews.data();
-	m_render_layer_info.layers.push_back(
-		reinterpret_cast<XrCompositionLayerBaseHeader*>(
-			&m_render_layer_info.layerProjection));
 }
 
 void WmrRenderer::SetExtensions()
@@ -292,7 +246,11 @@ bool WmrRenderer::CreateSwapchainImages(int type, uint32_t count, SwapchainInfo&
 	for (uint32_t j = 0; j < count; j++)
 	{
 		info.imageViews.push_back(
-			CreateImageView(type,
+			CreateImageView(type, 0,
+				(void*)(uint64_t)info.swapchainFormat,
+				(void*)(uint64_t)swapchain_images[j].texture));
+		info.imageViews.push_back(
+			CreateImageView(type, 1,
 				(void*)(uint64_t)info.swapchainFormat,
 				(void*)(uint64_t)swapchain_images[j].texture));
 	}
@@ -301,7 +259,7 @@ bool WmrRenderer::CreateSwapchainImages(int type, uint32_t count, SwapchainInfo&
 	return true;
 }
 
-void* WmrRenderer::CreateImageView(int type, void* format, void* tid)
+void* WmrRenderer::CreateImageView(int type, int eye, void* format, void* tid)
 {
 #ifdef _WIN32
 	switch (type)
@@ -310,8 +268,10 @@ void* WmrRenderer::CreateImageView(int type, void* format, void* tid)
 		{
 			D3D11_RENDER_TARGET_VIEW_DESC rtvDesc{};
 			rtvDesc.Format = (DXGI_FORMAT)(uint64_t)format;
-			rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-			rtvDesc.Texture2D.MipSlice = 0;
+			rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+			rtvDesc.Texture2DArray.MipSlice = 0;
+			rtvDesc.Texture2DArray.ArraySize = 1;
+			rtvDesc.Texture2DArray.FirstArraySlice = eye;
 			ID3D11RenderTargetView* rtv = nullptr;
 			m_device->CreateRenderTargetView((ID3D11Resource*)(uint64_t)tid, &rtvDesc, &rtv);
 			return rtv;
@@ -320,8 +280,10 @@ void* WmrRenderer::CreateImageView(int type, void* format, void* tid)
 		{
 			D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
 			dsvDesc.Format = (DXGI_FORMAT)(uint64_t)format;
-			dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-			dsvDesc.Texture2D.MipSlice = 0;
+			dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+			dsvDesc.Texture2DArray.MipSlice = 0;
+			dsvDesc.Texture2DArray.ArraySize = 1;
+			dsvDesc.Texture2DArray.FirstArraySlice = eye;
 			ID3D11DepthStencilView* dsv = nullptr;
 			m_device->CreateDepthStencilView((ID3D11Resource*)(uint64_t)tid, &dsvDesc, &dsv);
 			return dsv;

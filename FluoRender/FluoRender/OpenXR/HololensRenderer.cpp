@@ -156,6 +156,7 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 
 	//create shared tex if not present
 	CreateSharedTex();
+	CreateDepthStencilView();
 
 	m_initialized = true;
 
@@ -175,6 +176,75 @@ void HololensRenderer::Close()
 #endif
 	DestroyInstance();
 	DestroyD3DDevice();
+}
+
+void HololensRenderer::Draw(const std::vector<flvr::Framebuffer*>& fbos)
+{
+	if (!m_app_running || !m_session_running)
+		return;
+	if (!m_frame_state.shouldRender)
+		return;
+
+	uint32_t viewCount = m_render_layer_info.layerProjectionViews.size();
+	// Per view in the view configuration:
+	for (uint32_t i = 0; i < viewCount; i++)
+	{
+#ifdef _WIN32
+		//copy buffer
+		if (fbos.size() > i)
+		{
+			uint32_t array_index = m_color_image_index * 2 + i;
+			// Set the render target for the current eye
+			ID3D11RenderTargetView* renderTargets[] = { (ID3D11RenderTargetView*)(m_swapchain_infos_color.imageViews[array_index]) };
+			m_im_context->OMSetRenderTargets(1, renderTargets, m_depth_stencil_view);
+
+			//test
+			float clearColor[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
+			m_im_context->ClearRenderTargetView((ID3D11RenderTargetView*)(m_swapchain_infos_color.imageViews[array_index]), clearColor);
+			if (m_use_depth)
+				m_im_context->ClearDepthStencilView((ID3D11DepthStencilView*)(m_swapchain_infos_depth.imageViews[array_index]), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+			// Share the texture with Direct3D
+			wglDXLockObjectsNV(m_interop, 1, &m_gl_d3d_tex);
+
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[i]->id());
+			// Read pixels to PBO
+			GLuint dest_fbo = (GLuint)(uint64_t)(m_gl_fbo);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest_fbo);
+			glBlitFramebuffer(
+				0, 0, m_size[0], m_size[1],
+				0, m_size[1], m_size[0], 0,
+				GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			// Unbind the framebuffers
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+			// Unlock the OpenGL texture
+			wglDXUnlockObjectsNV(m_interop, 1, &m_gl_d3d_tex);
+
+			// Copy the shared texture to the swap chain image view
+			ID3D11RenderTargetView* target_view = static_cast<ID3D11RenderTargetView*>(m_swapchain_infos_color.imageViews[array_index]);
+			// Get the underlying texture from the render target view
+			ID3D11Resource* target_res;
+			target_view->GetResource(&target_res);
+			D3D11_BOX srcBox = { 0, 0, 0, m_size[0], m_size[1], 1 };
+
+			try
+			{
+				m_im_context->CopySubresourceRegion(target_res, i, 0, 0, 0, m_d3d_tex, 0, &srcBox);
+			}
+			catch (const std::exception& e)
+			{
+#ifdef _DEBUG
+				DBGPRINT(L"%s\n", e.what());
+#endif
+			}
+
+			// Release the resource when done
+			target_res->Release();
+		}
+#endif
+	}
 }
 
 void HololensRenderer::SetExtensions()
@@ -432,6 +502,23 @@ void HololensRenderer::PollEvents()
 }
 
 #ifdef _WIN32
+void HololensRenderer::CreateDepthStencilView()
+{
+	// Create a depth stencil view (if needed)
+	D3D11_TEXTURE2D_DESC depthStencilDesc = {};
+	depthStencilDesc.Width = m_size[0];
+	depthStencilDesc.Height = m_size[1];
+	depthStencilDesc.MipLevels = 1;
+	depthStencilDesc.ArraySize = 1;
+	depthStencilDesc.Format = static_cast<DXGI_FORMAT>(m_swapchain_infos_depth.swapchainFormat);
+	depthStencilDesc.SampleDesc.Count = 1;
+	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+	m_device->CreateTexture2D(&depthStencilDesc, nullptr, &m_depth_stencil_tex);
+	m_device->CreateDepthStencilView(m_depth_stencil_tex, nullptr, &m_depth_stencil_view);
+}
+
 bool HololensRenderer::EnableRemotingXR()
 {
 	wchar_t executablePath[MAX_PATH];
