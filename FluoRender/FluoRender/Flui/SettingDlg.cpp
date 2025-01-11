@@ -1461,6 +1461,10 @@ void SettingDlg::OnStereoCheck(wxCommandEvent& event)
 void SettingDlg::OnXrApiComb(wxCommandEvent& event)
 {
 	glbin_settings.m_xr_api = m_xr_api_cmb->GetCurrentSelection();
+	if (glbin_settings.m_xr_api == 4)
+		glbin_settings.m_eye_dist = 0;
+	else
+		glbin_settings.m_eye_dist = 20;
 	FluoRefresh(2, { gstHologramMode });
 }
 

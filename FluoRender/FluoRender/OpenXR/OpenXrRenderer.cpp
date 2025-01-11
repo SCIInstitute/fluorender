@@ -771,10 +771,6 @@ bool OpenXrRenderer::CreateSwapchains()
 		m_session, formatCount, &formatCount, formats.data());
 	if (result != XR_SUCCESS) return false;
 
-	//Resize the SwapchainInfo to match the number of view in the View Configuration.
-	//m_swapchain_infos_color.resize(m_view_config_views.size());
-	//m_swapchain_infos_depth.resize(m_view_config_views.size());
-
 	// Per view, create a color and depth swapchain, and their associated image views.
 	const uint32_t array_size = m_view_config_views.size();
 	const uint32_t imageRectWidth = m_view_config_views[0].recommendedImageRectWidth;
@@ -809,12 +805,6 @@ bool OpenXrRenderer::CreateSwapchains()
 		swapchainCI.createFlags = 0;
 		swapchainCI.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 		swapchainCI.format = SelectSwapchainFormat(formats, m_preferred_depth_formats);
-		//swapchainCI.sampleCount = m_view_config_views[i].recommendedSwapchainSampleCount;  // Use the recommended values from the XrViewConfigurationView.
-		//swapchainCI.width = m_view_config_views[i].recommendedImageRectWidth;
-		//swapchainCI.height = m_view_config_views[i].recommendedImageRectHeight;
-		//swapchainCI.faceCount = 1;
-		//swapchainCI.arraySize = 2;
-		//swapchainCI.mipCount = 1;
 		result = xrCreateSwapchain(m_session, &swapchainCI, &m_swapchain_infos_depth.swapchain);
 		if (result != XR_SUCCESS) return false;
 		m_swapchain_infos_depth.swapchainFormat = swapchainCI.format;  // Save the swapchain format for later use.
@@ -907,9 +897,6 @@ void* OpenXrRenderer::CreateImageView(int type, int eye, void* format, void* tid
 		break;
 	}
 	GLuint tex_id = (GLuint)(uint64_t)tid;
-	//glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
-	//	attachment, GL_TEXTURE_2D,
-	//	tex_id, 0);
 	glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER,
 		attachment, tex_id,
 		0, // mipmap level
