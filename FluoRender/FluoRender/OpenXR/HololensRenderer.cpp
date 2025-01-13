@@ -199,6 +199,8 @@ void HololensRenderer::SetExtensions()
 	m_instanceExtensions.push_back(XR_MSFT_UNBOUNDED_REFERENCE_SPACE_EXTENSION_NAME);
 	m_instanceExtensions.push_back(XR_MSFT_SPATIAL_ANCHOR_EXTENSION_NAME);
 #endif
+	//hand tracking
+	m_instanceExtensions.push_back(XR_EXT_HAND_TRACKING_EXTENSION_NAME);
 }
 
 void HololensRenderer::LoadFunctions()

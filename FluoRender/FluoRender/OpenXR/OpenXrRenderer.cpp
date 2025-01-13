@@ -78,6 +78,9 @@ bool OpenXrRenderer::Init(void* hdc, void* hglrc)
 	if (!CreateInstance())
 		return false;
 
+	//load extension functions
+	LoadFunctions();
+
 #ifdef _DEBUG
 	CreateDebugMessenger();
 	GetInstanceProperties();
@@ -100,6 +103,8 @@ bool OpenXrRenderer::Init(void* hdc, void* hglrc)
 
 	CreateActionPoses();
 	AttachActionSet();
+
+	m_use_hand_tracking = CreateHandTrackers();
 
 	if (!CreateReferenceSpace())
 		return false;
@@ -126,6 +131,10 @@ void OpenXrRenderer::Close()
 
 void OpenXrRenderer::GetControllerStates()
 {
+	//if able to track hands, use hand pose to override controller pose
+	if (m_use_hand_tracking && TrackHands())
+		return;
+
 	bool grab[2] = { false, false };
 	//grab
 	if (m_grab_state[0].isActive &&
@@ -340,6 +349,7 @@ void OpenXrRenderer::BeginFrame()
 			m_mv_mat[i] = glm::inverse(viewMatrix);
 		}
 	}
+
 }
 
 void OpenXrRenderer::EndFrame()
@@ -417,6 +427,8 @@ void OpenXrRenderer::SetExtensions()
 	// Add both required and requested instance extensions.
 	m_instanceExtensions.push_back(XR_EXT_DEBUG_UTILS_EXTENSION_NAME);
 	m_instanceExtensions.push_back(XR_KHR_OPENGL_ENABLE_EXTENSION_NAME);
+	//hand tracking
+	m_instanceExtensions.push_back(XR_EXT_HAND_TRACKING_EXTENSION_NAME);
 }
 
 bool OpenXrRenderer::CreateInstance()
@@ -1186,12 +1198,6 @@ bool OpenXrRenderer::SuggestBindings()
 		{m_pose_act, CreateXrPath("/user/hand/right/input/grip/pose")},
 		{m_js_act, CreateXrPath("/user/hand/left/input/thumbstick")},
 		{m_js_act, CreateXrPath("/user/hand/right/input/thumbstick")} });
-	// Hololens
-	any_ok |= SuggestBindings("/interaction_profiles/microsoft/hand_interaction", {
-		{m_grab_act, CreateXrPath("/user/hand/left/input/select/click")},
-		{m_grab_act, CreateXrPath("/user/hand/right/input/select/click")},
-		{m_pose_act, CreateXrPath("/user/hand/left/input/grip/pose")},
-		{m_pose_act, CreateXrPath("/user/hand/right/input/grip/pose")} });
 	// SteamVR
 	any_ok |= SuggestBindings("/interaction_profiles/htc/vive_controller", {
 		{m_grab_act, CreateXrPath("/user/hand/left/input/grip/value")},
@@ -1284,6 +1290,115 @@ void OpenXrRenderer::DestroyActions()
 	}
 }
 
+void OpenXrRenderer::LoadFunctions()
+{
+	XrResult result;
+	//hand tracking
+	result = xrGetInstanceProcAddr(m_instance, "xrCreateHandTrackerEXT", (PFN_xrVoidFunction*)&xrCreateHandTrackerEXT);
+	result = xrGetInstanceProcAddr(m_instance, "xrDestroyHandTrackerEXT", (PFN_xrVoidFunction*)&xrDestroyHandTrackerEXT);
+	result = xrGetInstanceProcAddr(m_instance, "xrLocateHandJointsEXT", (PFN_xrVoidFunction*)&xrLocateHandJointsEXT);
+}
+
+bool OpenXrRenderer::CreateHandTrackers()
+{
+	if (!xrCreateHandTrackerEXT)
+		return false;
+
+	XrResult result;
+	XrHandTrackerCreateInfoEXT createInfo = {XR_TYPE_HAND_TRACKER_CREATE_INFO_EXT};
+	createInfo.hand = XR_HAND_LEFT_EXT;
+	createInfo.handJointSet = XR_HAND_JOINT_SET_DEFAULT_EXT;
+
+	//left
+	result = xrCreateHandTrackerEXT(m_session, &createInfo, &m_hand_tracker[0]);
+	if (result != XR_SUCCESS)
+		return false;
+
+	createInfo.hand = XR_HAND_RIGHT_EXT;
+	result = xrCreateHandTrackerEXT(m_session, &createInfo, &m_hand_tracker[1]);
+	if (result != XR_SUCCESS)
+		return false;
+
+	return true;
+}
+
+bool OpenXrRenderer::TrackHands()
+{
+	bool detected = false;
+	XrResult result;
+	// Locate hand joints
+	XrHandJointsLocateInfoEXT locateInfo = { XR_TYPE_HAND_JOINTS_LOCATE_INFO_EXT };
+	locateInfo.baseSpace = m_space;
+	locateInfo.time = m_frame_state.predictedDisplayTime;
+
+	XrHandJointLocationsEXT jointLocations = { XR_TYPE_HAND_JOINT_LOCATIONS_EXT };
+	jointLocations.jointCount = XR_HAND_JOINT_COUNT_EXT;
+	jointLocations.jointLocations = new XrHandJointLocationEXT[XR_HAND_JOINT_COUNT_EXT];
+
+	//start with right hand
+	for (int hand = 1; hand >= 0; --hand)
+	{
+		result = xrLocateHandJointsEXT(m_hand_tracker[hand], &locateInfo, &jointLocations);
+		if (result != XR_SUCCESS)
+			continue;
+		
+		float d = DetectHand(jointLocations.jointLocations);
+		if (d < 0.0f)
+		{
+			continue;
+		}
+		else if (d < 0.2f)
+		{
+			//fist
+			detected = true;
+			m_grab_mat = glm::mat4(1.0);
+			m_grab[hand] = false;
+		}
+		else if (d > 0.5f)
+		{
+			//palm
+			detected = true;
+			m_hand_pose[hand] = jointLocations.jointLocations->pose;
+			m_grab_mat = XrPoseToMat4(m_hand_pose[hand]);
+			m_grab_mat[3][0] = 0.0;
+			m_grab_mat[3][1] = 0.0;
+			m_grab_mat[3][2] = 0.0;
+			m_grab[hand] = true;
+			break;
+		}
+	}
+
+	delete[] jointLocations.jointLocations;
+	return detected;
+}
+
+float OpenXrRenderer::DetectHand(const XrHandJointLocationEXT* jointLocations)
+{
+	float d = 0.0f;
+	int fingerTips[] = {
+			XR_HAND_JOINT_THUMB_TIP_EXT,
+			XR_HAND_JOINT_INDEX_TIP_EXT,
+			XR_HAND_JOINT_MIDDLE_TIP_EXT,
+			XR_HAND_JOINT_RING_TIP_EXT,
+			XR_HAND_JOINT_LITTLE_TIP_EXT
+	};
+	for (int i = 0; i < 5; ++i)
+	{
+		int tipIndex = fingerTips[i];
+		if (!(jointLocations[tipIndex].locationFlags & XR_SPACE_LOCATION_POSITION_VALID_BIT))
+		{
+			return -1.0f;
+		}
+		XrVector3f tipPosition = jointLocations[tipIndex].pose.position;
+		XrVector3f palmPosition = jointLocations[XR_HAND_JOINT_PALM_EXT].pose.position;
+		float distance = sqrt(pow(tipPosition.x - palmPosition.x, 2) +
+			pow(tipPosition.y - palmPosition.y, 2) +
+			pow(tipPosition.z - palmPosition.z, 2));
+		d += distance;
+	}
+	return d;
+}
+
 void OpenXrRenderer::ApplyEyeOffsets(XrView* views, int eye_index)
 {
 	if (!views)
@@ -1291,6 +1406,8 @@ void OpenXrRenderer::ApplyEyeOffsets(XrView* views, int eye_index)
 	if (eye_index < 0 || eye_index > 1)
 		return;
 	float eye_dist = glbin_settings.m_eye_dist;
+	if (std::abs(eye_dist) < EPS)
+		return;
 	// Calculate the offset for each eye
 	glm::vec3 offset;
 	switch (eye_index)

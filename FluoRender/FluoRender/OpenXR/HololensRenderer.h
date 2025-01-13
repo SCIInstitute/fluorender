@@ -265,15 +265,16 @@ private:
 		bool SpatialAnchorSupported{ false };
 	} m_optionalExtensions;
 
-	PFN_xrRemotingSetContextPropertiesMSFT xrRemotingSetContextPropertiesMSFT;
-	PFN_xrRemotingConnectMSFT xrRemotingConnectMSFT;
-	PFN_xrRemotingListenMSFT xrRemotingListenMSFT;
-	PFN_xrRemotingDisconnectMSFT xrRemotingDisconnectMSFT;
-	PFN_xrRemotingGetConnectionStateMSFT xrRemotingGetConnectionStateMSFT;
-	PFN_xrRemotingSetSecureConnectionClientCallbacksMSFT xrRemotingSetSecureConnectionClientCallbacksMSFT;
-	PFN_xrRemotingSetSecureConnectionServerCallbacksMSFT xrRemotingSetSecureConnectionServerCallbacksMSFT;
-	PFN_xrInitializeRemotingSpeechMSFT xrInitializeRemotingSpeechMSFT;
-	PFN_xrRetrieveRemotingSpeechRecognizedTextMSFT xrRetrieveRemotingSpeechRecognizedTextMSFT;
+	//remoting
+	PFN_xrRemotingSetContextPropertiesMSFT xrRemotingSetContextPropertiesMSFT = nullptr;
+	PFN_xrRemotingConnectMSFT xrRemotingConnectMSFT = nullptr;
+	PFN_xrRemotingListenMSFT xrRemotingListenMSFT = nullptr;
+	PFN_xrRemotingDisconnectMSFT xrRemotingDisconnectMSFT = nullptr;
+	PFN_xrRemotingGetConnectionStateMSFT xrRemotingGetConnectionStateMSFT = nullptr;
+	PFN_xrRemotingSetSecureConnectionClientCallbacksMSFT xrRemotingSetSecureConnectionClientCallbacksMSFT = nullptr;
+	PFN_xrRemotingSetSecureConnectionServerCallbacksMSFT xrRemotingSetSecureConnectionServerCallbacksMSFT = nullptr;
+	PFN_xrInitializeRemotingSpeechMSFT xrInitializeRemotingSpeechMSFT = nullptr;
+	PFN_xrRetrieveRemotingSpeechRecognizedTextMSFT xrRetrieveRemotingSpeechRecognizedTextMSFT = nullptr;
 
 	SecureConnectionCallbacks m_secureConnectionCallbacks;
 #endif

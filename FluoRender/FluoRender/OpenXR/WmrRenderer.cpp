@@ -208,6 +208,8 @@ void WmrRenderer::SetExtensions()
 	// D3D11 extension is required for this sample, so check if it's supported.
 	m_instanceExtensions.push_back(XR_KHR_D3D11_ENABLE_EXTENSION_NAME);
 #endif
+	//hand tracking
+	m_instanceExtensions.push_back(XR_EXT_HAND_TRACKING_EXTENSION_NAME);
 }
 
 bool WmrRenderer::CreateSession(void* hdc, void* hdxrc)
@@ -553,4 +555,5 @@ void WmrRenderer::DestroySharedTex()
 
 void WmrRenderer::LoadFunctions()
 {
+	OpenXrRenderer::LoadFunctions();
 }

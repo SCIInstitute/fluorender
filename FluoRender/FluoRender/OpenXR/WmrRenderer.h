@@ -55,14 +55,13 @@ protected:
 	bool CreateSwapchainImages(int type, uint32_t count, SwapchainInfo& info) override;
 	void* CreateImageView(int type, int eye, void* format, void* tid) override;//0:color 1:depth
 	void DestroyImageView(void*& imageView) override;
+	virtual void LoadFunctions() override;
 
 	virtual bool CreateD3DDevice();
 	virtual void DestroyD3DDevice();
 
 	virtual bool CreateSharedTex();
 	virtual void DestroySharedTex();
-
-	virtual void LoadFunctions();
 
 #ifdef _WIN32
 	GLFormat TranslateD3D11ToGLFormat(DXGI_FORMAT d3dFormat);

@@ -153,6 +153,13 @@ protected:
 		{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -m_view_hm}},
 		{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -m_view_hm}} };
 
+	//hand tracking
+	PFN_xrCreateHandTrackerEXT xrCreateHandTrackerEXT = nullptr;
+	PFN_xrDestroyHandTrackerEXT xrDestroyHandTrackerEXT = nullptr;
+	PFN_xrLocateHandJointsEXT xrLocateHandJointsEXT = nullptr;
+	bool m_use_hand_tracking = false;
+	XrHandTrackerEXT m_hand_tracker[2];
+
 protected:
 	virtual void SetExtensions();
 	virtual bool CreateInstance();
@@ -218,6 +225,13 @@ protected:
 	virtual void CreateActionPoses();
 	virtual void AttachActionSet();
 	virtual void DestroyActions();
+
+	virtual void LoadFunctions();
+
+	virtual bool CreateHandTrackers();
+	virtual bool TrackHands();
+
+	float DetectHand(const XrHandJointLocationEXT* jointLocations);
 
 	void ApplyEyeOffsets(XrView* views, int eye_index);
 	glm::mat4 XrPoseToMat4(const XrPosef& pose);
