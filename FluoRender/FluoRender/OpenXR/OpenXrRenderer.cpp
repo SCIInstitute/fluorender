@@ -1343,6 +1343,9 @@ bool OpenXrRenderer::TrackHands()
 			continue;
 		
 		float d = DetectHand(jointLocations.jointLocations);
+#ifdef _DEBUG
+		DBGPRINT(L"Hand %d: %f\n", hand, d);
+#endif
 		if (d < 0.0f)
 		{
 			continue;
