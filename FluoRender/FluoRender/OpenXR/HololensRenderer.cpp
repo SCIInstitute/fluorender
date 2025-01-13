@@ -65,8 +65,9 @@ HololensRenderer::HololensRenderer(const HololensOptions& options) :
 #ifdef _WIN32
 	m_preferred_color_formats =
 	{
-		DXGI_FORMAT_R8G8B8A8_UNORM,
+		DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
 		DXGI_FORMAT_B8G8R8A8_UNORM,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
 	};
 	m_preferred_depth_formats =
 	{
@@ -139,7 +140,8 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 	GetEnvironmentBlendModes();
 
 #ifdef _WIN32
-	ConnectOrListen();
+	if (!ConnectOrListen())
+		return false;
 #endif
 
 	if (!CreateSession(hdc, hglrc))
@@ -478,32 +480,34 @@ void HololensRenderer::Disconnect()
 	XrResult result = xrRemotingDisconnectMSFT(m_instance, m_sys_id, &disconnectInfo);
 }
 
-void HololensRenderer::ConnectOrListen()
+bool HololensRenderer::ConnectOrListen()
 {
 	if (!m_usingRemotingRuntime)
 	{
-		return;
+		return false;
 	}
 
 	XrResult result;
 	XrRemotingConnectionStateMSFT connectionState;
 	result = xrRemotingGetConnectionStateMSFT(m_instance, m_sys_id, &connectionState, nullptr);
+	if (result != XR_SUCCESS)
+		return false;
 	if (connectionState != XR_REMOTING_CONNECTION_STATE_DISCONNECTED_MSFT)
 	{
-		return;
+		return false;
 	}
 
 	// Apply remote context properties while disconnected.
-	{
-		XrRemotingRemoteContextPropertiesMSFT contextProperties;
-		contextProperties =
-			XrRemotingRemoteContextPropertiesMSFT{ static_cast<XrStructureType>(XR_TYPE_REMOTING_REMOTE_CONTEXT_PROPERTIES_MSFT) };
-		contextProperties.enableAudio = false;
-		contextProperties.maxBitrateKbps = 20000;
-		contextProperties.videoCodec = XR_REMOTING_VIDEO_CODEC_H265_MSFT;
-		contextProperties.depthBufferStreamResolution = XR_REMOTING_DEPTH_BUFFER_STREAM_RESOLUTION_HALF_MSFT;
-		result = xrRemotingSetContextPropertiesMSFT(m_instance, m_sys_id, &contextProperties);
-	}
+	XrRemotingRemoteContextPropertiesMSFT contextProperties;
+	contextProperties =
+		XrRemotingRemoteContextPropertiesMSFT{ static_cast<XrStructureType>(XR_TYPE_REMOTING_REMOTE_CONTEXT_PROPERTIES_MSFT) };
+	contextProperties.enableAudio = false;
+	contextProperties.maxBitrateKbps = 20000;
+	contextProperties.videoCodec = XR_REMOTING_VIDEO_CODEC_H265_MSFT;
+	contextProperties.depthBufferStreamResolution = XR_REMOTING_DEPTH_BUFFER_STREAM_RESOLUTION_HALF_MSFT;
+	result = xrRemotingSetContextPropertiesMSFT(m_instance, m_sys_id, &contextProperties);
+	if (result != XR_SUCCESS)
+		return false;
 
 	if (m_options.listen)
 	{
@@ -523,6 +527,8 @@ void HololensRenderer::ConnectOrListen()
 		listenInfo.transportListenPort = m_options.transportPort != 0 ? m_options.transportPort : 8266;
 		listenInfo.secureConnection = m_options.secureConnection;
 		result = xrRemotingListenMSFT(m_instance, m_sys_id, &listenInfo);
+		if (result != XR_SUCCESS)
+			return false;
 	}
 	else
 	{
@@ -541,7 +547,11 @@ void HololensRenderer::ConnectOrListen()
 		connectInfo.remotePort = m_options.port != 0 ? m_options.port : 8265;
 		connectInfo.secureConnection = m_options.secureConnection;
 		result = xrRemotingConnectMSFT(m_instance, m_sys_id, &connectInfo);
+		if (result != XR_SUCCESS)
+			return false;
 	}
+
+	return true;
 }
 
 XrResult HololensRenderer::AuthenticationRequestCallback(XrRemotingAuthenticationTokenRequestMSFT* authenticationTokenRequest)

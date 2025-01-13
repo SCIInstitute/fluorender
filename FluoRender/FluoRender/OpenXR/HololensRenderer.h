@@ -237,7 +237,7 @@ private:
 	void CheckExtensions();
 
 	void Disconnect();
-	void ConnectOrListen();
+	bool ConnectOrListen();
 
 	XrResult AuthenticationRequestCallback(XrRemotingAuthenticationTokenRequestMSFT* authenticationTokenRequest);
 	static XrResult XRAPI_CALL AuthenticationRequestCallbackStatic(XrRemotingAuthenticationTokenRequestMSFT* authenticationTokenRequest);
