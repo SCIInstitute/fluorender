@@ -78,7 +78,7 @@ Some third-party dependencies are included in the FluoRender source code. Other 
 
 4) Clone and build wxWidgets.
 
-   * <code>git clone --recursive https://github.com/wxWidgets/wxWidgets.git</code>
+   * <code>git clone --branch wxwidgets-3.2.6 --recursive https://github.com/basisunus/wxWidgets.git</code>
 
    * <code>cd wxwidgets</code>
 
@@ -96,7 +96,7 @@ Some third-party dependencies are included in the FluoRender source code. Other 
 
 <h2>Mac OS</h2> 
 
-1) Clone the latest wxWidgets using GIT (<code>git clone git@github.com:wxWidgets/wxWidgets.git</code>).
+1) Clone the latest wxWidgets using GIT (<code>git clone --branch wxwidgets-3.2.6 --recursive https://github.com/basisunus/wxWidgets.git</code>).
    
    * The steps following will assume the wxWidgets root directory is at <code>/wxWidgets</code>
 
