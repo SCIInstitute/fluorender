@@ -501,7 +501,7 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	m_xr_api_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnXrApiComb, this);
 #ifdef _WIN32
-	cmb_str = { "Cardboard", "OpenXR", "OpenVR", "Windows Mixed Reality", "Hololens Remote" };
+	cmb_str = { "Cardboard", "OpenXR", "OpenVR", "Windows Mixed Reality", "Holographic Remoting" };
 #else
 	cmb_str = { "Cardboard", "OpenXR", "OpenVR" };
 #endif
@@ -510,8 +510,8 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	sizer1_2->Add(st, 0, wxALIGN_CENTER);
 	sizer1_2->Add(m_xr_api_cmb, 0, wxALIGN_CENTER);
 #ifdef _WIN32
-	st = new wxStaticText(page, 0, "Hololens IP:",
-		wxDefaultPosition, FromDIP(wxSize(70, 20)));
+	st = new wxStaticText(page, 0, "Remote HMD IP:",
+		wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	wxArrayString allowedChars;
 	allowedChars.Add("0"); allowedChars.Add("1"); allowedChars.Add("2");
 	allowedChars.Add("3"); allowedChars.Add("4"); allowedChars.Add("5");
