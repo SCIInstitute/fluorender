@@ -258,8 +258,10 @@ find_package(Boost COMPONENTS system chrono filesystem REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
 # dlib
-add_subdirectory(${PARENT_DIR}/dlib-dir dlib_build)
-include_directories(${PARENT_DIR}/dlib-dir)
+file(GLOB DLIB_DIRS "${PARENT_DIR}/dlib*")
+list(GET DLIB_DIRS 0 DLIB_DIRS)  # Get the first match
+add_subdirectory(${DLIB_DIRS} dlib_build)
+include_directories(${DLIB_DIRS})
 
 #opencv
 file(GLOB OPENCV_DIRS "${PARENT_DIR}/opencv*")
@@ -370,13 +372,29 @@ elseif(UNIX OR APPLE OR MINGW)
   include_directories(${OpenCL_INCLUDE_DIRS})
 endif()
 
+# OpenVR
+file(GLOB OPENVR_DIRS "${PARENT_DIR}/openvr*")
+list(GET OPENVR_DIRS 0 OPENVR_DIRS)  # Get the first match
+include_directories(${OPENVR_DIRS}/headers)
+if(WIN32)
+    file(GLOB OpenVR_RELEASE_LIBRARIES ${OPENVR_DIRS}/bin/win64/Release/*.lib)
+    file(GLOB OpenVR_DEBUG_LIBRARIES ${OPENVR_DIRS}/bin/win64/Debug/*.lib)
+    set(OpenVR_LIBRARIES $<$<CONFIG:Release>:${OpenVR_RELEASE_LIBRARIES}> $<$<CONFIG:Debug>:${OpenVR_DEBUG_LIBRARIES}>)
+elseif(APPLE)
+    file(GLOB OpenVR_LIBRARIES ${OPENVR_DIRS}/bin/osx32/*.dylib)
+else()
+    file(GLOB OpenVR_LIBRARIES ${OPENVR_DIRS}/bin/linux64/*.so)
+endif()
+
 # OpenXR
-include_directories(${PARENT_DIR}/OpenXR-SDK/include)
+file(GLOB OPENXR_DIRS "${PARENT_DIR}/OpenXR-SDK*")
+list(GET OPENXR_DIRS 0 OPENXR_DIRS)  # Get the first match
+include_directories(${OPENXR_DIRS}/include)
 if(WIN32)
     #d3d11 dependencies
     include_directories(${CMAKE_BINARY_DIR}/packages/Microsoft.Holographic.Remoting.OpenXr.2.9.4/build/native/include)
-    file(GLOB OpenXR_RELEASE_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Release/*.lib)
-    file(GLOB OpenXR_DEBUG_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Debug/*.lib)
+    file(GLOB OpenXR_RELEASE_LIBRARIES ${OPENXR_DIRS}/build/src/loader/Release/*.lib)
+    file(GLOB OpenXR_DEBUG_LIBRARIES ${OPENXR_DIRS}/build/src/loader/Debug/*.lib)
     set(OpenXR_LIBRARIES $<$<CONFIG:Release>:${OpenXR_RELEASE_LIBRARIES} d3d11.lib dxgi.lib> $<$<CONFIG:Debug>:${OpenXR_DEBUG_LIBRARIES} d3d11.lib dxgi.lib>)
     add_definitions(-DXR_USE_PLATFORM_WIN32)
     add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
@@ -415,38 +433,18 @@ if(WIN32)
 
     # Link libraries
     link_directories(${NUGET_PACKAGE_DIR}/build/native/lib)
-
-#set(NUGET_COMMAND "${FluoRender_SOURCE_DIR}/NuGet/nuget.exe" CACHE STRING "NuGet executable used for package installs. Empty means NuGetTools is disabled.")
-    #include(NuGetTools)
-    # Initialize NuGet
-    #nuget_initialize()
-    # Add Holographic Remoting OpenXR package
-    #nuget_add_dependencies(
-    #    PACKAGE Microsoft.Holographic.Remoting.OpenXr
-    #    VERSION 2.9.4
-    #)
 elseif(APPLE)
-    file(GLOB OpenXR_RELEASE_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Release/*.a)
-    file(GLOB OpenXR_DEBUG_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Debug/*.a)
+    file(GLOB OpenXR_RELEASE_LIBRARIES ${OPENXR_DIRS}/build/src/loader/Release/*.a)
+    file(GLOB OpenXR_DEBUG_LIBRARIES ${OPENXR_DIRS}/build/src/loader/Debug/*.a)
     set(OpenXR_LIBRARIES $<$<CONFIG:Release>:${OpenXR_RELEASE_LIBRARIES}> $<$<CONFIG:Debug>:${OpenXR_DEBUG_LIBRARIES}>)
     add_definitions(-DXR_USE_PLATFORM_MACOS)
     add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
 else()
-    file(GLOB OpenXR_RELEASE_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Release/*.a)
-    file(GLOB OpenXR_DEBUG_LIBRARIES ${PARENT_DIR}/OpenXR-SDK/build/src/loader/Debug/*.a)
+    file(GLOB OpenXR_RELEASE_LIBRARIES ${OPENXR_DIRS}/build/src/loader/Release/*.a)
+    file(GLOB OpenXR_DEBUG_LIBRARIES ${OPENXR_DIRS}/build/src/loader/Debug/*.a)
     set(OpenXR_LIBRARIES $<$<CONFIG:Release>:${OpenXR_RELEASE_LIBRARIES}> $<$<CONFIG:Debug>:${OpenXR_DEBUG_LIBRARIES}>)
     add_definitions(-DXR_USE_PLATFORM_XLIB)
     add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
-endif()
-
-# OpenVR
-include_directories(${PARENT_DIR}/openvr/headers)
-if(WIN32)
-#    file(GLOB OpenVR_RELEASE_LIBRARIES ${PARENT_DIR}/openvr/bin/win64/Release/*.lib)
-#    file(GLOB OpenVR_DEBUG_LIBRARIES ${PARENT_DIR}/openvr/bin/win64/Debug/*.lib)
-#    set(OpenVR_LIBRARIES $<$<CONFIG:Release>:${OpenVR_RELEASE_LIBRARIES}> $<$<CONFIG:Debug>:${OpenVR_DEBUG_LIBRARIES}>)
-#    add_definitions(-DOPENVR_BUILD_STATIC)
-    file(GLOB OpenVR_LIBRARIES ${PARENT_DIR}/openvr/lib/win64/*.lib)
 endif()
 
 # pole
@@ -1176,18 +1174,30 @@ add_custom_command(TARGET FluoRender POST_BUILD
 if(WIN32)
 add_custom_command(TARGET FluoRender POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy
-	"${FluoRender_SOURCE_DIR}/FluoRender/OpenVR/lib/win64/openvr_api.dll"
+	"${OPENVR_DIRS}/bin/win64/openvr_api.dll"
+    "$<TARGET_FILE_DIR:FluoRender>")
+elseif(APPLE)
+add_custom_command(TARGET FluoRender POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+	"${OPENVR_DIRS}/bin/osx32/libopenvr_api.dylib"
+    "$<TARGET_FILE_DIR:FluoRender>")
+else()
+add_custom_command(TARGET FluoRender POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+	"${OPENVR_DIRS}/bin/linux64/libopenvr_api.so"
     "$<TARGET_FILE_DIR:FluoRender>")
 endif()
 
 # openxr
 if(WIN32)
-set(OPENXR_DLL_DEBUG "${FluoRender_SOURCE_DIR}/FluoRender/OpenXR/openxr_loaderd.dll")
-set(OPENXR_DLL_RELEASE "${FluoRender_SOURCE_DIR}/FluoRender/OpenXR/openxr_loader.dll")
+set(OPENXR_DLL_DEBUG "${OPENXR_DIRS}/build/src/loader/Debug/openxr_loaderd.dll")
+set(OPENXR_DLL_RELEASE "${OPENXR_DIRS}/build/src/loader/Release/openxr_loader.dll")
 add_custom_command(TARGET FluoRender POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
     $<IF:$<CONFIG:Debug>,${OPENXR_DLL_DEBUG},${OPENXR_DLL_RELEASE}>
     "$<TARGET_FILE_DIR:FluoRender>")
+elseif(APPLE)
+else()
 endif()
 
 # holoplay
