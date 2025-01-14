@@ -150,6 +150,8 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 	CreateActionPoses();
 	AttachActionSet();
 
+	m_use_hand_tracking = CreateHandTrackers();
+
 	if (!CreateReferenceSpace())
 		return false;
 
