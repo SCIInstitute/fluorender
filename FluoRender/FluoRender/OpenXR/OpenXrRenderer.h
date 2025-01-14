@@ -157,11 +157,15 @@ protected:
 	PFN_xrCreateHandTrackerEXT xrCreateHandTrackerEXT = nullptr;
 	PFN_xrDestroyHandTrackerEXT xrDestroyHandTrackerEXT = nullptr;
 	PFN_xrLocateHandJointsEXT xrLocateHandJointsEXT = nullptr;
+	bool m_hand_tracking_supported = false;
 	bool m_use_hand_tracking = false;
 	XrHandTrackerEXT m_hand_tracker[2];
 
 protected:
 	virtual void SetExtensions();
+	virtual void CheckExtensions();
+	virtual bool CheckExtension(const char* extensionName);
+
 	virtual bool CreateInstance();
 	virtual void DestroyInstance();
 

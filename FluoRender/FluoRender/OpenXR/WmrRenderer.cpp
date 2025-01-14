@@ -77,6 +77,8 @@ bool WmrRenderer::Init(void* hdc, void* hglrc)
 	if (!CreateInstance())
 		return false;
 
+	CheckExtensions();
+
 	//load opengl-d3d interop functions
 	LoadFunctions();
 

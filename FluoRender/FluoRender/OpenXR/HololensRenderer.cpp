@@ -460,6 +460,8 @@ bool HololensRenderer::EnableRemotingXR()
 
 void HololensRenderer::CheckExtensions()
 {
+	WmrRenderer::CheckExtensions();
+
 	// Add a specific extension to the list of extensions to be enabled, if it is supported.
 	auto CheckExtension = [&](const char* extensionName)
 	{

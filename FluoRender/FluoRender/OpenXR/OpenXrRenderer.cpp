@@ -78,6 +78,8 @@ bool OpenXrRenderer::Init(void* hdc, void* hglrc)
 	if (!CreateInstance())
 		return false;
 
+	CheckExtensions();
+
 	//load extension functions
 	LoadFunctions();
 
@@ -429,6 +431,23 @@ void OpenXrRenderer::SetExtensions()
 	m_instanceExtensions.push_back(XR_KHR_OPENGL_ENABLE_EXTENSION_NAME);
 	//hand tracking
 	m_instanceExtensions.push_back(XR_EXT_HAND_TRACKING_EXTENSION_NAME);
+}
+
+void OpenXrRenderer::CheckExtensions()
+{
+	m_hand_tracking_supported = CheckExtension(XR_EXT_HAND_TRACKING_EXTENSION_NAME);
+}
+
+bool OpenXrRenderer::CheckExtension(const char* extensionName)
+{
+	for (uint32_t i = 0; i < m_extensionCount; i++)
+	{
+		if (strcmp(m_extensionProperties[i].extensionName, extensionName) == 0)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 bool OpenXrRenderer::CreateInstance()
@@ -1301,6 +1320,8 @@ void OpenXrRenderer::LoadFunctions()
 
 bool OpenXrRenderer::CreateHandTrackers()
 {
+	if (!m_hand_tracking_supported)
+		return false;
 	if (!xrCreateHandTrackerEXT)
 		return false;
 
@@ -1324,6 +1345,8 @@ bool OpenXrRenderer::CreateHandTrackers()
 
 bool OpenXrRenderer::TrackHands()
 {
+	if (!m_hand_tracking_supported)
+		return false;
 	bool detected = false;
 	XrResult result;
 	// Locate hand joints
@@ -1340,6 +1363,8 @@ bool OpenXrRenderer::TrackHands()
 	{
 		result = xrLocateHandJointsEXT(m_hand_tracker[hand], &locateInfo, &jointLocations);
 		if (result != XR_SUCCESS)
+			continue;
+		if (!jointLocations.isActive)
 			continue;
 		
 		float d = DetectHand(jointLocations.jointLocations);

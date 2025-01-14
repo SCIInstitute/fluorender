@@ -225,6 +225,7 @@ public:
 
 protected:
 	void SetExtensions() override;
+	void CheckExtensions() override;
 	void LoadFunctions() override;
 	bool CreateReferenceSpace() override;
 
@@ -233,8 +234,6 @@ protected:
 private:
 #ifdef _WIN32
 	bool EnableRemotingXR();
-
-	void CheckExtensions();
 
 	void Disconnect();
 	bool ConnectOrListen();
