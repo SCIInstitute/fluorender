@@ -299,12 +299,27 @@ if (WIN32 OR APPLE)
 endif()
 
 # JNI includes
+if(WIN32)
+elseif(APPLE)
+  export JAVA_HOME=$(/usr/libexec/java_home)
+  find $JAVA_HOME -name jawt.h
+  find $JAVA_HOME -name jni.h
+  set(JAVA_AWT_INCLUDE_PATH "${JAVA_HOME}/include")
+  set(JAVA_INCLUDE_PATH "${JAVA_HOME}/include")
+  set(JAVA_INCLUDE_PATH2 "${JAVA_HOME}/include/darwin")
+else()
+  export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
+  find $JAVA_HOME -name jawt.h
+  find $JAVA_HOME -name jni.h
+  set(JAVA_INCLUDE_PATH "${JAVA_HOME}/include")
+  set(JAVA_INCLUDE_PATH2 "${JAVA_HOME}/include/linux")
+  set(JAVA_AWT_INCLUDE_PATH "${JAVA_HOME}/include")
+endif()
 find_package(JNI REQUIRED)
 if (JNI_FOUND)
    message (STATUS "JNI_INCLUDE_DIRS=${JNI_INCLUDE_DIRS}")
    message (STATUS "JNI_LIBRARIES=${JNI_LIBRARIES}")
    include_directories(${JNI_INCLUDE_DIRS})
-   #target_link_libraries(FluoRender ${JNI_LIBRARIES})
 endif()
 
 # FluoRender
