@@ -171,8 +171,8 @@ if(WIN32)
     set(wxWidgets_LIB_DIR ${WXWIDGETS_DIR}/lib/vc_x64_lib)
     set(wxWidgets_INCLUDE_DIRS ${WXWIDGETS_DIR}/include)
 else()
-    # Unix-specific settings
-    set(wxWidgets_CONFIG_OPTIONS --prefix=${WXWIDGETS_DIR})
+    set(wxWidgets_ROOT_DIR ${WXWIDGETS_DIR})
+    set(wxWidgets_CONFIG_OPTIONS --prefix=${WXWIDGETS_DIR}/mybuild)
 endif()
 set(wxWidgets_USE_REL_AND_DBG ON)
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
@@ -438,15 +438,11 @@ if(WIN32)
     # Link libraries
     link_directories(${NUGET_PACKAGE_DIR}/build/native/lib)
 elseif(APPLE)
-    file(GLOB OpenXR_RELEASE_LIBRARIES ${OPENXR_DIRS}/build/src/loader/Release/*.a)
-    file(GLOB OpenXR_DEBUG_LIBRARIES ${OPENXR_DIRS}/build/src/loader/Debug/*.a)
-    set(OpenXR_LIBRARIES $<$<CONFIG:Release>:${OpenXR_RELEASE_LIBRARIES}> $<$<CONFIG:Debug>:${OpenXR_DEBUG_LIBRARIES}>)
+    set(OpenXR_LIBRARIES ${OPENXR_DIRS}/build/src/loader/*.dylib)
     add_definitions(-DXR_USE_PLATFORM_MACOS)
     add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
 else()
-    file(GLOB OpenXR_RELEASE_LIBRARIES ${OPENXR_DIRS}/build/src/loader/Release/*.a)
-    file(GLOB OpenXR_DEBUG_LIBRARIES ${OPENXR_DIRS}/build/src/loader/Debug/*.a)
-    set(OpenXR_LIBRARIES $<$<CONFIG:Release>:${OpenXR_RELEASE_LIBRARIES}> $<$<CONFIG:Debug>:${OpenXR_DEBUG_LIBRARIES}>)
+    set(OpenXR_LIBRARIES ${OPENXR_DIRS}/build/src/loader/*.so)
     add_definitions(-DXR_USE_PLATFORM_XLIB)
     add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
 endif()
@@ -1201,7 +1197,15 @@ add_custom_command(TARGET FluoRender POST_BUILD
     $<IF:$<CONFIG:Debug>,${OPENXR_DLL_DEBUG},${OPENXR_DLL_RELEASE}>
     "$<TARGET_FILE_DIR:FluoRender>")
 elseif(APPLE)
+add_custom_command(TARGET FluoRender POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+	"${OPENXR_DIRS}/build/src/loader/libopenxr_loader.dylib"
+    "$<TARGET_FILE_DIR:FluoRender>")
 else()
+add_custom_command(TARGET FluoRender POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+	"${OPENXR_DIRS}/build/src/loader/libopenxr_loader.so"
+    "$<TARGET_FILE_DIR:FluoRender>")
 endif()
 
 # holoplay
