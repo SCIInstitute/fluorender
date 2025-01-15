@@ -48,7 +48,6 @@ if (WIN32)
   SET(USE_MP_COMPILE ON CACHE BOOL "Enable Multithreaded Compile")
 endif()
 
-
 cmake_minimum_required(VERSION 3.10)
 
 # for MSVC builds
@@ -77,6 +76,8 @@ ENDIF()
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
+option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
+set(CMAKE_FIND_LIBRARY_SUFFIXES .a .lib .dylib .so)
 
 if(UNIX OR APPLE OR MINGW)
   set(ARCHITECTURE 64)
