@@ -1102,6 +1102,8 @@ elseif(APPLE)
     ${HDF5_LIBRARIES}
     ${OpenCV_LIBS}
     ${HoloPlay_LIBRARIES}
+    ${OpenVR_LIBRARIES}
+    ${OpenXR_LIBRARIES}
   )
 else()
   target_link_libraries(FluoRender
@@ -1122,6 +1124,8 @@ else()
     ${HDF5_LIBRARIES}
     ${OpenCV_LIBS}
     ${HoloPlay_LIBRARIES}
+    ${OpenVR_LIBRARIES}
+    ${OpenXR_LIBRARIES}
   )
 endif()
 
