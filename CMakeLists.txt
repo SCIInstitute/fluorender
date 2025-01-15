@@ -342,7 +342,6 @@ if(WIN32)
   file(GLOB FREETYPE_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/freetype/lib/*.lib)
 else()
   find_package(Freetype REQUIRED)
-  find_library(FREETYPE_LIBRARY NAMES libfreetype.a PATHS ${FREETYPE_LIBRARY_DIRS})
   include_directories(${FREETYPE_INCLUDE_DIRS})
 endif()
 
