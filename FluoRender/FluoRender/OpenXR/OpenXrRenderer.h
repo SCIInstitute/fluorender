@@ -53,6 +53,9 @@ DEALINGS IN THE SOFTWARE.
 
 //placeholder for openxr. remove if supported in the future
 #ifdef __APPLE__
+#ifndef XR_TYPE_GRAPHICS_BINDING_OPENGL_MACOS_KHR
+#define XR_TYPE_GRAPHICS_BINDING_OPENGL_MACOS_KHR 1000123000
+#endif
 typedef struct XrGraphicsBindingOpenGLMacOSKHR
 {
 	XrStructureType type;	// Must be XR_TYPE_GRAPHICS_BINDING_OPENGL_MACOS_KHR
