@@ -292,9 +292,23 @@ endif()
 
 #hdf5
 if (WIN32 OR APPLE)
+  file(GLOB HDF5_DIRS "${PARENT_DIR}/hdf5*")
+  list(GET HDF5_DIRS 0 HDF5_DIRS)  # Get the first match
   set(HDF5_USE_STATIC_LIBRARIES ON)
+  set(HDF5_C_INCLUDE_DIR "${HDF5_DIRS}/src")
+  if(WIN32)
+    set(HDF5_hdf5_LIBRARY_DEBUG "${HDF5_DIRS}/build/bin/Debug/libhdf5_D.lib")
+    set(HDF5_hdf5_LIBRARY_RELEASE "${HDF5_DIRS}/build/bin/Release/libhdf5.lib")
+  else()
+    set(HDF5_hdf5_LIBRARY_DEBUG "${HDF5_DIRS}/build/bin/libhdf5.a")
+    set(HDF5_hdf5_LIBRARY_RELEASE "${HDF5_DIRS}/build/bin/libhdf5.a")
+  endif()
   find_package(HDF5 REQUIRED)
-  include_directories(${HDF5_INCLUDE_DIRS})
+  if (HDF5_FOUND)
+    message(STATUS "HDF5 include directories: ${HDF5_INCLUDE_DIRS}")
+    message(STATUS "HDF5 libraries: ${HDF5_LIBRARIES}")
+  endif()
+include_directories(${HDF5_INCLUDE_DIRS})
 endif()
 
 # JNI includes
