@@ -30,10 +30,10 @@ DEALINGS IN THE SOFTWARE.
 #define OpenXrRenderer_h
 
 #include <GL/glew.h>
-#include <GL/wglew.h>
 #include <compatibility.h>
 #ifdef _WIN32
 #define WINDOWS_LEAN_AND_MEAN
+#include <GL/wglew.h>
 #include <Windows.h>
 #include <unknwn.h>
 #include <d3d11_1.h>
