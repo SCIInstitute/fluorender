@@ -169,7 +169,9 @@ bool HololensRenderer::Init(void* v1, void* v2, void* v3)
 void HololensRenderer::Close()
 {
 	DestroySharedTex();
+#ifdef _WIN32
 	Disconnect();
+#endif
 	DestroyActions();
 	DestroySwapchains();
 	DestroyReferenceSpace();
