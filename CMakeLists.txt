@@ -76,8 +76,6 @@ ENDIF()
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
-option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
-set(CMAKE_FIND_LIBRARY_SUFFIXES .a .lib .dylib .so)
 
 if(UNIX OR APPLE OR MINGW)
   set(ARCHITECTURE 64)
@@ -344,6 +342,7 @@ if(WIN32)
   file(GLOB FREETYPE_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/freetype/lib/*.lib)
 else()
   find_package(Freetype REQUIRED)
+  find_library(FREETYPE_LIBRARY NAMES libfreetype.a PATHS ${FREETYPE_LIBRARY_DIRS})
   include_directories(${FREETYPE_INCLUDE_DIRS})
 endif()
 
