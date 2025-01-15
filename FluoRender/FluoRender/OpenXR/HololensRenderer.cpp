@@ -439,6 +439,30 @@ void HololensRenderer::PollEvents()
 	}
 }
 
+void HololensRenderer::CheckExtensions()
+{
+	WmrRenderer::CheckExtensions();
+
+#ifdef _WIN32
+	// Add a specific extension to the list of extensions to be enabled, if it is supported.
+	auto CheckExtension = [&](const char* extensionName)
+	{
+		for (uint32_t i = 0; i < m_extensionCount; i++)
+		{
+			if (strcmp(m_extensionProperties[i].extensionName, extensionName) == 0)
+			{
+				return true;
+			}
+		}
+		return false;
+	};
+
+	m_optionalExtensions.DepthExtensionSupported = CheckExtension(XR_KHR_COMPOSITION_LAYER_DEPTH_EXTENSION_NAME);
+	m_optionalExtensions.UnboundedRefSpaceSupported = CheckExtension(XR_MSFT_UNBOUNDED_REFERENCE_SPACE_EXTENSION_NAME);
+	m_optionalExtensions.SpatialAnchorSupported = CheckExtension(XR_MSFT_SPATIAL_ANCHOR_EXTENSION_NAME);
+#endif
+}
+
 #ifdef _WIN32
 bool HololensRenderer::EnableRemotingXR()
 {
@@ -458,28 +482,6 @@ bool HololensRenderer::EnableRemotingXR()
 	}
 
 	return false;
-}
-
-void HololensRenderer::CheckExtensions()
-{
-	WmrRenderer::CheckExtensions();
-
-	// Add a specific extension to the list of extensions to be enabled, if it is supported.
-	auto CheckExtension = [&](const char* extensionName)
-	{
-		for (uint32_t i = 0; i < m_extensionCount; i++)
-		{
-			if (strcmp(m_extensionProperties[i].extensionName, extensionName) == 0)
-			{
-				return true;
-			}
-		}
-		return false;
-	};
-
-	m_optionalExtensions.DepthExtensionSupported = CheckExtension(XR_KHR_COMPOSITION_LAYER_DEPTH_EXTENSION_NAME);
-	m_optionalExtensions.UnboundedRefSpaceSupported = CheckExtension(XR_MSFT_UNBOUNDED_REFERENCE_SPACE_EXTENSION_NAME);
-	m_optionalExtensions.SpatialAnchorSupported = CheckExtension(XR_MSFT_SPATIAL_ANCHOR_EXTENSION_NAME);
 }
 
 void HololensRenderer::Disconnect()
