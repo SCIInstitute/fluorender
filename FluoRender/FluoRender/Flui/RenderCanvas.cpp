@@ -468,7 +468,7 @@ void RenderCanvas::InitOpenXR()
 			static_cast<void*>(hglrc),
 			0);
 #elif defined(__APPLE__)
-	CGLContextObj cglContext = CGLGetCurrentContext();
+	/*CGLContextObj cglContext = CGLGetCurrentContext();
 	// Define the pixel format attributes based on wxGLCanvas attributes
 	NSOpenGLPixelFormatAttribute profile_ver = NSOpenGLProfileVersionLegacy;
 	if (glbin_settings.m_gl_major_ver == 3)
@@ -494,11 +494,11 @@ void RenderCanvas::InitOpenXR()
 	if (!pixelFormat)
 		return;
 	// Retrieve the CGLPixelFormatObj from the NSOpenGLPixelFormat
-	CGLPixelFormatObj cglPixelFormat = [pixelFormat CGLPixelFormatObj];
+	CGLPixelFormatObj cglPixelFormat = [pixelFormat CGLPixelFormatObj];*/
 	if (glbin_xr_renderer)
 		m_use_openxr = glbin_xr_renderer->Init(
-			static_cast<void*>(cglContext),
-			static_cast<void*>(cglPixelFormat),
+			0,
+			0,
 			0);
 #elif defined(__linux__)
 	Display* xDisplay = glXGetCurrentDisplay();
