@@ -51,6 +51,17 @@ DEALINGS IN THE SOFTWARE.
         }                                                                                                                                                   \
     }
 
+//placeholder for openxr. remove if supported in the future
+#ifdef __APPLE__
+typedef struct XrGraphicsBindingOpenGLMacOSKHR
+{
+	XrStructureType type;	// Must be XR_TYPE_GRAPHICS_BINDING_OPENGL_MACOS_KHR
+	void* next;				// Pointer to the next structure in a structure chain, or NULL
+	void* cglContext;		// OpenGL context handle
+	void* cglPixelFormat;	// pixelformat handle
+} XrGraphicsBindingOpenGLMacOSKHR;
+#endif
+
 XrBool32 OpenXRMessageCallbackFunction(XrDebugUtilsMessageSeverityFlagsEXT messageSeverity, XrDebugUtilsMessageTypeFlagsEXT messageType, const XrDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData);
 
 class OpenXrRenderer : public BaseXrRenderer

@@ -751,8 +751,8 @@ bool OpenXrRenderer::CreateSession(void* v1, void* v2, void* v3)
 	graphicsBindingOpenGL.hGLRC = static_cast<HGLRC>(v2);
 #elif defined(__APPLE__)
 	XrGraphicsBindingOpenGLMacOSKHR graphicsBindingOpenGL = { XR_TYPE_GRAPHICS_BINDING_OPENGL_MACOS_KHR };
-	graphicsBindingOpenGL.cglContext = static_cast<CGLContextObj>(v1);
-	graphicsBindingOpenGL.cglPixelFormat = static_cast<CGLPixelFormatObj>(v2);
+	graphicsBindingOpenGL.cglContext = v1;
+	graphicsBindingOpenGL.cglPixelFormat = v2;
 #elif defined(__linux__)
 	XrGraphicsBindingOpenGLXlibKHR graphicsBindingOpenGL = { XR_TYPE_GRAPHICS_BINDING_OPENGL_XLIB_KHR };
 	graphicsBindingOpenGL.xDisplay = static_cast<Display*>(v1);
