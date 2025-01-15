@@ -39,7 +39,7 @@ public:
 	OpenVrRenderer();
 	virtual ~OpenVrRenderer();
 
-	bool Init(void*, void*) override;
+	bool Init(void*, void*, void*) override;
 	void Close() override;
 
 	void GetControllerStates() override;

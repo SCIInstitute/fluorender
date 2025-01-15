@@ -40,7 +40,7 @@ OpenVrRenderer::~OpenVrRenderer()
 
 }
 
-bool OpenVrRenderer::Init(void* hdc, void* hglrc)
+bool OpenVrRenderer::Init(void* v1, void* v2, void* v3)
 {
 	if (m_initialized)
 		return m_initialized;

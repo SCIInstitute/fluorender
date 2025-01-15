@@ -59,7 +59,7 @@ public:
 	OpenXrRenderer();
 	virtual ~OpenXrRenderer();
 
-	bool Init(void*, void*) override;
+	bool Init(void*, void*, void*) override;
 	void Close() override;
 
 	void GetControllerStates() override;
@@ -177,7 +177,7 @@ protected:
 	virtual bool GetViewConfigurationViews();
 	virtual bool GetEnvironmentBlendModes();
 
-	virtual bool CreateSession(void* hdc, void* hglrc);
+	virtual bool CreateSession(void*, void*, void*);
 	virtual void DestroySession();
 
 	virtual bool CreateReferenceSpace();

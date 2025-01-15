@@ -67,7 +67,7 @@ OpenXrRenderer::~OpenXrRenderer()
 
 }
 
-bool OpenXrRenderer::Init(void* hdc, void* hglrc)
+bool OpenXrRenderer::Init(void* v1, void* v2, void* v3)
 {
 	if (m_initialized)
 		return m_initialized;
@@ -100,7 +100,7 @@ bool OpenXrRenderer::Init(void* hdc, void* hglrc)
 
 	GetEnvironmentBlendModes();
 
-	if (!CreateSession(hdc, hglrc))
+	if (!CreateSession(v1, v2, v3))
 		return false;
 
 	CreateActionPoses();
@@ -731,7 +731,7 @@ bool OpenXrRenderer::GetEnvironmentBlendModes()
 	return true;
 }
 
-bool OpenXrRenderer::CreateSession(void* hdc, void* hglrc)
+bool OpenXrRenderer::CreateSession(void* v1, void* v2, void* v3)
 {
 	XrResult result;
 	// Create an XrSessionCreateInfo structure.
@@ -745,9 +745,20 @@ bool OpenXrRenderer::CreateSession(void* hdc, void* hglrc)
 	XrGraphicsRequirementsOpenGLKHR requirements = { XR_TYPE_GRAPHICS_REQUIREMENTS_OPENGL_KHR };
 	result = xrGetOpenGLGraphicsRequirementsKHR(m_instance, m_sys_id, &requirements);
 	if (result != XR_SUCCESS) return false;
+#ifdef _WIN32
 	XrGraphicsBindingOpenGLWin32KHR graphicsBindingOpenGL = { XR_TYPE_GRAPHICS_BINDING_OPENGL_WIN32_KHR };
-	graphicsBindingOpenGL.hDC = static_cast<HDC>(hdc);
-	graphicsBindingOpenGL.hGLRC = static_cast<HGLRC>(hglrc);
+	graphicsBindingOpenGL.hDC = static_cast<HDC>(v1);
+	graphicsBindingOpenGL.hGLRC = static_cast<HGLRC>(v2);
+#elif defined(__APPLE__)
+	XrGraphicsBindingOpenGLMacOSKHR graphicsBindingOpenGL = { XR_TYPE_GRAPHICS_BINDING_OPENGL_MACOS_KHR };
+	graphicsBindingOpenGL.cglContext = static_cast<CGLContextObj>(v1);
+	graphicsBindingOpenGL.cglPixelFormat = static_cast<CGLPixelFormatObj>(v2);
+#elif defined(__linux__)
+	XrGraphicsBindingOpenGLXlibKHR graphicsBindingOpenGL = { XR_TYPE_GRAPHICS_BINDING_OPENGL_XLIB_KHR };
+	graphicsBindingOpenGL.xDisplay = static_cast<Display*>(v1);
+	graphicsBindingOpenGL.glxDrawable = static_cast<GLXDrawable>(v2);
+	graphicsBindingOpenGL.glxContext = static_cast<GLXContext>(v3);
+#endif
 
 	// Fill out the XrSessionCreateInfo structure and create an XrSession.
 	sessionCI.next = (void*)&graphicsBindingOpenGL;

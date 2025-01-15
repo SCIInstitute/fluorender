@@ -465,10 +465,50 @@ void RenderCanvas::InitOpenXR()
 	if (glbin_xr_renderer)
 		m_use_openxr = glbin_xr_renderer->Init(
 			static_cast<void*>(hdc),
-			static_cast<void*>(hglrc));
-#else
+			static_cast<void*>(hglrc),
+			0);
+#elif defined(__APPLE__)
+	CGLContextObj cglContext = CGLGetCurrentContext();
+	// Define the pixel format attributes based on wxGLCanvas attributes
+	NSOpenGLPixelFormatAttribute profile_ver = NSOpenGLProfileVersionLegacy;
+	if (glbin_settings.m_gl_major_ver == 3)
+		profile_ver = NSOpenGLProfileVersion3_2Core;
+	else if (glbin_settings.gl_major_ver == 4)
+		profile_ver = NSOpenGLProfileVersion4_1Core;
+	NSOpenGLPixelFormatAttribute color_size =
+		glbin_settings.m_red_bit +
+		glbin_settings.m_green_bit +
+		glbin_settings.m_blue_bit;
+	NSOpenGLPixelFormatAttribute alpha_size = glbin_settings.m_alpha_bit;
+	NSOpenGLPixelFormatAttribute depth_size = glbin_settings.m_depth_bit;
+	NSOpenGLPixelFormatAttribute attributes[] = {
+		NSOpenGLPFAOpenGLProfile, profile_ver,
+		NSOpenGLPFAColorSize, color_size,
+		NSOpenGLPFAAlphaSize, alpha_size,
+		NSOpenGLPFADepthSize, depth_size,
+		NSOpenGLPFADoubleBuffer,
+		0
+	};
+	// Create the NSOpenGLPixelFormat object
+	NSOpenGLPixelFormat* pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
+	if (!pixelFormat)
+		return;
+	// Retrieve the CGLPixelFormatObj from the NSOpenGLPixelFormat
+	CGLPixelFormatObj cglPixelFormat = [pixelFormat CGLPixelFormatObj];
 	if (glbin_xr_renderer)
-		m_use_openxr = glbin_xr_renderer->Init(0, 0);
+		m_use_openxr = glbin_xr_renderer->Init(
+			static_cast<void*>(cglContext),
+			static_cast<void*>(cglPixelFormat),
+			0);
+#elif defined(__linux__)
+	Display* xDisplay = glXGetCurrentDisplay();
+	GLXDrawable glxDrawable = glXGetCurrentDrawable();
+	GLXContext glxContext = glXGetCurrentContext();
+	if (glbin_xr_renderer)
+		m_use_openxr = glbin_xr_renderer->Init(
+			static_cast<void*>(xDisplay),
+			static_cast<void*>(glxDrawable),
+			static_cast<void*>(glxContext));
 #endif
 	if (!m_use_openxr)
 	{

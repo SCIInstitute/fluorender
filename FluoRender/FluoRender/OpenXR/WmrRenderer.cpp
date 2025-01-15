@@ -66,7 +66,7 @@ WmrRenderer::~WmrRenderer()
 {
 }
 
-bool WmrRenderer::Init(void* hdc, void* hglrc)
+bool WmrRenderer::Init(void* v1, void* v2, void* v3)
 {
 	if (m_initialized)
 		return m_initialized;
@@ -101,7 +101,7 @@ bool WmrRenderer::Init(void* hdc, void* hglrc)
 
 	GetEnvironmentBlendModes();
 
-	if (!CreateSession(hdc, hglrc))
+	if (!CreateSession(v1, v2, v3))
 		return false;
 
 	CreateActionPoses();
@@ -216,7 +216,7 @@ void WmrRenderer::SetExtensions()
 	m_instanceExtensions.push_back(XR_EXT_HAND_TRACKING_EXTENSION_NAME);
 }
 
-bool WmrRenderer::CreateSession(void* hdc, void* hdxrc)
+bool WmrRenderer::CreateSession(void* v1, void* v2, void* v3)
 {
 #ifdef _WIN32
 	XrResult result;

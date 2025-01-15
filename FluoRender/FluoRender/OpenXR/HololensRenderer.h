@@ -220,7 +220,7 @@ public:
 	HololensRenderer(const HololensOptions& options);
 	virtual ~HololensRenderer();
 
-	bool Init(void*, void*) override;
+	bool Init(void*, void*, void*) override;
 	void Close() override;
 
 protected:

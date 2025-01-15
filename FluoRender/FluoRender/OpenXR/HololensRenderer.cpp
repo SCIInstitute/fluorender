@@ -83,7 +83,7 @@ HololensRenderer::~HololensRenderer()
 {
 }
 
-bool HololensRenderer::Init(void* hdc, void* hglrc)
+bool HololensRenderer::Init(void* v1, void* v2, void* v3)
 {
 	if (m_initialized)
 		return m_initialized;
@@ -144,7 +144,7 @@ bool HololensRenderer::Init(void* hdc, void* hglrc)
 		return false;
 #endif
 
-	if (!CreateSession(hdc, hglrc))
+	if (!CreateSession(v1, v2, v3))
 		return false;
 
 	CreateActionPoses();
