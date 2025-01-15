@@ -43,8 +43,8 @@ DEALINGS IN THE SOFTWARE.
 
 HololensRenderer::HololensRenderer(const HololensOptions& options) :
 	WmrRenderer()
-	,m_options(options)
 #ifdef _WIN32
+	,m_options(options)
 	,m_secureConnectionCallbacks(m_options.authenticationToken,
 		m_options.allowCertificateNameMismatch,
 		m_options.allowUnverifiedCertificateChain,
