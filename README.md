@@ -14,11 +14,12 @@ Download the installer package for your operating system (OS).
 
 <h1 id="features">Latest Features</h1>
 
-- Support of a wide range of VR and AR headsets
-   - Microsoft Hololens 2 using Holographic Remoting (via local network on Wifi or Ethernet)
-   - Windows Mixed Reality headsets using OpenXR Direct3D binding
-   - Meta Quest headsets using OpenXR OpenGL binding (via wired or wireless Oculus Link)
-   - HTC Vive headsets using OpenVR
+- **Support for a Wide Range of VR and AR Headsets**
+   - **Microsoft Hololens 2:** Utilizes Holographic Remoting over local network (WiFi or Ethernet).
+   - **Windows Mixed Reality Headsets:** Compatible with OpenXR Direct3D binding.
+   - **Meta Quest Headsets:** Supports OpenXR OpenGL binding via wired or wireless Oculus Link.
+   - **HTC Vive Headsets:** Operates using OpenVR.
+- **Dyanmic Gradient Background**
 
 <h1 id="documentation">Documentation</h1>
 
