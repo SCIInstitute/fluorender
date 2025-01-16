@@ -44,14 +44,14 @@ public:
 	WmrRenderer();
 	virtual ~WmrRenderer();
 
-	bool Init(void*, void*, void*) override;
+	bool Init(void*, void*, uint64_t) override;
 	void Close() override;
 
 	void Draw(const std::vector<flvr::Framebuffer*> &fbos) override;
 
 protected:
 	void SetExtensions() override;
-	bool CreateSession(void*, void*, void*) override;
+	bool CreateSession(void*, void*, uint64_t) override;
 	bool CreateSwapchainImages(int type, uint32_t count, SwapchainInfo& info) override;
 	void* CreateImageView(int type, int eye, void* format, void* tid) override;//0:color 1:depth
 	void DestroyImageView(void*& imageView) override;

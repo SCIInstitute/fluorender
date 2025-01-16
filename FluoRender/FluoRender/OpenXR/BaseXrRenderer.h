@@ -63,7 +63,7 @@ class BaseXrRenderer
 public:
 	virtual ~BaseXrRenderer();
 
-	virtual bool Init(void*, void*, void*) = 0;
+	virtual bool Init(void*, void*, uint64_t) = 0;
 	virtual void Close() = 0;
 
 	virtual uint32_t GetSize(int i)

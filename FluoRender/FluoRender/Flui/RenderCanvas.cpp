@@ -507,8 +507,8 @@ void RenderCanvas::InitOpenXR()
 	if (glbin_xr_renderer)
 		m_use_openxr = glbin_xr_renderer->Init(
 			static_cast<void*>(xDisplay),
-			static_cast<void*>(glxDrawable),
-			static_cast<void*>(glxContext));
+			static_cast<void*>(glxContext),
+			static_cast<uint64_t>(glxDrawable));
 #endif
 	if (!m_use_openxr)
 	{

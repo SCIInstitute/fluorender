@@ -66,7 +66,7 @@ WmrRenderer::~WmrRenderer()
 {
 }
 
-bool WmrRenderer::Init(void* v1, void* v2, void* v3)
+bool WmrRenderer::Init(void* v1, void* v2, uint64_t v3)
 {
 	if (m_initialized)
 		return m_initialized;
@@ -216,7 +216,7 @@ void WmrRenderer::SetExtensions()
 	m_instanceExtensions.push_back(XR_EXT_HAND_TRACKING_EXTENSION_NAME);
 }
 
-bool WmrRenderer::CreateSession(void* v1, void* v2, void* v3)
+bool WmrRenderer::CreateSession(void* v1, void* v2, uint64_t v3)
 {
 #ifdef _WIN32
 	XrResult result;

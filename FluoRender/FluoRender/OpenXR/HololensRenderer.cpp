@@ -83,7 +83,7 @@ HololensRenderer::~HololensRenderer()
 {
 }
 
-bool HololensRenderer::Init(void* v1, void* v2, void* v3)
+bool HololensRenderer::Init(void* v1, void* v2, uint64_t v3)
 {
 	if (m_initialized)
 		return m_initialized;

@@ -327,12 +327,11 @@ else()
   set(JAVA_INCLUDE_PATH ${JAVA_HOME}/include)
   set(JAVA_INCLUDE_PATH2 ${JAVA_HOME}/include/linux)
   set(JAVA_AWT_INCLUDE_PATH ${JAVA_HOME}/include)
+  find_package(Java REQUIRED)
   find_package(JNI REQUIRED)
   include_directories(${JNI_INCLUDE_DIRS})
   include_directories(${JAVA_INCLUDE_PATH})
   include_directories(${JAVA_INCLUDE_PATH2})
-  message(STATUS "JAVA_HOME:" ${JAVA_HOME})
-  message(STATUS "Java paths: ${JNI_INCLUDE_DIRS} ${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2}")
 endif()
 
 # FluoRender
