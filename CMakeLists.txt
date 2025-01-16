@@ -316,7 +316,7 @@ include_directories(${HDF5_INCLUDE_DIRS}
 endif()
 
 # JNI includes
-if (WIN32 or APPLE)
+if (WIN32 OR APPLE)
   find_package(Java REQUIRED)
 else()
   set(JAVA_AWT_LIBRARY ${JAVA_HOME}/lib/libjawt.so)
