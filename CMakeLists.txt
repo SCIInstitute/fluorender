@@ -330,6 +330,7 @@ else()
   include_directories(${JNI_INCLUDE_DIRS})
   include_directories(${JAVA_INCLUDE_PATH})
   include_directories(${JAVA_INCLUDE_PATH2})
+  message(STATUS "Java paths: ${JNI_INCLUDE_DIRS} ${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2}")
 endif()
 
 # FluoRender
