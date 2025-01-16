@@ -19,7 +19,7 @@ Download the installer package for your operating system (OS).
    - **Windows Mixed Reality Headsets:** Compatible with OpenXR Direct3D binding.
    - **Meta Quest Headsets:** Supports OpenXR OpenGL binding via wired or wireless Oculus Link.
    - **HTC Vive Headsets:** Operates using OpenVR.
-- **Dyanmic Gradient Background**
+- **Dynamic Gradient Background**
 
 <h1 id="documentation">Documentation</h1>
 
