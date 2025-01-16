@@ -42,6 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #ifdef __linux__
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <GL/glx.h>
 #endif
 #include <openxr/openxr.h>
 #include <openxr/openxr_platform.h>
