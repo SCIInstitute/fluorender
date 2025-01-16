@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <string.h>
 
 template <typename T>
 inline bool BitwiseCheck(const T& value, const T& checkValue) {
