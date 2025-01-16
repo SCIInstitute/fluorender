@@ -12,6 +12,14 @@ Download the installer package for your operating system (OS).
 
 **Ubuntu:** [Version 2.31](https://github.com/SCIInstitute/fluorender/releases/download/v2.31/fluorender2.31_ubuntu22.04_amd64.deb)
 
+<h1 id="features">Latest Features</h1>
+
+- Support of a wide range of VR and AR headsets
+   - Microsoft Hololens 2 using Holographic Remoting (via local network on Wifi or Ethernet)
+   - Windows Mixed Reality headsets using OpenXR Direct3D binding
+   - Meta Quest headsets using OpenXR OpenGL binding (via wired or wireless Oculus Link)
+   - HTC Vive headsets using OpenVR
+
 <h1 id="documentation">Documentation</h1>
 
 **User Manual:** [Version 2.31](https://github.com/SCIInstitute/fluorender/releases/download/v2.31/FluoRender2.31_Manual.pdf)
