@@ -39,6 +39,10 @@ DEALINGS IN THE SOFTWARE.
 #include <d3d11_1.h>
 #include <dxgi1_6.h>
 #endif
+#ifdef __linux__
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#endif
 #include <openxr/openxr.h>
 #include <openxr/openxr_platform.h>
 #include <BaseXrRenderer.h>
