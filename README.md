@@ -59,18 +59,27 @@ Wan, Y., et al. (2017). FluoRender: joint free-hand segmentation and visualizati
 <h2>Common Dependencies</h2>
 
 Some third-party dependencies are included in the FluoRender source code. Other dependencies need to be prepared before building FluoRender.
- * Windows 10 and later : Visual Studio 2017 and later<br/>
-   Or Mac OS 11 (Big Sur) and later : Updated Xcode and command line tools<br/>
-   Or Ubuntu Linux 22.04 (tested to work)
- * Git (https://git-scm.com/) for managing the source code
- * CMake (http://www.cmake.org/) for generating building projects
- * wxWidgets (https://github.com/wxWidgets/wxWidgets) for user-interface library
- * Boost (http://www.boost.org/users/download/#live) for computing using the graph library
- * OpenCV (https://opencv.org/) for computer vision calculations
- * Dlib (http://dlib.net) for deep neural network calculations
- * JDK (https://www.oracle.com/java/technologies/downloads/) for linking to ImageJ functions
- * Python (https://www.python.org/downloads/) for linking to Python functions
- * HDF5 (https://www.hdfgroup.org/download-hdf5/) for managing HDF files
+ - Windows 10 and later : Visual Studio 2017 and later<br/>
+   - Or Mac OS 11 (Big Sur) and later : Updated Xcode and command line tools<br/>
+   - Or Ubuntu Linux 22.04 (tested to work)
+ - Git (https://git-scm.com/) for managing the source code
+ - CMake (http://www.cmake.org/) for generating building projects
+ - Boost (http://www.boost.org/users/download/#live) for computing using the graph library
+ - Dlib (http://dlib.net) for deep neural network calculations
+ - GLEW (https://glew.sourceforge.net) for OpenGL extension management
+   - https://github.com/nigels-com/glew/releases/tag/glew-2.2.0
+ - HDF5 (https://www.hdfgroup.org/download-hdf5/) for managing HDF files
+   - https://github.com/HDFGroup/hdf5/releases/tag/hdf5_1.14.5
+ - JDK (https://www.oracle.com/java/technologies/downloads/) for linking to ImageJ functions
+ - OpenCV (https://opencv.org/) for computer vision calculations
+   - https://github.com/opencv/opencv.git
+ - OpenVR (https://steamvr.com) for SteamVR headset support
+   - https://github.com/ValveSoftware/openvr.git
+ - OpenXR (https://www.khronos.org/openxr/) for OpenXR headset support
+   - https://github.com/KhronosGroup/OpenXR-SDK.git
+ - Python (https://www.python.org/downloads/) for linking to Python functions
+ - wxWidgets (https://github.com/wxWidgets/wxWidgets) for user-interface library
+   - I made some changes to the wxWidgets code. Use my branch: https://github.com/basisunus/wxWidgets.git
  
 <h2>Linux</h2> 
 
