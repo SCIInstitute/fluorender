@@ -317,6 +317,13 @@ endif()
 
 # JNI includes
 find_package(Java REQUIRED)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(JAVA_AWT_LIBRARY ${JAVA_HOME}/lib/libjawt.so)
+    set(JAVA_JVM_LIBRARY ${JAVA_HOME}/lib/server/libjvm.so)
+    set(JAVA_INCLUDE_PATH ${JAVA_HOME}/include)
+    set(JAVA_INCLUDE_PATH2 ${JAVA_HOME}/include/linux)
+    set(JAVA_AWT_INCLUDE_PATH ${JAVA_HOME}/include)
+endif()
 find_package(JNI REQUIRED)
 if (JNI_FOUND)
    message (STATUS "JNI_INCLUDE_DIRS=${JNI_INCLUDE_DIRS}")
