@@ -406,7 +406,7 @@ include_directories(${OPENVR_DIRS}/headers)
 if(WIN32)
     file(GLOB OpenVR_LIBRARIES ${OPENVR_DIRS}/lib/win64/openvr_api.lib)
 elseif(APPLE)
-    file(GLOB OpenVR_LIBRARIES ${OPENVR_DIRS}/lib/osx32/libopenvr_api.dylib)
+    file(GLOB OpenVR_LIBRARIES ${OPENVR_DIRS}/bin/osx64/libopenvr_api.dylib)
 else()
     file(GLOB OpenVR_LIBRARIES ${OPENVR_DIRS}/lib/linux64/libopenvr_api.so)
 endif()
@@ -1204,7 +1204,7 @@ add_custom_command(TARGET FluoRender POST_BUILD
 elseif(APPLE)
 add_custom_command(TARGET FluoRender POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy
-	"${OPENVR_DIRS}/bin/osx32/libopenvr_api.dylib"
+	"${OPENVR_DIRS}/bin/osx64/libopenvr_api.dylib"
     "$<TARGET_FILE_DIR:FluoRender>")
 else()
 add_custom_command(TARGET FluoRender POST_BUILD
