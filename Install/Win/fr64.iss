@@ -3,7 +3,7 @@
 
 #define MyAppName "FluoRender"   
 #define MyAppSetupName 'FluoRender'
-#define MyAppVersion "2.31"
+#define MyAppVersion "2.32"
 #define MyAppPublisher "SCI"
 #define MyAppURL "http://sci.utah.edu"
 #define MyAppExeName "FluoRender.exe"
@@ -13,12 +13,12 @@
 
 [Setup]
 OutputDir=..\build
-OutputBaseFilename=FluoRender2.31_win64
+OutputBaseFilename=FluoRender2.32_win64
 SetupIconFile=.\Images\FluoRenderIcon.ico
 WizardImageFile=.\Images\fluorender_logo_cut.bmp
 WizardSmallImageFile=.\Images\fluorender_logo_square.bmp
 WizardImageBackColor=clWhite
-LicenseFile=E:\PROJECTS\FLUORENDER\fluorender_work\LICENSE.txt
+LicenseFile=..\..\LICENSE.txt
 ChangesAssociations=yes
 
 [Dirs]
@@ -28,108 +28,116 @@ Name: "{app}\Database"; Permissions: users-full
 [Files]
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 ; BINARY ITEMS
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\FluoRender.exe"; DestDir: "{app}"; Flags: ignoreversion      
+Source: "..\..\build\bin\Release\FluoRender.exe"; DestDir: "{app}"; Flags: ignoreversion      
 ; OPEN CL items
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\CL_code\binary.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion     
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\CL_code\box.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion     
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\CL_code\conv.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\CL_code\copy.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\CL_code\erosion.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion       
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\CL_code\erosion_2d.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\CL_code\gauss.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\CL_code\gauss_2d.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\CL_code\max.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\CL_code\median.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\CL_code\min.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\CL_code\morph_grad.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\CL_code\remove_backg.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\CL_code\remove_backg_3d.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\CL_code\sharp.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\CL_code\sobel.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\CL_code\thinning.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\CL_code\thinning_simple.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\CL_code\binary.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion     
+Source: "..\..\build\bin\Release\CL_code\box.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion     
+Source: "..\..\build\bin\Release\CL_code\conv.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\CL_code\copy.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\CL_code\erosion.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion       
+Source: "..\..\build\bin\Release\CL_code\erosion_2d.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\CL_code\gauss.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\CL_code\gauss_2d.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\CL_code\max.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\CL_code\median.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\CL_code\min.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\CL_code\morph_grad.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\CL_code\remove_backg.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\CL_code\remove_backg_3d.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\CL_code\sharp.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion
+Source: "..\..\build\bin\Release\CL_code\sobel.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\CL_code\thinning.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\CL_code\thinning_simple.cl"; DestDir: "{app}\CL_code"; Flags: ignoreversion 
 ; Command items
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Commands\cell_30.txt"; DestDir: "{app}\Commands"; Flags: ignoreversion     
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Commands\cell_50.txt"; DestDir: "{app}\Commands"; Flags: ignoreversion     
+Source: "..\..\build\bin\Release\Commands\cell_30.txt"; DestDir: "{app}\Commands"; Flags: ignoreversion     
+Source: "..\..\build\bin\Release\Commands\cell_50.txt"; DestDir: "{app}\Commands"; Flags: ignoreversion     
 ; Data
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Data\example01_colormap.vrp"; DestDir: "{app}\Data"; Flags: ignoreversion
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Data\branches.tif"; DestDir: "{app}\Data"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Data\dens_field.tif"; DestDir: "{app}\Data"; Flags: ignoreversion
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Data\dens_field_16b.tif"; DestDir: "{app}\Data"; Flags: ignoreversion
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Data\dist_field.tif"; DestDir: "{app}\Data"; Flags: ignoreversion
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Data\dist_field_16b.tif"; DestDir: "{app}\Data"; Flags: ignoreversion
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Data\grid.tif"; DestDir: "{app}\Data"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Data\zf_ch01.tif"; DestDir: "{app}\Data"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Data\zf_ch02.tif"; DestDir: "{app}\Data"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Data\zf_ch03.tif"; DestDir: "{app}\Data"; Flags: ignoreversion
+Source: "..\..\build\bin\Release\Data\example01_colormap.vrp"; DestDir: "{app}\Data"; Flags: ignoreversion
+Source: "..\..\build\bin\Release\Data\branches.tif"; DestDir: "{app}\Data"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Data\dens_field.tif"; DestDir: "{app}\Data"; Flags: ignoreversion
+Source: "..\..\build\bin\Release\Data\dens_field_16b.tif"; DestDir: "{app}\Data"; Flags: ignoreversion
+Source: "..\..\build\bin\Release\Data\dist_field.tif"; DestDir: "{app}\Data"; Flags: ignoreversion
+Source: "..\..\build\bin\Release\Data\dist_field_16b.tif"; DestDir: "{app}\Data"; Flags: ignoreversion
+Source: "..\..\build\bin\Release\Data\grid.tif"; DestDir: "{app}\Data"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Data\zf_ch01.tif"; DestDir: "{app}\Data"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Data\zf_ch02.tif"; DestDir: "{app}\Data"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Data\zf_ch03.tif"; DestDir: "{app}\Data"; Flags: ignoreversion
 ; Database
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Database\density_field.cgtbl"; DestDir: "{app}\Database"; Flags: onlyifdoesntexist; Permissions: users-full
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Database\fish_test.vptbl"; DestDir: "{app}\Database"; Flags: onlyifdoesntexist; Permissions: users-full 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Database\dnn_test.vptbl"; DestDir: "{app}\Database"; Flags: onlyifdoesntexist; Permissions: users-full 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Database\dnn_test.vptbl.model"; DestDir: "{app}\Database"; Flags: onlyifdoesntexist; Permissions: users-full 
+Source: "..\..\build\bin\Release\Database\density_field.cgtbl"; DestDir: "{app}\Database"; Flags: onlyifdoesntexist; Permissions: users-full
+Source: "..\..\build\bin\Release\Database\fish_test.vptbl"; DestDir: "{app}\Database"; Flags: onlyifdoesntexist; Permissions: users-full 
+Source: "..\..\build\bin\Release\Database\dnn_test.vptbl"; DestDir: "{app}\Database"; Flags: onlyifdoesntexist; Permissions: users-full 
+Source: "..\..\build\bin\Release\Database\dnn_test.vptbl.model"; DestDir: "{app}\Database"; Flags: onlyifdoesntexist; Permissions: users-full 
 ; FONT ITEMS       
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Fonts\FreeMono.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Fonts\FreeMonoBold.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Fonts\FreeMonoBoldOblique.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Fonts\FreeMonoOblique.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion    
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Fonts\FreeSans.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Fonts\FreeSansBold.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Fonts\FreeSansBoldOblique.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Fonts\FreeSansOblique.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Fonts\FreeSerif.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Fonts\FreeSerifBold.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Fonts\FreeSerifBoldItalic.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Fonts\FreeSerifItalic.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Fonts\FreeMono.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Fonts\FreeMonoBold.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Fonts\FreeMonoBoldOblique.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Fonts\FreeMonoOblique.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion    
+Source: "..\..\build\bin\Release\Fonts\FreeSans.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion
+Source: "..\..\build\bin\Release\Fonts\FreeSansBold.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Fonts\FreeSansBoldOblique.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Fonts\FreeSansOblique.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Fonts\FreeSerif.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Fonts\FreeSerifBold.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion
+Source: "..\..\build\bin\Release\Fonts\FreeSerifBoldItalic.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Fonts\FreeSerifItalic.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion 
 ; Java
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Java_Code\ImageJ_Reader.class"; DestDir: "{app}\Java_Code"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Java_Code\ImageJ_Reader.class"; DestDir: "{app}\Java_Code"; Flags: ignoreversion  
 ; Scripts directory
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\background_stat.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\calculate.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\comp_ruler_export.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\comps_analyze.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\comps_dff.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\comps_gen_track_analyze.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\comps_generate.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\execute_opencl.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\export_random_colors.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\export_separate_chann.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\gen_walk.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\mask_clear.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\mask_fetch.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\mask_save_fetch.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\noise_removal.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\python.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\reg_ruler_analyze.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\registrate.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\roi_dff.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\ruler_info.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\ruler_profile.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\ruler_speed.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\stereo_reconstruct.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\track_mask.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\track_mask_analyze.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\track_selected_results.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\track_semiauto.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\video_analysis.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\video_train.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Scripts\volume_save.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\background_stat.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Scripts\calculate.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Scripts\comp_ruler_export.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Scripts\comps_analyze.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Scripts\comps_dff.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Scripts\comps_gen_track_analyze.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Scripts\comps_generate.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Scripts\execute_opencl.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Scripts\export_random_colors.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\export_separate_chann.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Scripts\gen_walk.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Scripts\mask_clear.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\mask_fetch.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\mask_save_fetch.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\noise_removal.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\python.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\reg_ruler_analyze.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\registrate.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\roi_dff.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\ruler_info.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\ruler_profile.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\ruler_speed.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\stereo_reconstruct.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\track_mask.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\track_mask_analyze.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\track_selected_results.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\track_semiauto.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\video_analysis.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\video_train.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "..\..\build\bin\Release\Scripts\volume_save.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
 ; Template directory
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Templates\d3.v4.min.js"; DestDir: "{app}\Templates"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Templates\ridgeline.html"; DestDir: "{app}\Templates"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Templates\ridgeline_local.html"; DestDir: "{app}\Templates"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Templates\table.html"; DestDir: "{app}\Templates"; Flags: ignoreversion  
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\Templates\table_local.html"; DestDir: "{app}\Templates"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Templates\d3.v4.min.js"; DestDir: "{app}\Templates"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Templates\ridgeline.html"; DestDir: "{app}\Templates"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Templates\ridgeline_local.html"; DestDir: "{app}\Templates"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Templates\table.html"; DestDir: "{app}\Templates"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Templates\table_local.html"; DestDir: "{app}\Templates"; Flags: ignoreversion  
 ; SETTINGS ITEMS
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\Settings\fluorender.ini"; DestDir: "{app}"; Flags: onlyifdoesntexist; Permissions: users-full
+Source: "..\..\Settings\fluorender.ini"; DestDir: "{app}"; Flags: onlyifdoesntexist; Permissions: users-full
 ; Benchmark
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\FluoRender_benchmark.bat"; DestDir: "{app}"; Flags: ignoreversion      
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\FluoRender_benchmark.command"; DestDir: "{app}"; Flags: ignoreversion      
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\FluoRender_benchmark_fullscreen.bat"; DestDir: "{app}"; Flags: ignoreversion      
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\FluoRender_benchmark_fullscreen.command"; DestDir: "{app}"; Flags: ignoreversion      
+Source: "..\..\build\bin\Release\FluoRender_benchmark.bat"; DestDir: "{app}"; Flags: ignoreversion      
+Source: "..\..\build\bin\Release\FluoRender_benchmark.command"; DestDir: "{app}"; Flags: ignoreversion      
+Source: "..\..\build\bin\Release\FluoRender_benchmark_fullscreen.bat"; DestDir: "{app}"; Flags: ignoreversion      
+Source: "..\..\build\bin\Release\FluoRender_benchmark_fullscreen.command"; DestDir: "{app}"; Flags: ignoreversion      
 ; OpenVR      
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\openvr_api.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\build\bin\Release\openvr_api.dll"; DestDir: "{app}"; Flags: ignoreversion
 ; HoloPlay      
-Source: "E:\PROJECTS\FLUORENDER\fluorender_work\build\bin\Release\HoloPlayCore.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\build\bin\Release\HoloPlayCore.dll"; DestDir: "{app}"; Flags: ignoreversion
+; OpenXR
+Source: "..\..\build\bin\Release\openxr_loader.dll"; DestDir: "{app}"; Flags: ignoreversion
+; Hololens
+Source: "..\..\build\bin\Release\Microsoft.Holographic.AppRemoting.OpenXr.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\build\bin\Release\Microsoft.Holographic.AppRemoting.OpenXr.SU.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\build\bin\Release\PerceptionDevice.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\build\bin\Release\OpenXRSpeechGrammar.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\build\bin\Release\RemotingXR.json"; DestDir: "{app}"; Flags: ignoreversion
 
 [Registry]
 Root: HKCR; Subkey: ".vrp"; ValueType: string; ValueName: ""; ValueData: "FluoRenderProject"; Flags: uninsdeletevalue
