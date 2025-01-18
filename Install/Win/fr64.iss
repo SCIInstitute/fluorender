@@ -5,7 +5,7 @@
 #define MyAppSetupName 'FluoRender'
 #define MyAppVersion "2.32"
 #define MyAppPublisher "SCI"
-#define MyAppURL "http://sci.utah.edu"
+#define MyAppURL "https://sciinstitute.github.io/fluorender/"
 #define MyAppExeName "FluoRender.exe"
 #define MyAppID "{CFC06103-F420-4239-9C5D-BA1F71733278}"
 #define ISSI_Splash "Images\fluorender_logo_lg.bmp"  
