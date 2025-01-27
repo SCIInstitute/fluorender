@@ -348,7 +348,7 @@ static char* glmDirName(char* path)
 * model - properly initialized GLMmodel structure
 * name  - name of the material library
 */
-static GLboolean glmReadMTL(GLMmodel* model, char* name)
+static bool glmReadMTL(GLMmodel* model, char* name)
 {
 	FILE* file;
 	//char* dir;

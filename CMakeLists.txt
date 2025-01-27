@@ -46,6 +46,8 @@ if (WIN32)
   endif()
 # option to build with multithreading
   SET(USE_MP_COMPILE ON CACHE BOOL "Enable Multithreaded Compile")
+# option to build tester
+  SET(BUILD_TESTER OFF CACHE BOOL "Enable building the tester")
 endif()
 
 cmake_minimum_required(VERSION 3.10)
@@ -993,23 +995,25 @@ elseif(WIN32)
       $<TARGET_OBJECTS:WACUTILS_OBJ>
     )
     endif()
-    add_executable(Tester
-      ${tester_src} ${tester_hdr}
-      $<TARGET_OBJECTS:CONTROL_OBJ>
-      $<TARGET_OBJECTS:DATABASE_OBJ>
-      $<TARGET_OBJECTS:FILE_OBJ>
-      $<TARGET_OBJECTS:FLOBJECT_OBJ>
-      $<TARGET_OBJECTS:IMAGE_OBJ>
-      $<TARGET_OBJECTS:TIMER_OBJ>
-      $<TARGET_OBJECTS:TRAINER_OBJ>
-      $<TARGET_OBJECTS:TYPE_OBJ>
-      $<TARGET_OBJECTS:UTILITY_OBJ>
-      $<TARGET_OBJECTS:VIDEO_OBJ>
-      $<TARGET_OBJECTS:POLE_OBJ>
-      $<TARGET_OBJECTS:TEEM_OBJ>
-      $<TARGET_OBJECTS:WACUTILS_OBJ>
-      $<TARGET_OBJECTS:XINPUT_OBJ>
-    )
+    if(BUILD_TESTER)
+        add_executable(Tester
+          ${tester_src} ${tester_hdr}
+          $<TARGET_OBJECTS:CONTROL_OBJ>
+          $<TARGET_OBJECTS:DATABASE_OBJ>
+          $<TARGET_OBJECTS:FILE_OBJ>
+          $<TARGET_OBJECTS:FLOBJECT_OBJ>
+          $<TARGET_OBJECTS:IMAGE_OBJ>
+          $<TARGET_OBJECTS:TIMER_OBJ>
+          $<TARGET_OBJECTS:TRAINER_OBJ>
+          $<TARGET_OBJECTS:TYPE_OBJ>
+          $<TARGET_OBJECTS:UTILITY_OBJ>
+          $<TARGET_OBJECTS:VIDEO_OBJ>
+          $<TARGET_OBJECTS:POLE_OBJ>
+          $<TARGET_OBJECTS:TEEM_OBJ>
+          $<TARGET_OBJECTS:WACUTILS_OBJ>
+          $<TARGET_OBJECTS:XINPUT_OBJ>
+        )
+    endif()
   endif()
 endif()
 
@@ -1066,28 +1070,30 @@ if(WIN32)
     XInput.lib
     ${ZLIB_LIBRARIES}
   )
-  target_link_libraries(Tester
-    ${Boost_LIBRARIES}
-    dlib::dlib
-    ${FFMPEG_LIBRARIES}
-    ${FREETYPE_LIBRARIES}
-    ${GLEW_STATIC_LIBRARIES}
-    ${HDF5_LIBRARIES}
-    ${HoloPlay_LIBRARIES}
-    ${ND2_LIBRARIES}
-    ${OpenCL_LIBRARIES}
-    ${OpenCV_LIBS}
-    ${OPENGL_LIBRARIES}
-    ${OpenVR_LIBRARIES}
-    ${OpenXR_LIBRARIES}
-    ${PNG_LIBRARIES}
-    ${Python3_LIBRARIES}
-    ${TIFF_LIBRARIES}
-    secur32.lib
-    ${wxWidgets_LIBRARIES}
-    XInput.lib
-    ${ZLIB_LIBRARIES}
-  )
+  if(BUILD_TESTER)
+      target_link_libraries(Tester
+        ${Boost_LIBRARIES}
+        dlib::dlib
+        ${FFMPEG_LIBRARIES}
+        ${FREETYPE_LIBRARIES}
+        ${GLEW_STATIC_LIBRARIES}
+        ${HDF5_LIBRARIES}
+        ${HoloPlay_LIBRARIES}
+        ${ND2_LIBRARIES}
+        ${OpenCL_LIBRARIES}
+        ${OpenCV_LIBS}
+        ${OPENGL_LIBRARIES}
+        ${OpenVR_LIBRARIES}
+        ${OpenXR_LIBRARIES}
+        ${PNG_LIBRARIES}
+        ${Python3_LIBRARIES}
+        ${TIFF_LIBRARIES}
+        secur32.lib
+        ${wxWidgets_LIBRARIES}
+        XInput.lib
+        ${ZLIB_LIBRARIES}
+      )
+  endif()
 elseif(APPLE)
   target_link_libraries(FluoRender
     dlib::dlib
