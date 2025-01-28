@@ -38,7 +38,7 @@ namespace flrd
 	public:
 		ExGauss(unsigned int x, unsigned int y, unsigned int z) :
 			nx(x), ny(y), nz(z),
-			m_l(1e-3),
+			m_l(1e-3f),
 			m_max_iter(0),
 			prob(0)
 		{

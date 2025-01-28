@@ -117,10 +117,10 @@ namespace flvr {
 		inline fluo::BBox &tbox() { return tbox_; }
 		inline fluo::BBox &dbox() { return dbox_; }
 
-		inline int nx() { return nx_; }
-		inline int ny() { return ny_; }
-		inline int nz() { return nz_; }
-		inline int nc() { return nc_; }
+		inline int nx() { return nx_<0?0:nx_; }
+		inline int ny() { return ny_<0?0:ny_; }
+		inline int nz() { return nz_<0?0:nz_; }
+		inline int nc() { return nc_<0?0:nc_; }
 		inline int nb(int c)
 		{
 			assert(c >= 0 && c < TEXTURE_MAX_COMPONENTS);

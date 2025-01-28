@@ -43,7 +43,7 @@ namespace flrd
 	public:
 		ExMax1():
 			m_eps(0),
-			m_l(1e-3),
+			m_l(1e-3f),
 			m_max_iter(25),
 			m_spc({1, 1, 1}),
 			m_cov_eps(0.0)

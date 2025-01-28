@@ -296,7 +296,7 @@ namespace flvr
 				s_kernel.name = name;
 				s_kernel.external = false;
 				kernels_.push_back(s_kernel);
-				return kernels_.size() - 1;
+				return static_cast<int>(kernels_.size() - 1);
 			}
 		}
 
@@ -1129,7 +1129,7 @@ namespace flvr
 			loj = std::max((unsigned int)(1), (target + 1) / 2);
 			hij = std::min(nt, target * 2);
 			res = 0; maxj = 0;
-			for (int j = loj; j < hij; ++j)
+			for (size_t j = loj; j < hij; ++j)
 			{
 				unsigned int rm = nt % j;
 				if (rm)
@@ -1160,7 +1160,7 @@ namespace flvr
 			loj = target;
 			hij = std::max(nt, target * 2);
 			res = 0; maxj = 0;
-			for (int j = loj; j < hij; ++j)
+			for (size_t j = loj; j < hij; ++j)
 			{
 				unsigned int rm = nt % j;
 				if (rm)

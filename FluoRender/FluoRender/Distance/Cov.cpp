@@ -213,7 +213,7 @@ bool Cov::ComputeCenter()
 		int ox, oy, oz, nc;
 		ox = b->ox(); oy = b->oy(); oz = b->oz();
 		//compute center
-		for (int i = 0; i < gsize.gsxyz; ++i)
+		for (size_t i = 0; i < gsize.gsxyz; ++i)
 		{
 			nc = count[i];
 			sum += nc;
@@ -291,7 +291,7 @@ bool Cov::ComputeCov()
 		kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz * 6), cov, cov);
 
 		//compute center
-		for (int i = 0; i < gsize.gsxyz; ++i)
+		for (size_t i = 0; i < gsize.gsxyz; ++i)
 		{
 			m_cov[0] += cov[i * 6];
 			m_cov[1] += cov[i * 6 + 1];

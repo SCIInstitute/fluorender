@@ -268,9 +268,9 @@ bool Relax::Compute()
 		kernel_prog->releaseAll();
 
 		//collect data
-		for (int j = 0; j < m_snum; ++j)
+		for (size_t j = 0; j < m_snum; ++j)
 		{
-			for (int i = 0; i < gsize.gsxyz; ++i)
+			for (size_t i = 0; i < gsize.gsxyz; ++i)
 			{
 				m_dsp[j * 3] += dsp[(m_snum * i + j) * 3];
 				m_dsp[j * 3 + 1] += dsp[(m_snum * i + j) * 3 + 1];

@@ -949,14 +949,14 @@ namespace flvr
 		glActiveTexture(GL_TEXTURE0 + (unit > 0 ? unit : c));
 
 		int nb = brick->nb(c);
-		int nx = brick->nx();
-		int ny = brick->ny();
-		int nz = brick->nz();
+		unsigned int nx = brick->nx();
+		unsigned int ny = brick->ny();
+		unsigned int nz = brick->nz();
 		GLenum textype = brick->tex_type(c);
 
 		//! Try to find the existing texture in tex_pool_, for this brick.
 		int idx = -1;
-		for (unsigned int i = 0; i < tex_pool_.size() && idx < 0; i++)
+		for (size_t i = 0; i < tex_pool_.size() && idx < 0; i++)
 		{
 			if (tex_pool_[i].id != 0
 				&& tex_pool_[i].brick == brick

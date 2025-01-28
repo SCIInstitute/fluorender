@@ -297,7 +297,6 @@ BRKXMLReader::ImageInfo BRKXMLReader::ReadImageInfo(tinyxml2::XMLElement *infoNo
 
 void BRKXMLReader::ReadPyramid(tinyxml2::XMLElement *lvRootNode, vector<LevelInfo> &pylamid)
 {
-	int ival;
 	int level;
 
 	tinyxml2::XMLElement *child = lvRootNode->FirstChildElement();
@@ -321,7 +320,6 @@ void BRKXMLReader::ReadPyramid(tinyxml2::XMLElement *lvRootNode, vector<LevelInf
 
 void BRKXMLReader::ReadLevel(tinyxml2::XMLElement* lvNode, LevelInfo &lvinfo)
 {
-	
 	string strValue;
 
 	lvinfo.imageW = STOI(lvNode->Attribute("imageW"));
@@ -392,11 +390,6 @@ void BRKXMLReader::ReadPackedBricks(tinyxml2::XMLElement* packNode, vector<Brick
 
 void BRKXMLReader::ReadBrick(tinyxml2::XMLElement* brickNode, BrickInfo &binfo)
 {
-	int ival;
-	double dval;
-	
-	string strValue;
-		
 	binfo.id = STOI(brickNode->Attribute("id"));
 
 	binfo.x_size = STOI(brickNode->Attribute("width"));
@@ -553,7 +546,6 @@ void BRKXMLReader::ReadFilenames(tinyxml2::XMLElement* fileRootNode, vector<vect
 bool BRKXMLReader::loadMetadata(const wstring &file)
 {
 	string str;
-	double dval;
 
 	if (m_md_doc.LoadFile(ws2s(file).c_str()) != 0){
 		return false;
@@ -1109,7 +1101,11 @@ void BRKXMLReader::build_bricks(vector<flvr::TextureBrick*> &tbrks, int lv)
 //	}
 	
 	if(bsize[0] > max_texture_size || bsize[1] > max_texture_size || bsize[2] > max_texture_size) return;
-	if(force_pow2 && (fluo::Pow2(bsize[0]) > bsize[0] || fluo::Pow2(bsize[1]) > bsize[1] || fluo::Pow2(bsize[2]) > bsize[2])) return;
+	if(force_pow2 &&
+		(fluo::Pow2(bsize[0]) > static_cast<unsigned int>(bsize[0]) ||
+		 fluo::Pow2(bsize[1]) > static_cast<unsigned int>(bsize[1]) ||
+		 fluo::Pow2(bsize[2]) > static_cast<unsigned int>(bsize[2])))
+		return;
 	
 	if(!tbrks.empty())
 	{

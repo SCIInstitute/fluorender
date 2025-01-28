@@ -179,7 +179,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 			nx = b->nx()-1;
 			ny = b->ny()-1;
 			nz = b->nz()-1;
-			int cnt = (nx ? 1 : 0) + (ny ? 1 : 0) + (nz ? 1 : 0);
+			int cnt = (nx>0 ? 1 : 0) + (ny>0 ? 1 : 0) + (nz>0 ? 1 : 0);
 			if (cnt < 2) continue;
 
 			//size
@@ -196,7 +196,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 			for (unsigned int k = 0; k < kn; ++k)
 			{
 				tp2 = tp;
-				for (unsigned int j = 0; j < ny; ++j)
+				for (int j = 0; j < ny; ++j)
 				{
 					memcpy(tempp, tp2, nx*nb);
 					tempp += nx*nb;
@@ -219,7 +219,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 				for (unsigned int k = 0; k < kn; ++k)
 				{
 					tp2 = tp;
-					for (unsigned int j = 0; j < ny; ++j)
+					for (int j = 0; j < ny; ++j)
 					{
 						memcpy(tempp, tp2, nx*nb);
 						tempp += nx*nb;
@@ -241,7 +241,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 			for (unsigned int k = 0; k < kn; ++k)
 			{
 				tp2 = tp;
-				for (unsigned int j = 0; j < ny; ++j)
+				for (int j = 0; j < ny; ++j)
 				{
 					memcpy(tempp, tp2, nx*nb);
 					tempp += nx*nb;
@@ -470,10 +470,10 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 		unsigned char* tempp = temp;
 		unsigned char* tp = (unsigned char*)(b->tex_data(c));
 		unsigned char* tp2;
-		for (unsigned int k = 0; k < nz; ++k)
+		for (int k = 0; k < nz; ++k)
 		{
 			tp2 = tp;
-			for (unsigned int j = 0; j < ny; ++j)
+			for (int j = 0; j < ny; ++j)
 			{
 				memcpy(tempp, tp2, nx*nb);
 				tempp += nx*nb;
@@ -487,8 +487,8 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 		//(x, y, nz-1)
 		if (nz > 1)
 		{
-			for (unsigned int j = 0; j < ny - 1; ++j)
-			for (unsigned int i = 0; i < nx - 1; ++i)
+			for (int j = 0; j < ny - 1; ++j)
+			for (int i = 0; i < nx - 1; ++i)
 			{
 				index = nx * ny*(nz - 1) + j * nx + i;
 				l1 = data_label[index];
@@ -512,8 +512,8 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 		int kz = nz > 1 ? nz - 1 : 1;
 		if (ny > 1)
 		{
-			for (unsigned int k = 0; k < kz; ++k)
-			for (unsigned int i = 0; i < nx - 1; ++i)
+			for (int k = 0; k < kz; ++k)
+			for (int i = 0; i < nx - 1; ++i)
 			{
 				index = nx * ny*k + nx * (ny - 1) + i;
 				l1 = data_label[index];
@@ -536,8 +536,8 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 		//(nx-1, y, z)
 		if (nx > 1)
 		{
-			for (unsigned int k = 0; k < kz; ++k)
-			for (unsigned int j = 0; j < ny - 1; ++j)
+			for (int k = 0; k < kz; ++k)
+			for (int j = 0; j < ny - 1; ++j)
 			{
 				index = nx * ny*k + nx * j + nx - 1;
 				l1 = data_label[index];
@@ -1321,14 +1321,14 @@ bool ComponentAnalyzer::OutputMultiChannels(std::list<VolumeData*>& channs)
 				tp = data_label_old;
 				tp_old = data_data_old;
 				tp_new = data_data_new;
-				for (unsigned int k = 0; k < nz2 - 1; ++k)
+				for (int k = 0; k < nz2 - 1; ++k)
 				{
 					tp2 = tp;
 					tp2_old = tp_old;
 					tp2_new = tp_new;
-					for (unsigned int j = 0; j < ny2 - 1; ++j)
+					for (int j = 0; j < ny2 - 1; ++j)
 					{
-						for (unsigned int i = 0; i < nx2 - 1; ++i)
+						for (int i = 0; i < nx2 - 1; ++i)
 						{
 							lv = tp2[i];
 							if (lv == iter->second->Id())
@@ -1910,7 +1910,7 @@ bool ComponentAnalyzer::GetColor(
 			if (brick_id < 0)
 			{
 				int bn = vd->GetAllBrickNum();
-				for (unsigned int i=0; i<bn; ++i)
+				for (int i=0; i<bn; ++i)
 				{
 					iter = comps.find(Cell::GetKey(id, i));
 					if (iter != comps.end())
@@ -1971,9 +1971,9 @@ void ComponentAnalyzer::ReplaceId(unsigned int base_id, Celp &info)
 	for (unsigned int k = 0; k < kz; ++k)
 	{
 		tp2 = tp;
-		for (unsigned int j = 0; j < ny - 1; ++j)
+		for (int j = 0; j < ny - 1; ++j)
 		{
-			for (unsigned int i = 0; i < nx - 1; ++i)
+			for (int i = 0; i < nx - 1; ++i)
 			{
 				lv = tp2[i];
 				if (lv == rep_id)
@@ -2006,9 +2006,9 @@ unsigned int ComponentAnalyzer::GetNonconflictId(
 		for (unsigned int k = 0; k < kz; ++k)
 		{
 			tp2 = tp;
-			for (unsigned int j = 0; j < ny - 1; ++j)
+			for (int j = 0; j < ny - 1; ++j)
 			{
-				for (unsigned int i = 0; i < nx - 1; ++i)
+				for (int i = 0; i < nx - 1; ++i)
 				{
 					lv = tp2[i];
 					if (lv == iid)

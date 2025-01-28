@@ -146,7 +146,6 @@ bool ExGauss::Flood(unsigned int i)
 void ExGauss::FitGauss()
 {
 	float v;
-	unsigned int i, j, k;
 	unsigned long long idx;
 
 	//find range

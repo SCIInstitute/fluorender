@@ -111,7 +111,7 @@ bool Group::removeChildren(size_t pos, size_t num)
 		if (end > m_children.size())
 			end = m_children.size();
 
-		for (unsigned int i = pos; i < end; ++i)
+		for (size_t i = pos; i < end; ++i)
 		{
 			m_children[i]->removeParent(this);
 

@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeSampler.h>
 #include <VolumeBaker.h>
 #include <Histogram.h>
+#include <EntryHist.h>
 #include <Reshape.h>
 #include <FpRangeDlg.h>
 #include <nrrd.h>

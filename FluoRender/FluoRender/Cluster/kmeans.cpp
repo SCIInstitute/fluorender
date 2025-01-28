@@ -95,7 +95,7 @@ void ClusterKmeans::Initialize()
 		cluster.push_back(p);
 	}
 	//search for the rest
-	for (int i = 1; i < m_clnum; ++i)
+	for (size_t i = 1; i < m_clnum; ++i)
 	{
 		p = nullptr;
 		for (ClusterIter iter = m_data.begin();
@@ -130,7 +130,7 @@ void ClusterKmeans::Assign()
 	{
 		int index = -1;
 		double mind;
-		for (int i = 0; i < m_clnum; ++i)
+		for (size_t i = 0; i < m_clnum; ++i)
 		{
 			double d = boost::qvm::mag((*iter)->centerf - m_means[i]);
 			if (i == 0)
@@ -155,7 +155,7 @@ void ClusterKmeans::Assign()
 
 void ClusterKmeans::Update()
 {
-	for (int i = 0; i < m_clnum; ++i)
+	for (size_t i = 0; i < m_clnum; ++i)
 	{
 		if (m_result[i].size() == 0)
 			continue;
@@ -173,7 +173,7 @@ void ClusterKmeans::Update()
 
 bool ClusterKmeans::Converge()
 {
-	for (int i = 0; i < m_clnum; ++i)
+	for (size_t i = 0; i < m_clnum; ++i)
 	{
 		double d = boost::qvm::mag(m_means[i] - m_means_prv[i]);
 		if (d > m_eps)

@@ -231,7 +231,7 @@ BackgStat::BackgStat(VolumeData* vd)
 	m_kx(40),
 	m_ky(40),
 	m_kz(10),
-	m_varth(0.0001),
+	m_varth(0.0001f),
 	m_gauth(2),
 	m_sum(0),
 	m_wsum(0),

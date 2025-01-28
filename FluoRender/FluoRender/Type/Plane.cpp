@@ -322,7 +322,7 @@ namespace fluo
 
 	PlaneSet::PlaneSet(unsigned int size)
 	{
-		for (int i = 0; i < size; ++i)
+		for (size_t i = 0; i < size; ++i)
 			planes_.push_back(Plane());
 	}
 

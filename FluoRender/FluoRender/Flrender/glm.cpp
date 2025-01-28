@@ -801,13 +801,13 @@ static GLvoid glmSecondPass(GLMmodel* model, char* file)
 			{
 				char mtlname[128];
 				SSCANF(line, "%s %s", buf,
-					mtlname, sizeof(mtlname));
+					mtlname);
 				group->material = material = glmFindMaterial(model, mtlname);
 			}
 			break;
 		case 'g':               /* group */
 			SSCANF(line, "%s %s", buf,
-				buf, sizeof(buf));
+				buf);
 			group = glmFindGroup(model, buf);
 			group->material = material;
 			break;

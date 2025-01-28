@@ -188,7 +188,7 @@ void ClusterExmax::Init1()
 		cluster.push_back(p);
 	}
 	//search for the rest
-	for (int i = 1; i < m_clnum; ++i)
+	for (size_t i = 1; i < m_clnum; ++i)
 	{
 		p = nullptr;
 		for (ClusterIter iter = m_data.begin();
@@ -223,7 +223,7 @@ void ClusterExmax::Init2()
 {
 	//mixture coefficient
 	double tau = 1.0 / m_clnum;
-	for (int i = 0; i < m_clnum; ++i)
+	for (size_t i = 0; i < m_clnum; ++i)
 	{
 		EmVec trace = { 0, 0, 0 };
 		EmVec mean = { 0, 0, 0 };
@@ -397,13 +397,13 @@ void ClusterExmax::GenResult()
 {
 	m_result.clear();
 	m_result.resize(m_clnum);
-	unsigned int i = 0;
+	size_t i = 0;
 	for (ClusterIter iter = m_data.begin();
 		iter != m_data.end(); ++iter)
 	{
 		int index = -1;
 		double max_mem_prob;
-		for (int j = 0; j < m_clnum; ++j)
+		for (size_t j = 0; j < m_clnum; ++j)
 		{
 			if (j == 0)
 			{
@@ -444,12 +444,12 @@ void ClusterExmax::GenHistogram(size_t bins)
 		m_histogram.push_back(bin);
 	}
 	//fill in histogram
-	unsigned int i = 0;
+	size_t i = 0;
 	for (ClusterIter iter = m_data.begin();
 		iter != m_data.end(); ++iter)
 	{
 		double max_mem_prob = 0;
-		for (int j = 0; j < m_clnum; ++j)
+		for (size_t j = 0; j < m_clnum; ++j)
 		{
 			if (j == 0)
 				max_mem_prob = m_mem_prob[j][i];
@@ -578,7 +578,7 @@ void ClusterExmax::GenerateNewColors2(void* label,
 		int index = -1;
 		double max_mem_prob;
 		id = 0;
-		for (int j = 0; j < m_clnum; ++j)
+		for (size_t j = 0; j < m_clnum; ++j)
 		{
 			if (j == 0)
 			{

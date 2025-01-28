@@ -1041,7 +1041,6 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	int ival;
 	double dval;
 	bool bval;
-	unsigned long long uval;
 
 	if (update_all || FOUND_VALUE(gstUseSelection))
 		m_use_sel_chk->SetValue(glbin_comp_generator.GetUseSel());

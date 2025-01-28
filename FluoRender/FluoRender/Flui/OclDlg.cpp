@@ -364,7 +364,7 @@ void OclDlg::OnExecuteNBtn(wxCommandEvent& event)
 
 	glbin_kernel_executor.SetProgress(0, "Running OpenCL kernel.");
 
-	for (int i=0; i<ival; ++i)
+	for (size_t i=0; i<ival; ++i)
 	{
 		glbin_kernel_executor.SetRange(100.0 * i / ival, 100.0 * (i + 1) / ival);
 		Execute();

@@ -104,7 +104,7 @@ int MPGReader::Preprocess()
 		return READER_OPEN_FAIL;
 	m_data_name = name;
 
-	int i, frameFinished;
+	int frameFinished;
 	ffmpeg::AVCodecContext* pCodecCtxOrig = NULL;
 	ffmpeg::AVCodec* pCodec = NULL;
 	ffmpeg::AVPacket packet;
@@ -120,7 +120,7 @@ int MPGReader::Preprocess()
 
 	// Find the first video stream
 	m_stream_index = -1;
-	for (i = 0; i < m_av_format_context->nb_streams; i++)
+	for (size_t i = 0; i < m_av_format_context->nb_streams; ++i)
 	{
 		if (m_av_format_context->streams[i]->codec->codec_type == ffmpeg::AVMEDIA_TYPE_VIDEO)
 		{

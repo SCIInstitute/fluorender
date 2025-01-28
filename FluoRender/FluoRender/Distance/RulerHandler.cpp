@@ -1953,7 +1953,7 @@ int RulerHandler::Profile(Ruler* ruler)
 		if (!profile) return 0;
 		profile->clear();
 		profile->reserve(size_t(bins));
-		for (unsigned int b = 0; b < bins; ++b)
+		for (unsigned int b = 0; b < static_cast<unsigned int>(bins); ++b)
 			profile->push_back(flrd::ProfileBin());
 
 		double brush_radius = ruler->GetBrushSize() + 1.0;
@@ -2018,7 +2018,7 @@ int RulerHandler::Profile(Ruler* ruler)
 		{
 			//allocate
 			profile->reserve(size_t(bins));
-			for (unsigned int b = 0; b < bins; ++b)
+			for (unsigned int b = 0; b < static_cast<unsigned int>(bins); ++b)
 				profile->push_back(flrd::ProfileBin());
 
 			fluo::Point p1, p2;
@@ -2026,7 +2026,7 @@ int RulerHandler::Profile(Ruler* ruler)
 			double dist;
 			double real_dist = 0, real_step = 0;
 			int total_dist = 0;
-			for (unsigned int pn = 0; pn < ruler->GetNumPoint() - 1; ++pn)
+			for (int pn = 0; pn < ruler->GetNumPoint() - 1; ++pn)
 			{
 				p1 = ruler->GetPointTransformed(pn);
 				p2 = ruler->GetPointTransformed(pn + 1);

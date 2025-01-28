@@ -557,8 +557,6 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	wxColor c(fc.r() * 255, fc.g() * 255, fc.b() * 255);
 
-	wxIntegerValidator<int>* vald_i;
-
 	if (update_all || FOUND_VALUE(gstClipPlaneRanges))
 	{
 		//slider range
