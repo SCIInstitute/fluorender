@@ -1275,7 +1275,7 @@ namespace flvr
 		float matrix[16];
 		unsigned int num = bricks->size();
 		for (i = ((order == 2) ? (num - 1) : 0);
-			(order == 2) ? (i >= 0) : (i < num);
+			(order == 2) ? (i >= 0) : (static_cast<long long>(i) < static_cast<long long>(num));
 			i += ((order == 2) ? -1 : 1))
 		{
 			TextureBrick* b = (*bricks)[i];
@@ -1536,7 +1536,7 @@ namespace flvr
 			kernel->releaseMemObject(kernel_index, 1, 0, mask_id);
 			kernel->releaseMemObject(kernel_index, 2, hist_size * sizeof(float), 0);
 			//analyze hist
-			int i;
+			unsigned int i;
 			float sum = 0;
 			for (i=0; i<hist_size; ++i)
 				sum += hist[i];

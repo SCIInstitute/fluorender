@@ -204,19 +204,19 @@ void Diffusion::GetMask(size_t brick_num, flvr::TextureBrick* b, void** val)
 	{
 		int c = b->nmask();
 		int nb = b->nb(c);
-		int nx = b->nx();
-		int ny = b->ny();
-		int nz = b->nz();
+		unsigned int nx = b->nx();
+		unsigned int ny = b->ny();
+		unsigned int nz = b->nz();
 		unsigned long long mem_size = (unsigned long long)nx*
 			(unsigned long long)ny*(unsigned long long)nz*(unsigned long long)nb;
 		unsigned char* temp = new unsigned char[mem_size];
 		unsigned char* tempp = temp;
 		unsigned char* tp = (unsigned char*)(b->tex_data(c));
 		unsigned char* tp2;
-		for (unsigned int k = 0; k < nz; ++k)
+		for (size_t k = 0; k < nz; ++k)
 		{
 			tp2 = tp;
-			for (unsigned int j = 0; j < ny; ++j)
+			for (size_t j = 0; j < ny; ++j)
 			{
 				memcpy(tempp, tp2, nx*nb);
 				tempp += nx * nb;
@@ -242,15 +242,15 @@ void Diffusion::ReleaseMask(void* val, size_t brick_num, flvr::TextureBrick* b)
 	unsigned char* tempp = (unsigned char*)val;
 	int c = b->nmask();
 	int nb = b->nb(c);
-	int nx = b->nx();
-	int ny = b->ny();
-	int nz = b->nz();
+	unsigned int nx = b->nx();
+	unsigned int ny = b->ny();
+	unsigned int nz = b->nz();
 	unsigned char* tp = (unsigned char*)(b->tex_data(c));
 	unsigned char* tp2;
-	for (unsigned int k = 0; k < nz; ++k)
+	for (size_t k = 0; k < nz; ++k)
 	{
 		tp2 = tp;
-		for (unsigned int j = 0; j < ny; ++j)
+		for (size_t j = 0; j < ny; ++j)
 		{
 			memcpy(tp2, tempp, nx*nb);
 			tempp += nx * nb;

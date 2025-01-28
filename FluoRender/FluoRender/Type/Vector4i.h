@@ -66,7 +66,10 @@ namespace fluo
 			GLfloat v1, v2, v3, v4;
 			char st;
 			is >> st >> v1 >> st >> v2 >> st >> v3 >> st >> v4 >> st;
-			v = Vector4i(v1, v2, v3, v4);
+			v = Vector4i(static_cast<GLint>(std::round(v1)),
+				static_cast<GLint>(std::round(v2)),
+				static_cast<GLint>(std::round(v3)),
+				static_cast<GLint>(std::round(v4)));
 			return is;
 		}
 	};

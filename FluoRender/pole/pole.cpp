@@ -56,7 +56,7 @@
 #include "pole.h"
 
 #ifdef POLE_USE_UTF16_FILENAMES
-#include <codecvt>
+#include <boost/locale.hpp>
 #endif //POLE_USE_UTF16_FILENAMES
 
 // enable to activate debugging output
@@ -292,13 +292,11 @@ using namespace POLE;
 #ifdef POLE_USE_UTF16_FILENAMES
 
 std::string POLE::UTF16toUTF8(const std::wstring &utf16) {
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-    return converter.to_bytes(utf16);
+    return boost::locale::conv::utf_to_utf<char>(utf16);
 }
 
 std::wstring POLE::UTF8toUTF16(const std::string &utf8) {
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-    return converter.from_bytes(utf8);
+    return boost::locale::conv::utf_to_utf<wchar_t>(utf8);
 }
 
 #endif //POLE_USE_UTF16_FILENAMES
@@ -1231,7 +1229,7 @@ StorageIO::StorageIO( Storage* st, const char* fname )
   filesize(0),        
   writeable(false),        
   header(new Header()),        
-  dirtree(new DirTree(1 << header->b_shift)),        
+  dirtree(new DirTree(1LL << header->b_shift)),        
   bbat(new AllocTable()),        
   sbat(new AllocTable()),
   sb_blocks(),

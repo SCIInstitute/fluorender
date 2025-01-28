@@ -421,7 +421,7 @@ unsigned int CZIReader::ReadDirectoryEntry(FILE* pfile)
 
 	unsigned int dim_count;
 	result &= fread(&dim_count, sizeof(unsigned int), 1, pfile) == 1;//dimension count
-	for (int i = 0; i < dim_count; ++i)
+	for (size_t i = 0; i < dim_count; ++i)
 	{
 		char dim[4];
 		result &= fread(dim, 1, 4, pfile) == 4;//dimension

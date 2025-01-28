@@ -37,8 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <unordered_map>
 #include <ostream>
-#include <codecvt>
-#include <locale>
+#include <boost/locale.hpp>
 #include <tuple>
 #include <unordered_set>
 //FluoRender's special types
@@ -689,12 +688,8 @@ namespace fluo
 			os << dynamic_cast<const TemplateValue<std::string>*>(&v)->getValue();
 			break;
 		case Value::vt_wstring:
-		{
-			//convert for os
-			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-			os << converter.to_bytes(dynamic_cast<const TemplateValue<std::wstring>*>(&v)->getValue());
-		}
-		break;
+			os << boost::locale::conv::utf_to_utf<char>(dynamic_cast<const TemplateValue<std::wstring>*>(&v)->getValue());
+			break;
 		case Value::vt_Point:
 			os << dynamic_cast<const TemplateValue<Point>*>(&v)->getValue();
 			break;

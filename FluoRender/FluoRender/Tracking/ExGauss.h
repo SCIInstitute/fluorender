@@ -97,9 +97,10 @@ namespace flrd
 		}
 		bool Valid(Coord &c)
 		{
-			return c.x >= 0 && c.x < nx &&
-				c.y >= 0 && c.y < ny &&
-				c.z >= 0 && c.z < nz;
+			return
+				c.x >= 0 && static_cast<long long>(c.x) < static_cast<long long>(nx) &&
+				c.y >= 0 && static_cast<long long>(c.y) < static_cast<long long>(ny) &&
+				c.z >= 0 && static_cast<long long>(c.z) < static_cast<long long>(nz);
 		}
 	};
 }

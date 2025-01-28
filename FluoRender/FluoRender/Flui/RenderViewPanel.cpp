@@ -1174,7 +1174,7 @@ void RenderViewPanel::SetFullScreen()
 		m_view_sizer->AddStretchSpacer();
 		m_canvas->Reparent(m_full_frame);
 		//get display id
-		int disp_id = glbin_settings.m_disp_id;
+		unsigned int disp_id = glbin_settings.m_disp_id;
 		if (disp_id >= wxDisplay::GetCount())
 			disp_id = 0;
 		wxDisplay display(disp_id);
@@ -1923,7 +1923,6 @@ wxWindow* RenderViewPanel::CreateExtraCaptureControl(wxWindow* parent)
 void RenderViewPanel::SaveDefault(unsigned int mask)
 {
 	wxString str;
-	bool bVal;
 	wxColor cVal;
 	double x, y, z;
 

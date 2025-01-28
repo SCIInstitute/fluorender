@@ -69,7 +69,7 @@ namespace flrd
 		m_merge(false),
 		m_split(false),
 		m_max_iter(25),
-		m_eps(1e-3),
+		m_eps(1e-3f),
 		m_filter(1),
 		m_stencil_thresh(2){}
 		~TrackMapProcessor();

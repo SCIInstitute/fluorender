@@ -264,7 +264,7 @@ namespace flrd
 		double m_size_d;
 		//external size
 		unsigned int m_ext_ui;
-		float m_ext_d;
+		double m_ext_d;
 		//distribution
 		bool m_calc;//if mean etc are calculated
 		double m_mean;//averaged int
@@ -338,7 +338,10 @@ namespace flrd
 		m_min = std::min(m_min, value);
 		m_max = std::max(m_max, value);
 
-		fluo::Point p(i, j, k);
+		fluo::Point p(
+			static_cast<double>(i),
+			static_cast<double>(j),
+			static_cast<double>(k));
 		m_pos += p;
 		m_box.extend(p);
 

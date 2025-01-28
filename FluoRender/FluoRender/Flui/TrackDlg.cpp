@@ -887,7 +887,6 @@ void TrackDlg::UpdateTrackList()
 	wxString item_y;
 	wxString item_z;
 	unsigned long id;
-	double hue;
 	long size;
 	double x, y, z;
 	//copy current to previous

@@ -643,9 +643,9 @@ namespace flvr
 		glActiveTexture(GL_TEXTURE0 + unit);
 
 		int nb = brick->nb(c);
-		int nx = brick->nx();
-		int ny = brick->ny();
-		int nz = brick->nz();
+		unsigned int nx = brick->nx();
+		unsigned int ny = brick->ny();
+		unsigned int nz = brick->nz();
 		GLenum textype = brick->tex_type(c);
 
 		//! Try to find the existing texture in tex_pool_, for this brick.
@@ -860,7 +860,7 @@ namespace flvr
 									elapsed = rn_time - st_time_;
 									t = glbin_settings.m_up_time - elapsed;
 									if (t > 0) wxMilliSleep(t);
-								} while (elapsed <= glbin_settings.m_up_time);
+								} while (elapsed <= static_cast<unsigned long>(glbin_settings.m_up_time));
 
 								if (brick->isLoaded())
 								{
@@ -1403,11 +1403,11 @@ namespace flvr
 		if (!tex_)
 			return;
 		int cur_lv = tex_->GetCurLevel();
-		for (unsigned int lv = 0; lv < tex_->GetLevelNum(); lv++)
+		for (size_t lv = 0; static_cast<long long>(lv) < static_cast<long long>(tex_->GetLevelNum()); lv++)
 		{
 			tex_->setLevel(lv);
 			vector<TextureBrick *> *bs = tex_->get_bricks();
-			for (unsigned int i = 0; i < bs->size(); i++)
+			for (size_t i = 0; i < bs->size(); i++)
 			{
 				if ((*bs)[i]->isLoaded()) {
 					available_mainmem_buf_size_ += (*bs)[i]->nx() * (*bs)[i]->ny() * (*bs)[i]->nz() * (*bs)[i]->nb(0) / 1.04e6;

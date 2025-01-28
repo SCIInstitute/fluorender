@@ -98,8 +98,6 @@ void TIFReader::SetFile(wstring &file)
 
 int TIFReader::Preprocess()
 {
-	int i;
-
 	m_4d_seq.clear();
 	isHyperstack_ = false;
 	isHsTimeSeq_ = false;
@@ -1806,7 +1804,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	}
 
 	m_slice_num = numPages;
-	int64_t pagepixels = (unsigned long long)m_x_size*(unsigned long long)m_y_size;
+	uint64_t pagepixels = (unsigned long long)m_x_size*(unsigned long long)m_y_size;
 
 	if (sequence && !isHyperstack_) CloseTiff();
 
@@ -2458,7 +2456,7 @@ bool TIFReader::GetFloatMinMax()
 			strip_size = height * width * samples * (bits / 8);
 	}
 
-	int64_t pagepixels = (unsigned long long)width * (unsigned long long)height;
+	uint64_t pagepixels = (unsigned long long)width * (unsigned long long)height;
 	if (isHyperstack_)
 	{
 		uint64_t pageindex = m_4d_seq[0].slices[0].pagenumber;
@@ -2515,8 +2513,7 @@ bool TIFReader::GetFloatMinMax()
 				//read file
 				for (uint64_t strip = 0; strip < num_strips; ++strip)
 				{
-					long long valindex;
-					int indexinpage;
+					uint64_t valindex;
 					if (samples > 1)
 					{
 						GetTiffStripMinMax(val_pageindex, strip, strip_size);

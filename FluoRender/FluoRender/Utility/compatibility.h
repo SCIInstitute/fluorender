@@ -37,14 +37,13 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <wx/fileconf.h>
 #include <wx/wfstream.h>
+#include <boost/locale.hpp>
 #include <string>
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include <locale>
 #include <vector>
 #include <tiffio.h>
-#include <codecvt>
 #include <cctype>
 #include <cmath>
 #include <regex>
@@ -325,16 +324,14 @@ inline bool SEP_PATH_NAME(std::wstring &pathname, std::wstring &path, std::wstri
 		return false;
 }
 
-inline std::wstring s2ws(const std::string& utf8) {
-	//    return std::wstring( str.begin(), str.end() );
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-	return converter.from_bytes(utf8);
+inline std::wstring s2ws(const std::string& s)
+{
+	return boost::locale::conv::utf_to_utf<wchar_t>(s);
 }
 
-inline std::string ws2s(const std::wstring& utf16) {
-	//    return std::string( str.begin(), str.end() );
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-	return converter.to_bytes(utf16);
+inline std::string ws2s(const std::wstring& ws)
+{
+	return boost::locale::conv::utf_to_utf<char>(ws);
 }
 
 inline TIFF* TIFFOpenW(std::wstring fname, const char* opt)

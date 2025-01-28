@@ -261,7 +261,7 @@ void VolumeRoi::Run()
 //		mi.data = wsum;
 //#endif
 		//sum
-		for (int ii = 0; ii < gsize.gsxyz; ++ii)
+		for (size_t ii = 0; ii < gsize.gsxyz; ++ii)
 		{
 			m_sum += sum[ii];
 			m_wsum += wsum[ii];

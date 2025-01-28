@@ -315,7 +315,7 @@ namespace flvr
 			if (sorted) {
 				// compute centroids
 				fluo::Vector vc(0.0, 0.0, 0.0), tc(0.0, 0.0, 0.0);
-				for (int j = 0; j < degree; j++)
+				for (size_t j = 0; j < degree; j++)
 				{
 					vc += vv[j]; tc += tt[j];
 				}

@@ -128,12 +128,6 @@ cmake_path(GET FluoRender_SOURCE_DIR PARENT_PATH PARENT_DIR)
 add_definitions(-DSTATIC_COMPILE)
 add_definitions(-DLX_STATIC_LINKING)
 
-# teem required definitions
-add_definitions(-DTEEM_DIO=0)
-add_definitions(-DTEEM_ENDIAN=1234)
-add_definitions(-DTEEM_QNANHIBIT=1)
-add_definitions(-DTEEM_ZLIB=1)
-
 # glm
 add_definitions(-DGLM_FORCE_RADIANS=1)
 
@@ -259,7 +253,7 @@ set(Boost_INCLUDE_DIR "${BOOST_DIRS}")
 set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
-find_package(Boost COMPONENTS system chrono filesystem REQUIRED)
+find_package(Boost COMPONENTS system chrono filesystem locale REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
 # dlib
@@ -481,22 +475,20 @@ file(GLOB pole_hdrs FluoRender/pole/pole.h)
 add_library(POLE_OBJ OBJECT ${pole_srcs} ${pole_hdrs})
 
 # teem
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem)
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Biff)
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Air)
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Hest)
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/teem/Nrrd)
-file(GLOB airsrc FluoRender/teem/Air/*.c)
-file(GLOB airhdr FluoRender/teem/Air/*.h)
-file(GLOB hestsrc FluoRender/teem/Hest/*.c)
-file(GLOB hesthdr FluoRender/teem/Hest/*.h)
-file(GLOB biffsrc FluoRender/teem/Biff/*.c)
-file(GLOB biffhdr FluoRender/teem/Biff/*.h)
-file(GLOB nrrdsrc FluoRender/teem/Nrrd/*.c)
-file(GLOB nrrdhdr FluoRender/teem/Nrrd/*.h)
-add_library(TEEM_OBJ OBJECT
-  ${airsrc} ${hestsrc} ${nrrdsrc} ${biffsrc}
-  ${airhdr} ${hesthdr} ${nrrdhdr} ${biffhdr})
+file(GLOB TEEM_DIRS "${PARENT_DIR}/teem*")
+list(GET TEEM_DIRS 0 TEEM_DIRS)  # Get the first match
+set(Teem_DIR "${TEEM_DIRS}/build")
+find_package(Teem REQUIRED)
+include(${Teem_USE_FILE})
+include_directories(${Teem_INCLUDE_DIRS})
+set(Nrrd_DIR "${TEEM_DIRS}/src/nrrd")
+include_directories(${Nrrd_DIR})
+# teem required definitions
+add_definitions(-DTEEM_DIO=0)
+add_definitions(-DTEEM_ENDIAN=1234)
+add_definitions(-DTEEM_QNANHIBIT=1)
+add_definitions(-DTEEM_ZLIB=1)
+add_definitions(-DTEEM_32BIT=0)
 
 # XInput
 if(WIN32 AND USE_XINPUT)
@@ -821,7 +813,6 @@ if(APPLE)
     $<TARGET_OBJECTS:UTILITY_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
-    $<TARGET_OBJECTS:TEEM_OBJ>
     )
   set_target_properties(FluoRender PROPERTIES MACOSX_DEPLOYMENT_TARGET "11.5")
 elseif(UNIX OR MINGW)
@@ -870,7 +861,6 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:UTILITY_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
-    $<TARGET_OBJECTS:TEEM_OBJ>
     )
 elseif(WIN32)
   # Windows
@@ -952,7 +942,6 @@ elseif(WIN32)
       $<TARGET_OBJECTS:UTILITY_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
-      $<TARGET_OBJECTS:TEEM_OBJ>
       $<TARGET_OBJECTS:WACUTILS_OBJ>
       $<TARGET_OBJECTS:XINPUT_OBJ>
     )
@@ -991,7 +980,6 @@ elseif(WIN32)
       $<TARGET_OBJECTS:UTILITY_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
-      $<TARGET_OBJECTS:TEEM_OBJ>
       $<TARGET_OBJECTS:WACUTILS_OBJ>
     )
     endif()
@@ -1009,7 +997,6 @@ elseif(WIN32)
           $<TARGET_OBJECTS:UTILITY_OBJ>
           $<TARGET_OBJECTS:VIDEO_OBJ>
           $<TARGET_OBJECTS:POLE_OBJ>
-          $<TARGET_OBJECTS:TEEM_OBJ>
           $<TARGET_OBJECTS:WACUTILS_OBJ>
           $<TARGET_OBJECTS:XINPUT_OBJ>
         )
@@ -1018,23 +1005,14 @@ elseif(WIN32)
 endif()
 
 # architecture specific rules
-if(${ARCHITECTURE} MATCHES 64)
-  if(APPLE)
-    set(ARCH_FLAGS "-m64 -arch x86_64")
-  endif()
-  add_definitions(-DTEEM_32BIT=0)
-  set(CMAKE_C_FLAGS "${ARCH_FLAGS} ${CFLAGS}")
-  set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
-  set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
-else()
-  if(APPLE)
-    set(ARCH_FLAGS "-m32 -arch i386")
-  endif()
-  add_definitions(-DTEEM_32BIT=1)
-  set(CMAKE_C_FLAGS "${ARCH_FLAGS} ${CFLAGS}")
-  set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
-  set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
-endif()
+#if(${ARCHITECTURE} MATCHES 64)
+#  if(APPLE)
+#    set(ARCH_FLAGS "-m64 -arch x86_64")
+#  endif()
+#  set(CMAKE_C_FLAGS "${ARCH_FLAGS} ${CFLAGS}")
+#  set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
+#  set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
+#endif()
 
 if(APPLE)
   set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -L/usr/lib ${CMAKE_EXE_LINKER_FLAGS} -liconv -lbz2 -framework OpenCL -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration -framework VideoToolbox -framework Security -framework CoreMedia")
@@ -1064,6 +1042,7 @@ if(WIN32)
     ${OpenXR_LIBRARIES}
     ${PNG_LIBRARIES}
     ${Python3_LIBRARIES}
+    teem
     ${TIFF_LIBRARIES}
     secur32.lib
     ${wxWidgets_LIBRARIES}
@@ -1087,6 +1066,7 @@ if(WIN32)
         ${OpenXR_LIBRARIES}
         ${PNG_LIBRARIES}
         ${Python3_LIBRARIES}
+        teem
         ${TIFF_LIBRARIES}
         secur32.lib
         ${wxWidgets_LIBRARIES}
@@ -1105,6 +1085,7 @@ elseif(APPLE)
     ${OpenCL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES}
+    teem
     ${TIFF_LIBRARIES}
     ${PNG_LIBRARIES}
     ${ZLIB_LIBRARIES}
@@ -1127,6 +1108,7 @@ else()
     ${OpenCL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES}
+    teem
     ${TIFF_LIBRARIES}
     ${PNG_LIBRARIES}
     ${ZLIB_LIBRARIES}

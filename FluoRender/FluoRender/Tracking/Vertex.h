@@ -250,7 +250,7 @@ namespace flrd
 			m_size_ui += celp->GetSizeUi();
 			m_size_d += celp->GetSizeD();
 		}
-		m_center /= m_cells.size();
+		m_center /= static_cast<double>(m_cells.size());
 	}
 
 	inline size_t Vertex::GetCellNum()

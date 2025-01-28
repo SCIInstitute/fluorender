@@ -110,7 +110,7 @@ void MaskBorder::Compute(int order)
 		return;
 	//get bricks with paint mask flag
 	std::vector<flvr::TextureBrick*> bricks;
-	for (int i = 0; i < bn; ++i)
+	for (size_t i = 0; i < bn; ++i)
 	{
 		if ((*all_bricks)[i]->is_mask_act())
 			bricks.push_back((*all_bricks)[i]);
@@ -128,7 +128,7 @@ void MaskBorder::Compute(int order)
 	flvr::TextureBrick* nb;//neighbor brick
 	unsigned int nid;//neighbor id
 	unsigned int bid;
-	for (int i = 0; i < bn; ++i)
+	for (size_t i = 0; i < bn; ++i)
 	{
 		flvr::TextureBrick* b = bricks[i];
 		bid = b->get_id();

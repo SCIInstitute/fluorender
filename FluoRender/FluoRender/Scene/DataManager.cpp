@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Histogram.h>
 #include <Reshape.h>
 #include <FpRangeDlg.h>
-#include <teem/Nrrd/nrrd.h>
+#include <nrrd.h>
 #include <wx/msgdlg.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>

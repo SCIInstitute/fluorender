@@ -175,7 +175,7 @@ void Relax::BuildSpring()
 fluo::Vector Relax::GetDisplacement(int idx)
 {
 	fluo::Vector v;
-	if (idx < 0 || idx >= m_snum)
+	if (idx < 0 || static_cast<unsigned int>(idx) >= m_snum)
 		return v;
 
 	double w = m_wsum[idx];

@@ -116,7 +116,7 @@ void* CountVoxels::GetVolDataBrick(flvr::TextureBrick* b)
 	if (!b)
 		return 0;
 
-	long nx, ny, nz;
+	size_t nx, ny, nz;
 	int bits = 8;
 	int c = 0;
 	int nb = 1;
@@ -133,10 +133,10 @@ void* CountVoxels::GetVolDataBrick(flvr::TextureBrick* b)
 	unsigned char* tempp = temp;
 	unsigned char* tp = (unsigned char*)(b->tex_data(c));
 	unsigned char* tp2;
-	for (unsigned int k = 0; k < nz; ++k)
+	for (size_t k = 0; k < nz; ++k)
 	{
 		tp2 = tp;
-		for (unsigned int j = 0; j < ny; ++j)
+		for (size_t j = 0; j < ny; ++j)
 		{
 			memcpy(tempp, tp2, nx*nb);
 			tempp += nx * nb;
@@ -228,7 +228,7 @@ void CountVoxels::Count()
 		kernel_prog->releaseMemObject(sizeof(float)*(gsize.gsxyz), wsum);
 
 		//sum
-		for (int i = 0; i < gsize.gsxyz; ++i)
+		for (size_t i = 0; i < gsize.gsxyz; ++i)
 		{
 			m_sum += sum[i];
 			m_wsum += wsum[i];

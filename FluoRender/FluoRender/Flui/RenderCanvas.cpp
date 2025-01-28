@@ -1435,10 +1435,9 @@ void RenderCanvas::DrawVolumes(int peel)
 			if (m_interactive)
 			{
 				//calculate quota
-				int total_bricks = flvr::TextureRenderer::get_total_brick_num();
-				int quota_bricks = 1;// total_bricks / 2;
-				int fin_bricks = finished_bricks;
-				int last_bricks = flvr::TextureRenderer::
+				unsigned long total_bricks = flvr::TextureRenderer::get_total_brick_num();
+				unsigned long quota_bricks = 1;// total_bricks / 2;
+				unsigned long last_bricks = flvr::TextureRenderer::
 					get_est_bricks(3);
 				int adj_bricks = 0;
 				unsigned long up_time = flvr::TextureRenderer::get_cor_up_time();
@@ -1458,7 +1457,7 @@ void RenderCanvas::DrawVolumes(int peel)
 				flvr::TextureRenderer::set_quota_bricks(quota_bricks);
 				flvr::TextureRenderer::push_quota_brick(quota_bricks);
 
-				int quota_bricks_chan = 0;
+				unsigned long quota_bricks_chan = 0;
 				if (m_vd_pop_list.size() > 1)
 				{
 					//priority: 1-selected channel; 2-group contains selected channel; 3-linear distance to above
@@ -1466,16 +1465,16 @@ void RenderCanvas::DrawVolumes(int peel)
 					std::vector<VolumeData*>::iterator cur_iter;
 					cur_iter = find(m_vd_pop_list.begin(), m_vd_pop_list.end(), m_cur_vol);
 					size_t cur_index = distance(m_vd_pop_list.begin(), cur_iter);
-					int vd_index;
+					unsigned long vd_index;
 					if (cur_iter != m_vd_pop_list.end())
 					{
 						VolumeData* vd;
 						vd = *cur_iter;
 						quota_vd_list.push_back(vd);
-						int count_bricks = vd->GetBrickNum();
+						unsigned long count_bricks = vd->GetBrickNum();
 						quota_bricks_chan = std::min(count_bricks, quota_bricks);
 						vd->GetVR()->set_quota_bricks_chan(quota_bricks_chan);
-						int count = 0;
+						unsigned long count = 0;
 						while (count_bricks < quota_bricks &&
 							quota_vd_list.size() < m_vd_pop_list.size())
 						{
@@ -1488,7 +1487,7 @@ void RenderCanvas::DrawVolumes(int peel)
 								(size_t)vd_index >= m_vd_pop_list.size())
 								continue;
 							vd = m_vd_pop_list[vd_index];
-							int brick_num = vd->GetBrickNum();
+							unsigned long brick_num = vd->GetBrickNum();
 							quota_vd_list.push_back(vd);
 							if (count_bricks + brick_num > quota_bricks)
 								quota_bricks_chan = quota_bricks - count_bricks;

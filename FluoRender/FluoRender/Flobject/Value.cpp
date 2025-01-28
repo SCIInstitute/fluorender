@@ -301,8 +301,8 @@ bool ValueSet::addValue(ValueTuple& vt)
 		}
 	case Value::vt_wstring:
 		{
-			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-			return addValue(name, converter.from_bytes(value));
+			return addValue(name,
+				boost::locale::conv::utf_to_utf<wchar_t>(value));
 		}
 	case Value::vt_Point:
 		{
@@ -815,8 +815,8 @@ bool ValueSet::setValue(ValueTuple& vt, Event& event)
 		}
 	case Value::vt_wstring:
 		{
-			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-			return setValue(name, converter.from_bytes(value), event);
+			return setValue(name,
+				boost::locale::conv::utf_to_utf<wchar_t>(value), event);
 		}
 	case Value::vt_Point:
 		{
@@ -1075,8 +1075,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 				std::wstring v;
 				if (getValue(name, v))
 				{
-					std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-					oss << converter.to_bytes(v);
+					oss << boost::locale::conv::utf_to_utf<char>(v);
 					std::get<2>(vt) = oss.str();
 					return true;
 				}

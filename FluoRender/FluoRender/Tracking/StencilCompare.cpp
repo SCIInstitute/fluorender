@@ -1145,10 +1145,10 @@ float StencilCompare::Similar(const std::string& name)
 	m_prog->releaseMemObject(arg_sumi);
 
 	//sum
-	for (int i = 0; i < gsize.gsxyz; ++i)
+	for (size_t i = 0; i < gsize.gsxyz; ++i)
 		result += sumf[i];
 	unsigned int num = 0;
-	for (int i = 0; i < gsize.gsxyz; ++i)
+	for (size_t i = 0; i < gsize.gsxyz; ++i)
 		num += sumi[i];
 	delete[] sumf;
 	delete[] sumi;

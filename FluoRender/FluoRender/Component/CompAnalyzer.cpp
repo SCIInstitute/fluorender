@@ -278,7 +278,6 @@ void ComponentAnalyzer::Analyze(bool sel)
 		unsigned int brick_id = b->get_id();
 		double value;
 		double scale;
-		double delta;
 		double ext;
 		int i, j, k;
 		//m_vd->GetResolution(nx, ny, nz);

@@ -38,7 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumePoint.h>
 #include <DistCalculator.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <Nrrd/nrrd.h>
+#include <nrrd.h>
 #include <wx/fileconf.h>
 #include <Debug.h>
 

@@ -37,7 +37,7 @@ class RenderCanvas;
 class VolumeData;
 namespace flrd
 {
-	class VolCache;
+	struct VolCache;
 	//class ComponentAnalyzer;
 	class ComponentEditor
 	{

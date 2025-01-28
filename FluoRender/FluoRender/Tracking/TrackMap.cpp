@@ -4243,7 +4243,7 @@ bool TrackMapProcessor::ClusterCellsSplit(CelpList &list, size_t frame,
 	cs_proc_km.Execute();
 	cs_proc_km.AddIDsToData();
 	cs_proc_em.SetClnum(clnum);
-	cs_proc_em.SetProbTol(0.9);
+	cs_proc_em.SetProbTol(0.9f);
 	cs_proc_em.SetData(cs_proc_km.GetData());
 	cs_proc_em.SetUseInitCluster(true);
 	bool result = cs_proc_em.Execute();

@@ -363,7 +363,7 @@ void BasicStat::Run()
 			kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz), wsum, wsum);
 
 			//sum
-			for (int ii = 0; ii < gsize.gsxyz; ++ii)
+			for (size_t ii = 0; ii < gsize.gsxyz; ++ii)
 			{
 				m_sum += sum[ii];
 				m_wsum += wsum[ii];
@@ -395,7 +395,7 @@ void BasicStat::Run()
 			kernel_prog->readBuffer(sizeof(unsigned int)*(gsize.gsxyz), maxv, maxv);
 
 			//collect
-			for (int ii = 0; ii < gsize.gsxyz; ++ii)
+			for (size_t ii = 0; ii < gsize.gsxyz; ++ii)
 			{
 				bminv = minv[ii] ? std::min(bminv, minv[ii]) : bminv;
 				bmaxv = std::max(bmaxv, maxv[ii]);
@@ -431,7 +431,7 @@ void BasicStat::Run()
 			kernel_prog->readBuffer(sizeof(unsigned int)*(bin), hist, hist);
 
 			//collect
-			for (int ii = 0; ii < bin; ++ii)
+			for (size_t ii = 0; ii < bin; ++ii)
 			{
 				unsigned int key = ii + bminv;
 				auto it = m_hist.find(key);

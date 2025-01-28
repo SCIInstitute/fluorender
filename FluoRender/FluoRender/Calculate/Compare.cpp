@@ -582,7 +582,7 @@ void* ChannelCompare::GetVolDataBrick(flvr::TextureBrick* b)
 	if (!b)
 		return 0;
 
-	long nx, ny, nz;
+	size_t nx, ny, nz;
 	int bits = 8;
 	int c = 0;
 	int nb = 1;
@@ -599,10 +599,10 @@ void* ChannelCompare::GetVolDataBrick(flvr::TextureBrick* b)
 	unsigned char* tempp = temp;
 	unsigned char* tp = (unsigned char*)(b->tex_data(c));
 	unsigned char* tp2;
-	for (unsigned int k = 0; k < nz; ++k)
+	for (size_t k = 0; k < nz; ++k)
 	{
 		tp2 = tp;
-		for (unsigned int j = 0; j < ny; ++j)
+		for (size_t j = 0; j < ny; ++j)
 		{
 			memcpy(tempp, tp2, nx*nb);
 			tempp += nx * nb;
@@ -729,7 +729,7 @@ void ChannelCompare::Product()
 		kernel_prog->releaseAll();
 
 		//sum
-		for (int i=0; i< gsize.gsxyz; ++i)
+		for (size_t i=0; i< gsize.gsxyz; ++i)
 			m_result += sum[i];
 		delete[] sum;
 	}
@@ -837,7 +837,7 @@ void ChannelCompare::MinValue()
 		kernel_prog->releaseAll();
 
 		//sum
-		for (int i = 0; i < gsize.gsxyz; ++i)
+		for (size_t i = 0; i < gsize.gsxyz; ++i)
 			m_result += sum[i];
 		delete[] sum;
 	}
@@ -949,7 +949,7 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		kernel_prog->releaseAll();
 
 		//sum
-		for (int i = 0; i < gsize.gsxyz; ++i)
+		for (size_t i = 0; i < gsize.gsxyz; ++i)
 			m_result += sum[i];
 		delete[] sum;
 

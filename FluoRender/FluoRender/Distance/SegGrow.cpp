@@ -735,10 +735,10 @@ void SegGrow::Compute()
 
 		//get count and ids
 		std::set<unsigned int> uniqids;
-		for (int i = 0; i < gsize.gsxyz; ++i)
+		for (size_t i = 0; i < gsize.gsxyz; ++i)
 		{
 			if (count[i])
-				for (int j = 0; j < count[i]; ++j)
+				for (size_t j = 0; j < count[i]; ++j)
 					uniqids.insert(ids[i*m_branches+j]);
 		}
 		unsigned int total = uniqids.size();
@@ -778,7 +778,7 @@ void SegGrow::Compute()
 
 			//merge ids
 			std::vector<std::set<unsigned int>> id_set;
-			for (int i = 0; i < total; ++i)
+			for (size_t i = 0; i < total; ++i)
 			{
 				unsigned int id = ids[i];
 				bool found = false;
@@ -799,7 +799,7 @@ void SegGrow::Compute()
 					it = id_set.end() - 1;
 				}
 
-				for (int j = 0; j < gsize.gsxyz; ++j)
+				for (size_t j = 0; j < gsize.gsxyz; ++j)
 				{
 					for (int k = 0; k < 6; ++k)
 					{
@@ -896,7 +896,7 @@ void SegGrow::Compute()
 			ox = b->ox(); oy = b->oy(); oz = b->oz();
 			//compute centers and connection
 			unsigned int cid0, cid1, cid2;
-			for (int j = 0; j < total; ++j)
+			for (size_t j = 0; j < total; ++j)
 			{
 				auto it = m_list.find(ids[j]);
 				if (it == m_list.end())
@@ -909,7 +909,7 @@ void SegGrow::Compute()
 						BranchPoint>(bp.id, bp));
 					it = ret.first;
 				}
-				for (int i = 0; i < gsize.gsxyz; ++i)
+				for (size_t i = 0; i < gsize.gsxyz; ++i)
 				{
 					nc = sum[i*total + j];
 					it->second.sum += nc;
@@ -1103,7 +1103,8 @@ void SegGrow::Compute()
 	for (auto it = m_list.begin();
 		it != m_list.end(); ++it)
 	{
-		if (it->second.sum < m_sz_thresh)
+		if (static_cast<long long>(it->second.sum) <
+			static_cast<long long>(m_sz_thresh))
 			continue;
 		it->second.ctr = it->second.ctr / it->second.sum;
 		it->second.ctr.scale(spcx, spcy, spcz);
