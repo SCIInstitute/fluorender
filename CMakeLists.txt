@@ -344,6 +344,22 @@ set(FFMPEG_LIBRARIES
     ${AVUTIL_LIBRARY}
     ${SWSCALE_LIBRARY}
     ${SWRESAMPLE_LIBRARY})
+if(WIN32)
+set(X26x_RELEASE_LIBRARIES
+    ${FFMPEG_DIRS}/depends/lib/libx264.lib
+    ${FFMPEG_DIRS}/depends/lib/libx265.lib)
+set(X26x_DEBUG_LIBRARIES
+    ${FFMPEG_DIRS}/depends/lib/libx264.lib
+    ${FFMPEG_DIRS}/depends/lib/libx265d.lib)
+list(APPEND FFMPEG_LIBRARIES
+    $<$<CONFIG:Debug>:${X26x_DEBUG_LIBRARIES}>
+    $<$<CONFIG:Release>:${X26x_RELEASE_LIBRARIES}>
+    mfplat.lib
+    mfuuid.lib
+    strmiids.lib
+    bcrypt.lib
+)
+endif()
 
 # freetype
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/freetype/include)

@@ -1,64 +1,23 @@
-04-18-2016
-Build FFMpeg with H.264 for FluoRender
-
-OS X:
-1. Checkout FFMpeg and x264 from github.com
-2. Build x264 first
-	./configure --disable-shared --enable-static
-	make
-	make install
-	make install-lib-static
-3. Build FFMpeg next
-	./configure --enable-gpl --enable-libx264
-	make
-4. Copy headers and libs to FluoRender, including libx264.a
-5. Added frameworks:
-	VideoToolbox.framework
-	Security.framework
-	CoreMedia.framework
-
-Reference:
-http://www.osxexperts.net/ffmpeg/ffmpegexperts.html
-
-
-Windows
-1. Get MSYS2 (https://msys2.github.io/)
-2. Get yasm (http://yasm.tortall.net/Download.html)
-3. Copy yasm.exe to /usr/local/bin of MINGW64
-	So that yasm.exe is exposed to MSYS2
-4. Launch VS2015 x64 native tools command prompt
-5. Check "VS2015 cmd" system path
-	echo %PATH%
-	VSPATH=
-	'/C/Program Files (x86)/Microsoft Visual Studio 14.0/Common7/IDE/CommonExtensions/Microsoft/TestWindow':'/C/Program Files (x86)/MSBuild/14.0/bin/amd64':'/C/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN/amd64':'/C/Windows/Microsoft.NET/Framework64/v4.0.30319':'/C/Program Files (x86)/Microsoft Visual Studio 14.0/VC/VCPackages':'/C/Program Files (x86)/Microsoft Visual Studio 14.0/Common7/IDE':'/C/Program Files (x86)/Microsoft Visual Studio 14.0/Common7/Tools':'/C/Program Files (x86)/HTML Help Workshop':'/C/Program Files (x86)/Microsoft Visual Studio 14.0/Team Tools/Performance Tools/x64':'/C/Program Files (x86)/Microsoft Visual Studio 14.0/Team Tools/Performance Tools'
-6. Lauch MSYS2 from VS2015 cmd
+Download source code
+FFmpeg: https://github.com/FFmpeg/FFmpeg.git
+x264: https://code.videolan.org/videolan/x264.git
+x265: https://bitbucket.org/multicoreware/x265_git.git
+Install MSYS2
+Install dependencies on mingw. May need to check if there is anything missing when running config or building.
+	pacman -S mingw-w64-x86_64-toolchain base-devel git yasm pkg-config mingw-w64-x86_64-x264 libiconv
+	pacman -S yasm libiconv nasm make pkgconf
+Lauch MSYS2 from msvc cmd
 	cd /msys64
-	mingw64_shell.bat
-7. Set MSYS2 system path to VSPATH
-	export PATH=$PATH:VSPATH
-	So that cl.exe and link.exe are exposed to MSYS2
-	Also, remove/rename link.exe in MSYS2
-	To make sure, use:
-	which cl
-	which link
-8. Build x264 first
-	CC=cl ./configure --disable-cli --enable-static
-	make
-	It should generate libx264.lib and libx264.def
-9. Build FFMpeg next
-10. Inlcude x264 directory to include for headers
-	C:/msys/x264
-	Note, use Windows absolute directory
-	Include x264 directory to lib for linker
-	C:/msys/x264
-	Note, use Windows absolute directory
-11. Build FFMpeg
-	./configure --toolchain=msvc --enable-static --disable-shared --enable-gpl --enable-libx264
-	make
-12. It generates *.a files for static libraries, which can be used in VS2015 just like *.lib files
-13. Copy headers and libs to FluoRender, including libx264.lib and libws2_32.a
-14. It also requires secur32.lib from VS2015
-
-References:
-https://ffmpeg.zeranoe.com/forum/viewtopic.php?t=1309
-http://cristobaldobranco.github.io/blog/2015/01/20/compiling-ffmpeg-with-windows-tools/
+	msys2_shell.cmd -mingw64 -full-path
+Configure path. Change paths for future msvc versions
+	export PATH="/c/Program Files/Microsoft Visual Studio/2022/Professional/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64:$PATH"
+	export PATH="/c/Program Files/Microsoft Visual Studio/2022/Professional/MSBuild/Current/Bin:$PATH"
+	export PATH="/c/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE:$PATH"
+	export PATH="/c/Program Files/Microsoft Visual Studio/2022/Professional/VC/Auxiliary/Build:$PATH"
+May need to change link.exe in mingw64
+Configure x264
+	CC=cl ./configure --prefix=/mingw64 --disable-cli --enable-static
+Use x265's script to generate vc projects
+Copy built results to FFmpeg/depends/
+Configure FFMpeg
+	./configure --toolchain=msvc --prefix=/mingw64 --enable-static --disable-shared --enable-gpl --enable-libx264 --enable-libx265 --extra-cflags="-I./depends/include" --extra-ldflags="/LIBPATH:./depends/lib libx264.lib libx265.lib" --pkg-config-flags="--static" --logfile=ffmpeg_configure.log
