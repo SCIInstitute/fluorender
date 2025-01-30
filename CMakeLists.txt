@@ -332,7 +332,6 @@ include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender)
 file(GLOB FFMPEG_DIRS "${PARENT_DIR}/FFmpeg*")
 list(GET FFMPEG_DIRS 0 FFMPEG_DIRS)  # Get the first match
 set(FFMPEG_INCLUDE_DIR "${FFMPEG_DIRS}")
-#add_definitions(-D__STDC_CONSTANT_MACROS)
 find_library(AVCODEC_LIBRARY avcodec HINTS "${FFMPEG_DIRS}/libavcodec")
 find_library(AVFORMAT_LIBRARY avformat HINTS "${FFMPEG_DIRS}/libavformat")
 find_library(AVUTIL_LIBRARY avutil HINTS "${FFMPEG_DIRS}/libavutil")
@@ -340,8 +339,8 @@ find_library(SWSCALE_LIBRARY swscale HINTS "${FFMPEG_DIRS}/libswscale")
 find_library(SWRESAMPLE_LIBRARY swresample HINTS "${FFMPEG_DIRS}/libswresample")
 include_directories(${FFMPEG_INCLUDE_DIR})
 set(FFMPEG_LIBRARIES
-    ${AVFORMAT_LIBRARY}
     ${AVCODEC_LIBRARY}
+    ${AVFORMAT_LIBRARY}
     ${AVUTIL_LIBRARY}
     ${SWSCALE_LIBRARY}
     ${SWRESAMPLE_LIBRARY})
