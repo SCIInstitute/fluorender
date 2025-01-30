@@ -91,7 +91,6 @@ int LOFReader::Preprocess()
 		return READER_OPEN_FAIL;
 
 	unsigned long long ioffset = 0;
-	unsigned long long ull;
 	bool result = true;
 
 	//header

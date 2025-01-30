@@ -29,15 +29,13 @@ DEALINGS IN THE SOFTWARE.
 #define _MPG_READER_H_
 
 #include <base_reader.h>
-extern "C" {
-	namespace ffmpeg {
+extern "C"
+{
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
-	}
+#include <libavutil/imgutils.h>
 }
-
-using namespace std;
 
 class MPGReader : public BaseReader
 {
@@ -47,7 +45,7 @@ public:
 
 	int GetType() { return READER_MPG_TYPE; }
 
-	void SetFile(string &file);
+	void SetFile(std::string &file);
 	void SetFile(wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
@@ -109,17 +107,17 @@ private:
 
 	//ffmpeg structs
 	int m_stream_index;
-	ffmpeg::AVFormatContext* m_av_format_context;
-	ffmpeg::AVCodecContext* m_av_codec_context;
-	ffmpeg::SwsContext* m_sws_context;
+	AVFormatContext* m_av_format_context;
+	AVCodecContext* m_av_codec_context;
+	SwsContext* m_sws_context;
 	//frame cache
-	ffmpeg::AVFrame* m_frame_yuv;//frame cache, should all be the same size
-	ffmpeg::AVFrame* m_frame_rgb;//frame cache
+	AVFrame* m_frame_yuv;//frame cache, should all be the same size
+	AVFrame* m_frame_rgb;//frame cache
 	uint8_t* m_frame_buffer;
 
 private:
 	FrameInfo get_frame_info(int64_t dts, int64_t pts);
-	Nrrd* get_nrrd(ffmpeg::AVFrame* frame, int c);
+	Nrrd* get_nrrd(AVFrame* frame, int c);
 };
 
 #endif//_MPG_READER_H_

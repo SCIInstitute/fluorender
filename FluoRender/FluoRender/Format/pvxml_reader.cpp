@@ -554,7 +554,6 @@ void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
 void PVXMLReader::ReadFrame(wxXmlNode* frameNode)
 {
 	wxString str;
-	long ival;
 	FrameInfo frame_info;
 
 	wxXmlNode *child = frameNode->GetChildren();

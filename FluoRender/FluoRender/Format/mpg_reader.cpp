@@ -66,17 +66,17 @@ MPGReader::~MPGReader()
 {
 	//release frame cache
 	if (m_frame_yuv)
-		ffmpeg::av_frame_free(&m_frame_yuv);
+		av_frame_free(&m_frame_yuv);
 	if (m_frame_rgb)
-		ffmpeg::av_frame_free(&m_frame_rgb);
+		av_frame_free(&m_frame_rgb);
 	if (m_frame_buffer)
-		ffmpeg::av_free(m_frame_buffer);
+		av_free(m_frame_buffer);
 	// Close the codecs
 	if (m_av_codec_context)
-		ffmpeg::avcodec_close(m_av_codec_context);
+		avcodec_free_context(&m_av_codec_context);
 	// Close the video file
 	if (m_av_format_context)
-		ffmpeg::avformat_close_input(&m_av_format_context);
+		avformat_close_input(&m_av_format_context);
 }
 
 void MPGReader::SetFile(string &file)
@@ -104,25 +104,22 @@ int MPGReader::Preprocess()
 		return READER_OPEN_FAIL;
 	m_data_name = name;
 
-	int frameFinished;
-	ffmpeg::AVCodecContext* pCodecCtxOrig = NULL;
-	ffmpeg::AVCodec* pCodec = NULL;
-	ffmpeg::AVPacket packet;
+	AVPacket packet;
 
 	// Open video file
 	std::string str = ws2s(m_path_name);
-	if (ffmpeg::avformat_open_input(&m_av_format_context, str.c_str(), NULL, NULL) != 0)
+	if (avformat_open_input(&m_av_format_context, str.c_str(), NULL, NULL) != 0)
 		return READER_OPEN_FAIL; // Couldn't open file
 
 	// Retrieve stream information
-	if (ffmpeg::avformat_find_stream_info(m_av_format_context, NULL) < 0)
+	if (avformat_find_stream_info(m_av_format_context, NULL) < 0)
 		return READER_OPEN_FAIL; // Couldn't find stream information
 
 	// Find the first video stream
 	m_stream_index = -1;
 	for (size_t i = 0; i < m_av_format_context->nb_streams; ++i)
 	{
-		if (m_av_format_context->streams[i]->codec->codec_type == ffmpeg::AVMEDIA_TYPE_VIDEO)
+		if (m_av_format_context->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
 		{
 			m_stream_index = i;
 			break;
@@ -131,29 +128,30 @@ int MPGReader::Preprocess()
 	if (m_stream_index == -1)
 		return READER_OPEN_FAIL; // Didn't find a video stream
 
-	// Get a pointer to the codec context for the video stream
-	pCodecCtxOrig = m_av_format_context->streams[m_stream_index]->codec;
+	// Get codec parameters from the video stream
+	AVCodecParameters *pCodecPar = m_av_format_context->streams[m_stream_index]->codecpar;
 
 	// Find the decoder for the video stream
-	pCodec = ffmpeg::avcodec_find_decoder(pCodecCtxOrig->codec_id);
-	if (pCodec == NULL)
+	const AVCodec *pCodec = avcodec_find_decoder(pCodecPar->codec_id);
+	if (!pCodec)
 		return READER_OPEN_FAIL; // Codec not found
+
 	// Copy context
-	m_av_codec_context = ffmpeg::avcodec_alloc_context3(pCodec);
-	if (ffmpeg::avcodec_copy_context(m_av_codec_context, pCodecCtxOrig) != 0)
+	m_av_codec_context = avcodec_alloc_context3(pCodec);
+	if (avcodec_parameters_to_context(m_av_codec_context, pCodecPar) != 0)
 		return READER_OPEN_FAIL; // Error copying codec context
 	// Open codec
-	if (ffmpeg::avcodec_open2(m_av_codec_context, pCodec, NULL) < 0)
+	if (avcodec_open2(m_av_codec_context, pCodec, NULL) < 0)
 		return READER_OPEN_FAIL; // Could not open codec
 
 	// initialize SWS context for software scaling
-	m_sws_context = ffmpeg::sws_getContext(
+	m_sws_context = sws_getContext(
 		m_av_codec_context->width,
 		m_av_codec_context->height,
 		m_av_codec_context->pix_fmt,
 		m_av_codec_context->width,
 		m_av_codec_context->height,
-		ffmpeg::AV_PIX_FMT_RGB24,
+		AV_PIX_FMT_RGB24,
 		SWS_BILINEAR,
 		NULL,
 		NULL,
@@ -166,24 +164,28 @@ int MPGReader::Preprocess()
 
 	// Allocate video frame
 	if (!m_frame_yuv)
-		m_frame_yuv = ffmpeg::av_frame_alloc();
+		m_frame_yuv = av_frame_alloc();
 	//read frame
-	while (ffmpeg::av_read_frame(m_av_format_context, &packet) >= 0)
+	while (av_read_frame(m_av_format_context, &packet) >= 0)
 	{
 		if (packet.stream_index == m_stream_index)
 		{
-			// Decode video frame
-			ffmpeg::avcodec_decode_video2(m_av_codec_context, m_frame_yuv, &frameFinished, &packet);
+			// Send the packet with the compressed data to the decoder
+			if (avcodec_send_packet(m_av_codec_context, &packet) < 0) {
+				// Error sending a packet for decoding
+				av_packet_unref(&packet);
+				continue;
+			}
 
-			// Did we get a video frame?
-			if (frameFinished)
-			{
+			// Receive the decoded frame from the decoder
+			while (avcodec_receive_frame(m_av_codec_context, m_frame_yuv) >= 0) {
+				// Process the decoded frame (m_frame_yuv)
 				FrameInfo info = get_frame_info(packet.dts, packet.pts);
 				m_mpg_info.push_back(info);
 			}
 		}
 		// Free the packet that was allocated by av_read_frame
-		ffmpeg::av_free_packet(&packet);
+		av_packet_unref(&packet);
 	}
 
 	//get time num
@@ -204,7 +206,7 @@ int MPGReader::Preprocess()
 	m_scalar_scale = 1;
 
 	// Close the codecs
-	ffmpeg::avcodec_close(pCodecCtxOrig);
+	//avcodec_close(pCodecCtxOrig);
 
 	return READER_OK;
 }
@@ -295,8 +297,7 @@ Nrrd* MPGReader::Convert(int t, int c, bool get_max)
 	}
 	m_cur_time = t;
 
-	int frameFinished;
-	ffmpeg::AVPacket packet;
+	AVPacket packet;
 
 	// Allocate video frame
 	if (!m_frame_yuv)
@@ -305,52 +306,57 @@ Nrrd* MPGReader::Convert(int t, int c, bool get_max)
 	// Allocate an AVFrame structure
 	if (!m_frame_rgb)
 	{
-		m_frame_rgb = ffmpeg::av_frame_alloc();
+		m_frame_rgb = av_frame_alloc();
 		if (m_frame_rgb == NULL)
 			return data;
 
 		// Determine required buffer size and allocate buffer
-		int numBytes = ffmpeg::avpicture_get_size(ffmpeg::AV_PIX_FMT_RGB24, m_x_size, m_y_size);
-		m_frame_buffer = (uint8_t*)ffmpeg::av_malloc(numBytes * sizeof(uint8_t));
+		int numBytes = av_image_get_buffer_size(AV_PIX_FMT_RGB24, m_x_size, m_y_size, 1);
+		m_frame_buffer = (uint8_t*)av_malloc(numBytes * sizeof(uint8_t));
 
 		// Assign appropriate parts of buffer to image planes in pFrameRGB
 		// Note that pFrameRGB is an AVFrame, but AVFrame is a superset
 		// of AVPicture
-		ffmpeg::avpicture_fill((ffmpeg::AVPicture*)m_frame_rgb, m_frame_buffer, ffmpeg::AV_PIX_FMT_RGB24, m_x_size, m_y_size);
+		av_image_fill_arrays(m_frame_rgb->data, m_frame_rgb->linesize, m_frame_buffer, AV_PIX_FMT_RGB24, m_x_size, m_y_size, 1);
 	}
 
 	//seek frame
 	int64_t target = m_mpg_info[t].dts;
-	if (ffmpeg::av_seek_frame(m_av_format_context, m_stream_index, target, AVSEEK_FLAG_BACKWARD) < 0)
+	if (av_seek_frame(m_av_format_context, m_stream_index, target, AVSEEK_FLAG_BACKWARD) < 0)
 		return data;
 
-	//read frame
-	while (ffmpeg::av_read_frame(m_av_format_context, &packet) >= 0)
+	// Read frame
+	while (av_read_frame(m_av_format_context, &packet) >= 0)
 	{
 		if (packet.stream_index == m_stream_index)
 		{
-			// Decode video frame
-			ffmpeg::avcodec_decode_video2(m_av_codec_context, m_frame_yuv, &frameFinished, &packet);
+			// Send the packet with the compressed data to the decoder
+			if (avcodec_send_packet(m_av_codec_context, &packet) < 0) {
+				// Error sending a packet for decoding
+				av_packet_unref(&packet);
+				continue;
+			}
 
-			// Did we get a video frame?
-			if (frameFinished &&
-				packet.pts == m_mpg_info[t].pts)
-			{
-				// Convert the image from its native format to RGB
-				ffmpeg::sws_scale(m_sws_context, (uint8_t const* const*)m_frame_yuv->data,
-					m_frame_yuv->linesize, 0, m_av_codec_context->height,
-					m_frame_rgb->data, m_frame_rgb->linesize);
+			// Receive the decoded frame from the decoder
+			while (avcodec_receive_frame(m_av_codec_context, m_frame_yuv) >= 0) {
+				// Did we get a video frame?
+				if (packet.pts == m_mpg_info[t].pts)
+				{
+					// Convert the image from its native format to RGB
+					sws_scale(m_sws_context, (uint8_t const* const*)m_frame_yuv->data,
+						m_frame_yuv->linesize, 0, m_av_codec_context->height,
+						m_frame_rgb->data, m_frame_rgb->linesize);
 
-				data = get_nrrd(m_frame_rgb, c);
+					data = get_nrrd(m_frame_rgb, c);
 
-				ffmpeg::av_free_packet(&packet);
-				break;
+					av_packet_unref(&packet);
+					break;
+				}
 			}
 		}
 		// Free the packet that was allocated by av_read_frame
-		ffmpeg::av_free_packet(&packet);
+		av_packet_unref(&packet);
 	}
-
 	return data;
 }
 
@@ -389,7 +395,7 @@ MPGReader::FrameInfo MPGReader::get_frame_info(int64_t dts, int64_t pts)
 	return info;
 }
 
-Nrrd* MPGReader::get_nrrd(ffmpeg::AVFrame* frame, int c)
+Nrrd* MPGReader::get_nrrd(AVFrame* frame, int c)
 {
 	//extract channel
 	unsigned long long total_size = (unsigned long long)m_x_size * (unsigned long long)m_y_size;

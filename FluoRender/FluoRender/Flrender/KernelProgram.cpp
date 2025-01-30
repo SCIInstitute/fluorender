@@ -278,7 +278,7 @@ namespace flvr
 
 		if (!queue_)
 		{
-			queue_ = clCreateCommandQueue(context_, device_, 0, &err);
+			queue_ = clCreateCommandQueueWithProperties(context_, device_, nullptr, &err);
 			if (err != CL_SUCCESS)
 				return -1;
 		}
@@ -309,7 +309,7 @@ namespace flvr
 		{
 			if (kernels_[i].name == name &&
 				!kernels_[i].external)
-				return i;
+				return static_cast<int>(i);
 		}
 		return -1;
 	}
@@ -325,7 +325,7 @@ namespace flvr
 		s_kernel.name = kernel_prog->kernels_[kernel_index].name;
 		s_kernel.external = true;
 		kernels_.push_back(s_kernel);
-		return kernels_.size() - 1;
+		return static_cast<int>(kernels_.size() - 1);
 	}
 
 	void KernelProgram::removeExternalKernels()
@@ -492,7 +492,7 @@ namespace flvr
 		if (!matchArgBuf(arg, ai))
 		{
 			arg_list_.push_back(arg);
-			ai = arg_list_.size() - 1;
+			ai = static_cast<int>(arg_list_.size() - 1);
 		}
 		else
 			arg_list_[ai].kernel(kernel_idx_);
@@ -1137,12 +1137,12 @@ namespace flvr
 					if (rm > res)
 					{
 						res = rm;
-						maxj = j;
+						maxj = static_cast<unsigned int>(j);
 					}
 				}
 				else
 				{
-					return j;
+					return static_cast<unsigned int>(j);
 				}
 			}
 			if (maxj)
@@ -1168,12 +1168,12 @@ namespace flvr
 					if (rm > res)
 					{
 						res = rm;
-						maxj = j;
+						maxj = static_cast<unsigned int>(j);
 					}
 				}
 				else
 				{
-					return j;
+					return static_cast<unsigned int>(j);
 				}
 			}
 			if (maxj)

@@ -32,7 +32,7 @@ using namespace flrd;
 
 ClusterKmeans::ClusterKmeans() :
 	m_clnum(2),
-	m_eps(1e-3),
+	m_eps(1e-3f),
 	m_max_iter(100)
 {
 

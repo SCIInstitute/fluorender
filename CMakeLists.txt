@@ -329,30 +329,22 @@ include_directories(${FluoRender_SOURCE_DIR}/FluoRender)
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender)
 
 # ffmpeg
-if(WIN32)
-  include_directories(${FluoRender_SOURCE_DIR}/FluoRender/ffmpeg/include)
-  file(GLOB FFMPEG_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/ffmpeg/lib/Win64/*.a ${FluoRender_SOURCE_DIR}/FluoRender/ffmpeg/lib/Win64/*.lib)
-  add_definitions(-D__STDC_CONSTANT_MACROS)
-elseif(APPLE)
-  include_directories(${FluoRender_SOURCE_DIR}/FluoRender/ffmpeg/include)
-  file(GLOB FFMPEG_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/ffmpeg/lib/OSX/*.a)
-else()
-  set(FFMPEG_INCLUDE_DIR /usr/include/x86_64-linux-gnu/libavcodec)
-  include_directories(${FFMPEG_INCLUDE_DIR})
-  find_library(AVCODEC_LIBRARY avcodec)
-  find_library(AVFORMAT_LIBRARY avformat)
-  find_library(AVUTIL_LIBRARY avutil)
-  find_library(SWSCALE_LIBRARY swscale)
-  find_library(SWRESAMPLE_LIBRARY swresample)
-  set(
-    FFMPEG_LIBRARIES
+file(GLOB FFMPEG_DIRS "${PARENT_DIR}/FFmpeg*")
+list(GET FFMPEG_DIRS 0 FFMPEG_DIRS)  # Get the first match
+set(FFMPEG_INCLUDE_DIR "${FFMPEG_DIRS}")
+#add_definitions(-D__STDC_CONSTANT_MACROS)
+find_library(AVCODEC_LIBRARY avcodec HINTS "${FFMPEG_DIRS}/libavcodec")
+find_library(AVFORMAT_LIBRARY avformat HINTS "${FFMPEG_DIRS}/libavformat")
+find_library(AVUTIL_LIBRARY avutil HINTS "${FFMPEG_DIRS}/libavutil")
+find_library(SWSCALE_LIBRARY swscale HINTS "${FFMPEG_DIRS}/libswscale")
+find_library(SWRESAMPLE_LIBRARY swresample HINTS "${FFMPEG_DIRS}/libswresample")
+include_directories(${FFMPEG_INCLUDE_DIR})
+set(FFMPEG_LIBRARIES
     ${AVFORMAT_LIBRARY}
     ${AVCODEC_LIBRARY}
     ${AVUTIL_LIBRARY}
     ${SWSCALE_LIBRARY}
-    ${SWRESAMPLE_LIBRARY}
-)
-endif()
+    ${SWRESAMPLE_LIBRARY})
 
 # freetype
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/freetype/include)
@@ -380,24 +372,15 @@ endif()
 #nikon
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/nd2/include)
 if(WIN32)
+  add_compile_options(/wd4099)
   file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/*.lib)
 else()
   file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/*.a)
 endif()
 
 # OpenCL
-if(WIN32)
-  include_directories(${FluoRender_SOURCE_DIR}/FluoRender/OpenCL/include)
-  if(${ARCHITECTURE} MATCHES 64)
-    file(GLOB OpenCL_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/OpenCL/lib/x86_64/*.lib)
-  elseif(${ARCHITECTURE} MATCHES 32)
-    file(GLOB OpenCL_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/OpenCL/lib/x86/*.lib)
-  endif()
-elseif(UNIX OR APPLE OR MINGW)
-  #include(${CMAKE_SOURCE_DIR}/FindOpenCL.cmake)
-  find_package(OpenCL REQUIRED)
-  include_directories(${OpenCL_INCLUDE_DIRS})
-endif()
+find_package(OpenCL REQUIRED)
+include_directories(${OpenCL_INCLUDE_DIRS})
 
 # OpenVR
 file(GLOB OPENVR_DIRS "${PARENT_DIR}/openvr*")

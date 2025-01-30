@@ -65,12 +65,16 @@ bool LightFieldShader::emit_v(string& s)
 
 	z << ShaderProgram::glsl_version_;
 	z << ShaderProgram::glsl_unroll_;
+	//type doesn't do anything for now
+#pragma warning(push)
+#pragma warning(disable : 4065)
 	switch (type_)
 	{
 	default:
 		z << LIGHT_FIELD_SHADER_VERTEX;
 		break;
 	}
+#pragma warning(pop)
 
 	s = z.str();
 	return false;
@@ -82,12 +86,16 @@ bool LightFieldShader::emit_f(string& s)
 
 	z << ShaderProgram::glsl_version_;
 	z << ShaderProgram::glsl_unroll_;
+	//type doesn't do anything for now
+#pragma warning(push)
+#pragma warning(disable : 4065)
 	switch (type_)
 	{
 	default:
 		z << LIGHT_FIELD_SHADER_FRAG;
 		break;
 	}
+#pragma warning(pop)
 
 	s = z.str();
 	return false;

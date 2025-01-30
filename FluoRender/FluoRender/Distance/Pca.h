@@ -98,7 +98,7 @@ namespace flrd
 		}
 		void SetCovMat(std::vector<double> &cov)
 		{
-			int size = cov.size();
+			size_t size = cov.size();
 			if (size < 6)
 				return;
 			if (size > 9)
