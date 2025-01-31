@@ -67,7 +67,7 @@ Some third-party dependencies are included in the FluoRender source code. Other 
  - Boost (http://www.boost.org/users/download/#live) for computing using the graph library
    - Needs building before FluoRender
  - Dlib (http://dlib.net) for deep neural network calculations
-   - No need to build before FluoRender
+   - No need to build before FluoRender for the template library
  - FFmpeg for reading and writing video files
    - https://github.com/FFmpeg/FFmpeg.git
    - x264 codec (https://code.videolan.org/videolan/x264.git)
@@ -82,7 +82,7 @@ Some third-party dependencies are included in the FluoRender source code. Other 
    - Needs building before FluoRender
  - GLM for mathematics like vectors, matrices, and quaternions
    - https://github.com/g-truc/glm.git
-   - No need to build for head-only library
+   - No need to build for header-only library
  - HDF5 (https://www.hdfgroup.org/download-hdf5/) for managing HDF files
    - https://github.com/HDFGroup/hdf5/releases/tag/hdf5_1.14.5
    - Needs building before FluoRender
@@ -106,7 +106,7 @@ Some third-party dependencies are included in the FluoRender source code. Other 
    - I generally use the built-in libs in wxWidgets, including Jpeg, Png, Tiff, and Zlib
    - Needs building before FluoRender
 
-Libraries that need building before FluoRender or included as head-only are placed at the same level of the FluoRender source code path so that they can be automatically found. See FluoRender's CMake file for more details.
+Libraries that need building before FluoRender or included as head-only are placed at the same level of the FluoRender source code path so that they can be automatically found. See FluoRender's CMake file for more details. I usually prefer the source code of a released version instead of the master head.
  
 <h2>Linux</h2> 
 
