@@ -49,9 +49,9 @@ if (WIN32)
 endif()
 
 # option to build with multithreading
-SET(USE_MP_COMPILE 4 CACHE INTEGER "Number of parallel jobs for building")
+SET(USE_MP_COMPILE 4 CACHE INTEGER "Number of parallel jobs for building" FORCE)
 if (USE_MP_COMPILE)
-    set(CMAKE_BUILD_PARALLEL_LEVEL ${USE_MP_COMPILE})
+    set(CMAKE_BUILD_PARALLEL_LEVEL "${USE_MP_COMPILE}")
 endif()
 
 cmake_minimum_required(VERSION 3.10)
@@ -131,9 +131,6 @@ cmake_path(GET FluoRender_SOURCE_DIR PARENT_PATH PARENT_DIR)
 # static compile
 add_definitions(-DSTATIC_COMPILE)
 add_definitions(-DLX_STATIC_LINKING)
-
-# glm
-add_definitions(-DGLM_FORCE_RADIANS=1)
 
 # Set the GLEW directory
 if(WIN32 OR APPLE)
@@ -366,13 +363,21 @@ list(APPEND FFMPEG_LIBRARIES
 endif()
 
 # freetype
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/freetype/include)
+file(GLOB FREETYPE_DIRS "${PARENT_DIR}/freetype*")
+list(GET FREETYPE_DIRS 0 FREETYPE_DIRS)  # Get the first match
+set(FREETYPE_INCLUDE_DIRS "${FREETYPE_DIRS}/include")
 if(WIN32)
-  file(GLOB FREETYPE_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/freetype/lib/*.lib)
-else()
-  find_package(Freetype REQUIRED)
-  include_directories(${FREETYPE_INCLUDE_DIRS})
+    set(FREETYPE_LIBRARY_RELEASE "${FREETYPE_DIRS}/build/Release/freetype.lib")
+    set(FREETYPE_LIBRARY_DEBUG "${FREETYPE_DIRS}/build/Debug/freetyped.lib")
 endif()
+find_package(Freetype REQUIRED)
+include_directories(${FREETYPE_INCLUDE_DIRS})
+
+# glm
+file(GLOB GLM_DIRS "${PARENT_DIR}/glm*")
+list(GET GLM_DIRS 0 GLM_DIRS)  # Get the first match
+include_directories(${GLM_DIRS})
+add_definitions(-DGLM_FORCE_RADIANS=1)
 
 # HoloPlay
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/include)
