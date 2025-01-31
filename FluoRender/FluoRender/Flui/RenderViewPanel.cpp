@@ -1924,7 +1924,6 @@ void RenderViewPanel::SaveDefault(unsigned int mask)
 {
 	wxString str;
 	wxColor cVal;
-	double x, y, z;
 
 	//render modes
 	if (mask & 0x1)

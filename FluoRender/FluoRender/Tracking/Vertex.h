@@ -167,7 +167,7 @@ namespace flrd
 
 	inline Vrtx Vertex::GetInterVert(InterGraph& graph)
 	{
-		unsigned int key = graph.index;
+		unsigned int key = static_cast<unsigned int>(graph.index);
 		InterVertListIter iter = m_inter_verts.find(key);
 		if (iter != m_inter_verts.end())
 			return iter->second;
@@ -178,7 +178,7 @@ namespace flrd
 	inline void Vertex::SetInterVert(InterGraph& graph,
 		Vrtx inter_vert)
 	{
-		unsigned int key = graph.index;
+		unsigned int key = static_cast<unsigned int>(graph.index);
 		InterVertListIter iter = m_inter_verts.find(key);
 		if (iter != m_inter_verts.end())
 			iter->second = inter_vert;
@@ -198,7 +198,7 @@ namespace flrd
 
 	inline size_t Vertex::GetFrame(InterGraph& graph)
 	{
-		unsigned int key = graph.index;
+		unsigned int key = static_cast<unsigned int>(graph.index);
 		InterVertListIter iter = m_inter_verts.find(key);
 		if (iter != m_inter_verts.end())
 			return graph[iter->second].frame;
@@ -272,7 +272,7 @@ namespace flrd
 		{
 			Celp celp0 = m_cells[i].lock();
 			if (celp0 && celp0->Id() == celp->Id())
-				return i;
+				return static_cast<int>(i);
 		}
 		return -1;
 	}

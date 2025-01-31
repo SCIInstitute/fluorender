@@ -219,7 +219,7 @@ void QVideoEncoder::close()
 {
 	if (!valid_) return;
 	//flush the remaining (delayed) frames.
-	int last_dts = 0;
+	int64_t last_dts = 0;
 	AVPacket *pkt = av_packet_alloc();
 	if (!pkt)
 		return;
@@ -315,7 +315,6 @@ bool QVideoEncoder::write_video_frame(size_t frame_num)
 	AVFrame * frame = output_stream_.frame;
 
 	AVPacket pkt;
-	av_init_packet(&pkt);
 	pkt.data = NULL; // packet data will be allocated by the encoder
 	pkt.size = 0;
 
@@ -405,12 +404,12 @@ void QVideoEncoder::fill_yuv_image(int64_t frame_index) {
 	/* Y */
 	for (y = 0; y < height_; y++)
 		for (x = 0; x < width_; x++)
-			pict->data[0][y * pict->linesize[0] + x] = x + y + i * 3;
+			pict->data[0][y * pict->linesize[0] + x] = static_cast<uint8_t>(x + y + i * 3);
 	/* Cb and Cr */
 	for (y = 0; y < height_ / 2; y++) {
 		for (x = 0; x < width_ / 2; x++) {
-			pict->data[1][y * pict->linesize[1] + x] = 128 + y + i * 2;
-			pict->data[2][y * pict->linesize[2] + x] = 64 + x + i * 5;
+			pict->data[1][y * pict->linesize[1] + x] = static_cast<uint8_t>(128 + y + i * 2);
+			pict->data[2][y * pict->linesize[2] + x] = static_cast<uint8_t>(64 + x + i * 5);
 		}
 	}
 }
@@ -420,8 +419,8 @@ bool QVideoEncoder::set_frame_rgb_data(unsigned char * data) {
 		* to the codec pixel format if needed */
 	if (!output_stream_.sws_ctx) {
 		output_stream_.sws_ctx = sws_getContext(
-			width_, height_, AV_PIX_FMT_RGB24,
-			width_, height_, AV_PIX_FMT_YUV420P,
+			static_cast<int>(width_), static_cast<int>(height_), AV_PIX_FMT_RGB24,
+			static_cast<int>(width_), static_cast<int>(height_), AV_PIX_FMT_YUV420P,
 			SCALE_FLAGS, NULL, NULL, NULL);
 		if (!output_stream_.sws_ctx) {
 			fprintf(stderr, "Could not initialize the conversion context\n");
@@ -452,7 +451,7 @@ bool QVideoEncoder::set_frame_rgb_data(unsigned char * data) {
 	}
 	sws_scale(output_stream_.sws_ctx,
 		inData, inLinesize,
-		0, height_, output_stream_.frame->data,
+		0, static_cast<int>(height_), output_stream_.frame->data,
 		output_stream_.frame->linesize);
 	delete[]temp_array;
 	return true;

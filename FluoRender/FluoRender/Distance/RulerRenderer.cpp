@@ -529,7 +529,7 @@ void RulerRenderer::DrawText(int nx, int ny)
 	fluo::Color c;
 	fluo::Color text_color = m_view->GetTextColor();
 	fluo::Point p2;
-	float px, py, p2x, p2y;
+	float p2x, p2y;
 	fluo::Transform mv, p;
 	glm::mat4 mv_mat = m_view->GetModelView();
 	mv.set(glm::value_ptr(mv_mat));

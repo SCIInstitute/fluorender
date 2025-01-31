@@ -44,10 +44,14 @@ if (WIN32)
   if (USE_XINPUT)
     add_definitions(-DUSE_XINPUT=1)
   endif()
-# option to build with multithreading
-  SET(USE_MP_COMPILE ON CACHE BOOL "Enable Multithreaded Compile")
 # option to build tester
   SET(BUILD_TESTER OFF CACHE BOOL "Enable building the tester")
+endif()
+
+# option to build with multithreading
+SET(USE_MP_COMPILE 4 CACHE INTEGER "Number of parallel jobs for building")
+if (USE_MP_COMPILE)
+    set(CMAKE_BUILD_PARALLEL_LEVEL ${USE_MP_COMPILE})
 endif()
 
 cmake_minimum_required(VERSION 3.10)
@@ -396,6 +400,7 @@ endif()
 # OpenCL
 find_package(OpenCL REQUIRED)
 include_directories(${OpenCL_INCLUDE_DIRS})
+add_definitions(-DCL_TARGET_OPENCL_VERSION=300)
 
 # OpenVR
 file(GLOB OPENVR_DIRS "${PARENT_DIR}/openvr*")

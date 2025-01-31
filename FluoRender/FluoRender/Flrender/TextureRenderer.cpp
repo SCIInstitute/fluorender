@@ -604,10 +604,10 @@ namespace flvr
 			unsigned char* tempp = temp; \
 			unsigned char* tp = (unsigned char*)(brick->tex_data(c)); \
 			unsigned char* tp2; \
-			for (unsigned int k = 0; k < nz; ++k) \
+			for (size_t k = 0; k < static_cast<size_t>(nz); ++k) \
 			{ \
 				tp2 = tp; \
-				for (unsigned int j = 0; j < ny; ++j) \
+				for (size_t j = 0; j < static_cast<size_t>(ny); ++j) \
 				{ \
 					memcpy(tempp, tp2, nx*nb); \
 					tempp += nx*nb; \

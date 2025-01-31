@@ -5124,7 +5124,6 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 
 	//find matching stencil in frame2
 	fluo::Point center;
-	float prob;
 	Stencil s1, s2;
 	s2.data = data2;
 	s2.label = label2;

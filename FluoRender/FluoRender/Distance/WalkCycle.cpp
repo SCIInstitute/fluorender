@@ -633,7 +633,7 @@ void WalkCycle::Correct(int mode)
 {
 	if (names_.empty())
 		return;
-	int dim = names_[0].d;
+	int dim = static_cast<int>(names_[0].d);
 	switch (mode)
 	{
 	case 0:

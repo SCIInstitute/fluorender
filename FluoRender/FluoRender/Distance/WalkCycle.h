@@ -95,7 +95,7 @@ namespace flrd
 		}
 		void half()
 		{
-			double dw = w;
+			double dw = static_cast<double>(w);
 			dw /= 2;
 			w = size_t(dw + 0.55);
 			w = w ? w : 1;
@@ -103,7 +103,7 @@ namespace flrd
 		}
 		void onehalf()
 		{
-			double dw = w;
+			double dw = static_cast<double>(w);
 			dw /= 2;
 			w = size_t(dw + w);
 			w = w ? w : 1;
@@ -121,7 +121,7 @@ namespace flrd
 	public:
 		double get(const Window& win, double j)
 		{
-			double w = win.w - 1;
+			double w = static_cast<double>(win.w) - 1;
 			double p = win.l + w * j;
 			size_t i0 = size_t(p);
 			size_t i1 = i0 + 1;
