@@ -65,21 +65,48 @@ Some third-party dependencies are included in the FluoRender source code. Other 
  - Git (https://git-scm.com/) for managing the source code
  - CMake (http://www.cmake.org/) for generating building projects
  - Boost (http://www.boost.org/users/download/#live) for computing using the graph library
+   - Needs building before FluoRender
  - Dlib (http://dlib.net) for deep neural network calculations
+   - No need to build before FluoRender
+ - FFmpeg for reading and writing video files
+   - https://github.com/FFmpeg/FFmpeg.git
+   - x264 codec (https://code.videolan.org/videolan/x264.git)
+   - x265 codec (https://bitbucket.org/multicoreware/x265_git.git)
+   - May need MSYS2 to build on Windows
+   - Build codecs first and then FFmpeg
+ - FreeType for managing type fonts
+   - https://github.com/freetype/freetype.git
+   - Needs building before FluoRender
  - GLEW (https://glew.sourceforge.net) for OpenGL extension management
    - https://github.com/nigels-com/glew/releases/tag/glew-2.2.0
+   - Needs building before FluoRender
+ - GLM for mathematics like vectors, matrices, and quaternions
+   - https://github.com/g-truc/glm.git
+   - No need to build for head-only library
  - HDF5 (https://www.hdfgroup.org/download-hdf5/) for managing HDF files
    - https://github.com/HDFGroup/hdf5/releases/tag/hdf5_1.14.5
+   - Needs building before FluoRender
  - JDK (https://www.oracle.com/java/technologies/downloads/) for linking to ImageJ functions
+   - Needs installation
  - OpenCV (https://opencv.org/) for computer vision calculations
    - https://github.com/opencv/opencv.git
+   - Needs building before FluoRender
  - OpenVR (https://steamvr.com) for SteamVR headset support
    - https://github.com/ValveSoftware/openvr.git
+   - Needs building before FluoRender
  - OpenXR (https://www.khronos.org/openxr/) for OpenXR headset support
    - https://github.com/KhronosGroup/OpenXR-SDK.git
+   - Needs building before FluoRender
  - Python (https://www.python.org/downloads/) for linking to Python functions
+   - Needs installation
+ - Teem (https://teem.sourceforge.net/) for reading and writing Nrrd format files
+   - Needs building before FluoRender
  - wxWidgets (https://github.com/wxWidgets/wxWidgets) for user-interface library
    - I made some changes to the wxWidgets code. Use my branch: https://github.com/basisunus/wxWidgets.git
+   - I generally use the built-in libs in wxWidgets, including Jpeg, Png, Tiff, and Zlib
+   - Needs building before FluoRender
+
+Libraries that need building before FluoRender or included as head-only are placed at the same level of the FluoRender source code path so that they can be automatically found. See FluoRender's CMake file for more details.
  
 <h2>Linux</h2> 
 
