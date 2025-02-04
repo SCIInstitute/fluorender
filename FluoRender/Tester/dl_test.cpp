@@ -124,3 +124,18 @@ catch (std::exception& e)
     cout << e.what() << endl;
 }
 
+#define gno_vp_output_size 26
+
+void DLTest2() try
+{
+	using net_type_vp =
+		loss_mean_squared_multioutput<
+		fc<gno_vp_output_size,
+		input<matrix<float>>>>;
+		net_type_vp m_net;
+		dnn_trainer<net_type_vp> m_trainer(m_net);
+}
+catch (std::exception& e)
+{
+    cout << e.what() << endl;
+}

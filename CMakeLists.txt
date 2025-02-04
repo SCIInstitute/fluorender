@@ -1009,19 +1009,8 @@ elseif(WIN32)
     if(BUILD_TESTER)
         add_executable(Tester
           ${tester_src} ${tester_hdr}
-          $<TARGET_OBJECTS:CONTROL_OBJ>
-          $<TARGET_OBJECTS:DATABASE_OBJ>
-          $<TARGET_OBJECTS:FILE_OBJ>
           $<TARGET_OBJECTS:FLOBJECT_OBJ>
-          $<TARGET_OBJECTS:IMAGE_OBJ>
-          $<TARGET_OBJECTS:TIMER_OBJ>
-          $<TARGET_OBJECTS:TRAINER_OBJ>
           $<TARGET_OBJECTS:TYPE_OBJ>
-          $<TARGET_OBJECTS:UTILITY_OBJ>
-          $<TARGET_OBJECTS:VIDEO_OBJ>
-          $<TARGET_OBJECTS:POLE_OBJ>
-          $<TARGET_OBJECTS:WACUTILS_OBJ>
-          $<TARGET_OBJECTS:XINPUT_OBJ>
         )
     endif()
   endif()
