@@ -49,9 +49,9 @@ if (WIN32)
 endif()
 
 # option to build with multithreading
-SET(USE_MP_COMPILE 4 CACHE INTEGER "Number of parallel jobs for building" FORCE)
-if (USE_MP_COMPILE)
-    set(CMAKE_BUILD_PARALLEL_LEVEL "${USE_MP_COMPILE}")
+SET(USE_MP_COMPILE "4" CACHE STRING "Number of parallel jobs for building")
+if (NOT USE_MP_COMPILE STREQUAL "")
+    set(CMAKE_BUILD_PARALLEL_LEVEL ${USE_MP_COMPILE})
 endif()
 
 cmake_minimum_required(VERSION 3.10)
@@ -258,10 +258,25 @@ find_package(Boost COMPONENTS system chrono filesystem locale REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
 # dlib
+if(WIN32)
+    file(GLOB BLAS_DIRS "${PARENT_DIR}/OpenBLAS*")
+    list(GET BLAS_DIRS 0 BLAS_DIRS)  # Get the first match
+    set(OpenBLAS_DIR "${BLAS_DIRS}/build")
+    set(OpenBLAS_LIB_DIR "${BLAS_DIRS}/build/lib")
+    set(BLAS_openblas_LIBRARY "${BLAS_DIRS}/build/lib/RELEASE/openblas.lib")
+    set(CUDNN_ROOT_DIR $ENV{CUDNN_PATH})
+    message (STATUS "CUDNN_ROOT_DIR=${CUDNN_ROOT_DIR}")
+    set(cudnn "${CUDNN_ROOT_DIR}/lib/12.5/x64/cudnn.lib")
+    message (STATUS cudnn "cudnn=${cudnn}")
+    set(cudnn_include "${CUDNN_ROOT_DIR}/include/12.5/")
+    message (STATUS cudnn_include "cudnn_include=${cudnn_include}")
+endif()
 file(GLOB DLIB_DIRS "${PARENT_DIR}/dlib*")
 list(GET DLIB_DIRS 0 DLIB_DIRS)  # Get the first match
 add_subdirectory(${DLIB_DIRS} dlib_build)
 include_directories(${DLIB_DIRS})
+set(DLIB_USE_BLAS ON)
+set(DLIB_USE_CUDA ON)
 
 #opencv
 file(GLOB OPENCV_DIRS "${PARENT_DIR}/opencv*")

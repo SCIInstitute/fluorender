@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _DNNTRAINER_H_
 
 #include <Trainer.h>
-#include <dlib/dnn.h>
+#include <dlib/matrix.h>
 #include <Numbers.h>
 
 namespace flrd

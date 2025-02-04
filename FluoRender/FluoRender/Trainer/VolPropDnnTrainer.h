@@ -28,15 +28,16 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLPROPDNNTRAINER_H_
 #define _VOLPROPDNNTRAINER_H_
 
+#include <dlib/dnn.h>
 #include <DnnTrainer.h>
 
 namespace flrd
 {
 	//adjust net definition to change behaviors
-	using net_type_vp =
-		dlib::loss_mean_squared_multioutput<
-		dlib::fc<gno_vp_output_size,
-		dlib::input<dlib::matrix<float>>>>;
+	//using net_type_vp =
+	//	dlib::loss_mean_squared_multioutput<
+	//	dlib::fc<gno_vp_output_size,
+	//	dlib::input<dlib::matrix<float>>>>;
 		//dlib::relu<dlib::fc<gno_vp_input_size,
 		//dlib::input<dlib::matrix<float>>
 		//>>>>;
@@ -54,8 +55,8 @@ namespace flrd
 		virtual void set_model_file(const std::string& file);
 
 	protected:
-		net_type_vp m_net;
-		dlib::dnn_trainer<net_type_vp> m_trainer;
+		//net_type_vp m_net;
+		//dlib::dnn_trainer<net_type_vp> m_trainer;
 	};
 }
 #endif

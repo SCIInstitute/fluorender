@@ -31,9 +31,15 @@ using namespace flrd;
 
 #define VP_TRAIN_STEPS 10000
 
+	using net_type_vp =
+		dlib::loss_mean_squared_multioutput<
+		dlib::fc<gno_vp_output_size,
+		dlib::input<dlib::matrix<float>>>>;
+		net_type_vp m_net;
+		dlib::dnn_trainer<net_type_vp> m_trainer;
 VolPropDnnTrainer::VolPropDnnTrainer() :
-	DnnTrainer(),
-	m_trainer(m_net)
+	DnnTrainer()//,
+	//m_trainer(m_net)
 {
 	m_trainer.set_learning_rate(0.1);
 	m_trainer.set_mini_batch_size(16);
