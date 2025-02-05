@@ -722,8 +722,10 @@ add_library(TRACKING_OBJ OBJECT
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Trainer)
 file(GLOB trainer_src FluoRender/FluoRender/Trainer/*.cpp)
 file(GLOB trainer_hdr FluoRender/FluoRender/Trainer/*.h)
-add_library(TRAINER_OBJ OBJECT
+add_library(TRAINER_LIB STATIC
   ${trainer_src} ${trainer_hdr})
+target_link_libraries(TRAINER_LIB
+  dlib::dlib)
 
 # Type
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Type)
@@ -831,7 +833,6 @@ if(APPLE)
     $<TARGET_OBJECTS:SELECTION_OBJ>
     $<TARGET_OBJECTS:TIMER_OBJ>
     $<TARGET_OBJECTS:TRACKING_OBJ>
-    $<TARGET_OBJECTS:TRAINER_OBJ>
     $<TARGET_OBJECTS:TYPE_OBJ>
     $<TARGET_OBJECTS:UTILITY_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
@@ -879,7 +880,6 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:SELECTION_OBJ>
     $<TARGET_OBJECTS:TIMER_OBJ>
     $<TARGET_OBJECTS:TRACKING_OBJ>
-    $<TARGET_OBJECTS:TRAINER_OBJ>
     $<TARGET_OBJECTS:TYPE_OBJ>
     $<TARGET_OBJECTS:UTILITY_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
@@ -960,7 +960,6 @@ elseif(WIN32)
       $<TARGET_OBJECTS:SELECTION_OBJ>
       $<TARGET_OBJECTS:TIMER_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
-      $<TARGET_OBJECTS:TRAINER_OBJ>
       $<TARGET_OBJECTS:TYPE_OBJ>
       $<TARGET_OBJECTS:UTILITY_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
@@ -998,7 +997,6 @@ elseif(WIN32)
       $<TARGET_OBJECTS:SELECTION_OBJ>
       $<TARGET_OBJECTS:TIMER_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
-      $<TARGET_OBJECTS:TRAINER_OBJ>
       $<TARGET_OBJECTS:TYPE_OBJ>
       $<TARGET_OBJECTS:UTILITY_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
@@ -1040,7 +1038,6 @@ target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
 if(WIN32)
   target_link_libraries(FluoRender
     ${Boost_LIBRARIES}
-    dlib::dlib
     ${FFMPEG_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${GLEW_STATIC_LIBRARIES}
@@ -1056,6 +1053,7 @@ if(WIN32)
     ${Python3_LIBRARIES}
     teem
     ${TIFF_LIBRARIES}
+    TRAINER_LIB
     secur32.lib
     ${wxWidgets_LIBRARIES}
     XInput.lib
@@ -1069,48 +1067,48 @@ if(WIN32)
   endif()
 elseif(APPLE)
   target_link_libraries(FluoRender
-    dlib::dlib
-    ${OPENGL_LIBRARIES}
-    ${GLEW_STATIC_LIBRARIES}
-    ${FFMPEG_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${Python3_LIBRARIES}
-    ${OpenCL_LIBRARIES}
+    ${FFMPEG_LIBRARIES}
     ${FREETYPE_LIBRARIES}
-    ${wxWidgets_LIBRARIES}
-    teem
-    ${TIFF_LIBRARIES}
-    ${PNG_LIBRARIES}
-    ${ZLIB_LIBRARIES}
-    ${ND2_LIBRARIES}
+    ${GLEW_STATIC_LIBRARIES}
     ${HDF5_LIBRARIES}
-    ${OpenCV_LIBS}
     ${HoloPlay_LIBRARIES}
+    ${ND2_LIBRARIES}
+    ${OpenCL_LIBRARIES}
+    ${OpenCV_LIBS}
+    ${OPENGL_LIBRARIES}
     ${OpenVR_LIBRARIES}
     ${OpenXR_LIBRARIES}
+    ${PNG_LIBRARIES}
+    ${Python3_LIBRARIES}
+    teem
+    ${TIFF_LIBRARIES}
+    TRAINER_LIB
+    ${wxWidgets_LIBRARIES}
+    ${ZLIB_LIBRARIES}
   )
 else()
   target_link_libraries(FluoRender
-    stdc++fs
-    dlib::dlib
-    ${OPENGL_LIBRARIES}
-    ${GLEW_STATIC_LIBRARIES}
-    ${FFMPEG_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${Python3_LIBRARIES}
-    ${OpenCL_LIBRARIES}
+    ${FFMPEG_LIBRARIES}
     ${FREETYPE_LIBRARIES}
-    ${wxWidgets_LIBRARIES}
-    teem
-    ${TIFF_LIBRARIES}
-    ${PNG_LIBRARIES}
-    ${ZLIB_LIBRARIES}
-    ${ND2_LIBRARIES}
+    ${GLEW_STATIC_LIBRARIES}
     ${HDF5_LIBRARIES}
-    ${OpenCV_LIBS}
     ${HoloPlay_LIBRARIES}
+    ${ND2_LIBRARIES}
+    ${OpenCL_LIBRARIES}
+    ${OpenCV_LIBS}
+    ${OPENGL_LIBRARIES}
     ${OpenVR_LIBRARIES}
     ${OpenXR_LIBRARIES}
+    ${PNG_LIBRARIES}
+    ${Python3_LIBRARIES}
+    stdc++fs
+    teem
+    ${TIFF_LIBRARIES}
+    TRAINER_LIB
+    ${wxWidgets_LIBRARIES}
+    ${ZLIB_LIBRARIES}
   )
 endif()
 
