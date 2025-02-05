@@ -20,6 +20,8 @@ using net_type_vp =
 	//dlib::relu<dlib::fc<gno_vp_input_size,
 	//dlib::input<dlib::matrix<float>>
 	//>>>>;
+extern net_type_vp net2;
+extern dlib::dnn_trainer<net_type_vp>* trainer2;
 
 void DLTest2();
 //class DTrainer

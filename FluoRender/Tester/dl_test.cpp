@@ -121,9 +121,13 @@ catch (std::exception& e)
     std::cout << e.what() << std::endl;
 }
 
+net_type_vp net2;
+dlib::dnn_trainer<net_type_vp>* trainer2;
+
 void DLTest2()
 {
-
+    trainer2 = new dlib::dnn_trainer<net_type_vp>(net2);
+    delete trainer2;
 }
 //#define VP_TRAIN_STEPS 10000
 

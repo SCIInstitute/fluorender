@@ -42,5 +42,7 @@ int main(int argc, char* argv[])
 
 	DLTest();
 
+	DLTest2();
+
 	return 0;
 }
