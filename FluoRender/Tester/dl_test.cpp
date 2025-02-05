@@ -1,10 +1,5 @@
-#include "tests.h"
-#include "asserts.h"
-#include <dlib/dnn.h>
+#include "dl_test.h"
 #include <iostream>
-
-using namespace std;
-using namespace dlib;
 
 /*
     This is an example illustrating the use of the deep learning tools from the
@@ -31,6 +26,8 @@ using namespace dlib;
     You should also have read the examples that introduce the dlib DNN API before
     continuing.  These are dnn_introduction_ex.cpp and dnn_introduction2_ex.cpp.
 */
+net_type net;
+dlib::dnn_trainer<net_type>* trainer;
 void DLTest() try
 {
     // The API for doing metric learning is very similar to the API for
@@ -38,7 +35,7 @@ void DLTest() try
     // labeled objects.  So here we create our dataset.  We make up some simple
     // vectors and label them with the integers 1,2,3,4.  The specific values of
     // the integer labels don't matter.
-    std::vector<matrix<double, 0, 1>> samples;
+    std::vector<dlib::matrix<double, 0, 1>> samples;
     std::vector<unsigned long> labels;
 
     // class 1 training vectors
@@ -60,32 +57,30 @@ void DLTest() try
 
     // Make a network that simply learns a linear mapping from 8D vectors to 2D
     // vectors.
-    using net_type = loss_metric<fc<2, input<matrix<double, 0, 1>>>>;
-    net_type net;
-    dnn_trainer<net_type> trainer(net);
-    trainer.set_learning_rate(0.1);
+    trainer = new dlib::dnn_trainer<net_type>(net);
+    trainer->set_learning_rate(0.1);
 
     // It should be emphasized out that it's really important that each mini-batch contain
     // multiple instances of each class of object.  This is because the metric learning
     // algorithm needs to consider pairs of objects that should be close as well as pairs
     // of objects that should be far apart during each training step.  Here we just keep
     // training on the same small batch so this constraint is trivially satisfied.
-    while (trainer.get_learning_rate() >= 1e-4)
-        trainer.train_one_step(samples, labels);
+    while (trainer->get_learning_rate() >= 1e-4)
+        trainer->train_one_step(samples, labels);
 
     // Wait for training threads to stop
-    trainer.get_net();
-    cout << "done training" << endl;
+    trainer->get_net();
+    std::cout << "done training" << std::endl;
 
 
     // Run all the samples through the network to get their 2D vector embeddings.
-    std::vector<matrix<float, 0, 1>> embedded = net(samples);
+    std::vector<dlib::matrix<float, 0, 1>> embedded = net(samples);
 
     // Print the embedding for each sample to the screen.  If you look at the
     // outputs carefully you should notice that they are grouped together in 2D
     // space according to their label.
     for (size_t i = 0; i < embedded.size(); ++i)
-        cout << "label: " << labels[i] << "\t" << trans(embedded[i]);
+        std::cout << "label: " << labels[i] << "\t" << trans(embedded[i]);
 
     // Now, check if the embedding puts things with the same labels near each other and
     // things with different labels far apart.
@@ -116,26 +111,97 @@ void DLTest() try
         }
     }
 
-    cout << "num_right: " << num_right << endl;
-    cout << "num_wrong: " << num_wrong << endl;
+    std::cout << "num_right: " << num_right << std::endl;
+    std::cout << "num_wrong: " << num_wrong << std::endl;
+
+    delete trainer;
 }
 catch (std::exception& e)
 {
-    cout << e.what() << endl;
+    std::cout << e.what() << std::endl;
 }
 
-#define gno_vp_output_size 26
+void DLTest2()
+{
 
-void DLTest2() try
-{
-	using net_type_vp =
-		loss_mean_squared_multioutput<
-		fc<gno_vp_output_size,
-		input<matrix<float>>>>;
-		net_type_vp m_net;
-		dnn_trainer<net_type_vp> m_trainer(m_net);
 }
-catch (std::exception& e)
-{
-    cout << e.what() << endl;
-}
+//#define VP_TRAIN_STEPS 10000
+
+//DTrainer::DTrainer() :
+//	m_trainer(m_net)
+//{
+//	m_trainer.set_learning_rate(0.1);
+//	m_trainer.set_mini_batch_size(16);
+//}
+//
+//DTrainer::~DTrainer()
+//{
+//
+//}
+//
+//void DTrainer::add(float* in, float* out)
+//{
+//	dlib::matrix<float> tii(gno_vp_input_size, 1);
+//	dlib::matrix<float> toi(gno_vp_output_size, 1);
+//
+//	for (int i = 0; i < gno_vp_input_size; ++i)
+//		tii(i, 0) = in[i];
+//	for (int i = 0; i < gno_vp_output_size; ++i)
+//		toi(i, 0) = out[i];
+//
+//	m_input.push_back(tii);
+//	m_output.push_back(toi);
+//
+//	size_t bs = m_trainer.get_mini_batch_size();
+//	if (m_input.size() >= bs)
+//		train();
+//}
+//
+//void DTrainer::train()
+//{
+//	//train all
+//	size_t bs = m_trainer.get_mini_batch_size();
+//	if (m_input.size() < bs ||
+//		m_output.size() < bs)
+//		return;
+//
+//	for (int i = 0; i < VP_TRAIN_STEPS; ++i)
+//		m_trainer.train_one_step(m_input, m_output);
+//
+//	m_input.clear();
+//	m_output.clear();
+//
+//	m_trainer.get_net();
+//
+//	m_valid = true;
+//	m_trained_rec_num += bs;
+//}
+//
+//float* DTrainer::infer(float* in)
+//{
+//	if (!m_valid)
+//		return 0;
+//
+//	dlib::matrix<float> tii(gno_vp_input_size, 1);
+//	for (int i = 0; i < gno_vp_input_size; ++i)
+//		tii(i, 0) = in[i];
+//
+//	m_result = m_net(tii);
+//
+//	return &m_result(0, 0);
+//}
+//
+//double DTrainer::get_rate()
+//{
+//	if (!m_valid)
+//		return 1;
+//
+//	return m_trainer.get_learning_rate();
+//}
+//
+//void DTrainer::set_model_file(const std::string& file)
+//{
+//	//Trainer::set_model_file(file);
+//    m_model_file = file;
+//	m_trainer.set_synchronization_file(file, std::chrono::minutes(5));
+//}

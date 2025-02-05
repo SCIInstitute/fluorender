@@ -33,4 +33,3 @@ void ComputeVariance(const std::string& cycle_file, const std::vector<std::strin
 void ComputeTime(const std::string& cycle_file, const std::vector<std::string>& sample_list, size_t ol, double d);
 void WalkTest(int argc, char* argv[]);
 
-void DLTest();

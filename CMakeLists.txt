@@ -1063,27 +1063,8 @@ if(WIN32)
   )
   if(BUILD_TESTER)
       target_link_libraries(Tester
-        ${Boost_LIBRARIES}
-        dlib::dlib
-        ${FFMPEG_LIBRARIES}
-        ${FREETYPE_LIBRARIES}
-        ${GLEW_STATIC_LIBRARIES}
-        ${HDF5_LIBRARIES}
-        ${HoloPlay_LIBRARIES}
-        ${ND2_LIBRARIES}
-        ${OpenCL_LIBRARIES}
-        ${OpenCV_LIBS}
-        ${OPENGL_LIBRARIES}
-        ${OpenVR_LIBRARIES}
-        ${OpenXR_LIBRARIES}
-        ${PNG_LIBRARIES}
-        ${Python3_LIBRARIES}
-        teem
-        ${TIFF_LIBRARIES}
-        secur32.lib
-        ${wxWidgets_LIBRARIES}
-        XInput.lib
-        ${ZLIB_LIBRARIES}
+      ${Boost_LIBRARIES}
+      dlib::dlib
       )
   endif()
 elseif(APPLE)

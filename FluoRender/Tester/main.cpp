@@ -2,6 +2,7 @@
 //#include <vld.h>
 #include "asserts.h"
 #include "tests.h"
+#include "dl_test.h"
 #include "reformat_data.h"
 
 using namespace std;
