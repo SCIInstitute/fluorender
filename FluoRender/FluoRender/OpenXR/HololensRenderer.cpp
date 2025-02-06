@@ -693,6 +693,7 @@ void HololensRenderer::InitializeSpeechRecognition(XrRemotingSpeechInitInfoMSFT&
 	// Initialize the dictionary.
 	m_command_table = {
 		//move closer
+		{"zoom in", "move_closer"},
 		{"closer", "move_closer"},
 		{"move closer", "move_closer"},
 		{"come", "move_closer"},
@@ -707,6 +708,7 @@ void HololensRenderer::InitializeSpeechRecognition(XrRemotingSpeechInitInfoMSFT&
 		{"step closer", "move_closer"},
 		{"step near", "move_closer"},
 		//move away
+		{"zoom out", "move_away"},
 		{"away", "move_away"},
 		{"move away", "move_away"},
 		{"go", "move_away"},

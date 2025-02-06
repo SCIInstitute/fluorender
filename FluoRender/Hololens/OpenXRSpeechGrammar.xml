@@ -5,6 +5,7 @@
     <rule id="rootRule">
         <one-of>
             <!-- Move Closer Commands -->
+            <item>zoom in</item>
             <item>closer</item>
             <item>move closer</item>
             <item>come</item>
@@ -19,6 +20,7 @@
             <item>step closer</item>
             <item>step near</item>
             <!-- Move Away Commands -->
+            <item>zoom out</item>
             <item>away</item>
             <item>move away</item>
             <item>go</item>
