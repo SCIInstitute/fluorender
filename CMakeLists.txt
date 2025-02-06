@@ -227,7 +227,7 @@ if(WIN32)
 endif()
 find_package(TIFF REQUIRED)
 find_package(PNG REQUIRED)
-find_package(ZLIB REQUIRED)
+#find_package(ZLIB REQUIRED)
 if(WIN32)
     set(Tiff_DIR ${wxWidgets_ROOT_DIR}/src/tiff/libtiff)
     set(ZLIB_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/zlib)
@@ -242,9 +242,6 @@ if (PNG_FOUND)
     message (STATUS "PNG_PNG_INCLUDE_DIR=${PNG_PNG_INCLUDE_DIR}")
 endif()
 include_directories(${ZLIB_INCLUDE_DIRS})
-if (ZLIB_FOUND)
-    message (STATUS "ZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIRS}")
-endif()
 
 # Boost
 file(GLOB BOOST_DIRS "${PARENT_DIR}/boost*")
@@ -341,7 +338,6 @@ else()
 endif()
 
 # FluoRender
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender)
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender)
 
 # ffmpeg
@@ -1057,7 +1053,6 @@ if(WIN32)
     secur32.lib
     ${wxWidgets_LIBRARIES}
     XInput.lib
-    ${ZLIB_LIBRARIES}
   )
   if(BUILD_TESTER)
       target_link_libraries(Tester
@@ -1085,7 +1080,6 @@ elseif(APPLE)
     ${TIFF_LIBRARIES}
     TRAINER_LIB
     ${wxWidgets_LIBRARIES}
-    ${ZLIB_LIBRARIES}
   )
 else()
   target_link_libraries(FluoRender
@@ -1108,7 +1102,6 @@ else()
     ${TIFF_LIBRARIES}
     TRAINER_LIB
     ${wxWidgets_LIBRARIES}
-    ${ZLIB_LIBRARIES}
   )
 endif()
 
