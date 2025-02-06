@@ -5721,7 +5721,7 @@ void DataManager::StartupLoad(wxArrayString files, bool run_mov, bool with_image
 
 	if (run_mov)
 	{
-		glbin_moviemaker.SetFileName(glbin_settings.m_mov_filename);
+		glbin_moviemaker.SetFileName(glbin_settings.m_mov_filename.ToStdString());
 		glbin_moviemaker.PlaySave();
 	}
 }

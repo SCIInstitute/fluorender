@@ -338,6 +338,7 @@ else()
 endif()
 
 # FluoRender
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender)
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender)
 
 # ffmpeg
@@ -826,7 +827,6 @@ if(APPLE)
     $<TARGET_OBJECTS:TYPE_OBJ>
     $<TARGET_OBJECTS:UTILITY_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
-    $<TARGET_OBJECTS:POLE_OBJ>
     )
   set_target_properties(FluoRender PROPERTIES MACOSX_DEPLOYMENT_TARGET "11.5")
 elseif(UNIX OR MINGW)
@@ -873,7 +873,6 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:TYPE_OBJ>
     $<TARGET_OBJECTS:UTILITY_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
-    $<TARGET_OBJECTS:POLE_OBJ>
     )
 elseif(WIN32)
   # Windows
@@ -953,7 +952,6 @@ elseif(WIN32)
       $<TARGET_OBJECTS:TYPE_OBJ>
       $<TARGET_OBJECTS:UTILITY_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
-      $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:WACUTILS_OBJ>
       $<TARGET_OBJECTS:XINPUT_OBJ>
     )
@@ -990,7 +988,6 @@ elseif(WIN32)
       $<TARGET_OBJECTS:TYPE_OBJ>
       $<TARGET_OBJECTS:UTILITY_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
-      $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:WACUTILS_OBJ>
     )
     endif()

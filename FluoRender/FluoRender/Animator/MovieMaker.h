@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MOVIEMAKER_H_
 #define _MOVIEMAKER_H_
 
-#include <wx/string.h>
 #include <vector>
 #include <string>
 

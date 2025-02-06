@@ -1683,7 +1683,7 @@ void MoviePanel::Save(const wxString& filename)
 	if (glbin_moviemaker.IsRunning())
 		return;
 
-	glbin_moviemaker.SetFileName(filename);
+	glbin_moviemaker.SetFileName(filename.ToStdString());
 	glbin_moviemaker.PlaySave();
 
 	fluo::ValueCollection vc = { gstMovPlay };
