@@ -7,7 +7,7 @@ using namespace std;
 using namespace fluo;
 
 //define test classes
-//Outline of inheritance: Object◁-Node◁-VolumeData
+//Outline of inheritance: Object<-Node<-VolumeData
 //Object base class stores values and handles value change events
 class MyVolumeData : public Node
 {
@@ -35,7 +35,7 @@ protected:
 	}
 };
 
-//Outline of inheritance: Object◁-Node◁-Group◁-VolumeGroup
+//Outline of inheritance: Object<-Node<-Group<-VolumeGroup
 class MyVolumeGroup : public Group
 {
 public:

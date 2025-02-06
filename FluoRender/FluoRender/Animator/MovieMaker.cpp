@@ -32,6 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderViewPanel.h>
 #include <StopWatch.hpp>
 #include <StopWatchFactory.hpp>
+#include <iostream>
+#include <filesystem>
 
 MovieMaker::MovieMaker() :
 	m_frame(0),
@@ -180,9 +182,9 @@ void MovieMaker::PlaySave()
 
 	Rewind();
 
-	filetype_ = m_filename.SubString(m_filename.Len() - 4,
-		m_filename.Len() - 1);
-	if (filetype_.IsSameAs(wxString(".mov")))
+	std::filesystem::path file_path(m_filename);
+	filetype_ = file_path.extension().string();
+	if (filetype_ == ".mov")
 	{
 		if (!m_crop)
 		{
@@ -198,17 +200,17 @@ void MovieMaker::PlaySave()
 			m_crop_h *= scale;
 		}
 
-		glbin.get_video_encoder().open(m_filename.ToStdString(), m_crop_w, m_crop_h,
+		glbin.get_video_encoder().open(m_filename, m_crop_w, m_crop_h,
 			m_clip_frame_num + 1, m_fps, glbin_settings.m_mov_bitrate * 1e6);
 	}
-	m_filename = m_filename.SubString(0, m_filename.Len() - 5);
+	m_filename = file_path.stem().string();
 	m_record = true;
 	if (glbin_settings.m_prj_save)
 	{
 		wxString new_folder;
 		new_folder = m_filename + "_project";
 		MkDirW(new_folder.ToStdWstring());
-		wstring name = m_filename.ToStdWstring();
+		wstring name = s2ws(m_filename);
 		name = GET_NAME(name);
 		wxString prop_file = new_folder + GETSLASH()
 			+ name + "_project.vrp";
@@ -288,7 +290,7 @@ void MovieMaker::WriteFrameToFile()
 		m_last_frame, ".tif");
 
 	//capture
-	bool bmov = filetype_.IsSameAs(".mov");
+	bool bmov = filetype_ == ".mov";
 	int chann = glbin_settings.m_save_alpha ? 4 : 3;
 	bool fp32 = bmov ? false : glbin_settings.m_save_float;
 	float dpi = glbin_settings.m_dpi;

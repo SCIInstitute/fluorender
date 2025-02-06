@@ -83,7 +83,7 @@ public:
 	void SetView(RenderCanvas* view);
 	RenderCanvas* GetRenderCanvas();
 	int GetViewIndex();
-	void SetFileName(const wxString& filename) { m_filename = filename; }
+	void SetFileName(const std::string& filename) { m_filename = filename; }
 	void SetLoop(bool val) { m_loop = val; }
 	bool GetLoop() { return m_loop; }
 
@@ -206,8 +206,8 @@ private:
 	bool m_reverse;//play backward
 	bool m_loop;//rewind after finish and restart play
 	//save
-	wxString m_filename;
-	wxString filetype_;
+	std::string m_filename;
+	std::string filetype_;
 	int m_scroll_thumb_size;
 
 	//settings

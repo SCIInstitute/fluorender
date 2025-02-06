@@ -1397,7 +1397,7 @@ namespace flvr
 		del_id = 0;
 	}
 
-	//Texture‚ÖˆÚ“®—\’è
+	//Texture
 	void TextureRenderer::clear_brick_buf()
 	{
 		if (!tex_)
@@ -1414,7 +1414,7 @@ namespace flvr
 					(*bs)[i]->freeBrkData();
 				}
 			}
-			rearrangeLoadedBrkVec();//tex_‚Åload‚µ‚½‚à‚Ì‚¾‚¯‚ðÁ‚·
+			rearrangeLoadedBrkVec();//tex_
 		}
 		tex_->setLevel(cur_lv);
 	}

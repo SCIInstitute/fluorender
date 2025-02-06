@@ -487,12 +487,6 @@ else()
     add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
 endif()
 
-# pole
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/pole)
-file(GLOB pole_srcs FluoRender/pole/pole.cpp)
-file(GLOB pole_hdrs FluoRender/pole/pole.h)
-add_library(POLE_OBJ OBJECT ${pole_srcs} ${pole_hdrs})
-
 # teem
 file(GLOB TEEM_DIRS "${PARENT_DIR}/teem*")
 list(GET TEEM_DIRS 0 TEEM_DIRS)  # Get the first match
