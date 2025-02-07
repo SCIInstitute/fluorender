@@ -1258,8 +1258,9 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	//id text
 	if (update_all || FOUND_VALUE(gstCompIdColor))
 	{
-		wxColor color = glbin_comp_editor.GetWxColor();
-		m_comp_id_text->SetBackgroundColour(color);
+		fluo::Color color = glbin_comp_editor.GetColor();
+		wxColor wxc = wxColor(color.r() * 255, color.g() * 255, color.b() * 255);
+		m_comp_id_text->SetBackgroundColour(wxc);
 		m_comp_id_text->Refresh();
 	}
 	//size limiters

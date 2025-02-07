@@ -78,37 +78,9 @@ void Camera2Ruler::SetList(int i, RulerList* list)
 		m_list2 = list;
 }
 
-void Camera2Ruler::SetList(int i, const std::string& config)
+void Camera2Ruler::SetList(int i, int startf, int endf)
 {
 	RulerList* list = 0;
-	wxFileInputStream is(config);
-	if (!is.IsOk())
-		return;
-	wxFileConfig fconfig(is);
-
-	//movie panel
-	int startf = 0, endf = 0;
-	if (fconfig.Exists("/movie_panel"))
-	{
-		fconfig.SetPath("/movie_panel");
-		fconfig.Read("start_frame", &startf, 0);
-		fconfig.Read("end_frame", &endf, 0);
-	}
-	//views
-	if (fconfig.Exists("/views"))
-	{
-		fconfig.SetPath("/views");
-		int num = fconfig.Read("num", 0l);
-		if (num < 1)
-			return;
-
-		if (fconfig.Exists("/views/0/rulers"))
-		{
-			fconfig.SetPath("/views/0/rulers");
-			glbin_ruler_handler.Read(fconfig, 0);
-		}
-	}
-
 	if (list)
 	{
 		if (i == 1)

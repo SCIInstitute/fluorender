@@ -78,7 +78,7 @@ VolumeData* VolumeCalculator::GetResult(bool pop)
 	return vd;
 }
 
-void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
+void VolumeCalculator::CalculateSingle(int type, const std::string& prev_group, bool add)
 {
 	bool update = false;
 	bool refresh = false;
@@ -148,7 +148,7 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 	}
 }
 
-void VolumeCalculator::CalculateGroup(int type, wxString prev_group, bool add)
+void VolumeCalculator::CalculateGroup(int type, const std::string& prev_group, bool add)
 {
 	if (type == 5 ||
 		type == 6 ||

@@ -93,8 +93,8 @@ void Colocalize::Compute()
 			rm[i].push_back(0);
 	}
 
-	m_titles.Clear();
-	m_values.Clear();
+	m_titles.clear();
+	m_values.clear();
 	m_tps.clear();
 
 	//fill the matrix

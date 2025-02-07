@@ -43,7 +43,7 @@ ComponentEditor::~ComponentEditor()
 
 }
 
-wxString ComponentEditor::GetOutput()
+std::string ComponentEditor::GetOutput()
 {
 	return m_output;
 }
@@ -68,12 +68,12 @@ fluo::Color ComponentEditor::GetColor()
 	return c;
 }
 
-wxColor ComponentEditor::GetWxColor()
-{
-	fluo::Color c = GetColor();
-	wxColor wxc = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
-	return wxc;
-}
+//wxColor ComponentEditor::GetWxColor()
+//{
+//	fluo::Color c = GetColor();
+//	wxColor wxc = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
+//	return wxc;
+//}
 
 void ComponentEditor::Clean(int mode)
 {

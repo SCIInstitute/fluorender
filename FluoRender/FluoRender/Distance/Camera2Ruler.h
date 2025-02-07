@@ -42,7 +42,7 @@ namespace flrd
 		~Camera2Ruler();
 
 		void SetList(int i, RulerList* list);
-		void SetList(int i, const std::string& config);//read list from a project
+		void SetList(int i, int startf, int endf);//read list from a project
 		void SetRange(int i, size_t start, size_t end)
 		{
 			if (i == 1)

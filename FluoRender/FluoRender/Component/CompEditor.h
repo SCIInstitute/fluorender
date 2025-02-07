@@ -28,10 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_CompEditor_h
 #define FL_CompEditor_h
 
-#include <vector>
+#include <Color.h>
 #include <Cell.h>
-#include <wx/string.h>
-#include <wx/colour.h>
+#include <string>
+#include <vector>
 
 class RenderCanvas;
 class VolumeData;
@@ -61,8 +61,8 @@ namespace flrd
 		}
 
 		fluo::Color GetColor();
-		wxColor GetWxColor();
-		wxString GetOutput();
+		//wxColor GetWxColor();
+		std::string GetOutput();
 
 		void Clean(int mode);
 		void NewId(bool append, bool track);
@@ -72,7 +72,7 @@ namespace flrd
 		void CombineList();
 
 	private:
-		wxString m_output;
+		std::string m_output;
 		unsigned int m_id;
 		bool m_id_empty;
 		CelpList m_list;

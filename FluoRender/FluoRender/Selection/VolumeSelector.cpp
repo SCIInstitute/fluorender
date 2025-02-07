@@ -456,7 +456,7 @@ void VolumeSelector::Erase()
 	if (group)
 		group_name = group->GetName();
 	glbin_vol_calculator.SetVolumeA(m_vd);
-	glbin_vol_calculator.CalculateGroup(mode, group_name);
+	glbin_vol_calculator.CalculateGroup(mode, group_name.ToStdString());
 }
 
 //extract a new volume of the selection
@@ -469,7 +469,7 @@ void VolumeSelector::Extract()
 	if (group)
 		group_name = group->GetName();
 	glbin_vol_calculator.SetVolumeA(m_vd);
-	glbin_vol_calculator.CalculateGroup(5, group_name);
+	glbin_vol_calculator.CalculateGroup(5, group_name.ToStdString());
 }
 
 double VolumeSelector::HueCalculation(int mode, unsigned int label)

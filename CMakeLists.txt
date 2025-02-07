@@ -517,29 +517,29 @@ endif()
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Animator)
 file(GLOB ani_src FluoRender/FluoRender/Animator/*.cpp)
 file(GLOB ani_hdr FluoRender/FluoRender/Animator/*.h)
-add_library(ANIMATORS_OBJ OBJECT
+add_library(ANIMATORS_LIB STATIC
   ${ani_src} ${ani_hdr})
 
 # Calculate
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Calculate)
 file(GLOB calc_src FluoRender/FluoRender/Calculate/*.cpp)
 file(GLOB calc_hdr FluoRender/FluoRender/Calculate/*.h)
-add_library(CALCULATE_OBJ OBJECT
+add_library(CALCULATE_LIB STATIC
   ${calc_src} ${calc_hdr})
 
 # Cluster
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Cluster)
 file(GLOB clstr_src FluoRender/FluoRender/Cluster/*.cpp)
 file(GLOB clstr_hdr FluoRender/FluoRender/Cluster/*.h)
-add_library(CLUSTER_OBJ OBJECT
-  ${clstr_src} ${clstr_hdr})
 
 # Component
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Component)
 file(GLOB cmp_src FluoRender/FluoRender/Component/*.cpp)
 file(GLOB cmp_hdr FluoRender/FluoRender/Component/*.h)
-add_library(COMPONENT_OBJ OBJECT
-  ${cmp_src} ${cmp_hdr})
+add_library(COMPUTE_LIB STATIC
+  ${cmp_src} ${cmp_hdr} ${clstr_src} ${clstr_hdr})
+target_link_libraries(COMPUTE_LIB
+  ${Boost_LIBRARIES})
 
 # Config
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Config)
@@ -559,14 +559,16 @@ add_library(CONTROL_OBJ OBJECT
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Converter)
 file(GLOB cvt_src FluoRender/FluoRender/Converter/*.cpp)
 file(GLOB cvt_hdr FluoRender/FluoRender/Converter/*.h)
-add_library(CONVERTER_OBJ OBJECT
+add_library(CONVERTER_LIB STATIC
   ${cvt_src} ${cvt_hdr})
+target_link_libraries(CONVERTER_LIB
+  teem)
 
 # Database
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Database)
 file(GLOB dbs_src FluoRender/FluoRender/Database/*.cpp)
 file(GLOB dbs_hdr FluoRender/FluoRender/Database/*.h)
-add_library(DATABASE_OBJ OBJECT
+add_library(DATABASE_LIB STATIC
   ${dbs_src} ${dbs_hdr})
 
 # Distance
@@ -716,6 +718,7 @@ file(GLOB trainer_hdr FluoRender/FluoRender/Trainer/*.h)
 add_library(TRAINER_LIB STATIC
   ${trainer_src} ${trainer_hdr})
 target_link_libraries(TRAINER_LIB
+  ${Python3_LIBRARIES}
   dlib::dlib)
 
 # Type
@@ -782,7 +785,6 @@ ENDIF()
 
 # platform specific rules
 if(APPLE)
-  set_target_properties(ANIMATORS_OBJ PROPERTIES MACOSX_DEPOLYMENT_TARGET "11.5")
   set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++")
   # Mac OS X
   if(NOT OPEN_GL_HEADER_LOC)
@@ -797,14 +799,8 @@ if(APPLE)
   include(BundleUtilities)
   add_executable(FluoRender MACOSX_BUNDLE
     ${src} ${hdr} ${rsc} ${icns}
-    $<TARGET_OBJECTS:ANIMATORS_OBJ>
-    $<TARGET_OBJECTS:CALCULATE_OBJ>
-    $<TARGET_OBJECTS:CLUSTER_OBJ>
-    $<TARGET_OBJECTS:COMPONENT_OBJ>
     $<TARGET_OBJECTS:CONFIG_OBJ>
     $<TARGET_OBJECTS:CONTROL_OBJ>
-    $<TARGET_OBJECTS:CONVERTER_OBJ>
-    $<TARGET_OBJECTS:DATABASE_OBJ>
     $<TARGET_OBJECTS:DISTANCE_OBJ>
     $<TARGET_OBJECTS:FILE_OBJ>
     $<TARGET_OBJECTS:FILTER_OBJ>
@@ -843,14 +839,8 @@ elseif(UNIX OR MINGW)
   #include(BundleUtilities)
   add_executable(FluoRender
     ${src} ${hdr} ${rsc} ${icns}
-    $<TARGET_OBJECTS:ANIMATORS_OBJ>
-    $<TARGET_OBJECTS:CALCULATE_OBJ>
-    $<TARGET_OBJECTS:CLUSTER_OBJ>
-    $<TARGET_OBJECTS:COMPONENT_OBJ>
     $<TARGET_OBJECTS:CONFIG_OBJ>
     $<TARGET_OBJECTS:CONTROL_OBJ>
-    $<TARGET_OBJECTS:CONVERTER_OBJ>
-    $<TARGET_OBJECTS:DATABASE_OBJ>
     $<TARGET_OBJECTS:DISTANCE_OBJ>
     $<TARGET_OBJECTS:FILE_OBJ>
     $<TARGET_OBJECTS:FILTER_OBJ>
@@ -922,14 +912,8 @@ elseif(WIN32)
     if (USE_XINPUT)
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
-      $<TARGET_OBJECTS:ANIMATORS_OBJ>
-      $<TARGET_OBJECTS:CALCULATE_OBJ>
-      $<TARGET_OBJECTS:CLUSTER_OBJ>
-      $<TARGET_OBJECTS:COMPONENT_OBJ>
       $<TARGET_OBJECTS:CONFIG_OBJ>
       $<TARGET_OBJECTS:CONTROL_OBJ>
-      $<TARGET_OBJECTS:CONVERTER_OBJ>
-      $<TARGET_OBJECTS:DATABASE_OBJ>
       $<TARGET_OBJECTS:DISTANCE_OBJ>
       $<TARGET_OBJECTS:FILE_OBJ>
       $<TARGET_OBJECTS:FILTER_OBJ>
@@ -958,14 +942,8 @@ elseif(WIN32)
     else()
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
-      $<TARGET_OBJECTS:ANIMATORS_OBJ>
-      $<TARGET_OBJECTS:CALCULATE_OBJ>
-      $<TARGET_OBJECTS:CLUSTER_OBJ>
-      $<TARGET_OBJECTS:COMPONENT_OBJ>
       $<TARGET_OBJECTS:CONFIG_OBJ>
       $<TARGET_OBJECTS:CONTROL_OBJ>
-      $<TARGET_OBJECTS:CONVERTER_OBJ>
-      $<TARGET_OBJECTS:DATABASE_OBJ>
       $<TARGET_OBJECTS:DISTANCE_OBJ>
       $<TARGET_OBJECTS:FILE_OBJ>
       $<TARGET_OBJECTS:FILTER_OBJ>
@@ -1037,13 +1015,18 @@ if(WIN32)
     ${OpenVR_LIBRARIES}
     ${OpenXR_LIBRARIES}
     ${PNG_LIBRARIES}
-    ${Python3_LIBRARIES}
     teem
     ${TIFF_LIBRARIES}
     TRAINER_LIB
     secur32.lib
     ${wxWidgets_LIBRARIES}
     XInput.lib
+    ANIMATORS_LIB
+    CALCULATE_LIB
+    CLUSTER_LIB
+    COMPUTE_LIB
+    CONVERTER_LIB
+    DATABASE_LIB
   )
   if(BUILD_TESTER)
       target_link_libraries(Tester
@@ -1066,11 +1049,16 @@ elseif(APPLE)
     ${OpenVR_LIBRARIES}
     ${OpenXR_LIBRARIES}
     ${PNG_LIBRARIES}
-    ${Python3_LIBRARIES}
     teem
     ${TIFF_LIBRARIES}
     TRAINER_LIB
     ${wxWidgets_LIBRARIES}
+    ANIMATORS_LIB
+    CALCULATE_LIB
+    CLUSTER_LIB
+    COMPUTE_LIB
+    CONVERTER_LIB
+    DATABASE_LIB
   )
 else()
   target_link_libraries(FluoRender
@@ -1087,12 +1075,17 @@ else()
     ${OpenVR_LIBRARIES}
     ${OpenXR_LIBRARIES}
     ${PNG_LIBRARIES}
-    ${Python3_LIBRARIES}
     stdc++fs
     teem
     ${TIFF_LIBRARIES}
     TRAINER_LIB
     ${wxWidgets_LIBRARIES}
+    ANIMATORS_LIB
+    CALCULATE_LIB
+    CLUSTER_LIB
+    COMPUTE_LIB
+    CONVERTER_LIB
+    DATABASE_LIB
   )
 endif()
 

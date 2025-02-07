@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _COMBINELIST_H_
 
 #include <list>
-#include <wx/string.h>
+#include <string>
 
 class VolumeData;
 
@@ -41,8 +41,8 @@ namespace flrd
 		CombineList() {};
 		~CombineList() {};
 
-		void SetName(wxString &name);
-		void SetVolumes(std::list<VolumeData*> &channs);
+		void SetName(const std::string &name);
+		void SetVolumes(const std::list<VolumeData*> &channs);
 		void GetResults(std::list<VolumeData*> &results);
 		int Execute();
 
@@ -52,7 +52,7 @@ namespace flrd
 		int m_resx, m_resy, m_resz;
 		double m_spcx, m_spcy, m_spcz;
 		int m_bits;
-		wxString m_name;
+		std::string m_name;
 
 	private:
 		unsigned char Inc(unsigned char base, unsigned char inc);

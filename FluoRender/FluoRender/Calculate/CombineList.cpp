@@ -31,12 +31,12 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-void CombineList::SetName(wxString &name)
+void CombineList::SetName(const std::string &name)
 {
 	m_name = name;
 }
 
-void CombineList::SetVolumes(std::list<VolumeData*> &channs)
+void CombineList::SetVolumes(const std::list<VolumeData*> &channs)
 {
 	m_channs = channs;
 }

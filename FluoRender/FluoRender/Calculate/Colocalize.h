@@ -29,7 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define _COLOCALIZE_H_
 
 #include <Compare.h>
-#include <wx/string.h>
+#include <vector>
+#include <string>
 #include <chrono>
 
 namespace flrd
@@ -41,11 +42,11 @@ namespace flrd
 		~Colocalize();
 
 		void Compute();
-		wxString GetTitles() { return m_titles; }
-		wxString GetValues() { return m_values; }
+		std::string GetTitles() { return m_titles; }
+		std::string GetValues() { return m_values; }
 
 	private:
-		wxString m_titles, m_values;//results
+		std::string m_titles, m_values;//results
 		bool m_test_speed;
 		std::vector<std::chrono::high_resolution_clock::time_point> m_tps;
 
