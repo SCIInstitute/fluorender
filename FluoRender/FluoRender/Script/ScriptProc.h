@@ -140,7 +140,7 @@ namespace flrd
 		void RunUnlinkCells();
 		void RunBackgroundStat();
 		void RunRegistration();
-		void GetFrames(const wxString& vrp, int &startf, int &endf);
+		void GetRulers(const wxString& vrp, int &startf, int &endf);
 		void RunCameraPoints();
 		void RunRulerInfo();
 		void RunRulerTransform();

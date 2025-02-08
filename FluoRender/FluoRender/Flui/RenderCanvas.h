@@ -48,6 +48,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Color.h>
 #include <BBox.h>
 #include <Quaternion.h>
+#include <Size.h>
 #include <compatibility.h>
 #include <wxBasisSlider.h>
 
@@ -591,7 +592,7 @@ public:
 
 	//get view info for external ops
 	//get size, considering enlargement
-	wxSize GetGLSize();
+	Size2D GetGLSize();
 	fluo::Point GetMousePos(wxMouseEvent& e);
 	bool GetMouseIn(wxPoint& p);
 	glm::mat4 GetModelView()
@@ -845,7 +846,7 @@ public:
 private:
 	bool m_drawing;
 	bool m_refresh;//own refresh command
-	wxSize m_size;
+	Size2D m_size;
 	wxString m_GLversion;
 	wxGLContext* m_glRC;
 	bool m_sharedRC;
@@ -1253,7 +1254,7 @@ private:
 	friend class RenderViewPanel;
 };
 
-inline wxSize RenderCanvas::GetGLSize()
+inline Size2D RenderCanvas::GetGLSize()
 {
 	double dval = 1;
 #ifdef _DARWIN
@@ -1263,7 +1264,7 @@ inline wxSize RenderCanvas::GetGLSize()
 	if (m_enlarge)
 		size.Set(size.x * m_enlarge_scale,
 			size.y * m_enlarge_scale);
-	return size;
+	return Size2D(size.x, size.y);
 }
 
 inline fluo::Point RenderCanvas::GetMousePos(wxMouseEvent& e)

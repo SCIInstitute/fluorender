@@ -1138,7 +1138,7 @@ void ScriptProc::RunOpenCL()
 		i != vlist.end(); ++i)
 	{
 		(*i)->GetVR()->clear_tex_current();
-		glbin_kernel_executor.LoadCode(clname);
+		glbin_kernel_executor.LoadCode(clname.ToStdString());
 		glbin_kernel_executor.SetVolume(*i);
 		glbin_kernel_executor.SetDuplicate(true);
 		glbin_kernel_executor.Execute();
@@ -1806,7 +1806,7 @@ void ScriptProc::RunRegistration()
 	}
 }
 
-void ScriptProc::GetFrames(const wxString& vrp, int &startf, int &endf)
+void ScriptProc::GetRulers(const wxString& vrp, int &startf, int &endf)
 {
 	wxFileInputStream is(vrp);
 	if (!is.IsOk())
@@ -1814,7 +1814,8 @@ void ScriptProc::GetFrames(const wxString& vrp, int &startf, int &endf)
 	wxFileConfig fconfig(is);
 
 	//movie panel
-	int startf = 0, endf = 0;
+	startf = 0;
+	endf = 0;
 	if (fconfig.Exists("/movie_panel"))
 	{
 		fconfig.SetPath("/movie_panel");
@@ -1832,7 +1833,7 @@ void ScriptProc::GetFrames(const wxString& vrp, int &startf, int &endf)
 		if (fconfig.Exists("/views/0/rulers"))
 		{
 			fconfig.SetPath("/views/0/rulers");
-			glbin_ruler_handler.Read(fconfig, 0);
+			glbin_project.ReadRulerList(fconfig, 0);
 		}
 	}
 }
@@ -1873,7 +1874,7 @@ void ScriptProc::RunCameraPoints()
 	c2r.SetList(1, ruler_list);
 	c2r.SetRange(1, m_view->m_begin_frame, m_view->m_end_frame);
 	int startf, endf;
-	GetFrames(prj2, startf, endf)
+	GetRulers(prj2, startf, endf);
 	c2r.SetList(2, startf, endf);
 	c2r.SetNames(names);
 	c2r.SetAffine(affine);
@@ -1929,7 +1930,7 @@ void ScriptProc::RunRulerInfo()
 		if (!ruler->GetDisp()) continue;
 		fluo::Group* ruler_group = cmdg->getOrAddGroup(std::to_string(ruler->Id() + 1));
 		ruler_group->addSetValue("type", std::string("ruler"));
-		ruler_group->addSetValue("name", ruler->GetName().ToStdString());
+		ruler_group->addSetValue("name", ruler->GetName());
 		ruler->SetWorkTime(curf);
 		for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
 		{
@@ -2004,7 +2005,7 @@ void ScriptProc::RunRulerTransform()
 		if (!ruler->GetDisp()) continue;
 		fluo::Group* ruler_group = cmdg->getOrAddGroup(std::to_string(ruler->Id() + 1));
 		ruler_group->addSetValue("type", std::string("ruler"));
-		ruler_group->addSetValue("name", ruler->GetName().ToStdString());
+		ruler_group->addSetValue("name", ruler->GetName());
 		ruler->SetWorkTime(curf);
 		for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
 		{

@@ -36,7 +36,7 @@
 #include <utility>
 #include <iostream>
 #include <fstream>
-#include <wx/filefn.h>
+#include <filesystem>
 
 using namespace std;
 
@@ -561,7 +561,7 @@ namespace flvr
 		return true;
 	}
 
-	bool TextureBrick::read_brick_without_decomp(char* &data, size_t &readsize, FileLocInfo* finfo, wxThread *th)
+	bool TextureBrick::read_brick_without_decomp(char* &data, size_t &readsize, FileLocInfo* finfo, void *th)
 	{
 		readsize = -1;
 
@@ -570,8 +570,8 @@ namespace flvr
 		if (finfo->isurl)
 		{
 			bool found_cache = false;
-			wxString wxcfname = finfo->cache_filename;
-			if (finfo->cached && wxFileExists(wxcfname))
+			std::wstring cfname = finfo->cache_filename;
+			if (finfo->cached && std::filesystem::exists(cfname))
 				found_cache = true;
 			else
 			{
@@ -580,8 +580,8 @@ namespace flvr
 				auto itr = cache_table_.find(fcname);
 				if (itr != cache_table_.end())
 				{
-					wxcfname = itr->second;
-					if (wxFileExists(wxcfname))
+					cfname = itr->second;
+					if (std::filesystem::exists(cfname))
 						found_cache = true;
 				}
 

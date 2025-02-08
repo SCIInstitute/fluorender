@@ -36,7 +36,6 @@
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 #include <compatibility.h>
-#include <wx/utils.h>
 
 using namespace std;
 
@@ -859,7 +858,7 @@ namespace flvr
 									rn_time = GET_TICK_COUNT();
 									elapsed = rn_time - st_time_;
 									t = glbin_settings.m_up_time - elapsed;
-									if (t > 0) wxMilliSleep(t);
+									if (t > 0) std::this_thread::sleep_for(std::chrono::milliseconds(t));
 								} while (elapsed <= static_cast<unsigned long>(glbin_settings.m_up_time));
 
 								if (brick->isLoaded())

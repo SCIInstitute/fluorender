@@ -66,7 +66,7 @@ int CombineList::Execute()
 		m_spcx, m_spcy, m_spcz,
 		brick_size);
 	vd_r->SetSpcFromFile(true);
-	vd_r->SetName(m_name + wxString::Format("_CH_R"));
+	vd_r->SetName(m_name + "_CH_R");
 	//green volume
 	VolumeData* vd_g = new VolumeData();
 	vd_g->AddEmptyData(m_bits,
@@ -74,7 +74,7 @@ int CombineList::Execute()
 		m_spcx, m_spcy, m_spcz,
 		brick_size);
 	vd_g->SetSpcFromFile(true);
-	vd_g->SetName(m_name + wxString::Format("_CH_G"));
+	vd_g->SetName(m_name + "_CH_G");
 	//blue volume
 	VolumeData* vd_b = new VolumeData();
 	vd_b->AddEmptyData(m_bits,
@@ -82,7 +82,7 @@ int CombineList::Execute()
 		m_spcx, m_spcy, m_spcz,
 		brick_size);
 	vd_b->SetSpcFromFile(true);
-	vd_b->SetName(m_name + wxString::Format("_CH_B"));
+	vd_b->SetName(m_name + "_CH_B");
 
 	//get new data
 	//red volume

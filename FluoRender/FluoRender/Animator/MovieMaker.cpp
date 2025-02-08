@@ -190,8 +190,8 @@ void MovieMaker::PlaySave()
 		{
 			m_crop_x = 0;
 			m_crop_y = 0;
-			m_crop_w = m_view->GetGLSize().x;
-			m_crop_h = m_view->GetGLSize().y;
+			m_crop_w = m_view->GetGLSize().w();
+			m_crop_h = m_view->GetGLSize().h();
 		}
 		else if (m_view->GetEnlarge())
 		{

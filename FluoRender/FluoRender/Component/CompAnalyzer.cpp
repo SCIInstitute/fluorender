@@ -1281,7 +1281,7 @@ bool ComponentAnalyzer::OutputMultiChannels(std::list<VolumeData*>& channs)
 			brick_size);
 		vdn->SetSpcFromFile(true);
 		vdn->SetName(vd->GetName() +
-			wxString::Format("_COMP%d_SIZE%d", count++, i->second->GetSizeUi()));
+			"_COMP" + std::to_string(count++) + "_SIZE" + std::to_string(i->second->GetSizeUi()));
 
 		//populate the volume
 		//the actual data
@@ -1445,8 +1445,7 @@ bool ComponentAnalyzer::OutputRgbChannels(std::list<VolumeData*> &channs)
 		spcx, spcy, spcz,
 		brick_size);
 	vd_r->SetSpcFromFile(true);
-	vd_r->SetName(vd->GetName() +
-		wxString::Format("_CH_R"));
+	vd_r->SetName(vd->GetName() + "_CH_R");
 	//green volume
 	VolumeData* vd_g = new VolumeData();
 	vd_g->AddEmptyData(8,
@@ -1454,8 +1453,7 @@ bool ComponentAnalyzer::OutputRgbChannels(std::list<VolumeData*> &channs)
 		spcx, spcy, spcz,
 		brick_size);
 	vd_g->SetSpcFromFile(true);
-	vd_g->SetName(vd->GetName() +
-		wxString::Format("_CH_G"));
+	vd_g->SetName(vd->GetName() + "_CH_G");
 	//blue volume
 	VolumeData* vd_b = new VolumeData();
 	vd_b->AddEmptyData(8,
@@ -1463,8 +1461,7 @@ bool ComponentAnalyzer::OutputRgbChannels(std::list<VolumeData*> &channs)
 		spcx, spcy, spcz,
 		brick_size);
 	vd_b->SetSpcFromFile(true);
-	vd_b->SetName(vd->GetName() +
-		wxString::Format("_CH_B"));
+	vd_b->SetName(vd->GetName() + "_CH_B");
 
 	//get new data
 	//red volume

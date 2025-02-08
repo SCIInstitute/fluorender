@@ -351,7 +351,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 			pr.set(glm::value_ptr(m_prj_mat));
 			mat.set(glm::value_ptr(cmat));
 			pb.SetMats(mv, pr, mat);
-			pb.SetPaintTex(m_2d_mask, canvas->GetGLSize().x, canvas->GetGLSize().y);
+			pb.SetPaintTex(m_2d_mask, canvas->GetGLSize().w(), canvas->GetGLSize().h());
 			if (m_mode == 9)
 				pb.SetMousePos(m_mx, m_my);
 			pb.Compute();
@@ -538,8 +538,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 		spc_x, spc_y, spc_z,
 		brick_size);
 	vd_r->SetSpcFromFile(true);
-	vd_r->SetName(m_vd->GetName() +
-		wxString::Format("_COMP1"));
+	vd_r->SetName(m_vd->GetName() + "_COMP1");
 	vd_r->SetCurChannel(0);
 	//green volume
 	if (!vd_g)
@@ -549,8 +548,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 		spc_x, spc_y, spc_z,
 		brick_size);
 	vd_g->SetSpcFromFile(true);
-	vd_g->SetName(m_vd->GetName() +
-		wxString::Format("_COMP2"));
+	vd_g->SetName(m_vd->GetName() + "_COMP2");
 	vd_g->SetCurChannel(1);
 	//blue volume
 	if (!vd_b)
@@ -560,8 +558,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 		spc_x, spc_y, spc_z,
 		brick_size);
 	vd_b->SetSpcFromFile(true);
-	vd_b->SetName(m_vd->GetName() +
-		wxString::Format("_COMP3"));
+	vd_b->SetName(m_vd->GetName() + "_COMP3");
 	vd_b->SetCurChannel(2);
 
 	//get new data
@@ -827,8 +824,8 @@ bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)
 		m_mx0 < 0 || m_my0 < 0)
 		return false;
 	
-	int nx = canvas->GetGLSize().x;
-	int ny = canvas->GetGLSize().y;
+	int nx = canvas->GetGLSize().w();
+	int ny = canvas->GetGLSize().h();
 	fluo::Transform *tform = m_vd->GetTexture()->transform();
 	double mvmat[16];
 	tform->get_trans(mvmat);

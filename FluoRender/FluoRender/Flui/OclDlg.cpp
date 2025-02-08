@@ -249,7 +249,7 @@ void OclDlg::Execute()
 	//bool dup = false;
 
 	glbin_kernel_executor.SetVolume(vd);
-	glbin_kernel_executor.SetCode(code);
+	glbin_kernel_executor.SetCode(code.ToStdString());
 	glbin_kernel_executor.SetDuplicate(dup);
 	glbin_kernel_executor.Execute();
 
@@ -264,9 +264,7 @@ void OclDlg::Execute()
 	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
 	(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";*/
 
-	wxString str;
-	glbin_kernel_executor.GetMessage(str);
-	(*m_output_txt) << str;
+	(*m_output_txt) << glbin_kernel_executor.GetMessage();
 
 	//add result for rendering
 	if (dup)

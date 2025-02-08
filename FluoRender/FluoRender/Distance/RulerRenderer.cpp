@@ -60,8 +60,8 @@ void RulerRenderer::Draw()
 	if (m_ruler_list->empty())
 		return;
 
-	int nx = m_view->GetGLSize().x;
-	int ny = m_view->GetGLSize().y;
+	int nx = m_view->GetGLSize().w();
+	int ny = m_view->GetGLSize().h();
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -112,8 +112,8 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 	else
 		tseq_cur_num = m_view->m_tseq_cur_num;
 	bool persp = m_view->GetPersp();
-	int nx = m_view->GetGLSize().x;
-	int ny = m_view->GetGLSize().y;
+	int nx = m_view->GetGLSize().w();
+	int ny = m_view->GetGLSize().h();
 	float w = glbin_text_tex_manager.GetSize() / 4.0f;
 	float px, py;
 
@@ -463,8 +463,8 @@ void RulerRenderer::DrawArc(fluo::Point & ppc, fluo::Point& pp0, fluo::Point& pp
 		return;
 
 	bool persp = m_view->GetPersp();
-	int nx = m_view->GetGLSize().x;
-	int ny = m_view->GetGLSize().y;
+	int nx = m_view->GetGLSize().w();
+	int ny = m_view->GetGLSize().h();
 	float px, py;
 	fluo::Point p1, p2;
 	int sec = 20;
@@ -561,7 +561,7 @@ void RulerRenderer::DrawText(int nx, int ny)
 			p2x = p2.x()*nx / 2.0;
 			p2y = p2.y()*ny / 2.0;
 			text_renderer->RenderText(
-				ruler->GetName().ToStdWstring(),
+				s2ws(ruler->GetName()),
 				c,
 				(p2x + w)*sx, (p2y + w)*sy, sx, sy);
 		}

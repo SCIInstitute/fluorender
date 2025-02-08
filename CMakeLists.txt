@@ -575,36 +575,48 @@ add_library(DATABASE_LIB STATIC
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Distance)
 file(GLOB dist_src FluoRender/FluoRender/Distance/*.cpp)
 file(GLOB dist_hdr FluoRender/FluoRender/Distance/*.h)
-add_library(DISTANCE_OBJ OBJECT
+add_library(DISTANCE_LIB STATIC
   ${dist_src} ${dist_hdr})
+target_link_libraries(DISTANCE_LIB
+  teem
+  ${OpenCV_LIBS}
+)
 
 # File
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/File)
 file(GLOB file_src FluoRender/FluoRender/File/*.cpp)
 file(GLOB file_hdr FluoRender/FluoRender/File/*.h)
-add_library(FILE_OBJ OBJECT
+add_library(FILE_LIB STATIC
   ${file_src} ${file_hdr})
 
 # Filter
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Filter)
 file(GLOB fltr_src FluoRender/FluoRender/Filter/*.cpp)
 file(GLOB fltr_hdr FluoRender/FluoRender/Filter/*.h)
-add_library(FILTER_OBJ OBJECT
+add_library(FILTER_LIB STATIC
   ${fltr_src} ${fltr_hdr})
+target_link_libraries(FILTER_LIB
+  ${Boost_LIBRARIES})
 
 # Flobject
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Flobject)
 file(GLOB obj_src FluoRender/FluoRender/Flobject/*.cpp)
 file(GLOB obj_hdr FluoRender/FluoRender/Flobject/*.hpp)
-add_library(FLOBJECT_OBJ OBJECT
+add_library(FLOBJECT_LIB STATIC
   ${obj_src} ${obj_hdr})
 
 # Flrender
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Flrender)
 file(GLOB flrd_src FluoRender/FluoRender/Flrender/*.cpp)
 file(GLOB flrd_hdr FluoRender/FluoRender/Flrender/*.h)
-add_library(FLRENDER_OBJ OBJECT
+add_library(FLRENDER_LIB STATIC
   ${flrd_src} ${flrd_hdr})
+target_link_libraries(FLRENDER_LIB
+  teem
+  ${GLEW_STATIC_LIBRARIES}
+  ${OpenCL_LIBRARIES}
+  ${OPENGL_LIBRARIES}
+)
 
 # Flui
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Flui)
@@ -801,11 +813,6 @@ if(APPLE)
     ${src} ${hdr} ${rsc} ${icns}
     $<TARGET_OBJECTS:CONFIG_OBJ>
     $<TARGET_OBJECTS:CONTROL_OBJ>
-    $<TARGET_OBJECTS:DISTANCE_OBJ>
-    $<TARGET_OBJECTS:FILE_OBJ>
-    $<TARGET_OBJECTS:FILTER_OBJ>
-    $<TARGET_OBJECTS:FLRENDER_OBJ>
-    $<TARGET_OBJECTS:FLOBJECT_OBJ>
     $<TARGET_OBJECTS:FLUI_OBJ>
     $<TARGET_OBJECTS:FORMAT_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
@@ -841,11 +848,6 @@ elseif(UNIX OR MINGW)
     ${src} ${hdr} ${rsc} ${icns}
     $<TARGET_OBJECTS:CONFIG_OBJ>
     $<TARGET_OBJECTS:CONTROL_OBJ>
-    $<TARGET_OBJECTS:DISTANCE_OBJ>
-    $<TARGET_OBJECTS:FILE_OBJ>
-    $<TARGET_OBJECTS:FILTER_OBJ>
-    $<TARGET_OBJECTS:FLRENDER_OBJ>
-    $<TARGET_OBJECTS:FLOBJECT_OBJ>
     $<TARGET_OBJECTS:FLUI_OBJ>
     $<TARGET_OBJECTS:FORMAT_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
@@ -914,11 +916,6 @@ elseif(WIN32)
       ${src} ${hdr} ${rsc} ${icns}
       $<TARGET_OBJECTS:CONFIG_OBJ>
       $<TARGET_OBJECTS:CONTROL_OBJ>
-      $<TARGET_OBJECTS:DISTANCE_OBJ>
-      $<TARGET_OBJECTS:FILE_OBJ>
-      $<TARGET_OBJECTS:FILTER_OBJ>
-      $<TARGET_OBJECTS:FLRENDER_OBJ>
-      $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:FLUI_OBJ>
       $<TARGET_OBJECTS:FORMAT_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
@@ -944,11 +941,6 @@ elseif(WIN32)
       ${src} ${hdr} ${rsc} ${icns}
       $<TARGET_OBJECTS:CONFIG_OBJ>
       $<TARGET_OBJECTS:CONTROL_OBJ>
-      $<TARGET_OBJECTS:DISTANCE_OBJ>
-      $<TARGET_OBJECTS:FILE_OBJ>
-      $<TARGET_OBJECTS:FILTER_OBJ>
-      $<TARGET_OBJECTS:FLRENDER_OBJ>
-      $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:FLUI_OBJ>
       $<TARGET_OBJECTS:FORMAT_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
@@ -972,7 +964,6 @@ elseif(WIN32)
     if(BUILD_TESTER)
         add_executable(Tester
           ${tester_src} ${tester_hdr}
-          $<TARGET_OBJECTS:FLOBJECT_OBJ>
           $<TARGET_OBJECTS:TYPE_OBJ>
         )
     endif()
@@ -1010,7 +1001,6 @@ if(WIN32)
     ${HoloPlay_LIBRARIES}
     ${ND2_LIBRARIES}
     ${OpenCL_LIBRARIES}
-    ${OpenCV_LIBS}
     ${OPENGL_LIBRARIES}
     ${OpenVR_LIBRARIES}
     ${OpenXR_LIBRARIES}
@@ -1023,10 +1013,14 @@ if(WIN32)
     XInput.lib
     ANIMATORS_LIB
     CALCULATE_LIB
-    CLUSTER_LIB
     COMPUTE_LIB
     CONVERTER_LIB
     DATABASE_LIB
+    DISTANCE_LIB
+    FILE_LIB
+    FILTER_LIB
+    FLOBJECT_LIB
+    FLRENDER_LIB
   )
   if(BUILD_TESTER)
       target_link_libraries(Tester
@@ -1044,7 +1038,6 @@ elseif(APPLE)
     ${HoloPlay_LIBRARIES}
     ${ND2_LIBRARIES}
     ${OpenCL_LIBRARIES}
-    ${OpenCV_LIBS}
     ${OPENGL_LIBRARIES}
     ${OpenVR_LIBRARIES}
     ${OpenXR_LIBRARIES}
@@ -1055,10 +1048,14 @@ elseif(APPLE)
     ${wxWidgets_LIBRARIES}
     ANIMATORS_LIB
     CALCULATE_LIB
-    CLUSTER_LIB
     COMPUTE_LIB
     CONVERTER_LIB
     DATABASE_LIB
+    DISTANCE_LIB
+    FILE_LIB
+    FILTER_LIB
+    FLOBJECT_LIB
+    FLRENDER_LIB
   )
 else()
   target_link_libraries(FluoRender
@@ -1070,7 +1067,6 @@ else()
     ${HoloPlay_LIBRARIES}
     ${ND2_LIBRARIES}
     ${OpenCL_LIBRARIES}
-    ${OpenCV_LIBS}
     ${OPENGL_LIBRARIES}
     ${OpenVR_LIBRARIES}
     ${OpenXR_LIBRARIES}
@@ -1082,11 +1078,21 @@ else()
     ${wxWidgets_LIBRARIES}
     ANIMATORS_LIB
     CALCULATE_LIB
-    CLUSTER_LIB
     COMPUTE_LIB
     CONVERTER_LIB
     DATABASE_LIB
+    DISTANCE_LIB
+    FILE_LIB
+    FILTER_LIB
+    FLOBJECT_LIB
+    FLRENDER_LIB
   )
+endif()
+
+if(BUILD_TESTER)
+    target_link_libraries(Tester
+        FLOBJECT_LIB
+        )
 endif()
 
 # copy Java code dir to the binary directory

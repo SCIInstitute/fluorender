@@ -39,7 +39,6 @@ DEALINGS IN THE SOFTWARE.
 #include <DistCalculator.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <nrrd.h>
-#include <wx/fileconf.h>
 #include <Debug.h>
 
 using namespace flrd;
@@ -207,9 +206,9 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 	size_t rwt = canvas->m_tseq_cur_num;
 
 	//get view size
-	wxSize view_size = canvas->GetGLSize();
-	int nx = view_size.x;
-	int ny = view_size.y;
+	Size2D view_size = canvas->GetGLSize();
+	int nx = view_size.w();
+	int ny = view_size.h();
 	if (nx <= 0 || ny <= 0)
 		return false;
 
@@ -276,9 +275,9 @@ bool RulerHandler::FindClosestRulerPoint(double mx, double my)
 	size_t rwt = canvas->m_tseq_cur_num;
 
 	//get view size
-	wxSize view_size = canvas->GetGLSize();
-	int nx = view_size.x;
-	int ny = view_size.y;
+	Size2D view_size = canvas->GetGLSize();
+	int nx = view_size.w();
+	int ny = view_size.h();
 	if (nx <= 0 || ny <= 0)
 		return false;
 
@@ -351,9 +350,9 @@ bool RulerHandler::FindClosestRulerBranch(double mx, double my)
 	size_t rwt = canvas->m_tseq_cur_num;
 
 	//get view size
-	wxSize view_size = canvas->GetGLSize();
-	int nx = view_size.x;
-	int ny = view_size.y;
+	Size2D view_size = canvas->GetGLSize();
+	int nx = view_size.w();
+	int ny = view_size.h();
 	if (nx <= 0 || ny <= 0)
 		return false;
 
@@ -433,9 +432,9 @@ bool RulerHandler::FindClosestRulerBranchPoint(double mx, double my)
 	size_t rwt = canvas->m_tseq_cur_num;
 
 	//get view size
-	wxSize view_size = canvas->GetGLSize();
-	int nx = view_size.x;
-	int ny = view_size.y;
+	Size2D view_size = canvas->GetGLSize();
+	int nx = view_size.w();
+	int ny = view_size.h();
 	if (nx <= 0 || ny <= 0)
 		return false;
 
@@ -862,16 +861,16 @@ void RulerHandler::AddPaintRulerPoint()
 	fluo::Point center = cover.GetCenter();
 	double size = counter.GetSum();
 
-	wxString str;
+	std::string str;
 	bool new_ruler = true;
 	if (ruler &&
 		ruler->GetDisp() &&
 		!ruler->GetFinished())
 	{
 		ruler->AddPoint(center);
-		str = wxString::Format("\tv%d", ruler->GetNumPoint() - 1);
+		str = "\tv" + std::to_string(ruler->GetNumPoint() - 1);
 		ruler->AddInfoNames(str);
-		str = wxString::Format("\t%.0f", size);
+		str = "\t" + std::to_string(static_cast<int>(size));
 		ruler->AddInfoValues(str);
 		new_ruler = false;
 	}
@@ -883,7 +882,7 @@ void RulerHandler::AddPaintRulerPoint()
 		ruler->AddPoint(center);
 		str = "v0";
 		ruler->AddInfoNames(str);
-		str = wxString::Format("%.0f", size);
+		str = std::to_string(static_cast<int>(size));
 		ruler->AddInfoValues(str);
 		list->push_back(ruler);
 		RenderCanvas* canvas = glbin_current.canvas;
@@ -1412,428 +1411,6 @@ void RulerHandler::DeleteAll(bool cur_time)
 	m_pindex = -1;
 }
 
-void RulerHandler::Export(const wxString& filename)
-{
-	RulerList* list = glbin_current.GetRulerList();
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!list || !canvas)
-		return;
-
-	std::ofstream os;
-	OutputStreamOpen(os, filename.ToStdString());
-
-	wxString str;
-	wxString unit;
-	int num_points;
-	fluo::Point p;
-	flrd::Ruler* ruler;
-	switch (canvas->m_sb_unit)
-	{
-	case 0:
-		unit = "nm";
-		break;
-	case 1:
-	default:
-		unit = L"\u03BCm";
-		break;
-	case 2:
-		unit = "mm";
-		break;
-	}
-
-	int ruler_num = list->size();
-	std::vector<unsigned int> groups;
-	std::vector<int> counts;
-	int group_num = list->GetGroupNumAndCount(groups, counts);
-	std::vector<int> group_count(group_num, 0);
-
-	if (ruler_num > 1)
-		os << "Ruler Count:\t" << ruler_num << "\n";
-	if (group_num > 1)
-	{
-		//group count
-		os << "Group Count:\t" << group_num << "\n";
-		for (int i = 0; i < group_num; ++i)
-		{
-			os << "Group " << groups[i];
-			if (i < group_num - 1)
-				os << "\t";
-			else
-				os << "\n";
-		}
-		for (int i = 0; i < group_num; ++i)
-		{
-			os << counts[i];
-			if (i < group_num - 1)
-				os << "\t";
-			else
-				os << "\n";
-		}
-	}
-
-	os << "Name\tGroup\tCount\tColor\tBranch\tLength(" << unit << ")\tAngle/Pitch(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
-
-	double f = 0.0;
-	fluo::Color color;
-	for (size_t i = 0; i < list->size(); i++)
-	{
-		//for each ruler
-		ruler = (*list)[i];
-		if (!ruler)
-			continue;
-		ruler->SetWorkTime(canvas->m_tseq_cur_num);
-
-		os << ruler->GetName() << "\t";
-
-		//group and count
-		unsigned int group = ruler->Group();
-		os << group << "\t";
-		int count = 0;
-		auto iter = std::find(groups.begin(), groups.end(), group);
-		if (iter != groups.end())
-		{
-			int index = std::distance(groups.begin(), iter);
-			count = ++group_count[index];
-		}
-		os << count << "\t";
-
-		//color
-		if (ruler->GetUseColor())
-		{
-			color = ruler->GetColor();
-			str = wxString::Format("RGB(%d, %d, %d)",
-				int(std::round(color.r() * 255)),
-				int(std::round(color.g() * 255)),
-				int(std::round(color.b() * 255)));
-		}
-		else
-			str = "N/A";
-		os << str << "\t";
-
-		//branch count
-		str = wxString::Format("%d", ruler->GetNumBranch());
-		os << str << "\t";
-		//length
-		str = wxString::Format("%.2f", ruler->GetLength());
-		os << str << "\t";
-		//angle
-		str = wxString::Format("%.1f", ruler->GetAngle());
-		os << str << "\t";
-
-		str = "";
-		//start and end points
-		num_points = ruler->GetNumPoint();
-		if (num_points > 0)
-		{
-			p = ruler->GetPoint(0);
-			str += wxString::Format("%.2f\t%.2f\t%.2f\t", p.x(), p.y(), p.z());
-		}
-		if (num_points > 1)
-		{
-			p = ruler->GetPoint(num_points - 1);
-			str += wxString::Format("%.2f\t%.2f\t%.2f\t", p.x(), p.y(), p.z());
-		}
-		else
-			str += "\t\t\t";
-		os << str;
-
-		//time
-		if (ruler->GetTransient())
-			str = wxString::Format("%d", ruler->GetTransTime());
-		else
-			str = "N/A";
-		os << str << "\t";
-
-		//info values v1 v2
-		os << ruler->GetInfoValues() << "\n";
-
-		//export points
-		if (ruler->GetNumPoint() > 2)
-		{
-			os << ruler->GetPosNames();
-			os << ruler->GetPosValues();
-		}
-
-		//export profile
-		std::vector<flrd::ProfileBin>* profile = ruler->GetProfile();
-		if (profile && profile->size())
-		{
-			double sumd = 0.0;
-			unsigned long long sumull = 0;
-			os << ruler->GetInfoProfile() << "\n";
-			for (size_t j = 0; j < profile->size(); ++j)
-			{
-				//for each profile
-				int pixels = (*profile)[j].m_pixels;
-				if (pixels <= 0)
-					os << "0.0\t";
-				else
-				{
-					os << (*profile)[j].m_accum / pixels << "\t";
-					sumd += (*profile)[j].m_accum;
-					sumull += pixels;
-				}
-			}
-			//if (m_ruler_df_f)
-			//{
-			//	double avg = 0.0;
-			//	if (sumull != 0)
-			//		avg = sumd / double(sumull);
-			//	if (i == 0)
-			//	{
-			//		f = avg;
-			//		os << "\t" << f << "\t";
-			//	}
-			//	else
-			//	{
-			//		double df = avg - f;
-			//		if (f == 0.0)
-			//			os << "\t" << df << "\t";
-			//		else
-			//			os << "\t" << df / f << "\t";
-			//	}
-			//}
-			os << "\n";
-		}
-	}
-
-	os.close();
-}
-
-void RulerHandler::Save(wxFileConfig &fconfig, int vi)
-{
-	RulerList* list = glbin_current.GetRulerList();
-	if (!list || list->empty())
-		return;
-
-	fconfig.Write("num", static_cast<unsigned int>(list->size()));
-	for (size_t ri = 0; ri < list->size(); ++ri)
-	{
-		Ruler* ruler = (*list)[ri];
-		if (!ruler) continue;
-		fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", vi, (int)ri));
-		fconfig.Write("name", ruler->GetName());
-		fconfig.Write("group", ruler->Group());
-		fconfig.Write("type", ruler->GetRulerType());
-		fconfig.Write("display", ruler->GetDisp());
-		fconfig.Write("transient", ruler->GetTransient());
-		fconfig.Write("time", ruler->GetTransTime());
-		fconfig.Write("info_names", ruler->GetInfoNames());
-		fconfig.Write("info_values", ruler->GetInfoValues());
-		fconfig.Write("use_color", ruler->GetUseColor());
-		fconfig.Write("color", wxString::Format("%f %f %f",
-			ruler->GetColor().r(), ruler->GetColor().g(), ruler->GetColor().b()));
-		fconfig.Write("interp", ruler->GetInterp());
-		fconfig.Write("num", ruler->GetNumBranch());
-		wxString path = wxString::Format(
-			"/views/%d/rulers/%d/branches", vi, (int)ri);
-		fconfig.SetPath(path);
-		fconfig.Write("num", ruler->GetNumBranch());
-		for (size_t rbi = 0; rbi < ruler->GetNumBranch(); ++rbi)
-		{
-			wxString path_br = path + wxString::Format("/%d", (int)rbi);
-			fconfig.SetPath(path_br);
-			fconfig.Write("num", ruler->GetNumBranchPoint(rbi));
-			fconfig.Write("time_point", true);
-			for (size_t rpi = 0; rpi < ruler->GetNumBranchPoint(rbi); ++rpi)
-			{
-				RulerPoint* rp = ruler->GetRulerPoint(rbi, rpi);
-				if (!rp) continue;
-				//fconfig.Write(wxString::Format("point%d", (int)rpi),
-				//	wxString::Format("%f %f %f %d %d",
-				//	rp->GetPoint(0).x(),
-				//	rp->GetPoint(0).y(),
-				//	rp->GetPoint(0).z(),
-				//	rp->GetLocked(),
-				//	rp->GetId()));
-				wxString path2 = path_br + wxString::Format("/point%d", (int)rpi);
-				fconfig.SetPath(path2);
-				fconfig.Write("num", rp->GetTimeNum());
-				fconfig.Write("locked", rp->GetLocked());
-				fconfig.Write("id", rp->GetId());
-				for (size_t tpi = 0; tpi < rp->GetTimeNum(); ++tpi)
-				{
-					wxString tpn = wxString::Format("tp%d", (int)tpi);
-					size_t t = 0;
-					fluo::Point p;
-					if (rp->GetTimeAndPoint(tpi, t, p))
-						fconfig.Write(tpn,
-							wxString::Format("%d %f %f %f",
-								(int)t,
-								p.x(),
-								p.y(),
-								p.z()));
-				}
-			}
-		}
-	}
-}
-
-void RulerHandler::Read(wxFileConfig &fconfig, int vi)
-{
-	RulerList* list = glbin_current.GetRulerList();
-	if (!list)
-		return;
-	wxString str;
-	int ival;
-	bool bval;
-	int rbi, rpi;
-	float x, y, z;
-	int l = 0;
-	unsigned int id;
-
-	list->clear();
-	int rnum = fconfig.Read("num", 0l);
-	for (int ri = 0; ri < rnum; ++ri)
-	{
-		if (fconfig.Exists(wxString::Format("/views/%d/rulers/%d", vi, ri)))
-		{
-			fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", vi, ri));
-			Ruler* ruler = new Ruler();
-			if (fconfig.Read("name", &str))
-				ruler->SetName(str);
-			if (fconfig.Read("group", &ival))
-				ruler->Group(ival);
-			if (fconfig.Read("type", &ival))
-				ruler->SetRulerType(ival);
-			if (fconfig.Read("display", &bval))
-				ruler->SetDisp(bval);
-			if (fconfig.Read("transient", &bval))
-				ruler->SetTransient(bval);
-			if (fconfig.Read("time", &ival))
-				ruler->SetTransTime(ival);
-			if (fconfig.Read("info_names", &str))
-				ruler->SetInfoNames(str);
-			if (fconfig.Read("info_values", &str))
-				ruler->SetInfoValues(str);
-			if (fconfig.Read("use_color", &bval))
-			{
-				if (bval)
-				{
-					if (fconfig.Read("color", &str))
-					{
-						float r, g, b;
-						if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b))
-						{
-							fluo::Color col(r, g, b);
-							ruler->SetColor(col);
-						}
-					}
-				}
-			}
-			if (fconfig.Read("interp", &ival))
-				ruler->SetInterp(ival);
-			int num = fconfig.Read("num", 0l);
-			//num could be points or branch
-			for (int ii = 0; ii < num; ++ii)
-			{
-				//if points
-				rbi = rpi = ii;
-				if (fconfig.Exists(wxString::Format(
-					"/views/%d/rulers/%d/points/%d", vi, ri, rpi)))
-				{
-					fconfig.SetPath(wxString::Format(
-						"/views/%d/rulers/%d/points/%d", vi, ri, rpi));
-					if (fconfig.Read("point", &str))
-					{
-						if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						{
-							fluo::Point point(x, y, z);
-							ruler->AddPoint(point);
-						}
-					}
-				}
-				//if branch
-				else if (fconfig.Exists(wxString::Format(
-					"/views/%d/rulers/%d/branches/%d", vi, ri, rbi)))
-				{
-					wxString path = wxString::Format(
-						"/views/%d/rulers/%d/branches/%d", vi, ri, rbi);
-					fconfig.SetPath(path);
-					if (fconfig.Read("num", &ival))
-					{
-						bool time_point = false;
-						fconfig.Read("time_point", &time_point, false);
-						for (rpi = 0; rpi < ival; ++rpi)
-						{
-							if (time_point)
-							{
-								wxString path2 = path + wxString::Format("/point%d", rpi);
-								fconfig.SetPath(path2);
-								int tnum;
-								fconfig.Read("num", &tnum);
-								fconfig.Read("locked", &l);
-								//fconfig.Read("id", &id);
-								unsigned int t;
-								for (int tpi = 0; tpi < tnum; ++tpi)
-								{
-									wxString tpn = wxString::Format("tp%d", tpi);
-									if (fconfig.Read(tpn, &str))
-									{
-										if (SSCANF(str.c_str(), "%u%f%f%f", &t, &x, &y, &z))
-										{
-											ruler->SetWorkTime(t);
-											fluo::Point point(x, y, z);
-											if (rbi > 0 && rpi == 0)
-											{
-												pRulerPoint pp = ruler->FindPRulerPoint(point);
-												pp->SetLocked(l);
-												ruler->AddBranch(pp);
-											}
-											else
-											{
-												if (tpi == 0)
-												{
-													ruler->AddPoint(point);
-													pRulerPoint pp = ruler->FindPRulerPoint(point);
-													pp->SetLocked(l);
-												}
-												else
-												{
-													pRulerPoint pp = ruler->GetPRulerPoint(rpi);
-													if (pp)
-													{
-														pp->SetPoint(point, t);
-														pp->SetLocked(l);
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-							else
-							{
-								if (fconfig.Read(wxString::Format("point%d", rpi), &str))
-								{
-									if (SSCANF(str.c_str(), "%f%f%f%d%u", &x, &y, &z, &l, &id))
-									{
-										fluo::Point point(x, y, z);
-										if (rbi > 0 && rpi == 0)
-										{
-											pRulerPoint pp = ruler->FindPRulerPoint(point);
-											pp->SetLocked(l);
-											ruler->AddBranch(pp);
-										}
-										else
-										{
-											ruler->AddPoint(point);
-											pRulerPoint pp = ruler->FindPRulerPoint(point);
-											pp->SetLocked(l);
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			ruler->SetFinished();
-			list->push_back(ruler);
-		}
-	}
-}
-
 std::string RulerHandler::PrintRulers(bool h)
 {
 	std::string s;
@@ -1845,7 +1422,7 @@ std::string RulerHandler::PrintRulers(bool h)
 	{
 		Ruler* ruler = (*list)[ri];
 		if (!ruler) continue;
-		std::string rname = ruler->GetName().ToStdString();
+		std::string rname = ruler->GetName();
 		std::string line;
 		int rpn = ruler->GetNumPoint();
 		for (size_t rpi = 0; rpi < rpn; ++rpi)
@@ -2056,7 +1633,7 @@ int RulerHandler::Profile(Ruler* ruler)
 				profile->erase(profile->begin() + total_dist, profile->begin() + bins - 1);
 		}
 	}
-	wxString str("Profile of volume ");
+	std::string str = "Profile of volume ";
 	str = str + vd->GetName();
 	ruler->SetInfoProfile(str);
 
@@ -2187,18 +1764,22 @@ int RulerHandler::RoiAll()
 	return c;
 }
 
-void RulerHandler::Distance(const std::set<int>& rulers, const wxString& filename)
+void RulerHandler::Distance(const std::set<int>& rulers, const std::string& filename)
 {
 	RulerList* list = glbin_current.GetRulerList();
 	if (!list)
+	{
 		return;
+	}
 	flrd::CelpList* cplist = glbin_comp_analyzer.GetCelpList();
 	if (cplist->empty())
+	{
 		return;
+	}
 
 	bool update_all = rulers.empty();
 
-	std::string str = filename.ToStdString();
+	std::string str = filename;
 	str = str.substr(0, str.find_last_of('.'));
 	std::string fi;
 
@@ -2232,19 +1813,23 @@ void RulerHandler::Distance(const std::set<int>& rulers, const wxString& filenam
 	}
 }
 
-void RulerHandler::Project(const std::set<int>& rulers, const wxString& filename)
+void RulerHandler::Project(const std::set<int>& rulers, const std::string& filename)
 {
 	RulerList* list = glbin_current.GetRulerList();
 	if (!list)
+	{
 		return;
+	}
 	flrd::CelpList* cplist = glbin_comp_analyzer.GetCelpList();
 	if (cplist->empty())
+	{
 		return;
+	}
 	glbin_dist_calculator.SetCelpList(cplist);
 
 	bool update_all = rulers.empty();
 
-	string str = filename.ToStdString();
+	string str = filename;
 	std::ofstream ofs;
 	ofs.open(str, std::ofstream::out);
 
@@ -2474,7 +2059,7 @@ bool RulerHandler::GetRulerPointNames(std::vector<std::string>& names)
 		if (!i)
 			continue;
 		int rpn = i->GetNumPoint();
-		std::string name = i->GetName().ToStdString();
+		std::string name = i->GetName();
 		std::string str;
 		if (rpn == 1)
 		{

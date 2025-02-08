@@ -33,7 +33,6 @@
 #include <Ray.h>
 #include <BBox.h>
 #include <Plane.h>
-#include <wx/thread.h>
 #include <vector>
 #include <nrrd.h>
 #include <stdint.h>
@@ -217,7 +216,7 @@ namespace flvr {
 
 		void set_brkdata(char *brkdata) { brkdata_ = brkdata; }
 		const char *getBrickData() { return brkdata_; }
-		static bool read_brick_without_decomp(char* &data, size_t &readsize, FileLocInfo* finfo, wxThread *th = NULL);
+		static bool read_brick_without_decomp(char* &data, size_t &readsize, FileLocInfo* finfo, void *th = NULL);
 
 		void set_disp(bool disp) { disp_ = disp; }
 		bool get_disp() { return disp_; }

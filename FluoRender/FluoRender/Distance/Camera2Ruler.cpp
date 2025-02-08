@@ -31,8 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <RulerHandler.h>
 #include <Ray.h>
 #include <Plane.h>
-#include <wx/wfstream.h>
-#include <wx/fileconf.h>
 
 using namespace flrd;
 
@@ -80,27 +78,27 @@ void Camera2Ruler::SetList(int i, RulerList* list)
 
 void Camera2Ruler::SetList(int i, int startf, int endf)
 {
-	RulerList* list = 0;
-	if (list)
+	RulerList* list = glbin_current.GetRulerList();
+	if (!list)
+		return;
+
+	if (i == 1)
 	{
-		if (i == 1)
-		{
-			if (m_del_list1)
-				delete m_list1;
-			m_list1 = list;
-			m_del_list1 = true;
-			m_start_list1 = std::max(int(m_start_list1), startf);
-			m_end_list1 = m_end_list1 ? std::min(int(m_end_list1), endf) : endf;
-		}
-		else if (i == 2)
-		{
-			if (m_del_list2)
-				delete m_list2;
-			m_list2 = list;
-			m_del_list2 = true;
-			m_start_list2 = std::max(int(m_start_list2), startf);
-			m_end_list2 = m_end_list2 ? std::min(int(m_end_list2), endf) : endf;
-		}
+		if (m_del_list1)
+			delete m_list1;
+		m_list1 = list;
+		m_del_list1 = true;
+		m_start_list1 = std::max(int(m_start_list1), startf);
+		m_end_list1 = m_end_list1 ? std::min(int(m_end_list1), endf) : endf;
+	}
+	else if (i == 2)
+	{
+		if (m_del_list2)
+			delete m_list2;
+		m_list2 = list;
+		m_del_list2 = true;
+		m_start_list2 = std::max(int(m_start_list2), startf);
+		m_end_list2 = m_end_list2 ? std::min(int(m_end_list2), endf) : endf;
 	}
 }
 
@@ -117,7 +115,7 @@ void Camera2Ruler::Run()
 		if (!ruler)
 			continue;
 		if (std::find(m_names.begin(), m_names.end(),
-			ruler->GetName().ToStdString()) == m_names.end())
+			ruler->GetName()) == m_names.end())
 			continue;//ignore non-calib points
 		for (int i = 0; i < ruler->GetNumPoint(); ++i)
 		{
@@ -131,7 +129,7 @@ void Camera2Ruler::Run()
 		if (!ruler)
 			continue;
 		if (std::find(m_names.begin(), m_names.end(),
-			ruler->GetName().ToStdString()) == m_names.end())
+			ruler->GetName()) == m_names.end())
 			continue;//ignore non-calib points
 		for (int i = 0; i < ruler->GetNumPoint(); ++i)
 		{
@@ -175,7 +173,7 @@ void Camera2Ruler::Run()
 			continue;
 		bool use_t = true;
 		if (std::find(m_names.begin(), m_names.end(),
-			ruler->GetName().ToStdString()) != m_names.end())
+			ruler->GetName()) != m_names.end())
 			use_t = false;
 		for (int i = 0; i < ruler->GetNumPoint(); ++i)
 		{
@@ -202,7 +200,7 @@ void Camera2Ruler::Run()
 			continue;
 		bool use_t = true;
 		if (std::find(m_names.begin(), m_names.end(),
-			ruler->GetName().ToStdString()) != m_names.end())
+			ruler->GetName()) != m_names.end())
 			use_t = false;
 		for (int i = 0; i < ruler->GetNumPoint(); ++i)
 		{
@@ -247,7 +245,7 @@ void Camera2Ruler::Run()
 			continue;
 		bool use_t = true;
 		if (std::find(m_names.begin(), m_names.end(),
-			ruler->GetName().ToStdString()) != m_names.end())
+			ruler->GetName()) != m_names.end())
 			use_t = false;
 		Ruler* r0 = new Ruler;
 		r0->SetName(ruler->GetName());

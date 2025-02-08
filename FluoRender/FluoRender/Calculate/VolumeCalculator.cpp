@@ -284,8 +284,8 @@ void VolumeCalculator::CreateVolumeResult1()
 	//vd->SetCurChannel(m_vd_a->GetCurChannel());
 	m_vd_r.push_back(vd);
 
-	wxString name = m_vd_a->GetName();
-	wxString str_type;
+	std::string name = m_vd_a->GetName();
+	std::string str_type;
 	switch (m_type)
 	{
 	case 5://substraction
@@ -338,14 +338,14 @@ void VolumeCalculator::CreateVolumeResult2()
 	vd->SetSpcFromFile(true);
 	m_vd_r.push_back(vd);
 
-	wxString name_a = m_vd_a->GetName();
-	wxString name_b = m_vd_b->GetName();
+	std::string name_a = m_vd_a->GetName();
+	std::string name_b = m_vd_b->GetName();
 	size_t len = 15;
 	if (name_a.length() > len)
-		name_a = name_a.Left(len);
+		name_a = name_a.substr(0, len);
 	if (name_b.length() > len)
-		name_b = name_b.Left(len);
-	wxString str_type;
+		name_b = name_b.substr(0, len);
+	std::string str_type;
 	switch (m_type)
 	{
 	case 1://substraction
@@ -361,7 +361,7 @@ void VolumeCalculator::CreateVolumeResult2()
 		str_type = "_AND_";
 		break;
 	}
-	wxString name = name_a + str_type + name_b;
+	std::string name = name_a + str_type + name_b;
 	vd->SetName(name);
 }
 

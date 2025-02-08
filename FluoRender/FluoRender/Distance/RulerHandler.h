@@ -133,8 +133,8 @@ namespace flrd
 		int Profile(Ruler* ruler);
 		int Profile(int index);
 		int ProfileAll();
-		void Distance(const std::set<int>& rulers, const wxString& filename);
-		void Project(const std::set<int>& rulers, const wxString& filename);
+		void Distance(const std::set<int>& rulers, const std::string& filename);
+		void Project(const std::set<int>& rulers, const std::string& filename);
 
 		//transient over time
 		void SetTransient(bool bval, const std::set<int>& rulers);
@@ -165,9 +165,6 @@ namespace flrd
 		void DeleteSelection(const std::set<int> &sel);
 		void DeleteAll(bool cur_time);
 
-		void Export(const wxString& filename);
-		void Save(wxFileConfig &fconfig, int vi);
-		void Read(wxFileConfig &fconfig, int vi);
 		std::string PrintRulers(bool h);//h-if prints hierarchy
 
 		void SetFsize(int ival)
@@ -284,9 +281,9 @@ namespace flrd
 			if (!excldxyz(x, y, z))
 				return 0;
 			unsigned long long index =
-				(unsigned long long)m_nx * m_ny * z +
-				(unsigned long long)m_nx * y +
-				(unsigned long long)x;
+				static_cast<unsigned long long>(z) * m_nx * m_ny +
+				static_cast<unsigned long long>(y) * m_nx +
+				static_cast<unsigned long long>(x);
 			if (m_bits == 8)
 				return double(((unsigned char*)m_data)[index]) / 255.0;
 			else
@@ -321,11 +318,11 @@ namespace flrd
 		bool ijk(int &i, int &j, int &k)
 		{
 			if (i < 0) i = 0;
-			if (i >= m_nx) i = m_nx - 1;
+			if (i >= m_nx) i = static_cast<int>(m_nx - 1);
 			if (j < 0) j = 0;
-			if (j >= m_ny) j = m_ny - 1;
+			if (j >= m_ny) j = static_cast<int>(m_ny - 1);
 			if (k < 0) k = 0;
-			if (k >= m_nz) k = m_nz - 1;
+			if (k >= m_nz) k = static_cast<int>(m_nz - 1);
 			return true;
 		}
 		double get_data_bl(double x, double y, double z)
@@ -368,7 +365,7 @@ namespace flrd
 				size_t count = 0;
 				double sum = 0;
 				double val;
-				int lub = m_fsize / 2 + m_fsize % 2;
+				int lub = static_cast<int>(m_fsize / 2 + m_fsize % 2);
 				double r = double(m_fsize) / 2.0; r *= r;
 				double dx, dy;
 				for (int ii = -lub; ii <= lub; ++ii)

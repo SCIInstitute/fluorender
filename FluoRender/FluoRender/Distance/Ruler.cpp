@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Ruler.h>
 #include <Quaternion.h>
 #include <Utils.h>
+#include <fstream>
 
 using namespace flrd;
 
@@ -39,7 +40,7 @@ Ruler::Ruler()
 	m_id = m_num;
 	m_group = 0;
 	m_num++;
-	m_name = wxString::Format("Ruler %d", m_num);
+	m_name = "Ruler " + std::to_string(m_num);
 	m_disp = true;
 	m_tform.load_identity();
 	m_ruler_type = 0;
@@ -73,7 +74,7 @@ Ruler::~Ruler()
 //data
 int Ruler::GetNumBranch()
 {
-	return m_ruler.size();
+	return static_cast<int>(m_ruler.size());
 }
 
 int Ruler::GetNumPoint()
@@ -87,7 +88,7 @@ int Ruler::GetNumPoint()
 	for (auto it = m_ruler.begin();
 		it != m_ruler.end(); ++it)
 	{
-		count += first ? it->size() : it->size() - 1;
+		count += static_cast<int>(first ? it->size() : it->size() - 1);
 		first = false;
 	}
 	return count;
@@ -98,7 +99,7 @@ int Ruler::GetNumBranchPoint(int nb)
 	int branch_num = GetNumBranch();
 	if (nb < 0 || nb >= branch_num)
 		return 0;
-	return m_ruler.at(nb).size();
+	return static_cast<int>(m_ruler.at(nb).size());
 }
 
 RulerPoint *Ruler::GetRulerPoint(int index)
@@ -111,7 +112,7 @@ RulerPoint *Ruler::GetRulerPoint(int index)
 	for (auto it = m_ruler.begin();
 		it != m_ruler.end(); ++it)
 	{
-		size = it->size();
+		size = static_cast<int>(it->size());
 		inc = first ? size : size - 1;;
 		if (index >= count && index < count + inc)
 		{
@@ -148,7 +149,7 @@ pRulerPoint Ruler::GetPRulerPoint(int index)
 	for (auto it = m_ruler.begin();
 		it != m_ruler.end(); ++it)
 	{
-		size = it->size();
+		size = static_cast<int>(it->size());
 		inc = first ? size : size - 1;;
 		if (index >= count && index < count + inc)
 		{
@@ -207,9 +208,9 @@ pRulerPoint Ruler::FindNearestPRulerPoint(fluo::Point& point, size_t &ri, size_t
 	bool first = true, found = false;
 	double dist, min_dist;
 	size_t mini, minj;
-	for (int i = m_ruler.size()-1; i >= 0; --i)
+	for (size_t i = m_ruler.size()-1; i-- > 0;)
 	{
-		for (int j = m_ruler[i].size()-1; j >= 0; --j)
+		for (size_t j = m_ruler[i].size()-1; j-- > 0;)
 		{
 			dist = (m_ruler[i][j]->GetPoint(m_work_time, m_interp) - point).length2();
 			if (first || dist < min_dist)
@@ -237,7 +238,7 @@ pRulerPoint Ruler::FindBranchPRulerPoint(fluo::Point& point, size_t& ri, size_t&
 	double dist;
 	double min_dist = std::numeric_limits<double>::max();
 	size_t mini;
-	for (int i = m_ruler.size() - 1; i >= 0; --i)
+	for (size_t i = m_ruler.size() - 1; i-- > 0;)
 	{
 		if (m_ruler[i].size() < 2)
 			continue;
@@ -423,9 +424,9 @@ bool Ruler::AddPointAfterId(
 
 	bool found = false;
 	size_t ri, rj;
-	for (int i = m_ruler.size()-1; i >= 0; --i)
+	for (size_t i = m_ruler.size()-1; i-- > 0;)
 	{
-		for (int j = m_ruler[i].size()-1; j >= 0; --j)
+		for (size_t j = m_ruler[i].size()-1; j-- > 0;)
 		{
 			//if (cid.find(m_ruler[i][j]->m_id) != cid.end())
 			for (auto sit = cid.begin(); 
@@ -515,9 +516,9 @@ void Ruler::DeletePoint(pRulerPoint &point)
 
 void Ruler::Prune(int len)
 {
-	int lastj;
+	size_t lastj;
 	bool found;
-	for (int i = m_ruler.size() - 1; i >= 0; --i)
+	for (size_t i = m_ruler.size() - 1; i-- > 0;)
 	{
 		//if the branch is shorter than len, remove it
 		if (m_ruler[i].size() <= len + 1)
@@ -527,9 +528,9 @@ void Ruler::Prune(int len)
 			found = false;
 			//find the starting point of the branch
 			pRulerPoint pp = m_ruler[i][0];
-			for (int ii = 0; ii < m_ruler.size(); ++ii)
+			for (size_t ii = 0; ii < m_ruler.size(); ++ii)
 			{
-				for (int jj = 0; jj < m_ruler[ii].size(); ++jj)
+				for (size_t jj = 0; jj < m_ruler[ii].size(); ++jj)
 				{
 					if (m_ruler[ii][jj] == pp && ii != i)
 					{
@@ -570,9 +571,9 @@ void Ruler::Reverse()
 		std::reverse(std::begin(m_ruler[0]), std::end(m_ruler[0]));
 }
 
-wxString Ruler::GetDelInfoValues(wxString del)
+std::string Ruler::GetDelInfoValues(const std::string& del)
 {
-	wxString output;
+	std::string output;
 
 	for (size_t i = 0; i < m_info_values.length(); i++)
 	{
@@ -585,9 +586,9 @@ wxString Ruler::GetDelInfoValues(wxString del)
 	return output;
 }
 
-wxString Ruler::GetPosValues()
+std::string Ruler::GetPosValues()
 {
-	wxString output;
+	std::string output;
 
 	//x string
 	output += "x\t";
@@ -629,9 +630,9 @@ wxString Ruler::GetPosValues()
 	return output;
 }
 
-wxString Ruler::GetPosNames()
+std::string Ruler::GetPosNames()
 {
-	wxString output;
+	std::string output;
 
 	output += "Coords\t";
 
@@ -649,8 +650,25 @@ wxString Ruler::GetPosNames()
 	return output;
 }
 
-void Ruler::SaveProfile(wxString &filename)
+void Ruler::SaveProfile(const std::string &filename)
 {
+	if (m_profile.empty())
+		return;
+	std::ofstream ofs(filename.c_str());
+	if (!ofs)
+		return;
+	//header
+	ofs << "Distance\tValue\n";
+	//data
+	for (size_t i = 0; i < m_profile.size(); ++i)
+	{
+		ofs << m_profile[i].dist << "\t";
+		if (m_profile[i].m_pixels <= 0)
+			ofs << "0.0\n";
+		else
+			ofs << m_profile[i].m_accum / m_profile[i].m_pixels << "\n";
+	}
+	ofs.close();
 }
 
 double Ruler::GetProfileMaxValue()

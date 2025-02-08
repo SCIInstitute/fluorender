@@ -28,14 +28,14 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Ruler_h
 #define FL_Ruler_h
 
+#include <Point.h>
+#include <Color.h>
+#include <Transform.h>
 #include <memory>
 #include <vector>
 #include <set>
 #include <map>
-#include <Point.h>
-#include <Color.h>
-#include <Transform.h>
-#include <wx/string.h>
+#include <string>
 
 namespace flrd
 {
@@ -276,7 +276,7 @@ namespace flrd
 				fluo::Point* p1 = get_point(nt);
 				if (!p0 || !p1)
 					return fluo::Point();
-				double d = nt - pt;
+				double d = static_cast<double>(nt - pt);
 				if (d == 0.0)
 					return fluo::Point();
 				double w0, w1;
@@ -311,7 +311,7 @@ namespace flrd
 				fluo::Point* p1 = get_point(nt);
 				if (!p0 || !p1)
 					return fluo::Point();
-				double d = nt - pt;
+				double d = static_cast<double>(nt - pt);
 				if (d == 0.0)
 					return fluo::Point();
 				double w0, w1;
@@ -370,11 +370,11 @@ namespace flrd
 		}
 
 		//name
-		wxString GetName()
+		std::string GetName()
 		{
 			return m_name;
 		}
-		void SetName(wxString name)
+		void SetName(const std::string& name)
 		{
 			m_name = name;
 		}
@@ -520,40 +520,40 @@ namespace flrd
 		}
 
 		//extra info
-		void AddInfoNames(wxString &str)
+		void AddInfoNames(const std::string &str)
 		{
 			m_info_names += str;
 		}
-		void SetInfoNames(wxString &str)
+		void SetInfoNames(const std::string &str)
 		{
 			m_info_names = str;
 		}
-		wxString &GetInfoNames()
+		std::string GetInfoNames()
 		{
 			return m_info_names;
 		}
-		void AddInfoValues(wxString &str)
+		void AddInfoValues(const std::string &str)
 		{
 			m_info_values += str;
 		}
-		void SetInfoValues(wxString &str)
+		void SetInfoValues(const std::string &str)
 		{
 			m_info_values = str;
 		}
-		wxString &GetInfoValues()
+		std::string GetInfoValues()
 		{
 			return m_info_values;
 		}
-		wxString GetDelInfoValues(wxString del = ",");
-		wxString GetPosValues();
-		wxString GetPosNames();
+		std::string GetDelInfoValues(const std::string& del = ",");
+		std::string GetPosValues();
+		std::string GetPosNames();
 
 		//profile
-		void SetInfoProfile(wxString &str)
+		void SetInfoProfile(const std::string &str)
 		{
 			m_info_profile = str;
 		}
-		wxString &GetInfoProfile()
+		std::string GetInfoProfile()
 		{
 			return m_info_profile;
 		}
@@ -561,7 +561,7 @@ namespace flrd
 		{
 			return &m_profile;
 		}
-		void SaveProfile(wxString &filename);
+		void SaveProfile(const std::string &filename);
 		double GetProfileMaxValue();
 		void GetProfileMaxValue(double &val, double &dist);//return max value and its distance on ruler
 		void SetScalarScale(double dval)
@@ -623,7 +623,7 @@ namespace flrd
 		{
 			for (size_t i = 0; i < GetNumPoint(); ++i)
 			{
-				RulerPoint* p = GetRulerPoint(i);
+				RulerPoint* p = GetRulerPoint(static_cast<int>(i));
 				if (!p)
 					continue;
 				p->DeletePoint(m_work_time);
@@ -633,7 +633,7 @@ namespace flrd
 		{
 			for (size_t i = 0; i < GetNumPoint(); ++i)
 			{
-				RulerPoint* p = GetRulerPoint(i);
+				RulerPoint* p = GetRulerPoint(static_cast<int>(i));
 				if (!p)
 					continue;
 				p->DeleteAllPoint(m_work_time, m_interp);
@@ -642,7 +642,7 @@ namespace flrd
 
 	private:
 		static int m_num;
-		wxString m_name;
+		std::string m_name;
 		unsigned int m_id;
 		unsigned int m_group;//group number
 		int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
@@ -652,7 +652,7 @@ namespace flrd
 		bool m_disp;
 		fluo::Transform m_tform;
 		//a profile
-		wxString m_info_profile;
+		std::string m_info_profile;
 		std::vector<ProfileBin> m_profile;
 		//mean intensity in roi
 		double m_mean_int;
@@ -670,8 +670,8 @@ namespace flrd
 		bool m_disp_part[3];//point, line, name
 
 		//extra info
-		wxString m_info_names;
-		wxString m_info_values;
+		std::string m_info_names;
+		std::string m_info_values;
 
 		//brush size if brush is used along with the ruler
 		double m_brush_size;
@@ -697,7 +697,7 @@ namespace flrd
 				if (std::find(groups.begin(), groups.end(), group) == groups.end())
 					groups.push_back(group);
 			}
-			return groups.size();
+			return static_cast<int>(groups.size());
 		}
 
 		int GetGroupNumAndCount(std::vector<unsigned int> &groups,
@@ -715,11 +715,11 @@ namespace flrd
 				}
 				else
 				{
-					int index = std::distance(groups.begin(), ir);
+					size_t index = std::distance(groups.begin(), ir);
 					counts[index]++;
 				}
 			}
-			return groups.size();
+			return static_cast<int>(groups.size());
 		}
 
 		Ruler* GetRuler(const std::string& name)

@@ -70,6 +70,7 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	long style) :
 	wxGLCanvas(parent, attriblist, wxID_ANY, pos, size, style),
 	//public
+	m_size(size.x, size.y),
 	//set gl
 	m_set_gl(false),
 	//ruler
@@ -548,7 +549,7 @@ RenderCanvas::~RenderCanvas()
 		double fps = glbin.getStopWatch(gstStopWatch)->total_fps();
 		wxString string = wxString("FluoRender has finished benchmarking.\n") +
 			wxString("Results:\n") +
-			wxString("Render size: ") + wxString::Format("%d X %d\n", m_size.GetWidth(), m_size.GetHeight()) +
+			wxString("Render size: ") + wxString::Format("%d X %d\n", m_size.w(), m_size.h()) +
 			wxString("Time: ") + wxString::Format("%llu msec\n", msec) +
 			wxString("Frames: ") + wxString::Format("%llu\n", count) +
 			wxString("FPS: ") + wxString::Format("%.2f", fps);
@@ -667,7 +668,7 @@ RenderCanvas::~RenderCanvas()
 
 void RenderCanvas::OnResize(wxSizeEvent& event)
 {
-	wxSize size = GetGLSize();
+	Size2D size = GetGLSize();
 	if (m_size == size)
 		return;
 	else
@@ -2271,8 +2272,8 @@ void RenderCanvas::GetRenderSize(int &nx, int &ny)
 	}
 	else
 	{
-		nx = GetGLSize().x;
-		ny = GetGLSize().y;
+		nx = GetGLSize().w();
+		ny = GetGLSize().h();
 		if (glbin_settings.m_hologram_mode == 1 &&
 			!glbin_settings.m_sbs)
 			nx /= 2;
@@ -2348,8 +2349,8 @@ void RenderCanvas::DrawVRBuffer()
 {
 	int vr_x, vr_y, gl_x, gl_y;
 	GetRenderSize(vr_x, vr_y);
-	gl_x = GetGLSize().x;
-	gl_y = GetGLSize().y;
+	gl_x = GetGLSize().w();
+	gl_y = GetGLSize().h();
 	if (glbin_settings.m_sbs)
 		vr_x /= 2;
 	int vp_y = std::round((double)gl_x * vr_y / vr_x / 2.0);
@@ -3712,8 +3713,8 @@ void RenderCanvas::Pick()
 bool RenderCanvas::PickMesh()
 {
 	int i;
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx = GetGLSize().w();
+	int ny = GetGLSize().h();
 	if (nx <= 0 || ny <= 0)
 		return false;
 	wxPoint mouse_pos = ScreenToClient(wxGetMousePosition());
@@ -3953,8 +3954,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	if (m_update_rot_ctr && m_cur_vol && !m_free)
 	{
 		fluo::Point p, ip;
-		int nx = GetGLSize().x;
-		int ny = GetGLSize().y;
+		int nx = GetGLSize().w();
+		int ny = GetGLSize().h();
 		int mode = 2;
 		if (m_cur_vol->GetMode() == 1) mode = 1;
 		glbin_volume_point.SetVolumeData(m_cur_vol);
@@ -4379,8 +4380,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		leftx = glbin_xr_renderer->GetControllerLeftThumbstickX();
 		lefty = glbin_xr_renderer->GetControllerLeftThumbstickY();
 
-		int nx = GetGLSize().x;
-		int ny = GetGLSize().y;
+		int nx = GetGLSize().w();
+		int ny = GetGLSize().h();
 		//horizontal move
 		if (leftx != 0.0)
 		{
@@ -4451,8 +4452,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) px = -inc;
 		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) px = inc;
 
-		int nx = GetGLSize().x;
-		int ny = GetGLSize().y;
+		int nx = GetGLSize().w();
+		int ny = GetGLSize().h();
 		//horizontal move
 		if (leftx != 0.0)
 		{
@@ -4964,15 +4965,15 @@ void RenderCanvas::ReloadVolumeData(int frame)
 				tex->setLevel(curlv);
 				tex->set_FrameAndChannel(0, vd->GetCurChannel());
 				vd->SetCurTime(reader->GetCurTime());
-				wxString data_name = wxString(reader->GetDataName());
+				std::string data_name = ws2s(reader->GetDataName());
 				if (i > 0)
 					m_bat_folder += "_";
 				m_bat_folder += data_name;
 
 				int chan_num = 0;
-				if (data_name.Find("_1ch") != -1)
+				if (data_name.find("_1ch") != std::string::npos)
 					chan_num = 1;
-				else if (data_name.Find("_2ch") != -1)
+				else if (data_name.find("_2ch") != std::string::npos)
 					chan_num = 2;
 				if (chan_num > 0 && vd->GetCurChannel() >= chan_num)
 					vd->SetDisp(false);
@@ -4980,7 +4981,7 @@ void RenderCanvas::ReloadVolumeData(int frame)
 					vd->SetDisp(true);
 
 				if (reader->GetChanNum() > 1)
-					data_name += wxString::Format("_%d", vd->GetCurChannel() + 1);
+					data_name += "_" + std::to_string(vd->GetCurChannel() + 1);
 				vd->SetName(data_name);
 			}
 			else
@@ -5012,15 +5013,15 @@ void RenderCanvas::ReloadVolumeData(int frame)
 					continue;
 				}
 
-				wxString data_name = wxString(reader->GetDataName());
+				std::string data_name = ws2s(reader->GetDataName());
 				if (i > 0)
 					m_bat_folder += "_";
 				m_bat_folder += data_name;
 
 				int chan_num = 0;
-				if (data_name.Find("_1ch") != -1)
+				if (data_name.find("_1ch") != std::string::npos)
 					chan_num = 1;
-				else if (data_name.Find("_2ch") != -1)
+				else if (data_name.find("_2ch") != std::string::npos)
 					chan_num = 2;
 				if (chan_num > 0 && vd->GetCurChannel() >= chan_num)
 					vd->SetDisp(false);
@@ -5028,7 +5029,7 @@ void RenderCanvas::ReloadVolumeData(int frame)
 					vd->SetDisp(true);
 
 				if (reader->GetChanNum() > 1)
-					data_name += wxString::Format("_%d", vd->GetCurChannel() + 1);
+					data_name += "_" + std::to_string(vd->GetCurChannel() + 1);
 				vd->SetName(data_name);
 				vd->SetPath(wxString(reader->GetPathName()));
 				vd->SetCurTime(reader->GetCurTime());
@@ -5239,8 +5240,8 @@ void RenderCanvas::ReadPixels(
 	{
 		x = 0;
 		y = 0;
-		w = GetGLSize().x;
-		h = GetGLSize().y;
+		w = GetGLSize().w();
+		h = GetGLSize().h();
 	}
 
 	if (m_enlarge || fp32)
@@ -7080,7 +7081,7 @@ wxString RenderCanvas::AddGroup(wxString str, wxString prev_group)
 {
 	DataGroup* group = new DataGroup();
 	if (group && str != "")
-		group->SetName(str);
+		group->SetName(str.ToStdString());
 
 	bool found_prev = false;
 	for (int i = 0; i<(int)m_layer_list.size(); i++)
@@ -7177,7 +7178,7 @@ wxString RenderCanvas::AddMGroup(wxString str)
 {
 	MeshGroup* group = new MeshGroup();
 	if (group && str != "")
-		group->SetName(str);
+		group->SetName(str.ToStdString());
 	m_layer_list.push_back(group);
 
 	if (group)
@@ -9741,7 +9742,7 @@ void RenderCanvas::DrawCells()
 		shader->bind();
 	}
 	glm::mat4 matrix = glm::ortho(float(0),
-		float(GetGLSize().x), float(0), float(GetGLSize().y));
+		float(GetGLSize().w()), float(0), float(GetGLSize().h()));
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 	shader->setLocalParam(0, GetSize().x, GetSize().y, width, 0.0);
 
@@ -9843,8 +9844,8 @@ void RenderCanvas::GetCellPoints(fluo::BBox& box,
 		maxy = std::max(maxy, pp[i].y());
 	}
 
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx = GetGLSize().w();
+	int ny = GetGLSize().h();
 
 	p1 = fluo::Point((minx+1)*nx/2, (miny+1)*ny/2, 0.0);
 	p2 = fluo::Point((maxx+1)*nx/2, (miny+1)*ny/2, 0.0);
@@ -10199,8 +10200,8 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 
 	m_paint_enable = false;
 	m_retain_finalbuffer = false;
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx = GetGLSize().w();
+	int ny = GetGLSize().h();
 	fluo::Point mp = GetMousePos(event);
 
 	//mouse button down operations
@@ -10877,8 +10878,8 @@ void RenderCanvas::ResetZeroRotations(double &rotx, double &roty, double &rotz)
 void RenderCanvas::CalcFrame()
 {
 	int w, h;
-	w = GetGLSize().x;
-	h = GetGLSize().y;
+	w = GetGLSize().w();
+	h = GetGLSize().h();
 
 	if (m_cur_vol)
 	{
@@ -10962,7 +10963,7 @@ void RenderCanvas::DrawViewQuad()
 //find crop frame
 int RenderCanvas::HitCropFrame(fluo::Point& mp)
 {
-	int ny = GetGLSize().y;
+	int ny = GetGLSize().h();
 	fluo::Point p(mp);
 	p.y(ny - p.y());
 
@@ -11040,7 +11041,7 @@ void RenderCanvas::ChangeCropFrame(fluo::Point& mp)
 	if (!m_crop_type)
 		return;
 
-	int ny = GetGLSize().y;
+	int ny = GetGLSize().h();
 	fluo::Point p(mp);
 	p.y(ny - p.y());
 

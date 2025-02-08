@@ -29,9 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <KernelProgram.h>
 #include <VolKernel.h>
-#include <wx/wfstream.h>
-#include <wx/txtstrm.h>
 #include <boost/chrono.hpp>
+#include <filesystem>
 
 using namespace boost::chrono;
 
@@ -46,33 +45,29 @@ KernelExecutor::~KernelExecutor()
 {
 }
 
-void KernelExecutor::SetCode(wxString &code)
+void KernelExecutor::SetCode(const std::string &code)
 {
 	m_code = code;
 }
 
-void KernelExecutor::LoadCode(wxString &filename)
+void KernelExecutor::LoadCode(const std::string &filename)
 {
-	if (!wxFileExists(filename))
+	if (!std::filesystem::exists(filename))
 	{
 		m_message = "Kernel file " +
 			filename + " doesn't exist.\n";
 		return;
 	}
-	wxFileInputStream input(filename);
-	wxTextInputStream cl_file(input);
-	if (!input.IsOk())
+	std::ifstream input(filename);
+	if (!input)
 	{
 		m_message = "Kernel file " +
 			filename + " reading failed.\n";
 		return;
 	}
-	m_code = "";
-	while (!input.Eof())
-	{
-		m_code += cl_file.ReadLine();
-		m_code += "\n";
-	}
+	std::ostringstream ss;
+	ss << input.rdbuf();
+	m_code = ss.str();
 	m_message = "Kernel file " +
 		filename + " read.\n";
 }
@@ -104,15 +99,9 @@ VolumeData* KernelExecutor::GetResult(bool pop)
 	return vd;
 }
 
-bool KernelExecutor::GetMessage(wxString &msg)
+std::string KernelExecutor::GetMessage()
 {
-	if (m_message == "")
-		return false;
-	else
-	{
-		msg = m_message;
-		return true;
-	}
+	return m_message;
 }
 
 bool KernelExecutor::Execute()
@@ -184,8 +173,7 @@ bool KernelExecutor::Execute()
 			spc_x, spc_y, spc_z,
 			brick_size);
 		vd->SetSpcFromFile(true);
-		wxString name = m_vd->GetName();
-		vd->SetName(name + "_CL");
+		vd->SetName(m_vd->GetName() + "_CL");
 		flvr::Texture* tex_r = vd->GetTexture();
 		if (!tex_r)
 			return false;
@@ -218,7 +206,7 @@ bool KernelExecutor::Execute()
 		GLint data_id = vr->load_brick(b);
 		flvr::KernelProgram* kernel =
 			glbin_vol_kernel_factory.
-			kernel(m_code.ToStdString(), bits);
+			kernel(m_code, bits);
 		if (kernel)
 		{
 			m_message += "OpenCL kernel created.\n";

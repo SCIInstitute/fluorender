@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Progress.h>
 #include <wx/string.h>
+#include <wx/fileconf.h>
 
 class Project : public Progress
 {
@@ -41,6 +42,10 @@ public:
 	void Open(wxString& filename);
 	void Save(wxString& filename, bool inc);//inc: save incrementally
 	void Reset();
+
+	void ExportRulerList(const std::string& filename);
+	void SaveRulerList(wxFileConfig &fconfig, int vi);
+	void ReadRulerList(wxFileConfig &fconfig, int vi);
 
 private:
 };

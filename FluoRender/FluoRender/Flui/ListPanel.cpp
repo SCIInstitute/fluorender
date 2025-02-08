@@ -438,9 +438,9 @@ void ListPanel::AddSelToCurView()
 
 void ListPanel::RenameSelection(const wxString& name)
 {
-	wxString new_name = name;
+	std::string new_name = name.ToStdString();
 	for (int i = 1; glbin_data_manager.CheckNames(new_name); i++)
-		new_name = new_name + wxString::Format("_%d", i);
+		new_name = new_name + "_" + std::to_string(i);
 	int type = glbin_current.GetType();
 
 	switch (type)

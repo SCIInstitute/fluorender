@@ -30,13 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <File.h>
 #include <compatibility.h>
 #include <fstream>
-#if defined(_WIN32) || defined(_DARWIN)
 #include <filesystem>
-namespace stdfs = std::filesystem;
-#else
-#include <experimental/filesystem>
-namespace stdfs = std::experimental::filesystem;
-#endif
 #include <algorithm>
 
 using namespace flrd;
@@ -188,7 +182,7 @@ void Table::open(const std::string& filename, bool info)
 	}
 	if (m_name.empty())
 	{
-		const stdfs::path p(filename);
+		const std::filesystem::path p(filename);
 		m_name = p.stem().string();
 	}
 	//time of creation

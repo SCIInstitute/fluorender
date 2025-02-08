@@ -213,7 +213,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_vr = new flvr::VolumeRenderer(*copy.m_vr);
 	//layer properties
 	type = 2;//volume
-	SetName(copy.GetName()+wxString::Format("_%d", m_dup_counter));
+	SetName(copy.GetName()+"_" + std::to_string(m_dup_counter));
 	SetGammaColor(copy.GetGammaColor());
 	SetBrightness(copy.GetBrightness());
 	SetHdr(copy.GetHdr());
@@ -6084,8 +6084,8 @@ int DataManager::LoadMeshData(wxString &filename)
 	MeshData *md = new MeshData();
 	md->Load(pathname);
 
-	wxString name = md->GetName();
-	wxString new_name = name;
+	std::string name = md->GetName();
+	std::string new_name = name;
 	int i;
 	for (i=1; CheckNames(new_name); i++)
 		new_name = name+wxString::Format("_%d", i);
@@ -6103,8 +6103,8 @@ int DataManager::LoadMeshData(GLMmodel* mesh)
 	MeshData *md = new MeshData();
 	md->Load(mesh);
 
-	wxString name = md->GetName();
-	wxString new_name = name;
+	std::string name = md->GetName();
+	std::string new_name = name;
 	int i;
 	for (i=1; CheckNames(new_name); i++)
 		new_name = name+wxString::Format("_%d", i);
@@ -6258,8 +6258,8 @@ void DataManager::AddVolumeData(VolumeData* vd)
 	if (!vd)
 		return;
 
-	wxString name = vd->GetName();
-	wxString new_name = name;
+	std::string name = vd->GetName();
+	std::string new_name = name;
 
 	int i;
 	for (i=1; CheckNames(new_name); i++)
@@ -6308,8 +6308,8 @@ int DataManager::LoadAnnotations(wxString &filename)
 	Annotations* ann = new Annotations();
 	ann->Load(pathname, this);
 
-	wxString name = ann->GetName();
-	wxString new_name = name;
+	std::string name = ann->GetName();
+	std::string new_name = name;
 	int i;
 	for (i=1; CheckNames(new_name); i++)
 		new_name = name+wxString::Format("_%d", i);
@@ -6325,8 +6325,8 @@ void DataManager::AddAnnotations(Annotations* ann)
 	if (!ann)
 		return;
 
-	wxString name = ann->GetName();
-	wxString new_name = name;
+	std::string name = ann->GetName();
+	std::string new_name = name;
 
 	int i;
 	for (i=1; CheckNames(new_name); i++)
@@ -6384,7 +6384,7 @@ int DataManager::GetAnnotationIndex(wxString &name)
 	return -1;
 }
 
-bool DataManager::CheckNames(wxString &str)
+bool DataManager::CheckNames(const std::string &str)
 {
 	bool result = false;
 	for (unsigned int i=0; i<m_vd_list.size(); i++)

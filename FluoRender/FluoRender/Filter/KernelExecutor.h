@@ -43,13 +43,13 @@ public:
 	KernelExecutor();
 	~KernelExecutor();
 
-	void SetCode(wxString &code);
-	void LoadCode(wxString &filename);
+	void SetCode(const std::string &code);
+	void LoadCode(const std::string &filename);
 	void SetVolume(VolumeData *vd);
 	void SetDuplicate(bool dup);
 	VolumeData* GetVolume();
 	VolumeData* GetResult(bool pop);
-	bool GetMessage(wxString &msg);
+	std::string GetMessage();
 
 	bool Execute();
 
@@ -58,8 +58,8 @@ private:
 	std::vector<VolumeData*> m_vd_r;//result
 	bool m_duplicate;//whether duplicate the input volume
 
-	wxString m_code;
-	wxString m_message;
+	std::string m_code;
+	std::string m_message;
 
 	bool ExecuteKernel(flvr::KernelProgram* kernel,
 		unsigned int data_id, void* result,

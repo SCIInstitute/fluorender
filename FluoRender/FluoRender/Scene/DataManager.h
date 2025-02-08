@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _DATAMANAGER_H_
 
 #include <compatibility.h>
-#include <vector>
 #include <tiffio.h>
 #include <BBox.h>
 #include <Color.h>
@@ -63,6 +62,8 @@ DEALINGS IN THE SOFTWARE.
 #include <TrackMap.h>
 #include <Ruler.h>
 #include <Progress.h>
+#include <vector>
+#include <string>
 
 using namespace std;
 
@@ -98,11 +99,11 @@ public:
 	{
 		return type;
 	}
-	wxString GetName()
+	std::string GetName()
 	{
 		return m_name;
 	}
-	void SetName(wxString name)
+	void SetName(const std::string& name)
 	{
 		m_name = name;
 	}
@@ -146,7 +147,7 @@ public:
 
 protected:
 	int type;//-1:invalid, 2:volume, 3:mesh, 4:annotations, 5:group, 6:mesh group, 7:ruler, 8:traces
-	wxString m_name;
+	std::string m_name;
 	unsigned int m_id;
 
 	//layer adjustment
@@ -1427,7 +1428,7 @@ public:
 			return 0;
 	}
 
-	bool CheckNames(wxString &str);
+	bool CheckNames(const std::string &str);
 
 	//wavelength to color
 	fluo::Color GetWavelengthColor(double wavelength);
