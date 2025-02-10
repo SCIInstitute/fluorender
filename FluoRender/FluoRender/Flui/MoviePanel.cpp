@@ -32,7 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderViewPanel.h>
 #include <wxUndoableScrollBar.h>
 #include <ModalDlg.h>
-#include <tiffio.h>
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>

@@ -39,7 +39,6 @@ DEALINGS IN THE SOFTWARE.
 #include <ModalDlg.h>
 #include <wx/utils.h>
 #include <wx/valnum.h>
-#include <tiffio.h>
 #include <algorithm>
 #include <limits>
 #include <png_resource.h>

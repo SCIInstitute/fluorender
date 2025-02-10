@@ -506,11 +506,13 @@ add_definitions(-DTEEM_32BIT=0)
 
 # XInput
 if(WIN32 AND USE_XINPUT)
-	include_directories(${FluoRender_SOURCE_DIR}/FluoRender/XInput)
-	file(GLOB xip_src FluoRender/XInput/*.cpp)
-	file(GLOB xip_hdr FluoRender/XInput/*.h)
-	add_library(XINPUT_OBJ OBJECT
+	include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/XInput)
+	file(GLOB xip_src FluoRender/FluoRender/XInput/*.cpp)
+	file(GLOB xip_hdr FluoRender/FluoRender/XInput/*.h)
+	add_library(XINPUT_LIB STATIC
 		${xip_src} ${xip_hdr})
+    target_link_libraries(XINPUT_LIB
+        XInput.lib)
 endif()
 
 # Animator
@@ -531,28 +533,28 @@ add_library(CALCULATE_LIB STATIC
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Cluster)
 file(GLOB clstr_src FluoRender/FluoRender/Cluster/*.cpp)
 file(GLOB clstr_hdr FluoRender/FluoRender/Cluster/*.h)
+add_library(CLUSTER_LIB STATIC
+  ${clstr_src} ${clstr_hdr})
 
 # Component
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Component)
 file(GLOB cmp_src FluoRender/FluoRender/Component/*.cpp)
 file(GLOB cmp_hdr FluoRender/FluoRender/Component/*.h)
-add_library(COMPUTE_LIB STATIC
-  ${cmp_src} ${cmp_hdr} ${clstr_src} ${clstr_hdr})
-target_link_libraries(COMPUTE_LIB
-  ${Boost_LIBRARIES})
+add_library(COMPONENT_LIB STATIC
+  ${cmp_src} ${cmp_hdr})
 
 # Config
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Config)
 file(GLOB config_src FluoRender/FluoRender/Config/*.cpp)
 file(GLOB config_hdr FluoRender/FluoRender/Config/*.h)
-add_library(CONFIG_OBJ OBJECT
+add_library(CONFIG_LIB STATIC
   ${config_src} ${config_hdr})
 
 # Control
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Control)
 file(GLOB ctrl_src FluoRender/FluoRender/Control/*.cpp)
 file(GLOB ctrl_hdr FluoRender/FluoRender/Control/*.h)
-add_library(CONTROL_OBJ OBJECT
+add_library(CONTROL_LIB STATIC
   ${ctrl_src} ${ctrl_hdr})
 
 # Converter
@@ -595,7 +597,13 @@ file(GLOB fltr_src FluoRender/FluoRender/Filter/*.cpp)
 file(GLOB fltr_hdr FluoRender/FluoRender/Filter/*.h)
 add_library(FILTER_LIB STATIC
   ${fltr_src} ${fltr_hdr})
-target_link_libraries(FILTER_LIB
+
+# boost interface
+add_library(BOOST_ILIB INTERFACE)
+target_link_libraries(BOOST_ILIB INTERFACE
+  CLUSTER_LIB
+  COMPONENT_LIB
+  FILTER_LIB
   ${Boost_LIBRARIES})
 
 # Flobject
@@ -622,22 +630,33 @@ target_link_libraries(FLRENDER_LIB
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Flui)
 file(GLOB flui_src FluoRender/FluoRender/Flui/*.cpp)
 file(GLOB flui_hdr FluoRender/FluoRender/Flui/*.h)
-add_library(FLUI_OBJ OBJECT
+add_library(FLUI_LIB STATIC
   ${flui_src} ${flui_hdr})
+if (USE_XINPUT)
+    target_link_libraries(FLUI_LIB
+      XINPUT_LIB)
+endif()
 
 # Format
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Format)
 file(GLOB fmt_src FluoRender/FluoRender/Format/*.cpp)
 file(GLOB fmt_hdr FluoRender/FluoRender/Format/*.h)
 file(GLOB fmt_rsc FluoRender/FluoRender/Format/*.class)
-add_library(FORMAT_OBJ OBJECT
+add_library(FORMAT_LIB STATIC
   ${fmt_src} ${fmt_hdr} ${fmt_rsc})
+target_link_libraries(FORMAT_LIB
+  teem
+  ${Boost_LIBRARIES}
+  ${FFMPEG_LIBRARIES}
+  ${ND2_LIBRARIES}
+  ${TIFF_LIBRARIES}
+)
 
 # Global
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Global)
 file(GLOB glb_src FluoRender/FluoRender/Global/*.cpp)
 file(GLOB glb_hdr FluoRender/FluoRender/Global/*.h)
-add_library(GLOBAL_OBJ OBJECT
+add_library(GLOBAL_LIB STATIC
   ${glb_src} ${glb_hdr})
 
 # Image
@@ -645,20 +664,17 @@ include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Image)
 file(GLOB img_hdr FluoRender/FluoRender/Image/*.h)
 file(GLOB img_src FluoRender/FluoRender/Image/*.cpp)
 file(GLOB img_rsc FluoRender/FluoRender/Image/*.xpm)
-add_library(IMAGE_OBJ OBJECT
+add_library(IMAGE_LIB STATIC
   ${img_hdr} ${img_src} ${img_rsc})
 
 # LookingGlass
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/LookingGlass)
 file(GLOB lgr_src FluoRender/FluoRender/LookingGlass/*.cpp)
 file(GLOB lgr_hdr FluoRender/FluoRender/LookingGlass/*.h)
-if (APPLE)
-add_library(LOOKINGGLASS_OBJ OBJECT
-  ${lgr_src} ${lgr_hdr} ${HoloPlay_LIBRARIES})
-else()
-add_library(LOOKINGGLASS_OBJ OBJECT
+add_library(LOOKINGGLASS_LIB STATIC
   ${lgr_src} ${lgr_hdr})
-endif()
+target_link_libraries(LOOKINGGLASS_LIB
+  ${HoloPlay_LIBRARIES})
 
 # OpenXR
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/OpenXR)
@@ -811,13 +827,6 @@ if(APPLE)
   include(BundleUtilities)
   add_executable(FluoRender MACOSX_BUNDLE
     ${src} ${hdr} ${rsc} ${icns}
-    $<TARGET_OBJECTS:CONFIG_OBJ>
-    $<TARGET_OBJECTS:CONTROL_OBJ>
-    $<TARGET_OBJECTS:FLUI_OBJ>
-    $<TARGET_OBJECTS:FORMAT_OBJ>
-    $<TARGET_OBJECTS:GLOBAL_OBJ>
-    $<TARGET_OBJECTS:IMAGE_OBJ>
-    $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
     $<TARGET_OBJECTS:OPENXR_OBJ>
     $<TARGET_OBJECTS:PROGRESS_OBJ>
     $<TARGET_OBJECTS:PROJECT_OBJ>
@@ -846,13 +855,6 @@ elseif(UNIX OR MINGW)
   #include(BundleUtilities)
   add_executable(FluoRender
     ${src} ${hdr} ${rsc} ${icns}
-    $<TARGET_OBJECTS:CONFIG_OBJ>
-    $<TARGET_OBJECTS:CONTROL_OBJ>
-    $<TARGET_OBJECTS:FLUI_OBJ>
-    $<TARGET_OBJECTS:FORMAT_OBJ>
-    $<TARGET_OBJECTS:GLOBAL_OBJ>
-    $<TARGET_OBJECTS:IMAGE_OBJ>
-    $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
     $<TARGET_OBJECTS:OPENXR_OBJ>
     $<TARGET_OBJECTS:PROGRESS_OBJ>
     $<TARGET_OBJECTS:PROJECT_OBJ>
@@ -911,41 +913,8 @@ elseif(WIN32)
     file(GLOB wac_hdr FluoRender/Wacom/*.h)
     add_library(WACUTILS_OBJ OBJECT
       ${wac_src} ${wac_hdr})
-    if (USE_XINPUT)
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
-      $<TARGET_OBJECTS:CONFIG_OBJ>
-      $<TARGET_OBJECTS:CONTROL_OBJ>
-      $<TARGET_OBJECTS:FLUI_OBJ>
-      $<TARGET_OBJECTS:FORMAT_OBJ>
-      $<TARGET_OBJECTS:GLOBAL_OBJ>
-      $<TARGET_OBJECTS:IMAGE_OBJ>
-      $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
-      $<TARGET_OBJECTS:OPENXR_OBJ>
-      $<TARGET_OBJECTS:PROGRESS_OBJ>
-      $<TARGET_OBJECTS:PROJECT_OBJ>
-      $<TARGET_OBJECTS:PYTHON_OBJ>
-      $<TARGET_OBJECTS:SCENE_OBJ>
-      $<TARGET_OBJECTS:SCRIPT_OBJ>
-      $<TARGET_OBJECTS:SELECTION_OBJ>
-      $<TARGET_OBJECTS:TIMER_OBJ>
-      $<TARGET_OBJECTS:TRACKING_OBJ>
-      $<TARGET_OBJECTS:TYPE_OBJ>
-      $<TARGET_OBJECTS:UTILITY_OBJ>
-      $<TARGET_OBJECTS:VIDEO_OBJ>
-      $<TARGET_OBJECTS:WACUTILS_OBJ>
-      $<TARGET_OBJECTS:XINPUT_OBJ>
-    )
-    else()
-    add_executable(FluoRender WIN32
-      ${src} ${hdr} ${rsc} ${icns}
-      $<TARGET_OBJECTS:CONFIG_OBJ>
-      $<TARGET_OBJECTS:CONTROL_OBJ>
-      $<TARGET_OBJECTS:FLUI_OBJ>
-      $<TARGET_OBJECTS:FORMAT_OBJ>
-      $<TARGET_OBJECTS:GLOBAL_OBJ>
-      $<TARGET_OBJECTS:IMAGE_OBJ>
-      $<TARGET_OBJECTS:LOOKINGGLASS_OBJ>
       $<TARGET_OBJECTS:OPENXR_OBJ>
       $<TARGET_OBJECTS:PROGRESS_OBJ>
       $<TARGET_OBJECTS:PROJECT_OBJ>
@@ -960,7 +929,6 @@ elseif(WIN32)
       $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:WACUTILS_OBJ>
     )
-    endif()
     if(BUILD_TESTER)
         add_executable(Tester
           ${tester_src} ${tester_hdr}
@@ -998,29 +966,31 @@ if(WIN32)
     ${FREETYPE_LIBRARIES}
     ${GLEW_STATIC_LIBRARIES}
     ${HDF5_LIBRARIES}
-    ${HoloPlay_LIBRARIES}
-    ${ND2_LIBRARIES}
     ${OpenCL_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${OpenVR_LIBRARIES}
     ${OpenXR_LIBRARIES}
     ${PNG_LIBRARIES}
     teem
-    ${TIFF_LIBRARIES}
-    TRAINER_LIB
     secur32.lib
     ${wxWidgets_LIBRARIES}
-    XInput.lib
     ANIMATORS_LIB
+    BOOST_ILIB
     CALCULATE_LIB
-    COMPUTE_LIB
+    CONFIG_LIB
+    CONTROL_LIB
     CONVERTER_LIB
     DATABASE_LIB
     DISTANCE_LIB
     FILE_LIB
-    FILTER_LIB
     FLOBJECT_LIB
     FLRENDER_LIB
+    FLUI_LIB
+    FORMAT_LIB
+    GLOBAL_LIB
+    IMAGE_LIB
+    LOOKINGGLASS_LIB
+    TRAINER_LIB
   )
   if(BUILD_TESTER)
       target_link_libraries(Tester
@@ -1035,27 +1005,30 @@ elseif(APPLE)
     ${FREETYPE_LIBRARIES}
     ${GLEW_STATIC_LIBRARIES}
     ${HDF5_LIBRARIES}
-    ${HoloPlay_LIBRARIES}
-    ${ND2_LIBRARIES}
     ${OpenCL_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${OpenVR_LIBRARIES}
     ${OpenXR_LIBRARIES}
     ${PNG_LIBRARIES}
     teem
-    ${TIFF_LIBRARIES}
-    TRAINER_LIB
     ${wxWidgets_LIBRARIES}
     ANIMATORS_LIB
+    BOOST_ILIB
     CALCULATE_LIB
-    COMPUTE_LIB
+    CONFIG_LIB
+    CONTROL_LIB
     CONVERTER_LIB
     DATABASE_LIB
     DISTANCE_LIB
     FILE_LIB
-    FILTER_LIB
     FLOBJECT_LIB
     FLRENDER_LIB
+    FLUI_LIB
+    FORMAT_LIB
+    GLOBAL_LIB
+    IMAGE_LIB
+    LOOKINGGLASS_LIB
+    TRAINER_LIB
   )
 else()
   target_link_libraries(FluoRender
@@ -1064,8 +1037,6 @@ else()
     ${FREETYPE_LIBRARIES}
     ${GLEW_STATIC_LIBRARIES}
     ${HDF5_LIBRARIES}
-    ${HoloPlay_LIBRARIES}
-    ${ND2_LIBRARIES}
     ${OpenCL_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${OpenVR_LIBRARIES}
@@ -1073,19 +1044,24 @@ else()
     ${PNG_LIBRARIES}
     stdc++fs
     teem
-    ${TIFF_LIBRARIES}
-    TRAINER_LIB
     ${wxWidgets_LIBRARIES}
     ANIMATORS_LIB
+    BOOST_ILIB
     CALCULATE_LIB
-    COMPUTE_LIB
+    CONFIG_LIB
+    CONTROL_LIB
     CONVERTER_LIB
     DATABASE_LIB
     DISTANCE_LIB
     FILE_LIB
-    FILTER_LIB
     FLOBJECT_LIB
     FLRENDER_LIB
+    FLUI_LIB
+    FORMAT_LIB
+    GLOBAL_LIB
+    IMAGE_LIB
+    LOOKINGGLASS_LIB
+    TRAINER_LIB
   )
 endif()
 
