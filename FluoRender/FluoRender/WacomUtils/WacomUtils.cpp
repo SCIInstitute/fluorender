@@ -14,7 +14,7 @@
 		copied, or distributed without compensation or licensing restrictions.
 
 ---------------------------------------------------------------------------- */
-#include "Utils.h"
+#include "WacomUtils.h"
 
 //////////////////////////////////////////////////////////////////////////////
 HINSTANCE ghWintab = NULL;

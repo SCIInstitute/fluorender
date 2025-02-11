@@ -5551,7 +5551,7 @@ void DataManager::LoadVolumes(wxArrayString files, bool withImageJ)
 
 	for (m_cur_file = 0; m_cur_file < m_file_num; m_cur_file++)
 	{
-		SetProgress(std::round(100.0 * (m_cur_file + 1) / files.Count()), str_streaming);
+		SetProgress(std::round(100.0 * (m_cur_file + 1) / files.Count()), str_streaming.ToStdString());
 
 		int ch_num = 0;
 		wxString filename = files[m_cur_file];

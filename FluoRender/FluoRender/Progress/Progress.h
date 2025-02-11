@@ -29,7 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _PROGRESS_H_
 #define _PROGRESS_H_
 
-#include <wx/string.h>
+#include <functional>
+#include <string>
 
 class Progress
 {
@@ -38,11 +39,11 @@ public:
 	~Progress() {}
 
 	//set progress
-	void SetProgressFunc(const std::function<void(int, const wxString&)>& f)
+	void SetProgressFunc(const std::function<void(int, const std::string&)>& f)
 	{
 		m_progress_func = f;
 	}
-	std::function<void(int, const wxString&)> GetProgressFunc()
+	std::function<void(int, const std::string&)> GetProgressFunc()
 	{
 		return m_progress_func;
 	}
@@ -67,13 +68,13 @@ public:
 
 	bool IsBusy() { return m_busy; }
 
-	void SetProgress(int val, const wxString& str);
+	void SetProgress(int val, const std::string& str);
 
 protected:
 	bool m_busy;//it's currently working
 
 private:
-	std::function<void(int, const wxString&)> m_progress_func;
+	std::function<void(int, const std::string&)> m_progress_func;
 	int m_min;
 	int m_max;
 	int m_range;

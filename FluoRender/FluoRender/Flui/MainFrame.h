@@ -346,7 +346,7 @@ public:
 	void FullScreen();
 
 	//set status bar callback
-	void SetProgress(int val, const wxString& str);
+	void SetProgress(int val, const std::string& str);
 
 private:
 	//aui manager

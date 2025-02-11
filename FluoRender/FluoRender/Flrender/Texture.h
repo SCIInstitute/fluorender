@@ -199,7 +199,7 @@ namespace flvr
 			b_spcz_ = z;
 			fluo::Transform tform;
 			tform.load_identity();
-			int nx, ny, nz;
+			size_t nx, ny, nz;
 			if (brkxml_)
 			{
 				nx = pyramid_[0].data->axis[0].size;
@@ -292,7 +292,7 @@ namespace flvr
 
 		//for brkxml file
 		int GetCurLevel() { return pyramid_cur_lv_; }
-		int GetLevelNum() { return pyramid_.size(); }
+		int GetLevelNum() { return static_cast<int>(pyramid_.size()); }
 		void SetCopyableLevel(int lv) { pyramid_copy_lv_ = lv; }
 		int GetCopyableLevel() { return pyramid_copy_lv_; }
 		bool buildPyramid(vector<Pyramid_Level> &pyramid, vector<vector<vector<vector<FileLocInfo *>>>> &filenames, bool useURL = false);
@@ -483,7 +483,7 @@ namespace flvr
 
 	inline unsigned int Texture::get_brick_id(unsigned long long index)
 	{
-		int x, y, z;
+		unsigned long long x, y, z;
 		z = index / (nx_ * ny_);
 		y = index % (nx_ * ny_);
 		x = y % nx_;
@@ -492,7 +492,7 @@ namespace flvr
 		x = bszx_ <= 1 ? 0 : x / (bszx_-1);
 		y = bszy_ <= 1 ? 0 : y / (bszy_-1);
 		z = bszz_ <= 1 ? 0 : z / (bszz_-1);
-		return z * bnx_ * bny_ + y * bnx_ + x;
+		return static_cast<unsigned int>(z * bnx_ * bny_ + y * bnx_ + x);
 	}
 
 	inline TextureBrick* Texture::get_brick(unsigned int bid)

@@ -41,7 +41,7 @@ Progress::Progress() :
 			std::placeholders::_1, std::placeholders::_2));
 }
 
-void Progress::SetProgress(int val, const wxString& str)
+void Progress::SetProgress(int val, const std::string& str)
 {
 	if (glbin_moviemaker.IsRunning())
 		return;

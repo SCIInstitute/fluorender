@@ -74,7 +74,7 @@ DEALINGS IN THE SOFTWARE.
 		PK_NORMAL_PRESSURE | PK_TANGENT_PRESSURE)
 #define PACKETMODE	PK_BUTTONS
 #include <PKTDEF.h>
-#include <Wacom/Utils.h>
+#include <WacomUtils.h>
 #ifdef USE_XINPUT
 #include <XInput/XboxController.h>
 #endif

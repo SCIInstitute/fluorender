@@ -107,7 +107,7 @@ void ExGauss::FindExetr()
 
 bool ExGauss::Flood(unsigned int i)
 {
-	float eps = -1e-2 * exetrval;
+	float eps = -1e-2f * exetrval;
 	std::list<Coord> cl2;
 	for (auto it : cl)
 	{

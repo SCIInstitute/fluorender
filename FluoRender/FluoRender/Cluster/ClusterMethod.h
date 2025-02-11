@@ -59,7 +59,7 @@ namespace flrd
 	{
 		EmVec p1p2 = p1.centerf - p2.centerf;
 		float int_diff = fabs(p1.intensity - p2.intensity);
-		return boost::qvm::mag(p1p2) + w * int_diff;
+		return static_cast<float>(boost::qvm::mag(p1p2)) + w * int_diff;
 	}
 
 	class Cluster : public std::list<pClusterPoint>

@@ -78,7 +78,7 @@ public:
 	void OutputInfo();
 
 	void GetLandmark(int index, wstring &name, double &x, double &y, double &z, double &spcx, double &spcy, double &spcz);
-	int GetLandmarkNum() {return m_landmarks.size();}
+	int GetLandmarkNum() {return static_cast<int>(m_landmarks.size());}
 	wstring GetROITree() {return m_roi_tree;}
 	void GetMetadataID(wstring &mid) {mid = m_metadata_id;}
 

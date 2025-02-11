@@ -2131,7 +2131,7 @@ void MainFrame::FullScreen()
 	}
 }
 
-void MainFrame::SetProgress(int val, const wxString& str)
+void MainFrame::SetProgress(int val, const std::string& str)
 {
 	wxGetApp().Yield();
 	m_statusbar->SetGaugeValue(val);

@@ -504,6 +504,16 @@ add_definitions(-DTEEM_QNANHIBIT=1)
 add_definitions(-DTEEM_ZLIB=1)
 add_definitions(-DTEEM_32BIT=0)
 
+# Wacom
+if(WIN32)
+    include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/WacomUtils/Include)
+    include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/WacomUtils)
+    file(GLOB wac_src FluoRender/FluoRender/WacomUtils/*.cpp)
+    file(GLOB wac_hdr FluoRender/FluoRender/WacomUtils/*.h)
+    add_library(WACOMUTILS_LIB STATIC
+      ${wac_src} ${wac_hdr})
+endif()
+
 # XInput
 if(WIN32 AND USE_XINPUT)
 	include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/XInput)
@@ -632,7 +642,11 @@ file(GLOB flui_src FluoRender/FluoRender/Flui/*.cpp)
 file(GLOB flui_hdr FluoRender/FluoRender/Flui/*.h)
 add_library(FLUI_LIB STATIC
   ${flui_src} ${flui_hdr})
-if (USE_XINPUT)
+if(WIN32)
+    target_link_libraries(FLUI_LIB
+      WACOMUTILS_LIB)
+endif()
+if (WIN32 AND USE_XINPUT)
     target_link_libraries(FLUI_LIB
       XINPUT_LIB)
 endif()
@@ -680,14 +694,18 @@ target_link_libraries(LOOKINGGLASS_LIB
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/OpenXR)
 file(GLOB oxr_src FluoRender/FluoRender/OpenXR/*.cpp)
 file(GLOB oxr_hdr FluoRender/FluoRender/OpenXR/*.h)
-add_library(OPENXR_OBJ OBJECT
+add_library(OPENXR_LIB STATIC
   ${oxr_src} ${oxr_hdr})
+target_link_libraries(OPENXR_LIB
+  ${GLEW_STATIC_LIBRARIES}
+  ${OpenVR_LIBRARIES}
+  ${OpenXR_LIBRARIES})
 
 # Progress
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Progress)
 file(GLOB prg_src FluoRender/FluoRender/Progress/*.cpp)
 file(GLOB prg_hdr FluoRender/FluoRender/Progress/*.h)
-add_library(PROGRESS_OBJ OBJECT
+add_library(PROGRESS_LIB STATIC
   ${prg_src} ${prg_hdr})
 
 # Project
@@ -827,8 +845,6 @@ if(APPLE)
   include(BundleUtilities)
   add_executable(FluoRender MACOSX_BUNDLE
     ${src} ${hdr} ${rsc} ${icns}
-    $<TARGET_OBJECTS:OPENXR_OBJ>
-    $<TARGET_OBJECTS:PROGRESS_OBJ>
     $<TARGET_OBJECTS:PROJECT_OBJ>
     $<TARGET_OBJECTS:PYTHON_OBJ>
     $<TARGET_OBJECTS:SCENE_OBJ>
@@ -842,21 +858,10 @@ if(APPLE)
     )
   set_target_properties(FluoRender PROPERTIES MACOSX_DEPLOYMENT_TARGET "11.5")
 elseif(UNIX OR MINGW)
-  # Linux
-  #if(NOT OPEN_GL_HEADER_LOC)
-  #  add_definitions(-DOPEN_GL_HEADER_LOC=<OpenGL/gl.h>)
-  #endif()
-  #if(NOT OPEN_GLU_HEADER_LOC)
-  #  add_definitions(-DOPEN_GLU_HEADER_LOC=<OpenGL/glu.h>)
-  #endif()
-  #add_definitions(-D_DARWIN)
   set(CFLAGS "-fPIC")
   set(CXXFLAGS "-fPIC ")
-  #include(BundleUtilities)
   add_executable(FluoRender
     ${src} ${hdr} ${rsc} ${icns}
-    $<TARGET_OBJECTS:OPENXR_OBJ>
-    $<TARGET_OBJECTS:PROGRESS_OBJ>
     $<TARGET_OBJECTS:PROJECT_OBJ>
     $<TARGET_OBJECTS:PYTHON_OBJ>
     $<TARGET_OBJECTS:SCENE_OBJ>
@@ -881,7 +886,6 @@ elseif(WIN32)
     add_definitions(-DWIN32)
     add_definitions(-D_WIN32)
     if(MSVC)
-      #add_definitions(-DSEQAN_C++11_STANDARD=ON)
       if (USE_MP_COMPILE)
         add_definitions(/MP)
       endif()
@@ -908,15 +912,8 @@ elseif(WIN32)
       SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -MD")
       SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -MD")
     endif()
-    include_directories(${FluoRender_SOURCE_DIR}/FluoRender/Wacom/Include)
-    file(GLOB wac_src FluoRender/Wacom/*.cpp)
-    file(GLOB wac_hdr FluoRender/Wacom/*.h)
-    add_library(WACUTILS_OBJ OBJECT
-      ${wac_src} ${wac_hdr})
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
-      $<TARGET_OBJECTS:OPENXR_OBJ>
-      $<TARGET_OBJECTS:PROGRESS_OBJ>
       $<TARGET_OBJECTS:PROJECT_OBJ>
       $<TARGET_OBJECTS:PYTHON_OBJ>
       $<TARGET_OBJECTS:SCENE_OBJ>
@@ -927,7 +924,6 @@ elseif(WIN32)
       $<TARGET_OBJECTS:TYPE_OBJ>
       $<TARGET_OBJECTS:UTILITY_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
-      $<TARGET_OBJECTS:WACUTILS_OBJ>
     )
     if(BUILD_TESTER)
         add_executable(Tester
@@ -968,8 +964,6 @@ if(WIN32)
     ${HDF5_LIBRARIES}
     ${OpenCL_LIBRARIES}
     ${OPENGL_LIBRARIES}
-    ${OpenVR_LIBRARIES}
-    ${OpenXR_LIBRARIES}
     ${PNG_LIBRARIES}
     teem
     secur32.lib
@@ -990,6 +984,8 @@ if(WIN32)
     GLOBAL_LIB
     IMAGE_LIB
     LOOKINGGLASS_LIB
+    OPENXR_LIB
+    PROGRESS_LIB
     TRAINER_LIB
   )
   if(BUILD_TESTER)
@@ -1007,8 +1003,6 @@ elseif(APPLE)
     ${HDF5_LIBRARIES}
     ${OpenCL_LIBRARIES}
     ${OPENGL_LIBRARIES}
-    ${OpenVR_LIBRARIES}
-    ${OpenXR_LIBRARIES}
     ${PNG_LIBRARIES}
     teem
     ${wxWidgets_LIBRARIES}
@@ -1028,6 +1022,8 @@ elseif(APPLE)
     GLOBAL_LIB
     IMAGE_LIB
     LOOKINGGLASS_LIB
+    OPENXR_LIB
+    PROGRESS_LIB
     TRAINER_LIB
   )
 else()
@@ -1039,8 +1035,6 @@ else()
     ${HDF5_LIBRARIES}
     ${OpenCL_LIBRARIES}
     ${OPENGL_LIBRARIES}
-    ${OpenVR_LIBRARIES}
-    ${OpenXR_LIBRARIES}
     ${PNG_LIBRARIES}
     stdc++fs
     teem
@@ -1061,6 +1055,8 @@ else()
     GLOBAL_LIB
     IMAGE_LIB
     LOOKINGGLASS_LIB
+    OPENXR_LIB
+    PROGRESS_LIB
     TRAINER_LIB
   )
 endif()

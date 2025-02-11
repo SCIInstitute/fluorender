@@ -99,7 +99,7 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 				cell->Inc(i, j, k, (*iter)->intensity);
 
 			if (count % 100 == 0)
-				SetProgress(count / ticks,
+				SetProgress(static_cast<int>(count / ticks),
 					"Generating IDs.");
 			count++;
 		}
@@ -134,7 +134,7 @@ void ClusterMethod::AddIDsToData()
 		for (auto iter = cluster.begin();
 			iter != cluster.end(); ++iter)
 		{
-			(*iter)->cid = ii;
+			(*iter)->cid = static_cast<int>(ii);
 		}
 	}
 }

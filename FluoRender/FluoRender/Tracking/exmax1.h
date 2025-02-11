@@ -66,7 +66,7 @@ namespace flrd
 		void SetSpacings(double spcx, double spcy, double spcz)
 		{
 			m_spc = { spcx, spcy, spcz };
-			m_eps = std::min(spcx, std::min(spcy, spcz));
+			m_eps = static_cast<float>(std::min(spcx, std::min(spcy, spcz)));
 		}
 		void AddClusterPoint(const EmVec &p, const float value);
 		bool Execute();

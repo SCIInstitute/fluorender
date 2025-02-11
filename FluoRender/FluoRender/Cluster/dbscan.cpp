@@ -107,7 +107,7 @@ void ClusterDbscan::Dbscan()
 		}
 		if (count % 100 == 0)
 		{
-			SetProgress(count / ticks,
+			SetProgress(static_cast<int>(count / ticks),
 				"Computing DBSCAN.");
 			count++;
 		}
@@ -195,7 +195,7 @@ bool ClusterDbscan::ClusterNoise(pClusterPoint& p, Cluster& neighbors)
 			cluster_count.begin(), cluster_count.end());
 		if (*result)
 		{
-			int index = std::distance(cluster_count.begin(), result);
+			size_t index = std::distance(cluster_count.begin(), result);
 			m_result[index].push_back(p);
 			p->noise = false;
 			return true;

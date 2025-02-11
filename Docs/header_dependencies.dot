@@ -1,9 +1,6 @@
 digraph dependencies {
-"LookingGlassRenderer.cpp" -> "LookingGlassRenderer.h";
-"LookingGlassRenderer.cpp" -> "Global.h";
-"LookingGlassRenderer.cpp" -> "HoloPlayCore.h";
-"LookingGlassRenderer.cpp" -> "compatibility.h";
-"LookingGlassRenderer.cpp" -> "wx/display.h";
-"LookingGlassRenderer.cpp" -> "string";
-"LookingGlassRenderer.cpp" -> "Debug.h";
+"Progress.cpp" -> "Progress.h";
+"Progress.cpp" -> "Global.h";
+"Progress.cpp" -> "MainFrame.h";
+"Progress.h" -> "wx/string.h";
 }

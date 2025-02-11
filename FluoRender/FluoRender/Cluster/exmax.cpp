@@ -67,7 +67,7 @@ bool ClusterExmax::Execute()
 		//histograom test
 		GenUncertainty(0.05);
 		counter++;
-		SetProgress(100 * counter / m_max_iter,
+		SetProgress(static_cast<int>(100 * counter / m_max_iter),
 			"Computing ExMax.");
 	} while (!Converge() &&
 		counter < m_max_iter);
@@ -401,7 +401,8 @@ void ClusterExmax::GenResult()
 	for (ClusterIter iter = m_data.begin();
 		iter != m_data.end(); ++iter)
 	{
-		int index = -1;
+		size_t index = 0;
+		bool changed = false;
 		double max_mem_prob;
 		for (size_t j = 0; j < m_clnum; ++j)
 		{
@@ -409,6 +410,7 @@ void ClusterExmax::GenResult()
 			{
 				index = j;
 				max_mem_prob = m_mem_prob[j][i];
+				changed = true;
 			}
 			else
 			{
@@ -416,10 +418,11 @@ void ClusterExmax::GenResult()
 				{
 					index = j;
 					max_mem_prob = m_mem_prob[j][i];
+					changed = true;
 				}
 			}
 		}
-		if (index > -1)
+		if (changed)
 			m_result[index].push_back(*iter);
 		i++;
 	}
@@ -504,7 +507,7 @@ void ClusterExmax::GenUncertainty(double delta, bool output)
 		//if (m_histogram.size() <= m_count[i])
 		//	m_histogram.resize(m_count[i] + 1);
 		//m_histogram[m_count[i]].count++;
-		size_t index = m_count[i] / delta;
+		size_t index = static_cast<size_t>(m_count[i] / delta);
 		if (m_histogram.size() <= index)
 		{
 			m_histogram.resize(index + 1);
@@ -546,7 +549,7 @@ void ClusterExmax::GenerateNewColors(void* label,
 		iter != m_data.end(); ++iter)
 	{
 		//id = m_count[ii] * 10 + 1;
-		id = m_count[ii] * scale + 1;
+		id = static_cast<unsigned int>(m_count[ii] * scale + 1);
 		ii++;
 		i = int(boost::qvm::A0((*iter)->centeri) + 0.5);
 		if (i < 0 || i >= nx)
@@ -575,7 +578,8 @@ void ClusterExmax::GenerateNewColors2(void* label,
 	for (ClusterIter iter = m_data.begin();
 		iter != m_data.end(); ++iter)
 	{
-		int index = -1;
+		size_t index = 0;
+		bool changed = false;
 		double max_mem_prob;
 		id = 0;
 		for (size_t j = 0; j < m_clnum; ++j)
@@ -584,6 +588,7 @@ void ClusterExmax::GenerateNewColors2(void* label,
 			{
 				index = j;
 				max_mem_prob = m_mem_prob[j][ii];
+				changed = true;
 			}
 			else
 			{
@@ -591,11 +596,12 @@ void ClusterExmax::GenerateNewColors2(void* label,
 				{
 					index = j;
 					max_mem_prob = m_mem_prob[j][ii];
+					changed = true;
 				}
 			}
 		}
-		if (index > -1)
-			id = (1.0 - max_mem_prob) * 700 + 1;
+		if (changed)
+			id = static_cast<unsigned int>((1.0 - max_mem_prob) * 700 + 1);
 		ii++;
 		i = int(boost::qvm::A0((*iter)->centeri) + 0.5);
 		if (i < 0 || i >= nx)

@@ -56,7 +56,7 @@ bool ClusterKmeans::Execute()
 		Assign();
 		Update();
 		counter++;
-		SetProgress(100 * counter / (m_max_iter ? m_max_iter : 1),
+		SetProgress(static_cast<int>(100 * counter / (m_max_iter ? m_max_iter : 1)),
 			"Computing K-Means.");
 	} while (!Converge() &&
 		counter < m_max_iter);
@@ -128,7 +128,8 @@ void ClusterKmeans::Assign()
 	for (ClusterIter iter = m_data.begin();
 		iter != m_data.end(); ++iter)
 	{
-		int index = -1;
+		size_t index = 0;
+		bool changed = false;
 		double mind;
 		for (size_t i = 0; i < m_clnum; ++i)
 		{
@@ -137,6 +138,7 @@ void ClusterKmeans::Assign()
 			{
 				index = i;
 				mind = d;
+				changed = true;
 			}
 			else
 			{
@@ -144,11 +146,12 @@ void ClusterKmeans::Assign()
 				{
 					index = i;
 					mind = d;
+					changed = true;
 				}
 			}
 		}
 
-		if (index > -1)
+		if (changed)
 			m_result[index].push_back(*iter);
 	}
 }

@@ -590,10 +590,10 @@ namespace flrd
 	//random
 	inline bool TrackMapProcessor::get_random(size_t count, InterGraph &graph)
 	{
-		int c = graph.counter;
+		size_t c = graph.counter;
 		if (c < 4)
 			return true;
-		int r = c / 2 + std::rand() % c;
+		size_t r = c / 2 + std::rand() % c;
 		return count < r;
 
 		//if (rand() % c < 10)
