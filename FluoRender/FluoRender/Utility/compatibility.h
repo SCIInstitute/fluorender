@@ -47,6 +47,7 @@ DEALINGS IN THE SOFTWARE.
 #include <cctype>
 #include <cmath>
 #include <regex>
+#include <filesystem>
 
 inline std::regex REGEX(const std::string& wildcard, bool caseSensitive = true)
 {
@@ -228,6 +229,21 @@ inline std::string split_host_name_and_port(const std::string& address, uint16_t
 	}
 }
 
+inline std::wstring GET_SUFFIX(const std::wstring &pathname)
+{
+	std::wstring extension = std::filesystem::path(pathname).extension().wstring();
+	std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+	return extension;
+}
+
+inline std::string GET_SUFFIX(const std::string &pathname)
+{
+	std::string extension = std::filesystem::path(pathname).extension().string();
+	std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+	return extension;
+}
+
+
 #ifdef _WIN32 //WINDOWS ONLY
 
 #include <cstdlib>
@@ -248,24 +264,6 @@ inline wchar_t GETSLASH() { return L'\\'; }
 inline wchar_t GETSLASHALT() { return L'/'; }
 inline char GETSLASHA() { return '\\'; }
 inline char GETSLASHALTA() { return '/'; }
-
-inline std::wstring GET_SUFFIX(std::wstring &pathname)
-{
-	int64_t pos = pathname.find_last_of(L'.');
-	if (pos != std::wstring::npos)
-		return pathname.substr(pos);
-	else
-		return L"";
-}
-
-inline std::string GET_SUFFIX(std::string &pathname)
-{
-	int64_t pos = pathname.find_last_of('.');
-	if (pos != std::string::npos)
-		return pathname.substr(pos);
-	else
-		return "";
-}
 
 inline std::wstring GET_NAME(std::wstring &pathname)
 {
@@ -605,24 +603,6 @@ inline bool str_mat(std::wstring &s1, size_t p1, std::wstring &s2, size_t p2)
 inline bool STR_MATCH(std::wstring &pattern, std::wstring &search)
 {
 	return str_mat(pattern, 0, search, 0);
-}
-
-inline std::wstring GET_SUFFIX(std::wstring &pathname)
-{
-	int64_t pos = pathname.find_last_of(L'.');
-	if (pos != std::wstring::npos)
-		return pathname.substr(pos);
-	else
-		return L"";
-}
-
-inline std::string GET_SUFFIX(std::string &pathname)
-{
-	int64_t pos = pathname.find_last_of('.');
-	if (pos != std::string::npos)
-		return pathname.substr(pos);
-	else
-		return "";
 }
 
 inline std::wstring GET_NAME(std::wstring &pathname)

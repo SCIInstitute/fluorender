@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _OUTADJDEFAULT_H_
 
 #include <wx/fileconf.h>
-#include <wx/string.h>
 
 class RenderCanvas;
 class TreeLayer;

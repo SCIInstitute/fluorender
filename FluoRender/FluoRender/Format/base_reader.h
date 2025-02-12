@@ -34,8 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <sstream>
 
-using namespace std;
-
 #ifdef STATIC_COMPILE
 	#define nrrdWrap nrrdWrap_va
 	#define nrrdAxisInfoSet nrrdAxisInfoSet_va
@@ -78,9 +76,9 @@ public:
 	virtual int GetType() = 0;	//get reader type
 
 	//set the file name and path to open and read
-	virtual void SetFile(std::string &file) = 0;
+	virtual void SetFile(const std::string &file) = 0;
 	//set the file name and path to open and read (in wide string for foreign languages)
-	virtual void SetFile(std::wstring &file) = 0;
+	virtual void SetFile(const std::wstring &file) = 0;
 	//set reader flag to read a 3D stack as a file sequence, each file being a slice
 	//in UI, it is set in the open file dialog as "read a sequence as z slices..."
 	//not all reader types use this flag, basically for a tiff sequence
@@ -97,7 +95,7 @@ public:
 	//time identifier is a string to identify each file in a sequence as a time point
 	//in UI, it is set in the open file dialog as option "time sequence identifier"
 	//default value is "_T", which means any digits after the string in a file name is used as its time value
-	virtual void SetTimeId(std::wstring &id) = 0;
+	virtual void SetTimeId(const std::wstring &id) = 0;
 	//get current time identifier
 	virtual std::wstring GetTimeId() = 0;
 	//preprocess the file
@@ -184,7 +182,7 @@ public:
 		return m_id_string == reader.m_id_string;
 	}
 	//another way to check if two readers are the same
-	bool Match(std::wstring &id_string)
+	bool Match(const std::wstring &id_string)
 	{
 		return m_id_string == id_string;
 	}
@@ -332,8 +330,8 @@ protected:
 	void DecodeAcc16(tidata_t cp0, tsize_t cc, tsize_t stride);
 
 	//read number after a position in a string
-	int get_number(string &str, int64_t pos);
-	double get_double(string& str, int64_t pos);
+	int get_number(const std::string &str, int64_t pos);
+	double get_double(const std::string& str, int64_t pos);
 };
 
 #endif//_BASE_READER_H_

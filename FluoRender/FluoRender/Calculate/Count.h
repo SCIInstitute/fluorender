@@ -32,8 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelProgram.h>
 #include <VolKernel.h>
 
-using namespace std;
-
 class VolumeData;
 namespace flrd
 {

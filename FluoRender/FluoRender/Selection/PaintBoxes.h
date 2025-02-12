@@ -35,8 +35,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Transform.h>
 #include <TextureBrick.h>
 
-using namespace std;
-
 namespace flrd
 {
 	class PaintBoxes

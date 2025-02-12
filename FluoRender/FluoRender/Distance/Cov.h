@@ -34,8 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Point.h>
 #include <vector>
 
-using namespace std;
-
 class VolumeData;
 namespace flrd
 {

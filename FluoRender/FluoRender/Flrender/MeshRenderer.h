@@ -37,8 +37,6 @@
 #include <cstring>
 #include <glm/glm.hpp>
 
-using namespace std;
-
 namespace flvr
 {
 	class MshShaderFactory;

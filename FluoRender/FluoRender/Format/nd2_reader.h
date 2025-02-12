@@ -34,8 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <limits>
 #include <algorithm>
 
-using namespace std;
-
 #define ND2_STR_SIZE	1024
 
 class ND2Reader : public BaseReader
@@ -46,26 +44,26 @@ public:
 
 	int GetType() { return READER_ND2_TYPE; }
 
-	void SetFile(string &file);
-	void SetFile(wstring &file);
+	void SetFile(const std::string &file);
+	void SetFile(const std::wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
 	void SetChannSeq(bool cs);
 	bool GetChannSeq();
 	void SetDigitOrder(int order);
 	int GetDigitOrder();
-	void SetTimeId(wstring &id);
-	wstring GetTimeId();
+	void SetTimeId(const std::wstring &id);
+	std::wstring GetTimeId();
 	int Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	Nrrd* Convert(int t, int c, bool get_max);
-	wstring GetCurDataName(int t, int c);
-	wstring GetCurMaskName(int t, int c);
-	wstring GetCurLabelName(int t, int c);
+	std::wstring GetCurDataName(int t, int c);
+	std::wstring GetCurMaskName(int t, int c);
+	std::wstring GetCurLabelName(int t, int c);
 
-	wstring GetPathName() {return m_path_name;}
-	wstring GetDataName() {return m_data_name;}
+	std::wstring GetPathName() {return m_path_name;}
+	std::wstring GetDataName() {return m_data_name;}
 	int GetTimeNum() {return m_time_num;}
 	int GetCurTime() {return m_cur_time;}
 	int GetChanNum() {return m_chan_num;}
@@ -84,7 +82,7 @@ public:
 	int GetCurBatch() {return m_cur_batch;}
 
 private:
-	wstring m_data_name;
+	std::wstring m_data_name;
 
 	struct FrameInfo
 	{

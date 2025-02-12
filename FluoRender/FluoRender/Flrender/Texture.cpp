@@ -36,8 +36,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <Debug.h>
 
-using namespace std;
-
 namespace flvr
 {
 	size_t Texture::mask_undo_num_ = 0;

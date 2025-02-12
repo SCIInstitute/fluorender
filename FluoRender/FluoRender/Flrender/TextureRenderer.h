@@ -269,7 +269,7 @@ namespace flvr
 		static int active_view_;
 		static double mainmem_buf_size_;
 		static double available_mainmem_buf_size_;
-		static vector<TexParam> tex_pool_;
+		static std::vector<TexParam> tex_pool_;
 		static bool start_update_loop_;
 		static bool done_update_loop_;
 		static bool done_current_chan_;
@@ -300,7 +300,7 @@ namespace flvr
 			TextureBrick *brk;
 			double size;
 		};
-		static vector<LoadedBrick> loadedbrks;
+		static std::vector<LoadedBrick> loadedbrks;
 		static int del_id;
 
 		//for view testing
@@ -339,11 +339,11 @@ namespace flvr
 		void draw_view_quad(double d=0.0);
 
 		//slices
-		void draw_polygons(vector<float>& vertex, 
-			vector<uint32_t>& poly);
-		void draw_polygons_wireframe(vector<float>& vertex,
-			vector<uint32_t>& index,
-			vector<uint32_t>& size);
+		void draw_polygons(std::vector<float>& vertex, 
+			std::vector<uint32_t>& poly);
+		void draw_polygons_wireframe(std::vector<float>& vertex,
+			std::vector<uint32_t>& index,
+			std::vector<uint32_t>& size);
 
 		//bind 2d mask for segmentation
 		void bind_2d_mask();

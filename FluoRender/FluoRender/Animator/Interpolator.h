@@ -37,8 +37,6 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <string>
 
-using namespace std;
-
 typedef struct
 {
 	int id;		//identifier
@@ -46,7 +44,7 @@ typedef struct
 	double dt;	//duration
 	int type;	//interpolation method: 0-linear; 1-spline
 	std::vector<FlKey*> keys; //keys
-	string desc;//descriptions
+	std::string desc;//descriptions
 } FlKeyGroup;
 
 class Interpolator
@@ -75,7 +73,7 @@ public:
 	double GetKeyTime(int index);
 	double GetKeyDuration(int index);
 	int GetKeyType(int index);
-	string GetKeyDesc(int index);
+	std::string GetKeyDesc(int index);
 	int GetLastIndex()
 	{ return (int)m_key_list.size() - 1;}
 	std::vector<FlKeyGroup*>* GetKeyList()

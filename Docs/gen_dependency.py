@@ -34,7 +34,7 @@ def generate_dot(source_dir):
     dot_content += '}'
     return dot_content
 
-source_directory = 'E:/PROJECTS/FLUORENDER/fluorender_work/FluoRender/FluoRender/Progress'
+source_directory = 'E:/PROJECTS/FLUORENDER/fluorender_work/FluoRender/FluoRender/Scene'
 dot_file_content = generate_dot(source_directory)
 
 with open('header_dependencies.dot', 'w') as dot_file:

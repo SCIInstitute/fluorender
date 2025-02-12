@@ -32,7 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <math.h>
 
 using namespace fluo;
-using namespace std;
 
 void BBox::extend_disk(const Point& cen, const Vector& normal, double r)
 {

@@ -32,7 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Vector.h>
 #include <Point.h>
 #include <wx/fileconf.h>
-#include <wx/string.h>
 
 class RenderCanvas;
 class ViewDefault
@@ -58,8 +57,8 @@ public:
 	bool m_draw_scalebar;
 	bool m_draw_scalebar_text;
 	double m_scalebar_len;
-	wxString m_scalebar_text;
-	wxString m_scalebar_num;
+	std::string m_scalebar_text;
+	std::string m_scalebar_num;
 	int m_scalebar_unit;
 	bool m_mouse_focus;
 	bool m_persp;

@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _DATAMANAGER_H_
 
 #include <compatibility.h>
-#include <tiffio.h>
 #include <BBox.h>
 #include <Color.h>
 #include <Point.h>
@@ -38,8 +37,6 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeRenderer.h>
 #include <VertexArray.h>
 #include <EntryParams.h>
-#include <wx/wfstream.h>
-#include <wx/fileconf.h>
 #include <base_reader.h>
 #include <oib_reader.h>
 #include <oif_reader.h>
@@ -64,8 +61,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Progress.h>
 #include <vector>
 #include <string>
-
-using namespace std;
 
 #define DATA_VOLUME			1
 #define DATA_MESH			2
@@ -162,9 +157,13 @@ protected:
 
 struct VD_Landmark
 {
-	wstring name;
-	double x, y, z;
-	double spcx, spcy, spcz;
+	std::wstring name = L"";
+	double x = 0;
+	double y = 0;
+	double z = 0;
+	double spcx = 0;
+	double spcy = 0;
+	double spcz = 0;
 };
 
 class VolumeData : public TreeLayer
@@ -201,7 +200,7 @@ public:
 	void SetSkipBrick(bool skip);
 	bool GetSkipBrick();
 	//load
-	int Load(Nrrd* data, wxString &name, wxString &path);
+	int Load(Nrrd* data, const std::string &name, const std::string &path);
 	int Replace(Nrrd* data, bool del_tex);
 	int Replace(VolumeData* data);
 	Nrrd* GetVolume(bool ret);
@@ -235,7 +234,7 @@ public:
 	void SetResize(int resize, int nx, int ny, int nz);
 	void GetResize(bool &resize, int &nx, int &ny, int &nz);
 	//mask: 0-save none; 1-save mask; 2-save label; 3-save mask and label...
-	void Save(const wxString &filename, int mode,
+	void Save(const std::string &filename, int mode,
 		int mask, bool neg_mask,
 		bool crop, int filter,
 		bool bake, bool compress,
@@ -256,8 +255,8 @@ public:
 	fluo::BBox GetBounds();
 	fluo::BBox GetClippedBounds();
 	//path
-	void SetPath(wxString path);
-	wxString GetPath();
+	void SetPath(const std::string& path);
+	std::string GetPath();
 	//multi-channel
 	void SetCurChannel(int chan);
 	int GetCurChannel();
@@ -568,7 +567,7 @@ private:
 
 	flrd::EntryParams m_ep;
 
-	wxString m_tex_path;
+	std::string m_tex_path;
 	fluo::BBox m_bounds;
 	flvr::VolumeRenderer *m_vr;
 	flvr::Texture *m_tex;
@@ -704,7 +703,7 @@ private:
 	double m_est_thresh;
 
 	std::vector<VD_Landmark> m_landmarks;
-	wstring m_metadata_id;
+	std::wstring m_metadata_id;
 
 	//mask cleared
 	bool m_mask_clear;
@@ -739,7 +738,7 @@ public:
 	//set viewport
 	void SetViewport(GLint vp[4]);
 
-	wxString GetPath();
+	std::string GetPath();
 	fluo::BBox GetBounds();
 	GLMmodel* GetMesh();
 	void SetDisp(bool disp);
@@ -750,9 +749,9 @@ public:
 	bool GetDrawBounds();
 
 	//data management
-	int Load(wxString &filename);
+	int Load(const std::string &filename);
 	int Load(GLMmodel* mesh);
-	void Save(wxString &filename);
+	void Save(const std::string &filename);
 
 	//MR
 	flvr::MeshRenderer* GetMR();
@@ -803,8 +802,7 @@ public:
 	int GetLimitNumber();
 
 private:
-	//wxString m_name;
-	wxString m_data_path;
+	std::string m_data_path;
 	GLMmodel* m_data;
 	flvr::MeshRenderer *m_mr;
 	fluo::BBox m_bounds;
@@ -842,21 +840,21 @@ class AText
 {
 public:
 	AText();
-	AText(const string &str, const fluo::Point &pos);
+	AText(const std::string &str, const fluo::Point &pos);
 	~AText();
 
-	string GetText();
+	std::string GetText();
 	fluo::Point GetPos();
-	void SetText(string str);
+	void SetText(const std::string& str);
 	void SetPos(fluo::Point pos);
-	void SetInfo(string str);
+	void SetInfo(const std::string& str);
 
 	friend class Annotations;
 
 private:
-	string m_txt;
+	std::string m_txt;
 	fluo::Point m_pos;
-	string m_info;
+	std::string m_info;
 };
 
 class DataManager;
@@ -881,11 +879,11 @@ public:
 	}
 
 	int GetTextNum();
-	string GetTextText(int index);
+	std::string GetTextText(int index);
 	fluo::Point GetTextPos(int index);
 	fluo::Point GetTextTransformedPos(int index);
-	string GetTextInfo(int index);
-	void AddText(std::string str, fluo::Point pos, std::string info);
+	std::string GetTextInfo(int index);
+	void AddText(const std::string& str, fluo::Point pos, const std::string& info);
 	void SetTransform(fluo::Transform *tform);
 	void SetVolume(VolumeData* vd);
 	VolumeData* GetVolume();
@@ -907,19 +905,19 @@ public:
 	}
 
 	//memo
-	void SetMemo(string &memo);
-	string &GetMemo();
+	void SetMemo(const std::string &memo);
+	std::string GetMemo();
 	void SetMemoRO(bool ro);
 	bool GetMemoRO();
 
 	//save/load
-	wxString GetPath();
-	int Load(wxString &filename, DataManager* mgr);
-	void Save(wxString &filename);
+	std::string GetPath();
+	int Load(const std::string &filename, DataManager* mgr);
+	void Save(const std::string &filename);
 
 	//info meaning
-	wxString GetInfoMeaning();
-	void SetInfoMeaning(wxString &str);
+	std::string GetInfoMeaning();
+	void SetInfoMeaning(const std::string &str);
 
 	bool InsideClippingPlanes(fluo::Point &pos);
 
@@ -932,17 +930,17 @@ private:
 	bool m_disp;
 
 	//memo
-	string m_memo;
+	std::string m_memo;
 	bool m_memo_ro;//read only
 
 	//on disk
-	wxString m_data_path;
+	std::string m_data_path;
 
 	//atext info meaning
-	wxString m_info_meaning;
+	std::string m_info_meaning;
 
 private:
-	AText* GetAText(wxString str);
+	AText* GetAText(const std::string& str);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -971,7 +969,7 @@ public:
 		return m_track_map;
 	}
 
-	wxString GetPath() {return m_data_path;}
+	std::string GetPath() {return m_data_path;}
 	void SetCurTime(int time);
 	int GetCurTime();
 	void SetPrvTime(int time);
@@ -1008,8 +1006,8 @@ public:
 
 	//i/o
 	void Clear();
-	bool Load(wxString &filename);
-	bool Save(wxString &filename);
+	bool Load(const std::string &filename);
+	bool Save(const std::string &filename);
 
 	//draw
 	unsigned int Draw(std::vector<float> &verts, int shuffle);
@@ -1025,7 +1023,7 @@ public:
 
 private:
 	static int m_num;
-	wxString m_data_path;
+	std::string m_data_path;
 	//for selective drawing
 	int m_cur_time;
 	int m_prv_time;
@@ -1197,7 +1195,6 @@ public:
 
 private:
 	static int m_num;
-	//wxString m_name;
 	std::vector <VolumeData*> m_vd_list;
 	bool m_sync_volume_prop;
 
@@ -1336,7 +1333,7 @@ struct CurrentObjects
 	void SetVolumeData(VolumeData* vd);
 	void SetMeshData(MeshData* md);
 	void SetAnnotation(Annotations* ann);
-	void SetSel(const wxString& str);
+	void SetSel(const std::string& str);
 
 	flrd::RulerList* GetRulerList();
 	flrd::Ruler* GetRuler();
@@ -1365,24 +1362,24 @@ public:
 	//set project path
 	//when data and project are moved, use project file's path
 	//if data's directory doesn't exist
-	void SetProjectPath(wxString path);
-	wxString SearchProjectPath(wxString &filename);
-	wxString GetProjectFile();
+	void SetProjectPath(const std::string& path);
+	std::string SearchProjectPath(const std::string &filename);
+	std::string GetProjectFile();
 
 	//load volume
-	void LoadVolumes(wxArrayString files, bool withImageJ);
-	void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
-	int LoadVolumeData(wxString &filename, int type, bool withImageJ, int ch_num=-1, int t_num=-1);
+	void LoadVolumes(const std::vector<std::string>& files, bool withImageJ);
+	void StartupLoad(const std::vector<std::string>& files, bool run_mov, bool with_imagej);
+	int LoadVolumeData(const std::string &filename, int type, bool withImageJ, int ch_num=-1, int t_num=-1);
 	//set default
 	void SetVolumeDefault(VolumeData* vd);
 	void AddVolumeData(VolumeData* vd);
 	VolumeData* DuplicateVolumeData(VolumeData* vd);
 	void RemoveVolumeData(int index);
-	void RemoveVolumeData(const wxString &name);
+	void RemoveVolumeData(const std::string &name);
 	int GetVolumeNum();
 	VolumeData* GetVolumeData(int index);
-	VolumeData* GetVolumeData(wxString &name);
-	int GetVolumeIndex(wxString &name);
+	VolumeData* GetVolumeData(const std::string &name);
+	int GetVolumeIndex(const std::string &name);
 	VolumeData* GetLastVolumeData()
 	{
 		int num = m_vd_list.size();
@@ -1393,13 +1390,13 @@ public:
 	};
 
 	//load mesh
-	void LoadMeshes(wxArrayString files);
-	int LoadMeshData(wxString &filename);
+	void LoadMeshes(const std::vector<std::string>& files);
+	int LoadMeshData(const std::string &filename);
 	int LoadMeshData(GLMmodel* mesh);
 	int GetMeshNum();
 	MeshData* GetMeshData(int index);
-	MeshData* GetMeshData(wxString &name);
-	int GetMeshIndex(wxString &name);
+	MeshData* GetMeshData(const std::string &name);
+	int GetMeshIndex(const std::string &name);
 	MeshData* GetLastMeshData()
 	{
 		int num = m_md_list.size();
@@ -1412,13 +1409,13 @@ public:
 	void ClearMeshSelection();
 
 	//annotations
-	int LoadAnnotations(wxString &filename);
+	int LoadAnnotations(const std::string &filename);
 	void AddAnnotations(Annotations* ann);
 	void RemoveAnnotations(int index);
 	int GetAnnotationNum();
 	Annotations* GetAnnotations(int index);
-	Annotations* GetAnnotations(wxString &name);
-	int GetAnnotationIndex(wxString &name);
+	Annotations* GetAnnotations(const std::string &name);
+	int GetAnnotationIndex(const std::string &name);
 	Annotations* GetLastAnnotations()
 	{
 		int num = m_annotation_list.size();
@@ -1442,8 +1439,8 @@ private:
 	std::vector <Annotations*> m_annotation_list;
 
 	//project path
-	wxString m_prj_path;
-	wxString m_prj_file;
+	std::string m_prj_path;
+	std::string m_prj_file;
 
 	//for reading files and channels
 	size_t m_cur_file;

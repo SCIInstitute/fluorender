@@ -47,7 +47,6 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeDefault.h>
 #include <MovieDefault.h>
 #include <ColocalDefault.h>
-#include <wx/string.h>
 #include <string>
 
 //clipping plane modes
@@ -74,9 +73,9 @@ public:
 	std::vector<std::string> GetJvmArgs()
 	{
 		std::vector<std::string> args;
-		args.push_back(m_jvm_path.ToStdString());
-		args.push_back(m_ij_path.ToStdString());
-		args.push_back(m_bioformats_path.ToStdString());
+		args.push_back(m_jvm_path);
+		args.push_back(m_ij_path);
+		args.push_back(m_bioformats_path);
 		return args;
 	}
 	void GetMemorySettings();
@@ -92,13 +91,13 @@ public:
 public:
 	//default values
 	double m_dpi_scale_factor;//dpi scale factor
-	wxString m_layout;
+	std::string m_layout;
 	bool m_prj_panel_split;	//split the project panel
 	bool m_clip_panel_split;//split the clip plane panel
 
 	bool m_prj_save;		//save project automatically
 	bool m_prj_save_inc;	//save project incrementally
-	wxString m_time_id;		//identfier for time sequence
+	std::string m_time_id;		//identfier for time sequence
 	bool m_save_compress;	//save tif compressed
 	bool m_override_vox;
 	int m_last_tool;		//last tool
@@ -117,7 +116,7 @@ public:
 	double m_dpi;			//dpi number of captured image
 	bool m_realtime_compress;//real time compress
 	double m_mov_bitrate;	//bitrate for mov export (Mbits)
-	wxString m_mov_filename;//file name for mov export
+	std::string m_mov_filename;//file name for mov export
 	bool m_fp_convert;		//convert floating point to int
 	double m_fp_min;		//min value of the floating point number
 	double m_fp_max;		//max value of the floating point number
@@ -125,7 +124,7 @@ public:
 
 	bool m_run_script;		//script
 	bool m_script_break;	//allow script break
-	wxString m_script_file;
+	std::string m_script_file;
 
 	bool m_inverse_slider;	//invert vertical sliders
 	int m_mulfunc;			//multifunction button use
@@ -168,7 +167,7 @@ public:
 	bool m_show_cursor;
 	int m_color_depth;		//for hdr and 10-bit displays
 
-	wxString m_font_file;	//font lib file in the Fonts folder
+	std::string m_font_file;	//font lib file in the Fonts folder
 	int m_text_size;		//text size in viewport
 	int m_text_color;		//text color: 0- contrast to bg; 1-same as bg; 2-volume sec color
 
@@ -233,9 +232,9 @@ public:
 	double m_contact_factor;
 	double m_similarity;
 
-	wxString m_jvm_path;	// java settings strings.
-	wxString m_ij_path;
-	wxString m_bioformats_path;
+	std::string m_jvm_path;	// java settings strings.
+	std::string m_ij_path;
+	std::string m_bioformats_path;
 	int m_ij_mode;//0: imagej; 1: fiji
 
 	std::string m_cg_table;	//machine learning settings

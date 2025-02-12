@@ -271,9 +271,9 @@ int BaseReader::LoadOffset(int offset)
 
 int BaseReader::GetOffset() { return m_cur_batch; }
 
-int BaseReader::get_number(string &str, int64_t pos)
+int BaseReader::get_number(const std::string &str, int64_t pos)
 {
-	string num_str;
+	std::string num_str;
 	for (int64_t i = pos; i < static_cast<int64_t>(str.length()); ++i)
 	{
 		if (isdigit(str[i]))
@@ -287,9 +287,9 @@ int BaseReader::get_number(string &str, int64_t pos)
 		return 0;
 }
 
-double BaseReader::get_double(string& str, int64_t pos)
+double BaseReader::get_double(const std::string& str, int64_t pos)
 {
-	string num_str;
+	std::string num_str;
 	for (int64_t i = pos; i < static_cast<int64_t>(str.length()); ++i)
 	{
 		if (isdigit(str[i]) || str[i] == '.' ||
@@ -299,14 +299,14 @@ double BaseReader::get_double(string& str, int64_t pos)
 			break;
 	}
 	if (num_str != "")
-		return stod(num_str.c_str());
+		return std::stod(num_str.c_str());
 	else
 		return 0;
 }
 
-string BaseReader::GetError(int code)
+std::string BaseReader::GetError(int code)
 {
-	string err_str;
+	std::string err_str;
 	switch (code)
 	{
 	case READER_OK:

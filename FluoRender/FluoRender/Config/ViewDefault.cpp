@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #include <ViewDefault.h>
 #include <Names.h>
 #include <RenderCanvas.h>
-#include <wx/string.h>
 
 ViewDefault::ViewDefault()
 {
@@ -43,7 +42,7 @@ ViewDefault::ViewDefault()
 	m_draw_scalebar = false;
 	m_draw_scalebar_text = false;
 	m_scalebar_len = 50;
-	m_scalebar_text = L"50 \u03BCm";
+	m_scalebar_text = "50 \u03BCm";
 	m_scalebar_num = "50";
 	m_scalebar_unit = 1;
 	m_mouse_focus = false;
@@ -88,8 +87,10 @@ void ViewDefault::Read(wxFileConfig& f)
 	f.Read("draw scalebar", &m_draw_scalebar, false);
 	f.Read("draw scalebar text", &m_draw_scalebar_text, false);
 	f.Read("scalebar len", &m_scalebar_len, 50);
-	f.Read("scalebar text", &m_scalebar_text, L"50 \u03BCm");
-	f.Read("scalebar num", &m_scalebar_num, "50");
+	f.Read("scalebar text", &str, "50 \u03BCm");
+	m_scalebar_text = str.ToStdString();
+	f.Read("scalebar num", &str, "50");
+	m_scalebar_num = str.ToStdString();
 	f.Read("scalebar unit", &m_scalebar_unit, 1);
 	f.Read("mouse focus", &m_mouse_focus, false);
 	f.Read("persp", &m_persp, false);
@@ -133,8 +134,8 @@ void ViewDefault::Save(wxFileConfig& f)
 	f.Write("draw scalebar", m_draw_scalebar);
 	f.Write("draw scalebar text", m_draw_scalebar_text);
 	f.Write("scalebar len", m_scalebar_len);
-	f.Write("scalebar text", m_scalebar_text);
-	f.Write("scalebar num", m_scalebar_num);
+	f.Write("scalebar text", wxString(m_scalebar_text));
+	f.Write("scalebar num", wxString(m_scalebar_num));
 	f.Write("scalebar unit", m_scalebar_unit);
 	f.Write("mouse focus", m_mouse_focus);
 	f.Write("persp", m_persp);

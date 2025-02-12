@@ -79,7 +79,7 @@ MPGReader::~MPGReader()
 		avformat_close_input(&m_av_format_context);
 }
 
-void MPGReader::SetFile(string &file)
+void MPGReader::SetFile(const std::string &file)
 {
 	if (!file.empty())
 	{
@@ -91,7 +91,7 @@ void MPGReader::SetFile(string &file)
 	m_id_string = m_path_name;
 }
 
-void MPGReader::SetFile(wstring &file)
+void MPGReader::SetFile(const std::wstring &file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;
@@ -99,7 +99,7 @@ void MPGReader::SetFile(wstring &file)
 
 int MPGReader::Preprocess()
 {
-	wstring path, name;
+	std::wstring path, name;
 	if (!SEP_PATH_NAME(m_path_name, path, name))
 		return READER_OPEN_FAIL;
 	m_data_name = name;
@@ -241,14 +241,14 @@ int MPGReader::GetDigitOrder()
 	return 0;
 }
 
-void MPGReader::SetTimeId(wstring &id)
+void MPGReader::SetTimeId(const std::wstring &id)
 {
 	//do nothing
 }
 
-wstring MPGReader::GetTimeId()
+std::wstring MPGReader::GetTimeId()
 {
-	return wstring(L"");
+	return L"";
 }
 
 void MPGReader::SetBatch(bool batch)
@@ -360,30 +360,30 @@ Nrrd* MPGReader::Convert(int t, int c, bool get_max)
 	return data;
 }
 
-wstring MPGReader::GetCurDataName(int t, int c)
+std::wstring MPGReader::GetCurDataName(int t, int c)
 {
 	return m_path_name;
 }
 
-wstring MPGReader::GetCurMaskName(int t, int c)
+std::wstring MPGReader::GetCurMaskName(int t, int c)
 {
-	wostringstream woss;
+	std::wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".msk";
-	wstring mask_name = woss.str();
+	std::wstring mask_name = woss.str();
 	return mask_name;
 }
 
-wstring MPGReader::GetCurLabelName(int t, int c)
+std::wstring MPGReader::GetCurLabelName(int t, int c)
 {
-	wostringstream woss;
+	std::wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".lbl";
-	wstring label_name = woss.str();
+	std::wstring label_name = woss.str();
 	return label_name;
 }
 

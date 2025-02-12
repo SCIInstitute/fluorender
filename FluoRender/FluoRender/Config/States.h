@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _STATES_H_
 #define _STATES_H_
 
-#include <wx/string.h>
+#include <string>
 
 class States
 {
@@ -50,6 +50,6 @@ public:
 
 	bool m_modal_shown;	//a modal dialog is currently shown, disable keyboard shortcuts
 
-	wxString m_status_str;		//string to show on main statusbar
+	std::string m_status_str;		//string to show on main statusbar
 };
 #endif

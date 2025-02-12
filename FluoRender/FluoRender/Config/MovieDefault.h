@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Point.h>
 #include <wx/fileconf.h>
-#include <wx/string.h>
 
 class MovieMaker;
 class MovieDefault

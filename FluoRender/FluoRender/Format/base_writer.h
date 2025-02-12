@@ -31,8 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <nrrd.h>
 
-using namespace std;
-
 #ifdef STATIC_COMPILE
 	#define nrrdWrap nrrdWrap_va
 	#define nrrdAxisInfoSet nrrdAxisInfoSet_va
@@ -47,7 +45,7 @@ public:
 	virtual void SetData(Nrrd* data) = 0;
 	virtual void SetSpacings(double spcx, double spcy, double spcz) = 0;
 	virtual void SetCompression(bool value) = 0;
-	virtual void Save(wstring filename, int mode) = 0;
+	virtual void Save(const std::wstring& filename, int mode) = 0;
 };
 
 #endif//_BASE_WRITER_H_

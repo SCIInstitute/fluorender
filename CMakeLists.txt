@@ -608,14 +608,6 @@ file(GLOB fltr_hdr FluoRender/FluoRender/Filter/*.h)
 add_library(FILTER_LIB STATIC
   ${fltr_src} ${fltr_hdr})
 
-# boost interface
-add_library(BOOST_ILIB INTERFACE)
-target_link_libraries(BOOST_ILIB INTERFACE
-  CLUSTER_LIB
-  COMPONENT_LIB
-  FILTER_LIB
-  ${Boost_LIBRARIES})
-
 # Flobject
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Flobject)
 file(GLOB obj_src FluoRender/FluoRender/Flobject/*.cpp)
@@ -712,15 +704,21 @@ add_library(PROGRESS_LIB STATIC
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Project)
 file(GLOB prj_src FluoRender/FluoRender/Project/*.cpp)
 file(GLOB prj_hdr FluoRender/FluoRender/Project/*.h)
-add_library(PROJECT_OBJ OBJECT
+add_library(PROJECT_LIB STATIC
   ${prj_src} ${prj_hdr})
+target_link_libraries(PROJECT_LIB
+  ${wxWidgets_LIBRARIES}
+)
 
 # Python
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Python)
 file(GLOB pyth_hdr FluoRender/FluoRender/Python/*.h)
 file(GLOB pyth_src FluoRender/FluoRender/Python/*.cpp)
-add_library(PYTHON_OBJ OBJECT
+add_library(PYTHON_LIB STATIC
   ${pyth_hdr} ${pyth_src})
+target_link_libraries(PYTHON_LIB
+  ${HDF5_LIBRARIES}
+  ${Boost_LIBRARIES})
 
 # Scene
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Scene)
@@ -793,6 +791,14 @@ add_library(VIDEO_OBJ OBJECT
 file(GLOB src FluoRender/FluoRender/*.cpp)
 file(GLOB hdr FluoRender/FluoRender/*.h)
 
+# boost interface
+add_library(BOOST_ILIB INTERFACE)
+target_link_libraries(BOOST_ILIB INTERFACE
+  CLUSTER_LIB
+  COMPONENT_LIB
+  FILTER_LIB
+  ${Boost_LIBRARIES})
+
 # SynthBB
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/SynthBB)
 file(GLOB synthbb_hdr FluoRender/SynthBB/*.h)
@@ -845,8 +851,6 @@ if(APPLE)
   include(BundleUtilities)
   add_executable(FluoRender MACOSX_BUNDLE
     ${src} ${hdr} ${rsc} ${icns}
-    $<TARGET_OBJECTS:PROJECT_OBJ>
-    $<TARGET_OBJECTS:PYTHON_OBJ>
     $<TARGET_OBJECTS:SCENE_OBJ>
     $<TARGET_OBJECTS:SCRIPT_OBJ>
     $<TARGET_OBJECTS:SELECTION_OBJ>
@@ -862,8 +866,6 @@ elseif(UNIX OR MINGW)
   set(CXXFLAGS "-fPIC ")
   add_executable(FluoRender
     ${src} ${hdr} ${rsc} ${icns}
-    $<TARGET_OBJECTS:PROJECT_OBJ>
-    $<TARGET_OBJECTS:PYTHON_OBJ>
     $<TARGET_OBJECTS:SCENE_OBJ>
     $<TARGET_OBJECTS:SCRIPT_OBJ>
     $<TARGET_OBJECTS:SELECTION_OBJ>
@@ -914,8 +916,6 @@ elseif(WIN32)
     endif()
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
-      $<TARGET_OBJECTS:PROJECT_OBJ>
-      $<TARGET_OBJECTS:PYTHON_OBJ>
       $<TARGET_OBJECTS:SCENE_OBJ>
       $<TARGET_OBJECTS:SCRIPT_OBJ>
       $<TARGET_OBJECTS:SELECTION_OBJ>
@@ -946,7 +946,7 @@ endif()
 
 if(APPLE)
   set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -L/usr/lib ${CMAKE_EXE_LINKER_FLAGS} -liconv -lbz2 -framework OpenCL -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration -framework VideoToolbox -framework Security -framework CoreMedia")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.11 -DWX_PRECOMP -std=c++11 -stdlib=libc++")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=11.5 -DWX_PRECOMP -std=c++20 -stdlib=libc++")
 elseif(UNIX OR MINGW)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread -ldl")
 endif()
@@ -957,15 +957,23 @@ target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
 # link the libraries
 if(WIN32)
   target_link_libraries(FluoRender
+    secur32.lib
+  )
+elseif(APPLE)
+else()
+  target_link_libraries(FluoRender
+    stdc++fs
+  )
+endif()
+
+target_link_libraries(FluoRender
     ${Boost_LIBRARIES}
     ${FFMPEG_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${GLEW_STATIC_LIBRARIES}
-    ${HDF5_LIBRARIES}
     ${OpenCL_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${PNG_LIBRARIES}
-    teem
     secur32.lib
     ${wxWidgets_LIBRARIES}
     ANIMATORS_LIB
@@ -986,85 +994,16 @@ if(WIN32)
     LOOKINGGLASS_LIB
     OPENXR_LIB
     PROGRESS_LIB
+    PROJECT_LIB
+    PYTHON_LIB
     TRAINER_LIB
-  )
-  if(BUILD_TESTER)
-      target_link_libraries(Tester
-      ${Boost_LIBRARIES}
-      dlib::dlib
-      )
-  endif()
-elseif(APPLE)
-  target_link_libraries(FluoRender
-    ${Boost_LIBRARIES}
-    ${FFMPEG_LIBRARIES}
-    ${FREETYPE_LIBRARIES}
-    ${GLEW_STATIC_LIBRARIES}
-    ${HDF5_LIBRARIES}
-    ${OpenCL_LIBRARIES}
-    ${OPENGL_LIBRARIES}
-    ${PNG_LIBRARIES}
-    teem
-    ${wxWidgets_LIBRARIES}
-    ANIMATORS_LIB
-    BOOST_ILIB
-    CALCULATE_LIB
-    CONFIG_LIB
-    CONTROL_LIB
-    CONVERTER_LIB
-    DATABASE_LIB
-    DISTANCE_LIB
-    FILE_LIB
-    FLOBJECT_LIB
-    FLRENDER_LIB
-    FLUI_LIB
-    FORMAT_LIB
-    GLOBAL_LIB
-    IMAGE_LIB
-    LOOKINGGLASS_LIB
-    OPENXR_LIB
-    PROGRESS_LIB
-    TRAINER_LIB
-  )
-else()
-  target_link_libraries(FluoRender
-    ${Boost_LIBRARIES}
-    ${FFMPEG_LIBRARIES}
-    ${FREETYPE_LIBRARIES}
-    ${GLEW_STATIC_LIBRARIES}
-    ${HDF5_LIBRARIES}
-    ${OpenCL_LIBRARIES}
-    ${OPENGL_LIBRARIES}
-    ${PNG_LIBRARIES}
-    stdc++fs
-    teem
-    ${wxWidgets_LIBRARIES}
-    ANIMATORS_LIB
-    BOOST_ILIB
-    CALCULATE_LIB
-    CONFIG_LIB
-    CONTROL_LIB
-    CONVERTER_LIB
-    DATABASE_LIB
-    DISTANCE_LIB
-    FILE_LIB
-    FLOBJECT_LIB
-    FLRENDER_LIB
-    FLUI_LIB
-    FORMAT_LIB
-    GLOBAL_LIB
-    IMAGE_LIB
-    LOOKINGGLASS_LIB
-    OPENXR_LIB
-    PROGRESS_LIB
-    TRAINER_LIB
-  )
-endif()
-
+)
 if(BUILD_TESTER)
     target_link_libraries(Tester
-        FLOBJECT_LIB
-        )
+      ${Boost_LIBRARIES}
+      dlib::dlib
+      FLOBJECT_LIB
+      )
 endif()
 
 # copy Java code dir to the binary directory

@@ -38,8 +38,6 @@
 #include <fstream>
 #include <filesystem>
 
-using namespace std;
-
 namespace flvr
 {
 	std::map<wstring, wstring> TextureBrick::cache_table_ = std::map<wstring, wstring>();

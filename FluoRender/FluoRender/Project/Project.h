@@ -30,8 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #define _PROJECT_H_
 
 #include <Progress.h>
-#include <wx/string.h>
 #include <wx/fileconf.h>
+#include <string>
 
 class Project : public Progress
 {
@@ -39,8 +39,8 @@ public:
 	Project();
 	~Project();
 
-	void Open(wxString& filename);
-	void Save(wxString& filename, bool inc);//inc: save incrementally
+	void Open(const std::string& filename);
+	void Save(const std::string& filename, bool inc);//inc: save incrementally
 	void Reset();
 
 	void ExportRulerList(const std::string& filename);

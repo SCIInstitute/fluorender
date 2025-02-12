@@ -338,7 +338,7 @@ void VolumeLoader::ClearQueues()
 	}
 }
 
-void VolumeLoader::Set(vector<VolumeLoaderData> vld)
+void VolumeLoader::Set(std::vector<VolumeLoaderData> vld)
 {
 	Abort();
 	//StopAll();
@@ -399,9 +399,9 @@ void VolumeLoader::CleanupLoadedBrick()
 			required += (size_t)b->nx()*(size_t)b->ny()*(size_t)b->nz()*(size_t)b->nb(0);
 	}
 
-	vector<VolumeLoaderData> vd_undisp;
-	vector<VolumeLoaderData> b_undisp;
-	vector<VolumeLoaderData> b_drawn;
+	std::vector<VolumeLoaderData> vd_undisp;
+	std::vector<VolumeLoaderData> b_undisp;
+	std::vector<VolumeLoaderData> b_drawn;
 	for (auto elem : m_loaded)
 	{
 		if (!elem.second.vd->GetDisp())

@@ -37,14 +37,12 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <compatibility.h>
 
-using namespace std;
-
 namespace flvr
 {
 	int TextureRenderer::active_view_ = -1;
 	double TextureRenderer::mainmem_buf_size_ = 4000.0;
 	double TextureRenderer::available_mainmem_buf_size_ = 0.0;
-	vector<TexParam> TextureRenderer::tex_pool_;
+	std::vector<TexParam> TextureRenderer::tex_pool_;
 	bool TextureRenderer::start_update_loop_ = false;
 	bool TextureRenderer::done_update_loop_ = true;
 	bool TextureRenderer::done_current_chan_ = true;
@@ -67,7 +65,7 @@ namespace flvr
 	int TextureRenderer::quota_bricks_ = 0;
 	fluo::Point TextureRenderer::quota_center_;
 	bool TextureRenderer::load_on_main_thread_ = false;
-	vector<TextureRenderer::LoadedBrick> TextureRenderer::loadedbrks;
+	std::vector<TextureRenderer::LoadedBrick> TextureRenderer::loadedbrks;
 	int TextureRenderer::del_id = 0;
 #ifdef _DARWIN
 	CGLContextObj TextureRenderer::gl_context_ = 0;
@@ -176,7 +174,7 @@ namespace flvr
 	{
 		if (!tex_)
 			return;
-		vector<TextureBrick*>* bricks = tex_->get_bricks();
+		std::vector<TextureBrick*>* bricks = tex_->get_bricks();
 		TextureBrick* brick = 0;
 		for (int i = tex_pool_.size() - 1; i >= 0; --i)
 		{
@@ -205,7 +203,7 @@ namespace flvr
 	{
 		if (!tex_)
 			return;
-		vector<TextureBrick*>* bricks = tex_->get_bricks();
+		std::vector<TextureBrick*>* bricks = tex_->get_bricks();
 		TextureBrick *brick = 0;
 		TextureBrick *locbk = 0;
 		for (int i = tex_pool_.size() - 1; i >= 0; --i)
@@ -239,7 +237,7 @@ namespace flvr
 	{
 		if (!tex_)
 			return;
-		vector<TextureBrick*>* bricks = tex_->get_bricks();
+		std::vector<TextureBrick*>* bricks = tex_->get_bricks();
 		TextureBrick *brick = 0;
 		TextureBrick *locbk = 0;
 		for (int i = tex_pool_.size() - 1; i >= 0; --i)
@@ -1187,7 +1185,7 @@ namespace flvr
 				return;
 		}
 
-		vector<BrickDist> bd_list;
+		std::vector<BrickDist> bd_list;
 		BrickDist bd;
 		//generate a list of bricks and their distances to the new brick
 		for (i = 0; i < tex_pool_.size(); i++)
@@ -1253,8 +1251,8 @@ namespace flvr
 		}
 	}
 
-	void TextureRenderer::draw_polygons(vector<float>& vertex,
-		vector<uint32_t>& index)
+	void TextureRenderer::draw_polygons(std::vector<float>& vertex,
+		std::vector<uint32_t>& index)
 	{
 		if (vertex.empty() || index.empty())
 			return;
@@ -1292,8 +1290,8 @@ namespace flvr
 		}
 	}
 
-	void TextureRenderer::draw_polygons_wireframe(vector<float>& vertex,
-		vector<uint32_t>& index, vector<uint32_t>& size)
+	void TextureRenderer::draw_polygons_wireframe(std::vector<float>& vertex,
+		std::vector<uint32_t>& index, std::vector<uint32_t>& size)
 	{
 		if (vertex.empty() || index.empty())
 			return;
@@ -1378,7 +1376,7 @@ namespace flvr
 	void TextureRenderer::rearrangeLoadedBrkVec()
 	{
 		if (loadedbrks.empty()) return;
-		vector<LoadedBrick>::iterator ite = loadedbrks.begin();
+		std::vector<LoadedBrick>::iterator ite = loadedbrks.begin();
 		while (ite != loadedbrks.end())
 		{
 			if (!ite->brk->isLoaded())
@@ -1405,7 +1403,7 @@ namespace flvr
 		for (size_t lv = 0; static_cast<long long>(lv) < static_cast<long long>(tex_->GetLevelNum()); lv++)
 		{
 			tex_->setLevel(lv);
-			vector<TextureBrick *> *bs = tex_->get_bricks();
+			std::vector<TextureBrick *> *bs = tex_->get_bricks();
 			for (size_t i = 0; i < bs->size(); i++)
 			{
 				if ((*bs)[i]->isLoaded()) {

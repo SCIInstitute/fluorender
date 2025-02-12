@@ -33,8 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelProgram.h>
 #include <VolKernel.h>
 
-using namespace std;
-
 namespace flrd
 {
 	class MaskBorder

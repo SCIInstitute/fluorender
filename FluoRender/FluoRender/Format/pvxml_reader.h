@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <base_reader.h>
 
-using namespace std;
 class wxXmlNode;
 class wxString;
 
@@ -43,26 +42,26 @@ public:
 
 	int GetType() { return READER_PVXML_TYPE; }
 
-	void SetFile(string &file);
-	void SetFile(wstring &file);
+	void SetFile(const std::string &file);
+	void SetFile(const std::wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
 	void SetChannSeq(bool cs);
 	bool GetChannSeq();
 	void SetDigitOrder(int order);
 	int GetDigitOrder();
-	void SetTimeId(wstring &id);
-	wstring GetTimeId();
+	void SetTimeId(const std::wstring &id);
+	std::wstring GetTimeId();
 	int Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	Nrrd* Convert(int t, int c, bool get_max);
-	wstring GetCurDataName(int t, int c);
-	wstring GetCurMaskName(int t, int c);
-	wstring GetCurLabelName(int t, int c);
+	std::wstring GetCurDataName(int t, int c);
+	std::wstring GetCurMaskName(int t, int c);
+	std::wstring GetCurLabelName(int t, int c);
 
-	wstring GetPathName() {return m_path_name;}
-	wstring GetDataName() {return m_data_name;}
+	std::wstring GetPathName() {return m_path_name;}
+	std::wstring GetDataName() {return m_data_name;}
 	int GetTimeNum() {return m_time_num;}
 	int GetCurTime() {return m_cur_time;}
 	int GetChanNum()
@@ -87,13 +86,13 @@ public:
 	void SetSeqType(int value) { m_seq_type = value; }
 
 private:
-	wstring m_data_name;
+	std::wstring m_data_name;
 
 	bool m_force_stack;
 
 	struct ChannelInfo
 	{
-		wstring file_name;
+		std::wstring file_name;
 		int chan;//channel index on file
 	};
 	struct FrameInfo
@@ -213,7 +212,7 @@ private:
 	double m_scalar_scale;
 
 	//time sequence id
-	wstring m_time_id;
+	std::wstring m_time_id;
 
 	//user setting for flipping
 	//0:auto; -1:flip; 1:no flip

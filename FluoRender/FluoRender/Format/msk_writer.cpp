@@ -61,7 +61,7 @@ void MSKWriter::SetCompression(bool value)
 {
 }
 
-void MSKWriter::Save(wstring filename, int mode)
+void MSKWriter::Save(const std::wstring& filename, int mode)
 {
 	if (!m_data)
 		return;

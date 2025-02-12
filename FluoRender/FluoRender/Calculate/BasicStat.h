@@ -33,8 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <VolKernel.h>
 #include <map>
 
-using namespace std;
-
 class VolumeData;
 namespace flrd
 {

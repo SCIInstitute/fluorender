@@ -11,16 +11,16 @@
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 
-template <typename _T> void clear2DVector(std::vector<std::vector<_T>> &vec2d)
+template <typename _T> void clear2DVector(std::vector<std::vector<_T>>& vec2d)
 {
-	if(vec2d.empty())return;
-	for(int i = 0; i < vec2d.size(); i++)std::vector<_T>().swap(vec2d[i]);
+	if (vec2d.empty())return;
+	for (int i = 0; i < vec2d.size(); i++)std::vector<_T>().swap(vec2d[i]);
 	std::vector<std::vector<_T>>().swap(vec2d);
 }
 
-template <typename _T> inline void SafeDelete(_T* &p)
+template <typename _T> inline void SafeDelete(_T*& p)
 {
-	if(p != NULL){
+	if (p != NULL) {
 		delete (p);
 		(p) = NULL;
 	}
@@ -29,43 +29,43 @@ template <typename _T> inline void SafeDelete(_T* &p)
 BRKXMLReader::BRKXMLReader() :
 	BaseReader()
 {
-   m_resize_type = 0;
-   m_resample_type = 0;
-   m_alignment = 0;
+	m_resize_type = 0;
+	m_resample_type = 0;
+	m_alignment = 0;
 
-   m_level_num = 0;
-   m_cur_level = -1;
+	m_level_num = 0;
+	m_cur_level = -1;
 
-   m_time_num = 0;
-   m_cur_time = -1;
-   m_chan_num = 0;
-   m_cur_chan = 0;
-   m_slice_num = 0;
-   m_x_size = 0;
-   m_y_size = 0;
-   
-   m_valid_spc = false;
-   m_xspc = 0.0;
-   m_yspc = 0.0;
-   m_zspc = 0.0;
+	m_time_num = 0;
+	m_cur_time = -1;
+	m_chan_num = 0;
+	m_cur_chan = 0;
+	m_slice_num = 0;
+	m_x_size = 0;
+	m_y_size = 0;
 
-   m_max_value = 0.0;
-   m_scalar_scale = 1.0;
+	m_valid_spc = false;
+	m_xspc = 0.0;
+	m_yspc = 0.0;
+	m_zspc = 0.0;
 
-   m_fp_convert = false;
-   m_fp_min = 0;
-   m_fp_max = 1;
+	m_max_value = 0.0;
+	m_scalar_scale = 1.0;
 
-   m_batch = false;
-   m_cur_batch = -1;
-   m_file_type = BRICK_FILE_TYPE_NONE;
+	m_fp_convert = false;
+	m_fp_min = 0;
+	m_fp_max = 1;
 
-   m_ex_metadata_path = wstring();
-   m_ex_metadata_url = wstring();
-   
-   m_isURL = false;
+	m_batch = false;
+	m_cur_batch = -1;
+	m_file_type = BRICK_FILE_TYPE_NONE;
 
-   m_copy_lv = -1;
+	m_ex_metadata_path = L"";
+	m_ex_metadata_url = L"";
+
+	m_isURL = false;
+
+	m_copy_lv = -1;
 }
 
 BRKXMLReader::~BRKXMLReader()
@@ -75,71 +75,71 @@ BRKXMLReader::~BRKXMLReader()
 
 void BRKXMLReader::Clear()
 {
-	if(m_pyramid.empty()) return;
-	for(int i = 0; i < m_pyramid.size(); i++){
-		if(!m_pyramid[i].bricks.empty()){
-			for(int j = 0; j < m_pyramid[i].bricks.size(); j++) SafeDelete(m_pyramid[i].bricks[j]);
-			vector<BrickInfo *>().swap(m_pyramid[i].bricks);
+	if (m_pyramid.empty()) return;
+	for (int i = 0; i < m_pyramid.size(); i++) {
+		if (!m_pyramid[i].bricks.empty()) {
+			for (int j = 0; j < m_pyramid[i].bricks.size(); j++) SafeDelete(m_pyramid[i].bricks[j]);
+			std::vector<BrickInfo*>().swap(m_pyramid[i].bricks);
 		}
-		if(!m_pyramid[i].filename.empty()){
-			for(int j = 0; j < m_pyramid[i].filename.size(); j++){
-				if(!m_pyramid[i].filename[j].empty()){
-					for(int k = 0; k < m_pyramid[i].filename[j].size(); k++){
-						if(!m_pyramid[i].filename[j][k].empty()){
-							for(int m = 0; m < m_pyramid[i].filename[j][k].size(); m++)
+		if (!m_pyramid[i].filename.empty()) {
+			for (int j = 0; j < m_pyramid[i].filename.size(); j++) {
+				if (!m_pyramid[i].filename[j].empty()) {
+					for (int k = 0; k < m_pyramid[i].filename[j].size(); k++) {
+						if (!m_pyramid[i].filename[j][k].empty()) {
+							for (int m = 0; m < m_pyramid[i].filename[j][k].size(); m++)
 								SafeDelete(m_pyramid[i].filename[j][k][m]);
-							vector<flvr::FileLocInfo *>().swap(m_pyramid[i].filename[j][k]);
+							std::vector<flvr::FileLocInfo*>().swap(m_pyramid[i].filename[j][k]);
 						}
 					}
-					vector<vector<flvr::FileLocInfo *>>().swap(m_pyramid[i].filename[j]);
+					std::vector<std::vector<flvr::FileLocInfo*>>().swap(m_pyramid[i].filename[j]);
 				}
 			}
-			vector<vector<vector<flvr::FileLocInfo *>>>().swap(m_pyramid[i].filename);
+			std::vector<std::vector<std::vector<flvr::FileLocInfo*>>>().swap(m_pyramid[i].filename);
 		}
 	}
-	vector<LevelInfo>().swap(m_pyramid);
+	std::vector<LevelInfo>().swap(m_pyramid);
 
-	vector<Landmark>().swap(m_landmarks);
+	std::vector<Landmark>().swap(m_landmarks);
 }
 
 //Use Before Preprocess()
-void BRKXMLReader::SetFile(string &file)
+void BRKXMLReader::SetFile(const std::string& file)
 {
-   if (!file.empty())
-   {
-      if (!m_path_name.empty())
-         m_path_name.clear();
-      m_path_name.assign(file.length(), L' ');
-      copy(file.begin(), file.end(), m_path_name.begin());
+	if (!file.empty())
+	{
+		if (!m_path_name.empty())
+			m_path_name.clear();
+		m_path_name.assign(file.length(), L' ');
+		copy(file.begin(), file.end(), m_path_name.begin());
 #ifdef _WIN32
-   wchar_t slash = L'\\';
-   std::replace(m_path_name.begin(), m_path_name.end(), L'/', L'\\');
+		wchar_t slash = L'\\';
+		std::replace(m_path_name.begin(), m_path_name.end(), L'/', L'\\');
 #else
-   wchar_t slash = L'/';
+		wchar_t slash = L'/';
 #endif
-      m_data_name = m_path_name.substr(m_path_name.find_last_of(slash)+1);
-	  m_dir_name = m_path_name.substr(0, m_path_name.find_last_of(slash)+1);
-   }
-   m_id_string = m_path_name;
+		m_data_name = m_path_name.substr(m_path_name.find_last_of(slash) + 1);
+		m_dir_name = m_path_name.substr(0, m_path_name.find_last_of(slash) + 1);
+	}
+	m_id_string = m_path_name;
 }
 
 //Use Before Preprocess()
-void BRKXMLReader::SetFile(wstring &file)
+void BRKXMLReader::SetFile(const std::wstring& file)
 {
-   m_path_name = file;
+	m_path_name = file;
 #ifdef _WIN32
-   wchar_t slash = L'\\';
-   std::replace(m_path_name.begin(), m_path_name.end(), L'/', L'\\');
+	wchar_t slash = L'\\';
+	std::replace(m_path_name.begin(), m_path_name.end(), L'/', L'\\');
 #else
-   wchar_t slash = L'/';
+	wchar_t slash = L'/';
 #endif
-   m_data_name = m_path_name.substr(m_path_name.find_last_of(slash)+1);
-   m_dir_name = m_path_name.substr(0, m_path_name.find_last_of(slash)+1);
-   m_id_string = m_path_name;
+	m_data_name = m_path_name.substr(m_path_name.find_last_of(slash) + 1);
+	m_dir_name = m_path_name.substr(0, m_path_name.find_last_of(slash) + 1);
+	m_id_string = m_path_name;
 }
 
 //Use Before Preprocess()
-void BRKXMLReader::SetDir(string &dir)
+void BRKXMLReader::SetDir(const std::string& dir)
 {
 	if (!dir.empty())
 	{
@@ -148,7 +148,7 @@ void BRKXMLReader::SetDir(string &dir)
 		m_dir_name.assign(dir.length(), L' ');
 		copy(dir.begin(), dir.end(), m_dir_name.begin());
 		size_t pos = m_dir_name.find(L"://");
-		if (pos != wstring::npos)
+		if (pos != std::wstring::npos)
 			m_isURL = true;
 
 #ifdef _WIN32
@@ -162,13 +162,13 @@ void BRKXMLReader::SetDir(string &dir)
 }
 
 //Use Before Preprocess()
-void BRKXMLReader::SetDir(wstring &dir)
+void BRKXMLReader::SetDir(const std::wstring& dir)
 {
 	if (!dir.empty())
 	{
 		m_dir_name = dir;
 		size_t pos = m_dir_name.find(L"://");
-		if (pos != wstring::npos)
+		if (pos != std::wstring::npos)
 			m_isURL = true;
 
 #ifdef _WIN32
@@ -196,38 +196,38 @@ int BRKXMLReader::Preprocess()
 #endif
 	//separate path and name
 	size_t pos = m_path_name.find_last_of(slash);
-	wstring path = m_path_name.substr(0, pos+1);
-	wstring name = m_path_name.substr(pos+1);
+	std::wstring path = m_path_name.substr(0, pos + 1);
+	std::wstring name = m_path_name.substr(pos + 1);
 
-	if (m_doc.LoadFile(ws2s(m_path_name).c_str()) != 0){
+	if (m_doc.LoadFile(ws2s(m_path_name).c_str()) != 0) {
 		return READER_OPEN_FAIL;
 	}
-		
-	tinyxml2::XMLElement *root = m_doc.RootElement();
+
+	tinyxml2::XMLElement* root = m_doc.RootElement();
 	if (!root || strcmp(root->Name(), "BRK"))
 		return READER_OPEN_FAIL;
 	m_imageinfo = ReadImageInfo(root);
 
 	if (root->Attribute("exMetadataPath"))
 	{
-		string str = root->Attribute("exMetadataPath");
+		std::string str = root->Attribute("exMetadataPath");
 		m_ex_metadata_path = s2ws(str);
 	}
 	if (root->Attribute("exMetadataURL"))
 	{
-		string str = root->Attribute("exMetadataURL");
+		std::string str = root->Attribute("exMetadataURL");
 		m_ex_metadata_url = s2ws(str);
 	}
 
 	ReadPyramid(root, m_pyramid);
-	
+
 	m_time_num = m_imageinfo.nFrame;
 	m_chan_num = m_imageinfo.nChannel;
 	m_copy_lv = m_imageinfo.copyableLv;
 
 	m_cur_time = 0;
 
-	if(m_pyramid.empty()) return READER_OPEN_FAIL;
+	if (m_pyramid.empty()) return READER_OPEN_FAIL;
 
 	m_xspc = m_pyramid[0].xspc;
 	m_yspc = m_pyramid[0].yspc;
@@ -242,7 +242,7 @@ int BRKXMLReader::Preprocess()
 	m_level_num = m_pyramid.size();
 	m_cur_level = 0;
 
-	wstring cur_dir_name = m_path_name.substr(0, m_path_name.find_last_of(slash)+1);
+	std::wstring cur_dir_name = m_path_name.substr(0, m_path_name.find_last_of(slash) + 1);
 	loadMetadata(m_path_name);
 	loadMetadata(cur_dir_name + L"_metadata.xml");
 
@@ -268,20 +268,20 @@ int BRKXMLReader::Preprocess()
 	return READER_OK;
 }
 
-BRKXMLReader::ImageInfo BRKXMLReader::ReadImageInfo(tinyxml2::XMLElement *infoNode)
+BRKXMLReader::ImageInfo BRKXMLReader::ReadImageInfo(tinyxml2::XMLElement* infoNode)
 {
 	ImageInfo iinfo;
 	int ival;
-	
-    string strValue;
-	
+
+	std::string strValue;
+
 	ival = STOI(infoNode->Attribute("nChannel"));
 	iinfo.nChannel = ival;
 
-    ival = STOI(infoNode->Attribute("nFrame"));
+	ival = STOI(infoNode->Attribute("nFrame"));
 	iinfo.nFrame = ival;
 
-    ival = STOI(infoNode->Attribute("nLevel"));
+	ival = STOI(infoNode->Attribute("nLevel"));
 	iinfo.nLevel = ival;
 
 	if (infoNode->Attribute("CopyableLv"))
@@ -295,11 +295,11 @@ BRKXMLReader::ImageInfo BRKXMLReader::ReadImageInfo(tinyxml2::XMLElement *infoNo
 	return iinfo;
 }
 
-void BRKXMLReader::ReadPyramid(tinyxml2::XMLElement *lvRootNode, vector<LevelInfo> &pylamid)
+void BRKXMLReader::ReadPyramid(tinyxml2::XMLElement* lvRootNode, std::vector<LevelInfo>& pylamid)
 {
 	int level;
 
-	tinyxml2::XMLElement *child = lvRootNode->FirstChildElement();
+	tinyxml2::XMLElement* child = lvRootNode->FirstChildElement();
 	while (child)
 	{
 		if (child->Name())
@@ -309,7 +309,7 @@ void BRKXMLReader::ReadPyramid(tinyxml2::XMLElement *lvRootNode, vector<LevelInf
 				level = STOI(child->Attribute("lv"));
 				if (level >= 0)
 				{
-					if(level + 1 > pylamid.size()) pylamid.resize(level + 1);
+					if (level + 1 > pylamid.size()) pylamid.resize(level + 1);
 					ReadLevel(child, pylamid[level]);
 				}
 			}
@@ -318,9 +318,9 @@ void BRKXMLReader::ReadPyramid(tinyxml2::XMLElement *lvRootNode, vector<LevelInf
 	}
 }
 
-void BRKXMLReader::ReadLevel(tinyxml2::XMLElement* lvNode, LevelInfo &lvinfo)
+void BRKXMLReader::ReadLevel(tinyxml2::XMLElement* lvNode, LevelInfo& lvinfo)
 {
-	string strValue;
+	std::string strValue;
 
 	lvinfo.imageW = STOI(lvNode->Attribute("imageW"));
 
@@ -344,12 +344,12 @@ void BRKXMLReader::ReadLevel(tinyxml2::XMLElement* lvNode, LevelInfo &lvinfo)
 	}
 	else lvinfo.file_type = BRICK_FILE_TYPE_NONE;
 
-	tinyxml2::XMLElement *child = lvNode->FirstChildElement();
+	tinyxml2::XMLElement* child = lvNode->FirstChildElement();
 	while (child)
 	{
 		if (child->Name())
 		{
-			if (strcmp(child->Name(), "Bricks") == 0){
+			if (strcmp(child->Name(), "Bricks") == 0) {
 				lvinfo.brick_baseW = STOI(child->Attribute("brick_baseW"));
 
 				lvinfo.brick_baseH = STOI(child->Attribute("brick_baseH"));
@@ -364,11 +364,11 @@ void BRKXMLReader::ReadLevel(tinyxml2::XMLElement* lvNode, LevelInfo &lvinfo)
 	}
 }
 
-void BRKXMLReader::ReadPackedBricks(tinyxml2::XMLElement* packNode, vector<BrickInfo *> &brks)
+void BRKXMLReader::ReadPackedBricks(tinyxml2::XMLElement* packNode, std::vector<BrickInfo*>& brks)
 {
 	int id;
-	
-	tinyxml2::XMLElement *child = packNode->FirstChildElement();
+
+	tinyxml2::XMLElement* child = packNode->FirstChildElement();
 	while (child)
 	{
 		if (child->Name())
@@ -377,7 +377,7 @@ void BRKXMLReader::ReadPackedBricks(tinyxml2::XMLElement* packNode, vector<Brick
 			{
 				id = STOI(child->Attribute("id"));
 
-				if(id + 1 > brks.size())
+				if (id + 1 > brks.size())
 					brks.resize(id + 1, NULL);
 
 				if (!brks[id]) brks[id] = new BrickInfo();
@@ -388,7 +388,7 @@ void BRKXMLReader::ReadPackedBricks(tinyxml2::XMLElement* packNode, vector<Brick
 	}
 }
 
-void BRKXMLReader::ReadBrick(tinyxml2::XMLElement* brickNode, BrickInfo &binfo)
+void BRKXMLReader::ReadBrick(tinyxml2::XMLElement* brickNode, BrickInfo& binfo)
 {
 	binfo.id = STOI(brickNode->Attribute("id"));
 
@@ -408,7 +408,7 @@ void BRKXMLReader::ReadBrick(tinyxml2::XMLElement* brickNode, BrickInfo &binfo)
 
 	binfo.fsize = STOI(brickNode->Attribute("size"));
 
-	tinyxml2::XMLElement *child = brickNode->FirstChildElement();
+	tinyxml2::XMLElement* child = brickNode->FirstChildElement();
 	while (child)
 	{
 		if (child->Name())
@@ -426,27 +426,27 @@ void BRKXMLReader::ReadBrick(tinyxml2::XMLElement* brickNode, BrickInfo &binfo)
 	}
 }
 
-void BRKXMLReader::Readbox(tinyxml2::XMLElement* boxNode, double &x0, double &y0, double &z0, double &x1, double &y1, double &z1)
+void BRKXMLReader::Readbox(tinyxml2::XMLElement* boxNode, double& x0, double& y0, double& z0, double& x1, double& y1, double& z1)
 {
 	x0 = STOD(boxNode->Attribute("x0"));
-	
+
 	y0 = STOD(boxNode->Attribute("y0"));
 
 	z0 = STOD(boxNode->Attribute("z0"));
 
 	x1 = STOD(boxNode->Attribute("x1"));
-    
-    y1 = STOD(boxNode->Attribute("y1"));
-    
-    z1 = STOD(boxNode->Attribute("z1"));
+
+	y1 = STOD(boxNode->Attribute("y1"));
+
+	z1 = STOD(boxNode->Attribute("z1"));
 }
 
-void BRKXMLReader::ReadFilenames(tinyxml2::XMLElement* fileRootNode, vector<vector<vector<flvr::FileLocInfo *>>> &filename)
+void BRKXMLReader::ReadFilenames(tinyxml2::XMLElement* fileRootNode, std::vector<std::vector<std::vector<flvr::FileLocInfo*>>>& filename)
 {
-	string str;
+	std::string str;
 	int frame, channel, id;
 
-	tinyxml2::XMLElement *child = fileRootNode->FirstChildElement();
+	tinyxml2::XMLElement* child = fileRootNode->FirstChildElement();
 	while (child)
 	{
 		if (child->Name())
@@ -459,15 +459,15 @@ void BRKXMLReader::ReadFilenames(tinyxml2::XMLElement* fileRootNode, vector<vect
 
 				id = STOI(child->Attribute("brickID"));
 
-				if(frame + 1 > filename.size())
+				if (frame + 1 > filename.size())
 					filename.resize(frame + 1);
-				if(channel + 1 > filename[frame].size())
+				if (channel + 1 > filename[frame].size())
 					filename[frame].resize(channel + 1);
-				if(id + 1 > filename[frame][channel].size())
+				if (id + 1 > filename[frame][channel].size())
 					filename[frame][channel].resize(id + 1, NULL);
 
 				if (!filename[frame][channel][id])
-						filename[frame][channel][id] = new flvr::FileLocInfo();
+					filename[frame][channel][id] = new flvr::FileLocInfo();
 
 				if (child->Attribute("filename")) //this option will be deprecated
 					str = child->Attribute("filename");
@@ -479,7 +479,7 @@ void BRKXMLReader::ReadFilenames(tinyxml2::XMLElement* fileRootNode, vector<vect
 				bool url = false;
 				bool rel = false;
 				auto pos_u = str.find("://");
-				if (pos_u != string::npos)
+				if (pos_u != std::string::npos)
 					url = true;
 				if (!url)
 				{
@@ -514,7 +514,7 @@ void BRKXMLReader::ReadFilenames(tinyxml2::XMLElement* fileRootNode, vector<vect
 				filename[frame][channel][id]->datasize = 0;
 				if (child->Attribute("datasize"))
 					filename[frame][channel][id]->datasize = STOI(child->Attribute("datasize"));
-				
+
 				if (child->Attribute("filetype"))
 				{
 					str = child->Attribute("filetype");
@@ -525,12 +525,12 @@ void BRKXMLReader::ReadFilenames(tinyxml2::XMLElement* fileRootNode, vector<vect
 				else
 				{
 					filename[frame][channel][id]->type = BRICK_FILE_TYPE_RAW;
-					wstring fname = filename[frame][channel][id]->filename;
+					std::wstring fname = filename[frame][channel][id]->filename;
 					auto pos = fname.find_last_of(L".");
-					if (pos != wstring::npos && pos < fname.length()-1)
+					if (pos != std::wstring::npos && pos < fname.length() - 1)
 					{
-						wstring ext = fname.substr(pos+1);
-						transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+						std::wstring ext = fname.substr(pos + 1);
+						std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
 						if (ext == L"jpg" || ext == L"jpeg")
 							filename[frame][channel][id]->type = BRICK_FILE_TYPE_JPEG;
 						else if (ext == L"zlib")
@@ -543,23 +543,23 @@ void BRKXMLReader::ReadFilenames(tinyxml2::XMLElement* fileRootNode, vector<vect
 	}
 }
 
-bool BRKXMLReader::loadMetadata(const wstring &file)
+bool BRKXMLReader::loadMetadata(const std::wstring& file)
 {
-	string str;
+	std::string str;
 
-	if (m_md_doc.LoadFile(ws2s(file).c_str()) != 0){
+	if (m_md_doc.LoadFile(ws2s(file).c_str()) != 0) {
 		return false;
 	}
-		
-	tinyxml2::XMLElement *root = m_md_doc.RootElement();
+
+	tinyxml2::XMLElement* root = m_md_doc.RootElement();
 	if (!root) return false;
 
-	tinyxml2::XMLElement *md_node = NULL;
+	tinyxml2::XMLElement* md_node = NULL;
 	if (strcmp(root->Name(), "Metadata") == 0)
 		md_node = root;
 	else
 	{
-		tinyxml2::XMLElement *child = root->FirstChildElement();
+		tinyxml2::XMLElement* child = root->FirstChildElement();
 		while (child)
 		{
 			if (child->Name() && strcmp(child->Name(), "Metadata") == 0)
@@ -578,7 +578,7 @@ bool BRKXMLReader::loadMetadata(const wstring &file)
 		m_metadata_id = s2ws(str);
 	}
 
-	tinyxml2::XMLElement *child = md_node->FirstChildElement();
+	tinyxml2::XMLElement* child = md_node->FirstChildElement();
 	while (child)
 	{
 		if (child->Name())
@@ -611,7 +611,7 @@ bool BRKXMLReader::loadMetadata(const wstring &file)
 	return true;
 }
 
-void BRKXMLReader::LoadROITree(tinyxml2::XMLElement *lvNode)
+void BRKXMLReader::LoadROITree(tinyxml2::XMLElement* lvNode)
 {
 	if (!lvNode || strcmp(lvNode->Name(), "ROI_Tree"))
 		return;
@@ -619,56 +619,56 @@ void BRKXMLReader::LoadROITree(tinyxml2::XMLElement *lvNode)
 	if (!m_roi_tree.empty()) m_roi_tree.clear();
 
 	int gid = -2;
-	LoadROITree_r(lvNode, m_roi_tree, wstring(L""), gid);
+	LoadROITree_r(lvNode, m_roi_tree, L"", gid);
 }
 
-void BRKXMLReader::LoadROITree_r(tinyxml2::XMLElement *lvNode, wstring& tree, const wstring& parent, int& gid)
+void BRKXMLReader::LoadROITree_r(tinyxml2::XMLElement* lvNode, std::wstring& tree, const std::wstring& parent, int& gid)
 {
-	tinyxml2::XMLElement *child = lvNode->FirstChildElement();
+	tinyxml2::XMLElement* child = lvNode->FirstChildElement();
 	while (child)
 	{
 		if (child->Name() && child->Attribute("name"))
 		{
 			try
 			{
-				wstring name = s2ws(child->Attribute("name"));
-				int r=0, g=0, b=0;
+				std::wstring name = s2ws(child->Attribute("name"));
+				int r = 0, g = 0, b = 0;
 				if (strcmp(child->Name(), "Group") == 0)
 				{
-					wstringstream wss;
+					std::wstringstream wss;
 					wss << (parent.empty() ? L"" : parent + L".") << gid;
-					wstring c_path = wss.str();
+					std::wstring c_path = wss.str();
 
 					tree += c_path + L"\n";
 					tree += s2ws(child->Attribute("name")) + L"\n";
-						
+
 					//id and color
-					wstringstream wss2;
+					std::wstringstream wss2;
 					wss2 << gid << L" " << r << L" " << g << L" " << b << L"\n";
 					tree += wss2.str();
-					
+
 					LoadROITree_r(child, tree, c_path, --gid);
 				}
 				if (strcmp(child->Name(), "ROI") == 0 && child->Attribute("id"))
 				{
-					string strid = child->Attribute("id");
+					std::string strid = child->Attribute("id");
 					int id = boost::lexical_cast<int>(strid);
 					if (id >= 0 && id < PALETTE_SIZE && child->Attribute("r") && child->Attribute("g") && child->Attribute("b"))
 					{
-						wstring c_path = (parent.empty() ? L"" : parent + L".") + s2ws(strid);
+						std::wstring c_path = (parent.empty() ? L"" : parent + L".") + s2ws(strid);
 
 						tree += c_path + L"\n";
 						tree += s2ws(child->Attribute("name")) + L"\n";
 
-						string strR = child->Attribute("r");
-						string strG = child->Attribute("g");
-						string strB = child->Attribute("b");
+						std::string strR = child->Attribute("r");
+						std::string strG = child->Attribute("g");
+						std::string strB = child->Attribute("b");
 						r = boost::lexical_cast<int>(strR);
 						g = boost::lexical_cast<int>(strG);
 						b = boost::lexical_cast<int>(strB);
 
 						//id and color
-						wstringstream wss;
+						std::wstringstream wss;
 						wss << id << L" " << r << L" " << g << L" " << b << L"\n";
 						tree += wss.str();
 					}
@@ -676,14 +676,14 @@ void BRKXMLReader::LoadROITree_r(tinyxml2::XMLElement *lvNode, wstring& tree, co
 			}
 			catch (boost::bad_lexical_cast e)
 			{
-				cerr << "BRKXMLReader::LoadROITree_r(XMLElement *lvNode, wstring& tree, const wstring& parent): bad_lexical_cast" << endl;
+				std::cerr << "BRKXMLReader::LoadROITree_r(XMLElement *lvNode, wstring& tree, const wstring& parent): bad_lexical_cast" << std::endl;
 			}
 		}
 		child = child->NextSiblingElement();
 	}
 }
 
-void BRKXMLReader::GetLandmark(int index, wstring &name, double &x, double &y, double &z, double &spcx, double &spcy, double &spcz)
+void BRKXMLReader::GetLandmark(int index, std::wstring& name, double& x, double& y, double& z, double& spcx, double& spcy, double& spcz)
 {
 	if (index < 0 || m_landmarks.size() <= index) return;
 
@@ -698,12 +698,12 @@ void BRKXMLReader::GetLandmark(int index, wstring &name, double &x, double &y, d
 
 void BRKXMLReader::SetSliceSeq(bool ss)
 {
-   //do nothing
+	//do nothing
 }
 
 bool BRKXMLReader::GetSliceSeq()
 {
-   return false;
+	return false;
 }
 
 void BRKXMLReader::SetChannSeq(bool cs)
@@ -728,22 +728,22 @@ int BRKXMLReader::GetDigitOrder()
 
 void BRKXMLReader::SetTimeSeq(bool ts)
 {
-   //do nothing
+	//do nothing
 }
 
 bool BRKXMLReader::GetTimeSeq()
 {
-   return false;
+	return false;
 }
 
-void BRKXMLReader::SetTimeId(wstring &id)
+void BRKXMLReader::SetTimeId(const std::wstring& id)
 {
-   m_time_id = id;
+	m_time_id = id;
 }
 
-wstring BRKXMLReader::GetTimeId()
+std::wstring BRKXMLReader::GetTimeId()
 {
-   return m_time_id;
+	return m_time_id;
 }
 
 void BRKXMLReader::SetCurTime(int t)
@@ -762,9 +762,9 @@ void BRKXMLReader::SetCurChan(int c)
 
 void BRKXMLReader::SetLevel(int lv)
 {
-	if(m_pyramid.empty()) return;
-	
-	if(lv < 0 || lv > m_level_num-1) return;
+	if (m_pyramid.empty()) return;
+
+	if (lv < 0 || lv > m_level_num - 1) return;
 	m_cur_level = lv;
 
 	m_xspc = m_pyramid[lv].xspc;
@@ -781,103 +781,103 @@ void BRKXMLReader::SetLevel(int lv)
 void BRKXMLReader::SetBatch(bool batch)
 {
 #ifdef _WIN32
-   wchar_t slash = L'\\';
+	wchar_t slash = L'\\';
 #else
-   wchar_t slash = L'/';
+	wchar_t slash = L'/';
 #endif
-   if (batch)
-   {
-      //read the directory info
-      wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(slash)) + slash;
-      FIND_FILES(search_path,L"*.vvd",m_batch_list,m_cur_batch);
-      m_batch = true;
-   }
-   else
-      m_batch = false;
+	if (batch)
+	{
+		//read the directory info
+		std::wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(slash)) + slash;
+		FIND_FILES(search_path, L"*.vvd", m_batch_list, m_cur_batch);
+		m_batch = true;
+	}
+	else
+		m_batch = false;
 }
 
 int BRKXMLReader::LoadBatch(int index)
 {
-   int result = -1;
-   if (index>=0 && index<(int)m_batch_list.size())
-   {
-      m_path_name = m_batch_list[index];
-      Preprocess();
-      result = index;
-      m_cur_batch = result;
-   }
-   else
-      result = -1;
+	int result = -1;
+	if (index >= 0 && index < (int)m_batch_list.size())
+	{
+		m_path_name = m_batch_list[index];
+		Preprocess();
+		result = index;
+		m_cur_batch = result;
+	}
+	else
+		result = -1;
 
-   return result;
+	return result;
 }
 
 int BRKXMLReader::LoadOffset(int offset)
 {
-   int result = m_cur_batch + offset;
+	int result = m_cur_batch + offset;
 
-   if (offset > 0)
-   {
-      if (result<(int)m_batch_list.size())
-      {
-         m_path_name = m_batch_list[result];
-         Preprocess();
-         m_cur_batch = result;
-      }
-      else if (m_cur_batch<(int)m_batch_list.size()-1)
-      {
-         result = (int)m_batch_list.size()-1;
-         m_path_name = m_batch_list[result];
-         Preprocess();
-         m_cur_batch = result;
-      }
-      else
-         result = -1;
-   }
-   else if (offset < 0)
-   {
-      if (result >= 0)
-      {
-         m_path_name = m_batch_list[result];
-         Preprocess();
-         m_cur_batch = result;
-      }
-      else if (m_cur_batch > 0)
-      {
-         result = 0;
-         m_path_name = m_batch_list[result];
-         Preprocess();
-         m_cur_batch = result;
-      }
-      else
-         result = -1;
-   }
-   else
-      result = -1;
+	if (offset > 0)
+	{
+		if (result < (int)m_batch_list.size())
+		{
+			m_path_name = m_batch_list[result];
+			Preprocess();
+			m_cur_batch = result;
+		}
+		else if (m_cur_batch < (int)m_batch_list.size() - 1)
+		{
+			result = (int)m_batch_list.size() - 1;
+			m_path_name = m_batch_list[result];
+			Preprocess();
+			m_cur_batch = result;
+		}
+		else
+			result = -1;
+	}
+	else if (offset < 0)
+	{
+		if (result >= 0)
+		{
+			m_path_name = m_batch_list[result];
+			Preprocess();
+			m_cur_batch = result;
+		}
+		else if (m_cur_batch > 0)
+		{
+			result = 0;
+			m_path_name = m_batch_list[result];
+			Preprocess();
+			m_cur_batch = result;
+		}
+		else
+			result = -1;
+	}
+	else
+		result = -1;
 
-   return result;
+	return result;
 }
 
 double BRKXMLReader::GetExcitationWavelength(int chan)
 {
-   return 0.0;
+	return 0.0;
 }
 
 //This function does not load image data into Nrrd.
-Nrrd *BRKXMLReader::Convert(int t, int c, bool get_max)
+Nrrd* BRKXMLReader::Convert(int t, int c, bool get_max)
 {
-	Nrrd *data = 0;
+	Nrrd* data = 0;
 
 	//if (m_max_value > 0.0)
 	//	m_scalar_scale = 65535.0 / m_max_value;
 	m_scalar_scale = 1.0;
 
-	if (m_xspc>0.0 && m_xspc<100.0 &&
-		m_yspc>0.0 && m_yspc<100.0)
+	if (m_xspc > 0.0 && m_xspc < 100.0 &&
+		m_yspc>0.0 && m_yspc < 100.0)
 	{
 		m_valid_spc = true;
-		if (m_zspc<=0.0 || m_zspc>100.0)
-			m_zspc = max(m_xspc, m_yspc);
+		if (m_zspc <= 0.0 || m_zspc > 100.0)
+			m_zspc = std::max(m_xspc, m_yspc);
 	}
 	else
 	{
@@ -887,120 +887,121 @@ Nrrd *BRKXMLReader::Convert(int t, int c, bool get_max)
 		m_zspc = 1.0;
 	}
 
-	if (t>=0 && t<m_time_num &&
-		c>=0 && c<m_chan_num &&
+	if (t >= 0 && t < m_time_num &&
+		c >= 0 && c < m_chan_num &&
 		m_slice_num>0 &&
 		m_x_size>0 &&
-		m_y_size>0)
+		m_y_size > 0)
 	{
 		char dummy = 0;
 		data = nrrdNew();
-		if(m_pyramid[m_cur_level].bit_depth == 8)nrrdWrap(data, &dummy, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-		else if(m_pyramid[m_cur_level].bit_depth == 16)nrrdWrap(data, &dummy, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-		else if(m_pyramid[m_cur_level].bit_depth == 32)nrrdWrap(data, &dummy, nrrdTypeFloat, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+		if (m_pyramid[m_cur_level].bit_depth == 8)nrrdWrap(data, &dummy, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+		else if (m_pyramid[m_cur_level].bit_depth == 16)nrrdWrap(data, &dummy, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+		else if (m_pyramid[m_cur_level].bit_depth == 32)nrrdWrap(data, &dummy, nrrdTypeFloat, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
 		nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-		nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
+		nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc * m_x_size, m_yspc * m_y_size, m_zspc * m_slice_num);
 		nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
 		nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
 		data->data = NULL;//dangerous//
-		
+
 		m_cur_chan = c;
 		m_cur_time = t;
 	}
 
-	if(get_max)
+	if (get_max)
 	{
-		if(m_pyramid[m_cur_level].bit_depth == 8) m_max_value = 255.0;
-		else if(m_pyramid[m_cur_level].bit_depth == 16) m_max_value = 65535.0;
-		else if(m_pyramid[m_cur_level].bit_depth == 32) m_max_value = 1.0;
+		if (m_pyramid[m_cur_level].bit_depth == 8) m_max_value = 255.0;
+		else if (m_pyramid[m_cur_level].bit_depth == 16) m_max_value = 65535.0;
+		else if (m_pyramid[m_cur_level].bit_depth == 32) m_max_value = 1.0;
 	}
 
 	return data;
 }
 
-wstring BRKXMLReader::GetCurDataName(int t, int c)
+std::wstring BRKXMLReader::GetCurDataName(int t, int c)
 {
 	return m_path_name;
 }
 
-wstring BRKXMLReader::GetCurMaskName(int t, int c)
+std::wstring BRKXMLReader::GetCurMaskName(int t, int c)
 {
-	wostringstream woss;
+	std::wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".msk";
-	wstring mask_name = woss.str();
+	std::wstring mask_name = woss.str();
 	return mask_name;
 }
 
-wstring BRKXMLReader::GetCurLabelName(int t, int c)
+std::wstring BRKXMLReader::GetCurLabelName(int t, int c)
 {
-	wostringstream woss;
+	std::wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".lbl";
-	wstring label_name = woss.str();
+	std::wstring label_name = woss.str();
 	return label_name;
 }
+
 flvr::FileLocInfo* BRKXMLReader::GetBrickFilePath(int fr, int ch, int id, int lv)
 {
 	int level = lv;
 	int frame = fr;
 	int channel = ch;
 	int brickID = id;
-	
-	if(lv < 0 || lv >= m_level_num) level = m_cur_level;
-	if(fr < 0 || fr >= m_time_num)  frame = m_cur_time;
-	if(ch < 0 || ch >= m_chan_num)	channel = m_cur_chan;
-	if(id < 0 || id >= m_pyramid[level].bricks.size()) brickID = 0;
-	
+
+	if (lv < 0 || lv >= m_level_num) level = m_cur_level;
+	if (fr < 0 || fr >= m_time_num)  frame = m_cur_time;
+	if (ch < 0 || ch >= m_chan_num)	channel = m_cur_chan;
+	if (id < 0 || id >= m_pyramid[level].bricks.size()) brickID = 0;
+
 	return m_pyramid[level].filename[frame][channel][brickID];
 }
 
-wstring BRKXMLReader::GetBrickFileName(int fr, int ch, int id, int lv)
+std::wstring BRKXMLReader::GetBrickFileName(int fr, int ch, int id, int lv)
 {
 	int level = lv;
 	int frame = fr;
 	int channel = ch;
 	int brickID = id;
-	
-	if(lv < 0 || lv >= m_level_num) level = m_cur_level;
-	if(fr < 0 || fr >= m_time_num)  frame = m_cur_time;
-	if(ch < 0 || ch >= m_chan_num)	channel = m_cur_chan;
-	if(id < 0 || id >= m_pyramid[level].bricks.size()) brickID = 0;
 
-	#ifdef _WIN32
+	if (lv < 0 || lv >= m_level_num) level = m_cur_level;
+	if (fr < 0 || fr >= m_time_num)  frame = m_cur_time;
+	if (ch < 0 || ch >= m_chan_num)	channel = m_cur_chan;
+	if (id < 0 || id >= m_pyramid[level].bricks.size()) brickID = 0;
+
+#ifdef _WIN32
 	wchar_t slash = L'\\';
 #else
 	wchar_t slash = L'/';
 #endif
-	if(m_isURL) slash = L'/';
+	if (m_isURL) slash = L'/';
 	//separate path and name
 	size_t pos = m_pyramid[level].filename[frame][channel][brickID]->filename.find_last_of(slash);
-	wstring name = m_pyramid[level].filename[frame][channel][brickID]->filename.substr(pos+1);
-	
+	std::wstring name = m_pyramid[level].filename[frame][channel][brickID]->filename.substr(pos + 1);
+
 	return name;
 }
 
 int BRKXMLReader::GetFileType(int lv)
 {
-	if(lv < 0 || lv > m_level_num-1) return m_file_type;
+	if (lv < 0 || lv > m_level_num - 1) return m_file_type;
 
 	return m_pyramid[lv].file_type;
 }
 
 void BRKXMLReader::OutputInfo()
 {
-	ofstream ofs;
+	std::ofstream ofs;
 	ofs.open("PyramidInfo.txt");
 
 	ofs << "nChannel: " << m_imageinfo.nChannel << "\n";
 	ofs << "nFrame: " << m_imageinfo.nFrame << "\n";
 	ofs << "nLevel: " << m_imageinfo.nLevel << "\n\n";
 
-	for(int i = 0; i < m_pyramid.size(); i++){
+	for (int i = 0; i < m_pyramid.size(); i++) {
 		ofs << "<Level: " << i << ">\n";
 		ofs << "\timageW: " << m_pyramid[i].imageW << "\n";
 		ofs << "\timageH: " << m_pyramid[i].imageH << "\n";
@@ -1013,8 +1014,8 @@ void BRKXMLReader::OutputInfo()
 		ofs << "\tbrick_baseD: " << m_pyramid[i].brick_baseD << "\n";
 		ofs << "\tbit_depth: " << m_pyramid[i].bit_depth << "\n";
 		ofs << "\tfile_type: " << m_pyramid[i].file_type << "\n\n";
-		for(int j = 0; j < m_pyramid[i].bricks.size(); j++){
-			ofs << "\tBrick: " << " id = " <<  m_pyramid[i].bricks[j]->id
+		for (int j = 0; j < m_pyramid[i].bricks.size(); j++) {
+			ofs << "\tBrick: " << " id = " << m_pyramid[i].bricks[j]->id
 				<< " w = " << m_pyramid[i].bricks[j]->x_size
 				<< " h = " << m_pyramid[i].bricks[j]->y_size
 				<< " d = " << m_pyramid[i].bricks[j]->z_size
@@ -1040,9 +1041,9 @@ void BRKXMLReader::OutputInfo()
 				<< " z1 = " << m_pyramid[i].bricks[j]->bz1 << "\n";
 		}
 		ofs << "\n";
-		for(int j = 0; j < m_pyramid[i].filename.size(); j++){
-			for(int k = 0; k < m_pyramid[i].filename[j].size(); k++){
-				for(int n = 0; n < m_pyramid[i].filename[j][k].size(); n++)
+		for (int j = 0; j < m_pyramid[i].filename.size(); j++) {
+			for (int k = 0; k < m_pyramid[i].filename[j].size(); k++) {
+				for (int n = 0; n < m_pyramid[i].filename[j][k].size(); n++)
 					ofs << "\t<Frame = " << j << " Channel = " << k << " ID = " << n << " Filepath = " << ws2s(m_pyramid[i].filename[j][k][n]->filename) << ">\n";
 			}
 		}
@@ -1050,7 +1051,7 @@ void BRKXMLReader::OutputInfo()
 	}
 
 	ofs << "Landmarks\n";
-	for(int i = 0; i < m_landmarks.size(); i++){
+	for (int i = 0; i < m_landmarks.size(); i++) {
 		ofs << "\tName: " << ws2s(m_landmarks[i].name);
 		ofs << " X: " << m_landmarks[i].x;
 		ofs << " Y: " << m_landmarks[i].y;
@@ -1063,11 +1064,11 @@ void BRKXMLReader::OutputInfo()
 	ofs.close();
 }
 
-void BRKXMLReader::build_bricks(vector<flvr::TextureBrick*> &tbrks, int lv)
+void BRKXMLReader::build_bricks(std::vector<flvr::TextureBrick*>& tbrks, int lv)
 {
 	int lev;
 
-	if(lv < 0 || lv > m_level_num-1) lev = m_cur_level;
+	if (lv < 0 || lv > m_level_num - 1) lev = m_cur_level;
 	else lev = lv;
 
 	// Initial brick size
@@ -1090,7 +1091,7 @@ void BRKXMLReader::build_bricks(vector<flvr::TextureBrick*> &tbrks, int lv)
 		numb[0] = m_pyramid[lev].bit_depth / 8;
 	else
 		numb[0] = 0;
-	
+
 	//further determine the max texture size
 //	if (flvr::TextureRenderer::get_mem_swap())
 //	{
@@ -1099,24 +1100,24 @@ void BRKXMLReader::build_bricks(vector<flvr::TextureBrick*> &tbrks, int lv)
 //			data_size > flvr::TextureRenderer::get_large_data_size())
 //			max_texture_size = flvr::TextureRenderer::get_force_brick_size();
 //	}
-	
-	if(bsize[0] > max_texture_size || bsize[1] > max_texture_size || bsize[2] > max_texture_size) return;
-	if(force_pow2 &&
+
+	if (bsize[0] > max_texture_size || bsize[1] > max_texture_size || bsize[2] > max_texture_size) return;
+	if (force_pow2 &&
 		(fluo::Pow2(bsize[0]) > static_cast<unsigned int>(bsize[0]) ||
-		 fluo::Pow2(bsize[1]) > static_cast<unsigned int>(bsize[1]) ||
-		 fluo::Pow2(bsize[2]) > static_cast<unsigned int>(bsize[2])))
+			fluo::Pow2(bsize[1]) > static_cast<unsigned int>(bsize[1]) ||
+			fluo::Pow2(bsize[2]) > static_cast<unsigned int>(bsize[2])))
 		return;
-	
-	if(!tbrks.empty())
+
+	if (!tbrks.empty())
 	{
-		for(int i = 0; i < tbrks.size(); i++)
+		for (int i = 0; i < tbrks.size(); i++)
 		{
 			tbrks[i]->freeBrkData();
 			delete tbrks[i];
 		}
 		tbrks.clear();
 	}
-	vector<BrickInfo *>::iterator bite = m_pyramid[lev].bricks.begin();
+	std::vector<BrickInfo*>::iterator bite = m_pyramid[lev].bricks.begin();
 	while (bite != m_pyramid[lev].bricks.end())
 	{
 		fluo::BBox tbox(fluo::Point((*bite)->tx0, (*bite)->ty0, (*bite)->tz0), fluo::Point((*bite)->tx1, (*bite)->ty1, (*bite)->tz1));
@@ -1133,20 +1134,20 @@ void BRKXMLReader::build_bricks(vector<flvr::TextureBrick*> &tbrks, int lv)
 		fluo::BBox dbox = fluo::BBox(fluo::Point(dx0, dy0, dz0), fluo::Point(dx1, dy1, dz1));
 
 		//numc? gm_nrrd?
-		flvr::TextureBrick *b = new flvr::TextureBrick(
-			0, 0, (*bite)->x_size, (*bite)->y_size, (*bite)->z_size, 1, numb, 
+		flvr::TextureBrick* b = new flvr::TextureBrick(
+			0, 0, (*bite)->x_size, (*bite)->y_size, (*bite)->z_size, 1, numb,
 			(*bite)->x_start, (*bite)->y_start, (*bite)->z_start,
 			(*bite)->x_size, (*bite)->y_size, (*bite)->z_size, bbox, tbox, dbox,
 			tbrks.size(), (*bite)->id, (*bite)->offset, (*bite)->fsize);
 		tbrks.push_back(b);
-		
+
 		bite++;
 	}
 
 	return;
 }
 
-void BRKXMLReader::build_pyramid(vector<flvr::Pyramid_Level> &pyramid, vector<vector<vector<vector<flvr::FileLocInfo *>>>> &filenames, int t, int c)
+void BRKXMLReader::build_pyramid(std::vector<flvr::Pyramid_Level>& pyramid, std::vector<std::vector<std::vector<std::vector<flvr::FileLocInfo*>>>>& filenames, int t, int c)
 {
 	if (!pyramid.empty())
 	{
@@ -1156,17 +1157,17 @@ void BRKXMLReader::build_pyramid(vector<flvr::Pyramid_Level> &pyramid, vector<ve
 			for (int j = 0; j < pyramid[i].bricks.size(); j++)
 				if (pyramid[i].bricks[j]) delete pyramid[i].bricks[j];
 		}
-		vector<flvr::Pyramid_Level>().swap(pyramid);
+		std::vector<flvr::Pyramid_Level>().swap(pyramid);
 	}
 
-	if(!filenames.empty())
+	if (!filenames.empty())
 	{
 		for (int i = 0; i < filenames.size(); i++)
 			for (int j = 0; j < filenames[i].size(); j++)
 				for (int k = 0; k < filenames[i][j].size(); k++)
 					for (int n = 0; n < filenames[i][j][k].size(); n++)
-					if (filenames[i][j][k][n]) delete filenames[i][j][k][n];
-		vector<vector<vector<vector<flvr::FileLocInfo *>>>>().swap(filenames);
+						if (filenames[i][j][k][n]) delete filenames[i][j][k][n];
+		std::vector<std::vector<std::vector<std::vector<flvr::FileLocInfo*>>>>().swap(filenames);
 	}
 
 	pyramid.resize(m_pyramid.size());
@@ -1184,15 +1185,15 @@ void BRKXMLReader::build_pyramid(vector<flvr::Pyramid_Level> &pyramid, vector<ve
 		pyramid[i].bszx = m_pyramid[i].brick_baseW;
 		pyramid[i].bszy = m_pyramid[i].brick_baseH;
 		pyramid[i].bszz = m_pyramid[i].brick_baseD;
-		pyramid[i].bnx = pyramid[i].bszx>1 ?
+		pyramid[i].bnx = pyramid[i].bszx > 1 ?
 			((pyramid[i].szx - 1) / (pyramid[i].bszx - 1) +
-			(((pyramid[i].szx - 1) % (pyramid[i].bszx - 1)) ? 1 : 0)) : 1;
-		pyramid[i].bny = pyramid[i].bszy>1 ?
+				(((pyramid[i].szx - 1) % (pyramid[i].bszx - 1)) ? 1 : 0)) : 1;
+		pyramid[i].bny = pyramid[i].bszy > 1 ?
 			((pyramid[i].szy - 1) / (pyramid[i].bszy - 1) +
-			(((pyramid[i].szy - 1) % (pyramid[i].bszy - 1)) ? 1 : 0)) : 1;
-		pyramid[i].bnz = pyramid[i].bszz>1 ?
+				(((pyramid[i].szy - 1) % (pyramid[i].bszy - 1)) ? 1 : 0)) : 1;
+		pyramid[i].bnz = pyramid[i].bszz > 1 ?
 			((pyramid[i].szz - 1) / (pyramid[i].bszz - 1) +
-			(((pyramid[i].szz - 1) % (pyramid[i].bszz - 1)) ? 1 : 0)) : 1;
+				(((pyramid[i].szz - 1) % (pyramid[i].bszz - 1)) ? 1 : 0)) : 1;
 	}
 
 	filenames.resize(m_pyramid.size());
@@ -1217,8 +1218,8 @@ void BRKXMLReader::build_pyramid(vector<flvr::Pyramid_Level> &pyramid, vector<ve
 
 void BRKXMLReader::SetInfo()
 {
-	wstringstream wss;
-	
+	std::wstringstream wss;
+
 	wss << L"------------------------\n";
 	wss << m_path_name << '\n';
 	wss << L"File type: VVD\n";

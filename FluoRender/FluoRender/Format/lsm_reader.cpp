@@ -66,7 +66,7 @@ LSMReader::~LSMReader()
 {
 }
 
-void LSMReader::SetFile(string &file)
+void LSMReader::SetFile(const std::string &file)
 {
 	if (!file.empty())
 	{
@@ -78,7 +78,7 @@ void LSMReader::SetFile(string &file)
 	m_id_string = m_path_name;
 }
 
-void LSMReader::SetFile(wstring &file)
+void LSMReader::SetFile(const std::wstring &file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;
@@ -647,14 +647,14 @@ int LSMReader::GetDigitOrder()
 	return 0;
 }
 
-void LSMReader::SetTimeId(wstring &id)
+void LSMReader::SetTimeId(const std::wstring &id)
 {
 	//do nothing
 }
 
-wstring LSMReader::GetTimeId()
+std::wstring LSMReader::GetTimeId()
 {
-	return wstring(L"");
+	return L"";
 }
 
 void LSMReader::SetBatch(bool batch)
@@ -800,29 +800,29 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
 	return data;
 }
 
-wstring LSMReader::GetCurDataName(int t, int c)
+std::wstring LSMReader::GetCurDataName(int t, int c)
 {
 	return m_path_name;
 }
 
-wstring LSMReader::GetCurMaskName(int t, int c)
+std::wstring LSMReader::GetCurMaskName(int t, int c)
 {
-	wostringstream woss;
+	std::wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".msk";
-	wstring mask_name = woss.str();
+	std::wstring mask_name = woss.str();
 	return mask_name;
 }
 
-wstring LSMReader::GetCurLabelName(int t, int c)
+std::wstring LSMReader::GetCurLabelName(int t, int c)
 {
-	wostringstream woss;
+	std::wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".lbl";
-	wstring label_name = woss.str();
+	std::wstring label_name = woss.str();
 	return label_name;
 }

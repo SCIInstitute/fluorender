@@ -34,8 +34,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
-using namespace std;
-
 namespace flvr
 {
 	MshShaderFactory MeshRenderer::msh_shader_factory_;

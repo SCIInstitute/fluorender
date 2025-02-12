@@ -191,7 +191,7 @@ int Interpolator::GetKeyType(int index)
 		return 0;
 }
 
-string Interpolator::GetKeyDesc(int index)
+std::string Interpolator::GetKeyDesc(int index)
 {
 	if (index>=0 && (size_t)index<m_key_list.size())
 		return m_key_list[index]->desc;

@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ClipPlanePanel.h>
 #include <MoviePanel.h>
 #include <TrackDlg.h>
+#include <compatibility.h>
 #include <wx/wfstream.h>
 
 Project::Project() :
@@ -44,7 +45,7 @@ Project::~Project()
 {
 }
 
-void Project::Open(wxString& filename)
+void Project::Open(const std::string& filename)
 {
 	MainFrame* frame = glbin_current.mainframe;
 	if (!frame)
@@ -165,6 +166,7 @@ void Project::Open(wxString& filename)
 				//path
 				if (fconfig.Read("path", &str))
 				{
+					std::string filepath = str.ToStdString();
 					int cur_chan = 0;
 					if (!fconfig.Read("cur_chan", &cur_chan))
 						if (fconfig.Read("tiff_chan", &cur_chan))
@@ -179,7 +181,7 @@ void Project::Open(wxString& filename)
 					glbin_settings.m_slice_sequence = slice_seq;
 					wxString time_id;
 					fconfig.Read("time_id", &time_id);
-					glbin_settings.m_time_id = time_id;
+					glbin_settings.m_time_id = time_id.ToStdString();
 					bool fp_convert = false;
 					double minv, maxv;
 					fconfig.Read("fp_convert", &fp_convert, false);
@@ -188,33 +190,33 @@ void Project::Open(wxString& filename)
 					glbin_settings.m_fp_convert = fp_convert;
 					glbin_settings.m_fp_min = minv;
 					glbin_settings.m_fp_max = maxv;
-					wxString suffix = str.Mid(str.Find('.', true)).MakeLower();
+					std::string suffix = GET_SUFFIX(filepath);
 					if (reader_type == READER_IMAGEJ_TYPE)
-						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_IMAGEJ, true, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_IMAGEJ, true, cur_chan, cur_time);
 					else if (suffix == ".nrrd" || suffix == ".msk" || suffix == ".lbl")
-						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_NRRD, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_NRRD, false, cur_chan, cur_time);
 					else if (suffix == ".tif" || suffix == ".tiff")
-						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_TIFF, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_TIFF, false, cur_chan, cur_time);
 					else if (suffix == ".oib")
-						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_OIB, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_OIB, false, cur_chan, cur_time);
 					else if (suffix == ".oif")
-						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_OIF, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_OIF, false, cur_chan, cur_time);
 					else if (suffix == ".lsm")
-						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_LSM, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_LSM, false, cur_chan, cur_time);
 					else if (suffix == ".xml")
-						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_PVXML, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_PVXML, false, cur_chan, cur_time);
 					else if (suffix == ".vvd")
-						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_BRKXML, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_BRKXML, false, cur_chan, cur_time);
 					else if (suffix == ".czi")
-						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_CZI, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_CZI, false, cur_chan, cur_time);
 					else if (suffix == ".nd2")
-						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_ND2, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_ND2, false, cur_chan, cur_time);
 					else if (suffix == ".lif")
-						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_LIF, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_LIF, false, cur_chan, cur_time);
 					else if (suffix == ".lof")
-						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_LOF, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_LOF, false, cur_chan, cur_time);
 					else if (suffix == ".mp4" || suffix == ".m4v" || suffix == ".mov" || suffix == ".avi" || suffix == ".wmv")
-						loaded_num = glbin_data_manager.LoadVolumeData(str, LOAD_TYPE_MPG, false, cur_chan, cur_time);
+						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_MPG, false, cur_chan, cur_time);
 				}
 				VolumeData* vd = 0;
 				if (loaded_num)
@@ -498,7 +500,7 @@ void Project::Open(wxString& filename)
 						if (fconfig.Read("mask", &str))
 						{
 							MSKReader msk_reader;
-							wstring maskname = str.ToStdWstring();
+							std::wstring maskname = str.ToStdWstring();
 							msk_reader.SetFile(maskname);
 							BaseReader* br = &msk_reader;
 							Nrrd* mask = br->Convert(true);
@@ -510,7 +512,7 @@ void Project::Open(wxString& filename)
 			}
 			tick_cnt++;
 		}
-		glbin_current.vol_data = glbin_data_manager.GetVolumeData(cur_vol_data);
+		glbin_current.vol_data = glbin_data_manager.GetVolumeData(cur_vol_data.ToStdString());
 	}
 	//mesh
 	if (fconfig.Exists("/data/mesh"))
@@ -529,7 +531,7 @@ void Project::Open(wxString& filename)
 				fconfig.SetPath(str);
 				if (fconfig.Read("path", &str))
 				{
-					glbin_data_manager.LoadMeshData(str);
+					glbin_data_manager.LoadMeshData(str.ToStdString());
 				}
 				MeshData* md = glbin_data_manager.GetLastMeshData();
 				if (md)
@@ -627,7 +629,7 @@ void Project::Open(wxString& filename)
 			}
 			tick_cnt++;
 		}
-		glbin_current.mesh_data = glbin_data_manager.GetMeshData(cur_mesh_data);
+		glbin_current.mesh_data = glbin_data_manager.GetMeshData(cur_mesh_data.ToStdString());
 	}
 	//annotations
 	if (fconfig.Exists("/data/annotations"))
@@ -643,11 +645,11 @@ void Project::Open(wxString& filename)
 				fconfig.SetPath(str);
 				if (fconfig.Read("path", &str))
 				{
-					glbin_data_manager.LoadAnnotations(str);
+					glbin_data_manager.LoadAnnotations(str.ToStdString());
 				}
 			}
 		}
-		glbin_current.ann_data = glbin_data_manager.GetAnnotations(cur_ann_data);
+		glbin_current.ann_data = glbin_data_manager.GetAnnotations(cur_ann_data.ToStdString());
 	}
 
 	bool bVal;
@@ -679,7 +681,7 @@ void Project::Open(wxString& filename)
 				{
 					if (fconfig.Read(wxString::Format("name%d", j), &str))
 					{
-						VolumeData* vd = glbin_data_manager.GetVolumeData(str);
+						VolumeData* vd = glbin_data_manager.GetVolumeData(str.ToStdString());
 						if (vd)
 							canvas->AddVolumeData(vd);
 					}
@@ -696,7 +698,7 @@ void Project::Open(wxString& filename)
 				{
 					if (fconfig.Read(wxString::Format("name%d", j), &str))
 					{
-						MeshData* md = glbin_data_manager.GetMeshData(str);
+						MeshData* md = glbin_data_manager.GetMeshData(str.ToStdString());
 						if (md)
 							canvas->AddMeshData(md);
 					}
@@ -725,7 +727,7 @@ void Project::Open(wxString& filename)
 							{
 								if (fconfig.Read("name", &str))
 								{
-									VolumeData* vd = glbin_data_manager.GetVolumeData(str);
+									VolumeData* vd = glbin_data_manager.GetVolumeData(str.ToStdString());
 									if (vd)
 										canvas->AddVolumeData(vd);
 								}
@@ -735,7 +737,7 @@ void Project::Open(wxString& filename)
 							{
 								if (fconfig.Read("name", &str))
 								{
-									MeshData* md = glbin_data_manager.GetMeshData(str);
+									MeshData* md = glbin_data_manager.GetMeshData(str.ToStdString());
 									if (md)
 										canvas->AddMeshData(md);
 								}
@@ -745,7 +747,7 @@ void Project::Open(wxString& filename)
 							{
 								if (fconfig.Read("name", &str))
 								{
-									Annotations* ann = glbin_data_manager.GetAnnotations(str);
+									Annotations* ann = glbin_data_manager.GetAnnotations(str.ToStdString());
 									if (ann)
 										canvas->AddAnnotations(ann);
 								}
@@ -810,7 +812,7 @@ void Project::Open(wxString& filename)
 											{
 												if (fconfig.Read(wxString::Format("vol_%d", k), &str))
 												{
-													VolumeData* vd = glbin_data_manager.GetVolumeData(str);
+													VolumeData* vd = glbin_data_manager.GetVolumeData(str.ToStdString());
 													if (vd)
 													{
 														group->InsertVolumeData(k - 1, vd);
@@ -852,7 +854,7 @@ void Project::Open(wxString& filename)
 											{
 												if (fconfig.Read(wxString::Format("mesh_%d", k), &str))
 												{
-													MeshData* md = glbin_data_manager.GetMeshData(str);
+													MeshData* md = glbin_data_manager.GetMeshData(str.ToStdString());
 													if (md)
 													{
 														group->InsertMeshData(k - 1, md);
@@ -1355,7 +1357,7 @@ void Project::Open(wxString& filename)
 	frame->UpdateProps({}, 0, 0);
 }
 
-void Project::Save(wxString& filename, bool inc)
+void Project::Save(const std::string& filename, bool inc)
 {
 	MainFrame* frame = glbin_current.mainframe;
 	if (!frame)
@@ -1442,7 +1444,7 @@ void Project::Save(wxString& filename, bool inc)
 				new_folder = filename2 + "_files";
 				MkDirW(new_folder.ToStdWstring());
 				str = new_folder + GETSLASH() + vd->GetName() + ".tif";
-				vd->Save(str, 0, 3, false,
+				vd->Save(str.ToStdString(), 0, 3, false,
 					false, 0, false, glbin_settings.m_save_compress,
 					fluo::Point(), fluo::Quaternion(), fluo::Point(), false);
 				fconfig.Write("path", str);
@@ -1621,7 +1623,7 @@ void Project::Save(wxString& filename, bool inc)
 				new_folder = filename2 + "_files";
 				MkDirW(new_folder.ToStdWstring());
 				str = new_folder + GETSLASH() + md->GetName() + ".obj";
-				md->Save(str);
+				md->Save(str.ToStdString());
 			}
 			str = wxString::Format("/data/mesh/%d", i);
 			fconfig.SetPath(str);
@@ -1688,7 +1690,7 @@ void Project::Save(wxString& filename, bool inc)
 				new_folder = filename2 + "_files";
 				MkDirW(new_folder.ToStdWstring());
 				str = new_folder + GETSLASH() + ann->GetName() + ".txt";
-				ann->Save(str);
+				ann->Save(str.ToStdString());
 			}
 			str = wxString::Format("/data/annotations/%d", i);
 			fconfig.SetPath(str);
@@ -2017,7 +2019,7 @@ void Project::Save(wxString& filename, bool inc)
 	SaveConfig(fconfig, filename2);
 
 	SetProgress(0, "");
-	glbin_data_manager.SetProjectPath(filename2);
+	glbin_data_manager.SetProjectPath(filename2.ToStdString());
 
 	frame->UpdateProps({ gstListCtrl });
 }

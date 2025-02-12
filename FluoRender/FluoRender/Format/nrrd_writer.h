@@ -39,7 +39,7 @@ public:
 	void SetData(Nrrd* data);
 	void SetSpacings(double spcx, double spcy, double spcz);
 	void SetCompression(bool value);
-	void Save(wstring filename, int mode);
+	void Save(const std::wstring& filename, int mode);
 
 private:
 	Nrrd* m_data;

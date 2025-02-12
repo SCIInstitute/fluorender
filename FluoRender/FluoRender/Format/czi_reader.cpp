@@ -84,7 +84,7 @@ CZIReader::~CZIReader()
 {
 }
 
-void CZIReader::SetFile(string &file)
+void CZIReader::SetFile(const std::string &file)
 {
 	if (!file.empty())
 	{
@@ -96,7 +96,7 @@ void CZIReader::SetFile(string &file)
 	m_id_string = m_path_name;
 }
 
-void CZIReader::SetFile(wstring &file)
+void CZIReader::SetFile(const std::wstring &file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;
@@ -165,14 +165,14 @@ int CZIReader::GetDigitOrder()
 	return 0;
 }
 
-void CZIReader::SetTimeId(wstring &id)
+void CZIReader::SetTimeId(const std::wstring &id)
 {
 	//do nothing
 }
 
-wstring CZIReader::GetTimeId()
+std::wstring CZIReader::GetTimeId()
 {
-	return wstring(L"");
+	return L"";
 }
 
 void CZIReader::SetBatch(bool batch)
@@ -283,30 +283,30 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 	return data;
 }
 
-wstring CZIReader::GetCurDataName(int t, int c)
+std::wstring CZIReader::GetCurDataName(int t, int c)
 {
 	return m_path_name;
 }
 
-wstring CZIReader::GetCurMaskName(int t, int c)
+std::wstring CZIReader::GetCurMaskName(int t, int c)
 {
-	wostringstream woss;
+	std::wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".msk";
-	wstring mask_name = woss.str();
+	std::wstring mask_name = woss.str();
 	return mask_name;
 }
 
-wstring CZIReader::GetCurLabelName(int t, int c)
+std::wstring CZIReader::GetCurLabelName(int t, int c)
 {
-	wostringstream woss;
+	std::wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".lbl";
-	wstring label_name = woss.str();
+	std::wstring label_name = woss.str();
 	return label_name;
 }
 

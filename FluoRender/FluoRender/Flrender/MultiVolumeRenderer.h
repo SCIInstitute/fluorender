@@ -36,8 +36,6 @@
 #include <VolumeRenderer.h>
 #include <vector>
 
-using namespace std;
-
 namespace flvr
 {
 	class Framebuffer;

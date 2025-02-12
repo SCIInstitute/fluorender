@@ -29,10 +29,10 @@ DEALINGS IN THE SOFTWARE.
 #include <JVMInitializer.h>
 #include <SettingDlg.h>
 #include <Debug.h>
-#include <wx/stdpaths.h>
 #include <wx/dir.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <filesystem>
 
 JVMInitializer* JVMInitializer::m_pJVMInstance = nullptr;
 JavaVM* JVMInitializer::m_pJvm = nullptr;
@@ -238,13 +238,13 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args)
 	DBGPRINT(L"%lsIJ\n", s2ws(jvm_ij_path).c_str());
 	DBGPRINT(L"%ls\n", s2ws(jvm_bioformats_path).c_str());
 	DBGPRINT(L"\n");
-	using namespace std;
+
 	JavaVMOption* options = new JavaVMOption[3];
 	//Geting absolute path to class file.
-	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-	exePath = wxPathOnly(exePath);
-	string imageJPath = "-Djava.class.path=";
-	imageJPath += exePath.ToStdString() + GETSLASHA() + "Java_Code" + GETSLASHA() + getPathSeparator();
+	std::filesystem::path currentPath = std::filesystem::current_path();
+	std::string exePath = currentPath.string();
+	std::string imageJPath = "-Djava.class.path=";
+	imageJPath += exePath + GETSLASHA() + "Java_Code" + GETSLASHA() + getPathSeparator();
 	imageJPath.append(jvm_ij_path + getPathSeparator());
 	imageJPath.append(jvm_bioformats_path);
 

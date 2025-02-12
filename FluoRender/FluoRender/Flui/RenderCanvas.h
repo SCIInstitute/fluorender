@@ -114,8 +114,6 @@ DEALINGS IN THE SOFTWARE.
 
 #define ID_ftrigger	0
 
-using namespace std;
-
 class MainFrame;
 class RenderViewPanel;
 class RenderCanvas : public wxGLCanvas
@@ -821,8 +819,8 @@ public:
 	bool m_disp_scale_bar_text;
 	double m_sb_length;
 	int m_sb_unit;
-	wxString m_sb_text;
-	wxString m_sb_num;
+	std::string m_sb_text;
+	std::string m_sb_num;
 	double m_sb_height;
 	//ortho size
 	double m_ortho_left;

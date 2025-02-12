@@ -30,9 +30,9 @@ DEALINGS IN THE SOFTWARE.
 #include <MainSettings.h>
 #include <Names.h>
 #include <compatibility.h>
-#include <wx/stdpaths.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
+#include <filesystem>
 
 MainSettings::MainSettings()
 {
@@ -194,13 +194,14 @@ MainSettings::~MainSettings()
 
 void MainSettings::Read()
 {
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	wxString dft = expath + GETSLASH() + "fluorender.ini";
+	std::filesystem::path p = std::filesystem::current_path();
+	p /= "fluorender.ini";
+	std::string dft = p.string();
 	wxFileInputStream is(dft);
 	if (!is.IsOk())
 		return;
 	wxFileConfig fconfig(is);
+	wxString str;
 
 	//project
 	if (fconfig.Exists("/project"))
@@ -208,7 +209,8 @@ void MainSettings::Read()
 		fconfig.SetPath("/project");
 		fconfig.Read("save project", &m_prj_save, false);
 		fconfig.Read("inc save", &m_prj_save_inc, false);
-		fconfig.Read("time id", &m_time_id, "_T");
+		fconfig.Read("time id", &str, "_T");
+		m_time_id = str.ToStdString();
 		fconfig.Read("save compress", &m_save_compress, false);
 		fconfig.Read("override vox", &m_override_vox, true);
 		fconfig.Read("last tool", &m_last_tool, 0);
@@ -231,7 +233,8 @@ void MainSettings::Read()
 		fconfig.Read("dpi", &m_dpi, 72.0);
 		fconfig.Read("rt compress", &m_realtime_compress, false);
 		fconfig.Read("mov bitrate", &m_mov_bitrate, 20.0);
-		fconfig.Read("mov filename", &m_mov_filename, "output.mov");
+		fconfig.Read("mov filename", &str, "output.mov");
+		m_mov_filename = str.ToStdString();
 		fconfig.Read("fp convert", &m_fp_convert, false);
 		fconfig.Read("fp min", &m_fp_min, 0);
 		fconfig.Read("fp max", &m_fp_max, 1);
@@ -242,7 +245,8 @@ void MainSettings::Read()
 	{
 		fconfig.SetPath("/script");
 		fconfig.Read("script break", &m_script_break, true);
-		fconfig.Read("script file", &m_script_file, "");
+		fconfig.Read("script file", &str, "");
+		m_mov_filename = str.ToStdString();
 	}
 	//ui
 	if (fconfig.Exists("/ui"))
@@ -305,7 +309,6 @@ void MainSettings::Read()
 		fconfig.Read("mv hmd", &m_mv_hmd, true);
 		fconfig.Read("sbs enable", &m_sbs, false);
 		fconfig.Read("eye dist", &m_eye_dist, 20.0);
-		wxString str;
 		fconfig.Read("holo ip", &str, "192.168.137.78");
 		m_holo_ip = str.ToStdString();
 		fconfig.Read("hologram debug", &m_hologram_debug, false);
@@ -319,7 +322,8 @@ void MainSettings::Read()
 	if (fconfig.Exists("/font"))
 	{
 		fconfig.SetPath("/font");
-		fconfig.Read("font file", &m_font_file, "");
+		fconfig.Read("font file", &str, "");
+		m_font_file = str.ToStdString();
 		fconfig.Read("text size", &m_text_size, 12);
 		fconfig.Read("text color", &m_text_color, 0);
 	}
@@ -412,15 +416,17 @@ void MainSettings::Read()
 	if (fconfig.Exists("/java"))
 	{
 		fconfig.SetPath("/java");
-		fconfig.Read("jvm_path", &m_jvm_path, "");
-		fconfig.Read("ij_path", &m_ij_path, "");
-		fconfig.Read("bioformats_path", &m_bioformats_path, "");
+		fconfig.Read("jvm_path", &str, "");
+		m_jvm_path = str.ToStdString();
+		fconfig.Read("ij_path", &str, "");
+		m_ij_path = str.ToStdString();
+		fconfig.Read("bioformats_path", &str, "");
+		m_bioformats_path = str.ToStdString();
 		fconfig.Read("ij_mode", &m_ij_mode, 0);
 	}
 	//machine learning settings
 	if (fconfig.Exists("/ml"))
 	{
-		wxString str;
 		fconfig.SetPath("/ml");
 		fconfig.Read("cg_table", &str, "");
 		m_cg_table = str.ToStdString();
@@ -463,7 +469,7 @@ void MainSettings::Save()
 	fconfig.SetPath("/project");
 	fconfig.Write("save project", m_prj_save);
 	fconfig.Write("inc save", m_prj_save_inc);
-	fconfig.Write("time id", m_time_id);
+	fconfig.Write("time id", wxString(m_time_id));
 	fconfig.Write("save compress", m_save_compress);
 	fconfig.Write("override vox", m_override_vox);
 	fconfig.Write("last tool", m_last_tool);
@@ -484,7 +490,7 @@ void MainSettings::Save()
 	fconfig.Write("dpi", m_dpi);
 	fconfig.Write("rt compress", m_realtime_compress);
 	fconfig.Write("mov bitrate", m_mov_bitrate);
-	fconfig.Write("mov filename", m_mov_filename);
+	fconfig.Write("mov filename", wxString(m_mov_filename));
 	fconfig.Write("fp convert", m_fp_convert);
 	fconfig.Write("fp min", m_fp_min);
 	fconfig.Write("fp max", m_fp_max);
@@ -493,7 +499,7 @@ void MainSettings::Save()
 	//script
 	fconfig.SetPath("/script");
 	fconfig.Write("script break", m_script_break);
-	fconfig.Write("script file", m_script_file);
+	fconfig.Write("script file", wxString(m_script_file));
 
 	//ui
 	fconfig.SetPath("/ui");
@@ -554,7 +560,7 @@ void MainSettings::Save()
 
 	//font
 	fconfig.SetPath("/font");
-	fconfig.Write("font file", m_font_file);
+	fconfig.Write("font file", wxString(m_font_file));
 	fconfig.Write("text size", m_text_size);
 	fconfig.Write("text color", m_text_color);
 
@@ -633,9 +639,9 @@ void MainSettings::Save()
 
 	// java
 	fconfig.SetPath("/java");
-	fconfig.Write("jvm_path", m_jvm_path);
-	fconfig.Write("ij_path", m_ij_path);
-	fconfig.Write("bioformats_path", m_bioformats_path);
+	fconfig.Write("jvm_path", wxString(m_jvm_path));
+	fconfig.Write("ij_path", wxString(m_ij_path));
+	fconfig.Write("bioformats_path", wxString(m_bioformats_path));
 	fconfig.Write("ij_mode", m_ij_mode);
 
 	//machine learning settings
@@ -659,9 +665,9 @@ void MainSettings::Save()
 	m_movie_def.Save(fconfig);
 	m_colocal_def.Save(fconfig);
 
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	wxString dft = expath + GETSLASH() + "fluorender.ini";
+	std::filesystem::path p = std::filesystem::current_path();
+	p /= "fluorender.ini";
+	std::string dft = p.string();
 	SaveConfig(fconfig, dft);
 }
 

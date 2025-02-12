@@ -109,7 +109,7 @@ protected:
 	std::vector<VolumeLoaderData> m_queued;
 	std::vector<VolumeDecompressorData> m_decomp_queues;
 	std::vector<VolumeDecompressorThread *> m_decomp_threads;
-	unordered_map<flvr::TextureBrick*, VolumeLoaderData> m_loaded;
+	std::unordered_map<flvr::TextureBrick*, VolumeLoaderData> m_loaded;
 	int m_running_decomp_th;
 	int m_max_decomp_th;
 	bool m_valid;

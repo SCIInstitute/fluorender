@@ -37,8 +37,6 @@
 
 namespace flvr
 {
-	using namespace std;
-
 	class Texture 
 	{
 	public:
@@ -51,7 +49,7 @@ namespace flvr
 		bool build(Nrrd* val, Nrrd* grad,
 			double vmn, double vmx,
 			double gmn, double gmx,
-			vector<flvr::TextureBrick*>* brks = NULL);
+			std::vector<flvr::TextureBrick*>* brks = NULL);
 
 		inline fluo::Vector res() { return fluo::Vector(nx_, ny_, nz_); }
 		inline int nx() { return nx_; }
@@ -132,10 +130,10 @@ namespace flvr
 		inline void set_transform(fluo::Transform tform) { transform_ = tform; }
 
 		// get sorted bricks
-		vector<TextureBrick*>* get_sorted_bricks(
+		std::vector<TextureBrick*>* get_sorted_bricks(
 			fluo::Ray& view, bool is_orthographic = false);
 		//get closest bricks
-		vector<TextureBrick*>* get_closest_bricks(
+		std::vector<TextureBrick*>* get_closest_bricks(
 			fluo::Point& center, int quota, bool skip,
 			fluo::Ray& view, bool is_orthographic = false);
 		//set sort bricks
@@ -143,12 +141,12 @@ namespace flvr
 		void reset_sort_bricks() {sort_bricks_ = false;}
 		bool get_sort_bricks() {return sort_bricks_;}
 		// load the bricks independent of the view
-		vector<TextureBrick*>* get_bricks();
+		std::vector<TextureBrick*>* get_bricks();
 		//get bricks sorted by id
-		vector<TextureBrick*>* get_bricks_id();
+		std::vector<TextureBrick*>* get_bricks_id();
 		int get_brick_num() {return int((*bricks_).size());}
 		//quota bricks
-		vector<TextureBrick*>* get_quota_bricks();
+		std::vector<TextureBrick*>* get_quota_bricks();
 
 		// Tests the bounding box against the current MODELVIEW and
 		// PROJECTION matrices to determine if it is within the viewport.
@@ -295,15 +293,15 @@ namespace flvr
 		int GetLevelNum() { return static_cast<int>(pyramid_.size()); }
 		void SetCopyableLevel(int lv) { pyramid_copy_lv_ = lv; }
 		int GetCopyableLevel() { return pyramid_copy_lv_; }
-		bool buildPyramid(vector<Pyramid_Level> &pyramid, vector<vector<vector<vector<FileLocInfo *>>>> &filenames, bool useURL = false);
+		bool buildPyramid(std::vector<Pyramid_Level> &pyramid, std::vector<std::vector<std::vector<std::vector<FileLocInfo *>>>> &filenames, bool useURL = false);
 		void setLevel(int lv);
-		void set_data_file(vector<FileLocInfo *> *fname, int type);
+		void set_data_file(std::vector<FileLocInfo *> *fname, int type);
 		bool isBrxml() { return brkxml_; }
 		FileLocInfo *GetFileName(int id);
 		void set_FrameAndChannel(int fr, int ch);
 
 	protected:
-		void build_bricks(vector<TextureBrick*> &bricks,
+		void build_bricks(std::vector<TextureBrick*> &bricks,
 			int nx, int ny, int nz,
 			int nc, int* nb);
 
@@ -312,9 +310,9 @@ namespace flvr
 		//expected brick size, 0: ignored
 		int brick_size_;
 		//! data carved up to texture memory sized chunks.
-		vector<TextureBrick*>						*bricks_;
+		std::vector<TextureBrick*>						*bricks_;
 		//for limited number of bricks during interactions
-		vector<TextureBrick*>						quota_bricks_;
+		std::vector<TextureBrick*>						quota_bricks_;
 		//sort texture brick
 		bool sort_bricks_;
 		//! data size
@@ -370,7 +368,7 @@ namespace flvr
 		//actual data
 		Nrrd* data_[TEXTURE_MAX_COMPONENTS];
 		//undos for mask
-		vector<void*> mask_undos_;
+		std::vector<void*> mask_undos_;
 		int mask_undo_pointer_;
 
 		//for brkxml
@@ -383,14 +381,14 @@ namespace flvr
 		int pyramid_copy_lv_;
 		int filetype_;
 
-		vector<Pyramid_Level> pyramid_;
-		vector<vector<vector<vector<FileLocInfo *>>>> filenames_;
+		std::vector<Pyramid_Level> pyramid_;
+		std::vector<std::vector<std::vector<std::vector<FileLocInfo *>>>> filenames_;
 
-		vector<FileLocInfo *> *filename_;
+		std::vector<FileLocInfo *> *filename_;
 		void clearPyramid();
 
 		//used when brkxml_ is not equal to false.
-		vector<TextureBrick*> default_vec_;
+		std::vector<TextureBrick*> default_vec_;
 
 		//for view testing
 		fluo::Transform mv_;
