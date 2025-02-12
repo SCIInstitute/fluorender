@@ -203,7 +203,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		}
 
 		//recalculate range
-		vector<fluo::Plane*> *planes =
+		std::vector<fluo::Plane*> *planes =
 			m_input->GetVR()->get_planes();
 		fluo::Plane p[6];
 		int np = int(planes->size());
@@ -391,7 +391,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		if (!m_result)
 		{
 			m_result = new VolumeData();
-			wxString name, path;
+			std::string name, path;
 			if (type == SDT_Data)
 				m_result->Load(nrrd_result, name, path);
 		}

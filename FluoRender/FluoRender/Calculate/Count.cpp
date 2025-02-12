@@ -173,7 +173,7 @@ void CountVoxels::Count()
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;
-	string name = "kernel_0";
+	std::string name = "kernel_0";
 	if (kernel_prog->valid())
 		kernel_index = kernel_prog->findKernel(name);
 	else

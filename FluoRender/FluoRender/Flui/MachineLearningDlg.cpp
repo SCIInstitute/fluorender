@@ -114,8 +114,8 @@ MachineLearningPanel::MachineLearningPanel(
 		0, "MachineLearningPanel"),
 	m_record(false)
 {
-	m_exepath = wxStandardPaths::Get().GetExecutablePath();
-	m_exepath = wxPathOnly(m_exepath);
+	std::filesystem::path p = std::filesystem::current_path();
+	m_exepath = p.string();
 }
 
 MachineLearningPanel::~MachineLearningPanel()

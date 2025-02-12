@@ -1629,7 +1629,7 @@ void TreePanel::OnSelChanged(wxTreeEvent& event)
 	fluo::ValueCollection vc;
 
 	//select data
-	wxString name = m_datatree->GetItemText(sel_item);
+	std::string name = m_datatree->GetItemText(sel_item).ToStdString();
 	LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
 
 	if (item_data)
@@ -1668,7 +1668,7 @@ void TreePanel::OnSelChanged(wxTreeEvent& event)
 			break;
 		case 5://volume group
 		{
-			wxString par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item));
+			std::string par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item)).ToStdString();
 			RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
 			if (view)
 			{

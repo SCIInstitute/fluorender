@@ -131,7 +131,7 @@ void CalculationDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		return;
 	bool update_all = vc.empty();
 
-	wxString str;
+	std::string str;
 	if (update_all || FOUND_VALUE(gstVolumeA))
 	{
 		VolumeData* vd = glbin_vol_calculator.GetVolumeA();
@@ -212,8 +212,8 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent& event)
 		return;
 
 	flrd::CombineList Op;
-	wxString name = group->GetName() + "_combined";
-	Op.SetName(name.ToStdString());
+	std::string name = group->GetName() + "_combined";
+	Op.SetName(name);
 	std::list<VolumeData*> channs;
 	for (int i = 0; i < group->GetVolumeNum(); ++i)
 	{
@@ -234,7 +234,7 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent& event)
 	if (results.empty())
 		return;
 
-	wxString group_name = "";
+	std::string group_name = "";
 	group = 0;
 	VolumeData* volume = 0;
 	for (auto i = results.begin(); i != results.end(); ++i)

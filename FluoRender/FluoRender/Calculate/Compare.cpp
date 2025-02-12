@@ -639,7 +639,7 @@ void ChannelCompare::Product()
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;
-	string name = "kernel_0";
+	std::string name = "kernel_0";
 	if (m_use_mask)
 	{
 		if (m_int_weighted)
@@ -747,7 +747,7 @@ void ChannelCompare::MinValue()
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;
-	string name = "kernel_0";
+	std::string name = "kernel_0";
 	if (m_use_mask)
 	{
 		if (m_int_weighted)
@@ -855,7 +855,7 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;
-	string name = "kernel_0";
+	std::string name = "kernel_0";
 	if (m_use_mask)
 	{
 		if (m_int_weighted)
@@ -969,7 +969,7 @@ void ChannelCompare::Average(float weight, flvr::Argument& avg)
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;
-	string name = "kernel_0";
+	std::string name = "kernel_0";
 	if (weight > 0.0)
 		name = "kernel_1";
 	if (kernel_prog->valid())

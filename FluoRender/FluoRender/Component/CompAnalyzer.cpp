@@ -933,7 +933,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 
 void ComponentAnalyzer::OutputCompListStr(std::string &str, int verbose, std::string comp_header)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 	OutputCompListStream(oss, verbose, comp_header);
 	str = oss.str();
 }
@@ -1109,7 +1109,7 @@ bool ComponentAnalyzer::OutputAnnotations()
 		Analyze(true);
 
 	std::string sinfo;
-	ostringstream oss;
+	std::ostringstream oss;
 	std::string str;
 
 	Annotations* ann = new Annotations();
@@ -1170,7 +1170,7 @@ bool ComponentAnalyzer::OutputChannels()
 		break;
 	}
 
-	wxString group_name = "";
+	std::string group_name = "";
 	DataGroup* group = 0;
 	RenderCanvas* view = glbin_current.canvas;
 	if (!view)
@@ -2035,7 +2035,7 @@ unsigned int ComponentAnalyzer::GetNonconflictId(
 void ComponentAnalyzer::FindCelps(CelpList& list,
 	CelpListIter& it, bool links)
 {
-	list.insert(pair<unsigned long long, flrd::Celp>
+	list.insert(std::pair<unsigned long long, flrd::Celp>
 		(it->second->GetEId(), it->second));
 
 	if (links)
@@ -2049,7 +2049,7 @@ void ComponentAnalyzer::FindCelps(CelpList& list,
 			for (auto it2 = links.begin();
 				it2 != links.end(); ++it2)
 			{
-				list.insert(pair<unsigned long long, flrd::Celp>
+				list.insert(std::pair<unsigned long long, flrd::Celp>
 					(it2->second->GetEId(), it2->second));
 			}
 		}

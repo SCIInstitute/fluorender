@@ -44,7 +44,6 @@ DEALINGS IN THE SOFTWARE.
 #include <PyBase.h>
 #include <compatibility.h>
 #include <wx/filefn.h>
-#include <wx/stdpaths.h>
 #include <wx/mimetype.h>
 #include <iostream>
 #include <string> 
@@ -73,8 +72,8 @@ ScriptProc::~ScriptProc()
 
 void ScriptProc::LoadScriptFile()
 {
-	wxString scriptfile = glbin_settings.m_script_file;
-	if (!scriptfile.IsEmpty() &&
+	std::string scriptfile = glbin_settings.m_script_file;
+	if (!scriptfile.empty() &&
 		m_fconfig_name != scriptfile)
 	{
 		m_fconfig_name = scriptfile;
@@ -353,37 +352,36 @@ int ScriptProc::GetTimeNum()
 	return 0;
 }
 
-wxString ScriptProc::GetInputFile(const wxString &str, const wxString &subd)
+std::string ScriptProc::GetInputFile(const std::string &str, const std::string &subd)
 {
-	wxString result = str;
+	std::string result = str;
 	bool exist = false;
-	if (result.IsEmpty())
+	if (result.empty())
 		return result;
-	exist = wxFileExists(result);
+	exist = std::filesystem::exists(result);
 	if (!exist)
 	{
 		//find in default folder
-		std::wstring name = result.ToStdWstring();
-		name = GET_NAME(name);
-		wxString path = wxStandardPaths::Get().GetExecutablePath();
-		path = wxPathOnly(path);
-		if (subd.IsEmpty())
-			result = path + GETSLASH() + name;
+		std::string name = GET_NAMEA(result);
+		std::filesystem::path p = std::filesystem::current_path();
+		if (subd.empty())
+			p = p / name;
 		else
-			result = path + GETSLASH() + subd + GETSLASH() + name;
-		exist = wxFileExists(result);
+			p = p / subd / name;
+		result = p.string();
+		exist = std::filesystem::exists(result);
 	}
 	if (!exist)
 	{
 		//find in config file folder
-		wxString path = wxPathOnly(m_fconfig_name);
-		result = path + GETSLASH() + str;
-		exist = wxFileExists(result);
+		std::string path = GET_PATHA(m_fconfig_name);
+		result = path + GETSLASHA() + str;
+		exist = std::filesystem::exists(result);
 	}
 	if (exist)
 	{
 		//make slash consistent
-		std::filesystem::path p(result.ToStdWstring());
+		std::filesystem::path p(result);
 		result = p.make_preferred().string();
 		return result;
 	}
@@ -391,10 +389,10 @@ wxString ScriptProc::GetInputFile(const wxString &str, const wxString &subd)
 		return "";
 }
 
-wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool rep)
+std::string ScriptProc::GetSavePath(const std::string &str, const std::string &ext, bool rep)
 {
-	wxString temp = str;
-	wxString path;
+	std::string temp = str;
+	std::string path;
 	fluo::Node* node = m_output->getChild("savepath");
 	if (node)
 	{
@@ -402,7 +400,7 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 		node->getValue("path", name);
 		if (!name.empty())
 		{
-			std::string ext2 = '.' + ext.ToStdString();
+			std::string ext2 = '.' + ext;
 			if (GET_SUFFIX(name) != ext2)
 				name += ext2;
 			return name;
@@ -410,10 +408,10 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 	}
 
 	//not found
-	bool has_file = temp != wxPathOnly(temp);
-	bool absolute = wxIsAbsolutePath(temp);
+	bool has_file = temp != GET_PATHA(temp);
+	bool absolute = std::filesystem::path(temp).is_absolute();
 
-	if (temp.IsEmpty() ||
+	if (temp.empty() ||
 		temp == "FILE_DLG")
 	{
 		//file dialog
@@ -421,7 +419,7 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 			"Save Results",
 			"Output file(*." + ext + ")|*." + ext,
 			wxFD_SAVE);
-		if (path.IsEmpty())
+		if (path.empty())
 			path = GetDataDir(ext);
 	}
 	else if (temp == "DATA_DIR")
@@ -433,28 +431,28 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 		if (absolute)
 		{
 			//absolute dir
-			path = wxPathOnly(temp);
-			if (!wxDirExists(path))
-				MkDirW(path.ToStdWstring());
+			path = GET_PATHA(temp);
+			if (!std::filesystem::exists(path))
+				MkDir(path);
 		}
 		else
 		{
 			//relative
-			wxString conf_path = wxPathOnly(m_fconfig_name);
-			path = conf_path + GETSLASH() + wxPathOnly(temp);
-			if (!wxDirExists(path))
-				MkDirW(path.ToStdWstring());
+			std::string conf_path = GET_PATHA(m_fconfig_name);
+			path = conf_path + GETSLASHA() + GET_PATHA(temp);
+			if (!std::filesystem::exists(path))
+				MkDir(path);
 		}
 		if (has_file)
 		{
-			path += GETSLASH() + wxFileNameFromPath(temp);
+			path += GETSLASHA() + GET_NAMEA(temp);
 		}
 		else
 		{
-			wxString lc = path.Last();
-			if (lc != "/" &&
-				lc != "\\")
-				path += GETSLASH();
+			char lc = path.back();
+			if (lc != '/' &&
+				lc != '\\')
+				path += GETSLASHA();
 			path += "output01." + ext;//not containing filename
 		}
 	}
@@ -462,12 +460,12 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 			path = INC_NUM_EXIST(path);
 
 	node = m_output->getOrAddNode("savepath");
-	path = STR_DIR_SEP(path.ToStdString());
-	node->addSetValue("path", path.ToStdString());
+	path = STR_DIR_SEP(path);
+	node->addSetValue("path", path);
 	return path;
 }
 
-wxString ScriptProc::GetDataDir(const wxString &ext)
+std::string ScriptProc::GetDataDir(const std::string &ext)
 {
 	//data dir
 	if (!m_view)
@@ -475,20 +473,20 @@ wxString ScriptProc::GetDataDir(const wxString &ext)
 	VolumeData* vol = glbin_current.vol_data;
 	if (!vol)
 		return "";
-	wxString path = vol->GetPath();
-	path = wxPathOnly(path);
-	path += GETSLASH();
+	std::string path = vol->GetPath();
+	path = GET_PATHA(path);
+	path += GETSLASHA();
 	path += "output01." + ext;
 	return path;
 }
 
-wxString ScriptProc::GetConfigFile(
-	const wxString& str,
-	const wxString& ext,
-	const wxString& type,
+std::string ScriptProc::GetConfigFile(
+	const std::string& str,
+	const std::string& ext,
+	const std::string& type,
 	int mode)
 {
-	if (wxFileExists(str))
+	if (std::filesystem::exists(str))
 		return str;
 	long style = wxFD_OPEN | wxFD_FILE_MUST_EXIST;
 	if (mode == 1)
@@ -499,11 +497,11 @@ wxString ScriptProc::GetConfigFile(
 		style);
 }
 
-int ScriptProc::GetItems(const wxString& str, std::vector<std::string>& items)
+int ScriptProc::GetItems(const std::string& str, std::vector<std::string>& items)
 {
 	if (!items.empty())
 		items.clear();
-	std::istringstream s(str.ToStdString());
+	std::istringstream s(str);
 	std::string item;
 	while (std::getline(s >> std::ws, item, ','))
 		items.push_back(item);
@@ -888,7 +886,7 @@ void ScriptProc::RunFetchMask()
 		if (bmask)
 		{
 			MSKReader msk_reader;
-			wstring mskname = reader->GetCurMaskName(curf, (*i)->GetCurChannel());
+			std::wstring mskname = reader->GetCurMaskName(curf, (*i)->GetCurChannel());
 			msk_reader.SetFile(mskname);
 			Nrrd* mask_nrrd_new = msk_reader.Convert(curf, (*i)->GetCurChannel(), true);
 			if (mask_nrrd_new)
@@ -900,7 +898,7 @@ void ScriptProc::RunFetchMask()
 		if (blabel)
 		{
 			LBLReader lbl_reader;
-			wstring lblname = reader->GetCurLabelName(curf, (*i)->GetCurChannel());
+			std::wstring lblname = reader->GetCurLabelName(curf, (*i)->GetCurChannel());
 			lbl_reader.SetFile(lblname);
 			Nrrd* label_nrrd_new = lbl_reader.Convert(curf, (*i)->GetCurChannel(), true);
 			if (label_nrrd_new)
@@ -966,8 +964,11 @@ void ScriptProc::RunSaveVolume()
 	if (!TimeCondition())
 		return;
 
-	wxString source;
-	m_fconfig->Read("source", &source);
+	wxString str;
+
+	std::string source;
+	m_fconfig->Read("source", &str);
+	source = str.ToStdString();
 	int mode;
 	m_fconfig->Read("format", &mode, 0);
 	int mask;
@@ -981,8 +982,9 @@ void ScriptProc::RunSaveVolume()
 	m_fconfig->Read("bake", &bake, false);
 	bool compression;
 	m_fconfig->Read("compress", &compression, false);
-	wxString pathname;
-	m_fconfig->Read("savepath", &pathname, "");
+	std::string pathname;
+	m_fconfig->Read("savepath", &str, "");
+	pathname = str.ToStdString();
 	bool del_vol;
 	m_fconfig->Read("delete", &del_vol, false);
 	int smooth;
@@ -1036,32 +1038,29 @@ void ScriptProc::RunSaveVolume()
 	int chan_num = vlist.size();
 	int time_num = GetTimeNum();
 	int curf = m_view->m_tseq_cur_num;
-	wxString ext, str;
+	std::string ext, name;
 	if (mode == 0 || mode == 1)
 		ext = "tif";
 	else if (mode == 2)
 		ext = "nrrd";
-	str = GetSavePath(pathname, ext);
-	str = REM_EXT(str);
-	str = REM_NUM(str);
-	if (str.IsEmpty())
+	name = GetSavePath(pathname, ext);
+	name = REM_EXT(name);
+	name = REM_NUM(name);
+	if (name.empty())
 		return;
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
 		//time
-		wxString format = wxString::Format("%d", time_num);
-		int fr_length = format.Length();
-		format = wxString::Format("_T%%0%dd", fr_length);
-		wxString vstr = str;
-		vstr += wxString::Format(format, curf);
+		std::string format = std::to_string(time_num);
+		int fr_length = format.length();
+		std::string vstr = name + "_T" + MAKE_NUM(curf, fr_length);
 		//channel
 		if (chan_num > 1)
 		{
-			format = wxString::Format("%d", chan_num);
-			int ch_length = format.Length();
-			format = wxString::Format("_CH%%0%dd", ch_length + 1);
-			vstr += wxString::Format(format, (*i)->GetCurChannel() + 1);
+			format = std::to_string(chan_num);
+			int ch_length = format.length();
+			vstr += "_CH" + MAKE_NUM((*i)->GetCurChannel() + 1, ch_length + 1);
 		}
 		//ext
 		vstr += "." + ext;
@@ -1083,13 +1082,14 @@ void ScriptProc::RunCalculate()
 
 	//VolumeCalculator* calculator = m_view->GetVolumeCalculator();
 	//if (!calculator) return;
-
+	wxString str;
 	int vol_a_index;
 	m_fconfig->Read("vol_a", &vol_a_index, 0);
 	int vol_b_index;
 	m_fconfig->Read("vol_b", &vol_b_index, 0);
-	wxString sOper;
-	m_fconfig->Read("operator", &sOper, "");
+	std::string sOper;
+	m_fconfig->Read("operator", &str, "");
+	sOper = str.ToStdString();
 
 	int vlist_size = m_view->GetDispVolumeNum();
 	//get volumes
@@ -1127,18 +1127,19 @@ void ScriptProc::RunOpenCL()
 
 	//KernelExecutor* executor = m_view->GetKernelExecutor();
 	//if (!executor) return;
-
-	wxString clname;
-	m_fconfig->Read("clpath", &clname, "");
+	wxString str;
+	std::string clname;
+	m_fconfig->Read("clpath", &str, "");
+	clname = str.ToStdString();
 	clname = GetInputFile(clname, "CL_code");
-	if (clname.IsEmpty())
+	if (clname.empty())
 		return;
 
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
 		(*i)->GetVR()->clear_tex_current();
-		glbin_kernel_executor.LoadCode(clname.ToStdString());
+		glbin_kernel_executor.LoadCode(clname);
 		glbin_kernel_executor.SetVolume(*i);
 		glbin_kernel_executor.SetDuplicate(true);
 		glbin_kernel_executor.Execute();
@@ -1187,8 +1188,8 @@ void ScriptProc::RunCompAnalysis()
 		chg->addSetValue("type", std::string("channel"));
 		chg->addSetValue("ch", long(ch));
 		//script command
-		fluo::Group* cmdg = chg->getOrAddGroup(m_type.ToStdString());
-		cmdg->addSetValue("type", m_type.ToStdString());
+		fluo::Group* cmdg = chg->getOrAddGroup(m_type);
+		cmdg->addSetValue("type", m_type);
 
 		CelpList* celp_list = glbin_comp_analyzer.GetCelpList();
 		CellGraph* graph = glbin_comp_analyzer.GetCellGraph();
@@ -1266,13 +1267,15 @@ void ScriptProc::RunCompRuler()
 	RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list || ruler_list->empty()) return;
 
+	wxString str;
 	int dim;
 	m_fconfig->Read("dim", &dim);//2 or 3
-	wxString name;
-	m_fconfig->Read("name", &name);
+	std::string name;
+	m_fconfig->Read("name", &str);
+	name = str.ToStdString();
 	double len;
 	m_fconfig->Read("length", &len);//physical length
-	flrd::Ruler* ruler = ruler_list->GetRuler(name.ToStdString());
+	flrd::Ruler* ruler = ruler_list->GetRuler(name);
 	if (!ruler)
 		return;
 	if (ruler->GetNumPoint() < 2)
@@ -1310,8 +1313,8 @@ void ScriptProc::RunCompRuler()
 	std::string fn = std::to_string(curf);
 	//output
 	//script command
-	fluo::Group* cmdg = m_output->getOrAddGroup(m_type.ToStdString());
-	cmdg->addSetValue("type", m_type.ToStdString());//ruler_transform
+	fluo::Group* cmdg = m_output->getOrAddGroup(m_type);
+	cmdg->addSetValue("type", m_type);//ruler_transform
 	cmdg->addSetValue("dim", (long)dim);
 
 	//convert comp to ruler
@@ -1354,18 +1357,21 @@ void ScriptProc::RunGenerateComp()
 	if (!GetVolumes(vlist))
 		return;
 
-	wxString ml_table_file;
-	m_fconfig->Read("ml_table", &ml_table_file);
+	wxString str;
+	std::string ml_table_file;
+	m_fconfig->Read("ml_table", &str);
+	ml_table_file = str.ToStdString();
 	ml_table_file = GetInputFile(ml_table_file, "Database");
 	bool use_ml = !ml_table_file.empty();
 	bool use_sel;
 	m_fconfig->Read("use_sel", &use_sel, false);
 	double tfac;
 	m_fconfig->Read("th_factor", &tfac, 1.0);
-	wxString cmdfile;
-	m_fconfig->Read("comp_command", &cmdfile);
+	std::string cmdfile;
+	m_fconfig->Read("comp_command", &str);
+	cmdfile = str.ToStdString();
 	cmdfile = GetInputFile(cmdfile, "Commands");
-	if (cmdfile.IsEmpty())
+	if (cmdfile.empty())
 		glbin_comp_generator.ResetCmd();
 	else
 		glbin_comp_generator.LoadCmd(cmdfile);
@@ -1377,7 +1383,7 @@ void ScriptProc::RunGenerateComp()
 		if (use_ml)
 		{
 			flrd::TableHistParams& table = glbin.get_cg_table();
-			table.open(ml_table_file.ToStdString());
+			table.open(ml_table_file);
 			glbin_comp_generator.ApplyRecord();
 		}
 		else
@@ -1429,8 +1435,8 @@ void ScriptProc::RunRulerProfile()
 		chg->addSetValue("type", std::string("channel"));
 		chg->addSetValue("ch", long(ch));
 		//script command
-		fluo::Group* cmdg = chg->getOrAddGroup(m_type.ToStdString());
-		cmdg->addSetValue("type", m_type.ToStdString());
+		fluo::Group* cmdg = chg->getOrAddGroup(m_type);
+		cmdg->addSetValue("type", m_type);
 
 		for (size_t i = 0; i < ruler_list->size(); ++i)
 		{
@@ -1503,8 +1509,8 @@ void ScriptProc::RunRoi()
 		chg->addSetValue("type", std::string("channel"));
 		chg->addSetValue("ch", long(ch));
 		//script command
-		fluo::Group* cmdg = chg->getOrAddGroup(m_type.ToStdString());
-		cmdg->addSetValue("type", m_type.ToStdString());
+		fluo::Group* cmdg = chg->getOrAddGroup(m_type);
+		cmdg->addSetValue("type", m_type);
 
 		for (size_t i = 0; i < ruler_list->size(); ++i)
 		{
@@ -1670,11 +1676,11 @@ void ScriptProc::RunBackgroundStat()
 		chg->addSetValue("type", std::string("channel"));
 		chg->addSetValue("ch", long(ch));
 		//script command
-		fluo::Group* cmdg = chg->getOrAddGroup(m_type.ToStdString());
-		cmdg->addSetValue("type", m_type.ToStdString());
+		fluo::Group* cmdg = chg->getOrAddGroup(m_type);
+		cmdg->addSetValue("type", m_type);
 		//result node
 		fluo::Node* node = cmdg->getOrAddNode("result");
-		node->addSetValue("type", m_type.ToStdString());
+		node->addSetValue("type", m_type);
 		node->addSetValue(bgs.GetTypeName(iindx), result);
 	}
 }
@@ -1806,7 +1812,7 @@ void ScriptProc::RunRegistration()
 	}
 }
 
-void ScriptProc::GetRulers(const wxString& vrp, int &startf, int &endf)
+void ScriptProc::GetRulers(const std::string& vrp, int &startf, int &endf)
 {
 	wxFileInputStream is(vrp);
 	if (!is.IsOk())
@@ -1845,13 +1851,14 @@ void ScriptProc::RunCameraPoints()
 	if (!TimeCondition())
 		return;
 
-	wxString prj2;
-	m_fconfig->Read("project_file", &prj2);
-	prj2 = GetConfigFile(prj2, "vrp", "FluoRender Project", 0);
 	wxString str;
+	std::string prj2;
+	m_fconfig->Read("project_file", &str);
+	prj2 = str.ToStdString();
+	prj2 = GetConfigFile(prj2, "vrp", "FluoRender Project", 0);
 	m_fconfig->Read("names", &str);
 	std::vector<std::string> names;
-	int correct = GetItems(str, names);
+	int correct = GetItems(str.ToStdString(), names);
 	double slope;
 	m_fconfig->Read("slope", &slope, 0);
 	bool affine;
@@ -1919,8 +1926,8 @@ void ScriptProc::RunRulerInfo()
 	std::string fn = std::to_string(curf);
 	//output
 	//script command
-	fluo::Group* cmdg = m_output->getOrAddGroup(m_type.ToStdString());
-	cmdg->addSetValue("type", m_type.ToStdString());
+	fluo::Group* cmdg = m_output->getOrAddGroup(m_type);
+	cmdg->addSetValue("type", m_type);
 
 	for (size_t i = 0; i < ruler_list->size(); ++i)
 	{
@@ -1948,13 +1955,15 @@ void ScriptProc::RunRulerTransform()
 	RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list || ruler_list->empty()) return;
 
+	wxString str;
 	int dim;
 	m_fconfig->Read("dim", &dim);//2 or 3
-	wxString name;
-	m_fconfig->Read("name", &name);
+	std::string name;
+	m_fconfig->Read("name", &str);
+	name = str.ToStdString();
 	double len;
 	m_fconfig->Read("length", &len);//physical length
-	flrd::Ruler* ruler = ruler_list->GetRuler(name.ToStdString());
+	flrd::Ruler* ruler = ruler_list->GetRuler(name);
 	if (!ruler)
 		return;
 	if (ruler->GetNumPoint() < 2)
@@ -1993,8 +2002,8 @@ void ScriptProc::RunRulerTransform()
 	std::string fn = std::to_string(curf);
 	//output
 	//script command
-	fluo::Group* cmdg = m_output->getOrAddGroup(m_type.ToStdString());
-	cmdg->addSetValue("type", m_type.ToStdString());//ruler_transform
+	fluo::Group* cmdg = m_output->getOrAddGroup(m_type);
+	cmdg->addSetValue("type", m_type);//ruler_transform
 	cmdg->addSetValue("dim", (long)dim);
 
 	for (size_t i = 0; i < ruler_list->size(); ++i)
@@ -2024,8 +2033,10 @@ void ScriptProc::RunRulerSpeed()
 	if (!TimeCondition())
 		return;
 
-	wxString type;
-	m_fconfig->Read("type_name", &type);
+	wxString str;
+	std::string type;
+	m_fconfig->Read("type_name", &str);
+	type = str.ToStdString();
 	double time;//time between two samples
 	m_fconfig->Read("time", &time, 1);
 	double fps;//alternative
@@ -2034,7 +2045,7 @@ void ScriptProc::RunRulerSpeed()
 		time = 1 / fps;
 	}
 
-	fluo::Node* node = m_output->getChild(type.ToStdString());
+	fluo::Node* node = m_output->getChild(type);
 	if (!node)
 		return;
 	fluo::Group* cmdg_old = node->asGroup();
@@ -2044,11 +2055,11 @@ void ScriptProc::RunRulerSpeed()
 	cmdg_old->getValue("dim", dim);
 
 	fluo::Point p0, p1;
-	std::string str;
+	std::string stdstr;
 	//output
 	//script command
-	fluo::Group* cmdg = m_output->getOrAddGroup(m_type.ToStdString());
-	cmdg->addSetValue("type", m_type.ToStdString());//ruler_speed
+	fluo::Group* cmdg = m_output->getOrAddGroup(m_type);
+	cmdg->addSetValue("type", m_type);//ruler_speed
 	cmdg->addSetValue("dim", dim);
 
 	for (size_t i = 0; i < cmdg_old->getNumChildren(); ++i)
@@ -2060,12 +2071,12 @@ void ScriptProc::RunRulerSpeed()
 		if (!ruler_group_old)
 			continue;
 
-		str = ruler_group_old->getName();
-		fluo::Group* ruler_group = cmdg->getOrAddGroup(str);
-		ruler_group_old->getValue("type", str);
-		ruler_group->addSetValue("type", str);
-		ruler_group_old->getValue("name", str);
-		ruler_group->addSetValue("name", str);
+		stdstr = ruler_group_old->getName();
+		fluo::Group* ruler_group = cmdg->getOrAddGroup(stdstr);
+		ruler_group_old->getValue("type", stdstr);
+		ruler_group->addSetValue("type", stdstr);
+		ruler_group_old->getValue("name", stdstr);
+		ruler_group->addSetValue("name", stdstr);
 		for (size_t j = 0; j < ruler_group_old->getNumChildren(); ++j)
 		{
 			node = ruler_group_old->getChild(j);
@@ -2099,8 +2110,10 @@ void ScriptProc::RunGenerateWalk()
 	if (!m_view)
 		return;
 
-	wxString filename;
-	m_fconfig->Read("cycle", &filename);
+	wxString str;
+	std::string filename;
+	m_fconfig->Read("cycle", &str);
+	filename = str.ToStdString();
 	filename = GetConfigFile(filename, "csv", "Cycle", 0);
 	int length;
 	m_fconfig->Read("length", &length);
@@ -2108,7 +2121,7 @@ void ScriptProc::RunGenerateWalk()
 	m_fconfig->Read("dir", &dir);
 
 	flrd::WalkCycle cycle;
-	cycle.ReadData(filename.ToStdString());
+	cycle.ReadData(filename);
 	cycle.Correct(0);
 	glbin_ruler_handler.GenerateWalk(length, dir, cycle);
 }
@@ -2146,11 +2159,13 @@ void ScriptProc::RunDlcVideoAnalyze()
 	if (dlc->GetState() == 2)
 		return;//busy, already created
 
-	wxString filename;
-	m_fconfig->Read("config", &filename);
+	wxString str;
+	std::string filename;
+	m_fconfig->Read("config", &str);
+	filename = str.ToStdString();
 	filename = GetConfigFile(filename, "yaml", "Config", 0);
-	std::string fn = cur_vol->GetPath().ToStdString();
-	std::string cfg = filename.ToStdString();
+	std::string fn = cur_vol->GetPath();
+	std::string cfg = filename;
 	if (fn.empty() || cfg.empty())
 		return;
 
@@ -2179,7 +2194,7 @@ void ScriptProc::RunDlcGetRulers()
 	m_fconfig->Read("time_offset", &toff, 0);
 	fluo::Group* dlcg = m_output->getOrAddGroup("dlc");
 	bool analyzed = false;
-	std::string fn = cur_vol->GetPath().ToStdString();
+	std::string fn = cur_vol->GetPath();
 	dlcg->getValue(fn, analyzed);
 	if (analyzed)
 		return;
@@ -2227,15 +2242,17 @@ void ScriptProc::RunDlcCreateProj()
 	dlc->SetFrameNumber(m_view->m_end_all_frame);
 	dlc->SetFrameRange(m_view->m_begin_frame, m_view->m_end_frame);
 
-	wxString filename;
-	m_fconfig->Read("config", &filename);
+	wxString str;
+	std::string filename;
+	m_fconfig->Read("config", &str);
+	filename = str.ToStdString();
 	filename = GetConfigFile(filename, "yaml", "Config", 1);
-	dlc->SetConfigFile(filename.ToStdString());
-	std::string str = cur_vol->GetPath().ToStdString();
-	dlc->SetVideoFile(str);
-	std::filesystem::path p(str);
-	str = p.stem().string();
-	dlc->CreateConfigFile(str, "FluoRender", &glbin_ruler_handler);
+	dlc->SetConfigFile(filename);
+	std::string stdstr = cur_vol->GetPath();
+	dlc->SetVideoFile(stdstr);
+	std::filesystem::path p(stdstr);
+	stdstr = p.stem().string();
+	dlc->CreateConfigFile(stdstr, "FluoRender", &glbin_ruler_handler);
 }
 
 void ScriptProc::RunDlcLabel()
@@ -2357,25 +2374,26 @@ void ScriptProc::ExportInfo()
 	if (!TimeCondition())
 		return;
 
-	wxString outputfile;
-	m_fconfig->Read("output", &outputfile);
+	wxString str;
+	std::string outputfile;
+	m_fconfig->Read("output", &str);
+	outputfile = str.ToStdString();
 	outputfile = GetSavePath(outputfile, "csv", false);
-	if (outputfile.IsEmpty())
+	if (outputfile.empty())
 		return;
 	int tnum;
 	m_fconfig->Read("type_num", &tnum, 0);
 	std::set<std::string> tnames;
 	for (int i = 0; i < tnum; ++i)
 	{
-		wxString str;
 		if (m_fconfig->Read(
-			wxString::Format("type_name%d", i),
+			"type_name" + std::to_string(i),
 			&str))
 			tnames.insert(str.ToStdString());
 	}
 
 	//print lines
-	std::ofstream ofs(outputfile.ToStdString());
+	std::ofstream ofs(outputfile);
 	OutCoordVisitor visitor(ofs, tnames);
 	m_output->accept(visitor);
 	ofs.close();
@@ -2397,34 +2415,37 @@ void ScriptProc::ExportTemplate()
 	if (!TimeCondition())
 		return;
 
+	wxString str;
 	//template
-	wxString tempfile;
-	m_fconfig->Read("template", &tempfile);
+	std::string tempfile;
+	m_fconfig->Read("template", &str);
+	tempfile = str.ToStdString();
 	tempfile = GetInputFile(tempfile, "Templates");
-	if (tempfile.IsEmpty())
+	if (tempfile.empty())
 		return;
-	wxString outputfile;
-	m_fconfig->Read("output", &outputfile);
+	std::string outputfile;
+	m_fconfig->Read("output", &str);
+	outputfile = str.ToStdString();
 	outputfile = GetSavePath(outputfile, "html", false);
-	if (outputfile.IsEmpty())
+	if (outputfile.empty())
 		return;
 	int vnum;
 	m_fconfig->Read("value_num", &vnum, 0);
 	std::set<std::string> vnames;
 	for (int i = 0; i < vnum; ++i)
 	{
-		wxString str;
 		if (m_fconfig->Read(
-			wxString::Format("value_name%d", i),
+			"value_name" + std::to_string(i),
 			&str))
 			vnames.insert(str.ToStdString());
 	}
-	wxString js_value;
-	m_fconfig->Read("js_value", &js_value);
+	std::string js_value;
+	m_fconfig->Read("js_value", &str);
+	js_value = str.ToStdString();
 
 	//print lines
-	std::ifstream ifs(tempfile.ToStdString());
-	std::ofstream ofs(outputfile.ToStdString());
+	std::ifstream ifs(tempfile);
+	std::ofstream ofs(outputfile);
 	std::string line;
 	int replace = 0;//1:data;2:value name;
 	while (std::getline(ifs, line))
@@ -2434,9 +2455,8 @@ void ScriptProc::ExportTemplate()
 		{
 			//source
 			ofs << "    <script src=\"";
-			wxString path = wxStandardPaths::Get().GetExecutablePath();
-			path = wxPathOnly(path);
-			ofs << path.ToStdString();
+			std::filesystem::path p = std::filesystem::current_path();
+			ofs << p.string();
 			ofs << "/Templates/d3.v4.min.js\"></script>" << std::endl;
 			continue;
 		}
@@ -2460,7 +2480,7 @@ void ScriptProc::ExportTemplate()
 			//value name
 			replace = 2;
 			ofs << "//#begin value name" << std::endl;
-			ofs << "        value: " << js_value.ToStdString();
+			ofs << "        value: " << js_value;
 			if (js_value.find(',') == std::string::npos)
 				ofs << ",";
 			ofs << std::endl;
@@ -2489,25 +2509,26 @@ void ScriptProc::ExportSpreadsheet()
 	if (!TimeCondition())
 		return;
 
-	wxString outputfile;
-	m_fconfig->Read("output", &outputfile);
+	wxString str;
+	std::string outputfile;
+	m_fconfig->Read("output", &str);
+	outputfile = str.ToStdString();
 	outputfile = GetSavePath(outputfile, "csv", false);
-	if (outputfile.IsEmpty())
+	if (outputfile.empty())
 		return;
 	int vnum;
 	m_fconfig->Read("value_num", &vnum, 0);
 	std::set<std::string> vnames;
 	for (int i = 0; i < vnum; ++i)
 	{
-		wxString str;
 		if (m_fconfig->Read(
-			wxString::Format("value_name%d", i),
+			"value_name" + std::to_string(i),
 			&str))
 			vnames.insert(str.ToStdString());
 	}
 
 	//print lines
-	std::ofstream ofs(outputfile.ToStdString());
+	std::ofstream ofs(outputfile);
 	OutCsvVisitor visitor(ofs, vnames);
 	m_output->accept(visitor);
 	ofs.close();
@@ -2530,10 +2551,12 @@ void ScriptProc::ChangeData()
 	if (!TimeCondition())
 		return;
 
+	wxString str;
 	bool clear;
 	m_fconfig->Read("clear", &clear, true);
-	wxString filename;
-	m_fconfig->Read("input", &filename, "");
+	std::string filename;
+	m_fconfig->Read("input", &str, "");
+	filename = str.ToStdString();
 	filename = GetInputFile(filename, "Data");
 	bool imagej;
 	m_fconfig->Read("imagej", &imagej, false);
@@ -2547,10 +2570,10 @@ void ScriptProc::ChangeData()
 		DataGroup::ResetID();
 		MeshGroup::ResetID();
 	}
-	if (!filename.IsEmpty())
+	if (!filename.empty())
 	{
-		wxArrayString files;
-		files.Add(filename);
+		std::vector<std::string> files;
+		files.push_back(filename);
 		glbin_data_manager.LoadVolumes(files, imagej);
 		m_view->m_cur_vol_save = m_view->GetAllVolumeData(0);
 	}
@@ -2563,15 +2586,17 @@ void ScriptProc::ChangeScript()
 	if (!TimeCondition())
 		return;
 
+	wxString str;
 	bool run_script;
 	m_fconfig->Read("run_script", &run_script, false);
-	wxString filename;
-	m_fconfig->Read("script_file", &filename, "");
+	std::string filename;
+	m_fconfig->Read("script_file", &str, "");
+	filename = str.ToStdString();
 	filename = GetInputFile(filename, "Scripts");
 
 	if (!run_script)
 		glbin_settings.m_run_script = run_script;
-	if (!filename.IsEmpty())
+	if (!filename.empty())
 		glbin_settings.m_script_file = filename;
 	m_frame->GetMoviePanel()->FluoUpdate({ gstScriptList });
 	//m_fconfig_name = filename;
@@ -2584,8 +2609,10 @@ void ScriptProc::LoadProject()
 	if (!TimeCondition())
 		return;
 
-	wxString filename;
-	m_fconfig->Read("project_file", &filename, "");
+	wxString str;
+	std::string filename;
+	m_fconfig->Read("project_file", &str, "");
+	filename = str.ToStdString();
 	filename = GetInputFile(filename, "Data");
 
 	glbin_project.Open(filename);
@@ -2601,7 +2628,9 @@ bool ScriptProc::RunBreak()
 	if (!TimeCondition())
 		return false;
 
-	m_fconfig->Read("info", &m_info, "");
+	wxString str;
+	m_fconfig->Read("info", &str, "");
+	m_info = str.ToStdString();
 	//info.Replace("\n", "\n");
 	bool reset = false;
 	m_fconfig->Read("reset", &reset, false);
@@ -2678,7 +2707,7 @@ void ScriptProc::ReadVolCacheDataLabel(flrd::VolCache& vol_cache)
 	Nrrd* data = reader->Convert(frame, chan, true);
 	vol_cache.nrrd_data = data;
 	vol_cache.data = data->data;
-	wstring lblname = reader->GetCurLabelName(frame, chan);
+	std::wstring lblname = reader->GetCurLabelName(frame, chan);
 	lbl_reader.SetFile(lblname);
 	Nrrd* label = lbl_reader.Convert(frame, chan, true);
 	if (!label)
@@ -2744,8 +2773,7 @@ void ScriptProc::DelVolCacheDataLabel(flrd::VolCache& vol_cache)
 		BaseReader* reader = cur_vol->GetReader();
 		if (reader)
 		{
-			wstring filename;
-			filename = reader->GetCurLabelName(frame, chan);
+			std::wstring filename = reader->GetCurLabelName(frame, chan);
 			msk_writer.Save(filename, 1);
 		}
 

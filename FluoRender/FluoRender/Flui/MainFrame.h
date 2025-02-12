@@ -302,7 +302,7 @@ public:
 	void RefreshCanvases(const std::set<int>& canvases = {});//view indices to update
 	int GetCanvasNum();
 	RenderCanvas* GetRenderCanvas(int index);
-	RenderCanvas* GetRenderCanvas(const wxString& name);
+	RenderCanvas* GetRenderCanvas(const std::string& name);
 	int GetRenderCanvas(RenderCanvas* view);
 	RenderCanvas* GetLastRenderCanvas();
 	wxString CreateRenderView(int row = 1);
@@ -336,8 +336,8 @@ public:
 	void ShowMachineLearningDlg();
 	void ShowScriptBreakDlg(bool show = true);
 	void ShowInfo();
-	wxString ScriptDialog(const wxString& title,
-		const wxString& wildcard, long style);
+	std::string ScriptDialog(const std::string& title,
+		const std::string& wildcard, long style);
 	//organize render views
 	void OrganizeVRenderViews(int mode);
 	//reset layout

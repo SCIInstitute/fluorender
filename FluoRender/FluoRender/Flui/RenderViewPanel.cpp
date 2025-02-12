@@ -995,11 +995,10 @@ void RenderViewPanel::Capture()
 
 		if (glbin_settings.m_prj_save)
 		{
-			wxString new_folder;
-			new_folder = m_canvas->m_cap_file + "_project";
-			MkDirW(new_folder.ToStdWstring());
-			wxString prop_file = new_folder + GETSLASH() + file_dlg.GetFilename() + "_project.vrp";
-			bool inc = wxFileExists(prop_file) &&
+			std::string new_folder = m_canvas->m_cap_file + "_project";
+			MkDir(new_folder);
+			std::string prop_file = new_folder + GETSLASHA() + file_dlg.GetFilename().ToStdString() + "_project.vrp";
+			bool inc = std::filesystem::exists(prop_file) &&
 				glbin_settings.m_prj_save_inc;
 			glbin_project.Save(prop_file, inc);
 		}
@@ -1060,8 +1059,8 @@ void RenderViewPanel::SetDrawScalebar(int val)
 
 void RenderViewPanel::SetScaleText(double val)
 {
-	wxString str, num_text, unit_text;
-	num_text = wxString::Format("%d", (int)val);
+	std::string str, num_text, unit_text;
+	num_text = std::to_string((int)val);
 	switch (m_canvas->m_sb_unit)
 	{
 	case 0:
@@ -1069,7 +1068,7 @@ void RenderViewPanel::SetScaleText(double val)
 		break;
 	case 1:
 	default:
-		unit_text = L"\u03BCm";
+		unit_text = "\u03BCm";
 		break;
 	case 2:
 		unit_text = "mm";
@@ -1087,8 +1086,8 @@ void RenderViewPanel::SetScaleUnit(int val)
 {
 	m_canvas->m_sb_unit = val;
 	double dval = m_canvas->m_sb_length;
-	wxString str, num_text, unit_text;
-	num_text = wxString::Format("%d", (int)dval);
+	std::string str, num_text, unit_text;
+	num_text = std::to_string((int)dval);
 	switch (val)
 	{
 	case 0:
@@ -1096,7 +1095,7 @@ void RenderViewPanel::SetScaleUnit(int val)
 		break;
 	case 1:
 	default:
-		unit_text = L"\u03BCm";
+		unit_text = "\u03BCm";
 		break;
 	case 2:
 		unit_text = "mm";

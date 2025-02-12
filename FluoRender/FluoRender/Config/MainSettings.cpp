@@ -253,7 +253,8 @@ void MainSettings::Read()
 	{
 		fconfig.SetPath("/ui");
 		fconfig.Read("dpi scale factor", &m_dpi_scale_factor, 0.0);
-		fconfig.Read("layout", &m_layout);
+		fconfig.Read("layout", &str, "");
+		m_layout = str.ToStdString();
 		fconfig.Read("prj panel split", &m_prj_panel_split, false);
 		fconfig.Read("clip panel split", &m_clip_panel_split, false);
 		fconfig.Read("invert slider", &m_inverse_slider, false);
@@ -504,7 +505,7 @@ void MainSettings::Save()
 	//ui
 	fconfig.SetPath("/ui");
 	fconfig.Write("dpi scale factor", m_dpi_scale_factor);
-	fconfig.Write("layout", m_layout);
+	fconfig.Write("layout", wxString(m_layout));
 	fconfig.Write("prj panel split", m_prj_panel_split);
 	fconfig.Write("clip panel split", m_clip_panel_split);
 	fconfig.Write("invert slider", m_inverse_slider);

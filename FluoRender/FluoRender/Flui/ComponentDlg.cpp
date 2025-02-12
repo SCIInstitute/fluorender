@@ -1375,7 +1375,7 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			if (rval == wxID_OK)
 			{
 				wxString filename = fopendlg->GetPath();
-				string str = filename.ToStdString();
+				std::string str = filename.ToStdString();
 				glbin_comp_analyzer.OutputCompListFile(str, 1);
 				saved = true;
 			}
@@ -1384,7 +1384,7 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		}
 		if (!saved)
 		{
-			string titles, values;
+			std::string titles, values;
 			glbin_comp_analyzer.OutputFormHeader(titles);
 			glbin_comp_analyzer.OutputCompListStr(values, 0);
 			wxString str1(titles), str2(values);
@@ -2619,7 +2619,7 @@ void ComponentDlg::OutputDistance()
 	if (rval == wxID_OK)
 	{
 		wxString filename = fopendlg->GetPath();
-		string str = filename.ToStdString();
+		std::string str = filename.ToStdString();
 		std::ofstream outfile;
 		outfile.open(str, std::ofstream::out);
 		//output result matrix

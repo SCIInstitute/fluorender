@@ -165,7 +165,7 @@ bool Cov::ComputeCenter()
 	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_cov);
 	if (!kernel_prog)
 		return false;
-	string name = "kernel_0";
+	std::string name = "kernel_0";
 	int kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
@@ -246,7 +246,7 @@ bool Cov::ComputeCov()
 	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_cov);
 	if (!kernel_prog)
 		return false;
-	string name = "kernel_1";
+	std::string name = "kernel_1";
 	int kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();

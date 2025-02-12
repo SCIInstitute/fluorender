@@ -48,11 +48,20 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 {
 	if (filenames.Count())
 	{
+		std::vector<std::string> std_filenames;
+		std_filenames.reserve(filenames.size()); // Reserve space for efficiency
+
+		for (const auto& filename : filenames) {
+			std_filenames.push_back(std::string(filename.mb_str()));
+		}
+
 		MainFrame* vr_frame = (MainFrame*)m_frame;
 		if (vr_frame)
 		{
-			wxString filename = filenames[0];
-			wxString suffix = filename.Mid(filename.Find('.', true)).MakeLower();
+			std::string filename = std_filenames[0];
+			std::filesystem::path p(filename);
+			std::string suffix = p.extension().string();
+			std::transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
 
 			if (suffix == ".vrp")
 			{
@@ -83,15 +92,15 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 					 suffix == ".avi" ||
 					 suffix == ".wmv")
 			{
-				glbin_data_manager.LoadVolumes(filenames, false);
+				glbin_data_manager.LoadVolumes(std_filenames, false);
 			}
 			else if (suffix == ".obj")
 			{
-				glbin_data_manager.LoadMeshes(filenames);
+				glbin_data_manager.LoadMeshes(std_filenames);
 			}
 			else
 			{
-				glbin_data_manager.LoadVolumes(filenames, true);
+				glbin_data_manager.LoadVolumes(std_filenames, true);
 			}
 		}
 	}

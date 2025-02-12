@@ -147,7 +147,7 @@ void VolumeBaker::Bake(bool replace)
 		if (!m_result)
 		{
 			m_result = new VolumeData();
-			wxString name, path;
+			std::string name, path;
 			m_result->Load(nrrd_result, name, path);
 		}
 		else

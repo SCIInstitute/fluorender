@@ -390,7 +390,7 @@ void ComponentEditor::ReplaceList()
 			while (vd->SearchLabel(new_id))
 				new_id += 253;
 			//add cell to list_rep
-			list_rep.insert(pair<unsigned int, unsigned int>
+			list_rep.insert(std::pair<unsigned int, unsigned int>
 				(old_id, new_id));
 			glbin_trackmap_proc.ReplaceCellID(old_id, new_id,
 					cur_time);
@@ -566,7 +566,7 @@ void ComponentEditor::ReadVolCache(VolCache& vol_cache)
 			return;
 		vol_cache.nrrd_data = data;
 		vol_cache.data = data->data;
-		wstring lblname = reader->GetCurLabelName(frame, chan);
+		std::wstring lblname = reader->GetCurLabelName(frame, chan);
 		lbl_reader.SetFile(lblname);
 		Nrrd* label = lbl_reader.Convert(frame, chan, true);
 		if (!label)
@@ -599,7 +599,7 @@ void ComponentEditor::DelVolCache(VolCache& vol_cache)
 		double spcx, spcy, spcz;
 		vd->GetSpacings(spcx, spcy, spcz);
 		msk_writer.SetSpacings(spcx, spcy, spcz);
-		wstring filename = reader->GetCurLabelName(frame, chan);
+		std::wstring filename = reader->GetCurLabelName(frame, chan);
 		msk_writer.Save(filename, 1);
 	}
 

@@ -202,23 +202,22 @@ void OclDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 void OclDlg::UpdateKernelList()
 {
-	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-	exePath = wxPathOnly(exePath);
 	m_kernel_list->DeleteAllItems();
-	wxString loc = exePath + GETSLASH() + "CL_code" +
-		GETSLASH() + "*.cl";
-	wxLogNull logNo;
-	wxArrayString list;
-	wxString file = wxFindFirstFile(loc);
-	while (!file.empty())
+	std::filesystem::path p = std::filesystem::current_path();
+	p /= "CL_code";
+	std::vector<std::string> list;
+	// Iterate over the files in the "Scripts" directory
+	for (const auto& entry : std::filesystem::directory_iterator(p))
 	{
-		file = wxFileNameFromPath(file);
-		file = file.BeforeLast('.');
-		list.Add(file);
-		file = wxFindNextFile();
+		if (entry.is_regular_file() && entry.path().extension() == ".cl")
+		{
+			list.push_back(entry.path().string());
+		}
 	}
-	list.Sort();
-	for (size_t i = 0; i < list.GetCount(); ++i)
+	// Sort the list of files
+	std::sort(list.begin(), list.end());
+
+	for (size_t i = 0; i < list.size(); ++i)
 		m_kernel_list->InsertItem(
 			m_kernel_list->GetItemCount(),
 			list[i]);
@@ -332,16 +331,17 @@ void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 	{
 		wxString filename = fopendlg->GetPath();
 		rval = m_kernel_edit_stc->SaveFile(filename);
-		if (rval) {
+		if (rval)
+		{
 			m_kernel_file_txt->ChangeValue(filename);
-			filename = wxFileNameFromPath(filename);
-			wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-			exePath = wxPathOnly(exePath);
-			wxString temp = exePath + GETSLASH() + "CL_code" +
-				GETSLASH() + filename;
-			m_kernel_edit_stc->SaveFile(temp);
-			filename = filename.BeforeFirst('.');
-			m_kernel_list->InsertItem(m_kernel_list->GetItemCount(), filename);
+			std::filesystem::path p(filename.ToStdString());
+			std::string fn = p.filename().string();
+			p = std::filesystem::current_path();
+			p = p / "CL_code" / fn;
+			fn = p.string();
+			m_kernel_edit_stc->SaveFile(fn);
+			fn = p.stem().string();
+			m_kernel_list->InsertItem(m_kernel_list->GetItemCount(), fn);
 		}
 	}
 
@@ -397,10 +397,9 @@ void OclDlg::OnKernelListSelected(wxListEvent& event)
 	if (item != -1)
 	{
 		wxString file = m_kernel_list->GetItemText(item);
-		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-		exePath = wxPathOnly(exePath);
-		file = exePath + GETSLASH() + "CL_code" +
-			GETSLASH() + file + ".cl";
+		std::filesystem::path p = std::filesystem::current_path();
+		p = p / "CL_code" / (file.ToStdString() + ".cl");
+		file = p.string();
 		m_kernel_edit_stc->LoadFile(file);
 		m_kernel_edit_stc->EmptyUndoBuffer();
 		m_kernel_file_txt->ChangeValue(file);
@@ -586,7 +585,7 @@ void OclDlg::min_filter(void* data, void* result,
 			unsigned int kc = brick_x*brick_y*cz +
 				brick_x*cy + cx;
 			unsigned char dvalue = ((unsigned char*)data)[kc];
-			rvalue = min(rvalue, dvalue);
+			rvalue = std::min(rvalue, dvalue);
 		}
 		((unsigned char*)result)[index] = rvalue;
 	}
@@ -623,7 +622,7 @@ void OclDlg::max_filter(void* data, void* result,
 			unsigned int kc = brick_x*brick_y*cz +
 				brick_x*cy + cx;
 			unsigned char dvalue = ((unsigned char*)data)[kc];
-			rvalue = max(rvalue, dvalue);
+			rvalue = std::max(rvalue, dvalue);
 		}
 		((unsigned char*)result)[index] = rvalue;
 	}
@@ -733,7 +732,7 @@ void OclDlg::morph_filter(void* data, void* result,
 			unsigned int kc = brick_x*brick_y*cz +
 				brick_x*cy + cx;
 			unsigned char dvalue = ((unsigned char*)data)[kc];
-			rvalue = max(rvalue, dvalue);
+			rvalue = std::max(rvalue, dvalue);
 		}
 		unsigned int kc = brick_x*brick_y*bk +
 			brick_x*bj + bi;

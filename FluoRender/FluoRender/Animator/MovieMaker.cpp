@@ -207,14 +207,15 @@ void MovieMaker::PlaySave()
 	m_record = true;
 	if (glbin_settings.m_prj_save)
 	{
-		wxString new_folder;
+		std::string new_folder;
 		new_folder = m_filename + "_project";
-		MkDirW(new_folder.ToStdWstring());
-		wstring name = s2ws(m_filename);
-		name = GET_NAME(name);
-		wxString prop_file = new_folder + GETSLASH()
+		MkDir(new_folder);
+		std::filesystem::path p(m_filename);
+		std::string name = p.stem().string();
+		std::string prop_file = new_folder + GETSLASHA()
 			+ name + "_project.vrp";
-		bool inc = wxFileExists(prop_file) && glbin_settings.m_prj_save_inc;
+		bool inc = std::filesystem::exists(prop_file) &&
+			glbin_settings.m_prj_save_inc;
 		glbin_project.Save(prop_file, inc);
 	}
 
@@ -283,11 +284,18 @@ void MovieMaker::WriteFrameToFile()
 	if (!m_view)
 		return;
 
-	wxString s_length = wxString::Format("%d", m_clip_frame_num);
-	int length = s_length.Length();
-	wxString format = wxString::Format("_%%0%dd", length);
-	wxString outputfilename = wxString::Format("%s" + format + "%s", m_filename,
-		m_last_frame, ".tif");
+	//wxString s_length = wxString::Format("%d", m_clip_frame_num);
+	//int length = s_length.Length();
+	//wxString format = wxString::Format("_%%0%dd", length);
+	//wxString outputfilename = wxString::Format("%s" + format + "%s", m_filename,
+	//	m_last_frame, ".tif");
+	std::ostringstream oss;
+	oss << m_clip_frame_num;
+	std::string s_length = oss.str();
+	int length = s_length.length();
+	oss.str(""); oss.clear();
+	oss << m_filename << "_" << std::setfill('0') << std::setw(length) << m_last_frame << ".tif";
+	std::string outputfilename = oss.str();
 
 	//capture
 	bool bmov = filetype_ == ".mov";
@@ -298,7 +306,6 @@ void MovieMaker::WriteFrameToFile()
 	void* image = 0;
 	m_view->ReadPixels(chann, fp32, x, y, w, h, &image);
 
-	string str_fn = outputfilename.ToStdString();
 	if (bmov)
 	{
 		//flip vertically 
@@ -315,7 +322,7 @@ void MovieMaker::WriteFrameToFile()
 	}
 	else
 	{
-		TIFF* out = TIFFOpen(str_fn.c_str(), "wb");
+		TIFF* out = TIFFOpen(outputfilename.c_str(), "wb");
 		if (!out) return;
 		TIFFSetField(out, TIFFTAG_IMAGEWIDTH, w);
 		TIFFSetField(out, TIFFTAG_IMAGELENGTH, h);

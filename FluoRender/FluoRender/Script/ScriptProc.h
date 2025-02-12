@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Group.hpp>
 #include <VolCache.h>
 #include <Cell.h>
-#include <wx/string.h>
 #include <wx/fileconf.h>
 #include <vector>
 
@@ -71,8 +70,8 @@ namespace flrd
 		void SetBreak(bool bval) { m_break = bval; }
 		bool GetBreak() { return m_break; }
 		void SetBreakCount(int val = 0) { m_break_count = val; }
-		wxString GetTitle() { return m_fconfig_name; }
-		wxString GetInfo() { return m_info; }
+		std::string GetTitle() { return m_fconfig_name; }
+		std::string GetInfo() { return m_info; }
 		void LoadScriptFile();
 
 		//run 4d script
@@ -85,11 +84,11 @@ namespace flrd
 		MainFrame* m_frame;
 		RenderCanvas *m_view;
 
-		wxString m_type;
+		std::string m_type;
 		TimeMask m_time_mask;
 		wxFileConfig *m_fconfig;
-		wxString m_fconfig_name;
-		wxString m_info;
+		std::string m_fconfig_name;
+		std::string m_info;
 		bool m_rewind;
 		bool m_break;
 		int m_break_count;
@@ -109,11 +108,11 @@ namespace flrd
 		void UpdateTraceDlg();
 		int TimeMode(std::string &str);
 		int GetTimeNum();
-		wxString GetInputFile(const wxString &str, const wxString &subd);
-		wxString GetSavePath(const wxString &str, const wxString &ext, bool rep = true);
-		wxString GetDataDir(const wxString &ext);
-		wxString GetConfigFile(const wxString& str, const wxString& ext, const wxString& type, int mode);//mode-0 open;1-save
-		int GetItems(const wxString& str, std::vector<std::string>& items);
+		std::string GetInputFile(const std::string &str, const std::string &subd);
+		std::string GetSavePath(const std::string &str, const std::string &ext, bool rep = true);
+		std::string GetDataDir(const std::string &ext);
+		std::string GetConfigFile(const std::string& str, const std::string& ext, const std::string& type, int mode);//mode-0 open;1-save
+		int GetItems(const std::string& str, std::vector<std::string>& items);
 		bool GetRegistrationTransform(fluo::Point& transl, fluo::Point& center, fluo::Point& euler, int sn);//sn: smooth frame number
 		
 		void RunNoiseReduction();
@@ -140,7 +139,7 @@ namespace flrd
 		void RunUnlinkCells();
 		void RunBackgroundStat();
 		void RunRegistration();
-		void GetRulers(const wxString& vrp, int &startf, int &endf);
+		void GetRulers(const std::string& vrp, int &startf, int &endf);
 		void RunCameraPoints();
 		void RunRulerInfo();
 		void RunRulerTransform();

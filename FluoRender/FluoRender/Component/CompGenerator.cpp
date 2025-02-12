@@ -585,6 +585,7 @@ void ComponentGenerator::Grow()
 		float scl_ff = m_diff ? m_falloff : 0.0f;
 		float grad_ff = m_diff ? m_falloff : 0.0f;
 		float tran = m_thresh * m_tfactor;
+		int fixed = m_grow_fixed;
 
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };

@@ -135,7 +135,7 @@ public:
 	void InitOpenXR();
 	void InitLookingGlass();
 
-	wxString GetOGLVersion();
+	std::string GetOGLVersion();
 	//initialization
 	void Init();
 
@@ -158,43 +158,43 @@ public:
 	MeshData* GetMeshData(int index);
 	TreeLayer* GetLayer(int index);
 	flvr::MultiVolumeRenderer* GetMultiVolumeData() { return m_mvr; };
-	VolumeData* GetVolumeData(wxString &name);
-	MeshData* GetMeshData(wxString &name);
-	Annotations* GetAnnotations(wxString &name);
-	DataGroup* GetGroup(wxString &name);
+	VolumeData* GetVolumeData(const std::string &name);
+	MeshData* GetMeshData(const std::string &name);
+	Annotations* GetAnnotations(const std::string &name);
+	DataGroup* GetGroup(const std::string &name);
 	DataGroup* GetGroup(int index);
 	DataGroup* GetGroup(VolumeData* vd);
-	MeshGroup* GetMGroup(wxString str);
+	MeshGroup* GetMGroup(const std::string &str);
 	//add
-	DataGroup* AddVolumeData(VolumeData* vd, wxString group_name = "");
+	DataGroup* AddVolumeData(VolumeData* vd, const std::string &group_name = "");
 	void AddMeshData(MeshData* md);
 	void AddAnnotations(Annotations* ann);
-	wxString AddGroup(wxString str, wxString prev_group = "");
+	std::string AddGroup(const std::string& str, const std::string& prev_group = "");
 	DataGroup* AddOrGetGroup();
-	wxString AddMGroup(wxString str);
+	std::string AddMGroup(const std::string& str);
 	MeshGroup* AddOrGetMGroup();
 	//remove
-	void RemoveVolumeData(wxString &name);
-	void RemoveVolumeDataDup(wxString &name);//remove all duplicated data
-	void ReplaceVolumeData(wxString &name, VolumeData *dst);
-	void RemoveMeshData(wxString &name);
-	void RemoveAnnotations(wxString &name);
-	void RemoveGroup(wxString &name);
+	void RemoveVolumeData(const std::string &name);
+	void RemoveVolumeDataDup(const std::string &name);//remove all duplicated data
+	void ReplaceVolumeData(const std::string &name, VolumeData *dst);
+	void RemoveMeshData(const std::string &name);
+	void RemoveAnnotations(const std::string &name);
+	void RemoveGroup(const std::string &name);
 	//isolate
-	void Isolate(int type, wxString name);
+	void Isolate(int type, const std::string& name);
 	void ShowAll();
 	//move
-	void MoveLayerinView(wxString &src_name, wxString &dst_name);
+	void MoveLayerinView(const std::string &src_name, const std::string &dst_name);
 	//move volume
-	void MoveLayerinGroup(wxString &group_name, wxString &src_name, wxString &dst_name);
-	void MoveLayertoView(wxString &group_name, wxString &src_name, wxString &dst_name);
-	void MoveLayertoGroup(wxString &group_name, wxString &src_name, wxString &dst_name);
-	void MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst_group_name, wxString &src_name, wxString &dst_name);
+	void MoveLayerinGroup(const std::string &group_name, const std::string &src_name, const std::string &dst_name);
+	void MoveLayertoView(const std::string &group_name, const std::string &src_name, const std::string &dst_name);
+	void MoveLayertoGroup(const std::string &group_name, const std::string &src_name, const std::string &dst_name);
+	void MoveLayerfromtoGroup(const std::string &src_group_name, const std::string &dst_group_name, const std::string &src_name, const std::string &dst_name);
 	//move mesh
-	void MoveMeshinGroup(wxString &group_name, wxString &src_name, wxString &dst_name);
-	void MoveMeshtoView(wxString &group_name, wxString &src_name, wxString &dst_name);
-	void MoveMeshtoGroup(wxString &group_name, wxString &src_name, wxString &dst_name);
-	void MoveMeshfromtoGroup(wxString &src_group_name, wxString &dst_group_name, wxString &src_name, wxString &dst_name);
+	void MoveMeshinGroup(const std::string &group_name, const std::string &src_name, const std::string &dst_name);
+	void MoveMeshtoView(const std::string &group_name, const std::string &src_name, const std::string &dst_name);
+	void MoveMeshtoGroup(const std::string &group_name, const std::string &src_name, const std::string &dst_name);
+	void MoveMeshfromtoGroup(const std::string &src_group_name, const std::string &dst_group_name, const std::string &src_name, const std::string &dst_name);
 	//
 	void PopVolumeList();
 	void PopMeshList();
@@ -418,15 +418,15 @@ public:
 		double step,
 		int frames,
 		int rot_axis,
-		wxString &cap_file,
+		const std::string &cap_file,
 		bool rewind,
 		int len);
 	//time sequence data
-	void Set4DSeqCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind);
+	void Set4DSeqCapture(const std::string &cap_file, int begin_frame, int end_frame, bool rewind);
 	//batch files
-	void Set3DBatCapture(wxString &cap_file, int begin_frame, int end_frame);
+	void Set3DBatCapture(const std::string &cap_file, int begin_frame, int end_frame);
 	//parameter recording/capture
-	void SetParamCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind);
+	void SetParamCapture(const std::string &cap_file, int begin_frame, int end_frame, bool rewind);
 	//set parameters
 	void SetParams(double t);
 	//reset and stop
@@ -452,7 +452,7 @@ public:
 	void EnableSBText() { m_disp_scale_bar_text = true; }
 	void DisableSBText() { m_disp_scale_bar_text = false; }
 	void SetScaleBarLen(double len) { m_sb_length = len; }
-	void SetSBText(wxString text) { m_sb_text = text; }
+	void SetSBText(const std::string text) { m_sb_text = text; }
 
 	//gamma settings
 	fluo::Color GetGammaColor() { return m_gamma; }
@@ -552,11 +552,11 @@ public:
 	//track map file
 	int GetTrackFileExist(bool save);//0:no trace group; 1:trace groups exists not saved; 2:saved
 	TrackGroup* GetTrackGroup();
-	wxString GetTrackGroupFile();
+	std::string GetTrackGroupFile();
 	void CreateTrackGroup();
-	int LoadTrackGroup(wxString filename);
-	int SaveTrackGroup(wxString filename);
-	void ExportTrackGroup(wxString filename, unsigned int id);
+	int LoadTrackGroup(const std::string& filename);
+	int SaveTrackGroup(const std::string& filename);
+	void ExportTrackGroup(const std::string& filename, unsigned int id);
 	void DrawTraces();
 	void GetTraces(bool update = false);
 
@@ -791,9 +791,9 @@ public:
 	int m_param_cur_num;
 	int m_total_frames;
 	//file name for capturing
-	wxString m_cap_file;
+	std::string m_cap_file;
 	//folder name for 3d batch
-	wxString m_bat_folder;
+	std::string m_bat_folder;
 	//hud
 	bool m_retain_finalbuffer;	//sometimes we don't redraw everything,
 								//just use the final buffer from last draw
@@ -845,7 +845,7 @@ private:
 	bool m_drawing;
 	bool m_refresh;//own refresh command
 	Size2D m_size;
-	wxString m_GLversion;
+	std::string m_GLversion;
 	wxGLContext* m_glRC;
 	bool m_sharedRC;
 	MainFrame* m_frame;
@@ -1138,7 +1138,7 @@ private:
 	void DrawScaleBar();
 	void DrawLegend();
 	void DrawName(double x, double y, int nx, int ny,
-		wxString name, fluo::Color color,
+		const std::string& name, fluo::Color color,
 		double font_height, bool hilighted = false);
 	void DrawFrame();
 	void DrawClippingPlanes(int face_winding);

@@ -46,7 +46,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Cov.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <wxSingleSlider.h>
-#include <wx/stdpaths.h>
 #include <Debug.h>
 #include <StopWatch.hpp>
 #include <StopWatchFactory.hpp>
@@ -588,7 +587,7 @@ RenderCanvas::~RenderCanvas()
 
 	m_loader.StopAll();
 
-	wxString str = GetName() + ":";
+	std::string str = GetName().ToStdString() + ":";
 
 	int i;
 	//delete groups
@@ -935,8 +934,8 @@ void RenderCanvas::CalcFogRange()
 		mv.set(glm::value_ptr(m_mv_mat));
 
 		double minz, maxz;
-		minz = numeric_limits<double>::max();
-		maxz = -numeric_limits<double>::max();
+		minz = std::numeric_limits<double>::max();
+		maxz = -std::numeric_limits<double>::max();
 
 		std::vector<fluo::Point> points;
 		points.push_back(fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Min().z()));
@@ -1050,7 +1049,7 @@ void RenderCanvas::DrawDP()
 	int i;
 	int nx, ny;
 	GetRenderSize(nx, ny);
-	string name;
+	std::string name;
 	flvr::Framebuffer* peel_buffer = 0;
 
 	//clear
@@ -1687,9 +1686,9 @@ void RenderCanvas::DrawAnnotations()
 			if (!ann) continue;
 			if (ann->GetDisp())
 			{
-				string str;
+				std::string str;
 				fluo::Point pos;
-				wstring wstr;
+				std::wstring wstr;
 				for (int j = 0; j<ann->GetTextNum(); ++j)
 				{
 					str = ann->GetTextText(j);
@@ -1831,7 +1830,7 @@ void RenderCanvas::OrganizeLayers()
 		{
 			//layer is volume
 			VolumeData* vd = (VolumeData*)layer;
-			wxString name = vd->GetName();
+			std::string name = vd->GetName();
 			if (le_group)
 			{
 				RemoveVolumeData(name);
@@ -1839,7 +1838,7 @@ void RenderCanvas::OrganizeLayers()
 			}
 			else
 			{
-				wxString group_name = AddGroup("");
+				std::string group_name = AddGroup("");
 				le_group = GetGroup(group_name);
 				if (le_group)
 				{
@@ -1996,7 +1995,7 @@ void RenderCanvas::DrawBrush()
 		float px, py;
 		px = cx2 - 7 - nx / 2.0;
 		py = cy2 - 3 - ny / 2.0;
-		wstring wstr;
+		std::wstring wstr;
 		switch (mode)
 		{
 		case 1:
@@ -3137,7 +3136,7 @@ void RenderCanvas::DrawOLShadowsMesh(double darkness)
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glActiveTexture(GL_TEXTURE0);
-	string name = "peel buffer" + std::to_string(0);
+	std::string name = "peel buffer" + std::to_string(0);
 	flvr::Framebuffer* peel_buffer =
 		glbin_framebuffer_manager.framebuffer(name);
 	if (peel_buffer)
@@ -4567,7 +4566,7 @@ void RenderCanvas::Set3DRotCapture(double start_angle,
 	double step,
 	int frames,
 	int rot_axis,
-	wxString &cap_file,
+	const std::string &cap_file,
 	bool rewind,
 	int len)
 {
@@ -4606,7 +4605,7 @@ void RenderCanvas::Set3DRotCapture(double start_angle,
 	m_stages = 0;
 }
 
-void RenderCanvas::Set3DBatCapture(wxString &cap_file, int begin_frame, int end_frame)
+void RenderCanvas::Set3DBatCapture(const std::string &cap_file, int begin_frame, int end_frame)
 {
 	m_cap_file = cap_file;
 	m_begin_frame = begin_frame;
@@ -4614,15 +4613,16 @@ void RenderCanvas::Set3DBatCapture(wxString &cap_file, int begin_frame, int end_
 	m_capture_bat = true;
 	m_capture = true;
 
-	if (!m_cap_file.IsEmpty() && m_total_frames>1)
+	if (!m_cap_file.empty() && m_total_frames>1)
 	{
-		wxString new_folder = wxPathOnly(m_cap_file)
-			+ GETSLASH() + m_bat_folder + "_folder";
-		MkDirW(new_folder.ToStdWstring());
+		std::filesystem::path p(m_cap_file);
+		std::string new_folder = p.parent_path().string()
+			+ GETSLASHA() + m_bat_folder + "_folder";
+		MkDir(new_folder);
 	}
 }
 
-void RenderCanvas::Set4DSeqCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
+void RenderCanvas::Set4DSeqCapture(const std::string &cap_file, int begin_frame, int end_frame, bool rewind)
 {
 	m_cap_file = cap_file;
 	m_tseq_cur_num = begin_frame;
@@ -4635,7 +4635,7 @@ void RenderCanvas::Set4DSeqCapture(wxString &cap_file, int begin_frame, int end_
 	m_4d_rewind = rewind;
 }
 
-void RenderCanvas::SetParamCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
+void RenderCanvas::SetParamCapture(const std::string &cap_file, int begin_frame, int end_frame, bool rewind)
 {
 	m_cap_file = cap_file;
 	m_param_cur_num = begin_frame;
@@ -5031,7 +5031,7 @@ void RenderCanvas::ReloadVolumeData(int frame)
 				if (reader->GetChanNum() > 1)
 					data_name += "_" + std::to_string(vd->GetCurChannel() + 1);
 				vd->SetName(data_name);
-				vd->SetPath(wxString(reader->GetPathName()));
+				vd->SetPath(ws2s(reader->GetPathName()));
 				vd->SetCurTime(reader->GetCurTime());
 				if (!reader->IsSpcInfoValid())
 					vd->SetSpacings(spcx, spcy, spcz);
@@ -5128,7 +5128,7 @@ void RenderCanvas::Get3DBatRange(int &start_frame, int &end_frame)
 
 			if (i > 0)
 				m_bat_folder += "_";
-			m_bat_folder += wxString(reader->GetDataName());
+			m_bat_folder += ws2s(reader->GetDataName());
 
 			if (i == 0)
 			{
@@ -5307,11 +5307,9 @@ void RenderCanvas::PostDraw()
 		return;
 
 	//output animations
-	if (m_capture && !m_cap_file.IsEmpty())
+	if (m_capture && !m_cap_file.empty())
 	{
 		//capture
-		wxString outputfilename = m_cap_file;
-
 		int chann = glbin_settings.m_save_alpha ? 4 : 3;
 		bool fp32 = glbin_settings.m_save_float;
 		float dpi = glbin_settings.m_dpi;
@@ -5319,7 +5317,7 @@ void RenderCanvas::PostDraw()
 		void* image = 0;
 		ReadPixels(chann, fp32, x, y, w, h, &image);
 
-		string str_fn = outputfilename.ToStdString();
+		std::string str_fn = m_cap_file;
 		TIFF *out = TIFFOpen(str_fn.c_str(), "wb");
 		if (!out)
 			return;
@@ -5876,7 +5874,7 @@ MeshData* RenderCanvas::GetMeshData(int index)
 		return 0;
 }
 
-VolumeData* RenderCanvas::GetVolumeData(wxString &name)
+VolumeData* RenderCanvas::GetVolumeData(const std::string &name)
 {
 	int i, j;
 
@@ -5912,7 +5910,7 @@ VolumeData* RenderCanvas::GetVolumeData(wxString &name)
 	return 0;
 }
 
-MeshData* RenderCanvas::GetMeshData(wxString &name)
+MeshData* RenderCanvas::GetMeshData(const std::string &name)
 {
 	int i, j;
 
@@ -5946,7 +5944,7 @@ MeshData* RenderCanvas::GetMeshData(wxString &name)
 	return 0;
 }
 
-Annotations* RenderCanvas::GetAnnotations(wxString &name)
+Annotations* RenderCanvas::GetAnnotations(const std::string &name)
 {
 	int i;
 
@@ -5967,7 +5965,7 @@ Annotations* RenderCanvas::GetAnnotations(wxString &name)
 	return 0;
 }
 
-DataGroup* RenderCanvas::GetGroup(wxString &name)
+DataGroup* RenderCanvas::GetGroup(const std::string &name)
 {
 	int i;
 
@@ -6073,7 +6071,7 @@ int RenderCanvas::GetMeshNum()
 	return m_md_pop_list.size();
 }
 
-DataGroup* RenderCanvas::AddVolumeData(VolumeData* vd, wxString group_name)
+DataGroup* RenderCanvas::AddVolumeData(VolumeData* vd, const std::string& group_name)
 {
 	//m_layer_list.push_back(vd);
 	int i;
@@ -6100,7 +6098,7 @@ DataGroup* RenderCanvas::AddVolumeData(VolumeData* vd, wxString group_name)
 
 	if (!group)
 	{
-		wxString group_name = AddGroup("");
+		std::string group_name = AddGroup("");
 		group = GetGroup(group_name);
 		if (!group)
 			return 0;
@@ -6149,7 +6147,7 @@ void RenderCanvas::AddAnnotations(Annotations* ann)
 	m_layer_list.push_back(ann);
 }
 
-void RenderCanvas::ReplaceVolumeData(wxString &name, VolumeData *dst)
+void RenderCanvas::ReplaceVolumeData(const std::string &name, VolumeData *dst)
 {
 	int i, j;
 
@@ -6211,9 +6209,9 @@ void RenderCanvas::ReplaceVolumeData(wxString &name, VolumeData *dst)
 	}
 }
 
-void RenderCanvas::RemoveVolumeData(wxString &name)
+void RenderCanvas::RemoveVolumeData(const std::string &name)
 {
-	wxString str = GetName() + ":";
+	std::string str = GetName().ToStdString() + ":";
 	m_frame->DeleteProps(2, name);
 
 	for (auto iter = m_layer_list.begin();
@@ -6256,9 +6254,9 @@ void RenderCanvas::RemoveVolumeData(wxString &name)
 	}
 }
 
-void RenderCanvas::RemoveVolumeDataDup(wxString &name)
+void RenderCanvas::RemoveVolumeDataDup(const std::string &name)
 {
-	wxString str = GetName() + ":";
+	std::string str = GetName().ToStdString() + ":";
 	m_frame->DeleteProps(2, name);
 	VolumeData* vd_main = 0;
 	for (auto iter = m_layer_list.begin();
@@ -6372,9 +6370,9 @@ void RenderCanvas::RemoveVolumeDataDup(wxString &name)
 	}
 }
 
-void RenderCanvas::RemoveMeshData(wxString &name)
+void RenderCanvas::RemoveMeshData(const std::string &name)
 {
-	wxString str = GetName() + ":";
+	std::string str = GetName().ToStdString() + ":";
 	m_frame->DeleteProps(3, name);
 
 	int i, j;
@@ -6416,9 +6414,9 @@ void RenderCanvas::RemoveMeshData(wxString &name)
 	}
 }
 
-void RenderCanvas::RemoveAnnotations(wxString &name)
+void RenderCanvas::RemoveAnnotations(const std::string &name)
 {
-	wxString str = GetName() + ":";
+	std::string str = GetName().ToStdString() + ":";
 	m_frame->DeleteProps(4, name);
 	for (int i = 0; i<(int)m_layer_list.size(); i++)
 	{
@@ -6435,9 +6433,9 @@ void RenderCanvas::RemoveAnnotations(wxString &name)
 	}
 }
 
-void RenderCanvas::RemoveGroup(wxString &name)
+void RenderCanvas::RemoveGroup(const std::string &name)
 {
-	wxString str = GetName() + ":";
+	std::string str = GetName().ToStdString() + ":";
 	int i, j;
 	for (i = 0; i<(int)m_layer_list.size(); i++)
 	{
@@ -6491,7 +6489,7 @@ void RenderCanvas::RemoveGroup(wxString &name)
 }
 
 //isolate
-void RenderCanvas::Isolate(int type, wxString name)
+void RenderCanvas::Isolate(int type, const std::string& name)
 {
 	for (int i = 0; i<(int)m_layer_list.size(); i++)
 	{
@@ -6610,7 +6608,7 @@ void RenderCanvas::Isolate(int type, wxString name)
 
 //move layer of the same level within this view
 //source is after the destination
-void RenderCanvas::MoveLayerinView(wxString &src_name, wxString &dst_name)
+void RenderCanvas::MoveLayerinView(const std::string &src_name, const std::string &dst_name)
 {
 	int i, src_index;
 	TreeLayer* src = 0;
@@ -6708,7 +6706,7 @@ void RenderCanvas::ShowAll()
 
 //move layer (volume) of the same level within the given group
 //source is after the destination
-void RenderCanvas::MoveLayerinGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
+void RenderCanvas::MoveLayerinGroup(const std::string &group_name, const std::string &src_name, const std::string &dst_name)
 {
 	DataGroup* group = GetGroup(group_name);
 	if (!group)
@@ -6718,7 +6716,7 @@ void RenderCanvas::MoveLayerinGroup(wxString &group_name, wxString &src_name, wx
 	int i, src_index;
 	for (i = 0; i<group->GetVolumeNum(); i++)
 	{
-		wxString name = group->GetVolumeData(i)->GetName();
+		std::string name = group->GetVolumeData(i)->GetName();
 		if (name == src_name)
 		{
 			src_index = i;
@@ -6731,7 +6729,7 @@ void RenderCanvas::MoveLayerinGroup(wxString &group_name, wxString &src_name, wx
 		return;
 	for (i = 0; i<group->GetVolumeNum(); i++)
 	{
-		wxString name = group->GetVolumeData(i)->GetName();
+		std::string name = group->GetVolumeData(i)->GetName();
 		if (name == dst_name)
 		{
 			if (i >= src_index)
@@ -6747,7 +6745,7 @@ void RenderCanvas::MoveLayerinGroup(wxString &group_name, wxString &src_name, wx
 
 //move layer (volume) from the given group up one level to this view
 //source is after the destination
-void RenderCanvas::MoveLayertoView(wxString &group_name, wxString &src_name, wxString &dst_name)
+void RenderCanvas::MoveLayertoView(const std::string &group_name, const std::string &src_name, const std::string &dst_name)
 {
 	DataGroup* group = GetGroup(group_name);
 	if (!group)
@@ -6757,7 +6755,7 @@ void RenderCanvas::MoveLayertoView(wxString &group_name, wxString &src_name, wxS
 	int i;
 	for (i = 0; i<group->GetVolumeNum(); i++)
 	{
-		wxString name = group->GetVolumeData(i)->GetName();
+		std::string name = group->GetVolumeData(i)->GetName();
 		if (name == src_name)
 		{
 			src_vd = group->GetVolumeData(i);
@@ -6775,7 +6773,7 @@ void RenderCanvas::MoveLayertoView(wxString &group_name, wxString &src_name, wxS
 	{
 		for (i = 0; i<(int)m_layer_list.size(); i++)
 		{
-			wxString name = m_layer_list[i]->GetName();
+			std::string name = m_layer_list[i]->GetName();
 			if (name == dst_name)
 			{
 				m_layer_list.insert(m_layer_list.begin() + i + 1, src_vd);
@@ -6789,14 +6787,14 @@ void RenderCanvas::MoveLayertoView(wxString &group_name, wxString &src_name, wxS
 
 //move layer (volume) one level down to the given group
 //source is after the destination
-void RenderCanvas::MoveLayertoGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
+void RenderCanvas::MoveLayertoGroup(const std::string &group_name, const std::string &src_name, const std::string &dst_name)
 {
 	VolumeData* src_vd = 0;
 	int i;
 
 	for (i = 0; i<(int)m_layer_list.size(); i++)
 	{
-		wxString name = m_layer_list[i]->GetName();
+		std::string name = m_layer_list[i]->GetName();
 		if (name == src_name && m_layer_list[i]->IsA() == 2)//is volume data
 		{
 			src_vd = (VolumeData*)m_layer_list[i];
@@ -6815,7 +6813,7 @@ void RenderCanvas::MoveLayertoGroup(wxString &group_name, wxString &src_name, wx
 	{
 		for (i = 0; i<group->GetVolumeNum(); i++)
 		{
-			wxString name = group->GetVolumeData(i)->GetName();
+			std::string name = group->GetVolumeData(i)->GetName();
 			if (name == dst_name)
 			{
 				group->InsertVolumeData(i, src_vd);
@@ -6840,7 +6838,7 @@ void RenderCanvas::MoveLayertoGroup(wxString &group_name, wxString &src_name, wx
 
 //move layer (volume from one group to another different group
 //sourece is after the destination
-void RenderCanvas::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst_group_name, wxString &src_name, wxString &dst_name)
+void RenderCanvas::MoveLayerfromtoGroup(const std::string &src_group_name, const std::string &dst_group_name, const std::string &src_name, const std::string &dst_name)
 {
 	DataGroup* src_group = GetGroup(src_group_name);
 	if (!src_group)
@@ -6849,7 +6847,7 @@ void RenderCanvas::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst_
 	VolumeData* src_vd = 0;
 	for (i = 0; i<src_group->GetVolumeNum(); i++)
 	{
-		wxString name = src_group->GetVolumeData(i)->GetName();
+		std::string name = src_group->GetVolumeData(i)->GetName();
 		if (name == src_name)
 		{
 			src_vd = src_group->GetVolumeData(i);
@@ -6868,7 +6866,7 @@ void RenderCanvas::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst_
 	{
 		for (i = 0; i<dst_group->GetVolumeNum(); i++)
 		{
-			wxString name = dst_group->GetVolumeData(i)->GetName();
+			std::string name = dst_group->GetVolumeData(i)->GetName();
 			if (name == dst_name)
 			{
 				dst_group->InsertVolumeData(i, src_vd);
@@ -6897,7 +6895,7 @@ void RenderCanvas::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst_
 }
 
 //move mesh within a group
-void RenderCanvas::MoveMeshinGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
+void RenderCanvas::MoveMeshinGroup(const std::string &group_name, const std::string &src_name, const std::string &dst_name)
 {
 	MeshGroup* group = GetMGroup(group_name);
 	if (!group)
@@ -6907,7 +6905,7 @@ void RenderCanvas::MoveMeshinGroup(wxString &group_name, wxString &src_name, wxS
 	int i, src_index;
 	for (i = 0; i<group->GetMeshNum(); i++)
 	{
-		wxString name = group->GetMeshData(i)->GetName();
+		std::string name = group->GetMeshData(i)->GetName();
 		if (name == src_name)
 		{
 			src_index = i;
@@ -6920,7 +6918,7 @@ void RenderCanvas::MoveMeshinGroup(wxString &group_name, wxString &src_name, wxS
 		return;
 	for (i = 0; i<group->GetMeshNum(); i++)
 	{
-		wxString name = group->GetMeshData(i)->GetName();
+		std::string name = group->GetMeshData(i)->GetName();
 		if (name == dst_name)
 		{
 			if (i >= src_index)
@@ -6936,7 +6934,7 @@ void RenderCanvas::MoveMeshinGroup(wxString &group_name, wxString &src_name, wxS
 }
 
 //move mesh out of a group
-void RenderCanvas::MoveMeshtoView(wxString &group_name, wxString &src_name, wxString &dst_name)
+void RenderCanvas::MoveMeshtoView(const std::string &group_name, const std::string &src_name, const std::string &dst_name)
 {
 	MeshGroup* group = GetMGroup(group_name);
 	if (!group)
@@ -6946,7 +6944,7 @@ void RenderCanvas::MoveMeshtoView(wxString &group_name, wxString &src_name, wxSt
 	int i;
 	for (i = 0; i<group->GetMeshNum(); i++)
 	{
-		wxString name = group->GetMeshData(i)->GetName();
+		std::string name = group->GetMeshData(i)->GetName();
 		if (name == src_name)
 		{
 			src_md = group->GetMeshData(i);
@@ -6962,7 +6960,7 @@ void RenderCanvas::MoveMeshtoView(wxString &group_name, wxString &src_name, wxSt
 	{
 		for (i = 0; i<(int)m_layer_list.size(); i++)
 		{
-			wxString name = m_layer_list[i]->GetName();
+			std::string name = m_layer_list[i]->GetName();
 			if (name == dst_name)
 			{
 				m_layer_list.insert(m_layer_list.begin() + i + 1, src_md);
@@ -6975,14 +6973,14 @@ void RenderCanvas::MoveMeshtoView(wxString &group_name, wxString &src_name, wxSt
 }
 
 //move mesh into a group
-void RenderCanvas::MoveMeshtoGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
+void RenderCanvas::MoveMeshtoGroup(const std::string &group_name, const std::string &src_name, const std::string &dst_name)
 {
 	MeshData* src_md = 0;
 	int i;
 
 	for (i = 0; i<(int)m_layer_list.size(); i++)
 	{
-		wxString name = m_layer_list[i]->GetName();
+		std::string name = m_layer_list[i]->GetName();
 		if (name == src_name && m_layer_list[i]->IsA() == 3)
 		{
 			src_md = (MeshData*)m_layer_list[i];
@@ -6999,7 +6997,7 @@ void RenderCanvas::MoveMeshtoGroup(wxString &group_name, wxString &src_name, wxS
 	{
 		for (i = 0; i<group->GetMeshNum(); i++)
 		{
-			wxString name = group->GetMeshData(i)->GetName();
+			std::string name = group->GetMeshData(i)->GetName();
 			if (name == dst_name)
 			{
 				group->InsertMeshData(i, src_md);
@@ -7012,7 +7010,7 @@ void RenderCanvas::MoveMeshtoGroup(wxString &group_name, wxString &src_name, wxS
 }
 
 //move mesh out of then into a group
-void RenderCanvas::MoveMeshfromtoGroup(wxString &src_group_name, wxString &dst_group_name, wxString &src_name, wxString &dst_name)
+void RenderCanvas::MoveMeshfromtoGroup(const std::string &src_group_name, const std::string &dst_group_name, const std::string &src_name, const std::string &dst_name)
 {
 	MeshGroup* src_group = GetMGroup(src_group_name);
 	if (!src_group)
@@ -7021,7 +7019,7 @@ void RenderCanvas::MoveMeshfromtoGroup(wxString &src_group_name, wxString &dst_g
 	MeshData* src_md = 0;
 	for (i = 0; i<src_group->GetMeshNum(); i++)
 	{
-		wxString name = src_group->GetMeshData(i)->GetName();
+		std::string name = src_group->GetMeshData(i)->GetName();
 		if (name == src_name)
 		{
 			src_md = src_group->GetMeshData(i);
@@ -7038,7 +7036,7 @@ void RenderCanvas::MoveMeshfromtoGroup(wxString &src_group_name, wxString &dst_g
 	{
 		for (i = 0; i<dst_group->GetMeshNum(); i++)
 		{
-			wxString name = dst_group->GetMeshData(i)->GetName();
+			std::string name = dst_group->GetMeshData(i)->GetName();
 			if (name == dst_name)
 			{
 				dst_group->InsertMeshData(i, src_md);
@@ -7077,11 +7075,11 @@ TreeLayer* RenderCanvas::GetLayer(int index)
 		return 0;
 }
 
-wxString RenderCanvas::AddGroup(wxString str, wxString prev_group)
+std::string RenderCanvas::AddGroup(const std::string& str, const std::string& prev_group)
 {
 	DataGroup* group = new DataGroup();
 	if (group && str != "")
-		group->SetName(str.ToStdString());
+		group->SetName(str);
 
 	bool found_prev = false;
 	for (int i = 0; i<(int)m_layer_list.size(); i++)
@@ -7174,11 +7172,11 @@ DataGroup* RenderCanvas::AddOrGetGroup()
 	return group;
 }
 
-wxString RenderCanvas::AddMGroup(wxString str)
+std::string RenderCanvas::AddMGroup(const std::string& str)
 {
 	MeshGroup* group = new MeshGroup();
 	if (group && str != "")
-		group->SetName(str.ToStdString());
+		group->SetName(str);
 	m_layer_list.push_back(group);
 
 	if (group)
@@ -7212,7 +7210,7 @@ MeshGroup* RenderCanvas::AddOrGetMGroup()
 	return group;
 }
 
-MeshGroup* RenderCanvas::GetMGroup(wxString str)
+MeshGroup* RenderCanvas::GetMGroup(const std::string& str)
 {
 	int i;
 
@@ -7880,7 +7878,7 @@ void RenderCanvas::DrawScaleBar()
 	float len = m_sb_length / (m_ortho_right - m_ortho_left);
 	sb_w = len * nx;
 	sb_h = glbin_settings.m_line_width * 3;
-	wstring wsb_text = m_sb_text.ToStdWstring();
+	std::wstring wsb_text = s2ws(m_sb_text);
 	float textlen =
 		m_text_renderer.RenderTextLen(wsb_text);
 	fluo::Color text_color = GetTextColor();
@@ -7991,8 +7989,7 @@ void RenderCanvas::DrawLegend()
 			yoffset += font_height * 1.5;
 	}
 
-	wxString wxstr;
-	wstring wstr;
+	std::wstring wstr;
 	float length = 0;
 	float name_len = 0;
 	float gap_width = font_height * 1.5;
@@ -8004,8 +8001,7 @@ void RenderCanvas::DrawLegend()
 	{
 		if (m_vd_pop_list[i] && m_vd_pop_list[i]->GetLegend())
 		{
-			wxstr = m_vd_pop_list[i]->GetName();
-			wstr = wxstr.ToStdWstring();
+			wstr = s2ws(m_vd_pop_list[i]->GetName());
 			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
 			if (length < float(m_draw_frame ? w : nx) - gap_width)
@@ -8023,8 +8019,7 @@ void RenderCanvas::DrawLegend()
 	{
 		if (m_md_pop_list[i] && m_md_pop_list[i]->GetLegend())
 		{
-			wxstr = m_md_pop_list[i]->GetName();
-			wstr = wxstr.ToStdWstring();
+			wstr = s2ws(m_md_pop_list[i]->GetName());
 			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
 			if (length < float(m_draw_frame ? w : nx) - gap_width)
@@ -8047,9 +8042,9 @@ void RenderCanvas::DrawLegend()
 	{
 		if (m_vd_pop_list[i] && m_vd_pop_list[i]->GetLegend())
 		{
-			wxstr = m_vd_pop_list[i]->GetName();
+			std::string vd_name = m_vd_pop_list[i]->GetName();
+			wstr = s2ws(vd_name);
 			xpos = length;
-			wstr = wxstr.ToStdWstring();
 			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
 			if (length < double(m_draw_frame ? w : nx) - gap_width)
@@ -8065,11 +8060,11 @@ void RenderCanvas::DrawLegend()
 			bool highlighted = false;
 			if (glbin_current.GetType() == 2 &&
 				glbin_current.vol_data &&
-				glbin_current.vol_data->GetName() == wxstr)
+				glbin_current.vol_data->GetName() == vd_name)
 				highlighted = true;
 			xpos += xoffset;
 			ypos = ny - (lines - cur_line + 0.1) * font_height - yoffset;
-			DrawName(xpos, ypos, nx, ny, wxstr,
+			DrawName(xpos, ypos, nx, ny, vd_name,
 				m_vd_pop_list[i]->GetColor(),
 				font_height, highlighted);
 		}
@@ -8078,9 +8073,9 @@ void RenderCanvas::DrawLegend()
 	{
 		if (m_md_pop_list[i] && m_md_pop_list[i]->GetLegend())
 		{
-			wxstr = m_md_pop_list[i]->GetName();
+			std::string md_name = m_md_pop_list[i]->GetName();
+			wstr = s2ws(md_name);
 			xpos = length;
-			wstr = wxstr.ToStdWstring();
 			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
 			if (length < double(m_draw_frame ? w : nx) - gap_width)
@@ -8100,11 +8095,11 @@ void RenderCanvas::DrawLegend()
 			bool highlighted = false;
 			if (glbin_current.GetType() == 3 &&
 				glbin_current.mesh_data &&
-				glbin_current.mesh_data->GetName() == wxstr)
+				glbin_current.mesh_data->GetName() == md_name)
 				highlighted = true;
 			xpos += xoffset;
 			ypos = ny - (lines - cur_line + 0.1) * font_height - yoffset;
-			DrawName(xpos, ypos, nx, ny, wxstr,
+			DrawName(xpos, ypos, nx, ny, md_name,
 				m_vd_pop_list[i]->GetColor(),
 				font_height, highlighted);
 		}
@@ -8115,7 +8110,7 @@ void RenderCanvas::DrawLegend()
 
 void RenderCanvas::DrawName(
 	double x, double y, int nx, int ny,
-	wxString name, fluo::Color color,
+	const std::string& name, fluo::Color color,
 	double font_height,
 	bool highlighted)
 {
@@ -8124,7 +8119,7 @@ void RenderCanvas::DrawName(
 	if (!va_legend_squares)
 		return;
 
-	wstring wstr;
+	std::wstring wstr;
 	float sx, sy;
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
@@ -8162,7 +8157,7 @@ void RenderCanvas::DrawName(
 
 	float px1 = x + font_height - nx / 2.0;
 	float py1 = ny / 2.0 - y + 0.25 * font_height;
-	wstr = name.ToStdWstring();
+	wstr = s2ws(name);
 	m_text_renderer.RenderText(
 		wstr, text_color,
 		px1*sx, py1*sy, sx, sy);
@@ -8500,8 +8495,8 @@ void RenderCanvas::DrawColormap()
 	cmw = 40;
 	float txx, txy;//pixel pos of text
 
-	wxString str;
-	wstring wstr;
+	std::string str;
+	std::wstring wstr;
 	std::vector<float> vertex;
 	vertex.reserve(98);
 	//draw colormap
@@ -8518,8 +8513,8 @@ void RenderCanvas::DrawColormap()
 			framex *= m_enlarge_scale;
 			framey *= m_enlarge_scale;
 		}
-		str = wxString::Format("%d", 88);
-		wstr = str.ToStdWstring();
+		str = std::to_string(88);
+		wstr = s2ws(str);
 		float textlen =
 			m_text_renderer.RenderTextLen(wstr);
 
@@ -8557,36 +8552,36 @@ void RenderCanvas::DrawColormap()
 	px = txx - nx / 2.0;
 	//value 1
 	py = txy - ny / 2.0;
-	str = wxString::Format("%d", 0);
-	wstr = str.ToStdWstring();
+	str = "0";
+	wstr = s2ws(str);
 	m_text_renderer.RenderText(
 		wstr, text_color,
 		px * sx, py * sy, sx, sy);
 	//value 2
 	py = txy + cmh * m_value_2 - ny / 2.0;
-	str = wxString::Format("%d", int(std::round(m_value_2 * max_val)));
-	wstr = str.ToStdWstring();
+	str = std::to_string(int(std::round(m_value_2 * max_val)));
+	wstr = s2ws(str);
 	m_text_renderer.RenderText(
 		wstr, text_color,
 		px * sx, py * sy, sx, sy);
 	//value 4
 	py = txy + cmh * m_value_4 - ny / 2.0;
-	str = wxString::Format("%d", int(std::round(m_value_4 * max_val)));
-	wstr = str.ToStdWstring();
+	str = std::to_string(int(std::round(m_value_4 * max_val)));
+	wstr = s2ws(str);
 	m_text_renderer.RenderText(
 		wstr, text_color,
 		px * sx, py * sy, sx, sy);
 	//value 6
 	py = txy + cmh * m_value_6 - ny / 2.0;
-	str = wxString::Format("%d", int(std::round(m_value_6 * max_val)));
-	wstr = str.ToStdWstring();
+	str = std::to_string(int(std::round(m_value_6 * max_val)));
+	wstr = s2ws(str);
 	m_text_renderer.RenderText(
 		wstr, text_color,
 		px * sx, py * sy, sx, sy);
 	//value 7
 	py = txy + cmh - ny / 2.0;
-	str = wxString::Format("%d", int(std::round(max_val)));
-	wstr = str.ToStdWstring();
+	str = std::to_string(int(std::round(max_val)));
+	wstr = s2ws(str);
 	m_text_renderer.RenderText(
 		wstr, text_color,
 		px * sx, py * sy, sx, sy);
@@ -8669,27 +8664,25 @@ void RenderCanvas::DrawInfo(int nx, int ny, bool intactive)
 
 	double fps = 1.0 / glbin.getStopWatch(gstStopWatch)->average();
 	fps = std::max(fps, 0.0);
-	wxString str;
 	fluo::Color text_color = GetTextColor();
+	std::string str;
+	std::ostringstream tos;
 	if (glbin_settings.m_mem_swap)
 	{
 		if (glbin_vol_selector.GetBrushUsePres())
-			str = wxString::Format(
-				"FPS: %.2f, Act: %s, Bricks: %d, Quota: %d, Time: %lu, Pressure: %.2f",
-				fps,
-				intactive ? "Yes" : "No",
-				flvr::TextureRenderer::get_finished_bricks(),
-				flvr::TextureRenderer::get_quota_bricks(),
-				flvr::TextureRenderer::get_cor_up_time(),
-				glbin_vol_selector.GetPressure());
+			tos << "FPS: " << std::fixed << std::setprecision(2) << fps
+				<< ", Act: " << (intactive ? "Yes" : "No")
+				<< ", Bricks: " << flvr::TextureRenderer::get_finished_bricks()
+				<< ", Quota: " << flvr::TextureRenderer::get_quota_bricks()
+				<< ", Time: " << flvr::TextureRenderer::get_cor_up_time()
+				<< ", Pressure: " << std::fixed << std::setprecision(2) << glbin_vol_selector.GetPressure();
 		else
-			str = wxString::Format(
-				"FPS: %.2f, Act: %s, Bricks: %d, Quota: %d, Time: %lu",
-				fps,
-				intactive ? "Yes" : "No",
-				flvr::TextureRenderer::get_finished_bricks(),
-				flvr::TextureRenderer::get_quota_bricks(),
-				flvr::TextureRenderer::get_cor_up_time());
+			tos << "FPS: " << std::fixed << std::setprecision(2) << fps
+				<< ", Act: " << (intactive ? "Yes" : "No")
+				<< ", Bricks: " << flvr::TextureRenderer::get_finished_bricks()
+				<< ", Quota: " << flvr::TextureRenderer::get_quota_bricks()
+				<< ", Time: " << flvr::TextureRenderer::get_cor_up_time();
+		
 		////budget_test
 		//if (m_interactive)
 		//  tos <<
@@ -8707,12 +8700,13 @@ void RenderCanvas::DrawInfo(int nx, int ny, bool intactive)
 	else
 	{
 		if (glbin_vol_selector.GetBrushUsePres())
-			str = wxString::Format("FPS: %.2f, Pressure: %.2f",
-				fps, glbin_vol_selector.GetPressure());
+			tos << "FPS: " << std::fixed << std::setprecision(2) << fps
+				<< ", Pressure: " << std::fixed << std::setprecision(2) << glbin_vol_selector.GetPressure();
 		else
-			str = wxString::Format("FPS: %.2f", fps);
+			tos << "FPS: " << std::fixed << std::setprecision(2) << fps;
 	}
-	wstring wstr_temp = str.ToStdWstring();
+	str = tos.str();
+	std::wstring wstr_temp = s2ws(str);
 	px = gapw - nx / 2.0;
 	py = ny / 2.0 - gaph / 2.0;
 	m_text_renderer.RenderText(
@@ -8730,9 +8724,12 @@ void RenderCanvas::DrawInfo(int nx, int ny, bool intactive)
 		if ((glbin_volume_point.GetPointVolumeBox(mouse_pos.x, mouse_pos.y, true, p )>0.0) ||
 			glbin_volume_point.GetPointPlane(mouse_pos.x, mouse_pos.y, 0, true, p)>0.0)
 		{
-			str = wxString::Format("T: %d  X: %.2f  Y: %.2f  Z: %.2f",
-				m_tseq_cur_num, p.x(), p.y(), p.z());
-			wstr_temp = str.ToStdWstring();
+			tos << "T: " << m_tseq_cur_num
+				<< ", X: " << std::fixed << std::setprecision(2) << p.x()
+				<< ", Y: " << std::fixed << std::setprecision(2) << p.y()
+				<< ", Z: " << std::fixed << std::setprecision(2) << p.z();
+			str = tos.str();
+			wstr_temp = s2ws(str);
 			px = gapw - nx / 2.0;
 			py = ny / 2.0 - gaph;
 			m_text_renderer.RenderText(
@@ -8754,9 +8751,9 @@ void RenderCanvas::DrawInfo(int nx, int ny, bool intactive)
 			plane->get_copy(abcd);
 			int val = fabs(abcd[3] * resz) + 0.499;
 
-			str = wxString::Format("Z: %.2f ", val * spcz);
-			str += L"\u03BCm";
-			wstr_temp = str.ToStdWstring();
+			tos << "Z: " << std::fixed << std::setprecision(2) << val * spcz << "\u03BCm";
+			str = tos.str();
+			wstr_temp = s2ws(str);
 			if (m_draw_frame)
 			{
 				px = 0.01*glbin_moviemaker.GetCropW() + glbin_moviemaker.GetCropX() - nx / 2.0;
@@ -8777,8 +8774,8 @@ void RenderCanvas::DrawInfo(int nx, int ny, bool intactive)
 	{
 		if (m_vol_method == VOL_METHOD_MULTI && m_mvr)
 		{
-			str = wxString::Format("SLICES: %d", m_mvr->get_slice_num());
-			wstr_temp = str.ToStdWstring();
+			str = "SLICES: " + std::to_string(m_mvr->get_slice_num());
+			wstr_temp = s2ws(str);
 			px = gapw - nx / 2.0;
 			py = ny / 2.0 - gaph*1.5;
 			m_text_renderer.RenderText(
@@ -8792,8 +8789,8 @@ void RenderCanvas::DrawInfo(int nx, int ny, bool intactive)
 				VolumeData* vd = m_vd_pop_list[i];
 				if (vd && vd->GetVR())
 				{
-					str = wxString::Format("SLICES_%d: %d", i + 1, vd->GetVR()->get_slice_num());
-					wstr_temp = str.ToStdWstring();
+					str = "SLICES_" + std::to_string(i + 1) + ": " + std::to_string(vd->GetVR()->get_slice_num());
+					wstr_temp = s2ws(str);
 					px = gapw - nx / 2.0;
 					py = ny / 2.0 - gaph*(3 + i) / 2;
 					m_text_renderer.RenderText(
@@ -9862,8 +9859,8 @@ int RenderCanvas::GetTrackFileExist(bool save)
 		return 0;
 	if (!m_track_group->GetTrackMap()->GetFrameNum())
 		return 0;
-	wxString filename = m_track_group->GetPath();
-	if (wxFileExists(filename))
+	std::string filename = m_track_group->GetPath();
+	if (std::filesystem::exists(filename))
 	{
 		if (save)
 			SaveTrackGroup(filename);
@@ -9878,9 +9875,9 @@ TrackGroup* RenderCanvas::GetTrackGroup()
 	return m_track_group;
 }
 
-wxString RenderCanvas::GetTrackGroupFile()
+std::string RenderCanvas::GetTrackGroupFile()
 {
-	wxString str;
+	std::string str;
 	if (m_track_group)
 		str = m_track_group->GetPath();
 	return str;
@@ -9894,7 +9891,7 @@ void RenderCanvas::CreateTrackGroup()
 	m_track_group = new TrackGroup;
 }
 
-int RenderCanvas::LoadTrackGroup(wxString filename)
+int RenderCanvas::LoadTrackGroup(const std::string& filename)
 {
 	if (m_track_group)
 		delete m_track_group;
@@ -9903,7 +9900,7 @@ int RenderCanvas::LoadTrackGroup(wxString filename)
 	return m_track_group->Load(filename);
 }
 
-int RenderCanvas::SaveTrackGroup(wxString filename)
+int RenderCanvas::SaveTrackGroup(const std::string& filename)
 {
 	if (m_track_group)
 		return m_track_group->Save(filename);
@@ -9911,7 +9908,7 @@ int RenderCanvas::SaveTrackGroup(wxString filename)
 		return 0;
 }
 
-void RenderCanvas::ExportTrackGroup(wxString filename, unsigned int id)
+void RenderCanvas::ExportTrackGroup(const std::string& filename, unsigned int id)
 {
 	if (!m_track_group)
 		return;
@@ -10008,7 +10005,7 @@ void RenderCanvas::GetTraces(bool update)
 			{
 				flrd::Celp cell(new flrd::Cell(label_value));
 				cell->Inc(ii, jj, kk, 1.0f);
-				sel_labels.insert(pair<unsigned int, flrd::Celp>
+				sel_labels.insert(std::pair<unsigned int, flrd::Celp>
 					(label_value, cell));
 			}
 			else
@@ -11317,7 +11314,7 @@ int RenderCanvas::GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd) {
 }
 #endif
 
-wxString RenderCanvas::GetOGLVersion() {
+std::string RenderCanvas::GetOGLVersion() {
 	return m_GLversion;
 }
 

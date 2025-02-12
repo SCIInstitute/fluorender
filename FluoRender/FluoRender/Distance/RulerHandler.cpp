@@ -1829,7 +1829,7 @@ void RulerHandler::Project(const std::set<int>& rulers, const std::string& filen
 
 	bool update_all = rulers.empty();
 
-	string str = filename;
+	std::string str = filename;
 	std::ofstream ofs;
 	ofs.open(str, std::ofstream::out);
 

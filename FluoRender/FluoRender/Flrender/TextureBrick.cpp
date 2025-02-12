@@ -40,7 +40,7 @@
 
 namespace flvr
 {
-	std::map<wstring, wstring> TextureBrick::cache_table_ = std::map<wstring, wstring>();
+	std::map<std::wstring, std::wstring> TextureBrick::cache_table_ = std::map<std::wstring, std::wstring>();
 
 	TextureBrick::TextureBrick(Nrrd* n0, Nrrd* n1,
 		int nx, int ny, int nz, int nc, int* nb,
@@ -523,12 +523,12 @@ namespace flvr
 	{
 		try
 		{
-			ifstream ifs;
-			ifs.open(ws2s(finfo->filename), ios::binary);
+			std::ifstream ifs;
+			ifs.open(ws2s(finfo->filename), std::ios::binary);
 			if (!ifs) return false;
 			if (finfo->datasize > 0 && size != finfo->datasize) return false;
 			size_t read_size = finfo->datasize > 0 ? finfo->datasize : size;
-			ifs.seekg(finfo->offset, ios_base::beg);
+			ifs.seekg(finfo->offset, std::ios_base::beg);
 			ifs.read(data, read_size);
 			if (ifs) ifs.close();
 			/*
@@ -552,7 +552,7 @@ namespace flvr
 		}
 		catch (std::exception &e)
 		{
-			cerr << typeid(e).name() << "\n" << e.what() << endl;
+			std::cerr << typeid(e).name() << "\n" << e.what() << std::endl;
 			return false;
 		}
 
@@ -573,7 +573,7 @@ namespace flvr
 				found_cache = true;
 			else
 			{
-				wstring fcname;
+				std::wstring fcname;
 
 				auto itr = cache_table_.find(fcname);
 				if (itr != cache_table_.end())
@@ -671,14 +671,14 @@ namespace flvr
 */			}
 		}
 
-		ifstream ifs;
-		wstring fn = finfo->cached ? finfo->cache_filename : finfo->filename;
-		ifs.open(ws2s(fn), ios::binary);
+		std::ifstream ifs;
+		std::wstring fn = finfo->cached ? finfo->cache_filename : finfo->filename;
+		ifs.open(ws2s(fn), std::ios::binary);
 		if (!ifs) return false;
 		size_t zsize = finfo->datasize;
 		if (zsize <= 0) zsize = (size_t)ifs.seekg(0, std::ios::end).tellg();
 		char *zdata = new char[zsize];
-		ifs.seekg(finfo->offset, ios_base::beg);
+		ifs.seekg(finfo->offset, std::ios_base::beg);
 		ifs.read((char*)zdata, zsize);
 		if (ifs) ifs.close();
 		data = zdata;

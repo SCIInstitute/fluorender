@@ -34,9 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef __COMPATIBILITY_H__
 #define __COMPATIBILITY_H__
 
-#include <wx/wx.h>
-#include <wx/fileconf.h>
-#include <wx/wfstream.h>
 #include <boost/locale.hpp>
 #include <string>
 #include <cstring>
@@ -74,58 +71,62 @@ inline std::regex REGEX(const std::string& wildcard, bool caseSensitive = true)
 	return std::regex(regexString, caseSensitive ? std::regex_constants::ECMAScript : std::regex_constants::icase);
 }
 
-inline wxString REM_EXT(const wxString& str)
+inline std::string REM_EXT(const std::string& str)
 {
-	int pos = str.Find('.', true);
-	if (pos != wxNOT_FOUND)
-		return str.Left(pos);
+	size_t pos = str.rfind('.');
+	if (pos != std::string::npos)
+		return str.substr(0, pos);
 	return str;
 }
 
-inline wxString REM_NUM(const wxString& str)
+inline std::string REM_NUM(const std::string& str)
 {
-	wxString tmp = REM_EXT(str);
-	while (wxIsdigit(tmp.Last()))
-		tmp.RemoveLast();
+	std::string tmp = REM_EXT(str);
+	while (!tmp.empty() && std::isdigit(tmp.back()))
+	{
+		tmp.pop_back();
+	}
 	return tmp;
 }
 
-inline wxString INC_NUM(const wxString& str)
+inline std::string INC_NUM(const std::string& str)
 {
-	int pos = str.Find('.', true);
-	wxString ext;
-	if (pos != wxNOT_FOUND)
-		ext = str.Right(str.Length() - pos);
-	wxString tmp = str.Left(pos);
-	wxString digits;
-	while (wxIsdigit(tmp.Last()))
-	{
-		digits.Prepend(tmp.Last());
-		tmp.RemoveLast();
+	size_t pos = str.rfind('.');
+	std::string ext;
+	if (pos != std::string::npos) {
+		ext = str.substr(pos);
 	}
-	int len = digits.Length();
-	if (!len)
-	{
+	std::string tmp = str.substr(0, pos);
+	std::string digits;
+	while (!tmp.empty() && std::isdigit(tmp.back())) {
+		digits.insert(digits.begin(), tmp.back());
+		tmp.pop_back();
+	}
+	int len = digits.length();
+	if (len == 0) {
 		return tmp + "01" + ext;
 	}
-	long num;
-	digits.ToLong(&num);
+	int num = std::stoi(digits);
 	num++;
-	digits = wxString::Format("%d", num);
-	if (digits.Length() < len)
-	{
-		wxString format = wxString::Format("%%0%dd", len);
-		digits = wxString::Format(format, num);
-	}
+	std::ostringstream oss;
+	oss << std::setw(len) << std::setfill('0') << num;
+	digits = oss.str();
 	return tmp + digits + ext;
 }
 
-inline wxString INC_NUM_EXIST(const wxString& str)
+inline std::string INC_NUM_EXIST(const std::string& str)
 {
-	wxString str2 = str;
-	while (wxFileExists(str2))
+	std::string str2 = str;
+	while (std::filesystem::exists(str2))
 		str2 = INC_NUM(str2);
 	return str2;
+}
+
+inline std::string MAKE_NUM(int num, int len)
+{
+	std::ostringstream oss;
+	oss << std::setw(len) << std::setfill('0') << num;
+	return oss.str();
 }
 
 #define PI_2 1.5707963267948966192313216916398
@@ -267,8 +268,8 @@ inline char GETSLASHALTA() { return '/'; }
 
 inline std::wstring GET_NAME(std::wstring &pathname)
 {
-	int64_t pos1 = pathname.find_last_of(GETSLASH());
-	int64_t pos2 = pathname.find_last_of(GETSLASHALT());
+	size_t pos1 = pathname.find_last_of(GETSLASH());
+	size_t pos2 = pathname.find_last_of(GETSLASHALT());
 	if (pos1 != std::wstring::npos &&
 		pos2 != std::wstring::npos)
 		return pathname.substr((pos1 > pos2 ? pos1 : pos2) + 1);
@@ -280,10 +281,25 @@ inline std::wstring GET_NAME(std::wstring &pathname)
 		return pathname;
 }
 
+inline std::string GET_NAMEA(std::string &pathname)
+{
+	size_t pos1 = pathname.find_last_of(GETSLASHA());
+	size_t pos2 = pathname.find_last_of(GETSLASHALTA());
+	if (pos1 != std::string::npos &&
+		pos2 != std::string::npos)
+		return pathname.substr((pos1 > pos2 ? pos1 : pos2) + 1);
+	else if (pos1 != std::string::npos)
+		return pathname.substr(pos1 + 1);
+	else if (pos2 != std::string::npos)
+		return pathname.substr(pos2 + 1);
+	else
+		return pathname;
+}
+
 inline std::wstring GET_PATH(std::wstring &pathname)
 {
-	int64_t pos1 = pathname.find_last_of(GETSLASH());
-	int64_t pos2 = pathname.find_last_of(GETSLASHALT());
+	size_t pos1 = pathname.find_last_of(GETSLASH());
+	size_t pos2 = pathname.find_last_of(GETSLASHALT());
 	if (pos1 != std::wstring::npos &&
 		pos2 != std::wstring::npos)
 		return pathname.substr(0, (pos1 > pos2 ? pos1 : pos2) + 1);
@@ -295,10 +311,25 @@ inline std::wstring GET_PATH(std::wstring &pathname)
 		return pathname;
 }
 
+inline std::string GET_PATHA(std::string &pathname)
+{
+	size_t pos1 = pathname.find_last_of(GETSLASHA());
+	size_t pos2 = pathname.find_last_of(GETSLASHALTA());
+	if (pos1 != std::string::npos &&
+		pos2 != std::string::npos)
+		return pathname.substr(0, (pos1 > pos2 ? pos1 : pos2) + 1);
+	else if (pos1 != std::string::npos)
+		return pathname.substr(0, pos1 + 1);
+	else if (pos2 != std::string::npos)
+		return pathname.substr(0, pos2 + 1);
+	else
+		return pathname;
+}
+
 inline bool SEP_PATH_NAME(std::wstring &pathname, std::wstring &path, std::wstring &name)
 {
-	int64_t pos1 = pathname.find_last_of(GETSLASH());
-	int64_t pos2 = pathname.find_last_of(GETSLASHALT());
+	size_t pos1 = pathname.find_last_of(GETSLASH());
+	size_t pos2 = pathname.find_last_of(GETSLASHALT());
 	if (pos1 != std::wstring::npos &&
 		pos2 != std::wstring::npos)
 	{
@@ -313,6 +344,33 @@ inline bool SEP_PATH_NAME(std::wstring &pathname, std::wstring &path, std::wstri
 		return true;
 	}
 	else if (pos2 != std::wstring::npos)
+	{
+		path = pathname.substr(0, pos2 + 1);
+		name = pathname.substr(pos2 + 1);
+		return true;
+	}
+	else
+		return false;
+}
+
+inline bool SEP_PATH_NAMEA(std::string &pathname, std::string &path, std::string &name)
+{
+	size_t pos1 = pathname.find_last_of(GETSLASHA());
+	size_t pos2 = pathname.find_last_of(GETSLASHALTA());
+	if (pos1 != std::string::npos &&
+		pos2 != std::string::npos)
+	{
+		path = pathname.substr(0, (pos1 > pos2 ? pos1 : pos2) + 1);
+		name = pathname.substr((pos1 > pos2 ? pos1 : pos2) + 1);
+		return true;
+	}
+	else if (pos1 != std::string::npos)
+	{
+		path = pathname.substr(0, pos1 + 1);
+		name = pathname.substr(pos1 + 1);
+		return true;
+	}
+	else if (pos2 != std::string::npos)
 	{
 		path = pathname.substr(0, pos2 + 1);
 		name = pathname.substr(pos2 + 1);
@@ -397,12 +455,8 @@ inline int WSTOI(std::wstring s) { return _wtoi(s.c_str()); }
 inline double WSTOD(std::wstring s) { return _wtof(s.c_str()); }
 
 inline int STOI(const char * s) { return (s ? atoi(s) : 0); }
-inline int STOI(const wxChar * s) { return (s ? _wtoi(s) : 0); }
-inline int STOI(wxChar * s) { return (s ? _wtoi(s) : 0); }
 
 inline double STOD(const char * s) { return (s ? atof(s) : 0.0); }
-inline double STOD(wxChar * s) { return (s ? _wtof(s) : 0.0); }
-inline double STOD(const wxChar * s) { return (s ? _wtof(s) : 0.0); }
 
 inline unsigned long long TIME()
 {
@@ -614,6 +668,15 @@ inline std::wstring GET_NAME(std::wstring &pathname)
 		return pathname;
 }
 
+inline std::string GET_NAMEA(std::string &pathname)
+{
+	int64_t pos = pathname.find_last_of(GETSLASHA());
+	if (pos != std::string::npos)
+		return pathname.substr(pos + 1);
+	else
+		return pathname;
+}
+
 inline std::wstring GET_PATH(std::wstring &pathname)
 {
 	int64_t pos = pathname.find_last_of(GETSLASH());
@@ -623,10 +686,32 @@ inline std::wstring GET_PATH(std::wstring &pathname)
 		return pathname;
 }
 
+inline std::string GET_PATHA(std::string &pathname)
+{
+	int64_t pos = pathname.find_last_of(GETSLASHA());
+	if (pos != std::string::npos)
+		return pathname.substr(0, pos + 1);
+	else
+		return pathname;
+}
+
 inline bool SEP_PATH_NAME(std::wstring &pathname, std::wstring &path, std::wstring &name)
 {
-	int64_t pos = pathname.find_last_of(GETSLASH());
+	size_t pos = pathname.find_last_of(GETSLASH());
 	if (pos != std::wstring::npos)
+	{
+		path = pathname.substr(0, pos + 1);
+		name = pathname.substr(pos + 1);
+		return true;
+	}
+	else
+		return false;
+}
+
+inline bool SEP_PATH_NAMEA(std::string &pathname, std::string &path, std::string &name)
+{
+	size_t pos = pathname.find_last_of(GETSLASHA());
+	if (pos != std::string::npos)
 	{
 		path = pathname.substr(0, pos + 1);
 		name = pathname.substr(pos + 1);

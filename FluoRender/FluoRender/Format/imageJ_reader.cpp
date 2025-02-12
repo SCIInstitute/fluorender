@@ -66,19 +66,10 @@ ImageJReader::ImageJReader():
 
 	m_time_id = L"_T";
 	
-	//Geting absolute path to class file.
-	//wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-	//exePath = wxPathOnly(exePath);
-	//string imageJPath = exePath.ToStdString();
-	//imageJPath += GETSLASHA() + "Java_Code" + GETSLASHA();
-	//imageJPath += "ImageJ_Reader";
-
 	//Java code to get the number of depth images.
 	m_pJVMInstance = JVMInitializer::getInstance();
 	if (m_pJVMInstance == nullptr)
 		return;
-	//printf("%s", imageJPath.c_str());
-	//fflush(stdout);
 
 	m_imageJ_cls = m_pJVMInstance->m_pEnv->FindClass("ImageJ_Reader");
 	if (m_imageJ_cls == nullptr)

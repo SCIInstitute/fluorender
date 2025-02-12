@@ -972,27 +972,25 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstFontFile))
 	{
 		//populate fonts
-		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-		exePath = wxPathOnly(exePath);
-		wxString loc = exePath + GETSLASH() + "Fonts" +
-			GETSLASH() + "*.ttf";
-		wxLogNull logNo;
-		wxArrayString list;
-		wxString file = wxFindFirstFile(loc);
-		while (!file.empty())
+		std::filesystem::path p = std::filesystem::current_path();
+		p /= "Fonts";
+		std::vector<std::string> list;
+		for (const auto& entry : std::filesystem::directory_iterator(p))
 		{
-			file = wxFileNameFromPath(file);
-			file = file.BeforeLast('.');
-			list.Add(file);
-			file = wxFindNextFile();
+			if (entry.is_regular_file() && entry.path().extension() == ".ttf")
+			{
+				list.push_back(entry.path().string());
+			}
 		}
-		list.Sort();
-		for (size_t i = 0; i < list.GetCount(); ++i)
+		std::sort(list.begin(), list.end());
+
+		for (size_t i = 0; i < list.size(); ++i)
 			m_font_cmb->Append(list[i]);
 	}
 	if (update_all || FOUND_VALUE(gstSettingsFont))
 	{
-		wxString str = glbin_settings.m_font_file.BeforeLast('.');
+		std::filesystem::path p(glbin_settings.m_font_file);
+		wxString str = p.stem().string();
 		int font_sel = m_font_cmb->FindString(str);
 		if (font_sel != wxNOT_FOUND)
 			m_font_cmb->Select(font_sel);
@@ -1756,17 +1754,14 @@ void SettingDlg::OnDetailLevelOffsetEdit(wxCommandEvent& event)
 //font
 void SettingDlg::OnFontChange(wxCommandEvent& event)
 {
-	wxString str = m_font_cmb->GetValue();
-	if (str.IsEmpty())
+	std::string str = m_font_cmb->GetValue().ToStdString();
+	if (str.empty())
 		return;
 
 	glbin_settings.m_font_file = str + ".ttf";
-	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-	exePath = wxPathOnly(exePath);
-	wxString loc = exePath + GETSLASH() + "Fonts" +
-		GETSLASH() + str + ".ttf";
-
-	glbin_text_tex_manager.load_face(loc.ToStdString());
+	std::filesystem::path p = std::filesystem::current_path();
+	p = p / "Fonts" / (str + ".ttf");
+	glbin_text_tex_manager.load_face(p.string());
 	glbin_text_tex_manager.SetSize(glbin_settings.m_text_size);
 	FluoRefresh(3, { gstNull });
 }

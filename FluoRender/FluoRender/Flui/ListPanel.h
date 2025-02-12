@@ -40,8 +40,8 @@ public:
 		const wxSize& size = wxDefaultSize,
 		long style = wxLC_REPORT | wxLC_SINGLE_SEL);
 
-	void Append(int type, wxString name, wxString path);
-	void SetText(long item, int col, wxString &str);
+	void Append(int type, const wxString& name, const wxString& path);
+	void SetText(long item, int col, const wxString &str);
 	wxString GetText(long item, int col);
 	void StartEdit();
 	wxString EndEdit();
@@ -100,7 +100,7 @@ public:
 
 	void AddSelectionToView(int view);
 	void AddSelToCurView();
-	void RenameSelection(const wxString& name);
+	void RenameSelection(const std::string& name);
 	void SaveSelection();
 	void BakeSelection();
 	void SaveSelMask();
