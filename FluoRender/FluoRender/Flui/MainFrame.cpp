@@ -1864,8 +1864,8 @@ void MainFrame::ShowInfo()
 	txt->SetFont(font);
 	right->Add(txt, 0, wxEXPAND);
 	txt = new wxStaticText(d, wxID_ANY, "Version: " +
-		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR)),
-		wxDefaultPosition, FromDIP(wxSize(50, -1)));
+		std::format("{}.{}", VERSION_MAJOR, std::format("{:.1f}", VERSION_MINOR))),
+		wxDefaultPosition, FromDIP(wxSize(50, -1));
 	font = wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
 	txt->SetFont(font);
 	right->Add(txt, 0, wxEXPAND);
@@ -2263,7 +2263,7 @@ void MainFrame::SaveAsProject()
 	std::string default_path = glbin_data_manager.GetProjectFile();
 	std::string path;
 	std::string filename;
-	bool default_valid = SEP_PATH_NAMEA(default_path, path, filename);
+	bool default_valid = SEP_PATH_NAME(default_path, path, filename);
 
 	ModalDlg* fopendlg = new ModalDlg(
 		this, "Save Project File",

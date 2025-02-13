@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <StopWatchFactory.hpp>
 #include <iostream>
 #include <filesystem>
+#include <tiffio.h>
 
 MovieMaker::MovieMaker() :
 	m_frame(0),
@@ -212,9 +213,10 @@ void MovieMaker::PlaySave()
 		MkDir(new_folder);
 		std::filesystem::path p(m_filename);
 		std::string name = p.stem().string();
-		std::string prop_file = new_folder + GETSLASHA()
-			+ name + "_project.vrp";
-		bool inc = std::filesystem::exists(prop_file) &&
+		p = new_folder;
+		p /= name + "_project.vrp";
+		std::string prop_file = p.string();
+		bool inc = std::filesystem::exists(p) &&
 			glbin_settings.m_prj_save_inc;
 		glbin_project.Save(prop_file, inc);
 	}

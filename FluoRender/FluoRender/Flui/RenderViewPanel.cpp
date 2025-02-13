@@ -989,7 +989,7 @@ void RenderViewPanel::Capture()
 	int rval = file_dlg.ShowModal();
 	if (rval == wxID_OK)
 	{
-		m_canvas->m_cap_file = file_dlg.GetDirectory() + GETSLASH() + file_dlg.GetFilename();
+		m_canvas->m_cap_file = file_dlg.GetPath();
 		m_canvas->m_capture = true;
 		RefreshGL();
 
@@ -997,7 +997,9 @@ void RenderViewPanel::Capture()
 		{
 			std::string new_folder = m_canvas->m_cap_file + "_project";
 			MkDir(new_folder);
-			std::string prop_file = new_folder + GETSLASHA() + file_dlg.GetFilename().ToStdString() + "_project.vrp";
+			std::filesystem::path p = new_folder;
+			p /= file_dlg.GetFilename().ToStdString() + "_project.vrp";
+			std::string prop_file = p.string();
 			bool inc = std::filesystem::exists(prop_file) &&
 				glbin_settings.m_prj_save_inc;
 			glbin_project.Save(prop_file, inc);

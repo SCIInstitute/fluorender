@@ -40,11 +40,11 @@ DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #include <iostream>
 #include <vector>
-#include <tiffio.h>
 #include <cctype>
 #include <cmath>
 #include <regex>
 #include <filesystem>
+#include <chrono>
 
 inline std::regex REGEX(const std::string& wildcard, bool caseSensitive = true)
 {
@@ -244,140 +244,125 @@ inline std::string GET_SUFFIX(const std::string &pathname)
 	return extension;
 }
 
-
-#ifdef _WIN32 //WINDOWS ONLY
-
-#include <cstdlib>
-#include <cstdio>
-#include <cstdarg>
-#include <cstdint>
-#include <chrono>
-#include <sys/types.h>
-#include <ctype.h>
-#include <direct.h>
-
-#define GETCURRENTDIR _getcwd
-
-#define FSEEK64     _fseeki64
-#define SSCANF    sscanf
-
-inline wchar_t GETSLASH() { return L'\\'; }
-inline wchar_t GETSLASHALT() { return L'/'; }
-inline char GETSLASHA() { return '\\'; }
-inline char GETSLASHALTA() { return '/'; }
-
-inline std::wstring GET_NAME(std::wstring &pathname)
+inline unsigned long long TIME()
 {
-	size_t pos1 = pathname.find_last_of(GETSLASH());
-	size_t pos2 = pathname.find_last_of(GETSLASHALT());
-	if (pos1 != std::wstring::npos &&
-		pos2 != std::wstring::npos)
-		return pathname.substr((pos1 > pos2 ? pos1 : pos2) + 1);
-	else if (pos1 != std::wstring::npos)
-		return pathname.substr(pos1 + 1);
-	else if (pos2 != std::wstring::npos)
-		return pathname.substr(pos2 + 1);
-	else
-		return pathname;
+	using namespace std::chrono;
+	return time_point_cast<seconds>(system_clock::now()).time_since_epoch().count();
 }
 
-inline std::string GET_NAMEA(std::string &pathname)
+inline unsigned long long GET_TICK_COUNT()
 {
-	size_t pos1 = pathname.find_last_of(GETSLASHA());
-	size_t pos2 = pathname.find_last_of(GETSLASHALTA());
-	if (pos1 != std::string::npos &&
-		pos2 != std::string::npos)
-		return pathname.substr((pos1 > pos2 ? pos1 : pos2) + 1);
-	else if (pos1 != std::string::npos)
-		return pathname.substr(pos1 + 1);
-	else if (pos2 != std::string::npos)
-		return pathname.substr(pos2 + 1);
-	else
-		return pathname;
+	using namespace std::chrono;
+	return time_point_cast<milliseconds>(steady_clock::now()).time_since_epoch().count();
 }
 
-inline std::wstring GET_PATH(std::wstring &pathname)
+inline std::string STR_DIR_SEP(const std::string& pathname)
 {
-	size_t pos1 = pathname.find_last_of(GETSLASH());
-	size_t pos2 = pathname.find_last_of(GETSLASHALT());
-	if (pos1 != std::wstring::npos &&
-		pos2 != std::wstring::npos)
-		return pathname.substr(0, (pos1 > pos2 ? pos1 : pos2) + 1);
-	else if (pos1 != std::wstring::npos)
-		return pathname.substr(0, pos1 + 1);
-	else if (pos2 != std::wstring::npos)
-		return pathname.substr(0, pos2 + 1);
-	else
-		return pathname;
+	std::filesystem::path path(pathname);
+	return path.make_preferred().string();
 }
 
-inline std::string GET_PATHA(std::string &pathname)
+inline bool FIND_FILES_4D(const std::wstring& path_name, const std::wstring& id, std::vector<std::wstring>& batch_list, int& cur_batch)
 {
-	size_t pos1 = pathname.find_last_of(GETSLASHA());
-	size_t pos2 = pathname.find_last_of(GETSLASHALTA());
-	if (pos1 != std::string::npos &&
-		pos2 != std::string::npos)
-		return pathname.substr(0, (pos1 > pos2 ? pos1 : pos2) + 1);
-	else if (pos1 != std::string::npos)
-		return pathname.substr(0, pos1 + 1);
-	else if (pos2 != std::string::npos)
-		return pathname.substr(0, pos2 + 1);
-	else
-		return pathname;
-}
-
-inline bool SEP_PATH_NAME(std::wstring &pathname, std::wstring &path, std::wstring &name)
-{
-	size_t pos1 = pathname.find_last_of(GETSLASH());
-	size_t pos2 = pathname.find_last_of(GETSLASHALT());
-	if (pos1 != std::wstring::npos &&
-		pos2 != std::wstring::npos)
-	{
-		path = pathname.substr(0, (pos1 > pos2 ? pos1 : pos2) + 1);
-		name = pathname.substr((pos1 > pos2 ? pos1 : pos2) + 1);
-		return true;
-	}
-	else if (pos1 != std::wstring::npos)
-	{
-		path = pathname.substr(0, pos1 + 1);
-		name = pathname.substr(pos1 + 1);
-		return true;
-	}
-	else if (pos2 != std::wstring::npos)
-	{
-		path = pathname.substr(0, pos2 + 1);
-		name = pathname.substr(pos2 + 1);
-		return true;
-	}
-	else
+	size_t begin = path_name.rfind(id);
+	size_t id_len = id.length();
+	if (begin == std::wstring::npos)
 		return false;
+
+	std::wstring searchstr = path_name.substr(0, begin) + L"*";
+	std::wstring t_num;
+	size_t k;
+	bool end_digits = false;
+	for (k = begin + id_len; k < path_name.length(); ++k) {
+		wchar_t c = path_name[k];
+		if (iswdigit(c)) {
+			if (end_digits)
+				searchstr.push_back(c);
+			else
+				t_num.push_back(c);
+		}
+		else if (k == begin + id_len) {
+			return false;
+		}
+		else {
+			end_digits = true;
+			searchstr.push_back(c);
+		}
+	}
+	if (t_num.empty())
+		return false;
+
+	std::filesystem::path p(path_name);
+	p = p.parent_path();
+	std::wstring search_path = p.wstring();
+	std::wregex regex(searchstr);
+	batch_list.clear();
+	cur_batch = -1;
+	int cnt = 0;
+
+	for (const auto& entry : std::filesystem::directory_iterator(search_path)) {
+		if (std::regex_match(entry.path().filename().wstring(), regex)) {
+			std::wstring name = entry.path().wstring();
+			batch_list.push_back(name);
+			if (name == path_name)
+				cur_batch = cnt;
+			cnt++;
+		}
+	}
+
+	return !batch_list.empty();
 }
 
-inline bool SEP_PATH_NAMEA(std::string &pathname, std::string &path, std::string &name)
+inline void FIND_FILES(const std::wstring& path_name,
+	const std::wstring& search_mask,
+	std::vector<std::wstring>& batch_list,
+	int& cur_batch)
 {
-	size_t pos1 = pathname.find_last_of(GETSLASHA());
-	size_t pos2 = pathname.find_last_of(GETSLASHALTA());
-	if (pos1 != std::string::npos &&
-		pos2 != std::string::npos)
-	{
-		path = pathname.substr(0, (pos1 > pos2 ? pos1 : pos2) + 1);
-		name = pathname.substr((pos1 > pos2 ? pos1 : pos2) + 1);
-		return true;
+	std::filesystem::path p(path_name);
+	p = p.parent_path();
+	std::wstring search_path = p.wstring();
+	std::wstring full_search_mask = (search_mask.find(path_name) == std::wstring::npos) ? search_path + search_mask : search_mask;
+
+	std::wregex regex(full_search_mask);
+	batch_list.clear();
+	cur_batch = -1;
+	int cnt = 0;
+
+	for (const auto& entry : std::filesystem::directory_iterator(search_path)) {
+		if (std::regex_match(entry.path().filename().wstring(), regex)) {
+			std::wstring name = entry.path().wstring();
+			batch_list.push_back(name);
+			if (name == path_name)
+				cur_batch = cnt;
+			cnt++;
+		}
 	}
-	else if (pos1 != std::string::npos)
+}
+
+inline bool IS_NUMBER(const std::string& s)
+{
+	return !s.empty() && std::find_if(s.begin(),
+		s.end(), [](unsigned char c) { return !std::isdigit(int(c)); }) == s.end();
+}
+
+inline void INC_NUMBER(std::string& s)
+{
+	if (s.empty())
 	{
-		path = pathname.substr(0, pos1 + 1);
-		name = pathname.substr(pos1 + 1);
-		return true;
+		s = "1";
+		return;
 	}
-	else if (pos2 != std::string::npos)
+	if (std::isdigit(s.back()))
 	{
-		path = pathname.substr(0, pos2 + 1);
-		name = pathname.substr(pos2 + 1);
-		return true;
+		size_t p = s.find_last_not_of("0123456789") + 1;
+		std::string sn = s.substr(p);
+		s = s.substr(0, p);
+		s += std::to_string(std::stoi(sn) + 1);
 	}
 	else
-		return false;
+	{
+		s += "1";
+	}
 }
 
 inline std::wstring s2ws(const std::string& s)
@@ -389,6 +374,101 @@ inline std::string ws2s(const std::wstring& ws)
 {
 	return boost::locale::conv::utf_to_utf<char>(ws);
 }
+
+inline std::wstring GET_NAME(const std::wstring& pathname)
+{
+	std::filesystem::path path(pathname);
+	return path.stem().wstring();
+}
+
+inline std::string GET_NAME(const std::string& pathname)
+{
+	std::filesystem::path path(pathname);
+	return path.stem().string();
+}
+
+inline std::wstring GET_PATH(const std::wstring& pathname)
+{
+	std::filesystem::path path(pathname);
+	return path.parent_path().wstring();
+}
+
+inline std::string GET_PATH(const std::string& pathname)
+{
+	std::filesystem::path path(pathname);
+	return path.parent_path().string();
+}
+
+inline bool SEP_PATH_NAME(const std::wstring& pathname, std::wstring& path, std::wstring& name)
+{
+	std::filesystem::path fs_path(pathname);
+
+	// Check if the path exists and is a file
+	if (!std::filesystem::exists(fs_path) || !std::filesystem::is_regular_file(fs_path)) {
+		return false;
+	}
+
+	path = fs_path.parent_path().wstring();
+	name = fs_path.filename().wstring();
+	return true;
+}
+
+inline bool SEP_PATH_NAME(const std::string& pathname, std::string& path, std::string& name)
+{
+	std::filesystem::path fs_path(pathname);
+
+	// Check if the path exists and is a file
+	if (!std::filesystem::exists(fs_path) || !std::filesystem::is_regular_file(fs_path)) {
+		return false;
+	}
+
+	path = fs_path.parent_path().string();
+	name = fs_path.filename().string();
+	return true;
+}
+
+inline void CHECK_TRAILING_SLASH(std::wstring& str)
+{
+	std::filesystem::path path(str);
+	if (!path.empty() && path.native().back() != std::filesystem::path::preferred_separator) {
+		path += std::filesystem::path::preferred_separator;
+	}
+	str = path.wstring();
+}
+
+inline void CHECK_TRAILING_SLASH(std::string& str)
+{
+	std::filesystem::path path(str);
+	if (!path.empty() && path.native().back() != std::filesystem::path::preferred_separator) {
+		path += std::filesystem::path::preferred_separator;
+	}
+	str = path.string();
+}
+
+extern "C" {
+	typedef struct tiff TIFF;
+	TIFF* TIFFOpenW(const wchar_t* name, const char* mode);
+}
+
+
+#ifdef _WIN32 //WINDOWS ONLY
+
+#include <cstdlib>
+#include <cstdio>
+#include <cstdarg>
+#include <cstdint>
+#include <sys/types.h>
+#include <ctype.h>
+#include <direct.h>
+
+#define FSEEK64     _fseeki64
+#define SSCANF    sscanf
+
+inline wchar_t GETSLASH() { return L'\\'; }
+inline wchar_t GETSLASHALT() { return L'/'; }
+inline char GETSLASHA() { return '\\'; }
+inline char GETSLASHALTA() { return '/'; }
+
 
 inline TIFF* TIFFOpenW(std::wstring fname, const char* opt)
 {
@@ -458,137 +538,12 @@ inline int STOI(const char * s) { return (s ? atoi(s) : 0); }
 
 inline double STOD(const char * s) { return (s ? atof(s) : 0.0); }
 
-inline unsigned long long TIME()
-{
-	using namespace std::chrono;
-	return time_point_cast<seconds>(system_clock::now()).time_since_epoch().count();
-}
-
-inline unsigned long long GET_TICK_COUNT()
-{
-	using namespace std::chrono;
-	return time_point_cast<milliseconds>(steady_clock::now()).time_since_epoch().count();
-}
-
-inline std::string STR_DIR_SEP(const std::string pathname)
-{
-	std::string result = pathname;
-	size_t pos = 0;
-	while ((pos = result.find("/", pos)) != std::string::npos)
-	{
-		result.replace(pos, 1, "\\");
-		pos++;
-	}
-	return result;
-}
-
-inline bool FIND_FILES_4D(const std::wstring& path_name, const std::wstring& id, std::vector<std::wstring>& batch_list, int& cur_batch)
-{
-	size_t begin = path_name.rfind(id);
-	size_t id_len = id.length();
-	if (begin == std::wstring::npos)
-		return false;
-
-	std::wstring searchstr = path_name.substr(0, begin) + L"*";
-	std::wstring t_num;
-	size_t k;
-	bool end_digits = false;
-	for (k = begin + id_len; k < path_name.length(); ++k) {
-		wchar_t c = path_name[k];
-		if (iswdigit(c)) {
-			if (end_digits)
-				searchstr.push_back(c);
-			else
-				t_num.push_back(c);
-		}
-		else if (k == begin + id_len) {
-			return false;
-		}
-		else {
-			end_digits = true;
-			searchstr.push_back(c);
-		}
-	}
-	if (t_num.empty())
-		return false;
-
-	std::wstring search_path = path_name.substr(0, path_name.find_last_of(L'\\')) + L'\\';
-	std::wregex regex(searchstr);
-	batch_list.clear();
-	cur_batch = -1;
-	int cnt = 0;
-
-	for (const auto& entry : std::filesystem::directory_iterator(search_path)) {
-		if (std::regex_match(entry.path().filename().wstring(), regex)) {
-			std::wstring name = entry.path().wstring();
-			batch_list.push_back(name);
-			if (name == path_name)
-				cur_batch = cnt;
-			cnt++;
-		}
-	}
-
-	return !batch_list.empty();
-}
-
-inline void FIND_FILES(const std::wstring& m_path_name,
-	const std::wstring& search_mask,
-	std::vector<std::wstring>& m_batch_list,
-	int& m_cur_batch)
-{
-	std::wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(L'\\')) + L'\\';
-	std::wstring full_search_mask = (search_mask.find(m_path_name) == std::wstring::npos) ? search_path + search_mask : search_mask;
-
-	std::wregex regex(full_search_mask);
-	m_batch_list.clear();
-	m_cur_batch = -1;
-	int cnt = 0;
-
-	for (const auto& entry : std::filesystem::directory_iterator(search_path)) {
-		if (std::regex_match(entry.path().filename().wstring(), regex)) {
-			std::wstring name = entry.path().wstring();
-			m_batch_list.push_back(name);
-			if (name == m_path_name)
-				m_cur_batch = cnt;
-			cnt++;
-		}
-	}
-}
-
-inline bool IS_NUMBER(const std::string& s)
-{
-	return !s.empty() && std::find_if(s.begin(),
-		s.end(), [](unsigned char c) { return !std::isdigit(int(c)); }) == s.end();
-}
-
-inline void INC_NUMBER(std::string& s)
-{
-	if (s.empty())
-	{
-		s = "1";
-		return;
-	}
-	if (std::isdigit(s.back()))
-	{
-		size_t p = s.find_last_not_of("0123456789") + 1;
-		std::string sn = s.substr(p);
-		s = s.substr(0, p);
-		s += std::to_string(std::stoi(sn) + 1);
-	}
-	else
-	{
-		s += "1";
-	}
-}
-
 #else // MAC OSX or LINUX
 
 #include <unistd.h>
 #include <dirent.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-
-#define GETCURRENTDIR getcwd
 
 #define FSEEK64     fseek
 
@@ -618,85 +573,6 @@ inline bool str_mat(std::wstring &s1, size_t p1, std::wstring &s2, size_t p2)
 	if (s1[p1] == L'*')
 		return str_mat(s1, p1 + 1, s2, p2) || str_mat(s1, p1, s2, p2 + 1);
 	return false;
-}
-
-inline bool STR_MATCH(std::wstring &pattern, std::wstring &search)
-{
-	return str_mat(pattern, 0, search, 0);
-}
-
-inline std::wstring GET_NAME(std::wstring &pathname)
-{
-	int64_t pos = pathname.find_last_of(GETSLASH());
-	if (pos != std::wstring::npos)
-		return pathname.substr(pos + 1);
-	else
-		return pathname;
-}
-
-inline std::string GET_NAMEA(std::string &pathname)
-{
-	int64_t pos = pathname.find_last_of(GETSLASHA());
-	if (pos != std::string::npos)
-		return pathname.substr(pos + 1);
-	else
-		return pathname;
-}
-
-inline std::wstring GET_PATH(std::wstring &pathname)
-{
-	int64_t pos = pathname.find_last_of(GETSLASH());
-	if (pos != std::wstring::npos)
-		return pathname.substr(0, pos + 1);
-	else
-		return pathname;
-}
-
-inline std::string GET_PATHA(std::string &pathname)
-{
-	int64_t pos = pathname.find_last_of(GETSLASHA());
-	if (pos != std::string::npos)
-		return pathname.substr(0, pos + 1);
-	else
-		return pathname;
-}
-
-inline bool SEP_PATH_NAME(std::wstring &pathname, std::wstring &path, std::wstring &name)
-{
-	size_t pos = pathname.find_last_of(GETSLASH());
-	if (pos != std::wstring::npos)
-	{
-		path = pathname.substr(0, pos + 1);
-		name = pathname.substr(pos + 1);
-		return true;
-	}
-	else
-		return false;
-}
-
-inline bool SEP_PATH_NAMEA(std::string &pathname, std::string &path, std::string &name)
-{
-	size_t pos = pathname.find_last_of(GETSLASHA());
-	if (pos != std::string::npos)
-	{
-		path = pathname.substr(0, pos + 1);
-		name = pathname.substr(pos + 1);
-		return true;
-	}
-	else
-		return false;
-}
-
-inline std::wstring s2ws(const std::string& utf8) {
-	//    return std::wstring( str.begin(), str.end() );
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-	return converter.from_bytes(utf8);
-}
-
-inline std::string ws2s(const std::wstring& utf16) {
-	//    return std::string( str.begin(), str.end() );
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-	return converter.to_bytes(utf16);
 }
 
 inline int SSCANF(const char* buf, const char* fmt, ...) {
@@ -749,8 +625,6 @@ inline int STOI(const char * s) { return (s ? atoi(s) : 0); }
 
 inline double STOD(const char * s) { return (s ? atof(s) : 0.0); }
 
-inline time_t TIME() { return time(NULL); }
-
 typedef union _LARGE_INTEGER {
 	struct {
 		unsigned int LowPart;
@@ -762,120 +636,6 @@ typedef union _LARGE_INTEGER {
 	} u;
 	long long QuadPart;
 } LARGE_INTEGER, *PLARGE_INTEGER;
-
-inline std::string STR_DIR_SEP(const std::string pathname)
-{
-	std::string result = pathname;
-	size_t pos = 0;
-	while ((pos = result.find("\\", pos)) != std::string::npos)
-	{
-		result.replace(pos, 1, "/");
-		pos++;
-	}
-	return result;
-}
-
-inline bool FIND_FILES_4D(std::wstring path_name,
-	std::wstring id, std::vector<std::wstring> &batch_list,
-	int &cur_batch)
-{
-	int64_t begin = path_name.find(id);
-	size_t id_len = id.length();
-	if (begin == -1)
-		return false;
-	else
-	{
-		std::wstring searchstr = path_name.substr(0, begin);
-		std::wstring searchstr2;
-		std::wstring t_num;
-		size_t k;
-		bool end_digits = false;
-		for (k = begin + id_len; k < path_name.length(); ++k)
-		{
-			wchar_t c = path_name[k];
-			if (iswdigit(c))
-			{
-				if (end_digits)
-					searchstr.push_back(c);
-				else
-					t_num.push_back(c);
-			}
-			else if (k == begin + id_len)
-				return false;
-			else
-			{
-				end_digits = true;
-				searchstr2.push_back(c);
-			}
-		}
-		if (t_num.length() == 0)
-			return false;
-
-		std::wstring search_path = path_name.substr(0,
-			path_name.find_last_of(L'/')) + L'/';
-		DIR* dir;
-		struct dirent *ent;
-		if ((dir = opendir(ws2s(search_path).c_str())) != NULL)
-		{
-			int cnt = 0;
-			batch_list.clear();
-
-			while ((ent = readdir(dir)) != NULL)
-			{
-				std::string file(ent->d_name);
-				std::wstring wfile = search_path + s2ws(file);
-				//check if it contains the string.
-				if (ent->d_name[0] != '.' &&
-					wfile.find(searchstr) != std::string::npos &&
-					wfile.find(searchstr2) != std::string::npos) {
-					std::string ss = ent->d_name;
-					std::wstring f = s2ws(ss);
-					std::wstring name;
-					if (f.find(search_path) == std::string::npos)
-						name = search_path + f;
-					else
-						name = f;
-					batch_list.push_back(name);
-					if (name == path_name)
-						cur_batch = cnt;
-					cnt++;
-				}
-			}
-		}
-		return true;
-	}
-}
-
-inline void FIND_FILES(std::wstring m_path_name,
-	std::wstring search_mask,
-	std::vector<std::wstring> &m_batch_list,
-	int &m_cur_batch)
-{
-	std::wstring search_path = m_path_name.substr(0,
-		m_path_name.find_last_of(L'/')) + L'/';
-	std::string sspath = ws2s(search_path.c_str());
-	DIR* dir = opendir(sspath.c_str());
-	if (!dir)
-		return;
-	int cnt = 0;
-	m_batch_list.clear();
-	struct dirent *ent;
-	while ((ent = readdir(dir)) != NULL)
-	{
-		std::string file(ent->d_name);
-		std::wstring wfile = s2ws(file);
-		if (file[0] != '.' &&
-			STR_MATCH(search_mask, wfile))
-		{
-			std::wstring name = search_path + wfile;
-			m_batch_list.push_back(name);
-			if (name == m_path_name)
-				m_cur_batch = cnt;
-			cnt++;
-		}
-	}
-	closedir(dir);
-}
 
 inline FILE* WFOPEN(FILE ** fp, const wchar_t* filename, const wchar_t* mode) {
 	*fp = fopen(ws2s(std::wstring(filename)).c_str(),
@@ -906,33 +666,6 @@ inline int MkDir(std::string dirname)
 inline int MkDirW(std::wstring dirname)
 {
 	return mkdir(ws2s(dirname).c_str(), 0777);
-}
-
-inline uint32_t GET_TICK_COUNT() {
-	struct timeval ts;
-	gettimeofday(&ts, NULL);
-	return ts.tv_sec * 1000 + ts.tv_usec / 1000;
-}
-
-inline bool IS_NUMBER(const std::string& s)
-{
-	return !s.empty() && std::find_if(s.begin(),
-		s.end(), [](unsigned char c) { return !std::isdigit(int(c)); }) == s.end();
-}
-
-inline void INC_NUMBER(std::string& s)
-{
-	if (std::isdigit(s.back()))
-	{
-		size_t p = s.find_last_not_of("0123456789") + 1;
-		std::string sn = s.substr(p);
-		s = s.substr(0, p);
-		s += std::to_string(std::stoi(sn) + 1);
-	}
-	else
-	{
-		s += "1";
-	}
 }
 
 //LINUX SPECIFIC

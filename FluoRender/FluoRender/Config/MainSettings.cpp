@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <GL/glew.h>
 #include <MainSettings.h>
 #include <Names.h>
+#include <Global.h>
 #include <compatibility.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
@@ -456,10 +457,10 @@ void MainSettings::Read()
 
 void MainSettings::Save()
 {
-	wxString app_name = "FluoRender " +
-		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
-	wxString vendor_name = "FluoRender";
-	wxString local_name = "fluorender.ini";
+	std::string app_name = "FluoRender " +
+		std::format("{}.{}", VERSION_MAJOR, std::format("{:.1f}", VERSION_MINOR));
+	std::string vendor_name = "FluoRender";
+	std::string local_name = "fluorender.ini";
 	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
 		wxCONFIG_USE_LOCAL_FILE);
 
@@ -669,7 +670,7 @@ void MainSettings::Save()
 	std::filesystem::path p = std::filesystem::current_path();
 	p /= "fluorender.ini";
 	std::string dft = p.string();
-	SaveConfig(fconfig, dft);
+	glbin_project.SaveConfig(fconfig, dft);
 }
 
 void MainSettings::GetMemorySettings()

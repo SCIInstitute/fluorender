@@ -234,8 +234,7 @@ std::string PyBase::GetPythonPath()
 			continue;
 
 		//potential path
-		if (str.back() != GETSLASHA())
-			str += GETSLASHA();
+		CHECK_TRAILING_SLASH(str);
 		std::filesystem::path path(str);
 		str += "*.dll";
 		std::regex rgx = REGEX(str);
@@ -293,8 +292,7 @@ std::string PyBase::GetPythonPath()
 	{
 		env_path /= "lib";
 		std::string str = env_path.string();
-		if (str.back() != GETSLASHA())
-			str += GETSLASHA();
+		CHECK_TRAILING_SLASH(str);
 		std::filesystem::path path(str);
 		str += "*.dylib";
 		std::regex rgx = REGEX(str);

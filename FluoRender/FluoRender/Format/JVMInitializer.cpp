@@ -80,30 +80,39 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args)
 	std::string bioformats_path;
 	std::string jvm_ij_path = "";
 	std::string jvm_bioformats_path = "";
+	std::filesystem::path p;
 
 	if (!args.empty())
 	{
 		jvm_path = args[0]; //inp_settingDlg->getJVMPath();
 		ij_path = args[1]; //inp_settingDlg->getIJPath();
 		bioformats_path = args[2]; //inp_settingDlg->getBioformatsPath();
-		std::string name = ij_path;
 		// For Mac: ij_path is going to be ij.app or fiji.app.
 
+		std::string name;
+		p = ij_path;
 #ifdef _WIN32
+		p /= "ij.jar";
 #else
-		name = name + GETSLASHA() + "Contents" + GETSLASHA() + "Java";
+		p /= "Contents";
+		p /= "Java";
+		p /= "ij.jar";
 #endif
-		if (FILE* file = fopen((name + GETSLASHA() + "ij.jar").c_str(), "r"))
+		name = p.string();
+		if (FILE* file = fopen(name.c_str(), "r"))
 		{
 			DBGPRINT(L"Inside here.\n");
 			m_with_fiji = false;
-			jvm_ij_path = name + GETSLASHA() + "ij.jar";
+			jvm_ij_path = name;
 			jvm_bioformats_path = bioformats_path;
 			fclose(file);
 		}
 		else
 		{
-			name = ij_path + GETSLASHA() + std::string("jars") + GETSLASHA() + std::string("bio-formats");
+			p = ij_path;
+			p /= "jars";
+			p /= "bio-formats";
+			name = p.string();
 			wxDir dir(name);
 			if (!dir.IsOpened())
 			{
@@ -129,7 +138,9 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args)
 					cont = dir.GetNext(&filename);
 				}
 
-				dir.Open(ij_path + GETSLASHA() + std::string("jars"));
+				p = ij_path;
+				p /= "jars";
+				dir.Open(p.string());
 				cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
 				while (cont)
 				{
@@ -155,7 +166,9 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args)
 					cont = dir.GetNext(&filename);
 				}
 
-				dir.Open(ij_path + GETSLASHA() + std::string("plugins"));
+				p = ij_path;
+				p /= "plugins";
+				dir.Open(p.string());
 				cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
 				while (cont)
 				{
@@ -166,25 +179,32 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args)
 				//Checking for jvm path.
 				if (wxIsEmpty(jvm_path))
 				{
+					p = ij_path;
+					p /= "java";
 #ifdef _DARWIN
-					jvm_path = ij_path + GETSLASHA() + "java" + GETSLASHA() + "macosx";
+					p /= "macosx";
 #else
-					jvm_path = ij_path + GETSLASHA() + "java" + GETSLASHA() + "win64";
+					p /= "win64";
 #endif
+					jvm_path = p.string();
 					dir.Open(jvm_path);
 					cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_DIRS);
 					while (cont)
 					{
 						if (filename.Matches("*jdk*"))
 						{
-							jvm_path = dir.GetNameWithSep() + filename + GETSLASHA();
+							p = dir.GetNameWithSep().ToStdString() + filename.ToStdString();
+							p /= "";
+							jvm_path = p.string();
 						}
 						cont = dir.GetNext(&filename);
 					}
 #ifdef _DARWIN
-					jvm_path = jvm_path + "jre" + GETSLASHA() + "Contents" + GETSLASHA() + "HOME" + GETSLASHA() + "lib" + GETSLASHA() + "server" + GETSLASHA() + "libjvm.dylib";
+					p = jvm_path; p /= "jre"; p /= "Contents"; p /= "Home"; p /= "lib"; p /= "server"; p /= "libjvm.dylib";
+					jvm_path = p.string();
 #else
-					jvm_path = jvm_path + "jre" + GETSLASHA() + "bin" + GETSLASHA() + "server" + GETSLASHA() + "jvm.dll";
+					p = jvm_path; p /= "jre"; p /= "bin"; p /= "server"; p /= "jvm.dll";
+					jvm_path = p.string();
 #endif
 				}
 			}
@@ -244,7 +264,8 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args)
 	std::filesystem::path currentPath = std::filesystem::current_path();
 	std::string exePath = currentPath.string();
 	std::string imageJPath = "-Djava.class.path=";
-	imageJPath += exePath + GETSLASHA() + "Java_Code" + GETSLASHA() + getPathSeparator();
+	p = exePath; p /= "Java_Code"; p /= "";
+	imageJPath += p.string() + getPathSeparator();
 	imageJPath.append(jvm_ij_path + getPathSeparator());
 	imageJPath.append(jvm_bioformats_path);
 

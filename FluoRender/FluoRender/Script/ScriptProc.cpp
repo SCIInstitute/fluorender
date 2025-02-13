@@ -43,13 +43,15 @@ DEALINGS IN THE SOFTWARE.
 #include <Registrator.h>
 #include <PyBase.h>
 #include <compatibility.h>
-#include <wx/filefn.h>
+#include <wx/fileconf.h>
+#include <wx/wfstream.h>
 #include <wx/mimetype.h>
 #include <iostream>
 #include <string> 
 #include <sstream>
 #include <fstream>
 #include <filesystem>
+#include <tiffio.h>
 
 using namespace flrd;
 
@@ -362,7 +364,7 @@ std::string ScriptProc::GetInputFile(const std::string &str, const std::string &
 	if (!exist)
 	{
 		//find in default folder
-		std::string name = GET_NAMEA(result);
+		std::string name = GET_NAME(result);
 		std::filesystem::path p = std::filesystem::current_path();
 		if (subd.empty())
 			p = p / name;
@@ -374,8 +376,10 @@ std::string ScriptProc::GetInputFile(const std::string &str, const std::string &
 	if (!exist)
 	{
 		//find in config file folder
-		std::string path = GET_PATHA(m_fconfig_name);
-		result = path + GETSLASHA() + str;
+		std::string path = GET_PATH(m_fconfig_name);
+		std::filesystem::path p = path;
+		p /= str;
+		result = p.string();
 		exist = std::filesystem::exists(result);
 	}
 	if (exist)
@@ -408,7 +412,7 @@ std::string ScriptProc::GetSavePath(const std::string &str, const std::string &e
 	}
 
 	//not found
-	bool has_file = temp != GET_PATHA(temp);
+	bool has_file = temp != GET_PATH(temp);
 	bool absolute = std::filesystem::path(temp).is_absolute();
 
 	if (temp.empty() ||
@@ -431,28 +435,29 @@ std::string ScriptProc::GetSavePath(const std::string &str, const std::string &e
 		if (absolute)
 		{
 			//absolute dir
-			path = GET_PATHA(temp);
+			path = GET_PATH(temp);
 			if (!std::filesystem::exists(path))
 				MkDir(path);
 		}
 		else
 		{
 			//relative
-			std::string conf_path = GET_PATHA(m_fconfig_name);
-			path = conf_path + GETSLASHA() + GET_PATHA(temp);
+			std::string conf_path = GET_PATH(m_fconfig_name);
+			std::filesystem::path p(conf_path);
+			p /= GET_PATH(temp);
+			path = p.string();
 			if (!std::filesystem::exists(path))
 				MkDir(path);
 		}
 		if (has_file)
 		{
-			path += GETSLASHA() + GET_NAMEA(temp);
+			std::filesystem::path p(path);
+			p /= GET_NAME(temp);
+			path += p.string();
 		}
 		else
 		{
-			char lc = path.back();
-			if (lc != '/' &&
-				lc != '\\')
-				path += GETSLASHA();
+			CHECK_TRAILING_SLASH(path);
 			path += "output01." + ext;//not containing filename
 		}
 	}
@@ -474,9 +479,10 @@ std::string ScriptProc::GetDataDir(const std::string &ext)
 	if (!vol)
 		return "";
 	std::string path = vol->GetPath();
-	path = GET_PATHA(path);
-	path += GETSLASHA();
-	path += "output01." + ext;
+	std::filesystem::path p(path);
+	p = p.parent_path();
+	p /= "output01." + ext;
+	path = p.string();
 	return path;
 }
 
@@ -2313,7 +2319,9 @@ void ScriptProc::RunDlcLabel()
 		std::string filename = dlc->GetLabelPath();
 		std::ostringstream oss;
 		oss << std::setw(fn_len) << std::setfill('0') << curf;
-		filename = filename + GETSLASHA() + "img" + oss.str() + ".tif";
+		std::filesystem::path p(filename);
+		p /= "img" + oss.str() + ".tif";
+		filename = p.string();
 
 		//write tiff
 		TIFF* out = TIFFOpen(filename.c_str(), "wb");

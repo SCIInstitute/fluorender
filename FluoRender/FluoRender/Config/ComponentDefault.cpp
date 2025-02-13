@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <ComponentDefault.h>
 #include <Names.h>
+#include <Global.h>
 #include <compatibility.h>
 #include <CompGenerator.h>
 #include <CompSelector.h>
@@ -125,15 +126,15 @@ void ComponentDefault::Read(const std::string& filename)
 
 void ComponentDefault::Save(const std::string& filename)
 {
-	wxString app_name = "FluoRender " +
-		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
-	wxString vendor_name = "FluoRender";
-	wxString local_name = "component_settings.dft";
+	std::string app_name = "FluoRender " +
+		std::format("{}.{}", VERSION_MAJOR, std::format("{:.1f}", VERSION_MINOR));
+	std::string vendor_name = "FluoRender";
+	std::string local_name = "component_settings.dft";
 	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
 		wxCONFIG_USE_LOCAL_FILE);
 
 	Save(fconfig);
-	SaveConfig(fconfig, filename);
+	glbin_project.SaveConfig(fconfig, filename);
 }
 
 void ComponentDefault::Read(wxFileConfig& f)

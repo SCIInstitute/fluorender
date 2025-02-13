@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TrackDlg.h>
 #include <compatibility.h>
 #include <wx/wfstream.h>
+#include <format>
 
 Project::Project() :
 	Progress()
@@ -1363,14 +1364,14 @@ void Project::Save(const std::string& filename, bool inc)
 	if (!frame)
 		return;
 
-	wxString filename2 = filename;
+	std::string filename2 = filename;
 	if (inc)
 		filename2 = INC_NUM_EXIST(filename);
 
-	wxString app_name = "FluoRender " +
-		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
-	wxString vendor_name = "FluoRender";
-	wxString local_name = filename2;
+	std::string app_name = "FluoRender " +
+		std::format("{}.{}", VERSION_MAJOR, std::format("{:.1f}", VERSION_MINOR));
+	std::string vendor_name = "FluoRender";
+	std::string local_name = filename2;
 	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
 		wxCONFIG_USE_LOCAL_FILE);
 
@@ -1440,14 +1441,15 @@ void Project::Save(const std::string& filename, bool inc)
 			bool new_chan = false;
 			if (str == "" || glbin_settings.m_vrp_embed)
 			{
-				wxString new_folder;
+				std::string new_folder;
 				new_folder = filename2 + "_files";
-				MkDirW(new_folder.ToStdWstring());
-				str = new_folder + GETSLASH() + vd->GetName() + ".tif";
-				vd->Save(str.ToStdString(), 0, 3, false,
+				MkDir(new_folder);
+				std::filesystem::path p(new_folder);
+				p /= vd->GetName() + ".tif";
+				vd->Save(p.string(), 0, 3, false,
 					false, 0, false, glbin_settings.m_save_compress,
 					fluo::Point(), fluo::Quaternion(), fluo::Point(), false);
-				fconfig.Write("path", str);
+				fconfig.Write("path", wxString(p.string()));
 				new_chan = true;
 			}
 			else
@@ -1619,11 +1621,12 @@ void Project::Save(const std::string& filename, bool inc)
 		{
 			if (md->GetPath() == "" || glbin_settings.m_vrp_embed)
 			{
-				wxString new_folder;
+				std::string new_folder;
 				new_folder = filename2 + "_files";
-				MkDirW(new_folder.ToStdWstring());
-				str = new_folder + GETSLASH() + md->GetName() + ".obj";
-				md->Save(str.ToStdString());
+				MkDir(new_folder);
+				std::filesystem::path p(new_folder);
+				p /= md->GetName() + ".obj";
+				md->Save(p.string());
 			}
 			str = wxString::Format("/data/mesh/%d", i);
 			fconfig.SetPath(str);
@@ -1686,11 +1689,12 @@ void Project::Save(const std::string& filename, bool inc)
 		{
 			if (ann->GetPath() == "")
 			{
-				wxString new_folder;
+				std::string new_folder;
 				new_folder = filename2 + "_files";
-				MkDirW(new_folder.ToStdWstring());
-				str = new_folder + GETSLASH() + ann->GetName() + ".txt";
-				ann->Save(str.ToStdString());
+				MkDir(new_folder);
+				std::filesystem::path p(new_folder);
+				p /= ann->GetName() + ".txt";
+				ann->Save(p.string());
 			}
 			str = wxString::Format("/data/annotations/%d", i);
 			fconfig.SetPath(str);
@@ -1795,12 +1799,12 @@ void Project::Save(const std::string& filename, bool inc)
 			int ival = canvas->GetTrackFileExist(true);
 			if (ival == 1)
 			{
-				wxString new_folder;
+				std::string new_folder;
 				new_folder = filename2 + "_files";
-				MkDirW(new_folder.ToStdWstring());
-				std::wstring wstr = filename2.ToStdWstring();
-				str = new_folder + GETSLASH() + GET_NAME(wstr) + ".track";
-				canvas->SaveTrackGroup(str);
+				MkDir(new_folder);
+				std::filesystem::path p(new_folder);
+				p /= GET_NAME(filename2) + ".track";
+				canvas->SaveTrackGroup(p.string());
 			}
 			fconfig.Write("track_file", canvas->GetTrackGroupFile());
 

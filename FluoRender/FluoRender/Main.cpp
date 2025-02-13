@@ -79,9 +79,8 @@ bool FluoRenderApp::OnInit()
 	//_CrtSetBreakAlloc(331430);
 	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	char cpath[FILENAME_MAX];
-	GETCURRENTDIR(cpath, sizeof(cpath));
-	::wxSetWorkingDirectory(wxString(s2ws(std::string(cpath))));
+	std::string path = std::filesystem::current_path().string();
+	::wxSetWorkingDirectory(path);
 	// call default behaviour (mandatory)
 	if (!wxApp::OnInit())
 		return false;

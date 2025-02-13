@@ -444,7 +444,9 @@ void PyDlc::WriteHDF(RulerHandler* rhdl)
 	std::vector<char> cvals;
 
 	//open a file
-	std::string fn = m_label_path + GETSLASHA() + "CollectedData_" + m_usr_name + ".h5";
+	std::filesystem::path p(m_label_path);
+	p /= "CollectedData_" + m_usr_name + ".h5";
+	std::string fn = p.string();
 	hid_t file_id = H5Fcreate(fn.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 	//attributes
 	hdf_write_attr_utf(file_id, "CLASS", u8"GROUP");

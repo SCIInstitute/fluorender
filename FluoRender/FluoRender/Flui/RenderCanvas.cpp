@@ -4616,8 +4616,9 @@ void RenderCanvas::Set3DBatCapture(const std::string &cap_file, int begin_frame,
 	if (!m_cap_file.empty() && m_total_frames>1)
 	{
 		std::filesystem::path p(m_cap_file);
-		std::string new_folder = p.parent_path().string()
-			+ GETSLASHA() + m_bat_folder + "_folder";
+		p = p.parent_path();
+		p /= m_bat_folder + "_folder";
+		std::string new_folder = p.string();
 		MkDir(new_folder);
 	}
 }
