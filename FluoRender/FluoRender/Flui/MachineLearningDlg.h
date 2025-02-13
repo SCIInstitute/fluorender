@@ -34,7 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/splitter.h>
 #include <wx/tglbtn.h>
 #include <wx/checkbox.h>
-#include <wx/stdpaths.h>
 #include <string>
 #include <vector>
 

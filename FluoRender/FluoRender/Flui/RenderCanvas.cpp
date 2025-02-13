@@ -52,6 +52,7 @@ DEALINGS IN THE SOFTWARE.
 #include <png_resource.h>
 #include <icons.h>
 #include <array>
+#include <tiffio.h>
 
 bool RenderCanvas::m_linked_rot = false;
 RenderCanvas* RenderCanvas::m_master_linked_view = 0;

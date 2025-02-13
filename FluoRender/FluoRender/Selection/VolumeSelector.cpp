@@ -35,8 +35,6 @@ DEALINGS IN THE SOFTWARE.
 #include <MaskBorder.h>
 #include <Histogram.h>
 #include <RecordHistParams.h>
-#include <wx/wx.h>
-#include <wx/stdpaths.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <Debug.h>
 

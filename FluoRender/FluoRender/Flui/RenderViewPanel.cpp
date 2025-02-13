@@ -43,7 +43,6 @@ DEALINGS IN THE SOFTWARE.
 #include <limits>
 #include <png_resource.h>
 #include <icons.h>
-#include <wx/stdpaths.h>
 #include <wx/display.h>
 #include <Debug.h>
 

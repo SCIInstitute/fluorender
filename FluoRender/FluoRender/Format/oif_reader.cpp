@@ -64,7 +64,7 @@ OIFReader::~OIFReader()
 {
 }
 
-void OIFReader::SetFile(std::string &file)
+void OIFReader::SetFile(const std::string &file)
 {
 	if (!file.empty())
 	{
@@ -78,7 +78,7 @@ void OIFReader::SetFile(std::string &file)
 	m_id_string = m_path_name;
 }
 
-void OIFReader::SetFile(wstring &file)
+void OIFReader::SetFile(const std::wstring &file)
 {
 	m_path_name = file;
 	m_data_name = GET_NAME(m_path_name);
@@ -91,7 +91,7 @@ int OIFReader::Preprocess()
 	m_oif_info.clear();
 
 	//separate path and name
-	wstring path, name;
+	std::wstring path, name;
 	if (!SEP_PATH_NAME(m_path_name, path, name))
 		return READER_OPEN_FAIL;
 
@@ -219,12 +219,12 @@ int OIFReader::GetDigitOrder()
 	return 0;
 }
 
-void OIFReader::SetTimeId(wstring &id)
+void OIFReader::SetTimeId(const std::wstring &id)
 {
 	m_time_id = id;
 }
 
-wstring OIFReader::GetTimeId()
+std::wstring OIFReader::GetTimeId()
 {
 	return m_time_id;
 }
@@ -234,7 +234,7 @@ void OIFReader::SetBatch(bool batch)
 	if (batch)
 	{
 		//read the directory info
-		wstring search_path = GET_PATH(m_path_name);
+		std::wstring search_path = GET_PATH(m_path_name);
 		FIND_FILES(search_path, L"*.oif", m_batch_list, m_cur_batch);
 		m_batch = true;
 	}
@@ -258,7 +258,7 @@ int OIFReader::LoadBatch(int index)
 	return result;
 }
 
-void OIFReader::ReadTifSequence(wstring file_name, int t)
+void OIFReader::ReadTifSequence(const std::wstring& file_name, int t)
 {
 	size_t line_size = file_name.size();
 	if (file_name.substr(line_size - 3, 3) == L"tif")
@@ -269,7 +269,7 @@ void OIFReader::ReadTifSequence(wstring file_name, int t)
 		if (pos_ != -1)
 		{
 			size_t j;
-			wstring wstr;
+			std::wstring wstr;
 			int num_c = -1;
 			int num_z = -1;
 			int num_t = -1;
@@ -372,11 +372,11 @@ void OIFReader::ReadOif()
 {
 	//read oif file
 #ifdef _WIN32
-	ifstream is(m_path_name.c_str());
+	std::ifstream is(m_path_name.c_str());
 #else
-	ifstream is(ws2s(m_path_name).c_str());
+	std::ifstream is(ws2s(m_path_name).c_str());
 #endif
-	wstring oneline;
+	std::wstring oneline;
 	if (is.is_open())
 	{
 		//reset
@@ -422,7 +422,7 @@ void OIFReader::ReadOif()
 	{
 		m_valid_spc = true;
 		if (m_zspc <= 0.0 || m_zspc>100.0)
-			m_zspc = max(m_xspc, m_yspc);
+			m_zspc = std::max(m_xspc, m_yspc);
 	}
 	else
 	{
@@ -433,7 +433,7 @@ void OIFReader::ReadOif()
 	}
 }
 
-void OIFReader::ReadOifLine(wstring oneline)
+void OIFReader::ReadOifLine(const std::wstring oneline)
 {
 	//process
 	if (oneline.substr(0, 6) == L"[Axis ")
@@ -445,8 +445,8 @@ void OIFReader::ReadOifLine(wstring oneline)
 		if (axis_num > -1)
 		{
 			size_t pos = oneline.find(L'=');
-			wstring str1 = oneline.substr(0, oneline.find_last_not_of(L' ', pos));
-			wstring str2 = oneline.substr(oneline.find_first_not_of(L' ', pos + 1));
+			std::wstring str1 = oneline.substr(0, oneline.find_last_not_of(L' ', pos));
+			std::wstring str2 = oneline.substr(oneline.find_first_not_of(L' ', pos + 1));
 
 			if (str1 == L"AxisCode")
 			{
@@ -525,12 +525,12 @@ void OIFReader::ReadOifLine(wstring oneline)
 		if (chan_num > -1)
 		{
 			size_t pos = oneline.find(L'=');
-			wstring str1 = oneline.substr(0, oneline.find_last_not_of(L' ', pos));
-			wstring str2 = oneline.substr(oneline.find_first_not_of(L' ', pos + 1));
-			wstring str3 = L"Transmitted Light";
+			std::wstring str1 = oneline.substr(0, oneline.find_last_not_of(L' ', pos));
+			std::wstring str2 = oneline.substr(oneline.find_first_not_of(L' ', pos + 1));
+			std::wstring str3 = L"Transmitted Light";
 			if (str1 == L"LightType") {
 				light_type = str2;
-				if (light_type.find(str3) != wstring::npos) {
+				if (light_type.find(str3) != std::wstring::npos) {
 					for (int i = m_excitation_wavelength_list.size() - 1; i >= 0; i--) {
 						if (m_excitation_wavelength_list.at(i).chan_num == cur_chan) {
 							m_excitation_wavelength_list.at(i).wavelength = -1;
@@ -625,21 +625,21 @@ Nrrd* OIFReader::Convert(int t, int c, bool get_max)
 		for (size_t i = 0; i < num; i++)
 		{
 			char *pbyData = 0;
-			wstring file_name = (*cinfo)[i];
+			std::wstring file_name = (*cinfo)[i];
 
 			//open file
-			ifstream is;
+			std::ifstream is;
 #ifdef _WIN32
-			is.open(file_name.c_str(), ios::binary);
+			is.open(file_name.c_str(), std::ios::binary);
 #else
-			is.open(ws2s(file_name).c_str(), ios::binary);
+			is.open(ws2s(file_name).c_str(), std::ios::binary);
 #endif
 			if (is.is_open())
 			{
-				is.seekg(0, ios::end);
+				is.seekg(0, std::ios::end);
 				size_t size = is.tellg();
 				pbyData = new char[size];
-				is.seekg(0, ios::beg);
+				is.seekg(0, std::ios::beg);
 				is.read(pbyData, size);
 				is.close();
 
@@ -683,22 +683,22 @@ Nrrd* OIFReader::Convert(int t, int c, bool get_max)
 	return data;
 }
 
-wstring OIFReader::GetCurDataName(int t, int c)
+std::wstring OIFReader::GetCurDataName(int t, int c)
 {
 	return m_oif_info[t].dataset[c][0];
 }
 
-wstring OIFReader::GetCurMaskName(int t, int c)
+std::wstring OIFReader::GetCurMaskName(int t, int c)
 {
-	wstring data_name = m_oif_info[t].dataset[c][0];
-	wstring mask_name = data_name.substr(0, data_name.find_last_of('.')) + L".msk";
+	std::wstring data_name = m_oif_info[t].dataset[c][0];
+	std::wstring mask_name = data_name.substr(0, data_name.find_last_of('.')) + L".msk";
 	return mask_name;
 }
 
-wstring OIFReader::GetCurLabelName(int t, int c)
+std::wstring OIFReader::GetCurLabelName(int t, int c)
 {
-	wstring data_name = m_oif_info[t].dataset[c][0];
-	wstring label_name = data_name.substr(0, data_name.find_last_of('.')) + L".lbl";
+	std::wstring data_name = m_oif_info[t].dataset[c][0];
+	std::wstring label_name = data_name.substr(0, data_name.find_last_of('.')) + L".lbl";
 	return label_name;
 }
 

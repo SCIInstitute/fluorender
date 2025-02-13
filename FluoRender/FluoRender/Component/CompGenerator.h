@@ -139,8 +139,8 @@ namespace flrd
 		void GenerateDB();
 
 		//command
-		void LoadCmd(const wxString& filename);
-		void SaveCmd(const wxString& filename);
+		void LoadCmd(const std::string& filename);
+		void SaveCmd(const std::string& filename);
 		void AddCmd(const std::string& type);
 		void ResetCmd();
 		void PlayCmd(double tfactor);

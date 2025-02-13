@@ -33,7 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wxSingleSlider.h>
 #include <wxUndoableToolbar.h>
 #include <wx/valnum.h>
-#include <wx/stdpaths.h>
 #include <wx/gbsizer.h>
 #include <png_resource.h>
 #include <icons.h>

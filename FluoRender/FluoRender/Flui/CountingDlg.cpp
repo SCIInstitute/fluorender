@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <wx/valnum.h>
-#include <wx/stdpaths.h>
 
 CountingDlg::CountingDlg(MainFrame *frame)
 : PropPanel(frame, frame,

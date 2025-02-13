@@ -72,7 +72,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/fileconf.h>
 #include <wx/aboutdlg.h>
 #include <wx/hyperlink.h>
-#include <wx/stdpaths.h>
 #include <wx/accel.h>
 #include <cstdio>
 #include <iostream>
@@ -1864,7 +1863,7 @@ void MainFrame::ShowInfo()
 	txt->SetFont(font);
 	right->Add(txt, 0, wxEXPAND);
 	txt = new wxStaticText(d, wxID_ANY, "Version: " +
-		std::format("{}.{}", VERSION_MAJOR, std::format("{:.1f}", VERSION_MINOR))),
+		std::format("{}.{}", VERSION_MAJOR, std::format("{:.1f}", float(VERSION_MINOR)))),
 		wxDefaultPosition, FromDIP(wxSize(50, -1));
 	font = wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
 	txt->SetFont(font);

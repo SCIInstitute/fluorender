@@ -138,7 +138,7 @@ int Interpolator::GetKeyIndex(int id)
 	{
 		FlKeyGroup *group = m_key_list[i];
 		if (group && group->id==id)
-			return i;
+			return static_cast<int>(i);
 	}
 	return 0;
 }

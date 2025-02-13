@@ -27,7 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <imageJ_reader.h>
 #include <compatibility.h>
-#include <wx/stdpaths.h>
 
 ImageJReader::ImageJReader():
 	BaseReader()
@@ -209,7 +208,7 @@ int ImageJReader::Preprocess()
 					default:
 						if (i >= 13 && i <= (13 + m_chan_num - 1)) {
 							if(test == -1)
-								m_excitation_wavelength[i - 13] = 0.0;
+								m_excitation_wavelength[i - 13] = 0;
 							else	
 								m_excitation_wavelength[i - 13] = test;
 						}						
@@ -381,7 +380,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 		{
 			unsigned long long offset = 0;			
 			for (unsigned long long i = 0; i < len; i++) {
-				jbyteArray inner_data = static_cast<jbyteArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, i));
+				jbyteArray inner_data = static_cast<jbyteArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, (jsize)i));
 				jsize len2 = m_pJVMInstance->m_pEnv->GetArrayLength(inner_data);				
 				offset = i*len2;
 				if (t_data == NULL)
@@ -418,7 +417,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 		{
 			unsigned long long offset = 0;
 			for (unsigned long long i = 0; i < len; i++) {
-				jshortArray inner_data = static_cast<jshortArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, i));
+				jshortArray inner_data = static_cast<jshortArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, (jsize)i));
 				jsize len2 = m_pJVMInstance->m_pEnv->GetArrayLength(inner_data);
 				offset = i*len2;
 				if (t_data == NULL)

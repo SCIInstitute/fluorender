@@ -121,7 +121,7 @@ int MPGReader::Preprocess()
 	{
 		if (m_av_format_context->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
 		{
-			m_stream_index = i;
+			m_stream_index = static_cast<int>(i);
 			break;
 		}
 	}
@@ -189,7 +189,7 @@ int MPGReader::Preprocess()
 	}
 
 	//get time num
-	m_time_num = m_mpg_info.size();
+	m_time_num = static_cast<int>(m_mpg_info.size());
 	m_cur_time = 0;
 
 	m_chan_num = 3;

@@ -34,7 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <ModalDlg.h>
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
-#include <wx/stdpaths.h>
 #include <png_resource.h>
 #include <icons.h>
 #include <key.xpm>
@@ -2548,7 +2547,10 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	wxTextCtrl* tx_estimate = new wxTextCtrl(panel, ID_MOV_ESTIMATE_TEXT, "2.5",
 		wxDefaultPosition, parent->FromDIP(wxSize(60, 20)), wxTE_RIGHT);
 	tx_estimate->Disable();
-	glbin_settings.m_mov_bitrate = STOD(bitrate_text->GetValue().fn_str());
+	double dval;
+	wxString str = bitrate_text->GetValue();
+	str.ToDouble(&dval);
+	glbin_settings.m_mov_bitrate = dval;
 	double size = glbin_settings.m_mov_bitrate *
 		glbin_moviemaker.GetMovieLength() / 8.;
 	tx_estimate->ChangeValue(wxString::Format("%.2f", size));

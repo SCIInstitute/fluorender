@@ -596,7 +596,7 @@ void VolumeData::AddEmptyData(int bits,
 	{
 		unsigned long long mem_size = (unsigned long long)nx*
 			(unsigned long long)ny*(unsigned long long)nz;
-		uint8 *val8 = new (std::nothrow) uint8[mem_size]();
+		uint8_t *val8 = new (std::nothrow) uint8_t[mem_size]();
 		if (!val8)
 		{
 			//SetProgress("Not enough memory. Please save project and restart.");
@@ -608,7 +608,7 @@ void VolumeData::AddEmptyData(int bits,
 	{
 		unsigned long long mem_size = (unsigned long long)nx*
 			(unsigned long long)ny*(unsigned long long)nz;
-		uint16 *val16 = new (std::nothrow) uint16[mem_size]();
+		uint16_t *val16 = new (std::nothrow) uint16_t[mem_size]();
 		if (!val16)
 		{
 			//SetProgress("Not enough memory. Please save project and restart.");
@@ -709,7 +709,7 @@ void VolumeData::AddEmptyMask(int mode, bool change)
 		return;
 
 	Nrrd *nrrd_mask = 0;
-	uint8 *val8 = 0;
+	uint8_t *val8 = 0;
 	unsigned long long mem_size = (unsigned long long)m_res_x*
 		(unsigned long long)m_res_y*(unsigned long long)m_res_z;
 	//prepare the texture bricks for the mask
@@ -718,7 +718,7 @@ void VolumeData::AddEmptyMask(int mode, bool change)
 	{
 		//add the nrrd data for mask
 		nrrd_mask = nrrdNew();
-		val8 = new (std::nothrow) uint8[mem_size];
+		val8 = new (std::nothrow) uint8_t[mem_size];
 		if (!val8)
 		{
 			//SetProgress("Not enough memory. Please save project and restart.");
@@ -737,7 +737,7 @@ void VolumeData::AddEmptyMask(int mode, bool change)
 	else
 	{
 		nrrd_mask = m_tex->get_nrrd(m_tex->nmask());
-		val8 = (uint8*)nrrd_mask->data;
+		val8 = (uint8_t*)nrrd_mask->data;
 	}
 
 	if (empty || change)
@@ -746,7 +746,7 @@ void VolumeData::AddEmptyMask(int mode, bool change)
 		{
 			if (val8)
 				std::memset((void*)val8, mode ?
-					255 : 0, mem_size * sizeof(uint8));
+					255 : 0, mem_size * sizeof(uint8_t));
 		}
 	}
 }
@@ -762,7 +762,7 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 		return;
 
 	Nrrd *nrrd_mask = 0;
-	uint8 *val8 = 0;
+	uint8_t *val8 = 0;
 	unsigned long long mem_size = (unsigned long long)m_res_x*
 		(unsigned long long)m_res_y*(unsigned long long)m_res_z;
 	//prepare the texture bricks for the mask
@@ -771,7 +771,7 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 	{
 		//add the nrrd data for mask
 		nrrd_mask = nrrdNew();
-		val8 = new (std::nothrow) uint8[mem_size];
+		val8 = new (std::nothrow) uint8_t[mem_size];
 		if (!val8)
 		{
 			//SetProgress("Not enough memory. Please save project and restart.");
@@ -790,7 +790,7 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 	else
 	{
 		nrrd_mask = m_tex->get_nrrd(m_tex->nmask());
-		val8 = (uint8*)nrrd_mask->data;
+		val8 = (uint8_t*)nrrd_mask->data;
 	}
 
 	if (val8)
@@ -804,7 +804,7 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 					index < mem_size; ++index)
 				{
 					val8[index] = std::max(val8[index],
-						((uint8*)(mask->data))[index]);
+						((uint8_t*)(mask->data))[index]);
 				}
 				break;
 			case 2://exclude
@@ -812,7 +812,7 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 					index < mem_size; ++index)
 				{
 					if (std::min(val8[index],
-						((uint8*)(mask->data))[index]) > 0)
+						((uint8_t*)(mask->data))[index]) > 0)
 						val8[index] = 0;
 				}
 				break;
@@ -821,14 +821,14 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 					index < mem_size; ++index)
 				{
 					val8[index] = std::min(val8[index],
-						((uint8*)(mask->data))[index]);
+						((uint8_t*)(mask->data))[index]);
 				}
 				break;
 			}
 		}
 		else//replace
 		{
-			memcpy(val8, mask->data, mem_size * sizeof(uint8));
+			memcpy(val8, mask->data, mem_size * sizeof(uint8_t));
 		}
 		m_vr->clear_tex_mask(false);
 	}
@@ -845,7 +845,7 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 		return;
 
 	Nrrd *nrrd_mask = 0;
-	uint8 *val8 = 0;
+	uint8_t *val8 = 0;
 	unsigned long long mem_size = (unsigned long long)m_res_x*
 		(unsigned long long)m_res_y*(unsigned long long)m_res_z;
 	//prepare the texture bricks for the mask
@@ -854,7 +854,7 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 	{
 		//add the nrrd data for mask
 		nrrd_mask = nrrdNew();
-		val8 = new (std::nothrow) uint8[mem_size];
+		val8 = new (std::nothrow) uint8_t[mem_size];
 		if (!val8)
 		{
 			//SetProgress("Not enough memory. Please save project and restart.");
@@ -873,7 +873,7 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 	else
 	{
 		nrrd_mask = m_tex->get_nrrd(m_tex->nmask());
-		val8 = (uint8*)nrrd_mask->data;
+		val8 = (uint8_t*)nrrd_mask->data;
 	}
 
 	if (val8)
@@ -887,7 +887,7 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 					index < mem_size; ++index)
 				{
 					val8[index] = std::max(val8[index],
-						uint8(scale*((uint16*)(mask->data))[index]));
+						uint8_t(scale*((uint16_t*)(mask->data))[index]));
 				}
 				break;
 			case 2://exclude
@@ -895,7 +895,7 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 					index < mem_size; ++index)
 				{
 					if (std::min(val8[index],
-						uint8(scale*((uint16*)(mask->data))[index])) > 0)
+						uint8_t(scale*((uint16_t*)(mask->data))[index])) > 0)
 						val8[index] = 0;
 				}
 				break;
@@ -904,7 +904,7 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 					index < mem_size; ++index)
 				{
 					val8[index] = std::min(val8[index],
-						uint8(scale*((uint16*)(mask->data))[index]));
+						uint8_t(scale*((uint16_t*)(mask->data))[index]));
 				}
 				break;
 			}
@@ -914,7 +914,7 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 			for (unsigned long long index = 0;
 				index < mem_size; ++index)
 			{
-				val8[index] = uint8(scale*((uint16*)(mask->data))[index]);
+				val8[index] = uint8_t(scale*((uint16_t*)(mask->data))[index]);
 			}
 		}
 		m_vr->clear_tex_mask(false);
@@ -1146,13 +1146,13 @@ double VolumeData::GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b)
 	if (bits == 8)
 	{
 		uint64_t index = (nx)*(ny)*(kk) + (nx)*(jj) + (ii);
-		uint8 old_value = ((uint8*)(data_data))[index];
+		uint8_t old_value = ((uint8_t*)(data_data))[index];
 		return double(old_value)/255.0;
 	}
 	else if (bits == 16)
 	{
 		uint64_t index = (nx)*(ny)*(kk) + (nx)*(jj) + (ii);
-		uint16 old_value = ((uint16*)(data_data))[index];
+		uint16_t old_value = ((uint16_t*)(data_data))[index];
 		return double(old_value)*m_scalar_scale/65535.0;
 	}
 
@@ -1198,7 +1198,7 @@ double VolumeData::GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b
 	if (bits == 8)
 	{
 		uint64_t index = nx*ny*kk + nx*jj + ii;
-		uint8 old_value = ((uint8*)(data_data))[index];
+		uint8_t old_value = ((uint8_t*)(data_data))[index];
 		double gm = 0.0;
 		double new_value = double(old_value)/255.0;
 		if (m_vr->get_inversion())
@@ -1207,12 +1207,12 @@ double VolumeData::GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b
 			j>0 && j<ny-1 &&
 			k>0 && k<nz-1)
 		{
-			double v1 = ((uint8*)(data_data))[nx*ny*kk + nx*jj + ii-1];
-			double v2 = ((uint8*)(data_data))[nx*ny*kk + nx*jj + ii+1];
-			double v3 = ((uint8*)(data_data))[nx*ny*kk + nx*(jj-1) + ii];
-			double v4 = ((uint8*)(data_data))[nx*ny*kk + nx*(jj+1) + ii];
-			double v5 = ((uint8*)(data_data))[nx*ny*(kk-1) + nx*jj + ii];
-			double v6 = ((uint8*)(data_data))[nx*ny*(kk+1) + nx*jj + ii];
+			double v1 = ((uint8_t*)(data_data))[nx*ny*kk + nx*jj + ii-1];
+			double v2 = ((uint8_t*)(data_data))[nx*ny*kk + nx*jj + ii+1];
+			double v3 = ((uint8_t*)(data_data))[nx*ny*kk + nx*(jj-1) + ii];
+			double v4 = ((uint8_t*)(data_data))[nx*ny*kk + nx*(jj+1) + ii];
+			double v5 = ((uint8_t*)(data_data))[nx*ny*(kk-1) + nx*jj + ii];
+			double v6 = ((uint8_t*)(data_data))[nx*ny*(kk+1) + nx*jj + ii];
 			double normal_x, normal_y, normal_z;
 			normal_x = (v2 - v1) / 255.0;
 			normal_y = (v4 - v3) / 255.0;
@@ -1243,7 +1243,7 @@ double VolumeData::GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b
 	else if (bits == 16)
 	{
 		uint64_t index = nx*ny*kk + nx*jj + ii;
-		uint16 old_value = ((uint16*)(data_data))[index];
+		uint16_t old_value = ((uint16_t*)(data_data))[index];
 		double gm = 0.0;
 		double new_value = double(old_value)*m_scalar_scale/65535.0;
 		if (m_vr->get_inversion())
@@ -1252,12 +1252,12 @@ double VolumeData::GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b
 			jj>0 && jj<ny-1 &&
 			kk>0 && kk<nz-1)
 		{
-			double v1 = ((uint8*)(data_data))[nx*ny*kk + nx*jj + ii-1];
-			double v2 = ((uint8*)(data_data))[nx*ny*kk + nx*jj + ii+1];
-			double v3 = ((uint8*)(data_data))[nx*ny*kk + nx*(jj-1) + ii];
-			double v4 = ((uint8*)(data_data))[nx*ny*kk + nx*(jj+1) + ii];
-			double v5 = ((uint8*)(data_data))[nx*ny*(kk-1) + nx*jj + ii];
-			double v6 = ((uint8*)(data_data))[nx*ny*(kk+1) + nx*jj + ii];
+			double v1 = ((uint8_t*)(data_data))[nx*ny*kk + nx*jj + ii-1];
+			double v2 = ((uint8_t*)(data_data))[nx*ny*kk + nx*jj + ii+1];
+			double v3 = ((uint8_t*)(data_data))[nx*ny*kk + nx*(jj-1) + ii];
+			double v4 = ((uint8_t*)(data_data))[nx*ny*kk + nx*(jj+1) + ii];
+			double v5 = ((uint8_t*)(data_data))[nx*ny*(kk-1) + nx*jj + ii];
+			double v6 = ((uint8_t*)(data_data))[nx*ny*(kk+1) + nx*jj + ii];
 			double normal_x, normal_y, normal_z;
 			normal_x = (v2 - v1)*m_scalar_scale/65535.0;
 			normal_y = (v4 - v3)*m_scalar_scale/65535.0;
@@ -5541,14 +5541,13 @@ void DataManager::LoadVolumes(const std::vector<std::string>& files, bool withIm
 	double data_size = glbin_settings.m_large_data_size;
 	int brick_size = glbin_settings.m_force_brick_size;
 	int resp_time = glbin_settings.m_up_time;
-	wxString str_streaming;
+	std::string str_streaming;
 	if (streaming)
 	{
 		str_streaming = "Large data streaming is currently ON. ";
-		str_streaming += wxString::Format("FluoRender uses up to %dMB GPU memory. ", int(std::round(gpu_size)));
-		str_streaming += wxString::Format("Data >%dMB are divided into %d voxel bricks. ",
-			int(data_size), brick_size);
-		str_streaming += wxString::Format("System response time: %dms.", resp_time);
+		str_streaming += "FluoRender uses up to " + std::to_string(int(std::round(gpu_size))) + "MB GPU memory. ";
+		str_streaming += "Data >" + std::to_string(int(data_size)) + "MB are divided into " + std::to_string(brick_size) + "voxel bricks. ";
+		str_streaming += "System response time: " + std::to_string(resp_time) + "ms.";
 	}
 	else
 		str_streaming = "Large data streaming is currently OFF.";
@@ -5558,7 +5557,7 @@ void DataManager::LoadVolumes(const std::vector<std::string>& files, bool withIm
 
 	for (m_cur_file = 0; m_cur_file < m_file_num; ++m_cur_file)
 	{
-		SetProgress(std::round(100.0 * (m_cur_file + 1) / m_file_num), str_streaming.ToStdString());
+		SetProgress(std::round(100.0 * (m_cur_file + 1) / m_file_num), str_streaming);
 
 		int ch_num = 0;
 		std::string filename = files[m_cur_file];
@@ -5602,11 +5601,12 @@ void DataManager::LoadVolumes(const std::vector<std::string>& files, bool withIm
 					if (vd)
 					{
 						canvas->AddVolumeData(vd, group->GetName());
-						wxString vol_name = vd->GetName();
-						if (vol_name.Find("_1ch") != -1 &&
+						std::string vol_name = vd->GetName();
+						if (vol_name.find("_1ch") != std::string::npos &&
 							(i == 1 || i == 2))
 							vd->SetDisp(false);
-						if (vol_name.Find("_2ch") != -1 && i == 1)
+						if (vol_name.find("_2ch") != std::string::npos &&
+							i == 1)
 							vd->SetDisp(false);
 
 						if (i == ch_num)
@@ -5733,7 +5733,7 @@ void DataManager::StartupLoad(const std::vector<std::string>& files, bool run_mo
 	}
 }
 
-int DataManager::LoadVolumeData(const std::string &filename, int type, bool withImageJ, int ch_num, int t_num)
+size_t DataManager::LoadVolumeData(const std::string &filename, int type, bool withImageJ, int ch_num, int t_num)
 {
 	bool isURL = false;
 	bool downloaded = false;
@@ -5749,11 +5749,10 @@ int DataManager::LoadVolumeData(const std::string &filename, int type, bool with
 			return 0;
 	}
 
-	int i;
-	int result = 0;
+	size_t result = 0;
 	BaseReader* reader = 0;
 
-	for (i=0; i<(int)m_reader_list.size(); i++)
+	for (size_t i=0; i<m_reader_list.size(); i++)
 	{
 		std::wstring wstr = s2ws(pathname);
 		if (m_reader_list[i]->Match(wstr))
@@ -5831,7 +5830,7 @@ int DataManager::LoadVolumeData(const std::string &filename, int type, bool with
 		
 		
 		m_reader_list.push_back(reader);
-		wstring str_w = s2ws(pathname);
+		std::wstring str_w = s2ws(pathname);
 		reader->SetFile(str_w);
 		reader->SetSliceSeq(glbin_settings.m_slice_sequence);
 		reader->SetChannSeq(glbin_settings.m_chann_sequence);
@@ -5859,7 +5858,7 @@ int DataManager::LoadVolumeData(const std::string &filename, int type, bool with
 
 	if (reader_return > 0)
 	{
-		string err_str = BaseReader::GetError(reader_return);
+		std::string err_str = BaseReader::GetError(reader_return);
 		SetProgress(0, err_str);
 		int i = (int)m_reader_list.size() - 1;		
 		if (m_reader_list[i]) {
@@ -5894,7 +5893,7 @@ int DataManager::LoadVolumeData(const std::string &filename, int type, bool with
 	}
 	int r = GetRange();
 
-	for (i=(ch_num>=0?ch_num:0);
+	for (size_t i=(ch_num>=0?ch_num:0);
 		i<(ch_num>=0?ch_num+1:chan); i++)
 	{
 		reader->SetRange(v1 + std::round(double(i) * r / chan),
@@ -6023,7 +6022,7 @@ int DataManager::LoadVolumeData(const std::string &filename, int type, bool with
 	return result;
 }
 
-void DataManager::LoadMeshes(wxArrayString files)
+void DataManager::LoadMeshes(const std::vector<std::string>& files)
 {
 	RenderCanvas* canvas = glbin_current.canvas;
 
@@ -6034,15 +6033,16 @@ void DataManager::LoadMeshes(wxArrayString files)
 
 	MeshData* md_sel = 0;
 	MeshGroup* group = 0;
-	if (files.Count() > 1)
+	size_t fn = files.size();
+	if (fn > 1)
 		group = canvas->AddOrGetMGroup();
 
-	for (int i = 0; i < (int)files.Count(); i++)
+	for (size_t i = 0; i < fn; i++)
 	{
-		SetProgress(std::round(100.0 * (i + 1) / files.Count()),
+		SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / fn)),
 			"FluoRender is reading and processing selected mesh data. Please wait.");
 
-		wxString filename = files[i];
+		std::string filename = files[i];
 		LoadMeshData(filename);
 
 		MeshData* md = GetLastMeshData();
@@ -6056,7 +6056,7 @@ void DataManager::LoadMeshes(wxArrayString files)
 			else
 				canvas->AddMeshData(md);
 
-			if (i == int(files.Count() - 1))
+			if (i == int(fn - 1))
 				md_sel = md;
 		}
 	}
@@ -6072,14 +6072,14 @@ void DataManager::LoadMeshes(wxArrayString files)
 	SetProgress(0, "");
 }
 
-int DataManager::LoadMeshData(wxString &filename)
+bool DataManager::LoadMeshData(const std::string &filename)
 {
-	wxString pathname = filename;
-	if (!wxFileExists(pathname))
+	std::string pathname = filename;
+	if (!std::filesystem::exists(pathname))
 	{
 		pathname = SearchProjectPath(filename);
-		if (!wxFileExists(pathname))
-			return 0;
+		if (!std::filesystem::exists(pathname))
+			return false;
 	}
 
 	MeshData *md = new MeshData();
@@ -6087,54 +6087,54 @@ int DataManager::LoadMeshData(wxString &filename)
 
 	std::string name = md->GetName();
 	std::string new_name = name;
-	int i;
+	size_t i;
 	for (i=1; CheckNames(new_name); i++)
-		new_name = name+wxString::Format("_%d", i);
+		new_name = name + "_" + std::to_string(i);
 	if (i>1)
 		md->SetName(new_name);
 	m_md_list.push_back(md);
 
-	return 1;
+	return true;
 }
 
-int DataManager::LoadMeshData(GLMmodel* mesh)
+bool DataManager::LoadMeshData(GLMmodel* mesh)
 {
-	if (!mesh) return 0;
+	if (!mesh) return false;
 
 	MeshData *md = new MeshData();
 	md->Load(mesh);
 
 	std::string name = md->GetName();
 	std::string new_name = name;
-	int i;
+	size_t i;
 	for (i=1; CheckNames(new_name); i++)
-		new_name = name+wxString::Format("_%d", i);
+		new_name = name + "_" + std::to_string(i);
 	if (i>1)
 		md->SetName(new_name);
 	m_md_list.push_back(md);
 
-	return 1;
+	return true;
 }
 
-VolumeData* DataManager::GetVolumeData(int index)
+VolumeData* DataManager::GetVolumeData(size_t index)
 {
-	if (index>=0 && index<(int)m_vd_list.size())
+	if (index<m_vd_list.size())
 		return m_vd_list[index];
 	else
 		return 0;
 }
 
-MeshData* DataManager::GetMeshData(int index)
+MeshData* DataManager::GetMeshData(size_t index)
 {
-	if (index>=0 && index<(int)m_md_list.size())
+	if (index<m_md_list.size())
 		return m_md_list[index];
 	else
 		return 0;
 }
 
-VolumeData* DataManager::GetVolumeData(wxString &name)
+VolumeData* DataManager::GetVolumeData(const std::string &name)
 {
-	for (int i=0 ; i<(int)m_vd_list.size() ; i++)
+	for (size_t i=0 ; i<m_vd_list.size() ; i++)
 	{
 		if (name == m_vd_list[i]->GetName())
 		{
@@ -6144,9 +6144,9 @@ VolumeData* DataManager::GetVolumeData(wxString &name)
 	return 0;
 }
 
-MeshData* DataManager::GetMeshData(wxString &name)
+MeshData* DataManager::GetMeshData(const std::string &name)
 {
-	for (int i=0 ; i<(int)m_md_list.size() ; i++)
+	for (size_t i=0 ; i<m_md_list.size() ; i++)
 	{
 		if (name == m_md_list[i]->GetName())
 		{
@@ -6156,9 +6156,9 @@ MeshData* DataManager::GetMeshData(wxString &name)
 	return 0;
 }
 
-int DataManager::GetVolumeIndex(wxString &name)
+size_t DataManager::GetVolumeIndex(const std::string &name)
 {
-	for (int i=0 ; i<(int)m_vd_list.size() ; i++)
+	for (size_t i=0 ; i<m_vd_list.size() ; i++)
 	{
 		if (!m_vd_list[i])
 			continue;
@@ -6170,9 +6170,9 @@ int DataManager::GetVolumeIndex(wxString &name)
 	return -1;
 }
 
-int DataManager::GetMeshIndex(wxString &name)
+size_t DataManager::GetMeshIndex(const std::string &name)
 {
-	for (int i=0 ; i<(int)m_md_list.size() ; i++)
+	for (size_t i=0 ; i<m_md_list.size() ; i++)
 	{
 		if (name == m_md_list[i]->GetName())
 		{
@@ -6182,7 +6182,7 @@ int DataManager::GetMeshIndex(wxString &name)
 	return -1;
 }
 
-void DataManager::RemoveVolumeData(int index)
+void DataManager::RemoveVolumeData(size_t index)
 {
 	VolumeData* data = m_vd_list[index];
 	if (!data)
@@ -6213,9 +6213,9 @@ void DataManager::RemoveVolumeData(int index)
 	}	
 }
 
-void DataManager::RemoveVolumeData(const wxString &name)
+void DataManager::RemoveVolumeData(const std::string &name)
 {
-	for (int i = 0; i<(int)m_vd_list.size(); i++)
+	for (size_t i = 0; i<m_vd_list.size(); i++)
 	{
 		if (name == m_vd_list[i]->GetName())
 		{
@@ -6224,7 +6224,7 @@ void DataManager::RemoveVolumeData(const wxString &name)
 	}
 }
 
-void DataManager::RemoveMeshData(int index)
+void DataManager::RemoveMeshData(size_t index)
 {
 	MeshData* data = m_md_list[index];
 	if (data)
@@ -6244,12 +6244,12 @@ void DataManager::ClearMeshSelection()
 	}
 }
 
-int DataManager::GetVolumeNum()
+size_t DataManager::GetVolumeNum()
 {
 	return m_vd_list.size();
 }
 
-int DataManager::GetMeshNum()
+size_t DataManager::GetMeshNum()
 {
 	return m_md_list.size();
 }
@@ -6296,14 +6296,14 @@ VolumeData* DataManager::DuplicateVolumeData(VolumeData* vd)
 	return vd_new;
 }
 
-int DataManager::LoadAnnotations(wxString &filename)
+bool DataManager::LoadAnnotations(const std::string &filename)
 {
-	wxString pathname = filename;
-	if (!wxFileExists(pathname))
+	std::string pathname = filename;
+	if (!std::filesystem::exists(pathname))
 	{
 		pathname = SearchProjectPath(filename);
-		if (!wxFileExists(pathname))
-			return 0;
+		if (!std::filesystem::exists(pathname))
+			return false;
 	}
 
 	Annotations* ann = new Annotations();
@@ -6311,14 +6311,14 @@ int DataManager::LoadAnnotations(wxString &filename)
 
 	std::string name = ann->GetName();
 	std::string new_name = name;
-	int i;
+	size_t i;
 	for (i=1; CheckNames(new_name); i++)
-		new_name = name+wxString::Format("_%d", i);
+		new_name = name + "_" + std::to_string(i);
 	if (i>1)
 		ann->SetName(new_name);
 	m_annotation_list.push_back(ann);
 
-	return 1;
+	return true;
 }
 
 void DataManager::AddAnnotations(Annotations* ann)
@@ -6329,17 +6329,16 @@ void DataManager::AddAnnotations(Annotations* ann)
 	std::string name = ann->GetName();
 	std::string new_name = name;
 
-	int i;
+	size_t i;
 	for (i=1; CheckNames(new_name); i++)
-		new_name = name+wxString::Format("_%d", i);
-
+		new_name = name + "_" + std::to_string(i);
 	if (i>1)
 		ann->SetName(new_name);
 
 	m_annotation_list.push_back(ann);
 }
 
-void DataManager::RemoveAnnotations(int index)
+void DataManager::RemoveAnnotations(size_t index)
 {
 	Annotations* ann = m_annotation_list[index];
 	if (ann)
@@ -6350,22 +6349,22 @@ void DataManager::RemoveAnnotations(int index)
 	}
 }
 
-int DataManager::GetAnnotationNum()
+size_t DataManager::GetAnnotationNum()
 {
 	return m_annotation_list.size();
 }
 
-Annotations* DataManager::GetAnnotations(int index)
+Annotations* DataManager::GetAnnotations(size_t index)
 {
-	if (index>=0 && index<(int)m_annotation_list.size())
+	if (index<m_annotation_list.size())
 		return m_annotation_list[index];
 	else
 		return 0;
 }
 
-Annotations* DataManager::GetAnnotations(wxString &name)
+Annotations* DataManager::GetAnnotations(const std::string &name)
 {
-	for (int i=0; i<(int)m_annotation_list.size(); i++)
+	for (size_t i=0; i<m_annotation_list.size(); i++)
 	{
 		if (name == m_annotation_list[i]->GetName())
 			return m_annotation_list[i];
@@ -6373,9 +6372,9 @@ Annotations* DataManager::GetAnnotations(wxString &name)
 	return 0;
 }
 
-int DataManager::GetAnnotationIndex(wxString &name)
+size_t DataManager::GetAnnotationIndex(const std::string &name)
 {
-	for (int i=0; i<(int)m_annotation_list.size(); i++)
+	for (size_t i=0; i<m_annotation_list.size(); i++)
 	{
 		if (!m_annotation_list[i])
 			continue;

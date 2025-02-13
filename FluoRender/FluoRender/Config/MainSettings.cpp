@@ -458,7 +458,7 @@ void MainSettings::Read()
 void MainSettings::Save()
 {
 	std::string app_name = "FluoRender " +
-		std::format("{}.{}", VERSION_MAJOR, std::format("{:.1f}", VERSION_MINOR));
+		std::format("{}.{}", VERSION_MAJOR, std::format("{:.1f}", float(VERSION_MINOR)));
 	std::string vendor_name = "FluoRender";
 	std::string local_name = "fluorender.ini";
 	wxFileConfig fconfig(app_name, vendor_name, local_name, "",

@@ -35,7 +35,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Count.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
-#include <wx/stdpaths.h>
 //resources
 #include <png_resource.h>
 #include <icons.h>

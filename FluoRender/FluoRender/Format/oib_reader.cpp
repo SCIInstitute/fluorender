@@ -64,7 +64,7 @@ OIBReader::~OIBReader()
 {
 }
 
-void OIBReader::SetFile(string &file)
+void OIBReader::SetFile(const std::string &file)
 {
 	if (!file.empty())
 	{
@@ -76,7 +76,7 @@ void OIBReader::SetFile(string &file)
 	m_id_string = m_path_name;
 }
 
-void OIBReader::SetFile(wstring &file)
+void OIBReader::SetFile(const std::wstring &file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;
@@ -88,7 +88,7 @@ int OIBReader::Preprocess()
 	m_oib_info.clear();
 
 	//separate path and name
-	wstring path, name;
+	std::wstring path, name;
 	if (!SEP_PATH_NAME(m_path_name, path, name))
 		return READER_OPEN_FAIL;
 
@@ -175,7 +175,7 @@ void OIBReader::ReadSequenceOib()
 {
 	for (int i = 0; i < (int)m_oib_info.size(); i++)
 	{
-		wstring path_name = m_oib_info[i].filename;
+		std::wstring path_name = m_oib_info[i].filename;
 
 		if (path_name == m_path_name)
 			m_cur_time = i;
@@ -231,12 +231,12 @@ int OIBReader::GetDigitOrder()
 	return 0;
 }
 
-void OIBReader::SetTimeId(wstring &id)
+void OIBReader::SetTimeId(const std::wstring &id)
 {
 	m_time_id = id;
 }
 
-wstring OIBReader::GetTimeId()
+std::wstring OIBReader::GetTimeId()
 {
 	return m_time_id;
 }
@@ -246,7 +246,7 @@ void OIBReader::SetBatch(bool batch)
 	if (batch)
 	{
 		//read the directory info
-		wstring search_path = GET_PATH(m_path_name);
+		std::wstring search_path = GET_PATH(m_path_name);
 		FIND_FILES(search_path, L"*.oib", m_batch_list, m_cur_batch);
 		m_batch = true;
 	}
@@ -270,7 +270,7 @@ int OIBReader::LoadBatch(int index)
 	return result;
 }
 
-void OIBReader::ReadStream(POLE::Storage &pStg, wstring &stream_name)
+void OIBReader::ReadStream(POLE::Storage &pStg, const std::wstring &stream_name)
 {
 	POLE::Stream pStm(&pStg, ws2s(stream_name));
 	unsigned char *pbyData = 0;
@@ -286,7 +286,7 @@ void OIBReader::ReadStream(POLE::Storage &pStg, wstring &stream_name)
 		//read
 		if (pStm.read(pbyData, sz)) {
 			//read oib info
-			if (stream_name == wstring(L"OibInfo.txt")) {
+			if (stream_name == std::wstring(L"OibInfo.txt")) {
 				ReadOibInfo(pbyData, sz);
 			}
 			else {
@@ -308,7 +308,7 @@ void OIBReader::ReadOibInfo(unsigned char* pbyData, size_t size)
 	uint16_t * data = (uint16_t *)pbyData;
 
 	size_t i = 1;
-	wstring oneline;
+	std::wstring oneline;
 
 	while (i < size / 2)
 	{
@@ -333,7 +333,7 @@ void OIBReader::ReadOibInfo(unsigned char* pbyData, size_t size)
 			else if (oneline.substr(0, 7) == L"Storage")
 			{
 				size_t pos = oneline.find(L'=');
-				wstring name = oneline.substr(0, oneline.find_last_not_of(L' ', pos));
+				std::wstring name = oneline.substr(0, oneline.find_last_not_of(L' ', pos));
 				if (m_type == 0)
 					m_substg_name = name;
 				else
@@ -346,8 +346,8 @@ void OIBReader::ReadOibInfo(unsigned char* pbyData, size_t size)
 				pos2 = pos2 == -1 ? oneline.find_last_of(L'\\') : pos2;
 				if (pos1 != -1 && pos2 != -1)
 				{
-					wstring stream_name;
-					wstring file_name;
+					std::wstring stream_name;
+					std::wstring file_name;
 					stream_name = oneline.substr(0, oneline.find_last_not_of(L' ', pos1));
 					file_name = oneline.substr(oneline.find_first_not_of(L' ', pos2 + 1));
 
@@ -357,7 +357,7 @@ void OIBReader::ReadOibInfo(unsigned char* pbyData, size_t size)
 					if (pos_ != -1)
 					{
 						size_t j;
-						wstring wstr;
+						std::wstring wstr;
 						int num_c = -1;
 						int num_z = -1;
 						int num_t = -1;
@@ -481,14 +481,14 @@ void OIBReader::ReadOif(unsigned char *pbyData, size_t size)
 	uint16_t* data = (uint16_t*)pbyData;
 
 	size_t i = 1;
-	wstring oneline;
+	std::wstring oneline;
 
 	//axis info
-	wstring axis_code;
-	wstring pix_unit;
-	wstring max_size;
-	wstring start_pos;
-	wstring end_pos;
+	std::wstring axis_code;
+	std::wstring pix_unit;
+	std::wstring max_size;
+	std::wstring start_pos;
+	std::wstring end_pos;
 
 	//axis count
 	int axis_num = -1;
@@ -515,8 +515,8 @@ void OIBReader::ReadOif(unsigned char *pbyData, size_t size)
 				if (axis_num > -1)
 				{
 					size_t pos = oneline.find(L'=');
-					wstring str1 = oneline.substr(0, oneline.find_last_not_of(L' ', pos));
-					wstring str2 = oneline.substr(oneline.find_first_not_of(L' ', pos + 1));
+					std::wstring str1 = oneline.substr(0, oneline.find_last_not_of(L' ', pos));
+					std::wstring str2 = oneline.substr(oneline.find_first_not_of(L' ', pos + 1));
 
 					if (str1 == L"AxisCode")
 					{
@@ -595,12 +595,12 @@ void OIBReader::ReadOif(unsigned char *pbyData, size_t size)
 				if (chan_num > -1)
 				{
 					size_t pos = oneline.find(L'=');
-					wstring str1 = oneline.substr(0, oneline.find_last_not_of(L' ', pos));
-					wstring str2 = oneline.substr(oneline.find_first_not_of(L' ', pos + 1));
-					wstring str3 = L"Transmitted Light";
+					std::wstring str1 = oneline.substr(0, oneline.find_last_not_of(L' ', pos));
+					std::wstring str2 = oneline.substr(oneline.find_first_not_of(L' ', pos + 1));
+					std::wstring str3 = L"Transmitted Light";
 					if (str1 == L"LightType") {
 						light_type = str2;
-						if (light_type.find(str3) != wstring::npos) {
+						if (light_type.find(str3) != std::wstring::npos) {
 							for (int i = m_excitation_wavelength_list.size() - 1; i >= 0; i--) {
 								if (m_excitation_wavelength_list.at(i).chan_num == cur_chan) {
 									m_excitation_wavelength_list.at(i).wavelength = -1;
@@ -672,7 +672,7 @@ void OIBReader::ReadOif(unsigned char *pbyData, size_t size)
 	{
 		m_valid_spc = true;
 		if (m_zspc <= 0.0 || m_zspc>100.0)
-			m_zspc = max(m_xspc, m_yspc);
+			m_zspc = std::max(m_xspc, m_yspc);
 	}
 	else
 	{
@@ -704,7 +704,7 @@ Nrrd *OIBReader::Convert(int t, int c, bool get_max)
 		m_y_size > 0)
 	{
 		unsigned char *pbyData = 0;
-		wstring path_name = m_type == 0 ? m_path_name : m_oib_info[t].filename;
+		std::wstring path_name = m_type == 0 ? m_path_name : m_oib_info[t].filename;
 		//storage
 		POLE::Storage pStg(ws2s(path_name).c_str());
 		//open
@@ -802,55 +802,55 @@ Nrrd *OIBReader::Convert(int t, int c, bool get_max)
 	return data;
 }
 
-wstring OIBReader::GetCurDataName(int t, int c)
+std::wstring OIBReader::GetCurDataName(int t, int c)
 {
 	return m_type == 0 ? m_path_name : m_oib_info[t].filename;
 }
 
-wstring OIBReader::GetCurMaskName(int t, int c)
+std::wstring OIBReader::GetCurMaskName(int t, int c)
 {
 	if (m_type == 0)
 	{
-		wostringstream woss;
+		std::wostringstream woss;
 		woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 		if (m_time_num > 1) woss << "_T" << t;
 		if (m_chan_num > 1) woss << "_C" << c;
 		woss << ".msk";
-		wstring mask_name = woss.str();
+		std::wstring mask_name = woss.str();
 		return mask_name;
 	}
 	else
 	{
-		wstring data_name = m_oib_info[t].filename;
-		wostringstream woss;
+		std::wstring data_name = m_oib_info[t].filename;
+		std::wostringstream woss;
 		woss << data_name.substr(0, data_name.find_last_of('.'));
 		if (m_chan_num > 1) woss << "_C" << c;
 		woss << ".msk";
-		wstring mask_name = woss.str();
+		std::wstring mask_name = woss.str();
 		return mask_name;
 	}
 }
 
-wstring OIBReader::GetCurLabelName(int t, int c)
+std::wstring OIBReader::GetCurLabelName(int t, int c)
 {
 	if (m_type == 0)
 	{
-		wostringstream woss;
+		std::wostringstream woss;
 		woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 		if (m_time_num > 1) woss << "_T" << t;
 		if (m_chan_num > 1) woss << "_C" << c;
 		woss << ".lbl";
-		wstring label_name = woss.str();
+		std::wstring label_name = woss.str();
 		return label_name;
 	}
 	else
 	{
-		wstring data_name = m_oib_info[t].filename;
-		wostringstream woss;
+		std::wstring data_name = m_oib_info[t].filename;
+		std::wostringstream woss;
 		woss << data_name.substr(0, data_name.find_last_of('.'));
 		if (m_chan_num > 1) woss << "_C" << c;
 		woss << ".lbl";
-		wstring label_name = woss.str();
+		std::wstring label_name = woss.str();
 		return label_name;
 	}
 }

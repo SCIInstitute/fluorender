@@ -34,7 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <cstdio>
 #include <iostream>
 #include <wx/cmdline.h>
-#include <wx/stdpaths.h>
 #include <wx/filefn.h>
 
 IMPLEMENT_APP(FluoRenderApp)
@@ -181,11 +180,11 @@ bool FluoRenderApp::OnCmdLineParsed(wxCmdLineParser& parser)
 		m_dpi = float(dVal);
 	wxString str;
 	if (parser.Found("m", &str))
-		m_mov_file = str;
+		m_mov_file = str.ToStdString();
 	//volumes to load
 	for (size_t i = 0; i < parser.GetParamCount(); ++i)
-		m_files.Add(parser.GetParam(i));
-	m_file_num = m_files.GetCount();
+		m_files.push_back(parser.GetParam(i).ToStdString());
+	m_file_num = m_files.size();
 
 	return true;
 }

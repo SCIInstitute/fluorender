@@ -342,10 +342,10 @@ namespace flvr
 			int location;
 			for (size_t i=0; i<MAX_SHADER_UNIFORMS; ++i)
 			{
-				glActiveTexture(GL_TEXTURE0 + i);
+				glActiveTexture(GL_TEXTURE0 + GLenum(i));
 				location = glGetUniformLocation(id_, loc_strings[i]);
 				if (location != -1)
-					glUniform1i(location, i);
+					glUniform1i(location, GLint(i));
 			}
 			glActiveTexture(GL_TEXTURE0);
 

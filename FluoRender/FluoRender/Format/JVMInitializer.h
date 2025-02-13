@@ -29,6 +29,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _JVMINITIALIZER_H_
 #define _JVMINITIALIZER_H_
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
 #include <jni.h>
 #include <vector>
 #include <iostream>

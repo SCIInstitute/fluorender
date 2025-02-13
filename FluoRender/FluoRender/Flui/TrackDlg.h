@@ -79,9 +79,9 @@ public:
 	void UpdateTrackList();
 	void UpdateTracks();
 
-	void LoadTrackFile(const wxString &file);
+	void LoadTrackFile(const std::string &file);
 	bool SaveTrackFile();
-	void SaveTrackFile(const wxString &file);
+	void SaveTrackFile(const std::string &file);
 	void SaveasTrackFile();
 	void DeleteSelection(int type);
 

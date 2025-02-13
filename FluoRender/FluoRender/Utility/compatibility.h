@@ -102,7 +102,7 @@ inline std::string INC_NUM(const std::string& str)
 		digits.insert(digits.begin(), tmp.back());
 		tmp.pop_back();
 	}
-	int len = digits.length();
+	size_t len = digits.length();
 	if (len == 0) {
 		return tmp + "01" + ext;
 	}

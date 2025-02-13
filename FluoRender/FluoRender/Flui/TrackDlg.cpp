@@ -42,7 +42,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/dirdlg.h>
-#include <wx/stdpaths.h>
 #include <png_resource.h>
 #include <icons.h>
 #include <set>
@@ -1019,7 +1018,7 @@ void TrackDlg::UpdateTracks()
 	Thaw();
 }
 
-void TrackDlg::LoadTrackFile(const wxString& file)
+void TrackDlg::LoadTrackFile(const std::string& file)
 {
 	RenderCanvas* canvas = glbin_current.canvas;
 	canvas->LoadTrackGroup(file);
@@ -1034,13 +1033,13 @@ bool TrackDlg::SaveTrackFile()
 	TrackGroup* trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return false;
-	wxString str = trkg->GetPath();
-	if (wxFileExists(str))
+	std::string str = trkg->GetPath();
+	if (std::filesystem::exists(str))
 		return canvas->SaveTrackGroup(str);
 	return false;
 }
 
-void TrackDlg::SaveTrackFile(const wxString& file)
+void TrackDlg::SaveTrackFile(const std::string& file)
 {
 	RenderCanvas* canvas = glbin_current.canvas;
 	canvas->SaveTrackGroup(file);
@@ -1055,7 +1054,7 @@ void TrackDlg::SaveasTrackFile()
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		wxString filename = fopendlg->GetPath();
+		std::string filename = fopendlg->GetPath().ToStdString();
 		SaveTrackFile(filename);
 	}
 
@@ -1097,7 +1096,7 @@ void TrackDlg::OnLoadTrace(wxCommandEvent& event)
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		wxString filename = fopendlg->GetPath();
+		std::string filename = fopendlg->GetPath().ToStdString();
 		LoadTrackFile(filename);
 	}
 
@@ -1479,7 +1478,7 @@ void TrackDlg::OnAnalyzeComp(wxCommandEvent& event)
 
 	glbin_comp_analyzer.SetVolume(vd);
 	glbin_comp_analyzer.Analyze(true);
-	string str;
+	std::string str;
 	glbin_comp_analyzer.OutputCompListStr(str, 1);
 	m_stat_text->ChangeValue(str);
 }

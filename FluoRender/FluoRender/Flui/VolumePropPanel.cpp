@@ -55,7 +55,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/colordlg.h>
 #include <wx/valnum.h>
 #include <wx/hyperlink.h>
-#include <wx/stdpaths.h>
 #include <icons.h>
 #include <limits>
 #include <Debug.h>

@@ -34,7 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <CompSelector.h>
 #include <CompAnalyzer.h>
 #include <Clusterizer.h>
-#include <wx/stdpaths.h>
 #include <wx/wfstream.h>
 
 ComponentDefault::ComponentDefault()
@@ -127,7 +126,7 @@ void ComponentDefault::Read(const std::string& filename)
 void ComponentDefault::Save(const std::string& filename)
 {
 	std::string app_name = "FluoRender " +
-		std::format("{}.{}", VERSION_MAJOR, std::format("{:.1f}", VERSION_MINOR));
+		std::format("{}.{}", VERSION_MAJOR, std::format("{:.1f}", float(VERSION_MINOR)));
 	std::string vendor_name = "FluoRender";
 	std::string local_name = "component_settings.dft";
 	wxFileConfig fconfig(app_name, vendor_name, local_name, "",

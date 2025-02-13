@@ -38,7 +38,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Progress.h>
 #include <wx/scrolwin.h>
 #include <wx/valnum.h>
-#include <wx/stdpaths.h>
 #include <limits>
 #include <string>
 #include <cctype>
@@ -1971,7 +1970,7 @@ void ComponentDlg::OnLoadCmd(wxCommandEvent& event)
 		delete fopendlg;
 		return;
 	}
-	wxString filename = fopendlg->GetPath();
+	std::string filename = fopendlg->GetPath().ToStdString();
 	delete fopendlg;
 
 	glbin_comp_generator.LoadCmd(filename);
@@ -1988,7 +1987,7 @@ void ComponentDlg::OnSaveCmd(wxCommandEvent& event)
 		delete fopendlg;
 		return;
 	}
-	wxString filename = fopendlg->GetPath();
+	std::string filename = fopendlg->GetPath().ToStdString();
 	delete fopendlg;
 
 	glbin_comp_generator.SaveCmd(filename);

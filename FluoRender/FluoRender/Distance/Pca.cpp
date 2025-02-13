@@ -56,7 +56,7 @@ void Pca::Compute()
 	}
 	else if (m_mode == 2)
 	{
-		m_num = m_points.size();
+		m_num = static_cast<int>(m_points.size());
 		if (m_num < 2)
 			return;
 

@@ -40,15 +40,15 @@ public:
 	bool OnCmdLineParsed(wxCmdLineParser& parser);	
 
 private:
-	wxArrayString m_files;
-	int m_file_num;
+	std::vector<std::string> m_files;
+	size_t m_file_num;
 	bool m_benchmark;
 	bool m_fullscreen;
 	bool m_windowed;
 	bool m_hidepanels;
 	int m_win_width;
 	int m_win_height;
-	wxString m_mov_file;
+	std::string m_mov_file;
 	double m_bitrate;
 	bool m_lzw;
 	bool m_save_alpha;

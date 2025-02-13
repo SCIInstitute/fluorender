@@ -33,7 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <ModalDlg.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
-#include <wx/stdpaths.h>
 #include <wx/valnum.h>
 #include <compatibility.h>
 

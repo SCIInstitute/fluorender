@@ -34,7 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <ModalDlg.h>
 #include <wx/valnum.h>
 #include <wx/notebook.h>
-#include <wx/stdpaths.h>
 #include <wx/display.h>
 #include <wx/valtext.h>
 #include <wx/regex.h>

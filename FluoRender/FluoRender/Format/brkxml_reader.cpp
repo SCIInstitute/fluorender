@@ -239,7 +239,7 @@ int BRKXMLReader::Preprocess()
 
 	m_file_type = m_pyramid[0].file_type;
 
-	m_level_num = m_pyramid.size();
+	m_level_num = static_cast<int>(m_pyramid.size());
 	m_cur_level = 0;
 
 	std::wstring cur_dir_name = m_path_name.substr(0, m_path_name.find_last_of(slash) + 1);
@@ -1138,7 +1138,7 @@ void BRKXMLReader::build_bricks(std::vector<flvr::TextureBrick*>& tbrks, int lv)
 			0, 0, (*bite)->x_size, (*bite)->y_size, (*bite)->z_size, 1, numb,
 			(*bite)->x_start, (*bite)->y_start, (*bite)->z_start,
 			(*bite)->x_size, (*bite)->y_size, (*bite)->z_size, bbox, tbox, dbox,
-			tbrks.size(), (*bite)->id, (*bite)->offset, (*bite)->fsize);
+			static_cast<unsigned int>(tbrks.size()), (*bite)->id, (*bite)->offset, (*bite)->fsize);
 		tbrks.push_back(b);
 
 		bite++;

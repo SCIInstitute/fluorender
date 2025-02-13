@@ -761,8 +761,8 @@ void Project::Open(const std::string& filename)
 									int id;
 									if (fconfig.Read("id", &id))
 										DataGroup::SetID(id);
-									str = canvas->AddGroup(str);
-									DataGroup* group = canvas->GetGroup(str);
+									str = canvas->AddGroup(str.ToStdString());
+									DataGroup* group = canvas->GetGroup(str.ToStdString());
 									if (group)
 									{
 										//display
@@ -836,8 +836,8 @@ void Project::Open(const std::string& filename)
 									int id;
 									if (fconfig.Read("id", &id))
 										MeshGroup::SetID(id);
-									str = canvas->AddMGroup(str);
-									MeshGroup* group = canvas->GetMGroup(str);
+									str = canvas->AddMGroup(str.ToStdString());
+									MeshGroup* group = canvas->GetMGroup(str.ToStdString());
 									if (group)
 									{
 										//display
@@ -883,7 +883,7 @@ void Project::Open(const std::string& filename)
 			{
 				if (fconfig.Read("track_file", &str))
 				{
-					canvas->LoadTrackGroup(str);
+					canvas->LoadTrackGroup(str.ToStdString());
 				}
 			}
 
@@ -1102,7 +1102,7 @@ void Project::Open(const std::string& filename)
 				ReadRulerList(fconfig, i);
 			}
 		}
-		glbin_current.canvas = frame->GetRenderCanvas(cur_canvas);
+		glbin_current.canvas = frame->GetRenderCanvas(cur_canvas.ToStdString());
 	}
 
 	//clipping planes
@@ -1369,7 +1369,7 @@ void Project::Save(const std::string& filename, bool inc)
 		filename2 = INC_NUM_EXIST(filename);
 
 	std::string app_name = "FluoRender " +
-		std::format("{}.{}", VERSION_MAJOR, std::format("{:.1f}", VERSION_MINOR));
+		std::format("{}.{}", VERSION_MAJOR, std::format("{:.1f}", float(VERSION_MINOR)));
 	std::string vendor_name = "FluoRender";
 	std::string local_name = filename2;
 	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
@@ -1806,7 +1806,7 @@ void Project::Save(const std::string& filename, bool inc)
 				p /= GET_NAME(filename2) + ".track";
 				canvas->SaveTrackGroup(p.string());
 			}
-			fconfig.Write("track_file", canvas->GetTrackGroupFile());
+			fconfig.Write("track_file", wxString(canvas->GetTrackGroupFile()));
 
 			//properties
 			fconfig.SetPath(wxString::Format("/views/%d/properties", i));
@@ -1932,7 +1932,7 @@ void Project::Save(const std::string& filename, bool inc)
 	fconfig.Write("start_frame", glbin_moviemaker.GetClipStartFrame());
 	fconfig.Write("end_frame", glbin_moviemaker.GetClipEndFrame());
 	fconfig.Write("run_script", glbin_settings.m_run_script);
-	fconfig.Write("script_file", glbin_settings.m_script_file);
+	fconfig.Write("script_file", wxString(glbin_settings.m_script_file));
 	//layout
 	fconfig.SetPath("/ui_layout");
 	fconfig.Write("dpi scale factor", frame->GetDPIScaleFactor());
@@ -2023,7 +2023,7 @@ void Project::Save(const std::string& filename, bool inc)
 	SaveConfig(fconfig, filename2);
 
 	SetProgress(0, "");
-	glbin_data_manager.SetProjectPath(filename2.ToStdString());
+	glbin_data_manager.SetProjectPath(filename2);
 
 	frame->UpdateProps({ gstListCtrl });
 }
@@ -2477,12 +2477,13 @@ void Project::ReadRulerList(wxFileConfig &fconfig, int vi)
 	}
 }
 
-void SaveConfig(wxFileConfig& fconfig, const std::string& filename)
+void Project::SaveConfig(wxFileConfig& fconfig, const std::string& filename)
 {
+	std::string str = filename;
 #ifdef _WIN32
-	filename = "\x5c\x5c\x3f\x5c" + filename;
+	str = "\x5c\x5c\x3f\x5c" + str;
 #endif
-	wxFileOutputStream os(filename);
+	wxFileOutputStream os(str);
 	fconfig.Save(os);
 
 }

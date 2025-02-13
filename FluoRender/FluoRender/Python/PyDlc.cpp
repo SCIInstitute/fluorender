@@ -216,7 +216,7 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 					if (r)
 					{
 						r->SetWorkTime(t);
-						r->SetPoint(rpi, i);
+						r->SetPoint(static_cast<int>(rpi), i);
 						rpi++;
 					}
 
@@ -361,7 +361,7 @@ void PyDlc::CreateConfigFile(
 		std::set<size_t> keys;
 		if (!rhdl->GetKeyFrames(keys))
 			return;
-		key_num = keys.size();
+		key_num = static_cast<int>(keys.size());
 	}
 	cf << "numframes2pick: " << key_num << std::endl;
 	cf << std::endl;
@@ -576,7 +576,7 @@ void PyDlc::WriteHDF(RulerHandler* rhdl)
 	//values
 	rhdl->GetRulerPointCoords(coords);
 	hdf_write_array2_double(group_id, "block0_values",
-		kn, rpn2, coords);
+		static_cast<int>(kn), static_cast<int>(rpn2), coords);
 
 	//close group
 	herr_t status = H5Gclose(group_id);

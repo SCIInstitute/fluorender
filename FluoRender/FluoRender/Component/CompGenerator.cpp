@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <EntryHist.h>
 #include <EntryParams.h>
 #include <Reshape.h>
+#include <wx/wfstream.h>
 #include <algorithm>
 #ifdef _DEBUG
 #include <Debug.h>
@@ -1963,7 +1964,7 @@ void ComponentGenerator::GenerateDB()
 }
 
 //command
-void ComponentGenerator::LoadCmd(const wxString& filename)
+void ComponentGenerator::LoadCmd(const std::string& filename)
 {
 	wxFileInputStream is(filename);
 	if (!is.IsOk())
@@ -2074,7 +2075,7 @@ void ComponentGenerator::LoadCmd(const wxString& filename)
 	//m_cmd_count_text->ChangeValue(wxString::Format("%d", ival));
 }
 
-void ComponentGenerator::SaveCmd(const wxString& filename)
+void ComponentGenerator::SaveCmd(const std::string& filename)
 {
 	if (m_command.empty())
 	{
@@ -2139,7 +2140,7 @@ void ComponentGenerator::SaveCmd(const wxString& filename)
 		}
 	}
 
-	SaveConfig(fconfig, filename);
+	glbin_project.SaveConfig(fconfig, filename);
 	//m_cmd_file_text->ChangeValue(filename);
 }
 

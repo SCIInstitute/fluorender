@@ -57,7 +57,7 @@ void NRRDWriter::SetCompression(bool value)
 {
 }
 
-void NRRDWriter::Save(const std::wstring filename, int mode)
+void NRRDWriter::Save(const std::wstring& filename, int mode)
 {
    if (!m_data)
       return;

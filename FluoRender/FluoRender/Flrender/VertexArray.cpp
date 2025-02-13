@@ -197,9 +197,9 @@ namespace flvr
 					float_list_[i*3+1],
 					float_list_[i*3+2]))
 				{
-					float_list_[i * 3] = pp[i].x();
-					float_list_[i * 3+1] = pp[i].y();
-					float_list_[i * 3+2] = pp[i].z();
+					float_list_[i * 3] = static_cast<float>(pp[i].x());
+					float_list_[i * 3+1] = static_cast<float>(pp[i].y());
+					float_list_[i * 3+2] = static_cast<float>(pp[i].z());
 					update_vertex = true;
 				}
 			}
@@ -283,10 +283,10 @@ namespace flvr
 
 	void VertexArray::update_buffer_norm_square_d()
 	{
-		float d = 0.0;
+		float d = 0.0f;
 		auto param = param_list_.find(0);
 		if (param != param_list_.end())
-			d = param->second;
+			d = static_cast<float>(param->second);
 
 		float points[] = {
 			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, d,
@@ -300,18 +300,18 @@ namespace flvr
 	void VertexArray::update_buffer_circles()
 	{
 		//get parameters
-		float r1 = -1.0;
-		float r2 = -1.0;
+		float r1 = -1.0f;
+		float r2 = -1.0f;
 		int secs = 0;
 		auto param = param_list_.find(0);
 		if (param != param_list_.end())
-			r1 = param->second;
+			r1 = static_cast<float>(param->second);
 		param = param_list_.find(1);
 		if (param != param_list_.end())
-			r2 = param->second;
+			r2 = static_cast<float>(param->second);
 		param = param_list_.find(2);
 		if (param != param_list_.end())
-			secs = int(param->second + 0.5);
+			secs = static_cast<int>(std::round(param->second));
 
 		if (r1 < 0.0 && r2 < 0.0)
 			return;
@@ -323,13 +323,13 @@ namespace flvr
 		else
 			vertex.reserve(secs * 6);//two circles
 
-		float deg = 0.0;
+		float deg = 0.0f;
 		//first circle
 		if (r1 >= 0.0)
 		{
 			for (size_t i = 0; i<secs; ++i)
 			{
-				deg = i * 2 * PI / secs;
+				deg = static_cast<float>(i * 2 * PI / secs);
 				vertex.push_back(r1*sin(deg));
 				vertex.push_back(r1*cos(deg));
 				vertex.push_back(0.0f);
@@ -340,7 +340,7 @@ namespace flvr
 			//second circle
 			for (size_t i = 0; i<secs; ++i)
 			{
-				deg = i * 2 * PI / secs;
+				deg = static_cast<float>(i * 2 * PI / secs);
 				vertex.push_back(r2*sin(deg));
 				vertex.push_back(r2*cos(deg));
 				vertex.push_back(0.0f);
@@ -357,42 +357,49 @@ namespace flvr
 		std::vector<float> vertex;
 		vertex.reserve(24 * 3);
 
+		float x1 = static_cast<float>(bbox_.Min().x());
+		float y1 = static_cast<float>(bbox_.Min().y());
+		float z1 = static_cast<float>(bbox_.Min().z());
+		float x2 = static_cast<float>(bbox_.Max().x());
+		float y2 = static_cast<float>(bbox_.Max().y());
+		float z2 = static_cast<float>(bbox_.Max().z());
+
 		//s1-000-100
-		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Min().z());
-		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Min().z());
+		vertex.push_back(x1); vertex.push_back(y1); vertex.push_back(z1);
+		vertex.push_back(x2); vertex.push_back(y1); vertex.push_back(z1);
 		//s2-100-101
-		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Min().z());
-		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Max().z());
+		vertex.push_back(x2); vertex.push_back(y1); vertex.push_back(z1);
+		vertex.push_back(x2); vertex.push_back(y1); vertex.push_back(z2);
 		//s3-101-001
-		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Max().z());
-		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Max().z());
+		vertex.push_back(x2); vertex.push_back(y1); vertex.push_back(z2);
+		vertex.push_back(x1); vertex.push_back(y1); vertex.push_back(z2);
 		//s4-001-000
-		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Max().z());
-		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Min().z());
+		vertex.push_back(x1); vertex.push_back(y1); vertex.push_back(z2);
+		vertex.push_back(x1); vertex.push_back(y1); vertex.push_back(z1);
 		//s5-000-010
-		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Min().z());
-		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Min().z());
+		vertex.push_back(x1); vertex.push_back(y1); vertex.push_back(z1);
+		vertex.push_back(x1); vertex.push_back(y2); vertex.push_back(z1);
 		//s6-100-110
-		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Min().z());
-		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Min().z());
+		vertex.push_back(x2); vertex.push_back(y1); vertex.push_back(z1);
+		vertex.push_back(x2); vertex.push_back(y2); vertex.push_back(z1);
 		//s7-101-111
-		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Max().z());
-		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Max().z());
+		vertex.push_back(x2); vertex.push_back(y1); vertex.push_back(z2);
+		vertex.push_back(x2); vertex.push_back(y2); vertex.push_back(z2);
 		//s8-001-011
-		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Min().y()); vertex.push_back(bbox_.Max().z());
-		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Max().z());
+		vertex.push_back(x1); vertex.push_back(y1); vertex.push_back(z2);
+		vertex.push_back(x1); vertex.push_back(y2); vertex.push_back(z2);
 		//s9-010-110
-		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Min().z());
-		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Min().z());
+		vertex.push_back(x1); vertex.push_back(y2); vertex.push_back(z1);
+		vertex.push_back(x2); vertex.push_back(y2); vertex.push_back(z1);
 		//s10-110-111
-		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Min().z());
-		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Max().z());
+		vertex.push_back(x2); vertex.push_back(y2); vertex.push_back(z1);
+		vertex.push_back(x2); vertex.push_back(y2); vertex.push_back(z2);
 		//s11-111-011
-		vertex.push_back(bbox_.Max().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Max().z());
-		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Max().z());
+		vertex.push_back(x2); vertex.push_back(y2); vertex.push_back(z2);
+		vertex.push_back(x1); vertex.push_back(y2); vertex.push_back(z2);
 		//s12-011-010
-		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Max().z());
-		vertex.push_back(bbox_.Min().x()); vertex.push_back(bbox_.Max().y()); vertex.push_back(bbox_.Min().z());
+		vertex.push_back(x1); vertex.push_back(y2); vertex.push_back(z2);
+		vertex.push_back(x1); vertex.push_back(y2); vertex.push_back(z1);
 
 		buffer_data(VABuf_Coord,
 			sizeof(float) * vertex.size(),
@@ -431,13 +438,13 @@ namespace flvr
 	{
 		//get parameters
 		int grid_num = 0;
-		float distance = 1.0;
+		float distance = 1.0f;
 		auto param = param_list_.find(0);
 		if (param != param_list_.end())
 			grid_num = int(param->second+0.5);
 		param = param_list_.find(1);
 		if (param != param_list_.end())
-			distance = param->second;
+			distance = static_cast<float>(param->second);
 		int line_num = grid_num * 2 + 1;
 		std::vector<float> vertex;
 		vertex.reserve(line_num * 4 * 3);
@@ -469,20 +476,20 @@ namespace flvr
 
 	void VertexArray::update_cam_jack()
 	{
-		float len = 1.0;
+		float len = 1.0f;
 		auto param = param_list_.find(0);
 		if (param != param_list_.end())
-			len = param->second;
+			len = static_cast<float>(param->second);
 
 		std::vector<float> vertex;
 		vertex.reserve(6 * 3);
 
-		vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
-		vertex.push_back(len); vertex.push_back(0.0); vertex.push_back(0.0);
-		vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
-		vertex.push_back(0.0); vertex.push_back(len); vertex.push_back(0.0);
-		vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(0.0);
-		vertex.push_back(0.0); vertex.push_back(0.0); vertex.push_back(len);
+		vertex.push_back(0.0f); vertex.push_back(0.0f); vertex.push_back(0.0f);
+		vertex.push_back(len);  vertex.push_back(0.0f); vertex.push_back(0.0f);
+		vertex.push_back(0.0f); vertex.push_back(0.0f); vertex.push_back(0.0f);
+		vertex.push_back(0.0f); vertex.push_back(len);  vertex.push_back(0.0f);
+		vertex.push_back(0.0f); vertex.push_back(0.0f); vertex.push_back(0.0f);
+		vertex.push_back(0.0f); vertex.push_back(0.0f); vertex.push_back(len);
 		buffer_data(VABuf_Coord,
 			sizeof(float) * vertex.size(),
 			&vertex[0], GL_STATIC_DRAW);
@@ -490,11 +497,11 @@ namespace flvr
 
 	void VertexArray::update_cam_center()
 	{
-		float len = 10;
+		float len = 10.0f;
 		auto param = param_list_.find(0);
 		if (param != param_list_.end())
-			len = param->second;
-		float gap = 5;
+			len = static_cast<float>(param->second);
+		float gap = 5.0f;
 
 		std::vector<float> vertex;
 		vertex.reserve(24);
@@ -514,22 +521,22 @@ namespace flvr
 
 	void VertexArray::update_crop_frame()
 	{
-		float x = 0.0;
-		float y = 0.0;
-		float w = 1.0;
-		float h = 1.0;
+		float x = 0.0f;
+		float y = 0.0f;
+		float w = 1.0f;
+		float h = 1.0f;
 		auto param = param_list_.find(0);
 		if (param != param_list_.end())
-			x = param->second;
+			x = static_cast<float>(param->second);
 		param = param_list_.find(1);
 		if (param != param_list_.end())
-			y = param->second;
+			y = static_cast<float>(param->second);
 		param = param_list_.find(2);
 		if (param != param_list_.end())
-			w = param->second;
+			w = static_cast<float>(param->second);
 		param = param_list_.find(3);
 		if (param != param_list_.end())
-			h = param->second;
+			h = static_cast<float>(param->second);
 
 		std::vector<float> vertex;
 		vertex.reserve(4 * 3);
@@ -545,22 +552,22 @@ namespace flvr
 
 	void VertexArray::update_scale_bar()
 	{
-		float x = 0.0;
-		float y = 0.0;
-		float w = 1.0;
-		float h = 1.0;
+		float x = 0.0f;
+		float y = 0.0f;
+		float w = 1.0f;
+		float h = 1.0f;
 		auto param = param_list_.find(0);
 		if (param != param_list_.end())
-			x = param->second;
+			x = static_cast<float>(param->second);
 		param = param_list_.find(1);
 		if (param != param_list_.end())
-			y = param->second;
+			y = static_cast<float>(param->second);
 		param = param_list_.find(2);
 		if (param != param_list_.end())
-			w = param->second;
+			w = static_cast<float>(param->second);
 		param = param_list_.find(3);
 		if (param != param_list_.end())
-			h = param->second;
+			h = static_cast<float>(param->second);
 
 		std::vector<float> vertex;
 		vertex.reserve(4 * 3);
@@ -576,34 +583,34 @@ namespace flvr
 
 	void VertexArray::update_legend_squares()
 	{
-		float px1 = 0.0;
-		float py1 = 0.0;
-		float px2 = 1.0;
-		float py2 = 1.0;
+		float px1 = 0.0f;
+		float py1 = 0.0f;
+		float px2 = 1.0f;
+		float py2 = 1.0f;
 		auto param = param_list_.find(0);
 		if (param != param_list_.end())
-			px1 = param->second;
+			px1 = static_cast<float>(param->second);
 		param = param_list_.find(1);
 		if (param != param_list_.end())
-			py1 = param->second;
+			py1 = static_cast<float>(param->second);
 		param = param_list_.find(2);
 		if (param != param_list_.end())
-			px2 = param->second;
+			px2 = static_cast<float>(param->second);
 		param = param_list_.find(3);
 		if (param != param_list_.end())
-			py2 = param->second;
+			py2 = static_cast<float>(param->second);
 
 		std::vector<float> vertex;
 		vertex.reserve(8 * 3);
 
-		vertex.push_back(px1 - 1.0); vertex.push_back(py2 + 1.0); vertex.push_back(0.0);
-		vertex.push_back(px2 + 1.0); vertex.push_back(py2 + 1.0); vertex.push_back(0.0);
-		vertex.push_back(px1 - 1.0); vertex.push_back(py1 - 1.0); vertex.push_back(0.0);
-		vertex.push_back(px2 + 1.0); vertex.push_back(py1 - 1.0); vertex.push_back(0.0);
-		vertex.push_back(px1); vertex.push_back(py2); vertex.push_back(0.0);
-		vertex.push_back(px2); vertex.push_back(py2); vertex.push_back(0.0);
-		vertex.push_back(px1); vertex.push_back(py1); vertex.push_back(0.0);
-		vertex.push_back(px2); vertex.push_back(py1); vertex.push_back(0.0);
+		vertex.push_back(px1 - 1.0f); vertex.push_back(py2 + 1.0f); vertex.push_back(0.0f);
+		vertex.push_back(px2 + 1.0f); vertex.push_back(py2 + 1.0f); vertex.push_back(0.0f);
+		vertex.push_back(px1 - 1.0f); vertex.push_back(py1 - 1.0f); vertex.push_back(0.0f);
+		vertex.push_back(px2 + 1.0f); vertex.push_back(py1 - 1.0f); vertex.push_back(0.0f);
+		vertex.push_back(px1); vertex.push_back(py2); vertex.push_back(0.0f);
+		vertex.push_back(px2); vertex.push_back(py2); vertex.push_back(0.0f);
+		vertex.push_back(px1); vertex.push_back(py1); vertex.push_back(0.0f);
+		vertex.push_back(px2); vertex.push_back(py1); vertex.push_back(0.0f);
 		buffer_data(VABuf_Coord,
 			sizeof(float) * vertex.size(),
 			&vertex[0], GL_STREAM_DRAW);

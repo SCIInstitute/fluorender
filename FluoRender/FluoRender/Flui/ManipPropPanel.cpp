@@ -268,7 +268,10 @@ void ManipPropPanel::OnSpinUp(wxSpinEvent& event)
 	if (text_ctrl)
 	{
 		wxString str_val = text_ctrl->GetValue();
-		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str())+1);
+		double dval;
+		str_val.ToDouble(&dval);
+		dval += 1.0;
+		wxString str = wxString::Format("%.3f", dval);
 		text_ctrl->ChangeValue(str);
 		UpdateMeshData();
 	}
@@ -311,7 +314,10 @@ void ManipPropPanel::OnSpinDown(wxSpinEvent& event)
 	if (text_ctrl)
 	{
 		wxString str_val = text_ctrl->GetValue();
-		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str())-1);
+		double dval;
+		str_val.ToDouble(&dval);
+		dval -= 1.0;
+		wxString str = wxString::Format("%.3f", dval);
 		text_ctrl->ChangeValue(str);
 		UpdateMeshData();
 	}
@@ -324,27 +330,27 @@ void ManipPropPanel::UpdateMeshData()
 
 	double x, y, z;
 	wxString str = m_x_trans_text->GetValue();
-	x = STOD(str.fn_str());
+	str.ToDouble(&x);
 	str = m_y_trans_text->GetValue();
-	y = STOD(str.fn_str());
+	str.ToDouble(&y);
 	str = m_z_trans_text->GetValue();
-	z = STOD(str.fn_str());
+	str.ToDouble(&z);
 	m_md->SetTranslation(x, y, z);
 
 	str = m_x_rot_text->GetValue();
-	x = STOD(str.fn_str());
+	str.ToDouble(&x);
 	str = m_y_rot_text->GetValue();
-	y = STOD(str.fn_str());
+	str.ToDouble(&y);
 	str = m_z_rot_text->GetValue();
-	z = STOD(str.fn_str());
+	str.ToDouble(&z);
 	m_md->SetRotation(x, y, z);
 
 	str = m_x_scl_text->GetValue();
-	x = STOD(str.fn_str());
+	str.ToDouble(&x);
 	str = m_y_scl_text->GetValue();
-	y = STOD(str.fn_str());
+	str.ToDouble(&y);
 	str = m_z_scl_text->GetValue();
-	z = STOD(str.fn_str());
+	str.ToDouble(&z);
 	m_md->SetScaling(x, y, z);
 
 	FluoRefresh(1, { gstNull });

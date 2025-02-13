@@ -62,7 +62,7 @@ void TIFWriter::SetCompression(bool value)
 	m_compression = value;
 }
 
-void TIFWriter::Save(std::wstring& filename, int mode)
+void TIFWriter::Save(const std::wstring& filename, int mode)
 {
 	switch (mode)
 	{
@@ -163,14 +163,15 @@ void TIFWriter::SaveSingleFile(const std::wstring& filename)
 		_TIFFfree(buf8);
 }
 
-void TIFWriter::SaveSequence(std::wstring& filename)
+void TIFWriter::SaveSequence(const std::wstring& filename)
 {
 	if (!m_data || !m_data->data || m_data->dim!=3)
 		return;
 
-	size_t pos = filename.find_last_of(L'.');
+	std::wstring str_fn = filename;
+	size_t pos = str_fn.find_last_of(L'.');
 	if (pos != std::wstring::npos)
-		filename = filename.substr(0, pos);
+		str_fn = str_fn.substr(0, pos);
 
 	int numPages = int(m_data->axis[2].size);
 	int width = int(m_data->axis[0].size);
@@ -212,7 +213,7 @@ void TIFWriter::SaveSequence(std::wstring& filename)
 		int ndigit = int(log10(double(numPages))) + 1;
 		swprintf_s(format, 32, L"%%0%dd", ndigit);
 		swprintf_s(fileindex, 32, format, i+1);
-		std::wstring pagefilename = filename + fileindex + L".tif";
+		std::wstring pagefilename = str_fn + fileindex + L".tif";
 		TIFF* outfile = TIFFOpenW(pagefilename, "wb");
 
 		TIFFSetField(outfile, TIFFTAG_IMAGEWIDTH, width);

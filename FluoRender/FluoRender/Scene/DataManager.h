@@ -1369,20 +1369,20 @@ public:
 	//load volume
 	void LoadVolumes(const std::vector<std::string>& files, bool withImageJ);
 	void StartupLoad(const std::vector<std::string>& files, bool run_mov, bool with_imagej);
-	int LoadVolumeData(const std::string &filename, int type, bool withImageJ, int ch_num=-1, int t_num=-1);
+	size_t LoadVolumeData(const std::string &filename, int type, bool withImageJ, int ch_num=-1, int t_num=-1);
 	//set default
 	void SetVolumeDefault(VolumeData* vd);
 	void AddVolumeData(VolumeData* vd);
 	VolumeData* DuplicateVolumeData(VolumeData* vd);
-	void RemoveVolumeData(int index);
+	void RemoveVolumeData(size_t index);
 	void RemoveVolumeData(const std::string &name);
-	int GetVolumeNum();
-	VolumeData* GetVolumeData(int index);
+	size_t GetVolumeNum();
+	VolumeData* GetVolumeData(size_t index);
 	VolumeData* GetVolumeData(const std::string &name);
-	int GetVolumeIndex(const std::string &name);
+	size_t GetVolumeIndex(const std::string &name);
 	VolumeData* GetLastVolumeData()
 	{
-		int num = m_vd_list.size();
+		size_t num = m_vd_list.size();
 		if (num)
 			return m_vd_list[num-1];
 		else
@@ -1391,34 +1391,34 @@ public:
 
 	//load mesh
 	void LoadMeshes(const std::vector<std::string>& files);
-	int LoadMeshData(const std::string &filename);
-	int LoadMeshData(GLMmodel* mesh);
-	int GetMeshNum();
-	MeshData* GetMeshData(int index);
+	bool LoadMeshData(const std::string &filename);
+	bool LoadMeshData(GLMmodel* mesh);
+	size_t GetMeshNum();
+	MeshData* GetMeshData(size_t index);
 	MeshData* GetMeshData(const std::string &name);
-	int GetMeshIndex(const std::string &name);
+	size_t GetMeshIndex(const std::string &name);
 	MeshData* GetLastMeshData()
 	{
-		int num = m_md_list.size();
+		size_t num = m_md_list.size();
 		if (num)
 			return m_md_list[num-1];
 		else
 			return 0;
 	};
-	void RemoveMeshData(int index);
+	void RemoveMeshData(size_t index);
 	void ClearMeshSelection();
 
 	//annotations
-	int LoadAnnotations(const std::string &filename);
+	bool LoadAnnotations(const std::string &filename);
 	void AddAnnotations(Annotations* ann);
-	void RemoveAnnotations(int index);
-	int GetAnnotationNum();
-	Annotations* GetAnnotations(int index);
+	void RemoveAnnotations(size_t index);
+	size_t GetAnnotationNum();
+	Annotations* GetAnnotations(size_t index);
 	Annotations* GetAnnotations(const std::string &name);
-	int GetAnnotationIndex(const std::string &name);
+	size_t GetAnnotationIndex(const std::string &name);
 	Annotations* GetLastAnnotations()
 	{
-		int num = m_annotation_list.size();
+		size_t num = m_annotation_list.size();
 		if (num)
 			return m_annotation_list[num-1];
 		else

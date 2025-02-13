@@ -1150,7 +1150,7 @@ void PVXMLReader::ReadLaser(wxXmlNode* node)
 			{
 				for (int i = 0; i < strDesc.size(); ++i)
 				{
-					if (wxIsdigit(strDesc[i]))
+					if (std::isdigit(strDesc[i]))
 						strWl += strDesc[i];
 					else
 						break;
