@@ -2473,3 +2473,12 @@ void Project::ReadRulerList(wxFileConfig &fconfig, int vi)
 	}
 }
 
+void SaveConfig(wxFileConfig& fconfig, const std::string& filename)
+{
+#ifdef _WIN32
+	filename = "\x5c\x5c\x3f\x5c" + filename;
+#endif
+	wxFileOutputStream os(filename);
+	fconfig.Save(os);
+
+}

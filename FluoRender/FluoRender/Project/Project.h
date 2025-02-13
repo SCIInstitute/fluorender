@@ -47,6 +47,8 @@ public:
 	void SaveRulerList(wxFileConfig &fconfig, int vi);
 	void ReadRulerList(wxFileConfig &fconfig, int vi);
 
+	void SaveConfig(wxFileConfig& fconfig, const std::string& filename);
+
 private:
 };
 

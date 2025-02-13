@@ -482,111 +482,77 @@ inline std::string STR_DIR_SEP(const std::string pathname)
 	return result;
 }
 
-inline bool FIND_FILES_4D(std::wstring path_name,
-	std::wstring id, std::vector<std::wstring> &batch_list,
-	int &cur_batch)
+inline bool FIND_FILES_4D(const std::wstring& path_name, const std::wstring& id, std::vector<std::wstring>& batch_list, int& cur_batch)
 {
 	size_t begin = path_name.rfind(id);
 	size_t id_len = id.length();
-	if (begin == -1)
+	if (begin == std::wstring::npos)
 		return false;
-	else
-	{
-		std::wstring searchstr = path_name.substr(0, begin);
-		searchstr.push_back(L'*');
-		std::wstring t_num;
-		size_t k;
-		bool end_digits = false;
-		for (k = begin+id_len; k < path_name.length(); ++k)
-		{
-			wchar_t c = path_name[k];
-			if (iswdigit(c))
-			{
-				if (end_digits)
-					searchstr.push_back(c);
-				else
-					t_num.push_back(c);
-			}
-			else if (k == begin + id_len)
-				return false;
-			else
-			{
-				end_digits = true;
+
+	std::wstring searchstr = path_name.substr(0, begin) + L"*";
+	std::wstring t_num;
+	size_t k;
+	bool end_digits = false;
+	for (k = begin + id_len; k < path_name.length(); ++k) {
+		wchar_t c = path_name[k];
+		if (iswdigit(c)) {
+			if (end_digits)
 				searchstr.push_back(c);
-			}
+			else
+				t_num.push_back(c);
 		}
-		if (t_num.length() == 0)
+		else if (k == begin + id_len) {
 			return false;
-		
-		std::wstring search_path = path_name.substr(0,
-			path_name.find_last_of(L'\\')) + L'\\';
-		WIN32_FIND_DATAW FindFileData;
-		HANDLE hFind;
-		hFind = FindFirstFileW(searchstr.c_str(), &FindFileData);
-		if (hFind != INVALID_HANDLE_VALUE)
-		{
-			int cnt = 0;
-			batch_list.clear();
-			std::wstring name = search_path + FindFileData.cFileName;
+		}
+		else {
+			end_digits = true;
+			searchstr.push_back(c);
+		}
+	}
+	if (t_num.empty())
+		return false;
+
+	std::wstring search_path = path_name.substr(0, path_name.find_last_of(L'\\')) + L'\\';
+	std::wregex regex(searchstr);
+	batch_list.clear();
+	cur_batch = -1;
+	int cnt = 0;
+
+	for (const auto& entry : std::filesystem::directory_iterator(search_path)) {
+		if (std::regex_match(entry.path().filename().wstring(), regex)) {
+			std::wstring name = entry.path().wstring();
 			batch_list.push_back(name);
 			if (name == path_name)
 				cur_batch = cnt;
 			cnt++;
-
-			while (FindNextFileW(hFind, &FindFileData) != 0)
-			{
-				name = search_path + FindFileData.cFileName;
-				batch_list.push_back(name);
-				if (name == path_name)
-					cur_batch = cnt;
-				cnt++;
-			}
 		}
-		FindClose(hFind);
-
-		return true;
 	}
+
+	return !batch_list.empty();
 }
 
-inline void FIND_FILES(std::wstring m_path_name,
-	std::wstring search_mask,
-	std::vector<std::wstring> &m_batch_list,
-	int &m_cur_batch)
+inline void FIND_FILES(const std::wstring& m_path_name,
+	const std::wstring& search_mask,
+	std::vector<std::wstring>& m_batch_list,
+	int& m_cur_batch)
 {
-	std::wstring search_path = m_path_name.substr(0,
-		m_path_name.find_last_of(L'\\')) + L'\\';
-	if (std::string::npos == search_mask.find(m_path_name))
-		search_mask = search_path + search_mask;
-	WIN32_FIND_DATAW FindFileData;
-	HANDLE hFind;
-	hFind = FindFirstFileW(search_mask.c_str(), &FindFileData);
-	if (hFind != INVALID_HANDLE_VALUE)
-	{
-		int cnt = 0;
-		m_batch_list.clear();
-		std::wstring name = search_path + FindFileData.cFileName;
-		m_batch_list.push_back(name);
-		if (name == m_path_name)
-			m_cur_batch = cnt;
-		cnt++;
+	std::wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(L'\\')) + L'\\';
+	std::wstring full_search_mask = (search_mask.find(m_path_name) == std::wstring::npos) ? search_path + search_mask : search_mask;
 
-		while (FindNextFileW(hFind, &FindFileData) != 0)
-		{
-			name = search_path + FindFileData.cFileName;
+	std::wregex regex(full_search_mask);
+	m_batch_list.clear();
+	m_cur_batch = -1;
+	int cnt = 0;
+
+	for (const auto& entry : std::filesystem::directory_iterator(search_path)) {
+		if (std::regex_match(entry.path().filename().wstring(), regex)) {
+			std::wstring name = entry.path().wstring();
 			m_batch_list.push_back(name);
 			if (name == m_path_name)
 				m_cur_batch = cnt;
 			cnt++;
 		}
 	}
-	FindClose(hFind);
-}
-
-inline void SaveConfig(wxFileConfig &file, wxString str)
-{
-	str = "\x5c\x5c\x3f\x5c" + str;
-	wxFileOutputStream os(str);
-	file.Save(os);
 }
 
 inline bool IS_NUMBER(const std::string& s)
@@ -946,12 +912,6 @@ inline uint32_t GET_TICK_COUNT() {
 	struct timeval ts;
 	gettimeofday(&ts, NULL);
 	return ts.tv_sec * 1000 + ts.tv_usec / 1000;
-}
-
-inline void SaveConfig(wxFileConfig &file, wxString str)
-{
-	wxFileOutputStream os(str);
-	file.Save(os);
 }
 
 inline bool IS_NUMBER(const std::string& s)
