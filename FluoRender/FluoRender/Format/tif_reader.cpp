@@ -1710,7 +1710,11 @@ void TIFReader::OpenTiff(const std::wstring& name)
 		ResetTiff();
 }
 
-void TIFReader::CloseTiff() { if (tiff_stream.is_open()) tiff_stream.close(); }
+void TIFReader::CloseTiff()
+{
+	if (tiff_stream.is_open())
+		tiff_stream.close();
+}
 
 Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	int c, bool get_max)

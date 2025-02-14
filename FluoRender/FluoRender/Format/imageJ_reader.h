@@ -36,10 +36,9 @@ DEALINGS IN THE SOFTWARE.
 #include <stdexcept>
 #include <algorithm>
 #include <stdint.h>
+#include <jni.h>
 #include <cmath>
 #include <string>
-
-#include <JVMInitializer.h>
 
 class ImageJReader : public BaseReader
 {
@@ -90,7 +89,6 @@ public:
 
 private:
 	// ImageJ related variables.
-	JVMInitializer* m_pJVMInstance;
 	jclass m_imageJ_cls;
 	bool m_eight_bit;
 

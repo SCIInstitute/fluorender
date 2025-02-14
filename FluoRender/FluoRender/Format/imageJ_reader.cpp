@@ -27,11 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <imageJ_reader.h>
 #include <compatibility.h>
+#include <Global.h>
 
 ImageJReader::ImageJReader():
 	BaseReader()
 {
-	m_pJVMInstance = 0;
 	m_imageJ_cls = 0;
 
 	m_resize_type = 0;
@@ -66,15 +66,14 @@ ImageJReader::ImageJReader():
 	m_time_id = L"_T";
 	
 	//Java code to get the number of depth images.
-	m_pJVMInstance = JVMInitializer::getInstance();
-	if (m_pJVMInstance == nullptr)
-		return;
-
-	m_imageJ_cls = m_pJVMInstance->m_pEnv->FindClass("ImageJ_Reader");
-	if (m_imageJ_cls == nullptr)
+	if (glbin_jvm_instance->IsValid())
 	{
-		m_pJVMInstance->m_pEnv->ExceptionDescribe();
-		std::cerr << "ERROR: class not found !";
+		m_imageJ_cls = glbin_jvm_instance->m_pEnv->FindClass("ImageJ_Reader");
+		if (m_imageJ_cls == nullptr)
+		{
+			glbin_jvm_instance->m_pEnv->ExceptionDescribe();
+			std::cerr << "ERROR: class not found !";
+		}
 	}
 }
 
@@ -117,29 +116,29 @@ int ImageJReader::Preprocess()
 	}
 	else {
 		// getting the image metadata.
-		jmethodID method_handle = m_pJVMInstance->m_pEnv->GetStaticMethodID(m_imageJ_cls, "getMetaData", "([Ljava/lang/String;)[I");
+		jmethodID method_handle = glbin_jvm_instance->m_pEnv->GetStaticMethodID(m_imageJ_cls, "getMetaData", "([Ljava/lang/String;)[I");
 		if (method_handle == nullptr)
 			std::cerr << "ERROR: method void getDepth() not found !" << std::endl;
 		else {
 			// This part goes in setFile.
-			jobjectArray arr = m_pJVMInstance->m_pEnv->NewObjectArray(2,      // constructs java array of 2
-				m_pJVMInstance->m_pEnv->FindClass("java/lang/String"),    // Strings
-				m_pJVMInstance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
+			jobjectArray arr = glbin_jvm_instance->m_pEnv->NewObjectArray(2,      // constructs java array of 2
+				glbin_jvm_instance->m_pEnv->FindClass("java/lang/String"),    // Strings
+				glbin_jvm_instance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
 			
 			//char* cstr = new char[m_path_name.length() + 1];
 			//sprintf(cstr, "%ws", m_path_name.c_str());
 			std::string path_name = ws2s(m_path_name);
 
-			m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF(const_cast<char*>(path_name.c_str())));  // change an element
-			//m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 1, m_pJVMInstance->m_pEnv->NewStringUTF("4D_1ch.lsm"));  // change an element
-			//jint depth = (jint)(m_pJVMInstance->m_pEnv->CallStaticIntMethod(imageJ_cls, mid, arr));   // call the method with the arr as argument.
-			//m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);     // release the object
+			glbin_jvm_instance->m_pEnv->SetObjectArrayElement(arr, 0, glbin_jvm_instance->m_pEnv->NewStringUTF(const_cast<char*>(path_name.c_str())));  // change an element
+			//glbin_jvm_instance->m_pEnv->SetObjectArrayElement(arr, 1, glbin_jvm_instance->m_pEnv->NewStringUTF("4D_1ch.lsm"));  // change an element
+			//jint depth = (jint)(glbin_jvm_instance->m_pEnv->CallStaticIntMethod(imageJ_cls, mid, arr));   // call the method with the arr as argument.
+			//glbin_jvm_instance->m_pEnv->DeleteLocalRef(arr);     // release the object
 
-			jintArray val = (jintArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_handle, arr));   // call the method with the arr as argument.					
+			jintArray val = (jintArray)(glbin_jvm_instance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_handle, arr));   // call the method with the arr as argument.					
 			if (!val)
 				return READER_OPEN_FAIL;
-			jsize len = m_pJVMInstance->m_pEnv->GetArrayLength(val);
-			jint* body = m_pJVMInstance->m_pEnv->GetIntArrayElements(val, 0);
+			jsize len = glbin_jvm_instance->m_pEnv->GetArrayLength(val);
+			jint* body = glbin_jvm_instance->m_pEnv->GetIntArrayElements(val, 0);
 
 			//Checking if the right format was loaded.
 			if (len == 1) {
@@ -218,9 +217,9 @@ int ImageJReader::Preprocess()
 			}
 
 			// release the object
-			m_pJVMInstance->m_pEnv->ReleaseIntArrayElements(val, body, JNI_ABORT);
-			m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
-			m_pJVMInstance->m_pEnv->DeleteLocalRef(val);
+			glbin_jvm_instance->m_pEnv->ReleaseIntArrayElements(val, body, JNI_ABORT);
+			glbin_jvm_instance->m_pEnv->DeleteLocalRef(arr);
+			glbin_jvm_instance->m_pEnv->DeleteLocalRef(val);
 		}
 	}
 	m_cur_time = 0;	
@@ -351,10 +350,10 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 
 	jmethodID method_id = NULL;
 	if (m_eight_bit == true){
-		method_id = m_pJVMInstance->m_pEnv->GetStaticMethodID(m_imageJ_cls, "getByteData2D", "([Ljava/lang/String;II)[[B");
+		method_id = glbin_jvm_instance->m_pEnv->GetStaticMethodID(m_imageJ_cls, "getByteData2D", "([Ljava/lang/String;II)[[B");
 	}
 	else {
-		method_id = m_pJVMInstance->m_pEnv->GetStaticMethodID(m_imageJ_cls, "getIntData2D", "([Ljava/lang/String;II)[[S");
+		method_id = glbin_jvm_instance->m_pEnv->GetStaticMethodID(m_imageJ_cls, "getIntData2D", "([Ljava/lang/String;II)[[S");
 	}
 	
 	void* t_data = NULL;
@@ -363,93 +362,93 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 		return NULL;
 	}
 	else if (m_eight_bit == true){
-		jobjectArray arr = m_pJVMInstance->m_pEnv->NewObjectArray(2,      // constructs java array of 3
-			m_pJVMInstance->m_pEnv->FindClass("java/lang/String"),    // Strings
-			m_pJVMInstance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
-		m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF(const_cast<char*>(path_name.c_str())));  // change an element		
+		jobjectArray arr = glbin_jvm_instance->m_pEnv->NewObjectArray(2,      // constructs java array of 3
+			glbin_jvm_instance->m_pEnv->FindClass("java/lang/String"),    // Strings
+			glbin_jvm_instance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
+		glbin_jvm_instance->m_pEnv->SetObjectArrayElement(arr, 0, glbin_jvm_instance->m_pEnv->NewStringUTF(const_cast<char*>(path_name.c_str())));  // change an element		
 
-		jobjectArray  val = (jobjectArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)t, (jint)c));   // call the method with the arr as argument.
-		//jboolean flag = m_pJVMInstance->m_pEnv->ExceptionCheck();
+		jobjectArray  val = (jobjectArray)(glbin_jvm_instance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)t, (jint)c));   // call the method with the arr as argument.
+		//jboolean flag = glbin_jvm_instance->m_pEnv->ExceptionCheck();
 		//if (flag) {
-		//	m_pJVMInstance->m_pEnv->ExceptionClear();
+		//	glbin_jvm_instance->m_pEnv->ExceptionClear();
 		//	//TODO: code to handle exception.
 		//}
 
-		jsize len = m_pJVMInstance->m_pEnv->GetArrayLength(val);
+		jsize len = glbin_jvm_instance->m_pEnv->GetArrayLength(val);
 		if (len >= 1)
 		{
 			unsigned long long offset = 0;			
 			for (unsigned long long i = 0; i < len; i++) {
-				jbyteArray inner_data = static_cast<jbyteArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, (jsize)i));
-				jsize len2 = m_pJVMInstance->m_pEnv->GetArrayLength(inner_data);				
+				jbyteArray inner_data = static_cast<jbyteArray>(glbin_jvm_instance->m_pEnv->GetObjectArrayElement(val, (jsize)i));
+				jsize len2 = glbin_jvm_instance->m_pEnv->GetArrayLength(inner_data);				
 				offset = i*len2;
 				if (t_data == NULL)
 					t_data = new unsigned char[(unsigned long long)len*len2];
 
-				jbyte* body = (jbyte*)(m_pJVMInstance->m_pEnv->GetByteArrayElements(inner_data, 0));
+				jbyte* body = (jbyte*)(glbin_jvm_instance->m_pEnv->GetByteArrayElements(inner_data, 0));
 				for (unsigned long long j = 0; j < len2; ++j) {
 					int test = *(body + j);					
 					((unsigned char*)t_data)[offset + j] = test;
 				}
-				m_pJVMInstance->m_pEnv->ReleaseByteArrayElements(inner_data, body, JNI_ABORT);						
+				glbin_jvm_instance->m_pEnv->ReleaseByteArrayElements(inner_data, body, JNI_ABORT);						
 			}			
 		}
 		else {
-			jshortArray inner_data = static_cast<jshortArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, 0));
-			jshort* body = (jshort*)(m_pJVMInstance->m_pEnv->GetShortArrayElements(inner_data, 0));
+			jshortArray inner_data = static_cast<jshortArray>(glbin_jvm_instance->m_pEnv->GetObjectArrayElement(val, 0));
+			jshort* body = (jshort*)(glbin_jvm_instance->m_pEnv->GetShortArrayElements(inner_data, 0));
 			int test = *(body);
 			std::cout << "Error";
 		}
-		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
-		m_pJVMInstance->m_pEnv->DeleteLocalRef(val);
+		glbin_jvm_instance->m_pEnv->DeleteLocalRef(arr);
+		glbin_jvm_instance->m_pEnv->DeleteLocalRef(val);
 	}
 	else if (m_eight_bit == false)
 	{
-		//m_pJVMInstance->m_pEnv->PushLocalFrame(1000);
-		jobjectArray arr = m_pJVMInstance->m_pEnv->NewObjectArray(2,      // constructs java array of 3
-			m_pJVMInstance->m_pEnv->FindClass("java/lang/String"),    // Strings
-			m_pJVMInstance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
-		m_pJVMInstance->m_pEnv->SetObjectArrayElement(arr, 0, m_pJVMInstance->m_pEnv->NewStringUTF(const_cast<char*>(path_name.c_str())));  // change an element		
-		jobjectArray val = (jobjectArray)(m_pJVMInstance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)t, (jint)c));   // call the method with the arr as argument.
-		jsize len = m_pJVMInstance->m_pEnv->GetArrayLength(val);
+		//glbin_jvm_instance->m_pEnv->PushLocalFrame(1000);
+		jobjectArray arr = glbin_jvm_instance->m_pEnv->NewObjectArray(2,      // constructs java array of 3
+			glbin_jvm_instance->m_pEnv->FindClass("java/lang/String"),    // Strings
+			glbin_jvm_instance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
+		glbin_jvm_instance->m_pEnv->SetObjectArrayElement(arr, 0, glbin_jvm_instance->m_pEnv->NewStringUTF(const_cast<char*>(path_name.c_str())));  // change an element		
+		jobjectArray val = (jobjectArray)(glbin_jvm_instance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)t, (jint)c));   // call the method with the arr as argument.
+		jsize len = glbin_jvm_instance->m_pEnv->GetArrayLength(val);
 
 		if (len >= 1)
 		{
 			unsigned long long offset = 0;
 			for (unsigned long long i = 0; i < len; i++) {
-				jshortArray inner_data = static_cast<jshortArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, (jsize)i));
-				jsize len2 = m_pJVMInstance->m_pEnv->GetArrayLength(inner_data);
+				jshortArray inner_data = static_cast<jshortArray>(glbin_jvm_instance->m_pEnv->GetObjectArrayElement(val, (jsize)i));
+				jsize len2 = glbin_jvm_instance->m_pEnv->GetArrayLength(inner_data);
 				offset = i*len2;
 				if (t_data == NULL)
 					t_data = t_data = new unsigned short int[(unsigned long long)len*len2];
 
-				jshort* body = (jshort*)(m_pJVMInstance->m_pEnv->GetShortArrayElements(inner_data, 0));
+				jshort* body = (jshort*)(glbin_jvm_instance->m_pEnv->GetShortArrayElements(inner_data, 0));
 				for (unsigned long long j = 0; j < len2; ++j) {
 					int test = *(body + j);
 					*((unsigned short int*)t_data + offset + j) = test;
 				}
-				m_pJVMInstance->m_pEnv->ReleaseShortArrayElements(inner_data, body, JNI_ABORT);
+				glbin_jvm_instance->m_pEnv->ReleaseShortArrayElements(inner_data, body, JNI_ABORT);
 			}
 			/*
-			jshort* body = m_pJVMInstance->m_pEnv->GetShortArrayElements(val, 0);
+			jshort* body = glbin_jvm_instance->m_pEnv->GetShortArrayElements(val, 0);
 			unsigned short int* dummy = reinterpret_cast<unsigned short int*>(body);
 			t_data = new unsigned short int[len];
 			for (int i = 0; i < len; i++) {
 				int test = *(body + i);
 				*((unsigned short int*)t_data + i) = test;
 			}
-			m_pJVMInstance->m_pEnv->ReleaseShortArrayElements(val, body, JNI_ABORT);
+			glbin_jvm_instance->m_pEnv->ReleaseShortArrayElements(val, body, JNI_ABORT);
 			*/
 		}
 		else {
-			jshortArray inner_data = static_cast<jshortArray>(m_pJVMInstance->m_pEnv->GetObjectArrayElement(val, 0));
-			jshort* body = (jshort*)(m_pJVMInstance->m_pEnv->GetShortArrayElements(inner_data, 0));
+			jshortArray inner_data = static_cast<jshortArray>(glbin_jvm_instance->m_pEnv->GetObjectArrayElement(val, 0));
+			jshort* body = (jshort*)(glbin_jvm_instance->m_pEnv->GetShortArrayElements(inner_data, 0));
 			int test = *(body);
 			std::cout << "Error";
 		}
 		unsigned short int test = ((unsigned short int *)(t_data))[10*488 + 10];
-		m_pJVMInstance->m_pEnv->DeleteLocalRef(arr);
-		m_pJVMInstance->m_pEnv->DeleteLocalRef(val);
+		glbin_jvm_instance->m_pEnv->DeleteLocalRef(arr);
+		glbin_jvm_instance->m_pEnv->DeleteLocalRef(val);
 	}
 
 	// Creating Nrrd out of the data.

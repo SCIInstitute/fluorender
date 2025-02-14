@@ -59,7 +59,6 @@ DEALINGS IN THE SOFTWARE.
 #include <FpRangeDlg.h>
 #include <AsyncTimerFactory.hpp>
 #include <Tester.h>
-#include <JVMInitializer.h>
 #include <png_resource.h>
 #include <msk_writer.h>
 #include <msk_reader.h>
@@ -168,7 +167,7 @@ MainFrame::MainFrame(
 	bitmap = wxGetBitmapFromMemory(icon_open_volume);
 	m_main_tb->AddTool(ID_OpenVolume, "Open Volume", bitmap,
 		"Open single or multiple volume data file(s)");
-	if (JVMInitializer::getInstance(glbin_settings.GetJvmArgs()) != nullptr)
+	if (glbin_jvm_instance->IsValid())
 	{
 		bitmap = wxGetBitmapFromMemory(icon_import);
 		m_main_tb->AddTool(ID_ImportVolume, "Import Volume", bitmap,
@@ -635,7 +634,7 @@ MainFrame::MainFrame(
 	m = m_top_file->Append(ID_OpenVolumeMenu, "Open &Volume",
 		"Open a volume data set and add it to the render view");
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_volume_mini));
-	if (JVMInitializer::getInstance(glbin_settings.GetJvmArgs()) != nullptr)
+	if (glbin_jvm_instance->IsValid())
 	{
 		m = m_top_file->Append(ID_ImportVolumeMenu, "&Import Volume",
 			"Import a volume data set using ImageJ");
@@ -825,7 +824,6 @@ MainFrame::MainFrame(
 	m_aui_mgr.Update();
 
 	glbin_states.m_status_str = std::string(FLUORENDER_TITLE) + " started normally.";
-	UpdateProps({});
 }
 
 MainFrame::~MainFrame()

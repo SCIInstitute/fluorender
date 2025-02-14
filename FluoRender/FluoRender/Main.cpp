@@ -26,10 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#include <Directory.h>
 #include <Main.h>
 #include <MainFrame.h>
 #include <compatibility.h>
-#include <JVMInitializer.h>
 #include <Global.h>
 #include <cstdio>
 #include <iostream>
@@ -78,8 +78,8 @@ bool FluoRenderApp::OnInit()
 	//_CrtSetBreakAlloc(331430);
 	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	std::string path = std::filesystem::current_path().string();
-	::wxSetWorkingDirectory(path);
+	std::string path = getExecutablePath();
+	std::filesystem::current_path(path);
 	// call default behaviour (mandatory)
 	if (!wxApp::OnInit())
 		return false;
@@ -92,7 +92,7 @@ bool FluoRenderApp::OnInit()
 	std::string title = std::string(FLUORENDER_TITLE) + std::string(" ") +
 		std::string(VERSION_MAJOR_TAG) + std::string(".") +
 		std::string(VERSION_MINOR_TAG);
-	wxFrame* frame = new MainFrame(
+	MainFrame* frame = new MainFrame(
 		(wxFrame*)NULL,
 		wxString(title),
 		-1, -1,
@@ -115,14 +115,12 @@ bool FluoRenderApp::OnInit()
 	if (m_file_num > 0)
 		glbin_data_manager.StartupLoad(m_files, run_mov, m_imagej);
 
-	// Adding JVm initialization.
-	JVMInitializer*	pInstance = JVMInitializer::getInstance(glbin_settings.GetJvmArgs());
+	frame->UpdateProps({});
 	return true;
 }
 
 int FluoRenderApp::OnExit()
 {
-	JVMInitializer::destroyJVM();
 	return 0;
 }
 

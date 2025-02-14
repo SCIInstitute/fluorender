@@ -34,46 +34,9 @@ DEALINGS IN THE SOFTWARE.
 #include <sys/types.h>
 #include <filesystem>
 
-JVMInitializer* JVMInitializer::m_pJVMInstance = nullptr;
-JavaVM* JVMInitializer::m_pJvm = nullptr;
-JNIEnv* JVMInitializer::m_pEnv = nullptr;
-JavaVMInitArgs JVMInitializer::m_VMargs;
-bool JVMInitializer::m_with_fiji = false;
-
-#ifdef _WIN32
-HMODULE JVMInitializer::m_jvm_dll = nullptr;
-#else
-void* JVMInitializer::m_jvm_dll = nullptr;
-#endif
-
-#ifdef _WIN32
-decltype(&JNI_CreateJavaVM) JVMInitializer::m_createJVM_Ptr = nullptr;
-#else
-JVMInitializer::CreateJavaVM_t* JVMInitializer::m_createJVM_Ptr = nullptr;
-#endif
-
 decltype(&JNIEnv::FindClass) m_FindClass_Ptr = nullptr;
 
-
-JVMInitializer* JVMInitializer::getInstance(std::vector<std::string> args)
-{
-	if (m_pJVMInstance == nullptr) {
-		if (create_JVM(args) == true)
-			m_pJVMInstance = new JVMInitializer();
-	}
-	return m_pJVMInstance;
-}
-
-char JVMInitializer::getPathSeparator()
-{
-#ifdef _WIN32
-	return ';';
-#else
-	return ':';
-#endif
-}
-
-bool JVMInitializer::create_JVM(std::vector<std::string> args)
+bool JVMInitializer::create_JVM(const std::vector<std::string>& args)
 {
 	std::string jvm_path;
 	std::string ij_path;

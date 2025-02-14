@@ -390,12 +390,14 @@ inline std::string GET_NAME(const std::string& pathname)
 inline std::wstring GET_PATH(const std::wstring& pathname)
 {
 	std::filesystem::path path(pathname);
+	path /= "";
 	return path.parent_path().wstring();
 }
 
 inline std::string GET_PATH(const std::string& pathname)
 {
 	std::filesystem::path path(pathname);
+	path /= "";
 	return path.parent_path().string();
 }
 
@@ -408,7 +410,9 @@ inline bool SEP_PATH_NAME(const std::wstring& pathname, std::wstring& path, std:
 		return false;
 	}
 
-	path = fs_path.parent_path().wstring();
+	std::filesystem::path p = fs_path.parent_path();
+	p /= "";
+	path = p.wstring();
 	name = fs_path.filename().wstring();
 	return true;
 }
@@ -422,7 +426,9 @@ inline bool SEP_PATH_NAME(const std::string& pathname, std::string& path, std::s
 		return false;
 	}
 
-	path = fs_path.parent_path().string();
+	std::filesystem::path p = fs_path.parent_path();
+	p /= "";
+	path = p.string();
 	name = fs_path.filename().string();
 	return true;
 }

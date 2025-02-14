@@ -73,6 +73,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeMeshConv.h>
 #include <Project.h>
 #include <BaseXrRenderer.h>
+#include <JVMInitializer.h>
 
 #define glbin fluo::Global::instance()
 #define glbin_cache_queue fluo::Global::instance().get_cache_queue()
@@ -138,6 +139,9 @@ DEALINGS IN THE SOFTWARE.
 
 //help url
 #define glbin_help_url fluo::Global::instance().get_help_url()
+
+//jvm
+#define glbin_jvm_instance fluo::Global::instance().get_jvm_instance()
 
 //ml output size
 #define glbin_vp_size 26
@@ -242,6 +246,9 @@ namespace fluo
 		//xr renderer
 		BaseXrRenderer* get_xr_renderer();
 
+		//jvm
+		JVMInitializer* get_jvm_instance();
+
 		//graphics resources
 		flvr::VolKernelFactory& get_vol_kernel_factory() { return vol_kernel_factory_; }
 		flvr::FramebufferManager& get_framebuffer_manager() { return framebuffer_manager_; }
@@ -322,6 +329,9 @@ namespace fluo
 
 		//xr renderer
 		std::unique_ptr<BaseXrRenderer> m_xr_renderer = nullptr;
+
+		//jvm
+		std::unique_ptr<JVMInitializer> m_pJVMInstance = nullptr;
 
 		//graphics resources
 		//kernel for calculation

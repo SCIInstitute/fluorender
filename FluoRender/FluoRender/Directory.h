@@ -26,60 +26,38 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _JVMINITIALIZER_H_
-#define _JVMINITIALIZER_H_
+#ifndef _DIRECTORY_H_
+#define _DIRECTORY_H_
 
-#ifdef _WIN32
+#include <iostream>
+#include <string>
+#include <filesystem>
+
+#if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#endif
-#include <jni.h>
-#include <vector>
-#include <iostream>
-#include <compatibility.h>
-
-#ifdef __linux__
-#include <dlfcn.h>
+#elif defined(__linux__)
+#include <unistd.h>
+#include <limits.h>
+#elif defined(__APPLE__)
+#include <mach-o/dyld.h>
 #endif
 
-class JVMInitializer
-{
-public:
-	JVMInitializer(const std::vector<std::string>& args) { m_valid = create_JVM(args); };
-	~JVMInitializer() {destroyJVM();};
-
-	bool IsValid() { return m_valid; }
-
-#ifdef _WIN32
-	HMODULE m_jvm_dll = nullptr;
-#else
-	void* m_jvm_dll = nullptr;
+std::string getExecutablePath() {
+	char buffer[1024];
+#if defined(_WIN32)
+	GetModuleFileNameA(NULL, buffer, sizeof(buffer));
+#elif defined(__linux__)
+	readlink("/proc/self/exe", buffer, sizeof(buffer));
+#elif defined(__APPLE__)
+	uint32_t size = sizeof(buffer);
+	_NSGetExecutablePath(buffer, &size);
 #endif
-	JavaVM* m_pJvm = nullptr;                      // Pointer to the JVM (Java Virtual Machine)
-	JNIEnv* m_pEnv = nullptr;                      // Pointer to native interface
-	JavaVMInitArgs m_VMargs;
+	std::string str(buffer);
+	std::filesystem::path p(str);
+	p = p.parent_path();
+	str = p.string();
+	return str;
+}
 
-#ifdef _WIN32
-	decltype(&JNI_CreateJavaVM) m_createJVM_Ptr = nullptr;
-#else
-	typedef jint(JNICALL CreateJavaVM_t)(JavaVM** pvm, void** env, void* args);
-	CreateJavaVM_t* m_createJVM_Ptr = nullptr;
-#endif
-
-private:
-	bool m_valid = false;
-	bool m_with_fiji = false;
-
-	bool create_JVM(const std::vector<std::string>& args);
-	void destroyJVM();
-	inline char getPathSeparator()
-	{
-#ifdef _WIN32
-		return ';';
-#else
-		return ':';
-#endif
-	}
-};
-
-#endif //_JVMINITIALIZER_H_
+#endif//_DIRECTORY_H_

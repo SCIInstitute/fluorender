@@ -461,3 +461,13 @@ BaseXrRenderer* Global::get_xr_renderer()
 	}
 	return 0;
 }
+
+//jvm
+JVMInitializer* Global::get_jvm_instance()
+{
+	if (m_pJVMInstance)
+		return m_pJVMInstance.get();
+	// Adding JVm initialization.
+	m_pJVMInstance = std::make_unique<JVMInitializer>(glbin_settings.GetJvmArgs());
+	return m_pJVMInstance.get();
+}
