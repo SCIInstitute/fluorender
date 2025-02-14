@@ -160,8 +160,8 @@ namespace flrd
 		//void DistField(int iter, float th, int dsize, float sscale);
 
 		//output
-		wxString GetTitles() { return m_titles; }
-		wxString GetValues() { return m_values; }
+		std::string GetTitles() { return m_titles; }
+		std::string GetValues() { return m_values; }
 
 		//update progress
 		CompGenFunc prework;
@@ -210,7 +210,7 @@ namespace flrd
 		//speed test
 		bool m_test_speed;
 		std::vector<std::chrono::high_resolution_clock::time_point> m_tps;
-		wxString m_titles, m_values;
+		std::string m_titles, m_values;
 
 	private:
 		bool CheckBricks();

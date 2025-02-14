@@ -219,9 +219,8 @@ void ComponentEditor::NewId(bool append, bool track)
 			new_id += inc;
 			if (new_id == stop_id)
 			{
-				m_output = wxString::Format(
-					"ID assignment failed. Type a different ID than %d",
-					stop_id);
+				m_output = "ID assignment failed. Type a different ID than " +
+					std::to_string(stop_id);
 				return;
 			}
 		}

@@ -156,7 +156,7 @@ void ComponentGenerator::GenerateComp(bool command)
 	{
 		m_titles += "Total time\n";
 	}
-	m_values += wxString::Format("%.4f", time_span.count());
+	m_values += std::to_string(time_span.count());
 	m_values += " sec.\n";
 	//SetOutput(m_titles, m_values);
 
