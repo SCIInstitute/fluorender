@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Colocalize.h>
 #include <Global.h>
 #include <RenderCanvas.h>
+#include <string>
 
 using namespace flrd;
 
@@ -54,7 +55,7 @@ void Colocalize::Compute()
 	//spacings, assuming they are all same for channels
 	double spcx, spcy, spcz;
 	double spc;
-	wxString unit;
+	std::string unit;
 	VolumeData* vd = group->GetVolumeData(0);
 	if (!vd)
 	{
@@ -70,14 +71,14 @@ void Colocalize::Compute()
 		switch (canvas->m_sb_unit)
 		{
 		case 0:
-			unit = L"nm\u00B3";
+			unit = "nm\u00B3";
 			break;
 		case 1:
 		default:
-			unit = L"\u03BCm\u00B3";
+			unit = "\u03BCm\u00B3";
 			break;
 		case 2:
-			unit = L"mm\u00B3";
+			unit = "mm\u00B3";
 			break;
 		}
 	}
@@ -185,15 +186,15 @@ void Colocalize::Compute()
 	}
 	else
 	{
-		wxString name;
+		std::string name;
 		double v;
 		glbin_colocal_def.ResetMinMax();
 		for (size_t i = 0; i < num; ++i)
 		{
 			if (glbin_colocal_def.m_get_ratio)
-				m_titles += wxString::Format("%d (%%)", int(i + 1));
+				m_titles += std::to_string(i+1) + " (%%)";
 			else
-				m_titles += wxString::Format("%d", int(i + 1));
+				m_titles += std::to_string(i+1);
 			VolumeData* vd = group->GetVolumeData(i);
 			if (vd)
 				name = vd->GetName();
@@ -214,7 +215,7 @@ void Colocalize::Compute()
 					{
 						v = rm[it1][it2] * 100.0 / rm[it1][it1];
 						glbin_colocal_def.SetMinMax(v);
-						m_values += wxString::Format("%f", v);
+						m_values += std::to_string(v);
 					}
 					else
 					{
@@ -228,7 +229,7 @@ void Colocalize::Compute()
 					{
 						v = rm[it1][it2] * spc;
 						glbin_colocal_def.SetMinMax(v);
-						m_values += wxString::Format("%f", v);
+						m_values += std::to_string(v);
 						m_values += unit;
 					}
 					else
@@ -236,9 +237,9 @@ void Colocalize::Compute()
 						v = rm[it1][it2];
 						glbin_colocal_def.SetMinMax(v);
 						if (glbin_colocal_def.m_int_weighted)
-							m_values += wxString::Format("%f", v);
+							m_values += std::to_string(v);
 						else
-							m_values += wxString::Format("%.0f", v);
+							m_values += std::to_string(static_cast<int>(v));
 					}
 				}
 				if (it2 < num - 1)
@@ -267,9 +268,11 @@ void Colocalize::StopTimer(const std::string& str)
 			std::chrono::duration_cast<std::chrono::duration<double>>(
 				m_tps.back() - t0);
 
-		m_values += str + "\t";
-		m_values += wxString::Format("%.4f", time_span.count());
-		m_values += " sec.\n";
+		std::ostringstream oss;
+		oss << str << "\t";
+		oss << std::fixed << std::setprecision(4) << time_span.count();
+		oss << " sec.\n";
+		m_values += oss.str();
 	}
 }
 

@@ -368,6 +368,8 @@ namespace fluo
 	private:
 		Global();
 		void BuildFactories();
+
+		void InitLocale();
 	};
 
 }

@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <SearchVisitor.hpp>
 #include <Reshape.h>
 #include <memory>
+#include <boost/locale.hpp>
 
 using namespace fluo;
 
@@ -226,6 +227,8 @@ Global::Global() :
 	BuildFactories();
 
 	help_url_ = "https://github.com/SCIInstitute/fluorender";
+
+	InitLocale();
 }
 
 //python
@@ -470,4 +473,14 @@ JVMInitializer* Global::get_jvm_instance()
 	// Adding JVm initialization.
 	m_pJVMInstance = std::make_unique<JVMInitializer>(glbin_settings.GetJvmArgs());
 	return m_pJVMInstance.get();
+}
+
+//locale
+void Global::InitLocale()
+{
+	boost::locale::generator gen;
+	std::locale loc = gen("en_US.UTF-8");
+	std::locale::global(loc);
+	std::cout.imbue(loc);
+	std::wcout.imbue(loc);
 }

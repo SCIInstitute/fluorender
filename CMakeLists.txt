@@ -623,6 +623,7 @@ add_library(FLRENDER_LIB STATIC
   ${flrd_src} ${flrd_hdr})
 target_link_libraries(FLRENDER_LIB
   teem
+  ${FREETYPE_LIBRARIES}
   ${GLEW_STATIC_LIBRARIES}
   ${OpenCL_LIBRARIES}
   ${OPENGL_LIBRARIES}
@@ -706,9 +707,6 @@ file(GLOB prj_src FluoRender/FluoRender/Project/*.cpp)
 file(GLOB prj_hdr FluoRender/FluoRender/Project/*.h)
 add_library(PROJECT_LIB STATIC
   ${prj_src} ${prj_hdr})
-target_link_libraries(PROJECT_LIB
-  ${wxWidgets_LIBRARIES}
-)
 
 # Python
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Python)
@@ -724,36 +722,40 @@ target_link_libraries(PYTHON_LIB
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Scene)
 file(GLOB scn_src FluoRender/FluoRender/Scene/*.cpp)
 file(GLOB scn_hdr FluoRender/FluoRender/Scene/*.h)
-add_library(SCENE_OBJ OBJECT
+add_library(SCENE_LIB STATIC
   ${scn_src} ${scn_hdr})
 
 # Script
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Script)
 file(GLOB scr_src FluoRender/FluoRender/Script/*.cpp)
 file(GLOB scr_hdr FluoRender/FluoRender/Script/*.h)
-add_library(SCRIPT_OBJ OBJECT
+add_library(SCRIPT_LIB STATIC
   ${scr_src} ${scr_hdr})
+target_link_libraries(SCRIPT_LIB
+  ${TIFF_LIBRARIES})
 
 # Selection
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Selection)
 file(GLOB sel_src FluoRender/FluoRender/Selection/*.cpp)
 file(GLOB sel_hdr FluoRender/FluoRender/Selection/*.h)
-add_library(SELECTION_OBJ OBJECT
+add_library(SELECTION_LIB STATIC
   ${sel_src} ${sel_hdr})
 
 # Timer
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Timer)
 file(GLOB timer_src FluoRender/FluoRender/Timer/*.cpp)
 file(GLOB timer_hdr FluoRender/FluoRender/Timer/*.hpp)
-add_library(TIMER_OBJ OBJECT
+add_library(TIMER_LIB STATIC
   ${timer_src} ${timer_hdr})
 
 # Tracking
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Tracking)
 file(GLOB trk_src FluoRender/FluoRender/Tracking/*.cpp)
 file(GLOB trk_hdr FluoRender/FluoRender/Tracking/*.h)
-add_library(TRACKING_OBJ OBJECT
+add_library(TRACKING_LIB STATIC
   ${trk_src} ${trk_hdr})
+target_link_libraries(TRACKING_LIB
+  ${Boost_LIBRARIES})
 
 # Trainer
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Trainer)
@@ -769,23 +771,29 @@ target_link_libraries(TRAINER_LIB
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Type)
 file(GLOB typ_src FluoRender/FluoRender/Type/*.cpp)
 file(GLOB typ_hdr FluoRender/FluoRender/Type/*.h)
-add_library(TYPE_OBJ OBJECT
+add_library(TYPE_LIB STATIC
   ${typ_src} ${typ_hdr})
+target_link_libraries(TYPE_LIB
+  ${GLEW_STATIC_LIBRARIES})
 
 # Utility
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Utility)
 file(GLOB utl_src FluoRender/FluoRender/Utility/*.cpp)
 file(GLOB utl_hdr FluoRender/FluoRender/Utility/*.h)
 file(GLOB utl_rsc FluoRender/FluoRender/Utility/*.natvis)
-add_library(UTILITY_OBJ OBJECT
+add_library(UTILITY_LIB STATIC
   ${utl_src} ${utl_hdr} ${utl_rsc})
+target_link_libraries(UTILITY_LIB
+  ${Boost_LIBRARIES})
 
 # Video
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Video)
 file(GLOB vid_src FluoRender/FluoRender/Video/*.cpp)
 file(GLOB vid_hdr FluoRender/FluoRender/Video/*.h)
-add_library(VIDEO_OBJ OBJECT
+add_library(VIDEO_LIB STATIC
   ${vid_src} ${vid_hdr})
+target_link_libraries(VIDEO_LIB
+  ${FFMPEG_LIBRARIES})
 
 # other sources
 file(GLOB src FluoRender/FluoRender/*.cpp)
@@ -851,14 +859,6 @@ if(APPLE)
   include(BundleUtilities)
   add_executable(FluoRender MACOSX_BUNDLE
     ${src} ${hdr} ${rsc} ${icns}
-    $<TARGET_OBJECTS:SCENE_OBJ>
-    $<TARGET_OBJECTS:SCRIPT_OBJ>
-    $<TARGET_OBJECTS:SELECTION_OBJ>
-    $<TARGET_OBJECTS:TIMER_OBJ>
-    $<TARGET_OBJECTS:TRACKING_OBJ>
-    $<TARGET_OBJECTS:TYPE_OBJ>
-    $<TARGET_OBJECTS:UTILITY_OBJ>
-    $<TARGET_OBJECTS:VIDEO_OBJ>
     )
   set_target_properties(FluoRender PROPERTIES MACOSX_DEPLOYMENT_TARGET "11.5")
 elseif(UNIX OR MINGW)
@@ -866,14 +866,6 @@ elseif(UNIX OR MINGW)
   set(CXXFLAGS "-fPIC ")
   add_executable(FluoRender
     ${src} ${hdr} ${rsc} ${icns}
-    $<TARGET_OBJECTS:SCENE_OBJ>
-    $<TARGET_OBJECTS:SCRIPT_OBJ>
-    $<TARGET_OBJECTS:SELECTION_OBJ>
-    $<TARGET_OBJECTS:TIMER_OBJ>
-    $<TARGET_OBJECTS:TRACKING_OBJ>
-    $<TARGET_OBJECTS:TYPE_OBJ>
-    $<TARGET_OBJECTS:UTILITY_OBJ>
-    $<TARGET_OBJECTS:VIDEO_OBJ>
     )
 elseif(WIN32)
   # Windows
@@ -916,19 +908,10 @@ elseif(WIN32)
     endif()
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
-      $<TARGET_OBJECTS:SCENE_OBJ>
-      $<TARGET_OBJECTS:SCRIPT_OBJ>
-      $<TARGET_OBJECTS:SELECTION_OBJ>
-      $<TARGET_OBJECTS:TIMER_OBJ>
-      $<TARGET_OBJECTS:TRACKING_OBJ>
-      $<TARGET_OBJECTS:TYPE_OBJ>
-      $<TARGET_OBJECTS:UTILITY_OBJ>
-      $<TARGET_OBJECTS:VIDEO_OBJ>
     )
     if(BUILD_TESTER)
         add_executable(Tester
           ${tester_src} ${tester_hdr}
-          $<TARGET_OBJECTS:TYPE_OBJ>
         )
     endif()
   endif()
@@ -967,14 +950,6 @@ else()
 endif()
 
 target_link_libraries(FluoRender
-    ${Boost_LIBRARIES}
-    ${FFMPEG_LIBRARIES}
-    ${FREETYPE_LIBRARIES}
-    ${GLEW_STATIC_LIBRARIES}
-    ${OpenCL_LIBRARIES}
-    ${OPENGL_LIBRARIES}
-    ${PNG_LIBRARIES}
-    secur32.lib
     ${wxWidgets_LIBRARIES}
     ANIMATORS_LIB
     BOOST_ILIB
@@ -996,13 +971,22 @@ target_link_libraries(FluoRender
     PROGRESS_LIB
     PROJECT_LIB
     PYTHON_LIB
+    SCENE_LIB
+    SCRIPT_LIB
+    SELECTION_LIB
+    TIMER_LIB
+    TRACKING_LIB
     TRAINER_LIB
+    TYPE_LIB
+    UTILITY_LIB
+    VIDEO_LIB
 )
 if(BUILD_TESTER)
     target_link_libraries(Tester
       ${Boost_LIBRARIES}
       dlib::dlib
       FLOBJECT_LIB
+      TYPE_LIB
       )
 endif()
 
