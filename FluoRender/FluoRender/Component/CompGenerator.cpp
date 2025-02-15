@@ -93,8 +93,8 @@ void ComponentGenerator::GenerateComp(bool command)
 	double scale = m_vd->GetScalarScale();
 
 	//glbin_comp_generator.SetVolumeData(vd);
-	m_titles.Clear();
-	m_values.Clear();
+	m_titles.clear();
+	m_values.clear();
 	m_tps.clear();
 	m_tps.push_back(std::chrono::high_resolution_clock::now());
 
