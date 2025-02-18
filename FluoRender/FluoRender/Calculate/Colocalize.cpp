@@ -1,4 +1,4 @@
-/*
+﻿/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -55,7 +55,7 @@ void Colocalize::Compute()
 	//spacings, assuming they are all same for channels
 	double spcx, spcy, spcz;
 	double spc;
-	std::string unit;
+	std::wstring unit;
 	VolumeData* vd = group->GetVolumeData(0);
 	if (!vd)
 	{
@@ -71,14 +71,14 @@ void Colocalize::Compute()
 		switch (canvas->m_sb_unit)
 		{
 		case 0:
-			unit = "nm\u00B3";
+			unit = L"nm\u00B3";
 			break;
 		case 1:
 		default:
-			unit = "\u03BCm\u00B3";
+			unit = L"\u03BCm\u00B3";
 			break;
 		case 2:
-			unit = "mm\u00B3";
+			unit = L"mm\u00B3";
 			break;
 		}
 	}
@@ -230,7 +230,7 @@ void Colocalize::Compute()
 						v = rm[it1][it2] * spc;
 						glbin_colocal_def.SetMinMax(v);
 						m_values += std::to_string(v);
-						m_values += unit;
+						m_values += ws2s(unit);
 					}
 					else
 					{

@@ -34,9 +34,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef __COMPATIBILITY_H__
 #define __COMPATIBILITY_H__
 
-#include <boost/locale.hpp>
 #include <string>
 #include <cstring>
+#include <cwchar>
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -367,12 +367,22 @@ inline void INC_NUMBER(std::string& s)
 
 inline std::wstring s2ws(const std::string& s)
 {
-	return boost::locale::conv::utf_to_utf<wchar_t>(s);
+	std::mbstate_t state = std::mbstate_t();
+	const char* src = s.data();
+	size_t len = std::mbsrtowcs(nullptr, &src, 0, &state);
+	std::wstring dest(len, L'\0');
+	std::mbsrtowcs(&dest[0], &src, len, &state);
+	return dest;
 }
 
 inline std::string ws2s(const std::wstring& ws)
 {
-	return boost::locale::conv::utf_to_utf<char>(ws);
+	std::mbstate_t state = std::mbstate_t();
+	const wchar_t* src = ws.data();
+	size_t len = std::wcsrtombs(nullptr, &src, 0, &state);
+	std::string dest(len, '\0');
+	std::wcsrtombs(&dest[0], &src, len, &state);
+	return dest;
 }
 
 inline std::wstring GET_NAME(const std::wstring& pathname)

@@ -301,8 +301,7 @@ bool ValueSet::addValue(ValueTuple& vt)
 		}
 	case Value::vt_wstring:
 		{
-			return addValue(name,
-				boost::locale::conv::utf_to_utf<wchar_t>(value));
+			return addValue(name, s2ws(value));
 		}
 	case Value::vt_Point:
 		{
@@ -815,8 +814,7 @@ bool ValueSet::setValue(ValueTuple& vt, Event& event)
 		}
 	case Value::vt_wstring:
 		{
-			return setValue(name,
-				boost::locale::conv::utf_to_utf<wchar_t>(value), event);
+			return setValue(name, s2ws(value), event);
 		}
 	case Value::vt_Point:
 		{
@@ -1075,7 +1073,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 				std::wstring v;
 				if (getValue(name, v))
 				{
-					oss << boost::locale::conv::utf_to_utf<char>(v);
+					oss << ws2s(v);
 					std::get<2>(vt) = oss.str();
 					return true;
 				}

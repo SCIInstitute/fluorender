@@ -37,7 +37,6 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <unordered_map>
 #include <ostream>
-#include <boost/locale.hpp>
 #include <tuple>
 #include <unordered_set>
 //FluoRender's special types
@@ -51,6 +50,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Vector.h>
 #include <Vector4f.h>
 #include <Vector4i.h>
+#include <compatibility.h>
 
 namespace fluo
 {
@@ -688,7 +688,7 @@ namespace fluo
 			os << dynamic_cast<const TemplateValue<std::string>*>(&v)->getValue();
 			break;
 		case Value::vt_wstring:
-			os << boost::locale::conv::utf_to_utf<char>(dynamic_cast<const TemplateValue<std::wstring>*>(&v)->getValue());
+			os << ws2s(dynamic_cast<const TemplateValue<std::wstring>*>(&v)->getValue());
 			break;
 		case Value::vt_Point:
 			os << dynamic_cast<const TemplateValue<Point>*>(&v)->getValue();

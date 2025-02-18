@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <openxr/openxr_msft_remoting_frame_mirroring.h>
 #include <openxr/openxr_msft_remoting_speech.h>
 #endif
+#include <unordered_map>
 
 struct HololensOptions
 {

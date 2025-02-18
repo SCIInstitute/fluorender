@@ -1,4 +1,4 @@
-/*
+﻿/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ColocalizationDlg.h>
 #include <Global.h>
 #include <MainFrame.h>
+#include <StringConvert.h>
 
 ColocalizationDlg::ColocalizationDlg(MainFrame* frame) :
 	PropPanel(frame, frame,
@@ -216,7 +217,7 @@ void ColocalizationDlg::SetOutput()
 	int i, k;
 
 	k = 0;
-	cur_line = glbin_colocalizer.GetTitles();
+	cur_line = s2wxs(glbin_colocalizer.GetTitles());
 	do
 	{
 		cur_field = cur_line.BeforeFirst('\t');
@@ -238,7 +239,7 @@ void ColocalizationDlg::SetOutput()
 		(glbin_colocal_def.m_cm_max - glbin_colocal_def.m_cm_min) > 0.0;
 
 	i = 0;
-	copy_data = glbin_colocalizer.GetValues();
+	copy_data = s2wxs(glbin_colocalizer.GetValues());
 	do
 	{
 		k = 0;
