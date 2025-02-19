@@ -1,4 +1,4 @@
-#!/bin/bash
+﻿#!/bin/bash
 mkdir MyIcon.iconset
 sips -z 16 16     Icon1024.png --out MyIcon.iconset/icon_16x16.png
 sips -z 32 32     Icon1024.png --out MyIcon.iconset/icon_16x16@2x.png

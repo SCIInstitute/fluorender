@@ -1,4 +1,4 @@
-#ifndef _BRKXML_READER_H_
+﻿#ifndef _BRKXML_READER_H_
 #define _BRKXML_READER_H_
 
 #include <vector>
