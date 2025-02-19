@@ -28,10 +28,12 @@ DEALINGS IN THE SOFTWARE.
 
 #ifndef _STRINGCONVERT_H_
 #define _STRINGCONVERT_H_
+#include <compatibility.h>
 #include <wx/string.h>
 
 wxString s2wxs(const std::string& s)
 {
-	return wxString(s.c_str(), wxConvUTF8);
+	return wxString(s2ws(s));
+	//return wxString(s.c_str(), wxConvUTF8);
 }
 #endif//_STRINGCONVERT_H_
