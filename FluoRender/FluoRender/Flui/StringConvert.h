@@ -31,9 +31,22 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 #include <wx/string.h>
 
+bool special(const std::string& s)
+{
+	for (char c : s)
+	{
+		if (static_cast<unsigned char>(c) > 127)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 wxString s2wxs(const std::string& s)
 {
-	return wxString(s2ws(s));
-	//return wxString(s.c_str(), wxConvUTF8);
+	if (special(s))
+		return wxString(s2ws(s));
+	return wxString(s);
 }
 #endif//_STRINGCONVERT_H_

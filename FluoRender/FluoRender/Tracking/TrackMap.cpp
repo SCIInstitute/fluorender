@@ -2802,7 +2802,7 @@ bool TrackMapProcessor::RemoveVertex(InterGraph& graph, Verp &vertex)
 	return false;
 }
 
-bool TrackMapProcessor::Export(std::string &filename)
+bool TrackMapProcessor::Export(const std::wstring &filename)
 {
 	if (m_map->m_frame_num == 0 ||
 		m_map->m_frame_num != m_map->m_celp_list.size() ||
@@ -2955,7 +2955,7 @@ bool TrackMapProcessor::Export(std::string &filename)
 	return true;
 }
 
-bool TrackMapProcessor::Import(std::string &filename)
+bool TrackMapProcessor::Import(const std::wstring &filename)
 {
 	//clear everything
 	m_map->Clear();

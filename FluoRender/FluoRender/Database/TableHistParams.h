@@ -45,7 +45,7 @@ namespace flrd
 
 		virtual void addRecord(Record* rec);
 
-		virtual void open(const std::string& filename);
+		virtual void open(const std::wstring& filename);
 
 		void addUntrainedRecord();
 

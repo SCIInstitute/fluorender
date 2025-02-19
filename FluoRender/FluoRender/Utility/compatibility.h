@@ -71,6 +71,31 @@ inline std::regex REGEX(const std::string& wildcard, bool caseSensitive = true)
 	return std::regex(regexString, caseSensitive ? std::regex_constants::ECMAScript : std::regex_constants::icase);
 }
 
+inline std::wregex REGEX(const std::wstring& wildcard, bool caseSensitive = true)
+{
+	// Note It is possible to automate checking if filesystem is case sensitive or not (e.g. by performing a test first time this function is ran)
+	std::wstring regexString{ wildcard };
+	// Escape all regex special chars:
+	regexString = std::regex_replace(regexString, std::wregex(L"\\\\"), L"\\\\");
+	regexString = std::regex_replace(regexString, std::wregex(L"\\^"), L"\\^");
+	regexString = std::regex_replace(regexString, std::wregex(L"\\."), L"\\.");
+	regexString = std::regex_replace(regexString, std::wregex(L"\\$"), L"\\$");
+	regexString = std::regex_replace(regexString, std::wregex(L"\\|"), L"\\|");
+	regexString = std::regex_replace(regexString, std::wregex(L"\\("), L"\\(");
+	regexString = std::regex_replace(regexString, std::wregex(L"\\)"), L"\\)");
+	regexString = std::regex_replace(regexString, std::wregex(L"\\{"), L"\\{");
+	regexString = std::regex_replace(regexString, std::wregex(L"\\{"), L"\\}");
+	regexString = std::regex_replace(regexString, std::wregex(L"\\["), L"\\[");
+	regexString = std::regex_replace(regexString, std::wregex(L"\\]"), L"\\]");
+	regexString = std::regex_replace(regexString, std::wregex(L"\\+"), L"\\+");
+	regexString = std::regex_replace(regexString, std::wregex(L"\\/"), L"\\/");
+	// Convert wildcard specific chars '*?' to their regex equivalents:
+	regexString = std::regex_replace(regexString, std::wregex(L"\\?"), L".");
+	regexString = std::regex_replace(regexString, std::wregex(L"\\*"), L".*");
+
+	return std::wregex(regexString, caseSensitive ? std::regex_constants::ECMAScript : std::regex_constants::icase);
+}
+
 inline std::string REM_EXT(const std::string& str)
 {
 	size_t pos = str.rfind('.');
@@ -82,6 +107,24 @@ inline std::string REM_EXT(const std::string& str)
 inline std::string REM_NUM(const std::string& str)
 {
 	std::string tmp = REM_EXT(str);
+	while (!tmp.empty() && std::isdigit(tmp.back()))
+	{
+		tmp.pop_back();
+	}
+	return tmp;
+}
+
+inline std::wstring REM_EXT(const std::wstring& str)
+{
+	size_t pos = str.rfind(L'.');
+	if (pos != std::wstring::npos)
+		return str.substr(0, pos);
+	return str;
+}
+
+inline std::wstring REM_NUM(const std::wstring& str)
+{
+	std::wstring tmp = REM_EXT(str);
 	while (!tmp.empty() && std::isdigit(tmp.back()))
 	{
 		tmp.pop_back();
@@ -114,9 +157,42 @@ inline std::string INC_NUM(const std::string& str)
 	return tmp + digits + ext;
 }
 
+inline std::wstring INC_NUM(const std::wstring& str)
+{
+	size_t pos = str.rfind('.');
+	std::wstring ext;
+	if (pos != std::wstring::npos) {
+		ext = str.substr(pos);
+	}
+	std::wstring tmp = str.substr(0, pos);
+	std::wstring digits;
+	while (!tmp.empty() && std::isdigit(tmp.back())) {
+		digits.insert(digits.begin(), tmp.back());
+		tmp.pop_back();
+	}
+	size_t len = digits.length();
+	if (len == 0) {
+		return tmp + L"01" + ext;
+	}
+	int num = std::stoi(digits);
+	num++;
+	std::wostringstream oss;
+	oss << std::setw(len) << std::setfill(L'0') << num;
+	digits = oss.str();
+	return tmp + digits + ext;
+}
+
 inline std::string INC_NUM_EXIST(const std::string& str)
 {
 	std::string str2 = str;
+	while (std::filesystem::exists(str2))
+		str2 = INC_NUM(str2);
+	return str2;
+}
+
+inline std::wstring INC_NUM_EXIST(const std::wstring& str)
+{
+	std::wstring str2 = str;
 	while (std::filesystem::exists(str2))
 		str2 = INC_NUM(str2);
 	return str2;
@@ -126,6 +202,13 @@ inline std::string MAKE_NUM(int num, int len)
 {
 	std::ostringstream oss;
 	oss << std::setw(len) << std::setfill('0') << num;
+	return oss.str();
+}
+
+inline std::wstring MAKE_NUMW(int num, int len)
+{
+	std::wostringstream oss;
+	oss << std::setw(len) << std::setfill(L'0') << num;
 	return oss.str();
 }
 
@@ -262,6 +345,12 @@ inline std::string STR_DIR_SEP(const std::string& pathname)
 	return path.make_preferred().string();
 }
 
+inline std::wstring STR_DIR_SEP(const std::wstring& pathname)
+{
+	std::filesystem::path path(pathname);
+	return path.make_preferred().wstring();
+}
+
 inline bool FIND_FILES_4D(const std::wstring& path_name, const std::wstring& id, std::vector<std::wstring>& batch_list, int& cur_batch)
 {
 	size_t begin = path_name.rfind(id);
@@ -362,6 +451,26 @@ inline void INC_NUMBER(std::string& s)
 	else
 	{
 		s += "1";
+	}
+}
+
+inline void INC_NUMBER(std::wstring& s)
+{
+	if (s.empty())
+	{
+		s = L"1";
+		return;
+	}
+	if (std::isdigit(s.back()))
+	{
+		size_t p = s.find_last_not_of(L"0123456789") + 1;
+		std::wstring sn = s.substr(p);
+		s = s.substr(0, p);
+		s += std::to_wstring(std::stoi(sn) + 1);
+	}
+	else
+	{
+		s += L"1";
 	}
 }
 
@@ -466,6 +575,8 @@ extern "C" {
 	TIFF* TIFFOpenW(const wchar_t* name, const char* mode);
 }
 
+inline wchar_t GETSLASH() { static_cast<wchar_t>(GETSLASHA()); }
+inline char GETSLASHA() { std::filesystem::path::preferred_separator; }
 
 #ifdef _WIN32 //WINDOWS ONLY
 
@@ -480,11 +591,8 @@ extern "C" {
 #define FSEEK64     _fseeki64
 #define SSCANF    sscanf
 
-inline wchar_t GETSLASH() { return L'\\'; }
 inline wchar_t GETSLASHALT() { return L'/'; }
-inline char GETSLASHA() { return '\\'; }
 inline char GETSLASHALTA() { return '/'; }
-
 
 inline TIFF* TIFFOpenW(std::wstring fname, const char* opt)
 {
@@ -562,9 +670,6 @@ inline double STOD(const char * s) { return (s ? atof(s) : 0.0); }
 #include <sys/stat.h>
 
 #define FSEEK64     fseek
-
-inline wchar_t GETSLASH() { return L'/'; }
-inline char GETSLASHA() { return '/'; }
 
 inline bool str_mat(std::wstring &s1, size_t p1, std::wstring &s2, size_t p2)
 {

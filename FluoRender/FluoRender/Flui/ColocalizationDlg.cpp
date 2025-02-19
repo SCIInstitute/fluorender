@@ -217,7 +217,7 @@ void ColocalizationDlg::SetOutput()
 	int i, k;
 
 	k = 0;
-	cur_line = s2wxs(glbin_colocalizer.GetTitles());
+	cur_line = glbin_colocalizer.GetTitles();
 	do
 	{
 		cur_field = cur_line.BeforeFirst('\t');
@@ -239,7 +239,7 @@ void ColocalizationDlg::SetOutput()
 		(glbin_colocal_def.m_cm_max - glbin_colocal_def.m_cm_min) > 0.0;
 
 	i = 0;
-	copy_data = s2wxs(glbin_colocalizer.GetValues());
+	copy_data = glbin_colocalizer.GetValues();
 	do
 	{
 		k = 0;

@@ -158,43 +158,43 @@ public:
 	MeshData* GetMeshData(int index);
 	TreeLayer* GetLayer(int index);
 	flvr::MultiVolumeRenderer* GetMultiVolumeData() { return m_mvr; };
-	VolumeData* GetVolumeData(const std::string &name);
-	MeshData* GetMeshData(const std::string &name);
-	Annotations* GetAnnotations(const std::string &name);
-	DataGroup* GetGroup(const std::string &name);
+	VolumeData* GetVolumeData(const std::wstring &name);
+	MeshData* GetMeshData(const std::wstring &name);
+	Annotations* GetAnnotations(const std::wstring &name);
+	DataGroup* GetGroup(const std::wstring &name);
 	DataGroup* GetGroup(int index);
 	DataGroup* GetGroup(VolumeData* vd);
-	MeshGroup* GetMGroup(const std::string &str);
+	MeshGroup* GetMGroup(const std::wstring &str);
 	//add
-	DataGroup* AddVolumeData(VolumeData* vd, const std::string &group_name = "");
+	DataGroup* AddVolumeData(VolumeData* vd, const std::wstring &group_name = L"");
 	void AddMeshData(MeshData* md);
 	void AddAnnotations(Annotations* ann);
-	std::string AddGroup(const std::string& str, const std::string& prev_group = "");
+	std::wstring AddGroup(const std::wstring& str, const std::wstring& prev_group = L"");
 	DataGroup* AddOrGetGroup();
-	std::string AddMGroup(const std::string& str);
+	std::wstring AddMGroup(const std::wstring& str);
 	MeshGroup* AddOrGetMGroup();
 	//remove
-	void RemoveVolumeData(const std::string &name);
-	void RemoveVolumeDataDup(const std::string &name);//remove all duplicated data
-	void ReplaceVolumeData(const std::string &name, VolumeData *dst);
-	void RemoveMeshData(const std::string &name);
-	void RemoveAnnotations(const std::string &name);
-	void RemoveGroup(const std::string &name);
+	void RemoveVolumeData(const std::wstring &name);
+	void RemoveVolumeDataDup(const std::wstring &name);//remove all duplicated data
+	void ReplaceVolumeData(const std::wstring &name, VolumeData *dst);
+	void RemoveMeshData(const std::wstring &name);
+	void RemoveAnnotations(const std::wstring &name);
+	void RemoveGroup(const std::wstring &name);
 	//isolate
-	void Isolate(int type, const std::string& name);
+	void Isolate(int type, const std::wstring& name);
 	void ShowAll();
 	//move
-	void MoveLayerinView(const std::string &src_name, const std::string &dst_name);
+	void MoveLayerinView(const std::wstring &src_name, const std::wstring &dst_name);
 	//move volume
-	void MoveLayerinGroup(const std::string &group_name, const std::string &src_name, const std::string &dst_name);
-	void MoveLayertoView(const std::string &group_name, const std::string &src_name, const std::string &dst_name);
-	void MoveLayertoGroup(const std::string &group_name, const std::string &src_name, const std::string &dst_name);
-	void MoveLayerfromtoGroup(const std::string &src_group_name, const std::string &dst_group_name, const std::string &src_name, const std::string &dst_name);
+	void MoveLayerinGroup(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name);
+	void MoveLayertoView(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name);
+	void MoveLayertoGroup(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name);
+	void MoveLayerfromtoGroup(const std::wstring &src_group_name, const std::wstring &dst_group_name, const std::wstring &src_name, const std::wstring &dst_name);
 	//move mesh
-	void MoveMeshinGroup(const std::string &group_name, const std::string &src_name, const std::string &dst_name);
-	void MoveMeshtoView(const std::string &group_name, const std::string &src_name, const std::string &dst_name);
-	void MoveMeshtoGroup(const std::string &group_name, const std::string &src_name, const std::string &dst_name);
-	void MoveMeshfromtoGroup(const std::string &src_group_name, const std::string &dst_group_name, const std::string &src_name, const std::string &dst_name);
+	void MoveMeshinGroup(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name);
+	void MoveMeshtoView(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name);
+	void MoveMeshtoGroup(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name);
+	void MoveMeshfromtoGroup(const std::wstring &src_group_name, const std::wstring &dst_group_name, const std::wstring &src_name, const std::wstring &dst_name);
 	//
 	void PopVolumeList();
 	void PopMeshList();
@@ -418,15 +418,15 @@ public:
 		double step,
 		int frames,
 		int rot_axis,
-		const std::string &cap_file,
+		const std::wstring &cap_file,
 		bool rewind,
 		int len);
 	//time sequence data
-	void Set4DSeqCapture(const std::string &cap_file, int begin_frame, int end_frame, bool rewind);
+	void Set4DSeqCapture(const std::wstring &cap_file, int begin_frame, int end_frame, bool rewind);
 	//batch files
-	void Set3DBatCapture(const std::string &cap_file, int begin_frame, int end_frame);
+	void Set3DBatCapture(const std::wstring &cap_file, int begin_frame, int end_frame);
 	//parameter recording/capture
-	void SetParamCapture(const std::string &cap_file, int begin_frame, int end_frame, bool rewind);
+	void SetParamCapture(const std::wstring &cap_file, int begin_frame, int end_frame, bool rewind);
 	//set parameters
 	void SetParams(double t);
 	//reset and stop
@@ -452,7 +452,7 @@ public:
 	void EnableSBText() { m_disp_scale_bar_text = true; }
 	void DisableSBText() { m_disp_scale_bar_text = false; }
 	void SetScaleBarLen(double len) { m_sb_length = len; }
-	void SetSBText(const std::string text) { m_sb_text = text; }
+	void SetSBText(const std::wstring text) { m_sb_text = text; }
 
 	//gamma settings
 	fluo::Color GetGammaColor() { return m_gamma; }
@@ -552,11 +552,11 @@ public:
 	//track map file
 	int GetTrackFileExist(bool save);//0:no trace group; 1:trace groups exists not saved; 2:saved
 	TrackGroup* GetTrackGroup();
-	std::string GetTrackGroupFile();
+	std::wstring GetTrackGroupFile();
 	void CreateTrackGroup();
-	int LoadTrackGroup(const std::string& filename);
-	int SaveTrackGroup(const std::string& filename);
-	void ExportTrackGroup(const std::string& filename, unsigned int id);
+	int LoadTrackGroup(const std::wstring& filename);
+	int SaveTrackGroup(const std::wstring& filename);
+	void ExportTrackGroup(const std::wstring& filename, unsigned int id);
 	void DrawTraces();
 	void GetTraces(bool update = false);
 
@@ -791,9 +791,9 @@ public:
 	int m_param_cur_num;
 	int m_total_frames;
 	//file name for capturing
-	std::string m_cap_file;
+	std::wstring m_cap_file;
 	//folder name for 3d batch
-	std::string m_bat_folder;
+	std::wstring m_bat_folder;
 	//hud
 	bool m_retain_finalbuffer;	//sometimes we don't redraw everything,
 								//just use the final buffer from last draw
@@ -819,8 +819,8 @@ public:
 	bool m_disp_scale_bar_text;
 	double m_sb_length;
 	int m_sb_unit;
-	std::string m_sb_text;
-	std::string m_sb_num;
+	std::wstring m_sb_text;
+	std::wstring m_sb_num;
 	double m_sb_height;
 	//ortho size
 	double m_ortho_left;
@@ -1138,7 +1138,7 @@ private:
 	void DrawScaleBar();
 	void DrawLegend();
 	void DrawName(double x, double y, int nx, int ny,
-		const std::string& name, fluo::Color color,
+		const std::wstring& name, fluo::Color color,
 		double font_height, bool hilighted = false);
 	void DrawFrame();
 	void DrawClippingPlanes(int face_winding);

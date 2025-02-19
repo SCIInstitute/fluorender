@@ -76,12 +76,12 @@ namespace flrd
 			{
 				return &m_modify_time;
 			}
-			virtual void setNotes(const std::string& text)
+			virtual void setNotes(const std::wstring& text)
 			{
 				m_notes = text;
 				setModified();
 			}
-			virtual std::string getNotes()
+			virtual std::wstring getNotes()
 			{
 				return m_notes;
 			}
@@ -96,18 +96,18 @@ namespace flrd
 			{
 				return m_modified;
 			}
-			virtual void setName(const std::string& name)
+			virtual void setName(const std::wstring& name)
 			{
 				m_name = name;
 				setModified();
 			}
-			virtual std::string getName()
+			virtual std::wstring getName()
 			{
 				return m_name;
 			}
 
-			virtual void open(const std::string& filename, bool info = false);
-			virtual void save(const std::string& filename);
+			virtual void open(const std::wstring& filename, bool info = false);
+			virtual void save(const std::wstring& filename);
 
 			virtual size_t getRecSize()
 			{
@@ -160,8 +160,8 @@ namespace flrd
 			bool m_modified;
 			std::time_t m_create_time;
 			std::time_t m_modify_time;
-			std::string m_name;
-			std::string m_notes;
+			std::wstring m_name;
+			std::wstring m_notes;
 			size_t m_recnum;
 			std::vector<Record*> m_data;
 			Params* m_params;//type of records

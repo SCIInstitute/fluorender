@@ -46,7 +46,7 @@ WalkCycle::~WalkCycle()
 
 }
 
-void WalkCycle::ReadData(const std::string& name)
+void WalkCycle::ReadData(const std::wstring& name)
 {
 	time_.clear();
 	names_.clear();
@@ -143,7 +143,7 @@ void WalkCycle::ReadData(const std::string& name)
 	f.close();
 }
 
-void WalkCycle::SaveData(const std::string& name)
+void WalkCycle::SaveData(const std::wstring& name)
 {
 	std::ofstream f(name);
 	if (!f.good())
@@ -459,7 +459,7 @@ void WalkCycle::LoadCycle()
 	}
 }
 
-void WalkCycle::LoadCycle(const std::string& name)
+void WalkCycle::LoadCycle(const std::wstring& name)
 {
 	cycle_.clear();
 
@@ -533,7 +533,7 @@ void WalkCycle::LoadCycle(const std::string& name)
 	win_ = Window(0, cycle_.length() -1);
 }
 
-void WalkCycle::SaveCycle(const std::string& name)
+void WalkCycle::SaveCycle(const std::wstring& name)
 {
 	std::ofstream f(name);
 	if (!f.good())
@@ -653,7 +653,7 @@ void WalkCycle::Correct(int mode)
 	}
 }
 
-void WalkCycle::SaveDist(const std::string& name)
+void WalkCycle::SaveDist(const std::wstring& name)
 {
 	std::ofstream f(name);
 	if (!f.good())
@@ -697,7 +697,7 @@ void WalkCycle::SaveDist(const std::string& name)
 	f.close();
 }
 
-void WalkCycle::SaveAligned(const std::string& name)
+void WalkCycle::SaveAligned(const std::wstring& name)
 {
 	std::ofstream f(name);
 	if (!f.good())

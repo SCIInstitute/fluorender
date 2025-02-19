@@ -139,8 +139,8 @@ namespace flrd
 		void GenerateDB();
 
 		//command
-		void LoadCmd(const std::string& filename);
-		void SaveCmd(const std::string& filename);
+		void LoadCmd(const std::wstring& filename);
+		void SaveCmd(const std::wstring& filename);
 		void AddCmd(const std::string& type);
 		void ResetCmd();
 		void PlayCmd(double tfactor);
@@ -160,8 +160,8 @@ namespace flrd
 		//void DistField(int iter, float th, int dsize, float sscale);
 
 		//output
-		std::string GetTitles() { return m_titles; }
-		std::string GetValues() { return m_values; }
+		std::wstring GetTitles() { return m_titles; }
+		std::wstring GetValues() { return m_values; }
 
 		//update progress
 		CompGenFunc prework;
@@ -210,7 +210,7 @@ namespace flrd
 		//speed test
 		bool m_test_speed;
 		std::vector<std::chrono::high_resolution_clock::time_point> m_tps;
-		std::string m_titles, m_values;
+		std::wstring m_titles, m_values;
 
 	private:
 		bool CheckBricks();

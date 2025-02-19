@@ -181,30 +181,30 @@ void Colocalize::Compute()
 
 	if (m_test_speed)
 	{
-		m_titles += "Function\t";
-		m_titles += "Time\n";
+		m_titles += L"Function\t";
+		m_titles += L"Time\n";
 	}
 	else
 	{
-		std::string name;
+		std::wstring name;
 		double v;
 		glbin_colocal_def.ResetMinMax();
 		for (size_t i = 0; i < num; ++i)
 		{
 			if (glbin_colocal_def.m_get_ratio)
-				m_titles += std::to_string(i+1) + " (%%)";
+				m_titles += std::to_wstring(i+1) + L" (%%)";
 			else
-				m_titles += std::to_string(i+1);
+				m_titles += std::to_wstring(i+1);
 			VolumeData* vd = group->GetVolumeData(i);
 			if (vd)
 				name = vd->GetName();
 			else
-				name = "";
-			m_titles += ": " + name;
+				name = L"";
+			m_titles += L": " + name;
 			if (i < num - 1)
-				m_titles += "\t";
+				m_titles += L"\t";
 			else
-				m_titles += "\n";
+				m_titles += L"\n";
 		}
 		for (int it1 = 0; it1 < num; ++it1)
 			for (int it2 = 0; it2 < num; ++it2)
@@ -215,12 +215,12 @@ void Colocalize::Compute()
 					{
 						v = rm[it1][it2] * 100.0 / rm[it1][it1];
 						glbin_colocal_def.SetMinMax(v);
-						m_values += std::to_string(v);
+						m_values += std::to_wstring(v);
 					}
 					else
 					{
 						glbin_colocal_def.SetMinMax(0.0);
-						m_values += "0";
+						m_values += L"0";
 					}
 				}
 				else
@@ -229,23 +229,23 @@ void Colocalize::Compute()
 					{
 						v = rm[it1][it2] * spc;
 						glbin_colocal_def.SetMinMax(v);
-						m_values += std::to_string(v);
-						m_values += ws2s(unit);
+						m_values += std::to_wstring(v);
+						m_values += unit;
 					}
 					else
 					{
 						v = rm[it1][it2];
 						glbin_colocal_def.SetMinMax(v);
 						if (glbin_colocal_def.m_int_weighted)
-							m_values += std::to_string(v);
+							m_values += std::to_wstring(v);
 						else
-							m_values += std::to_string(static_cast<int>(v));
+							m_values += std::to_wstring(static_cast<int>(v));
 					}
 				}
 				if (it2 < num - 1)
-					m_values += "\t";
+					m_values += L"\t";
 				else
-					m_values += "\n";
+					m_values += L"\n";
 			}
 	}
 }
@@ -268,10 +268,10 @@ void Colocalize::StopTimer(const std::string& str)
 			std::chrono::duration_cast<std::chrono::duration<double>>(
 				m_tps.back() - t0);
 
-		std::ostringstream oss;
-		oss << str << "\t";
+		std::wostringstream oss;
+		oss << s2ws(str) << L"\t";
 		oss << std::fixed << std::setprecision(4) << time_span.count();
-		oss << " sec.\n";
+		oss << L" sec.\n";
 		m_values += oss.str();
 	}
 }

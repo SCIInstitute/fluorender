@@ -44,22 +44,22 @@ namespace flrd
 		~PyDlc();
 
 		void LoadDlc();
-		void SetConfigFile(const std::string& str)
+		void SetConfigFile(const std::wstring& str)
 		{
 			m_config_file = str;
 #ifdef _WIN32
 			m_config_file_py = std::regex_replace(m_config_file,
-				std::regex(R"(\\)"), R"(\\)");
+				std::wregex(LR"(\\)"), LR"(\\)");
 #else
 			m_config_file_py = m_config_file;
 #endif
 		}
-		void SetVideoFile(const std::string& str)
+		void SetVideoFile(const std::wstring& str)
 		{
 			m_video_file = str;
 #ifdef _WIN32
 			m_video_file_py = std::regex_replace(m_video_file,
-				std::regex(R"(\\)"), R"(\\)");
+				std::wregex(LR"(\\)"), LR"(\\)");
 #else
 			m_video_file_py = m_video_file;
 #endif
@@ -87,19 +87,19 @@ namespace flrd
 			m_nx = nx;
 			m_ny = ny;
 		}
-		std::string GetLabelPath()
+		std::wstring GetLabelPath()
 		{
 			return m_label_path;
 		}
-		std::string GetConfigFile()
+		std::wstring GetConfigFile()
 		{
 			return m_config_file_py;
 		}
 		//train
 		std::string GetTrainCmd(int maxiters);
 		void Train(int maxiters);
-		void CreateConfigFile(const std::string& prj_name,
-			const std::string& usr_name,
+		void CreateConfigFile(const std::wstring& prj_name,
+			const std::wstring& usr_name,
 			RulerHandler* rhdl);
 		void WriteHDF(RulerHandler* rhdl);
 		//analysis
@@ -109,14 +109,14 @@ namespace flrd
 		bool AddRulers(RulerHandler* rhdl, size_t toff);//time offset: dlc may have decoding error causing the offset
 
 	protected:
-		std::string m_config_file;
-		std::string m_config_file_py;
-		std::string m_video_file;
-		std::string m_video_file_py;
-		std::string m_result_file;
-		std::string m_label_path;
-		std::string m_prj_name;
-		std::string m_usr_name;
+		std::wstring m_config_file;
+		std::wstring m_config_file_py;
+		std::wstring m_video_file;
+		std::wstring m_video_file_py;
+		std::wstring m_result_file;
+		std::wstring m_label_path;
+		std::wstring m_prj_name;
+		std::wstring m_usr_name;
 		int m_frame_num;
 		int m_start_fn;
 		int m_end_fn;

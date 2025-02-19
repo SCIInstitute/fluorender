@@ -61,7 +61,7 @@ namespace flrd
 			m_nx = nx;
 			m_ny = ny;
 		}
-		void SetNames(const std::vector<std::string>& names)
+		void SetNames(const std::vector<std::wstring>& names)
 		{
 			m_names = names;
 		}
@@ -104,7 +104,7 @@ namespace flrd
 		RulerList* m_list2;
 		RulerList* m_list_out;
 		double m_slope;
-		std::vector<std::string> m_names;
+		std::vector<std::wstring> m_names;
 		bool m_persp;
 		bool m_affine;
 		bool m_metric;

@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <QVideoEncoder.h>
+#include <compatibility.h>
 
 QVideoEncoder::QVideoEncoder()
 {
@@ -41,7 +42,7 @@ QVideoEncoder::QVideoEncoder()
 	output_stream_.tmp_frame = 0;
 	format_context_ = NULL;
 	av_codec_context_ = NULL;
-	filename_ = "";
+	filename_ = L"";
 	width_ = 0;
 	height_ = 0;
 	actual_width_ = 0;
@@ -53,7 +54,7 @@ QVideoEncoder::QVideoEncoder()
 }
 
 bool QVideoEncoder::open(
-	const std::string& f,
+	const std::wstring& f,
 	size_t w, size_t h, size_t len,
 	size_t fps, size_t bitrate)
 {
@@ -79,19 +80,19 @@ bool QVideoEncoder::open(
 	{
 		gop_ = 0;
 		avformat_alloc_output_context2(
-			&format_context_, NULL, "mpeg", filename_.c_str());
+			&format_context_, NULL, "mpeg", ws2s(filename_).c_str());
 	}
 	else
 	{
 		gop_ = fps > 30 ? 30 : fps;
 		avformat_alloc_output_context2(
-			&format_context_, NULL, NULL, filename_.c_str());
+			&format_context_, NULL, NULL, ws2s(filename_).c_str());
 	}
 	if (!format_context_) {
 		std::cerr << "Could not deduce output" <<
 			"format from file extension: using MPEG.\n";
 		avformat_alloc_output_context2(
-			&format_context_, NULL, "mpeg", filename_.c_str());
+			&format_context_, NULL, "mpeg", ws2s(filename_).c_str());
 	}
 	if (!format_context_) return false;
 	const AVOutputFormat* format = format_context_->oformat;
@@ -102,13 +103,13 @@ bool QVideoEncoder::open(
 	/* Now that all the parameters are set, we can open the audio and
 	 * video codecs and allocate the necessary encode buffers. */
 	if (!open_video()) return false;
-	//av_dump_format(format_context_, 0, filename_.c_str(), 1);
+	//av_dump_format(format_context_, 0, ws2s(filename_).c_str(), 1);
 	/* open the output file, if needed */
 	if (!(format->flags & AVFMT_NOFILE)) {
 		int ret = avio_open(&format_context_->pb,
-			filename_.c_str(), AVIO_FLAG_WRITE);
+			ws2s(filename_).c_str(), AVIO_FLAG_WRITE);
 		if (ret < 0) {
-			fprintf(stderr, "Could not open '%s': %d\n", filename_.c_str(), ret);
+			fprintf(stderr, "Could not open '%s': %d\n", ws2s(filename_).c_str(), ret);
 			return false;
 		}
 	}

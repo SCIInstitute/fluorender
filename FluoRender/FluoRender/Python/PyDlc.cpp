@@ -65,8 +65,8 @@ void PyDlc::AnalyzeVideo()
 {
 	std::string cmd =
 		"deeplabcut.analyze_videos(";
-	cmd += "\"" + m_config_file_py + "\", ";
-	cmd += "\"" + m_video_file_py + "\", ";
+	cmd += "\"" + ws2s(m_config_file_py) + "\", ";
+	cmd += "\"" + ws2s(m_video_file_py) + "\", ";
 	cmd += "robust_nframes=True,";
 	cmd += "save_as_csv=True)";
 	Run(ot_Run_SimpleStringEx,
@@ -79,17 +79,17 @@ bool PyDlc::GetResultFile()
 		return false;//busy
 
 	std::filesystem::path p = m_video_file;
-	m_result_file = p.replace_extension().string();
+	m_result_file = p.replace_extension().wstring();
 	std::filesystem::path path = p.parent_path();
 	if (!std::filesystem::exists(path))
 		return false;//doesn't exist
-	m_result_file += "*.csv";
-	std::regex rgx = REGEX(m_result_file);
+	m_result_file += L"*.csv";
+	std::wregex rgx = REGEX(m_result_file);
 	for (auto& it : std::filesystem::directory_iterator(path))
 	{
 		if (!std::filesystem::is_regular_file(it))
 			continue;
-		const std::string str = it.path().string();
+		const std::wstring str = it.path().wstring();
 		if (std::regex_match(str, rgx))
 		{
 			m_result_file = str;
@@ -242,7 +242,7 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 		inf.read(buffer.data(), size);
 		inf.close();
 		std::ofstream outf;
-		OutputStreamOpen(outf, m_result_file);
+		OutputStreamOpen(outf, ws2s(m_result_file));
 		if (!outf.good())
 			return true;
 		outf << "time_offset," << toff << std::endl;
@@ -269,10 +269,10 @@ std::string PyDlc::GetTrainCmd(int maxiters)
 	cmd += "print('START TRAINING WITH DEEPLABCUT. FLUORENDER CAN BE CLOSED.')\n";
 	cmd += "import deeplabcut\n";
 	cmd += "deeplabcut.create_training_dataset(\\\"";
-	cmd += m_config_file_py;
+	cmd += ws2s(m_config_file_py);
 	cmd += "\\\", augmenter_type='imgaug')\n";
 	cmd += "deeplabcut.train_network(\\\"";
-	cmd += m_config_file_py;
+	cmd += ws2s(m_config_file_py);
 	cmd += "\\\", ";
 	cmd += "displayiters=" + std::to_string(displayiters) + ", ";
 	cmd += "saveiters=" + std::to_string(saveiters) + ", ";
@@ -290,10 +290,10 @@ void PyDlc::Train(int maxiters)
 	int saveiters = maxiters;
 
 	cmd += "deeplabcut.create_training_dataset(";
-	cmd += "\"" + m_config_file_py + "\", ";
+	cmd += "\"" + ws2s(m_config_file_py) + "\", ";
 	cmd += "augmenter_type='imgaug')\n";
 	cmd += "deeplabcut.train_network(";
-	cmd += "\"" + m_config_file_py + "\", ";
+	cmd += "\"" + ws2s(m_config_file_py) + "\", ";
 	cmd += "displayiters=" + std::to_string(displayiters) + ", ";
 	cmd += "saveiters=" + std::to_string(saveiters) + ", ";
 	cmd += "maxiters=" + std::to_string(maxiters) + ")\n";
@@ -303,8 +303,8 @@ void PyDlc::Train(int maxiters)
 }
 
 void PyDlc::CreateConfigFile(
-	const std::string& prj_name,
-	const std::string& usr_name,
+	const std::wstring& prj_name,
+	const std::wstring& usr_name,
 	RulerHandler* rhdl)
 {
 	std::filesystem::path p = m_config_file;
@@ -327,11 +327,11 @@ void PyDlc::CreateConfigFile(
 	m_usr_name = usr_name;
 
 	std::ofstream cf;
-	OutputStreamOpen(cf, m_config_file);
+	OutputStreamOpen(cf, ws2s(m_config_file));
 
 	cf << "    # Project definitions (do not edit)" << std::endl;
-	cf << "Task: " << m_prj_name << std::endl;
-	cf << "scorer: " << m_usr_name << std::endl;
+	cf << "Task: " << ws2s(m_prj_name) << std::endl;
+	cf << "scorer: " << ws2s(m_usr_name) << std::endl;
 	auto t = std::time(nullptr);
 	auto tm = *std::localtime(&t);
 	cf << "date: " << std::put_time(&tm, "%b%d") << std::endl;
@@ -343,7 +343,7 @@ void PyDlc::CreateConfigFile(
 	cf << std::endl;
 	cf << "    # Annotation data set configuration(and individual video cropping parameters)" << std::endl;
 	cf << "video_sets:" << std::endl;
-	cf << "  " << m_video_file << ":" << std::endl;
+	cf << "  " << ws2s(m_video_file) << ":" << std::endl;
 	cf << "    crop: 0, " << m_nx << ", 0, " << m_ny << std::endl;
 	cf << "bodyparts:" << std::endl;
 	if (rhdl)
@@ -413,7 +413,7 @@ void PyDlc::CreateConfigFile(
 	std::filesystem::create_directory(child_path);
 	child_path.append(m_prj_name);
 	std::filesystem::create_directory(child_path);//put extracted frames here
-	m_label_path = child_path.string();
+	m_label_path = child_path.wstring();
 	child_path = p;
 	child_path.append("training-datasets");
 	std::filesystem::create_directory(child_path);
@@ -445,7 +445,7 @@ void PyDlc::WriteHDF(RulerHandler* rhdl)
 
 	//open a file
 	std::filesystem::path p(m_label_path);
-	p /= "CollectedData_" + m_usr_name + ".h5";
+	p /= "CollectedData_" + ws2s(m_usr_name) + ".h5";
 	std::string fn = p.string();
 	hid_t file_id = H5Fcreate(fn.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 	//attributes
@@ -506,7 +506,7 @@ void PyDlc::WriteHDF(RulerHandler* rhdl)
 	}
 	hdf_write_array(group_id, "axis0_label2", vals);
 	//level0
-	strs = {m_usr_name};
+	strs = {ws2s(m_usr_name)};
 	hdf_write_array_str(group_id, "axis0_level0",
 		"axis0_namescorer", u8"scorer", strs);
 	//level1
@@ -532,7 +532,7 @@ void PyDlc::WriteHDF(RulerHandler* rhdl)
 	hdf_write_array_str(group_id, "axis1_level0",
 		"axis1_nameNone", u8"N.", strs);
 	//level1
-	strs = { m_prj_name };
+	strs = { ws2s(m_prj_name) };
 	hdf_write_array_str(group_id, "axis1_level1",
 		"axis1_nameNone", u8"N.", strs);
 	//level2
@@ -562,7 +562,7 @@ void PyDlc::WriteHDF(RulerHandler* rhdl)
 	}
 	hdf_write_array(group_id, "block0_items_label2", vals);
 	//level0
-	strs = { m_usr_name };
+	strs = { ws2s(m_usr_name) };
 	hdf_write_array_str(group_id, "block0_items_level0",
 		"block0_items_namescorer", u8"scorer", strs);
 	//level1

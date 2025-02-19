@@ -212,7 +212,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_vr = new flvr::VolumeRenderer(*copy.m_vr);
 	//layer properties
 	type = 2;//volume
-	SetName(copy.GetName()+"_" + std::to_string(m_dup_counter));
+	SetName(copy.GetName() + L"_" + std::to_wstring(m_dup_counter));
 	SetGammaColor(copy.GetGammaColor());
 	SetBrightness(copy.GetBrightness());
 	SetHdr(copy.GetHdr());
@@ -409,7 +409,7 @@ bool VolumeData::GetSkipBrick()
 	return m_skip_brick;
 }
 
-int VolumeData::Load(Nrrd* data, const std::string &name, const std::string &path)
+int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &path)
 {
 	if (!data || data->dim!=3)
 		return 0;
@@ -1310,7 +1310,7 @@ void VolumeData::GetResize(bool &resize, int &nx, int &ny, int &nz)
 }
 
 //save
-void VolumeData::Save(const std::string &filename, int mode,
+void VolumeData::Save(const std::wstring &filename, int mode,
 	int mask, bool neg_mask,
 	bool crop, int filter,
 	bool bake, bool compress,
@@ -1384,7 +1384,7 @@ void VolumeData::Save(const std::string &filename, int mode,
 		writer->SetData(data);
 		writer->SetSpacings(spcx, spcy, spcz);
 		writer->SetCompression(compress);
-		writer->Save(s2ws(filename), mode);
+		writer->Save(filename, mode);
 	}
 	delete writer;
 
@@ -1431,7 +1431,7 @@ void VolumeData::SaveMask(bool use_reader, int t, int c)
 	if (use_reader && m_reader)
 		filename = m_reader->GetCurMaskName(t, c);
 	else
-		filename = s2ws(m_tex_path.substr(0, m_tex_path.find_last_of('.')) + ".msk");
+		filename = m_tex_path.substr(0, m_tex_path.find_last_of(L'.')) + L".msk";
 	msk_writer.Save(filename, 0);
 }
 
@@ -1456,7 +1456,7 @@ void VolumeData::SaveLabel(bool use_reader, int t, int c)
 	if (use_reader && m_reader)
 		filename = m_reader->GetCurLabelName(t, c);
 	else
-		filename = s2ws(m_tex_path.substr(0, m_tex_path.find_last_of('.')) + ".lbl");
+		filename = m_tex_path.substr(0, m_tex_path.find_last_of(L'.')) + L".lbl";
 	msk_writer.Save(filename, 1);
 }
 
@@ -1496,12 +1496,12 @@ fluo::BBox VolumeData::GetClippedBounds()
 }
 
 //path
-void VolumeData::SetPath(const std::string& path)
+void VolumeData::SetPath(const std::wstring& path)
 {
 	m_tex_path = path;
 }
 
-std::string VolumeData::GetPath()
+std::wstring VolumeData::GetPath()
 {
 	return m_tex_path;
 }
@@ -3157,8 +3157,8 @@ int MeshData::Load(GLMmodel* mesh)
 {
 	if (!mesh) return 0;
 
-	m_data_path = "";
-	m_name = "New Mesh";
+	m_data_path = L"";
+	m_name = L"New Mesh";
 
 	if (m_data)
 		delete m_data;
@@ -3220,18 +3220,18 @@ int MeshData::Load(GLMmodel* mesh)
 	return 1;
 }
 
-int MeshData::Load(const std::string &filename)
+int MeshData::Load(const std::wstring &filename)
 {
 	m_data_path = filename;
 	std::filesystem::path p(filename);
-	m_name = p.filename().string();
+	m_name = p.filename().wstring();
 
 	if (m_data)
 		delete m_data;
 
-	std::string str_fn = filename;
+	std::string str_fn = ws2s(filename);
 	bool no_fail = true;
-	m_data = glmReadOBJ(str_fn.c_str(),&no_fail);
+	m_data = glmReadOBJ(str_fn.c_str(), &no_fail);
 	//while (!no_fail) {
 	//	wxMessageDialog *dial = new wxMessageDialog(NULL, 
 	//		wxT("A part of the OBJ file failed to load. Would you like to try re-loading?"), 
@@ -3303,16 +3303,12 @@ int MeshData::Load(const std::string &filename)
 	return 1;
 }
 
-void MeshData::Save(const std::string& filename)
+void MeshData::Save(const std::wstring& filename)
 {
 	if (m_data)
 	{
-		char* str = new char[filename.length()+1];
-		for (int i=0; i<(int)filename.length(); i++)
-			str[i] = (char)filename[i];
-		str[filename.length()] = 0;
-		glmWriteOBJ(m_data, str, GLM_SMOOTH);
-		delete[] str;
+		std::string str = ws2s(filename);
+		glmWriteOBJ(m_data, str.c_str(), GLM_SMOOTH);
 		m_data_path = filename;
 	}
 }
@@ -3544,7 +3540,7 @@ double MeshData::GetShadowIntensity()
 	return m_shadow_intensity;
 }
 
-std::string MeshData::GetPath()
+std::wstring MeshData::GetPath()
 {
 	return m_data_path;
 }
@@ -3717,7 +3713,7 @@ AText::AText()
 {
 }
 
-AText::AText(const std::string &str, const fluo::Point &pos)
+AText::AText(const std::wstring &str, const fluo::Point &pos)
 {
 	m_txt = str;
 	m_pos = pos;
@@ -3727,7 +3723,7 @@ AText::~AText()
 {
 }
 
-std::string AText::GetText()
+std::wstring AText::GetText()
 {
 	return m_txt;
 }
@@ -3737,7 +3733,7 @@ fluo::Point AText::GetPos()
 	return m_pos;
 }
 
-void AText::SetText(const std::string& str)
+void AText::SetText(const std::wstring& str)
 {
 	m_txt = str;
 }
@@ -3747,7 +3743,7 @@ void AText::SetPos(fluo::Point pos)
 	m_pos = pos;
 }
 
-void AText::SetInfo(const std::string& str)
+void AText::SetInfo(const std::wstring& str)
 {
 	m_info = str;
 }
@@ -3758,7 +3754,7 @@ Annotations::Annotations()
 {
 	type = 4;//annotations
 	m_num++;
-	m_name = "Antn_" + std::to_string(m_num);
+	m_name = L"Antn_" + std::to_wstring(m_num);
 	m_tform = 0;
 	m_vd = 0;
 	m_disp = true;
@@ -3775,7 +3771,7 @@ int Annotations::GetTextNum()
 	return (int)m_alist.size();
 }
 
-std::string Annotations::GetTextText(int index)
+std::wstring Annotations::GetTextText(int index)
 {
 	if (index>=0 && index<(int)m_alist.size())
 	{
@@ -3783,7 +3779,7 @@ std::string Annotations::GetTextText(int index)
 		if (atext)
 			return atext->m_txt;
 	}
-	return "";
+	return L"";
 }
 
 fluo::Point Annotations::GetTextPos(int index)
@@ -3808,7 +3804,7 @@ fluo::Point Annotations::GetTextTransformedPos(int index)
 	return fluo::Point(fluo::Vector(0.0));
 }
 
-std::string Annotations::GetTextInfo(int index)
+std::wstring Annotations::GetTextInfo(int index)
 {
 	if (index>=0 && index<(int)m_alist.size())
 	{
@@ -3816,10 +3812,10 @@ std::string Annotations::GetTextInfo(int index)
 		if(atext)
 			return atext->m_info;
 	}
-	return "";
+	return L"";
 }
 
-void Annotations::AddText(const std::string& str, fluo::Point pos, const std::string& info)
+void Annotations::AddText(const std::wstring& str, fluo::Point pos, const std::wstring& info)
 {
 	AText* atext = new AText(str, pos);
 	atext->SetInfo(info);
@@ -3835,7 +3831,7 @@ void Annotations::SetVolume(VolumeData *vd)
 {
 	m_vd = vd;
 	if (m_vd)
-		m_name += "_FROM_" + m_vd->GetName();
+		m_name += L"_FROM_" + m_vd->GetName();
 }
 
 VolumeData* Annotations::GetVolume()
@@ -3855,12 +3851,12 @@ void Annotations::Clear()
 }
 
 //memo
-void Annotations::SetMemo(const std::string &memo)
+void Annotations::SetMemo(const std::wstring &memo)
 {
 	m_memo = memo;
 }
 
-std::string Annotations::GetMemo()
+std::wstring Annotations::GetMemo()
 {
 	return m_memo;
 }
@@ -3876,51 +3872,51 @@ bool Annotations::GetMemoRO()
 }
 
 //save/load
-std::string Annotations::GetPath()
+std::wstring Annotations::GetPath()
 {
 	return m_data_path;
 }
 
-int Annotations::Load(const std::string &filename, DataManager* mgr)
+int Annotations::Load(const std::wstring &filename, DataManager* mgr)
 {
-	std::ifstream fis(filename);
+	std::wifstream fis(filename);
 	if (!fis.is_open())
 		return 0;
 
-	std::string str;
-	std::string sline;
+	std::wstring str;
+	std::wstring sline;
 
 	while (std::getline(fis, sline))
 	{
-		if (sline.substr(0, 5) == "Name: ")
+		if (sline.substr(0, 5) == L"Name: ")
 		{
 			m_name = sline.substr(6, sline.length()-6);
 		}
-		else if (sline.substr(0, 8) == "Display: ")
+		else if (sline.substr(0, 8) == L"Display: ")
 		{
 			str = sline.substr(9, 1);
-			if (str == "0")
+			if (str == L"0")
 				m_disp = false;
 			else
 				m_disp = true;
 		}
-		else if (sline.substr(0, 4) == "Memo:")
+		else if (sline.substr(0, 4) == L"Memo:")
 		{
 			while (std::getline(fis, str))
 			{
-				if (str.substr(0, 12) == "Memo Update: ")
+				if (str.substr(0, 12) == L"Memo Update: ")
 				{
-					if (str.substr(13, 1) == "0")
+					if (str.substr(13, 1) == L"0")
 						m_memo_ro = false;
 					else
 						m_memo_ro = true;
 					break;
 				}
 				else
-					m_memo += str + "\n";
+					m_memo += str + L"\n";
 			}
 		}
-		else if (sline.substr(0, 7) == "Volume: ")
+		else if (sline.substr(0, 7) == L"Volume: ")
 		{
 			str = sline.substr(8, sline.length()-8);
 			VolumeData* vd = mgr->GetVolumeData(str);
@@ -3930,7 +3926,7 @@ int Annotations::Load(const std::string &filename, DataManager* mgr)
 				m_tform = vd->GetTexture()->transform();
 			}
 		}
-		else if (sline.substr(0, 9) == "Transform:")
+		else if (sline.substr(0, 9) == L"Transform:")
 		{
 			for (int i = 0; i < 4; i++)
 			{
@@ -3948,13 +3944,13 @@ int Annotations::Load(const std::string &filename, DataManager* mgr)
 				//}
 			}
 		}
-		else if (sline.substr(0, 10) == "Components:")
+		else if (sline.substr(0, 10) == L"Components:")
 		{
 			std::getline(fis, str);
 			int tab_counter = 0;
 			for (size_t i=0; i<str.length(); ++i)
 			{
-				if (str[i] == '\t')
+				if (str[i] == L'\t')
 					tab_counter++;
 				if (tab_counter == 4)
 				{
@@ -3975,10 +3971,10 @@ int Annotations::Load(const std::string &filename, DataManager* mgr)
 	return 1;
 }
 
-void Annotations::Save(const std::string &filename)
+void Annotations::Save(const std::wstring &filename)
 {
-	std::ofstream os;
-	OutputStreamOpen(os, filename);
+	std::wofstream os;
+	OutputStreamOpenW(os, filename);
 
 	int resx = 1;
 	int resy = 1;
@@ -3986,32 +3982,32 @@ void Annotations::Save(const std::string &filename)
 	if (m_vd)
 		m_vd->GetResolution(resx, resy, resz);
 
-	os << "Name: " << m_name << "\n";
-	os << "Display: " << m_disp << "\n";
-	os << "Memo:\n" << m_memo << "\n";
-	os << "Memo Update: " << m_memo_ro << "\n";
+	os << L"Name: " << m_name << L"\n";
+	os << L"Display: " << m_disp << L"\n";
+	os << L"Memo:\n" << m_memo << L"\n";
+	os << L"Memo Update: " << m_memo_ro << L"\n";
 	if (m_vd)
 	{
-		os << "Volume: " << m_vd->GetName() << "\n";
-		os << "Voxel size (X Y Z):\n";
+		os << L"Volume: " << m_vd->GetName() << L"\n";
+		os << L"Voxel size (X Y Z):\n";
 		double spcx, spcy, spcz;
 		m_vd->GetSpacings(spcx, spcy, spcz);
-		os << spcx << "\t" << spcy << "\t" << spcz << "\n";
+		os << spcx << L"\t" << spcy << L"\t" << spcz << L"\n";
 	}
 
 
-	os << "\nComponents:\n";
-	os << "ID\tX\tY\tZ\t" << m_info_meaning << "\n\n";
+	os << L"\nComponents:\n";
+	os << L"ID\tX\tY\tZ\t" << m_info_meaning << L"\n\n";
 	for (int i=0; i<(int)m_alist.size(); i++)
 	{
 		AText* atext = m_alist[i];
 		if (atext)
 		{
-			os << atext->m_txt << "\t";
-			os << int(atext->m_pos.x()*resx+1.0) << "\t";
-			os << int(atext->m_pos.y()*resy+1.0) << "\t";
-			os << int(atext->m_pos.z()*resz+1.0) << "\t";
-			os << atext->m_info << "\n";
+			os << atext->m_txt << L"\t";
+			os << int(atext->m_pos.x()*resx+1.0) << L"\t";
+			os << int(atext->m_pos.y()*resy+1.0) << L"\t";
+			os << int(atext->m_pos.z()*resz+1.0) << L"\t";
+			os << atext->m_info << L"\n";
 		}
 	}
 
@@ -4019,12 +4015,12 @@ void Annotations::Save(const std::string &filename)
 	m_data_path = filename;
 }
 
-std::string Annotations::GetInfoMeaning()
+std::wstring Annotations::GetInfoMeaning()
 {
 	return m_info_meaning;
 }
 
-void Annotations::SetInfoMeaning(const std::string &str)
+void Annotations::SetInfoMeaning(const std::wstring &str)
 {
 	m_info_meaning = str;
 }
@@ -4054,20 +4050,20 @@ bool Annotations::InsideClippingPlanes(fluo::Point &pos)
 	return true;
 }
 
-AText* Annotations::GetAText(const std::string& str)
+AText* Annotations::GetAText(const std::wstring& str)
 {
 	AText *atext = 0;
-	std::string sID;
-	std::string sX;
-	std::string sY;
-	std::string sZ;
-	std::string sInfo;
+	std::wstring sID;
+	std::wstring sX;
+	std::wstring sY;
+	std::wstring sZ;
+	std::wstring sInfo;
 	int tab_counter = 0;
 
 	size_t i = 0;
-	for (char c : str)
+	for (auto c : str)
 	{
-		if (c == '\t')
+		if (c == L'\t')
 			tab_counter++;
 		else
 		{
@@ -4115,7 +4111,7 @@ TrackGroup::TrackGroup()
 {
 	type = 8;//traces
 	m_num++;
-	m_name = "Traces " + std::to_string(m_num);
+	m_name = L"Traces " + std::to_wstring(m_num);
 	m_cur_time = -1;
 	m_prv_time = -1;
 	m_ghost_num = 10;
@@ -4498,14 +4494,14 @@ void TrackGroup::Clear()
 	m_track_map->Clear();
 }
 
-bool TrackGroup::Load(const std::string &filename)
+bool TrackGroup::Load(const std::wstring &filename)
 {
 	m_data_path = filename;
 	glbin_trackmap_proc.SetTrackMap(m_track_map);
 	return glbin_trackmap_proc.Import(m_data_path);
 }
 
-bool TrackGroup::Save(const std::string &filename)
+bool TrackGroup::Save(const std::wstring &filename)
 {
 	m_data_path = filename;
 	glbin_trackmap_proc.SetTrackMap(m_track_map);
@@ -4575,7 +4571,7 @@ DataGroup::DataGroup()
 {
 	type = 5;//group
 	m_num++;
-	m_name = "Group " + std::to_string(m_num);
+	m_name = L"Group " + std::to_wstring(m_num);
 	m_disp = true;
 	m_sync_volume_prop = false;
 }
@@ -5063,7 +5059,7 @@ MeshGroup::MeshGroup()
 {
 	type = 6;//mesh group
 	m_num++;
-	m_name = "MGroup " + std::to_string(m_num);
+	m_name = L"MGroup " + std::to_string(m_num);
 	m_disp = true;
 	m_sync_mesh_prop = false;
 }
@@ -5314,7 +5310,7 @@ void CurrentObjects::SetAnnotation(Annotations* ann)
 		canvas->m_cur_vol = 0;
 }
 
-void CurrentObjects::SetSel(const std::string& str)
+void CurrentObjects::SetSel(const std::wstring& str)
 {
 	if (!mainframe)
 		return;
@@ -5489,42 +5485,42 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 //set project path
 //when data and project are moved, use project file's path
 //if data's directory doesn't exist
-void DataManager::SetProjectPath(const std::string& path)
+void DataManager::SetProjectPath(const std::wstring& path)
 {
 	m_prj_file = path;
 	m_prj_path.clear();
 	std::filesystem::path p(path);
-	m_prj_path = p.parent_path().string();
+	m_prj_path = p.parent_path().wstring();
 }
 
-std::string DataManager::SearchProjectPath(const std::string& filename)
+std::wstring DataManager::SearchProjectPath(const std::wstring& filename)
 {
 	int i;
-	std::string pathname = filename;
-	if (m_prj_path == "")
-		return "";
-	std::string search_str;
+	std::wstring pathname = filename;
+	if (m_prj_path == L"")
+		return L"";
+	std::wstring search_str;
 	for (i = pathname.length() - 1; i >= 0; i--)
 	{
-		if (pathname[i] == '\\' || pathname[i] == '/')
+		if (pathname[i] == L'\\' || pathname[i] == L'/')
 		{
-			search_str.insert(search_str.begin(), '/');
-			std::string name_temp = m_prj_path + search_str;
+			search_str.insert(search_str.begin(), L'/');
+			std::wstring name_temp = m_prj_path + search_str;
 			if (std::filesystem::exists(name_temp))
 				return name_temp;
 		}
 		else
 			search_str.insert(search_str.begin(), pathname[i]);
 	}
-	return "";
+	return L"";
 }
 
-std::string DataManager::GetProjectFile()
+std::wstring DataManager::GetProjectFile()
 {
 	return m_prj_file;
 }
 
-void DataManager::LoadVolumes(const std::vector<std::string>& files, bool withImageJ)
+void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withImageJ)
 {
 	fluo::ValueCollection vc;
 	VolumeData* vd_sel = 0;
@@ -5560,34 +5556,34 @@ void DataManager::LoadVolumes(const std::vector<std::string>& files, bool withIm
 		SetProgress(std::round(100.0 * (m_cur_file + 1) / m_file_num), str_streaming);
 
 		int ch_num = 0;
-		std::string filename = files[m_cur_file];
-		std::string suffix = GET_SUFFIX(filename);
+		std::wstring filename = files[m_cur_file];
+		std::wstring suffix = GET_SUFFIX(filename);
 
 		if (withImageJ)
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_IMAGEJ, true); //The type of data doesnt matter.
-		else if (suffix == ".nrrd" || suffix == ".msk" || suffix == ".lbl")
+		else if (suffix == L".nrrd" || suffix == L".msk" || suffix == L".lbl")
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_NRRD, false);
-		else if (suffix == ".tif" || suffix == ".tiff")
+		else if (suffix == L".tif" || suffix == L".tiff")
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_TIFF, false);
-		else if (suffix == ".oib")
+		else if (suffix == L".oib")
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_OIB, false);
-		else if (suffix == ".oif")
+		else if (suffix == L".oif")
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_OIF, false);
-		else if (suffix == ".lsm")
+		else if (suffix == L".lsm")
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_LSM, false);
-		else if (suffix == ".xml")
+		else if (suffix == L".xml")
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_PVXML, false);
-		else if (suffix == ".vvd")
+		else if (suffix == L".vvd")
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_BRKXML, false);
-		else if (suffix == ".czi")
+		else if (suffix == L".czi")
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_CZI, false);
-		else if (suffix == ".nd2")
+		else if (suffix == L".nd2")
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_ND2, false);
-		else if (suffix == ".lif")
+		else if (suffix == L".lif")
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_LIF, false);
-		else if (suffix == ".lof")
+		else if (suffix == L".lof")
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_LOF, false);
-		else if (suffix == ".mp4" || suffix == ".m4v" || suffix == ".mov" || suffix == ".avi" || suffix == ".wmv")
+		else if (suffix == L".mp4" || suffix == L".m4v" || suffix == L".mov" || suffix == L".avi" || suffix == L".wmv")
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_MPG, false);
 
 		if (ch_num > 1)
@@ -5601,11 +5597,11 @@ void DataManager::LoadVolumes(const std::vector<std::string>& files, bool withIm
 					if (vd)
 					{
 						canvas->AddVolumeData(vd, group->GetName());
-						std::string vol_name = vd->GetName();
-						if (vol_name.find("_1ch") != std::string::npos &&
+						std::wstring vol_name = vd->GetName();
+						if (vol_name.find(L"_1ch") != std::wstring::npos &&
 							(i == 1 || i == 2))
 							vd->SetDisp(false);
-						if (vol_name.find("_2ch") != std::string::npos &&
+						if (vol_name.find(L"_2ch") != std::wstring::npos &&
 							i == 1)
 							vd->SetDisp(false);
 
@@ -5678,7 +5674,7 @@ void DataManager::LoadVolumes(const std::vector<std::string>& files, bool withIm
 	m_file_num = 0;
 }
 
-void DataManager::StartupLoad(const std::vector<std::string>& files, bool run_mov, bool with_imagej)
+void DataManager::StartupLoad(const std::vector<std::wstring>& files, bool run_mov, bool with_imagej)
 {
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (canvas)
@@ -5686,37 +5682,37 @@ void DataManager::StartupLoad(const std::vector<std::string>& files, bool run_mo
 
 	if (!files.empty())
 	{
-		std::string filename = files[0];
-		std::string suffix = GET_SUFFIX(filename);
+		std::wstring filename = files[0];
+		std::wstring suffix = GET_SUFFIX(filename);
 
-		if (suffix == ".vrp")
+		if (suffix == L".vrp")
 		{
 			glbin_project.Open(files[0]);
 			m_frame->FluoUpdate({ gstMainFrameTitle });
 		}
-		else if (suffix == ".nrrd" ||
-			suffix == ".msk" ||
-			suffix == ".lbl" ||
-			suffix == ".tif" ||
-			suffix == ".tiff" ||
-			suffix == ".oib" ||
-			suffix == ".oif" ||
-			suffix == ".lsm" ||
-			suffix == ".xml" ||
-			suffix == ".vvd" ||
-			suffix == ".nd2" ||
-			suffix == ".czi" ||
-			suffix == ".lif" ||
-			suffix == ".lof" ||
-			suffix == ".mp4" ||
-			suffix == ".m4v" ||
-			suffix == ".mov" ||
-			suffix == ".avi" ||
-			suffix == ".wmv")
+		else if (suffix == L".nrrd" ||
+			suffix == L".msk" ||
+			suffix == L".lbl" ||
+			suffix == L".tif" ||
+			suffix == L".tiff" ||
+			suffix == L".oib" ||
+			suffix == L".oif" ||
+			suffix == L".lsm" ||
+			suffix == L".xml" ||
+			suffix == L".vvd" ||
+			suffix == L".nd2" ||
+			suffix == L".czi" ||
+			suffix == L".lif" ||
+			suffix == L".lof" ||
+			suffix == L".mp4" ||
+			suffix == L".m4v" ||
+			suffix == L".mov" ||
+			suffix == L".avi" ||
+			suffix == L".wmv")
 		{
 			LoadVolumes(files, with_imagej);
 		}
-		else if (suffix == ".obj")
+		else if (suffix == L".obj")
 		{
 			LoadMeshes(files);
 		}
@@ -5733,15 +5729,15 @@ void DataManager::StartupLoad(const std::vector<std::string>& files, bool run_mo
 	}
 }
 
-size_t DataManager::LoadVolumeData(const std::string &filename, int type, bool withImageJ, int ch_num, int t_num)
+size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool withImageJ, int ch_num, int t_num)
 {
 	bool isURL = false;
 	bool downloaded = false;
-	std::string downloaded_filepath;
+	std::wstring downloaded_filepath;
 	bool downloaded_metadata = false;
-	std::string downloaded_metadatafilepath;
+	std::wstring downloaded_metadatafilepath;
 
-	std::string pathname = filename;
+	std::wstring pathname = filename;
 	if (!std::filesystem::exists(pathname))
 	{
 		pathname = SearchProjectPath(pathname);
@@ -5754,7 +5750,7 @@ size_t DataManager::LoadVolumeData(const std::string &filename, int type, bool w
 
 	for (size_t i=0; i<m_reader_list.size(); i++)
 	{
-		std::wstring wstr = s2ws(pathname);
+		std::wstring wstr = pathname;
 		if (m_reader_list[i]->Match(wstr))
 		{
 			reader = m_reader_list[i];
@@ -5830,13 +5826,11 @@ size_t DataManager::LoadVolumeData(const std::string &filename, int type, bool w
 		
 		
 		m_reader_list.push_back(reader);
-		std::wstring str_w = s2ws(pathname);
-		reader->SetFile(str_w);
+		reader->SetFile(pathname);
 		reader->SetSliceSeq(glbin_settings.m_slice_sequence);
 		reader->SetChannSeq(glbin_settings.m_chann_sequence);
 		reader->SetDigitOrder(glbin_settings.m_digit_order);
-		str_w = s2ws(glbin_settings.m_time_id);
-		reader->SetTimeId(str_w);
+		reader->SetTimeId(glbin_settings.m_time_id);
 		reader_return = reader->Preprocess();
 	}
 
@@ -5908,21 +5902,21 @@ size_t DataManager::LoadVolumeData(const std::string &filename, int type, bool w
 		if (!data)
 			continue;
 
-		std::string name;
+		std::wstring name;
 		if (type != LOAD_TYPE_BRKXML)
 		{
-			name = ws2s(reader->GetDataName());
+			name = reader->GetDataName();
 			if (chan > 1)
-				name += "_Ch" + std::to_string(i + 1);
+				name += L"_Ch" + std::to_wstring(i + 1);
 		}
 		else
 		{
 			BRKXMLReader* breader = (BRKXMLReader*)reader;
-			name = ws2s(reader->GetDataName());
+			name = reader->GetDataName();
 			std::filesystem::path p(name);
-			name = p.stem().string();
+			name = p.stem().wstring();
 			if (ch_num > 1)
-				name = "_Ch" + std::to_string(i);
+				name = L"_Ch" + std::to_wstring(i);
 			pathname = filename;
 			breader->SetCurChan(i);
 			breader->SetCurTime(0);
@@ -6022,7 +6016,7 @@ size_t DataManager::LoadVolumeData(const std::string &filename, int type, bool w
 	return result;
 }
 
-void DataManager::LoadMeshes(const std::vector<std::string>& files)
+void DataManager::LoadMeshes(const std::vector<std::wstring>& files)
 {
 	RenderCanvas* canvas = glbin_current.canvas;
 
@@ -6042,7 +6036,7 @@ void DataManager::LoadMeshes(const std::vector<std::string>& files)
 		SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / fn)),
 			"FluoRender is reading and processing selected mesh data. Please wait.");
 
-		std::string filename = files[i];
+		std::wstring filename = files[i];
 		LoadMeshData(filename);
 
 		MeshData* md = GetLastMeshData();
@@ -6072,9 +6066,9 @@ void DataManager::LoadMeshes(const std::vector<std::string>& files)
 	SetProgress(0, "");
 }
 
-bool DataManager::LoadMeshData(const std::string &filename)
+bool DataManager::LoadMeshData(const std::wstring &filename)
 {
-	std::string pathname = filename;
+	std::wstring pathname = filename;
 	if (!std::filesystem::exists(pathname))
 	{
 		pathname = SearchProjectPath(filename);
@@ -6085,11 +6079,11 @@ bool DataManager::LoadMeshData(const std::string &filename)
 	MeshData *md = new MeshData();
 	md->Load(pathname);
 
-	std::string name = md->GetName();
-	std::string new_name = name;
+	std::wstring name = md->GetName();
+	std::wstring new_name = name;
 	size_t i;
 	for (i=1; CheckNames(new_name); i++)
-		new_name = name + "_" + std::to_string(i);
+		new_name = name + L"_" + std::to_wstring(i);
 	if (i>1)
 		md->SetName(new_name);
 	m_md_list.push_back(md);
@@ -6104,11 +6098,11 @@ bool DataManager::LoadMeshData(GLMmodel* mesh)
 	MeshData *md = new MeshData();
 	md->Load(mesh);
 
-	std::string name = md->GetName();
-	std::string new_name = name;
+	std::wstring name = md->GetName();
+	std::wstring new_name = name;
 	size_t i;
 	for (i=1; CheckNames(new_name); i++)
-		new_name = name + "_" + std::to_string(i);
+		new_name = name + L"_" + std::to_string(i);
 	if (i>1)
 		md->SetName(new_name);
 	m_md_list.push_back(md);
@@ -6132,7 +6126,7 @@ MeshData* DataManager::GetMeshData(size_t index)
 		return 0;
 }
 
-VolumeData* DataManager::GetVolumeData(const std::string &name)
+VolumeData* DataManager::GetVolumeData(const std::wstring &name)
 {
 	for (size_t i=0 ; i<m_vd_list.size() ; i++)
 	{
@@ -6144,7 +6138,7 @@ VolumeData* DataManager::GetVolumeData(const std::string &name)
 	return 0;
 }
 
-MeshData* DataManager::GetMeshData(const std::string &name)
+MeshData* DataManager::GetMeshData(const std::wstring &name)
 {
 	for (size_t i=0 ; i<m_md_list.size() ; i++)
 	{
@@ -6156,7 +6150,7 @@ MeshData* DataManager::GetMeshData(const std::string &name)
 	return 0;
 }
 
-size_t DataManager::GetVolumeIndex(const std::string &name)
+size_t DataManager::GetVolumeIndex(const std::wstring &name)
 {
 	for (size_t i=0 ; i<m_vd_list.size() ; i++)
 	{
@@ -6170,7 +6164,7 @@ size_t DataManager::GetVolumeIndex(const std::string &name)
 	return -1;
 }
 
-size_t DataManager::GetMeshIndex(const std::string &name)
+size_t DataManager::GetMeshIndex(const std::wstring &name)
 {
 	for (size_t i=0 ; i<m_md_list.size() ; i++)
 	{
@@ -6213,7 +6207,7 @@ void DataManager::RemoveVolumeData(size_t index)
 	}	
 }
 
-void DataManager::RemoveVolumeData(const std::string &name)
+void DataManager::RemoveVolumeData(const std::wstring &name)
 {
 	for (size_t i = 0; i<m_vd_list.size(); i++)
 	{
@@ -6259,12 +6253,12 @@ void DataManager::AddVolumeData(VolumeData* vd)
 	if (!vd)
 		return;
 
-	std::string name = vd->GetName();
-	std::string new_name = name;
+	std::wstring name = vd->GetName();
+	std::wstring new_name = name;
 
 	int i;
 	for (i=1; CheckNames(new_name); i++)
-		new_name = name+wxString::Format("_%d", i);
+		new_name = name + L"_" + std::to_wstring(i);
 
 	if (i>1)
 		vd->SetName(new_name);
@@ -6296,9 +6290,9 @@ VolumeData* DataManager::DuplicateVolumeData(VolumeData* vd)
 	return vd_new;
 }
 
-bool DataManager::LoadAnnotations(const std::string &filename)
+bool DataManager::LoadAnnotations(const std::wstring &filename)
 {
-	std::string pathname = filename;
+	std::wstring pathname = filename;
 	if (!std::filesystem::exists(pathname))
 	{
 		pathname = SearchProjectPath(filename);
@@ -6309,11 +6303,11 @@ bool DataManager::LoadAnnotations(const std::string &filename)
 	Annotations* ann = new Annotations();
 	ann->Load(pathname, this);
 
-	std::string name = ann->GetName();
-	std::string new_name = name;
+	std::wstring name = ann->GetName();
+	std::wstring new_name = name;
 	size_t i;
 	for (i=1; CheckNames(new_name); i++)
-		new_name = name + "_" + std::to_string(i);
+		new_name = name + L"_" + std::to_string(i);
 	if (i>1)
 		ann->SetName(new_name);
 	m_annotation_list.push_back(ann);
@@ -6326,12 +6320,12 @@ void DataManager::AddAnnotations(Annotations* ann)
 	if (!ann)
 		return;
 
-	std::string name = ann->GetName();
-	std::string new_name = name;
+	std::wstring name = ann->GetName();
+	std::wstring new_name = name;
 
 	size_t i;
 	for (i=1; CheckNames(new_name); i++)
-		new_name = name + "_" + std::to_string(i);
+		new_name = name + L"_" + std::to_string(i);
 	if (i>1)
 		ann->SetName(new_name);
 
@@ -6362,7 +6356,7 @@ Annotations* DataManager::GetAnnotations(size_t index)
 		return 0;
 }
 
-Annotations* DataManager::GetAnnotations(const std::string &name)
+Annotations* DataManager::GetAnnotations(const std::wstring &name)
 {
 	for (size_t i=0; i<m_annotation_list.size(); i++)
 	{
@@ -6372,7 +6366,7 @@ Annotations* DataManager::GetAnnotations(const std::string &name)
 	return 0;
 }
 
-size_t DataManager::GetAnnotationIndex(const std::string &name)
+size_t DataManager::GetAnnotationIndex(const std::wstring &name)
 {
 	for (size_t i=0; i<m_annotation_list.size(); i++)
 	{
@@ -6384,7 +6378,7 @@ size_t DataManager::GetAnnotationIndex(const std::string &name)
 	return -1;
 }
 
-bool DataManager::CheckNames(const std::string &str)
+bool DataManager::CheckNames(const std::wstring &str)
 {
 	bool result = false;
 	for (unsigned int i=0; i<m_vd_list.size(); i++)

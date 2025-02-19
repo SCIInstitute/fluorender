@@ -204,18 +204,18 @@ void MovieMaker::PlaySave()
 		glbin.get_video_encoder().open(m_filename, m_crop_w, m_crop_h,
 			m_clip_frame_num + 1, m_fps, glbin_settings.m_mov_bitrate * 1e6);
 	}
-	m_filename = file_path.stem().string();
+	m_filename = file_path.stem().wstring();
 	m_record = true;
 	if (glbin_settings.m_prj_save)
 	{
-		std::string new_folder;
-		new_folder = m_filename + "_project";
-		MkDir(new_folder);
+		std::wstring new_folder;
+		new_folder = m_filename + L"_project";
+		MkDirW(new_folder);
 		std::filesystem::path p(m_filename);
-		std::string name = p.stem().string();
+		std::wstring name = p.stem().wstring();
 		p = new_folder;
-		p /= name + "_project.vrp";
-		std::string prop_file = p.string();
+		p /= name + L"_project.vrp";
+		std::wstring prop_file = p.wstring();
 		bool inc = std::filesystem::exists(p) &&
 			glbin_settings.m_prj_save_inc;
 		glbin_project.Save(prop_file, inc);
@@ -291,13 +291,13 @@ void MovieMaker::WriteFrameToFile()
 	//wxString format = wxString::Format("_%%0%dd", length);
 	//wxString outputfilename = wxString::Format("%s" + format + "%s", m_filename,
 	//	m_last_frame, ".tif");
-	std::ostringstream oss;
+	std::wostringstream oss;
 	oss << m_clip_frame_num;
-	std::string s_length = oss.str();
+	std::wstring s_length = oss.str();
 	int length = s_length.length();
-	oss.str(""); oss.clear();
-	oss << m_filename << "_" << std::setfill('0') << std::setw(length) << m_last_frame << ".tif";
-	std::string outputfilename = oss.str();
+	oss.str(L""); oss.clear();
+	oss << m_filename << L"_" << std::setfill(L'0') << std::setw(length) << m_last_frame << L".tif";
+	std::wstring outputfilename = oss.str();
 
 	//capture
 	bool bmov = filetype_ == ".mov";
@@ -324,7 +324,7 @@ void MovieMaker::WriteFrameToFile()
 	}
 	else
 	{
-		TIFF* out = TIFFOpen(outputfilename.c_str(), "wb");
+		TIFF* out = TIFFOpenW(outputfilename.c_str(), "wb");
 		if (!out) return;
 		TIFFSetField(out, TIFFTAG_IMAGEWIDTH, w);
 		TIFFSetField(out, TIFFTAG_IMAGELENGTH, h);
@@ -688,7 +688,7 @@ void MovieMaker::InsertKey(int index)
 		keycode.l0 = 1;
 		keycode.l0_name = m_view->m_renderview_panel->GetName();
 		keycode.l1 = 2;
-		keycode.l1_name = vd->GetName();
+		keycode.l1_name = ws2s(vd->GetName());
 		//display
 		keycode.l2 = 0;
 		keycode.l2_name = "display";
@@ -1135,7 +1135,7 @@ void MovieMaker::MakeKeysTimeSequence()
 		if (!vd)
 			continue;
 		keycode.l1 = 2;
-		keycode.l1_name = vd->GetName();
+		keycode.l1_name = ws2s(vd->GetName());
 		flkey = new FlKeyDouble(keycode, 0);
 		glbin_interpolator.AddKey(flkey);
 	}
@@ -1151,7 +1151,7 @@ void MovieMaker::MakeKeysTimeSequence()
 		if (!vd)
 			continue;
 		keycode.l1 = 2;
-		keycode.l1_name = vd->GetName();
+		keycode.l1_name = ws2s(vd->GetName());
 		flkey = new FlKeyDouble(keycode, m_seq_all_num);
 		glbin_interpolator.AddKey(flkey);
 	}
@@ -1167,7 +1167,7 @@ void MovieMaker::MakeKeysTimeSequence()
 		if (!vd)
 			continue;
 		keycode.l1 = 2;
-		keycode.l1_name = vd->GetName();
+		keycode.l1_name = ws2s(vd->GetName());
 		flkey = new FlKeyDouble(keycode, 0);
 		glbin_interpolator.AddKey(flkey);
 	}
@@ -1258,7 +1258,7 @@ void MovieMaker::MakeKeysTimeColormap()
 			if (!vd)
 				continue;
 			keycode.l1 = 2;
-			keycode.l1_name = vd->GetName();
+			keycode.l1_name = ws2s(vd->GetName());
 			keycode.l2_name = "color";
 			flkey = new FlKeyColor(keycode, c[i]);
 			glbin_interpolator.AddKey(flkey);
@@ -1323,11 +1323,11 @@ void MovieMaker::MakeKeysClipZ(int type)
 		if (!vd)
 			continue;
 		keycode1.l1 = 2;
-		keycode1.l1_name = vd->GetName();
+		keycode1.l1_name = ws2s(vd->GetName());
 		flkey = new FlKeyDouble(keycode1, 0);
 		glbin_interpolator.AddKey(flkey);
 		keycode2.l1 = 2;
-		keycode2.l1_name = vd->GetName();
+		keycode2.l1_name = ws2s(vd->GetName());
 		flkey = new FlKeyDouble(keycode2,
 			type ? 1.0 / z : 1);
 		glbin_interpolator.AddKey(flkey);
@@ -1344,13 +1344,13 @@ void MovieMaker::MakeKeysClipZ(int type)
 		if (!vd)
 			continue;
 		keycode1.l1 = 2;
-		keycode1.l1_name = vd->GetName();
+		keycode1.l1_name = ws2s(vd->GetName());
 		int x, y, z;
 		vd->GetResolution(x, y, z);
 		flkey = new FlKeyDouble(keycode1, 1 - 1.0 / z);
 		glbin_interpolator.AddKey(flkey);
 		keycode2.l1 = 2;
-		keycode2.l1_name = vd->GetName();
+		keycode2.l1_name = ws2s(vd->GetName());
 		flkey = new FlKeyDouble(keycode2, 1);
 		glbin_interpolator.AddKey(flkey);
 	}
@@ -1366,11 +1366,11 @@ void MovieMaker::MakeKeysClipZ(int type)
 		if (!vd)
 			continue;
 		keycode1.l1 = 2;
-		keycode1.l1_name = vd->GetName();
+		keycode1.l1_name = ws2s(vd->GetName());
 		flkey = new FlKeyDouble(keycode1, 0);
 		glbin_interpolator.AddKey(flkey);
 		keycode2.l1 = 2;
-		keycode2.l1_name = vd->GetName();
+		keycode2.l1_name = ws2s(vd->GetName());
 		flkey = new FlKeyDouble(keycode2,
 			type ? 1.0 / z : 1);
 		glbin_interpolator.AddKey(flkey);
@@ -1407,7 +1407,7 @@ void MovieMaker::AddChannToView()
 	{
 		VolumeData* vd = m_view->GetAllVolumeData(i);
 		keycode.l1 = 2;
-		keycode.l1_name = vd->GetName();
+		keycode.l1_name = ws2s(vd->GetName());
 		flkeyB = new FlKeyBoolean(keycode, false);
 		glbin_interpolator.AddKey(flkeyB);
 	}
@@ -1424,7 +1424,7 @@ void MovieMaker::AddChannToView()
 		{
 			VolumeData* vd = m_view->GetAllVolumeData(j);
 			keycode.l1 = 2;
-			keycode.l1_name = vd->GetName();
+			keycode.l1_name = ws2s(vd->GetName());
 			flkeyB = new FlKeyBoolean(keycode, j <= i);
 			glbin_interpolator.AddKey(flkeyB);
 		}
@@ -1479,7 +1479,7 @@ void MovieMaker::MakeKeysChannComb(int comb)
 			keycode.l0 = 1;
 			keycode.l0_name = m_view->m_renderview_panel->GetName();
 			keycode.l1 = 2;
-			keycode.l1_name = vd->GetName();
+			keycode.l1_name = ws2s(vd->GetName());
 			//display only
 			keycode.l2 = 0;
 			keycode.l2_name = "display";

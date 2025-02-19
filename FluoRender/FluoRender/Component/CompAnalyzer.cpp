@@ -831,7 +831,7 @@ void ComponentAnalyzer::OutputFormHeader(std::string &str)
 	str += "\n";
 }
 
-void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, std::string comp_header)
+void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, const std::string& comp_header)
 {
 	if (!m_compgroup)
 		return;
@@ -931,14 +931,14 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 	}
 }
 
-void ComponentAnalyzer::OutputCompListStr(std::string &str, int verbose, std::string comp_header)
+void ComponentAnalyzer::OutputCompListStr(std::string &str, int verbose, const std::string& comp_header)
 {
 	std::ostringstream oss;
 	OutputCompListStream(oss, verbose, comp_header);
 	str = oss.str();
 }
 
-void ComponentAnalyzer::OutputCompListFile(std::string &filename, int verbose, std::string comp_header)
+void ComponentAnalyzer::OutputCompListFile(const std::wstring &filename, int verbose, const std::string& comp_header)
 {
 	std::ofstream ofs;
 	ofs.open(filename, std::ofstream::out);
@@ -1108,9 +1108,9 @@ bool ComponentAnalyzer::OutputAnnotations()
 		m_compgroup->dirty)
 		Analyze(true);
 
-	std::string sinfo;
-	std::ostringstream oss;
-	std::string str;
+	std::wostringstream oss;
+	std::wstring sinfo;
+	std::wstring str;
 
 	Annotations* ann = new Annotations();
 
@@ -1128,18 +1128,18 @@ bool ComponentAnalyzer::OutputAnnotations()
 			graph.GetLinkedComps(i->second, list, m_slimit);
 		}
 
-		oss.str("");
-		oss << i->second->GetSizeUi() << "\t";
-		oss << double(i->second->GetSizeUi())*spcx*spcy*spcz << "\t";
+		oss.str(L"");
+		oss << i->second->GetSizeUi() << L"\t";
+		oss << double(i->second->GetSizeUi())*spcx*spcy*spcz << L"\t";
 		oss << i->second->GetMean(scale);
 		sinfo = oss.str();
 		switch (m_annot_type)
 		{
 		case 1://id
-			str = std::to_string(i->second->Id());
+			str = std::to_wstring(i->second->Id());
 			break;
 		case 2://sn
-			str = std::to_string(count);
+			str = std::to_wstring(count);
 		}
 		fluo::Point p = i->second->GetCenter(1.0 / nx, 1.0 / ny, 1.0 / nz);
 		ann->AddText(str, p, sinfo);
@@ -1170,7 +1170,7 @@ bool ComponentAnalyzer::OutputChannels()
 		break;
 	}
 
-	std::string group_name = "";
+	std::wstring group_name = L"";
 	DataGroup* group = 0;
 	RenderCanvas* view = glbin_current.canvas;
 	if (!view)
@@ -1184,7 +1184,7 @@ bool ComponentAnalyzer::OutputChannels()
 			glbin_data_manager.AddVolumeData(vd);
 			if (i == channs.begin())
 			{
-				group_name = view->AddGroup("");
+				group_name = view->AddGroup(L"");
 				group = view->GetGroup(group_name);
 			}
 			view->AddVolumeData(vd, group_name);
@@ -1281,7 +1281,8 @@ bool ComponentAnalyzer::OutputMultiChannels(std::list<VolumeData*>& channs)
 			brick_size);
 		vdn->SetSpcFromFile(true);
 		vdn->SetName(vd->GetName() +
-			"_COMP" + std::to_string(count++) + "_SIZE" + std::to_string(i->second->GetSizeUi()));
+			L"_COMP" + std::to_wstring(count++) +
+			L"_SIZE" + std::to_wstring(i->second->GetSizeUi()));
 
 		//populate the volume
 		//the actual data
@@ -1445,7 +1446,7 @@ bool ComponentAnalyzer::OutputRgbChannels(std::list<VolumeData*> &channs)
 		spcx, spcy, spcz,
 		brick_size);
 	vd_r->SetSpcFromFile(true);
-	vd_r->SetName(vd->GetName() + "_CH_R");
+	vd_r->SetName(vd->GetName() + L"_CH_R");
 	//green volume
 	VolumeData* vd_g = new VolumeData();
 	vd_g->AddEmptyData(8,
@@ -1453,7 +1454,7 @@ bool ComponentAnalyzer::OutputRgbChannels(std::list<VolumeData*> &channs)
 		spcx, spcy, spcz,
 		brick_size);
 	vd_g->SetSpcFromFile(true);
-	vd_g->SetName(vd->GetName() + "_CH_G");
+	vd_g->SetName(vd->GetName() + L"_CH_G");
 	//blue volume
 	VolumeData* vd_b = new VolumeData();
 	vd_b->AddEmptyData(8,
@@ -1461,7 +1462,7 @@ bool ComponentAnalyzer::OutputRgbChannels(std::list<VolumeData*> &channs)
 		spcx, spcy, spcz,
 		brick_size);
 	vd_b->SetSpcFromFile(true);
-	vd_b->SetName(vd->GetName() + "_CH_B");
+	vd_b->SetName(vd->GetName() + L"_CH_B");
 
 	//get new data
 	//red volume

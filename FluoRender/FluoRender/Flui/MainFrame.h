@@ -336,8 +336,8 @@ public:
 	void ShowMachineLearningDlg();
 	void ShowScriptBreakDlg(bool show = true);
 	void ShowInfo();
-	std::string ScriptDialog(const std::string& title,
-		const std::string& wildcard, long style);
+	std::wstring ScriptDialog(const std::wstring& title,
+		const std::wstring& wildcard, long style);
 	//organize render views
 	void OrganizeVRenderViews(int mode);
 	//reset layout

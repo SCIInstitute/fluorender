@@ -370,13 +370,17 @@ namespace flrd
 		}
 
 		//name
-		std::string GetName()
+		std::wstring GetName()
 		{
 			return m_name;
 		}
-		void SetName(const std::string& name)
+		void SetName(const std::wstring& name)
 		{
 			m_name = name;
+		}
+		void SetName(const std::string& name)
+		{
+			m_name = s2ws(name);
 		}
 		unsigned int Id()
 		{
@@ -642,7 +646,7 @@ namespace flrd
 
 	private:
 		static int m_num;
-		std::string m_name;
+		std::wstring m_name;
 		unsigned int m_id;
 		unsigned int m_group;//group number
 		int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
@@ -722,7 +726,7 @@ namespace flrd
 			return static_cast<int>(groups.size());
 		}
 
-		Ruler* GetRuler(const std::string& name)
+		Ruler* GetRuler(const std::wstring& name)
 		{
 			for (auto ruler : *this)
 			{

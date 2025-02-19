@@ -78,7 +78,7 @@ void TableHistParams::addRecord(Record* rec)
 	dnn_add(rec);
 }
 
-void TableHistParams::open(const std::string& filename)
+void TableHistParams::open(const std::wstring& filename)
 {
 	Table::open(filename);
 	compute();
@@ -87,7 +87,7 @@ void TableHistParams::open(const std::string& filename)
 	{
 		//std::chrono::high_resolution_clock::time_point p0, p1;
 		//p0 = std::chrono::high_resolution_clock::now();
-		std::string model_file = filename + ".model";
+		std::wstring model_file = filename + L".model";
 		if (!std::filesystem::exists(model_file))
 			m_trained_rec_num = 0;
 		m_dnn->set_model_file(model_file);

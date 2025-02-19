@@ -106,7 +106,7 @@ double RulerHandler::GetVolumeBgInt()
 	return vd->GetBackgroundInt();
 }
 
-Ruler* RulerHandler::GetRuler(const std::string& name)
+Ruler* RulerHandler::GetRuler(const std::wstring& name)
 {
 	RulerList* list = glbin_current.GetRulerList();
 	if (!list)
@@ -1411,9 +1411,9 @@ void RulerHandler::DeleteAll(bool cur_time)
 	m_pindex = -1;
 }
 
-std::string RulerHandler::PrintRulers(bool h)
+std::wstring RulerHandler::PrintRulers(bool h)
 {
-	std::string s;
+	std::wstring s;
 	RulerList* list = glbin_current.GetRulerList();
 	if (!list)
 		return s;
@@ -1422,24 +1422,24 @@ std::string RulerHandler::PrintRulers(bool h)
 	{
 		Ruler* ruler = (*list)[ri];
 		if (!ruler) continue;
-		std::string rname = ruler->GetName();
-		std::string line;
+		std::wstring rname = ruler->GetName();
+		std::wstring line;
 		int rpn = ruler->GetNumPoint();
 		for (size_t rpi = 0; rpi < rpn; ++rpi)
 		{
 			if (h)
 			{
 				if (rpi == 0)
-					line = "- - ";
+					line = L"- - ";
 				else
-					line = "  - ";
+					line = L"  - ";
 			}
 			else
-				line = "- ";
+				line = L"- ";
 			line += rname;
 			if (rpn > 1)
-				line += "_" + std::to_string(rpi + 1);
-			line += "\n";
+				line += L"_" + std::to_wstring(rpi + 1);
+			line += L"\n";
 			s += line;
 		}
 	}
@@ -1764,7 +1764,7 @@ int RulerHandler::RoiAll()
 	return c;
 }
 
-void RulerHandler::Distance(const std::set<int>& rulers, const std::string& filename)
+void RulerHandler::Distance(const std::set<int>& rulers, const std::wstring& filename)
 {
 	RulerList* list = glbin_current.GetRulerList();
 	if (!list)
@@ -1779,9 +1779,9 @@ void RulerHandler::Distance(const std::set<int>& rulers, const std::string& file
 
 	bool update_all = rulers.empty();
 
-	std::string str = filename;
-	str = str.substr(0, str.find_last_of('.'));
-	std::string fi;
+	std::wstring str = filename;
+	str = str.substr(0, str.find_last_of(L'.'));
+	std::wstring fi;
 
 	double sx = cplist->sx;
 	double sy = cplist->sy;
@@ -1806,14 +1806,14 @@ void RulerHandler::Distance(const std::set<int>& rulers, const std::string& file
 				it->second->SetDistp(dist);
 			}
 
-			fi = str + std::to_string(c) + ".txt";
+			fi = str + std::to_wstring(c) + L".txt";
 			glbin_comp_analyzer.OutputCompListFile(fi, 1);
 		}
 		c++;
 	}
 }
 
-void RulerHandler::Project(const std::set<int>& rulers, const std::string& filename)
+void RulerHandler::Project(const std::set<int>& rulers, const std::wstring& filename)
 {
 	RulerList* list = glbin_current.GetRulerList();
 	if (!list)
@@ -1829,7 +1829,7 @@ void RulerHandler::Project(const std::set<int>& rulers, const std::string& filen
 
 	bool update_all = rulers.empty();
 
-	std::string str = filename;
+	std::wstring str = filename;
 	std::ofstream ofs;
 	ofs.open(str, std::ofstream::out);
 
@@ -2047,7 +2047,7 @@ size_t RulerHandler::GetRulerPointNum()
 	return sum;
 }
 
-bool RulerHandler::GetRulerPointNames(std::vector<std::string>& names)
+bool RulerHandler::GetRulerPointNames(std::vector<std::wstring>& names)
 {
 	RulerList* list = glbin_current.GetRulerList();
 	if (!list || list->empty())
@@ -2059,8 +2059,8 @@ bool RulerHandler::GetRulerPointNames(std::vector<std::string>& names)
 		if (!i)
 			continue;
 		int rpn = i->GetNumPoint();
-		std::string name = i->GetName();
-		std::string str;
+		std::wstring name = i->GetName();
+		std::wstring str;
 		if (rpn == 1)
 		{
 			names.push_back(name);
@@ -2069,7 +2069,7 @@ bool RulerHandler::GetRulerPointNames(std::vector<std::string>& names)
 		{
 			for (size_t j = 0; j < rpn; ++j)
 			{
-				str = name + "_" + std::to_string(j + 1);
+				str = name + L"_" + std::to_wstring(j + 1);
 				names.push_back(str);
 			}
 		}

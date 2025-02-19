@@ -50,26 +50,26 @@ void KernelExecutor::SetCode(const std::string &code)
 	m_code = code;
 }
 
-void KernelExecutor::LoadCode(const std::string &filename)
+void KernelExecutor::LoadCode(const std::wstring &filename)
 {
 	if (!std::filesystem::exists(filename))
 	{
-		m_message = "Kernel file " +
-			filename + " doesn't exist.\n";
+		m_message = L"Kernel file " +
+			filename + L" doesn't exist.\n";
 		return;
 	}
 	std::ifstream input(filename);
 	if (!input)
 	{
-		m_message = "Kernel file " +
-			filename + " reading failed.\n";
+		m_message = L"Kernel file " +
+			filename + L" reading failed.\n";
 		return;
 	}
 	std::ostringstream ss;
 	ss << input.rdbuf();
 	m_code = ss.str();
-	m_message = "Kernel file " +
-		filename + " read.\n";
+	m_message = L"Kernel file " +
+		filename + L" read.\n";
 }
 
 void KernelExecutor::SetVolume(VolumeData *vd)
@@ -99,7 +99,7 @@ VolumeData* KernelExecutor::GetResult(bool pop)
 	return vd;
 }
 
-std::string KernelExecutor::GetMessage()
+std::wstring KernelExecutor::GetMessage()
 {
 	return m_message;
 }
@@ -108,7 +108,7 @@ bool KernelExecutor::Execute()
 {
 	if (m_code == "")
 	{
-		m_message = "No OpenCL code to execute.\n";
+		m_message = L"No OpenCL code to execute.\n";
 		return false;
 	}
 
@@ -121,19 +121,19 @@ bool KernelExecutor::Execute()
 	//get volume currently selected
 	if (!m_vd)
 	{
-		m_message = "No volume selected. Select a volume first.\n";
+		m_message = L"No volume selected. Select a volume first.\n";
 		return false;
 	}
 	flvr::VolumeRenderer* vr = m_vd->GetVR();
 	if (!vr)
 	{
-		m_message = "Volume corrupted.\n";
+		m_message = L"Volume corrupted.\n";
 		return false;
 	}
 	flvr::Texture* tex =m_vd->GetTexture();
 	if (!tex)
 	{
-		m_message = "Volume corrupted.\n";
+		m_message = L"Volume corrupted.\n";
 		return false;
 	}
 
@@ -149,11 +149,11 @@ bool KernelExecutor::Execute()
 	std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray);
 	if (!bricks || bricks->size() == 0)
 	{
-		m_message = "Volume empty.\n";
+		m_message = L"Volume empty.\n";
 		return false;
 	}
 
-	m_message = "";
+	m_message = L"";
 	//execute for each brick
 	flvr::TextureBrick *b, *b_r;
 	std::vector<flvr::TextureBrick*> *bricks_r;
@@ -173,7 +173,7 @@ bool KernelExecutor::Execute()
 			spc_x, spc_y, spc_z,
 			brick_size);
 		vd->SetSpcFromFile(true);
-		vd->SetName(m_vd->GetName() + "_CL");
+		vd->SetName(m_vd->GetName() + L"_CL");
 		flvr::Texture* tex_r = vd->GetTexture();
 		if (!tex_r)
 			return false;
@@ -209,7 +209,7 @@ bool KernelExecutor::Execute()
 			kernel(m_code, bits);
 		if (kernel)
 		{
-			m_message += "OpenCL kernel created.\n";
+			m_message += L"OpenCL kernel created.\n";
 			if (brick_num == 1)
 				kernel_exe = ExecuteKernel(kernel, data_id, result, res_x, res_y, res_z, chars);
 			else
@@ -245,7 +245,7 @@ bool KernelExecutor::Execute()
 		}
 		else
 		{
-			m_message += "Fail to create OpenCL kernel.\n";
+			m_message += L"Fail to create OpenCL kernel.\n";
 			kernel_exe = false;
 			break;
 		}
@@ -293,12 +293,12 @@ bool KernelExecutor::ExecuteKernel(flvr::KernelProgram* kernel,
 	kernel->executeKernel(kernel_index, 3, global_size, local_size);
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-	std::string stime = std::to_string(time_span.count());
-	m_message += "OpenCL time on ";
-	m_message += kernel->get_device_name().c_str();
-	m_message += ": ";
+	std::wstring stime = std::to_wstring(time_span.count());
+	m_message += L"OpenCL time on ";
+	m_message += s2ws(kernel->get_device_name());
+	m_message += L": ";
 	m_message += stime;
-	m_message += " sec.\n";
+	m_message += L" sec.\n";
 	kernel->readBuffer(result_size, result, result);
 
 	//release buffer

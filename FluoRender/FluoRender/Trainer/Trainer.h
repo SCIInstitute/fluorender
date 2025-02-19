@@ -53,13 +53,13 @@ namespace flrd
 		virtual double get_rate() = 0;
 		bool is_valid() { return m_valid; }
 
-		virtual void set_model_file(const std::string& file) { m_model_file = file; }
+		virtual void set_model_file(const std::wstring& file) { m_model_file = file; }
 		virtual std::string get_model_file() { return m_model_file; }
 
 	protected:
 		bool m_valid;
 		size_t m_trained_rec_num;
-		std::string m_model_file;
+		std::wstring m_model_file;
 	};
 }
 #endif//_TRAINER_H_

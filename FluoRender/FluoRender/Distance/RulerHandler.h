@@ -62,7 +62,7 @@ namespace flrd
 
 		double GetVolumeBgInt();
 
-		Ruler* GetRuler(const std::string& name);
+		Ruler* GetRuler(const std::wstring& name);
 
 		Ruler* GetRuler(size_t i);
 
@@ -133,8 +133,8 @@ namespace flrd
 		int Profile(Ruler* ruler);
 		int Profile(int index);
 		int ProfileAll();
-		void Distance(const std::set<int>& rulers, const std::string& filename);
-		void Project(const std::set<int>& rulers, const std::string& filename);
+		void Distance(const std::set<int>& rulers, const std::wstring& filename);
+		void Project(const std::set<int>& rulers, const std::wstring& filename);
 
 		//transient over time
 		void SetTransient(bool bval, const std::set<int>& rulers);
@@ -165,7 +165,7 @@ namespace flrd
 		void DeleteSelection(const std::set<int> &sel);
 		void DeleteAll(bool cur_time);
 
-		std::string PrintRulers(bool h);//h-if prints hierarchy
+		std::wstring PrintRulers(bool h);//h-if prints hierarchy
 
 		void SetFsize(int ival)
 		{
@@ -205,7 +205,7 @@ namespace flrd
 		//get time points where keys exist
 		bool GetKeyFrames(std::set<size_t>& kf);
 		size_t GetRulerPointNum();
-		bool GetRulerPointNames(std::vector<std::string>& names);
+		bool GetRulerPointNames(std::vector<std::wstring>& names);
 		bool GetRulerPointCoords(std::vector<double>& coords);
 
 		//generate walk

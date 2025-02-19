@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <VolPropDnnTrainer.h>
+#include <compatibility.h>
 
 using namespace flrd;
 
@@ -104,8 +105,8 @@ double VolPropDnnTrainer::get_rate()
 	return m_trainer.get_learning_rate();
 }
 
-void VolPropDnnTrainer::set_model_file(const std::string& file)
+void VolPropDnnTrainer::set_model_file(const std::wstring& file)
 {
 	Trainer::set_model_file(file);
-	m_trainer.set_synchronization_file(file, std::chrono::minutes(5));
+	m_trainer.set_synchronization_file(ws2s(file), std::chrono::minutes(5));
 }

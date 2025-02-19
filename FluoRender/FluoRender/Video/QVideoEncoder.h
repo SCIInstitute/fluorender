@@ -61,7 +61,7 @@ protected:
 	//the original dimensions (video is cropped so width and height are both
 	//divisible by 16.)
 	size_t actual_width_, actual_height_;
-	std::string filename_;
+	std::wstring filename_;
 	bool valid_;
 
 	// a wrapper around a single output AVStream
@@ -91,7 +91,7 @@ protected:
 public:
 	QVideoEncoder();
 	virtual ~QVideoEncoder();
-	bool open(const std::string& f, size_t w, size_t h, size_t len, size_t fps, size_t bitrate);
+	bool open(const std::wstring& f, size_t w, size_t h, size_t len, size_t fps, size_t bitrate);
 	void close();
 	void fill_yuv_image(int64_t frame_index);
 	bool write_video_frame(size_t frame_num);

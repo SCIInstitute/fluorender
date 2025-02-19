@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <File.h>
+#include <compatibility.h>
 
 using namespace flrd;
 
@@ -40,7 +41,7 @@ File::~File()
 
 }
 
-void File::beginWrite(const std::string& filename)
+void File::beginWrite(const std::wstring& filename)
 {
 	ofs_ = std::ofstream(filename, std::ios::out | std::ios::binary);
 	if (ofs_.bad()) return;
@@ -53,7 +54,7 @@ void File::endWrite()
 	mode_ = 0;
 }
 
-void File::beginRead(const std::string& filename)
+void File::beginRead(const std::wstring& filename)
 {
 	ifs_ = std::ifstream(filename, std::ios::out | std::ios::binary);
 	if (ifs_.bad()) return;
@@ -94,3 +95,9 @@ void File::setPos()
 	}
 }
 
+void File::writeString(const std::wstring& s)
+{
+	if (ofs_.bad()) return;
+	std::string str = ws2s(s);
+	ofs_.write(str.c_str(), s.size());
+}

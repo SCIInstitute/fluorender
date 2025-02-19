@@ -39,15 +39,15 @@ public:
 	Project();
 	~Project();
 
-	void Open(const std::string& filename);
-	void Save(const std::string& filename, bool inc);//inc: save incrementally
+	void Open(const std::wstring& filename);
+	void Save(const std::wstring& filename, bool inc);//inc: save incrementally
 	void Reset();
 
-	void ExportRulerList(const std::string& filename);
+	void ExportRulerList(const std::wstring& filename);
 	void SaveRulerList(wxFileConfig &fconfig, int vi);
 	void ReadRulerList(wxFileConfig &fconfig, int vi);
 
-	void SaveConfig(wxFileConfig& fconfig, const std::string& filename);
+	void SaveConfig(wxFileConfig& fconfig, const std::wstring& filename);
 
 private:
 };

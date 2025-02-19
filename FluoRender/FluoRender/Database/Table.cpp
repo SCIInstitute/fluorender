@@ -53,9 +53,9 @@ Table::Table(const Table& table) :
 	m_params(table.m_params),
 	m_trained_rec_num(0)
 {
-	std::string tname = table.m_name;
+	std::wstring tname = table.m_name;
 	if (tname.empty())
-		m_name = "New_table";
+		m_name = L"New_table";
 	else
 	{
 		INC_NUMBER(tname);
@@ -86,8 +86,8 @@ void Table::clear()
 	}
 	m_data.clear();
 	m_modified = false;
-	m_name = "";
-	m_notes = "";
+	m_name = L"";
+	m_notes = L"";
 	m_recnum = 0;
 }
 
@@ -155,7 +155,7 @@ void Table::setCreateTime(const std::time_t& t)
 	m_create_time = t;
 }
 
-void Table::open(const std::string& filename, bool info)
+void Table::open(const std::wstring& filename, bool info)
 {
 	clear();
 
@@ -183,7 +183,7 @@ void Table::open(const std::string& filename, bool info)
 	if (m_name.empty())
 	{
 		const std::filesystem::path p(filename);
-		m_name = p.stem().string();
+		m_name = p.stem().wstring();
 	}
 	//time of creation
 	if (file.check(TAG_TABLE_TIME_CREATE))
@@ -202,7 +202,7 @@ void Table::open(const std::string& filename, bool info)
 	}
 	if (m_notes.empty())
 	{
-		m_notes = "Table for " + m_name;
+		m_notes = L"Table for " + m_name;
 	}
 
 	//rec num
@@ -261,7 +261,7 @@ void Table::open(const std::string& filename, bool info)
 	m_modified = false;
 }
 
-void Table::save(const std::string& filename)
+void Table::save(const std::wstring& filename)
 {
 	flrd::File file;
 	file.beginWrite(filename);

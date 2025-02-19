@@ -70,7 +70,7 @@ namespace flrd
 		void SetBreak(bool bval) { m_break = bval; }
 		bool GetBreak() { return m_break; }
 		void SetBreakCount(int val = 0) { m_break_count = val; }
-		std::string GetTitle() { return m_fconfig_name; }
+		std::wstring GetTitle() { return m_fconfig_name; }
 		std::string GetInfo() { return m_info; }
 		void LoadScriptFile();
 
@@ -87,7 +87,7 @@ namespace flrd
 		std::string m_type;
 		TimeMask m_time_mask;
 		wxFileConfig *m_fconfig;
-		std::string m_fconfig_name;
+		std::wstring m_fconfig_name;
 		std::string m_info;
 		bool m_rewind;
 		bool m_break;
@@ -108,11 +108,11 @@ namespace flrd
 		void UpdateTraceDlg();
 		int TimeMode(std::string &str);
 		int GetTimeNum();
-		std::string GetInputFile(const std::string &str, const std::string &subd);
-		std::string GetSavePath(const std::string &str, const std::string &ext, bool rep = true);
-		std::string GetDataDir(const std::string &ext);
-		std::string GetConfigFile(const std::string& str, const std::string& ext, const std::string& type, int mode);//mode-0 open;1-save
-		int GetItems(const std::string& str, std::vector<std::string>& items);
+		std::wstring GetInputFile(const std::wstring &str, const std::wstring &subd);
+		std::wstring GetSavePath(const std::wstring &str, const std::wstring &ext, bool rep = true);
+		std::wstring GetDataDir(const std::wstring &ext);
+		std::wstring GetConfigFile(const std::wstring& str, const std::wstring& ext, const std::wstring& type, int mode);//mode-0 open;1-save
+		int GetItems(const std::wstring& str, std::vector<std::wstring>& items);
 		bool GetRegistrationTransform(fluo::Point& transl, fluo::Point& center, fluo::Point& euler, int sn);//sn: smooth frame number
 		
 		void RunNoiseReduction();
@@ -139,7 +139,7 @@ namespace flrd
 		void RunUnlinkCells();
 		void RunBackgroundStat();
 		void RunRegistration();
-		void GetRulers(const std::string& vrp, int &startf, int &endf);
+		void GetRulers(const std::wstring& vrp, int &startf, int &endf);
 		void RunCameraPoints();
 		void RunRulerInfo();
 		void RunRulerTransform();

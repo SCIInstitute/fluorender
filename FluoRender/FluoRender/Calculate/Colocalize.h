@@ -42,11 +42,11 @@ namespace flrd
 		~Colocalize();
 
 		void Compute();
-		std::string GetTitles() { return m_titles; }
-		std::string GetValues() { return m_values; }
+		std::wstring GetTitles() { return m_titles; }
+		std::wstring GetValues() { return m_values; }
 
 	private:
-		std::string m_titles, m_values;//results
+		std::wstring m_titles, m_values;//results
 		bool m_test_speed;
 		std::vector<std::chrono::high_resolution_clock::time_point> m_tps;
 

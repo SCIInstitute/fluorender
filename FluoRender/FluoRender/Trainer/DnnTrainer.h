@@ -44,7 +44,7 @@ namespace flrd
 		virtual void train() = 0;
 		virtual float* infer(float*) = 0;
 		virtual double get_rate() = 0;
-		virtual void set_model_file(const std::string& file) = 0;
+		virtual void set_model_file(const std::wstring& file) = 0;
 
 	protected:
 		std::vector<dlib::matrix<float>> m_input;

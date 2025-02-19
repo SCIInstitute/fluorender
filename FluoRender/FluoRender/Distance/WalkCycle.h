@@ -291,7 +291,7 @@ namespace flrd
 
 	struct WcName
 	{
-		std::string s;
+		std::wstring s;
 		size_t n;
 		size_t d;
 	};
@@ -302,8 +302,8 @@ namespace flrd
 		WalkCycle();
 		~WalkCycle();
 
-		void ReadData(const std::string& name);
-		void SaveData(const std::string& name);
+		void ReadData(const std::wstring& name);
+		void SaveData(const std::wstring& name);
 		WalkData& GetData()
 		{
 			return data_;
@@ -322,8 +322,8 @@ namespace flrd
 			return win_;
 		}
 		void LoadCycle();//from data
-		void LoadCycle(const std::string& name);//from file
-		void SaveCycle(const std::string& name);
+		void LoadCycle(const std::wstring& name);//from file
+		void SaveCycle(const std::wstring& name);
 
 		WalkData GetCycle()
 		{
@@ -355,8 +355,8 @@ namespace flrd
 
 		void Correct(int mode);//0: data, 1: cycle
 
-		void SaveDist(const std::string& name);
-		void SaveAligned(const std::string& name);
+		void SaveDist(const std::wstring& name);
+		void SaveAligned(const std::wstring& name);
 		WalkData GetAligned()
 		{
 			return aligned_;

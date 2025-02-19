@@ -284,18 +284,18 @@ void VolumeCalculator::CreateVolumeResult1()
 	//vd->SetCurChannel(m_vd_a->GetCurChannel());
 	m_vd_r.push_back(vd);
 
-	std::string name = m_vd_a->GetName();
-	std::string str_type;
+	std::wstring name = m_vd_a->GetName();
+	std::wstring str_type;
 	switch (m_type)
 	{
 	case 5://substraction
-		str_type = "_EXTRACTED";
+		str_type = L"_EXTRACTED";
 		break;
 	case 6:
-		str_type = "_DELETED";
+		str_type = L"_DELETED";
 		break;
 	case 9:
-		str_type = "_FILLED";
+		str_type = L"_FILLED";
 		break;
 	}
 	vd->SetName(name + str_type);
@@ -338,30 +338,30 @@ void VolumeCalculator::CreateVolumeResult2()
 	vd->SetSpcFromFile(true);
 	m_vd_r.push_back(vd);
 
-	std::string name_a = m_vd_a->GetName();
-	std::string name_b = m_vd_b->GetName();
+	std::wstring name_a = m_vd_a->GetName();
+	std::wstring name_b = m_vd_b->GetName();
 	size_t len = 15;
 	if (name_a.length() > len)
 		name_a = name_a.substr(0, len);
 	if (name_b.length() > len)
 		name_b = name_b.substr(0, len);
-	std::string str_type;
+	std::wstring str_type;
 	switch (m_type)
 	{
 	case 1://substraction
-		str_type = "_SUB_";
+		str_type = L"_SUB_";
 		break;
 	case 2://addition
-		str_type = "_ADD_";
+		str_type = L"_ADD_";
 		break;
 	case 3://division
-		str_type = "_DIV_";
+		str_type = L"_DIV_";
 		break;
 	case 4://intersection
-		str_type = "_AND_";
+		str_type = L"_AND_";
 		break;
 	}
-	std::string name = name_a + str_type + name_b;
+	std::wstring name = name_a + str_type + name_b;
 	vd->SetName(name);
 }
 

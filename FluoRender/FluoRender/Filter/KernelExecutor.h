@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _KERNELEXECUTOR_H_
 
 #include <Progress.h>
-#include <wx/string.h>
 #include <vector>
 
 class VolumeData;
@@ -44,12 +43,12 @@ public:
 	~KernelExecutor();
 
 	void SetCode(const std::string &code);
-	void LoadCode(const std::string &filename);
+	void LoadCode(const std::wstring &filename);
 	void SetVolume(VolumeData *vd);
 	void SetDuplicate(bool dup);
 	VolumeData* GetVolume();
 	VolumeData* GetResult(bool pop);
-	std::string GetMessage();
+	std::wstring GetMessage();
 
 	bool Execute();
 
@@ -59,7 +58,7 @@ private:
 	bool m_duplicate;//whether duplicate the input volume
 
 	std::string m_code;
-	std::string m_message;
+	std::wstring m_message;
 
 	bool ExecuteKernel(flvr::KernelProgram* kernel,
 		unsigned int data_id, void* result,

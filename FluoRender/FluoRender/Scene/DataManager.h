@@ -94,13 +94,17 @@ public:
 	{
 		return type;
 	}
-	std::string GetName()
+	std::wstring GetName()
 	{
 		return m_name;
 	}
-	void SetName(const std::string& name)
+	void SetName(const std::wstring& name)
 	{
 		m_name = name;
+	}
+	void SetName(const std::string& name)
+	{
+		m_name = s2ws(name);
 	}
 	unsigned int Id()
 	{
@@ -142,7 +146,7 @@ public:
 
 protected:
 	int type;//-1:invalid, 2:volume, 3:mesh, 4:annotations, 5:group, 6:mesh group, 7:ruler, 8:traces
-	std::string m_name;
+	std::wstring m_name;
 	unsigned int m_id;
 
 	//layer adjustment
@@ -200,7 +204,7 @@ public:
 	void SetSkipBrick(bool skip);
 	bool GetSkipBrick();
 	//load
-	int Load(Nrrd* data, const std::string &name, const std::string &path);
+	int Load(Nrrd* data, const std::wstring &name, const std::wstring &path);
 	int Replace(Nrrd* data, bool del_tex);
 	int Replace(VolumeData* data);
 	Nrrd* GetVolume(bool ret);
@@ -234,7 +238,7 @@ public:
 	void SetResize(int resize, int nx, int ny, int nz);
 	void GetResize(bool &resize, int &nx, int &ny, int &nz);
 	//mask: 0-save none; 1-save mask; 2-save label; 3-save mask and label...
-	void Save(const std::string &filename, int mode,
+	void Save(const std::wstring &filename, int mode,
 		int mask, bool neg_mask,
 		bool crop, int filter,
 		bool bake, bool compress,
@@ -255,8 +259,8 @@ public:
 	fluo::BBox GetBounds();
 	fluo::BBox GetClippedBounds();
 	//path
-	void SetPath(const std::string& path);
-	std::string GetPath();
+	void SetPath(const std::wstring& path);
+	std::wstring GetPath();
 	//multi-channel
 	void SetCurChannel(int chan);
 	int GetCurChannel();
@@ -567,7 +571,7 @@ private:
 
 	flrd::EntryParams m_ep;
 
-	std::string m_tex_path;
+	std::wstring m_tex_path;
 	fluo::BBox m_bounds;
 	flvr::VolumeRenderer *m_vr;
 	flvr::Texture *m_tex;
@@ -738,7 +742,7 @@ public:
 	//set viewport
 	void SetViewport(GLint vp[4]);
 
-	std::string GetPath();
+	std::wstring GetPath();
 	fluo::BBox GetBounds();
 	GLMmodel* GetMesh();
 	void SetDisp(bool disp);
@@ -749,9 +753,9 @@ public:
 	bool GetDrawBounds();
 
 	//data management
-	int Load(const std::string &filename);
+	int Load(const std::wstring &filename);
 	int Load(GLMmodel* mesh);
-	void Save(const std::string &filename);
+	void Save(const std::wstring &filename);
 
 	//MR
 	flvr::MeshRenderer* GetMR();
@@ -802,7 +806,7 @@ public:
 	int GetLimitNumber();
 
 private:
-	std::string m_data_path;
+	std::wstring m_data_path;
 	GLMmodel* m_data;
 	flvr::MeshRenderer *m_mr;
 	fluo::BBox m_bounds;
@@ -840,21 +844,21 @@ class AText
 {
 public:
 	AText();
-	AText(const std::string &str, const fluo::Point &pos);
+	AText(const std::wstring &str, const fluo::Point &pos);
 	~AText();
 
-	std::string GetText();
+	std::wstring GetText();
 	fluo::Point GetPos();
-	void SetText(const std::string& str);
+	void SetText(const std::wstring& str);
 	void SetPos(fluo::Point pos);
-	void SetInfo(const std::string& str);
+	void SetInfo(const std::wstring& str);
 
 	friend class Annotations;
 
 private:
-	std::string m_txt;
+	std::wstring m_txt;
 	fluo::Point m_pos;
-	std::string m_info;
+	std::wstring m_info;
 };
 
 class DataManager;
@@ -879,11 +883,11 @@ public:
 	}
 
 	int GetTextNum();
-	std::string GetTextText(int index);
+	std::wstring GetTextText(int index);
 	fluo::Point GetTextPos(int index);
 	fluo::Point GetTextTransformedPos(int index);
-	std::string GetTextInfo(int index);
-	void AddText(const std::string& str, fluo::Point pos, const std::string& info);
+	std::wstring GetTextInfo(int index);
+	void AddText(const std::wstring& str, fluo::Point pos, const std::wstring& info);
 	void SetTransform(fluo::Transform *tform);
 	void SetVolume(VolumeData* vd);
 	VolumeData* GetVolume();
@@ -905,19 +909,19 @@ public:
 	}
 
 	//memo
-	void SetMemo(const std::string &memo);
-	std::string GetMemo();
+	void SetMemo(const std::wstring &memo);
+	std::wstring GetMemo();
 	void SetMemoRO(bool ro);
 	bool GetMemoRO();
 
 	//save/load
-	std::string GetPath();
-	int Load(const std::string &filename, DataManager* mgr);
-	void Save(const std::string &filename);
+	std::wstring GetPath();
+	int Load(const std::wstring &filename, DataManager* mgr);
+	void Save(const std::wstring &filename);
 
 	//info meaning
-	std::string GetInfoMeaning();
-	void SetInfoMeaning(const std::string &str);
+	std::wstring GetInfoMeaning();
+	void SetInfoMeaning(const std::wstring &str);
 
 	bool InsideClippingPlanes(fluo::Point &pos);
 
@@ -930,17 +934,17 @@ private:
 	bool m_disp;
 
 	//memo
-	std::string m_memo;
+	std::wstring m_memo;
 	bool m_memo_ro;//read only
 
 	//on disk
-	std::string m_data_path;
+	std::wstring m_data_path;
 
 	//atext info meaning
-	std::string m_info_meaning;
+	std::wstring m_info_meaning;
 
 private:
-	AText* GetAText(const std::string& str);
+	AText* GetAText(const std::wstring& str);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -969,7 +973,7 @@ public:
 		return m_track_map;
 	}
 
-	std::string GetPath() {return m_data_path;}
+	std::wstring GetPath() {return m_data_path;}
 	void SetCurTime(int time);
 	int GetCurTime();
 	void SetPrvTime(int time);
@@ -1006,8 +1010,8 @@ public:
 
 	//i/o
 	void Clear();
-	bool Load(const std::string &filename);
-	bool Save(const std::string &filename);
+	bool Load(const std::wstring &filename);
+	bool Save(const std::wstring &filename);
 
 	//draw
 	unsigned int Draw(std::vector<float> &verts, int shuffle);
@@ -1023,7 +1027,7 @@ public:
 
 private:
 	static int m_num;
-	std::string m_data_path;
+	std::wstring m_data_path;
 	//for selective drawing
 	int m_cur_time;
 	int m_prv_time;
@@ -1333,7 +1337,7 @@ struct CurrentObjects
 	void SetVolumeData(VolumeData* vd);
 	void SetMeshData(MeshData* md);
 	void SetAnnotation(Annotations* ann);
-	void SetSel(const std::string& str);
+	void SetSel(const std::wstring& str);
 
 	flrd::RulerList* GetRulerList();
 	flrd::Ruler* GetRuler();
@@ -1362,24 +1366,24 @@ public:
 	//set project path
 	//when data and project are moved, use project file's path
 	//if data's directory doesn't exist
-	void SetProjectPath(const std::string& path);
-	std::string SearchProjectPath(const std::string &filename);
-	std::string GetProjectFile();
+	void SetProjectPath(const std::wstring& path);
+	std::wstring SearchProjectPath(const std::wstring &filename);
+	std::wstring GetProjectFile();
 
 	//load volume
-	void LoadVolumes(const std::vector<std::string>& files, bool withImageJ);
-	void StartupLoad(const std::vector<std::string>& files, bool run_mov, bool with_imagej);
-	size_t LoadVolumeData(const std::string &filename, int type, bool withImageJ, int ch_num=-1, int t_num=-1);
+	void LoadVolumes(const std::vector<std::wstring>& files, bool withImageJ);
+	void StartupLoad(const std::vector<std::wstring>& files, bool run_mov, bool with_imagej);
+	size_t LoadVolumeData(const std::wstring &filename, int type, bool withImageJ, int ch_num=-1, int t_num=-1);
 	//set default
 	void SetVolumeDefault(VolumeData* vd);
 	void AddVolumeData(VolumeData* vd);
 	VolumeData* DuplicateVolumeData(VolumeData* vd);
 	void RemoveVolumeData(size_t index);
-	void RemoveVolumeData(const std::string &name);
+	void RemoveVolumeData(const std::wstring &name);
 	size_t GetVolumeNum();
 	VolumeData* GetVolumeData(size_t index);
-	VolumeData* GetVolumeData(const std::string &name);
-	size_t GetVolumeIndex(const std::string &name);
+	VolumeData* GetVolumeData(const std::wstring &name);
+	size_t GetVolumeIndex(const std::wstring &name);
 	VolumeData* GetLastVolumeData()
 	{
 		size_t num = m_vd_list.size();
@@ -1390,13 +1394,13 @@ public:
 	};
 
 	//load mesh
-	void LoadMeshes(const std::vector<std::string>& files);
-	bool LoadMeshData(const std::string &filename);
+	void LoadMeshes(const std::vector<std::wstring>& files);
+	bool LoadMeshData(const std::wstring &filename);
 	bool LoadMeshData(GLMmodel* mesh);
 	size_t GetMeshNum();
 	MeshData* GetMeshData(size_t index);
-	MeshData* GetMeshData(const std::string &name);
-	size_t GetMeshIndex(const std::string &name);
+	MeshData* GetMeshData(const std::wstring &name);
+	size_t GetMeshIndex(const std::wstring &name);
 	MeshData* GetLastMeshData()
 	{
 		size_t num = m_md_list.size();
@@ -1409,13 +1413,13 @@ public:
 	void ClearMeshSelection();
 
 	//annotations
-	bool LoadAnnotations(const std::string &filename);
+	bool LoadAnnotations(const std::wstring &filename);
 	void AddAnnotations(Annotations* ann);
 	void RemoveAnnotations(size_t index);
 	size_t GetAnnotationNum();
 	Annotations* GetAnnotations(size_t index);
-	Annotations* GetAnnotations(const std::string &name);
-	size_t GetAnnotationIndex(const std::string &name);
+	Annotations* GetAnnotations(const std::wstring &name);
+	size_t GetAnnotationIndex(const std::wstring &name);
 	Annotations* GetLastAnnotations()
 	{
 		size_t num = m_annotation_list.size();
@@ -1425,7 +1429,7 @@ public:
 			return 0;
 	}
 
-	bool CheckNames(const std::string &str);
+	bool CheckNames(const std::wstring &str);
 
 	//wavelength to color
 	fluo::Color GetWavelengthColor(double wavelength);
@@ -1439,8 +1443,8 @@ private:
 	std::vector <Annotations*> m_annotation_list;
 
 	//project path
-	std::string m_prj_path;
-	std::string m_prj_file;
+	std::wstring m_prj_path;
+	std::wstring m_prj_file;
 
 	//for reading files and channels
 	size_t m_cur_file;

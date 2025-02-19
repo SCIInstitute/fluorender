@@ -1964,7 +1964,7 @@ void ComponentGenerator::GenerateDB()
 }
 
 //command
-void ComponentGenerator::LoadCmd(const std::string& filename)
+void ComponentGenerator::LoadCmd(const std::wstring& filename)
 {
 	wxFileInputStream is(filename);
 	if (!is.IsOk())
@@ -2075,7 +2075,7 @@ void ComponentGenerator::LoadCmd(const std::string& filename)
 	//m_cmd_count_text->ChangeValue(wxString::Format("%d", ival));
 }
 
-void ComponentGenerator::SaveCmd(const std::string& filename)
+void ComponentGenerator::SaveCmd(const std::wstring& filename)
 {
 	if (m_command.empty())
 	{
@@ -2341,9 +2341,9 @@ void ComponentGenerator::StopTimer(const std::string& str)
 			std::chrono::duration_cast<std::chrono::duration<double>>(
 				m_tps.back() - t0);
 
-		m_values += str + "\t";
+		m_values += str + L"\t";
 		m_values += wxString::Format("%.4f", time_span.count());
-		m_values += " sec.\n";
+		m_values += L" sec.\n";
 	}
 }
 

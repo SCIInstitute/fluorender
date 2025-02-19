@@ -1889,17 +1889,17 @@ void MainFrame::ShowInfo()
 	d->ShowModal();
 }
 
-std::string MainFrame::ScriptDialog(const std::string& title,
-	const std::string& wildcard, long style)
+std::wstring MainFrame::ScriptDialog(const std::wstring& title,
+	const std::wstring& wildcard, long style)
 {
 	glbin_moviemaker.Hold();
-	std::string result;
+	std::wstring result;
 	ModalDlg* dlg = new ModalDlg(
 		this, title, "", "",
 		wildcard, style);
 	int rval = dlg->ShowModal();
 	if (rval == wxID_OK)
-		result = dlg->GetPath().ToStdString();
+		result = dlg->GetPath().ToStdWstring();
 	delete dlg;
 	glbin_moviemaker.Resume();
 	return result;

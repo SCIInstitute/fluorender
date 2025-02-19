@@ -82,7 +82,7 @@ public:
 	void SetView(RenderCanvas* view);
 	RenderCanvas* GetRenderCanvas();
 	int GetViewIndex();
-	void SetFileName(const std::string& filename) { m_filename = filename; }
+	void SetFileName(const std::wstring& filename) { m_filename = filename; }
 	void SetLoop(bool val) { m_loop = val; }
 	bool GetLoop() { return m_loop; }
 
@@ -205,7 +205,7 @@ private:
 	bool m_reverse;//play backward
 	bool m_loop;//rewind after finish and restart play
 	//save
-	std::string m_filename;
+	std::wstring m_filename;
 	std::string filetype_;
 	int m_scroll_thumb_size;
 

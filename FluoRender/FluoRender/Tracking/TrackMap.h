@@ -115,8 +115,8 @@ namespace flrd
 		//clear counters
 		bool ClearCounters();
 
-		bool Export(std::string &filename);
-		bool Import(std::string &filename);
+		bool Export(const std::wstring &filename);
+		bool Import(const std::wstring &filename);
 
 		bool ResetVertexIDs();
 

@@ -49,9 +49,9 @@ namespace flrd
 			return ifs_;
 		}
 
-		virtual void beginWrite(const std::string& filename);
+		virtual void beginWrite(const std::wstring& filename);
 		virtual void endWrite();
-		virtual void beginRead(const std::string& filename);
+		virtual void beginRead(const std::wstring& filename);
 		virtual void endRead();
 		virtual void getPos();
 		virtual void setPos();
@@ -76,6 +76,7 @@ namespace flrd
 			if (ofs_.bad()) return;
 			ofs_.write(s.c_str(), s.size());
 		}
+		void writeString(const std::wstring& s);
 		template<typename T>
 		void writeVector(const std::vector<T>& v)
 		{

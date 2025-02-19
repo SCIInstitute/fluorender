@@ -597,7 +597,7 @@ target_link_libraries(DISTANCE_LIB
 # File
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/File)
 file(GLOB file_src_c FluoRender/FluoRender/File/*.c)
-file(GLBO file_src_cpp FluoRender/FluoRender/File/*.cpp)
+file(GLOB file_src_cpp FluoRender/FluoRender/File/*.cpp)
 file(GLOB file_hdr FluoRender/FluoRender/File/*.h)
 set(file_src ${file_src_c} ${file_src_cpp})
 add_library(FILE_LIB STATIC

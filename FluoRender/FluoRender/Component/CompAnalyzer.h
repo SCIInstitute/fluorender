@@ -168,9 +168,9 @@ namespace flrd
 		void OutputFormHeader(std::string &str);
 		//print out results
 		//verbose: 0-clean output; 1-extra info
-		void OutputCompListStream(std::ostream &stream, int verbose, std::string comp_header = "");
-		void OutputCompListStr(std::string &str, int verbose, std::string comp_header="");
-		void OutputCompListFile(std::string &filename, int verbose, std::string comp_header = "");
+		void OutputCompListStream(std::ostream &stream, int verbose, const std::string& comp_header = "");
+		void OutputCompListStr(std::string &str, int verbose, const std::string& comp_header="");
+		void OutputCompListFile(const std::wstring &filename, int verbose, const std::string& comp_header = "");
 
 		bool OutputChannels();
 		bool OutputMultiChannels(std::list<VolumeData*> &channs);
