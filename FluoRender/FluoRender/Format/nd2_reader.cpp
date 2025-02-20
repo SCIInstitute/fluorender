@@ -334,10 +334,10 @@ std::wstring ND2Reader::GetCurDataName(int t, int c)
 std::wstring ND2Reader::GetCurMaskName(int t, int c)
 {
 	std::wostringstream woss;
-	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
-	if (m_time_num > 1) woss << "_T" << t;
-	if (m_chan_num > 1) woss << "_C" << c;
-	woss << ".msk";
+	woss << m_path_name.substr(0, m_path_name.find_last_of(L'.'));
+	if (m_time_num > 1) woss << L"_T" << t;
+	if (m_chan_num > 1) woss << L"_C" << c;
+	woss << L".msk";
 	std::wstring mask_name = woss.str();
 	return mask_name;
 }
@@ -345,10 +345,10 @@ std::wstring ND2Reader::GetCurMaskName(int t, int c)
 std::wstring ND2Reader::GetCurLabelName(int t, int c)
 {
 	std::wostringstream woss;
-	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
-	if (m_time_num > 1) woss << "_T" << t;
-	if (m_chan_num > 1) woss << "_C" << c;
-	woss << ".lbl";
+	woss << m_path_name.substr(0, m_path_name.find_last_of(L'.'));
+	if (m_time_num > 1) woss << L"_T" << t;
+	if (m_chan_num > 1) woss << L"_C" << c;
+	woss << L".lbl";
 	std::wstring label_name = woss.str();
 	return label_name;
 }

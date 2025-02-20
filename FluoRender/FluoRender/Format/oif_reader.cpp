@@ -691,14 +691,14 @@ std::wstring OIFReader::GetCurDataName(int t, int c)
 std::wstring OIFReader::GetCurMaskName(int t, int c)
 {
 	std::wstring data_name = m_oif_info[t].dataset[c][0];
-	std::wstring mask_name = data_name.substr(0, data_name.find_last_of('.')) + L".msk";
+	std::wstring mask_name = data_name.substr(0, data_name.find_last_of(L'.')) + L".msk";
 	return mask_name;
 }
 
 std::wstring OIFReader::GetCurLabelName(int t, int c)
 {
 	std::wstring data_name = m_oif_info[t].dataset[c][0];
-	std::wstring label_name = data_name.substr(0, data_name.find_last_of('.')) + L".lbl";
+	std::wstring label_name = data_name.substr(0, data_name.find_last_of(L'.')) + L".lbl";
 	return label_name;
 }
 

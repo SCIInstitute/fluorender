@@ -410,7 +410,7 @@ std::wstring NRRDReader::GetCurMaskName(int t, int c)
 		mask_name = data_name.substr(0, data_name.find_last_of('.')) + L".msk";
 		return mask_name;
 	}
-	mask_name = m_path_name.substr(0, m_path_name.find_last_of('.'));
+	mask_name = m_path_name.substr(0, m_path_name.find_last_of(L'.'));
 	if (m_time_num > 1) mask_name += L"_T" + std::to_wstring(t);
 	if (m_chan_num > 1) mask_name += L"_C" + std::to_wstring(c);
 	mask_name += L".msk";
@@ -426,7 +426,7 @@ std::wstring NRRDReader::GetCurLabelName(int t, int c)
 		std::wstring label_name = data_name.substr(0, data_name.find_last_of('.')) + L".lbl";
 		return label_name;
 	}
-	label_name = m_path_name.substr(0, m_path_name.find_last_of('.'));
+	label_name = m_path_name.substr(0, m_path_name.find_last_of(L'.'));
 	if (m_time_num > 1) label_name += L"_T" + std::to_wstring(t);
 	if (m_chan_num > 1) label_name += L"_C" + std::to_wstring(c);
 	label_name += L".lbl";

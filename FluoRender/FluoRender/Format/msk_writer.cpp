@@ -66,7 +66,7 @@ void MSKWriter::Save(const std::wstring& filename, int mode)
 	if (!m_data)
 		return;
 
-	//int64_t pos = filename.find_last_of('.');
+	//int64_t pos = filename.find_last_of(L'.');
 	//if (pos == -1)
 	//	return;
 	//wstring str_name = filename.substr(0, pos);

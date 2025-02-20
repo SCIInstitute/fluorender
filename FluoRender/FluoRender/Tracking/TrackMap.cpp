@@ -199,7 +199,6 @@ void TrackMapProcessor::RefineMap(int t, bool erase_v)
 		WriteInfo(L"Refining track map for all time points.\n");
 	else
 		WriteInfo(L"Refining track map at time point " + std::to_wstring(t) + L"\n");
-	//wxGetApp().Yield();
 
 	//start progress
 	bool clear_counters = false;
@@ -248,7 +247,6 @@ void TrackMapProcessor::RefineMap(int t, bool erase_v)
 			ProcessFrames(i, i + 1, erase_v);
 			ProcessFrames(i + 1, i, erase_v);
 			WriteInfo(L"Time point " + std::to_wstring(i + 1) + L" processed.\n");
-			//wxGetApp().Yield();
 		}
 	}
 
@@ -258,13 +256,11 @@ void TrackMapProcessor::RefineMap(int t, bool erase_v)
 		if (t < 0)
 		{
 			WriteInfo(L"Set colors for frame 0\n");
-			//wxGetApp().Yield();
 			MakeConsistent(0);
 			//remaining frames
 			for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
 			{
 				WriteInfo(L"Set colors for frame " + std::to_wstring(fi) + L"\n");
-				//wxGetApp().Yield();
 				MakeConsistent(fi - 1, fi);
 			}
 		}
@@ -5229,7 +5225,6 @@ void TrackMapProcessor::ConvertConsistent()
 		return;
 
 	WriteInfo(L"Generating consistent IDs in");
-	//wxGetApp().Yield();
 
 	flrd::pTrackMap track_map = trkg->GetTrackMap();
 	SetTrackMap(track_map);
@@ -5245,14 +5240,12 @@ void TrackMapProcessor::ConvertConsistent()
 	glbin_cache_queue.set_max_size(2);
 
 	WriteInfo(L"Frame 0\n");
-	//wxGetApp().Yield();
 	MakeConsistent(0);
 
 	//remaining frames
 	for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
 	{
 		WriteInfo(L"Frame " + std::to_wstring(fi) + L"\n");
-		//wxGetApp().Yield();
 		MakeConsistent(fi - 1, fi);
 	}
 }

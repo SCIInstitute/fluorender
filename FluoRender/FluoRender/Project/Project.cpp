@@ -240,11 +240,11 @@ void Project::Open(const std::wstring& filename)
 							int type;
 							float left_x, left_y, width, height, offset1, offset2, gamma;
 							wchar_t token[256] = {};
-							token[255] = '\0';
+							token[255] = L'\0';
 							const wchar_t* sstr = str.wc_str();
 							std::wstringstream ss(sstr);
 							ss.read(token, 255);
-							wchar_t c = 'x';
+							wchar_t c = L'x';
 							while (!isspace(c)) ss.read(&c, 1);
 							ss >> type >> left_x >> left_y >> width >>
 								height >> offset1 >> offset2 >> gamma;

@@ -273,7 +273,7 @@ namespace fluo
 		//project
 		Project& get_project() { return project_; }
 
-		wxString& get_help_url() { return help_url_; }
+		std::string& get_help_url() { return help_url_; }
 
 	private:
 		static Global instance_;
@@ -363,7 +363,7 @@ namespace fluo
 		Project project_;
 
 		//help url
-		wxString help_url_;
+		std::string help_url_;
 
 	private:
 		Global();

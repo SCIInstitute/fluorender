@@ -2342,7 +2342,7 @@ void ComponentGenerator::StopTimer(const std::string& str)
 				m_tps.back() - t0);
 
 		m_values += str + L"\t";
-		m_values += wxString::Format("%.4f", time_span.count());
+		m_values += std::to_wstring(time_span.count());
 		m_values += L" sec.\n";
 	}
 }

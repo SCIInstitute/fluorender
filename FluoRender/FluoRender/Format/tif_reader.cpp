@@ -1304,17 +1304,17 @@ std::wstring TIFReader::GetCurMaskName(int t, int c)
 		if (t >= 0 && t < (int)m_4d_seq.size())
 		{
 			std::wstring data_name = (m_4d_seq[t].slices)[0].slice;
-			woss << data_name.substr(0, data_name.find_last_of('.'));
-			if (m_chan_num > 1) woss << "_C" << c;
-			woss << ".msk";
+			woss << data_name.substr(0, data_name.find_last_of(L'.'));
+			if (m_chan_num > 1) woss << L"_C" << c;
+			woss << L".msk";
 			mask_name = woss.str();
 			return mask_name;
 		}
 	}
-	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
-	if (m_time_num > 1) woss << "_T" << t;
-	if (m_chan_num > 1) woss << "_C" << c;
-	woss << ".msk";
+	woss << m_path_name.substr(0, m_path_name.find_last_of(L'.'));
+	if (m_time_num > 1) woss << L"_T" << t;
+	if (m_chan_num > 1) woss << L"_C" << c;
+	woss << L".msk";
 	mask_name = woss.str();
 	return mask_name;
 }
@@ -1328,17 +1328,17 @@ std::wstring TIFReader::GetCurLabelName(int t, int c)
 		if (t >= 0 && t < (int)m_4d_seq.size())
 		{
 			std::wstring data_name = (m_4d_seq[t].slices)[0].slice;
-			woss << data_name.substr(0, data_name.find_last_of('.'));
-			if (m_chan_num > 1) woss << "_C" << c;
-			woss << ".lbl";
+			woss << data_name.substr(0, data_name.find_last_of(L'.'));
+			if (m_chan_num > 1) woss << L"_C" << c;
+			woss << L".lbl";
 			label_name = woss.str();
 			return label_name;
 		}
 	}
-	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
-	if (m_time_num > 1) woss << "_T" << t;
-	if (m_chan_num > 1) woss << "_C" << c;
-	woss << ".lbl";
+	woss << m_path_name.substr(0, m_path_name.find_last_of(L'.'));
+	if (m_time_num > 1) woss << L"_T" << t;
+	if (m_chan_num > 1) woss << L"_C" << c;
+	woss << L".lbl";
 	label_name = woss.str();
 	return label_name;
 }

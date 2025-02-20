@@ -114,12 +114,12 @@ int LBLReader::LoadBatch(int index)
 
 Nrrd* LBLReader::Convert(int t, int c, bool get_max)
 {
-	int64_t pos = m_path_name.find_last_of('.');
+	int64_t pos = m_path_name.find_last_of(L'.');
 	if (pos == -1)
 		return 0;
 	std::wstring str_name = m_path_name.substr(0, pos);
 	std::wostringstream strs;
-	strs << str_name /*<< "_t" << t << "_c" << c*/ << ".lbl";
+	strs << str_name /*<< "_t" << t << "_c" << c*/ << L".lbl";
 	str_name = strs.str();
 	FILE* lbl_file = 0;
 	if (!WFOPEN(&lbl_file, str_name.c_str(), L"rb"))

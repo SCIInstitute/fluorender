@@ -444,17 +444,17 @@ void VolumeSelector::Erase()
 	if (!m_vd)
 		m_vd = glbin_current.vol_data;
 	int mode = 6;
-	wxString vd_name;
+	std::wstring vd_name;
 	if (m_vd)
-		vd_name = vd_name;
-	if (vd_name.Find("_DELETED") != wxNOT_FOUND)
+		vd_name = m_vd->GetName();
+	if (vd_name.find(L"_DELETED") != std::wstring::npos)
 		mode = 7;
-	wxString group_name;
+	std::wstring group_name;
 	DataGroup* group = glbin_current.vol_group;
 	if (group)
 		group_name = group->GetName();
 	glbin_vol_calculator.SetVolumeA(m_vd);
-	glbin_vol_calculator.CalculateGroup(mode, group_name.ToStdWstring());
+	glbin_vol_calculator.CalculateGroup(mode, group_name);
 }
 
 //extract a new volume of the selection
@@ -462,12 +462,12 @@ void VolumeSelector::Extract()
 {
 	if (!m_vd)
 		m_vd = glbin_current.vol_data;
-	wxString group_name;
+	std::wstring group_name;
 	DataGroup* group = glbin_current.vol_group;
 	if (group)
 		group_name = group->GetName();
 	glbin_vol_calculator.SetVolumeA(m_vd);
-	glbin_vol_calculator.CalculateGroup(5, group_name.ToStdWstring());
+	glbin_vol_calculator.CalculateGroup(5, group_name);
 }
 
 double VolumeSelector::HueCalculation(int mode, unsigned int label)
