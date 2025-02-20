@@ -47,6 +47,7 @@ MainSettings::MainSettings()
 	m_save_compress = false;
 	m_override_vox = true;
 	m_last_tool = 0;
+	m_config_file_type = 0;
 
 	m_slice_sequence = false;
 	m_chann_sequence = false;
@@ -215,6 +216,7 @@ void MainSettings::Read()
 		fconfig.Read("save compress", &m_save_compress, false);
 		fconfig.Read("override vox", &m_override_vox, true);
 		fconfig.Read("last tool", &m_last_tool, 0);
+		fconfig.Read("config file type", &m_config_file_type, 0);
 	}
 	//image
 	if (fconfig.Exists("/image"))
@@ -475,6 +477,7 @@ void MainSettings::Save()
 	fconfig.Write("save compress", m_save_compress);
 	fconfig.Write("override vox", m_override_vox);
 	fconfig.Write("last tool", m_last_tool);
+	fconfig.Write("config file type", m_config_file_type);
 
 	//image
 	fconfig.SetPath("/image");

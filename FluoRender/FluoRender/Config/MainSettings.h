@@ -94,6 +94,7 @@ public:
 	bool m_save_compress;	//save tif compressed
 	bool m_override_vox;
 	int m_last_tool;		//last tool
+	int m_config_file_type;	//0:ini, 1:xml, 2:json
 
 	bool m_slice_sequence;	//if slices are sequence
 	bool m_chann_sequence;	//read channels

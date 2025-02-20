@@ -74,6 +74,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Project.h>
 #include <BaseXrRenderer.h>
 #include <JVMInitializer.h>
+#include <TreeFileFactory.h>
 
 #define glbin fluo::Global::instance()
 #define glbin_cache_queue fluo::Global::instance().get_cache_queue()
@@ -82,6 +83,8 @@ DEALINGS IN THE SOFTWARE.
 	RegisterCacheQueueFuncs(\
 	std::bind(&read_func, obj, std::placeholders::_1),\
 	std::bind(&del_func, obj, std::placeholders::_1))
+//config file handlers
+#define glbin_tree_file_factory fluo::Global::instance().get_tree_file_factory()
 //settings
 #define glbin_settings fluo::Global::instance().get_settings()
 #define glbin_brush_def fluo::Global::instance().get_brush_def()
@@ -158,6 +161,9 @@ namespace fluo
 		static Global& instance() { return instance_; }
 
 		flrd::CacheQueue& get_cache_queue() { return cache_queue_; }
+
+		//config file handlers
+		TreeFileFactory& get_tree_file_factor() { return tree_file_factory_; }
 
 		//video encoder
 		QVideoEncoder& get_video_encoder() { return encoder_; }
@@ -277,6 +283,9 @@ namespace fluo
 
 	private:
 		static Global instance_;
+
+		//config file handlers
+		TreeFileFactory tree_file_factory_;
 
 		flrd::CacheQueue cache_queue_;
 
