@@ -116,7 +116,7 @@ KeyListCtrl::~KeyListCtrl()
 {
 }
 
-void KeyListCtrl::Append(int id, int time, int duration, int interp, const std::string& description)
+void KeyListCtrl::Append(int id, int time, int duration, int interp, const std::wstring& description)
 {
 	long tmp = InsertItem(GetItemCount(), wxString::Format("%d", id), 0);
 	SetItem(tmp, 1, wxString::Format("%d", time));
@@ -161,7 +161,7 @@ void KeyListCtrl::Update()
 		int time = glbin_interpolator.GetKeyTime(i);
 		int duration = glbin_interpolator.GetKeyDuration(i);
 		int interp = glbin_interpolator.GetKeyType(i);
-		std::string desc = glbin_interpolator.GetKeyDesc(i);
+		std::wstring desc = glbin_interpolator.GetKeyDesc(i);
 		Append(id, time, duration, interp, desc);
 	}
 
@@ -180,7 +180,7 @@ void KeyListCtrl::UpdateText()
 		int time = glbin_interpolator.GetKeyTime(i);
 		int duration = glbin_interpolator.GetKeyDuration(i);
 		int interp = glbin_interpolator.GetKeyType(i);
-		std::string desc = glbin_interpolator.GetKeyDesc(i);
+		std::wstring desc = glbin_interpolator.GetKeyDesc(i);
 
 		wxString wx_id = wxString::Format("%d", id);
 		wxString wx_time = wxString::Format("%d", time);
@@ -351,7 +351,7 @@ void KeyListCtrl::OnDescritionText(wxCommandEvent& event)
 	if (keygroup)
 	{
 		str = m_description_text->GetValue();
-		keygroup->desc = str.ToStdString();
+		keygroup->desc = str.ToStdWstring();
 		SetText(m_editing_item, 4, str);
 	}
 }
@@ -1484,16 +1484,16 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstScriptList))
 	{
 		m_script_list->DeleteAllItems();
-		std::vector<std::string> list;
-		std::string filename;
+		std::vector<std::wstring> list;
+		std::wstring filename;
 		long tmp;
 		if (GetScriptFiles(list))
 		{
 			for (size_t i = 0; i < list.size(); ++i)
 			{
 				std::filesystem::path p(list[i]);
-				filename = p.stem().string();
-				tmp = m_script_list->InsertItem(i, std::to_string(i + 1), 0);
+				filename = p.stem().wstring();
+				tmp = m_script_list->InsertItem(i, std::to_wstring(i + 1), 0);
 				m_script_list->SetItem(tmp, 1, filename);
 			}
 			m_script_list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
@@ -1503,7 +1503,7 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstScriptSelect))
 	{
-		std::vector<std::string> list;
+		std::vector<std::wstring> list;
 		if (GetScriptFiles(list))
 		{
 			int idx = -1;
@@ -1676,7 +1676,7 @@ void MoviePanel::DecFrame()
 	FluoRefresh(2, vc, { glbin_mov_def.m_view_idx });
 }
 
-void MoviePanel::Save(const std::string& filename)
+void MoviePanel::Save(const std::wstring& filename)
 {
 	if (glbin_moviemaker.IsRunning())
 		return;
@@ -1865,7 +1865,7 @@ void MoviePanel::OnSave(wxCommandEvent& event)
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		Save(fopendlg->GetPath().ToStdString());
+		Save(fopendlg->GetPath().ToStdWstring());
 	}
 	delete fopendlg;
 }
@@ -2201,7 +2201,7 @@ void MoviePanel::OnSbSpinDown(wxSpinEvent& event)
 void MoviePanel::OnRunScriptChk(wxCommandEvent& event)
 {
 	bool val = m_run_script_chk->GetValue();
-	std::string str = m_script_file_text->GetValue().ToStdString();
+	std::wstring str = m_script_file_text->GetValue().ToStdWstring();
 	EnableScript(val, str);
 }
 
@@ -2227,7 +2227,7 @@ void MoviePanel::OnScriptFileBtn(wxCommandEvent& event)
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		std::string file = fopendlg->GetPath().ToStdString();
+		std::wstring file = fopendlg->GetPath().ToStdWstring();
 		glbin_settings.m_script_file = file;
 		m_script_file_text->ChangeValue(file);
 
@@ -2248,13 +2248,13 @@ void MoviePanel::OnScriptListSelected(wxListEvent& event)
 		wxString file = m_script_list->GetItemText(item, 1);
 		std::filesystem::path p = std::filesystem::current_path();
 		p = p / "Scripts" / (file.ToStdString() + ".txt");
-		std::string filename = p.string();
+		std::wstring filename = p.wstring();
 		m_script_file_text->ChangeValue(filename);
 		EnableScript(true, filename);
 	}
 }
 
-size_t MoviePanel::GetScriptFiles(std::vector<std::string>& list)
+size_t MoviePanel::GetScriptFiles(std::vector<std::wstring>& list)
 {
 	std::filesystem::path p = std::filesystem::current_path();
 	p /=  "Scripts";
@@ -2263,7 +2263,7 @@ size_t MoviePanel::GetScriptFiles(std::vector<std::string>& list)
 	{
 		if (entry.is_regular_file() && entry.path().extension() == ".txt")
 		{
-			list.push_back(entry.path().string());
+			list.push_back(entry.path().wstring());
 		}
 	}
 
@@ -2272,7 +2272,7 @@ size_t MoviePanel::GetScriptFiles(std::vector<std::string>& list)
 	return list.size();
 }
 
-void MoviePanel::EnableScript(bool val, const std::string& filename)
+void MoviePanel::EnableScript(bool val, const std::wstring& filename)
 {
 	glbin_settings.m_run_script = val;
 	glbin_settings.m_script_file = filename;

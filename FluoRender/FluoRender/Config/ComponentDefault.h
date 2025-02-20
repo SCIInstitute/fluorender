@@ -43,8 +43,8 @@ public:
 	ComponentDefault();
 	~ComponentDefault();
 
-	void Read(const std::string& filename);
-	void Save(const std::string& filename);
+	void Read(const std::wstring& filename);
+	void Save(const std::wstring& filename);
 	void Read(wxFileConfig& f);
 	void Save(wxFileConfig& f);
 	void Set(flrd::ComponentGenerator* cg);

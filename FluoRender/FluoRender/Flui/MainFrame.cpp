@@ -781,14 +781,14 @@ MainFrame::MainFrame(
 	//python
 	flrd::PyBase::SetHighVer(glbin_settings.m_python_ver);
 	//font
-	std::string font_file = glbin_settings.m_font_file;
+	std::wstring font_file = glbin_settings.m_font_file;
 	std::filesystem::path p = std::filesystem::current_path();
 	p /= "Fonts";
 	if (font_file != "")
 		p /= font_file;
 	else
 		p /= "FreeSans.ttf";
-	font_file = p.string();
+	font_file = p.wstring();
 	glbin_text_tex_manager.load_face(font_file);
 	glbin_text_tex_manager.SetSize(glbin_settings.m_text_size);
 
@@ -980,7 +980,7 @@ RenderCanvas* MainFrame::GetRenderCanvas(int index)
 	return 0;
 }
 
-RenderCanvas* MainFrame::GetRenderCanvas(const std::string& name)
+RenderCanvas* MainFrame::GetRenderCanvas(const std::wstring& name)
 {
 	for (size_t i=0; i < m_render_view_panels.size(); ++i)
 	{
@@ -2159,10 +2159,10 @@ void MainFrame::OpenVolume()
 	{
 		wxArrayString paths;
 		fopendlg->GetPaths(paths);
-		std::vector<std::string> std_filenames;
+		std::vector<std::wstring> std_filenames;
 		std_filenames.reserve(paths.size());
 		for (const auto& filename : paths) {
-			std_filenames.push_back(std::string(filename.mb_str()));
+			std_filenames.push_back(filename.ToStdWstring());
 		}
 		glbin_data_manager.LoadVolumes(std_filenames, false);
 	}
@@ -2182,10 +2182,10 @@ void MainFrame::ImportVolume()
 	{
 		wxArrayString paths;
 		fopendlg->GetPaths(paths);
-		std::vector<std::string> std_filenames;
+		std::vector<std::wstring> std_filenames;
 		std_filenames.reserve(paths.size());
 		for (const auto& filename : paths) {
-			std_filenames.push_back(std::string(filename.mb_str()));
+			std_filenames.push_back(filename.ToStdWstring());
 		}
 		glbin_data_manager.LoadVolumes(std_filenames, true);
 	}
@@ -2204,10 +2204,10 @@ void MainFrame::OpenMesh()
 	{
 		wxArrayString files;
 		fopendlg->GetPaths(files);
-		std::vector<std::string> std_filenames;
+		std::vector<std::wstring> std_filenames;
 		std_filenames.reserve(files.size());
 		for (const auto& filename : files) {
-			std_filenames.push_back(std::string(filename.mb_str()));
+			std_filenames.push_back(filename.ToStdWstring());
 		}
 		glbin_data_manager.LoadMeshes(std_filenames);
 	}
@@ -2232,7 +2232,7 @@ void MainFrame::OpenProject()
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		std::string path = fopendlg->GetPath().ToStdString();
+		std::wstring path = fopendlg->GetPath().ToStdWstring();
 		glbin_project.Open(path);
 		FluoUpdate({ gstMainFrameTitle });
 	}
@@ -2242,7 +2242,7 @@ void MainFrame::OpenProject()
 
 void MainFrame::SaveProject()
 {
-	std::string default_path = glbin_data_manager.GetProjectFile();
+	std::wstring default_path = glbin_data_manager.GetProjectFile();
 	if (default_path.empty())
 	{
 		SaveAsProject();
@@ -2257,21 +2257,21 @@ void MainFrame::SaveProject()
 
 void MainFrame::SaveAsProject()
 {
-	std::string default_path = glbin_data_manager.GetProjectFile();
-	std::string path;
-	std::string filename;
+	std::wstring default_path = glbin_data_manager.GetProjectFile();
+	std::wstring path;
+	std::wstring filename;
 	bool default_valid = SEP_PATH_NAME(default_path, path, filename);
 
 	ModalDlg* fopendlg = new ModalDlg(
 		this, "Save Project File",
-		default_valid ? path : "", default_valid ? filename : "",
+		default_valid ? path : L"", default_valid ? filename : L"",
 		"*.vrp", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 	fopendlg->SetExtraControlCreator(CreateExtraControlProjectSave);
 
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		filename = fopendlg->GetPath().ToStdString();
+		filename = fopendlg->GetPath().ToStdWstring();
 		glbin_project.Save(filename, false);
 		FluoUpdate({ gstMainFrameTitle });
 	}

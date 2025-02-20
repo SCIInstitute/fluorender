@@ -79,14 +79,14 @@ public:
 	void UpdateTrackList();
 	void UpdateTracks();
 
-	void LoadTrackFile(const std::string &file);
+	void LoadTrackFile(const std::wstring &file);
 	bool SaveTrackFile();
-	void SaveTrackFile(const std::string &file);
+	void SaveTrackFile(const std::wstring &file);
 	void SaveasTrackFile();
 	void DeleteSelection(int type);
 
 	//output
-	void WriteInfo(const std::string& str);
+	void WriteInfo(const std::wstring& str);
 
 private:
 	typedef struct

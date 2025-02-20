@@ -40,7 +40,7 @@ Ruler::Ruler()
 	m_id = m_num;
 	m_group = 0;
 	m_num++;
-	m_name = "Ruler " + std::to_string(m_num);
+	m_name = L"Ruler " + std::to_wstring(m_num);
 	m_disp = true;
 	m_tform.load_identity();
 	m_ruler_type = 0;

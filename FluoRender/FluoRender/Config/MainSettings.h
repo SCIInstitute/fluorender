@@ -70,14 +70,7 @@ public:
 	void Read();
 	void Save();
 
-	std::vector<std::string> GetJvmArgs()
-	{
-		std::vector<std::string> args;
-		args.push_back(ws2s(m_jvm_path));
-		args.push_back(ws2s(m_ij_path));
-		args.push_back(ws2s(m_bioformats_path));
-		return args;
-	}
+	std::vector<std::string> GetJvmArgs();
 	void GetMemorySettings();
 
 	BrushDefault m_brush_def;

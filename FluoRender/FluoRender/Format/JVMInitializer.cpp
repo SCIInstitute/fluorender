@@ -140,7 +140,7 @@ bool JVMInitializer::create_JVM(const std::vector<std::string>& args)
 					cont = dir.GetNext(&filename);
 				}
 				//Checking for jvm path.
-				if (wxIsEmpty(jvm_path))
+				if (jvm_path.empty())
 				{
 					p = ij_path;
 					p /= "java";

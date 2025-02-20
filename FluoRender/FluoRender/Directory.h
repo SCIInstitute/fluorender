@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include <string>
 #include <filesystem>
+#include <cwchar>
 
 #if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
@@ -43,21 +44,29 @@ DEALINGS IN THE SOFTWARE.
 #include <mach-o/dyld.h>
 #endif
 
-std::string getExecutablePath() {
-	char buffer[1024];
+std::wstring getExecutablePath() {
+	wchar_t buffer[1024];
 #if defined(_WIN32)
-	GetModuleFileNameA(NULL, buffer, sizeof(buffer));
+	GetModuleFileNameW(NULL, buffer, sizeof(buffer) / sizeof(wchar_t));
 #elif defined(__linux__)
-	readlink("/proc/self/exe", buffer, sizeof(buffer));
+	char tempBuffer[1024];
+	readlink("/proc/self/exe", tempBuffer, sizeof(tempBuffer));
+	std::mbstate_t state = std::mbstate_t();
+	const char* src = tempBuffer;
+	std::size_t len = std::mbsrtowcs(buffer, &src, sizeof(buffer) / sizeof(wchar_t), &state);
 #elif defined(__APPLE__)
-	uint32_t size = sizeof(buffer);
-	_NSGetExecutablePath(buffer, &size);
+	char tempBuffer[1024];
+	uint32_t size = sizeof(tempBuffer);
+	_NSGetExecutablePath(tempBuffer, &size);
+	std::mbstate_t state = std::mbstate_t();
+	const char* src = tempBuffer;
+	std::size_t len = std::mbsrtowcs(buffer, &src, sizeof(buffer) / sizeof(wchar_t), &state);
 #endif
-	std::string str(buffer);
-	std::filesystem::path p(str);
+	std::wstring wstr(buffer);
+	std::filesystem::path p(wstr);
 	p = p.parent_path();
-	str = p.string();
-	return str;
+	wstr = p.wstring();
+	return wstr;
 }
 
 #endif//_DIRECTORY_H_

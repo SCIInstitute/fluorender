@@ -113,7 +113,7 @@ ComponentDefault::~ComponentDefault()
 
 }
 
-void ComponentDefault::Read(const std::string& filename)
+void ComponentDefault::Read(const std::wstring& filename)
 {
 	wxFileInputStream is(filename);
 	if (!is.IsOk())
@@ -123,7 +123,7 @@ void ComponentDefault::Read(const std::string& filename)
 	Read(fconfig);
 }
 
-void ComponentDefault::Save(const std::string& filename)
+void ComponentDefault::Save(const std::wstring& filename)
 {
 	std::string app_name = "FluoRender " +
 		std::format("{}.{}", VERSION_MAJOR, std::format("{:.1f}", float(VERSION_MINOR)));

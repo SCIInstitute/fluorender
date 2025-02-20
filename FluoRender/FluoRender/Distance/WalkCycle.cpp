@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <WalkCycle.h>
+#include <compatibility.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -83,7 +84,7 @@ void WalkCycle::ReadData(const std::wstring& name)
 				else //point index
 				{
 					WcName wcn;
-					wcn.s = entry[1];
+					wcn.s = s2ws(entry[1]);
 					wcn.n = 0;
 					wcn.d = 0;
 					names_.push_back(wcn);
@@ -154,7 +155,7 @@ void WalkCycle::SaveData(const std::wstring& name)
 	for (size_t i = 0; i < names_.size(); ++i)
 	{
 		//name
-		f << i + 1 << ", " << names_[i].s << std::endl;
+		f << i + 1 << ", " << ws2s(names_[i].s) << std::endl;
 		for (size_t j = 0; j < names_[i].n; ++j)
 		{
 			//sn
@@ -547,7 +548,7 @@ void WalkCycle::SaveCycle(const std::wstring& name)
 	for (size_t i = 0; i < names_.size(); ++i)
 	{
 		//name
-		f << i + 1 << ", " << names_[i].s << std::endl;
+		f << i + 1 << ", " << ws2s(names_[i].s) << std::endl;
 		for (size_t j = 0; j < names_[i].n; ++j)
 		{
 			//sn
@@ -664,7 +665,7 @@ void WalkCycle::SaveDist(const std::wstring& name)
 	for (size_t i = 0; i < names_.size(); ++i)
 	{
 		//name
-		f << i + 1 << ", " << names_[i].s << std::endl;
+		f << i + 1 << ", " << ws2s(names_[i].s) << std::endl;
 		for (size_t j = 0; j < names_[i].n; ++j)
 		{
 			//sn
@@ -708,7 +709,7 @@ void WalkCycle::SaveAligned(const std::wstring& name)
 	for (size_t i = 0; i < names_.size(); ++i)
 	{
 		//name
-		f << i + 1 << ", " << names_[i].s << std::endl;
+		f << i + 1 << ", " << ws2s(names_[i].s) << std::endl;
 		for (size_t j = 0; j < names_[i].n; ++j)
 		{
 			//sn

@@ -1018,7 +1018,7 @@ void TrackDlg::UpdateTracks()
 	Thaw();
 }
 
-void TrackDlg::LoadTrackFile(const std::string& file)
+void TrackDlg::LoadTrackFile(const std::wstring& file)
 {
 	RenderCanvas* canvas = glbin_current.canvas;
 	canvas->LoadTrackGroup(file);
@@ -1033,13 +1033,13 @@ bool TrackDlg::SaveTrackFile()
 	TrackGroup* trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return false;
-	std::string str = trkg->GetPath();
+	std::wstring str = trkg->GetPath();
 	if (std::filesystem::exists(str))
 		return canvas->SaveTrackGroup(str);
 	return false;
 }
 
-void TrackDlg::SaveTrackFile(const std::string& file)
+void TrackDlg::SaveTrackFile(const std::wstring& file)
 {
 	RenderCanvas* canvas = glbin_current.canvas;
 	canvas->SaveTrackGroup(file);
@@ -1054,7 +1054,7 @@ void TrackDlg::SaveasTrackFile()
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		std::string filename = fopendlg->GetPath().ToStdString();
+		std::wstring filename = fopendlg->GetPath().ToStdWstring();
 		SaveTrackFile(filename);
 	}
 
@@ -1074,7 +1074,7 @@ void TrackDlg::DeleteSelection(int type)
 		m_active_list->DeleteSelection();
 }
 
-void TrackDlg::WriteInfo(const std::string& str)
+void TrackDlg::WriteInfo(const std::wstring& str)
 {
 	(*m_stat_text) << str;
 }
@@ -1096,7 +1096,7 @@ void TrackDlg::OnLoadTrace(wxCommandEvent& event)
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		std::string filename = fopendlg->GetPath().ToStdString();
+		std::wstring filename = fopendlg->GetPath().ToStdWstring();
 		LoadTrackFile(filename);
 	}
 
@@ -1123,7 +1123,7 @@ void TrackDlg::OnGenMapBtn(wxCommandEvent& event)
 	glbin_settings.m_run_script = true;
 	std::filesystem::path p = std::filesystem::current_path();
 	p = p / "Scripts" / "track_selected_results.txt";
-	glbin_settings.m_script_file = p.string();
+	glbin_settings.m_script_file = p.wstring();
 	m_frame->UpdateProps({ gstMovPlay, gstRunScript, gstScriptFile, gstScriptSelect });
 }
 

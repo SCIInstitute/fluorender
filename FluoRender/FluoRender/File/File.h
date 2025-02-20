@@ -76,7 +76,7 @@ namespace flrd
 			if (ofs_.bad()) return;
 			ofs_.write(s.c_str(), s.size());
 		}
-		void writeString(const std::wstring& s);
+		void writeWstring(const std::wstring& s);
 		template<typename T>
 		void writeVector(const std::vector<T>& v)
 		{
@@ -99,6 +99,15 @@ namespace flrd
 			char* buf = new char[l + 1]();
 			ifs_.read(buf, l);
 			std::string str(buf);
+			delete[] buf;
+			return str;
+		}
+		std::wstring readWstring(size_t l)
+		{
+			if (ifs_.bad()) return L"";
+			wchar_t* buf = new wchar_t[l + 1]();
+			ifs_.read((char*)buf, l * sizeof(wchar_t));
+			std::wstring str(buf);
 			delete[] buf;
 			return str;
 		}

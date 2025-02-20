@@ -71,8 +71,8 @@ public:
 	virtual void UpdateTopList();
 	virtual void UpdateBotList() {};
 	virtual void AutoLoadTable() = 0;
-	virtual void LoadTable(const std::string& filename) = 0;
-	virtual void SaveTable(const std::string& filename) = 0;
+	virtual void LoadTable(const std::wstring& filename) = 0;
+	virtual void SaveTable(const std::wstring& filename) = 0;
 	virtual void SetAutoStart(bool bval) { m_auto_start_check->SetValue(bval); }
 
 protected:
@@ -99,12 +99,12 @@ protected:
 	wxButton* m_apply_rec_btn;
 
 	bool m_record;//state for recording
-	std::string m_dir;//dir for searching tables
-	std::string m_ext;//file extension for tables
-	std::string m_exepath;//path to executable
+	std::wstring m_dir;//dir for searching tables
+	std::wstring m_ext;//file extension for tables
+	std::wstring m_exepath;//path to executable
 
 protected:
-	virtual bool MatchTableName(std::string& name);
+	virtual bool MatchTableName(std::wstring& name);
 	virtual void EvenSizeBotGrid();
 	//
 	virtual void OnNewTable(wxCommandEvent& event) = 0;
@@ -137,8 +137,8 @@ public:
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	virtual void UpdateBotList();
 	virtual void AutoLoadTable();
-	virtual void LoadTable(const std::string& filename);
-	virtual void SaveTable(const std::string& filename);
+	virtual void LoadTable(const std::wstring& filename);
+	virtual void SaveTable(const std::wstring& filename);
 	virtual void SetAutoStart(bool bval);
 
 protected:
@@ -171,8 +171,8 @@ public:
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	virtual void UpdateBotList();
 	virtual void AutoLoadTable();
-	virtual void LoadTable(const std::string& filename);
-	virtual void SaveTable(const std::string& filename);
+	virtual void LoadTable(const std::wstring& filename);
+	virtual void SaveTable(const std::wstring& filename);
 	virtual void SetAutoStart(bool bval);
 
 protected:

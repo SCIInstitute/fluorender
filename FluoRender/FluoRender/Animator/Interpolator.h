@@ -44,7 +44,7 @@ typedef struct
 	double dt;	//duration
 	int type;	//interpolation method: 0-linear; 1-spline
 	std::vector<FlKey*> keys; //keys
-	std::string desc;//descriptions
+	std::wstring desc;//descriptions
 } FlKeyGroup;
 
 class Interpolator
@@ -73,7 +73,7 @@ public:
 	double GetKeyTime(int index);
 	double GetKeyDuration(int index);
 	int GetKeyType(int index);
-	std::string GetKeyDesc(int index);
+	std::wstring GetKeyDesc(int index);
 	int GetLastIndex()
 	{ return (int)m_key_list.size() - 1;}
 	std::vector<FlKeyGroup*>* GetKeyList()

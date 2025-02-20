@@ -391,7 +391,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		if (!m_result)
 		{
 			m_result = new VolumeData();
-			std::string name, path;
+			std::wstring name, path;
 			if (type == SDT_Data)
 				m_result->Load(nrrd_result, name, path);
 		}

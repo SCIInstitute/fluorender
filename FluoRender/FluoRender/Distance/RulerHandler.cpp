@@ -1039,7 +1039,7 @@ void RulerHandler::AddAverage(const std::set<int>& rulers)
 	avg /= double(count);
 	flrd::Ruler* ruler = new flrd::Ruler();
 	ruler->SetRulerType(2);
-	ruler->SetName("Average");
+	ruler->SetName(L"Average");
 	ruler->AddPoint(avg);
 	ruler->SetTransient(false);
 	ruler->SetTransTime(0);
@@ -2071,6 +2071,36 @@ bool RulerHandler::GetRulerPointNames(std::vector<std::wstring>& names)
 			{
 				str = name + L"_" + std::to_wstring(j + 1);
 				names.push_back(str);
+			}
+		}
+	}
+	return true;
+}
+
+bool RulerHandler::GetRulerPointNames(std::vector<std::string>& names)
+{
+	RulerList* list = glbin_current.GetRulerList();
+	if (!list || list->empty())
+		return false;
+
+	names.clear();
+	for (auto i : *list)
+	{
+		if (!i)
+			continue;
+		int rpn = i->GetNumPoint();
+		std::wstring name = i->GetName();
+		std::wstring str;
+		if (rpn == 1)
+		{
+			names.push_back(ws2s(name));
+		}
+		else if (rpn > 1)
+		{
+			for (size_t j = 0; j < rpn; ++j)
+			{
+				str = name + L"_" + std::to_wstring(j + 1);
+				names.push_back(ws2s(str));
 			}
 		}
 	}

@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-void CombineList::SetName(const std::string &name)
+void CombineList::SetName(const std::wstring &name)
 {
 	m_name = name;
 }
@@ -56,8 +56,8 @@ int CombineList::Execute()
 	(*m_channs.begin())->GetSpacings(m_spcx, m_spcy, m_spcz);
 	m_bits = (*m_channs.begin())->GetBits();
 	int brick_size = (*m_channs.begin())->GetTexture()->get_build_max_tex_size();
-	if (m_name == "")
-		m_name = "combined_volume";
+	if (m_name == L"")
+		m_name = L"combined_volume";
 
 	//red volume
 	VolumeData* vd_r = new VolumeData();
@@ -66,7 +66,7 @@ int CombineList::Execute()
 		m_spcx, m_spcy, m_spcz,
 		brick_size);
 	vd_r->SetSpcFromFile(true);
-	vd_r->SetName(m_name + "_CH_R");
+	vd_r->SetName(m_name + L"_CH_R");
 	//green volume
 	VolumeData* vd_g = new VolumeData();
 	vd_g->AddEmptyData(m_bits,
@@ -74,7 +74,7 @@ int CombineList::Execute()
 		m_spcx, m_spcy, m_spcz,
 		brick_size);
 	vd_g->SetSpcFromFile(true);
-	vd_g->SetName(m_name + "_CH_G");
+	vd_g->SetName(m_name + L"_CH_G");
 	//blue volume
 	VolumeData* vd_b = new VolumeData();
 	vd_b->AddEmptyData(m_bits,
@@ -82,7 +82,7 @@ int CombineList::Execute()
 		m_spcx, m_spcy, m_spcz,
 		brick_size);
 	vd_b->SetSpcFromFile(true);
-	vd_b->SetName(m_name + "_CH_B");
+	vd_b->SetName(m_name + L"_CH_B");
 
 	//get new data
 	//red volume

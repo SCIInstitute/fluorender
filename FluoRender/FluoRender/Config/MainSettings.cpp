@@ -43,7 +43,7 @@ MainSettings::MainSettings()
 
 	m_prj_save = false;
 	m_prj_save_inc = false;
-	m_time_id = "_T";
+	m_time_id = L"_T";
 	m_save_compress = false;
 	m_override_vox = true;
 	m_last_tool = 0;
@@ -62,7 +62,7 @@ MainSettings::MainSettings()
 	m_dpi = 72.0;
 	m_realtime_compress = false;
 	m_mov_bitrate = 20.0;
-	m_mov_filename = "output.mov";
+	m_mov_filename = L"output.mov";
 	m_fp_convert = false;
 	m_fp_min = 0;
 	m_fp_max = 1;
@@ -70,7 +70,7 @@ MainSettings::MainSettings()
 
 	m_script_break = true;
 	m_run_script = false;
-	m_script_file = "";
+	m_script_file = L"";
 
 	m_inverse_slider = false;
 	m_mulfunc = 0;
@@ -113,7 +113,7 @@ MainSettings::MainSettings()
 	m_show_cursor = true;
 	m_color_depth = 0;
 
-	m_font_file = "";
+	m_font_file = L"";
 	m_text_size = 12;
 	m_text_color = 0;
 
@@ -175,9 +175,9 @@ MainSettings::MainSettings()
 	m_contact_factor = 0.6;
 	m_similarity = 0.5;
 
-	m_jvm_path = "";
-	m_ij_path = "";
-	m_bioformats_path = "";
+	m_jvm_path = L"";
+	m_ij_path = L"";
+	m_bioformats_path = L"";
 	m_ij_mode = 0;
 
 	m_ml_auto_start_all = false;
@@ -211,7 +211,7 @@ void MainSettings::Read()
 		fconfig.Read("save project", &m_prj_save, false);
 		fconfig.Read("inc save", &m_prj_save_inc, false);
 		fconfig.Read("time id", &str, "_T");
-		m_time_id = str.ToStdString();
+		m_time_id = str.ToStdWstring();
 		fconfig.Read("save compress", &m_save_compress, false);
 		fconfig.Read("override vox", &m_override_vox, true);
 		fconfig.Read("last tool", &m_last_tool, 0);
@@ -235,7 +235,7 @@ void MainSettings::Read()
 		fconfig.Read("rt compress", &m_realtime_compress, false);
 		fconfig.Read("mov bitrate", &m_mov_bitrate, 20.0);
 		fconfig.Read("mov filename", &str, "output.mov");
-		m_mov_filename = str.ToStdString();
+		m_mov_filename = str.ToStdWstring();
 		fconfig.Read("fp convert", &m_fp_convert, false);
 		fconfig.Read("fp min", &m_fp_min, 0);
 		fconfig.Read("fp max", &m_fp_max, 1);
@@ -247,7 +247,7 @@ void MainSettings::Read()
 		fconfig.SetPath("/script");
 		fconfig.Read("script break", &m_script_break, true);
 		fconfig.Read("script file", &str, "");
-		m_mov_filename = str.ToStdString();
+		m_mov_filename = str.ToStdWstring();
 	}
 	//ui
 	if (fconfig.Exists("/ui"))
@@ -325,7 +325,7 @@ void MainSettings::Read()
 	{
 		fconfig.SetPath("/font");
 		fconfig.Read("font file", &str, "");
-		m_font_file = str.ToStdString();
+		m_font_file = str.ToStdWstring();
 		fconfig.Read("text size", &m_text_size, 12);
 		fconfig.Read("text color", &m_text_color, 0);
 	}
@@ -419,11 +419,11 @@ void MainSettings::Read()
 	{
 		fconfig.SetPath("/java");
 		fconfig.Read("jvm_path", &str, "");
-		m_jvm_path = str.ToStdString();
+		m_jvm_path = str.ToStdWstring();
 		fconfig.Read("ij_path", &str, "");
-		m_ij_path = str.ToStdString();
+		m_ij_path = str.ToStdWstring();
 		fconfig.Read("bioformats_path", &str, "");
-		m_bioformats_path = str.ToStdString();
+		m_bioformats_path = str.ToStdWstring();
 		fconfig.Read("ij_mode", &m_ij_mode, 0);
 	}
 	//machine learning settings
@@ -431,9 +431,9 @@ void MainSettings::Read()
 	{
 		fconfig.SetPath("/ml");
 		fconfig.Read("cg_table", &str, "");
-		m_cg_table = str.ToStdString();
+		m_cg_table = str.ToStdWstring();
 		fconfig.Read("vp_table", &str, "");
-		m_vp_table = str.ToStdString();
+		m_vp_table = str.ToStdWstring();
 		fconfig.Read("auto_start_all", &m_ml_auto_start_all, false);
 		fconfig.Read("cg_auto_start", &m_cg_auto_start, false);
 		fconfig.Read("vp_auto_start", &m_vp_auto_start, false);
@@ -669,8 +669,17 @@ void MainSettings::Save()
 
 	std::filesystem::path p = std::filesystem::current_path();
 	p /= "fluorender.ini";
-	std::string dft = p.string();
+	std::wstring dft = p.wstring();
 	glbin_project.SaveConfig(fconfig, dft);
+}
+
+std::vector<std::string> MainSettings::GetJvmArgs()
+{
+	std::vector<std::string> args;
+	args.push_back(ws2s(m_jvm_path));
+	args.push_back(ws2s(m_ij_path));
+	args.push_back(ws2s(m_bioformats_path));
+	return args;
 }
 
 void MainSettings::GetMemorySettings()

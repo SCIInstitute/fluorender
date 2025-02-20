@@ -178,7 +178,7 @@ void Table::open(const std::wstring& filename, bool info)
 		if (file.check(TAG_TABLE_NAME_SIZE))
 			file.readValue(ns);
 		if (ns)
-			m_name = file.readString(ns);
+			m_name = s2ws(file.readString(ns));
 	}
 	if (m_name.empty())
 	{
@@ -198,7 +198,7 @@ void Table::open(const std::wstring& filename, bool info)
 		if (file.check(TAG_TABLE_NOTE_SIZE))
 			file.readValue(ns);
 		if (ns)
-			m_notes = file.readString(ns);
+			m_notes = s2ws(file.readString(ns));
 	}
 	if (m_notes.empty())
 	{
@@ -263,6 +263,7 @@ void Table::open(const std::wstring& filename, bool info)
 
 void Table::save(const std::wstring& filename)
 {
+	std::string str;
 	flrd::File file;
 	file.beginWrite(filename);
 
@@ -272,8 +273,9 @@ void Table::save(const std::wstring& filename)
 	//name
 	file.writeValue(TAG_TABLE_NAME);
 	file.writeValue(TAG_TABLE_NAME_SIZE);
-	file.writeValue(m_name.size());
-	file.writeString(m_name);
+	str = ws2s(m_name);
+	file.writeValue(str.size());
+	file.writeString(str);
 	//time of creation
 	file.writeValue(TAG_TABLE_TIME_CREATE);
 	file.writeValue(m_create_time);
@@ -283,8 +285,9 @@ void Table::save(const std::wstring& filename)
 	//notes
 	file.writeValue(TAG_TABLE_NOTES);
 	file.writeValue(TAG_TABLE_NOTE_SIZE);
-	file.writeValue(m_notes.size());
-	file.writeString(m_notes);
+	str = ws2s(m_notes);
+	file.writeValue(str.size());
+	file.writeString(str);
 
 	//rec num
 	file.writeValue(TAG_TABLE_REC_NUM);

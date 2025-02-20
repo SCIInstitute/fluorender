@@ -1753,14 +1753,14 @@ void SettingDlg::OnDetailLevelOffsetEdit(wxCommandEvent& event)
 //font
 void SettingDlg::OnFontChange(wxCommandEvent& event)
 {
-	std::string str = m_font_cmb->GetValue().ToStdString();
+	std::wstring str = m_font_cmb->GetValue().ToStdWstring();
 	if (str.empty())
 		return;
 
-	glbin_settings.m_font_file = str + ".ttf";
+	glbin_settings.m_font_file = str + L".ttf";
 	std::filesystem::path p = std::filesystem::current_path();
-	p = p / "Fonts" / (str + ".ttf");
-	glbin_text_tex_manager.load_face(p.string());
+	p = p / "Fonts" / (str + L".ttf");
+	glbin_text_tex_manager.load_face(p.wstring());
 	glbin_text_tex_manager.SetSize(glbin_settings.m_text_size);
 	FluoRefresh(3, { gstNull });
 }

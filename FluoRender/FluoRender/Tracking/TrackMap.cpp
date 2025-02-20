@@ -83,7 +83,7 @@ void TrackMapProcessor::GenMap()
 	size_t count = 0;
 	//start progress
 	info_str = "Generating track map.\n";
-	WriteInfo(info_str);
+	WriteInfo(s2ws(info_str));
 	SetProgress(0, info_str);
 
 	//get and set parameters
@@ -113,7 +113,7 @@ void TrackMapProcessor::GenMap()
 	for (int i = 0; i < frames; ++i)
 	{
 		InitializeFrame(i);
-		WriteInfo("Time point " + std::to_string(i) + " initialized.\n");
+		WriteInfo(L"Time point " + std::to_wstring(i) + L" initialized.\n");
 		SetProgress(100.0 * count / ticks, info_str);
 		count++;
 
@@ -122,12 +122,12 @@ void TrackMapProcessor::GenMap()
 
 		//link maps 1 and 2
 		LinkFrames(i - 1, i);
-		WriteInfo("Time point " + std::to_string(i) + " linked.\n");
+		WriteInfo(L"Time point " + std::to_wstring(i) + L" linked.\n");
 
 		//check contacts and merge cells
 		ResolveGraph(i - 1, i);
 		ResolveGraph(i, i - 1);
-		WriteInfo("Time point " + std::to_string(i) + " merged.\n");
+		WriteInfo(L"Time point " + std::to_wstring(i) + L" merged.\n");
 
 		if (i < 2)
 			continue;
@@ -135,12 +135,12 @@ void TrackMapProcessor::GenMap()
 		//further process
 		ProcessFrames(i - 2, i - 1);
 		ProcessFrames(i - 1, i - 2);
-		WriteInfo("Time point " + std::to_string(i) + " processed.\n");
+		WriteInfo(L"Time point " + std::to_wstring(i) + L" processed.\n");
 	}
 	//last frame
 	ProcessFrames(frames - 2, frames - 1);
 	ProcessFrames(frames - 1, frames - 2);
-	WriteInfo("Time point " + std::to_string(frames - 1) + " processed.\n");
+	WriteInfo(L"Time point " + std::to_wstring(frames - 1) + L" processed.\n");
 	SetProgress(100.0 * count / ticks, info_str);
 
 	//iterations
@@ -151,7 +151,7 @@ void TrackMapProcessor::GenMap()
 			//further process
 			ProcessFrames(i - 2, i - 1);
 			ProcessFrames(i - 1, i - 2);
-			WriteInfo("Time point " + std::to_string(i - 1) + " processed.\n");
+			WriteInfo(L"Time point " + std::to_wstring(i - 1) + L" processed.\n");
 			SetProgress(100.0 * count / ticks, info_str);
 			count++;
 		}
@@ -160,12 +160,12 @@ void TrackMapProcessor::GenMap()
 	//consistent colors
 	if (glbin_settings.m_consistent_color)
 	{
-		WriteInfo("Set colors for frame 0\n");
+		WriteInfo(L"Set colors for frame 0\n");
 		MakeConsistent(0);
 		//remaining frames
 		for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
 		{
-			WriteInfo("Set colors for frame " + std::to_string(fi) + "\n");
+			WriteInfo(L"Set colors for frame " + std::to_wstring(fi) + L"\n");
 			SetProgress(100.0 * count / ticks, info_str);
 			count++;
 
@@ -175,7 +175,7 @@ void TrackMapProcessor::GenMap()
 
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> time_span = duration_cast<std::chrono::duration<double>>(t2 - t1);
-	WriteInfo("Wall clock time: " + std::to_string(time_span.count()) + "s.\n");
+	WriteInfo(L"Wall clock time: " + std::to_wstring(time_span.count()) + L"s.\n");
 	SetProgress(0, "");
 	SetRange(0, 100);
 
@@ -196,9 +196,9 @@ void TrackMapProcessor::RefineMap(int t, bool erase_v)
 	if (!trkg)
 		return;
 	if (t < 0)
-		WriteInfo("Refining track map for all time points.\n");
+		WriteInfo(L"Refining track map for all time points.\n");
 	else
-		WriteInfo("Refining track map at time point " + std::to_string(t) + "\n");
+		WriteInfo(L"Refining track map at time point " + std::to_wstring(t) + L"\n");
 	//wxGetApp().Yield();
 
 	//start progress
@@ -247,7 +247,7 @@ void TrackMapProcessor::RefineMap(int t, bool erase_v)
 			//further process
 			ProcessFrames(i, i + 1, erase_v);
 			ProcessFrames(i + 1, i, erase_v);
-			WriteInfo("Time point " + std::to_string(i + 1) + " processed.\n");
+			WriteInfo(L"Time point " + std::to_wstring(i + 1) + L" processed.\n");
 			//wxGetApp().Yield();
 		}
 	}
@@ -257,13 +257,13 @@ void TrackMapProcessor::RefineMap(int t, bool erase_v)
 	{
 		if (t < 0)
 		{
-			WriteInfo("Set colors for frame 0\n");
+			WriteInfo(L"Set colors for frame 0\n");
 			//wxGetApp().Yield();
 			MakeConsistent(0);
 			//remaining frames
 			for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
 			{
-				WriteInfo("Set colors for frame " + std::to_string(fi) + "\n");
+				WriteInfo(L"Set colors for frame " + std::to_wstring(fi) + L"\n");
 				//wxGetApp().Yield();
 				MakeConsistent(fi - 1, fi);
 			}
@@ -276,7 +276,7 @@ void TrackMapProcessor::RefineMap(int t, bool erase_v)
 
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> time_span = duration_cast<std::chrono::duration<double>>(t2 - t1);
-	WriteInfo("Wall clock time: " + std::to_string(time_span.count()) + "s.\n");
+	WriteInfo(L"Wall clock time: " + std::to_wstring(time_span.count()) + L"s.\n");
 
 	canvas->GetTraces(false);
 }
@@ -4483,11 +4483,11 @@ void TrackMapProcessor::AnalyzeLink()
 	SetTrackMap(trkg->GetTrackMap());
 	size_t frames = m_map->GetFrameNum();
 	if (frames == 0)
-		WriteInfo("ERROR! Generate a track map first.\n");
+		WriteInfo(L"ERROR! Generate a track map first.\n");
 	else
-		WriteInfo("Time point number: " + std::to_string(frames) + "\n");
+		WriteInfo(L"Time point number: " + std::to_wstring(frames) + L"\n");
 
-	WriteInfo("Time\tIn Orphan\tOut Orphan\tIn Multi\tOut Multi\n");
+	WriteInfo(L"Time\tIn Orphan\tOut Orphan\tIn Multi\tOut Multi\n");
 	flrd::VertexList in_orphan_list;
 	flrd::VertexList out_orphan_list;
 	flrd::VertexList in_multi_list;
@@ -4497,11 +4497,11 @@ void TrackMapProcessor::AnalyzeLink()
 		GetLinkLists(fi,
 			in_orphan_list, out_orphan_list,
 			in_multi_list, out_multi_list);
-		WriteInfo(std::to_string(fi) + "\t" +
-			std::to_string(in_orphan_list.size()) + "\t" +
-			std::to_string(out_orphan_list.size()) + "\t" +
-			std::to_string(in_multi_list.size()) + "\t" +
-			std::to_string(out_multi_list.size()) + "\n");
+		WriteInfo(std::to_wstring(fi) + L"\t" +
+			std::to_wstring(in_orphan_list.size()) + L"\t" +
+			std::to_wstring(out_orphan_list.size()) + L"\t" +
+			std::to_wstring(in_multi_list.size()) + L"\t" +
+			std::to_wstring(out_multi_list.size()) + L"\n");
 	}
 }
 
@@ -4857,14 +4857,14 @@ void TrackMapProcessor::GetCellUncertainty()
 	}
 
 	//header
-	WriteInfo("ID\tIn\tOut\n");
+	WriteInfo(L"ID\tIn\tOut\n");
 	for (auto iter = m_list_in.begin();
 		iter != m_list_in.end(); ++iter)
 	{
-		wxString sid = wxString::Format("%u", iter->second->Id());
-		WriteInfo(sid.ToStdString() + "\t" +
-			std::to_string(iter->second->GetCount0()) + "\t" +
-			std::to_string(iter->second->GetCount1()) + "\n");
+		std::wstring sid = std::to_wstring(iter->second->Id());
+		WriteInfo(sid + L"\t" +
+			std::to_wstring(iter->second->GetCount0()) + L"\t" +
+			std::to_wstring(iter->second->GetCount1()) + L"\n");
 	}
 }
 
@@ -4883,21 +4883,21 @@ void TrackMapProcessor::GetUncertainHist()
 	if (frame > 0)
 	{
 		//header
-		WriteInfo("In\n");
-		WriteInfo("Level\tFrequency\n");
+		WriteInfo(L"In\n");
+		WriteInfo(L"Level\tFrequency\n");
 		InterGraph &inter_graph = m_map->m_inter_graph_list.at(frame - 1);
 		UncertainHist hist;
 		GetUncertainHist(hist, vertex_list, inter_graph);
 	}
 
-	WriteInfo("\n");
+	WriteInfo(L"\n");
 
 	//out lists
 	if (frame < m_map->m_frame_num - 1)
 	{
 		//header
-		WriteInfo("Out\n");
-		WriteInfo("Level\tFrequency\n");
+		WriteInfo(L"Out\n");
+		WriteInfo(L"Level\tFrequency\n");
 		InterGraph &inter_graph = m_map->m_inter_graph_list.at(frame);
 		UncertainHist hist;
 		GetUncertainHist(hist, vertex_list, inter_graph);
@@ -4960,10 +4960,10 @@ void TrackMapProcessor::GetUncertainHist(UncertainHist& hist,
 	{
 		while (iter->second.level > count)
 		{
-			WriteInfo(std::to_string(count++) + "\t0\n");
+			WriteInfo(std::to_wstring(count++) + L"\t0\n");
 		}
-		WriteInfo(std::to_string(iter->second.level) + "\t" +
-			std::to_string(iter->second.count) + "\n");
+		WriteInfo(std::to_wstring(iter->second.level) + L"\t" +
+			std::to_wstring(iter->second.count) + L"\n");
 		count++;
 	}
 }
@@ -4979,11 +4979,11 @@ void TrackMapProcessor::AnalyzePath()
 	if (m_list_in.empty())
 		return;
 
-	std::stringstream ss;
+	std::wstringstream ss;
 
 	if (frame > 0)
 	{
-		WriteInfo("Paths of T" + std::to_string(frame) + " to T" + std::to_string(frame - 1) + ":\n");
+		WriteInfo(L"Paths of T" + std::to_wstring(frame) + L" to T" + std::to_wstring(frame - 1) + L":\n");
 		flrd::PathList paths_prv;
 		GetPaths(paths_prv, frame, frame - 1);
 		for (size_t i = 0; i < paths_prv.size(); ++i)
@@ -4991,10 +4991,10 @@ void TrackMapProcessor::AnalyzePath()
 		WriteInfo(ss.str());
 	}
 
-	ss.str("");
+	ss.str(L"");
 	if (frame < m_map->GetFrameNum() - 1)
 	{
-		WriteInfo("Paths of T" + std::to_string(frame) + " to T" + std::to_string(frame + 1) + ":\n");
+		WriteInfo(L"Paths of T" + std::to_wstring(frame) + L" to T" + std::to_wstring(frame + 1) + L":\n");
 		flrd::PathList paths_nxt;
 		GetPaths(paths_nxt, frame, frame + 1);
 		for (size_t i = 0; i < paths_nxt.size(); ++i)
@@ -5228,7 +5228,7 @@ void TrackMapProcessor::ConvertConsistent()
 	if (!trkg)
 		return;
 
-	WriteInfo("Generating consistent IDs in");
+	WriteInfo(L"Generating consistent IDs in");
 	//wxGetApp().Yield();
 
 	flrd::pTrackMap track_map = trkg->GetTrackMap();
@@ -5244,14 +5244,14 @@ void TrackMapProcessor::ConvertConsistent()
 	glbin_reg_cache_queue_func(this, TrackMapProcessor::ReadVolCache, TrackMapProcessor::DelVolCache);
 	glbin_cache_queue.set_max_size(2);
 
-	WriteInfo("Frame 0\n");
+	WriteInfo(L"Frame 0\n");
 	//wxGetApp().Yield();
 	MakeConsistent(0);
 
 	//remaining frames
 	for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
 	{
-		WriteInfo("Frame " + std::to_string(fi) + "\n");
+		WriteInfo(L"Frame " + std::to_wstring(fi) + L"\n");
 		//wxGetApp().Yield();
 		MakeConsistent(fi - 1, fi);
 	}

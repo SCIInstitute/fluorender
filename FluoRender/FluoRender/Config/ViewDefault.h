@@ -57,8 +57,8 @@ public:
 	bool m_draw_scalebar;
 	bool m_draw_scalebar_text;
 	double m_scalebar_len;
-	std::string m_scalebar_text;
-	std::string m_scalebar_num;
+	std::wstring m_scalebar_text;
+	std::wstring m_scalebar_num;
 	int m_scalebar_unit;
 	bool m_mouse_focus;
 	bool m_persp;

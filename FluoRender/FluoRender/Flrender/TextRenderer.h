@@ -97,7 +97,7 @@ namespace flvr
 		TextTextureManager();
 		~TextTextureManager();
 
-		void load_face(const std::string &lib_name);
+		void load_face(const std::wstring &lib_name);
 		void SetSize(unsigned int size);
 		inline unsigned int GetSize();
 		void SetEnlargeScale(double dval);

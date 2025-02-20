@@ -302,7 +302,7 @@ public:
 	void RefreshCanvases(const std::set<int>& canvases = {});//view indices to update
 	int GetCanvasNum();
 	RenderCanvas* GetRenderCanvas(int index);
-	RenderCanvas* GetRenderCanvas(const std::string& name);
+	RenderCanvas* GetRenderCanvas(const std::wstring& name);
 	int GetRenderCanvas(RenderCanvas* view);
 	RenderCanvas* GetLastRenderCanvas();
 	wxString CreateRenderView(int row = 1);

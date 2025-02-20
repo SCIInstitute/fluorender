@@ -171,7 +171,7 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 					{
 						r = rhdl->AddRuler(i, t);
 						if (c < names.size())
-							r->SetName(names[c]);
+							r->SetName(s2ws(names[c]));
 						r->SetRulerType(rst == -2 ? 2 : 1);
 						rlist.push_back(r);
 					}
@@ -348,7 +348,7 @@ void PyDlc::CreateConfigFile(
 	cf << "bodyparts:" << std::endl;
 	if (rhdl)
 	{
-		std::string str = rhdl->PrintRulers(false);
+		std::string str = ws2s(rhdl->PrintRulers(false));
 		cf << str;
 	}
 	cf << std::endl;
@@ -369,7 +369,7 @@ void PyDlc::CreateConfigFile(
 	cf << "skeleton:" << std::endl;
 	if (rhdl)
 	{
-		std::string str = rhdl->PrintRulers(true);
+		std::string str = ws2s(rhdl->PrintRulers(true));
 		cf << str;
 	}
 	cf << "skeleton_color: black" << std::endl;

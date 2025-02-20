@@ -54,7 +54,7 @@ namespace flrd
 		bool is_valid() { return m_valid; }
 
 		virtual void set_model_file(const std::wstring& file) { m_model_file = file; }
-		virtual std::string get_model_file() { return m_model_file; }
+		virtual std::wstring get_model_file() { return m_model_file; }
 
 	protected:
 		bool m_valid;

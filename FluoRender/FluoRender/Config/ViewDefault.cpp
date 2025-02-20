@@ -42,8 +42,8 @@ ViewDefault::ViewDefault()
 	m_draw_scalebar = false;
 	m_draw_scalebar_text = false;
 	m_scalebar_len = 50;
-	m_scalebar_text = "50 \u03BCm";
-	m_scalebar_num = "50";
+	m_scalebar_text = L"50 \u03BCm";
+	m_scalebar_num = L"50";
 	m_scalebar_unit = 1;
 	m_mouse_focus = false;
 	m_persp = false;
@@ -87,10 +87,10 @@ void ViewDefault::Read(wxFileConfig& f)
 	f.Read("draw scalebar", &m_draw_scalebar, false);
 	f.Read("draw scalebar text", &m_draw_scalebar_text, false);
 	f.Read("scalebar len", &m_scalebar_len, 50);
-	f.Read("scalebar text", &str, "50 \u03BCm");
-	m_scalebar_text = str.ToStdString();
+	f.Read("scalebar text", &str, L"50 \u03BCm");
+	m_scalebar_text = str.ToStdWstring();
 	f.Read("scalebar num", &str, "50");
-	m_scalebar_num = str.ToStdString();
+	m_scalebar_num = str.ToStdWstring();
 	f.Read("scalebar unit", &m_scalebar_unit, 1);
 	f.Read("mouse focus", &m_mouse_focus, false);
 	f.Read("persp", &m_persp, false);

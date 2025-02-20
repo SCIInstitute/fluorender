@@ -182,7 +182,7 @@ void Project::Open(const std::wstring& filename)
 					glbin_settings.m_slice_sequence = slice_seq;
 					wxString time_id;
 					fconfig.Read("time_id", &time_id);
-					glbin_settings.m_time_id = time_id.ToStdString();
+					glbin_settings.m_time_id = time_id.ToStdWstring();
 					bool fp_convert = false;
 					double minv, maxv;
 					fconfig.Read("fp_convert", &fp_convert, false);
@@ -761,8 +761,8 @@ void Project::Open(const std::wstring& filename)
 									int id;
 									if (fconfig.Read("id", &id))
 										DataGroup::SetID(id);
-									str = canvas->AddGroup(str.ToStdString());
-									DataGroup* group = canvas->GetGroup(str.ToStdString());
+									str = canvas->AddGroup(str.ToStdWstring());
+									DataGroup* group = canvas->GetGroup(str.ToStdWstring());
 									if (group)
 									{
 										//display
@@ -836,8 +836,8 @@ void Project::Open(const std::wstring& filename)
 									int id;
 									if (fconfig.Read("id", &id))
 										MeshGroup::SetID(id);
-									str = canvas->AddMGroup(str.ToStdString());
-									MeshGroup* group = canvas->GetMGroup(str.ToStdString());
+									str = canvas->AddMGroup(str.ToStdWstring());
+									MeshGroup* group = canvas->GetMGroup(str.ToStdWstring());
 									if (group)
 									{
 										//display
@@ -883,7 +883,7 @@ void Project::Open(const std::wstring& filename)
 			{
 				if (fconfig.Read("track_file", &str))
 				{
-					canvas->LoadTrackGroup(str.ToStdString());
+					canvas->LoadTrackGroup(str.ToStdWstring());
 				}
 			}
 
@@ -1102,7 +1102,7 @@ void Project::Open(const std::wstring& filename)
 				ReadRulerList(fconfig, i);
 			}
 		}
-		glbin_current.canvas = frame->GetRenderCanvas(cur_canvas.ToStdString());
+		glbin_current.canvas = frame->GetRenderCanvas(cur_canvas.ToStdWstring());
 	}
 
 	//clipping planes
@@ -1255,7 +1255,7 @@ void Project::Open(const std::wstring& filename)
 				if (fconfig.Read("type", &iVal))
 					key_group->type = iVal;
 				if (fconfig.Read("desc", &sVal))
-					key_group->desc = sVal.ToStdString();
+					key_group->desc = sVal.ToStdWstring();
 				str = wxString::Format("/interpolator/%d/keys", i);
 				if (fconfig.Exists(str))
 				{
@@ -2334,7 +2334,7 @@ void Project::ReadRulerList(wxFileConfig &fconfig, int vi)
 			fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", vi, ri));
 			flrd::Ruler* ruler = new flrd::Ruler();
 			if (fconfig.Read("name", &str))
-				ruler->SetName(str.ToStdString());
+				ruler->SetName(str.ToStdWstring());
 			if (fconfig.Read("group", &ival))
 				ruler->Group(ival);
 			if (fconfig.Read("type", &ival))

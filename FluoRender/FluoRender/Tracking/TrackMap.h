@@ -55,7 +55,7 @@ namespace flrd
 	class TrackMap;
 	typedef std::shared_ptr<TrackMap> pTrackMap;
 	typedef std::weak_ptr<TrackMap> pwTrackMap;
-	typedef std::function<void(const std::string&)> InfoOutFunc;
+	typedef std::function<void(const std::wstring&)> InfoOutFunc;
 
 	class TrackMapProcessor : public Progress
 	{
@@ -382,7 +382,7 @@ namespace flrd
 			unsigned int edge_count);
 
 		//output info
-		void WriteInfo(const std::string& str)
+		void WriteInfo(const std::wstring& str)
 		{
 			if (m_info_out)
 				m_info_out(str);

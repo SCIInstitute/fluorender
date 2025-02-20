@@ -78,7 +78,7 @@ bool FluoRenderApp::OnInit()
 	//_CrtSetBreakAlloc(331430);
 	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	std::string path = getExecutablePath();
+	std::wstring path = getExecutablePath();
 	std::filesystem::current_path(path);
 	// call default behaviour (mandatory)
 	if (!wxApp::OnInit())
@@ -102,7 +102,7 @@ bool FluoRenderApp::OnInit()
 	SetTopWindow(frame);
 	frame->Show();
 	bool run_mov = false;
-	if (m_mov_file != "")
+	if (m_mov_file != L"")
 	{
 		glbin_settings.m_save_compress = m_lzw;
 		glbin_settings.m_save_alpha = m_save_alpha;
@@ -144,7 +144,7 @@ bool FluoRenderApp::OnCmdLineParsed(wxCmdLineParser& parser)
 	m_save_float = false;
 	m_dpi = 72.0f;
 	m_bitrate = 10.0;
-	m_mov_file = "";
+	m_mov_file = L"";
 	m_imagej = false;
 
 	//control string
@@ -178,10 +178,10 @@ bool FluoRenderApp::OnCmdLineParsed(wxCmdLineParser& parser)
 		m_dpi = float(dVal);
 	wxString str;
 	if (parser.Found("m", &str))
-		m_mov_file = str.ToStdString();
+		m_mov_file = str.ToStdWstring();
 	//volumes to load
 	for (size_t i = 0; i < parser.GetParamCount(); ++i)
-		m_files.push_back(parser.GetParam(i).ToStdString());
+		m_files.push_back(parser.GetParam(i).ToStdWstring());
 	m_file_num = m_files.size();
 
 	return true;

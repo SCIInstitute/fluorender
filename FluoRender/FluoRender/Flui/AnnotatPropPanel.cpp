@@ -114,7 +114,7 @@ void AnnotatPropPanel::OnMemoUpdateBtn(wxCommandEvent& event)
 	if (m_ann)
 	{
 		wxString memo = m_memo_text->GetValue();
-		std::string str = memo.ToStdString();
+		std::wstring str = memo.ToStdWstring();
 		m_ann->SetMemo(str);
 	}
 }

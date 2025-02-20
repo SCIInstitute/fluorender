@@ -454,7 +454,7 @@ void VolumeSelector::Erase()
 	if (group)
 		group_name = group->GetName();
 	glbin_vol_calculator.SetVolumeA(m_vd);
-	glbin_vol_calculator.CalculateGroup(mode, group_name.ToStdString());
+	glbin_vol_calculator.CalculateGroup(mode, group_name.ToStdWstring());
 }
 
 //extract a new volume of the selection
@@ -467,7 +467,7 @@ void VolumeSelector::Extract()
 	if (group)
 		group_name = group->GetName();
 	glbin_vol_calculator.SetVolumeA(m_vd);
-	glbin_vol_calculator.CalculateGroup(5, group_name.ToStdString());
+	glbin_vol_calculator.CalculateGroup(5, group_name.ToStdWstring());
 }
 
 double VolumeSelector::HueCalculation(int mode, unsigned int label)
@@ -536,7 +536,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 		spc_x, spc_y, spc_z,
 		brick_size);
 	vd_r->SetSpcFromFile(true);
-	vd_r->SetName(m_vd->GetName() + "_COMP1");
+	vd_r->SetName(m_vd->GetName() + L"_COMP1");
 	vd_r->SetCurChannel(0);
 	//green volume
 	if (!vd_g)
@@ -546,7 +546,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 		spc_x, spc_y, spc_z,
 		brick_size);
 	vd_g->SetSpcFromFile(true);
-	vd_g->SetName(m_vd->GetName() + "_COMP2");
+	vd_g->SetName(m_vd->GetName() + L"_COMP2");
 	vd_g->SetCurChannel(1);
 	//blue volume
 	if (!vd_b)
@@ -556,7 +556,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 		spc_x, spc_y, spc_z,
 		brick_size);
 	vd_b->SetSpcFromFile(true);
-	vd_b->SetName(m_vd->GetName() + "_COMP3");
+	vd_b->SetName(m_vd->GetName() + L"_COMP3");
 	vd_b->SetCurChannel(2);
 
 	//get new data

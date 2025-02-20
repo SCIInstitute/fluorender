@@ -148,16 +148,16 @@ void ComponentGenerator::GenerateComp(bool command)
 			m_tps.back() - m_tps.front());
 	if (m_test_speed)
 	{
-		m_titles += "Function\t";
-		m_titles += "Time\n";
-		m_values += "Total\t";
+		m_titles += L"Function\t";
+		m_titles += L"Time\n";
+		m_values += L"Total\t";
 	}
 	else
 	{
-		m_titles += "Total time\n";
+		m_titles += L"Total time\n";
 	}
-	m_values += std::to_string(time_span.count());
-	m_values += " sec.\n";
+	m_values += std::to_wstring(time_span.count());
+	m_values += L" sec.\n";
 	//SetOutput(m_titles, m_values);
 
 	if (command && m_record_cmd)

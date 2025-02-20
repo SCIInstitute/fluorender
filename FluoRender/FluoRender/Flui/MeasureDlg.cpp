@@ -1109,7 +1109,7 @@ void MeasureDlg::SetCurrentRuler()
 	RenderCanvas* canvas = glbin_current.canvas;
 	if (!ruler || !canvas)
 		return;
-	ruler->SetName(m_ruler_list->m_name.ToStdString());
+	ruler->SetName(m_ruler_list->m_name.ToStdWstring());
 	if (ruler->GetRulerType() == 2)
 	{
 		ruler->SetWorkTime(canvas->m_tseq_cur_num);
@@ -1558,7 +1558,7 @@ void MeasureDlg::Distance()
 		wxString wxstr = fopendlg->GetPath();
 		std::set<int> sel;
 		m_ruler_list->GetCurrSelection(sel);
-		glbin_ruler_handler.Distance(sel, wxstr.ToStdString());
+		glbin_ruler_handler.Distance(sel, wxstr.ToStdWstring());
 	}
 
 	if (fopendlg)
@@ -1577,7 +1577,7 @@ void MeasureDlg::Project()
 		wxString wxstr = fopendlg->GetPath();
 		std::set<int> sel;
 		m_ruler_list->GetCurrSelection(sel);
-		glbin_ruler_handler.Project(sel, wxstr.ToStdString());
+		glbin_ruler_handler.Project(sel, wxstr.ToStdWstring());
 	}
 
 	if (fopendlg)
@@ -1596,7 +1596,7 @@ void MeasureDlg::Export()
 	if (rval == wxID_OK)
 	{
 		wxString filename = fopendlg->GetPath();
-		glbin_project.ExportRulerList(filename.ToStdString());
+		glbin_project.ExportRulerList(filename.ToStdWstring());
 	}
 
 	if (fopendlg)

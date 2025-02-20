@@ -378,10 +378,6 @@ namespace flrd
 		{
 			m_name = name;
 		}
-		void SetName(const std::string& name)
-		{
-			m_name = s2ws(name);
-		}
 		unsigned int Id()
 		{
 			return m_id;

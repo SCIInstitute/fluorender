@@ -268,6 +268,41 @@ namespace flrd
 		return os;
 	}
 
+	inline std::wostream& operator<<(std::wostream& os, Path& p)
+	{
+		InterGraph graph = p.get_graph();
+		Verp vertex;
+		for (auto iter = p.begin();
+			iter != p.end(); ++iter)
+		{
+			//output vertex
+			vertex = graph[iter->vert].vertex.lock();
+			if (vertex)
+			{
+				os << L"(Vertex: ";
+				os << vertex->Id() << L", ";
+				os << vertex->GetSizeD() << L", ";
+				os << graph[iter->vert].count << L") ";
+			}
+			//output edge
+			PathIter i1 = iter + 1;
+			if (i1 != p.end())
+			{
+				std::pair<Edge, bool> edge =
+					boost::edge(iter->vert, i1->vert, graph);
+				if (edge.second)
+				{
+					os << L"(Edge: ";
+					os << graph[edge.first].size_d << L", ";
+					os << graph[edge.first].dist << L", ";
+					os << graph[edge.first].link << L", ";
+					os << graph[edge.first].count << L") ";
+				}
+			}
+		}
+		os << L"\n";
+		return os;
+	}
 }//namespace flrd
 
 #endif//FL_VertexList_h

@@ -860,10 +860,10 @@ void TreePanel::traversalSel(wxTreeItemId item)
 	case 1://canvas
 		if (glbin_current.GetType() == 1)
 		{
-			std::string str1 = m_datatree->GetItemText(item).ToStdString();
-			std::string str2;
+			std::wstring str1 = m_datatree->GetItemText(item).ToStdWstring();
+			std::wstring str2;
 			if (glbin_current.canvas)
-				str2 = glbin_current.canvas->GetName();
+				str2 = glbin_current.canvas->GetName().ToStdWstring();
 			if (str1 == str2)
 				sel = true;
 		}
@@ -871,8 +871,8 @@ void TreePanel::traversalSel(wxTreeItemId item)
 	case 2://volume
 		if (glbin_current.GetType() == 2)
 		{
-			std::string str1 = m_datatree->GetItemText(item).ToStdString();
-			std::string str2;
+			std::wstring str1 = m_datatree->GetItemText(item).ToStdWstring();
+			std::wstring str2;
 			if (glbin_current.vol_data)
 				str2 = glbin_current.vol_data->GetName();
 			if (str1 == str2)
@@ -882,8 +882,8 @@ void TreePanel::traversalSel(wxTreeItemId item)
 	case 3://mesh
 		if (glbin_current.GetType() == 3)
 		{
-			std::string str1 = m_datatree->GetItemText(item).ToStdString();
-			std::string str2;
+			std::wstring str1 = m_datatree->GetItemText(item).ToStdWstring();
+			std::wstring str2;
 			if (glbin_current.mesh_data)
 				str2 = glbin_current.mesh_data->GetName();
 			if (str1 == str2)
@@ -893,8 +893,8 @@ void TreePanel::traversalSel(wxTreeItemId item)
 	case 4://annotations
 		if (glbin_current.GetType() == 4)
 		{
-			std::string str1 = m_datatree->GetItemText(item).ToStdString();
-			std::string str2;
+			std::wstring str1 = m_datatree->GetItemText(item).ToStdWstring();
+			std::wstring str2;
 			if (glbin_current.ann_data)
 				str2 = glbin_current.ann_data->GetName();
 			if (str1 == str2)
@@ -904,8 +904,8 @@ void TreePanel::traversalSel(wxTreeItemId item)
 	case 5://volume group
 		if (glbin_current.GetType() == 5)
 		{
-			std::string str1 = m_datatree->GetItemText(item).ToStdString();
-			std::string str2;
+			std::wstring str1 = m_datatree->GetItemText(item).ToStdWstring();
+			std::wstring str2;
 			if (glbin_current.vol_group)
 				str2 = glbin_current.vol_group->GetName();
 			if (str1 == str2)
@@ -915,8 +915,8 @@ void TreePanel::traversalSel(wxTreeItemId item)
 	case 6://mesh group
 		if (glbin_current.GetType() == 6)
 		{
-			std::string str1 = m_datatree->GetItemText(item).ToStdString();
-			std::string str2;
+			std::wstring str1 = m_datatree->GetItemText(item).ToStdWstring();
+			std::wstring str2;
 			if (glbin_current.mesh_group)
 				str2 = glbin_current.mesh_group->GetName();
 			if (str1 == str2)
@@ -943,7 +943,7 @@ void TreePanel::traversalSel(wxTreeItemId item)
 void TreePanel::AddVolumeGroup()
 {
 	RenderCanvas* view = glbin_current.canvas;
-	std::string name = view->AddGroup("");
+	std::wstring name = view->AddGroup(L"");
 	DataGroup* group = view->GetGroup(name);
 	glbin_current.SetVolumeGroup(group);
 
@@ -953,7 +953,7 @@ void TreePanel::AddVolumeGroup()
 void TreePanel::AddMeshGroup()
 {
 	RenderCanvas* view = glbin_current.canvas;
-	std::string name = view->AddMGroup("");
+	std::wstring name = view->AddMGroup(L"");
 	MeshGroup* group = view->GetMGroup(name);
 	glbin_current.SetMeshGroup(group);
 
@@ -982,7 +982,7 @@ void TreePanel::DeleteSelection()
 		if (vd)
 		{
 			vd->SetDisp(true);
-			std::string name = vd->GetName();
+			std::wstring name = vd->GetName();
 			canvas->RemoveVolumeData(name);
 		}
 	}
@@ -993,7 +993,7 @@ void TreePanel::DeleteSelection()
 		if (md)
 		{
 			md->SetDisp(true);
-			std::string name = md->GetName();
+			std::wstring name = md->GetName();
 			canvas->RemoveMeshData(name);
 		}
 	}
@@ -1004,7 +1004,7 @@ void TreePanel::DeleteSelection()
 		if (ann)
 		{
 			ann->SetDisp(true);
-			std::string name = ann->GetName();
+			std::wstring name = ann->GetName();
 			canvas->RemoveAnnotations(name);
 		}
 	}
@@ -1014,7 +1014,7 @@ void TreePanel::DeleteSelection()
 		DataGroup* group = glbin_current.vol_group;
 		if (group)
 		{
-			std::string name = group->GetName();
+			std::wstring name = group->GetName();
 			canvas->RemoveGroup(name);
 		}
 	}
@@ -1024,7 +1024,7 @@ void TreePanel::DeleteSelection()
 		MeshGroup* group = glbin_current.mesh_group;
 		if (group)
 		{
-			std::string name = group->GetName();
+			std::wstring name = group->GetName();
 			canvas->RemoveGroup(name);
 		}
 	}
@@ -1204,7 +1204,7 @@ void TreePanel::Isolate()
 	if (!canvas)
 		return;
 
-	std::string name;
+	std::wstring name;
 	int type = glbin_current.GetType();
 	switch (type)
 	{
@@ -1629,7 +1629,7 @@ void TreePanel::OnSelChanged(wxTreeEvent& event)
 	fluo::ValueCollection vc;
 
 	//select data
-	std::string name = m_datatree->GetItemText(sel_item).ToStdString();
+	std::wstring name = m_datatree->GetItemText(sel_item).ToStdWstring();
 	LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
 
 	if (item_data)
@@ -1668,7 +1668,7 @@ void TreePanel::OnSelChanged(wxTreeEvent& event)
 			break;
 		case 5://volume group
 		{
-			std::string par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item)).ToStdString();
+			std::wstring par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item)).ToStdWstring();
 			RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
 			if (view)
 			{
@@ -1679,7 +1679,7 @@ void TreePanel::OnSelChanged(wxTreeEvent& event)
 			break;
 		case 6://mesh group
 		{
-			std::string par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item)).ToStdString();
+			std::wstring par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item)).ToStdWstring();
 			RenderCanvas* view = m_frame->GetRenderCanvas(par_name);
 			if (view)
 			{
@@ -1752,7 +1752,7 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 		dst_par_item = dst_item.IsOk() ? m_datatree->GetItemParent(dst_item) : 0;
 	m_drag_item = (wxTreeItemId)0l;
 	bool refresh = false;
-	std::string src_name, src_par_name, dst_name, dst_par_name;
+	std::wstring src_name, src_par_name, dst_name, dst_par_name;
 
 	if (src_item.IsOk() && dst_item.IsOk() &&
 		src_par_item.IsOk() &&
@@ -1763,10 +1763,10 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 		int dst_type = ((LayerInfo*)m_datatree->GetItemData(dst_item))->type;
 		int dst_par_type = ((LayerInfo*)m_datatree->GetItemData(dst_par_item))->type;
 
-		src_name = m_datatree->GetItemText(src_item).ToStdString();
-		src_par_name = m_datatree->GetItemText(src_par_item).ToStdString();
-		dst_name = m_datatree->GetItemText(dst_item).ToStdString();
-		dst_par_name = m_datatree->GetItemText(dst_par_item).ToStdString();
+		src_name = m_datatree->GetItemText(src_item).ToStdWstring();
+		src_par_name = m_datatree->GetItemText(src_par_item).ToStdWstring();
+		dst_name = m_datatree->GetItemText(dst_item).ToStdWstring();
+		dst_par_name = m_datatree->GetItemText(dst_par_item).ToStdWstring();
 
 		if (src_par_type == 1 &&
 			dst_par_type == 1 &&
@@ -1780,7 +1780,7 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 				RenderCanvas* view = m_frame->GetRenderCanvas(src_par_name);
 				if (view)
 				{
-					view->MoveLayertoGroup(dst_name, src_name, "");
+					view->MoveLayertoGroup(dst_name, src_name, L"");
 				}
 			}
 			else if (src_type == 3 && dst_type == 6)
@@ -1789,7 +1789,7 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 				RenderCanvas* view = m_frame->GetRenderCanvas(src_par_name);
 				if (view)
 				{
-					view->MoveMeshtoGroup(dst_name, src_name, "");
+					view->MoveMeshtoGroup(dst_name, src_name, L"");
 				}
 			}
 			else
@@ -1805,7 +1805,7 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 			src_name != dst_name)
 		{
 			//move volume within the same group
-			RenderCanvas* view = m_frame->GetRenderCanvas(m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)).ToStdString());
+			RenderCanvas* view = m_frame->GetRenderCanvas(m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)).ToStdWstring());
 			if (view)
 				view->MoveLayerinGroup(src_par_name, src_name, dst_name);
 		}
@@ -1820,7 +1820,7 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 				RenderCanvas* view = m_frame->GetRenderCanvas(dst_par_name);
 				if (view)
 				{
-					view->MoveLayerfromtoGroup(src_par_name, dst_name, src_name, "");
+					view->MoveLayerfromtoGroup(src_par_name, dst_name, src_name, L"");
 				}
 			}
 			else
@@ -1848,7 +1848,7 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 			m_datatree->GetItemText(src_par_item) != m_datatree->GetItemText(dst_par_item))// par groups are different
 		{
 			//move volume from one group to another
-			RenderCanvas* view = m_frame->GetRenderCanvas(m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)).ToStdString());
+			RenderCanvas* view = m_frame->GetRenderCanvas(m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)).ToStdWstring());
 			if (view)
 				view->MoveLayerfromtoGroup(src_par_name, dst_par_name, src_name, dst_name);
 		}
@@ -1861,7 +1861,7 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 			RenderCanvas* view = m_frame->GetRenderCanvas(dst_name);
 			if (view)
 			{
-				view->MoveLayertoView(src_par_name, src_name, "");
+				view->MoveLayertoView(src_par_name, src_name, L"");
 			}
 		}
 		else if (src_par_type == 6 &&
@@ -1870,7 +1870,7 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 			src_name != dst_name)
 		{
 			//move mesh within the same group
-			RenderCanvas* view = m_frame->GetRenderCanvas(m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)).ToStdString());
+			RenderCanvas* view = m_frame->GetRenderCanvas(m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)).ToStdWstring());
 			if (view)
 				view->MoveMeshinGroup(src_par_name, src_name, dst_name);
 		}
@@ -1885,7 +1885,7 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 				RenderCanvas* view = m_frame->GetRenderCanvas(dst_par_name);
 				if (view)
 				{
-					view->MoveMeshfromtoGroup(src_par_name, dst_name, src_name, "");
+					view->MoveMeshfromtoGroup(src_par_name, dst_name, src_name, L"");
 				}
 			}
 			else
@@ -1913,7 +1913,7 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 			m_datatree->GetItemText(src_par_item) != m_datatree->GetItemText(dst_par_item))// par groups are different
 		{
 			//move mesh from one group to another
-			RenderCanvas* view = m_frame->GetRenderCanvas(m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)).ToStdString());
+			RenderCanvas* view = m_frame->GetRenderCanvas(m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)).ToStdWstring());
 			if (view)
 				view->MoveMeshfromtoGroup(src_par_name, dst_par_name, src_name, dst_name);
 		}
@@ -1926,7 +1926,7 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 			RenderCanvas* view = m_frame->GetRenderCanvas(dst_name);
 			if (view)
 			{
-				view->MoveMeshtoView(src_par_name, src_name, "");
+				view->MoveMeshtoView(src_par_name, src_name, L"");
 			}
 		}
 
@@ -1945,10 +1945,10 @@ void TreePanel::OnEndDrag(wxTreeEvent& event)
 
 		if (src_type == 2 && src_par_type == 5)
 		{
-			RenderCanvas* view = m_frame->GetRenderCanvas(m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)).ToStdString());
+			RenderCanvas* view = m_frame->GetRenderCanvas(m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)).ToStdWstring());
 			if (view)
 			{
-				view->MoveLayertoView(src_par_name, src_name, "");
+				view->MoveLayertoView(src_par_name, src_name, L"");
 
 				//glbin.set_tree_selection(src_name.ToStdString());
 				refresh = true;

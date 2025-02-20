@@ -55,8 +55,8 @@ namespace flrd
 		VolumeData* GetResult(bool pop);
 
 		//1-sub;2-add;3-div;4-and;5-new;6-new inv;7-clear
-		void CalculateGroup(int type, const std::string &prev_group = "", bool add = true);
-		void CalculateSingle(int type, const std::string &prev_group, bool add);
+		void CalculateGroup(int type, const std::wstring &prev_group = L"", bool add = true);
+		void CalculateSingle(int type, const std::wstring &prev_group, bool add);
 		void Calculate(int type);
 
 	private:

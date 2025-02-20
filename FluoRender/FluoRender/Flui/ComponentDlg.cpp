@@ -1374,7 +1374,7 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			if (rval == wxID_OK)
 			{
 				wxString filename = fopendlg->GetPath();
-				std::string str = filename.ToStdString();
+				std::wstring str = filename.ToStdWstring();
 				glbin_comp_analyzer.OutputCompListFile(str, 1);
 				saved = true;
 			}
@@ -1970,7 +1970,7 @@ void ComponentDlg::OnLoadCmd(wxCommandEvent& event)
 		delete fopendlg;
 		return;
 	}
-	std::string filename = fopendlg->GetPath().ToStdString();
+	std::wstring filename = fopendlg->GetPath().ToStdWstring();
 	delete fopendlg;
 
 	glbin_comp_generator.LoadCmd(filename);
@@ -1987,7 +1987,7 @@ void ComponentDlg::OnSaveCmd(wxCommandEvent& event)
 		delete fopendlg;
 		return;
 	}
-	std::string filename = fopendlg->GetPath().ToStdString();
+	std::wstring filename = fopendlg->GetPath().ToStdWstring();
 	delete fopendlg;
 
 	glbin_comp_generator.SaveCmd(filename);

@@ -100,7 +100,7 @@ public:
 
 	void AddSelectionToView(int view);
 	void AddSelToCurView();
-	void RenameSelection(const std::string& name);
+	void RenameSelection(const std::wstring& name);
 	void SaveSelection();
 	void BakeSelection();
 	void SaveSelMask();

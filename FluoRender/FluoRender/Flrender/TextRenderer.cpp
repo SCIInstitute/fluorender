@@ -103,7 +103,7 @@ namespace flvr
 			FT_Done_FreeType(m_ft);
 	}
 
-	void TextTextureManager::load_face(const std::string &lib_name)
+	void TextTextureManager::load_face(const std::wstring &lib_name)
 	{
 		FT_Error err;
 		if (!m_init)
@@ -121,7 +121,8 @@ namespace flvr
 			m_valid = false;
 		}
 
-		err = FT_New_Face(m_ft, lib_name.c_str(), 0, &m_face);
+		std::string str = ws2s(lib_name);
+		err = FT_New_Face(m_ft, str.c_str(), 0, &m_face);
 		if (!err)
 			m_valid = true;
 

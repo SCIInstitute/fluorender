@@ -95,7 +95,7 @@ void File::setPos()
 	}
 }
 
-void File::writeString(const std::wstring& s)
+void File::writeWstring(const std::wstring& s)
 {
 	if (ofs_.bad()) return;
 	std::string str = ws2s(s);

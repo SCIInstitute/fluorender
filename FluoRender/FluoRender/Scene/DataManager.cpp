@@ -5777,7 +5777,7 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 			reader->SetDigitOrder(glbin_settings.m_digit_order);
 			preprocess = true;
 		}
-		std::wstring str_w = s2ws(glbin_settings.m_time_id);
+		std::wstring str_w = glbin_settings.m_time_id;
 		if (reader->GetTimeId() != str_w)
 		{
 			reader->SetTimeId(str_w);

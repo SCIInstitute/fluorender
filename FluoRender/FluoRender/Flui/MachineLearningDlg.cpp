@@ -115,7 +115,7 @@ MachineLearningPanel::MachineLearningPanel(
 	m_record(false)
 {
 	std::filesystem::path p = std::filesystem::current_path();
-	m_exepath = p.string();
+	m_exepath = p.wstring();
 }
 
 MachineLearningPanel::~MachineLearningPanel()
@@ -271,20 +271,20 @@ void MachineLearningPanel::PopTopList()
 
 	std::filesystem::path p(m_exepath);
 	p /= m_dir;
-	std::string path = p.string();
-	std::string name, ext, filename;
+	std::wstring path = p.wstring();
+	std::wstring name, ext, filename;
 	int i = 0;
 	for (const auto& entry : std::filesystem::directory_iterator(path))
 	{
-		ext = entry.path().extension().string();
+		ext = entry.path().extension().wstring();
 		if (ext != m_ext)
 			continue;
-		filename = entry.path().string();
+		filename = entry.path().wstring();
 		flrd::Table table;
 		table.open(filename, true);
 		m_top_grid->InsertRows(i);
 		name = table.getName();
-		if (name.empty()) name = entry.path().stem().string();
+		if (name.empty()) name = entry.path().stem().wstring();
 		m_top_grid->SetCellValue(i, 0, name);
 		m_top_grid->SetCellValue(i, 1, std::to_string(table.getRecNum()));
 		m_top_grid->SetCellValue(i, 2, table.getNotes());
@@ -322,7 +322,7 @@ void MachineLearningPanel::UpdateList(int index)
 void MachineLearningPanel::UpdateTopList()
 {
 	flrd::TableHistParams& table = glbin.get_cg_table();
-	std::string name = table.getName();
+	std::wstring name = table.getName();
 	for (int i = 0; i < m_top_grid->GetNumberRows(); ++i)
 	{
 		if (m_top_grid->GetCellValue(i, 0) == wxString(name))
@@ -342,20 +342,20 @@ void MachineLearningPanel::UpdateTopList()
 	}
 }
 
-bool MachineLearningPanel::MatchTableName(std::string& name)
+bool MachineLearningPanel::MatchTableName(std::wstring& name)
 {
 	bool modified = false;
 	std::filesystem::path p(m_exepath);
 	p /= m_dir;
-	std::string path = p.string();
-	std::string stem, ext;
+	std::wstring path = p.wstring();
+	std::wstring stem, ext;
 	while (true)
 	{
 		bool found_same = false;
 		for (const auto& entry : std::filesystem::directory_iterator(path))
 		{
-			stem = entry.path().stem().string();
-			ext = entry.path().extension().string();
+			stem = entry.path().stem().wstring();
+			ext = entry.path().extension().wstring();
 			if (ext == m_ext && stem == name)
 			{
 				found_same = true;
@@ -409,8 +409,8 @@ MLCompGenPanel::MLCompGenPanel(
 	MainFrame* frame, wxWindow* parent) :
 	MachineLearningPanel(frame, parent)
 {
-	m_dir = "Database";
-	m_ext = ".cgtbl";
+	m_dir = L"Database";
+	m_ext = L".cgtbl";
 	m_top_grid_name = "Data Sets";
 	m_bot_grid_name = "Machine Learning Records";
 	Create();
@@ -426,11 +426,11 @@ MLCompGenPanel::~MLCompGenPanel()
 	//save existing table if modified
 	if (table.getModified())
 	{
-		std::string name = table.getName();
+		std::wstring name = table.getName();
 		std::filesystem::path p(m_exepath);
 		p /= m_dir;
 		p /= name + m_ext;
-		std::string filename = p.string();
+		std::wstring filename = p.wstring();
 		table.save(filename);
 	}
 }
@@ -468,7 +468,7 @@ void MLCompGenPanel::OnLoadTable(wxCommandEvent& event)
 	wxArrayInt seli = m_top_grid->GetSelectedRows();
 	if (seli.GetCount() > 0)
 	{
-		std::string name = m_top_grid->GetCellValue(seli[0], 0).ToStdString();
+		std::wstring name = m_top_grid->GetCellValue(seli[0], 0).ToStdWstring();
 		LoadTable(name);
 		UpdateBotList();
 	}
@@ -511,14 +511,14 @@ void MLCompGenPanel::OnDupTable(wxCommandEvent& event)
 	}
 
 	flrd::TableHistParams new_table(table);
-	std::string name = new_table.getName();
+	std::wstring name = new_table.getName();
 	if (MatchTableName(name))
 		new_table.setName(name);
 	//save it
 	std::filesystem::path p(m_exepath);
 	p /= m_dir;
 	p /= name + m_ext;
-	std::string str = p.string();
+	std::wstring str = p.wstring();
 	new_table.save(str);
 	PopTopList();
 }
@@ -528,7 +528,7 @@ void MLCompGenPanel::OnAutoLoad(wxCommandEvent& event)
 	wxArrayInt seli = m_top_grid->GetSelectedRows();
 	if (seli.GetCount() > 0)
 	{
-		std::string name = m_top_grid->GetCellValue(seli[0], 0).ToStdString();
+		std::wstring name = m_top_grid->GetCellValue(seli[0], 0).ToStdWstring();
 		glbin_settings.m_cg_table = name;
 	}
 }
@@ -590,20 +590,20 @@ void MLCompGenPanel::OnTopGridCellChanged(wxGridEvent& event)
 {
 	int c = event.GetCol();
 	int r = event.GetRow();
-	std::string str0, str1;
+	std::wstring str0, str1;
 	flrd::TableHistParams& table = glbin.get_cg_table();
 	if (c == 0)
 	{
 		//name
 		str0 = event.GetString();
-		str1 = m_top_grid->GetCellValue(r, c).ToStdString();
+		str1 = m_top_grid->GetCellValue(r, c).ToStdWstring();
 		if (str0 == table.getName())
 			table.setName(str1);
 		flrd::TableHistParams temptbl;
 		std::filesystem::path p(m_exepath);
 		p /= m_dir;
 		p /= "";
-		std::string filename = p.string();
+		std::wstring filename = p.wstring();
 		temptbl.open(filename + str0 + m_ext);
 		temptbl.setName(str1);
 		temptbl.save(filename + str1 + m_ext);
@@ -613,8 +613,8 @@ void MLCompGenPanel::OnTopGridCellChanged(wxGridEvent& event)
 	else if (c == 2)
 	{
 		//notes
-		str0 = m_top_grid->GetCellValue(r, 0).ToStdString();
-		str1 = m_top_grid->GetCellValue(r, c).ToStdString();
+		str0 = m_top_grid->GetCellValue(r, 0).ToStdWstring();
+		str1 = m_top_grid->GetCellValue(r, c).ToStdWstring();
 		if (str0 == table.getName())
 		{
 			table.setNotes(str1);
@@ -625,7 +625,7 @@ void MLCompGenPanel::OnTopGridCellChanged(wxGridEvent& event)
 			std::filesystem::path p(m_exepath);
 			p /= m_dir;
 			p /= str0 + m_ext;
-			std::string filename = p.string();
+			std::wstring filename = p.wstring();
 			temptbl.open(filename);
 			temptbl.setNotes(str1);
 			temptbl.save(filename);
@@ -641,7 +641,7 @@ void MLCompGenPanel::UpdateBotList()
 		m_bot_grid->DeleteRows(0, row, true);
 
 	flrd::TableHistParams& table = glbin.get_cg_table();
-	std::string name = table.getName();
+	std::wstring name = table.getName();
 	if (name.empty())
 	{
 		m_bot_table_name->SetLabelText("No table loaded");
@@ -689,9 +689,9 @@ void MLCompGenPanel::UpdateBotList()
 				str_out += std::format("{:.2f}", data_out[j]) + ", ";
 			str_out += std::format("{:.2f}", data_out[len - 1]);
 #else
-            for (size_t j = 0; j < data_out.size() - 1; ++j)
-                str_out += wxString::Format("%.2f", data_out[j]).ToStdString() + ", ";
-            str_out += wxString::Format("%.2f", data_out[len - 1]).ToStdString();
+			for (size_t j = 0; j < data_out.size() - 1; ++j)
+				str_out += wxString::Format("%.2f", data_out[j]).ToStdString() + ", ";
+			str_out += wxString::Format("%.2f", data_out[len - 1]).ToStdString();
 #endif
 		}
 		m_bot_grid->SetCellValue(0, 1, str_out);
@@ -703,13 +703,13 @@ void MLCompGenPanel::UpdateBotList()
 
 void MLCompGenPanel::AutoLoadTable()
 {
-	std::string name, str;
+	std::wstring name, str;
 	int count = m_top_grid->GetNumberRows();
 	bool found = false;
 	name = glbin_settings.m_cg_table;
 	for (int i = 0; i < count; ++i)
 	{
-		str = m_top_grid->GetCellValue(i, 0).ToStdString();
+		str = m_top_grid->GetCellValue(i, 0).ToStdWstring();
 		if (str == name)
 		{
 			found = true;
@@ -717,7 +717,7 @@ void MLCompGenPanel::AutoLoadTable()
 		}
 	}
 	if (!found && count > 0)
-		name = m_top_grid->GetCellValue(0, 0).ToStdString();
+		name = m_top_grid->GetCellValue(0, 0).ToStdWstring();
 	LoadTable(name);
 	UpdateBotList();
 
@@ -728,17 +728,17 @@ void MLCompGenPanel::AutoLoadTable()
 	}
 }
 
-void MLCompGenPanel::LoadTable(const std::string& filename)
+void MLCompGenPanel::LoadTable(const std::wstring& filename)
 {
 	std::filesystem::path p(m_exepath);
 	p /= m_dir;
 	p /= "";
-	std::string str = p.string();
+	std::wstring str = p.wstring();
 	flrd::TableHistParams& table = glbin.get_cg_table();
 	//save existing table if modified
 	if (table.getModified())
 	{
-		std::string name = table.getName();
+		std::wstring name = table.getName();
 		str += name + m_ext;
 		table.save(str);
 	}
@@ -746,12 +746,12 @@ void MLCompGenPanel::LoadTable(const std::string& filename)
 	table.open(str);
 }
 
-void MLCompGenPanel::SaveTable(const std::string& filename)
+void MLCompGenPanel::SaveTable(const std::wstring& filename)
 {
 	std::filesystem::path p(m_exepath);
 	p /= m_dir;
 	p /= filename + m_ext;
-	std::string str = p.string();
+	std::wstring str = p.wstring();
 	glbin.get_cg_table().save(str);
 }
 
@@ -766,8 +766,8 @@ MLVolPropPanel::MLVolPropPanel(
 	MainFrame* frame, wxWindow* parent) :
 	MachineLearningPanel(frame, parent)
 {
-	m_dir = "Database";
-	m_ext = ".vptbl";
+	m_dir = L"Database";
+	m_ext = L".vptbl";
 	m_top_grid_name = "Data Sets";
 	m_bot_grid_name = "Machine Learning Records";
 	Create();
@@ -791,11 +791,11 @@ MLVolPropPanel::~MLVolPropPanel()
 	//save existing table if modified
 	if (table.getModified())
 	{
-		std::string name = table.getName();
+		std::wstring name = table.getName();
 		std::filesystem::path p(m_exepath);
 		p /= m_dir;
 		p /= name + m_ext;
-		std::string filename = p.string();
+		std::wstring filename = p.wstring();
 		table.save(filename);
 	}
 }
@@ -839,7 +839,7 @@ void MLVolPropPanel::OnLoadTable(wxCommandEvent& event)
 	wxArrayInt seli = m_top_grid->GetSelectedRows();
 	if (seli.GetCount() > 0)
 	{
-		std::string name = m_top_grid->GetCellValue(seli[0], 0).ToStdString();
+		std::wstring name = m_top_grid->GetCellValue(seli[0], 0).ToStdWstring();
 		LoadTable(name);
 		UpdateBotList();
 	}
@@ -882,14 +882,14 @@ void MLVolPropPanel::OnDupTable(wxCommandEvent& event)
 	}
 
 	flrd::TableHistParams new_table(table);
-	std::string name = new_table.getName();
+	std::wstring name = new_table.getName();
 	if (MatchTableName(name))
 		new_table.setName(name);
 	//save it
 	std::filesystem::path p(m_exepath);
 	p /= m_dir;
 	p /= name + m_ext;
-	std::string str = p.string();
+	std::wstring str = p.wstring();
 	new_table.save(str);
 	PopTopList();
 }
@@ -898,7 +898,7 @@ void MLVolPropPanel::OnAutoLoad(wxCommandEvent& event)
 {
 	wxArrayInt seli = m_top_grid->GetSelectedRows();
 	if (seli.GetCount() > 0)
-		glbin_settings.m_vp_table = m_top_grid->GetCellValue(seli[0], 0).ToStdString();
+		glbin_settings.m_vp_table = m_top_grid->GetCellValue(seli[0], 0).ToStdWstring();
 }
 
 void MLVolPropPanel::OnAutoStartRec(wxCommandEvent& event)
@@ -961,20 +961,20 @@ void MLVolPropPanel::OnTopGridCellChanged(wxGridEvent& event)
 {
 	int c = event.GetCol();
 	int r = event.GetRow();
-	std::string str0, str1;
+	std::wstring str0, str1;
 	flrd::TableHistParams& table = glbin.get_vp_table();
 	if (c == 0)
 	{
 		//name
 		str0 = event.GetString();
-		str1 = m_top_grid->GetCellValue(r, c).ToStdString();
+		str1 = m_top_grid->GetCellValue(r, c).ToStdWstring();
 		if (str0 == table.getName())
 			table.setName(str1);
 		flrd::TableHistParams temptbl;
 		std::filesystem::path p(m_exepath);
 		p /= m_dir;
 		p /= "";
-		std::string filename = p.string();
+		std::wstring filename = p.wstring();
 		temptbl.open(filename + str0 + m_ext);
 		temptbl.setName(str1);
 		temptbl.save(filename + str1 + m_ext);
@@ -984,8 +984,8 @@ void MLVolPropPanel::OnTopGridCellChanged(wxGridEvent& event)
 	else if (c == 2)
 	{
 		//notes
-		str0 = m_top_grid->GetCellValue(r, 0).ToStdString();
-		str1 = m_top_grid->GetCellValue(r, c).ToStdString();
+		str0 = m_top_grid->GetCellValue(r, 0).ToStdWstring();
+		str1 = m_top_grid->GetCellValue(r, c).ToStdWstring();
 		if (str0 == table.getName())
 		{
 			table.setNotes(str1);
@@ -996,7 +996,7 @@ void MLVolPropPanel::OnTopGridCellChanged(wxGridEvent& event)
 			std::filesystem::path p(m_exepath);
 			p /= m_dir;
 			p /= str0 + m_ext;
-			std::string filename = p.string();
+			std::wstring filename = p.wstring();
 			temptbl.open(filename);
 			temptbl.setNotes(str1);
 			temptbl.save(filename);
@@ -1012,7 +1012,7 @@ void MLVolPropPanel::UpdateBotList()
 		m_bot_grid->DeleteRows(0, row, true);
 
 	flrd::TableHistParams& table = glbin.get_vp_table();
-	std::string name = table.getName();
+	std::wstring name = table.getName();
 	if (name.empty())
 	{
 		m_bot_table_name->SetLabelText("No table loaded");
@@ -1074,13 +1074,13 @@ void MLVolPropPanel::UpdateBotList()
 
 void MLVolPropPanel::AutoLoadTable()
 {
-	std::string name, str;
+	std::wstring name, str;
 	int count = m_top_grid->GetNumberRows();
 	bool found = false;
 	name = glbin_settings.m_vp_table;
 	for (int i = 0; i < count; ++i)
 	{
-		str = m_top_grid->GetCellValue(i, 0).ToStdString();
+		str = m_top_grid->GetCellValue(i, 0).ToStdWstring();
 		if (str == name)
 		{
 			found = true;
@@ -1088,7 +1088,7 @@ void MLVolPropPanel::AutoLoadTable()
 		}
 	}
 	if (!found && count > 0)
-		name = m_top_grid->GetCellValue(0, 0).ToStdString();
+		name = m_top_grid->GetCellValue(0, 0).ToStdWstring();
 	LoadTable(name);
 	UpdateBotList();
 
@@ -1099,18 +1099,18 @@ void MLVolPropPanel::AutoLoadTable()
 	}
 }
 
-void MLVolPropPanel::LoadTable(const std::string& filename)
+void MLVolPropPanel::LoadTable(const std::wstring& filename)
 {
 	std::filesystem::path p(m_exepath);
 	p /= m_dir;
 	p /= "";
-	std::string str = p.string();
+	std::wstring str = p.wstring();
 	flrd::TableHistParams& table = glbin.get_vp_table();
-	std::string str2;
+	std::wstring str2;
 	//save existing table if modified
 	if (table.getModified())
 	{
-		std::string name = table.getName();
+		std::wstring name = table.getName();
 		str2 = str + name + m_ext;
 		table.save(str2);
 	}
@@ -1118,12 +1118,12 @@ void MLVolPropPanel::LoadTable(const std::string& filename)
 	table.open(str2);
 }
 
-void MLVolPropPanel::SaveTable(const std::string& filename)
+void MLVolPropPanel::SaveTable(const std::wstring& filename)
 {
 	std::filesystem::path p(m_exepath);
 	p /= m_dir;
 	p /= filename + m_ext;
-	std::string str = p.string();
+	std::wstring str = p.wstring();
 	glbin.get_vp_table().save(str);
 }
 

@@ -48,22 +48,22 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 {
 	if (filenames.Count())
 	{
-		std::vector<std::string> std_filenames;
+		std::vector<std::wstring> std_filenames;
 		std_filenames.reserve(filenames.size()); // Reserve space for efficiency
 
 		for (const auto& filename : filenames) {
-			std_filenames.push_back(std::string(filename.mb_str()));
+			std_filenames.push_back(filename.ToStdWstring());
 		}
 
 		MainFrame* vr_frame = (MainFrame*)m_frame;
 		if (vr_frame)
 		{
-			std::string filename = std_filenames[0];
+			std::wstring filename = std_filenames[0];
 			std::filesystem::path p(filename);
-			std::string suffix = p.extension().string();
+			std::wstring suffix = p.extension().wstring();
 			std::transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
 
-			if (suffix == ".vrp")
+			if (suffix == L".vrp")
 			{
 				if (m_view)
 				{
@@ -72,29 +72,29 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 				}
 				glbin_project.Open(filename);
 			}
-			else if (suffix == ".nrrd" ||
-					 suffix == ".msk" ||
-					 suffix == ".lbl" ||
-					 suffix == ".tif" ||
-					 suffix == ".tiff" ||
-					 suffix == ".oib" ||
-					 suffix == ".oif" ||
-					 suffix == ".lsm" ||
-					 suffix == ".xml" ||
-					 suffix == ".vvd" ||
-					 suffix == ".nd2" ||
-					 suffix == ".czi" ||
-					 suffix == ".lif" ||
-					 suffix == ".lof" ||
-					 suffix == ".mp4" ||
-					 suffix == ".m4v" ||
-					 suffix == ".mov" ||
-					 suffix == ".avi" ||
-					 suffix == ".wmv")
+			else if (suffix == L".nrrd" ||
+					 suffix == L".msk" ||
+					 suffix == L".lbl" ||
+					 suffix == L".tif" ||
+					 suffix == L".tiff" ||
+					 suffix == L".oib" ||
+					 suffix == L".oif" ||
+					 suffix == L".lsm" ||
+					 suffix == L".xml" ||
+					 suffix == L".vvd" ||
+					 suffix == L".nd2" ||
+					 suffix == L".czi" ||
+					 suffix == L".lif" ||
+					 suffix == L".lof" ||
+					 suffix == L".mp4" ||
+					 suffix == L".m4v" ||
+					 suffix == L".mov" ||
+					 suffix == L".avi" ||
+					 suffix == L".wmv")
 			{
 				glbin_data_manager.LoadVolumes(std_filenames, false);
 			}
-			else if (suffix == ".obj")
+			else if (suffix == L".obj")
 			{
 				glbin_data_manager.LoadMeshes(std_filenames);
 			}

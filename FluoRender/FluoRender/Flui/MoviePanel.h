@@ -55,7 +55,7 @@ public:
 		long style = wxLC_REPORT | wxLC_SINGLE_SEL);
 	~KeyListCtrl();
 
-	void Append(int id, int time, int duration, int interp, const std::string& description);
+	void Append(int id, int time, int duration, int interp, const std::wstring& description);
 	void DeleteSel();
 	void DeleteAll();
 	wxString GetText(long item, int col);
@@ -136,7 +136,7 @@ public:
 	void Loop(bool val);
 	void IncFrame();
 	void DecFrame();
-	void Save(const std::string& filename);
+	void Save(const std::wstring& filename);
 
 	//keyframe movie
 	void SetKeyframeMovie(bool val);
@@ -148,8 +148,8 @@ public:
 	void SetScalebarValues(int x, int y);
 
 	//script
-	size_t GetScriptFiles(std::vector<std::string>& list);
-	void EnableScript(bool val, const std::string& filename = "");
+	size_t GetScriptFiles(std::vector<std::wstring>& list);
+	void EnableScript(bool val, const std::wstring& filename = L"");
 
 private:
 	bool m_running;

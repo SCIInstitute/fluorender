@@ -575,8 +575,8 @@ extern "C" {
 	TIFF* TIFFOpenW(const wchar_t* name, const char* mode);
 }
 
-inline wchar_t GETSLASH() { static_cast<wchar_t>(GETSLASHA()); }
-inline char GETSLASHA() { std::filesystem::path::preferred_separator; }
+inline char GETSLASHA() { return std::filesystem::path::preferred_separator; }
+inline wchar_t GETSLASH() { return static_cast<wchar_t>(GETSLASHA()); }
 
 #ifdef _WIN32 //WINDOWS ONLY
 

@@ -268,8 +268,8 @@ void ListPanel::UpdateList()
 		VolumeData* vd = glbin_data_manager.GetVolumeData(i);
 		if (vd && !vd->GetDup())
 		{
-			std::string name = vd->GetName();
-			std::string path = vd->GetPath();
+			std::wstring name = vd->GetName();
+			std::wstring path = vd->GetPath();
 			m_datalist->Append(DATA_VOLUME, name, path);
 		}
 	}
@@ -279,8 +279,8 @@ void ListPanel::UpdateList()
 		MeshData* md = glbin_data_manager.GetMeshData(i);
 		if (md)
 		{
-			std::string name = md->GetName();
-			std::string path = md->GetPath();
+			std::wstring name = md->GetName();
+			std::wstring path = md->GetPath();
 			m_datalist->Append(DATA_MESH, name, path);
 		}
 	}
@@ -290,8 +290,8 @@ void ListPanel::UpdateList()
 		Annotations* ann = glbin_data_manager.GetAnnotations(i);
 		if (ann)
 		{
-			std::string name = ann->GetName();
-			std::string path = ann->GetPath();
+			std::wstring name = ann->GetName();
+			std::wstring path = ann->GetPath();
 			m_datalist->Append(DATA_ANNOTATIONS, name, path);
 		}
 	}
@@ -300,7 +300,7 @@ void ListPanel::UpdateList()
 void ListPanel::UpdateSelection()
 {
 	int type = glbin_current.GetType();
-	std::string name, item_type;
+	std::wstring name, item_type;
 	switch (type)
 	{
 	case 2://volume
@@ -308,7 +308,7 @@ void ListPanel::UpdateSelection()
 		VolumeData* vd = glbin_current.vol_data;
 		if (vd)
 			name = vd->GetName();
-		item_type = "Volume";
+		item_type = L"Volume";
 	}
 	break;
 	case 3://mesh
@@ -316,7 +316,7 @@ void ListPanel::UpdateSelection()
 		MeshData* md = glbin_current.mesh_data;
 		if (md)
 			name = md->GetName();
-		item_type = "Mesh";
+		item_type = L"Mesh";
 	}
 	break;
 	case 4://annotations
@@ -324,15 +324,15 @@ void ListPanel::UpdateSelection()
 		Annotations* ann = glbin_current.ann_data;
 		if (ann)
 			name = ann->GetName();
-		item_type = "Annotations";
+		item_type = L"Annotations";
 	}
 	break;
 	}
 
 	for (int i = 0; i < m_datalist->GetItemCount(); ++i)
 	{
-		std::string stype = m_datalist->GetText(i, 0).ToStdString();
-		std::string sname = m_datalist->GetText(i, 1).ToStdString();
+		std::wstring stype = m_datalist->GetText(i, 0).ToStdWstring();
+		std::wstring sname = m_datalist->GetText(i, 1).ToStdWstring();
 
 		if (stype == item_type &&
 			sname == name)
@@ -361,7 +361,7 @@ void ListPanel::AddSelectionToView(int view)
 		if (!vd)
 			break;
 
-		std::string name = vd->GetName();
+		std::wstring name = vd->GetName();
 		VolumeData* vd_add = vd;
 
 		for (int i = 0; i < m_frame->GetCanvasNum(); ++i)
@@ -436,11 +436,11 @@ void ListPanel::AddSelToCurView()
 	AddSelectionToView(view);
 }
 
-void ListPanel::RenameSelection(const std::string& name)
+void ListPanel::RenameSelection(const std::wstring& name)
 {
-	std::string new_name = name;
+	std::wstring new_name = name;
 	for (int i = 1; glbin_data_manager.CheckNames(new_name); i++)
-		new_name = new_name + "_" + std::to_string(i);
+		new_name = new_name + L"_" + std::to_wstring(i);
 	int type = glbin_current.GetType();
 
 	switch (type)
@@ -499,12 +499,12 @@ void ListPanel::SaveSelection()
 
 		if (rval == wxID_OK)
 		{
-			std::string filename = fopendlg->GetPath().ToStdString();
+			std::wstring filename = fopendlg->GetPath().ToStdWstring();
 			vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
 				glbin_settings.m_save_crop, glbin_settings.m_save_filter,
 				false, glbin_settings.m_save_compress,
 				fluo::Point(), q, fluo::Point(), false);
-			std::string str = vd->GetPath();
+			std::wstring str = vd->GetPath();
 			m_datalist->SetText(item, 2, str);
 		}
 		delete fopendlg;
@@ -524,10 +524,10 @@ void ListPanel::SaveSelection()
 
 		if (rval == wxID_OK)
 		{
-			std::string filename = fopendlg->GetPath().ToStdString();
+			std::wstring filename = fopendlg->GetPath().ToStdWstring();
 
 			md->Save(filename);
-			std::string str = md->GetPath();
+			std::wstring str = md->GetPath();
 			m_datalist->SetText(item, 2, str);
 		}
 		delete fopendlg;
@@ -547,10 +547,10 @@ void ListPanel::SaveSelection()
 
 		if (rval == wxID_OK)
 		{
-			std::string filename = fopendlg->GetPath().ToStdString();
+			std::wstring filename = fopendlg->GetPath().ToStdWstring();
 
 			ann->Save(filename);
-			std::string str = ann->GetPath();
+			std::wstring str = ann->GetPath();
 			m_datalist->SetText(item, 2, str);
 		}
 		delete fopendlg;
@@ -582,14 +582,14 @@ void ListPanel::BakeSelection()
 
 	if (rval == wxID_OK)
 	{
-		std::string filename = fopendlg->GetPath().ToStdString();
+		std::wstring filename = fopendlg->GetPath().ToStdWstring();
 
 		fluo::Quaternion q = m_frame->GetRenderCanvas(0)->GetClipRotation();
 		vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
 			glbin_settings.m_save_crop, glbin_settings.m_save_filter,
 			true, glbin_settings.m_save_compress,
 			fluo::Point(), q, fluo::Point(), false);
-		std::string str = vd->GetPath();
+		std::wstring str = vd->GetPath();
 		m_datalist->SetText(item, 2, str);
 	}
 
@@ -617,7 +617,7 @@ void ListPanel::DeleteSelection()
 		VolumeData* vd = glbin_current.vol_data;
 		if (!vd)
 			break;
-		std::string name = vd->GetName();
+		std::wstring name = vd->GetName();
 		//from view
 		for (int i = 0; i < m_frame->GetCanvasNum(); i++)
 		{
@@ -640,7 +640,7 @@ void ListPanel::DeleteSelection()
 		MeshData* md = glbin_current.mesh_data;
 		if (!md)
 			break;
-		std::string name = md->GetName();
+		std::wstring name = md->GetName();
 		//from view
 		for (int i = 0; i < m_frame->GetCanvasNum(); i++)
 		{
@@ -663,7 +663,7 @@ void ListPanel::DeleteSelection()
 		Annotations* ann = glbin_current.ann_data;
 		if (!ann)
 			break;
-		std::string name = ann->GetName();
+		std::wstring name = ann->GetName();
 		//from view
 		for (int i = 0; i < m_frame->GetCanvasNum(); i++)
 		{
@@ -856,18 +856,18 @@ void ListPanel::OnSelect(wxListEvent& event)
 	if (item == -1)
 		return;
 
-	std::string stype = m_datalist->GetText(item, 0).ToStdString();
-	std::string name = m_datalist->GetText(item, 1).ToStdString();
+	std::wstring stype = m_datalist->GetText(item, 0).ToStdWstring();
+	std::wstring name = m_datalist->GetText(item, 1).ToStdWstring();
 
-	if (stype == "Volume")
+	if (stype == L"Volume")
 	{
 		glbin_current.SetVolumeData(glbin_data_manager.GetVolumeData(name));
 	}
-	else if (stype == "Mesh")
+	else if (stype == L"Mesh")
 	{
 		glbin_current.SetMeshData(glbin_data_manager.GetMeshData(name));
 	}
-	else if (stype == "Annotations")
+	else if (stype == L"Annotations")
 	{
 		glbin_current.SetAnnotation(glbin_data_manager.GetAnnotations(name));
 	}
@@ -901,7 +901,7 @@ void ListPanel::OnMouse(wxMouseEvent& event)
 
 void ListPanel::OnEndEditName(wxCommandEvent& event)
 {
-	std::string str = m_datalist->EndEdit().ToStdString();
+	std::wstring str = m_datalist->EndEdit().ToStdWstring();
 	RenameSelection(str);
 }
 

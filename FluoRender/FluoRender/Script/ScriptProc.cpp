@@ -602,7 +602,7 @@ void ScriptProc::RunNoiseReduction()
 		if (m_frame->GetNoiseCancellingDlg())
 			m_frame->GetNoiseCancellingDlg()->Preview();
 		//delete
-		glbin_vol_calculator.CalculateGroup(6, "", false);
+		glbin_vol_calculator.CalculateGroup(6, L"", false);
 	}
 }
 
@@ -1112,15 +1112,15 @@ void ScriptProc::RunCalculate()
 	glbin_vol_calculator.SetVolumeA(vol_a);
 	glbin_vol_calculator.SetVolumeB(vol_b);
 	if (sOper == "subtract")
-		glbin_vol_calculator.CalculateGroup(1, "", false);
+		glbin_vol_calculator.CalculateGroup(1, L"", false);
 	else if (sOper == "add")
-		glbin_vol_calculator.CalculateGroup(2, "", false);
+		glbin_vol_calculator.CalculateGroup(2, L"", false);
 	else if (sOper == "divide")
-		glbin_vol_calculator.CalculateGroup(3, "", false);
+		glbin_vol_calculator.CalculateGroup(3, L"", false);
 	else if (sOper == "colocate")
-		glbin_vol_calculator.CalculateGroup(4, "", false);
+		glbin_vol_calculator.CalculateGroup(4, L"", false);
 	else if (sOper == "fill")
-		glbin_vol_calculator.CalculateGroup(9, "", false);
+		glbin_vol_calculator.CalculateGroup(9, L"", false);
 }
 
 void ScriptProc::RunOpenCL()

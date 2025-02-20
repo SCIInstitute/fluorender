@@ -40,7 +40,7 @@ public:
 	bool OnCmdLineParsed(wxCmdLineParser& parser);	
 
 private:
-	std::vector<std::string> m_files;
+	std::vector<std::wstring> m_files;
 	size_t m_file_num;
 	bool m_benchmark;
 	bool m_fullscreen;
@@ -48,7 +48,7 @@ private:
 	bool m_hidepanels;
 	int m_win_width;
 	int m_win_height;
-	std::string m_mov_file;
+	std::wstring m_mov_file;
 	double m_bitrate;
 	bool m_lzw;
 	bool m_save_alpha;
