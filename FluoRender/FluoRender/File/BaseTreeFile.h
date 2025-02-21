@@ -37,11 +37,22 @@ class BaseTreeFile
 public:
 	virtual ~BaseTreeFile() {}
 
+	virtual int LoadFile(const std::string& filename) = 0;
+	virtual int LoadString(const std::string& str) = 0;
+	virtual int SaveFile(const std::string& filename) = 0;
+	virtual int SaveString(std::string& str) = 0;
+
 	// Template methods to read values
 	template<typename T>
 	bool Read(const std::string& key, T* value) const {
 		if constexpr (std::is_same_v<T, std::string>) {
 			return ReadString(key, value);
+		}
+		else if constexpr (std::is_same_v<T, std::wstring>) {
+			return ReadWstring(key, value);
+		}
+		else if constexpr (std::is_same_v<T, bool>) {
+			return ReadBool(key, value);
 		}
 		else if constexpr (std::is_same_v<T, long>) {
 			return ReadLong(key, value);
@@ -60,6 +71,12 @@ public:
 		if constexpr (std::is_same_v<T, std::string>) {
 			return WriteString(key, value);
 		}
+		else if constexpr (std::is_same_v<T, std::wstring>) {
+			return WriteWstring(key, value);
+		}
+		else if constexpr (std::is_same_v<T, bool>) {
+			return WriteBool(key, value);
+		}
 		else if constexpr (std::is_same_v<T, long>) {
 			return WriteLong(key, value);
 		}
@@ -72,6 +89,7 @@ public:
 	}
 
 	// Methods to manage groups
+	virtual bool Exists(const std::string& path) const = 0;
 	virtual bool SetPath(const std::string& path) = 0;
 	virtual std::string GetPath() const = 0;
 	virtual bool HasGroup(const std::string& group) const = 0;
@@ -90,11 +108,15 @@ public:
 protected:
 	// Type-specific read methods
 	virtual bool ReadString(const std::string& key, std::string* value) const = 0;
+	virtual bool ReadWstring(const std::string& key, std::wstring* value) const = 0;
+	virtual bool ReadBool(const std::string& key, bool* value) const = 0;
 	virtual bool ReadLong(const std::string& key, long* value) const = 0;
 	virtual bool ReadDouble(const std::string& key, double* value) const = 0;
 
 	// Type-specific write methods
 	virtual bool WriteString(const std::string& key, const std::string& value) = 0;
+	virtual bool WriteWstring(const std::string& key, const std::wstring& value) = 0;
+	virtual bool WriteBool(const std::string& key, bool value) = 0;
 	virtual bool WriteLong(const std::string& key, long value) = 0;
 	virtual bool WriteDouble(const std::string& key, double value) = 0;
 
