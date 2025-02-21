@@ -201,7 +201,7 @@ typedef int (* IniSubstrHandler) (
 
 
 extern int strip_ini_cache (
-    register char * const ini_source,
+    char * const ini_source,
     const size_t ini_length,
     const IniFormat format,
     const IniStatsHandler f_init,

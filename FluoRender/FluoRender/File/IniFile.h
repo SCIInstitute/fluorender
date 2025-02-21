@@ -31,8 +31,12 @@ DEALINGS IN THE SOFTWARE.
 #include <BaseTreeFile.h>
 #include <confini.h>
 #include <compatibility.h>
+#include <map>
+#include <set>
 
-#define DOT_REPLACEMENT '\\'
+#define PATH_SEPARATOR '\\'
+#define CURR_DIR '.'
+#define PAR_DIR ".."
 #define __INI_MAP_DEFAULT_FORMAT__ { \
     /* .delimiter_symbol = */ INI_EQUALS, \
     /* .case_sensitive = */ false, \
@@ -70,8 +74,8 @@ public:
 
 	int LoadString(const std::string& ini_string) override
 	{
-		this->dictionary.clear();
-		this->_format_ = __INI_MAP_DEFAULT_FORMAT__;
+		dictionary.clear();
+		_format_ = __INI_MAP_DEFAULT_FORMAT__;
 		size_t len = ini_string.length();
 		char* tmp = new char[len + 1];
 		memcpy(tmp, ini_string.c_str(), len + 1);
@@ -87,8 +91,10 @@ public:
 			return CONFINI_EIO;
 		}
 
-		for (const auto& pair : dictionary) {
-			size_t pos = pair.first.find('\\');
+		std::map<std::string, std::string> sorted_dict(dictionary.begin(), dictionary.end());
+
+		for (const auto& pair : sorted_dict) {
+			size_t pos = pair.first.find(PATH_SEPARATOR);
 			std::string section = pair.first.substr(0, pos);
 			std::string key = pair.first.substr(pos + 1);
 
@@ -104,8 +110,10 @@ public:
 	{
 		std::ostringstream oss;
 
-		for (const auto& pair : dictionary) {
-			size_t pos = pair.first.find('\\');
+		std::map<std::string, std::string> sorted_dict(dictionary.begin(), dictionary.end());
+
+		for (const auto& pair : sorted_dict) {
+			size_t pos = pair.first.find(PATH_SEPARATOR);
 			std::string section = pair.first.substr(0, pos);
 			std::string key = pair.first.substr(pos + 1);
 
@@ -121,80 +129,134 @@ public:
 	// Implement group management methods
 	bool Exists(const std::string& path) const override
 	{
-		return dictionary.count(path) ? true : false;
+		std::string full_key = getFullKey(path);
+		return dictionary.count(full_key) ? true : false;
 	}
 
-	bool SetPath(const std::string& path) override {
-		currentSection = ini_get_section(ini, path.c_str());
-		return currentSection != nullptr;
+	bool SetPath(const std::string& path) override
+	{
+		current_section = getFullPath(path);
+		return !current_section.empty();
 	}
 
-	std::string GetPath() const override {
-		return currentSection->name;
+	std::string GetPath() const override
+	{
+		return current_section;
 	}
 
-	bool HasGroup(const std::string& group) const override {
-		return ini_get_section(ini, group.c_str()) != nullptr;
+	bool HasGroup(const std::string& group) const override
+	{
+		std::string prefix = current_section + group + PATH_SEPARATOR;
+		for (const auto& pair : dictionary)
+		{
+			if (pair.first.find(prefix) == 0 && pair.first != group) {
+				return true;
+			}
+		}
+		return false;
 	}
 
-	bool HasEntry(const std::string& entry) const override {
-		return ini_get_entry(currentSection, entry.c_str()) != nullptr;
+	bool HasEntry(const std::string& entry) const override
+	{
+		std::string full_key = getFullKey(entry);
+		return dictionary.find(full_key) != dictionary.end();
 	}
 
 	// Implement enumeration methods
-	bool GetFirstGroup(std::string* group, long* index) const override {
-		if (ini->sections) {
-			*group = ini->sections->name;
-			*index = 0;
-			return true;
+	bool GetFirstGroup(std::string* group, long* index) const override
+	{
+		if (dictionary.empty()) {
+			return false;
 		}
-		return false;
+
+		std::set<std::string> unique_sections;
+		for (const auto& pair : dictionary) {
+			size_t pos = pair.first.find(PATH_SEPARATOR);
+			std::string section = (pos == std::string::npos) ? pair.first : pair.first.substr(0, pos);
+			unique_sections.insert(section);
+		}
+
+		if (unique_sections.empty()) {
+			return false;
+		}
+
+		*group = *unique_sections.begin();
+		*index = 0;
+		sections_vector.assign(unique_sections.begin(), unique_sections.end());
+		return true;
 	}
 
-	bool GetNextGroup(std::string* group, long* index) const override {
-		const ini_section_t* section = ini->sections;
-		for (long i = 0; i <= *index; ++i) {
-			section = section->next;
+	bool GetNextGroup(std::string* group, long* index) const override
+	{
+		if (*index + 1 >= sections_vector.size()) {
+			return false;
 		}
-		if (section) {
-			*group = section->name;
-			(*index)++;
-			return true;
-		}
-		return false;
+
+		*index += 1;
+		*group = sections_vector[*index];
+		return true;
 	}
 
-	bool GetFirstEntry(std::string* entry, long* index) const override {
-		if (currentSection->entries) {
-			*entry = currentSection->entries->name;
-			*index = 0;
-			return true;
+	bool GetFirstEntry(std::string* entry, long* index) const override
+	{
+		if (dictionary.empty() || current_section.empty()) {
+			return false;
 		}
-		return false;
+
+		entries_vector.clear();
+		std::string prefix = current_section;
+		for (const auto& pair : dictionary) {
+			if (pair.first.find(prefix) == 0) {
+				entries_vector.push_back(pair.first.substr(prefix.length()));
+			}
+		}
+
+		if (entries_vector.empty()) {
+			return false;
+		}
+
+		*entry = entries_vector[0];
+		*index = 0;
+		return true;
 	}
 
-	bool GetNextEntry(std::string* entry, long* index) const override {
-		const ini_entry_t* entryPtr = currentSection->entries;
-		for (long i = 0; i <= *index; ++i) {
-			entryPtr = entryPtr->next;
+	bool GetNextEntry(std::string* entry, long* index) const override
+	{
+		if (*index + 1 >= entries_vector.size()) {
+			return false;
 		}
-		if (entryPtr) {
-			*entry = entryPtr->name;
-			(*index)++;
-			return true;
-		}
-		return false;
+
+		*index += 1;
+		*entry = entries_vector[*index];
+		return true;
 	}
 
 	// Implement deletion methods
-	bool DeleteEntry(const std::string& key) override {
-		ini_remove_entry(currentSection, key.c_str());
-		return true;
+	bool DeleteEntry(const std::string& key) override
+	{
+		std::string full_key = getFullKey(key);
+		auto it = dictionary.find(full_key);
+		if (it != dictionary.end()) {
+			dictionary.erase(it);
+			return true;
+		}
+		return false;
 	}
 
-	bool DeleteGroup(const std::string& group) override {
-		ini_remove_section(ini, group.c_str());
-		return true;
+	bool DeleteGroup(const std::string& group) override
+	{
+		std::string prefix = getFullPath(group);
+		bool found = false;
+		for (auto it = dictionary.begin(); it != dictionary.end(); ) {
+			if (it->first.find(prefix) == 0 || it->first == group) {
+				it = dictionary.erase(it);
+				found = true;
+			}
+			else {
+				++it;
+			}
+		}
+		return found;
 	}
 
 protected:
@@ -244,19 +306,31 @@ protected:
 	}
 
 	// Implement type-specific write methods
-	bool WriteString(const std::string& key, const std::string& value) override {
-		ini_set_entry(currentSection, key.c_str(), value.c_str());
+	bool WriteString(const std::string& key, const std::string& value) override
+	{
+		std::string full_key = getFullKey(key);
+		dictionary.insert(std::pair<std::string, std::string>(full_key, value));
 		return true;
 	}
 
-	bool WriteLong(const std::string& key, long value) override {
-		ini_set_entry(currentSection, key.c_str(), std::to_string(value).c_str());
-		return true;
+	bool WriteWstring(const std::string& key, const std::wstring& value) override
+	{
+		return WriteString(key, ws2s(value));
 	}
 
-	bool WriteDouble(const std::string& key, double value) override {
-		ini_set_entry(currentSection, key.c_str(), std::to_string(value).c_str());
-		return true;
+	bool WriteBool(const std::string& key, bool value) override
+	{
+		return WriteString(key, value ? "1" : "0");
+	}
+
+	bool WriteLong(const std::string& key, long value) override
+	{
+		return WriteString(key, std::to_string(value));
+	}
+
+	bool WriteDouble(const std::string& key, double value) override
+	{
+		return WriteString(key, std::to_string(value));
 	}
 
 private:
@@ -264,6 +338,8 @@ private:
 
 	std::unordered_map<std::string, std::string> dictionary;
 	std::string current_section;
+	mutable std::vector<std::string> sections_vector;
+	mutable std::vector<std::string> entries_vector;
 
 	static inline void chrarr_tolower(char* const str)
 	{
@@ -272,9 +348,84 @@ private:
 		}
 	}
 
+	std::vector<std::string> splitPath(const std::string& path) const {
+		std::vector<std::string> parts;
+		std::istringstream iss(path);
+		std::string part;
+		while (std::getline(iss, part, PATH_SEPARATOR)) {
+			if (!part.empty()) {
+				parts.push_back(part);
+			}
+		}
+		return parts;
+	}
+
+	std::string joinPath(const std::vector<std::string>& parts) const {
+		std::ostringstream oss;
+		for (const auto& part : parts) {
+			if (!oss.str().empty()) {
+				oss << PATH_SEPARATOR;
+			}
+			oss << part;
+		}
+		return oss.str();
+	}
+
+	std::string normalizePath(const std::string& path) const {
+		std::vector<std::string> parts = splitPath(path);
+		std::vector<std::string> normalized_parts;
+		for (const auto& part : parts) {
+			if (part == "..") {
+				if (!normalized_parts.empty()) {
+					normalized_parts.pop_back();
+				}
+			}
+			else if (part != ".") {
+				normalized_parts.push_back(part);
+			}
+		}
+		return joinPath(normalized_parts);
+	}
+
+	std::string getFullPath(const std::string& path) const {
+		if (path.empty()) {
+			return current_section + PATH_SEPARATOR;
+		}
+
+		if (path[0] == PATH_SEPARATOR) {
+			// Absolute path
+			return normalizePath(path) + PATH_SEPARATOR;
+		}
+
+		std::vector<std::string> parts;
+		if (path.substr(0, 2) == PAR_DIR) {
+			// Handle relative path with ".."
+			parts = splitPath(current_section);
+			parts.pop_back(); // Go up one level
+			parts.push_back(path.substr(2));
+		}
+		else if (path[0] == CURR_DIR) {
+			// Handle relative path with "."
+			parts = splitPath(current_section);
+			parts.push_back(path.substr(1));
+		}
+		else {
+			// Relative path
+			parts = splitPath(current_section);
+			parts.push_back(path);
+		}
+
+		return normalizePath(joinPath(parts)) + PATH_SEPARATOR;
+	}
+
+	std::string getFullKey(const std::string& key) const
+	{
+		std::string full_key = current_section.empty() ? key : current_section + PATH_SEPARATOR + key;
+	}
+
 	std::string getSource(const std::string& key) const
 	{
-		std::string full_key = current_section.empty() ? key : current_section + "\\" + key;
+		std::string full_key = getFullKey(key);
 		if (!dictionary.count(full_key))
 		{
 			return "";
@@ -327,7 +478,7 @@ private:
 				while (idx > 0) {
 
 					--idx;
-					newptr1[idx] = oldptr1[idx] == '.' ? DOT_REPLACEMENT : oldptr1[idx];
+					newptr1[idx] = oldptr1[idx] == '.' ? PATH_SEPARATOR : oldptr1[idx];
 
 				}
 
@@ -356,7 +507,7 @@ private:
 		do {
 
 			--idx;
-			newptr2[idx] = disp->data[idx] == '.' ? DOT_REPLACEMENT : disp->data[idx];
+			newptr2[idx] = disp->data[idx] == '.' ? PATH_SEPARATOR : disp->data[idx];
 
 		} while (idx > 0);
 

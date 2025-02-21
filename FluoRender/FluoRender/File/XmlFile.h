@@ -89,7 +89,7 @@ public:
 			element = doc.NewElement(key.c_str());
 			currentElement->InsertEndChild(element);
 		}
-		element->SetText(value);
+		element->SetText(static_cast<int>(value));
 		return true;
 	}
 

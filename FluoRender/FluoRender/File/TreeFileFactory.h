@@ -52,7 +52,7 @@ public:
 		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 		file.close();
 
-		FileType type = determineFileType(content);
+		int type = determineFileType(content);
 		std::shared_ptr<BaseTreeFile> handler;
 		switch (type)
 		{
