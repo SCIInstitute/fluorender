@@ -34,76 +34,39 @@ DEALINGS IN THE SOFTWARE.
 class XmlFile : public BaseTreeFile
 {
 public:
-	XmlFile(const std::string& filename) {
-		doc.LoadFile(filename.c_str());
-		currentElement = doc.RootElement();
+	XmlFile() {
 	}
 
 	~XmlFile() {}
 
-	// Implement type-specific read methods
-	bool ReadString(const std::string& key, std::string* value) const override {
-		const tinyxml2::XMLElement* element = currentElement->FirstChildElement(key.c_str());
-		if (element && element->GetText()) {
-			*value = element->GetText();
-			return true;
-		}
-		return false;
+	int LoadFile(const std::string& filename) override
+	{
+		doc.LoadFile(filename.c_str());
+		currentElement = doc.RootElement();
+		return 0;
 	}
 
-	bool ReadLong(const std::string& key, long* value) const override {
-		const tinyxml2::XMLElement* element = currentElement->FirstChildElement(key.c_str());
-		if (element) {
-			int64_t tempValue;
-			if (element->QueryInt64Text(&tempValue) == tinyxml2::XML_SUCCESS) {
-				*value = static_cast<long>(tempValue);
-				return true;
-			}
-		}
-		return false;
+	int LoadString(const std::string& ini_string) override
+	{
+		return 1;
 	}
 
-	bool ReadDouble(const std::string& key, double* value) const override {
-		const tinyxml2::XMLElement* element = currentElement->FirstChildElement(key.c_str());
-		if (element) {
-			element->QueryDoubleText(value);
-			return true;
-		}
-		return false;
+	int SaveFile(const std::string& filename) override
+	{
+		return 1;
 	}
 
-	// Implement type-specific write methods
-	bool WriteString(const std::string& key, const std::string& value) override {
-		tinyxml2::XMLElement* element = currentElement->FirstChildElement(key.c_str());
-		if (!element) {
-			element = doc.NewElement(key.c_str());
-			currentElement->InsertEndChild(element);
-		}
-		element->SetText(value.c_str());
-		return true;
-	}
-
-	bool WriteLong(const std::string& key, long value) override {
-		tinyxml2::XMLElement* element = currentElement->FirstChildElement(key.c_str());
-		if (!element) {
-			element = doc.NewElement(key.c_str());
-			currentElement->InsertEndChild(element);
-		}
-		element->SetText(static_cast<int>(value));
-		return true;
-	}
-
-	bool WriteDouble(const std::string& key, double value) override {
-		tinyxml2::XMLElement* element = currentElement->FirstChildElement(key.c_str());
-		if (!element) {
-			element = doc.NewElement(key.c_str());
-			currentElement->InsertEndChild(element);
-		}
-		element->SetText(value);
-		return true;
+	int SaveString(std::string& str) override
+	{
+		return 1;
 	}
 
 	// Implement group management methods
+	bool Exists(const std::string& path) const override
+	{
+		return false;
+	}
+
 	bool SetPath(const std::string& path) override {
 		currentElement = doc.RootElement()->FirstChildElement(path.c_str());
 		return currentElement != nullptr;
@@ -179,6 +142,89 @@ public:
 			return true;
 		}
 		return false;
+	}
+
+protected:
+	// Implement type-specific read methods
+	bool ReadString(const std::string& key, std::string* value) const override {
+		const tinyxml2::XMLElement* element = currentElement->FirstChildElement(key.c_str());
+		if (element && element->GetText()) {
+			*value = element->GetText();
+			return true;
+		}
+		return false;
+	}
+
+	bool ReadWstring(const std::string& key, std::wstring* value) const override
+	{
+		return false;
+	}
+
+	bool ReadBool(const std::string& key, bool* value) const override
+	{
+		return false;
+	}
+
+	bool ReadLong(const std::string& key, long* value) const override {
+		const tinyxml2::XMLElement* element = currentElement->FirstChildElement(key.c_str());
+		if (element) {
+			int64_t tempValue;
+			if (element->QueryInt64Text(&tempValue) == tinyxml2::XML_SUCCESS) {
+				*value = static_cast<long>(tempValue);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool ReadDouble(const std::string& key, double* value) const override {
+		const tinyxml2::XMLElement* element = currentElement->FirstChildElement(key.c_str());
+		if (element) {
+			element->QueryDoubleText(value);
+			return true;
+		}
+		return false;
+	}
+
+	// Implement type-specific write methods
+	bool WriteString(const std::string& key, const std::string& value) override {
+		tinyxml2::XMLElement* element = currentElement->FirstChildElement(key.c_str());
+		if (!element) {
+			element = doc.NewElement(key.c_str());
+			currentElement->InsertEndChild(element);
+		}
+		element->SetText(value.c_str());
+		return true;
+	}
+
+	bool WriteWstring(const std::string& key, const std::wstring& value) override
+	{
+		return false;
+	}
+
+	bool WriteBool(const std::string& key, bool value) override
+	{
+		return false;
+	}
+
+	bool WriteLong(const std::string& key, long value) override {
+		tinyxml2::XMLElement* element = currentElement->FirstChildElement(key.c_str());
+		if (!element) {
+			element = doc.NewElement(key.c_str());
+			currentElement->InsertEndChild(element);
+		}
+		element->SetText(static_cast<int>(value));
+		return true;
+	}
+
+	bool WriteDouble(const std::string& key, double value) override {
+		tinyxml2::XMLElement* element = currentElement->FirstChildElement(key.c_str());
+		if (!element) {
+			element = doc.NewElement(key.c_str());
+			currentElement->InsertEndChild(element);
+		}
+		element->SetText(value);
+		return true;
 	}
 
 private:
