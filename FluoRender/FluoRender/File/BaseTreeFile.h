@@ -106,6 +106,12 @@ public:
 	virtual bool DeleteGroup(const std::string& group) = 0;
 
 protected:
+	std::string cur_path_;
+	std::string path_sep_;//separator for path
+	std::string cd_sep_;//symbol for current dir
+	std::string pd_sep_;//symbol for parent dir
+
+protected:
 	// Type-specific read methods
 	virtual bool ReadString(const std::string& key, std::string* value) const = 0;
 	virtual bool ReadWstring(const std::string& key, std::wstring* value) const = 0;
@@ -119,6 +125,87 @@ protected:
 	virtual bool WriteBool(const std::string& key, bool value) = 0;
 	virtual bool WriteLong(const std::string& key, long value) = 0;
 	virtual bool WriteDouble(const std::string& key, double value) = 0;
+
+	//path processing
+	std::vector<std::string> splitPath(const std::string& path) const {
+		std::vector<std::string> parts;
+		size_t start = 0, end = 0;
+		while ((end = path.find(path_sep_, start)) != std::string::npos) {
+			std::string part = path.substr(start, end - start);
+			if (!part.empty()) {
+				parts.push_back(part);
+			}
+			start = end + path_sep_.length();
+		}
+		std::string part = path.substr(start);
+		if (!part.empty()) {
+			parts.push_back(part);
+		}
+		return parts;
+	}
+
+	std::string joinPath(const std::vector<std::string>& parts) const {
+		std::ostringstream oss;
+		for (const auto& part : parts) {
+			if (!oss.str().empty()) {
+				oss << path_sep_;
+			}
+			oss << part;
+		}
+		return oss.str();
+	}
+
+	std::string normalizePath(const std::string& path) const {
+		std::vector<std::string> parts = splitPath(path);
+		std::vector<std::string> normalized_parts;
+		for (const auto& part : parts) {
+			if (part == "..") {
+				if (!normalized_parts.empty()) {
+					normalized_parts.pop_back();
+				}
+			}
+			else if (part != ".") {
+				normalized_parts.push_back(part);
+			}
+		}
+		return joinPath(normalized_parts);
+	}
+
+	std::string getFullPath(const std::string& path) const {
+		if (path.empty()) {
+			return cur_path_ + path_sep_;
+		}
+
+		if (path.substr(0, path_sep_.length()) == path_sep_) {
+			// Absolute path
+			return normalizePath(path) + path_sep_;
+		}
+
+		std::vector<std::string> parts;
+		if (path.substr(0, pd_sep_.length()) == pd_sep_) {
+			// Handle relative path with ".."
+			parts = splitPath(cur_path_);
+			parts.pop_back(); // Go up one level
+			parts.push_back(path.substr(pd_sep_.length()));
+		}
+		else if (path.substr(0, cd_sep_.length()) == cd_sep_) {
+			// Handle relative path with "."
+			parts = splitPath(cur_path_);
+			parts.push_back(path.substr(cd_sep_.length()));
+		}
+		else {
+			// Relative path
+			parts = splitPath(cur_path_);
+			parts.push_back(path);
+		}
+
+		return normalizePath(joinPath(parts)) + path_sep_;
+	}
+
+	std::string getFullKey(const std::string& key) const
+	{
+		return cur_path_.empty() ? key : cur_path_ + path_sep_ + key;
+	}
 
 private:
 	template<class T> struct always_false : std::false_type {};

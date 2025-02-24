@@ -34,9 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <map>
 #include <set>
 
-#define PATH_SEPARATOR '\\'
-#define CURR_DIR '.'
-#define PAR_DIR ".."
 #define __INI_MAP_DEFAULT_FORMAT__ { \
     /* .delimiter_symbol = */ INI_EQUALS, \
     /* .case_sensitive = */ false, \
@@ -63,6 +60,10 @@ public:
 	IniFile() :
 		dictionary()
 	{
+		path_sep_ = "\\";
+		path_sep_s_ = path_sep_;
+		cd_sep_ = ".";
+		pd_sep_ = "..";
 	}
 
 	int LoadFile(const std::string& filename) override
@@ -94,7 +95,7 @@ public:
 		std::map<std::string, std::string> sorted_dict(dictionary.begin(), dictionary.end());
 
 		for (const auto& pair : sorted_dict) {
-			size_t pos = pair.first.find(PATH_SEPARATOR);
+			size_t pos = pair.first.find(path_sep_);
 			std::string section = pair.first.substr(0, pos);
 			std::string key = pair.first.substr(pos + 1);
 
@@ -113,7 +114,7 @@ public:
 		std::map<std::string, std::string> sorted_dict(dictionary.begin(), dictionary.end());
 
 		for (const auto& pair : sorted_dict) {
-			size_t pos = pair.first.find(PATH_SEPARATOR);
+			size_t pos = pair.first.find(path_sep_);
 			std::string section = pair.first.substr(0, pos);
 			std::string key = pair.first.substr(pos + 1);
 
@@ -129,24 +130,24 @@ public:
 	// Implement group management methods
 	bool Exists(const std::string& path) const override
 	{
-		std::string full_key = getFullKey(path);
-		return dictionary.count(full_key) ? true : false;
+		std::string str = getFullPath(path);
+		return dictionary.count(str) ? true : false;
 	}
 
 	bool SetPath(const std::string& path) override
 	{
-		current_section = getFullPath(path);
-		return !current_section.empty();
+		cur_path_ = getFullPath(path);
+		return !cur_path_.empty();
 	}
 
 	std::string GetPath() const override
 	{
-		return current_section;
+		return cur_path_;
 	}
 
 	bool HasGroup(const std::string& group) const override
 	{
-		std::string prefix = current_section + group + PATH_SEPARATOR;
+		std::string prefix = cur_path_ + group + path_sep_;
 		for (const auto& pair : dictionary)
 		{
 			if (pair.first.find(prefix) == 0 && pair.first != group) {
@@ -171,7 +172,7 @@ public:
 
 		std::set<std::string> unique_sections;
 		for (const auto& pair : dictionary) {
-			size_t pos = pair.first.find(PATH_SEPARATOR);
+			size_t pos = pair.first.find(path_sep_);
 			std::string section = (pos == std::string::npos) ? pair.first : pair.first.substr(0, pos);
 			unique_sections.insert(section);
 		}
@@ -199,12 +200,12 @@ public:
 
 	bool GetFirstEntry(std::string* entry, long* index) const override
 	{
-		if (dictionary.empty() || current_section.empty()) {
+		if (dictionary.empty() || cur_path_.empty()) {
 			return false;
 		}
 
 		entries_vector.clear();
-		std::string prefix = current_section;
+		std::string prefix = cur_path_;
 		for (const auto& pair : dictionary) {
 			if (pair.first.find(prefix) == 0) {
 				entries_vector.push_back(pair.first.substr(prefix.length()));
@@ -334,94 +335,12 @@ protected:
 	}
 
 private:
+	static std::string path_sep_s_;
 	IniFormat _format_;
 
 	std::unordered_map<std::string, std::string> dictionary;
-	std::string current_section;
 	mutable std::vector<std::string> sections_vector;
 	mutable std::vector<std::string> entries_vector;
-
-	static inline void chrarr_tolower(char* const str)
-	{
-		for (char* chrptr = str; *chrptr; chrptr++) {
-			*chrptr = *chrptr > 0x40 && *chrptr < 0x5b ? *chrptr | 0x60 : *chrptr;
-		}
-	}
-
-	std::vector<std::string> splitPath(const std::string& path) const {
-		std::vector<std::string> parts;
-		std::istringstream iss(path);
-		std::string part;
-		while (std::getline(iss, part, PATH_SEPARATOR)) {
-			if (!part.empty()) {
-				parts.push_back(part);
-			}
-		}
-		return parts;
-	}
-
-	std::string joinPath(const std::vector<std::string>& parts) const {
-		std::ostringstream oss;
-		for (const auto& part : parts) {
-			if (!oss.str().empty()) {
-				oss << PATH_SEPARATOR;
-			}
-			oss << part;
-		}
-		return oss.str();
-	}
-
-	std::string normalizePath(const std::string& path) const {
-		std::vector<std::string> parts = splitPath(path);
-		std::vector<std::string> normalized_parts;
-		for (const auto& part : parts) {
-			if (part == "..") {
-				if (!normalized_parts.empty()) {
-					normalized_parts.pop_back();
-				}
-			}
-			else if (part != ".") {
-				normalized_parts.push_back(part);
-			}
-		}
-		return joinPath(normalized_parts);
-	}
-
-	std::string getFullPath(const std::string& path) const {
-		if (path.empty()) {
-			return current_section + PATH_SEPARATOR;
-		}
-
-		if (path[0] == PATH_SEPARATOR) {
-			// Absolute path
-			return normalizePath(path) + PATH_SEPARATOR;
-		}
-
-		std::vector<std::string> parts;
-		if (path.substr(0, 2) == PAR_DIR) {
-			// Handle relative path with ".."
-			parts = splitPath(current_section);
-			parts.pop_back(); // Go up one level
-			parts.push_back(path.substr(2));
-		}
-		else if (path[0] == CURR_DIR) {
-			// Handle relative path with "."
-			parts = splitPath(current_section);
-			parts.push_back(path.substr(1));
-		}
-		else {
-			// Relative path
-			parts = splitPath(current_section);
-			parts.push_back(path);
-		}
-
-		return normalizePath(joinPath(parts)) + PATH_SEPARATOR;
-	}
-
-	std::string getFullKey(const std::string& key) const
-	{
-		std::string full_key = current_section.empty() ? key : current_section + PATH_SEPARATOR + key;
-	}
 
 	std::string getSource(const std::string& key) const
 	{
@@ -449,88 +368,60 @@ private:
 		return true;
 	}
 
+	static inline void chrarr_tolower(char* const str)
+	{
+		for (char* chrptr = str; *chrptr; chrptr++) {
+			*chrptr = *chrptr > 0x40 && *chrptr < 0x5b ? *chrptr | 0x60 : *chrptr;
+		}
+	}
+
 	static int _push_dispatch_(IniDispatch* const disp, void* const v_dictionary)
 	{
 #define thismap (reinterpret_cast<std::unordered_map<std::string, std::string> *>(v_dictionary))
 
 		if (disp->type != INI_KEY) {
-
 			return 0;
-
 		}
 
-		size_t idx;
-		char* newptr1, * newptr2, * oldptr1, * oldptr2;
+		std::string new_parent, new_key;
 		disp->d_len = ini_unquote(disp->data, disp->format);
 
 		/*  remove quoted dots from parent  */
 		if (disp->at_len) {
-
 			/*  has parent  */
-			newptr1 = newptr2 = new char[disp->at_len + 1];
-			*((const char**)&oldptr2) = disp->append_to;
-
-			while ((oldptr1 = oldptr2)) {
-
-				idx = ini_array_shift((const char**)&oldptr2, '.', disp->format);
-				newptr1[idx] = '\0';
-
-				while (idx > 0) {
-
-					--idx;
-					newptr1[idx] = oldptr1[idx] == '.' ? PATH_SEPARATOR : oldptr1[idx];
-
-				}
-
-				newptr1 += ini_unquote(newptr1, disp->format);
-				*newptr1++ = '.';
-
+			std::string parent(disp->append_to, disp->at_len);
+			size_t pos = 0;
+			while ((pos = parent.find('.', pos)) != std::string::npos) {
+				parent.replace(pos, 1, path_sep_s_);
+				pos += path_sep_s_.length();
 			}
-
-			idx = newptr1 - newptr2;
-			newptr1 = new char[idx + disp->d_len + 1];
-			memcpy(newptr1, newptr2, idx);
-			delete[] newptr2;
-			newptr2 = newptr1 + idx;
-
-		}
-		else {
-
-			/*  parent is root  */
-			newptr1 = newptr2 = new char[disp->d_len + 1];
-
+			new_parent = parent;
 		}
 
 		/*  remove dots from key name  */
-		idx = disp->d_len + 1;
-
-		do {
-
-			--idx;
-			newptr2[idx] = disp->data[idx] == '.' ? PATH_SEPARATOR : disp->data[idx];
-
-		} while (idx > 0);
+		std::string key(disp->data, disp->d_len);
+		size_t pos = 0;
+		while ((pos = key.find('.', pos)) != std::string::npos) {
+			key.replace(pos, 1, path_sep_s_);
+			pos += path_sep_s_.length();
+		}
+		new_key = key;
 
 		if (!disp->format.case_sensitive) {
-
-			chrarr_tolower(newptr1);
-
+			std::transform(new_key.begin(), new_key.end(), new_key.begin(), ::tolower);
 		}
 
-		std::string key = std::string(newptr1, newptr2 - newptr1 + disp->d_len);
-		delete newptr1;
+		std::string full_key = new_parent.empty() ? new_key : new_parent + path_sep_s_ + new_key;
 
 		/*  check for duplicate keys  */
-		if (thismap->count(key)) {
-
-			std::cerr << "`" << key << "` will be overwritten (duplicate key found)\n";
-			thismap->erase(key);
-
+		if (thismap->count(full_key)) {
+			std::cerr << "`" << full_key << "` will be overwritten (duplicate key found)\n";
+			thismap->erase(full_key);
 		}
 
 		thismap->insert(
 			std::pair<std::string, std::string>(
-				key,
+				full_key,
 				disp->value ? std::string(disp->value, disp->v_len) : ""
 			)
 		);
@@ -541,5 +432,7 @@ private:
 	}
 
 };
+
+//std::string IniFile::path_sep_s_;
 
 #endif//_INIFILE_H_

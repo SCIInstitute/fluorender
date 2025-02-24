@@ -100,18 +100,18 @@ public:
 		}
 		if (!storage_)
 			return false;
-		current_path_ = path;
+		cur_path_ = path;
 		groups_.clear();
 		group_index_ = -1;
 		entries_.clear();
 		entry_index_ = -1;
 
-		std::list<std::string> subpaths = storage_->entries(current_path_);
+		std::list<std::string> subpaths = storage_->entries(cur_path_);
 		if (subpaths.empty())
 		{
 			if (stream_)
 				delete stream_;
-			stream_ = new POLE::Stream(storage_, current_path_);
+			stream_ = new POLE::Stream(storage_, cur_path_);
 
 			if (!stream_)
 				return false;
@@ -145,7 +145,7 @@ public:
 	}
 
 	std::string GetPath() const override {
-		return current_path_;
+		return cur_path_;
 	}
 
 	bool HasGroup(const std::string& group) const override
@@ -153,7 +153,7 @@ public:
 		if (!storage_)
 			return false;
 
-		std::list<std::string> subpaths = storage_->entries(current_path_);
+		std::list<std::string> subpaths = storage_->entries(cur_path_);
 		return std::find(subpaths.begin(), subpaths.end(), group) != subpaths.end();
 	}
 
@@ -174,8 +174,8 @@ public:
 			return false;
 
 		groups_ = std::vector<std::string>(
-			storage_->entries(current_path_).begin(),
-			storage_->entries(current_path_).end());
+			storage_->entries(cur_path_).begin(),
+			storage_->entries(cur_path_).end());
 		if (groups_.empty()) {
 			return false;
 		}
@@ -255,7 +255,7 @@ public:
 			return false;
 
 		// Construct the full path to the group
-		std::string groupPath = current_path_ + "/" + group;
+		std::string groupPath = cur_path_ + "/" + group;
 
 		// Use pole::Storage::deleteByName to delete the group
 		return storage_->deleteByName(groupPath);
@@ -379,7 +379,6 @@ protected:
 private:
 	POLE::Storage* storage_;
 	POLE::Stream* stream_;
-	std::string current_path_;
 	mutable std::vector<std::string> groups_;
 	mutable long group_index_;
 	mutable std::vector<std::pair<std::string, std::string>> entries_;
