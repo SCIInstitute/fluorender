@@ -29,82 +29,217 @@ DEALINGS IN THE SOFTWARE.
 #define _JSONFILE_H_
 
 #include <BaseTreeFile.h>
+#include <compatibility.h>
 #include <tiny-json.h>
 #include <fstream>
 #include <sstream>
 
 class JsonFile : public BaseTreeFile {
 public:
-	JsonFile()
+	JsonFile() :
+		json_(0),
+		cur_obj_(0)
 	{
 	}
 
 	~JsonFile()
 	{
-		//json_delete(json);
 	}
 
 	int LoadFile(const std::string& filename) override
 	{
-		//std::ifstream file(filename);
-		//std::stringstream buffer;
-		//buffer << file.rdbuf();
-		//std::string str = buffer.str();
-		//std::vector<char> mutableBuffer(str.begin(), str.end());
-		//mutableBuffer.push_back('\0'); // Ensure null-termination
-		//json = json_create(mutableBuffer.data(), mutableBuffer.size() - 1);
-		//currentObject = json_getObject(json);
+		std::ifstream file(filename);
+		std::stringstream buffer;
+		buffer << file.rdbuf();
+		std::string str = buffer.str();
+		json_t mem[32];
+		json_ = const_cast<json_t*>(json_create(str.data(), mem, sizeof mem / sizeof * mem));
+		cur_obj_ = 0;
 
-		return 1;
+		return json_ == 0;
 	}
 
 	int LoadString(const std::string& ini_string) override
 	{
-		return 1;
+		json_t mem[32];
+		std::string str = ini_string;
+		json_ = const_cast<json_t*>(json_create(str.data(), mem, sizeof mem / sizeof * mem));
+		cur_obj_ = 0;
+
+		return json_ == 0;
 	}
 
 	int SaveFile(const std::string& filename) override
 	{
-		return 1;
+		if (json_ == nullptr) {
+			return 1; // Error: No JSON data to save
+		}
+
+		std::ofstream file(filename);
+		if (!file.is_open()) {
+			return 6; // Error: Unable to open file
+		}
+
+		std::string jsonString = json_stringify(json_);
+		file << jsonString;
+		file.close();
+
+		return 0; // Success
 	}
 
 	int SaveString(std::string& str) override
 	{
-		return 1;
+		if (json_ == nullptr) {
+			return 1; // Error: No JSON data to save
+		}
+
+		str = json_stringify(json_);
+		return 0; // Success
 	}
 
 	// Implement group management methods
 	bool Exists(const std::string& path) const override
 	{
-		return false;
+		// Normalize the path to handle relative and absolute paths
+		std::string normalized_path = getFullPath(path);
+		std::vector<std::string> components = splitPath(normalized_path);
+
+		// Start from the root element or current element based on whether the path is absolute or relative
+		json_t* element = const_cast<json_t*>((normalized_path.substr(0, path_sep_.length()) == path_sep_) ? json_ : cur_obj_);
+		std::vector<json_t*> temp_stack = element_stack_;
+
+		// Traverse the path components
+		for (const auto& component : components) {
+			if (component == cd_sep_) {
+				// Current level, do nothing
+				continue;
+			}
+			else if (component == pd_sep_) {
+				// Parent level, move to parent element if possible
+				if (!temp_stack.empty()) {
+					element = temp_stack.back();
+					temp_stack.pop_back();
+				}
+				else {
+					return false; // No parent element, path is invalid
+				}
+			}
+			else {
+				// Move to the child element with the given name
+				temp_stack.push_back(element);
+				element = const_cast<json_t*>(json_getProperty(element, component.c_str()));
+				if (!element) {
+					return false; // Element not found, path is invalid
+				}
+			}
+		}
+
+		return true; // Path exists
 	}
 
 	bool SetPath(const std::string& path) override
 	{
-		//currentObject = json_getObject(json_getProperty(json_getObject(json), path.c_str()));
-		//return currentObject != nullptr;
-		return false;
+		// Normalize the path to handle relative and absolute paths
+		std::string normalized_path = normalizePath(path);
+		std::vector<std::string> components = splitPath(normalized_path);
+
+		// Determine the starting element
+		json_t* element = nullptr;
+		std::string new_path;
+		std::vector<json_t*> new_stack;
+
+		if (normalized_path.substr(0, path_sep_.length()) == path_sep_) {
+			// Absolute path
+			element = const_cast<json_t*>(json_);
+			new_path = path_sep_;
+		}
+		else {
+			// Relative path
+			element = const_cast<json_t*>(cur_obj_);
+			new_path = cur_path_;
+			new_stack = element_stack_;
+		}
+
+		// Traverse the path components
+		for (const auto& component : components) {
+			if (component == cd_sep_) {
+				// Current level, do nothing
+				continue;
+			}
+			else if (component == pd_sep_) {
+				// Parent level, move to parent element if possible
+				if (!new_stack.empty()) {
+					element = new_stack.back();
+					new_stack.pop_back();
+					size_t pos = new_path.find_last_of(path_sep_);
+					if (pos != std::string::npos) {
+						new_path = new_path.substr(0, pos);
+					}
+				}
+				else {
+					return false; // No parent element, path is invalid
+				}
+			}
+			else {
+				// Move to the child element with the given name
+				new_stack.push_back(element);
+				json_t* child = const_cast<json_t*>(json_getProperty(element, component.c_str()));
+				if (!child) {
+					// Create a new child element if it doesn't exist
+					child = (json_t*)malloc(sizeof(json_t));
+					child->name = strdup(component.c_str());
+					child->type = JSON_OBJ;
+					child->u.c.child = nullptr;
+					child->u.c.last_child = nullptr;
+					child->sibling = nullptr;
+					addProperty(element, component, child);
+				}
+				element = child;
+				new_path += path_sep_ + component;
+			}
+		}
+
+		// Update cur_obj_, cur_path_, and element_stack_
+		cur_obj_ = element;
+		cur_path_ = new_path;
+		element_stack_ = new_stack;
+
+		return true; // Path exists or was created, and cur_obj_, cur_path_, and element_stack_ are updated
 	}
 
 	std::string GetPath() const override
 	{
-		return ""; // tiny-json does not support getting the current path directly
+		return cur_path_;
 	}
 
 	bool HasGroup(const std::string& group) const override
 	{
-		return json_getProperty(currentObject, group.c_str()) != nullptr;
+		if (!cur_obj_) {
+			return false;
+		}
+		const json_t* child = json_getProperty(cur_obj_, group.c_str());
+		return child != nullptr && json_getType(child) == JSON_OBJ;
 	}
 
 	bool HasEntry(const std::string& entry) const override
 	{
-		return json_getProperty(currentObject, entry.c_str()) != nullptr;
+		if (!cur_obj_) {
+			return false;
+		}
+		const json_t* child = json_getProperty(cur_obj_, entry.c_str());
+		return child != nullptr;
 	}
 
 	// Implement enumeration methods
 	bool GetFirstGroup(std::string* group, long* index) const override
 	{
-		json_t const* item = json_getChild(currentObject);
+		if (!cur_obj_) {
+			return false;
+		}
+		const json_t* item = json_getChild(cur_obj_);
+		while (item && json_getType(item) != JSON_OBJ) {
+			item = json_getSibling(item);
+		}
 		if (item) {
 			*group = json_getName(item);
 			*index = 0;
@@ -115,8 +250,14 @@ public:
 
 	bool GetNextGroup(std::string* group, long* index) const override
 	{
-		json_t const* item = json_getSibling(json_getChild(currentObject));
+		if (!cur_obj_) {
+			return false;
+		}
+		const json_t* item = json_getChild(cur_obj_);
 		for (long i = 0; i <= *index; ++i) {
+			item = json_getSibling(item);
+		}
+		while (item && json_getType(item) != JSON_OBJ) {
 			item = json_getSibling(item);
 		}
 		if (item) {
@@ -129,7 +270,10 @@ public:
 
 	bool GetFirstEntry(std::string* entry, long* index) const override
 	{
-		json_t const* item = json_getChild(currentObject);
+		if (!cur_obj_) {
+			return false;
+		}
+		const json_t* item = json_getChild(cur_obj_);
 		if (item) {
 			*entry = json_getName(item);
 			*index = 0;
@@ -140,7 +284,10 @@ public:
 
 	bool GetNextEntry(std::string* entry, long* index) const override
 	{
-		json_t const* item = json_getSibling(json_getChild(currentObject));
+		if (!cur_obj_) {
+			return false;
+		}
+		const json_t* item = json_getChild(cur_obj_);
 		for (long i = 0; i <= *index; ++i) {
 			item = json_getSibling(item);
 		}
@@ -155,29 +302,50 @@ public:
 	// Implement deletion methods
 	bool DeleteEntry(const std::string& key) override
 	{
-		//json_t* item = json_getProperty(currentObject, key.c_str());
-		//if (item) {
-		//	json_removeProperty(currentObject, key.c_str());
-		//	return true;
-		//}
+		if (!cur_obj_) {
+			return false;
+		}
+		json_t* parent = const_cast<json_t*>(cur_obj_);
+		json_t* prev = nullptr;
+		json_t* item = parent->u.c.child;
+		while (item) {
+			if (strcmp(item->name, key.c_str()) == 0) {
+				if (prev) {
+					prev->sibling = item->sibling;
+				}
+				else {
+					parent->u.c.child = item->sibling;
+				}
+				if (item == parent->u.c.last_child) {
+					parent->u.c.last_child = prev;
+				}
+				// Free the memory associated with the item
+				free((void*)item->name);
+				if (item->type == JSON_TEXT) {
+					free((void*)item->u.value);
+				}
+				free(item);
+				return true;
+			}
+			prev = item;
+			item = item->sibling;
+		}
 		return false;
 	}
 
 	bool DeleteGroup(const std::string& group) override
 	{
-		//json_t* item = json_getProperty(currentObject, group.c_str());
-		//if (item) {
-		//	json_removeProperty(currentObject, group.c_str());
-		//	return true;
-		//}
-		return false;
+		return DeleteEntry(group); // Groups and entries are handled similarly
 	}
 
 protected:
 	// Implement type-specific read methods
 	bool ReadString(const std::string& key, std::string* value) const override
 	{
-		json_t const* item = json_getProperty(currentObject, key.c_str());
+		if (!cur_obj_) {
+			return false;
+		}
+		json_t const* item = json_getProperty(cur_obj_, key.c_str());
 		if (item && json_getType(item) == JSON_TEXT) {
 			*value = json_getValue(item);
 			return true;
@@ -187,19 +355,35 @@ protected:
 
 	bool ReadWstring(const std::string& key, std::wstring* value) const override
 	{
+		std::string str;
+		if (ReadString(key, &str)) {
+			*value = s2ws(str);
+			return true;
+		}
 		return false;
 	}
 
 	bool ReadBool(const std::string& key, bool* value) const override
 	{
+		if (!cur_obj_) {
+			return false;
+		}
+		json_t const* item = json_getProperty(cur_obj_, key.c_str());
+		if (item && json_getType(item) == JSON_BOOLEAN) {
+			*value = json_getBoolean(item);
+			return true;
+		}
 		return false;
 	}
 
 	bool ReadLong(const std::string& key, long* value) const override
 	{
-		json_t const* item = json_getProperty(currentObject, key.c_str());
+		if (!cur_obj_) {
+			return false;
+		}
+		json_t const* item = json_getProperty(cur_obj_, key.c_str());
 		if (item && json_getType(item) == JSON_INTEGER) {
-			*value = std::stol(json_getValue(item));
+			*value = static_cast<long>(json_getInteger(item));
 			return true;
 		}
 		return false;
@@ -207,9 +391,12 @@ protected:
 
 	bool ReadDouble(const std::string& key, double* value) const override
 	{
-		json_t const* item = json_getProperty(currentObject, key.c_str());
+		if (!cur_obj_) {
+			return false;
+		}
+		json_t const* item = json_getProperty(cur_obj_, key.c_str());
 		if (item && json_getType(item) == JSON_REAL) {
-			*value = std::stod(json_getValue(item));
+			*value = json_getReal(item);
 			return true;
 		}
 		return false;
@@ -218,50 +405,158 @@ protected:
 	// Implement type-specific write methods
 	bool WriteString(const std::string& key, const std::string& value) override
 	{
-		//json_t* item = json_getProperty(currentObject, key.c_str());
-		//if (!item) {
-		//	item = json_create(JSON_TEXT);
-		//	json_addProperty(currentObject, key.c_str(), item);
-		//}
-		//json_setValue(item, value.c_str());
+		if (!cur_obj_) {
+			return false;
+		}
+		json_t* parent = const_cast<json_t*>(cur_obj_);
+		json_t* item = const_cast<json_t*>(json_getProperty(parent, key.c_str()));
+		if (!item) {
+			item = (json_t*)malloc(sizeof(json_t));
+			item->type = JSON_TEXT;
+			if (!addProperty(parent, key, item)) {
+				free(item);
+				return false;
+			}
+		}
+		item->u.value = strdup(value.c_str());
 		return true;
 	}
 
 	bool WriteWstring(const std::string& key, const std::wstring& value) override
 	{
-		return true;
+		return WriteString(key, ws2s(value));
 	}
 
 	bool WriteBool(const std::string& key, bool value) override
 	{
+		if (!cur_obj_) {
+			return false;
+		}
+		json_t* parent = const_cast<json_t*>(cur_obj_);
+		json_t* item = const_cast<json_t*>(json_getProperty(parent, key.c_str()));
+		if (!item) {
+			item = (json_t*)malloc(sizeof(json_t));
+			item->type = JSON_BOOLEAN;
+			if (!addProperty(parent, key, item)) {
+				free(item);
+				return false;
+			}
+		}
+		item->u.value = value ? "true" : "false";
 		return true;
 	}
 
 	bool WriteLong(const std::string& key, long value) override
 	{
-		//json_t* item = json_getProperty(currentObject, key.c_str());
-		//if (!item) {
-		//	item = json_create(JSON_INTEGER);
-		//	json_addProperty(currentObject, key.c_str(), item);
-		//}
-		//json_setInteger(item, value);
+		if (!cur_obj_) {
+			return false;
+		}
+		json_t* parent = const_cast<json_t*>(cur_obj_);
+		json_t* item = const_cast<json_t*>(json_getProperty(parent, key.c_str()));
+		if (!item) {
+			item = (json_t*)malloc(sizeof(json_t));
+			item->type = JSON_INTEGER;
+			if (!addProperty(parent, key, item)) {
+				free(item);
+				return false;
+			}
+		}
+		item->u.value = strdup(std::to_string(value).c_str());
 		return true;
 	}
 
 	bool WriteDouble(const std::string& key, double value) override
 	{
-		//json_t* item = json_getProperty(currentObject, key.c_str());
-		//if (!item) {
-		//	item = json_create(JSON_REAL);
-		//	json_addProperty(currentObject, key.c_str(), item);
-		//}
-		//json_setReal(item, value);
+		if (!cur_obj_) {
+			return false;
+		}
+		json_t* parent = const_cast<json_t*>(cur_obj_);
+		json_t* item = const_cast<json_t*>(json_getProperty(parent, key.c_str()));
+		if (!item) {
+			item = (json_t*)malloc(sizeof(json_t));
+			item->type = JSON_REAL;
+			if (!addProperty(parent, key, item)) {
+				free(item);
+				return false;
+			}
+		}
+		item->u.value = strdup(std::to_string(value).c_str());
 		return true;
 	}
 
 private:
-	json_t* json;
-	json_t* currentObject;
+	json_t* json_;
+	json_t* cur_obj_;
+	std::vector<json_t*> element_stack_;
+
+private:
+	std::string json_stringify(const json_t* json) {
+		if (json == nullptr) {
+			return "{}";
+		}
+
+		std::ostringstream oss;
+		switch (json_getType(json)) {
+		case JSON_OBJ:
+			oss << "{";
+			for (const json_t* child = json_getChild(json); child != nullptr; child = json_getSibling(child)) {
+				oss << "\"" << json_getName(child) << "\": " << json_stringify(child);
+				if (json_getSibling(child) != nullptr) {
+					oss << ", ";
+				}
+			}
+			oss << "}";
+			break;
+		case JSON_ARRAY:
+			oss << "[";
+			for (const json_t* child = json_getChild(json); child != nullptr; child = json_getSibling(child)) {
+				oss << json_stringify(child);
+				if (json_getSibling(child) != nullptr) {
+					oss << ", ";
+				}
+			}
+			oss << "]";
+			break;
+		case JSON_TEXT:
+			oss << "\"" << json_getValue(json) << "\"";
+			break;
+		case JSON_BOOLEAN:
+			oss << (json_getBoolean(json) ? "true" : "false");
+			break;
+		case JSON_INTEGER:
+			oss << json_getInteger(json);
+			break;
+		case JSON_REAL:
+			oss << json_getReal(json);
+			break;
+		case JSON_NULL:
+			oss << "null";
+			break;
+		default:
+			break;
+		}
+
+		return oss.str();
+	}
+
+	bool addProperty(json_t* parent, const std::string& key, json_t* item)
+	{
+		if (!parent || !item) {
+			return false;
+		}
+		item->name = strdup(key.c_str());
+		item->sibling = nullptr;
+
+		if (!parent->u.c.child) {
+			parent->u.c.child = item;
+			parent->u.c.last_child = item;
+		}
+		else {
+			parent->u.c.last_child->sibling = item;
+			parent->u.c.last_child = item;
+		}
+		return true;
+	}
 };
 
 #endif//_JSONFILE_H_

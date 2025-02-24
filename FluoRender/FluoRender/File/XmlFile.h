@@ -121,7 +121,7 @@ public:
 		tinyxml2::XMLElement* element = nullptr;
 		std::string new_path;
 
-		if (path.substr(0, path_sep_.length()) == path_sep_) {
+		if (normalized_path.substr(0, path_sep_.length()) == path_sep_) {
 			// Absolute path
 			element = doc_.RootElement();
 			new_path = path_sep_;
@@ -153,10 +153,13 @@ public:
 			}
 			else {
 				// Move to the child element with the given name
-				element = element->FirstChildElement(component.c_str());
-				if (!element) {
-					return false; // Element not found, path is invalid
+				tinyxml2::XMLElement* child = element->FirstChildElement(component.c_str());
+				if (!child) {
+					// Create a new child element if it doesn't exist
+					child = doc_.NewElement(component.c_str());
+					element->InsertEndChild(child);
 				}
+				element = child;
 				new_path += path_sep_ + component;
 			}
 		}
@@ -165,7 +168,7 @@ public:
 		cur_element_ = element;
 		cur_path_ = new_path;
 
-		return true; // Path exists and cur_element_ and cur_path_ are updated
+		return true; // Path exists or was created, and cur_element_ and cur_path_ are updated
 	}
 
 	std::string GetPath() const override
