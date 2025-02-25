@@ -44,16 +44,16 @@ LBLReader::~LBLReader()
 {
 }
 
-void LBLReader::SetFile(const std::string &file)
-{
-	if (!file.empty())
-	{
-		if (!m_path_name.empty())
-			m_path_name.clear();
-		m_path_name.assign(file.length(), L' ');
-		copy(file.begin(), file.end(), m_path_name.begin());
-	}
-}
+//void LBLReader::SetFile(const std::string &file)
+//{
+//	if (!file.empty())
+//	{
+//		if (!m_path_name.empty())
+//			m_path_name.clear();
+//		m_path_name.assign(file.length(), L' ');
+//		copy(file.begin(), file.end(), m_path_name.begin());
+//	}
+//}
 
 void LBLReader::SetFile(const std::wstring &file)
 {

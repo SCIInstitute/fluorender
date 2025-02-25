@@ -103,25 +103,25 @@ void BRKXMLReader::Clear()
 }
 
 //Use Before Preprocess()
-void BRKXMLReader::SetFile(const std::string& file)
-{
-	if (!file.empty())
-	{
-		if (!m_path_name.empty())
-			m_path_name.clear();
-		m_path_name.assign(file.length(), L' ');
-		copy(file.begin(), file.end(), m_path_name.begin());
-#ifdef _WIN32
-		wchar_t slash = L'\\';
-		std::replace(m_path_name.begin(), m_path_name.end(), L'/', L'\\');
-#else
-		wchar_t slash = L'/';
-#endif
-		m_data_name = m_path_name.substr(m_path_name.find_last_of(slash) + 1);
-		m_dir_name = m_path_name.substr(0, m_path_name.find_last_of(slash) + 1);
-	}
-	m_id_string = m_path_name;
-}
+//void BRKXMLReader::SetFile(const std::string& file)
+//{
+//	if (!file.empty())
+//	{
+//		if (!m_path_name.empty())
+//			m_path_name.clear();
+//		m_path_name.assign(file.length(), L' ');
+//		copy(file.begin(), file.end(), m_path_name.begin());
+//#ifdef _WIN32
+//		wchar_t slash = L'\\';
+//		std::replace(m_path_name.begin(), m_path_name.end(), L'/', L'\\');
+//#else
+//		wchar_t slash = L'/';
+//#endif
+//		m_data_name = m_path_name.substr(m_path_name.find_last_of(slash) + 1);
+//		m_dir_name = m_path_name.substr(0, m_path_name.find_last_of(slash) + 1);
+//	}
+//	m_id_string = m_path_name;
+//}
 
 //Use Before Preprocess()
 void BRKXMLReader::SetFile(const std::wstring& file)

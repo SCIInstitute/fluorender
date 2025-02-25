@@ -76,7 +76,7 @@ public:
 	virtual int GetType() = 0;	//get reader type
 
 	//set the file name and path to open and read
-	virtual void SetFile(const std::string &file) = 0;
+	//virtual void SetFile(const std::string &file) = 0;
 	//set the file name and path to open and read (in wide string for foreign languages)
 	virtual void SetFile(const std::wstring &file) = 0;
 	//set reader flag to read a 3D stack as a file sequence, each file being a slice

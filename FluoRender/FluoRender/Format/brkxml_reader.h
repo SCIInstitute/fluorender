@@ -14,7 +14,7 @@ public:
 
 	int GetType() { return READER_BRKXML_TYPE; }
 
-	void SetFile(const std::string &file);
+	//void SetFile(const std::string &file);
 	void SetFile(const std::wstring &file);
 	void SetDir(const std::string &dir);
 	void SetDir(const std::wstring &dir);

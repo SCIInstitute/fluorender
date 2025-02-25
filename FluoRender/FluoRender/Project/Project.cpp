@@ -225,7 +225,7 @@ void Project::Open(const std::wstring& filename)
 				if (vd)
 				{
 					if (fconfig.Read("name", &str))
-						vd->SetName(str.ToStdString());//setname
+						vd->SetName(str.ToStdWstring());//setname
 					//volume properties
 					if (fconfig.Exists("properties"))
 					{
@@ -538,7 +538,7 @@ void Project::Open(const std::wstring& filename)
 				if (md)
 				{
 					if (fconfig.Read("name", &str))
-						md->SetName(str.ToStdString());//setname
+						md->SetName(str.ToStdWstring());//setname
 					//mesh properties
 					if (fconfig.Exists("properties"))
 					{

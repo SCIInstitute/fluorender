@@ -50,7 +50,7 @@ public:
 
 	int GetType() { return READER_LIF_TYPE; }
 
-	void SetFile(const std::string &file);
+	//void SetFile(const std::string &file);
 	void SetFile(const std::wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
