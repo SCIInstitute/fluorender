@@ -734,6 +734,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstRulerTools "ruler tools"
 #define gstRulerProfile "ruler profile"
 #define gstRulerMethod "ruler method"
+#define gstRulerFile "ruler file"
 //movie agent
 #define gstMovPlay "mov play"
 #define gstMovLoop "mov loop"

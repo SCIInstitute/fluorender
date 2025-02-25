@@ -53,9 +53,10 @@ public:
 		}
 	}
 
-	int LoadFile(const std::string& filename) override
+	int LoadFile(const std::wstring& filename) override
 	{
-		storage_ = new POLE::Storage(filename.c_str());
+		std::string str = ws2s(filename);
+		storage_ = new POLE::Storage(str.c_str());
 		if (storage_)
 		{
 			storage_->open();
@@ -69,9 +70,10 @@ public:
 		return 1;
 	}
 
-	int SaveFile(const std::string& filename) override
+	int SaveFile(const std::wstring& filename) override
 	{
-		storage_ = new POLE::Storage(filename.c_str());
+		std::string str = ws2s(filename);
+		storage_ = new POLE::Storage(str.c_str());
 		if (storage_)
 		{
 			storage_->open(true, true);
@@ -263,7 +265,7 @@ public:
 
 protected:
 	// Implement type-specific read methods
-	bool ReadString(const std::string& key, std::string* value) const override
+	bool ReadString(const std::string& key, std::string* value, const std::string& def = "") const override
 	{
 		// Search for the key in the entries vector
 		for (const auto& kv : entries_) {
@@ -272,10 +274,11 @@ protected:
 				return true;
 			}
 		}
+		*value = def;
 		return false; // Key not found
 	}
 
-	bool ReadWstring(const std::string& key, std::wstring* value) const override
+	bool ReadWstring(const std::string& key, std::wstring* value, const std::wstring& def = L"") const override
 	{
 		std::string str;
 		if (ReadString(key, &str))
@@ -283,10 +286,11 @@ protected:
 			*value = s2ws(str);
 			return true;
 		}
+		*value = def;
 		return false;
 	}
 
-	bool ReadBool(const std::string& key, bool* value) const override
+	bool ReadBool(const std::string& key, bool* value, bool def = false) const override
 	{
 		long lval;
 		if (ReadLong(key, &lval))
@@ -294,10 +298,11 @@ protected:
 			*value = !(lval & 2);
 			return true;
 		}
+		*value = def;
 		return false;
 	}
 
-	bool ReadLong(const std::string& key, long* value) const override
+	bool ReadLong(const std::string& key, long* value, long def = 0) const override
 	{
 		std::string str;
 		if (ReadString(key, &str))
@@ -305,10 +310,11 @@ protected:
 			*value = std::stol(str);
 			return true;
 		}
+		*value = def;
 		return false;
 	}
 
-	bool ReadDouble(const std::string& key, double* value) const override
+	bool ReadDouble(const std::string& key, double* value, double def = 0.0) const override
 	{
 		std::string str;
 		if (ReadString(key, &str))
@@ -316,6 +322,7 @@ protected:
 			*value = std::stod(str);
 			return true;
 		}
+		*value = def;
 		return false;
 	}
 

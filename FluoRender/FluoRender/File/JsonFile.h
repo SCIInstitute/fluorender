@@ -46,7 +46,7 @@ public:
 	{
 	}
 
-	int LoadFile(const std::string& filename) override
+	int LoadFile(const std::wstring& filename) override
 	{
 		std::ifstream file(filename);
 		std::stringstream buffer;
@@ -69,7 +69,7 @@ public:
 		return json_ == 0;
 	}
 
-	int SaveFile(const std::string& filename) override
+	int SaveFile(const std::wstring& filename) override
 	{
 		if (json_ == nullptr) {
 			return 1; // Error: No JSON data to save
@@ -340,9 +340,10 @@ public:
 
 protected:
 	// Implement type-specific read methods
-	bool ReadString(const std::string& key, std::string* value) const override
+	bool ReadString(const std::string& key, std::string* value, const std::string& def = "") const override
 	{
 		if (!cur_obj_) {
+			*value = def;
 			return false;
 		}
 		json_t const* item = json_getProperty(cur_obj_, key.c_str());
@@ -350,22 +351,25 @@ protected:
 			*value = json_getValue(item);
 			return true;
 		}
+		*value = def;
 		return false;
 	}
 
-	bool ReadWstring(const std::string& key, std::wstring* value) const override
+	bool ReadWstring(const std::string& key, std::wstring* value, const std::wstring& def = L"") const override
 	{
 		std::string str;
 		if (ReadString(key, &str)) {
 			*value = s2ws(str);
 			return true;
 		}
+		*value = def;
 		return false;
 	}
 
-	bool ReadBool(const std::string& key, bool* value) const override
+	bool ReadBool(const std::string& key, bool* value, bool def = false) const override
 	{
 		if (!cur_obj_) {
+			*value = def;
 			return false;
 		}
 		json_t const* item = json_getProperty(cur_obj_, key.c_str());
@@ -373,12 +377,14 @@ protected:
 			*value = json_getBoolean(item);
 			return true;
 		}
+		*value = def;
 		return false;
 	}
 
-	bool ReadLong(const std::string& key, long* value) const override
+	bool ReadLong(const std::string& key, long* value, long def = 0) const override
 	{
 		if (!cur_obj_) {
+			*value = def;
 			return false;
 		}
 		json_t const* item = json_getProperty(cur_obj_, key.c_str());
@@ -386,12 +392,14 @@ protected:
 			*value = static_cast<long>(json_getInteger(item));
 			return true;
 		}
+		*value = def;
 		return false;
 	}
 
-	bool ReadDouble(const std::string& key, double* value) const override
+	bool ReadDouble(const std::string& key, double* value, double def = 0.0) const override
 	{
 		if (!cur_obj_) {
+			*value = def;
 			return false;
 		}
 		json_t const* item = json_getProperty(cur_obj_, key.c_str());
@@ -399,6 +407,7 @@ protected:
 			*value = json_getReal(item);
 			return true;
 		}
+		*value = def;
 		return false;
 	}
 

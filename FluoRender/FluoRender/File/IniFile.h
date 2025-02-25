@@ -60,22 +60,25 @@ public:
 	IniFile() :
 		dictionary()
 	{
-		path_sep_ = "\\";
+		path_sep_ = "/";
 		path_sep_s_ = path_sep_;
 		cd_sep_ = ".";
 		pd_sep_ = "..";
 	}
 
-	int LoadFile(const std::string& filename) override
+	int LoadFile(const std::wstring& filename) override
 	{
 		dictionary.clear();
+		cur_path_ = "";
 		_format_ = __INI_MAP_DEFAULT_FORMAT__;
-		return load_ini_path(filename.c_str(), __INI_MAP_DEFAULT_FORMAT__, NULL, _push_dispatch_, &dictionary);
+		std::string str = ws2s(filename);
+		return load_ini_path(str.c_str(), __INI_MAP_DEFAULT_FORMAT__, NULL, _push_dispatch_, &dictionary);
 	}
 
 	int LoadString(const std::string& ini_string) override
 	{
 		dictionary.clear();
+		cur_path_ = "";
 		_format_ = __INI_MAP_DEFAULT_FORMAT__;
 		size_t len = ini_string.length();
 		char* tmp = new char[len + 1];
@@ -85,7 +88,7 @@ public:
 		return retval;
 	}
 
-	int SaveFile(const std::string& filename) override
+	int SaveFile(const std::wstring& filename) override
 	{
 		std::ofstream file(filename);
 		if (!file.is_open()) {
@@ -262,46 +265,69 @@ public:
 
 protected:
 	// Implement type-specific read methods
-	bool ReadString(const std::string& key, std::string* value) const override
+	bool ReadString(const std::string& key, std::string* value, const std::string& def = "") const override
 	{
 		std::string str;
 		if (!extractString(key, str))
+		{
+			*value = def;
 			return false;
+		}
 		*value = str;
 		return true;
 	}
 
-	bool ReadWstring(const std::string& key, std::wstring* value) const override
+	bool ReadWstring(const std::string& key, std::wstring* value, const std::wstring& def = L"") const override
 	{
 		std::string str;
 		if (!extractString(key, str))
+		{
+			*value = def;
 			return false;
+		}
 		*value = s2ws(str);
 		return true;
 	}
 
-	bool ReadBool(const std::string& key, bool* value) const override
+	bool ReadBool(const std::string& key, bool* value, bool def = false) const override
 	{
-		unsigned int uintbool =
-			static_cast<unsigned int>(ini_get_bool_i(getSource(key).c_str(), 2, _format_));
-		*value = !(uintbool & 2);
-		return static_cast<bool>(uintbool & 1);
+		// Check if the key exists in the INI file
+		const char* source = getSource(key).c_str();
+		int result = ini_get_bool_i(source, 2, _format_);
+
+		if (result == 2) {
+			// Key not found, use the default value
+			*value = def;
+			return def;
+		}
+		else {
+			// Key found, use the value from the INI file
+			unsigned int uintbool = static_cast<unsigned int>(result);
+			*value = !(uintbool & 2);
+			return static_cast<bool>(uintbool & 1);
+		}
 	}
 
-	bool ReadLong(const std::string& key, long* value) const override
+	bool ReadLong(const std::string& key, long* value, long def = 0) const override
 	{
 		std::string str;
 		if (!extractString(key, str))
+		{
+			*value = def;
 			return false;
+		}
 		*value = std::stol(str);
 		return true;
 	}
 
-	bool ReadDouble(const std::string& key, double* value) const override
+	bool ReadDouble(const std::string& key, double* value, double def = 0.0) const override
 	{
 		std::string str;
 		if (!extractString(key, str))
+		{
+			*value = def;
 			return false;
+		}
 		*value = std::stod(str);
 		return true;
 	}

@@ -37,9 +37,9 @@ class BaseTreeFile
 public:
 	virtual ~BaseTreeFile() {}
 
-	virtual int LoadFile(const std::string& filename) = 0;
+	virtual int LoadFile(const std::wstring& filename) = 0;
 	virtual int LoadString(const std::string& str) = 0;
-	virtual int SaveFile(const std::string& filename) = 0;
+	virtual int SaveFile(const std::wstring& filename) = 0;
 	virtual int SaveString(std::string& str) = 0;
 
 	// Template methods to read values
@@ -59,6 +59,28 @@ public:
 		}
 		else if constexpr (std::is_same_v<T, double>) {
 			return ReadDouble(key, value);
+		}
+		else {
+			static_assert(always_false<T>::value, "Unsupported type");
+		}
+	}
+
+	template<typename T>
+	bool Read(const std::string& key, T* value, const T& defaultVal) const {
+		if constexpr (std::is_same_v<T, std::string>) {
+			return ReadString(key, value, defaultVal);
+		}
+		else if constexpr (std::is_same_v<T, std::wstring>) {
+			return ReadWstring(key, value, defaultVal);
+		}
+		else if constexpr (std::is_same_v<T, bool>) {
+			return ReadBool(key, value, defaultVal);
+		}
+		else if constexpr (std::is_same_v<T, long>) {
+			return ReadLong(key, value, defaultVal);
+		}
+		else if constexpr (std::is_same_v<T, double>) {
+			return ReadDouble(key, value, defaultVal);
 		}
 		else {
 			static_assert(always_false<T>::value, "Unsupported type");
@@ -113,11 +135,11 @@ protected:
 
 protected:
 	// Type-specific read methods
-	virtual bool ReadString(const std::string& key, std::string* value) const = 0;
-	virtual bool ReadWstring(const std::string& key, std::wstring* value) const = 0;
-	virtual bool ReadBool(const std::string& key, bool* value) const = 0;
-	virtual bool ReadLong(const std::string& key, long* value) const = 0;
-	virtual bool ReadDouble(const std::string& key, double* value) const = 0;
+	virtual bool ReadString(const std::string& key, std::string* value, const std::string& def = "") const = 0;
+	virtual bool ReadWstring(const std::string& key, std::wstring* value, const std::wstring& def = L"") const = 0;
+	virtual bool ReadBool(const std::string& key, bool* value, bool def = false) const = 0;
+	virtual bool ReadLong(const std::string& key, long* value, long def = 0) const = 0;
+	virtual bool ReadDouble(const std::string& key, double* value, double def = 0.0) const = 0;
 
 	// Type-specific write methods
 	virtual bool WriteString(const std::string& key, const std::string& value) = 0;

@@ -163,7 +163,7 @@ namespace fluo
 		flrd::CacheQueue& get_cache_queue() { return cache_queue_; }
 
 		//config file handlers
-		TreeFileFactory& get_tree_file_factor() { return tree_file_factory_; }
+		TreeFileFactory& get_tree_file_factory() { return tree_file_factory_; }
 
 		//video encoder
 		QVideoEncoder& get_video_encoder() { return encoder_; }

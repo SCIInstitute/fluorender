@@ -43,16 +43,17 @@ DEALINGS IN THE SOFTWARE.
 #include <Registrator.h>
 #include <PyBase.h>
 #include <compatibility.h>
-#include <wx/fileconf.h>
-#include <wx/wfstream.h>
-#include <wx/mimetype.h>
 #include <iostream>
 #include <string> 
 #include <sstream>
 #include <fstream>
 #include <filesystem>
 #include <tiffio.h>
-
+#if defined(_WIN32) || defined(_WIN64)
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <shellapi.h>
+#endif
 using namespace flrd;
 
 ScriptProc::ScriptProc() :
@@ -60,8 +61,7 @@ ScriptProc::ScriptProc() :
 	m_view(0),
 	m_break(true),
 	m_rewind(false),
-	m_break_count(0),
-	m_fconfig(0)
+	m_break_count(0)
 {
 	m_output = fluo::ref_ptr<fluo::Group>(new fluo::Group());
 }
@@ -69,7 +69,7 @@ ScriptProc::ScriptProc() :
 ScriptProc::~ScriptProc()
 {
 	if (m_fconfig)
-		delete m_fconfig;
+		m_fconfig.reset();
 }
 
 void ScriptProc::LoadScriptFile()
@@ -78,13 +78,10 @@ void ScriptProc::LoadScriptFile()
 	if (!scriptfile.empty() &&
 		m_fconfig_name != scriptfile)
 	{
-		m_fconfig_name = scriptfile;
-		wxFileInputStream is(m_fconfig_name);
-		if (is.IsOk())
+		m_fconfig = glbin_tree_file_factory.createTreeFile(scriptfile, gstScriptFile);
+		if (m_fconfig)
 		{
-			if (m_fconfig)
-				delete m_fconfig;
-			m_fconfig = new wxFileConfig(is);
+			m_fconfig->LoadFile(scriptfile);
 		}
 	}
 }
@@ -106,20 +103,21 @@ int ScriptProc::Run4DScript(TimeMask tm, bool rewind)
 		SetBreakCount();
 
 	int i;
-	wxString str;
+	std::string str;
 
 	//tasks
 	if (m_fconfig->Exists("/tasks"))
 	{
 		m_fconfig->SetPath("/tasks");
-		int tasknum = m_fconfig->Read("tasknum", 0l);
+		long tasknum = 0;
+		m_fconfig->Read("tasknum", &tasknum, 0l);
 		for (i = 0; i < tasknum; i++)
 		{
-			str = wxString::Format("/tasks/task%d", i);
+			str = "/tasks/task" + std::to_string(i);
 			if (m_fconfig->Exists(str))
 			{
 				m_fconfig->SetPath(str);
-				m_fconfig->Read("type", &str, "");
+				m_fconfig->Read("type", &str, std::string(""));
 				m_type = str;
 				if (str == "break")
 				{
@@ -127,7 +125,7 @@ int ScriptProc::Run4DScript(TimeMask tm, bool rewind)
 						if (m_break_count == 1)
 						{
 							//reset on first break
-							delete m_fconfig;
+							//delete m_fconfig;
 							return 2;
 						}
 				}
@@ -223,9 +221,8 @@ bool ScriptProc::TimeCondition()
 	if (!m_fconfig || !m_view)
 		return false;
 	int time_mode;
-	wxString str;
-	m_fconfig->Read("time_mode", &str, "TM_ALL_PRE");
-	std::string mode_str = str.ToStdString();
+	std::string mode_str;
+	m_fconfig->Read("time_mode", &mode_str, std::string("TM_ALL_PRE"));
 	time_mode = TimeMode(mode_str);
 	if (m_rewind)
 		return time_mode & m_time_mask & TM_REWIND;
@@ -239,9 +236,9 @@ bool ScriptProc::TimeCondition()
 	int startd = curf - startf;
 	int endd = endf - curf;
 	if (startd < 6)
-		tm = TM_FIRST_BOTH << startd*2;
+		tm = TM_FIRST_BOTH << startd * 2;
 	if (endd < 6)
-		tm = TM_LAST_BOTH >> endd*2;
+		tm = TM_LAST_BOTH >> endd * 2;
 	if (startd >= 6 && endd >= 6)
 		tm = 0x14000;
 	//time mode
@@ -250,7 +247,7 @@ bool ScriptProc::TimeCondition()
 	return false;
 }
 
-bool ScriptProc::GetVolumes(std::vector<VolumeData*> &list)
+bool ScriptProc::GetVolumes(std::vector<VolumeData*>& list)
 {
 	if (!m_fconfig || !m_view)
 		return false;
@@ -297,7 +294,7 @@ void ScriptProc::UpdateTraceDlg()
 			{ gstTrackList });
 }
 
-int ScriptProc::TimeMode(std::string &str)
+int ScriptProc::TimeMode(std::string& str)
 {
 	if (str == "TM_NONE")
 		return TM_NONE;
@@ -354,7 +351,7 @@ int ScriptProc::GetTimeNum()
 	return 0;
 }
 
-std::wstring ScriptProc::GetInputFile(const std::wstring &str, const std::wstring &subd)
+std::wstring ScriptProc::GetInputFile(const std::wstring& str, const std::wstring& subd)
 {
 	std::wstring result = str;
 	bool exist = false;
@@ -393,7 +390,7 @@ std::wstring ScriptProc::GetInputFile(const std::wstring &str, const std::wstrin
 		return L"";
 }
 
-std::wstring ScriptProc::GetSavePath(const std::wstring &str, const std::wstring &ext, bool rep)
+std::wstring ScriptProc::GetSavePath(const std::wstring& str, const std::wstring& ext, bool rep)
 {
 	std::wstring temp = str;
 	std::wstring path;
@@ -422,7 +419,7 @@ std::wstring ScriptProc::GetSavePath(const std::wstring &str, const std::wstring
 		path = m_frame->ScriptDialog(
 			L"Save Results",
 			L"Output file(*." + ext + L")|*." + ext,
-			wxFD_SAVE);
+			2);
 		if (path.empty())
 			path = GetDataDir(ext);
 	}
@@ -462,7 +459,7 @@ std::wstring ScriptProc::GetSavePath(const std::wstring &str, const std::wstring
 		}
 	}
 	if (!rep)
-			path = INC_NUM_EXIST(path);
+		path = INC_NUM_EXIST(path);
 
 	node = m_output->getOrAddNode("savepath");
 	path = STR_DIR_SEP(path);
@@ -470,7 +467,7 @@ std::wstring ScriptProc::GetSavePath(const std::wstring &str, const std::wstring
 	return path;
 }
 
-std::wstring ScriptProc::GetDataDir(const std::wstring &ext)
+std::wstring ScriptProc::GetDataDir(const std::wstring& ext)
 {
 	//data dir
 	if (!m_view)
@@ -494,12 +491,12 @@ std::wstring ScriptProc::GetConfigFile(
 {
 	if (std::filesystem::exists(str))
 		return str;
-	long style = wxFD_OPEN | wxFD_FILE_MUST_EXIST;
+	long style = 1 | 16;
 	if (mode == 1)
-		style = wxFD_SAVE | wxFD_OVERWRITE_PROMPT;
+		style = 2 | 4;
 	return m_frame->ScriptDialog(
-		L"Choose "+type+L" file",
-		type+L" file(*." + ext + L")|*." + ext,
+		L"Choose " + type + L" file",
+		type + L" file(*." + ext + L")|*." + ext,
 		style);
 }
 
@@ -680,7 +677,7 @@ void ScriptProc::RunPostTracking()
 	cur_vol->GetResolution(nx, ny, nz);
 	//update the mask according to the new label
 	unsigned long long for_size = nx * ny * nz;
-	std::memset((void*)mask_data, 0, sizeof(uint8)*for_size);
+	std::memset((void*)mask_data, 0, sizeof(uint8) * for_size);
 	for (unsigned long long idx = 0;
 		idx < for_size; ++idx)
 	{
@@ -724,11 +721,11 @@ void ScriptProc::RunMaskTracking()
 	double exttx, extty, exttz;
 	m_fconfig->Read("ext_x", &exttx, 0.1);
 	m_fconfig->Read("ext_y", &extty, 0.1);
-	m_fconfig->Read("ext_z", &exttz, 0);
+	m_fconfig->Read("ext_z", &exttz, 0.0);
 	fluo::Vector extt(exttx, extty, exttz);
 	m_fconfig->Read("ext_a", &exttx, 0.1);
 	m_fconfig->Read("ext_b", &extty, 0.1);
-	m_fconfig->Read("ext_c", &exttz, 0);
+	m_fconfig->Read("ext_c", &exttz, 0.0);
 	fluo::Vector exta(exttx, extty, exttz);
 	int iter;
 	m_fconfig->Read("iter", &iter, 25);
@@ -879,8 +876,8 @@ void ScriptProc::RunFetchMask()
 
 	int curf = m_view->m_tseq_cur_num;
 	bool bmask, blabel;
-	m_fconfig->Read("mask", &bmask, 1);
-	m_fconfig->Read("label", &blabel, 1);
+	m_fconfig->Read("mask", &bmask, true);
+	m_fconfig->Read("label", &blabel, true);
 
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
@@ -924,8 +921,8 @@ void ScriptProc::RunClearMask()
 		return;
 
 	bool bmask, blabel;
-	m_fconfig->Read("mask", &bmask, 1);
-	m_fconfig->Read("label", &blabel, 1);
+	m_fconfig->Read("mask", &bmask, true);
+	m_fconfig->Read("label", &blabel, true);
 
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
@@ -950,8 +947,8 @@ void ScriptProc::RunSaveMask()
 
 	int curf = m_view->m_tseq_cur_num;
 	bool bmask, blabel;
-	m_fconfig->Read("mask", &bmask, 1);
-	m_fconfig->Read("label", &blabel, 1);
+	m_fconfig->Read("mask", &bmask, true);
+	m_fconfig->Read("label", &blabel, true);
 
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
@@ -970,11 +967,8 @@ void ScriptProc::RunSaveVolume()
 	if (!TimeCondition())
 		return;
 
-	wxString str;
-
 	std::string source;
-	m_fconfig->Read("source", &str);
-	source = str.ToStdString();
+	m_fconfig->Read("source", &source);
 	int mode;
 	m_fconfig->Read("format", &mode, 0);
 	int mask;
@@ -989,8 +983,7 @@ void ScriptProc::RunSaveVolume()
 	bool compression;
 	m_fconfig->Read("compress", &compression, false);
 	std::wstring pathname;
-	m_fconfig->Read("savepath", &str, "");
-	pathname = str.ToStdWstring();
+	m_fconfig->Read("savepath", &pathname, std::wstring(L""));
 	bool del_vol;
 	m_fconfig->Read("delete", &del_vol, false);
 	int smooth;
@@ -1077,7 +1070,7 @@ void ScriptProc::RunSaveVolume()
 			center, rot, transl,
 			fix_size);
 		if (del_vol)
-			delete *i;
+			delete* i;
 	}
 }
 
@@ -1088,14 +1081,12 @@ void ScriptProc::RunCalculate()
 
 	//VolumeCalculator* calculator = m_view->GetVolumeCalculator();
 	//if (!calculator) return;
-	wxString str;
 	int vol_a_index;
 	m_fconfig->Read("vol_a", &vol_a_index, 0);
 	int vol_b_index;
 	m_fconfig->Read("vol_b", &vol_b_index, 0);
 	std::string sOper;
-	m_fconfig->Read("operator", &str, "");
-	sOper = str.ToStdString();
+	m_fconfig->Read("operator", &sOper, std::string(""));
 
 	int vlist_size = m_view->GetDispVolumeNum();
 	//get volumes
@@ -1133,10 +1124,8 @@ void ScriptProc::RunOpenCL()
 
 	//KernelExecutor* executor = m_view->GetKernelExecutor();
 	//if (!executor) return;
-	wxString str;
 	std::wstring clname;
-	m_fconfig->Read("clpath", &str, "");
-	clname = str.ToStdWstring();
+	m_fconfig->Read("clpath", &clname, std::wstring(L""));
 	clname = GetInputFile(clname, L"CL_code");
 	if (clname.empty())
 		return;
@@ -1273,12 +1262,10 @@ void ScriptProc::RunCompRuler()
 	RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list || ruler_list->empty()) return;
 
-	wxString str;
 	int dim;
 	m_fconfig->Read("dim", &dim);//2 or 3
 	std::wstring name;
-	m_fconfig->Read("name", &str);
-	name = str.ToStdWstring();
+	m_fconfig->Read("name", &name);
 	double len;
 	m_fconfig->Read("length", &len);//physical length
 	flrd::Ruler* ruler = ruler_list->GetRuler(name);
@@ -1342,7 +1329,7 @@ void ScriptProc::RunCompRuler()
 			fluo::Point point;
 			node->getValue("comp_center", point);
 			//convert
-			fluo::Group* ruler_group = cmdg->getOrAddGroup(std::to_string(i+1));
+			fluo::Group* ruler_group = cmdg->getOrAddGroup(std::to_string(i + 1));
 			ruler_group->addSetValue("type", std::string("ruler"));
 			ruler_group->addSetValue("name", comp_name);
 			fluo::Node* point_node = ruler_group->getOrAddNode(std::to_string(0));
@@ -1363,10 +1350,8 @@ void ScriptProc::RunGenerateComp()
 	if (!GetVolumes(vlist))
 		return;
 
-	wxString str;
 	std::wstring ml_table_file;
-	m_fconfig->Read("ml_table", &str);
-	ml_table_file = str.ToStdWstring();
+	m_fconfig->Read("ml_table", &ml_table_file);
 	ml_table_file = GetInputFile(ml_table_file, L"Database");
 	bool use_ml = !ml_table_file.empty();
 	bool use_sel;
@@ -1374,8 +1359,7 @@ void ScriptProc::RunGenerateComp()
 	double tfac;
 	m_fconfig->Read("th_factor", &tfac, 1.0);
 	std::wstring cmdfile;
-	m_fconfig->Read("comp_command", &str);
-	cmdfile = str.ToStdWstring();
+	m_fconfig->Read("comp_command", &cmdfile);
 	cmdfile = GetInputFile(cmdfile, L"Commands");
 	if (cmdfile.empty())
 		glbin_comp_generator.ResetCmd();
@@ -1415,7 +1399,7 @@ void ScriptProc::RunRulerProfile()
 	glbin_ruler_handler.SetFsize(ival);
 	m_fconfig->Read("sample_type", &ival, 1);
 	glbin_ruler_handler.SetSampleType(ival);
-	m_fconfig->Read("step_len", &dval, 1);
+	m_fconfig->Read("step_len", &dval, 1.0);
 	glbin_ruler_handler.SetStepLength(dval);
 	bool bg_int = glbin_ruler_handler.GetBackground();
 	glbin_ruler_handler.SetBackground(false);
@@ -1451,7 +1435,7 @@ void ScriptProc::RunRulerProfile()
 			if (!ruler) continue;
 			if (!ruler->GetDisp()) continue;
 			ruler->SetWorkTime(curf);
-			fluo::Node* ruler_node = cmdg->getOrAddNode(std::to_string(ruler->Id()+1));
+			fluo::Node* ruler_node = cmdg->getOrAddNode(std::to_string(ruler->Id() + 1));
 			ruler_node->addSetValue("type", std::string("ruler"));
 
 			std::vector<flrd::ProfileBin>* profile = ruler->GetProfile();
@@ -1543,12 +1527,9 @@ void ScriptProc::RunRoiDff()
 	if (!TimeCondition())
 		return;
 
-	wxString str;
 	std::string valname, bgname;
-	if (m_fconfig->Read("value_name", &str))
-		valname = str.ToStdString();
-	if (m_fconfig->Read("bg_name", &str))
-		bgname = str.ToStdString();
+	m_fconfig->Read("value_name", &valname);
+	m_fconfig->Read("bg_name", &bgname);
 	double var = 0.001;
 	m_fconfig->Read("var_cut", &var);
 	int mode = 0;
@@ -1663,11 +1644,11 @@ void ScriptProc::RunBackgroundStat()
 		m_fconfig->Read("ky", &ky, 0);
 		if (kx && ky)
 			bgs.SetFeatureSize2D(kx, ky);
-		float varth = 0, gauth = 0;
-		m_fconfig->Read("varth", &varth, 0);
-		m_fconfig->Read("gauth", &gauth, 0);
+		double varth = 0, gauth = 0;
+		m_fconfig->Read("varth", &varth, 0.0);
+		m_fconfig->Read("gauth", &gauth, 0.0);
 		if (varth > 0.0 && gauth > 0.0)
-			bgs.SetThreshold(varth, gauth);
+			bgs.SetThreshold(static_cast<float>(varth), static_cast<float>(gauth));
 
 		bgs.Run();
 		float result = bgs.GetResultf(iindx);
@@ -1713,11 +1694,11 @@ void ScriptProc::RunRegistration()
 	double exttx, extty, exttz;
 	m_fconfig->Read("ext_x", &exttx, 0.1);
 	m_fconfig->Read("ext_y", &extty, 0.1);
-	m_fconfig->Read("ext_z", &exttz, 0);
+	m_fconfig->Read("ext_z", &exttz, 0.0);
 	fluo::Vector extt(exttx, extty, exttz);
 	m_fconfig->Read("ext_a", &exttx, 0.1);
 	m_fconfig->Read("ext_b", &extty, 0.1);
-	m_fconfig->Read("ext_c", &exttz, 0);
+	m_fconfig->Read("ext_c", &exttz, 0.0);
 	fluo::Vector exta(exttx, extty, exttz);
 	int iter;
 	m_fconfig->Read("iter", &iter, 50);
@@ -1818,34 +1799,35 @@ void ScriptProc::RunRegistration()
 	}
 }
 
-void ScriptProc::GetRulers(const std::wstring& vrp, int &startf, int &endf)
+void ScriptProc::GetRulers(const std::wstring& vrp, int& startf, int& endf)
 {
-	wxFileInputStream is(vrp);
-	if (!is.IsOk())
+	std::shared_ptr<BaseTreeFile> ruler_file =
+		glbin_tree_file_factory.createTreeFile(vrp, gstRulerFile);
+	if (!ruler_file)
 		return;
-	wxFileConfig fconfig(is);
 
 	//movie panel
 	startf = 0;
 	endf = 0;
-	if (fconfig.Exists("/movie_panel"))
+	if (ruler_file->Exists("/movie_panel"))
 	{
-		fconfig.SetPath("/movie_panel");
-		fconfig.Read("start_frame", &startf, 0);
-		fconfig.Read("end_frame", &endf, 0);
+		ruler_file->SetPath("/movie_panel");
+		ruler_file->Read("start_frame", &startf, 0);
+		ruler_file->Read("end_frame", &endf, 0);
 	}
 	//views
-	if (fconfig.Exists("/views"))
+	if (ruler_file->Exists("/views"))
 	{
-		fconfig.SetPath("/views");
-		int num = fconfig.Read("num", 0l);
+		ruler_file->SetPath("/views");
+		long num = 0l;
+		ruler_file->Read("num", &num, 0l);
 		if (num < 1)
 			return;
 
-		if (fconfig.Exists("/views/0/rulers"))
+		if (ruler_file->Exists("/views/0/rulers"))
 		{
-			fconfig.SetPath("/views/0/rulers");
-			glbin_project.ReadRulerList(fconfig, 0);
+			ruler_file->SetPath("/views/0/rulers");
+			glbin_project.ReadRulerList(gstRulerFile, 0);
 		}
 	}
 }
@@ -1857,16 +1839,15 @@ void ScriptProc::RunCameraPoints()
 	if (!TimeCondition())
 		return;
 
-	wxString str;
 	std::wstring prj2;
-	m_fconfig->Read("project_file", &str);
-	prj2 = str.ToStdWstring();
+	m_fconfig->Read("project_file", &prj2);
 	prj2 = GetConfigFile(prj2, L"vrp", L"FluoRender Project", 0);
+	std::wstring str;
 	m_fconfig->Read("names", &str);
 	std::vector<std::wstring> names;
-	int correct = GetItems(str.ToStdWstring(), names);
+	int correct = GetItems(str, names);
 	double slope;
-	m_fconfig->Read("slope", &slope, 0);
+	m_fconfig->Read("slope", &slope, 0.0);
 	bool affine;
 	m_fconfig->Read("affine", &affine, false);
 	bool persp;
@@ -1961,12 +1942,10 @@ void ScriptProc::RunRulerTransform()
 	RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list || ruler_list->empty()) return;
 
-	wxString str;
 	int dim;
 	m_fconfig->Read("dim", &dim);//2 or 3
 	std::wstring name;
-	m_fconfig->Read("name", &str);
-	name = str.ToStdWstring();
+	m_fconfig->Read("name", &name);
 	double len;
 	m_fconfig->Read("length", &len);//physical length
 	flrd::Ruler* ruler = ruler_list->GetRuler(name);
@@ -2039,14 +2018,12 @@ void ScriptProc::RunRulerSpeed()
 	if (!TimeCondition())
 		return;
 
-	wxString str;
 	std::string type;
-	m_fconfig->Read("type_name", &str);
-	type = str.ToStdString();
+	m_fconfig->Read("type_name", &type);
 	double time;//time between two samples
-	m_fconfig->Read("time", &time, 1);
+	m_fconfig->Read("time", &time, 1.0);
 	double fps;//alternative
-	if (m_fconfig->Read("fps", &fps, 1))
+	if (m_fconfig->Read("fps", &fps, 1.0))
 	{
 		time = 1 / fps;
 	}
@@ -2116,10 +2093,8 @@ void ScriptProc::RunGenerateWalk()
 	if (!m_view)
 		return;
 
-	wxString str;
 	std::wstring filename;
-	m_fconfig->Read("cycle", &str);
-	filename = str.ToStdWstring();
+	m_fconfig->Read("cycle", &filename);
 	filename = GetConfigFile(filename, L"csv", L"Cycle", 0);
 	int length;
 	m_fconfig->Read("length", &length);
@@ -2137,15 +2112,15 @@ void ScriptProc::RunPython()
 	if (!TimeCondition())
 		return;
 
-	wxString cmd;
+	std::string cmd;
 	m_fconfig->Read("command", &cmd);
-	if (cmd.IsEmpty())
+	if (cmd.empty())
 		return;
 	flrd::PyBase* python = glbin.get_add_pybase("python");
 	if (!python)
 		return;
 	python->Init();
-	python->Run(flrd::PyBase::ot_Run_SimpleString, cmd.ToStdString());
+	python->Run(flrd::PyBase::ot_Run_SimpleString, cmd);
 	python->Exit();
 }
 
@@ -2165,10 +2140,8 @@ void ScriptProc::RunDlcVideoAnalyze()
 	if (dlc->GetState() == 2)
 		return;//busy, already created
 
-	wxString str;
 	std::wstring filename;
-	m_fconfig->Read("config", &str);
-	filename = str.ToStdWstring();
+	m_fconfig->Read("config", &filename);
 	filename = GetConfigFile(filename, L"yaml", L"Config", 0);
 	std::wstring fn = cur_vol->GetPath();
 	std::wstring cfg = filename;
@@ -2248,10 +2221,8 @@ void ScriptProc::RunDlcCreateProj()
 	dlc->SetFrameNumber(m_view->m_end_all_frame);
 	dlc->SetFrameRange(m_view->m_begin_frame, m_view->m_end_frame);
 
-	wxString str;
 	std::wstring filename;
-	m_fconfig->Read("config", &str);
-	filename = str.ToStdWstring();
+	m_fconfig->Read("config", &filename);
 	filename = GetConfigFile(filename, L"yaml", L"Config", 1);
 	dlc->SetConfigFile(filename);
 	std::wstring stdstr = cur_vol->GetPath();
@@ -2294,7 +2265,7 @@ void ScriptProc::RunDlcLabel()
 
 		//get data
 		vd_rgb[0]->GetResolution(nx, ny, nz);
-		char* image = new char[nx*ny*3]();
+		char* image = new char[nx * ny * 3]();
 		size_t isize = nx * ny;
 		char* datar = 0;
 		if (vd_rgb[0])
@@ -2355,7 +2326,7 @@ void ScriptProc::RunDlcLabel()
 		if (image)
 			delete[]image;
 	}
-	
+
 	if (curf == endf)
 	{
 		//write hdf
@@ -2371,7 +2342,9 @@ void ScriptProc::RunDlcLabel()
 #else
 		std::string cmd = dlc->GetTrainCmd(maxiters);
 		glbin_moviemaker.Hold();
-		wxExecute(cmd);
+		std::thread([&cmd]{
+		std::system(cmd.c_str());
+			}).detach(); // Detach the thread to run independently
 		glbin_moviemaker.Resume();
 #endif
 	}
@@ -2382,22 +2355,21 @@ void ScriptProc::ExportInfo()
 	if (!TimeCondition())
 		return;
 
-	wxString str;
 	std::wstring outputfile;
-	m_fconfig->Read("output", &str);
-	outputfile = str.ToStdWstring();
+	m_fconfig->Read("output", &outputfile);
 	outputfile = GetSavePath(outputfile, L"csv", false);
 	if (outputfile.empty())
 		return;
 	int tnum;
 	m_fconfig->Read("type_num", &tnum, 0);
 	std::set<std::string> tnames;
+	std::string str;
 	for (int i = 0; i < tnum; ++i)
 	{
 		if (m_fconfig->Read(
 			"type_name" + std::to_string(i),
 			&str))
-			tnames.insert(str.ToStdString());
+			tnames.insert(str);
 	}
 
 	//print lines
@@ -2406,15 +2378,9 @@ void ScriptProc::ExportInfo()
 	m_output->accept(visitor);
 	ofs.close();
 
-	wxMimeTypesManager manager;
-	wxFileType* filetype = manager.GetFileTypeFromExtension("csv");
-	if (filetype)
-	{
-		wxString command = filetype->GetOpenCommand(outputfile);
-		glbin_moviemaker.Hold();
-		wxExecute(command);
-		glbin_moviemaker.Resume();
-	}
+	glbin_moviemaker.Hold();
+	OpenFileWithDefaultProgram(outputfile);
+	glbin_moviemaker.Resume();
 }
 
 void ScriptProc::ExportTemplate()
@@ -2423,33 +2389,30 @@ void ScriptProc::ExportTemplate()
 	if (!TimeCondition())
 		return;
 
-	wxString str;
 	//template
 	std::wstring tempfile;
-	m_fconfig->Read("template", &str);
-	tempfile = str.ToStdWstring();
+	m_fconfig->Read("template", &tempfile);
 	tempfile = GetInputFile(tempfile, L"Templates");
 	if (tempfile.empty())
 		return;
 	std::wstring outputfile;
-	m_fconfig->Read("output", &str);
-	outputfile = str.ToStdWstring();
+	m_fconfig->Read("output", &outputfile);
 	outputfile = GetSavePath(outputfile, L"html", false);
 	if (outputfile.empty())
 		return;
 	int vnum;
 	m_fconfig->Read("value_num", &vnum, 0);
 	std::set<std::string> vnames;
+	std::string str;
 	for (int i = 0; i < vnum; ++i)
 	{
 		if (m_fconfig->Read(
 			"value_name" + std::to_string(i),
 			&str))
-			vnames.insert(str.ToStdString());
+			vnames.insert(str);
 	}
 	std::string js_value;
-	m_fconfig->Read("js_value", &str);
-	js_value = str.ToStdString();
+	m_fconfig->Read("js_value", &js_value);
 
 	//print lines
 	std::ifstream ifs(tempfile);
@@ -2508,7 +2471,7 @@ void ScriptProc::ExportTemplate()
 	outputfile = "file://" + outputfile;
 #endif
 	glbin_moviemaker.Hold();
-	::wxLaunchDefaultBrowser(outputfile);
+	OpenFileWithDefaultProgram(outputfile);
 	glbin_moviemaker.Resume();
 }
 
@@ -2517,22 +2480,21 @@ void ScriptProc::ExportSpreadsheet()
 	if (!TimeCondition())
 		return;
 
-	wxString str;
 	std::wstring outputfile;
-	m_fconfig->Read("output", &str);
-	outputfile = str.ToStdWstring();
+	m_fconfig->Read("output", &outputfile);
 	outputfile = GetSavePath(outputfile, L"csv", false);
 	if (outputfile.empty())
 		return;
 	int vnum;
 	m_fconfig->Read("value_num", &vnum, 0);
 	std::set<std::string> vnames;
+	std::string str;
 	for (int i = 0; i < vnum; ++i)
 	{
 		if (m_fconfig->Read(
 			"value_name" + std::to_string(i),
 			&str))
-			vnames.insert(str.ToStdString());
+			vnames.insert(str);
 	}
 
 	//print lines
@@ -2541,15 +2503,9 @@ void ScriptProc::ExportSpreadsheet()
 	m_output->accept(visitor);
 	ofs.close();
 
-	wxMimeTypesManager manager;
-	wxFileType* filetype = manager.GetFileTypeFromExtension("csv");
-	if (filetype)
-	{
-		wxString command = filetype->GetOpenCommand(outputfile);
-		glbin_moviemaker.Hold();
-		wxExecute(command);
-		glbin_moviemaker.Resume();
-	}
+	glbin_moviemaker.Hold();
+	OpenFileWithDefaultProgram(outputfile);
+	glbin_moviemaker.Resume();
 }
 
 void ScriptProc::ChangeData()
@@ -2559,12 +2515,10 @@ void ScriptProc::ChangeData()
 	if (!TimeCondition())
 		return;
 
-	wxString str;
 	bool clear;
 	m_fconfig->Read("clear", &clear, true);
 	std::wstring filename;
-	m_fconfig->Read("input", &str, "");
-	filename = str.ToStdWstring();
+	m_fconfig->Read("input", &filename, std::wstring(L""));
 	filename = GetInputFile(filename, L"Data");
 	bool imagej;
 	m_fconfig->Read("imagej", &imagej, false);
@@ -2594,12 +2548,10 @@ void ScriptProc::ChangeScript()
 	if (!TimeCondition())
 		return;
 
-	wxString str;
 	bool run_script;
 	m_fconfig->Read("run_script", &run_script, false);
 	std::wstring filename;
-	m_fconfig->Read("script_file", &str, "");
-	filename = str.ToStdWstring();
+	m_fconfig->Read("script_file", &filename, std::wstring(L""));
 	filename = GetInputFile(filename, L"Scripts");
 
 	if (!run_script)
@@ -2617,10 +2569,8 @@ void ScriptProc::LoadProject()
 	if (!TimeCondition())
 		return;
 
-	wxString str;
 	std::wstring filename;
-	m_fconfig->Read("project_file", &str, "");
-	filename = str.ToStdWstring();
+	m_fconfig->Read("project_file", &filename, std::wstring(L""));
 	filename = GetInputFile(filename, L"Data");
 
 	glbin_project.Open(filename);
@@ -2636,9 +2586,7 @@ bool ScriptProc::RunBreak()
 	if (!TimeCondition())
 		return false;
 
-	wxString str;
-	m_fconfig->Read("info", &str, "");
-	m_info = str.ToStdString();
+	m_fconfig->Read("info", &m_info, std::string(""));
 	//info.Replace("\n", "\n");
 	bool reset = false;
 	m_fconfig->Read("reset", &reset, false);
@@ -2725,13 +2673,13 @@ void ScriptProc::ReadVolCacheDataLabel(flrd::VolCache& vol_cache)
 		double spcx, spcy, spcz;
 		cur_vol->GetSpacings(spcx, spcy, spcz);
 		label = nrrdNew();
-		unsigned long long mem_size = (unsigned long long)resx*
-			(unsigned long long)resy*(unsigned long long)resz;
-		unsigned int *val32 = new (std::nothrow) unsigned int[mem_size]();
+		unsigned long long mem_size = (unsigned long long)resx *
+			(unsigned long long)resy * (unsigned long long)resz;
+		unsigned int* val32 = new (std::nothrow) unsigned int[mem_size]();
 		nrrdWrap(label, val32, nrrdTypeUInt, 3, (size_t)resx, (size_t)resy, (size_t)resz);
 		nrrdAxisInfoSet(label, nrrdAxisInfoSpacing, spcx, spcy, spcz);
 		nrrdAxisInfoSet(label, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		nrrdAxisInfoSet(label, nrrdAxisInfoMax, spcx*resx, spcy*resy, spcz*resz);
+		nrrdAxisInfoSet(label, nrrdAxisInfoMax, spcx * resx, spcy * resy, spcz * resz);
 		nrrdAxisInfoSet(label, nrrdAxisInfoSize, (size_t)resx, (size_t)resy, (size_t)resz);
 	}
 	vol_cache.nrrd_label = label;
@@ -2791,3 +2739,20 @@ void ScriptProc::DelVolCacheDataLabel(flrd::VolCache& vol_cache)
 	}
 }
 
+void ScriptProc::OpenFileWithDefaultProgram(const std::wstring& filename)
+{
+#if defined(_WIN32) || defined(_WIN64)
+    // Windows-specific code
+    ShellExecuteW(NULL, L"open", filename.c_str(), NULL, NULL, SW_SHOWNORMAL);
+#elif defined(__APPLE__) || defined(__MACH__)
+    // macOS-specific code
+    std::string command = "open " + ws2s(filename);
+    std::system(command.c_str());
+#elif defined(__linux__)
+    // Linux-specific code
+    std::string command = "xdg-open " + ws2s(filename);
+    std::system(command.c_str());
+#else
+    #error "Unsupported operating system"
+#endif
+}

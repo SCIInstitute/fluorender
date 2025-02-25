@@ -43,7 +43,7 @@ DEALINGS IN THE SOFTWARE.
 class TreeFileFactory
 {
 public:
-	std::shared_ptr<BaseTreeFile> createTreeFile(const std::string& filename, const std::string& id) {
+	std::shared_ptr<BaseTreeFile> createTreeFile(const std::wstring& filename, const std::string& id) {
 		std::ifstream file(filename);
 		if (!file.is_open()) {
 			throw std::runtime_error("Unable to open file");

@@ -44,8 +44,8 @@ public:
 	void Reset();
 
 	void ExportRulerList(const std::wstring& filename);
-	void SaveRulerList(wxFileConfig &fconfig, int vi);
-	void ReadRulerList(wxFileConfig &fconfig, int vi);
+	void SaveRulerList(const std::string& gst_name, int vi);
+	void ReadRulerList(const std::string& gst_name, int vi);
 
 	void SaveConfig(wxFileConfig& fconfig, const std::wstring& filename);
 

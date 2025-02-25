@@ -31,12 +31,12 @@ DEALINGS IN THE SOFTWARE.
 #include <Group.hpp>
 #include <VolCache.h>
 #include <Cell.h>
-#include <wx/fileconf.h>
 #include <vector>
 
 class MainFrame;
 class RenderCanvas;
 class VolumeData;
+class BaseTreeFile;
 namespace flrd
 {
 	class ScriptProc
@@ -86,7 +86,7 @@ namespace flrd
 
 		std::string m_type;
 		TimeMask m_time_mask;
-		wxFileConfig *m_fconfig;
+		std::shared_ptr<BaseTreeFile> m_fconfig;
 		std::wstring m_fconfig_name;
 		std::string m_info;
 		bool m_rewind;
@@ -168,6 +168,9 @@ namespace flrd
 		void ReadVolCacheDataLabel(VolCache& vol_cache);
 		void DelVolCacheData(VolCache& vol_cache);
 		void DelVolCacheDataLabel(VolCache& vol_cache);
+
+		//open file of certain type
+		void OpenFileWithDefaultProgram(const std::wstring& filename);
 	};
 }
 #endif//_SCRIPTPROC_H_

@@ -1099,7 +1099,7 @@ void Project::Open(const std::wstring& filename)
 				fconfig.Exists(wxString::Format("/views/%d/rulers", i)))
 			{
 				fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
-				ReadRulerList(fconfig, i);
+				ReadRulerList("fconfig", i);
 			}
 		}
 		glbin_current.canvas = frame->GetRenderCanvas(cur_canvas.ToStdWstring());
@@ -1901,7 +1901,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 
 			//rulers
 			fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
-			SaveRulerList(fconfig, i);
+			SaveRulerList("fconfig", i);
 		}
 	}
 	//clipping planes
@@ -2243,81 +2243,89 @@ void Project::ExportRulerList(const std::wstring& filename)
 	os.close();
 }
 
-void Project::SaveRulerList(wxFileConfig &fconfig, int vi)
+void Project::SaveRulerList(const std::string &gst_name, int vi)
 {
 	flrd::RulerList* list = glbin_current.GetRulerList();
 	if (!list || list->empty())
 		return;
 
-	fconfig.Write("num", static_cast<unsigned int>(list->size()));
+	std::shared_ptr<BaseTreeFile> fconfig = glbin_tree_file_factory.getTreeFile(gst_name);
+	if (!fconfig)
+		return;
+
+	fconfig->Write("num", static_cast<unsigned int>(list->size()));
 	for (size_t ri = 0; ri < list->size(); ++ri)
 	{
 		flrd::Ruler* ruler = (*list)[ri];
 		if (!ruler) continue;
-		fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", vi, (int)ri));
-		fconfig.Write("name", wxString(ruler->GetName()));
-		fconfig.Write("group", ruler->Group());
-		fconfig.Write("type", ruler->GetRulerType());
-		fconfig.Write("display", ruler->GetDisp());
-		fconfig.Write("transient", ruler->GetTransient());
-		fconfig.Write("time", ruler->GetTransTime());
-		fconfig.Write("info_names", wxString(ruler->GetInfoNames()));
-		fconfig.Write("info_values", wxString(ruler->GetInfoValues()));
-		fconfig.Write("use_color", ruler->GetUseColor());
-		fconfig.Write("color", wxString::Format("%f %f %f",
-			ruler->GetColor().r(), ruler->GetColor().g(), ruler->GetColor().b()));
-		fconfig.Write("interp", ruler->GetInterp());
-		fconfig.Write("num", ruler->GetNumBranch());
-		wxString path = wxString::Format(
-			"/views/%d/rulers/%d/branches", vi, (int)ri);
-		fconfig.SetPath(path);
-		fconfig.Write("num", ruler->GetNumBranch());
+		fconfig->SetPath("/views/" + std::to_string(vi) + "/rulers/" + std::to_string(ri));
+		fconfig->Write("name", ruler->GetName());
+		fconfig->Write("group", ruler->Group());
+		fconfig->Write("type", ruler->GetRulerType());
+		fconfig->Write("display", ruler->GetDisp());
+		fconfig->Write("transient", ruler->GetTransient());
+		fconfig->Write("time", ruler->GetTransTime());
+		fconfig->Write("info_names", ruler->GetInfoNames());
+		fconfig->Write("info_values", ruler->GetInfoValues());
+		fconfig->Write("use_color", ruler->GetUseColor());
+		fconfig->Write("color", wxString::Format("%f %f %f",
+			ruler->GetColor().r(), ruler->GetColor().g(), ruler->GetColor().b()).ToStdString());
+		fconfig->Write("interp", ruler->GetInterp());
+		fconfig->Write("num", ruler->GetNumBranch());
+		std::string path = "/views/" + std::to_string(vi) + "/rulers/" + std::to_string(ri) + "/branches";
+		fconfig->SetPath(path);
+		fconfig->Write("num", ruler->GetNumBranch());
 		for (size_t rbi = 0; rbi < ruler->GetNumBranch(); ++rbi)
 		{
-			wxString path_br = path + wxString::Format("/%d", (int)rbi);
-			fconfig.SetPath(path_br);
-			fconfig.Write("num", ruler->GetNumBranchPoint(rbi));
-			fconfig.Write("time_point", true);
+			std::string path_br = path + std::to_string(rbi);
+			fconfig->SetPath(path_br);
+			fconfig->Write("num", ruler->GetNumBranchPoint(rbi));
+			fconfig->Write("time_point", true);
 			for (size_t rpi = 0; rpi < ruler->GetNumBranchPoint(rbi); ++rpi)
 			{
 				flrd::RulerPoint* rp = ruler->GetRulerPoint(rbi, rpi);
 				if (!rp) continue;
-				//fconfig.Write(wxString::Format("point%d", (int)rpi),
+				//fconfig->Write(wxString::Format("point%d", (int)rpi),
 				//	wxString::Format("%f %f %f %d %d",
 				//	rp->GetPoint(0).x(),
 				//	rp->GetPoint(0).y(),
 				//	rp->GetPoint(0).z(),
 				//	rp->GetLocked(),
 				//	rp->GetId()));
-				wxString path2 = path_br + wxString::Format("/point%d", (int)rpi);
-				fconfig.SetPath(path2);
-				fconfig.Write("num", rp->GetTimeNum());
-				fconfig.Write("locked", rp->GetLocked());
-				fconfig.Write("id", rp->GetId());
+				std::string path2 = path_br + "/point" + std::to_string(rpi);
+				fconfig->SetPath(path2);
+				fconfig->Write("num", rp->GetTimeNum());
+				fconfig->Write("locked", rp->GetLocked());
+				fconfig->Write("id", rp->GetId());
 				for (size_t tpi = 0; tpi < rp->GetTimeNum(); ++tpi)
 				{
-					wxString tpn = wxString::Format("tp%d", (int)tpi);
+					std::string tpn = "tp" + std::to_string(tpi);
 					size_t t = 0;
 					fluo::Point p;
 					if (rp->GetTimeAndPoint(tpi, t, p))
-						fconfig.Write(tpn,
-							wxString::Format("%d %f %f %f",
-								(int)t,
-								p.x(),
-								p.y(),
-								p.z()));
+						fconfig->Write(tpn,
+								std::to_string(t) +
+							std::to_string(p.x()) +
+							std::to_string(p.y()) +
+							std::to_string(p.z()));
 				}
 			}
 		}
 	}
 }
 
-void Project::ReadRulerList(wxFileConfig &fconfig, int vi)
+void Project::ReadRulerList(const std::string &gst_name, int vi)
 {
 	flrd::RulerList* list = glbin_current.GetRulerList();
 	if (!list)
 		return;
-	wxString str;
+
+	std::shared_ptr<BaseTreeFile> fconfig = glbin_tree_file_factory.getTreeFile(gst_name);
+	if (!fconfig)
+		return;
+
+	std::string str;
+	std::wstring wstr;
 	int ival;
 	bool bval;
 	int rbi, rpi;
@@ -2326,34 +2334,35 @@ void Project::ReadRulerList(wxFileConfig &fconfig, int vi)
 	unsigned int id;
 
 	list->clear();
-	int rnum = fconfig.Read("num", 0l);
+	long rnum = 0;
+	fconfig->Read("num", &rnum);
 	for (int ri = 0; ri < rnum; ++ri)
 	{
-		if (fconfig.Exists(wxString::Format("/views/%d/rulers/%d", vi, ri)))
+		if (fconfig->Exists("/views/" + std::to_string(vi) + "/rulers/" + std::to_string(ri)))
 		{
-			fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", vi, ri));
+			fconfig->SetPath("/views/" +std::to_string(vi) + "/rulers/" + std::to_string(ri));
 			flrd::Ruler* ruler = new flrd::Ruler();
-			if (fconfig.Read("name", &str))
-				ruler->SetName(str.ToStdWstring());
-			if (fconfig.Read("group", &ival))
+			if (fconfig->Read("name", &wstr))
+				ruler->SetName(wstr);
+			if (fconfig->Read("group", &ival))
 				ruler->Group(ival);
-			if (fconfig.Read("type", &ival))
+			if (fconfig->Read("type", &ival))
 				ruler->SetRulerType(ival);
-			if (fconfig.Read("display", &bval))
+			if (fconfig->Read("display", &bval))
 				ruler->SetDisp(bval);
-			if (fconfig.Read("transient", &bval))
+			if (fconfig->Read("transient", &bval))
 				ruler->SetTransient(bval);
-			if (fconfig.Read("time", &ival))
+			if (fconfig->Read("time", &ival))
 				ruler->SetTransTime(ival);
-			if (fconfig.Read("info_names", &str))
-				ruler->SetInfoNames(str.ToStdString());
-			if (fconfig.Read("info_values", &str))
-				ruler->SetInfoValues(str.ToStdString());
-			if (fconfig.Read("use_color", &bval))
+			if (fconfig->Read("info_names", &str))
+				ruler->SetInfoNames(str);
+			if (fconfig->Read("info_values", &str))
+				ruler->SetInfoValues(str);
+			if (fconfig->Read("use_color", &bval))
 			{
 				if (bval)
 				{
-					if (fconfig.Read("color", &str))
+					if (fconfig->Read("color", &str))
 					{
 						float r, g, b;
 						if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b))
@@ -2364,20 +2373,20 @@ void Project::ReadRulerList(wxFileConfig &fconfig, int vi)
 					}
 				}
 			}
-			if (fconfig.Read("interp", &ival))
+			if (fconfig->Read("interp", &ival))
 				ruler->SetInterp(ival);
-			int num = fconfig.Read("num", 0l);
+			long num = 0;
+			fconfig->Read("num", &num);
 			//num could be points or branch
 			for (int ii = 0; ii < num; ++ii)
 			{
 				//if points
 				rbi = rpi = ii;
-				if (fconfig.Exists(wxString::Format(
-					"/views/%d/rulers/%d/points/%d", vi, ri, rpi)))
+				if (fconfig->Exists(
+					"/views/" + std::to_string(vi) + "/rulers/" + std::to_string(ri) + "/points/"+ std::to_string(rpi)))
 				{
-					fconfig.SetPath(wxString::Format(
-						"/views/%d/rulers/%d/points/%d", vi, ri, rpi));
-					if (fconfig.Read("point", &str))
+					fconfig->SetPath("/views/" + std::to_string(vi) + "/rulers/" + std::to_string(ri) + "/points/"+ std::to_string(rpi));
+					if (fconfig->Read("point", &str))
 					{
 						if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
 						{
@@ -2387,31 +2396,30 @@ void Project::ReadRulerList(wxFileConfig &fconfig, int vi)
 					}
 				}
 				//if branch
-				else if (fconfig.Exists(wxString::Format(
-					"/views/%d/rulers/%d/branches/%d", vi, ri, rbi)))
+				else if (fconfig->Exists(
+					"/views/" + std::to_string(vi) + "/rulers/" + std::to_string(ri) + "/branches/" + std::to_string(rbi)))
 				{
-					wxString path = wxString::Format(
-						"/views/%d/rulers/%d/branches/%d", vi, ri, rbi);
-					fconfig.SetPath(path);
-					if (fconfig.Read("num", &ival))
+					std::string path = "/views/" + std::to_string(vi) + "/rulers/" + std::to_string(ri) + "/branches/" + std::to_string(rbi);
+					fconfig->SetPath(path);
+					if (fconfig->Read("num", &ival))
 					{
 						bool time_point = false;
-						fconfig.Read("time_point", &time_point, false);
+						fconfig->Read("time_point", &time_point, false);
 						for (rpi = 0; rpi < ival; ++rpi)
 						{
 							if (time_point)
 							{
-								wxString path2 = path + wxString::Format("/point%d", rpi);
-								fconfig.SetPath(path2);
+								std::string path2 = path + "/point" + std::to_string(rpi);
+								fconfig->SetPath(path2);
 								int tnum;
-								fconfig.Read("num", &tnum);
-								fconfig.Read("locked", &l);
-								//fconfig.Read("id", &id);
+								fconfig->Read("num", &tnum);
+								fconfig->Read("locked", &l);
+								//fconfig->Read("id", &id);
 								unsigned int t;
 								for (int tpi = 0; tpi < tnum; ++tpi)
 								{
-									wxString tpn = wxString::Format("tp%d", tpi);
-									if (fconfig.Read(tpn, &str))
+									std::string tpn = "tp" + std::to_string(tpi);
+									if (fconfig->Read(tpn, &str))
 									{
 										if (SSCANF(str.c_str(), "%u%f%f%f", &t, &x, &y, &z))
 										{
@@ -2447,7 +2455,7 @@ void Project::ReadRulerList(wxFileConfig &fconfig, int vi)
 							}
 							else
 							{
-								if (fconfig.Read(wxString::Format("point%d", rpi), &str))
+								if (fconfig->Read("point" +std::to_string(rpi), &str))
 								{
 									if (SSCANF(str.c_str(), "%f%f%f%d%u", &x, &y, &z, &l, &id))
 									{

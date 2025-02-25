@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <BaseTreeFile.h>
 #include <tinyxml2.h>
+#include <compatibility.h>
 
 class XmlFile : public BaseTreeFile
 {
@@ -41,9 +42,10 @@ public:
 
 	~XmlFile() {}
 
-	int LoadFile(const std::string& filename) override
+	int LoadFile(const std::wstring& filename) override
 	{
-		doc_.LoadFile(filename.c_str());
+		std::string str = ws2s(filename);
+		doc_.LoadFile(str.c_str());
 		cur_element_ = doc_.RootElement();
 		cur_path_ = path_sep_;
 		return 0;
@@ -57,9 +59,10 @@ public:
 		return 0;
 	}
 
-	int SaveFile(const std::string& filename) override
+	int SaveFile(const std::wstring& filename) override
 	{
-		if (doc_.SaveFile(filename.c_str()) == tinyxml2::XML_SUCCESS)
+		std::string str = ws2s(filename);
+		if (doc_.SaveFile(str.c_str()) == tinyxml2::XML_SUCCESS)
 		{
 			return 0;
 		}
@@ -270,21 +273,26 @@ public:
 
 protected:
 	// Implement type-specific read methods
-	bool ReadString(const std::string& key, std::string* value) const override
+	bool ReadString(const std::string& key, std::string* value, const std::string& def = "") const override
 	{
 		if (!cur_element_)
+		{
+			*value = def;
 			return false;
+		}
 		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
 		if (element && element->GetText()) {
 			*value = element->GetText();
 			return true;
 		}
+		*value = def;
 		return false;
 	}
 
-	bool ReadWstring(const std::string& key, std::wstring* value) const override
+	bool ReadWstring(const std::string& key, std::wstring* value, const std::wstring& def = L"") const override
 	{
 		if (!cur_element_) {
+			*value = def;
 			return false;
 		}
 		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
@@ -295,12 +303,14 @@ protected:
 				return true;
 			}
 		}
+		*value = def;
 		return false;
 	}
 
-	bool ReadBool(const std::string& key, bool* value) const override
+	bool ReadBool(const std::string& key, bool* value, bool def = false) const override
 	{
 		if (!cur_element_) {
+			*value = def;
 			return false;
 		}
 		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
@@ -319,13 +329,17 @@ protected:
 				}
 			}
 		}
+		*value = def;
 		return false;
 	}
 
-	bool ReadLong(const std::string& key, long* value) const override
+	bool ReadLong(const std::string& key, long* value, long def = 0) const override
 	{
 		if (!cur_element_)
+		{
+			*value = def;
 			return false;
+		}
 		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
 		if (element) {
 			int64_t tempValue;
@@ -334,18 +348,23 @@ protected:
 				return true;
 			}
 		}
+		*value = def;
 		return false;
 	}
 
-	bool ReadDouble(const std::string& key, double* value) const override
+	bool ReadDouble(const std::string& key, double* value, double def = 0.0) const override
 	{
 		if (!cur_element_)
+		{
+			*value = def;
 			return false;
+		}
 		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
 		if (element) {
 			element->QueryDoubleText(value);
 			return true;
 		}
+		*value = def;
 		return false;
 	}
 
