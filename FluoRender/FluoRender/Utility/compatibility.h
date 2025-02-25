@@ -479,6 +479,8 @@ inline std::wstring s2ws(const std::string& s)
 	std::mbstate_t state = std::mbstate_t();
 	const char* src = s.data();
 	size_t len = std::mbsrtowcs(nullptr, &src, 0, &state);
+	if (len == static_cast<size_t>(-1))
+		return L"";
 	std::wstring dest(len, L'\0');
 	std::mbsrtowcs(&dest[0], &src, len, &state);
 	return dest;
@@ -489,6 +491,8 @@ inline std::string ws2s(const std::wstring& ws)
 	std::mbstate_t state = std::mbstate_t();
 	const wchar_t* src = ws.data();
 	size_t len = std::wcsrtombs(nullptr, &src, 0, &state);
+	if (len == static_cast<size_t>(-1))
+		return "";
 	std::string dest(len, '\0');
 	std::wcsrtombs(&dest[0], &src, len, &state);
 	return dest;

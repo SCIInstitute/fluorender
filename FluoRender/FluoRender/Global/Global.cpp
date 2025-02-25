@@ -477,5 +477,5 @@ JVMInitializer* Global::get_jvm_instance()
 //locale
 void Global::InitLocale()
 {
-	std::setlocale(LC_ALL, "");
+	std::setlocale(LC_ALL, "en_US.UTF-8");
 }
