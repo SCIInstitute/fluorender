@@ -28,9 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #include <lif_reader.h>
 #include <compatibility.h>
 #include <Global.h>
-#include <wx/sstream.h>
+#include <tinyxml2.h>
 #include <stdio.h>
-//#include <fstream>
 
 LIFReader::LIFReader():
 	BaseReader()
@@ -318,8 +317,7 @@ unsigned long long LIFReader::ReadMetadata(FILE* pfile, unsigned long long ioffs
 	result &= fread(&temp[0], 1, xmlsize * 2, pfile) == xmlsize * 2;
 	if (!result)
 		return 0;
-	wxMBConvUTF16 conv;
-	wxString xmlstr(temp.c_str(), conv);
+	std::wstring xmlstr = s2ws(temp);
 #endif
 
 	//test xml
@@ -330,16 +328,16 @@ unsigned long long LIFReader::ReadMetadata(FILE* pfile, unsigned long long ioffs
 	//outfile.close();
 	//endof test
 
-	wxXmlDocument doc;
-	wxStringInputStream wxss(xmlstr);
-	result &= doc.Load(wxss);
-	wxXmlNode *root = doc.GetRoot();
-	if (!root || root->GetName() != "LMSDataContainerHeader")
+	tinyxml2::XMLDocument doc;
+	tinyxml2::XMLError eResult = doc.Parse(ws2s(xmlstr).c_str());
+	if (eResult != tinyxml2::XML_SUCCESS)
 		return 0;
-	wxString wstr = root->GetAttribute("Version");
-	unsigned long ival;
-	if (wstr.ToULong(&ival))
-		m_version = ival;
+	tinyxml2::XMLElement* root = doc.RootElement();
+	if (!root || std::string(root->Name()) != "LMSDataContainerHeader")
+		return 0;
+	std::string wstr = root->Attribute("Version");
+	unsigned long ival = std::stoul(wstr);
+	m_version = ival;
 	ReadElement(root);
 
 	return LIFHSIZE + uisize;
@@ -395,9 +393,7 @@ unsigned long long LIFReader::PreReadMemoryBlock(FILE* pfile, unsigned long long
 	result &= fread(&temp[0], 1, nsize * 2, pfile) == nsize * 2;
 	if (!result)
 		return 0;
-	wxMBConvUTF16 conv;
-	wxString wxnamestr(temp.c_str(), conv);
-	std::wstring namestr = wxnamestr.ToStdWstring();
+	std::wstring namestr = s2ws(temp);
 #endif
 	ImageInfo* imgi = FindImageInfoMbid(namestr);
 	if (imgi)
@@ -558,50 +554,50 @@ bool LIFReader::CopyMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 	return result;
 }
 
-void LIFReader::ReadElement(wxXmlNode* node)
+void LIFReader::ReadElement(tinyxml2::XMLElement* node)
 {
 	if (!node)
 		return;
-	wxString str;
-	wxXmlNode *child = node->GetChildren();
+	std::string str;
+	tinyxml2::XMLElement *child = node->FirstChildElement();
 	while (child)
 	{
-		str = child->GetName();
+		str = child->Name();
 		if (str == "Element")
 		{
-			str = child->GetAttribute("Visibility");
+			str = child->Attribute("Visibility");
 			if (str != "0")
 			{
-				std::wstring name = child->GetAttribute("Name").ToStdWstring();
+				std::wstring name = s2ws(child->Attribute("Name"));
 				ReadData(child, name);
 			}
 		}
 		ReadElement(child);
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 }
 
-void LIFReader::ReadData(wxXmlNode* node, std::wstring &name)
+void LIFReader::ReadData(tinyxml2::XMLElement* node, std::wstring &name)
 {
 	if (!node)
 		return;
-	wxString str;
-	wxXmlNode *child = node->GetChildren();
+	std::string str;
+	tinyxml2::XMLElement *child = node->FirstChildElement();
 	ImageInfo* imgi = 0;
 	unsigned long long sbsize = 0;
 	std::wstring sbname;
 	while (child)
 	{
-		str = child->GetName();
+		str = child->Name();
 		if (str == "Data")
 			imgi = ReadImage(child, name);
 		else if (str == "Memory")
 		{
-			str = child->GetAttribute("Size");
-			str.ToULongLong(&sbsize);
-			sbname = child->GetAttribute("MemoryBlockID");
+			str = child->Attribute("Size");
+			sbsize = std::stoull(str);
+			sbname = s2ws(child->Attribute("MemoryBlockID"));
 		}
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 	if (imgi && sbsize && sbname != L"")
 	{
@@ -609,13 +605,13 @@ void LIFReader::ReadData(wxXmlNode* node, std::wstring &name)
 	}
 }
 
-LIFReader::ImageInfo* LIFReader::ReadImage(wxXmlNode* node, std::wstring &name)
+LIFReader::ImageInfo* LIFReader::ReadImage(tinyxml2::XMLElement* node, std::wstring &name)
 {
 	if (!node)
 		return 0;
 	std::string str;
-	wxXmlNode* child = node->GetChildren();
-	if (!child || child->GetName() != "Image")
+	tinyxml2::XMLElement* child = node->FirstChildElement();
+	if (!child || std::string(child->Name()) != "Image")
 		return 0;
 	ImageInfo imgi;
 	imgi.name = name;
@@ -646,35 +642,28 @@ LIFReader::ImageInfo* LIFReader::ReadImage(wxXmlNode* node, std::wstring &name)
 	return &(m_lif_info.images.back());
 }
 
-void LIFReader::ReadSubBlockInfo(wxXmlNode* node, LIFReader::ImageInfo &imgi)
+void LIFReader::ReadSubBlockInfo(tinyxml2::XMLElement* node, LIFReader::ImageInfo &imgi)
 {
 	if (!node)
 		return;
-	wxString str;
-	unsigned long ulv;
-	double dval;
-	unsigned long long ull;
-	wxXmlNode *child = node->GetChildren();
+	std::string str;
+	tinyxml2::XMLElement *child = node->FirstChildElement();
 	while (child)
 	{
-		str = child->GetName();
+		str = child->Name();
 		if (str == "ChannelDescription")
 		{
 			ChannelInfo cinfo;
 			cinfo.chan = imgi.channels.size();
-			str = child->GetAttribute("Resolution");
-			if (str.ToULong(&ulv))
-				cinfo.res = ulv;
-			str = child->GetAttribute("Min");
-			if (str.ToDouble(&dval))
-				cinfo.minv = dval;
-			str = child->GetAttribute("Max");
-			if (str.ToDouble(&dval))
-				cinfo.maxv = dval;
-			str = child->GetAttribute("BytesInc");
-			if (str.ToULongLong(&ull))
-				cinfo.inc = ull;
-			cinfo.lut = child->GetAttribute("LUTName");
+			str = child->Attribute("Resolution");
+			cinfo.res = std::stoul(str);
+			str = child->Attribute("Min");
+			cinfo.minv = std::stod(str);
+			str = child->Attribute("Max");
+			cinfo.maxv = std::stod(str);
+			str = child->Attribute("BytesInc");
+			cinfo.inc = std::stoull(str);
+			cinfo.lut = child->Attribute("LUTName");
 			imgi.channels.push_back(cinfo);
 			imgi.minv = std::min(imgi.minv, cinfo.minv);
 			imgi.maxv = std::max(imgi.maxv, cinfo.maxv);
@@ -684,26 +673,31 @@ void LIFReader::ReadSubBlockInfo(wxXmlNode* node, LIFReader::ImageInfo &imgi)
 			unsigned long did = 0, size = 0;
 			double orig = 0, len = 0, sfactor = 1;
 			unsigned long long inc = 0;
-			str = child->GetAttribute("DimID");
-			if (str.ToULong(&did))
+			str = child->Attribute("DimID");
+			bool flag = true;
+			try
 			{
-				str = child->GetAttribute("Unit");
+				did = std::stoul(str);
+			}
+			catch (...)
+			{
+				flag = false;
+			}
+			if (flag)
+			{
+				str = child->Attribute("Unit");
 				if (str == "m")
 					sfactor = 1e6;
 				else if (str == "mm")
 					sfactor = 1e3;
-				str = child->GetAttribute("NumberOfElements");
-				if (str.ToULong(&ulv))
-					size = ulv;
-				str = child->GetAttribute("Origin");
-				if (str.ToDouble(&dval))
-					orig = dval * sfactor;
-				str = child->GetAttribute("Length");
-				if (str.ToDouble(&dval))
-					len = dval * sfactor;
-				str = child->GetAttribute("BytesInc");
-				if (str.ToULongLong(&ull))
-					inc = ull;
+				str = child->Attribute("NumberOfElements");
+				size = std::stoul(str);
+				str = child->Attribute("Origin");
+				orig = std::stod(str) * sfactor;
+				str = child->Attribute("Length");
+				len = std::stod(str) * sfactor;
+				str = child->Attribute("BytesInc");
+				inc = std::stoull(str);
 				AddSubBlockInfo(imgi, did, size, orig, len, inc);
 			}
 		}
@@ -713,7 +707,7 @@ void LIFReader::ReadSubBlockInfo(wxXmlNode* node, LIFReader::ImageInfo &imgi)
 		}
 
 		ReadSubBlockInfo(child, imgi);
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 }
 
@@ -743,48 +737,40 @@ void LIFReader::AddSubBlockInfo(ImageInfo &imgi, unsigned int dim, unsigned int 
 		size, orig, len, inc);
 }
 
-bool LIFReader::ReadTileScanInfo(wxXmlNode* node, TileList& list)
+bool LIFReader::ReadTileScanInfo(tinyxml2::XMLElement* node, TileList& list)
 {
 	if (!node)
 		return false;
-	wxString str;
-	str = node->GetName();
+	std::string str;
+	str = node->Name();
 	if (str != "Attachment")
 		return false;
-	str = node->GetAttribute("Name");
+	str = node->Attribute("Name");
 	if (str != "TileScanInfo")
 		return false;
-	long lval;
-	double dval;
 	list.clear();
-	wxXmlNode* child = node->GetChildren();
+	tinyxml2::XMLElement* child = node->FirstChildElement();
 	while (child)
 	{
-		str = child->GetName();
+		str = child->Name();
 		if (str == "Tile")
 		{
 			TileScanInfo info;
-			str = child->GetAttribute("FieldX");
-			if (str.ToLong(&lval))
-				info.fieldx = lval;
-			str = child->GetAttribute("FieldY");
-			if (str.ToLong(&lval))
-				info.fieldy = lval;
-			str = child->GetAttribute("FieldZ");
-			if (str.ToLong(&lval))
-				info.fieldz = lval;
-			str = child->GetAttribute("PosX");
-			if (str.ToDouble(&dval))
-				info.posx = dval;
-			str = child->GetAttribute("PosY");
-			if (str.ToDouble(&dval))
-				info.posy = dval;
-			str = child->GetAttribute("PosZ");
-			if (str.ToDouble(&dval))
-				info.posz = dval;
+			str = child->Attribute("FieldX");
+			info.fieldx = std::stoi(str);
+			str = child->Attribute("FieldY");
+			info.fieldy = std::stoi(str);
+			str = child->Attribute("FieldZ");
+			info.fieldz = std::stoi(str);
+			str = child->Attribute("PosX");
+			info.posx = std::stod(str);
+			str = child->Attribute("PosY");
+			info.posy = std::stod(str);
+			str = child->Attribute("PosZ");
+			info.posz = std::stod(str);
 			list.push_back(info);
 		}
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 	if (list.empty())
 		return false;

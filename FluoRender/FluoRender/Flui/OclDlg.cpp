@@ -262,7 +262,7 @@ void OclDlg::Execute()
 	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
 	(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";*/
 
-	(*m_output_txt) << glbin_kernel_executor.GetMessage();
+	(*m_output_txt) << glbin_kernel_executor.GetInfo();
 
 	//add result for rendering
 	if (dup)

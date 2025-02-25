@@ -99,7 +99,7 @@ VolumeData* KernelExecutor::GetResult(bool pop)
 	return vd;
 }
 
-std::wstring KernelExecutor::GetMessage()
+std::wstring KernelExecutor::GetInfo()
 {
 	return m_message;
 }

@@ -27,12 +27,12 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <pvxml_reader.h>
 #include <Utils.h>
-#include <wx/xml/xml.h>
 #include <compatibility.h>
+#include <tinyxml2.h>
 #include <fstream>
 #include <iostream>
 
-PVXMLReader::PVXMLReader():
+PVXMLReader::PVXMLReader() :
 	BaseReader()
 {
 	m_force_stack = false;
@@ -76,7 +76,7 @@ PVXMLReader::~PVXMLReader()
 {
 }
 
-void PVXMLReader::SetFile(const std::string &file)
+void PVXMLReader::SetFile(const std::string& file)
 {
 	if (!file.empty())
 	{
@@ -89,7 +89,7 @@ void PVXMLReader::SetFile(const std::string &file)
 	m_id_string = m_path_name;
 }
 
-void PVXMLReader::SetFile(const std::wstring &file)
+void PVXMLReader::SetFile(const std::wstring& file)
 {
 	m_path_name = file;
 	m_data_name = GET_NAME(m_path_name);
@@ -111,28 +111,29 @@ int PVXMLReader::Preprocess()
 	if (!SEP_PATH_NAME(m_path_name, path, name))
 		return READER_OPEN_FAIL;
 
-	wxXmlDocument doc;
-	if (!doc.Load(m_path_name))
+	tinyxml2::XMLDocument doc;
+	std::string str = ws2s(m_path_name);
+	if (doc.LoadFile(str.c_str()) != tinyxml2::XML_SUCCESS)
 		return READER_OPEN_FAIL;
 
-	wxXmlNode *root = doc.GetRoot();
+	tinyxml2::XMLElement* root = doc.RootElement();
 
-	if (!root || root->GetName() != "PVScan")
+	if (!root || std::string(root->Name()) != "PVScan")
 		return READER_FORMAT_ERROR;
 
-	wxXmlNode *child = root->GetChildren();
+	tinyxml2::XMLElement* child = root->FirstChildElement();
 	while (child)
 	{
-		if (child->GetName() == "SystemConfiguration")
+		if (std::string(child->Name()) == "SystemConfiguration")
 			ReadSystemConfig(child);
-		else if (child->GetName() == "PVStateShard")
+		else if (std::string(child->Name()) == "PVStateShard")
 		{
 			UpdateStateShard(child);
 			m_state_shard_stack.push_back(m_current_state);
 		}
-		else if (child->GetName() == "Sequence")
+		else if (std::string(child->Name()) == "Sequence")
 			ReadSequence(child);
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 
 	m_time_num = int(m_pvxml_info.size());
@@ -140,28 +141,28 @@ int PVXMLReader::Preprocess()
 
 	if (m_time_num == 0) return READER_EMPTY_DATA;
 
-	int i, j, k, l;
+	size_t i, j, k, l;
 	double x_end, y_end, z_end;
 	std::wstring filename;
 	bool first = true;
 	m_sep_seq = false;
-	for (i=0; i<(int)m_pvxml_info.size(); i++)
+	for (i = 0; i < m_pvxml_info.size(); i++)
 	{
 		TimeDataInfo* time_data_info = &(m_pvxml_info[i]);
 		int chan_num = 0;
-		for (j=0; j<(int)time_data_info->size(); j++)
+		for (j = 0; j < time_data_info->size(); j++)
 		{
 			SequenceInfo* sequence_info = &((*time_data_info)[j]);
 			m_sep_seq = m_sep_seq || sequence_info->apart;
-			for (k=0; k<(int)sequence_info->frames.size(); k++)
+			for (k = 0; k < sequence_info->frames.size(); k++)
 			{
-				FrameInfo *frame_info = &((sequence_info->frames)[k]);
+				FrameInfo* frame_info = &((sequence_info->frames)[k]);
 				x_end = frame_info->x_start + frame_info->x_size * m_xspc;
 				y_end = frame_info->y_start + frame_info->y_size * m_yspc;
 				z_end = frame_info->z_start + m_zspc;
 
-				if (k==0)
-					chan_num += frame_info->channels.size();
+				if (k == 0)
+					chan_num += static_cast<int>(frame_info->channels.size());
 
 				if (first)
 				{
@@ -180,23 +181,23 @@ int PVXMLReader::Preprocess()
 						double x_extend = frame_info->x_start - x_end;
 						double y_extend = frame_info->y_start - y_end;
 						double z_extend = frame_info->z_start - z_end;
-						m_x_max = x_extend>(m_x_max-m_x_min)?m_x_min+x_extend:m_x_max;
-						m_y_max = y_extend>(m_y_max-m_y_min)?m_y_min+y_extend:m_y_max;
-						m_z_max = z_extend>(m_z_max-m_z_min)?m_z_min+z_extend:m_z_max;
+						m_x_max = x_extend > (m_x_max - m_x_min) ? m_x_min + x_extend : m_x_max;
+						m_y_max = y_extend > (m_y_max - m_y_min) ? m_y_min + y_extend : m_y_max;
+						m_z_max = z_extend > (m_z_max - m_z_min) ? m_z_min + z_extend : m_z_max;
 					}
 					else
 					{
-						m_x_min = frame_info->x_start<m_x_min?frame_info->x_start:m_x_min;
-						m_y_min = frame_info->y_start<m_y_min?frame_info->y_start:m_y_min;
-						m_z_min = frame_info->z_start<m_z_min?frame_info->z_start:m_z_min;
-						m_x_max = x_end>m_x_max?x_end:m_x_max;
-						m_y_max = y_end>m_y_max?y_end:m_y_max;
-						m_z_max = z_end>m_z_max?z_end:m_z_max;
+						m_x_min = frame_info->x_start < m_x_min ? frame_info->x_start : m_x_min;
+						m_y_min = frame_info->y_start < m_y_min ? frame_info->y_start : m_y_min;
+						m_z_min = frame_info->z_start < m_z_min ? frame_info->z_start : m_z_min;
+						m_x_max = x_end > m_x_max ? x_end : m_x_max;
+						m_y_max = y_end > m_y_max ? y_end : m_y_max;
+						m_z_max = z_end > m_z_max ? z_end : m_z_max;
 					}
 				}
 
 				//append path
-				for (l=0; l<(int)frame_info->channels.size(); l++)
+				for (l = 0; l < frame_info->channels.size(); l++)
 				{
 					filename = path + frame_info->channels[l].file_name;
 					frame_info->channels[l].file_name = filename;
@@ -207,14 +208,14 @@ int PVXMLReader::Preprocess()
 		//correct chan num
 		if (m_sep_seq)
 		{
-			m_group_num = chan_num>m_group_num?chan_num:m_group_num;
+			m_group_num = chan_num > m_group_num ? chan_num : m_group_num;
 		}
 	}
 
 	//make sure not divide by zero
-	m_xspc = m_xspc==0.0?1.0:m_xspc;
-	m_yspc = m_yspc==0.0?1.0:m_yspc;
-	m_zspc = m_zspc==0.0?1.0:(m_zspc==FLT_MAX?1.0:m_zspc);
+	m_xspc = m_xspc == 0.0 ? 1.0 : m_xspc;
+	m_yspc = m_yspc == 0.0 ? 1.0 : m_yspc;
+	m_zspc = m_zspc == 0.0 ? 1.0 : (m_zspc == FLT_MAX ? 1.0 : m_zspc);
 
 	m_x_size = int((m_x_max - m_x_min) / m_xspc + 0.5);
 	m_y_size = int((m_y_max - m_y_min) / m_yspc + 0.5);
@@ -231,36 +232,36 @@ int PVXMLReader::Preprocess()
 	int y0;
 	bool firsty = true;
 	bool flipy = false;
-	for (i=0; i<(int)m_pvxml_info.size(); i++)
+	for (i = 0; i < (int)m_pvxml_info.size(); i++)
 	{
 		TimeDataInfo* time_data_info = &(m_pvxml_info[i]);
-		for (j=0; j<(int)time_data_info->size(); j++)
+		for (j = 0; j < (int)time_data_info->size(); j++)
 		{
 			SequenceInfo* sequence_info = &((*time_data_info)[j]);
-			for (k=0; k<(int)sequence_info->frames.size(); k++)
+			for (k = 0; k < (int)sequence_info->frames.size(); k++)
 			{
-				FrameInfo *frame_info = &((sequence_info->frames)[k]);
+				FrameInfo* frame_info = &((sequence_info->frames)[k]);
 				if (m_sep_seq)
 				{
 					frame_info->x = 0;
 					frame_info->y = 0;
-					frame_info->z = k;
+					frame_info->z = static_cast<int>(k);
 				}
 				else
 				{
 					frame_info->x = int((frame_info->x_start - m_x_min) / m_xspc + 0.5);
 					frame_info->y = int((frame_info->y_start - m_y_min) / m_yspc + 0.5);
 					if (m_force_stack)
-						frame_info->z = k;
+						frame_info->z = static_cast<int>(k);
 					else
 					{
 						double dt = frame_info->z_start - m_z_min;
 						if (std::abs(dt) > fluo::Epsilon(10))
 							frame_info->z = int(dt / m_zspc + 0.5);
-						else frame_info->z = k;
+						else frame_info->z = static_cast<int>(k);
 					}
 				}
-				if (m_user_flip_y==0 && !flipy)
+				if (m_user_flip_y == 0 && !flipy)
 				{
 					if (firsty)
 					{
@@ -269,12 +270,12 @@ int PVXMLReader::Preprocess()
 					}
 					else
 					{
-						if (frame_info->y > y0+int(frame_info->y_size*0.1))
+						if (frame_info->y > y0 + int(frame_info->y_size * 0.1))
 						{
 							m_flip_y = true;
 							flipy = true;
 						}
-						else if (frame_info->y < y0-int(frame_info->y_size*0.1))
+						else if (frame_info->y < y0 - int(frame_info->y_size * 0.1))
 							flipy = true;
 					}
 				}
@@ -285,63 +286,63 @@ int PVXMLReader::Preprocess()
 	return READER_OK;
 }
 
-void PVXMLReader::ReadSystemConfig(wxXmlNode* systemNode)
+void PVXMLReader::ReadSystemConfig(tinyxml2::XMLElement* systemNode)
 {
 }
 
-void PVXMLReader::UpdateStateShard(wxXmlNode *stateNode)
+void PVXMLReader::UpdateStateShard(tinyxml2::XMLElement* stateNode)
 {
 	if (m_state_shard_stack.size())
 		m_current_state = m_state_shard_stack.back();
-	wxXmlNode *child = stateNode->GetChildren();
+	tinyxml2::XMLElement* child = stateNode->FirstChildElement();
 	while (child)
 	{
-		wxString child_name = child->GetName();
+		std::string child_name(child->Name());
 		if (child_name == "Key" ||
 			child_name == "PVStateValue")
 			ReadKey(child);
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 }
 
-void PVXMLReader::ReadKey(wxXmlNode* keyNode)
+void PVXMLReader::ReadKey(tinyxml2::XMLElement* keyNode)
 {
-	long ival;
+	int ival;
 	double dval;
-	wxString strKey = keyNode->GetAttribute("key");
-	wxString strValue = keyNode->GetAttribute("value");
+	std::string strKey(keyNode->Attribute("key"));
+	std::string strValue(keyNode->Attribute("value"));
 
 	if (strKey == "xYStageGridIndex")
 	{
-		strValue.ToLong(&ival);
+		ival = std::stoi(strValue);
 		m_current_state.grid_index = ival;
 	}
 	else if (strKey == "xYStageGridXIndex")
 	{
-		strValue.ToLong(&ival);
+		ival = std::stoi(strValue);
 		m_current_state.grid_index_x = ival;
 	}
 	else if (strKey == "xYStageGridYIndex")
 	{
-		strValue.ToLong(&ival);
+		ival = std::stoi(strValue);
 		m_current_state.grid_index_y = ival;
 	}
 	else if (strKey == "positionCurrent_XAxis")
 	{
-		strValue.ToDouble(&dval);
+		dval = std::stod(strValue);
 		m_current_state.pos_x = dval;
 	}
 	else if (strKey == "positionCurrent_YAxis")
 	{
-		strValue.ToDouble(&dval);
+		dval = std::stod(strValue);
 		m_current_state.pos_y = dval;
 	}
 	else if (strKey == "positionCurrent_ZAxis")
 	{
-		int pos = strValue.Find(',');
-		if (pos == wxNOT_FOUND)
+		size_t pos = strValue.find(',');
+		if (pos == std::string::npos)
 		{
-			strValue.ToDouble(&dval);
+			dval = std::stod(strValue);
 			m_current_state.pos_z = dval;
 		}
 		else
@@ -349,13 +350,12 @@ void PVXMLReader::ReadKey(wxXmlNode* keyNode)
 			m_current_state.pos_z = 0.0;
 			do
 			{
-				strValue.Left(pos).ToDouble(&dval);
+				dval = std::stod(strValue.substr(0, pos));
 				m_current_state.pos_z += dval;
-				strValue = strValue.Right(strValue.Length()-pos-1);
-				pos = strValue.Find(',');
-			} while (pos != wxNOT_FOUND);
-			if (strValue.Length() &&
-				strValue.ToDouble(&dval))
+				strValue = strValue.substr(pos + 1);
+				pos = strValue.find(',');
+			} while (pos != std::string::npos);
+			if (!strValue.empty() && (dval = std::stod(strValue)))
 				m_current_state.pos_z += dval;
 		}
 	}
@@ -365,27 +365,27 @@ void PVXMLReader::ReadKey(wxXmlNode* keyNode)
 	}
 	else if (strKey == "zDevice")
 	{
-		strValue.ToLong(&ival);
+		ival = std::stoi(strValue);
 		m_current_state.z_device = ival;
 	}
 	else if (strKey == "pixelsPerLine")
 	{
-		strValue.ToLong(&ival);
+		ival = std::stoi(strValue);
 		m_current_state.ppl = ival;
 	}
 	else if (strKey == "linesPerFrame")
 	{
-		strValue.ToLong(&ival);
+		ival = std::stoi(strValue);
 		m_current_state.lpf = ival;
 	}
 	else if (strKey == "micronsPerPixel_XAxis")
 	{
-		strValue.ToDouble(&dval);
+		dval = std::stod(strValue);
 		m_current_state.mpp_x = dval;
 	}
 	else if (strKey == "micronsPerPixel_YAxis")
 	{
-		strValue.ToDouble(&dval);
+		dval = std::stod(strValue);
 		m_current_state.mpp_y = dval;
 	}
 	else if (strKey == "micronsPerPixel")
@@ -394,12 +394,12 @@ void PVXMLReader::ReadKey(wxXmlNode* keyNode)
 	}
 	else if (strKey == "bitDepth")
 	{
-		strValue.ToLong(&ival);
+		ival = std::stoi(strValue);
 		m_current_state.bit_depth = ival;
 	}
 	else if (strKey == "seqType")
 	{
-		strValue.ToLong(&ival);
+		ival = std::stoi(strValue);
 		m_seq_type = ival;
 	}
 	else if (strKey == "laserPower")
@@ -408,78 +408,78 @@ void PVXMLReader::ReadKey(wxXmlNode* keyNode)
 	}
 }
 
-void PVXMLReader::ReadIndexedKey(wxXmlNode* keyNode, wxString &key)
+void PVXMLReader::ReadIndexedKey(tinyxml2::XMLElement* keyNode, const std::string& key)
 {
 	double dval;
 
 	if (key == "positionCurrent")
 	{
-		wxXmlNode *child = keyNode->GetChildren();
+		tinyxml2::XMLElement* child = keyNode->FirstChildElement();
 		while (child)
 		{
-			wxString child_name = child->GetName();
+			std::string child_name(child->Name());
 			if (child_name == "SubindexedValues")
 			{
-				wxString strIndex = child->GetAttribute("index");
-				wxXmlNode *gchild = child->GetChildren();
+				std::string strIndex(child->Attribute("index"));
+				tinyxml2::XMLElement* gchild = child->FirstChildElement();
 				while (gchild)
 				{
-					wxString strSubIndex = gchild->GetAttribute("subindex");
-					wxString strValue = gchild->GetAttribute("value");
+					std::string strSubIndex(gchild->Attribute("subindex"));
+					std::string strValue(gchild->Attribute("value"));
 					if (strSubIndex == "0")
 					{
 						if (strIndex == "XAxis")
 						{
-							strValue.ToDouble(&dval);
+							dval = std::stod(strValue);
 							m_current_state.pos_x = dval;
 						}
 						else if (strIndex == "YAxis")
 						{
-							strValue.ToDouble(&dval);
+							dval = std::stod(strValue);
 							m_current_state.pos_y = dval;
 						}
 						else if (strIndex == "ZAxis")
 						{
-							strValue.ToDouble(&dval);
+							dval = std::stod(strValue);
 							m_current_state.pos_z = dval;
 						}
 					}
-					gchild = gchild->GetNext();
+					gchild = gchild->NextSiblingElement();
 				}
 			}
-			child = child->GetNext();
+			child = child->NextSiblingElement();
 		}
 	}
 	else if (key == "micronsPerPixel")
 	{
-		wxXmlNode *child = keyNode->GetChildren();
+		tinyxml2::XMLElement* child = keyNode->FirstChildElement();
 		while (child)
 		{
-			wxString child_name = child->GetName();
+			std::string child_name(child->Name());
 			if (child_name == "IndexedValue")
 			{
-				wxString strIndex = child->GetAttribute("index");
-				wxString strValue = child->GetAttribute("value");
+				std::string strIndex(child->Attribute("index"));
+				std::string strValue(child->Attribute("value"));
 				if (strIndex == "XAxis")
 				{
-					strValue.ToDouble(&dval);
+					dval = std::stod(strValue);
 					m_current_state.mpp_x = dval;
 				}
 				else if (strIndex == "YAxis")
 				{
-					strValue.ToDouble(&dval);
+					dval = std::stod(strValue);
 					m_current_state.mpp_y = dval;
 				}
 			}
-			child = child->GetNext();
+			child = child->NextSiblingElement();
 		}
 	}
 }
 
-void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
+void PVXMLReader::ReadSequence(tinyxml2::XMLElement* seqNode)
 {
 	//get type
-	wxString type = seqNode->GetAttribute("type");
+	std::string type(seqNode->Attribute("type"));
 	if (type == "TSeries Timed Element" &&
 		!m_seq_type)
 		m_seq_type = 2;
@@ -500,17 +500,18 @@ void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
 	}
 	m_seq_zspc = FLT_MAX;
 	m_seq_zpos = 0.0;
-	wxXmlNode *child = seqNode->GetChildren();
+	tinyxml2::XMLElement* child = seqNode->FirstChildElement();
 	int stack_push_count = 0;
 	while (child)
 	{
-		if (child->GetName() == "PVStateShard")
+		std::string strName(child->Name());
+		if (strName == "PVStateShard")
 		{
 			UpdateStateShard(child);
 			m_state_shard_stack.push_back(m_current_state);
 			stack_push_count++;
 		}
-		else if (child->GetName() == "Frame")
+		else if (strName == "Frame")
 		{
 			if (m_seq_type == 2)
 			{
@@ -523,21 +524,21 @@ void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
 				m_seq_slice_num++;
 			}
 		}
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 	//pop all stacked states
-	for (int i=0; i<stack_push_count; i++)
+	for (int i = 0; i < stack_push_count; i++)
 		m_state_shard_stack.pop_back();
 
 	if (m_slice_num)
 	{
-		m_slice_num = m_seq_slice_num>m_slice_num?m_seq_slice_num:m_slice_num;
+		m_slice_num = m_seq_slice_num > m_slice_num ? m_seq_slice_num : m_slice_num;
 		if (m_seq_zspc > 0.0)
 		{
 			if (m_zspc == 0.0)
 				m_zspc = m_seq_zspc;
 			else
-				m_zspc = m_seq_zspc<m_zspc?m_seq_zspc:m_zspc;
+				m_zspc = m_seq_zspc < m_zspc ? m_seq_zspc : m_zspc;
 		}
 	}
 	else
@@ -551,32 +552,31 @@ void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
 	m_pvxml_info.back().back().grid_index = m_current_state.grid_index;
 }
 
-void PVXMLReader::ReadFrame(wxXmlNode* frameNode)
+void PVXMLReader::ReadFrame(tinyxml2::XMLElement* frameNode)
 {
-	wxString str;
 	FrameInfo frame_info;
 
-	wxXmlNode *child = frameNode->GetChildren();
+	tinyxml2::XMLElement* child = frameNode->FirstChildElement();
 	while (child)
 	{
-		if (child->GetName() == "File")
+		std::string strName(child->Name());
+		if (strName == "File")
 		{
-			wxString channel = child->GetAttribute("channel");
-			long chn;
-			channel.ToLong(&chn);
-			wxString filename = child->GetAttribute("filename");
+			std::string channel(child->Attribute("channel"));
+			int chn = std::stoi(channel);
+			std::string filename(child->Attribute("filename"));
 
 			ChannelInfo channel_info;
-			channel_info.file_name = filename.ToStdWstring();
+			channel_info.file_name = s2ws(filename);
 			channel_info.chan = chn;
 			frame_info.channels.push_back(channel_info);
-			int size = frame_info.channels.size();
-			m_chan_num = size>m_chan_num?size:m_chan_num;
+			int size = static_cast<int>(frame_info.channels.size());
+			m_chan_num = size > m_chan_num ? size : m_chan_num;
 		}
-		else if (child->GetName() == "PVStateShard")
+		else if (strName == "PVStateShard")
 			UpdateStateShard(child);
 
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 
 	frame_info.x_size = m_current_state.ppl;
@@ -588,7 +588,7 @@ void PVXMLReader::ReadFrame(wxXmlNode* frameNode)
 	if (m_seq_zpos != 0.0)
 	{
 		double spc = fabs(frame_info.z_start - m_seq_zpos);
-		m_seq_zspc = spc<m_seq_zspc?spc:m_seq_zspc;
+		m_seq_zspc = spc < m_seq_zspc ? spc : m_seq_zspc;
 	}
 	m_seq_zpos = frame_info.z_start;
 	if (m_xspc == 0.0)
@@ -598,8 +598,8 @@ void PVXMLReader::ReadFrame(wxXmlNode* frameNode)
 	}
 	else
 	{
-		m_xspc = m_current_state.mpp_x<m_xspc?m_current_state.mpp_x:m_xspc;
-		m_yspc = m_current_state.mpp_y<m_yspc?m_current_state.mpp_y:m_yspc;
+		m_xspc = m_current_state.mpp_x < m_xspc ? m_current_state.mpp_x : m_xspc;
+		m_yspc = m_current_state.mpp_y < m_yspc ? m_current_state.mpp_y : m_yspc;
 	}
 
 	bool apart = false;
@@ -612,13 +612,13 @@ void PVXMLReader::ReadFrame(wxXmlNode* frameNode)
 		sb.y_max = sb.y_min + frame_info.y_size * m_current_state.mpp_y;
 		bool overlap = false;
 		double ol_value;
-		apart = m_seq_boxes.size()>0?true:false;
-		for (unsigned int i=0; i<m_seq_boxes.size(); ++i)
+		apart = m_seq_boxes.size() > 0 ? true : false;
+		for (unsigned int i = 0; i < m_seq_boxes.size(); ++i)
 		{
 			ol_value = sb.overlaps(m_seq_boxes[i]);
-			if (ol_value>=0.0)
+			if (ol_value >= 0.0)
 				apart = false;
-			if (ol_value>=0.9)
+			if (ol_value >= 0.9)
 			{
 				overlap = true;
 				m_seq_boxes.clear();
@@ -689,7 +689,7 @@ int PVXMLReader::GetDigitOrder()
 	return 0;
 }
 
-void PVXMLReader::SetTimeId(const std::wstring &id)
+void PVXMLReader::SetTimeId(const std::wstring& id)
 {
 	m_time_id = id;
 }
@@ -705,7 +705,7 @@ void PVXMLReader::SetBatch(bool batch)
 	{
 		//read the directory info
 		std::wstring search_path = GET_PATH(m_path_name);
-		FIND_FILES(search_path,L"*.oib",m_batch_list,m_cur_batch);
+		FIND_FILES(search_path, L"*.oib", m_batch_list, m_cur_batch);
 		m_batch = true;
 	}
 	else
@@ -715,7 +715,7 @@ void PVXMLReader::SetBatch(bool batch)
 int PVXMLReader::LoadBatch(int index)
 {
 	int result = -1;
-	if (index>=0 && index<(int)m_batch_list.size())
+	if (index >= 0 && index < (int)m_batch_list.size())
 	{
 		m_path_name = m_batch_list[index];
 		Preprocess();
@@ -750,25 +750,25 @@ double PVXMLReader::GetExcitationWavelength(int chan)
 	return 0.0;
 }
 
-bool PVXMLReader::ConvertN(int c, TimeDataInfo* time_data_info, unsigned short *val)
+bool PVXMLReader::ConvertN(int c, TimeDataInfo* time_data_info, unsigned short* val)
 {
 	int i, j, k;
-	for (i=0; i<(int)time_data_info->size(); i++)
+	for (i = 0; i < (int)time_data_info->size(); i++)
 	{
 		SequenceInfo* sequence_info = &((*time_data_info)[i]);
-		for (j=0; j<(int)sequence_info->frames.size(); j++)
+		for (j = 0; j < (int)sequence_info->frames.size(); j++)
 		{
-			FrameInfo *frame_info = &((sequence_info->frames)[j]);
+			FrameInfo* frame_info = &((sequence_info->frames)[j]);
 
 			if ((size_t)c >= frame_info->channels.size())
 				continue;
 
 			unsigned long long frame_size = (unsigned long long)(frame_info->x_size) *
 				(unsigned long long)(frame_info->y_size);
-			unsigned short *frame_val = new (std::nothrow) unsigned short[frame_size];
+			unsigned short* frame_val = new (std::nothrow) unsigned short[frame_size];
 			if (!val) return 0;
 
-			char *pbyData = 0;
+			char* pbyData = 0;
 			std::wstring file_name = frame_info->channels[c].file_name;
 
 			//open file
@@ -794,13 +794,13 @@ bool PVXMLReader::ConvertN(int c, TimeDataInfo* time_data_info, unsigned short *
 					delete[] pbyData;
 
 				//copy frame val to val
-				unsigned long long index = (unsigned long long)m_x_size*m_y_size*frame_info->z + m_x_size*(m_y_size-frame_info->y-frame_info->y_size) + frame_info->x;
+				unsigned long long index = (unsigned long long)m_x_size * m_y_size * frame_info->z + m_x_size * (m_y_size - frame_info->y - frame_info->y_size) + frame_info->x;
 				long frame_index = 0;
 				if (m_flip_y)
-					frame_index = frame_info->x_size * (frame_info->y_size-1);
-				for (k=0; k<frame_info->y_size; k++)
+					frame_index = frame_info->x_size * (frame_info->y_size - 1);
+				for (k = 0; k < frame_info->y_size; k++)
 				{
-					memcpy((void*)(val+index), (void*)(frame_val+frame_index), frame_info->x_size*sizeof(unsigned short));
+					memcpy((void*)(val + index), (void*)(frame_val + frame_index), frame_info->x_size * sizeof(unsigned short));
 					index += m_x_size;
 					if (m_flip_y)
 						frame_index -= frame_info->x_size;
@@ -817,29 +817,29 @@ bool PVXMLReader::ConvertN(int c, TimeDataInfo* time_data_info, unsigned short *
 	return true;
 }
 
-bool PVXMLReader::ConvertS(int c, TimeDataInfo* time_data_info, unsigned short *val)
+bool PVXMLReader::ConvertS(int c, TimeDataInfo* time_data_info, unsigned short* val)
 {
 	int cur_chan = 0;
 	size_t i, j, k;
-	for (i=0; i<time_data_info->size(); ++i)
+	for (i = 0; i < time_data_info->size(); ++i)
 	{
-		if (c>=cur_chan && c<cur_chan+m_chan_num)
+		if (c >= cur_chan && c < cur_chan + m_chan_num)
 		{
 			int index = c - cur_chan;
 			SequenceInfo* sequence_info = &((*time_data_info)[i]);
 
-			for (j=0; j<(int)sequence_info->frames.size(); j++)
+			for (j = 0; j < (int)sequence_info->frames.size(); j++)
 			{
-				FrameInfo *frame_info = &((sequence_info->frames)[j]);
+				FrameInfo* frame_info = &((sequence_info->frames)[j]);
 				if ((size_t)index >= frame_info->channels.size())
 					continue;
 
 				unsigned long long frame_size = (unsigned long long)(frame_info->x_size) *
 					(unsigned long long)(frame_info->y_size);
-				unsigned short *frame_val = new (std::nothrow) unsigned short[frame_size];
+				unsigned short* frame_val = new (std::nothrow) unsigned short[frame_size];
 				if (!val) return 0;
 
-				char *pbyData = 0;
+				char* pbyData = 0;
 				std::wstring file_name = frame_info->channels[index].file_name;
 
 				//open file
@@ -865,13 +865,13 @@ bool PVXMLReader::ConvertS(int c, TimeDataInfo* time_data_info, unsigned short *
 						delete[] pbyData;
 
 					//copy frame val to val
-					unsigned long long index = (unsigned long long)m_x_size*m_y_size*frame_info->z + m_x_size*(m_y_size-frame_info->y-frame_info->y_size) + frame_info->x;
+					unsigned long long index = (unsigned long long)m_x_size * m_y_size * frame_info->z + m_x_size * (m_y_size - frame_info->y - frame_info->y_size) + frame_info->x;
 					long frame_index = 0;
 					if (m_flip_y)
-						frame_index = frame_info->x_size * (frame_info->y_size-1);
-					for (k=0; k<frame_info->y_size; k++)
+						frame_index = frame_info->x_size * (frame_info->y_size - 1);
+					for (k = 0; k < frame_info->y_size; k++)
 					{
-						memcpy((void*)(val+index), (void*)(frame_val+frame_index), frame_info->x_size*sizeof(unsigned short));
+						memcpy((void*)(val + index), (void*)(frame_val + frame_index), frame_info->x_size * sizeof(unsigned short));
 						index += m_x_size;
 						if (m_flip_y)
 							frame_index -= frame_info->x_size;
@@ -891,25 +891,25 @@ bool PVXMLReader::ConvertS(int c, TimeDataInfo* time_data_info, unsigned short *
 	return true;
 }
 
-Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
+Nrrd* PVXMLReader::Convert(int t, int c, bool get_max)
 {
-	Nrrd *data = 0;
+	Nrrd* data = 0;
 
-	int chan_num = m_sep_seq?m_group_num:m_chan_num;
-	if (t>=0 && t<m_time_num &&
-		c>=0 && c<chan_num &&
+	int chan_num = m_sep_seq ? m_group_num : m_chan_num;
+	if (t >= 0 && t < m_time_num &&
+		c >= 0 && c < chan_num &&
 		m_slice_num>0 &&
 		m_x_size>0 &&
-		m_y_size>0)
+		m_y_size > 0)
 	{
 		//allocate memory for nrrd
-		unsigned long long mem_size = (unsigned long long)m_x_size*
-			(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
-		unsigned short *val = new (std::nothrow) unsigned short[mem_size]();
+		unsigned long long mem_size = (unsigned long long)m_x_size *
+			(unsigned long long)m_y_size * (unsigned long long)m_slice_num;
+		unsigned short* val = new (std::nothrow) unsigned short[mem_size]();
 		if (!val) return 0;
 
 		TimeDataInfo* time_data_info = &(m_pvxml_info[t]);
-		
+
 		if (m_sep_seq)
 			ConvertS(c, time_data_info, val);
 		else
@@ -921,15 +921,15 @@ Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
 			data = nrrdNew();
 			nrrdWrap(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
 			nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-			nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
+			nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc * m_x_size, m_yspc * m_y_size, m_zspc * m_slice_num);
 			nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
 			nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
 
 			if (get_max)
 			{
 				double value;
-				unsigned long long totali = (unsigned long long)m_slice_num*
-					m_x_size*m_y_size;
+				unsigned long long totali = (unsigned long long)m_slice_num *
+					m_x_size * m_y_size;
 				for (unsigned long long i = 0; i < totali; ++i)
 				{
 					value = val[i];
@@ -943,11 +943,11 @@ Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
 	if (m_max_value > 0.0)
 		m_scalar_scale = 65535.0 / m_max_value;
 
-	if (m_xspc>0.0 && m_xspc<100.0 &&
-		m_yspc>0.0 && m_yspc<100.0)
+	if (m_xspc > 0.0 && m_xspc < 100.0 &&
+		m_yspc>0.0 && m_yspc < 100.0)
 	{
 		m_valid_spc = true;
-		if (m_zspc<=0.0 || m_zspc>100.0)
+		if (m_zspc <= 0.0 || m_zspc > 100.0)
 			m_zspc = std::max(m_xspc, m_yspc);
 	}
 	else
@@ -960,7 +960,7 @@ Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
 	return data;
 }
 
-void PVXMLReader::ReadTiff(char *pbyData, unsigned short *val)
+void PVXMLReader::ReadTiff(char* pbyData, unsigned short* val)
 {
 	if (*((unsigned int*)pbyData) != 0x002A4949)
 		return;
@@ -968,10 +968,10 @@ void PVXMLReader::ReadTiff(char *pbyData, unsigned short *val)
 	int compression = 0;
 	unsigned int offset = 0;
 	//directory offset
-	offset = *((unsigned int*)(pbyData+4));
+	offset = *((unsigned int*)(pbyData + 4));
 	//the directory
 	//entry number
-	int entry_num = *((unsigned short*)(pbyData+offset));
+	int entry_num = *((unsigned short*)(pbyData + offset));
 	//strip info
 	int strips = 0;
 	int rows = 0;
@@ -981,131 +981,131 @@ void PVXMLReader::ReadTiff(char *pbyData, unsigned short *val)
 	//get strip info
 	unsigned int s_num1 = 0;
 	unsigned int s_num2 = 0;
-	for (int i=0; i<entry_num; i++)
+	for (int i = 0; i < entry_num; i++)
 	{
 		//read each entry (12 bytes)
-		unsigned short tag = *((unsigned short*)(pbyData+offset+2+12*i));
+		unsigned short tag = *((unsigned short*)(pbyData + offset + 2 + 12 * i));
 		switch (tag)
 		{
 		case 0x0100:  //256, image width
+		{
+			unsigned short type = *((unsigned short*)(pbyData + offset + 2 + 12 * i + 2));
+			if (type == 3)
 			{
-				unsigned short type = *((unsigned short*)(pbyData+offset+2+12*i+2));
-				if (type == 3)
-				{
-					//unsigned short
-					unsigned short value;
-					value = *((unsigned short*)(pbyData+offset+2+12*i+8));
-					width = value;
-				}
-				else if (type == 4)
-				{
-					//unsigned int
-					unsigned int value;
-					value = *((unsigned int*)(pbyData+offset+2+12*i+8));
-					width = value;
-				}
+				//unsigned short
+				unsigned short value;
+				value = *((unsigned short*)(pbyData + offset + 2 + 12 * i + 8));
+				width = value;
 			}
-			break;
+			else if (type == 4)
+			{
+				//unsigned int
+				unsigned int value;
+				value = *((unsigned int*)(pbyData + offset + 2 + 12 * i + 8));
+				width = value;
+			}
+		}
+		break;
 		case 0x0103:  //259, compression
-			{
-				unsigned short value;
-				value = *((unsigned short*)(pbyData+offset+2+12*i+8));
-				compression = value<<16>>16;
-			}
-			break;
+		{
+			unsigned short value;
+			value = *((unsigned short*)(pbyData + offset + 2 + 12 * i + 8));
+			compression = value << 16 >> 16;
+		}
+		break;
 		case 0x0111:  //strip offsets
+		{
+			unsigned short type = *((unsigned short*)(pbyData + offset + 2 + 12 * i + 2));
+			//number of values
+			s_num1 = *((unsigned int*)(pbyData + offset + 2 + 12 * i + 4));
+			unsigned int entry_offset = 0;
+			entry_offset = *((unsigned int*)(pbyData + offset + 2 + 12 * i + 8));
+			if (s_num1 == 1)
 			{
-				unsigned short type = *((unsigned short*)(pbyData+offset+2+12*i+2));
-				//number of values
-				s_num1 = *((unsigned int*)(pbyData+offset+2+12*i+4));
-				unsigned int entry_offset = 0;
-				entry_offset = *((unsigned int*)(pbyData+offset+2+12*i+8));
-				if (s_num1 == 1)
+				strip_offsets.push_back(entry_offset);
+			}
+			else
+			{
+				for (int j = 0; j<int(s_num1); j++)
 				{
-					strip_offsets.push_back(entry_offset);
-				}
-				else
-				{
-					for (int j=0; j<int(s_num1); j++)
+					if (type == 3)
 					{
-						if (type == 3)
-						{
-							//unsigned short
-							unsigned short value;
-							value = *((unsigned short*)(pbyData+entry_offset+2*j));
-							strip_offsets.push_back((unsigned int)value);
-						}
-						else if (type == 4)
-						{
-							//unsigned int
-							unsigned int value;
-							value = *((unsigned int*)(pbyData+entry_offset+4*j));
-							strip_offsets.push_back(value);
-						}
+						//unsigned short
+						unsigned short value;
+						value = *((unsigned short*)(pbyData + entry_offset + 2 * j));
+						strip_offsets.push_back((unsigned int)value);
+					}
+					else if (type == 4)
+					{
+						//unsigned int
+						unsigned int value;
+						value = *((unsigned int*)(pbyData + entry_offset + 4 * j));
+						strip_offsets.push_back(value);
 					}
 				}
 			}
-			break;
+		}
+		break;
 		case 0x0116:  //rows per strip
+		{
+			unsigned short type = *((unsigned short*)(pbyData + offset + 2 + 12 * i + 2));
+			if (type == 3)
 			{
-				unsigned short type = *((unsigned short*)(pbyData+offset+2+12*i+2));
-				if (type == 3)
-				{
-					//unsigned short
-					unsigned short value;
-					value = *((unsigned short*)(pbyData+offset+2+12*i+8));
-					rows = value;
-				}
-				else if (type == 4)
-				{
-					//unsigned int
-					unsigned int value;
-					value = *((unsigned int*)(pbyData+offset+2+12*i+8));
-					rows = value;
-				}
+				//unsigned short
+				unsigned short value;
+				value = *((unsigned short*)(pbyData + offset + 2 + 12 * i + 8));
+				rows = value;
 			}
-			break;
-		case 0x0117:  //strip byte counts
+			else if (type == 4)
 			{
-				unsigned short type = *((unsigned short*)(pbyData+offset+2+12*i+2));
-				//number of values
-				s_num2 = *((unsigned int*)(pbyData+offset+2+12*i+4));
-				unsigned int entry_offset = 0;
-				entry_offset = *((unsigned int*)(pbyData+offset+2+12*i+8));
-				if (s_num2 == 1)
+				//unsigned int
+				unsigned int value;
+				value = *((unsigned int*)(pbyData + offset + 2 + 12 * i + 8));
+				rows = value;
+			}
+		}
+		break;
+		case 0x0117:  //strip byte counts
+		{
+			unsigned short type = *((unsigned short*)(pbyData + offset + 2 + 12 * i + 2));
+			//number of values
+			s_num2 = *((unsigned int*)(pbyData + offset + 2 + 12 * i + 4));
+			unsigned int entry_offset = 0;
+			entry_offset = *((unsigned int*)(pbyData + offset + 2 + 12 * i + 8));
+			if (s_num2 == 1)
+			{
+				strip_bytes.push_back(entry_offset);
+			}
+			else
+			{
+				for (int j = 0; j<int(s_num2); j++)
 				{
-					strip_bytes.push_back(entry_offset);
-				}
-				else
-				{
-					for (int j=0; j<int(s_num2); j++)
+					if (type == 3)
 					{
-						if (type == 3)
-						{
-							//unsigned short
-							unsigned short value;
-							value = *((unsigned short*)(pbyData+entry_offset+2*j));
-							strip_bytes.push_back((unsigned int)value);
-						}
-						else if (type == 4)
-						{
-							//unsigned int
-							unsigned int value;
-							value = *((unsigned int*)(pbyData+entry_offset+4*j));
-							strip_bytes.push_back(value);
-						}
+						//unsigned short
+						unsigned short value;
+						value = *((unsigned short*)(pbyData + entry_offset + 2 * j));
+						strip_bytes.push_back((unsigned int)value);
+					}
+					else if (type == 4)
+					{
+						//unsigned int
+						unsigned int value;
+						value = *((unsigned int*)(pbyData + entry_offset + 4 * j));
+						strip_bytes.push_back(value);
 					}
 				}
 			}
-			break;
+		}
+		break;
 		case 0x0119:  //max sample value
-			{
-				unsigned short value;
-				value = *((unsigned short*)(pbyData+offset+2+12*i+8));
-				//if ((double)value > m_max_value)
-				m_max_value = (double)value;
-			}
-			break;
+		{
+			unsigned short value;
+			value = *((unsigned short*)(pbyData + offset + 2 + 12 * i + 8));
+			//if ((double)value > m_max_value)
+			m_max_value = (double)value;
+		}
+		break;
 		}
 	}
 	//read strips
@@ -1116,35 +1116,34 @@ void PVXMLReader::ReadTiff(char *pbyData, unsigned short *val)
 		strips = s_num1;
 
 		unsigned int val_pos = 0;
-		for (int i=0; i<strips; i++)
+		for (int i = 0; i < strips; i++)
 		{
 			unsigned int data_pos = strip_offsets[i];
 			unsigned int data_size = strip_bytes[i];
 			if (compression == 1)//no copmression
-				memcpy((void*)(val+val_pos), (void*)(pbyData+data_pos), data_size);
+				memcpy((void*)(val + val_pos), (void*)(pbyData + data_pos), data_size);
 			else if (compression == 5)
-				LZWDecode((tidata_t)(pbyData+data_pos), (tidata_t)(val+val_pos), m_x_size*rows*2);
-			val_pos += rows*width;
+				LZWDecode((tidata_t)(pbyData + data_pos), (tidata_t)(val + val_pos), m_x_size * rows * 2);
+			val_pos += rows * width;
 		}
 	}
 }
 
-void PVXMLReader::ReadLaser(wxXmlNode* node)
+void PVXMLReader::ReadLaser(tinyxml2::XMLElement* node)
 {
-	wxXmlNode* child = node->GetChildren();
+	tinyxml2::XMLElement* child = node->FirstChildElement();
 	while (child)
 	{
-		wxString child_name = child->GetName();
+		std::string child_name(child->Name());
 		if (child_name == "IndexedValue")
 		{
-			wxString strIndex = child->GetAttribute("index");
-			wxString strValue = child->GetAttribute("value");
-			wxString strDesc = child->GetAttribute("description");
-			long ch = 0;
-			long wl = 0;
-			strIndex.ToLong(&ch);
-			wxString strWl;
-			if (strDesc.Find("LED") != wxNOT_FOUND)
+			std::string strIndex(child->Attribute("index"));
+			std::string strValue(child->Attribute("value"));
+			std::string strDesc(child->Attribute("description"));
+			int ch = std::stoi(strIndex);
+			int wl = 0;
+			std::string strWl;
+			if (strDesc.find("LED") != std::string::npos)
 				wl = -1;
 			else
 			{
@@ -1155,14 +1154,14 @@ void PVXMLReader::ReadLaser(wxXmlNode* node)
 					else
 						break;
 				}
-				strWl.ToLong(&wl);
+				wl = std::stoi(strWl);
 			}
 			WavelengthInfo winfo;
 			winfo.chan_num = ch;
 			winfo.wavelength = wl;
 			m_excitation_wavelength_list.push_back(winfo);
 		}
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 }
 

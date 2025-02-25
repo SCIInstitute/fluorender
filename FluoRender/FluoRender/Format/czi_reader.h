@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _CZI_READER_H_
 
 #include <base_reader.h>
-#include <wx/xml/xml.h>
 #include <vector>
 #include <string>
 #include <limits>
@@ -37,6 +36,11 @@ DEALINGS IN THE SOFTWARE.
 
 #define HDRSIZE	32//header size
 #define FIXSIZE	256//fixed part size
+
+namespace tinyxml2
+{
+	class XMLElement;
+}
 
 class CZIReader : public BaseReader
 {
@@ -258,7 +262,7 @@ private:
 	void GetMinMax16B(unsigned short* val, int nx, int ny, int nz, int sx, int sy,
 		unsigned short &minv, unsigned short &maxv);
 	//search metadata
-	void FindNodeRecursive(wxXmlNode* node);
+	void FindNodeRecursive(tinyxml2::XMLElement* node);
 };
 
 #endif//_CZI_READER_H_

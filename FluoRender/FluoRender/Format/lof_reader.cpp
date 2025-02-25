@@ -28,10 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #include <lof_reader.h>
 #include <compatibility.h>
 #include <Global.h>
-#include <wx/sstream.h>
+#include <tinyxml2.h>
 #include <stdio.h>
 #include <algorithm>
-//#include <fstream>
 
 LOFReader::LOFReader():
 	BaseReader()
@@ -354,8 +353,7 @@ unsigned long long LOFReader::ReadMetadata(FILE* pfile, unsigned long long ioffs
 	result &= fread(&temp[0], 1, xmlsize * 2, pfile) == xmlsize * 2;
 	if (!result)
 		return 0;
-	wxMBConvUTF16 conv;
-	wxString xmlstr(temp.c_str(), conv);
+	std::wstring xmlstr = s2ws(temp);
 #endif
 
 	//test xml
@@ -366,22 +364,23 @@ unsigned long long LOFReader::ReadMetadata(FILE* pfile, unsigned long long ioffs
 	//outfile.close();
 	//endof test
 
-	wxXmlDocument doc;
-	wxStringInputStream wxss(xmlstr);
-	result &= doc.Load(wxss);
-	wxXmlNode *root = doc.GetRoot();
+	tinyxml2::XMLDocument doc;
+	tinyxml2::XMLError eResult = doc.Parse(ws2s(xmlstr).c_str());
+	if (eResult != tinyxml2::XML_SUCCESS)
+		return 0;
+	tinyxml2::XMLElement* root = doc.RootElement();
 	ReadImage(root);
 
 	return LOFHSIZE + uisize;
 }
 
-void LOFReader::ReadImage(wxXmlNode* node)
+void LOFReader::ReadImage(tinyxml2::XMLElement* node)
 {
 	if (!node)
 		return;
 	std::string str;
-	wxXmlNode* child = node->GetChildren();
-	if (!child || child->GetName() != "Image")
+	tinyxml2::XMLElement* child = node->FirstChildElement();
+	if (!child || std::string(child->Name()) != "Image")
 		return;
 	ReadSubBlockInfo(child);
 	for (size_t i = 0; i < m_lof_info.channels.size(); ++i)
@@ -406,35 +405,28 @@ void LOFReader::ReadImage(wxXmlNode* node)
 	}
 }
 
-void LOFReader::ReadSubBlockInfo(wxXmlNode* node)
+void LOFReader::ReadSubBlockInfo(tinyxml2::XMLElement* node)
 {
 	if (!node)
 		return;
-	wxString str;
-	unsigned long ulv;
-	double dval;
-	unsigned long long ull;
-	wxXmlNode *child = node->GetChildren();
+	std::string str;
+	tinyxml2::XMLElement *child = node->FirstChildElement();
 	while (child)
 	{
-		str = child->GetName();
+		str = child->Name();
 		if (str == "ChannelDescription")
 		{
 			ChannelInfo cinfo;
 			cinfo.chan = m_lof_info.channels.size();
-			str = child->GetAttribute("Resolution");
-			if (str.ToULong(&ulv))
-				cinfo.res = ulv;
-			str = child->GetAttribute("Min");
-			if (str.ToDouble(&dval))
-				cinfo.minv = dval;
-			str = child->GetAttribute("Max");
-			if (str.ToDouble(&dval))
-				cinfo.maxv = dval;
-			str = child->GetAttribute("BytesInc");
-			if (str.ToULongLong(&ull))
-				cinfo.inc = ull;
-			cinfo.lut = child->GetAttribute("LUTName");
+			str = child->Attribute("Resolution");
+			cinfo.res = std::stoul(str);
+			str = child->Attribute("Min");
+			cinfo.minv = std::stod(str);
+			str = child->Attribute("Max");
+			cinfo.maxv = std::stod(str);
+			str = child->Attribute("BytesInc");
+			cinfo.inc = std::stoull(str);
+			cinfo.lut = child->Attribute("LUTName");
 			m_lof_info.channels.push_back(cinfo);
 			m_lof_info.minv = std::min(m_lof_info.minv, cinfo.minv);
 			m_lof_info.maxv = std::max(m_lof_info.maxv, cinfo.maxv);
@@ -444,31 +436,36 @@ void LOFReader::ReadSubBlockInfo(wxXmlNode* node)
 			unsigned long did = 0, size = 0;
 			double orig = 0, len = 0, sfactor = 1;
 			unsigned long long inc = 0;
-			str = child->GetAttribute("DimID");
-			if (str.ToULong(&did))
+			str = child->Attribute("DimID");
+			bool flag = true;
+			try
 			{
-				str = child->GetAttribute("Unit");
+				did = std::stoul(str);
+			}
+			catch (...)
+			{
+				flag = false;
+			}
+			if (flag)
+			{
+				str = child->Attribute("Unit");
 				if (str == "m")
 					sfactor = 1e6;
 				else if (str == "mm")
 					sfactor = 1e3;
-				str = child->GetAttribute("NumberOfElements");
-				if (str.ToULong(&ulv))
-					size = ulv;
-				str = child->GetAttribute("Origin");
-				if (str.ToDouble(&dval))
-					orig = dval * sfactor;
-				str = child->GetAttribute("Length");
-				if (str.ToDouble(&dval))
-					len = dval * sfactor;
-				str = child->GetAttribute("BytesInc");
-				if (str.ToULongLong(&ull))
-					inc = ull;
+				str = child->Attribute("NumberOfElements");
+				size = std::stoul(str);
+				str = child->Attribute("Origin");
+				orig = std::stod(str) * sfactor;
+				str = child->Attribute("Length");
+				len = std::stod(str) * sfactor;
+				str = child->Attribute("BytesInc");
+				inc = std::stoull(str);
 				AddSubBlockInfo(did, size, orig, len, inc);
 			}
 		}
 		ReadSubBlockInfo(child);
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 }
 

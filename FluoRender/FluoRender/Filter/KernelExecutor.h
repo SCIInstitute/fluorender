@@ -48,7 +48,7 @@ public:
 	void SetDuplicate(bool dup);
 	VolumeData* GetVolume();
 	VolumeData* GetResult(bool pop);
-	std::wstring GetMessage();
+	std::wstring GetInfo();
 
 	bool Execute();
 

@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _LIF_READER_H_
 
 #include <base_reader.h>
-#include <wx/xml/xml.h>
 #include <vector>
 #include <string>
 #include <limits>
@@ -37,6 +36,11 @@ DEALINGS IN THE SOFTWARE.
 #define LIFHSIZE	8
 #define LIFTEST0	0x70
 #define LIFTEXT1	0x2A
+
+namespace tinyxml2
+{
+	class XMLElement;
+}
 
 class LIFReader : public BaseReader
 {
@@ -267,7 +271,7 @@ private:
 			for (size_t i = 0; i < times.size(); ++i)
 			{
 				times[i].chan = chan;
-				times[i].time = i;
+				times[i].time = static_cast<int>(i);
 				times[i].loc = loc + times[0].inc * i;
 				times[i].blocks = times[0].blocks;
 			}
@@ -330,13 +334,13 @@ private:
 	unsigned long long PreReadMemoryBlock(FILE* pfile, unsigned long long ioffset);
 	bool ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val);
 	bool CopyMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val);
-	void ReadElement(wxXmlNode* node);
-	void ReadData(wxXmlNode* node, std::wstring &name);
-	ImageInfo* ReadImage(wxXmlNode* node, std::wstring &name);
-	void ReadSubBlockInfo(wxXmlNode* node, ImageInfo &imgi);
+	void ReadElement(tinyxml2::XMLElement* node);
+	void ReadData(tinyxml2::XMLElement* node, std::wstring &name);
+	ImageInfo* ReadImage(tinyxml2::XMLElement* node, std::wstring &name);
+	void ReadSubBlockInfo(tinyxml2::XMLElement* node, ImageInfo &imgi);
 	void AddSubBlockInfo(ImageInfo &imgi, unsigned int dim, unsigned int size,
 		double orig, double len, unsigned long long inc);
-	bool ReadTileScanInfo(wxXmlNode* node, TileList& list);
+	bool ReadTileScanInfo(tinyxml2::XMLElement* node, TileList& list);
 	void GenImageInfo(ImageInfo* imgi);
 
 	ImageInfo* FindImageInfoMbid(std::wstring &mbid)

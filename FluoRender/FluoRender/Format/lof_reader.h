@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _LOF_READER_H_
 
 #include <base_reader.h>
-#include <wx/xml/xml.h>
 #include <vector>
 #include <string>
 #include <limits>
@@ -38,6 +37,11 @@ DEALINGS IN THE SOFTWARE.
 #define LOFTEST0	0x70
 #define LOFTEXT1	0x2A
 #define LOFSKIPSIZE	19
+
+namespace tinyxml2
+{
+	class XMLElement;
+}
 
 class LOFReader : public BaseReader
 {
@@ -239,7 +243,7 @@ private:
 			for (size_t i = 0; i < times.size(); ++i)
 			{
 				times[i].chan = chan;
-				times[i].time = i;
+				times[i].time = static_cast<int>(i);
 				times[i].loc = loc + times[0].inc * i;
 				times[i].blocks = times[0].blocks;
 			}
@@ -296,8 +300,8 @@ private:
 private:
 	unsigned long long ReadMetadata(FILE* pfile, unsigned long long ioffset);
 	bool ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val);
-	void ReadImage(wxXmlNode* node);
-	void ReadSubBlockInfo(wxXmlNode* node);
+	void ReadImage(tinyxml2::XMLElement* node);
+	void ReadSubBlockInfo(tinyxml2::XMLElement* node);
 	void AddSubBlockInfo(unsigned int dim, unsigned int size,
 		double orig, double len, unsigned long long inc);
 	void FillLofInfo();

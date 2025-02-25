@@ -129,7 +129,7 @@ namespace flrd
 		}
 		int GetCompGroupSize()
 		{
-			return m_comp_groups.size();
+			return static_cast<int>(m_comp_groups.size());
 		}
 		CompGroup* GetCompGroup(int i)
 		{

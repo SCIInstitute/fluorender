@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <czi_reader.h>
 #include <compatibility.h>
 #include <Global.h>
-#include <wx/sstream.h>
+#include <tinyxml2.h>
 #include <stdio.h>
 #include <set>
 #include <Debug.h>
@@ -40,9 +40,9 @@ std::vector<std::string> CZIReader::m_types{
 	"ZISRAWMETADATA",
 	"ZISRAWATTACH",
 	"ZISRAWATTDIR",
-	"DELETED"};
+	"DELETED" };
 
-CZIReader::CZIReader():
+CZIReader::CZIReader() :
 	BaseReader(),
 	m_header_read(false),
 	m_multi_file(false),
@@ -84,7 +84,7 @@ CZIReader::~CZIReader()
 {
 }
 
-void CZIReader::SetFile(const std::string &file)
+void CZIReader::SetFile(const std::string& file)
 {
 	if (!file.empty())
 	{
@@ -96,7 +96,7 @@ void CZIReader::SetFile(const std::string &file)
 	m_id_string = m_path_name;
 }
 
-void CZIReader::SetFile(const std::wstring &file)
+void CZIReader::SetFile(const std::wstring& file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;
@@ -165,7 +165,7 @@ int CZIReader::GetDigitOrder()
 	return 0;
 }
 
-void CZIReader::SetTimeId(const std::wstring &id)
+void CZIReader::SetTimeId(const std::wstring& id)
 {
 	//do nothing
 }
@@ -215,7 +215,7 @@ double CZIReader::GetExcitationWavelength(int chan)
 
 Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 {
-	Nrrd *data = 0;
+	Nrrd* data = 0;
 	FILE* pfile = 0;
 	if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
 		return 0;
@@ -228,7 +228,7 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 		t < (int)m_czi_info.times.size() &&
 		c < (int)m_czi_info.times[t].channels.size())
 	{
-		ChannelInfo *cinfo = GetChaninfo(t, c);
+		ChannelInfo* cinfo = GetChaninfo(t, c);
 		if (!cinfo)
 		{
 			fclose(pfile);
@@ -237,8 +237,8 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 		//allocate memory for nrrd
 		bool show_progress = false;
 		size_t blk_num = cinfo->blocks.size();
-		unsigned long long mem_size = (unsigned long long)m_x_size*
-			(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+		unsigned long long mem_size = (unsigned long long)m_x_size *
+			(unsigned long long)m_y_size * (unsigned long long)m_slice_num;
 		void* val = 0;
 		switch (m_datatype)
 		{
@@ -271,7 +271,7 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 			break;
 		}
 		nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-		nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
+		nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc * m_x_size, m_yspc * m_y_size, m_zspc * m_slice_num);
 		nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
 		nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
 	}
@@ -310,7 +310,7 @@ std::wstring CZIReader::GetCurLabelName(int t, int c)
 	return label_name;
 }
 
-bool CZIReader::ReadSegment(FILE* pfile, unsigned long long &ioffset, SegType readtype)
+bool CZIReader::ReadSegment(FILE* pfile, unsigned long long& ioffset, SegType readtype)
 {
 	if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
 		return false;
@@ -471,7 +471,7 @@ unsigned int CZIReader::ReadDirectoryEntry(FILE* pfile)
 	if (pyra_type > 0)
 		return dirpos;
 	//add info to list
-	TimeInfo *timeinfo = GetTimeinfo(sbi.time);
+	TimeInfo* timeinfo = GetTimeinfo(sbi.time);
 	if (timeinfo)
 	{
 		ChannelInfo* chaninfo = GetChaninfo(timeinfo, sbi.chan);
@@ -529,13 +529,13 @@ bool CZIReader::ReadDirectory(FILE* pfile, unsigned long long ioffset)
 	std::set<int> channums;
 	std::set<int> timenums;
 	for (size_t i = 0; i < m_czi_info.times.size(); ++i)
-	for (size_t j = 0; j < m_czi_info.times[i].channels.size(); ++j)
-	for (size_t k = 0; k < m_czi_info.times[i].channels[j].blocks.size(); ++k)
-	{
-		channums.insert(m_czi_info.times[i].channels[j].blocks[k].chan);
-		timenums.insert(m_czi_info.times[i].channels[j].blocks[k].time);
-		pixtypes.insert(m_czi_info.times[i].channels[j].blocks[k].pxtype);
-	}
+		for (size_t j = 0; j < m_czi_info.times[i].channels.size(); ++j)
+			for (size_t k = 0; k < m_czi_info.times[i].channels[j].blocks.size(); ++k)
+			{
+				channums.insert(m_czi_info.times[i].channels[j].blocks[k].chan);
+				timenums.insert(m_czi_info.times[i].channels[j].blocks[k].time);
+				pixtypes.insert(m_czi_info.times[i].channels[j].blocks[k].pxtype);
+			}
 	m_time_num = timenums.size();
 	m_chan_num = channums.size();
 	m_slice_num = m_czi_info.zmax - m_czi_info.zmin;
@@ -601,11 +601,12 @@ bool CZIReader::ReadMetadata(FILE* pfile, unsigned long long ioffset)
 	if (!result)
 		return result;
 
-	wxXmlDocument doc;
-	wxStringInputStream wxss(xmlstr);
-	result &= doc.Load(wxss);
-	wxXmlNode *root = doc.GetRoot();
-	if (!root || root->GetName() != "ImageDocument")
+	tinyxml2::XMLDocument doc;
+	tinyxml2::XMLError eResult = doc.Parse(xmlstr.c_str());
+	if (eResult != tinyxml2::XML_SUCCESS)
+		return false;
+	tinyxml2::XMLElement* root = doc.RootElement();
+	if (!root || std::string(root->Name()) != "ImageDocument")
 		return false;
 
 	//get values
@@ -720,36 +721,36 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 			{
 				LZWDecode(block, (unsigned char*)val + pos, data_size);
 				for (int i = 0; i < sbi->z_size; ++i)
-				for (int j = 0; j < sbi->y_size; ++j)
-					DecodeAcc8((unsigned char*)val + pos + xysize * i + m_x_size * j,
-						sbi->x_size, 1);
+					for (int j = 0; j < sbi->y_size; ++j)
+						DecodeAcc8((unsigned char*)val + pos + xysize * i + m_x_size * j,
+							sbi->x_size, 1);
 			}
 			else
 			{
 				for (int i = 0; i < sbi->z_size; ++i)
-				for (int j = 0; j < sbi->y_size; ++j)
-					memcpy((unsigned char*)val + pos + xysize * i + m_x_size * j,
-						block + i * sbi->x_size * sbi->y_size + j * sbi->x_size, sbi->x_size);
+					for (int j = 0; j < sbi->y_size; ++j)
+						memcpy((unsigned char*)val + pos + xysize * i + m_x_size * j,
+							block + i * sbi->x_size * sbi->y_size + j * sbi->x_size, sbi->x_size);
 			}
 		}
-			break;
+		break;
 		case 2:
 		{
 			if (compress)
 			{
 				LZWDecode(block, (unsigned char*)((unsigned short*)val + pos), data_size);
 				for (int i = 0; i < sbi->z_size; ++i)
-				for (int j = 0; j < sbi->y_size; ++j)
-					DecodeAcc16((unsigned char*)((unsigned short*)val + pos + xysize * i + m_x_size * j),
-						sbi->x_size, 1);
+					for (int j = 0; j < sbi->y_size; ++j)
+						DecodeAcc16((unsigned char*)((unsigned short*)val + pos + xysize * i + m_x_size * j),
+							sbi->x_size, 1);
 			}
 			else
 			{
 				for (int i = 0; i < sbi->z_size; ++i)
-				for (int j = 0; j < sbi->y_size; ++j)
-					memcpy((unsigned short*)val + pos + xysize * i + m_x_size * j,
-						(unsigned short*)block + i * sbi->x_size * sbi->y_size + j * sbi->x_size,
-						2 * sbi->x_size);
+					for (int j = 0; j < sbi->y_size; ++j)
+						memcpy((unsigned short*)val + pos + xysize * i + m_x_size * j,
+							(unsigned short*)block + i * sbi->x_size * sbi->y_size + j * sbi->x_size,
+							2 * sbi->x_size);
 			}
 			//get min max
 			GetMinMax16B((unsigned short*)val + pos,
@@ -784,7 +785,7 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 }
 
 void CZIReader::GetMinMax16(unsigned short* val, unsigned long long px,
-	unsigned short &minv, unsigned short &maxv)
+	unsigned short& minv, unsigned short& maxv)
 {
 	for (unsigned long long i = 0; i < px; ++i)
 	{
@@ -794,65 +795,63 @@ void CZIReader::GetMinMax16(unsigned short* val, unsigned long long px,
 }
 
 void CZIReader::GetMinMax16B(unsigned short* val, int nx, int ny, int nz, int sx, int sy,
-	unsigned short &minv, unsigned short &maxv)
+	unsigned short& minv, unsigned short& maxv)
 {
 	unsigned long long pos;
 	unsigned short* pv;
 	for (int i = 0; i < nz; ++i)
-	for (int j = 0; j < ny; ++j)
-	for (int k = 0; k < nx; ++k)
-	{
-		pos = (unsigned long long)sx * sy * i + sx * j + k;
-		pv = val + pos;
-		minv = std::min(*pv, minv);
-		maxv = std::max(*pv, maxv);
-	}
+		for (int j = 0; j < ny; ++j)
+			for (int k = 0; k < nx; ++k)
+			{
+				pos = (unsigned long long)sx * sy * i + sx * j + k;
+				pv = val + pos;
+				minv = std::min(*pv, minv);
+				maxv = std::max(*pv, maxv);
+			}
 }
 
-void CZIReader::FindNodeRecursive(wxXmlNode* node)
+void CZIReader::FindNodeRecursive(tinyxml2::XMLElement* node)
 {
 	if (!node)
 		return;
-	wxString str;
+	std::string str;
 	double dval;
-	wxXmlNode *child = node->GetChildren();
+	tinyxml2::XMLElement* child = node->FirstChildElement();
 	while (child)
 	{
-		wxString name = child->GetName();
+		std::string name(child->Name());
 		if (name == "ScalingX")
 		{
-			str = child->GetNodeContent();
-			if (str.ToDouble(&dval))
-				m_xspc = dval * 1e6;
+			str = child->GetText();
+			dval = std::stod(str);
+			m_xspc = dval * 1e6;
 		}
 		else if (name == "ScalingY")
 		{
-			str = child->GetNodeContent();
-			if (str.ToDouble(&dval))
-				m_yspc = dval * 1e6;
+			str = child->GetText();
+			dval = std::stod(str);
+			m_yspc = dval * 1e6;
 		}
 		else if (name == "ScalingZ")
 		{
-			str = child->GetNodeContent();
-			if (str.ToDouble(&dval))
+			str = child->GetText();
+			dval = std::stod(str);
 				m_zspc = dval * 1e6;
 		}
 		else if (name == "ExcitationWavelength")
 		{
-			str = child->GetNodeContent();
-			if (str.ToDouble(&dval))
-			{
-				WavelengthInfo winfo;
-				winfo.chan_num = m_excitation_wavelength_list.size();
-				winfo.wavelength = dval;
-				m_excitation_wavelength_list.push_back(winfo);
-			}
+			str = child->GetText();
+			dval = std::stod(str);
+			WavelengthInfo winfo;
+			winfo.chan_num = m_excitation_wavelength_list.size();
+			winfo.wavelength = dval;
+			m_excitation_wavelength_list.push_back(winfo);
 		}
 		else
 		{
 			FindNodeRecursive(child);
 		}
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 	return;
 }

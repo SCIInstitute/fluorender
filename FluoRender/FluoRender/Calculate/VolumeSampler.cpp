@@ -149,9 +149,9 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		return;
 
 	//input size
-	m_nx_in = input_nrrd->axis[0].size;
-	m_ny_in = input_nrrd->axis[1].size;
-	m_nz_in = input_nrrd->axis[2].size;
+	m_nx_in = static_cast<int>(input_nrrd->axis[0].size);
+	m_ny_in = static_cast<int>(input_nrrd->axis[1].size);
+	m_nz_in = static_cast<int>(input_nrrd->axis[2].size);
 	//bits
 	switch (input_nrrd->type)
 	{

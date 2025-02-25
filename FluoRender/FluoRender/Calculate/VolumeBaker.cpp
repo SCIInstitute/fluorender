@@ -74,9 +74,9 @@ void VolumeBaker::Bake(bool replace)
 		return;
 
 	//input size
-	m_nx = input_nrrd->axis[0].size;
-	m_ny = input_nrrd->axis[1].size;
-	m_nz = input_nrrd->axis[2].size;
+	m_nx = static_cast<int>(input_nrrd->axis[0].size);
+	m_ny = static_cast<int>(input_nrrd->axis[1].size);
+	m_nz = static_cast<int>(input_nrrd->axis[2].size);
 	//bits
 	switch (input_nrrd->type)
 	{

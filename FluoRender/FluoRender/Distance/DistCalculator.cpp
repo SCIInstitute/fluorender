@@ -66,8 +66,8 @@ void DistCalculator::CenterRuler(int type, bool init, int iter)
 		if (m_type == 3)
 			BuildCloud();
 		m_rest = GetRestDist();
-		m_relax.SetRestDist(m_rest);
-		m_relax.SetInflRange(m_rest*m_infr*5);
+		m_relax.SetRestDist(static_cast<float>(m_rest));
+		m_relax.SetInflRange(static_cast<float>(m_rest*m_infr*5));
 		m_init = true;
 	}
 
@@ -178,17 +178,17 @@ void DistCalculator::BuildCloud()
 
 double DistCalculator::GetRestDist()
 {
-	int size = m_cloud.size();
+	size_t size = m_cloud.size();
 	if (size < 2)
 		return 1.0;
 
-	int num = size * (size - 1) / 2;
+	size_t num = size * (size - 1) / 2;
 	double len;
 	double sumd = 0.0;
 	double mind = std::numeric_limits<double>::max();
 	fluo::Point p1, p2;
-	for (int i = 0; i < size - 1; ++i)
-	for (int j = i + 1; j < size - 1; ++j)
+	for (size_t i = 0; i < size - 1; ++i)
+	for (size_t j = i + 1; j < size - 1; ++j)
 	{
 		p1 = m_cloud[i];
 		p2 = m_cloud[j];
@@ -208,9 +208,9 @@ void DistCalculator::UpdateSpringNode(int idx)
 		return;
 	size_t rwt = m_ruler->GetWorkTime();
 	int interp = m_ruler->GetInterp();
-	int sz = m_spring.size();
-	int cz = m_cloud.size();
-	if (idx < 0 || idx >= sz)
+	size_t sz = m_spring.size();
+	size_t cz = m_cloud.size();
+	if (idx < 0 || idx >= static_cast<int>(sz))
 		return;
 	SpringNode& node = m_spring.at(idx);
 	if (node.p->GetLocked())
@@ -229,7 +229,7 @@ void DistCalculator::UpdateSpringNode(int idx)
 	{
 		//from cloud
 		std::vector<double> lens;
-		for (int i = 0; i < cz; ++i)
+		for (size_t i = 0; i < cz; ++i)
 		{
 			dir = m_cloud[i] - pos;
 			lens.push_back(dir.length());
@@ -237,9 +237,9 @@ void DistCalculator::UpdateSpringNode(int idx)
 		std::sort(lens.begin(), lens.end());
 		double scale = (node.prevd == 0.0 ||
 			node.nextd == 0.0) ? 1.0 : m_infr;
-		int loc = int(scale * cz / sz + 1.0);
+		size_t loc = size_t(scale * cz / sz + 1.0);
 		loc = std::min(loc, cz - 1);
-		for (int i = 0; i < cz; ++i)
+		for (size_t i = 0; i < cz; ++i)
 		{
 			dir = m_cloud[i] - pos;
 			dist = dir.length();
@@ -348,7 +348,7 @@ void DistCalculator::SpringProject(fluo::Point &p0, fluo::Point &pp)
 		return;
 	size_t rwt = m_ruler->GetWorkTime();
 	int interp = m_ruler->GetInterp();
-	int sz = m_spring.size();
+	size_t sz = m_spring.size();
 	if (sz < 2)
 	{
 		pp = fluo::Point(p0 -
@@ -361,7 +361,7 @@ void DistCalculator::SpringProject(fluo::Point &p0, fluo::Point &pp)
 	double dist;
 	double mind = std::numeric_limits<double>::max();
 	fluo::Point mp;
-	for (int i = 0; i < sz - 1; ++i)
+	for (size_t i = 0; i < sz - 1; ++i)
 	{
 		SpringNode &node1 = m_spring.at(i);
 		SpringNode &node2 = m_spring.at(i + 1);
@@ -371,7 +371,7 @@ void DistCalculator::SpringProject(fluo::Point &p0, fluo::Point &pp)
 		if (dist < mind)
 		{
 			mind = dist;
-			minidx = i;
+			minidx = static_cast<int>(i);
 		}
 	}
 

@@ -1077,7 +1077,7 @@ public:
 
 	int GetVolumeNum()
 	{
-		return m_vd_list.size();
+		return static_cast<int>(m_vd_list.size());
 	}
 	VolumeData* GetVolumeData(int index)
 	{

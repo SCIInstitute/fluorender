@@ -61,12 +61,12 @@ namespace flrd
 				//set to correct spacings
 				double spcx, spcy, spcz;
 				m_vd->GetSpacings(spcx, spcy, spcz);
-				m_cov[0] *= spcx * spcx;
-				m_cov[1] *= spcx * spcy;
-				m_cov[2] *= spcx * spcz;
-				m_cov[3] *= spcy * spcy;
-				m_cov[4] *= spcy * spcz;
-				m_cov[5] *= spcz * spcz;
+				m_cov[0] *= static_cast<float>(spcx * spcx);
+				m_cov[1] *= static_cast<float>(spcx * spcy);
+				m_cov[2] *= static_cast<float>(spcx * spcz);
+				m_cov[3] *= static_cast<float>(spcy * spcy);
+				m_cov[4] *= static_cast<float>(spcy * spcz);
+				m_cov[5] *= static_cast<float>(spcz * spcz);
 			}
 
 			std::vector<double> cov;
@@ -82,9 +82,9 @@ namespace flrd
 				//set to correct spacings
 				double spcx, spcy, spcz;
 				m_vd->GetSpacings(spcx, spcy, spcz);
-				m_center[0] *= spcx;
-				m_center[1] *= spcy;
-				m_center[2] *= spcz;
+				m_center[0] *= static_cast<float>(spcx);
+				m_center[1] *= static_cast<float>(spcy);
+				m_center[2] *= static_cast<float>(spcz);
 			}
 
 			fluo::Point center;
