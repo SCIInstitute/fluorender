@@ -313,14 +313,14 @@ inline std::string split_host_name_and_port(const std::string& address, uint16_t
 	}
 }
 
-inline std::wstring GET_SUFFIX(const std::wstring &pathname)
+inline std::wstring GET_SUFFIX(const std::wstring& pathname)
 {
 	std::wstring extension = std::filesystem::path(pathname).extension().wstring();
 	std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
 	return extension;
 }
 
-inline std::string GET_SUFFIX(const std::string &pathname)
+inline std::string GET_SUFFIX(const std::string& pathname)
 {
 	std::string extension = std::filesystem::path(pathname).extension().string();
 	std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
@@ -351,6 +351,13 @@ inline std::wstring STR_DIR_SEP(const std::wstring& pathname)
 	return path.make_preferred().wstring();
 }
 
+inline std::wstring NORM_PATH(const std::wstring& path)
+{
+	std::wstring normalizedPath = path;
+	std::replace(normalizedPath.begin(), normalizedPath.end(), L'\\', L'/');
+	return normalizedPath;
+}
+
 inline bool FIND_FILES_4D(const std::wstring& path_name, const std::wstring& id, std::vector<std::wstring>& batch_list, int& cur_batch)
 {
 	size_t begin = path_name.rfind(id);
@@ -358,7 +365,7 @@ inline bool FIND_FILES_4D(const std::wstring& path_name, const std::wstring& id,
 	if (begin == std::wstring::npos)
 		return false;
 
-	std::wstring searchstr = path_name.substr(0, begin) + L"*";
+	std::wstring searchstr = path_name.substr(0, begin) + L".*";
 	std::wstring t_num;
 	size_t k;
 	bool end_digits = false;
@@ -384,13 +391,15 @@ inline bool FIND_FILES_4D(const std::wstring& path_name, const std::wstring& id,
 	std::filesystem::path p(path_name);
 	p = p.parent_path();
 	std::wstring search_path = p.wstring();
-	std::wregex regex(searchstr);
+	std::wregex regex(NORM_PATH(searchstr));
 	batch_list.clear();
 	cur_batch = -1;
 	int cnt = 0;
 
+	//normalize to linux style always
 	for (const auto& entry : std::filesystem::directory_iterator(search_path)) {
-		if (std::regex_match(entry.path().filename().wstring(), regex)) {
+		std::wstring str = NORM_PATH(entry.path().wstring());
+		if (std::regex_match(str, regex)) {
 			std::wstring name = entry.path().wstring();
 			batch_list.push_back(name);
 			if (name == path_name)
@@ -402,6 +411,34 @@ inline bool FIND_FILES_4D(const std::wstring& path_name, const std::wstring& id,
 	return !batch_list.empty();
 }
 
+inline void FIND_FILES_BATCH(const std::wstring& path_name,
+	const std::wstring& search_mask,
+	std::vector<std::wstring>& batch_list,
+	int& cur_batch)
+{
+	std::filesystem::path p(path_name);
+	p = p.parent_path();
+	std::wstring search_path = p.wstring();
+	std::wstring full_search_mask =
+		NORM_PATH(search_path + L".*" + search_mask);
+
+	std::wregex regex(full_search_mask);
+	batch_list.clear();
+	cur_batch = -1;
+	int cnt = 0;
+
+	for (const auto& entry : std::filesystem::directory_iterator(search_path)) {
+		std::wstring str = NORM_PATH(entry.path().wstring());
+		if (std::regex_match(str, regex)) {
+			std::wstring name = entry.path().wstring();
+			batch_list.push_back(name);
+			if (name == path_name)
+				cur_batch = cnt;
+			cnt++;
+		}
+	}
+}
+
 inline void FIND_FILES(const std::wstring& path_name,
 	const std::wstring& search_mask,
 	std::vector<std::wstring>& batch_list,
@@ -410,15 +447,15 @@ inline void FIND_FILES(const std::wstring& path_name,
 	std::filesystem::path p(path_name);
 	p = p.parent_path();
 	std::wstring search_path = p.wstring();
-	std::wstring full_search_mask = (search_mask.find(path_name) == std::wstring::npos) ? search_path + search_mask : search_mask;
 
-	std::wregex regex(full_search_mask);
+	std::wregex regex(NORM_PATH(search_mask));
 	batch_list.clear();
 	cur_batch = -1;
 	int cnt = 0;
 
 	for (const auto& entry : std::filesystem::directory_iterator(search_path)) {
-		if (std::regex_match(entry.path().filename().wstring(), regex)) {
+		std::wstring str = NORM_PATH(entry.path().wstring());
+		if (std::regex_match(str, regex)) {
 			std::wstring name = entry.path().wstring();
 			batch_list.push_back(name);
 			if (name == path_name)
@@ -604,7 +641,7 @@ inline TIFF* TIFFOpenW(std::wstring fname, const char* opt)
 	return TIFFOpenW(fname.c_str(), opt);
 }
 
-inline FILE* FOPEN(FILE** fp, const char *fname, const char* mode) {
+inline FILE* FOPEN(FILE** fp, const char* fname, const char* mode) {
 	fopen_s(fp, fname, mode);
 	return *fp;
 }
@@ -614,13 +651,13 @@ inline FILE* WFOPEN(FILE** fp, const wchar_t* fname, const wchar_t* mode) {
 	return *fp;
 }
 
-inline void OutputStreamOpen(std::ofstream &os, std::string fname)
+inline void OutputStreamOpen(std::ofstream& os, std::string fname)
 {
 	fname = "\x5c\x5c\x3f\x5c" + fname;
 	os.open(fname);
 }
 
-inline void OutputStreamOpenW(std::wofstream &os, std::wstring fname)
+inline void OutputStreamOpenW(std::wofstream& os, std::wstring fname)
 {
 	fname = L"\x5c\x5c\x3f\x5c" + fname;
 	os.open(fname);
@@ -644,13 +681,13 @@ inline errno_t STRNCPY(char* d, size_t n, const char* s, size_t x) {
 	return strncpy_s(d, n, s, x);
 }
 
-inline errno_t STRCAT(char * d, size_t n, const char* s) {
+inline errno_t STRCAT(char* d, size_t n, const char* s) {
 	return strcat_s(d, n, s);
 }
 
 inline char* STRDUP(const char* s) { return _strdup(s); }
 
-inline int SPRINTF(char* buf, size_t n, const char * fmt, ...) {
+inline int SPRINTF(char* buf, size_t n, const char* fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
 	int r = vsprintf_s(buf, n, fmt, args);
@@ -662,9 +699,9 @@ inline int WSTOI(std::wstring s) { return _wtoi(s.c_str()); }
 
 inline double WSTOD(std::wstring s) { return _wtof(s.c_str()); }
 
-inline int STOI(const char * s) { return (s ? atoi(s) : 0); }
+inline int STOI(const char* s) { return (s ? atoi(s) : 0); }
 
-inline double STOD(const char * s) { return (s ? atof(s) : 0.0); }
+inline double STOD(const char* s) { return (s ? atof(s) : 0.0); }
 
 #else // MAC OSX or LINUX
 
@@ -675,7 +712,7 @@ inline double STOD(const char * s) { return (s ? atof(s) : 0.0); }
 
 #define FSEEK64     fseek
 
-inline bool str_mat(std::wstring &s1, size_t p1, std::wstring &s2, size_t p2)
+inline bool str_mat(std::wstring& s1, size_t p1, std::wstring& s2, size_t p2)
 {
 	// If we reach at the end of both strings, we are done
 	if (s1[p1] == L'\0' && s2[p2] == L'\0')
@@ -684,7 +721,7 @@ inline bool str_mat(std::wstring &s1, size_t p1, std::wstring &s2, size_t p2)
 	// Make sure that the characters after '*' are present 
 	// in second string. This function assumes that the first 
 	// string will not contain two consecutive '*' 
-	if (s1[p1] == L'*' && s1[p1+1] != L'\0' && s2[p2] == L'\0')
+	if (s1[p1] == L'*' && s1[p1 + 1] != L'\0' && s2[p2] == L'\0')
 		return false;
 
 	// If the first string contains '?', or current characters 
@@ -708,7 +745,7 @@ inline int SSCANF(const char* buf, const char* fmt, ...) {
 	return r;
 }
 
-inline int swprintf_s(wchar_t *buf, size_t n, const wchar_t* fmt, ...) {
+inline int swprintf_s(wchar_t* buf, size_t n, const wchar_t* fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
 	int r = vswprintf(buf, n, fmt, args);
@@ -724,7 +761,7 @@ inline char* STRNCPY(char* d, size_t n, const char* s, size_t x) {
 	return strncpy(d, s, n - 1);
 }
 
-inline char* STRCAT(char * d, size_t n, const char* s) {
+inline char* STRCAT(char* d, size_t n, const char* s) {
 	return strncat(d, s, n - strlen(d) - 1);
 }
 
@@ -734,7 +771,7 @@ inline TIFF* TIFFOpenW(std::wstring fname, const char* opt) {
 	return TIFFOpen(ws2s(fname).c_str(), opt);
 }
 
-inline int SPRINTF(char* buf, size_t n, const char * fmt, ...) {
+inline int SPRINTF(char* buf, size_t n, const char* fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
 	int r = vsprintf(buf, fmt, args);
@@ -746,9 +783,9 @@ inline int WSTOI(std::wstring s) { return atoi(ws2s(s).c_str()); }
 
 inline double WSTOD(std::wstring s) { return atof(ws2s(s).c_str()); }
 
-inline int STOI(const char * s) { return (s ? atoi(s) : 0); }
+inline int STOI(const char* s) { return (s ? atoi(s) : 0); }
 
-inline double STOD(const char * s) { return (s ? atof(s) : 0.0); }
+inline double STOD(const char* s) { return (s ? atof(s) : 0.0); }
 
 typedef union _LARGE_INTEGER {
 	struct {
@@ -760,27 +797,27 @@ typedef union _LARGE_INTEGER {
 		long HighPart;
 	} u;
 	long long QuadPart;
-} LARGE_INTEGER, *PLARGE_INTEGER;
+} LARGE_INTEGER, * PLARGE_INTEGER;
 
-inline FILE* WFOPEN(FILE ** fp, const wchar_t* filename, const wchar_t* mode) {
+inline FILE* WFOPEN(FILE** fp, const wchar_t* filename, const wchar_t* mode) {
 	*fp = fopen(ws2s(std::wstring(filename)).c_str(),
 		ws2s(std::wstring(mode)).c_str());
 	return *fp;
 }
 
-inline FILE* FOPEN(FILE ** fp, const char* filename, const char* mode) {
+inline FILE* FOPEN(FILE** fp, const char* filename, const char* mode) {
 	*fp = fopen(filename, mode);
 	return *fp;
 }
 
-inline void OutputStreamOpen(std::ofstream &os, std::string fname)
+inline void OutputStreamOpen(std::ofstream& os, std::string fname)
 {
 	os.open(fname);
 }
 
-inline void OutputStreamOpenW(std::wofstream &os, std::wstring fname)
+inline void OutputStreamOpenW(std::wofstream& os, std::wstring fname)
 {
-    //os.open(L"test");//fname.c_str());
+	//os.open(L"test");//fname.c_str());
 }
 
 inline int MkDir(std::string dirname)

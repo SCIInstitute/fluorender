@@ -775,16 +775,10 @@ void BRKXMLReader::SetLevel(int lv)
 
 void BRKXMLReader::SetBatch(bool batch)
 {
-#ifdef _WIN32
-	wchar_t slash = L'\\';
-#else
-	wchar_t slash = L'/';
-#endif
 	if (batch)
 	{
 		//read the directory info
-		std::wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(slash)) + slash;
-		FIND_FILES(search_path, L"*.vvd", m_batch_list, m_cur_batch);
+		FIND_FILES_BATCH(m_path_name, L".vvd", m_batch_list, m_cur_batch);
 		m_batch = true;
 	}
 	else

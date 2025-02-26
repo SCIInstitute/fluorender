@@ -58,7 +58,7 @@ class IniFile : public BaseTreeFile
 {
 public:
 	IniFile() :
-		dictionary()
+		dictionary_()
 	{
 		path_sep_ = "/";
 		path_sep_s_ = path_sep_;
@@ -68,22 +68,22 @@ public:
 
 	int LoadFile(const std::wstring& filename) override
 	{
-		dictionary.clear();
+		dictionary_.clear();
 		cur_path_ = "";
 		_format_ = __INI_MAP_DEFAULT_FORMAT__;
 		std::string str = ws2s(filename);
-		return load_ini_path(str.c_str(), __INI_MAP_DEFAULT_FORMAT__, NULL, _push_dispatch_, &dictionary);
+		return load_ini_path(str.c_str(), __INI_MAP_DEFAULT_FORMAT__, NULL, _push_dispatch_, &dictionary_);
 	}
 
 	int LoadString(const std::string& ini_string) override
 	{
-		dictionary.clear();
+		dictionary_.clear();
 		cur_path_ = "";
 		_format_ = __INI_MAP_DEFAULT_FORMAT__;
 		size_t len = ini_string.length();
 		char* tmp = new char[len + 1];
 		memcpy(tmp, ini_string.c_str(), len + 1);
-		int retval = strip_ini_cache(tmp, len, __INI_MAP_DEFAULT_FORMAT__, NULL, _push_dispatch_, &dictionary);
+		int retval = strip_ini_cache(tmp, len, __INI_MAP_DEFAULT_FORMAT__, NULL, _push_dispatch_, &dictionary_);
 		delete[] tmp;
 		return retval;
 	}
@@ -95,7 +95,7 @@ public:
 			return CONFINI_EIO;
 		}
 
-		std::map<std::string, std::string> sorted_dict(dictionary.begin(), dictionary.end());
+		std::map<std::string, std::string> sorted_dict(dictionary_.begin(), dictionary_.end());
 
 		for (const auto& pair : sorted_dict) {
 			size_t pos = pair.first.find(path_sep_);
@@ -114,7 +114,7 @@ public:
 	{
 		std::ostringstream oss;
 
-		std::map<std::string, std::string> sorted_dict(dictionary.begin(), dictionary.end());
+		std::map<std::string, std::string> sorted_dict(dictionary_.begin(), dictionary_.end());
 
 		for (const auto& pair : sorted_dict) {
 			size_t pos = pair.first.find(path_sep_);
@@ -134,7 +134,12 @@ public:
 	bool Exists(const std::string& path) const override
 	{
 		std::string str = getFullPath(path);
-		return dictionary.count(str) ? true : false;
+		for (const auto& it : dictionary_)
+		{
+			if (it.first.find(str) == 0)
+				return true;
+		}
+		return false;
 	}
 
 	bool SetPath(const std::string& path) override
@@ -151,7 +156,7 @@ public:
 	bool HasGroup(const std::string& group) const override
 	{
 		std::string prefix = cur_path_ + group + path_sep_;
-		for (const auto& pair : dictionary)
+		for (const auto& pair : dictionary_)
 		{
 			if (pair.first.find(prefix) == 0 && pair.first != group) {
 				return true;
@@ -163,18 +168,18 @@ public:
 	bool HasEntry(const std::string& entry) const override
 	{
 		std::string full_key = getFullKey(entry);
-		return dictionary.find(full_key) != dictionary.end();
+		return dictionary_.find(full_key) != dictionary_.end();
 	}
 
 	// Implement enumeration methods
 	bool GetFirstGroup(std::string* group, long* index) const override
 	{
-		if (dictionary.empty()) {
+		if (dictionary_.empty()) {
 			return false;
 		}
 
 		std::set<std::string> unique_sections;
-		for (const auto& pair : dictionary) {
+		for (const auto& pair : dictionary_) {
 			size_t pos = pair.first.find(path_sep_);
 			std::string section = (pos == std::string::npos) ? pair.first : pair.first.substr(0, pos);
 			unique_sections.insert(section);
@@ -186,52 +191,52 @@ public:
 
 		*group = *unique_sections.begin();
 		*index = 0;
-		sections_vector.assign(unique_sections.begin(), unique_sections.end());
+		sections_vector_.assign(unique_sections.begin(), unique_sections.end());
 		return true;
 	}
 
 	bool GetNextGroup(std::string* group, long* index) const override
 	{
-		if (*index + 1 >= sections_vector.size()) {
+		if (*index + 1 >= sections_vector_.size()) {
 			return false;
 		}
 
 		*index += 1;
-		*group = sections_vector[*index];
+		*group = sections_vector_[*index];
 		return true;
 	}
 
 	bool GetFirstEntry(std::string* entry, long* index) const override
 	{
-		if (dictionary.empty() || cur_path_.empty()) {
+		if (dictionary_.empty() || cur_path_.empty()) {
 			return false;
 		}
 
-		entries_vector.clear();
+		entries_vector_.clear();
 		std::string prefix = cur_path_;
-		for (const auto& pair : dictionary) {
+		for (const auto& pair : dictionary_) {
 			if (pair.first.find(prefix) == 0) {
-				entries_vector.push_back(pair.first.substr(prefix.length()));
+				entries_vector_.push_back(pair.first.substr(prefix.length()));
 			}
 		}
 
-		if (entries_vector.empty()) {
+		if (entries_vector_.empty()) {
 			return false;
 		}
 
-		*entry = entries_vector[0];
+		*entry = entries_vector_[0];
 		*index = 0;
 		return true;
 	}
 
 	bool GetNextEntry(std::string* entry, long* index) const override
 	{
-		if (*index + 1 >= entries_vector.size()) {
+		if (*index + 1 >= entries_vector_.size()) {
 			return false;
 		}
 
 		*index += 1;
-		*entry = entries_vector[*index];
+		*entry = entries_vector_[*index];
 		return true;
 	}
 
@@ -239,9 +244,9 @@ public:
 	bool DeleteEntry(const std::string& key) override
 	{
 		std::string full_key = getFullKey(key);
-		auto it = dictionary.find(full_key);
-		if (it != dictionary.end()) {
-			dictionary.erase(it);
+		auto it = dictionary_.find(full_key);
+		if (it != dictionary_.end()) {
+			dictionary_.erase(it);
 			return true;
 		}
 		return false;
@@ -251,9 +256,9 @@ public:
 	{
 		std::string prefix = getFullPath(group);
 		bool found = false;
-		for (auto it = dictionary.begin(); it != dictionary.end(); ) {
+		for (auto it = dictionary_.begin(); it != dictionary_.end(); ) {
 			if (it->first.find(prefix) == 0 || it->first == group) {
-				it = dictionary.erase(it);
+				it = dictionary_.erase(it);
 				found = true;
 			}
 			else {
@@ -420,7 +425,7 @@ protected:
 	bool WriteString(const std::string& key, const std::string& value) override
 	{
 		std::string full_key = getFullKey(key);
-		dictionary.insert(std::pair<std::string, std::string>(full_key, value));
+		dictionary_.insert(std::pair<std::string, std::string>(full_key, value));
 		return true;
 	}
 
@@ -483,19 +488,19 @@ private:
 	static std::string path_sep_s_;
 	IniFormat _format_;
 
-	std::unordered_map<std::string, std::string> dictionary;
-	mutable std::vector<std::string> sections_vector;
-	mutable std::vector<std::string> entries_vector;
+	std::unordered_map<std::string, std::string> dictionary_;
+	mutable std::vector<std::string> sections_vector_;
+	mutable std::vector<std::string> entries_vector_;
 
 	std::string getSource(const std::string& key) const
 	{
 		std::string full_key = getFullKey(key);
-		if (!dictionary.count(full_key))
+		if (!dictionary_.count(full_key))
 		{
 			return "";
 			//throw std::runtime_error("Key not present.");
 		}
-		return dictionary.at(full_key);
+		return dictionary_.at(full_key);
 	}
 
 	bool extractString(const std::string& key, std::string& result) const

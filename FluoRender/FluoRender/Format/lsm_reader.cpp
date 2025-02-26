@@ -662,7 +662,7 @@ void LSMReader::SetBatch(bool batch)
 	if (batch)
 	{
 		//read the directory info
-		FIND_FILES(m_path_name, L"*.lsm", m_batch_list, m_cur_batch);
+		FIND_FILES_BATCH(m_path_name, L".lsm", m_batch_list, m_cur_batch);
 		m_batch = true;
 	}
 	else

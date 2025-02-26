@@ -27,10 +27,10 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <tif_reader.h>
 #include <Global.h>
-#include <boost/filesystem.hpp>
 #include <compatibility.h>
 #include <sstream>
 #include <iomanip>
+#include <filesystem>
 
 TIFReader::TIFReader():
 	BaseReader()
@@ -1167,9 +1167,8 @@ void TIFReader::SetBatch(bool batch)
 	if (batch)
 	{
 		//separate path and name
-		std::wstring search_path = GET_PATH(m_path_name);
-		std::wstring suffix = L"*" + GET_SUFFIX(m_path_name);
-		FIND_FILES(m_path_name, suffix, m_batch_list, m_cur_batch);
+		std::wstring suffix = GET_SUFFIX(m_path_name);
+		FIND_FILES_BATCH(m_path_name, suffix, m_batch_list, m_cur_batch);
 		m_batch = true;
 	}
 	else
@@ -2148,7 +2147,7 @@ void TIFReader::AnalyzeNamePattern(const std::wstring &path_name)
 {
 	m_name_patterns.clear();
 
-	boost::filesystem::path p(path_name);
+	std::filesystem::path p(path_name);
 	p.make_preferred();
 	std::wstring path = p.stem().wstring();
 	std::wstring name = p.filename().wstring();
@@ -2290,7 +2289,7 @@ std::wstring TIFReader::GetSearchString(int mode, int t)
 		}
 
 		if (add_ast == 1)
-			str += L"*";
+			str += L".*";
 		else if (add_ast == 2)
 		{
 			std::wstringstream ss;
@@ -2305,7 +2304,7 @@ std::wstring TIFReader::GetSearchString(int mode, int t)
 
 int TIFReader::GetPatternNumber(std::wstring &path_name, int mode, bool count)
 {
-	boost::filesystem::path p(path_name);
+	std::filesystem::path p(path_name);
 	std::wstring name = p.filename().wstring();
 
 	int number = 0;

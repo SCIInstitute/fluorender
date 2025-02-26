@@ -303,7 +303,7 @@ protected:
 
 	std::string getFullKey(const std::string& key) const
 	{
-		return cur_path_.empty() ? key : cur_path_ + path_sep_ + key;
+		return cur_path_.empty() ? path_sep_ + key : cur_path_ + key;
 	}
 
 private:
