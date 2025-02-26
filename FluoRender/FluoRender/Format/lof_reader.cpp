@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <lof_reader.h>
 #include <compatibility.h>
 #include <Global.h>
-#include <tinyxml2.h>
+#include <XmlUtils.h>
 #include <stdio.h>
 #include <algorithm>
 
@@ -418,15 +418,15 @@ void LOFReader::ReadSubBlockInfo(tinyxml2::XMLElement* node)
 		{
 			ChannelInfo cinfo;
 			cinfo.chan = m_lof_info.channels.size();
-			str = child->Attribute("Resolution");
+			str = GetAttributeValue(child, "Resolution");
 			cinfo.res = std::stoul(str);
-			str = child->Attribute("Min");
+			str = GetAttributeValue(child, "Min");
 			cinfo.minv = std::stod(str);
-			str = child->Attribute("Max");
+			str = GetAttributeValue(child, "Max");
 			cinfo.maxv = std::stod(str);
-			str = child->Attribute("BytesInc");
+			str = GetAttributeValue(child, "BytesInc");
 			cinfo.inc = std::stoull(str);
-			cinfo.lut = child->Attribute("LUTName");
+			cinfo.lut = GetAttributeValue(child, "LUTName");
 			m_lof_info.channels.push_back(cinfo);
 			m_lof_info.minv = std::min(m_lof_info.minv, cinfo.minv);
 			m_lof_info.maxv = std::max(m_lof_info.maxv, cinfo.maxv);
@@ -436,7 +436,7 @@ void LOFReader::ReadSubBlockInfo(tinyxml2::XMLElement* node)
 			unsigned long did = 0, size = 0;
 			double orig = 0, len = 0, sfactor = 1;
 			unsigned long long inc = 0;
-			str = child->Attribute("DimID");
+			str = GetAttributeValue(child, "DimID");
 			bool flag = true;
 			try
 			{
@@ -448,18 +448,18 @@ void LOFReader::ReadSubBlockInfo(tinyxml2::XMLElement* node)
 			}
 			if (flag)
 			{
-				str = child->Attribute("Unit");
+				str = GetAttributeValue(child, "Unit");
 				if (str == "m")
 					sfactor = 1e6;
 				else if (str == "mm")
 					sfactor = 1e3;
-				str = child->Attribute("NumberOfElements");
+				str = GetAttributeValue(child, "NumberOfElements");
 				size = std::stoul(str);
-				str = child->Attribute("Origin");
+				str = GetAttributeValue(child, "Origin");
 				orig = std::stod(str) * sfactor;
-				str = child->Attribute("Length");
+				str = GetAttributeValue(child, "Length");
 				len = std::stod(str) * sfactor;
-				str = child->Attribute("BytesInc");
+				str = GetAttributeValue(child, "BytesInc");
 				inc = std::stoull(str);
 				AddSubBlockInfo(did, size, orig, len, inc);
 			}

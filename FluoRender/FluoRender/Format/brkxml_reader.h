@@ -4,7 +4,7 @@
 #include <vector>
 #include <base_reader.h>
 #include <TextureBrick.h>
-#include <tinyxml2.h>
+#include <XmlUtils.h>
 
 class BRKXMLReader : public BaseReader
 {

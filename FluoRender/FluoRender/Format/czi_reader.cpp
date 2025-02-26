@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <czi_reader.h>
 #include <compatibility.h>
 #include <Global.h>
-#include <tinyxml2.h>
+#include <XmlUtils.h>
 #include <stdio.h>
 #include <set>
 #include <Debug.h>

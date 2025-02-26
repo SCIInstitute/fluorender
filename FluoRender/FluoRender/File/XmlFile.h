@@ -352,6 +352,120 @@ protected:
 		return false;
 	}
 
+	bool ReadULong(const std::string& key, unsigned long* value, unsigned long def = 0) const override
+	{
+		if (!cur_element_)
+		{
+			*value = def;
+			return false;
+		}
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		if (element) {
+			uint64_t tempValue;
+			if (element->QueryUnsigned64Text(&tempValue) == tinyxml2::XML_SUCCESS) {
+				*value = static_cast<unsigned long>(tempValue);
+				return true;
+			}
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadInt(const std::string& key, int* value, int def = 0) const override
+	{
+		if (!cur_element_)
+		{
+			*value = def;
+			return false;
+		}
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		if (element) {
+			int tempValue;
+			if (element->QueryIntText(&tempValue) == tinyxml2::XML_SUCCESS) {
+				*value = tempValue;
+				return true;
+			}
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadUInt(const std::string& key, unsigned int* value, unsigned int def = 0) const override
+	{
+		if (!cur_element_)
+		{
+			*value = def;
+			return false;
+		}
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		if (element) {
+			unsigned int tempValue;
+			if (element->QueryUnsignedText(&tempValue) == tinyxml2::XML_SUCCESS) {
+				*value = tempValue;
+				return true;
+			}
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadSizeT(const std::string& key, size_t* value, size_t def = 0) const override
+	{
+		if (!cur_element_)
+		{
+			*value = def;
+			return false;
+		}
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		if (element) {
+			uint64_t tempValue;
+			if (element->QueryUnsigned64Text(&tempValue) == tinyxml2::XML_SUCCESS) {
+				*value = static_cast<size_t>(tempValue);
+				return true;
+			}
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadShort(const std::string& key, short* value, short def = 0) const override
+	{
+		if (!cur_element_)
+		{
+			*value = def;
+			return false;
+		}
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		if (element) {
+			int tempValue;
+			if (element->QueryIntText(&tempValue) == tinyxml2::XML_SUCCESS) {
+				*value = static_cast<short>(tempValue);
+				return true;
+			}
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadUShort(const std::string& key, unsigned short* value, unsigned short def = 0) const override
+	{
+		if (!cur_element_)
+		{
+			*value = def;
+			return false;
+		}
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		if (element) {
+			unsigned int tempValue;
+			if (element->QueryUnsignedText(&tempValue) == tinyxml2::XML_SUCCESS) {
+				*value = static_cast<unsigned short>(tempValue);
+				return true;
+			}
+		}
+		*value = def;
+		return false;
+	}
+
 	bool ReadDouble(const std::string& key, double* value, double def = 0.0) const override
 	{
 		if (!cur_element_)
@@ -362,6 +476,22 @@ protected:
 		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
 		if (element) {
 			element->QueryDoubleText(value);
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadFloat(const std::string& key, float* value, float def = 0.0) const override
+	{
+		if (!cur_element_)
+		{
+			*value = def;
+			return false;
+		}
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		if (element) {
+			element->QueryFloatText(value);
 			return true;
 		}
 		*value = def;
@@ -420,11 +550,102 @@ protected:
 			element = doc_.NewElement(key.c_str());
 			cur_element_->InsertEndChild(element);
 		}
+		element->SetText(static_cast<int64_t>(value));
+		return true;
+	}
+
+	bool WriteULong(const std::string& key, unsigned long value) override
+	{
+		if (!cur_element_)
+			return false;
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		if (!element) {
+			element = doc_.NewElement(key.c_str());
+			cur_element_->InsertEndChild(element);
+		}
+		element->SetText(static_cast<uint64_t>(value));
+		return true;
+	}
+
+	bool WriteInt(const std::string& key, int value) override
+	{
+		if (!cur_element_)
+			return false;
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		if (!element) {
+			element = doc_.NewElement(key.c_str());
+			cur_element_->InsertEndChild(element);
+		}
+		element->SetText(value);
+		return true;
+	}
+
+	bool WriteUInt(const std::string& key, unsigned int value) override
+	{
+		if (!cur_element_)
+			return false;
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		if (!element) {
+			element = doc_.NewElement(key.c_str());
+			cur_element_->InsertEndChild(element);
+		}
+		element->SetText(value);
+		return true;
+	}
+
+	bool WriteSizeT(const std::string& key, size_t value) override
+	{
+		if (!cur_element_)
+			return false;
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		if (!element) {
+			element = doc_.NewElement(key.c_str());
+			cur_element_->InsertEndChild(element);
+		}
+		element->SetText(static_cast<uint64_t>(value));
+		return true;
+	}
+
+	bool WriteShort(const std::string& key, short value) override
+	{
+		if (!cur_element_)
+			return false;
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		if (!element) {
+			element = doc_.NewElement(key.c_str());
+			cur_element_->InsertEndChild(element);
+		}
 		element->SetText(static_cast<int>(value));
 		return true;
 	}
 
+	bool WriteUShort(const std::string& key, unsigned short value) override
+	{
+		if (!cur_element_)
+			return false;
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		if (!element) {
+			element = doc_.NewElement(key.c_str());
+			cur_element_->InsertEndChild(element);
+		}
+		element->SetText(static_cast<unsigned int>(value));
+		return true;
+	}
+
 	bool WriteDouble(const std::string& key, double value) override
+	{
+		if (!cur_element_)
+			return false;
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		if (!element) {
+			element = doc_.NewElement(key.c_str());
+			cur_element_->InsertEndChild(element);
+		}
+		element->SetText(value);
+		return true;
+	}
+
+	bool WriteFloat(const std::string& key, float value) override
 	{
 		if (!cur_element_)
 			return false;

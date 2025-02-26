@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <pvxml_reader.h>
 #include <Utils.h>
 #include <compatibility.h>
-#include <tinyxml2.h>
+#include <XmlUtils.h>
 #include <fstream>
 #include <iostream>
 
@@ -309,8 +309,9 @@ void PVXMLReader::ReadKey(tinyxml2::XMLElement* keyNode)
 {
 	int ival;
 	double dval;
-	std::string strKey(keyNode->Attribute("key"));
-	std::string strValue(keyNode->Attribute("value"));
+
+	std::string strKey = GetAttributeValue(keyNode, "key");
+	std::string strValue = GetAttributeValue(keyNode, "value");
 
 	if (strKey == "xYStageGridIndex")
 	{
@@ -420,12 +421,12 @@ void PVXMLReader::ReadIndexedKey(tinyxml2::XMLElement* keyNode, const std::strin
 			std::string child_name(child->Name());
 			if (child_name == "SubindexedValues")
 			{
-				std::string strIndex(child->Attribute("index"));
+				std::string strIndex = GetAttributeValue(child, "index");
 				tinyxml2::XMLElement* gchild = child->FirstChildElement();
 				while (gchild)
 				{
-					std::string strSubIndex(gchild->Attribute("subindex"));
-					std::string strValue(gchild->Attribute("value"));
+					std::string strSubIndex = GetAttributeValue(gchild, "subindex");
+					std::string strValue = GetAttributeValue(gchild, "value");
 					if (strSubIndex == "0")
 					{
 						if (strIndex == "XAxis")
@@ -458,8 +459,8 @@ void PVXMLReader::ReadIndexedKey(tinyxml2::XMLElement* keyNode, const std::strin
 			std::string child_name(child->Name());
 			if (child_name == "IndexedValue")
 			{
-				std::string strIndex(child->Attribute("index"));
-				std::string strValue(child->Attribute("value"));
+				std::string strIndex = GetAttributeValue(child, "index");
+				std::string strValue = GetAttributeValue(child, "value");
 				if (strIndex == "XAxis")
 				{
 					dval = std::stod(strValue);
@@ -479,7 +480,7 @@ void PVXMLReader::ReadIndexedKey(tinyxml2::XMLElement* keyNode, const std::strin
 void PVXMLReader::ReadSequence(tinyxml2::XMLElement* seqNode)
 {
 	//get type
-	std::string type(seqNode->Attribute("type"));
+	std::string type = GetAttributeValue(seqNode, "type");
 	if (type == "TSeries Timed Element" &&
 		!m_seq_type)
 		m_seq_type = 2;
@@ -562,9 +563,9 @@ void PVXMLReader::ReadFrame(tinyxml2::XMLElement* frameNode)
 		std::string strName(child->Name());
 		if (strName == "File")
 		{
-			std::string channel(child->Attribute("channel"));
+			std::string channel = GetAttributeValue(child, "channel");
 			int chn = std::stoi(channel);
-			std::string filename(child->Attribute("filename"));
+			std::string filename = GetAttributeValue(child, "filename");
 
 			ChannelInfo channel_info;
 			channel_info.file_name = s2ws(filename);
@@ -1137,9 +1138,9 @@ void PVXMLReader::ReadLaser(tinyxml2::XMLElement* node)
 		std::string child_name(child->Name());
 		if (child_name == "IndexedValue")
 		{
-			std::string strIndex(child->Attribute("index"));
-			std::string strValue(child->Attribute("value"));
-			std::string strDesc(child->Attribute("description"));
+			std::string strIndex = GetAttributeValue(child, "index");
+			std::string strValue = GetAttributeValue(child, "value");
+			std::string strDesc = GetAttributeValue(child, "description");
 			int ch = std::stoi(strIndex);
 			int wl = 0;
 			std::string strWl;

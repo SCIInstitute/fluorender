@@ -57,8 +57,29 @@ public:
 		else if constexpr (std::is_same_v<T, long>) {
 			return ReadLong(key, value);
 		}
+		else if constexpr (std::is_same_v<T, unsigned long>) {
+			return ReadULong(key, value);
+		}
+		else if constexpr (std::is_same_v<T, int>) {
+			return ReadInt(key, value);
+		}
+		else if constexpr (std::is_same_v<T, unsigned int>) {
+			return ReadUInt(key, value);
+		}
+		else if constexpr (std::is_same_v<T, size_t>) {
+			return ReadSizeT(key, value);
+		}
+		else if constexpr (std::is_same_v<T, short>) {
+			return ReadShort(key, value);
+		}
+		else if constexpr (std::is_same_v<T, unsigned short>) {
+			return ReadUShort(key, value);
+		}
 		else if constexpr (std::is_same_v<T, double>) {
 			return ReadDouble(key, value);
+		}
+		else if constexpr (std::is_same_v<T, float>) {
+			return ReadFloat(key, value);
 		}
 		else {
 			static_assert(always_false<T>::value, "Unsupported type");
@@ -79,8 +100,29 @@ public:
 		else if constexpr (std::is_same_v<T, long>) {
 			return ReadLong(key, value, defaultVal);
 		}
+		else if constexpr (std::is_same_v<T, unsigned long>) {
+			return ReadULong(key, value, defaultVal);
+		}
+		else if constexpr (std::is_same_v<T, int>) {
+			return ReadInt(key, value, defaultVal);
+		}
+		else if constexpr (std::is_same_v<T, unsigned int>) {
+			return ReadUInt(key, value, defaultVal);
+		}
+		else if constexpr (std::is_same_v<T, size_t>) {
+			return ReadSizeT(key, value, defaultVal);
+		}
+		else if constexpr (std::is_same_v<T, short>) {
+			return ReadShort(key, value, defaultVal);
+		}
+		else if constexpr (std::is_same_v<T, unsigned short>) {
+			return ReadUShort(key, value, defaultVal);
+		}
 		else if constexpr (std::is_same_v<T, double>) {
 			return ReadDouble(key, value, defaultVal);
+		}
+		else if constexpr (std::is_same_v<T, float>) {
+			return ReadFloat(key, value, defaultVal);
 		}
 		else {
 			static_assert(always_false<T>::value, "Unsupported type");
@@ -102,8 +144,29 @@ public:
 		else if constexpr (std::is_same_v<T, long>) {
 			return WriteLong(key, value);
 		}
+		else if constexpr (std::is_same_v<T, unsigned long>) {
+			return WriteULong(key, value);
+		}
+		else if constexpr (std::is_same_v<T, int>) {
+			return WriteInt(key, value);
+		}
+		else if constexpr (std::is_same_v<T, unsigned int>) {
+			return WriteUInt(key, value);
+		}
+		else if constexpr (std::is_same_v<T, size_t>) {
+			return WriteSizeT(key, value);
+		}
+		else if constexpr (std::is_same_v<T, short>) {
+			return WriteShort(key, value);
+		}
+		else if constexpr (std::is_same_v<T, unsigned short>) {
+			return WriteUShort(key, value);
+		}
 		else if constexpr (std::is_same_v<T, double>) {
 			return WriteDouble(key, value);
+		}
+		else if constexpr (std::is_same_v<T, float>) {
+			return WriteFloat(key, value);
 		}
 		else {
 			static_assert(always_false<T>::value, "Unsupported type");
@@ -139,14 +202,28 @@ protected:
 	virtual bool ReadWstring(const std::string& key, std::wstring* value, const std::wstring& def = L"") const = 0;
 	virtual bool ReadBool(const std::string& key, bool* value, bool def = false) const = 0;
 	virtual bool ReadLong(const std::string& key, long* value, long def = 0) const = 0;
+	virtual bool ReadULong(const std::string& key, unsigned long* value, unsigned long def = 0) const = 0;
+	virtual bool ReadInt(const std::string& key, int* value, int def = 0) const = 0;
+	virtual bool ReadUInt(const std::string& key, unsigned int* value, unsigned int def = 0) const = 0;
+	virtual bool ReadSizeT(const std::string& key, size_t* value, size_t def = 0) const = 0;
+	virtual bool ReadShort(const std::string& key, short* value, short def = 0) const = 0;
+	virtual bool ReadUShort(const std::string& key, unsigned short* value, unsigned short def = 0) const = 0;
 	virtual bool ReadDouble(const std::string& key, double* value, double def = 0.0) const = 0;
+	virtual bool ReadFloat(const std::string& key, float* value, float def = 0.0f) const = 0;
 
 	// Type-specific write methods
 	virtual bool WriteString(const std::string& key, const std::string& value) = 0;
 	virtual bool WriteWstring(const std::string& key, const std::wstring& value) = 0;
 	virtual bool WriteBool(const std::string& key, bool value) = 0;
 	virtual bool WriteLong(const std::string& key, long value) = 0;
+	virtual bool WriteULong(const std::string& key, unsigned long value) = 0;
+	virtual bool WriteInt(const std::string& key, int value) = 0;
+	virtual bool WriteUInt(const std::string& key, unsigned int value) = 0;
+	virtual bool WriteSizeT(const std::string& key, size_t value) = 0;
+	virtual bool WriteShort(const std::string& key, short value) = 0;
+	virtual bool WriteUShort(const std::string& key, unsigned short value) = 0;
 	virtual bool WriteDouble(const std::string& key, double value) = 0;
+	virtual bool WriteFloat(const std::string& key, float value) = 0;
 
 	//path processing
 	std::vector<std::string> splitPath(const std::string& path) const {

@@ -208,16 +208,10 @@ int BRKXMLReader::Preprocess()
 		return READER_OPEN_FAIL;
 	m_imageinfo = ReadImageInfo(root);
 
-	if (root->Attribute("exMetadataPath"))
-	{
-		std::string str = root->Attribute("exMetadataPath");
-		m_ex_metadata_path = s2ws(str);
-	}
-	if (root->Attribute("exMetadataURL"))
-	{
-		std::string str = root->Attribute("exMetadataURL");
-		m_ex_metadata_url = s2ws(str);
-	}
+	std::string str = GetAttributeValue(root, "exMetadataPath");
+	m_ex_metadata_path = s2ws(str);
+	str = GetAttributeValue(root, "exMetadataURL");
+	m_ex_metadata_url = s2ws(str);
 
 	ReadPyramid(root, m_pyramid);
 
@@ -284,7 +278,7 @@ BRKXMLReader::ImageInfo BRKXMLReader::ReadImageInfo(tinyxml2::XMLElement* infoNo
 	ival = STOI(infoNode->Attribute("nLevel"));
 	iinfo.nLevel = ival;
 
-	if (infoNode->Attribute("CopyableLv"))
+	if (HasAttribute(infoNode, "CopyableLv"))
 	{
 		ival = STOI(infoNode->Attribute("CopyableLv"));
 		iinfo.copyableLv = ival;
@@ -336,13 +330,14 @@ void BRKXMLReader::ReadLevel(tinyxml2::XMLElement* lvNode, LevelInfo& lvinfo)
 
 	lvinfo.bit_depth = STOI(lvNode->Attribute("bitDepth"));
 
-	if (lvNode->Attribute("FileType"))
+	if (HasAttribute(lvNode, "FileType"))
 	{
 		strValue = lvNode->Attribute("FileType");
 		if (strValue == "RAW") lvinfo.file_type = BRICK_FILE_TYPE_RAW;
 		else if (strValue == "JPEG") lvinfo.file_type = BRICK_FILE_TYPE_JPEG;
 	}
-	else lvinfo.file_type = BRICK_FILE_TYPE_NONE;
+	else
+		lvinfo.file_type = BRICK_FILE_TYPE_NONE;
 
 	tinyxml2::XMLElement* child = lvNode->FirstChildElement();
 	while (child)
@@ -469,11 +464,11 @@ void BRKXMLReader::ReadFilenames(tinyxml2::XMLElement* fileRootNode, std::vector
 				if (!filename[frame][channel][id])
 					filename[frame][channel][id] = new flvr::FileLocInfo();
 
-				if (child->Attribute("filename")) //this option will be deprecated
+				if (HasAttribute(child, "filename")) //this option will be deprecated
 					str = child->Attribute("filename");
-				else if (child->Attribute("filepath")) //use this
+				else if (HasAttribute(child, "filepath")) //use this
 					str = child->Attribute("filepath");
-				else if (child->Attribute("url")) //this option will be deprecated
+				else if (HasAttribute(child, "url")) //this option will be deprecated
 					str = child->Attribute("url");
 
 				bool url = false;
@@ -509,13 +504,13 @@ void BRKXMLReader::ReadFilenames(tinyxml2::XMLElement* fileRootNode, std::vector
 				}
 
 				filename[frame][channel][id]->offset = 0;
-				if (child->Attribute("offset"))
+				if (HasAttribute(child, "offset"))
 					filename[frame][channel][id]->offset = STOI(child->Attribute("offset"));
 				filename[frame][channel][id]->datasize = 0;
-				if (child->Attribute("datasize"))
+				if (HasAttribute(child, "datasize"))
 					filename[frame][channel][id]->datasize = STOI(child->Attribute("datasize"));
 
-				if (child->Attribute("filetype"))
+				if (HasAttribute(child, "filetype"))
 				{
 					str = child->Attribute("filetype");
 					if (str == "RAW") filename[frame][channel][id]->type = BRICK_FILE_TYPE_RAW;
@@ -572,7 +567,7 @@ bool BRKXMLReader::loadMetadata(const std::wstring& file)
 
 	if (!md_node) return false;
 
-	if (md_node->Attribute("ID"))
+	if (HasAttribute(md_node, "ID"))
 	{
 		str = md_node->Attribute("ID");
 		m_metadata_id = s2ws(str);
@@ -583,7 +578,7 @@ bool BRKXMLReader::loadMetadata(const std::wstring& file)
 	{
 		if (child->Name())
 		{
-			if (strcmp(child->Name(), "Landmark") == 0 && child->Attribute("name"))
+			if (strcmp(child->Name(), "Landmark") == 0 && HasAttribute(child, "name"))
 			{
 				Landmark lm;
 
@@ -627,7 +622,7 @@ void BRKXMLReader::LoadROITree_r(tinyxml2::XMLElement* lvNode, std::wstring& tre
 	tinyxml2::XMLElement* child = lvNode->FirstChildElement();
 	while (child)
 	{
-		if (child->Name() && child->Attribute("name"))
+		if (child->Name() && HasAttribute(child, "name"))
 		{
 			try
 			{
@@ -649,11 +644,11 @@ void BRKXMLReader::LoadROITree_r(tinyxml2::XMLElement* lvNode, std::wstring& tre
 
 					LoadROITree_r(child, tree, c_path, --gid);
 				}
-				if (strcmp(child->Name(), "ROI") == 0 && child->Attribute("id"))
+				if (strcmp(child->Name(), "ROI") == 0 && HasAttribute(child, "id"))
 				{
 					std::string strid = child->Attribute("id");
 					int id = boost::lexical_cast<int>(strid);
-					if (id >= 0 && id < PALETTE_SIZE && child->Attribute("r") && child->Attribute("g") && child->Attribute("b"))
+					if (id >= 0 && id < PALETTE_SIZE && HasAttribute(child, "r") && HasAttribute(child, "g") && HasAttribute(child, "b"))
 					{
 						std::wstring c_path = (parent.empty() ? L"" : parent + L".") + s2ws(strid);
 

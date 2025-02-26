@@ -314,12 +314,96 @@ protected:
 		return false;
 	}
 
+	bool ReadULong(const std::string& key, unsigned long* value, unsigned long def = 0) const override
+	{
+		std::string str;
+		if (ReadString(key, &str))
+		{
+			*value = std::stoul(str);
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadInt(const std::string& key, int* value, int def = 0) const override
+	{
+		std::string str;
+		if (ReadString(key, &str))
+		{
+			*value = std::stoi(str);
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadUInt(const std::string& key, unsigned int* value, unsigned int def = 0) const override
+	{
+		std::string str;
+		if (ReadString(key, &str))
+		{
+			*value = std::stoul(str);
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadSizeT(const std::string& key, size_t* value, size_t def = 0) const override
+	{
+		std::string str;
+		if (ReadString(key, &str))
+		{
+			*value = std::stoull(str);
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadShort(const std::string& key, short* value, short def = 0) const override
+	{
+		std::string str;
+		if (ReadString(key, &str))
+		{
+			*value = static_cast<short>(std::stoi(str));
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadUShort(const std::string& key, unsigned short* value, unsigned short def = 0) const override
+	{
+		std::string str;
+		if (ReadString(key, &str))
+		{
+			*value = static_cast<unsigned short>(std::stoul(str));
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
 	bool ReadDouble(const std::string& key, double* value, double def = 0.0) const override
 	{
 		std::string str;
 		if (ReadString(key, &str))
 		{
 			*value = std::stod(str);
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadFloat(const std::string& key, float* value, float def = 0.0) const override
+	{
+		std::string str;
+		if (ReadString(key, &str))
+		{
+			*value = std::stof(str);
 			return true;
 		}
 		*value = def;
@@ -377,7 +461,49 @@ protected:
 		return WriteString(key, str);
 	}
 
+	bool WriteULong(const std::string& key, unsigned long value) override
+	{
+		std::string str = std::to_string(value);
+		return WriteString(key, str);
+	}
+
+	bool WriteInt(const std::string& key, int value) override
+	{
+		std::string str = std::to_string(value);
+		return WriteString(key, str);
+	}
+
+	bool WriteUInt(const std::string& key, unsigned int value) override
+	{
+		std::string str = std::to_string(value);
+		return WriteString(key, str);
+	}
+
+	bool WriteSizeT(const std::string& key, size_t value) override
+	{
+		std::string str = std::to_string(value);
+		return WriteString(key, str);
+	}
+
+	bool WriteShort(const std::string& key, short value) override
+	{
+		std::string str = std::to_string(value);
+		return WriteString(key, str);
+	}
+
+	bool WriteUShort(const std::string& key, unsigned short value) override
+	{
+		std::string str = std::to_string(value);
+		return WriteString(key, str);
+	}
+
 	bool WriteDouble(const std::string& key, double value) override
+	{
+		std::string str = std::to_string(value);
+		return WriteString(key, str);
+	}
+
+	bool WriteFloat(const std::string& key, float value) override
 	{
 		std::string str = std::to_string(value);
 		return WriteString(key, str);

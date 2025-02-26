@@ -209,6 +209,7 @@ std::unordered_map<std::string, flrd::Params> gen_list()
 
 std::unordered_map<std::string, flrd::Params> flrd::Reshape::params_list_ = gen_list();
 flrd::EntryParams* flrd::Reshape::result_ = 0;
+std::string IniFile::path_sep_s_ = "";
 
 Global Global::instance_;
 

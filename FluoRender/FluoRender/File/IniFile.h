@@ -320,6 +320,78 @@ protected:
 		return true;
 	}
 
+	bool ReadULong(const std::string& key, unsigned long* value, unsigned long def = 0) const override
+	{
+		std::string str;
+		if (!extractString(key, str))
+		{
+			*value = def;
+			return false;
+		}
+		*value = std::stoul(str);
+		return true;
+	}
+
+	bool ReadInt(const std::string& key, int* value, int def = 0) const override
+	{
+		std::string str;
+		if (!extractString(key, str))
+		{
+			*value = def;
+			return false;
+		}
+		*value = std::stoi(str);
+		return true;
+	}
+
+	bool ReadUInt(const std::string& key, unsigned int* value, unsigned int def = 0) const override
+	{
+		std::string str;
+		if (!extractString(key, str))
+		{
+			*value = def;
+			return false;
+		}
+		*value = std::stoul(str);
+		return true;
+	}
+
+	bool ReadSizeT(const std::string& key, size_t* value, size_t def = 0) const override
+	{
+		std::string str;
+		if (!extractString(key, str))
+		{
+			*value = def;
+			return false;
+		}
+		*value = std::stoull(str);
+		return true;
+	}
+
+	bool ReadShort(const std::string& key, short* value, short def = 0) const override
+	{
+		std::string str;
+		if (!extractString(key, str))
+		{
+			*value = def;
+			return false;
+		}
+		*value = static_cast<short>(std::stoi(str));
+		return true;
+	}
+
+	bool ReadUShort(const std::string& key, unsigned short* value, unsigned short def = 0) const override
+	{
+		std::string str;
+		if (!extractString(key, str))
+		{
+			*value = def;
+			return false;
+		}
+		*value = static_cast<unsigned short>(std::stoul(str));
+		return true;
+	}
+
 	bool ReadDouble(const std::string& key, double* value, double def = 0.0) const override
 	{
 		std::string str;
@@ -329,6 +401,18 @@ protected:
 			return false;
 		}
 		*value = std::stod(str);
+		return true;
+	}
+
+	bool ReadFloat(const std::string& key, float* value, float def = 0.0) const override
+	{
+		std::string str;
+		if (!extractString(key, str))
+		{
+			*value = def;
+			return false;
+		}
+		*value = std::stof(str);
 		return true;
 	}
 
@@ -355,7 +439,42 @@ protected:
 		return WriteString(key, std::to_string(value));
 	}
 
+	bool WriteULong(const std::string& key, unsigned long value) override
+	{
+		return WriteString(key, std::to_string(value));
+	}
+
+	bool WriteInt(const std::string& key, int value) override
+	{
+		return WriteString(key, std::to_string(value));
+	}
+
+	bool WriteUInt(const std::string& key, unsigned int value) override
+	{
+		return WriteString(key, std::to_string(value));
+	}
+
+	bool WriteSizeT(const std::string& key, size_t value) override
+	{
+		return WriteString(key, std::to_string(value));
+	}
+
+	bool WriteShort(const std::string& key, short value) override
+	{
+		return WriteString(key, std::to_string(value));
+	}
+
+	bool WriteUShort(const std::string& key, unsigned short value) override
+	{
+		return WriteString(key, std::to_string(value));
+	}
+
 	bool WriteDouble(const std::string& key, double value) override
+	{
+		return WriteString(key, std::to_string(value));
+	}
+
+	bool WriteFloat(const std::string& key, float value) override
 	{
 		return WriteString(key, std::to_string(value));
 	}
@@ -458,7 +577,5 @@ private:
 	}
 
 };
-
-//std::string IniFile::path_sep_s_;
 
 #endif//_INIFILE_H_

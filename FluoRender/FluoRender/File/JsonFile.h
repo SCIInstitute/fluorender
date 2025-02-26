@@ -396,6 +396,96 @@ protected:
 		return false;
 	}
 
+	bool ReadULong(const std::string& key, unsigned long* value, unsigned long def = 0) const override
+	{
+		if (!cur_obj_) {
+			*value = def;
+			return false;
+		}
+		json_t const* item = json_getProperty(cur_obj_, key.c_str());
+		if (item && json_getType(item) == JSON_INTEGER) {
+			*value = static_cast<unsigned long>(json_getInteger(item));
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadInt(const std::string& key, int* value, int def = 0) const override
+	{
+		if (!cur_obj_) {
+			*value = def;
+			return false;
+		}
+		json_t const* item = json_getProperty(cur_obj_, key.c_str());
+		if (item && json_getType(item) == JSON_INTEGER) {
+			*value = static_cast<int>(json_getInteger(item));
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadUInt(const std::string& key, unsigned int* value, unsigned int def = 0) const override
+	{
+		if (!cur_obj_) {
+			*value = def;
+			return false;
+		}
+		json_t const* item = json_getProperty(cur_obj_, key.c_str());
+		if (item && json_getType(item) == JSON_INTEGER) {
+			*value = static_cast<unsigned int>(json_getInteger(item));
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadSizeT(const std::string& key, size_t* value, size_t def = 0) const override
+	{
+		if (!cur_obj_) {
+			*value = def;
+			return false;
+		}
+		json_t const* item = json_getProperty(cur_obj_, key.c_str());
+		if (item && json_getType(item) == JSON_INTEGER) {
+			*value = static_cast<size_t>(json_getInteger(item));
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadShort(const std::string& key, short* value, short def = 0) const override
+	{
+		if (!cur_obj_) {
+			*value = def;
+			return false;
+		}
+		json_t const* item = json_getProperty(cur_obj_, key.c_str());
+		if (item && json_getType(item) == JSON_INTEGER) {
+			*value = static_cast<short>(json_getInteger(item));
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadUShort(const std::string& key, unsigned short* value, unsigned short def = 0) const override
+	{
+		if (!cur_obj_) {
+			*value = def;
+			return false;
+		}
+		json_t const* item = json_getProperty(cur_obj_, key.c_str());
+		if (item && json_getType(item) == JSON_INTEGER) {
+			*value = static_cast<unsigned short>(json_getInteger(item));
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
 	bool ReadDouble(const std::string& key, double* value, double def = 0.0) const override
 	{
 		if (!cur_obj_) {
@@ -405,6 +495,21 @@ protected:
 		json_t const* item = json_getProperty(cur_obj_, key.c_str());
 		if (item && json_getType(item) == JSON_REAL) {
 			*value = json_getReal(item);
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadFloat(const std::string& key, float* value, float def = 0.0) const override
+	{
+		if (!cur_obj_) {
+			*value = def;
+			return false;
+		}
+		json_t const* item = json_getProperty(cur_obj_, key.c_str());
+		if (item && json_getType(item) == JSON_REAL) {
+			*value = static_cast<float>(json_getReal(item));
 			return true;
 		}
 		*value = def;
@@ -474,7 +579,84 @@ protected:
 		return true;
 	}
 
+	bool WriteULong(const std::string& key, unsigned long value) override
+	{
+		if (!cur_obj_) {
+			return false;
+		}
+		json_t* parent = const_cast<json_t*>(cur_obj_);
+		json_t* item = const_cast<json_t*>(json_getProperty(parent, key.c_str()));
+		if (!item) {
+			item = (json_t*)malloc(sizeof(json_t));
+			item->type = JSON_INTEGER;
+			if (!addProperty(parent, key, item)) {
+				free(item);
+				return false;
+			}
+		}
+		item->u.value = strdup(std::to_string(value).c_str());
+		return true;
+	}
+
+	bool WriteInt(const std::string& key, int value) override
+	{
+		return WriteLong(key, static_cast<long>(value));
+	}
+
+	bool WriteUInt(const std::string& key, unsigned int value) override
+	{
+		return WriteULong(key, static_cast<unsigned long>(value));
+	}
+
+	bool WriteSizeT(const std::string& key, size_t value) override
+	{
+		if (!cur_obj_) {
+			return false;
+		}
+		json_t* parent = const_cast<json_t*>(cur_obj_);
+		json_t* item = const_cast<json_t*>(json_getProperty(parent, key.c_str()));
+		if (!item) {
+			item = (json_t*)malloc(sizeof(json_t));
+			item->type = JSON_INTEGER;
+			if (!addProperty(parent, key, item)) {
+				free(item);
+				return false;
+			}
+		}
+		item->u.value = strdup(std::to_string(value).c_str());
+		return true;
+	}
+
+	bool WriteShort(const std::string& key, short value) override
+	{
+		return WriteLong(key, static_cast<long>(value));
+	}
+
+	bool WriteUShort(const std::string& key, unsigned short value) override
+	{
+		return WriteULong(key, static_cast<unsigned long>(value));
+	}
+
 	bool WriteDouble(const std::string& key, double value) override
+	{
+		if (!cur_obj_) {
+			return false;
+		}
+		json_t* parent = const_cast<json_t*>(cur_obj_);
+		json_t* item = const_cast<json_t*>(json_getProperty(parent, key.c_str()));
+		if (!item) {
+			item = (json_t*)malloc(sizeof(json_t));
+			item->type = JSON_REAL;
+			if (!addProperty(parent, key, item)) {
+				free(item);
+				return false;
+			}
+		}
+		item->u.value = strdup(std::to_string(value).c_str());
+		return true;
+	}
+
+	bool WriteFloat(const std::string& key, float value) override
 	{
 		if (!cur_obj_) {
 			return false;
