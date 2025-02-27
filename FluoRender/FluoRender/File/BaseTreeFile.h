@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <vector>
 #include <type_traits>
+#include <unordered_map>
 
 class BaseTreeFile
 {
@@ -39,6 +40,8 @@ public:
 
 	virtual int LoadFile(const std::wstring& filename) = 0;
 	virtual int LoadString(const std::string& str) = 0;
+	virtual int LoadData(const std::unordered_map<std::string, std::string>& data) = 0;
+	virtual std::unordered_map<std::string, std::string> GetData() = 0;
 	virtual int SaveFile(const std::wstring& filename) = 0;
 	virtual int SaveString(std::string& str) = 0;
 

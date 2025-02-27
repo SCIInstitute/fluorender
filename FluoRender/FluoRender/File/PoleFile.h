@@ -70,6 +70,18 @@ public:
 		return 1;
 	}
 
+	int LoadData(const std::unordered_map<std::string, std::string>& data) override
+	{
+		//dictionary_ = data;
+		return 0;
+	}
+
+	std::unordered_map<std::string, std::string> GetData() override
+	{
+		std::unordered_map<std::string, std::string> data;
+		return data;
+	}
+
 	int SaveFile(const std::wstring& filename) override
 	{
 		std::string str = ws2s(filename);

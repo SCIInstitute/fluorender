@@ -88,6 +88,17 @@ public:
 		return retval;
 	}
 
+	int LoadData(const std::unordered_map<std::string, std::string>& data) override
+	{
+		dictionary_ = data;
+		return 0;
+	}
+
+	std::unordered_map<std::string, std::string> GetData() override
+	{
+		return dictionary_;
+	}
+
 	int SaveFile(const std::wstring& filename) override
 	{
 		std::ofstream file(filename);

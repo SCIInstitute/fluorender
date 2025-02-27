@@ -69,6 +69,18 @@ public:
 		return json_ == 0;
 	}
 
+	int LoadData(const std::unordered_map<std::string, std::string>& data) override
+	{
+		//dictionary_ = data;
+		return 0;
+	}
+
+	std::unordered_map<std::string, std::string> GetData() override
+	{
+		std::unordered_map<std::string, std::string> data;
+		return data;
+	}
+
 	int SaveFile(const std::wstring& filename) override
 	{
 		if (json_ == nullptr) {

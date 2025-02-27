@@ -43,16 +43,7 @@ DEALINGS IN THE SOFTWARE.
 class TreeFileFactory
 {
 public:
-	std::shared_ptr<BaseTreeFile> createTreeFile(const std::wstring& filename, const std::string& id) {
-		std::ifstream file(filename);
-		if (!file.is_open()) {
-			throw std::runtime_error("Unable to open file");
-		}
-
-		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-		file.close();
-
-		int type = determineFileType(content);
+	std::shared_ptr<BaseTreeFile> createTreeFile(int type, const std::string& id) {
 		std::shared_ptr<BaseTreeFile> handler;
 		switch (type)
 		{
@@ -74,6 +65,19 @@ public:
 
 		handlers[id] = handler;
 		return handler;
+	}
+
+	std::shared_ptr<BaseTreeFile> createTreeFile(const std::wstring& filename, const std::string& id) {
+		std::ifstream file(filename);
+		if (!file.is_open()) {
+			throw std::runtime_error("Unable to open file");
+		}
+
+		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+		file.close();
+
+		int type = determineFileType(content);
+		return createTreeFile(type, id);
 	}
 
 	std::shared_ptr<BaseTreeFile> getTreeFile(const std::string& id) {
