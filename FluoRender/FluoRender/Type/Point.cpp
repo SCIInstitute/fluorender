@@ -59,6 +59,11 @@ Point::Point(double x, double y, double z, double w)
 	}
 }
 
+Point::Point(const std::string& s)
+{
+	*this = from_string(s);
+}
+
 namespace fluo
 {
 	Point AffineCombination(const Point& p1, double w1,

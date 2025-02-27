@@ -34,7 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <CompSelector.h>
 #include <CompAnalyzer.h>
 #include <Clusterizer.h>
-#include <wx/wfstream.h>
 
 ComponentDefault::ComponentDefault()
 {
@@ -115,168 +114,176 @@ ComponentDefault::~ComponentDefault()
 
 void ComponentDefault::Read(const std::wstring& filename)
 {
-	wxFileInputStream is(filename);
-	if (!is.IsOk())
+	std::shared_ptr<BaseTreeFile> fconfig =
+		glbin_tree_file_factory.createTreeFile(filename, gstCompDefaultFile);
+	if (!fconfig)
 		return;
-	wxFileConfig fconfig(is);
 
-	Read(fconfig);
+	Read(gstCompDefaultFile);
 }
 
 void ComponentDefault::Save(const std::wstring& filename)
 {
-	std::string app_name = "FluoRender " +
-		std::format("{}.{}", VERSION_MAJOR, std::format("{:.1f}", float(VERSION_MINOR)));
-	std::string vendor_name = "FluoRender";
-	std::string local_name = "component_settings.dft";
-	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
-		wxCONFIG_USE_LOCAL_FILE);
+	std::shared_ptr<BaseTreeFile> fconfig =
+		glbin_tree_file_factory.createTreeFile(filename, gstCompDefaultFile);
+	if (!fconfig)
+		return;
 
-	Save(fconfig);
-	glbin_project.SaveConfig(fconfig, filename);
+	Save(gstCompDefaultFile);
+	fconfig->SaveFile(filename);
 }
 
-void ComponentDefault::Read(wxFileConfig& f)
+void ComponentDefault::Read(const std::string& gst_file)
 {
-	if (f.Exists("/comp default"))
-		f.SetPath("/comp default");
+	std::shared_ptr<BaseTreeFile> f =
+		glbin_tree_file_factory.getTreeFile(gst_file);
+	if (!f)
+		return;
+
+	if (f->Exists("/comp default"))
+		f->SetPath("/comp default");
 
 	//basic settings
-	f.Read("use_sel", &m_use_sel);
-	f.Read("use_ml", &m_use_ml);
-	f.Read("iter", &m_iter);
-	f.Read("thresh", &m_thresh);
-	f.Read("use_dist_field", &m_use_dist_field);
-	f.Read("dist_strength", &m_dist_strength);
-	f.Read("dist_filter_size", &m_dist_filter_size);
-	f.Read("max_dist", &m_max_dist);
-	f.Read("dist_thresh", &m_dist_thresh);
-	f.Read("diff", &m_diff);
-	f.Read("falloff", &m_falloff);
-	f.Read("size", &m_size);
-	f.Read("size_lm", &m_size_lm);
-	f.Read("density", &m_density);
-	f.Read("density_thresh", &m_density_thresh);
-	f.Read("varth", &m_varth);
-	f.Read("density_window_size", &m_density_window_size);
-	f.Read("density_stats_size", &m_density_stats_size);
-	f.Read("clean", &m_clean);
-	f.Read("clean_iter", &m_clean_iter);
-	f.Read("clean_size_vl", &m_clean_size_vl);
-	f.Read("grow_fixed", &m_grow_fixed);
-	f.Read("fill_border", &m_fill_border);
+	f->Read("use_sel", &m_use_sel);
+	f->Read("use_ml", &m_use_ml);
+	f->Read("iter", &m_iter);
+	f->Read("thresh", &m_thresh);
+	f->Read("use_dist_field", &m_use_dist_field);
+	f->Read("dist_strength", &m_dist_strength);
+	f->Read("dist_filter_size", &m_dist_filter_size);
+	f->Read("max_dist", &m_max_dist);
+	f->Read("dist_thresh", &m_dist_thresh);
+	f->Read("diff", &m_diff);
+	f->Read("falloff", &m_falloff);
+	f->Read("size", &m_size);
+	f->Read("size_lm", &m_size_lm);
+	f->Read("density", &m_density);
+	f->Read("density_thresh", &m_density_thresh);
+	f->Read("varth", &m_varth);
+	f->Read("density_window_size", &m_density_window_size);
+	f->Read("density_stats_size", &m_density_stats_size);
+	f->Read("clean", &m_clean);
+	f->Read("clean_iter", &m_clean_iter);
+	f->Read("clean_size_vl", &m_clean_size_vl);
+	f->Read("grow_fixed", &m_grow_fixed);
+	f->Read("fill_border", &m_fill_border);
 
 	//noise removal
-	f.Read("nr thresh", &m_nr_thresh);
-	f.Read("nr size", &m_nr_size);
-	f.Read("nr preview", &m_nr_preview);
-	f.Read("nr hdr r", &m_nr_hdr_r);
-	f.Read("nr hdr g", &m_nr_hdr_g);
-	f.Read("nr hdr b", &m_nr_hdr_b);
+	f->Read("nr thresh", &m_nr_thresh);
+	f->Read("nr size", &m_nr_size);
+	f->Read("nr preview", &m_nr_preview);
+	f->Read("nr hdr r", &m_nr_hdr_r);
+	f->Read("nr hdr g", &m_nr_hdr_g);
+	f->Read("nr hdr b", &m_nr_hdr_b);
 
 	//cluster
-	f.Read("cluster_method", &m_cluster_method);
+	f->Read("cluster_method", &m_cluster_method);
 	//parameters
-	f.Read("cluster_clnum", &m_cluster_clnum);
-	f.Read("cluster_maxiter", &m_cluster_maxiter);
-	f.Read("cluster_tol", &m_cluster_tol);
-	f.Read("cluster_size", &m_cluster_size);
-	f.Read("cluster_eps", &m_cluster_eps);
+	f->Read("cluster_clnum", &m_cluster_clnum);
+	f->Read("cluster_maxiter", &m_cluster_maxiter);
+	f->Read("cluster_tol", &m_cluster_tol);
+	f->Read("cluster_size", &m_cluster_size);
+	f->Read("cluster_eps", &m_cluster_eps);
 
 	//selection
-	f.Read("use_min", &m_use_min);
-	f.Read("min_num", &m_min_num);
-	f.Read("use_max", &m_use_max);
-	f.Read("max_num", &m_max_num);
+	f->Read("use_min", &m_use_min);
+	f->Read("min_num", &m_min_num);
+	f->Read("use_max", &m_use_max);
+	f->Read("max_num", &m_max_num);
 
 	//analyzer
-	f.Read("size limit", &m_slimit);
-	f.Read("colocal", &m_colocal);
-	f.Read("consistent", &m_consistent);
-	f.Read("channel type", &m_channel_type);
-	f.Read("color type", &m_color_type);
-	f.Read("annot type", &m_annot_type);
+	f->Read("size limit", &m_slimit);
+	f->Read("colocal", &m_colocal);
+	f->Read("consistent", &m_consistent);
+	f->Read("channel type", &m_channel_type);
+	f->Read("color type", &m_color_type);
+	f->Read("annot type", &m_annot_type);
 	//distance
-	f.Read("use_dist_neighbor", &m_use_dist_neighbor);
-	f.Read("dist_neighbor", &m_dist_neighbor_num);
-	f.Read("use_dist_allchan", &m_use_dist_allchan);
+	f->Read("use_dist_neighbor", &m_use_dist_neighbor);
+	f->Read("dist_neighbor", &m_dist_neighbor_num);
+	f->Read("use_dist_allchan", &m_use_dist_allchan);
 
 	////auto update
-	//f.Read("auto_update", &m_auto_update);
+	//f->Read("auto_update", &m_auto_update);
 
 	////record
-	//f.Read("record_cmd", &m_record_cmd);
+	//f->Read("record_cmd", &m_record_cmd);
 }
 
-void ComponentDefault::Save(wxFileConfig& f)
+void ComponentDefault::Save(const std::string& gst_file)
 {
-	f.SetPath("/comp default");
+	std::shared_ptr<BaseTreeFile> f =
+		glbin_tree_file_factory.getTreeFile(gst_file);
+	if (!f)
+		return;
+
+	f->SetPath("/comp default");
 
 	//comp generate settings
-	f.Write("use_sel", m_use_sel);
-	f.Write("use_ml", m_use_ml);
-	f.Write("iter", m_iter);
-	f.Write("thresh", m_thresh);
-	f.Write("use_dist_field", m_use_dist_field);
-	f.Write("dist_strength", m_dist_strength);
-	f.Write("dist_filter_size", m_dist_filter_size);
-	f.Write("max_dist", m_max_dist);
-	f.Write("dist_thresh", m_dist_thresh);
-	f.Write("diff", m_diff);
-	f.Write("falloff", m_falloff);
-	f.Write("size", m_size);
-	f.Write("size_lm", m_size_lm);
-	f.Write("density", m_density);
-	f.Write("density_thresh", m_density_thresh);
-	f.Write("varth", m_varth);
-	f.Write("density_window_size", m_density_window_size);
-	f.Write("density_stats_size", m_density_stats_size);
-	f.Write("clean", m_clean);
-	f.Write("clean_iter", m_clean_iter);
-	f.Write("clean_size_vl", m_clean_size_vl);
-	f.Write("grow_fixed", m_grow_fixed);
-	f.Write("fill_border", m_fill_border);
+	f->Write("use_sel", m_use_sel);
+	f->Write("use_ml", m_use_ml);
+	f->Write("iter", m_iter);
+	f->Write("thresh", m_thresh);
+	f->Write("use_dist_field", m_use_dist_field);
+	f->Write("dist_strength", m_dist_strength);
+	f->Write("dist_filter_size", m_dist_filter_size);
+	f->Write("max_dist", m_max_dist);
+	f->Write("dist_thresh", m_dist_thresh);
+	f->Write("diff", m_diff);
+	f->Write("falloff", m_falloff);
+	f->Write("size", m_size);
+	f->Write("size_lm", m_size_lm);
+	f->Write("density", m_density);
+	f->Write("density_thresh", m_density_thresh);
+	f->Write("varth", m_varth);
+	f->Write("density_window_size", m_density_window_size);
+	f->Write("density_stats_size", m_density_stats_size);
+	f->Write("clean", m_clean);
+	f->Write("clean_iter", m_clean_iter);
+	f->Write("clean_size_vl", m_clean_size_vl);
+	f->Write("grow_fixed", m_grow_fixed);
+	f->Write("fill_border", m_fill_border);
 
 	//noise removal
-	f.Write("nr thresh", m_nr_thresh);
-	f.Write("nr size", m_nr_size);
-	f.Write("nr preview", m_nr_preview);
-	f.Write("nr hdr r", m_nr_hdr_r);
-	f.Write("nr hdr g", m_nr_hdr_g);
-	f.Write("nr hdr b", m_nr_hdr_b);
+	f->Write("nr thresh", m_nr_thresh);
+	f->Write("nr size", m_nr_size);
+	f->Write("nr preview", m_nr_preview);
+	f->Write("nr hdr r", m_nr_hdr_r);
+	f->Write("nr hdr g", m_nr_hdr_g);
+	f->Write("nr hdr b", m_nr_hdr_b);
 
 	//cluster
-	f.Write("cluster_method", m_cluster_method);
+	f->Write("cluster_method", m_cluster_method);
 	//parameters
-	f.Write("cluster_clnum", m_cluster_clnum);
-	f.Write("cluster_maxiter", m_cluster_maxiter);
-	f.Write("cluster_tol", m_cluster_tol);
-	f.Write("cluster_size", m_cluster_size);
-	f.Write("cluster_eps", m_cluster_eps);
+	f->Write("cluster_clnum", m_cluster_clnum);
+	f->Write("cluster_maxiter", m_cluster_maxiter);
+	f->Write("cluster_tol", m_cluster_tol);
+	f->Write("cluster_size", m_cluster_size);
+	f->Write("cluster_eps", m_cluster_eps);
 
 	//selection
-	f.Write("use_min", m_use_min);
-	f.Write("min_num", m_min_num);
-	f.Write("use_max", m_use_max);
-	f.Write("max_num", m_max_num);
+	f->Write("use_min", m_use_min);
+	f->Write("min_num", m_min_num);
+	f->Write("use_max", m_use_max);
+	f->Write("max_num", m_max_num);
 
 	//analyzer
-	f.Write("size limit", m_slimit);
-	f.Write("colocal", m_colocal);
-	f.Write("consistent", m_consistent);
-	f.Write("channel type", m_channel_type);
-	f.Write("color type", m_color_type);
-	f.Write("annot type", m_annot_type);
+	f->Write("size limit", m_slimit);
+	f->Write("colocal", m_colocal);
+	f->Write("consistent", m_consistent);
+	f->Write("channel type", m_channel_type);
+	f->Write("color type", m_color_type);
+	f->Write("annot type", m_annot_type);
 	//distance
-	f.Write("use_dist_neighbor", m_use_dist_neighbor);
-	f.Write("dist_neighbor", m_dist_neighbor_num);
-	f.Write("use_dist_allchan", m_use_dist_allchan);
+	f->Write("use_dist_neighbor", m_use_dist_neighbor);
+	f->Write("dist_neighbor", m_dist_neighbor_num);
+	f->Write("use_dist_allchan", m_use_dist_allchan);
 
 	//auto update
-	f.Write("auto_update", m_auto_update);
+	f->Write("auto_update", m_auto_update);
 
 	//record
-	f.Write("record_cmd", m_record_cmd);
+	f->Write("record_cmd", m_record_cmd);
 }
 
 void ComponentDefault::Set(flrd::ComponentGenerator* cg)

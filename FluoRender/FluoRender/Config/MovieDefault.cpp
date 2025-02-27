@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <MovieDefault.h>
 #include <Names.h>
+#include <Global.h>
 #include <MovieMaker.h>
 
 MovieDefault::MovieDefault()
@@ -72,79 +73,87 @@ MovieDefault::~MovieDefault()
 
 }
 
-void MovieDefault::Read(wxFileConfig& f)
+void MovieDefault::Read()
 {
-	wxString str;
-	if (f.Exists("/movie default"))
-		f.SetPath("/movie default");
+	std::shared_ptr<BaseTreeFile> f =
+		glbin_tree_file_factory.getTreeFile(gstConfigFile);
+	if (!f)
+		return;
 
-	f.Read("view idx", &m_view_idx, 0);
-	f.Read("slider style", &m_slider_style, false);
+	if (f->Exists("/movie default"))
+		f->SetPath("/movie default");
 
-	f.Read("keyframe enable", &m_slider_style, false);
-	f.Read("rotate", &m_rotate, true);
-	f.Read("rot axis", &m_rot_axis, 1);
-	f.Read("rot deg", &m_rot_deg, 360);
-	f.Read("rot int type", &m_interpolation, 0);
-	f.Read("seq mode", &m_seq_mode, 0);
+	f->Read("view idx", &m_view_idx, 0);
+	f->Read("slider style", &m_slider_style, false);
 
-	f.Read("full frame num", &m_full_frame_num, 360);
-	f.Read("movie len", &m_movie_len, 12);
-	f.Read("fps", &m_fps, 30);
-	f.Read("clip start frame", &m_clip_start_frame, 0);
-	f.Read("clip end frame", &m_clip_end_frame, 360);
-	f.Read("cur frame", &m_cur_frame, 0);
-	f.Read("cur time", &m_cur_time, 0);
+	f->Read("keyframe enable", &m_slider_style, false);
+	f->Read("rotate", &m_rotate, true);
+	f->Read("rot axis", &m_rot_axis, 1);
+	f->Read("rot deg", &m_rot_deg, 360);
+	f->Read("rot int type", &m_interpolation, 0);
+	f->Read("seq mode", &m_seq_mode, 0);
 
-	f.Read("crop", &m_crop, false);
-	f.Read("crop x", &m_crop_x, 0);
-	f.Read("crop y", &m_crop_y, 0);
-	f.Read("crop w", &m_crop_w, 0);
-	f.Read("crop h", &m_crop_h, 0);
-	f.Read("scalebar pos", &m_sb_pos, 3);
-	f.Read("scalebar x", &m_sb_x, 5);
-	f.Read("scalebar y", &m_sb_y, 5);
+	f->Read("full frame num", &m_full_frame_num, 360);
+	f->Read("movie len", &m_movie_len, 12.0);
+	f->Read("fps", &m_fps, 30.0);
+	f->Read("clip start frame", &m_clip_start_frame, 0);
+	f->Read("clip end frame", &m_clip_end_frame, 360);
+	f->Read("cur frame", &m_cur_frame, 0);
+	f->Read("cur time", &m_cur_time, 0.0);
 
-	f.Read("key duration", &m_key_duration, 30);
-	f.Read("cam lock", &m_cam_lock, false);
-	f.Read("cam lock type", &m_cam_lock_type, 1);
+	f->Read("crop", &m_crop, false);
+	f->Read("crop x", &m_crop_x, 0);
+	f->Read("crop y", &m_crop_y, 0);
+	f->Read("crop w", &m_crop_w, 0);
+	f->Read("crop h", &m_crop_h, 0);
+	f->Read("scalebar pos", &m_sb_pos, 3);
+	f->Read("scalebar x", &m_sb_x, 5);
+	f->Read("scalebar y", &m_sb_y, 5);
+
+	f->Read("key duration", &m_key_duration, 30.0);
+	f->Read("cam lock", &m_cam_lock, false);
+	f->Read("cam lock type", &m_cam_lock_type, 1);
 }
 
-void MovieDefault::Save(wxFileConfig& f)
+void MovieDefault::Save()
 {
-	wxString str;
-	f.SetPath("/movie default");
+	std::shared_ptr<BaseTreeFile> f =
+		glbin_tree_file_factory.getTreeFile(gstConfigFile);
+	if (!f)
+		return;
 
-	f.Write("view idx", m_view_idx);
-	f.Write("slider style", m_slider_style);
+	f->SetPath("/movie default");
 
-	f.Write("keyframe enable", m_slider_style);
-	f.Write("rotate", m_rotate);
-	f.Write("rot axis", m_rot_axis);
-	f.Write("rot deg", m_rot_deg);
-	f.Write("rot int type", m_interpolation);
-	f.Write("seq mode", m_seq_mode);
+	f->Write("view idx", m_view_idx);
+	f->Write("slider style", m_slider_style);
 
-	f.Write("full frame num", m_full_frame_num);
-	f.Write("movie len", m_movie_len);
-	f.Write("fps", m_fps);
-	f.Write("clip start frame", m_clip_start_frame);
-	f.Write("clip end frame", m_clip_end_frame);
-	f.Write("cur frame", m_cur_frame);
-	f.Write("cur time", m_cur_time);
+	f->Write("keyframe enable", m_slider_style);
+	f->Write("rotate", m_rotate);
+	f->Write("rot axis", m_rot_axis);
+	f->Write("rot deg", m_rot_deg);
+	f->Write("rot int type", m_interpolation);
+	f->Write("seq mode", m_seq_mode);
 
-	f.Write("crop", m_crop);
-	f.Write("crop x", m_crop_x);
-	f.Write("crop y", m_crop_y);
-	f.Write("crop w", m_crop_w);
-	f.Write("crop h", m_crop_h);
-	f.Write("scalebar pos", m_sb_pos);
-	f.Write("scalebar x", m_sb_x);
-	f.Write("scalebar y", m_sb_y);
+	f->Write("full frame num", m_full_frame_num);
+	f->Write("movie len", m_movie_len);
+	f->Write("fps", m_fps);
+	f->Write("clip start frame", m_clip_start_frame);
+	f->Write("clip end frame", m_clip_end_frame);
+	f->Write("cur frame", m_cur_frame);
+	f->Write("cur time", m_cur_time);
 
-	f.Write("key duration", m_key_duration);
-	f.Write("cam lock", m_cam_lock);
-	f.Write("cam lock type", m_cam_lock_type);
+	f->Write("crop", m_crop);
+	f->Write("crop x", m_crop_x);
+	f->Write("crop y", m_crop_y);
+	f->Write("crop w", m_crop_w);
+	f->Write("crop h", m_crop_h);
+	f->Write("scalebar pos", m_sb_pos);
+	f->Write("scalebar x", m_sb_x);
+	f->Write("scalebar y", m_sb_y);
+
+	f->Write("key duration", m_key_duration);
+	f->Write("cam lock", m_cam_lock);
+	f->Write("cam lock type", m_cam_lock_type);
 }
 
 void MovieDefault::Set(MovieMaker* mm)

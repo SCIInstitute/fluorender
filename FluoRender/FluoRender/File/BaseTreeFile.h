@@ -28,6 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _BASETREEFILE_H_
 #define _BASETREEFILE_H_
 
+#include <Color.h>
+#include <Point.h>
+#include <Vector.h>
 #include <string>
 #include <vector>
 #include <type_traits>
@@ -84,6 +87,15 @@ public:
 		else if constexpr (std::is_same_v<T, float>) {
 			return ReadFloat(key, value);
 		}
+		else if constexpr (std::is_same_v<T, fluo::Color>) {
+			return ReadColor(key, value);
+		}
+		else if constexpr (std::is_same_v<T, fluo::Point>) {
+			return ReadPoint(key, value);
+		}
+		else if constexpr (std::is_same_v<T, fluo::Vector>) {
+			return ReadVector(key, value);
+		}
 		else {
 			static_assert(always_false<T>::value, "Unsupported type");
 		}
@@ -126,6 +138,15 @@ public:
 		}
 		else if constexpr (std::is_same_v<T, float>) {
 			return ReadFloat(key, value, defaultVal);
+		}
+		else if constexpr (std::is_same_v<T, fluo::Color>) {
+			return ReadColor(key, value, defaultVal);
+		}
+		else if constexpr (std::is_same_v<T, fluo::Point>) {
+			return ReadPoint(key, value, defaultVal);
+		}
+		else if constexpr (std::is_same_v<T, fluo::Vector>) {
+			return ReadVector(key, value, defaultVal);
 		}
 		else {
 			static_assert(always_false<T>::value, "Unsupported type");
@@ -171,6 +192,15 @@ public:
 		else if constexpr (std::is_same_v<T, float>) {
 			return WriteFloat(key, value);
 		}
+		else if constexpr (std::is_same_v<T, fluo::Color>) {
+			return WriteColor(key, value);
+		}
+		else if constexpr (std::is_same_v<T, fluo::Point>) {
+			return WritePoint(key, value);
+		}
+		else if constexpr (std::is_same_v<T, fluo::Vector>) {
+			return WriteVector(key, value);
+		}
 		else {
 			static_assert(always_false<T>::value, "Unsupported type");
 		}
@@ -213,6 +243,9 @@ protected:
 	virtual bool ReadUShort(const std::string& key, unsigned short* value, unsigned short def = 0) const = 0;
 	virtual bool ReadDouble(const std::string& key, double* value, double def = 0.0) const = 0;
 	virtual bool ReadFloat(const std::string& key, float* value, float def = 0.0f) const = 0;
+	virtual bool ReadColor(const std::string& key, fluo::Color* value, const fluo::Color& def = fluo::Color(0.0)) const = 0;
+	virtual bool ReadPoint(const std::string& key, fluo::Point* value, const fluo::Point& def = fluo::Point(0.0)) const = 0;
+	virtual bool ReadVector(const std::string& key, fluo::Vector* value, const fluo::Vector& def = fluo::Vector(0.0)) const = 0;
 
 	// Type-specific write methods
 	virtual bool WriteString(const std::string& key, const std::string& value) = 0;
@@ -227,6 +260,9 @@ protected:
 	virtual bool WriteUShort(const std::string& key, unsigned short value) = 0;
 	virtual bool WriteDouble(const std::string& key, double value) = 0;
 	virtual bool WriteFloat(const std::string& key, float value) = 0;
+	virtual bool WriteColor(const std::string& key, const fluo::Color& value) = 0;
+	virtual bool WritePoint(const std::string& key, const fluo::Point& value) = 0;
+	virtual bool WriteVector(const std::string& key, const fluo::Vector& value) = 0;
 
 	//path processing
 	std::vector<std::string> splitPath(const std::string& path) const {

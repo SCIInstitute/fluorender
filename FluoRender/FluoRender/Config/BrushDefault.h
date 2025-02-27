@@ -28,8 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _BRUSHDEFAULT_H_
 #define _BRUSHDEFAULT_H_
 
-#include <wx/fileconf.h>
-
 namespace flrd
 {
 	struct BrushRadiusSet;
@@ -41,8 +39,8 @@ public:
 	BrushDefault();
 	~BrushDefault();
 
-	void Read(wxFileConfig& f);
-	void Save(wxFileConfig& f);
+	void Read();
+	void Save();
 	void Set(flrd::VolumeSelector* vs);
 	void Apply(flrd::VolumeSelector* vs);
 

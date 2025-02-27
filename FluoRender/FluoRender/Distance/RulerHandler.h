@@ -34,7 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 
 class RenderCanvas;
-class wxFileConfig;
 class VolumeData;
 
 namespace flrd

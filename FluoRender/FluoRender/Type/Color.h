@@ -31,6 +31,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include <stdlib.h>
 #include <iostream>
+#include <string>
+#include <sstream>
 
 namespace fluo
 {
@@ -75,9 +77,9 @@ namespace fluo
 			}
 		}
 
-		inline double hue() const {return hue_;}
-		inline double sat() const {return sat_;}
-		inline double val() const {return val_;}
+		inline double hue() const { return hue_; }
+		inline double sat() const { return sat_; }
+		inline double val() const { return val_; }
 
 		friend std::ostream& operator<<(std::ostream& os, const HSVColor& c)
 		{
@@ -106,6 +108,7 @@ namespace fluo
 		Color(double);
 		Color(double[3]);
 		Color(const Color&);
+		Color(const std::string& s);
 		Color& operator=(const Color&);
 		Color(const HSVColor&);
 		Color(unsigned int id, int shuffle = 0);
@@ -120,22 +123,22 @@ namespace fluo
 
 		inline int operator==(const Color& c) const
 		{
-			return ((r_==c.r_)&&(g_==c.g_)&&(b_==c.b_));
+			return ((r_ == c.r_) && (g_ == c.g_) && (b_ == c.b_));
 		}
 
 		inline int operator!=(const Color& c) const
 		{
-			return ((r_ != c.r_)||(g_!=c.g_)||(b_!=c.b_));
+			return ((r_ != c.r_) || (g_ != c.g_) || (b_ != c.b_));
 		}
 
 		void get_color(double color[4]);
-		inline double r() const {return r_;}
-		inline double g() const {return g_;}
-		inline double b() const {return b_;}
+		inline double r() const { return r_; }
+		inline double g() const { return g_; }
+		inline double b() const { return b_; }
 
-		inline void r( const double v ) { r_ = v; }
-		inline void g( const double v ) { g_ = v; }
-		inline void b( const double v ) { b_ = v; }
+		inline void r(const double v) { r_ = v; }
+		inline void g(const double v) { g_ = v; }
+		inline void b(const double v) { b_ = v; }
 
 		inline double& operator[](int i)
 		{
@@ -164,11 +167,24 @@ namespace fluo
 
 		inline void rand()
 		{
-			double hue = (double)::rand()/(RAND_MAX) * 360.0;
+			double hue = (double)::rand() / (RAND_MAX) * 360.0;
 			Color color(HSVColor(hue, 1.0, 1.0));
 			r_ = color.r();
 			g_ = color.g();
 			b_ = color.b();
+		}
+
+		inline std::string to_string() const
+		{
+			std::ostringstream oss;
+			oss << *this;
+		}
+
+		static Color from_string(const std::string& str) {
+			std::istringstream is(str);
+			Color c;
+			is >> c;
+			return c;
 		}
 
 		friend std::ostream& operator<<(std::ostream& os, const Color& c)
@@ -179,8 +195,15 @@ namespace fluo
 		friend std::istream& operator >> (std::istream& is, Color& c)
 		{
 			double r, g, b;
-			char st;
-			is >> st >> r >> st >> g >> st >> b >> st;
+			char ch;
+			is >> ch;
+			if (ch == '[') {
+				is >> r >> ch >> g >> ch >> b >> ch;
+			}
+			else {
+				is.putback(ch);
+				is >> r >> g >> b;
+			}
 			c = Color(r, g, b);
 			return is;
 		}
@@ -195,9 +218,9 @@ namespace fluo
 		Colorub() {};
 		Colorub(Color& c)
 		{
-			data[0] = (unsigned char)(c.r()*255);
-			data[1] = (unsigned char)(c.g()*255);
-			data[2] = (unsigned char)(c.b()*255);
+			data[0] = (unsigned char)(c.r() * 255);
+			data[1] = (unsigned char)(c.g() * 255);
+			data[2] = (unsigned char)(c.b() * 255);
 		}; // converts them...
 
 		unsigned char* ptr() { return &data[0]; }; // grab pointer
@@ -221,18 +244,18 @@ namespace fluo
 		char blue;
 		// char alpha;
 
-		CharColor ();
-		CharColor ( char a, char b, char c );
-		CharColor ( Color& c );
+		CharColor();
+		CharColor(char a, char b, char c);
+		CharColor(Color& c);
 
-		inline double r() const {return red;}
-		inline double g() const {return green;}
-		inline double b() const {return blue;}
+		inline double r() const { return red; }
+		inline double g() const { return green; }
+		inline double b() const { return blue; }
 
-		CharColor operator= ( const Color& );
-		CharColor operator= ( const CharColor& );
+		CharColor operator= (const Color&);
+		CharColor operator= (const CharColor&);
 
-		int operator!= ( const CharColor& ) const;
+		int operator!= (const CharColor&) const;
 
 	};
 

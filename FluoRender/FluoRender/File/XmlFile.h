@@ -510,6 +510,18 @@ protected:
 		return false;
 	}
 
+	bool ReadColor(const std::string& key, fluo::Color* value, const fluo::Color& def = fluo::Color(0.0)) const override
+	{
+		std::string str;
+		if (ReadString(key, &str))
+		{
+			*value = fluo::Color(str);
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
 	// Implement type-specific write methods
 	bool WriteString(const std::string& key, const std::string& value) override
 	{

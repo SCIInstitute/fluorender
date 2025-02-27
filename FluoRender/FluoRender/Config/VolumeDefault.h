@@ -28,8 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMEDEFAULT_H_
 #define _VOLUMEDEFAULT_H_
 
-#include <wx/fileconf.h>
-
 class VolumeData;
 class DataGroup;
 class VolumeDataDefault
@@ -38,8 +36,8 @@ public:
 	VolumeDataDefault();
 	~VolumeDataDefault();
 
-	void Read(wxFileConfig& f);
-	void Save(wxFileConfig& f);
+	void Read();
+	void Save();
 	void Set(VolumeData* vd);
 	void Apply(VolumeData* vd);
 	void Copy(VolumeData* v1, VolumeData* v2);//v2 to v1

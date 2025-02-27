@@ -32,7 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <EntryHist.h>
 #include <EntryParams.h>
 #include <Reshape.h>
-#include <wx/wfstream.h>
 #include <algorithm>
 #ifdef _DEBUG
 #include <Debug.h>
@@ -1966,102 +1965,102 @@ void ComponentGenerator::GenerateDB()
 //command
 void ComponentGenerator::LoadCmd(const std::wstring& filename)
 {
-	wxFileInputStream is(filename);
-	if (!is.IsOk())
-		return;
-	wxFileConfig fconfig(is);
 	//m_cmd_file_text->ChangeValue(filename);
+	std::shared_ptr<BaseTreeFile> fconfig =
+		glbin_tree_file_factory.createTreeFile(filename, gstCompCommandFile);
+	if (!fconfig)
+		return;
 
 	m_command.clear();
 	int cmd_count = 0;
-	wxString str;
+	std::string str;
 	std::string cmd_str = "/cmd" + std::to_string(cmd_count);
-	while (fconfig.Exists(cmd_str))
+	while (fconfig->Exists(cmd_str))
 	{
 		flrd::CompCmdParams params;
-		fconfig.SetPath(cmd_str);
-		str = fconfig.Read("type", "");
+		fconfig->SetPath(cmd_str);
+		fconfig->Read("type", &str, std::string(""));
 		if (str == "generate" ||
 			str == "clean" ||
 			str == "fixate")
-			params.push_back(str.ToStdString());
+			params.push_back(str);
 		else
 			continue;
 		long lval;
-		if (fconfig.Read("iter", &lval))
+		if (fconfig->Read("iter", &lval))
 		{
 			params.push_back("iter"); params.push_back(std::to_string(lval));
 		}
-		if (fconfig.Read("use_dist_field", &lval))
+		if (fconfig->Read("use_dist_field", &lval))
 		{
 			params.push_back("use_dist_field"); params.push_back(std::to_string(lval));
 		}
-		if (fconfig.Read("dist_filter_size", &lval))
+		if (fconfig->Read("dist_filter_size", &lval))
 		{
 			params.push_back("dist_filter_size"); params.push_back(std::to_string(lval));
 		}
-		if (fconfig.Read("max_dist", &lval))
+		if (fconfig->Read("max_dist", &lval))
 		{
 			params.push_back("max_dist"); params.push_back(std::to_string(lval));
 		}
-		if (fconfig.Read("diff", &lval))
+		if (fconfig->Read("diff", &lval))
 		{
 			params.push_back("diff"); params.push_back(std::to_string(lval));
 		}
-		if (fconfig.Read("density", &lval))
+		if (fconfig->Read("density", &lval))
 		{
 			params.push_back("density"); params.push_back(std::to_string(lval));
 		}
-		if (fconfig.Read("density_window_size", &lval))
+		if (fconfig->Read("density_window_size", &lval))
 		{
 			params.push_back("density_window_size"); params.push_back(std::to_string(lval));
 		}
-		if (fconfig.Read("density_stats_size", &lval))
+		if (fconfig->Read("density_stats_size", &lval))
 		{
 			params.push_back("density_stats_size"); params.push_back(std::to_string(lval));
 		}
-		if (fconfig.Read("cleanb", &lval))
+		if (fconfig->Read("cleanb", &lval))
 		{
 			params.push_back("cleanb"); params.push_back(std::to_string(lval));
 		}
-		if (fconfig.Read("clean_iter", &lval))
+		if (fconfig->Read("clean_iter", &lval))
 		{
 			params.push_back("clean_iter"); params.push_back(std::to_string(lval));
 		}
-		if (fconfig.Read("clean_size_vl", &lval))
+		if (fconfig->Read("clean_size_vl", &lval))
 		{
 			params.push_back("clean_size_vl"); params.push_back(std::to_string(lval));
 		}
-		if (fconfig.Read("grow_fixed", &lval))
+		if (fconfig->Read("grow_fixed", &lval))
 		{
 			params.push_back("grow_fixed"); params.push_back(std::to_string(lval));
 		}
-		if (fconfig.Read("fix_size", &lval))
+		if (fconfig->Read("fix_size", &lval))
 		{
 			params.push_back("fix_size"); params.push_back(std::to_string(lval));
 		}
 		double dval;
-		if (fconfig.Read("thresh", &dval))
+		if (fconfig->Read("thresh", &dval))
 		{
 			params.push_back("thresh"); params.push_back(std::to_string(dval));
 		}
-		if (fconfig.Read("dist_strength", &dval))
+		if (fconfig->Read("dist_strength", &dval))
 		{
 			params.push_back("dist_strength"); params.push_back(std::to_string(dval));
 		}
-		if (fconfig.Read("dist_thresh", &dval))
+		if (fconfig->Read("dist_thresh", &dval))
 		{
 			params.push_back("dist_thresh"); params.push_back(std::to_string(dval));
 		}
-		if (fconfig.Read("falloff", &dval))
+		if (fconfig->Read("falloff", &dval))
 		{
 			params.push_back("falloff"); params.push_back(std::to_string(dval));
 		}
-		if (fconfig.Read("density_thresh", &dval))
+		if (fconfig->Read("density_thresh", &dval))
 		{
 			params.push_back("density_thresh"); params.push_back(std::to_string(dval));
 		}
-		if (fconfig.Read("varth", &dval))
+		if (fconfig->Read("varth", &dval))
 		{
 			params.push_back("varth"); params.push_back(std::to_string(dval));
 		}
@@ -2072,7 +2071,7 @@ void ComponentGenerator::LoadCmd(const std::wstring& filename)
 	}
 	//record
 	//int ival = m_command.size();
-	//m_cmd_count_text->ChangeValue(wxString::Format("%d", ival));
+	//m_cmd_count_text->ChangeValue(Format("%d", ival));
 }
 
 void ComponentGenerator::SaveCmd(const std::wstring& filename)
@@ -2082,9 +2081,11 @@ void ComponentGenerator::SaveCmd(const std::wstring& filename)
 		AddCmd("generate");
 	}
 
-	wxFileConfig fconfig("", "", filename, "",
-		wxCONFIG_USE_LOCAL_FILE);
-	fconfig.DeleteAll();
+	std::shared_ptr<BaseTreeFile> fconfig =
+		glbin_tree_file_factory.createTreeFile(
+			glbin_settings.m_config_file_type, gstCompCommandFile);
+	if (!fconfig)
+		return;
 
 	int cmd_count = 0;
 	std::string str, str2;
@@ -2099,9 +2100,9 @@ void ComponentGenerator::SaveCmd(const std::wstring& filename)
 			(*it)[0] == "fixate")
 		{
 			str = "/cmd" + std::to_string(cmd_count++);
-			fconfig.SetPath(str);
+			fconfig->SetPath(str);
 			str = (*it)[0];
-			fconfig.Write("type", wxString(str));
+			fconfig->Write("type", str);
 		}
 		for (auto it2 = it->begin();
 			it2 != it->end(); ++it2)
@@ -2123,7 +2124,7 @@ void ComponentGenerator::SaveCmd(const std::wstring& filename)
 				str = (*it2);
 				++it2;
 				str2 = (*it2);
-				fconfig.Write(str, std::stoi(str2));
+				fconfig->Write(str, std::stoi(str2));
 			}
 			else if (*it2 == "thresh" ||
 				*it2 == "dist_strength" ||
@@ -2135,12 +2136,13 @@ void ComponentGenerator::SaveCmd(const std::wstring& filename)
 				str = (*it2);
 				++it2;
 				str2 = (*it2);
-				fconfig.Write(str, std::stod(str2));
+				fconfig->Write(str, std::stod(str2));
 			}
 		}
 	}
 
-	glbin_project.SaveConfig(fconfig, filename);
+	fconfig->SaveFile(filename);
+	//glbin_project.SaveConfig(fconfig, filename);
 	//m_cmd_file_text->ChangeValue(filename);
 }
 
@@ -2200,7 +2202,7 @@ void ComponentGenerator::AddCmd(const std::string& type)
 
 	//record
 	//int ival = m_command.size();
-	//m_cmd_count_text->ChangeValue(wxString::Format("%d", ival));
+	//m_cmd_count_text->ChangeValue(Format("%d", ival));
 }
 
 void ComponentGenerator::ResetCmd()
@@ -2210,7 +2212,7 @@ void ComponentGenerator::ResetCmd()
 	m_record_cmd = false;
 	//record
 	//int ival = m_command.size();
-	//m_cmd_count_text->ChangeValue(wxString::Format("%d", ival));
+	//m_cmd_count_text->ChangeValue(Format("%d", ival));
 }
 
 void ComponentGenerator::PlayCmd(double tfactor)

@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _COLOCALDEFAULT_H_
 #define _COLOCALDEFAULT_H_
 
-#include <wx/fileconf.h>
 #include <limits>
 
 class ColocalDefault
@@ -37,8 +36,8 @@ public:
 	ColocalDefault();
 	~ColocalDefault();
 
-	void Read(wxFileConfig& f);
-	void Save(wxFileConfig& f);
+	void Read();
+	void Save();
 
 	bool GetThreshUpdate()
 	{

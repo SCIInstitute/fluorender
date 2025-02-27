@@ -528,6 +528,42 @@ protected:
 		return false;
 	}
 
+	bool ReadColor(const std::string& key, fluo::Color* value, const fluo::Color& def = fluo::Color(0.0)) const override
+	{
+		std::string str;
+		if (ReadString(key, &str))
+		{
+			*value = fluo::Color(str);
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadPoint(const std::string& key, fluo::Point* value, const fluo::Point& def = fluo::Point(0.0)) const override
+	{
+		std::string str;
+		if (ReadString(key, &str))
+		{
+			*value = fluo::Point(str);
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
+	bool ReadVector(const std::string& key, fluo::Vector* value, const fluo::Vector& def = fluo::Vector(0.0)) const override
+	{
+		std::string str;
+		if (ReadString(key, &str))
+		{
+			*value = fluo::Vector(str);
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
 	// Implement type-specific write methods
 	bool WriteString(const std::string& key, const std::string& value) override
 	{
@@ -685,6 +721,24 @@ protected:
 		}
 		item->u.value = strdup(std::to_string(value).c_str());
 		return true;
+	}
+
+	bool WriteColor(const std::string& key, const fluo::Color& value) override
+	{
+		std::string str = value.to_string();
+		return WriteString(key, str);
+	}
+
+	bool WritePoint(const std::string& key, const fluo::Point& value) override
+	{
+		std::string str = value.to_string();
+		return WriteString(key, str);
+	}
+
+	bool WriteVector(const std::string& key, const fluo::Vector& value) override
+	{
+		std::string str = value.to_string();
+		return WriteString(key, str);
 	}
 
 private:

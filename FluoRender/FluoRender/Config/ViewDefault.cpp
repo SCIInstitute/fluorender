@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <ViewDefault.h>
 #include <Names.h>
+#include <Global.h>
 #include <RenderCanvas.h>
 
 ViewDefault::ViewDefault()
@@ -66,93 +67,79 @@ ViewDefault::~ViewDefault()
 
 }
 
-void ViewDefault::Read(wxFileConfig& f)
+void ViewDefault::Read()
 {
-	wxString str;
-	if (f.Exists("/view default"))
-		f.SetPath("/view default");
+	std::shared_ptr<BaseTreeFile> f =
+		glbin_tree_file_factory.getTreeFile(gstConfigFile);
+	if (!f)
+		return;
 
-	f.Read("vol method", &m_vol_method, 1);
-	if (f.Read("bg color", &str))
-	{
-		double r, g, b;
-		if (SSCANF(str.c_str(), "%lf%lf%lf", &r, &g, &b))
-			m_bg_color = fluo::Color(r, g, b);
-	}
-	f.Read("draw camctr", &m_draw_camctr, false);
-	f.Read("camctr size", &m_camctr_size, 2.0);
-	f.Read("draw info", &m_draw_info, 250);
-	f.Read("draw legend", &m_draw_legend, false);
-	f.Read("draw colormap", &m_draw_colormap, false);
-	f.Read("draw scalebar", &m_draw_scalebar, false);
-	f.Read("draw scalebar text", &m_draw_scalebar_text, false);
-	f.Read("scalebar len", &m_scalebar_len, 50);
-	f.Read("scalebar text", &str, L"50 \u03BCm");
-	m_scalebar_text = str.ToStdWstring();
-	f.Read("scalebar num", &str, "50");
-	m_scalebar_num = str.ToStdWstring();
-	f.Read("scalebar unit", &m_scalebar_unit, 1);
-	f.Read("mouse focus", &m_mouse_focus, false);
-	f.Read("persp", &m_persp, false);
-	f.Read("aov", &m_aov, 15.0);
-	f.Read("free", &m_free, false);
-	if (f.Read("center", &str))
-	{
-		double x, y, z;
-		if (SSCANF(str.c_str(), "%lf%lf%lf", &x, &y, &z))
-			m_center = fluo::Point(x, y, z);
-	}
-	f.Read("rot lock", &m_rot_lock, false);
-	f.Read("pin rot center", &m_pin_rot_center, false);
-	f.Read("scale mode", &m_scale_mode, 0);
-	f.Read("scale factor", &m_scale_factor, 1.0);
-	f.Read("use fog", &m_use_fog, false);
-	f.Read("fog intensity", &m_fog_intensity, 0.0);
+	if (f->Exists("/view default"))
+		f->SetPath("/view default");
 
-	if (f.Read("rot", &str))
-	{
-		double x, y, z;
-		if (SSCANF(str.c_str(), "%lf%lf%lf", &x, &y, &z))
-			m_rot = fluo::Vector(x, y, z);
-	}
-	f.Read("rot slider", &m_rot_slider, true);
+	f->Read("vol method", &m_vol_method, 1);
+	f->Read("bg color", &m_bg_color);
+	f->Read("draw camctr", &m_draw_camctr, false);
+	f->Read("camctr size", &m_camctr_size, 2.0);
+	f->Read("draw info", &m_draw_info, 250);
+	f->Read("draw legend", &m_draw_legend, false);
+	f->Read("draw colormap", &m_draw_colormap, false);
+	f->Read("draw scalebar", &m_draw_scalebar, false);
+	f->Read("draw scalebar text", &m_draw_scalebar_text, false);
+	f->Read("scalebar len", &m_scalebar_len, 50.0);
+	f->Read("scalebar text", &m_scalebar_text, std::wstring(L"50 \u03BCm"));
+	f->Read("scalebar num", &m_scalebar_num, std::wstring(L"50"));
+	f->Read("scalebar unit", &m_scalebar_unit, 1);
+	f->Read("mouse focus", &m_mouse_focus, false);
+	f->Read("persp", &m_persp, false);
+	f->Read("aov", &m_aov, 15.0);
+	f->Read("free", &m_free, false);
+	f->Read("center", &m_center);
+	f->Read("rot lock", &m_rot_lock, false);
+	f->Read("pin rot center", &m_pin_rot_center, false);
+	f->Read("scale mode", &m_scale_mode, 0);
+	f->Read("scale factor", &m_scale_factor, 1.0);
+	f->Read("use fog", &m_use_fog, false);
+	f->Read("fog intensity", &m_fog_intensity, 0.0);
+	f->Read("rot", &m_rot);
+	f->Read("rot slider", &m_rot_slider, true);
 }
 
-void ViewDefault::Save(wxFileConfig& f)
+void ViewDefault::Save()
 {
-	wxString str;
-	f.SetPath("/view default");
+	std::shared_ptr<BaseTreeFile> f =
+		glbin_tree_file_factory.getTreeFile(gstConfigFile);
+	if (!f)
+		return;
 
-	f.Write("vol method", m_vol_method);
-	str = wxString::Format("%f %f %f", m_bg_color.r(), m_bg_color.g(), m_bg_color.b());
-	f.Write("bg color", str);
-	f.Write("draw camctr", m_draw_camctr);
-	f.Write("camctr size", m_camctr_size);
-	f.Write("draw info", m_draw_info);
-	f.Write("draw legend", m_draw_legend);
-	f.Write("draw colormap", m_draw_colormap);
-	f.Write("draw scalebar", m_draw_scalebar);
-	f.Write("draw scalebar text", m_draw_scalebar_text);
-	f.Write("scalebar len", m_scalebar_len);
-	f.Write("scalebar text", wxString(m_scalebar_text));
-	f.Write("scalebar num", wxString(m_scalebar_num));
-	f.Write("scalebar unit", m_scalebar_unit);
-	f.Write("mouse focus", m_mouse_focus);
-	f.Write("persp", m_persp);
-	f.Write("aov", m_aov);
-	f.Write("free", m_free);
-	str = wxString::Format("%f %f %f", m_center.x(), m_center.y(), m_center.z());
-	f.Write("center", str);
-	f.Write("rot lock", m_rot_lock);
-	f.Write("pin rot center", m_pin_rot_center);
-	f.Write("scale mode", m_scale_mode);
-	f.Write("scale factor", m_scale_factor);
-	f.Write("use fog", m_use_fog);
-	f.Write("fog intensity", m_fog_intensity);
+	f->SetPath("/view default");
 
-	str = wxString::Format("%f %f %f", m_rot.x(), m_rot.y(), m_rot.z());
-	f.Write("rot", str);
-	f.Write("rot slider", m_rot_slider);
+	f->Write("vol method", m_vol_method);
+	f->Write("bg color", m_bg_color);
+	f->Write("draw camctr", m_draw_camctr);
+	f->Write("camctr size", m_camctr_size);
+	f->Write("draw info", m_draw_info);
+	f->Write("draw legend", m_draw_legend);
+	f->Write("draw colormap", m_draw_colormap);
+	f->Write("draw scalebar", m_draw_scalebar);
+	f->Write("draw scalebar text", m_draw_scalebar_text);
+	f->Write("scalebar len", m_scalebar_len);
+	f->Write("scalebar text", wxString(m_scalebar_text));
+	f->Write("scalebar num", wxString(m_scalebar_num));
+	f->Write("scalebar unit", m_scalebar_unit);
+	f->Write("mouse focus", m_mouse_focus);
+	f->Write("persp", m_persp);
+	f->Write("aov", m_aov);
+	f->Write("free", m_free);
+	f->Write("center", m_center);
+	f->Write("rot lock", m_rot_lock);
+	f->Write("pin rot center", m_pin_rot_center);
+	f->Write("scale mode", m_scale_mode);
+	f->Write("scale factor", m_scale_factor);
+	f->Write("use fog", m_use_fog);
+	f->Write("fog intensity", m_fog_intensity);
+	f->Write("rot", m_rot);
+	f->Write("rot slider", m_rot_slider);
 }
 
 void ViewDefault::Set(RenderCanvas* canvas)

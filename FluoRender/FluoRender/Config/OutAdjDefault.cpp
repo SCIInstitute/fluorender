@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <OutAdjDefault.h>
 #include <Names.h>
+#include <Global.h>
 #include <RenderCanvas.h>
 #include <DataManager.h>
 
@@ -53,51 +54,61 @@ OutAdjDefault::~OutAdjDefault()
 
 }
 
-void OutAdjDefault::Read(wxFileConfig& f)
+void OutAdjDefault::Read()
 {
-	if (f.Exists("/outadj default"))
-		f.SetPath("/outadj default");
+	std::shared_ptr<BaseTreeFile> f =
+		glbin_tree_file_factory.getTreeFile(gstConfigFile);
+	if (!f)
+		return;
 
-	f.Read("split", &m_split, true);
+	if (f->Exists("/outadj default"))
+		f->SetPath("/outadj default");
 
-	f.Read("sync_r", &m_sync_r, false);
-	f.Read("sync_g", &m_sync_g, false);
-	f.Read("sync_b", &m_sync_b, false);
+	f->Read("split", &m_split, true);
 
-	f.Read("gamma_r", &m_gamma_r, 1.0);
-	f.Read("gamma_g", &m_gamma_g, 1.0);
-	f.Read("gamma_b", &m_gamma_b, 1.0);
+	f->Read("sync_r", &m_sync_r, false);
+	f->Read("sync_g", &m_sync_g, false);
+	f->Read("sync_b", &m_sync_b, false);
 
-	f.Read("brightness_r", &m_brightness_r, 1.0);
-	f.Read("brightness_g", &m_brightness_g, 1.0);
-	f.Read("brightness_b", &m_brightness_b, 1.0);
+	f->Read("gamma_r", &m_gamma_r, 1.0);
+	f->Read("gamma_g", &m_gamma_g, 1.0);
+	f->Read("gamma_b", &m_gamma_b, 1.0);
 
-	f.Read("hdr_r", &m_hdr_r, 0.0);
-	f.Read("hdr_g", &m_hdr_g, 0.0);
-	f.Read("hdr_b", &m_hdr_b, 0.0);
+	f->Read("brightness_r", &m_brightness_r, 1.0);
+	f->Read("brightness_g", &m_brightness_g, 1.0);
+	f->Read("brightness_b", &m_brightness_b, 1.0);
+
+	f->Read("hdr_r", &m_hdr_r, 0.0);
+	f->Read("hdr_g", &m_hdr_g, 0.0);
+	f->Read("hdr_b", &m_hdr_b, 0.0);
 }
 
-void OutAdjDefault::Save(wxFileConfig& f)
+void OutAdjDefault::Save()
 {
-	f.SetPath("/outadj default");
+	std::shared_ptr<BaseTreeFile> f =
+		glbin_tree_file_factory.getTreeFile(gstConfigFile);
+	if (!f)
+		return;
 
-	f.Write("split", m_split);
+	f->SetPath("/outadj default");
 
-	f.Write("sync_r", m_sync_r);
-	f.Write("sync_g", m_sync_g);
-	f.Write("sync_b", m_sync_b);
+	f->Write("split", m_split);
 
-	f.Write("gamma_r", m_gamma_r);
-	f.Write("gamma_g", m_gamma_g);
-	f.Write("gamma_b", m_gamma_b);
+	f->Write("sync_r", m_sync_r);
+	f->Write("sync_g", m_sync_g);
+	f->Write("sync_b", m_sync_b);
 
-	f.Write("brightness_r", m_brightness_r);
-	f.Write("brightness_g", m_brightness_g);
-	f.Write("brightness_b", m_brightness_b);
+	f->Write("gamma_r", m_gamma_r);
+	f->Write("gamma_g", m_gamma_g);
+	f->Write("gamma_b", m_gamma_b);
 
-	f.Write("hdr_r", m_hdr_r);
-	f.Write("hdr_g", m_hdr_g);
-	f.Write("hdr_b", m_hdr_b);
+	f->Write("brightness_r", m_brightness_r);
+	f->Write("brightness_g", m_brightness_g);
+	f->Write("brightness_b", m_brightness_b);
+
+	f->Write("hdr_r", m_hdr_r);
+	f->Write("hdr_g", m_hdr_g);
+	f->Write("hdr_b", m_hdr_b);
 }
 
 void OutAdjDefault::Set(RenderCanvas* view)

@@ -28,8 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _OUTADJDEFAULT_H_
 #define _OUTADJDEFAULT_H_
 
-#include <wx/fileconf.h>
-
 class RenderCanvas;
 class TreeLayer;
 class OutAdjDefault
@@ -38,8 +36,8 @@ public:
 	OutAdjDefault();
 	~OutAdjDefault();
 
-	void Read(wxFileConfig& f);
-	void Save(wxFileConfig& f);
+	void Read();
+	void Save();
 	void Set(RenderCanvas* view);
 	void Apply(RenderCanvas* view);
 	void Set(TreeLayer* layer);

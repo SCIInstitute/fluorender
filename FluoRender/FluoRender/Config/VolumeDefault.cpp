@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <VolumeDefault.h>
 #include <DataManager.h>
+#include <Global.h>
 #include <Names.h>
 #include <Color.h>
 
@@ -98,119 +99,129 @@ VolumeDataDefault::~VolumeDataDefault()
 
 }
 
-void VolumeDataDefault::Read(wxFileConfig& f)
+void VolumeDataDefault::Read()
 {
-	if (f.Exists("/volume default"))
-		f.SetPath("/volume default");
+	std::shared_ptr<BaseTreeFile> f =
+		glbin_tree_file_factory.getTreeFile(gstConfigFile);
+	if (!f)
+		return;
 
-	f.Read(gstGammaEnable, &m_gamma_enable, true);
-	f.Read(gstGamma3d, &m_gamma, 1.0);
+	if (f->Exists("/volume default"))
+		f->SetPath("/volume default");
 
-	f.Read(gstBoundaryEnable, &m_boundary_enable, true);
-	f.Read(gstBoundary, &m_boundary, 0.0);
+	f->Read(gstGammaEnable, &m_gamma_enable, true);
+	f->Read(gstGamma3d, &m_gamma, 1.0);
 
-	f.Read(gstSaturationEnable, &m_saturation_enable, true);
-	f.Read(gstSaturation, &m_saturation, 1.0);
+	f->Read(gstBoundaryEnable, &m_boundary_enable, true);
+	f->Read(gstBoundary, &m_boundary, 0.0);
 
-	f.Read(gstThresholdEnable, &m_thresh_enable, true);
-	f.Read(gstLowThreshold, &m_lo_thresh, 0.0);
-	f.Read(gstHighThreshold, &m_hi_thresh, 1.0);
-	f.Read("soft thresh", &m_sw, 0.0);
+	f->Read(gstSaturationEnable, &m_saturation_enable, true);
+	f->Read(gstSaturation, &m_saturation, 1.0);
 
-	f.Read(gstLuminanceEnable, &m_luminance_enable, true);
-	f.Read(gstLuminance, &m_luminance, 1.0);
+	f->Read(gstThresholdEnable, &m_thresh_enable, true);
+	f->Read(gstLowThreshold, &m_lo_thresh, 0.0);
+	f->Read(gstHighThreshold, &m_hi_thresh, 1.0);
+	f->Read("soft thresh", &m_sw, 0.0);
 
-	f.Read(gstAlphaEnable, &m_alpha_enable, true);
-	f.Read(gstAlpha, &m_alpha, 1.0);
+	f->Read(gstLuminanceEnable, &m_luminance_enable, true);
+	f->Read(gstLuminance, &m_luminance, 1.0);
 
-	f.Read(gstShadingEnable, &m_shading_enable, false);
-	f.Read(gstLowShading, &m_low_shading, 1.0);
-	f.Read(gstHighShading, &m_high_shading, 10.0);
+	f->Read(gstAlphaEnable, &m_alpha_enable, true);
+	f->Read(gstAlpha, &m_alpha, 1.0);
 
-	f.Read(gstShadowEnable, &m_shadow_enable, false);
-	f.Read(gstShadowInt, &m_shadow_intensity, 0.0);
+	f->Read(gstShadingEnable, &m_shading_enable, false);
+	f->Read(gstLowShading, &m_low_shading, 1.0);
+	f->Read(gstHighShading, &m_high_shading, 10.0);
 
-	f.Read(gstSampleRateEnable, &m_sample_rate_enable, true);
-	f.Read(gstSampleRate, &m_sample_rate, 2.0);
+	f->Read(gstShadowEnable, &m_shadow_enable, false);
+	f->Read(gstShadowInt, &m_shadow_intensity, 0.0);
 
-	f.Read(gstSpcX, &m_spcx, 1.0);
-	f.Read(gstSpcY, &m_spcy, 1.0);
-	f.Read(gstSpcZ, &m_spcz, 1.0);
+	f->Read(gstSampleRateEnable, &m_sample_rate_enable, true);
+	f->Read(gstSampleRate, &m_sample_rate, 2.0);
 
-	f.Read(gstColormapMode, &m_colormap_mode, 0);
-	f.Read(gstColormapDisp, &m_colormap_disp, false);
-	f.Read(gstColormapLow, &m_colormap_low_value, 0.0);
-	f.Read(gstColormapHigh, &m_colormap_hi_value, 1.0);
-	f.Read(gstColormapInv, &m_colormap_inv, 1.0);
-	f.Read(gstColormapType, &m_colormap_type, 0);
-	f.Read(gstColormapProj, &m_colormap_proj, 0);
+	f->Read(gstSpcX, &m_spcx, 1.0);
+	f->Read(gstSpcY, &m_spcy, 1.0);
+	f->Read(gstSpcZ, &m_spcz, 1.0);
 
-	f.Read(gstNoiseRedct, &m_noise_rd, false);
-	f.Read(gstInterpolate, &m_interpolate, true);
-	f.Read(gstInvert, &m_inverted, false);
-	f.Read(gstMipMode, &m_mip_enable, false);
-	f.Read(gstTransparent, &m_transparent, false);
+	f->Read(gstColormapMode, &m_colormap_mode, 0);
+	f->Read(gstColormapDisp, &m_colormap_disp, false);
+	f->Read(gstColormapLow, &m_colormap_low_value, 0.0);
+	f->Read(gstColormapHigh, &m_colormap_hi_value, 1.0);
+	f->Read(gstColormapInv, &m_colormap_inv, 1.0);
+	f->Read(gstColormapType, &m_colormap_type, 0);
+	f->Read(gstColormapProj, &m_colormap_proj, 0);
 
-	f.Read(gstBlendMode, &m_blend_mode, 0);
-	f.Read(gstLegend, &m_legend, true);
-	f.Read(gstLabelMode, &m_label_mode, 1);
+	f->Read(gstNoiseRedct, &m_noise_rd, false);
+	f->Read(gstInterpolate, &m_interpolate, true);
+	f->Read(gstInvert, &m_inverted, false);
+	f->Read(gstMipMode, &m_mip_enable, false);
+	f->Read(gstTransparent, &m_transparent, false);
+
+	f->Read(gstBlendMode, &m_blend_mode, 0);
+	f->Read(gstLegend, &m_legend, true);
+	f->Read(gstLabelMode, &m_label_mode, 1);
 }
 
-void VolumeDataDefault::Save(wxFileConfig& f)
+void VolumeDataDefault::Save()
 {
-	f.SetPath("/volume default");
+	std::shared_ptr<BaseTreeFile> f =
+		glbin_tree_file_factory.getTreeFile(gstConfigFile);
+	if (!f)
+		return;
 
-	f.Write(gstGammaEnable, m_gamma_enable);
-	f.Write(gstGamma3d, m_gamma);
+	f->SetPath("/volume default");
 
-	f.Write(gstBoundaryEnable, m_boundary_enable);
-	f.Write(gstBoundary, m_boundary);
+	f->Write(gstGammaEnable, m_gamma_enable);
+	f->Write(gstGamma3d, m_gamma);
 
-	f.Write(gstSaturationEnable, m_saturation_enable);
-	f.Write(gstSaturation, m_saturation);
+	f->Write(gstBoundaryEnable, m_boundary_enable);
+	f->Write(gstBoundary, m_boundary);
 
-	f.Write(gstThresholdEnable, m_thresh_enable);
-	f.Write(gstLowThreshold, m_lo_thresh);
-	f.Write(gstHighThreshold, m_hi_thresh);
-	f.Write("soft thresh", m_sw);
+	f->Write(gstSaturationEnable, m_saturation_enable);
+	f->Write(gstSaturation, m_saturation);
 
-	f.Write(gstLuminanceEnable, m_luminance_enable);
-	f.Write(gstLuminance, m_luminance);
+	f->Write(gstThresholdEnable, m_thresh_enable);
+	f->Write(gstLowThreshold, m_lo_thresh);
+	f->Write(gstHighThreshold, m_hi_thresh);
+	f->Write("soft thresh", m_sw);
 
-	f.Write(gstAlphaEnable, m_alpha_enable);
-	f.Write(gstAlpha, m_alpha);
+	f->Write(gstLuminanceEnable, m_luminance_enable);
+	f->Write(gstLuminance, m_luminance);
 
-	f.Write(gstShadingEnable, m_shading_enable);
-	f.Write(gstLowShading, m_low_shading);
-	f.Write(gstHighShading, m_high_shading);
+	f->Write(gstAlphaEnable, m_alpha_enable);
+	f->Write(gstAlpha, m_alpha);
 
-	f.Write(gstShadowEnable, m_shadow_enable);
-	f.Write(gstShadowInt, m_shadow_intensity);
+	f->Write(gstShadingEnable, m_shading_enable);
+	f->Write(gstLowShading, m_low_shading);
+	f->Write(gstHighShading, m_high_shading);
 
-	f.Write(gstSampleRateEnable, m_sample_rate_enable);
-	f.Write(gstSampleRate, m_sample_rate);
+	f->Write(gstShadowEnable, m_shadow_enable);
+	f->Write(gstShadowInt, m_shadow_intensity);
 
-	f.Write(gstSpcX, m_spcx);
-	f.Write(gstSpcY, m_spcy);
-	f.Write(gstSpcZ, m_spcz);
+	f->Write(gstSampleRateEnable, m_sample_rate_enable);
+	f->Write(gstSampleRate, m_sample_rate);
 
-	f.Write(gstColormapMode, m_colormap_mode);
-	f.Write(gstColormapDisp, m_colormap_disp);
-	f.Write(gstColormapLow, m_colormap_low_value);
-	f.Write(gstColormapHigh, m_colormap_hi_value);
-	f.Write(gstColormapInv, m_colormap_inv);
-	f.Write(gstColormapType, m_colormap_type);
-	f.Write(gstColormapProj, m_colormap_proj);
+	f->Write(gstSpcX, m_spcx);
+	f->Write(gstSpcY, m_spcy);
+	f->Write(gstSpcZ, m_spcz);
 
-	f.Write(gstNoiseRedct, m_noise_rd);
-	f.Write(gstInterpolate, m_interpolate);
-	f.Write(gstInvert, m_inverted);
-	f.Write(gstMipMode, m_mip_enable);
-	f.Write(gstTransparent, m_transparent);
+	f->Write(gstColormapMode, m_colormap_mode);
+	f->Write(gstColormapDisp, m_colormap_disp);
+	f->Write(gstColormapLow, m_colormap_low_value);
+	f->Write(gstColormapHigh, m_colormap_hi_value);
+	f->Write(gstColormapInv, m_colormap_inv);
+	f->Write(gstColormapType, m_colormap_type);
+	f->Write(gstColormapProj, m_colormap_proj);
 
-	f.Write(gstBlendMode, m_blend_mode);
-	f.Write(gstLegend, m_legend);
-	f.Write(gstLabelMode, m_label_mode);
+	f->Write(gstNoiseRedct, m_noise_rd);
+	f->Write(gstInterpolate, m_interpolate);
+	f->Write(gstInvert, m_inverted);
+	f->Write(gstMipMode, m_mip_enable);
+	f->Write(gstTransparent, m_transparent);
+
+	f->Write(gstBlendMode, m_blend_mode);
+	f->Write(gstLegend, m_legend);
+	f->Write(gstLabelMode, m_label_mode);
 }
 
 void VolumeDataDefault::Set(VolumeData* vd)

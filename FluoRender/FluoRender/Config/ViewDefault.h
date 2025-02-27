@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Color.h>
 #include <Vector.h>
 #include <Point.h>
-#include <wx/fileconf.h>
 
 class RenderCanvas;
 class ViewDefault
@@ -40,8 +39,8 @@ public:
 	ViewDefault();
 	~ViewDefault();
 
-	void Read(wxFileConfig& f);
-	void Save(wxFileConfig& f);
+	void Read();
+	void Save();
 	void Set(RenderCanvas* view);
 	void Apply(RenderCanvas* view);
 

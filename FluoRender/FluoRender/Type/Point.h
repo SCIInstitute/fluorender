@@ -33,6 +33,7 @@
 #include <iosfwd>
 #include <iostream>
 #include <algorithm>
+#include <sstream>
 
 namespace fluo {
 	using std::string;
@@ -47,6 +48,7 @@ namespace fluo {
 		inline Point(double v) : x_(v), y_(v), z_(v) {}
 		Point(double, double, double, double);
 		Point(const Point&);
+		Point(const std::string& s);
 		inline Point();
 		inline int operator==(const Point&) const;
 		inline int operator!=(const Point&) const;
@@ -119,6 +121,19 @@ namespace fluo {
 			z_ = z;
 		}
 
+		inline std::string to_string() const
+		{
+			std::ostringstream oss;
+			oss << *this;
+		}
+
+		static Point from_string(const std::string& str) {
+			std::istringstream is(str);
+			Point p;
+			is >> p;
+			return p;
+		}
+
 		friend std::ostream& operator<<(std::ostream& os, const Point& p)
 		{
 			os << '[' << p.x() << ' ' << p.y() << ' ' << p.z() << ']';
@@ -127,8 +142,15 @@ namespace fluo {
 		friend std::istream& operator >> (std::istream& is, Point& p)
 		{
 			double x, y, z;
-			char st;
-			is >> st >> x >> st >> y >> st >> z >> st;
+			char ch;
+			is >> ch;
+			if (ch == '[') {
+				is >> x >> ch >> y >> ch >> z >> ch;
+			}
+			else {
+				is.putback(ch);
+				is >> x >> y >> z;
+			}
 			p = Point(x, y, z);
 			return is;
 		}

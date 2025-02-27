@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-
+#include <Global.h>
 #include <ColocalDefault.h>
 #include <Names.h>
 
@@ -47,35 +47,43 @@ ColocalDefault::~ColocalDefault()
 
 }
 
-void ColocalDefault::Read(wxFileConfig& f)
+void ColocalDefault::Read()
 {
-	wxString str;
-	if (f.Exists("/colocal default"))
-		f.SetPath("/colocal default");
+	std::shared_ptr<BaseTreeFile> f =
+		glbin_tree_file_factory.getTreeFile(gstConfigFile);
+	if (!f)
+		return;
 
-	f.Read("use mask", &m_use_mask, false);
-	f.Read("auto update", &m_auto_update, false);
-	f.Read("method", &m_method, 2);
-	f.Read("int weighted", &m_int_weighted, false);
-	f.Read("get ratio", &m_get_ratio, false);
-	f.Read("physical size", &m_physical_size, false);
-	f.Read("colormap", &m_colormap, false);
-	f.Read("colormap min", &m_cm_min, 0.0);
-	f.Read("colormap max", &m_cm_max, 1.0);
+	if (f->Exists("/colocal default"))
+		f->SetPath("/colocal default");
+
+	f->Read("use mask", &m_use_mask, false);
+	f->Read("auto update", &m_auto_update, false);
+	f->Read("method", &m_method, 2);
+	f->Read("int weighted", &m_int_weighted, false);
+	f->Read("get ratio", &m_get_ratio, false);
+	f->Read("physical size", &m_physical_size, false);
+	f->Read("colormap", &m_colormap, false);
+	f->Read("colormap min", &m_cm_min, 0.0);
+	f->Read("colormap max", &m_cm_max, 1.0);
 }
 
-void ColocalDefault::Save(wxFileConfig& f)
+void ColocalDefault::Save()
 {
-	wxString str;
-	f.SetPath("/colocal default");
+	std::shared_ptr<BaseTreeFile> f =
+		glbin_tree_file_factory.getTreeFile(gstConfigFile);
+	if (!f)
+		return;
 
-	f.Write("use mask", m_use_mask);
-	f.Write("auto update", m_auto_update);
-	f.Write("method", m_method);
-	f.Write("int weighted", m_int_weighted);
-	f.Write("get ratio", m_get_ratio);
-	f.Write("physical size", m_physical_size);
-	f.Write("colormap", m_colormap);
-	f.Write("colormap min", m_cm_min);
-	f.Write("colormap max", m_cm_max);
+	f->SetPath("/colocal default");
+
+	f->Write("use mask", m_use_mask);
+	f->Write("auto update", m_auto_update);
+	f->Write("method", m_method);
+	f->Write("int weighted", m_int_weighted);
+	f->Write("get ratio", m_get_ratio);
+	f->Write("physical size", m_physical_size);
+	f->Write("colormap", m_colormap);
+	f->Write("colormap min", m_cm_min);
+	f->Write("colormap max", m_cm_max);
 }

@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _MOVIEDEFAULT_H_
 
 #include <Point.h>
-#include <wx/fileconf.h>
 
 class MovieMaker;
 class MovieDefault
@@ -38,8 +37,8 @@ public:
 	MovieDefault();
 	~MovieDefault();
 
-	void Read(wxFileConfig& f);
-	void Save(wxFileConfig& f);
+	void Read();
+	void Save();
 	void Set(MovieMaker* mm);
 	void Apply(MovieMaker* mm);
 

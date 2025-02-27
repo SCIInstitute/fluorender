@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-
+#include <Global.h>
 #include <BrushDefault.h>
 #include <Names.h>
 #include <VolumeSelector.h>
@@ -68,66 +68,71 @@ BrushDefault::~BrushDefault()
 
 }
 
-void BrushDefault::Read(wxFileConfig& f)
+void BrushDefault::Read()
 {
-	wxString str;
-	if (f.Exists("/brush default"))
-		f.SetPath("/brush default");
+	std::shared_ptr<BaseTreeFile> f =
+		glbin_tree_file_factory.getTreeFile(gstConfigFile);
+	if (!f)
+		return;
+
+	if (f->Exists("/brush default"))
+		f->SetPath("/brush default");
 
 	//history
-	f.Read("hist depth", &m_paint_hist_depth, 1);
+	f->Read("hist depth", &m_paint_hist_depth, 1);
 	//iterations
-	f.Read("iter weak", &m_iter_weak, 10);
-	f.Read("iter normal", &m_iter_normal, 30);
-	f.Read("iter strong", &m_iter_strong, 60);
-	f.Read("iter num", &m_iter_num, 30);
+	f->Read("iter weak", &m_iter_weak, 10);
+	f->Read("iter normal", &m_iter_normal, 30);
+	f->Read("iter strong", &m_iter_strong, 60);
+	f->Read("iter num", &m_iter_num, 30);
 	//brush properties
-	f.Read("ini thresh", &m_ini_thresh, 0.0);
-	f.Read("auto thresh", &m_estimate_threshold, false);
-	f.Read("gm falloff", &m_gm_falloff, 1.0);
-	f.Read("scl falloff", &m_scl_falloff, 0.0);
-	f.Read("scl translate", &m_scl_translate, 0.0);
+	f->Read("ini thresh", &m_ini_thresh, 0.0);
+	f->Read("auto thresh", &m_estimate_threshold, false);
+	f->Read("gm falloff", &m_gm_falloff, 1.0);
+	f->Read("scl falloff", &m_scl_falloff, 0.0);
+	f->Read("scl translate", &m_scl_translate, 0.0);
 	//select group
-	f.Read("select group", &m_select_multi, false);
+	f->Read("select group", &m_select_multi, false);
 	//edge detect
-	f.Read("edge detect", &m_edge_detect, false);
+	f->Read("edge detect", &m_edge_detect, false);
 	//hidden removal
-	f.Read("hidden removal", &m_hidden_removal, false);
-	f.Read("ortho", &m_ortho, true);
+	f->Read("hidden removal", &m_hidden_removal, false);
+	f->Read("ortho", &m_ortho, true);
 	//brick accuracy
-	f.Read("accurate bricks", &m_update_order, true);
+	f->Read("accurate bricks", &m_update_order, true);
 
 	//2d influence
-	f.Read("2d infl", &m_w2d, 0.0);
+	f->Read("2d infl", &m_w2d, 0.0);
 	//size 1
-	f.Read("size1", &m_brush_radius1, 10);
+	f->Read("size1", &m_brush_radius1, 10.0);
 	//size 2 link
-	f.Read("use_size2", &m_use_brush_radius2, true);
+	f->Read("use_size2", &m_use_brush_radius2, true);
 	//size 2
-	f.Read("size2", &m_brush_radius2, 30);
+	f->Read("size2", &m_brush_radius2, 30.0);
 	//radius settings for individual brush types
-	if (f.Exists("radius_settings"))
+	if (f->Exists("radius_settings"))
 	{
-		f.SetPath("radius_settings");
-		int brush_num = f.Read("num", 0l);
+		f->SetPath("radius_settings");
+		int brush_num = 0;
+		f->Read("num", &brush_num);
 		if (m_brush_radius_sets.size() != brush_num)
 			m_brush_radius_sets.resize(brush_num);
 		for (int i = 0; i < brush_num; ++i)
 		{
-			str = wxString::Format("%d", i);
-			if (!f.Exists(str))
+			std::string str = std::to_string(i);
+			if (!f->Exists(str))
 				continue;
-			f.SetPath(str);
+			f->SetPath(str);
 			//type
-			f.Read("type", &(m_brush_radius_sets[i].type));
+			f->Read("type", &(m_brush_radius_sets[i].type));
 			//radius 1
-			f.Read("radius1", &(m_brush_radius_sets[i].radius1));
+			f->Read("radius1", &(m_brush_radius_sets[i].radius1));
 			//radius 2
-			f.Read("radius2", &(m_brush_radius_sets[i].radius2));
+			f->Read("radius2", &(m_brush_radius_sets[i].radius2));
 			//use radius 2
-			f.Read("use_radius2", &(m_brush_radius_sets[i].use_radius2));
-			//f.SetPath("/brush default/radius_settings");
-			f.SetPath("..");
+			f->Read("use_radius2", &(m_brush_radius_sets[i].use_radius2));
+			//f->SetPath("/brush default/radius_settings");
+			f->SetPath("..");
 		}
 	}
 	if (m_brush_radius_sets.size() == 0)
@@ -150,81 +155,85 @@ void BrushDefault::Read(wxFileConfig& f)
 		radius_set.use_radius2 = false;
 		m_brush_radius_sets.push_back(radius_set);
 	}
-	if (f.Exists("/brush default"))
-		f.SetPath("/brush default");
+	if (f->Exists("/brush default"))
+		f->SetPath("/brush default");
 	//spacing
-	f.Read("spacing", &m_brush_spacing, 0.1);
+	f->Read("spacing", &m_brush_spacing, 0.1);
 	//brush size relation
-	f.Read("size_data", &m_brush_size_data, true);
+	f->Read("size_data", &m_brush_size_data, true);
 
 	//auto update
-	f.Read("update size", &m_update_size, false);
-	f.Read("update colocal", &m_update_colocal, false);
+	f->Read("update size", &m_update_size, false);
+	f->Read("update colocal", &m_update_colocal, false);
 }
 
-void BrushDefault::Save(wxFileConfig& f)
+void BrushDefault::Save()
 {
-	wxString str;
-	f.SetPath("/brush default");
+	std::shared_ptr<BaseTreeFile> f =
+		glbin_tree_file_factory.getTreeFile(gstConfigFile);
+	if (!f)
+		return;
+
+	f->SetPath("/brush default");
 
 	//history
-	f.Write("hist depth", m_paint_hist_depth);
+	f->Write("hist depth", m_paint_hist_depth);
 	//iterations
-	f.Write("iter weak", m_iter_weak);
-	f.Write("iter normal", m_iter_normal);
-	f.Write("iter strong", m_iter_strong);
-	f.Write("iter num", m_iter_num);
+	f->Write("iter weak", m_iter_weak);
+	f->Write("iter normal", m_iter_normal);
+	f->Write("iter strong", m_iter_strong);
+	f->Write("iter num", m_iter_num);
 	//brush properties
-	f.Write("ini thresh", m_ini_thresh);
-	f.Write("auto thresh", m_estimate_threshold);
-	f.Write("gm falloff", m_gm_falloff);
-	f.Write("scl falloff", m_scl_falloff);
-	f.Write("scl translate", m_scl_translate);
+	f->Write("ini thresh", m_ini_thresh);
+	f->Write("auto thresh", m_estimate_threshold);
+	f->Write("gm falloff", m_gm_falloff);
+	f->Write("scl falloff", m_scl_falloff);
+	f->Write("scl translate", m_scl_translate);
 	//select group
-	f.Write("select group", m_select_multi);
+	f->Write("select group", m_select_multi);
 	//edge detect
-	f.Write("edge detect", m_edge_detect);
+	f->Write("edge detect", m_edge_detect);
 	//hidden removal
-	f.Write("hidden removal", m_hidden_removal);
-	f.Write("ortho", m_ortho);
+	f->Write("hidden removal", m_hidden_removal);
+	f->Write("ortho", m_ortho);
 	//brick accuracy
-	f.Write("accurate bricks", m_update_order);
+	f->Write("accurate bricks", m_update_order);
 
 	//2d influence
-	f.Write("2d infl", m_w2d);
+	f->Write("2d infl", m_w2d);
 	//size 1
-	f.Write("size1", m_brush_radius1);
+	f->Write("size1", m_brush_radius1);
 	//size 2 link
-	f.Write("use_size2", m_use_brush_radius2);
+	f->Write("use_size2", m_use_brush_radius2);
 	//size 2
-	f.Write("size2", m_brush_radius2);
+	f->Write("size2", m_brush_radius2);
 	//radius settings for individual brush types
-	f.SetPath("/brush default/radius_settings");
+	f->SetPath("/brush default/radius_settings");
 	int brush_num = m_brush_radius_sets.size();
-	f.Write("num", brush_num);
+	f->Write("num", brush_num);
 	for (int i = 0; i < brush_num; ++i)
 	{
 		flrd::BrushRadiusSet radius_set = m_brush_radius_sets[i];
-		str = wxString::Format("/brush default/radius_settings/%d", i);
-		f.SetPath(str);
+		std::string str = "/brush default/radius_settings/" + std::to_string(i);
+		f->SetPath(str);
 		//type
-		f.Write("type", radius_set.type);
+		f->Write("type", radius_set.type);
 		//radius 1
-		f.Write("radius1", radius_set.radius1);
+		f->Write("radius1", radius_set.radius1);
 		//radius 2
-		f.Write("radius2", radius_set.radius2);
+		f->Write("radius2", radius_set.radius2);
 		//use radius 2
-		f.Write("use_radius2", radius_set.use_radius2);
+		f->Write("use_radius2", radius_set.use_radius2);
 	}
-	f.SetPath("/brush default");
+	f->SetPath("/brush default");
 	//spacing
-	f.Write("spacing", m_brush_spacing);
+	f->Write("spacing", m_brush_spacing);
 	//brush size relation
-	f.Write("size_data", m_brush_size_data);
+	f->Write("size_data", m_brush_size_data);
 
 	//auto update
-	f.Write("update size", m_update_size);
-	f.Write("update colocal", m_update_colocal);
+	f->Write("update size", m_update_size);
+	f->Write("update colocal", m_update_colocal);
 }
 
 void BrushDefault::Set(flrd::VolumeSelector* vs)

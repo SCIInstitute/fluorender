@@ -28,8 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _COMPONENTDEFAULT_H_
 #define _COMPONENTDEFAULT_H_
 
-#include <wx/fileconf.h>
-
 namespace flrd
 {
 	class ComponentGenerator;
@@ -45,8 +43,8 @@ public:
 
 	void Read(const std::wstring& filename);
 	void Save(const std::wstring& filename);
-	void Read(wxFileConfig& f);
-	void Save(wxFileConfig& f);
+	void Read(const std::string& gst_file);
+	void Save(const std::string& gst_file);
 	void Set(flrd::ComponentGenerator* cg);
 	void Apply(flrd::ComponentGenerator* cg);
 	void Set(flrd::Clusterizer* cl);

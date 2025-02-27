@@ -693,6 +693,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstDistNeighborValue "dist neighbor value"
 #define gstAlignAxisType "align axis type"//xyz:0; yxz:1; zxy:2; xzy:3; yzx:4; zyx:5;
 #define gstAlignCenter "align center"
+#define gstCompCommandFile "comp command file"
+#define gstCompDefaultFile "comp default file"
 //conver agent
 #define gstVolMeshThresh "vol mesh thresh"
 #define gstVolMeshDownXY "vol mesh down xy"
@@ -780,6 +782,7 @@ DEALINGS IN THE SOFTWARE.
 //recorder agent
 #define gstSelectedKey "selected key"
 //setting agent/root
+#define gstConfigFile "config file"
 #define gstSaveProjectEnable "save project enable"
 #define gstProjectPath "project path"
 #define gstTestParam "test param"
