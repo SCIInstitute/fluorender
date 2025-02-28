@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #define _PROJECT_H_
 
 #include <Progress.h>
-#include <wx/fileconf.h>
 #include <string>
 
 class Project : public Progress
@@ -46,8 +45,6 @@ public:
 	void ExportRulerList(const std::wstring& filename);
 	void SaveRulerList(const std::string& gst_name, int vi);
 	void ReadRulerList(const std::string& gst_name, int vi);
-
-	void SaveConfig(wxFileConfig& fconfig, const std::wstring& filename);
 
 private:
 };

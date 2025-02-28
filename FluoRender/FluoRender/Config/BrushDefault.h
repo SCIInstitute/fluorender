@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _BRUSHDEFAULT_H_
 #define _BRUSHDEFAULT_H_
 
+#include <vector>
+
 namespace flrd
 {
 	struct BrushRadiusSet;

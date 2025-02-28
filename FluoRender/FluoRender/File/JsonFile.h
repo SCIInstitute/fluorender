@@ -540,6 +540,18 @@ protected:
 		return false;
 	}
 
+	bool ReadHSVColor(const std::string& key, fluo::HSVColor* value, const fluo::HSVColor& def = fluo::HSVColor()) const override
+	{
+		std::string str;
+		if (ReadString(key, &str))
+		{
+			*value = fluo::HSVColor(str);
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
 	bool ReadPoint(const std::string& key, fluo::Point* value, const fluo::Point& def = fluo::Point(0.0)) const override
 	{
 		std::string str;
@@ -724,6 +736,12 @@ protected:
 	}
 
 	bool WriteColor(const std::string& key, const fluo::Color& value) override
+	{
+		std::string str = value.to_string();
+		return WriteString(key, str);
+	}
+
+	bool WriteHSVColor(const std::string& key, const fluo::HSVColor& value) override
 	{
 		std::string str = value.to_string();
 		return WriteString(key, str);

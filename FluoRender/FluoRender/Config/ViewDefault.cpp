@@ -124,8 +124,8 @@ void ViewDefault::Save()
 	f->Write("draw scalebar", m_draw_scalebar);
 	f->Write("draw scalebar text", m_draw_scalebar_text);
 	f->Write("scalebar len", m_scalebar_len);
-	f->Write("scalebar text", wxString(m_scalebar_text));
-	f->Write("scalebar num", wxString(m_scalebar_num));
+	f->Write("scalebar text", m_scalebar_text);
+	f->Write("scalebar num", m_scalebar_num);
 	f->Write("scalebar unit", m_scalebar_unit);
 	f->Write("mouse focus", m_mouse_focus);
 	f->Write("persp", m_persp);

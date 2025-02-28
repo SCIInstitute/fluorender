@@ -90,6 +90,9 @@ public:
 		else if constexpr (std::is_same_v<T, fluo::Color>) {
 			return ReadColor(key, value);
 		}
+		else if constexpr (std::is_same_v<T, fluo::HSVColor>) {
+			return ReadHSVColor(key, value);
+		}
 		else if constexpr (std::is_same_v<T, fluo::Point>) {
 			return ReadPoint(key, value);
 		}
@@ -141,6 +144,9 @@ public:
 		}
 		else if constexpr (std::is_same_v<T, fluo::Color>) {
 			return ReadColor(key, value, defaultVal);
+		}
+		else if constexpr (std::is_same_v<T, fluo::HSVColor>) {
+			return ReadHSVColor(key, value, defaultVal);
 		}
 		else if constexpr (std::is_same_v<T, fluo::Point>) {
 			return ReadPoint(key, value, defaultVal);
@@ -195,6 +201,9 @@ public:
 		else if constexpr (std::is_same_v<T, fluo::Color>) {
 			return WriteColor(key, value);
 		}
+		else if constexpr (std::is_same_v<T, fluo::HSVColor>) {
+			return WriteHSVColor(key, value);
+		}
 		else if constexpr (std::is_same_v<T, fluo::Point>) {
 			return WritePoint(key, value);
 		}
@@ -244,6 +253,7 @@ protected:
 	virtual bool ReadDouble(const std::string& key, double* value, double def = 0.0) const = 0;
 	virtual bool ReadFloat(const std::string& key, float* value, float def = 0.0f) const = 0;
 	virtual bool ReadColor(const std::string& key, fluo::Color* value, const fluo::Color& def = fluo::Color(0.0)) const = 0;
+	virtual bool ReadHSVColor(const std::string& key, fluo::HSVColor* value, const fluo::HSVColor& def = fluo::HSVColor()) const = 0;
 	virtual bool ReadPoint(const std::string& key, fluo::Point* value, const fluo::Point& def = fluo::Point(0.0)) const = 0;
 	virtual bool ReadVector(const std::string& key, fluo::Vector* value, const fluo::Vector& def = fluo::Vector(0.0)) const = 0;
 
@@ -261,6 +271,7 @@ protected:
 	virtual bool WriteDouble(const std::string& key, double value) = 0;
 	virtual bool WriteFloat(const std::string& key, float value) = 0;
 	virtual bool WriteColor(const std::string& key, const fluo::Color& value) = 0;
+	virtual bool WriteHSVColor(const std::string& key, const fluo::HSVColor& value) = 0;
 	virtual bool WritePoint(const std::string& key, const fluo::Point& value) = 0;
 	virtual bool WriteVector(const std::string& key, const fluo::Vector& value) = 0;
 

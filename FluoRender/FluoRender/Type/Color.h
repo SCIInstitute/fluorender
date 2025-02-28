@@ -48,6 +48,10 @@ namespace fluo
 		~HSVColor();
 		HSVColor(const HSVColor&);
 		HSVColor(const Color&);
+		HSVColor(const std::string& s)
+		{
+			*this = from_string(s);
+		}
 		HSVColor& operator=(const HSVColor&);
 
 		inline int operator==(const HSVColor& c) const
@@ -81,6 +85,20 @@ namespace fluo
 		inline double sat() const { return sat_; }
 		inline double val() const { return val_; }
 
+		inline std::string to_string() const
+		{
+			std::ostringstream oss;
+			oss << *this;
+			return oss.str();
+		}
+
+		static HSVColor from_string(const std::string& str) {
+			std::istringstream is(str);
+			HSVColor c;
+			is >> c;
+			return c;
+		}
+
 		friend std::ostream& operator<<(std::ostream& os, const HSVColor& c)
 		{
 			os << '[' << c.hue_ << ',' << c.sat_ << ',' << c.val_ << ']';
@@ -89,8 +107,15 @@ namespace fluo
 		friend std::istream& operator >> (std::istream& is, HSVColor& c)
 		{
 			double hue, sat, val;
-			char st;
-			is >> st >> hue >> st >> sat >> st >> val >> st;
+			char ch;
+			is >> ch;
+			if (ch == '[') {
+				is >> hue >> ch >> sat >> ch >> val >> ch;
+			}
+			else {
+				is.putback(ch);
+				is >> hue >> sat >> val;
+			}
 			c = HSVColor(hue, sat, val);
 			return is;
 		}
@@ -178,6 +203,7 @@ namespace fluo
 		{
 			std::ostringstream oss;
 			oss << *this;
+			return oss.str();
 		}
 
 		static Color from_string(const std::string& str) {

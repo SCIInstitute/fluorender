@@ -467,8 +467,8 @@ void MainSettings::Save()
 	if (!fconfig)
 		return;
 
-	fconfig->Write("ver_major", VERSION_MAJOR_TAG);
-	fconfig->Write("ver_minor", VERSION_MINOR_TAG);
+	fconfig->Write("ver_major", std::string(VERSION_MAJOR_TAG));
+	fconfig->Write("ver_minor", std::string(VERSION_MINOR_TAG));
 
 	//project
 	fconfig->SetPath("/project");

@@ -190,6 +190,7 @@ namespace fluo
 		{
 			std::ostringstream oss;
 			oss << *this;
+			return oss.str();
 		}
 
 		static Vector from_string(const std::string& str) {
@@ -226,42 +227,395 @@ namespace fluo
 } // End namespace fluo
 
 
+// This cannot be above due to circular dependencies
+#include <Point.h>
+
 namespace fluo
 {
-inline Vector Abs(const Vector& v)
-{
-	double x = v.x_ < 0 ? -v.x_ : v.x_;
-	double y = v.y_ < 0 ? -v.y_ : v.y_;
-	double z = v.z_ < 0 ? -v.z_ : v.z_;
-	return Vector(x, y, z);
-}
+	inline Vector::Vector(const Point& p)
+		: x_(p.x_), y_(p.y_), z_(p.z_)
+	{
+	}
 
-inline Vector Cross(const Vector& v1, const Vector& v2)
-{
-	return Vector(v1.y_ * v2.z_ - v1.z_ * v2.y_,
-		v1.z_ * v2.x_ - v1.x_ * v2.z_,
-		v1.x_ * v2.y_ - v1.y_ * v2.x_);
-}
+	inline Vector::Vector()
+	{
+		x_ = y_ = z_ = 0.0;
+	}
 
-inline Vector Interpolate(const Vector& v1, const Vector& v2,
-	double weight)
-{
-	double weight1 = 1.0 - weight;
-	return Vector(v2.x_ * weight + v1.x_ * weight1,
-		v2.y_ * weight + v1.y_ * weight1,
-		v2.z_ * weight + v1.z_ * weight1);
-}
+	inline Vector::Vector(const Vector& p)
+	{
+		x_ = p.x_;
+		y_ = p.y_;
+		z_ = p.z_;
+	}
 
-inline double Dot(const Vector& v1, const Vector& v2)
-{
-	return v1.x_ * v2.x_ + v1.y_ * v2.y_ + v1.z_ * v2.z_;
-}
+	inline double Vector::length2() const
+	{
+		return x_*x_ + y_*y_ + z_*z_;
+	}
 
-inline double Dot(const Vector& v, const Point& p)
-{
-	return v.x_ * p.x_ + v.y_ * p.y_ + v.z_ * p.z_;
-}
+	inline Vector& Vector::operator=(const Vector& v)
+	{
+		x_ = v.x_;
+		y_ = v.y_;
+		z_ = v.z_;
+		return *this;
+	}
 
+	// for initializing in dynamic code
+	// one often want template<class T> T val = 0.0;
+
+	inline Vector& Vector::operator=(const double& d)
+	{
+		x_ = d;
+		y_ = d;
+		z_ = d;
+		return *this;
+	}
+
+	inline Vector& Vector::operator=(const int& d)
+	{
+		x_ = static_cast<int>(d);
+		y_ = static_cast<int>(d);
+		z_ = static_cast<int>(d);
+		return *this;
+	}
+
+	inline bool operator<(Vector v1, Vector v2)
+	{
+		return(v1.length() < v2.length());
+	}
+
+	inline bool operator<=(Vector v1, Vector v2)
+	{
+		return(v1.length() <= v2.length());
+	}
+
+	inline bool operator>(Vector v1, Vector v2)
+	{
+		return(v1.length() > v2.length());
+	}
+
+	inline bool operator>=(Vector v1, Vector v2)
+	{
+		return(v1.length() >= v2.length());
+	}
+
+	inline Vector Vector::operator*(const double s) const
+	{
+		return Vector(x_*s, y_*s, z_*s);
+	}
+
+	inline Vector& Vector::operator*=(const Vector& v)
+	{
+		x_ *= v.x_;
+		y_ *= v.y_;
+		z_ *= v.z_;
+		return *this;
+	}
+
+	inline Vector& Vector::operator/=(const Vector& v)
+	{
+		x_ /= v.x_;
+		y_ /= v.y_;
+		z_ /= v.z_;
+		return *this;
+	}
+
+	// Allows for double * Vector so that everything doesn't have to be
+	// Vector * double
+	inline Vector operator*(const double s, const Vector& v)
+	{
+		return v*s;
+	}
+
+	inline Vector Vector::operator/(const double d) const
+	{
+		return Vector(x_ / d, y_ / d, z_ / d);
+	}
+
+	inline Vector Vector::operator/(const Vector& v2) const
+	{
+		return Vector(x_ / v2.x_, y_ / v2.y_, z_ / v2.z_);
+	}
+
+	inline Vector Vector::operator+(const Vector& v2) const
+	{
+		return Vector(x_ + v2.x_, y_ + v2.y_, z_ + v2.z_);
+	}
+
+	inline Vector Vector::operator*(const Vector& v2) const
+	{
+		return Vector(x_*v2.x_, y_*v2.y_, z_*v2.z_);
+	}
+
+	inline Vector Vector::operator-(const Vector& v2) const
+	{
+		return Vector(x_ - v2.x_, y_ - v2.y_, z_ - v2.z_);
+	}
+
+	inline Vector Vector::operator-(const Point& v2) const
+	{
+		return Vector(x_ - v2.x_, y_ - v2.y_, z_ - v2.z_);
+	}
+
+	inline Vector& Vector::operator+=(const Vector& v2)
+	{
+		x_ += v2.x_;
+		y_ += v2.y_;
+		z_ += v2.z_;
+		return *this;
+	}
+
+	inline Vector& Vector::operator-=(const Vector& v2)
+	{
+		x_ -= v2.x_;
+		y_ -= v2.y_;
+		z_ -= v2.z_;
+		return *this;
+	}
+
+	inline Vector Vector::operator-() const
+	{
+		return Vector(-x_, -y_, -z_);
+	}
+
+	inline double Vector::length() const
+	{
+		return sqrt(x_*x_ + y_*y_ + z_*z_);
+	}
+
+	inline Vector Abs(const Vector& v)
+	{
+		double x = v.x_ < 0 ? -v.x_ : v.x_;
+		double y = v.y_ < 0 ? -v.y_ : v.y_;
+		double z = v.z_ < 0 ? -v.z_ : v.z_;
+		return Vector(x, y, z);
+	}
+
+	inline Vector Cross(const Vector& v1, const Vector& v2)
+	{
+		return Vector(v1.y_*v2.z_ - v1.z_*v2.y_,
+			v1.z_*v2.x_ - v1.x_*v2.z_,
+			v1.x_*v2.y_ - v1.y_*v2.x_);
+	}
+
+	inline Vector Interpolate(const Vector& v1, const Vector& v2,
+		double weight)
+	{
+		double weight1 = 1.0 - weight;
+		return Vector(v2.x_*weight + v1.x_*weight1,
+			v2.y_*weight + v1.y_*weight1,
+			v2.z_*weight + v1.z_*weight1);
+	}
+
+	inline Vector& Vector::operator*=(const double d)
+	{
+		x_ *= d;
+		y_ *= d;
+		z_ *= d;
+		return *this;
+	}
+
+	inline Vector& Vector::operator/=(const double d)
+	{
+		x_ /= d;
+		y_ /= d;
+		z_ /= d;
+		return *this;
+	}
+
+	inline void Vector::x(double d)
+	{
+		x_ = d;
+	}
+
+	inline double Vector::x() const
+	{
+		return x_;
+	}
+
+	inline void Vector::y(double d)
+	{
+		y_ = d;
+	}
+
+	inline double Vector::y() const
+	{
+		return y_;
+	}
+
+	inline void Vector::z(double d)
+	{
+		z_ = d;
+	}
+
+	inline double Vector::z() const
+	{
+		return z_;
+	}
+
+	inline int Vector::intx() const
+	{
+		return int(std::round(x_));
+	}
+
+	inline int Vector::inty() const
+	{
+		return int(std::round(y_));
+	}
+
+	inline int Vector::intz() const
+	{
+		return int(std::round(z_));
+	}
+
+	inline Vector Vector::unit_sign() const
+	{
+		return Vector(
+			(x_ > 0) - (x_ < 0),
+			(y_ > 0) - (y_ < 0),
+			(z_ > 0) - (z_ < 0));
+	}
+
+	inline double Vector::volume() const
+	{
+		return std::abs(x_ * y_ * z_);
+	}
+
+	inline int Vector::min() const
+	{
+		if (x_ <= y_ && x_ <= z_)
+			return 0;
+		if (y_ <= x_ && y_ <= z_)
+			return 1;
+		if (z_ <= x_ && z_ <= y_)
+			return 2;
+		return 0;
+	}
+
+	inline int Vector::max() const
+	{
+		if (z_ >= x_ && z_ >= y_)
+			return 2;
+		if (y_ >= x_ && y_ >= z_)
+			return 1;
+		if (x_ >= y_ && x_ >= z_)
+			return 0;
+		return 2;
+	}
+
+	inline int Vector::mid() const
+	{
+		int imin = min();
+		int imax = max();
+		for (int i = 0; i < 3; ++i)
+		{
+			if (i != imin && i != imax)
+				return i;
+		}
+		return 1;
+	}
+
+	inline void Vector::u(double d)
+	{
+		x_ = d;
+	}
+
+	inline double Vector::u() const
+	{
+		return x_;
+	}
+
+	inline void Vector::v(double d)
+	{
+		y_ = d;
+	}
+
+	inline double Vector::v() const
+	{
+		return y_;
+	}
+
+	inline void Vector::w(double d)
+	{
+		z_ = d;
+	}
+
+	inline double Vector::w() const
+	{
+		return z_;
+	}
+
+	inline double Dot(const Vector& v1, const Vector& v2)
+	{
+		return v1.x_*v2.x_ + v1.y_*v2.y_ + v1.z_*v2.z_;
+	}
+
+	inline double Dot(const Vector& v, const Point& p)
+	{
+		return v.x_*p.x_ + v.y_*p.y_ + v.z_*p.z_;
+	}
+
+	inline
+		double Vector::normalize()
+	{
+		double l = sqrt(x_*x_ + y_*y_ + z_*z_);
+		if (l > 0.0)
+		{
+			x_ /= l;
+			y_ /= l;
+			z_ /= l;
+		}
+		return l;
+	}
+
+	inline
+		double Vector::safe_normalize()
+	{
+		double l = sqrt(x_*x_ + y_*y_ + z_*z_);
+		if (l > 0.0)
+		{
+			x_ /= l;
+			y_ /= l;
+			z_ /= l;
+		}
+		return l;
+	}
+
+	inline const Point &Vector::point() const
+	{
+		return (const Point &)(*this);
+	}
+
+	inline Point &Vector::asPoint() const
+	{
+		return (Point &)(*this);
+	}
+
+	inline Vector Min(const Vector &v1, const Vector &v2)
+	{
+		return Vector(std::min(v1.x(), v2.x()),
+			std::min(v1.y(), v2.y()),
+			std::min(v1.z(), v2.z()));
+	}
+
+	inline Vector Max(const Vector &v1, const Vector &v2)
+	{
+		return Vector(std::max(v1.x(), v2.x()),
+			std::max(v1.y(), v2.y()),
+			std::max(v1.z(), v2.z()));
+	}
+
+	inline double Max(const Vector &v)
+	{
+		return Max(v.x(), v.y(), v.z());
+	}
+
+	inline double Min(const Vector &v)
+	{
+		return Min(v.x(), v.y(), v.z());
+	}
 
 } // End namespace fluo
 

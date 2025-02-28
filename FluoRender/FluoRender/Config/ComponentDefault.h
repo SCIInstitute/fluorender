@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _COMPONENTDEFAULT_H_
 #define _COMPONENTDEFAULT_H_
 
+#include <string>
+
 namespace flrd
 {
 	class ComponentGenerator;

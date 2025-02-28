@@ -125,6 +125,7 @@ namespace fluo {
 		{
 			std::ostringstream oss;
 			oss << *this;
+			return oss.str();
 		}
 
 		static Point from_string(const std::string& str) {

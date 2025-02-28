@@ -783,6 +783,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstSelectedKey "selected key"
 //setting agent/root
 #define gstConfigFile "config file"
+#define gstProjectFile "project file"
 #define gstSaveProjectEnable "save project enable"
 #define gstProjectPath "project path"
 #define gstTestParam "test param"
