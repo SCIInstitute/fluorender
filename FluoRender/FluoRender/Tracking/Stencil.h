@@ -104,8 +104,8 @@ namespace flrd
 				size_t count = 0;
 				float sum = 0;
 				float val;
-				int lb = fsize / 2 + fsize % 2 - 1;
-				int ub = fsize / 2;
+				int lb = static_cast<int>(fsize / 2 + fsize % 2 - 1);
+				int ub = static_cast<int>(fsize / 2);
 				for (int ii = -lb; ii <= ub; ++ii)
 				for (int jj = -lb; jj <= ub; ++jj)
 				//for (int kk = -lb; kk <= ub; ++kk)

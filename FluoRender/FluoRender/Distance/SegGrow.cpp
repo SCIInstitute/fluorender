@@ -741,7 +741,7 @@ void SegGrow::Compute()
 				for (size_t j = 0; j < count[i]; ++j)
 					uniqids.insert(ids[i*m_branches+j]);
 		}
-		unsigned int total = uniqids.size();
+		size_t total = uniqids.size();
 		if (total)
 		{
 			b->set_new_grown(true);//new ids exist in brick, will be considered for merging
@@ -839,7 +839,7 @@ void SegGrow::Compute()
 			pids = ids.data();
 			if (!merge_id.empty())
 			{
-				unsigned int nmid = merge_id.size() / 2;
+				unsigned int nmid = static_cast<unsigned int>(merge_id.size() / 2);
 				kernel_prog->setKernelArgBegin(kernel_5);
 				kernel_prog->setKernelArgument(arg_label);
 				kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
@@ -941,7 +941,7 @@ void SegGrow::Compute()
 	}
 
 	//connect bricks
-	unsigned int idnum = m_list.size();
+	size_t idnum = m_list.size();
 	std::vector<std::set<unsigned int>> merge_list;//ids in different bricks to be merged
 	std::vector<std::set<unsigned int>> brick_pairs;//pairs processed don't need to process again
 	while (bnum > 1 && idnum > 1)
@@ -1228,7 +1228,7 @@ void SegGrow::CheckBorders(int d0, int d1, int n0, int n1,
 	//set
 	//unsigned int d0 = nx - 1;
 	//unsigned int d1 = 0;
-	unsigned int idnum = ids.size();
+	size_t idnum = ids.size();
 	std::vector<unsigned int> cids(idnum * 3, 0);
 	unsigned int* pcids = cids.data();
 	kernel_prog->setKernelArgBegin(kernel);

@@ -110,7 +110,7 @@ namespace flrd
 		inline void Lookup()
 		{
 			fluo::Range all2(fluo::Point(),
-				fluo::Vector(m_s2->nx - 1, m_s2->ny - 1, m_s2->nz - 1));
+				fluo::Vector(static_cast<double>(m_s2->nx - 1), static_cast<double>(m_s2->ny - 1), static_cast<double>(m_s2->nz - 1)));
 			for (fluo::Point i = all2.begin(); i != all2.end(); i = ++all2)
 			{
 				unsigned int l = m_s1->lookuplabel(i, *m_s2);

@@ -71,7 +71,12 @@ public:
 		dictionary_.clear();
 		cur_path_ = "";
 		_format_ = __INI_MAP_DEFAULT_FORMAT__;
-		std::string str = ws2s(filename);
+#ifdef _WIN32
+		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
+#else
+		std::wstring long_name = filename;
+#endif
+		std::string str = ws2s(long_name);
 		return load_ini_path(str.c_str(), __INI_MAP_DEFAULT_FORMAT__, NULL, _push_dispatch_, &dictionary_);
 	}
 
@@ -101,7 +106,12 @@ public:
 
 	int SaveFile(const std::wstring& filename) override
 	{
-		std::ofstream file(filename);
+#ifdef _WIN32
+		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
+#else
+		std::wstring long_name = filename;
+#endif
+		std::ofstream file(long_name);
 		if (!file.is_open()) {
 			return CONFINI_EIO;
 		}
@@ -480,6 +490,18 @@ protected:
 		return true;
 	}
 
+	bool ReadQuaternion(const std::string& key, fluo::Quaternion* value, const fluo::Quaternion& def = fluo::Quaternion()) const override
+	{
+		std::string str;
+		if (!extractString(key, str))
+		{
+			*value = def;
+			return false;
+		}
+		*value = fluo::Quaternion(str);
+		return true;
+	}
+
 	// Implement type-specific write methods
 	bool WriteString(const std::string& key, const std::string& value) override
 	{
@@ -559,6 +581,11 @@ protected:
 	}
 
 	bool WriteVector(const std::string& key, const fluo::Vector& value) override
+	{
+		return WriteString(key, value.to_string());
+	}
+
+	bool WriteQuaternion(const std::string& key, const fluo::Quaternion& value) override
 	{
 		return WriteString(key, value.to_string());
 	}

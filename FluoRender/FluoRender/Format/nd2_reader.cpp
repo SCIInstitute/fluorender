@@ -421,7 +421,7 @@ bool ND2Reader::ReadChannel(LIMFILEHANDLE h, int t, int c, void* val)
 		Lim_DestroyPicture(&pic);
 
 		if (show_progress && m_time_num == 1)
-			SetProgress(std::round(100.0 * (i + 1) / num), "NOT_SET");
+			SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / num)), "NOT_SET");
 	}
 
 	return true;
@@ -580,11 +580,11 @@ void ND2Reader::ReadSequences(LIMFILEHANDLE h)
 			str = buffer;
 			if (str == "TimeLoop" ||
 				str == "NETimeLoop")
-				ti = i;
+				ti = static_cast<int>(i);
 			else if (str == "XYPosLoop")
-				xyi = i;
+				xyi = static_cast<int>(i);
 			else if (str == "ZStackLoop")
-				zi = i;
+				zi = static_cast<int>(i);
 		}
 		for (unsigned int i = 0; i < fnum; ++i)
 		{
@@ -624,7 +624,7 @@ void ND2Reader::ReadSequences(LIMFILEHANDLE h)
 		}
 	}
 
-	m_time_num = m_nd2_info.times.size();
+	m_time_num = static_cast<int>(m_nd2_info.times.size());
 	m_slice_num = maxz + 1;
 	m_cur_time = 0;
 	m_data_name = GET_NAME(m_path_name);
@@ -641,8 +641,8 @@ void ND2Reader::ReadSequences(LIMFILEHANDLE h)
 				continue;
 			for (size_t i = 0; i < cinfo->chann.size(); ++i)
 			{
-				cinfo->chann[i].x = (cinfo->chann[i].posx - m_nd2_info.xmin) / m_xspc;
-				cinfo->chann[i].y = (cinfo->chann[i].posy - m_nd2_info.ymin) / m_yspc;
+				cinfo->chann[i].x = static_cast<int>((cinfo->chann[i].posx - m_nd2_info.xmin) / m_xspc);
+				cinfo->chann[i].y = static_cast<int>((cinfo->chann[i].posy - m_nd2_info.ymin) / m_yspc);
 				m_x_size = std::max(m_x_size, cinfo->chann[i].x + cinfo->chann[i].xsize);
 				m_y_size = std::max(m_y_size, cinfo->chann[i].y + cinfo->chann[i].ysize);
 			}

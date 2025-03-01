@@ -127,7 +127,7 @@ public:
 
 	void SetRotLock(bool val);
 	void SetSliderType(bool val);
-	void SetRotations(double rotx, double roty, double rotz, bool notify);
+	void SetRotations(const fluo::Vector& val, bool notify);
 	void SetZeroRotations();
 
 	//get rendering context

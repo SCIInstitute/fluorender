@@ -115,7 +115,7 @@ int MSKReader::LoadBatch(int index)
 Nrrd* MSKReader::Convert(int t, int c, bool get_max)
 {
 	FILE* msk_file = 0;
-	if (!WFOPEN(&msk_file, m_path_name.c_str(), L"rb"))
+	if (!WFOPEN(&msk_file, m_path_name, L"rb"))
 		return 0;
 
 	Nrrd *output = nrrdNew();

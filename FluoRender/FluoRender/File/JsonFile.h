@@ -48,7 +48,12 @@ public:
 
 	int LoadFile(const std::wstring& filename) override
 	{
-		std::ifstream file(filename);
+#ifdef _WIN32
+		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
+#else
+		std::wstring long_name = filename;
+#endif
+		std::ifstream file(long_name);
 		std::stringstream buffer;
 		buffer << file.rdbuf();
 		std::string str = buffer.str();
@@ -87,7 +92,12 @@ public:
 			return 1; // Error: No JSON data to save
 		}
 
-		std::ofstream file(filename);
+#ifdef _WIN32
+		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
+#else
+		std::wstring long_name = filename;
+#endif
+		std::ofstream file(long_name);
 		if (!file.is_open()) {
 			return 6; // Error: Unable to open file
 		}
@@ -576,6 +586,18 @@ protected:
 		return false;
 	}
 
+	bool ReadQuaternion(const std::string& key, fluo::Quaternion* value, const fluo::Quaternion& def = fluo::Quaternion()) const override
+	{
+		std::string str;
+		if (ReadString(key, &str))
+		{
+			*value = fluo::Quaternion(str);
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
 	// Implement type-specific write methods
 	bool WriteString(const std::string& key, const std::string& value) override
 	{
@@ -754,6 +776,12 @@ protected:
 	}
 
 	bool WriteVector(const std::string& key, const fluo::Vector& value) override
+	{
+		std::string str = value.to_string();
+		return WriteString(key, str);
+	}
+
+	bool WriteQuaternion(const std::string& key, const fluo::Quaternion& value) override
 	{
 		std::string str = value.to_string();
 		return WriteString(key, str);

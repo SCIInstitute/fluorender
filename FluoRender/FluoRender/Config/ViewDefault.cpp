@@ -164,9 +164,7 @@ void ViewDefault::Set(RenderCanvas* canvas)
 	m_persp = canvas->GetPersp();
 	m_aov = canvas->GetAov();
 	m_free = canvas->GetFree();
-	double x, y, z;
-	canvas->GetCenters(x, y, z);
-	m_center = fluo::Point(x, y, z);
+	m_center = canvas->GetCenters();
 	m_rot_lock = canvas->GetRotLock();
 	m_pin_rot_center = canvas->m_pin_rot_ctr;
 	m_scale_mode = canvas->m_scale_mode;
@@ -197,7 +195,7 @@ void ViewDefault::Apply(RenderCanvas* canvas)
 	canvas->SetPersp(m_persp);
 	canvas->SetAov(m_aov);
 	canvas->SetFree(m_free);
-	canvas->SetCenters(m_center.x(), m_center.y(), m_center.z());
+	canvas->SetCenters(m_center);
 	canvas->SetRotLock(m_rot_lock);
 	canvas->SetPinRotCenter(m_pin_rot_center);
 	canvas->m_scale_mode = m_scale_mode;

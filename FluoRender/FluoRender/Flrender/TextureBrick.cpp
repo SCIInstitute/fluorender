@@ -337,19 +337,19 @@ namespace flvr
 			}
 			// save all of the indices
 			for (uint32_t j = 1; j < degree - 1; j++) {
-				index.push_back(vert_count);
-				index.push_back(vert_count + j);
-				index.push_back(vert_count + j + 1);
+				index.push_back(static_cast<unsigned int>(vert_count));
+				index.push_back(static_cast<unsigned int>(vert_count + j));
+				index.push_back(static_cast<unsigned int>(vert_count + j + 1));
 			}
 			// save all of the verts
 			for (uint32_t j = 0; j < degree; j++)
 			{
-				vertex.push_back((sorted ? vv[idx[j]] : vv[j]).x());
-				vertex.push_back((sorted ? vv[idx[j]] : vv[j]).y());
-				vertex.push_back((sorted ? vv[idx[j]] : vv[j]).z());
-				vertex.push_back((sorted ? tt[idx[j]] : tt[j]).x());
-				vertex.push_back((sorted ? tt[idx[j]] : tt[j]).y());
-				vertex.push_back((sorted ? tt[idx[j]] : tt[j]).z());
+				vertex.push_back(static_cast<float>((sorted ? vv[idx[j]] : vv[j]).x()));
+				vertex.push_back(static_cast<float>((sorted ? vv[idx[j]] : vv[j]).y()));
+				vertex.push_back(static_cast<float>((sorted ? vv[idx[j]] : vv[j]).z()));
+				vertex.push_back(static_cast<float>((sorted ? tt[idx[j]] : tt[j]).x()));
+				vertex.push_back(static_cast<float>((sorted ? tt[idx[j]] : tt[j]).y()));
+				vertex.push_back(static_cast<float>((sorted ? tt[idx[j]] : tt[j]).z()));
 				vert_count++;
 			}
 
@@ -433,9 +433,9 @@ namespace flvr
 		if (brkdata_) ptr = (unsigned char *)(brkdata_);
 		else
 		{
-			int bd = tex_type_size(tex_type(c));
-			ptr = new unsigned char[(size_t)nx_*(size_t)ny_*(size_t)nz_*(size_t)bd];
-			if (!read_brick((char *)ptr, (size_t)nx_*(size_t)ny_*(size_t)nz_*(size_t)bd, finfo))
+			size_t bd = tex_type_size(tex_type(c));
+			ptr = new unsigned char[(size_t)nx_*(size_t)ny_*(size_t)nz_*bd];
+			if (!read_brick((char *)ptr, (size_t)nx_*(size_t)ny_*(size_t)nz_*bd, finfo))
 			{
 				delete[] ptr;
 				return NULL;

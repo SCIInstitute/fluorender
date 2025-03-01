@@ -176,7 +176,7 @@ namespace flvr
 			return;
 		std::vector<TextureBrick*>* bricks = tex_->get_bricks();
 		TextureBrick* brick = 0;
-		for (int i = tex_pool_.size() - 1; i >= 0; --i)
+		for (size_t i = tex_pool_.size() - 1; i-- > 0;)
 		{
 			for (size_t j = 0; j < bricks->size(); ++j)
 			{
@@ -206,7 +206,7 @@ namespace flvr
 		std::vector<TextureBrick*>* bricks = tex_->get_bricks();
 		TextureBrick *brick = 0;
 		TextureBrick *locbk = 0;
-		for (int i = tex_pool_.size() - 1; i >= 0; --i)
+		for (size_t i = tex_pool_.size() - 1; i-- > 0;)
 		{
 			brick = tex_pool_[i].brick;
 			if (skip && !brick->is_mask_valid())
@@ -240,7 +240,7 @@ namespace flvr
 		std::vector<TextureBrick*>* bricks = tex_->get_bricks();
 		TextureBrick *brick = 0;
 		TextureBrick *locbk = 0;
-		for (int i = tex_pool_.size() - 1; i >= 0; --i)
+		for (size_t i = tex_pool_.size() - 1; i-- > 0;)
 		{
 			brick = tex_pool_[i].brick;
 			if (!brick->is_mask_valid())
@@ -821,7 +821,7 @@ namespace flvr
 									lb.swapped = false;
 									lb.size = brick->nx()*brick->ny()*brick->nz()*brick->nb(c) / 1.04e6;
 									lb.brk = brick;
-									lb.brk->set_id_in_loadedbrks(loadedbrks.size());
+									lb.brk->set_id_in_loadedbrks(static_cast<int>(loadedbrks.size()));
 									loadedbrks.push_back(lb);
 
 								}
@@ -853,7 +853,7 @@ namespace flvr
 								unsigned long elapsed;
 								long t;
 								do {
-									rn_time = GET_TICK_COUNT();
+									rn_time = static_cast<uint32_t>(GET_TICK_COUNT());
 									elapsed = rn_time - st_time_;
 									t = glbin_settings.m_up_time - elapsed;
 									if (t > 0) std::this_thread::sleep_for(std::chrono::milliseconds(t));
@@ -966,7 +966,7 @@ namespace flvr
 				&& tex_pool_[i].id)
 			{
 				//found!
-				idx = i;
+				idx = static_cast<int>(i);
 			}
 		}
 
@@ -1284,7 +1284,7 @@ namespace flvr
 			}
 			va_slices_->draw_begin();
 			va_slices_->draw_elements(
-				GL_TRIANGLES, index.size(),
+				GL_TRIANGLES, static_cast<GLsizei>(index.size()),
 				GL_UNSIGNED_INT, 0);
 			va_slices_->draw_end();
 		}
@@ -1402,7 +1402,7 @@ namespace flvr
 		int cur_lv = tex_->GetCurLevel();
 		for (size_t lv = 0; static_cast<long long>(lv) < static_cast<long long>(tex_->GetLevelNum()); lv++)
 		{
-			tex_->setLevel(lv);
+			tex_->setLevel(static_cast<int>(lv));
 			std::vector<TextureBrick *> *bs = tex_->get_bricks();
 			for (size_t i = 0; i < bs->size(); i++)
 			{

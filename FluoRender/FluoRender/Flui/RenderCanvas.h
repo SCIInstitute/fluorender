@@ -212,44 +212,42 @@ public:
 	void HandleProjection(int nx, int ny, bool vr = false);
 	void HandleCamera(bool vr = false);
 	//camera operations
-	void GetTranslations(double &transx, double &transy, double &transz)
+	fluo::Vector GetTranslations()
 	{
-		transx = m_transx; transy = m_transy; transz = m_transz;
+		return fluo::Vector(m_transx, m_transy, m_transz);
 	}
-	void SetTranslations(double transx, double transy, double transz)
+	void SetTranslations(const fluo::Vector& val)
 	{
-		m_transx = transx; m_transy = transy; m_transz = transz;
+		m_transx = val.x(); m_transy = val.y(); m_transz = val.z();
 		m_distance = sqrt(m_transx*m_transx + m_transy*m_transy + m_transz*m_transz);
 	}
 	fluo::Quaternion GetZeroQuat()
 	{
 		return m_zq;
 	}
-	void SetZeroQuat(double x, double y, double z, double w)
+	void SetZeroQuat(const fluo::Quaternion& val)
 	{
-		m_zq = fluo::Quaternion(x, y, z, w);
+		m_zq = val;
 	}
-	fluo::Quaternion GetRotations()
+	fluo::Quaternion GetRotQuat()
 	{
 		return m_q;
 	}
-	void GetRotations(double &rotx, double &roty, double &rotz)
+	fluo::Vector GetRotations()
 	{
-		rotx = m_rotx;
-		roty = m_roty;
-		rotz = m_rotz;
+		return fluo::Vector(m_rotx, m_roty, m_rotz);
 	}
-	void SetRotations(double rotx, double roty, double rotz, bool notify);
+	void SetRotations(const fluo::Vector& val, bool notify);
 	int GetOrientation();//same as the indices in the view panel
 	void SetZeroRotations();
-	void ResetZeroRotations(double &rotx, double &roty, double &rotz);
-	void GetCenters(double &ctrx, double &ctry, double &ctrz)
+	fluo::Vector ResetZeroRotations();
+	fluo::Point GetCenters()
 	{
-		ctrx = m_ctrx; ctry = m_ctry; ctrz = m_ctrz;
+		return fluo::Point(m_ctrx, m_ctry, m_ctrz);
 	}
-	void SetCenters(double ctrx, double ctry, double ctrz)
+	void SetCenters(const fluo::Point& val)
 	{
-		m_ctrx = ctrx; m_ctry = ctry; m_ctrz = ctrz;
+		m_ctrx = val.x(); m_ctry = val.y(); m_ctrz = val.z();
 	}
 	double GetCenterEyeDist()
 	{
@@ -278,29 +276,25 @@ public:
 	void SetPinRotCenter(bool);
 
 	//object operations
-	void GetObjCenters(double &ctrx, double &ctry, double &ctrz)
+	fluo::Point GetObjCenters()
 	{
-		ctrx = m_obj_ctrx;
-		ctry = m_obj_ctry;
-		ctrz = m_obj_ctrz;
+		return fluo::Point(m_obj_ctrx, m_obj_ctry, m_obj_ctrz);
 	}
-	void SetObjCenters(double ctrx, double ctry, double ctrz)
+	void SetObjCenters(const fluo::Point& val)
 	{
-		m_obj_ctrx = ctrx;
-		m_obj_ctry = ctry;
-		m_obj_ctrz = ctrz;
+		m_obj_ctrx = val.x();
+		m_obj_ctry = val.y();
+		m_obj_ctrz = val.z();
 	}
-	void GetObjRot(double &rotx, double &roty, double &rotz)
+	fluo::Vector GetObjRot()
 	{
-		rotx = m_obj_rotx;
-		roty = m_obj_roty;
-		rotz = m_obj_rotz;
+		return fluo::Vector(m_obj_rotx, m_obj_roty, m_obj_rotz);
 	}
-	void SetObjRot(double rotx, double roty, double rotz)
+	void SetObjRot(const fluo::Vector& val)
 	{
-		m_obj_rotx = rotx;
-		m_obj_roty = roty;
-		m_obj_rotz = rotz;
+		m_obj_rotx = val.x();
+		m_obj_roty = val.y();
+		m_obj_rotz = val.z();
 	}
 	void SetOffset()
 	{
@@ -311,60 +305,52 @@ public:
 		else
 			m_offset = false;
 	}
-	void GetObjCtrOff(double &dx, double &dy, double &dz)
+	fluo::Vector GetObjCtrOff()
 	{
-		dx = m_obj_ctr_offx;
-		dy = m_obj_ctr_offy;
-		dz = m_obj_ctr_offz;
+		return fluo::Vector(m_obj_ctr_offx, m_obj_ctr_offy, m_obj_ctr_offz);
 	}
-	void SetObjCtrOff(double dx, double dy, double dz)
+	void SetObjCtrOff(const fluo::Vector& val)
 	{
-		m_obj_ctr_offx = dx;
-		m_obj_ctr_offy = dy;
-		m_obj_ctr_offz = dz;
+		m_obj_ctr_offx = val.x();
+		m_obj_ctr_offy = val.y();
+		m_obj_ctr_offz = val.z();
 		SetOffset();
 	}
-	void GetObjRotCtrOff(double &dx, double &dy, double &dz)
+	fluo::Vector GetObjRotCtrOff()
 	{
-		dx = m_obj_rot_ctr_offx;
-		dy = m_obj_rot_ctr_offy;
-		dz = m_obj_rot_ctr_offz;
+		return fluo::Vector(m_obj_rot_ctr_offx, m_obj_rot_ctr_offy, m_obj_rot_ctr_offz);
 	}
-	void SetObjRotCtrOff(double dx, double dy, double dz)
+	void SetObjRotCtrOff(const fluo::Vector& val)
 	{
-		m_obj_rot_ctr_offx = dx == 0.0 ? m_obj_ctrx : dx;
-		m_obj_rot_ctr_offy = dy == 0.0 ? m_obj_ctry : dy;
-		m_obj_rot_ctr_offz = dz == 0.0 ? m_obj_ctrz : dz;
+		m_obj_rot_ctr_offx = val.x() == 0.0 ? m_obj_ctrx : val.x();
+		m_obj_rot_ctr_offy = val.y() == 0.0 ? m_obj_ctry : val.y();
+		m_obj_rot_ctr_offz = val.z() == 0.0 ? m_obj_ctrz : val.z();
 		SetOffset();
 	}
-	void GetObjRotOff(double &dx, double &dy, double &dz)
+	fluo::Vector GetObjRotOff()
 	{
-		dx = m_obj_rot_offx;
-		dy = m_obj_rot_offy;
-		dz = m_obj_rot_offz;
+		return fluo::Vector(m_obj_rot_offx, m_obj_rot_offy, m_obj_rot_offz);
 	}
-	void SetObjRotOff(double dx, double dy, double dz)
+	void SetObjRotOff(const fluo::Vector& val)
 	{
-		m_obj_rot_offx = dx;
-		m_obj_rot_offy = dy;
-		m_obj_rot_offz = dz;
+		m_obj_rot_offx = val.x();
+		m_obj_rot_offy = val.y();
+		m_obj_rot_offz = val.z();
 		SetOffset();
 	}
 	void SetOffsetTransform(const fluo::Transform &tf)
 	{
 		m_offset_tf = tf;
 	}
-	void GetObjTrans(double &transx, double &transy, double &transz)
+	fluo::Vector GetObjTrans()
 	{
-		transx = m_obj_transx;
-		transy = m_obj_transy;
-		transz = m_obj_transz;
+		return fluo::Vector(m_obj_transx, m_obj_transy, m_obj_transz);
 	}
-	void SetObjTrans(double transx, double transy, double transz)
+	void SetObjTrans(const fluo::Vector& val)
 	{
-		m_obj_transx = transx;
-		m_obj_transy = transy;
-		m_obj_transz = transz;
+		m_obj_transx = val.x();
+		m_obj_transy = val.y();
+		m_obj_transz = val.z();
 	}
 	void SetRotLock(bool mode)
 	{
@@ -498,8 +484,8 @@ public:
 	void RestorePlanes();
 	//clipping plane rotations
 	void ClipRotate();
-	void SetClippingPlaneRotations(double rotx, double roty, double rotz);
-	void GetClippingPlaneRotations(double &rotx, double &roty, double &rotz);
+	void SetClippingPlaneRotations(const fluo::Vector& val);
+	fluo::Vector GetClippingPlaneRotations();
 	void SetClipRotX(double val);
 	void SetClipRotY(double val);
 	void SetClipRotZ(double val);

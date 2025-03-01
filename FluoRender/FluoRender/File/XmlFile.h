@@ -44,7 +44,12 @@ public:
 
 	int LoadFile(const std::wstring& filename) override
 	{
-		std::string str = ws2s(filename);
+#ifdef _WIN32
+		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
+#else
+		std::wstring long_name = filename;
+#endif
+		std::string str = ws2s(long_name);
 		doc_.LoadFile(str.c_str());
 		cur_element_ = doc_.RootElement();
 		cur_path_ = path_sep_;
@@ -73,7 +78,12 @@ public:
 
 	int SaveFile(const std::wstring& filename) override
 	{
-		std::string str = ws2s(filename);
+#ifdef _WIN32
+		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
+#else
+		std::wstring long_name = filename;
+#endif
+		std::string str = ws2s(long_name);
 		if (doc_.SaveFile(str.c_str()) == tinyxml2::XML_SUCCESS)
 		{
 			return 0;
@@ -558,6 +568,18 @@ protected:
 		return false;
 	}
 
+	bool ReadQuaternion(const std::string& key, fluo::Quaternion* value, const fluo::Quaternion& def = fluo::Quaternion()) const override
+	{
+		std::string str;
+		if (ReadString(key, &str))
+		{
+			*value = fluo::Quaternion(str);
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
 	// Implement type-specific write methods
 	bool WriteString(const std::string& key, const std::string& value) override
 	{
@@ -574,17 +596,7 @@ protected:
 
 	bool WriteWstring(const std::string& key, const std::wstring& value) override
 	{
-		if (!cur_element_) {
-			return false;
-		}
-		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
-		if (!element) {
-			element = cur_element_->GetDocument()->NewElement(key.c_str());
-			cur_element_->InsertEndChild(element);
-		}
-		std::string valueStr(value.begin(), value.end());
-		element->SetText(valueStr.c_str());
-		return true;
+		return WriteString(key, ws2s(value));
 	}
 
 	bool WriteBool(const std::string& key, bool value) override
@@ -734,6 +746,11 @@ protected:
 	}
 
 	bool WriteVector(const std::string& key, const fluo::Vector& value) override
+	{
+		return WriteString(key, value.to_string());
+	}
+
+	bool WriteQuaternion(const std::string& key, const fluo::Quaternion& value) override
 	{
 		return WriteString(key, value.to_string());
 	}

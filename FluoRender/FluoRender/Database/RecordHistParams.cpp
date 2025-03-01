@@ -142,7 +142,7 @@ float RecordHistParams::getHistPopl()
 	EntryHist* e = dynamic_cast<EntryHist*>(m_input);
 	if (!e)
 		return 0;
-	return e->getPopulation();
+	return static_cast<float>(e->getPopulation());
 }
 
 float RecordHistParams::getParamIter()

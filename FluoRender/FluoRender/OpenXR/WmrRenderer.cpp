@@ -144,7 +144,7 @@ void WmrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 	if (!m_frame_state.shouldRender)
 		return;
 
-	uint32_t viewCount = m_render_layer_info.layerProjectionViews.size();
+	uint32_t viewCount = static_cast<uint32_t>(m_render_layer_info.layerProjectionViews.size());
 	// Per view in the view configuration:
 	for (uint32_t i = 0; i < viewCount; i++)
 	{

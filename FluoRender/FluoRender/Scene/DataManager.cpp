@@ -2198,6 +2198,17 @@ void VolumeData::GetHSV(double &hue, double &sat, double &val)
 	val = m_hsv.val();
 }
 
+void VolumeData::SetHSVColor(const fluo::HSVColor& hsv)
+{
+	m_hsv = hsv;
+	m_luminance = m_hsv.val();
+}
+
+fluo::HSVColor VolumeData::GetHSVColor()
+{
+	return m_hsv;
+}
+
 //mask threshold
 void VolumeData::SetMaskThreshold(double thresh)
 {
@@ -2442,6 +2453,11 @@ void VolumeData::GetScalings(double &sclx, double &scly, double &sclz)
 	sclx = m_sclx; scly = m_scly; sclz = m_sclz;
 }
 
+fluo::Vector VolumeData::GetScalings()
+{
+	return fluo::Vector(m_sclx, m_scly, m_sclz);
+}
+
 void VolumeData::SetSpacings(double spcx, double spcy, double spcz)
 {
 	if (GetTexture())
@@ -2456,6 +2472,17 @@ void VolumeData::GetSpacings(double &spcx, double &spcy, double & spcz, int lv)
 {
 	if (GetTexture())
 		GetTexture()->get_spacings(spcx, spcy, spcz, lv);
+}
+
+fluo::Vector VolumeData::GetSpacings(int lv)
+{
+	double x, y, z;
+	if (GetTexture())
+	{
+		GetTexture()->get_spacings(x, y, z, lv);
+		return fluo::Vector(x, y, z);
+	}
+	return fluo::Vector(0);
 }
 
 void VolumeData::GetFileSpacings(double &spcx, double &spcy, double &spcz)
@@ -2480,6 +2507,17 @@ void VolumeData::GetBaseSpacings(double &spcx, double &spcy, double & spcz)
 		GetTexture()->get_base_spacings(spcx, spcy, spcz);
 }
 
+fluo::Vector VolumeData::GetBaseSpacings()
+{
+	double x, y, z;
+	if (GetTexture())
+	{
+		GetTexture()->get_base_spacings(x, y, z);
+		return fluo::Vector(x, y, z);
+	}
+	return fluo::Vector(0);
+}
+
 void VolumeData::SetSpacingScales(double s_spcx, double s_spcy, double s_spcz)
 {
 	if (GetTexture())
@@ -2494,6 +2532,17 @@ void VolumeData::GetSpacingScales(double &s_spcx, double &s_spcy, double &s_spcz
 {
 	if (GetTexture())
 		GetTexture()->get_spacing_scales(s_spcx, s_spcy, s_spcz);
+}
+
+fluo::Vector VolumeData::GetSpacingScales()
+{
+	double x, y, z;
+	if (GetTexture())
+	{
+		GetTexture()->get_spacing_scales(x, y, z);
+		return fluo::Vector(x, y, z);
+	}
+	return fluo::Vector(0);
 }
 
 void VolumeData::SetLevel(int lv)
@@ -3628,6 +3677,18 @@ void MeshData::GetTranslation(double &x, double &y, double &z)
 	z = m_trans[2];
 }
 
+void MeshData::SetTranslation(const fluo::Vector& val)
+{
+	m_trans[0] = val.x();
+	m_trans[1] = val.y();
+	m_trans[2] = val.z();
+}
+
+fluo::Vector MeshData::GetTranslation()
+{
+	return fluo::Vector(m_trans[0], m_trans[1], m_trans[2]);
+}
+
 void MeshData::SetRotation(double x, double y, double z)
 {
 	m_rot[0] = x;
@@ -3642,6 +3703,18 @@ void MeshData::GetRotation(double &x, double &y, double &z)
 	z = m_rot[2];
 }
 
+void MeshData::SetRotation(const fluo::Vector& val)
+{
+	m_rot[0] = val.x();
+	m_rot[1] = val.y();
+	m_rot[2] = val.z();
+}
+
+fluo::Vector MeshData::GetRotation()
+{
+	return fluo::Vector(m_rot[0], m_rot[1], m_rot[2]);
+}
+
 void MeshData::SetScaling(double x, double y, double z)
 {
 	m_scale[0] = x;
@@ -3654,6 +3727,18 @@ void MeshData::GetScaling(double &x, double &y, double &z)
 	x = m_scale[0];
 	y = m_scale[1];
 	z = m_scale[2];
+}
+
+void MeshData::SetScaling(const fluo::Vector& val)
+{
+	m_scale[0] = val.x();
+	m_scale[1] = val.y();
+	m_scale[2] = val.z();
+}
+
+fluo::Vector MeshData::GetScaling()
+{
+	return fluo::Vector(m_scale[0], m_scale[1], m_scale[2]);
 }
 
 //randomize color

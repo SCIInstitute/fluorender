@@ -102,7 +102,7 @@ void Clusterizer::Compute()
 	{
 		flrd::ClusterDbscan* method_dbscan = new flrd::ClusterDbscan();
 		method_dbscan->SetSize(glbin_comp_def.m_cluster_size);
-		method_dbscan->SetEps(glbin_comp_def.m_cluster_eps);
+		method_dbscan->SetEps(static_cast<float>(glbin_comp_def.m_cluster_eps));
 		method = method_dbscan;
 	}
 		break;
@@ -167,7 +167,7 @@ void Clusterizer::Compute()
 			}
 			if (index % 1000 == 0)
 			{
-				SetProgress(100 * count / ticks,
+				SetProgress(static_cast<int>(100 * count / ticks),
 					"Computing clusters");
 				count++;
 			}
@@ -194,7 +194,7 @@ void Clusterizer::Compute()
 			if (bits == 8)
 				data_value = ((unsigned char*)data_data)[index] / 255.0f;
 			else if (bits == 16)
-				data_value = ((unsigned short*)data_data)[index] * scale / 65535.0f;
+				data_value = ((unsigned short*)data_data)[index] * static_cast<float>(scale) / 65535.0f;
 			flrd::EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
 			label_value = data_label[index];
 			int cid = -1;
@@ -234,7 +234,7 @@ void Clusterizer::Compute()
 		}
 		if (index % 1000 == 0)
 		{
-			SetProgress(100 * count / ticks,
+			SetProgress(static_cast<int>(100 * count / ticks),
 				"Computing clusters");
 			count++;
 		}

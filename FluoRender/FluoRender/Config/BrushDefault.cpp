@@ -209,9 +209,9 @@ void BrushDefault::Save()
 	f->Write("size2", m_brush_radius2);
 	//radius settings for individual brush types
 	f->SetPath("/brush default/radius_settings");
-	int brush_num = m_brush_radius_sets.size();
+	size_t brush_num = m_brush_radius_sets.size();
 	f->Write("num", brush_num);
-	for (int i = 0; i < brush_num; ++i)
+	for (size_t i = 0; i < brush_num; ++i)
 	{
 		flrd::BrushRadiusSet radius_set = m_brush_radius_sets[i];
 		std::string str = "/brush default/radius_settings/" + std::to_string(i);

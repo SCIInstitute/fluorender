@@ -433,7 +433,7 @@ void BasicStat::Run()
 			//collect
 			for (size_t ii = 0; ii < bin; ++ii)
 			{
-				unsigned int key = ii + bminv;
+				unsigned int key = static_cast<unsigned int>(ii + bminv);
 				auto it = m_hist.find(key);
 				if (it == m_hist.end())
 					m_hist.insert(std::pair<unsigned int, unsigned int>(key, hist[ii]));

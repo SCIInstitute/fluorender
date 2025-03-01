@@ -86,7 +86,7 @@ void LOFReader::SetFile(const std::wstring &file)
 int LOFReader::Preprocess()
 {
 	FILE* pfile = 0;
-	if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
+	if (!WFOPEN(&pfile, m_path_name, L"rb"))
 		return READER_OPEN_FAIL;
 
 	unsigned long long ioffset = 0;
@@ -231,7 +231,7 @@ Nrrd* LOFReader::Convert(int t, int c, bool get_max)
 {
 	Nrrd *data = 0;
 	FILE* pfile = 0;
-	if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
+	if (!WFOPEN(&pfile, m_path_name, L"rb"))
 		return 0;
 
 	if (t >= 0 && t < m_time_num &&
@@ -268,7 +268,7 @@ Nrrd* LOFReader::Convert(int t, int c, bool get_max)
 			SubBlockInfo* sbi = &(tinfo->blocks[i]);
 			ReadMemoryBlock(pfile, sbi, val);
 			if (show_progress && m_time_num == 1)
-				SetProgress(std::round(100.0 * (i + 1) / blk_num), "NOT_SET");
+				SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / blk_num)), "NOT_SET");
 		}
 		//create nrrd
 		data = nrrdNew();
@@ -389,7 +389,7 @@ void LOFReader::ReadImage(tinyxml2::XMLElement* node)
 		if (!str.empty())
 		{
 			WavelengthInfo winfo;
-			winfo.chan_num = i;
+			winfo.chan_num = static_cast<int>(i);
 			if (str == "Red")
 				winfo.wavelength = 550.0;
 			else if (str == "Green")
@@ -417,7 +417,7 @@ void LOFReader::ReadSubBlockInfo(tinyxml2::XMLElement* node)
 		if (str == "ChannelDescription")
 		{
 			ChannelInfo cinfo;
-			cinfo.chan = m_lof_info.channels.size();
+			cinfo.chan = static_cast<int>(m_lof_info.channels.size());
 			str = GetAttributeValue(child, "Resolution");
 			cinfo.res = std::stoul(str);
 			str = GetAttributeValue(child, "Min");
@@ -501,11 +501,11 @@ void LOFReader::FillLofInfo()
 
 	m_cur_time = 0;
 	m_data_name = GET_NAME(m_path_name);
-	m_chan_num = m_lof_info.channels.size();
+	m_chan_num = static_cast<int>(m_lof_info.channels.size());
 	ChannelInfo* cinfo = m_lof_info.GetChannelInfo(0);
 	if (cinfo)
 	{
-		m_time_num = cinfo->times.size();
+		m_time_num = static_cast<int>(cinfo->times.size());
 		if (cinfo->res == 8)
 			m_datatype = 1;
 		else if (cinfo->res > 8)

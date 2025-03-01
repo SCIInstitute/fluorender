@@ -122,7 +122,7 @@ Nrrd* LBLReader::Convert(int t, int c, bool get_max)
 	strs << str_name /*<< "_t" << t << "_c" << c*/ << L".lbl";
 	str_name = strs.str();
 	FILE* lbl_file = 0;
-	if (!WFOPEN(&lbl_file, str_name.c_str(), L"rb"))
+	if (!WFOPEN(&lbl_file, str_name, L"rb"))
 		return 0;
 
 	Nrrd *output = nrrdNew();

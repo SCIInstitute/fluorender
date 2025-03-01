@@ -110,7 +110,7 @@ void OpenVrRenderer::GetControllerStates()
 void OpenVrRenderer::BeginFrame()
 {
 	std::array<vr::TrackedDevicePose_t, vr::k_unMaxTrackedDeviceCount> tracked_device_poses;
-	vr::VRCompositor()->WaitGetPoses(tracked_device_poses.data(), tracked_device_poses.size(), NULL, 0);
+	vr::VRCompositor()->WaitGetPoses(tracked_device_poses.data(), static_cast<uint32_t>(tracked_device_poses.size()), NULL, 0);
 
 	//get projection matrix
 	for (int eye_index = 0; eye_index < 2; ++eye_index)
@@ -165,7 +165,7 @@ glm::mat4 OpenVrRenderer::ApplyEyeOffsets(const glm::mat4& mv, int eye_index)
 {
 	if (eye_index < 0 || eye_index > 1)
 		return glm::mat4(1.0);
-	float eye_dist = glbin_settings.m_eye_dist;
+	float eye_dist = static_cast<float>(glbin_settings.m_eye_dist);
 	// Calculate the offset for each eye
 	glm::vec3 offset;
 	switch (eye_index)

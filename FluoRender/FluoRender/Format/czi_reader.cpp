@@ -105,7 +105,7 @@ void CZIReader::SetFile(const std::wstring& file)
 int CZIReader::Preprocess()
 {
 	FILE* pfile = 0;
-	if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
+	if (!WFOPEN(&pfile, m_path_name, L"rb"))
 		return READER_OPEN_FAIL;
 
 	unsigned long long ioffset = 0;
@@ -217,7 +217,7 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 {
 	Nrrd* data = 0;
 	FILE* pfile = 0;
-	if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
+	if (!WFOPEN(&pfile, m_path_name, L"rb"))
 		return 0;
 
 	if (t >= 0 && t < m_time_num &&
@@ -257,7 +257,7 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 			SubBlockInfo* sbi = &(cinfo->blocks[i]);
 			ReadSegSubBlock(pfile, sbi, val);
 			if (show_progress && m_time_num == 1)
-				SetProgress(std::round(100.0 * (i + 1) / blk_num), "NOT_SET");
+				SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / blk_num)), "NOT_SET");
 		}
 		//create nrrd
 		data = nrrdNew();
@@ -536,8 +536,8 @@ bool CZIReader::ReadDirectory(FILE* pfile, unsigned long long ioffset)
 				timenums.insert(m_czi_info.times[i].channels[j].blocks[k].time);
 				pixtypes.insert(m_czi_info.times[i].channels[j].blocks[k].pxtype);
 			}
-	m_time_num = timenums.size();
-	m_chan_num = channums.size();
+	m_time_num = static_cast<int>(timenums.size());
+	m_chan_num = static_cast<int>(channums.size());
 	m_slice_num = m_czi_info.zmax - m_czi_info.zmin;
 	m_x_size = m_czi_info.xmax - m_czi_info.xmin;
 	m_y_size = m_czi_info.ymax - m_czi_info.ymin;
@@ -719,7 +719,7 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 		{
 			if (compress)
 			{
-				LZWDecode(block, (unsigned char*)val + pos, data_size);
+				LZWDecode(block, (unsigned char*)val + pos, static_cast<tsize_t>(data_size));
 				for (int i = 0; i < sbi->z_size; ++i)
 					for (int j = 0; j < sbi->y_size; ++j)
 						DecodeAcc8((unsigned char*)val + pos + xysize * i + m_x_size * j,
@@ -738,7 +738,7 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 		{
 			if (compress)
 			{
-				LZWDecode(block, (unsigned char*)((unsigned short*)val + pos), data_size);
+				LZWDecode(block, (unsigned char*)((unsigned short*)val + pos), static_cast<tsize_t>(data_size));
 				for (int i = 0; i < sbi->z_size; ++i)
 					for (int j = 0; j < sbi->y_size; ++j)
 						DecodeAcc16((unsigned char*)((unsigned short*)val + pos + xysize * i + m_x_size * j),
@@ -843,7 +843,7 @@ void CZIReader::FindNodeRecursive(tinyxml2::XMLElement* node)
 			str = child->GetText();
 			dval = std::stod(str);
 			WavelengthInfo winfo;
-			winfo.chan_num = m_excitation_wavelength_list.size();
+			winfo.chan_num = static_cast<int>(m_excitation_wavelength_list.size());
 			winfo.wavelength = dval;
 			m_excitation_wavelength_list.push_back(winfo);
 		}

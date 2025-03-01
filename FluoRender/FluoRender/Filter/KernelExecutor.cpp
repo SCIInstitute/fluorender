@@ -199,7 +199,7 @@ bool KernelExecutor::Execute()
 
 	for (size_t i = 0; i<brick_num; ++i)
 	{
-		SetProgress(100.0 * i / brick_num, "Running OpenCL kernel.");
+		SetProgress(static_cast<int>(100.0 * i / brick_num), "Running OpenCL kernel.");
 
 		b = (*bricks)[i];
 		if (m_duplicate) b_r = (*bricks_r)[i];

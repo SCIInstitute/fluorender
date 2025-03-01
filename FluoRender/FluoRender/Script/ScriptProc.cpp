@@ -1718,8 +1718,8 @@ void ScriptProc::RunRegistration()
 	//rewind
 	if (curf == bgnf)
 	{
-		m_view->SetObjCtrOff(0, 0, 0);
-		m_view->SetObjRotOff(0, 0, 0);
+		m_view->SetObjCtrOff(fluo::Vector(0));
+		m_view->SetObjRotOff(fluo::Vector(0));
 		fluo::Transform tf;
 		tf.load_identity();
 		m_view->SetOffsetTransform(tf);
@@ -1792,9 +1792,9 @@ void ScriptProc::RunRegistration()
 		regg_cur->addSetValue("rot", rot);
 		regg_cur->addSetValue("transform", tf);
 		//apply transform to current view
-		m_view->SetObjCtrOff(transl2.x(), transl2.y(), transl2.z());
-		m_view->SetObjRotCtrOff(center2.x(), center2.y(), center2.z());
-		m_view->SetObjRotOff(euler.x(), euler.y(), euler.z());
+		m_view->SetObjCtrOff(fluo::Vector(transl2));
+		m_view->SetObjRotCtrOff(fluo::Vector(center2));
+		m_view->SetObjRotOff(fluo::Vector(euler));
 		m_view->SetOffsetTransform(tf);
 	}
 }

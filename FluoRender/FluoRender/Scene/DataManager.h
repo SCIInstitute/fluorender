@@ -368,6 +368,8 @@ public:
 	void ResetMaskColorSet();
 	void SetHSV(double hue = -1, double sat = -1, double val = -1);
 	void GetHSV(double &hue, double &sat, double &val);
+	void SetHSVColor(const fluo::HSVColor& hsv);
+	fluo::HSVColor GetHSVColor();
 
 	//mask threshold
 	void SetMaskThreshold(double thresh);
@@ -403,8 +405,10 @@ public:
 	void GetResolution(int &res_x, int &res_y, int &res_z, int lv = -1);
 	void SetScalings(double sclx, double scly, double sclz);
 	void GetScalings(double &sclx, double &scly, double &sclz);
+	fluo::Vector GetScalings();
 	void SetSpacings(double spcx, double spcy, double spcz);
 	void GetSpacings(double &spcx, double &spcy, double & spcz, int lv = -1);
+	fluo::Vector GetSpacings(int lv = -1);
 	void GetFileSpacings(double &spcx, double &spcy, double &spcz);
 	//read resolutions from file
 	void SetSpcFromFile(bool val=true) {m_spc_from_file = val;}
@@ -413,8 +417,10 @@ public:
 	//brkxml
 	void SetBaseSpacings(double spcx, double spcy, double spcz);
 	void GetBaseSpacings(double &spcx, double &spcy, double & spcz);
+	fluo::Vector GetBaseSpacings();
 	void SetSpacingScales(double s_spcx, double s_spcy, double s_spcz);
 	void GetSpacingScales(double &s_spcx, double &s_spcy, double &s_spcz);
+	fluo::Vector GetSpacingScales();
 	void SetLevel(int lv);
 	int GetLevel();
 	int GetLevelNum();
@@ -783,10 +789,16 @@ public:
 
 	void SetTranslation(double x, double y, double z);
 	void GetTranslation(double &x, double &y, double &z);
+	void SetTranslation(const fluo::Vector& val);
+	fluo::Vector GetTranslation();
 	void SetRotation(double x, double y, double z);
 	void GetRotation(double &x, double &y, double &z);
+	void SetRotation(const fluo::Vector& val);
+	fluo::Vector GetRotation();
 	void SetScaling(double x, double y, double z);
 	void GetScaling(double &x, double &y, double &z);
+	void SetScaling(const fluo::Vector& val);
+	fluo::Vector GetScaling();
 
 	//randomize color
 	void RandomizeColor();

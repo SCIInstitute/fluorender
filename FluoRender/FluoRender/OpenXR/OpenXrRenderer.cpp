@@ -397,7 +397,7 @@ void OpenXrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 	if (!m_frame_state.shouldRender)
 		return;
 
-	uint32_t viewCount = m_render_layer_info.layerProjectionViews.size();
+	uint32_t viewCount = static_cast<uint32_t>(m_render_layer_info.layerProjectionViews.size());
 	// Per view in the view configuration:
 	for (uint32_t i = 0; i < viewCount; i++)
 	{
@@ -684,7 +684,7 @@ bool OpenXrRenderer::GetViewConfigurationViews()
 		m_view_config_views.data());
 	if (result != XR_SUCCESS) return false;
 
-	uint32_t viewCount = m_view_config_views.size();
+	uint32_t viewCount = static_cast<uint32_t>(m_view_config_views.size());
 	if (viewCount == 0) return false;
 	m_size[0] = m_view_config_views[0].recommendedImageRectWidth;
 	m_size[1] = m_view_config_views[0].recommendedImageRectHeight;
@@ -814,7 +814,7 @@ bool OpenXrRenderer::CreateSwapchains()
 	if (result != XR_SUCCESS) return false;
 
 	// Per view, create a color and depth swapchain, and their associated image views.
-	const uint32_t array_size = m_view_config_views.size();
+	const uint32_t array_size = static_cast<uint32_t>(m_view_config_views.size());
 	const uint32_t imageRectWidth = m_view_config_views[0].recommendedImageRectWidth;
 	const uint32_t imageRectHeight = m_view_config_views[0].recommendedImageRectHeight;
 	const uint32_t swapchainSampleCount = m_view_config_views[0].recommendedSwapchainSampleCount;
@@ -1430,9 +1430,9 @@ float OpenXrRenderer::DetectHand(const XrHandJointLocationEXT* jointLocations)
 		}
 		XrVector3f tipPosition = jointLocations[tipIndex].pose.position;
 		XrVector3f palmPosition = jointLocations[XR_HAND_JOINT_PALM_EXT].pose.position;
-		float distance = sqrt(pow(tipPosition.x - palmPosition.x, 2) +
+		float distance = static_cast<float>(sqrt(pow(tipPosition.x - palmPosition.x, 2) +
 			pow(tipPosition.y - palmPosition.y, 2) +
-			pow(tipPosition.z - palmPosition.z, 2));
+			pow(tipPosition.z - palmPosition.z, 2)));
 		d += distance;
 	}
 	return d;
@@ -1444,7 +1444,7 @@ void OpenXrRenderer::ApplyEyeOffsets(XrView* views, int eye_index)
 		return;
 	if (eye_index < 0 || eye_index > 1)
 		return;
-	float eye_dist = glbin_settings.m_eye_dist;
+	float eye_dist = static_cast<float>(glbin_settings.m_eye_dist);
 	if (std::abs(eye_dist) < EPS)
 		return;
 	// Calculate the offset for each eye

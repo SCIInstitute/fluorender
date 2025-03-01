@@ -87,7 +87,7 @@ void LSMReader::SetFile(const std::wstring &file)
 int LSMReader::Preprocess()
 {
 	FILE* pfile = 0;
-	if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
+	if (!WFOPEN(&pfile, m_path_name, L"rb"))
 		return READER_OPEN_FAIL;
 
 	m_lsm_info.clear();
@@ -699,7 +699,7 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
 {
 	Nrrd *data = 0;
 	FILE* pfile = 0;
-	if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
+	if (!WFOPEN(&pfile, m_path_name, L"rb"))
 		return 0;
 
 	if (t >= 0 && t < m_time_num &&
@@ -774,7 +774,7 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
 				}
 
 				if (show_progress && m_time_num == 1)
-					SetProgress(std::round(100.0 * (i + 1) / blk_num), "NOT_SET");
+					SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / blk_num)), "NOT_SET");
 			}
 		}
 		//create nrrd

@@ -599,7 +599,7 @@ namespace flvr
 		if (rate > 0.0)
 		{
 			dt = cell_diag.length() / compute_rate_scale(snapview.direction()) / rate;
-			num_slices_ = std::round(diag.length()/dt);
+			num_slices_ = static_cast<int>(std::round(diag.length()/dt));
 		}
 		else
 		{
@@ -870,7 +870,7 @@ namespace flvr
 			size.clear();
 			b->compute_polygons(snapview, dt, vertex, index, size, multibricks);
 
-			num_slices_ += vertex.size()/12;
+			num_slices_ += static_cast<int>(vertex.size())/12;
 
 			if (!vertex.empty())
 			{
@@ -1075,7 +1075,7 @@ namespace flvr
 		if (rate > 0.0)
 		{
 			dt = cell_diag.length() / compute_rate_scale(snapview.direction()) / rate;
-			num_slices = std::round(diag.length()/dt);
+			num_slices = static_cast<int>(std::round(diag.length()/dt));
 		}
 		else
 		{
@@ -1273,7 +1273,7 @@ namespace flvr
 
 		int i;
 		float matrix[16];
-		unsigned int num = bricks->size();
+		unsigned int num = static_cast<unsigned int>(bricks->size());
 		for (i = ((order == 2) ? (num - 1) : 0);
 			(order == 2) ? (i >= 0) : (static_cast<long long>(i) < static_cast<long long>(num));
 			i += ((order == 2) ? -1 : 1))
@@ -1729,7 +1729,7 @@ namespace flvr
 			return;
 
 		int i;
-		size_t num = bricks->size();
+		unsigned int num = static_cast<unsigned int>(bricks->size());
 		for (i=((order==2)?(num-1):0);
 			(order==2)?(i>=0):(i<num);
 			i+=((order==2)?-1:1))

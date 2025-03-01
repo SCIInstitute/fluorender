@@ -100,18 +100,18 @@ void PaintBoxes::Compute()
 		return;
 
 	//allocate memory and initialize
-	int num = bbs.size();
+	size_t num = bbs.size();
 	float* boxes = new float[num * 6];
 	unsigned int* hits = new unsigned int[num];
-	for (int i = 0; i < num; ++i)
+	for (size_t i = 0; i < num; ++i)
 	{
 		BrickBox bb = bbs[i];
-		boxes[i * 6 + 0] = bb.bbox.Min().x();
-		boxes[i * 6 + 1] = bb.bbox.Min().y();
-		boxes[i * 6 + 2] = bb.bbox.Min().z();
-		boxes[i * 6 + 3] = bb.bbox.Max().x();
-		boxes[i * 6 + 4] = bb.bbox.Max().y();
-		boxes[i * 6 + 5] = bb.bbox.Max().z();
+		boxes[i * 6 + 0] = static_cast<float>(bb.bbox.Min().x());
+		boxes[i * 6 + 1] = static_cast<float>(bb.bbox.Min().y());
+		boxes[i * 6 + 2] = static_cast<float>(bb.bbox.Min().z());
+		boxes[i * 6 + 3] = static_cast<float>(bb.bbox.Max().x());
+		boxes[i * 6 + 4] = static_cast<float>(bb.bbox.Max().y());
+		boxes[i * 6 + 5] = static_cast<float>(bb.bbox.Max().z());
 		hits[i] = 0;
 	}
 

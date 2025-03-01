@@ -364,10 +364,10 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	}
 	if (glbin_settings.m_mem_swap)
 	{
-		int num = 0;
+		size_t num = 0;
 		for (size_t i=0; i<vr_list_.size(); ++i)
 			num += vr_list_[i]->tex_->get_bricks()->size();
-		if (TextureRenderer::cur_chan_brick_num_ >= num)
+		if (TextureRenderer::cur_chan_brick_num_ >= static_cast<int>(num))
 		{
 			TextureRenderer::done_current_chan_ = true;
 			TextureRenderer::clear_chan_buffer_ = true;
@@ -926,7 +926,7 @@ void MultiVolumeRenderer::draw_wireframe(bool orthographic_p)
 	{
 		dt = cell_diag.length() /
 			vr_list_[0]->compute_rate_scale(snapview.direction())/rate;
-		num_slices_ = std::round(diag.length()/dt);
+		num_slices_ = static_cast<int>(std::round(diag.length()/dt));
 	}
 	else
 	{

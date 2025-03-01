@@ -255,9 +255,8 @@ void MovieMaker::SetRendering(bool rewind)
 		//rotate animation
 		if (m_rotate)
 		{
-			double rval[3];
 			double val;
-			m_view->GetRotations(rval[0], rval[1], rval[2]);
+			fluo::Vector rval = m_view->GetRotations();
 			val = rval[m_rot_axis];
 			if (m_interpolation == 0)
 				val = m_starting_rot + t * m_rot_deg;
@@ -265,7 +264,7 @@ void MovieMaker::SetRendering(bool rewind)
 				val = m_starting_rot +
 				(-2.0 * t * t * t + 3.0 * t * t) * m_rot_deg;
 			rval[m_rot_axis] = val;
-			m_view->SetRotations(rval[0], rval[1], rval[2], true);
+			m_view->SetRotations(rval, true);
 		}
 	}
 	if (m_running)
@@ -592,8 +591,7 @@ void MovieMaker::SetCurrentFrame(int val, bool upd_seq)
 {
 	if (m_rotate && !IsPaused())
 	{
-		double rval[3];
-		m_view->GetRotations(rval[0], rval[1], rval[2]);
+		fluo::Vector rval = m_view->GetRotations();
 		double r = rval[m_rot_axis];
 		m_starting_rot = fluo::RotateClamp(r, 0, 360);
 	}
@@ -765,51 +763,50 @@ void MovieMaker::InsertKey(int index)
 	//rotation
 	keycode.l2 = 0;
 	keycode.l2_name = "rotation";
-	fluo::Quaternion q = m_view->GetRotations();
+	fluo::Quaternion q = m_view->GetRotQuat();
 	flkeyQ = new FlKeyQuaternion(keycode, q);
 	glbin_interpolator.AddKey(flkeyQ);
 	//translation
-	double tx, ty, tz;
-	m_view->GetTranslations(tx, ty, tz);
+	fluo::Vector vval = m_view->GetTranslations();
 	//x
 	keycode.l2_name = "translation_x";
-	flkey = new FlKeyDouble(keycode, tx);
+	flkey = new FlKeyDouble(keycode, vval.x());
 	glbin_interpolator.AddKey(flkey);
 	//y
 	keycode.l2_name = "translation_y";
-	flkey = new FlKeyDouble(keycode, ty);
+	flkey = new FlKeyDouble(keycode, vval.y());
 	glbin_interpolator.AddKey(flkey);
 	//z
 	keycode.l2_name = "translation_z";
-	flkey = new FlKeyDouble(keycode, tz);
+	flkey = new FlKeyDouble(keycode, vval.z());
 	glbin_interpolator.AddKey(flkey);
 	//centers
-	m_view->GetCenters(tx, ty, tz);
+	fluo::Point pval = m_view->GetCenters();
 	//x
 	keycode.l2_name = "center_x";
-	flkey = new FlKeyDouble(keycode, tx);
+	flkey = new FlKeyDouble(keycode, pval.x());
 	glbin_interpolator.AddKey(flkey);
 	//y
 	keycode.l2_name = "center_y";
-	flkey = new FlKeyDouble(keycode, ty);
+	flkey = new FlKeyDouble(keycode, pval.y());
 	glbin_interpolator.AddKey(flkey);
 	//z
 	keycode.l2_name = "center_z";
-	flkey = new FlKeyDouble(keycode, tz);
+	flkey = new FlKeyDouble(keycode, pval.z());
 	glbin_interpolator.AddKey(flkey);
 	//obj traslation
-	m_view->GetObjTrans(tx, ty, tz);
+	vval = m_view->GetObjTrans();
 	//x
 	keycode.l2_name = "obj_trans_x";
-	flkey = new FlKeyDouble(keycode, tx);
+	flkey = new FlKeyDouble(keycode, vval.x());
 	glbin_interpolator.AddKey(flkey);
 	//y
 	keycode.l2_name = "obj_trans_y";
-	flkey = new FlKeyDouble(keycode, ty);
+	flkey = new FlKeyDouble(keycode, vval.y());
 	glbin_interpolator.AddKey(flkey);
 	//z
 	keycode.l2_name = "obj_trans_z";
-	flkey = new FlKeyDouble(keycode, tz);
+	flkey = new FlKeyDouble(keycode, vval.z());
 	glbin_interpolator.AddKey(flkey);
 	//scale
 	double scale = m_view->m_scale_factor;
@@ -1008,7 +1005,7 @@ void MovieMaker::MakeKeysCameraTumble()
 
 	//initial
 	glbin_interpolator.Begin(t, m_key_duration);
-	q = m_view->GetRotations();
+	q = m_view->GetRotQuat();
 	flkey = new FlKeyQuaternion(keycode, q);
 	glbin_interpolator.AddKey(flkey);
 	glbin_interpolator.End();
@@ -1028,7 +1025,7 @@ void MovieMaker::MakeKeysCameraTumble()
 	t += m_key_duration;
 	//restore
 	glbin_interpolator.Begin(t, m_key_duration);
-	q = m_view->GetRotations();
+	q = m_view->GetRotQuat();
 	flkey = new FlKeyQuaternion(keycode, q);
 	glbin_interpolator.AddKey(flkey);
 	glbin_interpolator.End();
@@ -1048,7 +1045,7 @@ void MovieMaker::MakeKeysCameraTumble()
 	t += m_key_duration;
 	//restore
 	glbin_interpolator.Begin(t, m_key_duration);
-	q = m_view->GetRotations();
+	q = m_view->GetRotQuat();
 	flkey = new FlKeyQuaternion(keycode, q);
 	glbin_interpolator.AddKey(flkey);
 	glbin_interpolator.End();

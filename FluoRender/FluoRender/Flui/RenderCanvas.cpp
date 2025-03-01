@@ -717,7 +717,7 @@ void RenderCanvas::ClearAll()
 		m_track_group->Clear();
 	m_cell_list.clear();
 	InitView();
-	SetClippingPlaneRotations(0, 0, 0);
+	SetClippingPlaneRotations(fluo::Vector(0.0));
 }
 
 void RenderCanvas::Clear()
@@ -4569,8 +4569,7 @@ void RenderCanvas::Set3DRotCapture(double start_angle,
 	bool rewind,
 	int len)
 {
-	double rv[3] = { 0 };
-	GetRotations(rv[0], rv[1], rv[2]);
+	fluo::Vector rv = GetRotations();
 
 	//remove the chance of the x/y/z angles being outside 360.
 	while (rv[0] > 360.)  rv[0] -= 360.;
@@ -4762,7 +4761,7 @@ void RenderCanvas::SetParams(double t)
 	keycode.l2_name = "translation_z";
 	bz = glbin_interpolator.GetDouble(keycode, t, tz);
 	if (bx && by && bz)
-		SetTranslations(tx, ty, tz);
+		SetTranslations(fluo::Vector(tx, ty, tz));
 	//centers
 	keycode.l2_name = "center_x";
 	bx = glbin_interpolator.GetDouble(keycode, t, tx);
@@ -4771,7 +4770,7 @@ void RenderCanvas::SetParams(double t)
 	keycode.l2_name = "center_z";
 	bz = glbin_interpolator.GetDouble(keycode, t, tz);
 	if (bx && by && bz)
-		SetCenters(tx, ty, tz);
+		SetCenters(fluo::Point(tx, ty, tz));
 	//obj translation
 	keycode.l2_name = "obj_trans_x";
 	bx = glbin_interpolator.GetDouble(keycode, t, tx);
@@ -4780,7 +4779,7 @@ void RenderCanvas::SetParams(double t)
 	keycode.l2_name = "obj_trans_z";
 	bz = glbin_interpolator.GetDouble(keycode, t, tz);
 	if (bx && by && bz)
-		SetObjTrans(tx, ty, tz);
+		SetObjTrans(fluo::Vector(tx, ty, tz));
 	//scale
 	double scale;
 	keycode.l2_name = "scale";
@@ -4799,7 +4798,7 @@ void RenderCanvas::SetParams(double t)
 		q *= -m_zq;
 		double rotx, roty, rotz;
 		q.ToEuler(rotx, roty, rotz);
-		SetRotations(rotx, roty, rotz, true);
+		SetRotations(fluo::Vector(rotx, roty, rotz), true);
 		vc.insert(gstCamRotation);
 	}
 	//intermixing mode
@@ -4839,10 +4838,9 @@ void RenderCanvas::SetParams(double t)
 
 void RenderCanvas::ResetMovieAngle()
 {
-	double rv[3] = { 0 };
-	GetRotations(rv[0], rv[1], rv[2]);
+	fluo::Vector rv = GetRotations();
 	rv[m_rot_axis] = m_init_angle;
-	SetRotations(rv[0], rv[1], rv[2], true);
+	SetRotations(rv, true);
 
 	m_capture = false;
 	m_capture_rotat = false;
@@ -5580,7 +5578,7 @@ void RenderCanvas::ForceDraw()
 				RenderCanvas* view = m_frame->GetRenderCanvas(i);
 				if (view && view != this)
 				{
-					view->SetRotations(m_rotx, m_roty, m_rotz, true);
+					view->SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
 					view->RefreshGL(39);
 					view->Update();
 				}
@@ -5730,7 +5728,7 @@ void RenderCanvas::SetPersp(bool persp)
 		m_scale_factor = m_scale_factor_saved;
 
 		m_renderview_panel->FluoUpdate({ gstScaleFactor, gstFree });
-		SetRotations(m_rotx, m_roty, m_rotz, true);
+		SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
 	}
 
 	//SetSortBricks();
@@ -5792,7 +5790,7 @@ void RenderCanvas::SetFree(bool free)
 		m_scale_factor = m_scale_factor_saved;
 		m_renderview_panel->FluoUpdate({ gstScaleFactor });
 
-		SetRotations(m_rotx, m_roty, m_rotz, true);
+		SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
 	}
 	//SetSortBricks();
 }
@@ -9014,7 +9012,7 @@ void RenderCanvas::SetClipMode(int mode)
 		break;
 	case 1:
 		m_clip_mode = 1;
-		SetRotations(m_rotx, m_roty, m_rotz, true);
+		SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
 		break;
 	case 2:
 		m_clip_mode = 2;
@@ -9028,7 +9026,7 @@ void RenderCanvas::SetClipMode(int mode)
 		if (m_rotx_cl > 180.0) m_rotx_cl -= 360.0;
 		if (m_roty_cl > 180.0) m_roty_cl -= 360.0;
 		if (m_rotz_cl > 180.0) m_rotz_cl -= 360.0;
-		SetRotations(m_rotx, m_roty, m_rotz, true);
+		SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
 		break;
 	}
 }
@@ -9061,23 +9059,24 @@ void RenderCanvas::ClipRotate()
 	m_q_cl.FromEuler(m_rotx_cl, m_roty_cl, m_rotz_cl);
 	m_q_cl.Normalize();
 
-	SetRotations(m_rotx, m_roty, m_rotz, true);
+	SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
 
 }
 
-void RenderCanvas::SetClippingPlaneRotations(double rotx, double roty, double rotz)
+void RenderCanvas::SetClippingPlaneRotations(const fluo::Vector& val)
 {
-	m_rotx_cl = -rotx;
-	m_roty_cl = roty;
-	m_rotz_cl = rotz;
+	m_rotx_cl = -val.x();
+	m_roty_cl = val.y();
+	m_rotz_cl = val.z();
 	ClipRotate();
 }
 
-void RenderCanvas::GetClippingPlaneRotations(double &rotx, double &roty, double &rotz)
+fluo::Vector RenderCanvas::GetClippingPlaneRotations()
 {
-	rotx = m_rotx_cl == 0.0 ? m_rotx_cl : -m_rotx_cl;
-	roty = m_roty_cl;
-	rotz = m_rotz_cl;
+	return fluo::Vector(
+		m_rotx_cl == 0.0 ? m_rotx_cl : -m_rotx_cl,
+		m_roty_cl,
+		m_rotz_cl);
 }
 
 void RenderCanvas::SetClipRotX(double val)
@@ -10582,7 +10581,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 					fluo::Quaternion q_delta = TrackballClip(old_mouse_X, mp.y(), mp.x(), old_mouse_Y);
 					m_q_cl = q_delta * m_q_cl;
 					m_q_cl.Normalize();
-					SetRotations(m_rotx, m_roty, m_rotz, true);
+					SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
 					RefreshGL(34);
 				}
 			}
@@ -10769,11 +10768,11 @@ void RenderCanvas::SetFog(bool b)
 	//	m_renderview_panel->m_left_toolbar->ToggleTool(RenderViewPanel::ID_DepthAttenChk, b);
 }
 
-void RenderCanvas::SetRotations(double rotx, double roty, double rotz, bool notify)
+void RenderCanvas::SetRotations(const fluo::Vector& val, bool notify)
 {
-	m_rotx = rotx;
-	m_roty = roty;
-	m_rotz = rotz;
+	m_rotx = val.x();
+	m_roty = val.y();
+	m_rotz = val.z();
 
 	if (m_roty>360.0)
 		m_roty -= 360.0;
@@ -10828,8 +10827,9 @@ void RenderCanvas::SetZeroRotations()
 	m_zq = m_q;
 }
 
-void RenderCanvas::ResetZeroRotations(double &rotx, double &roty, double &rotz)
+fluo::Vector RenderCanvas::ResetZeroRotations()
 {
+	double rotx, roty, rotz;
 	m_zq = fluo::Quaternion();
 	m_q.ToEuler(rotx, roty, rotz);
 	if (roty > 360.0)
@@ -10844,6 +10844,7 @@ void RenderCanvas::ResetZeroRotations(double &rotx, double &roty, double &rotz)
 		rotz -= 360.0;
 	if (rotz < 0.0)
 		rotz += 360.0;
+	return fluo::Vector(rotx, roty, rotz);
 }
 
 void RenderCanvas::CalcFrame()

@@ -577,7 +577,7 @@ namespace flvr
 
 					fluo::BBox dbox(fluo::Point(dx0, dy0, dz0), fluo::Point(dx1, dy1, dz1));
 					TextureBrick *b = new TextureBrick(0, 0, mx2, my2, mz2, numc, numb,
-						ox, oy, oz, mx2, my2, mz2, bbox, tbox, dbox, bricks.size());
+						ox, oy, oz, mx2, my2, mz2, bbox, tbox, dbox, static_cast<unsigned int>(bricks.size()));
 					bricks.push_back(b);
 				}
 			}
@@ -641,7 +641,7 @@ namespace flvr
 
 		clearPyramid();
 
-		pyramid_lv_num_ = pyramid.size();
+		pyramid_lv_num_ = static_cast<int>(pyramid.size());
 		pyramid_ = pyramid;
 		filenames_ = filenames;
 		for (int i = 0; i < pyramid_.size(); i++)
@@ -857,7 +857,7 @@ namespace flvr
 		else
 		{
 			mask_undos_.push_back(mask_data);
-			mask_undo_pointer_ = mask_undos_.size()-1;
+			mask_undo_pointer_ = static_cast<int>(mask_undos_.size())-1;
 			trim_mask_undos_head();
 		}
 	}

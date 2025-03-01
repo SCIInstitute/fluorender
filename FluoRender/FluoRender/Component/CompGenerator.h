@@ -146,7 +146,7 @@ namespace flrd
 		void PlayCmd(double tfactor);
 		void SetRecordCmd(bool val);
 		bool GetRecordCmd();
-		int GetCmdNum();
+		size_t GetCmdNum();
 
 		//unused
 		//void OrderID_2D();

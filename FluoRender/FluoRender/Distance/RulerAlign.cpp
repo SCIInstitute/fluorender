@@ -91,9 +91,9 @@ void RulerAlign::AlignRuler()
 	ang = r2d(std::acos(ang));
 	fluo::Quaternion q(ang, rotv);
 	double qx, qy, qz;
-	m_view->ResetZeroRotations(qx, qy, qz);
+	m_view->ResetZeroRotations();
 	q.ToEuler(qx, qy, qz);
-	m_view->SetRotations(qx, -qy, -qz, true);
+	m_view->SetRotations(fluo::Vector(qx, -qy, -qz), true);
 
 	if (m_align_center)
 	{
@@ -108,12 +108,11 @@ void RulerAlign::AlignRuler()
 			center /= double(n);
 		}
 
-		double tx, ty, tz;
-		m_view->GetObjCenters(tx, ty, tz);
-		m_view->SetObjTrans(
-			tx - center.x(),
-			center.y() - ty,
-			center.z() - tz);
+		fluo::Point trans = m_view->GetObjCenters();
+		m_view->SetObjTrans(fluo::Vector(
+			trans.x() - center.x(),
+			center.y() - trans.y(),
+			center.z() - trans.z()));
 	}
 }
 
@@ -214,17 +213,16 @@ void RulerAlign::AlignPca(bool rulers)
 	rotq.Normalize();
 	fluo::Quaternion q2 = q * rotq;
 	double qx, qy, qz;
-	m_view->ResetZeroRotations(qx, qy, qz);
+	m_view->ResetZeroRotations();
 	q2.ToEuler(qx, qy, qz);
-	m_view->SetRotations(qx, -qy, -qz, true);
+	m_view->SetRotations(fluo::Vector(qx, -qy, -qz), true);
 
 	if (m_align_center)
 	{
-		double tx, ty, tz;
-		m_view->GetObjCenters(tx, ty, tz);
-		m_view->SetObjTrans(
-			tx - center.x(),
-			center.y() - ty,
-			center.z() - tz);
+		fluo::Point trans = m_view->GetObjCenters();
+		m_view->SetObjTrans(fluo::Vector(
+			trans.x() - center.x(),
+			center.y() - trans.y(),
+			center.z() - trans.z()));
 	}
 }

@@ -811,7 +811,7 @@ void StencilCompare::Prepare(const std::string& cmp_name)
 		kernel_index = m_prog->createKernel(name);
 
 	flvr::Argument img[2];
-	unsigned int nx = m_s1->nx, ny = m_s1->ny, nz = m_s1->nz;
+	unsigned int nx = static_cast<unsigned int>(m_s1->nx), ny = static_cast<unsigned int>(m_s1->ny), nz = static_cast<unsigned int>(m_s1->nz);
 	size_t local_size[3] = { 1, 1, 1 };
 	size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 	size_t buf_size = m_s1->bits == 8 ?
@@ -925,7 +925,7 @@ bool StencilCompare::Compare()
 	//set up initial neighborhoods
 	fluo::Vector s1cp(m_s1->box.center());
 	fluo::Vector range = m_s1->box.diagonal();
-	range = fluo::Min(range, fluo::Vector(m_s1->nx-1, m_s1->ny-1, m_s1->nz-1));
+	range = fluo::Min(range, fluo::Vector(static_cast<double>(m_s1->nx-1), static_cast<double>(m_s1->ny-1), static_cast<double>(m_s1->nz-1)));
 	range = fluo::Min(range, m_ext1);
 	fluo::Neighbor nb_trans(fluo::Point(), range);
 	range = fluo::Min(fluo::Vector(range.z(), range.z(), 180), m_ext2);
@@ -1083,7 +1083,7 @@ float StencilCompare::Similar(const std::string& name)
 	size_t global_size[3] = { size_t(gsize.gsx), size_t(gsize.gsy), size_t(gsize.gsz) };
 
 	//set up kernel
-	unsigned int nx = m_s1->nx, ny = m_s1->ny, nz = m_s1->nz;
+	unsigned int nx = static_cast<unsigned int>(m_s1->nx), ny = static_cast<unsigned int>(m_s1->ny), nz = static_cast<unsigned int>(m_s1->nz);
 	unsigned int nxy = nx * ny;
 	cl_float intmax = m_s1->max_int;
 	cl_int3 bmin{

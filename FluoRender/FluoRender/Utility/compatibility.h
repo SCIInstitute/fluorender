@@ -641,13 +641,15 @@ inline TIFF* TIFFOpenW(std::wstring fname, const char* opt)
 	return TIFFOpenW(fname.c_str(), opt);
 }
 
-inline FILE* FOPEN(FILE** fp, const char* fname, const char* mode) {
-	fopen_s(fp, fname, mode);
+inline FILE* FOPEN(FILE** fp, std::string& fname, const char* mode) {
+	fname = "\x5c\x5c\x3f\x5c" + fname;
+	fopen_s(fp, fname.c_str(), mode);
 	return *fp;
 }
 
-inline FILE* WFOPEN(FILE** fp, const wchar_t* fname, const wchar_t* mode) {
-	_wfopen_s(fp, fname, mode);
+inline FILE* WFOPEN(FILE** fp, std::wstring& fname, const wchar_t* mode) {
+	fname = L"\x5c\x5c\x3f\x5c" + fname;
+	_wfopen_s(fp, fname.c_str(), mode);
 	return *fp;
 }
 
@@ -799,14 +801,14 @@ typedef union _LARGE_INTEGER {
 	long long QuadPart;
 } LARGE_INTEGER, * PLARGE_INTEGER;
 
-inline FILE* WFOPEN(FILE** fp, const wchar_t* filename, const wchar_t* mode) {
-	*fp = fopen(ws2s(std::wstring(filename)).c_str(),
+inline FILE* WFOPEN(FILE** fp, std::wstring& filename, const wchar_t* mode) {
+	*fp = fopen(ws2s(filename).c_str(),
 		ws2s(std::wstring(mode)).c_str());
 	return *fp;
 }
 
-inline FILE* FOPEN(FILE** fp, const char* filename, const char* mode) {
-	*fp = fopen(filename, mode);
+inline FILE* FOPEN(FILE** fp, std::string& filename, const char* mode) {
+	*fp = fopen(filename.c_str(), mode);
 	return *fp;
 }
 

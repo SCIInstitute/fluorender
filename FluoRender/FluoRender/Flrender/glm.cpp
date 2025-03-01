@@ -44,7 +44,8 @@ GLboolean glmLoadTGA(TextureImage *texture, const char *filename,GLuint *texture
 	GLuint    type=GL_RGBA;                // Set The Default GL Mode To RBGA (32 BPP)
 
 	FILE *file;
-	if (!FOPEN(&file, filename, "rb"))          // Open The TGA File
+	std::string str = filename;
+	if (!FOPEN(&file, str, "rb"))          // Open The TGA File
 		return false;
 
 	if(  file==NULL ||                    // Does File Even Exist?
@@ -371,7 +372,7 @@ static bool glmReadMTL(GLMmodel* model, char* name)
 	std::wstring filename = wdir + wname;
 	str = ws2s(filename);
 
-	if (!FOPEN(&file, str.c_str(), "rb"))
+	if (!FOPEN(&file, str, "rb"))
 	{
 		//free(filename);
 		return false;
@@ -563,7 +564,8 @@ static GLvoid glmWriteMTL(GLMmodel* model, const char* modelpath, char* mtllibna
 	free(dir);
 
 	/* open the file */
-	if (!FOPEN(&file, filename, "wt"))
+	std::string str = filename;
+	if (!FOPEN(&file, str, "wt"))
 		return;
 	free(filename);
 
@@ -1736,7 +1738,8 @@ GLMmodel* glmReadOBJ(const char* filename, bool *no_fail)
 	FILE* file;
 
 	/* open the file */
-	if (!FOPEN(&file, filename, "rb"))
+	std::string str = filename;
+	if (!FOPEN(&file, str, "rb"))
 		return 0;
 
 	//find file size
@@ -1868,7 +1871,8 @@ GLvoid glmWriteOBJ(GLMmodel* model, const char* filename, GLuint mode)
 
 
 	/* open the file */
-	if (!FOPEN(&file, filename, "wt"))
+	std::string str = filename;
+	if (!FOPEN(&file, str, "wt"))
 		return;
 
 	/* spit out a header */
@@ -2088,7 +2092,8 @@ GLubyte* glmReadPPM(char* filename, int* width, int* height)
 	unsigned char* image;
 	char head[70];          /* max line <= 70 in PPM (per spec). */
 
-	if (!FOPEN(&fp, filename, "rb"))
+	std::string str = filename;
+	if (!FOPEN(&fp, str, "rb"))
 		return NULL;
 
 	/* grab first two chars of the file and make sure that it has the

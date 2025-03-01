@@ -82,8 +82,8 @@ bool Registrator::Run(size_t f1, size_t f2,
 	s1.nz = s2.nz = nz;
 	int bits = m_vd->GetBits();
 	s1.bits = s2.bits = bits;
-	s1.scale = s2.scale = m_vd->GetScalarScale();
-	s1.max_int = s2.max_int = m_vd->GetMaxValue();
+	s1.scale = s2.scale = static_cast<float>(m_vd->GetScalarScale());
+	s1.max_int = s2.max_int = static_cast<float>(m_vd->GetMaxValue());
 	s1.fsize = s2.fsize = m_fsize;
 	fluo::BBox extent(fluo::Point(0), fluo::Point(nx, ny, nz));
 	if (m_use_mask)

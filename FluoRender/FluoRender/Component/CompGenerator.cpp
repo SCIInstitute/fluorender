@@ -309,7 +309,7 @@ void ComponentGenerator::ShuffleID()
 		if (prework)
 			prework("");
 
-		SetProgress(100 * count / brick_num,
+		SetProgress(static_cast<int>(100 * count / brick_num),
 			"Shuffling IDs.");
 		count++;
 
@@ -431,7 +431,7 @@ void ComponentGenerator::SetIDBit(int psize)
 		if (prework)
 			prework("");
 
-		SetProgress(100 * count / brick_num,
+		SetProgress(static_cast<int>(100 * count / brick_num),
 			"Setting ID bits.");
 		count++;
 
@@ -538,7 +538,7 @@ void ComponentGenerator::Grow()
 	if (!CheckBricks())
 		return;
 
-	float scale = m_vd->GetScalarScale();
+	float scale = static_cast<float>(m_vd->GetScalarScale());
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_brainbow_3d);
@@ -582,9 +582,9 @@ void ComponentGenerator::Grow()
 		unsigned int seed = biter > 10 ? biter : 11;
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
-		float scl_ff = m_diff ? m_falloff : 0.0f;
-		float grad_ff = m_diff ? m_falloff : 0.0f;
-		float tran = m_thresh * m_tfactor;
+		float scl_ff = m_diff ? static_cast<float>(m_falloff) : 0.0f;
+		float grad_ff = m_diff ? static_cast<float>(m_falloff) : 0.0f;
+		float tran = static_cast<float>(m_thresh * m_tfactor);
 		int fixed = m_grow_fixed;
 
 		//set
@@ -609,7 +609,7 @@ void ComponentGenerator::Grow()
 		//execute
 		for (int j = 0; j < biter; ++j)
 		{
-			SetProgress(100 * count / ticks,
+			SetProgress(static_cast<int>(100 * count / ticks),
 				"Generating components.");
 			count++;
 
@@ -636,7 +636,7 @@ void ComponentGenerator::DensityField()
 	if (!CheckBricks())
 		return;
 
-	float scale = m_vd->GetScalarScale();
+	float scale = static_cast<float>(m_vd->GetScalarScale());
 
 	//create program and kernels
 	//prog density
@@ -740,7 +740,7 @@ void ComponentGenerator::DensityField()
 
 		//init
 		kernel_prog_dens->executeKernel(kernel_dens_index0, 3, global_size2, local_size);
-		SetProgress(100 * count / ticks,
+		SetProgress(static_cast<int>(100 * count / ticks),
 			"Generating components.");
 		count++;
 		//#ifdef _DEBUG
@@ -751,7 +751,7 @@ void ComponentGenerator::DensityField()
 		//group avg and var
 		global_size[0] = size_t(ngx); global_size[1] = size_t(ngy); global_size[2] = size_t(ngz);
 		kernel_prog_dens->executeKernel(kernel_dens_index1, 3, global_size, local_size);
-		SetProgress(100 * count / ticks,
+		SetProgress(static_cast<int>(100 * count / ticks),
 			"Generating components.");
 		count++;
 		//#ifdef _DEBUG
@@ -767,7 +767,7 @@ void ComponentGenerator::DensityField()
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		kernel_prog_dens->setKernelArgument(arg_gavg);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
-		SetProgress(100 * count / ticks,
+		SetProgress(static_cast<int>(100 * count / ticks),
 			"Generating components.");
 		count++;
 		//compute var
@@ -776,7 +776,7 @@ void ComponentGenerator::DensityField()
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		kernel_prog_dens->setKernelArgument(arg_gvar);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
-		SetProgress(100 * count / ticks,
+		SetProgress(static_cast<int>(100 * count / ticks),
 			"Generating components.");
 		count++;
 
@@ -787,11 +787,11 @@ void ComponentGenerator::DensityField()
 		//density grow
 		unsigned int rcnt = 0;
 		unsigned int seed = m_iter > 10 ? m_iter : 11;
-		float scl_ff = m_diff ? m_falloff : 0.0f;
-		float grad_ff = m_diff ? m_falloff : 0.0f;
-		float tran = m_thresh * m_tfactor;
-		float density = m_density_thresh;
-		float varth = m_varth;
+		float scl_ff = m_diff ? static_cast<float>(m_falloff) : 0.0f;
+		float grad_ff = m_diff ? static_cast<float>(m_falloff) : 0.0f;
+		float tran = static_cast<float>(m_thresh * m_tfactor);
+		float density = static_cast<float>(m_density_thresh);
+		float varth = static_cast<float>(m_varth);
 		int fixed = m_grow_fixed;
 
 		//set
@@ -825,7 +825,7 @@ void ComponentGenerator::DensityField()
 		{
 			kernel_prog_grow->executeKernel(kernel_grow_index0, 3, global_size, local_size);
 
-			SetProgress(100 * count / ticks,
+			SetProgress(static_cast<int>(100 * count / ticks),
 				"Generating components.");
 			count++;
 		}
@@ -851,7 +851,7 @@ void ComponentGenerator::DistGrow()
 	if (!CheckBricks())
 		return;
 
-	float scale = m_vd->GetScalarScale();
+	float scale = static_cast<float>(m_vd->GetScalarScale());
 
 	//create program and kernels
 	//prog dist
@@ -905,7 +905,7 @@ void ComponentGenerator::DistGrow()
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
-		float dist_thresh = m_dist_thresh;
+		float dist_thresh = static_cast<float>(m_dist_thresh);
 		//generate distance field arg_distf
 		unsigned char ini = 1;
 		//set
@@ -939,7 +939,7 @@ void ComponentGenerator::DistGrow()
 		}
 		//init
 		kernel_prog_dist->executeKernel(kernel_dist_index0, 3, global_size, local_size);
-		SetProgress(100 * count / ticks,
+		SetProgress(static_cast<int>(100 * count / ticks),
 			"Generating components.");
 		count++;
 		unsigned char nn, re;
@@ -951,7 +951,7 @@ void ComponentGenerator::DistGrow()
 			kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&nn));
 			kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&re));
 			kernel_prog_dist->executeKernel(kernel_dist_index1, 3, global_size, local_size);
-			SetProgress(100 * count / ticks,
+			SetProgress(static_cast<int>(100 * count / ticks),
 				"Generating components.");
 			count++;
 		}
@@ -959,11 +959,11 @@ void ComponentGenerator::DistGrow()
 		//grow
 		unsigned int rcnt = 0;
 		unsigned int seed = m_iter > 10 ? m_iter : 11;
-		float scl_ff = m_diff ? m_falloff : 0.0f;
-		float grad_ff = m_diff ? m_falloff : 0.0f;
+		float scl_ff = m_diff ? static_cast<float>(m_falloff) : 0.0f;
+		float grad_ff = m_diff ? static_cast<float>(m_falloff) : 0.0f;
 		float distscl = 5.0f / m_max_dist;
-		float tran = m_thresh * m_tfactor;
-		float dist_strength = m_dist_strength;
+		float tran = static_cast<float>(m_thresh * m_tfactor);
+		float dist_strength = static_cast<float>(m_dist_strength);
 		int fixed = m_grow_fixed;
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
@@ -991,7 +991,7 @@ void ComponentGenerator::DistGrow()
 		for (int j = 0; j < m_iter; ++j)
 		{
 			kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
-			SetProgress(100 * count / ticks,
+			SetProgress(static_cast<int>(100 * count / ticks),
 				"Generating components.");
 			count++;
 		}
@@ -1017,7 +1017,7 @@ void ComponentGenerator::DistDensityField()
 	if (!CheckBricks())
 		return;
 
-	float scale = m_vd->GetScalarScale();
+	float scale = static_cast<float>(m_vd->GetScalarScale());
 
 	//create program and kernels
 	//prog dist
@@ -1101,7 +1101,7 @@ void ComponentGenerator::DistDensityField()
 
 		//generate distance field arg_distf
 		unsigned char ini = 1;
-		float dist_thresh = m_dist_thresh;
+		float dist_thresh = static_cast<float>(m_dist_thresh);
 		//set
 		//kernel 0
 		kernel_prog_dist->setKernelArgBegin(kernel_dist_index0);
@@ -1132,7 +1132,7 @@ void ComponentGenerator::DistDensityField()
 		}
 		//init
 		kernel_prog_dist->executeKernel(kernel_dist_index0, 3, global_size, local_size);
-		SetProgress(100 * count / ticks,
+		SetProgress(static_cast<int>(100 * count / ticks),
 			"Generating components.");
 		count++;
 		unsigned char nn, re;
@@ -1144,7 +1144,7 @@ void ComponentGenerator::DistDensityField()
 			kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&nn));
 			kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&re));
 			kernel_prog_dist->executeKernel(kernel_dist_index1, 3, global_size, local_size);
-			SetProgress(100 * count / ticks,
+			SetProgress(static_cast<int>(100 * count / ticks),
 				"Generating components.");
 			count++;
 		}
@@ -1158,7 +1158,7 @@ void ComponentGenerator::DistDensityField()
 		//set
 		//kernel 0
 		float distscl = 5.0f / m_max_dist;
-		float dist_strength = m_dist_strength;
+		float dist_strength = static_cast<float>(m_dist_strength);
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index0);
 		kernel_prog_dens->setKernelArgument(arg_img);
 		kernel_prog_dens->setKernelArgument(arg_distf);
@@ -1201,7 +1201,7 @@ void ComponentGenerator::DistDensityField()
 
 		//init
 		kernel_prog_dens->executeKernel(kernel_dens_index0, 3, global_size2, local_size);
-		SetProgress(100 * count / ticks,
+		SetProgress(static_cast<int>(100 * count / ticks),
 			"Generating components.");
 		count++;
 //#ifdef _DEBUG
@@ -1212,7 +1212,7 @@ void ComponentGenerator::DistDensityField()
 		//group avg and var
 		global_size[0] = size_t(ngx); global_size[1] = size_t(ngy); global_size[2] = size_t(ngz);
 		kernel_prog_dens->executeKernel(kernel_dens_index1, 3, global_size, local_size);
-		SetProgress(100 * count / ticks,
+		SetProgress(static_cast<int>(100 * count / ticks),
 			"Generating components.");
 		count++;
 		//compute avg
@@ -1222,7 +1222,7 @@ void ComponentGenerator::DistDensityField()
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		kernel_prog_dens->setKernelArgument(arg_gavg);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
-		SetProgress(100 * count / ticks,
+		SetProgress(static_cast<int>(100 * count / ticks),
 			"Generating components.");
 		count++;
 		//compute var
@@ -1231,7 +1231,7 @@ void ComponentGenerator::DistDensityField()
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		kernel_prog_dens->setKernelArgument(arg_gvar);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
-		SetProgress(100 * count / ticks,
+		SetProgress(static_cast<int>(100 * count / ticks),
 			"Generating components.");
 		count++;
 
@@ -1243,12 +1243,12 @@ void ComponentGenerator::DistDensityField()
 		//distance + density grow
 		unsigned int rcnt = 0;
 		unsigned int seed = m_iter > 10 ? m_iter : 11;
-		float scl_ff = m_diff ? m_falloff : 0.0f;
-		float grad_ff = m_diff ? m_falloff : 0.0f;
-		float tran = m_thresh * m_tfactor;
+		float scl_ff = m_diff ? static_cast<float>(m_falloff) : 0.0f;
+		float grad_ff = m_diff ? static_cast<float>(m_falloff) : 0.0f;
+		float tran = static_cast<float>(m_thresh * m_tfactor);
 		int fixed = m_grow_fixed;
-		float density = m_density_thresh;
-		float varth = m_varth;
+		float density = static_cast<float>(m_density_thresh);
+		float varth = static_cast<float>(m_varth);
 
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
@@ -1280,7 +1280,7 @@ void ComponentGenerator::DistDensityField()
 		for (int j = 0; j < m_iter; ++j)
 		{
 			kernel_prog_grow->executeKernel(kernel_grow_index0, 3, global_size, local_size);
-			SetProgress(100 * count / ticks,
+			SetProgress(static_cast<int>(100 * count / ticks),
 				"Generating components.");
 			count++;
 		}
@@ -1424,7 +1424,7 @@ void ComponentGenerator::CleanNoise()
 			kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
 			kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
 
-			SetProgress(100 * count / ticks,
+			SetProgress(static_cast<int>(100 * count / ticks),
 				"Cleaning components.");
 			count++;
 		}
@@ -1494,7 +1494,7 @@ void ComponentGenerator::ClearBorders()
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
-		SetProgress(100 * count / brick_num,
+		SetProgress(static_cast<int>(100 * count / brick_num),
 			"Clearing borders.");
 		count++;
 
@@ -1549,7 +1549,7 @@ void ComponentGenerator::FillBorders()
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
-		float tol = m_fill_border;
+		float tol = static_cast<float>(m_fill_border);
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgBegin(kernel_index);
@@ -1566,7 +1566,7 @@ void ComponentGenerator::FillBorders()
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 
-		SetProgress(100 * count / brick_num,
+		SetProgress(static_cast<int>(100 * count / brick_num),
 			"Filling borders.");
 		count++;
 
@@ -1618,17 +1618,17 @@ void ComponentGenerator::GenerateDB()
 
 	flrd::TableHistParams& table = glbin.get_cg_table();
 	//check table size
-	unsigned int rec = table.getRecSize();
+	size_t rec = table.getRecSize();
 	unsigned int bin = EntryHist::m_bins;
-	unsigned int par = flrd::Reshape::get_param_size("comp_gen");
+	size_t par = flrd::Reshape::get_param_size("comp_gen");
 	if (!(rec && bin && par))
 		return;
 
 	//iterration maximum from db
-	int iter = table.getParamIter();
-	int max_dist = table.getParamMxdist();//max iteration for distance field
+	int iter = static_cast<int>(table.getParamIter());
+	int max_dist = static_cast<int>(table.getParamMxdist());//max iteration for distance field
 	bool cleanb = table.getParamCleanb() > 0.0f;
-	int clean_iter = table.getParamCleanIter();
+	int clean_iter = static_cast<int>(table.getParamCleanIter());
 
 	//histogram window size
 	int whistxy = 20;//histogram size
@@ -1640,17 +1640,17 @@ void ComponentGenerator::GenerateDB()
 	if (nz < 5)
 	{
 		w = std::sqrt(hsize);
-		whistxy = (int)std::ceil(w);
+		whistxy = static_cast<int>(std::ceil(w));
 		whistz = 1;
 	}
 	else
 	{
-		w = std::pow((double)hsize / (nx / nz) / (ny / nz), double(1) / 3);
-		whistz = (int)std::ceil(w);
-		whistxy = (int)std::ceil(w * nx / nz);
+		w = static_cast<float>(std::pow((double)hsize / (nx / nz) / (ny / nz), double(1) / 3));
+		whistz = static_cast<int>(std::ceil(w));
+		whistxy = static_cast<int>(std::ceil(w * nx / nz));
 	}
 	//intensity scale
-	float sscale = float(m_vd->GetScalarScale());
+	float sscale = static_cast<float>(m_vd->GetScalarScale());
 
 	//prog
 	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_comp_gen_db);
@@ -1729,7 +1729,7 @@ void ComponentGenerator::GenerateDB()
 
 		//execute
 		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
-		SetProgress(100 * count / ticks,
+		SetProgress(static_cast<int>(100 * count / ticks),
 			"Generating components.");
 		count++;
 
@@ -1774,7 +1774,7 @@ void ComponentGenerator::GenerateDB()
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
 		//init
 		kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
-		SetProgress(100 * count / ticks,
+		SetProgress(static_cast<int>(100 * count / ticks),
 			"Generating components.");
 		count++;
 
@@ -1787,7 +1787,7 @@ void ComponentGenerator::GenerateDB()
 			kernel_prog->setKernelArgConst(sizeof(unsigned char), (void*)(&nn));
 			kernel_prog->setKernelArgConst(sizeof(unsigned char), (void*)(&re));
 			kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
-			SetProgress(100 * count / ticks,
+			SetProgress(static_cast<int>(100 * count / ticks),
 				"Generating components.");
 			count++;
 		}
@@ -1824,12 +1824,12 @@ void ComponentGenerator::GenerateDB()
 
 		//mix fields
 		kernel_prog->executeKernel(kernel_index3, 3, global_size, local_size);
-		SetProgress(100 * count / ticks,
+		SetProgress(static_cast<int>(100 * count / ticks),
 			"Generating components.");
 		count++;
 		//gen avg and var
 		kernel_prog->executeKernel(kernel_index4, 3, global_size, local_size);
-		SetProgress(100 * count / ticks,
+		SetProgress(static_cast<int>(100 * count / ticks),
 			"Generating components.");
 		count++;
 		//#ifdef _DEBUG
@@ -1872,12 +1872,12 @@ void ComponentGenerator::GenerateDB()
 		{
 			if (j)
 			{
-				iterf = j;
+				iterf = static_cast<float>(j);
 				kernel_prog->setKernelArgBegin(kernel_index5);
 				kernel_prog->setKernelArgConst(sizeof(float), (void*)(&iterf));
 			}
 			kernel_prog->executeKernel(kernel_index5, 3, global_size, local_size);
-			SetProgress(100 * count / ticks,
+			SetProgress(static_cast<int>(100 * count / ticks),
 				"Generating components.");
 			count++;
 		}
@@ -1943,7 +1943,7 @@ void ComponentGenerator::GenerateDB()
 				kernel_prog->executeKernel(kernel_index6, 3, global_size, local_size);
 				kernel_prog->executeKernel(kernel_index7, 3, global_size, local_size);
 				kernel_prog->executeKernel(kernel_index8, 3, global_size, local_size);
-				SetProgress(100 * count / ticks,
+				SetProgress(static_cast<int>(100 * count / ticks),
 					"Generating components.");
 				count++;
 			}
@@ -2142,7 +2142,6 @@ void ComponentGenerator::SaveCmd(const std::wstring& filename)
 	}
 
 	fconfig->SaveFile(filename);
-	//glbin_project.SaveConfig(fconfig, filename);
 	//m_cmd_file_text->ChangeValue(filename);
 }
 
@@ -2250,7 +2249,7 @@ void ComponentGenerator::PlayCmd(double tfactor)
 				else if (*it2 == "dist_strength")
 					m_dist_strength = std::stod(*(++it2));
 				else if (*it2 == "dist_filter_size")
-					m_dist_filter_size = std::stod(*(++it2));
+					m_dist_filter_size = std::stoi(*(++it2));
 				else if (*it2 == "max_dist")
 					m_max_dist = std::stoi(*(++it2));
 				else if (*it2 == "dist_thresh")
@@ -2320,7 +2319,7 @@ bool ComponentGenerator::GetRecordCmd()
 	return m_record_cmd;
 }
 
-int ComponentGenerator::GetCmdNum()
+size_t ComponentGenerator::GetCmdNum()
 {
 	return m_command.size();
 }
@@ -2343,7 +2342,7 @@ void ComponentGenerator::StopTimer(const std::string& str)
 			std::chrono::duration_cast<std::chrono::duration<double>>(
 				m_tps.back() - t0);
 
-		m_values += str + L"\t";
+		m_values += s2ws(str) + L"\t";
 		m_values += std::to_wstring(time_span.count());
 		m_values += L" sec.\n";
 	}

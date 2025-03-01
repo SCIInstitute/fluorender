@@ -200,7 +200,7 @@ int TIFReader::Preprocess()
 				if (FIND_FILES_4D(m_path_name, m_time_id, list, m_cur_time))
 				{
 					isHsTimeSeq_ = true;
-					m_time_num = list.size();
+					m_time_num = static_cast<int>(list.size());
 				}
 			}
 
@@ -389,7 +389,7 @@ int TIFReader::Preprocess()
 			{
 				InvalidatePageInfo();
 				OpenTiff(tiff_name);
-				m_chan_num = GetTiffField(kSamplesPerPixelTag);
+				m_chan_num = static_cast<int>(GetTiffField(kSamplesPerPixelTag));
 				if (m_chan_num == 0 &&
 					GetTiffField(kImageWidthTag) > 0 &&
 					GetTiffField(kImageLengthTag) > 0)
@@ -400,7 +400,7 @@ int TIFReader::Preprocess()
 				//channels could be stored in slices
 				if (m_chann_seq)
 				{
-					m_chan_num *= m_chann_count.size();
+					m_chan_num *= static_cast<int>(m_chann_count.size());
 				}
 			}
 			else m_chan_num = 0;
@@ -1421,14 +1421,14 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
 	char *temp = new char[byte_count];
 	//unsigned long long pos = tiff_stream.tellg();
 	tiff_stream.read((char*)temp, byte_count);
-	int bits = GetTiffField(kBitsPerSampleTag);
+	int bits = static_cast<int>(GetTiffField(kBitsPerSampleTag));
 	bool eight_bits = 8 == bits;
 	//get compression tag, decompress if necessary
 	uint64_t tmp = GetTiffField(kCompressionTag);
 	uint64_t prediction = GetTiffField(kPredictionTag);
 	uint64_t samples = GetTiffField(kSamplesPerPixelTag);
 	samples = samples == 0 ? 1 : samples;
-	tsize_t stride = (GetTiffField(kPlanarConfigurationTag) == 2) ? 1 : samples;
+	tsize_t stride = static_cast<tsize_t>((GetTiffField(kPlanarConfigurationTag) == 2) ? 1 : samples);
 	//uint64_t rows_per_strip = GetTiffField(kRowsPerStripTag,NULL,0);
 	uint64_t rows_per_strip = strip_size /
 		GetTiffField(kImageWidthTag) /
@@ -1436,14 +1436,14 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
 	bool isCompressed = tmp == 5;
 	if (isCompressed)
 	{
-		LZWDecode((tidata_t)temp, (tidata_t)data, strip_size);
+		LZWDecode((tidata_t)temp, (tidata_t)data, static_cast<tsize_t>(strip_size));
 		if (prediction == 2)
 		{
 			for (size_t j = 0; j < rows_per_strip; j++)
 				if (eight_bits)
-					DecodeAcc8((tidata_t)data + j*m_x_size*samples, m_x_size*samples, stride);
+					DecodeAcc8((tidata_t)data + j*m_x_size*samples, static_cast<tsize_t>(m_x_size*samples), stride);
 				else
-					DecodeAcc16((tidata_t)data + j*m_x_size*samples * 2, m_x_size*samples * 2, stride);
+					DecodeAcc16((tidata_t)data + j*m_x_size*samples * 2, static_cast<tsize_t>(m_x_size*samples * 2), stride);
 		}
 	}
 	else
@@ -1461,7 +1461,7 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
 				{
 					//convert
 					float vf = reinterpret_cast<float&>(vi);
-					vf = (vf - m_fp_min) * 65535 / (m_fp_max - m_fp_min);
+					vf = static_cast<float>((vf - m_fp_min) * 65535 / (m_fp_max - m_fp_min));
 					vf = std::roundf(std::clamp(vf, 0.0f, 65535.0f));
 					vs = uint16_t(vf);
 				}
@@ -1497,25 +1497,25 @@ void TIFReader::GetTiffTile(uint64_t page, uint64_t tile,
 	char *temp = new char[byte_count];
 	//unsigned long long pos = tiff_stream.tellg();
 	tiff_stream.read((char*)temp, byte_count);
-	int bits = GetTiffField(kBitsPerSampleTag);
+	int bits = static_cast<int>(GetTiffField(kBitsPerSampleTag));
 	bool eight_bits = 8 == bits;
 	//get compression tag, decompress if necessary
 	uint64_t tmp = GetTiffField(kCompressionTag);
 	uint64_t prediction = GetTiffField(kPredictionTag);
 	uint64_t samples = GetTiffField(kSamplesPerPixelTag);
 	samples = samples == 0 ? 1 : samples;
-	tsize_t stride = (GetTiffField(kPlanarConfigurationTag) == 2) ? 1 : samples;
+	tsize_t stride = static_cast<tsize_t>((GetTiffField(kPlanarConfigurationTag) == 2) ? 1 : samples);
 	bool isCompressed = tmp == 5;
 	if (isCompressed)
 	{
-		LZWDecode((tidata_t)temp, (tidata_t)data, tile_size);
+		LZWDecode((tidata_t)temp, (tidata_t)data, static_cast<tsize_t>(tile_size));
 		if (prediction == 2)
 		{
 			for (size_t j = 0; j < tile_height; j++)
 				if (eight_bits)
-					DecodeAcc8((tidata_t)data + j*m_x_size*samples, m_x_size*samples, stride);
+					DecodeAcc8((tidata_t)data + j*m_x_size*samples, static_cast<tsize_t>(m_x_size*samples), stride);
 				else
-					DecodeAcc16((tidata_t)data + j*m_x_size*samples * 2, m_x_size*samples * 2, stride);
+					DecodeAcc16((tidata_t)data + j*m_x_size*samples * 2, static_cast<tsize_t>(m_x_size*samples * 2), stride);
 		}
 	}
 	else
@@ -1533,7 +1533,7 @@ void TIFReader::GetTiffTile(uint64_t page, uint64_t tile,
 				{
 					//convert
 					float vf = reinterpret_cast<float&>(vi);
-					vf = (vf - m_fp_min) * 65535 / (m_fp_max - m_fp_min);
+					vf = static_cast<float>((vf - m_fp_min) * 65535 / (m_fp_max - m_fp_min));
 					vf = std::roundf(std::clamp(vf, 0.0f, 65535.0f));
 					vs = uint16_t(vf);
 				}
@@ -1604,14 +1604,14 @@ void TIFReader::GetTiffStripMinMax(uint64_t page, uint64_t strip, uint64_t strip
 	char* temp = new char[byte_count];
 	//unsigned long long pos = tiff_stream.tellg();
 	tiff_stream.read((char*)temp, byte_count);
-	int bits = GetTiffField(kBitsPerSampleTag);
+	int bits = static_cast<int>(GetTiffField(kBitsPerSampleTag));
 	bool eight_bits = 8 == bits;
 	//get compression tag, decompress if necessary
 	uint64_t tmp = GetTiffField(kCompressionTag);
 	uint64_t prediction = GetTiffField(kPredictionTag);
 	uint64_t samples = GetTiffField(kSamplesPerPixelTag);
 	samples = samples == 0 ? 1 : samples;
-	tsize_t stride = (GetTiffField(kPlanarConfigurationTag) == 2) ? 1 : samples;
+	tsize_t stride = static_cast<tsize_t>((GetTiffField(kPlanarConfigurationTag) == 2) ? 1 : samples);
 	//uint64_t rows_per_strip = GetTiffField(kRowsPerStripTag,NULL,0);
 	uint64_t rows_per_strip = strip_size /
 		GetTiffField(kImageWidthTag) /
@@ -1642,14 +1642,14 @@ void TIFReader::GetTiffTileMinMax(uint64_t page, uint64_t tile, uint64_t tile_si
 	char* temp = new char[byte_count];
 	//unsigned long long pos = tiff_stream.tellg();
 	tiff_stream.read((char*)temp, byte_count);
-	int bits = GetTiffField(kBitsPerSampleTag);
+	int bits = static_cast<int>(GetTiffField(kBitsPerSampleTag));
 	bool eight_bits = 8 == bits;
 	//get compression tag, decompress if necessary
 	uint64_t tmp = GetTiffField(kCompressionTag);
 	uint64_t prediction = GetTiffField(kPredictionTag);
 	uint64_t samples = GetTiffField(kSamplesPerPixelTag);
 	samples = samples == 0 ? 1 : samples;
-	tsize_t stride = (GetTiffField(kPlanarConfigurationTag) == 2) ? 1 : samples;
+	tsize_t stride = static_cast<tsize_t>((GetTiffField(kPlanarConfigurationTag) == 2) ? 1 : samples);
 	bool isCompressed = tmp == 5;
 	if (!isCompressed && bits == 32 && m_fp_convert)
 	{
@@ -1798,15 +1798,15 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	}
 
 	if (m_resize_type == 1 && m_alignment > 1) {
-		m_x_size = (width / m_alignment + (width%m_alignment ? 1 : 0))*m_alignment;
-		m_y_size = (height / m_alignment + (height%m_alignment ? 1 : 0))*m_alignment;
+		m_x_size = static_cast<int>((width / m_alignment + (width%m_alignment ? 1 : 0))*m_alignment);
+		m_y_size = static_cast<int>((height / m_alignment + (height%m_alignment ? 1 : 0))*m_alignment);
 	}
 	else {
-		m_x_size = width;
-		m_y_size = height;
+		m_x_size = static_cast<int>(width);
+		m_y_size = static_cast<int>(height);
 	}
 
-	m_slice_num = numPages;
+	m_slice_num = static_cast<int>(numPages);
 	uint64_t pagepixels = (unsigned long long)m_x_size*(unsigned long long)m_y_size;
 
 	if (sequence && !isHyperstack_) CloseTiff();
@@ -1896,7 +1896,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 			//if (!imagej_raw_)
 			//	InvalidatePageInfo();
 			if (show_progress && m_time_num == 1)
-				SetProgress(std::round(100.0 * (i + 1) / numPages), "NOT_SET");
+				SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / numPages)), "NOT_SET");
 		}
 	}
 	else
@@ -1959,13 +1959,13 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 					if (samples > 1)
 					{
 						GetTiffTile(sequence ? 0 : val_pageindex, tile, buf, tile_size, tile_h);
-						int num_pixels = tile_size / samples / (bits / 8);
+						uint64_t num_pixels = tile_size / samples / (bits / 8);
 						uint64_t tx, ty;//tile coord
 						tx = tile % x_tile_num;
 						ty = tile / x_tile_num;
 						indexinpage = width * ty * tile_h + tx * tile_w;
 						valindex = val_pageindex * pagepixels + indexinpage;
-						for (int i = 0; i<num_pixels; i++)
+						for (uint64_t i = 0; i<num_pixels; i++)
 						{
 							if (tx == x_tile_num - 1)
 							{
@@ -2054,10 +2054,10 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 					if (samples > 1)
 					{
 						GetTiffStrip(sequence ? 0 : val_pageindex, strip, buf, strip_size);
-						int num_pixels = strip_size / samples / (bits / 8);
+						uint64_t num_pixels = strip_size / samples / (bits / 8);
 						indexinpage = strip*num_pixels;
 						valindex = val_pageindex *pagepixels + indexinpage;
-						for (int i = 0; i<num_pixels; i++)
+						for (uint64_t i = 0; i<num_pixels; i++)
 						{
 							if (indexinpage++ >= pagepixels) break;
 							if (eight_bit)
@@ -2098,7 +2098,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 			//if (!imagej_raw_)
 			//	InvalidatePageInfo();
 			if (show_progress && m_time_num == 1)
-				SetProgress(std::round(100.0 * (pageindex + 1) / for_size), "NOT_SET");
+				SetProgress(static_cast<int>(std::round(100.0 * (pageindex + 1) / for_size)), "NOT_SET");
 		}
 	}
 

@@ -419,7 +419,7 @@ void ComponentDefault::Apply(flrd::ComponentAnalyzer* ca)
 	if (!ca)
 		return;
 
-	ca->SetSizeLimit(m_slimit);
+	ca->SetSizeLimit(static_cast<unsigned int>(m_slimit));
 	ca->SetColocal(m_colocal);
 	ca->SetConsistent(m_consistent);
 	ca->SetChannelType(m_channel_type);

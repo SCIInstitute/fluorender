@@ -85,7 +85,7 @@ void LIFReader::SetFile(const std::wstring &file)
 int LIFReader::Preprocess()
 {
 	FILE* pfile = 0;
-	if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
+	if (!WFOPEN(&pfile, m_path_name, L"rb"))
 		return READER_OPEN_FAIL;
 
 	unsigned long long ioffset = 0;
@@ -195,7 +195,7 @@ Nrrd* LIFReader::Convert(int t, int c, bool get_max)
 {
 	Nrrd *data = 0;
 	FILE* pfile = 0;
-	if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
+	if (!WFOPEN(&pfile, m_path_name, L"rb"))
 		return 0;
 
 	if (t >= 0 && t < m_time_num &&
@@ -232,7 +232,7 @@ Nrrd* LIFReader::Convert(int t, int c, bool get_max)
 			SubBlockInfo* sbi = &(tinfo->blocks[i]);
 			ReadMemoryBlock(pfile, sbi, val);
 			if (show_progress && m_time_num == 1)
-				SetProgress(std::round(100.0 * (i + 1) / blk_num), "NOT_SET");
+				SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / blk_num)), "NOT_SET");
 		}
 		//create nrrd
 		data = nrrdNew();
@@ -625,7 +625,7 @@ LIFReader::ImageInfo* LIFReader::ReadImage(tinyxml2::XMLElement* node, std::wstr
 		if (!str.empty())
 		{
 			WavelengthInfo winfo;
-			winfo.chan_num = i;
+			winfo.chan_num = static_cast<int>(i);
 			if (str == "Red")
 				winfo.wavelength = 550.0;
 			else if (str == "Green")
@@ -657,7 +657,7 @@ void LIFReader::ReadSubBlockInfo(tinyxml2::XMLElement* node, LIFReader::ImageInf
 		if (str == "ChannelDescription")
 		{
 			ChannelInfo cinfo;
-			cinfo.chan = imgi.channels.size();
+			cinfo.chan = static_cast<int>(imgi.channels.size());
 			str = GetAttributeValue(child, "Resolution");
 			cinfo.res = std::stoul(str);
 			str = GetAttributeValue(child, "Min");
@@ -782,14 +782,14 @@ bool LIFReader::ReadTileScanInfo(tinyxml2::XMLElement* node, TileList& list)
 
 void LIFReader::GenImageInfo(ImageInfo* imgi)
 {
-	m_chan_num = imgi->channels.size();
+	m_chan_num = static_cast<int>(imgi->channels.size());
 	if (m_chan_num < 1)
 		return;
 
 	ChannelInfo* cinfo = imgi->GetChannelInfo(0);
 	if (!cinfo)
 		return;
-	m_time_num = cinfo->times.size();
+	m_time_num = static_cast<int>(cinfo->times.size());
 	if (m_time_num < 1)
 		return;
 	if (cinfo->res == 8)
@@ -800,7 +800,7 @@ void LIFReader::GenImageInfo(ImageInfo* imgi)
 	TimeInfo* tinfo = imgi->GetTimeInfo(0, 0);
 	if (!tinfo)
 		return;
-	int block_num = tinfo->blocks.size();
+	int block_num = static_cast<int>(tinfo->blocks.size());
 	if (block_num < 1)
 		return;
 	else if (block_num > 1 &&

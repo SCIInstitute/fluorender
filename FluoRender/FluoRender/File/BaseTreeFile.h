@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Color.h>
 #include <Point.h>
 #include <Vector.h>
+#include <Quaternion.h>
 #include <string>
 #include <vector>
 #include <type_traits>
@@ -99,6 +100,9 @@ public:
 		else if constexpr (std::is_same_v<T, fluo::Vector>) {
 			return ReadVector(key, value);
 		}
+		else if constexpr (std::is_same_v<T, fluo::Quaternion>) {
+			return ReadQuaternion(key, value);
+		}
 		else {
 			static_assert(always_false<T>::value, "Unsupported type");
 		}
@@ -153,6 +157,9 @@ public:
 		}
 		else if constexpr (std::is_same_v<T, fluo::Vector>) {
 			return ReadVector(key, value, defaultVal);
+		}
+		else if constexpr (std::is_same_v<T, fluo::Quaternion>) {
+			return ReadQuaternion(key, value, defaultVal);
 		}
 		else {
 			static_assert(always_false<T>::value, "Unsupported type");
@@ -210,6 +217,9 @@ public:
 		else if constexpr (std::is_same_v<T, fluo::Vector>) {
 			return WriteVector(key, value);
 		}
+		else if constexpr (std::is_same_v<T, fluo::Quaternion>) {
+			return WriteQuaternion(key, value);
+		}
 		else {
 			static_assert(always_false<T>::value, "Unsupported type");
 		}
@@ -256,6 +266,7 @@ protected:
 	virtual bool ReadHSVColor(const std::string& key, fluo::HSVColor* value, const fluo::HSVColor& def = fluo::HSVColor()) const = 0;
 	virtual bool ReadPoint(const std::string& key, fluo::Point* value, const fluo::Point& def = fluo::Point(0.0)) const = 0;
 	virtual bool ReadVector(const std::string& key, fluo::Vector* value, const fluo::Vector& def = fluo::Vector(0.0)) const = 0;
+	virtual bool ReadQuaternion(const std::string& key, fluo::Quaternion* value, const fluo::Quaternion& def = fluo::Quaternion()) const = 0;
 
 	// Type-specific write methods
 	virtual bool WriteString(const std::string& key, const std::string& value) = 0;
@@ -274,6 +285,7 @@ protected:
 	virtual bool WriteHSVColor(const std::string& key, const fluo::HSVColor& value) = 0;
 	virtual bool WritePoint(const std::string& key, const fluo::Point& value) = 0;
 	virtual bool WriteVector(const std::string& key, const fluo::Vector& value) = 0;
+	virtual bool WriteQuaternion(const std::string& key, const fluo::Quaternion& value) = 0;
 
 	//path processing
 	std::vector<std::string> splitPath(const std::string& path) const {

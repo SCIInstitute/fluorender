@@ -103,7 +103,7 @@ void MaskBorder::Compute(int order)
 	if (!tex)
 		return;
 
-	unsigned int idx, bn;
+	size_t idx, bn;
 	std::vector<flvr::TextureBrick*> *all_bricks = m_vd->GetTexture()->get_bricks();
 	bn = all_bricks->size();
 	if (bn < 2)

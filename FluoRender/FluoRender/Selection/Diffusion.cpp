@@ -384,15 +384,14 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		}
 		//params
 		inv = m_vd->GetInvert();
-		scalar_scale = m_vd->GetScalarScale();
-		lo_thresh = m_vd->GetLeftThresh();
-		hi_thresh = m_vd->GetRightThresh();
-		gamma3d = m_vd->GetGamma();
-		gm_thresh = m_vd->GetBoundary();
-		offset = m_vd->GetSaturation();
-		sw = m_vd->GetSoftThreshold();
+		scalar_scale = static_cast<float>(m_vd->GetScalarScale());
+		lo_thresh = static_cast<float>(m_vd->GetLeftThresh());
+		hi_thresh = static_cast<float>(m_vd->GetRightThresh());
+		gamma3d = static_cast<float>(m_vd->GetGamma());
+		gm_thresh = static_cast<float>(m_vd->GetBoundary());
+		offset = static_cast<float>(m_vd->GetSaturation());
+		sw = static_cast<float>(m_vd->GetSoftThreshold());
 	}
-
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();

@@ -955,14 +955,13 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//roatation
 	if (update_all || FOUND_VALUE(gstCamRotation))
 	{
-		double rotx, roty, rotz;
-		m_canvas->GetRotations(rotx, roty, rotz);
-		m_x_rot_sldr->ChangeValue(std::round(rotx));
-		m_y_rot_sldr->ChangeValue(std::round(roty));
-		m_z_rot_sldr->ChangeValue(std::round(rotz));
-		m_x_rot_text->ChangeValue(wxString::Format("%.1f", rotx));
-		m_y_rot_text->ChangeValue(wxString::Format("%.1f", roty));
-		m_z_rot_text->ChangeValue(wxString::Format("%.1f", rotz));
+		fluo::Vector rot = m_canvas->GetRotations();
+		m_x_rot_sldr->ChangeValue(static_cast<int>(std::round(rot.x())));
+		m_y_rot_sldr->ChangeValue(static_cast<int>(std::round(rot.y())));
+		m_z_rot_sldr->ChangeValue(static_cast<int>(std::round(rot.z())));
+		m_x_rot_text->ChangeValue(wxString::Format("%.1f", rot.x()));
+		m_y_rot_text->ChangeValue(wxString::Format("%.1f", rot.y()));
+		m_z_rot_text->ChangeValue(wxString::Format("%.1f", rot.z()));
 		m_x_rot_text->Update();
 		m_y_rot_text->Update();
 		m_z_rot_text->Update();
@@ -1284,12 +1283,11 @@ void RenderViewPanel::SetRotLock(bool val)
 	m_canvas->SetRotLock(val);
 	if (val)
 	{
-		double rotx, roty, rotz;
-		m_canvas->GetRotations(rotx, roty, rotz);
-		rotx = (((int)(rotx / 45)) * 45);
-		roty = (((int)(roty / 45)) * 45);
-		rotz = (((int)(rotz / 45)) * 45);
-		SetRotations(rotx, roty, rotz, true);
+		fluo::Vector rot = m_canvas->GetRotations();
+		rot = fluo::Vector(static_cast<int>(rot.x() / 45) * 45,
+				static_cast<int>(rot.y() / 45) * 45,
+				static_cast<int>(rot.z() / 45) * 45);
+		SetRotations(rot, true);
 	}
 	FluoRefresh(2, { gstGearedEnable }, { m_frame->GetRenderCanvas(m_canvas) });
 }
@@ -1300,9 +1298,9 @@ void RenderViewPanel::SetSliderType(bool val)
 	FluoRefresh(2, { gstRotSliderMode }, { m_frame->GetRenderCanvas(m_canvas) });
 }
 
-void RenderViewPanel::SetRotations(double rotx, double roty, double rotz, bool notify)
+void RenderViewPanel::SetRotations(const fluo::Vector& val, bool notify)
 {
-	m_canvas->SetRotations(rotx, roty, rotz, false);
+	m_canvas->SetRotations(val, false);
 	if (notify)
 		FluoRefresh(2, { gstCamRotation }, { m_frame->GetRenderCanvas(m_canvas) });
 	else
@@ -1311,20 +1309,19 @@ void RenderViewPanel::SetRotations(double rotx, double roty, double rotz, bool n
 
 void RenderViewPanel::SetZeroRotations()
 {
-	double rotx, roty, rotz;
-	m_canvas->GetRotations(rotx, roty, rotz);
-	if (rotx == 0.0 &&
-		roty == 0.0 &&
-		rotz == 0.0)
+	fluo::Vector rot = m_canvas->GetRotations();
+	if (rot.x() == 0.0 &&
+		rot.y() == 0.0 &&
+		rot.z() == 0.0)
 	{
 		//reset
-		m_canvas->ResetZeroRotations(rotx, roty, rotz);
-		m_canvas->SetRotations(rotx, roty, rotz, false);
+		rot = m_canvas->ResetZeroRotations();
+		m_canvas->SetRotations(rot, false);
 	}
 	else
 	{
 		m_canvas->SetZeroRotations();
-		m_canvas->SetRotations(0.0, 0.0, 0.0, false);
+		m_canvas->SetRotations(fluo::Vector(0), false);
 	}
 	FluoRefresh(2, { gstCamRotation }, { m_frame->GetRenderCanvas(m_canvas) });
 }
@@ -1584,7 +1581,7 @@ void RenderViewPanel::OnRotEdit(wxCommandEvent& event)
 	m_x_rot_sldr->ChangeValue(std::round(rotx));
 	m_y_rot_sldr->ChangeValue(std::round(roty));
 	m_z_rot_sldr->ChangeValue(std::round(rotz));
-	SetRotations(rotx, roty, rotz, false);
+	SetRotations(fluo::Vector(rotx, roty, rotz), false);
 }
 
 void RenderViewPanel::OnRotScroll(wxScrollEvent& event)
@@ -1599,7 +1596,7 @@ void RenderViewPanel::OnRotScroll(wxScrollEvent& event)
 	m_x_rot_text->Update();
 	m_y_rot_text->Update();
 	m_z_rot_text->Update();
-	SetRotations(rotx, roty, rotz, false);
+	SetRotations(fluo::Vector(rotx, roty, rotz), false);
 }
 
 void RenderViewPanel::OnOrthoViewSelected(wxCommandEvent& event)
@@ -1610,22 +1607,22 @@ void RenderViewPanel::OnOrthoViewSelected(wxCommandEvent& event)
 	switch (sel)
 	{
 	case 0://+X
-		m_canvas->SetRotations(0.0, 90.0, 0.0, false);
+		m_canvas->SetRotations(fluo::Vector(0.0, 90.0, 0.0), false);
 		break;
 	case 1://-X
-		m_canvas->SetRotations(0.0, 270.0, 0.0, false);
+		m_canvas->SetRotations(fluo::Vector(0.0, 270.0, 0.0), false);
 		break;
 	case 2://+Y
-		m_canvas->SetRotations(90.0, 0.0, 0.0, false);
+		m_canvas->SetRotations(fluo::Vector(90.0, 0.0, 0.0), false);
 		break;
 	case 3://-Y
-		m_canvas->SetRotations(270.0, 0.0, 0.0, false);
+		m_canvas->SetRotations(fluo::Vector(270.0, 0.0, 0.0), false);
 		break;
 	case 4://+Z
-		m_canvas->SetRotations(0.0, 0.0, 0.0, false);
+		m_canvas->SetRotations(fluo::Vector(0.0, 0.0, 0.0), false);
 		break;
 	case 5:
-		m_canvas->SetRotations(0.0, 180.0, 0.0, false);
+		m_canvas->SetRotations(fluo::Vector(0.0, 180.0, 0.0), false);
 		break;
 	}
 	if (sel < 6)
@@ -1644,7 +1641,7 @@ void RenderViewPanel::OnRotReset(wxCommandEvent& event)
 		SetZeroRotations();
 		break;
 	case ID_RotResetBtn:
-		SetRotations(0.0, 0.0, 0.0, true);
+		SetRotations(fluo::Vector(0), true);
 		break;
 	}
 }

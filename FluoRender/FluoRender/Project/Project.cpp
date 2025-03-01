@@ -63,6 +63,9 @@ void Project::Open(const std::wstring& filename)
 
 	std::shared_ptr<BaseTreeFile> fconfig =
 		glbin_tree_file_factory.createTreeFile(filename, gstProjectFile);
+	if (!fconfig)
+		return;
+
 	std::string ver_major, ver_minor;
 	long l_major;
 	double d_minor;
@@ -96,11 +99,14 @@ void Project::Open(const std::wstring& filename)
 	fluo::Color cval;
 	fluo::HSVColor hval;
 	fluo::Vector vval;
+	fluo::Quaternion qval;
+	fluo::Point pval;
 
 	//read streaming mode
-	if (fconfig->Exists("/settings"))
+	path = "/settings";
+	if (fconfig->Exists(path))
 	{
-		fconfig->SetPath("/settings");
+		fconfig->SetPath(path);
 		fconfig->Read("mouse int", &bval, true);
 		glbin_settings.m_mouse_int = bval;
 		fconfig->Read("mem swap", &bval, false);
@@ -129,9 +135,10 @@ void Project::Open(const std::wstring& filename)
 	glbin_current.SetRoot();
 	std::wstring cur_canvas, cur_vol_group, cur_mesh_group,
 		cur_vol_data, cur_mesh_data, cur_ann_data;
-	if (fconfig->Exists("/current"))
+	path = "/current";
+	if (fconfig->Exists(path))
 	{
-		fconfig->SetPath("/current");
+		fconfig->SetPath(path);
 		fconfig->Read("canvas", &cur_canvas);
 		fconfig->Read("vol group", &cur_vol_group);
 		fconfig->Read("mesh group", &cur_mesh_group);
@@ -142,12 +149,13 @@ void Project::Open(const std::wstring& filename)
 
 	//read data list
 	//volume
-	if (fconfig->Exists("/data/volume"))
+	path = "/data/volume";
+	if (fconfig->Exists(path))
 	{
-		fconfig->SetPath("/data/volume");
-		int num = 0;
+		fconfig->SetPath(path);
+		size_t num = 0;
 		fconfig->Read("num", &num);
-		for (int i = 0; i < num; i++)
+		for (size_t i = 0; i < num; i++)
 		{
 			SetProgress(100 * tick_cnt / ticks,
 				"FluoRender is reading and processing volume data. Please wait.");
@@ -155,17 +163,15 @@ void Project::Open(const std::wstring& filename)
 			glbin_data_manager.SetRange(
 				std::round(100.0 * tick_cnt / ticks),
 				std::round(100.0 * (tick_cnt + 1) / ticks));
-			path = "/data/volume/%d" + std::to_string(i);
+			path = "/data/volume/" + std::to_string(i);
 			if (fconfig->Exists(path))
 			{
 				int loaded_num = 0;
 				fconfig->SetPath(path);
-				bool compression = false;
-				fconfig->Read("compression", &compression);
-				glbin_settings.m_realtime_compress = compression;
-				bool skip_brick = false;
-				fconfig->Read("skip_brick", &skip_brick);
-				glbin_settings.m_skip_brick = skip_brick;
+				fconfig->Read("compression", &bval);
+				glbin_settings.m_realtime_compress = bval;
+				fconfig->Read("skip_brick", &bval);
+				glbin_settings.m_skip_brick = bval;
 				//path
 				std::wstring filepath;
 				if (fconfig->Read("path", &filepath))
@@ -220,9 +226,10 @@ void Project::Open(const std::wstring& filename)
 					if (fconfig->Read("name", &wsval))
 						vd->SetName(wsval);//setname
 					//volume properties
-					if (fconfig->Exists("properties"))
+					path = "properties";
+					if (fconfig->Exists(path))
 					{
-						fconfig->SetPath("properties");
+						fconfig->SetPath(path);
 						if (fconfig->Read("display", &bval))
 							vd->SetDisp(bval);
 
@@ -290,9 +297,9 @@ void Project::Open(const std::wstring& filename)
 						if (fconfig->Read("samplerate", &dval))
 						{
 							if (l_major < 2)
-								vd->SetSampleRate(bval / 5.0);
+								vd->SetSampleRate(dval / 5.0);
 							else
-								vd->SetSampleRate(bval);
+								vd->SetSampleRate(dval);
 						}
 
 						//spacings and scales
@@ -442,12 +449,13 @@ void Project::Open(const std::wstring& filename)
 		glbin_current.vol_data = glbin_data_manager.GetVolumeData(cur_vol_data);
 	}
 	//mesh
-	if (fconfig->Exists("/data/mesh"))
+	path = "/data/mesh";
+	if (fconfig->Exists(path))
 	{
-		fconfig->SetPath("/data/mesh");
-		int num = 0;
+		fconfig->SetPath(path);
+		size_t num = 0;
 		fconfig->Read("num", &num);
-		for (int i = 0; i < num; i++)
+		for (size_t i = 0; i < num; i++)
 		{
 			SetProgress(100 * tick_cnt / ticks,
 				"FluoRender is reading and processing mesh data. Please wait.");
@@ -466,9 +474,10 @@ void Project::Open(const std::wstring& filename)
 					if (fconfig->Read("name", &wsval))
 						md->SetName(wsval);//setname
 					//mesh properties
-					if (fconfig->Exists("properties"))
+					path = "properties";
+					if (fconfig->Exists(path))
 					{
-						fconfig->SetPath("properties");
+						fconfig->SetPath(path);
 						if (fconfig->Read("display", &bval))
 							md->SetDisp(bval);
 						//lighting
@@ -503,15 +512,16 @@ void Project::Open(const std::wstring& filename)
 							md->SetShadowIntensity(darkness);
 
 						//mesh transform
-						if (fconfig->Exists("../transform"))
+						path = "../transform";
+						if (fconfig->Exists(path))
 						{
-							fconfig->SetPath("../transform");
+							fconfig->SetPath(path);
 							if (fconfig->Read("translation", &vval))
-								md->SetTranslation(vval.x(), vval.y(), vval.z());
+								md->SetTranslation(vval);
 							if (fconfig->Read("rotation", &vval))
-								md->SetRotation(vval.x(), vval.y(), vval.z());
+								md->SetRotation(vval);
 							if (fconfig->Read("scaling", &vval))
-								md->SetScaling(vval.x(), vval.y(), vval.z());
+								md->SetScaling(vval);
 						}
 					}
 				}
@@ -521,12 +531,13 @@ void Project::Open(const std::wstring& filename)
 		glbin_current.mesh_data = glbin_data_manager.GetMeshData(cur_mesh_data);
 	}
 	//annotations
-	if (fconfig->Exists("/data/annotations"))
+	path = "/data/annotations";
+	if (fconfig->Exists(path))
 	{
-		fconfig->SetPath("/data/annotations");
-		int num = 0;
+		fconfig->SetPath(path);
+		size_t num = 0;
 		fconfig->Read("num", &num);
-		for (int i = 0; i < num; i++)
+		for (size_t i = 0; i < num; i++)
 		{
 			path = "/data/annotations/" + std::to_string(i);
 			if (fconfig->Exists(path))
@@ -542,13 +553,14 @@ void Project::Open(const std::wstring& filename)
 	}
 
 	//views
-	if (fconfig->Exists("/views"))
+	path = "/views";
+	if (fconfig->Exists(path))
 	{
-		fconfig->SetPath("/views");
-		int num = 0;
+		fconfig->SetPath(path);
+		size_t num = 0;
 		fconfig->Read("num", &num);
 
-		for (int i = 0; i < num; i++)
+		for (size_t i = 0; i < num; i++)
 		{
 			if (i > 0)
 				frame->CreateRenderView();
@@ -596,18 +608,20 @@ void Project::Open(const std::wstring& filename)
 			}
 
 			//new
-			path = wxString::Format("/views/%d/layers", i);
-			if (fconfig->Exists(str))
+			path = "/views/" + std::to_string(i) + "/layers";
+			if (fconfig->Exists(path))
 			{
-				fconfig->SetPath(str);
+				fconfig->SetPath(path);
 
 				//view layers
-				int layer_num = fconfig->Read("num", 0l);
-				for (j = 0; j < layer_num; j++)
+				int layer_num = 0;
+				fconfig->Read("num", &layer_num);
+				for (int j = 0; j < layer_num; j++)
 				{
-					if (fconfig->Exists(wxString::Format("/views/%d/layers/%d", i, j)))
+					path = "/views/" + std::to_string(i) + "/layers/" + std::to_string(j);
+					if (fconfig->Exists(path))
 					{
-						fconfig->SetPath(wxString::Format("/views/%d/layers/%d", i, j));
+						fconfig->SetPath(path);
 						int type;
 						if (fconfig->Read("type", &type))
 						{
@@ -615,9 +629,9 @@ void Project::Open(const std::wstring& filename)
 							{
 							case 2://volume data
 							{
-								if (fconfig->Read("name", &str))
+								if (fconfig->Read("name", &wsval))
 								{
-									VolumeData* vd = glbin_data_manager.GetVolumeData(str.ToStdWstring());
+									VolumeData* vd = glbin_data_manager.GetVolumeData(wsval);
 									if (vd)
 										canvas->AddVolumeData(vd);
 								}
@@ -625,9 +639,9 @@ void Project::Open(const std::wstring& filename)
 							break;
 							case 3://mesh data
 							{
-								if (fconfig->Read("name", &str))
+								if (fconfig->Read("name", &wsval))
 								{
-									MeshData* md = glbin_data_manager.GetMeshData(str.ToStdWstring());
+									MeshData* md = glbin_data_manager.GetMeshData(wsval);
 									if (md)
 										canvas->AddMeshData(md);
 								}
@@ -635,9 +649,9 @@ void Project::Open(const std::wstring& filename)
 							break;
 							case 4://annotations
 							{
-								if (fconfig->Read("name", &str))
+								if (fconfig->Read("name", &wsval))
 								{
-									Annotations* ann = glbin_data_manager.GetAnnotations(str.ToStdWstring());
+									Annotations* ann = glbin_data_manager.GetAnnotations(wsval);
 									if (ann)
 										canvas->AddAnnotations(ann);
 								}
@@ -645,64 +659,45 @@ void Project::Open(const std::wstring& filename)
 							break;
 							case 5://group
 							{
-								if (fconfig->Read("name", &str))
+								if (fconfig->Read("name", &wsval))
 								{
-									int id;
-									if (fconfig->Read("id", &id))
-										DataGroup::SetID(id);
-									str = canvas->AddGroup(str.ToStdWstring());
-									DataGroup* group = canvas->GetGroup(str.ToStdWstring());
+									if (fconfig->Read("id", &ival))
+										DataGroup::SetID(ival);
+									wsval = canvas->AddGroup(wsval);
+									DataGroup* group = canvas->GetGroup(wsval);
 									if (group)
 									{
 										//display
-										if (fconfig->Read("display", &bVal))
-										{
-											group->SetDisp(bVal);
-										}
+										if (fconfig->Read("display", &bval))
+											group->SetDisp(bval);
 										//2d adjustment
-										if (fconfig->Read("gamma", &str))
-										{
-											float r, g, b;
-											if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)) {
-												fluo::Color col(r, g, b);
-												group->SetGammaColor(col);
-											}
-										}
-										if (fconfig->Read("brightness", &str))
-										{
-											float r, g, b;
-											if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)) {
-												fluo::Color col(r, g, b);
-												group->SetBrightness(col);
-											}
-										}
-										if (fconfig->Read("hdr", &str))
-										{
-											float r, g, b;
-											if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)) {
-												fluo::Color col(r, g, b);
-												group->SetHdr(col);
-											}
-										}
-										if (fconfig->Read("sync_r", &bVal))
-											group->SetSync(0, bVal);
-										if (fconfig->Read("sync_g", &bVal))
-											group->SetSync(1, bVal);
-										if (fconfig->Read("sync_b", &bVal))
-											group->SetSync(2, bVal);
+										if (fconfig->Read("gamma", &cval))
+											group->SetGammaColor(cval);
+										if (fconfig->Read("brightness", &cval))
+											group->SetBrightness(cval);
+										if (fconfig->Read("hdr", &cval))
+											group->SetHdr(cval);
+										if (fconfig->Read("sync_r", &bval))
+											group->SetSync(0, bval);
+										if (fconfig->Read("sync_g", &bval))
+											group->SetSync(1, bval);
+										if (fconfig->Read("sync_b", &bval))
+											group->SetSync(2, bval);
 										//sync volume properties
-										if (fconfig->Read("sync_vp", &bVal))
-											group->SetVolumeSyncProp(bVal);
+										if (fconfig->Read("sync_vp", &bval))
+											group->SetVolumeSyncProp(bval);
 										//volumes
-										if (fconfig->Exists(wxString::Format("/views/%d/layers/%d/volumes", i, j)))
+										path = "/views/" + std::to_string(i) + "/layers/" + std::to_string(j) + "/volumes";
+										if (fconfig->Exists(path))
 										{
-											fconfig->SetPath(wxString::Format("/views/%d/layers/%d/volumes", i, j));
-											int vol_num = fconfig->Read("num", 0l);
-											for (k = 0; k < vol_num; k++)
+											fconfig->SetPath(path);
+											int vol_num = 0;
+											fconfig->Read("num", &vol_num);
+											for (int k = 0; k < vol_num; k++)
 											{
-												if (fconfig->Read(wxString::Format("vol_%d", k), &str))
+												if (fconfig->Read("vol_" + std::to_string(k), &wsval))
 												{
-													VolumeData* vd = glbin_data_manager.GetVolumeData(str.ToStdWstring());
+													VolumeData* vd = glbin_data_manager.GetVolumeData(wsval);
 													if (vd)
 													{
 														group->InsertVolumeData(k - 1, vd);
@@ -720,31 +715,32 @@ void Project::Open(const std::wstring& filename)
 							break;
 							case 6://mesh group
 							{
-								if (fconfig->Read("name", &str))
+								if (fconfig->Read("name", &wsval))
 								{
-									int id;
-									if (fconfig->Read("id", &id))
-										MeshGroup::SetID(id);
-									str = canvas->AddMGroup(str.ToStdWstring());
-									MeshGroup* group = canvas->GetMGroup(str.ToStdWstring());
+									if (fconfig->Read("id", &ival))
+										MeshGroup::SetID(ival);
+									wsval = canvas->AddMGroup(wsval);
+									MeshGroup* group = canvas->GetMGroup(wsval);
 									if (group)
 									{
 										//display
-										if (fconfig->Read("display", &bVal))
-											group->SetDisp(bVal);
+										if (fconfig->Read("display", &bval))
+											group->SetDisp(bval);
 										//sync mesh properties
-										if (fconfig->Read("sync_mp", &bVal))
-											group->SetMeshSyncProp(bVal);
+										if (fconfig->Read("sync_mp", &bval))
+											group->SetMeshSyncProp(bval);
 										//meshes
-										if (fconfig->Exists(wxString::Format("/views/%d/layers/%d/meshes", i, j)))
+										path = "/views/" + std::to_string(i) + "/layers/" + std::to_string(j) + "/meshes";
+										if (fconfig->Exists(path))
 										{
-											fconfig->SetPath(wxString::Format("/views/%d/layers/%d/meshes", i, j));
-											int mesh_num = fconfig->Read("num", 0l);
-											for (k = 0; k < mesh_num; k++)
+											fconfig->SetPath(path);
+											int mesh_num = 0;
+											fconfig->Read("num", &mesh_num);
+											for (int k = 0; k < mesh_num; k++)
 											{
-												if (fconfig->Read(wxString::Format("mesh_%d", k), &str))
+												if (fconfig->Read("mesh_" + std::to_string(k), &wsval))
 												{
-													MeshData* md = glbin_data_manager.GetMeshData(str.ToStdWstring());
+													MeshData* md = glbin_data_manager.GetMeshData(wsval);
 													if (md)
 													{
 														group->InsertMeshData(k - 1, md);
@@ -768,36 +764,29 @@ void Project::Open(const std::wstring& filename)
 			}
 
 			//tracking group
-			if (fconfig->Exists(wxString::Format("/views/%d/track_group", i)))
+			path = "/views/" + std::to_string(i) + "/track_group";
+			if (fconfig->Exists(path))
 			{
-				if (fconfig->Read("track_file", &str))
+				if (fconfig->Read("track_file", &wsval))
 				{
-					canvas->LoadTrackGroup(str.ToStdWstring());
+					canvas->LoadTrackGroup(wsval);
 				}
 			}
 
 			//properties
-			if (fconfig->Exists(wxString::Format("/views/%d/properties", i)))
+			path = "/views/" + std::to_string(i) + "/properties";
+			if (fconfig->Exists(path))
 			{
-				float x, y, z, w;
-				fconfig->SetPath(wxString::Format("/views/%d/properties", i));
-				bool draw;
-				if (fconfig->Read("drawall", &draw))
-					canvas->SetDraw(draw);
+				fconfig->SetPath(path);
+				if (fconfig->Read("drawall", &bval))
+					canvas->SetDraw(bval);
 				//properties
-				bool persp;
-				if (fconfig->Read("persp", &persp))
-					canvas->SetPersp(persp);
-				else
-					canvas->SetPersp(true);
-				bool free;
-				if (fconfig->Read("free", &free))
-					canvas->SetFree(free);
-				else
-					canvas->SetFree(false);
-				double aov;
-				if (fconfig->Read("aov", &aov))
-					canvas->SetAov(aov);
+				if (fconfig->Read("persp", &bval))
+					canvas->SetPersp(bval);
+				if (fconfig->Read("free", &bval))
+					canvas->SetFree(bval);
+				if (fconfig->Read("aov", &dval))
+					canvas->SetAov(dval);
 				double nearclip;
 				double farclip;
 				if (fconfig->Read("nearclip", &nearclip) &&
@@ -808,197 +797,131 @@ void Project::Open(const std::wstring& filename)
 					if (glbin_xr_renderer)
 						glbin_xr_renderer->SetClips(nearclip, farclip);
 				}
-				if (fconfig->Read("backgroundcolor", &str))
-				{
-					float r, g, b;
-					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)) {
-						fluo::Color col(r, g, b);
-						canvas->SetBackgroundColor(col);
-					}
-				}
-				int volmethod;
-				if (fconfig->Read("volmethod", &volmethod))
-					canvas->SetVolMethod(volmethod);
-				bool fog;
-				if (fconfig->Read("fog", &fog))
-					canvas->SetFog(fog);
-				double fogintensity;
-				if (fconfig->Read("fogintensity", &fogintensity))
-					canvas->SetFogIntensity(fogintensity);
-				if (fconfig->Read("draw_camctr", &bVal))
-				{
-					canvas->m_draw_camctr = bVal;
-				}
-				if (fconfig->Read("draw_info", &iVal))
-				{
-					canvas->m_draw_info = iVal;
-				}
-				if (fconfig->Read("draw_legend", &bVal))
-				{
-					canvas->m_draw_legend = bVal;
-				}
+				if (fconfig->Read("backgroundcolor", &cval))
+					canvas->SetBackgroundColor(cval);
+				if (fconfig->Read("volmethod", &ival))
+					canvas->SetVolMethod(ival);
+				if (fconfig->Read("fog", &bval))
+					canvas->SetFog(bval);
+				if (fconfig->Read("fogintensity", &dval))
+					canvas->SetFogIntensity(dval);
+				if (fconfig->Read("draw_camctr", &bval))
+					canvas->m_draw_camctr = bval;
+				if (fconfig->Read("draw_info", &ival))
+					canvas->m_draw_info = ival;
+				if (fconfig->Read("draw_legend", &bval))
+					canvas->m_draw_legend = bval;
 
 				//camera
-				if (fconfig->Read("translation", &str))
-				{
-					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						canvas->SetTranslations(x, y, z);
-				}
-				if (fconfig->Read("rotation", &str))
-				{
-					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						canvas->SetRotations(x, y, z, false);
-				}
-				if (fconfig->Read("zero_quat", &str))
-				{
-					if (SSCANF(str.c_str(), "%f%f%f%f", &x, &y, &z, &w))
-						canvas->SetZeroQuat(x, y, z, w);
-				}
-				if (fconfig->Read("center", &str))
-				{
-					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						canvas->SetCenters(x, y, z);
-				}
-				double dist;
-				if (fconfig->Read("centereyedist", &dist))
-					canvas->SetCenterEyeDist(dist);
-				double radius = 5.0;
-				if (fconfig->Read("radius", &radius))
-					canvas->SetRadius(radius);
-				double initdist;
-				if (fconfig->Read("initdist", &initdist))
-					canvas->SetInitDist(initdist);
+				if (fconfig->Read("translation", &vval))
+					canvas->SetTranslations(vval);
+				if (fconfig->Read("rotation", &vval))
+						canvas->SetRotations(vval, false);
+				if (fconfig->Read("zero_quat", &qval))
+						canvas->SetZeroQuat(qval);
+				if (fconfig->Read("center", &pval))
+					canvas->SetCenters(pval);
+				if (fconfig->Read("centereyedist", &dval))
+					canvas->SetCenterEyeDist(dval);
+				if (fconfig->Read("radius", &dval, 5.0))
+					canvas->SetRadius(dval);
+				if (fconfig->Read("initdist", &dval))
+					canvas->SetInitDist(dval);
 				else
-					canvas->SetInitDist(radius / tan(d2r(canvas->GetAov() / 2.0)));
-				int scale_mode;
-				if (fconfig->Read("scale_mode", &scale_mode))
-					canvas->m_scale_mode = scale_mode;
-				double scale;
-				if (!fconfig->Read("scale", &scale))
-					scale = radius / tan(d2r(canvas->GetAov() / 2.0)) / dist;
-				canvas->m_scale_factor = scale;
-				bool pin_rot_center;
-				if (fconfig->Read("pin_rot_center", &pin_rot_center))
-					canvas->SetPinRotCenter(pin_rot_center);
+					canvas->SetInitDist(canvas->GetRadius() / tan(d2r(canvas->GetAov() / 2.0)));
+				if (fconfig->Read("scale_mode", &ival))
+					canvas->m_scale_mode = ival;
+				if (fconfig->Read("scale", &dval))
+					canvas->m_scale_factor = dval;
+				else
+					canvas->m_scale_factor = canvas->GetRadius() / tan(d2r(canvas->GetAov() / 2.0)) / canvas->GetInitDist();
+				if (fconfig->Read("pin_rot_center", &bval))
+					canvas->SetPinRotCenter(bval);
 				//object
-				if (fconfig->Read("obj_center", &str))
+				if (fconfig->Read("obj_center", &pval))
+					canvas->SetObjCenters(pval);
+				if (fconfig->Read("obj_trans", &vval))
+					canvas->SetObjTrans(vval);
+				if (fconfig->Read("obj_rot", &vval))
 				{
-					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						canvas->SetObjCenters(x, y, z);
-				}
-				if (fconfig->Read("obj_trans", &str))
-				{
-					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						canvas->SetObjTrans(x, y, z);
-				}
-				if (fconfig->Read("obj_rot", &str))
-				{
-					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-					{
-						if (l_major <= 2 && d_minor < 24.3)
-							canvas->SetObjRot(x, y + 180.0, z + 180.0);
-						else
-							canvas->SetObjRot(x, y, z);
-					}
+					if (l_major <= 2 && d_minor < 24.3)
+						vval += fluo::Vector(0, 180, 180);
+					canvas->SetObjRot(vval);
 				}
 				//scale bar
-				bool disp;
-				if (fconfig->Read("disp_scale_bar", &disp))
-					canvas->m_disp_scale_bar = disp;
-				if (fconfig->Read("disp_scale_bar_text", &disp))
-					canvas->m_disp_scale_bar_text = disp;
-				double length;
-				if (fconfig->Read("sb_length", &length))
-					canvas->m_sb_length = length;
-				if (fconfig->Read("sb_text", &str))
-					canvas->m_sb_text = str;
-				if (fconfig->Read("sb_num", &str))
-					canvas->m_sb_num = str;
-				int unit;
-				if (fconfig->Read("sb_unit", &unit))
-					canvas->m_sb_unit = unit;
+				if (fconfig->Read("disp_scale_bar", &bval))
+					canvas->m_disp_scale_bar = bval;
+				if (fconfig->Read("disp_scale_bar_text", &bval))
+					canvas->m_disp_scale_bar_text = bval;
+				if (fconfig->Read("sb_length", &dval))
+					canvas->m_sb_length = dval;
+				if (fconfig->Read("sb_text", &wsval))
+					canvas->m_sb_text = wsval;
+				if (fconfig->Read("sb_num", &wsval))
+					canvas->m_sb_num = wsval;
+				if (fconfig->Read("sb_unit", &ival))
+					canvas->m_sb_unit = ival;
 
 				//2d sdjustment settings
-				if (fconfig->Read("gamma", &str))
-				{
-					float r, g, b;
-					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)) {
-						fluo::Color col(r, g, b);
-						canvas->SetGammaColor(col);
-					}
-				}
-				if (fconfig->Read("brightness", &str))
-				{
-					float r, g, b;
-					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)) {
-						fluo::Color col(r, g, b);
-						canvas->SetBrightness(col);
-					}
-				}
-				if (fconfig->Read("hdr", &str))
-				{
-					float r, g, b;
-					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)) {
-						fluo::Color col(r, g, b);
-						canvas->SetHdr(col);
-					}
-				}
-				if (fconfig->Read("sync_r", &bVal))
-					canvas->SetSync(0, bVal);
-				if (fconfig->Read("sync_g", &bVal))
-					canvas->SetSync(1, bVal);
-				if (fconfig->Read("sync_b", &bVal))
-					canvas->SetSync(2, bVal);
+				if (fconfig->Read("gamma", &cval))
+					canvas->SetGammaColor(cval);
+				if (fconfig->Read("brightness", &cval))
+					canvas->SetBrightness(cval);
+				if (fconfig->Read("hdr", &cval))
+					canvas->SetHdr(cval);
+				if (fconfig->Read("sync_r", &bval))
+					canvas->SetSync(0, bval);
+				if (fconfig->Read("sync_g", &bval))
+					canvas->SetSync(1, bval);
+				if (fconfig->Read("sync_b", &bval))
+					canvas->SetSync(2, bval);
 
 				//clipping plane rotations
-				int clip_mode;
-				if (fconfig->Read("clip_mode", &clip_mode))
-					canvas->SetClipMode(clip_mode);
+				if (fconfig->Read("clip_mode", &ival))
+					canvas->SetClipMode(ival);
 				double rotx_cl, roty_cl, rotz_cl;
-				if (fconfig->Read("rotx_cl", &rotx_cl) &&
+				if (fconfig->Read("rot_cl", &vval))
+					canvas->SetClippingPlaneRotations(vval);
+				else if (fconfig->Read("rotx_cl", &rotx_cl) &&
 					fconfig->Read("roty_cl", &roty_cl) &&
 					fconfig->Read("rotz_cl", &rotz_cl))
-				{
-					canvas->SetClippingPlaneRotations(rotx_cl, roty_cl, rotz_cl);
-				}
+					canvas->SetClippingPlaneRotations(fluo::Vector(rotx_cl, roty_cl, rotz_cl));
 
 				//painting parameters
-				double dVal;
-				if (fconfig->Read("brush_use_pres", &bVal))
-					glbin_vol_selector.SetBrushUsePres(bVal);
+				if (fconfig->Read("brush_use_pres", &dval))
+					glbin_vol_selector.SetBrushUsePres(dval);
 				double size1, size2;
 				if (fconfig->Read("brush_size_1", &size1) &&
 					fconfig->Read("brush_size_2", &size2))
 					glbin_vol_selector.SetBrushSize(size1, size2);
-				if (fconfig->Read("brush_spacing", &dVal))
-					glbin_vol_selector.SetBrushSpacing(dVal);
-				if (fconfig->Read("brush_iteration", &dVal))
-					glbin_vol_selector.SetBrushIteration(dVal);
-				if (fconfig->Read("brush_size_data", &bVal))
-					glbin_vol_selector.SetBrushSizeData(bVal);
-				if (fconfig->Read("brush_translate", &dVal))
-					glbin_vol_selector.SetBrushSclTranslate(dVal);
-				if (fconfig->Read("w2d", &dVal))
-					glbin_vol_selector.SetW2d(dVal);
-
+				if (fconfig->Read("brush_spacing", &dval))
+					glbin_vol_selector.SetBrushSpacing(dval);
+				if (fconfig->Read("brush_iteration", &dval))
+					glbin_vol_selector.SetBrushIteration(dval);
+				if (fconfig->Read("brush_size_data", &dval))
+					glbin_vol_selector.SetBrushSizeData(dval);
+				if (fconfig->Read("brush_translate", &dval))
+					glbin_vol_selector.SetBrushSclTranslate(dval);
+				if (fconfig->Read("w2d", &dval))
+					glbin_vol_selector.SetW2d(dval);
 			}
 
 			//rulers
-			if (canvas->GetRulerList() &&
-				fconfig->Exists(wxString::Format("/views/%d/rulers", i)))
+			path = "/views/" + std::to_string(i) + "/rulers";
+			if (canvas->GetRulerList() && fconfig->Exists(path))
 			{
-				fconfig->SetPath(wxString::Format("/views/%d/rulers", i));
-				ReadRulerList("fconfig", i);
+				fconfig->SetPath(path);
+				ReadRulerList(gstProjectFile, i);
 			}
 		}
-		glbin_current.canvas = frame->GetRenderCanvas(cur_canvas.ToStdWstring());
+		glbin_current.canvas = frame->GetRenderCanvas(cur_canvas);
 	}
 
 	//clipping planes
-	if (fconfig->Exists("/prop_panel"))
+	path = "/prop_panel";
+	if (fconfig->Exists(path))
 	{
-		fconfig->SetPath("/prop_panel");
-		bool bval;
+		fconfig->SetPath(path);
 		if (fconfig->Read("clip link", &bval))
 			glbin_settings.m_clip_link = bval;
 		if (fconfig->Read("clip hold", &bval))
@@ -1014,62 +937,59 @@ void Project::Open(const std::wstring& filename)
 	}
 
 	//movie panel
-	if (fconfig->Exists("/movie_panel"))
+	path = "/movie_panel";
+	if (fconfig->Exists(path))
 	{
-		fconfig->SetPath("/movie_panel");
-		wxString sVal;
-		bool bVal;
-		int iVal;
-		double dVal;
+		fconfig->SetPath(path);
 
 		//set settings for frame
 		RenderCanvas* canvas = 0;
-		if (fconfig->Read("key frame enable", &bVal))
-			glbin_moviemaker.SetKeyframeEnable(bVal);
-		if (fconfig->Read("views_cmb", &iVal))
+		if (fconfig->Read("key frame enable", &bval))
+			glbin_moviemaker.SetKeyframeEnable(bval);
+		if (fconfig->Read("views_cmb", &ival))
 		{
-			canvas = frame->GetRenderCanvas(iVal);
+			canvas = frame->GetRenderCanvas(ival);
 			glbin_moviemaker.SetView(canvas);
 		}
-		if (fconfig->Read("rot_check", &bVal))
-			glbin_moviemaker.SetRotateEnable(bVal);
-		if (fconfig->Read("seq_mode", &iVal))
-			glbin_moviemaker.SetSeqMode(iVal);
-		if (fconfig->Read("x_rd", &bVal))
+		if (fconfig->Read("rot_check", &bval))
+			glbin_moviemaker.SetRotateEnable(bval);
+		if (fconfig->Read("seq_mode", &ival))
+			glbin_moviemaker.SetSeqMode(ival);
+		if (fconfig->Read("x_rd", &bval))
 		{
-			if (bVal)
+			if (bval)
 				glbin_moviemaker.SetRotateAxis(0);
 		}
-		if (fconfig->Read("y_rd", &bVal))
+		if (fconfig->Read("y_rd", &bval))
 		{
-			if (bVal)
+			if (bval)
 				glbin_moviemaker.SetRotateAxis(1);
 		}
-		if (fconfig->Read("z_rd", &bVal))
+		if (fconfig->Read("z_rd", &bval))
 		{
-			if (bVal)
+			if (bval)
 				glbin_moviemaker.SetRotateAxis(2);
 		}
-		if (fconfig->Read("rot_axis", &iVal))
-			glbin_moviemaker.SetRotateAxis(iVal);
-		if (fconfig->Read("rot_deg", &iVal))
-			glbin_moviemaker.SetRotateDeg(iVal);
-		if (fconfig->Read("movie_len", &dVal))
-			glbin_moviemaker.SetMovieLength(dVal);
-		if (fconfig->Read("fps", &dVal))
-			glbin_moviemaker.SetFps(dVal);
-		if (fconfig->Read("crop", &bVal))
-			glbin_moviemaker.SetCropEnable(bVal);
-		if (fconfig->Read("crop_x", &iVal))
-			glbin_moviemaker.SetCropX(iVal);
-		if (fconfig->Read("crop_y", &iVal))
-			glbin_moviemaker.SetCropY(iVal);
-		if (fconfig->Read("crop_w", &iVal))
-			glbin_moviemaker.SetCropW(iVal);
-		if (fconfig->Read("crop_h", &iVal))
-			glbin_moviemaker.SetCropH(iVal);
-		if (fconfig->Read("full frame num", &iVal))
-			glbin_moviemaker.SetFullFrameNum(iVal);
+		if (fconfig->Read("rot_axis", &ival))
+			glbin_moviemaker.SetRotateAxis(ival);
+		if (fconfig->Read("rot_deg", &ival))
+			glbin_moviemaker.SetRotateDeg(ival);
+		if (fconfig->Read("movie_len", &dval))
+			glbin_moviemaker.SetMovieLength(dval);
+		if (fconfig->Read("fps", &dval))
+			glbin_moviemaker.SetFps(dval);
+		if (fconfig->Read("crop", &bval))
+			glbin_moviemaker.SetCropEnable(bval);
+		if (fconfig->Read("crop_x", &ival))
+			glbin_moviemaker.SetCropX(ival);
+		if (fconfig->Read("crop_y", &ival))
+			glbin_moviemaker.SetCropY(ival);
+		if (fconfig->Read("crop_w", &ival))
+			glbin_moviemaker.SetCropW(ival);
+		if (fconfig->Read("crop_h", &ival))
+			glbin_moviemaker.SetCropH(ival);
+		if (fconfig->Read("full frame num", &ival))
+			glbin_moviemaker.SetFullFrameNum(ival);
 		int startf = 0, endf = 0, curf = 0;
 		if (fconfig->Read("start_frame", &startf) &&
 			fconfig->Read("end_frame", &endf))
@@ -1086,54 +1006,49 @@ void Project::Open(const std::wstring& filename)
 				}
 			}
 		}
-		if (fconfig->Read("run_script", &bVal))
-			glbin_settings.m_run_script = bVal;
-		if (fconfig->Read("script_file", &sVal))
-			glbin_settings.m_script_file = sVal;
+		if (fconfig->Read("run_script", &bval))
+			glbin_settings.m_run_script = bval;
+		if (fconfig->Read("script_file", &wsval))
+			glbin_settings.m_script_file = wsval;
 		frame->GetMoviePanel()->FluoUpdate();
 	}
 
 	//ui layout
-	if (fconfig->Exists("/ui_layout"))
+	path = "/ui_layout";
+	if (fconfig->Exists(path))
 	{
-		fconfig->SetPath("/ui_layout");
-		wxString str;
-		double dval;
+		fconfig->SetPath(path);
 		bool update = false;
 		if (fconfig->Read("dpi scale factor", &dval))
 			update = fluo::InEpsilon(dval, frame->GetDPIScaleFactor());
-		if (update && fconfig->Read("layout", &str))
-			frame->LoadPerspective(str);
+		if (update && fconfig->Read("layout", &sval))
+			frame->LoadPerspective(sval);
 	}
 
-	//selection
-
 	//interpolator
-	if (fconfig->Exists("/interpolator"))
+	path = "/interpolator";
+	if (fconfig->Exists(path))
 	{
-		wxString str;
-		wxString sVal;
-		double dVal;
-
-		fconfig->SetPath("/interpolator");
+		fconfig->SetPath(path);
 		glbin_interpolator.Clear();
-		if (fconfig->Read("max_id", &iVal))
-			Interpolator::m_id = iVal;
+		if (fconfig->Read("max_id", &ival))
+			Interpolator::m_id = ival;
 		std::vector<FlKeyGroup*>* key_list = glbin_interpolator.GetKeyList();
-		int group_num = fconfig->Read("num", 0l);
-		for (i = 0; i < group_num; i++)
+		int group_num = 0;
+		fconfig->Read("num", &group_num);
+		for (int i = 0; i < group_num; i++)
 		{
-			str = wxString::Format("/interpolator/%d", i);
-			if (fconfig->Exists(str))
+			path = "/interpolator/" + std::to_string(i);
+			if (fconfig->Exists(path))
 			{
-				fconfig->SetPath(str);
+				fconfig->SetPath(path);
 				FlKeyGroup* key_group = new FlKeyGroup;
-				if (fconfig->Read("id", &iVal))
-					key_group->id = iVal;
-				if (fconfig->Read("t", &dVal))
-					key_group->t = dVal;
-				if (fconfig->Read("dt", &dVal))
-					key_group->dt = dVal;
+				if (fconfig->Read("id", &ival))
+					key_group->id = ival;
+				if (fconfig->Read("t", &dval))
+					key_group->t = dval;
+				if (fconfig->Read("dt", &dval))
+					key_group->dt = dval;
 				else
 				{
 					if (key_list->empty())
@@ -1141,93 +1056,82 @@ void Project::Open(const std::wstring& filename)
 					else
 						key_group->dt = key_group->t - key_list->back()->t;
 				}
-				if (fconfig->Read("type", &iVal))
-					key_group->type = iVal;
-				if (fconfig->Read("desc", &sVal))
-					key_group->desc = sVal.ToStdWstring();
-				str = wxString::Format("/interpolator/%d/keys", i);
-				if (fconfig->Exists(str))
+				if (fconfig->Read("type", &ival))
+					key_group->type = ival;
+				if (fconfig->Read("desc", &wsval))
+					key_group->desc = wsval;
+				path = "/interpolator/" + std::to_string(i) + "/keys";
+				if (fconfig->Exists(path))
 				{
-					fconfig->SetPath(str);
-					int key_num = fconfig->Read("num", 0l);
-					for (j = 0; j < key_num; j++)
+					fconfig->SetPath(path);
+					size_t key_num = 0;
+					fconfig->Read("num", &key_num);
+					for (size_t j = 0; j < key_num; j++)
 					{
-						str = wxString::Format("/interpolator/%d/keys/%d", i, j);
-						if (fconfig->Exists(str))
+						path = "/interpolator/" + std::to_string(i) + "/keys/" + std::to_string(j);
+						if (fconfig->Exists(path))
 						{
-							fconfig->SetPath(str);
+							fconfig->SetPath(path);
 							int key_type;
 							if (fconfig->Read("type", &key_type))
 							{
 								FlKeyCode code;
-								if (fconfig->Read("l0", &iVal))
-									code.l0 = iVal;
-								if (fconfig->Read("l0_name", &sVal))
-									code.l0_name = sVal.ToStdString();
-								if (fconfig->Read("l1", &iVal))
-									code.l1 = iVal;
-								if (fconfig->Read("l1_name", &sVal))
-									code.l1_name = sVal.ToStdString();
-								if (fconfig->Read("l2", &iVal))
-									code.l2 = iVal;
-								if (fconfig->Read("l2_name", &sVal))
-									code.l2_name = sVal.ToStdString();
+								if (fconfig->Read("l0", &ival))
+									code.l0 = ival;
+								if (fconfig->Read("l0_name", &sval))
+									code.l0_name = sval;
+								if (fconfig->Read("l1", &ival))
+									code.l1 = ival;
+								if (fconfig->Read("l1_name", &sval))
+									code.l1_name = sval;
+								if (fconfig->Read("l2", &ival))
+									code.l2 = ival;
+								if (fconfig->Read("l2_name", &sval))
+									code.l2_name = sval;
 								switch (key_type)
 								{
 								case FLKEY_TYPE_DOUBLE:
 								{
-									if (fconfig->Read("val", &dVal))
+									if (fconfig->Read("val", &dval))
 									{
-										FlKeyDouble* key = new FlKeyDouble(code, dVal);
+										FlKeyDouble* key = new FlKeyDouble(code, dval);
 										key_group->keys.push_back(key);
 									}
 								}
 								break;
 								case FLKEY_TYPE_QUATER:
 								{
-									if (fconfig->Read("val", &sVal))
+									if (fconfig->Read("val", &qval))
 									{
-										double x, y, z, w;
-										if (SSCANF(sVal.c_str(), "%lf%lf%lf%lf",
-											&x, &y, &z, &w))
-										{
-											fluo::Quaternion qval = fluo::Quaternion(x, y, z, w);
-											FlKeyQuaternion* key = new FlKeyQuaternion(code, qval);
-											key_group->keys.push_back(key);
-										}
+										FlKeyQuaternion* key = new FlKeyQuaternion(code, qval);
+										key_group->keys.push_back(key);
 									}
 								}
 								break;
 								case FLKEY_TYPE_BOOLEAN:
 								{
-									if (fconfig->Read("val", &bVal))
+									if (fconfig->Read("val", &bval))
 									{
-										FlKeyBoolean* key = new FlKeyBoolean(code, bVal);
+										FlKeyBoolean* key = new FlKeyBoolean(code, bval);
 										key_group->keys.push_back(key);
 									}
 								}
 								break;
 								case FLKEY_TYPE_INT:
 								{
-									if (fconfig->Read("val", &iVal))
+									if (fconfig->Read("val", &ival))
 									{
-										FlKeyInt* key = new FlKeyInt(code, iVal);
+										FlKeyInt* key = new FlKeyInt(code, ival);
 										key_group->keys.push_back(key);
 									}
 								}
 								break;
 								case FLKEY_TYPE_COLOR:
 								{
-									if (fconfig->Read("val", &sVal))
+									if (fconfig->Read("val", &cval))
 									{
-										double r, g, b;
-										if (SSCANF(sVal.c_str(), "%lf%lf%lf",
-											&r, &g, &b))
-										{
-											fluo::Color cval = fluo::Color(r, g, b);
-											FlKeyColor* key = new FlKeyColor(code, cval);
-											key_group->keys.push_back(key);
-										}
+										FlKeyColor* key = new FlKeyColor(code, cval);
+										key_group->keys.push_back(key);
 									}
 								}
 								break;
@@ -1257,16 +1161,13 @@ void Project::Save(const std::wstring& filename, bool inc)
 	if (inc)
 		filename2 = INC_NUM_EXIST(filename);
 
-	std::wstring app_name = L"FluoRender " +
-		std::format(L"{}.{}", VERSION_MAJOR, std::format(L"{:.1f}", float(VERSION_MINOR)));
-	std::wstring vendor_name = L"FluoRender";
-	std::wstring local_name = filename2;
-	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
-		wxCONFIG_USE_LOCAL_FILE);
+	std::shared_ptr<BaseTreeFile> fconfig =
+		glbin_tree_file_factory.createTreeFile(glbin_settings.m_config_file_type, gstProjectFile);
+	if (!fconfig)
+		return;
 
-	int i, j, k;
-	fconfig->Write("ver_major", VERSION_MAJOR_TAG);
-	fconfig->Write("ver_minor", VERSION_MINOR_TAG);
+	fconfig->Write("ver_major", std::string(VERSION_MAJOR_TAG));
+	fconfig->Write("ver_minor", std::string(VERSION_MINOR_TAG));
 
 	int ticks = glbin_data_manager.GetVolumeNum() + glbin_data_manager.GetMeshNum();
 	ticks = ticks ? ticks : 1;
@@ -1274,9 +1175,11 @@ void Project::Save(const std::wstring& filename, bool inc)
 	fconfig->Write("ticks", ticks);
 	SetProgress(0, "FluoRender is saving the project file. Please wait.");
 
-	wxString str;
+	std::string path;
+	std::wstring wsval;
 
-	fconfig->SetPath("/settings");
+	path = "/settings";
+	fconfig->SetPath(path);
 	//save streaming mode
 	fconfig->Write("mouse int", glbin_settings.m_mouse_int);
 	fconfig->Write("mem swap", glbin_settings.m_mem_swap);
@@ -1289,25 +1192,28 @@ void Project::Save(const std::wstring& filename, bool inc)
 	//save peeling layers
 	fconfig->Write("peeling layers", glbin_settings.m_peeling_layers);
 
-	fconfig->SetPath("/current");
-	str = glbin_current.canvas ? glbin_current.canvas->GetName() : wxString("");
-	fconfig->Write("canvas", str);
-	str = glbin_current.vol_group ? glbin_current.vol_group->GetName() : wxString("");
-	fconfig->Write("vol group", str);
-	str = glbin_current.mesh_group ? glbin_current.mesh_group->GetName() : wxString("");
-	fconfig->Write("mesh group", str);
-	str = glbin_current.vol_data ? glbin_current.vol_data->GetName() : wxString("");
-	fconfig->Write("vol data", str);
-	str = glbin_current.mesh_data ? glbin_current.mesh_data->GetName() : wxString("");
-	fconfig->Write("mesh data", str);
-	str = glbin_current.ann_data ? glbin_current.ann_data->GetName() : wxString("");
-	fconfig->Write("ann data", str);
+	path = "/current";
+	fconfig->SetPath(path);
+	wsval = glbin_current.canvas ? glbin_current.canvas->GetName().ToStdWstring() : L"";
+	fconfig->Write("canvas", wsval);
+	wsval = glbin_current.vol_group ? glbin_current.vol_group->GetName() : L"";
+	fconfig->Write("vol group", wsval);
+	wsval = glbin_current.mesh_group ? glbin_current.mesh_group->GetName() : L"";
+	fconfig->Write("mesh group", wsval);
+	wsval = glbin_current.vol_data ? glbin_current.vol_data->GetName() : L"";
+	fconfig->Write("vol data", wsval);
+	wsval = glbin_current.mesh_data ? glbin_current.mesh_data->GetName() : L"";
+	fconfig->Write("mesh data", wsval);
+	wsval = glbin_current.ann_data ? glbin_current.ann_data->GetName() : L"";
+	fconfig->Write("ann data", wsval);
 
 	//save data list
 	//volume
-	fconfig->SetPath("/data/volume");
-	fconfig->Write("num", glbin_data_manager.GetVolumeNum());
-	for (i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
+	path = "/data/volume";
+	fconfig->SetPath(path);
+	size_t num = glbin_data_manager.GetVolumeNum();
+	fconfig->Write("num", num);
+	for (size_t i = 0; i < num; i++)
 	{
 		SetProgress(100 * tick_cnt / ticks,
 			"FluoRender is saving volume data. Please wait.");
@@ -1316,19 +1222,18 @@ void Project::Save(const std::wstring& filename, bool inc)
 		VolumeData* vd = glbin_data_manager.GetVolumeData(i);
 		if (vd)
 		{
-			str = wxString::Format("/data/volume/%d", i);
+			path = "/data/volume/" + std::to_string(i);
 			//name
-			fconfig->SetPath(str);
-			str = vd->GetName();
-			fconfig->Write("name", str);
+			fconfig->SetPath(path);
+			fconfig->Write("name", vd->GetName());
 			//compression
 			fconfig->Write("compression", glbin_settings.m_realtime_compress);
 			//skip brick
 			fconfig->Write("skip_brick", vd->GetSkipBrick());
 			//path
-			str = vd->GetPath();
+			std::wstring filepath = vd->GetPath();
 			bool new_chan = false;
-			if (str == "" || glbin_settings.m_vrp_embed)
+			if (filepath.empty() || glbin_settings.m_vrp_embed)
 			{
 				std::wstring new_folder;
 				new_folder = filename2 + L"_files";
@@ -1338,19 +1243,18 @@ void Project::Save(const std::wstring& filename, bool inc)
 				vd->Save(p.wstring(), 0, 3, false,
 					false, 0, false, glbin_settings.m_save_compress,
 					fluo::Point(), fluo::Quaternion(), fluo::Point(), false);
-				fconfig->Write("path", wxString(p.wstring()));
+				fconfig->Write("path", p.wstring());
 				new_chan = true;
 			}
 			else
-				fconfig->Write("path", str);
+				fconfig->Write("path", filepath);
 			BaseReader* reader = vd->GetReader();
 			if (reader)
 			{
 				//reader type
 				fconfig->Write("reader_type", reader->GetType());
 				fconfig->Write("slice_seq", reader->GetSliceSeq());
-				str = reader->GetTimeId();
-				fconfig->Write("time_id", str);
+				fconfig->Write("time_id", reader->GetTimeId());
 				//float convert
 				fconfig->Write("fp_convert", reader->GetFpConvert());
 				double minv, maxv;
@@ -1361,13 +1265,14 @@ void Project::Save(const std::wstring& filename, bool inc)
 			else
 			{
 				fconfig->Write("slice_seq", false);
-				fconfig->Write("time_id", "");
+				fconfig->Write("time_id", std::wstring(L""));
 			}
 			fconfig->Write("cur_time", vd->GetCurTime());
 			fconfig->Write("cur_chan", new_chan ? 0 : vd->GetCurChannel());
 
 			//volume properties
-			fconfig->SetPath("properties");
+			path = "properties";
+			fconfig->SetPath(path);
 			fconfig->Write("display", vd->GetDisp());
 
 			//properties
@@ -1376,16 +1281,9 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("contrast", vd->GetSaturation());
 			fconfig->Write("left_thresh", vd->GetLeftThresh());
 			fconfig->Write("right_thresh", vd->GetRightThresh());
-			fluo::Color color = vd->GetColor();
-			str = wxString::Format("%f %f %f", color.r(), color.g(), color.b());
-			fconfig->Write("color", str);
-			double hue, sat, val;
-			vd->GetHSV(hue, sat, val);
-			str = wxString::Format("%f %f %f", hue, sat, val);
-			fconfig->Write("hsv", str);
-			color = vd->GetMaskColor();
-			str = wxString::Format("%f %f %f", color.r(), color.g(), color.b());
-			fconfig->Write("mask_color", str);
+			fconfig->Write("color", vd->GetColor());
+			fconfig->Write("hsv", vd->GetHSVColor());
+			fconfig->Write("mask_color", vd->GetMaskColor());
 			fconfig->Write("mask_color_set", vd->GetMaskColorSet());
 			fconfig->Write("enable_alpha", vd->GetAlphaEnable());
 			fconfig->Write("alpha", vd->GetAlpha());
@@ -1399,22 +1297,10 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("samplerate", vd->GetSampleRate());
 
 			//resolution scale
-			double resx, resy, resz;
-			double b_resx, b_resy, b_resz;
-			double s_resx, s_resy, s_resz;
-			double sclx, scly, sclz;
-			vd->GetSpacings(resx, resy, resz);
-			vd->GetBaseSpacings(b_resx, b_resy, b_resz);
-			vd->GetSpacingScales(s_resx, s_resy, s_resz);
-			vd->GetScalings(sclx, scly, sclz);
-			str = wxString::Format("%lf %lf %lf", resx, resy, resz);
-			fconfig->Write("res", str);
-			str = wxString::Format("%lf %lf %lf", b_resx, b_resy, b_resz);
-			fconfig->Write("b_res", str);
-			str = wxString::Format("%lf %lf %lf", s_resx, s_resy, s_resz);
-			fconfig->Write("s_res", str);
-			str = wxString::Format("%lf %lf %lf", sclx, scly, sclz);
-			fconfig->Write("scl", str);
+			fconfig->Write("res", vd->GetSpacings());
+			fconfig->Write("b_res", vd->GetBaseSpacings());
+			fconfig->Write("s_res", vd->GetSpacingScales());
+			fconfig->Write("scl", vd->GetScalings());
 
 			//planes
 			std::vector<fluo::Plane*>* planes = 0;
@@ -1452,12 +1338,9 @@ void Project::Save(const std::wstring& filename, bool inc)
 			}
 
 			//2d adjustment settings
-			str = wxString::Format("%f %f %f", vd->GetGammaColor().r(), vd->GetGammaColor().g(), vd->GetGammaColor().b());
-			fconfig->Write("gamma", str);
-			str = wxString::Format("%f %f %f", vd->GetBrightness().r(), vd->GetBrightness().g(), vd->GetBrightness().b());
-			fconfig->Write("brightness", str);
-			str = wxString::Format("%f %f %f", vd->GetHdr().r(), vd->GetHdr().g(), vd->GetHdr().b());
-			fconfig->Write("hdr", str);
+			fconfig->Write("gamma", vd->GetGammaColor());
+			fconfig->Write("brightness", vd->GetBrightness());
+			fconfig->Write("hdr", vd->GetHdr());
 			fconfig->Write("sync_r", vd->GetSync(0));
 			fconfig->Write("sync_g", vd->GetSync(1));
 			fconfig->Write("sync_b", vd->GetSync(2));
@@ -1498,8 +1381,9 @@ void Project::Save(const std::wstring& filename, bool inc)
 	}
 	//mesh
 	fconfig->SetPath("/data/mesh");
-	fconfig->Write("num", glbin_data_manager.GetMeshNum());
-	for (i = 0; i < glbin_data_manager.GetMeshNum(); i++)
+	num = glbin_data_manager.GetMeshNum();
+	fconfig->Write("num", num);
+	for (size_t i = 0; i < num; i++)
 	{
 		SetProgress(100 * tick_cnt / ticks,
 			"FluoRender is saving mesh data. Please wait.");
@@ -1517,12 +1401,10 @@ void Project::Save(const std::wstring& filename, bool inc)
 				p /= md->GetName() + L".obj";
 				md->Save(p.wstring());
 			}
-			str = wxString::Format("/data/mesh/%d", i);
-			fconfig->SetPath(str);
-			str = md->GetName();
-			fconfig->Write("name", str);
-			str = md->GetPath();
-			fconfig->Write("path", str);
+			path = "/data/mesh/" + std::to_string(i);
+			fconfig->SetPath(path);
+			fconfig->Write("name", md->GetName());
+			fconfig->Write("path", md->GetPath());
 			//mesh prperties
 			fconfig->SetPath("properties");
 			fconfig->Write("display", md->GetDisp());
@@ -1532,21 +1414,15 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fluo::Color amb, diff, spec;
 			double shine, alpha;
 			md->GetMaterial(amb, diff, spec, shine, alpha);
-			str = wxString::Format("%f %f %f", amb.r(), amb.g(), amb.b());
-			fconfig->Write("ambient", str);
-			str = wxString::Format("%f %f %f", diff.r(), diff.g(), diff.b());
-			fconfig->Write("diffuse", str);
-			str = wxString::Format("%f %f %f", spec.r(), spec.g(), spec.b());
-			fconfig->Write("specular", str);
+			fconfig->Write("ambient", amb);
+			fconfig->Write("diffuse", diff);
+			fconfig->Write("specular", spec);
 			fconfig->Write("shininess", shine);
 			fconfig->Write("alpha", alpha);
 			//2d adjustment settings
-			str = wxString::Format("%f %f %f", md->GetGammaColor().r(), md->GetGammaColor().g(), md->GetGammaColor().b());
-			fconfig->Write("gamma", str);
-			str = wxString::Format("%f %f %f", md->GetBrightness().r(), md->GetBrightness().g(), md->GetBrightness().b());
-			fconfig->Write("brightness", str);
-			str = wxString::Format("%f %f %f", md->GetHdr().r(), md->GetHdr().g(), md->GetHdr().b());
-			fconfig->Write("hdr", str);
+			fconfig->Write("gamma", md->GetGammaColor());
+			fconfig->Write("brightness", md->GetBrightness());
+			fconfig->Write("hdr", md->GetHdr());
 			fconfig->Write("sync_r", md->GetSync(0));
 			fconfig->Write("sync_g", md->GetSync(1));
 			fconfig->Write("sync_b", md->GetSync(2));
@@ -1555,28 +1431,24 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("shadow_darkness", md->GetShadowIntensity());
 
 			//mesh transform
-			fconfig->SetPath("../transform");
-			double x, y, z;
-			md->GetTranslation(x, y, z);
-			str = wxString::Format("%f %f %f", x, y, z);
-			fconfig->Write("translation", str);
-			md->GetRotation(x, y, z);
-			str = wxString::Format("%f %f %f", x, y, z);
-			fconfig->Write("rotation", str);
-			md->GetScaling(x, y, z);
-			str = wxString::Format("%f %f %f", x, y, z);
-			fconfig->Write("scaling", str);
+			path = "../transform";
+			fconfig->SetPath(path);
+			fconfig->Write("translation", md->GetTranslation());
+			fconfig->Write("rotation", md->GetRotation());
+			fconfig->Write("scaling", md->GetScaling());
 		}
 	}
 	//annotations
-	fconfig->SetPath("/data/annotations");
-	fconfig->Write("num", glbin_data_manager.GetAnnotationNum());
-	for (i = 0; i < glbin_data_manager.GetAnnotationNum(); i++)
+	path = "/data/annotations";
+	fconfig->SetPath(path);
+	num = glbin_data_manager.GetAnnotationNum();
+	fconfig->Write("num", num);
+	for (size_t i = 0; i < num; i++)
 	{
 		Annotations* ann = glbin_data_manager.GetAnnotations(i);
 		if (ann)
 		{
-			if (ann->GetPath() == "")
+			if (ann->GetPath() == L"")
 			{
 				std::wstring new_folder;
 				new_folder = filename2 + L"_files";
@@ -1585,79 +1457,73 @@ void Project::Save(const std::wstring& filename, bool inc)
 				p /= ann->GetName() + L".txt";
 				ann->Save(p.wstring());
 			}
-			str = wxString::Format("/data/annotations/%d", i);
-			fconfig->SetPath(str);
-			str = ann->GetName();
-			fconfig->Write("name", str);
-			str = ann->GetPath();
-			fconfig->Write("path", str);
+			path = "/data/annotations/" + std::to_string(i);
+			fconfig->SetPath(path);
+			fconfig->Write("name", ann->GetName());
+			fconfig->Write("path", ann->GetPath());
 		}
 	}
 	//views
-	fconfig->SetPath("/views");
-	fconfig->Write("num", frame->GetCanvasNum());
-	for (i = 0; i < frame->GetCanvasNum(); i++)
+	path = "/views";
+	fconfig->SetPath(path);
+	num = frame->GetCanvasNum();
+	fconfig->Write("num", num);
+	for (size_t i = 0; i < static_cast<size_t>(frame->GetCanvasNum()); i++)
 	{
 		RenderCanvas* canvas = frame->GetRenderCanvas(i);
 		if (canvas)
 		{
-			str = wxString::Format("/views/%d", i);
-			fconfig->SetPath(str);
 			//view layers
-			str = wxString::Format("/views/%d/layers", i);
-			fconfig->SetPath(str);
-			fconfig->Write("num", canvas->GetLayerNum());
-			for (j = 0; j < canvas->GetLayerNum(); j++)
+			path = "/views/" + std::to_string(i) + "/layers";
+			fconfig->SetPath(path);
+			int layer_num = canvas->GetLayerNum();
+			fconfig->Write("num", layer_num);
+			for (int j = 0; j < layer_num; j++)
 			{
 				TreeLayer* layer = canvas->GetLayer(j);
 				if (!layer)
 					continue;
-				str = wxString::Format("/views/%d/layers/%d", i, j);
-				fconfig->SetPath(str);
+				path = "/views/" + std::to_string(i) + "/layers/" + std::to_string(j);
+				fconfig->SetPath(path);
 				switch (layer->IsA())
 				{
 				case 2://volume data
 					fconfig->Write("type", 2);
-					fconfig->Write("name", wxString(layer->GetName()));
+					fconfig->Write("name", layer->GetName());
 					break;
 				case 3://mesh data
 					fconfig->Write("type", 3);
-					fconfig->Write("name", wxString(layer->GetName()));
+					fconfig->Write("name", layer->GetName());
 					break;
 				case 4://annotations
 					fconfig->Write("type", 4);
-					fconfig->Write("name", wxString(layer->GetName()));
+					fconfig->Write("name", layer->GetName());
 					break;
 				case 5://group
 				{
 					DataGroup* group = (DataGroup*)layer;
 
 					fconfig->Write("type", 5);
-					fconfig->Write("name", wxString(layer->GetName()));
+					fconfig->Write("name", layer->GetName());
 					fconfig->Write("id", DataGroup::GetID());
 					//dispaly
 					fconfig->Write("display", group->GetDisp());
 					//2d adjustment
-					str = wxString::Format("%f %f %f", group->GetGammaColor().r(),
-						group->GetGammaColor().g(), group->GetGammaColor().b());
-					fconfig->Write("gamma", str);
-					str = wxString::Format("%f %f %f", group->GetBrightness().r(),
-						group->GetBrightness().g(), group->GetBrightness().b());
-					fconfig->Write("brightness", str);
-					str = wxString::Format("%f %f %f", group->GetHdr().r(),
-						group->GetHdr().g(), group->GetHdr().b());
-					fconfig->Write("hdr", str);
+					fconfig->Write("gamma", group->GetGammaColor());
+					fconfig->Write("brightness", group->GetBrightness());
+					fconfig->Write("hdr", group->GetHdr());
 					fconfig->Write("sync_r", group->GetSync(0));
 					fconfig->Write("sync_g", group->GetSync(1));
 					fconfig->Write("sync_b", group->GetSync(2));
 					//sync volume properties
 					fconfig->Write("sync_vp", group->GetVolumeSyncProp());
 					//volumes
-					str = wxString::Format("/views/%d/layers/%d/volumes", i, j);
-					fconfig->SetPath(str);
-					fconfig->Write("num", group->GetVolumeNum());
-					for (k = 0; k < group->GetVolumeNum(); k++)
-						fconfig->Write(wxString::Format("vol_%d", k), wxString(group->GetVolumeData(k)->GetName()));
+					path = "/views/" + std::to_string(i) + "/layers/" + std::to_string(j) + "/volumes";
+					fconfig->SetPath(path);
+					int vol_num = group->GetVolumeNum();
+					fconfig->Write("num", vol_num);
+					for (int k = 0; k < vol_num; k++)
+						fconfig->Write("vol_" + std::to_string(k), group->GetVolumeData(k)->GetName());
 
 				}
 				break;
@@ -1666,25 +1532,27 @@ void Project::Save(const std::wstring& filename, bool inc)
 					MeshGroup* group = (MeshGroup*)layer;
 
 					fconfig->Write("type", 6);
-					fconfig->Write("name", wxString(layer->GetName()));
+					fconfig->Write("name", layer->GetName());
 					fconfig->Write("id", MeshGroup::GetID());
 					//display
 					fconfig->Write("display", group->GetDisp());
 					//sync mesh properties
 					fconfig->Write("sync_mp", group->GetMeshSyncProp());
 					//meshes
-					str = wxString::Format("/views/%d/layers/%d/meshes", i, j);
-					fconfig->SetPath(str);
-					fconfig->Write("num", group->GetMeshNum());
-					for (k = 0; k < group->GetMeshNum(); k++)
-						fconfig->Write(wxString::Format("mesh_%d", k), wxString(group->GetMeshData(k)->GetName()));
+					path = "/views/" + std::to_string(i) + "/layers/" + std::to_string(j) + "/meshes";
+					fconfig->SetPath(path);
+					int mesh_num = group->GetMeshNum();
+					fconfig->Write("num", mesh_num);
+					for (int k = 0; k < mesh_num; k++)
+						fconfig->Write("mesh_" + std::to_string(k), group->GetMeshData(k)->GetName());
 				}
 				break;
 				}
 			}
 
 			//tracking group
-			fconfig->SetPath("/views/%d/track_group");
+			path = "/views/" + std::to_string(i) + "/track_group";
+			fconfig->SetPath(path);
 			int ival = canvas->GetTrackFileExist(true);
 			if (ival == 1)
 			{
@@ -1695,42 +1563,31 @@ void Project::Save(const std::wstring& filename, bool inc)
 				p /= GET_NAME(filename2) + L".track";
 				canvas->SaveTrackGroup(p.wstring());
 			}
-			fconfig->Write("track_file", wxString(canvas->GetTrackGroupFile()));
+			fconfig->Write("track_file",canvas->GetTrackGroupFile());
 
 			//properties
-			fconfig->SetPath(wxString::Format("/views/%d/properties", i));
+			path = "/views/" + std::to_string(i) + "/properties";
+			fconfig->SetPath(path);
 			fconfig->Write("drawall", canvas->GetDraw());
 			fconfig->Write("persp", canvas->GetPersp());
 			fconfig->Write("free", canvas->GetFree());
 			fconfig->Write("aov", canvas->GetAov());
 			fconfig->Write("nearclip", canvas->GetNearClip());
 			fconfig->Write("farclip", canvas->GetFarClip());
-			fluo::Color bkcolor;
-			bkcolor = canvas->GetBackgroundColor();
-			str = wxString::Format("%f %f %f", bkcolor.r(), bkcolor.g(), bkcolor.b());
-			fconfig->Write("backgroundcolor", str);
+			fconfig->Write("backgroundcolor", canvas->GetBackgroundColor());
 			fconfig->Write("drawtype", canvas->GetDrawType());
 			fconfig->Write("volmethod", canvas->GetVolMethod());
 			fconfig->Write("fog", canvas->GetFog());
-			fconfig->Write("fogintensity", (double)canvas->GetFogIntensity());
+			fconfig->Write("fogintensity", canvas->GetFogIntensity());
 			fconfig->Write("draw_camctr", canvas->m_draw_camctr);
 			fconfig->Write("draw_info", canvas->m_draw_info);
 			fconfig->Write("draw_legend", canvas->m_draw_legend);
 
-			double x, y, z;
 			//camera
-			canvas->GetTranslations(x, y, z);
-			str = wxString::Format("%f %f %f", x, y, z);
-			fconfig->Write("translation", str);
-			canvas->GetRotations(x, y, z);
-			str = wxString::Format("%f %f %f", x, y, z);
-			fconfig->Write("rotation", str);
-			fluo::Quaternion q = canvas->GetZeroQuat();
-			str = wxString::Format("%f %f %f %f", q.x, q.y, q.z, q.w);
-			fconfig->Write("zero_quat", str);
-			canvas->GetCenters(x, y, z);
-			str = wxString::Format("%f %f %f", x, y, z);
-			fconfig->Write("center", str);
+			fconfig->Write("translation", canvas->GetTranslations());
+			fconfig->Write("rotation", canvas->GetRotations());
+			fconfig->Write("zero_quat", canvas->GetZeroQuat());
+			fconfig->Write("center", canvas->GetCenters());
 			fconfig->Write("centereyedist", canvas->GetCenterEyeDist());
 			fconfig->Write("radius", canvas->GetRadius());
 			fconfig->Write("initdist", canvas->GetInitDist());
@@ -1738,46 +1595,28 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("scale", canvas->m_scale_factor);
 			fconfig->Write("pin_rot_center", canvas->m_pin_rot_ctr);
 			//object
-			canvas->GetObjCenters(x, y, z);
-			str = wxString::Format("%f %f %f", x, y, z);
-			fconfig->Write("obj_center", str);
-			canvas->GetObjTrans(x, y, z);
-			str = wxString::Format("%f %f %f", x, y, z);
-			fconfig->Write("obj_trans", str);
-			canvas->GetObjRot(x, y, z);
-			str = wxString::Format("%f %f %f", x, y, z);
-			fconfig->Write("obj_rot", str);
+			fconfig->Write("obj_center", canvas->GetObjCenters());
+			fconfig->Write("obj_trans", canvas->GetObjTrans());
+			fconfig->Write("obj_rot", canvas->GetObjRot());
 			//scale bar
 			fconfig->Write("disp_scale_bar", canvas->m_disp_scale_bar);
 			fconfig->Write("disp_scale_bar_text", canvas->m_disp_scale_bar_text);
 			fconfig->Write("sb_length", canvas->m_sb_length);
-			str = canvas->m_sb_text;
-			fconfig->Write("sb_text", str);
-			str = canvas->m_sb_num;
-			fconfig->Write("sb_num", str);
+			fconfig->Write("sb_text", canvas->m_sb_text);
+			fconfig->Write("sb_num", canvas->m_sb_num);
 			fconfig->Write("sb_unit", canvas->m_sb_unit);
 
 			//2d adjustment
-			str = wxString::Format("%f %f %f", canvas->GetGammaColor().r(),
-				canvas->GetGammaColor().g(), canvas->GetGammaColor().b());
-			fconfig->Write("gamma", str);
-			str = wxString::Format("%f %f %f", canvas->GetBrightness().r(),
-				canvas->GetBrightness().g(), canvas->GetBrightness().b());
-			fconfig->Write("brightness", str);
-			str = wxString::Format("%f %f %f", canvas->GetHdr().r(),
-				canvas->GetHdr().g(), canvas->GetHdr().b());
-			fconfig->Write("hdr", str);
+			fconfig->Write("gamma", canvas->GetGammaColor());
+			fconfig->Write("brightness", canvas->GetBrightness());
+			fconfig->Write("hdr", canvas->GetHdr());
 			fconfig->Write("sync_r", canvas->GetSync(0));
 			fconfig->Write("sync_g", canvas->GetSync(1));
 			fconfig->Write("sync_b", canvas->GetSync(2));
 
 			//clipping plane rotations
 			fconfig->Write("clip_mode", canvas->GetClipMode());
-			double rotx_cl, roty_cl, rotz_cl;
-			canvas->GetClippingPlaneRotations(rotx_cl, roty_cl, rotz_cl);
-			fconfig->Write("rotx_cl", rotx_cl);
-			fconfig->Write("roty_cl", roty_cl);
-			fconfig->Write("rotz_cl", rotz_cl);
+			fconfig->Write("rot_cl", canvas->GetClippingPlaneRotations());
 
 			//painting parameters
 			fconfig->Write("brush_use_pres", glbin_vol_selector.GetBrushUsePres());
@@ -1789,12 +1628,14 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("w2d", glbin_vol_selector.GetW2d());
 
 			//rulers
-			fconfig->SetPath(wxString::Format("/views/%d/rulers", i));
-			SaveRulerList("fconfig", i);
+			path = "/views/" + std::to_string(i) + "/rulers";
+			fconfig->SetPath(path);
+			SaveRulerList(gstProjectFile, i);
 		}
 	}
 	//clipping planes
-	fconfig->SetPath("/prop_panel");
+	path = "/prop_panel";
+	fconfig->SetPath(path);
 	fconfig->Write("clip link", glbin_settings.m_clip_link);
 	fconfig->Write("clip hold", glbin_settings.m_clip_hold);
 	fconfig->Write("clip mode", glbin_settings.m_clip_mode);
@@ -1802,7 +1643,8 @@ void Project::Save(const std::wstring& filename, bool inc)
 	fconfig->Write("y_link", frame->GetClipPlanPanel()->GetYLink());
 	fconfig->Write("z_link", frame->GetClipPlanPanel()->GetZLink());
 	//movie view
-	fconfig->SetPath("/movie_panel");
+	path = "/movie_panel";
+	fconfig->SetPath(path);
 	fconfig->Write("key frame enable", glbin_moviemaker.GetKeyframeEnable());
 	fconfig->Write("views_cmb", glbin_moviemaker.GetViewIndex());
 	fconfig->Write("rot_check", glbin_moviemaker.GetRotateEnable());
@@ -1821,88 +1663,66 @@ void Project::Save(const std::wstring& filename, bool inc)
 	fconfig->Write("start_frame", glbin_moviemaker.GetClipStartFrame());
 	fconfig->Write("end_frame", glbin_moviemaker.GetClipEndFrame());
 	fconfig->Write("run_script", glbin_settings.m_run_script);
-	fconfig->Write("script_file", wxString(glbin_settings.m_script_file));
+	fconfig->Write("script_file", glbin_settings.m_script_file);
 	//layout
-	fconfig->SetPath("/ui_layout");
+	path = "/ui_layout";
+	fconfig->SetPath(path);
 	fconfig->Write("dpi scale factor", frame->GetDPIScaleFactor());
-	fconfig->Write("layout", frame->SavePerspective());
+	fconfig->Write("layout", frame->SavePerspective().ToStdString());
 	//interpolator
-	fconfig->SetPath("/interpolator");
+	path = "/interpolator";
+	fconfig->SetPath(path);
 	fconfig->Write("max_id", Interpolator::m_id);
 	int group_num = glbin_interpolator.GetKeyNum();
 	fconfig->Write("num", group_num);
-	for (i = 0; i < group_num; i++)
+	for (int i = 0; i < group_num; i++)
 	{
 		FlKeyGroup* key_group = glbin_interpolator.GetKeyGroup(i);
 		if (key_group)
 		{
-			str = wxString::Format("/interpolator/%d", i);
-			fconfig->SetPath(str);
+			path = "/interpolator/" + std::to_string(i);
+			fconfig->SetPath(path);
 			fconfig->Write("id", key_group->id);
 			fconfig->Write("t", key_group->t);
 			fconfig->Write("dt", key_group->dt);
 			fconfig->Write("type", key_group->type);
-			str = key_group->desc;
-			fconfig->Write("desc", str);
-			int key_num = (int)key_group->keys.size();
-			str = wxString::Format("/interpolator/%d/keys", i);
-			fconfig->SetPath(str);
+			fconfig->Write("desc", key_group->desc);
+			size_t key_num = (int)key_group->keys.size();
+			path = "/interpolator/" + std::to_string(i) + "/keys";
+			fconfig->SetPath(path);
 			fconfig->Write("num", key_num);
-			for (j = 0; j < key_num; j++)
+			for (size_t j = 0; j < key_num; j++)
 			{
 				FlKey* key = key_group->keys[j];
 				if (key)
 				{
-					str = wxString::Format("/interpolator/%d/keys/%d", i, j);
-					fconfig->SetPath(str);
-					int key_type = key->GetType();
-					fconfig->Write("type", key_type);
+					path = "/interpolator/" + std::to_string(i) + "/keys/" + std::to_string(j);
+					fconfig->SetPath(path);
+					fconfig->Write("type", key->GetType());
 					FlKeyCode code = key->GetKeyCode();
 					fconfig->Write("l0", code.l0);
-					str = code.l0_name;
-					fconfig->Write("l0_name", str);
+					fconfig->Write("l0_name", code.l0_name);
 					fconfig->Write("l1", code.l1);
-					str = code.l1_name;
-					fconfig->Write("l1_name", str);
+					fconfig->Write("l1_name", code.l1_name);
 					fconfig->Write("l2", code.l2);
-					str = code.l2_name;
-					fconfig->Write("l2_name", str);
-					switch (key_type)
+					fconfig->Write("l2_name", code.l2_name);
+					switch (key->GetType())
 					{
 					case FLKEY_TYPE_DOUBLE:
-					{
-						double dval = ((FlKeyDouble*)key)->GetValue();
-						fconfig->Write("val", dval);
-					}
-					break;
+						fconfig->Write("val", ((FlKeyDouble*)key)->GetValue());
+						break;
 					case FLKEY_TYPE_QUATER:
-					{
-						fluo::Quaternion qval = ((FlKeyQuaternion*)key)->GetValue();
-						str = wxString::Format("%lf %lf %lf %lf",
-							qval.x, qval.y, qval.z, qval.w);
-						fconfig->Write("val", str);
-					}
-					break;
+						fconfig->Write("val", ((FlKeyQuaternion*)key)->GetValue());
+						break;
 					case FLKEY_TYPE_BOOLEAN:
-					{
-						bool bval = ((FlKeyBoolean*)key)->GetValue();
-						fconfig->Write("val", bval);
-					}
-					break;
+						fconfig->Write("val", ((FlKeyBoolean*)key)->GetValue());
+						break;
 					case FLKEY_TYPE_INT:
-					{
-						int ival = ((FlKeyInt*)key)->GetValue();
-						fconfig->Write("val", ival);
-					}
-					break;
+						fconfig->Write("val", ((FlKeyInt*)key)->GetValue());
+						break;
 					case FLKEY_TYPE_COLOR:
-					{
-						fluo::Color cval = ((FlKeyColor*)key)->GetValue();
-						str = wxString::Format("%lf %lf %lf",
-							cval.r(), cval.g(), cval.b());
-						fconfig->Write("val", str);
-					}
-					break;
+						fconfig->Write("val", ((FlKeyColor*)key)->GetValue());
+						break;
 					}
 				}
 			}
@@ -1954,7 +1774,7 @@ void Project::ExportRulerList(const std::wstring& filename)
 	std::wofstream os;
 	OutputStreamOpenW(os, filename);
 
-	wxString str;
+	std::string str;
 	std::wstring unit;
 	int num_points;
 	fluo::Point p;
@@ -2033,23 +1853,23 @@ void Project::ExportRulerList(const std::wstring& filename)
 		if (ruler->GetUseColor())
 		{
 			color = ruler->GetColor();
-			str = wxString::Format("RGB(%d, %d, %d)",
-				int(std::round(color.r() * 255)),
-				int(std::round(color.g() * 255)),
-				int(std::round(color.b() * 255)));
+			str = "RGB(" +
+				std::to_string(int(std::round(color.r() * 255))) + ", " +
+				std::to_string(int(std::round(color.g() * 255))) + ", " +
+				std::to_string(int(std::round(color.b() * 255))) + ")";
 		}
 		else
 			str = "N/A";
 		os << str << "\t";
 
 		//branch count
-		str = wxString::Format("%d", ruler->GetNumBranch());
+		str = std::to_string(ruler->GetNumBranch());
 		os << str << "\t";
 		//length
-		str = wxString::Format("%.2f", ruler->GetLength());
+		str = std::to_string(ruler->GetLength());
 		os << str << "\t";
 		//angle
-		str = wxString::Format("%.1f", ruler->GetAngle());
+		str = std::to_string(ruler->GetAngle());
 		os << str << "\t";
 
 		str = "";
@@ -2058,12 +1878,12 @@ void Project::ExportRulerList(const std::wstring& filename)
 		if (num_points > 0)
 		{
 			p = ruler->GetPoint(0);
-			str += wxString::Format("%.2f\t%.2f\t%.2f\t", p.x(), p.y(), p.z());
+			str += p.to_string();
 		}
 		if (num_points > 1)
 		{
 			p = ruler->GetPoint(num_points - 1);
-			str += wxString::Format("%.2f\t%.2f\t%.2f\t", p.x(), p.y(), p.z());
+			str += p.to_string();
 		}
 		else
 			str += "\t\t\t";
@@ -2071,7 +1891,7 @@ void Project::ExportRulerList(const std::wstring& filename)
 
 		//time
 		if (ruler->GetTransient())
-			str = wxString::Format("%d", ruler->GetTransTime());
+			str = std::to_string(ruler->GetTransTime());
 		else
 			str = "N/A";
 		os << str << "\t";
@@ -2132,7 +1952,7 @@ void Project::ExportRulerList(const std::wstring& filename)
 	os.close();
 }
 
-void Project::SaveRulerList(const std::string &gst_name, int vi)
+void Project::SaveRulerList(const std::string &gst_name, int view_index)
 {
 	flrd::RulerList* list = glbin_current.GetRulerList();
 	if (!list || list->empty())
@@ -2142,12 +1962,15 @@ void Project::SaveRulerList(const std::string &gst_name, int vi)
 	if (!fconfig)
 		return;
 
-	fconfig->Write("num", static_cast<unsigned int>(list->size()));
-	for (size_t ri = 0; ri < list->size(); ++ri)
+	std::string path;
+	size_t num = list->size();
+	fconfig->Write("num", num);
+	for (size_t i = 0; i < num; ++i)
 	{
-		flrd::Ruler* ruler = (*list)[ri];
+		flrd::Ruler* ruler = (*list)[i];
 		if (!ruler) continue;
-		fconfig->SetPath("/views/" + std::to_string(vi) + "/rulers/" + std::to_string(ri));
+		path = "/views/" + std::to_string(view_index) + "/rulers/" + std::to_string(i);
+		fconfig->SetPath(path);
 		fconfig->Write("name", ruler->GetName());
 		fconfig->Write("group", ruler->Group());
 		fconfig->Write("type", ruler->GetRulerType());
@@ -2157,31 +1980,25 @@ void Project::SaveRulerList(const std::string &gst_name, int vi)
 		fconfig->Write("info_names", ruler->GetInfoNames());
 		fconfig->Write("info_values", ruler->GetInfoValues());
 		fconfig->Write("use_color", ruler->GetUseColor());
-		fconfig->Write("color", wxString::Format("%f %f %f",
-			ruler->GetColor().r(), ruler->GetColor().g(), ruler->GetColor().b()).ToStdString());
+		fconfig->Write("color", ruler->GetColor());
 		fconfig->Write("interp", ruler->GetInterp());
-		fconfig->Write("num", ruler->GetNumBranch());
-		std::string path = "/views/" + std::to_string(vi) + "/rulers/" + std::to_string(ri) + "/branches";
+		size_t branch_num = ruler->GetNumBranch();
+		fconfig->Write("num", branch_num);
+		path = "/views/" + std::to_string(view_index) + "/rulers/" + std::to_string(i) + "/branches";
 		fconfig->SetPath(path);
-		fconfig->Write("num", ruler->GetNumBranch());
-		for (size_t rbi = 0; rbi < ruler->GetNumBranch(); ++rbi)
+		fconfig->Write("num", branch_num);
+		for (size_t j = 0; j < branch_num; ++j)
 		{
-			std::string path_br = path + std::to_string(rbi);
+			std::string path_br = path + std::to_string(j);
 			fconfig->SetPath(path_br);
-			fconfig->Write("num", ruler->GetNumBranchPoint(rbi));
+			size_t branch_point_num = ruler->GetNumBranchPoint(j);
+			fconfig->Write("num", branch_point_num);
 			fconfig->Write("time_point", true);
-			for (size_t rpi = 0; rpi < ruler->GetNumBranchPoint(rbi); ++rpi)
+			for (size_t k = 0; k < branch_point_num; ++k)
 			{
-				flrd::RulerPoint* rp = ruler->GetRulerPoint(rbi, rpi);
+				flrd::RulerPoint* rp = ruler->GetRulerPoint(j, k);
 				if (!rp) continue;
-				//fconfig->Write(wxString::Format("point%d", (int)rpi),
-				//	wxString::Format("%f %f %f %d %d",
-				//	rp->GetPoint(0).x(),
-				//	rp->GetPoint(0).y(),
-				//	rp->GetPoint(0).z(),
-				//	rp->GetLocked(),
-				//	rp->GetId()));
-				std::string path2 = path_br + "/point" + std::to_string(rpi);
+				std::string path2 = path_br + "/point" + std::to_string(k);
 				fconfig->SetPath(path2);
 				fconfig->Write("num", rp->GetTimeNum());
 				fconfig->Write("locked", rp->GetLocked());
@@ -2192,18 +2009,17 @@ void Project::SaveRulerList(const std::string &gst_name, int vi)
 					size_t t = 0;
 					fluo::Point p;
 					if (rp->GetTimeAndPoint(tpi, t, p))
-						fconfig->Write(tpn,
-								std::to_string(t) +
-							std::to_string(p.x()) +
-							std::to_string(p.y()) +
-							std::to_string(p.z()));
+					{
+						fconfig->Write(tpn + "_time", t);
+						fconfig->Write(tpn + "_pos", p);
+					}
 				}
 			}
 		}
 	}
 }
 
-void Project::ReadRulerList(const std::string &gst_name, int vi)
+void Project::ReadRulerList(const std::string &gst_name, int view_index)
 {
 	flrd::RulerList* list = glbin_current.GetRulerList();
 	if (!list)
@@ -2213,26 +2029,27 @@ void Project::ReadRulerList(const std::string &gst_name, int vi)
 	if (!fconfig)
 		return;
 
-	std::string str;
-	std::wstring wstr;
+	std::string path;
+	std::string sval;
+	std::wstring wsval;
 	int ival;
 	bool bval;
-	int rbi, rpi;
-	float x, y, z;
-	int l = 0;
-	unsigned int id;
+	fluo::Color cval;
+	fluo::Point pval;
+	size_t szval;
 
 	list->clear();
-	long rnum = 0;
-	fconfig->Read("num", &rnum);
-	for (int ri = 0; ri < rnum; ++ri)
+	size_t ruler_num = 0;
+	fconfig->Read("num", &ruler_num);
+	for (size_t i = 0; i < ruler_num; ++i)
 	{
-		if (fconfig->Exists("/views/" + std::to_string(vi) + "/rulers/" + std::to_string(ri)))
+		path = "/views/" + std::to_string(view_index) + "/rulers/" + std::to_string(i);
+		if (fconfig->Exists(path))
 		{
-			fconfig->SetPath("/views/" +std::to_string(vi) + "/rulers/" + std::to_string(ri));
+			fconfig->SetPath(path);
 			flrd::Ruler* ruler = new flrd::Ruler();
-			if (fconfig->Read("name", &wstr))
-				ruler->SetName(wstr);
+			if (fconfig->Read("name", &wsval))
+				ruler->SetName(wsval);
 			if (fconfig->Read("group", &ival))
 				ruler->Group(ival);
 			if (fconfig->Read("type", &ival))
@@ -2243,123 +2060,82 @@ void Project::ReadRulerList(const std::string &gst_name, int vi)
 				ruler->SetTransient(bval);
 			if (fconfig->Read("time", &ival))
 				ruler->SetTransTime(ival);
-			if (fconfig->Read("info_names", &str))
-				ruler->SetInfoNames(str);
-			if (fconfig->Read("info_values", &str))
-				ruler->SetInfoValues(str);
+			if (fconfig->Read("info_names", &sval))
+				ruler->SetInfoNames(sval);
+			if (fconfig->Read("info_values", &sval))
+				ruler->SetInfoValues(sval);
 			if (fconfig->Read("use_color", &bval))
 			{
-				if (bval)
-				{
-					if (fconfig->Read("color", &str))
-					{
-						float r, g, b;
-						if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b))
-						{
-							fluo::Color col(r, g, b);
-							ruler->SetColor(col);
-						}
-					}
-				}
+				if (bval && fconfig->Read("color", &cval))
+					ruler->SetColor(cval);
 			}
 			if (fconfig->Read("interp", &ival))
 				ruler->SetInterp(ival);
-			long num = 0;
-			fconfig->Read("num", &num);
+			size_t branch_num = 0;
+			fconfig->Read("num", &branch_num);
 			//num could be points or branch
-			for (int ii = 0; ii < num; ++ii)
+			for (size_t j = 0; j < branch_num; ++j)
 			{
 				//if points
-				rbi = rpi = ii;
-				if (fconfig->Exists(
-					"/views/" + std::to_string(vi) + "/rulers/" + std::to_string(ri) + "/points/"+ std::to_string(rpi)))
+				std::string path_nobr = "/views/" + std::to_string(view_index) + "/rulers/" + std::to_string(i) + "/points/" + std::to_string(j);
+				std::string path_br = "/views/" + std::to_string(view_index) + "/rulers/" + std::to_string(i) + "/branches/" + std::to_string(j);
+				if (fconfig->Exists(path_nobr))
 				{
-					fconfig->SetPath("/views/" + std::to_string(vi) + "/rulers/" + std::to_string(ri) + "/points/"+ std::to_string(rpi));
-					if (fconfig->Read("point", &str))
-					{
-						if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						{
-							fluo::Point point(x, y, z);
-							ruler->AddPoint(point);
-						}
-					}
+					fconfig->SetPath(path_nobr);
+					if (fconfig->Read("point", &pval))
+						ruler->AddPoint(pval);
 				}
 				//if branch
-				else if (fconfig->Exists(
-					"/views/" + std::to_string(vi) + "/rulers/" + std::to_string(ri) + "/branches/" + std::to_string(rbi)))
+				else if (fconfig->Exists(path_br))
 				{
-					std::string path = "/views/" + std::to_string(vi) + "/rulers/" + std::to_string(ri) + "/branches/" + std::to_string(rbi);
-					fconfig->SetPath(path);
-					if (fconfig->Read("num", &ival))
+					fconfig->SetPath(path_br);
+					size_t branch_point_num = 0;
+					if (fconfig->Read("num", &branch_point_num))
 					{
 						bool time_point = false;
 						fconfig->Read("time_point", &time_point, false);
-						for (rpi = 0; rpi < ival; ++rpi)
+						for (size_t k = 0; k < branch_point_num; ++k)
 						{
 							if (time_point)
 							{
-								std::string path2 = path + "/point" + std::to_string(rpi);
+								std::string path2 = path_br + "/point" + std::to_string(k);
 								fconfig->SetPath(path2);
-								int tnum;
+								size_t tnum;
+								bool locked;
 								fconfig->Read("num", &tnum);
-								fconfig->Read("locked", &l);
+								fconfig->Read("locked", &locked);
 								//fconfig->Read("id", &id);
-								unsigned int t;
-								for (int tpi = 0; tpi < tnum; ++tpi)
+								size_t t;
+								for (size_t tpi = 0; tpi < tnum; ++tpi)
 								{
 									std::string tpn = "tp" + std::to_string(tpi);
-									if (fconfig->Read(tpn, &str))
+									if (fconfig->Read(tpn + "_time", &t) &&
+										fconfig->Read(tpn + "_pos", &pval))
 									{
-										if (SSCANF(str.c_str(), "%u%f%f%f", &t, &x, &y, &z))
+										ruler->SetWorkTime(szval);
+										if (j > 0 && k == 0)
 										{
-											ruler->SetWorkTime(t);
-											fluo::Point point(x, y, z);
-											if (rbi > 0 && rpi == 0)
-											{
-												flrd::pRulerPoint pp = ruler->FindPRulerPoint(point);
-												pp->SetLocked(l);
-												ruler->AddBranch(pp);
-											}
-											else
-											{
-												if (tpi == 0)
-												{
-													ruler->AddPoint(point);
-													flrd::pRulerPoint pp = ruler->FindPRulerPoint(point);
-													pp->SetLocked(l);
-												}
-												else
-												{
-													flrd::pRulerPoint pp = ruler->GetPRulerPoint(rpi);
-													if (pp)
-													{
-														pp->SetPoint(point, t);
-														pp->SetLocked(l);
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-							else
-							{
-								if (fconfig->Read("point" +std::to_string(rpi), &str))
-								{
-									if (SSCANF(str.c_str(), "%f%f%f%d%u", &x, &y, &z, &l, &id))
-									{
-										fluo::Point point(x, y, z);
-										if (rbi > 0 && rpi == 0)
-										{
-											flrd::pRulerPoint pp = ruler->FindPRulerPoint(point);
-											pp->SetLocked(l);
+											flrd::pRulerPoint pp = ruler->FindPRulerPoint(pval);
+											pp->SetLocked(locked);
 											ruler->AddBranch(pp);
 										}
 										else
 										{
-											ruler->AddPoint(point);
-											flrd::pRulerPoint pp = ruler->FindPRulerPoint(point);
-											pp->SetLocked(l);
+											if (tpi == 0)
+											{
+												ruler->AddPoint(pval);
+												flrd::pRulerPoint pp = ruler->FindPRulerPoint(pval);
+												pp->SetLocked(locked);
+											}
+											else
+											{
+												flrd::pRulerPoint pp = ruler->GetPRulerPoint(k);
+												if (pp)
+												{
+													pp->SetPoint(pval, t);
+													pp->SetLocked(locked);
+												}
+											}
 										}
 									}
 								}
@@ -2373,14 +2149,3 @@ void Project::ReadRulerList(const std::string &gst_name, int vi)
 		}
 	}
 }
-
-//void Project::SaveConfig(wxFileConfig& fconfig, const std::wstring& filename)
-//{
-//	std::wstring str = filename;
-//#ifdef _WIN32
-//	str = L"\x5c\x5c\x3f\x5c" + str;
-//#endif
-//	wxFileOutputStream os(str);
-//	fconfig->Save(os);
-//
-//}

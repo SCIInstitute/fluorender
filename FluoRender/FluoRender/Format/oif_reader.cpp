@@ -531,7 +531,7 @@ void OIFReader::ReadOifLine(const std::wstring oneline)
 			if (str1 == L"LightType") {
 				light_type = str2;
 				if (light_type.find(str3) != std::wstring::npos) {
-					for (int i = m_excitation_wavelength_list.size() - 1; i >= 0; i--) {
+					for (size_t i = m_excitation_wavelength_list.size() - 1; i-- > 0;) {
 						if (m_excitation_wavelength_list.at(i).chan_num == cur_chan) {
 							m_excitation_wavelength_list.at(i).wavelength = -1;
 							break;
@@ -644,7 +644,7 @@ Nrrd* OIFReader::Convert(int t, int c, bool get_max)
 				is.close();
 
 				//read
-				ReadTiff(pbyData, val, i);
+				ReadTiff(pbyData, val, static_cast<int>(i));
 
 				//increase
 				sl_num++;
@@ -654,7 +654,7 @@ Nrrd* OIFReader::Convert(int t, int c, bool get_max)
 				delete[]pbyData;
 
 			if (show_progress && m_time_num == 1)
-				SetProgress(std::round(100.0 * (i + 1) / num), "NOT_SET");
+				SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / num)), "NOT_SET");
 		}
 
 		//create nrrd

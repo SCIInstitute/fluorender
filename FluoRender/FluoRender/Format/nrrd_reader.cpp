@@ -237,7 +237,7 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 	std::wstring str_name = m_4d_seq[t].filename;
 	m_data_name = GET_NAME(str_name);
 	FILE* nrrd_file = 0;
-	if (!WFOPEN(&nrrd_file, str_name.c_str(), L"rb"))
+	if (!WFOPEN(&nrrd_file, str_name, L"rb"))
 		return 0;
 
 	Nrrd *output = nrrdNew();

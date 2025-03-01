@@ -360,21 +360,21 @@ private:
 		double sumx = 0, sumy = 0, sumxy = 0, sumxx = 0;
 		for (size_t i = 0; i < bv.size(); ++i)
 		{
-			x = i;
+			x = static_cast<double>(i);
 			y = bv[i];
 			sumx += x;
 			sumxx += x * x;
 			sumy += y;
 			sumxy += x * y;
 		}
-		double n = bv.size();
+		double n = static_cast<double>(bv.size());
 		mean = sumy / n;
 		b1 = (n * sumxy - sumx * sumy) / (n * sumxx - sumx * sumx);
 		b2 = (sumy - b1 * sumx) / n;
 		sumy = 0;
 		for (size_t i = 0; i < bv.size(); ++i)
 		{
-			x = i;
+			x = static_cast<double>(i);
 			y = b1 * x + b2;
 			sumy += (bv[i] - y) * (bv[i] - y);
 		}

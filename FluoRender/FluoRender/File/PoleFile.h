@@ -55,7 +55,12 @@ public:
 
 	int LoadFile(const std::wstring& filename) override
 	{
-		std::string str = ws2s(filename);
+#ifdef _WIN32
+		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
+#else
+		std::wstring long_name = filename;
+#endif
+		std::string str = ws2s(long_name);
 		storage_ = new POLE::Storage(str.c_str());
 		if (storage_)
 		{
@@ -84,7 +89,12 @@ public:
 
 	int SaveFile(const std::wstring& filename) override
 	{
-		std::string str = ws2s(filename);
+#ifdef _WIN32
+		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
+#else
+		std::wstring long_name = filename;
+#endif
+		std::string str = ws2s(long_name);
 		storage_ = new POLE::Storage(str.c_str());
 		if (storage_)
 		{
@@ -470,6 +480,18 @@ protected:
 		return false;
 	}
 
+	bool ReadQuaternion(const std::string& key, fluo::Quaternion* value, const fluo::Quaternion& def = fluo::Quaternion()) const override
+	{
+		std::string str;
+		if (ReadString(key, &str))
+		{
+			*value = fluo::Quaternion(str);
+			return true;
+		}
+		*value = def;
+		return false;
+	}
+
 	// Implement type-specific write methods
 	bool WriteString(const std::string& key, const std::string& value) override
 	{
@@ -588,6 +610,12 @@ protected:
 	}
 
 	bool WriteVector(const std::string& key, const fluo::Vector& value) override
+	{
+		std::string str = value.to_string();
+		return WriteString(key, str);
+	}
+
+	bool WriteQuaternion(const std::string& key, const fluo::Quaternion& value) override
 	{
 		std::string str = value.to_string();
 		return WriteString(key, str);

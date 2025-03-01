@@ -80,6 +80,11 @@ public:
 	{
 	}
 
+	Quaternion(const std::string& s)
+	{
+		*this = from_string(s);
+	}
+
 	Quaternion& operator=(Quaternion& copy)
 	{
 		x = copy.x;
@@ -290,6 +295,20 @@ public:
 	double x, y, z, w;
 
 public:
+	inline std::string to_string() const
+	{
+		std::ostringstream oss;
+		oss << *this;
+		return oss.str();
+	}
+
+	static Quaternion from_string(const std::string& str) {
+		std::istringstream is(str);
+		Quaternion q;
+		is >> q;
+		return q;
+	}
+
 	friend std::ostream& operator<<(std::ostream& os, const Quaternion& q)
 	{
 		os << '[' << q.x << ',' << q.y << ',' << q.z << ',' << q.w << ']';
@@ -298,8 +317,15 @@ public:
 	friend std::istream& operator >> (std::istream& is, Quaternion& q)
 	{
 		double x, y, z, w;
-		char st;
-		is >> st >> x >> st >> y >> st >> z >> st >> w >> st;
+		char ch;
+		is >> ch;
+		if (ch == '[') {
+			is >> x >> ch >> y >> ch >> z >> ch >> w >> ch;
+		}
+		else {
+			is.putback(ch);
+			is >> x >> y >> z >> w;
+		}
 		q = Quaternion(x, y, z, w);
 		return is;
 	}
