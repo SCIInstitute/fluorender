@@ -2036,7 +2036,6 @@ void Project::ReadRulerList(const std::string &gst_name, int view_index)
 	bool bval;
 	fluo::Color cval;
 	fluo::Point pval;
-	size_t szval;
 
 	list->clear();
 	size_t ruler_num = 0;
@@ -2112,7 +2111,7 @@ void Project::ReadRulerList(const std::string &gst_name, int view_index)
 									if (fconfig->Read(tpn + "_time", &t) &&
 										fconfig->Read(tpn + "_pos", &pval))
 									{
-										ruler->SetWorkTime(szval);
+										ruler->SetWorkTime(t);
 										if (j > 0 && k == 0)
 										{
 											flrd::pRulerPoint pp = ruler->FindPRulerPoint(pval);

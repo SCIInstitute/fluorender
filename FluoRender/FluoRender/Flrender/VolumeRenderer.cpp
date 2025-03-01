@@ -1728,8 +1728,8 @@ namespace flvr
 		if (c<0 || c>=TEXTURE_MAX_COMPONENTS)
 			return;
 
-		int i;
-		unsigned int num = static_cast<unsigned int>(bricks->size());
+		size_t i;
+		size_t num = bricks->size();
 		for (i=((order==2)?(num-1):0);
 			(order==2)?(i>=0):(i<num);
 			i+=((order==2)?-1:1))
