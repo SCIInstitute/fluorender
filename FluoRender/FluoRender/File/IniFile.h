@@ -116,14 +116,52 @@ public:
 			return CONFINI_EIO;
 		}
 
-		std::map<std::string, std::string> sorted_dict(dictionary_.begin(), dictionary_.end());
+		struct SectionComparator {
+			bool operator()(const std::string& lhs, const std::string& rhs) const {
+				std::vector<std::string> lhs_parts = split(lhs, '/');
+				std::vector<std::string> rhs_parts = split(rhs, '/');
 
+				for (size_t i = 0; i < std::min(lhs_parts.size(), rhs_parts.size()); ++i) {
+					if (lhs_parts[i] != rhs_parts[i]) {
+						return lhs_parts[i] < rhs_parts[i];
+					}
+				}
+				return lhs_parts.size() < rhs_parts.size();
+			}
+
+			// Helper function to split a string by a delimiter
+			std::vector<std::string> split(const std::string& str, char delimiter) const {
+				std::vector<std::string> tokens;
+				std::stringstream ss(str);
+				std::string token;
+				while (std::getline(ss, token, delimiter)) {
+					tokens.push_back(token);
+				}
+				return tokens;
+			}
+		};
+
+		std::map<std::string, std::string, SectionComparator> sorted_dict(dictionary_.begin(), dictionary_.end());
+
+		std::string current_section;
 		for (const auto& pair : sorted_dict) {
-			size_t pos = pair.first.find(path_sep_);
-			std::string section = pair.first.substr(0, pos);
-			std::string key = pair.first.substr(pos + 1);
+			std::string full_key = pair.first;
+			size_t pos = 0;
+			std::string section;
+			std::string key = full_key;
 
-			file << "[" << section << "]\n";
+			// Determine the section and key
+			while ((pos = key.find(path_sep_)) != std::string::npos) {
+				section += (section.empty() ? "" : path_sep_) + key.substr(0, pos);
+				key = key.substr(pos + 1);
+			}
+
+			// Print the section if it's different from the current section
+			if (section != current_section) {
+				current_section = section;
+				file << "[" << current_section << "]\n";
+			}
+
 			file << key << " = " << pair.second << "\n";
 		}
 
@@ -660,6 +698,11 @@ private:
 		while ((pos = key.find('.', pos)) != std::string::npos) {
 			key.replace(pos, 1, path_sep_s_);
 			pos += path_sep_s_.length();
+		}
+		// Replace "\ " with " " in the key name
+		pos = 0;
+		while ((pos = key.find("\\ ", pos)) != std::string::npos) {
+			key.replace(pos, 2, " ");
 		}
 		new_key = key;
 
