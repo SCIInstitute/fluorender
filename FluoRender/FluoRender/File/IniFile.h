@@ -116,45 +116,7 @@ public:
 			return CONFINI_EIO;
 		}
 
-		struct SectionComparator {
-			bool operator()(const std::string& lhs, const std::string& rhs) const {
-				std::vector<std::string> lhs_parts = split(lhs, '/');
-				std::vector<std::string> rhs_parts = split(rhs, '/');
-
-				size_t lhs_size = lhs_parts.size();
-				size_t rhs_size = rhs_parts.size();
-
-				// Ensure sizes are greater than zero before subtracting one
-				size_t min_size = std::min(lhs_size > 0 ? lhs_size - 1 : 0, rhs_size > 0 ? rhs_size - 1 : 0);
-
-				// Compare parent groups first
-				for (size_t i = 0; i < min_size; ++i) {
-					if (lhs_parts[i] != rhs_parts[i]) {
-						return lhs_parts[i] < rhs_parts[i];
-					}
-				}
-
-				// If parent groups are the same, compare the keys themselves
-				if (lhs_size != rhs_size) {
-					return lhs_size < rhs_size;
-				}
-
-				return lhs_parts.back() < rhs_parts.back();
-			}
-
-			// Helper function to split a string by a delimiter
-			std::vector<std::string> split(const std::string& str, char delimiter) const {
-				std::vector<std::string> tokens;
-				std::stringstream ss(str);
-				std::string token;
-				while (std::getline(ss, token, delimiter)) {
-					tokens.push_back(token);
-				}
-				return tokens;
-			}
-		};
-
-		std::map<std::string, std::string, SectionComparator> sorted_dict(dictionary_.begin(), dictionary_.end());
+		auto sorted_dict = SortingUtility::getSortedMap(dictionary_);
 
 		std::string current_section;
 		for (const auto& pair : sorted_dict) {
@@ -723,7 +685,7 @@ private:
 			std::transform(new_key.begin(), new_key.end(), new_key.begin(), ::tolower);
 		}
 
-		std::string full_key = new_parent.empty() ? new_key : new_parent + path_sep_s_ + new_key;
+		std::string full_key = path_sep_s_ + (new_parent.empty() ? new_key : new_parent + path_sep_s_ + new_key);
 
 		/*  check for duplicate keys  */
 		if (thismap->count(full_key)) {
@@ -742,7 +704,6 @@ private:
 
 #undef thismap
 	}
-
 };
 
 #endif//_INIFILE_H_

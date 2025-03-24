@@ -329,7 +329,12 @@ protected:
 				normalized_parts.push_back(part);
 			}
 		}
-		return joinPath(normalized_parts);
+		std::string normalized_path = joinPath(normalized_parts);
+		// Preserve leading separator if the original path was absolute
+		if (!path.empty() && path[0] == path_sep_[0]) {
+			normalized_path = path_sep_ + normalized_path;
+		}
+		return normalized_path;
 	}
 
 	std::string getFullPath(const std::string& path) const {
@@ -370,6 +375,47 @@ protected:
 
 private:
 	template<class T> struct always_false : std::false_type {};
+};
+
+class SortingUtility {
+public:
+	struct SectionComparator {
+		bool operator()(const std::string& lhs, const std::string& rhs) const {
+			std::vector<std::string> lhs_parts = split(lhs, '/');
+			std::vector<std::string> rhs_parts = split(rhs, '/');
+
+			size_t lhs_size = lhs_parts.size();
+			size_t rhs_size = rhs_parts.size();
+
+			size_t min_size = std::min(lhs_size > 0 ? lhs_size - 1 : 0, rhs_size > 0 ? rhs_size - 1 : 0);
+
+			for (size_t i = 0; i < min_size; ++i) {
+				if (lhs_parts[i] != rhs_parts[i]) {
+					return lhs_parts[i] < rhs_parts[i];
+				}
+			}
+
+			if (lhs_size != rhs_size) {
+				return lhs_size < rhs_size;
+			}
+
+			return lhs_parts.back() < rhs_parts.back();
+		}
+
+		std::vector<std::string> split(const std::string& str, char delimiter) const {
+			std::vector<std::string> tokens;
+			std::stringstream ss(str);
+			std::string token;
+			while (std::getline(ss, token, delimiter)) {
+				tokens.push_back(token);
+			}
+			return tokens;
+		}
+	};
+
+	static std::map<std::string, std::string, SectionComparator> getSortedMap(const std::unordered_map<std::string, std::string>& dictionary) {
+		return std::map<std::string, std::string, SectionComparator>(dictionary.begin(), dictionary.end());
+	}
 };
 
 #endif

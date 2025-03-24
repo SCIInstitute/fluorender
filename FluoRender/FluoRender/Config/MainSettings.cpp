@@ -219,6 +219,9 @@ void MainSettings::Read()
 	if (!fconfig)
 		return;
 
+	if (fconfig->LoadFile(dft))
+		return;
+
 	//project
 	if (fconfig->Exists("/project"))
 	{

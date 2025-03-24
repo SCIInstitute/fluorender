@@ -38,6 +38,9 @@ public:
 	XmlFile() :
 		cur_element_(0)
 	{
+		path_sep_ = "/";
+		cd_sep_ = ".";
+		pd_sep_ = "..";
 	}
 
 	~XmlFile() {}
@@ -66,13 +69,48 @@ public:
 
 	int LoadData(const std::unordered_map<std::string, std::string>& data) override
 	{
-		//dictionary_ = data;
+		// Clear the document if it's non-empty
+		if (doc_.FirstChild() != nullptr) {
+			doc_.Clear();
+		}
+
+		auto sorted_dict = SortingUtility::getSortedMap(data);
+
+		tinyxml2::XMLElement* root = doc_.NewElement("root");
+		doc_.InsertFirstChild(root);
+
+		std::unordered_map<std::string, tinyxml2::XMLElement*> element_map;
+
+		for (const auto& pair : sorted_dict) {
+			std::vector<std::string> parts = SortingUtility::SectionComparator().split(pair.first, '/');
+			std::string key = parts.back();
+			parts.pop_back();
+
+			std::string parent_path;
+			tinyxml2::XMLElement* parent_element = root;
+
+			for (const auto& part : parts) {
+				parent_path += part + "/";
+				if (element_map.find(parent_path) == element_map.end()) {
+					tinyxml2::XMLElement* new_element = doc_.NewElement(part.c_str());
+					parent_element->InsertEndChild(new_element);
+					element_map[parent_path] = new_element;
+				}
+				parent_element = element_map[parent_path];
+			}
+
+			parent_element->SetAttribute(key.c_str(), pair.second.c_str());
+		}
 		return 0;
 	}
 
 	std::unordered_map<std::string, std::string> GetData() override
 	{
 		std::unordered_map<std::string, std::string> data;
+		const tinyxml2::XMLElement* root = doc_.RootElement();
+		if (root) {
+			readXMLElement(root, "", data);
+		}
 		return data;
 	}
 
@@ -108,6 +146,11 @@ public:
 
 		// Start from the root element or current element based on whether the path is absolute or relative
 		const tinyxml2::XMLElement* element = (normalized_path.substr(0, path_sep_.length()) == path_sep_) ? doc_.RootElement() : cur_element_;
+
+		if (!element)
+		{
+			return false; // No root element, path is invalid
+		}
 
 		// Traverse the path components
 		for (const auto& component : components) {
@@ -149,6 +192,12 @@ public:
 		if (normalized_path.substr(0, path_sep_.length()) == path_sep_) {
 			// Absolute path
 			element = doc_.RootElement();
+			if (!element) {
+				// Create a root element if it doesn't exist
+				element = doc_.NewElement(components.front().c_str());
+				doc_.InsertFirstChild(element);
+				components.erase(components.begin());
+			}
 			new_path = path_sep_;
 		}
 		else {
@@ -759,6 +808,24 @@ private:
 	tinyxml2::XMLDocument doc_;
 	tinyxml2::XMLElement* cur_element_;
 	std::string cur_path_;
+
+private:
+	void readXMLElement(const tinyxml2::XMLElement* element, const std::string& parent_path, std::unordered_map<std::string, std::string>& dictionary) {
+		std::string current_path = parent_path.empty() ? element->Name() : parent_path + "/" + element->Name();
+
+		const tinyxml2::XMLAttribute* attribute = element->FirstAttribute();
+		while (attribute) {
+			std::string key = current_path + "/" + attribute->Name();
+			dictionary[key] = attribute->Value();
+			attribute = attribute->Next();
+		}
+
+		const tinyxml2::XMLElement* child = element->FirstChildElement();
+		while (child) {
+			readXMLElement(child, current_path, dictionary);
+			child = child->NextSiblingElement();
+		}
+	}
 };
 
 #endif//_XMLFILE_H_
