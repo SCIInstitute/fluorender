@@ -121,12 +121,25 @@ public:
 				std::vector<std::string> lhs_parts = split(lhs, '/');
 				std::vector<std::string> rhs_parts = split(rhs, '/');
 
-				for (size_t i = 0; i < std::min(lhs_parts.size(), rhs_parts.size()); ++i) {
+				size_t lhs_size = lhs_parts.size();
+				size_t rhs_size = rhs_parts.size();
+
+				// Ensure sizes are greater than zero before subtracting one
+				size_t min_size = std::min(lhs_size > 0 ? lhs_size - 1 : 0, rhs_size > 0 ? rhs_size - 1 : 0);
+
+				// Compare parent groups first
+				for (size_t i = 0; i < min_size; ++i) {
 					if (lhs_parts[i] != rhs_parts[i]) {
 						return lhs_parts[i] < rhs_parts[i];
 					}
 				}
-				return lhs_parts.size() < rhs_parts.size();
+
+				// If parent groups are the same, compare the keys themselves
+				if (lhs_size != rhs_size) {
+					return lhs_size < rhs_size;
+				}
+
+				return lhs_parts.back() < rhs_parts.back();
 			}
 
 			// Helper function to split a string by a delimiter

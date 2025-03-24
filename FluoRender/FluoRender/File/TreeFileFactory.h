@@ -48,6 +48,7 @@ public:
 		switch (type)
 		{
 		case 0:
+		default:
 			handler = std::make_shared<IniFile>();
 			break;
 		case 1:
@@ -59,8 +60,6 @@ public:
 		case 3:
 			handler = std::make_shared<PoleFile>();
 			break;
-		default:
-			throw std::runtime_error("Unknown file type");
 		}
 
 		handlers[id] = handler;
@@ -70,7 +69,7 @@ public:
 	std::shared_ptr<BaseTreeFile> createTreeFile(const std::wstring& filename, const std::string& id) {
 		std::ifstream file(filename);
 		if (!file.is_open()) {
-			throw std::runtime_error("Unable to open file");
+			return nullptr;
 		}
 
 		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
