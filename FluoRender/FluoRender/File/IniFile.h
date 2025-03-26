@@ -637,13 +637,6 @@ private:
 		return true;
 	}
 
-	static inline void chrarr_tolower(char* const str)
-	{
-		for (char* chrptr = str; *chrptr; chrptr++) {
-			*chrptr = *chrptr > 0x40 && *chrptr < 0x5b ? *chrptr | 0x60 : *chrptr;
-		}
-	}
-
 	static int _push_dispatch_(IniDispatch* const disp, void* const v_dictionary)
 	{
 #define thismap (reinterpret_cast<std::unordered_map<std::string, std::string> *>(v_dictionary))
@@ -655,7 +648,7 @@ private:
 		std::string new_parent, new_key;
 		disp->d_len = ini_unquote(disp->data, disp->format);
 
-		/*  remove quoted dots from parent  */
+		/*  remove quoted dots and "\ " from parent (section) name  */
 		if (disp->at_len) {
 			/*  has parent  */
 			std::string parent(disp->append_to, disp->at_len);
@@ -664,10 +657,15 @@ private:
 				parent.replace(pos, 1, path_sep_s_);
 				pos += path_sep_s_.length();
 			}
+			// Replace "\ " with " " in the parent (section) name
+			pos = 0;
+			while ((pos = parent.find("\\ ", pos)) != std::string::npos) {
+				parent.replace(pos, 2, " ");
+			}
 			new_parent = parent;
 		}
 
-		/*  remove dots from key name  */
+		/*  remove dots and "\ " from key name  */
 		std::string key(disp->data, disp->d_len);
 		size_t pos = 0;
 		while ((pos = key.find('.', pos)) != std::string::npos) {
@@ -683,6 +681,7 @@ private:
 
 		if (!disp->format.case_sensitive) {
 			std::transform(new_key.begin(), new_key.end(), new_key.begin(), ::tolower);
+			std::transform(new_parent.begin(), new_parent.end(), new_parent.begin(), ::tolower);
 		}
 
 		std::string full_key = path_sep_s_ + (new_parent.empty() ? new_key : new_parent + path_sep_s_ + new_key);

@@ -137,7 +137,7 @@ namespace fluo {
 
 		friend std::ostream& operator<<(std::ostream& os, const Point& p)
 		{
-			os << '[' << p.x() << ' ' << p.y() << ' ' << p.z() << ']';
+			os << '[' << p.x() << ',' << p.y() << ',' << p.z() << ']';
 			return os;
 		}
 		friend std::istream& operator >> (std::istream& is, Point& p)

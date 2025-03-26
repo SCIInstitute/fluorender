@@ -41,6 +41,12 @@ public:
 		path_sep_ = "/";
 		cd_sep_ = ".";
 		pd_sep_ = "..";
+
+		// Create a common root element
+		tinyxml2::XMLElement* root = doc_.NewElement("FluoRender");
+		doc_.InsertFirstChild(root);
+		cur_element_ = doc_.RootElement();
+		cur_path_ = path_sep_;
 	}
 
 	~XmlFile() {}
@@ -76,7 +82,8 @@ public:
 
 		auto sorted_dict = SortingUtility::getSortedMap(data);
 
-		tinyxml2::XMLElement* root = doc_.NewElement("root");
+		// Create a common root element
+		tinyxml2::XMLElement* root = doc_.NewElement("FluoRender");
 		doc_.InsertFirstChild(root);
 
 		std::unordered_map<std::string, tinyxml2::XMLElement*> element_map;
@@ -85,21 +92,26 @@ public:
 			std::vector<std::string> parts = SortingUtility::SectionComparator().split(pair.first, '/');
 			std::string key = parts.back();
 			parts.pop_back();
+			// Replace spaces in the key
+			std::string modified_key = NormalizeKey(key);
 
 			std::string parent_path;
 			tinyxml2::XMLElement* parent_element = root;
 
 			for (const auto& part : parts) {
-				parent_path += part + "/";
+				std::string modified_part = NormalizeKey(part);
+				parent_path += modified_part + "/";
 				if (element_map.find(parent_path) == element_map.end()) {
-					tinyxml2::XMLElement* new_element = doc_.NewElement(part.c_str());
+					tinyxml2::XMLElement* new_element = doc_.NewElement(modified_part.c_str());
 					parent_element->InsertEndChild(new_element);
 					element_map[parent_path] = new_element;
 				}
 				parent_element = element_map[parent_path];
 			}
 
-			parent_element->SetAttribute(key.c_str(), pair.second.c_str());
+			tinyxml2::XMLElement* new_element = doc_.NewElement(modified_key.c_str());
+			new_element->SetText(pair.second.c_str());
+			parent_element->InsertEndChild(new_element);
 		}
 		return 0;
 	}
@@ -122,6 +134,11 @@ public:
 		std::wstring long_name = filename;
 #endif
 		std::string str = ws2s(long_name);
+
+		// Add XML header
+		tinyxml2::XMLDeclaration* decl = doc_.NewDeclaration("xml version=\"1.0\" encoding=\"UTF-8\"");
+		doc_.InsertFirstChild(decl);
+
 		if (doc_.SaveFile(str.c_str()) == tinyxml2::XML_SUCCESS)
 		{
 			return 0;
@@ -188,13 +205,15 @@ public:
 		// Determine the starting element
 		tinyxml2::XMLElement* element = nullptr;
 		std::string new_path;
+		std::string key;
 
 		if (normalized_path.substr(0, path_sep_.length()) == path_sep_) {
 			// Absolute path
 			element = doc_.RootElement();
 			if (!element) {
 				// Create a root element if it doesn't exist
-				element = doc_.NewElement(components.front().c_str());
+				key = NormalizeKey(components.front());
+				element = doc_.NewElement(key.c_str());
 				doc_.InsertFirstChild(element);
 				components.erase(components.begin());
 			}
@@ -230,7 +249,8 @@ public:
 				tinyxml2::XMLElement* child = element->FirstChildElement(component.c_str());
 				if (!child) {
 					// Create a new child element if it doesn't exist
-					child = doc_.NewElement(component.c_str());
+					key = NormalizeKey(component);
+					child = doc_.NewElement(key.c_str());
 					element->InsertEndChild(child);
 				}
 				element = child;
@@ -322,7 +342,9 @@ public:
 	{
 		if (!cur_element_)
 			return false;
-		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (element) {
 			cur_element_->DeleteChild(element);
 			return true;
@@ -351,7 +373,9 @@ protected:
 			*value = def;
 			return false;
 		}
-		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (element && element->GetText()) {
 			*value = element->GetText();
 			return true;
@@ -366,7 +390,9 @@ protected:
 			*value = def;
 			return false;
 		}
-		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (element) {
 			const char* text = element->GetText();
 			if (text) {
@@ -384,7 +410,9 @@ protected:
 			*value = def;
 			return false;
 		}
-		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (element) {
 			const char* text = element->GetText();
 			if (text) {
@@ -411,7 +439,9 @@ protected:
 			*value = def;
 			return false;
 		}
-		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (element) {
 			int64_t tempValue;
 			if (element->QueryInt64Text(&tempValue) == tinyxml2::XML_SUCCESS) {
@@ -430,7 +460,9 @@ protected:
 			*value = def;
 			return false;
 		}
-		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (element) {
 			uint64_t tempValue;
 			if (element->QueryUnsigned64Text(&tempValue) == tinyxml2::XML_SUCCESS) {
@@ -449,7 +481,9 @@ protected:
 			*value = def;
 			return false;
 		}
-		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (element) {
 			int tempValue;
 			if (element->QueryIntText(&tempValue) == tinyxml2::XML_SUCCESS) {
@@ -468,7 +502,9 @@ protected:
 			*value = def;
 			return false;
 		}
-		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (element) {
 			unsigned int tempValue;
 			if (element->QueryUnsignedText(&tempValue) == tinyxml2::XML_SUCCESS) {
@@ -487,7 +523,9 @@ protected:
 			*value = def;
 			return false;
 		}
-		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (element) {
 			uint64_t tempValue;
 			if (element->QueryUnsigned64Text(&tempValue) == tinyxml2::XML_SUCCESS) {
@@ -506,7 +544,9 @@ protected:
 			*value = def;
 			return false;
 		}
-		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (element) {
 			int tempValue;
 			if (element->QueryIntText(&tempValue) == tinyxml2::XML_SUCCESS) {
@@ -525,7 +565,9 @@ protected:
 			*value = def;
 			return false;
 		}
-		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (element) {
 			unsigned int tempValue;
 			if (element->QueryUnsignedText(&tempValue) == tinyxml2::XML_SUCCESS) {
@@ -544,7 +586,9 @@ protected:
 			*value = def;
 			return false;
 		}
-		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (element) {
 			element->QueryDoubleText(value);
 			return true;
@@ -560,7 +604,9 @@ protected:
 			*value = def;
 			return false;
 		}
-		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (element) {
 			element->QueryFloatText(value);
 			return true;
@@ -634,9 +680,11 @@ protected:
 	{
 		if (!cur_element_)
 			return false;
-		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (!element) {
-			element = doc_.NewElement(key.c_str());
+			element = doc_.NewElement(modified_key.c_str());
 			cur_element_->InsertEndChild(element);
 		}
 		element->SetText(value.c_str());
@@ -653,9 +701,11 @@ protected:
 		if (!cur_element_) {
 			return false;
 		}
-		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (!element) {
-			element = cur_element_->GetDocument()->NewElement(key.c_str());
+			element = cur_element_->GetDocument()->NewElement(modified_key.c_str());
 			cur_element_->InsertEndChild(element);
 		}
 		element->SetText(value ? "1" : "0");
@@ -666,9 +716,11 @@ protected:
 	{
 		if (!cur_element_)
 			return false;
-		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (!element) {
-			element = doc_.NewElement(key.c_str());
+			element = doc_.NewElement(modified_key.c_str());
 			cur_element_->InsertEndChild(element);
 		}
 		element->SetText(static_cast<int64_t>(value));
@@ -679,9 +731,11 @@ protected:
 	{
 		if (!cur_element_)
 			return false;
-		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (!element) {
-			element = doc_.NewElement(key.c_str());
+			element = doc_.NewElement(modified_key.c_str());
 			cur_element_->InsertEndChild(element);
 		}
 		element->SetText(static_cast<uint64_t>(value));
@@ -692,9 +746,11 @@ protected:
 	{
 		if (!cur_element_)
 			return false;
-		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (!element) {
-			element = doc_.NewElement(key.c_str());
+			element = doc_.NewElement(modified_key.c_str());
 			cur_element_->InsertEndChild(element);
 		}
 		element->SetText(value);
@@ -705,9 +761,11 @@ protected:
 	{
 		if (!cur_element_)
 			return false;
-		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (!element) {
-			element = doc_.NewElement(key.c_str());
+			element = doc_.NewElement(modified_key.c_str());
 			cur_element_->InsertEndChild(element);
 		}
 		element->SetText(value);
@@ -718,9 +776,11 @@ protected:
 	{
 		if (!cur_element_)
 			return false;
-		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (!element) {
-			element = doc_.NewElement(key.c_str());
+			element = doc_.NewElement(modified_key.c_str());
 			cur_element_->InsertEndChild(element);
 		}
 		element->SetText(static_cast<uint64_t>(value));
@@ -731,9 +791,11 @@ protected:
 	{
 		if (!cur_element_)
 			return false;
-		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (!element) {
-			element = doc_.NewElement(key.c_str());
+			element = doc_.NewElement(modified_key.c_str());
 			cur_element_->InsertEndChild(element);
 		}
 		element->SetText(static_cast<int>(value));
@@ -744,9 +806,11 @@ protected:
 	{
 		if (!cur_element_)
 			return false;
-		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (!element) {
-			element = doc_.NewElement(key.c_str());
+			element = doc_.NewElement(modified_key.c_str());
 			cur_element_->InsertEndChild(element);
 		}
 		element->SetText(static_cast<unsigned int>(value));
@@ -757,9 +821,11 @@ protected:
 	{
 		if (!cur_element_)
 			return false;
-		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (!element) {
-			element = doc_.NewElement(key.c_str());
+			element = doc_.NewElement(modified_key.c_str());
 			cur_element_->InsertEndChild(element);
 		}
 		element->SetText(value);
@@ -770,9 +836,11 @@ protected:
 	{
 		if (!cur_element_)
 			return false;
-		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(key.c_str());
+		// Replace spaces in the key
+		std::string modified_key = NormalizeKey(key);
+		tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
 		if (!element) {
-			element = doc_.NewElement(key.c_str());
+			element = doc_.NewElement(modified_key.c_str());
 			cur_element_->InsertEndChild(element);
 		}
 		element->SetText(value);
@@ -825,6 +893,20 @@ private:
 			readXMLElement(child, current_path, dictionary);
 			child = child->NextSiblingElement();
 		}
+	}
+
+	std::string NormalizeKey(const std::string& key) const {
+		std::string result = key;
+
+		// Replace spaces with underscores
+		std::replace(result.begin(), result.end(), ' ', '_');
+
+		// Add a prefix if the key starts with a digit
+		if (!result.empty() && std::isdigit(result[0])) {
+			result = "_" + result;
+		}
+
+		return result;
 	}
 };
 
