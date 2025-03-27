@@ -1971,6 +1971,9 @@ void ComponentGenerator::LoadCmd(const std::wstring& filename)
 	if (!fconfig)
 		return;
 
+	if (fconfig->LoadFile(filename))
+		return;
+
 	m_command.clear();
 	int cmd_count = 0;
 	std::string str;

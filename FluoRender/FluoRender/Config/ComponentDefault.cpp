@@ -119,6 +119,9 @@ void ComponentDefault::Read(const std::wstring& filename)
 	if (!fconfig)
 		return;
 
+	if (fconfig->LoadFile(filename))
+		return;
+
 	Read(gstCompDefaultFile);
 }
 

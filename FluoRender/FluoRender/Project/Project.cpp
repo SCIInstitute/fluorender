@@ -66,6 +66,9 @@ void Project::Open(const std::wstring& filename)
 	if (!fconfig)
 		return;
 
+	if (fconfig->LoadFile(filename))
+		return;
+
 	std::string ver_major, ver_minor;
 	long l_major;
 	double d_minor;

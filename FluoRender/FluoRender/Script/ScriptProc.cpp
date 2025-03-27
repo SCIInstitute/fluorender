@@ -1806,6 +1806,9 @@ void ScriptProc::GetRulers(const std::wstring& vrp, int& startf, int& endf)
 	if (!ruler_file)
 		return;
 
+	if (ruler_file->LoadFile(vrp))
+		return;
+
 	//movie panel
 	startf = 0;
 	endf = 0;
