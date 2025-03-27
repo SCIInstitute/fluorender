@@ -54,6 +54,8 @@ private:
 	wxCheckBox* m_inverse_slider_chk;
 	//multifunc button use
 	wxComboBox* m_mul_func_btn_comb;
+	//project format
+	wxComboBox* m_config_file_type_comb;
 	//mouse interations
 	wxCheckBox *m_mouse_int_chk;
 	//depth peeling
@@ -169,6 +171,7 @@ private:
 	void OnScriptBreakCheck(wxCommandEvent& event);
 	void OnInverseSliderCheck(wxCommandEvent& event);
 	void OnMulFuncBtnComb(wxCommandEvent& event);
+	void OnConfigFileTypeComb(wxCommandEvent& event);
 	//mouse interaction
 	void OnMouseIntCheck(wxCommandEvent& event);
 	//peeling

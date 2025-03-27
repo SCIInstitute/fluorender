@@ -75,6 +75,17 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	sizer1_1->Add(10, 10);
 	sizer1_1->Add(m_mul_func_btn_comb);
 	sizer1_1->Add(10, 10);
+	wxBoxSizer* sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Project and config file type:");
+	m_config_file_type_comb = new wxComboBox(page, wxID_ANY, "",
+		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
+	std::vector<wxString> items2 = { "INI", "XML", "JSON" };
+	m_config_file_type_comb->Append(items2);
+	m_config_file_type_comb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnConfigFileTypeComb, this);
+	sizer1_2->Add(st);
+	sizer1_2->Add(10, 10);
+	sizer1_2->Add(m_config_file_type_comb);
+	sizer1_2->Add(10, 10);
 	group1->Add(10, 5);
 	group1->Add(m_prj_save_chk);
 	group1->Add(10, 5);
@@ -87,6 +98,8 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	group1->Add(m_inverse_slider_chk);
 	group1->Add(10, 5);
 	group1->Add(sizer1_1);
+	group1->Add(10, 5);
+	group1->Add(sizer1_2);
 	group1->Add(10, 5);
 
 	//font
@@ -115,8 +128,8 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Color:");
 	m_text_color_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
-	std::vector<wxString> items2 = { "BG inverted", "Background", "Vol sec color" };
-	m_text_color_cmb->Append(items2);
+	std::vector<wxString> items3 = { "BG inverted", "Background", "Vol sec color" };
+	m_text_color_cmb->Append(items3);
 	m_text_color_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnTextColorChange, this);
 	sizer2_1->Add(st);
 	sizer2_1->Add(10, 10);
@@ -965,6 +978,8 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_inverse_slider_chk->SetValue(glbin_settings.m_inverse_slider);
 		//multifunc button
 		m_mul_func_btn_comb->Select(glbin_settings.m_mulfunc);
+		//config file type
+		m_config_file_type_comb->Select(glbin_settings.m_config_file_type);
 	}
 
 	//font
@@ -1283,6 +1298,11 @@ void SettingDlg::OnMulFuncBtnComb(wxCommandEvent& event)
 {
 	glbin_settings.m_mulfunc = m_mul_func_btn_comb->GetCurrentSelection();
 	FluoRefresh(3, { gstMultiFuncTips }, { -1 });
+}
+
+void SettingDlg::OnConfigFileTypeComb(wxCommandEvent& event)
+{
+	glbin_settings.m_config_file_type = m_config_file_type_comb->GetCurrentSelection();
 }
 
 void SettingDlg::OnMouseIntCheck(wxCommandEvent& event)

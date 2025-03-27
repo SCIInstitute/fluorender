@@ -345,30 +345,37 @@ protected:
 			return cur_path_ + path_sep_;
 		}
 
+		std::string full_path;
 		if (path.substr(0, path_sep_.length()) == path_sep_) {
 			// Absolute path
-			return normalizePath(path) + path_sep_;
+			full_path = path_sep_ + normalizePath(path.substr(path_sep_.length()));
+		}
+		else
+		{
+			std::vector<std::string> parts = splitPath(cur_path_);
+			if (cur_path_.substr(0, path_sep_.length()) == path_sep_) {
+				// Re-add leading separator if cur_path_ is absolute
+				full_path = path_sep_;
+			}
+
+			if (path.substr(0, pd_sep_.length()) == pd_sep_) {
+				// Handle relative path with ".."
+				parts.pop_back(); // Go up one level
+				parts.push_back(path.substr(pd_sep_.length()));
+			}
+			else if (path.substr(0, cd_sep_.length()) == cd_sep_) {
+				// Handle relative path with "."
+				parts.push_back(path.substr(cd_sep_.length()));
+			}
+			else {
+				// Relative path
+				parts.push_back(path);
+			}
+
+			full_path += normalizePath(joinPath(parts));
 		}
 
-		std::vector<std::string> parts;
-		if (path.substr(0, pd_sep_.length()) == pd_sep_) {
-			// Handle relative path with ".."
-			parts = splitPath(cur_path_);
-			parts.pop_back(); // Go up one level
-			parts.push_back(path.substr(pd_sep_.length()));
-		}
-		else if (path.substr(0, cd_sep_.length()) == cd_sep_) {
-			// Handle relative path with "."
-			parts = splitPath(cur_path_);
-			parts.push_back(path.substr(cd_sep_.length()));
-		}
-		else {
-			// Relative path
-			parts = splitPath(cur_path_);
-			parts.push_back(path);
-		}
-
-		return normalizePath(joinPath(parts)) + path_sep_;
+		return full_path + path_sep_;
 	}
 
 	std::string getFullKey(const std::string& key) const
