@@ -40,6 +40,15 @@ public:
 		json_(0),
 		cur_obj_(0)
 	{
+		path_sep_ = "/";
+		cd_sep_ = ".";
+		pd_sep_ = "..";
+
+		//root
+		json_t mem[32];
+		char empty_json[] = R"({})";
+		json_ = const_cast<json_t*>(json_create(empty_json, mem, sizeof mem / sizeof * mem));
+		cur_obj_ = json_;
 	}
 
 	~JsonFile()
@@ -59,7 +68,7 @@ public:
 		std::string str = buffer.str();
 		json_t mem[32];
 		json_ = const_cast<json_t*>(json_create(str.data(), mem, sizeof mem / sizeof * mem));
-		cur_obj_ = 0;
+		cur_obj_ = json_;
 
 		return json_ == 0;
 	}
@@ -69,7 +78,7 @@ public:
 		json_t mem[32];
 		std::string str = ini_string;
 		json_ = const_cast<json_t*>(json_create(str.data(), mem, sizeof mem / sizeof * mem));
-		cur_obj_ = 0;
+		cur_obj_ = json_;
 
 		return json_ == 0;
 	}

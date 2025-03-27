@@ -79,7 +79,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Project and config file type:");
 	m_config_file_type_comb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
-	std::vector<wxString> items2 = { "INI", "XML", "JSON" };
+	std::vector<wxString> items2 = { "INI", "XML" };
 	m_config_file_type_comb->Append(items2);
 	m_config_file_type_comb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnConfigFileTypeComb, this);
 	sizer1_2->Add(st);
