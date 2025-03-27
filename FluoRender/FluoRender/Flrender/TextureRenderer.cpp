@@ -176,23 +176,23 @@ namespace flvr
 			return;
 		std::vector<TextureBrick*>* bricks = tex_->get_bricks();
 		TextureBrick* brick = 0;
-		for (size_t i = tex_pool_.size() - 1; i-- > 0;)
+		for (size_t i = tex_pool_.size(); i > 0; --i)
 		{
 			for (size_t j = 0; j < bricks->size(); ++j)
 			{
 				brick = (*bricks)[j];
-				if (tex_pool_[i].brick == brick/* &&
+				if (tex_pool_[i-1].brick == brick/* &&
 					(tex_pool_[i].comp == 0 ||
 					tex_pool_[i].comp == brick->nmask() ||
 					tex_pool_[i].comp == brick->nlabel())*/)
 				{
 					glbin_settings.m_available_mem +=
-						tex_pool_[i].nx *
-						tex_pool_[i].ny *
-						tex_pool_[i].nz *
-						tex_pool_[i].nb / 1.04e6;
-					glDeleteTextures(1, (GLuint*)&tex_pool_[i].id);
-					tex_pool_.erase(tex_pool_.begin() + i);
+						tex_pool_[i-1].nx *
+						tex_pool_[i-1].ny *
+						tex_pool_[i-1].nz *
+						tex_pool_[i-1].nb / 1.04e6;
+					glDeleteTextures(1, (GLuint*)&tex_pool_[i-1].id);
+					tex_pool_.erase(tex_pool_.begin() + i - 1);
 					break;
 				}
 			}
@@ -206,9 +206,9 @@ namespace flvr
 		std::vector<TextureBrick*>* bricks = tex_->get_bricks();
 		TextureBrick *brick = 0;
 		TextureBrick *locbk = 0;
-		for (size_t i = tex_pool_.size() - 1; i-- > 0;)
+		for (size_t i = tex_pool_.size(); i > 0; --i)
 		{
-			brick = tex_pool_[i].brick;
+			brick = tex_pool_[i-1].brick;
 			if (skip && !brick->is_mask_valid())
 			{
 				//brick->reset_skip_mask();
@@ -218,15 +218,15 @@ namespace flvr
 			{
 				locbk = (*bricks)[j];
 				if (brick == locbk &&
-					tex_pool_[i].comp == brick->nmask())
+					tex_pool_[i-1].comp == brick->nmask())
 				{
 					glbin_settings.m_available_mem +=
-						tex_pool_[i].nx *
-						tex_pool_[i].ny *
-						tex_pool_[i].nz *
-						tex_pool_[i].nb / 1.04e6;
-					glDeleteTextures(1, (GLuint*)&tex_pool_[i].id);
-					tex_pool_.erase(tex_pool_.begin() + i);
+						tex_pool_[i-1].nx *
+						tex_pool_[i-1].ny *
+						tex_pool_[i-1].nz *
+						tex_pool_[i-1].nb / 1.04e6;
+					glDeleteTextures(1, (GLuint*)&tex_pool_[i-1].id);
+					tex_pool_.erase(tex_pool_.begin() + i - 1);
 					break;
 				}
 			}
@@ -240,9 +240,9 @@ namespace flvr
 		std::vector<TextureBrick*>* bricks = tex_->get_bricks();
 		TextureBrick *brick = 0;
 		TextureBrick *locbk = 0;
-		for (size_t i = tex_pool_.size() - 1; i-- > 0;)
+		for (size_t i = tex_pool_.size(); i > 0; --i)
 		{
-			brick = tex_pool_[i].brick;
+			brick = tex_pool_[i-1].brick;
 			if (!brick->is_mask_valid())
 			{
 				//brick->reset_skip_mask();
@@ -252,15 +252,15 @@ namespace flvr
 			{
 				locbk = (*bricks)[j];
 				if (brick == locbk &&
-					tex_pool_[i].comp == brick->nlabel())
+					tex_pool_[i-1].comp == brick->nlabel())
 				{
 					glbin_settings.m_available_mem +=
-						tex_pool_[i].nx *
-						tex_pool_[i].ny *
-						tex_pool_[i].nz *
-						tex_pool_[i].nb / 1.04e6;
-					glDeleteTextures(1, (GLuint*)&tex_pool_[i].id);
-					tex_pool_.erase(tex_pool_.begin() + i);
+						tex_pool_[i-1].nx *
+						tex_pool_[i-1].ny *
+						tex_pool_[i-1].nz *
+						tex_pool_[i-1].nb / 1.04e6;
+					glDeleteTextures(1, (GLuint*)&tex_pool_[i-1].id);
+					tex_pool_.erase(tex_pool_.begin() + i - 1);
 					break;
 				}
 			}

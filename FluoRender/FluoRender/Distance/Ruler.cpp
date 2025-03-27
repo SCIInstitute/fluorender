@@ -208,16 +208,16 @@ pRulerPoint Ruler::FindNearestPRulerPoint(fluo::Point& point, size_t &ri, size_t
 	bool first = true, found = false;
 	double dist, min_dist;
 	size_t mini, minj;
-	for (size_t i = m_ruler.size()-1; i-- > 0;)
+	for (size_t i = m_ruler.size(); i > 0; --i)
 	{
-		for (size_t j = m_ruler[i].size()-1; j-- > 0;)
+		for (size_t j = m_ruler[i-1].size(); j > 0; --j)
 		{
-			dist = (m_ruler[i][j]->GetPoint(m_work_time, m_interp) - point).length2();
+			dist = (m_ruler[i-1][j-1]->GetPoint(m_work_time, m_interp) - point).length2();
 			if (first || dist < min_dist)
 			{
 				min_dist = dist;
-				mini = i;
-				minj = j;
+				mini = i-1;
+				minj = j-1;
 				found = true;
 			}
 			first = false;
@@ -238,15 +238,15 @@ pRulerPoint Ruler::FindBranchPRulerPoint(fluo::Point& point, size_t& ri, size_t&
 	double dist;
 	double min_dist = std::numeric_limits<double>::max();
 	size_t mini;
-	for (size_t i = m_ruler.size() - 1; i-- > 0;)
+	for (size_t i = m_ruler.size(); i > 0; --i)
 	{
-		if (m_ruler[i].size() < 2)
+		if (m_ruler[i-1].size() < 2)
 			continue;
-		dist = (m_ruler[i][0]->GetPoint(m_work_time, m_interp) - point).length2();
+		dist = (m_ruler[i-1][0]->GetPoint(m_work_time, m_interp) - point).length2();
 		if (dist < min_dist)
 		{
 			min_dist = dist;
-			mini = i;
+			mini = i-1;
 			found = true;
 		}
 	}
@@ -424,16 +424,16 @@ bool Ruler::AddPointAfterId(
 
 	bool found = false;
 	size_t ri, rj;
-	for (size_t i = m_ruler.size()-1; i-- > 0;)
+	for (size_t i = m_ruler.size(); i > 0; --i)
 	{
-		for (size_t j = m_ruler[i].size()-1; j-- > 0;)
+		for (size_t j = m_ruler[i-1].size(); j > 0; --j)
 		{
 			//if (cid.find(m_ruler[i][j]->m_id) != cid.end())
 			for (auto sit = cid.begin(); 
 				sit != cid.end(); ++sit)
-				if (m_ruler[i][j]->MatchId(*sit))
+				if (m_ruler[i-1][j-1]->MatchId(*sit))
 				{
-					ri = i; rj = j;
+					ri = i-1; rj = j-1;
 					found = true;
 					break;
 				}
@@ -518,21 +518,21 @@ void Ruler::Prune(int len)
 {
 	size_t lastj;
 	bool found;
-	for (size_t i = m_ruler.size() - 1; i-- > 0;)
+	for (size_t i = m_ruler.size(); i > 0; --i)
 	{
 		//if the branch is shorter than len, remove it
-		if (m_ruler[i].size() <= len + 1)
-			m_ruler.erase(m_ruler.begin() + i);
+		if (m_ruler[i-1].size() <= len + 1)
+			m_ruler.erase(m_ruler.begin() + i - 1);
 		else
 		{
 			found = false;
 			//find the starting point of the branch
-			pRulerPoint pp = m_ruler[i][0];
+			pRulerPoint pp = m_ruler[i-1][0];
 			for (size_t ii = 0; ii < m_ruler.size(); ++ii)
 			{
 				for (size_t jj = 0; jj < m_ruler[ii].size(); ++jj)
 				{
-					if (m_ruler[ii][jj] == pp && ii != i)
+					if (m_ruler[ii][jj] == pp && ii != i-1)
 					{
 						//found
 						lastj = m_ruler[ii].size() - 1;
@@ -542,9 +542,9 @@ void Ruler::Prune(int len)
 							m_ruler[ii].resize(jj + 1);
 							//copy i branch to ii
 							m_ruler[ii].insert(m_ruler[ii].end(),
-								m_ruler[i].begin() + 1, m_ruler[i].end());
+								m_ruler[i-1].begin() + 1, m_ruler[i-1].end());
 							//delete branch i
-							m_ruler.erase(m_ruler.begin() + i);
+							m_ruler.erase(m_ruler.begin() + i - 1);
 							//set flag and break
 							found = true;
 							break;

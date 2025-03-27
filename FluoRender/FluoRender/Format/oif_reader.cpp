@@ -531,9 +531,9 @@ void OIFReader::ReadOifLine(const std::wstring oneline)
 			if (str1 == L"LightType") {
 				light_type = str2;
 				if (light_type.find(str3) != std::wstring::npos) {
-					for (size_t i = m_excitation_wavelength_list.size() - 1; i-- > 0;) {
-						if (m_excitation_wavelength_list.at(i).chan_num == cur_chan) {
-							m_excitation_wavelength_list.at(i).wavelength = -1;
+					for (size_t i = m_excitation_wavelength_list.size(); i > 0; --i) {
+						if (m_excitation_wavelength_list.at(i-1).chan_num == cur_chan) {
+							m_excitation_wavelength_list.at(i-1).wavelength = -1;
 							break;
 						}
 					}
