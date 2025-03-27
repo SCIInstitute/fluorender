@@ -330,21 +330,31 @@ protected:
 
 	bool ReadBool(const std::string& key, bool* value, bool def = false) const override
 	{
-		// Check if the key exists in the INI file
-		const char* source = getSource(key).c_str();
-		int result = ini_get_bool_i(source, 2, _format_);
-
-		if (result == 2) {
-			// Key not found, use the default value
+		std::string str;
+		if (!extractString(key, str))
+		{
 			*value = def;
-			return def;
+			return false;
 		}
-		else {
-			// Key found, use the value from the INI file
-			unsigned int uintbool = static_cast<unsigned int>(result);
-			*value = !(uintbool & 2);
-			return static_cast<bool>(uintbool & 1);
+
+		// Convert the string to lowercase for case-insensitive comparison
+		std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+
+		if (str == "1" || str == "true")
+		{
+			*value = true;
 		}
+		else if (str == "0" || str == "false")
+		{
+			*value = false;
+		}
+		else
+		{
+			*value = def;
+			return false;
+		}
+
+		return true;
 	}
 
 	bool ReadLong(const std::string& key, long* value, long def = 0) const override
