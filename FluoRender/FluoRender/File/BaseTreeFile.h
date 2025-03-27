@@ -321,8 +321,11 @@ protected:
 		std::vector<std::string> normalized_parts;
 		for (const auto& part : parts) {
 			if (part == "..") {
-				if (!normalized_parts.empty()) {
+				if (!normalized_parts.empty() && normalized_parts.back() != "..") {
 					normalized_parts.pop_back();
+				}
+				else {
+					normalized_parts.push_back(part);
 				}
 			}
 			else if (part != ".") {

@@ -186,7 +186,8 @@ public:
 			}
 			else {
 				// Move to the child element with the given name
-				element = element->FirstChildElement(component.c_str());
+				std::string normalized_component = NormalizeKey(component);
+				element = element->FirstChildElement(normalized_component.c_str());
 				if (!element) {
 					return false; // Element not found, path is invalid
 				}
@@ -246,15 +247,17 @@ public:
 			}
 			else {
 				// Move to the child element with the given name
-				tinyxml2::XMLElement* child = element->FirstChildElement(component.c_str());
+				key = NormalizeKey(component);
+				tinyxml2::XMLElement* child = element->FirstChildElement(key.c_str());
 				if (!child) {
 					// Create a new child element if it doesn't exist
-					key = NormalizeKey(component);
 					child = doc_.NewElement(key.c_str());
 					element->InsertEndChild(child);
 				}
 				element = child;
-				new_path += path_sep_ + component;
+				if (new_path.substr(new_path.size() - path_sep_.size()) != path_sep_)
+					new_path += path_sep_;
+				new_path += component;
 			}
 		}
 
@@ -386,19 +389,11 @@ protected:
 
 	bool ReadWstring(const std::string& key, std::wstring* value, const std::wstring& def = L"") const override
 	{
-		if (!cur_element_) {
-			*value = def;
-			return false;
-		}
-		// Replace spaces in the key
-		std::string modified_key = NormalizeKey(key);
-		const tinyxml2::XMLElement* element = cur_element_->FirstChildElement(modified_key.c_str());
-		if (element) {
-			const char* text = element->GetText();
-			if (text) {
-				*value = std::wstring(text, text + strlen(text));
-				return true;
-			}
+		std::string str;
+		if (ReadString(key, &str))
+		{
+			*value = s2ws(str);
+			return true;
 		}
 		*value = def;
 		return false;
